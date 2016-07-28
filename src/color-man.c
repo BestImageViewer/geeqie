@@ -188,7 +188,7 @@ static ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gch
 					   (has_alpha) ? TYPE_RGBA_8 : TYPE_RGB_8,
 					   cc->profile_out,
 					   (has_alpha) ? TYPE_RGBA_8 : TYPE_RGB_8,
-					   INTENT_PERCEPTUAL, 0);
+					   options->color_profile.render_intent, 0);
 
 	if (!cc->transform)
 		{

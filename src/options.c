@@ -43,6 +43,7 @@ ConfOptions *init_options(ConfOptions *options)
 	options->color_profile.screen_file = NULL;
 	options->color_profile.use_image = TRUE;
 	options->color_profile.use_x11_screen_profile = TRUE;
+	options->color_profile.render_intent = 0;
 
 	options->dnd_icon_size = 48;
 	options->duplicates_similarity_threshold = 99;

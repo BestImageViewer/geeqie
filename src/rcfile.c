@@ -444,6 +444,7 @@ static void write_color_profile(GString *outstr, gint indent)
 	WRITE_BOOL(options->color_profile, use_image);
 	WRITE_INT(options->color_profile, input_type);
 	WRITE_BOOL(options->color_profile, use_x11_screen_profile);
+	WRITE_INT(options->color_profile, render_intent);
 	WRITE_STRING(">");
 
 	indent++;
@@ -724,6 +725,7 @@ static void options_load_color_profiles(GQParserData *parser_data, GMarkupParseC
 		if (READ_INT(options->color_profile, input_type)) continue;
 		if (READ_CHAR(options->color_profile, screen_file)) continue;
 		if (READ_BOOL(options->color_profile, use_x11_screen_profile)) continue;
+		if (READ_INT(options->color_profile, render_intent)) continue;
 
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}

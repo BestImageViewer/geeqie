@@ -176,7 +176,7 @@ struct _ConfOptions
 		gchar *screen_file;
 		gboolean use_image;
 		gboolean use_x11_screen_profile;
-
+		gint render_intent;
 	} color_profile;
 
 	/* Helpers programs */

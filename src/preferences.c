@@ -48,6 +48,13 @@
 
 #include <math.h>
 
+#ifdef HAVE_LCMS
+#ifdef HAVE_LCMS2
+#include <lcms2.h>
+#else
+#include <lcms.h>
+#endif
+#endif
 
 #define EDITOR_NAME_MAX_LENGTH 32
 #define EDITOR_COMMAND_MAX_LENGTH 1024
@@ -368,6 +375,11 @@ static void config_window_apply(void)
 		}
 	config_entry_to_option(color_profile_screen_file_entry, &options->color_profile.screen_file, NULL);
 	options->color_profile.use_x11_screen_profile = c_options->color_profile.use_x11_screen_profile;
+	if (options->color_profile.render_intent != c_options->color_profile.render_intent)
+		{
+		options->color_profile.render_intent = c_options->color_profile.render_intent;
+		color_man_update();
+		}
 #endif
 
 	image_options_sync();
@@ -1917,6 +1929,63 @@ static void config_tab_metadata(GtkWidget *notebook)
 }
 
 /* metadata tab */
+#ifdef HAVE_LCMS
+static void intent_menu_cb(GtkWidget *combo, gpointer data)
+{
+	gint *option = data;
+
+	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
+		{
+		case 0:
+		default:
+			*option = INTENT_PERCEPTUAL;
+			break;
+		case 1:
+			*option = INTENT_RELATIVE_COLORIMETRIC;
+			break;
+		case 2:
+			*option = INTENT_SATURATION;
+			break;
+		case 3:
+			*option = INTENT_ABSOLUTE_COLORIMETRIC;
+			break;
+		}
+}
+
+static void add_intent_menu(GtkWidget *table, gint column, gint row, const gchar *text,
+			     guint option, guint *option_c)
+{
+	GtkWidget *combo;
+	gint current = 0;
+
+	*option_c = option;
+
+	pref_table_label(table, column, row, text, 0.0);
+
+	combo = gtk_combo_box_text_new();
+
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Perceptual"));
+	if (option == INTENT_PERCEPTUAL) current = 0;
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Relative Colorimetric"));
+	if (option == INTENT_RELATIVE_COLORIMETRIC) current = 1;
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Saturation"));
+	if (option == INTENT_SATURATION) current = 2;
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Absolute Colorimetric"));
+	if (option == INTENT_ABSOLUTE_COLORIMETRIC) current = 3;
+
+	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
+
+	gtk_widget_set_tooltip_text(combo,"Refer to the lcms documentation for the defaults used when the selected Intent is not available");
+
+	g_signal_connect(G_OBJECT(combo), "changed",
+			 G_CALLBACK(intent_menu_cb), option_c);
+
+	gtk_table_attach(GTK_TABLE(table), combo, column + 1, column + 2, row, row + 1,
+			 GTK_EXPAND | GTK_FILL, 0, 0, 0);
+	gtk_widget_show(combo);
+}
+#endif
+
 static void config_tab_color(GtkWidget *notebook)
 {
 	GtkWidget *label;
@@ -1988,9 +2057,13 @@ static void config_tab_color(GtkWidget *notebook)
 				     options->color_profile.screen_file, NULL, NULL);
 	tab_completion_add_select_button(color_profile_screen_file_entry, _("Select color profile"), FALSE);
 	gtk_widget_set_size_request(color_profile_screen_file_entry, 160, -1);
+#ifdef HAVE_LCMS
+	add_intent_menu(table, 0, 1, _("Render Intent:"), options->color_profile.render_intent, &c_options->color_profile.render_intent);
+#endif
 	gtk_table_attach(GTK_TABLE(table), tabcomp, 1, 2,
 			 0, 1,
 			 GTK_FILL | GTK_EXPAND, 0, 0, 0);
+
 	gtk_widget_show(tabcomp);
 }
 
