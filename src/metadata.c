@@ -784,6 +784,37 @@ gdouble metadata_read_GPS_coord(FileData *fd, const gchar *key, gdouble fallback
 	return coord;
 }
 
+gdouble metadata_read_GPS_direction(FileData *fd, const gchar *key, gdouble fallback)
+{
+	gchar *endptr;
+	gdouble deg;
+	gboolean ok = FALSE;
+	gchar *string = metadata_read_string(fd, key, METADATA_PLAIN);
+	if (!string) return fallback;
+
+	DEBUG_3("GPS_direction: %s\n", string);
+	deg = g_ascii_strtod(string, &endptr);
+
+	/* Expected text string is of the format e.g.:
+	 * 18000/100
+	 */
+	if (*endptr == '/')
+		{
+		deg = deg/100;
+		ok = TRUE;
+		}
+
+	if (!ok)
+		{
+		deg = fallback;
+		log_printf("unable to parse GPS direction '%s: %f'\n", string, deg);
+		}
+
+	g_free(string);
+
+	return deg;
+}
+
 gboolean metadata_append_string(FileData *fd, const gchar *key, const char *value)
 {
 	gchar *str = metadata_read_string(fd, key, METADATA_PLAIN);

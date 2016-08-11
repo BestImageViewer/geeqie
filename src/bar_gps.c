@@ -43,6 +43,8 @@
 #define THUMB_COLOUR 0xff, 0xff, 0xff, 0xff
 #define THUMB_SIZE 100
 
+#define DIRECTION_SIZE 300
+
 /*
  *-------------------------------------------------------------------
  * GPS Map utils
@@ -72,6 +74,20 @@ struct _PaneGPSData
 	gboolean enable_markers_checked;
 };
 
+static gboolean bar_gps_draw_direction (ClutterCanvas *canvas,
+				cairo_t *cr, gpointer data)
+{
+	cairo_set_source_rgb(cr, 255, 0, 0);
+
+	cairo_set_line_width(cr, 2);
+	cairo_move_to(cr, 0, 1);
+	cairo_line_to(cr, DIRECTION_SIZE, 1);
+
+	cairo_stroke(cr);
+
+	return TRUE;
+}
+
 static void bar_pane_gps_thumb_done_cb(ThumbLoader *tl, gpointer data)
 {
 	FileData *fd;
@@ -98,12 +114,12 @@ static gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButton
 {
 	//PaneGPSData *pgd = data;
 	FileData *fd;
-	ClutterActor *marker;
+	ClutterActor *label_marker, *parent_marker;
 	ClutterColor marker_colour = { MARKER_COLOUR };
 	ClutterColor text_colour = { TEXT_COLOUR };
 	ClutterColor thumb_colour = { THUMB_COLOUR };
 	gchar *current_text;
-	ClutterActor *actor;
+	ClutterActor *actor, *direction;
 	ClutterActor *current_image;
 	GString *text;
 	gint height, width, rotate;
@@ -112,19 +128,19 @@ static gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButton
 
 	if (bevent->button == MOUSE_BUTTON_LEFT)
 		{
-		marker = CLUTTER_ACTOR(widget);
-		fd = g_object_get_data(G_OBJECT(marker), "file_fd");
+		label_marker = CLUTTER_ACTOR(widget);
+		fd = g_object_get_data(G_OBJECT(label_marker), "file_fd");
 
 		/* If the marker is showing a thumbnail, delete it
 		 */
-		current_image = champlain_label_get_image(CHAMPLAIN_LABEL(marker));
+		current_image = champlain_label_get_image(CHAMPLAIN_LABEL(label_marker));
 		if (current_image != NULL)
 			{
 			clutter_actor_destroy(CLUTTER_ACTOR(current_image));
-		 	champlain_label_set_image(CHAMPLAIN_LABEL(marker), NULL);
+		 	champlain_label_set_image(CHAMPLAIN_LABEL(label_marker), NULL);
 			}
 
-		current_text = g_strdup(champlain_label_get_text(CHAMPLAIN_LABEL(marker)));
+		current_text = g_strdup(champlain_label_get_text(CHAMPLAIN_LABEL(label_marker)));
 
 		/* If the marker is showing only the text character, replace it with a
 		 * thumbnail and date and altitude
@@ -139,7 +155,7 @@ static gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButton
 				{
 				actor = gtk_clutter_texture_new();
 				gtk_clutter_texture_set_from_pixbuf(GTK_CLUTTER_TEXTURE(actor), fd->thumb_pixbuf, NULL);
-				champlain_label_set_image(CHAMPLAIN_LABEL(marker), actor);
+				champlain_label_set_image(CHAMPLAIN_LABEL(label_marker), actor);
 				}
 			else if (fd->pixbuf != NULL)
 				{
@@ -164,7 +180,7 @@ static gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButton
 					gtk_clutter_texture_set_from_pixbuf(GTK_CLUTTER_TEXTURE(actor),
 										gdk_pixbuf_rotate_simple(gdk_pixbuf_scale_simple(fd->pixbuf, THUMB_SIZE, height * THUMB_SIZE / width,
 										GDK_INTERP_NEAREST), rotate), NULL);
-					champlain_label_set_image(CHAMPLAIN_LABEL(marker), actor);
+					champlain_label_set_image(CHAMPLAIN_LABEL(label_marker), actor);
 				}
 			else
 				{
@@ -173,7 +189,7 @@ static gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButton
 											bar_pane_gps_thumb_done_cb,
 											bar_pane_gps_thumb_error_cb,
 											NULL,
-											marker);
+											label_marker);
 				thumb_loader_start(tl, fd);
 				}
 
@@ -187,22 +203,30 @@ static gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButton
 				g_string_append(text, altitude);
 				}
 
-			champlain_label_set_text(CHAMPLAIN_LABEL(marker), text->str);
-			champlain_label_set_color(CHAMPLAIN_LABEL(marker), &thumb_colour);
-			champlain_label_set_text_color(CHAMPLAIN_LABEL(marker), &text_colour);
-			champlain_label_set_font_name(CHAMPLAIN_LABEL(marker), "sans 8");
+			champlain_label_set_text(CHAMPLAIN_LABEL(label_marker), text->str);
+			champlain_label_set_font_name(CHAMPLAIN_LABEL(label_marker), "sans 8");
+			champlain_marker_set_selection_color(&thumb_colour);
+			champlain_marker_set_selection_text_color(&text_colour);
 
 			g_free(altitude);
 			g_string_free(text, TRUE);
+
+			parent_marker = clutter_actor_get_parent(label_marker);
+			direction = clutter_actor_get_child_at_index(parent_marker, 0);
+			clutter_actor_set_opacity(direction, 255);
 			}
 		/* otherwise, revert to the hidden text marker
 		 */
 		else
 			{
-			champlain_label_set_text(CHAMPLAIN_LABEL(marker), "i");
-			champlain_label_set_color(CHAMPLAIN_LABEL(marker), &marker_colour);
-			champlain_label_set_text_color(CHAMPLAIN_LABEL(marker), &marker_colour);
-			champlain_label_set_font_name(CHAMPLAIN_LABEL(marker), "courier 5");
+			champlain_label_set_text(CHAMPLAIN_LABEL(label_marker), "i");
+			champlain_label_set_font_name(CHAMPLAIN_LABEL(label_marker), "courier 5");
+			champlain_marker_set_selection_color(&marker_colour);
+			champlain_marker_set_selection_text_color(&marker_colour);
+
+			parent_marker = clutter_actor_get_parent(label_marker);
+			direction = clutter_actor_get_child_at_index(parent_marker, 0);
+			clutter_actor_set_opacity(direction, 0);
 			}
 
 		g_free(current_text);
@@ -217,10 +241,14 @@ static gboolean bar_pane_gps_create_markers_cb(gpointer data)
 	PaneGPSData *pgd = data;
 	gdouble latitude;
 	gdouble longitude;
-	ClutterActor *marker;
+	gdouble compass;
 	FileData *fd;
+	ClutterActor *parent_marker, *label_marker;
+	ClutterActor *direction;
 	ClutterColor marker_colour = { MARKER_COLOUR };
+	ClutterColor thumb_colour = { THUMB_COLOUR };
 	GString *message;
+	ClutterContent *canvas;
 
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress),
 							(gdouble)(pgd->selection_count - g_list_length(pgd->not_added)) /
@@ -239,23 +267,47 @@ static gboolean bar_pane_gps_create_markers_cb(gpointer data)
 
 		latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 0);
 		longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 0);
+		compass = metadata_read_GPS_direction(fd, "Xmp.exif.GPSImgDirection", 1000);
 
 		if (!(latitude == 0 && longitude == 0))
 			{
 			pgd->num_added++;
 
-			marker = champlain_label_new_with_text("i","courier 5", &marker_colour, &marker_colour);
+			parent_marker = champlain_marker_new();
+			clutter_actor_set_reactive(parent_marker, FALSE);
+			label_marker = champlain_label_new_with_text("i","courier 5", &marker_colour, &marker_colour);
+			clutter_actor_set_reactive(label_marker, TRUE);
+			champlain_marker_set_selection_color(&thumb_colour);
 
-			champlain_location_set_location(CHAMPLAIN_LOCATION(marker), latitude, longitude);
-			champlain_marker_layer_add_marker(pgd->icon_layer, CHAMPLAIN_MARKER(marker));
-			clutter_actor_set_reactive(marker, TRUE);
+			if (compass != 1000)
+				{
+				canvas = clutter_canvas_new();
+				clutter_canvas_set_size(CLUTTER_CANVAS (canvas), DIRECTION_SIZE, 3);
+				g_signal_connect(canvas, "draw", G_CALLBACK(bar_gps_draw_direction), NULL);
+				direction = clutter_actor_new();
+				clutter_actor_set_size(direction, DIRECTION_SIZE, 3);
+				clutter_actor_set_position(direction, 0, 0);
+				clutter_actor_set_rotation_angle(direction, CLUTTER_Z_AXIS, compass -90.00);
+				clutter_actor_set_content(direction, canvas);
+				clutter_content_invalidate(canvas);
+				g_object_unref(canvas);
 
-			g_signal_connect(G_OBJECT(marker), "button_release_event",
+				clutter_actor_add_child(parent_marker, direction);
+				clutter_actor_set_opacity(direction, 0);
+				}
+
+			clutter_actor_add_child(parent_marker, label_marker);
+
+			champlain_location_set_location(CHAMPLAIN_LOCATION(parent_marker), latitude, longitude);
+			champlain_marker_layer_add_marker(pgd->icon_layer, CHAMPLAIN_MARKER(parent_marker));
+
+			g_signal_connect(G_OBJECT(label_marker), "button_release_event",
 	 				G_CALLBACK(bar_pane_gps_marker_keypress_cb), pgd);
 
-			g_object_set_data(G_OBJECT(marker), "file_fd", fd);
+			g_object_set_data(G_OBJECT(label_marker), "file_fd", fd);
 
 			champlain_bounding_box_extend(pgd->bbox, latitude, longitude);
+
 			}
 		return TRUE;
 		}

@@ -45,6 +45,7 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 gchar *metadata_read_string(FileData *fd, const gchar *key, MetadataFormat format);
 guint64 metadata_read_int(FileData *fd, const gchar *key, guint64 fallback);
 gdouble metadata_read_GPS_coord(FileData *fd, const gchar *key, gdouble fallback);
+gdouble metadata_read_GPS_direction(FileData *fd, const gchar *key, gdouble fallback);
 
 gboolean metadata_append_string(FileData *fd, const gchar *key, const char *value);
 gboolean metadata_append_list(FileData *fd, const gchar *key, const GList *values);
