@@ -516,6 +516,7 @@ static void gr_file_load(const gchar *text, GIOChannel *channel, gpointer data)
 	else
 		{
 		log_printf("remote sent filename that does not exist:\"%s\"\n", filename);
+		layout_set_path(NULL, homedir());
 		}
 
 	g_free(filename);
@@ -532,6 +533,7 @@ static void gr_config_load(const gchar *text, GIOChannel *channel, gpointer data
 	else
 		{
 		log_printf("remote sent filename that does not exist:\"%s\"\n", filename);
+		layout_set_path(NULL, homedir());
 		}
 
 	g_free(filename);
