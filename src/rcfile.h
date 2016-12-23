@@ -31,6 +31,8 @@ void write_color_option(GString *str, gint indent, gchar *label, GdkColor *color
 gboolean read_color_option(const gchar *option, const gchar *label, const gchar *value, GdkColor *color);
 void write_int_option(GString *str, gint indent, const gchar *label, gint n);
 gboolean read_int_option(const gchar *option, const gchar *label, const gchar *value, gint *n);
+void write_ushort_option(GString *str, gint indent, const gchar *label, guint16 n);
+gboolean read_ushort_option(const gchar *option, const gchar *label, const gchar *value, guint16 *n);
 void write_uint_option(GString *str, gint indent, const gchar *label, guint n);
 gboolean read_uint_option(const gchar *option, const gchar *label, const gchar *value, guint *n);
 gboolean read_uint_option_clamp(const gchar *option, const gchar *label, const gchar *value, guint *n, guint min, guint max);
@@ -54,6 +56,7 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 #define READ_BOOL(_target_, _name_) read_bool_option(option, #_name_, value, &(_target_)._name_)
 #define READ_INT(_target_, _name_) read_int_option(option, #_name_, value, &(_target_)._name_)
 #define READ_UINT(_target_, _name_) read_uint_option(option, #_name_, value, &(_target_)._name_)
+#define READ_USHORT(_target_, _name_) read_ushort_option(option, #_name_, value, &(_target_)._name_)
 #define READ_INT_CLAMP(_target_, _name_, _min_, _max_) read_int_option_clamp(option, #_name_, value, &(_target_)._name_, _min_, _max_)
 #define READ_UINT_CLAMP(_target_, _name_, _min_, _max_) read_uint_option_clamp(option, #_name_, value, &(_target_)._name_, _min_, _max_)
 #define READ_INT_UNIT(_target_, _name_, _unit_) read_int_unit_option(option, #_name_, value, &(_target_)._name_, _unit_)

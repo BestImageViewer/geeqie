@@ -22,15 +22,8 @@
 #ifndef PAN_TYPES_H
 #define PAN_TYPES_H
 
-#include "cache.h"
 #include "cache-loader.h"
 #include "filedata.h"
-#include "image.h"
-#include "image-load.h"
-#include "pixbuf_util.h"
-#include "pixbuf-renderer.h"
-#include "ui_misc.h"
-
 
 /* thumbnail sizes and spacing */
 
@@ -249,120 +242,6 @@ struct _PanCacheData {
 	FileData *fd;
 	CacheData *cd;
 };
-
-
-/* pan-view.c */
-
-GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height);
-void pan_layout_resize(PanWindow *pw);
-
-void pan_cache_sync_date(PanWindow *pw, GList *list);
-
-GList *pan_cache_sort(GList *list, SortType method, gboolean ascend);
-/* pan-item.c */
-
-void pan_item_free(PanItem *pi);
-
-void pan_item_set_key(PanItem *pi, const gchar *key);
-void pan_item_added(PanWindow *pw, PanItem *pi);
-void pan_item_remove(PanWindow *pw, PanItem *pi);
-
-void pan_item_size_by_item(PanItem *pi, PanItem *child, gint border);
-void pan_item_size_coordinates(PanItem *pi, gint border, gint *w, gint *h);
-
-
-PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key);
-GList *pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
-			     gboolean ignore_case, gboolean partial);
-GList *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,
-			     gboolean ignore_case, gboolean partial);
-PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
-				gint x, gint y, const gchar *key);
-
-
-PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
-			  gint border_size,
-			  guint8 base_r, guint8 base_g, guint8 base_b, guint8 base_a,
-			  guint8 bord_r, guint8 bord_g, guint8 bord_b, guint8 bord_a);
-void pan_item_box_shadow(PanItem *pi, gint offset, gint fade);
-gint pan_item_box_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-		       gint x, gint y, gint width, gint height);
-
-PanItem *pan_item_tri_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
-			  gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
-			  guint8 r, guint8 g, guint8 b, guint8 a);
-void pan_item_tri_border(PanItem *pi, gint borders,
-			 guint8 r, guint8 g, guint8 b, guint8 a);
-gint pan_item_tri_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-		       gint x, gint y, gint width, gint height);
-
-PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
-			   PanTextAttrType attr, PanBorderType border,
-			   guint8 r, guint8 g, guint8 b, guint8 a);
-gint pan_item_text_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-			gint x, gint y, gint width, gint height);
-
-PanItem *pan_item_thumb_new(PanWindow *pw, FileData *fd, gint x, gint y);
-gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-			 gint x, gint y, gint width, gint height);
-
-PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w, gint h);
-gint pan_item_image_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-			 gint x, gint y, gint width, gint height);
-
-
-typedef struct _PanTextAlignment PanTextAlignment;
-struct _PanTextAlignment {
-	PanWindow *pw;
-
-	GList *column1;
-	GList *column2;
-
-	gint x;
-	gint y;
-	gchar *key;
-};
-
-PanTextAlignment *pan_text_alignment_new(PanWindow *pw, gint x, gint y, const gchar *key);
-void pan_text_alignment_free(PanTextAlignment *ta);
-
-PanItem *pan_text_alignment_add(PanTextAlignment *ta, const gchar *label, const gchar *text);
-void pan_text_alignment_calc(PanTextAlignment *ta, PanItem *box);
-
-
-/* utils in pan-util.c */
-
-typedef enum {
-	PAN_DATE_LENGTH_EXACT,
-	PAN_DATE_LENGTH_HOUR,
-	PAN_DATE_LENGTH_DAY,
-	PAN_DATE_LENGTH_WEEK,
-	PAN_DATE_LENGTH_MONTH,
-	PAN_DATE_LENGTH_YEAR
-} PanDateLengthType;
-
-gboolean pan_date_compare(time_t a, time_t b, PanDateLengthType length);
-gint pan_date_value(time_t d, PanDateLengthType length);
-gchar *pan_date_value_string(time_t d,  PanDateLengthType length);
-time_t pan_date_to_time(gint year, gint month, gint day);
-
-gboolean pan_is_link_loop(const gchar *s);
-gboolean pan_is_ignored(const gchar *s, gboolean ignore_symlinks);
-GList *pan_list_tree(FileData *dir_fd, SortType sort, gboolean ascend,
-		     gboolean ignore_symlinks);
-
-
-/* the different view types */
-
-void pan_calendar_update(PanWindow *pw, PanItem *pi_day);
-void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height);
-void pan_flower_compute(PanWindow *pw, FileData *dir_fd,
-			gint *width, gint *height,
-			gint *scroll_x, gint *scroll_y);
-void pan_folder_tree_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height);
-void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height);
-void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height);
-
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

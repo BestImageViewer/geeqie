@@ -19,21 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PAN_VIEW_H
-#define PAN_VIEW_H
+#ifndef PAN_UTIL_H
+#define PAN_UTIL_H
 
 #include "main.h"
 #include "pan-types.h"
 
-void pan_window_new(FileData *dir_fd);
+typedef enum {
+	PAN_DATE_LENGTH_EXACT,
+	PAN_DATE_LENGTH_HOUR,
+	PAN_DATE_LENGTH_DAY,
+	PAN_DATE_LENGTH_WEEK,
+	PAN_DATE_LENGTH_MONTH,
+	PAN_DATE_LENGTH_YEAR
+} PanDateLengthType;
 
-GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height);
-void pan_layout_resize(PanWindow *pw);
+gboolean pan_date_compare(time_t a, time_t b, PanDateLengthType length);
+gint pan_date_value(time_t d, PanDateLengthType length);
+gchar *pan_date_value_string(time_t d,  PanDateLengthType length);
+time_t pan_date_to_time(gint year, gint month, gint day);
 
-void pan_cache_sync_date(PanWindow *pw, GList *list);
-
-GList *pan_cache_sort(GList *list, SortType method, gboolean ascend);
-
+gboolean pan_is_link_loop(const gchar *s);
+gboolean pan_is_ignored(const gchar *s, gboolean ignore_symlinks);
+GList *pan_list_tree(FileData *dir_fd, SortType sort, gboolean ascend,
+		     gboolean ignore_symlinks);
 
 #endif
-/* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

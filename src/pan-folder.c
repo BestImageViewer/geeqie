@@ -19,11 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-#include "pan-types.h"
+#include "pan-folder.h"
 
 #include <math.h>
 
+#include "pan-item.h"
+#include "pan-util.h"
 
 static void pan_flower_size(PanWindow *pw, gint *width, gint *height)
 {

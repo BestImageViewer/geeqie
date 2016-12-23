@@ -19,9 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-#include "pan-types.h"
+#include "pan-timeline.h"
 
+#include "pan-item.h"
+#include "pan-util.h"
+#include "pan-view.h"
 
 void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height)
 {

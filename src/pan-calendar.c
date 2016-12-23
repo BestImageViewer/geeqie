@@ -19,12 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-#include "pan-types.h"
+#include "pan-calendar.h"
 
 #include <glib/gprintf.h>
 #include <math.h>
 
+#include "pan-util.h"
+#include "pan-view.h"
+#include "pixbuf_util.h"
 
 #define PAN_CAL_POPUP_COLOR 220, 220, 220
 #define PAN_CAL_POPUP_ALPHA 255

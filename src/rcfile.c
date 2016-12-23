@@ -157,6 +157,31 @@ gboolean read_int_option(const gchar *option, const gchar *label, const gchar *v
 	return TRUE;
 }
 
+void write_ushort_option(GString *str, gint indent, const gchar *label, guint16 n)
+{
+	g_string_append_printf(str, "%s = \"%uh\" ", label, n);
+}
+
+gboolean read_ushort_option(const gchar *option, const gchar *label, const gchar *value, guint16 *n)
+{
+	if (g_ascii_strcasecmp(option, label) != 0) return FALSE;
+	if (!n) return FALSE;
+
+	if (g_ascii_isdigit(value[0]))
+		{
+		*n = strtoul(value, NULL, 10);
+		}
+	else
+		{
+		if (g_ascii_strcasecmp(value, "true") == 0)
+			*n = 1;
+		else
+			*n = 0;
+		}
+
+	return TRUE;
+}
+
 void write_uint_option(GString *str, gint indent, const gchar *label, guint n)
 {
 	g_string_append_printf(str, "%s = \"%u\" ", label, n);
@@ -642,14 +667,14 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_CHAR(*options, image_overlay.template_string)) continue;
 		if (READ_INT(*options, image_overlay.x)) continue;
 		if (READ_INT(*options, image_overlay.y)) continue;
-		if (READ_INT(*options, image_overlay.text_red)) continue;
-		if (READ_INT(*options, image_overlay.text_green)) continue;
-		if (READ_INT(*options, image_overlay.text_blue)) continue;
-		if (READ_INT(*options, image_overlay.text_alpha)) continue;
-		if (READ_INT(*options, image_overlay.background_red)) continue;
-		if (READ_INT(*options, image_overlay.background_green)) continue;
-		if (READ_INT(*options, image_overlay.background_blue)) continue;
-		if (READ_INT(*options, image_overlay.background_alpha)) continue;
+		if (READ_USHORT(*options, image_overlay.text_red)) continue;
+		if (READ_USHORT(*options, image_overlay.text_green)) continue;
+		if (READ_USHORT(*options, image_overlay.text_blue)) continue;
+		if (READ_USHORT(*options, image_overlay.text_alpha)) continue;
+		if (READ_USHORT(*options, image_overlay.background_red)) continue;
+		if (READ_USHORT(*options, image_overlay.background_green)) continue;
+		if (READ_USHORT(*options, image_overlay.background_blue)) continue;
+		if (READ_USHORT(*options, image_overlay.background_alpha)) continue;
 		if (READ_CHAR(*options, image_overlay.font)) continue;
 
 		/* Slideshow options */
