@@ -1303,9 +1303,9 @@ void pr_render_complete_signal(PixbufRenderer *pr)
 		}
 }
 
-static void pr_drag_signal(PixbufRenderer *pr, GdkEventButton *bevent)
+static void pr_drag_signal(PixbufRenderer *pr, GdkEventMotion *event)
 {
-	g_signal_emit(pr, signals[SIGNAL_DRAG], 0, bevent);
+	g_signal_emit(pr, signals[SIGNAL_DRAG], 0, event);
 }
 
 static void pr_update_pixel_signal(PixbufRenderer *pr)
@@ -1954,7 +1954,7 @@ void pixbuf_renderer_set_scroll_center(PixbufRenderer *pr, gdouble x, gdouble y)
  *-------------------------------------------------------------------
  */
 
-static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpointer data)
 {
 	PixbufRenderer *pr;
 	gint accel;
@@ -1967,25 +1967,25 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventButton *bevent, gp
 	 * See http://bugzilla.gnome.org/show_bug.cgi?id=587714 for more. */
 	gint x, y;
 #if GTK_CHECK_VERSION(3,0,0)
-	device_manager = gdk_display_get_device_manager(gdk_window_get_display(bevent->window));
+	device_manager = gdk_display_get_device_manager(gdk_window_get_display(event->window));
 	device = gdk_device_manager_get_client_pointer(device_manager);
-	gdk_window_get_device_position(bevent->window, device, &x, &y, NULL);
+	gdk_window_get_device_position(event->window, device, &x, &y, NULL);
 #else
-	gdk_window_get_pointer (bevent->window, &x, &y, NULL);
+	gdk_window_get_pointer (event->window, &x, &y, NULL);
 #endif
-	bevent->x = x;
-	bevent->y = y;
+	event->x = x;
+	event->y = y;
 
 	pr = PIXBUF_RENDERER(widget);
 
 	if (pr->scroller_id)
 		{
-		pr->scroller_xpos = bevent->x;
-		pr->scroller_ypos = bevent->y;
+		pr->scroller_xpos = event->x;
+		pr->scroller_ypos = event->y;
 		}
 
-	pr->x_mouse = bevent->x;
-	pr->y_mouse = bevent->y;
+	pr->x_mouse = event->x;
+	pr->y_mouse = event->y;
 	pr_update_pixel_signal(pr);
 
 	if (!pr->in_drag || !gdk_pointer_is_grabbed()) return FALSE;
@@ -1999,7 +1999,7 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventButton *bevent, gp
 		widget_set_cursor(widget, GDK_FLEUR);
 		}
 
-	if (bevent->state & GDK_CONTROL_MASK)
+	if (event->state & GDK_CONTROL_MASK)
 		{
 		accel = PR_PAN_SHIFT_MULTIPLIER;
 		}
@@ -2009,19 +2009,19 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventButton *bevent, gp
 		}
 
 	/* do the scroll */
-	pixbuf_renderer_scroll(pr, (pr->drag_last_x - bevent->x) * accel,
-			       (pr->drag_last_y - bevent->y) * accel);
+	pixbuf_renderer_scroll(pr, (pr->drag_last_x - event->x) * accel,
+			       (pr->drag_last_y - event->y) * accel);
 
-	pr_drag_signal(pr, bevent);
+	pr_drag_signal(pr, event);
 
-	pr->drag_last_x = bevent->x;
-	pr->drag_last_y = bevent->y;
+	pr->drag_last_x = event->x;
+	pr->drag_last_y = event->y;
 
 	/* This is recommended by the GTK+ documentation, but does not work properly.
 	 * Use deprecated way until GTK+ gets a solution for correct motion hint handling:
 	 * http://bugzilla.gnome.org/show_bug.cgi?id=587714
 	 */
-	/* gdk_event_request_motions (bevent); */
+	/* gdk_event_request_motions (event); */
 	return FALSE;
 }
 

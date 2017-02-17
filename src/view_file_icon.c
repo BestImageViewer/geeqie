@@ -1372,12 +1372,12 @@ gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
  *-------------------------------------------------------------------
  */
 
-static gboolean vficon_motion_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+static gboolean vficon_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpointer data)
 {
 	ViewFile *vf = data;
 	IconData *id;
 
-	id = vficon_find_data_by_coord(vf, (gint)bevent->x, (gint)bevent->y, NULL);
+	id = vficon_find_data_by_coord(vf, (gint)event->x, (gint)event->y, NULL);
 	tip_update(vf, id);
 
 	return FALSE;

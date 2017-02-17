@@ -63,7 +63,7 @@ static void image_click_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer d
 		}
 }
 
-static void image_drag_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer data)
+static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer data)
 {
 	ImageWindow *imd = data;
 	gint width, height;
@@ -993,7 +993,7 @@ void image_set_button_func(ImageWindow *imd,
 }
 
 void image_set_drag_func(ImageWindow *imd,
-			   void (*func)(ImageWindow *, GdkEventButton *event, gdouble dx, gdouble dy, gpointer),
+			   void (*func)(ImageWindow *, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer),
 			   gpointer data)
 {
 	imd->func_drag = func;

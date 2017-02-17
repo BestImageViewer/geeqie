@@ -99,7 +99,7 @@ static void fullscreen_hide_mouse_reset(FullScreenData *fs)
 	fs->hide_mouse_id = g_timeout_add(FULL_SCREEN_HIDE_MOUSE_DELAY, fullscreen_hide_mouse_cb, fs);
 }
 
-static gboolean fullscreen_mouse_moved(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+static gboolean fullscreen_mouse_moved(GtkWidget *widget, GdkEventMotion *event, gpointer data)
 {
 	FullScreenData *fs = data;
 

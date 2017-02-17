@@ -36,7 +36,7 @@ void image_set_button_func(ImageWindow *imd,
 	void (*func)(ImageWindow *, GdkEventButton *event, gpointer),
 	gpointer data);
 void image_set_drag_func(ImageWindow *imd,
-	void (*func)(ImageWindow *, GdkEventButton *event, gdouble dx, gdouble dy, gpointer),
+	void (*func)(ImageWindow *, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer),
 	gpointer data);
 void image_set_scroll_func(ImageWindow *imd,
 	void (*func)(ImageWindow *, GdkEventScroll *event, gpointer),

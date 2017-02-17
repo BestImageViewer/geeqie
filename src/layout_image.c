@@ -1722,7 +1722,7 @@ static void layout_image_scroll_cb(ImageWindow *imd, GdkEventScroll *event, gpoi
 		}
 }
 
-static void layout_image_drag_cb(ImageWindow *imd, GdkEventButton *event, gdouble dx, gdouble dy, gpointer data)
+static void layout_image_drag_cb(ImageWindow *imd, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer data)
 {
 	gint i;
 	LayoutWindow *lw = data;
@@ -1793,7 +1793,7 @@ static void layout_image_button_inactive_cb(ImageWindow *imd, GdkEventButton *ev
 
 }
 
-static void layout_image_drag_inactive_cb(ImageWindow *imd, GdkEventButton *event, gdouble dx, gdouble dy, gpointer data)
+static void layout_image_drag_inactive_cb(ImageWindow *imd, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer data)
 {
 	LayoutWindow *lw = data;
 	gint i = image_idx(lw, imd);

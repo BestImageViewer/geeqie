@@ -1201,7 +1201,7 @@ static gint sizer_default_handle_size(void)
 	return handle_size;
 }
 
-static gboolean sizer_motion_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+static gboolean sizer_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpointer data)
 {
 	SizerData *sd = data;
 	gint x, y;
@@ -1210,8 +1210,8 @@ static gboolean sizer_motion_cb(GtkWidget *widget, GdkEventButton *bevent, gpoin
 
 	if (!sd->in_drag) return FALSE;
 
-	x = sd->press_x - bevent->x_root;
-	y = sd->press_y - bevent->y_root;
+	x = sd->press_x - event->x_root;
+	y = sd->press_y - event->y_root;
 
 	w = sd->press_width;
 	h = sd->press_height;

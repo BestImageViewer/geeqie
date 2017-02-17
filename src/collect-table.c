@@ -1593,11 +1593,11 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
  *-------------------------------------------------------------------
  */
 
-static gboolean collection_table_motion_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+static gboolean collection_table_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpointer data)
 {
 	CollectTable *ct = data;
 
-	collection_table_motion_update(ct, (gint)bevent->x, (gint)bevent->y, FALSE);
+	collection_table_motion_update(ct, (gint)event->x, (gint)event->y, FALSE);
 
 	return FALSE;
 }
