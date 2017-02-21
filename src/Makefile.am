@@ -226,6 +226,8 @@ geeqie_SOURCES = \
 	search.h	\
 	secure_save.c	\
 	secure_save.h	\
+	shortcuts.c	\
+	shortcuts.h	\
 	similar.c	\
 	similar.h	\
 	slideshow.c	\

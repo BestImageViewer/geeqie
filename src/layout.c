@@ -46,7 +46,7 @@
 #include "bar.h"
 #include "bar_sort.h"
 #include "preferences.h"
-
+#include "shortcuts.h"
 #ifdef HAVE_LIRC
 #include "lirc.h"
 #endif
@@ -183,6 +183,20 @@ static gboolean layout_set_current_cb(GtkWidget *widget, GdkEventFocus *event, g
 	return FALSE;
 }
 
+static void layout_box_folders_changed_cb(GtkWidget *widget, gpointer data)
+{
+	LayoutWindow *lw;
+	GList *work;
+
+	work = layout_window_list;
+	while (work)
+		{
+		lw = work->data;
+		lw->options.folder_window.vdivider_pos = gtk_paned_get_position(GTK_PANED(widget));
+		work = work->next;
+		}
+}
+
 /*
  *-----------------------------------------------------------------------------
  * menu, toolbar, and dir view
@@ -272,6 +286,8 @@ static void layout_path_entry_tab_append_cb(const gchar *path, gpointer data, gi
 static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 {
 	GtkWidget *box;
+	GtkWidget *box_folders;
+	GtkWidget *scd;
 	GtkWidget *menu_bar;
 	GtkWidget *tabcomp;
 	GtkWidget *toolbar;
@@ -300,14 +316,25 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 			 G_CALLBACK(layout_path_entry_changed_cb), lw);
 #endif
 
+	box_folders = GTK_WIDGET(gtk_hpaned_new());
+	gtk_box_pack_start(GTK_BOX(box), box_folders, TRUE, TRUE, 0);
+
 	lw->vd = vd_new(lw->options.dir_view_type, lw->dir_fd);
 	vd_set_layout(lw->vd, lw);
 	vd_set_select_func(lw->vd, layout_vd_select_cb, lw);
 
 	lw->dir_view = lw->vd->widget;
-
-	gtk_box_pack_start(GTK_BOX(box), lw->dir_view, TRUE, TRUE, 0);
+	gtk_paned_add2(GTK_PANED(box_folders), lw->dir_view);
 	gtk_widget_show(lw->dir_view);
+
+	scd = shortcuts_new_default(lw);
+	gtk_paned_add1(GTK_PANED(box_folders), scd);
+	gtk_paned_set_position(GTK_PANED(box_folders), lw->options.folder_window.vdivider_pos);
+
+	gtk_widget_show(box_folders);
+
+	g_signal_connect(G_OBJECT(box_folders), "notify::position",
+			 G_CALLBACK(layout_box_folders_changed_cb), lw);
 
 	gtk_widget_show(box);
 
@@ -2277,6 +2304,9 @@ void layout_write_attributes(LayoutOptions *layout, GString *outstr, gint indent
 	WRITE_NL(); WRITE_INT(*layout, main_window.vdivider_pos);
 	WRITE_SEPARATOR();
 
+	WRITE_NL(); WRITE_INT(*layout, folder_window.vdivider_pos);
+	WRITE_SEPARATOR();
+
 	WRITE_NL(); WRITE_INT(*layout, float_window.x);
 	WRITE_NL(); WRITE_INT(*layout, float_window.y);
 	WRITE_NL(); WRITE_INT(*layout, float_window.w);
@@ -2350,6 +2380,8 @@ void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names
 		if (READ_BOOL(*layout, main_window.maximized)) continue;
 		if (READ_INT(*layout, main_window.hdivider_pos)) continue;
 		if (READ_INT(*layout, main_window.vdivider_pos)) continue;
+
+		if (READ_INT(*layout, folder_window.vdivider_pos)) continue;
 
 		if (READ_INT(*layout, float_window.x)) continue;
 		if (READ_INT(*layout, float_window.y)) continue;

@@ -606,6 +606,10 @@ struct _LayoutOptions
 	} float_window;
 
 	struct {
+		gint vdivider_pos;
+	} folder_window;
+
+	struct {
 		gint w;
 		gint h;
 	} properties_window;
