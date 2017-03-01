@@ -3077,11 +3077,11 @@ static gboolean dupe_window_keypress_cb(GtkWidget *widget, GdkEventKey *event, g
 					}
 				break;
 			case '1':
-				options->duplicates_select_type == DUPE_SELECT_GROUP1;
+				options->duplicates_select_type = DUPE_SELECT_GROUP1;
 				dupe_listview_select_dupes(dw, DUPE_SELECT_GROUP1);
 				break;
 			case '2':
-				options->duplicates_select_type == DUPE_SELECT_GROUP2;
+				options->duplicates_select_type = DUPE_SELECT_GROUP2;
 				dupe_listview_select_dupes(dw, DUPE_SELECT_GROUP2);
 				break;
 			case GDK_KEY_Menu:
