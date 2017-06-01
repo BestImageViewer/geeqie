@@ -52,7 +52,7 @@
 
 static GtkWidget *layout_image_pop_menu(LayoutWindow *lw);
 static void layout_image_set_buttons(LayoutWindow *lw);
-static void layout_image_animate_stop(LayoutWindow *lw);
+// static void layout_image_animate_stop(LayoutWindow *lw);
 static gboolean layout_image_animate_new_file(LayoutWindow *lw);
 static void layout_image_animate_update_image(LayoutWindow *lw);
 
@@ -297,7 +297,7 @@ static gboolean animation_should_continue(AnimationData *fd)
 static gboolean show_next_frame(gpointer data)
 {
 	AnimationData *fd = (AnimationData*)data;
-	int delay;
+	guint delay;
 	PixbufRenderer *pr;
 
 	if(animation_should_continue(fd)==FALSE)
@@ -355,6 +355,7 @@ static gboolean layout_image_animate_check(LayoutWindow *lw)
 	return TRUE;
 }
 
+/*
 static void layout_image_animate_stop(LayoutWindow *lw)
 {
 	if (!layout_valid(&lw)) return;
@@ -365,6 +366,7 @@ static void layout_image_animate_stop(LayoutWindow *lw)
 		lw->animation = NULL;
 		}
 }
+*/
 
 static void layout_image_animate_update_image(LayoutWindow *lw)
 {

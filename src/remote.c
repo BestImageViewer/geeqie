@@ -692,7 +692,7 @@ static RemoteCommandEntry remote_commands[] = {
 	{ NULL, "--list-clear",         gr_list_clear,          FALSE, FALSE, NULL, N_("clear command line collection list") },
 	{ NULL, "--list-add:",          gr_list_add,            TRUE,  FALSE, N_("<FILE>"), N_("add FILE to command line collection list") },
 	{ NULL, "raise",                gr_raise,               FALSE, FALSE, NULL, N_("bring the Geeqie window to the top") },
-	{ NULL, NULL, NULL, FALSE, FALSE, NULL }
+	{ NULL, NULL, NULL, FALSE, FALSE, NULL, NULL }
 };
 
 static RemoteCommandEntry *remote_command_find(const gchar *text, const gchar **offset)

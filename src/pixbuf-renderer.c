@@ -920,9 +920,6 @@ static void pr_scroller_stop(PixbufRenderer *pr)
 
 void pixbuf_renderer_set_color(PixbufRenderer *pr, GdkColor *color)
 {
-	GtkStyle *style;
-	GtkWidget *widget;
-
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 
 	if (color)
@@ -2298,15 +2295,15 @@ static void pr_create_anaglyph_dubois(GdkPixbuf *pixbuf, GdkPixbuf *right, gint 
 	guchar *spi, *dpi;
 	gint i, j, k;
 	double pr_dubois_matrix[3][6];
-	const static double pr_dubois_matrix_RC[3][6] = {
+	static const double pr_dubois_matrix_RC[3][6] = {
 		{ 0.456,  0.500,  0.176, -0.043, -0.088, -0.002},
 		{-0.040, -0.038, -0.016,  0.378,  0.734, -0.018},
 		{-0.015, -0.021, -0.005, -0.072, -0.113,  1.226}};
-	const static double pr_dubois_matrix_GM[3][6] = {
+	static const double pr_dubois_matrix_GM[3][6] = {
 		{-0.062, -0.158, -0.039,  0.529,  0.705,  0.024},
 		{ 0.284,  0.668,  0.143, -0.016, -0.015, -0.065},
 		{-0.015, -0.027,  0.021,  0.009,  0.075,  0.937}};
-	const static double pr_dubois_matrix_YB[3][6] = {
+	static const double pr_dubois_matrix_YB[3][6] = {
 		{ 1.000, -0.193,  0.282, -0.015, -0.116, -0.016},
 		{-0.024,  0.855,  0.064,  0.006,  0.058, -0.016},
 		{-0.036, -0.163,  0.021,  0.089,  0.174,  0.858}};

@@ -802,7 +802,7 @@ static void collection_table_popup_select_invert_cb(GtkWidget *widget, gpointer 
 
 static void collection_table_popup_rectangular_selection_cb(GtkWidget *widget, gpointer data)
 {
-	CollectTable *ct = data;
+	// CollectTable *ct = data;
 
 	options->collections.rectangular_selection = !(options->collections.rectangular_selection);
 }
