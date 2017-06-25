@@ -56,6 +56,8 @@ void init_exec_time(void);
 
 #else /* DEBUG */
 
+#define set_regexp(regexp) do { } while(0)
+#define get_regexp() (NULL)
 #define get_debug_level() (0)
 #define set_debug_level(new_level) do { } while(0)
 #define debug_level_add(delta) do { } while(0)
