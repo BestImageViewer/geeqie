@@ -2727,6 +2727,16 @@ void layout_util_sync_color(LayoutWindow *lw)
 	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_image_get_desaturate(lw));
 }
 
+void layout_util_sync_marks(LayoutWindow *lw)
+{
+	GtkAction *action;
+
+	if (!lw->action_group) return;
+
+	action = gtk_action_group_get_action(lw->action_group, "ShowMarks");
+	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_marks);
+}
+
 static void layout_util_sync_views(LayoutWindow *lw)
 {
 	GtkAction *action;
@@ -2766,9 +2776,6 @@ static void layout_util_sync_views(LayoutWindow *lw)
 
 	action = gtk_action_group_get_action(lw->action_group, "ShowInfoPixel");
 	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_info_pixel);
-
-	action = gtk_action_group_get_action(lw->action_group, "ShowMarks");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_marks);
 
 	action = gtk_action_group_get_action(lw->action_group, "SlideShow");
 	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_image_slideshow_active(lw));
@@ -2810,6 +2817,7 @@ static void layout_util_sync_views(LayoutWindow *lw)
 	action = gtk_action_group_get_action(lw->action_group, "StereoAuto");
 	gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), layout_image_stereo_pixbuf_get(lw));
 
+	layout_util_sync_marks(lw);
 	layout_util_sync_color(lw);
 }
 

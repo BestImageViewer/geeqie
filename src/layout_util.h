@@ -28,6 +28,7 @@
 gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
 
 void layout_util_sync_thumb(LayoutWindow *lw);
+void layout_util_sync_marks(LayoutWindow *lw);
 void layout_util_sync_color(LayoutWindow *lw);
 void layout_util_sync(LayoutWindow *lw);
 
