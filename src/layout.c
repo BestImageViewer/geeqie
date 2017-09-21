@@ -1135,7 +1135,7 @@ void layout_marks_set(LayoutWindow *lw, gboolean enable)
 
 	lw->options.show_marks = enable;
 
-//	layout_util_sync_marks(lw);
+	layout_util_sync_marks(lw);
 	layout_list_sync_marks(lw);
 }
 
