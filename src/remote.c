@@ -279,11 +279,11 @@ static RemoteConnection *remote_client_open(const gchar *path)
 	return rc;
 }
 
-static sig_atomic_t sigpipe_occured = FALSE;
+static sig_atomic_t sigpipe_occurred = FALSE;
 
 static void sighandler_sigpipe(gint sig)
 {
-	sigpipe_occured = TRUE;
+	sigpipe_occurred = TRUE;
 }
 
 static gboolean remote_client_send(RemoteConnection *rc, const gchar *text)
@@ -296,7 +296,7 @@ static gboolean remote_client_send(RemoteConnection *rc, const gchar *text)
 	if (!rc || rc->server) return FALSE;
 	if (!text) return TRUE;
 
-	sigpipe_occured = FALSE;
+	sigpipe_occurred = FALSE;
 
 	new_action.sa_handler = sighandler_sigpipe;
 	sigemptyset(&new_action.sa_mask);

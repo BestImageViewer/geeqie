@@ -1975,7 +1975,7 @@ static void print_job_throw_error(PrintWindow *pw, const gchar *message)
 				parent, TRUE, NULL, NULL);
 	generic_dialog_add_button(gd, GTK_STOCK_OK, NULL, NULL, TRUE);
 
-	buf = g_strdup_printf(_("An error occured printing to %s."), print_output_name(pw->output));
+	buf = g_strdup_printf(_("An error occurred printing to %s."), print_output_name(pw->output));
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_ERROR, _("Printing error"), buf, TRUE);
 	g_free(buf);
 
