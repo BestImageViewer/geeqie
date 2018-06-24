@@ -570,9 +570,19 @@ gboolean copy_file(const gchar *s, const gchar *t)
 			{
 			gchar *absolute;
 
-			absolute = g_malloc(PATH_MAX + 1);
 			char *lastslash = strrchr(sl, G_DIR_SEPARATOR);
 			int len = lastslash - sl + 1;
+
+			int path_max;
+#ifdef PATH_MAX
+			path_max = PATH_MAX;
+#else
+			path_max = pathconf(sl, _PC_PATH_MAX);
+			if (path_max <= 0)
+				path_max = 4096;
+#endif
+
+			absolute = g_malloc(path_max + 1);
 
 			strncpy(absolute, sl, len);
 			strcpy(absolute + len, link_target);
