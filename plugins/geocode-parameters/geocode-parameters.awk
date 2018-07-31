@@ -1,3 +1,4 @@
+#!/usr/bin/awk -f
 #
 # This file is used by the Search option "search on geo-position".
 # It is used to decode the results of internet or other searches
