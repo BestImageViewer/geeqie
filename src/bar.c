@@ -66,6 +66,15 @@ static const gchar default_config_title[] =
 "    </layout>"
 "</gq>";
 
+static const gchar default_config_headline[] =
+"<gq>"
+"    <layout id = '_current_'>"
+"        <bar>"
+"            <pane_comment id = 'headline' expanded = 'true' key = 'Xmp.photoshop.Headline'  height = '40' />"
+"        </bar>"
+"    </layout>"
+"</gq>";
+
 static const gchar default_config_keywords[] =
 "<gq>"
 "    <layout id = '_current_'>"
@@ -192,6 +201,7 @@ static const KnownPanes known_panes[] = {
 	{PANE_KEYWORDS,		"keywords",	N_("Keywords"),		default_config_keywords},
 	{PANE_COMMENT,		"comment",	N_("Comment"),		default_config_comment},
 	{PANE_COMMENT,		"rating",	N_("Rating"),		default_config_rating},
+	{PANE_COMMENT,		"headline",	N_("Headline"),		default_config_headline},
 	{PANE_EXIF,		"exif",		N_("Exif"),		default_config_exif},
 /* other pre-configured panes */
 	{PANE_EXIF,		"file_info",	N_("File info"),	default_config_file_info},
