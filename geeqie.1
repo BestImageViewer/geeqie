@@ -644,6 +644,59 @@ delete selected files
 close window
 .br
 
+.SH FILES
+The following data lists the locations Geeqie uses for various actions. The
+uppercase symbols are environment variables. If they are not set on your system
+the fallback locations are listed in parentheses. Geeqie will first attempt to
+load a configuration file from:
+
+.B /etc/geeqie/geeqierc.xml
+
+It will then continue with the following locations.
+Most of Geeqie's configuration files are contained in the folder, and sub-folders of:
+
+.B $XDG_CONFIG_HOME/geeqie/
+.B ($~/.config/geeqie/)
+
+Geeqie's standard configuration file is:
+
+.B .../geeqierc.xml
+
+An alternative configuration file may be used by executing:
+
+.B geeqie -r --config-load:<filename>
+
+Geeqie-created desktop files used by Plugins are in the folder:
+
+.B .../applications
+
+Lua script files for Lua Extensions are in the folder:
+
+.B .../lua
+
+Historic data such as last several folders visited, bookmarks, and recently used collections, as well as default print settings are contained in this text file:
+
+.B .../history
+
+Keyboard shortcut maps are contained in this text file:
+
+.B .../accels
+
+The location for Collections is in the folder:
+
+.B $XDG_DATA_HOME/geeqie/collections
+.br
+.B ($~/.local/share/geeqie/collections)
+
+The lirc Infra-red controller configuration file must be located at:
+
+.B $HOME/.lircrc
+
+Thumbnails are stored in a location specified in Thumbnail Preferences
+
+Metadata is stored either in the image file or in the location specified in Safe Delete
+
+The safe delete folder is specified in the Metadata tab of main Preferences
 
 .SH LICENSE
 Copyright (C) 1999-2004 by John Ellis.
