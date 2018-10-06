@@ -200,7 +200,7 @@ fi
 AM_PATH_GLIB_2_0(2.24.0,,AC_MSG_ERROR(GLIB >= 2.24.0 not installed.))
 AC_ARG_ENABLE([gtk3], AC_HELP_STRING([--disable-gtk3], [use gtk2 instead of gtk3]),[gtk3="${enableval}"], [gtk3=m4_ifdef([AM_PATH_GTK_3_0], [auto], [no])])
 
-if test x$gtk3 == xyes; then
+if test x$gtk3 = xyes; then
     AC_MSG_WARN("Gtk3 enabled")
     m4_ifdef([AM_PATH_GTK_3_0], [AM_PATH_GTK_3_0(3.0.0,,AC_MSG_ERROR(GTK+ >= 3.0.0 not installed.))])
 else
@@ -210,7 +210,7 @@ else
     fi
 fi
 
-if test x$gtk3 == xno; then
+if test x$gtk3 = xno; then
     m4_ifdef([AM_PATH_GTK_2_0], [AM_PATH_GTK_2_0(2.20.0,,AC_MSG_ERROR(GTK+ >= 2.20.0 not installed.))])
     true
 fi
@@ -479,7 +479,7 @@ AC_SUBST(CLUTTER_GTK_LIBS)
 #  Libchamplain support - used for map facility
 # ----------------------------------------------------------------------
 
-if test "x${libgps}" != "xno" -a "x${HAVE_CLUTTER}" == "xyes"; then
+if test "x${libgps}" != "xno" -a "x${HAVE_CLUTTER}" = "xyes"; then
     if test "x${gtk3}" != "xno"; then
       PKG_CHECK_MODULES(LIBCHAMPLAIN, [champlain-0.12 >= 0.12],
         [
@@ -497,7 +497,7 @@ else
   HAVE_LIBCHAMPLAIN=disabled
 fi
 
-if test "x${libgps}" != "xno" -a "x${HAVE_LIBCHAMPLAIN}" == "xyes" ; then
+if test "x${libgps}" != "xno" -a "x${HAVE_LIBCHAMPLAIN}" = "xyes" ; then
   PKG_CHECK_MODULES(LIBCHAMPLAIN_GTK, [champlain-gtk-0.12 >= 0.12],
     [
       HAVE_LIBCHAMPLAIN_GTK=yes
