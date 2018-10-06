@@ -54,7 +54,6 @@ gint vf_index_by_fd(ViewFile *vf, FileData *in_fd);
 guint vf_count(ViewFile *vf, gint64 *bytes);
 GList *vf_get_list(ViewFile *vf);
 
-gint vf_index_is_selected(ViewFile *vf, gint row);
 guint vf_selection_count(ViewFile *vf, gint64 *bytes);
 GList *vf_selection_get_list(ViewFile *vf);
 GList *vf_selection_get_list_by_index(ViewFile *vf);
