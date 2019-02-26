@@ -1049,7 +1049,6 @@ static gboolean filter_add_scroll(gpointer data)
 	GList *list_cells;
 	GtkCellRenderer *cell;
 	GtkTreeViewColumn *column;
-	GList *list_columns;
 	const gchar *title;
 	guint i = 0;
 	gint rows;
@@ -1057,12 +1056,7 @@ static gboolean filter_add_scroll(gpointer data)
 	rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(filter_store), NULL);
 	path = gtk_tree_path_new_from_indices(rows-1, -1);
 
-	list_columns = gtk_tree_view_get_columns(GTK_TREE_VIEW(data));
-	do {
-		column = g_list_nth(list_columns,i)->data;
-		title = gtk_tree_view_column_get_title(GTK_TREE_VIEW_COLUMN(column));
-		i++;
-		} while (strcmp(title, "Filter") !=0 );
+	column = gtk_tree_view_get_column(GTK_TREE_VIEW(data), 0);
 
 	list_cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
 	cell = g_list_last(list_cells)->data;
@@ -1074,7 +1068,6 @@ static gboolean filter_add_scroll(gpointer data)
 
 	gtk_tree_path_free(path);
 	g_list_free(list_cells);
-	g_list_free(list_columns);
 
 	return(FALSE);
 }
