@@ -239,6 +239,14 @@ static void advanced_exif_add_column(GtkWidget *listview, const gchar *title, gi
 	column = gtk_tree_view_column_new();
 	gtk_tree_view_column_set_title(column, title);
 
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, n);
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_column_pack_start(column, renderer, TRUE);
+	gtk_tree_view_column_add_attribute(column, renderer, "text", n);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(listview), column);
+
 	if (sizable)
 		{
 		gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
@@ -248,14 +256,6 @@ static void advanced_exif_add_column(GtkWidget *listview, const gchar *title, gi
 		{
 		gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 		}
-
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, n);
-
-	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	gtk_tree_view_column_add_attribute(column, renderer, "text", n);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(listview), column);
 }
 
 void advanced_exif_close(ExifWin *ew)
