@@ -82,6 +82,12 @@ gint pan_date_value(time_t d, PanDateLengthType length)
 	return -1;
 }
 
+#if defined(__GLIBC_PREREQ)
+# if __GLIBC_PREREQ(2, 27)
+#  define HAS_GLIBC_STRFTIME_EXTENSIONS
+# endif
+#endif
+
 gchar *pan_date_value_string(time_t d, PanDateLengthType length)
 {
 	struct tm td;
@@ -99,7 +105,7 @@ gchar *pan_date_value_string(time_t d, PanDateLengthType length)
 			format = "%A %e";
 			break;
 		case PAN_DATE_LENGTH_MONTH:
-#if __GLIBC_PREREQ(2, 27)
+#if defined(HAS_GLIBC_STRFTIME_EXTENSIONS) || defined(__FreeBSD__)
 			format = "%OB %Y";
 #else
 			format = "%B %Y";
