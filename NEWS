@@ -1,3 +1,42 @@
+Geeqie 1.5
+==========
+
+- Partial implementation of Hi-DPI-aware rendering of images
+- Improved multi display full screen
+- Use GPS lat/long to provide local time corrected for UTC offset and DST correction.
+- Marks/image connections can optionally be saved in a text file
+- Show star rating
+- Search using regular expressions
+- Replace GQView print dialog with GTK print dialog
+- Plugins added
+- Option to delete to standard trash folder and optimizing trash handling
+- Display random image
+- Allow LUA script support in sidebar
+- Additional remote commands
+
+And as usual:
+- Many small improvements
+- Many bug fixes
+- Updated language support
+
+Geeqie 1.4
+==========
+
+- Improvement of GTK3 implementation
+- Improved marks workflow
+- Animate gifs (via context menu or key A)
+- Compiles with gcc and clang
+- Rectangular selections (activated by Alt-R)
+- Folder bookmarks
+- Search via geo position
+- Thumbnail preview in dialogues
+- Customisable tool bar
+- Slideshow speed customisable while playing
+- Many usability improvements
+- Language updates
+- Many small improvements
+- Many bugfixes as usual
+
 Geeqie 1.3
 ==========
 
