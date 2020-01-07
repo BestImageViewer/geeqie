@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <id type="desktop">geeqie.desktop</id>
+    <metadata_license>CC-BY-SA-4.0</metadata_license>
+    <project_license>GPL-3.0+</project_license>
+    <name>Geeqie</name>
+    <summary>A lightweight image viewer.</summary>
+    <description>
+      <p>
+          Geeqie is a lightweight image viewer for Linux, BSDs and compatibles.
+        </p>
+        <p>
+          It can be used as a simple, fast, database-free image viewer, but equally it can be used to manage large collections of images.
+        </p>
+    </description>
+    <screenshots>
+      <screenshot type="default">
+        <image>http://www.geeqie.org/screenshots/Screenshot_2017-08-13_12-02-32.png</image>
+      </screenshot>
+      <screenshot>
+        <image>http://www.geeqie.org/screenshots/Screenshot_2017-08-13_12-29-44.png</image>
+      </screenshot>
+    </screenshots>
+    <keywords>
+      <keyword>image</keyword>
+      <keyword>photography</keyword>
+      <keyword>fast</keyword>
+      <keyword>graphics</keyword>
+    </keywords>
+    <url type="homepage">http://geeqie.org</url>
+    <update_contact>geeqie@freelists.org</update_contact>
+</component>
