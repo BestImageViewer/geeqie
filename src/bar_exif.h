@@ -28,9 +28,6 @@ void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_n
 void bar_pane_exif_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 
 /* these are exposed for when duplication of the exif bar's text is needed */
-
-const gchar **bar_exif_key_list;
-const gint bar_exif_key_count;
 GList *bar_pane_exif_list();
 
 #endif

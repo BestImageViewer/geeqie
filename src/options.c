@@ -32,6 +32,9 @@
 #include "ui_fileops.h"
 #include "window.h"
 
+ConfOptions *options;
+CommandLine *command_line;
+
 ConfOptions *init_options(ConfOptions *options)
 {
 	gint i;
