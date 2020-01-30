@@ -806,7 +806,7 @@ GtkWidget *bookmark_list_new(const gchar *key,
 
 	scrolled = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
-				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
 	bm->box = gtk_vbox_new(FALSE, 0);
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled), bm->box);
