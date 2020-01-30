@@ -1583,7 +1583,6 @@ static gboolean vf_read_metadata_in_idle_cb(gpointer data)
 {
 	FileData *fd;
 	ViewFile *vf = data;
-	GList *list_entry;
 	GList *work;
 
 	vf_thumb_status(vf, vf_read_metadata_in_idle_progress(vf), _("Loading meta..."));
@@ -1630,9 +1629,6 @@ static void vf_read_metadata_in_idle_finished_cb(gpointer data)
 
 void vf_read_metadata_in_idle(ViewFile *vf)
 {
-	GList *work;
-	FileData *fd;
-
 	if (!vf) return;
 
 	if (vf->read_metadata_in_idle_id)

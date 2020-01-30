@@ -151,8 +151,6 @@ void image_chain_append_end(const gchar *path)
 		else
 			{
 			work = g_list_last(image_chain);
-			gchar *tmp;
-			tmp = work->data;
 			if (g_strcmp0(work->data , path) != 0)
 				{
 				image_chain = g_list_append(image_chain, g_strdup(path));

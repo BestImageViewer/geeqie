@@ -719,7 +719,6 @@ static void gr_pixel_info(const gchar *text, GIOChannel *channel, gpointer data)
 	gint width, height;
 	gint r_mouse, g_mouse, b_mouse;
 	PixbufRenderer *pr;
-	LayoutWindow *lw = NULL;
 
 	if (!layout_valid(&lw_id)) return;
 
@@ -761,7 +760,6 @@ static void gr_rectangle(const gchar *text, GIOChannel *channel, gpointer data)
 {
 	gchar *rectangle_info;
 	PixbufRenderer *pr;
-	LayoutWindow *lw = NULL;
 	gint x1, y1, x2, y2;
 
 	if (!options->draw_rectangle) return;
@@ -1162,8 +1160,6 @@ static void gr_list_add(const gchar *text, GIOChannel *channel, gpointer data)
 
 static void gr_raise(const gchar *text, GIOChannel *channel, gpointer data)
 {
-	LayoutWindow *lw = NULL;
-
 	if (layout_valid(&lw_id))
 		{
 		gtk_window_present(GTK_WINDOW(lw_id->window));
@@ -1172,16 +1168,12 @@ static void gr_raise(const gchar *text, GIOChannel *channel, gpointer data)
 
 static void gr_pwd(const gchar *text, GIOChannel *channel, gpointer data)
 {
-	LayoutWindow *lw = NULL;
-
 	g_free(pwd);
 	pwd = g_strdup(text);
 }
 
 static void gr_print0(const gchar *text, GIOChannel *channel, gpointer data)
 {
-	LayoutWindow *lw = NULL;
-
 	g_io_channel_write_chars(channel, "print0", -1, NULL, NULL);
 	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
 }

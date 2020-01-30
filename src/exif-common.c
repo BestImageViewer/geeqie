@@ -842,7 +842,6 @@ static gchar *exif_build_formatted_localtime(ExifData *exif)
  */
 static gchar *exif_build_formatted_timezone(ExifData *exif)
 {
-	gchar *time_zone = NULL;
 	gchar *exif_date_time = NULL;
 	gchar *timezone = NULL;
 	gchar *countryname = NULL;

@@ -542,8 +542,6 @@ static void layout_menu_exif_rotate_cb(GtkToggleAction *action, gpointer data)
 
 static void layout_menu_select_rectangle_cb(GtkToggleAction *action, gpointer data)
 {
-	LayoutWindow *lw = data;
-
 	options->draw_rectangle = gtk_toggle_action_get_active(action);
 }
 
@@ -980,7 +978,6 @@ static void layout_menu_guidelines_cb(GtkToggleAction *action, gpointer data)
 
 	if (gtk_toggle_action_get_active(action))
 		{
-		OsdShowFlags flags = image_osd_get(lw->image);
 		image_osd_set(lw->image, OSD_SHOW_INFO | OSD_SHOW_STATUS | OSD_SHOW_GUIDELINES);
 		layout_util_sync_views(lw);
 		}
@@ -1599,7 +1596,6 @@ static void layout_menu_page_previous_cb(GtkAction *action, gpointer data)
 static void layout_menu_image_forward_cb(GtkAction *action, gpointer data)
 {
 	LayoutWindow *lw = data;
-	FileData *dir_fd;
 
 	/* Obtain next image */
 	layout_set_path(lw, image_chain_forward());
@@ -1608,7 +1604,6 @@ static void layout_menu_image_forward_cb(GtkAction *action, gpointer data)
 static void layout_menu_image_back_cb(GtkAction *action, gpointer data)
 {
 	LayoutWindow *lw = data;
-	FileData *dir_fd;
 
 	/* Obtain previous image */
 	layout_set_path(lw, image_chain_back());
@@ -2696,7 +2691,6 @@ void layout_actions_setup(LayoutWindow *lw)
 {
 	GError *error;
 	gint i;
-	GtkAction *action;
 
 	DEBUG_1("%s layout_actions_setup: start", get_exec_time());
 	if (lw->ui_manager) return;

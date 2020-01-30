@@ -1944,7 +1944,6 @@ GList *keyword_list_get()
 
 void keyword_list_set(GList *keyword_list)
 {
-	GList *ret = NULL;
 	GtkTreeIter  iter;
 
 	if (!keyword_list) return;

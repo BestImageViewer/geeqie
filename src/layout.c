@@ -293,7 +293,6 @@ static void layout_path_entry_tab_append_cb(const gchar *path, gpointer data, gi
 
 static gboolean path_entry_tooltip_cb(GtkWidget *widget, gpointer data)
 {
-	LayoutWindow *lw = data;
 	GList *box_child_list;
 	GtkComboBox *path_entry;
 	gchar *current_path;
@@ -579,7 +578,6 @@ static GtkWidget *layout_zoom_button(LayoutWindow *lw, GtkWidget *box, gint size
 
 void layout_status_update_progress(LayoutWindow *lw, gdouble val, const gchar *text)
 {
-	static gdouble thumb = 0;
 	static gdouble meta = 0;
 
 	if (!layout_valid(&lw)) return;
@@ -589,7 +587,6 @@ void layout_status_update_progress(LayoutWindow *lw, gdouble val, const gchar *t
 	 */
 	if(!g_strcmp0(text, "Loading thumbs..."))
 		{
-		thumb = val;
 		if (meta)
 			{
 			return;
@@ -1825,7 +1822,6 @@ static void layout_grid_setup(LayoutWindow *lw)
 void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 {
 	FileData *dir_fd;
-	gint i;
 
 	if (!layout_valid(&lw)) return;
 

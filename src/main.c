@@ -829,7 +829,6 @@ gint main(gint argc, gchar *argv[])
 	CollectionData *first_collection = NULL;
 	gchar *buf;
 	CollectionData *cd = NULL;
-	gchar *app_lock;
 
 #ifdef HAVE_GTHREAD
 #if !GLIB_CHECK_VERSION(2,32,0)

@@ -440,7 +440,6 @@ static gchar *color_man_get_profile_name(ColorManProfileType type, cmsHPROFILE p
 			if (profile)
 				{
 #ifdef HAVE_LCMS2
-				cmsUInt32Number r;
 				char buffer[20];
 				buffer[0] = '\0';
 				cmsGetProfileInfoASCII(profile, cmsInfoDescription, "en", "US", buffer, 20);

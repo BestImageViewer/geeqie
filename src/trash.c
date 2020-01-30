@@ -179,7 +179,6 @@ gboolean file_util_safe_unlink(const gchar *path)
 
 		if (result && !gd)
 			{
-			GtkWidget *button;
 			gchar *buf;
 
 			buf = g_strdup_printf(_("Unable to access or create the trash folder.\n\"%s\""), options->file_ops.safe_delete_path);

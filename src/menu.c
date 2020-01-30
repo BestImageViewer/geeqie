@@ -410,7 +410,6 @@ static void add_collection_list(GtkWidget *menu, GCallback func,
 {
 	GList *work;
 	gint index = 0; /* index to existing collection list menu item selected */
-	GtkWidget *item;
 
 	work = collection_list;
 	while (work)

@@ -383,7 +383,6 @@ static void image_loader_tiff_free(gpointer loader)
 
 static void image_loader_tiff_set_page_num(gpointer loader, gint page_num)
 {
-	ImageLoader *il = (ImageLoader *) loader;
 	ImageLoaderTiff *lt = (ImageLoaderTiff *) loader;
 
 	lt->page_num = page_num;

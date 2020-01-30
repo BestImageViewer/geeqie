@@ -1096,7 +1096,6 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 	GtkWidget *menu;
 	GtkWidget *item;
 	GList *editmenu_fd_list;
-	GtkWidget *submenu;
 	gboolean video;
 
 	menu = popup_menu_short_lived();

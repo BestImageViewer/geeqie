@@ -2348,7 +2348,6 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	GtkWidget *item;
 	gint on_row;
 	GList *editmenu_fd_list;
-	GtkWidget *submenu;
 
 	on_row = (di != NULL);
 

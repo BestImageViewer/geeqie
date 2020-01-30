@@ -1317,7 +1317,6 @@ static void image_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 static GtkWidget *view_popup_menu(ViewWindow *vw)
 {
 	GtkWidget *menu;
-	GtkWidget *submenu;
 	GtkWidget *item;
 	GList *editmenu_fd_list;
 

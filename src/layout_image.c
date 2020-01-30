@@ -1804,7 +1804,6 @@ static void layout_image_button_cb(ImageWindow *imd, GdkEventButton *event, gpoi
 {
 	LayoutWindow *lw = data;
 	GtkWidget *menu;
-	FileData *dir_fd;
 
 	switch (event->button)
 		{

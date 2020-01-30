@@ -1738,7 +1738,6 @@ gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
 		{
 		GtkTextBuffer *buffer;
 		GtkTextIter start, end;
-		GtkTextIter selection_start, selection_end;
 
 		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_widget));
 		gtk_text_buffer_get_bounds(buffer, &start, &end);

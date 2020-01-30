@@ -155,19 +155,12 @@ static void set_osd_button(GtkTable *table, const gint rows, const gint cols, co
 
 GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 {
-	GtkWidget *hbox;
 	GtkWidget *vbox;
-	GtkWidget *vbox_buttons;
-	GtkWidget *group;
-	GtkWidget *button;
 	GtkWidget *scrolled;
-	GtkTextBuffer *buffer;
 	GtkWidget *label;
-	GtkWidget *	subgroup;
 	gint i = 0;
 	gint rows = 0;
 	gint max_rows = 0;
-	gint col = 0;
 	gint cols = 0;
 	gdouble entries;
 	GtkWidget *viewport;

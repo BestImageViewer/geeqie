@@ -253,12 +253,12 @@ int runcmd(gchar *cmd)
  */
 gint date_get_first_day_of_week()
 {
-	gchar *dot;
-	gchar *current_locale;
-
 #ifdef HAVE__NL_TIME_FIRST_WEEKDAY
 	return nl_langinfo(_NL_TIME_FIRST_WEEKDAY)[0];
 #else
+	gchar *dot;
+	gchar *current_locale;
+
 	current_locale = setlocale(LC_ALL, NULL);
 	dot = strstr(current_locale, ".");
 	if ((strncmp(dot - 2, "US", 2) == 0) || (strncmp(dot - 2, "MX", 2) == 0) || (strncmp(dot - 2, "CA", 2) == 0))

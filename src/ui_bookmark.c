@@ -543,7 +543,6 @@ static void bookmark_drag_begin(GtkWidget *button, GdkDragContext *context, gpoi
 
 static gboolean bookmark_path_tooltip_cb(GtkWidget *button, gpointer data)
 {
-	BookMarkData *bm = data;
 	BookButtonData *b;
 
 	b = g_object_get_data(G_OBJECT(button), "bookbuttondata");
