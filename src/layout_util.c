@@ -386,16 +386,6 @@ static void layout_menu_move_to_trash_cb(GtkAction *action, gpointer data)
 	file_util_delete(NULL, layout_selection_list(lw), layout_window(lw));
 }
 
-static void layout_menu_delete_key_cb(GtkAction *action, gpointer data)
-{
-	LayoutWindow *lw = data;
-
-	if (options->file_ops.enable_delete_key)
-		{
-		options->file_ops.safe_delete_enable = FALSE;
-		file_util_delete(NULL, layout_selection_list(lw), layout_window(lw));
-		}
-}
 static void layout_menu_move_to_trash_key_cb(GtkAction *action, gpointer data)
 {
 	LayoutWindow *lw = data;

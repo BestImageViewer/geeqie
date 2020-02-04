@@ -118,13 +118,6 @@ static gchar *file_util_safe_dest(const gchar *path)
 	return dest;
 }
 
-static void file_util_safe_del_close_cb(GtkWidget *dialog, gpointer data)
-{
-	GenericDialog **gd = data;
-
-	*gd = NULL;
-}
-
 gboolean file_util_safe_unlink(const gchar *path)
 {
 	static GenericDialog *gd = NULL;
