@@ -157,7 +157,6 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 {
 	GtkWidget *vbox;
 	GtkWidget *scrolled;
-	GtkWidget *label;
 	gint i = 0;
 	gint rows = 0;
 	gint max_rows = 0;
@@ -174,7 +173,6 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 	gtk_container_set_border_width(GTK_CONTAINER(scrolled), PREF_PAD_BORDER);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	label = gtk_label_new("title");
 	gtk_widget_show(scrolled);
 	gtk_widget_set_size_request(scrolled, -1, 140);
 
