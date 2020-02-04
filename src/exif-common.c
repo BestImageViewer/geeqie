@@ -815,10 +815,9 @@ static gchar *exif_build_formatted_localtime(ExifData *exif)
 				else
 					{
 					g_free(exif_date_time);
-					exif_date_time = g_strdup(tmp);
+					exif_date_time = tmp;
 					}
 				}
-				g_free(tmp);
 			}
 		putenv(time_zone_org);
 
