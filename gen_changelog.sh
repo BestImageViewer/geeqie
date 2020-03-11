@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Script to update ChangeLog file,
 # it keeps "pre-svn" history and inserts git log at top,
