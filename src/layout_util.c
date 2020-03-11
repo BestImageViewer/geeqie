@@ -60,6 +60,7 @@
 #include "metadata.h"
 #include "desktop_file.h"
 
+#include <sys/wait.h>
 #include <gdk/gdkkeysyms.h> /* for keyboard values */
 #include "keymap_template.c"
 
