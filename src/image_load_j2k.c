@@ -25,7 +25,6 @@
 
 #include "misc.h"
 
-#include <sys/sysinfo.h>
 #ifdef HAVE_J2K
 #include "openjpeg.h"
 
