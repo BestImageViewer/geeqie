@@ -503,7 +503,7 @@ ZoneDetect *ZDOpenDatabase(const char *path)
         lseek(library->fd, 0, SEEK_SET);
 
         library->mapping = mmap(NULL, (size_t)library->length, PROT_READ, MAP_PRIVATE | MAP_FILE, library->fd, 0);
-        if(!library->mapping) {
+        if(library->mapping == MAP_FAILED) {
             zdError(ZD_E_DB_MMAP, errno);
             goto fail;
         }
