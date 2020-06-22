@@ -69,9 +69,6 @@ typedef enum {
 	SEARCH_MATCH_NONE,
 	SEARCH_MATCH_EQUAL,
 	SEARCH_MATCH_CONTAINS,
-	SEARCH_MATCH_NAME_EQUAL,
-	SEARCH_MATCH_NAME_CONTAINS,
-	SEARCH_MATCH_PATH_CONTAINS,
 	SEARCH_MATCH_UNDER,
 	SEARCH_MATCH_OVER,
 	SEARCH_MATCH_BETWEEN,
@@ -274,9 +271,8 @@ static const MatchList text_search_menu_path[] = {
 };
 
 static const MatchList text_search_menu_name[] = {
-	{ N_("name contains"),	SEARCH_MATCH_NAME_CONTAINS },
-	{ N_("name is"),	SEARCH_MATCH_NAME_EQUAL },
-	{ N_("path contains"),	SEARCH_MATCH_PATH_CONTAINS }
+	{ N_("contains"),	SEARCH_MATCH_CONTAINS },
+	{ N_("is"),		SEARCH_MATCH_EQUAL }
 };
 
 static const MatchList text_search_menu_size[] = {
@@ -1953,7 +1949,7 @@ static gboolean search_file_next(SearchData *sd)
 		tested = TRUE;
 		match = FALSE;
 
-		if (sd->match_name == SEARCH_MATCH_NAME_EQUAL)
+		if (sd->match_name == SEARCH_MATCH_EQUAL)
 			{
 			if (sd->search_name_match_case)
 				{
@@ -1964,25 +1960,16 @@ static gboolean search_file_next(SearchData *sd)
 				match = (g_ascii_strcasecmp(fd->name, sd->search_name) == 0);
 				}
 			}
-		else if (sd->match_name == SEARCH_MATCH_NAME_CONTAINS || sd->match_name == SEARCH_MATCH_PATH_CONTAINS)
+		else if (sd->match_name == SEARCH_MATCH_CONTAINS)
 			{
-			const gchar *fd_name_or_path;
-			if (sd->match_name == SEARCH_MATCH_NAME_CONTAINS)
-				{
-				fd_name_or_path = fd->name;
-				}
-			else
-				{
-				fd_name_or_path = fd->path;
-				}
 			if (sd->search_name_match_case)
 				{
-				match = g_regex_match(sd->search_name_regex, fd_name_or_path, 0, NULL);
+				match = g_regex_match(sd->search_name_regex, fd->name, 0, NULL);
 				}
 			else
 				{
 				/* sd->search_name is converted in search_start() */
-				gchar *haystack = g_utf8_strdown(fd_name_or_path, -1);
+				gchar *haystack = g_utf8_strdown(fd->name, -1);
 				match = g_regex_match(sd->search_name_regex, haystack, 0, NULL);
 				g_free(haystack);
 				}
@@ -3300,7 +3287,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	sd->search_type = SEARCH_MATCH_NONE;
 
-	sd->match_name = SEARCH_MATCH_NAME_CONTAINS;
+	sd->match_name = SEARCH_MATCH_CONTAINS;
 	sd->match_size = SEARCH_MATCH_EQUAL;
 	sd->match_date = SEARCH_MATCH_EQUAL;
 	sd->match_dimensions = SEARCH_MATCH_EQUAL;
@@ -3393,7 +3380,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for file name */
 	hbox = menu_choice(sd->box_search, &sd->check_name, &sd->menu_name,
-			   _("File"), &sd->match_name_enable,
+			   _("File name"), &sd->match_name_enable,
 			   text_search_menu_name, sizeof(text_search_menu_name) / sizeof(MatchList),
 			   G_CALLBACK(menu_choice_name_cb), sd);
 	combo = history_combo_new(&sd->entry_name, "", "search_name", -1);
