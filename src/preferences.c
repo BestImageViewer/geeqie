@@ -3764,7 +3764,7 @@ static void config_tab_advanced(GtkWidget *notebook)
 	pref_line(vbox, PREF_PAD_SPACE);
 	group = pref_group_new(vbox, FALSE, _("Thread pool limits"), GTK_ORIENTATION_VERTICAL);
 
-	threads_string_label = pref_label_new(group, "This option limits the number of threads (or cpu cores)\nthat Geeqie will use when running duplicate checks. The default value is 0, which means all avaialble cores will be used.");
+	threads_string_label = pref_label_new(group, "This option limits the number of threads (or cpu cores)\nthat Geeqie will use when running duplicate checks. The default value is 0, which means all available cores will be used.");
 	gtk_label_set_line_wrap(GTK_LABEL(threads_string_label), TRUE);
 
 	pref_spacer(vbox, PREF_PAD_GROUP);
