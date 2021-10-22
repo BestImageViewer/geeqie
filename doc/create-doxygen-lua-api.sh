@@ -93,9 +93,8 @@ BEGIN {
 		{print}
 		}
 }
-' ../doxygen.conf > $TMPFILE
+' ../doxygen.conf > "$TMPFILE"
 
-doxygen $TMPFILE
+doxygen "$TMPFILE"
 
-rm $TMPFILE
-
+rm "$TMPFILE"

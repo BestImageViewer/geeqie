@@ -10,7 +10,7 @@
 merge_file()
 {
 flag=0
-while read line_merge
+while read -r line_merge
 do
 	if [[ flag -eq 0 ]]
 	then
@@ -23,7 +23,7 @@ do
 		then
 			flag=0
 		else
-			echo $line_merge >> "$2"
+			echo "$line_merge" >> "$2"
 		fi
 	fi
 done < "$1"
@@ -65,11 +65,11 @@ fi
 
 tmp_file=$(mktemp)
 
-while read line_main
+while read -r line_main
 do
 	if [[ $line_main =~ "</keyword_tree>" ]]
 	then
-		merge_file  "$config_merge" "$tmp_file"
+		merge_file "$config_merge" "$tmp_file"
 	fi
 	echo "$line_main" >> "$tmp_file"
 done < "$config_main"
@@ -77,7 +77,7 @@ done < "$config_main"
 zenity --question --text="Backup configuration file before overwriting?"
 if [[ $? -eq 0 ]]
 then
-	cp "$config_main" "$config_main""."$(date +%Y%m%d%H%M%S)
+	cp "$config_main" "$config_main.$(date +%Y%m%d%H%M%S)"
 fi
 
 mv "$tmp_file" "$config_main"

@@ -4,11 +4,11 @@
 # This needs to be run only when the menus have changed.
 
 tmp_file=$(mktemp)
-path=$(dirname $(realpath $0))
-srcpath=$(dirname $path)"/src/layout_util.c"
-templatepath=$(dirname $path)"/plugins/template.desktop.in"
+path=$(dirname "$(realpath "$0")")
+srcpath=$(dirname "$path")/src/layout_util.c
+templatepath=$(dirname "$path")/plugins/template.desktop.in
 
-awk -v src_path=$srcpath 'BEGIN {
+awk -v src_path="$srcpath" 'BEGIN {
 menu_flag = 0
 template_flag = 0
 i = 0
@@ -72,12 +72,12 @@ function get_menus()
 /Valid sections/ {template_flag = 1; print; get_menus()}
 /This is a filter/ {template_flag = 0; print ""}
 (template_flag == 0) {print}
-'  $templatepath > $tmp_file
+'  "$templatepath" > "$tmp_file"
 
-zenity --text-info < $tmp_file
-if [ $? == 0 ]
+zenity --text-info < "$tmp_file"
+if [ "$?" == 0 ]
 then
-	mv $tmp_file  $templatepath
+	mv "$tmp_file" "$templatepath"
 else
-	rm $tmp_file
+	rm "$tmp_file"
 fi
