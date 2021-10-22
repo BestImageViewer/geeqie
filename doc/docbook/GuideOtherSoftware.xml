@@ -39,7 +39,7 @@
   <section id="InstallDebian">
     <title>Install Geeqie from sources on Debian</title>
     <para>
-      This script will clone the Geeqie repository, fulfill all dependecies, and install Geeqie on a Debian based system: <ulink url="https://raw.githubusercontent.com/BestImageViewer/geeqie/master/web/geeqie-install-debian.sh">geeqie-install-debian.sh</ulink>
+      This script will clone the Geeqie repository, fulfill all dependencies, and install Geeqie on a Debian based system: <ulink url="https://raw.githubusercontent.com/BestImageViewer/geeqie/master/web/geeqie-install-debian.sh">geeqie-install-debian.sh</ulink>
     </para>
   </section>
   <section id="GenericInstall">

@@ -1257,7 +1257,7 @@ static void bar_pane_keywords_add_to_selected_cb(GtkWidget *menu_widget, gpointe
 
 	GtkTextBuffer *keyword_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pkd->keyword_view));
 
-	/* Aquire selected keyword */
+	/* Acquire selected keyword */
 	if (pkd->click_tpath)
 		{
 		gboolean is_keyword = TRUE;
