@@ -26,7 +26,7 @@ else
 	timezone_boundary_builder_release=$timezone_boundary_builder_default_release
 fi
 
-timezone_boundary_builder_release=$(zenity --entry --entry-text="$timezone_boundary_builder_release" --title "Geeqie generate timezone database" --text="Which timezone boundary builder\nrelease should be used?\n" --width=350 --window-icon=$current_dir/../../geeqie.png)
+timezone_boundary_builder_release=$(zenity --entry --entry-text="$timezone_boundary_builder_release" --title "Geeqie generate timezone database" --text="Which timezone boundary builder\nrelease should be used?\n" --width=350 --window-icon="$current_dir/../../geeqie.png")
 
 if [ -n "$timezone_boundary_builder_release" ]
 then
@@ -45,9 +45,9 @@ g++ builder.cpp -o builder -lshp
 mkdir naturalearth
 cd naturalearth
 wget https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries_lakes.zip
-if [ $? -ne 0 ]
+if [ "$?" -ne 0 ]
 then
-	zenity --error --text="Download of naturalearthdata failed" --title="Generate Geeqie timezone database" --width=300 --window-icon=$current_dir/../../geeqie.png
+	zenity --error --text="Download of naturalearthdata failed" --title="Generate Geeqie timezone database" --width=300 --window-icon="$current_dir/../../geeqie.png"
 	exit
 fi
 
@@ -56,10 +56,10 @@ cd ..
 
 mkdir timezone
 cd timezone
-wget https://github.com/evansiroky/timezone-boundary-builder/releases/download/$timezone_boundary_builder_release/timezones.shapefile.zip
-if [ $? -ne 0 ]
+wget "https://github.com/evansiroky/timezone-boundary-builder/releases/download/$timezone_boundary_builder_release/timezones.shapefile.zip"
+if [ "$?" -ne 0 ]
 then
-	zenity --error --text="Download of timezone-boundary-builder failed" --title="Generate Geeqie timezone database" --width=300 --window-icon=$current_dir/../../geeqie.png
+	zenity --error --text="Download of timezone-boundary-builder failed" --title="Generate Geeqie timezone database" --width=300 --window-icon="$current_dir/../../geeqie.png"
 	exit
 fi
 
@@ -72,20 +72,20 @@ cd ..
 mkdir geeqie_org
 cd geeqie_org
 wget http://www.geeqie.org/downloads/timezone21.bin
-if [ $? -ne 0 ]
+if [ "$?" -ne 0 ]
 then
-	zenity --error --text="Download of timezone database from geeqie.org failed" --title="Generate Geeqie timezone database" --width=300 --window-icon=$current_dir/../../geeqie.png
+	zenity --error --text="Download of timezone database from geeqie.org failed" --title="Generate Geeqie timezone database" --width=300 --window-icon="$current_dir/../../geeqie.png"
 	exit
 fi
 cd ..
 
 diff ./geeqie_org/timezone21.bin timezone21.bin
 
-if [ $? != 0 ]
-then 
-	zenity --info --title="Generate Geeqie timezone database" --text="Generated file differs from that on geeqie.org\n\nUpload timezone21.bin to:\ngeeqie.org/downloads/" --width=300 --window-icon=$current_dir/../../geeqie.png
+if [ "$?" -ne 0 ]
+then
+	zenity --info --title="Generate Geeqie timezone database" --text="Generated file differs from that on geeqie.org\n\nUpload timezone21.bin to:\ngeeqie.org/downloads/" --width=300 --window-icon="$current_dir/../../geeqie.png"
 else
-	zenity --info --title="Generate Geeqie timezone database" --text="Generated file is the same as on geeqie.org" --width=300 --window-icon=$current_dir/../../geeqie.png
+	zenity --info --title="Generate Geeqie timezone database" --text="Generated file is the same as on geeqie.org" --width=300 --window-icon="$current_dir/../../geeqie.png"
 	rm timezone21.bin
 fi
 

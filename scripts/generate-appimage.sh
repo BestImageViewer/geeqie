@@ -34,7 +34,7 @@ then
 	exit 1
 fi
 
-target_dir=$(realpath $1)
+target_dir=$(realpath "$1")
 
 if [[ $? -ne 0 ]]
 then
@@ -54,12 +54,12 @@ make install DESTDIR="$target_dir"/AppDir
 
 export VERSION=$(git tag | tail -1)
 
-cd $target_dir
+cd "$target_dir"
 
 linuxdeploy-x86_64.AppImage \
---appdir ./AppDir --output appimage \
---desktop-file ./AppDir/usr/share/applications/geeqie.desktop \
---icon-file ./AppDir/usr/share/pixmaps/geeqie.png \
---executable ./AppDir/usr/bin/geeqie
+	--appdir ./AppDir --output appimage \
+	--desktop-file ./AppDir/usr/share/applications/geeqie.desktop \
+	--icon-file ./AppDir/usr/share/pixmaps/geeqie.png \
+	--executable ./AppDir/usr/bin/geeqie
 
-mv ./Geeqie-$VERSION-x86_64.AppImage $(./Geeqie-$VERSION-x86_64.AppImage -v | sed 's/git//' | sed 's/-.* /-/' | sed 's/ /-v/' | sed 's/-GTK3//').AppImage
+mv "./Geeqie-$VERSION-x86_64.AppImage" "$(./Geeqie-$VERSION-x86_64.AppImage -v | sed 's/git//' | sed 's/-.* /-/' | sed 's/ /-v/' | sed 's/-GTK3//').AppImage"
