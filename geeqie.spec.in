@@ -86,7 +86,7 @@ make install DESTDIR=%{buildroot}
 %clean
 %__rm -rf "%{buildroot}"
 
-%files 
+%files
 %defattr(-,root,root)
 %doc %{_docdir}/%{docname}
 %{_bindir}/geeqie*
