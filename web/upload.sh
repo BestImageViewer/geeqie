@@ -2,7 +2,7 @@
 
 if [ "${PWD##*/}" != "web" ] ; then
   echo $0 must be called from directory \"web\"
-  exit 1;
+  exit 1
 fi
 
 # later we can include user manual
