@@ -157,7 +157,7 @@ void pref_signal_unblock_data(GtkWidget *widget, gpointer data);
 
 
 GtkWidget *pref_table_new(GtkWidget *parent_box, gint columns, gint rows,
-			  gboolean homegeneous, gboolean fill);
+			  gboolean homogeneous, gboolean fill);
 
 GtkWidget *pref_table_box(GtkWidget *table, gint column, gint row,
 			  GtkOrientation orientation, const gchar *text);
