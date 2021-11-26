@@ -467,6 +467,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 	gtk_widget_show(scrolled);
 #else
 	vbox = gtk_vbox_new(FALSE, PREF_PAD_BUTTON_SPACE);
+	gtk_container_add(GTK_CONTAINER(gd->dialog), vbox);
 #endif
 	gtk_widget_show(vbox);
 
