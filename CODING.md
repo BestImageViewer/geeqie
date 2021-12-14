@@ -77,7 +77,7 @@ If referencing a Geeqie GitHub issue, include the issue number in the summary li
 
 Use whole sentences beginning with Capital letter. For each modification use a new line. Or you can write the theme, colon and then every change on new line, begin with "- ".
 
-See also [A Note About Git Commit Messages](http://www.tpope.net/node/106)
+See also [A Note About Git Commit Messages](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
 
 Example:
 

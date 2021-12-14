@@ -251,11 +251,11 @@ void help_window_show(const gchar *key)
 			{
 			if (g_strcmp0(key, "index.html") == 0)
 				{
-				path = g_build_filename("http://geeqie.org/help/", "GuideIndex.html", NULL);
+				path = g_build_filename("https://geeqie.org/help/", "GuideIndex.html", NULL);
 				}
 			else
 				{
-				path = g_build_filename("http://geeqie.org/help/", key, NULL);
+				path = g_build_filename("https://geeqie.org/help/", key, NULL);
 				}
 			}
 		help_browser_run(path);

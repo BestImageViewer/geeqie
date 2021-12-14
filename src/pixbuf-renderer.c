@@ -2041,7 +2041,7 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 #endif
 
 	/* This is a hack, but work far the best, at least for single pointer systems.
-	 * See http://bugzilla.gnome.org/show_bug.cgi?id=587714 for more. */
+	 * See https://bugzilla.gnome.org/show_bug.cgi?id=587714 for more. */
 	gint x, y;
 #if GTK_CHECK_VERSION(3,0,0)
 	device_manager = gdk_display_get_device_manager(gdk_window_get_display(event->window));
@@ -2098,7 +2098,7 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 
 	/* This is recommended by the GTK+ documentation, but does not work properly.
 	 * Use deprecated way until GTK+ gets a solution for correct motion hint handling:
-	 * http://bugzilla.gnome.org/show_bug.cgi?id=587714
+	 * https://bugzilla.gnome.org/show_bug.cgi?id=587714
 	 */
 	/* gdk_event_request_motions (event); */
 	return FALSE;

@@ -34,7 +34,7 @@ License:        GNU General Public License version 2 or later (GPL v2 or later)
 Group:          Productivity/Graphics/Viewers
 Source:         geeqie-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.geeqie.org/
+URL:            https://www.geeqie.org/
 #
 # these are requirements of the plugins
 Requires: exiv2 exiftran ImageMagick ufraw

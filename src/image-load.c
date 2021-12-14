@@ -581,8 +581,8 @@ static void image_loader_area_prepared_cb(gpointer loader, gpointer data)
 	size_t h, rs;
 
 	/* a workaround for
-	   http://bugzilla.gnome.org/show_bug.cgi?id=547669
-	   http://bugzilla.gnome.org/show_bug.cgi?id=589334
+	   https://bugzilla.gnome.org/show_bug.cgi?id=547669
+	   https://bugzilla.gnome.org/show_bug.cgi?id=589334
 	*/
 	gchar *format = il->backend.get_format_name(loader);
 	if (strcmp(format, "svg") == 0 ||

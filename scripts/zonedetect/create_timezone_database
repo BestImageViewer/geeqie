@@ -71,7 +71,7 @@ cd ..
 
 mkdir geeqie_org
 cd geeqie_org
-wget http://www.geeqie.org/downloads/timezone21.bin
+wget https://www.geeqie.org/downloads/timezone21.bin
 if [ "$?" -ne 0 ]
 then
 	zenity --error --text="Download of timezone database from geeqie.org failed" --title="Generate Geeqie timezone database" --width=300 --window-icon="$current_dir/../../geeqie.png"

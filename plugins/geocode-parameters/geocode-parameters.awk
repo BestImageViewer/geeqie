@@ -40,13 +40,13 @@ function check_parameters(latitude, longitude)
 #
 # Search the input string for known formats.
 {
-if (index($0, "http://www.geonames.org/maps/google_"))
+if (index($0, "https://www.geonames.org/maps/google_"))
     {
     # This is a drag-and-drop or copy-paste from a geonames.org search
     # in the format e.g.
-    # http://www.geonames.org/maps/google_51.513_-0.092.html
+    # https://www.geonames.org/maps/google_51.513_-0.092.html
 
-    gsub(/http:\/\/www.geonames.org\/maps\/google_/, "")
+    gsub(/https:\/\/www.geonames.org\/maps\/google_/, "")
     gsub(/.html/, "")
     gsub(/_/, " ")
     print check_parameters($1, $2)

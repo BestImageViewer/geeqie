@@ -316,7 +316,7 @@ static ExifTextList ExifSubjectRangeList[] = {
 };
 
 /*
-Tag names should match to exiv2 keys, http://www.exiv2.org/metadata.html
+Tag names should match to exiv2 keys, https://www.exiv2.org/metadata.html
 Tags that don't match are not supported by exiv2 and should not be used anywhere in the code
 */
 

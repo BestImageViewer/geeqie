@@ -27,7 +27,7 @@ open an issue on [Geeqie at GitHub](https://github.com/BestImageViewer/geeqie/is
 
 Subscribe to the mailing list [here](https://www.freelists.org/list/geeqie).
 
-The project website is <http://www.geeqie.org/> and you will find the latest sources in the
+The project website is <https://www.geeqie.org/> and you will find the latest sources in the
 [Geeqie repository](http://geeqie.org/cgi-bin/gitweb.cgi?p=geeqie.git).
 
 # README contents:
@@ -99,7 +99,7 @@ Geeqie is a graphics file viewer. Basic features:
 * Geeqie includes a 'find duplicates' tool which can compare images using a variety of criteria (filename, file size, visual similarity, dimensions, image content), either within a single folder or between two folders. Finding duplicates ignoring the rotation of images is also supported.
 * Images may be given a rating value (also known as a "star rating").
 
-* Maps from [OpenStreetMap](http://www.openstreetmap.org) may be displayed in a side panel. If an image has GPS coordinates embedded, its position will be displayed on the map - if Image Direction is encoded, that will be displayed also. If an image does not have embedded GPS coordinates, it may be dragged-and-dropped onto the map to encode its position.
+* Maps from [OpenStreetMap](https://www.openstreetmap.org) may be displayed in a side panel. If an image has GPS coordinates embedded, its position will be displayed on the map - if Image Direction is encoded, that will be displayed also. If an image does not have embedded GPS coordinates, it may be dragged-and-dropped onto the map to encode its position.
 
 * Speed of operation can be increased by caching thumbnails and similarity data of images. When Geeqie is run as a stand-alone command line program (`geeqie --cache-maintenance <path>`) these data will be recursively created from the defined start point. This program can be called from `cron` or `anacron` so that cache updating is automatically done at specified intervals.
 
@@ -131,9 +131,7 @@ To get the script, from the command line type:<br/><br/>
 
 If you wish to compile the sources yourself you may download the latest version (if you have installed git) from here:
 
-Either: `git clone git://www.geeqie.org/geeqie.git`
-
-Or: `git clone http://www.geeqie.org/git/geeqie.git`
+`git clone git://www.geeqie.org/geeqie.git`
 
 ## Manual Installation
 
