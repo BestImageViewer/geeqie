@@ -2,7 +2,7 @@
 _Name=Geeqie
 _GenericName=Image Viewer
 _Comment=View and manage images
-Exec=geeqie -r %F
+Exec=geeqie %F
 Icon=geeqie
 Type=Application
 Terminal=false
