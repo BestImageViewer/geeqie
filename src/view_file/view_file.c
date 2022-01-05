@@ -611,6 +611,28 @@ static void vf_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	filelist_free(selection_list);
 }
 
+static void open_folder_cb(GtkWidget *widget, gpointer data)
+{
+	ViewFile *vf = data;
+	GError *err = NULL;
+
+	GList *list = vf_pop_menu_file_list(vf);
+
+	GList *work = list;
+
+	// Get the first item in the list
+	FileData *fd = work->data;
+
+	if (fd) {
+		gchar *newdir = g_strdup_printf("file://%s/", g_path_get_dirname(fd->path));
+
+		g_app_info_launch_default_for_uri(newdir, NULL, &err);
+
+		g_free(newdir);
+	}
+
+}
+
 GtkWidget *vf_pop_menu(ViewFile *vf)
 {
 	GtkWidget *menu;
@@ -720,6 +742,9 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 				options->file_ops.confirm_delete ? _("_Delete...") :
 					_("_Delete"), GTK_STOCK_DELETE, active,
 				G_CALLBACK(vf_pop_menu_delete_cb), vf);
+	menu_item_add_divider(menu);
+
+	menu_item_add_stock(menu, _("Open folder"), GTK_STOCK_DIRECTORY, G_CALLBACK(open_folder_cb), vf);
 	menu_item_add_divider(menu);
 
 	menu_item_add_sensitive(menu, _("Enable file _grouping"), active,
