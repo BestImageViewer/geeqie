@@ -22,7 +22,7 @@ if [ -d .git ]
 then
 	branch=$(git rev-parse --abbrev-ref HEAD)
 
-	if [ "$branch" == "master" ]
+	if [ "$branch" = "master" ]
 	then
 		IFS=$'.'
 # shellcheck disable=SC2046
