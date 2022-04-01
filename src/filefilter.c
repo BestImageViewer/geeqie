@@ -296,6 +296,7 @@ void filter_add_defaults(void)
 #endif
 #ifdef HAVE_HEIF
 	filter_add_if_missing("HEIF", "HEIF Format", ".heic;.heif", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+	filter_add_if_missing("AVIF", "AVIF Format", ".avif", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
 #endif
 #ifdef HAVE_WEBP
 	filter_add_if_missing("webp", "WebP Format", ".webp", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
