@@ -2859,16 +2859,16 @@ void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names
 		if (READ_INT(*layout, style)) continue;
 		if (READ_CHAR(*layout, order)) continue;
 
-		if (READ_UINT(*layout, dir_view_type)) continue;
-		if (READ_UINT(*layout, file_view_type)) continue;
-		if (READ_UINT(*layout, dir_view_list_sort.method)) continue;
+		if (READ_UINT_ENUM(*layout, dir_view_type)) continue;
+		if (READ_UINT_ENUM(*layout, file_view_type)) continue;
+		if (READ_UINT_ENUM(*layout, dir_view_list_sort.method)) continue;
 		if (READ_BOOL(*layout, dir_view_list_sort.ascend)) continue;
 		if (READ_BOOL(*layout, show_marks)) continue;
 		if (READ_BOOL(*layout, show_file_filter)) continue;
 		if (READ_BOOL(*layout, show_thumbnails)) continue;
 		if (READ_BOOL(*layout, show_directory_date)) continue;
 		if (READ_CHAR(*layout, home_path)) continue;
-		if (READ_UINT_CLAMP(*layout, startup_path, 0, STARTUP_PATH_HOME)) continue;
+		if (READ_UINT_ENUM_CLAMP(*layout, startup_path, 0, STARTUP_PATH_HOME)) continue;
 
 		/* window positions */
 

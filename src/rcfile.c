@@ -837,7 +837,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_INT(*options, open_recent_list_maxsize)) continue;
 		if (READ_INT(*options, recent_folder_image_list_maxsize)) continue;
 		if (READ_INT(*options, dnd_icon_size)) continue;
-		if (READ_UINT(*options, dnd_default_action)) continue;
+		if (READ_UINT_ENUM(*options, dnd_default_action)) continue;
 		if (READ_BOOL(*options, place_dialogs_under_mouse)) continue;
 		if (READ_INT(*options, clipboard_selection)) continue;
 
@@ -868,8 +868,8 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, with_rename)) continue;
 
 		/* Image options */
-		if (READ_UINT_CLAMP(*options, image.zoom_mode, 0, ZOOM_RESET_NONE)) continue;
-		if (READ_UINT_CLAMP(*options, image.zoom_style, 0, ZOOM_ARITHMETIC)) continue;
+		if (READ_UINT_ENUM_CLAMP(*options, image.zoom_mode, 0, ZOOM_RESET_NONE)) continue;
+		if (READ_UINT_ENUM_CLAMP(*options, image.zoom_style, 0, ZOOM_ARITHMETIC)) continue;
 		if (READ_BOOL(*options, image.zoom_2pass)) continue;
 		if (READ_BOOL(*options, image.zoom_to_fit_allow_expand)) continue;
 		if (READ_BOOL(*options, image.fit_window_to_image)) continue;
@@ -909,7 +909,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 // 		if (READ_BOOL(*options, thumbnails.use_ft_metadata_small)) continue;
 
 		/* File sorting options */
-		if (READ_UINT(*options, file_sort.method)) continue;
+		if (READ_UINT_ENUM(*options, file_sort.method)) continue;
 		if (READ_BOOL(*options, file_sort.ascending)) continue;
 		if (READ_BOOL(*options, file_sort.case_sensitive)) continue;
 		if (READ_BOOL(*options, file_sort.natural)) continue;

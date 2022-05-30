@@ -547,7 +547,7 @@ void filter_load_file_type(const gchar **attribute_names, const gchar **attribut
 		if (READ_BOOL(fe, enabled)) continue;
 		if (READ_CHAR(fe, extensions)) continue;
 		if (READ_CHAR(fe, description)) continue;
-		if (READ_UINT(fe, file_class)) continue;
+		if (READ_UINT_ENUM(fe, file_class)) continue;
 		if (READ_BOOL(fe, writable)) continue;
 		if (READ_BOOL(fe, allow_sidecar)) continue;
 
