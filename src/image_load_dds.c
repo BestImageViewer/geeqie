@@ -104,16 +104,16 @@ int ddsGetAlphaMask(unsigned const char * buffer) {
 #define X8R8G8B8 ((4 << 16) | 4)
 
 // RGBA Masks
-static const int A1R5G5B5_MASKS[] = { 0x7C00, 0x03E0, 0x001F, 0x8000 };
-static const int X1R5G5B5_MASKS[] = { 0x7C00, 0x03E0, 0x001F, 0x0000 };
-static const int A4R4G4B4_MASKS[] = { 0x0F00, 0x00F0, 0x000F, 0xF000 };
-static const int X4R4G4B4_MASKS[] = { 0x0F00, 0x00F0, 0x000F, 0x0000 };
-static const int R5G6B5_MASKS[] = { 0xF800, 0x07E0, 0x001F, 0x0000 };
-static const int R8G8B8_MASKS[] = { 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 };
-static const int A8B8G8R8_MASKS[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
-static const int X8B8G8R8_MASKS[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000 };
-static const int A8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000 };
-static const int X8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000 };
+static const uint A1R5G5B5_MASKS[] = { 0x7C00, 0x03E0, 0x001F, 0x8000 };
+static const uint X1R5G5B5_MASKS[] = { 0x7C00, 0x03E0, 0x001F, 0x0000 };
+static const uint A4R4G4B4_MASKS[] = { 0x0F00, 0x00F0, 0x000F, 0xF000 };
+static const uint X4R4G4B4_MASKS[] = { 0x0F00, 0x00F0, 0x000F, 0x0000 };
+static const uint R5G6B5_MASKS[] = { 0xF800, 0x07E0, 0x001F, 0x0000 };
+static const uint R8G8B8_MASKS[] = { 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 };
+static const uint A8B8G8R8_MASKS[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
+static const uint X8B8G8R8_MASKS[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000 };
+static const uint A8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000 };
+static const uint X8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000 };
 
 // BIT4 = 17 * index;
 static const int BIT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132, 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
