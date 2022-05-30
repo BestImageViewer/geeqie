@@ -593,12 +593,12 @@ float* ZDPolygonToList(const ZoneDetect *library, uint32_t polygonId, size_t* le
     uint32_t polygonIndex;
     int32_t* data = NULL;
     float* flData = NULL;
+    size_t length = 0;
 
     if(!ZDFindPolygon(library, polygonId, NULL, &polygonIndex)) {
         goto fail;
     }
 
-    size_t length = 0;
     data = ZDPolygonToListInternal(library, polygonIndex, &length);
 
     if(!data) {
@@ -610,8 +610,7 @@ float* ZDPolygonToList(const ZoneDetect *library, uint32_t polygonId, size_t* le
         goto fail;
     }
 
-    size_t i;
-    for(i = 0; i<length; i+= 2) {
+    for(size_t i = 0; i<length; i+= 2) {
         int32_t lat = data[i];
         int32_t lon = data[i+1];
 
@@ -1192,15 +1191,14 @@ char* ZDHelperSimpleLookupString(const ZoneDetect* library, float lat, float lon
     }
 
     char* output = NULL;
+    size_t length = 0;
+    char* strings[2] = {NULL};
 
     if(result[0].lookupResult == ZD_LOOKUP_END) {
         goto done;
     }
 
-    char* strings[2] = {NULL};
-
-    unsigned int i;
-    for(i = 0; i < result[0].numFields; i++) {
+    for(int i = 0; i < result[0].numFields; i++) {
         if(result[0].fieldNames[i] && result[0].data[i]) {
             if(library->tableType == 'T') {
                 if(!strcmp(result[0].fieldNames[i], "TimezoneIdPrefix")) {
@@ -1218,8 +1216,7 @@ char* ZDHelperSimpleLookupString(const ZoneDetect* library, float lat, float lon
         }
     }
 
-    size_t length = 0;
-    for(i=0; i<sizeof(strings)/sizeof(char*); i++) {
+    for(int i=0; i<sizeof(strings)/sizeof(char*); i++) {
         if(strings[i]) {
             size_t partLength = strlen(strings[i]);
             if(partLength > 512) {
@@ -1238,7 +1235,7 @@ char* ZDHelperSimpleLookupString(const ZoneDetect* library, float lat, float lon
     output = (char*)malloc(length);
     if(output) {
         output[0] = 0;
-        for(i=0; i<sizeof(strings)/sizeof(char*); i++) {
+        for(int i=0; i<sizeof(strings)/sizeof(char*); i++) {
             if(strings[i]) {
                 strcat(output + strlen(output), strings[i]);
             }
