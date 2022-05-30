@@ -156,7 +156,7 @@ static void real_collection_button_pressed(FileDialog *fd, gpointer data, gint a
 
 	if (append)
 		{
-		collection_load(cd, fd->dest_path, TRUE);
+		collection_load(cd, fd->dest_path, COLLECTION_LOAD_APPEND);
 		collection_unref(cd);
 		}
 	else
