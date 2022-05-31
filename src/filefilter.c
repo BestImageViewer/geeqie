@@ -179,6 +179,31 @@ void filter_reset(void)
 
 void filter_add_defaults(void)
 {
+	/* formats supported by custom loaders */
+	filter_add_if_missing("dds", "DirectDraw Surface", ".dds", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+#ifdef HAVE_PDF
+	filter_add_if_missing("pdf", "Portable Document Format", ".pdf", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
+#endif
+#ifdef HAVE_HEIF
+	filter_add_if_missing("heif/avif", "HEIF/AVIF Image", ".heif;.heic;.avif", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
+#endif
+#ifdef HAVE_WEBP
+	filter_add_if_missing("webp", "WebP Format", ".webp", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
+#endif
+#ifdef HAVE_DJVU
+	filter_add_if_missing("djvu", "DjVu Format", ".djvu;.djv", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
+#endif
+#ifdef HAVE_J2K
+	filter_add_if_missing("jp2", "JPEG 2000", ".jp2", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+#endif
+#ifdef HAVE_ARCHIVE
+	filter_add_if_missing("zip", "Archive files", ".zip;.rar;.tar;.tar.gz;.tar.bz2;.tar.xz;.tgz;.tbz;.txz;.cbr;.cbz;.gz;.bz2;.xz;.lzh;.lza;.7z", FORMAT_CLASS_ARCHIVE, FALSE, FALSE, TRUE);
+#endif
+	filter_add_if_missing("scr", "ZX Spectrum screen Format", ".scr", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+	filter_add_if_missing("psd", "Adobe Photoshop Document", ".psd", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+	filter_add_if_missing("apng", "Animated Portable Network Graphic", ".apng", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+
+	/* formats supported by gdk-pixbuf */
 	GSList *list, *work;
 
 	list = gdk_pixbuf_get_formats();
@@ -287,30 +312,6 @@ void filter_add_defaults(void)
 	filter_add_if_missing("mkv", "Matroska video file", ".mkv;.webm", FORMAT_CLASS_VIDEO, FALSE, FALSE, FALSE);
 	filter_add_if_missing("wmv", "Windows Media Video file", ".wmv;.asf", FORMAT_CLASS_VIDEO, FALSE, FALSE, FALSE);
 	filter_add_if_missing("flv", "Flash Video file", ".flv", FORMAT_CLASS_VIDEO, FALSE, FALSE, FALSE);
-
-	/* other supported formats */
-	filter_add_if_missing("dds", "DirectDraw Surface", ".dds", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
-#ifdef HAVE_PDF
-	filter_add_if_missing("pdf", "Portable Document Format", ".pdf", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
-#endif
-#ifdef HAVE_HEIF
-	filter_add_if_missing("heif/avif", "HEIF/AVIF Image", ".heif;.heic;.avif", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
-#endif
-#ifdef HAVE_WEBP
-	filter_add_if_missing("webp", "WebP Format", ".webp", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
-#endif
-#ifdef HAVE_DJVU
-	filter_add_if_missing("djvu", "DjVu Format", ".djvu;.djv", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
-#endif
-#ifdef HAVE_J2K
-	filter_add_if_missing("jp2", "JPEG 2000", ".jp2", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
-#endif
-#ifdef HAVE_ARCHIVE
-	filter_add_if_missing("zip", "Archive files", ".zip;.rar;.tar;.tar.gz;.tar.bz2;.tar.xz;.tgz;.tbz;.txz;.cbr;.cbz;.gz;.bz2;.xz;.lzh;.lza;.7z", FORMAT_CLASS_ARCHIVE, FALSE, FALSE, TRUE);
-#endif
-	filter_add_if_missing("scr", "ZX Spectrum screen Format", ".scr", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
-	filter_add_if_missing("psd", "Adobe Photoshop Document", ".psd", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
-	filter_add_if_missing("apng", "Animated Portable Network Graphic", ".apng", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
 }
 
 GList *filter_to_list(const gchar *extensions)
