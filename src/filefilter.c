@@ -295,8 +295,7 @@ void filter_add_defaults(void)
 	filter_add_if_missing("pdf", "Portable Document Format", ".pdf", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
 #endif
 #ifdef HAVE_HEIF
-	filter_add_if_missing("HEIF", "HEIF Format", ".heic;.heif", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
-	filter_add_if_missing("AVIF", "AVIF Format", ".avif", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
+	filter_add_if_missing("heif/avif", "HEIF/AVIF Image", ".heif;.heic;.avif", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
 #endif
 #ifdef HAVE_WEBP
 	filter_add_if_missing("webp", "WebP Format", ".webp", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
