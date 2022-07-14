@@ -66,11 +66,6 @@
 #include <clutter-gtk/clutter-gtk.h>
 #endif
 
-#ifdef HAVE_GTHREAD
-/** @FIXME see below */
-#include <X11/Xlib.h>
-#endif
-
 gboolean thumb_format_changed = FALSE;
 static RemoteConnection *remote_connection = NULL;
 
