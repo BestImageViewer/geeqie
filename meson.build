@@ -185,9 +185,9 @@ champlain_dep = []
 champlain_gtk_dep = []
 champlain_dep = dependency('champlain-0.12', version: '>=0.12', required : get_option('gps-map'))
 champlain_gtk_dep = dependency('champlain-gtk-0.12', version: '>=0.12', required : get_option('gps-map'))
+clutter_dep = []
+clutter_gtk_dep = []
 if champlain_dep.found() and champlain_gtk_dep.found()
-    clutter_dep = []
-    clutter_gtk_dep = []
     clutter_dep = dependency('clutter-1.0', required : true)
     clutter_gtk_dep = dependency('clutter-gtk-1.0', required : true)
     if clutter_dep.found() and clutter_gtk_dep.found()
