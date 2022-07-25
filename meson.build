@@ -540,5 +540,5 @@ i18n.merge_file(
 
 configure_file(input: 'geeqie.spec.in', output: 'geeqie.spec', configuration: conf_data)
 
-user_message = ''.join('Configuration Summary -\n\n', user_options_message, '\n', user_documentation_message, '\n', user_thumbnailer_message)
+user_message = ''.join(['Configuration Summary -\n\n', user_options_message, '\n', user_documentation_message, '\n', user_thumbnailer_message])
 message(user_message)
