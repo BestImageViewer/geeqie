@@ -307,13 +307,15 @@ subdir('doc')
 # Install other project files
 run_command(find_program('gen_changelog.sh'), meson.project_source_root(), meson.project_build_root(), check : true)
 
-run_command(find_program('gen_readme.sh'), meson.project_source_root(), meson.project_build_root(), check : true)
-
-pandoc = find_program('pandoc')
+pandoc = find_program('pandoc', required : false)
 if pandoc.found()
+    # gen_readme.sh depends on pandoc.
+    run_command(find_program('gen_readme.sh'), meson.project_source_root(), meson.project_build_root(), check : true)
+
     install_data('README.md', 'COPYING', join_paths(meson.project_build_root(), 'ChangeLog'), 'TODO', 'AUTHORS', join_paths(meson.project_build_root(), 'README.html'), join_paths(meson.project_build_root(), 'ChangeLog.html'), install_dir : helpdir, install_tag : 'help')
 else
-    install_data('README.md', 'COPYING', join_paths(meson.project_build_root(), 'ChangeLog'), 'TODO', 'README.lirc', 'AUTHORS', install_dir : helpdir, install_tag : 'help')
+    message('pandoc not found. Skipping creation of README.html')
+    install_data('README.md', 'COPYING', join_paths(meson.project_build_root(), 'ChangeLog'), 'TODO', 'AUTHORS', join_paths(meson.project_build_root(), 'ChangeLog.html'), install_dir : helpdir, install_tag : 'help')
 endif
 
 install_data('geeqie.png', install_dir : icondir, install_tag : 'icons')

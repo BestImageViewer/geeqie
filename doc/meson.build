@@ -19,8 +19,12 @@ iconsdir = join_paths(meson.project_source_root(), 'doc', 'icons/')
 guideindex_html = join_paths(destdir, 'GuideIndex.html')
 guideindex_ln = join_paths(destdir, 'index.html')
 
-run_command(gnome_doc_tool, 'html', '-o', destdir, '-p', iconsdir, guideindex_xml, check : false)
-run_command(find_program('ln'), '-s', '-f', guideindex_html, guideindex_ln, check : false)
+if gnome_doc_tool.found()
+    run_command(gnome_doc_tool, 'html', '-o', destdir, '-p', iconsdir, guideindex_xml, check : false)
+    run_command(find_program('ln'), '-s', '-f', guideindex_html, guideindex_ln, check : false)
+else
+    message('yelp-build not found. Help files not created.')
+endif
 
 install_subdir(destdir, install_dir : helpdir, install_tag : 'help')
 
