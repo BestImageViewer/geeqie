@@ -57,7 +57,7 @@
 #mesondefine HAVE_FFMPEGTHUMBNAILER
 
 /* Define if ffmpegthumbnailer supports embedded metadata */
-#define HAVE_FFMPEGTHUMBNAILER_METADATA
+#mesondefine HAVE_FFMPEGTHUMBNAILER_METADATA
 
 /* Define if ffmpegthumbnailer supports raw RGB output */
 #mesondefine HAVE_FFMPEGTHUMBNAILER_RGB
