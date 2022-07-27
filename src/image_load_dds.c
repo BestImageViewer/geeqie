@@ -46,43 +46,43 @@ static void free_buffer(guchar *pixels, gpointer UNUSED(data))
 	g_free(pixels);
 }
 
-int ddsGetHeight(unsigned const char * buffer) {
+uint ddsGetHeight(unsigned const char * buffer) {
 	return (buffer[12] & 0xFF) | (buffer[13] & 0xFF) << 8 | (buffer[14] & 0xFF) << 16 | (buffer[15] & 0xFF) << 24;
 }
 
-int ddsGetWidth(unsigned const char * buffer) {
+uint ddsGetWidth(unsigned const char * buffer) {
 	return (buffer[16] & 0xFF) | (buffer[17] & 0xFF) << 8 | (buffer[18] & 0xFF) << 16 | (buffer[19] & 0xFF) << 24;
 }
 
-int ddsGetMipmap(unsigned const char * buffer) {
+uint ddsGetMipmap(unsigned const char * buffer) {
 	return (buffer[28] & 0xFF) | (buffer[29] & 0xFF) << 8 | (buffer[30] & 0xFF) << 16 | (buffer[31] & 0xFF) << 24;
 }
 
-int ddsGetPixelFormatFlags(unsigned const char * buffer) {
+uint ddsGetPixelFormatFlags(unsigned const char * buffer) {
 	return (buffer[80] & 0xFF) | (buffer[81] & 0xFF) << 8 | (buffer[82] & 0xFF) << 16 | (buffer[83] & 0xFF) << 24;
 }
 
-int ddsGetFourCC(unsigned const char * buffer) {
+uint ddsGetFourCC(unsigned const char * buffer) {
 	return (buffer[84] & 0xFF) << 24 | (buffer[85] & 0xFF) << 16 | (buffer[86] & 0xFF) << 8 | (buffer[87] & 0xFF);
 }
 
-int ddsGetBitCount(unsigned const char * buffer) {
+uint ddsGetBitCount(unsigned const char * buffer) {
 	return (buffer[88] & 0xFF) | (buffer[89] & 0xFF) << 8 | (buffer[90] & 0xFF) << 16 | (buffer[91] & 0xFF) << 24;
 }
 
-int ddsGetRedMask(unsigned const char * buffer) {
+uint ddsGetRedMask(unsigned const char * buffer) {
 	return (buffer[92] & 0xFF) | (buffer[93] & 0xFF) << 8 | (buffer[94] & 0xFF) << 16 | (buffer[95] & 0xFF) << 24;
 }
 
-int ddsGetGreenMask(unsigned const char * buffer) {
+uint ddsGetGreenMask(unsigned const char * buffer) {
 	return (buffer[96] & 0xFF) | (buffer[97] & 0xFF) << 8 | (buffer[98] & 0xFF) << 16 | (buffer[99] & 0xFF) << 24;
 }
 
-int ddsGetBlueMask(unsigned const char * buffer) {
+uint ddsGetBlueMask(unsigned const char * buffer) {
 	return (buffer[100] & 0xFF) | (buffer[101] & 0xFF) << 8 | (buffer[102] & 0xFF) << 16 | (buffer[103] & 0xFF) << 24;
 }
 
-int ddsGetAlphaMask(unsigned const char * buffer) {
+uint ddsGetAlphaMask(unsigned const char * buffer) {
 	return (buffer[104] & 0xFF) | (buffer[105] & 0xFF) << 8 | (buffer[106] & 0xFF) << 16 | (buffer[107] & 0xFF) << 24;
 }
 
@@ -116,23 +116,23 @@ static const uint A8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF0
 static const uint X8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000 };
 
 // BIT4 = 17 * index;
-static const int BIT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132, 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
-static const int BIT6[] = { 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 130, 134, 138, 142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198, 202, 206, 210, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251, 255 };
+static const uint BIT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132, 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
+static const uint BIT6[] = { 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 130, 134, 138, 142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198, 202, 206, 210, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251, 255 };
 
-static int ddsGetType(const unsigned char *buffer) {
-	int type = 0;
-	int flags = ddsGetPixelFormatFlags(buffer);
+static uint ddsGetType(const unsigned char *buffer) {
+	uint type = 0;
+	uint flags = ddsGetPixelFormatFlags(buffer);
 	if ((flags & 0x04) != 0) {
 		// DXT
 		type = ddsGetFourCC(buffer);
 	}
 	else if ((flags & 0x40) != 0) {
 		// RGB
-		int bitCount = ddsGetBitCount(buffer);
-		int redMask = ddsGetRedMask(buffer);
-		int greenMask = ddsGetGreenMask(buffer);
-		int blueMask = ddsGetBlueMask(buffer);
-		int alphaMask = ((flags & 0x01) != 0) ? ddsGetAlphaMask(buffer) : 0; // 0x01 alpha
+		uint bitCount = ddsGetBitCount(buffer);
+		uint redMask = ddsGetRedMask(buffer);
+		uint greenMask = ddsGetGreenMask(buffer);
+		uint blueMask = ddsGetBlueMask(buffer);
+		uint alphaMask = ((flags & 0x01) != 0) ? ddsGetAlphaMask(buffer) : 0; // 0x01 alpha
 		if (bitCount == 16) {
 			if (redMask == A1R5G5B5_MASKS[0] && greenMask == A1R5G5B5_MASKS[1] && blueMask == A1R5G5B5_MASKS[2] && alphaMask == A1R5G5B5_MASKS[3]) {
 				// A1R5G5B5
@@ -195,30 +195,30 @@ static int ddsGetType(const unsigned char *buffer) {
 	return type;
 }
 
-int ddsGetDXTColor2_1(int c0, int c1, int a) {
+uint ddsGetDXTColor2_1(uint c0, uint c1, uint a) {
 	// 2*c0/3 + c1/3
-	int r = (2 * BIT5[(c0 & 0xFC00) >> 11] + BIT5[(c1 & 0xFC00) >> 11]) / 3;
-	int g = (2 * BIT6[(c0 & 0x07E0) >> 5] + BIT6[(c1 & 0x07E0) >> 5]) / 3;
-	int b = (2 * BIT5[c0 & 0x001F] + BIT5[c1 & 0x001F]) / 3;
+	uint r = (2 * BIT5[(c0 & 0xFC00) >> 11] + BIT5[(c1 & 0xFC00) >> 11]) / 3;
+	uint g = (2 * BIT6[(c0 & 0x07E0) >> 5] + BIT6[(c1 & 0x07E0) >> 5]) / 3;
+	uint b = (2 * BIT5[c0 & 0x001F] + BIT5[c1 & 0x001F]) / 3;
 	return (a << 24) | (r << 0) | (g << 8) | (b << 16);
 }
 
-int ddsGetDXTColor1_1(int c0, int c1, int a) {
+uint ddsGetDXTColor1_1(uint c0, uint c1, uint a) {
 	// (c0+c1) / 2
-	int r = (BIT5[(c0 & 0xFC00) >> 11] + BIT5[(c1 & 0xFC00) >> 11]) / 2;
-	int g = (BIT6[(c0 & 0x07E0) >> 5] + BIT6[(c1 & 0x07E0) >> 5]) / 2;
-	int b = (BIT5[c0 & 0x001F] + BIT5[c1 & 0x001F]) / 2;
+	uint r = (BIT5[(c0 & 0xFC00) >> 11] + BIT5[(c1 & 0xFC00) >> 11]) / 2;
+	uint g = (BIT6[(c0 & 0x07E0) >> 5] + BIT6[(c1 & 0x07E0) >> 5]) / 2;
+	uint b = (BIT5[c0 & 0x001F] + BIT5[c1 & 0x001F]) / 2;
 	return (a << 24) | (r << 0) | (g << 8) | (b << 16);
 }
 
-int ddsGetDXTColor1(int c, int a) {
-	int r = BIT5[(c & 0xFC00) >> 11];
-	int g = BIT6[(c & 0x07E0) >> 5];
-	int b = BIT5[(c & 0x001F)];
+uint ddsGetDXTColor1(uint c, uint a) {
+	uint r = BIT5[(c & 0xFC00) >> 11];
+	uint g = BIT6[(c & 0x07E0) >> 5];
+	uint b = BIT5[(c & 0x001F)];
 	return (a << 24) | (r << 0) | (g << 8) | (b << 16);
 }
 
-int ddsGetDXTColor(int c0, int c1, int a, int t) {
+uint ddsGetDXTColor(uint c0, uint c1, uint a, uint t) {
 	switch (t) {
 	case 0: return ddsGetDXTColor1(c0, a);
 	case 1: return ddsGetDXTColor1(c1, a);
@@ -228,21 +228,22 @@ int ddsGetDXTColor(int c0, int c1, int a, int t) {
 	return 0;
 }
 
-guchar *ddsDecodeDXT1(int width, int height, const unsigned char *buffer) {
-	int *pixels = g_try_malloc(4 * width*height);
-	int index = 128;
-	int w = (width + 3) / 4;
-	int h = (height + 3) / 4;
-	for (int i = 0; i<h; i++) {
-		for (int j = 0; j<w; j++) {
-			int c0 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-			int c1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-			for (int k = 0; k<4; k++) {
+guchar *ddsDecodeDXT1(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	uint w = (width + 3) / 4;
+	uint h = (height + 3) / 4;
+	for (uint i = 0; i<h; i++) {
+		for (uint j = 0; j<w; j++) {
+			uint c0 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+			uint c1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+			for (uint k = 0; k<4; k++) {
 				if (4 * i + k >= height) break;
-				int t0 = (buffer[index] & 0x03);
-				int t1 = (buffer[index] & 0x0C) >> 2;
-				int t2 = (buffer[index] & 0x30) >> 4;
-				int t3 = (buffer[index++] & 0xC0) >> 6;
+				uint t0 = (buffer[index] & 0x03);
+				uint t1 = (buffer[index] & 0x0C) >> 2;
+				uint t2 = (buffer[index] & 0x30) >> 4;
+				uint t3 = (buffer[index++] & 0xC0) >> 6;
 				pixels[4 * width*i + 4 * j + width*k + 0] = ddsGetDXTColor(c0, c1, 0xFF, t0);
 				if (4 * j + 1 >= width) continue;
 				pixels[4 * width*i + 4 * j + width*k + 1] = ddsGetDXTColor(c0, c1, 0xFF, t1);
@@ -256,32 +257,33 @@ guchar *ddsDecodeDXT1(int width, int height, const unsigned char *buffer) {
 	return (guchar *) pixels;
 }
 
-guchar *ddsDecodeDXT3(int width, int height, const unsigned char *buffer) {
-	int *pixels = g_try_malloc(4 * width*height);
-	int index = 128;
-	int w = (width + 3) / 4;
-	int h = (height + 3) / 4;
-	int alphaTable[16];
-	for (int i = 0; i<h; i++) {
-		for (int j = 0; j<w; j++) {
+guchar *ddsDecodeDXT3(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	uint w = (width + 3) / 4;
+	uint h = (height + 3) / 4;
+	uint alphaTable[16];
+	for (uint i = 0; i<h; i++) {
+		for (uint j = 0; j<w; j++) {
 			// create alpha table(4bit to 8bit)
-			for (int k = 0; k<4; k++) {
-				int a0 = (buffer[index++] & 0xFF);
-				int a1 = (buffer[index++] & 0xFF);
+			for (uint k = 0; k<4; k++) {
+				uint a0 = (buffer[index++] & 0xFF);
+				uint a1 = (buffer[index++] & 0xFF);
 				// 4bit alpha to 8bit alpha
 				alphaTable[4 * k + 0] = 17 * ((a0 & 0xF0) >> 4);
 				alphaTable[4 * k + 1] = 17 * (a0 & 0x0F);
 				alphaTable[4 * k + 2] = 17 * ((a1 & 0xF0) >> 4);
 				alphaTable[4 * k + 3] = 17 * (a1 & 0x0F);
 			}
-			int c0 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-			int c1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-			for (int k = 0; k<4; k++) {
+			uint c0 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+			uint c1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+			for (uint k = 0; k<4; k++) {
 				if (4 * i + k >= height) break;
-				int t0 = (buffer[index] & 0x03);
-				int t1 = (buffer[index] & 0x0C) >> 2;
-				int t2 = (buffer[index] & 0x30) >> 4;
-				int t3 = (buffer[index++] & 0xC0) >> 6;
+				uint t0 = (buffer[index] & 0x03);
+				uint t1 = (buffer[index] & 0x0C) >> 2;
+				uint t2 = (buffer[index] & 0x30) >> 4;
+				uint t3 = (buffer[index++] & 0xC0) >> 6;
 				pixels[4 * width*i + 4 * j + width*k + 0] = ddsGetDXTColor(c0, c1, alphaTable[4 * k + 0], t0);
 				if (4 * j + 1 >= width) continue;
 				pixels[4 * width*i + 4 * j + width*k + 1] = ddsGetDXTColor(c0, c1, alphaTable[4 * k + 1], t1);
@@ -295,11 +297,11 @@ guchar *ddsDecodeDXT3(int width, int height, const unsigned char *buffer) {
 	return (guchar *) pixels;
 }
 
-guchar *ddsDecodeDXT2(int width, int height, const unsigned char *buffer) {
+guchar *ddsDecodeDXT2(uint width, uint height, const unsigned char *buffer) {
 	return ddsDecodeDXT3(width, height, buffer);
 }
 
-int ddsGetDXT5Alpha(int a0, int a1, int t) {
+int ddsGetDXT5Alpha(uint a0, uint a1, uint t) {
 	if (a0 > a1) switch (t) {
 	case 0: return a0;
 	case 1: return a1;
@@ -323,19 +325,20 @@ int ddsGetDXT5Alpha(int a0, int a1, int t) {
 	return 0;
 }
 
-guchar *ddsDecodeDXT5(int width, int height, const unsigned char *buffer) {
-	int *pixels = g_try_malloc(4 * width*height);
-	int index = 128;
-	int w = (width + 3) / 4;
-	int h = (height + 3) / 4;
-	int alphaTable[16];
-	for (int i = 0; i<h; i++) {
-		for (int j = 0; j<w; j++) {
+guchar *ddsDecodeDXT5(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	uint w = (width + 3) / 4;
+	uint h = (height + 3) / 4;
+	uint alphaTable[16];
+	for (uint i = 0; i<h; i++) {
+		for (uint j = 0; j<w; j++) {
 			// create alpha table
-			int a0 = (buffer[index++] & 0xFF);
-			int a1 = (buffer[index++] & 0xFF);
-			int b0 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8 | (buffer[index + 2] & 0xFF) << 16; index += 3;
-			int b1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8 | (buffer[index + 2] & 0xFF) << 16; index += 3;
+			uint a0 = (buffer[index++] & 0xFF);
+			uint a1 = (buffer[index++] & 0xFF);
+			uint b0 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8 | (buffer[index + 2] & 0xFF) << 16; index += 3;
+			uint b1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8 | (buffer[index + 2] & 0xFF) << 16; index += 3;
 			alphaTable[0] = b0 & 0x07;
 			alphaTable[1] = (b0 >> 3) & 0x07;
 			alphaTable[2] = (b0 >> 6) & 0x07;
@@ -352,14 +355,14 @@ guchar *ddsDecodeDXT5(int width, int height, const unsigned char *buffer) {
 			alphaTable[13] = (b1 >> 15) & 0x07;
 			alphaTable[14] = (b1 >> 18) & 0x07;
 			alphaTable[15] = (b1 >> 21) & 0x07;
-			int c0 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-			int c1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-			for (int k = 0; k<4; k++) {
+			uint c0 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+			uint c1 = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+			for (uint k = 0; k<4; k++) {
 				if (4 * i + k >= height) break;
-				int t0 = (buffer[index] & 0x03);
-				int t1 = (buffer[index] & 0x0C) >> 2;
-				int t2 = (buffer[index] & 0x30) >> 4;
-				int t3 = (buffer[index++] & 0xC0) >> 6;
+				uint t0 = (buffer[index] & 0x03);
+				uint t1 = (buffer[index] & 0x0C) >> 2;
+				uint t2 = (buffer[index] & 0x30) >> 4;
+				uint t3 = (buffer[index++] & 0xC0) >> 6;
 				pixels[4 * width*i + 4 * j + width*k + 0] = ddsGetDXTColor(c0, c1, ddsGetDXT5Alpha(a0, a1, alphaTable[4 * k + 0]), t0);
 				if (4 * j + 1 >= width) continue;
 				pixels[4 * width*i + 4 * j + width*k + 1] = ddsGetDXTColor(c0, c1, ddsGetDXT5Alpha(a0, a1, alphaTable[4 * k + 1]), t1);
@@ -373,140 +376,150 @@ guchar *ddsDecodeDXT5(int width, int height, const unsigned char *buffer) {
 	return (guchar *) pixels;
 }
 
-guchar *ddsDecodeDXT4(int width, int height, const unsigned char *buffer) {
+guchar *ddsDecodeDXT4(uint width, uint height, const unsigned char *buffer) {
 	return ddsDecodeDXT5(width, height, buffer);
 }
 
-guchar *ddsReadA1R5G5B5(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4*width*height);
-	for (int i = 0; i<height*width; i++) {
-		int rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-		int r = BIT5[(rgba & A1R5G5B5_MASKS[0]) >> 10];
-		int g = BIT5[(rgba & A1R5G5B5_MASKS[1]) >> 5];
-		int b = BIT5[(rgba & A1R5G5B5_MASKS[2])];
-		int a = 255 * ((rgba & A1R5G5B5_MASKS[3]) >> 15);
+guchar *ddsReadA1R5G5B5(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+		uint r = BIT5[(rgba & A1R5G5B5_MASKS[0]) >> 10];
+		uint g = BIT5[(rgba & A1R5G5B5_MASKS[1]) >> 5];
+		uint b = BIT5[(rgba & A1R5G5B5_MASKS[2])];
+		uint a = 255 * ((rgba & A1R5G5B5_MASKS[3]) >> 15);
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
 }
 
-guchar *ddsReadX1R5G5B5(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4 * width*height);
-	for (int i = 0; i<height*width; i++) {
-		int rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-		int r = BIT5[(rgba & X1R5G5B5_MASKS[0]) >> 10];
-		int g = BIT5[(rgba & X1R5G5B5_MASKS[1]) >> 5];
-		int b = BIT5[(rgba & X1R5G5B5_MASKS[2])];
-		int a = 255;
+guchar *ddsReadX1R5G5B5(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+		uint r = BIT5[(rgba & X1R5G5B5_MASKS[0]) >> 10];
+		uint g = BIT5[(rgba & X1R5G5B5_MASKS[1]) >> 5];
+		uint b = BIT5[(rgba & X1R5G5B5_MASKS[2])];
+		uint a = 255;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
 }
 
-guchar *ddsReadA4R4G4B4(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4 * width*height);
-	for (int i = 0; i<height*width; i++) {
-		int rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-		int r = 17 * ((rgba & A4R4G4B4_MASKS[0]) >> 8);
-		int g = 17 * ((rgba & A4R4G4B4_MASKS[1]) >> 4);
-		int b = 17 * ((rgba & A4R4G4B4_MASKS[2]));
-		int a = 17 * ((rgba & A4R4G4B4_MASKS[3]) >> 12);
+guchar *ddsReadA4R4G4B4(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+		uint r = 17 * ((rgba & A4R4G4B4_MASKS[0]) >> 8);
+		uint g = 17 * ((rgba & A4R4G4B4_MASKS[1]) >> 4);
+		uint b = 17 * ((rgba & A4R4G4B4_MASKS[2]));
+		uint a = 17 * ((rgba & A4R4G4B4_MASKS[3]) >> 12);
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
 }
 
-guchar *ddsReadX4R4G4B4(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4 * width*height);
-	for (int i = 0; i<height*width; i++) {
-		int rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-		int r = 17 * ((rgba & A4R4G4B4_MASKS[0]) >> 8);
-		int g = 17 * ((rgba & A4R4G4B4_MASKS[1]) >> 4);
-		int b = 17 * ((rgba & A4R4G4B4_MASKS[2]));
-		int a = 255;
+guchar *ddsReadX4R4G4B4(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+		uint r = 17 * ((rgba & A4R4G4B4_MASKS[0]) >> 8);
+		uint g = 17 * ((rgba & A4R4G4B4_MASKS[1]) >> 4);
+		uint b = 17 * ((rgba & A4R4G4B4_MASKS[2]));
+		uint a = 255;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
 }
 
-guchar *ddsReadR5G6B5(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4 * width*height);
-	for (int i = 0; i<height*width; i++) {
-		int rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
-		int r = BIT5[((rgba & R5G6B5_MASKS[0]) >> 11)];
-		int g = BIT6[((rgba & R5G6B5_MASKS[1]) >> 5)];
-		int b = BIT5[((rgba & R5G6B5_MASKS[2]))];
-		int a = 255;
+guchar *ddsReadR5G6B5(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
+		uint r = BIT5[((rgba & R5G6B5_MASKS[0]) >> 11)];
+		uint g = BIT6[((rgba & R5G6B5_MASKS[1]) >> 5)];
+		uint b = BIT5[((rgba & R5G6B5_MASKS[2]))];
+		uint a = 255;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
 }
 
 guchar *ddsReadR8G8B8(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4 * width*height);
-	for (int i = 0; i<height*width; i++) {
-		int b = buffer[index++] & 0xFF;
-		int g = buffer[index++] & 0xFF;
-		int r = buffer[index++] & 0xFF;
-		int a = 255;
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint b = buffer[index++] & 0xFF;
+		uint g = buffer[index++] & 0xFF;
+		uint r = buffer[index++] & 0xFF;
+		uint a = 255;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
 }
 
-guchar *ddsReadA8B8G8R8(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4 * width*height);
-	for (int i = 0; i<height*width; i++) {
-		int r = buffer[index++] & 0xFF;
-		int g = buffer[index++] & 0xFF;
-		int b = buffer[index++] & 0xFF;
-		int a = buffer[index++] & 0xFF;
+guchar *ddsReadA8B8G8R8(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint r = buffer[index++] & 0xFF;
+		uint g = buffer[index++] & 0xFF;
+		uint b = buffer[index++] & 0xFF;
+		uint a = buffer[index++] & 0xFF;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
 }
 
-guchar *ddsReadX8B8G8R8(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4 * width*height);
-	for (int i = 0; i<height*width; i++) {
-		int r = buffer[index++] & 0xFF;
-		int g = buffer[index++] & 0xFF;
-		int b = buffer[index++] & 0xFF;
-		int a = 255; index++;
+guchar *ddsReadX8B8G8R8(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint r = buffer[index++] & 0xFF;
+		uint g = buffer[index++] & 0xFF;
+		uint b = buffer[index++] & 0xFF;
+		uint a = 255; index++;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
 }
 
-guchar *ddsReadA8R8G8B8(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4 * width*height);
-	for (int i = 0; i<height*width; i++) {
-		int b = buffer[index++] & 0xFF;
-		int g = buffer[index++] & 0xFF;
-		int r = buffer[index++] & 0xFF;
-		int a = buffer[index++] & 0xFF;
+guchar *ddsReadA8R8G8B8(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint b = buffer[index++] & 0xFF;
+		uint g = buffer[index++] & 0xFF;
+		uint r = buffer[index++] & 0xFF;
+		uint a = buffer[index++] & 0xFF;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
 }
 
-guchar *ddsReadX8R8G8B8(int width, int height, const unsigned char *buffer) {
-	int index = 128;
-	int *pixels = g_try_malloc(4 * width*height);
-	for (int i = 0; i<height*width; i++) {
-		int b = buffer[index++] & 0xFF;
-		int g = buffer[index++] & 0xFF;
-		int r = buffer[index++] & 0xFF;
-		int a = 255; index++;
+guchar *ddsReadX8R8G8B8(uint width, uint height, const unsigned char *buffer) {
+	uint *pixels = g_try_malloc(4 * width*height);
+	if (pixels == NULL) return NULL;
+	uint index = 128;
+	for (uint i = 0; i<height*width; i++) {
+		uint b = buffer[index++] & 0xFF;
+		uint g = buffer[index++] & 0xFF;
+		uint r = buffer[index++] & 0xFF;
+		uint a = 255; index++;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
 	return (guchar *) pixels;
@@ -515,13 +528,13 @@ guchar *ddsReadX8R8G8B8(int width, int height, const unsigned char *buffer) {
 static gboolean image_loader_dds_load (gpointer loader, const guchar *buf, gsize UNUSED(count), GError **UNUSED(error))
 {
 	ImageLoaderDDS *ld = (ImageLoaderDDS *) loader;
-	int width = ddsGetWidth(buf);
-	int height = ddsGetHeight(buf);
-	int type = ddsGetType(buf);
+	uint width = ddsGetWidth(buf);
+	uint height = ddsGetHeight(buf);
+	uint type = ddsGetType(buf);
 	if (type == 0) return FALSE;
 	{
 		guchar *pixels = NULL;
-		gint rowstride = width * 4;
+		guint rowstride = width * 4;
 		switch (type) {
 		case DXT1: pixels = ddsDecodeDXT1(width, height, buf); break;
 		case DXT2: pixels = ddsDecodeDXT2(width, height, buf); break;
