@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: geeqie-1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-31 17:46+0000\n"
-"PO-Revision-Date: 2021-01-24 12:41+0000\n"
+"PO-Revision-Date: 2022-07-31 20:38+0100\n"
 "Last-Translator: Carles Pina i Estany <carles@pina.cat>\n"
 "Language-Team: Catalan <ca@dodds.net> <>\n"
 "Language: ca\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: ../geeqie.desktop.in.h:1 ../org.geeqie.Geeqie.appdata.xml.in.h:1
 msgid "Geeqie"
@@ -1282,7 +1282,7 @@ msgid ""
 "About to delete the file:\n"
 " %s"
 msgstr ""
-"Sobre suprimir el fitxer:\n"
+"Se suprimir el fitxer:\n"
 " %s"
 
 #: ../src/desktop_file.c:384
@@ -6102,7 +6102,7 @@ msgstr "Comportament"
 
 #: ../src/preferences.c:3502
 msgid "Confirm permanent file delete"
-msgstr "Demana confirmació a l'eliminar un fitxer permanentment"
+msgstr "Demana confirmació al suprimir un fitxer permanentment"
 
 #: ../src/preferences.c:3504
 msgid "Confirm move file to Trash"
@@ -7515,7 +7515,7 @@ msgstr "Això mourà els següents fitxers a la Paperera"
 
 #: ../src/utilops.c:2228
 msgid "This will permanently delete the following files"
-msgstr "Això eliminarà els següents fitxers"
+msgstr "Això suprimirà els següents fitxers"
 
 #: ../src/utilops.c:2231
 msgid "Delete files?"
@@ -7591,19 +7591,19 @@ msgstr "No s'ha pogut executar la comanda externa"
 
 #: ../src/utilops.c:2678 ../src/utilops.c:2751
 msgid "Delete folder"
-msgstr "Elimina la carpeta"
+msgstr "Suprimeix la carpeta"
 
 #: ../src/utilops.c:2679
 msgid "Delete symbolic link?"
-msgstr "Voleu eliminar l'enllaç simbòlic?"
+msgstr "Voleu suprimir l'enllaç simbòlic?"
 
 #: ../src/utilops.c:2681
 msgid ""
 "This will delete the symbolic link.\n"
 "The folder this link points to will not be deleted."
 msgstr ""
-"Això esborrarà l'enllaç simbòlic. \n"
-"El contingut de l'enllaç no s'esborrarà."
+"Això suprimirà l'enllaç simbòlic. \n"
+"El contingut de l'enllaç no ."
 
 #: ../src/utilops.c:2683
 msgid "Link deletion failed"
@@ -7636,12 +7636,12 @@ msgid ""
 "\n"
 "This folder contains subfolders which must be moved before it can be deleted."
 msgstr ""
-"No es pot esborrar la carpeta:\n"
+"No es pot suprimir la carpeta:\n"
 "\n"
 "%s\n"
 "\n"
 "Aquesta carpeta conté subcarpetes que haurien de ser mogudes per poder-la "
-"esborrar."
+"suprimir."
 
 #: ../src/utilops.c:2731
 msgid "Subfolders:"
@@ -7660,7 +7660,7 @@ msgid ""
 "This will delete the folder.\n"
 "The contents of this folder will also be deleted."
 msgstr ""
-"Això esborrarà la carpeta. \n"
+"Això suprimirà la carpeta. \n"
 "El contingut de la carpeta també s'esborrarà."
 
 #: ../src/utilops.c:2884
