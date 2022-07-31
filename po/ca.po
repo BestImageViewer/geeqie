@@ -3,8 +3,16 @@
 # www.kyfieithu.co.uk, www.gyfieithu.co.uk, 2003.
 # angel mompo <mecatxis@ya.com>, 2010.
 # Àngel Mompó <mecatxis@gmail.com>, 2012.
-# Carles Pina i Estany <carles@pina.cat>, 2021
+# Carles Pina i Estany <carles@pina.cat>, 2021-2022
+# Carles Pina i Estany <carles@pina.cat>, 2021-2022
 #
+# Convencions:
+# "Delete" és traduït per "Suprimir" (enlloc d'eliminar o esborrar)
+# Això és seguint el que és més habitual i els exemples de SoftCatalà.
+#
+# En general, davant del dubte, seguirem la guia d'estil de SoftCatalà
+# (possiblement no tot ho segueix i és per temes històrics o desconeixement).
+
 msgid ""
 msgstr ""
 "Project-Id-Version: geeqie-1.3\n"
