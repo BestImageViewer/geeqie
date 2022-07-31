@@ -455,7 +455,7 @@ guchar *ddsReadR5G6B5(uint width, uint height, const unsigned char *buffer) {
 	return (guchar *) pixels;
 }
 
-guchar *ddsReadR8G8B8(int width, int height, const unsigned char *buffer) {
+guchar *ddsReadR8G8B8(uint width, uint height, const unsigned char *buffer) {
 	uint *pixels = g_try_malloc(4 * width*height);
 	if (pixels == NULL) return NULL;
 	uint index = 128;
