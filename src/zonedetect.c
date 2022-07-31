@@ -1216,7 +1216,7 @@ char* ZDHelperSimpleLookupString(const ZoneDetect* library, float lat, float lon
         }
     }
 
-    for(int i=0; i<sizeof(strings)/sizeof(char*); i++) {
+    for(size_t i=0; i<sizeof(strings)/sizeof(char*); i++) {
         if(strings[i]) {
             size_t partLength = strlen(strings[i]);
             if(partLength > 512) {
@@ -1235,7 +1235,7 @@ char* ZDHelperSimpleLookupString(const ZoneDetect* library, float lat, float lon
     output = (char*)malloc(length);
     if(output) {
         output[0] = 0;
-        for(int i=0; i<sizeof(strings)/sizeof(char*); i++) {
+        for(size_t i=0; i<sizeof(strings)/sizeof(char*); i++) {
             if(strings[i]) {
                 strcat(output + strlen(output), strings[i]);
             }
