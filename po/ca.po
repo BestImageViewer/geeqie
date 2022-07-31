@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: geeqie-1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-31 17:46+0000\n"
-"PO-Revision-Date: 2022-07-31 21:42+0100\n"
+"PO-Revision-Date: 2022-07-31 21:46+0100\n"
 "Last-Translator: Carles Pina i Estany <carles@pina.cat>\n"
 "Language-Team: Catalan <ca@dodds.net> <>\n"
 "Language: ca\n"
@@ -947,7 +947,7 @@ msgstr "Fitxers de col·lecció"
 #: ../src/collect-io.c:406
 #, c-format
 msgid "failed to open collection (write) \"%s\"\n"
-msgstr "no s'ha pogut obrir la col·lecció (escriptura) \"%s\"\n"
+msgstr "no s'ha pogut obrir la col·lecció (escriptura) «%s»\n"
 
 #: ../src/collect-io.c:431
 #, c-format
@@ -4876,7 +4876,7 @@ msgstr "%d imatges, %s"
 #: ../src/pan-view/pan-view.c:519
 #, c-format
 msgid "The pan view does not support the folder \"%s\"."
-msgstr "La vista panoràmica no suporta la carpeta \"%s\"."
+msgstr "La vista panoràmica no suporta la carpeta «%s»."
 
 #: ../src/pan-view/pan-view.c:520
 msgid "Folder not supported"
@@ -7058,7 +7058,7 @@ msgid ""
 "\"%s\""
 msgstr ""
 "No es pot accedir o crear la paperera.\n"
-"\"%s\""
+"«%s»"
 
 #: ../src/trash.c:198
 msgid "Deletion by external command"
@@ -7150,7 +7150,7 @@ msgid ""
 "The locale appears to be set to \"%s\"\n"
 "(set by the LANG environment variable)\n"
 msgstr ""
-"L'idioma sembla establert a \"%s\"\n"
+"L'idioma sembla establert a «%s»\n"
 "(establert per la variable de sistema LANG)\n"
 
 #: ../src/ui_fileops.c:104
@@ -7168,12 +7168,12 @@ msgstr "[no es pot mostrar el nom]"
 #: ../src/ui_fileops.c:108
 #, c-format
 msgid "\"%s\" is encoded in valid UTF-8."
-msgstr "\"%s\" està codificat en UTF-8 vàlid."
+msgstr "«%s» està codificat en UTF-8 vàlid."
 
 #: ../src/ui_fileops.c:110
 #, c-format
 msgid "\"%s\" is not encoded in valid UTF-8."
-msgstr "\"%s\" no està codificat en UTF-8 vàlid."
+msgstr "«%s» no està codificat en UTF-8 vàlid."
 
 #: ../src/ui_fileops.c:115 ../src/ui_fileops.c:120
 msgid "Filename encoding locale mismatch"
@@ -7423,7 +7423,7 @@ msgid ""
 "The following metadata tags will be written to\n"
 "'%s'."
 msgstr ""
-"Les seguents etiquetes de metadades seran escrites amb\n"
+"Les següents etiquetes de metadades seran escrites amb\n"
 "'%s'."
 
 #: ../src/utilops.c:2106
