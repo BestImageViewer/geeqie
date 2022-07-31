@@ -12,13 +12,12 @@
 #
 # En general, davant del dubte, seguirem la guia d'estil de SoftCatalà
 # (possiblement no tot ho segueix i és per temes històrics o desconeixement).
-
 msgid ""
 msgstr ""
 "Project-Id-Version: geeqie-1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-31 17:46+0000\n"
-"PO-Revision-Date: 2022-07-31 20:38+0100\n"
+"PO-Revision-Date: 2022-07-31 21:42+0100\n"
 "Last-Translator: Carles Pina i Estany <carles@pina.cat>\n"
 "Language-Team: Catalan <ca@dodds.net> <>\n"
 "Language: ca\n"
@@ -71,9 +70,8 @@ msgid "Export jpeg"
 msgstr "Exportar jpeg"
 
 #: ../plugins/export-jpeg/export-jpeg.desktop.in.h:2
-#, fuzzy
 msgid "Extract embedded jpegs from a raw file"
-msgstr "Extreure jpegs de dins els fitxers raw"
+msgstr "Extreure jpegs encastats dels fitxers raw"
 
 #: ../plugins/image-crop/image-crop.desktop.in.h:1
 msgid "Image crop"
@@ -204,9 +202,8 @@ msgid "Move to _bottom"
 msgstr "Mou a _baix de tot"
 
 #: ../src/bar.c:417
-#, fuzzy
 msgid "Height..."
-msgstr "Alçada"
+msgstr "Alçada..."
 
 #: ../src/bar.c:421 ../src/collect-table.c:87 ../src/dupe.c:156
 #: ../src/search.c:359 ../src/toolbar.c:229
@@ -386,9 +383,8 @@ msgid "Zoom"
 msgstr "Ampliació"
 
 #: ../src/bar_gps.c:970
-#, fuzzy
 msgid "Zoom level"
-msgstr "Nivell de zoom %i"
+msgstr "Nivell de zoom"
 
 #. use the same strings as in layout_util.c
 #: ../src/bar_histogram.c:257 ../src/layout_util.c:2661
@@ -649,24 +645,20 @@ msgstr ""
 "error: %s\n"
 
 #: ../src/cache_maint.c:72
-#, fuzzy
 msgid "Geeqie: Creating sim data..."
-msgstr "S'estan llegint les dades de la imatge..."
+msgstr "Geeqie: creant dades sim..."
 
 #: ../src/cache_maint.c:78
-#, fuzzy
 msgid "Geeqie: Creating thumbs..."
-msgstr "Esborrant miniatures..."
+msgstr "Geeqie: creant miniatures..."
 
 #: ../src/cache_maint.c:94
-#, fuzzy
 msgid "Exit Geeqie Cache Maintenance"
-msgstr "Manteniment de la memòria cau"
+msgstr "Surt del manteniment de la memòria cau"
 
 #: ../src/cache_maint.c:111
-#, fuzzy
 msgid "Geeqie: Cleaning thumbs..."
-msgstr "Esborrant miniatures..."
+msgstr "Geeqie: netejant miniatures..."
 
 #: ../src/cache_maint.c:184 ../src/cache_maint.c:684 ../src/cache_maint.c:787
 #: ../src/cache_maint.c:984 ../src/cache_maint.c:1461 ../src/editors.c:1245
@@ -771,9 +763,8 @@ msgid "Create sim. files recursively"
 msgstr "Genera els fitxers de semblances recursivament"
 
 #: ../src/cache_maint.c:1656 ../src/cache_maint.c:1790
-#, fuzzy
 msgid "Background cache maintenance"
-msgstr "Manteniment de la memòria cau"
+msgstr "Manteniment de la memòria cau en segon pla"
 
 #: ../src/cache_maint.c:1664
 msgid ""
@@ -781,6 +772,9 @@ msgid ""
 "and .sim files, and create new\n"
 "thumbnails and .sim files"
 msgstr ""
+"Suprimeix recursivament les miniatures orfes\n"
+"i els fitxers .sim, i crea nou\n"
+"fitxers de miniatures i .sim"
 
 #: ../src/cache_maint.c:1708
 msgid "Cache Maintenance"
@@ -845,13 +839,12 @@ msgid "Remove orphaned keywords and comments."
 msgstr "Suprimeix les paraules clau i els comentaris orfes."
 
 #: ../src/cache_maint.c:1794
-#, fuzzy
 msgid "Select"
-msgstr "_Selecció"
+msgstr "Selecciona"
 
 #: ../src/cache_maint.c:1797
 msgid "Run cache maintenance as a background job."
-msgstr ""
+msgstr "Executa feina de manteniment de la memòria cau en segon pla."
 
 #. When does this occur ??
 #: ../src/collect.c:493 ../src/image.c:349 ../src/image-overlay.c:265
@@ -1015,33 +1008,28 @@ msgid "Rectangular selection"
 msgstr "Selecció rectangular"
 
 #: ../src/collect-table.c:93
-#, fuzzy
 msgid "Select single file"
-msgstr "Selecciona el filtre de Classe"
+msgstr "Selecciona un fitxer individual"
 
 #: ../src/collect-table.c:94
-#, fuzzy
 msgid "Toggle select image"
-msgstr "Inversió de la imatge esquerra"
+msgstr "Commuta selecció d'imatge"
 
 #: ../src/collect-table.c:95 ../src/collect-table.c:1013
 msgid "Append from file selection"
 msgstr "Afegeix des de la llista de fitxers"
 
 #: ../src/collect-table.c:96
-#, fuzzy
 msgid "Append from collection"
-msgstr "Afegeix des de col·lecció..."
+msgstr "Afegeix des de col·lecció"
 
 #: ../src/collect-table.c:98
-#, fuzzy
 msgid "Save collection as"
-msgstr "Desa la col·lecció"
+msgstr "Desa col·lecció com"
 
 #: ../src/collect-table.c:99
-#, fuzzy
 msgid "Show filename text"
-msgstr "Mostra el _nom del fitxer"
+msgstr "Mostra el text de nom de fitxer"
 
 #: ../src/collect-table.c:100 ../src/menu.c:174
 msgid "Sort by name"
@@ -1290,7 +1278,7 @@ msgid ""
 "About to delete the file:\n"
 " %s"
 msgstr ""
-"Se suprimir el fitxer:\n"
+"Se suprimirà el fitxer:\n"
 " %s"
 
 #: ../src/desktop_file.c:384
@@ -1327,29 +1315,24 @@ msgid "Clear"
 msgstr "Neteja"
 
 #: ../src/dupe.c:160 ../src/search.c:363
-#, fuzzy
 msgid "Toggle thumbs"
-msgstr "Marca commutada"
+msgstr "Commuta miniatures"
 
 #: ../src/dupe.c:164 ../src/search.c:367
-#, fuzzy
 msgid "Collection from selection"
-msgstr "Afegeix des de la llista de fitxers"
+msgstr "Col·lecció des de la sel·lecció"
 
 #: ../src/dupe.c:165
-#, fuzzy
 msgid "Append list"
-msgstr "_Afegir"
+msgstr "Afegir llista"
 
 #: ../src/dupe.c:167
-#, fuzzy
 msgid "Select group 1 duplicates"
-msgstr "Seleccioneu duplicats del grup _1"
+msgstr "Selecciona duplicats grup 1"
 
 #: ../src/dupe.c:168
-#, fuzzy
 msgid "Select group 2 duplicates"
-msgstr "Seleccioneu duplicats del grup_ 2 duplicats"
+msgstr "Selecciona duplicats grup 2"
 
 #: ../src/dupe.c:255
 msgid "Drop files to compare them."
@@ -1391,9 +1374,8 @@ msgid "Sorting..."
 msgstr "S'està ordenant..."
 
 #: ../src/dupe.c:2600
-#, fuzzy
 msgid "Queuing..."
-msgstr "executant..."
+msgstr "Afegint a la cua..."
 
 #: ../src/dupe.c:3033
 msgid "Loading file list"
@@ -1445,19 +1427,16 @@ msgid "Checksum"
 msgstr "Suma de verificació"
 
 #: ../src/dupe.c:3985
-#, fuzzy
 msgid "Similarity (high - 95)"
-msgstr "Semblança (alta)"
+msgstr "Semblança (alta - 95)"
 
 #: ../src/dupe.c:3986
-#, fuzzy
 msgid "Similarity (med. - 90)"
-msgstr "Semblança (baixa)"
+msgstr "Semblança (mitjana - 90)"
 
 #: ../src/dupe.c:3987
-#, fuzzy
 msgid "Similarity (low - 85)"
-msgstr "Semblança (baixa)"
+msgstr "Semblança (baixa - 85)"
 
 #: ../src/dupe.c:3988
 msgid "Similarity (custom)"
@@ -1561,9 +1540,8 @@ msgid "Export Files"
 msgstr "Exportar Fitxers"
 
 #: ../src/dupe.c:5446
-#, fuzzy
 msgid "_Export"
-msgstr "Exportar"
+msgstr "_Exportar"
 
 #: ../src/dupe.c:5451
 msgid "Export to csv"
@@ -2402,17 +2380,17 @@ msgid "%d bytes"
 msgstr "%d bytes"
 
 #: ../src/filedata.c:116
-#, fuzzy, c-format
+#, c-format
 msgid "%.1f KiB"
-msgstr "%.1f K"
+msgstr "%.1f KB"
 
 #: ../src/filedata.c:120
-#, fuzzy, c-format
+#, c-format
 msgid "%.1f MiB"
 msgstr "%.1f MB"
 
 #: ../src/filedata.c:125
-#, fuzzy, c-format
+#, c-format
 msgid "%.1f GiB"
 msgstr "%.1f GB"
 
@@ -2594,36 +2572,30 @@ msgid "Rotate 180°"
 msgstr "Gira 180°"
 
 #: ../src/img-view.c:100
-#, fuzzy
 msgid "Rotate mirror"
-msgstr "Reflexa la Imatge"
+msgstr "Gira mirall"
 
 #: ../src/img-view.c:101
-#, fuzzy
 msgid "Rotate flip"
-msgstr "Inverteix la imatge suaument"
+msgstr "Capgira"
 
 #: ../src/img-view.c:102
-#, fuzzy
 msgid " Rotate counterclockwise 90°"
-msgstr "Gira en sentit antihorari"
+msgstr " Gira en sentit antihorari 90°"
 
 #: ../src/img-view.c:103
-#, fuzzy
 msgid " Rotate clockwise 90°"
-msgstr "Gira en sentit horari"
+msgstr " Gira en sentit horari 90°"
 
 #: ../src/img-view.c:104 ../src/img-view.c:105 ../src/img-view.c:106
 #: ../src/img-view.c:107
-#, fuzzy
 msgid "Previous"
-msgstr "Pàgina Prèvia"
+msgstr "Previ"
 
 #: ../src/img-view.c:108 ../src/img-view.c:109 ../src/img-view.c:110
 #: ../src/img-view.c:111
-#, fuzzy
 msgid "Next"
-msgstr "Pàgina següent"
+msgstr "Següent"
 
 #: ../src/img-view.c:112 ../src/img-view.c:113 ../src/layout_util.c:2543
 #: ../src/layout_util.c:2544 ../src/pan-view/pan-view.c:107
@@ -2680,14 +2652,12 @@ msgid "Zoom 1:2"
 msgstr "Escala 1:2"
 
 #: ../src/img-view.c:126
-#, fuzzy
 msgid "Zoom fit window width"
-msgstr "Amplia fins que encaixi"
+msgstr "Zoom fins que encaixi amb l'amplada de la finestra"
 
 #: ../src/img-view.c:127
-#, fuzzy
 msgid "Zoom fit window height"
-msgstr "Amplia fins que encaixi"
+msgstr "Amplia fins que encaixi amb l'alçada de la finestra"
 
 #: ../src/img-view.c:128 ../src/layout_util.c:2621
 msgid "Toggle slideshow"
@@ -2699,42 +2669,35 @@ msgid "Pause slideshow"
 msgstr "Pausa la seqüència de diapositives"
 
 #: ../src/img-view.c:130
-#, fuzzy
 msgid "Reload image"
-msgstr "Imatge aleatòria"
+msgstr "Recarrega la imatge"
 
 #: ../src/img-view.c:132 ../src/img-view.c:133
-#, fuzzy
 msgid "Fullscreen"
 msgstr "Pantalla completa"
 
 #: ../src/img-view.c:134
-#, fuzzy
 msgid "Image overlay"
 msgstr "Imatge sobreposada"
 
 #: ../src/img-view.c:135 ../src/pan-view/pan-view.c:105
-#, fuzzy
 msgid "Exit fullscreen"
-msgstr "Sortir del mode _pantalla completa"
+msgstr "Sortir del mode pantalla completa"
 
 #: ../src/img-view.c:137
-#, fuzzy
 msgid "Desaturate"
-msgstr "Natura"
+msgstr "Desatura"
 
 #: ../src/img-view.c:672 ../src/layout_image.c:701 ../src/layout_image.c:1897
 #: ../src/layout_util.c:914 ../src/view_file/view_file.c:396
-#, fuzzy
 msgid "Cannot open archive file"
-msgstr "No es pot canviar el nom del fitxer"
+msgstr "No es pot obrir el fitxer d'arxiu"
 
 #: ../src/img-view.c:672 ../src/layout_image.c:701 ../src/layout_image.c:1897
 #: ../src/layout_util.c:914 ../src/preferences.c:4202 ../src/preferences.c:4210
 #: ../src/view_file/view_file.c:396
-#, fuzzy
 msgid "See the Log Window"
-msgstr "Finestra de Registre"
+msgstr "Veure la Finestra de Registre"
 
 #: ../src/img-view.c:1410 ../src/layout_image.c:782 ../src/layout_util.c:2543
 #: ../src/layout_util.c:2544 ../src/layout_util.c:2559
@@ -2797,7 +2760,7 @@ msgstr "Ascendent"
 
 #: ../src/layout.c:581
 msgid "Scroll to top left corner"
-msgstr "Desplaça't a la cantonada superior esquerra"
+msgstr "Desplaça a la cantonada superior esquerra"
 
 #: ../src/layout.c:586
 msgid "Scroll to image center"
@@ -2808,14 +2771,12 @@ msgid "Keep the region from previous image"
 msgstr "Conserva la zona de la imàtge prèvia"
 
 #: ../src/layout.c:704
-#, fuzzy
 msgid " Slideshow ["
-msgstr " Projecció de diapositives"
+msgstr " Projecció de diapositives ["
 
 #: ../src/layout.c:708
-#, fuzzy
 msgid " Paused ["
-msgstr " En pausa"
+msgstr " En pausa ["
 
 #: ../src/layout.c:741
 #, c-format
@@ -2857,11 +2818,12 @@ msgid "Select sort order"
 msgstr "Seleccioneu tipus d'ordenació"
 
 #: ../src/layout.c:923
-#, fuzzy
 msgid ""
 "Folder contents (files selected)\n"
 "Slideshow [time interval]"
-msgstr "Contingut de la carpeta (fitxers seleccionats)"
+msgstr ""
+"Contingut de la carpeta (fitxers seleccionats)\n"
+"Diapositives [interval de temps]"
 
 #: ../src/layout.c:934
 msgid "(Image dimensions) Image size [page n of m]"
@@ -2917,7 +2879,7 @@ msgstr "Directori de l'usuari"
 
 #: ../src/layout.c:2407
 msgid "Layout"
-msgstr "Format"
+msgstr "Disposició"
 
 #: ../src/layout.c:2738
 msgid "Invalid geometry\n"
@@ -2938,9 +2900,8 @@ msgstr "(arrossegueu per canviar l'ordre)"
 
 #: ../src/layout_image.c:805 ../src/layout_util.c:2274
 #: ../src/layout_util.c:2576 ../src/view_file/view_file.c:701
-#, fuzzy
 msgid "Open archive"
-msgstr "Obre recents"
+msgstr "Obre arxiu"
 
 #: ../src/layout_image.c:819 ../src/layout_util.c:2521
 #: ../src/pan-view/pan-view.c:2408 ../src/view_file/view_file.c:710
@@ -2953,9 +2914,8 @@ msgid "_Copy path unquoted to clipboard"
 msgstr "_Copia el camí sense cometes al porta-retalls"
 
 #: ../src/layout_image.c:821
-#, fuzzy
 msgid "Copy _image to clipboard"
-msgstr "Copia el camí al porta-retalls"
+msgstr "Copia _imatge al portapapers"
 
 #: ../src/layout_image.c:872 ../src/layout_util.c:2628
 msgid "GIF _animation"
@@ -3019,7 +2979,7 @@ msgstr "Error: la disposició de finestra amb nom: %s no existeix\n"
 #: ../src/layout_util.c:2143
 #, c-format
 msgid "Window layout name \"%s\" already exists."
-msgstr "Ja existeix una disposició de finestra anomenada \"%s\"."
+msgstr "Ja existeix una disposició de finestra anomenada «%s»."
 
 #: ../src/layout_util.c:2144 ../src/layout_util.c:2393
 #: ../src/layout_util.c:2509
@@ -3277,9 +3237,8 @@ msgid "default"
 msgstr "per defecte"
 
 #: ../src/layout_util.c:2507
-#, fuzzy
 msgid "New window (default)"
-msgstr "Nova finestra"
+msgstr "Nova finestra (omissió)"
 
 #: ../src/layout_util.c:2508
 msgid "from current"
@@ -3432,12 +3391,12 @@ msgstr "Gira la imatge en sentit horari"
 
 #: ../src/layout_util.c:2531
 msgid "Rotate _counterclockwise 90°"
-msgstr "Gira en sentit _antihorari"
+msgstr "Gira en sentit _antihorari 90°"
 
 #: ../src/layout_util.c:2531 ../src/menu.c:351 ../src/preferences.c:813
 #: ../src/toolbar.c:111
 msgid "Rotate counterclockwise 90°"
-msgstr "Gira en sentit antihorari"
+msgstr "Gira en sentit antihorari 90°"
 
 #: ../src/layout_util.c:2532
 msgid "Rotate 1_80°"
@@ -3683,14 +3642,12 @@ msgid "Refresh"
 msgstr "Actualitza"
 
 #: ../src/layout_util.c:2590
-#, fuzzy
 msgid "_Help manual"
-msgstr "manual"
+msgstr "Manual d'_ajuda"
 
 #: ../src/layout_util.c:2590
-#, fuzzy
 msgid "Help manual"
-msgstr "manual"
+msgstr "Manual d'ajuda"
 
 #: ../src/layout_util.c:2591 ../src/window.c:371
 msgid "On-line help search"
@@ -3714,11 +3671,11 @@ msgstr "Mapa de teclat"
 
 #: ../src/layout_util.c:2594
 msgid "_Readme"
-msgstr ""
+msgstr "_Llegeix-me"
 
 #: ../src/layout_util.c:2594
 msgid "Readme"
-msgstr ""
+msgstr "Llegeix-me"
 
 #: ../src/layout_util.c:2595
 msgid "_ChangeLog"
@@ -3941,9 +3898,8 @@ msgid "_Exif rotate"
 msgstr "Gira Exif"
 
 #: ../src/layout_util.c:2629
-#, fuzzy
 msgid "Toggle Exif rotate"
-msgstr "Gira Exif"
+msgstr "Commute rotació Exif"
 
 #: ../src/layout_util.c:2630 ../src/preferences.c:843 ../src/toolbar.c:146
 msgid "Draw Rectangle"
@@ -3954,27 +3910,24 @@ msgid "Over/Under Exposed"
 msgstr "Sobre/Sota Exposat"
 
 #: ../src/layout_util.c:2631
-#, fuzzy
 msgid "Highlight over/under exposed"
-msgstr "Sobre/Sota Exposat"
+msgstr "Ressalta sobre/sota exposat"
 
 #: ../src/layout_util.c:2632 ../src/preferences.c:831 ../src/toolbar.c:129
 msgid "Split Pane Sync"
 msgstr "Sincronitza Panell Dividit"
 
 #: ../src/layout_util.c:2636
-#, fuzzy
 msgid "Images as _List"
-msgstr "_Llista d'imatges"
+msgstr "Imatges com a _llista"
 
 #: ../src/layout_util.c:2636
 msgid "View Images as List"
 msgstr "Mostra les imatges en una llista"
 
 #: ../src/layout_util.c:2637
-#, fuzzy
 msgid "Images as I_cons"
-msgstr "Mostra les imatges com a icones"
+msgstr "Imatges com a i_cones"
 
 #: ../src/layout_util.c:2637
 msgid "View Images as Icons"
@@ -3993,36 +3946,32 @@ msgid "_Horizontal"
 msgstr "_Horitzontal"
 
 #: ../src/layout_util.c:2645
-#, fuzzy
 msgid "Split panes horizontal."
-msgstr "Divideix _Horitzontalment"
+msgstr "Divideix els panells en horitzontal."
 
 #: ../src/layout_util.c:2646
 msgid "_Vertical"
 msgstr "_Vertical"
 
 #: ../src/layout_util.c:2646
-#, fuzzy
 msgid "Split panes vertical"
-msgstr "Divideix _Verticalment"
+msgstr "Divideix els panells en vertical"
 
 #: ../src/layout_util.c:2647
 msgid "_Quad"
 msgstr "_Quatre"
 
 #: ../src/layout_util.c:2647
-#, fuzzy
 msgid "Split panes quad"
-msgstr "Divideix en quatre"
+msgstr "Divideix els panells en quarts"
 
 #: ../src/layout_util.c:2648
 msgid "_Single"
 msgstr "Sola"
 
 #: ../src/layout_util.c:2648
-#, fuzzy
 msgid "Single pane"
-msgstr "Una sola imatge"
+msgstr "Panell sol"
 
 #: ../src/layout_util.c:2652
 msgid "Input _0: sRGB"
@@ -4284,42 +4233,36 @@ msgid "Debug level:"
 msgstr "Nivell de depuració:"
 
 #: ../src/logwindow.c:405
-#, fuzzy
 msgid "Pause scrolling"
-msgstr "La rodeta del ratolí desplaça la imatge"
+msgstr "Pausa desplaçament"
 
 #: ../src/logwindow.c:413
-#, fuzzy
 msgid "Enable line wrap"
-msgstr "Habilita els grups de fitxers"
+msgstr "Activa ajust de línies"
 
 #: ../src/logwindow.c:421
-#, fuzzy
 msgid "Enable timer data"
-msgstr "Dades del temporitzador"
+msgstr "Activa dades del temporitzador"
 
 #: ../src/logwindow.c:441
 msgid "Search for text in log window"
-msgstr ""
+msgstr "Cerca pel text a la finestra de registre"
 
 #: ../src/logwindow.c:450
-#, fuzzy
 msgid "Search backwards"
-msgstr "Cerca per paraules clau"
+msgstr "Cerca endarrera"
 
 #: ../src/logwindow.c:460
-#, fuzzy
 msgid "Search forwards"
-msgstr "Cerca per paraules clau"
+msgstr "Cerca endavant"
 
 #: ../src/logwindow.c:470
 msgid "Highlight all"
-msgstr ""
+msgstr "Ressalta tot"
 
 #: ../src/logwindow.c:476
-#, fuzzy
 msgid "Filter regexp"
-msgstr "Filtratge"
+msgstr "Filtre expressió regular"
 
 #: ../src/main.c:593
 #, c-format
@@ -4331,9 +4274,10 @@ msgstr ""
 "\n"
 
 #: ../src/main.c:594
-#, fuzzy
 msgid "Valid options:\n"
-msgstr "les opcions vàlides son:\n"
+msgstr ""
+"Opcions vàlides:\n"
+"\n"
 
 #: ../src/main.c:595
 msgid "      --blank                      start with blank file list\n"
@@ -4344,16 +4288,16 @@ msgstr ""
 msgid ""
 "      --cache-maintenance <path>   run cache maintenance in non-GUI mode\n"
 msgstr ""
+"    --cache-maintenance <path>   executa manteniment de la memòria cau en "
+"mode sense GUI\n"
 
 #: ../src/main.c:597
-#, fuzzy
 msgid ""
 "      --disable-clutter            disable use of Clutter library (i.e. GPU "
 "accel.)\n"
 msgstr ""
 "      --disable-clutter            desactiva l'ús de Clutter library (p.ex. "
 "GPU accel.)\n"
-"\n"
 
 #: ../src/main.c:598
 msgid "  -f, --fullscreen                 start in full screen mode\n"
@@ -4361,7 +4305,6 @@ msgstr ""
 "  -f, --fullscreen                 inicia en mode de pantalla completa\n"
 
 #: ../src/main.c:599
-#, fuzzy
 msgid "      --geometry=WxH+XOFF+YOFF     set main window location\n"
 msgstr ""
 "      --geometry=XxY+XOFF+YOFF     estableix la situació de la finestra "
@@ -4383,7 +4326,6 @@ msgid "  -n, --new-instance               open a new instance of Geeqie\n"
 msgstr "  -n, --new-instance               obre una nova instància de Geeqie\n"
 
 #: ../src/main.c:603
-#, fuzzy
 msgid "  -o:, --log-file:<file>     save log data to file\n"
 msgstr "  -o:<fitxer>, --log-file:<fitxer> desa el registre al fitxer\n"
 
@@ -4395,7 +4337,6 @@ msgstr ""
 "oberta\n"
 
 #: ../src/main.c:605
-#, fuzzy
 msgid "  -rh, --remote-help               print remote command list\n"
 msgstr ""
 "  -rh,--remote-help                mostra la llista de comandes remotes\n"
@@ -4427,33 +4368,28 @@ msgid "      --debug[=level]              turn on debug output\n"
 msgstr "      --debug[=level]              activa la sortida de depuració\n"
 
 #: ../src/main.c:613
-#, fuzzy
 msgid "  -g:, --grep:<regexp>     filter debug output\n"
 msgstr "  -g:<regexp>, --grep:<regexp>     filtre la sortida de depuració\n"
 
 #: ../src/main.c:875
-#, fuzzy
 msgid "Cannot load "
-msgstr "No es pot llegir el fitxer"
+msgstr "No es pot carregar: "
 
 #: ../src/main.c:881
-#, fuzzy
 msgid "Configuration file path "
-msgstr "Demana confirmació al moure un fitxer a la Paperera"
+msgstr "Camí al fitxer de configuració "
 
 #: ../src/main.c:881
-#, fuzzy
 msgid " is not a file\n"
-msgstr "%s no és un directori"
+msgstr " no és un fitxer\n"
 
 #: ../src/main.c:888
-#, fuzzy
 msgid " is not a folder\n"
-msgstr "%s no és un directori"
+msgstr " %s no és un directori\n"
 
 #: ../src/main.c:895
 msgid "No path parameter given\n"
-msgstr ""
+msgstr "No s'ha donat paràmetre camí\n"
 
 #: ../src/main.c:957
 #, c-format
@@ -4782,22 +4718,23 @@ msgstr "Perspectiva"
 
 #: ../src/misc.c:395
 msgid "Warning: libarchive not installed"
-msgstr ""
+msgstr "Atenció: libarchive no és instal·lat"
 
 #: ../src/misc.c:422
-#, fuzzy
 msgid "Open Archive - Cannot create directory: "
-msgstr "No es pot crear el directori"
+msgstr "Obre arxiu - no es pot crear el directori: "
 
 #: ../src/misc.c:431 ../src/misc.c:443
 msgid "Open Archive - Cannot change directory to: "
-msgstr ""
+msgstr "Obre Arxiu - No es pot canviar el directori a: "
 
 #: ../src/misc.c:431 ../src/misc.c:443
 msgid ""
 "\n"
 "  Error code: "
 msgstr ""
+"\n"
+"Codi d'error: "
 
 #: ../src/options.c:244 ../src/ui_bookmark.c:588
 msgid "Desktop"
@@ -4873,70 +4810,63 @@ msgstr ""
 
 #: ../src/pan-view/pan-view.c:103 ../src/pan-view/pan-view.c:122
 msgid "Display Find search bar"
-msgstr ""
+msgstr "Mostra la barra de Cerca"
 
 #: ../src/pan-view/pan-view.c:104
-#, fuzzy
 msgid "Start search"
-msgstr "Cerca d'imatges"
+msgstr "Comença cerca"
 
 #: ../src/pan-view/pan-view.c:106
 msgid "Hide Find search bar"
-msgstr ""
+msgstr "Amaga barra de Cerca"
 
 #: ../src/pan-view/pan-view.c:123
-#, fuzzy
 msgid "Scroll left"
-msgstr "superior esquerra"
+msgstr "Desplaça esquerra"
 
 #: ../src/pan-view/pan-view.c:124
-#, fuzzy
 msgid "Scroll right"
-msgstr "superior dreta"
+msgstr "Desplaça dreta"
 
 #: ../src/pan-view/pan-view.c:125
 msgid "Scroll up"
-msgstr ""
+msgstr "Desplaça amunt"
 
 #: ../src/pan-view/pan-view.c:126
 msgid "Scroll down"
-msgstr ""
+msgstr "Desplaça avall"
 
 #: ../src/pan-view/pan-view.c:127
-#, fuzzy
 msgid "Scroll left faster"
-msgstr "Desplaça't a la cantonada superior esquerra"
+msgstr "Dreplaça esquerra més ràpid"
 
 #: ../src/pan-view/pan-view.c:128
-#, fuzzy
 msgid "Scroll right faster"
-msgstr "Desplaça't al centre de la imatge"
+msgstr "Desplaça a la dreta més ràpid"
 
 #: ../src/pan-view/pan-view.c:129
-#, fuzzy
 msgid "Scroll up faster"
-msgstr "Desplaça't a la cantonada superior esquerra"
+msgstr "Desplaça amunt més ràpid"
 
 #: ../src/pan-view/pan-view.c:130
-#, fuzzy
 msgid "Scroll down faster"
-msgstr "Desplaça't al centre de la imatge"
+msgstr "Desplaça avall més ràpid"
 
 #: ../src/pan-view/pan-view.c:131
 msgid "Scroll display half screen up"
-msgstr ""
+msgstr "Desplaça visualització mitja pantalla amunt"
 
 #: ../src/pan-view/pan-view.c:132
 msgid "Scroll display half screen down"
-msgstr ""
+msgstr "Desplaça visualització mitja pantalla avall"
 
 #: ../src/pan-view/pan-view.c:133
 msgid "Scroll display half screen left"
-msgstr ""
+msgstr "Desplaça visualització mitja pantalla a l'esquerra"
 
 #: ../src/pan-view/pan-view.c:134
 msgid "Scroll display half screen right"
-msgstr ""
+msgstr "Desplaça visualització mitja pantalla a la dreta"
 
 #: ../src/pan-view/pan-view.c:509
 #, c-format
@@ -5184,9 +5114,8 @@ msgid "Document"
 msgstr "Document"
 
 #: ../src/preferences.c:132
-#, fuzzy
 msgid "Archive"
-msgstr "Arquitectura"
+msgstr "Arxiva"
 
 #: ../src/preferences.c:657
 msgid "Nearest (worst, but fastest)"
@@ -5218,11 +5147,11 @@ msgstr "Ambdós"
 
 #: ../src/preferences.c:756
 msgid "Geometric"
-msgstr ""
+msgstr "Geometria"
 
 #: ../src/preferences.c:758
 msgid "Arithmetic"
-msgstr ""
+msgstr "Aritmètica"
 
 #: ../src/preferences.c:783 ../src/toolbar.c:78
 msgid "Back"
@@ -5468,9 +5397,8 @@ msgstr ""
 "actualitzades)"
 
 #: ../src/preferences.c:2045
-#, fuzzy
 msgid "Thumbnail color management"
-msgstr "Gestió del color"
+msgstr "Gestió del color de les miniatures"
 
 #: ../src/preferences.c:2048
 msgid "Collection preview:"
@@ -5494,7 +5422,7 @@ msgstr "Puntuació per estrelles"
 
 #: ../src/preferences.c:2070
 msgid "Star character: "
-msgstr ""
+msgstr "Caràcter estrella: "
 
 #: ../src/preferences.c:2081 ../src/preferences.c:2113
 msgid "Display selected character"
@@ -5514,9 +5442,8 @@ msgid "Default"
 msgstr "Opcions per defecte"
 
 #: ../src/preferences.c:2102
-#, fuzzy
 msgid "Rejected character: "
-msgstr "Mostra el caràcter seleccionat"
+msgstr "Caràcter rebutjat: "
 
 #: ../src/preferences.c:2134
 msgid "Slide show"
@@ -5539,9 +5466,8 @@ msgid "Image loading and caching"
 msgstr "Lectura de les imatges i memòria cau"
 
 #: ../src/preferences.c:2168
-#, fuzzy
 msgid "Decoded image cache size (MiB):"
-msgstr "Mida a la memòria cau de la imatge descodificada (MB):"
+msgstr "Mida de la memòria cau de la imatge descodificada (MB):"
 
 #: ../src/preferences.c:2170
 msgid "Preload next image"
@@ -5581,9 +5507,8 @@ msgid "Install"
 msgstr "Instal·la"
 
 #: ../src/preferences.c:2220
-#, fuzzy
 msgid "Download database from: "
-msgstr "Baixant la base de dades de zones horàries"
+msgstr "Descarrega la base de dades des de: "
 
 #: ../src/preferences.c:2226
 msgid ""
@@ -5633,9 +5558,8 @@ msgid "Zoom increment:"
 msgstr "Increment de l'ampliació:"
 
 #: ../src/preferences.c:2308
-#, fuzzy
 msgid "Zoom style:"
-msgstr "Allunya"
+msgstr "Estil de zoom:"
 
 #: ../src/preferences.c:2313
 msgid "Allow enlargement of image (max. size in %)"
@@ -5675,18 +5599,16 @@ msgstr ""
 "mode en pantalla completa."
 
 #: ../src/preferences.c:2330
-#, fuzzy
 msgid "Tile size"
-msgstr "Mida del fitxer"
+msgstr "Mida de la rajola"
 
 #: ../src/preferences.c:2334
-#, fuzzy
 msgid "Pixels"
-msgstr "Informació de píxel"
+msgstr "Píxels"
 
 #: ../src/preferences.c:2334
 msgid "(Requires restart)"
-msgstr ""
+msgstr "(cal reiniciar)"
 
 #: ../src/preferences.c:2337
 msgid ""
@@ -5729,9 +5651,8 @@ msgid "State"
 msgstr "Estat"
 
 #: ../src/preferences.c:2428
-#, fuzzy
 msgid "Remember session"
-msgstr "Recorda els ajustos d'impressió"
+msgstr "Recorda sessió"
 
 #: ../src/preferences.c:2431
 msgid "Use saved window positions also for new windows"
@@ -5756,13 +5677,15 @@ msgstr "Mostra ID de la finestra"
 
 #: ../src/preferences.c:2449
 msgid "Use current layout for default: "
-msgstr ""
+msgstr "Utilitza la disposició actual per omissió: "
 
 #: ../src/preferences.c:2455
 msgid ""
 "Current window layout\n"
 "has been set as default"
 msgstr ""
+"La disposició de la finestra actual\n"
+"s'ha establert com a per omissió"
 
 #: ../src/preferences.c:2462
 msgid "Fit window to image when tools are hidden/floating"
@@ -6129,7 +6052,6 @@ msgid "Maximum size:"
 msgstr "Mida màxima:"
 
 #: ../src/preferences.c:3527
-#, fuzzy
 msgid "MiB"
 msgstr "MB"
 
@@ -6158,13 +6080,12 @@ msgid "List directory view uses single click to enter"
 msgstr "Utilitza un clic per entrar a la vista de directori"
 
 #: ../src/preferences.c:3560
-#, fuzzy
 msgid "Circular selection lists"
-msgstr "Col·lecció existent"
+msgstr "Llistes de selecció circular"
 
 #: ../src/preferences.c:3562
 msgid "Traverse selection lists in a circular manner"
-msgstr ""
+msgstr "Recórrer les llistes de selecció de manera circular"
 
 #: ../src/preferences.c:3564
 msgid "Save marks on exit"
@@ -6219,9 +6140,8 @@ msgid "Navigation by left or middle click on image"
 msgstr "Navegació via clic esquerre o centre a la imatge"
 
 #: ../src/preferences.c:3604
-#, fuzzy
 msgid "Open archive by left click on image"
-msgstr "Reproduir el vídeo mitjançant el clic esquerre a la imatge"
+msgstr "Obre l'arxiu clicant amb l'esquerre a l'imatge"
 
 #: ../src/preferences.c:3606
 msgid "Play video by left click on image"
@@ -6245,7 +6165,7 @@ msgstr "GPU"
 
 #: ../src/preferences.c:3621
 msgid "Override disable GPU"
-msgstr "Sobrescriu desactivació de la GPU"
+msgstr "Sobrescriur desactivació de la GPU"
 
 #: ../src/preferences.c:3628
 msgid "Debugging"
@@ -6296,53 +6216,49 @@ msgid "Advanced"
 msgstr "Avançat"
 
 #: ../src/preferences.c:3799
-#, fuzzy
 msgid "External preview extraction"
-msgstr "Comanda externa de creació de carpeta"
+msgstr "Extracció de la vista prèvia externament"
 
 #: ../src/preferences.c:3801
 msgid "Use external preview extraction -  Requires restart"
 msgstr ""
+"Utilitza extracció de les vistes prèvies externament -  Necessita reiniciar"
 
 #: ../src/preferences.c:3838
-#, fuzzy
 msgid "Usable file types:\n"
-msgstr "Tipus de fitxers"
+msgstr "Tipus de fitxers usables:\n"
 
 #: ../src/preferences.c:3844
-#, fuzzy
 msgid "File identification tool"
-msgstr "Escriu l'orientació al fitxer"
+msgstr "Eina d'identificació de fitxer"
 
 #: ../src/preferences.c:3847
 msgid "Select file identification tool"
-msgstr ""
+msgstr "Selecciona eina per identificar fitxers"
 
 #: ../src/preferences.c:3851
-#, fuzzy
 msgid "Preview extraction tool"
-msgstr "Escriu l'orientació al fitxer"
+msgstr "Eina d'extracció de vistes prèvia"
 
 #: ../src/preferences.c:3854
 msgid "Select preview extraction tool"
-msgstr ""
+msgstr "Selecciona eina per extreure les vistes prèvies"
 
 #: ../src/preferences.c:3867
 msgid "Thread pool limits"
-msgstr ""
+msgstr "Límits de compartició de fils"
 
 #: ../src/preferences.c:3874
 msgid "Duplicate check:"
-msgstr ""
+msgstr "Examina duplicats:"
 
 #: ../src/preferences.c:3874
 msgid "max. threads"
-msgstr ""
+msgstr "número màxim de fils"
 
 #: ../src/preferences.c:3875
-#, fuzzy
 msgid "Set to 0 for unlimited"
-msgstr "Poseu-ho a 0 per indicar una mida il·limitada"
+msgstr "Poseu-ho a 0 per indicar il·limitat"
 
 #: ../src/preferences.c:3888
 msgid "Stereo"
@@ -6409,14 +6325,13 @@ msgid "translator-credits"
 msgstr "crèdits-tradcutors"
 
 #: ../src/preferences.c:4202 ../src/preferences.c:4210
-#, fuzzy
 msgid "Warning: Cannot open timezone database file"
-msgstr "Baixant la base de dades de zones horàries"
+msgstr ""
+"Atenció: no es pot obrir el fitxer de la base de dades de zones horàries"
 
 #: ../src/preferences.c:4217
-#, fuzzy
 msgid "Error: Timezone database download failed"
-msgstr "Ha fallat la baixada de la base de dades de zones horària"
+msgstr "Error: ha fallat la descàrrega de la base de dades de zones horàries"
 
 #: ../src/preferences.c:4259
 msgid "Timezone database download failed"
@@ -6444,7 +6359,7 @@ msgstr "Mostra el text pàgina"
 
 #: ../src/print.c:464
 msgid "Text shown on each page of a single or multi-page print job"
-msgstr ""
+msgstr "Text mostrat a cada pàgina d"
 
 #: ../src/rcfile.c:91
 #, c-format
@@ -6466,9 +6381,9 @@ msgstr ""
 "error: %s\n"
 
 #: ../src/rcfile.c:754
-#, fuzzy, c-format
+#, c-format
 msgid "error saving default layout file: %s\n"
-msgstr "s'ha produït un error en desar el fitxer: %s\n"
+msgstr "s'ha produït un error en desar el fitxer de disposició: %s\n"
 
 #: ../src/remote.c:757
 #, c-format
@@ -6523,14 +6438,12 @@ msgid "<FILE>|layout ID"
 msgstr "<FITXER>|disposició ID"
 
 #: ../src/remote.c:1401
-#, fuzzy
 msgid " load configuration from FILE"
-msgstr "carregar configuració del FITXER"
+msgstr " carrega configuració del FITXER"
 
 #: ../src/remote.c:1402
-#, fuzzy
 msgid "clean the metadata cache"
-msgstr "   neteja la memòria cau de les metadades"
+msgstr "neteja la memòria cau de les metadades"
 
 #: ../src/remote.c:1403
 msgid "<folder>  "
@@ -6635,9 +6548,8 @@ msgid "<FILE>"
 msgstr "<FITXER>"
 
 #: ../src/remote.c:1421
-#, fuzzy
 msgid "get destination path of FILE (See Plugins Configuration)"
-msgstr "obtenir el camí del FITXER destí"
+msgstr "obtenir el camí de destió del FITXER (veure configuració de plugins)"
 
 #: ../src/remote.c:1422
 msgid "get file info"
@@ -6768,7 +6680,6 @@ msgid "Remote command list:\n"
 msgstr "Llista de comandes remotes:\n"
 
 #: ../src/remote.c:1534
-#, fuzzy
 msgid ""
 "\n"
 "\n"
@@ -6778,8 +6689,13 @@ msgid ""
 "may be used.\n"
 msgstr ""
 "\n"
+"\n"
 "  Tots els altres paràmetres de línia de comandes es fan servir com a "
 "fitxers de text pla si existeixen.\n"
+"\n"
+"  El nom de la col·lecció, amb o sense el camí o extensió (.gqv) pot ser "
+"usat.\n"
+"\n"
 
 #: ../src/remote.c:1584
 #, c-format
@@ -6876,7 +6792,7 @@ msgstr "no és"
 
 #: ../src/search.c:368
 msgid "Start/stop search"
-msgstr ""
+msgstr "Comença/atura cerca"
 
 #: ../src/search.c:410
 #, c-format
@@ -7095,9 +7011,8 @@ msgstr ""
 "crear.\n"
 
 #: ../src/toolbar.c:100
-#, fuzzy
 msgid "Open Archive"
-msgstr "Obre recents"
+msgstr "Obre Arxiu"
 
 #: ../src/toolbar.c:132
 msgid "Pixel Info"
@@ -7154,7 +7069,7 @@ msgid "Deleting without trash"
 msgstr "Eliminant sense paperera"
 
 #: ../src/trash.c:210
-#, fuzzy, c-format
+#, c-format
 msgid " (max. %d MiB)"
 msgstr " (max. %d MB)"
 
@@ -7351,7 +7266,7 @@ msgid ""
 " Continue multiple file operation?"
 msgstr ""
 "\n"
-" Voleu continuar l'operació sobre múltiples fitxers?"
+" Voleu continuar l'operació de múltiples fitxers?"
 
 #: ../src/utilops.c:607 ../src/utilops.c:1055
 msgid "Co_ntinue"
@@ -7500,7 +7415,7 @@ msgstr "Fitxer exclòs"
 
 #: ../src/utilops.c:2084 ../src/utilops.c:2109
 msgid "Overview of changed metadata"
-msgstr "Sobrescriptura de les metadades canviades"
+msgstr "Resum de les metadades canviades"
 
 #: ../src/utilops.c:2102
 #, c-format
@@ -7752,14 +7667,12 @@ msgid "Re_fresh"
 msgstr "Ac_tualitza"
 
 #: ../src/view_file/view_file.c:749
-#, fuzzy
 msgid "Images as List"
-msgstr "Mostra les imatges en una llista"
+msgstr "Imatges com a llista"
 
 #: ../src/view_file/view_file.c:752
-#, fuzzy
 msgid "Images as Icons"
-msgstr "Mostra les imatges com a icones"
+msgstr "Imatges com a icones"
 
 #: ../src/view_file/view_file.c:758
 msgid "Show _thumbnails"
@@ -7779,7 +7692,7 @@ msgstr "Això posarà o treurà la marca del text."
 
 #: ../src/view_file/view_file.c:1199
 msgid "Case"
-msgstr ""
+msgstr "Diferència majúscules/minúscules"
 
 #: ../src/view_file/view_file.c:1201
 msgid "Case sensitive"
