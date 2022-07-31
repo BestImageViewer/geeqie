@@ -1179,31 +1179,62 @@ static void options_parse_marks_tooltips(GQParserData *parser_data, GMarkupParse
 
 static void class_filter_load_filter_type(const gchar **attribute_names, const gchar **attribute_values)
 {
-	gint i;
-	gint index;
+	// This is called with all attributes for a given XML element.  So for
+	// a sample input of:
+	// <filter_type filter = "RAW Image" enabled = "true" />
+	// attribute_names will be {"filter", "enabled"} and attribute_values
+	// will be {"RAW Image", "true"}.
+	// For a sample input of:
+	// <filter_type enabled = "true" filter = "RAW Image" />
+	// attribute_names will be {"enabled", "filter"} and attribute_values
+	// will be {"true", "RAW Image"}.
 
+	gchar *filter_name = NULL;
+	gchar *filter_value = NULL;
+	gchar *enabled_name = NULL;
+	gchar *enabled_value = NULL;
+	int format_class_index = -1;
+
+	// In this loop, we iterate through matching attribute/value pairs in
+	// tandem, looking for a "filter" value and an "enabled" value.
 	while (*attribute_names)
 		{
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
+
+		// If the name is "filter" and the value is in our
+		// format_class_list, then stash the format class index.
 		if (g_strcmp0("filter", option) == 0)
 			{
-			for (i = 0; i < FILE_FORMAT_CLASSES; i++)
+			for (int i = 0; i < FILE_FORMAT_CLASSES; i++)
 				{
 				if (g_strcmp0(format_class_list[i], value) == 0)
 					{
-					index = i;
+					format_class_index = i;
+					break;
 					}
 				}
 			continue;
 			}
 
-		if (READ_BOOL_FULL("enabled", options->class_filter[index]))
+		if (g_strcmp0("enabled", option) == 0)
 			{
+			enabled_name = option;
+			enabled_value = value;
 			continue;
 			}
+
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}
+
+	if (enabled_name == NULL || enabled_value == NULL || load_class_index < 0)
+		{
+		log_printf("Failed to parse <filter_type> config element\n");
+		return;
+		}
+
+	read_bool_option(enabled_name, "enabled", enabled_value,
+			 &(options->class_filter[load_class_index]);
 }
 
 static void options_parse_class_filter(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer UNUSED(data), GError **UNUSED(error))
