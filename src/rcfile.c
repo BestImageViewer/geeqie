@@ -1189,10 +1189,8 @@ static void class_filter_load_filter_type(const gchar **attribute_names, const g
 	// attribute_names will be {"enabled", "filter"} and attribute_values
 	// will be {"true", "RAW Image"}.
 
-	gchar *filter_name = NULL;
-	gchar *filter_value = NULL;
-	gchar *enabled_name = NULL;
-	gchar *enabled_value = NULL;
+	const gchar *enabled_name = NULL;
+	const gchar *enabled_value = NULL;
 	int format_class_index = -1;
 
 	// In this loop, we iterate through matching attribute/value pairs in
@@ -1227,17 +1225,17 @@ static void class_filter_load_filter_type(const gchar **attribute_names, const g
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}
 
-	if (enabled_name == NULL || enabled_value == NULL || load_class_index < 0)
+	if (enabled_name == NULL || enabled_value == NULL || format_class_index < 0)
 		{
 		log_printf("Failed to parse <filter_type> config element\n");
 		return;
 		}
 
 	if (!read_bool_option(enabled_name, "enabled", enabled_value,
-						  &(options->class_filter[load_class_index])
+						  &(options->class_filter[format_class_index])))
 		{
 		log_printf("Failed to load <filter_type> config element with "
-			   "class index %d\n", load_class_index);
+			   "class index %d\n", format_class_index);
 		}
 }
 
