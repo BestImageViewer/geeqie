@@ -1525,13 +1525,13 @@ void remote_help(void)
 			printf_term(FALSE, "  %-4s %-40s%-s\n",
 					s_opt_param,
 					l_opt_param,
-					remote_commands[i].description);
+					_(remote_commands[i].description));
 			g_free(s_opt_param);
 			g_free(l_opt_param);
 			}
 		i++;
 		}
-	printf_term(FALSE, N_("\n\n  All other command line parameters are used as plain files if they exist.\n\n  The name of a collection, with or without either path or extension (.gqv) may be used.\n"));
+	printf_term(FALSE, _("\n\n  All other command line parameters are used as plain files if they exist.\n\n  The name of a collection, with or without either path or extension (.gqv) may be used.\n"));
 }
 
 GList *remote_build_list(GList *list, gint argc, gchar *argv[], GList **errors)
