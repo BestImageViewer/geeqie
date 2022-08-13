@@ -67,3 +67,5 @@ icons_inline_h = custom_target('icons_inline', output : 'icons_inline.h',
         capture : true)
 
 project_sources += icons_inline_h
+
+subdir('svg')

@@ -7,12 +7,12 @@
   <_name>Geeqie</_name>
   <_summary>A lightweight image viewer</_summary>
   <description>
-    <_p>
+    <p>
           Geeqie is a lightweight image viewer for Linux, BSDs and compatibles.
-        </_p>
-    <_p>
+    </p>
+    <p>
           It can be used as a simple, fast, database-free image viewer, but equally it can be used to manage large collections of images.
-        </_p>
+    </p>
   </description>
   <screenshots>
     <screenshot type="default">
@@ -35,4 +35,3 @@
   <update_contact>geeqie@freelists.org</update_contact>
   <translation type="gettext">geeqie</translation>
 </component>
-
