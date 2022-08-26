@@ -51,6 +51,14 @@ project(
 # To inhibit warnings from the generated files icons_inline.h and ui_icons.h
 add_global_arguments('-Wno-overlength-strings', language : 'c')
 
+# To compile originally-C files as C++
+add_global_arguments('-fpermissive', language : 'cpp')
+add_global_arguments('-Wno-error=deprecated-declarations', language : 'cpp')
+add_global_arguments('-Wno-error=sign-compare', language : 'cpp')
+add_global_arguments('-Wno-error=return-type', language : 'cpp')
+add_global_arguments('-Wno-error=literal-suffix', language : 'cpp')
+add_global_arguments('-Wno-error=write-strings', language : 'cpp')
+
 # Project requirements
 project_sources = []
 gnome = import('gnome')
