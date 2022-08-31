@@ -401,7 +401,7 @@ endif
 tiff_dep = []
 option = get_option('tiff')
 if not option.disabled()
-    tiff_dep = cc.find_library('libtiff', required: get_option('tiff'))
+    tiff_dep = dependency('libtiff-4', required: get_option('tiff'))
     if tiff_dep.found()
         if cc.has_function('TIFFClientOpen', dependencies : tiff_dep)
             conf_data.set('HAVE_TIFF', 1)
