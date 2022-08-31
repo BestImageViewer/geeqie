@@ -16,13 +16,12 @@ subdir('html')
 guideindex_xml = files('docbook/GuideIndex.xml')
 destdir = join_paths(meson.current_build_dir(), 'html/')
 iconsdir = join_paths(meson.current_source_dir(), 'icons/')
-guideindex_html = join_paths(destdir, 'GuideIndex.html')
 guideindex_ln = join_paths(destdir, 'index.html')
 
 # Not-found notification already handled by ../meson.build
 if gnome_doc_tool.found()
     run_command(gnome_doc_tool, 'html', '-o', destdir, '-p', iconsdir, guideindex_xml, check : false)
-    run_command(find_program('ln'), '-s', '-f', guideindex_html, guideindex_ln, check : false)
+    run_command(find_program('ln'), '-s', '-f', 'GuideIndex.html', guideindex_ln, check : false)
 endif
 
 install_subdir(destdir, install_dir : helpdir, exclude_directories : 'lua-api/latex')
