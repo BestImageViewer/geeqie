@@ -368,14 +368,14 @@
  * image_change : image.cc
  * image_change_complete : image.cc
  * image_load_begin : image.cc
- * image_loader_start : image_load.c
- * image_loader_start_thread : image_load.c
- * image_loader_thread_run : image_load.c
- * image_loader_begin : image_load.c
- * image_loader_setuploader : image_load.c
+ * image_loader_start : image-load.cc
+ * image_loader_start_thread : image-load.cc
+ * image_loader_thread_run : image-load.cc
+ * image_loader_begin : image-load.cc
+ * image_loader_setuploader : image-load.cc
  * image_loader_setuploader : -
  * image_loader_setuploader : Select backend using magic
- * image_loader_setup_source : image_load.c
+ * image_loader_setup_source : image-load.cc
  * exif_get_preview : exiv2.cc
  * exif_get_preview : EXIV2_TEST_VERSION(0,17,90)
  * exif_get_preview_ : exif.cc
