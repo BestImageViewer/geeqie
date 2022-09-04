@@ -20,10 +20,6 @@
 #ifndef __GQV_CELL_RENDERER_ICON_H__
 #define __GQV_CELL_RENDERER_ICON_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 #define TOGGLE_WIDTH 13
 #define TOGGLE_SPACING 16
 
@@ -80,10 +76,6 @@ struct _GQvCellRendererIconClass
 
 GType            gqv_cell_renderer_icon_get_type(void);
 GtkCellRenderer *gqv_cell_renderer_icon_new(void);
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #endif /* __GQV_CELL_RENDERER_ICON_H__ */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

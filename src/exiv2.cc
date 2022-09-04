@@ -52,7 +52,6 @@
 #define EXV_PACKAGE "exiv2"
 #endif
 
-extern "C" {
 #include <glib.h>
 
 #include "main.h"
@@ -62,7 +61,6 @@ extern "C" {
 #include "ui-fileops.h"
 
 #include "misc.h"
-}
 
 typedef struct _AltKey AltKey;
 
@@ -286,9 +284,7 @@ public:
 	}
 };
 
-extern "C" {
 static void _ExifDataProcessed_update_xmp(gpointer key, gpointer value, gpointer data);
-}
 
 // This allows read-write access to the metadata
 struct _ExifDataProcessed : public _ExifData
@@ -442,7 +438,6 @@ public:
 
 
 
-extern "C" {
 
 
 void exif_init(void)
@@ -1244,7 +1239,6 @@ void exif_free_preview(guchar *buf)
 }
 #endif
 
-}
 #if !EXIV2_TEST_VERSION(0,17,90)
 
 /* This is a dirty hack to support raw file preview, bassed on
@@ -1279,7 +1273,7 @@ struct _UnmapData
 
 static GList *exif_unmap_list = 0;
 
-extern "C" guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, gint requested_height)
+guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, gint requested_height)
 {
 	unsigned long offset;
 
