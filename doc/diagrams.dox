@@ -193,15 +193,15 @@
  * #setup_default_options
  * 
  * @startuml
- * group main.c
+ * group main.cc
  * start
- * group options.c
+ * group options.cc
  * : **init_options()**
  * 
  * Set **options** = ConfOptions from hard-coded init values;
  * end group
  * 
- * group options.c
+ * group options.cc
  * : **setup_default_options()**
  * 
  * set hard-coded ConfOptions:
@@ -222,7 +222,7 @@
  * if (first entry
  * or
  * --new-instance) then (yes)
- * group options.c
+ * group options.cc
  * : **load_options()**
  * ;
  * 
@@ -237,7 +237,7 @@
  * /.geeqie/geeqierc.xml;
  * end split
  * 
- * group rcfile.c
+ * group rcfile.cc
  * : **load_config_from_file()**
  * 
  * set  **options** from file
@@ -250,7 +250,7 @@
  * or no config file
  * or no layout section loaded
  * (i.e. session not saved)) then (yes)
- * group layout.c
+ * group layout.cc
  * : **layout_new_from_default()**;
  * if (default.xml exists) then (yes)
  * : Load user-saved
@@ -282,9 +282,9 @@
  * #layout_new_from_default  
  * @startuml
  * 
- * group remote.c
+ * group remote.cc
  * start
- * group layout.c
+ * group layout.cc
  * : **layout_new_from_default()**;
  * if (default.xml exists) then (yes)
  * : Load user-saved
@@ -307,12 +307,12 @@
  * #layout_new_from_default  
  * @startuml
  * 
- * group layout-util.c
+ * group layout-util.cc
  * start
  * 
  * split
  * : default;
- * group layout.c
+ * group layout.cc
  * : **layout_new_from_default()**;
  * if (default.xml exists) then (yes)
  * : Load user-saved
@@ -365,9 +365,9 @@
  * object exif_get_preview
  * object libraw_get_preview
  * 
- * image_change : image.c
- * image_change_complete : image.c
- * image_load_begin : image.c
+ * image_change : image.cc
+ * image_change_complete : image.cc
+ * image_load_begin : image.cc
  * image_loader_start : image_load.c
  * image_loader_start_thread : image_load.c
  * image_loader_thread_run : image_load.c
@@ -378,10 +378,10 @@
  * image_loader_setup_source : image_load.c
  * exif_get_preview : exiv2.cc
  * exif_get_preview : EXIV2_TEST_VERSION(0,17,90)
- * exif_get_preview_ : exif.c
+ * exif_get_preview_ : exif.cc
  * exif_get_preview_ : -
  * exif_get_preview_ : If exiv2 not installed
- * libraw_get_preview : image-load-libraw.c
+ * libraw_get_preview : image-load-libraw.cc
  * 
  * image_change --> image_change_complete
  * image_change_complete --> image_load_begin

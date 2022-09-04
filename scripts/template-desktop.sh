@@ -9,7 +9,7 @@
 
 tmp_file=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXXXXXX")
 path=$(dirname "$(realpath "$0")")
-srcpath=$(dirname "$path")/src/layout-util.c
+srcpath=$(dirname "$path")/src/layout-util.cc
 templatepath=$(dirname "$path")/plugins/template.desktop.in
 
 awk -v src_path="$srcpath" 'BEGIN {

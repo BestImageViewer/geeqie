@@ -123,7 +123,7 @@ void generic_dialog_close(GenericDialog *gd)
 	w = gdk_window_get_width(gtk_widget_get_window (gd->dialog));
 	h = gdk_window_get_height(gtk_widget_get_window (gd->dialog));
 
-	/* The window title is modified in window.c: window_new()
+	/* The window title is modified in window.cc: window_new()
 	 * by appending the string " - Geeqie"
 	 */
 	ident_string = g_strconcat(" - ", GQ_APPNAME, NULL);

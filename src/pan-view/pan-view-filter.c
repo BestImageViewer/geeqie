@@ -356,7 +356,7 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 			}
 		else if (filter_elements)
 			{
-			/** @todo (xsdg): OPTIMIZATION Do the search inside of metadata.c to avoid a bunch of string list copies. */
+			/** @todo (xsdg): OPTIMIZATION Do the search inside of metadata.cc to avoid a bunch of string list copies. */
 			GList *img_keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
 
 			/** @todo (xsdg): OPTIMIZATION Determine a heuristic for when to linear-search the keywords list, and when to build a hash table for the image's keywords. */

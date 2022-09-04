@@ -37,7 +37,7 @@ function check_parameters(latitude, longitude)
     }
 
 # This awk file is accessed by the decode_geo_parameters() function
-# in search.c. The call is of the format:
+# in search.cc. The call is of the format:
 # echo "string_to_be_searched" | awk -f geocode-parameters.awk
 #
 # Search the input string for known formats.

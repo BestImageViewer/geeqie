@@ -7,7 +7,7 @@
 #define _GNU_SOURCE
 #endif
 
-// in case you want to #include "whereami.c" in a larger compilation unit
+// in case you want to #include "whereami.cc" in a larger compilation unit
 #if !defined(WHEREAMI_H)
 #include <whereami.h>
 #endif

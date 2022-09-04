@@ -43,7 +43,7 @@ typedef enum
 	DUPE_MATCH_NAME_CI = 1 << 10,	/**< same as name, but case insensitive */
 	DUPE_MATCH_NAME_CONTENT = 1 << 11,	/**< same name, but different content */
 	DUPE_MATCH_NAME_CI_CONTENT = 1 << 12,	/**< same name - case insensitive, but different content */
-	DUPE_MATCH_ALL = 1 << 13 /**< N.B. this is used as a clamp value in rcfile.c */
+	DUPE_MATCH_ALL = 1 << 13 /**< N.B. this is used as a clamp value in rcfile.cc */
 } DupeMatchType;
 
 typedef enum

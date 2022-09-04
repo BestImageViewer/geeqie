@@ -71,7 +71,7 @@ endif
 
 debug = get_option('debug')
 
-# Note that main.c sets prefix to the directory above where the executable is run from.
+# Note that main.cc sets prefix to the directory above where the executable is run from.
 # This is to allow AppImages to be used
 
 # These gq_* variables are paths relative to /prefix/,

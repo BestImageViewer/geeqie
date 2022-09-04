@@ -3117,7 +3117,7 @@ GList *file_data_process_groups_in_selection(GList *list, gboolean ungroup, GLis
 
 /* might use file_maint_ functions for now, later it should be changed to a system of callbacks */
 /** @FIXME do we need the ignore_list? It looks like a workaround for ineffective
-   implementation in view-file-list.c */
+   implementation in view-file-list.cc */
 
 
 typedef struct _NotifyIdleData NotifyIdleData;

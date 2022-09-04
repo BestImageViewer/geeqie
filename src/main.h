@@ -145,12 +145,12 @@
 
 /*
  *----------------------------------------------------------------------------
- * main.c
+ * main.cc
  *----------------------------------------------------------------------------
  */
 
 /*
- * This also doubles as the main.c header.
+ * This also doubles as the main.cc header.
  */
 
 extern gboolean thumb_format_changed;

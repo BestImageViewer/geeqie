@@ -1782,7 +1782,7 @@ FileData *vficon_thumb_next_fd(ViewFile *vf)
 		{
 		FileData *fd = work->data;
 
-		// Note: This implementation differs from view-file-list.c because sidecar files are not
+		// Note: This implementation differs from view-file-list.cc because sidecar files are not
 		// distinct list elements here, as they are in the list view.
 		if (!fd->thumb_pixbuf) return fd;
 		}

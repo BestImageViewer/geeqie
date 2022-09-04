@@ -27,7 +27,7 @@
 #include "secure-save.h"
 
 /**
- * @file secure-save.c
+ * @file secure-save.cc
  * 
  * ABOUT SECURE SAVE \n
  * This code was borrowed from the ELinks project (http://elinks.cz)

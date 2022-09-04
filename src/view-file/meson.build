@@ -11,9 +11,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #
 
-view_file_sources= files('view-file.c',
-'view-file-icon.c',
+view_file_sources= files('view-file.cc',
+'view-file-icon.cc',
 'view-file-icon.h',
-'view-file-list.c',
+'view-file-list.cc',
 'view-file-list.h')
 project_sources += view_file_sources

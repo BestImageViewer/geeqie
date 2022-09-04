@@ -11,23 +11,23 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #
 
-pan_view_sources = files('pan-calendar.c',
+pan_view_sources = files('pan-calendar.cc',
 'pan-calendar.h',
-'pan-folder.c',
+'pan-folder.cc',
 'pan-folder.h',
-'pan-grid.c',
+'pan-grid.cc',
 'pan-grid.h',
-'pan-item.c',
+'pan-item.cc',
 'pan-item.h',
-'pan-timeline.c',
+'pan-timeline.cc',
 'pan-timeline.h',
 'pan-types.h',
-'pan-util.c',
+'pan-util.cc',
 'pan-util.h',
-'pan-view.c',
-'pan-view-filter.c',
+'pan-view.cc',
+'pan-view-filter.cc',
 'pan-view-filter.h',
 'pan-view.h',
-'pan-view-search.c',
+'pan-view-search.cc',
 'pan-view-search.h')
 project_sources += pan_view_sources

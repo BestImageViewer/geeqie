@@ -72,7 +72,7 @@ BEGIN {
 		}
 	else if ($1 == "FILE_PATTERNS")
 		{
-		print "FILE_PATTERNS = lua.c"
+		print "FILE_PATTERNS = lua.cc"
 		FILE_PATTERNS_found = "TRUE"
 		next
 		}

@@ -26,7 +26,7 @@ GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, cons
 void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 
-GList *keyword_list_pull(GtkWidget *text_widget); /**< used in search.c */
+GList *keyword_list_pull(GtkWidget *text_widget); /**< used in search.cc */
 
 GList *keyword_list_get();
 void keyword_list_set(GList *keyword_list);

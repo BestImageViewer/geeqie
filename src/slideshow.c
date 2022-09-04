@@ -378,7 +378,7 @@ static SlideShowData *real_slideshow_start(LayoutWindow *target_lw, ImageWindow 
 	ss = g_new0(SlideShowData, 1);
 
 	ss->lw = target_lw;
-	ss->imd = imd; /** @FIXME ss->imd is used only for img-view.c and can be dropped with it */
+	ss->imd = imd; /** @FIXME ss->imd is used only for img-view.cc and can be dropped with it */
 	ss->filelist = filelist;
 	ss->cd = cd;
 

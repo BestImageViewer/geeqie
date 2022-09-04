@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/** @FIXME This is just a copy of image-load-jpeg.c, with an adjusted
+/** @FIXME This is just a copy of image-load-jpeg.cc, with an adjusted
  * start address for a .cr3 file
  */
 #include "main.h"

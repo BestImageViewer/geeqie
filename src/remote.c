@@ -83,7 +83,7 @@ struct _RemoteData {
  */
 static gboolean print0 = FALSE;
 
-/* Remote commands from main.c are prepended with the current dir the remote
+/* Remote commands from main.cc are prepended with the current dir the remote
  * command was made from. Some remote commands require this. The
  * value is stored here
  */

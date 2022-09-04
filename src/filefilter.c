@@ -283,7 +283,7 @@ void filter_add_defaults(void)
 	filter_add_if_missing("pto", "Panorama script file", ".pto", FORMAT_CLASS_META, FALSE, FALSE, TRUE);
 
 	/* These are the raw camera formats with embedded jpeg/exif.
-	 * (see format-raw.c and/or exiv2.cc)
+	 * (see format-raw.cc and/or exiv2.cc)
 	 */
 	filter_add_if_missing("arw", "Sony raw format", ".arw;.srf;.sr2", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);
 	filter_add_if_missing("crw", "Canon raw format", ".crw;.cr2;.cr3", FORMAT_CLASS_RAWIMAGE, FALSE, TRUE, TRUE);

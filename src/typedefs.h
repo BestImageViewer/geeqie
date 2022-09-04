@@ -163,7 +163,7 @@ typedef enum {
 	FILE_FORMAT_CLASSES
 } FileFormatClass;
 
-extern gchar *format_class_list[]; /**< defined in preferences.c */
+extern gchar *format_class_list[]; /**< defined in preferences.cc */
 
 /**
  * @typedef SecureSaveErrno
@@ -1033,7 +1033,7 @@ struct _SlideShowData
 {
 	LayoutWindow *lw;        /**< use this window to display the slideshow */
 	ImageWindow *imd;        /**< use this window only if lw is not available,
-	                            @FIXME it is probably required only by img-view.c and should be dropped with it */
+	                            @FIXME it is probably required only by img-view.cc and should be dropped with it */
 
 	GList *filelist;
 	CollectionData *cd;

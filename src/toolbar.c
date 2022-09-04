@@ -66,7 +66,7 @@ struct _UseableToolbarItems
 };
 
 /** @FIXME Should be created by program from menu_entries[]
- * in layout-util.c */
+ * in layout-util.cc */
  /** The user is limited to selecting from this list of menu items
   * plus any desktop files
   **/
