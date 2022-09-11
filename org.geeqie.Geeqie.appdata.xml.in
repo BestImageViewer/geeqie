@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <component>
-  <id type="desktop">geeqie.desktop</id>
+  <id>org.geeqie.Geeqie</id>
   <metadata_license>CC-BY-SA-4.0</metadata_license>
   <content_rating type="oars-1.1" />
   <project_license>GPL-3.0+</project_license>
-  <_name>Geeqie</_name>
-  <_summary>A lightweight image viewer</_summary>
+  <name>Geeqie</name>
+  <summary>A lightweight image viewer</summary>
   <description>
     <p>
           Geeqie is a lightweight image viewer for Linux, BSDs and compatibles.
