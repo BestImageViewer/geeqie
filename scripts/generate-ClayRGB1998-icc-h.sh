@@ -12,9 +12,12 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
+# Allow standalone replacement for xxd
+command -v xxdi.pl >/dev/null 2>&1 && XXD="xxdi.pl" || XXD="xxd -i"
+
 # To generate the required code, xxd has to run in the same folder as the source
 build_dir="$PWD"
 
 cd "$(dirname "$1")" || return 1
 
-xxd -i "$(basename "$1")" "$build_dir/$2"
+${XXD} "$(basename "$1")" "$build_dir/$2"
