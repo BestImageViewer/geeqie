@@ -70,12 +70,6 @@ configuration_inc = include_directories('.')
 # External programs
 gdk_pixbuf_csource = find_program('gdk-pixbuf-csource', required : true)
 glib_genmarshal = find_program('glib-genmarshal', required : true)
-gnome_doc_tool = find_program('yelp-build', required : false)
-if gnome_doc_tool.found()
-    summary({'help' : ['Help files created:', true]}, section : 'Documentation', bool_yn : true)
-else
-    summary({'help' : ['yelp-build not found - Help files created:', false]}, section : 'Documentation', bool_yn : true)
-endif
 
 debug = get_option('debug')
 
@@ -145,6 +139,26 @@ conf_data.set('DEBUG', debug)
 
 gtk_dep = dependency('gtk+-3.0', version : '>=3.22', required: true)
 glib_dep = dependency('glib-2.0', version : '>=2.52', required: true)
+
+#option = get_option('doc')
+if not get_option('doc').disabled()
+    gnome_doc_tool = find_program('yelp-build', required : false)
+    if gnome_doc_tool.found()
+        summary({'help' : ['Help files created:', true]}, section : 'Documentation', bool_yn : true)
+    else
+        summary({'help' : ['yelp-build not found - Help files created:', false]}, section : 'Documentation', bool_yn : true)
+    endif
+
+    doxygen = find_program('doxygen', required : false)
+    if doxygen.found()
+        summary({'lua-api' : ['lua-api help file created:', true]}, section : 'Documentation', bool_yn : true)
+    else
+        summary({'lua-api' : ['doxygen not found - lua-api help file created:', false]}, section : 'Documentation', bool_yn : true)
+    endif
+else
+    summary({'help' : ['disabled - Help files created:', false]}, section : 'Documentation', bool_yn : true)
+    summary({'lua-api' : ['disabled - lua-api help file created:', false]}, section : 'Documentation', bool_yn : true)
+endif
 
 libarchive_dep = []
 req_version = '>=3.4.0'

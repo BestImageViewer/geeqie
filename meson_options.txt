@@ -26,6 +26,7 @@ option('gq_localedir', type : 'string', value : '', description : 'Location wher
 option('archive', type : 'feature', value : 'auto', description : 'archive files e.g. zip, gz')
 option('cms', type : 'feature', value : 'auto', description : 'color management system')
 option('djvu', type : 'feature', value : 'auto', description : 'djvu')
+option('doc', type : 'feature', value : 'auto', description : 'doc')
 option('exiv2', type : 'feature', value : 'auto', description : 'exiv2')
 option('videothumbnailer', type : 'feature', value : 'auto', description : 'video thumbnailer')
 option('gps-map', type : 'feature', value : 'auto', description : 'gps map')
