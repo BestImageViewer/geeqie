@@ -140,7 +140,7 @@ summary({'gq_appdir': gq_appdir,
 
 # Create the define constants used in the sources. Set via config.h.in
 conf_data = configuration_data()
-conf_data.set_quoted('VERSION', run_command('./version.sh', check : true).stdout())
+conf_data.set_quoted('VERSION', meson.project_version())
 conf_data.set('DEBUG', debug)
 
 gtk_dep = dependency('gtk+-3.0', version : '>=3.22', required: true)
