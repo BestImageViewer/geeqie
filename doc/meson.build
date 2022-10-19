@@ -27,7 +27,7 @@ endif
 install_subdir(destdir, install_dir : helpdir, exclude_directories : 'lua-api/latex')
 
 doxygen = find_program('doxygen', required : false)
-if doxygen.found()
+if doxygen.found() and running_from_git
     srcdir = join_paths(meson.source_root())
     destdir = join_paths(meson.build_root(), 'doc', 'html', 'lua-api')
 
