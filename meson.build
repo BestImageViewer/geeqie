@@ -507,17 +507,20 @@ endif
 
 pandoc = find_program('pandoc', required : false)
 if pandoc.found()
-    run_command(find_program('gen_readme.sh'), meson.source_root(), meson.build_root(), check : false)
+    readme_html = custom_target(
+        'README.html',
+        input: 'README.md',
+        output: 'README.html',
+        command: [pandoc, '@INPUT@', '-o', '@OUTPUT@'],
+        install: true,
+        install_dir: helpdir)
 
-    install_data('README.md', 'COPYING', 'TODO', 'AUTHORS',
-                 join_paths(meson.build_root(), 'README.html'),
-                 install_dir : helpdir)
     summary({'README' : ['README.html created:', true]}, section : 'Documentation', bool_yn : true)
 else
-    install_data('README.md', 'COPYING', 'TODO', 'AUTHORS',
-                 install_dir : helpdir)
     summary({'README' : ['pandoc not found - README.html created:', false]}, section : 'Documentation', bool_yn : true)
 endif
+install_data('README.md', 'COPYING', 'TODO', 'AUTHORS',
+             install_dir : helpdir)
 
 evince = find_program('evince', required : false)
 if evince.found()
