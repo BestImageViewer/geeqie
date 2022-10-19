@@ -65,6 +65,7 @@ gnome = import('gnome')
 thread_dep = dependency('threads')
 cc = meson.get_compiler('c')
 i18n = import('i18n')
+fs = import('fs')
 configuration_inc = include_directories('.')
 
 # External programs
@@ -76,6 +77,8 @@ if gnome_doc_tool.found()
 else
     summary({'help' : ['yelp-build not found - Help files created:', false]}, section : 'Documentation', bool_yn : true)
 endif
+
+running_from_git = find_program('git', required: false).found() and fs.is_dir('.git')
 
 debug = get_option('debug')
 
@@ -489,10 +492,14 @@ subdir('src')
 subdir('doc')
 
 # Install other project files
-res = run_command(find_program('gen_changelog.sh'), meson.source_root(), meson.build_root(), check : false)
-
-if res.returncode() == 0
-    install_data(join_paths(meson.build_root(), 'ChangeLog'), join_paths(meson.build_root(), 'ChangeLog.html'), install_dir : helpdir)
+if running_from_git
+    custom_target(
+        'ChangeLog',
+        input: 'ChangeLog.gqview',
+        output: ['ChangeLog', 'ChangeLog.html'],
+        command: [find_program('gen_changelog.sh'), meson.current_source_dir(), meson.current_build_dir()],
+        install: true,
+        install_dir: helpdir)
     summary({'ChangeLog' : ['ChangeLog, ChangeLog.html created:', true]}, section : 'Documentation', bool_yn : true)
 else
     summary({'ChangeLog' : ['ChangeLog, ChangeLog.html created:', false]}, section : 'Documentation', bool_yn : true)
