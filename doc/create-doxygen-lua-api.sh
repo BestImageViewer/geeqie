@@ -100,7 +100,7 @@ BEGIN {
 		{print}
 		}
 }
-' ../doxygen.conf > "$TMPFILE"
+' "$SRCDIR"/doxygen.conf > "$TMPFILE"
 
 doxygen "$TMPFILE"
 
