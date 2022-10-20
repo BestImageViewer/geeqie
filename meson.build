@@ -493,14 +493,19 @@ subdir('doc')
 
 # Install other project files
 if running_from_git
+    cmd = [find_program('gen_changelog.sh'), meson.current_source_dir(), meson.current_build_dir()]
     custom_target(
         'ChangeLog',
         input: 'ChangeLog.gqview',
         output: ['ChangeLog', 'ChangeLog.html'],
-        command: [find_program('gen_changelog.sh'), meson.current_source_dir(), meson.current_build_dir()],
+        command: cmd,
         install: true,
         install_dir: helpdir)
+    meson.add_dist_script(cmd)
     summary({'ChangeLog' : ['ChangeLog, ChangeLog.html created:', true]}, section : 'Documentation', bool_yn : true)
+elif fs.exists('ChangeLog.html')
+    install_data('ChangeLog', 'ChangeLog.html', install_dir: helpdir)
+    summary({'ChangeLog' : ['ChangeLog, ChangeLog.html installed from dist:', true]}, section : 'Documentation', bool_yn : true)
 else
     summary({'ChangeLog' : ['ChangeLog, ChangeLog.html created:', false]}, section : 'Documentation', bool_yn : true)
 endif

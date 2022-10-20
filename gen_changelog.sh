@@ -38,4 +38,14 @@ echo "</html>" >> "$builddir/ChangeLog.$$.new.html"
 rm "$builddir/ChangeLog.$$.old.html"
 mv -f "$builddir/ChangeLog.$$.new.html" "$builddir/ChangeLog.html"
 
+# Meson: distribute in tarballs. The first variable is more reliable, but requires Meson 0.58.
+# Fallback to the older one if necessary
+for distdir in "$MESON_PROJECT_DIST_ROOT" "$MESON_DIST_ROOT"; do
+    if [ -n "$distdir" ]; then
+        cp -f "$builddir/ChangeLog.html" "$distdir/ChangeLog.html"
+        cp -f "$builddir/ChangeLog" "$distdir/ChangeLog"
+        break
+    fi
+done
+
 exit 0
