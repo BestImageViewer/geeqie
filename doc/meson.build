@@ -26,6 +26,8 @@ endif
 
 install_subdir(destdir, install_dir : helpdir, exclude_directories : 'lua-api/latex')
 
+option = get_option('doxygen')
+if not option.disabled()
 doxygen = find_program('doxygen', required : false)
 if doxygen.found() and running_from_git
     srcdir = join_paths(meson.source_root())
@@ -36,4 +38,5 @@ if doxygen.found() and running_from_git
     summary({'lua-api' : ['lua-api help file created:', true]}, section : 'Documentation', bool_yn : true)
 else
     summary({'lua-api' : ['doxygen not found - lua-api help file created:', false]}, section : 'Documentation', bool_yn : true)
+endif
 endif
