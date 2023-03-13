@@ -1015,6 +1015,107 @@ static void gr_selection_clear(const gchar *UNUSED(text), GIOChannel *UNUSED(cha
 	layout_select_none(lw_id);  // Checks lw_id validity internally.
 }
 
+static void gr_selection_remove(const gchar *text, GIOChannel *UNUSED(channel), gpointer UNUSED(data))
+{
+	if (!layout_valid(&lw_id)) return;
+
+	GList *selected = layout_selection_list(lw_id);  // Keep copy to free.
+	if (!selected)
+		{
+		log_printf("remote sent --selection-remove with empty selection.");
+		return;
+		}
+
+	FileData *fd_to_deselect = NULL;
+	gchar *path = NULL;
+	gchar *filename = NULL;
+	gchar *slash_plus_filename = NULL;
+	if (strcmp(text, "") == 0)
+		{
+		// No file specified, use current fd.
+		fd_to_deselect = layout_image_get_fd(lw_id);
+		if (!fd_to_deselect)
+			{
+			log_printf("remote sent \"--selection-remove:\" with no current image");
+			filelist_free(selected);
+			return;
+			}
+		}
+	else
+		{
+		// Search through the selection list for a file matching the specified path.
+		// "Match" is either a basename match or a file path match.
+		path = expand_tilde(text);
+		filename = g_path_get_basename(path);
+		slash_plus_filename = g_strdup_printf("%s%s", G_DIR_SEPARATOR_S, filename);
+		}
+
+	GList *prior_link = NULL;  // Stash base for link removal to avoid a second traversal.
+	GList *link_to_remove = NULL;
+	for (GList *work = selected; work; prior_link = work, work = work->next)
+		{
+		FileData *fd = work->data;
+		if (fd_to_deselect)
+			{
+			if (fd == fd_to_deselect)
+				{
+				link_to_remove = work;
+				break;
+				}
+			}
+		else
+			{
+			// path, filename, and slash_plus_filename should be defined.
+
+			if (!strcmp(path, fd->path) || g_str_has_suffix(fd->path, slash_plus_filename))
+				{
+				link_to_remove = work;
+				break;
+				}
+			}
+		}
+
+	if (!link_to_remove)
+		{
+		if (fd_to_deselect)
+			{
+			log_printf("remote sent \"--selection-remove:\" but current image is not selected");
+			}
+		else
+			{
+			log_printf("remote sent \"--selection-remove:%s\" but that filename is not selected",
+				   filename);
+			}
+		}
+	else
+		{
+		if (link_to_remove == selected)
+			{
+			// Remove first link.
+			selected = g_list_remove_link(selected, link_to_remove);
+			filelist_free(link_to_remove);
+			link_to_remove = NULL;
+			}
+		else
+			{
+			// Remove a subsequent link.
+			prior_link = g_list_remove_link(prior_link, link_to_remove);
+			filelist_free(link_to_remove);
+			link_to_remove = NULL;
+			}
+
+		// Re-select all but the deselected item.
+		layout_select_none(lw_id);
+		layout_select_list(lw_id, selected);
+		}
+
+	filelist_free(selected);
+	file_data_unref(fd_to_deselect);
+	g_free(slash_plus_filename);
+	g_free(filename);
+	g_free(path);
+}
+
 static void gr_collection(const gchar *text, GIOChannel *channel, gpointer UNUSED(data))
 {
 	GString *contents = g_string_new(NULL);
@@ -1542,6 +1643,7 @@ static RemoteCommandEntry remote_commands[] = {
 	{ NULL, "raise",                gr_raise,               FALSE, FALSE, NULL, N_("bring the Geeqie window to the top") },
 	{ NULL, "--selection-add:",     gr_selection_add,       TRUE,  FALSE, N_("[<FILE>]"), N_("adds the current file (or the specified file) to the current selection") },
 	{ NULL, "--selection-clear",    gr_selection_clear,     FALSE, FALSE, NULL, N_("clears the current selection") },
+	{ NULL, "--selection-remove:",  gr_selection_remove,    TRUE,  FALSE, N_("[<FILE>]"), N_("removes the current file (or the specified file) from the current selection") },
 	{ "-s", "--slideshow",          gr_slideshow_toggle,    FALSE, TRUE,  NULL, N_("toggle slide show") },
 	{ NULL, "--slideshow-recurse:", gr_slideshow_start_rec, TRUE,  FALSE, N_("<FOLDER>"), N_("start recursive slide show in FOLDER") },
 	{ "-ss","--slideshow-start",    gr_slideshow_start,     FALSE, FALSE, NULL, N_("start slide show") },
