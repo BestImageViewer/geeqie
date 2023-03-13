@@ -926,18 +926,18 @@ static void gr_get_selection(const gchar *UNUSED(text), GIOChannel *channel, gbo
 {
 	if (!layout_valid(&lw_id)) return;
 
-    GList *selected = layout_selection_list(lw_id);  // Keep copy to free.
-    GString *out_string = g_string_new(NULL);
+	GList *selected = layout_selection_list(lw_id);  // Keep copy to free.
+	GString *out_string = g_string_new(NULL);
 
-    GList *work = selected;
-    while (work)
-        {
-        FileData *fd = work->data;
-        g_assert(fd->magick == FD_MAGICK);
+	GList *work = selected;
+	while (work)
+		{
+		FileData *fd = work->data;
+		g_assert(fd->magick == FD_MAGICK);
 
-        g_string_append_printf(out_string, "%s    %s\n",
-                               fd->path,
-                               format_class_list[filter_file_get_class(fd->path)]);
+		g_string_append_printf(out_string, "%s    %s\n",
+				       fd->path,
+				       format_class_list[filter_file_get_class(fd->path)]);
 
 		work = work->next;
 		}
@@ -945,7 +945,7 @@ static void gr_get_selection(const gchar *UNUSED(text), GIOChannel *channel, gbo
 	g_io_channel_write_chars(channel, out_string->str, -1, NULL, NULL);
 	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
 
-    filelist_free(selected);
+	filelist_free(selected);
 	g_string_free(out_string, TRUE);
 }
 
