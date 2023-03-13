@@ -1010,6 +1010,11 @@ static void gr_selection_add(const gchar *text, GIOChannel *UNUSED(channel), gpo
 		}
 }
 
+static void gr_selection_clear(const gchar *UNUSED(text), GIOChannel *UNUSED(channel), gpointer UNUSED(data))
+{
+	layout_select_none(lw_id);  // Checks lw_id validity internally.
+}
+
 static void gr_collection(const gchar *text, GIOChannel *channel, gpointer UNUSED(data))
 {
 	GString *contents = g_string_new(NULL);
@@ -1536,6 +1541,7 @@ static RemoteCommandEntry remote_commands[] = {
 	{ NULL, "--raise",              gr_raise,               FALSE, FALSE, NULL, N_("bring the Geeqie window to the top") },
 	{ NULL, "raise",                gr_raise,               FALSE, FALSE, NULL, N_("bring the Geeqie window to the top") },
 	{ NULL, "--selection-add:",     gr_selection_add,       TRUE,  FALSE, N_("[<FILE>]"), N_("adds the current file (or the specified file) to the current selection") },
+	{ NULL, "--selection-clear",    gr_selection_clear,     FALSE, FALSE, NULL, N_("clears the current selection") },
 	{ "-s", "--slideshow",          gr_slideshow_toggle,    FALSE, TRUE,  NULL, N_("toggle slide show") },
 	{ NULL, "--slideshow-recurse:", gr_slideshow_start_rec, TRUE,  FALSE, N_("<FOLDER>"), N_("start recursive slide show in FOLDER") },
 	{ "-ss","--slideshow-start",    gr_slideshow_start,     FALSE, FALSE, NULL, N_("start slide show") },
