@@ -922,6 +922,33 @@ static void get_filelist(const gchar *text, GIOChannel *channel, gboolean recurs
 	file_data_unref(dir_fd);
 }
 
+static void gr_get_selection(const gchar *UNUSED(text), GIOChannel *channel, gboolean UNUSED(data))
+{
+	if (!layout_valid(&lw_id)) return;
+
+    GList *selected = layout_selection_list(lw_id);  // Keep copy to free.
+    GString *out_string = g_string_new(NULL);
+
+    GList *work = selected;
+    while (work)
+        {
+        FileData *fd = work->data;
+        g_assert(fd->magick == FD_MAGICK);
+
+        g_string_append_printf(out_string, "%s    %s\n",
+                               fd->path,
+                               format_class_list[filter_file_get_class(fd->path)]);
+
+		work = work->next;
+		}
+
+	g_io_channel_write_chars(channel, out_string->str, -1, NULL, NULL);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+
+    filelist_free(selected);
+	g_string_free(out_string, TRUE);
+}
+
 static void gr_collection(const gchar *text, GIOChannel *channel, gpointer UNUSED(data))
 {
 	GString *contents = g_string_new(NULL);
@@ -1430,6 +1457,7 @@ static RemoteCommandEntry remote_commands[] = {
 	{ NULL, "--get-filelist-recurse:", gr_filelist_recurse, TRUE,  FALSE, N_("[<FOLDER>]"), N_("get list of files and class recursive") },
 	{ NULL, "--get-rectangle",      gr_rectangle,           FALSE, FALSE, NULL, N_("get rectangle co-ordinates") },
 	{ NULL, "--get-render-intent",  gr_render_intent,       FALSE, FALSE, NULL, N_("get render intent") },
+	{ NULL, "--get-selection",      gr_get_selection,       FALSE, FALSE, NULL, N_("get list of selected files") },
 	{ NULL, "--get-sidecars:",      gr_get_sidecars,        TRUE,  FALSE, N_("<FILE>"), N_("get list of sidecars of FILE") },
 	{ NULL, "--id:",                gr_lw_id,               TRUE, FALSE, N_("<ID>"), N_("window id for following commands") },
 	{ NULL, "--last",               gr_image_last,          FALSE, FALSE, NULL, N_("last image") },
