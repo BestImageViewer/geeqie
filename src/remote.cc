@@ -949,6 +949,67 @@ static void gr_get_selection(const gchar *UNUSED(text), GIOChannel *channel, gbo
 	g_string_free(out_string, TRUE);
 }
 
+static void gr_selection_add(const gchar *text, GIOChannel *UNUSED(channel), gpointer UNUSED(data))
+{
+	if (!layout_valid(&lw_id)) return;
+
+	FileData *fd_to_select = NULL;
+	if (strcmp(text, "") == 0)
+		{
+		// No file specified, use current fd.
+		fd_to_select = layout_image_get_fd(lw_id);
+		}
+	else
+		{
+		// Search through the current file list for a file matching the specified path.
+		// "Match" is either a basename match or a file path match.
+		gchar *path = expand_tilde(text);
+		gchar *filename = g_path_get_basename(path);
+		gchar *slash_plus_filename = g_strdup_printf("%s%s", G_DIR_SEPARATOR_S, filename);
+
+		GList *file_list = layout_list(lw_id);
+		for (GList *work = file_list; work && !fd_to_select; work = work->next)
+			{
+			FileData *fd = work->data;
+			if (!strcmp(path, fd->path) || g_str_has_suffix(fd->path, slash_plus_filename))
+				{
+				fd_to_select = file_data_ref(fd);
+				continue;  // will exit loop.
+				}
+
+			for (GList *sidecar = fd->sidecar_files; sidecar && !fd_to_select; sidecar = sidecar->next)
+				{
+				FileData *side_fd = sidecar->data;
+				if (!strcmp(path, side_fd->path)
+	                            || g_str_has_suffix(side_fd->path, slash_plus_filename))
+					{
+					fd_to_select = file_data_ref(side_fd);
+					continue;  // will exit both nested loops.
+					}
+				}
+			}
+
+		if (!fd_to_select)
+			{
+			log_printf("remote sent --selection-add filename that could not be found: \"%s\"\n",
+				   filename);
+			}
+
+		filelist_free(file_list);
+		g_free(slash_plus_filename);
+		g_free(filename);
+		g_free(path);
+		}
+
+	if (fd_to_select)
+		{
+		GList *to_select = g_list_append(NULL, fd_to_select);
+		// Using the "_list" variant doesn't clear the existing selection.
+		layout_select_list(lw_id, to_select);
+		filelist_free(to_select);
+		}
+}
+
 static void gr_collection(const gchar *text, GIOChannel *channel, gpointer UNUSED(data))
 {
 	GString *contents = g_string_new(NULL);
@@ -1474,6 +1535,7 @@ static RemoteCommandEntry remote_commands[] = {
 	{ "-q", "--quit",               gr_quit,                FALSE, FALSE, NULL, N_("quit") },
 	{ NULL, "--raise",              gr_raise,               FALSE, FALSE, NULL, N_("bring the Geeqie window to the top") },
 	{ NULL, "raise",                gr_raise,               FALSE, FALSE, NULL, N_("bring the Geeqie window to the top") },
+	{ NULL, "--selection-add:",     gr_selection_add,       TRUE,  FALSE, N_("[<FILE>]"), N_("adds the current file (or the specified file) to the current selection") },
 	{ "-s", "--slideshow",          gr_slideshow_toggle,    FALSE, TRUE,  NULL, N_("toggle slide show") },
 	{ NULL, "--slideshow-recurse:", gr_slideshow_start_rec, TRUE,  FALSE, N_("<FOLDER>"), N_("start recursive slide show in FOLDER") },
 	{ "-ss","--slideshow-start",    gr_slideshow_start,     FALSE, FALSE, NULL, N_("start slide show") },
