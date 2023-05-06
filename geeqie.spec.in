@@ -1,6 +1,6 @@
 # norootforbuild
 
-BuildRequires:  libgtk-3-dev gcc-c++ intltool gnome-doc-utils libjpeg-devel libtiff-devel
+BuildRequires:  libgtk-3-dev gcc-c++ gnome-doc-utils libjpeg-devel libtiff-devel
 %if 0%{?suse_version}
 BuildRequires:  liblcms-devel update-desktop-files
 %define docname	%{name}

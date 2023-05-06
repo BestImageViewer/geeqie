@@ -29,7 +29,6 @@ Command line options are:
 essential_array="git
 build-essential
 libglib2.0-0
-intltool
 libtool
 meson
 yelp-tools

@@ -34,9 +34,6 @@ Makefile.in
 /depcomp
 /auxdir
 /stamp-h1
-/intltool-extract.in
-/intltool-update.in
-/intltool-merge.in
 
 # /po/
 /po/Makefile.in.in
@@ -47,7 +44,6 @@ Makefile.in
 /po/geeqie.pot
 /po/*.mo
 /po/stamp-it
-/po/.intltool-merge-cache
 
 # /src/
 /src/.deps
