@@ -308,7 +308,7 @@ static gboolean pan_view_list_contains_kw_pattern(GList *haystack, PanViewFilter
 			{
 			gchar *keyword = static_cast<gchar *>(work->data);
 			work = work->next;
-			if (g_regex_match(filter->kw_regex, keyword, G_REGEX_MATCH_DEFAULT, NULL))
+			if (g_regex_match(filter->kw_regex, keyword, GRegexMatchFlags(0), NULL))
 				{
 				if (found_kw) *found_kw = keyword;
 				return TRUE;

@@ -1895,7 +1895,7 @@ GList *file_data_filter_marks_list(GList *list, guint filter)
 
 gboolean file_data_filter_file_filter(FileData *fd, GRegex *filter)
 {
-	return g_regex_match(filter, fd->name, G_REGEX_MATCH_DEFAULT, NULL);
+	return g_regex_match(filter, fd->name, (GRegexMatchFlags)0, NULL);
 }
 
 GList *file_data_filter_file_filter_list(GList *list, GRegex *filter)

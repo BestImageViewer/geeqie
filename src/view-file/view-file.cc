@@ -1639,26 +1639,26 @@ GRegex *vf_file_filter_get_filter(ViewFile *vf)
 
 	if (!gtk_widget_get_visible(vf->file_filter.combo))
 		{
-		return g_regex_new("", G_REGEX_DEFAULT, G_REGEX_MATCH_DEFAULT, NULL);
+		return g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), NULL);
 		}
 
 	file_filter_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
 
 	if (file_filter_text[0] != '\0')
 		{
-		ret = g_regex_new(file_filter_text, vf->file_filter.case_sensitive ? G_REGEX_DEFAULT : G_REGEX_CASELESS, G_REGEX_MATCH_DEFAULT, &error);
+		ret = g_regex_new(file_filter_text, vf->file_filter.case_sensitive ? GRegexCompileFlags(0) : G_REGEX_CASELESS, GRegexMatchFlags(0), &error);
 		if (error)
 			{
 			log_printf("Error: could not compile regular expression %s\n%s\n", file_filter_text, error->message);
 			g_error_free(error);
 			error = NULL;
-			ret = g_regex_new("", G_REGEX_DEFAULT, G_REGEX_MATCH_DEFAULT, NULL);
+			ret = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), NULL);
 			}
 		g_free(file_filter_text);
 		}
 	else
 		{
-		ret = g_regex_new("", G_REGEX_DEFAULT, G_REGEX_MATCH_DEFAULT, NULL);
+		ret = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), NULL);
 		}
 
 	return ret;

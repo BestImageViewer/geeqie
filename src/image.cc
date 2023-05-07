@@ -877,7 +877,7 @@ static void image_load_done_cb(ImageLoader *UNUSED(il), gpointer data)
 
 	if (options->image.enable_read_ahead && imd->image_fd && !imd->image_fd->pixbuf && image_loader_get_pixbuf(imd->il))
 		{
-		imd->image_fd->pixbuf = g_object_ref(image_loader_get_pixbuf(imd->il));
+		imd->image_fd->pixbuf = (GdkPixbuf*)g_object_ref(image_loader_get_pixbuf(imd->il));
 		image_cache_set(imd, imd->image_fd);
 		}
 	/* call the callback triggered by image_state after fd->pixbuf is set */

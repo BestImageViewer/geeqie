@@ -174,7 +174,7 @@ GType pixbuf_renderer_get_type(void)
 			};
 
 		pixbuf_renderer_type = g_type_register_static(GTK_TYPE_EVENT_BOX, "PixbufRenderer",
-							      &pixbuf_renderer_info, G_TYPE_FLAG_NONE);
+							      &pixbuf_renderer_info, GTypeFlags(0));
 		}
 
 	return pixbuf_renderer_type;
