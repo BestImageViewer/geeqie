@@ -387,7 +387,7 @@ gboolean format_nikon_makernote(ExifData *exif, guchar *tiff, guint offset,
 		{
 		static ExifMarker marker = { 0x0088, EXIF_FORMAT_STRING, -1,
 					     "Nikon.AutoFocusPoint", "Auto focus point", NULL };
-		guchar *array = item->data;
+		guchar *array = (guchar*)item->data;
 		gchar *text;
 		gint l;
 

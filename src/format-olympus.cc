@@ -321,7 +321,7 @@ gboolean format_olympus_makernote(ExifData *exif, guchar *tiff, guint offset,
 		{
 		static ExifMarker marker = { 0x0200, EXIF_FORMAT_STRING, -1,
 					     "Olympus.ShootingMode", "Shooting mode", NULL };
-		guint32 *array = item->data;
+		guint32 *array = (guint32 *)item->data;
 		gchar *mode;
 		gchar *pdir = NULL;
 		gchar *text;
@@ -352,7 +352,7 @@ gboolean format_olympus_makernote(ExifData *exif, guchar *tiff, guint offset,
 		{
 		static ExifMarker marker = { 0x1015, EXIF_FORMAT_STRING, -1,
 					     "Olympus.WhiteBalance", "White balance", NULL };
-		guint16 *array = item->data;
+		guint16 *array = (guint16 *)item->data;
 		gchar *mode;
 		gchar *color = NULL;
 		gchar *text;

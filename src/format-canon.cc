@@ -516,13 +516,13 @@ gboolean format_canon_makernote(ExifData *exif, guchar *tiff, guint offset,
 	item = exif_get_item(exif, "MkN.Canon.Settings1");
 	if (item)
 		{
-		canon_mknote_parse_settings(exif, item->data, item->data_len, bo, CanonSet1);
+		canon_mknote_parse_settings(exif, (guint16*)item->data, item->data_len, bo, CanonSet1);
 		}
 
 	item = exif_get_item(exif, "MkN.Canon.Settings2");
 	if (item)
 		{
-		canon_mknote_parse_settings(exif, item->data, item->data_len, bo, CanonSet2);
+		canon_mknote_parse_settings(exif, (guint16*)item->data, item->data_len, bo, CanonSet2);
 		}
 
 	return TRUE;

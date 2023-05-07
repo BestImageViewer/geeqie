@@ -66,7 +66,7 @@ static FormatRawEntry format_raw_list[] = {
 	FORMAT_RAW_OLYMPUS,
 	FORMAT_RAW_PENTAX,
 	FORMAT_RAW_SAMSUNG,
-	{ NULL, 0, 0, NULL, 0, 0, NULL, NULL, NULL }
+	{ NULL, (FormatRawMatchType)0, 0, NULL, 0, (FormatRawExifType)0, NULL, NULL, NULL }
 };
 
 
@@ -84,7 +84,7 @@ static FormatExifEntry format_exif_list[] = {
 	FORMAT_EXIF_FUJI,
 	FORMAT_EXIF_NIKON,
 	FORMAT_EXIF_OLYMPUS,
-	{ 0, NULL, 0, NULL, NULL }
+	{ (FormatExifMatchType)0, NULL, 0, NULL, NULL }
 };
 
 
@@ -283,11 +283,11 @@ FormatRawExifType format_raw_exif_offset(guchar *data, const guint len, guint *e
 {
 	FormatRawEntry *entry;
 
-	if (!data || len < 1) return FALSE;
+	if (!data || len < 1) return (FormatRawExifType)FALSE;
 
 	entry = format_raw_find(data, len);
 
-	if (!entry || !entry->func_parse) return FALSE;
+	if (!entry || !entry->func_parse) return (FormatRawExifType)FALSE;
 
 	if (!format_raw_parse(entry, data, len, NULL, exif_offset)) return FORMAT_RAW_EXIF_NONE;
 
@@ -360,7 +360,7 @@ gboolean format_raw_img_exif_offsets_fd(gint fd, const gchar *path,
 		return FALSE;
 		}
 
-	success = format_raw_parse(entry, map_data, map_len, image_offset, exif_offset);
+	success = format_raw_parse(entry, (guchar*)map_data, map_len, image_offset, exif_offset);
 
 	if (munmap(map_data, map_len) == -1)
 		{

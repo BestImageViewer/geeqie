@@ -91,7 +91,7 @@ ExifFormatAttrib ExifFormatList[] = {
 	{ EXIF_FORMAT_RATIONAL,		8, "srational",	"signed rational" },
 	{ EXIF_FORMAT_FLOAT,		4, "float",	"float" },
 	{ EXIF_FORMAT_DOUBLE,		8, "double",	"double" },
-	{ -1, 0, NULL, NULL }
+	{ (ExifFormatType)-1, 0, NULL, NULL }
 };
 
 /* tags that are special, or need special treatment */
@@ -584,7 +584,7 @@ gchar *exif_item_get_data(ExifItem *item, guint *data_len)
 {
 	if (data_len)
 		*data_len = item->data_len;
-	return g_memdup(item->data, item->data_len);
+	return (gchar*)g_memdup2((gpointer)(item->data), item->data_len);
 }
 
 guint exif_item_get_format_id(ExifItem *item)
@@ -746,7 +746,7 @@ static const ExifMarker *exif_marker_from_tag(guint16 tag, const ExifMarker *lis
 
 static void rational_from_data(ExifRational *r, gpointer src, ExifByteOrder bo)
 {
-	r->num = exif_byte_get_int32(src, bo);
+	r->num = exif_byte_get_int32((guchar *)src, bo);
 	r->den = exif_byte_get_int32((guchar *)src + sizeof(guint32), bo);
 }
 
@@ -932,7 +932,7 @@ static gint exif_parse_IFD_entry(ExifData *exif, guchar *tiff, guint offset,
 		}
 
 	item = exif_item_new(marker->format, tag, count, marker);
-	exif_item_copy_data(item, tiff + data_offset, data_length, format, bo);
+	exif_item_copy_data(item, tiff + data_offset, data_length, (ExifFormatType)format, bo);
 	exif->items = g_list_prepend(exif->items, item);
 
 	if (list == ExifKnownMarkersList)
@@ -1245,7 +1245,7 @@ ExifData *exif_read(gchar *path, gchar *UNUSED(sidecar_path), GHashTable *UNUSED
 		FormatRawExifParseFunc exif_parse_func;
 		guint32 offset = 0;
 
-		exif_type = format_raw_exif_offset(f, size, &offset, &exif_parse_func);
+		exif_type = format_raw_exif_offset((guchar*)f, size, &offset, &exif_parse_func);
 		switch (exif_type)
 			{
 			case FORMAT_RAW_EXIF_NONE:
@@ -1299,7 +1299,7 @@ ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 		{
 		ExifItem *item;
 
-		item = work->data;
+		item = (ExifItem*)(work->data);
 		work = work->next;
 		if (item->marker->key && strcmp(key, item->marker->key) == 0) return item;
 		}
@@ -1571,7 +1571,7 @@ void exif_write_data_list(ExifData *exif, FILE *f, gint human_readable_list)
 			{
 			ExifItem *item;
 
-			item = work->data;
+			item = (ExifItem*)(work->data);
 			work = work->next;
 
 			exif_write_item(f, item);
