@@ -697,6 +697,7 @@ FileData *file_data_ref(FileData *fd)
  */
 void file_data_dump()
 {
+#ifdef DEBUG_FILEDATA
 	FileData *fd;
 	GList *list;
 
@@ -716,6 +717,7 @@ void file_data_dump()
 
 		g_list_free(list);
 		}
+#endif
 }
 
 static void file_data_free(FileData *fd)
