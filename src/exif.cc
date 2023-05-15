@@ -584,7 +584,11 @@ gchar *exif_item_get_data(ExifItem *item, guint *data_len)
 {
 	if (data_len)
 		*data_len = item->data_len;
+#if GLIB_CHECK_VERSION(2,68,0)
 	return (gchar*)g_memdup2((gpointer)(item->data), item->data_len);
+#else
+	return (gchar*)g_memdup((gpointer)(item->data), item->data_len);
+#endif
 }
 
 guint exif_item_get_format_id(ExifItem *item)
