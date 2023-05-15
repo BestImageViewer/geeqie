@@ -267,7 +267,11 @@ public:
 		if (cp_data_)
 		{
 			if (data_len) *data_len = cp_length_;
+#if GLIB_CHECK_VERSION(2,68,0)
+			return (unsigned char *) g_memdup2(cp_data_, cp_length_);
+#else
 			return (unsigned char *) g_memdup(cp_data_, cp_length_);
+#endif
 		}
 		return NULL;
 	}
