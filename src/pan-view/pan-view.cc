@@ -1674,8 +1674,6 @@ static void pan_window_image_scroll_notify_cb(PixbufRenderer *pr, gpointer data)
 	gtk_adjustment_set_value(adj, static_cast<gdouble>(rect.x));
 
 	pref_signal_block_data(pw->scrollbar_h, pw);
-	gtk_adjustment_changed(adj);
-	gtk_adjustment_value_changed(adj);
 	pref_signal_unblock_data(pw->scrollbar_h, pw);
 
 	adj = gtk_range_get_adjustment(GTK_RANGE(pw->scrollbar_v));
@@ -1687,8 +1685,6 @@ static void pan_window_image_scroll_notify_cb(PixbufRenderer *pr, gpointer data)
 	gtk_adjustment_set_value(adj, static_cast<gdouble>(rect.y));
 
 	pref_signal_block_data(pw->scrollbar_v, pw);
-	gtk_adjustment_changed(adj);
-	gtk_adjustment_value_changed(adj);
 	pref_signal_unblock_data(pw->scrollbar_v, pw);
 }
 
