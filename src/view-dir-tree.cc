@@ -49,10 +49,13 @@ static void vdtree_row_expanded(GtkTreeView *treeview, GtkTreeIter *iter, GtkTre
 static void set_cursor(GtkWidget *widget, GdkCursorType cursor_type)
 {
 	GdkCursor *cursor = nullptr;
+	GdkDisplay *display;
 
 	if (!widget || !gtk_widget_get_window(widget)) return;
 
-	if (cursor_type > -1) cursor = gdk_cursor_new(cursor_type);
+	display = gdk_display_get_default();
+
+	if (cursor_type > -1) cursor = gdk_cursor_new_for_display(display, cursor_type);
 	gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
 	if (cursor) g_object_unref(G_OBJECT(cursor));
 	gdk_flush();

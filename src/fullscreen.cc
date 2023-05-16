@@ -45,13 +45,17 @@ enum {
 static void clear_mouse_cursor(GtkWidget *widget, gint state)
 {
 	GdkWindow *window = gtk_widget_get_window(widget);
+	GdkDisplay *display;
+
 	if (!window) return;
+
+	display = gdk_display_get_default();
 
 	if (state & FULLSCREEN_CURSOR_BUSY)
 		{
 		GdkCursor *cursor;
 
-		cursor = gdk_cursor_new(GDK_WATCH);
+		cursor = gdk_cursor_new_for_display(display, GDK_WATCH);
 		gdk_window_set_cursor(window, cursor);
 		g_object_unref(G_OBJECT(cursor));
 		}
@@ -63,7 +67,7 @@ static void clear_mouse_cursor(GtkWidget *widget, gint state)
 		{
 		GdkCursor *cursor;
 
-		cursor = gdk_cursor_new(GDK_BLANK_CURSOR);
+		cursor = gdk_cursor_new_for_display(display, GDK_BLANK_CURSOR);
 		gdk_window_set_cursor(window, cursor);
 		g_object_unref(G_OBJECT(cursor));
 		}

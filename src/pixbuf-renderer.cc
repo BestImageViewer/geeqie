@@ -620,8 +620,11 @@ static void pixbuf_renderer_get_property(GObject *object, guint prop_id,
 static void widget_set_cursor(GtkWidget *widget, gint icon)
 {
 	GdkCursor *cursor;
+	GdkDisplay *display;
 
 	if (!gtk_widget_get_window(widget)) return;
+
+	display = gdk_display_get_default();
 
 	if (icon == -1)
 		{
@@ -629,7 +632,7 @@ static void widget_set_cursor(GtkWidget *widget, gint icon)
 		}
 	else
 		{
-		cursor = gdk_cursor_new(static_cast<GdkCursorType>(icon));
+		cursor = gdk_cursor_new_for_display(display, static_cast<GdkCursorType>(icon));
 		}
 
 	gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
