@@ -978,17 +978,17 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 
 	menu_item_add_sensitive(menu, _("_View"), over_icon,
 			G_CALLBACK(collection_table_popup_view_cb), ct);
-	menu_item_add_stock_sensitive(menu, _("View in _new window"), GTK_STOCK_NEW, over_icon,
+	menu_item_add_icon_sensitive(menu, _("View in _new window"), "document-new", over_icon,
 			G_CALLBACK(collection_table_popup_view_new_cb), ct);
-	menu_item_add_stock(menu, _("Go to original"), GTK_STOCK_FIND,
+	menu_item_add_icon(menu, _("Go to original"), "edit-find",
 			G_CALLBACK(collection_table_popup_goto_original_cb), ct);
 	menu_item_add_divider(menu);
-	menu_item_add_stock_sensitive(menu, _("Rem_ove"), GTK_STOCK_REMOVE, over_icon,
+	menu_item_add_icon_sensitive(menu, _("Rem_ove"), "list-remove", over_icon,
 			G_CALLBACK(collection_table_popup_remove_cb), ct);
 
-	menu_item_add_stock(menu, _("Append from file selection"), GTK_STOCK_ADD,
+	menu_item_add_icon(menu, _("Append from file selection"), "list-add",
 			G_CALLBACK(collection_table_popup_add_file_selection_cb), ct);
-	menu_item_add_stock(menu, _("Append from collection..."), GTK_STOCK_OPEN,
+	menu_item_add_icon(menu, _("Append from collection..."), "document-open",
 			G_CALLBACK(collection_table_popup_add_collection_cb), ct);
 	menu_item_add_divider(menu);
 
@@ -1012,7 +1012,7 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 	gtk_widget_set_sensitive(item, over_icon);
 
 	menu_item_add_divider(menu);
-	menu_item_add_stock_sensitive(menu, _("_Copy..."), GTK_STOCK_COPY, over_icon,
+	menu_item_add_icon_sensitive(menu, _("_Copy..."), "edit-copy", over_icon,
 			G_CALLBACK(collection_table_popup_copy_cb), ct);
 	menu_item_add_sensitive(menu, _("_Move..."), over_icon,
 			G_CALLBACK(collection_table_popup_move_cb), ct);
@@ -1024,13 +1024,13 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 				G_CALLBACK(collection_table_popup_copy_path_unquoted_cb), ct);
 
 	menu_item_add_divider(menu);
-	menu_item_add_stock_sensitive(menu,
+	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_move_to_trash ? _("Move to Trash...") :
-					_("Move to Trash"), PIXBUF_INLINE_ICON_TRASH, over_icon,
+					_("Move to Trash"), "edit-delete", over_icon,
 				G_CALLBACK(collection_table_popup_move_to_trash_cb), ct);
-	menu_item_add_stock_sensitive(menu,
+	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), GTK_STOCK_DELETE, over_icon,
+					_("_Delete"), "edit-delete-shred", over_icon,
 				G_CALLBACK(collection_table_popup_delete_cb), ct);
 
 	menu_item_add_divider(menu);
@@ -1046,14 +1046,14 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 	menu_item_add_check(menu, _("Show star rating"), ct->show_stars,
 				G_CALLBACK(collection_table_popup_show_stars_cb), ct);
 	menu_item_add_divider(menu);
-	menu_item_add_stock(menu, _("_Save collection"), GTK_STOCK_SAVE,
+	menu_item_add_icon(menu, _("_Save collection"), "document-save",
 			G_CALLBACK(collection_table_popup_save_cb), ct);
-	menu_item_add_stock(menu, _("Save collection _as..."), GTK_STOCK_SAVE_AS,
+	menu_item_add_icon(menu, _("Save collection _as..."), "document-save-as",
 			G_CALLBACK(collection_table_popup_save_as_cb), ct);
 	menu_item_add_divider(menu);
-	menu_item_add_stock(menu, _("_Find duplicates..."), GTK_STOCK_FIND,
+	menu_item_add_icon(menu, _("_Find duplicates..."), "edit-find",
 			G_CALLBACK(collection_table_popup_find_dupes_cb), ct);
-	menu_item_add_stock_sensitive(menu, _("Print..."), GTK_STOCK_PRINT, over_icon,
+	menu_item_add_icon_sensitive(menu, _("Print..."), "document-print", over_icon,
 			G_CALLBACK(collection_table_popup_print_cb), ct);
 
 	return menu;
@@ -2230,14 +2230,14 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
 
 	menu_item_add_stock(menu, _("Dropped list includes folders."), GTK_STOCK_DND_MULTIPLE, nullptr, nullptr);
 	menu_item_add_divider(menu);
-	menu_item_add_stock(menu, _("_Add contents"), GTK_STOCK_OK,
+	menu_item_add_icon(menu, _("_Add contents"), "dialog-ok",
 			    G_CALLBACK(confirm_dir_list_add), ct);
-	menu_item_add_stock(menu, _("Add contents _recursive"), GTK_STOCK_ADD,
+	menu_item_add_icon(menu, _("Add contents _recursive"), "list-add",
 			    G_CALLBACK(confirm_dir_list_recurse), ct);
-	menu_item_add_stock(menu, _("_Skip folders"), GTK_STOCK_REMOVE,
+	menu_item_add_icon(menu, _("_Skip folders"), "list-remove",
 			    G_CALLBACK(confirm_dir_list_skip), ct);
 	menu_item_add_divider(menu);
-	menu_item_add_stock(menu, _("Cancel"), GTK_STOCK_CANCEL, nullptr, ct);
+	menu_item_add_icon(menu, _("Cancel"), "dialog-cancel", nullptr, ct);
 
 	return menu;
 }

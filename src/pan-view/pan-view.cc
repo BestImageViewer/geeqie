@@ -2318,15 +2318,15 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 	g_object_set_data(G_OBJECT(menu), "window_keys", pan_view_window_keys);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
-	menu_item_add_stock_sensitive(menu, _("_Play"), GTK_STOCK_MEDIA_PLAY, video,
+	menu_item_add_icon_sensitive(menu, _("_Play"), "media-playback-start", video,
 			    G_CALLBACK(pan_play_cb), pw);
 	menu_item_add_divider(menu);
 
-	menu_item_add_stock(menu, _("Zoom _in"), GTK_STOCK_ZOOM_IN,
+	menu_item_add_icon(menu, _("Zoom _in"), "zoom-in",
 			    G_CALLBACK(pan_zoom_in_cb), pw);
-	menu_item_add_stock(menu, _("Zoom _out"), GTK_STOCK_ZOOM_OUT,
+	menu_item_add_icon(menu, _("Zoom _out"), "zoom-out",
 			    G_CALLBACK(pan_zoom_out_cb), pw);
-	menu_item_add_stock(menu, _("Zoom _1:1"), GTK_STOCK_ZOOM_100,
+	menu_item_add_icon(menu, _("Zoom _1:1"), "zoom-original",
 			    G_CALLBACK(pan_zoom_1_1_cb), pw);
 	menu_item_add_divider(menu);
 
@@ -2337,13 +2337,13 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 	submenu_add_edit(menu, &item, G_CALLBACK(pan_edit_cb), pw, editmenu_fd_list);
 	gtk_widget_set_sensitive(item, active);
 
-	menu_item_add_stock_sensitive(menu, _("View in _new window"), GTK_STOCK_NEW, active,
+	menu_item_add_icon_sensitive(menu, _("View in _new window"), "document-new", active,
 				      G_CALLBACK(pan_new_window_cb), pw);
-	menu_item_add_stock(menu, _("Go to original"), GTK_STOCK_FIND,
+	menu_item_add_icon(menu, _("Go to original"), "edit-find",
 			G_CALLBACK(pan_go_to_original_cb), pw);
 
 	menu_item_add_divider(menu);
-	menu_item_add_stock_sensitive(menu, _("_Copy..."), GTK_STOCK_COPY, active,
+	menu_item_add_icon_sensitive(menu, _("_Copy..."), "edit-copy", active,
 				      G_CALLBACK(pan_copy_cb), pw);
 	menu_item_add_sensitive(menu, _("_Move..."), active,
 				G_CALLBACK(pan_move_cb), pw);
@@ -2355,13 +2355,13 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 				G_CALLBACK(pan_copy_path_unquoted_cb), pw);
 
 	menu_item_add_divider(menu);
-	menu_item_add_stock_sensitive(menu,
+	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_move_to_trash ? _("Move to Trash...") :
-					_("Move to Trash"), PIXBUF_INLINE_ICON_TRASH, active,
+					_("Move to Trash"), "edit-delete", active,
 						G_CALLBACK(pan_move_to_trash_cb), pw);
-	menu_item_add_stock_sensitive(menu,
+	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), GTK_STOCK_DELETE, active,
+					_("_Delete"), "edit-delete-shred", active,
 						G_CALLBACK(pan_delete_cb), pw);
 
 	menu_item_add_divider(menu);
@@ -2422,7 +2422,7 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 		}
 
 	menu_item_add_divider(menu);
-	menu_item_add_stock(menu, _("C_lose window"), GTK_STOCK_CLOSE, G_CALLBACK(pan_close_cb), pw);
+	menu_item_add_icon(menu, _("C_lose window"), "window-close", G_CALLBACK(pan_close_cb), pw);
 
 	return menu;
 }

@@ -605,7 +605,7 @@ static gboolean dest_popup_menu(Dest_Data *dd, GtkTreeView *view,
 		menu = popup_menu_short_lived();
 		menu_item_add_sensitive(menu, _("_Rename"), !normal_dir,
 			      G_CALLBACK(dest_popup_dir_rename_cb), dd);
-		menu_item_add_stock(menu, _("Add _Bookmark"), GTK_STOCK_JUMP_TO,
+		menu_item_add_icon(menu, _("Add _Bookmark"), "go-jump",
 			      G_CALLBACK(dest_popup_dir_bookmark_cb), dd);
 		}
 	else
@@ -613,9 +613,9 @@ static gboolean dest_popup_menu(Dest_Data *dd, GtkTreeView *view,
 		menu = popup_menu_short_lived();
 		menu_item_add(menu, _("_Rename"),
 				G_CALLBACK(dest_popup_file_rename_cb), dd);
-		menu_item_add_stock(menu, _("_Delete"), GTK_STOCK_DELETE,
+		menu_item_add_icon(menu, _("_Delete"), "edit-delete",
 				G_CALLBACK(dest_popup_file_delete_cb), dd);
-		menu_item_add_stock(menu, _("Add _Bookmark"), GTK_STOCK_JUMP_TO,
+		menu_item_add_icon(menu, _("Add _Bookmark"), "go-jump",
 				G_CALLBACK(dest_popup_file_bookmark_cb), dd);
 		}
 

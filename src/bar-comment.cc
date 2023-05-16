@@ -235,8 +235,8 @@ static void bar_pane_comment_populate_popup(GtkTextView *UNUSED(textview), GtkMe
 	auto pcd = static_cast<PaneCommentData *>(data);
 
 	menu_item_add_divider(GTK_WIDGET(menu));
-	menu_item_add_stock(GTK_WIDGET(menu), _("Add text to selected files"), GTK_STOCK_ADD, G_CALLBACK(bar_pane_comment_sel_add_cb), pcd);
-	menu_item_add_stock(GTK_WIDGET(menu), _("Replace existing text in selected files"), GTK_STOCK_CONVERT, G_CALLBACK(bar_pane_comment_sel_replace_cb), data);
+	menu_item_add_icon(GTK_WIDGET(menu), _("Add text to selected files"), "list-add", G_CALLBACK(bar_pane_comment_sel_add_cb), pcd);
+	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing text in selected files"), "edit-find-replace", G_CALLBACK(bar_pane_comment_sel_replace_cb), data);
 }
 
 static void bar_pane_comment_destroy(GtkWidget *UNUSED(widget), gpointer data)

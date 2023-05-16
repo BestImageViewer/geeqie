@@ -385,13 +385,13 @@ static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button,
 	bm->active_button = b;
 
 	menu = popup_menu_short_lived();
-	menu_item_add_stock_sensitive(menu, _("_Properties..."), GTK_STOCK_PROPERTIES, bm->editable,
+	menu_item_add_icon_sensitive(menu, _("_Properties..."), "document-properties", bm->editable,
 		      G_CALLBACK(bookmark_menu_prop_cb), bm);
-	menu_item_add_stock_sensitive(menu, _("Move _up"), GTK_STOCK_GO_UP, bm->editable,
+	menu_item_add_icon_sensitive(menu, _("Move _up"), "go-up", bm->editable,
 		      G_CALLBACK(bookmark_menu_up_cb), bm);
-	menu_item_add_stock_sensitive(menu, _("Move _down"), GTK_STOCK_GO_DOWN, bm->editable,
+	menu_item_add_icon_sensitive(menu, _("Move _down"), "go-down", bm->editable,
 		      G_CALLBACK(bookmark_menu_down_cb), bm);
-	menu_item_add_stock_sensitive(menu, _("_Remove"), GTK_STOCK_REMOVE, bm->editable,
+	menu_item_add_icon_sensitive(menu, _("_Remove"), "list-remove", bm->editable,
 		      G_CALLBACK(bookmark_menu_remove_cb), bm);
 
 	if (local)

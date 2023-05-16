@@ -486,7 +486,7 @@ GtkWidget *vd_drop_menu(ViewDir *vd, gint active)
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(vd_popup_destroy_cb), vd);
 
-	menu_item_add_stock_sensitive(menu, _("_Copy"), GTK_STOCK_COPY, active,
+	menu_item_add_icon_sensitive(menu, _("_Copy"), "edit-copy", active,
 				      G_CALLBACK(vd_drop_menu_copy_cb), vd);
 	menu_item_add_sensitive(menu, _("_Move"), active, G_CALLBACK(vd_drop_menu_move_cb), vd);
 
@@ -506,7 +506,7 @@ GtkWidget *vd_drop_menu(ViewDir *vd, gint active)
 	g_list_free(editors_list);
 
 	menu_item_add_divider(menu);
-	menu_item_add_stock(menu, _("Cancel"), GTK_STOCK_CANCEL, nullptr, vd);
+	menu_item_add_icon(menu, _("Cancel"), "dialog-cancel", nullptr, vd);
 
 	return menu;
 }
@@ -789,7 +789,7 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(vd_popup_destroy_cb), vd);
 
-	menu_item_add_stock_sensitive(menu, _("_Up to parent"), GTK_STOCK_GO_UP,
+	menu_item_add_icon_sensitive(menu, _("_Up to parent"), "go-up",
 				      (vd->dir_fd && strcmp(vd->dir_fd->path, G_DIR_SEPARATOR_S) != 0),
 				      G_CALLBACK(vd_pop_menu_up_cb), vd);
 
@@ -800,9 +800,9 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 				G_CALLBACK(vd_pop_menu_slide_rec_cb), vd);
 
 	menu_item_add_divider(menu);
-	menu_item_add_stock_sensitive(menu, _("Find _duplicates..."), GTK_STOCK_FIND, active,
+	menu_item_add_icon_sensitive(menu, _("Find _duplicates..."), "edit-find", active,
 				      G_CALLBACK(vd_pop_menu_dupe_cb), vd);
-	menu_item_add_stock_sensitive(menu, _("Find duplicates recursive..."), GTK_STOCK_FIND, active,
+	menu_item_add_icon_sensitive(menu, _("Find duplicates recursive..."), "edit-find", active,
 				      G_CALLBACK(vd_pop_menu_dupe_rec_cb), vd);
 
 	menu_item_add_divider(menu);
@@ -819,7 +819,7 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 	menu_item_add(menu, _("_Copy path unquoted"),
 		      G_CALLBACK(vd_pop_menu_copy_path_unquoted_cb), vd);
 
-	menu_item_add_stock_sensitive(menu, _("_Delete..."), GTK_STOCK_DELETE, rename_delete_active,
+	menu_item_add_icon_sensitive(menu, _("_Delete..."), "edit-delete", rename_delete_active,
 				      G_CALLBACK(vd_pop_menu_delete_cb), vd);
 	menu_item_add_divider(menu);
 
@@ -843,7 +843,7 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 	menu_item_add_check(menu, _("Show _hidden files"), options->file_filter.show_hidden_files,
 			    G_CALLBACK(vd_toggle_show_hidden_files_cb), vd);
 
-	menu_item_add_stock(menu, _("Re_fresh"), GTK_STOCK_REFRESH,
+	menu_item_add_icon(menu, _("Re_fresh"), "view-refresh",
 			    G_CALLBACK(vd_pop_menu_refresh_cb), vd);
 
 	return menu;

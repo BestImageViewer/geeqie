@@ -27,9 +27,13 @@ GtkWidget *menu_item_add(GtkWidget *menu, const gchar *label,
 			 GCallback func, gpointer data);
 GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar *stock_id,
 			       GCallback func, gpointer data);
+GtkWidget *menu_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *icon_name,
+			       GCallback func, gpointer data);
 GtkWidget *menu_item_add_sensitive(GtkWidget *menu, const gchar *label, gboolean sensitive,
 				   GCallback func, gpointer data);
-GtkWidget *menu_item_add_stock_sensitive(GtkWidget *menu, const gchar *label, const gchar *stock_id, gboolean sensitive,
+GtkWidget *menu_item_add_icon_sensitive(GtkWidget *menu, const gchar *label, const gchar *stock_id, gboolean sensitive,
+					 GCallback func, gpointer data);
+GtkWidget *menu_item_add_stock_sensitive(GtkWidget *menu, const gchar *label, const gchar *icon_name, gboolean sensitive,
 					 GCallback func, gpointer data);
 GtkWidget *menu_item_add_check(GtkWidget *menu, const gchar *label, gboolean active,
 			       GCallback func, gpointer data);

@@ -385,19 +385,19 @@ static void bar_menu_popup(GtkWidget *widget)
 
 	if (expander)
 		{
-		menu_item_add_stock(menu, _("Move to _top"), GTK_STOCK_GOTO_TOP, G_CALLBACK(bar_expander_move_top_cb), expander);
-		menu_item_add_stock(menu, _("Move _up"), GTK_STOCK_GO_UP, G_CALLBACK(bar_expander_move_up_cb), expander);
-		menu_item_add_stock(menu, _("Move _down"), GTK_STOCK_GO_DOWN, G_CALLBACK(bar_expander_move_down_cb), expander);
-		menu_item_add_stock(menu, _("Move to _bottom"), GTK_STOCK_GOTO_BOTTOM, G_CALLBACK(bar_expander_move_bottom_cb), expander);
+		menu_item_add_icon(menu, _("Move to _top"), "go-top", G_CALLBACK(bar_expander_move_top_cb), expander);
+		menu_item_add_icon(menu, _("Move _up"), "go-up", G_CALLBACK(bar_expander_move_up_cb), expander);
+		menu_item_add_icon(menu, _("Move _down"), "go-down", G_CALLBACK(bar_expander_move_down_cb), expander);
+		menu_item_add_icon(menu, _("Move to _bottom"), "go-bottom", G_CALLBACK(bar_expander_move_bottom_cb), expander);
 		menu_item_add_divider(menu);
 
 		if (gtk_expander_get_expanded(GTK_EXPANDER(expander)) && display_height_option)
 			{
-			menu_item_add_stock(menu, _("Height..."), GTK_STOCK_PREFERENCES, G_CALLBACK(bar_expander_height_cb), expander);
+			menu_item_add_icon(menu, _("Height..."), "preferences-system", G_CALLBACK(bar_expander_height_cb), expander);
 			menu_item_add_divider(menu);
 			}
 
-		menu_item_add_stock(menu, _("Remove"), GTK_STOCK_DELETE, G_CALLBACK(bar_expander_delete_cb), expander);
+		menu_item_add_icon(menu, _("Remove"), "edit-delete", G_CALLBACK(bar_expander_delete_cb), expander);
 		menu_item_add_divider(menu);
 		}
 
@@ -417,7 +417,7 @@ static void bar_menu_add_popup(GtkWidget *widget)
 	while (pane->id)
 		{
 		GtkWidget *item;
-		item = menu_item_add_stock(menu, _(pane->title), GTK_STOCK_ADD, G_CALLBACK(bar_expander_add_cb), bar);
+		item = menu_item_add_icon(menu, _(pane->title), "list-add", G_CALLBACK(bar_expander_add_cb), bar);
 		g_object_set_data(G_OBJECT(item), "pane_add_id", const_cast<gchar *>(pane->id));
 		pane++;
 		}

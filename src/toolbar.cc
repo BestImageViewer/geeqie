@@ -213,12 +213,12 @@ static void toolbar_menu_popup(GtkWidget *widget)
 
 	if (widget)
 		{
-		menu_item_add_stock(menu, _("Move to _top"), GTK_STOCK_GOTO_TOP, G_CALLBACK(toolbar_item_move_top_cb), widget);
-		menu_item_add_stock(menu, _("Move _up"), GTK_STOCK_GO_UP, G_CALLBACK(toolbar_item_move_up_cb), widget);
-		menu_item_add_stock(menu, _("Move _down"), GTK_STOCK_GO_DOWN, G_CALLBACK(toolbar_item_move_down_cb), widget);
-		menu_item_add_stock(menu, _("Move to _bottom"), GTK_STOCK_GOTO_BOTTOM, G_CALLBACK(toolbar_item_move_bottom_cb), widget);
+		menu_item_add_icon(menu, _("Move to _top"), "go-top", G_CALLBACK(toolbar_item_move_top_cb), widget);
+		menu_item_add_icon(menu, _("Move _up"), "go-up", G_CALLBACK(toolbar_item_move_up_cb), widget);
+		menu_item_add_icon(menu, _("Move _down"), "go-down", G_CALLBACK(toolbar_item_move_down_cb), widget);
+		menu_item_add_icon(menu, _("Move to _bottom"), "go-bottom", G_CALLBACK(toolbar_item_move_bottom_cb), widget);
 		menu_item_add_divider(menu);
-		menu_item_add_stock(menu, _("Remove"), GTK_STOCK_DELETE, G_CALLBACK(toolbar_item_delete_cb), widget);
+		menu_item_add_icon(menu, _("Remove"), "edit-delete", G_CALLBACK(toolbar_item_delete_cb), widget);
 		menu_item_add_divider(menu);
 		}
 
@@ -404,7 +404,7 @@ static void toolbar_menu_add_popup(GtkWidget *UNUSED(widget), gpointer data)
 		GtkWidget *item;
 		gchar *icon = g_strconcat(editor->icon, ".desktop", NULL);
 
-		item = menu_item_add_stock(menu, editor->name, icon,
+		item = menu_item_add_icon(menu, editor->name, icon,
 										G_CALLBACK(toolbarlist_add_cb), toolbarlist);
 		g_object_set_data(G_OBJECT(item), "toolbar_add_name", g_strdup(editor->key));
 		g_object_set_data(G_OBJECT(item), "toolbar_add_label", g_strdup(editor->name));

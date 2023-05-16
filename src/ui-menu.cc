@@ -227,6 +227,36 @@ GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar 
 	return item;
 }
 
+GtkWidget *menu_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *icon_name,
+			       GCallback func, gpointer data)
+{
+	GtkWidget *item;
+	GtkWidget *image;
+	GtkAccelGroup *accel_group;
+	hard_coded_window_keys *window_keys;
+
+	item = gtk_image_menu_item_new_with_mnemonic(label);
+	window_keys = static_cast<hard_coded_window_keys *>(g_object_get_data(G_OBJECT(menu), "window_keys"));
+	accel_group = static_cast<GtkAccelGroup *>(g_object_get_data(G_OBJECT(menu), "accel_group"));
+
+	image = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), image);
+
+	if (accel_group && window_keys)
+		{
+		menu_item_add_accelerator(item, accel_group, window_keys);
+		}
+	else if (accel_group)
+		{
+		menu_item_add_main_window_accelerator(item, accel_group);
+		}
+
+	gtk_widget_show(image);
+	menu_item_finish(menu, item, func, data);
+
+	return item;
+}
+
 GtkWidget *menu_item_add_sensitive(GtkWidget *menu, const gchar *label, gboolean sensitive,
 				   GCallback func, gpointer data)
 {
@@ -258,6 +288,29 @@ GtkWidget *menu_item_add_stock_sensitive(GtkWidget *menu, const gchar *label, co
 	hard_coded_window_keys *window_keys;
 
 	item = menu_item_add_stock(menu, label, stock_id, func, data);
+	gtk_widget_set_sensitive(item, sensitive);
+	window_keys = static_cast<hard_coded_window_keys *>(g_object_get_data(G_OBJECT(menu), "window_keys"));
+	accel_group = static_cast<GtkAccelGroup *>(g_object_get_data(G_OBJECT(menu), "accel_group"));
+	if (accel_group && window_keys)
+		{
+		menu_item_add_accelerator(item, accel_group, window_keys);
+		}
+	else if (accel_group)
+		{
+		menu_item_add_main_window_accelerator(item, accel_group);
+		}
+
+	return item;
+}
+
+GtkWidget *menu_item_add_icon_sensitive(GtkWidget *menu, const gchar *label, const gchar *icon_name, gboolean sensitive,
+					 GCallback func, gpointer data)
+{
+	GtkWidget *item;
+	GtkAccelGroup *accel_group;
+	hard_coded_window_keys *window_keys;
+
+	item = menu_item_add_icon(menu, label, icon_name, func, data);
 	gtk_widget_set_sensitive(item, sensitive);
 	window_keys = static_cast<hard_coded_window_keys *>(g_object_get_data(G_OBJECT(menu), "window_keys"));
 	accel_group = static_cast<GtkAccelGroup *>(g_object_get_data(G_OBJECT(menu), "accel_group"));

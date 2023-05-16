@@ -1135,13 +1135,13 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	video = (on_row && sd->click_fd && sd->click_fd->format_class == FORMAT_CLASS_VIDEO);
-	menu_item_add_stock_sensitive(menu, _("_Play"), GTK_STOCK_MEDIA_PLAY, video,
+	menu_item_add_icon_sensitive(menu, _("_Play"), "media-skip-backward" , video,
 			    G_CALLBACK(sr_menu_play_cb), sd);
 	menu_item_add_divider(menu);
 
 	menu_item_add_sensitive(menu, _("_View"), on_row,
 				G_CALLBACK(sr_menu_view_cb), sd);
-	menu_item_add_stock_sensitive(menu, _("View in _new window"), GTK_STOCK_NEW, on_row,
+	menu_item_add_icon_sensitive(menu, _("View in _new window"), "document-new", on_row,
 				      G_CALLBACK(sr_menu_viewnew_cb), sd);
 	menu_item_add_divider(menu);
 	menu_item_add_sensitive(menu, _("Select all"), !empty,
@@ -1160,10 +1160,10 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 				G_CALLBACK(search_pop_menu_collections_cb), sd);
 	gtk_widget_set_sensitive(item, on_row);
 
-	menu_item_add_stock_sensitive(menu, _("Print..."), GTK_STOCK_PRINT, on_row,
+	menu_item_add_icon_sensitive(menu, _("Print..."), "document-print", on_row,
 				      G_CALLBACK(sr_menu_print_cb), sd);
 	menu_item_add_divider(menu);
-	menu_item_add_stock_sensitive(menu, _("_Copy..."), GTK_STOCK_COPY, on_row,
+	menu_item_add_icon_sensitive(menu, _("_Copy..."), "edit-copy", on_row,
 				      G_CALLBACK(sr_menu_copy_cb), sd);
 	menu_item_add_sensitive(menu, _("_Move..."), on_row,
 				G_CALLBACK(sr_menu_move_cb), sd);
@@ -1175,13 +1175,13 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 				G_CALLBACK(sr_menu_copy_path_unquoted_cb), sd);
 
 	menu_item_add_divider(menu);
-	menu_item_add_stock_sensitive(menu,
+	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_move_to_trash ? _("Move to Trash...") :
-					_("Move to Trash"), PIXBUF_INLINE_ICON_TRASH, on_row,
+					_("Move to Trash"), "edit-delete", on_row,
 				G_CALLBACK(sr_menu_move_to_trash_cb), sd);
-	menu_item_add_stock_sensitive(menu,
+	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), GTK_STOCK_DELETE, on_row,
+					_("_Delete"), "edit-delete-shred", on_row,
 				G_CALLBACK(sr_menu_delete_cb), sd);
 
 	return menu;
