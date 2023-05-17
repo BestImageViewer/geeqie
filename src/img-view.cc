@@ -1468,11 +1468,11 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 
 	if (vw->fs)
 		{
-		menu_item_add(menu, _("Exit _full screen"), G_CALLBACK(view_fullscreen_cb), vw);
+		menu_item_add_icon(menu, _("Exit _full screen"), "view-restore", G_CALLBACK(view_fullscreen_cb), vw);
 		}
 	else
 		{
-		menu_item_add(menu, _("_Full screen"), G_CALLBACK(view_fullscreen_cb), vw);
+		menu_item_add_icon(menu, _("_Full screen"), "view-fullscreen", G_CALLBACK(view_fullscreen_cb), vw);
 		}
 
 	menu_item_add_divider(menu);

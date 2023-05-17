@@ -856,11 +856,11 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	if (!fullscreen)
 		{
-		menu_item_add(menu, _("_Full screen"), G_CALLBACK(li_pop_menu_full_screen_cb), lw);
+		menu_item_add_icon(menu, _("_Full screen"), "view-fullscreen", G_CALLBACK(li_pop_menu_full_screen_cb), lw);
 		}
 	else
 		{
-		menu_item_add(menu, _("Exit _full screen"), G_CALLBACK(li_pop_menu_full_screen_cb), lw);
+		menu_item_add_icon(menu, _("Exit _full screen"), "view-restore", G_CALLBACK(li_pop_menu_full_screen_cb), lw);
 		}
 
 	menu_item_add_check(menu, _("GIF _animation"), lw->options.animate, G_CALLBACK(li_pop_menu_animate_cb), lw);

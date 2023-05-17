@@ -2414,11 +2414,11 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 
 	if (pw->fs)
 		{
-		menu_item_add(menu, _("Exit _full screen"), G_CALLBACK(pan_fullscreen_cb), pw);
+		menu_item_add_icon(menu, _("Exit _full screen"), "view-restore", G_CALLBACK(pan_fullscreen_cb), pw);
 		}
 	else
 		{
-		menu_item_add(menu, _("_Full screen"), G_CALLBACK(pan_fullscreen_cb), pw);
+		menu_item_add_icon(menu, _("_Full screen"), "view-fullscreen", G_CALLBACK(pan_fullscreen_cb), pw);
 		}
 
 	menu_item_add_divider(menu);
