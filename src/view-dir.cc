@@ -1103,7 +1103,7 @@ static gboolean vd_dnd_drop_motion(GtkWidget *UNUSED(widget), GdkDragContext *co
 
 	if (vd->drop_fd)
 		{
-		GtkAdjustment *adj = gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(vd->view));
+		GtkAdjustment *adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(vd->view));
 		widget_auto_scroll_start(vd->view, adj, -1, -1, vd_auto_scroll_notify_cb, vd);
 		}
 

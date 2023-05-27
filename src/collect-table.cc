@@ -1227,7 +1227,7 @@ static gint page_height(CollectTable *ct)
 	gint row_height;
 	gint ret;
 
-	adj = gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(ct->listview));
+	adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(ct->listview));
 	page_size = static_cast<gint>(gtk_adjustment_get_page_increment(adj));
 
 	row_height = options->thumbnails.max_height + THUMB_BORDER_PADDING * 2;
@@ -1656,7 +1656,7 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
 		}
 	else
 		{
-		GtkAdjustment *adj = gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(ct->listview));
+		GtkAdjustment *adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(ct->listview));
 		widget_auto_scroll_start(ct->listview, adj, -1, options->thumbnails.max_height / 2,
 					 collection_table_auto_scroll_notify_cb, ct);
 		}

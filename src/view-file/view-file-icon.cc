@@ -1162,7 +1162,7 @@ static gint page_height(ViewFile *vf)
 	gint row_height;
 	gint ret;
 
-	adj = gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(vf->listview));
+	adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(vf->listview));
 	page_size = static_cast<gint>(gtk_adjustment_get_page_increment(adj));
 
 	row_height = options->thumbnails.max_height + THUMB_BORDER_PADDING * 2;
