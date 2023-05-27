@@ -902,9 +902,9 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 				     vf_marks_tooltip_cancel_cb, mte);
 	generic_dialog_add_message(mte->gd, GTK_STOCK_DIALOG_QUESTION, _("Set mark text"),
 				   _("This will set or clear the mark text."), FALSE);
-	generic_dialog_add_button(mte->gd, GTK_STOCK_OK, nullptr,
+	generic_dialog_add_button(mte->gd, "dialog-ok", "OK",
 				  vf_marks_tooltip_ok_cb, TRUE);
-	generic_dialog_add_button(mte->gd, GTK_STOCK_HELP, nullptr,
+	generic_dialog_add_button(mte->gd, "help-browser", _("Help"),
 				  vf_marks_tooltip_help_cb, FALSE);
 
 	table = pref_table_new(mte->gd->vbox, 3, 1, FALSE, TRUE);

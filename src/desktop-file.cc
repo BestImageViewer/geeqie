@@ -218,7 +218,7 @@ static void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_box_pack_end(GTK_BOX(hbox), button_hbox, FALSE, FALSE, 0);
 	gtk_widget_show(button_hbox);
 
-	ew->save_button = pref_button_new(nullptr, GTK_STOCK_SAVE, nullptr, FALSE,
+	ew->save_button = pref_button_new(nullptr, "document-save", _("Save"),
 				 G_CALLBACK(editor_window_save_cb), ew);
 	gtk_container_add(GTK_CONTAINER(button_hbox), ew->save_button);
 	gtk_widget_set_can_default(ew->save_button, TRUE);
@@ -226,7 +226,7 @@ static void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_widget_show(ew->save_button);
 	ct_button = ew->save_button;
 
-	button = pref_button_new(nullptr, GTK_STOCK_CLOSE, nullptr, FALSE,
+	button = pref_button_new(nullptr, "window-close", _("Close"),
 				 G_CALLBACK(editor_window_close_cb), ew);
 	gtk_container_add(GTK_CONTAINER(button_hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
@@ -341,7 +341,7 @@ static void editor_list_window_delete_cb(GtkWidget *UNUSED(widget), gpointer dat
 					    nullptr, TRUE,
 					    editor_list_window_delete_dlg_cancel, ewdl);
 
-		generic_dialog_add_button(ewl->gd, GTK_STOCK_DELETE, nullptr, editor_list_window_delete_dlg_ok_cb, TRUE);
+		generic_dialog_add_button(ewl->gd, "edit-delete", "Delete", editor_list_window_delete_dlg_ok_cb, TRUE);
 
 		text = g_strdup_printf(_("About to delete the file:\n %s"), path);
 		generic_dialog_add_message(ewl->gd, GTK_STOCK_DIALOG_QUESTION,
@@ -559,20 +559,19 @@ static void editor_list_window_create()
 	gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
 
-
-	button = pref_button_new(nullptr, GTK_STOCK_HELP, nullptr, FALSE,
+	button = pref_button_new(nullptr, "help-browser", _("Help"),
 				 G_CALLBACK(editor_list_window_help_cb), ewl);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	button = pref_button_new(nullptr, GTK_STOCK_NEW, nullptr, FALSE,
+	button = pref_button_new(nullptr, "document-new", _("New"),
 				 G_CALLBACK(editor_list_window_new_cb), ewl);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	button = pref_button_new(nullptr, GTK_STOCK_EDIT, nullptr, FALSE,
+	button = pref_button_new(nullptr, "document-edit", _("Edit"),
 				 G_CALLBACK(editor_list_window_edit_cb), ewl);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
@@ -580,7 +579,7 @@ static void editor_list_window_create()
 	gtk_widget_show(button);
 	ewl->edit_button = button;
 
-	button = pref_button_new(nullptr, GTK_STOCK_DELETE, nullptr, FALSE,
+	button = pref_button_new(nullptr, "edit-delete", "Delete",
 				 G_CALLBACK(editor_list_window_delete_cb), ewl);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
@@ -588,7 +587,7 @@ static void editor_list_window_create()
 	gtk_widget_show(button);
 	ewl->delete_button = button;
 
-	button = pref_button_new(nullptr, GTK_STOCK_CLOSE, nullptr, FALSE,
+	button = pref_button_new(nullptr, "window-close", _("Close"),
 				 G_CALLBACK(editor_list_window_close_cb), ewl);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);

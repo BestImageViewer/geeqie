@@ -2027,7 +2027,7 @@ static gboolean pan_warning(FileData *dir_fd)
 	gd = generic_dialog_new(_("Pan View Performance"), "pan_view_warning", nullptr, FALSE,
 				nullptr, nullptr);
 	gd->data = file_data_ref(dir_fd);
-	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr,
+	generic_dialog_add_button(gd, "dialog-ok", "OK",
 				  pan_warning_ok_cb, TRUE);
 
 	box = generic_dialog_add_message(gd, GTK_STOCK_DIALOG_INFO,

@@ -229,13 +229,13 @@ gboolean generic_dialog_get_alternative_button_order(GtkWidget *widget)
 	return alternative_order;
 }
 
-GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *stock_id, const gchar *text,
+GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, const gchar *text,
 				     void (*func_cb)(GenericDialog *, gpointer), gboolean is_default)
 {
 	GtkWidget *button;
 	gboolean alternative_order;
 
-	button = pref_button_new(nullptr, stock_id, text, FALSE,
+	button = pref_button_new(nullptr, icon_name, text,
 				 G_CALLBACK(generic_dialog_click_cb), gd);
 
 	gtk_widget_set_can_default(button, TRUE);
@@ -453,7 +453,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	if (gd->cancel_cb)
 		{
-		gd->cancel_button = generic_dialog_add_button(gd, GTK_STOCK_CANCEL, nullptr, gd->cancel_cb, TRUE);
+		gd->cancel_button = generic_dialog_add_button(gd, "dialog-cancel", _("Cancel"), gd->cancel_cb, TRUE);
 		}
 	else
 		{
@@ -498,7 +498,7 @@ GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 	GenericDialog *gd;
 
 	gd = generic_dialog_new(heading, "warning", parent, TRUE, nullptr, nullptr);
-	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr, warning_dialog_ok_cb, TRUE);
+	generic_dialog_add_button(gd, "dialog-ok", "OK", warning_dialog_ok_cb, TRUE);
 
 	generic_dialog_add_message(gd, icon_stock_id, heading, text, TRUE);
 

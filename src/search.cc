@@ -3262,7 +3262,7 @@ static void select_collection_clicked_cb(GtkWidget *UNUSED(widget), gpointer dat
 	title = _("Select collection");
 	btntext = nullptr;
 	btnfunc = reinterpret_cast<void *>(select_collection_dialog_ok_cb);
-	stock_id = GTK_STOCK_OK;
+	stock_id = "dialog-ok";
 
 	fdlg = file_util_file_dlg(title, "dlg_collection", sd->window, select_collection_dialog_close_cb, sd);
 
@@ -3703,20 +3703,20 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_box_pack_start(GTK_BOX(hbox), sd->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(sd->spinner);
 
-	sd->button_help = pref_button_new(hbox, GTK_STOCK_HELP, nullptr, FALSE, G_CALLBACK(search_window_help_cb), sd);
+	sd->button_help = pref_button_new(hbox, "help-browser", _("Help"), G_CALLBACK(search_window_help_cb), sd);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(sd->button_help), "F1");
 	gtk_widget_set_sensitive(sd->button_help, TRUE);
 	pref_spacer(hbox, PREF_PAD_BUTTON_GAP);
-	sd->button_start = pref_button_new(hbox, GTK_STOCK_FIND, nullptr, FALSE,
+	sd->button_start = pref_button_new(hbox, "edit-find", nullptr,
 					   G_CALLBACK(search_start_cb), sd);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(sd->button_start), "Ctrl-Return");
 	pref_spacer(hbox, PREF_PAD_BUTTON_GAP);
-	sd->button_stop = pref_button_new(hbox, GTK_STOCK_STOP, nullptr, FALSE,
+	sd->button_stop = pref_button_new(hbox, "process-stop", _("Stop"),
 					  G_CALLBACK(search_start_cb), sd);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(sd->button_stop), "Ctrl-Return");
 	gtk_widget_set_sensitive(sd->button_stop, FALSE);
 	pref_spacer(hbox, PREF_PAD_BUTTON_GAP);
-	sd->button_close = pref_button_new(hbox, GTK_STOCK_CLOSE, nullptr, FALSE, G_CALLBACK(search_window_close_cb), sd);
+	sd->button_close = pref_button_new(hbox, "window-close", _("Close"), G_CALLBACK(search_window_close_cb), sd);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(sd->button_close), "Ctrl-W");
 	gtk_widget_set_sensitive(sd->button_close, TRUE);
 

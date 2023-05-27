@@ -236,67 +236,23 @@ void pref_label_bold(GtkWidget *label, gboolean bold, gboolean increase_size)
 	pango_attr_list_unref(pal);
 }
 
-GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *stock_id,
-			   const gchar *text, gboolean hide_stock_text,
-			   GCallback func, gpointer data)
+GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *icon_name,
+			   const gchar *text, GCallback func, gpointer data)
 {
 	GtkWidget *button;
 
-	if (stock_id && !text && !hide_stock_text)
+	if (icon_name)
 		{
-		button = gtk_button_new_from_stock(stock_id);
+		button = gtk_button_new_from_icon_name(icon_name, GTK_ICON_SIZE_BUTTON);
 		}
 	else
 		{
-		GtkWidget *image = nullptr;
-		GtkWidget *label = nullptr;
-
 		button = gtk_button_new();
+		}
 
-		if (stock_id)
-			{
-			image = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
-			}
-
-		if (text)
-			{
-			label = gtk_label_new_with_mnemonic(text);
-			gtk_label_set_xalign(GTK_LABEL(label), 0.5);
-			gtk_label_set_yalign(GTK_LABEL(label), 0.5);
-			gtk_label_set_mnemonic_widget(GTK_LABEL(label), button);
-			}
-
-		if (image && label)
-			{
-			GtkWidget *align;
-			GtkWidget *hbox;
-
-			hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_ICON_GAP);
-
-			align = gtk_alignment_new(0.5, 0.5, 0.0, 0.0);
-			gtk_container_add(GTK_CONTAINER(button), align);
-			gtk_widget_show(align);
-
-			gtk_container_add(GTK_CONTAINER(align), hbox);
-			gtk_widget_show(hbox);
-
-			gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
-			gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 0);
-			}
-		else
-			{
-			if (image)
-				{
-				gtk_container_add(GTK_CONTAINER(button), image);
-				}
-			else if (label)
-				{
-				gtk_container_add(GTK_CONTAINER(button), label);
-				}
-			}
-
-		if (image) gtk_widget_show(image);
-		if (label) gtk_widget_show(label);
+	if (text)
+		{
+		gtk_button_set_label(GTK_BUTTON(button), text);
 		}
 
 	if (func) g_signal_connect(G_OBJECT(button), "clicked", func, data);
@@ -655,12 +611,12 @@ GtkWidget *pref_table_label(GtkWidget *table, gint column, gint row,
 }
 
 GtkWidget *pref_table_button(GtkWidget *table, gint column, gint row,
-			     const gchar *stock_id, const gchar *text, gboolean hide_stock_text,
+			     const gchar *stock_id, const gchar *text,
 			     GCallback func, gpointer data)
 {
 	GtkWidget *button;
 
-	button = pref_button_new(nullptr, stock_id, text, hide_stock_text, func, data);
+	button = pref_button_new(nullptr, stock_id, text, func, data);
 	gtk_table_attach(GTK_TABLE(table), button, column, column + 1, row, row + 1,
 			 GTK_FILL, static_cast<GtkAttachOptions>(0), 0, 0);
 	gtk_widget_show(button);

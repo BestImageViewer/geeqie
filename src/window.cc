@@ -371,7 +371,7 @@ void help_search_window_show()
 				help_search_window_cancel_cb, hsd);
 	generic_dialog_add_message(gd, nullptr, _("Search the on-line help files.\n"), nullptr, FALSE);
 
-	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr,
+	generic_dialog_add_button(gd, "dialog-ok", "OK",
 				  help_search_window_ok_cb, TRUE);
 
 	label1 = pref_label_new(GENERIC_DIALOG(gd)->vbox, _("Search engine:"));

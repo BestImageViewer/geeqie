@@ -588,11 +588,10 @@ static EditorVerboseData *editor_verbose_window(EditorData *ed, const gchar *tex
 	buf = g_strdup_printf(_("Output of %s"), text);
 	generic_dialog_add_message(vd->gd, nullptr, buf, nullptr, FALSE);
 	g_free(buf);
-
 	vd->button_stop = generic_dialog_add_button(vd->gd, "process-stop", nullptr,
 						   editor_verbose_window_stop, FALSE);
 	gtk_widget_set_sensitive(vd->button_stop, FALSE);
-	vd->button_close = generic_dialog_add_button(vd->gd, GTK_STOCK_CLOSE, nullptr,
+	vd->button_close = generic_dialog_add_button(vd->gd, "window-close", _("Close"),
 						    editor_verbose_window_close, TRUE);
 	gtk_widget_set_sensitive(vd->button_close, FALSE);
 

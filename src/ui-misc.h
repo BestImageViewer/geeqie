@@ -110,9 +110,8 @@ GtkWidget *pref_label_new(GtkWidget *parent_box, const gchar *text);
 GtkWidget *pref_label_new_mnemonic(GtkWidget *parent_box, const gchar *text, GtkWidget *widget);
 void pref_label_bold(GtkWidget *label, gboolean bold, gboolean increase_size);
 
-GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *stock_id,
-			   const gchar *text, gboolean hide_stock_text,
-			   GCallback func, gpointer data);
+GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *icon_name,
+			   const gchar *text, GCallback func, gpointer data);
 
 GtkWidget *pref_checkbox_new(GtkWidget *parent_box, const gchar *text, gboolean active,
 			     GCallback func, gpointer data);
@@ -166,7 +165,7 @@ GtkWidget *pref_table_label(GtkWidget *table, gint column, gint row,
 			    const gchar *text, gfloat alignment);
 
 GtkWidget *pref_table_button(GtkWidget *table, gint column, gint row,
-			     const gchar *stock_id, const gchar *text, gboolean hide_stock_text,
+			     const gchar *stock_id, const gchar *text,
 			     GCallback func, gpointer data);
 
 GtkWidget *pref_table_spin(GtkWidget *table, gint column, gint row,

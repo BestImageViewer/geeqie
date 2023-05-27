@@ -956,7 +956,7 @@ static void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_e
 
 	generic_dialog_add_message(gd, nullptr, name ? _("Configure keyword") : _("New keyword"), nullptr, FALSE);
 
-	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr,
+	generic_dialog_add_button(gd, "dialog-ok", "OK",
 				  bar_pane_keywords_edit_ok_cb, TRUE);
 
 	table = pref_table_new(gd->vbox, 3, 1, FALSE, TRUE);
@@ -1054,7 +1054,7 @@ static void bar_pane_keywords_disconnect_marks_cb(GtkWidget *menu_widget, gpoint
 				"marks_keywords", menu_widget, TRUE, dummy_cancel_cb, pkd);
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_WARNING,
 				"Disconnect all Marks Keywords connections?", message->str, TRUE);
-	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr, bar_pane_keywords_disconnect_marks_ok_cb, TRUE);
+	generic_dialog_add_button(gd, "dialog-ok", "OK", bar_pane_keywords_disconnect_marks_ok_cb, TRUE);
 
 	gtk_widget_show(gd->dialog);
 

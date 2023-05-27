@@ -562,7 +562,7 @@ static void bar_pane_exif_conf_dialog(GtkWidget *widget)
 
 	generic_dialog_add_message(gd, nullptr, ee ? _("Configure entry") : _("Add entry"), nullptr, FALSE);
 
-	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr,
+	generic_dialog_add_button(gd, "dialog-ok", "OK",
 				  bar_pane_exif_edit_ok_cb, TRUE);
 
 	table = pref_table_new(gd->vbox, 3, 2, FALSE, TRUE);

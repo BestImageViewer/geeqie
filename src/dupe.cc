@@ -3121,7 +3121,7 @@ static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 	gd = file_util_gen_dlg("Image thumbprint debug info", "thumbprint",
 			       dw->window, TRUE,
 			       nullptr, nullptr);
-	generic_dialog_add_button(gd, GTK_STOCK_CLOSE, nullptr, nullptr, TRUE);
+	generic_dialog_add_button(gd, "window-close", _("Close"), nullptr, TRUE);
 
 	dupe_display_label(gd->vbox, "name:", di->fd->name);
 	buf = text_from_size(di->fd->size);
@@ -4784,18 +4784,18 @@ DupeWindow *dupe_window_new()
 	gtk_box_pack_end(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
 
-	button = pref_button_new(nullptr, GTK_STOCK_HELP, nullptr, FALSE, G_CALLBACK(dupe_help_cb), nullptr);
+	button = pref_button_new(nullptr, "help-browser", _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(button), "F1");
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	button = pref_button_new(nullptr, GTK_STOCK_STOP, nullptr, FALSE, G_CALLBACK(dupe_check_stop_cb), dw);
+	button = pref_button_new(nullptr, "process-stop", _("Stop"), G_CALLBACK(dupe_check_stop_cb), dw);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	button = pref_button_new(nullptr, GTK_STOCK_CLOSE, nullptr, FALSE, G_CALLBACK(dupe_window_close_cb), dw);
+	button = pref_button_new(nullptr, "window-close", _("Close"), G_CALLBACK(dupe_window_close_cb), dw);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(button), "Ctrl-W");
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
@@ -5332,7 +5332,6 @@ static void pop_menu_export(GList *UNUSED(selection_list), gpointer dupe_window,
 	const gchar *title = "Export duplicates data";
 	const gchar *default_path = "/tmp/";
 	gchar *file_extension;
-	const gchar *stock_id;
 	ExportDupesData *edd;
 	const gchar *previous_path;
 
@@ -5353,10 +5352,8 @@ static void pop_menu_export(GList *UNUSED(selection_list), gpointer dupe_window,
 			return;
 		}
 
-	stock_id = GTK_STOCK_SAVE;
-
 	generic_dialog_add_message(GENERIC_DIALOG(edd->dialog), nullptr, title, nullptr, FALSE);
-	file_dialog_add_button(edd->dialog, stock_id, nullptr, export_duplicates_data_save_cb, TRUE);
+	file_dialog_add_button(edd->dialog, "document-save", _("Save"), export_duplicates_data_save_cb, TRUE);
 
 	previous_path = history_list_find_last_path_by_key("export_duplicates");
 
@@ -5392,9 +5389,9 @@ static GtkWidget *submenu_add_export(GtkWidget *menu, GtkWidget **menu_item, GCa
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
 	menu_item_add_icon_sensitive(submenu, _("Export to csv"),
-					GTK_STOCK_INDEX, TRUE, G_CALLBACK(func), GINT_TO_POINTER(0));
+					"document-export", TRUE, G_CALLBACK(func), GINT_TO_POINTER(0));
 	menu_item_add_icon_sensitive(submenu, _("Export to tab-delimited"),
-					GTK_STOCK_INDEX, TRUE, G_CALLBACK(func), GINT_TO_POINTER(1));
+					"document-export", TRUE, G_CALLBACK(func), GINT_TO_POINTER(1));
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 	if (menu_item) *menu_item = item;

@@ -2279,7 +2279,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
 
-	button = pref_button_new(nullptr, GTK_STOCK_OK, nullptr, FALSE,
+	button = pref_button_new(nullptr, "dialog-ok", "OK",
 				 G_CALLBACK(layout_config_ok_cb), lc);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
@@ -2288,25 +2288,25 @@ void layout_show_config_window(LayoutWindow *lw)
 
 	ct_button = button;
 /*
-	button = pref_button_new(NULL, GTK_STOCK_SAVE, NULL, FALSE,
+	button = pref_button_new(NULL, "document-save", _("Save"), FALSE,
 				 G_CALLBACK(layout_config_save_cb), NULL);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
 	gtk_widget_show(button);
 */
-	button = pref_button_new(nullptr, GTK_STOCK_HELP, nullptr, FALSE,
+	button = pref_button_new(nullptr, "help-browser", _("Help"),
 				 G_CALLBACK(layout_config_help_cb), lc);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	button = pref_button_new(nullptr, GTK_STOCK_APPLY, nullptr, FALSE,
+	button = pref_button_new(nullptr, "dialog-ok-apply", _("Apply"),
 				 G_CALLBACK(layout_config_apply_cb), lc);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	button = pref_button_new(nullptr, GTK_STOCK_CANCEL, nullptr, FALSE,
+	button = pref_button_new(nullptr, 	"dialog-cancel", _("Cancel"),
 				 G_CALLBACK(layout_config_close_cb), lc);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
@@ -2336,7 +2336,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	gtk_box_pack_start(GTK_BOX(hbox), tabcomp, TRUE, TRUE, 0);
 	gtk_widget_show(tabcomp);
 
-	button = pref_button_new(hbox, nullptr, _("Use current"), FALSE,
+	button = pref_button_new(hbox, nullptr, _("Use current"),
 				 G_CALLBACK(home_path_set_current_cb), lc);
 
 	pref_checkbox_new_int(group, _("Show date in directories list view"),

@@ -243,7 +243,7 @@ GtkWidget *help_window_new(const gchar *title,
 	gtk_box_pack_end(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
 
-	button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+	button = gtk_button_new_from_stock("document-close");
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(help_window_close), window);
 	gtk_container_add(GTK_CONTAINER(hbox), button);

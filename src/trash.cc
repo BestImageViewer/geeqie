@@ -193,7 +193,7 @@ gboolean file_util_safe_unlink(const gchar *path)
 			{
 			message = g_strconcat("See the Help file for a possible workaround.\n\n", error->message, NULL);
 			gd = warning_dialog(_("Move to trash failed\n\n"), message, GTK_STOCK_DIALOG_ERROR, nullptr);
-			generic_dialog_add_button(gd, GTK_STOCK_HELP, "Help", move_to_trash_failed_cb, FALSE);
+			generic_dialog_add_button(gd, "help-browser", _("Help"), move_to_trash_failed_cb, FALSE);
 
 			g_free(message);
 			g_error_free(error);

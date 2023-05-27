@@ -781,9 +781,8 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	DEBUG_NAME(add_box);
 	gtk_box_pack_end(GTK_BOX(bd->widget), add_box, FALSE, FALSE, 0);
 	tbar = pref_toolbar_new(add_box, GTK_TOOLBAR_ICONS);
-	bd->add_button = pref_toolbar_button(tbar, GTK_STOCK_ADD, nullptr, FALSE,
-					     _("Add Pane"),
-					     G_CALLBACK(bar_menu_add_cb), bd);
+	bd->add_button = pref_toolbar_button(tbar, "list-add", _("Add"), FALSE,
+					     _("Add Pane"), G_CALLBACK(bar_menu_add_cb), bd);
 	gtk_widget_show(add_box);
 
 #ifdef HAVE_LIBCHAMPLAIN_GTK

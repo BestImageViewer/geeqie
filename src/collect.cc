@@ -1233,8 +1233,8 @@ static void collection_close_dlg_show(CollectWindow *cw)
 				   _("Close collection"),
 				   _("Collection has been modified.\nSave first?"), TRUE);
 
-	generic_dialog_add_button(gd, GTK_STOCK_SAVE, nullptr, collection_close_save_cb, TRUE);
-	generic_dialog_add_button(gd, GTK_STOCK_DELETE, _("_Discard"), collection_close_close_cb, FALSE);
+	generic_dialog_add_button(gd, "document-save", _("Save"), collection_close_save_cb, TRUE);
+	generic_dialog_add_button(gd, "edit-delete", _("_Discard"), collection_close_close_cb, FALSE);
 
 	cw->close_dialog = gd->dialog;
 

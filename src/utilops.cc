@@ -213,7 +213,7 @@ GenericDialog *file_util_warning_dialog(const gchar *heading, const gchar *messa
 
 	gd = file_util_gen_dlg(heading, "warning", parent, TRUE, nullptr, nullptr);
 	generic_dialog_add_message(gd, icon_stock_id, heading, message, TRUE);
-	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr, file_util_warning_dialog_ok_cb, TRUE);
+	generic_dialog_add_button(gd, "dialog-ok", "OK", file_util_warning_dialog_ok_cb, TRUE);
 	if (options->place_dialogs_under_mouse)
 		{
 		gtk_window_set_position(GTK_WINDOW(gd->dialog), GTK_WIN_POS_MOUSE);
@@ -599,7 +599,7 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 
 			generic_dialog_add_message(d, GTK_STOCK_DIALOG_WARNING, nullptr, msg->str, TRUE);
 
-			generic_dialog_add_button(d, GTK_STOCK_GO_FORWARD, _("Co_ntinue"),
+			generic_dialog_add_button(d, "go-next", _("Co_ntinue"),
 						  file_util_resume_cb, TRUE);
 			gtk_widget_show(d->dialog);
 			ret = EDITOR_CB_SUSPEND;
@@ -1047,7 +1047,7 @@ void file_util_check_ci(UtilityData *ud)
 
 		generic_dialog_add_message(d, GTK_STOCK_DIALOG_WARNING, _("Really continue?"), desc, TRUE);
 
-		generic_dialog_add_button(d, GTK_STOCK_GO_FORWARD, _("Co_ntinue"),
+		generic_dialog_add_button(d, "go-next", _("Co_ntinue"),
 					  file_util_check_resume_cb, TRUE);
 		gtk_widget_show(d->dialog);
 		}
@@ -1514,26 +1514,29 @@ static void file_util_dialog_init_simple_list(UtilityData *ud)
 	GtkTreeSelection *selection;
 	gchar *dir_msg;
 
-	const gchar *stock_id;
+	const gchar *icon_name;
+	const gchar *msg;
 
 	/** @FIXME use ud->stock_id */
 	if (ud->type == UTILITY_TYPE_DELETE ||
 	    ud->type == UTILITY_TYPE_DELETE_LINK ||
 	    ud->type == UTILITY_TYPE_DELETE_FOLDER)
 		{
-		stock_id = GTK_STOCK_DELETE;
+		icon_name = "edit-delete";
+		msg = _("Delete");
 		}
 	else
 		{
-		stock_id = GTK_STOCK_OK;
+		icon_name = "dialog-ok";
+		msg = "OK";
 		}
 
 	ud->gd = file_util_gen_dlg(ud->messages.title, "dlg_confirm",
 				   ud->parent, FALSE,  file_util_cancel_cb, ud);
-	if (ud->discard_func) generic_dialog_add_button(ud->gd, GTK_STOCK_REVERT_TO_SAVED, _("Discard changes"), file_util_discard_cb, FALSE);
-	if (ud->details_func) generic_dialog_add_button(ud->gd, GTK_STOCK_INFO, _("File details"), file_util_details_cb, FALSE);
+	if (ud->discard_func) generic_dialog_add_button(ud->gd, "document-revert", _("Discard changes"), file_util_discard_cb, FALSE);
+	if (ud->details_func) generic_dialog_add_button(ud->gd, "dialog-information", _("File details"), file_util_details_cb, FALSE);
 
-	generic_dialog_add_button(ud->gd, stock_id, nullptr, file_util_ok_cb, TRUE);
+	generic_dialog_add_button(ud->gd, icon_name, msg, file_util_ok_cb, TRUE);
 
 	if (ud->dir_fd)
 		{
@@ -1577,15 +1580,15 @@ static void file_util_dialog_init_dest_folder(UtilityData *ud)
 {
 	FileDialog *fdlg;
 	GtkWidget *label;
-	const gchar *stock_id;
+	const gchar *icon_name;
 
 	if (ud->type == UTILITY_TYPE_COPY)
 		{
-		stock_id = GTK_STOCK_COPY;
+		icon_name = "edit-copy";
 		}
 	else
 		{
-		stock_id = GTK_STOCK_OK;
+		icon_name = "dialog-ok";
 		}
 
 	fdlg = file_util_file_dlg(ud->messages.title, "dlg_dest_folder", ud->parent,
@@ -1603,13 +1606,13 @@ static void file_util_dialog_init_dest_folder(UtilityData *ud)
 
 	if (options->with_rename)
 		{
-		file_dialog_add_button(fdlg, stock_id, ud->messages.title, file_util_fdlg_ok_cb, TRUE);
-		file_dialog_add_button(fdlg, GTK_STOCK_EDIT, "With Rename", file_util_fdlg_rename_cb, TRUE);
+		file_dialog_add_button(fdlg, icon_name, ud->messages.title, file_util_fdlg_ok_cb, TRUE);
+		file_dialog_add_button(fdlg, "document-edit", _("With Rename"), file_util_fdlg_rename_cb, TRUE);
 		}
 	else
 		{
-		file_dialog_add_button(fdlg, GTK_STOCK_EDIT, "With Rename", file_util_fdlg_rename_cb, TRUE);
-		file_dialog_add_button(fdlg, stock_id, ud->messages.title, file_util_fdlg_ok_cb, TRUE);
+		file_dialog_add_button(fdlg, "document-edit", _("With Rename"), file_util_fdlg_rename_cb, TRUE);
+		file_dialog_add_button(fdlg, icon_name, ud->messages.title, file_util_fdlg_ok_cb, TRUE);
 		}
 
 	file_dialog_add_path_widgets(fdlg, nullptr, ud->dest_path, "move_copy", nullptr, nullptr);
@@ -1655,10 +1658,10 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 
 	box = generic_dialog_add_message(ud->gd, nullptr, ud->messages.question, nullptr, TRUE);
 
-	if (ud->discard_func) generic_dialog_add_button(ud->gd, GTK_STOCK_REVERT_TO_SAVED, _("Discard changes"), file_util_discard_cb, FALSE);
-	if (ud->details_func) generic_dialog_add_button(ud->gd, GTK_STOCK_INFO, _("File details"), file_util_details_cb, FALSE);
+	if (ud->discard_func) generic_dialog_add_button(ud->gd, "document-revert", _("Discard changes"), file_util_discard_cb, FALSE);
+	if (ud->details_func) generic_dialog_add_button(ud->gd, "dialog-information", _("File details"), file_util_details_cb, FALSE);
 
-	generic_dialog_add_button(ud->gd, GTK_STOCK_OK, ud->messages.title, file_util_ok_cb, TRUE);
+	generic_dialog_add_button(ud->gd, "dialog-ok", ud->messages.title, file_util_ok_cb, TRUE);
 
 	if (ud->type == UTILITY_TYPE_COPY || ud->type == UTILITY_TYPE_MOVE)
 		{
@@ -2014,7 +2017,7 @@ static void file_util_details_dialog(UtilityData *ud, FileData *fd)
 	const gchar *stock_id;
 
 	gd = file_util_gen_dlg(_("File details"), "details", ud->gd->dialog, TRUE, nullptr, ud);
-	generic_dialog_add_button(gd, GTK_STOCK_CLOSE, nullptr, file_util_details_dialog_ok_cb, TRUE);
+	generic_dialog_add_button(gd, "window-close", _("Close"), file_util_details_dialog_ok_cb, TRUE);
 	generic_dialog_add_button(gd, GTK_STOCK_REMOVE, _("Exclude file"), file_util_details_dialog_exclude_cb, FALSE);
 
 	g_object_set_data(G_OBJECT(gd->dialog), "file_data", fd);
@@ -2061,9 +2064,9 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 
 
 	gd = file_util_gen_dlg(_("Overview of changed metadata"), "details", ud->gd->dialog, TRUE, nullptr, ud);
-	generic_dialog_add_button(gd, GTK_STOCK_CLOSE, nullptr, file_util_details_dialog_ok_cb, TRUE);
+	generic_dialog_add_button(gd, "window-close", _("Close"), file_util_details_dialog_ok_cb, TRUE);
 	generic_dialog_add_button(gd, GTK_STOCK_REMOVE, _("Exclude file"), file_util_details_dialog_exclude_cb, FALSE);
-	generic_dialog_add_button(gd, GTK_STOCK_REVERT_TO_SAVED, _("Discard changes"), file_util_details_dialog_discard_cb, FALSE);
+	generic_dialog_add_button(gd, "document-revert", _("Discard changes"), file_util_details_dialog_discard_cb, FALSE);
 
 	g_object_set_data(G_OBJECT(gd->dialog), "file_data", fd);
 
@@ -2691,7 +2694,7 @@ static void file_util_delete_dir_full(FileData *fd, GtkWidget *parent, UtilityPh
 
 		gd = file_util_gen_dlg(_("Folder contains subfolders"), "dlg_warning",
 					parent, TRUE, nullptr, nullptr);
-		generic_dialog_add_button(gd, GTK_STOCK_CLOSE, nullptr, nullptr, TRUE);
+		generic_dialog_add_button(gd, "window-close", _("Close"), nullptr, TRUE);
 
 		text = g_strdup_printf(_("Unable to delete the folder:\n\n%s\n\n"
 					 "This folder contains subfolders which must be moved before it can be deleted."),

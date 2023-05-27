@@ -67,7 +67,7 @@ GenericDialog *generic_dialog_new(const gchar *title,
 				  void (*cancel_cb)(GenericDialog *, gpointer), gpointer data);
 void generic_dialog_close(GenericDialog *gd);
 
-GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *stock_id, const gchar *text,
+GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, const gchar *text,
 				     void (*func_cb)(GenericDialog *, gpointer), gboolean is_default);
 void generic_dialog_attach_default(GenericDialog *gd, GtkWidget *widget);
 

@@ -274,7 +274,7 @@ static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent
 
 	generic_dialog_add_message(gd, nullptr, _("Edit Bookmark"), nullptr, FALSE);
 
-	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr,
+	generic_dialog_add_button(gd, "dialog-ok", "OK",
 				  bookmark_edit_ok_cb, TRUE);
 
 	table = pref_table_new(gd->vbox, 3, 2, FALSE, TRUE);
@@ -655,8 +655,7 @@ static void bookmark_populate(BookMarkData *bm)
 					}
 				else
 					{
-					b->image = gtk_image_new_from_icon_name("folder",
-									    GTK_ICON_SIZE_BUTTON);
+					b->image = gtk_image_new_from_icon_name("folder", GTK_ICON_SIZE_BUTTON);
 					}
 				}
 			else
@@ -757,7 +756,7 @@ static void bookmark_dnd_get_data(GtkWidget *UNUSED(widget),
 				}
 			else if (isfile(path))
 				{
-				buf = bookmark_string(filename_from_path(path), path, GTK_STOCK_FILE);
+				buf = bookmark_string(filename_from_path(path), path, "text-x-generic");
 				}
 			else
 				{
@@ -905,7 +904,7 @@ void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 		{
 		if (isfile(path))
 			{
-			buf = bookmark_string(name, path, "gtk-file");
+			buf = bookmark_string(name, path, "text-x-generic");
 			}
 		else
 			{
