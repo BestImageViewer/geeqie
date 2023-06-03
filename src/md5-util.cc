@@ -224,7 +224,7 @@ md5_final(MD5Context *ctx, guchar digest[16])
 static void
 md5_transform(guint32 buf[4], const guint32 in[16])
 {
-	register guint32 a, b, c, d;
+	guint32 a, b, c, d;
 
 	a = buf[0];
 	b = buf[1];
