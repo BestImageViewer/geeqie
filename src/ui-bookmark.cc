@@ -538,7 +538,7 @@ static void bookmark_populate(BookMarkData *bm)
 			history_list_add_to_key(bm->key, buf, 0);
 			g_free(buf);
 
-			if (!g_strcmp0(bm->key, "shortcuts") == 0)
+			if (g_strcmp0(bm->key, "shortcuts") != 0)
 				{
 				buf = bookmark_string(".", g_strdup(history_list_find_last_path_by_key("path_list")), NULL);
 				history_list_add_to_key(bm->key, buf, 0);
@@ -567,7 +567,7 @@ static void bookmark_populate(BookMarkData *bm)
 
 			if (strcmp(name, ".") == 0)
 				{
-				if (!g_strcmp0(bm->key, "shortcuts") == 0)
+				if (g_strcmp0(bm->key, "shortcuts") != 0)
 					{
 					buf = bookmark_string(name, g_strdup(history_list_find_last_path_by_key("path_list")), NULL);
 					}
