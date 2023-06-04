@@ -40,8 +40,8 @@ struct _ImageLoaderCOLLECTION {
 
 static gboolean image_loader_collection_load(gpointer loader, const guchar *UNUSED(buf), gsize UNUSED(count), GError **UNUSED(error))
 {
-	ImageLoaderCOLLECTION *ld = (ImageLoaderCOLLECTION *) loader;
-	ImageLoader *il = static_cast<ImageLoader *>(ld->data);
+	auto ld = (ImageLoaderCOLLECTION *) loader;
+	auto il = static_cast<ImageLoader *>(ld->data);
 
 	#define LINE_LENGTH 1000
 
@@ -116,7 +116,7 @@ static gboolean image_loader_collection_load(gpointer loader, const guchar *UNUS
 
 static gpointer image_loader_collection_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
-	ImageLoaderCOLLECTION *loader = g_new0(ImageLoaderCOLLECTION, 1);
+	auto loader = g_new0(ImageLoaderCOLLECTION, 1);
 	loader->area_updated_cb = area_updated_cb;
 	loader->size_cb = size_cb;
 	loader->area_prepared_cb = area_prepared_cb;
@@ -126,14 +126,14 @@ static gpointer image_loader_collection_new(ImageLoaderBackendCbAreaUpdated area
 
 static void image_loader_collection_set_size(gpointer loader, int width, int height)
 {
-	ImageLoaderCOLLECTION *ld = (ImageLoaderCOLLECTION *) loader;
+	auto ld = (ImageLoaderCOLLECTION *) loader;
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_collection_get_pixbuf(gpointer loader)
 {
-	ImageLoaderCOLLECTION *ld = (ImageLoaderCOLLECTION *) loader;
+	auto ld = (ImageLoaderCOLLECTION *) loader;
 	return ld->pixbuf;
 }
 
@@ -154,13 +154,13 @@ static gboolean image_loader_collection_close(gpointer UNUSED(loader), GError **
 
 static void image_loader_collection_abort(gpointer loader)
 {
-	ImageLoaderCOLLECTION *ld = (ImageLoaderCOLLECTION *) loader;
+	auto ld = (ImageLoaderCOLLECTION *) loader;
 	ld->abort = TRUE;
 }
 
 static void image_loader_collection_free(gpointer loader)
 {
-	ImageLoaderCOLLECTION *ld = (ImageLoaderCOLLECTION *) loader;
+	auto ld = (ImageLoaderCOLLECTION *) loader;
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }

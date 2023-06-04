@@ -88,7 +88,7 @@ static void bar_pane_rating_write_config(GtkWidget *pane, GString *outstr, gint 
 
 static void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
-	PaneRatingData *prd = static_cast<PaneRatingData *>(data);
+	auto prd = static_cast<PaneRatingData *>(data);
 
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_HISTMAP | NOTIFY_PIXBUF)) && fd == prd->fd)
 		{
@@ -99,7 +99,7 @@ static void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer da
 
 static void bar_pane_rating_destroy(GtkWidget *UNUSED(widget), gpointer data)
 {
-	PaneRatingData *prd = static_cast<PaneRatingData *>(data);
+	auto prd = static_cast<PaneRatingData *>(data);
 
 	file_data_unregister_notify_func(bar_pane_rating_notify_cb, prd);
 	file_data_unref(prd->fd);
@@ -109,7 +109,7 @@ static void bar_pane_rating_destroy(GtkWidget *UNUSED(widget), gpointer data)
 
 static void bar_pane_rating_selected_cb(GtkToggleButton *togglebutton, gpointer data)
 {
-	PaneRatingData *prd = static_cast<PaneRatingData *>(data);
+	auto prd = static_cast<PaneRatingData *>(data);
 	GSList *list;
 	gint i;
 	gchar *rating;

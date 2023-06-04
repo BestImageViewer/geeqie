@@ -71,7 +71,7 @@ static void clear_mouse_cursor(GtkWidget *widget, gint state)
 
 static gboolean fullscreen_hide_mouse_cb(gpointer data)
 {
-	FullScreenData *fs = static_cast<FullScreenData *>(data);
+	auto fs = static_cast<FullScreenData *>(data);
 
 	if (!fs->hide_mouse_id) return FALSE;
 
@@ -100,7 +100,7 @@ static void fullscreen_hide_mouse_reset(FullScreenData *fs)
 
 static gboolean fullscreen_mouse_moved(GtkWidget *UNUSED(widget), GdkEventMotion *UNUSED(event), gpointer data)
 {
-	FullScreenData *fs = static_cast<FullScreenData *>(data);
+	auto fs = static_cast<FullScreenData *>(data);
 
 	if (!(fs->cursor_state & FULLSCREEN_CURSOR_NORMAL))
 		{
@@ -141,7 +141,7 @@ static void fullscreen_mouse_set_busy(FullScreenData *fs, gboolean busy)
 
 static gboolean fullscreen_mouse_set_busy_cb(gpointer data)
 {
-	FullScreenData *fs = static_cast<FullScreenData *>(data);
+	auto fs = static_cast<FullScreenData *>(data);
 
 	fs->busy_mouse_id = 0;
 	fullscreen_mouse_set_busy(fs, TRUE);
@@ -159,7 +159,7 @@ static void fullscreen_mouse_set_busy_idle(FullScreenData *fs)
 
 static void fullscreen_image_update_cb(ImageWindow *UNUSED(imd), gpointer data)
 {
-	FullScreenData *fs = static_cast<FullScreenData *>(data);
+	auto fs = static_cast<FullScreenData *>(data);
 
 	if (fs->imd->il &&
 	    image_loader_get_pixbuf(fs->imd->il) != image_get_pixbuf(fs->imd))
@@ -170,7 +170,7 @@ static void fullscreen_image_update_cb(ImageWindow *UNUSED(imd), gpointer data)
 
 static void fullscreen_image_complete_cb(ImageWindow *UNUSED(imd), gboolean preload, gpointer data)
 {
-	FullScreenData *fs = static_cast<FullScreenData *>(data);
+	auto fs = static_cast<FullScreenData *>(data);
 
 	if (!preload) fullscreen_mouse_set_busy(fs, FALSE);
 }
@@ -207,7 +207,7 @@ static gboolean fullscreen_saver_block_cb(gpointer UNUSED(data))
 
 static gboolean fullscreen_delete_cb(GtkWidget *UNUSED(widget), GdkEventAny *UNUSED(event), gpointer data)
 {
-	FullScreenData *fs = static_cast<FullScreenData *>(data);
+	auto fs = static_cast<FullScreenData *>(data);
 
 	fullscreen_stop(fs);
 	return TRUE;
@@ -461,7 +461,7 @@ void fullscreen_prefs_list_free(GList *list)
 	work = list;
 	while (work)
 		{
-		ScreenData *sd = static_cast<ScreenData *>(work->data);
+		auto sd = static_cast<ScreenData *>(work->data);
 		work = work->next;
 
 		g_free(sd->description);
@@ -478,7 +478,7 @@ ScreenData *fullscreen_prefs_list_find(GList *list, gint screen)
 	work = list;
 	while (work)
 		{
-		ScreenData *sd = static_cast<ScreenData *>(work->data);
+		auto sd = static_cast<ScreenData *>(work->data);
 		work = work->next;
 
 		if (sd->number == screen) return sd;
@@ -615,7 +615,7 @@ enum {
 
 static void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer data)
 {
-	gint *value = static_cast<gint *>(data);
+	auto value = static_cast<gint *>(data);
 	GtkTreeModel *store;
 	GtkTreeIter iter;
 	GtkWidget *button;
@@ -681,7 +681,7 @@ GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value,
 	work = list;
 	while (work)
 		{
-		ScreenData *sd = static_cast<ScreenData *>(work->data);
+		auto sd = static_cast<ScreenData *>(work->data);
 
 		fullscreen_prefs_selection_add(store, sd->description, sd->number);
 		if (*screen_value == sd->number) current = n;

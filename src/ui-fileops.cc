@@ -735,7 +735,7 @@ void string_list_free(GList *list)
 GList *string_list_copy(const GList *list)
 {
 	GList *new_list = NULL;
-	GList *work = (GList *) list;
+	auto work = (GList *) list;
 
 	while (work)
 		{
@@ -1018,7 +1018,7 @@ struct _WebData
 static void web_file_async_ready_cb(GObject *source_object, GAsyncResult *res, gpointer data)
 {
 	GError *error = NULL;
-	WebData *web = static_cast<WebData *>(data);
+	auto web = static_cast<WebData *>(data);
 	gchar *tmp_filename;
 
 	if (!g_cancellable_is_cancelled(web->cancellable))
@@ -1045,7 +1045,7 @@ static void web_file_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 
 static void web_file_progress_cb(goffset current_num_bytes, goffset total_num_bytes, gpointer data)
 {
-	WebData *web = static_cast<WebData *>(data);
+	auto web = static_cast<WebData *>(data);
 
 	if (!g_cancellable_is_cancelled(web->cancellable))
 		{
@@ -1055,7 +1055,7 @@ static void web_file_progress_cb(goffset current_num_bytes, goffset total_num_by
 
 static void download_web_file_cancel_button_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	WebData *web = static_cast<WebData *>(data);
+	auto web = static_cast<WebData *>(data);
 
 	g_cancellable_cancel(web->cancellable);
 }
@@ -1063,7 +1063,7 @@ static void download_web_file_cancel_button_cb(GenericDialog *UNUSED(gd), gpoint
 gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 {
 	gchar *scheme;
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	gchar *tmp_dir;
 	GError *error = NULL;
 	WebData *web;

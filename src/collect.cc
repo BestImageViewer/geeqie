@@ -45,14 +45,14 @@
 
 /**
  * @brief  List of currently open Collections.
- * 
- * Type ::_CollectionData 
+ *
+ * Type ::_CollectionData
  */
 static GList *collection_list = NULL;
 
 /**
  * @brief  List of currently open Collection windows.
- * 
+ *
  * Type ::_CollectWindow
  */
 static GList *collection_window_list = NULL;
@@ -139,8 +139,8 @@ static SortType collection_list_sort_method = SORT_NAME;
 
 static gint collection_list_sort_cb(gconstpointer a, gconstpointer b)
 {
-	const CollectInfo *cia = static_cast<const CollectInfo *>(a);
-	const CollectInfo *cib = static_cast<const CollectInfo *>(b);
+	auto cia = static_cast<const CollectInfo *>(a);
+	auto cib = static_cast<const CollectInfo *>(b);
 
 	switch (collection_list_sort_method)
 		{
@@ -272,7 +272,7 @@ CollectInfo *collection_list_find_fd(GList *list, FileData *fd)
 
 	while (work)
 		{
-		CollectInfo *ci = static_cast<CollectInfo *>(work->data);
+		auto ci = static_cast<CollectInfo *>(work->data);
 		if (ci->fd == fd) return ci;
 		work = work->next;
 		}
@@ -287,7 +287,7 @@ GList *collection_list_to_filelist(GList *list)
 
 	while (work)
 		{
-		CollectInfo *info = static_cast<CollectInfo *>(work->data);
+		auto info = static_cast<CollectInfo *>(work->data);
 		filelist = g_list_prepend(filelist, file_data_ref(info->fd));
 		work = work->next;
 		}
@@ -303,7 +303,7 @@ CollectWindow *collection_window_find(CollectionData *cd)
 	work = collection_window_list;
 	while (work)
 		{
-		CollectWindow *cw = static_cast<CollectWindow *>(work->data);
+		auto cw = static_cast<CollectWindow *>(work->data);
 		if (cw->cd == cd) return cw;
 		work = work->next;
 		}
@@ -320,7 +320,7 @@ CollectWindow *collection_window_find_by_path(const gchar *path)
 	work = collection_window_list;
 	while (work)
 		{
-		CollectWindow *cw = static_cast<CollectWindow *>(work->data);
+		auto cw = static_cast<CollectWindow *>(work->data);
 		if (cw->cd->path && strcmp(cw->cd->path, path) == 0) return cw;
 		work = work->next;
 		}
@@ -332,7 +332,7 @@ CollectWindow *collection_window_find_by_path(const gchar *path)
  * @brief Checks string for existence of Collection.
  * @param[in] param Filename, with or without extension of any collection
  * @returns full pathname if found or NULL
- * 
+ *
  * Return value must be freed with g_free()
  */
 gchar *collection_path(const gchar *param)
@@ -364,8 +364,8 @@ gchar *collection_path(const gchar *param)
  * @brief Checks input string for existence of Collection.
  * @param[in] param Filename with or without extension of any collection
  * @returns TRUE if found
- * 
- * 
+ *
+ *
  */
 gboolean is_collection(const gchar *param)
 {
@@ -384,8 +384,8 @@ gboolean is_collection(const gchar *param)
  * @brief Creates a text list of the image paths of the contents of a Collection
  * @param[in] name The name of the collection, with or without extension
  * @param[inout] contents A GString to which the image paths are appended
- * 
- * 
+ *
+ *
  */
 void collection_contents(const gchar *name, GString **contents)
 {
@@ -418,8 +418,8 @@ void collection_contents(const gchar *name, GString **contents)
 /**
  * @brief Returns a list of filedatas of the contents of a Collection
  * @param[in] name The name of the collection, with or without extension
- * 
- * 
+ *
+ *
  */
 GList *collection_contents_fd(const gchar *name)
 {
@@ -638,7 +638,7 @@ gchar *collection_info_list_to_dnd_data(CollectionData *cd, GList *list, gint *l
 	while (work)
 		{
 		gint len;
-		gchar *text = static_cast<gchar *>(work->data);
+		auto text = static_cast<gchar *>(work->data);
 
 		work = work->prev;
 
@@ -901,7 +901,7 @@ void collection_update_geometry(CollectionData *cd)
 
 static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
-	CollectionData *cd = static_cast<CollectionData *>(data);
+	auto cd = static_cast<CollectionData *>(data);
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
@@ -934,7 +934,7 @@ static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 static gboolean collection_window_keypress(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer data)
 {
-	CollectWindow *cw = static_cast<CollectWindow *>(data);
+	auto cw = static_cast<CollectWindow *>(data);
 	gboolean stop_signal = FALSE;
 	GList *list;
 
@@ -1131,7 +1131,7 @@ static void collection_window_update_title(CollectWindow *cw)
 
 static void collection_window_update_info(CollectionData *UNUSED(cd), CollectInfo *ci, gpointer data)
 {
-	CollectWindow *cw = static_cast<CollectWindow *>(data);
+	auto cw = static_cast<CollectWindow *>(data);
 
 	collection_table_file_update(cw->table, ci);
 }
@@ -1185,7 +1185,7 @@ static void collection_window_close_final(CollectWindow *cw)
 
 static void collection_close_save_cb(GenericDialog *gd, gpointer data)
 {
-	CollectWindow *cw = static_cast<CollectWindow *>(data);
+	auto cw = static_cast<CollectWindow *>(data);
 
 	cw->close_dialog = NULL;
 	generic_dialog_close(gd);
@@ -1209,7 +1209,7 @@ static void collection_close_save_cb(GenericDialog *gd, gpointer data)
 
 static void collection_close_close_cb(GenericDialog *gd, gpointer data)
 {
-	CollectWindow *cw = static_cast<CollectWindow *>(data);
+	auto cw = static_cast<CollectWindow *>(data);
 
 	cw->close_dialog = NULL;
 	generic_dialog_close(gd);
@@ -1219,7 +1219,7 @@ static void collection_close_close_cb(GenericDialog *gd, gpointer data)
 
 static void collection_close_cancel_cb(GenericDialog *gd, gpointer data)
 {
-	CollectWindow *cw = static_cast<CollectWindow *>(data);
+	auto cw = static_cast<CollectWindow *>(data);
 
 	cw->close_dialog = NULL;
 	generic_dialog_close(gd);
@@ -1272,7 +1272,7 @@ void collection_window_close_by_collection(CollectionData *cd)
 /**
  * @brief Check if any Collection windows have unsaved data
  * @returns TRUE if unsaved data exists
- * 
+ *
  * Also saves window geometry for Collection windows that have
  * no unsaved data
  */
@@ -1286,7 +1286,7 @@ gboolean collection_window_modified_exists(void)
 	work = collection_window_list;
 	while (work)
 		{
-		CollectWindow *cw = static_cast<CollectWindow *>(work->data);
+		auto cw = static_cast<CollectWindow *>(work->data);
 		if (cw->cd->changed)
 			{
 			ret = TRUE;
@@ -1306,7 +1306,7 @@ gboolean collection_window_modified_exists(void)
 
 static gboolean collection_window_delete(GtkWidget *UNUSED(widget), GdkEvent *UNUSED(event), gpointer data)
 {
-	CollectWindow *cw = static_cast<CollectWindow *>(data);
+	auto cw = static_cast<CollectWindow *>(data);
 	collection_window_close(cw);
 
 	return TRUE;

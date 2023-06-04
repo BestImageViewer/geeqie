@@ -295,7 +295,7 @@ static void collection_load_thumb_do(CollectionData *cd)
 
 static void collection_load_thumb_error_cb(ThumbLoader *UNUSED(tl), gpointer data)
 {
-	CollectionData *cd = static_cast<CollectionData *>(data);
+	auto cd = static_cast<CollectionData *>(data);
 
 	collection_load_thumb_do(cd);
 	collection_load_thumb_step(cd);
@@ -303,7 +303,7 @@ static void collection_load_thumb_error_cb(ThumbLoader *UNUSED(tl), gpointer dat
 
 static void collection_load_thumb_done_cb(ThumbLoader *UNUSED(tl), gpointer data)
 {
-	CollectionData *cd = static_cast<CollectionData *>(data);
+	auto cd = static_cast<CollectionData *>(data);
 
 	collection_load_thumb_do(cd);
 	collection_load_thumb_step(cd);
@@ -418,7 +418,7 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 	work = cd->list;
 	while (work && secsave_errno == SS_ERR_NONE)
 		{
-		CollectInfo *ci = static_cast<CollectInfo *>(work->data);
+		auto ci = static_cast<CollectInfo *>(work->data);
 		secure_fprintf(ssi, "\"%s\"\n", ci->fd->path);
 		work = work->next;
 		}
@@ -1020,18 +1020,18 @@ void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(da
 
 static gint collection_manager_sort_cb(gconstpointer a, gconstpointer b)
 {
-	const gchar *char_a = static_cast<const gchar *>(a);
-	const gchar *char_b = static_cast<const gchar *>(b);
+	auto char_a = static_cast<const gchar *>(a);
+	auto char_b = static_cast<const gchar *>(b);
 
 	return g_strcmp0(char_a, char_b);
 }
- 
+
 /**
  * @brief Creates sorted list of collections
  * @param[out] names_exc sorted list of collections names excluding extension
  * @param[out] names_inc sorted list of collections names including extension
  * @param[out] paths sorted list of collection paths
- * 
+ *
  * Lists of type gchar.
  * Used lists must be freed with string_list_free()
  */

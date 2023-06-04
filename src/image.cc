@@ -59,7 +59,7 @@ static gint rect_id = 0;
 
 static void image_click_cb(PixbufRenderer *UNUSED(pr), GdkEventButton *event, gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 	if (!options->image_lm_click_nav && event->button == MOUSE_BUTTON_MIDDLE)
 		{
 		imd->mouse_wheel_mode = !imd->mouse_wheel_mode;
@@ -139,7 +139,7 @@ static void switch_coords_orientation(ImageWindow *imd, gint x, gint y, gint wid
 
 static void image_press_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 	LayoutWindow *lw;
 	gint x_pixel, y_pixel;
 
@@ -185,7 +185,7 @@ static void image_press_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer d
 
 static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 	gint width, height;
 	gint rect_width;
 	gint rect_height;
@@ -254,7 +254,7 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 
 static void image_scroll_notify_cb(PixbufRenderer *pr, gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 
 	if (imd->func_scroll_notify && pr->scale)
 		{
@@ -288,7 +288,7 @@ static void image_complete_util(ImageWindow *imd, gboolean preload)
 
 static void image_render_complete_cb(PixbufRenderer *UNUSED(pr), gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 
 	image_complete_util(imd, FALSE);
 }
@@ -314,7 +314,7 @@ static void image_state_unset(ImageWindow *imd, ImageState state)
 
 static void image_zoom_cb(PixbufRenderer *UNUSED(pr), gdouble UNUSED(zoom), gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 
 	if (imd->title_show_zoom) image_update_title(imd);
 	image_state_set(imd, IMAGE_STATE_IMAGE);
@@ -565,7 +565,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 
 static void image_post_process_tile_color_cb(PixbufRenderer *UNUSED(pr), GdkPixbuf **pixbuf, gint x, gint y, gint w, gint h, gpointer data)
 {
-	ImageWindow *imd = (ImageWindow *)data;
+	auto imd = (ImageWindow *)data;
 	if (imd->cm) color_man_correct_region(static_cast<ColorMan *>(imd->cm), *pixbuf, x, y, w, h);
 	if (imd->desaturate) pixbuf_desaturate_rect(*pixbuf, x, y, w, h);
 	if (imd->overunderexposed) pixbuf_highlight_overunderexposed(*pixbuf, x, y, w, h);
@@ -731,7 +731,7 @@ static void image_read_ahead_cancel(ImageWindow *imd)
 
 static void image_read_ahead_done_cb(ImageLoader *UNUSED(il), gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 
 	if (!imd->read_ahead_fd || !imd->read_ahead_il) return;
 
@@ -853,7 +853,7 @@ static void image_load_pixbuf_ready(ImageWindow *imd)
 
 static void image_load_area_cb(ImageLoader *il, guint x, guint y, guint w, guint h, gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 	PixbufRenderer *pr;
 
 	pr = (PixbufRenderer *)imd->pr;
@@ -871,7 +871,7 @@ static void image_load_area_cb(ImageLoader *il, guint x, guint y, guint w, guint
 
 static void image_load_done_cb(ImageLoader *UNUSED(il), gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 
 	DEBUG_1("%s image done", get_exec_time());
 
@@ -934,7 +934,7 @@ static void image_load_done_cb(ImageLoader *UNUSED(il), gpointer data)
 
 static void image_load_size_cb(ImageLoader *UNUSED(il), guint width, guint height, gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 
 	DEBUG_1("image_load_size_cb: %dx%d", width, height);
 	pixbuf_renderer_set_size_early((PixbufRenderer *)imd->pr, width, height);
@@ -1182,7 +1182,7 @@ static void image_change_real(ImageWindow *imd, FileData *fd,
 
 static gboolean image_focus_in_cb(GtkWidget *UNUSED(widget), GdkEventFocus *UNUSED(event), gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 
 	if (imd->func_focus_in)
 		{
@@ -1194,7 +1194,7 @@ static gboolean image_focus_in_cb(GtkWidget *UNUSED(widget), GdkEventFocus *UNUS
 
 static gboolean image_scroll_cb(GtkWidget *UNUSED(widget), GdkEventScroll *event, gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 	gboolean in_lw = FALSE;
 	gint i = 0;
 	LayoutWindow *lw = NULL;
@@ -1850,7 +1850,7 @@ void image_prebuffer_set(ImageWindow *imd, FileData *fd)
 
 static void image_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 
 	if (!imd || !image_get_pixbuf(imd) ||
 	    /* imd->il || */ /* loading in progress - do not check - it should start from the beginning anyway */
@@ -2110,7 +2110,7 @@ static void image_free(ImageWindow *imd)
 
 static void image_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	ImageWindow *imd = static_cast<ImageWindow *>(data);
+	auto imd = static_cast<ImageWindow *>(data);
 	image_free(imd);
 }
 

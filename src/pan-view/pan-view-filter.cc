@@ -29,7 +29,7 @@
 
 PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 {
-	PanViewFilterUi *ui = g_new0(PanViewFilterUi, 1);
+	auto ui = g_new0(PanViewFilterUi, 1);
 	GtkWidget *combo;
 	GtkWidget *hbox;
 	gint i;
@@ -141,7 +141,7 @@ static void pan_filter_status(PanWindow *pw, const gchar *text)
 
 static void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 {
-	PanFilterCallbackState *cb_state = (PanFilterCallbackState *)data;
+	auto cb_state = (PanFilterCallbackState *)data;
 	PanWindow *pw = cb_state->pw;
 	PanViewFilterUi *ui = pw->filter_ui;
 
@@ -157,7 +157,7 @@ static void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 void pan_filter_activate_cb(const gchar *text, gpointer data)
 {
 	GtkWidget *kw_button;
-	PanWindow *pw = (PanWindow *)data;
+	auto pw = (PanWindow *)data;
 	PanViewFilterUi *ui = pw->filter_ui;
 	GtkTreeIter iter;
 
@@ -169,7 +169,7 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 	tab_completion_append_to_history(ui->filter_entry, text);
 
 	// Add new filter element.
-	PanViewFilterElement *element = g_new0(PanViewFilterElement, 1);
+	auto element = g_new0(PanViewFilterElement, 1);
 	gtk_tree_model_get(GTK_TREE_MODEL(ui->filter_mode_model), &iter, 0, &element->mode, -1);
 	element->keyword = g_strdup(text);
 	if (g_strcmp0(text, g_regex_escape_string(text, -1)))
@@ -192,7 +192,7 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 	gtk_box_pack_start(GTK_BOX(ui->filter_kw_hbox), kw_button, FALSE, FALSE, 0);
 	gtk_widget_show(kw_button);
 
-	PanFilterCallbackState *cb_state = g_new0(PanFilterCallbackState, 1);
+	auto cb_state = g_new0(PanFilterCallbackState, 1);
 	cb_state->pw = pw;
 	cb_state->filter_element = g_list_last(ui->filter_elements);
 
@@ -213,7 +213,7 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 
 void pan_filter_toggle_cb(GtkWidget *button, gpointer data)
 {
-	PanWindow *pw = (PanWindow *)data;
+	auto pw = (PanWindow *)data;
 	PanViewFilterUi *ui = pw->filter_ui;
 	gboolean visible;
 	GtkWidget *parent;
@@ -283,7 +283,7 @@ void pan_filter_toggle_cb(GtkWidget *button, gpointer data)
 
 void pan_filter_toggle_button_cb(GtkWidget *UNUSED(button), gpointer data)
 {
-	PanWindow *pw = (PanWindow *)data;
+	auto pw = (PanWindow *)data;
 	PanViewFilterUi *ui = pw->filter_ui;
 
 	gint old_classes = ui->filter_classes;
@@ -306,7 +306,7 @@ static gboolean pan_view_list_contains_kw_pattern(GList *haystack, PanViewFilter
 		GList *work = g_list_first(haystack);
 		while (work)
 			{
-			gchar *keyword = static_cast<gchar *>(work->data);
+			auto keyword = static_cast<gchar *>(work->data);
 			work = work->next;
 			if (g_regex_match(filter->kw_regex, keyword, GRegexMatchFlags(0), NULL))
 				{
@@ -340,7 +340,7 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 	work = *fd_list;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		GList *last_work = work;
 		work = work->next;
 
@@ -361,7 +361,7 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 
 			while (filter_element)
 				{
-				PanViewFilterElement *filter = static_cast<PanViewFilterElement *>(filter_element->data);
+				auto filter = static_cast<PanViewFilterElement *>(filter_element->data);
 				filter_element = filter_element->next;
 				gchar *found_kw = NULL;
 				gboolean has_kw = pan_view_list_contains_kw_pattern(img_keywords, filter, &found_kw);

@@ -356,7 +356,7 @@ static HistoryData *history_list_find_by_key(const gchar *key)
 
 	while (work)
 		{
-		HistoryData *hd = static_cast<HistoryData *>(work->data);
+		auto hd = static_cast<HistoryData *>(work->data);
 		if (strcmp(hd->key, key) == 0) return hd;
 		work = work->next;
 		}
@@ -403,7 +403,7 @@ void history_list_add_to_key(const gchar *key, const gchar *path, gint max)
 	work = hd->list;
 	while (work)
 		{
-		gchar *buf = static_cast<gchar *>(work->data);
+		auto buf = static_cast<gchar *>(work->data);
 
 		if (strcmp(buf, path) == 0)
 			{
@@ -459,7 +459,7 @@ void history_list_item_change(const gchar *key, const gchar *oldpath, const gcha
 	work = hd->list;
 	while (work)
 		{
-		gchar *buf = static_cast<gchar *>(work->data);
+		auto buf = static_cast<gchar *>(work->data);
 
 		if (!(g_str_has_prefix(buf, ".") && !newpath))
 			{
@@ -500,7 +500,7 @@ void history_list_item_move(const gchar *key, const gchar *path, gint direction)
 	work = hd->list;
 	while (work)
 		{
-		gchar *buf = static_cast<gchar *>(work->data);
+		auto buf = static_cast<gchar *>(work->data);
 		if (strcmp(buf, path) == 0)
 			{
 			p += direction;

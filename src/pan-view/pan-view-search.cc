@@ -30,7 +30,7 @@
 
 PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 {
-	PanViewSearchUi *ui = g_new0(PanViewSearchUi, 1);
+	auto ui = g_new0(PanViewSearchUi, 1);
 	GtkWidget *combo;
 	GtkWidget *hbox;
 
@@ -386,7 +386,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 void pan_search_activate_cb(const gchar *text, gpointer data)
 {
-	PanWindow *pw = (PanWindow *)data;
+	auto pw = (PanWindow *)data;
 
 	if (!text) return;
 
@@ -417,7 +417,7 @@ void pan_search_activate(PanWindow *pw)
 
 void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 {
-	PanWindow *pw = (PanWindow *)data;
+	auto pw = (PanWindow *)data;
 	PanViewSearchUi *ui = pw->search_ui;
 	gboolean visible;
 	GtkWidget *parent;

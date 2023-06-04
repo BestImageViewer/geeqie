@@ -138,7 +138,7 @@ const gchar *histogram_label(Histogram *histogram)
 
 static HistMap *histmap_new(void)
 {
-	HistMap *histmap = g_new0(HistMap, 1);
+	auto histmap = g_new0(HistMap, 1);
 	return histmap;
 }
 
@@ -204,7 +204,7 @@ const HistMap *histmap_get(FileData *fd)
 
 static gboolean histmap_idle_cb(gpointer data)
 {
-	FileData *fd = static_cast<FileData *>(data);
+	auto fd = static_cast<FileData *>(data);
 	if (histmap_read(fd->histmap, FALSE))
 		{
 		/* finished */

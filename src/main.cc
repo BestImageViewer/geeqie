@@ -613,7 +613,7 @@ static void parse_command_line(gint argc, gchar *argv[])
 
 			while (work)
 				{
-				gchar *opt = static_cast<gchar *>(work->data);
+				auto opt = static_cast<gchar *>(work->data);
 
 				command_line_errors = g_string_append(command_line_errors, opt);
 				command_line_errors = g_string_append(command_line_errors, "\n");
@@ -896,7 +896,7 @@ static void gq_accel_map_print(
 		    gboolean	changed)
 {
 	GString *gstring = g_string_new(changed ? NULL : "; ");
-	SecureSaveInfo *ssi = static_cast<SecureSaveInfo *>(data);
+	auto ssi = static_cast<SecureSaveInfo *>(data);
 	gchar *tmp, *name;
 
 	g_string_append(gstring, "(gtk_accel_path \"");

@@ -40,8 +40,8 @@ static gboolean collection_save_confirmed(FileDialog *fd, gboolean overwrite, Co
 
 static void collection_confirm_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	FileDialog *fd = static_cast<FileDialog *>(data);
-	CollectionData *cd = static_cast<CollectionData *>(GENERIC_DIALOG(fd)->data);
+	auto fd = static_cast<FileDialog *>(data);
+	auto cd = static_cast<CollectionData *>(GENERIC_DIALOG(fd)->data);
 
 	if (!collection_save_confirmed(fd, TRUE, cd))
 		{
@@ -103,7 +103,7 @@ static gboolean collection_save_confirmed(FileDialog *fd, gboolean overwrite, Co
 
 static void collection_save_cb(FileDialog *fd, gpointer data)
 {
-	CollectionData *cd = static_cast<CollectionData *>(data);
+	auto cd = static_cast<CollectionData *>(data);
 	const gchar *path;
 
 	path = fd->dest_path;
@@ -122,7 +122,7 @@ static void collection_save_cb(FileDialog *fd, gpointer data)
 
 static void real_collection_button_pressed(FileDialog *fd, gpointer data, gint append)
 {
-	CollectionData *cd = static_cast<CollectionData *>(data);
+	auto cd = static_cast<CollectionData *>(data);
 	gboolean err = FALSE;
 	gchar *text = NULL;
 
@@ -177,7 +177,7 @@ static void collection_append_cb(FileDialog *fd, gpointer data)
 
 static void collection_save_or_load_dialog_close_cb(FileDialog *fd, gpointer data)
 {
-	CollectionData *cd = static_cast<CollectionData *>(data);
+	auto cd = static_cast<CollectionData *>(data);
 
 	if (cd) collection_unref(cd);
 	file_dialog_close(fd);

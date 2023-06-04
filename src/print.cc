@@ -79,7 +79,7 @@ static gboolean print_job_render_image(PrintWindow *pw);
 
 static void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	GdkPixbuf *pixbuf;
 
 	pixbuf = image_loader_get_pixbuf(il);
@@ -175,7 +175,7 @@ static gint set_toggle(GSList *list, TextPosition pos)
 
 static void image_text_position_h1_cb(GtkWidget *widget, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -191,7 +191,7 @@ static void image_text_position_h1_cb(GtkWidget *widget, gpointer data)
 
 static void image_text_position_h2_cb(GtkWidget *widget, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -207,7 +207,7 @@ static void image_text_position_h2_cb(GtkWidget *widget, gpointer data)
 
 static void image_text_position_f1_cb(GtkWidget *widget, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -223,7 +223,7 @@ static void image_text_position_f1_cb(GtkWidget *widget, gpointer data)
 
 static void image_text_position_f2_cb(GtkWidget *widget, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -239,7 +239,7 @@ static void image_text_position_f2_cb(GtkWidget *widget, gpointer data)
 
 static void page_text_position_h1_cb(GtkWidget *widget, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -255,7 +255,7 @@ static void page_text_position_h1_cb(GtkWidget *widget, gpointer data)
 
 static void page_text_position_h2_cb(GtkWidget *widget, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -271,7 +271,7 @@ static void page_text_position_h2_cb(GtkWidget *widget, gpointer data)
 
 static void page_text_position_f1_cb(GtkWidget *widget, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -287,7 +287,7 @@ static void page_text_position_f1_cb(GtkWidget *widget, gpointer data)
 
 static void page_text_position_f2_cb(GtkWidget *widget, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -464,7 +464,7 @@ static gboolean paginate_cb(GtkPrintOperation *UNUSED(operation),
 									GtkPrintContext *UNUSED(context),
 									gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 
 	if (pw->job_render_finished)
 		{
@@ -542,7 +542,7 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 static void draw_page(GtkPrintOperation *UNUSED(operation), GtkPrintContext *context,
 									gint page_nr, gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	FileData *fd;
 	cairo_t *cr;
 	gdouble context_width, context_height;
@@ -757,7 +757,7 @@ static void begin_print(GtkPrintOperation *operation,
 						GtkPrintContext *UNUSED(context),
 						gpointer user_data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(user_data);
+	auto pw = static_cast<PrintWindow *>(user_data);
 	gint page_count;
 
 	page_count = print_layout_page_count(pw);
@@ -769,7 +769,7 @@ static void begin_print(GtkPrintOperation *operation,
 
 GObject *option_tab_cb(GtkPrintOperation *UNUSED(operation), gpointer user_data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(user_data);
+	auto pw = static_cast<PrintWindow *>(user_data);
 
 	return G_OBJECT(pw->vbox);
 }
@@ -789,7 +789,7 @@ static void print_pref_store(PrintWindow *pw)
 static void end_print_cb(GtkPrintOperation *operation,
 								GtkPrintContext *UNUSED(context), gpointer data)
 {
-	PrintWindow *pw = static_cast<PrintWindow *>(data);
+	auto pw = static_cast<PrintWindow *>(data);
 	GList *work;
 	GdkPixbuf *pixbuf;
 	gchar *path;

@@ -58,7 +58,7 @@ static void generic_dialog_save_window(const gchar *title, const gchar *role, gi
 	work = g_list_first(dialog_windows);
 	while (work)
 		{
-		DialogWindow *dw = static_cast<DialogWindow *>(work->data);
+		auto dw = static_cast<DialogWindow *>(work->data);
 		if (g_strcmp0(dw->title ,title) == 0 && g_strcmp0(dw->role, role) == 0)
 			{
 			dw->x = x;
@@ -70,7 +70,7 @@ static void generic_dialog_save_window(const gchar *title, const gchar *role, gi
 		work = work->next;
 		}
 
-	DialogWindow *dw = g_new0(DialogWindow, 1);
+	auto dw = g_new0(DialogWindow, 1);
 	dw->title = g_strdup(title);
 	dw->role = g_strdup(role);
 	dw->x = x;
@@ -88,7 +88,7 @@ static gboolean generic_dialog_find_window(const gchar *title, const gchar *role
 	work = g_list_first(dialog_windows);
 	while (work)
 		{
-		DialogWindow *dw = static_cast<DialogWindow *>(work->data);
+		auto dw = static_cast<DialogWindow *>(work->data);
 
 		if (g_strcmp0(dw->title,title) == 0 && g_strcmp0(dw->role, role) == 0)
 			{
@@ -132,7 +132,7 @@ void generic_dialog_close(GenericDialog *gd)
 
 static void generic_dialog_click_cb(GtkWidget *widget, gpointer data)
 {
-	GenericDialog *gd = static_cast<GenericDialog *>(data);
+	auto gd = static_cast<GenericDialog *>(data);
 	void (*func)(GenericDialog *, gpointer);
 	gboolean auto_close;
 
@@ -145,7 +145,7 @@ static void generic_dialog_click_cb(GtkWidget *widget, gpointer data)
 
 static gboolean generic_dialog_default_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-	GenericDialog *gd = static_cast<GenericDialog *>(data);
+	auto gd = static_cast<GenericDialog *>(data);
 
 	if (event->keyval == GDK_KEY_Return && gtk_widget_has_focus(widget)
 	    && gd->default_cb)
@@ -170,7 +170,7 @@ void generic_dialog_attach_default(GenericDialog *gd, GtkWidget *widget)
 
 static gboolean generic_dialog_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-	GenericDialog *gd = static_cast<GenericDialog *>(data);
+	auto gd = static_cast<GenericDialog *>(data);
 	gboolean auto_close = gd->auto_close;
 
 	if (event->keyval == GDK_KEY_Escape)
@@ -191,7 +191,7 @@ static gboolean generic_dialog_key_press_cb(GtkWidget *widget, GdkEventKey *even
 
 static gboolean generic_dialog_delete_cb(GtkWidget *UNUSED(w), GdkEventAny *UNUSED(event), gpointer data)
 {
-	GenericDialog *gd = static_cast<GenericDialog *>(data);
+	auto gd = static_cast<GenericDialog *>(data);
 	gboolean auto_close;
 
 	auto_close = gd->auto_close;
@@ -204,7 +204,7 @@ static gboolean generic_dialog_delete_cb(GtkWidget *UNUSED(w), GdkEventAny *UNUS
 
 static void generic_dialog_show_cb(GtkWidget *widget, gpointer data)
 {
-	GenericDialog *gd = static_cast<GenericDialog *>(data);
+	auto gd = static_cast<GenericDialog *>(data);
 	if (gd->cancel_button)
 		{
 		gtk_box_reorder_child(GTK_BOX(gd->hbox), gd->cancel_button, -1);
@@ -314,7 +314,7 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_stock
 
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	DialogWindow *dw =  g_new0(DialogWindow, 1);
+	auto dw =  g_new0(DialogWindow, 1);
 	gchar *title = NULL;
 	gchar *role = NULL;
 	gint x = 0;
@@ -361,7 +361,7 @@ void generic_dialog_windows_write_config(GString *outstr, gint indent)
 		work = g_list_first(dialog_windows);
 		while (work)
 			{
-			DialogWindow *dw = static_cast<DialogWindow *>(work->data);
+			auto dw = static_cast<DialogWindow *>(work->data);
 			WRITE_NL(); WRITE_STRING("<window ");
 			write_char_option(outstr, indent + 1, "title", dw->title);
 			write_char_option(outstr, indent + 1, "role", dw->role);
@@ -532,7 +532,7 @@ struct _AppImageData
 
 static gboolean appimage_notification_close_cb(gpointer data)
 {
-	AppImageData *appimage_data = static_cast<AppImageData *>(data);
+	auto appimage_data = static_cast<AppImageData *>(data);
 
 	if (appimage_data->window && gtk_window_get_opacity(GTK_WINDOW(appimage_data->window)) != 0)
 		{
@@ -555,7 +555,7 @@ static gboolean appimage_notification_close_cb(gpointer data)
 
 static gboolean appimage_notification_fade_cb(gpointer data)
 {
-	AppImageData *appimage_data = static_cast<AppImageData *>(data);
+	auto appimage_data = static_cast<AppImageData *>(data);
 
 	gtk_window_set_opacity(GTK_WINDOW(appimage_data->window), (gtk_window_get_opacity(GTK_WINDOW(appimage_data->window)) - 0.02));
 
@@ -571,7 +571,7 @@ static gboolean appimage_notification_fade_cb(gpointer data)
 
 static gboolean user_close_cb(GtkWidget *UNUSED(widget), GdkEvent *UNUSED(event), gpointer data)
 {
-	AppImageData *appimage_data = static_cast<AppImageData *>(data);
+	auto appimage_data = static_cast<AppImageData *>(data);
 
 	g_idle_add(appimage_notification_close_cb, appimage_data);
 
@@ -620,7 +620,7 @@ static void show_notification_message(gchar *version_string_from_file, AppImageD
 #ifdef __arm__
 static void appimage_data_arm_read_line_async_ready_cb(GObject *source_object, GAsyncResult *res, gpointer data)
 {
-	AppImageData *appimage_data = static_cast<AppImageData *>(data);
+	auto appimage_data = static_cast<AppImageData *>(data);
 	gsize length;
 	gchar *result;
 
@@ -641,7 +641,7 @@ static void appimage_data_arm_read_line_async_ready_cb(GObject *source_object, G
 
 static void appimage_data_x86_read_line_async_ready_cb(GObject *UNUSED(source_object), GAsyncResult *res, gpointer data)
 {
-	AppImageData *appimage_data = static_cast<AppImageData *>(data);
+	auto appimage_data = static_cast<AppImageData *>(data);
 	gsize length;
 	gchar *result;
 
@@ -667,7 +667,7 @@ static void appimage_data_x86_read_line_async_ready_cb(GObject *UNUSED(source_ob
 
 static void appimage_notification_func(gpointer data, gpointer UNUSED(user_data))
 {
-	AppImageData *appimage_data = static_cast<AppImageData *>(data);
+	auto appimage_data = static_cast<AppImageData *>(data);
 	GNetworkMonitor *net_mon;
 	GSocketConnectable *geeqie_github_io;
 	gboolean internet_available = FALSE;
@@ -745,14 +745,14 @@ GtkWidget *file_dialog_add_button(FileDialog *fdlg, const gchar *stock_id, const
 
 static void file_dialog_entry_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	FileDialog *fdlg = static_cast<FileDialog *>(data);
+	auto fdlg = static_cast<FileDialog *>(data);
 	g_free(fdlg->dest_path);
 	fdlg->dest_path = remove_trailing_slash(gtk_entry_get_text(GTK_ENTRY(fdlg->entry)));
 }
 
 static void file_dialog_entry_enter_cb(const gchar *UNUSED(path), gpointer data)
 {
-	GenericDialog *gd = static_cast<GenericDialog *>(data);
+	auto gd = static_cast<GenericDialog *>(data);
 
 	file_dialog_entry_cb(NULL, data);
 

@@ -174,7 +174,7 @@ static void command_store_populate(SarData* sar)
 
 static gboolean search_and_run_destroy(gpointer data)
 {
-	SarData *sar = static_cast<SarData *>(data);
+	auto sar = static_cast<SarData *>(data);
 
 	sar->lw->sar_window = NULL;
 	gtk_widget_destroy(sar->window);
@@ -184,7 +184,7 @@ static gboolean search_and_run_destroy(gpointer data)
 
 static gboolean entry_box_activate_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	SarData *sar = static_cast<SarData *>(data);
+	auto sar = static_cast<SarData *>(data);
 
 	if (sar->action)
 		{
@@ -198,7 +198,7 @@ static gboolean entry_box_activate_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static gboolean keypress_cb(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer data)
 {
-	SarData *sar = static_cast<SarData *>(data);
+	auto sar = static_cast<SarData *>(data);
 	gboolean ret = FALSE;
 
 	switch (event->keyval)
@@ -219,7 +219,7 @@ static gboolean keypress_cb(GtkWidget *UNUSED(widget), GdkEventKey *event, gpoin
 
 static gboolean match_selected_cb(GtkEntryCompletion *UNUSED(widget), GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
-	SarData *sar = static_cast<SarData *>(data);
+	auto sar = static_cast<SarData *>(data);
 
 	gtk_tree_model_get(GTK_TREE_MODEL(model), iter, SAR_ACTION, &sar->action, -1);
 
@@ -235,7 +235,7 @@ static gboolean match_selected_cb(GtkEntryCompletion *UNUSED(widget), GtkTreeMod
 
 static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, GtkTreeIter *iter, gpointer data)
 {
-	SarData *sar = static_cast<SarData *>(data);
+	auto sar = static_cast<SarData *>(data);
 	gboolean ret = FALSE;
 	gchar *normalized;
 	GtkTreeModel *model;

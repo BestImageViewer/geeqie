@@ -76,7 +76,7 @@ static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
 
 	while (work)
 		{
-		const EditorDescription *editor = static_cast<const EditorDescription *>(work->data);
+		auto editor = static_cast<const EditorDescription *>(work->data);
 		work = work->next;
 		gboolean active = TRUE;
 
@@ -416,11 +416,11 @@ GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data)
 
 /**
  * @brief Add submenu consisting of "New collection", and list of existing collections to a right-click menu.
- * @param[in] menu 
- * @param[in] func 
+ * @param[in] menu
+ * @param[in] func
  * @param[in] collection_list Type gchar
- * @param[in] data 
- * 
+ * @param[in] data
+ *
  *  Used by all image windows
  */
 static void add_collection_list(GtkWidget *menu, GCallback func,
@@ -432,7 +432,7 @@ static void add_collection_list(GtkWidget *menu, GCallback func,
 	work = collection_list;
 	while (work)
 		{
-		const gchar *collection_name = static_cast<const gchar *>(work->data);
+		auto collection_name = static_cast<const gchar *>(work->data);
 
 		menu_item_add(menu, collection_name, func,
 													GINT_TO_POINTER(index));
@@ -472,8 +472,8 @@ GtkWidget *submenu_add_collections(GtkWidget *menu, GtkWidget **menu_item,
  * @brief Add file selection list to a collection
  * @param[in] selection_list Selection list of ::_FileData
  * @param[in] data Index to the collection list menu item selected, or -1 for new collection
- * 
- * 
+ *
+ *
  */
 void pop_menu_collections(GList *selection_list, gpointer data)
 {

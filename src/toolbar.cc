@@ -156,12 +156,12 @@ static const UseableToolbarItems useable_toolbar_items[] = {
  * @param data Pointer to vbox list item
  * @param up Up/Down movement
  * @param single_step Move up/down one step, or to top/bottom
- * 
+ *
  */
 static void toolbar_item_move(GtkWidget *UNUSED(widget), gpointer data,
 									gboolean up, gboolean single_step)
 {
-	GtkWidget *list_item = static_cast<GtkWidget *>(data);
+	auto list_item = static_cast<GtkWidget *>(data);
 	GtkWidget *box;
 	gint pos = 0;
 
@@ -231,7 +231,7 @@ static void toolbar_menu_popup(GtkWidget *widget)
 
 static gboolean toolbar_press_cb(GtkGesture *UNUSED(gesture), int UNUSED(n_press), double UNUSED(x), double UNUSED(y), gpointer data)
 {
-	ToolbarButtonData *button_data = static_cast<ToolbarButtonData *>(data);
+	auto button_data = static_cast<ToolbarButtonData *>(data);
 
 	toolbar_menu_popup(button_data->button);
 
@@ -347,10 +347,10 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 
 static void toolbarlist_add_cb(GtkWidget *widget, gpointer data)
 {
-	const gchar *name = static_cast<const gchar *>(g_object_get_data(G_OBJECT(widget), "toolbar_add_name"));
-	const gchar *label = static_cast<const gchar *>(g_object_get_data(G_OBJECT(widget), "toolbar_add_label"));
-	const gchar *stock_id = static_cast<const gchar *>(g_object_get_data(G_OBJECT(widget), "toolbar_add_stock_id"));
-	ToolbarData *tbbd = static_cast<ToolbarData *>(data);
+	auto name = static_cast<const gchar *>(g_object_get_data(G_OBJECT(widget), "toolbar_add_name"));
+	auto label = static_cast<const gchar *>(g_object_get_data(G_OBJECT(widget), "toolbar_add_label"));
+	auto stock_id = static_cast<const gchar *>(g_object_get_data(G_OBJECT(widget), "toolbar_add_stock_id"));
+	auto tbbd = static_cast<ToolbarData *>(data);
 
 	toolbarlist_add_button(name, label, stock_id, GTK_BOX(tbbd->vbox));
 }
@@ -366,7 +366,7 @@ static void get_desktop_data(const gchar *name, gchar **label, gchar **stock_id)
 	work = editors_list;
 	while (work)
 		{
-		const EditorDescription *editor = static_cast<const EditorDescription *>(work->data);
+		auto editor = static_cast<const EditorDescription *>(work->data);
 
 		if (g_strcmp0(name, editor->key) == 0)
 			{
@@ -384,7 +384,7 @@ static void toolbar_menu_add_popup(GtkWidget *UNUSED(widget), gpointer data)
 	GtkWidget *menu;
 	GList *editors_list;
 	GList *work;
-	ToolbarData *toolbarlist = static_cast<ToolbarData *>(data);
+	auto toolbarlist = static_cast<ToolbarData *>(data);
 	const UseableToolbarItems *list = useable_toolbar_items;
 
 	menu = popup_menu_short_lived();
@@ -407,7 +407,7 @@ static void toolbar_menu_add_popup(GtkWidget *UNUSED(widget), gpointer data)
 	work = editors_list;
 	while (work)
 		{
-		const EditorDescription *editor = static_cast<const EditorDescription *>(work->data);
+		auto editor = static_cast<const EditorDescription *>(work->data);
 
 		GtkWidget *item;
 		gchar *icon = g_strconcat(editor->icon, ".desktop", NULL);
@@ -427,7 +427,7 @@ static void toolbar_menu_add_popup(GtkWidget *UNUSED(widget), gpointer data)
 
 static gboolean toolbar_menu_add_cb(GtkWidget *widget, gpointer data)
 {
-	ToolbarData *toolbarlist = static_cast<ToolbarData *>(data);
+	auto toolbarlist = static_cast<ToolbarData *>(data);
 
 	toolbar_menu_add_popup(widget, toolbarlist);
 	return TRUE;
@@ -436,7 +436,7 @@ static gboolean toolbar_menu_add_cb(GtkWidget *widget, gpointer data)
 /**
  * @brief For each layoutwindow, clear toolbar and reload with current selection
  * @param bar Main or Status toolbar
- * 
+ *
  */
 void toolbar_apply(ToolbarType bar)
 {
@@ -454,7 +454,7 @@ void toolbar_apply(ToolbarType bar)
 		work_toolbar = gtk_container_get_children(GTK_CONTAINER(toolbarlist[bar]->vbox));
 		while (work_toolbar)
 			{
-			GtkButton *button = static_cast<GtkButton *>(work_toolbar->data);
+			auto button = static_cast<GtkButton *>(work_toolbar->data);
 			ToolbarButtonData *tbbd;
 
 			tbbd = static_cast<ToolbarButtonData *>(g_object_get_data(G_OBJECT(button),"toolbarbuttondata"));
@@ -471,10 +471,10 @@ void toolbar_apply(ToolbarType bar)
 
 /**
  * @brief Load the current toolbar items into the vbox
- * @param lw 
+ * @param lw
  * @param box The vbox displayed in the preferences Toolbar tab
  * @param bar Main or Status toolbar
- * 
+ *
  * Get the current contents of the toolbar, both menu items
  * and desktop items, and load them into the vbox
  */
@@ -484,7 +484,7 @@ static void toolbarlist_populate(LayoutWindow *lw, GtkBox *box, ToolbarType bar)
 
 	while (work)
 		{
-		gchar *name = static_cast<gchar *>(work->data);
+		auto name = static_cast<gchar *>(work->data);
 		gchar *label;
 		gchar *icon;
 		work = work->next;

@@ -331,7 +331,7 @@ struct _HelpSearchData {
 static void help_search_window_show_icon_press(GtkEntry *UNUSED(entry), GtkEntryIconPosition UNUSED(pos),
 									GdkEvent *UNUSED(event), gpointer userdata)
 {
-	HelpSearchData *hsd = static_cast<HelpSearchData *>(userdata);
+	auto hsd = static_cast<HelpSearchData *>(userdata);
 
 	g_free(hsd->text_entry);
 	hsd->text_entry = g_strdup("");
@@ -340,7 +340,7 @@ static void help_search_window_show_icon_press(GtkEntry *UNUSED(entry), GtkEntry
 
 static void help_search_window_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	HelpSearchData *hsd = static_cast<HelpSearchData *>(data);
+	auto hsd = static_cast<HelpSearchData *>(data);
 	gchar *search_command;
 
 	search_command = g_strconcat(options->help_search_engine,
@@ -354,7 +354,7 @@ static void help_search_window_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
 
 static void help_search_window_cancel_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	HelpSearchData *hsd = static_cast<HelpSearchData *>(data);
+	auto hsd = static_cast<HelpSearchData *>(data);
 
 	g_free(hsd);
 }

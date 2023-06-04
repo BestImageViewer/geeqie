@@ -198,7 +198,7 @@ static gchar *bookmark_string(const gchar *name, const gchar *path, const gchar 
 
 static void bookmark_select_cb(GtkWidget *button, gpointer data)
 {
-	BookMarkData *bm = static_cast<BookMarkData *>(data);
+	auto bm = static_cast<BookMarkData *>(data);
 	BookButtonData *b;
 
 	b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
@@ -209,7 +209,7 @@ static void bookmark_select_cb(GtkWidget *button, gpointer data)
 
 static void bookmark_edit_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	BookPropData *p = static_cast<BookPropData *>(data);
+	auto p = static_cast<BookPropData *>(data);
 
 	bookmark_free(p->bb);
 	g_free(p);
@@ -221,7 +221,7 @@ static void bookmark_edit_cancel_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(d
 
 static void bookmark_edit_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	BookPropData *p = static_cast<BookPropData *>(data);
+	auto p = static_cast<BookPropData *>(data);
 	const gchar *name;
 	gchar *path;
 	const gchar *icon;
@@ -341,7 +341,7 @@ static void bookmark_move(BookMarkData *bm, GtkWidget *button, gint direction)
 
 static void bookmark_menu_prop_cb(GtkWidget *widget, gpointer data)
 {
-	BookMarkData *bm = static_cast<BookMarkData *>(data);
+	auto bm = static_cast<BookMarkData *>(data);
 
 	if (!bm->active_button) return;
 
@@ -367,7 +367,7 @@ static void bookmark_menu_down_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static void bookmark_menu_remove_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	BookMarkData *bm = static_cast<BookMarkData *>(data);
+	auto bm = static_cast<BookMarkData *>(data);
 
 	if (!bm->active_button) return;
 
@@ -408,7 +408,7 @@ static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button,
 
 static gboolean bookmark_press_cb(GtkWidget *button, GdkEventButton *event, gpointer data)
 {
-	BookMarkData *bm = static_cast<BookMarkData *>(data);
+	auto bm = static_cast<BookMarkData *>(data);
 
 	if (event->button != MOUSE_BUTTON_RIGHT) return FALSE;
 
@@ -419,7 +419,7 @@ static gboolean bookmark_press_cb(GtkWidget *button, GdkEventButton *event, gpoi
 
 static gboolean bookmark_keypress_cb(GtkWidget *button, GdkEventKey *event, gpointer data)
 {
-	BookMarkData *bm = static_cast<BookMarkData *>(data);
+	auto bm = static_cast<BookMarkData *>(data);
 
 	switch (event->keyval)
 		{
@@ -453,7 +453,7 @@ static void bookmark_drag_set_data(GtkWidget *button,
 				   GdkDragContext *context, GtkSelectionData *selection_data,
 				   guint UNUSED(info), guint UNUSED(time), gpointer data)
 {
-	BookMarkData *bm = static_cast<BookMarkData *>(data);
+	auto bm = static_cast<BookMarkData *>(data);
 	BookButtonData *b;
 	GList *list = NULL;
 
@@ -721,7 +721,7 @@ static void bookmark_dnd_get_data(GtkWidget *UNUSED(widget),
 				  GtkSelectionData *selection_data, guint UNUSED(info),
 				  guint UNUSED(time), gpointer data)
 {
-	BookMarkData *bm = static_cast<BookMarkData *>(data);
+	auto bm = static_cast<BookMarkData *>(data);
 	GList *list = NULL;
 	GList *errors = NULL;
 	GList *work;
@@ -744,7 +744,7 @@ static void bookmark_dnd_get_data(GtkWidget *UNUSED(widget),
 		work = list;
 		while (work)
 			{
-			gchar *path = static_cast<gchar *>(work->data);
+			auto path = static_cast<gchar *>(work->data);
 			gchar *buf;
 
 			work = work->next;
@@ -778,7 +778,7 @@ static void bookmark_dnd_get_data(GtkWidget *UNUSED(widget),
 
 static void bookmark_list_destroy(GtkWidget *UNUSED(widget), gpointer data)
 {
-	BookMarkData *bm = static_cast<BookMarkData *>(data);
+	auto bm = static_cast<BookMarkData *>(data);
 
 	bookmark_widget_list = g_list_remove(bookmark_widget_list, bm);
 
@@ -946,7 +946,7 @@ struct _HistoryComboData
 
 static void history_combo_destroy(GtkWidget *UNUSED(widget), gpointer data)
 {
-	HistoryComboData *hc = static_cast<HistoryComboData *>(data);
+	auto hc = static_cast<HistoryComboData *>(data);
 
 	g_free(hc->history_key);
 	g_free(data);

@@ -92,7 +92,7 @@ static FilterEntry *filter_get_by_key(const gchar *key)
 	work = filter_list;
 	while (work)
 		{
-		FilterEntry *fe = static_cast<FilterEntry *>(work->data);
+		auto fe = static_cast<FilterEntry *>(work->data);
 		work = work->next;
 
 		if (strcmp(fe->key, key) == 0) return fe;
@@ -139,7 +139,7 @@ static void filter_add_if_missing(const gchar *key, const gchar *description, co
 	work = filter_list;
 	while (work)
 		{
-		FilterEntry *fe = static_cast<FilterEntry *>(work->data);
+		auto fe = static_cast<FilterEntry *>(work->data);
 		work = work->next;
 		if (fe->key && strcmp(fe->key, key) == 0)
 			{
@@ -165,7 +165,7 @@ void filter_reset(void)
 	work = filter_list;
 	while (work)
 		{
-		FilterEntry *fe = static_cast<FilterEntry *>(work->data);
+		auto fe = static_cast<FilterEntry *>(work->data);
 		work = work->next;
 		filter_entry_free(fe);
 		}
@@ -358,8 +358,8 @@ GList *filter_to_list(const gchar *extensions)
 
 static gint filter_sort_ext_len_cb(gconstpointer a, gconstpointer b)
 {
-	gchar *sa = (gchar *)a;
-	gchar *sb = (gchar *)b;
+	auto sa = (gchar *)a;
+	auto sb = (gchar *)b;
 
 	gint len_a = strlen(sa);
 	gint len_b = strlen(sb);
@@ -445,7 +445,7 @@ static const gchar *filter_name_find(GList *filter, const gchar *name)
 	work = filter;
 	while (work)
 		{
-		gchar *filter = static_cast<gchar *>(work->data);
+		auto filter = static_cast<gchar *>(work->data);
 		guint lf = strlen(filter);
 
 		if (ln >= lf)
@@ -513,7 +513,7 @@ void filter_write_list(GString *outstr, gint indent)
 	work = filter_list;
 	while (work)
 		{
-		FilterEntry *fe = static_cast<FilterEntry *>(work->data);
+		auto fe = static_cast<FilterEntry *>(work->data);
 		work = work->next;
 
 		WRITE_NL(); WRITE_STRING("<file_type ");
@@ -583,7 +583,7 @@ static void sidecar_ext_free_list(void)
 	work = sidecar_ext_list;
 	while (work)
 		{
-		gchar *ext = static_cast<gchar *>(work->data);
+		auto ext = static_cast<gchar *>(work->data);
 		work = work->next;
 		g_free(ext);
 		}

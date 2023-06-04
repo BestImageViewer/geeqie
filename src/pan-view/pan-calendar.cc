@@ -244,7 +244,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 
 	if (list)
 		{
-		FileData *fd = static_cast<FileData *>(list->data);
+		auto fd = static_cast<FileData *>(list->data);
 
 		year = pan_date_value(fd->date, PAN_DATE_LENGTH_YEAR);
 		month = pan_date_value(fd->date, PAN_DATE_LENGTH_MONTH);
@@ -253,7 +253,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 	work = g_list_last(list);
 	if (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		end_year = pan_date_value(fd->date, PAN_DATE_LENGTH_YEAR);
 		end_month = pan_date_value(fd->date, PAN_DATE_LENGTH_MONTH);
 		}

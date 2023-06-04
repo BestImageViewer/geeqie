@@ -666,7 +666,7 @@ static gboolean thumb_loader_std_next_source(ThumbLoaderStd *tl, gboolean remove
 
 static void thumb_loader_std_done_cb(ImageLoader *il, gpointer data)
 {
-	ThumbLoaderStd *tl = static_cast<ThumbLoaderStd *>(data);
+	auto tl = static_cast<ThumbLoaderStd *>(data);
 	GdkPixbuf *pixbuf;
 
 	DEBUG_1("thumb image done: %s", tl->fd ? tl->fd->path : "???");
@@ -701,7 +701,7 @@ static void thumb_loader_std_done_cb(ImageLoader *il, gpointer data)
 
 static void thumb_loader_std_error_cb(ImageLoader *il, gpointer data)
 {
-	ThumbLoaderStd *tl = static_cast<ThumbLoaderStd *>(data);
+	auto tl = static_cast<ThumbLoaderStd *>(data);
 
 	/* if at least some of the image is available, go to done */
 	if (image_loader_get_pixbuf(tl->il) != NULL)
@@ -722,7 +722,7 @@ static void thumb_loader_std_error_cb(ImageLoader *il, gpointer data)
 
 static void thumb_loader_std_progress_cb(ImageLoader *UNUSED(il), gdouble percent, gpointer data)
 {
-	ThumbLoaderStd *tl = static_cast<ThumbLoaderStd *>(data);
+	auto tl = static_cast<ThumbLoaderStd *>(data);
 
 	tl->progress = (gdouble)percent;
 
@@ -920,7 +920,7 @@ static void thumb_loader_std_thumb_file_validate_finish(ThumbValidate *tv, gbool
 
 static void thumb_loader_std_thumb_file_validate_done_cb(ThumbLoaderStd *UNUSED(tl), gpointer data)
 {
-	ThumbValidate *tv = static_cast<ThumbValidate *>(data);
+	auto tv = static_cast<ThumbValidate *>(data);
 	GdkPixbuf *pixbuf;
 	gboolean valid = FALSE;
 
@@ -978,14 +978,14 @@ static void thumb_loader_std_thumb_file_validate_done_cb(ThumbLoaderStd *UNUSED(
 
 static void thumb_loader_std_thumb_file_validate_error_cb(ThumbLoaderStd *UNUSED(tl), gpointer data)
 {
-	ThumbValidate *tv = static_cast<ThumbValidate *>(data);
+	auto tv = static_cast<ThumbValidate *>(data);
 
 	thumb_loader_std_thumb_file_validate_finish(tv, FALSE);
 }
 
 static gboolean thumb_loader_std_thumb_file_validate_idle_cb(gpointer data)
 {
-	ThumbValidate *tv = static_cast<ThumbValidate *>(data);
+	auto tv = static_cast<ThumbValidate *>(data);
 
 	tv->idle_id = 0;
 	thumb_loader_std_thumb_file_validate_finish(tv, FALSE);
@@ -1088,7 +1088,7 @@ static gboolean thumb_std_maint_move_idle(gpointer data);
 
 static void thumb_std_maint_move_validate_cb(const gchar *UNUSED(path), gboolean UNUSED(valid), gpointer data)
 {
-	TMaintMove *tm = static_cast<TMaintMove *>(data);
+	auto tm = static_cast<TMaintMove *>(data);
 	GdkPixbuf *pixbuf;
 
 	/* get the original thumbnail pixbuf (unrotated, with original options)

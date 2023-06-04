@@ -380,7 +380,7 @@ gboolean editor_read_desktop_file(const gchar *path)
 
 static gboolean editor_remove_desktop_file_cb(gpointer UNUSED(key), gpointer value, gpointer UNUSED(user_data))
 {
-	EditorDescription *editor = static_cast<EditorDescription *>(value);
+	auto editor = static_cast<EditorDescription *>(value);
 	return editor->hidden || editor->ignored;
 }
 
@@ -475,8 +475,8 @@ GList *editor_get_desktop_files(void)
 
 static void editor_list_add_cb(gpointer UNUSED(key), gpointer value, gpointer data)
 {
-	GList **listp = static_cast<GList **>(data);
-	EditorDescription *editor = static_cast<EditorDescription *>(value);
+	auto listp = static_cast<GList **>(data);
+	auto editor = static_cast<EditorDescription *>(value);
 
 	/* do not show the special commands in any list, they are called explicitly */
 	if (strcmp(editor->key, CMD_COPY) == 0 ||
@@ -495,8 +495,8 @@ static void editor_list_add_cb(gpointer UNUSED(key), gpointer value, gpointer da
 
 static gint editor_sort(gconstpointer a, gconstpointer b)
 {
-	const EditorDescription *ea = static_cast<const EditorDescription *>(a);
-	const EditorDescription *eb = static_cast<const EditorDescription *>(b);
+	auto ea = static_cast<const EditorDescription *>(a);
+	auto eb = static_cast<const EditorDescription *>(b);
 	gchar *caseless_name_ea;
 	gchar *caseless_name_eb;
 	gchar *collate_key_ea;
@@ -551,7 +551,7 @@ static void editor_data_free(EditorData *ed)
 
 static void editor_verbose_window_close(GenericDialog *gd, gpointer data)
 {
-	EditorData *ed = static_cast<EditorData *>(data);
+	auto ed = static_cast<EditorData *>(data);
 
 	generic_dialog_close(gd);
 	editor_verbose_data_free(ed);
@@ -560,7 +560,7 @@ static void editor_verbose_window_close(GenericDialog *gd, gpointer data)
 
 static void editor_verbose_window_stop(GenericDialog *UNUSED(gd), gpointer data)
 {
-	EditorData *ed = static_cast<EditorData *>(data);
+	auto ed = static_cast<EditorData *>(data);
 	ed->stopping = TRUE;
 	ed->count = 0;
 	editor_verbose_window_progress(ed, _("stopping..."));
@@ -657,7 +657,7 @@ static void editor_verbose_window_progress(EditorData *ed, const gchar *text)
 
 static gboolean editor_verbose_io_cb(GIOChannel *source, GIOCondition condition, gpointer data)
 {
-	EditorData *ed = static_cast<EditorData *>(data);
+	auto ed = static_cast<EditorData *>(data);
 	gchar buf[512];
 	gsize count;
 
@@ -724,7 +724,7 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 			while (work)
 				{
 				GList *work2;
-				gchar *ext = static_cast<gchar *>(work->data);
+				auto ext = static_cast<gchar *>(work->data);
 				work = work->next;
 
 				if (strcmp(ext, "*") == 0 ||
@@ -737,7 +737,7 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 				work2 = consider_sidecars ? fd->sidecar_files : NULL;
 				while (work2)
 					{
-					FileData *sfd = static_cast<FileData *>(work2->data);
+					auto sfd = static_cast<FileData *>(work2->data);
 					work2 = work2->next;
 
 					if (g_ascii_strcasecmp(ext, sfd->extension) == 0)
@@ -810,7 +810,7 @@ static GString *append_quoted(GString *str, const char *s, gboolean single_quote
 
 EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, gboolean consider_sidecars, gchar **output)
 {
-	EditorFlags flags = static_cast<EditorFlags>(0);
+	auto  flags = static_cast<EditorFlags>(0);
 	const gchar *p;
 	GString *result = NULL;
 	gboolean escape = FALSE;
@@ -898,7 +898,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 
 							while (!pathl && work)
 								{
-								FileData *fd = static_cast<FileData *>(work->data);
+								auto fd = static_cast<FileData *>(work->data);
 								pathl = editor_command_path_parse(fd,
 												  consider_sidecars,
 												  (*p == 'f') ? PATH_FILE : PATH_FILE_URL,
@@ -937,7 +937,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 
 						while (work)
 							{
-							FileData *fd = static_cast<FileData *>(work->data);
+							auto fd = static_cast<FileData *>(work->data);
 							pathl = editor_command_path_parse(fd, consider_sidecars, (*p == 'F') ? PATH_FILE : PATH_FILE_URL, editor);
 							if (pathl)
 								{
@@ -1029,7 +1029,7 @@ err:
 
 static void editor_child_exit_cb(GPid pid, gint status, gpointer data)
 {
-	EditorData *ed = static_cast<EditorData *>(data);
+	auto ed = static_cast<EditorData *>(data);
 	g_spawn_close_pid(pid);
 	ed->pid = -1;
 
@@ -1040,7 +1040,7 @@ static void editor_child_exit_cb(GPid pid, gint status, gpointer data)
 static EditorFlags editor_command_one(const EditorDescription *editor, GList *list, EditorData *ed)
 {
 	gchar *command;
-	FileData *fd = static_cast<FileData *>((ed->flags & EDITOR_NO_PARAM) ? NULL : list->data);;
+	auto fd = static_cast<FileData *>((ed->flags & EDITOR_NO_PARAM) ? NULL : list->data);;
 	GPid pid;
 	gint standard_output;
 	gint standard_error;

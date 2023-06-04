@@ -69,7 +69,7 @@ void image_sim_alternate_set(gboolean enable)
 
 ImageSimilarityData *image_sim_new(void)
 {
-	ImageSimilarityData *sd = g_new0(ImageSimilarityData, 1);
+	auto sd = g_new0(ImageSimilarityData, 1);
 
 	return sd;
 }
@@ -81,8 +81,8 @@ void image_sim_free(ImageSimilarityData *sd)
 
 static gint image_sim_channel_eq_sort_cb(gconstpointer a, gconstpointer b)
 {
-	gint *pa = static_cast<gint *>((gpointer)a);
-	gint *pb = static_cast<gint *>((gpointer)b);
+	auto pa = static_cast<gint *>((gpointer)a);
+	auto pb = static_cast<gint *>((gpointer)b);
 	if (pa[1] < pb[1]) return -1;
 	if (pa[1] > pb[1]) return 1;
 	return 0;

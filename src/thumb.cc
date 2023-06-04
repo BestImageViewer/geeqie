@@ -114,7 +114,7 @@ static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failu
 
 static void thumb_loader_percent_cb(ImageLoader *UNUSED(il), gdouble percent, gpointer data)
 {
-	ThumbLoader *tl = static_cast<ThumbLoader *>(data);
+	auto tl = static_cast<ThumbLoader *>(data);
 
 	tl->percent_done = percent;
 
@@ -129,7 +129,7 @@ static void thumb_loader_set_fallback(ThumbLoader *tl)
 
 static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 {
-	ThumbLoader *tl = static_cast<ThumbLoader *>(data);
+	auto tl = static_cast<ThumbLoader *>(data);
 	GdkPixbuf *pixbuf;
 	gint pw, ph;
 	gint save;
@@ -247,7 +247,7 @@ static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 
 static void thumb_loader_error_cb(ImageLoader *il, gpointer data)
 {
-	ThumbLoader *tl = static_cast<ThumbLoader *>(data);
+	auto tl = static_cast<ThumbLoader *>(data);
 
 	/* if at least some of the image is available, go to done_cb */
 	if (image_loader_get_pixbuf(tl->il) != NULL)
@@ -268,7 +268,7 @@ static void thumb_loader_error_cb(ImageLoader *il, gpointer data)
 
 static gboolean thumb_loader_done_delay_cb(gpointer data)
 {
-	ThumbLoader *tl = static_cast<ThumbLoader *>(data);
+	auto tl = static_cast<ThumbLoader *>(data);
 
 	tl->idle_done_id = 0;
 

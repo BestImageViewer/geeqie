@@ -225,7 +225,7 @@ static char *ZDParseString(const ZoneDetect *library, uint32_t *index)
         }
     }
 
-    char *const str = static_cast<char *>(malloc((size_t)(strLength + 1)));
+    auto str = static_cast<char *>(malloc((size_t)(strLength + 1)));
 
     if(str) {
 #if defined(_MSC_VER)
@@ -542,7 +542,7 @@ static int32_t* ZDPolygonToListInternal(const ZoneDetect *library, uint32_t poly
     size_t listLength = 2 * 100;
     size_t listIndex = 0;
 
-    int32_t* list = static_cast<int32_t *>(malloc(sizeof(int32_t) * listLength));
+    auto  list = static_cast<int32_t *>(malloc(sizeof(int32_t) * listLength));
     if(!list) {
         goto fail;
     }
@@ -706,7 +706,7 @@ static ZDLookupResult ZDPointInPolygon(const ZoneDetect *library, uint32_t polyg
             /* Jumped two quadrants. */
             if(windingNeedCompare) {
                 /* Check if the target is on the border */
-                const int32_t intersectLon = (int32_t)(((float)latFixedPoint - b) / a);
+                const auto  intersectLon = (int32_t)(((float)latFixedPoint - b) / a);
                 if(intersectLon >= lonFixedPoint-1 && intersectLon <= lonFixedPoint+1) {
                     if(distanceSqrMin) *distanceSqrMin = 0;
                     return ZD_LOOKUP_ON_BORDER_SEGMENT;
@@ -811,7 +811,7 @@ void ZDCloseDatabase(ZoneDetect *library)
 
 ZoneDetect *ZDOpenDatabaseFromMemory(void* buffer, size_t length)
 {
-    ZoneDetect *const library = static_cast<ZoneDetect *>(malloc(sizeof *library));
+    auto library = static_cast<ZoneDetect *>(malloc(sizeof(ZoneDetect)));
 
     if(library) {
         memset(library, 0, sizeof(*library));
@@ -845,7 +845,7 @@ fail:
 
 ZoneDetect *ZDOpenDatabase(const char *path)
 {
-    ZoneDetect *const library = static_cast<ZoneDetect *>(malloc(sizeof *library));
+    auto library = static_cast<ZoneDetect *>(malloc(sizeof(ZoneDetect)));
 
     if(library) {
         memset(library, 0, sizeof(*library));
@@ -915,14 +915,14 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
     const int32_t latFixedPoint = ZDFloatToFixedPoint(lat, 90, library->precision);
     const int32_t lonFixedPoint = ZDFloatToFixedPoint(lon, 180, library->precision);
     size_t numResults = 0;
-    uint64_t distanceSqrMin = (uint64_t)-1;
+    auto  distanceSqrMin = (uint64_t)-1;
 
     /* Iterate over all polygons */
     uint32_t bboxIndex = library->bboxOffset;
     uint32_t metadataIndex = 0;
     uint32_t polygonIndex = 0;
 
-    ZoneDetectResult *results = static_cast<ZoneDetectResult *>(malloc(sizeof *results));
+    auto results = static_cast<ZoneDetectResult *>(malloc(sizeof(ZoneDetectResult)));
     if(!results) {
         return NULL;
     }
@@ -951,7 +951,7 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
                 if(lookupResult == ZD_LOOKUP_PARSE_ERROR) {
                     break;
                 } else if(lookupResult != ZD_LOOKUP_NOT_IN_ZONE) {
-                    ZoneDetectResult *const newResults = static_cast<ZoneDetectResult *>(realloc(results, sizeof *newResults * (numResults + 2)));
+                    auto newResults = static_cast<ZoneDetectResult *>(realloc(results, sizeof(ZoneDetectResult) * (numResults + 2)));
 
                     if(newResults) {
                         results = newResults;

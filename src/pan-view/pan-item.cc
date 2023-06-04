@@ -308,7 +308,7 @@ gint pan_item_tri_draw(PanWindow *UNUSED(pw), PanItem *pi, GdkPixbuf *pixbuf, Pi
 			     pi->x, pi->y, pi->width, pi->height,
 			     &rx, &ry, &rw, &rh) && pi->data)
 		{
-		gint *coord = static_cast<gint *>(pi->data);
+		auto coord = static_cast<gint *>(pi->data);
 		pixbuf_draw_triangle(pixbuf,
 				     rx - x, ry - y, rw, rh,
 				     coord[0] - x, coord[1] - y,

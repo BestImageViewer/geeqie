@@ -62,7 +62,7 @@ static void spinner_increment_frame(SpinnerData *sp)
 
 static gboolean spinner_loop_cb(gpointer data)
 {
-	SpinnerData *sp = static_cast<SpinnerData *>(data);
+	auto sp = static_cast<SpinnerData *>(data);
 
 	if (sp->list) spinner_increment_frame(sp);
 
@@ -93,7 +93,7 @@ static void spinner_set_timeout(SpinnerData *sp, gint interval)
 
 static void spinner_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	SpinnerData *sp = static_cast<SpinnerData *>(data);
+	auto sp = static_cast<SpinnerData *>(data);
 	GList *work;
 
 	spinner_set_timeout(sp, 0);
@@ -101,7 +101,7 @@ static void spinner_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 	work = sp->list;
 	while (work)
 		{
-		GdkPixbuf *pb = static_cast<GdkPixbuf *>(work->data);
+		auto pb = static_cast<GdkPixbuf *>(work->data);
 		work = work->next;
 
 		g_object_unref(pb);

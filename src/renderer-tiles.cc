@@ -697,7 +697,7 @@ static void rt_overlay_queue_all(RendererTiles *rt, gint x1, gint y1, gint x2, g
 	work = rt->overlay_list;
 	while (work)
 		{
-		OverlayData *od = static_cast<OverlayData *>(work->data);
+		auto od = static_cast<OverlayData *>(work->data);
 		work = work->next;
 
 		rt_overlay_queue_draw(rt, od, x1, y1, x2, y2);
@@ -711,7 +711,7 @@ static void rt_overlay_update_sizes(RendererTiles *rt)
 	work = rt->overlay_list;
 	while (work)
 		{
-		OverlayData *od = static_cast<OverlayData *>(work->data);
+		auto od = static_cast<OverlayData *>(work->data);
 		work = work->next;
 
 		if (!od->window) rt_overlay_init_window(rt, od);
@@ -733,7 +733,7 @@ static OverlayData *rt_overlay_find(RendererTiles *rt, gint id)
 	work = rt->overlay_list;
 	while (work)
 		{
-		OverlayData *od = static_cast<OverlayData *>(work->data);
+		auto od = static_cast<OverlayData *>(work->data);
 		work = work->next;
 
 		if (od->id == id) return od;
@@ -746,7 +746,7 @@ static OverlayData *rt_overlay_find(RendererTiles *rt, gint id)
 gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint y,
 				 OverlayRendererFlags flags)
 {
-	RendererTiles *rt = (RendererTiles *) renderer;
+	auto rt = (RendererTiles *) renderer;
 	PixbufRenderer *pr = rt->pr;
 	OverlayData *od;
 	gint id;
@@ -810,7 +810,7 @@ static void rt_overlay_list_reset_window(RendererTiles *rt)
 	work = rt->overlay_list;
 	while (work)
 		{
-		OverlayData *od = static_cast<OverlayData *>(work->data);
+		auto od = static_cast<OverlayData *>(work->data);
 		work = work->next;
 		if (od->window) gdk_window_destroy(od->window);
 		od->window = NULL;
@@ -819,7 +819,7 @@ static void rt_overlay_list_reset_window(RendererTiles *rt)
 
 void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint UNUSED(x), gint UNUSED(y))
 {
-	RendererTiles *rc = (RendererTiles *)renderer;
+	auto rc = (RendererTiles *)renderer;
 	PixbufRenderer *pr = rc->pr;
 	OverlayData *od;
 
@@ -844,7 +844,7 @@ void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint
 
 gboolean renderer_tiles_overlay_get(void *renderer, gint id, GdkPixbuf **pixbuf, gint *x, gint *y)
 {
-	RendererTiles *rt = (RendererTiles *) renderer;
+	auto rt = (RendererTiles *) renderer;
 	PixbufRenderer *pr = rt->pr;
 	OverlayData *od;
 
@@ -862,7 +862,7 @@ gboolean renderer_tiles_overlay_get(void *renderer, gint id, GdkPixbuf **pixbuf,
 
 static void rt_hierarchy_changed_cb(GtkWidget *UNUSED(widget), GtkWidget *UNUSED(previous_toplevel), gpointer data)
 {
-	RendererTiles *rt = static_cast<RendererTiles *>(data);
+	auto rt = static_cast<RendererTiles *>(data);
 	rt_overlay_list_reset_window(rt);
 }
 
@@ -1580,7 +1580,7 @@ static gint rt_get_queued_area(GList *work)
 
 	while (work)
 		{
-		QueueData *qd = static_cast<QueueData *>(work->data);
+		auto qd = static_cast<QueueData *>(work->data);
 		area += qd->w * qd->h;
 		work = work->next;
 		}
@@ -1636,7 +1636,7 @@ static gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_se
 
 static gboolean rt_queue_draw_idle_cb(gpointer data)
 {
-	RendererTiles *rt = static_cast<RendererTiles *>(data);
+	auto rt = static_cast<RendererTiles *>(data);
 	PixbufRenderer *pr = rt->pr;
 	QueueData *qd;
 	gboolean fast;
@@ -1936,7 +1936,7 @@ static void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
 
 static void rt_scroll(void *renderer, gint x_off, gint y_off)
 {
-	RendererTiles *rt = (RendererTiles *) renderer;
+	auto rt = (RendererTiles *) renderer;
 	PixbufRenderer *pr = rt->pr;
 
 	rt_sync_scroll(rt);
@@ -2020,7 +2020,7 @@ static void rt_scroll(void *renderer, gint x_off, gint y_off)
 
 static void renderer_area_changed(void *renderer, gint src_x, gint src_y, gint src_w, gint src_h)
 {
-	RendererTiles *rt = (RendererTiles *)renderer;
+	auto rt = (RendererTiles *)renderer;
 	PixbufRenderer *pr = rt->pr;
 	gint x, y, width, height,  x1, y1, x2, y2;
 
@@ -2074,7 +2074,7 @@ static void renderer_update_pixbuf(void *renderer, gboolean UNUSED(lazy))
 
 static void renderer_update_zoom(void *renderer, gboolean lazy)
 {
-	RendererTiles *rt = (RendererTiles *)renderer;
+	auto rt = (RendererTiles *)renderer;
 	PixbufRenderer *pr = rt->pr;
 
 	rt_tile_invalidate_all((RendererTiles *)renderer);
@@ -2092,7 +2092,7 @@ static void renderer_invalidate_region(void *renderer, gint x, gint y, gint w, g
 
 static void renderer_update_viewport(void *renderer)
 {
-	RendererTiles *rt = (RendererTiles *)renderer;
+	auto rt = (RendererTiles *)renderer;
 
 	rt->stereo_off_x = 0;
 	rt->stereo_off_y = 0;
@@ -2129,14 +2129,14 @@ static void renderer_update_viewport(void *renderer)
 
 static void renderer_stereo_set(void *renderer, gint stereo_mode)
 {
-	RendererTiles *rt = (RendererTiles *)renderer;
+	auto rt = (RendererTiles *)renderer;
 
 	rt->stereo_mode = stereo_mode;
 }
 
 static void renderer_free(void *renderer)
 {
-	RendererTiles *rt = (RendererTiles *)renderer;
+	auto rt = (RendererTiles *)renderer;
 	rt_queue_clear(rt);
 	rt_tile_free_all(rt);
 	if (rt->spare_tile) g_object_unref(rt->spare_tile);
@@ -2150,7 +2150,7 @@ static void renderer_free(void *renderer)
 
 static gboolean rt_realize_cb(GtkWidget *widget, gpointer data)
 {
-	RendererTiles *rt = (RendererTiles *)data;
+	auto rt = (RendererTiles *)data;
 	cairo_t *cr;
 
 	if (!rt->surface)
@@ -2168,7 +2168,7 @@ static gboolean rt_realize_cb(GtkWidget *widget, gpointer data)
 
 static gboolean rt_size_allocate_cb(GtkWidget *widget,  GdkRectangle *allocation, gpointer data)
 {
-	RendererTiles *rt = static_cast<RendererTiles *>(data);
+	auto rt = static_cast<RendererTiles *>(data);
 	cairo_t *cr;
 	cairo_surface_t *old_surface;
 
@@ -2194,7 +2194,7 @@ static gboolean rt_size_allocate_cb(GtkWidget *widget,  GdkRectangle *allocation
 
 static gboolean rt_draw_cb(GtkWidget *UNUSED(widget), cairo_t *cr, gpointer data)
 {
-	RendererTiles *rt = (RendererTiles *)data;
+	auto rt = (RendererTiles *)data;
 	GList *work;
 	OverlayData *od;
 
@@ -2254,7 +2254,7 @@ static gboolean rt_draw_cb(GtkWidget *UNUSED(widget), cairo_t *cr, gpointer data
 
 RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 {
-	RendererTiles *rt = g_new0(RendererTiles, 1);
+	auto rt = g_new0(RendererTiles, 1);
 
 	rt->pr = pr;
 

@@ -83,7 +83,7 @@ GList *vficon_pop_menu_file_list(ViewFile *vf)
 
 void vficon_pop_menu_view_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	if (!VFICON(vf)->click_fd) return;
 
@@ -103,14 +103,14 @@ void vficon_pop_menu_view_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 void vficon_pop_menu_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	file_util_rename(NULL, vf_pop_menu_file_list(vf), vf->listview);
 }
 
 void vficon_pop_menu_show_names_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	vficon_toggle_filenames(vf);
 }
@@ -127,21 +127,21 @@ static void vficon_toggle_star_rating(ViewFile *vf)
 
 void vficon_pop_menu_show_star_rating_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	vficon_toggle_star_rating(vf);
 }
 
 void vficon_pop_menu_refresh_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	vf_refresh(vf);
 }
 
 void vficon_popup_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 	vficon_selection_remove(vf, VFICON(vf)->click_fd, SELECTION_PRELIGHT, NULL);
 	VFICON(vf)->click_fd = NULL;
 	vf->popup = NULL;
@@ -297,7 +297,7 @@ static FileData *vficon_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTree
 
 static void vficon_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str, gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 	GtkTreeModel *store;
 	GtkTreePath *path = gtk_tree_path_new_from_string(path_str);
 	GtkTreeIter row;
@@ -374,7 +374,7 @@ static void tip_hide(ViewFile *vf)
 
 static gboolean tip_schedule_cb(gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 	GtkWidget *window;
 
 	if (!VFICON(vf)->tip_delay_id) return FALSE;
@@ -465,7 +465,7 @@ static void vficon_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(con
 			   GtkSelectionData *selection_data, guint UNUSED(info),
 			   guint UNUSED(time), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 	GList *list = NULL;
 
 	if (!VFICON(vf)->click_fd) return;
@@ -488,14 +488,14 @@ static void vficon_drag_data_received(GtkWidget *UNUSED(entry_widget), GdkDragCo
 				      int x, int y, GtkSelectionData *selection,
 				      guint info, guint UNUSED(time), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	if (info == TARGET_TEXT_PLAIN) {
 		FileData *fd = vficon_find_data_by_coord(vf, x, y, NULL);
 
 		if (fd) {
 			/* Add keywords to file */
-			gchar *str = (gchar *) gtk_selection_data_get_text(selection);
+			auto str = (gchar *) gtk_selection_data_get_text(selection);
 			GList *kw_list = string_to_keywords_list(str);
 
 			metadata_append_list(fd, KEYWORD_KEY, kw_list);
@@ -507,7 +507,7 @@ static void vficon_drag_data_received(GtkWidget *UNUSED(entry_widget), GdkDragCo
 
 static void vficon_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	tip_unschedule(vf);
 
@@ -526,7 +526,7 @@ static void vficon_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointe
 
 static void vficon_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *context, gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	vficon_selection_remove(vf, VFICON(vf)->click_fd, SELECTION_PRELIGHT, NULL);
 
@@ -632,7 +632,7 @@ static void vficon_verify_selections(ViewFile *vf)
 	work = VFICON(vf)->selection;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		work = work->next;
 
 		if (vficon_index_by_fd(vf, fd) >= 0) continue;
@@ -651,7 +651,7 @@ void vficon_select_all(ViewFile *vf)
 	work = vf->list;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		work = work->next;
 
 		VFICON(vf)->selection = g_list_append(VFICON(vf)->selection, fd);
@@ -668,7 +668,7 @@ void vficon_select_none(ViewFile *vf)
 	work = VFICON(vf)->selection;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		work = work->next;
 
 		vficon_selection_remove(vf, fd, SELECTION_SELECTED, NULL);
@@ -687,7 +687,7 @@ void vficon_select_invert(ViewFile *vf)
 	work = vf->list;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		work = work->next;
 
 		if (fd->selected & SELECTION_SELECTED)
@@ -767,7 +767,7 @@ static void vficon_select_region_util(ViewFile *vf, FileData *start, FileData *e
 		work = g_list_find(vf->list, start);
 		while (work)
 			{
-			FileData *fd = (FileData *)work->data;
+			auto fd = (FileData *)work->data;
 			vficon_select_util(vf, fd, select);
 
 			if (work->data != end)
@@ -823,7 +823,7 @@ guint vficon_selection_count(ViewFile *vf, gint64 *bytes)
 		work = VFICON(vf)->selection;
 		while (work)
 			{
-			FileData *fd = (FileData *)work->data;
+			auto fd = (FileData *)work->data;
 			g_assert(fd->magick == FD_MAGICK);
 			b += fd->size;
 
@@ -844,7 +844,7 @@ GList *vficon_selection_get_list(ViewFile *vf)
 	work = VFICON(vf)->selection;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		g_assert(fd->magick == FD_MAGICK);
 
 		list = g_list_prepend(list, file_data_ref(fd));
@@ -924,7 +924,7 @@ void vficon_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 	work = vf->list;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		gboolean mark_val, selected;
 
 		g_assert(fd->magick == FD_MAGICK);
@@ -962,7 +962,7 @@ void vficon_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 	work = slist;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 
 		switch (mode)
 			{
@@ -1179,7 +1179,7 @@ static gint page_height(ViewFile *vf)
 
 gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 	gint focus_row = 0;
 	gint focus_col = 0;
 	FileData *fd;
@@ -1311,7 +1311,7 @@ gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
 static gboolean vficon_motion_cb(GtkWidget *UNUSED(widget), GdkEventMotion *event, gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 	FileData *fd;
 
 	fd = vficon_find_data_by_coord(vf, (gint)event->x, (gint)event->y, NULL);
@@ -1322,7 +1322,7 @@ static gboolean vficon_motion_cb(GtkWidget *UNUSED(widget), GdkEventMotion *even
 
 gboolean vficon_press_cb(GtkWidget *UNUSED(widget), GdkEventButton *bevent, gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 	GtkTreeIter iter;
 	FileData *fd;
 
@@ -1367,7 +1367,7 @@ gboolean vficon_press_cb(GtkWidget *UNUSED(widget), GdkEventButton *bevent, gpoi
 
 gboolean vficon_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 	GtkTreeIter iter;
 	FileData *fd = NULL;
 	gboolean was_selected;
@@ -1448,7 +1448,7 @@ gboolean vficon_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer d
 
 static gboolean vficon_leave_cb(GtkWidget *UNUSED(widget), GdkEventCrossing *UNUSED(event), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	tip_unschedule(vf);
 	return FALSE;
@@ -1661,7 +1661,7 @@ static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint UNUSED(h), gb
 
 static void vficon_sized_cb(GtkWidget *UNUSED(widget), GtkAllocation *allocation, gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	vficon_populate_at_new_size(vf, allocation->width, allocation->height, FALSE);
 }
@@ -1695,7 +1695,7 @@ void vficon_thumb_progress_count(GList *list, gint *count, gint *done)
 	GList *work = list;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		work = work->next;
 
 		if (fd->thumb_pixbuf) (*done)++;
@@ -1708,7 +1708,7 @@ void vficon_read_metadata_progress_count(GList *list, gint *count, gint *done)
 	GList *work = list;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		work = work->next;
 
 		if (fd->metadata_in_idle_loaded) (*done)++;
@@ -1756,7 +1756,7 @@ FileData *vficon_thumb_next_fd(ViewFile *vf)
 			/** @todo (xsdg): for loop here. */
 			for (; list; list = list->next)
 				{
-				FileData *fd = static_cast<FileData *>(list->data);
+				auto fd = static_cast<FileData *>(list->data);
 				if (fd && !fd->thumb_pixbuf) return fd;
 				}
 
@@ -1768,7 +1768,7 @@ FileData *vficon_thumb_next_fd(ViewFile *vf)
 	GList *work;
 	for (work = vf->list; work; work = work->next)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 
 		// Note: This implementation differs from view-file-list.cc because sidecar files are not
 		// distinct list elements here, as they are in the list view.
@@ -1817,7 +1817,7 @@ FileData *vficon_star_next_fd(ViewFile *vf)
 
 			for (; list; list = list->next)
 				{
-				FileData *fd = static_cast<FileData *>(list->data);
+				auto fd = static_cast<FileData *>(list->data);
 				if (fd && fd->rating == STAR_RATING_NOT_READ)
 					{
 					vf->stars_filedata = fd;
@@ -1840,7 +1840,7 @@ FileData *vficon_star_next_fd(ViewFile *vf)
 	GList *work;
 	for (work = vf->list; work; work = work->next)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 
 		if (fd && fd->rating == STAR_RATING_NOT_READ)
 			{
@@ -1874,7 +1874,7 @@ gint vficon_index_by_fd(ViewFile *vf, FileData *in_fd)
 	work = vf->list;
 	while (work)
 		{
-		FileData *fd = (FileData *)work->data;
+		auto fd = (FileData *)work->data;
 		if (fd == in_fd) return p;
 		work = work->next;
 		p++;
@@ -2069,7 +2069,7 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *UNUSED(tree_column), GtkCellR
 {
 	GList *list;
 	FileData *fd;
-	ColumnData *cd = (ColumnData *)data;
+	auto cd = (ColumnData *)data;
 	ViewFile *vf = cd->vf;
 	gchar *star_rating;
 
@@ -2235,7 +2235,7 @@ gboolean vficon_set_fd(ViewFile *vf, FileData *dir_fd)
 
 void vficon_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	ViewFile *vf = (ViewFile *)data;
+	auto vf = (ViewFile *)data;
 
 	vf_refresh_idle_cancel(vf);
 

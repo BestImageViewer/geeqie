@@ -63,7 +63,7 @@ static void tree_edit_do(TreeEditData *ted)
 
 static gboolean tree_edit_click_end_cb(GtkWidget *UNUSED(widget), GdkEventButton *UNUSED(event), gpointer data)
 {
-	TreeEditData *ted = static_cast<TreeEditData *>(data);
+	auto ted = static_cast<TreeEditData *>(data);
 
 	tree_edit_do(ted);
 	tree_edit_close(ted);
@@ -73,7 +73,7 @@ static gboolean tree_edit_click_end_cb(GtkWidget *UNUSED(widget), GdkEventButton
 
 static gboolean tree_edit_click_cb(GtkWidget *UNUSED(widget), GdkEventButton *event, gpointer data)
 {
-	TreeEditData *ted = static_cast<TreeEditData *>(data);
+	auto ted = static_cast<TreeEditData *>(data);
 	GdkWindow *window = gtk_widget_get_window(ted->window);
 
 	gint x, y;
@@ -100,7 +100,7 @@ static gboolean tree_edit_click_cb(GtkWidget *UNUSED(widget), GdkEventButton *ev
 
 static gboolean tree_edit_key_press_cb(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer data)
 {
-	TreeEditData *ted = static_cast<TreeEditData *>(data);
+	auto ted = static_cast<TreeEditData *>(data);
 
 	switch (event->keyval)
 		{
@@ -130,7 +130,7 @@ static gboolean tree_edit_key_press_cb(GtkWidget *UNUSED(widget), GdkEventKey *e
 
 static gboolean tree_edit_by_path_idle_cb(gpointer data)
 {
-	TreeEditData *ted = static_cast<TreeEditData *>(data);
+	auto ted = static_cast<TreeEditData *>(data);
 	GdkRectangle rect;
 	gint x, y, w, h;	/* geometry of cell within tree */
 	gint wx, wy;		/* geometry of tree from root window */
@@ -555,7 +555,7 @@ void widget_auto_scroll_stop(GtkWidget *widget)
 
 static gboolean widget_auto_scroll_cb(gpointer data)
 {
-	AutoScrollData *sd = static_cast<AutoScrollData *>(data);
+	auto sd = static_cast<AutoScrollData *>(data);
 	GdkWindow *window;
 	gint x, y;
 	gint w, h;

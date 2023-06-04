@@ -44,7 +44,7 @@ static void file_cache_remove_fd(FileCacheData *fc, FileData *fd);
 
 FileCacheData *file_cache_new(FileCacheReleaseFunc release, gulong max_size)
 {
-	FileCacheData *fc = g_new(FileCacheData, 1);
+	auto fc = g_new(FileCacheData, 1);
 
 	fc->release = release;
 	fc->list = NULL;
@@ -65,7 +65,7 @@ gboolean file_cache_get(FileCacheData *fc, FileData *fd)
 	work = fc->list;
 	while (work)
 		{
-		FileCacheEntry *fce = static_cast<FileCacheEntry *>(work->data);
+		auto fce = static_cast<FileCacheEntry *>(work->data);
 		if (fce->fd == fd)
 			{
 			/* entry exists */
@@ -182,7 +182,7 @@ void file_cache_dump(FileCacheData *fc)
 
 	while (work)
 		{
-		FileCacheEntry *fe = static_cast<FileCacheEntry *>(work->data);
+		auto fe = static_cast<FileCacheEntry *>(work->data);
 		work = work->next;
 		DEBUG_1("cache entry: fc=%p [%lu] %s %ld", (void *)fc, ++n, fe->fd->path, fe->size);
 		}
@@ -190,7 +190,7 @@ void file_cache_dump(FileCacheData *fc)
 
 static void file_cache_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
-	FileCacheData *fc = static_cast<FileCacheData *>(data);
+	auto fc = static_cast<FileCacheData *>(data);
 
 	if (type & (NOTIFY_REREAD | NOTIFY_CHANGE)) /* invalidate the entry on each file change */
 		{

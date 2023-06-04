@@ -524,7 +524,7 @@ static void config_window_close_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(da
 
 static void config_window_help_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	GtkWidget *notebook = static_cast<GtkWidget *>(data);
+	auto notebook = static_cast<GtkWidget *>(data);
 	gint i;
 
 	static const gchar *html_section[] =
@@ -558,7 +558,7 @@ static gboolean config_window_delete(GtkWidget *UNUSED(widget), GdkEventAny *UNU
 static void config_window_ok_cb(GtkWidget *widget, gpointer data)
 {
 	LayoutWindow *lw;
-	GtkNotebook *notebook = static_cast<GtkNotebook *>(data);
+	auto notebook = static_cast<GtkNotebook *>(data);
 	GdkWindow *window;
 	gint x;
 	gint y;
@@ -594,7 +594,7 @@ static void config_window_ok_cb(GtkWidget *widget, gpointer data)
 
 static void quality_menu_cb(GtkWidget *combo, gpointer data)
 {
-	gint *option = static_cast<gint *>(data);
+	auto option = static_cast<gint *>(data);
 
 	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
 		{
@@ -613,7 +613,7 @@ static void quality_menu_cb(GtkWidget *combo, gpointer data)
 
 static void dnd_default_action_selection_menu_cb(GtkWidget *combo, gpointer data)
 {
-	gint *option = static_cast<gint *>(data);
+	auto option = static_cast<gint *>(data);
 
 	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
 		{
@@ -631,7 +631,7 @@ static void dnd_default_action_selection_menu_cb(GtkWidget *combo, gpointer data
 }
 static void clipboard_selection_menu_cb(GtkWidget *combo, gpointer data)
 {
-	gint *option = static_cast<gint *>(data);
+	auto option = static_cast<gint *>(data);
 
 	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
 		{
@@ -734,7 +734,7 @@ static void add_clipboard_selection_menu(GtkWidget *table, gint column, gint row
 
 static void zoom_style_selection_menu_cb(GtkWidget *combo, gpointer data)
 {
-	gint *option = static_cast<gint *>(data);
+	auto option = static_cast<gint *>(data);
 
 	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
 		{
@@ -857,7 +857,7 @@ static const UseableMouseItems useable_mouse_items[] = {
 
 static void mouse_buttons_selection_menu_cb(GtkWidget *combo, gpointer data)
 {
-	gchar **option = static_cast<gchar **>(data);
+	auto option = static_cast<gchar **>(data);
 	gchar *label;
 
 	label = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
@@ -982,7 +982,7 @@ static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, gchar *
 
 static void stereo_mode_menu_cb(GtkWidget *combo, gpointer data)
 {
-	gint *option = static_cast<gint *>(data);
+	auto option = static_cast<gint *>(data);
 
 	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
 		{
@@ -1101,16 +1101,16 @@ static void add_stereo_mode_menu(GtkWidget *table, gint column, gint row, const 
 
 static void video_menu_cb(GtkWidget *combo, gpointer data)
 {
-	gchar **option = static_cast<gchar **>(data);
+	auto option = static_cast<gchar **>(data);
 
-	EditorDescription *ed = static_cast<EditorDescription *>(g_list_nth_data(editor_list_get(), gtk_combo_box_get_active(GTK_COMBO_BOX(combo))));
+	auto ed = static_cast<EditorDescription *>(g_list_nth_data(editor_list_get(), gtk_combo_box_get_active(GTK_COMBO_BOX(combo))));
 	*option = ed->key;
 }
 
 static void video_menu_populate(gpointer data, gpointer user_data)
 {
-	GtkWidget *combo = static_cast<GtkWidget *>(user_data);
-	EditorDescription *ed = static_cast<EditorDescription *>(data);
+	auto combo = static_cast<GtkWidget *>(user_data);
+	auto ed = static_cast<EditorDescription *>(data);
 
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), ed->name);
 }
@@ -1165,8 +1165,8 @@ static void filter_store_populate(void)
 static void filter_store_ext_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *path_str,
 				     gchar *new_text, gpointer data)
 {
-	GtkWidget *model = static_cast<GtkWidget *>(data);
-	FilterEntry *fe = static_cast<FilterEntry *>(data);
+	auto model = static_cast<GtkWidget *>(data);
+	auto fe = static_cast<FilterEntry *>(data);
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
 
@@ -1186,8 +1186,8 @@ static void filter_store_ext_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *p
 static void filter_store_class_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *path_str,
 				       gchar *new_text, gpointer data)
 {
-	GtkWidget *model = static_cast<GtkWidget *>(data);
-	FilterEntry *fe = static_cast<FilterEntry *>(data);
+	auto model = static_cast<GtkWidget *>(data);
+	auto fe = static_cast<FilterEntry *>(data);
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
 	gint i;
@@ -1214,7 +1214,7 @@ static void filter_store_class_edit_cb(GtkCellRendererText *UNUSED(cell), gchar 
 static void filter_store_desc_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *path_str,
 				      gchar *new_text, gpointer data)
 {
-	GtkWidget *model = static_cast<GtkWidget *>(data);
+	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
@@ -1234,7 +1234,7 @@ static void filter_store_desc_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *
 static void filter_store_enable_cb(GtkCellRendererToggle *UNUSED(renderer),
 				   gchar *path_str, gpointer data)
 {
-	GtkWidget *model = static_cast<GtkWidget *>(data);
+	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
@@ -1252,7 +1252,7 @@ static void filter_store_enable_cb(GtkCellRendererToggle *UNUSED(renderer),
 static void filter_store_writable_cb(GtkCellRendererToggle *UNUSED(renderer),
 				     gchar *path_str, gpointer data)
 {
-	GtkWidget *model = static_cast<GtkWidget *>(data);
+	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
@@ -1271,7 +1271,7 @@ static void filter_store_writable_cb(GtkCellRendererToggle *UNUSED(renderer),
 static void filter_store_sidecar_cb(GtkCellRendererToggle *UNUSED(renderer),
 				    gchar *path_str, gpointer data)
 {
-	GtkWidget *model = static_cast<GtkWidget *>(data);
+	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
@@ -1380,7 +1380,7 @@ static void filter_add_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static void filter_remove_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	GtkWidget *filter_view = static_cast<GtkWidget *>(data);
+	auto filter_view = static_cast<GtkWidget *>(data);
 	GtkTreeSelection *selection;
 	GtkTreeIter iter;
 	FilterEntry *fe;
@@ -1445,7 +1445,7 @@ static void filter_default_cb(GtkWidget *widget, gpointer data)
 
 static void filter_disable_cb(GtkWidget *widget, gpointer data)
 {
-	GtkWidget *frame = static_cast<GtkWidget *>(data);
+	auto frame = static_cast<GtkWidget *>(data);
 
 	gtk_widget_set_sensitive(frame,
 				 !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
@@ -1499,7 +1499,7 @@ static void image_overlay_template_view_changed_cb(GtkWidget *UNUSED(widget), gp
 
 static void image_overlay_default_template_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	GtkTextView *text_view = static_cast<GtkTextView *>(data);
+	auto text_view = static_cast<GtkTextView *>(data);
 	GtkTextBuffer *buffer;
 
 	set_default_image_overlay_template_string(&options->image_overlay.template_string);
@@ -1665,7 +1665,7 @@ static void accel_store_cleared_cb(GtkCellRendererAccel *UNUSED(accel), gchar *U
 
 static gboolean accel_remove_key_cb(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer data)
 {
-	gchar *accel1 = static_cast<gchar *>(data);
+	auto accel1 = static_cast<gchar *>(data);
 	gchar *accel2;
 	GtkAccelKey key1;
 	GtkAccelKey key2;
@@ -1689,7 +1689,7 @@ static gboolean accel_remove_key_cb(GtkTreeModel *model, GtkTreePath *UNUSED(pat
 
 static void accel_store_edited_cb(GtkCellRendererAccel *UNUSED(accel), gchar *path_string, guint accel_key, GdkModifierType accel_mods, guint UNUSED(hardware_keycode), gpointer UNUSED(user_data))
 {
-	GtkTreeModel *model = (GtkTreeModel *)accel_store;
+	auto model = (GtkTreeModel *)accel_store;
 	GtkTreeIter iter;
 	gchar *acc;
 	gchar *accel_path;
@@ -1891,7 +1891,7 @@ static void star_rating_rejected_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIconPo
 
 static guint star_rating_symbol_test(GtkWidget *UNUSED(widget), gpointer data)
 {
-	GtkContainer *hbox = static_cast<GtkContainer *>(data);
+	auto hbox = static_cast<GtkContainer *>(data);
 	GString *str = g_string_new(NULL);
 	GtkEntry *hex_code_entry;
 	gchar *hex_code_full;
@@ -2371,7 +2371,7 @@ static void save_default_window_layout_cb(GtkWidget *UNUSED(widget), gpointer UN
 
 static gboolean popover_cb(gpointer data)
 {
-	GtkPopover *popover = static_cast<GtkPopover *>(data);
+	auto popover = static_cast<GtkPopover *>(data);
 
 	gtk_popover_popdown(popover);
 
@@ -3047,7 +3047,7 @@ static void keywords_find_reset(KeywordFindData *kfd)
 
 static void keywords_find_close_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	KeywordFindData *kfd = static_cast<KeywordFindData *>(data);
+	auto kfd = static_cast<KeywordFindData *>(data);
 
 	if (!gtk_widget_get_sensitive(kfd->button_close)) return;
 
@@ -3071,7 +3071,7 @@ static void keywords_find_finish(KeywordFindData *kfd)
 
 static void keywords_find_stop_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	KeywordFindData *kfd = static_cast<KeywordFindData *>(data);
+	auto kfd = static_cast<KeywordFindData *>(data);
 
 	g_idle_remove_by_data(kfd);
 
@@ -3080,7 +3080,7 @@ static void keywords_find_stop_cb(GenericDialog *UNUSED(fd), gpointer data)
 
 static gboolean keywords_find_file(gpointer data)
 {
-	KeywordFindData *kfd = static_cast<KeywordFindData *>(data);
+	auto kfd = static_cast<KeywordFindData *>(data);
 	GtkTextIter iter;
 	GtkTextBuffer *buffer;
 	gchar *tmp;
@@ -3132,7 +3132,7 @@ static gboolean keywords_find_file(gpointer data)
 
 static void keywords_find_start_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	KeywordFindData *kfd = static_cast<KeywordFindData *>(data);
+	auto kfd = static_cast<KeywordFindData *>(data);
 	gchar *path;
 
 	if (kfd->list || !gtk_widget_get_sensitive(kfd->button_start)) return;
@@ -4243,7 +4243,7 @@ static void image_overlay_set_text_colours()
 static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, gpointer data)
 {
 	GError *error = NULL;
-	TZData *tz = static_cast<TZData *>(data);
+	auto tz = static_cast<TZData *>(data);
 	gchar *tmp_filename;
 	gchar *timezone_bin;
 	gchar *tmp_dir = NULL;
@@ -4297,7 +4297,7 @@ static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 
 static void timezone_progress_cb(goffset current_num_bytes, goffset total_num_bytes, gpointer data)
 {
-	TZData *tz = static_cast<TZData *>(data);
+	auto tz = static_cast<TZData *>(data);
 
 	if (!g_cancellable_is_cancelled(tz->cancellable))
 		{
@@ -4307,14 +4307,14 @@ static void timezone_progress_cb(goffset current_num_bytes, goffset total_num_by
 
 static void timezone_cancel_button_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	TZData *tz = static_cast<TZData *>(data);
+	auto tz = static_cast<TZData *>(data);
 
 	g_cancellable_cancel(tz->cancellable);
 }
 
 static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 {
-	TZData *tz = static_cast<TZData *>(data);
+	auto tz = static_cast<TZData *>(data);
 	GError *error = NULL;
 	GFileIOStream *io_stream;
 

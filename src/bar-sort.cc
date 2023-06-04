@@ -152,7 +152,7 @@ static void bar_sort_mode_sync(SortData *sd, SortModeType mode)
 
 static void bar_sort_mode_cb(GtkWidget *combo, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 
 	if (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)) == BAR_SORT_MODE_FOLDER)
 		{
@@ -280,7 +280,7 @@ static void bar_sort_undo_collection(SortData *sd)
 
 static void bar_sort_undo_cb(GtkWidget *button, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 
 	if (sd->mode == BAR_SORT_MODE_FOLDER)
 		{
@@ -367,7 +367,7 @@ static void bar_sort_bookmark_select_collection(SortData *sd, FileData *source, 
 
 static void bar_sort_bookmark_select(const gchar *path, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 	FileData *source;
 
 	source = layout_image_get_fd(sd->lw);
@@ -399,21 +399,21 @@ static void bar_sort_set_action(SortData *sd, SortActionType action, const gchar
 
 static void bar_sort_set_copy_cb(GtkWidget *button, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) return;
 	bar_sort_set_action(sd, BAR_SORT_COPY, NULL);
 }
 
 static void bar_sort_set_move_cb(GtkWidget *button, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) return;
 	bar_sort_set_action(sd, BAR_SORT_MOVE, NULL);
 }
 
 static void bar_sort_set_filter_cb(GtkWidget *button, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 	const gchar *key;
 
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) return;
@@ -461,14 +461,14 @@ static void bar_sort_set_selection(SortData *sd, SortSelectionType selection)
 
 static void bar_sort_set_selection_image_cb(GtkWidget *button, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) return;
 	bar_sort_set_selection(sd, BAR_SORT_SELECTION_IMAGE);
 }
 
 static void bar_sort_set_selection_selected_cb(GtkWidget *button, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) return;
 	bar_sort_set_selection(sd, BAR_SORT_SELECTION_SELECTED);
 }
@@ -482,7 +482,7 @@ static void bar_sort_add_close(SortData *sd)
 
 static void bar_sort_add_ok_cb(FileDialog *fd, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 	const gchar *name = gtk_entry_get_text(GTK_ENTRY(sd->dialog_name_entry));
 	gboolean empty_name = (name[0] == '\0');
 
@@ -500,7 +500,7 @@ static void bar_sort_add_ok_cb(FileDialog *fd, gpointer data)
 		{
 		gchar *path;
 		gboolean has_extension;
-		gchar *filename = (gchar *) name;
+		auto filename = (gchar *) name;
 
 		if (empty_name) return;
 
@@ -545,14 +545,14 @@ static void bar_sort_add_ok_cb(FileDialog *fd, gpointer data)
 
 static void bar_sort_add_cancel_cb(FileDialog *UNUSED(fd), gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 
 	bar_sort_add_close(sd);
 }
 
 static void bar_sort_add_cb(GtkWidget *button, gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 	GtkWidget *hbox;
 	const gchar *title;
 
@@ -612,7 +612,7 @@ void bar_sort_close(GtkWidget *bar)
 
 static void bar_sort_destroy(GtkWidget *UNUSED(widget), gpointer data)
 {
-	SortData *sd = static_cast<SortData *>(data);
+	auto sd = static_cast<SortData *>(data);
 
 	bar_sort_add_close(sd);
 
@@ -700,7 +700,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 	while (work)
 		{
 		GtkWidget *button;
-		EditorDescription *editor = static_cast<EditorDescription *>(work->data);
+		auto editor = static_cast<EditorDescription *>(work->data);
 		gchar *key;
 		gboolean select = FALSE;
 

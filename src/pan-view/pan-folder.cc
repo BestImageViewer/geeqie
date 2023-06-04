@@ -365,7 +365,7 @@ void pan_flower_compute(PanWindow *pw, FileData *dir_fd,
 	list = pan_item_find_by_fd(pw, PAN_ITEM_BOX, dir_fd, FALSE, FALSE);
 	if (list)
 		{
-		PanItem *pi = static_cast<PanItem *>(list->data);
+		auto pi = static_cast<PanItem *>(list->data);
 		*scroll_x = pi->x + pi->width / 2;
 		*scroll_y = pi->y + pi->height / 2;
 		}

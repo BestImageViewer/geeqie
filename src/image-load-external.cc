@@ -40,8 +40,8 @@ struct _ImageLoaderExternal {
 
 static gboolean image_loader_external_load(gpointer loader, const guchar *UNUSED(buf), gsize UNUSED(count), GError **UNUSED(error))
 {
-	ImageLoaderExternal *ld = (ImageLoaderExternal *) loader;
-	ImageLoader *il = static_cast<ImageLoader *>(ld->data);
+	auto ld = (ImageLoaderExternal *) loader;
+	auto il = static_cast<ImageLoader *>(ld->data);
 	gchar *cmd_line;
 	gchar *randname;
 	gchar *tilde_filename;
@@ -69,7 +69,7 @@ static gboolean image_loader_external_load(gpointer loader, const guchar *UNUSED
 
 static gpointer image_loader_external_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
-	ImageLoaderExternal *loader = g_new0(ImageLoaderExternal, 1);
+	auto loader = g_new0(ImageLoaderExternal, 1);
 	loader->area_updated_cb = area_updated_cb;
 	loader->size_cb = size_cb;
 	loader->area_prepared_cb = area_prepared_cb;
@@ -79,14 +79,14 @@ static gpointer image_loader_external_new(ImageLoaderBackendCbAreaUpdated area_u
 
 static void image_loader_external_set_size(gpointer loader, int width, int height)
 {
-	ImageLoaderExternal *ld = (ImageLoaderExternal *) loader;
+	auto ld = (ImageLoaderExternal *) loader;
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_external_get_pixbuf(gpointer loader)
 {
-	ImageLoaderExternal *ld = (ImageLoaderExternal *) loader;
+	auto ld = (ImageLoaderExternal *) loader;
 	return ld->pixbuf;
 }
 
@@ -108,13 +108,13 @@ static gboolean image_loader_external_close(gpointer UNUSED(loader), GError **UN
 
 static void image_loader_external_abort(gpointer loader)
 {
-	ImageLoaderExternal *ld = (ImageLoaderExternal *) loader;
+	auto ld = (ImageLoaderExternal *) loader;
 	ld->abort = TRUE;
 }
 
 static void image_loader_external_free(gpointer loader)
 {
-	ImageLoaderExternal *ld = (ImageLoaderExternal *) loader;
+	auto ld = (ImageLoaderExternal *) loader;
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }

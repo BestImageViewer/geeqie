@@ -93,7 +93,7 @@ struct _TagData
 
 static void tag_button_cb(GtkWidget *widget, gpointer data)
 {
-	GtkTextView *image_overlay_template_view = static_cast<GtkTextView *>(data);
+	auto image_overlay_template_view = static_cast<GtkTextView *>(data);
 	GtkTextBuffer *buffer;
 	TagData *td;
 
@@ -109,7 +109,7 @@ static void osd_dnd_get_cb(GtkWidget *btn, GdkDragContext *UNUSED(context),
 								guint UNUSED(time), gpointer data)
 {
 	TagData *td;
-	GtkTextView *image_overlay_template_view = static_cast<GtkTextView *>(data);
+	auto image_overlay_template_view = static_cast<GtkTextView *>(data);
 
 	td = static_cast<TagData *>(g_object_get_data(G_OBJECT(btn), "tag_data"));
 	gtk_selection_data_set_text(selection_data, td->key, -1);
@@ -218,7 +218,7 @@ static gchar *keywords_to_string(FileData *fd)
 
 		while (work)
 			{
-			gchar *kw = static_cast<gchar *>(work->data);
+			auto kw = static_cast<gchar *>(work->data);
 			work = work->next;
 
 			if (!kw) continue;

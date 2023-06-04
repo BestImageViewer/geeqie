@@ -46,7 +46,7 @@ struct _ShortcutsData
 
 static void shortcuts_bookmark_select(const gchar *path, gpointer data)
 {
-	ShortcutsData *scd = static_cast<ShortcutsData *>(data);
+	auto scd = static_cast<ShortcutsData *>(data);
 
 	if (file_extension_match(path, GQ_COLLECTION_EXT))
 		{
@@ -68,7 +68,7 @@ static void shortcuts_add_close(ShortcutsData *scd)
 
 static void shortcuts_add_ok_cb(FileDialog *fd, gpointer data)
 {
-	ShortcutsData *scd = static_cast<ShortcutsData *>(data);
+	auto scd = static_cast<ShortcutsData *>(data);
 	const gchar *name = gtk_entry_get_text(GTK_ENTRY(scd->dialog_name_entry));
 	gboolean empty_name = (name[0] == '\0');
 
@@ -86,14 +86,14 @@ static void shortcuts_add_ok_cb(FileDialog *fd, gpointer data)
 
 static void shortcuts_add_cancel_cb(FileDialog *UNUSED(fd), gpointer data)
 {
-	ShortcutsData *scd = static_cast<ShortcutsData *>(data);
+	auto scd = static_cast<ShortcutsData *>(data);
 
 	shortcuts_add_close(scd);
 }
 
 static void shortcuts_add_cb(GtkWidget *button, gpointer data)
 {
-	ShortcutsData *scd = static_cast<ShortcutsData *>(data);
+	auto scd = static_cast<ShortcutsData *>(data);
 	GtkWidget *hbox;
 	const gchar *title;
 
@@ -127,7 +127,7 @@ static void shortcuts_add_cb(GtkWidget *button, gpointer data)
 
 static void shortcuts_destroy(GtkWidget *UNUSED(widget), gpointer data)
 {
-	ShortcutsData *scd = static_cast<ShortcutsData *>(data);
+	auto scd = static_cast<ShortcutsData *>(data);
 
 	shortcuts_add_close(scd);
 

@@ -189,7 +189,7 @@ static guint collection_table_list_count(CollectTable *ct, gint64 *bytes)
 		work = ct->cd->list;
 		while (work)
 			{
-			CollectInfo *ci = static_cast<CollectInfo *>(work->data);
+			auto ci = static_cast<CollectInfo *>(work->data);
 			work = work->next;
 			b += ci->fd->size;
 			}
@@ -210,7 +210,7 @@ static guint collection_table_selection_count(CollectTable *ct, gint64 *bytes)
 		work = ct->selection;
 		while (work)
 			{
-			CollectInfo *ci = static_cast<CollectInfo *>(work->data);
+			auto ci = static_cast<CollectInfo *>(work->data);
 			work = work->next;
 			b += ci->fd->size;
 			}
@@ -365,7 +365,7 @@ static void collection_table_verify_selections(CollectTable *ct)
 	work = ct->selection;
 	while (work)
 		{
-		CollectInfo *info = static_cast<CollectInfo *>(work->data);
+		auto info = static_cast<CollectInfo *>(work->data);
 		work = work->next;
 		if (!g_list_find(ct->cd->list, info))
 			{
@@ -418,7 +418,7 @@ static void collection_table_select_invert_all(CollectTable *ct)
 	work = ct->cd->list;
 	while (work)
 		{
-		CollectInfo *info = static_cast<CollectInfo *>(work->data);
+		auto info = static_cast<CollectInfo *>(work->data);
 
 		if (INFO_SELECTED(info))
 			{
@@ -601,7 +601,7 @@ static void tip_hide(CollectTable *ct)
 
 static gboolean tip_schedule_cb(gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	if (!ct->tip_delay_id) return FALSE;
 
@@ -675,14 +675,14 @@ static void tip_update(CollectTable *ct, CollectInfo *info)
 
 static void collection_table_popup_save_as_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_dialog_save_as(NULL, ct->cd);
 }
 
 static void collection_table_popup_save_cb(GtkWidget *widget, gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	if (!ct->cd->path)
 		{
@@ -711,7 +711,7 @@ static GList *collection_table_popup_file_list(CollectTable *ct)
 static void collection_table_popup_edit_cb(GtkWidget *widget, gpointer data)
 {
 	CollectTable *ct;
-	const gchar *key = static_cast<const gchar *>(data);
+	auto key = static_cast<const gchar *>(data);
 
 	ct = static_cast<CollectTable *>(submenu_item_get_data(widget));
 
@@ -722,28 +722,28 @@ static void collection_table_popup_edit_cb(GtkWidget *widget, gpointer data)
 
 static void collection_table_popup_copy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	file_util_copy(NULL, collection_table_popup_file_list(ct), NULL, ct->listview);
 }
 
 static void collection_table_popup_move_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	file_util_move(NULL, collection_table_popup_file_list(ct), NULL, ct->listview);
 }
 
 static void collection_table_popup_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	file_util_rename(NULL, collection_table_popup_file_list(ct), ct->listview);
 }
 
 static void collection_table_popup_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	options->file_ops.safe_delete_enable = FALSE;
 	file_util_delete(NULL, collection_table_popup_file_list(ct), ct->listview);
@@ -751,7 +751,7 @@ static void collection_table_popup_delete_cb(GtkWidget *UNUSED(widget), gpointer
 
 static void collection_table_popup_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	options->file_ops.safe_delete_enable = TRUE;
 	file_util_delete(NULL, collection_table_popup_file_list(ct), ct->listview);
@@ -759,14 +759,14 @@ static void collection_table_popup_move_to_trash_cb(GtkWidget *UNUSED(widget), g
 
 static void collection_table_popup_copy_path_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	file_util_copy_path_list_to_clipboard(collection_table_popup_file_list(ct), TRUE);
 }
 
 static void collection_table_popup_copy_path_unquoted_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	file_util_copy_path_list_to_clipboard(collection_table_popup_file_list(ct), FALSE);
 }
@@ -798,7 +798,7 @@ static void collection_table_popup_randomize_cb(GtkWidget *widget, gpointer UNUS
 
 static void collection_table_popup_view_new_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	if (ct->click_info && g_list_find(ct->cd->list, ct->click_info))
 		{
@@ -808,7 +808,7 @@ static void collection_table_popup_view_new_cb(GtkWidget *UNUSED(widget), gpoint
 
 static void collection_table_popup_view_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	if (ct->click_info && g_list_find(ct->cd->list, ct->click_info))
 		{
@@ -818,7 +818,7 @@ static void collection_table_popup_view_cb(GtkWidget *UNUSED(widget), gpointer d
 
 static void collection_table_popup_selectall_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_select_all(ct);
 	ct->prev_selection= ct->click_info;
@@ -826,7 +826,7 @@ static void collection_table_popup_selectall_cb(GtkWidget *UNUSED(widget), gpoin
 
 static void collection_table_popup_unselectall_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_unselect_all(ct);
 	ct->prev_selection= ct->click_info;
@@ -834,7 +834,7 @@ static void collection_table_popup_unselectall_cb(GtkWidget *UNUSED(widget), gpo
 
 static void collection_table_popup_select_invert_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_select_invert_all(ct);
 	ct->prev_selection= ct->click_info;
@@ -847,7 +847,7 @@ static void collection_table_popup_rectangular_selection_cb(GtkWidget *UNUSED(wi
 
 static void collection_table_popup_remove_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	GList *list;
 
 	if (!ct->click_info) return;
@@ -867,7 +867,7 @@ static void collection_table_popup_remove_cb(GtkWidget *UNUSED(widget), gpointer
 
 static void collection_table_popup_add_file_selection_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	GList *list;
 	LayoutWindow *lw = NULL;
 
@@ -884,14 +884,14 @@ static void collection_table_popup_add_file_selection_cb(GtkWidget *UNUSED(widge
 
 static void collection_table_popup_add_collection_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_dialog_append(NULL, ct->cd);
 }
 
 static void collection_table_popup_goto_original_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	GList *list;
 	LayoutWindow *lw = NULL;
 	FileData *fd;
@@ -911,7 +911,7 @@ static void collection_table_popup_goto_original_cb(GtkWidget *UNUSED(widget), g
 
 static void collection_table_popup_find_dupes_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	DupeWindow *dw;
 
 	dw = dupe_window_new();
@@ -920,7 +920,7 @@ static void collection_table_popup_find_dupes_cb(GtkWidget *UNUSED(widget), gpoi
 
 static void collection_table_popup_print_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	FileData *fd;
 
 	fd = (ct->click_info) ? ct->click_info->fd : NULL;
@@ -930,21 +930,21 @@ static void collection_table_popup_print_cb(GtkWidget *UNUSED(widget), gpointer 
 
 static void collection_table_popup_show_names_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_toggle_filenames(ct);
 }
 
 static void collection_table_popup_show_stars_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_toggle_stars(ct);
 }
 
 static void collection_table_popup_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_selection_remove(ct, ct->click_info, SELECTION_PRELIGHT, NULL);
 	ct->click_info = NULL;
@@ -1241,7 +1241,7 @@ static gint page_height(CollectTable *ct)
 
 static gboolean collection_table_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	gint focus_row = 0;
 	gint focus_col = 0;
 	CollectInfo *info;
@@ -1604,7 +1604,7 @@ static void collection_table_motion_update(CollectTable *ct, gint x, gint y, gbo
 
 static gboolean collection_table_auto_scroll_idle_cb(gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	GdkWindow *window;
 	gint x, y;
 	gint w, h;
@@ -1631,7 +1631,7 @@ static gboolean collection_table_auto_scroll_idle_cb(gpointer data)
 
 static gboolean collection_table_auto_scroll_notify_cb(GtkWidget *UNUSED(widget), gint UNUSED(x), gint UNUSED(y), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	if (!ct->drop_idle_id)
 		{
@@ -1669,7 +1669,7 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
 
 static gboolean collection_table_motion_cb(GtkWidget *UNUSED(widget), GdkEventMotion *event, gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_motion_update(ct, (gint)event->x, (gint)event->y, FALSE);
 
@@ -1678,7 +1678,7 @@ static gboolean collection_table_motion_cb(GtkWidget *UNUSED(widget), GdkEventMo
 
 static gboolean collection_table_press_cb(GtkWidget *UNUSED(widget), GdkEventButton *bevent, gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	GtkTreeIter iter;
 	CollectInfo *info;
 
@@ -1717,7 +1717,7 @@ static gboolean collection_table_press_cb(GtkWidget *UNUSED(widget), GdkEventBut
 
 static gboolean collection_table_release_cb(GtkWidget *UNUSED(widget), GdkEventButton *bevent, gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	GtkTreeIter iter;
 	CollectInfo *info = NULL;
 
@@ -1777,7 +1777,7 @@ static gboolean collection_table_release_cb(GtkWidget *UNUSED(widget), GdkEventB
 
 static gboolean collection_table_leave_cb(GtkWidget *UNUSED(widget), GdkEventCrossing *UNUSED(event), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	tip_unschedule(ct);
 	return FALSE;
@@ -1974,7 +1974,7 @@ static void collection_table_sync(CollectTable *ct)
 
 static gboolean collection_table_sync_idle_cb(gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	if (!ct->sync_idle_id) return G_SOURCE_REMOVE;
 	g_source_remove(ct->sync_idle_id);
@@ -2190,7 +2190,7 @@ static void confirm_dir_list_do(CollectTable *ct, GList *list, gboolean recursiv
 	GList *work = list;
 	while (work)
 		{
-		FileData *fd = static_cast<FileData *>(work->data);
+		auto fd = static_cast<FileData *>(work->data);
 		work = work->next;
 		if (isdir(fd->path)) collection_table_add_dir_recursive(ct, fd, recursive);
 		}
@@ -2200,21 +2200,21 @@ static void confirm_dir_list_do(CollectTable *ct, GList *list, gboolean recursiv
 
 static void confirm_dir_list_add(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	confirm_dir_list_do(ct, ct->drop_list, FALSE);
 }
 
 static void confirm_dir_list_recurse(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	confirm_dir_list_do(ct, ct->drop_list, TRUE);
 }
 
 static void confirm_dir_list_skip(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_insert_filelist(ct, ct->drop_list, ct->marker_info);
 }
@@ -2265,7 +2265,7 @@ static void collection_table_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *
 				     GtkSelectionData *selection_data, guint info,
 				     guint UNUSED(time), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	gboolean selected;
 	GList *list = NULL;
 	gchar *uri_text = NULL;
@@ -2317,7 +2317,7 @@ static void collection_table_dnd_receive(GtkWidget *UNUSED(widget), GdkDragConte
 					  GtkSelectionData *selection_data, guint info,
 					  guint UNUSED(time), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 	GList *list = NULL;
 	GList *info_list = NULL;
 	CollectionData *source;
@@ -2371,7 +2371,7 @@ static void collection_table_dnd_receive(GtkWidget *UNUSED(widget), GdkDragConte
 			work = list;
 			while (work)
 				{
-				FileData *fd = static_cast<FileData *>(work->data);
+				auto fd = static_cast<FileData *>(work->data);
 				if (isdir(fd->path))
 					{
 					GtkWidget *menu;
@@ -2399,7 +2399,7 @@ static void collection_table_dnd_receive(GtkWidget *UNUSED(widget), GdkDragConte
 
 static void collection_table_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	if (ct->click_info && ct->click_info->pixbuf)
 		{
@@ -2415,7 +2415,7 @@ static void collection_table_dnd_begin(GtkWidget *widget, GdkDragContext *contex
 
 static void collection_table_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(context), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	/* apparently a leave event is not generated on a drop */
 	tip_unschedule(ct);
@@ -2426,7 +2426,7 @@ static void collection_table_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *
 static gint collection_table_dnd_motion(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(context),
 					gint x, gint y, guint UNUSED(time), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_motion_update(ct, x, y, TRUE);
 	collection_table_scroll(ct, TRUE);
@@ -2436,7 +2436,7 @@ static gint collection_table_dnd_motion(GtkWidget *UNUSED(widget), GdkDragContex
 
 static void collection_table_dnd_leave(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(context), guint UNUSED(time), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_scroll(ct, FALSE);
 }
@@ -2481,7 +2481,7 @@ struct _ColumnData
 static void collection_table_cell_data_cb(GtkTreeViewColumn *UNUSED(tree_column), GtkCellRenderer *cell,
 					  GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
-	ColumnData *cd = static_cast<ColumnData *>(data);
+	auto cd = static_cast<ColumnData *>(data);
 	CollectTable *ct;
 	GtkStyle *style;
 	GList *list;
@@ -2616,7 +2616,7 @@ static void collection_table_append_column(CollectTable *ct, gint n)
 
 static void collection_table_destroy(GtkWidget *UNUSED(widget), gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	/* If there is no unsaved data, save the window geometry
 	 */
@@ -2645,7 +2645,7 @@ static void collection_table_destroy(GtkWidget *UNUSED(widget), gpointer data)
 
 static void collection_table_sized(GtkWidget *UNUSED(widget), GtkAllocation *allocation, gpointer data)
 {
-	CollectTable *ct = static_cast<CollectTable *>(data);
+	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_populate_at_new_size(ct, allocation->width, allocation->height, FALSE);
 }

@@ -115,7 +115,7 @@ static void bar_pane_comment_set_selection(PaneCommentData *pcd, gboolean append
 	work = list;
 	while (work)
 		{
-		FileData *fd = static_cast<FileData *>(work->data);
+		auto fd = static_cast<FileData *>(work->data);
 		work = work->next;
 		if (fd == pcd->fd) continue;
 
@@ -135,14 +135,14 @@ static void bar_pane_comment_set_selection(PaneCommentData *pcd, gboolean append
 
 static void bar_pane_comment_sel_add_cb(GtkWidget *UNUSED(button), gpointer data)
 {
-	PaneCommentData *pcd = static_cast<PaneCommentData *>(data);
+	auto pcd = static_cast<PaneCommentData *>(data);
 
 	bar_pane_comment_set_selection(pcd, TRUE);
 }
 
 static void bar_pane_comment_sel_replace_cb(GtkWidget *UNUSED(button), gpointer data)
 {
-	PaneCommentData *pcd = static_cast<PaneCommentData *>(data);
+	auto pcd = static_cast<PaneCommentData *>(data);
 
 	bar_pane_comment_set_selection(pcd, FALSE);
 }
@@ -211,7 +211,7 @@ static void bar_pane_comment_write_config(GtkWidget *pane, GString *outstr, gint
 
 static void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
-	PaneCommentData *pcd = static_cast<PaneCommentData *>(data);
+	auto pcd = static_cast<PaneCommentData *>(data);
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) && fd == pcd->fd)
 		{
 		DEBUG_1("Notify pane_comment: %s %04x", fd->path, type);
@@ -222,7 +222,7 @@ static void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer d
 
 static void bar_pane_comment_changed(GtkTextBuffer *UNUSED(buffer), gpointer data)
 {
-	PaneCommentData *pcd = static_cast<PaneCommentData *>(data);
+	auto pcd = static_cast<PaneCommentData *>(data);
 
 	bar_pane_comment_write(pcd);
 }
@@ -230,7 +230,7 @@ static void bar_pane_comment_changed(GtkTextBuffer *UNUSED(buffer), gpointer dat
 
 static void bar_pane_comment_populate_popup(GtkTextView *UNUSED(textview), GtkMenu *menu, gpointer data)
 {
-	PaneCommentData *pcd = static_cast<PaneCommentData *>(data);
+	auto pcd = static_cast<PaneCommentData *>(data);
 
 	menu_item_add_divider(GTK_WIDGET(menu));
 	menu_item_add_stock(GTK_WIDGET(menu), _("Add text to selected files"), GTK_STOCK_ADD, G_CALLBACK(bar_pane_comment_sel_add_cb), pcd);
@@ -239,7 +239,7 @@ static void bar_pane_comment_populate_popup(GtkTextView *UNUSED(textview), GtkMe
 
 static void bar_pane_comment_destroy(GtkWidget *UNUSED(widget), gpointer data)
 {
-	PaneCommentData *pcd = static_cast<PaneCommentData *>(data);
+	auto pcd = static_cast<PaneCommentData *>(data);
 
 	file_data_unregister_notify_func(bar_pane_comment_notify_cb, pcd);
 

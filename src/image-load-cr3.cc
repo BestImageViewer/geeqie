@@ -129,7 +129,7 @@ convert_cmyk_to_rgb (struct jpeg_decompress_struct *cinfo,
 
 static gpointer image_loader_cr3_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
-        ImageLoaderJpeg *loader = g_new0(ImageLoaderJpeg, 1);
+        auto loader = g_new0(ImageLoaderJpeg, 1);
 
 	loader->area_updated_cb = area_updated_cb;
 	loader->size_cb = size_cb;
@@ -216,7 +216,7 @@ static boolean fill_input_buffer (j_decompress_ptr cinfo)
 }
 static void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 {
-	struct jpeg_source_mgr* src = (struct jpeg_source_mgr*) cinfo->src;
+	auto  src = (struct jpeg_source_mgr*) cinfo->src;
 
 	if ((gulong)num_bytes > src->bytes_in_buffer)
 		{
@@ -253,7 +253,7 @@ static void set_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 
 static gboolean image_loader_cr3_load (gpointer loader, const guchar *buf, gsize count, GError **error)
 {
-	ImageLoaderJpeg *lj = (ImageLoaderJpeg *) loader;
+	auto lj = (ImageLoaderJpeg *) loader;
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_decompress_struct cinfo2;
 	guchar *dptr, *dptr2;
@@ -467,14 +467,14 @@ static gboolean image_loader_cr3_load (gpointer loader, const guchar *buf, gsize
 
 static void image_loader_cr3_set_size(gpointer loader, int width, int height)
 {
-	ImageLoaderJpeg *lj = (ImageLoaderJpeg *) loader;
+	auto lj = (ImageLoaderJpeg *) loader;
 	lj->requested_width = width;
 	lj->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_cr3_get_pixbuf(gpointer loader)
 {
-	ImageLoaderJpeg *lj = (ImageLoaderJpeg *) loader;
+	auto lj = (ImageLoaderJpeg *) loader;
 	return lj->pixbuf;
 }
 
@@ -495,13 +495,13 @@ static gboolean image_loader_cr3_close(gpointer UNUSED(loader), GError **UNUSED(
 
 static void image_loader_cr3_abort(gpointer loader)
 {
-	ImageLoaderJpeg *lj = (ImageLoaderJpeg *) loader;
+	auto lj = (ImageLoaderJpeg *) loader;
 	lj->abort = TRUE;
 }
 
 static void image_loader_cr3_free(gpointer loader)
 {
-	ImageLoaderJpeg *lj = (ImageLoaderJpeg *) loader;
+	auto lj = (ImageLoaderJpeg *) loader;
 	if (lj->pixbuf) g_object_unref(lj->pixbuf);
 	g_free(lj);
 }

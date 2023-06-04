@@ -553,7 +553,7 @@ static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
 					    gint	       *width,
 					    gint	       *height)
 {
-	GQvCellRendererIcon *cellicon = (GQvCellRendererIcon *) cell;
+	auto cellicon = (GQvCellRendererIcon *) cell;
 	gint calc_width;
 	gint calc_height;
 	gint xpad, ypad;
@@ -632,7 +632,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 
 {
 	GtkStyleContext *context = gtk_widget_get_style_context(widget);
-	GQvCellRendererIcon *cellicon = (GQvCellRendererIcon *) cell;
+	auto cellicon = (GQvCellRendererIcon *) cell;
 	GdkPixbuf *pixbuf;
 	const gchar *text;
 	GdkRectangle cell_rect;
@@ -813,7 +813,7 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 						const GdkRectangle   *cell_area,
 						GtkCellRendererState  UNUSED(flags))
 {
-	GQvCellRendererIcon *cellicon = (GQvCellRendererIcon *) cell;
+	auto cellicon = (GQvCellRendererIcon *) cell;
 	GdkEventButton *bevent = &event->button;
 
 	if (cellicon->show_marks &&

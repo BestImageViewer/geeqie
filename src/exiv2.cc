@@ -214,7 +214,7 @@ public:
 				if (!open) io.open();
 				if (io.isopen())
 					{
-					unsigned char *mapped = (unsigned char*)io.mmap();
+					auto mapped = (unsigned char*)io.mmap();
 					if (mapped) exif_jpeg_parse_color(this, mapped, io.size());
 					io.munmap();
 					}
@@ -529,21 +529,21 @@ ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 		Exiv2::Metadatum *item = NULL;
 		try {
 			Exiv2::ExifKey ekey(key);
-			Exiv2::ExifData::iterator pos = exif->exifData().findKey(ekey);
+			auto pos = exif->exifData().findKey(ekey);
 			if (pos == exif->exifData().end()) return NULL;
 			item = &*pos;
 		}
 		catch (Exiv2::AnyError& e) {
 			try {
 				Exiv2::IptcKey ekey(key);
-				Exiv2::IptcData::iterator pos = exif->iptcData().findKey(ekey);
+				auto pos = exif->iptcData().findKey(ekey);
 				if (pos == exif->iptcData().end()) return NULL;
 				item = &*pos;
 			}
 			catch (Exiv2::AnyError& e) {
 #if EXIV2_TEST_VERSION(0,16,0)
 				Exiv2::XmpKey ekey(key);
-				Exiv2::XmpData::iterator pos = exif->xmpData().findKey(ekey);
+				auto pos = exif->xmpData().findKey(ekey);
 				if (pos == exif->xmpData().end()) return NULL;
 				item = &*pos;
 #endif
@@ -564,7 +564,7 @@ ExifItem *exif_add_item(ExifData *exif, const gchar *key)
 		try {
 			Exiv2::ExifKey ekey(key);
 			exif->exifData().add(ekey, NULL);
-			Exiv2::ExifData::iterator pos = exif->exifData().end(); // a hack, there should be a better way to get the currently added item
+			auto pos = exif->exifData().end(); // a hack, there should be a better way to get the currently added item
 			pos--;
 			item = &*pos;
 		}
@@ -572,7 +572,7 @@ ExifItem *exif_add_item(ExifData *exif, const gchar *key)
 			try {
 				Exiv2::IptcKey ekey(key);
 				exif->iptcData().add(ekey, NULL);
-				Exiv2::IptcData::iterator pos = exif->iptcData().end();
+				auto pos = exif->iptcData().end();
 				pos--;
 				item = &*pos;
 			}
@@ -580,7 +580,7 @@ ExifItem *exif_add_item(ExifData *exif, const gchar *key)
 #if EXIV2_TEST_VERSION(0,16,0)
 				Exiv2::XmpKey ekey(key);
 				exif->xmpData().add(ekey, NULL);
-				Exiv2::XmpData::iterator pos = exif->xmpData().end();
+				auto pos = exif->xmpData().end();
 				pos--;
 				item = &*pos;
 #endif
@@ -703,9 +703,9 @@ char *exif_item_get_data(ExifItem *item, guint *data_len)
 {
 	try {
 		if (!item) return 0;
-		Exiv2::Metadatum *md = (Exiv2::Metadatum *)item;
+		auto md = (Exiv2::Metadatum *)item;
 		if (data_len) *data_len = md->size();
-		char *data = (char *)g_malloc(md->size());
+		auto data = (char *)g_malloc(md->size());
 		long res = md->copy((Exiv2::byte *)data, Exiv2::littleEndian /* should not matter */);
 		g_assert(res == md->size());
 		return data;
@@ -792,7 +792,7 @@ gchar *exif_item_get_data_as_text(ExifItem *item)
 {
 	try {
 		if (!item) return NULL;
-		Exiv2::Metadatum *metadatum = (Exiv2::Metadatum *)item;
+		auto metadatum = (Exiv2::Metadatum *)item;
 #if EXIV2_TEST_VERSION(0,17,0)
 		return utf8_validate_or_convert(metadatum->print().c_str());
 #else
@@ -823,7 +823,7 @@ gchar *exif_item_get_string(ExifItem *item, int idx)
 {
 	try {
 		if (!item) return NULL;
-		Exiv2::Metadatum *em = (Exiv2::Metadatum *)item;
+		auto em = (Exiv2::Metadatum *)item;
 #if EXIV2_TEST_VERSION(0,16,0)
 		std::string str = em->toString(idx);
 #else
@@ -927,7 +927,7 @@ static gint exif_update_metadata_simple(ExifData *exif, const gchar *key, const 
 		try {
 			Exiv2::ExifKey ekey(key);
 
-			Exiv2::ExifData::iterator pos = exif->exifData().findKey(ekey);
+			auto pos = exif->exifData().findKey(ekey);
 			while (pos != exif->exifData().end())
 				{
 				exif->exifData().erase(pos);
@@ -946,7 +946,7 @@ static gint exif_update_metadata_simple(ExifData *exif, const gchar *key, const 
 #endif
 			{
 				Exiv2::IptcKey ekey(key);
-				Exiv2::IptcData::iterator pos = exif->iptcData().findKey(ekey);
+				auto pos = exif->iptcData().findKey(ekey);
 				while (pos != exif->iptcData().end())
 					{
 					exif->iptcData().erase(pos);
@@ -962,7 +962,7 @@ static gint exif_update_metadata_simple(ExifData *exif, const gchar *key, const 
 #if EXIV2_TEST_VERSION(0,16,0)
 			catch (Exiv2::AnyError& e) {
 				Exiv2::XmpKey ekey(key);
-				Exiv2::XmpData::iterator pos = exif->xmpData().findKey(ekey);
+				auto pos = exif->xmpData().findKey(ekey);
 				while (pos != exif->xmpData().end())
 					{
 					exif->xmpData().erase(pos);
@@ -1090,7 +1090,7 @@ static GList *exif_get_metadata_simple(ExifData *exif, const gchar *key, Metadat
 	try {
 		try {
 			Exiv2::ExifKey ekey(key);
-			Exiv2::ExifData::iterator pos = exif->exifData().findKey(ekey);
+			auto pos = exif->exifData().findKey(ekey);
 			if (pos != exif->exifData().end())
 				list = exif_add_value_to_glist(list, *pos, format, &exif->exifData());
 
@@ -1098,7 +1098,7 @@ static GList *exif_get_metadata_simple(ExifData *exif, const gchar *key, Metadat
 		catch (Exiv2::AnyError& e) {
 			try {
 				Exiv2::IptcKey ekey(key);
-				Exiv2::IptcData::iterator pos = exif->iptcData().begin();
+				auto pos = exif->iptcData().begin();
 				while (pos != exif->iptcData().end())
 					{
 					if (pos->key() == key)
@@ -1110,7 +1110,7 @@ static GList *exif_get_metadata_simple(ExifData *exif, const gchar *key, Metadat
 			catch (Exiv2::AnyError& e) {
 #if EXIV2_TEST_VERSION(0,16,0)
 				Exiv2::XmpKey ekey(key);
-				Exiv2::XmpData::iterator pos = exif->xmpData().findKey(ekey);
+				auto pos = exif->xmpData().findKey(ekey);
 				if (pos != exif->xmpData().end())
 					list = exif_add_value_to_glist(list, *pos, format, NULL);
 #endif
@@ -1212,7 +1212,7 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, 
 		if (!list.empty())
 			{
 			Exiv2::PreviewPropertiesList::iterator pos;
-			Exiv2::PreviewPropertiesList::iterator last = --list.end();
+			auto last = --list.end();
 
 			if (requested_width == 0)
 				{

@@ -611,7 +611,7 @@ static void image_osd_info_hide(OverlayStateData *osd)
 
 static gboolean image_osd_update_cb(gpointer data)
 {
-	OverlayStateData *osd = static_cast<OverlayStateData *>(data);
+	auto osd = static_cast<OverlayStateData *>(data);
 
 	if (osd->show & OSD_SHOW_INFO)
 		{
@@ -699,7 +699,7 @@ void image_osd_update(ImageWindow *imd)
 
 static gboolean image_osd_timer_cb(gpointer data)
 {
-	OverlayStateData *osd = static_cast<OverlayStateData *>(data);
+	auto osd = static_cast<OverlayStateData *>(data);
 	gboolean done = TRUE;
 	gboolean changed = FALSE;
 	gint i;
@@ -742,7 +742,7 @@ static void image_osd_timer_schedule(OverlayStateData *osd)
 
 static void image_osd_state_cb(ImageWindow *UNUSED(imd), ImageState state, gpointer data)
 {
-	OverlayStateData *osd = static_cast<OverlayStateData *>(data);
+	auto osd = static_cast<OverlayStateData *>(data);
 
 	osd->changed_states = static_cast<ImageState>(osd->changed_states | state);
 	image_osd_update_schedule(osd, FALSE);
@@ -750,7 +750,7 @@ static void image_osd_state_cb(ImageWindow *UNUSED(imd), ImageState state, gpoin
 
 static void image_osd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
-	OverlayStateData *osd = static_cast<OverlayStateData *>(data);
+	auto osd = static_cast<OverlayStateData *>(data);
 
 	if ((type & (NOTIFY_HISTMAP)) && osd->imd && fd == osd->imd->image_fd)
 		{
@@ -788,7 +788,7 @@ static void image_osd_free(OverlayStateData *osd)
 
 static void image_osd_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	OverlayStateData *osd = static_cast<OverlayStateData *>(data);
+	auto osd = static_cast<OverlayStateData *>(data);
 
 	osd->imd = NULL;
 	image_osd_free(osd);

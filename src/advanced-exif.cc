@@ -281,7 +281,7 @@ void advanced_exif_close(ExifWin *ew)
 
 static gboolean advanced_exif_delete_cb(GtkWidget *UNUSED(widget), GdkEvent *UNUSED(event), gpointer data)
 {
-	ExifWin *ew = static_cast<ExifWin *>(data);
+	auto ew = static_cast<ExifWin *>(data);
 
 	if (!ew) return FALSE;
 
@@ -337,7 +337,7 @@ static gint advanced_exif_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIt
 static gboolean advanced_exif_mouseclick(GtkWidget *UNUSED(widget),
 						GdkEventButton *UNUSED(bevent), gpointer data)
 {
-	ExifWin *ew = static_cast<ExifWin *>(data);
+	auto ew = static_cast<ExifWin *>(data);
 	GtkTreePath *path;
 	GtkTreeViewColumn *column;
 	GtkTreeIter iter;
@@ -371,7 +371,7 @@ static gboolean advanced_exif_mouseclick(GtkWidget *UNUSED(widget),
 
 static gboolean advanced_exif_keypress(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer data)
 {
-	ExifWin *ew = static_cast<ExifWin *>(data);
+	auto ew = static_cast<ExifWin *>(data);
 	gboolean stop_signal = FALSE;
 
 	if (event->state & GDK_CONTROL_MASK)

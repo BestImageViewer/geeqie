@@ -72,7 +72,7 @@ static void layout_image_animate_update_image(LayoutWindow *lw);
 
 static void layout_image_full_screen_stop_func(FullScreenData *fs, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	/* restore image window */
 	if (lw->image == fs->imd)
@@ -164,7 +164,7 @@ static void layout_image_slideshow_prev(LayoutWindow *lw)
 
 static void layout_image_slideshow_stop_func(SlideShowData *UNUSED(ss), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	lw->slideshow = NULL;
 	layout_status_update_info(lw, NULL);
@@ -301,7 +301,7 @@ static gboolean animation_should_continue(AnimationData *fd)
 
 static gboolean show_next_frame(gpointer data)
 {
-	AnimationData *fd = (AnimationData*)data;
+	auto fd = (AnimationData*)data;
 	int delay;
 	PixbufRenderer *pr;
 
@@ -381,7 +381,7 @@ static void layout_image_animate_update_image(LayoutWindow *lw)
 static void animation_async_ready_cb(GObject *UNUSED(source_object), GAsyncResult *res, gpointer data)
 {
 	GError *error = NULL;
-	AnimationData *animation = static_cast<AnimationData *>(data);
+	auto animation = static_cast<AnimationData *>(data);
 
 	if (animation)
 		{
@@ -481,27 +481,27 @@ void layout_image_animate_toggle(LayoutWindow *lw)
 
 static void li_pop_menu_zoom_in_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_adjust(lw, get_zoom_increment(), FALSE);
 }
 
 static void li_pop_menu_zoom_out_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	layout_image_zoom_adjust(lw, -get_zoom_increment(), FALSE);
 }
 
 static void li_pop_menu_zoom_1_1_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 1.0, FALSE);
 }
 
 static void li_pop_menu_zoom_fit_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 0.0, FALSE);
 }
@@ -509,7 +509,7 @@ static void li_pop_menu_zoom_fit_cb(GtkWidget *UNUSED(widget), gpointer data)
 static void li_pop_menu_edit_cb(GtkWidget *widget, gpointer data)
 {
 	LayoutWindow *lw;
-	const gchar *key = static_cast<const gchar *>(data);
+	auto key = static_cast<const gchar *>(data);
 
 	lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
 
@@ -522,7 +522,7 @@ static void li_pop_menu_edit_cb(GtkWidget *widget, gpointer data)
 
 static void li_pop_menu_alter_cb(GtkWidget *widget, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	AlterType type;
 
 	lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
@@ -533,7 +533,7 @@ static void li_pop_menu_alter_cb(GtkWidget *widget, gpointer data)
 
 static void li_pop_menu_new_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	view_window_new(layout_image_get_fd(lw));
 }
@@ -558,7 +558,7 @@ static GtkWidget *li_pop_menu_click_parent(GtkWidget *widget, LayoutWindow *lw)
 
 static void li_pop_menu_copy_cb(GtkWidget *widget, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_copy(layout_image_get_fd(lw), NULL, NULL,
 		       li_pop_menu_click_parent(widget, lw));
@@ -566,21 +566,21 @@ static void li_pop_menu_copy_cb(GtkWidget *widget, gpointer data)
 
 static void li_pop_menu_copy_path_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), TRUE);
 }
 
 static void li_pop_menu_copy_path_unquoted_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), FALSE);
 }
 
 static void li_pop_menu_copy_image_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	ImageWindow *imd = lw->image;
 
 	GdkPixbuf *pixbuf;
@@ -591,7 +591,7 @@ static void li_pop_menu_copy_image_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static void li_pop_menu_move_cb(GtkWidget *widget, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_move(layout_image_get_fd(lw), NULL, NULL,
 		       li_pop_menu_click_parent(widget, lw));
@@ -599,7 +599,7 @@ static void li_pop_menu_move_cb(GtkWidget *widget, gpointer data)
 
 static void li_pop_menu_rename_cb(GtkWidget *widget, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_rename(layout_image_get_fd(lw), NULL,
 			 li_pop_menu_click_parent(widget, lw));
@@ -607,7 +607,7 @@ static void li_pop_menu_rename_cb(GtkWidget *widget, gpointer data)
 
 static void li_pop_menu_delete_cb(GtkWidget *widget, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	options->file_ops.safe_delete_enable = FALSE;
 	file_util_delete(layout_image_get_fd(lw), NULL,
@@ -616,7 +616,7 @@ static void li_pop_menu_delete_cb(GtkWidget *widget, gpointer data)
 
 static void li_pop_menu_move_to_trash_cb(GtkWidget *widget, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	options->file_ops.safe_delete_enable = TRUE;
 	file_util_delete(layout_image_get_fd(lw), NULL,
@@ -625,49 +625,49 @@ static void li_pop_menu_move_to_trash_cb(GtkWidget *widget, gpointer data)
 
 static void li_pop_menu_slide_start_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_slideshow_start(lw);
 }
 
 static void li_pop_menu_slide_stop_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_slideshow_stop(lw);
 }
 
 static void li_pop_menu_slide_pause_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_slideshow_pause_toggle(lw);
 }
 
 static void li_pop_menu_full_screen_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_full_screen_toggle(lw);
 }
 
 static void li_pop_menu_animate_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_animate_toggle(lw);
 }
 
 static void li_pop_menu_hide_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_tools_hide_toggle(lw);
 }
 
 static void li_set_layout_path_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	FileData *fd;
 
 	if (!layout_valid(&lw)) return;
@@ -678,7 +678,7 @@ static void li_set_layout_path_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static void li_open_archive_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	LayoutWindow *lw_new;
 	gchar *dest_dir;
 
@@ -712,7 +712,7 @@ static gboolean li_check_if_current_path(LayoutWindow *lw, const gchar *path)
 
 static void layout_image_popup_menu_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	GList *editmenu_fd_list = static_cast<GList *>(data);
+	auto editmenu_fd_list = static_cast<GList *>(data);
 
 	filelist_free(editmenu_fd_list);
 }
@@ -736,10 +736,10 @@ static GList *layout_image_get_fd_list(LayoutWindow *lw)
 
 /**
  * @brief Add file selection list to a collection
- * @param[in] widget 
+ * @param[in] widget
  * @param[in] data Index to the collection list menu item selected, or -1 for new collection
- * 
- * 
+ *
+ *
  */
 static void layout_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 {
@@ -891,7 +891,7 @@ static void layout_image_dnd_receive(GtkWidget *widget, GdkDragContext *UNUSED(c
 				     GtkSelectionData *selection_data, guint info,
 				     guint UNUSED(time), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	gint i;
 	gchar *url;
 
@@ -932,7 +932,7 @@ static void layout_image_dnd_receive(GtkWidget *widget, GdkDragContext *UNUSED(c
 
 		if (list)
 			{
-			FileData *fd = static_cast<FileData *>(list->data);
+			auto fd = static_cast<FileData *>(list->data);
 
 			if (isfile(fd->path))
 				{
@@ -979,7 +979,7 @@ static void layout_image_dnd_get(GtkWidget *widget, GdkDragContext *UNUSED(conte
 				 GtkSelectionData *selection_data, guint UNUSED(info),
 				 guint UNUSED(time), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	FileData *fd;
 	gint i;
 
@@ -1014,7 +1014,7 @@ static void layout_image_dnd_get(GtkWidget *widget, GdkDragContext *UNUSED(conte
 
 static void layout_image_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *context, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
 		{
 		FileData *fd;
@@ -1851,7 +1851,7 @@ static gint image_idx(LayoutWindow *lw, ImageWindow *imd)
 
 static void layout_image_focus_in_cb(ImageWindow *imd, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	gint i = image_idx(lw, imd);
 
@@ -1865,7 +1865,7 @@ static void layout_image_focus_in_cb(ImageWindow *imd, gpointer data)
 
 static void layout_image_button_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *menu;
 	LayoutWindow *lw_new;
 	gchar *dest_dir;
@@ -1913,7 +1913,7 @@ static void layout_image_button_cb(ImageWindow *imd, GdkEventButton *event, gpoi
 
 static void layout_image_scroll_cb(ImageWindow *imd, GdkEventScroll *event, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	gint i = image_idx(lw, imd);
 
@@ -1978,7 +1978,7 @@ static void layout_image_scroll_cb(ImageWindow *imd, GdkEventScroll *event, gpoi
 static void layout_image_drag_cb(ImageWindow *imd, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer data)
 {
 	gint i;
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	gdouble sx, sy;
 
 	if (lw->full_screen && lw->image != lw->full_screen->imd &&
@@ -2021,7 +2021,7 @@ static void layout_image_drag_cb(ImageWindow *imd, GdkEventMotion *event, gdoubl
 
 static void layout_image_button_inactive_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *menu;
 	gint i = image_idx(lw, imd);
 
@@ -2048,7 +2048,7 @@ static void layout_image_button_inactive_cb(ImageWindow *imd, GdkEventButton *ev
 
 static void layout_image_drag_inactive_cb(ImageWindow *imd, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	gint i = image_idx(lw, imd);
 
 	if (i != -1)
@@ -2088,7 +2088,7 @@ static gint num_length(gint num)
 
 void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	gint x_pixel, y_pixel;
 	gint width, height;
 	gchar *text;
@@ -2139,7 +2139,7 @@ void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
 
 static void layout_image_update_cb(ImageWindow *UNUSED(imd), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	layout_status_update_image(lw);
 }
 
@@ -2254,7 +2254,7 @@ static void layout_image_setup_split_common(LayoutWindow *lw, gint n)
 
 				while (work && j < i)
 					{
-					FileData *fd = static_cast<FileData *>(work->data);
+					auto fd = static_cast<FileData *>(work->data);
 					work = work->prev;
 
 					if (!fd || !*fd->path || fd->parent ||
@@ -2506,7 +2506,7 @@ static void layout_image_maint_removed(LayoutWindow *lw, FileData *fd)
 
 void layout_image_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 

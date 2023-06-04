@@ -286,8 +286,8 @@ static void free_context(PsdContext *ctx)
 
 static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
-	ImageLoaderPSD *ld = (ImageLoaderPSD *) loader;
-	PsdContext* ctx = g_new0(PsdContext, 1);
+	auto ld = (ImageLoaderPSD *) loader;
+	auto  ctx = g_new0(PsdContext, 1);
 	guint i;
 	guint32 j;
 	guint size = count;
@@ -529,7 +529,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 
 static gpointer image_loader_psd_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
-	ImageLoaderPSD *loader = g_new0(ImageLoaderPSD, 1);
+	auto loader = g_new0(ImageLoaderPSD, 1);
 	loader->area_updated_cb = area_updated_cb;
 	loader->size_cb = size_cb;
 	loader->area_prepared_cb = area_prepared_cb;
@@ -539,14 +539,14 @@ static gpointer image_loader_psd_new(ImageLoaderBackendCbAreaUpdated area_update
 
 static void image_loader_psd_set_size(gpointer loader, int width, int height)
 {
-	ImageLoaderPSD *ld = (ImageLoaderPSD *) loader;
+	auto ld = (ImageLoaderPSD *) loader;
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_psd_get_pixbuf(gpointer loader)
 {
-	ImageLoaderPSD *ld = (ImageLoaderPSD *) loader;
+	auto ld = (ImageLoaderPSD *) loader;
 	return ld->pixbuf;
 }
 
@@ -568,13 +568,13 @@ static gboolean image_loader_psd_close(gpointer UNUSED(loader), GError **UNUSED(
 
 static void image_loader_psd_abort(gpointer loader)
 {
-	ImageLoaderPSD *ld = (ImageLoaderPSD *) loader;
+	auto ld = (ImageLoaderPSD *) loader;
 	ld->abort = TRUE;
 }
 
 static void image_loader_psd_free(gpointer loader)
 {
-	ImageLoaderPSD *ld = (ImageLoaderPSD *) loader;
+	auto ld = (ImageLoaderPSD *) loader;
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }

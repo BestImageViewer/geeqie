@@ -778,7 +778,7 @@ void pixbuf_renderer_overlay_remove(PixbufRenderer *pr, gint id)
 
 static gboolean pr_scroller_update_cb(gpointer data)
 {
-	PixbufRenderer *pr = static_cast<PixbufRenderer *>(data);
+	auto pr = static_cast<PixbufRenderer *>(data);
 	gint x, y;
 	gint xinc, yinc;
 
@@ -1099,7 +1099,7 @@ static SourceTile *pr_source_tile_find(PixbufRenderer *pr, gint x, gint y)
 	work = pr->source_tiles;
 	while (work)
 		{
-		SourceTile *st = static_cast<SourceTile *>(work->data);
+		auto st = static_cast<SourceTile *>(work->data);
 
 		if (x >= st->x && x < st->x + pr->source_tile_width &&
 		    y >= st->y && y < st->y + pr->source_tile_height)
@@ -1944,7 +1944,7 @@ static void pr_size_sync(PixbufRenderer *pr, gint new_width, gint new_height)
 
 static void pr_size_cb(GtkWidget *UNUSED(widget), GtkAllocation *allocation, gpointer data)
 {
-	PixbufRenderer *pr = static_cast<PixbufRenderer *>(data);
+	auto pr = static_cast<PixbufRenderer *>(data);
 
 	pr_size_sync(pr, allocation->width, allocation->height);
 }

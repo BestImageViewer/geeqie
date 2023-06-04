@@ -190,7 +190,7 @@ static void cache_maintain_home_stop(CMData *cm)
 
 static gboolean cache_maintain_home_cb(gpointer data)
 {
-	CMData *cm = static_cast<CMData *>(data);
+	auto cm = static_cast<CMData *>(data);
 	GList *dlist = NULL;
 	GList *list = NULL;
 	FileData *fd;
@@ -244,7 +244,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 			work = list;
 			while (work)
 				{
-				FileData *fd_list = static_cast<FileData *>(work->data);
+				auto fd_list = static_cast<FileData *>(work->data);
 				gchar *path_buf = g_strdup(fd_list->path);
 				gchar *dot;
 
@@ -319,7 +319,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 
 static void cache_maintain_home_close_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	CMData *cm = static_cast<CMData *>(data);
+	auto cm = static_cast<CMData *>(data);
 
 	if (!gtk_widget_get_sensitive(cm->button_close)) return;
 
@@ -328,7 +328,7 @@ static void cache_maintain_home_close_cb(GenericDialog *UNUSED(gd), gpointer dat
 
 static void cache_maintain_home_stop_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	CMData *cm = static_cast<CMData *>(data);
+	auto cm = static_cast<CMData *>(data);
 
 	cache_maintain_home_stop(cm);
 }
@@ -666,7 +666,7 @@ static void cache_manager_render_reset(CacheOpsData *cd)
 
 static void cache_manager_render_close_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	if (!gtk_widget_get_sensitive(cd->button_close)) return;
 
@@ -692,7 +692,7 @@ static void cache_manager_render_finish(CacheOpsData *cd)
 
 static void cache_manager_render_stop_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	gtk_entry_set_text(GTK_ENTRY(cd->progress), _("stopped"));
 	cache_manager_render_finish(cd);
@@ -723,7 +723,7 @@ static gboolean cache_manager_render_file(CacheOpsData *cd);
 
 static void cache_manager_render_thumb_done_cb(ThumbLoader *UNUSED(tl), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	thumb_loader_free((ThumbLoader *)cd->tl);
 	cd->tl = NULL;
@@ -797,7 +797,7 @@ static gboolean cache_manager_render_file(CacheOpsData *cd)
 
 static void cache_manager_render_start_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 	gchar *path;
 	GList *list_total = NULL;
 
@@ -961,7 +961,7 @@ void cache_manager_render_remote(const gchar *path, gboolean recurse, gboolean l
 
 static void cache_manager_standard_clean_close_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	if (!gtk_widget_get_sensitive(cd->button_close)) return;
 
@@ -997,14 +997,14 @@ static void cache_manager_standard_clean_done(CacheOpsData *cd)
 
 static void cache_manager_standard_clean_stop_cb(GenericDialog *UNUSED(gd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	cache_manager_standard_clean_done(cd);
 }
 
 static gint cache_manager_standard_clean_clear_cb(gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	if (cd->list)
 		{
@@ -1038,7 +1038,7 @@ static gint cache_manager_standard_clean_clear_cb(gpointer data)
 
 static void cache_manager_standard_clean_valid_cb(const gchar *path, gboolean valid, gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	if (path)
 		{
@@ -1079,7 +1079,7 @@ static void cache_manager_standard_clean_valid_cb(const gchar *path, gboolean va
 
 static void cache_manager_standard_clean_start(GenericDialog *UNUSED(gd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 	GList *list;
 	gchar *path;
 	FileData *dir_fd;
@@ -1303,7 +1303,7 @@ static void cache_manager_sim_reset(CacheOpsData *cd)
 
 static void cache_manager_sim_close_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	if (!gtk_widget_get_sensitive(cd->button_close)) return;
 
@@ -1328,7 +1328,7 @@ static void cache_manager_sim_finish(CacheOpsData *cd)
 
 static void cache_manager_sim_stop_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	gtk_entry_set_text(GTK_ENTRY(cd->progress), _("stopped"));
 	cache_manager_sim_finish(cd);
@@ -1357,7 +1357,7 @@ static void cache_manager_sim_folder(CacheOpsData *cd, FileData *dir_fd)
 
 static void cache_manager_sim_file_done_cb(CacheLoader *UNUSED(cl), gint UNUSED(error), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	cache_loader_free((CacheLoader *)cd->cl);
 	cd->cl = NULL;
@@ -1466,7 +1466,7 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 
 static void cache_manager_sim_start_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 	gchar *path;
 	GList *list_total = NULL;
 
@@ -1585,7 +1585,7 @@ static void cache_manager_sim_load_cb(GtkWidget *widget, gpointer UNUSED(data))
 
 static void cache_manager_cache_maintenance_close_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 
 	if (!gtk_widget_get_sensitive(cd->button_close)) return;
 
@@ -1596,7 +1596,7 @@ static void cache_manager_cache_maintenance_close_cb(GenericDialog *UNUSED(fd), 
 
 static void cache_manager_cache_maintenance_start_cb(GenericDialog *UNUSED(fd), gpointer data)
 {
-	CacheOpsData *cd = static_cast<CacheOpsData *>(data);
+	auto cd = static_cast<CacheOpsData *>(data);
 	gchar *path;
 	gchar *cmd_line;
 

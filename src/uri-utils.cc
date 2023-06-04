@@ -49,12 +49,12 @@ gchar **uris_from_pathlist(GList *list)
 	GList *work;
 	guint i = 0;
 	guint num = g_list_length(list);
-	gchar **uris = g_new0(gchar *, num + 1);
+	auto uris = g_new0(gchar *, num + 1);
 
 	work = list;
 	while (work)
 		{
-		const gchar *path = static_cast<const gchar *>(work->data);
+		auto path = static_cast<const gchar *>(work->data);
 		gchar *local_path = path_from_utf8(path);
 		uris[i] = g_filename_to_uri(local_path, NULL, NULL);
 		g_free(local_path);
