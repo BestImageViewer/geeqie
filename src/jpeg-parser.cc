@@ -43,7 +43,7 @@ gboolean jpeg_segment_find(const guchar *data, guint size,
 		    marker != JPEG_MARKER_EOI)
 			{
 			if (offset + 4 >= size) return FALSE;
-			length += ((guint)data[offset + 2] << 8) + data[offset + 3];
+			length += (static_cast<guint>(data[offset + 2]) << 8) + data[offset + 3];
 
 			if (marker == app_marker &&
 			    offset + length < size &&

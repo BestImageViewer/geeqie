@@ -380,9 +380,9 @@ gboolean metadata_write_list(FileData *fd, const gchar *key, const GList *values
 {
 	if (!fd->modified_xmp)
 		{
-		fd->modified_xmp = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)string_list_free);
+		fd->modified_xmp = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, reinterpret_cast<GDestroyNotify>(string_list_free));
 		}
-	g_hash_table_insert(fd->modified_xmp, g_strdup(key), string_list_copy((GList *)values));
+	g_hash_table_insert(fd->modified_xmp, g_strdup(key), string_list_copy(const_cast<GList *>(values)));
 
 	metadata_cache_remove(fd, key);
 
@@ -425,7 +425,7 @@ gboolean metadata_write_int(FileData *fd, const gchar *key, guint64 value)
 {
 	gchar string[50];
 
-	g_snprintf(string, sizeof(string), "%llu", (unsigned long long) value);
+	g_snprintf(string, sizeof(string), "%llu", static_cast<unsigned long long>(value));
 	return metadata_write_string(fd, key, string);
 }
 
@@ -484,12 +484,12 @@ static gboolean metadata_legacy_write(FileData *fd)
 
 	have_keywords = g_hash_table_lookup_extended(fd->modified_xmp, KEYWORD_KEY, NULL, &keywords);
 	have_comment = g_hash_table_lookup_extended(fd->modified_xmp, COMMENT_KEY, NULL, &comment_l);
-	comment = static_cast<const gchar *>((have_comment && comment_l) ? ((GList *)comment_l)->data : NULL);
+	comment = static_cast<const gchar *>((have_comment && comment_l) ? (static_cast<GList *>(comment_l))->data : NULL);
 
 	if (!have_keywords || !have_comment) metadata_file_read(metadata_pathl, &orig_keywords, &orig_comment);
 
 	success = metadata_file_write(metadata_pathl,
-				      have_keywords ? (GList *)keywords : orig_keywords,
+				      have_keywords ? static_cast<GList *>(keywords) : orig_keywords,
 				      have_comment ? comment : orig_comment);
 
 	g_free(metadata_pathl);
@@ -1127,7 +1127,7 @@ void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter
 		GList *path;
 		gchar *mark_str;
 		path = keyword_tree_get_path(keyword_tree, kw_iter);
-		file_data_register_mark_func(mark, meta_data_get_keyword_mark, meta_data_set_keyword_mark, path, (GDestroyNotify)string_list_free);
+		file_data_register_mark_func(mark, meta_data_get_keyword_mark, meta_data_set_keyword_mark, path, reinterpret_cast<GDestroyNotify>(string_list_free));
 
 		mark_str = g_strdup_printf("%d", (mark < 9 ? mark : -1) + 1);
 		gtk_tree_store_set(GTK_TREE_STORE(keyword_tree), kw_iter, KEYWORD_COLUMN_MARK, mark_str, -1);
@@ -1905,7 +1905,7 @@ GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *pa
 
 		if (mark_str)
 			{
-			gint i = (gint)atoi(mark_str);
+			gint i = static_cast<gint>(atoi(mark_str));
 			if (i == 0) i = 10;
 
 			meta_data_connect_mark_with_keyword(GTK_TREE_MODEL(keyword_tree),

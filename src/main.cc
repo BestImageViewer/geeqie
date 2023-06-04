@@ -1243,7 +1243,7 @@ static void create_application_paths()
 	gchar *path;
 
 	length = wai_getExecutablePath(NULL, 0, NULL);
-	path = (gchar *)malloc(length + 1);
+	path = static_cast<gchar *>(malloc(length + 1));
 	wai_getExecutablePath(path, length, NULL);
 	path[length] = '\0';
 
@@ -1516,7 +1516,7 @@ gint main(gint argc, gchar *argv[])
 			work = command_line->collection_list;
 			while (work)
 				{
-				collection_load(cd, (gchar *)work->data, COLLECTION_LOAD_APPEND);
+				collection_load(cd, static_cast<gchar *>(work->data), COLLECTION_LOAD_APPEND);
 				work = work->next;
 				}
 
@@ -1553,7 +1553,7 @@ gint main(gint argc, gchar *argv[])
 			work = command_line->cmd_list;
 			while (work)
 				{
-				fd = file_data_new_simple((gchar *)work->data);
+				fd = file_data_new_simple(static_cast<gchar *>(work->data));
 				selected = g_list_append(selected, fd);
 				file_data_unref(fd);
 				work = work->next;

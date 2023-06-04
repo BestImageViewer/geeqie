@@ -411,7 +411,7 @@ static void layout_sort_menu_cb(GtkWidget *widget, gpointer data)
 	lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
 	if (!lw) return;
 
-	type = (SortType)GPOINTER_TO_INT(data);
+	type = static_cast<SortType>GPOINTER_TO_INT(data);
 
 	if (type == SORT_EXIFTIME || type == SORT_EXIFTIMEDIGITIZED || type == SORT_RATING)
 		{
@@ -492,7 +492,7 @@ static void layout_zoom_menu_cb(GtkWidget *widget, gpointer data)
 
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	mode = (ZoomMode)GPOINTER_TO_INT(data);
+	mode = static_cast<ZoomMode>GPOINTER_TO_INT(data);
 	options->image.zoom_mode = mode;
 }
 
@@ -653,7 +653,7 @@ void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 					}
 				hrs = options->slideshow.delay / (36000);
 				min = (options->slideshow.delay -(36000 * hrs))/600;
-				sec = (gdouble)(options->slideshow.delay -(36000 * hrs)-(min * 600)) / 10;
+				sec = static_cast<gdouble>(options->slideshow.delay -(36000 * hrs)-(min * 600)) / 10;
 
 				if (hrs > 0)
 					{

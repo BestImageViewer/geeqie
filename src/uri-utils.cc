@@ -35,7 +35,7 @@ void warning_dialog_dnd_uri_error(GList *uri_error_list)
 		while (work)
 			{
 			gchar *prev = msg;
-			msg = g_strdup_printf("%s\n%s", prev, (gchar *)work->data);
+			msg = g_strdup_printf("%s\n%s", prev, static_cast<gchar *>(work->data));
 			work = work->next;
 			g_free(prev);
 			}

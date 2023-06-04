@@ -262,7 +262,7 @@ static RemoteConnection *remote_server_open(const gchar *path)
 	addr.sun_family = AF_UNIX;
 	sun_path_len = MIN(strlen(path) + 1, UNIX_PATH_MAX);
 	strncpy(addr.sun_path, path, sun_path_len);
-	if (bind(fd, (const struct sockaddr*)&addr, sizeof(addr)) == -1 ||
+	if (bind(fd, reinterpret_cast<const struct sockaddr*>(&addr), sizeof(addr)) == -1 ||
 	    listen(fd, REMOTE_SERVER_BACKLOG) == -1)
 		{
 		log_printf("error subscribing to socket: %s\n", strerror(errno));
@@ -311,7 +311,7 @@ static RemoteConnection *remote_client_open(const gchar *path)
 	addr.sun_family = AF_UNIX;
 	sun_path_len = MIN(strlen(path) + 1, UNIX_PATH_MAX);
 	strncpy(addr.sun_path, path, sun_path_len);
-	if (connect(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1)
+	if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1)
 		{
 		DEBUG_1("error connecting to socket: %s", strerror(errno));
 		close(fd);
@@ -645,7 +645,7 @@ static void gr_slideshow_delay(const gchar *text, GIOChannel *UNUSED(channel), g
 		n = 0;
 		}
 
-	options->slideshow.delay = (gint)(n * 10.0 + 0.01);
+	options->slideshow.delay = static_cast<gint>(n * 10.0 + 0.01);
 }
 
 static void gr_tools_show(const gchar *UNUSED(text), GIOChannel *UNUSED(channel), gpointer UNUSED(data))
@@ -738,7 +738,7 @@ static void gr_pixel_info(const gchar *UNUSED(text), GIOChannel *channel, gpoint
 
 	if (!layout_valid(&lw_id)) return;
 
-	pr = (PixbufRenderer*)lw_id->image->pr;
+	pr = reinterpret_cast<PixbufRenderer*>(lw_id->image->pr);
 
 	if (pr)
 		{
@@ -781,7 +781,7 @@ static void gr_rectangle(const gchar *UNUSED(text), GIOChannel *channel, gpointe
 	if (!options->draw_rectangle) return;
 	if (!layout_valid(&lw_id)) return;
 
-	pr = (PixbufRenderer*)lw_id->image->pr;
+	pr = reinterpret_cast<PixbufRenderer*>(lw_id->image->pr);
 
 	if (pr)
 		{
@@ -1464,7 +1464,7 @@ static void gr_list_add(const gchar *text, GIOChannel *UNUSED(channel), gpointer
 		while (work && remote_data->single_dir)
 			{
 			gchar *dirname;
-			dirname = g_path_get_dirname(((FileData *)work->data)->path);
+			dirname = g_path_get_dirname((static_cast<FileData *>(work->data))->path);
 			if (!path)
 				{
 				path = g_strdup(dirname);
@@ -1495,7 +1495,7 @@ static void gr_list_add(const gchar *text, GIOChannel *UNUSED(channel), gpointer
 
 	layout_select_list(lw_id, remote_data->file_list);
 	layout_refresh(lw_id);
-	first = (FileData *)(g_list_first(vf_selection_get_list(lw_id->vf))->data);
+	first = static_cast<FileData *>(g_list_first(vf_selection_get_list(lw_id->vf))->data);
 	layout_set_fd(lw_id, first);
 
 		CollectionData *cd;

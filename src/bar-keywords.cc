@@ -680,7 +680,7 @@ static void bar_pane_keywords_dnd_receive(GtkWidget *tree_view, GdkDragContext *
 		{
 		case TARGET_APP_KEYWORD_PATH:
 			{
-			auto path = static_cast<GList *>(*(gpointer *)(gtk_selection_data_get_data(selection_data)));
+			auto path = static_cast<GList *>(*reinterpret_cast<const gpointer *>(gtk_selection_data_get_data(selection_data)));
 			src_valid = keyword_tree_get_iter(keyword_tree, &src_kw_iter, path);
 			string_list_free(path);
 			break;

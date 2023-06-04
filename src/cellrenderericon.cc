@@ -98,12 +98,12 @@ gqv_cell_renderer_icon_get_type(void)
 			sizeof(GQvCellRendererIconClass), /* class_size */
 			NULL,		/* base_init */
 			NULL,		/* base_finalize */
-			(GClassInitFunc) gqv_cell_renderer_icon_class_init_wrapper, /* class_init */
+			static_cast<GClassInitFunc>(gqv_cell_renderer_icon_class_init_wrapper), /* class_init */
 			NULL,		/* class_finalize */
 			NULL,		/* class_data */
 			sizeof(GQvCellRendererIcon), /* instance_size */
 			0,		/* n_preallocs */
-			(GInstanceInitFunc) gqv_cell_renderer_icon_init_wrapper, /* instance_init */
+			reinterpret_cast<GInstanceInitFunc>(gqv_cell_renderer_icon_init_wrapper), /* instance_init */
 			NULL,		/* value_table */
 			};
 
@@ -430,7 +430,7 @@ gqv_cell_renderer_icon_set_property(GObject		*object,
 		{
 		GdkPixbuf *pixbuf;
 
-		pixbuf = (GdkPixbuf *) g_value_get_object(value);
+		pixbuf = static_cast<GdkPixbuf *>(g_value_get_object(value));
 		if (pixbuf) g_object_ref(pixbuf);
 		if (cellicon->pixbuf) g_object_unref(cellicon->pixbuf);
 		cellicon->pixbuf = pixbuf;
@@ -553,7 +553,7 @@ static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
 					    gint	       *width,
 					    gint	       *height)
 {
-	auto cellicon = (GQvCellRendererIcon *) cell;
+	auto cellicon = reinterpret_cast<GQvCellRendererIcon *>(cell);
 	gint calc_width;
 	gint calc_height;
 	gint xpad, ypad;
@@ -632,7 +632,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 
 {
 	GtkStyleContext *context = gtk_widget_get_style_context(widget);
-	auto cellicon = (GQvCellRendererIcon *) cell;
+	auto cellicon = reinterpret_cast<GQvCellRendererIcon *>(cell);
 	GdkPixbuf *pixbuf;
 	const gchar *text;
 	GdkRectangle cell_rect;
@@ -766,7 +766,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 
 				gtk_style_context_add_class(context, "marks");
 				GtkStyleProvider *provider;
-				provider = (GtkStyleProvider *)gtk_css_provider_new();
+				provider = reinterpret_cast<GtkStyleProvider *>(gtk_css_provider_new());
 				gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider),
 						".marks {\n"
 						"border-color: #808080;\n"
@@ -813,7 +813,7 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 						const GdkRectangle   *cell_area,
 						GtkCellRendererState  UNUSED(flags))
 {
-	auto cellicon = (GQvCellRendererIcon *) cell;
+	auto cellicon = reinterpret_cast<GQvCellRendererIcon *>(cell);
 	GdkEventButton *bevent = &event->button;
 
 	if (cellicon->show_marks &&

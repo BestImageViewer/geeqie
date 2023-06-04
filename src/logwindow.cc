@@ -118,10 +118,10 @@ static gboolean key_pressed(GtkWidget *UNUSED(widget), GdkEventKey *event, LogWi
 				gtk_text_iter_forward_to_line_end(&line_end);
 
 				chr_start = cursor_iter;
-				gtk_text_iter_backward_find_char(&chr_start, (GtkTextCharPredicate)iter_char_search_cb, GUINT_TO_POINTER(' '), &line_start);
+				gtk_text_iter_backward_find_char(&chr_start, static_cast<GtkTextCharPredicate>(iter_char_search_cb), GUINT_TO_POINTER(' '), &line_start);
 
 				chr_end = cursor_iter;
-				gtk_text_iter_forward_find_char(&chr_end, (GtkTextCharPredicate)iter_char_search_cb, GUINT_TO_POINTER(' '), &line_end);
+				gtk_text_iter_forward_find_char(&chr_end, static_cast<GtkTextCharPredicate>(iter_char_search_cb), GUINT_TO_POINTER(' '), &line_end);
 
 				gtk_text_buffer_select_range(buffer, &chr_start, &chr_end);
 				}
@@ -640,7 +640,7 @@ void log_window_append(const gchar *str, LogType type)
 
 			memory = g_list_prepend(memory, msg);
 
-			while (g_list_length(memory) >= (guint)options->log_window_lines)
+			while (g_list_length(memory) >= static_cast<guint>(options->log_window_lines))
 				{
 				GList *work = g_list_last(memory);
 				auto oldest_msg = static_cast<LogMsg *>(work->data);

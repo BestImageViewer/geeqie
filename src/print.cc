@@ -510,8 +510,8 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 
 	osd_template_insert(vars, "number", g_strdup_printf("%d", page_nr + 1), OSDT_NO_DUP);
 	osd_template_insert(vars, "total", g_strdup_printf("%d", total), OSDT_NO_DUP);
-	osd_template_insert(vars, "name", (gchar *) name, OSDT_NONE);
-	osd_template_insert(vars, "date", fd ? ((gchar *) text_from_time(fd->date)) : "", OSDT_NONE);
+	osd_template_insert(vars, "name", const_cast<gchar *>(name), OSDT_NONE);
+	osd_template_insert(vars, "date", fd ? (const_cast<gchar *>(text_from_time(fd->date))) : "", OSDT_NONE);
 	osd_template_insert(vars, "size", fd ? (text_from_size_abrev(fd->size)) : g_strdup(""), OSDT_FREE);
 
 	if (fd->pixbuf)
@@ -614,8 +614,8 @@ static void draw_page(GtkPrintOperation *UNUSED(operation), GtkPrintContext *con
 		pango_layout_set_font_description(layout_image, desc);
 
 		pango_layout_get_extents(layout_image, &ink_rect, &logical_rect);
-		image_text_width = ((gdouble)logical_rect.width / PANGO_SCALE) ;
-		image_text_height = ((gdouble)logical_rect.height / PANGO_SCALE);
+		image_text_width = (static_cast<gdouble>(logical_rect.width) / PANGO_SCALE) ;
+		image_text_height = (static_cast<gdouble>(logical_rect.height) / PANGO_SCALE);
 
 		pango_layout_set_alignment(layout_image, PANGO_ALIGN_CENTER);
 		pango_layout_set_text(layout_image, image_text->str, -1);
@@ -634,8 +634,8 @@ static void draw_page(GtkPrintOperation *UNUSED(operation), GtkPrintContext *con
 		pango_layout_set_font_description(layout_page, desc);
 
 		pango_layout_get_extents(layout_page, &ink_rect, &logical_rect);
-		page_text_width = ((gdouble)logical_rect.width / PANGO_SCALE) ;
-		page_text_height = ((gdouble)logical_rect.height / PANGO_SCALE);
+		page_text_width = (static_cast<gdouble>(logical_rect.width) / PANGO_SCALE) ;
+		page_text_height = (static_cast<gdouble>(logical_rect.height) / PANGO_SCALE);
 
 		pango_layout_set_alignment(layout_page, PANGO_ALIGN_CENTER);
 		pango_layout_set_text(layout_page, page_text->str, -1);

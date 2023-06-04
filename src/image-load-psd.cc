@@ -286,7 +286,7 @@ static void free_context(PsdContext *ctx)
 
 static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
-	auto ld = (ImageLoaderPSD *) loader;
+	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	auto  ctx = g_new0(PsdContext, 1);
 	guint i;
 	guint32 j;
@@ -411,13 +411,13 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 				break;
 			case PSD_STATE_LINES_LENGTHS:
 				if (feed_buffer(
-						(guchar*) ctx->lines_lengths, &ctx->bytes_read, &buf,
+						reinterpret_cast<guchar*>(ctx->lines_lengths), &ctx->bytes_read, &buf,
 						 &size,	2 * ctx->height * ctx->channels))
 				{
 					/* convert from different endianness */
 					for (i = 0; i < ctx->height * ctx->channels; i++) {
 						ctx->lines_lengths[i] = read_uint16(
-							(guchar*) &ctx->lines_lengths[i]);
+							reinterpret_cast<guchar*>(&ctx->lines_lengths[i]));
 					}
 					ctx->state = PSD_STATE_CHANNEL_DATA;
 					reset_context_buffer(ctx);
@@ -498,13 +498,13 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 			for (i = 0; i < ctx->height; i++) {
 				for (j = 0; j < ctx->width; j++) {
 					double c = 1.0 -
-						(double) ctx->ch_bufs[0][ctx->width*i + j] / 255.0;
+						static_cast<double>(ctx->ch_bufs[0][ctx->width*i + j]) / 255.0;
 					double m = 1.0 -
-						(double) ctx->ch_bufs[1][ctx->width*i + j] / 255.0;
+						static_cast<double>(ctx->ch_bufs[1][ctx->width*i + j]) / 255.0;
 					double y = 1.0 -
-						(double) ctx->ch_bufs[2][ctx->width*i + j] / 255.0;
+						static_cast<double>(ctx->ch_bufs[2][ctx->width*i + j]) / 255.0;
 					double k = 1.0 -
-						(double) ctx->ch_bufs[3][ctx->width*i + j] / 255.0;
+						static_cast<double>(ctx->ch_bufs[3][ctx->width*i + j]) / 255.0;
 					
 					pixels[3*j+0] = (1.0 - (c * (1.0 - k) + k)) * 255.0;
 					pixels[3*j+1] = (1.0 - (m * (1.0 - k) + k)) * 255.0;
@@ -539,14 +539,14 @@ static gpointer image_loader_psd_new(ImageLoaderBackendCbAreaUpdated area_update
 
 static void image_loader_psd_set_size(gpointer loader, int width, int height)
 {
-	auto ld = (ImageLoaderPSD *) loader;
+	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_psd_get_pixbuf(gpointer loader)
 {
-	auto ld = (ImageLoaderPSD *) loader;
+	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	return ld->pixbuf;
 }
 
@@ -568,13 +568,13 @@ static gboolean image_loader_psd_close(gpointer UNUSED(loader), GError **UNUSED(
 
 static void image_loader_psd_abort(gpointer loader)
 {
-	auto ld = (ImageLoaderPSD *) loader;
+	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	ld->abort = TRUE;
 }
 
 static void image_loader_psd_free(gpointer loader)
 {
-	auto ld = (ImageLoaderPSD *) loader;
+	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }

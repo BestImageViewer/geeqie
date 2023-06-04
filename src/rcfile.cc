@@ -73,7 +73,7 @@ void write_char_option(GString *str, gint UNUSED(indent), const gchar *label, co
 		'"',  0 /* '"' is handled in g_markup_escape_text */
 	};
 
-	gchar *escval1 = g_strescape(text ? text : "", (gchar *) no_quote_utf);
+	gchar *escval1 = g_strescape(text ? text : "", reinterpret_cast<const gchar *>(no_quote_utf));
 	gchar *escval2 = g_markup_escape_text(escval1, -1);
 	g_string_append_printf(str, "%s = \"%s\" ", label, escval2);
 	g_free(escval2);

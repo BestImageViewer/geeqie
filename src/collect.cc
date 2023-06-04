@@ -128,7 +128,7 @@ void collection_list_free(GList *list)
 	work = list;
 	while (work)
 		{
-		collection_info_free((CollectInfo *)work->data);
+		collection_info_free(static_cast<CollectInfo *>(work->data));
 		work = work->next;
 		}
 	g_list_free(list);
@@ -211,11 +211,11 @@ GList *collection_list_randomize(GList *list)
 	length = g_list_length(list);
 	if (!length) return NULL;
 
-	srand((unsigned int)time(NULL)); // Initialize random generator (hasn't to be that much strong)
+	srand(static_cast<unsigned int>(time(NULL))); // Initialize random generator (hasn't to be that much strong)
 
 	for (i = 0; i < length; i++)
 		{
-		random = (guint) (1.0 * length * rand()/(RAND_MAX + 1.0));
+		random = static_cast<guint>(1.0 * length * rand()/(RAND_MAX + 1.0));
 		olist = g_list_nth(list, i);
 		nlist = g_list_nth(list, random);
 		tmp = olist->data;
@@ -579,7 +579,7 @@ CollectionData *collection_from_dnd_data(const gchar *data, GList **list, GList 
 		guint item_number;
 		CollectInfo *info;
 
-		item_number = (guint) atoi(ptr);
+		item_number = static_cast<guint>(atoi(ptr));
 		while (*ptr != '\n' && *ptr != '\0') ptr++;
 		if (*ptr == '\0')
 			break;
@@ -859,7 +859,7 @@ void collection_remove_by_info_list(CollectionData *cd, GList *list)
 	if (!list->next)
 		{
 		/* more efficient (in collect-table) to remove a single item this way */
-		collection_remove_by_info(cd, (CollectInfo *)list->data);
+		collection_remove_by_info(cd, static_cast<CollectInfo *>(list->data));
 		return;
 		}
 

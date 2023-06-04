@@ -780,7 +780,7 @@ static void collection_table_popup_sort_cb(GtkWidget *widget, gpointer data)
 
 	if (!ct) return;
 
-	type = (SortType)GPOINTER_TO_INT(data);
+	type = static_cast<SortType>GPOINTER_TO_INT(data);
 
 	collection_set_sort_method(ct->cd, type);
 }
@@ -1228,7 +1228,7 @@ static gint page_height(CollectTable *ct)
 	gint ret;
 
 	adj = gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(ct->listview));
-	page_size = (gint)gtk_adjustment_get_page_increment(adj);
+	page_size = static_cast<gint>(gtk_adjustment_get_page_increment(adj));
 
 	row_height = options->thumbnails.max_height + THUMB_BORDER_PADDING * 2;
 	if (ct->show_text) row_height += options->thumbnails.max_height / 3;
@@ -1671,7 +1671,7 @@ static gboolean collection_table_motion_cb(GtkWidget *UNUSED(widget), GdkEventMo
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	collection_table_motion_update(ct, (gint)event->x, (gint)event->y, FALSE);
+	collection_table_motion_update(ct, static_cast<gint>(event->x), static_cast<gint>(event->y), FALSE);
 
 	return FALSE;
 }
@@ -1684,7 +1684,7 @@ static gboolean collection_table_press_cb(GtkWidget *UNUSED(widget), GdkEventBut
 
 	tip_unschedule(ct);
 
-	info = collection_table_find_data_by_coord(ct, (gint)bevent->x, (gint)bevent->y, &iter);
+	info = collection_table_find_data_by_coord(ct, static_cast<gint>(bevent->x), static_cast<gint>(bevent->y), &iter);
 
 	ct->click_info = info;
 	collection_table_selection_add(ct, ct->click_info, SELECTION_PRELIGHT, &iter);
@@ -1723,9 +1723,9 @@ static gboolean collection_table_release_cb(GtkWidget *UNUSED(widget), GdkEventB
 
 	tip_schedule(ct);
 
-	if ((gint)bevent->x != 0 || (gint)bevent->y != 0)
+	if (static_cast<gint>(bevent->x) != 0 || static_cast<gint>(bevent->y) != 0)
 		{
-		info = collection_table_find_data_by_coord(ct, (gint)bevent->x, (gint)bevent->y, &iter);
+		info = collection_table_find_data_by_coord(ct, static_cast<gint>(bevent->x), static_cast<gint>(bevent->y), &iter);
 		}
 
 	if (ct->click_info)
@@ -2004,7 +2004,7 @@ void collection_table_add_filelist(CollectTable *ct, GList *list)
 	work = list;
 	while (work)
 		{
-		collection_add(ct->cd, (FileData *)work->data, FALSE);
+		collection_add(ct->cd, static_cast<FileData *>(work->data), FALSE);
 		work = work->next;
 		}
 }
@@ -2018,7 +2018,7 @@ static void collection_table_insert_filelist(CollectTable *ct, GList *list, Coll
 	work = list;
 	while (work)
 		{
-		collection_insert(ct->cd, (FileData *)work->data, insert_info, FALSE);
+		collection_insert(ct->cd, static_cast<FileData *>(work->data), insert_info, FALSE);
 		work = work->next;
 		}
 
@@ -2106,7 +2106,7 @@ void collection_table_file_update(CollectTable *ct, CollectInfo *info)
 
 	if (ct->columns != 0 && ct->rows != 0)
 		{
-		value = (gdouble)(row * ct->columns + col) / (ct->columns * ct->rows);
+		value = static_cast<gdouble>(row * ct->columns + col) / (ct->columns * ct->rows);
 		}
 	else
 		{
@@ -2177,7 +2177,7 @@ static void collection_table_add_dir_recursive(CollectTable *ct, FileData *dir_f
 	work = g_list_last(d);
 	while (work)
 		{
-		collection_table_add_dir_recursive(ct, (FileData *)work->data, TRUE);
+		collection_table_add_dir_recursive(ct, static_cast<FileData *>(work->data), TRUE);
 		work = work->prev;
 		}
 
@@ -2289,7 +2289,7 @@ static void collection_table_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *
 				g_list_free(list);
 				}
 			gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data),
-						8, (guchar *)uri_text, total);
+						8, reinterpret_cast<guchar *>(uri_text), total);
 			g_free(uri_text);
 			break;
 		case TARGET_URI_LIST:

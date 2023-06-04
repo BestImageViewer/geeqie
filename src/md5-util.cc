@@ -43,7 +43,7 @@
 static void md5_transform(guint32 buf[4], const guint32 in[16]);
 
 static gint _ie = 0x44332211;
-static union _endian { gint i; gchar b[4]; } *_endian = (union _endian *)&_ie;
+static union _endian { gint i; gchar b[4]; } *_endian = reinterpret_cast<union _endian *>(&_ie);
 #define	IS_BIG_ENDIAN()		(_endian->b[0] == '\x44')
 #define	IS_LITTLE_ENDIAN()	(_endian->b[0] == '\x11')
 
@@ -56,9 +56,9 @@ _byte_reverse(guchar *buf, guint32 longs)
 {
 	guint32 t;
 	do {
-		t = (guint32) ((guint32) buf[3] << 8 | buf[2]) << 16 |
-			((guint32) buf[1] << 8 | buf[0]);
-		*(guint32 *) buf = t;
+		t = static_cast<guint32>(static_cast<guint32>(buf[3]) << 8 | buf[2]) << 16 |
+			(static_cast<guint32>(buf[1]) << 8 | buf[0]);
+		*reinterpret_cast<guint32 *>(buf) = t;
 		buf += 4;
 	} while (--longs);
 }
@@ -106,7 +106,7 @@ md5_update(MD5Context *ctx, const guchar *buf, guint32 len)
 	/* Update bitcount */
 
 	t = ctx->bits[0];
-	if ((ctx->bits[0] = t + ((guint32) len << 3)) < t)
+	if ((ctx->bits[0] = t + (len << 3)) < t)
 		ctx->bits[1]++;		/* Carry from low to high */
 	ctx->bits[1] += len >> 29;
 
@@ -125,7 +125,7 @@ md5_update(MD5Context *ctx, const guchar *buf, guint32 len)
 		memcpy(p, buf, t);
 		if (ctx->doByteReverse)
 			_byte_reverse(ctx->in, 16);
-		md5_transform(ctx->buf, (guint32 *) ctx->in);
+		md5_transform(ctx->buf, reinterpret_cast<guint32 *>(ctx->in));
 		buf += t;
 		len -= t;
 	}
@@ -135,7 +135,7 @@ md5_update(MD5Context *ctx, const guchar *buf, guint32 len)
 		memcpy(ctx->in, buf, 64);
 		if (ctx->doByteReverse)
 			_byte_reverse(ctx->in, 16);
-		md5_transform(ctx->buf, (guint32 *) ctx->in);
+		md5_transform(ctx->buf, reinterpret_cast<guint32 *>(ctx->in));
 		buf += 64;
 		len -= 64;
 	}
@@ -180,7 +180,7 @@ md5_final(MD5Context *ctx, guchar digest[16])
 		memset(p, 0, count);
 		if (ctx->doByteReverse)
 			_byte_reverse(ctx->in, 16);
-		md5_transform(ctx->buf, (guint32 *) ctx->in);
+		md5_transform(ctx->buf, reinterpret_cast<guint32 *>(ctx->in));
 
 		/* Now fill the next block with 56 bytes */
 		memset(ctx->in, 0, 56);
@@ -192,12 +192,12 @@ md5_final(MD5Context *ctx, guchar digest[16])
 		_byte_reverse(ctx->in, 14);
 
 	/* Append length in bits and transform */
-	((guint32 *) ctx->in)[14] = ctx->bits[0];
-	((guint32 *) ctx->in)[15] = ctx->bits[1];
+	(reinterpret_cast<guint32 *>(ctx->in))[14] = ctx->bits[0];
+	(reinterpret_cast<guint32 *>(ctx->in))[15] = ctx->bits[1];
 
-	md5_transform(ctx->buf, (guint32 *) ctx->in);
+	md5_transform(ctx->buf, reinterpret_cast<guint32 *>(ctx->in));
 	if (ctx->doByteReverse)
-		_byte_reverse((guchar *) ctx->buf, 4);
+		_byte_reverse(reinterpret_cast<guchar *>(ctx->buf), 4);
 	memcpy(digest, ctx->buf, 16);
 }
 

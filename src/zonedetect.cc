@@ -87,24 +87,24 @@ struct ZoneDetectOpaque {
 static void (*zdErrorHandler)(int, int);
 static void zdError(enum ZDInternalError errZD, int errNative)
 {
-    if (zdErrorHandler) zdErrorHandler((int)errZD, errNative);
+    if (zdErrorHandler) zdErrorHandler(static_cast<int>(errZD), errNative);
 }
 
 static int32_t ZDFloatToFixedPoint(float input, float scale, unsigned int precision)
 {
     const float inputScaled = input / scale;
-    return (int32_t)(inputScaled * (float)(1 << (precision - 1)));
+    return static_cast<int32_t>(inputScaled * static_cast<float>(1 << (precision - 1)));
 }
 
 static float ZDFixedPointToFloat(int32_t input, float scale, unsigned int precision)
 {
-    const float value = (float)input / (float)(1 << (precision - 1));
+    const float value = static_cast<float>(input) / static_cast<float>(1 << (precision - 1));
     return value * scale;
 }
 
 static unsigned int ZDDecodeVariableLengthUnsigned(const ZoneDetect *library, uint32_t *index, uint64_t *result)
 {
-    if(*index >= (uint32_t)library->length) {
+    if(*index >= static_cast<uint32_t>(library->length)) {
         return 0;
     }
 
@@ -118,7 +118,7 @@ static unsigned int ZDDecodeVariableLengthUnsigned(const ZoneDetect *library, ui
 
         unsigned int shift = 0;
         while(1) {
-            value |= ((((uint64_t)buffer[i]) & UINT8_C(0x7F)) << shift);
+            value |= (((static_cast<uint64_t>(buffer[i])) & UINT8_C(0x7F)) << shift);
             shift += 7u;
 
             if(!(buffer[i] & UINT8_C(0x80))) {
@@ -149,7 +149,7 @@ static unsigned int ZDDecodeVariableLengthUnsignedReverse(const ZoneDetect *libr
 {
     uint32_t i = *index;
 
-    if(*index >= (uint32_t)library->length) {
+    if(*index >= static_cast<uint32_t>(library->length)) {
         return 0;
     }
 
@@ -192,14 +192,14 @@ static unsigned int ZDDecodeVariableLengthUnsignedReverse(const ZoneDetect *libr
 
 static int64_t ZDDecodeUnsignedToSigned(uint64_t value)
 {
-    return (value & 1) ? -(int64_t)(value / 2) : (int64_t)(value / 2);
+    return (value & 1) ? -static_cast<int64_t>(value / 2) : static_cast<int64_t>(value / 2);
 }
 
 static unsigned int ZDDecodeVariableLengthSigned(const ZoneDetect *library, uint32_t *index, int32_t *result)
 {
     uint64_t value = 0;
     const unsigned int retVal = ZDDecodeVariableLengthUnsigned(library, index, &value);
-    *result = (int32_t)ZDDecodeUnsignedToSigned(value);
+    *result = static_cast<int32_t>(ZDDecodeUnsignedToSigned(value));
     return retVal;
 }
 
@@ -213,7 +213,7 @@ static char *ZDParseString(const ZoneDetect *library, uint32_t *index)
     uint32_t strOffset = *index;
     unsigned int remoteStr = 0;
     if(strLength >= 256) {
-        strOffset = library->metadataOffset + (uint32_t)strLength - 256;
+        strOffset = library->metadataOffset + static_cast<uint32_t>(strLength) - 256;
         remoteStr = 1;
 
         if(!ZDDecodeVariableLengthUnsigned(library, &strOffset, &strLength)) {
@@ -225,7 +225,7 @@ static char *ZDParseString(const ZoneDetect *library, uint32_t *index)
         }
     }
 
-    auto str = static_cast<char *>(malloc((size_t)(strLength + 1)));
+    auto str = static_cast<char *>(malloc(static_cast<size_t>(strLength + 1)));
 
     if(str) {
 #if defined(_MSC_VER)
@@ -233,7 +233,7 @@ static char *ZDParseString(const ZoneDetect *library, uint32_t *index)
 #endif
             size_t i;
             for(i = 0; i < strLength; i++) {
-                str[i] = (char)(library->mapping[strOffset + i] ^ UINT8_C(0x80));
+                str[i] = static_cast<char>(library->mapping[strOffset + i] ^ UINT8_C(0x80));
             }
 #if defined(_MSC_VER)
         } __except(GetExceptionCode() == EXCEPTION_IN_PAGE_ERROR
@@ -247,7 +247,7 @@ static char *ZDParseString(const ZoneDetect *library, uint32_t *index)
     }
 
     if(!remoteStr) {
-        *index += (uint32_t)strLength;
+        *index += static_cast<uint32_t>(strLength);
     }
 
     return str;
@@ -305,10 +305,10 @@ static int ZDParseHeader(ZoneDetect *library)
     /* By memset: library->bboxOffset = 0 */
 
     if(!ZDDecodeVariableLengthUnsigned(library, &index, &tmp)) return -1;
-    library->metadataOffset = (uint32_t)tmp + library->bboxOffset;
+    library->metadataOffset = static_cast<uint32_t>(tmp) + library->bboxOffset;
 
     if(!ZDDecodeVariableLengthUnsigned(library, &index, &tmp))return -1;
-    library->dataOffset = (uint32_t)tmp + library->metadataOffset;
+    library->dataOffset = static_cast<uint32_t>(tmp) + library->metadataOffset;
 
     if(!ZDDecodeVariableLengthUnsigned(library, &index, &tmp)) return -1;
 
@@ -318,7 +318,7 @@ static int ZDParseHeader(ZoneDetect *library)
     library->dataOffset += index;
 
     /* Verify file length */
-    if(tmp + library->dataOffset != (uint32_t)library->length) {
+    if(tmp + library->dataOffset != static_cast<uint32_t>(library->length)) {
         return -2;
     }
 
@@ -344,13 +344,13 @@ static uint32_t ZDUnshuffle(uint64_t w)
     w = (w | (w >> 4))  & 0x00FF00FF00FF00FFllu;
     w = (w | (w >> 8))  & 0x0000FFFF0000FFFFllu;
     w = (w | (w >> 16)) & 0x00000000FFFFFFFFllu;
-    return (uint32_t)w;
+    return static_cast<uint32_t>(w);
 }
 
 static void ZDDecodePoint(uint64_t point, int32_t* lat, int32_t* lon)
 {
-    *lat = (int32_t)ZDDecodeUnsignedToSigned(ZDUnshuffle(point));
-    *lon = (int32_t)ZDDecodeUnsignedToSigned(ZDUnshuffle(point >> 1));
+    *lat = static_cast<int32_t>(ZDDecodeUnsignedToSigned(ZDUnshuffle(point)));
+    *lon = static_cast<int32_t>(ZDDecodeUnsignedToSigned(ZDUnshuffle(point >> 1)));
 }
 
 struct Reader {
@@ -428,11 +428,11 @@ readNewPoint:
             } else if(value == 1) {
                 int32_t diff;
                 int64_t start;
-                if(!ZDDecodeVariableLengthUnsigned(reader->library, &reader->polygonIndex, (uint64_t*)&start)) return -1;
+                if(!ZDDecodeVariableLengthUnsigned(reader->library, &reader->polygonIndex, reinterpret_cast<uint64_t*>(&start))) return -1;
                 if(!ZDDecodeVariableLengthSigned(reader->library, &reader->polygonIndex, &diff)) return -1;
 
-                reader->referenceStart = reader->library->dataOffset+(uint32_t)start;
-                reader->referenceEnd = reader->library->dataOffset+(uint32_t)(start + diff);
+                reader->referenceStart = reader->library->dataOffset+static_cast<uint32_t>(start);
+                reader->referenceEnd = reader->library->dataOffset+static_cast<uint32_t>(start + diff);
                 reader->referenceDirection = diff;
                 if(diff < 0) {
                     reader->referenceStart--;
@@ -513,8 +513,8 @@ static int ZDFindPolygon(const ZoneDetect *library, uint32_t wantedId, uint32_t*
         if(!ZDDecodeVariableLengthSigned(library, &bboxIndex, &metadataIndexDelta)) break;
         if(!ZDDecodeVariableLengthUnsigned(library, &bboxIndex, &polygonIndexDelta)) break;
 
-        metadataIndex += (uint32_t)metadataIndexDelta;
-        polygonIndex += (uint32_t)polygonIndexDelta;
+        metadataIndex += static_cast<uint32_t>(metadataIndexDelta);
+        polygonIndex += static_cast<uint32_t>(polygonIndexDelta);
 
         if(polygonId == wantedId) {
             if(metadataIndexPtr) {
@@ -693,8 +693,8 @@ static ZDLookupResult ZDPointInPolygon(const ZoneDetect *library, uint32_t polyg
 
             /* Calculate the parameters of y=ax+b if needed */
             if(!lineIsStraight && (distanceSqrMin || windingNeedCompare)) {
-                a = ((float)pointLat - (float)prevLat) / ((float)pointLon - (float)prevLon);
-                b = (float)pointLat - a * (float)pointLon;
+                a = (static_cast<float>(pointLat) - static_cast<float>(prevLat)) / (static_cast<float>(pointLon) - static_cast<float>(prevLon));
+                b = static_cast<float>(pointLat) - a * static_cast<float>(pointLon);
             }
 
             int onStraight = ZDPointInBox(pointLat, latFixedPoint, prevLat, pointLon, lonFixedPoint, prevLon);
@@ -706,7 +706,7 @@ static ZDLookupResult ZDPointInPolygon(const ZoneDetect *library, uint32_t polyg
             /* Jumped two quadrants. */
             if(windingNeedCompare) {
                 /* Check if the target is on the border */
-                const auto  intersectLon = (int32_t)(((float)latFixedPoint - b) / a);
+                const auto intersectLon = static_cast<int32_t>((static_cast<float>(latFixedPoint) - b) / a);
                 if(intersectLon >= lonFixedPoint-1 && intersectLon <= lonFixedPoint+1) {
                     if(distanceSqrMin) *distanceSqrMin = 0;
                     return ZD_LOOKUP_ON_BORDER_SEGMENT;
@@ -725,36 +725,36 @@ static ZDLookupResult ZDPointInPolygon(const ZoneDetect *library, uint32_t polyg
             if(distanceSqrMin) {
                 float closestLon, closestLat;
                 if(!lineIsStraight) {
-                    closestLon = ((float)lonFixedPoint + a * (float)latFixedPoint - a * b) / (a * a + 1);
-                    closestLat = (a * ((float)lonFixedPoint + a * (float)latFixedPoint) + b) / (a * a + 1);
+                    closestLon = (static_cast<float>(lonFixedPoint) + a * static_cast<float>(latFixedPoint) - a * b) / (a * a + 1);
+                    closestLat = (a * (static_cast<float>(lonFixedPoint) + a * static_cast<float>(latFixedPoint)) + b) / (a * a + 1);
                 } else {
                     if(pointLon == prevLon) {
-                        closestLon = (float)pointLon;
-                        closestLat = (float)latFixedPoint;
+                        closestLon = static_cast<float>(pointLon);
+                        closestLat = static_cast<float>(latFixedPoint);
                     } else {
-                        closestLon = (float)lonFixedPoint;
-                        closestLat = (float)pointLat;
+                        closestLon = static_cast<float>(lonFixedPoint);
+                        closestLat = static_cast<float>(pointLat);
                     }
                 }
 
-                const int closestInBox = ZDPointInBox(pointLon, (int32_t)closestLon, prevLon, pointLat, (int32_t)closestLat, prevLat);
+                const int closestInBox = ZDPointInBox(pointLon, static_cast<int32_t>(closestLon), prevLon, pointLat, static_cast<int32_t>(closestLat), prevLat);
 
                 int64_t diffLat, diffLon;
                 if(closestInBox) {
                     /* Calculate squared distance to segment. */
-                    diffLat = (int64_t)(closestLat - (float)latFixedPoint);
-                    diffLon = (int64_t)(closestLon - (float)lonFixedPoint);
+                    diffLat = static_cast<int64_t>(closestLat - static_cast<float>(latFixedPoint));
+                    diffLon = static_cast<int64_t>(closestLon - static_cast<float>(lonFixedPoint));
                 } else {
                     /*
                      * Calculate squared distance to vertices
                      * It is enough to check the current point since the polygon is closed.
                      */
-                    diffLat = (int64_t)(pointLat - latFixedPoint);
-                    diffLon = (int64_t)(pointLon - lonFixedPoint);
+                    diffLat = static_cast<int64_t>(pointLat - latFixedPoint);
+                    diffLon = static_cast<int64_t>(pointLon - lonFixedPoint);
                 }
 
                 /* Note: lon has half scale */
-                uint64_t distanceSqr = (uint64_t)(diffLat * diffLat) + (uint64_t)(diffLon * diffLon) * 4;
+                uint64_t distanceSqr = static_cast<uint64_t>(diffLat * diffLat) + static_cast<uint64_t>(diffLon * diffLon) * 4;
                 if(distanceSqr < *distanceSqrMin) *distanceSqrMin = distanceSqr;
             }
         }
@@ -783,7 +783,7 @@ void ZDCloseDatabase(ZoneDetect *library)
     if(library) {
         if(library->fieldNames) {
             size_t i;
-            for(i = 0; i < (size_t)library->numFields; i++) {
+            for(i = 0; i < static_cast<size_t>(library->numFields); i++) {
                 if(library->fieldNames[i]) {
                     free(library->fieldNames[i]);
                 }
@@ -800,7 +800,7 @@ void ZDCloseDatabase(ZoneDetect *library)
             if(library->fdMap && !CloseHandle(library->fdMap))         zdError(ZD_E_DB_MUNMAP, (int)GetLastError());
             if(library->fd && !CloseHandle(library->fd))               zdError(ZD_E_DB_CLOSE, (int)GetLastError());
 #elif defined(__APPLE__) || defined(__linux__) || defined(__unix__) || defined(_POSIX_VERSION)
-            if(library->mapping && munmap(library->mapping, (size_t)(library->length))) zdError(ZD_E_DB_MUNMAP, 0);
+            if(library->mapping && munmap(library->mapping, static_cast<size_t>(library->length))) zdError(ZD_E_DB_MUNMAP, 0);
             if(library->fd >= 0 && close(library->fd))                                  zdError(ZD_E_DB_CLOSE, 0);
 #endif
         }
@@ -816,7 +816,7 @@ ZoneDetect *ZDOpenDatabaseFromMemory(void* buffer, size_t length)
     if(library) {
         memset(library, 0, sizeof(*library));
         library->closeType = 1;
-        library->length = (long int)length;
+        library->length = static_cast<long int>(length);
 
         if(library->length <= 0) {
 #if defined(_MSC_VER) || defined(__MINGW32__) || defined(__APPLE__) || defined(__linux__) || defined(__unix__) || defined(_POSIX_VERSION)
@@ -889,7 +889,7 @@ ZoneDetect *ZDOpenDatabase(const char *path)
         }
         lseek(library->fd, 0, SEEK_SET);
 
-        library->mapping = static_cast<uint8_t *>(mmap(NULL, (size_t)library->length, PROT_READ, MAP_PRIVATE | MAP_FILE, library->fd, 0));
+        library->mapping = static_cast<uint8_t *>(mmap(NULL, static_cast<size_t>(library->length), PROT_READ, MAP_PRIVATE | MAP_FILE, library->fd, 0));
         if(library->mapping == MAP_FAILED) {
             zdError(ZD_E_DB_MMAP, errno);
             goto fail;
@@ -915,7 +915,7 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
     const int32_t latFixedPoint = ZDFloatToFixedPoint(lat, 90, library->precision);
     const int32_t lonFixedPoint = ZDFloatToFixedPoint(lon, 180, library->precision);
     size_t numResults = 0;
-    auto  distanceSqrMin = (uint64_t)-1;
+    auto  distanceSqrMin = static_cast<uint64_t>(-1);
 
     /* Iterate over all polygons */
     uint32_t bboxIndex = library->bboxOffset;
@@ -939,8 +939,8 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
         if(!ZDDecodeVariableLengthSigned(library, &bboxIndex, &metadataIndexDelta)) break;
         if(!ZDDecodeVariableLengthUnsigned(library, &bboxIndex, &polygonIndexDelta)) break;
 
-        metadataIndex += (uint32_t)metadataIndexDelta;
-        polygonIndex += (uint32_t)polygonIndexDelta;
+        metadataIndex += static_cast<uint32_t>(metadataIndexDelta);
+        polygonIndex += static_cast<uint32_t>(polygonIndexDelta);
 
         if(latFixedPoint >= minLat) {
             if(latFixedPoint <= maxLat &&
@@ -1037,7 +1037,7 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
                     size_t k;
                     for(k = 0; k < i; k++) {
                         size_t l;
-                        for(l = 0; l < (size_t)results[k].numFields; l++) {
+                        for(l = 0; l < static_cast<size_t>(results[k].numFields); l++) {
                             if(results[k].data[l]) {
                                 free(results[k].data[l]);
                             }
@@ -1056,7 +1056,7 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
             size_t k;
             for(k = 0; k < i; k++) {
                 size_t l;
-                for(l = 0; l < (size_t)results[k].numFields; l++) {
+                for(l = 0; l < static_cast<size_t>(results[k].numFields); l++) {
                     if(results[k].data[l]) {
                         free(results[k].data[l]);
                     }
@@ -1077,7 +1077,7 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
     results[numResults].data = NULL;
 
     if(safezone) {
-        *safezone = sqrtf((float)distanceSqrMin) * 90 / (float)(1 << (library->precision - 1));
+        *safezone = sqrtf(static_cast<float>(distanceSqrMin)) * 90 / static_cast<float>(1 << (library->precision - 1));
     }
 
     return results;
@@ -1094,7 +1094,7 @@ void ZDFreeResults(ZoneDetectResult *results)
     while(results[index].lookupResult != ZD_LOOKUP_END) {
         if(results[index].data) {
             size_t i;
-            for(i = 0; i < (size_t)results[index].numFields; i++) {
+            for(i = 0; i < static_cast<size_t>(results[index].numFields); i++) {
                 if(results[index].data[i]) {
                     free(results[index].data[i]);
                 }
@@ -1144,7 +1144,7 @@ const char *ZDLookupResultToString(ZDLookupResult result)
 
 const char *ZDGetErrorString(int errZD)
 {
-    switch ((enum ZDInternalError)errZD) {
+    switch (static_cast<enum ZDInternalError>(errZD)) {
         default:
             assert(0);
         case ZD_OK                :
@@ -1229,7 +1229,7 @@ char* ZDHelperSimpleLookupString(const ZoneDetect* library, float lat, float lon
 
     length += 1;
 
-    output = (char*)malloc(length);
+    output = static_cast<char*>(malloc(length));
     if(output) {
         output[0] = 0;
         for(const auto& string : strings) {

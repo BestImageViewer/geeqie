@@ -280,7 +280,7 @@ static guint64 msec_time(void)
 
 	if (gettimeofday(&tv, NULL) == -1) return 0;
 
-	return (guint64)tv.tv_sec * 1000000 + (guint64)tv.tv_usec;
+	return static_cast<guint64>(tv.tv_sec) * 1000000 + static_cast<guint64>(tv.tv_usec);
 }
 
 static gint dupe_iterations(gint n)
@@ -343,7 +343,7 @@ static void dupe_window_update_progress(DupeWindow *dw, const gchar *status, gdo
 				d = dw->setup_count - dw->setup_n;
 				}
 
-			rem = (t - d) ? ((gdouble)(dw->setup_time_count / 1000000) / (t - d)) * d : 0;
+			rem = (t - d) ? (static_cast<gdouble>(dw->setup_time_count / 1000000) / (t - d)) * d : 0;
 
 			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(dw->extra_label), value);
 
@@ -665,7 +665,7 @@ static void dupe_listview_add(DupeWindow *dw, DupeItem *parent, DupeItem *child)
 		if (child->group)
 			{
 			dm = static_cast<DupeMatch *>(child->group->data);
-			rank = (gint)floor(dm->rank);
+			rank = static_cast<gint>(floor(dm->rank));
 			}
 		else
 			{
@@ -705,9 +705,9 @@ static void dupe_listview_add(DupeWindow *dw, DupeItem *parent, DupeItem *child)
 		}
 
 	text[DUPE_COLUMN_THUMB] = ("");
-	text[DUPE_COLUMN_NAME] = (gchar *)di->fd->name;
+	text[DUPE_COLUMN_NAME] = const_cast<gchar *>(di->fd->name);
 	text[DUPE_COLUMN_SIZE] = text_from_size(di->fd->size);
-	text[DUPE_COLUMN_DATE] = (gchar *)text_from_time(di->fd->date);
+	text[DUPE_COLUMN_DATE] = const_cast<gchar *>(text_from_time(di->fd->date));
 	if (di->width > 0 && di->height > 0)
 		{
 		text[DUPE_COLUMN_DIMENSIONS] = g_strdup_printf("%d x %d", di->width, di->height);
@@ -854,7 +854,7 @@ static GList *dupe_listview_get_selection(DupeWindow *UNUSED(dw), GtkWidget *lis
 			}
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	return g_list_reverse(list);
@@ -882,7 +882,7 @@ static gboolean dupe_listview_item_is_selected(DupeWindow *UNUSED(dw), DupeItem 
 		if (di_n == di) found = TRUE;
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	return found;
@@ -1591,7 +1591,7 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 
 		if (mask & DUPE_MATCH_SIM_HIGH) m = 0.95;
 		else if (mask & DUPE_MATCH_SIM_MED) m = 0.90;
-		else if (mask & DUPE_MATCH_SIM_CUSTOM) m = (gdouble)options->duplicates_similarity_threshold / 100.0;
+		else if (mask & DUPE_MATCH_SIM_CUSTOM) m = static_cast<gdouble>(options->duplicates_similarity_threshold) / 100.0;
 		else m = 0.85;
 
 		if (fast)
@@ -1733,7 +1733,7 @@ static DUPE_CHECK_RESULT dupe_match_check(DupeItem *di1, DupeItem *di2, gpointer
  */
 static gint dupe_match_binary_search_cb(gconstpointer a, gconstpointer b)
 {
-	const DupeItem *di1 = *((DupeItem **) a);
+	auto di1 = *(static_cast<const DupeItem *const *>(a));
 	auto di2 = static_cast<const DupeItem *>(b);
 	DupeMatchType mask = param_match_mask;
 
@@ -1792,8 +1792,8 @@ static gint dupe_match_binary_search_cb(gconstpointer a, gconstpointer b)
 */
 static gint dupe_match_sort_cb(gconstpointer a, gconstpointer b, gpointer data)
 {
-	const DupeItem *di1 = *((DupeItem **) a);
-	const DupeItem *di2 = *((DupeItem **) b);
+	auto di1 = *(static_cast<const DupeItem *const *>(a));
+	auto di2 = *(static_cast<const DupeItem *const *>(b));
 	auto dw = static_cast<DupeWindow *>(data);
 	DupeMatchType mask = dw->match_mask;
 
@@ -1907,12 +1907,12 @@ static void dupe_array_check(DupeWindow *dw )
 				}
 			g_array_sort_with_data(array_set2, dupe_match_sort_cb, dw);
 
-			for (i_set1 = 0; i_set1 <= (gint)(array_set1->len) - 1; i_set1++)
+			for (i_set1 = 0; i_set1 <= static_cast<gint>(array_set1->len) - 1; i_set1++)
 				{
 				auto di1 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1));
 				DupeItem *di2 = NULL;
 				/* If multiple identical entries in set 1, use the last one */
-				if (i_set1 < (gint)(array_set1->len) - 2)
+				if (i_set1 < static_cast<gint>(array_set1->len) - 2)
 					{
 					di2 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1 + 1));
 					check_result = dupe_match_check(di1, di2, dw);
@@ -1954,7 +1954,7 @@ static void dupe_array_check(DupeWindow *dw )
 							}
 						i_set2 = out_match_index + 1;
 
-						if (i_set2 > (gint)(array_set2->len) - 1)
+						if (i_set2 > static_cast<gint>(array_set2->len) - 1)
 							{
 							break;
 							}
@@ -1968,7 +1968,7 @@ static void dupe_array_check(DupeWindow *dw )
 								dupe_match_link(di2, di1, 0.0);
 								}
 							i_set2++;
-							if (i_set2 > (gint)(array_set2->len) - 1)
+							if (i_set2 > static_cast<gint>(array_set2->len) - 1)
 								{
 								break;
 								}
@@ -1986,9 +1986,9 @@ static void dupe_array_check(DupeWindow *dw )
 		g_list_free(dw->dupes);
 		dw->dupes = NULL;
 
-		if ((gint)(array_set1->len) > 1)
+		if (static_cast<gint>(array_set1->len) > 1)
 			{
-			for (i_set1 = 0; i_set1 <= (gint)(array_set1->len) - 2; i_set1++)
+			for (i_set1 = 0; i_set1 <= static_cast<gint>(array_set1->len) - 2; i_set1++)
 				{
 				auto di1 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1));
 				auto di2 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1 + 1));
@@ -2002,7 +2002,7 @@ static void dupe_array_check(DupeWindow *dw )
 						}
 					i_set1++;
 
-					if ( i_set1 + 1 > (gint)(array_set1->len) - 1)
+					if ( i_set1 + 1 > static_cast<gint>(array_set1->len) - 1)
 						{
 						break;
 						}
@@ -2017,7 +2017,7 @@ static void dupe_array_check(DupeWindow *dw )
 							}
 						i_set1++;
 
-						if (i_set1 + 1 > (gint)(array_set1->len) - 1)
+						if (i_set1 + 1 > static_cast<gint>(array_set1->len) - 1)
 							{
 							break;
 							}
@@ -2164,7 +2164,7 @@ static void dupe_thumb_step(DupeWindow *dw)
 		}
 
 	dupe_window_update_progress(dw, _("Loading thumbs..."),
-				    length == 0 ? 0.0 : (gdouble)(row) / length, FALSE);
+				    length == 0 ? 0.0 : static_cast<gdouble>(row) / length, FALSE);
 
 	dw->thumb_item = di;
 	thumb_loader_free(dw->thumb_loader);
@@ -2336,7 +2336,7 @@ static gboolean create_checksums_dimensions(DupeWindow *dw, GList *list)
 				if (!di->md5sum)
 					{
 					dupe_window_update_progress(dw, _("Reading checksums..."),
-						dw->setup_count == 0 ? 0.0 : (gdouble)(dw->setup_n - 1) / dw->setup_count, FALSE);
+						dw->setup_count == 0 ? 0.0 : static_cast<gdouble>(dw->setup_n - 1) / dw->setup_count, FALSE);
 
 					if (options->thumbnails.enable_caching)
 						{
@@ -2372,7 +2372,7 @@ static gboolean create_checksums_dimensions(DupeWindow *dw, GList *list)
 				if (di->width == 0 && di->height == 0)
 					{
 					dupe_window_update_progress(dw, _("Reading dimensions..."),
-						dw->setup_count == 0 ? 0.0 : (gdouble)(dw->setup_n - 1) / dw->setup_count, FALSE);
+						dw->setup_count == 0 ? 0.0 : static_cast<gdouble>(dw->setup_n - 1) / dw->setup_count, FALSE);
 
 					if (options->thumbnails.enable_caching)
 						{
@@ -2464,7 +2464,7 @@ static gboolean dupe_check_cb(gpointer data)
 				if (!di->simd)
 					{
 					dupe_window_update_progress(dw, _("Reading similarity data..."),
-						dw->setup_count == 0 ? 0.0 : (gdouble)dw->setup_n / dw->setup_count, FALSE);
+						dw->setup_count == 0 ? 0.0 : static_cast<gdouble>(dw->setup_n) / dw->setup_count, FALSE);
 
 					if (options->thumbnails.enable_caching)
 						{
@@ -2590,8 +2590,8 @@ static gboolean dupe_check_cb(gpointer data)
 		dw->match_mask == DUPE_MATCH_SIM_CUSTOM)
 		{
 		/* This is the similarity comparison */
-		dupe_list_check_match(dw, (DupeItem *)dw->working->data, dw->working);
-		dupe_window_update_progress(dw, _("Queuing..."), dw->setup_count == 0 ? 0.0 : (gdouble) dw->setup_n / dw->setup_count, FALSE);
+		dupe_list_check_match(dw, static_cast<DupeItem *>(dw->working->data), dw->working);
+		dupe_window_update_progress(dw, _("Queuing..."), dw->setup_count == 0 ? 0.0 : static_cast<gdouble>(dw->setup_n) / dw->setup_count, FALSE);
 		dw->setup_n++;
 		dw->queue_count++;
 
@@ -2863,14 +2863,14 @@ static void dupe_files_add(DupeWindow *dw, CollectionData *UNUSED(collection), C
 				work = f;
 				while (work)
 					{
-					dupe_files_add(dw, NULL, NULL, (FileData *)work->data, TRUE);
+					dupe_files_add(dw, NULL, NULL, static_cast<FileData *>(work->data), TRUE);
 					work = work->next;
 					}
 				filelist_free(f);
 				work = d;
 				while (work)
 					{
-					dupe_files_add(dw, NULL, NULL, (FileData *)work->data, TRUE);
+					dupe_files_add(dw, NULL, NULL, static_cast<FileData *>(work->data), TRUE);
 					work = work->next;
 					}
 				filelist_free(d);
@@ -3260,7 +3260,7 @@ static void dupe_window_remove_selection(DupeWindow *dw, GtkWidget *listview)
 		if (di) list = g_list_prepend(list, di);
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	dw->color_frozen = TRUE;
@@ -4230,7 +4230,7 @@ static gboolean dupe_window_keypress_cb(GtkWidget *widget, GdkEventKey *event, g
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DUPE_COLUMN_POINTER, &di, -1);
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	if (event->state & GDK_CONTROL_MASK)

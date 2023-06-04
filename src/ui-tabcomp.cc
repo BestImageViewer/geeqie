@@ -428,7 +428,7 @@ static gboolean tab_completion_do(TabCompData *td)
 			}
 		}
 
-	ptr = (gchar *)filename_from_path(entry_dir);
+	ptr = const_cast<gchar *>(filename_from_path(entry_dir));
 	if (ptr > entry_dir) ptr--;
 	ptr[0] = '\0';
 
@@ -674,7 +674,7 @@ GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
 	work = history_list_get_by_key(history_key);
 	while (work)
 		{
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), (gchar *)work->data);
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), static_cast<gchar *>(work->data));
 		work = work->next;
 		n++;
 		}
@@ -731,7 +731,7 @@ void tab_completion_append_to_history(GtkWidget *entry, const gchar *path)
 	work = history_list_get_by_key(td->history_key);
 	while (work)
 		{
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(td->combo), (gchar *)work->data);
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(td->combo), static_cast<gchar *>(work->data));
 		work = work->next;
 		n++;
 		}

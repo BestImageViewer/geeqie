@@ -50,8 +50,8 @@ static gdouble exif_rational_to_double(ExifRational *r, gint sign)
 {
 	if (!r || r->den == 0.0) return 0.0;
 
-	if (sign) return (gdouble)((gint)r->num) / (gdouble)((gint)r->den);
-	return (gdouble)r->num / r->den;
+	if (sign) return static_cast<gdouble>(static_cast<gint>(r->num)) / static_cast<gdouble>(static_cast<gint>(r->den));
+	return static_cast<gdouble>(r->num) / r->den;
 }
 
 static gdouble exif_get_rational_as_double(ExifData *exif, const gchar *key)
@@ -296,7 +296,7 @@ static gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
 	r = exif_get_rational(exif, "Exif.Photo.ExposureTime", NULL);
 	if (r && r->num && r->den)
 		{
-		gdouble n = (gdouble)r->den / (gdouble)r->num;
+		gdouble n = static_cast<gdouble>(r->den) / static_cast<gdouble>(r->num);
 		return g_strdup_printf("%s%.0fs", n > 1.0 ? "1/" : "",
 						  n > 1.0 ? n : 1.0 / n);
 		}
@@ -306,7 +306,7 @@ static gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
 		gdouble n = pow(2.0, exif_rational_to_double(r, TRUE));
 
 		/* Correct exposure time to avoid values like 1/91s (seen on Minolta DImage 7) */
-		if (n > 1.0 && (gint)n - ((gint)(n/10))*10 == 1) n--;
+		if (n > 1.0 && static_cast<gint>(n) - (static_cast<gint>(n/10))*10 == 1) n--;
 
 		return g_strdup_printf("%s%.0fs", n > 1.0 ? "1/" : "",
 						  n > 1.0 ? floor(n) : 1.0 / n);
@@ -387,8 +387,8 @@ static gchar *exif_build_formatted_SubjectDistance(ExifData *exif)
 	r = exif_get_rational(exif, "Exif.Photo.SubjectDistance", &sign);
 	if (!r) return NULL;
 
-	if ((glong)r->num == (glong)0xffffffff) return g_strdup(_("infinity"));
-	if ((glong)r->num == 0) return g_strdup(_("unknown"));
+	if (static_cast<glong>(r->num) == static_cast<glong>(0xffffffff)) return g_strdup(_("infinity"));
+	if (static_cast<glong>(r->num) == 0) return g_strdup(_("unknown"));
 
 	n = exif_rational_to_double(r, sign);
 	if (n == 0.0) return _("unknown");
@@ -456,8 +456,8 @@ static gchar *exif_build_formatted_Resolution(ExifData *exif)
 	if (!rx || !ry) return NULL;
 
 	units = exif_get_data_as_text(exif, "Exif.Image.ResolutionUnit");
-	text = g_strdup_printf("%0.f x %0.f (%s/%s)", rx->den ? (gdouble)rx->num / rx->den : 1.0,
-						      ry->den ? (gdouble)ry->num / ry->den : 1.0,
+	text = g_strdup_printf("%0.f x %0.f (%s/%s)", rx->den ? static_cast<gdouble>(rx->num) / rx->den : 1.0,
+						      ry->den ? static_cast<gdouble>(ry->num) / ry->den : 1.0,
 						      _("dot"), (units) ? units : _("unknown"));
 
 	g_free(units);
@@ -546,10 +546,10 @@ static gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 			{
 			value = exif_item_get_rational(item, NULL, i);
 			if (value && value->num && value->den)
-				p += (gdouble)value->num / (gdouble)value->den / pow(60.0, (gdouble)i);
+				p += static_cast<gdouble>(value->num) / static_cast<gdouble>(value->den) / pow(60.0, static_cast<gdouble>(i));
 			}
-		p1 = (gint)p;
-		p2 = (gint)((p - p1)*60);
+		p1 = static_cast<gint>(p);
+		p2 = static_cast<gint>((p - p1)*60);
 		p3 = ((p - p1)*60 - p2)*60;
 
 		g_string_append_printf(string, "%0lu° %0lu' %0.2f\" %.1s", p1, p2, p3, ref);
@@ -564,10 +564,10 @@ static gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 			{
 			value = exif_item_get_rational(item, NULL, i);
 			if (value && value->num && value->den)
-			p += (gdouble)value->num / (gdouble)value->den / pow(60.0, (gdouble)i);
+			p += static_cast<gdouble>(value->num) / static_cast<gdouble>(value->den) / pow(60.0, static_cast<gdouble>(i));
 			}
-		p1 = (gint)p;
-		p2 = (gint)((p - p1)*60);
+		p1 = static_cast<gint>(p);
+		p2 = static_cast<gint>((p - p1)*60);
 		p3 = ((p - p1)*60 - p2)*60;
 
 		g_string_append_printf(string, ", %0lu° %0lu' %0.2f\" %.1s", p1, p2, p3, ref);
@@ -1086,7 +1086,7 @@ gboolean exif_jpeg_parse_color(ExifData *exif, guchar *data, guint size)
 			{
 			guint i;
 
-			chunk_count = (guint)chunk_tot;
+			chunk_count = static_cast<guint>(chunk_tot);
 			for (i = 0; i < chunk_count; i++) chunk_offset[i] = 0;
 			for (i = 0; i < chunk_count; i++) chunk_length[i] = 0;
 			}
@@ -1180,7 +1180,7 @@ gchar *metadata_file_info(FileData *fd, const gchar *key, MetadataFormat UNUSED(
 
 	if (strcmp(key, "file.size") == 0)
 		{
-		return g_strdup_printf("%ld", (long)fd->size);
+		return g_strdup_printf("%ld", static_cast<long>(fd->size));
 		}
 	if (strcmp(key, "file.date") == 0)
 		{

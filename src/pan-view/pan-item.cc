@@ -439,8 +439,8 @@ gint pan_item_text_draw(PanWindow *UNUSED(pw), PanItem *pi, GdkPixbuf *pixbuf, P
 {
 	PangoLayout *layout;
 
-	layout = pan_item_text_layout(pi, (GtkWidget *)pr);
-	pixbuf_draw_layout(pixbuf, layout, (GtkWidget *)pr,
+	layout = pan_item_text_layout(pi, reinterpret_cast<GtkWidget *>(pr));
+	pixbuf_draw_layout(pixbuf, layout, reinterpret_cast<GtkWidget *>(pr),
 			   pi->x - x + pi->border, pi->y - y + pi->border,
 			   pi->color_r, pi->color_g, pi->color_b, pi->color_a);
 	g_object_unref(G_OBJECT(layout));
@@ -530,8 +530,8 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 				     &rx, &ry, &rw, &rh))
 			{
 			gdk_pixbuf_composite(pi->pixbuf, pixbuf, rx - x, ry - y, rw, rh,
-					     (gdouble) tx - x,
-					     (gdouble) ty - y,
+					     static_cast<gdouble>(tx) - x,
+					     static_cast<gdouble>(ty) - y,
 					     1.0, 1.0, GDK_INTERP_NEAREST,
 					     255);
 			}
@@ -670,8 +670,8 @@ gint pan_item_image_draw(PanWindow *UNUSED(pw), PanItem *pi, GdkPixbuf *pixbuf, 
 		if (pi->pixbuf)
 			{
 			gdk_pixbuf_composite(pi->pixbuf, pixbuf, rx - x, ry - y, rw, rh,
-					     (gdouble) pi->x - x,
-					     (gdouble) pi->y - y,
+					     static_cast<gdouble>(pi->x) - x,
+					     static_cast<gdouble>(pi->y) - y,
 					     1.0, 1.0, GDK_INTERP_NEAREST,
 					     pi->color_a);
 			}

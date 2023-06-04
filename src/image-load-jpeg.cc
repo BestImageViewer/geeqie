@@ -147,7 +147,7 @@ fatal_error_handler (j_common_ptr cinfo)
 	struct error_handler_data *errmgr;
         char buffer[JMSG_LENGTH_MAX];
 
-	errmgr = (struct error_handler_data *) cinfo->err;
+	errmgr = reinterpret_cast<struct error_handler_data *>(cinfo->err);
 
         /* Create the message */
         (* cinfo->err->format_message) (cinfo, buffer);
@@ -219,16 +219,16 @@ static boolean fill_input_buffer (j_decompress_ptr cinfo)
 }
 static void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 {
-	auto  src = (struct jpeg_source_mgr*) cinfo->src;
+	auto  src = static_cast<struct jpeg_source_mgr*>(cinfo->src);
 
-	if ((gulong)num_bytes > src->bytes_in_buffer)
+	if (static_cast<gulong>(num_bytes) > src->bytes_in_buffer)
 		{
 		ERREXIT(cinfo, JERR_INPUT_EOF);
 		}
 	else if (num_bytes > 0)
 		{
-		src->next_input_byte += (size_t) num_bytes;
-		src->bytes_in_buffer -= (size_t) num_bytes;
+		src->next_input_byte += static_cast<size_t>(num_bytes);
+		src->bytes_in_buffer -= static_cast<size_t>(num_bytes);
 		}
 }
 static void term_source (j_decompress_ptr UNUSED(cinfo)) {}
@@ -238,25 +238,25 @@ static void set_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 
 	if (cinfo->src == NULL)
 		{   /* first time for this JPEG object? */
-		cinfo->src = (struct jpeg_source_mgr *) (*cinfo->mem->alloc_small) (
-					(j_common_ptr) cinfo, JPOOL_PERMANENT,
-					sizeof(struct jpeg_source_mgr));
+		cinfo->src = static_cast<struct jpeg_source_mgr *>((*cinfo->mem->alloc_small) (
+					reinterpret_cast<j_common_ptr>(cinfo), JPOOL_PERMANENT,
+					sizeof(struct jpeg_source_mgr)));
 		}
 
-	src = (struct jpeg_source_mgr*) cinfo->src;
+	src = static_cast<struct jpeg_source_mgr*>(cinfo->src);
 	src->init_source = init_source;
 	src->fill_input_buffer = fill_input_buffer;
 	src->skip_input_data = skip_input_data;
 	src->resync_to_restart = jpeg_resync_to_restart; /* use default method */
 	src->term_source = term_source;
 	src->bytes_in_buffer = nbytes;
-	src->next_input_byte = (JOCTET*)buffer;
+	src->next_input_byte = static_cast<JOCTET*>(buffer);
 }
 
 
 static gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsize count, GError **error)
 {
-	auto lj = (ImageLoaderJpeg *) loader;
+	auto lj = static_cast<ImageLoaderJpeg *>(loader);
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_decompress_struct cinfo2;
 	guchar *dptr, *dptr2;
@@ -295,9 +295,9 @@ static gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsiz
 		if (idx1 >= 0 && idx2 >= 0)
 			{
 			lj->stereo = TRUE;
-			stereo_buf2 = (unsigned char *)buf + mpo->images[idx2].offset;
+			stereo_buf2 = const_cast<unsigned char *>(buf) + mpo->images[idx2].offset;
 			stereo_length = mpo->images[idx2].length;
-			buf = (unsigned char *)buf + mpo->images[idx1].offset;
+			buf = const_cast<unsigned char *>(buf) + mpo->images[idx1].offset;
 			count = mpo->images[idx1].length;
 			}
 		}
@@ -324,7 +324,7 @@ static gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsiz
 
 	jpeg_create_decompress(&cinfo);
 
-	set_mem_src(&cinfo, (unsigned char *)buf, count);
+	set_mem_src(&cinfo, const_cast<unsigned char *>(buf), count);
 
 
 	jpeg_read_header(&cinfo, TRUE);
@@ -429,14 +429,14 @@ static gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsiz
 
 static void image_loader_jpeg_set_size(gpointer loader, int width, int height)
 {
-	auto lj = (ImageLoaderJpeg *) loader;
+	auto lj = static_cast<ImageLoaderJpeg *>(loader);
 	lj->requested_width = width;
 	lj->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_jpeg_get_pixbuf(gpointer loader)
 {
-	auto lj = (ImageLoaderJpeg *) loader;
+	auto lj = static_cast<ImageLoaderJpeg *>(loader);
 	return lj->pixbuf;
 }
 
@@ -457,13 +457,13 @@ static gboolean image_loader_jpeg_close(gpointer UNUSED(loader), GError **UNUSED
 
 static void image_loader_jpeg_abort(gpointer loader)
 {
-	auto lj = (ImageLoaderJpeg *) loader;
+	auto lj = static_cast<ImageLoaderJpeg *>(loader);
 	lj->abort = TRUE;
 }
 
 static void image_loader_jpeg_free(gpointer loader)
 {
-	auto lj = (ImageLoaderJpeg *) loader;
+	auto lj = static_cast<ImageLoaderJpeg *>(loader);
 	if (lj->pixbuf) g_object_unref(lj->pixbuf);
 	g_free(lj);
 }

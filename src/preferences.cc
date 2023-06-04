@@ -170,7 +170,7 @@ static GtkWidget *help_search_engine_entry;
 
 static void zoom_increment_cb(GtkWidget *spin, gpointer UNUSED(data))
 {
-	c_options->image.zoom_increment = (gint)(gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)) * 100.0 + 0.01);
+	c_options->image.zoom_increment = static_cast<gint>(gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)) * 100.0 + 0.01);
 }
 
 static void slideshow_delay_hours_cb(GtkWidget *spin, gpointer UNUSED(data))
@@ -210,8 +210,8 @@ static void slideshow_delay_seconds_cb(GtkWidget *spin, gpointer UNUSED(data))
 	hours_mins = c_options->slideshow.delay / (60 * SLIDESHOW_SUBSECOND_PRECISION);
 
 	delay = (hours_mins * (60 * SLIDESHOW_SUBSECOND_PRECISION)) +
-							(gint)(gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)) *
-							(gdouble)(SLIDESHOW_SUBSECOND_PRECISION) + 0.01);
+							static_cast<gint>(gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)) *
+							static_cast<gdouble>(SLIDESHOW_SUBSECOND_PRECISION) + 0.01);
 
 	c_options->slideshow.delay = delay > 0 ? delay : SLIDESHOW_MIN_SECONDS *
 													SLIDESHOW_SUBSECOND_PRECISION;
@@ -920,7 +920,7 @@ static void thumb_size_menu_cb(GtkWidget *combo, gpointer UNUSED(data))
 	n = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
 	if (n < 0) return;
 
-	if ((guint) n < sizeof(thumb_size_list) / sizeof(ThumbSize))
+	if (static_cast<guint>(n) < sizeof(thumb_size_list) / sizeof(ThumbSize))
 		{
 		c_options->thumbnails.max_width = thumb_size_list[n].w;
 		c_options->thumbnails.max_height = thumb_size_list[n].h;
@@ -946,7 +946,7 @@ static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, gchar *
 	combo = gtk_combo_box_text_new();
 
 	current = -1;
-	for (i = 0; (guint) i < sizeof(thumb_size_list) / sizeof(ThumbSize); i++)
+	for (i = 0; static_cast<guint>(i) < sizeof(thumb_size_list) / sizeof(ThumbSize); i++)
 		{
 		gint w, h;
 		gchar *buf;
@@ -1375,7 +1375,7 @@ static void filter_add_cb(GtkWidget *UNUSED(widget), gpointer data)
 	filter_add_unique("description", ".new", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
 	filter_store_populate();
 
-	g_idle_add((GSourceFunc)filter_add_scroll, data);
+	g_idle_add(static_cast<GSourceFunc>(filter_add_scroll), data);
 }
 
 static void filter_remove_cb(GtkWidget *UNUSED(widget), gpointer data)
@@ -1422,7 +1422,7 @@ static void filter_default_ok_cb(GenericDialog *gd, gpointer UNUSED(data))
 	filter_rebuild();
 	filter_store_populate();
 
-	g_idle_add((GSourceFunc)filter_default_ok_scroll, gd->data);
+	g_idle_add(reinterpret_cast<GSourceFunc>(filter_default_ok_scroll), gd->data);
 }
 
 static void dummy_cancel_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
@@ -1689,7 +1689,7 @@ static gboolean accel_remove_key_cb(GtkTreeModel *model, GtkTreePath *UNUSED(pat
 
 static void accel_store_edited_cb(GtkCellRendererAccel *UNUSED(accel), gchar *path_string, guint accel_key, GdkModifierType accel_mods, guint UNUSED(hardware_keycode), gpointer UNUSED(user_data))
 {
-	auto model = (GtkTreeModel *)accel_store;
+	auto model = reinterpret_cast<GtkTreeModel *>(accel_store);
 	GtkTreeIter iter;
 	gchar *acc;
 	gchar *accel_path;
@@ -1740,7 +1740,7 @@ static void accel_default_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	accel_store_populate();
 
-	g_idle_add((GSourceFunc)accel_default_scroll, data);
+	g_idle_add(reinterpret_cast<GSourceFunc>(accel_default_scroll), data);
 }
 
 void accel_clear_selection(GtkTreeModel *UNUSED(model), GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer UNUSED(data))
@@ -1913,7 +1913,7 @@ static guint star_rating_symbol_test(GtkWidget *UNUSED(widget), gpointer data)
 		{
 		hex_value = 0x003F; // Unicode 'Question Mark'
 		}
-	str = g_string_append_unichar(str, (gunichar)hex_value);
+	str = g_string_append_unichar(str, static_cast<gunichar>(hex_value));
 	gtk_label_set_text(static_cast<GtkLabel *>(g_list_nth_data(list, 1)), str->str);
 
 	g_strfreev(hex_code);
@@ -2116,7 +2116,7 @@ static void config_tab_general(GtkWidget *notebook)
 	hours = options->slideshow.delay / (3600 * SLIDESHOW_SUBSECOND_PRECISION);
 	remainder = options->slideshow.delay % (3600 * SLIDESHOW_SUBSECOND_PRECISION);
 	minutes = remainder / (60 * SLIDESHOW_SUBSECOND_PRECISION);
-	seconds = (gdouble)(remainder % (60 * SLIDESHOW_SUBSECOND_PRECISION)) /
+	seconds = static_cast<gdouble>(remainder % (60 * SLIDESHOW_SUBSECOND_PRECISION)) /
 											SLIDESHOW_SUBSECOND_PRECISION;
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
@@ -2288,7 +2288,7 @@ static void config_tab_image(GtkWidget *notebook)
 
 	c_options->image.zoom_increment = options->image.zoom_increment;
 	spin = pref_spin_new(group, _("Zoom increment:"), NULL,
-			     0.01, 4.0, 0.01, 2, (gdouble)options->image.zoom_increment / 100.0,
+			     0.01, 4.0, 0.01, 2, static_cast<gdouble>(options->image.zoom_increment) / 100.0,
 			     G_CALLBACK(zoom_increment_cb), NULL);
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_ALWAYS);
 
@@ -2763,7 +2763,7 @@ static void config_tab_files(GtkWidget *notebook)
 	g_signal_connect(G_OBJECT(renderer), "edited",
 			 G_CALLBACK(filter_store_ext_edit_cb), filter_store);
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	g_object_set(G_OBJECT(renderer), "editable", (gboolean)TRUE, NULL);
+	g_object_set(G_OBJECT(renderer), "editable", static_cast<gboolean>TRUE, NULL);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
 						GINT_TO_POINTER(FE_EXTENSION), NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
@@ -2781,7 +2781,7 @@ static void config_tab_files(GtkWidget *notebook)
 	renderer = gtk_cell_renderer_text_new();
 	g_signal_connect(G_OBJECT(renderer), "edited",
 			 G_CALLBACK(filter_store_desc_edit_cb), filter_store);
-	g_object_set(G_OBJECT(renderer), "editable", (gboolean)TRUE, NULL);
+	g_object_set(G_OBJECT(renderer), "editable", static_cast<gboolean>TRUE, NULL);
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
 						GINT_TO_POINTER(FE_DESCRIPTION), NULL);
@@ -2793,7 +2793,7 @@ static void config_tab_files(GtkWidget *notebook)
 	gtk_tree_view_column_set_title(column, _("Class"));
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	renderer = gtk_cell_renderer_combo_new();
-	g_object_set(G_OBJECT(renderer), "editable", (gboolean)TRUE,
+	g_object_set(G_OBJECT(renderer), "editable", static_cast<gboolean>TRUE,
 					 "model", create_class_model(),
 					 "text-column", 0,
 					 "has-entry", FALSE,
@@ -3633,7 +3633,7 @@ static void config_tab_behavior(GtkWidget *notebook)
 	pref_checkbox_new_int(group, _("Progressive keyboard scrolling"),
 			      options->progressive_key_scrolling, &c_options->progressive_key_scrolling);
 	pref_spin_new_int(group, _("Keyboard scrolling step multiplier:"), NULL,
-			  1, 32, 1, options->keyboard_scroll_step, (int *)&c_options->keyboard_scroll_step);
+			  1, 32, 1, options->keyboard_scroll_step, reinterpret_cast<int *>(&c_options->keyboard_scroll_step));
 	pref_checkbox_new_int(group, _("Mouse wheel scrolls image"),
 			      options->mousewheel_scrolls, &c_options->mousewheel_scrolls);
 	pref_checkbox_new_int(group, _("Navigation by left or middle click on image"),
@@ -4301,7 +4301,7 @@ static void timezone_progress_cb(goffset current_num_bytes, goffset total_num_by
 
 	if (!g_cancellable_is_cancelled(tz->cancellable))
 		{
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(tz->progress), (gdouble)current_num_bytes / total_num_bytes);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(tz->progress), static_cast<gdouble>(current_num_bytes) / total_num_bytes);
 		}
 }
 

@@ -203,8 +203,8 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 	closedir(dp);
 	g_free(pathl);
 
-	path_list = g_list_sort(path_list, (GCompareFunc) dest_sort_cb);
-	file_list = g_list_sort(file_list, (GCompareFunc) dest_sort_cb);
+	path_list = g_list_sort(path_list, reinterpret_cast<GCompareFunc>(dest_sort_cb));
+	file_list = g_list_sort(file_list, reinterpret_cast<GCompareFunc>(dest_sort_cb));
 
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dd->d_view)));
 	gtk_list_store_clear(store);
@@ -223,7 +223,7 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 			{
 			gchar *p;
 			filepath = g_strdup(path);
-			p = (gchar *)filename_from_path(filepath);
+			p = const_cast<gchar *>(filename_from_path(filepath));
 			if (p - 1 != filepath) p--;
 			p[0] = '\0';
 			}
@@ -1193,7 +1193,7 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 			{
 			gint pos = -1;
 
-			dest_populate(dd, (gchar *)homedir());
+			dest_populate(dd, const_cast<gchar *>(homedir()));
 			if (path) gtk_editable_insert_text(GTK_EDITABLE(dd->entry), G_DIR_SEPARATOR_S, -1, &pos);
 			if (path) gtk_editable_insert_text(GTK_EDITABLE(dd->entry), path, -1, &pos);
 			}

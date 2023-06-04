@@ -40,7 +40,7 @@ struct _ImageLoaderCOLLECTION {
 
 static gboolean image_loader_collection_load(gpointer loader, const guchar *UNUSED(buf), gsize UNUSED(count), GError **UNUSED(error))
 {
-	auto ld = (ImageLoaderCOLLECTION *) loader;
+	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	auto il = static_cast<ImageLoader *>(ld->data);
 
 	#define LINE_LENGTH 1000
@@ -126,14 +126,14 @@ static gpointer image_loader_collection_new(ImageLoaderBackendCbAreaUpdated area
 
 static void image_loader_collection_set_size(gpointer loader, int width, int height)
 {
-	auto ld = (ImageLoaderCOLLECTION *) loader;
+	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_collection_get_pixbuf(gpointer loader)
 {
-	auto ld = (ImageLoaderCOLLECTION *) loader;
+	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	return ld->pixbuf;
 }
 
@@ -154,13 +154,13 @@ static gboolean image_loader_collection_close(gpointer UNUSED(loader), GError **
 
 static void image_loader_collection_abort(gpointer loader)
 {
-	auto ld = (ImageLoaderCOLLECTION *) loader;
+	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	ld->abort = TRUE;
 }
 
 static void image_loader_collection_free(gpointer loader)
 {
-	auto ld = (ImageLoaderCOLLECTION *) loader;
+	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }

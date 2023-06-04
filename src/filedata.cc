@@ -69,11 +69,11 @@ gchar *text_from_size(gint64 size)
 	if (size > G_MAXINT)
 		{
 		/* the %lld conversion is not valid in all libcs, so use a simple work-around */
-		a = g_strdup_printf("%d%09d", (guint)(size / 1000000000), (guint)(size % 1000000000));
+		a = g_strdup_printf("%d%09d", static_cast<guint>(size / 1000000000), static_cast<guint>(size % 1000000000));
 		}
 	else
 		{
-		a = g_strdup_printf("%d", (guint)size);
+		a = g_strdup_printf("%d", static_cast<guint>(size));
 		}
 	l = strlen(a);
 	n = (l - 1)/ 3;
@@ -106,22 +106,22 @@ gchar *text_from_size(gint64 size)
 
 gchar *text_from_size_abrev(gint64 size)
 {
-	if (size < (gint64)1024)
+	if (size < static_cast<gint64>(1024))
 		{
-		return g_strdup_printf(_("%d bytes"), (gint)size);
+		return g_strdup_printf(_("%d bytes"), static_cast<gint>(size));
 		}
-	if (size < (gint64)1048576)
+	if (size < static_cast<gint64>(1048576))
 		{
-		return g_strdup_printf(_("%.1f KiB"), (gdouble)size / 1024.0);
+		return g_strdup_printf(_("%.1f KiB"), static_cast<gdouble>(size) / 1024.0);
 		}
-	if (size < (gint64)1073741824)
+	if (size < static_cast<gint64>(1073741824))
 		{
-		return g_strdup_printf(_("%.1f MiB"), (gdouble)size / 1048576.0);
+		return g_strdup_printf(_("%.1f MiB"), static_cast<gdouble>(size) / 1048576.0);
 		}
 
 	/* to avoid overflowing the gdouble, do division in two steps */
 	size /= 1048576;
-	return g_strdup_printf(_("%.1f GiB"), (gdouble)size / 1024.0);
+	return g_strdup_printf(_("%.1f GiB"), static_cast<gdouble>(size) / 1024.0);
 }
 
 /* note: returned string is valid until next call to text_from_time() */
@@ -1236,7 +1236,7 @@ GList *filelist_insert_sort_full(GList *list, gpointer data, SortType method, gb
 
 GList *filelist_sort(GList *list, SortType method, gboolean ascend)
 {
-	return filelist_sort_full(list, method, ascend, (GCompareFunc) filelist_sort_file_cb);
+	return filelist_sort_full(list, method, ascend, reinterpret_cast<GCompareFunc>(filelist_sort_file_cb));
 }
 
 //GList *filelist_insert_sort(GList *list, FileData *fd, SortType method, gboolean ascend)
@@ -1308,12 +1308,12 @@ static GList * file_data_basename_hash_insert(GHashTable *basename_hash, FileDat
 
 static void file_data_basename_hash_insert_cb(gpointer fd, gpointer basename_hash)
 {
-	file_data_basename_hash_insert((GHashTable *)basename_hash, (FileData *)fd);
+	file_data_basename_hash_insert(static_cast<GHashTable *>(basename_hash), static_cast<FileData *>(fd));
 }
 
 static void file_data_basename_hash_remove_list(gpointer UNUSED(key), gpointer value, gpointer UNUSED(data))
 {
-	filelist_free((GList *)value);
+	filelist_free(static_cast<GList *>(value));
 }
 
 static void file_data_basename_hash_free(GHashTable *basename_hash)
@@ -1350,7 +1350,7 @@ static GList *filelist_filter_out_sidecars(GList *flist)
 
 static void file_data_basename_hash_to_sidecars(gpointer UNUSED(key), gpointer value, gpointer UNUSED(data))
 {
-	auto basename_list = (GList *)value;
+	auto basename_list = static_cast<GList *>(value);
 	file_data_check_sidecars(basename_list);
 }
 
@@ -1603,7 +1603,7 @@ GList *filelist_filter(GList *list, gboolean is_dir_list)
 	work = list;
 	while (work)
 		{
-		auto fd = (FileData *)(work->data);
+		auto fd = static_cast<FileData *>(work->data);
 		const gchar *name = fd->name;
 
 		if ((!options->file_filter.show_hidden_files && is_hidden_file(name)) ||
@@ -1647,7 +1647,7 @@ static void filelist_recursive_append(GList **list, GList *dirs)
 	work = dirs;
 	while (work)
 		{
-		auto fd = (FileData *)(work->data);
+		auto fd = static_cast<FileData *>(work->data);
 		GList *f;
 		GList *d;
 
@@ -1674,14 +1674,14 @@ static void filelist_recursive_append_full(GList **list, GList *dirs, SortType m
 	work = dirs;
 	while (work)
 		{
-		auto fd = (FileData *)(work->data);
+		auto fd = static_cast<FileData *>(work->data);
 		GList *f;
 		GList *d;
 
 		if (filelist_read(fd, &f, &d))
 			{
 			f = filelist_filter(f, FALSE);
-			f = filelist_sort_full(f, method, ascend, (GCompareFunc) filelist_sort_file_cb);
+			f = filelist_sort_full(f, method, ascend, reinterpret_cast<GCompareFunc>(filelist_sort_file_cb));
 			*list = g_list_concat(*list, f);
 
 			d = filelist_filter(d, TRUE);
@@ -1718,7 +1718,7 @@ GList *filelist_recursive_full(FileData *dir_fd, SortType method, gboolean ascen
 
 	if (!filelist_read(dir_fd, &list, &d)) return NULL;
 	list = filelist_filter(list, FALSE);
-	list = filelist_sort_full(list, method, ascend, (GCompareFunc) filelist_sort_file_cb);
+	list = filelist_sort_full(list, method, ascend, reinterpret_cast<GCompareFunc>(filelist_sort_file_cb));
 
 	d = filelist_filter(d, TRUE);
 	d = filelist_sort_path(d);
@@ -1897,7 +1897,7 @@ GList *file_data_filter_marks_list(GList *list, guint filter)
 
 gboolean file_data_filter_file_filter(FileData *fd, GRegex *filter)
 {
-	return g_regex_match(filter, fd->name, (GRegexMatchFlags)0, NULL);
+	return g_regex_match(filter, fd->name, static_cast<GRegexMatchFlags>(0), NULL);
 }
 
 GList *file_data_filter_file_filter_list(GList *list, GRegex *filter)
@@ -1930,7 +1930,7 @@ static gboolean file_data_filter_class(FileData *fd, guint filter)
 		{
 		if (filter & (1 << i))
 			{
-			if ((FileFormatClass)i == filter_file_get_class(fd->path))
+			if (static_cast<FileFormatClass>(i) == filter_file_get_class(fd->path))
 				{
 				return TRUE;
 				}
@@ -3187,7 +3187,7 @@ gboolean file_data_register_notify_func(FileDataNotifyFunc func, gpointer data, 
 
 	while (work)
 		{
-		auto nd = (NotifyData *)work->data;
+		auto nd = static_cast<NotifyData *>(work->data);
 
 		if (nd->func == func && nd->data == data)
 			{
@@ -3214,7 +3214,7 @@ gboolean file_data_unregister_notify_func(FileDataNotifyFunc func, gpointer data
 
 	while (work)
 		{
-		auto nd = (NotifyData *)work->data;
+		auto nd = static_cast<NotifyData *>(work->data);
 
 		if (nd->func == func && nd->data == data)
 			{
@@ -3254,7 +3254,7 @@ void file_data_send_notification(FileData *fd, NotifyType type)
 
 	while (work)
 		{
-		auto nd = (NotifyData *)work->data;
+		auto nd = static_cast<NotifyData *>(work->data);
 
 		nd->func(fd, type, nd->data);
 		work = work->next;

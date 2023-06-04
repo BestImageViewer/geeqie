@@ -287,7 +287,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	gtk_widget_show(toolbar_entry->button);
 
 	g_object_set_data_full(G_OBJECT(toolbar_entry->button), "toolbarbuttondata",
-	toolbar_entry, (GDestroyNotify)toolbar_item_free);
+	toolbar_entry, reinterpret_cast<GDestroyNotify>(toolbar_item_free));
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_container_add(GTK_CONTAINER(toolbar_entry->button), hbox);

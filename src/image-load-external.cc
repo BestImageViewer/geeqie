@@ -40,7 +40,7 @@ struct _ImageLoaderExternal {
 
 static gboolean image_loader_external_load(gpointer loader, const guchar *UNUSED(buf), gsize UNUSED(count), GError **UNUSED(error))
 {
-	auto ld = (ImageLoaderExternal *) loader;
+	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	auto il = static_cast<ImageLoader *>(ld->data);
 	gchar *cmd_line;
 	gchar *randname;
@@ -79,14 +79,14 @@ static gpointer image_loader_external_new(ImageLoaderBackendCbAreaUpdated area_u
 
 static void image_loader_external_set_size(gpointer loader, int width, int height)
 {
-	auto ld = (ImageLoaderExternal *) loader;
+	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_external_get_pixbuf(gpointer loader)
 {
-	auto ld = (ImageLoaderExternal *) loader;
+	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	return ld->pixbuf;
 }
 
@@ -108,13 +108,13 @@ static gboolean image_loader_external_close(gpointer UNUSED(loader), GError **UN
 
 static void image_loader_external_abort(gpointer loader)
 {
-	auto ld = (ImageLoaderExternal *) loader;
+	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	ld->abort = TRUE;
 }
 
 static void image_loader_external_free(gpointer loader)
 {
-	auto ld = (ImageLoaderExternal *) loader;
+	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }

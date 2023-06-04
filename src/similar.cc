@@ -81,8 +81,8 @@ void image_sim_free(ImageSimilarityData *sd)
 
 static gint image_sim_channel_eq_sort_cb(gconstpointer a, gconstpointer b)
 {
-	auto pa = static_cast<gint *>((gpointer)a);
-	auto pb = static_cast<gint *>((gpointer)b);
+	auto pa = static_cast<gint *>(const_cast<gpointer>(a));
+	auto pb = static_cast<gint *>(const_cast<gpointer>(b));
 	if (pa[1] < pb[1]) return -1;
 	if (pa[1] > pb[1]) return 1;
 	return 0;
@@ -101,7 +101,7 @@ static void image_sim_channel_equal(guint8 *pix, gint len)
 		{
 		buf[p] = i;
 		p++;
-		buf[p] = (gint)pix[i];
+		buf[p] = static_cast<gint>(pix[i]);
 		p++;
 		}
 
@@ -114,7 +114,7 @@ static void image_sim_channel_equal(guint8 *pix, gint len)
 
 		n = buf[p];
 		p += 2;
-		pix[n] = (guint8)(255 * i / len);
+		pix[n] = static_cast<guint8>(255 * i / len);
 		}
 
 	g_free(buf);
@@ -135,11 +135,11 @@ static void image_sim_channel_norm(guint8 *pix, gint len)
 		}
 
 	delta = h - l;
-	scale = (delta != 0) ? 255.0 / (gdouble)(delta) : 1.0;
+	scale = (delta != 0) ? 255.0 / static_cast<gdouble>(delta) : 1.0;
 
 	for (i = 0; i < len; i++)
 		{
-		pix[i] = (guint8)((gdouble)(pix[i] - l) * scale);
+		pix[i] = static_cast<guint8>(static_cast<gdouble>(pix[i] - l) * scale);
 		}
 }
 
@@ -234,8 +234,8 @@ void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 	h_left = h;
 	for (ys = 0; ys < 32; ys++)
 		{
-		if (y_small) j = (gdouble)h / 32 * ys;
-		        else y_inc = mround((gdouble)h_left/(32-ys));
+		if (y_small) j = static_cast<gdouble>(h) / 32 * ys;
+		        else y_inc = mround(static_cast<gdouble>(h_left)/(32-ys));
 		i = 0;
 
 		w_left = w;
@@ -246,8 +246,8 @@ void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 			gint t;
 			guchar *xpos;
 
-			if (x_small) i = (gdouble)w / 32 * xs;
-			        else x_inc = mround((gdouble)w_left/(32-xs));
+			if (x_small) i = static_cast<gdouble>(w) / 32 * xs;
+			        else x_inc = mround(static_cast<gdouble>(w_left)/(32-xs));
 			xy_inc = x_inc * y_inc;
 			r = g = b = 0;
 			xpos = pix + (i * p_step);
@@ -354,7 +354,7 @@ gdouble image_sim_compare_transfo(ImageSimilarityData *a, ImageSimilarityData *b
 			}
 		}
 
-	return 1.0 - ((gdouble)sim / (255.0 * 1024.0 * 3.0));
+	return 1.0 - (static_cast<gdouble>(sim) / (255.0 * 1024.0 * 3.0));
 }
 
 gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b)
@@ -406,10 +406,10 @@ gdouble image_sim_compare_fast_transfo(ImageSimilarityData *a, ImageSimilarityDa
 			sim += abs(a->avg_b[i1*32+j1] - b->avg_b[i2*32+j2]);
 			}
 		/* check for abort, if so return 0.0 */
-		if ((gdouble)sim / (255.0 * 1024.0 * 3.0) > min) return 0.0;
+		if (static_cast<gdouble>(sim) / (255.0 * 1024.0 * 3.0) > min) return 0.0;
 		}
 
-	return (1.0 - ((gdouble)sim / (255.0 * 1024.0 * 3.0)) );
+	return (1.0 - (static_cast<gdouble>(sim) / (255.0 * 1024.0 * 3.0)) );
 }
 
 /* this uses a cutoff point so that it can abort early when it gets to

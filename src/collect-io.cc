@@ -569,7 +569,7 @@ static void collect_manager_entry_free_data(CollectManagerEntry *entry)
 static void collect_manager_entry_init_data(CollectManagerEntry *entry)
 {
 	entry->add_list = NULL;
-	entry->oldpath_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, (GDestroyNotify) collect_manager_action_unref);
+	entry->oldpath_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, reinterpret_cast<GDestroyNotify>(collect_manager_action_unref));
 	entry->newpath_hash = g_hash_table_new(g_str_hash, g_str_equal);
 	entry->empty = TRUE;
 
@@ -1055,7 +1055,7 @@ void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 	while (list)
 		{
 		fd = static_cast<FileData *>(list->data);
-		filename = g_strdup(filename_from_path((gchar *)fd->path));
+		filename = g_strdup(filename_from_path(fd->path));
 
 		if (file_extension_match(filename, GQ_COLLECTION_EXT))
 			{

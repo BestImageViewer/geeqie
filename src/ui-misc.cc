@@ -545,7 +545,7 @@ GtkWidget *pref_spin_new_int(GtkWidget *parent_box, const gchar *text, const gch
 {
 	*value_var = value;
 	return pref_spin_new(parent_box, text, suffix,
-			     (gdouble)min, (gdouble)max, (gdouble)step, 0,
+			     static_cast<gdouble>(min), static_cast<gdouble>(max), static_cast<gdouble>(step), 0,
 			     value,
 			     G_CALLBACK(pref_spin_int_cb), value_var);
 }
@@ -710,7 +710,7 @@ GtkWidget *pref_table_spin_new_int(GtkWidget *table, gint column, gint row,
 	*value_var = value;
 	return pref_table_spin(table, column, row,
 			       text, suffix,
-			       (gdouble)min, (gdouble)max, (gdouble)step, 0,
+			       static_cast<gdouble>(min), static_cast<gdouble>(max), static_cast<gdouble>(step), 0,
 			       value,
 			       G_CALLBACK(pref_spin_int_cb), value_var);
 }
@@ -861,8 +861,8 @@ static gboolean date_selection_popup_press_cb(GtkWidget *UNUSED(widget), GdkEven
 	gint xr, yr;
 	GdkWindow *window;
 
-	xr = (gint)event->x_root;
-	yr = (gint)event->y_root;
+	xr = static_cast<gint>(event->x_root);
+	yr = static_cast<gint>(event->y_root);
 
 	window = gtk_widget_get_window(ds->window);
 	gdk_window_get_origin(window, &x, &y);
@@ -1101,9 +1101,9 @@ void date_selection_set(GtkWidget *widget, gint day, gint month, gint year)
 	ds = static_cast<DateSelection *>(g_object_get_data(G_OBJECT(widget), DATE_SELECION_KEY));
 	if (!ds) return;
 
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(ds->spin_d), (gdouble)day);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(ds->spin_m), (gdouble)month);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(ds->spin_y), (gdouble)year);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(ds->spin_d), static_cast<gdouble>(day));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(ds->spin_m), static_cast<gdouble>(month));
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(ds->spin_y), static_cast<gdouble>(year));
 }
 
 
@@ -1196,7 +1196,7 @@ static gboolean pref_list_get(const gchar *group, const gchar *key, const gchar 
 	work = pref_list_find(group, token);
 	if (work)
 		{
-		*result = (const gchar *)work->data + strlen(token);
+		*result = static_cast<const gchar *>(work->data) + strlen(token);
 		if (strlen(*result) == 0) *result = NULL;
 		ret = TRUE;
 		}
@@ -1269,7 +1269,7 @@ gboolean pref_list_int_get(const gchar *group, const gchar *key, gint *result)
 
 	if (pref_list_get(group, key, PREF_LIST_MARKER_INT, &text) && text)
 		{
-		*result = (gint)strtol(text, NULL, 10);
+		*result = static_cast<gint>(strtol(text, NULL, 10));
 		return TRUE;
 		}
 

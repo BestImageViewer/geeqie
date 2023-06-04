@@ -612,7 +612,7 @@ static void bookmark_populate(BookMarkData *bm)
 			gtk_widget_show(b->button);
 
 			g_object_set_data_full(G_OBJECT(b->button), "bookbuttondata",
-					       b, (GDestroyNotify)bookmark_free);
+					       b, reinterpret_cast<GDestroyNotify>(bookmark_free));
 
 			box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 			gtk_container_add(GTK_CONTAINER(b->button), box);
@@ -976,7 +976,7 @@ GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
 	work = history_list_get_by_key(hc->history_key);
 	while (work)
 		{
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(hc->combo), (gchar *)work->data);
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(hc->combo), static_cast<gchar *>(work->data));
 		work = work->next;
 		n++;
 		}
@@ -1033,7 +1033,7 @@ void history_combo_append_history(GtkWidget *widget, const gchar *text)
 		work = history_list_get_by_key(hc->history_key);
 		while (work)
 			{
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(hc->combo), (gchar *)work->data);
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(hc->combo), static_cast<gchar *>(work->data));
 			work = work->next;
 			}
 		}

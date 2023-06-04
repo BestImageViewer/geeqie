@@ -208,7 +208,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->viewport_width, pr->viewport_height,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, (double)pr->color.red/65535, (double)pr->color.green/65535, (double)pr->color.blue/65535);
+			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
 			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
@@ -225,7 +225,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->x_offset, pr->viewport_height,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, (double)pr->color.red/65535, (double)pr->color.green/65535, (double)pr->color.blue/65535);
+			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
 			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
@@ -236,7 +236,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->viewport_width - pr->vis_width - pr->x_offset, pr->viewport_height,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, (double)pr->color.red/65535, (double)pr->color.green/65535, (double)pr->color.blue/65535);
+			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
 			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
@@ -250,7 +250,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->vis_width, pr->y_offset,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, (double)pr->color.red/65535, (double)pr->color.green/65535, (double)pr->color.blue/65535);
+			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
 			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
@@ -261,7 +261,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->vis_width, pr->viewport_height - pr->vis_height - pr->y_offset,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, (double)pr->color.red/65535, (double)pr->color.green/65535, (double)pr->color.blue/65535);
+			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
 			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
@@ -510,7 +510,7 @@ static void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 		cairo_surface_t *surface;
 		guint size;
 
-		surface = gdk_window_create_similar_surface(gtk_widget_get_window((GtkWidget *)pr),
+		surface = gdk_window_create_similar_surface(gtk_widget_get_window(reinterpret_cast<GtkWidget *>(pr)),
 		                                            CAIRO_CONTENT_COLOR,
 		                                            rt->tile_width, rt->tile_height);
 
@@ -611,7 +611,7 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 			{
 			if (!rt->overlay_buffer)
 				{
-				rt->overlay_buffer = gdk_window_create_similar_surface(gtk_widget_get_window((GtkWidget *)pr),
+				rt->overlay_buffer = gdk_window_create_similar_surface(gtk_widget_get_window(reinterpret_cast<GtkWidget *>(pr)),
 		                                            CAIRO_CONTENT_COLOR,
 		                                            rt->tile_width, rt->tile_height);
 				}
@@ -746,7 +746,7 @@ static OverlayData *rt_overlay_find(RendererTiles *rt, gint id)
 gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint y,
 				 OverlayRendererFlags flags)
 {
-	auto rt = (RendererTiles *) renderer;
+	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
 	OverlayData *od;
 	gint id;
@@ -819,7 +819,7 @@ static void rt_overlay_list_reset_window(RendererTiles *rt)
 
 void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint UNUSED(x), gint UNUSED(y))
 {
-	auto rc = (RendererTiles *)renderer;
+	auto rc = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rc->pr;
 	OverlayData *od;
 
@@ -844,7 +844,7 @@ void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint
 
 gboolean renderer_tiles_overlay_get(void *renderer, gint id, GdkPixbuf **pixbuf, gint *x, gint *y)
 {
-	auto rt = (RendererTiles *) renderer;
+	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
 	OverlayData *od;
 
@@ -1159,13 +1159,13 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 		gint sx, sy, sw, sh;
 
 		if (pr->image_width == 0 || pr->image_height == 0) return FALSE;
-		scale_x = (gdouble)pr->width / pr->image_width;
-		scale_y = (gdouble)pr->height / pr->image_height;
+		scale_x = static_cast<gdouble>(pr->width) / pr->image_width;
+		scale_y = static_cast<gdouble>(pr->height) / pr->image_height;
 
-		sx = (gdouble)(it->x + x) / scale_x;
-		sy = (gdouble)(it->y + y) / scale_y;
-		sw = (gdouble)w / scale_x;
-		sh = (gdouble)h / scale_y;
+		sx = static_cast<gdouble>(it->x + x) / scale_x;
+		sy = static_cast<gdouble>(it->y + y) / scale_y;
+		sw = static_cast<gdouble>(w) / scale_x;
+		sh = static_cast<gdouble>(h) / scale_y;
 
 		if (pr->width < PR_MIN_SCALE_SIZE || pr->height < PR_MIN_SCALE_SIZE) fast = TRUE;
 
@@ -1185,10 +1185,10 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 			st = static_cast<SourceTile *>(work->data);
 			work = work->next;
 
-			stx = floor((gdouble)st->x * scale_x);
-			sty = floor((gdouble)st->y * scale_y);
-			stw = ceil((gdouble)(st->x + pr->source_tile_width) * scale_x) - stx;
-			sth = ceil((gdouble)(st->y + pr->source_tile_height) * scale_y) - sty;
+			stx = floor(static_cast<gdouble>(st->x) * scale_x);
+			sty = floor(static_cast<gdouble>(st->y) * scale_y);
+			stw = ceil(static_cast<gdouble>(st->x + pr->source_tile_width) * scale_x) - stx;
+			sth = ceil(static_cast<gdouble>(st->y + pr->source_tile_height) * scale_y) - sty;
 
 			if (pr_clip_region(stx, sty, stw, sth,
 					   it->x + x, it->y + y, w, h,
@@ -1210,12 +1210,12 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 					gdouble offset_y;
 
 					/* may need to use unfloored stx,sty values here */
-					offset_x = (gdouble)(stx - it->x);
-					offset_y = (gdouble)(sty - it->y);
+					offset_x = static_cast<gdouble>(stx - it->x);
+					offset_y = static_cast<gdouble>(sty - it->y);
 
 					gdk_pixbuf_scale(st->pixbuf, it->pixbuf, rx - it->x, ry - it->y, rw, rh,
-						 (gdouble) 0.0 + offset_x,
-						 (gdouble) 0.0 + offset_y,
+						 static_cast<gdouble>(0.0) + offset_x,
+						 static_cast<gdouble>(0.0) + offset_y,
 						 scale_x, scale_y,
 						 (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality);
 					draw = TRUE;
@@ -1282,7 +1282,7 @@ static void rt_tile_get_region(gboolean has_alpha, gboolean ignore_alpha,
 						{
 						for (c = 0; c < 3; c++)
 							{
-							pdst[(y * drs) + x*3 + c] = psrc[(-(int)offset_y + pb_y + y) * srs + (-(int)offset_x + pb_x+x)*3 + c];
+							pdst[(y * drs) + x*3 + c] = psrc[(-static_cast<int>(offset_y) + pb_y + y) * srs + (-static_cast<int>(offset_x) + pb_x+x)*3 + c];
 							}
 						}
 					}
@@ -1425,8 +1425,8 @@ static void rt_tile_render(RendererTiles *rt, ImageTile *it,
 
 		if (pr->image_width == 0 || pr->image_height == 0) return;
 
-		scale_x = rt->hidpi_scale * (gdouble)pr->width / pr->image_width;
-		scale_y = rt->hidpi_scale * (gdouble)pr->height / pr->image_height;
+		scale_x = rt->hidpi_scale * static_cast<gdouble>(pr->width) / pr->image_width;
+		scale_y = rt->hidpi_scale * static_cast<gdouble>(pr->height) / pr->image_height;
 
 		pr_tile_coords_map_orientation(orientation, it->x, it->y,
 					    pr->width, pr->height,
@@ -1469,8 +1469,8 @@ static void rt_tile_render(RendererTiles *rt, ImageTile *it,
 
 		rt_tile_get_region(has_alpha, pr->ignore_alpha,
 				   pr->pixbuf, it->pixbuf, pb_x, pb_y, pb_w, pb_h,
-				   (gdouble) 0.0 - src_x - GET_RIGHT_PIXBUF_OFFSET(rt) * scale_x,
-				   (gdouble) 0.0 - src_y,
+				   static_cast<gdouble>(0.0) - src_x - GET_RIGHT_PIXBUF_OFFSET(rt) * scale_x,
+				   static_cast<gdouble>(0.0) - src_y,
 				   scale_x, scale_y,
 				   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
 				   it->x + pb_x, it->y + pb_y, wide_image);
@@ -1480,8 +1480,8 @@ static void rt_tile_render(RendererTiles *rt, ImageTile *it,
 			GdkPixbuf *right_pb = rt_get_spare_tile(rt);
 			rt_tile_get_region(has_alpha, pr->ignore_alpha,
 					   pr->pixbuf, right_pb, pb_x, pb_y, pb_w, pb_h,
-					   (gdouble) 0.0 - src_x - GET_LEFT_PIXBUF_OFFSET(rt) * scale_x,
-					   (gdouble) 0.0 - src_y,
+					   static_cast<gdouble>(0.0) - src_x - GET_LEFT_PIXBUF_OFFSET(rt) * scale_x,
+					   static_cast<gdouble>(0.0) - src_y,
 					   scale_x, scale_y,
 					   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
 					   it->x + pb_x, it->y + pb_y, wide_image);
@@ -1936,7 +1936,7 @@ static void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
 
 static void rt_scroll(void *renderer, gint x_off, gint y_off)
 {
-	auto rt = (RendererTiles *) renderer;
+	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
 
 	rt_sync_scroll(rt);
@@ -2020,7 +2020,7 @@ static void rt_scroll(void *renderer, gint x_off, gint y_off)
 
 static void renderer_area_changed(void *renderer, gint src_x, gint src_y, gint src_w, gint src_h)
 {
-	auto rt = (RendererTiles *)renderer;
+	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
 	gint x, y, width, height,  x1, y1, x2, y2;
 
@@ -2039,10 +2039,10 @@ static void renderer_area_changed(void *renderer, gint src_x, gint src_y, gint s
 		height += 2;
 		}
 
-	x1 = (gint)floor((gdouble)x * pr->scale);
-	y1 = (gint)floor((gdouble)y * pr->scale * pr->aspect_ratio);
-	x2 = (gint)ceil((gdouble)(x + width) * pr->scale);
-	y2 = (gint)ceil((gdouble)(y + height) * pr->scale * pr->aspect_ratio);
+	x1 = static_cast<gint>(floor(static_cast<gdouble>(x) * pr->scale));
+	y1 = static_cast<gint>(floor(static_cast<gdouble>(y) * pr->scale * pr->aspect_ratio));
+	x2 = static_cast<gint>(ceil(static_cast<gdouble>(x + width) * pr->scale));
+	y2 = static_cast<gint>(ceil(static_cast<gdouble>(y + height) * pr->scale * pr->aspect_ratio));
 
 	rt_queue(rt, x1, y1, x2 - x1, y2 - y1, FALSE, TILE_RENDER_AREA, TRUE, TRUE);
 }
@@ -2069,15 +2069,15 @@ static void renderer_redraw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 
 static void renderer_update_pixbuf(void *renderer, gboolean UNUSED(lazy))
 {
-	rt_queue_clear((RendererTiles *)renderer);
+	rt_queue_clear(static_cast<RendererTiles *>(renderer));
 }
 
 static void renderer_update_zoom(void *renderer, gboolean lazy)
 {
-	auto rt = (RendererTiles *)renderer;
+	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
 
-	rt_tile_invalidate_all((RendererTiles *)renderer);
+	rt_tile_invalidate_all(static_cast<RendererTiles *>(renderer));
 	if (!lazy)
 		{
 		renderer_redraw(static_cast<_RendererTiles *>(renderer), 0, 0, pr->width, pr->height, TRUE, TILE_RENDER_ALL, TRUE, FALSE);
@@ -2087,12 +2087,12 @@ static void renderer_update_zoom(void *renderer, gboolean lazy)
 
 static void renderer_invalidate_region(void *renderer, gint x, gint y, gint w, gint h)
 {
-	rt_tile_invalidate_region((RendererTiles *)renderer, x, y, w, h);
+	rt_tile_invalidate_region(static_cast<RendererTiles *>(renderer), x, y, w, h);
 }
 
 static void renderer_update_viewport(void *renderer)
 {
-	auto rt = (RendererTiles *)renderer;
+	auto rt = static_cast<RendererTiles *>(renderer);
 
 	rt->stereo_off_x = 0;
 	rt->stereo_off_y = 0;
@@ -2129,14 +2129,14 @@ static void renderer_update_viewport(void *renderer)
 
 static void renderer_stereo_set(void *renderer, gint stereo_mode)
 {
-	auto rt = (RendererTiles *)renderer;
+	auto rt = static_cast<RendererTiles *>(renderer);
 
 	rt->stereo_mode = stereo_mode;
 }
 
 static void renderer_free(void *renderer)
 {
-	auto rt = (RendererTiles *)renderer;
+	auto rt = static_cast<RendererTiles *>(renderer);
 	rt_queue_clear(rt);
 	rt_tile_free_all(rt);
 	if (rt->spare_tile) g_object_unref(rt->spare_tile);
@@ -2150,7 +2150,7 @@ static void renderer_free(void *renderer)
 
 static gboolean rt_realize_cb(GtkWidget *widget, gpointer data)
 {
-	auto rt = (RendererTiles *)data;
+	auto rt = static_cast<RendererTiles *>(data);
 	cairo_t *cr;
 
 	if (!rt->surface)
@@ -2158,7 +2158,7 @@ static gboolean rt_realize_cb(GtkWidget *widget, gpointer data)
 		rt->surface = gdk_window_create_similar_surface(gtk_widget_get_window(widget), CAIRO_CONTENT_COLOR, gtk_widget_get_allocated_width(widget), gtk_widget_get_allocated_height(widget));
 
 		cr = cairo_create(rt->surface);
-		cairo_set_source_rgb(cr, (gdouble)rt->pr->color.red / 65535, (gdouble)rt->pr->color.green / 65535, (gdouble)rt->pr->color.blue / 65535);
+		cairo_set_source_rgb(cr, static_cast<gdouble>(rt->pr->color.red) / 65535, static_cast<gdouble>(rt->pr->color.green) / 65535, static_cast<gdouble>(rt->pr->color.blue) / 65535);
 		cairo_paint(cr);
 		cairo_destroy(cr);
 		}
@@ -2179,7 +2179,7 @@ static gboolean rt_size_allocate_cb(GtkWidget *widget,  GdkRectangle *allocation
 
 		cr = cairo_create(rt->surface);
 
-		cairo_set_source_rgb(cr, (gdouble)options->image.border_color.red / 65535, (gdouble)options->image.border_color.green / 65535, (gdouble)options->image.border_color.blue / 65535);
+		cairo_set_source_rgb(cr, static_cast<gdouble>(options->image.border_color.red) / 65535, static_cast<gdouble>(options->image.border_color.green) / 65535, static_cast<gdouble>(options->image.border_color.blue) / 65535);
 		cairo_paint(cr);
 		cairo_set_source_surface(cr, old_surface, 0, 0);
 		cairo_paint(cr);
@@ -2194,14 +2194,14 @@ static gboolean rt_size_allocate_cb(GtkWidget *widget,  GdkRectangle *allocation
 
 static gboolean rt_draw_cb(GtkWidget *UNUSED(widget), cairo_t *cr, gpointer data)
 {
-	auto rt = (RendererTiles *)data;
+	auto rt = static_cast<RendererTiles *>(data);
 	GList *work;
 	OverlayData *od;
 
 	if (rt->stereo_mode & (PR_STEREO_HORIZ | PR_STEREO_VERT))
 		{
 		cairo_push_group(cr);
-		cairo_set_source_rgb(cr, (double)rt->pr->color.red / 65535, (double)rt->pr->color.green / 65535, (double)rt->pr->color.blue / 65535);
+		cairo_set_source_rgb(cr, static_cast<double>(rt->pr->color.red) / 65535, static_cast<double>(rt->pr->color.green) / 65535, static_cast<double>(rt->pr->color.blue) / 65535);
 
 		if (rt->stereo_mode & PR_STEREO_HORIZ)
 			{
@@ -2297,7 +2297,7 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 	g_signal_connect(G_OBJECT(pr), "realize", G_CALLBACK(rt_realize_cb), rt);
 	g_signal_connect(G_OBJECT(pr), "size-allocate", G_CALLBACK(rt_size_allocate_cb), rt);
 
-	return (RendererFuncs *) rt;
+	return reinterpret_cast<RendererFuncs *>(rt);
 }
 
 

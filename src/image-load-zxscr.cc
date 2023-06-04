@@ -64,7 +64,7 @@ static void free_buffer(guchar *pixels, gpointer UNUSED(data))
 
 static gboolean image_loader_zxscr_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
-	auto ld = (ImageLoaderZXSCR *) loader;
+	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
 	guint8 *pixels;
 	gint width, height;
 	gint row, col, mrow, pxs, i;
@@ -156,14 +156,14 @@ static gpointer image_loader_zxscr_new(ImageLoaderBackendCbAreaUpdated area_upda
 
 static void image_loader_zxscr_set_size(gpointer loader, int width, int height)
 {
-	auto ld = (ImageLoaderZXSCR *) loader;
+	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf *image_loader_zxscr_get_pixbuf(gpointer loader)
 {
-	auto ld = (ImageLoaderZXSCR *) loader;
+	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
 	return ld->pixbuf;
 }
 
@@ -185,13 +185,13 @@ static gboolean image_loader_zxscr_close(gpointer UNUSED(loader), GError **UNUSE
 
 static void image_loader_zxscr_abort(gpointer loader)
 {
-	auto ld = (ImageLoaderZXSCR *) loader;
+	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
 	ld->abort = TRUE;
 }
 
 static void image_loader_zxscr_free(gpointer loader)
 {
-	auto ld = (ImageLoaderZXSCR *) loader;
+	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }

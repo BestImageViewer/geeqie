@@ -494,7 +494,7 @@ static gboolean search_result_row_selected(SearchData *sd, FileData *fd)
 		if (mfd_n->fd == fd) found = TRUE;
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	return found;
@@ -533,7 +533,7 @@ static gint search_result_selection_util(SearchData *sd, gint64 *bytes, GList **
 
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	if (bytes) *bytes = total;
@@ -751,7 +751,7 @@ static void search_result_remove_selection(SearchData *sd)
 		flist = g_list_prepend(flist, mfd->fd);
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	work = flist;
@@ -906,7 +906,7 @@ static void search_result_thumb_step(SearchData *sd)
 		return;
 		}
 
-	search_progress_update(sd, FALSE, (gdouble)row/length);
+	search_progress_update(sd, FALSE, static_cast<gdouble>(row)/length);
 
 	sd->thumb_fd = mfd->fd;
 	thumb_loader_free(sd->thumb_loader);
@@ -1353,7 +1353,7 @@ static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event,
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd, -1);
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	if (event->state & GDK_CONTROL_MASK)
@@ -1910,12 +1910,12 @@ static gboolean search_file_do_extra(SearchData *sd, FileData *fd, gint *match,
 			gdouble result;
 
 			result = image_sim_compare_fast(sd->search_similarity_cd->sim, sd->img_cd->sim,
-							(gdouble)sd->search_similarity / 100.0);
+							static_cast<gdouble>(sd->search_similarity) / 100.0);
 			result *= 100.0;
-			if (result >= (gdouble)sd->search_similarity)
+			if (result >= static_cast<gdouble>(sd->search_similarity))
 				{
 				tmatch = TRUE;
-				value = (gint)result;
+				value = static_cast<gint>(result);
 				}
 			}
 
@@ -2113,8 +2113,8 @@ static gboolean search_file_next(SearchData *sd)
 					haystack = list;
 					while (haystack && !found)
 						{
-						found = (g_ascii_strcasecmp((gchar *)needle->data,
-								    (gchar *)haystack->data) == 0);
+						found = (g_ascii_strcasecmp(static_cast<gchar *>(needle->data),
+								    static_cast<gchar *>(haystack->data)) == 0);
 						haystack = haystack->next;
 						}
 					needle = needle->next;
@@ -2132,8 +2132,8 @@ static gboolean search_file_next(SearchData *sd)
 					haystack = list;
 					while (haystack && !found)
 						{
-						found = (g_ascii_strcasecmp((gchar *)needle->data,
-								    (gchar *)haystack->data) == 0);
+						found = (g_ascii_strcasecmp(static_cast<gchar *>(needle->data),
+								    static_cast<gchar *>(haystack->data)) == 0);
 						haystack = haystack->next;
 						}
 					needle = needle->next;
@@ -2151,8 +2151,8 @@ static gboolean search_file_next(SearchData *sd)
 					haystack = list;
 					while (haystack && !found)
 						{
-						found = (g_ascii_strcasecmp((gchar *)needle->data,
-								    (gchar *)haystack->data) == 0);
+						found = (g_ascii_strcasecmp(static_cast<gchar *>(needle->data),
+								    static_cast<gchar *>(haystack->data)) == 0);
 						haystack = haystack->next;
 						}
 					needle = needle->next;
@@ -2861,8 +2861,8 @@ static gint search_result_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIt
 	switch (n)
 		{
 		case SEARCH_COLUMN_RANK:
-			if (((MatchFileData *)fda)->rank > (fdb)->rank) return 1;
-			if (((MatchFileData *)fda)->rank < (fdb)->rank) return -1;
+			if ((fda)->rank > (fdb)->rank) return 1;
+			if ((fda)->rank < (fdb)->rank) return -1;
 			return 0;
 			break;
 		case SEARCH_COLUMN_NAME:
@@ -3040,7 +3040,7 @@ static void menu_choice_spin_cb(GtkAdjustment *adjustment, gpointer data)
 {
 	auto value = static_cast<gint *>(data);
 
-	*value = (gint)gtk_adjustment_get_value(adjustment);
+	*value = static_cast<gint>(gtk_adjustment_get_value(adjustment));
 }
 
 static void menu_choice_gps_cb(GtkWidget *combo, gpointer data)
@@ -3060,7 +3060,7 @@ static GtkWidget *menu_spin(GtkWidget *box, gdouble min, gdouble max, gint value
 	GtkAdjustment *adj;
 
 	spin = gtk_spin_button_new_with_range(min, max, 1);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), (gdouble)value);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), static_cast<gdouble>(value));
 	adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
 	if (func) g_signal_connect(G_OBJECT(adj), "value_changed",
 				   G_CALLBACK(func), data);
@@ -3270,13 +3270,13 @@ static void select_collection_clicked_cb(GtkWidget *UNUSED(widget), gpointer dat
 
 	title = _("Select collection");
 	btntext = NULL;
-	btnfunc = (void *)select_collection_dialog_ok_cb;
+	btnfunc = reinterpret_cast<void *>(select_collection_dialog_ok_cb);
 	stock_id = GTK_STOCK_OK;
 
 	fdlg = file_util_file_dlg(title, "dlg_collection", sd->window, select_collection_dialog_close_cb, sd);
 
 	generic_dialog_add_message(GENERIC_DIALOG(fdlg), NULL, title, NULL, FALSE);
-	file_dialog_add_button(fdlg, stock_id, btntext, (void(*)(FileDialog *, gpointer))btnfunc, TRUE);
+	file_dialog_add_button(fdlg, stock_id, btntext, reinterpret_cast<void(*)(FileDialog *, gpointer)>(btnfunc), TRUE);
 
 	file_dialog_add_path_widgets(fdlg, get_collections_dir(), NULL, "search_collection", GQ_COLLECTION_EXT, _("Collection Files"));
 

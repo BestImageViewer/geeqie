@@ -254,7 +254,7 @@ guchar *ddsDecodeDXT1(uint width, uint height, const unsigned char *buffer) {
 			}
 		}
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsDecodeDXT3(uint width, uint height, const unsigned char *buffer) {
@@ -294,7 +294,7 @@ guchar *ddsDecodeDXT3(uint width, uint height, const unsigned char *buffer) {
 			}
 		}
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsDecodeDXT2(uint width, uint height, const unsigned char *buffer) {
@@ -373,7 +373,7 @@ guchar *ddsDecodeDXT5(uint width, uint height, const unsigned char *buffer) {
 			}
 		}
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsDecodeDXT4(uint width, uint height, const unsigned char *buffer) {
@@ -392,7 +392,7 @@ guchar *ddsReadA1R5G5B5(uint width, uint height, const unsigned char *buffer) {
 		uint a = 255 * ((rgba & A1R5G5B5_MASKS[3]) >> 15);
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsReadX1R5G5B5(uint width, uint height, const unsigned char *buffer) {
@@ -407,7 +407,7 @@ guchar *ddsReadX1R5G5B5(uint width, uint height, const unsigned char *buffer) {
 		uint a = 255;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsReadA4R4G4B4(uint width, uint height, const unsigned char *buffer) {
@@ -422,7 +422,7 @@ guchar *ddsReadA4R4G4B4(uint width, uint height, const unsigned char *buffer) {
 		uint a = 17 * ((rgba & A4R4G4B4_MASKS[3]) >> 12);
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsReadX4R4G4B4(uint width, uint height, const unsigned char *buffer) {
@@ -437,7 +437,7 @@ guchar *ddsReadX4R4G4B4(uint width, uint height, const unsigned char *buffer) {
 		uint a = 255;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsReadR5G6B5(uint width, uint height, const unsigned char *buffer) {
@@ -452,7 +452,7 @@ guchar *ddsReadR5G6B5(uint width, uint height, const unsigned char *buffer) {
 		uint a = 255;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsReadR8G8B8(uint width, uint height, const unsigned char *buffer) {
@@ -466,7 +466,7 @@ guchar *ddsReadR8G8B8(uint width, uint height, const unsigned char *buffer) {
 		uint a = 255;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsReadA8B8G8R8(uint width, uint height, const unsigned char *buffer) {
@@ -480,7 +480,7 @@ guchar *ddsReadA8B8G8R8(uint width, uint height, const unsigned char *buffer) {
 		uint a = buffer[index++] & 0xFF;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsReadX8B8G8R8(uint width, uint height, const unsigned char *buffer) {
@@ -494,7 +494,7 @@ guchar *ddsReadX8B8G8R8(uint width, uint height, const unsigned char *buffer) {
 		uint a = 255; index++;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsReadA8R8G8B8(uint width, uint height, const unsigned char *buffer) {
@@ -508,7 +508,7 @@ guchar *ddsReadA8R8G8B8(uint width, uint height, const unsigned char *buffer) {
 		uint a = buffer[index++] & 0xFF;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 guchar *ddsReadX8R8G8B8(uint width, uint height, const unsigned char *buffer) {
@@ -522,12 +522,12 @@ guchar *ddsReadX8R8G8B8(uint width, uint height, const unsigned char *buffer) {
 		uint a = 255; index++;
 		pixels[i] = (a << 24) | (r << 0) | (g << 8) | (b << 16);
 	}
-	return (guchar *) pixels;
+	return reinterpret_cast<guchar *>(pixels);
 }
 
 static gboolean image_loader_dds_load (gpointer loader, const guchar *buf, gsize UNUSED(count), GError **UNUSED(error))
 {
-	auto ld = (ImageLoaderDDS *) loader;
+	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	uint width = ddsGetWidth(buf);
 	uint height = ddsGetHeight(buf);
 	uint type = ddsGetType(buf);
@@ -570,14 +570,14 @@ static gpointer image_loader_dds_new(ImageLoaderBackendCbAreaUpdated area_update
 
 static void image_loader_dds_set_size(gpointer loader, int width, int height)
 {
-	auto ld = (ImageLoaderDDS *) loader;
+	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_dds_get_pixbuf(gpointer loader)
 {
-	auto ld = (ImageLoaderDDS *) loader;
+	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	return ld->pixbuf;
 }
 
@@ -598,13 +598,13 @@ static gboolean image_loader_dds_close(gpointer UNUSED(loader), GError **UNUSED(
 
 static void image_loader_dds_abort(gpointer loader)
 {
-	auto ld = (ImageLoaderDDS *) loader;
+	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	ld->abort = TRUE;
 }
 
 static void image_loader_dds_free(gpointer loader)
 {
-	auto ld = (ImageLoaderDDS *) loader;
+	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }

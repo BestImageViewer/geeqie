@@ -214,7 +214,7 @@ public:
 				if (!open) io.open();
 				if (io.isopen())
 					{
-					auto mapped = (unsigned char*)io.mmap();
+					auto mapped = static_cast<unsigned char*>(io.mmap());
 					if (mapped) exif_jpeg_parse_color(this, mapped, io.size());
 					io.munmap();
 					}
@@ -275,7 +275,7 @@ public:
 #if GLIB_CHECK_VERSION(2,68,0)
 			return (unsigned char *) g_memdup2(cp_data_, cp_length_);
 #else
-			return (unsigned char *) g_memdup(cp_data_, cp_length_);
+			return static_cast<unsigned char *>(g_memdup(cp_data_, cp_length_));
 #endif
 		}
 		return NULL;
@@ -468,7 +468,7 @@ void exif_init(void)
 
 static void _ExifDataProcessed_update_xmp(gpointer key, gpointer value, gpointer data)
 {
-	exif_update_metadata((ExifData *)data, (gchar *)key, (GList *)value);
+	exif_update_metadata(static_cast<ExifData *>(data), static_cast<gchar *>(key), static_cast<GList *>(value));
 }
 
 ExifData *exif_read(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
@@ -549,7 +549,7 @@ ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 #endif
 			}
 		}
-		return (ExifItem *)item;
+		return reinterpret_cast<ExifItem *>(item);
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
@@ -586,7 +586,7 @@ ExifItem *exif_add_item(ExifData *exif, const gchar *key)
 #endif
 			}
 		}
-		return (ExifItem *)item;
+		return reinterpret_cast<ExifItem *>(item);
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
@@ -667,7 +667,7 @@ char *exif_item_get_tag_name(ExifItem *item)
 {
 	try {
 		if (!item) return NULL;
-		return g_strdup(((Exiv2::Metadatum *)item)->key().c_str());
+		return g_strdup((reinterpret_cast<Exiv2::Metadatum *>(item))->key().c_str());
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
@@ -679,7 +679,7 @@ guint exif_item_get_tag_id(ExifItem *item)
 {
 	try {
 		if (!item) return 0;
-		return ((Exiv2::Metadatum *)item)->tag();
+		return (reinterpret_cast<Exiv2::Metadatum *>(item))->tag();
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
@@ -691,7 +691,7 @@ guint exif_item_get_elements(ExifItem *item)
 {
 	try {
 		if (!item) return 0;
-		return ((Exiv2::Metadatum *)item)->count();
+		return (reinterpret_cast<Exiv2::Metadatum *>(item))->count();
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
@@ -703,10 +703,10 @@ char *exif_item_get_data(ExifItem *item, guint *data_len)
 {
 	try {
 		if (!item) return 0;
-		auto md = (Exiv2::Metadatum *)item;
+		auto md = reinterpret_cast<Exiv2::Metadatum *>(item);
 		if (data_len) *data_len = md->size();
-		auto data = (char *)g_malloc(md->size());
-		long res = md->copy((Exiv2::byte *)data, Exiv2::littleEndian /* should not matter */);
+		auto data = static_cast<char *>(g_malloc(md->size()));
+		long res = md->copy(reinterpret_cast<Exiv2::byte *>(data), Exiv2::littleEndian /* should not matter */);
 		g_assert(res == md->size());
 		return data;
 	}
@@ -720,7 +720,7 @@ char *exif_item_get_description(ExifItem *item)
 {
 	try {
 		if (!item) return NULL;
-		return utf8_validate_or_convert(((Exiv2::Metadatum *)item)->tagLabel().c_str());
+		return utf8_validate_or_convert((reinterpret_cast<Exiv2::Metadatum *>(item))->tagLabel().c_str());
 	}
 	catch (std::exception& e) {
 //		debug_exception(e);
@@ -765,7 +765,7 @@ guint exif_item_get_format_id(ExifItem *item)
 {
 	try {
 		if (!item) return EXIF_FORMAT_UNKNOWN;
-		guint id = ((Exiv2::Metadatum *)item)->typeId();
+		guint id = (reinterpret_cast<Exiv2::Metadatum *>(item))->typeId();
 		if (id >= (sizeof(format_id_trans_tbl) / sizeof(format_id_trans_tbl[0])) ) return EXIF_FORMAT_UNKNOWN;
 		return format_id_trans_tbl[id];
 	}
@@ -779,7 +779,7 @@ const char *exif_item_get_format_name(ExifItem *item, gboolean UNUSED(brief))
 {
 	try {
 		if (!item) return NULL;
-		return ((Exiv2::Metadatum *)item)->typeName();
+		return (reinterpret_cast<Exiv2::Metadatum *>(item))->typeName();
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
@@ -792,7 +792,7 @@ gchar *exif_item_get_data_as_text(ExifItem *item)
 {
 	try {
 		if (!item) return NULL;
-		auto metadatum = (Exiv2::Metadatum *)item;
+		auto metadatum = reinterpret_cast<Exiv2::Metadatum *>(item);
 #if EXIV2_TEST_VERSION(0,17,0)
 		return utf8_validate_or_convert(metadatum->print().c_str());
 #else
@@ -823,7 +823,7 @@ gchar *exif_item_get_string(ExifItem *item, int idx)
 {
 	try {
 		if (!item) return NULL;
-		auto em = (Exiv2::Metadatum *)item;
+		auto em = reinterpret_cast<Exiv2::Metadatum *>(item);
 #if EXIV2_TEST_VERSION(0,16,0)
 		std::string str = em->toString(idx);
 #else
@@ -852,7 +852,7 @@ gint exif_item_get_integer(ExifItem *item, gint *value)
 #if EXIV2_TEST_VERSION(0,28,0)
         *value = ((Exiv2::Metadatum *)item)->toInt64();
 #else
-		*value = ((Exiv2::Metadatum *)item)->toLong();
+		*value = (reinterpret_cast<Exiv2::Metadatum *>(item))->toLong();
 #endif
 		return 1;
 	}
@@ -867,11 +867,11 @@ ExifRational *exif_item_get_rational(ExifItem *item, gint *sign, guint n)
 	try {
 		if (!item) return NULL;
 		if (n >= exif_item_get_elements(item)) return NULL;
-		Exiv2::Rational v = ((Exiv2::Metadatum *)item)->toRational(n);
+		Exiv2::Rational v = (reinterpret_cast<Exiv2::Metadatum *>(item))->toRational(n);
 		static ExifRational ret;
 		ret.num = v.first;
 		ret.den = v.second;
-		if (sign) *sign = (((Exiv2::Metadatum *)item)->typeId() == Exiv2::signedRational);
+		if (sign) *sign = ((reinterpret_cast<Exiv2::Metadatum *>(item))->typeId() == Exiv2::signedRational);
 		return &ret;
 	}
 	catch (Exiv2::AnyError& e) {
@@ -936,7 +936,7 @@ static gint exif_update_metadata_simple(ExifData *exif, const gchar *key, const 
 
 			while (work)
 				{
-				exif->exifData()[key] = (gchar *)work->data;
+				exif->exifData()[key] = static_cast<gchar *>(work->data);
 				work = work->next;
 				}
 		}
@@ -955,7 +955,7 @@ static gint exif_update_metadata_simple(ExifData *exif, const gchar *key, const 
 
 				while (work)
 					{
-					exif->iptcData()[key] = (gchar *)work->data;
+					exif->iptcData()[key] = static_cast<gchar *>(work->data);
 					work = work->next;
 					}
 			}
@@ -971,7 +971,7 @@ static gint exif_update_metadata_simple(ExifData *exif, const gchar *key, const 
 
 				while (work)
 					{
-					exif->xmpData()[key] = (gchar *)work->data;
+					exif->xmpData()[key] = static_cast<gchar *>(work->data);
 					work = work->next;
 					}
 			}
@@ -1168,7 +1168,7 @@ guchar *exif_get_color_profile(ExifData *exif, guint *data_len)
 
 	ExifItem *prof_item = exif_get_item(exif, "Exif.Image.InterColorProfile");
 	if (prof_item && exif_item_get_format_id(prof_item) == EXIF_FORMAT_UNDEFINED)
-		ret = (guchar *)exif_item_get_data(prof_item, data_len);
+		ret = reinterpret_cast<guchar *>(exif_item_get_data(prof_item, data_len));
 	return ret;
 }
 
@@ -1223,15 +1223,15 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, 
 				pos = list.begin();
 				while (pos != last)
 					{
-					if (pos->width_ >= (uint32_t)requested_width &&
-					    pos->height_ >= (uint32_t)requested_height) break;
+					if (pos->width_ >= static_cast<uint32_t>(requested_width) &&
+					    pos->height_ >= static_cast<uint32_t>(requested_height)) break;
 					++pos;
 					}
 
 				// we are not interested in smaller thumbnails in normal image formats - we can use full image instead
 				if (!is_raw)
 					{
-					if (pos->width_ < (uint32_t)requested_width || pos->height_ < (uint32_t)requested_height) return NULL;
+					if (pos->width_ < static_cast<uint32_t>(requested_width) || pos->height_ < static_cast<uint32_t>(requested_height)) return NULL;
 					}
 				}
 
@@ -1261,7 +1261,7 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, 
 
 void exif_free_preview(guchar *buf)
 {
-	delete[] (Exiv2::byte*)buf;
+	delete[] static_cast<Exiv2::byte*>(buf);
 }
 #endif
 

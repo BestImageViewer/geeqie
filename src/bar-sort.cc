@@ -500,7 +500,7 @@ static void bar_sort_add_ok_cb(FileDialog *fd, gpointer data)
 		{
 		gchar *path;
 		gboolean has_extension;
-		auto filename = (gchar *) name;
+		auto filename = const_cast<gchar *>(name);
 
 		if (empty_name) return;
 

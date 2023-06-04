@@ -404,7 +404,7 @@ void editor_table_clear(void)
 		{
 		g_hash_table_destroy(editors);
 		}
-	editors = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, (GDestroyNotify)editor_description_free);
+	editors = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, reinterpret_cast<GDestroyNotify>(editor_description_free));
 	editors_finished = FALSE;
 }
 
@@ -649,7 +649,7 @@ static void editor_verbose_window_progress(EditorData *ed, const gchar *text)
 
 	if (ed->total)
 		{
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(ed->vd->progress), (gdouble)ed->count / ed->total);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(ed->vd->progress), static_cast<gdouble>(ed->count) / ed->total);
 		}
 
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(ed->vd->progress), (text) ? text : "");
@@ -886,7 +886,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 							flags = static_cast<EditorFlags>(flags | EDITOR_ERROR_NO_FILE);
 							goto err;
 							}
-						pathl = editor_command_path_parse((FileData *)list->data,
+						pathl = editor_command_path_parse(static_cast<FileData *>(list->data),
 										  consider_sidecars,
 										  (*p == 'f') ? PATH_FILE : PATH_FILE_URL,
 										  editor);

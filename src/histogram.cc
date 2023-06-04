@@ -237,11 +237,11 @@ static void histogram_vgrid(Histogram *histogram, GdkPixbuf *pixbuf, gint x, gin
 
 	if (histogram->vgrid == 0) return;
 
-	add = width / (float)histogram->vgrid;
+	add = width / static_cast<float>(histogram->vgrid);
 
 	for (i = 1; i < histogram->vgrid; i++)
 		{
-		gint xpos = x + (int)(i * add + 0.5);
+		gint xpos = x + static_cast<int>(i * add + 0.5);
 
 		pixbuf_draw_line(pixbuf, x, y, width, height, xpos, y, xpos, y + height,
 				 histogram->grid_color.R,
@@ -258,11 +258,11 @@ static void histogram_hgrid(Histogram *histogram, GdkPixbuf *pixbuf, gint x, gin
 
 	if (histogram->hgrid == 0) return;
 
-	add = height / (float)histogram->hgrid;
+	add = height / static_cast<float>(histogram->hgrid);
 
 	for (i = 1; i < histogram->hgrid; i++)
 		{
-		gint ypos = y + (int)(i * add + 0.5);
+		gint ypos = y + static_cast<int>(i * add + 0.5);
 
 		pixbuf_draw_line(pixbuf, x, y, width, height, x, ypos, x + width, ypos,
 				 histogram->grid_color.R,
@@ -369,9 +369,9 @@ gboolean histogram_draw(Histogram *histogram, const HistMap *histmap, GdkPixbuf 
 				if (v[chanmax] == 0)
 					pt = 0;
 				else if (histogram->histogram_mode)
-					pt = ((gdouble)log(v[chanmax])) / logmax * (height - 1);
+					pt = (static_cast<gdouble>(log(v[chanmax]))) / logmax * (height - 1);
 				else
-					pt = ((gdouble)v[chanmax]) / max * (height - 1);
+					pt = (static_cast<gdouble>(v[chanmax])) / max * (height - 1);
 
 				pixbuf_draw_line(pixbuf,
 					x, y, width, height,

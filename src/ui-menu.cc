@@ -57,7 +57,7 @@ static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_grou
 		{
 		if (g_strcmp0(window_keys[i].text, label_stripped[0]) == 0)
 			{
-			gtk_widget_add_accelerator(menu, "activate", accel_group, window_keys[i].key_value, (GdkModifierType)window_keys[i].mask, GTK_ACCEL_VISIBLE);
+			gtk_widget_add_accelerator(menu, "activate", accel_group, window_keys[i].key_value, window_keys[i].mask, GTK_ACCEL_VISIBLE);
 
 			break;
 			}

@@ -85,7 +85,7 @@ static GPtrArray *generate_ptr_array_from_list(GList *src_list)
 {
 	GPtrArray *arr = g_ptr_array_sized_new(g_list_length(src_list));
 
-	g_list_foreach(src_list, (GFunc) ptr_array_add, arr);
+	g_list_foreach(src_list, reinterpret_cast<GFunc>(ptr_array_add), arr);
 
 	return arr;
 }
@@ -103,7 +103,7 @@ static void ptr_array_random_shuffle(GPtrArray *array)
 	guint i;
 	for (i = 0; i < array->len; ++i)
 		{
-		guint p = (double)rand() / ((double)RAND_MAX + 1.0) * array->len;
+		guint p = static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) + 1.0) * array->len;
 		swap(array, i, p);
 		}
 }
@@ -119,7 +119,7 @@ static GList *generate_random_list(SlideShowData *ss)
 	g_list_free(src_list);
 
 	ptr_array_random_shuffle(src_array);
-	g_ptr_array_foreach(src_array, (GFunc) list_prepend, &list);
+	g_ptr_array_foreach(src_array, reinterpret_cast<GFunc>(list_prepend), &list);
 	g_ptr_array_free(src_array, TRUE);
 
 	return list;
@@ -401,7 +401,7 @@ static SlideShowData *real_slideshow_start(LayoutWindow *target_lw, ImageWindow 
 		if (ss->slide_count < 2)
 			{
 			ss->slide_count = layout_list_count(ss->lw, NULL);
-			if (!options->slideshow.random && start_point >= 0 && (guint) start_point < ss->slide_count)
+			if (!options->slideshow.random && start_point >= 0 && static_cast<guint>(start_point) < ss->slide_count)
 				{
 				start_index = start_point;
 				}

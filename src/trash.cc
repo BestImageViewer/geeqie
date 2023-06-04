@@ -61,14 +61,14 @@ static gint file_util_safe_number(gint64 free_space)
 		fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
-		v = (gint)strtol(fd->name, NULL, 10);
+		v = static_cast<gint>(strtol(fd->name, NULL, 10));
 		if (v >= n) n = v + 1;
 
 		total += fd->size;
 		}
 
 	while (options->file_ops.safe_delete_folder_maxsize > 0 && list &&
-	       (free_space < 0 || total + free_space > (gint64)options->file_ops.safe_delete_folder_maxsize * 1048576) )
+	       (free_space < 0 || total + free_space > static_cast<gint64>(options->file_ops.safe_delete_folder_maxsize) * 1048576) )
 		{
 		FileData *fd;
 

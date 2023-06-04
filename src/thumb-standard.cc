@@ -350,7 +350,7 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 		mark_uri = (tl->cache_local) ? tl->local_uri :tl->thumb_uri;
 
 		mark_app = g_strdup_printf("%s %s", GQ_APPNAME, VERSION);
-		mark_mtime = g_strdup_printf("%llu", (unsigned long long)tl->source_mtime);
+		mark_mtime = g_strdup_printf("%llu", static_cast<unsigned long long>(tl->source_mtime));
 		pathl = path_from_utf8(tmp_path);
 		success = gdk_pixbuf_save(pixbuf, pathl, "png", NULL,
 					  THUMB_MARKER_URI, mark_uri,
@@ -549,7 +549,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 								  &thumb_w, &thumb_h))
 					{
 					pixbuf_thumb = gdk_pixbuf_scale_simple(pixbuf, thumb_w, thumb_h,
-									       (GdkInterpType)options->thumbnails.quality);
+									       static_cast<GdkInterpType>(options->thumbnails.quality));
 					}
 				else
 					{
@@ -604,7 +604,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 						  &thumb_w, &thumb_h))
 			{
 			result = gdk_pixbuf_scale_simple(pixbuf, thumb_w, thumb_h,
-							 (GdkInterpType)options->thumbnails.quality);
+							 static_cast<GdkInterpType>(options->thumbnails.quality));
 			}
 		else
 			{
@@ -724,7 +724,7 @@ static void thumb_loader_std_progress_cb(ImageLoader *UNUSED(il), gdouble percen
 {
 	auto tl = static_cast<ThumbLoaderStd *>(data);
 
-	tl->progress = (gdouble)percent;
+	tl->progress = percent;
 
 	if (tl->func_progress) tl->func_progress(tl, tl->data);
 }
@@ -960,7 +960,7 @@ static void thumb_loader_std_thumb_file_validate_done_cb(ThumbLoaderStd *UNUSED(
 					time_t now;
 
 					now = time(NULL);
-					if (st.st_atime >= now - (time_t)tv->days * 24 * 60 * 60)
+					if (st.st_atime >= now - static_cast<time_t>(tv->days) * 24 * 60 * 60)
 						{
 						valid = TRUE;
 						}

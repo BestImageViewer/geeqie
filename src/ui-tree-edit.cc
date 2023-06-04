@@ -81,8 +81,8 @@ static gboolean tree_edit_click_cb(GtkWidget *UNUSED(widget), GdkEventButton *ev
 
 	gint xr, yr;
 
-	xr = (gint)event->x_root;
-	yr = (gint)event->y_root;
+	xr = static_cast<gint>(event->x_root);
+	yr = static_cast<gint>(event->y_root);
 
 	gdk_window_get_origin(window, &x, &y);
 	w = gdk_window_get_width(window);
@@ -494,7 +494,7 @@ void shift_color(GdkColor *src, gshort val, gint direction)
 
 	/* up or down ? */
 	if (direction < 0 ||
-	    (direction == 0 &&((gint)src->red + (gint)src->green + (gint)src->blue) / 3 > 0xffff / 2))
+	    (direction == 0 &&(static_cast<gint>(src->red) + static_cast<gint>(src->green) + static_cast<gint>(src->blue)) / 3 > 0xffff / 2))
 		{
 		src->red = MAX(0 , src->red - cs);
 		src->green = MAX(0 , src->green - cs);

@@ -98,7 +98,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 			}
 		}
 
-	grid = (gint)(sqrt(g_list_length(list)) + 0.5);
+	grid = static_cast<gint>(sqrt(g_list_length(list)) + 0.5);
 
 	x = pi_day->x + pi_day->width + 4;
 	y = pi_day->y;
@@ -240,7 +240,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 
 	DEBUG_1("biggest day contains %d images", day_max);
 
-	grid = (gint)(sqrt((gdouble)day_max) + 0.5) * (PAN_THUMB_SIZE + PAN_SHADOW_OFFSET * 2 + PAN_THUMB_GAP);
+	grid = static_cast<gint>(sqrt(static_cast<gdouble>(day_max)) + 0.5) * (PAN_THUMB_SIZE + PAN_SHADOW_OFFSET * 2 + PAN_THUMB_GAP);
 
 	if (list)
 		{
@@ -253,7 +253,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 	work = g_list_last(list);
 	if (work)
 		{
-		auto fd = (FileData *)work->data;
+		auto fd = static_cast<FileData *>(work->data);
 		end_year = pan_date_value(fd->date, PAN_DATE_LENGTH_YEAR);
 		end_month = pan_date_value(fd->date, PAN_DATE_LENGTH_MONTH);
 		}
@@ -282,7 +282,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 		dt -= 60 * 60 * 24;
 
 		/* anything to show this month? */
-		if (!pan_date_compare(((FileData *)(work->data))->date, dt, PAN_DATE_LENGTH_MONTH))
+		if (!pan_date_compare((static_cast<FileData *>(work->data))->date, dt, PAN_DATE_LENGTH_MONTH))
 			{
 			month ++;
 			if (month > 12)

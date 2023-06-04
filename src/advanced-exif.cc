@@ -80,7 +80,7 @@ static gboolean advanced_exif_row_enabled(const gchar *name)
 	list = history_list_get_by_key("exif_extras");
 	while (list)
 		{
-		if (strcmp(name, (gchar *)(list->data)) == 0) return TRUE;
+		if (strcmp(name, static_cast<gchar *>(list->data)) == 0) return TRUE;
 		list = list->next;
 	}
 

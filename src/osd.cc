@@ -295,7 +295,7 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 			}
 
 		if (limpos)
-			limit = (guint) atoi(limpos);
+			limit = static_cast<guint>(atoi(limpos));
 
 		if (extrapos)
 			extra = g_strndup(extrapos, end - extrapos);

@@ -111,9 +111,9 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 		gtk_widget_show(ui->filter_check_buttons[i]);
 	}
 
-	gtk_toggle_button_set_active((GtkToggleButton *)ui->filter_check_buttons[FORMAT_CLASS_IMAGE], TRUE);
-	gtk_toggle_button_set_active((GtkToggleButton *)ui->filter_check_buttons[FORMAT_CLASS_RAWIMAGE], TRUE);
-	gtk_toggle_button_set_active((GtkToggleButton *)ui->filter_check_buttons[FORMAT_CLASS_VIDEO], TRUE);
+	gtk_toggle_button_set_active(reinterpret_cast<GtkToggleButton *>(ui->filter_check_buttons[FORMAT_CLASS_IMAGE]), TRUE);
+	gtk_toggle_button_set_active(reinterpret_cast<GtkToggleButton *>(ui->filter_check_buttons[FORMAT_CLASS_RAWIMAGE]), TRUE);
+	gtk_toggle_button_set_active(reinterpret_cast<GtkToggleButton *>(ui->filter_check_buttons[FORMAT_CLASS_VIDEO]), TRUE);
 	ui->filter_classes = (1 << FORMAT_CLASS_IMAGE) | (1 << FORMAT_CLASS_RAWIMAGE) | (1 << FORMAT_CLASS_VIDEO);
 
 	// Connecting the signal before setting the state causes segfault as pw is not yet prepared
@@ -141,7 +141,7 @@ static void pan_filter_status(PanWindow *pw, const gchar *text)
 
 static void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 {
-	auto cb_state = (PanFilterCallbackState *)data;
+	auto cb_state = static_cast<PanFilterCallbackState *>(data);
 	PanWindow *pw = cb_state->pw;
 	PanViewFilterUi *ui = pw->filter_ui;
 
@@ -157,7 +157,7 @@ static void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 void pan_filter_activate_cb(const gchar *text, gpointer data)
 {
 	GtkWidget *kw_button;
-	auto pw = (PanWindow *)data;
+	auto pw = static_cast<PanWindow *>(data);
 	PanViewFilterUi *ui = pw->filter_ui;
 	GtkTreeIter iter;
 
@@ -213,7 +213,7 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 
 void pan_filter_toggle_cb(GtkWidget *button, gpointer data)
 {
-	auto pw = (PanWindow *)data;
+	auto pw = static_cast<PanWindow *>(data);
 	PanViewFilterUi *ui = pw->filter_ui;
 	gboolean visible;
 	GtkWidget *parent;
@@ -283,7 +283,7 @@ void pan_filter_toggle_cb(GtkWidget *button, gpointer data)
 
 void pan_filter_toggle_button_cb(GtkWidget *UNUSED(button), gpointer data)
 {
-	auto pw = (PanWindow *)data;
+	auto pw = static_cast<PanWindow *>(data);
 	PanViewFilterUi *ui = pw->filter_ui;
 
 	gint old_classes = ui->filter_classes;
@@ -291,7 +291,7 @@ void pan_filter_toggle_button_cb(GtkWidget *UNUSED(button), gpointer data)
 
 	for (gint i = 0; i < FILE_FORMAT_CLASSES; i++)
 	{
-		ui->filter_classes |= gtk_toggle_button_get_active((GtkToggleButton *)ui->filter_check_buttons[i]) ? 1 << i : 0;
+		ui->filter_classes |= gtk_toggle_button_get_active(reinterpret_cast<GtkToggleButton *>(ui->filter_check_buttons[i])) ? 1 << i : 0;
 	}
 
 	if (ui->filter_classes != old_classes) 
@@ -319,7 +319,7 @@ static gboolean pan_view_list_contains_kw_pattern(GList *haystack, PanViewFilter
 	else
 		{
 		// regex compile failed; fall back to exact string match.
-		GList *found_elem = g_list_find_custom(haystack, filter->keyword, (GCompareFunc)g_strcmp0);
+		GList *found_elem = g_list_find_custom(haystack, filter->keyword, reinterpret_cast<GCompareFunc>(g_strcmp0));
 		if (found_elem && found_kw) *found_kw = static_cast<gchar *>(found_elem->data);
 		return !!found_elem;
 		}
@@ -340,7 +340,7 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 	work = *fd_list;
 	while (work)
 		{
-		auto fd = (FileData *)work->data;
+		auto fd = static_cast<FileData *>(work->data);
 		GList *last_work = work;
 		work = work->next;
 

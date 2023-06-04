@@ -27,7 +27,7 @@
 
 gdouble get_zoom_increment(void)
 {
-	return ((options->image.zoom_increment != 0) ? (gdouble)options->image.zoom_increment / 100.0 : 1.0);
+	return ((options->image.zoom_increment != 0) ? static_cast<gdouble>(options->image.zoom_increment) / 100.0 : 1.0);
 }
 
 gchar *utf8_validate_or_convert(const gchar *text)
@@ -59,8 +59,8 @@ gint utf8_compare(const gchar *s1, const gchar *s2, gboolean case_sensitive)
 		}
 	else
 		{
-		s1_t = (gchar *) s1;
-		s2_t = (gchar *) s2;
+		s1_t = const_cast<gchar *>(s1);
+		s2_t = const_cast<gchar *>(s2);
 		}
 
 	s1_key = g_utf8_collate_key(s1_t, -1);

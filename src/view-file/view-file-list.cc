@@ -92,7 +92,7 @@ typedef struct {
 
 static gboolean vflist_find_row_cb(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer data)
 {
-	auto find = (ViewFileFindRowData *)data;
+	auto find = static_cast<ViewFileFindRowData *>(data);
 	FileData *fd;
 	gtk_tree_model_get(model, iter, FILE_COLUMN_POINTER, &fd, -1);
 	if (fd == find->fd)
@@ -213,7 +213,7 @@ static void vflist_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(con
 			   GtkSelectionData *selection_data, guint UNUSED(info),
 			   guint UNUSED(time), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	GList *list = NULL;
 
 	if (!VFLIST(vf)->click_fd) return;
@@ -234,7 +234,7 @@ static void vflist_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(con
 
 static void vflist_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	vflist_color_set(vf, VFLIST(vf)->click_fd, TRUE);
 
@@ -254,7 +254,7 @@ static void vflist_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointe
 
 static void vflist_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *context, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
 
@@ -268,14 +268,14 @@ static void vflist_drag_data_received(GtkWidget *UNUSED(entry_widget), GdkDragCo
 				      int x, int y, GtkSelectionData *selection,
 				      guint info, guint UNUSED(time), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	if (info == TARGET_TEXT_PLAIN) {
 		FileData *fd = vflist_find_data_by_coord(vf, x, y, NULL);
 
 		if (fd) {
 			/* Add keywords to file */
-			auto str = (gchar *) gtk_selection_data_get_text(selection);
+			auto str = reinterpret_cast<gchar *>(gtk_selection_data_get_text(selection));
 			GList *kw_list = string_to_keywords_list(str);
 
 			metadata_append_list(fd, KEYWORD_KEY, kw_list);
@@ -332,7 +332,7 @@ GList *vflist_selection_get_one(ViewFile *vf, FileData *fd)
 				GList *work = fd->sidecar_files;
 				while (work)
 					{
-					auto sfd = (FileData *)work->data;
+					auto sfd = static_cast<FileData *>(work->data);
 					list = g_list_prepend(list, file_data_ref(sfd));
 					work = work->next;
 					}
@@ -359,7 +359,7 @@ GList *vflist_pop_menu_file_list(ViewFile *vf)
 
 void vflist_pop_menu_view_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	if (vflist_row_is_selected(vf, VFLIST(vf)->click_fd))
 		{
@@ -377,7 +377,7 @@ void vflist_pop_menu_view_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 void vflist_pop_menu_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	GList *list;
 
 	list = vf_pop_menu_file_list(vf);
@@ -408,7 +408,7 @@ void vflist_pop_menu_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 void vflist_pop_menu_thumbs_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
 	if (vf->layout)
@@ -430,7 +430,7 @@ void vflist_star_rating_set(ViewFile *vf, gboolean enable)
 	work = columns;
 	while (work)
 		{
-		auto column = (GtkTreeViewColumn *)work->data;
+		auto column = static_cast<GtkTreeViewColumn *>(work->data);
 		gint col_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
 		work = work->next;
 
@@ -458,7 +458,7 @@ void vflist_star_rating_set(ViewFile *vf, gboolean enable)
 
 void vflist_pop_menu_show_star_rating_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	options->show_star_rating = !options->show_star_rating;
 
@@ -470,7 +470,7 @@ void vflist_pop_menu_show_star_rating_cb(GtkWidget *UNUSED(widget), gpointer dat
 
 void vflist_pop_menu_refresh_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
 	vf_refresh(vf);
@@ -479,7 +479,7 @@ void vflist_pop_menu_refresh_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 void vflist_popup_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
 	VFLIST(vf)->click_fd = NULL;
 	vf->popup = NULL;
@@ -494,7 +494,7 @@ void vflist_popup_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static gboolean vflist_row_rename_cb(TreeEditData *UNUSED(td), const gchar *old_name, const gchar *new_name, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	gchar *new_path;
 
 	if (!new_name || !new_name[0]) return FALSE;
@@ -523,7 +523,7 @@ static gboolean vflist_row_rename_cb(TreeEditData *UNUSED(td), const gchar *old_
 
 gboolean vflist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	GtkTreePath *tpath;
 
 	if (event->keyval != GDK_KEY_Menu) return FALSE;
@@ -552,7 +552,7 @@ gboolean vflist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
 gboolean vflist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
 	FileData *fd = NULL;
@@ -636,7 +636,7 @@ gboolean vflist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 
 gboolean vflist_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
 	FileData *fd = NULL;
@@ -720,7 +720,7 @@ static void vflist_select_image(ViewFile *vf, FileData *sel_fd)
 	if (sel_fd && options->image.enable_read_ahead && row >= 0)
 		{
 		if (row > g_list_index(vf->list, cur_fd) &&
-		    (guint) (row + 1) < vf_count(vf, NULL))
+		    static_cast<guint>(row + 1) < vf_count(vf, NULL))
 			{
 			read_ahead_fd = vf_index_get_data(vf, row + 1);
 			}
@@ -735,7 +735,7 @@ static void vflist_select_image(ViewFile *vf, FileData *sel_fd)
 
 static gboolean vflist_select_idle_cb(gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	if (!vf->layout)
 		{
@@ -766,7 +766,7 @@ static void vflist_select_idle_cancel(ViewFile *vf)
 
 static gboolean vflist_select_cb(GtkTreeSelection *UNUSED(selection), GtkTreeModel *store, GtkTreePath *tpath, gboolean path_currently_selected, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	GtkTreeIter iter;
 	GtkTreePath *cursor_path;
 
@@ -794,13 +794,13 @@ static gboolean vflist_select_cb(GtkTreeSelection *UNUSED(selection), GtkTreeMod
 
 static void vflist_expand_cb(GtkTreeView *UNUSED(tree_view), GtkTreeIter *iter, GtkTreePath *UNUSED(path), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vflist_set_expanded(vf, iter, TRUE);
 }
 
 static void vflist_collapse_cb(GtkTreeView *UNUSED(tree_view), GtkTreeIter *iter, GtkTreePath *UNUSED(path), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vflist_set_expanded(vf, iter, FALSE);
 }
 
@@ -963,7 +963,7 @@ static void vflist_setup_iter_recursive(ViewFile *vf, GtkTreeStore *store, GtkTr
 	while (work)
 		{
 		gint match;
-		auto fd = (FileData *)work->data;
+		auto fd = static_cast<FileData *>(work->data);
 		gboolean done = FALSE;
 
 		while (!done)
@@ -1096,7 +1096,7 @@ void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend)
 	i = 0;
 	while (work)
 		{
-		auto fd = (FileData *)work->data;
+		auto fd = static_cast<FileData *>(work->data);
 		g_hash_table_insert(fd_idx_hash, fd, GINT_TO_POINTER(i));
 		i++;
 		work = work->next;
@@ -1113,7 +1113,7 @@ void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend)
 	i = 0;
 	while (work)
 		{
-		auto fd = (FileData *)work->data;
+		auto fd = static_cast<FileData *>(work->data);
 		new_order[i] = GPOINTER_TO_INT(g_hash_table_lookup(fd_idx_hash, fd));
 		i++;
 		work = work->next;
@@ -1138,7 +1138,7 @@ void vflist_thumb_progress_count(GList *list, gint *count, gint *done)
 	GList *work = list;
 	while (work)
 		{
-		auto fd = (FileData *)work->data;
+		auto fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
 		if (fd->thumb_pixbuf) (*done)++;
@@ -1156,7 +1156,7 @@ void vflist_read_metadata_progress_count(GList *list, gint *count, gint *done)
 	GList *work = list;
 	while (work)
 		{
-		auto fd = (FileData *)work->data;
+		auto fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
 		if (fd->metadata_in_idle_loaded) (*done)++;
@@ -1217,7 +1217,7 @@ FileData *vflist_thumb_next_fd(ViewFile *vf)
 		GList *work = vf->list;
 		while (work && !fd)
 			{
-			auto fd_p = (FileData *)work->data;
+			auto fd_p = static_cast<FileData *>(work->data);
 			if (!fd_p->thumb_pixbuf)
 				fd = fd_p;
 			else
@@ -1325,7 +1325,7 @@ FileData *vflist_star_next_fd(ViewFile *vf)
 
 		while (work && !fd)
 			{
-			auto fd_p = (FileData *)work->data;
+			auto fd_p = static_cast<FileData *>(work->data);
 
 			if (fd_p && fd_p->rating == STAR_RATING_NOT_READ)
 				{
@@ -1367,7 +1367,7 @@ gint vflist_index_by_fd(ViewFile *vf, FileData *fd)
 	work = vf->list;
 	while (work)
 		{
-		auto list_fd = (FileData *)work->data;
+		auto list_fd = static_cast<FileData *>(work->data);
 		if (list_fd == fd) return p;
 
 		work2 = list_fd->sidecar_files;
@@ -1408,7 +1408,7 @@ static gboolean vflist_row_is_selected(ViewFile *vf, FileData *fd)
 	work = slist;
 	while (!found && work)
 		{
-		auto tpath = (GtkTreePath *)work->data;
+		auto tpath = static_cast<GtkTreePath *>(work->data);
 		FileData *fd_n;
 		GtkTreeIter iter;
 
@@ -1417,7 +1417,7 @@ static gboolean vflist_row_is_selected(ViewFile *vf, FileData *fd)
 		if (fd_n == fd) found = TRUE;
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	return found;
@@ -1449,7 +1449,7 @@ guint vflist_selection_count(ViewFile *vf, gint64 *bytes)
 		work = slist;
 		while (work)
 			{
-			auto tpath = (GtkTreePath *)work->data;
+			auto tpath = static_cast<GtkTreePath *>(work->data);
 			GtkTreeIter iter;
 			FileData *fd;
 
@@ -1464,7 +1464,7 @@ guint vflist_selection_count(ViewFile *vf, gint64 *bytes)
 		}
 
 	count = g_list_length(slist);
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	return count;
@@ -1483,7 +1483,7 @@ GList *vflist_selection_get_list(ViewFile *vf)
 	work = slist;
 	while (work)
 		{
-		auto tpath = (GtkTreePath *)work->data;
+		auto tpath = static_cast<GtkTreePath *>(work->data);
 		FileData *fd;
 		GtkTreeIter iter;
 
@@ -1506,7 +1506,7 @@ GList *vflist_selection_get_list(ViewFile *vf)
 
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	return g_list_reverse(list);
@@ -1525,7 +1525,7 @@ GList *vflist_selection_get_list_by_index(ViewFile *vf)
 	work = slist;
 	while (work)
 		{
-		auto tpath = (GtkTreePath *)work->data;
+		auto tpath = static_cast<GtkTreePath *>(work->data);
 		FileData *fd;
 		GtkTreeIter iter;
 
@@ -1536,7 +1536,7 @@ GList *vflist_selection_get_list_by_index(ViewFile *vf)
 
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 
 	return g_list_reverse(list);
@@ -1753,7 +1753,7 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 	work = slist;
 	while (work)
 		{
-		auto tpath = (GtkTreePath *)work->data;
+		auto tpath = static_cast<GtkTreePath *>(work->data);
 		FileData *fd;
 		GtkTreeIter iter;
 
@@ -1791,7 +1791,7 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 
 		work = work->next;
 		}
-	g_list_foreach(slist, (GFunc)tree_path_free_wrapper, NULL);
+	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), NULL);
 	g_list_free(slist);
 }
 
@@ -1992,7 +1992,7 @@ static GdkColor *vflist_listview_color_shifted(GtkWidget *widget)
 static void vflist_listview_color_cb(GtkTreeViewColumn *UNUSED(tree_column), GtkCellRenderer *cell,
 				     GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	gboolean set;
 
 	gtk_tree_model_get(tree_model, iter, FILE_COLUMN_COLOR, &set, -1);
@@ -2041,7 +2041,7 @@ static void vflist_listview_add_column(ViewFile *vf, gint n, const gchar *title,
 
 static void vflist_listview_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	GtkTreeStore *store;
 	GtkTreePath *path = gtk_tree_path_new_from_string(path_str);
 	GtkTreeIter iter;
@@ -2128,7 +2128,7 @@ gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd)
 
 void vflist_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	file_data_unregister_notify_func(vf_notify_cb, vf);
 
@@ -2248,7 +2248,7 @@ void vflist_marks_set(ViewFile *vf, gboolean enable)
 	work = columns;
 	while (work)
 		{
-		auto column = (GtkTreeViewColumn *)work->data;
+		auto column = static_cast<GtkTreeViewColumn *>(work->data);
 		gint col_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
 		work = work->next;
 

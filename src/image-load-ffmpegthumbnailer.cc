@@ -54,7 +54,7 @@ static void image_loader_ft_log_cb(ThumbnailerLogLevel log_level, const char* ms
 
 void image_loader_ft_destroy_image_data(guchar *UNUSED(pixels), gpointer data)
 {
-	auto image = (image_data *) data;
+	auto image = static_cast<image_data *>(data);
 
 	video_thumbnailer_destroy_image_data (image);
 }
@@ -91,7 +91,7 @@ static gpointer image_loader_ft_new(ImageLoaderBackendCbAreaUpdated area_updated
 
 static void image_loader_ft_set_size(gpointer loader, int width, int height)
 {
-	auto lft = (ImageLoaderFT *) loader;
+	auto lft = static_cast<ImageLoaderFT *>(loader);
 	lft->requested_width = width;
 	lft->requested_height = height;
 	DEBUG_1("TG: setting size, w=%d, h=%d", width, height);
@@ -100,7 +100,7 @@ static void image_loader_ft_set_size(gpointer loader, int width, int height)
 // static gboolean image_loader_ft_loadfromdisk(gpointer loader, const gchar *path, GError **error)
 static gboolean image_loader_ft_load (gpointer loader, const guchar *UNUSED(buf), gsize UNUSED(count), GError **UNUSED(error))
 {
-	auto lft = (ImageLoaderFT *) loader;
+	auto lft = static_cast<ImageLoaderFT *>(loader);
 	auto il = static_cast<ImageLoader *>(lft->data);
 
 	image_data *image = video_thumbnailer_create_image_data();
@@ -163,7 +163,7 @@ static gboolean image_loader_ft_load (gpointer loader, const guchar *UNUSED(buf)
 
 static GdkPixbuf* image_loader_ft_get_pixbuf(gpointer loader)
 {
-	auto lft = (ImageLoaderFT *) loader;
+	auto lft = static_cast<ImageLoaderFT *>(loader);
 	return lft->pixbuf;
 }
 
@@ -178,7 +178,7 @@ static gboolean image_loader_ft_close(gpointer UNUSED(loader), GError **UNUSED(e
 
 static void image_loader_ft_free(gpointer loader)
 {
-	auto lft = (ImageLoaderFT *) loader;
+	auto lft = static_cast<ImageLoaderFT *>(loader);
 	if (lft->pixbuf) g_object_unref(lft->pixbuf);
 	video_thumbnailer_destroy (lft->vt);
 

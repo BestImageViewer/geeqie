@@ -65,11 +65,11 @@ static void image_loader_gdk_free(gpointer loader)
 void image_loader_backend_set_default(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_gdk_new;
-	funcs->set_size = (ImageLoaderBackendFuncSetSize) gdk_pixbuf_loader_set_size;
+	funcs->set_size = reinterpret_cast<ImageLoaderBackendFuncSetSize>(gdk_pixbuf_loader_set_size);
 	funcs->load = NULL;
-	funcs->write = (ImageLoaderBackendFuncWrite) gdk_pixbuf_loader_write;
-	funcs->get_pixbuf = (ImageLoaderBackendFuncGetPixbuf) gdk_pixbuf_loader_get_pixbuf;
-	funcs->close = (ImageLoaderBackendFuncClose) gdk_pixbuf_loader_close;
+	funcs->write = reinterpret_cast<ImageLoaderBackendFuncWrite>(gdk_pixbuf_loader_write);
+	funcs->get_pixbuf = reinterpret_cast<ImageLoaderBackendFuncGetPixbuf>(gdk_pixbuf_loader_get_pixbuf);
+	funcs->close = reinterpret_cast<ImageLoaderBackendFuncClose>(gdk_pixbuf_loader_close);
 	funcs->abort = image_loader_gdk_abort;
 	funcs->free = image_loader_gdk_free;
 

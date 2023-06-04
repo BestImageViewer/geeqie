@@ -731,7 +731,7 @@ static void vd_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 	if (!vd) return;
 	if (!vd->layout) return;
 
-	type = (SortType)GPOINTER_TO_INT(data);
+	type = static_cast<SortType>GPOINTER_TO_INT(data);
 
 	if (type == SORT_NAME || type == SORT_TIME)
 		{

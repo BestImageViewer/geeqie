@@ -69,13 +69,13 @@ static void cache_maintenance_sim_stop_cb(gpointer UNUSED(data))
 static void cache_maintenance_render_stop_cb(gpointer UNUSED(data))
 {
 	gtk_status_icon_set_tooltip_text(status_icon, _("Geeqie: Creating sim data..."));
-	cache_manager_sim_remote(cache_maintenance_path, TRUE, (GDestroyNotify *)cache_maintenance_sim_stop_cb);
+	cache_manager_sim_remote(cache_maintenance_path, TRUE, reinterpret_cast<GDestroyNotify *>(cache_maintenance_sim_stop_cb));
 }
 
 static void cache_maintenance_clean_stop_cb(gpointer UNUSED(data))
 {
 	gtk_status_icon_set_tooltip_text(status_icon, _("Geeqie: Creating thumbs..."));
-	cache_manager_render_remote(cache_maintenance_path, TRUE, options->thumbnails.cache_into_dirs, (GDestroyNotify *)cache_maintenance_render_stop_cb);
+	cache_manager_render_remote(cache_maintenance_path, TRUE, options->thumbnails.cache_into_dirs, reinterpret_cast<GDestroyNotify *>(cache_maintenance_render_stop_cb));
 }
 
 static void cache_maintenance_user_cancel_cb()
@@ -111,7 +111,7 @@ void cache_maintenance(const gchar *path)
 	gtk_status_icon_set_visible(status_icon, TRUE);
 	g_signal_connect(G_OBJECT(status_icon), "activate", G_CALLBACK(cache_maintenance_status_icon_activate_cb), NULL);
 
-	cache_maintain_home_remote(FALSE, FALSE, (GDestroyNotify *)cache_maintenance_clean_stop_cb);
+	cache_maintain_home_remote(FALSE, FALSE, reinterpret_cast<GDestroyNotify *>(cache_maintenance_clean_stop_cb));
 }
 
 /*
@@ -454,7 +454,7 @@ void cache_maintain_home_remote(gboolean metadata, gboolean clear, GDestroyNotif
 	cm->metadata = metadata;
 	cm->remote = TRUE;
 
-	cm->idle_id = g_idle_add_full(G_PRIORITY_LOW, cache_maintain_home_cb, cm, (GDestroyNotify)func);
+	cm->idle_id = g_idle_add_full(G_PRIORITY_LOW, cache_maintain_home_cb, cm, reinterpret_cast<GDestroyNotify>(func));
 }
 
 static void cache_file_move(const gchar *src, const gchar *dest)
@@ -660,7 +660,7 @@ static void cache_manager_render_reset(CacheOpsData *cd)
 	filelist_free(cd->list_dir);
 	cd->list_dir = NULL;
 
-	thumb_loader_free((ThumbLoader *)cd->tl);
+	thumb_loader_free(reinterpret_cast<ThumbLoader *>(cd->tl));
 	cd->tl = NULL;
 }
 
@@ -725,7 +725,7 @@ static void cache_manager_render_thumb_done_cb(ThumbLoader *UNUSED(tl), gpointer
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
-	thumb_loader_free((ThumbLoader *)cd->tl);
+	thumb_loader_free(reinterpret_cast<ThumbLoader *>(cd->tl));
 	cd->tl = NULL;
 
 	while (cache_manager_render_file(cd));
@@ -741,25 +741,25 @@ static gboolean cache_manager_render_file(CacheOpsData *cd)
 		fd = static_cast<FileData *>(cd->list->data);
 		cd->list = g_list_remove(cd->list, fd);
 
-		cd->tl = (ThumbLoaderStd *)thumb_loader_new(options->thumbnails.max_width, options->thumbnails.max_height);
-		thumb_loader_set_callbacks((ThumbLoader *)cd->tl,
+		cd->tl = reinterpret_cast<ThumbLoaderStd *>(thumb_loader_new(options->thumbnails.max_width, options->thumbnails.max_height));
+		thumb_loader_set_callbacks(reinterpret_cast<ThumbLoader *>(cd->tl),
 					   cache_manager_render_thumb_done_cb,
 					   cache_manager_render_thumb_done_cb,
 					   NULL, cd);
-		thumb_loader_set_cache((ThumbLoader *)cd->tl, TRUE, cd->local, TRUE);
-		success = thumb_loader_start((ThumbLoader *)cd->tl, fd);
+		thumb_loader_set_cache(reinterpret_cast<ThumbLoader *>(cd->tl), TRUE, cd->local, TRUE);
+		success = thumb_loader_start(reinterpret_cast<ThumbLoader *>(cd->tl), fd);
 		if (success)
 			{
 			if (!cd->remote)
 				{
 				gtk_entry_set_text(GTK_ENTRY(cd->progress), fd->path);
 				cd->count_done = cd->count_done + 1;
-				gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cd->progress_bar), (gdouble)cd->count_done / cd->count_total);
+				gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cd->progress_bar), static_cast<gdouble>(cd->count_done) / cd->count_total);
 				}
 			}
 		else
 			{
-			thumb_loader_free((ThumbLoader *)cd->tl);
+			thumb_loader_free(reinterpret_cast<ThumbLoader *>(cd->tl));
 			cd->tl = NULL;
 			}
 
@@ -789,7 +789,7 @@ static gboolean cache_manager_render_file(CacheOpsData *cd)
 
 	if (cd->destroy_func)
 		{
-		g_idle_add((GSourceFunc)cd->destroy_func, NULL);
+		g_idle_add(reinterpret_cast<GSourceFunc>(cd->destroy_func), NULL);
 		}
 
 	return FALSE;
@@ -1024,7 +1024,7 @@ static gint cache_manager_standard_clean_clear_cb(gpointer data)
 			if (cd->count_total != 0)
 				{
 				gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cd->progress),
-							      (gdouble)cd->count_done / cd->count_total);
+							      static_cast<gdouble>(cd->count_done) / cd->count_total);
 				}
 			}
 
@@ -1054,7 +1054,7 @@ static void cache_manager_standard_clean_valid_cb(const gchar *path, gboolean va
 			if (cd->count_total != 0)
 				{
 				gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cd->progress),
-							      (gdouble)cd->count_done / cd->count_total);
+							      static_cast<gdouble>(cd->count_done) / cd->count_total);
 				}
 			}
 		}
@@ -1297,7 +1297,7 @@ static void cache_manager_sim_reset(CacheOpsData *cd)
 	filelist_free(cd->list_dir);
 	cd->list_dir = NULL;
 
-	cache_loader_free((CacheLoader *)cd->cl);
+	cache_loader_free(cd->cl);
 	cd->cl = NULL;
 }
 
@@ -1359,7 +1359,7 @@ static void cache_manager_sim_file_done_cb(CacheLoader *UNUSED(cl), gint UNUSED(
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
-	cache_loader_free((CacheLoader *)cd->cl);
+	cache_loader_free(cd->cl);
 	cd->cl = NULL;
 
 	while (cache_manager_sim_file(cd));
@@ -1420,7 +1420,7 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 		cd->list = g_list_remove(cd->list, fd);
 
 		load_mask = static_cast<CacheDataType>(CACHE_LOADER_DIMENSIONS | CACHE_LOADER_DATE | CACHE_LOADER_MD5SUM | CACHE_LOADER_SIMILARITY);
-		cd->cl = (CacheLoader *)cache_loader_new(fd, load_mask, (cache_manager_sim_file_done_cb), cd);
+		cd->cl = cache_loader_new(fd, load_mask, (cache_manager_sim_file_done_cb), cd);
 
 		if (!cd->remote)
 			{
@@ -1431,7 +1431,7 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 		cd->count_done = cd->count_done + 1;
 		if (!cd->remote)
 			{
-			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cd->progress_bar), (gdouble)cd->count_done / cd->count_total);
+			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(cd->progress_bar), static_cast<gdouble>(cd->count_done) / cd->count_total);
 			}
 
 		return FALSE;
@@ -1443,7 +1443,7 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 		fd = static_cast<FileData *>(cd->list_dir->data);
 		cd->list_dir = g_list_remove(cd->list_dir, fd);
 
-		cache_manager_sim_folder((CacheOpsData *)cd, fd);
+		cache_manager_sim_folder(cd, fd);
 		file_data_unref(fd);
 
 		return TRUE;
@@ -1454,11 +1454,11 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 			gtk_entry_set_text(GTK_ENTRY(cd->progress), _("done"));
 			}
 
-	cache_manager_sim_finish((CacheOpsData *)cd);
+	cache_manager_sim_finish(cd);
 
 	if (cd->destroy_func)
 		{
-		g_idle_add((GSourceFunc)cd->destroy_func, NULL);
+		g_idle_add(reinterpret_cast<GSourceFunc>(cd->destroy_func), NULL);
 		}
 
 	return FALSE;
@@ -1511,7 +1511,7 @@ static void cache_manager_sim_start_cb(GenericDialog *UNUSED(fd), gpointer data)
 		g_list_free(list_total);
 		cd->count_done = 0;
 
-		while (cache_manager_sim_file((CacheOpsData *)cd));
+		while (cache_manager_sim_file(static_cast<CacheOpsData *>(cd)));
 		}
 
 	g_free(path);

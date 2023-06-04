@@ -728,14 +728,14 @@ void list_free_wrapper(void *data, void *UNUSED(userdata))
 
 void string_list_free(GList *list)
 {
-	g_list_foreach(list, (GFunc)list_free_wrapper, NULL);
+	g_list_foreach(list, static_cast<GFunc>(list_free_wrapper), NULL);
 	g_list_free(list);
 }
 
 GList *string_list_copy(const GList *list)
 {
 	GList *new_list = NULL;
-	auto work = (GList *) list;
+	auto work = const_cast<GList *>(list);
 
 	while (work)
 		{
@@ -1049,7 +1049,7 @@ static void web_file_progress_cb(goffset current_num_bytes, goffset total_num_by
 
 	if (!g_cancellable_is_cancelled(web->cancellable))
 		{
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(web->progress), (gdouble)current_num_bytes / total_num_bytes);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(web->progress), static_cast<gdouble>(current_num_bytes) / total_num_bytes);
 		}
 }
 

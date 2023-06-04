@@ -284,16 +284,16 @@ gboolean pixbuf_scale_aspect(gint req_w, gint req_h,
 			     gint old_w, gint old_h,
 			     gint *new_w, gint *new_h)
 {
-	if (((gdouble)req_w / old_w) < ((gdouble)req_h / old_h))
+	if ((static_cast<gdouble>(req_w) / old_w) < (static_cast<gdouble>(req_h) / old_h))
 		{
 		*new_w = req_w;
-		*new_h = (gdouble)*new_w / old_w * old_h;
+		*new_h = static_cast<gdouble>(*new_w) / old_w * old_h;
 		if (*new_h < 1) *new_h = 1;
 		}
 	else
 		{
 		*new_h = req_h;
-		*new_w = (gdouble)*new_h / old_h * old_w;
+		*new_w = static_cast<gdouble>(*new_h) / old_h * old_w;
 		if (*new_w < 1) *new_w = 1;
 		}
 
@@ -1019,12 +1019,12 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 		t = y1; y1 = y2; y2 = t;
 		}
 
-	slope1 = (gdouble)(y2 - y1);
-	if (slope1) slope1 = (gdouble)(x2 - x1) / slope1;
+	slope1 = static_cast<gdouble>(y2 - y1);
+	if (slope1) slope1 = static_cast<gdouble>(x2 - x1) / slope1;
 	slope1_x = x1;
 	slope1_y = y1;
-	slope2 = (gdouble)(y3 - y1);
-	if (slope2) slope2 = (gdouble)(x3 - x1) / slope2;
+	slope2 = static_cast<gdouble>(y3 - y1);
+	if (slope2) slope2 = static_cast<gdouble>(x3 - x1) / slope2;
 
 	for (y = fy1; y < fy2; y++)
 		{
@@ -1032,16 +1032,16 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 
 		if (!middle && y > y2)
 			{
-			slope1 = (gdouble)(y3 - y2);
-			if (slope1) slope1 = (gdouble)(x3 - x2) / slope1;
+			slope1 = static_cast<gdouble>(y3 - y2);
+			if (slope1) slope1 = static_cast<gdouble>(x3 - x2) / slope1;
 			slope1_x = x2;
 			slope1_y = y2;
 
 			middle = TRUE;
 			}
 
-		xa = slope1_x + ((gdouble)slope1 * (y - slope1_y) + 0.5);
-		xb = x1 + ((gdouble)slope2 * (y - y1) + 0.5);
+		xa = slope1_x + (slope1 * (y - slope1_y) + 0.5);
+		xb = x1 + (slope2 * (y - y1) + 0.5);
 
 		if (xa > xb)
 			{
@@ -1195,8 +1195,8 @@ void pixbuf_draw_line(GdkPixbuf *pb,
 	if (!util_clip_region(0, 0, pw, ph,
 			      clip_x, clip_y, clip_w, clip_h,
 			      &rx, &ry, &rw, &rh)) return;
-	if (!util_clip_line((gdouble)rx, (gdouble)ry, (gdouble)rw, (gdouble)rh,
-			    (gdouble)x1, (gdouble)y1, (gdouble)x2, (gdouble)y2,
+	if (!util_clip_line(static_cast<gdouble>(rx), static_cast<gdouble>(ry), static_cast<gdouble>(rw), static_cast<gdouble>(rh),
+			    static_cast<gdouble>(x1), static_cast<gdouble>(y1), static_cast<gdouble>(x2), static_cast<gdouble>(y2),
 			    &rx1, &ry1, &rx2, &ry2)) return;
 
 	cx1 = rx;
@@ -1223,8 +1223,8 @@ void pixbuf_draw_line(GdkPixbuf *pb,
 		if (slope != 0.0) slope = (ry2 - ry1) / slope;
 		for (x = rx1; x < rx2; x += 1.0)
 			{
-			px = (gint)(x + 0.5);
-			py = (gint)(ry1 + (x - rx1) * slope + 0.5);
+			px = static_cast<gint>(x + 0.5);
+			py = static_cast<gint>(ry1 + (x - rx1) * slope + 0.5);
 
 			if (px >=  cx1 && px < cx2 && py >= cy1 && py < cy2)
 				{
@@ -1250,8 +1250,8 @@ void pixbuf_draw_line(GdkPixbuf *pb,
 		if (slope != 0.0) slope = (rx2 - rx1) / slope;
 		for (y = ry1; y < ry2; y += 1.0)
 			{
-			px = (gint)(rx1 + (y - ry1) * slope + 0.5);
-			py = (gint)(y + 0.5);
+			px = static_cast<gint>(rx1 + (y - ry1) * slope + 0.5);
+			py = static_cast<gint>(y + 0.5);
 
 			if (px >=  cx1 && px < cx2 && py >= cy1 && py < cy2)
 				{

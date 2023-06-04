@@ -202,23 +202,23 @@ static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 		{
 		gint w, h;
 
-		if (((gdouble)tl->max_w / pw) < ((gdouble)tl->max_h / ph))
+		if ((static_cast<gdouble>(tl->max_w) / pw) < (static_cast<gdouble>(tl->max_h) / ph))
 			{
 			w = tl->max_w;
-			h = (gdouble)w / pw * ph;
+			h = static_cast<gdouble>(w) / pw * ph;
 			if (h < 1) h = 1;
 			}
 		else
 			{
 			h = tl->max_h;
-			w = (gdouble)h / ph * pw;
+			w = static_cast<gdouble>(h) / ph * pw;
 			if (w < 1) w = 1;
 			}
 
 		if (tl->fd)
 			{
 			if (tl->fd->thumb_pixbuf) g_object_unref(tl->fd->thumb_pixbuf);
-			tl->fd->thumb_pixbuf = gdk_pixbuf_scale_simple(pixbuf, w, h, (GdkInterpType)options->thumbnails.quality);
+			tl->fd->thumb_pixbuf = gdk_pixbuf_scale_simple(pixbuf, w, h, static_cast<GdkInterpType>(options->thumbnails.quality));
 			}
 		save = TRUE;
 		}
@@ -305,10 +305,10 @@ void thumb_loader_set_callbacks(ThumbLoader *tl,
 
 	if (tl->standard_loader)
 		{
-		thumb_loader_std_set_callbacks((ThumbLoaderStd *)tl,
-					       (ThumbLoaderStdFunc) func_done,
-					       (ThumbLoaderStdFunc) func_error,
-					       (ThumbLoaderStdFunc) func_progress,
+		thumb_loader_std_set_callbacks(reinterpret_cast<ThumbLoaderStd *>(tl),
+					       reinterpret_cast<ThumbLoaderStdFunc>(func_done),
+					       reinterpret_cast<ThumbLoaderStdFunc>(func_error),
+					       reinterpret_cast<ThumbLoaderStdFunc>(func_progress),
 					       data);
 		return;
 		}
@@ -326,7 +326,7 @@ void thumb_loader_set_cache(ThumbLoader *tl, gboolean enable_cache, gboolean loc
 
 	if (tl->standard_loader)
 		{
-		thumb_loader_std_set_cache((ThumbLoaderStd *)tl, enable_cache, local, retry_failed);
+		thumb_loader_std_set_cache(reinterpret_cast<ThumbLoaderStd *>(tl), enable_cache, local, retry_failed);
 		return;
 		}
 
@@ -342,7 +342,7 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 
 	if (tl->standard_loader)
 		{
-		return thumb_loader_std_start((ThumbLoaderStd *)tl, fd);
+		return thumb_loader_std_start(reinterpret_cast<ThumbLoaderStd *>(tl), fd);
 		}
 
 	if (!tl->fd && !fd) return FALSE;
@@ -441,7 +441,7 @@ GdkPixbuf *thumb_loader_get_pixbuf(ThumbLoader *tl)
 
 	if (tl && tl->standard_loader)
 		{
-		return thumb_loader_std_get_pixbuf((ThumbLoaderStd *)tl);
+		return thumb_loader_std_get_pixbuf(reinterpret_cast<ThumbLoaderStd *>(tl));
 		}
 
 	if (tl && tl->fd && tl->fd->thumb_pixbuf)
@@ -467,7 +467,7 @@ ThumbLoader *thumb_loader_new(gint width, gint height)
 	   and then performs one additional scaling */
 	if (options->thumbnails.spec_standard && options->thumbnails.enable_caching)
 		{
-		return (ThumbLoader *)thumb_loader_std_new(width, height);
+		return reinterpret_cast<ThumbLoader *>(thumb_loader_std_new(width, height));
 		}
 
 	tl = g_new0(ThumbLoader, 1);
@@ -486,7 +486,7 @@ void thumb_loader_free(ThumbLoader *tl)
 
 	if (tl->standard_loader)
 		{
-		thumb_loader_std_free((ThumbLoaderStd *)tl);
+		thumb_loader_std_free(reinterpret_cast<ThumbLoaderStd *>(tl));
 		return;
 		}
 

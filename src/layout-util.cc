@@ -113,7 +113,7 @@ gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 		/* the gtkaccelgroup of the window is stealing presses before they get to the entry (and more),
 		 * so when the some widgets have focus, give them priority (HACK)
 		 */
-		if (gtk_widget_event(lw->path_entry, (GdkEvent *)event))
+		if (gtk_widget_event(lw->path_entry, reinterpret_cast<GdkEvent *>(event)))
 			{
 			return TRUE;
 			}
@@ -121,7 +121,7 @@ gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
 	if (lw->vf->file_filter.combo && gtk_widget_has_focus(gtk_bin_get_child(GTK_BIN(lw->vf->file_filter.combo))))
 		{
-		if (gtk_widget_event(gtk_bin_get_child(GTK_BIN(lw->vf->file_filter.combo)), (GdkEvent *)event))
+		if (gtk_widget_event(gtk_bin_get_child(GTK_BIN(lw->vf->file_filter.combo)), reinterpret_cast<GdkEvent *>(event)))
 			{
 			return TRUE;
 			}
@@ -129,12 +129,12 @@ gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
 	if (lw->vd && lw->options.dir_view_type == DIRVIEW_TREE && gtk_widget_has_focus(lw->vd->view) &&
 	    !layout_key_match(event->keyval) &&
-	    gtk_widget_event(lw->vd->view, (GdkEvent *)event))
+	    gtk_widget_event(lw->vd->view, reinterpret_cast<GdkEvent *>(event)))
 		{
 		return TRUE;
 		}
 	if (lw->bar &&
-	    bar_event(lw->bar, (GdkEvent *)event))
+	    bar_event(lw->bar, reinterpret_cast<GdkEvent *>(event)))
 		{
 		return TRUE;
 		}
@@ -859,7 +859,7 @@ static void layout_menu_list_cb(GtkRadioAction *action, GtkRadioAction *UNUSED(c
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_exit_fullscreen(lw);
-	layout_views_set(lw, lw->options.dir_view_type, (FileViewType) gtk_radio_action_get_current_value(action));
+	layout_views_set(lw, lw->options.dir_view_type, static_cast<FileViewType>(gtk_radio_action_get_current_value(action)));
 }
 
 static void layout_menu_view_dir_as_cb(GtkToggleAction *action,  gpointer data)
@@ -1906,7 +1906,7 @@ static void layout_menu_recent_update(LayoutWindow *lw)
 
 	while (list)
 		{
-		const gchar *filename = filename_from_path((gchar *)list->data);
+		const gchar *filename = filename_from_path(static_cast<gchar *>(list->data));
 		gchar *name;
 		gboolean free_name = FALSE;
 
@@ -1917,7 +1917,7 @@ static void layout_menu_recent_update(LayoutWindow *lw)
 			}
 		else
 			{
-			name = (gchar *) filename;
+			name = const_cast<gchar *>(filename);
 			}
 
 		item = menu_item_add_simple(menu, name, G_CALLBACK(layout_menu_recent_cb), lw);
@@ -1998,7 +1998,7 @@ static gint layout_window_menu_list_sort_cb(gconstpointer a, gconstpointer b)
 	auto wna = static_cast<const WindowNames *>(a);
 	auto wnb = static_cast<const WindowNames *>(b);
 
-	return g_strcmp0((gchar *)wna->name, (gchar *)wnb->name);
+	return g_strcmp0(wna->name, wnb->name);
 }
 
 static GList *layout_window_menu_list(GList *listin)
@@ -2973,7 +2973,7 @@ static const gchar *menu_ui_description =
 
 static gchar *menu_translate(const gchar *path, gpointer UNUSED(data))
 {
-	return (gchar *)(_(path));
+	return static_cast<gchar *>(_(path));
 }
 
 static void layout_actions_setup_mark(LayoutWindow *lw, gint mark, const gchar *name_tmpl,
@@ -3097,7 +3097,7 @@ static GList *layout_actions_editor_menu_path(EditorDescription *editor)
 static void layout_actions_editor_add(GString *desc, GList *path, GList *old_path)
 {
 	gint to_open, to_close, i;
-	while (path && old_path && strcmp((gchar *)path->data, (gchar *)old_path->data) == 0)
+	while (path && old_path && strcmp(static_cast<gchar *>(path->data), static_cast<gchar *>(old_path->data)) == 0)
 		{
 		path = path->next;
 		old_path = old_path->next;
@@ -3148,7 +3148,7 @@ static void layout_actions_editor_add(GString *desc, GList *path, GList *old_pat
 		}
 
 	if (path)
-		g_string_append_printf(desc, "      <menuitem action='%s'/>", (gchar *)path->data);
+		g_string_append_printf(desc, "      <menuitem action='%s'/>", static_cast<gchar *>(path->data));
 }
 
 static void layout_actions_setup_editors(LayoutWindow *lw)
@@ -3447,7 +3447,7 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action)
 
 	if (!action || !lw->ui_manager) return;
 
-	if (g_list_find_custom(lw->toolbar_actions[type], action, (GCompareFunc)strcmp)) return;
+	if (g_list_find_custom(lw->toolbar_actions[type], action, reinterpret_cast<GCompareFunc>(strcmp))) return;
 
 	switch (type)
 		{

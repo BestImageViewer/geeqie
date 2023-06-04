@@ -80,12 +80,12 @@ GType image_loader_get_type(void)
 			sizeof(ImageLoaderClass),
 			NULL,   /* base_init */
 			NULL,   /* base_finalize */
-			(GClassInitFunc)image_loader_class_init_wrapper, /* class_init */
+			static_cast<GClassInitFunc>(image_loader_class_init_wrapper), /* class_init */
 			NULL,   /* class_finalize */
 			NULL,   /* class_data */
 			sizeof(ImageLoader),
 			0,      /* n_preallocs */
-			(GInstanceInitFunc)image_loader_init, /* instance_init */
+			static_cast<GInstanceInitFunc>(image_loader_init), /* instance_init */
 			NULL	/* value_table */
 			};
 		type = g_type_register_static(G_TYPE_OBJECT, "ImageLoaderType", &info, GTypeFlags(0));
@@ -95,7 +95,7 @@ GType image_loader_get_type(void)
 
 static void image_loader_init(GTypeInstance *instance, gpointer UNUSED(g_class))
 {
-	auto il = (ImageLoader *)instance;
+	auto il = reinterpret_cast<ImageLoader *>(instance);
 
 	il->pixbuf = NULL;
 	il->idle_id = 0;
@@ -200,7 +200,7 @@ static void image_loader_class_init(ImageLoaderClass *loader_class)
 
 static void image_loader_finalize(GObject *object)
 {
-	auto il = (ImageLoader *)object;
+	auto il = reinterpret_cast<ImageLoader *>(object);
 
 	image_loader_stop(il);
 
@@ -258,7 +258,7 @@ ImageLoader *image_loader_new(FileData *fd)
 
 	if (!fd) return NULL;
 
-	il = (ImageLoader *) g_object_new(TYPE_IMAGE_LOADER, NULL);
+	il = static_cast<ImageLoader *>(g_object_new(TYPE_IMAGE_LOADER, NULL));
 
 	il->fd = file_data_ref(fd);
 
@@ -572,16 +572,16 @@ static void image_loader_size_cb(gpointer loader,
 	if (width > il->requested_width || height > il->requested_height)
 		{
 
-		if (((gdouble)il->requested_width / width) < ((gdouble)il->requested_height / height))
+		if ((static_cast<gdouble>(il->requested_width) / width) < (static_cast<gdouble>(il->requested_height) / height))
 			{
 			nw = il->requested_width;
-			nh = (gdouble)nw / width * height;
+			nh = static_cast<gdouble>(nw) / width * height;
 			if (nh < 1) nh = 1;
 			}
 		else
 			{
 			nh = il->requested_height;
-			nw = (gdouble)nh / height * width;
+			nw = static_cast<gdouble>(nh) / height * width;
 			if (nw < 1) nw = 1;
 			}
 
@@ -988,7 +988,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 
 		if (options->thumbnails.use_exif)
 			{
-			il->mapped_file = exif_get_preview(exif, (guint *)&il->bytes_total, il->requested_width, il->requested_height);
+			il->mapped_file = exif_get_preview(exif, static_cast<guint *>(&il->bytes_total), il->requested_width, il->requested_height);
 
 			if (il->mapped_file)
 				{
@@ -997,7 +997,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 			}
 		else
 			{
-			il->mapped_file = libraw_get_preview(il, (guint *)&il->bytes_total);
+			il->mapped_file = libraw_get_preview(il, static_cast<guint *>(&il->bytes_total));
 
 			if (il->mapped_file)
 				{
@@ -1017,7 +1017,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 		/* If libraw does not find a thumbnail, try exiv2 */
 		if (!il->mapped_file)
 			{
-			il->mapped_file = exif_get_preview(exif, (guint *)&il->bytes_total, 0, 0); /* get the largest available preview image or NULL for normal images*/
+			il->mapped_file = exif_get_preview(exif, static_cast<guint *>(&il->bytes_total), 0, 0); /* get the largest available preview image or NULL for normal images*/
 
 			if (il->mapped_file)
 				{
@@ -1377,7 +1377,7 @@ gdouble image_loader_get_percent(ImageLoader *il)
 		}
 	else
 		{
-		ret = (gdouble)il->bytes_read / il->bytes_total;
+		ret = static_cast<gdouble>(il->bytes_read) / il->bytes_total;
 		}
 	g_mutex_unlock(il->data_mutex);
 	return ret;

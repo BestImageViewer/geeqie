@@ -301,7 +301,7 @@ static gboolean animation_should_continue(AnimationData *fd)
 
 static gboolean show_next_frame(gpointer data)
 {
-	auto fd = (AnimationData*)data;
+	auto fd = static_cast<AnimationData*>(data);
 	int delay;
 	PixbufRenderer *pr;
 
@@ -311,7 +311,7 @@ static gboolean show_next_frame(gpointer data)
 		return FALSE;
 		}
 
-	pr = (PixbufRenderer*)fd->iw->pr;
+	pr = reinterpret_cast<PixbufRenderer*>(fd->iw->pr);
 
 	if (gdk_pixbuf_animation_iter_advance(fd->iter,NULL)==FALSE)
 		{
@@ -449,7 +449,7 @@ static gboolean layout_image_animate_new_file(LayoutWindow *lw)
 	if (gfstream)
 		{
 		animation->gfstream = gfstream;
-		gdk_pixbuf_animation_new_from_stream_async((GInputStream*)gfstream, animation->cancellable, animation_async_ready_cb, animation);
+		gdk_pixbuf_animation_new_from_stream_async(reinterpret_cast<GInputStream*>(gfstream), animation->cancellable, animation_async_ready_cb, animation);
 		}
 	else
 		{
@@ -526,7 +526,7 @@ static void li_pop_menu_alter_cb(GtkWidget *widget, gpointer data)
 	AlterType type;
 
 	lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
-	type = (AlterType)GPOINTER_TO_INT(data);
+	type = static_cast<AlterType>GPOINTER_TO_INT(data);
 
 	image_alter_orientation(lw->image, lw->image->image_fd, type);
 }
@@ -1026,7 +1026,7 @@ static void layout_image_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *cont
 
 		if (!isfile(fd->path))
 			{
-			if ((guint) row < layout_list_count(lw, NULL) - 1)
+			if (static_cast<guint>(row) < layout_list_count(lw, NULL) - 1)
 				{
 				layout_image_next(lw);
 				}
@@ -1093,8 +1093,8 @@ void layout_image_scroll(LayoutWindow *lw, gint x, gint y, gboolean connect_scro
 	if (!connect_scroll) return;
 
 	image_get_image_size(lw->image, &width, &height);
-	dx = (gdouble) x / width;
-	dy = (gdouble) y / height;
+	dx = static_cast<gdouble>(x) / width;
+	dy = static_cast<gdouble>(y) / height;
 
 	for (i = 0; i < MAX_SPLIT_IMAGES; i++)
 		{
@@ -1316,7 +1316,7 @@ void layout_image_reset_orientation(LayoutWindow *lw)
 		 imd->orientation = imd->image_fd->user_orientation;
 		}
 
-	pixbuf_renderer_set_orientation((PixbufRenderer *)imd->pr, imd->orientation);
+	pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), imd->orientation);
 }
 
 void layout_image_set_desaturate(LayoutWindow *lw, gboolean desaturate)
@@ -1676,7 +1676,7 @@ void layout_image_next(LayoutWindow *lw)
 
 	if (current >= 0)
 		{
-		if ((guint) current < layout_list_count(lw, NULL) - 1)
+		if (static_cast<guint>(current) < layout_list_count(lw, NULL) - 1)
 			{
 			layout_image_set_index(lw, current + 1);
 			}

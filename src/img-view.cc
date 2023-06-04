@@ -711,7 +711,7 @@ static void scroll_cb(ImageWindow *imd, GdkEventScroll *event, gpointer data)
 				break;
 			}
 		}
-	else if ( (event->state & GDK_SHIFT_MASK) != (guint) (options->mousewheel_scrolls))
+	else if ( (event->state & GDK_SHIFT_MASK) != static_cast<guint>(options->mousewheel_scrolls))
 		{
 		switch (event->direction)
 			{
@@ -965,14 +965,14 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 		{
 		view_window_set_list(vw, list);
 		vw->list_pointer = vw->list;
-		image_change_fd(vw->imd, (FileData *)vw->list->data, image_zoom_get_default(NULL));
+		image_change_fd(vw->imd, static_cast<FileData *>(vw->list->data), image_zoom_get_default(NULL));
 		/* Set fd to first in list */
 		fd = static_cast<FileData *>(vw->list->data);
 
 		if (options->image.enable_read_ahead)
 			{
 			GList *work = vw->list->next;
-			if (work) image_prebuffer_set(vw->imd, (FileData *)work->data);
+			if (work) image_prebuffer_set(vw->imd, static_cast<FileData *>(work->data));
 			}
 		}
 	else

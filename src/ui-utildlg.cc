@@ -136,7 +136,7 @@ static void generic_dialog_click_cb(GtkWidget *widget, gpointer data)
 	void (*func)(GenericDialog *, gpointer);
 	gboolean auto_close;
 
-	func = (void(*)(GenericDialog *, gpointer))(g_object_get_data(G_OBJECT(widget), "dialog_function"));
+	func = reinterpret_cast<void(*)(GenericDialog *, gpointer)>(g_object_get_data(G_OBJECT(widget), "dialog_function"));
 	auto_close = gd->auto_close;
 
 	if (func) func(gd, gd->data);
@@ -239,7 +239,7 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *stock_id, c
 				 G_CALLBACK(generic_dialog_click_cb), gd);
 
 	gtk_widget_set_can_default(button, TRUE);
-	g_object_set_data(G_OBJECT(button), "dialog_function", (void *)func_cb);
+	g_object_set_data(G_OBJECT(button), "dialog_function", reinterpret_cast<void *>(func_cb));
 
 	gtk_container_add(GTK_CONTAINER(gd->hbox), button);
 
@@ -264,15 +264,15 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *stock_id, c
 }
 
 /**
- * @brief 
- * @param gd 
- * @param icon_stock_id 
- * @param heading 
- * @param text 
- * @param expand Used as the "expand" and "fill" parameters in the eventual call to gtk_box_pack_start() 
- * @returns 
- * 
- * 
+ * @brief
+ * @param gd
+ * @param icon_stock_id
+ * @param heading
+ * @param text
+ * @param expand Used as the "expand" and "fill" parameters in the eventual call to gtk_box_pack_start()
+ * @returns
+ *
+ *
  */
 GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_stock_id,
 				      const gchar *heading, const gchar *text, gboolean expand)
@@ -511,10 +511,10 @@ GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
  *-----------------------------------------------------------------------------
  * AppImage version update notification message with fade-out
  *-----------------------------------------------------------------------------
- * 
+ *
  * It is expected that the version file on the server has the following format
  * for the first two lines in these formats:
- * 
+ *
  * 1. x86_64 AppImage - e.g. Geeqie-v2.0+20221113-x86_64.AppImage
  * 2. arm AppImage - e.g. Geeqie-v2.0+20221025-aarch64.AppImage
  */
@@ -731,7 +731,7 @@ FileDialog *file_dialog_new(const gchar *title,
 
 	generic_dialog_setup(GENERIC_DIALOG(fdlg), title,
 			     role, parent, FALSE,
-			     (void(*)(GenericDialog *, gpointer))cancel_cb, data);
+			     reinterpret_cast<void(*)(GenericDialog *, gpointer)>(cancel_cb), data);
 
 	return fdlg;
 }
@@ -740,7 +740,7 @@ GtkWidget *file_dialog_add_button(FileDialog *fdlg, const gchar *stock_id, const
 				  void (*func_cb)(FileDialog *, gpointer), gboolean is_default)
 {
 	return generic_dialog_add_button(GENERIC_DIALOG(fdlg), stock_id, text,
-					 (void(*)(GenericDialog *, gpointer))func_cb, is_default);
+					 reinterpret_cast<void(*)(GenericDialog *, gpointer)>(func_cb), is_default);
 }
 
 static void file_dialog_entry_cb(GtkWidget *UNUSED(widget), gpointer data)

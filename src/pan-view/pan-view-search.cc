@@ -230,7 +230,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 	if (!text) return FALSE;
 
-	ptr = (gchar *)text;
+	ptr = const_cast<gchar *>(text);
 	while (*ptr != '\0')
 		{
 		if (!g_unichar_isdigit(*ptr) && !valid_date_separator(*ptr)) return FALSE;
@@ -245,11 +245,11 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 	if (valid_date_separator(*text))
 		{
 		year = -1;
-		mptr = (gchar *)text;
+		mptr = const_cast<gchar *>(text);
 		}
 	else
 		{
-		year = (gint)strtol(text, &mptr, 10);
+		year = static_cast<gint>(strtol(text, &mptr, 10));
 		if (mptr == text) return FALSE;
 		}
 
@@ -386,7 +386,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 void pan_search_activate_cb(const gchar *text, gpointer data)
 {
-	auto pw = (PanWindow *)data;
+	auto pw = static_cast<PanWindow *>(data);
 
 	if (!text) return;
 
@@ -417,7 +417,7 @@ void pan_search_activate(PanWindow *pw)
 
 void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 {
-	auto pw = (PanWindow *)data;
+	auto pw = static_cast<PanWindow *>(data);
 	PanViewSearchUi *ui = pw->search_ui;
 	gboolean visible;
 	GtkWidget *parent;

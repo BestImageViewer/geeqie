@@ -318,7 +318,7 @@ gboolean history_list_save(const gchar *path)
 					&&
 					(!(strcmp(hd->key, "image_list") == 0 && list_count > options->recent_folder_image_list_maxsize)))
 				{
-				secure_fprintf(ssi, "\"%s\"\n", (gchar *)work->data);
+				secure_fprintf(ssi, "\"%s\"\n", static_cast<gchar *>(work->data));
 				}
 			work = work->prev;
 			list_count--;

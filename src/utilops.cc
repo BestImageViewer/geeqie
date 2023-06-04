@@ -41,8 +41,8 @@ static GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget 
 
 static GtkTargetEntry target_types[] =
 {
-	{(gchar *)const_cast<gchar *>("text/plain"), 0, CLIPBOARD_TEXT_PLAIN},
-	{(gchar *)const_cast<gchar *>("text/uri-list"), 0, CLIPBOARD_TEXT_URI_LIST},
+	{const_cast<gchar *>("text/plain"), 0, CLIPBOARD_TEXT_PLAIN},
+	{const_cast<gchar *>("text/uri-list"), 0, CLIPBOARD_TEXT_URI_LIST},
 	{(gchar *)"x-special/gnome-copied-files", 0, CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES},
 	{(gchar *)"UTF8_STRING", 0, CLIPBOARD_UTF8_STRING}
 };
@@ -2426,7 +2426,7 @@ static void file_util_start_editor_full(const gchar *key, FileData *source_fd, G
 				file_directory = remove_level_from_path(source_fd->path);
 
 			if (!file_directory && flist)
-				file_directory = remove_level_from_path(((FileData *)flist->data)->path);
+				file_directory = remove_level_from_path((static_cast<FileData *>(flist->data))->path);
 			working_directory = file_directory;
 			}
 

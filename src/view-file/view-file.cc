@@ -97,7 +97,7 @@ guint vf_count(ViewFile *vf, gint64 *bytes)
 		work = vf->list;
 		while (work)
 			{
-			auto fd = (FileData *)work->data;
+			auto fd = static_cast<FileData *>(work->data);
 			work = work->next;
 
 			b += fd->size;
@@ -115,7 +115,7 @@ GList *vf_get_list(ViewFile *vf)
 	GList *work;
 	for (work = vf->list; work; work = work->next)
 		{
-		auto fd = (FileData *)work->data;
+		auto fd = static_cast<FileData *>(work->data);
 		list = g_list_prepend(list, file_data_ref(fd));
 		}
 
@@ -130,7 +130,7 @@ GList *vf_get_list(ViewFile *vf)
 
 static gboolean vf_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	gboolean ret;
 
 	switch (vf->type)
@@ -151,7 +151,7 @@ static gboolean vf_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer 
 
 static gboolean vf_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	gboolean ret;
 
 	switch (vf->type)
@@ -166,7 +166,7 @@ static gboolean vf_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer 
 
 static gboolean vf_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	gboolean ret;
 
 	switch (vf->type)
@@ -355,7 +355,7 @@ static void vf_pop_menu_edit_cb(GtkWidget *widget, gpointer data)
 
 static void vf_pop_menu_view_cb(GtkWidget *widget, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	switch (vf->type)
 	{
@@ -366,7 +366,7 @@ static void vf_pop_menu_view_cb(GtkWidget *widget, gpointer data)
 
 static void vf_pop_menu_open_archive_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	LayoutWindow *lw_new;
 	FileData *fd = NULL;
 	gchar *dest_dir;
@@ -396,21 +396,21 @@ static void vf_pop_menu_open_archive_cb(GtkWidget *UNUSED(widget), gpointer data
 
 static void vf_pop_menu_copy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	file_util_copy(NULL, vf_pop_menu_file_list(vf), NULL, vf->listview);
 }
 
 static void vf_pop_menu_move_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	file_util_move(NULL, vf_pop_menu_file_list(vf), NULL, vf->listview);
 }
 
 static void vf_pop_menu_rename_cb(GtkWidget *widget, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	switch (vf->type)
 	{
@@ -421,7 +421,7 @@ static void vf_pop_menu_rename_cb(GtkWidget *widget, gpointer data)
 
 static void vf_pop_menu_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	options->file_ops.safe_delete_enable = FALSE;
 	file_util_delete(NULL, vf_pop_menu_file_list(vf), vf->listview);
@@ -429,7 +429,7 @@ static void vf_pop_menu_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static void vf_pop_menu_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	options->file_ops.safe_delete_enable = TRUE;
 	file_util_delete(NULL, vf_pop_menu_file_list(vf), vf->listview);
@@ -437,28 +437,28 @@ static void vf_pop_menu_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer dat
 
 static void vf_pop_menu_copy_path_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	file_util_copy_path_list_to_clipboard(vf_pop_menu_file_list(vf), TRUE);
 }
 
 static void vf_pop_menu_copy_path_unquoted_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	file_util_copy_path_list_to_clipboard(vf_pop_menu_file_list(vf), FALSE);
 }
 
 static void vf_pop_menu_enable_grouping_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	file_data_disable_grouping_list(vf_pop_menu_file_list(vf), FALSE);
 }
 
 static void vf_pop_menu_duplicates_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	DupeWindow *dw;
 
 	dw = dupe_window_new();
@@ -467,7 +467,7 @@ static void vf_pop_menu_duplicates_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static void vf_pop_menu_disable_grouping_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	file_data_disable_grouping_list(vf_pop_menu_file_list(vf), TRUE);
 }
@@ -482,7 +482,7 @@ static void vf_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 	vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
 	if (!vf) return;
 
-	type = (SortType)GPOINTER_TO_INT(data);
+	type = static_cast<SortType>GPOINTER_TO_INT(data);
 
 	if (type == SORT_EXIFTIME || type == SORT_EXIFTIMEDIGITIZED || type == SORT_RATING)
 		{
@@ -501,7 +501,7 @@ static void vf_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 
 static void vf_pop_menu_sort_ascend_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	if (vf->layout)
 		{
@@ -515,49 +515,49 @@ static void vf_pop_menu_sort_ascend_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static void vf_pop_menu_sel_mark_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_SET);
 }
 
 static void vf_pop_menu_sel_mark_and_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_AND);
 }
 
 static void vf_pop_menu_sel_mark_or_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_OR);
 }
 
 static void vf_pop_menu_sel_mark_minus_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_MINUS);
 }
 
 static void vf_pop_menu_set_mark_sel_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vf_selection_to_mark(vf, vf->active_mark, STM_MODE_SET);
 }
 
 static void vf_pop_menu_res_mark_sel_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vf_selection_to_mark(vf, vf->active_mark, STM_MODE_RESET);
 }
 
 static void vf_pop_menu_toggle_mark_sel_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vf_selection_to_mark(vf, vf->active_mark, STM_MODE_TOGGLE);
 }
 
 static void vf_pop_menu_toggle_view_type_cb(GtkWidget *widget, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	auto  new_type = static_cast<FileViewType>(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data")));
 	if (!vf->layout) return;
 
@@ -566,7 +566,7 @@ static void vf_pop_menu_toggle_view_type_cb(GtkWidget *widget, gpointer data)
 
 static void vf_pop_menu_refresh_cb(GtkWidget *widget, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	switch (vf->type)
 	{
@@ -577,7 +577,7 @@ static void vf_pop_menu_refresh_cb(GtkWidget *widget, gpointer data)
 
 static void vf_popup_destroy_cb(GtkWidget *widget, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	switch (vf->type)
 	{
@@ -808,7 +808,7 @@ gboolean vf_set_fd(ViewFile *vf, FileData *dir_fd)
 
 static void vf_destroy_cb(GtkWidget *widget, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	switch (vf->type)
 	{
@@ -834,7 +834,7 @@ static void vf_destroy_cb(GtkWidget *widget, gpointer data)
 
 static void vf_marks_filter_toggle_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vf_refresh_idle(vf);
 }
 
@@ -849,7 +849,7 @@ struct _MarksTextEntry {
 
 static void vf_marks_tooltip_cancel_cb(GenericDialog *gd, gpointer data)
 {
-	auto mte = (MarksTextEntry *)data;
+	auto mte = static_cast<MarksTextEntry *>(data);
 
 	g_free(mte->text_entry);
 	generic_dialog_close(gd);
@@ -857,7 +857,7 @@ static void vf_marks_tooltip_cancel_cb(GenericDialog *gd, gpointer data)
 
 static void vf_marks_tooltip_ok_cb(GenericDialog *gd, gpointer data)
 {
-	auto mte = (MarksTextEntry *)data;
+	auto mte = static_cast<MarksTextEntry *>(data);
 
 	g_free(options->marks_tooltips[mte->mark_no]);
 	options->marks_tooltips[mte->mark_no] = g_strdup(gtk_entry_get_text(GTK_ENTRY(mte->edit_widget)));
@@ -938,7 +938,7 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 
 static void vf_file_filter_save_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	gchar *entry_text;
 	gchar *remove_text = NULL;
 	gchar *index_text = NULL;
@@ -997,14 +997,14 @@ static void vf_file_filter_save_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static void vf_file_filter_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	vf_refresh(vf);
 }
 
 static gboolean vf_file_filter_press_cb(GtkWidget *widget, GdkEventButton *UNUSED(bevent), gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	vf->file_filter.last_selected = gtk_combo_box_get_active(GTK_COMBO_BOX(vf->file_filter.combo));
 
 	gtk_widget_grab_focus(widget);
@@ -1055,7 +1055,7 @@ void vf_file_filter_set(ViewFile *vf, gboolean enable)
 
 static gboolean vf_file_filter_class_cb(GtkWidget *widget, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	gint i;
 
 	gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
@@ -1074,7 +1074,7 @@ static gboolean vf_file_filter_class_cb(GtkWidget *widget, gpointer data)
 
 static gboolean vf_file_filter_class_set_all_cb(GtkWidget *widget, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	GtkWidget *parent;
 	GList *children;
 	GtkWidget *child;
@@ -1146,7 +1146,7 @@ static GtkWidget *class_filter_menu (ViewFile *vf)
 
 static void case_sensitive_cb(GtkWidget *widget, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	vf->file_filter.case_sensitive = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	vf_refresh(vf);
@@ -1188,7 +1188,7 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	work = history_list_get_by_key("file_filter");
 	while (work)
 		{
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), (gchar *)work->data);
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), static_cast<gchar *>(work->data));
 		work = work->next;
 		n++;
 		vf->file_filter.count = n;
@@ -1331,7 +1331,7 @@ static gdouble vf_thumb_progress(ViewFile *vf)
 	}
 
 	DEBUG_1("thumb progress: %d of %d", done, count);
-	return (gdouble)done / count;
+	return static_cast<gdouble>(done) / count;
 }
 
 static gdouble vf_read_metadata_in_idle_progress(ViewFile *vf)
@@ -1345,7 +1345,7 @@ static gdouble vf_read_metadata_in_idle_progress(ViewFile *vf)
 		case FILEVIEW_ICON: vficon_read_metadata_progress_count(vf->list, &count, &done); break;
 		}
 
-	return (gdouble)done / count;
+	return static_cast<gdouble>(done) / count;
 }
 
 static void vf_set_thumb_fd(ViewFile *vf, FileData *fd)
@@ -1392,7 +1392,7 @@ void vf_thumb_stop(ViewFile *vf)
 
 static void vf_thumb_common_cb(ThumbLoader *tl, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	if (vf->thumbs_filedata && vf->thumbs_loader == tl)
 		{
@@ -1464,7 +1464,7 @@ static void vf_thumb_reset_all(ViewFile *vf)
 
 	for (work = vf->list; work; work = work->next)
 		{
-		auto fd = (FileData *)work->data;
+		auto fd = static_cast<FileData *>(work->data);
 		if (fd->thumb_pixbuf)
 			{
 			g_object_unref(fd->thumb_pixbuf);
@@ -1547,7 +1547,7 @@ static gboolean vf_star_next(ViewFile *vf)
 
 gboolean vf_stars_cb(gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	FileData *fd = vf->stars_filedata;
 
 	if (fd)
@@ -1699,7 +1699,7 @@ void vf_set_layout(ViewFile *vf, LayoutWindow *layout)
 
 static gboolean vf_refresh_idle_cb(gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	vf_refresh(vf);
 	vf->refresh_idle_id = 0;
@@ -1735,7 +1735,7 @@ void vf_refresh_idle(ViewFile *vf)
 
 void vf_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	gboolean refresh;
 
 	auto  interested = static_cast<NotifyType>(NOTIFY_CHANGE | NOTIFY_REREAD | NOTIFY_GROUPING);
@@ -1780,7 +1780,7 @@ void vf_notify_cb(FileData *fd, NotifyType type, gpointer data)
 static gboolean vf_read_metadata_in_idle_cb(gpointer data)
 {
 	FileData *fd;
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 	GList *work;
 
 	vf_thumb_status(vf, vf_read_metadata_in_idle_progress(vf), _("Loading meta..."));
@@ -1819,7 +1819,7 @@ static gboolean vf_read_metadata_in_idle_cb(gpointer data)
 
 static void vf_read_metadata_in_idle_finished_cb(gpointer data)
 {
-	auto vf = (ViewFile *)data;
+	auto vf = static_cast<ViewFile *>(data);
 
 	vf_thumb_status(vf, 0.0, "Loading meta...");
 	vf->read_metadata_in_idle_id = 0;
