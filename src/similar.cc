@@ -25,7 +25,7 @@
 
 /**
  * @file
- * 
+ *
  * These functions are intended to find images with similar color content. For
  * example when an image was saved at different compression levels or dimensions
  * (scaled down/up) the contents are similar, but these files do not match by file
@@ -48,7 +48,6 @@
  * generally only a match of > 0.85 are significant at all, and >.95 is useful to
  * find images that have been re-saved to other formats, dimensions, or compression.
  */
-
 
 /*
  * The experimental (alternate) algorithm is only for testing of new techniques to
@@ -81,8 +80,8 @@ void image_sim_free(ImageSimilarityData *sd)
 
 static gint image_sim_channel_eq_sort_cb(gconstpointer a, gconstpointer b)
 {
-	auto pa = static_cast<gint *>(const_cast<gpointer>(a));
-	auto pb = static_cast<gint *>(const_cast<gpointer>(b));
+	auto pa = static_cast<const gint *>(a);
+	auto pb = static_cast<const gint *>(b);
 	if (pa[1] < pb[1]) return -1;
 	if (pa[1] > pb[1]) return 1;
 	return 0;
