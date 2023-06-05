@@ -115,7 +115,7 @@ md5_update(MD5Context *ctx, const guchar *buf, guint32 len)
 	/* Handle any leading odd-sized chunks */
 
 	if (t) {
-		guchar *p = (guchar *) ctx->in + t;
+		auto p = (guchar *) ctx->in + t;
 
 		t = 64 - t;
 		if (len < t) {

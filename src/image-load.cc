@@ -988,7 +988,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 
 		if (options->thumbnails.use_exif)
 			{
-			il->mapped_file = exif_get_preview(exif, static_cast<guint *>(&il->bytes_total), il->requested_width, il->requested_height);
+			il->mapped_file = exif_get_preview(exif, reinterpret_cast<guint *>(&il->bytes_total), il->requested_width, il->requested_height);
 
 			if (il->mapped_file)
 				{
@@ -997,7 +997,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 			}
 		else
 			{
-			il->mapped_file = libraw_get_preview(il, static_cast<guint *>(&il->bytes_total));
+			il->mapped_file = libraw_get_preview(il, reinterpret_cast<guint *>(&il->bytes_total));
 
 			if (il->mapped_file)
 				{
@@ -1017,7 +1017,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 		/* If libraw does not find a thumbnail, try exiv2 */
 		if (!il->mapped_file)
 			{
-			il->mapped_file = exif_get_preview(exif, static_cast<guint *>(&il->bytes_total), 0, 0); /* get the largest available preview image or NULL for normal images*/
+			il->mapped_file = exif_get_preview(exif, reinterpret_cast<guint *>(&il->bytes_total), 0, 0); /* get the largest available preview image or NULL for normal images*/
 
 			if (il->mapped_file)
 				{

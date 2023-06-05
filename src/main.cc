@@ -946,7 +946,7 @@ static gboolean gq_accel_map_save(const gchar *path)
 
 	g_string_free(gstring, TRUE);
 
-	gtk_accel_map_foreach((gpointer) ssi, gq_accel_map_print);
+	gtk_accel_map_foreach(ssi, gq_accel_map_print);
 
 	if (secure_close(ssi))
 		{
@@ -1139,7 +1139,7 @@ void exit_program(void)
  * This code is incorrect according to POSIX, because:
  *
  *   mmap is not async-signal-safe and thus may not be called from a signal handler
- * 
+ *
  *   mmap must be called with a valid file descriptor.  POSIX requires that
  *   a fildes argument of -1 must cause mmap to return EBADF.
  *
@@ -1229,7 +1229,7 @@ static gboolean theme_change_cb(GObject *UNUSED(gobject), GParamSpec *UNUSED(psp
 
 /**
  * @brief Set up the application paths
- * 
+ *
  * This function is required for use of AppImages. AppImages are
  * relocatable, and therefore cannot use fixed paths to various components.
  * These paths were originally #defines created during compilation.

@@ -17,9 +17,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * 
+ *
  * Derived from:
- * 
+ *
  * GdkPixbuf library - PSD image loader
  *
  * Copyright (C) 2008 Jan Dudek
@@ -112,7 +112,7 @@ typedef enum
 typedef struct
 {
 	PsdReadState       state;
-	
+
 	GdkPixbuf*                  pixbuf;
 	gpointer                    user_data;
 
@@ -160,7 +160,7 @@ static PsdHeader
 psd_parse_header (guchar* str)
 {
 	PsdHeader hd;
-	
+
 	memcpy(hd.signature, str, 4);
 	hd.version = read_uint16(str + 4);
 	hd.channels = read_uint16(str + 12);
@@ -237,12 +237,12 @@ decompress_line(const guchar* src, guint line_length, guchar* dest)
 	while (bytes_read < line_length) {
 		gchar byte = src[bytes_read];
 		++bytes_read;
-	
+
 		if (byte == -128) {
 			continue;
 		} else if (byte > -1) {
 			gint count = byte + 1;
-		
+
 			/* copy next count bytes */
 			for (k = 0; k < count; ++k) {
 				*dest = src[bytes_read];
@@ -251,10 +251,10 @@ decompress_line(const guchar* src, guint line_length, guchar* dest)
 			}
 		} else {
 			gint count = -byte + 1;
-		
+
 			/* copy next byte count times */
 			guchar next_byte = src[bytes_read];
-			++bytes_read; 
+			++bytes_read;
 			for (k = 0; k < count; ++k) {
 				*dest = next_byte;
 				++dest;
@@ -320,7 +320,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 					ctx->depth = hd.depth;
 					ctx->depth_bytes = (ctx->depth/8 > 0 ? ctx->depth/8 : 1);
 					ctx->color_mode = static_cast<PsdColorMode>(hd.color_mode);
-					
+
 					if (ctx->color_mode != PSD_MODE_RGB
 					    && ctx->color_mode != PSD_MODE_GRAYSCALE
 					    && ctx->color_mode != PSD_MODE_CMYK
@@ -330,7 +330,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 						free_context(ctx);
 						return FALSE;
 					}
-					
+
 					if (ctx->depth != 8 && ctx->depth != 16) {
 						log_printf("warning: psd - Unsupported color depth\n");
 						free_context(ctx);
@@ -341,11 +341,11 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 					   row in RLE compressed format. 2*width should be enough */
 					g_free(ctx->buffer);
 					ctx->buffer = static_cast<guchar *>(g_malloc(ctx->width * 2 * ctx->depth_bytes));
-					
+
 					/* this will be needed for RLE decompression */
 					ctx->lines_lengths =
 						static_cast<guint16 *>(g_malloc(2 * ctx->channels * ctx->height));
-					
+
 					ctx->pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB,
 						FALSE, 8, ctx->width, ctx->height);
 
@@ -356,7 +356,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 						free_context(ctx);
 						return FALSE;
 					}
-					
+
 					/* create separate buffers for each channel */
 					ctx->ch_bufs = static_cast<guchar **>(g_malloc(sizeof(guchar*) * ctx->channels));
 					for (i = 0; i < ctx->channels; i++) {
@@ -367,7 +367,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 						log_printf("warning: Insufficient memory to load PSD image file\n");
 						free_context(ctx);
 						return FALSE;
-						}	
+						}
 					}
 
 					ctx->state = PSD_STATE_COLOR_MODE_BLOCK;
@@ -430,7 +430,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 						line_length = ctx->lines_lengths[
 							ctx->curr_ch * ctx->height + ctx->curr_row];
 					}
-					
+
 					if (feed_buffer(ctx->buffer, &ctx->bytes_read, &buf, &size,
 							line_length))
 					{
@@ -442,10 +442,10 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 							memcpy(ctx->ch_bufs[ctx->curr_ch] + ctx->pos,
 								ctx->buffer, line_length);
 						}
-						
+
 						ctx->pos += ctx->width * ctx->depth_bytes;
 						++ctx->curr_row;
-					
+
 						if (ctx->curr_row >= ctx->height) {
 							++ctx->curr_ch;
 							ctx->curr_row = 0;
@@ -454,7 +454,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 								ctx->state = PSD_STATE_DONE;
 							}
 						}
-						
+
 						reset_context_buffer(ctx);
 					}
 				}
@@ -465,7 +465,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 				break;
 		}
 	}
-	
+
 	if (ctx->state == PSD_STATE_DONE && !ctx->finalized) {
 		/* convert or copy channel buffers to our GdkPixbuf */
 		guchar* pixels = gdk_pixbuf_get_pixels(ctx->pixbuf);
@@ -493,7 +493,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 		} else if (ctx->color_mode == PSD_MODE_CMYK) {
 			/* unfortunately, this doesn't work 100% correctly...
 			   CMYK-RGB conversion distorts colors significantly  */
-		
+
 			guchar* pixels = gdk_pixbuf_get_pixels(ctx->pixbuf);
 			for (i = 0; i < ctx->height; i++) {
 				for (j = 0; j < ctx->width; j++) {
@@ -505,7 +505,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 						static_cast<double>(ctx->ch_bufs[2][ctx->width*i + j]) / 255.0;
 					double k = 1.0 -
 						static_cast<double>(ctx->ch_bufs[3][ctx->width*i + j]) / 255.0;
-					
+
 					pixels[3*j+0] = (1.0 - (c * (1.0 - k) + k)) * 255.0;
 					pixels[3*j+1] = (1.0 - (m * (1.0 - k) + k)) * 255.0;
 					pixels[3*j+2] = (1.0 - (y * (1.0 - k) + k)) * 255.0;
@@ -534,7 +534,7 @@ static gpointer image_loader_psd_new(ImageLoaderBackendCbAreaUpdated area_update
 	loader->size_cb = size_cb;
 	loader->area_prepared_cb = area_prepared_cb;
 	loader->data = data;
-	return (gpointer) loader;
+	return loader;
 }
 
 static void image_loader_psd_set_size(gpointer loader, int width, int height)

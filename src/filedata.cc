@@ -3172,8 +3172,8 @@ static GList *notify_func_list = NULL;
 
 static gint file_data_notify_sort(gconstpointer a, gconstpointer b)
 {
-	auto nda = (NotifyData *)a;
-	auto ndb = (NotifyData *)b;
+	auto nda = static_cast<const NotifyData *>(a);
+	auto ndb = static_cast<const NotifyData *>(b);
 
 	if (nda->priority < ndb->priority) return -1;
 	if (nda->priority > ndb->priority) return 1;

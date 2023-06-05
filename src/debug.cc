@@ -49,7 +49,7 @@ static gboolean log_msg_cb(gpointer data)
  * @brief Appends a user information message to the log window queue
  * @param data The message
  * @returns FALSE
- * 
+ *
  * If the first word of the message is either "error" or "warning"
  * (case insensitive) the message is color-coded appropriately
  */
@@ -259,10 +259,10 @@ gchar *get_regexp(void)
 #ifdef HAVE_EXECINFO_H
 /**
  * @brief Backtrace of geeqie files
- * @param file 
- * @param function 
- * @param line 
- * 
+ * @param file
+ * @param function
+ * @param line
+ *
  * Requires command line program addr2line \n
  * Prints the contents of the backtrace buffer for Geeqie files. \n
  * Format printed is: \n
@@ -286,7 +286,7 @@ void log_print_backtrace(const gchar *file, const gchar *function, gint line)
 	gint i;
 	void *bt[1024];
 
-	if (runcmd((gchar *)"which addr2line >/dev/null 2>&1") == 0)
+	if (runcmd(reinterpret_cast<const gchar *>("which addr2line >/dev/null 2>&1")) == 0)
 		{
 		exe_path = g_path_get_dirname(gq_executable_path);
 		bt_size = backtrace(bt, 1024);
@@ -352,10 +352,10 @@ void log_print_backtrace(const gchar *file, const gchar *function, gint line)
 
 /**
  * @brief Print ref. count and image name
- * @param file 
- * @param function 
- * @param line 
- * 
+ * @param file
+ * @param function
+ * @param line
+ *
  * Print image ref. count and full path name of all images in
  * the file_data_pool.
  */

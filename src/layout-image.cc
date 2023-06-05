@@ -909,7 +909,7 @@ static void layout_image_dnd_receive(GtkWidget *widget, GdkDragContext *UNUSED(c
 
 	if (info == TARGET_TEXT_PLAIN)
 		{
-		url = g_strdup((gchar *)gtk_selection_data_get_data(selection_data));
+		url = g_strdup(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)));
 		download_web_file(url, FALSE, lw);
 		g_free(url);
 		}
@@ -927,7 +927,7 @@ static void layout_image_dnd_receive(GtkWidget *widget, GdkDragContext *UNUSED(c
 			}
 		else
 			{
-			source = collection_from_dnd_data((gchar *)gtk_selection_data_get_data(selection_data), &list, &info_list);
+			source = collection_from_dnd_data(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), &list, &info_list);
 			}
 
 		if (list)

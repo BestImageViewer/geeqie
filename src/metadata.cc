@@ -655,7 +655,7 @@ static GList *remove_duplicate_strings_from_list(GList *list)
 
 		if (g_hash_table_lookup(hashtable, key) == NULL)
 			{
-			g_hash_table_insert(hashtable, (gpointer) key, GINT_TO_POINTER(1));
+			g_hash_table_insert(hashtable, key, GINT_TO_POINTER(1));
 			newlist = g_list_prepend(newlist, key);
 			}
 		work = work->next;

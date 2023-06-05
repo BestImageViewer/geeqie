@@ -460,20 +460,20 @@ void osd_template_insert(GHashTable *vars, const gchar *keyword, const gchar *va
 {
 	if (!value)
 		{
-		g_hash_table_insert(vars, (gpointer)(keyword), static_cast<gpointer>(g_strdup("")));
+		g_hash_table_insert(vars, const_cast<gchar *>(keyword), g_strdup(""));
 		return;
 		}
 
 	if (flags & OSDT_NO_DUP)
 		{
-		g_hash_table_insert(vars, (gpointer)(keyword), (gpointer)value);
+		g_hash_table_insert(vars, const_cast<gchar *>(keyword), (gpointer)value);
 		return;
 		}
 	else
 		{
-		g_hash_table_insert(vars, (gpointer)(keyword), g_strdup(value));
+		g_hash_table_insert(vars, const_cast<gchar *>(keyword), g_strdup(value));
 		}
 
-	if (flags & OSDT_FREE) g_free((gpointer) value);
+	if (flags & OSDT_FREE) g_free(const_cast<gchar *>(value));
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -43,8 +43,8 @@ static GtkTargetEntry target_types[] =
 {
 	{const_cast<gchar *>("text/plain"), 0, CLIPBOARD_TEXT_PLAIN},
 	{const_cast<gchar *>("text/uri-list"), 0, CLIPBOARD_TEXT_URI_LIST},
-	{(gchar *)"x-special/gnome-copied-files", 0, CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES},
-	{(gchar *)"UTF8_STRING", 0, CLIPBOARD_UTF8_STRING}
+	{const_cast<gchar *>("x-special/gnome-copied-files"), 0, CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES},
+	{const_cast<gchar *>("UTF8_STRING"), 0, CLIPBOARD_UTF8_STRING},
 };
 static gint target_types_n = 4;
 

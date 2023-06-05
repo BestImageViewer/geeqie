@@ -2334,7 +2334,7 @@ static void collection_table_dnd_receive(GtkWidget *UNUSED(widget), GdkDragConte
 	switch (info)
 		{
 		case TARGET_APP_COLLECTION_MEMBER:
-			source = collection_from_dnd_data((gchar *)gtk_selection_data_get_data(selection_data), &list, &info_list);
+			source = collection_from_dnd_data(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), &list, &info_list);
 			if (source)
 				{
 				if (source == ct->cd)

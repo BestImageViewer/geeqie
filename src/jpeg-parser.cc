@@ -338,7 +338,7 @@ MPOData *jpeg_get_mpo_data(const guchar *data, guint size)
 		mpo = g_new0(MPOData, 1);
 		mpo->mpo_offset = seg_offset;
 
-		tiff_parse_IFD_table(data + seg_offset,  offset , seg_size, bo, &next_offset, mpo_parse_Index_IFD_entry, (gpointer)mpo);
+		tiff_parse_IFD_table(data + seg_offset,  offset , seg_size, bo, &next_offset, mpo_parse_Index_IFD_entry, mpo);
 		if (!mpo->images) mpo->num_images = 0;
 
 
@@ -375,7 +375,7 @@ MPOData *jpeg_get_mpo_data(const guchar *data, guint size)
 					}
 
 				}
-			tiff_parse_IFD_table(data + mpo->images[i].offset + seg_offset,  offset , seg_size, bo, NULL, mpo_parse_Attributes_IFD_entry, (gpointer)&mpo->images[i]);
+			tiff_parse_IFD_table(data + mpo->images[i].offset + seg_offset,  offset , seg_size, bo, NULL, mpo_parse_Attributes_IFD_entry, &mpo->images[i]);
 			}
 
 		return mpo;

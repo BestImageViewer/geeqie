@@ -1128,7 +1128,7 @@ static void add_video_menu(GtkWidget *table, gint column, gint row, const gchar 
 	pref_table_label(table, column, row, text, 0.0);
 
 	combo = gtk_combo_box_text_new();
-	g_list_foreach(eds,video_menu_populate,(gpointer)combo);
+	g_list_foreach(eds,video_menu_populate,combo);
 	current = option ? g_list_index(eds,g_hash_table_lookup(editors,option)): -1;
 
 	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
@@ -3820,7 +3820,7 @@ static void config_tab_toolbar_status(GtkWidget *notebook)
 /* advanced tab */
 static gint extension_sort_cb(gconstpointer a, gconstpointer b)
 {
-	return g_strcmp0((gchar *)a, (gchar *)b);
+	return g_strcmp0(static_cast<const gchar *>(a), static_cast<const gchar *>(b));
 }
 
 static void config_tab_advanced(GtkWidget *notebook)

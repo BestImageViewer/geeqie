@@ -86,7 +86,7 @@ static gpointer image_loader_ft_new(ImageLoaderBackendCbAreaUpdated area_updated
 	video_thumbnailer_set_log_callback(loader->vt, image_loader_ft_log_cb);
 #endif
 
-	return (gpointer) loader;
+	return loader;
 }
 
 static void image_loader_ft_set_size(gpointer loader, int width, int height)

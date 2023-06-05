@@ -552,7 +552,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 			cm->incremental_sync = TRUE;
 			}
 
-		imd->cm = (gpointer)cm;
+		imd->cm = cm;
 		}
 
 	image_update_util(imd);
@@ -685,7 +685,7 @@ void image_set_desaturate(ImageWindow *imd, gboolean desaturate)
 {
 	imd->desaturate = desaturate;
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, (gpointer) imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
 	else
 		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), NULL, NULL, TRUE);
 	pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), imd->orientation);
@@ -700,7 +700,7 @@ void image_set_overunderexposed(ImageWindow *imd, gboolean overunderexposed)
 {
 	imd->overunderexposed = overunderexposed;
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, (gpointer) imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
 	else
 		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), NULL, NULL, TRUE);
 	pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), imd->orientation);
@@ -1459,7 +1459,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 		}
 
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, (gpointer) imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
 
 	image_state_set(imd, IMAGE_STATE_IMAGE);
 }
@@ -1582,7 +1582,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	pixbuf_renderer_move(PIXBUF_RENDERER(imd->pr), PIXBUF_RENDERER(source->pr));
 
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, (gpointer) imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
 	else
 		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), NULL, NULL, TRUE);
 
@@ -1644,7 +1644,7 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	pixbuf_renderer_copy(PIXBUF_RENDERER(imd->pr), PIXBUF_RENDERER(source->pr));
 
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, (gpointer) imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
 	else
 		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), NULL, NULL, TRUE);
 

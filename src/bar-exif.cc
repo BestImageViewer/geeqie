@@ -397,7 +397,7 @@ static void bar_pane_exif_dnd_receive(GtkWidget *pane, GdkDragContext *UNUSED(co
 			break;
 		default:
 			/** @FIXME this needs a check for valid exif keys */
-			new_entry = bar_pane_exif_add_entry(ped, (gchar *)gtk_selection_data_get_data(selection_data), NULL, TRUE, FALSE);
+			new_entry = bar_pane_exif_add_entry(ped, reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), NULL, TRUE, FALSE);
 			break;
 		}
 

@@ -686,7 +686,7 @@ static void bar_pane_keywords_dnd_receive(GtkWidget *tree_view, GdkDragContext *
 			break;
 			}
 		default:
-			new_keywords = string_to_keywords_list((gchar *)gtk_selection_data_get_data(selection_data));
+			new_keywords = string_to_keywords_list(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)));
 			break;
 		}
 

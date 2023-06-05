@@ -121,7 +121,7 @@ static gpointer image_loader_collection_new(ImageLoaderBackendCbAreaUpdated area
 	loader->size_cb = size_cb;
 	loader->area_prepared_cb = area_prepared_cb;
 	loader->data = data;
-	return (gpointer) loader;
+	return loader;
 }
 
 static void image_loader_collection_set_size(gpointer loader, int width, int height)

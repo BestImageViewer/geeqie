@@ -1337,8 +1337,8 @@ static GList *dupe_match_group_trim(GList *list, DupeWindow *dw)
 
 static gint dupe_match_sort_groups_cb(gconstpointer a, gconstpointer b)
 {
-	auto da = (DupeMatch *)a;
-	auto db = (DupeMatch *)b;
+	auto da = static_cast<const DupeMatch *>(a);
+	auto db = static_cast<const DupeMatch *>(b);
 
 	if (da->rank > db->rank) return -1;
 	if (da->rank < db->rank) return 1;
@@ -1366,8 +1366,8 @@ static void dupe_match_sort_groups(GList *list)
 
 static gint dupe_match_totals_sort_cb(gconstpointer a, gconstpointer b)
 {
-	auto da = (DupeItem *)a;
-	auto db = (DupeItem *)b;
+	auto da = static_cast<const DupeItem *>(a);
+	auto db = static_cast<const DupeItem *>(b);
 
 	if (g_list_length(da->group) > g_list_length(db->group)) return -1;
 	if (g_list_length(da->group) < g_list_length(db->group)) return 1;
@@ -1388,8 +1388,8 @@ static gint dupe_match_totals_sort_cb(gconstpointer a, gconstpointer b)
  */
 static gint dupe_match_rank_sort_cb(gconstpointer a, gconstpointer b)
 {
-	auto da = (DupeItem *)a;
-	auto db = (DupeItem *)b;
+	auto da = static_cast<const DupeItem *>(a);
+	auto db = static_cast<const DupeItem *>(b);
 
 	if (da->group_rank > db->group_rank) return -1;
 	if (da->group_rank < db->group_rank) return 1;
@@ -2409,7 +2409,7 @@ static gboolean create_checksums_dimensions(DupeWindow *dw, GList *list)
  */
 static gint sort_func(gconstpointer a, gconstpointer b)
 {
-	return (((DupeSearchMatch *)a)->index - ((DupeSearchMatch *)b)->index);
+	return static_cast<const DupeSearchMatch *>(a)->index - static_cast<const DupeSearchMatch *>(b)->index;
 }
 
 /**
@@ -5003,7 +5003,7 @@ static void dupe_dnd_data_get(GtkWidget *widget, GdkDragContext *context,
 	switch (info)
 		{
 		case TARGET_APP_COLLECTION_MEMBER:
-			collection_from_dnd_data((gchar *)gtk_selection_data_get_data(selection_data), &list, NULL);
+			collection_from_dnd_data(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), &list, NULL);
 			break;
 		case TARGET_URI_LIST:
 			list = uri_filelist_from_gtk_selection_data(selection_data);

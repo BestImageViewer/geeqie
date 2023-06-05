@@ -35,7 +35,7 @@
 
 /**
  * @file
- * 
+ *
  * This thumbnail caching implementation attempts to conform
  * to the Thumbnail Managing Standard proposed on freedesktop.org
  * The standard is documented here: \n
@@ -143,7 +143,7 @@ static gchar *thumb_std_cache_path(const gchar *path, const gchar *uri, gboolean
 
 	if (!path || !uri || !cache_subfolder) return NULL;
 
-	md5_get_digest((guchar *)uri, strlen(uri), digest);
+	md5_get_digest(reinterpret_cast<const guchar *>(uri), strlen(uri), digest);
 	md5_text = md5_digest_to_text(digest);
 
 	if (!md5_text) return NULL;

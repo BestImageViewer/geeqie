@@ -1657,7 +1657,7 @@ static void view_window_get_dnd_data(GtkWidget *UNUSED(widget), GdkDragContext *
 			}
 		else
 			{
-			source = collection_from_dnd_data((gchar *)gtk_selection_data_get_data(selection_data), &list, &info_list);
+			source = collection_from_dnd_data(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), &list, &info_list);
 			}
 
 		if (list)

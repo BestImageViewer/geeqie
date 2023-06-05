@@ -48,9 +48,9 @@
  * ----------------------------------------------------------------
  * Tab completion routines, can be connected to any gtkentry widget
  * using the tab_completion_add_to_entry() function.
- * 
+ *
  * Use remove_trailing_slash() to strip the trailing G_DIR_SEPARATOR.
- * 
+ *
  * ----------------------------------------------------------------
  */
 
@@ -253,7 +253,7 @@ static gboolean tab_completion_popup_key_press(GtkWidget *widget, GdkEventKey *e
 
 			/* Reduce the number of entries in the menu */
 			td->choices = 0;
-			gtk_container_foreach(GTK_CONTAINER(widget), tab_completion_iter_menu_items, (gpointer) td);
+			gtk_container_foreach(GTK_CONTAINER(widget), tab_completion_iter_menu_items, td);
 			if (td->choices > 1) return TRUE; /* multiple choices */
 			if (td->choices > 0) tab_completion_do(td); /* one choice */
 			}

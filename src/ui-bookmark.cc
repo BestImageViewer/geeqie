@@ -782,7 +782,7 @@ static void bookmark_list_destroy(GtkWidget *UNUSED(widget), gpointer data)
 
 	bookmark_widget_list = g_list_remove(bookmark_widget_list, bm);
 
-	g_free((gpointer)bm->key);
+	g_free(const_cast<gchar *>(bm->key));
 	g_free(bm);
 }
 
@@ -851,7 +851,7 @@ void bookmark_list_set_key(GtkWidget *list, const gchar *key)
 
 	if (bm->key && strcmp(bm->key, key) == 0) return;
 
-	g_free((gpointer)bm->key);
+	g_free(const_cast<gchar *>(bm->key));
 	bm->key = g_strdup(key);
 
 	bookmark_populate(bm);

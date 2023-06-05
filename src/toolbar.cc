@@ -261,9 +261,9 @@ static void toolbar_item_free(ToolbarButtonData *tbbd)
 {
 	if (!tbbd) return;
 
-	g_free((gpointer)tbbd->name);
-	g_free((gpointer)tbbd->stock_id);
-	g_free((gpointer)tbbd);
+	g_free(const_cast<gchar *>(tbbd->name));
+	g_free(const_cast<gchar *>(tbbd->stock_id));
+	g_free(const_cast<ToolbarButtonData *>(tbbd));
 }
 
 static void toolbar_button_free(GtkWidget *widget)

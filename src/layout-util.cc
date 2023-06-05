@@ -1278,8 +1278,8 @@ static void layout_menu_foreach_func(
 	else
 		key_name = g_strdup(name);
 
-	g_ptr_array_add(array, (gpointer)menu_name);
-	g_ptr_array_add(array, (gpointer)key_name);
+	g_ptr_array_add(array, menu_name);
+	g_ptr_array_add(array, key_name);
 
 	g_free(name);
 	g_free(path);

@@ -354,7 +354,7 @@ static gboolean advanced_exif_mouseclick(GtkWidget *UNUSED(widget),
 		gtk_tree_model_get_iter(store, &iter, path);
 
 		cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(ew->listview));
-		col_num = g_list_index(cols, (gpointer)column);
+		col_num = g_list_index(cols, column);
 		gtk_tree_model_get(store, &iter, display_order[col_num], &value, -1);
 
 		clipboard = gtk_clipboard_get(GDK_SELECTION_PRIMARY);

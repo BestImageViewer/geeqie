@@ -48,7 +48,7 @@ static gpointer image_loader_svgz_new(ImageLoaderBackendCbAreaUpdated area_updat
 	g_signal_connect(G_OBJECT(loader), "area_updated", G_CALLBACK(area_updated_cb), data);
 	g_signal_connect(G_OBJECT(loader), "size_prepared", G_CALLBACK(size_cb), data);
 	g_signal_connect(G_OBJECT(loader), "area_prepared", G_CALLBACK(area_prepared_cb), data);
-	return (gpointer) loader;
+	return loader;
 }
 
 static void image_loader_svgz_abort(gpointer UNUSED(loader))

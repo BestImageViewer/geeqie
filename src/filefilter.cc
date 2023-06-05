@@ -358,8 +358,8 @@ GList *filter_to_list(const gchar *extensions)
 
 static gint filter_sort_ext_len_cb(gconstpointer a, gconstpointer b)
 {
-	auto sa = (gchar *)a;
-	auto sb = (gchar *)b;
+	auto sa = static_cast<const gchar *>(a);
+	auto sb = static_cast<const gchar *>(b);
 
 	gint len_a = strlen(sa);
 	gint len_b = strlen(sb);
