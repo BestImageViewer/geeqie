@@ -117,7 +117,7 @@ static unsigned int ZDDecodeVariableLengthUnsigned(const ZoneDetect *library, ui
         uint8_t *const bufferEnd = library->mapping + library->length - 1;
 
         unsigned int shift = 0;
-        while(1) {
+        while(true) {
             value |= (((static_cast<uint64_t>(buffer[i])) & UINT8_C(0x7F)) << shift);
             shift += 7u;
 
@@ -547,7 +547,7 @@ static int32_t* ZDPolygonToListInternal(const ZoneDetect *library, uint32_t poly
         goto fail;
     }
 
-    while(1) {
+    while(true) {
         int32_t pointLat, pointLon;
         int result = ZDReaderGetPoint(&reader, &pointLat, &pointLon);
         if(result < 0) {
@@ -641,7 +641,7 @@ static ZDLookupResult ZDPointInPolygon(const ZoneDetect *library, uint32_t polyg
     struct Reader reader;
     ZDReaderInit(&reader, library, polygonIndex);
 
-    while(1) {
+    while(true) {
         int result = ZDReaderGetPoint(&reader, &pointLat, &pointLon);
         if(result < 0) {
             return ZD_LOOKUP_PARSE_ERROR;
