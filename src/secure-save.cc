@@ -188,14 +188,14 @@ secure_open_umask(const gchar *file_name)
 
 free_file_name:
 	g_free(ssi->file_name);
-	ssi->file_name = NULL;
+	ssi->file_name = nullptr;
 
 free_f:
 	g_free(ssi);
-	ssi = NULL;
+	ssi = nullptr;
 
 end:
-	return NULL;
+	return nullptr;
 }
 
 SecureSaveInfo *

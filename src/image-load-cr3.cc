@@ -65,7 +65,7 @@ explode_gray_into_buf (struct jpeg_decompress_struct *cinfo,
 	gint i, j;
 	guint w;
 
-	g_return_if_fail (cinfo != NULL);
+	g_return_if_fail (cinfo != nullptr);
 	g_return_if_fail (cinfo->output_components == 1);
 	g_return_if_fail (cinfo->out_color_space == JCS_GRAYSCALE);
 
@@ -96,7 +96,7 @@ convert_cmyk_to_rgb (struct jpeg_decompress_struct *cinfo,
 	gint i;
 	guint j;
 
-	g_return_if_fail (cinfo != NULL);
+	g_return_if_fail (cinfo != nullptr);
 	g_return_if_fail (cinfo->output_components == 4);
 	g_return_if_fail (cinfo->out_color_space == JCS_CMYK);
 
@@ -152,7 +152,7 @@ fatal_error_handler (j_common_ptr cinfo)
         /* broken check for *error == NULL for robustness against
          * crappy JPEG library
          */
-        if (errmgr->error && *errmgr->error == NULL) {
+        if (errmgr->error && *errmgr->error == nullptr) {
                 g_set_error (errmgr->error,
                              GDK_PIXBUF_ERROR,
                              cinfo->err->msg_code == JERR_OUT_OF_MEMORY
@@ -233,7 +233,7 @@ static void set_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 {
 	struct jpeg_source_mgr* src;
 
-	if (cinfo->src == NULL)
+	if (cinfo->src == nullptr)
 		{   /* first time for this JPEG object? */
 		cinfo->src = static_cast<struct jpeg_source_mgr *>((*cinfo->mem->alloc_small) (
 					reinterpret_cast<j_common_ptr>(cinfo), JPOOL_PERMANENT,
@@ -258,7 +258,7 @@ static gboolean image_loader_cr3_load (gpointer loader, const guchar *buf, gsize
 	struct jpeg_decompress_struct cinfo2;
 	guchar *dptr, *dptr2;
 	guint rowstride;
-	guchar *stereo_buf2 = NULL;
+	guchar *stereo_buf2 = nullptr;
 	guint stereo_length = 0;
 
 	struct error_handler_data jerr;
@@ -484,7 +484,7 @@ static gchar* image_loader_cr3_get_format_name(gpointer UNUSED(loader))
 }
 static gchar** image_loader_cr3_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"image/x-canon-cr3", NULL};
+	static const gchar *mime[] = {"image/x-canon-cr3", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
@@ -512,7 +512,7 @@ void image_loader_backend_set_cr3(ImageLoaderBackend *funcs)
 	funcs->loader_new = image_loader_cr3_new;
 	funcs->set_size = image_loader_cr3_set_size;
 	funcs->load = image_loader_cr3_load;
-	funcs->write = NULL;
+	funcs->write = nullptr;
 	funcs->get_pixbuf = image_loader_cr3_get_pixbuf;
 	funcs->close = image_loader_cr3_close;
 	funcs->abort = image_loader_cr3_abort;

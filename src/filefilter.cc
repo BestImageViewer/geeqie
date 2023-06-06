@@ -32,14 +32,14 @@
  *-----------------------------------------------------------------------------
  */
 
-static GList *filter_list = NULL;
-static GList *extension_list = NULL;
-static GList *sidecar_ext_list = NULL;
+static GList *filter_list = nullptr;
+static GList *extension_list = nullptr;
+static GList *sidecar_ext_list = nullptr;
 
 static GList *file_class_extension_list[FILE_FORMAT_CLASSES];
 
-static GList *file_writable_list = NULL; /* writable files */
-static GList *file_sidecar_list = NULL; /* files with allowed sidecar */
+static GList *file_writable_list = nullptr; /* writable files */
+static GList *file_sidecar_list = nullptr; /* files with allowed sidecar */
 
 
 static FilterEntry *filter_entry_new(const gchar *key, const gchar *description,
@@ -87,7 +87,7 @@ static FilterEntry *filter_get_by_key(const gchar *key)
 {
 	GList *work;
 
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	work = filter_list;
 	while (work)
@@ -98,12 +98,12 @@ static FilterEntry *filter_get_by_key(const gchar *key)
 		if (strcmp(fe->key, key) == 0) return fe;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 static gboolean filter_key_exists(const gchar *key)
 {
-	return (filter_get_by_key(key) != NULL);
+	return (filter_get_by_key(key) != nullptr);
 }
 
 void filter_add(const gchar *key, const gchar *description, const gchar *extensions, FileFormatClass file_class, gboolean writable, gboolean allow_sidecar, gboolean enabled)
@@ -171,7 +171,7 @@ void filter_reset(void)
 		}
 
 	g_list_free(filter_list);
-	filter_list = NULL;
+	filter_list = nullptr;
 }
 
 void filter_add_defaults(void)
@@ -211,7 +211,7 @@ void filter_add_defaults(void)
 		gchar *name;
 		gchar *desc;
 		gchar **extensions;
-		GString *filter = NULL;
+		GString *filter = nullptr;
 		guint i;
 
 		format = static_cast<GdkPixbufFormat *>(work->data);
@@ -313,10 +313,10 @@ void filter_add_defaults(void)
 
 GList *filter_to_list(const gchar *extensions)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 	const gchar *p;
 
-	if (!extensions) return NULL;
+	if (!extensions) return nullptr;
 
 	p = extensions;
 	while (*p != '\0')
@@ -376,18 +376,18 @@ void filter_rebuild(void)
 	guint i;
 
 	string_list_free(extension_list);
-	extension_list = NULL;
+	extension_list = nullptr;
 
 	string_list_free(file_writable_list);
-	file_writable_list = NULL;
+	file_writable_list = nullptr;
 
 	string_list_free(file_sidecar_list);
-	file_sidecar_list = NULL;
+	file_sidecar_list = nullptr;
 
 	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
 		{
 		string_list_free(file_class_extension_list[i]);
-		file_class_extension_list[i] = NULL;
+		file_class_extension_list[i] = nullptr;
 		}
 
 	work = filter_list;
@@ -456,7 +456,7 @@ static const gchar *filter_name_find(GList *filter, const gchar *name)
 		work = work->next;
 		}
 
-	return NULL;
+	return nullptr;
 }
 const gchar *registered_extension_from_path(const gchar *name)
 {
@@ -556,7 +556,7 @@ void filter_load_file_type(const gchar **attribute_names, const gchar **attribut
 		{
 		old_fe = filter_get_by_key(fe.key);
 
-		if (old_fe != NULL) filter_remove_entry(old_fe);
+		if (old_fe != nullptr) filter_remove_entry(old_fe);
 		filter_add(fe.key, fe.description, fe.extensions, fe.file_class, fe.writable, fe.allow_sidecar, fe.enabled);
 		}
 	g_free(fe.key);
@@ -588,13 +588,13 @@ static void sidecar_ext_free_list(void)
 		g_free(ext);
 		}
 	g_list_free(sidecar_ext_list);
-	sidecar_ext_list = NULL;
+	sidecar_ext_list = nullptr;
 }
 
 void sidecar_ext_parse(const gchar *text)
 {
 	sidecar_ext_free_list();
-	if (text == NULL) return;
+	if (text == nullptr) return;
 
 	sidecar_ext_list = filter_to_list(text);
 }

@@ -62,8 +62,8 @@ static void shortcuts_bookmark_select(const gchar *path, gpointer data)
 static void shortcuts_add_close(ShortcutsData *scd)
 {
 	if (scd->dialog) file_dialog_close(scd->dialog);
-	scd->dialog_name_entry = NULL;
-	scd->dialog = NULL;
+	scd->dialog_name_entry = nullptr;
+	scd->dialog = nullptr;
 }
 
 static void shortcuts_add_ok_cb(FileDialog *fd, gpointer data)
@@ -107,11 +107,11 @@ static void shortcuts_add_cb(GtkWidget *button, gpointer data)
 	scd->dialog = file_util_file_dlg(title,
 					"add_shortcuts", button,
 					shortcuts_add_cancel_cb, scd);
-	file_dialog_add_button(scd->dialog, GTK_STOCK_OK, NULL, shortcuts_add_ok_cb, TRUE);
+	file_dialog_add_button(scd->dialog, GTK_STOCK_OK, nullptr, shortcuts_add_ok_cb, TRUE);
 
-	generic_dialog_add_message(GENERIC_DIALOG(scd->dialog), NULL, title, NULL, FALSE);
+	generic_dialog_add_message(GENERIC_DIALOG(scd->dialog), nullptr, title, nullptr, FALSE);
 
-	file_dialog_add_path_widgets(scd->dialog, NULL, NULL, "add_shortcuts", NULL, NULL);
+	file_dialog_add_path_widgets(scd->dialog, nullptr, nullptr, "add_shortcuts", nullptr, nullptr);
 
 	hbox = pref_box_new(GENERIC_DIALOG(scd->dialog)->vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 
@@ -139,7 +139,7 @@ static GtkWidget *shortcuts_new(LayoutWindow *lw)
 	ShortcutsData *scd;
 	GtkWidget *tbar;
 
-	if (!lw) return NULL;
+	if (!lw) return nullptr;
 
 	scd = g_new0(ShortcutsData, 1);
 
@@ -156,7 +156,7 @@ static GtkWidget *shortcuts_new(LayoutWindow *lw)
 
 	tbar = pref_toolbar_new(scd->vbox, GTK_TOOLBAR_ICONS);
 
-	scd->add_button = pref_toolbar_button(tbar, GTK_STOCK_ADD, NULL, FALSE,
+	scd->add_button = pref_toolbar_button(tbar, GTK_STOCK_ADD, nullptr, FALSE,
 					_("Add Shortcut"),
 					G_CALLBACK(shortcuts_add_cb), scd);
 
@@ -175,7 +175,7 @@ GtkWidget *shortcuts_new_from_config(LayoutWindow *lw, const gchar **UNUSED(attr
 
 GtkWidget *shortcuts_new_default(LayoutWindow *lw)
 {
-	return shortcuts_new_from_config(lw, NULL, NULL);
+	return shortcuts_new_from_config(lw, nullptr, nullptr);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

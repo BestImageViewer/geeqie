@@ -38,7 +38,7 @@ static void update_recent_viewed_folder_image_list(const gchar *path);
  *-----------------------------------------------------------------------------
  */
 
-static GList *history_chain = NULL;
+static GList *history_chain = nullptr;
 static guint chain_index = G_MAXUINT;
 static gboolean nav_button = FALSE; /** Used to prevent the nav buttons making entries to the chain **/
 
@@ -112,7 +112,7 @@ void history_chain_append_end(const gchar *path)
  * 
  *-----------------------------------------------------------------------------
  */
-static GList *image_chain = NULL;
+static GList *image_chain = nullptr;
 static guint image_chain_index = G_MAXUINT;
 static gboolean image_nav_button = FALSE; /** Used to prevent the nav buttons making entries to the chain **/
 const gchar *image_chain_back()
@@ -191,7 +191,7 @@ struct _HistoryData
 	GList *list;
 };
 
-static GList *history_list = NULL;
+static GList *history_list = nullptr;
 
 
 static gchar *quoted_from_text(const gchar *text)
@@ -200,7 +200,7 @@ static gchar *quoted_from_text(const gchar *text)
 	gint c = 0;
 	gint l = strlen(text);
 
-	if (l == 0) return NULL;
+	if (l == 0) return nullptr;
 
 	while (c < l && text[c] !='"') c++;
 	if (text[c] == '"')
@@ -218,13 +218,13 @@ static gchar *quoted_from_text(const gchar *text)
 				}
 			}
 		}
-	return NULL;
+	return nullptr;
 }
 
 gboolean history_list_load(const gchar *path)
 {
 	FILE *f;
-	gchar *key = NULL;
+	gchar *key = nullptr;
 	gchar s_buf[1024];
 	gchar *pathl;
 
@@ -352,7 +352,7 @@ static HistoryData *history_list_find_by_key(const gchar *key)
 {
 	GList *work = history_list;
 
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	while (work)
 		{
@@ -360,7 +360,7 @@ static HistoryData *history_list_find_by_key(const gchar *key)
 		if (strcmp(hd->key, key) == 0) return hd;
 		work = work->next;
 		}
-	return NULL;
+	return nullptr;
 }
 
 const gchar *history_list_find_last_path_by_key(const gchar *key)
@@ -368,7 +368,7 @@ const gchar *history_list_find_last_path_by_key(const gchar *key)
 	HistoryData *hd;
 
 	hd = history_list_find_by_key(key);
-	if (!hd || !hd->list) return NULL;
+	if (!hd || !hd->list) return nullptr;
 
 	return static_cast<const gchar *>(hd->list->data);
 }
@@ -395,7 +395,7 @@ void history_list_add_to_key(const gchar *key, const gchar *path, gint max)
 		{
 		hd = g_new(HistoryData, 1);
 		hd->key = g_strdup(key);
-		hd->list = NULL;
+		hd->list = nullptr;
 		history_list = g_list_prepend(history_list, hd);
 		}
 
@@ -425,7 +425,7 @@ void history_list_add_to_key(const gchar *key, const gchar *path, gint max)
 		{
 		gint len = 0;
 		GList *work = hd->list;
-		GList *last = NULL;
+		GList *last = nullptr;
 
 		while (work)
 			{
@@ -516,7 +516,7 @@ void history_list_item_move(const gchar *key, const gchar *path, gint direction)
 
 void history_list_item_remove(const gchar *key, const gchar *path)
 {
-	history_list_item_change(key, path, NULL);
+	history_list_item_change(key, path, nullptr);
 }
 
 GList *history_list_get_by_key(const gchar *key)
@@ -524,7 +524,7 @@ GList *history_list_get_by_key(const gchar *key)
 	HistoryData *hd;
 
 	hd = history_list_find_by_key(key);
-	if (!hd) return NULL;
+	if (!hd) return nullptr;
 
 	return hd->list;
 }
@@ -541,11 +541,11 @@ gchar *get_recent_viewed_folder_image(gchar *path)
 	HistoryData *hd;
 	GList *work;
 	gchar *dirname;
-	gchar *ret = NULL;
+	gchar *ret = nullptr;
 
 	if (options->recent_folder_image_list_maxsize == 0)
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	hd = history_list_find_by_key("image_list");
@@ -554,7 +554,7 @@ gchar *get_recent_viewed_folder_image(gchar *path)
 		{
 		hd = g_new(HistoryData, 1);
 		hd->key = g_strdup("image_list");
-		hd->list = NULL;
+		hd->list = nullptr;
 		history_list = g_list_prepend(history_list, hd);
 		}
 
@@ -585,8 +585,8 @@ static void update_recent_viewed_folder_image_list(const gchar *path)
 {
 	HistoryData *hd;
 	GList *work;
-	gchar *image_dir = NULL;
-	gchar *list_dir = NULL;
+	gchar *image_dir = nullptr;
+	gchar *list_dir = nullptr;
 	gboolean found = FALSE;
 
 	if (options->recent_folder_image_list_maxsize == 0)
@@ -600,7 +600,7 @@ static void update_recent_viewed_folder_image_list(const gchar *path)
 		{
 		hd = g_new(HistoryData, 1);
 		hd->key = g_strdup("image_list");
-		hd->list = NULL;
+		hd->list = nullptr;
 		history_list = g_list_prepend(history_list, hd);
 		}
 

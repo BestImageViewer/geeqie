@@ -127,7 +127,7 @@ GtkWidget *spinner_new(const gchar *path, gint interval)
 
 		n = 0;
 		buf = g_strdup_printf("%s%02d.png", pathl, n);
-		while ((pb = gdk_pixbuf_new_from_file(buf, NULL)))
+		while ((pb = gdk_pixbuf_new_from_file(buf, nullptr)))
 			{
 			sp->list = g_list_append(sp->list, pb);
 
@@ -146,7 +146,7 @@ GtkWidget *spinner_new(const gchar *path, gint interval)
 		gint n;
 		gint w, h;
 
-		pb = gdk_pixbuf_new_from_inline(-1, icon_spinner, FALSE, NULL);
+		pb = gdk_pixbuf_new_from_inline(-1, icon_spinner, FALSE, nullptr);
 		w = gdk_pixbuf_get_width(pb);
 		h = gdk_pixbuf_get_height(pb) / SPINNER_FRAMES;
 		for (n = 0; n < SPINNER_FRAMES; n++)

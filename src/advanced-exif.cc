@@ -191,7 +191,7 @@ static void advanced_exif_dnd_get(GtkWidget *listview, GdkDragContext *UNUSED(co
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
 	GtkTreeIter iter;
 
-	if (gtk_tree_selection_get_selected(sel, NULL, &iter))
+	if (gtk_tree_selection_get_selected(sel, nullptr, &iter))
 		{
 		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(listview));
 		gchar *key;
@@ -211,7 +211,7 @@ static void advanced_exif_dnd_begin(GtkWidget *listview, GdkDragContext *context
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
 	GtkTreeIter iter;
 
-	if (gtk_tree_selection_get_selected(sel, NULL, &iter))
+	if (gtk_tree_selection_get_selected(sel, nullptr, &iter))
 		{
 		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(listview));
 		gchar *key;
@@ -255,7 +255,7 @@ static void advanced_exif_add_column(GtkWidget *listview, const gchar *title, gi
 static void advanced_exif_window_get_geometry(ExifWin *ew)
 {
 	GdkWindow *window;
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 
 	layout_valid(&lw);
 
@@ -428,12 +428,12 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	ew = g_new0(ExifWin, 1);
 
-	ew->window = window_new(GTK_WINDOW_TOPLEVEL, "view", NULL, NULL, _("Metadata"));
+	ew->window = window_new(GTK_WINDOW_TOPLEVEL, "view", nullptr, nullptr, _("Metadata"));
 	DEBUG_NAME(ew->window);
 
 	geometry.min_width = 900;
 	geometry.min_height = 600;
-	gtk_window_set_geometry_hints(GTK_WINDOW(ew->window), NULL, &geometry, GDK_HINT_MIN_SIZE);
+	gtk_window_set_geometry_hints(GTK_WINDOW(ew->window), nullptr, &geometry, GDK_HINT_MIN_SIZE);
 
 	gtk_window_set_resizable(GTK_WINDOW(ew->window), TRUE);
 
@@ -473,7 +473,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	sortable = GTK_TREE_SORTABLE(store);
 	for (n = EXIF_ADVCOL_DESCRIPTION; n <= EXIF_ADVCOL_ELEMENTS; n++)
 		gtk_tree_sortable_set_sort_func(sortable, n, advanced_exif_sort_cb,
-				  		GINT_TO_POINTER(n), NULL);
+				  		GINT_TO_POINTER(n), nullptr);
 
 	/* set initial sort order */
     	gtk_tree_sortable_set_sort_column_id(sortable, EXIF_ADVCOL_NAME, GTK_SORT_ASCENDING);
@@ -493,7 +493,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(ew->listview), TRUE);
 	gtk_tree_view_set_search_column(GTK_TREE_VIEW(ew->listview), EXIF_ADVCOL_DESCRIPTION);
-	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(ew->listview), search_function_cb, ew, NULL);
+	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(ew->listview), search_function_cb, ew, nullptr);
 
 	gtk_drag_source_set(ew->listview,
 			   static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
@@ -512,7 +512,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	g_signal_connect(G_OBJECT(ew->listview), "button_release_event",
 			G_CALLBACK(advanced_exif_mouseclick), ew);
 
-	ew->scrolled = gtk_scrolled_window_new(NULL, NULL);
+	ew->scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(ew->scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ew->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);

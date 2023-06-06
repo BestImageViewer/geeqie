@@ -66,7 +66,7 @@ static const gchar *group_keys[] = {
 	"Xmp.dc.rights",
 	"Xmp.dc.description",
 	"Xmp.photoshop.CaptionWriter",
-	NULL};
+	nullptr};
 
 static gboolean metadata_write_queue_idle_cb(gpointer data);
 static gboolean metadata_legacy_write(FileData *fd);
@@ -98,8 +98,8 @@ static void metadata_cache_update(FileData *fd, const gchar *key, const GList *v
 			{
 			/* key found - just replace values */
 			GList *old_values = entry->next;
-			entry->next = NULL;
-			old_values->prev = NULL;
+			entry->next = nullptr;
+			old_values->prev = nullptr;
 			string_list_free(old_values);
 			work->data = g_list_append(entry, string_list_copy(values));
 			DEBUG_1("updated %s %s\n", key, fd->path);
@@ -133,7 +133,7 @@ static const GList *metadata_cache_get(FileData *fd, const gchar *key)
 			}
 		work = work->next;
 		}
-	return NULL;
+	return nullptr;
 	DEBUG_1("not found %s %s\n", key, fd->path);
 }
 
@@ -174,7 +174,7 @@ void metadata_cache_free(FileData *fd)
 		work = work->next;
 		}
 	g_list_free(fd->cached_metadata);
-	fd->cached_metadata = NULL;
+	fd->cached_metadata = nullptr;
 }
 
 
@@ -188,7 +188,7 @@ void metadata_cache_free(FileData *fd)
  *-------------------------------------------------------------------
  */
 
-static GList *metadata_write_queue = NULL;
+static GList *metadata_write_queue = nullptr;
 static guint metadata_write_idle_id = 0; /* event source id */
 
 static void metadata_write_queue_add(FileData *fd)
@@ -209,7 +209,7 @@ static void metadata_write_queue_add(FileData *fd)
 
 	if (options->metadata.confirm_after_timeout)
 		{
-		metadata_write_idle_id = g_timeout_add(options->metadata.confirm_timeout * 1000, metadata_write_queue_idle_cb, NULL);
+		metadata_write_idle_id = g_timeout_add(options->metadata.confirm_timeout * 1000, metadata_write_queue_idle_cb, nullptr);
 		}
 }
 
@@ -217,7 +217,7 @@ static void metadata_write_queue_add(FileData *fd)
 gboolean metadata_write_queue_remove(FileData *fd)
 {
 	g_hash_table_destroy(fd->modified_xmp);
-	fd->modified_xmp = NULL;
+	fd->modified_xmp = nullptr;
 
 	metadata_write_queue = g_list_remove(metadata_write_queue, fd);
 
@@ -266,7 +266,7 @@ void metadata_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(data))
 gboolean metadata_write_queue_confirm(gboolean force_dialog, FileUtilDoneFunc done_func, gpointer done_data)
 {
 	GList *work;
-	GList *to_approve = NULL;
+	GList *to_approve = nullptr;
 
 	work = metadata_write_queue;
 	while (work)
@@ -286,14 +286,14 @@ gboolean metadata_write_queue_confirm(gboolean force_dialog, FileUtilDoneFunc do
 		to_approve = g_list_prepend(to_approve, file_data_ref(fd));
 		}
 
-	file_util_write_metadata(NULL, to_approve, NULL, force_dialog, done_func, done_data);
+	file_util_write_metadata(nullptr, to_approve, nullptr, force_dialog, done_func, done_data);
 
-	return (metadata_write_queue != NULL);
+	return (metadata_write_queue != nullptr);
 }
 
 static gboolean metadata_write_queue_idle_cb(gpointer UNUSED(data))
 {
-	metadata_write_queue_confirm(FALSE, NULL, NULL);
+	metadata_write_queue_confirm(FALSE, nullptr, nullptr);
 	metadata_write_idle_id = 0;
 	return FALSE;
 }
@@ -415,7 +415,7 @@ gboolean metadata_write_list(FileData *fd, const gchar *key, const GList *values
 
 gboolean metadata_write_string(FileData *fd, const gchar *key, const char *value)
 {
-	GList *list = g_list_append(NULL, g_strdup(value));
+	GList *list = g_list_append(nullptr, g_strdup(value));
 	gboolean ret = metadata_write_list(fd, key, list);
 	string_list_free(list);
 	return ret;
@@ -471,8 +471,8 @@ static gboolean metadata_legacy_write(FileData *fd)
 	gboolean have_keywords;
 	gboolean have_comment;
 	const gchar *comment;
-	GList *orig_keywords = NULL;
-	gchar *orig_comment = NULL;
+	GList *orig_keywords = nullptr;
+	gchar *orig_comment = nullptr;
 
 	g_assert(fd->change && fd->change->dest);
 
@@ -482,9 +482,9 @@ static gboolean metadata_legacy_write(FileData *fd)
 
 	metadata_pathl = path_from_utf8(fd->change->dest);
 
-	have_keywords = g_hash_table_lookup_extended(fd->modified_xmp, KEYWORD_KEY, NULL, &keywords);
-	have_comment = g_hash_table_lookup_extended(fd->modified_xmp, COMMENT_KEY, NULL, &comment_l);
-	comment = static_cast<const gchar *>((have_comment && comment_l) ? (static_cast<GList *>(comment_l))->data : NULL);
+	have_keywords = g_hash_table_lookup_extended(fd->modified_xmp, KEYWORD_KEY, nullptr, &keywords);
+	have_comment = g_hash_table_lookup_extended(fd->modified_xmp, COMMENT_KEY, nullptr, &comment_l);
+	comment = static_cast<const gchar *>((have_comment && comment_l) ? (static_cast<GList *>(comment_l))->data : nullptr);
 
 	if (!have_keywords || !have_comment) metadata_file_read(metadata_pathl, &orig_keywords, &orig_comment);
 
@@ -504,8 +504,8 @@ static gboolean metadata_file_read(gchar *path, GList **keywords, gchar **commen
 	FILE *f;
 	gchar s_buf[1024];
 	MetadataKey key = MK_NONE;
-	GList *list = NULL;
-	GString *comment_build = NULL;
+	GList *list = nullptr;
+	GString *comment_build = nullptr;
 
 	f = fopen(path, "r");
 	if (!f) return FALSE;
@@ -647,13 +647,13 @@ static GList *remove_duplicate_strings_from_list(GList *list)
 {
 	GList *work = list;
 	GHashTable *hashtable = g_hash_table_new(g_str_hash, g_str_equal);
-	GList *newlist = NULL;
+	GList *newlist = nullptr;
 
 	while (work)
 		{
 		auto key = static_cast<gchar *>(work->data);
 
-		if (g_hash_table_lookup(hashtable, key) == NULL)
+		if (g_hash_table_lookup(hashtable, key) == nullptr)
 			{
 			g_hash_table_insert(hashtable, key, GINT_TO_POINTER(1));
 			newlist = g_list_prepend(newlist, key);
@@ -670,9 +670,9 @@ static GList *remove_duplicate_strings_from_list(GList *list)
 GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 {
 	ExifData *exif;
-	GList *list = NULL;
+	GList *list = nullptr;
 	const GList *cache_entry;
-	if (!fd) return NULL;
+	if (!fd) return nullptr;
 
 	/* unwritten data override everything */
 	if (fd->modified_xmp && format == METADATA_PLAIN)
@@ -697,7 +697,7 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 	*/
 	if (strcmp(key, KEYWORD_KEY) == 0)
 		{
-		if (metadata_legacy_read(fd, &list, NULL))
+		if (metadata_legacy_read(fd, &list, nullptr))
 			{
 			if (format == METADATA_PLAIN)
 				{
@@ -708,12 +708,12 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 		}
 	else if (strcmp(key, COMMENT_KEY) == 0)
 		{
-		gchar *comment = NULL;
-	        if (metadata_legacy_read(fd, NULL, &comment)) return g_list_append(NULL, comment);
+		gchar *comment = nullptr;
+	        if (metadata_legacy_read(fd, nullptr, &comment)) return g_list_append(nullptr, comment);
 	        }
 	else if (strncmp(key, "file.", 5) == 0)
 		{
-	        return g_list_append(NULL, metadata_file_info(fd, key, format));
+	        return g_list_append(nullptr, metadata_file_info(fd, key, format));
 		}
 #ifdef HAVE_LUA
 	else if (strncmp(key, "lua.", 4) == 0)
@@ -723,7 +723,7 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 #endif
 
 	exif = exif_read_fd(fd); /* this is cached, thus inexpensive */
-	if (!exif) return NULL;
+	if (!exif) return nullptr;
 	list = exif_get_metadata(exif, key, format);
 	exif_free_fd(fd, exif);
 
@@ -741,11 +741,11 @@ gchar *metadata_read_string(FileData *fd, const gchar *key, MetadataFormat forma
 	if (string_list)
 		{
 		auto str = static_cast<gchar *>(string_list->data);
-		string_list->data = NULL;
+		string_list->data = nullptr;
 		string_list_free(string_list);
 		return str;
 		}
-	return NULL;
+	return nullptr;
 }
 
 guint64 metadata_read_int(FileData *fd, const gchar *key, guint64 fallback)
@@ -891,9 +891,9 @@ gboolean metadata_write_GPS_coord(FileData *fd, const gchar *key, gdouble value)
 	if (ok)
 		{
 		/* Avoid locale problems with commas and decimal points in numbers */
-		old_locale = setlocale(LC_ALL, NULL);
+		old_locale = setlocale(LC_ALL, nullptr);
 		saved_locale = strdup(old_locale);
-		if (saved_locale == NULL)
+		if (saved_locale == nullptr)
 			{
 			return FALSE;
 			}
@@ -960,7 +960,7 @@ gchar *find_string_in_list_utf8nocase(GList *list, const gchar *string)
 		}
 
 	g_free(string_casefold);
-	return NULL;
+	return nullptr;
 }
 
 /**
@@ -978,7 +978,7 @@ gchar *find_string_in_list_utf8case(GList *list, const gchar *string)
 		list = list->next;
 		} // while (list)
 
-	return NULL;
+	return nullptr;
 } // gchar *find_string_in_list_utf...
 
 /**
@@ -1007,7 +1007,7 @@ gchar *find_string_in_list(GList *list, const gchar *string)
 
 GList *string_to_keywords_list(const gchar *text)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 	const gchar *ptr = text;
 
 	while (*ptr != '\0')
@@ -1068,7 +1068,7 @@ gboolean meta_data_get_keyword_mark(FileData *fd, gint UNUSED(n), gpointer data)
 gboolean meta_data_set_keyword_mark(FileData *fd, gint UNUSED(n), gboolean value, gpointer data)
 {
 	auto path = static_cast<GList *>(data);
-	GList *keywords = NULL;
+	GList *keywords = nullptr;
 	GtkTreeIter iter;
 
 	if (!keyword_tree_get_iter(GTK_TREE_MODEL(keyword_tree), &iter, path)) return FALSE;
@@ -1115,7 +1115,7 @@ void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter
 			    (i == mark || /* release any previous connection of given mark */
 			     keyword_compare(keyword_tree, &old_kw_iter, kw_iter) == 0)) /* or given keyword */
 				{
-				file_data_register_mark_func(i, NULL, NULL, NULL, NULL);
+				file_data_register_mark_func(i, nullptr, nullptr, nullptr, nullptr);
 				gtk_tree_store_set(GTK_TREE_STORE(keyword_tree), &old_kw_iter, KEYWORD_COLUMN_MARK, "", -1);
 				}
 			}
@@ -1234,7 +1234,7 @@ gboolean keyword_exists(GtkTreeModel *keyword_tree, GtkTreeIter *parent_ptr, Gtk
 		toplevel = TRUE;
 		}
 
-	if (!gtk_tree_model_iter_children(GTK_TREE_MODEL(keyword_tree), &iter, toplevel ? NULL : &parent)) return FALSE;
+	if (!gtk_tree_model_iter_children(GTK_TREE_MODEL(keyword_tree), &iter, toplevel ? nullptr : &parent)) return FALSE;
 
 	casefold = g_utf8_casefold(name, -1);
 	ret = FALSE;
@@ -1314,7 +1314,7 @@ void keyword_move_recursive(GtkTreeStore *keyword_tree, GtkTreeIter *to, GtkTree
 
 GList *keyword_tree_get_path(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr)
 {
-	GList *path = NULL;
+	GList *path = nullptr;
 	GtkTreeIter iter = *iter_ptr;
 
 	while (TRUE)
@@ -1453,7 +1453,7 @@ static gboolean keyword_tree_is_set_casefull(GtkTreeModel *keyword_tree, GtkTree
 gboolean keyword_tree_is_set(GtkTreeModel *keyword_tree, GtkTreeIter *iter, GList *kw_list)
 {
 	gboolean ret;
-	GList *casefold_list = NULL;
+	GList *casefold_list = nullptr;
 	GList *work;
 
 	if (options->metadata.keywords_case_sensitive)
@@ -1507,7 +1507,7 @@ void keyword_tree_set(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr, GList *
 GList *keyword_tree_get(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr)
 {
 	GtkTreeIter iter = *iter_ptr;
-	GList *kw_list = NULL;
+	GList *kw_list = nullptr;
 
 	while (TRUE)
 		{
@@ -1734,14 +1734,14 @@ void keyword_tree_new_default(void)
 
 	if (!keyword_tree) keyword_tree_new();
 
-	i1 = keyword_tree_default_append(keyword_tree, NULL, _("People"), TRUE);
+	i1 = keyword_tree_default_append(keyword_tree, nullptr, _("People"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Family"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Free time"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Children"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Sport"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Culture"), TRUE);
 			keyword_tree_default_append(keyword_tree, &i2, _("Festival"), TRUE);
-	i1 = keyword_tree_default_append(keyword_tree, NULL, _("Nature"), TRUE);
+	i1 = keyword_tree_default_append(keyword_tree, nullptr, _("Nature"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Animal"), TRUE);
 			keyword_tree_default_append(keyword_tree, &i2, _("Bird"), TRUE);
 			keyword_tree_default_append(keyword_tree, &i2, _("Insect"), TRUE);
@@ -1756,16 +1756,16 @@ void keyword_tree_new_default(void)
 			keyword_tree_default_append(keyword_tree, &i2, _("Lake"), TRUE);
 			keyword_tree_default_append(keyword_tree, &i2, _("Sea"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Landscape"), TRUE);
-	i1 = keyword_tree_default_append(keyword_tree, NULL, _("Art"), TRUE);
+	i1 = keyword_tree_default_append(keyword_tree, nullptr, _("Art"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Statue"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Painting"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Historic"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Modern"), TRUE);
-	i1 = keyword_tree_default_append(keyword_tree, NULL, _("City"), TRUE);
+	i1 = keyword_tree_default_append(keyword_tree, nullptr, _("City"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Park"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Street"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Square"), TRUE);
-	i1 = keyword_tree_default_append(keyword_tree, NULL, _("Architecture"), TRUE);
+	i1 = keyword_tree_default_append(keyword_tree, nullptr, _("Architecture"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Buildings"), FALSE);
 			keyword_tree_default_append(keyword_tree, &i2, _("House"), TRUE);
 			keyword_tree_default_append(keyword_tree, &i2, _("Cathedral"), TRUE);
@@ -1775,8 +1775,8 @@ void keyword_tree_new_default(void)
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Interior"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Historic"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Modern"), TRUE);
-	i1 = keyword_tree_default_append(keyword_tree, NULL, _("Places"), FALSE);
-	i1 = keyword_tree_default_append(keyword_tree, NULL, _("Conditions"), FALSE);
+	i1 = keyword_tree_default_append(keyword_tree, nullptr, _("Places"), FALSE);
+	i1 = keyword_tree_default_append(keyword_tree, nullptr, _("Conditions"), FALSE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Night"), TRUE);
 			keyword_tree_default_append(keyword_tree, &i2, _("Lights"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Reflections"), TRUE);
@@ -1787,7 +1787,7 @@ void keyword_tree_new_default(void)
 			keyword_tree_default_append(keyword_tree, &i2, _("Clouds"), TRUE);
 			keyword_tree_default_append(keyword_tree, &i2, _("Snow"), TRUE);
 			keyword_tree_default_append(keyword_tree, &i2, _("Sunny weather"), TRUE);
-	i1 = keyword_tree_default_append(keyword_tree, NULL, _("Photo"), FALSE);
+	i1 = keyword_tree_default_append(keyword_tree, nullptr, _("Photo"), FALSE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Edited"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Detail"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Macro"), TRUE);
@@ -1878,9 +1878,9 @@ void keyword_tree_disconnect_marks()
 
 GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *parent, const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *name = NULL;
+	gchar *name = nullptr;
 	gboolean is_kw = TRUE;
-	gchar *mark_str = NULL;
+	gchar *mark_str = nullptr;
 
 	while (*attribute_names)
 		{
@@ -1897,7 +1897,7 @@ GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *pa
 		{
 		GtkTreeIter iter;
 		/* re-use existing keyword if any */
-		if (!keyword_exists(GTK_TREE_MODEL(keyword_tree), parent, NULL, name, FALSE, &iter))
+		if (!keyword_exists(GTK_TREE_MODEL(keyword_tree), parent, nullptr, name, FALSE, &iter))
 			{
 			gtk_tree_store_append(keyword_tree, &iter, parent);
 			}
@@ -1916,7 +1916,7 @@ GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *pa
 		return gtk_tree_iter_copy(&iter);
 		}
 	g_free(name);
-	return NULL;
+	return nullptr;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

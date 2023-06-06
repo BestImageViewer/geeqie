@@ -73,12 +73,12 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	guint total = 0;
 	guint fail = 0;
 	gboolean changed = FALSE;
-	CollectManagerEntry *entry = NULL;
+	CollectManagerEntry *entry = nullptr;
 	guint flush = !!(flags & COLLECTION_LOAD_FLUSH);
 	guint append = !!(flags & COLLECTION_LOAD_APPEND);
 	guint only_geometry = !!(flags & COLLECTION_LOAD_GEOMETRY);
 	gboolean reading_extended_filename = FALSE;
-	GString *extended_filename_buffer = g_string_new(NULL);
+	GString *extended_filename_buffer = g_string_new(nullptr);
 	gchar *buffer2;
 
 	if (!only_geometry)
@@ -93,7 +93,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		if (!append)
 			{
 			collection_list_free(cd->list);
-			cd->list = NULL;
+			cd->list = nullptr;
 			}
 		}
 
@@ -246,13 +246,13 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 
 	if (!flush)
 		{
-		gchar *buf = NULL;
+		gchar *buf = nullptr;
 		while (collect_manager_process_action(entry, &buf))
 			{
 			collection_add_check(cd, file_data_new_group(buf), FALSE, TRUE);
 			changed = TRUE;
 			g_free(buf);
-			buf = NULL;
+			buf = nullptr;
 			}
 		}
 
@@ -336,7 +336,7 @@ static void collection_load_thumb_step(CollectionData *cd)
 		collection_load_stop(cd);
 
 		/* send a NULL CollectInfo to notify end */
-		if (cd->info_updated_func) cd->info_updated_func(cd, NULL, cd->info_updated_data);
+		if (cd->info_updated_func) cd->info_updated_func(cd, nullptr, cd->info_updated_data);
 
 		return;
 		}
@@ -348,7 +348,7 @@ static void collection_load_thumb_step(CollectionData *cd)
 	thumb_loader_set_callbacks(cd->thumb_loader,
 				   collection_load_thumb_done_cb,
 				   collection_load_thumb_error_cb,
-				   NULL,
+				   nullptr,
 				   cd);
 
 	/* start it */
@@ -380,7 +380,7 @@ void collection_load_stop(CollectionData *cd)
 	if (!cd->thumb_loader) return;
 
 	thumb_loader_free(cd->thumb_loader);
-	cd->thumb_loader = NULL;
+	cd->thumb_loader = nullptr;
 }
 
 static gboolean collection_save_private(CollectionData *cd, const gchar *path)
@@ -503,9 +503,9 @@ struct _CollectManagerAction
 };
 
 
-static GList *collection_manager_entry_list = NULL;
-static GList *collection_manager_action_list = NULL;
-static GList *collection_manager_action_tail = NULL;
+static GList *collection_manager_entry_list = nullptr;
+static GList *collection_manager_action_list = nullptr;
+static GList *collection_manager_action_tail = nullptr;
 static guint collection_manager_timer_id = 0; /* event source id */
 
 
@@ -568,8 +568,8 @@ static void collect_manager_entry_free_data(CollectManagerEntry *entry)
 
 static void collect_manager_entry_init_data(CollectManagerEntry *entry)
 {
-	entry->add_list = NULL;
-	entry->oldpath_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, reinterpret_cast<GDestroyNotify>(collect_manager_action_unref));
+	entry->add_list = nullptr;
+	entry->oldpath_hash = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, reinterpret_cast<GDestroyNotify>(collect_manager_action_unref));
 	entry->newpath_hash = g_hash_table_new(g_str_hash, g_str_equal);
 	entry->empty = TRUE;
 
@@ -621,7 +621,7 @@ static CollectManagerEntry *collect_manager_get_entry(const gchar *path)
 			return entry;
 			}
 		}
-	return NULL;
+	return nullptr;
 
 }
 
@@ -632,10 +632,10 @@ static void collect_manager_entry_add_action(CollectManagerEntry *entry, Collect
 
 	entry->empty = FALSE;
 
-	if (action->oldpath == NULL)
+	if (action->oldpath == nullptr)
 		{
 		/* add file */
-		if (action->newpath == NULL)
+		if (action->newpath == nullptr)
 			{
 			return;
 			}
@@ -703,20 +703,20 @@ static gboolean collect_manager_process_action(CollectManagerEntry *entry, gchar
 	gchar *path = *path_ptr;
 	CollectManagerAction *action;
 
-	if (path == NULL)
+	if (path == nullptr)
 		{
 		/* get new files */
 		if (entry->add_list)
 			{
 			action = static_cast<CollectManagerAction *>(entry->add_list->data);
-			g_assert(action->oldpath == NULL);
+			g_assert(action->oldpath == nullptr);
 			entry->add_list = g_list_remove(entry->add_list, action);
 			path = g_strdup(action->newpath);
 			g_hash_table_remove(entry->newpath_hash, path);
 			collect_manager_action_unref(action);
 			}
 		*path_ptr = path;
-		return (path != NULL);
+		return (path != nullptr);
 		}
 
 	action = static_cast<CollectManagerAction *>(g_hash_table_lookup(entry->oldpath_hash, path));
@@ -737,7 +737,7 @@ static void collect_manager_refresh(void)
 	FileData *dir_fd;
 
 	dir_fd = file_data_new_dir(get_collections_dir());
-	filelist_read(dir_fd, &list, NULL);
+	filelist_read(dir_fd, &list, nullptr);
 	file_data_unref(dir_fd);
 
 	work = collection_manager_entry_list;
@@ -762,13 +762,13 @@ static void collect_manager_refresh(void)
 				list = g_list_remove(list, fd);
 				file_data_unref(fd);
 
-				entry = NULL;
+				entry = nullptr;
 				}
 			else
 				{
 				collect_manager_entry_free(entry);
 
-				entry = NULL;
+				entry = nullptr;
 				}
 			}
 		}
@@ -791,7 +791,7 @@ static void collect_manager_process_actions(gint max)
 {
 	if (collection_manager_action_list) DEBUG_1("collection manager processing actions");
 
-	while (collection_manager_action_list != NULL && max > 0)
+	while (collection_manager_action_list != nullptr && max > 0)
 		{
 		CollectManagerAction *action;
 		GList *work;
@@ -817,11 +817,11 @@ static void collect_manager_process_actions(gint max)
 				if (action->type == COLLECTION_MANAGER_ADD)
 					{
 					action->newpath = action->oldpath;
-					action->oldpath = NULL;
+					action->oldpath = nullptr;
 					}
 				else if (action->type == COLLECTION_MANAGER_REMOVE)
 					{
-					action->newpath = NULL;
+					action->newpath = nullptr;
 					}
 				collect_manager_entry_add_action(entry, action);
 				}
@@ -839,7 +839,7 @@ static void collect_manager_process_actions(gint max)
 
 		if (collection_manager_action_tail == collection_manager_action_list)
 			{
-			collection_manager_action_tail = NULL;
+			collection_manager_action_tail = nullptr;
 			}
 		collection_manager_action_list = g_list_remove(collection_manager_action_list, action);
 		collect_manager_action_unref(action);
@@ -895,7 +895,7 @@ static gboolean collect_manager_timer_cb(gpointer UNUSED(data))
 {
 	DEBUG_1("collection manager timer expired");
 
-	g_idle_add_full(G_PRIORITY_LOW, collect_manager_process_cb, NULL, NULL);
+	g_idle_add_full(G_PRIORITY_LOW, collect_manager_process_cb, nullptr, nullptr);
 
 	collection_manager_timer_id = 0;
 	return FALSE;
@@ -914,7 +914,7 @@ static void collect_manager_timer_push(gint stop)
 	if (!stop)
 		{
 		collection_manager_timer_id = g_timeout_add(COLLECT_MANAGER_FLUSH_DELAY,
-							    collect_manager_timer_cb, NULL);
+							    collect_manager_timer_cb, nullptr);
 		DEBUG_1("collection manager timer started");
 		}
 }
@@ -959,7 +959,7 @@ void collect_manager_add(FileData *fd, const gchar *collection)
 	cw = collection_window_find_by_path(collection);
 	if (cw)
 		{
-		if (collection_list_find_fd(cw->cd->list, fd) == NULL)
+		if (collection_list_find_fd(cw->cd->list, fd) == nullptr)
 			{
 			collection_add(cw->cd, fd, FALSE);
 			}
@@ -993,7 +993,7 @@ void collect_manager_flush(void)
 	collect_manager_timer_push(TRUE);
 
 	DEBUG_1("collection manager flushing");
-	while (collect_manager_process_cb(NULL));
+	while (collect_manager_process_cb(nullptr));
 }
 
 void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(data))
@@ -1038,19 +1038,19 @@ static gint collection_manager_sort_cb(gconstpointer a, gconstpointer b)
 void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 {
 	FileData *dir_fd;
-	GList *list = NULL;
+	GList *list = nullptr;
 	gchar *name;
 	FileData *fd;
 	gchar *filename;
 
-	if (names_exc == NULL && names_inc == NULL && paths == NULL)
+	if (names_exc == nullptr && names_inc == nullptr && paths == nullptr)
 		{
 		return;
 		}
 
 	dir_fd = file_data_new_dir((get_collections_dir()));
 
-	filelist_read(dir_fd, &list, NULL);
+	filelist_read(dir_fd, &list, nullptr);
 
 	while (list)
 		{
@@ -1061,19 +1061,19 @@ void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 			{
 			name = remove_extension_from_path(filename);
 
-			if (names_exc != NULL)
+			if (names_exc != nullptr)
 				{
 				*names_exc = g_list_insert_sorted(*names_exc, g_strdup(name),
 											collection_manager_sort_cb);
 				*names_exc = g_list_first(*names_exc);
 				}
-			if (names_inc != NULL)
+			if (names_inc != nullptr)
 				{
 				*names_inc = g_list_insert_sorted(*names_inc,filename,
 											collection_manager_sort_cb);
 				*names_inc = g_list_first(*names_inc);
 				}
-			if (paths != NULL)
+			if (paths != nullptr)
 				{
 				*paths = g_list_insert_sorted(*paths,fd->path,
 											collection_manager_sort_cb);

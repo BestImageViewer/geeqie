@@ -78,29 +78,29 @@ struct _AltKey
 
 /* this is a list of keys that should be converted, even with the older Exiv2 which does not support it directly */
 static const AltKey alt_keys[] = {
-	{"Xmp.tiff.Orientation",		"Exif.Image.Orientation", 	NULL},
-	{"Xmp.dc.title",			NULL,				"Iptc.Application2.ObjectName"		},
-	{"Xmp.photoshop.Urgency",		NULL,				"Iptc.Application2.Urgency"		},
-	{"Xmp.photoshop.Category",		NULL,				"Iptc.Application2.Category"		},
-	{"Xmp.photoshop.SupplementalCategory",	NULL,				"Iptc.Application2.SuppCategory"	},
-	{"Xmp.dc.subject",			NULL,				"Iptc.Application2.Keywords"		},
-	{"Xmp.iptc.Location",			NULL,				"Iptc.Application2.LocationName"	},
-	{"Xmp.photoshop.Instruction",		NULL,				"Iptc.Application2.SpecialInstructions"	},
-	{"Xmp.photoshop.DateCreated",		NULL,				"Iptc.Application2.DateCreated"		},
-	{"Xmp.dc.creator",			NULL,				"Iptc.Application2.Byline"		},
-	{"Xmp.photoshop.AuthorsPosition",	NULL,				"Iptc.Application2.BylineTitle"		},
-	{"Xmp.photoshop.City",			NULL,				"Iptc.Application2.City"		},
-	{"Xmp.photoshop.State",			NULL,				"Iptc.Application2.ProvinceState"	},
-	{"Xmp.iptc.CountryCode",		NULL,				"Iptc.Application2.CountryCode"		},
-	{"Xmp.photoshop.Country",		NULL,				"Iptc.Application2.CountryName"		},
-	{"Xmp.photoshop.TransmissionReference",	NULL,				"Iptc.Application2.TransmissionReference"},
-	{"Xmp.photoshop.Headline",		NULL,				"Iptc.Application2.Headline"		},
-	{"Xmp.photoshop.Credit",		NULL,				"Iptc.Application2.Credit"		},
-	{"Xmp.photoshop.Source",		NULL,				"Iptc.Application2.Source"		},
-	{"Xmp.dc.rights",			NULL,				"Iptc.Application2.Copyright"		},
-	{"Xmp.dc.description",			NULL,				"Iptc.Application2.Caption"		},
-	{"Xmp.photoshop.CaptionWriter",		NULL,				"Iptc.Application2.Writer"		},
-	{NULL, NULL, NULL}
+	{"Xmp.tiff.Orientation",		"Exif.Image.Orientation", 	nullptr},
+	{"Xmp.dc.title",			nullptr,				"Iptc.Application2.ObjectName"		},
+	{"Xmp.photoshop.Urgency",		nullptr,				"Iptc.Application2.Urgency"		},
+	{"Xmp.photoshop.Category",		nullptr,				"Iptc.Application2.Category"		},
+	{"Xmp.photoshop.SupplementalCategory",	nullptr,				"Iptc.Application2.SuppCategory"	},
+	{"Xmp.dc.subject",			nullptr,				"Iptc.Application2.Keywords"		},
+	{"Xmp.iptc.Location",			nullptr,				"Iptc.Application2.LocationName"	},
+	{"Xmp.photoshop.Instruction",		nullptr,				"Iptc.Application2.SpecialInstructions"	},
+	{"Xmp.photoshop.DateCreated",		nullptr,				"Iptc.Application2.DateCreated"		},
+	{"Xmp.dc.creator",			nullptr,				"Iptc.Application2.Byline"		},
+	{"Xmp.photoshop.AuthorsPosition",	nullptr,				"Iptc.Application2.BylineTitle"		},
+	{"Xmp.photoshop.City",			nullptr,				"Iptc.Application2.City"		},
+	{"Xmp.photoshop.State",			nullptr,				"Iptc.Application2.ProvinceState"	},
+	{"Xmp.iptc.CountryCode",		nullptr,				"Iptc.Application2.CountryCode"		},
+	{"Xmp.photoshop.Country",		nullptr,				"Iptc.Application2.CountryName"		},
+	{"Xmp.photoshop.TransmissionReference",	nullptr,				"Iptc.Application2.TransmissionReference"},
+	{"Xmp.photoshop.Headline",		nullptr,				"Iptc.Application2.Headline"		},
+	{"Xmp.photoshop.Credit",		nullptr,				"Iptc.Application2.Credit"		},
+	{"Xmp.photoshop.Source",		nullptr,				"Iptc.Application2.Source"		},
+	{"Xmp.dc.rights",			nullptr,				"Iptc.Application2.Copyright"		},
+	{"Xmp.dc.description",			nullptr,				"Iptc.Application2.Caption"		},
+	{"Xmp.photoshop.CaptionWriter",		nullptr,				"Iptc.Application2.Writer"		},
+	{nullptr, nullptr, nullptr}
 	};
 
 static void _debug_exception(const char* file,
@@ -108,7 +108,7 @@ static void _debug_exception(const char* file,
                              const char* func,
                              Exiv2::AnyError& e)
 {
-	gchar *str = g_locale_from_utf8(e.what(), -1, NULL, NULL, NULL);
+	gchar *str = g_locale_from_utf8(e.what(), -1, nullptr, nullptr, nullptr);
 	DEBUG_1("%s:%d:%s:Exiv2: %s", file, line, func, str);
 	g_free(str);
 }
@@ -125,14 +125,14 @@ struct _ExifData
 
 	virtual ~_ExifData() = default;
 
-	virtual void writeMetadata(gchar *UNUSED(path) = NULL)
+	virtual void writeMetadata(gchar *UNUSED(path) = nullptr)
 	{
 		g_critical("Unsupported method of writing metadata");
 	}
 
 	virtual ExifData *original()
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	virtual Exiv2::Image *image() = 0;
@@ -175,7 +175,7 @@ protected:
 public:
 	_ExifDataOriginal(Exiv2::Image::AutoPtr image)
 	{
-		cp_data_ = NULL;
+		cp_data_ = nullptr;
 		cp_length_ = 0;
         	image_ = std::move(image);
 		valid_ = TRUE;
@@ -183,7 +183,7 @@ public:
 
 	_ExifDataOriginal(gchar *path)
 	{
-		cp_data_ = NULL;
+		cp_data_ = nullptr;
 		cp_length_ = 0;
 		valid_ = TRUE;
 
@@ -234,7 +234,7 @@ public:
 
 	Exiv2::Image *image() override
 	{
-		if (!valid_) return NULL;
+		if (!valid_) return nullptr;
 		return image_.get();
 	}
 
@@ -276,7 +276,7 @@ public:
 			return static_cast<unsigned char *>(g_memdup(cp_data_, cp_length_));
 #endif
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	std::string image_comment() const override
@@ -310,7 +310,7 @@ public:
 	_ExifDataProcessed(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
 	{
 		imageData_ = std::make_unique<_ExifDataOriginal>(path);
-		sidecarData_ = NULL;
+		sidecarData_ = nullptr;
 #if EXIV2_TEST_VERSION(0,16,0)
 		if (sidecar_path)
 			{
@@ -346,7 +346,7 @@ public:
 		return imageData_.get();
 	}
 
-	void writeMetadata(gchar *path = NULL) override
+	void writeMetadata(gchar *path = nullptr) override
 	{
 		if (!path)
 			{
@@ -471,7 +471,7 @@ ExifData *exif_read(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 
 }
@@ -518,25 +518,25 @@ ExifData *exif_get_original(ExifData *exif)
 ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 {
 	try {
-		Exiv2::Metadatum *item = NULL;
+		Exiv2::Metadatum *item = nullptr;
 		try {
 			Exiv2::ExifKey ekey(key);
 			auto pos = exif->exifData().findKey(ekey);
-			if (pos == exif->exifData().end()) return NULL;
+			if (pos == exif->exifData().end()) return nullptr;
 			item = &*pos;
 		}
 		catch (Exiv2::AnyError& e) {
 			try {
 				Exiv2::IptcKey ekey(key);
 				auto pos = exif->iptcData().findKey(ekey);
-				if (pos == exif->iptcData().end()) return NULL;
+				if (pos == exif->iptcData().end()) return nullptr;
 				item = &*pos;
 			}
 			catch (Exiv2::AnyError& e) {
 #if EXIV2_TEST_VERSION(0,16,0)
 				Exiv2::XmpKey ekey(key);
 				auto pos = exif->xmpData().findKey(ekey);
-				if (pos == exif->xmpData().end()) return NULL;
+				if (pos == exif->xmpData().end()) return nullptr;
 				item = &*pos;
 #endif
 			}
@@ -545,17 +545,17 @@ ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 
 ExifItem *exif_add_item(ExifData *exif, const gchar *key)
 {
 	try {
-		Exiv2::Metadatum *item = NULL;
+		Exiv2::Metadatum *item = nullptr;
 		try {
 			Exiv2::ExifKey ekey(key);
-			exif->exifData().add(ekey, NULL);
+			exif->exifData().add(ekey, nullptr);
 			auto pos = exif->exifData().end(); // a hack, there should be a better way to get the currently added item
 			pos--;
 			item = &*pos;
@@ -563,7 +563,7 @@ ExifItem *exif_add_item(ExifData *exif, const gchar *key)
 		catch (Exiv2::AnyError& e) {
 			try {
 				Exiv2::IptcKey ekey(key);
-				exif->iptcData().add(ekey, NULL);
+				exif->iptcData().add(ekey, nullptr);
 				auto pos = exif->iptcData().end();
 				pos--;
 				item = &*pos;
@@ -571,7 +571,7 @@ ExifItem *exif_add_item(ExifData *exif, const gchar *key)
 			catch (Exiv2::AnyError& e) {
 #if EXIV2_TEST_VERSION(0,16,0)
 				Exiv2::XmpKey ekey(key);
-				exif->xmpData().add(ekey, NULL);
+				exif->xmpData().add(ekey, nullptr);
 				auto pos = exif->xmpData().end();
 				pos--;
 				item = &*pos;
@@ -582,7 +582,7 @@ ExifItem *exif_add_item(ExifData *exif, const gchar *key)
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -615,12 +615,12 @@ ExifItem *exif_get_first_item(ExifData *exif)
 			return (ExifItem *)item;
 			}
 #endif
-		return NULL;
+		return nullptr;
 
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -647,23 +647,23 @@ ExifItem *exif_get_next_item(ExifData *exif)
 			return (ExifItem *)item;
 		}
 #endif
-		return NULL;
+		return nullptr;
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 
 char *exif_item_get_tag_name(ExifItem *item)
 {
 	try {
-		if (!item) return NULL;
+		if (!item) return nullptr;
 		return g_strdup((reinterpret_cast<Exiv2::Metadatum *>(item))->key().c_str());
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -694,7 +694,7 @@ guint exif_item_get_elements(ExifItem *item)
 char *exif_item_get_data(ExifItem *item, guint *data_len)
 {
 	try {
-		if (!item) return 0;
+		if (!item) return nullptr;
 		auto md = reinterpret_cast<Exiv2::Metadatum *>(item);
 		if (data_len) *data_len = md->size();
 		auto data = static_cast<char *>(g_malloc(md->size()));
@@ -704,19 +704,19 @@ char *exif_item_get_data(ExifItem *item, guint *data_len)
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 
 char *exif_item_get_description(ExifItem *item)
 {
 	try {
-		if (!item) return NULL;
+		if (!item) return nullptr;
 		return utf8_validate_or_convert((reinterpret_cast<Exiv2::Metadatum *>(item))->tagLabel().c_str());
 	}
 	catch (std::exception& e) {
 //		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -770,12 +770,12 @@ guint exif_item_get_format_id(ExifItem *item)
 const char *exif_item_get_format_name(ExifItem *item, gboolean UNUSED(brief))
 {
 	try {
-		if (!item) return NULL;
+		if (!item) return nullptr;
 		return (reinterpret_cast<Exiv2::Metadatum *>(item))->typeName();
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -783,7 +783,7 @@ const char *exif_item_get_format_name(ExifItem *item, gboolean UNUSED(brief))
 gchar *exif_item_get_data_as_text(ExifItem *item)
 {
 	try {
-		if (!item) return NULL;
+		if (!item) return nullptr;
 		auto metadatum = reinterpret_cast<Exiv2::Metadatum *>(item);
 #if EXIV2_TEST_VERSION(0,17,0)
 		return utf8_validate_or_convert(metadatum->print().c_str());
@@ -807,14 +807,14 @@ gchar *exif_item_get_data_as_text(ExifItem *item)
 #endif
 	}
 	catch (Exiv2::AnyError& e) {
-		return NULL;
+		return nullptr;
 	}
 }
 
 gchar *exif_item_get_string(ExifItem *item, int idx)
 {
 	try {
-		if (!item) return NULL;
+		if (!item) return nullptr;
 		auto em = reinterpret_cast<Exiv2::Metadatum *>(item);
 #if EXIV2_TEST_VERSION(0,16,0)
 		std::string str = em->toString(idx);
@@ -831,7 +831,7 @@ gchar *exif_item_get_string(ExifItem *item, int idx)
 		return utf8_validate_or_convert(str.c_str());
 	}
 	catch (Exiv2::AnyError& e) {
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -857,8 +857,8 @@ gint exif_item_get_integer(ExifItem *item, gint *value)
 ExifRational *exif_item_get_rational(ExifItem *item, gint *sign, guint n)
 {
 	try {
-		if (!item) return NULL;
-		if (n >= exif_item_get_elements(item)) return NULL;
+		if (!item) return nullptr;
+		if (n >= exif_item_get_elements(item)) return nullptr;
 		Exiv2::Rational v = (reinterpret_cast<Exiv2::Metadatum *>(item))->toRational(n);
 		static ExifRational ret;
 		ret.num = v.first;
@@ -868,7 +868,7 @@ ExifRational *exif_item_get_rational(ExifItem *item, gint *sign, guint n)
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -892,11 +892,11 @@ gchar *exif_get_tag_description_by_key(const gchar *key)
 			}
 			catch (Exiv2::AnyError& e) {
 				debug_exception(e);
-				return NULL;
+				return nullptr;
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 static const AltKey *find_alt_key(const gchar *xmp_key)
@@ -908,7 +908,7 @@ static const AltKey *find_alt_key(const gchar *xmp_key)
 		if (strcmp(xmp_key, alt_keys[i].xmp_key) == 0) return &alt_keys[i];
 		i++;
 		}
-	return NULL;
+	return nullptr;
 }
 
 static gint exif_update_metadata_simple(ExifData *exif, const gchar *key, const GList *values)
@@ -1078,7 +1078,7 @@ static GList *exif_add_value_to_glist(GList *list, Exiv2::Metadatum &item, Metad
 
 static GList *exif_get_metadata_simple(ExifData *exif, const gchar *key, MetadataFormat format)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 	try {
 		try {
 			Exiv2::ExifKey ekey(key);
@@ -1094,7 +1094,7 @@ static GList *exif_get_metadata_simple(ExifData *exif, const gchar *key, Metadat
 				while (pos != exif->iptcData().end())
 					{
 					if (pos->key() == key)
-						list = exif_add_value_to_glist(list, *pos, format, NULL);
+						list = exif_add_value_to_glist(list, *pos, format, nullptr);
 					++pos;
 					}
 
@@ -1104,7 +1104,7 @@ static GList *exif_get_metadata_simple(ExifData *exif, const gchar *key, Metadat
 				Exiv2::XmpKey ekey(key);
 				auto pos = exif->xmpData().findKey(ekey);
 				if (pos != exif->xmpData().end())
-					list = exif_add_value_to_glist(list, *pos, format, NULL);
+					list = exif_add_value_to_glist(list, *pos, format, nullptr);
 #endif
 			}
 		}
@@ -1117,16 +1117,16 @@ static GList *exif_get_metadata_simple(ExifData *exif, const gchar *key, Metadat
 
 GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	if (format == METADATA_FORMATTED)
 		{
 		gchar *text;
 		gint key_valid;
 		text = exif_get_formatted_by_key(exif, key, &key_valid);
-		if (key_valid) return g_list_append(NULL, text);
+		if (key_valid) return g_list_append(nullptr, text);
 		}
 
 	list = exif_get_metadata_simple(exif, key, format);
@@ -1185,15 +1185,15 @@ void exif_set_image_comment(FileData* fd, const gchar* comment)
 
 guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, gint requested_height)
 {
-	if (!exif) return NULL;
+	if (!exif) return nullptr;
 
-	if (!exif->image()) return NULL;
+	if (!exif->image()) return nullptr;
 
 	std::string const path = exif->image()->io().path();
 	/* given image pathname, first do simple (and fast) file extension test */
 	gboolean is_raw = filter_file_class(path.c_str(), FORMAT_CLASS_RAWIMAGE);
 
-	if (!is_raw && requested_width == 0) return NULL;
+	if (!is_raw && requested_width == 0) return nullptr;
 
 	try {
 
@@ -1223,7 +1223,7 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, 
 				// we are not interested in smaller thumbnails in normal image formats - we can use full image instead
 				if (!is_raw)
 					{
-					if (pos->width_ < static_cast<uint32_t>(requested_width) || pos->height_ < static_cast<uint32_t>(requested_height)) return NULL;
+					if (pos->width_ < static_cast<uint32_t>(requested_width) || pos->height_ < static_cast<uint32_t>(requested_height)) return nullptr;
 					}
 				}
 
@@ -1243,11 +1243,11 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, 
 			return p.first;
 #endif
 			}
-		return NULL;
+		return nullptr;
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return NULL;
+		return nullptr;
 	}
 }
 

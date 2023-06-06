@@ -50,7 +50,7 @@ typedef enum {
 	LOGWINDOW_SEARCH_FORWARDS
 } LogWindowSearchDirection;
 
-static LogWindow *logwindow = NULL;
+static LogWindow *logwindow = nullptr;
 
 static void hide_cb(GtkWidget *UNUSED(widget), LogWindow *UNUSED(logwin))
 {
@@ -194,7 +194,7 @@ static void remove_green_bg(LogWindow *logwin)
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text));
 	gtk_text_buffer_get_start_iter(buffer, &start_find);
 
-	while (gtk_text_iter_forward_search(&start_find, text, GTK_TEXT_SEARCH_VISIBLE_ONLY,  &start_match, &end_match, NULL))
+	while (gtk_text_iter_forward_search(&start_find, text, GTK_TEXT_SEARCH_VISIBLE_ONLY,  &start_match, &end_match, nullptr))
 		{
 		list = gtk_text_iter_get_tags(&start_match);
 		while (list)
@@ -231,7 +231,7 @@ static void search_activate_event(GtkEntry *UNUSED(widget), LogWindow *logwin)
 		{
 		gtk_text_buffer_get_start_iter(buffer, &start_find);
 
-		while (gtk_text_iter_forward_search(&start_find, text, GTK_TEXT_SEARCH_VISIBLE_ONLY, &start_match, &end_match, NULL))
+		while (gtk_text_iter_forward_search(&start_find, text, GTK_TEXT_SEARCH_VISIBLE_ONLY, &start_match, &end_match, nullptr))
 			{
 			gtk_text_buffer_apply_tag_by_name(buffer, "gray_bg", &start_match, &end_match);
 			offset = gtk_text_iter_get_offset(&end_match);
@@ -243,7 +243,7 @@ static void search_activate_event(GtkEntry *UNUSED(widget), LogWindow *logwin)
 		cursor_mark = gtk_text_buffer_get_insert(buffer);
 		gtk_text_buffer_get_iter_at_mark(buffer, &cursor_iter, cursor_mark);
 
-		if (gtk_text_iter_forward_search(&cursor_iter, text, GTK_TEXT_SEARCH_VISIBLE_ONLY, &start_match, &end_match, NULL))
+		if (gtk_text_iter_forward_search(&cursor_iter, text, GTK_TEXT_SEARCH_VISIBLE_ONLY, &start_match, &end_match, nullptr))
 			{
 			gtk_text_buffer_apply_tag_by_name(buffer, "gray_bg", &start_match, &end_match);
 			}
@@ -281,7 +281,7 @@ static gboolean search_keypress_event(GtkWidget *UNUSED(widget), GdkEventKey *UN
 
 	if (logwin->highlight_all)
 		{
-		while (gtk_text_iter_forward_search(&start_find, text, GTK_TEXT_SEARCH_VISIBLE_ONLY, &start_match, &end_match, NULL))
+		while (gtk_text_iter_forward_search(&start_find, text, GTK_TEXT_SEARCH_VISIBLE_ONLY, &start_match, &end_match, nullptr))
 			{
 			gtk_text_buffer_apply_tag_by_name(buffer, "gray_bg", &start_match, &end_match);
 			offset = gtk_text_iter_get_offset(&end_match);
@@ -294,11 +294,11 @@ static gboolean search_keypress_event(GtkWidget *UNUSED(widget), GdkEventKey *UN
 
 	if (direction == LOGWINDOW_SEARCH_BACKWARDS)
 		{
-		match_found = gtk_text_iter_backward_search( &cursor_iter, text, GTK_TEXT_SEARCH_VISIBLE_ONLY,  &start_match, &end_match, NULL);
+		match_found = gtk_text_iter_backward_search( &cursor_iter, text, GTK_TEXT_SEARCH_VISIBLE_ONLY,  &start_match, &end_match, nullptr);
 		}
 	else
 		{
-		match_found = gtk_text_iter_forward_search( &cursor_iter, text, GTK_TEXT_SEARCH_VISIBLE_ONLY,  &start_match, &end_match, NULL);
+		match_found = gtk_text_iter_forward_search( &cursor_iter, text, GTK_TEXT_SEARCH_VISIBLE_ONLY,  &start_match, &end_match, nullptr);
 		}
 
 	if (match_found)
@@ -388,18 +388,18 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	GtkWidget *win_vbox;
 	GtkWidget *textbox;
 	GtkWidget *hbox;
-	GtkWidget *label = NULL;
+	GtkWidget *label = nullptr;
 	GtkWidget *search_box;
 	GtkWidget *backwards_button;
 	GtkWidget *forwards_button;
 	GtkWidget *all_button;
 	GtkIconTheme *theme;
 	GdkPixbuf *pixbuf;
-	GtkWidget *image = NULL;
+	GtkWidget *image = nullptr;
 
 	logwin = g_new0(LogWindow, 1);
 
-	window = window_new(GTK_WINDOW_TOPLEVEL, "log", NULL, NULL, _("Log"));
+	window = window_new(GTK_WINDOW_TOPLEVEL, "log", nullptr, nullptr, _("Log"));
 	DEBUG_NAME(window);
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	gtk_container_add(GTK_CONTAINER(window), win_vbox);
@@ -417,7 +417,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 			 G_CALLBACK(hide_cb), logwin);
 	gtk_widget_realize(window);
 
-	scrolledwin = gtk_scrolled_window_new(NULL, NULL);
+	scrolledwin = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledwin),
 				       GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolledwin),
@@ -449,7 +449,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
 	gtk_widget_show(hbox);
-	logwin->debug_level = pref_spin_new_int(hbox, _("Debug level:"), NULL, 0, 4, 1, get_debug_level(), &logwin->debug_value);
+	logwin->debug_level = pref_spin_new_int(hbox, _("Debug level:"), nullptr, 0, 4, 1, get_debug_level(), &logwin->debug_value);
 	g_signal_connect(logwin->debug_level, "value-changed", G_CALLBACK(debug_changed_cb), logwin);
 
 	logwin->pause = gtk_toggle_button_new();
@@ -495,7 +495,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	g_signal_connect(logwin->search_entry_box, "activate", G_CALLBACK(search_activate_event), logwin);
 
 	theme = gtk_icon_theme_get_default();
-	pixbuf = gtk_icon_theme_load_icon(theme, "pan-up-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
+	pixbuf = gtk_icon_theme_load_icon(theme, "pan-up-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
 	image = gtk_image_new_from_pixbuf(pixbuf);
 	backwards_button = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(backwards_button), GTK_WIDGET(image));
@@ -505,7 +505,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	g_signal_connect(backwards_button, "button_release_event", G_CALLBACK(backwards_keypress_event_cb), logwin);
 	g_object_unref(pixbuf);
 
-	pixbuf = gtk_icon_theme_load_icon(theme, "pan-down-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
+	pixbuf = gtk_icon_theme_load_icon(theme, "pan-down-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
 	image = gtk_image_new_from_pixbuf(pixbuf);
 	forwards_button = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(forwards_button), GTK_WIDGET(image));
@@ -515,7 +515,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	g_signal_connect(forwards_button, "button_release_event", G_CALLBACK(forwards_keypress_event_cb), logwin);
 	g_object_unref(pixbuf);
 
-	pixbuf = gtk_icon_theme_load_icon(theme, "edit-select-all-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, NULL);
+	pixbuf = gtk_icon_theme_load_icon(theme, "edit-select-all-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
 	image = gtk_image_new_from_pixbuf(pixbuf);
 	all_button = gtk_toggle_button_new();
 	gtk_button_set_image(GTK_BUTTON(all_button), GTK_WIDGET(image));
@@ -549,7 +549,7 @@ static void log_window_init(LogWindow *logwin)
 {
 	GtkTextBuffer *buffer;
 
-	g_assert(logwin != NULL);
+	g_assert(logwin != nullptr);
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text));
 
@@ -583,7 +583,7 @@ static void log_window_show(LogWindow *logwin)
 	log_window_append("", LOG_NORMAL); // to flush memorized lines
 
 	regexp = g_strdup(get_regexp());
-	if (regexp != NULL)
+	if (regexp != nullptr)
 		{
 		gtk_entry_set_text(GTK_ENTRY(logwin->regexp_box), regexp);
 		g_free(regexp);
@@ -592,7 +592,7 @@ static void log_window_show(LogWindow *logwin)
 
 void log_window_new(LayoutWindow *lw)
 {
-	if (logwindow == NULL)
+	if (logwindow == nullptr)
 		{
 		LogWindow *logwin;
 
@@ -628,9 +628,9 @@ void log_window_append(const gchar *str, LogType type)
 	GtkTextView *text;
 	GtkTextBuffer *buffer;
 	GtkTextIter iter;
-	static GList *memory = NULL;
+	static GList *memory = nullptr;
 
-	if (logwindow == NULL)
+	if (logwindow == nullptr)
 		{
 		if (*str) {
 			auto msg = g_new(LogMsg, 1);

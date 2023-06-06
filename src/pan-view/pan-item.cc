@@ -65,9 +65,9 @@ void pan_item_remove(PanWindow *pw, PanItem *pi)
 {
 	if (!pi) return;
 
-	if (pw->click_pi == pi) pw->click_pi = NULL;
-	if (pw->queue_pi == pi)	pw->queue_pi = NULL;
-	if (pw->search_pi == pi) pw->search_pi = NULL;
+	if (pw->click_pi == pi) pw->click_pi = nullptr;
+	if (pw->queue_pi == pi)	pw->queue_pi = nullptr;
+	if (pw->search_pi == pi) pw->search_pi = nullptr;
 	pw->queue = g_list_remove(pw->queue, pi);
 
 	pw->list = g_list_remove(pw->list, pi);
@@ -356,7 +356,7 @@ static PangoLayout *pan_item_text_layout(PanItem *pi, GtkWidget *widget)
 {
 	PangoLayout *layout;
 
-	layout = gtk_widget_create_pango_layout(widget, NULL);
+	layout = gtk_widget_create_pango_layout(widget, nullptr);
 
 	if (pi->text_attr & PAN_TEXT_ATTR_MARKUP)
 		{
@@ -592,7 +592,7 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			}
 		}
 
-	return (pi->pixbuf == NULL);
+	return (pi->pixbuf == nullptr);
 }
 
 
@@ -683,7 +683,7 @@ gint pan_item_image_draw(PanWindow *UNUSED(pw), PanItem *pi, GdkPixbuf *pixbuf, 
 			}
 		}
 
-	return (pi->pixbuf == NULL);
+	return (pi->pixbuf == nullptr);
 }
 
 
@@ -697,7 +697,7 @@ PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key)
 {
 	GList *work;
 
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	work = g_list_last(pw->list);
 	while (work)
@@ -726,7 +726,7 @@ PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key)
 		work = work->prev;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 /* when ignore_case and partial are TRUE, path should be converted to lower case */
@@ -759,7 +759,7 @@ static GList *pan_item_find_by_path_l(GList *list, GList *search_list,
 						gchar *haystack;
 
 						haystack = g_utf8_strdown(pi->fd->name, -1);
-						match = (strstr(haystack, path) != NULL);
+						match = (strstr(haystack, path) != nullptr);
 						g_free(haystack);
 						}
 					else
@@ -789,10 +789,10 @@ static GList *pan_item_find_by_path_l(GList *list, GList *search_list,
 GList *pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
 			     gboolean ignore_case, gboolean partial)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 
-	if (!path) return NULL;
-	if (partial && path[0] == G_DIR_SEPARATOR) return NULL;
+	if (!path) return nullptr;
+	if (partial && path[0] == G_DIR_SEPARATOR) return nullptr;
 
 	list = pan_item_find_by_path_l(list, pw->list_static, type, path, ignore_case, partial);
 	list = pan_item_find_by_path_l(list, pw->list, type, path, ignore_case, partial);
@@ -803,7 +803,7 @@ GList *pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
 GList *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,
 			   gboolean ignore_case, gboolean partial)
 {
-	if (!fd) return NULL;
+	if (!fd) return nullptr;
 	return pan_item_find_by_path(pw, type, fd->path, ignore_case, partial);
 }
 
@@ -828,7 +828,7 @@ static PanItem *pan_item_find_by_coord_l(GList *list, PanItemType type, gint x, 
 		work = work->next;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
@@ -886,7 +886,7 @@ PanItem *pan_text_alignment_add(PanTextAlignment *ta, const gchar *label, const 
 		}
 	else
 		{
-		item = NULL;
+		item = nullptr;
 		}
 	ta->column1 = g_list_append(ta->column1, item);
 
@@ -899,7 +899,7 @@ PanItem *pan_text_alignment_add(PanTextAlignment *ta, const gchar *label, const 
 		}
 	else
 		{
-		item = NULL;
+		item = nullptr;
 		}
 	ta->column2 = g_list_append(ta->column2, item);
 

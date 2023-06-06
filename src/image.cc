@@ -37,7 +37,7 @@
 
 #include <math.h>
 
-static GList *image_list = NULL;
+static GList *image_list = nullptr;
 
 void image_update_title(ImageWindow *imd);
 static void image_read_ahead_start(ImageWindow *imd);
@@ -333,11 +333,11 @@ static void image_zoom_cb(PixbufRenderer *UNUSED(pr), gdouble UNUSED(zoom), gpoi
 
 void image_update_title(ImageWindow *imd)
 {
-	gchar *title = NULL;
-	gchar *zoom = NULL;
-	gchar *collection = NULL;
+	gchar *title = nullptr;
+	gchar *zoom = nullptr;
+	gchar *collection = nullptr;
 	LayoutWindow *lw;
-	gchar *lw_ident = NULL;
+	gchar *lw_ident = nullptr;
 
 	if (!imd->top_window) return;
 
@@ -405,11 +405,11 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 	ColorMan *cm;
 	ColorManProfileType input_type;
 	ColorManProfileType screen_type;
-	const gchar *input_file = NULL;
-	const gchar *screen_file = NULL;
-	guchar *profile = NULL;
+	const gchar *input_file = nullptr;
+	const gchar *screen_file = nullptr;
+	guchar *profile = nullptr;
 	guint profile_len;
-	guchar *screen_profile = NULL;
+	guchar *screen_profile = nullptr;
 	gint screen_profile_len;
 	ExifData *exif;
 
@@ -429,7 +429,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 		 imd->color_profile_input <  COLOR_PROFILE_FILE)
 		{
 		input_type = static_cast<ColorManProfileType>(imd->color_profile_input);
-		input_file = NULL;
+		input_file = nullptr;
 		}
 	else
 		{
@@ -451,7 +451,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 	else
 		{
 		screen_type = COLOR_PROFILE_SRGB;
-		screen_file = NULL;
+		screen_file = nullptr;
 		}
 
 
@@ -476,7 +476,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 			if (!imd->color_profile_use_image)
 				{
 				g_free(profile);
-				profile = NULL;
+				profile = nullptr;
 				}
 			DEBUG_1("Found embedded color profile");
 			imd->color_profile_from_image = COLOR_PROFILE_MEM;
@@ -522,7 +522,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 			if (imd->color_profile_use_image && imd->color_profile_from_image != COLOR_PROFILE_NONE)
                                {
                                input_type = static_cast<ColorManProfileType>(imd->color_profile_from_image);
-                               input_file = NULL;
+                               input_file = nullptr;
                                }
 			}
 
@@ -532,14 +532,14 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 
 	if (profile)
 		{
-		cm = color_man_new_embedded(run_in_bg ? imd : NULL, NULL,
+		cm = color_man_new_embedded(run_in_bg ? imd : nullptr, nullptr,
 					    profile, profile_len,
 					    screen_type, screen_file, screen_profile, screen_profile_len);
 		g_free(profile);
 		}
 	else
 		{
-		cm = color_man_new(run_in_bg ? imd : NULL, NULL,
+		cm = color_man_new(run_in_bg ? imd : nullptr, nullptr,
 				   input_type, input_file,
 				   screen_type, screen_file, screen_profile, screen_profile_len);
 		}
@@ -560,7 +560,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 	if (screen_profile)
 		{
 		g_free(screen_profile);
-		screen_profile = NULL;
+		screen_profile = nullptr;
 		}
 
 	return !!cm;
@@ -685,9 +685,9 @@ void image_set_desaturate(ImageWindow *imd, gboolean desaturate)
 {
 	imd->desaturate = desaturate;
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 	else
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), NULL, NULL, TRUE);
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, TRUE);
 	pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), imd->orientation);
 }
 
@@ -700,9 +700,9 @@ void image_set_overunderexposed(ImageWindow *imd, gboolean overunderexposed)
 {
 	imd->overunderexposed = overunderexposed;
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 	else
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), NULL, NULL, TRUE);
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, TRUE);
 	pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), imd->orientation);
 }
 
@@ -727,10 +727,10 @@ static void image_read_ahead_cancel(ImageWindow *imd)
 	DEBUG_1("%s read ahead cancelled for :%s", get_exec_time(), imd->read_ahead_fd ? imd->read_ahead_fd->path : "null");
 
 	image_loader_free(imd->read_ahead_il);
-	imd->read_ahead_il = NULL;
+	imd->read_ahead_il = nullptr;
 
 	file_data_unref(imd->read_ahead_fd);
-	imd->read_ahead_fd = NULL;
+	imd->read_ahead_fd = nullptr;
 }
 
 static void image_read_ahead_done_cb(ImageLoader *UNUSED(il), gpointer data)
@@ -751,7 +751,7 @@ static void image_read_ahead_done_cb(ImageLoader *UNUSED(il), gpointer data)
 			}
 		}
 	image_loader_free(imd->read_ahead_il);
-	imd->read_ahead_il = NULL;
+	imd->read_ahead_il = nullptr;
 
 	image_complete_util(imd, TRUE);
 }
@@ -808,12 +808,12 @@ static void image_read_ahead_set(ImageWindow *imd, FileData *fd)
 static void image_cache_release_cb(FileData *fd)
 {
 	g_object_unref(fd->pixbuf);
-	fd->pixbuf = NULL;
+	fd->pixbuf = nullptr;
 }
 
 static FileCacheData *image_get_cache(void)
 {
-	static FileCacheData *cache = NULL;
+	static FileCacheData *cache = nullptr;
 	if (!cache) cache = file_cache_new(image_cache_release_cb, 1);
 	file_cache_set_max_size(cache, static_cast<gulong>(options->image.image_cache_max) * 1048576); /* update from options */
 	return cache;
@@ -929,7 +929,7 @@ static void image_load_done_cb(ImageLoader *UNUSED(il), gpointer data)
 		}
 
 	image_loader_free(imd->il);
-	imd->il = NULL;
+	imd->il = nullptr;
 
 //	image_post_process(imd, TRUE);
 
@@ -960,7 +960,7 @@ static void image_load_set_signals(ImageWindow *imd, gboolean override_old_signa
 	if (override_old_signals)
 		{
 		/* override the old signals */
-		g_signal_handlers_disconnect_matched(G_OBJECT(imd->il), G_SIGNAL_MATCH_DATA, 0, 0, NULL, NULL, imd);
+		g_signal_handlers_disconnect_matched(G_OBJECT(imd->il), G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, imd);
 		}
 
 	g_signal_connect(G_OBJECT(imd->il), "area_ready", (GCallback)image_load_area_cb, imd);
@@ -985,7 +985,7 @@ static gboolean image_read_ahead_check(ImageWindow *imd)
 	if (imd->read_ahead_il)
 		{
 		imd->il = imd->read_ahead_il;
-		imd->read_ahead_il = NULL;
+		imd->read_ahead_il = nullptr;
 
 		image_load_set_signals(imd, TRUE);
 
@@ -1000,7 +1000,7 @@ static gboolean image_read_ahead_check(ImageWindow *imd)
 		image_loader_delay_area_ready(imd->il, FALSE); /* send the delayed area_ready signals */
 
 		file_data_unref(imd->read_ahead_fd);
-		imd->read_ahead_fd = NULL;
+		imd->read_ahead_fd = nullptr;
 		return TRUE;
 		}
 	else if (imd->read_ahead_fd->pixbuf)
@@ -1008,7 +1008,7 @@ static gboolean image_read_ahead_check(ImageWindow *imd)
 		image_change_pixbuf(imd, imd->read_ahead_fd->pixbuf, image_zoom_get(imd), FALSE);
 
 		file_data_unref(imd->read_ahead_fd);
-		imd->read_ahead_fd = NULL;
+		imd->read_ahead_fd = nullptr;
 
 //		image_post_process(imd, FALSE);
 		return TRUE;
@@ -1045,7 +1045,7 @@ static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 
 		pr = PIXBUF_RENDERER(imd->pr);
 		if (pr->pixbuf) g_object_unref(pr->pixbuf);
-		pr->pixbuf = NULL;
+		pr->pixbuf = nullptr;
 		}
 
 	g_object_set(G_OBJECT(imd->pr), "loading", TRUE, NULL);
@@ -1061,7 +1061,7 @@ static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 		g_object_set(G_OBJECT(imd->pr), "loading", FALSE, NULL);
 
 		image_loader_free(imd->il);
-		imd->il = NULL;
+		imd->il = nullptr;
 
 		image_complete_util(imd, FALSE);
 
@@ -1088,10 +1088,10 @@ static void image_reset(ImageWindow *imd)
 	g_object_set(G_OBJECT(imd->pr), "loading", FALSE, NULL);
 
 	image_loader_free(imd->il);
-	imd->il = NULL;
+	imd->il = nullptr;
 
 	color_man_free(static_cast<ColorMan *>(imd->cm));
-	imd->cm = NULL;
+	imd->cm = nullptr;
 
 	imd->delay_alter_type = ALTER_NONE;
 
@@ -1115,7 +1115,7 @@ static void image_change_complete(ImageWindow *imd, gdouble zoom)
 
 	if (!imd->image_fd)
 		{
-		image_change_pixbuf(imd, NULL, zoom, FALSE);
+		image_change_pixbuf(imd, nullptr, zoom, FALSE);
 		}
 	else
 		{
@@ -1201,7 +1201,7 @@ static gboolean image_scroll_cb(GtkWidget *UNUSED(widget), GdkEventScroll *event
 	auto imd = static_cast<ImageWindow *>(data);
 	gboolean in_lw = FALSE;
 	gint i = 0;
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 
 	if (imd->func_scroll && event && event->type == GDK_SCROLL)
 		{
@@ -1265,7 +1265,7 @@ void image_attach_window(ImageWindow *imd, GtkWidget *window,
 
 	lw = layout_find_by_image(imd);
 
-	if (!(options->image.fit_window_to_image && lw && (lw->options.tools_float || lw->options.tools_hidden))) window = NULL;
+	if (!(options->image.fit_window_to_image && lw && (lw->options.tools_float || lw->options.tools_hidden))) window = nullptr;
 
 	pixbuf_renderer_set_parent(reinterpret_cast<PixbufRenderer *>(imd->pr), reinterpret_cast<GtkWindow *>(window));
 
@@ -1341,13 +1341,13 @@ void image_set_focus_in_func(ImageWindow *imd,
 
 const gchar *image_get_path(ImageWindow *imd)
 {
-	if (imd->image_fd == NULL) return NULL;
+	if (imd->image_fd == nullptr) return nullptr;
 	return imd->image_fd->path;
 }
 
 const gchar *image_get_name(ImageWindow *imd)
 {
-	if (imd->image_fd == NULL) return NULL;
+	if (imd->image_fd == nullptr) return nullptr;
 	return imd->image_fd->name;
 }
 
@@ -1378,7 +1378,7 @@ void image_change_fd(ImageWindow *imd, FileData *fd, gdouble zoom)
 {
 	if (imd->image_fd == fd) return;
 
-	image_change_real(imd, fd, NULL, NULL, zoom);
+	image_change_real(imd, fd, nullptr, nullptr, zoom);
 }
 
 gboolean image_get_image_size(ImageWindow *imd, gint *width, gint *height)
@@ -1431,11 +1431,11 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 			}
 		}
 
-	pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), NULL, NULL, FALSE);
+	pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, FALSE);
 	if (imd->cm)
 		{
 		color_man_free(static_cast<ColorMan *>(imd->cm));
-		imd->cm = NULL;
+		imd->cm = nullptr;
 		}
 
 	if (lazy)
@@ -1459,7 +1459,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 		}
 
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 
 	image_state_set(imd, IMAGE_STATE_IMAGE);
 }
@@ -1489,19 +1489,19 @@ CollectionData *image_get_collection(ImageWindow *imd, CollectInfo **info)
 {
 	if (collection_to_number(imd->collection) >= 0)
 		{
-		if (g_list_find(imd->collection->list, imd->collection_info) != NULL)
+		if (g_list_find(imd->collection->list, imd->collection_info) != nullptr)
 			{
 			if (info) *info = imd->collection_info;
 			}
 		else
 			{
-			if (info) *info = NULL;
+			if (info) *info = nullptr;
 			}
 		return imd->collection;
 		}
 
-	if (info) *info = NULL;
-	return NULL;
+	if (info) *info = nullptr;
+	return nullptr;
 }
 
 static void image_loader_sync_read_ahead_data(ImageLoader *il, gpointer old_data, gpointer data)
@@ -1538,7 +1538,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->collection_info = source->collection_info;
 
 	image_loader_free(imd->il);
-	imd->il = NULL;
+	imd->il = nullptr;
 
 	image_set_fd(imd, image_get_fd(source));
 
@@ -1546,7 +1546,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	if (source->il)
 		{
 		imd->il = source->il;
-		source->il = NULL;
+		source->il = nullptr;
 
 		image_loader_sync_data(imd->il, source, imd);
 
@@ -1558,13 +1558,13 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->color_profile_input = source->color_profile_input;
 	imd->color_profile_use_image = source->color_profile_use_image;
 	color_man_free(static_cast<ColorMan *>(imd->cm));
-	imd->cm = NULL;
+	imd->cm = nullptr;
 	if (source->cm)
 		{
 		ColorMan *cm;
 
 		imd->cm = source->cm;
-		source->cm = NULL;
+		source->cm = nullptr;
 
 		cm = static_cast<ColorMan *>(imd->cm);
 		cm->imd = imd;
@@ -1572,7 +1572,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 		}
 
 	file_data_unref(imd->read_ahead_fd);
-	source->read_ahead_fd = NULL;
+	source->read_ahead_fd = nullptr;
 
 	imd->orientation = source->orientation;
 	imd->desaturate = source->desaturate;
@@ -1582,9 +1582,9 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	pixbuf_renderer_move(PIXBUF_RENDERER(imd->pr), PIXBUF_RENDERER(source->pr));
 
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 	else
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), NULL, NULL, TRUE);
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, TRUE);
 
 }
 
@@ -1601,7 +1601,7 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->collection_info = source->collection_info;
 
 	image_loader_free(imd->il);
-	imd->il = NULL;
+	imd->il = nullptr;
 
 	image_set_fd(imd, image_get_fd(source));
 
@@ -1610,13 +1610,13 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->color_profile_input = source->color_profile_input;
 	imd->color_profile_use_image = source->color_profile_use_image;
 	color_man_free(static_cast<ColorMan *>(imd->cm));
-	imd->cm = NULL;
+	imd->cm = nullptr;
 	if (source->cm)
 		{
 		ColorMan *cm;
 
 		imd->cm = source->cm;
-		source->cm = NULL;
+		source->cm = nullptr;
 
 		cm = static_cast<ColorMan *>(imd->cm);
 		cm->imd = imd;
@@ -1625,12 +1625,12 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 
 	image_loader_free(imd->read_ahead_il);
 	imd->read_ahead_il = source->read_ahead_il;
-	source->read_ahead_il = NULL;
+	source->read_ahead_il = nullptr;
 	if (imd->read_ahead_il) image_loader_sync_read_ahead_data(imd->read_ahead_il, source, imd);
 
 	file_data_unref(imd->read_ahead_fd);
 	imd->read_ahead_fd = source->read_ahead_fd;
-	source->read_ahead_fd = NULL;
+	source->read_ahead_fd = nullptr;
 
 	imd->completed = source->completed;
 	imd->state = source->state;
@@ -1644,9 +1644,9 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	pixbuf_renderer_copy(PIXBUF_RENDERER(imd->pr), PIXBUF_RENDERER(source->pr));
 
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != NULL) );
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 	else
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), NULL, NULL, TRUE);
+		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, TRUE);
 
 }
 
@@ -1898,11 +1898,11 @@ void image_background_set_color(ImageWindow *imd, GdkColor *color)
 
 void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscreen)
 {
-	GdkColor *color = NULL;
+	GdkColor *color = nullptr;
 	GdkColor theme_color;
 	GdkRGBA bg_color;
 	GtkStyleContext *style_context;
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 
 	if ((options->image.use_custom_border_color && !fullscreen) ||
 	    (options->image.use_custom_border_color_in_fullscreen && fullscreen))
@@ -1996,7 +1996,7 @@ void image_set_delay_flip(ImageWindow *imd, gboolean delay)
 
 		pr = PIXBUF_RENDERER(imd->pr);
 		if (pr->pixbuf) g_object_unref(pr->pixbuf);
-		pr->pixbuf = NULL;
+		pr->pixbuf = nullptr;
 
 		image_load_pixbuf_ready(imd);
 		}
@@ -2127,7 +2127,7 @@ gboolean selectable_frame_draw_cb(GtkWidget *widget, cairo_t *cr, gpointer UNUSE
 			   gtk_widget_get_state(widget),
 			   gtk_frame_get_shadow_type(GTK_FRAME(widget)),
 			   widget,
-			   NULL,
+			   nullptr,
 			   allocation.x + 3, allocation.y + 3,
 			   allocation.width - 6, allocation.height - 6);
 
@@ -2158,7 +2158,7 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 
 	if (frame)
 		{
-		imd->frame = gtk_frame_new(NULL);
+		imd->frame = gtk_frame_new(nullptr);
 		DEBUG_NAME(imd->frame);
         	g_object_ref(imd->pr);
 		if (imd->has_frame != -1) gtk_container_remove(GTK_CONTAINER(imd->widget), imd->pr);
@@ -2183,7 +2183,7 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 			{
 			gtk_container_remove(GTK_CONTAINER(imd->frame), imd->pr);
 			gtk_widget_destroy(imd->frame);
-			imd->frame = NULL;
+			imd->frame = nullptr;
 			}
         	gtk_box_pack_start(GTK_BOX(imd->widget), imd->pr, TRUE, TRUE, 0);
 

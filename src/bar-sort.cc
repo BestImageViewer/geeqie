@@ -90,7 +90,7 @@ static void bar_sort_collection_list_build(GtkWidget *bookmarks)
 	bookmark_list_set_key(bookmarks, SORT_KEY_COLLECTIONS);
 
 	dir_fd = file_data_new_dir(get_collections_dir());
-	filelist_read(dir_fd, &list, NULL);
+	filelist_read(dir_fd, &list, nullptr);
 	file_data_unref(dir_fd);
 
 	list = filelist_sort_path(list);
@@ -147,7 +147,7 @@ static void bar_sort_mode_sync(SortData *sd, SortModeType mode)
 
 	bar_sort_add_close(sd);
 
-	bar_sort_undo_set(sd, NULL, NULL);
+	bar_sort_undo_set(sd, nullptr, nullptr);
 }
 
 static void bar_sort_mode_cb(GtkWidget *combo, gpointer data)
@@ -174,7 +174,7 @@ static void bar_sort_undo_set(SortData *sd, GList *src_list, const gchar *dest)
 		{
 		/* we should create the undo_dest_list to use it later... */
 		string_list_free(sd->undo_dest_list);
-		sd->undo_dest_list=NULL;
+		sd->undo_dest_list=nullptr;
 
 		GList *work = sd->undo_src_list;
 		while(work)
@@ -212,7 +212,7 @@ static void bar_sort_undo_folder(SortData *sd, GtkWidget *button)
 
 			if (sd->undo_src_list)
 				{
-				GList *work = NULL;
+				GList *work = nullptr;
 
 				src_path = g_strdup(static_cast<const gchar *>(sd->undo_src_list->data));
 				src_dir = remove_level_from_path(src_path);
@@ -234,7 +234,7 @@ static void bar_sort_undo_folder(SortData *sd, GtkWidget *button)
 			if (sd->undo_src_list)
 				{
 				GList *delete_list;
-				GList *work = NULL;
+				GList *work = nullptr;
 
 				delete_list = sd->undo_dest_list;
 				while (delete_list)
@@ -243,7 +243,7 @@ static void bar_sort_undo_folder(SortData *sd, GtkWidget *button)
 					delete_list = delete_list->next;
 					}
 				options->file_ops.safe_delete_enable = TRUE;
-				file_util_delete(NULL, work, button);
+				file_util_delete(nullptr, work, button);
 				}
 			break;
 
@@ -259,7 +259,7 @@ static void bar_sort_undo_folder(SortData *sd, GtkWidget *button)
 		layout_image_set_fd(sd->lw, file_data_new_group(origin));
 		}
 
-	bar_sort_undo_set(sd, NULL, NULL);
+	bar_sort_undo_set(sd, nullptr, nullptr);
 }
 
 static void bar_sort_undo_collection(SortData *sd)
@@ -275,7 +275,7 @@ static void bar_sort_undo_collection(SortData *sd)
 		collect_manager_remove(file_data_new_group(source), sd->undo_collection);
 		}
 
-	bar_sort_undo_set(sd, NULL,  NULL);
+	bar_sort_undo_set(sd, nullptr,  nullptr);
 }
 
 static void bar_sort_undo_cb(GtkWidget *button, gpointer data)
@@ -303,7 +303,7 @@ static void bar_sort_bookmark_select_folder(SortData *sd, FileData *UNUSED(sourc
 	orig_list = layout_selection_list(sd->lw);
 	action_list = orig_list;
 	undo_src_list = orig_list;
-	orig_list = NULL;
+	orig_list = nullptr;
 
 	bar_sort_undo_set(sd, undo_src_list, path);
 
@@ -311,13 +311,13 @@ static void bar_sort_bookmark_select_folder(SortData *sd, FileData *UNUSED(sourc
 		{
 		case BAR_SORT_COPY:
 			file_util_copy_simple(action_list, path, sd->lw->window);
-			action_list = NULL;
+			action_list = nullptr;
 			layout_image_next(sd->lw);
 			break;
 
 		case BAR_SORT_MOVE:
 			file_util_move_simple(action_list, path, sd->lw->window);
-			action_list = NULL;
+			action_list = nullptr;
 			break;
 
 		case BAR_SORT_FILTER:
@@ -332,12 +332,12 @@ static void bar_sort_bookmark_select_folder(SortData *sd, FileData *UNUSED(sourc
 
 static void bar_sort_bookmark_select_collection(SortData *sd, FileData *source, const gchar *path)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 
 	switch (sd->selection)
 		{
 		case BAR_SORT_SELECTION_IMAGE:
-			list = g_list_append(NULL, file_data_ref(source));
+			list = g_list_append(nullptr, file_data_ref(source));
 			break;
 		case BAR_SORT_SELECTION_SELECTED:
 			list = layout_selection_list(sd->lw);
@@ -348,7 +348,7 @@ static void bar_sort_bookmark_select_collection(SortData *sd, FileData *source, 
 
 	if (!list)
 		{
-		bar_sort_undo_set(sd, NULL, NULL);
+		bar_sort_undo_set(sd, nullptr, nullptr);
 		return;
 		}
 
@@ -393,7 +393,7 @@ static void bar_sort_set_action(SortData *sd, SortActionType action, const gchar
 		}
 	else
 		{
-		sd->filter_key = NULL;
+		sd->filter_key = nullptr;
 		}
 }
 
@@ -401,14 +401,14 @@ static void bar_sort_set_copy_cb(GtkWidget *button, gpointer data)
 {
 	auto sd = static_cast<SortData *>(data);
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) return;
-	bar_sort_set_action(sd, BAR_SORT_COPY, NULL);
+	bar_sort_set_action(sd, BAR_SORT_COPY, nullptr);
 }
 
 static void bar_sort_set_move_cb(GtkWidget *button, gpointer data)
 {
 	auto sd = static_cast<SortData *>(data);
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) return;
-	bar_sort_set_action(sd, BAR_SORT_MOVE, NULL);
+	bar_sort_set_action(sd, BAR_SORT_MOVE, nullptr);
 }
 
 static void bar_sort_set_filter_cb(GtkWidget *button, gpointer data)
@@ -431,11 +431,11 @@ static void bar_filter_help_dialog()
 	GenericDialog *gd;
 
 	gd = generic_dialog_new(_("Sort Manager Operations"),
-				"sort_manager_operations", NULL, TRUE, NULL, NULL);
+				"sort_manager_operations", nullptr, TRUE, nullptr, nullptr);
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_INFO,
 				"Sort Manager Operations", _("Additional operations utilising plugins\nmay be included by setting:\n\nX-Geeqie-Filter=true\n\nin the plugin file."), TRUE);
-	generic_dialog_add_button(gd, GTK_STOCK_HELP, NULL, bar_filter_help_cb, TRUE);
-	generic_dialog_add_button(gd, GTK_STOCK_OK, NULL, NULL, TRUE);
+	generic_dialog_add_button(gd, GTK_STOCK_HELP, nullptr, bar_filter_help_cb, TRUE);
+	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr, nullptr, TRUE);
 
 	gtk_widget_show(gd->dialog);
 }
@@ -476,8 +476,8 @@ static void bar_sort_set_selection_selected_cb(GtkWidget *button, gpointer data)
 static void bar_sort_add_close(SortData *sd)
 {
 	if (sd->dialog) file_dialog_close(sd->dialog);
-	sd->dialog_name_entry = NULL;
-	sd->dialog = NULL;
+	sd->dialog_name_entry = nullptr;
+	sd->dialog = nullptr;
 }
 
 static void bar_sort_add_ok_cb(FileDialog *fd, gpointer data)
@@ -514,7 +514,7 @@ static void bar_sort_add_ok_cb(FileDialog *fd, gpointer data)
 		if (isfile(path))
 			{
 			gchar *text = g_strdup_printf(_("The collection:\n%s\nalready exists."), filename);
-			file_util_warning_dialog(_("Collection exists"), text, GTK_STOCK_DIALOG_INFO, NULL);
+			file_util_warning_dialog(_("Collection exists"), text, GTK_STOCK_DIALOG_INFO, nullptr);
 			g_free(text);
 			}
 		else
@@ -574,13 +574,13 @@ static void bar_sort_add_cb(GtkWidget *button, gpointer data)
 	sd->dialog = file_util_file_dlg(title,
 				       "add_bookmark", button,
 				       bar_sort_add_cancel_cb, sd);
-	file_dialog_add_button(sd->dialog, GTK_STOCK_OK, NULL, bar_sort_add_ok_cb, TRUE);
+	file_dialog_add_button(sd->dialog, GTK_STOCK_OK, nullptr, bar_sort_add_ok_cb, TRUE);
 
-	generic_dialog_add_message(GENERIC_DIALOG(sd->dialog), NULL, title, NULL, FALSE);
+	generic_dialog_add_message(GENERIC_DIALOG(sd->dialog), nullptr, title, nullptr, FALSE);
 
 	if (sd->mode == BAR_SORT_MODE_FOLDER)
 		{
-		file_dialog_add_path_widgets(sd->dialog, NULL, NULL, "add_bookmark", NULL, NULL);
+		file_dialog_add_path_widgets(sd->dialog, nullptr, nullptr, "add_bookmark", nullptr, nullptr);
 		}
 
 	hbox = pref_box_new(GENERIC_DIALOG(sd->dialog)->vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
@@ -641,7 +641,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 	gboolean have_filter;
 	GtkWidget *button;
 
-	if (!lw) return NULL;
+	if (!lw) return nullptr;
 
 	sd = g_new0(SortData, 1);
 
@@ -655,9 +655,9 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 		}
 
 	sd->selection = selection;
-	sd->undo_src_list = NULL;
-	sd->undo_dest_list = NULL;
-	sd->undo_collection = NULL;
+	sd->undo_src_list = nullptr;
+	sd->undo_dest_list = nullptr;
+	sd->undo_collection = nullptr;
 
 	sd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	DEBUG_NAME(sd->vbox);
@@ -684,7 +684,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 	DEBUG_NAME(sd->folder_group);
 	gtk_widget_set_tooltip_text(sd->folder_group, _("See the Help file for additional functions"));
 
-	buttongrp = pref_radiobutton_new(sd->folder_group, NULL,
+	buttongrp = pref_radiobutton_new(sd->folder_group, nullptr,
 					 _("Copy"), (sd->action == BAR_SORT_COPY),
 					 G_CALLBACK(bar_sort_set_copy_cb), sd);
 	g_signal_connect(G_OBJECT(buttongrp), "button_press_event", G_CALLBACK(bar_filter_message_cb), NULL);
@@ -729,7 +729,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 
 	sd->collection_group = pref_box_new(sd->vbox, FALSE, GTK_ORIENTATION_VERTICAL, 0);
 
-	buttongrp = pref_radiobutton_new(sd->collection_group, NULL,
+	buttongrp = pref_radiobutton_new(sd->collection_group, nullptr,
 					 _("Add image"), (sd->selection == BAR_SORT_SELECTION_IMAGE),
 					 G_CALLBACK(bar_sort_set_selection_image_cb), sd);
 	pref_radiobutton_new(sd->collection_group, buttongrp,
@@ -744,13 +744,13 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 	tbar = pref_toolbar_new(sd->vbox, GTK_TOOLBAR_ICONS);
 	DEBUG_NAME(tbar);
 
-	sd->add_button = pref_toolbar_button(tbar, GTK_STOCK_ADD, NULL, FALSE,
+	sd->add_button = pref_toolbar_button(tbar, GTK_STOCK_ADD, nullptr, FALSE,
 					     _("Add Bookmark"),
 					     G_CALLBACK(bar_sort_add_cb), sd);
-	sd->undo_button = pref_toolbar_button(tbar, GTK_STOCK_UNDO, NULL, FALSE,
+	sd->undo_button = pref_toolbar_button(tbar, GTK_STOCK_UNDO, nullptr, FALSE,
 					      _("Undo last image"),
 					      G_CALLBACK(bar_sort_undo_cb), sd);
-	sd->help_button = pref_toolbar_button(tbar, GTK_STOCK_HELP, NULL, FALSE,
+	sd->help_button = pref_toolbar_button(tbar, GTK_STOCK_HELP, nullptr, FALSE,
 					      _("Functions additional to Copy and Move"),
 					      G_CALLBACK(bar_sort_help_cb), sd);
 
@@ -789,7 +789,7 @@ void bar_sort_cold_start(LayoutWindow *lw, const gchar **attribute_names, const 
 	gint action = BAR_SORT_COPY;
 	gint mode = BAR_SORT_MODE_FOLDER;
 	gint selection = BAR_SORT_SELECTION_IMAGE;
-	gchar *filter_key = NULL;
+	gchar *filter_key = nullptr;
 
 	while (attribute_names && *attribute_names)
 		{
@@ -816,7 +816,7 @@ void bar_sort_cold_start(LayoutWindow *lw, const gchar **attribute_names, const 
 
 GtkWidget *bar_sort_new_default(LayoutWindow *lw)
 {
-	return bar_sort_new_from_config(lw, NULL, NULL);
+	return bar_sort_new_from_config(lw, nullptr, nullptr);
 }
 
 void bar_sort_write_config(GtkWidget *bar, GString *outstr, gint indent)

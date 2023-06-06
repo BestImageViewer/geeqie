@@ -58,7 +58,7 @@ static gboolean bar_pane_histogram_update_cb(gpointer data);
 static void bar_pane_histogram_update(PaneHistogramData *phd)
 {
 	if (phd->pixbuf) g_object_unref(phd->pixbuf);
-	phd->pixbuf = NULL;
+	phd->pixbuf = nullptr;
 
 	gtk_label_set_text(GTK_LABEL(phd->pane.title), histogram_label(phd->histogram));
 
@@ -71,7 +71,7 @@ static void bar_pane_histogram_update(PaneHistogramData *phd)
 		{
 		if (!phd->idle_id)
 			{
-			phd->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, bar_pane_histogram_update_cb, phd, NULL);
+			phd->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, bar_pane_histogram_update_cb, phd, nullptr);
 			}
 		}
 	else
@@ -90,7 +90,7 @@ static gboolean bar_pane_histogram_update_cb(gpointer data)
 
 	gtk_widget_queue_draw_area(GTK_WIDGET(phd->drawing_area), 0, 0, phd->histogram_width, phd->histogram_height);
 
-	if (phd->fd == NULL) return G_SOURCE_REMOVE;
+	if (phd->fd == nullptr) return G_SOURCE_REMOVE;
 	histmap = histmap_get(phd->fd);
 
 	if (!histmap)
@@ -249,7 +249,7 @@ static gboolean bar_pane_histogram_press_cb(GtkGesture *UNUSED(gesture), gint UN
 	GtkWidget *menu;
 
 	menu = bar_pane_histogram_menu(phd);
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 
 	return TRUE;
 }
@@ -314,7 +314,7 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 
 GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *title = NULL;
+	gchar *title = nullptr;
 	gchar *id = g_strdup("histogram");
 	gboolean expanded = TRUE;
 	gint height = 80;

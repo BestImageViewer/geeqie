@@ -133,7 +133,7 @@ GtkWidget *pref_frame_new(GtkWidget *parent_box, gboolean fill,
 			  GtkOrientation orientation, gboolean padding)
 {
 	GtkWidget *box;
-	GtkWidget *frame = NULL;
+	GtkWidget *frame = nullptr;
 
 	frame = gtk_frame_new(text);
 	gtk_box_pack_start(GTK_BOX(parent_box), frame, fill, fill, 0);
@@ -248,8 +248,8 @@ GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *stock_id,
 		}
 	else
 		{
-		GtkWidget *image = NULL;
-		GtkWidget *label = NULL;
+		GtkWidget *image = nullptr;
+		GtkWidget *label = nullptr;
 
 		button = gtk_button_new();
 
@@ -406,7 +406,7 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 		}
 	else
 		{
-		group = NULL;
+		group = nullptr;
 		}
 
 	if (mnemonic_text)
@@ -566,13 +566,13 @@ void pref_link_sensitivity(GtkWidget *widget, GtkWidget *watch)
 void pref_signal_block_data(GtkWidget *widget, gpointer data)
 {
 	g_signal_handlers_block_matched(widget, G_SIGNAL_MATCH_DATA,
-					0, 0, NULL, NULL, data);
+					0, 0, nullptr, nullptr, data);
 }
 
 void pref_signal_unblock_data(GtkWidget *widget, gpointer data)
 {
 	g_signal_handlers_unblock_matched(widget, G_SIGNAL_MATCH_DATA,
-					  0, 0, NULL, NULL, data);
+					  0, 0, nullptr, nullptr, data);
 }
 
 GtkWidget *pref_table_new(GtkWidget *parent_box, gint columns, gint rows,
@@ -648,7 +648,7 @@ GtkWidget *pref_table_button(GtkWidget *table, gint column, gint row,
 {
 	GtkWidget *button;
 
-	button = pref_button_new(NULL, stock_id, text, hide_stock_text, func, data);
+	button = pref_button_new(nullptr, stock_id, text, hide_stock_text, func, data);
 	gtk_table_attach(GTK_TABLE(table), button, column, column + 1, row, row + 1,
 			 GTK_FILL, static_cast<GtkAttachOptions>(0), 0, 0);
 	gtk_widget_show(button);
@@ -757,7 +757,7 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 			}
 		else
 			{
-			item = GTK_WIDGET(gtk_tool_button_new(NULL, NULL));
+			item = GTK_WIDGET(gtk_tool_button_new(nullptr, nullptr));
 			}
 		}
 	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(item), TRUE);
@@ -839,8 +839,8 @@ static void date_selection_popup_hide(DateSelection *ds)
 	gtk_widget_hide(ds->window);
 
 	gtk_widget_destroy(ds->window);
-	ds->window = NULL;
-	ds->calendar = NULL;
+	ds->window = nullptr;
+	ds->calendar = nullptr;
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), FALSE);
 }
@@ -977,7 +977,7 @@ static void date_selection_popup(DateSelection *ds)
 	gtk_widget_grab_focus(ds->calendar);
 	gdk_pointer_grab(gtk_widget_get_window(ds->window), TRUE,
 			 static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK),
-			 NULL, NULL, GDK_CURRENT_TIME);
+			 nullptr, nullptr, GDK_CURRENT_TIME);
 	gdk_keyboard_grab(gtk_widget_get_window(ds->window), TRUE, GDK_CURRENT_TIME);
 	gtk_grab_add(ds->window);
 
@@ -1053,13 +1053,13 @@ GtkWidget *date_selection_new(void)
 			switch (date_format[i])
 				{
 				case 'd':
-					ds->spin_d = pref_spin_new(ds->box, NULL, NULL, 1, 31, 1, 0, 1, NULL, NULL);
+					ds->spin_d = pref_spin_new(ds->box, nullptr, nullptr, 1, 31, 1, 0, 1, nullptr, nullptr);
 					break;
 				case 'm':
-					ds->spin_m = pref_spin_new(ds->box, NULL, NULL, 1, 12, 1, 0, 1, NULL, NULL);
+					ds->spin_m = pref_spin_new(ds->box, nullptr, nullptr, 1, 12, 1, 0, 1, nullptr, nullptr);
 					break;
 				case 'y': case 'Y':
-					ds->spin_y = pref_spin_new(ds->box, NULL, NULL, 1900, 9999, 1, 0, 1900, NULL, NULL);
+					ds->spin_y = pref_spin_new(ds->box, nullptr, nullptr, 1900, 9999, 1, 0, 1900, nullptr, nullptr);
 					break;
 				default:
 					log_printf("Warning: Date locale %s is unknown", date_format);
@@ -1069,9 +1069,9 @@ GtkWidget *date_selection_new(void)
 		}
 	else
 		{
-		ds->spin_m = pref_spin_new(ds->box, NULL, NULL, 1, 12, 1, 0, 1, NULL, NULL);
-		ds->spin_d = pref_spin_new(ds->box, NULL, NULL, 1, 31, 1, 0, 1, NULL, NULL);
-		ds->spin_y = pref_spin_new(ds->box, NULL, NULL, 1900, 9999, 1, 0, 1900, NULL, NULL);
+		ds->spin_m = pref_spin_new(ds->box, nullptr, nullptr, 1, 12, 1, 0, 1, nullptr, nullptr);
+		ds->spin_d = pref_spin_new(ds->box, nullptr, nullptr, 1, 31, 1, 0, 1, nullptr, nullptr);
+		ds->spin_y = pref_spin_new(ds->box, nullptr, nullptr, 1900, 9999, 1, 0, 1900, nullptr, nullptr);
 		}
 
 	spin_increase(ds->spin_y, 5);
@@ -1176,7 +1176,7 @@ static GList *pref_list_find(const gchar *group, const gchar *token)
 		work = work->next;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 static gboolean pref_list_get(const gchar *group, const gchar *key, const gchar *marker, const gchar **result)
@@ -1187,7 +1187,7 @@ static gboolean pref_list_get(const gchar *group, const gchar *key, const gchar 
 
 	if (!group || !key || !marker)
 		{
-		*result = NULL;
+		*result = nullptr;
 		return FALSE;
 		}
 
@@ -1197,12 +1197,12 @@ static gboolean pref_list_get(const gchar *group, const gchar *key, const gchar 
 	if (work)
 		{
 		*result = static_cast<const gchar *>(work->data) + strlen(token);
-		if (strlen(*result) == 0) *result = NULL;
+		if (strlen(*result) == 0) *result = nullptr;
 		ret = TRUE;
 		}
 	else
 		{
-		*result = NULL;
+		*result = nullptr;
 		ret = FALSE;
 		}
 
@@ -1230,7 +1230,7 @@ static void pref_list_set(const gchar *group, const gchar *key, const gchar *mar
 		if (text)
 			{
 			work->data = path;
-			path = NULL;
+			path = nullptr;
 
 			g_free(old_path);
 			}
@@ -1269,7 +1269,7 @@ gboolean pref_list_int_get(const gchar *group, const gchar *key, gint *result)
 
 	if (pref_list_get(group, key, PREF_LIST_MARKER_INT, &text) && text)
 		{
-		*result = static_cast<gint>(strtol(text, NULL, 10));
+		*result = static_cast<gint>(strtol(text, nullptr, 10));
 		return TRUE;
 		}
 
@@ -1388,7 +1388,7 @@ gchar *text_widget_text_pull(GtkWidget *text_widget)
 		}
 	else
 		{
-		return NULL;
+		return nullptr;
 		}
 
 }
@@ -1417,7 +1417,7 @@ gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
 		}
 	else
 		{
-		return NULL;
+		return nullptr;
 		}
 }
 

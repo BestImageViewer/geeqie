@@ -189,7 +189,7 @@ gchar *layout_config_get(GtkWidget *widget, gint *style)
 	lc = static_cast<LayoutConfig *>(g_object_get_data(G_OBJECT(widget), "layout_config"));
 
 	/* this should not happen */
-	if (!lc) return NULL;
+	if (!lc) return nullptr;
 
 	*style = lc->style;
 
@@ -248,7 +248,7 @@ static GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint st
 		}
 	else
 		{
-		group = gtk_radio_button_new(NULL);
+		group = gtk_radio_button_new(nullptr);
 		}
 	g_object_set_data(G_OBJECT(group), "layout_config", lc);
 	g_signal_connect(G_OBJECT(group), "clicked",
@@ -289,7 +289,7 @@ GtkWidget *layout_config_new(void)
 {
 	LayoutConfig *lc;
 	GtkWidget *hbox;
-	GtkWidget *group = NULL;
+	GtkWidget *group = nullptr;
 	GtkWidget *scrolled;
 	GtkListStore *store;
 	GtkTreeViewColumn *column;
@@ -313,7 +313,7 @@ GtkWidget *layout_config_new(void)
 		}
 	gtk_widget_show(hbox);
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_NEVER);
@@ -333,7 +333,7 @@ GtkWidget *layout_config_new(void)
 
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, layout_config_number_cb, lc, NULL);
+	gtk_tree_view_column_set_cell_data_func(column, renderer, layout_config_number_cb, lc, nullptr);
 
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);

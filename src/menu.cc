@@ -54,7 +54,7 @@ static GtkWidget *add_menu_item(GtkWidget *menu, gchar *label, GtkAccelGroup *ac
 
 gpointer submenu_item_get_data(GtkWidget *menu)
 {
-	if (!gtk_widget_get_parent(menu) || !GTK_IS_MENU(gtk_widget_get_parent(menu))) return NULL;
+	if (!gtk_widget_get_parent(menu) || !GTK_IS_MENU(gtk_widget_get_parent(menu))) return nullptr;
 
 	return g_object_get_data(G_OBJECT(gtk_widget_get_parent(menu)), "submenu_data");
 }
@@ -80,13 +80,13 @@ static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
 		work = work->next;
 		gboolean active = TRUE;
 
-		if (fd_list && EDITOR_ERRORS(editor_command_parse(editor, fd_list, FALSE, NULL)))
+		if (fd_list && EDITOR_ERRORS(editor_command_parse(editor, fd_list, FALSE, nullptr)))
 			active = FALSE;
 
 		if (active)
 			{
 			GtkWidget *item;
-			const gchar *stock_id = NULL;
+			const gchar *stock_id = nullptr;
 			gchar *key = g_strdup(editor->key);
 
 			if (editor->icon && register_theme_icon_as_stock(key, editor->icon))
@@ -108,7 +108,7 @@ GtkWidget *submenu_add_edit(GtkWidget *menu, GtkWidget **menu_item, GCallback fu
 	GtkAccelGroup *accel_group;
 
 	accel_group = gtk_accel_group_new();
-	item = menu_item_add(menu, _("_Plugins"), NULL, NULL);
+	item = menu_item_add(menu, _("_Plugins"), nullptr, nullptr);
 
 	submenu = gtk_menu_new();
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
@@ -215,7 +215,7 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
 		{
 		GtkWidget *item;
 
-		item = menu_item_add(menu, _("Sort"), NULL, NULL);
+		item = menu_item_add(menu, _("Sort"), nullptr, nullptr);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 		return item;
 		}
@@ -241,7 +241,7 @@ GtkWidget *submenu_add_dir_sort(GtkWidget *menu, GCallback func, gpointer data,
 		{
 		GtkWidget *item;
 
-		item = menu_item_add(menu, _("Sort"), NULL, NULL);
+		item = menu_item_add(menu, _("Sort"), nullptr, nullptr);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 		return item;
 		}
@@ -315,7 +315,7 @@ GtkWidget *submenu_add_zoom(GtkWidget *menu, GCallback func, gpointer data,
 		{
 		GtkWidget *item;
 
-		item = menu_item_add(menu, _("Zoom"), NULL, NULL);
+		item = menu_item_add(menu, _("Zoom"), nullptr, nullptr);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 		return item;
 		}
@@ -392,7 +392,7 @@ static GtkWidget *real_submenu_add_alter(GtkWidget *menu, GCallback func, gpoint
 		{
 		GtkWidget *item;
 
-		item = menu_item_add(menu, _("_Orientation"), NULL, NULL);
+		item = menu_item_add(menu, _("_Orientation"), nullptr, nullptr);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 		return item;
 		}
@@ -446,9 +446,9 @@ GtkWidget *submenu_add_collections(GtkWidget *menu, GtkWidget **menu_item,
 {
 	GtkWidget *item;
 	GtkWidget *submenu;
-	GList *collection_list = NULL;
+	GList *collection_list = nullptr;
 
-	item = menu_item_add(menu, _("_Add to Collection"), NULL, NULL);
+	item = menu_item_add(menu, _("_Add to Collection"), nullptr, nullptr);
 
 	submenu = gtk_menu_new();
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
@@ -457,7 +457,7 @@ GtkWidget *submenu_add_collections(GtkWidget *menu, GtkWidget **menu_item,
 					GTK_STOCK_INDEX, TRUE, G_CALLBACK(func), GINT_TO_POINTER(-1));
 	menu_item_add_divider(submenu);
 
-	collect_manager_list(&collection_list,NULL,NULL);
+	collect_manager_list(&collection_list,nullptr,nullptr);
 	add_collection_list(submenu, func, collection_list, data);
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
@@ -479,13 +479,13 @@ void pop_menu_collections(GList *selection_list, gpointer data)
 {
 	CollectWindow *cw;
 	gchar *collection_name;
-	GList *collection_list = NULL;
+	GList *collection_list = nullptr;
 	gchar *name;
 	const gint index = GPOINTER_TO_INT(data);
 
 	if (index >= 0)
 		{
-		collect_manager_list(&collection_list, NULL, NULL);
+		collect_manager_list(&collection_list, nullptr, nullptr);
 		collection_name = static_cast<gchar *>(g_list_nth_data(collection_list, index));
 		name = collection_path(collection_name);
 		cw = collection_window_new(name);
@@ -494,7 +494,7 @@ void pop_menu_collections(GList *selection_list, gpointer data)
 		}
 	else
 		{
-		cw = collection_window_new(NULL);
+		cw = collection_window_new(nullptr);
 		}
 
 	collection_table_add_filelist(cw->table, selection_list);

@@ -35,7 +35,7 @@ GtkWidget *window_new(GtkWindowType type, const gchar *role, const gchar *icon,
 	GtkWidget *window;
 
 	window = gtk_window_new(type);
-	if (!window) return NULL;
+	if (!window) return nullptr;
 
 	if (subtitle)
 		{
@@ -72,7 +72,7 @@ void window_set_icon(GtkWidget *window, const gchar *icon, const gchar *file)
 		}
 	else
 		{
-		gtk_window_set_icon_from_file(GTK_WINDOW(window), file, NULL);
+		gtk_window_set_icon_from_file(GTK_WINDOW(window), file, nullptr);
 		}
 }
 
@@ -94,19 +94,19 @@ gboolean window_maximized(GtkWidget *window)
 
 static gchar *command_result(const gchar *binary, const gchar *command)
 {
-	gchar *result = NULL;
+	gchar *result = nullptr;
 	FILE *f;
 	gchar buf[2048];
 	gint l;
 
-	if (!binary || binary[0] == '\0') return NULL;
-	if (!file_in_path(binary)) return NULL;
+	if (!binary || binary[0] == '\0') return nullptr;
+	if (!file_in_path(binary)) return nullptr;
 
 	if (!command || command[0] == '\0') return g_strdup(binary);
 	if (command[0] == '!') return g_strdup(command + 1);
 
 	f = popen(command, "r");
-	if (!f) return NULL;
+	if (!f) return nullptr;
 
 	while ((l = fread(buf, sizeof(gchar), sizeof(buf), f)) > 0)
 		{
@@ -172,29 +172,29 @@ static int help_browser_command(const gchar *command, const gchar *path)
 static const gchar *html_browsers[] =
 {
 	/* Our specific script */
-	GQ_APPNAME_LC "_html_browser", NULL,
+	GQ_APPNAME_LC "_html_browser", nullptr,
 	/* Redhat has a nifty htmlview script to start the user's preferred browser */
-	"htmlview",	NULL,
+	"htmlview",	nullptr,
 	/* Debian has even better approach with alternatives */
-	"sensible-browser", NULL,
+	"sensible-browser", nullptr,
 	/* GNOME 2 */
 	"gconftool-2",	"gconftool-2 -g /desktop/gnome/url-handlers/http/command",
 	/* KDE */
 	"kfmclient",	"!kfmclient exec \"%s\"",
 	/* use fallbacks */
-	"firefox",	NULL,
-	"mozilla",	NULL,
-	"konqueror",	NULL,
-	"netscape",	NULL,
+	"firefox",	nullptr,
+	"mozilla",	nullptr,
+	"konqueror",	nullptr,
+	"netscape",	nullptr,
 	"opera",	"!opera --remote 'openURL(%s,new-page)'",
-	NULL,		NULL
+	nullptr,		nullptr
 };
 
 static void help_browser_run(const gchar *path)
 {
 	const gchar *name = options->helpers.html_browser.command_name;
 	const gchar *cmd = options->helpers.html_browser.command_line;
-	gchar *result = NULL;
+	gchar *result = nullptr;
 	gint i;
 
 	i = 0;
@@ -210,7 +210,7 @@ static void help_browser_run(const gchar *path)
 
 				if (ret == 0) break;
 				g_free(result);
-				result = NULL;
+				result = nullptr;
 			}
 		}
 		if (!html_browsers[i]) break;
@@ -233,18 +233,18 @@ static void help_browser_run(const gchar *path)
  *-----------------------------------------------------------------------------
  */
 
-static GtkWidget *help_window = NULL;
+static GtkWidget *help_window = nullptr;
 
 static void help_window_destroy_cb(GtkWidget *UNUSED(window), gpointer UNUSED(data))
 {
-	help_window = NULL;
+	help_window = nullptr;
 }
 
 void help_window_show(const gchar *key)
 {
 	gchar *path;
 
-	if (key && strstr(key, ".html") != 0)
+	if (key && strstr(key, ".html") != nullptr)
 		{
 		path = g_build_filename(gq_htmldir, key, NULL);
 		if (!isfile(path))
@@ -369,11 +369,11 @@ void help_search_window_show()
 
 	hsd = g_new0(HelpSearchData, 1);
 	hsd->gd = gd = generic_dialog_new(_("On-line help search"), "help_search",
-				NULL, TRUE,
+				nullptr, TRUE,
 				help_search_window_cancel_cb, hsd);
-	generic_dialog_add_message(gd, NULL, _("Search the on-line help files.\n"), NULL, FALSE);
+	generic_dialog_add_message(gd, nullptr, _("Search the on-line help files.\n"), nullptr, FALSE);
 
-	generic_dialog_add_button(gd, GTK_STOCK_OK, NULL,
+	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr,
 				  help_search_window_ok_cb, TRUE);
 
 	label1 = pref_label_new(GENERIC_DIALOG(gd)->vbox, _("Search engine:"));

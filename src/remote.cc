@@ -59,7 +59,7 @@ static RemoteConnection *remote_client_open(const gchar *path);
 static gint remote_client_send(RemoteConnection *rc, const gchar *text);
 static void gr_raise(const gchar *text, GIOChannel *channel, gpointer data);
 
-static LayoutWindow *lw_id = NULL; /* points to the window set by the --id option */
+static LayoutWindow *lw_id = nullptr; /* points to the window set by the --id option */
 
 typedef struct _RemoteClient RemoteClient;
 struct _RemoteClient {
@@ -85,7 +85,7 @@ static gboolean print0 = FALSE;
  * command was made from. Some remote commands require this. The
  * value is stored here
  */
-static gchar *pwd = NULL;
+static gchar *pwd = nullptr;
 
 /**
  * @brief Ensures file path is absolute.
@@ -120,17 +120,17 @@ static gboolean remote_server_client_cb(GIOChannel *source, GIOCondition conditi
 	RemoteConnection *rc;
 	GIOStatus status = G_IO_STATUS_NORMAL;
 
-	lw_id = NULL;
+	lw_id = nullptr;
 	rc = client->rc;
 
 	if (condition & G_IO_IN)
 		{
-		gchar *buffer = NULL;
-		GError *error = NULL;
+		gchar *buffer = nullptr;
+		GError *error = nullptr;
 		gsize termpos;
 		/** @FIXME it should be possible to terminate the command with a null character */
 		g_io_channel_set_line_term(source, "<gq_end_of_command>", -1);
-		while ((status = g_io_channel_read_line(source, &buffer, NULL, &termpos, &error)) == G_IO_STATUS_NORMAL)
+		while ((status = g_io_channel_read_line(source, &buffer, nullptr, &termpos, &error)) == G_IO_STATUS_NORMAL)
 			{
 			if (buffer)
 				{
@@ -139,12 +139,12 @@ static gboolean remote_server_client_cb(GIOChannel *source, GIOCondition conditi
 				if (strlen(buffer) > 0)
 					{
 					if (rc->read_func) rc->read_func(rc, buffer, source, rc->read_data);
-					g_io_channel_write_chars(source, "<gq_end_of_command>", -1, NULL, NULL); /* empty line finishes the command */
-					g_io_channel_flush(source, NULL);
+					g_io_channel_write_chars(source, "<gq_end_of_command>", -1, nullptr, nullptr); /* empty line finishes the command */
+					g_io_channel_flush(source, nullptr);
 					}
 				g_free(buffer);
 
-				buffer = NULL;
+				buffer = nullptr;
 				}
 			}
 
@@ -188,7 +188,7 @@ static void remote_server_client_add(RemoteConnection *rc, gint fd)
 
 	channel = g_io_channel_unix_new(fd);
 	client->channel_id = g_io_add_watch_full(channel, G_PRIORITY_DEFAULT, static_cast<GIOCondition>(G_IO_IN | G_IO_HUP),
-						 remote_server_client_cb, client, NULL);
+						 remote_server_client_cb, client, nullptr);
 	g_io_channel_unref(channel);
 
 	rc->clients = g_list_append(rc->clients, client);
@@ -215,7 +215,7 @@ static gboolean remote_server_read_cb(GIOChannel *UNUSED(source), GIOCondition U
 	gint fd;
 	guint alen;
 
-	fd = accept(rc->fd, NULL, &alen);
+	fd = accept(rc->fd, nullptr, &alen);
 	if (fd == -1)
 		{
 		log_printf("error accepting socket: %s\n", strerror(errno));
@@ -253,11 +253,11 @@ static RemoteConnection *remote_server_open(const gchar *path)
 	if (remote_server_exists(path))
 		{
 		log_printf("Address already in use: %s\n", path);
-		return NULL;
+		return nullptr;
 		}
 
 	fd = socket(PF_UNIX, SOCK_STREAM, 0);
-	if (fd == -1) return NULL;
+	if (fd == -1) return nullptr;
 
 	addr.sun_family = AF_UNIX;
 	sun_path_len = MIN(strlen(path) + 1, UNIX_PATH_MAX);
@@ -267,7 +267,7 @@ static RemoteConnection *remote_server_open(const gchar *path)
 		{
 		log_printf("error subscribing to socket: %s\n", strerror(errno));
 		close(fd);
-		return NULL;
+		return nullptr;
 		}
 
 	rc = g_new0(RemoteConnection, 1);
@@ -277,10 +277,10 @@ static RemoteConnection *remote_server_open(const gchar *path)
 	rc->path = g_strdup(path);
 
 	channel = g_io_channel_unix_new(rc->fd);
-	g_io_channel_set_flags(channel, G_IO_FLAG_NONBLOCK, NULL);
+	g_io_channel_set_flags(channel, G_IO_FLAG_NONBLOCK, nullptr);
 
 	rc->channel_id = g_io_add_watch_full(channel, G_PRIORITY_DEFAULT, G_IO_IN,
-					     remote_server_read_cb, rc, NULL);
+					     remote_server_read_cb, rc, nullptr);
 	g_io_channel_unref(channel);
 
 	return rc;
@@ -303,10 +303,10 @@ static RemoteConnection *remote_client_open(const gchar *path)
 	gint sun_path_len;
 	gint fd;
 
-	if (stat(path, &st) != 0 || !S_ISSOCK(st.st_mode)) return NULL;
+	if (stat(path, &st) != 0 || !S_ISSOCK(st.st_mode)) return nullptr;
 
 	fd = socket(PF_UNIX, SOCK_STREAM, 0);
-	if (fd == -1) return NULL;
+	if (fd == -1) return nullptr;
 
 	addr.sun_family = AF_UNIX;
 	sun_path_len = MIN(strlen(path) + 1, UNIX_PATH_MAX);
@@ -315,7 +315,7 @@ static RemoteConnection *remote_client_open(const gchar *path)
 		{
 		DEBUG_1("error connecting to socket: %s", strerror(errno));
 		close(fd);
-		return NULL;
+		return nullptr;
 		}
 
 	rc = g_new0(RemoteConnection, 1);
@@ -337,7 +337,7 @@ static gboolean remote_client_send(RemoteConnection *rc, const gchar *text)
 {
 	struct sigaction new_action, old_action;
 	gboolean ret = FALSE;
-	GError *error = NULL;
+	GError *error = nullptr;
 	GIOChannel *channel;
 
 	if (!rc || rc->server) return FALSE;
@@ -354,8 +354,8 @@ static gboolean remote_client_send(RemoteConnection *rc, const gchar *text)
 
 	channel = g_io_channel_unix_new(rc->fd);
 
-	g_io_channel_write_chars(channel, text, -1, NULL, &error);
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, &error);
+	g_io_channel_write_chars(channel, text, -1, nullptr, &error);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, &error);
 	g_io_channel_flush(channel, &error);
 
 	if (error)
@@ -371,10 +371,10 @@ static gboolean remote_client_send(RemoteConnection *rc, const gchar *text)
 
 	if (ret)
 		{
-		gchar *buffer = NULL;
+		gchar *buffer = nullptr;
 		gsize termpos;
 		g_io_channel_set_line_term(channel, "<gq_end_of_command>", -1);
-		while (g_io_channel_read_line(channel, &buffer, NULL, &termpos, &error) == G_IO_STATUS_NORMAL)
+		while (g_io_channel_read_line(channel, &buffer, nullptr, &termpos, &error) == G_IO_STATUS_NORMAL)
 			{
 			if (buffer)
 				{
@@ -385,7 +385,7 @@ static gboolean remote_client_send(RemoteConnection *rc, const gchar *text)
 					break;
 					}
 				buffer[termpos] = '\0';
-				if (g_strstr_len(buffer, -1, "print0") != 0)
+				if (g_strstr_len(buffer, -1, "print0") != nullptr)
 					{
 					print0 = TRUE;
 					}
@@ -401,7 +401,7 @@ static gboolean remote_client_send(RemoteConnection *rc, const gchar *text)
 						}
 					}
 				g_free(buffer);
-				buffer = NULL;
+				buffer = nullptr;
 				}
 			}
 
@@ -415,7 +415,7 @@ static gboolean remote_client_send(RemoteConnection *rc, const gchar *text)
 
 
 	/* restore the original signal handler */
-	sigaction(SIGPIPE, &old_action, NULL);
+	sigaction(SIGPIPE, &old_action, nullptr);
 	g_io_channel_unref(channel);
 	return ret;
 }
@@ -454,7 +454,7 @@ static void gr_image_next(const gchar *UNUSED(text), GIOChannel *UNUSED(channel)
 
 static void gr_new_window(const gchar *UNUSED(text), GIOChannel *UNUSED(channel), gpointer UNUSED(data))
 {
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 
 	if (!layout_valid(&lw)) return;
 
@@ -467,14 +467,14 @@ static gboolean gr_close_window_cb(gpointer UNUSED(data))
 {
 	if (!layout_valid(&lw_id)) return FALSE;
 
-	layout_menu_close_cb(NULL, lw_id);
+	layout_menu_close_cb(nullptr, lw_id);
 
 	return G_SOURCE_REMOVE;
 }
 
 static void gr_close_window(const gchar *UNUSED(text), GIOChannel *UNUSED(channel), gpointer UNUSED(data))
 {
-	g_idle_add((gr_close_window_cb), NULL);
+	g_idle_add((gr_close_window_cb), nullptr);
 }
 
 static void gr_image_prev(const gchar *UNUSED(text), GIOChannel *UNUSED(channel), gpointer UNUSED(data))
@@ -540,11 +540,11 @@ static void gr_cache_thumb(const gchar *text, GIOChannel *UNUSED(channel), gpoin
 {
 	if (!g_strcmp0(text, "clear"))
 		{
-		cache_maintain_home_remote(FALSE, TRUE, NULL);
+		cache_maintain_home_remote(FALSE, TRUE, nullptr);
 		}
 	else if (!g_strcmp0(text, "clean"))
 		{
-		cache_maintain_home_remote(FALSE, FALSE, NULL);
+		cache_maintain_home_remote(FALSE, FALSE, nullptr);
 		}
 }
 
@@ -558,24 +558,24 @@ static void gr_cache_shared(const gchar *text, GIOChannel *UNUSED(channel), gpoi
 
 static void gr_cache_metadata(const gchar *UNUSED(text), GIOChannel *UNUSED(channel), gpointer UNUSED(data))
 {
-	cache_maintain_home_remote(TRUE, FALSE, NULL);
+	cache_maintain_home_remote(TRUE, FALSE, nullptr);
 }
 
 static void gr_cache_render(const gchar *text, GIOChannel *UNUSED(channel), gpointer UNUSED(data))
 {
-	cache_manager_render_remote(text, FALSE, FALSE, NULL);
+	cache_manager_render_remote(text, FALSE, FALSE, nullptr);
 }
 
 static void gr_cache_render_recurse(const gchar *text, GIOChannel *UNUSED(channel), gpointer UNUSED(data))
 {
-	cache_manager_render_remote(text, TRUE, FALSE, NULL);
+	cache_manager_render_remote(text, TRUE, FALSE, nullptr);
 }
 
 static void gr_cache_render_standard(const gchar *text, GIOChannel *UNUSED(channel), gpointer UNUSED(data))
 {
 	if(options->thumbnails.spec_standard)
 		{
-		cache_manager_render_remote(text, FALSE, TRUE, NULL);
+		cache_manager_render_remote(text, FALSE, TRUE, nullptr);
 		}
 }
 
@@ -583,7 +583,7 @@ static void gr_cache_render_standard_recurse(const gchar *text, GIOChannel *UNUS
 {
 	if(options->thumbnails.spec_standard)
 		{
-		cache_manager_render_remote(text, TRUE, TRUE, NULL);
+		cache_manager_render_remote(text, TRUE, TRUE, nullptr);
 		}
 }
 
@@ -682,7 +682,7 @@ static void gr_quit(const gchar *UNUSED(text), GIOChannel *UNUSED(channel), gpoi
 	/* schedule exit when idle, if done from within a
 	 * remote handler remote_close will crash
 	 */
-	g_idle_add(gr_quit_idle_cb, NULL);
+	g_idle_add(gr_quit_idle_cb, nullptr);
 }
 
 static void gr_file_load_no_raise(const gchar *text, GIOChannel *UNUSED(channel), gpointer UNUSED(data))
@@ -690,7 +690,7 @@ static void gr_file_load_no_raise(const gchar *text, GIOChannel *UNUSED(channel)
 	gchar *filename;
 	gchar *tilde_filename;
 
-	if (!download_web_file(text, TRUE, NULL))
+	if (!download_web_file(text, TRUE, nullptr))
 		{
 		tilde_filename = expand_tilde(text);
 		filename = set_pwd(tilde_filename);
@@ -756,8 +756,8 @@ static void gr_pixel_info(const gchar *UNUSED(text), GIOChannel *channel, gpoint
 						 x_pixel, y_pixel,
 						 r_mouse, g_mouse, b_mouse);
 
-			g_io_channel_write_chars(channel, pixel_info, -1, NULL, NULL);
-			g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+			g_io_channel_write_chars(channel, pixel_info, -1, nullptr, nullptr);
+			g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 			g_free(pixel_info);
 			}
@@ -792,8 +792,8 @@ static void gr_rectangle(const gchar *UNUSED(text), GIOChannel *channel, gpointe
 					(x2 > x1) ? x1 : x2,
 					(y2 > y1) ? y1 : y2);
 
-		g_io_channel_write_chars(channel, rectangle_info, -1, NULL, NULL);
-		g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+		g_io_channel_write_chars(channel, rectangle_info, -1, nullptr, nullptr);
+		g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 		g_free(rectangle_info);
 		}
@@ -822,19 +822,19 @@ static void gr_render_intent(const gchar *UNUSED(text), GIOChannel *channel, gpo
 			break;
 		}
 
-	g_io_channel_write_chars(channel, render_intent, -1, NULL, NULL);
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+	g_io_channel_write_chars(channel, render_intent, -1, nullptr, nullptr);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 	g_free(render_intent);
 }
 
 static void get_filelist(const gchar *text, GIOChannel *channel, gboolean recurse)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 	FileFormatClass format_class;
 	FileData *dir_fd;
 	FileData *fd;
-	GString *out_string = g_string_new(NULL);
+	GString *out_string = g_string_new(nullptr);
 	GList *work;
 	gchar *tilde_filename;
 
@@ -870,7 +870,7 @@ static void get_filelist(const gchar *text, GIOChannel *channel, gboolean recurs
 		}
 	else
 		{
-		filelist_read(dir_fd, &list, NULL);
+		filelist_read(dir_fd, &list, nullptr);
 		}
 
 	work = list;
@@ -914,8 +914,8 @@ static void get_filelist(const gchar *text, GIOChannel *channel, gboolean recurs
 		work = work->next;
 		}
 
-	g_io_channel_write_chars(channel, out_string->str, -1, NULL, NULL);
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+	g_io_channel_write_chars(channel, out_string->str, -1, nullptr, nullptr);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 	g_string_free(out_string, TRUE);
 	filelist_free(list);
@@ -927,7 +927,7 @@ static void gr_get_selection(const gchar *UNUSED(text), GIOChannel *channel, gpo
 	if (!layout_valid(&lw_id)) return;
 
 	GList *selected = layout_selection_list(lw_id);  // Keep copy to free.
-	GString *out_string = g_string_new(NULL);
+	GString *out_string = g_string_new(nullptr);
 
 	GList *work = selected;
 	while (work)
@@ -942,8 +942,8 @@ static void gr_get_selection(const gchar *UNUSED(text), GIOChannel *channel, gpo
 		work = work->next;
 		}
 
-	g_io_channel_write_chars(channel, out_string->str, -1, NULL, NULL);
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+	g_io_channel_write_chars(channel, out_string->str, -1, nullptr, nullptr);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 	filelist_free(selected);
 	g_string_free(out_string, TRUE);
@@ -953,7 +953,7 @@ static void gr_selection_add(const gchar *text, GIOChannel *UNUSED(channel), gpo
 {
 	if (!layout_valid(&lw_id)) return;
 
-	FileData *fd_to_select = NULL;
+	FileData *fd_to_select = nullptr;
 	if (strcmp(text, "") == 0)
 		{
 		// No file specified, use current fd.
@@ -1003,7 +1003,7 @@ static void gr_selection_add(const gchar *text, GIOChannel *UNUSED(channel), gpo
 
 	if (fd_to_select)
 		{
-		GList *to_select = g_list_append(NULL, fd_to_select);
+		GList *to_select = g_list_append(nullptr, fd_to_select);
 		// Using the "_list" variant doesn't clear the existing selection.
 		layout_select_list(lw_id, to_select);
 		filelist_free(to_select);
@@ -1026,10 +1026,10 @@ static void gr_selection_remove(const gchar *text, GIOChannel *UNUSED(channel), 
 		return;
 		}
 
-	FileData *fd_to_deselect = NULL;
-	gchar *path = NULL;
-	gchar *filename = NULL;
-	gchar *slash_plus_filename = NULL;
+	FileData *fd_to_deselect = nullptr;
+	gchar *path = nullptr;
+	gchar *filename = nullptr;
+	gchar *slash_plus_filename = nullptr;
 	if (strcmp(text, "") == 0)
 		{
 		// No file specified, use current fd.
@@ -1050,8 +1050,8 @@ static void gr_selection_remove(const gchar *text, GIOChannel *UNUSED(channel), 
 		slash_plus_filename = g_strdup_printf("%s%s", G_DIR_SEPARATOR_S, filename);
 		}
 
-	GList *prior_link = NULL;  // Stash base for link removal to avoid a second traversal.
-	GList *link_to_remove = NULL;
+	GList *prior_link = nullptr;  // Stash base for link removal to avoid a second traversal.
+	GList *link_to_remove = nullptr;
 	for (GList *work = selected; work; prior_link = work, work = work->next)
 		{
 		auto fd = static_cast<FileData *>(work->data);
@@ -1094,14 +1094,14 @@ static void gr_selection_remove(const gchar *text, GIOChannel *UNUSED(channel), 
 			// Remove first link.
 			selected = g_list_remove_link(selected, link_to_remove);
 			filelist_free(link_to_remove);
-			link_to_remove = NULL;
+			link_to_remove = nullptr;
 			}
 		else
 			{
 			// Remove a subsequent link.
 			prior_link = g_list_remove_link(prior_link, link_to_remove);
 			filelist_free(link_to_remove);
-			link_to_remove = NULL;
+			link_to_remove = nullptr;
 			}
 
 		// Re-select all but the deselected item.
@@ -1118,7 +1118,7 @@ static void gr_selection_remove(const gchar *text, GIOChannel *UNUSED(channel), 
 
 static void gr_collection(const gchar *text, GIOChannel *channel, gpointer UNUSED(data))
 {
-	GString *contents = g_string_new(NULL);
+	GString *contents = g_string_new(nullptr);
 
 	if (is_collection(text))
 		{
@@ -1129,8 +1129,8 @@ static void gr_collection(const gchar *text, GIOChannel *channel, gpointer UNUSE
 		return;
 		}
 
-	g_io_channel_write_chars(channel, contents->str, -1, NULL, NULL);
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+	g_io_channel_write_chars(channel, contents->str, -1, nullptr, nullptr);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 	g_string_free(contents, TRUE);
 }
@@ -1138,11 +1138,11 @@ static void gr_collection(const gchar *text, GIOChannel *channel, gpointer UNUSE
 static void gr_collection_list(const gchar *UNUSED(text), GIOChannel *channel, gpointer UNUSED(data))
 {
 
-	GList *collection_list = NULL;
+	GList *collection_list = nullptr;
 	GList *work;
-	GString *out_string = g_string_new(NULL);
+	GString *out_string = g_string_new(nullptr);
 
-	collect_manager_list(&collection_list, NULL, NULL);
+	collect_manager_list(&collection_list, nullptr, nullptr);
 
 	work = collection_list;
 	while (work)
@@ -1154,8 +1154,8 @@ static void gr_collection_list(const gchar *UNUSED(text), GIOChannel *channel, g
 		work = work->next;
 		}
 
-	g_io_channel_write_chars(channel, out_string->str, -1, NULL, NULL);
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+	g_io_channel_write_chars(channel, out_string->str, -1, nullptr, nullptr);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 	string_list_free(collection_list);
 	g_string_free(out_string, TRUE);
@@ -1184,7 +1184,7 @@ static void gr_geometry(const gchar *text, GIOChannel *UNUSED(channel), gpointer
 	if (text[0] == '+')
 		{
 		geometry = g_strsplit_set(text, "+", 3);
-		if (geometry[1] != NULL && geometry[2] != NULL )
+		if (geometry[1] != nullptr && geometry[2] != nullptr )
 			{
 			gtk_window_move(GTK_WINDOW(lw_id->window), atoi(geometry[1]), atoi(geometry[2]));
 			}
@@ -1192,11 +1192,11 @@ static void gr_geometry(const gchar *text, GIOChannel *UNUSED(channel), gpointer
 	else
 		{
 		geometry = g_strsplit_set(text, "+x", 4);
-		if (geometry[0] != NULL && geometry[1] != NULL)
+		if (geometry[0] != nullptr && geometry[1] != nullptr)
 			{
 			gtk_window_resize(GTK_WINDOW(lw_id->window), atoi(geometry[0]), atoi(geometry[1]));
 			}
-		if (geometry[2] != NULL && geometry[3] != NULL)
+		if (geometry[2] != nullptr && geometry[3] != nullptr)
 			{
 			/* There is an occasional problem with a window_move immediately after a window_resize */
 			g_idle_add(wait_cb, GINT_TO_POINTER((atoi(geometry[2]) << 16) + atoi(geometry[3])));
@@ -1218,7 +1218,7 @@ static void gr_filelist_recurse(const gchar *text, GIOChannel *channel, gpointer
 static void gr_file_tell(const gchar *UNUSED(text), GIOChannel *channel, gpointer UNUSED(data))
 {
 	gchar *out_string;
-	gchar *collection_name = NULL;
+	gchar *collection_name = nullptr;
 
 	if (!layout_valid(&lw_id)) return;
 
@@ -1239,8 +1239,8 @@ static void gr_file_tell(const gchar *UNUSED(text), GIOChannel *channel, gpointe
 		out_string = g_strconcat(lw_id->dir_fd->path, G_DIR_SEPARATOR_S, NULL);
 		}
 
-	g_io_channel_write_chars(channel, out_string, -1, NULL, NULL);
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+	g_io_channel_write_chars(channel, out_string, -1, nullptr, nullptr);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 	g_free(collection_name);
 	g_free(out_string);
@@ -1263,7 +1263,7 @@ static void gr_file_info(const gchar *UNUSED(text), GIOChannel *channel, gpointe
 		{
 		filename = g_strdup(image_get_path(lw_id->image));
 		fd = file_data_new_group(filename);
-		out_string = g_string_new(NULL);
+		out_string = g_string_new(nullptr);
 
 		format_class = filter_file_get_class(image_get_path(lw_id->image));
 		if (format_class)
@@ -1307,8 +1307,8 @@ static void gr_file_info(const gchar *UNUSED(text), GIOChannel *channel, gpointe
 				}
 			}
 
-		g_io_channel_write_chars(channel, out_string->str, -1, NULL, NULL);
-		g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+		g_io_channel_write_chars(channel, out_string->str, -1, nullptr, nullptr);
+		g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 		g_string_free(out_string, TRUE);
 		file_data_unref(fd);
@@ -1318,14 +1318,14 @@ static void gr_file_info(const gchar *UNUSED(text), GIOChannel *channel, gpointe
 
 static gchar *config_file_path(const gchar *param)
 {
-	gchar *path = NULL;
-	gchar *full_name = NULL;
+	gchar *path = nullptr;
+	gchar *full_name = nullptr;
 
 	if (file_extension_match(param, ".xml"))
 		{
 		path = g_build_filename(get_window_layouts_dir(), param, NULL);
 		}
-	else if (file_extension_match(param, NULL))
+	else if (file_extension_match(param, nullptr))
 		{
 		full_name = g_strconcat(param, ".xml", NULL);
 		path = g_build_filename(get_window_layouts_dir(), full_name, NULL);
@@ -1334,7 +1334,7 @@ static gchar *config_file_path(const gchar *param)
 	if (!isfile(path))
 		{
 		g_free(path);
-		path = NULL;
+		path = nullptr;
 		}
 
 	g_free(full_name);
@@ -1343,7 +1343,7 @@ static gchar *config_file_path(const gchar *param)
 
 static gboolean is_config_file(const gchar *param)
 {
-	gchar *name = NULL;
+	gchar *name = nullptr;
 
 	name = config_file_path(param);
 	if (name)
@@ -1375,7 +1375,7 @@ static void gr_config_load(const gchar *text, GIOChannel *UNUSED(channel), gpoin
 	else
 		{
 		log_printf("remote sent filename that does not exist:\"%s\"\n", filename);
-		layout_set_path(NULL, homedir());
+		layout_set_path(nullptr, homedir());
 		}
 
 	g_free(filename);
@@ -1389,8 +1389,8 @@ static void gr_get_sidecars(const gchar *text, GIOChannel *channel, gpointer UNU
 	GList *work;
 	if (fd->parent) fd = fd->parent;
 
-	g_io_channel_write_chars(channel, fd->path, -1, NULL, NULL);
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+	g_io_channel_write_chars(channel, fd->path, -1, nullptr, nullptr);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 	work = fd->sidecar_files;
 
@@ -1398,8 +1398,8 @@ static void gr_get_sidecars(const gchar *text, GIOChannel *channel, gpointer UNU
 		{
 		fd = static_cast<FileData *>(work->data);
 		work = work->next;
-		g_io_channel_write_chars(channel, fd->path, -1, NULL, NULL);
-		g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+		g_io_channel_write_chars(channel, fd->path, -1, nullptr, nullptr);
+		g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 		}
 	g_free(filename);
 }
@@ -1411,8 +1411,8 @@ static void gr_get_destination(const gchar *text, GIOChannel *channel, gpointer 
 
 	if (fd->change && fd->change->dest)
 		{
-		g_io_channel_write_chars(channel, fd->change->dest, -1, NULL, NULL);
-		g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+		g_io_channel_write_chars(channel, fd->change->dest, -1, nullptr, nullptr);
+		g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 		}
 	g_free(filename);
 }
@@ -1433,8 +1433,8 @@ static void gr_list_clear(const gchar *UNUSED(text), GIOChannel *UNUSED(channel)
 {
 	auto remote_data = static_cast<RemoteData *>(data);
 
-	remote_data->command_collection = NULL;
-	remote_data->file_list = NULL;
+	remote_data->command_collection = nullptr;
+	remote_data->file_list = nullptr;
 	remote_data->single_dir = TRUE;
 }
 
@@ -1442,7 +1442,7 @@ static void gr_list_add(const gchar *text, GIOChannel *UNUSED(channel), gpointer
 {
 	auto remote_data = static_cast<RemoteData *>(data);
 	gboolean is_new = TRUE;
-	gchar *path = NULL;
+	gchar *path = nullptr;
 	FileData *fd;
 	FileData *first;
 
@@ -1503,7 +1503,7 @@ static void gr_list_add(const gchar *text, GIOChannel *UNUSED(channel), gpointer
 
 	if (!remote_data->command_collection && !remote_data->single_dir)
 		{
-		cw = collection_window_new(NULL);
+		cw = collection_window_new(nullptr);
 		cd = cw->cd;
 
 		collection_path_changed(cd);
@@ -1535,7 +1535,7 @@ static void gr_raise(const gchar *UNUSED(text), GIOChannel *UNUSED(channel), gpo
 
 static void gr_pwd(const gchar *text, GIOChannel *UNUSED(channel), gpointer UNUSED(data))
 {
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 
 	layout_valid(&lw);
 
@@ -1546,8 +1546,8 @@ static void gr_pwd(const gchar *text, GIOChannel *UNUSED(channel), gpointer UNUS
 
 static void gr_print0(const gchar *UNUSED(text), GIOChannel *channel, gpointer UNUSED(data))
 {
-	g_io_channel_write_chars(channel, "print0", -1, NULL, NULL);
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+	g_io_channel_write_chars(channel, "print0", -1, nullptr, nullptr);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 }
 
 #ifdef HAVE_LUA
@@ -1596,10 +1596,10 @@ struct _RemoteCommandEntry {
 
 static RemoteCommandEntry remote_commands[] = {
 	/* short, long                  callback,               extra, prefer, parameter, description */
-	{ "-b", "--back",               gr_image_prev,          FALSE, FALSE, NULL, N_("previous image") },
-	{ NULL, "--close-window",       gr_close_window,        FALSE, FALSE, NULL, N_("close window") },
-	{ NULL, "--config-load:",       gr_config_load,         TRUE,  FALSE, N_("<FILE>|layout ID"), N_("load configuration from FILE") },
-	{ "-cm","--cache-metadata",      gr_cache_metadata,               FALSE, FALSE, NULL, N_("clean the metadata cache") },
+	{ "-b", "--back",               gr_image_prev,          FALSE, FALSE, nullptr, N_("previous image") },
+	{ nullptr, "--close-window",       gr_close_window,        FALSE, FALSE, nullptr, N_("close window") },
+	{ nullptr, "--config-load:",       gr_config_load,         TRUE,  FALSE, N_("<FILE>|layout ID"), N_("load configuration from FILE") },
+	{ "-cm","--cache-metadata",      gr_cache_metadata,               FALSE, FALSE, nullptr, N_("clean the metadata cache") },
 	{ "-cr:", "--cache-render:",    gr_cache_render,        TRUE, FALSE, N_("<folder>  "), N_(" render thumbnails") },
 	{ "-crr:", "--cache-render-recurse:", gr_cache_render_recurse, TRUE, FALSE, N_("<folder> "), N_("render thumbnails recursively") },
 	{ "-crs:", "--cache-render-shared:", gr_cache_render_standard, TRUE, FALSE, N_("<folder> "), N_(" render thumbnails (see Help)") },
@@ -1607,53 +1607,53 @@ static RemoteCommandEntry remote_commands[] = {
 	{ "-cs:", "--cache-shared:",    gr_cache_shared,        TRUE, FALSE, N_("clear|clean"), N_("clear or clean shared thumbnail cache") },
 	{ "-ct:", "--cache-thumbs:",    gr_cache_thumb,         TRUE, FALSE, N_("clear|clean"), N_("clear or clean thumbnail cache") },
 	{ "-d", "--delay=",             gr_slideshow_delay,     TRUE,  FALSE, N_("<[H:][M:][N][.M]>"), N_("set slide show delay to Hrs Mins N.M seconds") },
-	{ NULL, "--first",              gr_image_first,         FALSE, FALSE, NULL, N_("first image") },
-	{ "-f", "--fullscreen",         gr_fullscreen_toggle,   FALSE, TRUE,  NULL, N_("toggle full screen") },
-	{ NULL, "--file:",              gr_file_load,           TRUE,  FALSE, N_("<FILE>|<URL>"), N_("open FILE or URL, bring Geeqie window to the top") },
-	{ NULL, "file:",                gr_file_load,           TRUE,  FALSE, N_("<FILE>|<URL>"), N_("open FILE or URL, bring Geeqie window to the top") },
-	{ NULL, "--File:",              gr_file_load_no_raise,  TRUE,  FALSE, N_("<FILE>|<URL>"), N_("open FILE or URL, do not bring Geeqie window to the top") },
-	{ NULL, "File:",                gr_file_load_no_raise,  TRUE,  FALSE, N_("<FILE>|<URL>"), N_("open FILE or URL, do not bring Geeqie window to the top") },
-	{ "-fs","--fullscreen-start",   gr_fullscreen_start,    FALSE, FALSE, NULL, N_("start full screen") },
-	{ "-fS","--fullscreen-stop",    gr_fullscreen_stop,     FALSE, FALSE, NULL, N_("stop full screen") },
-	{ NULL, "--geometry=",          gr_geometry,            TRUE, FALSE, N_("<GEOMETRY>"), N_("set window geometry") },
-	{ NULL, "--get-collection:",    gr_collection,          TRUE,  FALSE, N_("<COLLECTION>"), N_("get collection content") },
-	{ NULL, "--get-collection-list", gr_collection_list,    FALSE, FALSE, NULL, N_("get collection list") },
-	{ NULL, "--get-destination:",  	gr_get_destination,     TRUE,  FALSE, N_("<FILE>"), N_("get destination path of FILE (See Plugins Configuration)") },
-	{ NULL, "--get-file-info",      gr_file_info,           FALSE, FALSE, NULL, N_("get file info") },
-	{ NULL, "--get-filelist:",      gr_filelist,            TRUE,  FALSE, N_("[<FOLDER>]"), N_("get list of files and class") },
-	{ NULL, "--get-filelist-recurse:", gr_filelist_recurse, TRUE,  FALSE, N_("[<FOLDER>]"), N_("get list of files and class recursive") },
-	{ NULL, "--get-rectangle",      gr_rectangle,           FALSE, FALSE, NULL, N_("get rectangle co-ordinates") },
-	{ NULL, "--get-render-intent",  gr_render_intent,       FALSE, FALSE, NULL, N_("get render intent") },
-	{ NULL, "--get-selection",      gr_get_selection,       FALSE, FALSE, NULL, N_("get list of selected files") },
-	{ NULL, "--get-sidecars:",      gr_get_sidecars,        TRUE,  FALSE, N_("<FILE>"), N_("get list of sidecars of FILE") },
-	{ NULL, "--id:",                gr_lw_id,               TRUE, FALSE, N_("<ID>"), N_("window id for following commands") },
-	{ NULL, "--last",               gr_image_last,          FALSE, FALSE, NULL, N_("last image") },
-	{ NULL, "--list-add:",          gr_list_add,            TRUE,  FALSE, N_("<FILE>"), N_("add FILE to command line collection list") },
-	{ NULL, "--list-clear",         gr_list_clear,          FALSE, FALSE, NULL, N_("clear command line collection list") },
+	{ nullptr, "--first",              gr_image_first,         FALSE, FALSE, nullptr, N_("first image") },
+	{ "-f", "--fullscreen",         gr_fullscreen_toggle,   FALSE, TRUE,  nullptr, N_("toggle full screen") },
+	{ nullptr, "--file:",              gr_file_load,           TRUE,  FALSE, N_("<FILE>|<URL>"), N_("open FILE or URL, bring Geeqie window to the top") },
+	{ nullptr, "file:",                gr_file_load,           TRUE,  FALSE, N_("<FILE>|<URL>"), N_("open FILE or URL, bring Geeqie window to the top") },
+	{ nullptr, "--File:",              gr_file_load_no_raise,  TRUE,  FALSE, N_("<FILE>|<URL>"), N_("open FILE or URL, do not bring Geeqie window to the top") },
+	{ nullptr, "File:",                gr_file_load_no_raise,  TRUE,  FALSE, N_("<FILE>|<URL>"), N_("open FILE or URL, do not bring Geeqie window to the top") },
+	{ "-fs","--fullscreen-start",   gr_fullscreen_start,    FALSE, FALSE, nullptr, N_("start full screen") },
+	{ "-fS","--fullscreen-stop",    gr_fullscreen_stop,     FALSE, FALSE, nullptr, N_("stop full screen") },
+	{ nullptr, "--geometry=",          gr_geometry,            TRUE, FALSE, N_("<GEOMETRY>"), N_("set window geometry") },
+	{ nullptr, "--get-collection:",    gr_collection,          TRUE,  FALSE, N_("<COLLECTION>"), N_("get collection content") },
+	{ nullptr, "--get-collection-list", gr_collection_list,    FALSE, FALSE, nullptr, N_("get collection list") },
+	{ nullptr, "--get-destination:",  	gr_get_destination,     TRUE,  FALSE, N_("<FILE>"), N_("get destination path of FILE (See Plugins Configuration)") },
+	{ nullptr, "--get-file-info",      gr_file_info,           FALSE, FALSE, nullptr, N_("get file info") },
+	{ nullptr, "--get-filelist:",      gr_filelist,            TRUE,  FALSE, N_("[<FOLDER>]"), N_("get list of files and class") },
+	{ nullptr, "--get-filelist-recurse:", gr_filelist_recurse, TRUE,  FALSE, N_("[<FOLDER>]"), N_("get list of files and class recursive") },
+	{ nullptr, "--get-rectangle",      gr_rectangle,           FALSE, FALSE, nullptr, N_("get rectangle co-ordinates") },
+	{ nullptr, "--get-render-intent",  gr_render_intent,       FALSE, FALSE, nullptr, N_("get render intent") },
+	{ nullptr, "--get-selection",      gr_get_selection,       FALSE, FALSE, nullptr, N_("get list of selected files") },
+	{ nullptr, "--get-sidecars:",      gr_get_sidecars,        TRUE,  FALSE, N_("<FILE>"), N_("get list of sidecars of FILE") },
+	{ nullptr, "--id:",                gr_lw_id,               TRUE, FALSE, N_("<ID>"), N_("window id for following commands") },
+	{ nullptr, "--last",               gr_image_last,          FALSE, FALSE, nullptr, N_("last image") },
+	{ nullptr, "--list-add:",          gr_list_add,            TRUE,  FALSE, N_("<FILE>"), N_("add FILE to command line collection list") },
+	{ nullptr, "--list-clear",         gr_list_clear,          FALSE, FALSE, nullptr, N_("clear command line collection list") },
 #ifdef HAVE_LUA
 	{ NULL, "--lua:",               gr_lua,                 TRUE, FALSE, N_("<FILE>,<lua script>"), N_("run lua script on FILE") },
 #endif
-	{ NULL, "--new-window",         gr_new_window,          FALSE, FALSE, NULL, N_("new window") },
-	{ "-n", "--next",               gr_image_next,          FALSE, FALSE, NULL, N_("next image") },
-	{ NULL, "--pixel-info",         gr_pixel_info,          FALSE, FALSE, NULL, N_("print pixel info of mouse pointer on current image") },
-	{ NULL, "--print0",             gr_print0,              TRUE, FALSE, NULL, N_("terminate returned data with null character instead of newline") },
-	{ NULL, "--PWD:",               gr_pwd,                 TRUE, FALSE, N_("<PWD>"), N_("use PWD as working directory for following commands") },
-	{ "-q", "--quit",               gr_quit,                FALSE, FALSE, NULL, N_("quit") },
-	{ NULL, "--raise",              gr_raise,               FALSE, FALSE, NULL, N_("bring the Geeqie window to the top") },
-	{ NULL, "raise",                gr_raise,               FALSE, FALSE, NULL, N_("bring the Geeqie window to the top") },
-	{ NULL, "--selection-add:",     gr_selection_add,       TRUE,  FALSE, N_("[<FILE>]"), N_("adds the current file (or the specified file) to the current selection") },
-	{ NULL, "--selection-clear",    gr_selection_clear,     FALSE, FALSE, NULL, N_("clears the current selection") },
-	{ NULL, "--selection-remove:",  gr_selection_remove,    TRUE,  FALSE, N_("[<FILE>]"), N_("removes the current file (or the specified file) from the current selection") },
-	{ "-s", "--slideshow",          gr_slideshow_toggle,    FALSE, TRUE,  NULL, N_("toggle slide show") },
-	{ NULL, "--slideshow-recurse:", gr_slideshow_start_rec, TRUE,  FALSE, N_("<FOLDER>"), N_("start recursive slide show in FOLDER") },
-	{ "-ss","--slideshow-start",    gr_slideshow_start,     FALSE, FALSE, NULL, N_("start slide show") },
-	{ "-sS","--slideshow-stop",     gr_slideshow_stop,      FALSE, FALSE, NULL, N_("stop slide show") },
-	{ NULL, "--tell",               gr_file_tell,           FALSE, FALSE, NULL, N_("print filename [and Collection] of current image") },
-	{ "+t", "--tools-show",         gr_tools_show,          FALSE, TRUE,  NULL, N_("show tools") },
-	{ "-t", "--tools-hide",	        gr_tools_hide,          FALSE, TRUE,  NULL, N_("hide tools") },
-	{ NULL, "--view:",              gr_file_view,           TRUE,  FALSE, N_("<FILE>"), N_("open FILE in new window") },
-	{ NULL, "view:",                gr_file_view,           TRUE,  FALSE, N_("<FILE>"), N_("open FILE in new window") },
-	{ NULL, NULL, NULL, FALSE, FALSE, NULL, NULL }
+	{ nullptr, "--new-window",         gr_new_window,          FALSE, FALSE, nullptr, N_("new window") },
+	{ "-n", "--next",               gr_image_next,          FALSE, FALSE, nullptr, N_("next image") },
+	{ nullptr, "--pixel-info",         gr_pixel_info,          FALSE, FALSE, nullptr, N_("print pixel info of mouse pointer on current image") },
+	{ nullptr, "--print0",             gr_print0,              TRUE, FALSE, nullptr, N_("terminate returned data with null character instead of newline") },
+	{ nullptr, "--PWD:",               gr_pwd,                 TRUE, FALSE, N_("<PWD>"), N_("use PWD as working directory for following commands") },
+	{ "-q", "--quit",               gr_quit,                FALSE, FALSE, nullptr, N_("quit") },
+	{ nullptr, "--raise",              gr_raise,               FALSE, FALSE, nullptr, N_("bring the Geeqie window to the top") },
+	{ nullptr, "raise",                gr_raise,               FALSE, FALSE, nullptr, N_("bring the Geeqie window to the top") },
+	{ nullptr, "--selection-add:",     gr_selection_add,       TRUE,  FALSE, N_("[<FILE>]"), N_("adds the current file (or the specified file) to the current selection") },
+	{ nullptr, "--selection-clear",    gr_selection_clear,     FALSE, FALSE, nullptr, N_("clears the current selection") },
+	{ nullptr, "--selection-remove:",  gr_selection_remove,    TRUE,  FALSE, N_("[<FILE>]"), N_("removes the current file (or the specified file) from the current selection") },
+	{ "-s", "--slideshow",          gr_slideshow_toggle,    FALSE, TRUE,  nullptr, N_("toggle slide show") },
+	{ nullptr, "--slideshow-recurse:", gr_slideshow_start_rec, TRUE,  FALSE, N_("<FOLDER>"), N_("start recursive slide show in FOLDER") },
+	{ "-ss","--slideshow-start",    gr_slideshow_start,     FALSE, FALSE, nullptr, N_("start slide show") },
+	{ "-sS","--slideshow-stop",     gr_slideshow_stop,      FALSE, FALSE, nullptr, N_("stop slide show") },
+	{ nullptr, "--tell",               gr_file_tell,           FALSE, FALSE, nullptr, N_("print filename [and Collection] of current image") },
+	{ "+t", "--tools-show",         gr_tools_show,          FALSE, TRUE,  nullptr, N_("show tools") },
+	{ "-t", "--tools-hide",	        gr_tools_hide,          FALSE, TRUE,  nullptr, N_("hide tools") },
+	{ nullptr, "--view:",              gr_file_view,           TRUE,  FALSE, N_("<FILE>"), N_("open FILE in new window") },
+	{ nullptr, "view:",                gr_file_view,           TRUE,  FALSE, N_("<FILE>"), N_("open FILE in new window") },
+	{ nullptr, nullptr, nullptr, FALSE, FALSE, nullptr, nullptr }
 };
 
 static RemoteCommandEntry *remote_command_find(const gchar *text, const gchar **offset)
@@ -1662,7 +1662,7 @@ static RemoteCommandEntry *remote_command_find(const gchar *text, const gchar **
 	gint i;
 
 	i = 0;
-	while (!match && remote_commands[i].func != NULL)
+	while (!match && remote_commands[i].func != nullptr)
 		{
 		if (remote_commands[i].needs_extra)
 			{
@@ -1692,7 +1692,7 @@ static RemoteCommandEntry *remote_command_find(const gchar *text, const gchar **
 		i++;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 static void remote_cb(RemoteConnection *UNUSED(rc), const gchar *text, GIOChannel *channel, gpointer data)
@@ -1720,7 +1720,7 @@ void remote_help(void)
 	print_term(FALSE, _("Remote command list:\n"));
 
 	i = 0;
-	while (remote_commands[i].func != NULL)
+	while (remote_commands[i].func != nullptr)
 		{
 		if (remote_commands[i].description)
 			{
@@ -1747,7 +1747,7 @@ GList *remote_build_list(GList *list, gint argc, gchar *argv[], GList **errors)
 		{
 		RemoteCommandEntry *entry;
 
-		entry = remote_command_find(argv[i], NULL);
+		entry = remote_command_find(argv[i], nullptr);
 		if (entry)
 			{
 			list = g_list_append(list, argv[i]);
@@ -1798,7 +1798,7 @@ void remote_control(const gchar *arg_exec, GList *remote_list, const gchar *path
 			text = static_cast<gchar *>(work->data);
 			work = work->next;
 
-			entry = remote_command_find(text, NULL);
+			entry = remote_command_find(text, nullptr);
 			if (entry)
 				{
 				/* If Geeqie is not running, stop the --new-window command opening a second window */
@@ -1856,7 +1856,7 @@ void remote_control(const gchar *arg_exec, GList *remote_list, const gchar *path
 			text = static_cast<gchar *>(work->data);
 			work = work->next;
 
-			entry = remote_command_find(text, NULL);
+			entry = remote_command_find(text, nullptr);
 			if (entry &&
 			    entry->opt_l &&
 			    strcmp(entry->opt_l, "file:") == 0) use_path = FALSE;

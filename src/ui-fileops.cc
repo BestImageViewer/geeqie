@@ -46,7 +46,7 @@ void print_term(gboolean err, const gchar *text_utf8)
 {
 	gchar *text_l;
 
-	text_l = g_locale_from_utf8(text_utf8, -1, NULL, NULL, NULL);
+	text_l = g_locale_from_utf8(text_utf8, -1, nullptr, nullptr, nullptr);
 	if (err)
 		{
 		fputs((text_l) ? text_l : text_utf8, stderr);
@@ -88,11 +88,11 @@ static void encoding_dialog(const gchar *path)
 	if (lc && (strstr(lc, "UTF-8") || strstr(lc, "utf-8")))
 		{
 		gchar *name;
-		name = g_convert(path, -1, "UTF-8", "ISO-8859-1", NULL, NULL, NULL);
+		name = g_convert(path, -1, "UTF-8", "ISO-8859-1", nullptr, nullptr, nullptr);
 		string = g_string_append(string, _("\nPreferred encoding appears to be UTF-8, however the file:\n"));
 		g_string_append_printf(string, "\"%s\"\n", (name) ? name : _("[name not displayable]"));
 
-		if (g_utf8_validate(path, -1, NULL))
+		if (g_utf8_validate(path, -1, nullptr))
 			g_string_append_printf(string, _("\"%s\" is encoded in valid UTF-8."), (name) ? name : _("[name not displayable]"));
 		else
 			g_string_append_printf(string, _("\"%s\" is not encoded in valid UTF-8."), (name) ? name : _("[name not displayable]"));
@@ -101,8 +101,8 @@ static void encoding_dialog(const gchar *path)
 		}
 
 	gd = generic_dialog_new(_("Filename encoding locale mismatch"),
-				"locale warning", NULL, TRUE, NULL, NULL);
-	generic_dialog_add_button(gd, GTK_STOCK_CLOSE, NULL, NULL, TRUE);
+				"locale warning", nullptr, TRUE, nullptr, nullptr);
+	generic_dialog_add_button(gd, GTK_STOCK_CLOSE, nullptr, nullptr, TRUE);
 
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_WARNING,
 				   _("Filename encoding locale mismatch"), string->str, TRUE);
@@ -119,11 +119,11 @@ gchar *path_to_utf8(const gchar *path)
 #endif
 {
 	gchar *utf8;
-	GError *error = NULL;
+	GError *error = nullptr;
 
-	if (!path) return NULL;
+	if (!path) return nullptr;
 
-	utf8 = g_filename_to_utf8(path, -1, NULL, NULL, &error);
+	utf8 = g_filename_to_utf8(path, -1, nullptr, nullptr, &error);
 	if (error)
 		{
 #if GQ_DEBUG_PATH_UTF8
@@ -150,11 +150,11 @@ gchar *path_from_utf8(const gchar *utf8)
 #endif
 {
 	gchar *path;
-	GError *error = NULL;
+	GError *error = nullptr;
 
-	if (!utf8) return NULL;
+	if (!utf8) return nullptr;
 
-	path = g_filename_from_utf8(utf8, -1, NULL, NULL, &error);
+	path = g_filename_from_utf8(utf8, -1, nullptr, nullptr, &error);
 	if (error)
 		{
 #if GQ_DEBUG_PATH_UTF8
@@ -176,7 +176,7 @@ gchar *path_from_utf8(const gchar *utf8)
 /* first we try the HOME environment var, if that doesn't work, we try g_get_homedir(). */
 const gchar *homedir(void)
 {
-	static gchar *home = NULL;
+	static gchar *home = nullptr;
 
 	if (!home)
 		home = path_to_utf8(getenv("HOME"));
@@ -205,7 +205,7 @@ static gchar *xdg_dir_get(const gchar *key, const gchar *fallback)
 
 const gchar *xdg_data_home_get(void)
 {
-	static const gchar *xdg_data_home = NULL;
+	static const gchar *xdg_data_home = nullptr;
 
 	if (xdg_data_home) return xdg_data_home;
 
@@ -216,7 +216,7 @@ const gchar *xdg_data_home_get(void)
 
 const gchar *xdg_config_home_get(void)
 {
-	static const gchar *xdg_config_home = NULL;
+	static const gchar *xdg_config_home = nullptr;
 
 	if (xdg_config_home) return xdg_config_home;
 
@@ -227,7 +227,7 @@ const gchar *xdg_config_home_get(void)
 
 const gchar *xdg_cache_home_get(void)
 {
-	static const gchar *xdg_cache_home = NULL;
+	static const gchar *xdg_cache_home = nullptr;
 
 	if (xdg_cache_home) return xdg_cache_home;
 
@@ -238,7 +238,7 @@ const gchar *xdg_cache_home_get(void)
 
 const gchar *get_rc_dir(void)
 {
-	static gchar *rc_dir = NULL;
+	static gchar *rc_dir = nullptr;
 
 	if (rc_dir) return rc_dir;
 
@@ -256,7 +256,7 @@ const gchar *get_rc_dir(void)
 
 const gchar *get_collections_dir(void)
 {
-	static gchar *collections_dir = NULL;
+	static gchar *collections_dir = nullptr;
 
 	if (collections_dir) return collections_dir;
 
@@ -274,7 +274,7 @@ const gchar *get_collections_dir(void)
 
 const gchar *get_trash_dir(void)
 {
-	static gchar *trash_dir = NULL;
+	static gchar *trash_dir = nullptr;
 
 	if (trash_dir) return trash_dir;
 
@@ -292,7 +292,7 @@ const gchar *get_trash_dir(void)
 
 const gchar *get_window_layouts_dir(void)
 {
-	static gchar *window_layouts_dir = NULL;
+	static gchar *window_layouts_dir = nullptr;
 
 	if (window_layouts_dir) return window_layouts_dir;
 
@@ -535,11 +535,11 @@ static gboolean hard_linked(const gchar *a, const gchar *b)
 
 gboolean copy_file(const gchar *s, const gchar *t)
 {
-	FILE *fi = NULL;
-	FILE *fo = NULL;
-	gchar *sl = NULL;
-	gchar *tl = NULL;
-	gchar *randname = NULL;
+	FILE *fi = nullptr;
+	FILE *fo = nullptr;
+	gchar *sl = nullptr;
+	gchar *tl = nullptr;
+	gchar *randname = nullptr;
 	gchar buf[16384];
 	size_t b;
 	gint ret = FALSE;
@@ -588,9 +588,9 @@ gboolean copy_file(const gchar *s, const gchar *t)
 			link_target = absolute;
 
 			gchar *realPath;
-			realPath = realpath(link_target, NULL);
+			realPath = realpath(link_target, nullptr);
 
-			if (realPath != NULL) // successfully resolved into an absolute path
+			if (realPath != nullptr) // successfully resolved into an absolute path
 				{
 				g_free(link_target);
 				link_target = g_strdup(realPath);
@@ -642,8 +642,8 @@ gboolean copy_file(const gchar *s, const gchar *t)
 			}
 		}
 
-	fclose(fi); fi = NULL;
-	fclose(fo); fo = NULL;
+	fclose(fi); fi = nullptr;
+	fclose(fo); fo = nullptr;
 
 	if (rename(randname, tl) < 0) {
 		unlink(randname);
@@ -728,13 +728,13 @@ void list_free_wrapper(void *data, void *UNUSED(userdata))
 
 void string_list_free(GList *list)
 {
-	g_list_foreach(list, static_cast<GFunc>(list_free_wrapper), NULL);
+	g_list_foreach(list, static_cast<GFunc>(list_free_wrapper), nullptr);
 	g_list_free(list);
 }
 
 GList *string_list_copy(const GList *list)
 {
-	GList *new_list = NULL;
+	GList *new_list = nullptr;
 	auto work = const_cast<GList *>(list);
 
 	while (work)
@@ -775,7 +775,7 @@ gchar *unique_filename(const gchar *path, const gchar *ext, const gchar *divider
 			{
 			/* well, we tried */
 			g_free(unique);
-			return NULL;
+			return nullptr;
 			}
 		}
 
@@ -815,7 +815,7 @@ const gchar *filename_from_path(const gchar *path)
 {
 	const gchar *base;
 
-	if (!path) return NULL;
+	if (!path) return nullptr;
 
 	base = strrchr(path, G_DIR_SEPARATOR);
 	if (base) return base + 1;
@@ -856,11 +856,11 @@ gchar *remove_extension_from_path(const gchar *path)
 {
 	const gchar *reg_ext;
 
-	if (!path) return NULL;
+	if (!path) return nullptr;
 
 	reg_ext = registered_extension_from_path(path);
 
-	return g_strndup(path, strlen(path) - (reg_ext == NULL ? 0 : strlen(reg_ext)));
+	return g_strndup(path, strlen(path) - (reg_ext == nullptr ? 0 : strlen(reg_ext)));
 }
 
 void parse_out_relatives(gchar *path)
@@ -1017,7 +1017,7 @@ struct _WebData
 
 static void web_file_async_ready_cb(GObject *source_object, GAsyncResult *res, gpointer data)
 {
-	GError *error = NULL;
+	GError *error = nullptr;
 	auto web = static_cast<WebData *>(data);
 	gchar *tmp_filename;
 
@@ -1034,11 +1034,11 @@ static void web_file_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 		}
 	else
 		{
-		file_util_warning_dialog(_("Web file download failed"), error->message, GTK_STOCK_DIALOG_ERROR, NULL);
+		file_util_warning_dialog(_("Web file download failed"), error->message, GTK_STOCK_DIALOG_ERROR, nullptr);
 		}
 
 	g_object_unref(web->tmp_g_file);
-	web->tmp_g_file = NULL;
+	web->tmp_g_file = nullptr;
 	g_object_unref(web->cancellable);
 	g_object_unref(web->web_file);
 }
@@ -1065,7 +1065,7 @@ gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 	gchar *scheme;
 	auto lw = static_cast<LayoutWindow *>(data);
 	gchar *tmp_dir;
-	GError *error = NULL;
+	GError *error = nullptr;
 	WebData *web;
 	gchar *base;
 	gboolean ret = FALSE;
@@ -1084,7 +1084,7 @@ gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 				{
 				log_printf("Error: could not create temporary file n%s\n", error->message);
 				g_error_free(error);
-				error = NULL;
+				error = nullptr;
 				ret = TRUE;
 				}
 			else
@@ -1097,10 +1097,10 @@ gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 				base = g_strdup(g_file_get_basename(web->web_file));
 				web->tmp_g_file = g_file_new_for_path(g_build_filename(tmp_dir, base, NULL));
 
-				web->gd = generic_dialog_new(_("Download web file"), "download_web_file", NULL, TRUE, download_web_file_cancel_button_cb, web);
+				web->gd = generic_dialog_new(_("Download web file"), "download_web_file", nullptr, TRUE, download_web_file_cancel_button_cb, web);
 
 				message = g_strconcat(_("Downloading "), base, NULL);
-				generic_dialog_add_message(web->gd, GTK_STOCK_DIALOG_INFO, message, NULL, FALSE);
+				generic_dialog_add_message(web->gd, GTK_STOCK_DIALOG_INFO, message, nullptr, FALSE);
 
 				web->progress = gtk_progress_bar_new();
 				gtk_box_pack_start(GTK_BOX(web->gd->vbox), web->progress, FALSE, FALSE, 0);
@@ -1132,17 +1132,17 @@ gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 
 gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error)
 {
-	g_autoptr(GFileEnumerator) enumerator = NULL;
+	g_autoptr(GFileEnumerator) enumerator = nullptr;
 
-	enumerator = g_file_enumerate_children(file, G_FILE_ATTRIBUTE_STANDARD_NAME, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, cancellable, NULL);
+	enumerator = g_file_enumerate_children(file, G_FILE_ATTRIBUTE_STANDARD_NAME, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, cancellable, nullptr);
 
-	while (enumerator != NULL)
+	while (enumerator != nullptr)
 		{
 		 GFile *child;
 
-		if (!g_file_enumerator_iterate(enumerator, NULL, &child, cancellable, error))
+		if (!g_file_enumerator_iterate(enumerator, nullptr, &child, cancellable, error))
 			return FALSE;
-		if (child == NULL)
+		if (child == nullptr)
 			break;
 		if (!rmdir_recursive(child, cancellable, error))
 			return FALSE;
@@ -1160,7 +1160,7 @@ gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error)
  */
 gint scale_factor()
 {
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 
 	layout_valid(&lw);
 	return gtk_widget_get_scale_factor(lw->window);

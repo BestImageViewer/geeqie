@@ -34,11 +34,11 @@ gchar *utf8_validate_or_convert(const gchar *text)
 {
 	gint len;
 
-	if (!text) return NULL;
+	if (!text) return nullptr;
 
 	len = strlen(text);
-	if (!g_utf8_validate(text, len, NULL))
-		return g_convert(text, len, "UTF-8", "ISO-8859-1", NULL, NULL, NULL);
+	if (!g_utf8_validate(text, len, nullptr))
+		return g_convert(text, len, "UTF-8", "ISO-8859-1", nullptr, nullptr, nullptr);
 
 	return g_strdup(text);
 }
@@ -49,8 +49,8 @@ gint utf8_compare(const gchar *s1, const gchar *s2, gboolean case_sensitive)
 	gchar *s1_t, *s2_t;
 	gint ret;
 
-	g_assert(g_utf8_validate(s1, -1, NULL));
-	g_assert(g_utf8_validate(s2, -1, NULL));
+	g_assert(g_utf8_validate(s1, -1, nullptr));
+	g_assert(g_utf8_validate(s2, -1, nullptr));
 
 	if (!case_sensitive)
 		{
@@ -144,7 +144,7 @@ gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
 		gchar buf[BUFSIZE];
 		FILE *fp;
 
-		if ((fp = popen(cmd, "r")) == NULL)
+		if ((fp = popen(cmd, "r")) == nullptr)
 			{
 			message = g_strconcat("Error: opening pipe\n", input_text, NULL);
 			}
@@ -284,7 +284,7 @@ gint date_get_first_day_of_week()
  */
 gchar *date_get_abbreviated_day_name(gint day)
 {
-	gchar *abday = NULL;
+	gchar *abday = nullptr;
 
 	switch (day)
 		{
@@ -317,7 +317,7 @@ gchar *date_get_abbreviated_day_name(gint day)
 gchar *convert_rating_to_stars(gint rating)
 {
 	gchar *ret;
-	GString *str = g_string_new(NULL);
+	GString *str = g_string_new(nullptr);
 
 	if (rating == -1)
 		{
@@ -420,7 +420,7 @@ gchar *open_archive(FileData *fd)
 		{
 		log_printf("%s%s%s", _("Open Archive - Cannot create directory: "), destination_dir, "\n");
 		g_free(destination_dir);
-		return NULL;
+		return nullptr;
 		}
 
 	current_dir = g_get_current_dir();
@@ -430,7 +430,7 @@ gchar *open_archive(FileData *fd)
 		log_printf("%s%s%s%s%s", _("Open Archive - Cannot change directory to: "), destination_dir, _("\n  Error code: "), strerror(errno), "\n");
 		g_free(destination_dir);
 		g_free(current_dir);
-		return NULL;
+		return nullptr;
 		}
 
 	flags = ARCHIVE_EXTRACT_TIME;
@@ -442,14 +442,14 @@ gchar *open_archive(FileData *fd)
 		log_printf("%s%s%s%s%s", _("Open Archive - Cannot change directory to: "), current_dir, _("\n  Error code: "), strerror(errno), "\n");
 		g_free(destination_dir);
 		g_free(current_dir);
-		return NULL;
+		return nullptr;
 		}
 	g_free(current_dir);
 
 	if (!success)
 		{
 		g_free(destination_dir);
-		destination_dir = NULL;
+		destination_dir = nullptr;
 		}
 
 	return destination_dir;
@@ -469,9 +469,9 @@ static gboolean extract(const char *filename, int do_extract, int flags)
 	archive_read_support_filter_all(a);
 	archive_read_support_format_all(a);
 
-	if (filename != NULL && strcmp(filename, "-") == 0)
+	if (filename != nullptr && strcmp(filename, "-") == 0)
 		{
-		filename = NULL;
+		filename = nullptr;
 		}
 	if ((r = archive_read_open_filename(a, filename, 10240)))
 		{
@@ -567,7 +567,7 @@ static void msg(const char *m)
 
 static void errmsg(const char *m)
 {
-	if (m == NULL)
+	if (m == nullptr)
 		{
 		m = "Error: No error description provided.\n";
 		}

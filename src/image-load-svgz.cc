@@ -30,19 +30,19 @@ static gchar* image_loader_svgz_get_format_name(gpointer UNUSED(loader))
 }
 static gchar** image_loader_svgz_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"image/svg", NULL};
+	static const gchar *mime[] = {"image/svg", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
 static gpointer image_loader_svgz_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
-	GError *error = NULL;
+	GError *error = nullptr;
 
 	GdkPixbufLoader *loader = gdk_pixbuf_loader_new_with_mime_type("image/svg", &error);
 	if (error)
 		{
 		g_error_free(error);
-		return NULL;
+		return nullptr;
 		}
 
 	g_signal_connect(G_OBJECT(loader), "area_updated", G_CALLBACK(area_updated_cb), data);
@@ -64,7 +64,7 @@ void image_loader_backend_set_svgz(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_svgz_new;
 	funcs->set_size = reinterpret_cast<ImageLoaderBackendFuncSetSize>(gdk_pixbuf_loader_set_size);
-	funcs->load = NULL;
+	funcs->load = nullptr;
 	funcs->write = reinterpret_cast<ImageLoaderBackendFuncWrite>(gdk_pixbuf_loader_write);
 	funcs->get_pixbuf = reinterpret_cast<ImageLoaderBackendFuncGetPixbuf>(gdk_pixbuf_loader_get_pixbuf);
 	funcs->close = reinterpret_cast<ImageLoaderBackendFuncClose>(gdk_pixbuf_loader_close);

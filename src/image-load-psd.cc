@@ -298,11 +298,11 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 	ctx->buffer = static_cast<guchar *>(g_malloc(PSD_HEADER_SIZE));
 	reset_context_buffer(ctx);
 
-	ctx->ch_bufs = NULL;
+	ctx->ch_bufs = nullptr;
 	ctx->curr_ch = 0;
 	ctx->curr_row = 0;
 	ctx->pos = 0;
-	ctx->lines_lengths = NULL;
+	ctx->lines_lengths = nullptr;
 	ctx->finalized = FALSE;
 
 	while (size > 0) {
@@ -349,8 +349,8 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 					ctx->pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB,
 						FALSE, 8, ctx->width, ctx->height);
 
-					if (ctx->lines_lengths == NULL || ctx->buffer == NULL ||
-						ctx->pixbuf == NULL)
+					if (ctx->lines_lengths == nullptr || ctx->buffer == nullptr ||
+						ctx->pixbuf == nullptr)
 					{
 						log_printf("warning: Insufficient memory to load PSD image file\n");
 						free_context(ctx);
@@ -363,7 +363,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 						ctx->ch_bufs[i] =
 							static_cast<guchar *>(g_malloc(ctx->width*ctx->height*ctx->depth_bytes));
 
-						if (ctx->ch_bufs[i] == NULL) {
+						if (ctx->ch_bufs[i] == nullptr) {
 						log_printf("warning: Insufficient memory to load PSD image file\n");
 						free_context(ctx);
 						return FALSE;
@@ -557,7 +557,7 @@ static gchar* image_loader_psd_get_format_name(gpointer UNUSED(loader))
 
 static gchar** image_loader_psd_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"application/psd", NULL};
+	static const gchar *mime[] = {"application/psd", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
@@ -584,7 +584,7 @@ void image_loader_backend_set_psd(ImageLoaderBackend *funcs)
 	funcs->loader_new = image_loader_psd_new;
 	funcs->set_size = image_loader_psd_set_size;
 	funcs->load = image_loader_psd_load;
-	funcs->write = NULL;
+	funcs->write = nullptr;
 	funcs->get_pixbuf = image_loader_psd_get_pixbuf;
 	funcs->close = image_loader_psd_close;
 	funcs->abort = image_loader_psd_abort;

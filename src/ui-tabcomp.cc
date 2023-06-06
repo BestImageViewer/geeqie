@@ -92,7 +92,7 @@ static void tab_completion_free_list(TabCompData *td)
 	GList *list;
 
 	g_free(td->dir_path);
-	td->dir_path = NULL;
+	td->dir_path = nullptr;
 
 	list = td->file_list;
 
@@ -103,14 +103,14 @@ static void tab_completion_free_list(TabCompData *td)
 		}
 
 	g_list_free(td->file_list);
-	td->file_list = NULL;
+	td->file_list = nullptr;
 }
 
 static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 {
 	DIR *dp;
 	struct dirent *dir;
-	GList *list = NULL;
+	GList *list = nullptr;
 	gchar *pathl;
 
 	tab_completion_free_list(td);
@@ -123,7 +123,7 @@ static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 		g_free(pathl);
 		return;
 		}
-	while ((dir = readdir(dp)) != NULL)
+	while ((dir = readdir(dp)) != nullptr)
 		{
 		gchar *name = dir->d_name;
 		if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0 &&
@@ -320,7 +320,7 @@ static void tab_completion_popup_list(TabCompData *td, GList *list)
 	g_signal_connect(G_OBJECT(menu), "key_press_event",
 			 G_CALLBACK(tab_completion_popup_key_press), td);
 
-	gtk_menu_popup_at_widget(GTK_MENU(menu), td->entry, GDK_GRAVITY_NORTH_EAST, GDK_GRAVITY_NORTH, NULL);
+	gtk_menu_popup_at_widget(GTK_MENU(menu), td->entry, GDK_GRAVITY_NORTH_EAST, GDK_GRAVITY_NORTH, nullptr);
 }
 
 #ifndef CASE_SORT
@@ -441,7 +441,7 @@ static gboolean tab_completion_do(TabCompData *td)
 	if (isdir(entry_dir))
 		{
 		GList *list;
-		GList *poss = NULL;
+		GList *poss = nullptr;
 		gint l = strlen(entry_file);
 
 		if (!td->dir_path || !td->file_list || strcmp(td->dir_path, entry_dir) != 0)
@@ -619,7 +619,7 @@ static GtkWidget *tab_completion_create_complete_button(GtkWidget *entry, GtkWid
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(tab_completion_button_pressed), entry);
 
-	pixbuf = gdk_pixbuf_new_from_inline(-1, icon_tabcomp, FALSE, NULL);
+	pixbuf = gdk_pixbuf_new_from_inline(-1, icon_tabcomp, FALSE, nullptr);
 	icon = gtk_image_new_from_pixbuf(pixbuf);
 	g_object_unref(pixbuf);
 
@@ -659,10 +659,10 @@ GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
 	gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	tab_completion_add_to_entry(combo_entry, enter_func, NULL, NULL, data);
+	tab_completion_add_to_entry(combo_entry, enter_func, nullptr, nullptr, data);
 
 	td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(combo_entry), "tab_completion_data"));
-	if (!td) return NULL; /* this should never happen! */
+	if (!td) return nullptr; /* this should never happen! */
 
 	td->combo = combo;
 	td->has_history = TRUE;
@@ -697,7 +697,7 @@ const gchar *tab_completion_set_to_last_history(GtkWidget *entry)
 	auto td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
 	const gchar *buf;
 
-	if (!td || !td->has_history) return NULL;
+	if (!td || !td->has_history) return nullptr;
 
 	buf = history_list_find_last_path_by_key(td->history_key);
 	if (buf)
@@ -814,7 +814,7 @@ gchar *remove_trailing_slash(const gchar *path)
 {
 	gint l;
 
-	if (!path) return NULL;
+	if (!path) return nullptr;
 
 	l = strlen(path);
 	while (l > 1 && path[l - 1] == G_DIR_SEPARATOR) l--;
@@ -826,7 +826,7 @@ static void tab_completion_select_cancel_cb(FileDialog *fd, gpointer data)
 {
 	auto td = static_cast<TabCompData *>(data);
 
-	td->fd = NULL;
+	td->fd = nullptr;
 	file_dialog_close(fd);
 }
 
@@ -845,8 +845,8 @@ static void tab_completion_select_show(TabCompData *td)
 {
 	const gchar *title;
 	const gchar *path;
-	const gchar *filter = NULL;
-	gchar *filter_desc = NULL;
+	const gchar *filter = nullptr;
+	gchar *filter_desc = nullptr;
 
 	if (td->fd)
 		{
@@ -857,10 +857,10 @@ static void tab_completion_select_show(TabCompData *td)
 	title = (td->fd_title) ? td->fd_title : _("Select path");
 	td->fd = file_dialog_new(title, "select_path", td->entry,
 				 tab_completion_select_cancel_cb, td);
-	file_dialog_add_button(td->fd, GTK_STOCK_OK, NULL,
+	file_dialog_add_button(td->fd, GTK_STOCK_OK, nullptr,
 				 tab_completion_select_ok_cb, TRUE);
 
-	generic_dialog_add_message(GENERIC_DIALOG(td->fd), NULL, title, NULL, FALSE);
+	generic_dialog_add_message(GENERIC_DIALOG(td->fd), nullptr, title, nullptr, FALSE);
 
 	if (td->filter)
 		{
@@ -880,14 +880,14 @@ static void tab_completion_select_show(TabCompData *td)
 		}
 
 	path = gtk_entry_get_text(GTK_ENTRY(td->entry));
-	if (strlen(path) == 0) path = NULL;
+	if (strlen(path) == 0) path = nullptr;
 	if (td->fd_folders_only)
 		{
-		file_dialog_add_path_widgets(td->fd, NULL, path, td->history_key, NULL, NULL);
+		file_dialog_add_path_widgets(td->fd, nullptr, path, td->history_key, nullptr, nullptr);
 		}
 	else
 		{
-		file_dialog_add_path_widgets(td->fd, NULL, path, td->history_key, filter, filter_desc);
+		file_dialog_add_path_widgets(td->fd, nullptr, path, td->history_key, filter, filter_desc);
 		}
 
 	gtk_widget_show(GENERIC_DIALOG(td->fd)->dialog);

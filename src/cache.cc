@@ -282,7 +282,7 @@ static gboolean cache_sim_read_date(FILE *f, gchar *buf, gint s, CacheData *cd)
 			}
 
 		buf[p] = '\0';
-		cd->date = strtol(buf, NULL, 10);
+		cd->date = strtol(buf, nullptr, 10);
 
 		cd->have_date = TRUE;
 
@@ -354,7 +354,7 @@ static gboolean cache_sim_read_similarity(FILE *f, gchar *buf, gint s, CacheData
 			{
 			/* use current sim that may already contain data we will not touch here */
 			sd = cd->sim;
-			cd->sim = NULL;
+			cd->sim = nullptr;
 			cd->similarity = FALSE;
 			}
 		else
@@ -398,18 +398,18 @@ static gboolean cache_sim_read_similarity(FILE *f, gchar *buf, gint s, CacheData
 CacheData *cache_sim_data_load(const gchar *path)
 {
 	FILE *f;
-	CacheData *cd = NULL;
+	CacheData *cd = nullptr;
 	gchar buf[32];
 	gint success = CACHE_LOAD_LINE_NOISE;
 	gchar *pathl;
 
-	if (!path) return NULL;
+	if (!path) return nullptr;
 
 	pathl = path_from_utf8(path);
 	f = fopen(pathl, "r");
 	g_free(pathl);
 
-	if (!f) return NULL;
+	if (!f) return nullptr;
 
 	cd = cache_sim_data_new();
 	cd->path = g_strdup(path);
@@ -462,7 +462,7 @@ CacheData *cache_sim_data_load(const gchar *path)
 	    !cd->similarity)
 		{
 		cache_sim_data_free(cd);
-		cd = NULL;
+		cd = nullptr;
 		}
 
 	return cd;
@@ -561,14 +561,14 @@ static void cache_path_parts(CacheType type,
 
 gchar *cache_get_location(CacheType type, const gchar *source, gint include_name, mode_t *mode)
 {
-	gchar *path = NULL;
+	gchar *path = nullptr;
 	gchar *base;
-	gchar *name = NULL;
+	gchar *name = nullptr;
 	const gchar *cache_rc;
 	const gchar *cache_local;
 	const gchar *cache_ext;
 
-	if (!source) return NULL;
+	if (!source) return nullptr;
 
 	cache_path_parts(type, &cache_rc, &cache_local, &cache_ext);
 
@@ -628,7 +628,7 @@ gchar *cache_find_location(CacheType type, const gchar *source)
 	const gchar *cache_ext;
 	gboolean prefer_local;
 
-	if (!source) return NULL;
+	if (!source) return nullptr;
 
 	cache_path_parts(type, &cache_rc, &cache_local, &cache_ext);
 
@@ -667,7 +667,7 @@ gchar *cache_find_location(CacheType type, const gchar *source)
 		if (!isfile(path))
 			{
 			g_free(path);
-			path = NULL;
+			path = nullptr;
 			}
 		}
 
@@ -716,7 +716,7 @@ gboolean cache_time_valid(const gchar *cache, const gchar *path)
 
 const gchar *get_thumbnails_cache_dir(void)
 {
-	static gchar *thumbnails_cache_dir = NULL;
+	static gchar *thumbnails_cache_dir = nullptr;
 
 	if (thumbnails_cache_dir) return thumbnails_cache_dir;
 
@@ -735,7 +735,7 @@ const gchar *get_thumbnails_cache_dir(void)
 
 const gchar *get_thumbnails_standard_cache_dir(void)
 {
-	static gchar *thumbnails_standard_cache_dir = NULL;
+	static gchar *thumbnails_standard_cache_dir = nullptr;
 
 	if (thumbnails_standard_cache_dir) return thumbnails_standard_cache_dir;
 
@@ -747,7 +747,7 @@ const gchar *get_thumbnails_standard_cache_dir(void)
 
 const gchar *get_metadata_cache_dir(void)
 {
-	static gchar *metadata_cache_dir = NULL;
+	static gchar *metadata_cache_dir = nullptr;
 
 	if (metadata_cache_dir) return metadata_cache_dir;
 

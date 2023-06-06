@@ -160,8 +160,8 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 	DIR *dp;
 	struct dirent *dir;
 	struct stat ent_sbuf;
-	GList *path_list = NULL;
-	GList *file_list = NULL;
+	GList *path_list = nullptr;
+	GList *file_list = nullptr;
 	GList *list;
 	GtkListStore *store;
 	gchar *pathl;
@@ -176,7 +176,7 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 		g_free(pathl);
 		return;
 		}
-	while ((dir = readdir(dp)) != NULL)
+	while ((dir = readdir(dp)) != nullptr)
 		{
 		if (!options->file_filter.show_dot_directory
 		    && dir->d_name[0] == '.' && dir->d_name[1] == '\0')
@@ -272,7 +272,7 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 
 static void dest_change_dir(Dest_Data *dd, const gchar *path, gboolean retain_name)
 {
-	const gchar *old_name = NULL;
+	const gchar *old_name = nullptr;
 	gchar *full_path;
 	gchar *new_directory;
 
@@ -327,8 +327,8 @@ static void dest_dnd_set_data(GtkWidget *view,
 			      GdkDragContext *UNUSED(context), GtkSelectionData *selection_data,
 			      guint UNUSED(info), guint UNUSED(time), gpointer UNUSED(data))
 {
-	gchar *path = NULL;
-	GList *list = NULL;
+	gchar *path = nullptr;
+	GList *list = nullptr;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
 	GtkTreeIter iter;
@@ -385,7 +385,7 @@ static void dest_view_store_selection(Dest_Data *dd, GtkTreeView *view)
 	GtkTreeIter iter;
 
 	if (dd->right_click_path) gtk_tree_path_free(dd->right_click_path);
-	dd->right_click_path = NULL;
+	dd->right_click_path = nullptr;
 
 	selection = gtk_tree_view_get_selection(view);
 	if (!gtk_tree_selection_get_selected(selection, &model, &iter))
@@ -468,7 +468,7 @@ static void dest_view_delete_dlg_cancel(GenericDialog *UNUSED(gd), gpointer data
 {
 	auto dl = static_cast<DestDel_Data *>(data);
 
-	dl->dd->gd = NULL;
+	dl->dd->gd = nullptr;
 	g_free(dl->path);
 	g_free(dl);
 }
@@ -526,7 +526,7 @@ static void dest_view_delete(Dest_Data *dd, GtkTreeView *view)
 				    dd->entry, TRUE,
 				    dest_view_delete_dlg_cancel, dl);
 
-	generic_dialog_add_button(dd->gd, GTK_STOCK_DELETE, NULL, dest_view_delete_dlg_ok_cb, TRUE);
+	generic_dialog_add_button(dd->gd, GTK_STOCK_DELETE, nullptr, dest_view_delete_dlg_ok_cb, TRUE);
 
 	text = g_strdup_printf(_("About to delete the file:\n %s"), path);
 	generic_dialog_add_message(dd->gd, GTK_STOCK_DIALOG_QUESTION,
@@ -624,11 +624,11 @@ static gboolean dest_popup_menu(Dest_Data *dd, GtkTreeView *view,
 	if (local)
 		{
 		g_object_set_data(G_OBJECT(menu), "active_view", view);
-		gtk_menu_popup_at_widget(GTK_MENU(menu), GTK_WIDGET(view), GDK_GRAVITY_CENTER, GDK_GRAVITY_CENTER, NULL);
+		gtk_menu_popup_at_widget(GTK_MENU(menu), GTK_WIDGET(view), GDK_GRAVITY_CENTER, GDK_GRAVITY_CENTER, nullptr);
 		}
 	else
 		{
-		gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+		gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 
 		}
 
@@ -720,7 +720,7 @@ static void dest_new_dir_cb(GtkWidget *widget, gpointer data)
 	path = new_folder(GTK_WINDOW(dialog_window), dd->path);
 	gtk_window_present(GTK_WINDOW(dialog_window));
 
-	if (path == NULL)
+	if (path == nullptr)
 		{
 		return;
 		}
@@ -772,7 +772,7 @@ static void dest_select_cb(GtkTreeSelection *selection, gpointer data)
 	GtkTreeIter iter;
 	gchar *path;
 
-	if (!gtk_tree_selection_get_selected(selection, NULL, &iter)) return;
+	if (!gtk_tree_selection_get_selected(selection, nullptr, &iter)) return;
 
 	view = gtk_tree_selection_get_tree_view(selection);
 	store = gtk_tree_view_get_model(view);
@@ -780,7 +780,7 @@ static void dest_select_cb(GtkTreeSelection *selection, gpointer data)
 
 	if (view == GTK_TREE_VIEW(dd->d_view))
 		{
-		dest_change_dir(dd, path, (dd->f_view != NULL));
+		dest_change_dir(dd, path, (dd->f_view != nullptr));
 		}
 	else
 		{
@@ -803,7 +803,7 @@ static void dest_activate_cb(GtkWidget *view, GtkTreePath *tpath, GtkTreeViewCol
 
 	if (view == dd->d_view)
 		{
-		dest_change_dir(dd, path, (dd->f_view != NULL));
+		dest_change_dir(dd, path, (dd->f_view != nullptr));
 		}
 	else
 		{
@@ -820,7 +820,7 @@ static void dest_home_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 
-	dest_change_dir(dd, homedir(), (dd->f_view != NULL));
+	dest_change_dir(dd, homedir(), (dd->f_view != nullptr));
 }
 
 static void dest_show_hidden_cb(GtkWidget *UNUSED(widget), gpointer data)
@@ -946,10 +946,10 @@ static void dest_filter_add(Dest_Data *dd, const gchar *filter, const gchar *des
 static void dest_filter_clear(Dest_Data *dd)
 {
 	string_list_free(dd->filter_list);
-	dd->filter_list = NULL;
+	dd->filter_list = nullptr;
 
 	string_list_free(dd->filter_text_list);
-	dd->filter_text_list = NULL;
+	dd->filter_text_list = nullptr;
 
 	dest_filter_add(dd, "*", _("All Files"), TRUE);
 }
@@ -965,7 +965,7 @@ static void dest_filter_changed_cb(GtkEditable *UNUSED(editable), gpointer data)
 	buf = gtk_entry_get_text(GTK_ENTRY(entry));
 
 	g_free(dd->filter);
-	dd->filter = NULL;
+	dd->filter = nullptr;
 	if (strlen(buf) > 0) dd->filter = g_strdup(buf);
 
 	path = g_strdup(dd->path);
@@ -979,7 +979,7 @@ static void dest_bookmark_select_cb(const gchar *path, gpointer data)
 
 	if (isdir(path))
 		{
-		dest_change_dir(dd, path, (dd->f_view != NULL));
+		dest_change_dir(dd, path, (dd->f_view != nullptr));
 		}
 	else if (isfile(path) && dd->f_view)
 		{
@@ -1008,7 +1008,7 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 
 	dd = g_new0(Dest_Data, 1);
 
-	table = gtk_table_new(4, (filter != NULL) ? 3 : 1, FALSE);
+	table = gtk_table_new(4, (filter != nullptr) ? 3 : 1, FALSE);
 	gtk_table_set_col_spacings(GTK_TABLE(table), PREF_PAD_GAP);
 	gtk_table_set_row_spacing(GTK_TABLE(table), 0, PREF_PAD_GAP);
 	gtk_widget_show(table);
@@ -1016,11 +1016,11 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 	dd->entry = entry;
 	g_object_set_data(G_OBJECT(dd->entry), "destination_data", dd);
 
-	hbox2 = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, NULL);
+	hbox2 = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	gtk_box_set_spacing(GTK_BOX(hbox2), PREF_PAD_BUTTON_GAP);
-	pref_button_new(hbox2, NULL, _("Home"), FALSE,
+	pref_button_new(hbox2, nullptr, _("Home"), FALSE,
 			G_CALLBACK(dest_home_cb), dd);
-	pref_button_new(hbox2, NULL, _("New folder"), FALSE,
+	pref_button_new(hbox2, nullptr, _("New folder"), FALSE,
 			G_CALLBACK(dest_new_dir_cb), dd);
 
 	dd->hidden_button = gtk_check_button_new_with_label(_("Show hidden"));
@@ -1041,20 +1041,20 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 		}
 	else
 		{
-		paned = NULL;
+		paned = nullptr;
 		gtk_table_attach(GTK_TABLE(table), hbox2, 0, 1, 1, 2,
 				 static_cast<GtkAttachOptions>(GTK_EXPAND | GTK_FILL), static_cast<GtkAttachOptions>(GTK_EXPAND | GTK_FILL), 0, 0);
 		}
 	gtk_widget_show(hbox2);
 
 	/* bookmarks */
-	scrolled = bookmark_list_new(NULL, dest_bookmark_select_cb, dd);
+	scrolled = bookmark_list_new(nullptr, dest_bookmark_select_cb, dd);
 	gtk_box_pack_start(GTK_BOX(hbox2), scrolled, FALSE, FALSE, 0);
 	gtk_widget_show(scrolled);
 
 	dd->bookmark_list = scrolled;
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
@@ -1107,7 +1107,7 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 		{
 		GtkListStore *store;
 
-		hbox2 = pref_table_box(table, 2, 0, GTK_ORIENTATION_HORIZONTAL, NULL);
+		hbox2 = pref_table_box(table, 2, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
 		pref_label_new(hbox2, _("Filter:"));
 
 		store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
@@ -1125,7 +1125,7 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 		gtk_box_pack_start(GTK_BOX(hbox2), dd->filter_combo, TRUE, TRUE, 0);
 		gtk_widget_show(dd->filter_combo);
 
-		scrolled = gtk_scrolled_window_new(NULL, NULL);
+		scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 		gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 					       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);

@@ -124,7 +124,7 @@ static void real_collection_button_pressed(FileDialog *fd, gpointer data, gint a
 {
 	auto cd = static_cast<CollectionData *>(data);
 	gboolean err = FALSE;
-	gchar *text = NULL;
+	gchar *text = nullptr;
 
 	if (!isname(fd->dest_path))
 		{
@@ -145,7 +145,7 @@ static void real_collection_button_pressed(FileDialog *fd, gpointer data, gint a
 	if (err) {
 		if  (text)
 			{
-			file_util_warning_dialog(_("Can not open collection file"), text, GTK_STOCK_DIALOG_ERROR, NULL);
+			file_util_warning_dialog(_("Can not open collection file"), text, GTK_STOCK_DIALOG_ERROR, nullptr);
 			g_free(text);
 		}
 		return;
@@ -187,7 +187,7 @@ static void collection_save_or_load_dialog(const gchar *path,
 					   gint type, CollectionData *cd)
 {
 	FileDialog *fd;
-	GtkWidget *parent = NULL;
+	GtkWidget *parent = nullptr;
 	CollectWindow *cw;
 	const gchar *title;
 	const gchar *btntext;
@@ -198,14 +198,14 @@ static void collection_save_or_load_dialog(const gchar *path,
 		{
 		if (!cd) return;
 		title = _("Save collection");
-		btntext = NULL;
+		btntext = nullptr;
 		btnfunc = reinterpret_cast<gpointer>(collection_save_cb);
 		stock_id = GTK_STOCK_SAVE;
 		}
 	else if (type == DIALOG_LOAD)
 		{
 		title = _("Open collection");
-		btntext = NULL;
+		btntext = nullptr;
 		btnfunc = reinterpret_cast<gpointer>(collection_load_cb);
 		stock_id = GTK_STOCK_OPEN;
 		}
@@ -226,7 +226,7 @@ static void collection_save_or_load_dialog(const gchar *path,
 	fd = file_util_file_dlg(title, "dlg_collection", parent,
 			     collection_save_or_load_dialog_close_cb, cd);
 
-	generic_dialog_add_message(GENERIC_DIALOG(fd), NULL, title, NULL, FALSE);
+	generic_dialog_add_message(GENERIC_DIALOG(fd), nullptr, title, nullptr, FALSE);
 	file_dialog_add_button(fd, stock_id, btntext, reinterpret_cast<void (*)(FileDialog *, gpointer)>(btnfunc), TRUE);
 
 	file_dialog_add_path_widgets(fd, get_collections_dir(), path,
@@ -255,7 +255,7 @@ void collection_dialog_save_close(gchar *path, CollectionData *cd)
 
 void collection_dialog_load(gchar *path)
 {
-	collection_save_or_load_dialog(path, DIALOG_LOAD, NULL);
+	collection_save_or_load_dialog(path, DIALOG_LOAD, nullptr);
 }
 
 void collection_dialog_append(gchar *path, CollectionData *cd)

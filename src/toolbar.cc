@@ -147,7 +147,7 @@ static const UseableToolbarItems useable_toolbar_items[] = {
 	{"SBar",	N_("Info sidebar"), PIXBUF_INLINE_ICON_INFO},
 	{"SBarSort",	N_("Sort manager"), PIXBUF_INLINE_ICON_SORT},
 	{"Quit",	N_("Quit"), GTK_STOCK_QUIT},
-	{NULL,		NULL, NULL}
+	{nullptr,		nullptr, nullptr}
 };
 
 /**
@@ -226,7 +226,7 @@ static void toolbar_menu_popup(GtkWidget *widget)
 		menu_item_add_divider(menu);
 		}
 
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }
 
 static gboolean toolbar_press_cb(GtkGesture *UNUSED(gesture), int UNUSED(n_press), double UNUSED(x), double UNUSED(y), gpointer data)
@@ -241,8 +241,8 @@ static gboolean toolbar_press_cb(GtkGesture *UNUSED(gesture), int UNUSED(n_press
 static void get_toolbar_item(const gchar *name, gchar **label, gchar **stock_id)
 {
 	const UseableToolbarItems *list = useable_toolbar_items;
-	*label = NULL;
-	*stock_id = NULL;
+	*label = nullptr;
+	*stock_id = nullptr;
 
 	while (list->name)
 		{
@@ -311,7 +311,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 		GdkPixbuf *pixbuf;
 		gchar *iconl;
 		iconl = path_from_utf8(toolbar_entry->stock_id);
-		pixbuf = gdk_pixbuf_new_from_file(iconl, NULL);
+		pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
 		g_free(iconl);
 		if (pixbuf)
 			{
@@ -359,8 +359,8 @@ static void get_desktop_data(const gchar *name, gchar **label, gchar **stock_id)
 {
 	GList *editors_list;
 	GList *work;
-	*label = NULL;
-	*stock_id = NULL;
+	*label = nullptr;
+	*stock_id = nullptr;
 
 	editors_list = editor_list_get();
 	work = editors_list;
@@ -422,7 +422,7 @@ static void toolbar_menu_add_popup(GtkWidget *UNUSED(widget), gpointer data)
 		}
 	g_list_free(editors_list);
 
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }
 
 static gboolean toolbar_menu_add_cb(GtkWidget *widget, gpointer data)
@@ -507,7 +507,7 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 	GtkWidget *tbar;
 	GtkWidget *add_box;
 
-	if (!lw) return NULL;
+	if (!lw) return nullptr;
 
 	if (!toolbarlist[bar])
 		{
@@ -518,7 +518,7 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 	toolbarlist[bar]->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gtk_widget_show(toolbarlist[bar]->widget);
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 							GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_NONE);

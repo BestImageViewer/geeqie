@@ -202,7 +202,7 @@ static const KnownPanes known_panes[] = {
 	{PANE_GPS,		"gps",	N_("GPS Map"),	default_config_gps},
 #endif
 #endif
-	{PANE_UNDEF,		NULL,		NULL,			NULL}
+	{PANE_UNDEF,		nullptr,		nullptr,			nullptr}
 };
 
 typedef struct _BarData BarData;
@@ -295,7 +295,7 @@ static void bar_expander_height_cb(GtkWidget *UNUSED(widget), gpointer data)
 	display = gdk_display_get_default();
 	seat = gdk_display_get_default_seat(display);
 	device = gdk_seat_get_pointer(seat);
-	gdk_device_get_position(device, NULL, &x, &y);
+	gdk_device_get_position(device, nullptr, &x, &y);
 
 	list = gtk_container_get_children(GTK_CONTAINER(expander));
 	data_box = static_cast<GtkWidget *>(list->data);
@@ -372,7 +372,7 @@ static void bar_menu_popup(GtkWidget *widget)
 	bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(widget), "bar_data"));
 	if (bd)
 		{
-		expander = NULL;
+		expander = nullptr;
 		bar = widget;
 		}
 	else
@@ -404,7 +404,7 @@ static void bar_menu_popup(GtkWidget *widget)
 		menu_item_add_divider(menu);
 		}
 
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }
 
 static void bar_menu_add_popup(GtkWidget *widget)
@@ -425,7 +425,7 @@ static void bar_menu_add_popup(GtkWidget *widget)
 		pane++;
 		}
 
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }
 
 
@@ -537,12 +537,12 @@ GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id)
 {
 	BarData *bd;
 	GList *list, *work;
-	GtkWidget *ret = NULL;
+	GtkWidget *ret = nullptr;
 
-	if (!id || !id[0]) return NULL;
+	if (!id || !id[0]) return nullptr;
 
 	bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
-	if (!bd) return NULL;
+	if (!bd) return nullptr;
 
 	list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
 
@@ -646,7 +646,7 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 	pd->lw = bd->lw;
 	pd->bar = bar;
 
-	expander = gtk_expander_new(NULL);
+	expander = gtk_expander_new(nullptr);
 	DEBUG_NAME(expander);
 	if (pd && pd->title)
 		{
@@ -671,7 +671,7 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 
 void bar_populate_default(GtkWidget *UNUSED(bar))
 {
-	const gchar *populate_id[] = {"histogram", "title", "keywords", "comment", "rating", "exif", NULL};
+	const gchar *populate_id[] = {"histogram", "title", "keywords", "comment", "rating", "exif", nullptr};
 	const gchar **id = populate_id;
 
 	while (*id)
@@ -772,7 +772,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	gtk_box_pack_start(GTK_BOX(bd->widget), box, FALSE, FALSE, 0);
 	gtk_widget_show(box);
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	DEBUG_NAME(scrolled);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -788,7 +788,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	DEBUG_NAME(add_box);
 	gtk_box_pack_end(GTK_BOX(bd->widget), add_box, FALSE, FALSE, 0);
 	tbar = pref_toolbar_new(add_box, GTK_TOOLBAR_ICONS);
-	bd->add_button = pref_toolbar_button(tbar, GTK_STOCK_ADD, NULL, FALSE,
+	bd->add_button = pref_toolbar_button(tbar, GTK_STOCK_ADD, nullptr, FALSE,
 					     _("Add Pane"),
 					     G_CALLBACK(bar_menu_add_cb), bd);
 	gtk_widget_show(add_box);
@@ -881,7 +881,7 @@ const gchar *bar_pane_get_default_config(const gchar *id)
 		if (strcmp(pane->id, id) == 0) break;
 		pane++;
 		}
-	if (!pane->id) return NULL;
+	if (!pane->id) return nullptr;
 	return pane->config;
 }
 

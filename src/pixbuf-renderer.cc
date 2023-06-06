@@ -113,7 +113,7 @@ typedef enum {
 } PrZoomFlags;
 
 static guint signals[SIGNAL_COUNT] = { 0 };
-static GtkEventBoxClass *parent_class = NULL;
+static GtkEventBoxClass *parent_class = nullptr;
 
 
 
@@ -162,15 +162,15 @@ GType pixbuf_renderer_get_type(void)
 		static const GTypeInfo pixbuf_renderer_info =
 			{
 			sizeof(PixbufRendererClass), /* class_size */
-			NULL,		/* base_init */
-			NULL,		/* base_finalize */
+			nullptr,		/* base_init */
+			nullptr,		/* base_finalize */
 			static_cast<GClassInitFunc>(pixbuf_renderer_class_init_wrapper),
-			NULL,		/* class_finalize */
-			NULL,		/* class_data */
+			nullptr,		/* class_finalize */
+			nullptr,		/* class_data */
 			sizeof(PixbufRenderer), /* instance_size */
 			0,		/* n_preallocs */
 			reinterpret_cast<GInstanceInitFunc>(pixbuf_renderer_init_wrapper), /* instance_init */
-			NULL,		/* value_table */
+			nullptr,		/* value_table */
 			};
 
 		pixbuf_renderer_type = g_type_register_static(GTK_TYPE_EVENT_BOX, "PixbufRenderer",
@@ -195,7 +195,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_ZOOM_MIN,
 					g_param_spec_double("zoom_min",
 							    "Zoom minimum",
-							    NULL,
+							    nullptr,
 							    -1000.0,
 							    1000.0,
 							    PR_ZOOM_MIN,
@@ -205,7 +205,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_ZOOM_MAX,
 					g_param_spec_double("zoom_max",
 							    "Zoom maximum",
-							    NULL,
+							    nullptr,
 							    -1000.0,
 							    1000.0,
 							    PR_ZOOM_MIN,
@@ -215,7 +215,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_ZOOM_QUALITY,
 					g_param_spec_uint("zoom_quality",
 							  "Zoom quality",
-							  NULL,
+							  nullptr,
 							  GDK_INTERP_NEAREST,
 							  GDK_INTERP_BILINEAR,
 							  GDK_INTERP_BILINEAR,
@@ -225,7 +225,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_ZOOM_2PASS,
 					g_param_spec_boolean("zoom_2pass",
 							     "2 pass zoom",
-							     NULL,
+							     nullptr,
 							     TRUE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
@@ -233,14 +233,14 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_ZOOM_EXPAND,
 					g_param_spec_boolean("zoom_expand",
 							     "Expand image in autozoom.",
-							     NULL,
+							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 	g_object_class_install_property(gobject_class,
 					PROP_SCROLL_RESET,
 					g_param_spec_uint("scroll_reset",
 							  "New image scroll reset",
-							  NULL,
+							  nullptr,
 							  PR_SCROLL_RESET_TOPLEFT,
 							  PR_SCROLL_RESET_NOCHANGE,
 							  PR_SCROLL_RESET_TOPLEFT,
@@ -250,7 +250,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_DELAY_FLIP,
 					g_param_spec_boolean("delay_flip",
 							     "Delay image update",
-							     NULL,
+							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
@@ -258,7 +258,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_LOADING,
 					g_param_spec_boolean("loading",
 							     "Image actively loading",
-							     NULL,
+							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
@@ -266,7 +266,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_COMPLETE,
 					g_param_spec_boolean("complete",
 							     "Image rendering complete",
-							     NULL,
+							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
@@ -274,7 +274,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_CACHE_SIZE_DISPLAY,
 					g_param_spec_uint("cache_display",
 							  "Display cache size MiB",
-							  NULL,
+							  nullptr,
 							  0,
 							  128,
 							  PR_CACHE_SIZE_DEFAULT,
@@ -294,7 +294,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_WINDOW_FIT,
 					g_param_spec_boolean("window_fit",
 							     "Fit window to image size",
-							     NULL,
+							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
@@ -302,7 +302,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_WINDOW_LIMIT,
 					g_param_spec_boolean("window_limit",
 							     "Limit size of parent window",
-							     NULL,
+							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
@@ -310,7 +310,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_WINDOW_LIMIT_VALUE,
 					g_param_spec_uint("window_limit_value",
 							  "Size limit of parent window",
-							  NULL,
+							  nullptr,
 							  10,
 							  150,
 							  100,
@@ -320,7 +320,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_AUTOFIT_LIMIT,
 					g_param_spec_boolean("autofit_limit",
 							     "Limit size of image when autofitting",
-							     NULL,
+							     nullptr,
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
@@ -328,7 +328,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_AUTOFIT_LIMIT_VALUE,
 					g_param_spec_uint("autofit_limit_value",
 							  "Size limit of image when autofitting",
-							  NULL,
+							  nullptr,
 							  10,
 							  150,
 							  100,
@@ -338,7 +338,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 					PROP_ENLARGEMENT_LIMIT_VALUE,
 					g_param_spec_uint("enlargement_limit_value",
 							  "Size increase limit of image when autofitting",
-							  NULL,
+							  nullptr,
 							  100,
 							  999,
 							  500,
@@ -350,7 +350,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 			     G_OBJECT_CLASS_TYPE(gobject_class),
 			     G_SIGNAL_RUN_LAST,
 			     G_STRUCT_OFFSET(PixbufRendererClass, zoom),
-			     NULL, NULL,
+			     nullptr, nullptr,
 			     g_cclosure_marshal_VOID__DOUBLE,
 			     G_TYPE_NONE, 1,
 			     G_TYPE_DOUBLE);
@@ -360,7 +360,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 			     G_OBJECT_CLASS_TYPE(gobject_class),
 			     G_SIGNAL_RUN_LAST,
 			     G_STRUCT_OFFSET(PixbufRendererClass, clicked),
-			     NULL, NULL,
+			     nullptr, nullptr,
 			     g_cclosure_marshal_VOID__BOXED,
 			     G_TYPE_NONE, 1,
 			     GDK_TYPE_EVENT);
@@ -370,7 +370,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 			     G_OBJECT_CLASS_TYPE(gobject_class),
 			     G_SIGNAL_RUN_LAST,
 			     G_STRUCT_OFFSET(PixbufRendererClass, scroll_notify),
-			     NULL, NULL,
+			     nullptr, nullptr,
 			     g_cclosure_marshal_VOID__VOID,
 			     G_TYPE_NONE, 0);
 
@@ -379,7 +379,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 			     G_OBJECT_CLASS_TYPE(gobject_class),
 			     G_SIGNAL_RUN_LAST,
 			     G_STRUCT_OFFSET(PixbufRendererClass, render_complete),
-			     NULL, NULL,
+			     nullptr, nullptr,
 			     g_cclosure_marshal_VOID__VOID,
 			     G_TYPE_NONE, 0);
 
@@ -388,7 +388,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 			     G_OBJECT_CLASS_TYPE(gobject_class),
 			     G_SIGNAL_RUN_LAST,
 			     G_STRUCT_OFFSET(PixbufRendererClass, drag),
-			     NULL, NULL,
+			     nullptr, nullptr,
 			     g_cclosure_marshal_VOID__BOXED,
 			     G_TYPE_NONE, 1,
 			     GDK_TYPE_EVENT);
@@ -398,7 +398,7 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 			     G_OBJECT_CLASS_TYPE(gobject_class),
 			     G_SIGNAL_RUN_LAST,
 			     G_STRUCT_OFFSET(PixbufRendererClass, update_pixel),
-			     NULL, NULL,
+			     nullptr, nullptr,
 			     g_cclosure_marshal_VOID__VOID,
 			     G_TYPE_NONE, 0);
 }
@@ -441,7 +441,7 @@ static void pixbuf_renderer_init(PixbufRenderer *pr)
 	pr->y_mouse = -1;
 
 	pr->source_tiles_enabled = FALSE;
-	pr->source_tiles = NULL;
+	pr->source_tiles = nullptr;
 
 	pr->orientation = 1;
 
@@ -456,7 +456,7 @@ static void pixbuf_renderer_init(PixbufRenderer *pr)
 
 	pr->renderer = pr_backend_renderer_new(pr);
 
-	pr->renderer2 = NULL;
+	pr->renderer2 = nullptr;
 
 	gtk_widget_set_double_buffered(box, FALSE);
 	gtk_widget_set_app_paintable(box, TRUE);
@@ -485,7 +485,7 @@ static void pixbuf_renderer_finalize(GObject *object)
 
 PixbufRenderer *pixbuf_renderer_new(void)
 {
-	return static_cast<PixbufRenderer *>(g_object_new(TYPE_PIXBUF_RENDERER, NULL));
+	return static_cast<PixbufRenderer *>(g_object_new(TYPE_PIXBUF_RENDERER, nullptr));
 }
 
 static void pixbuf_renderer_set_property(GObject *object, guint prop_id,
@@ -635,7 +635,7 @@ static void widget_set_cursor(GtkWidget *widget, gint icon)
 
 	if (icon == -1)
 		{
-		cursor = NULL;
+		cursor = nullptr;
 		}
 	else
 		{
@@ -723,7 +723,7 @@ static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 void pixbuf_renderer_set_parent(PixbufRenderer *pr, GtkWindow *window)
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
-	g_return_if_fail(window == NULL || GTK_IS_WINDOW(window));
+	g_return_if_fail(window == nullptr || GTK_IS_WINDOW(window));
 
 	pr->parent_window = GTK_WIDGET(window);
 }
@@ -765,8 +765,8 @@ gboolean pixbuf_renderer_overlay_get(PixbufRenderer *pr, gint id, GdkPixbuf **pi
 
 void pixbuf_renderer_overlay_remove(PixbufRenderer *pr, gint id)
 {
-	pr->renderer->overlay_set(pr->renderer, id, NULL, 0, 0);
-	if (pr->renderer2) pr->renderer2->overlay_set(pr->renderer2, id, NULL, 0, 0);
+	pr->renderer->overlay_set(pr->renderer, id, nullptr, 0, 0);
+	if (pr->renderer2) pr->renderer2->overlay_set(pr->renderer2, id, nullptr, 0, 0);
 }
 
 /*
@@ -890,7 +890,7 @@ static void pr_scroller_start(PixbufRenderer *pr, gint x, gint y)
 
 		resource_path = g_build_filename(GQ_RESOURCE_PATH_ICONS, PIXBUF_INLINE_SCROLLER ".png", NULL);
 
-		pixbuf = gdk_pixbuf_new_from_resource(resource_path, NULL);
+		pixbuf = gdk_pixbuf_new_from_resource(resource_path, nullptr);
 		g_free(resource_path);
 #else
 		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 32, 32);
@@ -978,7 +978,7 @@ static void pr_source_tile_free_all(PixbufRenderer *pr)
 		}
 
 	g_list_free(pr->source_tiles);
-	pr->source_tiles = NULL;
+	pr->source_tiles = nullptr;
 }
 
 static void pr_source_tile_unset(PixbufRenderer *pr)
@@ -1010,7 +1010,7 @@ static gboolean pr_source_tile_visible(PixbufRenderer *pr, SourceTile *st)
 
 static SourceTile *pr_source_tile_new(PixbufRenderer *pr, gint x, gint y)
 {
-	SourceTile *st = NULL;
+	SourceTile *st = nullptr;
 	gint count;
 
 	g_return_val_if_fail(pr->source_tile_width >= 1 && pr->source_tile_height >= 1, NULL);
@@ -1076,7 +1076,7 @@ static SourceTile *pr_source_tile_request(PixbufRenderer *pr, gint x, gint y)
 	SourceTile *st;
 
 	st = pr_source_tile_new(pr, x, y);
-	if (!st) return NULL;
+	if (!st) return nullptr;
 
 	if (pr->func_tile_request &&
 	    pr->func_tile_request(pr, st->x, st->y,
@@ -1115,13 +1115,13 @@ static SourceTile *pr_source_tile_find(PixbufRenderer *pr, gint x, gint y)
 		work = work->next;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 GList *pr_source_tile_compute_region(PixbufRenderer *pr, gint x, gint y, gint w, gint h, gboolean request)
 {
 	gint x1, y1;
-	GList *list = NULL;
+	GList *list = nullptr;
 	gint sx, sy;
 
 	if (x < 0) x = 0;
@@ -1193,10 +1193,10 @@ void pixbuf_renderer_set_tiles(PixbufRenderer *pr, gint width, gint height,
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 	g_return_if_fail(tile_width >= 32 && tile_height >= 32);
 	g_return_if_fail(width >= 32 && height > 32);
-	g_return_if_fail(func_request != NULL);
+	g_return_if_fail(func_request != nullptr);
 
 	if (pr->pixbuf) g_object_unref(pr->pixbuf);
-	pr->pixbuf = NULL;
+	pr->pixbuf = nullptr;
 
 	pr_source_tile_unset(pr);
 
@@ -1925,7 +1925,7 @@ static void pr_size_sync(PixbufRenderer *pr, gint new_width, gint new_height)
 			{
 			GdkPixbuf *pixbuf;
 
-			if (pixbuf_renderer_overlay_get(pr, pr->scroller_overlay, &pixbuf, NULL, NULL))
+			if (pixbuf_renderer_overlay_get(pr, pr->scroller_overlay, &pixbuf, nullptr, nullptr))
 				{
 				gint w, h;
 
@@ -2043,7 +2043,7 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 	seat = gdk_display_get_default_seat(gdk_window_get_display(event->window));
 	device = gdk_seat_get_pointer(seat);
 
-	gdk_window_get_device_position(event->window, device, &x, &y, NULL);
+	gdk_window_get_device_position(event->window, device, &x, &y, nullptr);
 
 	event->x = x;
 	event->y = y;
@@ -2129,7 +2129,7 @@ static gboolean pr_mouse_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpo
 			pr->drag_moved = 0;
 			gdk_pointer_grab(gtk_widget_get_window(widget), FALSE,
 					 static_cast<GdkEventMask>(GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_RELEASE_MASK),
-					 NULL, NULL, bevent->time);
+					 nullptr, nullptr, bevent->time);
 			gtk_grab_add(widget);
 			break;
 		case MOUSE_BUTTON_MIDDLE:
@@ -2629,7 +2629,7 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 		pr->func_tile_data = source->func_tile_data;
 
 		pr->source_tiles = source->source_tiles;
-		source->source_tiles = NULL;
+		source->source_tiles = nullptr;
 
 		pr_zoom_sync(pr, source->zoom, static_cast<PrZoomFlags>(PR_ZOOM_FORCE | PR_ZOOM_NEW), 0, 0);
 		}
@@ -2640,7 +2640,7 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 
 	pr->scroll_reset = scroll_reset;
 
-	pixbuf_renderer_set_pixbuf(source, NULL, source->zoom);
+	pixbuf_renderer_set_pixbuf(source, nullptr, source->zoom);
 }
 
 void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
@@ -2686,7 +2686,7 @@ void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 		pr->func_tile_data = source->func_tile_data;
 
 		pr->source_tiles = source->source_tiles;
-		source->source_tiles = NULL;
+		source->source_tiles = nullptr;
 
 		pr_zoom_sync(pr, source->zoom, static_cast<PrZoomFlags>(PR_ZOOM_FORCE | PR_ZOOM_NEW), 0, 0);
 		}
@@ -2780,7 +2780,7 @@ static void pr_stereo_set(PixbufRenderer *pr)
 	else
 		{
 		if (pr->renderer2) pr->renderer2->free(pr->renderer2);
-		pr->renderer2 = NULL;
+		pr->renderer2 = nullptr;
 		}
 	if (pr->stereo_mode & PR_STEREO_HALF)
 		{
@@ -2835,7 +2835,7 @@ static void pr_stereo_temp_disable(PixbufRenderer *pr, gboolean disable)
 		if (!pr->renderer) pr->renderer = pr_backend_renderer_new(pr);
 		pr->renderer->stereo_set(pr->renderer, PR_STEREO_NONE);
 		if (pr->renderer2) pr->renderer2->free(pr->renderer2);
-		pr->renderer2 = NULL;
+		pr->renderer2 = nullptr;
 		pr->aspect_ratio = 1.0;
 		}
 	else
@@ -2855,7 +2855,7 @@ gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, gint x_pixel, gint
 	size_t xoff, yoff;
 
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(r_mouse != NULL && g_mouse != NULL && b_mouse != NULL, FALSE);
+	g_return_val_if_fail(r_mouse != nullptr && g_mouse != nullptr && b_mouse != nullptr, FALSE);
 
 	if (!pr->pixbuf && !pr->source_tiles_enabled)
 		{
@@ -2898,7 +2898,7 @@ gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, gint *x_pixel_re
 	gint x_pixel, y_pixel, x_pixel_clamped, y_pixel_clamped;
 
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(x_pixel_return != NULL && y_pixel_return != NULL, FALSE);
+	g_return_val_if_fail(x_pixel_return != nullptr && y_pixel_return != nullptr, FALSE);
 
 	if (!pr->pixbuf && !pr->source_tiles_enabled)
 		{
@@ -2932,7 +2932,7 @@ gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, gint *x_pixel_re
 gboolean pixbuf_renderer_get_image_size(PixbufRenderer *pr, gint *width, gint *height)
 {
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(width != NULL && height != NULL, FALSE);
+	g_return_val_if_fail(width != nullptr && height != nullptr, FALSE);
 
 	if (!pr->pixbuf && !pr->source_tiles_enabled && (!pr->image_width || !pr->image_height))
 		{
@@ -2949,7 +2949,7 @@ gboolean pixbuf_renderer_get_image_size(PixbufRenderer *pr, gint *width, gint *h
 gboolean pixbuf_renderer_get_scaled_size(PixbufRenderer *pr, gint *width, gint *height)
 {
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(width != NULL && height != NULL, FALSE);
+	g_return_val_if_fail(width != nullptr && height != nullptr, FALSE);
 
 	if (!pr->pixbuf && !pr->source_tiles_enabled && (!pr->image_width || !pr->image_height))
 		{
@@ -2966,7 +2966,7 @@ gboolean pixbuf_renderer_get_scaled_size(PixbufRenderer *pr, gint *width, gint *
 gboolean pixbuf_renderer_get_visible_rect(PixbufRenderer *pr, GdkRectangle *rect)
 {
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(rect != NULL, FALSE);
+	g_return_val_if_fail(rect != nullptr, FALSE);
 
 	if ((!pr->pixbuf && !pr->source_tiles_enabled) ||
 	    !pr->scale)

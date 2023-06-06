@@ -55,7 +55,7 @@ static gboolean image_loader_external_load(gpointer loader, const guchar *UNUSED
 
 	runcmd(cmd_line);
 
-	ld->pixbuf = gdk_pixbuf_new_from_file(randname, NULL);
+	ld->pixbuf = gdk_pixbuf_new_from_file(randname, nullptr);
 
 	ld->area_updated_cb(loader, 0, 0, gdk_pixbuf_get_width(ld->pixbuf), gdk_pixbuf_get_height(ld->pixbuf), ld->data);
 
@@ -97,7 +97,7 @@ static gchar* image_loader_external_get_format_name(gpointer UNUSED(loader))
 
 static gchar** image_loader_external_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"application/octet-stream", NULL};
+	static const gchar *mime[] = {"application/octet-stream", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
@@ -124,7 +124,7 @@ void image_loader_backend_set_external(ImageLoaderBackend *funcs)
 	funcs->loader_new = image_loader_external_new;
 	funcs->set_size = image_loader_external_set_size;
 	funcs->load = image_loader_external_load;
-	funcs->write = NULL;
+	funcs->write = nullptr;
 	funcs->get_pixbuf = image_loader_external_get_pixbuf;
 	funcs->close = image_loader_external_close;
 	funcs->abort = image_loader_external_abort;

@@ -47,7 +47,7 @@ FileCacheData *file_cache_new(FileCacheReleaseFunc release, gulong max_size)
 	auto fc = g_new(FileCacheData, 1);
 
 	fc->release = release;
-	fc->list = NULL;
+	fc->list = nullptr;
 	fc->max_size = max_size;
 	fc->size = 0;
 

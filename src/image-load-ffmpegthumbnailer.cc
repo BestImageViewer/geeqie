@@ -66,7 +66,7 @@ static gchar* image_loader_ft_get_format_name(gpointer UNUSED(loader))
 
 static gchar** image_loader_ft_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"video/mp4", NULL};
+	static const gchar *mime[] = {"video/mp4", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
@@ -130,16 +130,16 @@ static gboolean image_loader_ft_load (gpointer loader, const guchar *UNUSED(buf)
 	lft->area_updated_cb(loader, 0, 0, image->image_data_width, image->image_data_height, lft->data);
 #else
 	GInputStream *image_stream;
-	image_stream = g_memory_input_stream_new_from_data (image->image_data_ptr, image->image_data_size, NULL);
+	image_stream = g_memory_input_stream_new_from_data (image->image_data_ptr, image->image_data_size, nullptr);
 
-	if (image_stream == NULL)
+	if (image_stream == nullptr)
 	{
 	video_thumbnailer_destroy_image_data (image);
 	DEBUG_1("FFmpegthumbnailer: cannot open stream for %s", il->fd->path);
 	return FALSE;
     }
 
-	lft->pixbuf  = gdk_pixbuf_new_from_stream (image_stream, NULL, NULL);
+	lft->pixbuf  = gdk_pixbuf_new_from_stream (image_stream, nullptr, nullptr);
 	lft->size_cb(loader, gdk_pixbuf_get_width(lft->pixbuf), gdk_pixbuf_get_height(lft->pixbuf), lft->data);
 	g_object_unref (image_stream);
 	video_thumbnailer_destroy_image_data (image);
@@ -190,7 +190,7 @@ void image_loader_backend_set_ft(ImageLoaderBackend *funcs)
 	funcs->loader_new = image_loader_ft_new;
 	funcs->set_size = image_loader_ft_set_size;
 	funcs->load = image_loader_ft_load;
-	funcs->write = NULL;
+	funcs->write = nullptr;
 	funcs->get_pixbuf = image_loader_ft_get_pixbuf;
 	funcs->close = image_loader_ft_close;
 	funcs->abort = image_loader_ft_abort;

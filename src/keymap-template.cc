@@ -11687,5 +11687,5 @@ const char *keymap_template [] = {
 "         y=\"468.38324\" /></text>",
 "  </g>",
 "</svg>",
-NULL,
+nullptr,
 };

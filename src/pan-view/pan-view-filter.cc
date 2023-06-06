@@ -125,13 +125,13 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 
 void pan_filter_ui_destroy(PanViewFilterUi **ui_ptr)
 {
-	if (ui_ptr == NULL || *ui_ptr == NULL) return;
+	if (ui_ptr == nullptr || *ui_ptr == nullptr) return;
 
 	// Note that g_clear_pointer handles already-NULL pointers.
 	//g_clear_pointer(&(*ui_ptr)->filter_kw_table, g_hash_table_destroy);
 
 	g_free(*ui_ptr);
-	*ui_ptr = NULL;
+	*ui_ptr = nullptr;
 }
 
 static void pan_filter_status(PanWindow *pw, const gchar *text)
@@ -175,7 +175,7 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 	if (g_strcmp0(text, g_regex_escape_string(text, -1)))
 		{
 		// It's an actual regex, so compile
-		element->kw_regex = g_regex_new(text, static_cast<GRegexCompileFlags>(G_REGEX_ANCHORED | G_REGEX_OPTIMIZE), G_REGEX_MATCH_ANCHORED, NULL);
+		element->kw_regex = g_regex_new(text, static_cast<GRegexCompileFlags>(G_REGEX_ANCHORED | G_REGEX_OPTIMIZE), G_REGEX_MATCH_ANCHORED, nullptr);
 		}
 	ui->filter_elements = g_list_append(ui->filter_elements, element);
 
@@ -308,7 +308,7 @@ static gboolean pan_view_list_contains_kw_pattern(GList *haystack, PanViewFilter
 			{
 			auto keyword = static_cast<gchar *>(work->data);
 			work = work->next;
-			if (g_regex_match(filter->kw_regex, keyword, GRegexMatchFlags(0), NULL))
+			if (g_regex_match(filter->kw_regex, keyword, GRegexMatchFlags(0), nullptr))
 				{
 				if (found_kw) *found_kw = keyword;
 				return TRUE;
@@ -329,13 +329,13 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 {
 	GList *work;
 	gboolean modified = FALSE;
-	GHashTable *seen_kw_table = NULL;
+	GHashTable *seen_kw_table = nullptr;
 
 	if (!fd_list || !*fd_list) return modified;
 
 	// seen_kw_table is only valid in this scope, so don't take ownership of any strings.
 	if (filter_elements)
-		seen_kw_table = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+		seen_kw_table = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, nullptr);
 
 	work = *fd_list;
 	while (work)
@@ -345,7 +345,7 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 		work = work->next;
 
 		gboolean should_reject = FALSE;
-		gchar *group_kw = NULL;
+		gchar *group_kw = nullptr;
 
 		if (!((1 << fd -> format_class) & filter_classes))
 			{
@@ -363,7 +363,7 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 				{
 				auto filter = static_cast<PanViewFilterElement *>(filter_element->data);
 				filter_element = filter_element->next;
-				gchar *found_kw = NULL;
+				gchar *found_kw = nullptr;
 				gboolean has_kw = pan_view_list_contains_kw_pattern(img_keywords, filter, &found_kw);
 
 				switch (filter->mode)
@@ -384,7 +384,7 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 								{
 								should_reject = TRUE;
 								}
-							else if (group_kw == NULL)
+							else if (group_kw == nullptr)
 								{
 								group_kw = found_kw;
 								}
@@ -393,8 +393,8 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 					}
 				}
 			string_list_free(img_keywords);
-			if (!should_reject && group_kw != NULL) g_hash_table_add(seen_kw_table, group_kw);
-			group_kw = NULL;  // group_kw references an item from img_keywords.
+			if (!should_reject && group_kw != nullptr) g_hash_table_add(seen_kw_table, group_kw);
+			group_kw = nullptr;  // group_kw references an item from img_keywords.
 			}
 
 		if (should_reject)

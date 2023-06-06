@@ -96,15 +96,15 @@ gqv_cell_renderer_icon_get_type(void)
 		static const GTypeInfo cell_icon_info =
 			{
 			sizeof(GQvCellRendererIconClass), /* class_size */
-			NULL,		/* base_init */
-			NULL,		/* base_finalize */
+			nullptr,		/* base_init */
+			nullptr,		/* base_finalize */
 			static_cast<GClassInitFunc>(gqv_cell_renderer_icon_class_init_wrapper), /* class_init */
-			NULL,		/* class_finalize */
-			NULL,		/* class_data */
+			nullptr,		/* class_finalize */
+			nullptr,		/* class_data */
 			sizeof(GQvCellRendererIcon), /* instance_size */
 			0,		/* n_preallocs */
 			reinterpret_cast<GInstanceInitFunc>(gqv_cell_renderer_icon_init_wrapper), /* instance_init */
-			NULL,		/* value_table */
+			nullptr,		/* value_table */
 			};
 
 		cell_icon_type = g_type_register_static(GTK_TYPE_CELL_RENDERER,
@@ -164,7 +164,7 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 					g_param_spec_string("text",
 							"Text",
 							"Text to render",
-							NULL,
+							nullptr,
 							G_PARAM_READWRITE));
 
 	g_object_class_install_property(object_class,
@@ -272,7 +272,7 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 		G_OBJECT_CLASS_TYPE (object_class),
 		G_SIGNAL_RUN_LAST,
 		G_STRUCT_OFFSET (GQvCellRendererIconClass, toggled),
-		NULL, NULL,
+		nullptr, nullptr,
 		g_cclosure_marshal_VOID__STRING,
 		G_TYPE_NONE, 1,
 		G_TYPE_STRING);
@@ -302,7 +302,7 @@ gqv_cell_renderer_icon_get_property(GObject	*object,
 	switch (param_id)
 	{
 	case PROP_PIXBUF:
-		g_value_set_object(value, cellicon->pixbuf ? G_OBJECT(cellicon->pixbuf) : NULL);
+		g_value_set_object(value, cellicon->pixbuf ? G_OBJECT(cellicon->pixbuf) : nullptr);
 		break;
 	case PROP_TEXT:
 		g_value_set_string(value, cellicon->text);
@@ -542,7 +542,7 @@ gqv_cell_renderer_icon_get_layout(GQvCellRendererIcon *cellicon, GtkWidget *widg
 GtkCellRenderer *
 gqv_cell_renderer_icon_new(void)
 {
-	return static_cast<GtkCellRenderer *>(g_object_new(GQV_TYPE_CELL_RENDERER_ICON, NULL));
+	return static_cast<GtkCellRenderer *>(g_object_new(GQV_TYPE_CELL_RENDERER_ICON, nullptr));
 }
 
 static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
@@ -586,7 +586,7 @@ static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
 		PangoRectangle rect;
 
 		layout = gqv_cell_renderer_icon_get_layout(cellicon, widget, FALSE);
-		pango_layout_get_pixel_extents(layout, NULL, &rect);
+		pango_layout_get_pixel_extents(layout, nullptr, &rect);
 		g_object_unref(layout);
 
 		calc_width = MAX(calc_width, rect.width);
@@ -713,7 +713,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 		GdkRectangle pix_rect;
 		GdkRectangle draw_rect;
 		layout = gqv_cell_renderer_icon_get_layout(cellicon, widget, TRUE);
-		pango_layout_get_pixel_extents(layout, NULL, &text_rect);
+		pango_layout_get_pixel_extents(layout, nullptr, &text_rect);
 
 		pix_rect.width = text_rect.width;
 		pix_rect.height = text_rect.height;
@@ -774,7 +774,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 						"border-width: 1px;\n"
 						"border-radius: 0px;\n"
 						"}\n"
-						,-1, NULL);
+						,-1, nullptr);
 				gtk_style_context_add_provider(context, provider,
 							GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 

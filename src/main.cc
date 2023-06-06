@@ -63,7 +63,7 @@
 #endif
 
 gboolean thumb_format_changed = FALSE;
-static RemoteConnection *remote_connection = NULL;
+static RemoteConnection *remote_connection = nullptr;
 
 gchar *gq_prefix;
 gchar *gq_localedir;
@@ -79,7 +79,7 @@ gchar *instance_identifier;
 void sig_handler_cb(int signo, siginfo_t *info, void *UNUSED(context))
 {
 	gchar hex_char[16];
-	const gchar *signal_name = NULL;
+	const gchar *signal_name = nullptr;
 	gint i = 0;
 	guint64 addr;
 	guint64 char_index;
@@ -149,7 +149,7 @@ void sig_handler_cb(int signo, siginfo_t *info, void *UNUSED(context))
 
 	len = write(STDERR_FILENO, "Address: ", 9);
 
-	if (info->si_addr == 0)
+	if (info->si_addr == nullptr)
 		{
 		len = write(STDERR_FILENO, "0x0\n", 4);
 		}
@@ -327,7 +327,7 @@ static void parse_command_line_process_dir(const gchar *dir, gchar **path, gchar
 			{
 			parse_command_line_add_dir(*first_dir, path, file, list);
 			g_free(*first_dir);
-			*first_dir = NULL;
+			*first_dir = nullptr;
 			}
 		parse_command_line_add_dir(dir, path, file, list);
 		}
@@ -341,30 +341,30 @@ static void parse_command_line_process_file(const gchar *file_path, gchar **path
 		{
 		parse_command_line_add_dir(*first_dir, path, file, list);
 		g_free(*first_dir);
-		*first_dir = NULL;
+		*first_dir = nullptr;
 		}
 	parse_command_line_add_file(file_path, path, file, list, collection_list);
 }
 
 static void parse_command_line(gint argc, gchar *argv[])
 {
-	GList *list = NULL;
-	GList *remote_list = NULL;
-	GList *remote_errors = NULL;
+	GList *list = nullptr;
+	GList *remote_list = nullptr;
+	GList *remote_errors = nullptr;
 	gboolean remote_do = FALSE;
-	gchar *first_dir = NULL;
+	gchar *first_dir = nullptr;
 	gchar *app_lock;
 	gchar *pwd;
 	gchar *current_dir;
-	gchar *geometry = NULL;
+	gchar *geometry = nullptr;
 	GtkWidget *dialog_warning;
-	GString *command_line_errors = g_string_new(NULL);
+	GString *command_line_errors = g_string_new(nullptr);
 
 	command_line = g_new0(CommandLine, 1);
 
 	command_line->argc = argc;
 	command_line->argv = argv;
-	command_line->regexp = NULL;
+	command_line->regexp = nullptr;
 
 	if (argc > 1)
 		{
@@ -394,12 +394,12 @@ static void parse_command_line(gint argc, gchar *argv[])
 				parse_command_line_process_file(cmd_all, &command_line->path, &command_line->file,
 								&list, &command_line->collection_list, &first_dir);
 				}
-			else if (download_web_file(cmd_line, FALSE, NULL))
+			else if (download_web_file(cmd_line, FALSE, nullptr))
 				{
 				}
 			else if (is_collection(cmd_line))
 				{
-				gchar *path = NULL;
+				gchar *path = nullptr;
 
 				path = collection_path(cmd_line);
 				parse_command_line_process_file(path, &command_line->path, &command_line->file,
@@ -559,7 +559,7 @@ static void parse_command_line(gint argc, gchar *argv[])
 
 		if (command_line_errors->len > 0)
 			{
-			dialog_warning = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", "Invalid parameter(s):");
+			dialog_warning = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", "Invalid parameter(s):");
 			gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog_warning), "%s", command_line_errors->str);
 			gtk_window_set_title(GTK_WINDOW(dialog_warning), GQ_APPNAME);
 			gtk_window_set_keep_above(GTK_WINDOW(dialog_warning), TRUE);
@@ -580,7 +580,7 @@ static void parse_command_line(gint argc, gchar *argv[])
 	if (!command_line->path && first_dir)
 		{
 		command_line->path = first_dir;
-		first_dir = NULL;
+		first_dir = nullptr;
 
 		parse_out_relatives(command_line->path);
 		}
@@ -620,7 +620,7 @@ static void parse_command_line(gint argc, gchar *argv[])
 				work = work->next;
 				}
 
-			dialog_warning = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", "Invalid parameter(s):");
+			dialog_warning = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", "Invalid parameter(s):");
 			gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog_warning), "%s", command_line_errors->str);
 			gtk_window_set_title(GTK_WINDOW(dialog_warning), GQ_APPNAME);
 			gtk_window_set_keep_above(GTK_WINDOW(dialog_warning), TRUE);
@@ -654,19 +654,19 @@ static void parse_command_line(gint argc, gchar *argv[])
 	else
 		{
 		string_list_free(list);
-		command_line->cmd_list = NULL;
+		command_line->cmd_list = nullptr;
 		}
 
 	if (command_line->startup_blank)
 		{
 		g_free(command_line->path);
-		command_line->path = NULL;
+		command_line->path = nullptr;
 		g_free(command_line->file);
-		command_line->file = NULL;
+		command_line->file = nullptr;
 		filelist_free(command_line->cmd_list);
-		command_line->cmd_list = NULL;
+		command_line->cmd_list = nullptr;
 		string_list_free(command_line->collection_list);
-		command_line->collection_list = NULL;
+		command_line->collection_list = nullptr;
 		}
 }
 
@@ -750,7 +750,7 @@ static gboolean parse_command_line_for_cache_maintenance_option(gint argc, gchar
 static void process_command_line_for_cache_maintenance_option(gint argc, gchar *argv[])
 {
 	gchar *rc_path;
-	gchar *folder_path = NULL;
+	gchar *folder_path = nullptr;
 	gsize size;
 	gsize i = 0;
 	gchar *buf_config_file;
@@ -766,7 +766,7 @@ static void process_command_line_for_cache_maintenance_option(gint argc, gchar *
 
 			if (isfile(rc_path))
 				{
-				if (g_file_get_contents(rc_path, &buf_config_file, &size, NULL))
+				if (g_file_get_contents(rc_path, &buf_config_file, &size, nullptr))
 					{
 					while (i < size)
 						{
@@ -895,20 +895,20 @@ static void gq_accel_map_print(
 		    GdkModifierType accel_mods,
 		    gboolean	changed)
 {
-	GString *gstring = g_string_new(changed ? NULL : "; ");
+	GString *gstring = g_string_new(changed ? nullptr : "; ");
 	auto ssi = static_cast<SecureSaveInfo *>(data);
 	gchar *tmp, *name;
 
 	g_string_append(gstring, "(gtk_accel_path \"");
 
-	tmp = g_strescape(accel_path, NULL);
+	tmp = g_strescape(accel_path, nullptr);
 	g_string_append(gstring, tmp);
 	g_free(tmp);
 
 	g_string_append(gstring, "\" \"");
 
 	name = gtk_accelerator_name(accel_key, accel_mods);
-	tmp = g_strescape(name, NULL);
+	tmp = g_strescape(name, nullptr);
 	g_free(name);
 	g_string_append(gstring, tmp);
 	g_free(tmp);
@@ -1001,7 +1001,7 @@ static void gtkrc_load(void)
 
 static void exit_program_final(void)
 {
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 	GList *list;
 	LayoutWindow *tmp_lw;
 	gchar *archive_dir;
@@ -1043,7 +1043,7 @@ static void exit_program_final(void)
 	if (isdir(archive_dir))
 		{
 		archive_file = g_file_new_for_path(archive_dir);
-		rmdir_recursive(archive_file, NULL, NULL);
+		rmdir_recursive(archive_file, nullptr, nullptr);
 		g_free(archive_dir);
 		g_object_unref(archive_file);
 		}
@@ -1054,7 +1054,7 @@ static void exit_program_final(void)
 	if (isdir(archive_dir))
 		{
 		archive_file = g_file_new_for_path(archive_dir);
-		g_file_delete(archive_file, NULL, NULL);
+		g_file_delete(archive_file, nullptr, nullptr);
 		g_free(archive_dir);
 		g_object_unref(archive_file);
 		}
@@ -1064,17 +1064,17 @@ static void exit_program_final(void)
 	gtk_main_quit();
 }
 
-static GenericDialog *exit_dialog = NULL;
+static GenericDialog *exit_dialog = nullptr;
 
 static void exit_confirm_cancel_cb(GenericDialog *gd, gpointer UNUSED(data))
 {
-	exit_dialog = NULL;
+	exit_dialog = nullptr;
 	generic_dialog_close(gd);
 }
 
 static void exit_confirm_exit_cb(GenericDialog *gd, gpointer UNUSED(data))
 {
-	exit_dialog = NULL;
+	exit_dialog = nullptr;
 	generic_dialog_close(gd);
 	exit_program_final();
 }
@@ -1093,8 +1093,8 @@ static gint exit_confirm_dlg(void)
 
 	if (!collection_window_modified_exists()) return FALSE;
 
-	parent = NULL;
-	lw = NULL;
+	parent = nullptr;
+	lw = nullptr;
 	if (layout_valid(&lw))
 		{
 		parent = lw->window;
@@ -1103,13 +1103,13 @@ static gint exit_confirm_dlg(void)
 	msg = g_strdup_printf("%s - %s", GQ_APPNAME, _("exit"));
 	exit_dialog = generic_dialog_new(msg,
 				"exit", parent, FALSE,
-				exit_confirm_cancel_cb, NULL);
+				exit_confirm_cancel_cb, nullptr);
 	g_free(msg);
 	msg = g_strdup_printf(_("Quit %s"), GQ_APPNAME);
 	generic_dialog_add_message(exit_dialog, GTK_STOCK_DIALOG_QUESTION,
 				   msg, _("Collections have been modified. Quit anyway?"), TRUE);
 	g_free(msg);
-	generic_dialog_add_button(exit_dialog, GTK_STOCK_QUIT, NULL, exit_confirm_exit_cb, TRUE);
+	generic_dialog_add_button(exit_dialog, GTK_STOCK_QUIT, nullptr, exit_confirm_exit_cb, TRUE);
 
 	gtk_widget_show(exit_dialog->dialog);
 
@@ -1123,9 +1123,9 @@ static void exit_program_write_metadata_cb(gint success, const gchar *UNUSED(des
 
 void exit_program(void)
 {
-	layout_image_full_screen_stop(NULL);
+	layout_image_full_screen_stop(nullptr);
 
-	if (metadata_write_queue_confirm(FALSE, exit_program_write_metadata_cb, NULL)) return;
+	if (metadata_write_queue_confirm(FALSE, exit_program_write_metadata_cb, nullptr)) return;
 
 	options->marks_save ? marks_save(TRUE) : marks_save(FALSE);
 
@@ -1181,12 +1181,12 @@ static void setup_sig_handler(void)
 	sigsegv_action.sa_sigaction = sig_handler_cb;
 	sigsegv_action.sa_flags = SA_SIGINFO;
 
-	sigaction(SIGABRT, &sigsegv_action, NULL);
-	sigaction(SIGBUS, &sigsegv_action, NULL);
-	sigaction(SIGFPE, &sigsegv_action, NULL);
-	sigaction(SIGILL, &sigsegv_action, NULL);
-	sigaction(SIGIOT, &sigsegv_action, NULL);
-	sigaction(SIGSEGV, &sigsegv_action, NULL);
+	sigaction(SIGABRT, &sigsegv_action, nullptr);
+	sigaction(SIGBUS, &sigsegv_action, nullptr);
+	sigaction(SIGFPE, &sigsegv_action, nullptr);
+	sigaction(SIGILL, &sigsegv_action, nullptr);
+	sigaction(SIGIOT, &sigsegv_action, nullptr);
+	sigaction(SIGSEGV, &sigsegv_action, nullptr);
 }
 
 static void set_theme_bg_color()
@@ -1242,9 +1242,9 @@ static void create_application_paths()
 	gint length;
 	gchar *path;
 
-	length = wai_getExecutablePath(NULL, 0, NULL);
+	length = wai_getExecutablePath(nullptr, 0, nullptr);
 	path = static_cast<gchar *>(malloc(length + 1));
-	wai_getExecutablePath(path, length, NULL);
+	wai_getExecutablePath(path, length, nullptr);
 	path[length] = '\0';
 
 	gq_executable_path = g_strdup(path);
@@ -1264,9 +1264,9 @@ static void create_application_paths()
 
 gint main(gint argc, gchar *argv[])
 {
-	CollectionData *first_collection = NULL;
+	CollectionData *first_collection = nullptr;
 	gchar *buf;
-	CollectionData *cd = NULL;
+	CollectionData *cd = nullptr;
 	gboolean disable_clutter = FALSE;
 	gboolean single_dir = TRUE;
 	LayoutWindow *lw;
@@ -1305,7 +1305,7 @@ gint main(gint argc, gchar *argv[])
 #endif
 
 	/* setup random seed for random slideshow */
-	srand(time(NULL));
+	srand(time(nullptr));
 
 #if 0
 	/* See later comment; this handler leads to UB. */
@@ -1313,11 +1313,11 @@ gint main(gint argc, gchar *argv[])
 #endif
 
 	/* register global notify functions */
-	file_data_register_notify_func(cache_notify_cb, NULL, NOTIFY_PRIORITY_HIGH);
-	file_data_register_notify_func(thumb_notify_cb, NULL, NOTIFY_PRIORITY_HIGH);
-	file_data_register_notify_func(histogram_notify_cb, NULL, NOTIFY_PRIORITY_HIGH);
-	file_data_register_notify_func(collect_manager_notify_cb, NULL, NOTIFY_PRIORITY_LOW);
-	file_data_register_notify_func(metadata_notify_cb, NULL, NOTIFY_PRIORITY_LOW);
+	file_data_register_notify_func(cache_notify_cb, nullptr, NOTIFY_PRIORITY_HIGH);
+	file_data_register_notify_func(thumb_notify_cb, nullptr, NOTIFY_PRIORITY_HIGH);
+	file_data_register_notify_func(histogram_notify_cb, nullptr, NOTIFY_PRIORITY_HIGH);
+	file_data_register_notify_func(collect_manager_notify_cb, nullptr, NOTIFY_PRIORITY_LOW);
+	file_data_register_notify_func(metadata_notify_cb, nullptr, NOTIFY_PRIORITY_LOW);
 
 
 	gtkrc_load();
@@ -1358,7 +1358,7 @@ gint main(gint argc, gchar *argv[])
 	pixbuf_inline_register_stock_icons();
 
 	DEBUG_1("%s main: setting default options before commandline handling", get_exec_time());
-	options = init_options(NULL);
+	options = init_options(nullptr);
 	setup_default_options(options);
 	if (disable_clutter)
 		{
@@ -1463,7 +1463,7 @@ gint main(gint argc, gchar *argv[])
 		if (command_line->cmd_list && !(command_line->startup_command_line_collection))
 			{
 			GList *work;
-			gchar *path = NULL;
+			gchar *path = nullptr;
 
 			work = command_line->cmd_list;
 
@@ -1497,7 +1497,7 @@ gint main(gint argc, gchar *argv[])
 			GList *work;
 			CollectWindow *cw;
 
-			cw = collection_window_new(NULL);
+			cw = collection_window_new(nullptr);
 			cd = cw->cd;
 
 			collection_path_changed(cd);
@@ -1520,7 +1520,7 @@ gint main(gint argc, gchar *argv[])
 				work = work->next;
 				}
 
-			if (cd->list) layout_image_set_collection(NULL, cd, static_cast<CollectInfo *>(cd->list->data));
+			if (cd->list) layout_image_set_collection(nullptr, cd, static_cast<CollectInfo *>(cd->list->data));
 
 			/* mem leak, we never unref this collection when !startup_command_line_collection
 			 * (the image view of the main window does not hold a ref to the collection)
@@ -1533,14 +1533,14 @@ gint main(gint argc, gchar *argv[])
 			}
 		else if (first_collection)
 			{
-			layout_image_set_collection(NULL, first_collection,
+			layout_image_set_collection(nullptr, first_collection,
 						    collection_get_first(first_collection));
 			}
 
 		/* If the files on the command line are from one folder, select those files
 		 * unless it is a command line collection - then leave focus on collection window
 		 */
-		lw = NULL;
+		lw = nullptr;
 		layout_valid(&lw);
 
 		if (single_dir && command_line->cmd_list && !command_line->startup_command_line_collection)
@@ -1549,7 +1549,7 @@ gint main(gint argc, gchar *argv[])
 			GList *selected;
 			FileData *fd;
 
-			selected = NULL;
+			selected = nullptr;
 			work = command_line->cmd_list;
 			while (work)
 				{

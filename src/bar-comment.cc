@@ -71,8 +71,8 @@ static void bar_pane_comment_write(PaneCommentData *pcd)
 
 static void bar_pane_comment_update(PaneCommentData *pcd)
 {
-	gchar *comment = NULL;
-	gchar *orig_comment = NULL;
+	gchar *comment = nullptr;
+	gchar *orig_comment = nullptr;
 	const gchar *comment_not_null;
 	gshort rating;
 	GtkTextBuffer *comment_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pcd->comment_view));
@@ -98,19 +98,19 @@ static void bar_pane_comment_update(PaneCommentData *pcd)
 	g_free(comment);
 	g_free(orig_comment);
 
-	gtk_widget_set_sensitive(pcd->comment_view, (pcd->fd != NULL));
+	gtk_widget_set_sensitive(pcd->comment_view, (pcd->fd != nullptr));
 }
 
 static void bar_pane_comment_set_selection(PaneCommentData *pcd, gboolean append)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 	GList *work;
-	gchar *comment = NULL;
+	gchar *comment = nullptr;
 
 	comment = text_widget_text_pull(pcd->comment_view);
 
 	list = layout_selection_list(pcd->pane.lw);
-	list = file_data_process_groups_in_selection(list, FALSE, NULL);
+	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
 
 	work = list;
 	while (work)
@@ -275,7 +275,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd->key = g_strdup(key);
 	pcd->height = height;
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 
 	pcd->widget = scrolled;
 	g_object_set_data(G_OBJECT(pcd->widget), "pane_data", pcd);
@@ -319,7 +319,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 
 GtkWidget *bar_pane_comment_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *title = NULL;
+	gchar *title = nullptr;
 	gchar *key = g_strdup(COMMENT_KEY);
 	gboolean expanded = TRUE;
 	gint height = 50;
@@ -373,7 +373,7 @@ void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **attribut
 	pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pcd) return;
 
-	gchar *title = NULL;
+	gchar *title = nullptr;
 
 	while (*attribute_names)
 		{

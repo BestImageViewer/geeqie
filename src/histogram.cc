@@ -113,7 +113,7 @@ const gchar *histogram_label(Histogram *histogram)
 {
 	const gchar *t1 = "";
 
-	if (!histogram) return NULL;
+	if (!histogram) return nullptr;
 
 	if (histogram->histogram_mode)
 		switch (histogram->histogram_channel)
@@ -199,7 +199,7 @@ const HistMap *histmap_get(FileData *fd)
 {
 	if (fd->histmap && !fd->histmap->idle_id) return fd->histmap; /* histmap exists and is finished */
 
-	return NULL;
+	return nullptr;
 }
 
 static gboolean histmap_idle_cb(gpointer data)
@@ -209,7 +209,7 @@ static gboolean histmap_idle_cb(gpointer data)
 		{
 		/* finished */
 		g_object_unref(fd->histmap->pixbuf); /*pixbuf is no longer needed */
-		fd->histmap->pixbuf = NULL;
+		fd->histmap->pixbuf = nullptr;
 		fd->histmap->idle_id = 0;
 		file_data_send_notification(fd, NOTIFY_HISTMAP);
 		return G_SOURCE_REMOVE;
@@ -225,7 +225,7 @@ gboolean histmap_start_idle(FileData *fd)
 	fd->histmap->pixbuf = fd->pixbuf;
 	g_object_ref(fd->histmap->pixbuf);
 
-	fd->histmap->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, histmap_idle_cb, fd, NULL);
+	fd->histmap->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, histmap_idle_cb, fd, nullptr);
 	return TRUE;
 }
 
@@ -392,7 +392,7 @@ void histogram_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(data))
 		{
 		DEBUG_1("Notify histogram: %s %04x", fd->path, type);
 		histmap_free(fd->histmap);
-		fd->histmap = NULL;
+		fd->histmap = nullptr;
 		}
 }
 

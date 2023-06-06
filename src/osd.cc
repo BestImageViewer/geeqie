@@ -78,7 +78,7 @@ static const gchar *predefined_tags[][2] = {
 	{"%Xmp.dc.creator%",				N_("© Creator")},
 	{"%Xmp.dc.contributor%",			N_("© Contributor")},
 	{"%Xmp.dc.rights%",					N_("© Rights")},
-	{NULL, NULL}};
+	{nullptr, nullptr}};
 
 static GtkTargetEntry osd_drag_types[] = {
 	{ const_cast<gchar *>("text/plain"), GTK_TARGET_SAME_APP, TARGET_TEXT_PLAIN }
@@ -168,7 +168,7 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 
 	pref_label_new(vbox, _("To include predefined tags in the template, click a button or drag-and-drop"));
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_box_pack_start(GTK_BOX(vbox), scrolled, FALSE, FALSE, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(scrolled), PREF_PAD_BORDER);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
@@ -176,7 +176,7 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 	gtk_widget_show(scrolled);
 	gtk_widget_set_size_request(scrolled, -1, 140);
 
-	viewport = gtk_viewport_new(NULL, NULL);
+	viewport = gtk_viewport_new(nullptr, nullptr);
 	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
 	gtk_container_add(GTK_CONTAINER(scrolled), viewport);
 	gtk_widget_show(viewport);
@@ -205,8 +205,8 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 static gchar *keywords_to_string(FileData *fd)
 {
 	GList *keywords;
-	GString *kwstr = NULL;
-	gchar *ret = NULL;
+	GString *kwstr = nullptr;
+	gchar *ret = nullptr;
 
 	g_assert(fd);
 
@@ -260,10 +260,10 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 	while (TRUE)
 		{
 		guint limit = 0;
-		gchar *trunc = NULL;
-		gchar *limpos = NULL;
-		gchar *extra = NULL;
-		gchar *extrapos = NULL;
+		gchar *trunc = nullptr;
+		gchar *limpos = nullptr;
+		gchar *extra = nullptr;
+		gchar *extrapos = nullptr;
 		gchar *p;
 
 		start = strchr(osd_info->str + (prev + 1), delim);
@@ -302,7 +302,7 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 
 		name = g_strndup(start+1, (trunc ? trunc : end)-start-1);
 		pos = start - osd_info->str;
-		data = NULL;
+		data = nullptr;
 
 		if (strcmp(name, "keywords") == 0)
 			{
@@ -375,7 +375,7 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 				/** @FIXME using background / foreground colors lead to weird results.
 				 */
 				gchar *new_data;
-				gchar *left = NULL;
+				gchar *left = nullptr;
 				gchar *right = extra;
 				gchar *p;
 				guint len = strlen(extra);

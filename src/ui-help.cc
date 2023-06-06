@@ -57,7 +57,7 @@ static void help_window_scroll(GtkWidget *text, const gchar *key)
 	gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
 
 	if (gtk_text_iter_forward_search(&iter, needle, GTK_TEXT_SEARCH_TEXT_ONLY,
-					 &start, &end, NULL))
+					 &start, &end, nullptr))
 		{
 		gint line;
 		GtkTextMark *mark;
@@ -121,14 +121,14 @@ static void help_window_load_text(GtkWidget *text, const gchar *path)
 
 			l = strlen(s_buf);
 
-			if (!g_utf8_validate(s_buf, l, NULL))
+			if (!g_utf8_validate(s_buf, l, nullptr))
 				{
-				buf = g_locale_to_utf8(s_buf, l, NULL, NULL, NULL);
+				buf = g_locale_to_utf8(s_buf, l, nullptr, nullptr, nullptr);
 				if (!buf) buf = g_strdup("\n");
 				}
 			else
 				{
-				buf = NULL;
+				buf = nullptr;
 				}
 			gtk_text_buffer_insert_with_tags_by_name(buffer, &iter,
 								 (buf) ? buf : s_buf, -1,
@@ -198,7 +198,7 @@ GtkWidget *help_window_new(const gchar *title,
 
 	/* window */
 
-	window = window_new(GTK_WINDOW_TOPLEVEL, subclass, NULL, NULL, title);
+	window = window_new(GTK_WINDOW_TOPLEVEL, subclass, nullptr, nullptr, title);
 	DEBUG_NAME(window);
 	gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
 	gtk_window_set_default_size(GTK_WINDOW(window), HELP_WINDOW_WIDTH, HELP_WINDOW_HEIGHT);
@@ -218,7 +218,7 @@ GtkWidget *help_window_new(const gchar *title,
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
 	gtk_widget_show(hbox);
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);

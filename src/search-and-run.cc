@@ -51,15 +51,15 @@ static gint sort_iter_compare_func (GtkTreeModel *model, GtkTreeIter *a, GtkTree
 	gtk_tree_model_get(model, a, SAR_LABEL, &label1, -1);
 	gtk_tree_model_get(model, b, SAR_LABEL, &label2, -1);
 
-	if (label1 == NULL || label2 == NULL)
+	if (label1 == nullptr || label2 == nullptr)
 		{
-		if (label1 == NULL && label2 == NULL)
+		if (label1 == nullptr && label2 == nullptr)
 			{
 			ret = 0;
 			}
 		else
 			{
-			ret = (label1 == NULL) ? -1 : 1;
+			ret = (label1 == nullptr) ? -1 : 1;
 			}
 		}
 	else
@@ -92,7 +92,7 @@ static void command_store_populate(SarData* sar)
 	sar->command_store = gtk_list_store_new(SAR_COUNT, G_TYPE_STRING, G_TYPE_OBJECT);
 
 	sortable = GTK_TREE_SORTABLE(sar->command_store);
-	gtk_tree_sortable_set_sort_func(sortable, SAR_LABEL, sort_iter_compare_func, NULL, NULL);
+	gtk_tree_sortable_set_sort_func(sortable, SAR_LABEL, sort_iter_compare_func, nullptr, nullptr);
 
 	gtk_tree_sortable_set_sort_column_id(sortable, SAR_LABEL, GTK_SORT_ASCENDING);
 
@@ -110,23 +110,23 @@ static void command_store_populate(SarData* sar)
 				accel = gtk_accelerator_get_label(key.accel_key, key.accel_mods);
 
 				/* menu items with no tooltip are placeholders */
-				if (g_strrstr(accel_path, ".desktop") != NULL || tooltip != NULL)
+				if (g_strrstr(accel_path, ".desktop") != nullptr || tooltip != nullptr)
 					{
-					if (pango_parse_markup(label, -1, '_', NULL, &label2, NULL, NULL) && label2)
+					if (pango_parse_markup(label, -1, '_', nullptr, &label2, nullptr, nullptr) && label2)
 						{
 						g_free(label);
 						label = label2;
 						}
 					if (tooltip)
 						{
-						if (pango_parse_markup(tooltip, -1, '_', NULL, &tooltip2, NULL, NULL) && label2)
+						if (pango_parse_markup(tooltip, -1, '_', nullptr, &tooltip2, nullptr, nullptr) && label2)
 							{
 							g_free(tooltip);
 							tooltip = tooltip2;
 							}
 						}
 
-					new_command = g_string_new(NULL);
+					new_command = g_string_new(nullptr);
 					if (g_strcmp0(label, tooltip) == 0)
 						{
 						g_string_append_printf(new_command, "%s : %s",label, accel);
@@ -176,7 +176,7 @@ static gboolean search_and_run_destroy(gpointer data)
 {
 	auto sar = static_cast<SarData *>(data);
 
-	sar->lw->sar_window = NULL;
+	sar->lw->sar_window = nullptr;
 	gtk_widget_destroy(sar->window);
 
 	return G_SOURCE_CONTINUE;
@@ -211,7 +211,7 @@ static gboolean keypress_cb(GtkWidget *UNUSED(widget), GdkEventKey *event, gpoin
 			break;
 		default:
 			sar->match_found = FALSE;
-			sar->action = NULL;
+			sar->action = nullptr;
 		}
 
 	return ret;
@@ -243,7 +243,7 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 	gchar *label;
 	GString *reg_exp_str;
 	GRegex *reg_exp;
-	GError *error = NULL;
+	GError *error = nullptr;
 
 	model = gtk_entry_completion_get_model(completion);
 	gtk_tree_model_get(GTK_TREE_MODEL(model), iter, SAR_LABEL, &label, -1);
@@ -259,11 +259,11 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 		{
 		log_printf("Error: could not compile regular expression %s\n%s\n", reg_exp_str->str, error->message);
 		g_error_free(error);
-		error = NULL;
-		reg_exp = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), NULL);
+		error = nullptr;
+		reg_exp = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), nullptr);
 		}
 
-	ret = g_regex_match(reg_exp, normalized, GRegexMatchFlags(0), NULL);
+	ret = g_regex_match(reg_exp, normalized, GRegexMatchFlags(0), nullptr);
 
 	if (sar->match_found == FALSE && ret == TRUE)
 		{
@@ -285,14 +285,14 @@ GtkWidget *search_and_run_new(LayoutWindow *lw)
 
 	sar = g_new0(SarData, 1);
 	sar->lw = lw;
-	sar->window = window_new(GTK_WINDOW_TOPLEVEL, "sar_window", NULL, NULL, _("Search and Run command"));
+	sar->window = window_new(GTK_WINDOW_TOPLEVEL, "sar_window", nullptr, nullptr, _("Search and Run command"));
 	DEBUG_NAME(sar->window);
 
 	geometry.min_width = 500;
 	geometry.max_width = 1500;
 	geometry.min_height = 10;
 	geometry.max_height = 10;
-	gtk_window_set_geometry_hints(GTK_WINDOW(sar->window), NULL, &geometry, static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
+	gtk_window_set_geometry_hints(GTK_WINDOW(sar->window), nullptr, &geometry, static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
 
 	gtk_window_set_resizable(GTK_WINDOW(sar->window), TRUE);
 
@@ -316,7 +316,7 @@ GtkWidget *search_and_run_new(LayoutWindow *lw)
 	gtk_entry_completion_set_inline_completion(sar->completion, FALSE);
 	gtk_entry_completion_set_inline_selection(sar->completion, FALSE);
 	gtk_entry_completion_set_minimum_key_length(sar->completion, 1);
-	gtk_entry_completion_set_match_func(sar->completion, match_func, sar, NULL);
+	gtk_entry_completion_set_match_func(sar->completion, match_func, sar, nullptr);
 	g_signal_connect(G_OBJECT(sar->completion), "match-selected", G_CALLBACK(match_selected_cb), sar);
 	gtk_entry_completion_set_model(sar->completion, GTK_TREE_MODEL(sar->command_store));
 	gtk_entry_completion_set_text_column(sar->completion, SAR_LABEL);

@@ -103,7 +103,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	x = pi_day->x + pi_day->width + 4;
 	y = pi_day->y;
 
-	pbox = pan_item_box_new(pw, NULL, x, y, PAN_BOX_BORDER, PAN_BOX_BORDER,
+	pbox = pan_item_box_new(pw, nullptr, x, y, PAN_BOX_BORDER, PAN_BOX_BORDER,
 				PAN_CAL_POPUP_BORDER,
 				PAN_CAL_POPUP_COLOR, PAN_CAL_POPUP_ALPHA,
 				PAN_CAL_POPUP_BORDER_COLOR, PAN_CAL_POPUP_ALPHA);
@@ -174,7 +174,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	util_clip_triangle(x1, y1, x2, y2, x3, y3,
 			   &x, &y, &w, &h);
 
-	pi = pan_item_tri_new(pw, NULL, x, y, w, h,
+	pi = pan_item_tri_new(pw, nullptr, x, y, w, h,
 			      x1, y1, x2, y2, x3, y3,
 			      PAN_CAL_POPUP_COLOR, PAN_CAL_POPUP_ALPHA);
 	pan_item_tri_border(pi, PAN_BORDER_1 | PAN_BORDER_3, PAN_CAL_POPUP_BORDER_COLOR, PAN_CAL_POPUP_ALPHA);
@@ -302,7 +302,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 
 		x = PAN_BOX_BORDER;
 
-		pi_month = pan_item_box_new(pw, NULL, x, y, PAN_CAL_DAY_WIDTH * 7, PAN_CAL_DAY_HEIGHT / 4,
+		pi_month = pan_item_box_new(pw, nullptr, x, y, PAN_CAL_DAY_WIDTH * 7, PAN_CAL_DAY_HEIGHT / 4,
 					    PAN_CAL_MONTH_BORDER,
 					    PAN_CAL_MONTH_COLOR, PAN_CAL_MONTH_ALPHA,
 					    PAN_CAL_MONTH_BORDER_COLOR, PAN_CAL_MONTH_ALPHA);
@@ -346,7 +346,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 			dx = x + PAN_CAL_DOT_GAP * 2;
 			dy = y + PAN_CAL_DOT_GAP * 2;
 
-			fd = static_cast<FileData *>((work) ? work->data : NULL);
+			fd = static_cast<FileData *>((work) ? work->data : nullptr);
 			while (fd && pan_date_compare(fd->date, dt, PAN_DATE_LENGTH_DAY))
 				{
 				PanItem *pi;
@@ -372,7 +372,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 				n++;
 
 				work = work->next;
-				fd = static_cast<FileData *>((work) ? work->data : NULL);
+				fd = static_cast<FileData *>((work) ? work->data : nullptr);
 				}
 
 			if (n > 0)

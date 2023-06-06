@@ -64,7 +64,7 @@ FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row)
 	if (!path)
 		{
 		if (row) *row = -1;
-		return NULL;
+		return nullptr;
 		}
 
 	n = 0;
@@ -82,7 +82,7 @@ FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row)
 		}
 
 	if (row) *row = -1;
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -102,8 +102,8 @@ static void vdlist_scroll_to_row(ViewDir *vd, FileData *fd, gfloat y_align)
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
 		tpath = gtk_tree_model_get_path(store, &iter);
-		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(vd->view), tpath, NULL, TRUE, y_align, 0.0);
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(vd->view), tpath, NULL, FALSE);
+		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(vd->view), tpath, nullptr, TRUE, y_align, 0.0);
+		gtk_tree_view_set_cursor(GTK_TREE_VIEW(vd->view), tpath, nullptr, FALSE);
 		gtk_tree_path_free(tpath);
 
 		if (!gtk_widget_has_focus(vd->view)) gtk_widget_grab_focus(vd->view);
@@ -124,7 +124,7 @@ const gchar *vdlist_row_get_path(ViewDir *vd, gint row)
 
 	if (fd) return fd->path;
 
-	return NULL;
+	return nullptr;
 }
 
 static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
@@ -139,7 +139,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	FileData *fd;
 	SortType sort_type = SORT_NAME;
 	gboolean sort_ascend = TRUE;
-	gchar *link = NULL;
+	gchar *link = nullptr;
 
 	if (vd->layout)
 		{
@@ -149,7 +149,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 
 	old_list = VDLIST(vd)->list;
 
-	ret = filelist_read(vd->dir_fd, NULL, &VDLIST(vd)->list);
+	ret = filelist_read(vd->dir_fd, nullptr, &VDLIST(vd)->list);
 	VDLIST(vd)->list = filelist_sort(VDLIST(vd)->list, sort_type, sort_ascend);
 
 	/* add . and .. */
@@ -173,7 +173,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view)));
 	if (clear) gtk_list_store_clear(store);
 
-	valid = gtk_tree_model_iter_children(GTK_TREE_MODEL(store), &iter, NULL);
+	valid = gtk_tree_model_iter_children(GTK_TREE_MODEL(store), &iter, nullptr);
 
 	work = VDLIST(vd)->list;
 	while (work)
@@ -217,7 +217,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 
 		while (!done)
 			{
-			FileData *old_fd = NULL;
+			FileData *old_fd = nullptr;
 
 			if (valid)
 				{
@@ -244,11 +244,11 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 
 			if (islink(fd->path))
 				{
-				link = realpath(fd->path, NULL);
+				link = realpath(fd->path, nullptr);
 				}
 			else
 				{
-				link = NULL;
+				link = nullptr;
 				}
 
 			if (match < 0)
@@ -304,8 +304,8 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 		}
 
 
-	vd->click_fd = NULL;
-	vd->drop_fd = NULL;
+	vd->click_fd = nullptr;
+	vd->drop_fd = nullptr;
 
 	filelist_free(old_list);
 	g_free(link);
@@ -315,7 +315,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 {
 	gboolean ret;
-	gchar *old_path = NULL; /* Used to store directory for walking up */
+	gchar *old_path = nullptr; /* Used to store directory for walking up */
 
 	if (!dir_fd) return FALSE;
 	if (vd->dir_fd == dir_fd) return TRUE;
@@ -338,7 +338,7 @@ gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 	ret = vdlist_populate(vd, TRUE);
 
 	/* scroll to make last path visible */
-	FileData *found = NULL;
+	FileData *found = nullptr;
 	GList *work;
 
 	work = VDLIST(vd)->list;
@@ -368,7 +368,7 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
 	if (event->keyval != GDK_KEY_Menu) return FALSE;
 
-	gtk_tree_view_get_cursor(GTK_TREE_VIEW(vd->view), &tpath, NULL);
+	gtk_tree_view_get_cursor(GTK_TREE_VIEW(vd->view), &tpath, nullptr);
 	if (tpath)
 		{
 		GtkTreeModel *store;
@@ -382,14 +382,14 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 		}
 	else
 		{
-		vd->click_fd = NULL;
+		vd->click_fd = nullptr;
 		}
 
 	vd_color_set(vd, vd->click_fd, TRUE);
 
 	vd->popup = vd_pop_menu(vd, vd->click_fd);
 
-	gtk_menu_popup_at_pointer(GTK_MENU(vd->popup), NULL);
+	gtk_menu_popup_at_pointer(GTK_MENU(vd->popup), nullptr);
 
 	return TRUE;
 }
@@ -399,17 +399,17 @@ gboolean vdlist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 	auto vd = static_cast<ViewDir *>(data);
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
-	FileData *fd = NULL;
+	FileData *fd = nullptr;
 
 	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
-					  &tpath, NULL, NULL, NULL))
+					  &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &fd, -1);
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, NULL, FALSE);
+		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
 		gtk_tree_path_free(tpath);
 		}
 
@@ -421,7 +421,7 @@ gboolean vdlist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 	if (bevent->button == MOUSE_BUTTON_RIGHT)
 		{
 		vd->popup = vd_pop_menu(vd, vd->click_fd);
-		gtk_menu_popup_at_pointer(GTK_MENU(vd->popup), NULL);
+		gtk_menu_popup_at_pointer(GTK_MENU(vd->popup), nullptr);
 		return TRUE;
 		}
 
@@ -465,17 +465,17 @@ ViewDir *vdlist_new(ViewDir *vd, FileData *UNUSED(dir_fd))
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", DIR_COLUMN_ICON);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, NULL);
+	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
 
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
 	gtk_tree_view_column_add_attribute(column, renderer, "text", DIR_COLUMN_NAME);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, NULL);
+	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
 
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
 	gtk_tree_view_column_add_attribute(column, renderer, "text", DIR_COLUMN_DATE);
-	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, NULL);
+	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(vd->view), column);
 

@@ -207,7 +207,7 @@ static char *ZDParseString(const ZoneDetect *library, uint32_t *index)
 {
     uint64_t strLength;
     if(!ZDDecodeVariableLengthUnsigned(library, index, &strLength)) {
-        return NULL;
+        return nullptr;
     }
 
     uint32_t strOffset = *index;
@@ -217,11 +217,11 @@ static char *ZDParseString(const ZoneDetect *library, uint32_t *index)
         remoteStr = 1;
 
         if(!ZDDecodeVariableLengthUnsigned(library, &strOffset, &strLength)) {
-            return NULL;
+            return nullptr;
         }
 
         if(strLength > 256) {
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -582,17 +582,17 @@ fail:
     if(list) {
         free(list);
     }
-    return NULL;
+    return nullptr;
 }
 
 float* ZDPolygonToList(const ZoneDetect *library, uint32_t polygonId, size_t* lengthPtr)
 {
     uint32_t polygonIndex;
-    int32_t* data = NULL;
-    float* flData = NULL;
+    int32_t* data = nullptr;
+    float* flData = nullptr;
     size_t length = 0;
 
-    if(!ZDFindPolygon(library, polygonId, NULL, &polygonIndex)) {
+    if(!ZDFindPolygon(library, polygonId, nullptr, &polygonIndex)) {
         goto fail;
     }
 
@@ -628,7 +628,7 @@ fail:
     if(flData) {
         free(flData);
     }
-    return NULL;
+    return nullptr;
 }
 
 static ZDLookupResult ZDPointInPolygon(const ZoneDetect *library, uint32_t polygonIndex, int32_t latFixedPoint, int32_t lonFixedPoint, uint64_t *distanceSqrMin)
@@ -840,7 +840,7 @@ ZoneDetect *ZDOpenDatabaseFromMemory(void* buffer, size_t length)
 
 fail:
     ZDCloseDatabase(library);
-    return NULL;
+    return nullptr;
 }
 
 ZoneDetect *ZDOpenDatabase(const char *path)
@@ -889,7 +889,7 @@ ZoneDetect *ZDOpenDatabase(const char *path)
         }
         lseek(library->fd, 0, SEEK_SET);
 
-        library->mapping = static_cast<uint8_t *>(mmap(NULL, static_cast<size_t>(library->length), PROT_READ, MAP_PRIVATE | MAP_FILE, library->fd, 0));
+        library->mapping = static_cast<uint8_t *>(mmap(nullptr, static_cast<size_t>(library->length), PROT_READ, MAP_PRIVATE | MAP_FILE, library->fd, 0));
         if(library->mapping == MAP_FAILED) {
             zdError(ZD_E_DB_MMAP, errno);
             goto fail;
@@ -907,7 +907,7 @@ ZoneDetect *ZDOpenDatabase(const char *path)
 
 fail:
     ZDCloseDatabase(library);
-    return NULL;
+    return nullptr;
 }
 
 ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, float *safezone)
@@ -924,7 +924,7 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
 
     auto results = static_cast<ZoneDetectResult *>(malloc(sizeof(ZoneDetectResult)));
     if(!results) {
-        return NULL;
+        return nullptr;
     }
 
     uint32_t polygonId = 0;
@@ -947,7 +947,7 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
                     lonFixedPoint >= minLon &&
                     lonFixedPoint <= maxLon) {
 
-                const ZDLookupResult lookupResult = ZDPointInPolygon(library, library->dataOffset + polygonIndex, latFixedPoint, lonFixedPoint, (safezone) ? &distanceSqrMin : NULL);
+                const ZDLookupResult lookupResult = ZDPointInPolygon(library, library->dataOffset + polygonIndex, latFixedPoint, lonFixedPoint, (safezone) ? &distanceSqrMin : nullptr);
                 if(lookupResult == ZD_LOOKUP_PARSE_ERROR) {
                     break;
                 } else if(lookupResult != ZD_LOOKUP_NOT_IN_ZONE) {
@@ -1047,7 +1047,7 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
                         }
                     }
                     free(results);
-                    return NULL;
+                    return nullptr;
                 }
             }
         }
@@ -1066,15 +1066,15 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
                 }
             }
             free(results);
-            return NULL;
+            return nullptr;
         }
     }
 
     /* Write end marker */
     results[numResults].lookupResult = ZD_LOOKUP_END;
     results[numResults].numFields = 0;
-    results[numResults].fieldNames = NULL;
-    results[numResults].data = NULL;
+    results[numResults].fieldNames = nullptr;
+    results[numResults].data = nullptr;
 
     if(safezone) {
         *safezone = sqrtf(static_cast<float>(distanceSqrMin)) * 90 / static_cast<float>(1 << (library->precision - 1));
@@ -1182,14 +1182,14 @@ int ZDSetErrorHandler(void (*handler)(int, int))
 
 char* ZDHelperSimpleLookupString(const ZoneDetect* library, float lat, float lon)
 {
-    ZoneDetectResult *result = ZDLookup(library, lat, lon, NULL);
+    ZoneDetectResult *result = ZDLookup(library, lat, lon, nullptr);
     if(!result) {
-        return NULL;
+        return nullptr;
     }
 
-    char* output = NULL;
+    char* output = nullptr;
     size_t length = 0;
-    char* strings[2] = {NULL};
+    char* strings[2] = {nullptr};
 
     if(result[0].lookupResult == ZD_LOOKUP_END) {
         goto done;

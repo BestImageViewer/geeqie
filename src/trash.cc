@@ -45,7 +45,7 @@ static gint file_util_safe_number(gint64 free_space)
 	FileData *dir_fd;
 
 	dir_fd = file_data_new_dir(options->file_ops.safe_delete_path);
-	if (!filelist_read(dir_fd, &list, NULL))
+	if (!filelist_read(dir_fd, &list, nullptr))
 		{
 		file_data_unref(dir_fd);
 		return 0;
@@ -61,7 +61,7 @@ static gint file_util_safe_number(gint64 free_space)
 		fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
-		v = static_cast<gint>(strtol(fd->name, NULL, 10));
+		v = static_cast<gint>(strtol(fd->name, nullptr, 10));
 		if (v >= n) n = v + 1;
 
 		total += fd->size;
@@ -86,7 +86,7 @@ static gint file_util_safe_number(gint64 free_space)
 			{
 			file_util_warning_dialog(_("Delete failed"),
 						 _("Unable to remove old file from trash folder"),
-						 GTK_STOCK_DIALOG_WARNING, NULL);
+						 GTK_STOCK_DIALOG_WARNING, nullptr);
 			warned = TRUE;
 			}
 		total -= fd->size;
@@ -124,8 +124,8 @@ static void move_to_trash_failed_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(d
 
 gboolean file_util_safe_unlink(const gchar *path)
 {
-	static GenericDialog *gd = NULL;
-	gchar *result = NULL;
+	static GenericDialog *gd = nullptr;
+	gchar *result = nullptr;
 	gboolean success = TRUE;
 	gchar *message;
 
@@ -137,7 +137,7 @@ gboolean file_util_safe_unlink(const gchar *path)
 			{
 			file_util_warning_dialog(_("Delete failed"),
 						 _("Unable to remove file"),
-						 GTK_STOCK_DIALOG_WARNING, NULL);
+						 GTK_STOCK_DIALOG_WARNING, nullptr);
 			success = FALSE;
 			}
 		}
@@ -180,19 +180,19 @@ gboolean file_util_safe_unlink(const gchar *path)
 			gchar *buf;
 
 			buf = g_strdup_printf(_("Unable to access or create the trash folder.\n\"%s\""), options->file_ops.safe_delete_path);
-			gd = file_util_warning_dialog(result, buf, GTK_STOCK_DIALOG_WARNING, NULL);
+			gd = file_util_warning_dialog(result, buf, GTK_STOCK_DIALOG_WARNING, nullptr);
 			g_free(buf);
 			}
 		}
 	else
 		{
 		GFile *tmp = g_file_new_for_path(path);
-		GError *error = NULL;
+		GError *error = nullptr;
 
 		if (!g_file_trash(tmp, FALSE, &error) )
 			{
 			message = g_strconcat("See the Help file for a possible workaround.\n\n", error->message, NULL);
-			gd = warning_dialog(_("Move to trash failed\n\n"), message, GTK_STOCK_DIALOG_ERROR, NULL);
+			gd = warning_dialog(_("Move to trash failed\n\n"), message, GTK_STOCK_DIALOG_ERROR, nullptr);
 			generic_dialog_add_button(gd, GTK_STOCK_HELP, "Help", move_to_trash_failed_cb, FALSE);
 
 			g_free(message);
@@ -208,7 +208,7 @@ gboolean file_util_safe_unlink(const gchar *path)
 
 gchar *file_util_safe_delete_status(void)
 {
-	gchar *buf = NULL;
+	gchar *buf = nullptr;
 
 	if (is_valid_editor_command(CMD_DELETE))
 		{

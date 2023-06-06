@@ -164,7 +164,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 	row_1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gtk_box_pack_start(GTK_BOX(prd->widget), row_1, FALSE, FALSE, 0);
 
-	radio_rejected = gtk_radio_button_new_with_label(NULL, _("Rejected"));
+	radio_rejected = gtk_radio_button_new_with_label(nullptr, _("Rejected"));
 	gtk_box_pack_start(GTK_BOX(row_1), radio_rejected, FALSE, FALSE, 0);
 	g_signal_connect(radio_rejected, "released", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 
@@ -200,7 +200,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 
 GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *title = NULL;
+	gchar *title = nullptr;
 	gchar *id = g_strdup("rating");
 	gboolean expanded = TRUE;
 	GtkWidget *ret;
@@ -228,7 +228,7 @@ GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const 
 void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	PaneRatingData *prd;
-	gchar *title = NULL;
+	gchar *title = nullptr;
 
 	prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!prd) return;

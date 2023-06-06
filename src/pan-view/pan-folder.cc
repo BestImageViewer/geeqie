@@ -188,7 +188,7 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 		x2 = MAX(px, gx + 5);
 		y2 = MAX(py, gy + 5);
 
-		pi = pan_item_tri_new(pw, NULL, x1, y1, x2 - x1, y2 - y1,
+		pi = pan_item_tri_new(pw, nullptr, x1, y1, x2 - x1, y2 - y1,
 				      px, py, gx, gy, gx + 5, gy + 5,
 				      255, 40, 40, 128);
 		pan_item_tri_border(pi, PAN_BORDER_1 | PAN_BORDER_3,
@@ -196,7 +196,7 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 		}
 
 	pw->list = g_list_concat(group->items, pw->list);
-	group->items = NULL;
+	group->items = nullptr;
 
 	group->circumference = 0;
 	work = group->children;
@@ -237,8 +237,8 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 	gint grid_size;
 	gint grid_count;
 
-	if (!filelist_read(dir_fd, &f, &d)) return NULL;
-	if (!f && !d) return NULL;
+	if (!filelist_read(dir_fd, &f, &d)) return nullptr;
+	if (!f && !d) return nullptr;
 
 	f = filelist_sort(f, SORT_NAME, TRUE);
 	d = filelist_sort(d, SORT_NAME, TRUE);
@@ -302,13 +302,13 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 
 	group = g_new0(FlowerGroup, 1);
 	group->items = pw->list;
-	pw->list = NULL;
+	pw->list = nullptr;
 
 	group->width = pi_box->width;
 	group->height = pi_box->y + pi_box->height;
 	group->diameter = static_cast<gint>(sqrt(group->width * group->width + group->height * group->height));
 
-	group->children = NULL;
+	group->children = nullptr;
 
 	work = d;
 	while (work)
@@ -341,7 +341,7 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 
 		g_list_free(group->items);
 		g_free(group);
-		group = NULL;
+		group = nullptr;
 		}
 
 	g_list_free(f);
@@ -358,7 +358,7 @@ void pan_flower_compute(PanWindow *pw, FileData *dir_fd,
 	GList *list;
 
 	group = pan_flower_group(pw, dir_fd, 0, 0);
-	pan_flower_build(pw, group, NULL);
+	pan_flower_build(pw, group, nullptr);
 
 	pan_flower_size(pw, width, height);
 
@@ -476,7 +476,7 @@ void pan_folder_tree_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint 
 	w = PAN_BOX_BORDER * 2;
 	h = PAN_BOX_BORDER * 2;
 
-	pan_folder_tree_path(pw, dir_fd, &x, &y, &level, NULL, &w, &h);
+	pan_folder_tree_path(pw, dir_fd, &x, &y, &level, nullptr, &w, &h);
 
 	if (width) *width = w;
 	if (height) *height = h;

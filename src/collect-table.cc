@@ -95,7 +95,7 @@ hard_coded_window_keys collection_window_keys[] = {
 	{static_cast<GdkModifierType>(0), 'B', N_("Sort by size")},
 	{static_cast<GdkModifierType>(0), 'P', N_("Sort by path")},
 	{GDK_SHIFT_MASK, 'P', N_("Print")},
-	{static_cast<GdkModifierType>(0), 0, NULL}
+	{static_cast<GdkModifierType>(0), 0, nullptr}
 };
 
 /*
@@ -125,7 +125,7 @@ static gboolean collection_table_find_iter(CollectTable *ct, CollectInfo *info, 
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
 	if (!collection_table_find_position(ct, info, &row, &col)) return FALSE;
-	if (!gtk_tree_model_iter_nth_child(store, iter, NULL, row)) return FALSE;
+	if (!gtk_tree_model_iter_nth_child(store, iter, nullptr, row)) return FALSE;
 	if (column) *column = col;
 
 	return TRUE;
@@ -136,22 +136,22 @@ static CollectInfo *collection_table_find_data(CollectTable *ct, gint row, gint 
 	GtkTreeModel *store;
 	GtkTreeIter p;
 
-	if (row < 0 || col < 0) return NULL;
+	if (row < 0 || col < 0) return nullptr;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
-	if (gtk_tree_model_iter_nth_child(store, &p, NULL, row))
+	if (gtk_tree_model_iter_nth_child(store, &p, nullptr, row))
 		{
 		GList *list;
 
 		gtk_tree_model_get(store, &p, CTABLE_COLUMN_POINTER, &list, -1);
-		if (!list) return NULL;
+		if (!list) return nullptr;
 
 		if (iter) *iter = p;
 
 		return static_cast<CollectInfo *>(g_list_nth_data(list, col));
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 static CollectInfo *collection_table_find_data_by_coord(CollectTable *ct, gint x, gint y, GtkTreeIter *iter)
@@ -164,15 +164,15 @@ static CollectInfo *collection_table_find_data_by_coord(CollectTable *ct, gint x
 	gint n;
 
 	if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(ct->listview), x, y,
-					   &tpath, &column, NULL, NULL))
-		return NULL;
+					   &tpath, &column, nullptr, nullptr))
+		return nullptr;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
 	gtk_tree_model_get_iter(store, &row, tpath);
 	gtk_tree_path_free(tpath);
 
 	gtk_tree_model_get(store, &row, CTABLE_COLUMN_POINTER, &list, -1);
-	if (!list) return NULL;
+	if (!list) return nullptr;
 
 	n = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_number"));
 	if (iter) *iter = row;
@@ -331,7 +331,7 @@ static void collection_table_selection_set(CollectTable *ct, CollectInfo *info, 
 		{
 		GtkTreeIter row;
 
-		if (collection_table_find_iter(ct, info, &row, NULL))
+		if (collection_table_find_iter(ct, info, &row, nullptr))
 			{
 			gtk_tree_model_get(store, &row, CTABLE_COLUMN_POINTER, &list, -1);
 			if (list) gtk_list_store_set(GTK_LIST_STORE(store), &row, CTABLE_COLUMN_POINTER, list, -1);
@@ -379,13 +379,13 @@ void collection_table_select_all(CollectTable *ct)
 	GList *work;
 
 	g_list_free(ct->selection);
-	ct->selection = NULL;
+	ct->selection = nullptr;
 
 	work = ct->cd->list;
 	while (work)
 		{
 		ct->selection = g_list_append(ct->selection, work->data);
-		collection_table_selection_add(ct, static_cast<CollectInfo *>(work->data), SELECTION_SELECTED, NULL);
+		collection_table_selection_add(ct, static_cast<CollectInfo *>(work->data), SELECTION_SELECTED, nullptr);
 		work = work->next;
 		}
 
@@ -399,12 +399,12 @@ void collection_table_unselect_all(CollectTable *ct)
 	work = ct->selection;
 	while (work)
 		{
-		collection_table_selection_remove(ct, static_cast<CollectInfo *>(work->data), SELECTION_SELECTED, NULL);
+		collection_table_selection_remove(ct, static_cast<CollectInfo *>(work->data), SELECTION_SELECTED, nullptr);
 		work = work->next;
 		}
 
 	g_list_free(ct->selection);
-	ct->selection = NULL;
+	ct->selection = nullptr;
 
 	collection_table_update_status(ct);
 }
@@ -413,7 +413,7 @@ void collection_table_unselect_all(CollectTable *ct)
 static void collection_table_select_invert_all(CollectTable *ct)
 {
 	GList *work;
-	GList *new_selection = NULL;
+	GList *new_selection = nullptr;
 
 	work = ct->cd->list;
 	while (work)
@@ -422,12 +422,12 @@ static void collection_table_select_invert_all(CollectTable *ct)
 
 		if (INFO_SELECTED(info))
 			{
-			collection_table_selection_remove(ct, info, SELECTION_SELECTED, NULL);
+			collection_table_selection_remove(ct, info, SELECTION_SELECTED, nullptr);
 			}
 		else
 			{
 			new_selection = g_list_append(new_selection, info);
-			collection_table_selection_add(ct, info, SELECTION_SELECTED, NULL);
+			collection_table_selection_add(ct, info, SELECTION_SELECTED, nullptr);
 
 			}
 
@@ -447,7 +447,7 @@ void collection_table_select(CollectTable *ct, CollectInfo *info)
 	if (!info || INFO_SELECTED(info)) return;
 
 	ct->selection = g_list_append(ct->selection, info);
-	collection_table_selection_add(ct, info, SELECTION_SELECTED, NULL);
+	collection_table_selection_add(ct, info, SELECTION_SELECTED, nullptr);
 
 	collection_table_update_status(ct);
 }
@@ -459,7 +459,7 @@ static void collection_table_unselect(CollectTable *ct, CollectInfo *info)
 	if (!info || !INFO_SELECTED(info) ) return;
 
 	ct->selection = g_list_remove(ct->selection, info);
-	collection_table_selection_remove(ct, info, SELECTION_SELECTED, NULL);
+	collection_table_selection_remove(ct, info, SELECTION_SELECTED, nullptr);
 
 	collection_table_update_status(ct);
 }
@@ -509,7 +509,7 @@ static void collection_table_select_region_util(CollectTable *ct, CollectInfo *s
 			if (work->data != end)
 				work = work->next;
 			else
-				work = NULL;
+				work = nullptr;
 			}
 		return;
 		}
@@ -533,7 +533,7 @@ static void collection_table_select_region_util(CollectTable *ct, CollectInfo *s
 		{
 		for (j = col1; j <= col2; j++)
 			{
-			CollectInfo *info = collection_table_find_data(ct, i, j, NULL);
+			CollectInfo *info = collection_table_find_data(ct, i, j, nullptr);
 			if (info) collection_table_select_util(ct, info, select);
 			}
 		}
@@ -568,9 +568,9 @@ static void tip_show(CollectTable *ct)
 	seat = gdk_display_get_default_seat(gdk_window_get_display(gtk_widget_get_window(ct->listview)));
 	device = gdk_seat_get_pointer(seat);
 	gdk_window_get_device_position(gtk_widget_get_window(ct->listview),
-								device, &x, &y, NULL);
+								device, &x, &y, nullptr);
 
-	ct->tip_info = collection_table_find_data_by_coord(ct, x, y, NULL);
+	ct->tip_info = collection_table_find_data_by_coord(ct, x, y, nullptr);
 	if (!ct->tip_info) return;
 
 	ct->tip_window = gtk_window_new(GTK_WINDOW_POPUP);
@@ -586,7 +586,7 @@ static void tip_show(CollectTable *ct)
 	display = gdk_display_get_default();
 	seat = gdk_display_get_default_seat(display);
 	device = gdk_seat_get_pointer(seat);
-	gdk_device_get_position(device, NULL, &x, &y);
+	gdk_device_get_position(device, nullptr, &x, &y);
 
 	if (!gtk_widget_get_realized(ct->tip_window)) gtk_widget_realize(ct->tip_window);
 	gtk_window_move(GTK_WINDOW(ct->tip_window), x + 16, y + 16);
@@ -596,7 +596,7 @@ static void tip_show(CollectTable *ct)
 static void tip_hide(CollectTable *ct)
 {
 	if (ct->tip_window) gtk_widget_destroy(ct->tip_window);
-	ct->tip_window = NULL;
+	ct->tip_window = nullptr;
 }
 
 static gboolean tip_schedule_cb(gpointer data)
@@ -646,7 +646,7 @@ static void tip_update(CollectTable *ct, CollectInfo *info)
 	if (ct->tip_window)
 		{
 		gint x, y;
-		gdk_device_get_position(device, NULL, &x, &y);
+		gdk_device_get_position(device, nullptr, &x, &y);
 
 		gtk_window_move(GTK_WINDOW(ct->tip_window), x + 16, y + 16);
 
@@ -677,7 +677,7 @@ static void collection_table_popup_save_as_cb(GtkWidget *UNUSED(widget), gpointe
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	collection_dialog_save_as(NULL, ct->cd);
+	collection_dialog_save_as(nullptr, ct->cd);
 }
 
 static void collection_table_popup_save_cb(GtkWidget *widget, gpointer data)
@@ -698,14 +698,14 @@ static void collection_table_popup_save_cb(GtkWidget *widget, gpointer data)
 
 static GList *collection_table_popup_file_list(CollectTable *ct)
 {
-	if (!ct->click_info) return NULL;
+	if (!ct->click_info) return nullptr;
 
 	if (INFO_SELECTED(ct->click_info))
 		{
 		return collection_table_selection_get_list(ct);
 		}
 
-	return g_list_append(NULL, file_data_ref(ct->click_info->fd));
+	return g_list_append(nullptr, file_data_ref(ct->click_info->fd));
 }
 
 static void collection_table_popup_edit_cb(GtkWidget *widget, gpointer data)
@@ -717,28 +717,28 @@ static void collection_table_popup_edit_cb(GtkWidget *widget, gpointer data)
 
 	if (!ct) return;
 
-	file_util_start_editor_from_filelist(key, collection_table_popup_file_list(ct), NULL, ct->listview);
+	file_util_start_editor_from_filelist(key, collection_table_popup_file_list(ct), nullptr, ct->listview);
 }
 
 static void collection_table_popup_copy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	file_util_copy(NULL, collection_table_popup_file_list(ct), NULL, ct->listview);
+	file_util_copy(nullptr, collection_table_popup_file_list(ct), nullptr, ct->listview);
 }
 
 static void collection_table_popup_move_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	file_util_move(NULL, collection_table_popup_file_list(ct), NULL, ct->listview);
+	file_util_move(nullptr, collection_table_popup_file_list(ct), nullptr, ct->listview);
 }
 
 static void collection_table_popup_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	file_util_rename(NULL, collection_table_popup_file_list(ct), ct->listview);
+	file_util_rename(nullptr, collection_table_popup_file_list(ct), ct->listview);
 }
 
 static void collection_table_popup_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
@@ -746,7 +746,7 @@ static void collection_table_popup_delete_cb(GtkWidget *UNUSED(widget), gpointer
 	auto ct = static_cast<CollectTable *>(data);
 
 	options->file_ops.safe_delete_enable = FALSE;
-	file_util_delete(NULL, collection_table_popup_file_list(ct), ct->listview);
+	file_util_delete(nullptr, collection_table_popup_file_list(ct), ct->listview);
 }
 
 static void collection_table_popup_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer data)
@@ -754,7 +754,7 @@ static void collection_table_popup_move_to_trash_cb(GtkWidget *UNUSED(widget), g
 	auto ct = static_cast<CollectTable *>(data);
 
 	options->file_ops.safe_delete_enable = TRUE;
-	file_util_delete(NULL, collection_table_popup_file_list(ct), ct->listview);
+	file_util_delete(nullptr, collection_table_popup_file_list(ct), ct->listview);
 }
 
 static void collection_table_popup_copy_path_cb(GtkWidget *UNUSED(widget), gpointer data)
@@ -812,7 +812,7 @@ static void collection_table_popup_view_cb(GtkWidget *UNUSED(widget), gpointer d
 
 	if (ct->click_info && g_list_find(ct->cd->list, ct->click_info))
 		{
-		layout_image_set_collection(NULL, ct->cd, ct->click_info);
+		layout_image_set_collection(nullptr, ct->cd, ct->click_info);
 		}
 }
 
@@ -858,7 +858,7 @@ static void collection_table_popup_remove_cb(GtkWidget *UNUSED(widget), gpointer
 		}
 	else
 		{
-		list = g_list_append(NULL, ct->click_info);
+		list = g_list_append(nullptr, ct->click_info);
 		}
 
 	collection_remove_by_info_list(ct->cd, list);
@@ -869,7 +869,7 @@ static void collection_table_popup_add_file_selection_cb(GtkWidget *UNUSED(widge
 {
 	auto ct = static_cast<CollectTable *>(data);
 	GList *list;
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 
 	if (!layout_valid(&lw)) return;
 
@@ -886,14 +886,14 @@ static void collection_table_popup_add_collection_cb(GtkWidget *UNUSED(widget), 
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	collection_dialog_append(NULL, ct->cd);
+	collection_dialog_append(nullptr, ct->cd);
 }
 
 static void collection_table_popup_goto_original_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 	GList *list;
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 	FileData *fd;
 
 	if (!layout_valid(&lw)) return;
@@ -923,7 +923,7 @@ static void collection_table_popup_print_cb(GtkWidget *UNUSED(widget), gpointer 
 	auto ct = static_cast<CollectTable *>(data);
 	FileData *fd;
 
-	fd = (ct->click_info) ? ct->click_info->fd : NULL;
+	fd = (ct->click_info) ? ct->click_info->fd : nullptr;
 
 	print_window_new(fd, collection_table_selection_get_list(ct), collection_table_get_list(ct), gtk_widget_get_toplevel(ct->listview));
 }
@@ -946,16 +946,16 @@ static void collection_table_popup_destroy_cb(GtkWidget *UNUSED(widget), gpointe
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	collection_table_selection_remove(ct, ct->click_info, SELECTION_PRELIGHT, NULL);
-	ct->click_info = NULL;
-	ct->popup = NULL;
+	collection_table_selection_remove(ct, ct->click_info, SELECTION_PRELIGHT, nullptr);
+	ct->click_info = nullptr;
+	ct->popup = nullptr;
 
 	filelist_free(ct->drop_list);
-	ct->drop_list = NULL;
-	ct->drop_info = NULL;
+	ct->drop_list = nullptr;
+	ct->drop_info = nullptr;
 
 	filelist_free(ct->editmenu_fd_list);
-	ct->editmenu_fd_list = NULL;
+	ct->editmenu_fd_list = nullptr;
 }
 
 static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_icon)
@@ -992,7 +992,7 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 			G_CALLBACK(collection_table_popup_add_collection_cb), ct);
 	menu_item_add_divider(menu);
 
-	item = menu_item_add(menu, _("_Selection"), NULL, NULL);
+	item = menu_item_add(menu, _("_Selection"), nullptr, nullptr);
 	submenu = gtk_menu_new();
 	menu_item_add(submenu, _("Select all"),
 			G_CALLBACK(collection_table_popup_selectall_cb), ct);
@@ -1034,11 +1034,11 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 				G_CALLBACK(collection_table_popup_delete_cb), ct);
 
 	menu_item_add_divider(menu);
-	submenu = submenu_add_sort(NULL, G_CALLBACK(collection_table_popup_sort_cb), ct, FALSE, TRUE, FALSE, SORT_NONE);
+	submenu = submenu_add_sort(nullptr, G_CALLBACK(collection_table_popup_sort_cb), ct, FALSE, TRUE, FALSE, SORT_NONE);
 	menu_item_add_divider(submenu);
 	menu_item_add(submenu, _("Randomize"),
 			G_CALLBACK(collection_table_popup_randomize_cb), ct);
-	item = menu_item_add(menu, _("_Sort"), NULL, NULL);
+	item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 
 	menu_item_add_check(menu, _("Show filename _text"), ct->show_text,
@@ -1078,12 +1078,12 @@ void collection_table_set_focus(CollectTable *ct, CollectInfo *info)
 						       &ct->focus_row, &ct->focus_column);
 			return;
 			}
-		collection_table_selection_remove(ct, ct->focus_info, SELECTION_FOCUS, NULL);
+		collection_table_selection_remove(ct, ct->focus_info, SELECTION_FOCUS, nullptr);
 		}
 
 	if (!collection_table_find_position(ct, info, &row, &col))
 		{
-		ct->focus_info = NULL;
+		ct->focus_info = nullptr;
 		ct->focus_row = -1;
 		ct->focus_column = -1;
 		return;
@@ -1092,9 +1092,9 @@ void collection_table_set_focus(CollectTable *ct, CollectInfo *info)
 	ct->focus_info = info;
 	ct->focus_row = row;
 	ct->focus_column = col;
-	collection_table_selection_add(ct, ct->focus_info, SELECTION_FOCUS, NULL);
+	collection_table_selection_add(ct, ct->focus_info, SELECTION_FOCUS, nullptr);
 
-	if (collection_table_find_iter(ct, ct->focus_info, &iter, NULL))
+	if (collection_table_find_iter(ct, ct->focus_info, &iter, nullptr))
 		{
 		GtkTreePath *tpath;
 		GtkTreeViewColumn *column;
@@ -1197,7 +1197,7 @@ static void collection_table_move_focus(CollectTable *ct, gint row, gint col, gb
 		new_row = new_col = 0;
 		}
 
-	collection_table_set_focus(ct, collection_table_find_data(ct, new_row, new_col, NULL));
+	collection_table_set_focus(ct, collection_table_find_data(ct, new_row, new_col, nullptr));
 }
 
 static void collection_table_update_focus(CollectTable *ct)
@@ -1276,7 +1276,7 @@ static gboolean collection_table_press_key_cb(GtkWidget *widget, GdkEventKey *ev
 			focus_col = ct->columns - 1 - ct->focus_column;
 			break;
 		case GDK_KEY_space:
-			info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, NULL);
+			info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, nullptr);
 			if (info)
 				{
 				ct->click_info = info;
@@ -1296,14 +1296,14 @@ static gboolean collection_table_press_key_cb(GtkWidget *widget, GdkEventKey *ev
 			break;
 		case GDK_KEY_Menu:
 		case GDK_KEY_F10:
-			info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, NULL);
+			info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, nullptr);
 			ct->click_info = info;
 
-			collection_table_selection_add(ct, ct->click_info, SELECTION_PRELIGHT, NULL);
+			collection_table_selection_add(ct, ct->click_info, SELECTION_PRELIGHT, nullptr);
 			tip_unschedule(ct);
 
-			ct->popup = collection_table_popup_menu(ct, (info != NULL));
-			gtk_menu_popup_at_widget(GTK_MENU(ct->popup), widget, GDK_GRAVITY_SOUTH, GDK_GRAVITY_CENTER, NULL);
+			ct->popup = collection_table_popup_menu(ct, (info != nullptr));
+			gtk_menu_popup_at_widget(GTK_MENU(ct->popup), widget, GDK_GRAVITY_SOUTH, GDK_GRAVITY_CENTER, nullptr);
 
 			break;
 		default:
@@ -1316,9 +1316,9 @@ static gboolean collection_table_press_key_cb(GtkWidget *widget, GdkEventKey *ev
 		CollectInfo *new_info;
 		CollectInfo *old_info;
 
-		old_info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, NULL);
+		old_info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, nullptr);
 		collection_table_move_focus(ct, focus_row, focus_col, TRUE);
-		new_info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, NULL);
+		new_info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, nullptr);
 
 		if (new_info != old_info)
 			{
@@ -1364,7 +1364,7 @@ static gboolean collection_table_press_key_cb(GtkWidget *widget, GdkEventKey *ev
 static CollectInfo *collection_table_insert_find(CollectTable *ct, CollectInfo *source, gboolean *after, GdkRectangle *cell,
 						 gboolean use_coord, gint x, gint y)
 {
-	CollectInfo *info = NULL;
+	CollectInfo *info = nullptr;
 	GtkTreeModel *store;
 	GtkTreeIter iter;
 	GtkTreePath *tpath;
@@ -1379,7 +1379,7 @@ static CollectInfo *collection_table_insert_find(CollectTable *ct, CollectInfo *
 		seat = gdk_display_get_default_seat(gdk_window_get_display(gtk_widget_get_window(ct->listview)));
 		device = gdk_seat_get_pointer(seat);
 		gdk_window_get_device_position(gtk_widget_get_window(ct->listview),
-									device, &x, &y, NULL);
+									device, &x, &y, nullptr);
 		}
 
 	if (source)
@@ -1399,7 +1399,7 @@ static CollectInfo *collection_table_insert_find(CollectTable *ct, CollectInfo *
 		}
 
 	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(ct->listview), x, y,
-					  &tpath, &column, NULL, NULL))
+					  &tpath, &column, nullptr, nullptr))
 		{
 		GList *list;
 		gint n;
@@ -1419,7 +1419,7 @@ static CollectInfo *collection_table_insert_find(CollectTable *ct, CollectInfo *
 		gtk_tree_path_free(tpath);
 		}
 
-	if (info == NULL)
+	if (info == nullptr)
 		{
 		GList *work;
 
@@ -1450,7 +1450,7 @@ static CollectInfo *collection_table_insert_point(CollectTable *ct, gint x, gint
 	GdkRectangle cell;
 	gboolean after = FALSE;
 
-	info = collection_table_insert_find(ct, NULL, &after, &cell, TRUE, x, y);
+	info = collection_table_insert_find(ct, nullptr, &after, &cell, TRUE, x, y);
 
 	if (info && after)
 		{
@@ -1463,7 +1463,7 @@ static CollectInfo *collection_table_insert_point(CollectTable *ct, gint x, gint
 			}
 		else
 			{
-			info = NULL;
+			info = nullptr;
 			}
 		}
 
@@ -1476,7 +1476,7 @@ static void collection_table_insert_marker(CollectTable *ct, CollectInfo *info, 
 	GdkRectangle cell;
 	GdkWindow *parent;
 	gint x_parent, y_parent;
-	GError *error = NULL;
+	GError *error = nullptr;
 	GInputStream *in_stream;
 	GdkPixbuf *pb;
 	gchar *path;
@@ -1487,7 +1487,7 @@ static void collection_table_insert_marker(CollectTable *ct, CollectInfo *info, 
 	if (!enable)
 		{
 		if (ct->marker_window) gdk_window_destroy(ct->marker_window);
-		ct->marker_window = NULL;
+		ct->marker_window = nullptr;
 
 		return;
 		}
@@ -1506,7 +1506,7 @@ static void collection_table_insert_marker(CollectTable *ct, CollectInfo *info, 
 		in_stream = g_resources_open_stream(path, G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
 		g_free(path);
 
-		pb = gdk_pixbuf_new_from_stream(in_stream, NULL, &error);
+		pb = gdk_pixbuf_new_from_stream(in_stream, nullptr, &error);
 		g_object_unref(in_stream);
 
 		if (error)
@@ -1526,7 +1526,7 @@ static void collection_table_insert_marker(CollectTable *ct, CollectInfo *info, 
 		attributes.event_mask = gtk_widget_get_events(ct->listview);
 		attributes_mask = 0;
 
-		ct->marker_window = gdk_window_new(NULL, &attributes, attributes_mask);
+		ct->marker_window = gdk_window_new(nullptr, &attributes, attributes_mask);
 
 		cairo_region_t *mask;
 		cairo_pattern_t *pattern;
@@ -1589,7 +1589,7 @@ static void collection_table_motion_update(CollectTable *ct, gint x, gint y, gbo
 {
 	CollectInfo *info;
 
-	info = collection_table_find_data_by_coord(ct, x, y, NULL);
+	info = collection_table_find_data_by_coord(ct, x, y, nullptr);
 
 	if (drop_event)
 		{
@@ -1616,7 +1616,7 @@ static gboolean collection_table_auto_scroll_idle_cb(gpointer data)
 	window = gtk_widget_get_window(ct->listview);
 	seat = gdk_display_get_default_seat(gdk_window_get_display(window));
 	device = gdk_seat_get_pointer(seat);
-	gdk_window_get_device_position(window, device, &x, &y, NULL);
+	gdk_window_get_device_position(window, device, &x, &y, nullptr);
 
 	w = gdk_window_get_width(window);
 	h = gdk_window_get_height(window);
@@ -1651,7 +1651,7 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
 			ct->drop_idle_id = 0;
 			}
 		widget_auto_scroll_stop(ct->listview);
-		collection_table_insert_marker(ct, NULL, FALSE);
+		collection_table_insert_marker(ct, nullptr, FALSE);
 		}
 	else
 		{
@@ -1696,7 +1696,7 @@ static gboolean collection_table_press_cb(GtkWidget *UNUSED(widget), GdkEventBut
 				{
 				if (info)
 					{
-					layout_image_set_collection(NULL, ct->cd, info);
+					layout_image_set_collection(nullptr, ct->cd, info);
 					}
 				}
 			else if (!gtk_widget_has_focus(ct->listview))
@@ -1705,8 +1705,8 @@ static gboolean collection_table_press_cb(GtkWidget *UNUSED(widget), GdkEventBut
 				}
 			break;
 		case MOUSE_BUTTON_RIGHT:
-			ct->popup = collection_table_popup_menu(ct, (info != NULL));
-			gtk_menu_popup_at_pointer(GTK_MENU(ct->popup), NULL);
+			ct->popup = collection_table_popup_menu(ct, (info != nullptr));
+			gtk_menu_popup_at_pointer(GTK_MENU(ct->popup), nullptr);
 			break;
 		default:
 			break;
@@ -1719,7 +1719,7 @@ static gboolean collection_table_release_cb(GtkWidget *UNUSED(widget), GdkEventB
 {
 	auto ct = static_cast<CollectTable *>(data);
 	GtkTreeIter iter;
-	CollectInfo *info = NULL;
+	CollectInfo *info = nullptr;
 
 	tip_schedule(ct);
 
@@ -1730,7 +1730,7 @@ static gboolean collection_table_release_cb(GtkWidget *UNUSED(widget), GdkEventB
 
 	if (ct->click_info)
 		{
-		collection_table_selection_remove(ct, ct->click_info, SELECTION_PRELIGHT, NULL);
+		collection_table_selection_remove(ct, ct->click_info, SELECTION_PRELIGHT, nullptr);
 		}
 
 	if (bevent->button == MOUSE_BUTTON_LEFT &&
@@ -1804,7 +1804,7 @@ static void collection_table_clear_store(CollectTable *ct)
 	GtkTreeModel *store;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
-	gtk_tree_model_foreach(store, collection_table_destroy_node_cb, NULL);
+	gtk_tree_model_foreach(store, collection_table_destroy_node_cb, nullptr);
 
 	gtk_list_store_clear(GTK_LIST_STORE(store));
 }
@@ -1812,10 +1812,10 @@ static void collection_table_clear_store(CollectTable *ct)
 static GList *collection_table_add_row(CollectTable *ct, GtkTreeIter *iter)
 {
 	GtkListStore *store;
-	GList *list = NULL;
+	GList *list = nullptr;
 	gint i;
 
-	for (i = 0; i < ct->columns; i++) list = g_list_prepend(list, NULL);
+	for (i = 0; i < ct->columns; i++) list = g_list_prepend(list, nullptr);
 
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview)));
 	gtk_list_store_append(store, iter);
@@ -1851,7 +1851,7 @@ static void collection_table_populate(CollectTable *ct, gboolean resize)
 			gtk_tree_view_column_set_fixed_width(column, thumb_width + (THUMB_BORDER_PADDING * 6));
 
 			list = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
-			cell = static_cast<GtkCellRenderer *>((list) ? list->data : NULL);
+			cell = static_cast<GtkCellRenderer *>((list) ? list->data : nullptr);
 			g_list_free(list);
 
 			if (cell && GQV_IS_CELL_RENDERER_ICON(cell))
@@ -1925,7 +1925,7 @@ static void collection_table_sync(CollectTable *ct)
 		GList *list;
 		r++;
 		c = 0;
-		if (gtk_tree_model_iter_nth_child(store, &iter, NULL, r))
+		if (gtk_tree_model_iter_nth_child(store, &iter, nullptr, r))
 			{
 			gtk_tree_model_get(store, &iter, CTABLE_COLUMN_POINTER, &list, -1);
 			gtk_list_store_set(GTK_LIST_STORE(store), &iter, CTABLE_COLUMN_POINTER, list, -1);
@@ -1946,7 +1946,7 @@ static void collection_table_sync(CollectTable *ct)
 				}
 			else
 				{
-				info = NULL;
+				info = nullptr;
 				}
 			if (list)
 				{
@@ -1957,7 +1957,7 @@ static void collection_table_sync(CollectTable *ct)
 		}
 
 	r++;
-	while (gtk_tree_model_iter_nth_child(store, &iter, NULL, r))
+	while (gtk_tree_model_iter_nth_child(store, &iter, nullptr, r))
 		{
 		GList *list;
 
@@ -1991,7 +1991,7 @@ static void collection_table_sync_idle(CollectTable *ct)
 		/* high priority, the view needs to be resynced before a redraw
 		 * may contain invalid pointers at this time
 		 */
-		ct->sync_idle_id = g_idle_add_full(G_PRIORITY_HIGH, collection_table_sync_idle_cb, ct, NULL);
+		ct->sync_idle_id = g_idle_add_full(G_PRIORITY_HIGH, collection_table_sync_idle_cb, ct, nullptr);
 		}
 }
 
@@ -2028,13 +2028,13 @@ static void collection_table_insert_filelist(CollectTable *ct, GList *list, Coll
 static void collection_table_move_by_info_list(CollectTable *ct, GList *info_list, gint row, gint col)
 {
 	GList *work;
-	GList *insert_pos = NULL;
+	GList *insert_pos = nullptr;
 	GList *temp;
 	CollectInfo *info;
 
 	if (!info_list) return;
 
-	info = collection_table_find_data(ct, row, col, NULL);
+	info = collection_table_find_data(ct, row, col, nullptr);
 
 	if (!info_list->next && info_list->data == info) return;
 
@@ -2115,7 +2115,7 @@ void collection_table_file_update(CollectTable *ct, CollectInfo *info)
 
 	collection_table_update_extras(ct, TRUE, value);
 
-	if (collection_table_find_iter(ct, info, &iter, NULL))
+	if (collection_table_find_iter(ct, info, &iter, nullptr))
 		{
 		GtkTreeModel *store;
 		GList *list;
@@ -2163,7 +2163,7 @@ static void collection_table_add_dir_recursive(CollectTable *ct, FileData *dir_f
 	GList *f;
 	GList *work;
 
-	if (!filelist_read(dir_fd, &f, recursive ? &d : NULL))
+	if (!filelist_read(dir_fd, &f, recursive ? &d : nullptr))
 		return;
 
 	f = filelist_filter(f, FALSE);
@@ -2227,7 +2227,7 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(collection_table_popup_destroy_cb), ct);
 
-	menu_item_add_stock(menu, _("Dropped list includes folders."), GTK_STOCK_DND_MULTIPLE, NULL, NULL);
+	menu_item_add_stock(menu, _("Dropped list includes folders."), GTK_STOCK_DND_MULTIPLE, nullptr, nullptr);
 	menu_item_add_divider(menu);
 	menu_item_add_stock(menu, _("_Add contents"), GTK_STOCK_OK,
 			    G_CALLBACK(confirm_dir_list_add), ct);
@@ -2236,7 +2236,7 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
 	menu_item_add_stock(menu, _("_Skip folders"), GTK_STOCK_REMOVE,
 			    G_CALLBACK(confirm_dir_list_skip), ct);
 	menu_item_add_divider(menu);
-	menu_item_add_stock(menu, _("Cancel"), GTK_STOCK_CANCEL, NULL, ct);
+	menu_item_add_stock(menu, _("Cancel"), GTK_STOCK_CANCEL, nullptr, ct);
 
 	return menu;
 }
@@ -2267,8 +2267,8 @@ static void collection_table_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *
 {
 	auto ct = static_cast<CollectTable *>(data);
 	gboolean selected;
-	GList *list = NULL;
-	gchar *uri_text = NULL;
+	GList *list = nullptr;
+	gchar *uri_text = nullptr;
 	gint total;
 
 	if (!ct->click_info) return;
@@ -2284,7 +2284,7 @@ static void collection_table_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *
 				}
 			else
 				{
-				list = g_list_append(NULL, ct->click_info);
+				list = g_list_append(nullptr, ct->click_info);
 				uri_text = collection_info_list_to_dnd_data(ct->cd, list, &total);
 				g_list_free(list);
 				}
@@ -2301,7 +2301,7 @@ static void collection_table_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *
 				}
 			else
 				{
-				list = g_list_append(NULL, file_data_ref(ct->click_info->fd));
+				list = g_list_append(nullptr, file_data_ref(ct->click_info->fd));
 				}
 			if (!list) return;
 
@@ -2318,8 +2318,8 @@ static void collection_table_dnd_receive(GtkWidget *UNUSED(widget), GdkDragConte
 					  guint UNUSED(time), gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
-	GList *list = NULL;
-	GList *info_list = NULL;
+	GList *list = nullptr;
+	GList *info_list = nullptr;
 	CollectionData *source;
 	CollectInfo *drop_info;
 	GList *work;
@@ -2327,7 +2327,7 @@ static void collection_table_dnd_receive(GtkWidget *UNUSED(widget), GdkDragConte
 	DEBUG_1("%s", gtk_selection_data_get_data(selection_data));
 
 	collection_table_scroll(ct, FALSE);
-	collection_table_insert_marker(ct, NULL, FALSE);
+	collection_table_insert_marker(ct, nullptr, FALSE);
 
 	drop_info = collection_table_insert_point(ct, x, y);
 
@@ -2344,7 +2344,7 @@ static void collection_table_dnd_receive(GtkWidget *UNUSED(widget), GdkDragConte
 
 					/* it is a move within a collection */
 					filelist_free(list);
-					list = NULL;
+					list = nullptr;
 
 					if (!drop_info)
 						{
@@ -2379,14 +2379,14 @@ static void collection_table_dnd_receive(GtkWidget *UNUSED(widget), GdkDragConte
 					ct->drop_list = list;
 					ct->drop_info = drop_info;
 					menu = collection_table_drop_menu(ct);
-					gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+					gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 					return;
 					}
 				work = work->next;
 				}
 			break;
 		default:
-			list = NULL;
+			list = nullptr;
 			break;
 		}
 
@@ -2488,8 +2488,8 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *UNUSED(tree_column)
 	CollectInfo *info;
 	GdkColor color_fg;
 	GdkColor color_bg;
-	gchar *star_rating = NULL;
-	gchar *display_text = NULL;
+	gchar *star_rating = nullptr;
+	gchar *display_text = nullptr;
 
 	ct = cd->ct;
 
@@ -2631,7 +2631,7 @@ static void collection_table_destroy(GtkWidget *UNUSED(widget), gpointer data)
 	if (ct->popup)
 		{
 		g_signal_handlers_disconnect_matched(G_OBJECT(ct->popup), G_SIGNAL_MATCH_DATA,
-						     0, 0, 0, NULL, ct);
+						     0, 0, nullptr, nullptr, ct);
 		gtk_widget_destroy(ct->popup);
 		}
 
@@ -2663,7 +2663,7 @@ CollectTable *collection_table_new(CollectionData *cd)
 	ct->show_text = options->show_icon_names;
 	ct->show_stars = options->show_star_rating;
 
-	ct->scrolled = gtk_scrolled_window_new(NULL, NULL);
+	ct->scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(ct->scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ct->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -2724,7 +2724,7 @@ void collection_table_set_labels(CollectTable *ct, GtkWidget *status, GtkWidget 
 
 CollectInfo *collection_table_get_focus_info(CollectTable *ct)
 {
-	return collection_table_find_data(ct, ct->focus_row, ct->focus_column, NULL);
+	return collection_table_find_data(ct, ct->focus_row, ct->focus_column, nullptr);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

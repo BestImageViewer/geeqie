@@ -35,7 +35,7 @@
 
 gboolean pixbuf_to_file_as_png(GdkPixbuf *pixbuf, const gchar *filename)
 {
-	GError *error = NULL;
+	GError *error = nullptr;
 	gboolean ret;
 
 	if (!pixbuf || !filename) return FALSE;
@@ -144,18 +144,18 @@ static PixbufInline inline_pixbuf_data[] = {
 	{ PIXBUF_INLINE_SPLIT_PANE_SYNC, "gq-icon-split-pane-sync.png" },
 	{ PIXBUF_INLINE_UNKNOWN,	"gq-sheet-unknown.png" },
 	{ PIXBUF_INLINE_VIDEO,	"gq-sheet-video.png" },
-	{ NULL, NULL }
+	{ nullptr, nullptr }
 };
 
 GdkPixbuf *pixbuf_inline(const gchar *key)
 {
-	GError *error = NULL;
+	GError *error = nullptr;
 	GInputStream *in_stream;
 	GdkPixbuf *icon_pixbuf;
 	gchar *path;
 	gint i;
 
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	i = 0;
 	while (inline_pixbuf_data[i].key)
@@ -172,17 +172,17 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 				log_printf("warning: inline pixbuf error: %s", error->message);
 				g_error_free(error);
 				g_object_unref(in_stream);
-				return NULL;
+				return nullptr;
 				}
 
-			icon_pixbuf = gdk_pixbuf_new_from_stream(in_stream, NULL, &error);
+			icon_pixbuf = gdk_pixbuf_new_from_stream(in_stream, nullptr, &error);
 			g_object_unref(in_stream);
 
 			if (error)
 				{
 				log_printf("warning: inline pixbuf error: %s", error->message);
 				g_error_free(error);
-				return NULL;
+				return nullptr;
 				}
 
 			return icon_pixbuf;
@@ -192,12 +192,12 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 
 	log_printf("warning: inline pixbuf key \"%s\" not found.\n", key);
 
-	return NULL;
+	return nullptr;
 }
 
 static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
 {
-	static GtkIconFactory *icon_factory = NULL;
+	static GtkIconFactory *icon_factory = nullptr;
 	GtkIconSet *icon_set;
 
 	if (!icon_factory)
@@ -227,7 +227,7 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 {
 	GtkIconTheme *icon_theme;
 	GdkPixbuf *pixbuf;
-	GError *error = NULL;
+	GError *error = nullptr;
 
 	icon_theme = gtk_icon_theme_get_default();
 
@@ -244,7 +244,7 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 			{
 			DEBUG_1("Couldn't load icon %s: %s", icon, error->message);
 			g_error_free(error);
-			error = NULL;
+			error = nullptr;
 			}
 
 		if (strchr(icon, '.'))
@@ -260,7 +260,7 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 				{
 				DEBUG_1("Couldn't load icon %s: %s", icon2, error->message);
 				g_error_free(error);
-				error = NULL;
+				error = nullptr;
 
 				/* try as an absolute path */
 				pixbuf = gdk_pixbuf_new_from_file(icon, &error);
@@ -452,7 +452,7 @@ GdkPixbuf *pixbuf_copy_rotate_90(GdkPixbuf *src, gboolean counter_clockwise)
 	gint brs;
 	gint w, h;
 
-	if (!src) return NULL;
+	if (!src) return nullptr;
 
 	sw = gdk_pixbuf_get_width(src);
 	sh = gdk_pixbuf_get_height(src);
@@ -548,7 +548,7 @@ GdkPixbuf *pixbuf_copy_mirror(GdkPixbuf *src, gboolean mirror, gboolean flip)
 	gint i, j;
 	gint a;
 
-	if (!src) return NULL;
+	if (!src) return nullptr;
 
 	w = gdk_pixbuf_get_width(src);
 	h = gdk_pixbuf_get_height(src);
@@ -603,7 +603,7 @@ GdkPixbuf *pixbuf_copy_mirror(GdkPixbuf *src, gboolean mirror, gboolean flip)
 GdkPixbuf *pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation)
 {
 	GdkPixbuf *dest;
-	GdkPixbuf *tmp = NULL;
+	GdkPixbuf *tmp = nullptr;
 
 	switch (orientation)
 		{
@@ -899,8 +899,8 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout, GtkWidget *UNUSE
 	                                   cairo_image_surface_get_width (source),
 	                                   cairo_image_surface_get_height (source),
 	                                   cairo_image_surface_get_stride (source),
-	                                   NULL,
-	                                   NULL);
+	                                   nullptr,
+	                                   nullptr);
 
 	sx = 0;
 	sy = 0;

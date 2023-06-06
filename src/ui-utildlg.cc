@@ -49,7 +49,7 @@ struct _DialogWindow
 	gchar *role;
 };
 
-static GList *dialog_windows = NULL;
+static GList *dialog_windows = nullptr;
 
 static void generic_dialog_save_window(const gchar *title, const gchar *role, gint x, gint y, gint h, gint w)
 {
@@ -235,7 +235,7 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *stock_id, c
 	GtkWidget *button;
 	gboolean alternative_order;
 
-	button = pref_button_new(NULL, stock_id, text, FALSE,
+	button = pref_button_new(nullptr, stock_id, text, FALSE,
 				 G_CALLBACK(generic_dialog_click_cb), gd);
 
 	gtk_widget_set_can_default(button, TRUE);
@@ -315,8 +315,8 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_stock
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values)
 {
 	auto dw =  g_new0(DialogWindow, 1);
-	gchar *title = NULL;
-	gchar *role = NULL;
+	gchar *title = nullptr;
+	gchar *role = nullptr;
 	gint x = 0;
 	gint y = 0;
 	gint w = 0;
@@ -391,7 +391,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 	gd->data = data;
 	gd->cancel_cb = cancel_cb;
 
-	gd->dialog = window_new(GTK_WINDOW_TOPLEVEL, role, NULL, NULL, title);
+	gd->dialog = window_new(GTK_WINDOW_TOPLEVEL, role, nullptr, nullptr, title);
 	DEBUG_NAME(gd->dialog);
 	gtk_window_set_type_hint(GTK_WINDOW(gd->dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
 
@@ -406,7 +406,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	if (parent)
 		{
-		GtkWindow *window = NULL;
+		GtkWindow *window = nullptr;
 
 		if (GTK_IS_WINDOW(parent))
 			{
@@ -431,7 +431,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 	gtk_window_set_resizable(GTK_WINDOW(gd->dialog), TRUE);
 	gtk_container_set_border_width(GTK_CONTAINER(gd->dialog), PREF_PAD_BORDER);
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
 	gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(scrolled), TRUE);
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_BUTTON_SPACE);
@@ -453,11 +453,11 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	if (gd->cancel_cb)
 		{
-		gd->cancel_button = generic_dialog_add_button(gd, GTK_STOCK_CANCEL, NULL, gd->cancel_cb, TRUE);
+		gd->cancel_button = generic_dialog_add_button(gd, GTK_STOCK_CANCEL, nullptr, gd->cancel_cb, TRUE);
 		}
 	else
 		{
-		gd->cancel_button = NULL;
+		gd->cancel_button = nullptr;
 		}
 
 	if (generic_dialog_get_alternative_button_order(gd->hbox))
@@ -466,7 +466,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 				 G_CALLBACK(generic_dialog_show_cb), gd);
 		}
 
-	gd->default_cb = NULL;
+	gd->default_cb = nullptr;
 }
 
 GenericDialog *generic_dialog_new(const gchar *title,
@@ -497,8 +497,8 @@ GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 {
 	GenericDialog *gd;
 
-	gd = generic_dialog_new(heading, "warning", parent, TRUE, NULL, NULL);
-	generic_dialog_add_button(gd, GTK_STOCK_OK, NULL, warning_dialog_ok_cb, TRUE);
+	gd = generic_dialog_new(heading, "warning", parent, TRUE, nullptr, nullptr);
+	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr, warning_dialog_ok_cb, TRUE);
 
 	generic_dialog_add_message(gd, icon_stock_id, heading, text, TRUE);
 
@@ -624,7 +624,7 @@ static void appimage_data_arm_read_line_async_ready_cb(GObject *source_object, G
 	gsize length;
 	gchar *result;
 
-	result = g_data_input_stream_read_line_finish(appimage_data->data_input_stream, res, &length, NULL);
+	result = g_data_input_stream_read_line_finish(appimage_data->data_input_stream, res, &length, nullptr);
 
 	if (result && strstr(result, "-aarch64.AppImage"))
 		{
@@ -645,7 +645,7 @@ static void appimage_data_x86_read_line_async_ready_cb(GObject *UNUSED(source_ob
 	gsize length;
 	gchar *result;
 
-	result = g_data_input_stream_read_line_finish(appimage_data->data_input_stream, res, &length, NULL);
+	result = g_data_input_stream_read_line_finish(appimage_data->data_input_stream, res, &length, nullptr);
 
 #ifdef __x86_64__
 	if (result && strstr(result, "-x86_64.AppImage"))
@@ -659,7 +659,7 @@ static void appimage_data_x86_read_line_async_ready_cb(GObject *UNUSED(source_ob
 #endif
 
 #ifdef __arm__
-	g_data_input_stream_read_line_async(appimage_data->data_input_stream, G_PRIORITY_LOW, NULL, appimage_data_arm_read_line_async_ready_cb, appimage_data);
+	g_data_input_stream_read_line_async(appimage_data->data_input_stream, G_PRIORITY_LOW, nullptr, appimage_data_arm_read_line_async_ready_cb, appimage_data);
 #endif
 
 	g_free(result);
@@ -673,20 +673,20 @@ static void appimage_notification_func(gpointer data, gpointer UNUSED(user_data)
 	gboolean internet_available = FALSE;
 
 	net_mon = g_network_monitor_get_default();
-	geeqie_github_io = g_network_address_parse_uri(APPIMAGE_VERSION_FILE, 80, NULL);
+	geeqie_github_io = g_network_address_parse_uri(APPIMAGE_VERSION_FILE, 80, nullptr);
 	if (geeqie_github_io)
 		{
-		internet_available = g_network_monitor_can_reach(net_mon, geeqie_github_io, NULL, NULL);
+		internet_available = g_network_monitor_can_reach(net_mon, geeqie_github_io, nullptr, nullptr);
 		g_object_unref(geeqie_github_io);
 		}
 
 	if (internet_available)
 		{
 		appimage_data->version_file = g_file_new_for_uri(APPIMAGE_VERSION_FILE);
-		appimage_data->file_input_stream = g_file_read(appimage_data->version_file, NULL, NULL);
+		appimage_data->file_input_stream = g_file_read(appimage_data->version_file, nullptr, nullptr);
 		appimage_data->data_input_stream = g_data_input_stream_new(G_INPUT_STREAM(appimage_data->file_input_stream));
 
-		g_data_input_stream_read_line_async(appimage_data->data_input_stream, G_PRIORITY_LOW, NULL, appimage_data_x86_read_line_async_ready_cb, appimage_data);
+		g_data_input_stream_read_line_async(appimage_data->data_input_stream, G_PRIORITY_LOW, nullptr, appimage_data_x86_read_line_async_ready_cb, appimage_data);
 		}
 	else
 		{
@@ -701,8 +701,8 @@ void appimage_notification()
 
 	appimage_data = g_new0(AppImageData, 1);
 
-	appimage_data->thread_pool = g_thread_pool_new(appimage_notification_func, appimage_data, 1, FALSE, NULL);
-	g_thread_pool_push(appimage_data->thread_pool, appimage_data, NULL);
+	appimage_data->thread_pool = g_thread_pool_new(appimage_notification_func, appimage_data, 1, FALSE, nullptr);
+	g_thread_pool_push(appimage_data->thread_pool, appimage_data, nullptr);
 }
 
 /*
@@ -725,7 +725,7 @@ FileDialog *file_dialog_new(const gchar *title,
 			    GtkWidget *parent,
 			    void (*cancel_cb)(FileDialog *, gpointer), gpointer data)
 {
-	FileDialog *fdlg = NULL;
+	FileDialog *fdlg = nullptr;
 
 	fdlg = g_new0(FileDialog, 1);
 
@@ -754,7 +754,7 @@ static void file_dialog_entry_enter_cb(const gchar *UNUSED(path), gpointer data)
 {
 	auto gd = static_cast<GenericDialog *>(data);
 
-	file_dialog_entry_cb(NULL, data);
+	file_dialog_entry_cb(nullptr, data);
 
 	if (gd->default_cb) gd->default_cb(gd, gd->data);
 }
@@ -767,7 +767,7 @@ void file_dialog_add_path_widgets(FileDialog *fdlg, const gchar *default_path, c
 
 	if (fdlg->entry) return;
 
-	tabcomp = tab_completion_new_with_history(&fdlg->entry, NULL,
+	tabcomp = tab_completion_new_with_history(&fdlg->entry, nullptr,
 		  history_key, -1, file_dialog_entry_enter_cb, fdlg);
 	gtk_box_pack_end(GTK_BOX(GENERIC_DIALOG(fdlg)->vbox), tabcomp, FALSE, FALSE, 0);
 	generic_dialog_attach_default(GENERIC_DIALOG(fdlg), fdlg->entry);

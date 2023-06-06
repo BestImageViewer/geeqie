@@ -88,7 +88,7 @@ static void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
 	pw->print_pixbuf_queue = g_list_append(pw->print_pixbuf_queue, pixbuf);
 
 	image_loader_free(pw->job_loader);
-	pw->job_loader = NULL;
+	pw->job_loader = nullptr;
 
 	pw->job_page++;
 
@@ -100,13 +100,13 @@ static void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
 
 static gboolean print_job_render_image(PrintWindow *pw)
 {
-	FileData *fd = NULL;
+	FileData *fd = nullptr;
 
 	fd = static_cast<FileData *>(g_list_nth_data(pw->source_selection, pw->job_page));
 	if (!fd) return FALSE;
 
 	image_loader_free(pw->job_loader);
-	pw->job_loader = NULL;
+	pw->job_loader = nullptr;
 
 	pw->job_loader = image_loader_new(fd);
 	g_signal_connect(G_OBJECT(pw->job_loader), "done",
@@ -115,7 +115,7 @@ static gboolean print_job_render_image(PrintWindow *pw)
 	if (!image_loader_start(pw->job_loader))
 		{
 		image_loader_free(pw->job_loader);
-		pw->job_loader= NULL;
+		pw->job_loader= nullptr;
 		}
 
 	return TRUE;
@@ -356,7 +356,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_box_pack_start(GTK_BOX(subgroup), hbox, FALSE, FALSE, 0);
 
 	/* order is important */
-	button1 = pref_radiobutton_new(hbox, NULL,  "Header 1",
+	button1 = pref_radiobutton_new(hbox, nullptr,  "Header 1",
 							options->printer.image_text_position == HEADER_1,
 							G_CALLBACK(image_text_position_h1_cb), pw);
 	button1 = pref_radiobutton_new(hbox, button1,  "Header 2",
@@ -381,7 +381,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_widget_set_tooltip_markup(image_text_template_view,
 					_("Extensive formatting options are shown in the Help file"));
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_widget_set_size_request(scrolled, 200, 50);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
@@ -399,7 +399,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	button = pref_button_new(NULL, GTK_STOCK_SELECT_FONT, _("Font"), FALSE,
+	button = pref_button_new(nullptr, GTK_STOCK_SELECT_FONT, _("Font"), FALSE,
 				 G_CALLBACK(print_set_font_cb), const_cast<char *>("Image text font"));
 
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
@@ -419,7 +419,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_box_pack_start(GTK_BOX(subgroup), hbox, FALSE, FALSE, 0);
 
 	/* order is important */
-	button2 = pref_radiobutton_new(hbox, NULL, "Header 1",
+	button2 = pref_radiobutton_new(hbox, nullptr, "Header 1",
 							options->printer.page_text_position == HEADER_1,
 							G_CALLBACK(page_text_position_h1_cb), pw);
 	button2 = pref_radiobutton_new(hbox, button2,  "Header 2",
@@ -434,7 +434,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_widget_show(hbox);
 	pw->page_group = (gtk_radio_button_get_group(GTK_RADIO_BUTTON(button2)));
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_widget_set_size_request(scrolled, 50, 50);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
@@ -453,7 +453,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	button = pref_button_new(NULL, GTK_STOCK_SELECT_FONT, _("Font"), FALSE,
+	button = pref_button_new(nullptr, GTK_STOCK_SELECT_FONT, _("Font"), FALSE,
 				 G_CALLBACK(print_set_font_cb), const_cast<char *>("Page text font"));
 
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
@@ -479,17 +479,17 @@ static gboolean paginate_cb(GtkPrintOperation *UNUSED(operation),
 gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *pw, gint page_nr, gint total)
 {
 	const gchar *name;
-	gchar *text = NULL;
+	gchar *text = nullptr;
 	GHashTable *vars;
 	gchar *window_title;
 	gchar *delimiter;
 	gchar *collection_name;
 
-	if (!fd) return NULL;
+	if (!fd) return nullptr;
 
 	name = fd->name;
 
-	vars = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_free);
+	vars = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, g_free);
 
 	window_title = g_strdup(gtk_window_get_title(GTK_WINDOW(pw->parent)));
 	delimiter = g_strstr_len(window_title, -1, " - Collection - ");
@@ -499,7 +499,7 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 		}
 	else
 		{
-		collection_name = NULL;
+		collection_name = nullptr;
 		}
 	g_free(window_title);
 
@@ -526,9 +526,9 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
  		}
 	else
 		{
-		osd_template_insert(vars, "width", NULL, OSDT_NONE);
- 		osd_template_insert(vars, "height", NULL, OSDT_NONE);
- 		osd_template_insert(vars, "res", NULL, OSDT_NONE);
+		osd_template_insert(vars, "width", nullptr, OSDT_NONE);
+ 		osd_template_insert(vars, "height", nullptr, OSDT_NONE);
+ 		osd_template_insert(vars, "res", nullptr, OSDT_NONE);
 		}
 
 	text = image_osd_mkinfo(template_string, fd, vars);
@@ -550,12 +550,12 @@ static void draw_page(GtkPrintOperation *UNUSED(operation), GtkPrintContext *con
 	gdouble width_offset;
 	gdouble height_offset;
 	GdkPixbuf *pixbuf;
-	GdkPixbuf *rotated = NULL;
-	PangoLayout *layout_image = NULL;
-	PangoLayout *layout_page = NULL;
+	GdkPixbuf *rotated = nullptr;
+	PangoLayout *layout_image = nullptr;
+	PangoLayout *layout_page = nullptr;
 	PangoFontDescription *desc;
-	GString *image_text = g_string_new(NULL);
-	GString *page_text = g_string_new(NULL);
+	GString *image_text = g_string_new(nullptr);
+	GString *page_text = g_string_new(nullptr);
 	PangoRectangle ink_rect, logical_rect;
 	gdouble w, h, scale;
 	gdouble image_text_width, image_text_height, page_text_width, page_text_height;
@@ -795,7 +795,7 @@ static void end_print_cb(GtkPrintOperation *operation,
 	gchar *path;
 	GtkPrintSettings *print_settings;
 	GtkPageSetup *page_setup;
-	GError *error = NULL;
+	GError *error = nullptr;
 
 	print_settings = gtk_print_operation_get_print_settings(operation);
 	path = g_build_filename(get_rc_dir(), PRINT_SETTINGS, NULL);
@@ -805,7 +805,7 @@ static void end_print_cb(GtkPrintOperation *operation,
 		{
 		log_printf("Error: Print settings save failed:\n%s", error->message);
 		g_error_free(error);
-		error = NULL;
+		error = nullptr;
 		}
 	g_free(path);
 	g_object_unref(print_settings);
@@ -818,7 +818,7 @@ static void end_print_cb(GtkPrintOperation *operation,
 		{
 		log_printf("Error: Print page setup save failed:\n%s", error->message);
 		g_error_free(error);
-		error = NULL;
+		error = nullptr;
 		}
 	g_free(path);
 	g_object_unref(page_setup);
@@ -848,13 +848,13 @@ void print_window_new(FileData *UNUSED(fd), GList *selection, GList *UNUSED(list
 	GtkPageSetup *page_setup;
 	gchar *uri;
 	const gchar *dir;
-	GError *error = NULL;
+	GError *error = nullptr;
 	gchar *path;
 	GtkPrintSettings *settings;
 
 	pw = g_new0(PrintWindow, 1);
 
-	pw->source_selection = file_data_process_groups_in_selection(selection, FALSE, NULL);
+	pw->source_selection = file_data_process_groups_in_selection(selection, FALSE, nullptr);
 
 	if (print_layout_page_count(pw) == 0)
 		{
@@ -870,7 +870,7 @@ void print_window_new(FileData *UNUSED(fd), GList *selection, GList *UNUSED(list
 	print_text_menu(vbox, pw);
 	pw->vbox = vbox;
 
-	pw->print_pixbuf_queue = NULL;
+	pw->print_pixbuf_queue = nullptr;
 	pw->job_render_finished = FALSE;
 	pw->job_page = 0;
 
@@ -883,7 +883,7 @@ void print_window_new(FileData *UNUSED(fd), GList *selection, GList *UNUSED(list
 	gtk_print_operation_set_embed_page_setup(operation, TRUE);
 	gtk_print_operation_set_allow_async (operation, TRUE);
 	dir = g_get_user_special_dir(G_USER_DIRECTORY_DOCUMENTS);
-	if (dir == NULL)
+	if (dir == nullptr)
 		{
 		dir = g_get_home_dir();
 		}
@@ -898,7 +898,7 @@ void print_window_new(FileData *UNUSED(fd), GList *selection, GList *UNUSED(list
 		{
 		log_printf("Error: Printer settings load failed:\n%s", error->message);
 		g_error_free(error);
-		error = NULL;
+		error = nullptr;
 		}
 	gtk_print_operation_set_print_settings(operation, settings);
 	g_free(path);
@@ -910,7 +910,7 @@ void print_window_new(FileData *UNUSED(fd), GList *selection, GList *UNUSED(list
 		{
 		log_printf("Error: Print page setup load failed:\n%s", error->message);
 		g_error_free(error);
-		error = NULL;
+		error = nullptr;
 		}
 	gtk_print_operation_set_default_page_setup(operation, page_setup);
 	g_free(path);

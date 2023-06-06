@@ -141,7 +141,7 @@ void libraw_free_preview(guchar *UNUSED(buf))
 
 guchar *libraw_get_preview(ImageLoader *UNUSED(il), guint *UNUSED(data_len))
 {
-	return NULL;
+	return nullptr;
 }
 
 #endif

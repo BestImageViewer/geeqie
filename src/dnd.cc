@@ -109,7 +109,7 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 	GdkPixbuf *dest;
 	gint w, h;
 	gint sw, sh;
-	PangoLayout *layout = NULL;
+	PangoLayout *layout = nullptr;
 	gint x, y;
 
 	x = y = 0;
@@ -141,7 +141,7 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 		gchar *buf;
 		gint lw,lh;
 
-		layout = gtk_widget_create_pango_layout(widget, NULL);
+		layout = gtk_widget_create_pango_layout(widget, nullptr);
 		buf = g_strdup_printf("<small> %d </small>", items);
 		pango_layout_set_markup(layout, buf, -1);
 		g_free(buf);
@@ -158,8 +158,8 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 
 	if (layout)
 		{
-		pixbuf_draw_layout(dest, layout, NULL, x+1, y+1, 0, 0, 0, 255);
-		pixbuf_draw_layout(dest, layout, NULL, x, y, 255, 255, 255, 255);
+		pixbuf_draw_layout(dest, layout, nullptr, x+1, y+1, 0, 0, 0, 255);
+		pixbuf_draw_layout(dest, layout, nullptr, x, y, 255, 255, 255, 255);
 
 		g_object_unref(G_OBJECT(layout));
 		}

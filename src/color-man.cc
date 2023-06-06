@@ -816,7 +816,7 @@ ColorMan *color_man_new(ImageWindow *UNUSED(imd), GdkPixbuf *UNUSED(pixbuf),
 			guchar *UNUSED(screen_data), guint UNUSED(screen_data_len))
 {
 	/* no op */
-	return NULL;
+	return nullptr;
 }
 
 ColorMan *color_man_new_embedded(ImageWindow *UNUSED(imd), GdkPixbuf *UNUSED(pixbuf),
@@ -825,7 +825,7 @@ ColorMan *color_man_new_embedded(ImageWindow *UNUSED(imd), GdkPixbuf *UNUSED(pix
 				 guchar *UNUSED(screen_data), guint UNUSED(screen_data_len))
 {
 	/* no op */
-	return NULL;
+	return nullptr;
 }
 
 void color_man_free(ColorMan *UNUSED(cm))
@@ -855,7 +855,7 @@ gboolean color_man_get_status(ColorMan *UNUSED(cm), gchar **UNUSED(image_profile
 
 guchar *heif_color_profile(FileData *UNUSED(fd), guint *UNUSED(profile_len))
 {
-	return NULL;
+	return nullptr;
 }
 
 #endif /* define HAVE_LCMS */

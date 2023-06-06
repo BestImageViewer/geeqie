@@ -170,7 +170,7 @@ static gboolean tree_edit_by_path_idle_cb(gpointer data)
 	gtk_grab_add(ted->window);
 	gdk_pointer_grab(gtk_widget_get_window(ted->window), TRUE,
 			 static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK),
-			 NULL, NULL, GDK_CURRENT_TIME);
+			 nullptr, nullptr, GDK_CURRENT_TIME);
 	gdk_keyboard_grab(gtk_widget_get_window(ted->window), TRUE, GDK_CURRENT_TIME);
 
 	return G_SOURCE_REMOVE;
@@ -181,7 +181,7 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 {
 	TreeEditData *ted;
 	GtkTreeViewColumn *tcolumn;
-	GtkCellRenderer *cell = NULL;
+	GtkCellRenderer *cell = nullptr;
 	GList *list;
 	GList *work;
 
@@ -198,7 +198,7 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 		cell = static_cast<GtkCellRenderer *>(work->data);
 		if (!GTK_IS_CELL_RENDERER_TEXT(cell))
 			{
-			cell = NULL;
+			cell = nullptr;
 			}
 		work = work->next;
 		}
@@ -240,7 +240,7 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 	/* due to the fact that gtktreeview scrolls in an idle loop, we cannot
 	 * reliably get the cell position until those scroll priority signals are processed
 	 */
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE - 2, tree_edit_by_path_idle_cb, ted, NULL);
+	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE - 2, tree_edit_by_path_idle_cb, ted, nullptr);
 
 	return TRUE;
 }
@@ -283,7 +283,7 @@ gboolean tree_view_get_cell_origin(GtkTreeView *widget, GtkTreePath *tpath, gint
 
 	if (text_cell_only)
 		{
-		GtkCellRenderer *cell = NULL;
+		GtkCellRenderer *cell = nullptr;
 		GList *renderers;
 		GList *work;
 		gint cell_x;
@@ -295,7 +295,7 @@ gboolean tree_view_get_cell_origin(GtkTreeView *widget, GtkTreePath *tpath, gint
 			{
 			cell = static_cast<GtkCellRenderer *>(work->data);
 			work = work->next;
-			if (!GTK_IS_CELL_RENDERER_TEXT(cell)) cell = NULL;
+			if (!GTK_IS_CELL_RENDERER_TEXT(cell)) cell = nullptr;
 			}
 		g_list_free(renderers);
 
@@ -397,15 +397,15 @@ gint tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean
 	tpath = gtk_tree_model_get_path(gtk_tree_view_get_model(widget), iter);
 	if (center && vis != 0)
 		{
-		gtk_tree_view_scroll_to_cell(widget, tpath, NULL, TRUE, 0.5, 0.0);
+		gtk_tree_view_scroll_to_cell(widget, tpath, nullptr, TRUE, 0.5, 0.0);
 		}
 	else if (vis < 0)
 		{
-		gtk_tree_view_scroll_to_cell(widget, tpath, NULL, TRUE, 0.0, 0.0);
+		gtk_tree_view_scroll_to_cell(widget, tpath, nullptr, TRUE, 0.0, 0.0);
 		}
 	else if (vis > 0)
 		{
-		gtk_tree_view_scroll_to_cell(widget, tpath, NULL, TRUE, 1.0, 0.0);
+		gtk_tree_view_scroll_to_cell(widget, tpath, nullptr, TRUE, 1.0, 0.0);
 		}
 	gtk_tree_path_free(tpath);
 
@@ -423,7 +423,7 @@ gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboo
 
 	store = gtk_tree_view_get_model(widget);
 	tpath = gtk_tree_model_get_path(store, iter);
-	gtk_tree_view_get_cursor(widget, &fpath, NULL);
+	gtk_tree_view_get_cursor(widget, &fpath, nullptr);
 
 	if (fpath && gtk_tree_path_compare(tpath, fpath) == 0)
 		{
@@ -450,7 +450,7 @@ gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboo
 
 			if (move)
 				{
-				gtk_tree_view_set_cursor(widget, tpath, NULL, FALSE);
+				gtk_tree_view_set_cursor(widget, tpath, nullptr, FALSE);
 				}
 			}
 		}
@@ -547,7 +547,7 @@ void widget_auto_scroll_stop(GtkWidget *widget)
 
 	sd = static_cast<AutoScrollData *>(g_object_get_data(G_OBJECT(widget), "autoscroll"));
 	if (!sd) return;
-	g_object_set_data(G_OBJECT(widget), "autoscroll", NULL);
+	g_object_set_data(G_OBJECT(widget), "autoscroll", nullptr);
 
 	if (sd->timer_id) g_source_remove(sd->timer_id);
 	g_free(sd);
@@ -571,7 +571,7 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 	window = gtk_widget_get_window(sd->widget);
 	seat = gdk_display_get_default_seat(gdk_window_get_display(window));
 	device = gdk_seat_get_pointer(seat);
-	gdk_window_get_device_position(window, device, &x, &y, NULL);
+	gdk_window_get_device_position(window, device, &x, &y, nullptr);
 
 	w = gdk_window_get_width(window);
 	h = gdk_window_get_height(window);

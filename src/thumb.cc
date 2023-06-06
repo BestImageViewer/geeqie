@@ -133,7 +133,7 @@ static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 	GdkPixbuf *pixbuf;
 	gint pw, ph;
 	gint save;
-	GdkPixbuf *rotated = NULL;
+	GdkPixbuf *rotated = nullptr;
 
 	DEBUG_1("thumb done: %s", tl->fd->path);
 
@@ -188,7 +188,7 @@ static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 		if (!image_loader_start(tl->il))
 			{
 			image_loader_free(tl->il);
-			tl->il = NULL;
+			tl->il = nullptr;
 
 			DEBUG_1("regeneration failure: %s", tl->fd->path);
 			thumb_loader_error_cb(tl->il, tl);
@@ -250,7 +250,7 @@ static void thumb_loader_error_cb(ImageLoader *il, gpointer data)
 	auto tl = static_cast<ThumbLoader *>(data);
 
 	/* if at least some of the image is available, go to done_cb */
-	if (image_loader_get_pixbuf(tl->il) != NULL)
+	if (image_loader_get_pixbuf(tl->il) != nullptr)
 		{
 		thumb_loader_done_cb(il, data);
 		return;
@@ -259,7 +259,7 @@ static void thumb_loader_error_cb(ImageLoader *il, gpointer data)
 	DEBUG_1("thumb error: %s", tl->fd->path);
 
 	image_loader_free(tl->il);
-	tl->il = NULL;
+	tl->il = nullptr;
 
 	thumb_loader_set_fallback(tl);
 
@@ -336,7 +336,7 @@ void thumb_loader_set_cache(ThumbLoader *tl, gboolean enable_cache, gboolean loc
 
 gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 {
-	gchar *cache_path = NULL;
+	gchar *cache_path = nullptr;
 
 	if (!tl) return FALSE;
 
@@ -378,7 +378,7 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 			else
 				{
 				g_free(cache_path);
-				cache_path = NULL;
+				cache_path = nullptr;
 				}
 			}
 		}
@@ -427,7 +427,7 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 			}
 
 		image_loader_free(tl->il);
-		tl->il = NULL;
+		tl->il = nullptr;
 		thumb_loader_set_fallback(tl);
 		return FALSE;
 		}
@@ -451,7 +451,7 @@ GdkPixbuf *thumb_loader_get_pixbuf(ThumbLoader *tl)
 		}
 	else
 		{
-		pixbuf = pixbuf_fallback(NULL, tl->max_w, tl->max_h);
+		pixbuf = pixbuf_fallback(nullptr, tl->max_w, tl->max_h);
 		}
 
 	return pixbuf;
@@ -505,7 +505,7 @@ void thumb_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(data))
 		{
 		DEBUG_1("Notify thumb: %s %04x", fd->path, type);
 		g_object_unref(fd->thumb_pixbuf);
-		fd->thumb_pixbuf = NULL;
+		fd->thumb_pixbuf = nullptr;
 		}
 }
 
@@ -530,12 +530,12 @@ static guchar *load_xv_thumbnail(gchar *filename, gint *widthp, gint *heightp)
 {
 	FILE *file;
 	gchar buffer[XV_BUFFER];
-	guchar *data = NULL;
+	guchar *data = nullptr;
 
 	file = fopen(filename, "rt");
-	if (!file) return NULL;
+	if (!file) return nullptr;
 
-	if (fgets(buffer, XV_BUFFER, file) != NULL
+	if (fgets(buffer, XV_BUFFER, file) != nullptr
 	    && strncmp(buffer, "P7 332", 6) == 0)
 		{
 		gint width, height, depth;
@@ -603,7 +603,7 @@ static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h
 		g_free(packed_data);
 
 		pixbuf = gdk_pixbuf_new_from_data(rgb_data, GDK_COLORSPACE_RGB, FALSE, 8,
-						  width, height, 3 * width, free_rgb_buffer, NULL);
+						  width, height, 3 * width, free_rgb_buffer, nullptr);
 
 		if (pixbuf_scale_aspect(width, height, max_w, max_h, &width, &height))
 			{
@@ -618,6 +618,6 @@ static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h
 		return pixbuf;
 		}
 
-	return NULL;
+	return nullptr;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

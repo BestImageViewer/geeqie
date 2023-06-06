@@ -230,7 +230,7 @@ uint ddsGetDXTColor(uint c0, uint c1, uint a, uint t) {
 
 guchar *ddsDecodeDXT1(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	uint w = (width + 3) / 4;
 	uint h = (height + 3) / 4;
@@ -259,7 +259,7 @@ guchar *ddsDecodeDXT1(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsDecodeDXT3(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	uint w = (width + 3) / 4;
 	uint h = (height + 3) / 4;
@@ -327,7 +327,7 @@ int ddsGetDXT5Alpha(uint a0, uint a1, uint t) {
 
 guchar *ddsDecodeDXT5(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	uint w = (width + 3) / 4;
 	uint h = (height + 3) / 4;
@@ -382,7 +382,7 @@ guchar *ddsDecodeDXT4(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadA1R5G5B5(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
@@ -397,7 +397,7 @@ guchar *ddsReadA1R5G5B5(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadX1R5G5B5(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
@@ -412,7 +412,7 @@ guchar *ddsReadX1R5G5B5(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadA4R4G4B4(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
@@ -427,7 +427,7 @@ guchar *ddsReadA4R4G4B4(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadX4R4G4B4(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
@@ -442,7 +442,7 @@ guchar *ddsReadX4R4G4B4(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadR5G6B5(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8; index += 2;
@@ -457,7 +457,7 @@ guchar *ddsReadR5G6B5(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadR8G8B8(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint b = buffer[index++] & 0xFF;
@@ -471,7 +471,7 @@ guchar *ddsReadR8G8B8(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadA8B8G8R8(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint r = buffer[index++] & 0xFF;
@@ -485,7 +485,7 @@ guchar *ddsReadA8B8G8R8(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadX8B8G8R8(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint r = buffer[index++] & 0xFF;
@@ -499,7 +499,7 @@ guchar *ddsReadX8B8G8R8(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadA8R8G8B8(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint b = buffer[index++] & 0xFF;
@@ -513,7 +513,7 @@ guchar *ddsReadA8R8G8B8(uint width, uint height, const unsigned char *buffer) {
 
 guchar *ddsReadX8R8G8B8(uint width, uint height, const unsigned char *buffer) {
 	auto pixels = static_cast<uint *>(g_try_malloc(4 * width*height));
-	if (pixels == NULL) return NULL;
+	if (pixels == nullptr) return nullptr;
 	uint index = 128;
 	for (uint i = 0; i<height*width; i++) {
 		uint b = buffer[index++] & 0xFF;
@@ -533,7 +533,7 @@ static gboolean image_loader_dds_load (gpointer loader, const guchar *buf, gsize
 	uint type = ddsGetType(buf);
 	if (type == 0) return FALSE;
 	{
-		guchar *pixels = NULL;
+		guchar *pixels = nullptr;
 		guint rowstride = width * 4;
 		switch (type) {
 		case DXT1: pixels = ddsDecodeDXT1(width, height, buf); break;
@@ -552,7 +552,7 @@ static gboolean image_loader_dds_load (gpointer loader, const guchar *buf, gsize
 		case A8R8G8B8: pixels = ddsReadA8R8G8B8(width, height, buf); break;
 		case X8R8G8B8: pixels = ddsReadX8R8G8B8(width, height, buf); break;
 		}
-		ld->pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8, width, height, rowstride, free_buffer, NULL);
+		ld->pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8, width, height, rowstride, free_buffer, nullptr);
 		ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
 		return TRUE;
 	}
@@ -587,7 +587,7 @@ static gchar* image_loader_dds_get_format_name(gpointer UNUSED(loader))
 }
 static gchar** image_loader_dds_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"image/vnd-ms.dds", NULL};
+	static const gchar *mime[] = {"image/vnd-ms.dds", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
@@ -614,7 +614,7 @@ void image_loader_backend_set_dds(ImageLoaderBackend *funcs)
 	funcs->loader_new = image_loader_dds_new;
 	funcs->set_size = image_loader_dds_set_size;
 	funcs->load = image_loader_dds_load;
-	funcs->write = NULL;
+	funcs->write = nullptr;
 	funcs->get_pixbuf = image_loader_dds_get_pixbuf;
 	funcs->close = image_loader_dds_close;
 	funcs->abort = image_loader_dds_abort;

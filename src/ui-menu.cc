@@ -49,11 +49,11 @@ static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_grou
 
 	label = g_strdup(gtk_menu_item_get_label(GTK_MENU_ITEM(menu)));
 
-	pango_parse_markup(label, -1, '_', NULL, &label_text, NULL, NULL);
+	pango_parse_markup(label, -1, '_', nullptr, &label_text, nullptr, nullptr);
 
 	label_stripped = g_strsplit(label_text, "...", 2);
 
-	while (window_keys[i].text != NULL)
+	while (window_keys[i].text != nullptr)
 		{
 		if (g_strcmp0(window_keys[i].text, label_stripped[0]) == 0)
 			{
@@ -122,7 +122,7 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 
 	menu_label = g_strdup(gtk_menu_item_get_label(GTK_MENU_ITEM(menu)));
 
-	pango_parse_markup(menu_label, -1, '_', NULL, &menu_label_text, NULL, NULL);
+	pango_parse_markup(menu_label, -1, '_', nullptr, &menu_label_text, nullptr, nullptr);
 
 	lw = static_cast<LayoutWindow *>(layout_window_list->data); /* get the actions from the first window, it should not matter, they should be the same in all windows */
 
@@ -142,7 +142,7 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 				{
 				g_object_get(action, "label", &action_label, NULL);
 
-				pango_parse_markup(action_label, -1, '_', NULL, &action_label_text, NULL, NULL);
+				pango_parse_markup(action_label, -1, '_', nullptr, &action_label_text, nullptr, nullptr);
 
 				if (g_strcmp0(action_label_text, menu_label_text) == 0)
 					{

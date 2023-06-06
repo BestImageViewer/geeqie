@@ -102,7 +102,7 @@ static gboolean cache_loader_phase2_process(CacheLoader *cl)
 			}
 
 		image_loader_free(cl->il);
-		cl->il = NULL;
+		cl->il = nullptr;
 
 		cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_SIMILARITY);
 		}
@@ -180,7 +180,7 @@ static gboolean cache_loader_phase2_process(CacheLoader *cl)
 			if (recursive_mkdir_if_not_exists(base, mode))
 				{
 				g_free(cl->cd->path);
-				cl->cd->path = cache_get_location(CACHE_TYPE_SIM, cl->fd->path, TRUE, NULL);
+				cl->cd->path = cache_get_location(CACHE_TYPE_SIM, cl->fd->path, TRUE, nullptr);
 				if (cache_sim_data_save(cl->cd))
 					{
 					filetime_set(cl->cd->path, filetime(cl->fd->path));
@@ -222,7 +222,7 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 	CacheLoader *cl;
 	gchar *found;
 
-	if (!fd || !isfile(fd->path)) return NULL;
+	if (!fd || !isfile(fd->path)) return nullptr;
 
 	cl = g_new0(CacheLoader, 1);
 	cl->fd = file_data_ref(fd);
@@ -242,7 +242,7 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 	cl->todo_mask = load_mask;
 	cl->done_mask = CACHE_LOADER_NONE;
 
-	cl->il = NULL;
+	cl->il = nullptr;
 	cl->idle_id = g_idle_add(cache_loader_phase1_idle_cb, cl);
 
 	cl->error = FALSE;

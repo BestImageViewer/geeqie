@@ -72,10 +72,10 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 
 void pan_search_ui_destroy(PanViewSearchUi **ui_ptr)
 {
-	if (ui_ptr == NULL || *ui_ptr == NULL) return;
+	if (ui_ptr == nullptr || *ui_ptr == nullptr) return;
 
 	g_free(*ui_ptr);
-	*ui_ptr = NULL;
+	*ui_ptr = nullptr;
 }
 
 static void pan_search_status(PanWindow *pw, const gchar *text)
@@ -179,7 +179,7 @@ static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
 				     gint year, gint month, gint day,
 				     const gchar *key)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 	GList *work;
 
 	work = g_list_last(pw->list_static);
@@ -214,8 +214,8 @@ static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
 
 static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 {
-	PanItem *pi = NULL;
-	GList *list = NULL;
+	PanItem *pi = nullptr;
+	GList *list = nullptr;
 	GList *found;
 	gint year;
 	gint month = -1;
@@ -237,7 +237,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 		ptr++;
 		}
 
-	t = time(NULL);
+	t = time(nullptr);
 	if (t == -1) return FALSE;
 	lt = localtime(&t);
 	if (!lt) return FALSE;
@@ -311,7 +311,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 		PanItemType type;
 
 		type = (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE) ? PAN_ITEM_IMAGE : PAN_ITEM_THUMB;
-		list = pan_search_by_date_val(pw, type, year, month, day, NULL);
+		list = pan_search_by_date_val(pw, type, year, month, day, nullptr);
 		}
 
 	if (list)
@@ -332,7 +332,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 	if (pw->layout == PAN_LAYOUT_CALENDAR && pi && pi->type == PAN_ITEM_BOX)
 		{
-		pan_info_update(pw, NULL);
+		pan_info_update(pw, nullptr);
 		pan_calendar_update(pw, pi);
 		image_scroll_to_point(pw->imd,
 				      pi->x + pi->width / 2,

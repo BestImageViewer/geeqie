@@ -110,17 +110,17 @@ void thumb_loader_std_set_callbacks(ThumbLoaderStd *tl,
 static void thumb_loader_std_reset(ThumbLoaderStd *tl)
 {
 	image_loader_free(tl->il);
-	tl->il = NULL;
+	tl->il = nullptr;
 
 	file_data_unref(tl->fd);
-	tl->fd = NULL;
+	tl->fd = nullptr;
 
 	g_free(tl->thumb_path);
-	tl->thumb_path = NULL;
+	tl->thumb_path = nullptr;
 
 	g_free(tl->thumb_uri);
-	tl->thumb_uri = NULL;
-	tl->local_uri = NULL;
+	tl->thumb_uri = nullptr;
+	tl->local_uri = nullptr;
 
 	tl->thumb_path_local = FALSE;
 
@@ -136,17 +136,17 @@ static void thumb_loader_std_reset(ThumbLoaderStd *tl)
 static gchar *thumb_std_cache_path(const gchar *path, const gchar *uri, gboolean local,
 				   const gchar *cache_subfolder)
 {
-	gchar *result = NULL;
+	gchar *result = nullptr;
 	gchar *md5_text;
 	guchar digest[16];
 	gchar *name;
 
-	if (!path || !uri || !cache_subfolder) return NULL;
+	if (!path || !uri || !cache_subfolder) return nullptr;
 
 	md5_get_digest(reinterpret_cast<const guchar *>(uri), strlen(uri), digest);
 	md5_text = md5_digest_to_text(digest);
 
-	if (!md5_text) return NULL;
+	if (!md5_text) return nullptr;
 
 	name = g_strconcat(md5_text, THUMB_NAME_EXTENSION, NULL);
 
@@ -174,7 +174,7 @@ static gchar *thumb_loader_std_cache_path(ThumbLoaderStd *tl, gboolean local, Gd
 	const gchar *folder;
 	gint w, h;
 
-	if (!tl->fd || !tl->thumb_uri) return NULL;
+	if (!tl->fd || !tl->thumb_uri) return nullptr;
 
 	if (pixbuf)
 		{
@@ -210,21 +210,21 @@ static gboolean thumb_loader_std_fail_check(ThumbLoaderStd *tl)
 	gchar *fail_path;
 	gboolean result = FALSE;
 
-	fail_path = thumb_loader_std_cache_path(tl, FALSE, NULL, TRUE);
+	fail_path = thumb_loader_std_cache_path(tl, FALSE, nullptr, TRUE);
 	if (isfile(fail_path))
 		{
 		GdkPixbuf *pixbuf;
 
 		if (tl->cache_retry)
 			{
-			pixbuf = NULL;
+			pixbuf = nullptr;
 			}
 		else
 			{
 			gchar *pathl;
 
 			pathl = path_from_utf8(fail_path);
-			pixbuf = gdk_pixbuf_new_from_file(pathl, NULL);
+			pixbuf = gdk_pixbuf_new_from_file(pathl, nullptr);
 			g_free(pathl);
 			}
 
@@ -233,7 +233,7 @@ static gboolean thumb_loader_std_fail_check(ThumbLoaderStd *tl)
 			const gchar *mtime_str;
 
 			mtime_str = gdk_pixbuf_get_option(pixbuf, THUMB_MARKER_MTIME);
-			if (mtime_str && strtol(mtime_str, NULL, 10) == tl->source_mtime)
+			if (mtime_str && strtol(mtime_str, nullptr, 10) == tl->source_mtime)
 				{
 				result = TRUE;
 				DEBUG_1("thumb fail valid: %s", tl->fd->path);
@@ -274,7 +274,7 @@ static gboolean thumb_loader_std_validate(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 	if (!mtime_str || !uri || !valid_uri) return FALSE;
 	if (strcmp(uri, valid_uri) != 0) return FALSE;
 
-	mtime = strtol(mtime_str, NULL, 10);
+	mtime = strtol(mtime_str, nullptr, 10);
 	if (tl->source_mtime != mtime) return FALSE;
 
 	return TRUE;
@@ -352,7 +352,7 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 		mark_app = g_strdup_printf("%s %s", GQ_APPNAME, VERSION);
 		mark_mtime = g_strdup_printf("%llu", static_cast<unsigned long long>(tl->source_mtime));
 		pathl = path_from_utf8(tmp_path);
-		success = gdk_pixbuf_save(pixbuf, pathl, "png", NULL,
+		success = gdk_pixbuf_save(pixbuf, pathl, "png", nullptr,
 					  THUMB_MARKER_URI, mark_uri,
 					  THUMB_MARKER_MTIME, mark_mtime,
 					  THUMB_MARKER_APP, mark_app,
@@ -388,13 +388,13 @@ static void thumb_loader_std_set_fallback(ThumbLoaderStd *tl)
 
 
 void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf) {
-	ColorMan *cm = NULL;
-	ExifData *exif = NULL;
+	ColorMan *cm = nullptr;
+	ExifData *exif = nullptr;
 	gint color_profile_from_image = COLOR_PROFILE_NONE;
 	ColorManProfileType input_type = COLOR_PROFILE_MEM;
 	ColorManProfileType screen_type;
-	const gchar *input_file = NULL;
-	guchar *profile = NULL;
+	const gchar *input_file = nullptr;
+	guchar *profile = nullptr;
 	guint profile_len;
 	gint sw, sh;
 
@@ -471,16 +471,16 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf) {
 
 				if (profile)
 					{
-					cm = color_man_new_embedded(NULL, pixbuf,
+					cm = color_man_new_embedded(nullptr, pixbuf,
 									profile, profile_len,
-									screen_type, NULL, NULL, 0);
+									screen_type, nullptr, nullptr, 0);
 					g_free(profile);
 					}
 				else
 					{
-					cm = color_man_new(NULL, pixbuf,
+					cm = color_man_new(nullptr, pixbuf,
 							input_type, input_file,
-							screen_type, NULL, NULL, 0);
+							screen_type, nullptr, nullptr, 0);
 					}
 
 				if(cm) {
@@ -495,9 +495,9 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf) {
 
 static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf, gboolean shrunk)
 {
-	GdkPixbuf *pixbuf_thumb = NULL;
+	GdkPixbuf *pixbuf_thumb = nullptr;
 	GdkPixbuf *result;
-	GdkPixbuf *rotated = NULL;
+	GdkPixbuf *rotated = nullptr;
 	gint sw, sh;
 
 
@@ -574,7 +574,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 			 * so specifically save as a local thumbnail.
 			 */
 			g_free(tl->thumb_path);
-			tl->thumb_path = NULL;
+			tl->thumb_path = nullptr;
 
 			tl->cache_hit = FALSE;
 
@@ -625,7 +625,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 static gboolean thumb_loader_std_next_source(ThumbLoaderStd *tl, gboolean remove_broken)
 {
 	image_loader_free(tl->il);
-	tl->il = NULL;
+	tl->il = nullptr;
 
 	if (tl->thumb_path)
 		{
@@ -636,11 +636,11 @@ static gboolean thumb_loader_std_next_source(ThumbLoaderStd *tl, gboolean remove
 			}
 
 		g_free(tl->thumb_path);
-		tl->thumb_path = NULL;
+		tl->thumb_path = nullptr;
 
 		if (!tl->thumb_path_local)
 			{
-			tl->thumb_path = thumb_loader_std_cache_path(tl, TRUE, NULL, FALSE);
+			tl->thumb_path = thumb_loader_std_cache_path(tl, TRUE, nullptr, FALSE);
 			if (isfile(tl->thumb_path))
 				{
 				FileData *fd = file_data_new_no_grouping(tl->thumb_path);
@@ -654,13 +654,13 @@ static gboolean thumb_loader_std_next_source(ThumbLoaderStd *tl, gboolean remove
 				}
 
 			g_free(tl->thumb_path);
-			tl->thumb_path = NULL;
+			tl->thumb_path = nullptr;
 			}
 
 		if (thumb_loader_std_setup(tl, tl->fd)) return TRUE;
 		}
 
-	thumb_loader_std_save(tl, NULL);
+	thumb_loader_std_save(tl, nullptr);
 	return FALSE;
 }
 
@@ -688,7 +688,7 @@ static void thumb_loader_std_done_cb(ImageLoader *il, gpointer data)
 		return;
 		}
 
-	tl->cache_hit = (tl->thumb_path != NULL);
+	tl->cache_hit = (tl->thumb_path != nullptr);
 
 	if (tl->fd)
 		{
@@ -704,7 +704,7 @@ static void thumb_loader_std_error_cb(ImageLoader *il, gpointer data)
 	auto tl = static_cast<ThumbLoaderStd *>(data);
 
 	/* if at least some of the image is available, go to done */
-	if (image_loader_get_pixbuf(tl->il) != NULL)
+	if (image_loader_get_pixbuf(tl->il) != nullptr)
 		{
 		thumb_loader_std_done_cb(il, data);
 		return;
@@ -758,7 +758,7 @@ static gboolean thumb_loader_std_setup(ThumbLoaderStd *tl, FileData *fd)
 		}
 
 	image_loader_free(tl->il);
-	tl->il = NULL;
+	tl->il = nullptr;
 	return FALSE;
 }
 
@@ -777,7 +777,7 @@ void thumb_loader_std_set_cache(ThumbLoaderStd *tl, gboolean enable_cache, gbool
 
 gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 {
-	static gchar *thumb_cache = NULL;
+	static gchar *thumb_cache = nullptr;
 	struct stat st;
 
 	if (!tl || !fd) return FALSE;
@@ -805,7 +805,7 @@ gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 		gchar *pathl;
 
 		pathl = path_from_utf8(fd->path);
-		tl->thumb_uri = g_filename_to_uri(pathl, NULL, NULL);
+		tl->thumb_uri = g_filename_to_uri(pathl, nullptr, nullptr);
 		tl->local_uri = filename_from_path(tl->thumb_uri);
 		g_free(pathl);
 		}
@@ -814,7 +814,7 @@ gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 		{
 		gint found;
 
-		tl->thumb_path = thumb_loader_std_cache_path(tl, FALSE, NULL, FALSE);
+		tl->thumb_path = thumb_loader_std_cache_path(tl, FALSE, nullptr, FALSE);
 		tl->thumb_path_local = FALSE;
 
 		found = isfile(tl->thumb_path);
@@ -840,7 +840,7 @@ gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 
 	if (!thumb_loader_std_setup(tl, tl->fd))
 		{
-		thumb_loader_std_save(tl, NULL);
+		thumb_loader_std_save(tl, nullptr);
 		thumb_loader_std_set_fallback(tl);
 		return FALSE;
 		}
@@ -867,7 +867,7 @@ GdkPixbuf *thumb_loader_std_get_pixbuf(ThumbLoaderStd *tl)
 		}
 	else
 		{
-		pixbuf = pixbuf_fallback(NULL, tl->requested_width, tl->requested_height);
+		pixbuf = pixbuf_fallback(nullptr, tl->requested_width, tl->requested_height);
 		}
 
 	return pixbuf;
@@ -941,9 +941,9 @@ static void thumb_loader_std_thumb_file_validate_done_cb(ThumbLoaderStd *UNUSED(
 				struct stat st;
 				gchar *target;
 
-				target = g_filename_from_uri(uri, NULL, NULL);
+				target = g_filename_from_uri(uri, nullptr, nullptr);
 				if (stat(target, &st) == 0 &&
-				    st.st_mtime == strtol(mtime_str, NULL, 10))
+				    st.st_mtime == strtol(mtime_str, nullptr, 10))
 					{
 					valid = TRUE;
 					}
@@ -959,7 +959,7 @@ static void thumb_loader_std_thumb_file_validate_done_cb(ThumbLoaderStd *UNUSED(
 					{
 					time_t now;
 
-					now = time(NULL);
+					now = time(nullptr);
 					if (st.st_atime >= now - static_cast<time_t>(tv->days) * 24 * 60 * 60)
 						{
 						valid = TRUE;
@@ -1005,7 +1005,7 @@ ThumbLoaderStd *thumb_loader_std_thumb_file_validate(const gchar *thumb_path, gi
 	thumb_loader_std_set_callbacks(tv->tl,
 				       thumb_loader_std_thumb_file_validate_done_cb,
 				       thumb_loader_std_thumb_file_validate_error_cb,
-				       NULL,
+				       nullptr,
 				       tv);
 	thumb_loader_std_reset(tv->tl);
 
@@ -1051,7 +1051,7 @@ void thumb_std_maint_removed(const gchar *source)
 	gchar *sourcel;
 
 	sourcel = path_from_utf8(source);
-	uri = g_filename_to_uri(sourcel, NULL, NULL);
+	uri = g_filename_to_uri(sourcel, nullptr, nullptr);
 	g_free(sourcel);
 
 	/* all this to remove a thumbnail? */
@@ -1078,8 +1078,8 @@ struct _TMaintMove
 	gint pass;
 };
 
-static GList *thumb_std_maint_move_list = NULL;
-static GList *thumb_std_maint_move_tail = NULL;
+static GList *thumb_std_maint_move_list = nullptr;
+static GList *thumb_std_maint_move_tail = nullptr;
 
 
 static void thumb_std_maint_move_step(TMaintMove *tm);
@@ -1116,16 +1116,16 @@ static void thumb_std_maint_move_validate_cb(const gchar *UNUSED(path), gboolean
 			tm->tl->cache_local = FALSE;
 			file_data_unref(tm->tl->fd);
 			tm->tl->fd = file_data_new_group(tm->dest);
-			tm->tl->source_mtime = strtol(mtime_str, NULL, 10);
+			tm->tl->source_mtime = strtol(mtime_str, nullptr, 10);
 
 			pathl = path_from_utf8(tm->tl->fd->path);
 			g_free(tm->tl->thumb_uri);
-			tm->tl->thumb_uri = g_filename_to_uri(pathl, NULL, NULL);
+			tm->tl->thumb_uri = g_filename_to_uri(pathl, nullptr, nullptr);
 			tm->tl->local_uri = filename_from_path(tm->tl->thumb_uri);
 			g_free(pathl);
 
 			g_free(tm->tl->thumb_path);
-			tm->tl->thumb_path = NULL;
+			tm->tl->thumb_path = nullptr;
 			tm->tl->thumb_path_local = FALSE;
 
 			DEBUG_1("thumb move attempting save:");
@@ -1155,7 +1155,7 @@ static void thumb_std_maint_move_step(TMaintMove *tm)
 
 		if (thumb_std_maint_move_list)
 			{
-			g_idle_add_full(G_PRIORITY_LOW, thumb_std_maint_move_idle, NULL, NULL);
+			g_idle_add_full(G_PRIORITY_LOW, thumb_std_maint_move_idle, nullptr, nullptr);
 			}
 
 		return;
@@ -1179,10 +1179,10 @@ static gboolean thumb_std_maint_move_idle(gpointer UNUSED(data))
 	tm = static_cast<TMaintMove *>(thumb_std_maint_move_list->data);
 
 	thumb_std_maint_move_list = g_list_remove(thumb_std_maint_move_list, tm);
-	if (!thumb_std_maint_move_list) thumb_std_maint_move_tail = NULL;
+	if (!thumb_std_maint_move_list) thumb_std_maint_move_tail = nullptr;
 
 	pathl = path_from_utf8(tm->source);
-	tm->source_uri = g_filename_to_uri(pathl, NULL, NULL);
+	tm->source_uri = g_filename_to_uri(pathl, nullptr, nullptr);
 	g_free(pathl);
 
 	tm->pass = 0;
@@ -1213,7 +1213,7 @@ void thumb_std_maint_moved(const gchar *source, const gchar *dest)
 
 	if (!thumb_std_maint_move_list)
 		{
-		g_idle_add_full(G_PRIORITY_LOW, thumb_std_maint_move_idle, NULL, NULL);
+		g_idle_add_full(G_PRIORITY_LOW, thumb_std_maint_move_idle, nullptr, nullptr);
 		}
 
 	if (thumb_std_maint_move_tail)

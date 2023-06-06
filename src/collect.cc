@@ -48,14 +48,14 @@
  *
  * Type ::_CollectionData
  */
-static GList *collection_list = NULL;
+static GList *collection_list = nullptr;
 
 /**
  * @brief  List of currently open Collection windows.
  *
  * Type ::_CollectWindow
  */
-static GList *collection_window_list = NULL;
+static GList *collection_window_list = nullptr;
 
 static void collection_window_get_geometry(CollectWindow *cw);
 static void collection_window_refresh(CollectWindow *cw);
@@ -79,7 +79,7 @@ CollectInfo *collection_info_new(FileData *fd, struct stat *UNUSED(st), GdkPixbu
 {
 	CollectInfo *ci;
 
-	if (!fd) return NULL;
+	if (!fd) return nullptr;
 
 	ci = g_new0(CollectInfo, 1);
 	ci->fd = file_data_ref(fd);
@@ -93,7 +93,7 @@ CollectInfo *collection_info_new(FileData *fd, struct stat *UNUSED(st), GdkPixbu
 void collection_info_free_thumb(CollectInfo *ci)
 {
 	if (ci->pixbuf) g_object_unref(ci->pixbuf);
-	ci->pixbuf = NULL;
+	ci->pixbuf = nullptr;
 }
 
 void collection_info_free(CollectInfo *ci)
@@ -209,9 +209,9 @@ GList *collection_list_randomize(GList *list)
 	GList *nlist, *olist;
 
 	length = g_list_length(list);
-	if (!length) return NULL;
+	if (!length) return nullptr;
 
-	srand(static_cast<unsigned int>(time(NULL))); // Initialize random generator (hasn't to be that much strong)
+	srand(static_cast<unsigned int>(time(nullptr))); // Initialize random generator (hasn't to be that much strong)
 
 	for (i = 0; i < length; i++)
 		{
@@ -277,12 +277,12 @@ CollectInfo *collection_list_find_fd(GList *list, FileData *fd)
 		work = work->next;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 GList *collection_list_to_filelist(GList *list)
 {
-	GList *filelist = NULL;
+	GList *filelist = nullptr;
 	GList *work = list;
 
 	while (work)
@@ -308,14 +308,14 @@ CollectWindow *collection_window_find(CollectionData *cd)
 		work = work->next;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 CollectWindow *collection_window_find_by_path(const gchar *path)
 {
 	GList *work;
 
-	if (!path) return NULL;
+	if (!path) return nullptr;
 
 	work = collection_window_list;
 	while (work)
@@ -325,7 +325,7 @@ CollectWindow *collection_window_find_by_path(const gchar *path)
 		work = work->next;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 /**
@@ -337,14 +337,14 @@ CollectWindow *collection_window_find_by_path(const gchar *path)
  */
 gchar *collection_path(const gchar *param)
 {
-	gchar *path = NULL;
-	gchar *full_name = NULL;
+	gchar *path = nullptr;
+	gchar *full_name = nullptr;
 
 	if (file_extension_match(param, GQ_COLLECTION_EXT))
 		{
 		path = g_build_filename(get_collections_dir(), param, NULL);
 		}
-	else if (file_extension_match(param, NULL))
+	else if (file_extension_match(param, nullptr))
 		{
 		full_name = g_strconcat(param, GQ_COLLECTION_EXT, NULL);
 		path = g_build_filename(get_collections_dir(), full_name, NULL);
@@ -353,7 +353,7 @@ gchar *collection_path(const gchar *param)
 	if (!isfile(path))
 		{
 		g_free(path);
-		path = NULL;
+		path = nullptr;
 		}
 
 	g_free(full_name);
@@ -369,7 +369,7 @@ gchar *collection_path(const gchar *param)
  */
 gboolean is_collection(const gchar *param)
 {
-	gchar *name = NULL;
+	gchar *name = nullptr;
 
 	name = collection_path(param);
 	if (name)
@@ -427,7 +427,7 @@ GList *collection_contents_fd(const gchar *name)
 	CollectionData *cd;
 	CollectInfo *ci;
 	GList *work;
-	GList *list = NULL;
+	GList *list = nullptr;
 
 	if (is_collection(name))
 		{
@@ -466,7 +466,7 @@ CollectionData *collection_new(const gchar *path)
 	cd->sort_method = SORT_NONE;
 	cd->window_w = COLLECT_DEF_WIDTH;
 	cd->window_h = COLLECT_DEF_HEIGHT;
-	cd->existence = g_hash_table_new(NULL, NULL);
+	cd->existence = g_hash_table_new(nullptr, nullptr);
 
 	if (path)
 		{
@@ -557,16 +557,16 @@ CollectionData *collection_from_dnd_data(const gchar *data, GList **list, GList 
 	gint collection_number;
 	const gchar *ptr;
 
-	if (list) *list = NULL;
-	if (info_list) *info_list = NULL;
+	if (list) *list = nullptr;
+	if (info_list) *info_list = nullptr;
 
-	if (strncmp(data, "COLLECTION:", 11) != 0) return NULL;
+	if (strncmp(data, "COLLECTION:", 11) != 0) return nullptr;
 
 	ptr = data + 11;
 
 	collection_number = atoi(ptr);
 	cd = collection_from_number(collection_number);
-	if (!cd) return NULL;
+	if (!cd) return nullptr;
 
 	if (!list && !info_list) return cd;
 
@@ -599,17 +599,17 @@ CollectionData *collection_from_dnd_data(const gchar *data, GList **list, GList 
 gchar *collection_info_list_to_dnd_data(CollectionData *cd, GList *list, gint *length)
 {
 	GList *work;
-	GList *temp = NULL;
+	GList *temp = nullptr;
 	gchar *ptr;
 	gchar *text;
 	gchar *uri_text;
 	gint collection_number;
 
 	*length = 0;
-	if (!list) return NULL;
+	if (!list) return nullptr;
 
 	collection_number = collection_to_number(cd);
-	if (collection_number < 0) return NULL;
+	if (collection_number < 0) return nullptr;
 
 	text = g_strdup_printf("COLLECTION:%d\n", collection_number);
 	*length += strlen(text);
@@ -667,10 +667,10 @@ CollectInfo *collection_next_by_info(CollectionData *cd, CollectInfo *info)
 
 	work = g_list_find(cd->list, info);
 
-	if (!work) return NULL;
+	if (!work) return nullptr;
 	work = work->next;
 	if (work) return static_cast<CollectInfo *>(work->data);
-	return NULL;
+	return nullptr;
 }
 
 CollectInfo *collection_prev_by_info(CollectionData *cd, CollectInfo *info)
@@ -679,17 +679,17 @@ CollectInfo *collection_prev_by_info(CollectionData *cd, CollectInfo *info)
 
 	work = g_list_find(cd->list, info);
 
-	if (!work) return NULL;
+	if (!work) return nullptr;
 	work = work->prev;
 	if (work) return static_cast<CollectInfo *>(work->data);
-	return NULL;
+	return nullptr;
 }
 
 CollectInfo *collection_get_first(CollectionData *cd)
 {
 	if (cd->list) return static_cast<CollectInfo *>(cd->list->data);
 
-	return NULL;
+	return nullptr;
 }
 
 CollectInfo *collection_get_last(CollectionData *cd)
@@ -700,7 +700,7 @@ CollectInfo *collection_get_last(CollectionData *cd)
 
 	if (list) return static_cast<CollectInfo *>(list->data);
 
-	return NULL;
+	return nullptr;
 }
 
 void collection_set_sort_method(CollectionData *cd, SortType method)
@@ -738,9 +738,9 @@ static CollectInfo *collection_info_new_if_not_exists(CollectionData *cd, struct
 {
 	CollectInfo *ci;
 
-	if (g_hash_table_lookup(cd->existence, fd->path)) return NULL;
+	if (g_hash_table_lookup(cd->existence, fd->path)) return nullptr;
 
-	ci = collection_info_new(fd, st, NULL);
+	ci = collection_info_new(fd, st, nullptr);
 	if (ci) g_hash_table_insert(cd->existence, fd->path, g_strdup(""));
 	return ci;
 }
@@ -844,7 +844,7 @@ static void collection_remove_by_info(CollectionData *cd, CollectInfo *info)
 	if (!info || !g_list_find(cd->list, info)) return;
 
 	cd->list = g_list_remove(cd->list, info);
-	cd->changed = (cd->list != NULL);
+	cd->changed = (cd->list != nullptr);
 
 	collection_window_remove(collection_window_find(cd), info);
 	collection_info_free(info);
@@ -869,7 +869,7 @@ void collection_remove_by_info_list(CollectionData *cd, GList *list)
 		cd->list = collection_list_remove(cd->list, static_cast<CollectInfo *>(work->data));
 		work = work->next;
 		}
-	cd->changed = (cd->list != NULL);
+	cd->changed = (cd->list != nullptr);
 
 	collection_window_refresh(collection_window_find(cd));
 }
@@ -965,7 +965,7 @@ static gboolean collection_window_keypress(GtkWidget *UNUSED(widget), GdkEventKe
 					}
 				break;
 			case 'L': case 'l':
-				list = layout_list(NULL);
+				list = layout_list(nullptr);
 				if (list)
 					{
 					collection_table_add_filelist(cw->table, list);
@@ -973,20 +973,20 @@ static gboolean collection_window_keypress(GtkWidget *UNUSED(widget), GdkEventKe
 					}
 				break;
 			case 'C': case 'c':
-				file_util_copy(NULL, collection_table_selection_get_list(cw->table), NULL, cw->window);
+				file_util_copy(nullptr, collection_table_selection_get_list(cw->table), nullptr, cw->window);
 				break;
 			case 'M': case 'm':
-				file_util_move(NULL, collection_table_selection_get_list(cw->table), NULL, cw->window);
+				file_util_move(nullptr, collection_table_selection_get_list(cw->table), nullptr, cw->window);
 				break;
 			case 'R': case 'r':
-				file_util_rename(NULL, collection_table_selection_get_list(cw->table), cw->window);
+				file_util_rename(nullptr, collection_table_selection_get_list(cw->table), cw->window);
 				break;
 			case 'D': case 'd':
 				options->file_ops.safe_delete_enable = TRUE;
-				file_util_delete(NULL, collection_table_selection_get_list(cw->table), cw->window);
+				file_util_delete(nullptr, collection_table_selection_get_list(cw->table), cw->window);
 				break;
 			case 'S': case 's':
-				collection_dialog_save_as(NULL, cw->cd);
+				collection_dialog_save_as(nullptr, cw->cd);
 				break;
 			case 'W': case 'w':
 				collection_window_close(cw);
@@ -1002,7 +1002,7 @@ static gboolean collection_window_keypress(GtkWidget *UNUSED(widget), GdkEventKe
 		switch (event->keyval)
 			{
 			case GDK_KEY_Return: case GDK_KEY_KP_Enter:
-				layout_image_set_collection(NULL, cw->cd,
+				layout_image_set_collection(nullptr, cw->cd,
 					collection_table_get_focus_info(cw->table));
 				break;
 			case 'V': case 'v':
@@ -1012,7 +1012,7 @@ static gboolean collection_window_keypress(GtkWidget *UNUSED(widget), GdkEventKe
 			case 'S': case 's':
 				if (!cw->cd->path)
 					{
-					collection_dialog_save_as(NULL, cw->cd);
+					collection_dialog_save_as(nullptr, cw->cd);
 					}
 				else if (!collection_save(cw->cd, cw->cd->path))
 					{
@@ -1020,7 +1020,7 @@ static gboolean collection_window_keypress(GtkWidget *UNUSED(widget), GdkEventKe
 					}
 				break;
 			case 'A': case 'a':
-				collection_dialog_append(NULL, cw->cd);
+				collection_dialog_append(nullptr, cw->cd);
 				break;
 			case 'N': case 'n':
 				collection_set_sort_method(cw->cd, SORT_NAME);
@@ -1165,7 +1165,7 @@ static void collection_window_update(CollectWindow *cw, CollectInfo *ci)
 	if (!cw) return;
 
 	collection_table_file_update(cw->table, ci);
-	collection_table_file_update(cw->table, NULL);
+	collection_table_file_update(cw->table, nullptr);
 }
 
 static void collection_window_close_final(CollectWindow *cw)
@@ -1177,7 +1177,7 @@ static void collection_window_close_final(CollectWindow *cw)
 
 	gtk_widget_destroy(cw->window);
 
-	collection_set_update_info_func(cw->cd, NULL, NULL);
+	collection_set_update_info_func(cw->cd, nullptr, nullptr);
 	collection_unref(cw->cd);
 
 	g_free(cw);
@@ -1187,12 +1187,12 @@ static void collection_close_save_cb(GenericDialog *gd, gpointer data)
 {
 	auto cw = static_cast<CollectWindow *>(data);
 
-	cw->close_dialog = NULL;
+	cw->close_dialog = nullptr;
 	generic_dialog_close(gd);
 
 	if (!cw->cd->path)
 		{
-		collection_dialog_save_close(NULL, cw->cd);
+		collection_dialog_save_close(nullptr, cw->cd);
 		return;
 		}
 	else if (!collection_save(cw->cd, cw->cd->path))
@@ -1211,7 +1211,7 @@ static void collection_close_close_cb(GenericDialog *gd, gpointer data)
 {
 	auto cw = static_cast<CollectWindow *>(data);
 
-	cw->close_dialog = NULL;
+	cw->close_dialog = nullptr;
 	generic_dialog_close(gd);
 
 	collection_window_close_final(cw);
@@ -1221,7 +1221,7 @@ static void collection_close_cancel_cb(GenericDialog *gd, gpointer data)
 {
 	auto cw = static_cast<CollectWindow *>(data);
 
-	cw->close_dialog = NULL;
+	cw->close_dialog = nullptr;
 	generic_dialog_close(gd);
 }
 
@@ -1242,7 +1242,7 @@ static void collection_close_dlg_show(CollectWindow *cw)
 				   _("Close collection"),
 				   _("Collection has been modified.\nSave first?"), TRUE);
 
-	generic_dialog_add_button(gd, GTK_STOCK_SAVE, NULL, collection_close_save_cb, TRUE);
+	generic_dialog_add_button(gd, GTK_STOCK_SAVE, nullptr, collection_close_save_cb, TRUE);
 	generic_dialog_add_button(gd, GTK_STOCK_DELETE, _("_Discard"), collection_close_close_cb, FALSE);
 
 	cw->close_dialog = gd->dialog;
@@ -1334,14 +1334,14 @@ CollectWindow *collection_window_new(const gchar *path)
 
 	cw->cd = collection_new(path);
 
-	cw->window = window_new(GTK_WINDOW_TOPLEVEL, "collection", PIXBUF_INLINE_ICON_BOOK, NULL, NULL);
+	cw->window = window_new(GTK_WINDOW_TOPLEVEL, "collection", PIXBUF_INLINE_ICON_BOOK, nullptr, nullptr);
 	DEBUG_NAME(cw->window);
 
 	geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;
 	geometry.min_height = DEFAULT_MINIMAL_WINDOW_SIZE;
 	geometry.base_width = COLLECT_DEF_WIDTH;
 	geometry.base_height = COLLECT_DEF_HEIGHT;
-	gtk_window_set_geometry_hints(GTK_WINDOW(cw->window), NULL, &geometry,
+	gtk_window_set_geometry_hints(GTK_WINDOW(cw->window), nullptr, &geometry,
 				      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE));
 
 	if (options->collections_on_top)
@@ -1381,7 +1381,7 @@ CollectWindow *collection_window_new(const gchar *path)
 	gtk_box_pack_start(GTK_BOX(vbox), cw->status_box, FALSE, FALSE, 0);
 	gtk_widget_show(cw->status_box);
 
-	frame = gtk_frame_new(NULL);
+	frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
 	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
 	gtk_box_pack_start(GTK_BOX(cw->status_box), frame, TRUE, TRUE, 0);
@@ -1406,7 +1406,7 @@ CollectWindow *collection_window_new(const gchar *path)
 
 	collection_set_update_info_func(cw->cd, collection_window_update_info, cw);
 
-	if (path && *path == G_DIR_SEPARATOR) collection_load_begin(cw->cd, NULL, COLLECTION_LOAD_NONE);
+	if (path && *path == G_DIR_SEPARATOR) collection_load_begin(cw->cd, nullptr, COLLECTION_LOAD_NONE);
 
 	return cw;
 }

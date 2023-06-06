@@ -71,7 +71,7 @@ static EditorFlags editor_command_done(EditorData *ed);
  *-----------------------------------------------------------------------------
  */
 
-GHashTable *editors = NULL;
+GHashTable *editors = nullptr;
 GtkListStore *desktop_file_list;
 gboolean editors_finished = FALSE;
 
@@ -157,10 +157,10 @@ static GList *editor_mime_types_to_extensions(gchar **mime_types)
 		{"image/x-x3f",		".x3f"},
 		{"application/x-navi-animation",		".ani"},
 		{"application/x-ptoptimizer-script",	".pto"},
-		{NULL, NULL}};
+		{nullptr, nullptr}};
 
 	gint i, j;
-	GList *list = NULL;
+	GList *list = nullptr;
 
 	for (i = 0; mime_types[i]; i++)
 		for (j = 0; conv_table[j][0]; j++)
@@ -187,13 +187,13 @@ gboolean editor_read_desktop_file(const gchar *path)
 	if (g_hash_table_lookup(editors, key)) return FALSE; /* the file found earlier wins */
 
 	key_file = g_key_file_new();
-	if (!g_key_file_load_from_file(key_file, path, static_cast<GKeyFileFlags>(0), NULL))
+	if (!g_key_file_load_from_file(key_file, path, static_cast<GKeyFileFlags>(0), nullptr))
 		{
 		g_key_file_free(key_file);
 		return FALSE;
 		}
 
-	type = g_key_file_get_string(key_file, DESKTOP_GROUP, "Type", NULL);
+	type = g_key_file_get_string(key_file, DESKTOP_GROUP, "Type", nullptr);
 	if (!type || strcmp(type, "Application") != 0)
 		{
 		/* We only consider desktop entries of Application type */
@@ -210,13 +210,13 @@ gboolean editor_read_desktop_file(const gchar *path)
 
 	g_hash_table_insert(editors, editor->key, editor);
 
-	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Hidden", NULL)
-	    || g_key_file_get_boolean(key_file, DESKTOP_GROUP, "NoDisplay", NULL))
+	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Hidden", nullptr)
+	    || g_key_file_get_boolean(key_file, DESKTOP_GROUP, "NoDisplay", nullptr))
 	    	{
 	    	editor->hidden = TRUE;
 		}
 
-	categories = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "Categories", NULL, NULL);
+	categories = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "Categories", nullptr, nullptr);
 	if (categories)
 		{
 		gboolean found = FALSE;
@@ -243,7 +243,7 @@ gboolean editor_read_desktop_file(const gchar *path)
 		editor->ignored = TRUE;
 		}
 
-	only_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "OnlyShowIn", NULL, NULL);
+	only_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "OnlyShowIn", nullptr, nullptr);
 	if (only_show_in)
 		{
 		gboolean found = FALSE;
@@ -258,7 +258,7 @@ gboolean editor_read_desktop_file(const gchar *path)
 		g_strfreev(only_show_in);
 		}
 
-	not_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "NotShowIn", NULL, NULL);
+	not_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "NotShowIn", nullptr, nullptr);
 	if (not_show_in)
 		{
 		gboolean found = FALSE;
@@ -274,7 +274,7 @@ gboolean editor_read_desktop_file(const gchar *path)
 		}
 
 
-	try_exec = g_key_file_get_string(key_file, DESKTOP_GROUP, "TryExec", NULL);
+	try_exec = g_key_file_get_string(key_file, DESKTOP_GROUP, "TryExec", nullptr);
 	if (try_exec && !editor->hidden && !editor->ignored)
 		{
 		gchar *try_exec_res = g_find_program_in_path(try_exec);
@@ -290,8 +290,8 @@ gboolean editor_read_desktop_file(const gchar *path)
 		return TRUE;
 		}
 
-	editor->name = g_key_file_get_locale_string(key_file, DESKTOP_GROUP, "Name", NULL, NULL);
-	editor->icon = g_key_file_get_string(key_file, DESKTOP_GROUP, "Icon", NULL);
+	editor->name = g_key_file_get_locale_string(key_file, DESKTOP_GROUP, "Name", nullptr, nullptr);
+	editor->icon = g_key_file_get_string(key_file, DESKTOP_GROUP, "Icon", nullptr);
 
 	/* Icon key can be either a full path (absolute with file name extension) or an icon name (without extension) */
 	if (editor->icon && !g_path_is_absolute(editor->icon))
@@ -311,24 +311,24 @@ gboolean editor_read_desktop_file(const gchar *path)
 	if (editor->icon && !register_theme_icon_as_stock(editor->key, editor->icon))
 		{
 		g_free(editor->icon);
-		editor->icon = NULL;
+		editor->icon = nullptr;
 		}
 
-	editor->exec = g_key_file_get_string(key_file, DESKTOP_GROUP, "Exec", NULL);
+	editor->exec = g_key_file_get_string(key_file, DESKTOP_GROUP, "Exec", nullptr);
 
-	editor->menu_path = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-Menu-Path", NULL);
+	editor->menu_path = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-Menu-Path", nullptr);
 	if (!editor->menu_path) editor->menu_path = g_strdup("PluginsMenu");
 
-	editor->hotkey = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-Hotkey", NULL);
+	editor->hotkey = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-Hotkey", nullptr);
 
-	editor->comment = g_key_file_get_string(key_file, DESKTOP_GROUP, "Comment", NULL);
+	editor->comment = g_key_file_get_string(key_file, DESKTOP_GROUP, "Comment", nullptr);
 
-	extensions = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-File-Extensions", NULL);
+	extensions = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-File-Extensions", nullptr);
 	if (extensions)
 		editor->ext_list = filter_to_list(extensions);
 	else
 		{
-		gchar **mime_types = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "MimeType", NULL, NULL);
+		gchar **mime_types = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "MimeType", nullptr, nullptr);
 		if (mime_types)
 			{
 			editor->ext_list = editor_mime_types_to_extensions(mime_types);
@@ -337,13 +337,13 @@ gboolean editor_read_desktop_file(const gchar *path)
 			}
 		}
 
-	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Keep-Fullscreen", NULL)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_KEEP_FS);
-	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Verbose", NULL)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_VERBOSE);
-	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Verbose-Multi", NULL)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_VERBOSE_MULTI);
-	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Filter", NULL)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_DEST);
-	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Terminal", NULL)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_TERMINAL);
+	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Keep-Fullscreen", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_KEEP_FS);
+	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Verbose", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_VERBOSE);
+	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Verbose-Multi", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_VERBOSE_MULTI);
+	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "X-Geeqie-Filter", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_DEST);
+	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Terminal", nullptr)) editor->flags = static_cast<EditorFlags>(editor->flags | EDITOR_TERMINAL);
 
-	editor->flags = static_cast<EditorFlags>(editor->flags | editor_command_parse(editor, NULL, FALSE, NULL));
+	editor->flags = static_cast<EditorFlags>(editor->flags | editor_command_parse(editor, nullptr, FALSE, nullptr));
 
 	if ((editor->flags & EDITOR_NO_PARAM) && !category_geeqie) editor->hidden = TRUE;
 
@@ -386,7 +386,7 @@ static gboolean editor_remove_desktop_file_cb(gpointer UNUSED(key), gpointer val
 
 void editor_table_finish(void)
 {
-	g_hash_table_foreach_remove(editors, editor_remove_desktop_file_cb, NULL);
+	g_hash_table_foreach_remove(editors, editor_remove_desktop_file_cb, nullptr);
 	editors_finished = TRUE;
 }
 
@@ -404,7 +404,7 @@ void editor_table_clear(void)
 		{
 		g_hash_table_destroy(editors);
 		}
-	editors = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, reinterpret_cast<GDestroyNotify>(editor_description_free));
+	editors = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, reinterpret_cast<GDestroyNotify>(editor_description_free));
 	editors_finished = FALSE;
 }
 
@@ -422,7 +422,7 @@ static GList *editor_add_desktop_dir(GList *list, const gchar *path)
 		/* dir not found */
 		return list;
 		}
-	while ((dir = readdir(dp)) != NULL)
+	while ((dir = readdir(dp)) != nullptr)
 		{
 		gchar *namel = dir->d_name;
 
@@ -445,7 +445,7 @@ GList *editor_get_desktop_files(void)
 	gchar *all_dirs;
 	gchar **split_dirs;
 	gint i;
-	GList *list = NULL;
+	GList *list = nullptr;
 
 	xdg_data_dirs = getenv("XDG_DATA_DIRS");
 	if (xdg_data_dirs && xdg_data_dirs[0])
@@ -522,9 +522,9 @@ static gint editor_sort(gconstpointer a, gconstpointer b)
 
 GList *editor_list_get(void)
 {
-	GList *editors_list = NULL;
+	GList *editors_list = nullptr;
 
-	if (!editors_finished) return NULL;
+	if (!editors_finished) return nullptr;
 
 	g_hash_table_foreach(editors, editor_list_add_cb, &editors_list);
 	editors_list = g_list_sort(editors_list, editor_sort);
@@ -539,7 +539,7 @@ static void editor_verbose_data_free(EditorData *ed)
 {
 	if (!ed->vd) return;
 	g_free(ed->vd);
-	ed->vd = NULL;
+	ed->vd = nullptr;
 }
 
 static void editor_data_free(EditorData *ed)
@@ -585,21 +585,21 @@ static EditorVerboseData *editor_verbose_window(EditorData *ed, const gchar *tex
 	vd = g_new0(EditorVerboseData, 1);
 
 	vd->gd = file_util_gen_dlg(_("Edit command results"), "editor_results",
-				   NULL, FALSE,
-				   NULL, ed);
+				   nullptr, FALSE,
+				   nullptr, ed);
 	buf = g_strdup_printf(_("Output of %s"), text);
-	generic_dialog_add_message(vd->gd, NULL, buf, NULL, FALSE);
+	generic_dialog_add_message(vd->gd, nullptr, buf, nullptr, FALSE);
 	g_free(buf);
 	//~ vd->button_stop = generic_dialog_add_button(vd->gd, GTK_STOCK_STOP, NULL,
 						   //~ editor_verbose_window_stop, FALSE);
-	vd->button_stop = generic_dialog_add_button(vd->gd, "process-stop", NULL,
+	vd->button_stop = generic_dialog_add_button(vd->gd, "process-stop", nullptr,
 						   editor_verbose_window_stop, FALSE);
 	gtk_widget_set_sensitive(vd->button_stop, FALSE);
-	vd->button_close = generic_dialog_add_button(vd->gd, GTK_STOCK_CLOSE, NULL,
+	vd->button_close = generic_dialog_add_button(vd->gd, GTK_STOCK_CLOSE, nullptr,
 						    editor_verbose_window_close, TRUE);
 	gtk_widget_set_sensitive(vd->button_close, FALSE);
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -623,7 +623,7 @@ static EditorVerboseData *editor_verbose_window(EditorData *ed, const gchar *tex
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(vd->progress), TRUE);
 	gtk_widget_show(vd->progress);
 
-	vd->spinner = spinner_new(NULL, SPINNER_SPEED);
+	vd->spinner = spinner_new(nullptr, SPINNER_SPEED);
 	gtk_box_pack_start(GTK_BOX(hbox), vd->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(vd->spinner);
 
@@ -663,13 +663,13 @@ static gboolean editor_verbose_io_cb(GIOChannel *source, GIOCondition condition,
 
 	if (condition & G_IO_IN)
 		{
-		while (g_io_channel_read_chars(source, buf, sizeof(buf), &count, NULL) == G_IO_STATUS_NORMAL)
+		while (g_io_channel_read_chars(source, buf, sizeof(buf), &count, nullptr) == G_IO_STATUS_NORMAL)
 			{
-			if (!g_utf8_validate(buf, count, NULL))
+			if (!g_utf8_validate(buf, count, nullptr))
 				{
 				gchar *utf8;
 
-				utf8 = g_locale_to_utf8(buf, count, NULL, NULL, NULL);
+				utf8 = g_locale_to_utf8(buf, count, nullptr, nullptr, nullptr);
 				if (utf8)
 					{
 					editor_verbose_window_fill(ed->vd, utf8, -1);
@@ -689,7 +689,7 @@ static gboolean editor_verbose_io_cb(GIOChannel *source, GIOCondition condition,
 
 	if (condition & (G_IO_ERR | G_IO_HUP))
 		{
-		g_io_channel_shutdown(source, TRUE, NULL);
+		g_io_channel_shutdown(source, TRUE, nullptr);
 		return FALSE;
 		}
 
@@ -707,7 +707,7 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 {
 	GString *string;
 	gchar *pathl;
-	const gchar *p = NULL;
+	const gchar *p = nullptr;
 
 	DEBUG_2("editor_command_path_parse: %s %d %d %s", fd->path, consider_sidecars, type, editor->key);
 
@@ -734,7 +734,7 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 					break;
 					}
 
-				work2 = consider_sidecars ? fd->sidecar_files : NULL;
+				work2 = consider_sidecars ? fd->sidecar_files : nullptr;
 				while (work2)
 					{
 					auto sfd = static_cast<FileData *>(work2->data);
@@ -748,7 +748,7 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 					}
 				if (p) break;
 				}
-			if (!p) return NULL;
+			if (!p) return nullptr;
 			}
 		}
 	else if (type == PATH_DEST)
@@ -769,7 +769,7 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 	if (pathl && !pathl[0]) /* empty string case */
 		{
 		g_free(pathl);
-		pathl = NULL;
+		pathl = nullptr;
 		}
 
 	DEBUG_2("editor_command_path_parse: return %s", pathl);
@@ -812,7 +812,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 {
 	auto  flags = static_cast<EditorFlags>(0);
 	const gchar *p;
-	GString *result = NULL;
+	GString *result = nullptr;
 	gboolean escape = FALSE;
 	gboolean single_quotes = FALSE;
 	gboolean double_quotes = FALSE;
@@ -822,7 +822,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 	if (output)
 		result = g_string_new("");
 
-	if (editor->exec == NULL || editor->exec[0] == '\0')
+	if (editor->exec == nullptr || editor->exec[0] == '\0')
 		{
 		flags = static_cast<EditorFlags>(flags | EDITOR_ERROR_EMPTY);
 		goto err;
@@ -864,7 +864,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 			}
 		else if (*p == '%' && p[1])
 			{
-			gchar *pathl = NULL;
+			gchar *pathl = nullptr;
 
 			p++;
 
@@ -1021,7 +1021,7 @@ err:
 	if (output)
 		{
 		g_string_free(result, TRUE);
-		*output = NULL;
+		*output = nullptr;
 		}
 	return flags;
 }
@@ -1040,7 +1040,7 @@ static void editor_child_exit_cb(GPid pid, gint status, gpointer data)
 static EditorFlags editor_command_one(const EditorDescription *editor, GList *list, EditorData *ed)
 {
 	gchar *command;
-	auto fd = static_cast<FileData *>((ed->flags & EDITOR_NO_PARAM) ? NULL : list->data);;
+	auto fd = static_cast<FileData *>((ed->flags & EDITOR_NO_PARAM) ? nullptr : list->data);;
 	GPid pid;
 	gint standard_output;
 	gint standard_error;
@@ -1077,7 +1077,7 @@ static EditorFlags editor_command_one(const EditorDescription *editor, GList *li
 		if (options->shell.options && *options->shell.options)
 			args[n++] = options->shell.options;
 		args[n++] = command;
-		args[n] = NULL;
+		args[n] = nullptr;
 
 		if ((ed->flags & EDITOR_DEST) && fd && fd->change && fd->change->dest) /** @FIXME error handling */
 			{
@@ -1088,14 +1088,14 @@ static EditorFlags editor_command_one(const EditorDescription *editor, GList *li
 			g_unsetenv("GEEQIE_DESTINATION");
 			}
 
-		ok = g_spawn_async_with_pipes(working_directory, args, NULL,
+		ok = g_spawn_async_with_pipes(working_directory, args, nullptr,
 				      G_SPAWN_DO_NOT_REAP_CHILD, /* GSpawnFlags */
-				      NULL, NULL,
+				      nullptr, nullptr,
 				      &pid,
-				      NULL,
-				      ed->vd ? &standard_output : NULL,
-				      ed->vd ? &standard_error : NULL,
-				      NULL);
+				      nullptr,
+				      ed->vd ? &standard_output : nullptr,
+				      ed->vd ? &standard_error : nullptr,
+				      nullptr);
 
 		g_free(working_directory);
 
@@ -1125,21 +1125,21 @@ static EditorFlags editor_command_one(const EditorDescription *editor, GList *li
 			GIOChannel *channel_error;
 
 			channel_output = g_io_channel_unix_new(standard_output);
-			g_io_channel_set_flags(channel_output, G_IO_FLAG_NONBLOCK, NULL);
-			g_io_channel_set_encoding(channel_output, NULL, NULL);
+			g_io_channel_set_flags(channel_output, G_IO_FLAG_NONBLOCK, nullptr);
+			g_io_channel_set_encoding(channel_output, nullptr, nullptr);
 
 			g_io_add_watch_full(channel_output, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
-					    editor_verbose_io_cb, ed, NULL);
+					    editor_verbose_io_cb, ed, nullptr);
 			g_io_add_watch_full(channel_output, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
-					    editor_verbose_io_cb, ed, NULL);
+					    editor_verbose_io_cb, ed, nullptr);
 			g_io_channel_unref(channel_output);
 
 			channel_error = g_io_channel_unix_new(standard_error);
-			g_io_channel_set_flags(channel_error, G_IO_FLAG_NONBLOCK, NULL);
-			g_io_channel_set_encoding(channel_error, NULL, NULL);
+			g_io_channel_set_flags(channel_error, G_IO_FLAG_NONBLOCK, nullptr);
+			g_io_channel_set_encoding(channel_error, nullptr, nullptr);
 
 			g_io_add_watch_full(channel_error, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
-					    editor_verbose_io_cb, ed, NULL);
+					    editor_verbose_io_cb, ed, nullptr);
 			g_io_channel_unref(channel_error);
 			}
 		}
@@ -1158,7 +1158,7 @@ static EditorFlags editor_command_next_start(EditorData *ed)
 		FileData *fd;
 		EditorFlags error;
 
-		fd = static_cast<FileData *>((ed->flags & EDITOR_NO_PARAM) ? NULL : ed->list->data);
+		fd = static_cast<FileData *>((ed->flags & EDITOR_NO_PARAM) ? nullptr : ed->list->data);
 
 		if (ed->vd)
 			{
@@ -1172,7 +1172,7 @@ static EditorFlags editor_command_next_start(EditorData *ed)
 		error = editor_command_one(ed->editor, ed->list, ed);
 		if (!error && ed->vd)
 			{
-			gtk_widget_set_sensitive(ed->vd->button_stop, (ed->list != NULL) );
+			gtk_widget_set_sensitive(ed->vd->button_stop, (ed->list != nullptr) );
 			if ((ed->flags & EDITOR_FOR_EACH) && fd)
 				{
 				editor_verbose_window_fill(ed->vd, fd->path, strlen(fd->path));
@@ -1206,7 +1206,7 @@ static EditorFlags editor_command_next_finish(EditorData *ed, gint status)
 		ed->list = g_list_remove_link(ed->list, fd_element);
 		if (ed->callback)
 			{
-			cont = ed->callback(ed->list ? ed : NULL, ed->flags, fd_element, ed->data);
+			cont = ed->callback(ed->list ? ed : nullptr, ed->flags, fd_element, ed->data);
 			if (ed->stopping && cont == EDITOR_CB_CONTINUE) cont = EDITOR_CB_SKIP;
 			}
 		filelist_free(fd_element);
@@ -1215,9 +1215,9 @@ static EditorFlags editor_command_next_finish(EditorData *ed, gint status)
 		{
 		/* handle whole list */
 		if (ed->callback)
-			cont = ed->callback(NULL, ed->flags, ed->list, ed->data);
+			cont = ed->callback(nullptr, ed->flags, ed->list, ed->data);
 		filelist_free(ed->list);
-		ed->list = NULL;
+		ed->list = nullptr;
 		}
 
 	switch (cont)
@@ -1252,9 +1252,9 @@ static EditorFlags editor_command_done(EditorData *ed)
 	if (ed->list)
 		{
 		ed->flags = static_cast<EditorFlags>(ed->flags | EDITOR_ERROR_SKIPPED);
-		if (ed->callback) ed->callback(NULL, ed->flags, ed->list, ed->data);
+		if (ed->callback) ed->callback(nullptr, ed->flags, ed->list, ed->data);
 		filelist_free(ed->list);
-		ed->list = NULL;
+		ed->list = nullptr;
 		}
 
 	ed->count = 0;
@@ -1306,7 +1306,7 @@ static EditorFlags editor_command_start(const EditorDescription *editor, const g
 gboolean is_valid_editor_command(const gchar *key)
 {
 	if (!key) return FALSE;
-	return g_hash_table_lookup(editors, key) != NULL;
+	return g_hash_table_lookup(editors, key) != nullptr;
 }
 
 EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const gchar *working_directory, EditorCallback cb, gpointer data)
@@ -1320,7 +1320,7 @@ EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const
 	if (!editor) return EDITOR_ERROR_EMPTY;
 	if (!list && !(editor->flags & EDITOR_NO_PARAM)) return EDITOR_ERROR_NO_FILE;
 
-	error = editor_command_parse(editor, list, TRUE, NULL);
+	error = editor_command_parse(editor, list, TRUE, nullptr);
 
 	if (EDITOR_ERRORS(error)) return error;
 
@@ -1330,7 +1330,7 @@ EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const
 		{
 		gchar *text = g_strdup_printf(_("%s\n\"%s\""), editor_get_error_str(error), editor->file);
 
-		file_util_warning_dialog(_("Invalid editor command"), text, GTK_STOCK_DIALOG_ERROR, NULL);
+		file_util_warning_dialog(_("Invalid editor command"), text, GTK_STOCK_DIALOG_ERROR, nullptr);
 		g_free(text);
 		}
 
@@ -1339,7 +1339,7 @@ EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const
 
 EditorFlags start_editor_from_filelist(const gchar *key, GList *list)
 {
-	return start_editor_from_filelist_full(key, list, NULL, NULL, NULL);
+	return start_editor_from_filelist_full(key, list, nullptr, nullptr, nullptr);
 }
 
 EditorFlags start_editor_from_file_full(const gchar *key, FileData *fd, EditorCallback cb, gpointer data)
@@ -1349,20 +1349,20 @@ EditorFlags start_editor_from_file_full(const gchar *key, FileData *fd, EditorCa
 
 	if (!fd) return static_cast<EditorFlags>(FALSE);
 
-	list = g_list_append(NULL, fd);
-	error = start_editor_from_filelist_full(key, list, NULL, cb, data);
+	list = g_list_append(nullptr, fd);
+	error = start_editor_from_filelist_full(key, list, nullptr, cb, data);
 	g_list_free(list);
 	return error;
 }
 
 EditorFlags start_editor_from_file(const gchar *key, FileData *fd)
 {
-	return start_editor_from_file_full(key, fd, NULL, NULL);
+	return start_editor_from_file_full(key, fd, nullptr, nullptr);
 }
 
 EditorFlags start_editor(const gchar *key, const gchar *working_directory)
 {
-	return start_editor_from_filelist_full(key, NULL, working_directory, NULL, NULL);
+	return start_editor_from_filelist_full(key, nullptr, working_directory, nullptr, nullptr);
 }
 
 gboolean editor_window_flag_set(const gchar *key)

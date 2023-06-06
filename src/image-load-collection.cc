@@ -48,11 +48,11 @@ static gboolean image_loader_collection_load(gpointer loader, const guchar *UNUS
 	gboolean ret = FALSE;
 	gchar *randname;
 	gchar *cmd_line;
-	FILE *fp = NULL;
+	FILE *fp = nullptr;
 	gint line_count = 0;
-	GString *file_names = g_string_new(NULL);
+	GString *file_names = g_string_new(nullptr);
 	gchar line[LINE_LENGTH];
-	gchar **split_line = NULL;
+	gchar **split_line = nullptr;
 	gchar *cache_found;
 	gchar *pathl;
 
@@ -80,7 +80,7 @@ static gboolean image_loader_collection_load(gpointer loader, const guchar *UNUS
 						{
 						g_strfreev(split_line);
 						}
-					split_line = NULL;
+					split_line = nullptr;
 				}
 			fclose(fp);
 
@@ -92,7 +92,7 @@ static gboolean image_loader_collection_load(gpointer loader, const guchar *UNUS
 				cmd_line = g_strdup_printf("montage %s -geometry %dx%d+1+1 %s >/dev/null 2>&1", file_names->str, options->thumbnails.max_width, options->thumbnails.max_height, randname);
 
 				runcmd(cmd_line);
-				ld->pixbuf = gdk_pixbuf_new_from_file(randname, NULL);
+				ld->pixbuf = gdk_pixbuf_new_from_file(randname, nullptr);
 				if (ld->pixbuf)
 					{
 					ld->area_updated_cb(loader, 0, 0, gdk_pixbuf_get_width(ld->pixbuf), gdk_pixbuf_get_height(ld->pixbuf), ld->data);
@@ -143,7 +143,7 @@ static gchar* image_loader_collection_get_format_name(gpointer UNUSED(loader))
 }
 static gchar** image_loader_collection_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"image/png", NULL};
+	static const gchar *mime[] = {"image/png", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
@@ -170,7 +170,7 @@ void image_loader_backend_set_collection(ImageLoaderBackend *funcs)
 	funcs->loader_new = image_loader_collection_new;
 	funcs->set_size = image_loader_collection_set_size;
 	funcs->load = image_loader_collection_load;
-	funcs->write = NULL;
+	funcs->write = nullptr;
 	funcs->get_pixbuf = image_loader_collection_get_pixbuf;
 	funcs->close = image_loader_collection_close;
 	funcs->abort = image_loader_collection_abort;

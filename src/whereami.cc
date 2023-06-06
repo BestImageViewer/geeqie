@@ -195,7 +195,7 @@ WAI_FUNCSPEC
 int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
 {
   char buffer[PATH_MAX];
-  char* resolved = NULL;
+  char* resolved = nullptr;
   int length = -1;
 
   for (;;)
@@ -252,7 +252,7 @@ WAI_NOINLINE WAI_FUNCSPEC
 int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 {
   int length = -1;
-  FILE* maps = NULL;
+  FILE* maps = nullptr;
 
   for (int r = 0; r < WAI_PROC_SELF_MAPS_RETRY; ++r)
   {
@@ -356,7 +356,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
     }
 
     fclose(maps);
-    maps = NULL;
+    maps = nullptr;
 
     if (length != -1)
       break;

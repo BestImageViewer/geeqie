@@ -126,7 +126,7 @@ static void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 	gtk_container_add(GTK_CONTAINER(ee->ebox), ee->box);
 	gtk_widget_show(ee->box);
 
-	ee->title_label = gtk_label_new(NULL);
+	ee->title_label = gtk_label_new(nullptr);
 	gtk_label_set_xalign(GTK_LABEL(ee->title_label), horizontal ? 1.0 : 0.0);
 	gtk_label_set_yalign(GTK_LABEL(ee->title_label), 0.5);
 	gtk_size_group_add_widget(ped->size_group, ee->title_label);
@@ -142,7 +142,7 @@ static void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 		}
 	else
 		{
-		ee->value_widget = gtk_label_new(NULL);
+		ee->value_widget = gtk_label_new(nullptr);
 //		gtk_label_set_width_chars(GTK_LABEL(ee->value_widget), 20);
 		gtk_label_set_ellipsize(GTK_LABEL(ee->value_widget), PANGO_ELLIPSIZE_END);
 //		gtk_widget_set_size_request(ee->value_widget, 100, -1);
@@ -241,7 +241,7 @@ static void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboo
 
 	if (!ped->show_all && ee->if_set && !ee->editable && (!text || !*text))
 		{
-		gtk_label_set_text(GTK_LABEL(ee->value_widget), NULL);
+		gtk_label_set_text(GTK_LABEL(ee->value_widget), nullptr);
 		gtk_widget_hide(entry);
 		}
 	else
@@ -251,7 +251,7 @@ static void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboo
 			g_signal_handlers_block_by_func(ee->value_widget, (gpointer *)bar_pane_exif_entry_changed, ee);
 			gtk_entry_set_text(GTK_ENTRY(ee->value_widget), text ? text : "");
 			g_signal_handlers_unblock_by_func(ee->value_widget, (gpointer)bar_pane_exif_entry_changed, ee);
-			gtk_widget_set_tooltip_text(ee->box, NULL);
+			gtk_widget_set_tooltip_text(ee->box, nullptr);
 			}
 		else
 			{
@@ -382,7 +382,7 @@ static void bar_pane_exif_dnd_receive(GtkWidget *pane, GdkDragContext *UNUSED(co
 	PaneExifData *ped;
 	GList *work, *list;
 	gint pos;
-	GtkWidget *new_entry = NULL;
+	GtkWidget *new_entry = nullptr;
 
 	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!ped) return;
@@ -397,7 +397,7 @@ static void bar_pane_exif_dnd_receive(GtkWidget *pane, GdkDragContext *UNUSED(co
 			break;
 		default:
 			/** @FIXME this needs a check for valid exif keys */
-			new_entry = bar_pane_exif_add_entry(ped, reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), NULL, TRUE, FALSE);
+			new_entry = bar_pane_exif_add_entry(ped, reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), nullptr, TRUE, FALSE);
 			break;
 		}
 
@@ -564,9 +564,9 @@ static void bar_pane_exif_conf_dialog(GtkWidget *widget)
 	g_signal_connect(G_OBJECT(widget), "destroy",
 			 G_CALLBACK(bar_pane_exif_edit_close_cb), gd);
 
-	generic_dialog_add_message(gd, NULL, ee ? _("Configure entry") : _("Add entry"), NULL, FALSE);
+	generic_dialog_add_message(gd, nullptr, ee ? _("Configure entry") : _("Add entry"), nullptr, FALSE);
 
-	generic_dialog_add_button(gd, GTK_STOCK_OK, NULL,
+	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr,
 				  bar_pane_exif_edit_ok_cb, TRUE);
 
 	table = pref_table_new(gd->vbox, 3, 2, FALSE, TRUE);
@@ -655,7 +655,7 @@ static void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped)
 	menu_item_add_stock(menu, _("Add entry"), GTK_STOCK_ADD, G_CALLBACK(bar_pane_exif_conf_dialog_cb), ped->widget);
 	menu_item_add_check(menu, _("Show hidden entries"), ped->show_all, G_CALLBACK(bar_pane_exif_toggle_show_all_cb), ped);
 
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }
 
 static gboolean bar_pane_exif_menu_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
@@ -738,7 +738,7 @@ GList * bar_pane_exif_list()
 	PaneExifData *ped;
 	GList *list;
 	GList *work_windows;
-	GList *exif_list = NULL;
+	GList *exif_list = nullptr;
 	LayoutWindow *lw;
 	GtkWidget *bar;
 	GtkWidget *pane;
@@ -846,7 +846,7 @@ static GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolea
 
 GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *title = NULL;
+	gchar *title = nullptr;
 	gchar *id = g_strdup("exif");
 	gboolean expanded = TRUE;
 	gboolean show_all = FALSE;
@@ -875,7 +875,7 @@ GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gc
 void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	PaneExifData *ped;
-	gchar *title = NULL;
+	gchar *title = nullptr;
 
 	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!ped) return;
@@ -909,8 +909,8 @@ void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_n
 void bar_pane_exif_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	PaneExifData *ped;
-	gchar *key = NULL;
-	gchar *title = NULL;
+	gchar *key = nullptr;
+	gchar *title = nullptr;
 	gboolean if_set = TRUE;
 	gboolean editable = FALSE;
 

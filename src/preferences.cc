@@ -136,16 +136,16 @@ const gchar *format_class_list[] = {
 	};
 
 /* config memory values */
-static ConfOptions *c_options = NULL;
+static ConfOptions *c_options = nullptr;
 
 
 #ifdef DEBUG
 static gint debug_c;
 #endif
 
-static GtkWidget *configwindow = NULL;
-static GtkListStore *filter_store = NULL;
-static GtkTreeStore *accel_store = NULL;
+static GtkWidget *configwindow = nullptr;
+static GtkListStore *filter_store = nullptr;
+static GtkTreeStore *accel_store = nullptr;
 
 static GtkWidget *safe_delete_path_entry;
 
@@ -228,7 +228,7 @@ void config_entry_to_option(GtkWidget *entry, gchar **option, gchar *(*func)(con
 	const gchar *buf;
 
 	g_free(*option);
-	*option = NULL;
+	*option = nullptr;
 	buf = gtk_entry_get_text(GTK_ENTRY(entry));
 	if (buf && strlen(buf) > 0)
 		{
@@ -331,7 +331,7 @@ static void config_window_apply(void)
 	options->file_sort.natural = c_options->file_sort.natural;
 	options->file_filter.disable = c_options->file_filter.disable;
 
-	config_entry_to_option(sidecar_ext_entry, &options->sidecar.ext, NULL);
+	config_entry_to_option(sidecar_ext_entry, &options->sidecar.ext, nullptr);
 	sidecar_ext_parse(options->sidecar.ext);
 
 	options->slideshow.random = c_options->slideshow.random;
@@ -456,11 +456,11 @@ static void config_window_apply(void)
 	options->with_rename = c_options->with_rename;
 	options->collections_on_top = c_options->collections_on_top;
 	options->hide_window_in_fullscreen = c_options->hide_window_in_fullscreen;
-	config_entry_to_option(help_search_engine_entry, &options->help_search_engine, NULL);
+	config_entry_to_option(help_search_engine_entry, &options->help_search_engine, nullptr);
 
 	options->external_preview.enable = c_options->external_preview.enable;
-	config_entry_to_option(external_preview_select_entry, &options->external_preview.select, NULL);
-	config_entry_to_option(external_preview_extract_entry, &options->external_preview.extract, NULL);
+	config_entry_to_option(external_preview_select_entry, &options->external_preview.select, nullptr);
+	config_entry_to_option(external_preview_extract_entry, &options->external_preview.extract, nullptr);
 
 	options->read_metadata_in_idle = c_options->read_metadata_in_idle;
 
@@ -500,10 +500,10 @@ static void config_window_apply(void)
 	if (refresh)
 		{
 		filter_rebuild();
-		layout_refresh(NULL);
+		layout_refresh(nullptr);
 		}
 
-	if (accel_store) gtk_tree_model_foreach(GTK_TREE_MODEL(accel_store), accel_apply_cb, NULL);
+	if (accel_store) gtk_tree_model_foreach(GTK_TREE_MODEL(accel_store), accel_apply_cb, nullptr);
 
 	toolbar_apply(TOOLBAR_MAIN);
 	toolbar_apply(TOOLBAR_STATUS);
@@ -518,8 +518,8 @@ static void config_window_apply(void)
 static void config_window_close_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
 {
 	gtk_widget_destroy(configwindow);
-	configwindow = NULL;
-	filter_store = NULL;
+	configwindow = nullptr;
+	filter_store = nullptr;
 }
 
 static void config_window_help_cb(GtkWidget *UNUSED(widget), gpointer data)
@@ -551,7 +551,7 @@ static void config_window_help_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 static gboolean config_window_delete(GtkWidget *UNUSED(widget), GdkEventAny *UNUSED(event), gpointer UNUSED(data))
 {
-	config_window_close_cb(NULL, NULL);
+	config_window_close_cb(nullptr, nullptr);
 	return TRUE;
 }
 
@@ -583,7 +583,7 @@ static void config_window_ok_cb(GtkWidget *widget, gpointer data)
 	config_window_apply();
 	layout_util_sync(lw);
 	save_options(options);
-	config_window_close_cb(NULL, NULL);
+	config_window_close_cb(nullptr, nullptr);
 }
 
 /*
@@ -782,7 +782,7 @@ struct _UseableMouseItems
 };
 
 static const UseableMouseItems useable_mouse_items[] = {
-	{"", "", NULL},
+	{"", "", nullptr},
 	{"FirstImage",	N_("First Image"), GTK_STOCK_GOTO_TOP},
 	{"PrevImage",	N_("Previous Image"), GTK_STOCK_GO_UP},
 	{"NextImage",	N_("Next Image"), GTK_STOCK_GO_DOWN},
@@ -852,7 +852,7 @@ static const UseableMouseItems useable_mouse_items[] = {
 	{"SBar",	N_("Info sidebar"), PIXBUF_INLINE_ICON_INFO},
 	{"SBarSort",	N_("Sort manager"), PIXBUF_INLINE_ICON_SORT},
 	{"Quit",	N_("Quit"), GTK_STOCK_QUIT},
-	{NULL,		NULL, NULL}
+	{nullptr,		nullptr, nullptr}
 };
 
 static void mouse_buttons_selection_menu_cb(GtkWidget *combo, gpointer data)
@@ -1335,7 +1335,7 @@ static gboolean filter_add_scroll(gpointer data)
 	gboolean valid;
 	FilterEntry *filter;
 
-	rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(filter_store), NULL);
+	rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(filter_store), nullptr);
 	path = gtk_tree_path_new_from_indices(rows-1, -1);
 
 	column = gtk_tree_view_get_column(GTK_TREE_VIEW(data), 0);
@@ -1387,7 +1387,7 @@ static void filter_remove_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 	if (!filter_store) return;
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(filter_view));
-	if (!gtk_tree_selection_get_selected(selection, NULL, &iter)) return;
+	if (!gtk_tree_selection_get_selected(selection, nullptr, &iter)) return;
 	gtk_tree_model_get(GTK_TREE_MODEL(filter_store), &iter, 0, &fe, -1);
 	if (!fe) return;
 
@@ -1439,7 +1439,7 @@ static void filter_default_cb(GtkWidget *widget, gpointer data)
 				dummy_cancel_cb, data);
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION, _("Reset filters"),
 				   _("This will reset the file filters to the defaults.\nContinue?"), TRUE);
-	generic_dialog_add_button(gd, GTK_STOCK_OK, NULL, filter_default_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr, filter_default_ok_cb, TRUE);
 	gtk_widget_show(gd->dialog);
 }
 
@@ -1453,7 +1453,7 @@ static void filter_disable_cb(GtkWidget *widget, gpointer data)
 
 static void safe_delete_view_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
 {
-	layout_set_path(NULL, gtk_entry_get_text(GTK_ENTRY(safe_delete_path_entry)));
+	layout_set_path(nullptr, gtk_entry_get_text(GTK_ENTRY(safe_delete_path_entry)));
 }
 
 static void safe_delete_clear_ok_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
@@ -1467,10 +1467,10 @@ static void safe_delete_clear_cb(GtkWidget *widget, gpointer UNUSED(data))
 	GtkWidget *entry;
 	gd = generic_dialog_new(_("Clear trash"),
 				"clear_trash", widget, TRUE,
-				dummy_cancel_cb, NULL);
+				dummy_cancel_cb, nullptr);
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION, _("Clear trash"),
 				    _("This will remove the trash contents."), FALSE);
-	generic_dialog_add_button(gd, GTK_STOCK_OK, NULL, safe_delete_clear_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr, safe_delete_clear_ok_cb, TRUE);
 	entry = gtk_entry_new();
 	gtk_widget_set_can_focus(entry, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(entry), FALSE);
@@ -1518,7 +1518,7 @@ static void image_overlay_default_template_cb(GtkWidget *widget, gpointer data)
 				dummy_cancel_cb, data);
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION, _("Reset image overlay template string"),
 				   _("This will reset the image overlay template string to the default.\nContinue?"), TRUE);
-	generic_dialog_add_button(gd, GTK_STOCK_OK, NULL, image_overlay_default_template_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GTK_STOCK_OK, nullptr, image_overlay_default_template_ok_cb, TRUE);
 	gtk_widget_show(gd->dialog);
 }
 
@@ -1628,7 +1628,7 @@ static void accel_store_populate(void)
 					     "label", &label,
 					     NULL);
 
-				if (pango_parse_markup(label, -1, '_', NULL, &label2, NULL, NULL) && label2)
+				if (pango_parse_markup(label, -1, '_', nullptr, &label2, nullptr, nullptr) && label2)
 					{
 					g_free(label);
 					label = label2;
@@ -1638,7 +1638,7 @@ static void accel_store_populate(void)
 
 				if (tooltip)
 					{
-					gtk_tree_store_append(accel_store, &iter, NULL);
+					gtk_tree_store_append(accel_store, &iter, nullptr);
 					gtk_tree_store_set(accel_store, &iter,
 							   AE_ACTION, label,
 							   AE_KEY, accel,
@@ -1770,7 +1770,7 @@ static void accel_clear_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 	if (!accel_store) return;
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(data));
-	gtk_tree_selection_selected_foreach(selection, &accel_clear_selection, NULL);
+	gtk_tree_selection_selected_foreach(selection, &accel_clear_selection, nullptr);
 }
 
 static void accel_reset_cb(GtkWidget *UNUSED(widget), gpointer data)
@@ -1779,7 +1779,7 @@ static void accel_reset_cb(GtkWidget *UNUSED(widget), gpointer data)
 
 	if (!accel_store) return;
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(data));
-	gtk_tree_selection_selected_foreach(selection, &accel_reset_selection, NULL);
+	gtk_tree_selection_selected_foreach(selection, &accel_reset_selection, nullptr);
 }
 
 
@@ -1791,7 +1791,7 @@ static GtkWidget *scrolled_notebook_page(GtkWidget *notebook, const gchar *title
 	GtkWidget *scrolled;
 	GtkWidget *viewport;
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_container_set_border_width(GTK_CONTAINER(scrolled), PREF_PAD_BORDER);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -1799,7 +1799,7 @@ static GtkWidget *scrolled_notebook_page(GtkWidget *notebook, const gchar *title
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrolled, label);
 	gtk_widget_show(scrolled);
 
-	viewport = gtk_viewport_new(NULL, NULL);
+	viewport = gtk_viewport_new(nullptr, nullptr);
 	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
 	gtk_container_add(GTK_CONTAINER(scrolled), viewport);
 	gtk_widget_show(viewport);
@@ -1892,7 +1892,7 @@ static void star_rating_rejected_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIconPo
 static guint star_rating_symbol_test(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto hbox = static_cast<GtkContainer *>(data);
-	GString *str = g_string_new(NULL);
+	GString *str = g_string_new(nullptr);
 	GtkEntry *hex_code_entry;
 	gchar *hex_code_full;
 	gchar **hex_code;
@@ -1907,7 +1907,7 @@ static guint star_rating_symbol_test(GtkWidget *UNUSED(widget), gpointer data)
 	hex_code = g_strsplit(hex_code_full, "+", 2);
 	if (hex_code[0] && hex_code[1])
 		{
-		hex_value = strtoull(hex_code[1], NULL, 16);
+		hex_value = strtoull(hex_code[1], nullptr, 16);
 		}
 	if (!hex_value || hex_value > 0x10FFFF)
 		{
@@ -1987,8 +1987,8 @@ static void config_tab_general(GtkWidget *notebook)
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Custom size: "));
-	pref_spin_new_int(hbox, _("Width:"), NULL, 1, 512, 1, options->thumbnails.max_width, &c_options->thumbnails.max_width);
-	pref_spin_new_int(hbox, _("Height:"), NULL, 1, 512, 1, options->thumbnails.max_height, &c_options->thumbnails.max_height);
+	pref_spin_new_int(hbox, _("Width:"), nullptr, 1, 512, 1, options->thumbnails.max_width, &c_options->thumbnails.max_width);
+	pref_spin_new_int(hbox, _("Height:"), nullptr, 1, 512, 1, options->thumbnails.max_height, &c_options->thumbnails.max_height);
 
 	ct_button = pref_checkbox_new_int(group, _("Cache thumbnails and sim. files"),
 					  options->thumbnails.enable_caching, &c_options->thumbnails.enable_caching);
@@ -2000,23 +2000,23 @@ static void config_tab_general(GtkWidget *notebook)
 	c_options->thumbnails.cache_into_dirs = options->thumbnails.cache_into_dirs;
 	group_frame = pref_frame_new(subgroup, TRUE, _("Use Geeqie thumbnail style and cache"),
 										GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	button = pref_radiobutton_new(group_frame, NULL,  get_thumbnails_cache_dir(),
+	button = pref_radiobutton_new(group_frame, nullptr,  get_thumbnails_cache_dir(),
 							!options->thumbnails.spec_standard && !options->thumbnails.cache_into_dirs,
-							G_CALLBACK(cache_geeqie_cb), NULL);
+							G_CALLBACK(cache_geeqie_cb), nullptr);
 
 	group_frame = pref_frame_new(subgroup, TRUE,
 							_("Store thumbnails local to image folder (non-standard)"),
 							GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	pref_radiobutton_new(group_frame, button, "*/.thumbnails",
 							!options->thumbnails.spec_standard && options->thumbnails.cache_into_dirs,
-							G_CALLBACK(cache_local_cb), NULL);
+							G_CALLBACK(cache_local_cb), nullptr);
 
 	group_frame = pref_frame_new(subgroup, TRUE,
 							_("Use standard thumbnail style and cache, shared with other applications"),
 							GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	pref_radiobutton_new(group_frame, button, get_thumbnails_standard_cache_dir(),
 							options->thumbnails.spec_standard && !options->thumbnails.cache_into_dirs,
-							G_CALLBACK(cache_standard_cb), NULL);
+							G_CALLBACK(cache_standard_cb), nullptr);
 
 	pref_checkbox_new_int(group, _("Use EXIF thumbnails when available (EXIF thumbnails may be outdated)"),
 			      options->thumbnails.use_exif, &c_options->thumbnails.use_exif);
@@ -2024,7 +2024,7 @@ static void config_tab_general(GtkWidget *notebook)
 	pref_checkbox_new_int(group, _("Thumbnail color management"),
 				options->thumbnails.use_color_management, &c_options->thumbnails.use_color_management);
 
-	spin = pref_spin_new_int(group, _("Collection preview:"), NULL,
+	spin = pref_spin_new_int(group, _("Collection preview:"), nullptr,
 				 1, 999, 1,
 				 options->thumbnails.collection_preview, &c_options->thumbnails.collection_preview);
 	gtk_widget_set_tooltip_text(spin, _("The maximum number of thumbnails shown in a Collection preview montage"));
@@ -2044,7 +2044,7 @@ static void config_tab_general(GtkWidget *notebook)
 	c_options->star_rating.star = options->star_rating.star;
 	c_options->star_rating.rejected = options->star_rating.rejected;
 
-	str = g_string_new(NULL);
+	str = g_string_new(nullptr);
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Star character: "));
 	str = g_string_append_unichar(str, options->star_rating.star);
@@ -2055,7 +2055,7 @@ static void config_tab_general(GtkWidget *notebook)
 	gtk_box_pack_start(GTK_BOX(hbox), star_rating_entry, FALSE, FALSE, 0);
 	gtk_entry_set_width_chars(GTK_ENTRY(star_rating_entry), 15);
 	gtk_widget_show(star_rating_entry);
-	button = pref_button_new(NULL, NULL, _("Set"), FALSE,
+	button = pref_button_new(nullptr, nullptr, _("Set"), FALSE,
 					G_CALLBACK(star_rating_star_test_cb), hbox);
 	gtk_widget_set_tooltip_text(button, _("Display selected character"));
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
@@ -2076,7 +2076,7 @@ static void config_tab_general(GtkWidget *notebook)
 	g_string_free(str, TRUE);
 	g_free(rating_symbol);
 
-	str = g_string_new(NULL);
+	str = g_string_new(nullptr);
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Rejected character: "));
 	str = g_string_append_unichar(str, options->star_rating.rejected);
@@ -2087,7 +2087,7 @@ static void config_tab_general(GtkWidget *notebook)
 	gtk_box_pack_start(GTK_BOX(hbox), star_rating_entry, FALSE, FALSE, 0);
 	gtk_entry_set_width_chars(GTK_ENTRY(star_rating_entry), 15);
 	gtk_widget_show(star_rating_entry);
-	button = pref_button_new(NULL, NULL, _("Set"), FALSE,
+	button = pref_button_new(nullptr, nullptr, _("Set"), FALSE,
 					G_CALLBACK(star_rating_rejected_test_cb), hbox);
 	gtk_widget_set_tooltip_text(button, _("Display selected character"));
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
@@ -2121,20 +2121,20 @@ static void config_tab_general(GtkWidget *notebook)
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
-	spin = pref_spin_new(hbox, _("Delay between image change hrs:mins:secs.dec"), NULL,
+	spin = pref_spin_new(hbox, _("Delay between image change hrs:mins:secs.dec"), nullptr,
 										0, 23, 1.0, 0,
 										options->slideshow.delay ? hours : 0.0,
-										G_CALLBACK(slideshow_delay_hours_cb), NULL);
+										G_CALLBACK(slideshow_delay_hours_cb), nullptr);
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_ALWAYS);
-	spin = pref_spin_new(hbox, ":" , NULL,
+	spin = pref_spin_new(hbox, ":" , nullptr,
 										0, 59, 1.0, 0,
 										options->slideshow.delay ? minutes: 0.0,
-										G_CALLBACK(slideshow_delay_minutes_cb), NULL);
+										G_CALLBACK(slideshow_delay_minutes_cb), nullptr);
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_ALWAYS);
-	spin = pref_spin_new(hbox, ":", NULL,
+	spin = pref_spin_new(hbox, ":", nullptr,
 										SLIDESHOW_MIN_SECONDS, 59, 1.0, 1,
 										options->slideshow.delay ? seconds : 10.0,
-										G_CALLBACK(slideshow_delay_seconds_cb), NULL);
+										G_CALLBACK(slideshow_delay_seconds_cb), nullptr);
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_ALWAYS);
 
 	pref_checkbox_new_int(group, _("Random"), options->slideshow.random, &c_options->slideshow.random);
@@ -2144,7 +2144,7 @@ static void config_tab_general(GtkWidget *notebook)
 
 	group = pref_group_new(vbox, FALSE, _("Image loading and caching"), GTK_ORIENTATION_VERTICAL);
 
-	pref_spin_new_int(group, _("Decoded image cache size (MiB):"), NULL,
+	pref_spin_new_int(group, _("Decoded image cache size (MiB):"), nullptr,
 			  0, 99999, 1, options->image.image_cache_max, &c_options->image.image_cache_max);
 	pref_checkbox_new_int(group, _("Preload next image"),
 			      options->image.enable_read_ahead, &c_options->image.enable_read_ahead);
@@ -2175,10 +2175,10 @@ static void config_tab_general(GtkWidget *notebook)
 
 
 	net_mon = g_network_monitor_get_default();
-	tz_org = g_network_address_parse_uri(TIMEZONE_DATABASE_WEB, 80, NULL);
+	tz_org = g_network_address_parse_uri(TIMEZONE_DATABASE_WEB, 80, nullptr);
 	if (tz_org)
 		{
-		internet_available = g_network_monitor_can_reach(net_mon, tz_org, NULL, NULL);
+		internet_available = g_network_monitor_can_reach(net_mon, tz_org, nullptr, nullptr);
 		g_object_unref(tz_org);
 		}
 
@@ -2200,11 +2200,11 @@ static void config_tab_general(GtkWidget *notebook)
 
 	if (isfile(tz->timezone_database_user))
 		{
-		button = pref_button_new(GTK_WIDGET(hbox), NULL, _("Update"), FALSE, G_CALLBACK(timezone_database_install_cb), tz);
+		button = pref_button_new(GTK_WIDGET(hbox), nullptr, _("Update"), FALSE, G_CALLBACK(timezone_database_install_cb), tz);
 		}
 	else
 		{
-		button = pref_button_new(GTK_WIDGET(hbox), NULL, _("Install"), FALSE, G_CALLBACK(timezone_database_install_cb), tz);
+		button = pref_button_new(GTK_WIDGET(hbox), nullptr, _("Install"), FALSE, G_CALLBACK(timezone_database_install_cb), tz);
 		}
 
 	download_locn = g_strconcat(_("Download database from: "), TIMEZONE_DATABASE_WEB, NULL);
@@ -2287,9 +2287,9 @@ static void config_tab_image(GtkWidget *notebook)
 		//~ }
 
 	c_options->image.zoom_increment = options->image.zoom_increment;
-	spin = pref_spin_new(group, _("Zoom increment:"), NULL,
+	spin = pref_spin_new(group, _("Zoom increment:"), nullptr,
 			     0.01, 4.0, 0.01, 2, static_cast<gdouble>(options->image.zoom_increment) / 100.0,
-			     G_CALLBACK(zoom_increment_cb), NULL);
+			     G_CALLBACK(zoom_increment_cb), nullptr);
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_ALWAYS);
 
 	c_options->image.zoom_style = options->image.zoom_style;
@@ -2301,7 +2301,7 @@ static void config_tab_image(GtkWidget *notebook)
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	enlargement_button = pref_checkbox_new_int(hbox, _("Allow enlargement of image (max. size in %)"),
 			      options->image.zoom_to_fit_allow_expand, &c_options->image.zoom_to_fit_allow_expand);
-	spin = pref_spin_new_int(hbox, NULL, NULL,
+	spin = pref_spin_new_int(hbox, nullptr, nullptr,
 				 100, 999, 1,
 				 options->image.max_enlargement_size, &c_options->image.max_enlargement_size);
 	pref_checkbox_link_sensitivity(enlargement_button, spin);
@@ -2310,7 +2310,7 @@ static void config_tab_image(GtkWidget *notebook)
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	ct_button = pref_checkbox_new_int(hbox, _("Virtual window size (% of actual window):"),
 					  options->image.limit_autofit_size, &c_options->image.limit_autofit_size);
-	spin = pref_spin_new_int(hbox, NULL, NULL,
+	spin = pref_spin_new_int(hbox, nullptr, nullptr,
 				 10, 150, 1,
 				 options->image.max_autofit_size, &c_options->image.max_autofit_size);
 	pref_checkbox_link_sensitivity(ct_button, spin);
@@ -2352,7 +2352,7 @@ static void config_tab_image(GtkWidget *notebook)
 
 static void save_default_window_layout_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
 {
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 	gchar *default_path;
 	gchar *tmp_id;
 
@@ -2434,7 +2434,7 @@ static void config_tab_windows(GtkWidget *notebook)
 
 	subgroup = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(subgroup, _("Use current layout for default: "));
-	button = pref_button_new(subgroup, NULL, _("Set"), FALSE, G_CALLBACK(save_default_window_layout_cb), NULL);
+	button = pref_button_new(subgroup, nullptr, _("Set"), FALSE, G_CALLBACK(save_default_window_layout_cb), nullptr);
 
 	GtkWidget *popover;
 
@@ -2450,7 +2450,7 @@ static void config_tab_windows(GtkWidget *notebook)
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	ct_button = pref_checkbox_new_int(hbox, _("Limit size when auto-sizing window (%):"),
 					  options->image.limit_window_size, &c_options->image.limit_window_size);
-	spin = pref_spin_new_int(hbox, NULL, NULL,
+	spin = pref_spin_new_int(hbox, nullptr, nullptr,
 				 10, 150, 1,
 				 options->image.max_window_size, &c_options->image.max_window_size);
 	pref_checkbox_link_sensitivity(ct_button, spin);
@@ -2501,7 +2501,7 @@ static void config_tab_osd(GtkWidget *notebook)
 
 	pref_label_new(group, _("Image overlay template"));
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_widget_set_size_request(scrolled, 200, 150);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
@@ -2517,30 +2517,30 @@ static void config_tab_osd(GtkWidget *notebook)
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	button = pref_button_new(NULL, GTK_STOCK_SELECT_FONT, _("Font"), FALSE,
+	button = pref_button_new(nullptr, GTK_STOCK_SELECT_FONT, _("Font"), FALSE,
 				 G_CALLBACK(image_overlay_set_font_cb), notebook);
 
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, GTK_STOCK_COLOR_PICKER, _("Text"), FALSE,
-				 G_CALLBACK(image_overlay_set_text_colour_cb), NULL);
+	button = pref_button_new(nullptr, GTK_STOCK_COLOR_PICKER, _("Text"), FALSE,
+				 G_CALLBACK(image_overlay_set_text_colour_cb), nullptr);
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, GTK_STOCK_COLOR_PICKER, _("Background"), FALSE,
-				 G_CALLBACK(image_overlay_set_background_colour_cb), NULL);
+	button = pref_button_new(nullptr, GTK_STOCK_COLOR_PICKER, _("Background"), FALSE,
+				 G_CALLBACK(image_overlay_set_background_colour_cb), nullptr);
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 	image_overlay_set_text_colours();
 
-	button = pref_button_new(NULL, NULL, _("Defaults"), FALSE,
+	button = pref_button_new(nullptr, nullptr, _("Defaults"), FALSE,
 				 G_CALLBACK(image_overlay_default_template_cb), image_overlay_template_view);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, GTK_STOCK_HELP, NULL, FALSE,
-				 G_CALLBACK(image_overlay_help_cb), NULL);
+	button = pref_button_new(nullptr, GTK_STOCK_HELP, nullptr, FALSE,
+				 G_CALLBACK(image_overlay_help_cb), nullptr);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
@@ -2725,7 +2725,7 @@ static void config_tab_files(GtkWidget *notebook)
 			 G_CALLBACK(filter_disable_cb), frame);
 	gtk_widget_set_sensitive(frame, !options->file_filter.disable);
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
@@ -2748,15 +2748,15 @@ static void config_tab_files(GtkWidget *notebook)
 			 G_CALLBACK(filter_store_enable_cb), filter_store);
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_ENABLE), NULL);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_ENABLED, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_ENABLED), NULL);
+						GINT_TO_POINTER(FE_ENABLE), nullptr);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_ENABLED, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_ENABLED), nullptr);
 	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_ENABLED);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
 
 	column = gtk_tree_view_column_new();
 	gtk_tree_view_column_set_title(column, _("Filter"));
 	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_FILTER, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_FILTER), NULL);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_FILTER, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_FILTER), nullptr);
 	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_FILTER);
 
 	renderer = gtk_cell_renderer_text_new();
@@ -2765,12 +2765,12 @@ static void config_tab_files(GtkWidget *notebook)
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
 	g_object_set(G_OBJECT(renderer), "editable", static_cast<gboolean>TRUE, NULL);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_EXTENSION), NULL);
+						GINT_TO_POINTER(FE_EXTENSION), nullptr);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
 
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(filter_view), TRUE);
 	gtk_tree_view_set_search_column(GTK_TREE_VIEW(filter_view), FILETYPES_COLUMN_FILTER);
-	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(filter_view), search_function_cb, NULL, NULL);
+	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(filter_view), search_function_cb, nullptr, nullptr);
 
 	column = gtk_tree_view_column_new();
 	gtk_tree_view_column_set_title(column, _("Description"));
@@ -2784,9 +2784,9 @@ static void config_tab_files(GtkWidget *notebook)
 	g_object_set(G_OBJECT(renderer), "editable", static_cast<gboolean>TRUE, NULL);
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_DESCRIPTION), NULL);
+						GINT_TO_POINTER(FE_DESCRIPTION), nullptr);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_DESCRIPTION, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_DESCRIPTION), NULL);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_DESCRIPTION, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_DESCRIPTION), nullptr);
 	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_DESCRIPTION);
 
 	column = gtk_tree_view_column_new();
@@ -2803,9 +2803,9 @@ static void config_tab_files(GtkWidget *notebook)
 			 G_CALLBACK(filter_store_class_edit_cb), filter_store);
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_CLASS), NULL);
+						GINT_TO_POINTER(FE_CLASS), nullptr);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_CLASS, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_CLASS), NULL);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_CLASS, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_CLASS), nullptr);
 	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_CLASS);
 
 	column = gtk_tree_view_column_new();
@@ -2816,9 +2816,9 @@ static void config_tab_files(GtkWidget *notebook)
 			 G_CALLBACK(filter_store_writable_cb), filter_store);
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_WRITABLE), NULL);
+						GINT_TO_POINTER(FE_WRITABLE), nullptr);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_WRITABLE, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_WRITABLE), NULL);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_WRITABLE, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_WRITABLE), nullptr);
 	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_WRITABLE);
 
 	column = gtk_tree_view_column_new();
@@ -2829,9 +2829,9 @@ static void config_tab_files(GtkWidget *notebook)
 			 G_CALLBACK(filter_store_sidecar_cb), filter_store);
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
-						GINT_TO_POINTER(FE_ALLOW_SIDECAR), NULL);
+						GINT_TO_POINTER(FE_ALLOW_SIDECAR), nullptr);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_SIDECAR, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_SIDECAR), NULL);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(filter_store), FILETYPES_COLUMN_SIDECAR, filter_table_sort_cb, GINT_TO_POINTER(FILETYPES_COLUMN_SIDECAR), nullptr);
 	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_SIDECAR);
 
 	filter_store_populate();
@@ -2840,17 +2840,17 @@ static void config_tab_files(GtkWidget *notebook)
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	button = pref_button_new(NULL, NULL, _("Defaults"), FALSE,
+	button = pref_button_new(nullptr, nullptr, _("Defaults"), FALSE,
 				 G_CALLBACK(filter_default_cb), filter_view);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, GTK_STOCK_REMOVE, NULL, FALSE,
+	button = pref_button_new(nullptr, GTK_STOCK_REMOVE, nullptr, FALSE,
 				 G_CALLBACK(filter_remove_cb), filter_view);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, GTK_STOCK_ADD, NULL, FALSE,
+	button = pref_button_new(nullptr, GTK_STOCK_ADD, nullptr, FALSE,
 				 G_CALLBACK(filter_add_cb), filter_view);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
@@ -2966,7 +2966,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_checkbox_link_sensitivity(ct_button, hbox);
 
-	pref_spin_new_int(hbox, _("Timeout (seconds):"), NULL, 0, 900, 1, options->metadata.confirm_timeout, &c_options->metadata.confirm_timeout);
+	pref_spin_new_int(hbox, _("Timeout (seconds):"), nullptr, 0, 900, 1, options->metadata.confirm_timeout, &c_options->metadata.confirm_timeout);
 
 	pref_checkbox_new_int(group, _("Write metadata on image change"), options->metadata.confirm_on_image_change, &c_options->metadata.confirm_on_image_change);
 
@@ -3017,8 +3017,8 @@ struct _KeywordFindData
 
 static void keywords_find_folder(KeywordFindData *kfd, FileData *dir_fd)
 {
-	GList *list_d = NULL;
-	GList *list_f = NULL;
+	GList *list_d = nullptr;
+	GList *list_f = nullptr;
 
 	if (kfd->recurse)
 		{
@@ -3026,7 +3026,7 @@ static void keywords_find_folder(KeywordFindData *kfd, FileData *dir_fd)
 		}
 	else
 		{
-		filelist_read(dir_fd, &list_f, NULL);
+		filelist_read(dir_fd, &list_f, nullptr);
 		}
 
 	list_f = filelist_filter(list_f, FALSE);
@@ -3039,10 +3039,10 @@ static void keywords_find_folder(KeywordFindData *kfd, FileData *dir_fd)
 static void keywords_find_reset(KeywordFindData *kfd)
 {
 	filelist_free(kfd->list);
-	kfd->list = NULL;
+	kfd->list = nullptr;
 
 	filelist_free(kfd->list_dir);
-	kfd->list_dir = NULL;
+	kfd->list_dir = nullptr;
 }
 
 static void keywords_find_close_cb(GenericDialog *UNUSED(fd), gpointer data)
@@ -3176,18 +3176,18 @@ static void keywords_find_dialog(GtkWidget *widget, const gchar *path)
 	kfd->gd = generic_dialog_new(_("Search for keywords"),
 									"search_for_keywords",
 									widget, FALSE,
-									NULL, kfd);
+									nullptr, kfd);
 	gtk_window_set_default_size(GTK_WINDOW(kfd->gd->dialog), KEYWORD_DIALOG_WIDTH, -1);
 	kfd->gd->cancel_cb = keywords_find_close_cb;
-	kfd->button_close = generic_dialog_add_button(kfd->gd, GTK_STOCK_CLOSE, NULL,
+	kfd->button_close = generic_dialog_add_button(kfd->gd, GTK_STOCK_CLOSE, nullptr,
 						     keywords_find_close_cb, FALSE);
 	kfd->button_start = generic_dialog_add_button(kfd->gd, GTK_STOCK_OK, _("S_tart"),
 						     keywords_find_start_cb, FALSE);
-	kfd->button_stop = generic_dialog_add_button(kfd->gd, GTK_STOCK_STOP, NULL,
+	kfd->button_stop = generic_dialog_add_button(kfd->gd, GTK_STOCK_STOP, nullptr,
 						    keywords_find_stop_cb, FALSE);
 	gtk_widget_set_sensitive(kfd->button_stop, FALSE);
 
-	generic_dialog_add_message(kfd->gd, NULL, _("Search for keywords"), NULL, FALSE);
+	generic_dialog_add_message(kfd->gd, nullptr, _("Search for keywords"), nullptr, FALSE);
 
 	hbox = pref_box_new(kfd->gd->vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
 	pref_spacer(hbox, PREF_PAD_INDENT);
@@ -3196,7 +3196,7 @@ static void keywords_find_dialog(GtkWidget *widget, const gchar *path)
 	hbox = pref_box_new(kfd->group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Folder:"));
 
-	label = tab_completion_new(&kfd->entry, path, NULL, NULL, NULL, NULL);
+	label = tab_completion_new(&kfd->entry, path, nullptr, nullptr, nullptr, nullptr);
 	tab_completion_add_select_button(kfd->entry,_("Select folder") , TRUE);
 	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 	gtk_widget_show(label);
@@ -3213,18 +3213,18 @@ static void keywords_find_dialog(GtkWidget *widget, const gchar *path)
 	gtk_box_pack_start(GTK_BOX(hbox), kfd->progress, TRUE, TRUE, 0);
 	gtk_widget_show(kfd->progress);
 
-	kfd->spinner = spinner_new(NULL, -1);
+	kfd->spinner = spinner_new(nullptr, -1);
 	gtk_box_pack_start(GTK_BOX(hbox), kfd->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(kfd->spinner);
 
-	kfd->list = NULL;
+	kfd->list = nullptr;
 
 	gtk_widget_show(kfd->gd->dialog);
 }
 
 static void keywords_find_cb(GtkWidget *widget, gpointer UNUSED(data))
 {
-	const gchar *path = layout_get_path(NULL);
+	const gchar *path = layout_get_path(nullptr);
 
 	if (!path || !*path) path = homedir();
 	keywords_find_dialog(widget, path);
@@ -3234,7 +3234,7 @@ static void config_tab_keywords_save()
 {
 	GtkTextIter start, end;
 	GtkTextBuffer *buffer;
-	GList *kw_list = NULL;
+	GList *kw_list = nullptr;
 	GList *work;
 	gchar *buffer_text;
 	gchar *kw_split;
@@ -3246,7 +3246,7 @@ static void config_tab_keywords_save()
 	buffer_text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 
 	kw_split = strtok(buffer_text, "\n");
-	while (kw_split != NULL)
+	while (kw_split != nullptr)
 		{
 		work = kw_list;
 		found = FALSE;
@@ -3263,7 +3263,7 @@ static void config_tab_keywords_save()
 			{
 			kw_list = g_list_append(kw_list, g_strdup(kw_split));
 			}
-		kw_split = strtok(NULL, "\n");
+		kw_split = strtok(nullptr, "\n");
 		}
 
 	keyword_list_set(kw_list);
@@ -3299,7 +3299,7 @@ static void config_tab_keywords(GtkWidget *notebook)
 
 	keyword_text = gtk_text_view_new();
 	gtk_widget_set_size_request(keyword_text, 20, 20);
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
 	gtk_widget_show(scrolled);
 
@@ -3448,7 +3448,7 @@ static void config_tab_color(GtkWidget *notebook)
 		gtk_widget_show(entry);
 		color_profile_input_name_entry[i] = entry;
 
-		tabcomp = tab_completion_new(&entry, options->color_profile.input_file[i], NULL, ".icc", "ICC Files", NULL);
+		tabcomp = tab_completion_new(&entry, options->color_profile.input_file[i], nullptr, ".icc", "ICC Files", nullptr);
 		tab_completion_add_select_button(entry, _("Select color profile"), FALSE);
 		gtk_widget_set_size_request(entry, 160, -1);
 		gtk_table_attach(GTK_TABLE(table), tabcomp, 2, 3, i + 1, i + 2,
@@ -3468,7 +3468,7 @@ static void config_tab_color(GtkWidget *notebook)
 
 	pref_table_label(table, 0, 0, _("Screen:"), 1.0);
 	tabcomp = tab_completion_new(&color_profile_screen_file_entry,
-				     options->color_profile.screen_file, NULL, ".icc", "ICC Files", NULL);
+				     options->color_profile.screen_file, nullptr, ".icc", "ICC Files", nullptr);
 	tab_completion_add_select_button(color_profile_screen_file_entry, _("Select color profile"), FALSE);
 	gtk_widget_set_size_request(color_profile_screen_file_entry, 160, -1);
 #ifdef HAVE_LCMS
@@ -3536,8 +3536,8 @@ static void config_tab_behavior(GtkWidget *notebook)
 	pref_checkbox_new_int(group, _("Enable Delete key"),
 			      options->file_ops.enable_delete_key, &c_options->file_ops.enable_delete_key);
 
-	ct_button = pref_radiobutton_new(group, NULL, _("Use Geeqie trash location"),
-					!options->file_ops.use_system_trash && !options->file_ops.no_trash, G_CALLBACK(use_geeqie_trash_cb),NULL);
+	ct_button = pref_radiobutton_new(group, nullptr, _("Use Geeqie trash location"),
+					!options->file_ops.use_system_trash && !options->file_ops.no_trash, G_CALLBACK(use_geeqie_trash_cb),nullptr);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_checkbox_link_sensitivity(ct_button, hbox);
@@ -3545,8 +3545,8 @@ static void config_tab_behavior(GtkWidget *notebook)
 	pref_spacer(hbox, PREF_PAD_INDENT - PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Folder:"));
 
-	tabcomp = tab_completion_new(&safe_delete_path_entry, options->file_ops.safe_delete_path, NULL, NULL, NULL, NULL);
-	tab_completion_add_select_button(safe_delete_path_entry, NULL, TRUE);
+	tabcomp = tab_completion_new(&safe_delete_path_entry, options->file_ops.safe_delete_path, nullptr, nullptr, nullptr, nullptr);
+	tab_completion_add_select_button(safe_delete_path_entry, nullptr, TRUE);
 	gtk_box_pack_start(GTK_BOX(hbox), tabcomp, TRUE, TRUE, 0);
 	gtk_widget_show(tabcomp);
 
@@ -3557,23 +3557,23 @@ static void config_tab_behavior(GtkWidget *notebook)
 	spin = pref_spin_new_int(hbox, _("Maximum size:"), _("MiB"),
 				 0, 2048, 1, options->file_ops.safe_delete_folder_maxsize, &c_options->file_ops.safe_delete_folder_maxsize);
 	gtk_widget_set_tooltip_markup(spin, _("Set to 0 for unlimited size"));
-	button = pref_button_new(NULL, NULL, _("View"), FALSE,
-				 G_CALLBACK(safe_delete_view_cb), NULL);
+	button = pref_button_new(nullptr, nullptr, _("View"), FALSE,
+				 G_CALLBACK(safe_delete_view_cb), nullptr);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, GTK_STOCK_CLEAR, NULL, FALSE,
-				 G_CALLBACK(safe_delete_clear_cb), NULL);
+	button = pref_button_new(nullptr, GTK_STOCK_CLEAR, nullptr, FALSE,
+				 G_CALLBACK(safe_delete_clear_cb), nullptr);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
 	c_options->file_ops.no_trash = options->file_ops.no_trash;
 	c_options->file_ops.use_system_trash = options->file_ops.use_system_trash;
 
 	pref_radiobutton_new(group, ct_button, _("Use system Trash bin"),
-					options->file_ops.use_system_trash && !options->file_ops.no_trash, G_CALLBACK(use_system_trash_cb), NULL);
+					options->file_ops.use_system_trash && !options->file_ops.no_trash, G_CALLBACK(use_system_trash_cb), nullptr);
 
 	pref_radiobutton_new(group, ct_button, _("Use no trash at all"),
-			options->file_ops.no_trash, G_CALLBACK(use_no_cache_cb), NULL);
+			options->file_ops.no_trash, G_CALLBACK(use_no_cache_cb), nullptr);
 
 	gtk_widget_show(button);
 
@@ -3611,13 +3611,13 @@ static void config_tab_behavior(GtkWidget *notebook)
 				options->hide_window_in_fullscreen, &c_options->hide_window_in_fullscreen);
 	gtk_widget_set_tooltip_text(hide_window_in_fullscreen,"When alt-tabbing, prevent Geeqie window showing twice");
 
-	pref_spin_new_int(group, _("Recent folder list maximum size"), NULL,
+	pref_spin_new_int(group, _("Recent folder list maximum size"), nullptr,
 			  1, 50, 1, options->open_recent_list_maxsize, &c_options->open_recent_list_maxsize);
 
-	tmp = pref_spin_new_int(group, _("Recent folder-image list maximum size"), NULL, 0, 50, 1, options->recent_folder_image_list_maxsize, &c_options->recent_folder_image_list_maxsize);
+	tmp = pref_spin_new_int(group, _("Recent folder-image list maximum size"), nullptr, 0, 50, 1, options->recent_folder_image_list_maxsize, &c_options->recent_folder_image_list_maxsize);
 	gtk_widget_set_tooltip_text(tmp, _("List of the last image viewed in each recent folder.\nRe-opening a folder will set focus to the last image viewed."));
 
-	pref_spin_new_int(group, _("Drag'n drop icon size"), NULL,
+	pref_spin_new_int(group, _("Drag'n drop icon size"), nullptr,
 			  16, 256, 16, options->dnd_icon_size, &c_options->dnd_icon_size);
 
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
@@ -3632,7 +3632,7 @@ static void config_tab_behavior(GtkWidget *notebook)
 
 	pref_checkbox_new_int(group, _("Progressive keyboard scrolling"),
 			      options->progressive_key_scrolling, &c_options->progressive_key_scrolling);
-	pref_spin_new_int(group, _("Keyboard scrolling step multiplier:"), NULL,
+	pref_spin_new_int(group, _("Keyboard scrolling step multiplier:"), nullptr,
 			  1, 32, 1, options->keyboard_scroll_step, reinterpret_cast<int *>(&c_options->keyboard_scroll_step));
 	pref_checkbox_new_int(group, _("Mouse wheel scrolls image"),
 			      options->mousewheel_scrolls, &c_options->mousewheel_scrolls);
@@ -3664,13 +3664,13 @@ static void config_tab_behavior(GtkWidget *notebook)
 
 	group = pref_group_new(vbox, FALSE, _("Debugging"), GTK_ORIENTATION_VERTICAL);
 
-	pref_spin_new_int(group, _("Debug level:"), NULL,
+	pref_spin_new_int(group, _("Debug level:"), nullptr,
 			  DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX, 1, get_debug_level(), &debug_c);
 
 	pref_checkbox_new_int(group, _("Timer data"),
 			options->log_window.timer_data, &c_options->log_window.timer_data);
 
-	pref_spin_new_int(group, _("Log Window max. lines:"), NULL,
+	pref_spin_new_int(group, _("Log Window max. lines:"), nullptr,
 			  1, 99999, 1, options->log_window_lines, &options->log_window_lines);
 #endif
 }
@@ -3692,7 +3692,7 @@ static void config_tab_accelerators(GtkWidget *notebook)
 
 	group = pref_group_new(vbox, TRUE, _("Accelerators"), GTK_ORIENTATION_VERTICAL);
 
-	scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
@@ -3768,18 +3768,18 @@ static void config_tab_accelerators(GtkWidget *notebook)
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	button = pref_button_new(NULL, NULL, _("Defaults"), FALSE,
+	button = pref_button_new(nullptr, nullptr, _("Defaults"), FALSE,
 				 G_CALLBACK(accel_default_cb), accel_view);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, NULL, _("Reset selected"), FALSE,
+	button = pref_button_new(nullptr, nullptr, _("Reset selected"), FALSE,
 				 G_CALLBACK(accel_reset_cb), accel_view);
 	gtk_widget_set_tooltip_text(button, _("Will only reset changes made before the settings are saved"));
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, NULL, _("Clear selected"), FALSE,
+	button = pref_button_new(nullptr, nullptr, _("Clear selected"), FALSE,
 				 G_CALLBACK(accel_clear_cb), accel_view);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
@@ -3828,12 +3828,12 @@ static void config_tab_advanced(GtkWidget *notebook)
 	GtkWidget *vbox;
 	GtkWidget *group;
 	GSList *formats_list;
-	GList *extensions_list = NULL;
+	GList *extensions_list = nullptr;
 	gchar **extensions;
 	GtkWidget *tabcomp;
 	GdkPixbufFormat *fm;
 	gint i;
-	GString *types_string = g_string_new(NULL);
+	GString *types_string = g_string_new(nullptr);
 	GtkWidget *types_string_label;
 	GtkWidget *threads_string_label;
 	GtkWidget *dupes_threads_spin;
@@ -3886,14 +3886,14 @@ static void config_tab_advanced(GtkWidget *notebook)
 
 	group = pref_group_new(vbox, FALSE, _("File identification tool"), GTK_ORIENTATION_VERTICAL);
 	external_preview_select_entry = gtk_entry_new();
-	tabcomp = tab_completion_new(&external_preview_select_entry, options->external_preview.select, NULL, NULL, NULL, NULL);
+	tabcomp = tab_completion_new(&external_preview_select_entry, options->external_preview.select, nullptr, nullptr, nullptr, nullptr);
 	tab_completion_add_select_button(external_preview_select_entry, _("Select file identification tool"), FALSE);
 	gtk_box_pack_start(GTK_BOX(group), tabcomp, TRUE, TRUE, 0);
 	gtk_widget_show(tabcomp);
 
 	group = pref_group_new(vbox, FALSE, _("Preview extraction tool"), GTK_ORIENTATION_VERTICAL);
 	external_preview_extract_entry = gtk_entry_new();
-	tabcomp = tab_completion_new(&external_preview_extract_entry, options->external_preview.extract, NULL, NULL, NULL, NULL);
+	tabcomp = tab_completion_new(&external_preview_extract_entry, options->external_preview.extract, nullptr, nullptr, nullptr, nullptr);
 	tab_completion_add_select_button(external_preview_extract_entry, _("Select preview extraction tool"), FALSE);
 	gtk_box_pack_start(GTK_BOX(group), tabcomp, TRUE, TRUE, 0);
 	gtk_widget_show(tabcomp);
@@ -3936,16 +3936,16 @@ static void config_tab_stereo(GtkWidget *notebook)
 	add_stereo_mode_menu(table, 0, 0, _("Windowed stereo mode"), options->stereo.mode, &c_options->stereo.mode, FALSE);
 
 	table = pref_table_new(group, 2, 2, TRUE, FALSE);
-	box = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, NULL);
+	box = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Mirror left image"),
 			      options->stereo.mode & PR_STEREO_MIRROR_LEFT, &c_options->stereo.tmp.mirror_left);
-	box = pref_table_box(table, 1, 0, GTK_ORIENTATION_HORIZONTAL, NULL);
+	box = pref_table_box(table, 1, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Flip left image"),
 			      options->stereo.mode & PR_STEREO_FLIP_LEFT, &c_options->stereo.tmp.flip_left);
-	box = pref_table_box(table, 0, 1, GTK_ORIENTATION_HORIZONTAL, NULL);
+	box = pref_table_box(table, 0, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Mirror right image"),
 			      options->stereo.mode & PR_STEREO_MIRROR_RIGHT, &c_options->stereo.tmp.mirror_right);
-	box = pref_table_box(table, 1, 1, GTK_ORIENTATION_HORIZONTAL, NULL);
+	box = pref_table_box(table, 1, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Flip right image"),
 			      options->stereo.mode & PR_STEREO_FLIP_RIGHT, &c_options->stereo.tmp.flip_right);
 	pref_checkbox_new_int(group, _("Swap left and right images"),
@@ -3961,16 +3961,16 @@ static void config_tab_stereo(GtkWidget *notebook)
 	table = pref_table_new(box2, 2, 1, FALSE, FALSE);
 	add_stereo_mode_menu(table, 0, 0, _("Fullscreen stereo mode"), options->stereo.fsmode, &c_options->stereo.fsmode, TRUE);
 	table = pref_table_new(box2, 2, 2, TRUE, FALSE);
-	box = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, NULL);
+	box = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Mirror left image"),
 			      options->stereo.fsmode & PR_STEREO_MIRROR_LEFT, &c_options->stereo.tmp.fs_mirror_left);
-	box = pref_table_box(table, 1, 0, GTK_ORIENTATION_HORIZONTAL, NULL);
+	box = pref_table_box(table, 1, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Flip left image"),
 			      options->stereo.fsmode & PR_STEREO_FLIP_LEFT, &c_options->stereo.tmp.fs_flip_left);
-	box = pref_table_box(table, 0, 1, GTK_ORIENTATION_HORIZONTAL, NULL);
+	box = pref_table_box(table, 0, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Mirror right image"),
 			      options->stereo.fsmode & PR_STEREO_MIRROR_RIGHT, &c_options->stereo.tmp.fs_mirror_right);
-	box = pref_table_box(table, 1, 1, GTK_ORIENTATION_HORIZONTAL, NULL);
+	box = pref_table_box(table, 1, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Flip right image"),
 			      options->stereo.fsmode & PR_STEREO_FLIP_RIGHT, &c_options->stereo.tmp.fs_flip_right);
 	pref_checkbox_new_int(box2, _("Swap left and right images"),
@@ -3980,17 +3980,17 @@ static void config_tab_stereo(GtkWidget *notebook)
 
 	group2 = pref_group_new(box2, FALSE, _("Fixed position"), GTK_ORIENTATION_VERTICAL);
 	table = pref_table_new(group2, 5, 3, FALSE, FALSE);
-	pref_table_spin_new_int(table, 0, 0, _("Width"), NULL,
+	pref_table_spin_new_int(table, 0, 0, _("Width"), nullptr,
 			  1, 5000, 1, options->stereo.fixed_w, &c_options->stereo.fixed_w);
-	pref_table_spin_new_int(table, 3, 0,  _("Height"), NULL,
+	pref_table_spin_new_int(table, 3, 0,  _("Height"), nullptr,
 			  1, 5000, 1, options->stereo.fixed_h, &c_options->stereo.fixed_h);
-	pref_table_spin_new_int(table, 0, 1,  _("Left X"), NULL,
+	pref_table_spin_new_int(table, 0, 1,  _("Left X"), nullptr,
 			  0, 5000, 1, options->stereo.fixed_x1, &c_options->stereo.fixed_x1);
-	pref_table_spin_new_int(table, 3, 1,  _("Left Y"), NULL,
+	pref_table_spin_new_int(table, 3, 1,  _("Left Y"), nullptr,
 			  0, 5000, 1, options->stereo.fixed_y1, &c_options->stereo.fixed_y1);
-	pref_table_spin_new_int(table, 0, 2,  _("Right X"), NULL,
+	pref_table_spin_new_int(table, 0, 2,  _("Right X"), nullptr,
 			  0, 5000, 1, options->stereo.fixed_x2, &c_options->stereo.fixed_x2);
-	pref_table_spin_new_int(table, 3, 2,  _("Right Y"), NULL,
+	pref_table_spin_new_int(table, 3, 2,  _("Right Y"), nullptr,
 			  0, 5000, 1, options->stereo.fixed_y2, &c_options->stereo.fixed_y2);
 
 }
@@ -4004,9 +4004,9 @@ static void config_window_create(LayoutWindow *lw)
 	GtkWidget *button;
 	GtkWidget *ct_button;
 
-	if (!c_options) c_options = init_options(NULL);
+	if (!c_options) c_options = init_options(nullptr);
 
-	configwindow = window_new(GTK_WINDOW_TOPLEVEL, "preferences", PIXBUF_INLINE_ICON_CONFIG, NULL, _("Preferences"));
+	configwindow = window_new(GTK_WINDOW_TOPLEVEL, "preferences", PIXBUF_INLINE_ICON_CONFIG, nullptr, _("Preferences"));
 	DEBUG_NAME(configwindow);
 	gtk_window_set_type_hint(GTK_WINDOW(configwindow), GDK_WINDOW_TYPE_HINT_DIALOG);
 	g_signal_connect(G_OBJECT(configwindow), "delete_event",
@@ -4055,13 +4055,13 @@ static void config_window_create(LayoutWindow *lw)
 	gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
 
-	button = pref_button_new(NULL, GTK_STOCK_HELP, NULL, FALSE,
+	button = pref_button_new(nullptr, GTK_STOCK_HELP, nullptr, FALSE,
 				 G_CALLBACK(config_window_help_cb), notebook);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, GTK_STOCK_OK, NULL, FALSE,
+	button = pref_button_new(nullptr, GTK_STOCK_OK, nullptr, FALSE,
 				 G_CALLBACK(config_window_ok_cb), notebook);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
@@ -4070,8 +4070,8 @@ static void config_window_create(LayoutWindow *lw)
 
 	ct_button = button;
 
-	button = pref_button_new(NULL, GTK_STOCK_CANCEL, NULL, FALSE,
-				 G_CALLBACK(config_window_close_cb), NULL);
+	button = pref_button_new(nullptr, GTK_STOCK_CANCEL, nullptr, FALSE,
+				 G_CALLBACK(config_window_close_cb), nullptr);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
@@ -4133,7 +4133,7 @@ void show_about_window(LayoutWindow *lw)
 	gsize size;
 	guint32 flags;
 
-	copyright = g_string_new(NULL);
+	copyright = g_string_new(nullptr);
 	copyright = g_string_append(copyright, "This program comes with absolutely no warranty.\nGNU General Public License, version 2 or later.\nSee https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n\n");
 
 	timezone_path = g_build_filename(get_rc_dir(), TIMEZONE_DATABASE_FILE, NULL);
@@ -4154,34 +4154,34 @@ void show_about_window(LayoutWindow *lw)
 
 	authors_path = g_build_filename(GQ_RESOURCE_PATH_CREDITS, "authors", NULL);
 
-	in_stream_authors = g_resources_open_stream(authors_path, G_RESOURCE_LOOKUP_FLAGS_NONE, NULL);
+	in_stream_authors = g_resources_open_stream(authors_path, G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
 
 	data_stream = g_data_input_stream_new(in_stream_authors);
 
-	authors[0] = NULL;
-	while ((author_line = g_data_input_stream_read_line(G_DATA_INPUT_STREAM(data_stream), &length, NULL, NULL)))
+	authors[0] = nullptr;
+	while ((author_line = g_data_input_stream_read_line(G_DATA_INPUT_STREAM(data_stream), &length, nullptr, nullptr)))
 		{
 		authors[i_authors] = g_strdup(author_line);
 		i_authors++;
 		g_free(author_line);
 		}
-	authors[i_authors] = NULL;
+	authors[i_authors] = nullptr;
 
-	g_input_stream_close(in_stream_authors, NULL, NULL);
+	g_input_stream_close(in_stream_authors, nullptr, nullptr);
 
 	translators_path = g_build_filename(GQ_RESOURCE_PATH_CREDITS, "translators", NULL);
 
-	g_resources_get_info(translators_path, G_RESOURCE_LOOKUP_FLAGS_NONE, &size, &flags, NULL);
+	g_resources_get_info(translators_path, G_RESOURCE_LOOKUP_FLAGS_NONE, &size, &flags, nullptr);
 
-	in_stream_translators = g_resources_open_stream(translators_path, G_RESOURCE_LOOKUP_FLAGS_NONE, NULL);
+	in_stream_translators = g_resources_open_stream(translators_path, G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
 	translators = static_cast<gchar *>(g_malloc0(size));
-	g_input_stream_read_all(in_stream_translators, translators, size, &bytes_read, NULL, NULL);
-	g_input_stream_close(in_stream_translators, NULL, NULL);
+	g_input_stream_read_all(in_stream_translators, translators, size, &bytes_read, nullptr, nullptr);
+	g_input_stream_close(in_stream_translators, nullptr, nullptr);
 
 	comment = g_strconcat("Project created by John Ellis\nGQview 1998\nGeeqie 2007\n\n\nDevelopment and bug reports:\n", GQ_EMAIL_ADDRESS, "\nhttps://github.com/BestImageViewer/geeqie/issues",NULL);
 
 	artists[0] = g_strdup("Néstor Díaz Valencia <nestor@estudionexos.com>");
-	artists[1] = NULL;
+	artists[1] = nullptr;
 
 	pixbuf_logo = pixbuf_inline(PIXBUF_INLINE_LOGO);
 	pixbuf_icon = pixbuf_inline(PIXBUF_INLINE_ICON);
@@ -4242,11 +4242,11 @@ static void image_overlay_set_text_colours()
 
 static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, gpointer data)
 {
-	GError *error = NULL;
+	GError *error = nullptr;
 	auto tz = static_cast<TZData *>(data);
 	gchar *tmp_filename;
 	gchar *timezone_bin;
-	gchar *tmp_dir = NULL;
+	gchar *tmp_dir = nullptr;
 	FileData *fd;
 
 	if (!g_cancellable_is_cancelled(tz->cancellable))
@@ -4270,7 +4270,7 @@ static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 				}
 			else
 				{
-				warning_dialog(_("Warning: Cannot open timezone database file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, NULL);
+				warning_dialog(_("Warning: Cannot open timezone database file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, nullptr);
 				}
 
 			g_free(timezone_bin);
@@ -4278,19 +4278,19 @@ static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 			}
 		else
 			{
-			warning_dialog(_("Warning: Cannot open timezone database file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, NULL);
+			warning_dialog(_("Warning: Cannot open timezone database file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, nullptr);
 			}
 		g_free(tmp_filename);
 		file_data_unref(fd);
 		}
 	else
 		{
-		file_util_warning_dialog(_("Error: Timezone database download failed"), error->message, GTK_STOCK_DIALOG_ERROR, NULL);
+		file_util_warning_dialog(_("Error: Timezone database download failed"), error->message, GTK_STOCK_DIALOG_ERROR, nullptr);
 		}
 
-	g_file_delete(tz->tmp_g_file, NULL, &error);
+	g_file_delete(tz->tmp_g_file, nullptr, &error);
 	g_object_unref(tz->tmp_g_file);
-	tz->tmp_g_file = NULL;
+	tz->tmp_g_file = nullptr;
 	g_object_unref(tz->cancellable);
 	g_object_unref(tz->timezone_database_gq);
 }
@@ -4315,7 +4315,7 @@ static void timezone_cancel_button_cb(GenericDialog *UNUSED(gd), gpointer data)
 static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 {
 	auto tz = static_cast<TZData *>(data);
-	GError *error = NULL;
+	GError *error = nullptr;
 	GFileIOStream *io_stream;
 
 	if (tz->tmp_g_file)
@@ -4327,7 +4327,7 @@ static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 
 	if (error)
 		{
-		file_util_warning_dialog(_("Timezone database download failed"), error->message, GTK_STOCK_DIALOG_ERROR, NULL);
+		file_util_warning_dialog(_("Timezone database download failed"), error->message, GTK_STOCK_DIALOG_ERROR, nullptr);
 		log_printf("Error: Download timezone database failed:\n%s", error->message);
 		g_error_free(error);
 		g_object_unref(tz->tmp_g_file);
@@ -4336,9 +4336,9 @@ static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 		{
 		tz->timezone_database_gq = g_file_new_for_uri(TIMEZONE_DATABASE_WEB);
 
-		tz->gd = generic_dialog_new(_("Timezone database"), "download_timezone_database", NULL, TRUE, timezone_cancel_button_cb, tz);
+		tz->gd = generic_dialog_new(_("Timezone database"), "download_timezone_database", nullptr, TRUE, timezone_cancel_button_cb, tz);
 
-		generic_dialog_add_message(tz->gd, GTK_STOCK_DIALOG_INFO, _("Downloading timezone database"), NULL, FALSE);
+		generic_dialog_add_message(tz->gd, GTK_STOCK_DIALOG_INFO, _("Downloading timezone database"), nullptr, FALSE);
 
 		tz->progress = gtk_progress_bar_new();
 		gtk_box_pack_start(GTK_BOX(tz->gd->vbox), tz->progress, FALSE, FALSE, 0);

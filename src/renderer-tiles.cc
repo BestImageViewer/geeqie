@@ -211,7 +211,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
+			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
 			}
 		cairo_destroy(cr);
 		return;
@@ -228,7 +228,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
+			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
 			}
 		if (pr->viewport_width - pr->vis_width - pr->x_offset > 0 &&
 		    pr_clip_region(x, y, w, h,
@@ -239,7 +239,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
+			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
 			}
 		}
 	if (pr->vis_height < pr->viewport_height)
@@ -253,7 +253,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
+			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
 			}
 		if (pr->viewport_height - pr->vis_height - pr->y_offset > 0 &&
 		    pr_clip_region(x, y, w, h,
@@ -264,7 +264,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red)/65535, static_cast<double>(pr->color.green)/65535, static_cast<double>(pr->color.blue)/65535);
 			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
 			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, NULL);
+			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
 			}
 		}
 	cairo_destroy(cr);
@@ -325,7 +325,7 @@ static void rt_tile_free_all(RendererTiles *rt)
 		}
 
 	g_list_free(rt->tiles);
-	rt->tiles = NULL;
+	rt->tiles = nullptr;
 	rt->tile_cache_size = 0;
 }
 
@@ -351,7 +351,7 @@ static void rt_tile_remove(RendererTiles *rt, ImageTile *it)
 		{
 		QueueData *qd = it->qd;
 
-		it->qd = NULL;
+		it->qd = nullptr;
 		rt->draw_queue = g_list_remove(rt->draw_queue, qd);
 		g_free(qd);
 		}
@@ -360,7 +360,7 @@ static void rt_tile_remove(RendererTiles *rt, ImageTile *it)
 		{
 		QueueData *qd = it->qd2;
 
-		it->qd2 = NULL;
+		it->qd2 = nullptr;
 		rt->draw_queue_2pass = g_list_remove(rt->draw_queue_2pass, qd);
 		g_free(qd);
 		}
@@ -474,7 +474,7 @@ static ImageTile *rt_tile_get(RendererTiles *rt, gint x, gint y, gboolean only_e
 		work = work->next;
 		}
 
-	if (only_existing) return NULL;
+	if (only_existing) return nullptr;
 
 	return rt_tile_add(rt, x, y);
 }
@@ -496,7 +496,7 @@ static void rt_hidpi_aware_draw(
 	double y)
 {
 	cairo_surface_t *surface;
-	surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, rt->hidpi_scale, NULL);
+	surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, rt->hidpi_scale, nullptr);
 	cairo_set_source_surface(cr, surface, x, y);
 	cairo_fill(cr);
 	cairo_surface_destroy(surface);
@@ -739,7 +739,7 @@ static OverlayData *rt_overlay_find(RendererTiles *rt, gint id)
 		if (od->id == id) return od;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -752,7 +752,7 @@ gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint 
 	gint id;
 
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), -1);
-	g_return_val_if_fail(pixbuf != NULL, -1);
+	g_return_val_if_fail(pixbuf != nullptr, -1);
 
 	id = 1;
 	while (rt_overlay_find(rt, id)) id++;
@@ -785,7 +785,7 @@ static void rt_overlay_free(RendererTiles *rt, OverlayData *od)
 	if (!rt->overlay_list && rt->overlay_buffer)
 		{
 		cairo_surface_destroy(rt->overlay_buffer);
-		rt->overlay_buffer = NULL;
+		rt->overlay_buffer = nullptr;
 		}
 }
 
@@ -805,7 +805,7 @@ static void rt_overlay_list_reset_window(RendererTiles *rt)
 	GList *work;
 
 	if (rt->overlay_buffer) cairo_surface_destroy(rt->overlay_buffer);
-	rt->overlay_buffer = NULL;
+	rt->overlay_buffer = nullptr;
 
 	work = rt->overlay_list;
 	while (work)
@@ -813,7 +813,7 @@ static void rt_overlay_list_reset_window(RendererTiles *rt)
 		auto od = static_cast<OverlayData *>(work->data);
 		work = work->next;
 		if (od->window) gdk_window_destroy(od->window);
-		od->window = NULL;
+		od->window = nullptr;
 		}
 }
 
@@ -1598,7 +1598,7 @@ static gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_se
 		{
 		/* 2pass prio */
 		DEBUG_2("redraw priority: 2pass");
-		rt->draw_idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, rt_queue_draw_idle_cb, rt, NULL);
+		rt->draw_idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, rt_queue_draw_idle_cb, rt, nullptr);
 		return G_SOURCE_REMOVE;
 		}
 
@@ -1616,7 +1616,7 @@ static gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_se
 		{
 		/* we have enough data for starting intensive redrawing */
 		DEBUG_2("redraw priority: high %.2f %%", percent);
-		rt->draw_idle_id = g_idle_add_full(GDK_PRIORITY_REDRAW, rt_queue_draw_idle_cb, rt, NULL);
+		rt->draw_idle_id = g_idle_add_full(GDK_PRIORITY_REDRAW, rt_queue_draw_idle_cb, rt, nullptr);
 		return G_SOURCE_REMOVE;
 		}
 
@@ -1624,7 +1624,7 @@ static gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_se
 		{
 		/* queue is (almost) empty, wait  50 ms*/
 		DEBUG_2("redraw priority: wait %.2f %%", percent);
-		rt->draw_idle_id = g_timeout_add_full(G_PRIORITY_DEFAULT_IDLE, 50, rt_queue_draw_idle_cb, rt, NULL);
+		rt->draw_idle_id = g_timeout_add_full(G_PRIORITY_DEFAULT_IDLE, 50, rt_queue_draw_idle_cb, rt, nullptr);
 		return G_SOURCE_REMOVE;
 		}
 
@@ -1689,7 +1689,7 @@ static gboolean rt_queue_draw_idle_cb(gpointer data)
 
 	if (rt->draw_queue)
 		{
-		qd->it->qd = NULL;
+		qd->it->qd = nullptr;
 		rt->draw_queue = g_list_remove(rt->draw_queue, qd);
 		if (fast)
 			{
@@ -1711,7 +1711,7 @@ static gboolean rt_queue_draw_idle_cb(gpointer data)
 		}
 	else
 		{
-		qd->it->qd2 = NULL;
+		qd->it->qd2 = nullptr;
 		rt->draw_queue_2pass = g_list_remove(rt->draw_queue_2pass, qd);
 		g_free(qd);
 		}
@@ -1739,8 +1739,8 @@ static void rt_queue_list_free(GList *list)
 		qd = static_cast<QueueData *>(work->data);
 		work = work->next;
 
-		qd->it->qd = NULL;
-		qd->it->qd2 = NULL;
+		qd->it->qd = nullptr;
+		qd->it->qd2 = nullptr;
 		g_free(qd);
 		}
 
@@ -1750,10 +1750,10 @@ static void rt_queue_list_free(GList *list)
 static void rt_queue_clear(RendererTiles *rt)
 {
 	rt_queue_list_free(rt->draw_queue);
-	rt->draw_queue = NULL;
+	rt->draw_queue = nullptr;
 
 	rt_queue_list_free(rt->draw_queue_2pass);
-	rt->draw_queue_2pass = NULL;
+	rt->draw_queue_2pass = nullptr;
 
 	if (rt->draw_idle_id)
 		{
@@ -2144,7 +2144,7 @@ static void renderer_free(void *renderer)
 	rt_overlay_list_clear(rt);
 	/* disconnect "hierarchy-changed" */
 	g_signal_handlers_disconnect_matched(G_OBJECT(rt->pr), G_SIGNAL_MATCH_DATA,
-                                                     0, 0, 0, NULL, rt);
+                                                     0, 0, nullptr, nullptr, rt);
         g_free(rt);
 }
 
@@ -2276,7 +2276,7 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 	rt->tile_width = options->image.tile_size;
 	rt->tile_height = options->image.tile_size;
 
-	rt->tiles = NULL;
+	rt->tiles = nullptr;
 	rt->tile_cache_size = 0;
 
 	rt->tile_cache_max = PR_CACHE_SIZE_DEFAULT;

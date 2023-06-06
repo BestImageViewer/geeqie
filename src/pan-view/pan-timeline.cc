@@ -34,8 +34,8 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 	time_t group_start_date;
 	gint total;
 	gint count;
-	PanItem *pi_month = NULL;
-	PanItem *pi_day = NULL;
+	PanItem *pi_month = nullptr;
+	PanItem *pi_day = nullptr;
 	gint month_start;
 	gint day_start;
 	gint x_width;
@@ -85,7 +85,7 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 			if (!pan_date_compare(fd->date, group_start_date, PAN_DATE_LENGTH_MONTH))
 				{
 				// FD starts a new month group.
-				pi_day = NULL;
+				pi_day = nullptr;
 
 				if (pi_month)
 					{
@@ -136,7 +136,7 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 					}
 				else
 					{
-					needle = NULL;
+					needle = nullptr;
 					}
 				}
 

@@ -41,7 +41,7 @@ ConfOptions *init_options(ConfOptions *options)
 
 	options->color_profile.enabled = TRUE;
 	options->color_profile.input_type = 0;
-	options->color_profile.screen_file = NULL;
+	options->color_profile.screen_file = nullptr;
 	options->color_profile.use_image = TRUE;
 	options->color_profile.use_x11_screen_profile = TRUE;
 	options->color_profile.render_intent = 0;
@@ -72,7 +72,7 @@ ConfOptions *init_options(ConfOptions *options)
 	options->file_ops.enable_in_place_rename = TRUE;
 	options->file_ops.safe_delete_enable = TRUE;
 	options->file_ops.safe_delete_folder_maxsize = 128;
-	options->file_ops.safe_delete_path = NULL;
+	options->file_ops.safe_delete_path = nullptr;
 	options->file_ops.no_trash = FALSE;
 
 	options->file_sort.ascending = TRUE;
@@ -122,10 +122,10 @@ ConfOptions *init_options(ConfOptions *options)
 	options->image.zoom_style = ZOOM_GEOMETRIC;
 	options->image.tile_size = 128;
 
-	options->image_overlay.template_string = NULL;
+	options->image_overlay.template_string = nullptr;
 	options->image_overlay.x = 10;
 	options->image_overlay.y = -10;
-	options->image_overlay.font = NULL;
+	options->image_overlay.font = nullptr;
 	options->image_overlay.text_red = 0;
 	options->image_overlay.text_green = 0;
 	options->image_overlay.text_blue = 0;
@@ -140,7 +140,7 @@ ConfOptions *init_options(ConfOptions *options)
 	options->image_lm_click_nav = TRUE;
 	options->image_l_click_archive = FALSE;
 	options->image_l_click_video = FALSE;
-	options->image_l_click_video_editor = NULL;
+	options->image_l_click_video_editor = nullptr;
 	options->open_recent_list_maxsize = 10;
 	options->recent_folder_image_list_maxsize = 10;
 	options->place_dialogs_under_mouse = FALSE;
@@ -209,16 +209,16 @@ ConfOptions *init_options(ConfOptions *options)
 	options->star_rating.star = STAR_RATING_STAR;
 	options->star_rating.rejected = STAR_RATING_REJECTED;
 
-	options->printer.template_string = NULL;
+	options->printer.template_string = nullptr;
 	options->printer.image_font = g_strdup("Serif 10");
 	options->printer.page_font = g_strdup("Serif 10");
-	options->printer.page_text = NULL;
+	options->printer.page_text = nullptr;
 	options->printer.image_text_position = 1;
 	options->printer.page_text_position = 3;
 
 	options->threads.duplicates = -1;
 
-	options->disabled_plugins = NULL;
+	options->disabled_plugins = nullptr;
 
 	options->mouse_button_8 = g_strdup("Back");
 	options->mouse_button_9 = g_strdup("Forward");
@@ -250,8 +250,8 @@ void setup_default_options(ConfOptions *options)
 
 	for (i = 0; i < COLOR_PROFILE_INPUTS; i++)
 		{
-		options->color_profile.input_file[i] = NULL;
-		options->color_profile.input_name[i] = NULL;
+		options->color_profile.input_file[i] = nullptr;
+		options->color_profile.input_name[i] = nullptr;
 		}
 
 	set_default_image_overlay_template_string(&options->image_overlay.template_string);
@@ -300,7 +300,7 @@ LayoutOptions *init_layout_options(LayoutOptions *options)
 	options->float_window.w = 260;
 	options->float_window.x = 0;
 	options->float_window.y = 0;
-	options->home_path = NULL;
+	options->home_path = nullptr;
 	options->id = g_strdup("lw1");
 	options->main_window.h = 540;
 	options->main_window.hdivider_pos = -1;
@@ -348,7 +348,7 @@ LayoutOptions *init_layout_options(LayoutOptions *options)
 
 static void sync_options_with_current_state(ConfOptions *options)
 {
-	LayoutWindow *lw = NULL;
+	LayoutWindow *lw = nullptr;
 
 	if (layout_valid(&lw))
 		{
@@ -370,7 +370,7 @@ void save_options(ConfOptions *options)
 	sync_options_with_current_state(options);
 
 	rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
-	save_config_to_file(rc_path, options, NULL);
+	save_config_to_file(rc_path, options, nullptr);
 	g_free(rc_path);
 }
 

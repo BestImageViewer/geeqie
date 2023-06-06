@@ -35,7 +35,7 @@
 /*
  * Logging functions
  */
-static gchar *regexp = NULL;
+static gchar *regexp = nullptr;
 
 static gboolean log_msg_cb(gpointer data)
 {
@@ -93,7 +93,7 @@ void log_domain_print_message(const gchar *domain, gchar *buf)
 			ret_comp = regcomp(&regex, regexp, 0);
 			if (!ret_comp)
 				{
-				ret_exec = regexec(&regex, buf_nl, 0, NULL, 0);
+				ret_exec = regexec(&regex, buf_nl, 0, nullptr, 0);
 
 				if (!ret_exec)
 					{
@@ -218,7 +218,7 @@ const gchar *get_exec_time(void)
 	struct timeval tv = {0, 0};
 	static struct timeval delta = {0, 0};
 
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, nullptr);
 
 	if (start_tv.tv_sec == 0) start_tv = tv;
 
@@ -279,7 +279,7 @@ void log_print_backtrace(const gchar *file, const gchar *function, gint line)
 	gchar *address_offset;
 	gchar *cmd_line;
 	gchar *exe_path;
-	gchar *function_name = NULL;
+	gchar *function_name = nullptr;
 	gchar *paren_end;
 	gchar *paren_start;
 	gint bt_size;
@@ -307,18 +307,18 @@ void log_print_backtrace(const gchar *file, const gchar *function, gint line)
 				cmd_line = g_strconcat("addr2line -p -f -C -e ", gq_executable_path, " ", address_offset, NULL);
 
 				fp = popen(cmd_line, "r");
-				if (fp == NULL)
+				if (fp == nullptr)
 					{
 					log_printf("Failed to run command: %s", cmd_line);
 					}
 				else
 					{
-					while (fgets(path, sizeof(path), fp) != NULL)
+					while (fgets(path, sizeof(path), fp) != nullptr)
 						{
 						/* Remove redundant newline */
 						path[strlen(path) - 1] = '\0';
 
-						if (g_strstr_len(path, strlen(path), "(") != NULL)
+						if (g_strstr_len(path, strlen(path), "(") != nullptr)
 							{
 							function_name = g_strndup(path, g_strstr_len(path, strlen(path), "(") - path);
 							}

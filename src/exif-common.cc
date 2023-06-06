@@ -190,12 +190,12 @@ static gchar *exif_build_formatted_Camera(ExifData *exif)
 static gchar *exif_build_formatted_DateTime(ExifData *exif)
 {
 	gchar *text = exif_get_data_as_text(exif, "Exif.Photo.DateTimeOriginal");
-	gchar *subsec = NULL;
+	gchar *subsec = nullptr;
 	gchar buf[128];
 	gchar *tmp;
 	gint buflen;
 	struct tm tm;
-	GError *error = NULL;
+	GError *error = nullptr;
 
 	if (text)
 		{
@@ -214,7 +214,7 @@ static gchar *exif_build_formatted_DateTime(ExifData *exif)
 		buflen = strftime(buf, sizeof(buf), "%x %X", &tm);
 		if (buflen > 0)
 			{
-			tmp = g_locale_to_utf8(buf, buflen, NULL, NULL, &error);
+			tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 			if (error)
 				{
 				log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
@@ -241,12 +241,12 @@ static gchar *exif_build_formatted_DateTime(ExifData *exif)
 static gchar *exif_build_formatted_DateTimeDigitized(ExifData *exif)
 {
 	gchar *text = exif_get_data_as_text(exif, "Exif.Photo.DateTimeDigitized");
-	gchar *subsec = NULL;
+	gchar *subsec = nullptr;
 	gchar buf[128];
 	gchar *tmp;
 	gint buflen;
 	struct tm tm;
-	GError *error = NULL;
+	GError *error = nullptr;
 
 	if (text)
 		{
@@ -265,7 +265,7 @@ static gchar *exif_build_formatted_DateTimeDigitized(ExifData *exif)
 		buflen = strftime(buf, sizeof(buf), "%x %X", &tm);
 		if (buflen > 0)
 			{
-			tmp = g_locale_to_utf8(buf, buflen, NULL, NULL, &error);
+			tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 			if (error)
 				{
 				log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
@@ -293,14 +293,14 @@ static gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
 {
 	ExifRational *r;
 
-	r = exif_get_rational(exif, "Exif.Photo.ExposureTime", NULL);
+	r = exif_get_rational(exif, "Exif.Photo.ExposureTime", nullptr);
 	if (r && r->num && r->den)
 		{
 		gdouble n = static_cast<gdouble>(r->den) / static_cast<gdouble>(r->num);
 		return g_strdup_printf("%s%.0fs", n > 1.0 ? "1/" : "",
 						  n > 1.0 ? n : 1.0 / n);
 		}
-	r = exif_get_rational(exif, "Exif.Photo.ShutterSpeedValue", NULL);
+	r = exif_get_rational(exif, "Exif.Photo.ShutterSpeedValue", nullptr);
 	if (r && r->num  && r->den)
 		{
 		gdouble n = pow(2.0, exif_rational_to_double(r, TRUE));
@@ -311,7 +311,7 @@ static gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
 		return g_strdup_printf("%s%.0fs", n > 1.0 ? "1/" : "",
 						  n > 1.0 ? floor(n) : 1.0 / n);
 		}
-	return NULL;
+	return nullptr;
 }
 
 static gchar *exif_build_formatted_Aperture(ExifData *exif)
@@ -320,7 +320,7 @@ static gchar *exif_build_formatted_Aperture(ExifData *exif)
 
 	n = exif_get_rational_as_double(exif, "Exif.Photo.FNumber");
 	if (n == 0.0) n = exif_get_rational_as_double(exif, "Exif.Photo.ApertureValue");
-	if (n == 0.0) return NULL;
+	if (n == 0.0) return nullptr;
 
 	return g_strdup_printf("f/%.1f", n);
 }
@@ -332,7 +332,7 @@ static gchar *exif_build_formatted_ExposureBias(ExifData *exif)
 	gdouble n;
 
 	r = exif_get_rational(exif, "Exif.Photo.ExposureBiasValue", &sign);
-	if (!r) return NULL;
+	if (!r) return nullptr;
 
 	n = exif_rational_to_double(r, sign);
 	return g_strdup_printf("%+.1f", n);
@@ -343,7 +343,7 @@ static gchar *exif_build_formatted_FocalLength(ExifData *exif)
 	gdouble n;
 
 	n = exif_get_rational_as_double(exif, "Exif.Photo.FocalLength");
-	if (n == 0.0) return NULL;
+	if (n == 0.0) return nullptr;
 	return g_strdup_printf("%.0f mm", n);
 }
 
@@ -358,10 +358,10 @@ static gchar *exif_build_formatted_FocalLength35mmFilm(ExifData *exif)
 		}
 
 	f = exif_get_rational_as_double(exif, "Exif.Photo.FocalLength");
-	if (f == 0.0) return NULL;
+	if (f == 0.0) return nullptr;
 
 	c = get_crop_factor(exif);
-	if (c == 0.0) return NULL;
+	if (c == 0.0) return nullptr;
 
 	return g_strdup_printf("%.0f mm", f * c);
 }
@@ -385,7 +385,7 @@ static gchar *exif_build_formatted_SubjectDistance(ExifData *exif)
 	gdouble n;
 
 	r = exif_get_rational(exif, "Exif.Photo.SubjectDistance", &sign);
-	if (!r) return NULL;
+	if (!r) return nullptr;
 
 	if (static_cast<glong>(r->num) == static_cast<glong>(0xffffffff)) return g_strdup(_("infinity"));
 	if (static_cast<glong>(r->num) == 0) return g_strdup(_("unknown"));
@@ -403,7 +403,7 @@ static gchar *exif_build_formatted_Flash(ExifData *exif)
 	gint n;
 	gint v;
 
-	if (!exif_get_integer(exif, "Exif.Photo.Flash", &n)) return NULL;
+	if (!exif_get_integer(exif, "Exif.Photo.Flash", &n)) return nullptr;
 
 	/* Exif 2.1 only defines first 3 bits */
 	if (n <= 0x07) return exif_get_data_as_text(exif, "Exif.Photo.Flash");
@@ -451,9 +451,9 @@ static gchar *exif_build_formatted_Resolution(ExifData *exif)
 	gchar *units;
 	gchar *text;
 
-	rx = exif_get_rational(exif, "Exif.Image.XResolution", NULL);
-	ry = exif_get_rational(exif, "Exif.Image.YResolution", NULL);
-	if (!rx || !ry) return NULL;
+	rx = exif_get_rational(exif, "Exif.Image.XResolution", nullptr);
+	ry = exif_get_rational(exif, "Exif.Image.YResolution", nullptr);
+	if (!rx || !ry) return nullptr;
 
 	units = exif_get_data_as_text(exif, "Exif.Image.ResolutionUnit");
 	text = g_strdup_printf("%0.f x %0.f (%s/%s)", rx->den ? static_cast<gdouble>(rx->num) / rx->den : 1.0,
@@ -521,7 +521,7 @@ static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 			}
 #endif
 		}
-	if (name[0] == 0 && source[0] == 0) return NULL;
+	if (name[0] == 0 && source[0] == 0) return nullptr;
 	return g_strdup_printf("%s (%s)", name, source);
 }
 
@@ -544,7 +544,7 @@ static gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 		p = 0;
 		for (i = 0; i < exif_item_get_elements(item); i++)
 			{
-			value = exif_item_get_rational(item, NULL, i);
+			value = exif_item_get_rational(item, nullptr, i);
 			if (value && value->num && value->den)
 				p += static_cast<gdouble>(value->num) / static_cast<gdouble>(value->den) / pow(60.0, static_cast<gdouble>(i));
 			}
@@ -562,7 +562,7 @@ static gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 		p = 0;
 		for (i = 0; i < exif_item_get_elements(item); i++)
 			{
-			value = exif_item_get_rational(item, NULL, i);
+			value = exif_item_get_rational(item, nullptr, i);
 			if (value && value->num && value->den)
 			p += static_cast<gdouble>(value->num) / static_cast<gdouble>(value->den) / pow(60.0, static_cast<gdouble>(i));
 			}
@@ -587,9 +587,9 @@ static gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
 	gint ref;
 
 	item = exif_get_item(exif, "Exif.GPSInfo.GPSAltitudeRef");
-	r = exif_get_rational(exif, "Exif.GPSInfo.GPSAltitude", NULL);
+	r = exif_get_rational(exif, "Exif.GPSInfo.GPSAltitude", nullptr);
 
-	if (!r || !item) return NULL;
+	if (!r || !item) return nullptr;
 
 	alt = exif_rational_to_double(r, 0);
 	exif_item_get_integer(item, &ref);
@@ -609,8 +609,8 @@ static gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
  */
 static void zd_tz(ZoneDetectResult *results, gchar **timezone, gchar **countryname, gchar **countryalpha2)
 {
-	gchar *timezone_pre = NULL;
-	gchar *timezone_id = NULL;
+	gchar *timezone_pre = nullptr;
+	gchar *timezone_id = nullptr;
 	unsigned int index = 0;
 
 	while(results[index].lookupResult != ZD_LOOKUP_END)
@@ -690,7 +690,7 @@ static gboolean exif_build_tz_data(ExifData *exif, gchar **exif_date_time, gchar
 	if (text_latitude && text_longitude && text_latitude_ref && text_longitude_ref)
 		{
 		lat_deg = strtok(text_latitude, "deg'");
-		lat_min = strtok(NULL, "deg'");
+		lat_min = strtok(nullptr, "deg'");
 		if (!lat_deg || !lat_min)
 			{
 			return FALSE;
@@ -701,7 +701,7 @@ static gboolean exif_build_tz_data(ExifData *exif, gchar **exif_date_time, gchar
 			latitude = -latitude;
 			}
 		lon_deg = strtok(text_longitude, "deg'");
-		lon_min = strtok(NULL, "deg'");
+		lon_min = strtok(nullptr, "deg'");
 		if (!lon_deg || !lon_min)
 			{
 			return FALSE;
@@ -719,7 +719,7 @@ static gboolean exif_build_tz_data(ExifData *exif, gchar **exif_date_time, gchar
 			cd = ZDOpenDatabase(timezone_path);
 			if (cd)
 				{
-				results = ZDLookup(cd, latitude, longitude, NULL);
+				results = ZDLookup(cd, latitude, longitude, nullptr);
 				if (results)
 					{
 					zd_tz(results, timezone, countryname, countryalpha2);
@@ -762,16 +762,16 @@ static gchar *exif_build_formatted_localtime(ExifData *exif)
 	gchar buf[128];
 	gchar *tmp;
 	gint buflen;
-	GError *error = NULL;
+	GError *error = nullptr;
 	gchar *time_zone_image;
 	gchar *time_zone_org;
 	struct tm *tm_local;
 	struct tm tm_utc;
 	time_t stamp;
-	gchar *exif_date_time = NULL;
-	gchar *timezone = NULL;
-	gchar *countryname = NULL;
-	gchar *countryalpha2 = NULL;
+	gchar *exif_date_time = nullptr;
+	gchar *timezone = nullptr;
+	gchar *countryname = nullptr;
+	gchar *countryalpha2 = nullptr;
 
 	if (exif_build_tz_data(exif, &exif_date_time, &timezone, &countryname, &countryalpha2))
 		{
@@ -791,7 +791,7 @@ static gchar *exif_build_formatted_localtime(ExifData *exif)
 			buflen = strftime(buf, sizeof(buf), "%x %X", tm_local);
 			if (buflen > 0)
 				{
-				tmp = g_locale_to_utf8(buf, buflen, NULL, NULL, &error);
+				tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 				if (error)
 					{
 					log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
@@ -826,10 +826,10 @@ static gchar *exif_build_formatted_localtime(ExifData *exif)
  */
 static gchar *exif_build_formatted_timezone(ExifData *exif)
 {
-	gchar *exif_date_time = NULL;
-	gchar *timezone = NULL;
-	gchar *countryname = NULL;
-	gchar *countryalpha2 = NULL;
+	gchar *exif_date_time = nullptr;
+	gchar *timezone = nullptr;
+	gchar *countryname = nullptr;
+	gchar *countryalpha2 = nullptr;
 
 	exif_build_tz_data(exif, &exif_date_time, &timezone, &countryname, &countryalpha2);
 
@@ -849,10 +849,10 @@ static gchar *exif_build_formatted_timezone(ExifData *exif)
  */
 static gchar *exif_build_formatted_countryname(ExifData *exif)
 {
-	gchar *exif_date_time = NULL;
-	gchar *timezone = NULL;
-	gchar *countryname = NULL;
-	gchar *countryalpha2 = NULL;
+	gchar *exif_date_time = nullptr;
+	gchar *timezone = nullptr;
+	gchar *countryname = nullptr;
+	gchar *countryalpha2 = nullptr;
 
 	exif_build_tz_data(exif, &exif_date_time, &timezone, &countryname, &countryalpha2);
 
@@ -872,10 +872,10 @@ static gchar *exif_build_formatted_countryname(ExifData *exif)
  */
 static gchar *exif_build_formatted_countrycode(ExifData *exif)
 {
-	gchar *exif_date_time = NULL;
-	gchar *timezone = NULL;
-	gchar *countryname = NULL;
-	gchar *countryalpha2 = NULL;
+	gchar *exif_date_time = nullptr;
+	gchar *timezone = nullptr;
+	gchar *countryname = nullptr;
+	gchar *countryalpha2 = nullptr;
 
 	exif_build_tz_data(exif, &exif_date_time, &timezone, &countryname, &countryalpha2);
 
@@ -919,17 +919,17 @@ ExifFormattedText ExifFormattedList[] = {
 	EXIF_FORMATTED_TAG(countryname,		N_("Country name")),
 	EXIF_FORMATTED_TAG(countrycode,		N_("Country code")),
 	EXIF_FORMATTED_TAG(star_rating,		N_("Star rating")),
-	{"file.size",				N_("File size"), 	NULL},
-	{"file.date",				N_("File date"), 	NULL},
-	{"file.mode",				N_("File mode"), 	NULL},
-	{"file.ctime",				N_("File ctime"), 	NULL},
-	{"file.owner",				N_("File owner"), 	NULL},
-	{"file.group",				N_("File group"), 	NULL},
-	{"file.link",				N_("File link"), 	NULL},
-	{"file.class",				N_("File class"), 	NULL},
-	{"file.page_no",			N_("Page no."), 	NULL},
-	{"lua.lensID",				N_("Lens"), 		NULL},
-	{ NULL, NULL, NULL }
+	{"file.size",				N_("File size"), 	nullptr},
+	{"file.date",				N_("File date"), 	nullptr},
+	{"file.mode",				N_("File mode"), 	nullptr},
+	{"file.ctime",				N_("File ctime"), 	nullptr},
+	{"file.owner",				N_("File owner"), 	nullptr},
+	{"file.group",				N_("File group"), 	nullptr},
+	{"file.link",				N_("File link"), 	nullptr},
+	{"file.class",				N_("File class"), 	nullptr},
+	{"file.page_no",			N_("Page no."), 	nullptr},
+	{"lua.lensID",				N_("Lens"), 		nullptr},
+	{ nullptr, nullptr, nullptr }
 };
 
 gchar *exif_get_formatted_by_key(ExifData *exif, const gchar *key, gboolean *key_valid)
@@ -947,12 +947,12 @@ gchar *exif_get_formatted_by_key(ExifData *exif, const gchar *key, gboolean *key
 		}
 
 	if (key_valid) *key_valid = FALSE;
-	return NULL;
+	return nullptr;
 }
 
 gchar *exif_get_description_by_key(const gchar *key)
 {
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	if (strncmp(key, EXIF_FORMATTED(), EXIF_FORMATTED_LEN) == 0 || strncmp(key, "file.", 5) == 0 || strncmp(key, "lua.", 4) == 0)
 		{
@@ -988,7 +988,7 @@ gchar *exif_get_data_as_text(ExifData *exif, const gchar *key)
 	gchar *text;
 	gboolean key_valid;
 
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	text = exif_get_formatted_by_key(exif, key, &key_valid);
 	if (key_valid) return text;
@@ -996,7 +996,7 @@ gchar *exif_get_data_as_text(ExifData *exif, const gchar *key)
 	item = exif_get_item(exif, key);
 	if (item) return exif_item_get_data_as_text(item);
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -1005,7 +1005,7 @@ static FileCacheData *exif_cache;
 void exif_release_cb(FileData *fd)
 {
 	exif_free(fd->exif);
-	fd->exif = NULL;
+	fd->exif = nullptr;
 }
 
 void exif_init_cache(void)
@@ -1020,14 +1020,14 @@ ExifData *exif_read_fd(FileData *fd)
 
 	if (!exif_cache) exif_init_cache();
 
-	if (!fd) return NULL;
+	if (!fd) return nullptr;
 
 	if (file_cache_get(exif_cache, fd)) return fd->exif;
-	g_assert(fd->exif == NULL);
+	g_assert(fd->exif == nullptr);
 
 	/* CACHE_TYPE_XMP_METADATA file should exist only if the metadata are
 	 * not writable directly, thus it should contain the most up-to-date version */
-	sidecar_path = NULL;
+	sidecar_path = nullptr;
 
 #ifdef HAVE_EXIV2
 	/* we are not able to handle XMP sidecars without exiv2 */
@@ -1219,7 +1219,7 @@ gchar *metadata_file_info(FileData *fd, const gchar *key, MetadataFormat UNUSED(
 			}
 		else
 			{
-			return NULL;
+			return nullptr;
 			}
 		}
 	return g_strdup("");

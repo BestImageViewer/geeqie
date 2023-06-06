@@ -111,7 +111,7 @@ guint vf_count(ViewFile *vf, gint64 *bytes)
 
 GList *vf_get_list(ViewFile *vf)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 	GList *work;
 	for (work = vf->list; work; work = work->next)
 		{
@@ -208,7 +208,7 @@ GList *vf_selection_get_list(ViewFile *vf)
 	{
 	case FILEVIEW_LIST: ret = vflist_selection_get_list(vf); break;
 	case FILEVIEW_ICON: ret = vficon_selection_get_list(vf); break;
-	default: ret = NULL;
+	default: ret = nullptr;
 	}
 
 	return ret;
@@ -222,7 +222,7 @@ GList *vf_selection_get_list_by_index(ViewFile *vf)
 	{
 	case FILEVIEW_LIST: ret = vflist_selection_get_list_by_index(vf); break;
 	case FILEVIEW_ICON: ret = vficon_selection_get_list_by_index(vf); break;
-	default: ret = NULL;
+	default: ret = nullptr;
 	}
 
 	return ret;
@@ -321,7 +321,7 @@ GList *vf_pop_menu_file_list(ViewFile *vf)
 	{
 	case FILEVIEW_LIST: ret = vflist_pop_menu_file_list(vf); break;
 	case FILEVIEW_ICON: ret = vficon_pop_menu_file_list(vf); break;
-	default: ret = NULL;
+	default: ret = nullptr;
 	}
 
 	return ret;
@@ -335,7 +335,7 @@ GList *vf_selection_get_one(ViewFile *vf, FileData *fd)
 	{
 	case FILEVIEW_LIST: ret = vflist_selection_get_one(vf, fd); break;
 	case FILEVIEW_ICON: ret = vficon_selection_get_one(vf, fd); break;
-	default: ret = NULL;
+	default: ret = nullptr;
 	}
 
 	return ret;
@@ -368,7 +368,7 @@ static void vf_pop_menu_open_archive_cb(GtkWidget *UNUSED(widget), gpointer data
 {
 	auto vf = static_cast<ViewFile *>(data);
 	LayoutWindow *lw_new;
-	FileData *fd = NULL;
+	FileData *fd = nullptr;
 	gchar *dest_dir;
 
 	switch (vf->type)
@@ -390,7 +390,7 @@ static void vf_pop_menu_open_archive_cb(GtkWidget *UNUSED(widget), gpointer data
 		}
 	else
 		{
-		warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, NULL);
+		warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, nullptr);
 		}
 }
 
@@ -398,14 +398,14 @@ static void vf_pop_menu_copy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	file_util_copy(NULL, vf_pop_menu_file_list(vf), NULL, vf->listview);
+	file_util_copy(nullptr, vf_pop_menu_file_list(vf), nullptr, vf->listview);
 }
 
 static void vf_pop_menu_move_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	file_util_move(NULL, vf_pop_menu_file_list(vf), NULL, vf->listview);
+	file_util_move(nullptr, vf_pop_menu_file_list(vf), nullptr, vf->listview);
 }
 
 static void vf_pop_menu_rename_cb(GtkWidget *widget, gpointer data)
@@ -424,7 +424,7 @@ static void vf_pop_menu_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
 	auto vf = static_cast<ViewFile *>(data);
 
 	options->file_ops.safe_delete_enable = FALSE;
-	file_util_delete(NULL, vf_pop_menu_file_list(vf), vf->listview);
+	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview);
 }
 
 static void vf_pop_menu_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer data)
@@ -432,7 +432,7 @@ static void vf_pop_menu_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer dat
 	auto vf = static_cast<ViewFile *>(data);
 
 	options->file_ops.safe_delete_enable = TRUE;
-	file_util_delete(NULL, vf_pop_menu_file_list(vf), vf->listview);
+	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview);
 }
 
 static void vf_pop_menu_copy_path_cb(GtkWidget *UNUSED(widget), gpointer data)
@@ -586,7 +586,7 @@ static void vf_popup_destroy_cb(GtkWidget *widget, gpointer data)
 	}
 
 	filelist_free(vf->editmenu_fd_list);
-	vf->editmenu_fd_list = NULL;
+	vf->editmenu_fd_list = nullptr;
 }
 
 /**
@@ -621,12 +621,12 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	{
 	case FILEVIEW_LIST:
 		vflist_color_set(vf, VFLIST(vf)->click_fd, TRUE);
-		active = (VFLIST(vf)->click_fd != NULL);
-		class_archive = (VFLIST(vf)->click_fd != NULL && VFLIST(vf)->click_fd->format_class == FORMAT_CLASS_ARCHIVE);
+		active = (VFLIST(vf)->click_fd != nullptr);
+		class_archive = (VFLIST(vf)->click_fd != nullptr && VFLIST(vf)->click_fd->format_class == FORMAT_CLASS_ARCHIVE);
 		break;
 	case FILEVIEW_ICON:
-		active = (VFICON(vf)->click_fd != NULL);
-		class_archive = (VFICON(vf)->click_fd != NULL && VFICON(vf)->click_fd->format_class == FORMAT_CLASS_ARCHIVE);
+		active = (VFICON(vf)->click_fd != nullptr);
+		class_archive = (VFICON(vf)->click_fd != nullptr && VFICON(vf)->click_fd->format_class == FORMAT_CLASS_ARCHIVE);
 		break;
 	}
 
@@ -635,7 +635,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	accel_group = gtk_accel_group_new();
 	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
 
-	g_object_set_data(G_OBJECT(menu), "window_keys", NULL);
+	g_object_set_data(G_OBJECT(menu), "window_keys", nullptr);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	g_signal_connect(G_OBJECT(menu), "destroy",
@@ -734,13 +734,13 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	gtk_widget_set_sensitive(item, active);
 	menu_item_add_divider(menu);
 
-	submenu = submenu_add_sort(NULL, G_CALLBACK(vf_pop_menu_sort_cb), vf,
+	submenu = submenu_add_sort(nullptr, G_CALLBACK(vf_pop_menu_sort_cb), vf,
 				   FALSE, FALSE, TRUE, vf->sort_method);
 	menu_item_add_divider(submenu);
 	menu_item_add_check(submenu, _("Ascending"), vf->sort_ascend,
 			    G_CALLBACK(vf_pop_menu_sort_ascend_cb), vf);
 
-	item = menu_item_add(menu, _("_Sort"), NULL, NULL);
+	item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 
 	item = menu_item_add_radio(menu, _("Images as List"), GINT_TO_POINTER(FILEVIEW_LIST), vf->type == FILEVIEW_LIST,
@@ -819,7 +819,7 @@ static void vf_destroy_cb(GtkWidget *widget, gpointer data)
 	if (vf->popup)
 		{
 		g_signal_handlers_disconnect_matched(G_OBJECT(vf->popup), G_SIGNAL_MATCH_DATA,
-						     0, 0, 0, NULL, vf);
+						     0, 0, nullptr, nullptr, vf);
 		gtk_widget_destroy(vf->popup);
 		}
 
@@ -903,9 +903,9 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 						vf_marks_tooltip_cancel_cb, mte);
 		generic_dialog_add_message(mte->gd, GTK_STOCK_DIALOG_QUESTION, _("Set mark text"),
 					    _("This will set or clear the mark text."), FALSE);
-		generic_dialog_add_button(mte->gd, GTK_STOCK_OK, NULL,
+		generic_dialog_add_button(mte->gd, GTK_STOCK_OK, nullptr,
 							vf_marks_tooltip_ok_cb, TRUE);
-		generic_dialog_add_button(mte->gd, GTK_STOCK_HELP, NULL,
+		generic_dialog_add_button(mte->gd, GTK_STOCK_HELP, nullptr,
 						vf_marks_tooltip_help_cb, FALSE);
 
 		table = pref_table_new(mte->gd->vbox, 3, 1, FALSE, TRUE);
@@ -940,8 +940,8 @@ static void vf_file_filter_save_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	gchar *entry_text;
-	gchar *remove_text = NULL;
-	gchar *index_text = NULL;
+	gchar *remove_text = nullptr;
+	gchar *index_text = nullptr;
 	gboolean text_found = FALSE;
 	gint i;
 
@@ -1014,7 +1014,7 @@ static gboolean vf_file_filter_press_cb(GtkWidget *widget, GdkEventButton *UNUSE
 
 static GtkWidget *vf_marks_filter_init(ViewFile *vf)
 {
-	GtkWidget *frame = gtk_frame_new(NULL);
+	GtkWidget *frame = gtk_frame_new(nullptr);
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
 	gint i;
@@ -1163,7 +1163,7 @@ static void file_filter_clear_cb(GtkEntry *UNUSED(entry), GtkEntryIconPosition p
 
 static GtkWidget *vf_file_filter_init(ViewFile *vf)
 {
-	GtkWidget *frame = gtk_frame_new(NULL);
+	GtkWidget *frame = gtk_frame_new(nullptr);
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	GList *work;
 	gint n = 0;
@@ -1255,7 +1255,7 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	vf->sort_ascend = TRUE;
 	vf->read_metadata_in_idle_id = 0;
 
-	vf->scrolled = gtk_scrolled_window_new(NULL, NULL);
+	vf->scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(vf->scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(vf->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -1375,14 +1375,14 @@ static void vf_thumb_do(ViewFile *vf, FileData *fd)
 
 void vf_thumb_cleanup(ViewFile *vf)
 {
-	vf_thumb_status(vf, 0.0, NULL);
+	vf_thumb_status(vf, 0.0, nullptr);
 
 	vf->thumbs_running = FALSE;
 
 	thumb_loader_free(vf->thumbs_loader);
-	vf->thumbs_loader = NULL;
+	vf->thumbs_loader = nullptr;
 
-	vf->thumbs_filedata = NULL;
+	vf->thumbs_filedata = nullptr;
 }
 
 void vf_thumb_stop(ViewFile *vf)
@@ -1414,11 +1414,11 @@ static void vf_thumb_done_cb(ThumbLoader *tl, gpointer data)
 
 static gboolean vf_thumb_next(ViewFile *vf)
 {
-	FileData *fd = NULL;
+	FileData *fd = nullptr;
 
 	if (!gtk_widget_get_realized(vf->listview))
 		{
-		vf_thumb_status(vf, 0.0, NULL);
+		vf_thumb_status(vf, 0.0, nullptr);
 		return FALSE;
 		}
 
@@ -1443,7 +1443,7 @@ static gboolean vf_thumb_next(ViewFile *vf)
 	thumb_loader_set_callbacks(vf->thumbs_loader,
 				   vf_thumb_done_cb,
 				   vf_thumb_error_cb,
-				   NULL,
+				   nullptr,
 				   vf);
 
 	if (!thumb_loader_start(vf->thumbs_loader, fd))
@@ -1468,7 +1468,7 @@ static void vf_thumb_reset_all(ViewFile *vf)
 		if (fd->thumb_pixbuf)
 			{
 			g_object_unref(fd->thumb_pixbuf);
-			fd->thumb_pixbuf = NULL;
+			fd->thumb_pixbuf = nullptr;
 			}
 		}
 }
@@ -1499,7 +1499,7 @@ void vf_star_cleanup(ViewFile *vf)
 		}
 
 	vf->stars_id = 0;
-	vf->stars_filedata = NULL;
+	vf->stars_filedata = nullptr;
 }
 
 void vf_star_stop(ViewFile *vf)
@@ -1526,7 +1526,7 @@ static void vf_star_do(ViewFile *vf, FileData *fd)
 
 static gboolean vf_star_next(ViewFile *vf)
 {
-	FileData *fd = NULL;
+	FileData *fd = nullptr;
 
 	switch (vf->type)
 		{
@@ -1562,7 +1562,7 @@ gboolean vf_stars_cb(gpointer data)
 			}
 		else
 			{
-			vf->stars_filedata = NULL;
+			vf->stars_filedata = nullptr;
 			vf->stars_id = 0;
 			return G_SOURCE_REMOVE;
 			}
@@ -1633,13 +1633,13 @@ guint vf_marks_get_filter(ViewFile *vf)
 
 GRegex *vf_file_filter_get_filter(ViewFile *vf)
 {
-	GRegex *ret = NULL;
-	GError *error = NULL;
-	gchar *file_filter_text = NULL;
+	GRegex *ret = nullptr;
+	GError *error = nullptr;
+	gchar *file_filter_text = nullptr;
 
 	if (!gtk_widget_get_visible(vf->file_filter.combo))
 		{
-		return g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), NULL);
+		return g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), nullptr);
 		}
 
 	file_filter_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
@@ -1651,14 +1651,14 @@ GRegex *vf_file_filter_get_filter(ViewFile *vf)
 			{
 			log_printf("Error: could not compile regular expression %s\n%s\n", file_filter_text, error->message);
 			g_error_free(error);
-			error = NULL;
-			ret = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), NULL);
+			error = nullptr;
+			ret = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), nullptr);
 			}
 		g_free(file_filter_text);
 		}
 	else
 		{
-		ret = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), NULL);
+		ret = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), nullptr);
 		}
 
 	return ret;
@@ -1720,16 +1720,16 @@ void vf_refresh_idle(ViewFile *vf)
 {
 	if (!vf->refresh_idle_id)
 		{
-		vf->time_refresh_set = time(NULL);
+		vf->time_refresh_set = time(nullptr);
 		/* file operations run with G_PRIORITY_DEFAULT_IDLE */
-		vf->refresh_idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE + 50, vf_refresh_idle_cb, vf, NULL);
+		vf->refresh_idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE + 50, vf_refresh_idle_cb, vf, nullptr);
 		}
-	else if (time(NULL) - vf->time_refresh_set > 1)
+	else if (time(nullptr) - vf->time_refresh_set > 1)
 		{
 		/* more than 1 sec since last update - increase priority */
 		vf_refresh_idle_cancel(vf);
-		vf->time_refresh_set = time(NULL);
-		vf->refresh_idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE - 50, vf_refresh_idle_cb, vf, NULL);
+		vf->time_refresh_set = time(nullptr);
+		vf->refresh_idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE - 50, vf_refresh_idle_cb, vf, nullptr);
 		}
 }
 
@@ -1811,7 +1811,7 @@ static gboolean vf_read_metadata_in_idle_cb(gpointer data)
 		work = work->next;
 		}
 
-	vf_thumb_status(vf, 0.0, NULL);
+	vf_thumb_status(vf, 0.0, nullptr);
 	vf->read_metadata_in_idle_id = 0;
 	vf_refresh(vf);
 	return G_SOURCE_REMOVE;

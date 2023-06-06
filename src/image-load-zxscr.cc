@@ -88,7 +88,7 @@ static gboolean image_loader_zxscr_load(gpointer loader, const guchar *buf, gsiz
 		return FALSE;
 		}
 
-	ld->pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE, 8, width, height, width * 3, free_buffer, NULL);
+	ld->pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE, 8, width, height, width * 3, free_buffer, nullptr);
 
 	if (!ld->pixbuf)
 		{
@@ -174,7 +174,7 @@ static gchar *image_loader_zxscr_get_format_name(gpointer UNUSED(loader))
 
 static gchar **image_loader_zxscr_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"application/octet-stream", NULL};
+	static const gchar *mime[] = {"application/octet-stream", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
@@ -201,7 +201,7 @@ void image_loader_backend_set_zxscr(ImageLoaderBackend *funcs)
 	funcs->loader_new = image_loader_zxscr_new;
 	funcs->set_size = image_loader_zxscr_set_size;
 	funcs->load = image_loader_zxscr_load;
-	funcs->write = NULL;
+	funcs->write = nullptr;
 	funcs->get_pixbuf = image_loader_zxscr_get_pixbuf;
 	funcs->close = image_loader_zxscr_close;
 	funcs->abort = image_loader_zxscr_abort;
