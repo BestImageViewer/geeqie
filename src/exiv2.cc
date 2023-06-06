@@ -179,7 +179,7 @@ public:
 	{
 		cp_data_ = NULL;
 		cp_length_ = 0;
-        image_ = std::move(image);
+        	image_ = std::move(image);
 		valid_ = TRUE;
 	}
 
@@ -299,8 +299,8 @@ static void _ExifDataProcessed_update_xmp(gpointer key, gpointer value, gpointer
 struct _ExifDataProcessed : public _ExifData
 {
 protected:
-	_ExifDataOriginal *imageData_;
-	_ExifDataOriginal *sidecarData_;
+	std::unique_ptr<_ExifDataOriginal> imageData_;
+	std::unique_ptr<_ExifDataOriginal> sidecarData_;
 
 	Exiv2::ExifData exifData_;
 	Exiv2::IptcData iptcData_;
@@ -311,12 +311,12 @@ protected:
 public:
 	_ExifDataProcessed(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
 	{
-		imageData_ = new _ExifDataOriginal(path);
+		imageData_ = std::make_unique<_ExifDataOriginal>(path);
 		sidecarData_ = NULL;
 #if EXIV2_TEST_VERSION(0,16,0)
 		if (sidecar_path)
 			{
-			sidecarData_ = new _ExifDataOriginal(sidecar_path);
+			sidecarData_ = std::make_unique<_ExifDataOriginal>(sidecar_path);
 			xmpData_ = sidecarData_->xmpData();
 			}
 		else
@@ -343,15 +343,9 @@ public:
 			}
 	}
 
-	virtual ~_ExifDataProcessed()
-	{
-		if (imageData_) delete imageData_;
-		if (sidecarData_) delete sidecarData_;
-	}
-
 	virtual ExifData *original()
 	{
-		return imageData_;
+		return imageData_.get();
 	}
 
 	virtual void writeMetadata(gchar *path = NULL)
@@ -389,7 +383,7 @@ public:
 #if EXIV2_TEST_VERSION(0,17,0)
 			gchar *pathl = path_from_utf8(path);;
 
-			Exiv2::Image::AutoPtr sidecar = Exiv2::ImageFactory::create(Exiv2::ImageType::xmp, pathl);
+			auto sidecar = Exiv2::ImageFactory::create(Exiv2::ImageType::xmp, pathl);
 
 			g_free(pathl);
 
@@ -1404,22 +1398,22 @@ RawFile::RawFile(BasicIo &io) : io_(io), map_data(NULL), map_len(0), offset(0)
 	type = Exiv2::ImageFactory::getType(map_data, map_len);
 
 #if EXIV2_TEST_VERSION(0,16,0)
-	TiffHeaderBase *tiffHeader = NULL;
+	std::unique_ptr<TiffHeaderBase> tiffHeader;
 #else
-	TiffHeade2 *tiffHeader = NULL;
+	std::unique_ptr<TiffHeade2> tiffHeader;
 #endif
-	Cr2Header *cr2Header = NULL;
+	std::unique_ptr<Cr2Header> cr2Header;
 
 	switch (type) {
 		case Exiv2::ImageType::tiff:
-			tiffHeader = new TiffHeade2();
+			tiffHeader = std::make_unique<TiffHeade2>();
 			break;
 		case Exiv2::ImageType::cr2:
-			cr2Header = new Cr2Header();
+			cr2Header = std::make_unique<Cr2Header>();
 			break;
 #if EXIV2_TEST_VERSION(0,16,0)
 		case Exiv2::ImageType::orf:
-			tiffHeader = new OrfHeader();
+			tiffHeader = std::make_unique<OrfHeader>();
 			break;
 #endif
 #if EXIV2_TEST_VERSION(0,13,0)
@@ -1431,7 +1425,7 @@ RawFile::RawFile(BasicIo &io) : io_(io), map_data(NULL), map_len(0), offset(0)
 		case Exiv2::ImageType::crw:
 			{
 			// Parse the image, starting with a CIFF header component
-			Exiv2::CiffHeader::AutoPtr parseTree(new Exiv2::CiffHeader);
+			auto parseTree = std::make_unique<Exiv2::CiffHeader>();
 			parseTree->read(map_data, map_len);
 			CiffComponent *entry = parseTree->findComponent(0x2007, 0);
 			if (entry) offset =  entry->pData() - map_data;
@@ -1474,11 +1468,6 @@ RawFile::RawFile(BasicIo &io) : io_(io), map_data(NULL), map_len(0), offset(0)
 			  state);
 
 	rootDir->accept(reader);
-
-	if (tiffHeader)
-		delete tiffHeader;
-	if (cr2Header)
-		delete cr2Header;
 }
 
 RawFile::~RawFile(void)
