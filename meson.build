@@ -45,7 +45,7 @@ project(
     version : run_command('./version.sh', check : true).stdout().strip(),
     license : ['GPL-2.0-or-later'],
     meson_version : '>=0.56.2',
-    default_options : ['warning_level=3', 'buildtype=debugoptimized', 'cpp_link_args=-rdynamic']
+    default_options : ['cpp_std=c++14', 'warning_level=3', 'buildtype=debugoptimized', 'cpp_link_args=-rdynamic']
 )
 
 # To inhibit warnings from the generated files icons_inline.h and ui_icons.h
