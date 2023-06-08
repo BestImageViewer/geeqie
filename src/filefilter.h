@@ -23,8 +23,7 @@
 #define FILEFILTER_H
 
 
-typedef struct _FilterEntry FilterEntry;
-struct _FilterEntry {
+struct FilterEntry {
 	gchar *key;
 	gchar *description;
 	gchar *extensions;

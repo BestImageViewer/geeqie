@@ -432,7 +432,7 @@ gboolean format_nikon_makernote(ExifData *exif, guchar *tiff, guint offset,
 }
 
 #else
-typedef int dummy_variable;
+using dummy_variable = int;
 #endif
 /* not HAVE_EXIV2 */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

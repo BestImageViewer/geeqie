@@ -809,8 +809,7 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 #define DATE_SELECION_KEY "date_selection_data"
 
 
-typedef struct _DateSelection DateSelection;
-struct _DateSelection
+struct DateSelection
 {
 	GtkWidget *box;
 

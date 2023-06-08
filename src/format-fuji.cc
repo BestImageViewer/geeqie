@@ -202,7 +202,7 @@ gboolean format_fuji_makernote(ExifData *exif, guchar *tiff, guint offset,
 	return TRUE;
 }
 #else
-typedef int dummy_variable;
+using dummy_variable = int;
 #endif
 /* not HAVE_EXIV2 */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

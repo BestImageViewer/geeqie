@@ -2057,8 +2057,7 @@ gboolean vficon_refresh(ViewFile *vf)
  *-----------------------------------------------------------------------------
  */
 
-typedef struct _ColumnData ColumnData;
-struct _ColumnData
+struct ColumnData
 {
 	ViewFile *vf;
 	gint number;

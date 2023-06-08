@@ -27,20 +27,20 @@
 #include "image-load.h"
 
 
-typedef struct _CacheLoader CacheLoader;
+struct CacheLoader;
 
-typedef void (* CacheLoaderDoneFunc)(CacheLoader *cl, gint error, gpointer data);
+using CacheLoaderDoneFunc = void (*)(CacheLoader *, gint, gpointer);
 
 
-typedef enum {
-	CACHE_LOADER_NONE	= 0,
-	CACHE_LOADER_DIMENSIONS	= 1 << 0,
-	CACHE_LOADER_DATE	= 1 << 1,
-	CACHE_LOADER_MD5SUM	= 1 << 2,
-	CACHE_LOADER_SIMILARITY	= 1 << 3
-} CacheDataType;
+enum CacheDataType {
+	CACHE_LOADER_NONE       = 0,
+	CACHE_LOADER_DIMENSIONS = 1 << 0,
+	CACHE_LOADER_DATE       = 1 << 1,
+	CACHE_LOADER_MD5SUM     = 1 << 2,
+	CACHE_LOADER_SIMILARITY = 1 << 3
+};
 
-struct _CacheLoader {
+struct CacheLoader {
 	FileData *fd;
 	CacheData *cd;
 

@@ -26,8 +26,7 @@
 #include "misc.h"
 #include "ui-fileops.h"
 
-typedef struct _ImageLoaderCOLLECTION ImageLoaderCOLLECTION;
-struct _ImageLoaderCOLLECTION {
+struct ImageLoaderCOLLECTION {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;

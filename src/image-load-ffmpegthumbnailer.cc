@@ -26,8 +26,7 @@
 #ifdef HAVE_FFMPEGTHUMBNAILER
 #include <libffmpegthumbnailer/videothumbnailerc.h>
 
-typedef struct _ImageLoaderFT ImageLoaderFT;
-struct _ImageLoaderFT {
+struct ImageLoaderFT {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;

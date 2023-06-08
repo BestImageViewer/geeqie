@@ -29,8 +29,7 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 
-typedef struct _KnownPanes KnownPanes;
-struct _KnownPanes
+struct KnownPanes
 {
 	PaneType type;
 	const gchar *id;
@@ -205,8 +204,7 @@ static const KnownPanes known_panes[] = {
 	{PANE_UNDEF,		nullptr,		nullptr,			nullptr}
 };
 
-typedef struct _BarData BarData;
-struct _BarData
+struct BarData
 {
 	GtkWidget *widget;
 	GtkWidget *vbox;

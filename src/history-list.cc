@@ -34,7 +34,7 @@ static void update_recent_viewed_folder_image_list(const gchar *path);
  * Pressing the Back and Forward buttons moves along the chain, but does
  * not make additions to the chain.
  * The chain always increases and is deleted at the end of the session
- * 
+ *
  *-----------------------------------------------------------------------------
  */
 
@@ -64,7 +64,7 @@ const gchar *history_chain_forward()
 /**
  * @brief Appends a path to the history chain
  * @param path Path selected
- * 
+ *
  * Each time the user selects a new path it is appended to the chain
  * except when it is identical to the current last entry
  * The pointer is always moved to the end of the chain
@@ -109,7 +109,7 @@ void history_chain_append_end(const gchar *path)
  * Pressing the Image Back and Image Forward buttons moves along the chain,
  * but does not make additions to the chain.
  * The chain always increases and is deleted at the end of the session
- * 
+ *
  *-----------------------------------------------------------------------------
  */
 static GList *image_chain = nullptr;
@@ -137,7 +137,7 @@ const gchar *image_chain_forward()
 /**
  * @brief Appends a path to the image history chain
  * @param path Image path selected
- * 
+ *
  * Each time the user selects a new image it is appended to the chain
  * except when it is identical to the current last entry
  * The pointer is always moved to the end of the chain
@@ -184,8 +184,7 @@ void image_chain_append_end(const gchar *path)
  *-----------------------------------------------------------------------------
  */
 
-typedef struct _HistoryData HistoryData;
-struct _HistoryData
+struct HistoryData
 {
 	gchar *key;
 	GList *list;

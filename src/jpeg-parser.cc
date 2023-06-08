@@ -60,10 +60,10 @@ gboolean jpeg_segment_find(const guchar *data, guint size,
 }
 
 
-typedef enum {
+enum TiffByteOrder {
 	TIFF_BYTE_ORDER_INTEL,
 	TIFF_BYTE_ORDER_MOTOROLA
-} TiffByteOrder;
+};
 
 #define TIFF_TIFD_OFFSET_TAG 0
 #define TIFF_TIFD_OFFSET_FORMAT 2
@@ -157,9 +157,7 @@ gint tiff_directory_offset(const guchar *data, const guint len,
 	return (*offset < len);
 }
 
-typedef gint (* FuncParseIFDEntry)(const guchar *tiff, guint offset,
-				 guint size, TiffByteOrder bo,
-				 gpointer data);
+using FuncParseIFDEntry = gint (*)(const guchar *, guint, guint, TiffByteOrder, gpointer);
 
 
 gint tiff_parse_IFD_table(const guchar *tiff, guint offset,

@@ -38,8 +38,7 @@
  *-----------------------------------------------------------------------------
  */
 
-typedef struct _DialogWindow DialogWindow;
-struct _DialogWindow
+struct DialogWindow
 {
 	gint x;
 	gint y;
@@ -519,8 +518,7 @@ GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
  * 2. arm AppImage - e.g. Geeqie-v2.0+20221025-aarch64.AppImage
  */
 
-typedef struct _AppImageData AppImageData;
-struct _AppImageData
+struct AppImageData
 {
 	GFile *version_file;
 	GDataInputStream *data_input_stream;

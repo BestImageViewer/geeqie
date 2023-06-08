@@ -25,9 +25,7 @@
 #include "ui-misc.h"
 #include "window.h"
 
-typedef struct _LogWindow LogWindow;
-
-struct _LogWindow
+struct LogWindow
 {
 	GtkWidget *window;
 	GtkWidget *scrolledwin;
@@ -45,10 +43,10 @@ struct _LogWindow
 	gboolean highlight_all;
 };
 
-typedef enum {
+enum LogWindowSearchDirection {
 	LOGWINDOW_SEARCH_BACKWARDS,
 	LOGWINDOW_SEARCH_FORWARDS
-} LogWindowSearchDirection;
+};
 
 static LogWindow *logwindow = nullptr;
 
@@ -74,17 +72,17 @@ static gboolean iter_char_search_cb(gunichar ch, gpointer data)
 
 /**
  * @brief Handle escape and F1 keys
- * @param UNUSED 
- * @param event 
- * @param logwin 
- * @returns 
- * 
+ * @param UNUSED
+ * @param event
+ * @param logwin
+ * @returns
+ *
  * If escape key pressed, hide log window. \n
  * If no text selected, form a selection bounded by space characters or
  * start and end of line. \n
  * If F1 pressed, execute command line program: \n
  * <options->log_window.action> <selected text>
- * 
+ *
 */
 static gboolean key_pressed(GtkWidget *UNUSED(widget), GdkEventKey *event, LogWindow *logwin)
 {
@@ -604,9 +602,7 @@ void log_window_new(LayoutWindow *lw)
 	log_window_show(logwindow);
 }
 
-typedef struct _LogMsg LogMsg;
-
-struct _LogMsg {
+struct LogMsg {
 	gchar *text;
 	LogType type;
 };

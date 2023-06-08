@@ -21,11 +21,11 @@
 #ifndef OSD_H
 #define OSD_H
 
-typedef enum {
+enum OsdTemplateFlags {
 	OSDT_NONE 	= 0,
 	OSDT_FREE 	= 1 << 0,
 	OSDT_NO_DUP 	= 1 << 1
-} OsdTemplateFlags;
+};
 
 GtkWidget *osd_new(gint max_cols, GtkWidget *template_view);
 gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars);

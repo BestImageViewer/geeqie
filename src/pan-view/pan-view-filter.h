@@ -25,23 +25,21 @@
 #include "main.h"
 #include "pan-types.h"
 
-typedef enum {
+enum PanViewFilterMode {
 	PAN_VIEW_FILTER_REQUIRE,
 	PAN_VIEW_FILTER_EXCLUDE,
 	PAN_VIEW_FILTER_INCLUDE,
 	PAN_VIEW_FILTER_GROUP
-} PanViewFilterMode;
+};
 
-typedef struct _PanViewFilterElement PanViewFilterElement;
-struct _PanViewFilterElement
+struct PanViewFilterElement
 {
 	PanViewFilterMode mode;
 	gchar *keyword;
 	GRegex *kw_regex;
 };
 
-typedef struct _PanFilterCallbackState PanFilterCallbackState;
-struct _PanFilterCallbackState
+struct PanFilterCallbackState
 {
 	PanWindow *pw;
 	GList *filter_element;

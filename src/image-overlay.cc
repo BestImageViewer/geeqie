@@ -40,8 +40,7 @@
  */
 
 
-typedef struct _OverlayStateData OverlayStateData;
-struct _OverlayStateData {
+struct OverlayStateData {
 	ImageWindow *imd;
 	ImageState changed_states;
 	NotifyType notify;
@@ -65,8 +64,7 @@ struct _OverlayStateData {
 };
 
 
-typedef struct _OSDIcon OSDIcon;
-struct _OSDIcon {
+struct OSDIcon {
 	gboolean reset;	/* reset on new image */
 	gint x;		/* x, y offset */
 	gint y;

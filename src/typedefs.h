@@ -22,31 +22,31 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
-typedef enum {
+enum ZoomMode {
 	ZOOM_RESET_ORIGINAL	= 0,
 	ZOOM_RESET_FIT_WINDOW	= 1,
 	ZOOM_RESET_NONE		= 2
-} ZoomMode;
+};
 
-typedef enum {
+enum ZoomStyle {
 	ZOOM_GEOMETRIC	= 0,
 	ZOOM_ARITHMETIC	= 1
-} ZoomStyle;
+};
 
-typedef enum {
+enum ClipboardDestination {
 	CLIPBOARD_TEXT_PLAIN	= 0,
 	CLIPBOARD_TEXT_URI_LIST	= 1,
 	CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES	= 2,
 	CLIPBOARD_UTF8_STRING	= 3
-} ClipboardDestination;
+};
 
-typedef enum {
+enum ClipboardSelection {
 	CLIPBOARD_PRIMARY	= 0,
 	CLIPBOARD_CLIPBOARD = 1,
 	CLIPBOARD_BOTH = 2
-} ClipboardSelection;
+};
 
-typedef enum {
+enum MouseButton {
 	MOUSE_BUTTON_LEFT	= 1,
 	MOUSE_BUTTON_MIDDLE	= 2,
 	MOUSE_BUTTON_RIGHT	= 3,
@@ -54,21 +54,21 @@ typedef enum {
 	MOUSE_BUTTON_WHEEL_DOWN	= 5,
 	MOUSE_BUTTON_8	= 8,
 	MOUSE_BUTTON_9	= 9
-} MouseButton;
+};
 
-typedef enum {
+enum DirViewType {
 	DIRVIEW_LIST,
 	DIRVIEW_TREE,
 
 	DIRVIEW_LAST = DIRVIEW_TREE /**< Keep this up to date! */
-} DirViewType;
+};
 
-typedef enum {
+enum FileViewType {
 	FILEVIEW_LIST,
 	FILEVIEW_ICON,
 
 	FILEVIEW_LAST = FILEVIEW_ICON /**< Keep this up to date! */
-} FileViewType;
+};
 
 #define	CMD_COPY     "geeqie-copy-command.desktop"
 #define	CMD_MOVE     "geeqie-move-command.desktop"
@@ -76,7 +76,7 @@ typedef enum {
 #define	CMD_DELETE   "geeqie-delete-command.desktop"
 #define	CMD_FOLDER   "geeqie-folder-command.desktop"
 
-typedef enum {
+enum SortType {
 	SORT_NONE,
 	SORT_NAME,
 	SORT_SIZE,
@@ -87,37 +87,37 @@ typedef enum {
 	SORT_EXIFTIMEDIGITIZED,
 	SORT_RATING,
 	SORT_CLASS
-} SortType;
+};
 
 /**
  * @typedef DnDAction
  * drag and drop default action
  */
-typedef enum {
+enum DnDAction {
 	DND_ACTION_ASK,
 	DND_ACTION_COPY,
 	DND_ACTION_MOVE
-} DnDAction;
+};
 
-typedef enum {
+enum AlterType {
 	ALTER_NONE,		/**< do nothing */
 	ALTER_ROTATE_90,
 	ALTER_ROTATE_90_CC,	/**< counterclockwise */
 	ALTER_ROTATE_180,
 	ALTER_MIRROR,
 	ALTER_FLIP,
-} AlterType;
+};
 
-typedef enum {
+enum LayoutLocation {
 	LAYOUT_HIDE   = 0,
 	LAYOUT_LEFT   = 1 << 0,
 	LAYOUT_RIGHT  = 1 << 1,
 	LAYOUT_TOP    = 1 << 2,
 	LAYOUT_BOTTOM = 1 << 3
-} LayoutLocation;
+};
 
 
-typedef enum {
+enum ImageState {
 	IMAGE_STATE_NONE	= 0,
 	IMAGE_STATE_IMAGE	= 1 << 0,
 	IMAGE_STATE_LOADING	= 1 << 1,
@@ -126,39 +126,39 @@ typedef enum {
 	IMAGE_STATE_ROTATE_AUTO	= 1 << 4,
 	IMAGE_STATE_ROTATE_USER	= 1 << 5,
 	IMAGE_STATE_DELAY_FLIP	= 1 << 6
-} ImageState;
+};
 
-typedef enum {
+enum ImageSplitMode {
 	SPLIT_NONE = 0,
 	SPLIT_VERT,
 	SPLIT_HOR,
 	SPLIT_TRIPLE,
 	SPLIT_QUAD,
-} ImageSplitMode;
+};
 
-typedef enum {
+enum FileDataChangeType {
 	FILEDATA_CHANGE_DELETE,
 	FILEDATA_CHANGE_MOVE,
 	FILEDATA_CHANGE_RENAME,
 	FILEDATA_CHANGE_COPY,
 	FILEDATA_CHANGE_UNSPECIFIED,
 	FILEDATA_CHANGE_WRITE_METADATA
-} FileDataChangeType;
+};
 
-typedef enum {
+enum MarkToSelectionMode {
 	MTS_MODE_MINUS,
 	MTS_MODE_SET,
 	MTS_MODE_OR,
 	MTS_MODE_AND
-} MarkToSelectionMode;
+};
 
-typedef enum {
+enum SelectionToMarkMode {
 	STM_MODE_RESET,
 	STM_MODE_SET,
 	STM_MODE_TOGGLE
-} SelectionToMarkMode;
+};
 
-typedef enum {
+enum FileFormatClass {
 	FORMAT_CLASS_UNKNOWN,
 	FORMAT_CLASS_IMAGE,
 	FORMAT_CLASS_RAWIMAGE,
@@ -168,7 +168,7 @@ typedef enum {
 	FORMAT_CLASS_DOCUMENT,
 	FORMAT_CLASS_ARCHIVE,
 	FILE_FORMAT_CLASSES
-} FileFormatClass;
+};
 
 extern const gchar *format_class_list[]; /**< defined in preferences.cc */
 
@@ -176,7 +176,7 @@ extern const gchar *format_class_list[]; /**< defined in preferences.cc */
  * @typedef SecureSaveErrno
  * see err field in #SecureSaveInfo
  */
-typedef enum {
+enum SecureSaveErrno {
 	SS_ERR_NONE = 0,
 	SS_ERR_DISABLED, /**< secsave is disabled. */
 	SS_ERR_OUT_OF_MEM, /**< memory allocation failure */
@@ -188,15 +188,15 @@ typedef enum {
 	SS_ERR_MKSTEMP,
 	SS_ERR_RENAME,
 	SS_ERR_OTHER,
-} SecureSaveErrno;
+};
 
-typedef enum {
+enum NotifyPriority {
 	NOTIFY_PRIORITY_HIGH = 0,
 	NOTIFY_PRIORITY_MEDIUM,
 	NOTIFY_PRIORITY_LOW
-} NotifyPriority;
+};
 
-typedef enum {
+enum NotifyType {
 	NOTIFY_MARKS		= 1 << 1, /**< changed marks */
 	NOTIFY_PIXBUF		= 1 << 2, /**< image was read into fd->pixbuf */
 	NOTIFY_HISTMAP		= 1 << 3, /**< histmap was read into fd->histmap */
@@ -205,9 +205,9 @@ typedef enum {
 	NOTIFY_GROUPING		= 1 << 6, /**< change in fd->sidecar_files or fd->parent */
 	NOTIFY_REREAD		= 1 << 7, /**< changed file size, date, etc., file name remains unchanged */
 	NOTIFY_CHANGE		= 1 << 8  /**< generic change described by fd->change */
-} NotifyType;
+};
 
-typedef enum {
+enum ChangeError {
 	CHANGE_OK                      = 0,
 	CHANGE_WARN_DEST_EXISTS        = 1 << 0,
 	CHANGE_WARN_NO_WRITE_PERM      = 1 << 1,
@@ -224,26 +224,26 @@ typedef enum {
 	CHANGE_DEST_EXISTS             = 1 << 13,
 	CHANGE_NO_SRC                  = 1 << 14,
 	CHANGE_GENERIC_ERROR           = 1 << 16
-} ChangeError;
+};
 
-typedef enum {
+enum MetadataFormat {
 	METADATA_PLAIN		= 0, /**< format that can be edited and written back */
 	METADATA_FORMATTED	= 1  /**< for display only */
-} MetadataFormat;
+};
 
-typedef enum {
+enum StartUpPath {
 	STARTUP_PATH_CURRENT	= 0,
 	STARTUP_PATH_LAST,
 	STARTUP_PATH_HOME,
-} StartUpPath;
+};
 
-typedef enum {
+enum ToolbarType {
 	TOOLBAR_MAIN,
 	TOOLBAR_STATUS,
 	TOOLBAR_COUNT
-} ToolbarType;
+};
 
-typedef enum {
+enum PixbufRendererStereoMode {
 	PR_STEREO_NONE             = 0,	  /**< do nothing */
 	PR_STEREO_DUAL             = 1 << 0, /**< independent stereo buffers, for example nvidia opengl */
 	PR_STEREO_FIXED            = 1 << 1,  /**< custom position */
@@ -280,83 +280,83 @@ typedef enum {
 	PR_STEREO_SWAP             = 1 << 18,  /**< swap left and right buffers */
 	PR_STEREO_TEMP_DISABLE     = 1 << 19,  /**< temporarily disable stereo mode if source image is not stereo */
 	PR_STEREO_HALF             = 1 << 20
-} PixbufRendererStereoMode;
+};
 
-typedef enum {
+enum StereoPixbufData {
 	STEREO_PIXBUF_DEFAULT  = 0,
 	STEREO_PIXBUF_SBS      = 1,
 	STEREO_PIXBUF_CROSS    = 2,
 	STEREO_PIXBUF_NONE     = 3
-} StereoPixbufData;
+};
 
-typedef enum {
+enum SortModeType {
 	BAR_SORT_MODE_FOLDER = 0,
 	BAR_SORT_MODE_COLLECTION,
 	BAR_SORT_MODE_COUNT
-} SortModeType;
+};
 
-typedef enum {
+enum SortActionType {
 	BAR_SORT_COPY = 0,
 	BAR_SORT_MOVE,
 	BAR_SORT_FILTER,
 	BAR_SORT_ACTION_COUNT
-} SortActionType;
+};
 
-typedef enum {
+enum SortSelectionType {
 	BAR_SORT_SELECTION_IMAGE = 0,
 	BAR_SORT_SELECTION_SELECTED,
 	BAR_SORT_SELECTION_COUNT
-} SortSelectionType;
+};
 
 #define MAX_SPLIT_IMAGES 4
 
-typedef enum {
+enum SelectionType {
 	SELECTION_NONE		= 0,
 	SELECTION_SELECTED	= 1 << 0,
 	SELECTION_PRELIGHT	= 1 << 1,
 	SELECTION_FOCUS		= 1 << 2
-} SelectionType;
+};
 
-typedef struct _ImageLoader ImageLoader;
-typedef struct _ThumbLoader ThumbLoader;
+using ImageLoader = struct _ImageLoader;
+using ThumbLoader = struct _ThumbLoader;
 
-typedef struct _AnimationData AnimationData;
+using AnimationData = struct _AnimationData;
 
-typedef struct _CollectInfo CollectInfo;
-typedef struct _CollectionData CollectionData;
-typedef struct _CollectTable CollectTable;
-typedef struct _CollectWindow CollectWindow;
+using CollectInfo = struct _CollectInfo;
+using CollectionData = struct _CollectionData;
+using CollectTable = struct _CollectTable;
+using CollectWindow = struct _CollectWindow;
 
-typedef struct _ImageWindow ImageWindow;
+using ImageWindow = struct _ImageWindow;
 
-typedef struct _FileData FileData;
-typedef struct _FileDataChangeInfo FileDataChangeInfo;
+using FileData = struct _FileData;
+using FileDataChangeInfo = struct _FileDataChangeInfo;
 
-typedef struct _LayoutWindow LayoutWindow;
-typedef struct _LayoutOptions LayoutOptions;
+using LayoutWindow = struct _LayoutWindow;
+using LayoutOptions = struct _LayoutOptions;
 
-typedef struct _ViewDir ViewDir;
-typedef struct _ViewDirInfoList ViewDirInfoList;
-typedef struct _ViewDirInfoTree ViewDirInfoTree;
+using ViewDir = struct _ViewDir;
+using ViewDirInfoList = struct _ViewDirInfoList;
+using ViewDirInfoTree = struct _ViewDirInfoTree;
 
-typedef struct _ViewFile ViewFile;
-typedef struct _ViewFileInfoList ViewFileInfoList;
-typedef struct _ViewFileInfoIcon ViewFileInfoIcon;
+using ViewFile = struct _ViewFile;
+using ViewFileInfoList = struct _ViewFileInfoList;
+using ViewFileInfoIcon = struct _ViewFileInfoIcon;
 
-typedef struct _SlideShowData SlideShowData;
-typedef struct _FullScreenData FullScreenData;
+using SlideShowData = struct _SlideShowData;
+using FullScreenData = struct _FullScreenData;
 
-typedef struct _PixmapFolders PixmapFolders;
-typedef struct _Histogram Histogram;
-typedef struct _HistMap HistMap;
+using PixmapFolders = struct _PixmapFolders;
+using Histogram = struct _Histogram;
+using HistMap = struct _HistMap;
 
-typedef struct _SecureSaveInfo SecureSaveInfo;
+using SecureSaveInfo = struct _SecureSaveInfo;
 
-typedef struct _ExifData ExifData;
+struct ExifData;
 
-typedef struct _EditorDescription EditorDescription;
+using EditorDescription = struct _EditorDescription;
 
-typedef struct _CommandLine CommandLine;
+using CommandLine = struct _CommandLine;
 
 struct _Histogram {
 	gint histogram_channel; /**< drawing mode for histogram */
@@ -376,9 +376,9 @@ struct _Histogram {
 
 struct _ImageLoader;
 
-typedef void (* ThumbLoaderFunc)(ThumbLoader *tl, gpointer data);
+using ThumbLoaderFunc = void (*)(ThumbLoader *, gpointer);
 
-typedef void (* FileUtilDoneFunc)(gboolean success, const gchar *done_path, gpointer data);
+using FileUtilDoneFunc = void (*)(gboolean, const gchar *, gpointer);
 
 struct _ThumbLoader
 {
@@ -504,10 +504,8 @@ struct _CollectWindow
 	CollectionData *cd;
 };
 
-typedef gint (* ImageTileRequestFunc)(ImageWindow *imd, gint x, gint y,
-				      gint width, gint height, GdkPixbuf *pixbuf, gpointer);
-typedef void (* ImageTileDisposeFunc)(ImageWindow *imd, gint x, gint y,
-				      gint width, gint height, GdkPixbuf *pixbuf, gpointer);
+using ImageTileRequestFunc = gint (*)(ImageWindow *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
+using ImageTileDisposeFunc = void (*)(ImageWindow *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
 
 struct _ImageWindow
 {
@@ -1129,13 +1127,13 @@ struct _CommandLine
 /**
  * @struct _hard_coded_window_keys
  * @brief hard coded window shortcut keys
- * 
+ *
  * Used for two purposes:\n
  * to display the shortcuts keys in popup menus\n
  * used by ./doc/create-shortcuts-xml.sh to generate shortcut documentation in the Help files
- * 
+ *
  */
-typedef struct _hard_coded_window_keys hard_coded_window_keys;
+using hard_coded_window_keys = struct _hard_coded_window_keys;
 struct _hard_coded_window_keys {
 	GdkModifierType mask; /**< modifier key mask */
 	guint key_value;  /**< GDK_keyval */

@@ -37,8 +37,7 @@
  * 1 to 5 Rating value
  */
 
-typedef struct _PaneRatingData PaneRatingData;
-struct _PaneRatingData
+struct PaneRatingData
 {
 	PaneData pane;
 	GtkWidget *widget;

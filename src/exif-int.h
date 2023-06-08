@@ -30,13 +30,12 @@
  *-----------------------------------------------------------------------------
  */
 
-typedef enum {
+enum ExifByteOrder {
 	EXIF_BYTE_ORDER_INTEL,
 	EXIF_BYTE_ORDER_MOTOROLA
-} ExifByteOrder;
+};
 
-typedef struct _ExifFormatAttrib ExifFormatAttrib;
-struct _ExifFormatAttrib
+struct ExifFormatAttrib
 {
 	ExifFormatType type;
 	guint size;
@@ -53,28 +52,20 @@ extern ExifFormatAttrib ExifFormatList[]; /**< the list of known tag data format
  *-----------------------------------------------------------------------------
  */
 
-typedef struct _ExifMarker ExifMarker;
-typedef struct _ExifTextList ExifTextList;
-
-struct _ExifData
+struct ExifData
 {
 	gchar *path;
 	GList *items;	/**< list of (ExifItem *) */
 	GList *current; /**< for exif_get_next_item */
 };
 
-
-struct _ExifItem
+struct ExifTextList
 {
-	ExifFormatType format;
-	guint tag;
-	const ExifMarker *marker;
-	guint elements;
-	gpointer data;
-	guint data_len;
+	gint value;
+	const gchar *description;
 };
 
-struct _ExifMarker
+struct ExifMarker
 {
 	guint		tag;
 	ExifFormatType	format;
@@ -84,13 +75,17 @@ struct _ExifMarker
 	ExifTextList	*list;
 };
 
-#define EXIF_MARKER_LIST_END { 0x0000, EXIF_FORMAT_UNKNOWN, 0, NULL, NULL, NULL }
-
-struct _ExifTextList
+struct ExifItem
 {
-	gint value;
-	const gchar *description;
+	ExifFormatType format;
+	guint tag;
+	const ExifMarker *marker;
+	guint elements;
+	gpointer data;
+	guint data_len;
 };
+
+#define EXIF_MARKER_LIST_END { 0x0000, EXIF_FORMAT_UNKNOWN, 0, NULL, NULL, NULL }
 
 #define EXIF_TEXT_LIST_END { -1, NULL }
 

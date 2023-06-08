@@ -27,7 +27,7 @@
 /** @typedef DupeMatchType
  *  match methods
  */
-typedef enum
+enum DupeMatchType
 {
 	DUPE_MATCH_NONE = 0,
 	DUPE_MATCH_NAME = 1 << 0,
@@ -44,17 +44,16 @@ typedef enum
 	DUPE_MATCH_NAME_CONTENT = 1 << 11,	/**< same name, but different content */
 	DUPE_MATCH_NAME_CI_CONTENT = 1 << 12,	/**< same name - case insensitive, but different content */
 	DUPE_MATCH_ALL = 1 << 13 /**< N.B. this is used as a clamp value in rcfile.cc */
-} DupeMatchType;
+};
 
-typedef enum
+enum DupeSelectType
 {
 	DUPE_SELECT_NONE,
 	DUPE_SELECT_GROUP1,
 	DUPE_SELECT_GROUP2
-} DupeSelectType;
+};
 
-typedef struct _DupeItem DupeItem;
-struct _DupeItem
+struct DupeItem
 {
 	CollectionData *collection;	/**< NULL if from #DupeWindow->files */
 	CollectInfo *info;
@@ -76,15 +75,13 @@ struct _DupeItem
 	gint second;
 };
 
-typedef struct _DupeMatch DupeMatch;
-struct _DupeMatch
+struct DupeMatch
 {
 	DupeItem *di;
 	gdouble rank;
 };
 
-typedef struct _DupeWindow DupeWindow;
-struct _DupeWindow
+struct DupeWindow
 {
 	GList *list;	/**< one entry for each dropped file in 1st set window (#DupeItem) */
 	GList *dupes;			/**< list of dupes (#DupeItem, grouping the #DupeMatch-es) */

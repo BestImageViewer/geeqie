@@ -1630,8 +1630,7 @@ GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format
 	return g_list_append(NULL, str);
 }
 
-typedef struct _UnmapData UnmapData;
-struct _UnmapData
+struct UnmapData
 {
 	guchar *ptr;
 	guchar *map_data;
@@ -1717,7 +1716,7 @@ void exif_init(void)
 {
 }
 #else
-typedef int dummy_variable;
+using dummy_variable = int;
 #endif
 /* not HAVE_EXIV2 */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

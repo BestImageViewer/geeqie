@@ -1945,7 +1945,7 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 		{
 		if (lw->menu_bar) gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(lw->menu_bar)), lw->menu_bar);
 			for (i = 0; i < TOOLBAR_COUNT; i++)
-				if (lw->toolbar[i]) gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(lw->toolbar[i])), lw->toolbar[i]);	
+				if (lw->toolbar[i]) gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(lw->toolbar[i])), lw->toolbar[i]);
 		}
 
 	/* clear it all */
@@ -2147,8 +2147,7 @@ void layout_info_pixel_set(LayoutWindow *lw, gboolean show)
 #define CONFIG_WINDOW_DEF_WIDTH		600
 #define CONFIG_WINDOW_DEF_HEIGHT	400
 
-typedef struct _LayoutConfig LayoutConfig;
-struct _LayoutConfig
+struct LayoutConfig
 {
 	LayoutWindow *lw;
 

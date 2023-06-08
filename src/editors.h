@@ -23,7 +23,7 @@
 #define EDITORS_H
 
 
-typedef enum {
+enum EditorFlags {
 	EDITOR_KEEP_FS            = 0x00000001,
 	EDITOR_VERBOSE            = 0x00000002,
 	EDITOR_VERBOSE_MULTI      = 0x00000004,
@@ -43,7 +43,7 @@ typedef enum {
 	EDITOR_ERROR_SKIPPED      = 0x00800000,
 	/**< mask to match errors only */
 	EDITOR_ERROR_MASK         = ~0xffff,
-} EditorFlags;
+};
 
 struct _EditorDescription {
 	gchar *key; 		/**< desktop file name, not including path, including extension */
@@ -110,7 +110,7 @@ GList *editor_list_get(void);
  * @param list - list of processed #FileData structures, typically single file or whole list passed to start_editor_* @n
  * @param data - generic pointer
 */
-typedef gint (*EditorCallback) (gpointer ed, EditorFlags flags, GList *list, gpointer data);
+using EditorCallback = gint (*)(gpointer, EditorFlags, GList *, gpointer);
 
 
 void editor_resume(gpointer ed);

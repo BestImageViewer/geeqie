@@ -38,8 +38,7 @@ void fullscreen_stop(FullScreenData *fs);
  * 102  screen 0, monitor 1 \n
  * 201  screen 1, monitor 0 \n
  */
-typedef struct _ScreenData ScreenData;
-struct _ScreenData {
+struct ScreenData {
 	gint number;
 	gchar *description;
 	gint x;

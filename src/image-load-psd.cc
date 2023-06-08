@@ -53,8 +53,7 @@
 #include "image-load.h"
 #include "image-load-psd.h"
 
-typedef struct _ImageLoaderPSD ImageLoaderPSD;
-struct _ImageLoaderPSD {
+struct ImageLoaderPSD {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
@@ -65,7 +64,7 @@ struct _ImageLoaderPSD {
 	gboolean abort;
 };
 
-typedef struct
+struct PsdHeader
 {
 	guchar  signature[4];  /* file ID, always "8BPS" */
 	guint16 version;       /* version number, always 1 */
@@ -75,11 +74,11 @@ typedef struct
 	guint32 columns;       /* width of image in pixels (1-30000) */
 	guint16 depth;         /* number of bits per channel (1, 8, 16 or 32) */
 	guint16 color_mode;    /* color mode as defined below */
-} PsdHeader;
+};
 
 #define PSD_HEADER_SIZE 26
 
-typedef enum
+enum PsdColorMode
 {
 	PSD_MODE_MONO = 0,
 	PSD_MODE_GRAYSCALE = 1,
@@ -89,15 +88,15 @@ typedef enum
 	PSD_MODE_MULTICHANNEL = 7,
 	PSD_MODE_DUOTONE = 8,
 	PSD_MODE_LAB = 9,
-} PsdColorMode;
+};
 
-typedef enum
+enum PsdCompressionType
 {
 	PSD_COMPRESSION_NONE = 0,
 	PSD_COMPRESSION_RLE = 1
-} PsdCompressionType;
+};
 
-typedef enum
+enum PsdReadState
 {
 	PSD_STATE_HEADER,
 	PSD_STATE_COLOR_MODE_BLOCK,
@@ -107,9 +106,9 @@ typedef enum
 	PSD_STATE_LINES_LENGTHS,
 	PSD_STATE_CHANNEL_DATA,
 	PSD_STATE_DONE
-} PsdReadState;
+};
 
-typedef struct
+struct PsdContext
 {
 	PsdReadState       state;
 
@@ -135,7 +134,7 @@ typedef struct
 	guint              pos;
 	guint16*           lines_lengths;
 	gboolean           finalized;
-} PsdContext;
+};
 
 
 static guint16

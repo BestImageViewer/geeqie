@@ -43,8 +43,7 @@
   *-------------------------------------------------------------------
   */
 
-typedef struct _SortData SortData;
-struct _SortData
+struct SortData
 {
 	GtkWidget *vbox;
 	GtkWidget *bookmarks;
@@ -773,10 +772,10 @@ GtkWidget *bar_sort_new_from_config(LayoutWindow *lw, const gchar **UNUSED(attri
 
 /**
  * @brief Sets the bar_sort_enabled flag
- * @param lw 
- * @param attribute_names 
- * @param attribute_values 
- * 
+ * @param lw
+ * @param attribute_names
+ * @param attribute_values
+ *
  * Called from rcfile when processing geeqierc.xml on start-up.
  * It is necessary to set the bar_sort_enabled flag because
  * the sort manager and desktop files are set up in the idle loop, and

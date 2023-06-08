@@ -199,12 +199,12 @@ void date_selection_time_set(GtkWidget *widget, time_t t);
 time_t date_selection_time_get(GtkWidget *widget);
 
 
-typedef enum {
+enum SizerPositionType {
 	SIZER_POS_LEFT   = 1 << 0,
 	SIZER_POS_RIGHT  = 1 << 1,
 	SIZER_POS_TOP    = 1 << 2,
 	SIZER_POS_BOTTOM = 1 << 3
-} SizerPositionType;
+};
 
 void sizer_set_limits(GtkWidget *sizer,
 		      gint hsize_min, gint hsize_max,

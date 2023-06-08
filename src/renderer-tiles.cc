@@ -37,7 +37,7 @@
 #include "pixbuf-util.h"
 #include "exif.h"
 #else
-typedef enum {
+enum ExifOrientationType {
 	EXIF_ORIENTATION_UNKNOWN	= 0,
 	EXIF_ORIENTATION_TOP_LEFT	= 1,
 	EXIF_ORIENTATION_TOP_RIGHT	= 2,
@@ -47,13 +47,12 @@ typedef enum {
 	EXIF_ORIENTATION_RIGHT_TOP	= 6,
 	EXIF_ORIENTATION_RIGHT_BOTTOM	= 7,
 	EXIF_ORIENTATION_LEFT_BOTTOM	= 8
-} ExifOrientationType;
+};
 #endif
 
-typedef struct _ImageTile ImageTile;
-typedef struct _QueueData QueueData;
+using QueueData = struct _QueueData;
 
-struct _ImageTile
+struct ImageTile
 {
 	cairo_surface_t *surface;	/* off screen buffer */
 	GdkPixbuf *pixbuf;	/* pixbuf area for zooming */
@@ -90,8 +89,7 @@ struct _QueueData
 	gboolean new_data;
 };
 
-typedef struct _OverlayData OverlayData;
-struct _OverlayData
+struct OverlayData
 {
 	gint id;
 
@@ -104,9 +102,7 @@ struct _OverlayData
 	OverlayRendererFlags flags;
 };
 
-typedef struct _RendererTiles RendererTiles;
-
-struct _RendererTiles
+struct RendererTiles
 {
 	RendererFuncs f;
 	PixbufRenderer *pr;
@@ -1230,25 +1226,25 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 }
 
 /**
- * @brief 
- * @param has_alpha 
- * @param ignore_alpha 
- * @param src 
- * @param dest 
- * @param pb_x 
- * @param pb_y 
- * @param pb_w 
- * @param pb_h 
- * @param offset_x 
- * @param offset_y 
- * @param scale_x 
- * @param scale_y 
- * @param interp_type 
- * @param check_x 
- * @param check_y 
+ * @brief
+ * @param has_alpha
+ * @param ignore_alpha
+ * @param src
+ * @param dest
+ * @param pb_x
+ * @param pb_y
+ * @param pb_w
+ * @param pb_h
+ * @param offset_x
+ * @param offset_y
+ * @param scale_x
+ * @param scale_y
+ * @param interp_type
+ * @param check_x
+ * @param check_y
  * @param wide_image Used as a work-around for a GdkPixbuf problem. Set when image width is > 32767. Problem exhibited with gdk_pixbuf_copy_area() and GDK_INTERP_NEAREST. See #772 on GitHub Geeqie
- * 
- * 
+ *
+ *
  */
 static void rt_tile_get_region(gboolean has_alpha, gboolean ignore_alpha,
                                const GdkPixbuf *src, GdkPixbuf *dest,
@@ -2080,7 +2076,7 @@ static void renderer_update_zoom(void *renderer, gboolean lazy)
 	rt_tile_invalidate_all(static_cast<RendererTiles *>(renderer));
 	if (!lazy)
 		{
-		renderer_redraw(static_cast<_RendererTiles *>(renderer), 0, 0, pr->width, pr->height, TRUE, TILE_RENDER_ALL, TRUE, FALSE);
+		renderer_redraw(static_cast<RendererTiles *>(renderer), 0, 0, pr->width, pr->height, TRUE, TILE_RENDER_ALL, TRUE, FALSE);
 		}
 	rt_border_clear(rt);
 }

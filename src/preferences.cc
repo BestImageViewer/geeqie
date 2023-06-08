@@ -73,8 +73,7 @@ static void image_overlay_set_text_colours();
 GtkWidget *keyword_text;
 static void config_tab_keywords_save();
 
-typedef struct _ThumbSize ThumbSize;
-struct _ThumbSize
+struct ThumbSize
 {
 	gint w;
 	gint h;
@@ -773,8 +772,7 @@ static void add_zoom_style_selection_menu(GtkWidget *table, gint column, gint ro
 	gtk_widget_show(combo);
 }
 
-typedef struct _UseableMouseItems UseableMouseItems;
-struct _UseableMouseItems
+struct UseableMouseItems
 {
 	const gchar *name; /* GtkActionEntry terminology */
 	const gchar *label;
@@ -1941,8 +1939,7 @@ static void star_rating_rejected_test_cb(GtkWidget *widget, gpointer data)
 
 /* general options tab */
 static void timezone_database_install_cb(GtkWidget *widget, gpointer data);
-typedef struct _TZData TZData;
-struct _TZData
+struct TZData
 {
 	GenericDialog *gd;
 	GCancellable *cancellable;
@@ -2991,8 +2988,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 
 /* keywords tab */
 
-typedef struct _KeywordFindData KeywordFindData;
-struct _KeywordFindData
+struct KeywordFindData
 {
 	GenericDialog *gd;
 

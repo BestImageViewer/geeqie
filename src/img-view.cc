@@ -43,8 +43,7 @@
 #include "utilops.h"
 #include "window.h"
 
-typedef struct _ViewWindow ViewWindow;
-struct _ViewWindow
+struct ViewWindow
 {
 	GtkWidget *window;
 	ImageWindow *imd;
@@ -1488,10 +1487,10 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
  *-------------------------------------------------------------------
  */
 
-typedef struct {
+struct CViewConfirmD {
 	ViewWindow *vw;
 	GList *list;
-} CViewConfirmD;
+};
 
 static void view_dir_list_cancel(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
 {

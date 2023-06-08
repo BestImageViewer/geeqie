@@ -81,8 +81,7 @@ gint pan_item_image_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			 gint x, gint y, gint width, gint height);
 
 // Alignment
-typedef struct _PanTextAlignment PanTextAlignment;
-struct _PanTextAlignment {
+struct PanTextAlignment {
 	PanWindow *pw;
 
 	GList *column1;

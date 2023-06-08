@@ -39,7 +39,7 @@
 #include "pixbuf-util.h"
 #include "exif.h"
 #else
-typedef enum {
+enum ExifOrientationType {
 	EXIF_ORIENTATION_UNKNOWN	= 0,
 	EXIF_ORIENTATION_TOP_LEFT	= 1,
 	EXIF_ORIENTATION_TOP_RIGHT	= 2,
@@ -49,7 +49,7 @@ typedef enum {
 	EXIF_ORIENTATION_RIGHT_TOP	= 6,
 	EXIF_ORIENTATION_RIGHT_BOTTOM	= 7,
 	EXIF_ORIENTATION_LEFT_BOTTOM	= 8
-} ExifOrientationType;
+};
 #endif
 
 
@@ -103,14 +103,14 @@ enum {
 	PROP_ENLARGEMENT_LIMIT_VALUE
 };
 
-typedef enum {
+enum PrZoomFlags {
 	PR_ZOOM_NONE		= 0,
 	PR_ZOOM_FORCE 		= 1 << 0,
 	PR_ZOOM_NEW		= 1 << 1,
 	PR_ZOOM_CENTER		= 1 << 2,
 	PR_ZOOM_INVALIDATE	= 1 << 3,
 	PR_ZOOM_LAZY		= 1 << 4  /* wait with redraw for pixbuf_renderer_area_changed */
-} PrZoomFlags;
+};
 
 static guint signals[SIGNAL_COUNT] = { 0 };
 static GtkEventBoxClass *parent_class = nullptr;

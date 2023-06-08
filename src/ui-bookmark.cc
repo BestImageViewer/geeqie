@@ -44,11 +44,9 @@
 #define MARKER_PATH "[path]"
 #define MARKER_ICON "[icon]"
 
-typedef struct _BookMarkData BookMarkData;
-typedef struct _BookButtonData BookButtonData;
-typedef struct _BookPropData BookPropData;
+struct BookButtonData;
 
-struct _BookMarkData
+struct BookMarkData
 {
 	GtkWidget *widget;
 	GtkWidget *box;
@@ -64,7 +62,7 @@ struct _BookMarkData
 	BookButtonData *active_button;
 };
 
-struct _BookButtonData
+struct BookButtonData
 {
 	GtkWidget *button;
 	GtkWidget *image;
@@ -77,7 +75,7 @@ struct _BookButtonData
 	gchar *parent;
 };
 
-struct _BookPropData
+struct BookPropData
 {
 	GtkWidget *name_entry;
 	GtkWidget *path_entry;
@@ -935,8 +933,7 @@ void bookmark_add_default(const gchar *name, const gchar *path)
  *-----------------------------------------------------------------------------
  */
 
-typedef struct _HistoryComboData HistoryComboData;
-struct _HistoryComboData
+struct HistoryComboData
 {
 	GtkWidget *combo;
 	GtkWidget *entry;

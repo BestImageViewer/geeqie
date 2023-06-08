@@ -31,10 +31,7 @@
 #define GQV_IS_CELL_RENDERER_ICON_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), GQV_TYPE_CELL_RENDERER_ICON))
 #define GQV_CELL_RENDERER_ICON_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), GQV_TYPE_CELL_RENDERER_ICON, GQvCellRendererIconClass))
 
-typedef struct _GQvCellRendererIcon GQvCellRendererIcon;
-typedef struct _GQvCellRendererIconClass GQvCellRendererIconClass;
-
-struct _GQvCellRendererIcon
+struct GQvCellRendererIcon
 {
 	GtkCellRenderer parent;
 
@@ -61,7 +58,7 @@ struct _GQvCellRendererIcon
 
 };
 
-struct _GQvCellRendererIconClass
+struct GQvCellRendererIconClass
 {
 	GtkCellRendererClass parent_class;
 

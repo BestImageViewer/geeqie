@@ -22,25 +22,25 @@
 #ifndef COLOR_MAN_H
 #define COLOR_MAN_H
 
-typedef enum {
+enum ColorManProfileType {
 	COLOR_PROFILE_NONE = -1,
 	COLOR_PROFILE_MEM = -2,
 	COLOR_PROFILE_SRGB = 0,
 	COLOR_PROFILE_ADOBERGB,
 	COLOR_PROFILE_FILE,
-} ColorManProfileType;
+};
 
-typedef enum {
+enum ColorManReturnType {
 	COLOR_RETURN_SUCCESS = 0,
 	COLOR_RETURN_ERROR,
 	COLOR_RETURN_IMAGE_CHANGED
-} ColorManReturnType;
+};
 
-typedef struct _ColorMan ColorMan;
-typedef void (* ColorManDoneFunc)(ColorMan *cm, ColorManReturnType success, gpointer data);
+struct ColorMan;
+using ColorManDoneFunc = void (*)(ColorMan *, ColorManReturnType, gpointer);
 
 
-struct _ColorMan {
+struct ColorMan {
 	ImageWindow *imd;
 	GdkPixbuf *pixbuf;
 	gint incremental_sync;

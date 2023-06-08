@@ -33,8 +33,7 @@
  * Called from the Preferences/toolbar tab
  **/
 
-typedef struct _ToolbarData ToolbarData;
-struct _ToolbarData
+struct ToolbarData
 {
 	GtkWidget *widget;
 	GtkWidget *vbox;
@@ -43,8 +42,7 @@ struct _ToolbarData
 	LayoutWindow *lw;
 };
 
-typedef struct _ToolbarButtonData ToolbarButtonData;
-struct _ToolbarButtonData
+struct ToolbarButtonData
 {
 	GtkWidget *button;
 	GtkWidget *button_label;
@@ -56,8 +54,7 @@ struct _ToolbarButtonData
 
 static ToolbarData *toolbarlist[2];
 
-typedef struct _UseableToolbarItems UseableToolbarItems;
-struct _UseableToolbarItems
+struct UseableToolbarItems
 {
 	const gchar *name; /* GtkActionEntry terminology */
 	const gchar *label;

@@ -70,17 +70,16 @@ enum {
 	DUPE_COLUMN_COUNT	/**< total columns */
 };
 
-typedef enum {
+enum DUPE_CHECK_RESULT {
 	DUPE_MATCH = 0,
 	DUPE_NO_MATCH,
 	DUPE_NAME_MATCH
-} DUPE_CHECK_RESULT;
+};
 
-typedef struct _DupeQueueItem DupeQueueItem;
 /** Used for similarity checks. One for each item pushed
  * onto the thread pool.
  */
-struct _DupeQueueItem
+struct DupeQueueItem
 {
 	DupeItem *needle;
 	DupeWindow *dw;
@@ -88,10 +87,9 @@ struct _DupeQueueItem
 	gint index; /**< The order items pushed onto thread pool. Used to sort returned matches */
 };
 
-typedef struct _DupeSearchMatch DupeSearchMatch;
 /** Used for similarity checks thread. One for each pair match found.
  */
-struct _DupeSearchMatch
+struct DupeSearchMatch
 {
 	DupeItem *a; /**< \a a / \a b matched pair found */
 	DupeItem *b; /**< \a a / \a b matched pair found */
@@ -4859,10 +4857,10 @@ DupeWindow *dupe_window_new()
  *-------------------------------------------------------------------
  */
 
-typedef struct {
+struct CDupeConfirmD {
 	DupeWindow *dw;
 	GList *list;
-} CDupeConfirmD;
+};
 
 static void confirm_dir_list_cancel(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
 {
@@ -5187,13 +5185,12 @@ static void delete_finished_cb(gboolean success, const gchar *UNUSED(dest_path),
  *-------------------------------------------------------------------
  */
 
- typedef enum {
+enum SeparatorType {
 	EXPORT_CSV = 0,
 	EXPORT_TSV
-} SeparatorType;
+};
 
-typedef struct _ExportDupesData ExportDupesData;
-struct _ExportDupesData
+struct ExportDupesData
 {
 	FileDialog *dialog;
 	SeparatorType separator;

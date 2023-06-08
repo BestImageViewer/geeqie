@@ -35,8 +35,7 @@
 
 
 
-typedef struct _EditorWindow EditorWindow;
-struct _EditorWindow
+struct EditorWindow
 {
 	GtkWidget *window;
 	GtkWidget *entry;
@@ -46,8 +45,7 @@ struct _EditorWindow
 	gboolean modified;
 };
 
-typedef struct _EditorListWindow EditorListWindow;
-struct _EditorListWindow
+struct EditorListWindow
 {
 	GtkWidget *window;
 	GtkWidget *view;
@@ -56,8 +54,7 @@ struct _EditorListWindow
 	GtkWidget *edit_button;
 };
 
-typedef struct _EditorWindowDel_Data EditorWindowDel_Data;
-struct _EditorWindowDel_Data
+struct EditorWindowDel_Data
 {
 	EditorListWindow *ewl;
 	gchar *path;

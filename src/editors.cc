@@ -34,8 +34,7 @@
 
 
 
-typedef struct _EditorVerboseData EditorVerboseData;
-struct _EditorVerboseData {
+struct EditorVerboseData {
 	GenericDialog *gd;
 	GtkWidget *button_close;
 	GtkWidget *button_stop;
@@ -44,8 +43,7 @@ struct _EditorVerboseData {
 	GtkWidget *spinner;
 };
 
-typedef struct _EditorData EditorData;
-struct _EditorData {
+struct EditorData {
 	EditorFlags flags;
 	GPid pid;
 	GList *list;
@@ -696,11 +694,11 @@ static gboolean editor_verbose_io_cb(GIOChannel *source, GIOCondition condition,
 	return TRUE;
 }
 
-typedef enum {
+enum PathType {
 	PATH_FILE,
 	PATH_FILE_URL,
 	PATH_DEST
-} PathType;
+};
 
 
 static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_sidecars, PathType type, const EditorDescription *editor)

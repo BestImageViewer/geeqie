@@ -39,15 +39,14 @@
 #define PRINT_MAX_INTERP GDK_INTERP_BILINEAR
 
 /* reverse order is important */
-typedef enum {
+enum TextPosition {
 	FOOTER_2,
 	FOOTER_1,
 	HEADER_2,
 	HEADER_1
-} TextPosition;
+};
 
-typedef struct _PrintWindow PrintWindow;
-struct _PrintWindow
+struct PrintWindow
 {
 	GtkWidget *vbox;
 	GList *source_selection;

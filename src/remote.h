@@ -23,11 +23,11 @@
 #define REMOTE_H
 
 
-typedef struct _RemoteConnection RemoteConnection;
+struct RemoteConnection;
 
-typedef void RemoteReadFunc(RemoteConnection *rc, const gchar *text, GIOChannel *channel, gpointer data);
+using RemoteReadFunc = void (RemoteConnection *, const gchar *, GIOChannel *, gpointer);
 
-struct _RemoteConnection {
+struct RemoteConnection {
 	gint server;
 	gint fd;
 	gchar *path;

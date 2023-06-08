@@ -83,16 +83,16 @@
 
 
 
-typedef enum {
+enum PanLayoutType {
 	PAN_LAYOUT_TIMELINE = 0,
 	PAN_LAYOUT_CALENDAR,
 	PAN_LAYOUT_FOLDERS_LINEAR,
 	PAN_LAYOUT_FOLDERS_FLOWER,
 	PAN_LAYOUT_GRID,
 	PAN_LAYOUT_COUNT
-} PanLayoutType;
+};
 
-typedef enum {
+enum PanImageSize {
 	PAN_IMAGE_SIZE_THUMB_DOTS = 0,
 	PAN_IMAGE_SIZE_THUMB_NONE,
 	PAN_IMAGE_SIZE_THUMB_SMALL,
@@ -104,31 +104,31 @@ typedef enum {
 	PAN_IMAGE_SIZE_50,
 	PAN_IMAGE_SIZE_100,
 	PAN_IMAGE_SIZE_COUNT
-} PanImageSize;
+};
 
-typedef enum {
+enum PanItemType {
 	PAN_ITEM_NONE,
 	PAN_ITEM_THUMB,
 	PAN_ITEM_BOX,
 	PAN_ITEM_TRIANGLE,
 	PAN_ITEM_TEXT,
 	PAN_ITEM_IMAGE
-} PanItemType;
+};
 
-typedef enum {
+enum PanTextAttrType {
 	PAN_TEXT_ATTR_NONE = 0,
 	PAN_TEXT_ATTR_BOLD = 1 << 0,
 	PAN_TEXT_ATTR_HEADING = 1 << 1,
 	PAN_TEXT_ATTR_MARKUP = 1 << 2
-} PanTextAttrType;
+};
 
-typedef enum {
+enum PanBorderType {
 	PAN_BORDER_NONE = 0,
 	PAN_BORDER_1 = 1 << 0,
 	PAN_BORDER_2 = 1 << 1,
 	PAN_BORDER_3 = 1 << 2,
 	PAN_BORDER_4 = 1 << 3
-} PanBorderType;
+};
 
 #define PAN_BORDER_TOP		PAN_BORDER_1
 #define PAN_BORDER_RIGHT		PAN_BORDER_2
@@ -136,8 +136,7 @@ typedef enum {
 #define PAN_BORDER_LEFT		PAN_BORDER_4
 
 
-typedef struct _PanItem PanItem;
-struct _PanItem {
+struct PanItem {
 	PanItemType type;
 	gint x;
 	gint y;
@@ -169,8 +168,7 @@ struct _PanItem {
 	gboolean queued;
 };
 
-typedef struct _PanViewSearchUi PanViewSearchUi;
-struct _PanViewSearchUi
+struct PanViewSearchUi
 {
 	GtkWidget *search_box;
 	GtkWidget *search_entry;
@@ -183,10 +181,9 @@ struct _PanViewSearchUi
  * @typedef _PanViewFilterUi
  * Defined in pan-view-filter.h
  */
-typedef struct _PanViewFilterUi PanViewFilterUi;
+using PanViewFilterUi = struct _PanViewFilterUi;
 
-typedef struct _PanWindow PanWindow;
-struct _PanWindow
+struct PanWindow
 {
 	GtkWidget *window;
 	ImageWindow *imd;
@@ -241,8 +238,7 @@ struct _PanWindow
 	gint idle_id;
 };
 
-typedef struct _PanGrid PanGrid;
-struct _PanGrid {
+struct PanGrid {
 	gint x;
 	gint y;
 	gint w;
@@ -250,8 +246,7 @@ struct _PanGrid {
 	GList *list;
 };
 
-typedef struct _PanCacheData PanCacheData;
-struct _PanCacheData {
+struct PanCacheData {
 	FileData *fd;
 	CacheData *cd;
 };

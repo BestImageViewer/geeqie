@@ -38,7 +38,7 @@
 #endif
 #endif
 
-typedef enum {
+enum ZDLookupResult {
     ZD_LOOKUP_IGNORE = -3,
     ZD_LOOKUP_END = -2,
     ZD_LOOKUP_PARSE_ERROR = -1,
@@ -47,9 +47,9 @@ typedef enum {
     ZD_LOOKUP_IN_EXCLUDED_ZONE = 2,
     ZD_LOOKUP_ON_BORDER_VERTEX = 3,
     ZD_LOOKUP_ON_BORDER_SEGMENT = 4
-} ZDLookupResult;
+};
 
-typedef struct {
+struct ZoneDetectResult {
     ZDLookupResult lookupResult;
 
     uint32_t polygonId;
@@ -57,10 +57,10 @@ typedef struct {
     uint8_t numFields;
     char **fieldNames;
     char **data;
-} ZoneDetectResult;
+};
 
 struct ZoneDetectOpaque;
-typedef struct ZoneDetectOpaque ZoneDetect;
+using ZoneDetect = struct ZoneDetectOpaque;
 
 #ifdef __cplusplus
 extern "C" {

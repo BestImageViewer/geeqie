@@ -3152,17 +3152,13 @@ GList *file_data_process_groups_in_selection(GList *list, gboolean ungroup, GLis
    implementation in view-file-list.cc */
 
 
-typedef struct _NotifyIdleData NotifyIdleData;
-
-struct _NotifyIdleData {
+struct NotifyIdleData {
 	FileData *fd;
 	NotifyType type;
 };
 
 
-typedef struct _NotifyData NotifyData;
-
-struct _NotifyData {
+struct NotifyData {
 	FileDataNotifyFunc func;
 	gpointer data;
 	NotifyPriority priority;

@@ -2471,8 +2471,7 @@ static void collection_table_dnd_init(CollectTable *ct)
  *-----------------------------------------------------------------------------
  */
 
-typedef struct _ColumnData ColumnData;
-struct _ColumnData
+struct ColumnData
 {
 	CollectTable *ct;
 	gint number;

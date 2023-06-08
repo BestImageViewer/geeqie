@@ -36,8 +36,7 @@
 #include "window.h"
 
 
-typedef struct _CMData CMData;
-struct _CMData
+struct CMData
 {
 	GList *list;
 	GList *done_list;
@@ -419,8 +418,8 @@ void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent)
  * @param metadata TRUE - work on metadata cache, FALSE - work on thumbnail cache
  * @param clear TRUE - clear cache, FALSE - delete orphaned cached items
  * @param func Function called when idle loop function terminates
- * 
- * 
+ *
+ *
  */
 void cache_maintain_home_remote(gboolean metadata, gboolean clear, GDestroyNotify *func)
 {
@@ -604,8 +603,7 @@ void cache_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(data))
  *-------------------------------------------------------------------
  */
 
-typedef struct _CacheManager CacheManager;
-struct _CacheManager
+struct CacheManager
 {
 	GenericDialog *dialog;
 	GtkWidget *folder_entry;
@@ -617,8 +615,7 @@ struct _CacheManager
 	gint count_done;
 };
 
-typedef struct _CacheOpsData CacheOpsData;
-struct _CacheOpsData
+struct CacheOpsData
 {
 	GenericDialog *gd;
 	ThumbLoaderStd *tl;
@@ -940,11 +937,11 @@ static void cache_manager_render_dialog(GtkWidget *widget, const gchar *path)
 /**
  * @brief Create thumbnails
  * @param path Path to image folder
- * @param recurse 
+ * @param recurse
  * @param local Create thumbnails in same folder as images
  * @param func Function called when idle loop function terminates
- * 
- * 
+ *
+ *
  */
 void cache_manager_render_remote(const gchar *path, gboolean recurse, gboolean local, GDestroyNotify *func)
 {
@@ -1392,10 +1389,10 @@ static void cache_manager_sim_start_sim_remote(CacheOpsData *cd, const gchar *us
 /**
  * @brief Generate .sim files
  * @param path Path to image folder
- * @param recurse 
+ * @param recurse
  * @param func Function called when idle loop function terminates
- * 
- * 
+ *
+ *
  */
 void cache_manager_sim_remote(const gchar *path, gboolean recurse, GDestroyNotify *func)
 {

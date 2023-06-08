@@ -528,8 +528,7 @@ void shift_color(GdkColor *src, gshort val, gint direction)
 #define AUTO_SCROLL_DEFAULT_SPEED 100
 #define AUTO_SCROLL_DEFAULT_REGION 20
 
-typedef struct _AutoScrollData AutoScrollData;
-struct _AutoScrollData
+struct AutoScrollData
 {
 	guint timer_id; /* event source id */
 	gint region_size;

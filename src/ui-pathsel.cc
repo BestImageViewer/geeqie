@@ -50,8 +50,7 @@ enum {
 	FILTER_COLUMN_FILTER
 };
 
-typedef struct _Dest_Data Dest_Data;
-struct _Dest_Data
+struct Dest_Data
 {
 	GtkWidget *d_view;
 	GtkWidget *f_view;
@@ -76,8 +75,7 @@ struct _Dest_Data
 	GenericDialog *gd;	/* any open confirm dialogs ? */
 };
 
-typedef struct _DestDel_Data DestDel_Data;
-struct _DestDel_Data
+struct DestDel_Data
 {
 	Dest_Data *dd;
 	gchar *path;

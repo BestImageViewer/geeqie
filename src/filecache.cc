@@ -33,8 +33,7 @@ struct _FileCacheData {
 	gulong size;
 };
 
-typedef struct _FileCacheEntry FileCacheEntry;
-struct _FileCacheEntry {
+struct FileCacheEntry {
 	FileData *fd;
 	gulong size;
 };

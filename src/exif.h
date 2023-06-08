@@ -33,7 +33,7 @@
 
 #define EXIF_FORMAT_COUNT 13
 
-typedef enum {
+enum ExifFormatType {
 	EXIF_FORMAT_UNKNOWN		= 0,
 	EXIF_FORMAT_BYTE_UNSIGNED	= 1,
 	EXIF_FORMAT_STRING		= 2,
@@ -47,7 +47,7 @@ typedef enum {
 	EXIF_FORMAT_RATIONAL		= 10,
 	EXIF_FORMAT_FLOAT		= 11,
 	EXIF_FORMAT_DOUBLE		= 12
-} ExifFormatType;
+};
 
 
 /*
@@ -56,10 +56,9 @@ typedef enum {
  *-----------------------------------------------------------------------------
  */
 
-typedef struct _ExifItem ExifItem;
+struct ExifItem;
 
-typedef struct _ExifRational ExifRational;
-struct _ExifRational
+struct ExifRational
 {
 	guint32 num;
 	guint32 den;
@@ -68,7 +67,7 @@ struct _ExifRational
 
 /* enums useful for image manipulation */
 
-typedef enum {
+enum ExifOrientationType {
 	EXIF_ORIENTATION_UNKNOWN	= 0,
 	EXIF_ORIENTATION_TOP_LEFT	= 1,
 	EXIF_ORIENTATION_TOP_RIGHT	= 2,
@@ -78,17 +77,16 @@ typedef enum {
 	EXIF_ORIENTATION_RIGHT_TOP	= 6,
 	EXIF_ORIENTATION_RIGHT_BOTTOM	= 7,
 	EXIF_ORIENTATION_LEFT_BOTTOM	= 8
-} ExifOrientationType;
+};
 
-typedef enum {
+enum ExifUnitType {
 	EXIF_UNIT_UNKNOWN	= 0,
 	EXIF_UNIT_NOUNIT	= 1,
 	EXIF_UNIT_INCH		= 2,
 	EXIF_UNIT_CENTIMETER	= 3
-} ExifUnitType;
+};
 
-typedef struct _ExifFormattedText ExifFormattedText;
-struct _ExifFormattedText
+struct ExifFormattedText
 {
 	const gchar *key;
 	const gchar *description;

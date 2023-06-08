@@ -118,8 +118,7 @@ enum {
 
 static GType filter_keyword_column_types[] = {G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN};
 
-typedef struct _PaneKeywordsData PaneKeywordsData;
-struct _PaneKeywordsData
+struct PaneKeywordsData
 {
 	PaneData pane;
 	GtkWidget *widget;
@@ -143,8 +142,7 @@ struct _PaneKeywordsData
 	GtkWidget *autocomplete;
 };
 
-typedef struct _ConfDialogData ConfDialogData;
-struct _ConfDialogData
+struct ConfDialogData
 {
 	PaneKeywordsData *pkd;
 	GtkTreePath *click_tpath;

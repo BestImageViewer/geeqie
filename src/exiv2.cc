@@ -67,9 +67,7 @@
 #define AutoPtr UniquePtr
 #endif
 
-typedef struct _AltKey AltKey;
-
-struct _AltKey
+struct AltKey
 {
 	const gchar *xmp_key;
 	const gchar *exif_key;
@@ -115,7 +113,7 @@ static void _debug_exception(const char* file,
 
 #define debug_exception(e) _debug_exception(__FILE__, __LINE__, __func__, e)
 
-struct _ExifData
+struct ExifData
 {
 	Exiv2::ExifData::const_iterator exifIter; /* for exif_get_next_item */
 	Exiv2::IptcData::const_iterator iptcIter; /* for exif_get_next_item */
@@ -123,7 +121,7 @@ struct _ExifData
 	Exiv2::XmpData::const_iterator xmpIter; /* for exif_get_next_item */
 #endif
 
-	virtual ~_ExifData() = default;
+	virtual ~ExifData() = default;
 
 	virtual void writeMetadata(gchar *UNUSED(path) = nullptr)
 	{
@@ -155,7 +153,7 @@ struct _ExifData
 };
 
 // This allows read-only access to the original metadata
-struct _ExifDataOriginal : public _ExifData
+struct ExifDataOriginal : public ExifData
 {
 protected:
 	Exiv2::Image::AutoPtr image_;
@@ -173,7 +171,7 @@ protected:
 #endif
 
 public:
-	_ExifDataOriginal(Exiv2::Image::AutoPtr image)
+	ExifDataOriginal(Exiv2::Image::AutoPtr image)
 	{
 		cp_data_ = nullptr;
 		cp_length_ = 0;
@@ -181,7 +179,7 @@ public:
 		valid_ = TRUE;
 	}
 
-	_ExifDataOriginal(gchar *path)
+	ExifDataOriginal(gchar *path)
 	{
 		cp_data_ = nullptr;
 		cp_length_ = 0;
@@ -226,7 +224,7 @@ public:
 			}
 	}
 
-	~_ExifDataOriginal() override
+	~ExifDataOriginal() override
 	{
 		if (cp_data_) g_free(cp_data_);
 		if (pathl_) g_free(pathl_);
@@ -294,11 +292,11 @@ public:
 static void _ExifDataProcessed_update_xmp(gpointer key, gpointer value, gpointer data);
 
 // This allows read-write access to the metadata
-struct _ExifDataProcessed : public _ExifData
+struct ExifDataProcessed : public ExifData
 {
 protected:
-	std::unique_ptr<_ExifDataOriginal> imageData_;
-	std::unique_ptr<_ExifDataOriginal> sidecarData_;
+	std::unique_ptr<ExifDataOriginal> imageData_;
+	std::unique_ptr<ExifDataOriginal> sidecarData_;
 
 	Exiv2::ExifData exifData_;
 	Exiv2::IptcData iptcData_;
@@ -307,14 +305,14 @@ protected:
 #endif
 
 public:
-	_ExifDataProcessed(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
+	ExifDataProcessed(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
 	{
-		imageData_ = std::make_unique<_ExifDataOriginal>(path);
+		imageData_ = std::make_unique<ExifDataOriginal>(path);
 		sidecarData_ = nullptr;
 #if EXIV2_TEST_VERSION(0,16,0)
 		if (sidecar_path)
 			{
-			sidecarData_ = std::make_unique<_ExifDataOriginal>(sidecar_path);
+			sidecarData_ = std::make_unique<ExifDataOriginal>(sidecar_path);
 			xmpData_ = sidecarData_->xmpData();
 			}
 		else
@@ -467,7 +465,7 @@ ExifData *exif_read(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
 {
 	DEBUG_1("exif read %s, sidecar: %s", path, sidecar_path ? sidecar_path : "-");
 	try {
-		return new _ExifDataProcessed(path, sidecar_path, modified_xmp);
+		return new ExifDataProcessed(path, sidecar_path, modified_xmp);
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
@@ -505,7 +503,7 @@ gboolean exif_write_sidecar(ExifData *exif, gchar *path)
 void exif_free(ExifData *exif)
 {
 	if (!exif) return;
-	g_assert(dynamic_cast<_ExifDataProcessed *>(exif)); // this should not be called on ExifDataOriginal
+	g_assert(dynamic_cast<ExifDataProcessed *>(exif)); // this should not be called on ExifDataOriginal
 	delete exif;
 }
 
@@ -1281,8 +1279,7 @@ class RawFile {
 	unsigned long offset;
 };
 
-typedef struct _UnmapData UnmapData;
-struct _UnmapData
+struct UnmapData
 {
 	guchar *ptr;
 	guchar *map_data;

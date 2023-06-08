@@ -321,8 +321,7 @@ void help_window_show(const gchar *key)
  *-----------------------------------------------------------------------------
  */
 
-typedef struct _HelpSearchData HelpSearchData;
-struct _HelpSearchData {
+struct HelpSearchData {
 	GenericDialog *gd;
 	GtkWidget *edit_widget;
 	gchar *text_entry;

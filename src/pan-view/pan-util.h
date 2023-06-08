@@ -25,14 +25,14 @@
 #include "main.h"
 #include "pan-types.h"
 
-typedef enum {
+enum PanDateLengthType {
 	PAN_DATE_LENGTH_EXACT,
 	PAN_DATE_LENGTH_HOUR,
 	PAN_DATE_LENGTH_DAY,
 	PAN_DATE_LENGTH_WEEK,
 	PAN_DATE_LENGTH_MONTH,
 	PAN_DATE_LENGTH_YEAR
-} PanDateLengthType;
+};
 
 gboolean pan_date_compare(time_t a, time_t b, PanDateLengthType length);
 gint pan_date_value(time_t d, PanDateLengthType length);

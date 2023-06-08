@@ -23,8 +23,7 @@
 #define UI_TREE_EDIT_H
 
 
-typedef struct _TreeEditData TreeEditData;
-struct _TreeEditData
+struct TreeEditData
 {
 	GtkWidget *window;
 	GtkWidget *entry;

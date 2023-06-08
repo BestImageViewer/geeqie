@@ -29,8 +29,7 @@
 #include "ui-fileops.h"
 #include "ui-misc.h"
 
-typedef struct _ShortcutsData ShortcutsData;
-struct _ShortcutsData
+struct ShortcutsData
 {
 	GtkWidget *vbox;
 	GtkWidget *bookmarks;

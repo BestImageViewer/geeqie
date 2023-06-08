@@ -37,8 +37,7 @@
 
 
 
-typedef struct _PaneHistogramData PaneHistogramData;
-struct _PaneHistogramData
+struct PaneHistogramData
 {
 	PaneData pane;
 	GtkWidget *widget;

@@ -83,12 +83,12 @@ static void vflist_set_expanded(ViewFile *vf, GtkTreeIter *iter, gboolean expand
  * misc
  *-----------------------------------------------------------------------------
  */
-typedef struct {
+struct ViewFileFindRowData {
 	FileData *fd;
 	GtkTreeIter *iter;
 	gboolean found;
 	gint row;
-} ViewFileFindRowData;
+};
 
 static gboolean vflist_find_row_cb(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer data)
 {

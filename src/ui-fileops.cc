@@ -1003,8 +1003,7 @@ gchar *md5_text_from_file_utf8(const gchar *path, const gchar *error_text)
 
 /* Download web file
  */
-typedef struct _WebData WebData;
-struct _WebData
+struct WebData
 {
 	GenericDialog *gd;
 	GCancellable *cancellable;
@@ -1155,8 +1154,8 @@ gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error)
  * @brief Retrieves the internal scale factor that maps from window coordinates to the actual device pixels
  * @param  -
  * @returns scale factor
- * 
- * 
+ *
+ *
  */
 gint scale_factor()
 {

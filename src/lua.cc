@@ -426,6 +426,6 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 	return data;
 }
 #else
-typedef int dummy_variable;
+using dummy_variable = int;
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -45,10 +45,7 @@ gboolean jpeg_segment_find(const guchar *data, guint size,
 			    guint *seg_offset, guint *seg_length);
 
 
-typedef struct _MPOData MPOData;
-typedef struct _MPOEntry MPOEntry;
-
-struct _MPOEntry {
+struct MPOEntry {
 	guint type_code;
 	gboolean representative;
 	gboolean dependent_child;
@@ -73,11 +70,10 @@ struct _MPOEntry {
 	double YawAngle;
 	double PitchAngle;
 	double RollAngle;
-
 };
 
 
-struct _MPOData {
+struct MPOData {
         guint mpo_offset;
 
 	guint version;

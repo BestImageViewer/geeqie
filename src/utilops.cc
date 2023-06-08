@@ -48,8 +48,7 @@ static GtkTargetEntry target_types[] =
 };
 static gint target_types_n = 4;
 
-typedef struct _ClipboardData ClipboardData;
-struct _ClipboardData
+struct ClipboardData
 {
 	GList *path_list; /**< g_strdup(fd->path) */
 	gboolean quoted;
@@ -246,7 +245,7 @@ static gint filename_base_length(const gchar *name)
 
 
 
-typedef enum {
+enum UtilityType {
 	UTILITY_TYPE_COPY,
 	UTILITY_TYPE_MOVE,
 	UTILITY_TYPE_RENAME,
@@ -258,9 +257,9 @@ typedef enum {
 	UTILITY_TYPE_DELETE_FOLDER,
 	UTILITY_TYPE_CREATE_FOLDER,
 	UTILITY_TYPE_WRITE_METADATA
-} UtilityType;
+};
 
-typedef enum {
+enum UtilityPhase {
 	UTILITY_PHASE_START = 0,
 	UTILITY_PHASE_INTERMEDIATE,
 	UTILITY_PHASE_ENTERING,
@@ -268,7 +267,7 @@ typedef enum {
 	UTILITY_PHASE_DONE,
 	UTILITY_PHASE_CANCEL,
 	UTILITY_PHASE_DISCARD
-} UtilityPhase;
+};
 
 enum {
 	UTILITY_RENAME = 0,
@@ -276,8 +275,7 @@ enum {
 	UTILITY_RENAME_FORMATTED
 };
 
-typedef struct _UtilityDataMessages UtilityDataMessages;
-struct _UtilityDataMessages {
+struct UtilityDataMessages {
 	const gchar *title;
 	const gchar *question;
 	const gchar *desc_flist;
@@ -285,9 +283,7 @@ struct _UtilityDataMessages {
 	const gchar *fail;
 };
 
-typedef struct _UtilityData UtilityData;
-
-struct _UtilityData {
+struct UtilityData {
 	UtilityType type;
 	UtilityPhase phase;
 
@@ -350,9 +346,7 @@ enum {
 	UTILITY_COLUMN_COUNT
 };
 
-typedef struct _UtilityDelayData UtilityDelayData;
-
-struct _UtilityDelayData {
+struct UtilityDelayData {
 	UtilityType type;
 	UtilityPhase phase;
 	GList *flist;

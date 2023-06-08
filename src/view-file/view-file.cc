@@ -838,8 +838,7 @@ static void vf_marks_filter_toggle_cb(GtkWidget *UNUSED(widget), gpointer data)
 	vf_refresh_idle(vf);
 }
 
-typedef struct _MarksTextEntry MarksTextEntry;
-struct _MarksTextEntry {
+struct MarksTextEntry {
 	GenericDialog *gd;
 	gint mark_no;
 	GtkWidget *edit_widget;

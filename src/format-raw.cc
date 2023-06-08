@@ -569,7 +569,7 @@ gboolean format_debug_tiff_raw(guchar *data, const guint len,
 }
 #endif
 #else
-typedef int dummy_variable;
+using dummy_variable = int;
 #endif
 /* not HAVE_EXIV2 */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

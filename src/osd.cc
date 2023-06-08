@@ -84,8 +84,7 @@ static GtkTargetEntry osd_drag_types[] = {
 	{ const_cast<gchar *>("text/plain"), GTK_TARGET_SAME_APP, TARGET_TEXT_PLAIN }
 };
 
-typedef struct _TagData TagData;
-struct _TagData
+struct TagData
 {
 	gchar *key;
 	gchar *title;

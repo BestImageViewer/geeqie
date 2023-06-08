@@ -34,11 +34,11 @@
 #include "layout-util.h"
 #include "rcfile.h"
 
-typedef enum {
+enum MetadataKey {
 	MK_NONE,
 	MK_KEYWORDS,
 	MK_COMMENT
-} MetadataKey;
+};
 
 /* If contents change, keep GuideOptionsMetadata.xml up to date */
 /**

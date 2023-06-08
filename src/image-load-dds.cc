@@ -29,8 +29,7 @@
 #include "image-load.h"
 #include "image-load-dds.h"
 
-typedef struct _ImageLoaderDDS ImageLoaderDDS;
-struct _ImageLoaderDDS {
+struct ImageLoaderDDS {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;

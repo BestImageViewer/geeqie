@@ -35,8 +35,8 @@
 #define THUMB_NAME_EXTENSION ".png"
 
 
-typedef struct _ThumbLoaderStd ThumbLoaderStd;
-typedef void (* ThumbLoaderStdFunc)(ThumbLoaderStd *tl, gpointer data);
+using ThumbLoaderStd = struct _ThumbLoaderStd;
+using ThumbLoaderStdFunc = void (*)(ThumbLoaderStd *, gpointer);
 
 struct _ThumbLoaderStd
 {

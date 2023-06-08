@@ -25,8 +25,7 @@
 
 #define GENERIC_DIALOG(gd) ((GenericDialog *)gd)
 
-typedef struct _GenericDialog GenericDialog;
-struct _GenericDialog
+struct GenericDialog
 {
 	GtkWidget *dialog;	/**< window */
 	GtkWidget *vbox;	/**< place to add widgets */
@@ -43,8 +42,7 @@ struct _GenericDialog
 
 };
 
-typedef struct _FileDialog FileDialog;
-struct _FileDialog
+struct FileDialog
 {
 	GenericDialog gd;
 

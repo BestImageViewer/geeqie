@@ -21,9 +21,7 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
-typedef struct _ConfOptions ConfOptions;
-
-struct _ConfOptions
+struct ConfOptions
 {
 	/* ui */
 	gboolean progressive_key_scrolling;

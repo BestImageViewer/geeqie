@@ -23,8 +23,7 @@
 #define SIMILAR_H
 
 
-typedef struct _ImageSimilarityData ImageSimilarityData;
-struct _ImageSimilarityData
+struct ImageSimilarityData
 {
 	guint8 avg_r[1024];
 	guint8 avg_g[1024];

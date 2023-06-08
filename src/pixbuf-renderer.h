@@ -61,38 +61,35 @@
 #define ROUND_DOWN(A,B) ((gint)(((A))/(B))*(B))
 
 
-typedef struct _RendererFuncs RendererFuncs;
+using RendererFuncs = struct _RendererFuncs;
 
-typedef struct _PixbufRenderer PixbufRenderer;
-typedef struct _PixbufRendererClass PixbufRendererClass;
+using PixbufRenderer = struct _PixbufRenderer;
+using PixbufRendererClass = struct _PixbufRendererClass;
 
 
-typedef gint (* PixbufRendererTileRequestFunc)(PixbufRenderer *pr, gint x, gint y,
-					       gint width, gint height, GdkPixbuf *pixbuf, gpointer user_data);
-typedef void (* PixbufRendererTileDisposeFunc)(PixbufRenderer *pr, gint x, gint y,
-					       gint width, gint height, GdkPixbuf *pixbuf, gpointer user_data);
+using PixbufRendererTileRequestFunc = gint (*)(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
+using PixbufRendererTileDisposeFunc = void (*)(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
 
-typedef void (* PixbufRendererPostProcessFunc)(PixbufRenderer *pr, GdkPixbuf **pixbuf, gint x, gint y,
-					       gint width, gint height, gpointer user_data);
+using PixbufRendererPostProcessFunc = void (*)(PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint, gpointer);
 
-typedef enum {
+enum PixbufRendererScrollResetType {
 	PR_SCROLL_RESET_TOPLEFT = 0,
 	PR_SCROLL_RESET_CENTER,
 	PR_SCROLL_RESET_NOCHANGE,
 	PR_SCROLL_RESET_COUNT,
-} PixbufRendererScrollResetType;
+};
 
-typedef enum {
+enum ImageRenderType {
 	TILE_RENDER_NONE = 0, /**< do nothing */
 	TILE_RENDER_AREA, /**< render an area of the tile */
 	TILE_RENDER_ALL /**< render the whole tile */
-} ImageRenderType;
+};
 
-typedef enum {
+enum OverlayRendererFlags {
 	OVL_NORMAL 	= 0,
 	OVL_RELATIVE 	= 1 << 0, /**< x,y coordinates are relative, negative values start bottom right */
 	/* OVL_HIDE_ON_SCROLL = 1 << 1*/ /**< hide temporarily when scrolling (not yet implemented) */
-} OverlayRendererFlags;
+};
 
 struct _RendererFuncs
 {
@@ -379,7 +376,7 @@ void pixbuf_renderer_stereo_fixed_set(PixbufRenderer *pr, gint width, gint heigh
  * @struct _SourceTile
  * protected - for renderer use only
  */
-typedef struct _SourceTile SourceTile;
+using SourceTile = struct _SourceTile;
 struct _SourceTile
 {
 	gint x;

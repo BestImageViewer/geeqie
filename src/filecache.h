@@ -24,8 +24,8 @@
 #include "main.h"
 #include "filedata.h"
 
-typedef struct _FileCacheData FileCacheData;
-typedef void (*FileCacheReleaseFunc)(FileData *fd);
+using FileCacheData = struct _FileCacheData;
+using FileCacheReleaseFunc = void (*)(FileData *);
 
 
 FileCacheData *file_cache_new(FileCacheReleaseFunc release, gulong max_size);

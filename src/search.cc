@@ -60,7 +60,7 @@
 
 #define FORMAT_CLASS_BROKEN static_cast<FileFormatClass>(FILE_FORMAT_CLASSES + 1)
 
-typedef enum {
+enum MatchType {
 	SEARCH_MATCH_NONE,
 	SEARCH_MATCH_EQUAL,
 	SEARCH_MATCH_CONTAINS,
@@ -73,7 +73,7 @@ typedef enum {
 	SEARCH_MATCH_ALL,
 	SEARCH_MATCH_ANY,
 	SEARCH_MATCH_COLLECTION
-} MatchType;
+};
 
 enum {
 	SEARCH_COLUMN_POINTER = 0,
@@ -87,8 +87,7 @@ enum {
 	SEARCH_COLUMN_COUNT	/* total columns */
 };
 
-typedef struct _SearchData SearchData;
-struct _SearchData
+struct SearchData
 {
 	GtkWidget *window;
 
@@ -245,8 +244,7 @@ struct _SearchData
 
 };
 
-typedef struct _MatchFileData MatchFileData;
-struct _MatchFileData
+struct MatchFileData
 {
 	FileData *fd;
 	gint width;
@@ -254,8 +252,7 @@ struct _MatchFileData
 	gint rank;
 };
 
-typedef struct _MatchList MatchList;
-struct _MatchList
+struct MatchList
 {
 	const gchar *text;
 	const MatchType type;

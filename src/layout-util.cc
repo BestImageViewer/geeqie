@@ -1965,16 +1965,14 @@ void layout_recent_add_path(const gchar *path)
  * window layout menu
  *-----------------------------------------------------------------------------
  */
-typedef struct _WindowNames WindowNames;
-struct _WindowNames
+struct WindowNames
 {
 	gboolean displayed;
 	gchar *name;
 	gchar *path;
 };
 
-typedef struct _RenameWindow RenameWindow;
-struct _RenameWindow
+struct RenameWindow
 {
 	GenericDialog *gd;
 	LayoutWindow *lw;
@@ -1983,8 +1981,7 @@ struct _RenameWindow
 	GtkWidget *window_name_entry;
 };
 
-typedef struct _DeleteWindow DeleteWindow;
-struct _DeleteWindow
+struct DeleteWindow
 {
 	GenericDialog *gd;
 	LayoutWindow *lw;

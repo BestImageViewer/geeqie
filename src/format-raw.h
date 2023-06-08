@@ -25,19 +25,19 @@
 #include "exif-int.h"
 
 
-typedef enum {
+enum FormatRawMatchType {
 	FORMAT_RAW_MATCH_MAGIC,
 	FORMAT_RAW_MATCH_TIFF_MAKE
-} FormatRawMatchType;
+};
 
-typedef enum {
+enum FormatRawExifType {
 	FORMAT_RAW_EXIF_NONE,
 	FORMAT_RAW_EXIF_TIFF,
 	FORMAT_RAW_EXIF_JPEG,
 	FORMAT_RAW_EXIF_IFD_II,
 	FORMAT_RAW_EXIF_IFD_MM,
 	FORMAT_RAW_EXIF_PROPRIETARY
-} FormatRawExifType;
+};
 
 typedef gboolean (* FormatRawParseFunc)(guchar *data, const guint len,
 				        guint *image_offset, guint *exif_offset);
@@ -55,10 +55,10 @@ FormatRawExifType format_raw_exif_offset(guchar *data, const guint len, guint *e
 					 FormatRawExifParseFunc *exif_parse_func);
 
 
-typedef enum {
+enum FormatExifMatchType {
 	FORMAT_EXIF_MATCH_MAKE,
 	FORMAT_EXIF_MATCH_MAKERNOTE
-} FormatExifMatchType;
+};
 
 typedef gint (* FormatExifParseFunc)(ExifData *exif, guchar *tiff, guint offset,
 				     guint size, ExifByteOrder bo);

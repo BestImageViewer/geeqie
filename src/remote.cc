@@ -61,15 +61,13 @@ static void gr_raise(const gchar *text, GIOChannel *channel, gpointer data);
 
 static LayoutWindow *lw_id = nullptr; /* points to the window set by the --id option */
 
-typedef struct _RemoteClient RemoteClient;
-struct _RemoteClient {
+struct RemoteClient {
 	gint fd;
 	guint channel_id; /* event source id */
 	RemoteConnection *rc;
 };
 
-typedef struct _RemoteData RemoteData;
-struct _RemoteData {
+struct RemoteData {
 	CollectionData *command_collection;
 	GList *file_list;
 	gboolean single_dir;
@@ -1583,8 +1581,7 @@ static void gr_lua(const gchar *text, GIOChannel *channel, gpointer UNUSED(data)
 }
 #endif
 
-typedef struct _RemoteCommandEntry RemoteCommandEntry;
-struct _RemoteCommandEntry {
+struct RemoteCommandEntry {
 	const gchar *opt_s;
 	const gchar *opt_l;
 	void (*func)(const gchar *text, GIOChannel *channel, gpointer data);

@@ -33,8 +33,7 @@
 #include <jpeglib.h>
 #include <jerror.h>
 
-typedef struct _ImageLoaderJpeg ImageLoaderJpeg;
-struct _ImageLoaderJpeg {
+struct ImageLoaderJpeg {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;

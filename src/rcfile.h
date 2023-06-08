@@ -75,10 +75,10 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 
 #define READ_DUMMY(_target_, _name_, _msg_) read_dummy_option(option, #_name_, _msg_)
 
-typedef struct _GQParserFuncData GQParserFuncData;
-typedef struct _GQParserData GQParserData;
-typedef	void (* GQParserStartFunc)(GQParserData *parser_data, GMarkupParseContext *context, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **error);
-typedef	void (* GQParserEndFunc)(GQParserData *parser_data, GMarkupParseContext *context, const gchar *element_name, gpointer data, GError **error);
+using GQParserFuncData = struct _GQParserFuncData;
+using GQParserData = struct _GQParserData;
+using GQParserStartFunc = void (*)(GQParserData *, GMarkupParseContext *, const gchar *, const gchar **, const gchar **, gpointer, GError **);
+using GQParserEndFunc = void (*)(GQParserData *, GMarkupParseContext *, const gchar *, gpointer, GError **);
 
 void options_parse_func_push(GQParserData *parser_data, GQParserStartFunc start_func, GQParserEndFunc end_func, gpointer data);
 void options_parse_func_pop(GQParserData *parser_data);

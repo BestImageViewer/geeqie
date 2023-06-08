@@ -26,8 +26,7 @@
 #include "misc.h"
 #include "ui-fileops.h"
 
-typedef struct _ImageLoaderExternal ImageLoaderExternal;
-struct _ImageLoaderExternal {
+struct ImageLoaderExternal {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;

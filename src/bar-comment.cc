@@ -44,8 +44,7 @@ static void bar_pane_comment_changed(GtkTextBuffer *buffer, gpointer data);
 
 
 
-typedef struct _PaneCommentData PaneCommentData;
-struct _PaneCommentData
+struct PaneCommentData
 {
 	PaneData pane;
 	GtkWidget *widget;

@@ -22,7 +22,7 @@
 #ifndef BAR_H
 #define BAR_H
 
-typedef enum {
+enum PaneType {
 	PANE_UNDEF = 0,
 	PANE_COMMENT,
 	PANE_EXIF,
@@ -30,11 +30,9 @@ typedef enum {
 	PANE_KEYWORDS,
 	PANE_GPS,
 	PANE_RATING
-} PaneType;
+};
 
-typedef struct _PaneData PaneData;
-
-struct _PaneData {
+struct PaneData {
 	void (*pane_set_fd)(GtkWidget *pane, FileData *fd); /**< filled in by pane */
 	void (*pane_notify_selection)(GtkWidget *pane, gint count); /**< filled in by pane */
 	gint (*pane_event)(GtkWidget *pane, GdkEvent *event); /**< filled in by pane */

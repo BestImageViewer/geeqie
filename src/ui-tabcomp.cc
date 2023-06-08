@@ -54,8 +54,7 @@
  * ----------------------------------------------------------------
  */
 
-typedef struct _TabCompData TabCompData;
-struct _TabCompData
+struct TabCompData
 {
 	GtkWidget *entry;
 	gchar *dir_path;

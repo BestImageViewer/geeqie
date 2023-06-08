@@ -30,8 +30,7 @@ enum {
 	SAR_COUNT
 };
 
-typedef struct _SarData SarData;
-struct _SarData
+struct SarData
 {
 	GtkWidget *window;
 	GtkWidget *vbox;

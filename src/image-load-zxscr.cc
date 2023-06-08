@@ -23,8 +23,7 @@
 #include "image-load.h"
 #include "image-load-zxscr.h"
 
-typedef struct _ImageLoaderZXSCR ImageLoaderZXSCR;
-struct _ImageLoaderZXSCR {
+struct ImageLoaderZXSCR {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;

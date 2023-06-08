@@ -92,8 +92,7 @@ gboolean pixbuf_to_file_as_png(GdkPixbuf *pixbuf, const gchar *filename)
  *-----------------------------------------------------------------------------
  */
 
-typedef struct _PixbufInline PixbufInline;
-struct _PixbufInline
+struct PixbufInline
 {
 	const gchar *key;
 	const gchar *data;
