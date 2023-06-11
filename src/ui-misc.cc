@@ -1030,7 +1030,7 @@ static void date_selection_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 	g_free(ds);
 }
 
-GtkWidget *date_selection_new(void)
+GtkWidget *date_selection_new()
 {
 	DateSelection *ds;
 	GtkWidget *arrow;

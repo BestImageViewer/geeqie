@@ -87,7 +87,7 @@ static guint toggle_cell_signals[LAST_SIGNAL] = { 0 };
 static gpointer parent_class;
 
 GType
-gqv_cell_renderer_icon_get_type(void)
+gqv_cell_renderer_icon_get_type()
 {
 	static GType cell_icon_type = 0;
 
@@ -540,7 +540,7 @@ gqv_cell_renderer_icon_get_layout(GQvCellRendererIcon *cellicon, GtkWidget *widg
  * Return value: the new cell renderer
  **/
 GtkCellRenderer *
-gqv_cell_renderer_icon_new(void)
+gqv_cell_renderer_icon_new()
 {
 	return static_cast<GtkCellRenderer *>(g_object_new(GQV_TYPE_CELL_RENDERER_ICON, nullptr));
 }

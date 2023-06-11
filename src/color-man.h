@@ -65,7 +65,7 @@ ColorMan *color_man_new_embedded(ImageWindow *imd, GdkPixbuf *pixbuf,
 				 guchar *screen_data, guint screen_data_len);
 void color_man_free(ColorMan *cm);
 
-void color_man_update(void);
+void color_man_update();
 
 void color_man_correct_region(ColorMan *cm, GdkPixbuf *pixbuf, gint x, gint y, gint w, gint h);
 

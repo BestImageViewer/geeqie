@@ -340,7 +340,7 @@ gboolean metadata_write_perform(FileData *fd)
 	return success;
 }
 
-gint metadata_queue_length(void)
+gint metadata_queue_length()
 {
 	return g_list_length(metadata_write_queue);
 }
@@ -1713,7 +1713,7 @@ void keyword_show_set_in(GtkTreeStore *keyword_tree, gpointer id, GList *keyword
 }
 
 
-void keyword_tree_new(void)
+void keyword_tree_new()
 {
 	if (keyword_tree) return;
 
@@ -1728,7 +1728,7 @@ static GtkTreeIter keyword_tree_default_append(GtkTreeStore *keyword_tree, GtkTr
 	return iter;
 }
 
-void keyword_tree_new_default(void)
+void keyword_tree_new_default()
 {
 	GtkTreeIter i1, i2;
 

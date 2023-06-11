@@ -352,7 +352,7 @@ static void popup_menu_short_lived_cb(GtkWidget *UNUSED(widget), gpointer data)
 	g_object_unref(G_OBJECT(data));
 }
 
-GtkWidget *popup_menu_short_lived(void)
+GtkWidget *popup_menu_short_lived()
 {
 	GtkWidget *menu;
 

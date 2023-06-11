@@ -31,7 +31,7 @@
 #define HCHAN_DEFAULT HCHAN_RGB
 
 
-Histogram *histogram_new(void);
+Histogram *histogram_new();
 void histogram_free(Histogram *histogram);
 gint histogram_set_channel(Histogram *histogram, gint chan);
 gint histogram_get_channel(Histogram *histogram);

@@ -108,9 +108,9 @@ void layout_status_update(LayoutWindow *lw, const gchar *text);
 
 void layout_style_set(LayoutWindow *lw, gint style, const gchar *order);
 
-void layout_menu_update_edit(void);
-void layout_styles_update(void);
-void layout_colors_update(void);
+void layout_menu_update_edit();
+void layout_styles_update();
+void layout_colors_update();
 
 
 gboolean layout_geometry_get_tools(LayoutWindow *lw, gint *x, gint *y, gint *w, gint *h, gint *divider_pos);

@@ -86,7 +86,7 @@ CollectWindow *collection_window_new(const gchar *path);
 void collection_window_close_by_collection(CollectionData *cd);
 CollectWindow *collection_window_find(CollectionData *cd);
 CollectWindow *collection_window_find_by_path(const gchar *path);
-gboolean collection_window_modified_exists(void);
+gboolean collection_window_modified_exists();
 
 gboolean is_collection(const gchar *param);
 gchar *collection_path(const gchar *param);

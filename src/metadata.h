@@ -35,7 +35,7 @@ gboolean metadata_write_perform(FileData *fd);
 gboolean metadata_write_queue_confirm(gboolean force_dialog, FileUtilDoneFunc done_func, gpointer done_data);
 void metadata_notify_cb(FileData *fd, NotifyType type, gpointer data);
 
-gint metadata_queue_length(void);
+gint metadata_queue_length();
 
 gboolean metadata_write_revert(FileData *fd, const gchar *key);
 gboolean metadata_write_list(FileData *fd, const gchar *key, const GList *values);
@@ -105,8 +105,8 @@ void keyword_revert_hidden_in(GtkTreeStore *keyword_tree, gpointer id);
 void keyword_hide_unset_in(GtkTreeStore *keyword_tree, gpointer id, GList *keywords);
 void keyword_show_set_in(GtkTreeStore *keyword_tree, gpointer id, GList *keywords);
 
-void keyword_tree_new_default(void);
-void keyword_tree_new(void);
+void keyword_tree_new_default();
+void keyword_tree_new();
 
 void keyword_tree_write_config(GString *outstr, gint indent);
 GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *parent, const gchar **attribute_names, const gchar **attribute_values);

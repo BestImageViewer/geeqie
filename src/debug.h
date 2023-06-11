@@ -40,13 +40,13 @@ void log_print_backtrace(const gchar *file, const gchar *function_name, gint lin
 #define DEBUG_LEVEL_MAX 4
 
 void set_regexp(const gchar *regexp);
-gchar *get_regexp(void);
-gint get_debug_level(void);
+gchar *get_regexp();
+gint get_debug_level();
 void set_debug_level(gint new_level);
 void debug_level_add(gint delta);
 gint required_debug_level(gint level);
-const gchar *get_exec_time(void);
-void init_exec_time(void);
+const gchar *get_exec_time();
+void init_exec_time();
 
 #define DEBUG_N(n, ...) do \
 				{ \

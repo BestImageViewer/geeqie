@@ -46,7 +46,7 @@ struct _HistMap {
 };
 
 
-Histogram *histogram_new(void)
+Histogram *histogram_new()
 {
 	Histogram *histogram;
 
@@ -136,7 +136,7 @@ const gchar *histogram_label(Histogram *histogram)
 	return t1;
 }
 
-static HistMap *histmap_new(void)
+static HistMap *histmap_new()
 {
 	auto histmap = g_new0(HistMap, 1);
 	return histmap;

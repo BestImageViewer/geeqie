@@ -283,7 +283,7 @@ static void layout_config_number_cb(GtkTreeViewColumn *UNUSED(tree_column), GtkC
 	g_free(buf);
 }
 
-GtkWidget *layout_config_new(void)
+GtkWidget *layout_config_new()
 {
 	LayoutConfig *lc;
 	GtkWidget *hbox;

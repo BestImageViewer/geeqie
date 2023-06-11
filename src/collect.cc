@@ -1276,7 +1276,7 @@ void collection_window_close_by_collection(CollectionData *cd)
  * Also saves window geometry for Collection windows that have
  * no unsaved data
  */
-gboolean collection_window_modified_exists(void)
+gboolean collection_window_modified_exists()
 {
 	GList *work;
 	gboolean ret;

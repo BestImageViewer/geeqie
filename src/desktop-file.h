@@ -22,7 +22,7 @@
 #ifndef DESKTOP_FILE_H
 #define DESKTOP_FILE_H
 
-void show_editor_list_window(void);
+void show_editor_list_window();
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

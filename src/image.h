@@ -172,7 +172,7 @@ void image_set_image_as_tiles(ImageWindow *imd, gint width, gint height,
  * @headerfile image_options_sync
  * reset default options
  */
-void image_options_sync(void);
+void image_options_sync();
 
 void image_get_rectangle(gint *x1, gint *y1, gint *x2, gint *y2);
 void image_update_title(ImageWindow *imd);

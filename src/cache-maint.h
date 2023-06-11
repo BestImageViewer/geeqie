@@ -25,7 +25,7 @@
 
 void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent);
 void cache_notify_cb(FileData *fd, NotifyType type, gpointer data);
-void cache_manager_show(void);
+void cache_manager_show();
 
 void cache_maintain_home_remote(gboolean metadata, gboolean clear, GDestroyNotify *func);
 void cache_manager_standard_process_remote(gboolean clear);

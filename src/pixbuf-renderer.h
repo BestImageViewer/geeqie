@@ -247,9 +247,9 @@ struct _PixbufRendererClass
 
 
 
-GType pixbuf_renderer_get_type(void);
+GType pixbuf_renderer_get_type();
 
-PixbufRenderer *pixbuf_renderer_new(void);
+PixbufRenderer *pixbuf_renderer_new();
 
 void pixbuf_renderer_set_parent(PixbufRenderer *pr, GtkWindow *window);
 GtkWindow *pixbuf_renderer_get_parent(PixbufRenderer *pr);

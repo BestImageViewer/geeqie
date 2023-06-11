@@ -210,7 +210,7 @@ static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
 }
 
 
-void pixbuf_inline_register_stock_icons(void)
+void pixbuf_inline_register_stock_icons()
 {
 	gint i;
 

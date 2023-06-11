@@ -525,7 +525,7 @@ static void plugin_disable_set_func(GtkTreeViewColumn *UNUSED(tree_column), GtkC
 		}
 }
 
-static void editor_list_window_create(void)
+static void editor_list_window_create()
 {
 	GtkWidget *win_vbox;
 	GtkWidget *hbox;
@@ -687,7 +687,7 @@ static void editor_list_window_create(void)
  *-----------------------------------------------------------------------------
  */
 
-void show_editor_list_window(void)
+void show_editor_list_window()
 {
 	if (editor_list_window)
 		{

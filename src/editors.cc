@@ -382,13 +382,13 @@ static gboolean editor_remove_desktop_file_cb(gpointer UNUSED(key), gpointer val
 	return editor->hidden || editor->ignored;
 }
 
-void editor_table_finish(void)
+void editor_table_finish()
 {
 	g_hash_table_foreach_remove(editors, editor_remove_desktop_file_cb, nullptr);
 	editors_finished = TRUE;
 }
 
-void editor_table_clear(void)
+void editor_table_clear()
 {
 	if (desktop_file_list)
 		{
@@ -436,7 +436,7 @@ static GList *editor_add_desktop_dir(GList *list, const gchar *path)
 	return list;
 }
 
-GList *editor_get_desktop_files(void)
+GList *editor_get_desktop_files()
 {
 	gchar *path;
 	gchar *xdg_data_dirs;
@@ -518,7 +518,7 @@ static gint editor_sort(gconstpointer a, gconstpointer b)
 	return ret;
 }
 
-GList *editor_list_get(void)
+GList *editor_list_get()
 {
 	GList *editors_list = nullptr;
 

@@ -71,7 +71,7 @@ static void image_loader_class_init(ImageLoaderClass *loader_class);
 static void image_loader_finalize(GObject *object);
 static void image_loader_stop(ImageLoader *il);
 
-GType image_loader_get_type(void)
+GType image_loader_get_type()
 {
 	static GType type = 0;
 	if (type == 0)
@@ -1200,14 +1200,14 @@ static GMutex *image_loader_prio_mutex = nullptr;
 static gint image_loader_prio_num = 0;
 
 
-static void image_loader_thread_enter_high(void)
+static void image_loader_thread_enter_high()
 {
 	g_mutex_lock(image_loader_prio_mutex);
 	image_loader_prio_num++;
 	g_mutex_unlock(image_loader_prio_mutex);
 }
 
-static void image_loader_thread_leave_high(void)
+static void image_loader_thread_leave_high()
 {
 	g_mutex_lock(image_loader_prio_mutex);
 	image_loader_prio_num--;
@@ -1215,7 +1215,7 @@ static void image_loader_thread_leave_high(void)
 	g_mutex_unlock(image_loader_prio_mutex);
 }
 
-static void image_loader_thread_wait_high(void)
+static void image_loader_thread_wait_high()
 {
 	g_mutex_lock(image_loader_prio_mutex);
 	while (image_loader_prio_num)

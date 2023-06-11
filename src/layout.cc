@@ -2006,7 +2006,7 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 	file_data_unref(dir_fd);
 }
 
-void layout_colors_update(void)
+void layout_colors_update()
 {
 	GList *work;
 

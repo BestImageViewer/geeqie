@@ -34,17 +34,17 @@ void layout_util_sync_color(LayoutWindow *lw);
 void layout_util_sync(LayoutWindow *lw);
 
 void layout_util_status_update_write(LayoutWindow *lw);
-void layout_util_status_update_write_all(void);
+void layout_util_status_update_write_all();
 
 //void layout_edit_update_all(void);
 
-void layout_recent_update_all(void);
+void layout_recent_update_all();
 void layout_recent_add_path(const gchar *path);
 
-void layout_copy_path_update_all(void);
+void layout_copy_path_update_all();
 
-void layout_editors_reload_start(void);
-void layout_editors_reload_finish(void);
+void layout_editors_reload_start();
+void layout_editors_reload_finish();
 void layout_actions_setup(LayoutWindow *lw);
 void layout_actions_add_window(LayoutWindow *lw, GtkWidget *window);
 GtkWidget *layout_actions_menu_bar(LayoutWindow *lw);

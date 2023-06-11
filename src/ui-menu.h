@@ -44,7 +44,7 @@ void menu_item_add_divider(GtkWidget *menu);
 GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
 				GCallback func, gpointer data);
 
-GtkWidget *popup_menu_short_lived(void);
+GtkWidget *popup_menu_short_lived();
 
 /**
  * @headerfile popup_menu_position_clamp

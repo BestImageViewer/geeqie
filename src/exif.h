@@ -99,7 +99,7 @@ struct ExifFormattedText
  *-----------------------------------------------------------------------------
  */
 
-void exif_init(void);
+void exif_init();
 
 ExifData *exif_read(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp);
 

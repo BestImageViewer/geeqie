@@ -66,7 +66,7 @@ void image_sim_alternate_set(gboolean enable)
 	//return alternate_enabled;
 //}
 
-ImageSimilarityData *image_sim_new(void)
+ImageSimilarityData *image_sim_new()
 {
 	auto sd = g_new0(ImageSimilarityData, 1);
 

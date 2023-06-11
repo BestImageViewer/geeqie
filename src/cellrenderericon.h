@@ -65,14 +65,14 @@ struct GQvCellRendererIconClass
 	void (*toggled)(GQvCellRendererIcon *cell_renderer, const gchar *path);
 
 	/* Padding for future expansion */
-	void (*_gtk_reserved1)(void);
-	void (*_gtk_reserved2)(void);
-	void (*_gtk_reserved3)(void);
-	void (*_gtk_reserved4)(void);
+	void (*_gtk_reserved1)();
+	void (*_gtk_reserved2)();
+	void (*_gtk_reserved3)();
+	void (*_gtk_reserved4)();
 };
 
-GType            gqv_cell_renderer_icon_get_type(void);
-GtkCellRenderer *gqv_cell_renderer_icon_new(void);
+GType            gqv_cell_renderer_icon_get_type();
+GtkCellRenderer *gqv_cell_renderer_icon_new();
 
 #endif /* __GQV_CELL_RENDERER_ICON_H__ */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

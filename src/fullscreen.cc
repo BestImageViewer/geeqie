@@ -178,7 +178,7 @@ static void fullscreen_image_complete_cb(ImageWindow *UNUSED(imd), gboolean prel
 #define XSCREENSAVER_BINARY	"xscreensaver-command"
 #define XSCREENSAVER_COMMAND	"xscreensaver-command -deactivate >&- 2>&- &"
 
-static void fullscreen_saver_deactivate(void)
+static void fullscreen_saver_deactivate()
 {
 	static gboolean checked = FALSE;
 	static gboolean found = FALSE;
@@ -387,7 +387,7 @@ void fullscreen_stop(FullScreenData *fs)
  *----------------------------------------------------------------------------
  */
 
-GList *fullscreen_prefs_list(void)
+GList *fullscreen_prefs_list()
 {
 	GList *list = nullptr;
 	GdkDisplay *display;

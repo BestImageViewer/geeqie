@@ -259,7 +259,7 @@ static gboolean accel_apply_cb(GtkTreeModel *model, GtkTreePath *UNUSED(path), G
 }
 
 
-static void config_window_apply(void)
+static void config_window_apply()
 {
 	gboolean refresh = FALSE;
 #ifdef HAVE_LCMS2
@@ -1138,7 +1138,7 @@ static void add_video_menu(GtkWidget *table, gint column, gint row, const gchar 
 	gtk_widget_show(combo);
 }
 
-static void filter_store_populate(void)
+static void filter_store_populate()
 {
 	GList *work;
 
@@ -1595,7 +1595,7 @@ static void image_overlay_set_background_colour_cb(GtkWidget *widget, gpointer U
 	gtk_widget_destroy(dialog);
 }
 
-static void accel_store_populate(void)
+static void accel_store_populate()
 {
 	LayoutWindow *lw;
 	GList *groups, *actions;
@@ -2593,7 +2593,7 @@ static void config_tab_osd(GtkWidget *notebook)
 	gtk_widget_show(label);
 }
 
-static GtkTreeModel *create_class_model(void)
+static GtkTreeModel *create_class_model()
 {
 	GtkListStore *model;
 	GtkTreeIter iter;

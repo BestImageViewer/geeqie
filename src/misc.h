@@ -21,7 +21,7 @@
 #ifndef MISC_H
 #define MISC_H
 
-gdouble get_zoom_increment(void);
+gdouble get_zoom_increment();
 gchar *utf8_validate_or_convert(const gchar *text);
 gint utf8_compare(const gchar *s1, const gchar *s2, gboolean case_sensitive);
 gchar *expand_tilde(const gchar *filename);
@@ -31,7 +31,7 @@ gint date_get_first_day_of_week();
 gchar *date_get_abbreviated_day_name(gint day);
 gchar *convert_rating_to_stars(gint rating);
 gchar *get_symbolic_link(const gchar *path_utf8);
-gint get_cpu_cores(void);
+gint get_cpu_cores();
 void tree_path_free_wrapper(void *data, void *useradata);
 gchar *open_archive(FileData *fd);
 #endif /* MISC_H */

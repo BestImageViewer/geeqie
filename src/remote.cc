@@ -1708,7 +1708,7 @@ static void remote_cb(RemoteConnection *UNUSED(rc), const gchar *text, GIOChanne
 		}
 }
 
-void remote_help(void)
+void remote_help()
 {
 	gint i;
 	gchar *s_opt_param;

@@ -833,7 +833,7 @@ void color_man_free(ColorMan *UNUSED(cm))
 	/* no op */
 }
 
-void color_man_update(void)
+void color_man_update()
 {
 	/* no op */
 }

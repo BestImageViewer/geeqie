@@ -21,9 +21,9 @@
 
 #include "ui-utildlg.h"
 
-void file_util_trash_clear(void);
+void file_util_trash_clear();
 gboolean file_util_safe_unlink(const gchar *path);
-gchar *file_util_safe_delete_status(void);
+gchar *file_util_safe_delete_status();
 
 #endif /* TRASH_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

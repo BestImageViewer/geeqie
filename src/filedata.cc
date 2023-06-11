@@ -1251,7 +1251,7 @@ GList *filelist_sort(GList *list, SortType method, gboolean ascend)
  */
 
 
-static GHashTable *file_data_basename_hash_new(void)
+static GHashTable *file_data_basename_hash_new()
 {
 	return g_hash_table_new_full(g_str_hash, g_str_equal, g_free, nullptr);
 }

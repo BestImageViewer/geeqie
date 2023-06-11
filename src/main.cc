@@ -827,7 +827,7 @@ static void process_command_line_for_cache_maintenance_option(gint argc, gchar *
 #define RC_HISTORY_NAME "history"
 #define RC_MARKS_NAME "marks"
 
-static void setup_env_path(void)
+static void setup_env_path()
 {
 	const gchar *old_path = g_getenv("PATH");
 	gchar *path = g_strconcat(gq_bindir, ":", old_path, NULL);
@@ -835,7 +835,7 @@ static void setup_env_path(void)
 	g_free(path);
 }
 
-static void keys_load(void)
+static void keys_load()
 {
 	gchar *path;
 
@@ -844,7 +844,7 @@ static void keys_load(void)
 	g_free(path);
 }
 
-static void keys_save(void)
+static void keys_save()
 {
 	gchar *path;
 
@@ -853,7 +853,7 @@ static void keys_save(void)
 	g_free(path);
 }
 
-static void marks_load(void)
+static void marks_load()
 {
 	gchar *path;
 
@@ -958,12 +958,12 @@ static gboolean gq_accel_map_save(const gchar *path)
 	return TRUE;
 }
 
-static gchar *accep_map_filename(void)
+static gchar *accep_map_filename()
 {
 	return g_build_filename(get_rc_dir(), "accels", NULL);
 }
 
-static void accel_map_save(void)
+static void accel_map_save()
 {
 	gchar *path;
 
@@ -972,7 +972,7 @@ static void accel_map_save(void)
 	g_free(path);
 }
 
-static void accel_map_load(void)
+static void accel_map_load()
 {
 	gchar *path;
 	gchar *pathl;
@@ -984,7 +984,7 @@ static void accel_map_load(void)
 	g_free(path);
 }
 
-static void gtkrc_load(void)
+static void gtkrc_load()
 {
 	gchar *path;
 	gchar *pathl;
@@ -999,7 +999,7 @@ static void gtkrc_load(void)
 	g_free(path);
 }
 
-static void exit_program_final(void)
+static void exit_program_final()
 {
 	LayoutWindow *lw = nullptr;
 	GList *list;
@@ -1079,7 +1079,7 @@ static void exit_confirm_exit_cb(GenericDialog *gd, gpointer UNUSED(data))
 	exit_program_final();
 }
 
-static gint exit_confirm_dlg(void)
+static gint exit_confirm_dlg()
 {
 	GtkWidget *parent;
 	LayoutWindow *lw;
@@ -1121,7 +1121,7 @@ static void exit_program_write_metadata_cb(gint success, const gchar *UNUSED(des
 	if (success) exit_program();
 }
 
-void exit_program(void)
+void exit_program()
 {
 	layout_image_full_screen_stop(nullptr);
 
@@ -1174,7 +1174,7 @@ static void sigbus_handler_cb(int UNUSED(signum), siginfo_t *info, void *UNUSED(
 //#endif
 //}
 
-static void setup_sig_handler(void)
+static void setup_sig_handler()
 {
 	struct sigaction sigsegv_action;
 	sigfillset(&sigsegv_action.sa_mask);

@@ -70,7 +70,7 @@ static void filter_entry_free(FilterEntry *fe)
 	g_free(fe);
 }
 
-GList *filter_get_list(void)
+GList *filter_get_list()
 {
 	return filter_list;
 }
@@ -158,7 +158,7 @@ static void filter_add_if_missing(const gchar *key, const gchar *description, co
 	filter_add(key, description, extensions, file_class, writable, allow_sidecar, enabled);
 }
 
-void filter_reset(void)
+void filter_reset()
 {
 	GList *work;
 
@@ -174,7 +174,7 @@ void filter_reset(void)
 	filter_list = nullptr;
 }
 
-void filter_add_defaults(void)
+void filter_add_defaults()
 {
 	/* formats supported by custom loaders */
 	filter_add_if_missing("dds", "DirectDraw Surface", ".dds", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
@@ -370,7 +370,7 @@ static gint filter_sort_ext_len_cb(gconstpointer a, gconstpointer b)
 }
 
 
-void filter_rebuild(void)
+void filter_rebuild()
 {
 	GList *work;
 	guint i;
@@ -571,12 +571,12 @@ void filter_load_file_type(const gchar **attribute_names, const gchar **attribut
  *-----------------------------------------------------------------------------
  */
 
-GList *sidecar_ext_get_list(void)
+GList *sidecar_ext_get_list()
 {
 	return sidecar_ext_list;
 }
 
-static void sidecar_ext_free_list(void)
+static void sidecar_ext_free_list()
 {
 	GList *work;
 

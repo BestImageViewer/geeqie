@@ -190,7 +190,7 @@ void pref_toolbar_button_set_icon(GtkWidget *button, GtkWidget *widget, const gc
 GtkWidget *pref_toolbar_spacer(GtkWidget *toolbar);
 
 
-GtkWidget *date_selection_new(void);
+GtkWidget *date_selection_new();
 
 void date_selection_set(GtkWidget *widget, gint day, gint month, gint year);
 void date_selection_get(GtkWidget *widget, gint *day, gint *month, gint *year);

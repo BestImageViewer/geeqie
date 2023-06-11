@@ -166,7 +166,7 @@ void log_domain_printf(const gchar *domain, const gchar *format, ...)
 static gint debug_level = DEBUG_LEVEL_MIN;
 
 
-gint get_debug_level(void)
+gint get_debug_level()
 {
 	return debug_level;
 }
@@ -208,7 +208,7 @@ static gint timeval_delta(struct timeval *result, struct timeval *x, struct time
 	return x->tv_sec < y->tv_sec;
 }
 
-const gchar *get_exec_time(void)
+const gchar *get_exec_time()
 {
 	static gchar timestr[30];
 	static struct timeval start_tv = {0, 0};
@@ -241,7 +241,7 @@ const gchar *get_exec_time(void)
 	return timestr;
 }
 
-void init_exec_time(void)
+void init_exec_time()
 {
 	get_exec_time();
 }
@@ -251,7 +251,7 @@ void set_regexp(const gchar *cmd_regexp)
 	regexp = g_strdup(cmd_regexp);
 }
 
-gchar *get_regexp(void)
+gchar *get_regexp()
 {
 	return g_strdup(regexp);
 }

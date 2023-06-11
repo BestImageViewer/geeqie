@@ -63,7 +63,7 @@ struct CacheData
 gboolean cache_time_valid(const gchar *cache, const gchar *path);
 
 
-CacheData *cache_sim_data_new(void);
+CacheData *cache_sim_data_new();
 void cache_sim_data_free(CacheData *cd);
 
 gboolean cache_sim_data_save(CacheData *cd);
@@ -78,9 +78,9 @@ gint cache_sim_data_filled(ImageSimilarityData *sd);
 gchar *cache_get_location(CacheType type, const gchar *source, gint include_name, mode_t *mode);
 gchar *cache_find_location(CacheType type, const gchar *source);
 
-const gchar *get_thumbnails_cache_dir(void);
-const gchar *get_thumbnails_standard_cache_dir(void);
-const gchar *get_metadata_cache_dir(void);
+const gchar *get_thumbnails_cache_dir();
+const gchar *get_thumbnails_standard_cache_dir();
+const gchar *get_metadata_cache_dir();
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

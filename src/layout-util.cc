@@ -1937,7 +1937,7 @@ static void layout_menu_recent_update(LayoutWindow *lw)
 	gtk_widget_set_sensitive(recent, (n != 0));
 }
 
-void layout_recent_update_all(void)
+void layout_recent_update_all()
 {
 	GList *work;
 
@@ -3337,7 +3337,7 @@ static gboolean layout_editors_reload_idle_cb(gpointer UNUSED(data))
 	return G_SOURCE_CONTINUE;
 }
 
-void layout_editors_reload_start(void)
+void layout_editors_reload_start()
 {
 	DEBUG_1("%s layout_editors_reload_start", get_exec_time());
 
@@ -3351,7 +3351,7 @@ void layout_editors_reload_start(void)
 	layout_editors_reload_idle_id = g_idle_add(layout_editors_reload_idle_cb, nullptr);
 }
 
-void layout_editors_reload_finish(void)
+void layout_editors_reload_finish()
 {
 	if (layout_editors_reload_idle_id != -1)
 		{
@@ -3649,7 +3649,7 @@ void layout_util_status_update_write(LayoutWindow *lw)
 		}
 }
 
-void layout_util_status_update_write_all(void)
+void layout_util_status_update_write_all()
 {
 	GList *work;
 

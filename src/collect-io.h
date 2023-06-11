@@ -67,7 +67,7 @@ void collect_manager_remove(FileData *fd, const gchar *collection);
  * @headerfile collect_manager_flush
  * commit pending operations to disk
  */
-void collect_manager_flush(void);
+void collect_manager_flush();
 
 void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer data);
 void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths);

@@ -811,7 +811,7 @@ static void image_cache_release_cb(FileData *fd)
 	fd->pixbuf = nullptr;
 }
 
-static FileCacheData *image_get_cache(void)
+static FileCacheData *image_get_cache()
 {
 	static FileCacheData *cache = nullptr;
 	if (!cache) cache = file_cache_new(image_cache_release_cb, 1);
@@ -2071,7 +2071,7 @@ static void image_options_set(ImageWindow *imd)
 					options->stereo.fixed_x2, options->stereo.fixed_y2);
 }
 
-void image_options_sync(void)
+void image_options_sync()
 {
 	GList *work;
 

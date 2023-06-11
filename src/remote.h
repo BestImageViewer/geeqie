@@ -42,7 +42,7 @@ struct RemoteConnection {
 
 void remote_close(RemoteConnection *rc);
 GList *remote_build_list(GList *list, gint argc, gchar *argv[], GList **errors);
-void remote_help(void);
+void remote_help();
 void remote_control(const gchar *arg_exec, GList *remote_list, const gchar *path,
 		    GList *cmd_list, GList *collection_list);
 

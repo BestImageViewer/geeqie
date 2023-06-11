@@ -57,7 +57,7 @@
  *-------------------------------------------------------------------
  */
 
-CacheData *cache_sim_data_new(void)
+CacheData *cache_sim_data_new()
 {
 	CacheData *cd;
 
@@ -714,7 +714,7 @@ gboolean cache_time_valid(const gchar *cache, const gchar *path)
 	return ret;
 }
 
-const gchar *get_thumbnails_cache_dir(void)
+const gchar *get_thumbnails_cache_dir()
 {
 	static gchar *thumbnails_cache_dir = nullptr;
 
@@ -733,7 +733,7 @@ const gchar *get_thumbnails_cache_dir(void)
 	return thumbnails_cache_dir;
 }
 
-const gchar *get_thumbnails_standard_cache_dir(void)
+const gchar *get_thumbnails_standard_cache_dir()
 {
 	static gchar *thumbnails_standard_cache_dir = nullptr;
 
@@ -745,7 +745,7 @@ const gchar *get_thumbnails_standard_cache_dir(void)
 	return thumbnails_standard_cache_dir;
 }
 
-const gchar *get_metadata_cache_dir(void)
+const gchar *get_metadata_cache_dir()
 {
 	static gchar *metadata_cache_dir = nullptr;
 

@@ -37,14 +37,14 @@ struct FilterEntry {
  * @headerfile filter_get_list
  * you can change, but not add or remove entries from the returned list
  */
-GList *filter_get_list(void);
+GList *filter_get_list();
 void filter_remove_entry(FilterEntry *fe);
 
 void filter_add(const gchar *key, const gchar *description, const gchar *extensions, FileFormatClass file_class, gboolean writable, gboolean allow_sidecar, gboolean enabled);
 void filter_add_unique(const gchar *description, const gchar *extensions, FileFormatClass file_class, gboolean writable, gboolean allow_sidecar, gboolean enabled);
-void filter_add_defaults(void);
-void filter_reset(void);
-void filter_rebuild(void);
+void filter_add_defaults();
+void filter_reset();
+void filter_rebuild();
 GList *filter_to_list(const gchar *extensions);
 
 const gchar *registered_extension_from_path(const gchar *name);
@@ -59,8 +59,8 @@ void filter_load_file_type(const gchar **attribute_names, const gchar **attribut
 
 
 void sidecar_ext_parse(const gchar *text);
-gchar *sidecar_ext_to_string(void);
-GList *sidecar_ext_get_list(void);
+gchar *sidecar_ext_to_string();
+GList *sidecar_ext_get_list();
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -91,12 +91,12 @@ extern GtkListStore *desktop_file_list;
 
 extern GHashTable *editors;
 
-void editor_table_finish(void);
-void editor_table_clear(void);
-GList *editor_get_desktop_files(void);
+void editor_table_finish();
+void editor_table_clear();
+GList *editor_get_desktop_files();
 gboolean editor_read_desktop_file(const gchar *path);
 
-GList *editor_list_get(void);
+GList *editor_list_get();
 
 
 /**

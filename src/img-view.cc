@@ -1083,7 +1083,7 @@ void view_window_new_from_collection(CollectionData *cd, CollectInfo *info)
  *-----------------------------------------------------------------------------
  */
 
-void view_window_colors_update(void)
+void view_window_colors_update()
 {
 	GList *work;
 

@@ -25,7 +25,7 @@
 
 #include <langinfo.h>
 
-gdouble get_zoom_increment(void)
+gdouble get_zoom_increment()
 {
 	return ((options->image.zoom_increment != 0) ? static_cast<gdouble>(options->image.zoom_increment) / 100.0 : 1.0);
 }
@@ -376,7 +376,7 @@ gchar *get_symbolic_link(const gchar *path_utf8)
 	return ret;
 }
 
-gint get_cpu_cores(void)
+gint get_cpu_cores()
 {
     return sysconf(_SC_NPROCESSORS_ONLN);
 }

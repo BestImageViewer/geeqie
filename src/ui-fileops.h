@@ -48,14 +48,14 @@ gchar *path_to_utf8(const gchar *path);
 gchar *path_from_utf8(const gchar *utf8);
 #endif
 
-const gchar *xdg_data_home_get(void);
-const gchar *xdg_config_home_get(void);
-const gchar *xdg_cache_home_get(void);
-const gchar *homedir(void);
-const gchar *get_rc_dir(void);
-const gchar *get_collections_dir(void);
-const gchar *get_trash_dir(void);
-const gchar *get_window_layouts_dir(void);
+const gchar *xdg_data_home_get();
+const gchar *xdg_config_home_get();
+const gchar *xdg_cache_home_get();
+const gchar *homedir();
+const gchar *get_rc_dir();
+const gchar *get_collections_dir();
+const gchar *get_trash_dir();
+const gchar *get_window_layouts_dir();
 
 gboolean stat_utf8(const gchar *s, struct stat *st);
 gboolean lstat_utf8(const gchar *s, struct stat *st);
@@ -77,7 +77,7 @@ gboolean copy_file_attributes(const gchar *s, const gchar *t, gint perms, gint m
 gboolean copy_file(const gchar *s, const gchar *t);
 gboolean move_file(const gchar *s, const gchar *t);
 gboolean rename_file(const gchar *s, const gchar *t);
-gchar *get_current_dir(void);
+gchar *get_current_dir();
 
 /**
  * @headerfile string_list_free

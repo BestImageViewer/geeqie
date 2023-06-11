@@ -729,7 +729,7 @@ static gboolean collect_manager_process_action(CollectManagerEntry *entry, gchar
 	return FALSE; /* no change */
 }
 
-static void collect_manager_refresh(void)
+static void collect_manager_refresh()
 {
 	GList *list;
 	GList *work;
@@ -859,7 +859,7 @@ static gboolean collect_manager_process_entry(CollectManagerEntry *entry)
 	return TRUE;
 }
 
-static gboolean collect_manager_process_entry_list(void)
+static gboolean collect_manager_process_entry_list()
 {
 	GList *work;
 
@@ -987,7 +987,7 @@ void collect_manager_remove(FileData *fd, const gchar *collection)
 	collect_manager_add_action(action);
 }
 
-void collect_manager_flush(void)
+void collect_manager_flush()
 {
 	collect_manager_timer_push(TRUE);
 

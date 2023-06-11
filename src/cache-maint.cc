@@ -1678,7 +1678,7 @@ static void cache_manager_cache_maintenance_load_cb(GtkWidget *widget, gpointer 
 	cache_manager_cache_maintenance_load_dialog(widget, path);
 }
 
-void cache_manager_show(void)
+void cache_manager_show()
 {
 	GenericDialog *gd;
 	GtkWidget *group;

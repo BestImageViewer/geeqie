@@ -174,7 +174,7 @@ gchar *path_from_utf8(const gchar *utf8)
 }
 
 /* first we try the HOME environment var, if that doesn't work, we try g_get_homedir(). */
-const gchar *homedir(void)
+const gchar *homedir()
 {
 	static gchar *home = nullptr;
 
@@ -203,7 +203,7 @@ static gchar *xdg_dir_get(const gchar *key, const gchar *fallback)
 	return path_to_utf8(dir);
 }
 
-const gchar *xdg_data_home_get(void)
+const gchar *xdg_data_home_get()
 {
 	static const gchar *xdg_data_home = nullptr;
 
@@ -214,7 +214,7 @@ const gchar *xdg_data_home_get(void)
 	return xdg_data_home;
 }
 
-const gchar *xdg_config_home_get(void)
+const gchar *xdg_config_home_get()
 {
 	static const gchar *xdg_config_home = nullptr;
 
@@ -225,7 +225,7 @@ const gchar *xdg_config_home_get(void)
 	return xdg_config_home;
 }
 
-const gchar *xdg_cache_home_get(void)
+const gchar *xdg_cache_home_get()
 {
 	static const gchar *xdg_cache_home = nullptr;
 
@@ -236,7 +236,7 @@ const gchar *xdg_cache_home_get(void)
 	return xdg_cache_home;
 }
 
-const gchar *get_rc_dir(void)
+const gchar *get_rc_dir()
 {
 	static gchar *rc_dir = nullptr;
 
@@ -254,7 +254,7 @@ const gchar *get_rc_dir(void)
 	return rc_dir;
 }
 
-const gchar *get_collections_dir(void)
+const gchar *get_collections_dir()
 {
 	static gchar *collections_dir = nullptr;
 
@@ -272,7 +272,7 @@ const gchar *get_collections_dir(void)
 	return collections_dir;
 }
 
-const gchar *get_trash_dir(void)
+const gchar *get_trash_dir()
 {
 	static gchar *trash_dir = nullptr;
 
@@ -290,7 +290,7 @@ const gchar *get_trash_dir(void)
 	return trash_dir;
 }
 
-const gchar *get_window_layouts_dir(void)
+const gchar *get_window_layouts_dir()
 {
 	static gchar *window_layouts_dir = nullptr;
 
@@ -709,7 +709,7 @@ gboolean rename_file(const gchar *s, const gchar *t)
 	return ret;
 }
 
-gchar *get_current_dir(void)
+gchar *get_current_dir()
 {
 	gchar *pathl;
 	gchar *path8;

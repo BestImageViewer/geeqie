@@ -125,7 +125,7 @@ struct _ImageLoaderClass {
 	void (*percent)(ImageLoader *, gdouble, gpointer);
 };
 
-GType image_loader_get_type(void);
+GType image_loader_get_type();
 
 ImageLoader *image_loader_new(FileData *fd);
 

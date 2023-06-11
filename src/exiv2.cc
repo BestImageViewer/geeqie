@@ -443,7 +443,7 @@ public:
 
 
 
-void exif_init(void)
+void exif_init()
 {
 #ifdef EXV_ENABLE_NLS
 	bind_textdomain_codeset (EXV_PACKAGE, "UTF-8");

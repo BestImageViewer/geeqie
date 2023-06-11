@@ -98,7 +98,7 @@ static gint file_util_safe_number(gint64 free_space)
 	return n;
 }
 
-void file_util_trash_clear(void)
+void file_util_trash_clear()
 {
 	file_util_safe_number(-1);
 }
@@ -206,7 +206,7 @@ gboolean file_util_safe_unlink(const gchar *path)
 	return success;
 }
 
-gchar *file_util_safe_delete_status(void)
+gchar *file_util_safe_delete_status()
 {
 	gchar *buf = nullptr;
 

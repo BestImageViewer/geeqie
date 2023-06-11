@@ -272,7 +272,7 @@ static void dupe_window_update_count(DupeWindow *dw, gboolean count_only)
  *
  *
  */
-static guint64 msec_time(void)
+static guint64 msec_time()
 {
 	struct timeval tv;
 

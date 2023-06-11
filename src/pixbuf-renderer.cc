@@ -153,7 +153,7 @@ static void pixbuf_renderer_init_wrapper(PixbufRenderer *pr, void *UNUSED(class_
 	pixbuf_renderer_init(pr);
 }
 
-GType pixbuf_renderer_get_type(void)
+GType pixbuf_renderer_get_type()
 {
 	static GType pixbuf_renderer_type = 0;
 
@@ -483,7 +483,7 @@ static void pixbuf_renderer_finalize(GObject *object)
 	pr_source_tile_free_all(pr);
 }
 
-PixbufRenderer *pixbuf_renderer_new(void)
+PixbufRenderer *pixbuf_renderer_new()
 {
 	return static_cast<PixbufRenderer *>(g_object_new(TYPE_PIXBUF_RENDERER, nullptr));
 }
