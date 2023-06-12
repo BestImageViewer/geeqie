@@ -28,8 +28,7 @@
 #include <libdjvu/ddjvuapi.h>
 #include <libdjvu/miniexp.h>
 
-typedef struct _ImageLoaderDJVU ImageLoaderDJVU;
-struct _ImageLoaderDJVU {
+struct ImageLoaderDJVU {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;

@@ -54,8 +54,7 @@
  *-------------------------------------------------------------------
  */
 
-typedef struct _PaneGPSData PaneGPSData;
-struct _PaneGPSData
+struct PaneGPSData
 {
 	PaneData pane;
 	GtkWidget *widget;

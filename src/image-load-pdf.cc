@@ -26,8 +26,7 @@
 #ifdef HAVE_PDF
 #include <poppler/glib/poppler.h>
 
-typedef struct _ImageLoaderPDF ImageLoaderPDF;
-struct _ImageLoaderPDF {
+struct ImageLoaderPDF {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;

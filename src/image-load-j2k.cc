@@ -29,8 +29,7 @@
 
 #include "openjpeg.h"
 
-typedef struct _ImageLoaderJ2K ImageLoaderJ2K;
-struct _ImageLoaderJ2K {
+struct ImageLoaderJ2K {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
@@ -46,11 +45,11 @@ static void free_buffer(guchar *pixels, gpointer UNUSED(data))
 	g_free (pixels);
 }
 
-typedef struct opj_buffer_info {
+struct opj_buffer_info {
     OPJ_BYTE* buf;
     OPJ_BYTE* cur;
     OPJ_SIZE_T len;
-} opj_buffer_info_t;
+};
 
 static OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, opj_buffer_info_t* psrc)
 {

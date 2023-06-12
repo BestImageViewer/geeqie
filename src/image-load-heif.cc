@@ -26,8 +26,7 @@
 #ifdef HAVE_HEIF
 #include <libheif/heif.h>
 
-typedef struct _ImageLoaderHEIF ImageLoaderHEIF;
-struct _ImageLoaderHEIF {
+struct ImageLoaderHEIF {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
 	ImageLoaderBackendCbAreaPrepared area_prepared_cb;

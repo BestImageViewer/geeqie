@@ -36,8 +36,7 @@
 #include <libraw/libraw.h>
 #include <sys/mman.h>
 
-typedef struct _UnmapData UnmapData;
-struct _UnmapData
+struct UnmapData
 {
 	guchar *ptr;
 	guchar *map_data;
