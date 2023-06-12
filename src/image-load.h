@@ -41,8 +41,7 @@ using ImageLoaderBackendFuncGetFormatMimeTypes = gchar **(*)(gpointer);
 using ImageLoaderBackendFuncSetPageNum = void (*)(gpointer, gint);
 using ImageLoaderBackendFuncGetPageTotal = gint (*)(gpointer);
 
-using ImageLoaderBackend = struct _ImageLoaderBackend;
-struct _ImageLoaderBackend
+struct ImageLoaderBackend
 {
 	ImageLoaderBackendFuncLoaderNew loader_new;
 	ImageLoaderBackendFuncSetSize set_size;
@@ -65,10 +64,7 @@ enum ImageLoaderPreview {
 };
 
 
-//typedef struct _ImageLoader ImageLoader;
-using ImageLoaderClass = struct _ImageLoaderClass;
-
-struct _ImageLoader
+struct ImageLoader
 {
 	GObject parent;
 
@@ -115,7 +111,7 @@ struct _ImageLoader
 	guint idle_read_loop_count;
 };
 
-struct _ImageLoaderClass {
+struct ImageLoaderClass {
 	GObjectClass parent;
 
 	/* class members */

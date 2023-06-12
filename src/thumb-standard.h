@@ -35,10 +35,10 @@
 #define THUMB_NAME_EXTENSION ".png"
 
 
-using ThumbLoaderStd = struct _ThumbLoaderStd;
+struct ThumbLoaderStd;
 using ThumbLoaderStdFunc = void (*)(ThumbLoaderStd *, gpointer);
 
-struct _ThumbLoaderStd
+struct ThumbLoaderStd
 {
 	gboolean standard_loader;
 

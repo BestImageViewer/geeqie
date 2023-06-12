@@ -24,7 +24,7 @@
 
 #include "similar.h"
 
-/** @typedef DupeMatchType
+/** @enum DupeMatchType
  *  match methods
  */
 enum DupeMatchType

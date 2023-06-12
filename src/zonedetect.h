@@ -59,8 +59,7 @@ struct ZoneDetectResult {
     char **data;
 };
 
-struct ZoneDetectOpaque;
-using ZoneDetect = struct ZoneDetectOpaque;
+struct ZoneDetect;
 
 #ifdef __cplusplus
 extern "C" {

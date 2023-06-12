@@ -24,7 +24,7 @@
 #include "main.h"
 #include "filedata.h"
 
-using FileCacheData = struct _FileCacheData;
+struct FileCacheData;
 using FileCacheReleaseFunc = void (*)(FileData *);
 
 

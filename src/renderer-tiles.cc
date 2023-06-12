@@ -50,7 +50,7 @@ enum ExifOrientationType {
 };
 #endif
 
-using QueueData = struct _QueueData;
+struct QueueData;
 
 struct ImageTile
 {
@@ -79,7 +79,7 @@ struct ImageTile
 	guint size;		/* est. memory used by pixmap and pixbuf */
 };
 
-struct _QueueData
+struct QueueData
 {
 	ImageTile *it;
 	gint x;

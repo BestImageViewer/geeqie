@@ -61,10 +61,10 @@
 #define ROUND_DOWN(A,B) ((gint)(((A))/(B))*(B))
 
 
-using RendererFuncs = struct _RendererFuncs;
+struct RendererFuncs;
 
-using PixbufRenderer = struct _PixbufRenderer;
-using PixbufRendererClass = struct _PixbufRendererClass;
+struct PixbufRenderer;
+struct PixbufRendererClass;
 
 
 using PixbufRendererTileRequestFunc = gint (*)(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
@@ -91,7 +91,7 @@ enum OverlayRendererFlags {
 	/* OVL_HIDE_ON_SCROLL = 1 << 1*/ /**< hide temporarily when scrolling (not yet implemented) */
 };
 
-struct _RendererFuncs
+struct RendererFuncs
 {
 //	void (*redraw)(void *renderer, gint x, gint y, gint w, gint h,
   //                   gint clamp, ImageRenderType render, gboolean new_data, gboolean only_existing);
@@ -111,7 +111,7 @@ struct _RendererFuncs
 	void (*free)(void *renderer);
 };
 
-struct _PixbufRenderer
+struct PixbufRenderer
 {
 	GtkEventBox eventbox;
 
@@ -231,7 +231,7 @@ struct _PixbufRenderer
 	gboolean ignore_alpha;
 };
 
-struct _PixbufRendererClass
+struct PixbufRendererClass
 {
 	GtkEventBoxClass parent_class;
 
@@ -373,11 +373,10 @@ gint pixbuf_renderer_stereo_get(PixbufRenderer *pr);
 void pixbuf_renderer_stereo_fixed_set(PixbufRenderer *pr, gint width, gint height, gint x1, gint y1, gint x2, gint y2);
 
 /**
- * @struct _SourceTile
+ * @struct SourceTile
  * protected - for renderer use only
  */
-using SourceTile = struct _SourceTile;
-struct _SourceTile
+struct SourceTile
 {
 	gint x;
 	gint y;

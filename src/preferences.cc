@@ -475,10 +475,10 @@ static void config_window_apply()
 #ifdef HAVE_LCMS
 	for (i = 0; i < COLOR_PROFILE_INPUTS; i++)
 		{
-		config_entry_to_option(color_profile_input_name_entry[i], &options->color_profile.input_name[i], NULL);
-		config_entry_to_option(color_profile_input_file_entry[i], &options->color_profile.input_file[i], NULL);
+		config_entry_to_option(color_profile_input_name_entry[i], &options->color_profile.input_name[i], nullptr);
+		config_entry_to_option(color_profile_input_file_entry[i], &options->color_profile.input_file[i], nullptr);
 		}
-	config_entry_to_option(color_profile_screen_file_entry, &options->color_profile.screen_file, NULL);
+	config_entry_to_option(color_profile_screen_file_entry, &options->color_profile.screen_file, nullptr);
 	options->color_profile.use_x11_screen_profile = c_options->color_profile.use_x11_screen_profile;
 	if (options->color_profile.render_intent != c_options->color_profile.render_intent)
 		{
@@ -3343,7 +3343,7 @@ static void config_tab_keywords(GtkWidget *notebook)
 #ifdef HAVE_LCMS
 static void intent_menu_cb(GtkWidget *combo, gpointer data)
 {
-	gint *option = static_cast<gint *>(data);
+	auto option = static_cast<gint *>(data);
 
 	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
 		{

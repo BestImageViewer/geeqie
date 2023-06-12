@@ -1023,7 +1023,7 @@ static void exit_program_final()
 			tmp_lw = static_cast<LayoutWindow *>(list->data);
 			if (!g_str_has_prefix(tmp_lw->options.id, "lw"))
 				{
-				save_layout(static_cast<_LayoutWindow *>(list->data));
+				save_layout(static_cast<LayoutWindow *>(list->data));
 				}
 			list = list->next;
 			}

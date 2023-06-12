@@ -56,7 +56,7 @@ struct ColorManCache {
 #define COLOR_MAN_CHUNK_SIZE 81900
 
 
-static void color_man_lib_init(void)
+static void color_man_lib_init()
 {
 	static gboolean init_done = FALSE;
 
@@ -68,7 +68,7 @@ static void color_man_lib_init(void)
 #endif
 }
 
-static cmsHPROFILE color_man_create_adobe_comp(void)
+static cmsHPROFILE color_man_create_adobe_comp()
 {
 	/* ClayRGB1998 is AdobeRGB compatible */
 #include "ClayRGB1998_icc.h"
@@ -81,7 +81,7 @@ static cmsHPROFILE color_man_create_adobe_comp(void)
  *-------------------------------------------------------------------
  */
 
-static GList *cm_cache_list = NULL;
+static GList *cm_cache_list = nullptr;
 
 
 static void color_man_cache_ref(ColorManCache *cc)
@@ -112,7 +112,7 @@ static void color_man_cache_unref(ColorManCache *cc)
 static cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const gchar *file,
 						guchar *data, guint data_len)
 {
-	cmsHPROFILE profile = NULL;
+	cmsHPROFILE profile = nullptr;
 
 	switch (type)
 		{
@@ -180,7 +180,7 @@ static ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gch
 				  (!cc->profile_in) ? cc->profile_in_file : cc->profile_out_file);
 
 		color_man_cache_unref(cc);
-		return NULL;
+		return nullptr;
 		}
 
 	cc->transform = cmsCreateTransform(cc->profile_in,
@@ -194,7 +194,7 @@ static ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gch
 		DEBUG_1("failed to create color profile transform");
 
 		color_man_cache_unref(cc);
-		return NULL;
+		return nullptr;
 		}
 
 	if (cc->profile_in_type != COLOR_PROFILE_MEM && cc->profile_out_type != COLOR_PROFILE_MEM )
@@ -214,7 +214,7 @@ static void color_man_cache_free(ColorManCache *cc)
 	color_man_cache_unref(cc);
 }
 
-static void color_man_cache_reset(void)
+static void color_man_cache_reset()
 {
 	while (cm_cache_list)
 		{
@@ -261,7 +261,7 @@ static ColorManCache *color_man_cache_find(ColorManProfileType in_type, const gc
 		if (match) return cc;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 static ColorManCache *color_man_cache_get(ColorManProfileType in_type, const gchar *in_file,
@@ -396,7 +396,7 @@ static ColorMan *color_man_new_real(ImageWindow *imd, GdkPixbuf *pixbuf,
 	if (!cm->profile)
 		{
 		color_man_free(cm);
-		return NULL;
+		return nullptr;
 		}
 
 	return cm;
@@ -408,7 +408,7 @@ ColorMan *color_man_new(ImageWindow *imd, GdkPixbuf *pixbuf,
 			guchar *screen_data, guint screen_data_len)
 {
 	return color_man_new_real(imd, pixbuf,
-				  input_type, input_file, NULL, 0,
+				  input_type, input_file, nullptr, 0,
 				  screen_type, screen_file, screen_data, screen_data_len);
 }
 
@@ -425,7 +425,7 @@ ColorMan *color_man_new_embedded(ImageWindow *imd, GdkPixbuf *pixbuf,
 				 guchar *screen_data, guint screen_data_len)
 {
 	return color_man_new_real(imd, pixbuf,
-				  COLOR_PROFILE_MEM, NULL, input_data, input_data_len,
+				  COLOR_PROFILE_MEM, nullptr, input_data, input_data_len,
 				  screen_type, screen_file, screen_data, screen_data_len);
 }
 
@@ -484,7 +484,7 @@ void color_man_free(ColorMan *cm)
 	g_free(cm);
 }
 
-void color_man_update(void)
+void color_man_update()
 {
 	color_man_cache_reset();
 }
@@ -495,7 +495,7 @@ void color_man_update(void)
 
 static cmsToneCurve* colorspaces_create_transfer(int32_t size, double (*fct)(double))
 {
-	float *values = static_cast<float *>(g_malloc(sizeof(float) * size));
+	auto values = static_cast<float *>(g_malloc(sizeof(float) * size));
 
 	for(int32_t i = 0; i < size; ++i)
 		{
@@ -504,7 +504,7 @@ static cmsToneCurve* colorspaces_create_transfer(int32_t size, double (*fct)(dou
 		values[i] = static_cast<float>(y);
 		}
 
-	cmsToneCurve* result = cmsBuildTabulatedToneCurveFloat(NULL, size, values);
+	cmsToneCurve* result = cmsBuildTabulatedToneCurveFloat(nullptr, size, values);
 	g_free(values);
 	return result;
 }
@@ -571,12 +571,12 @@ static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, 
 {
 	const gchar *primaries_name = "";
 	const gchar *trc_name = "";
-	cmsHPROFILE *profile = NULL;
+	cmsHPROFILE *profile = nullptr;
 	cmsCIExyY whitepoint;
 	cmsCIExyYTRIPLE primaries;
 	cmsToneCurve *curve[3];
 	cmsUInt32Number size;
-	guint8 *data = NULL;
+	guint8 *data = nullptr;
 
 	cmsFloat64Number srgb_parameters[5] =
 	{ 2.4, 1.0 / 1.055,  0.055 / 1.055, 1.0 / 12.92, 0.04045 };
@@ -584,14 +584,14 @@ static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, 
 	cmsFloat64Number rec709_parameters[5] =
 	{ 2.2, 1.0 / 1.099,  0.099 / 1.099, 1.0 / 4.5, 0.081 };
 
-	if (nclx == NULL)
+	if (nclx == nullptr)
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	if (nclx->color_primaries == heif_color_primaries_unspecified)
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	whitepoint.x = nclx->color_primary_white_x;
@@ -647,7 +647,7 @@ static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, 
 			break;
 		default:
 			log_printf("nclx unsupported color_primaries value: %d\n", nclx->color_primaries);
-			return NULL;
+			return nullptr;
 			break;
 		}
 
@@ -656,25 +656,25 @@ static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, 
 	switch (nclx->transfer_characteristics)
 		{
 		case heif_transfer_characteristic_ITU_R_BT_709_5:
-			curve[0] = curve[1] = curve[2] = cmsBuildParametricToneCurve(NULL, 4, rec709_parameters);
+			curve[0] = curve[1] = curve[2] = cmsBuildParametricToneCurve(nullptr, 4, rec709_parameters);
 			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
 			cmsFreeToneCurve(curve[0]);
 			trc_name = "Rec709 RGB";
 			break;
 		case heif_transfer_characteristic_ITU_R_BT_470_6_System_M:
-			curve[0] = curve[1] = curve[2] = cmsBuildGamma (NULL, 2.2f);
+			curve[0] = curve[1] = curve[2] = cmsBuildGamma (nullptr, 2.2f);
 			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
 			cmsFreeToneCurve(curve[0]);
 			trc_name = "Gamma2.2 RGB";
 			break;
 		case heif_transfer_characteristic_ITU_R_BT_470_6_System_B_G:
-			curve[0] = curve[1] = curve[2] = cmsBuildGamma (NULL, 2.8f);
+			curve[0] = curve[1] = curve[2] = cmsBuildGamma (nullptr, 2.8f);
 			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
 			cmsFreeToneCurve(curve[0]);
 			trc_name = "Gamma2.8 RGB";
 			break;
 		case heif_transfer_characteristic_linear:
-			curve[0] = curve[1] = curve[2] = cmsBuildGamma (NULL, 1.0f);
+			curve[0] = curve[1] = curve[2] = cmsBuildGamma (nullptr, 1.0f);
 			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
 			cmsFreeToneCurve(curve[0]);
 			trc_name = "linear RGB";
@@ -694,7 +694,7 @@ static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, 
 		case heif_transfer_characteristic_IEC_61966_2_1:
 		/* same as default */
 		default:
-			curve[0] = curve[1] = curve[2] = cmsBuildParametricToneCurve(NULL, 4, srgb_parameters);
+			curve[0] = curve[1] = curve[2] = cmsBuildParametricToneCurve(nullptr, 4, srgb_parameters);
 			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
 			cmsFreeToneCurve(curve[0]);
 			trc_name = "sRGB-TRC RGB";
@@ -705,7 +705,7 @@ static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, 
 
 	if (profile)
 		{
-		if (cmsSaveProfileToMem(profile, NULL, &size))
+		if (cmsSaveProfileToMem(profile, nullptr, &size))
 			{
 			data = static_cast<guint8 *>(g_malloc(size));
 			if (cmsSaveProfileToMem(profile, data, &size))
@@ -718,12 +718,12 @@ static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, 
 		else
 			{
 			cmsCloseProfile(profile);
-			return NULL;
+			return nullptr;
 			}
 		}
 	else
 		{
-		return NULL;
+		return nullptr;
 		}
 }
 
@@ -736,16 +736,16 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 	gint profile_type;
 	guchar *profile;
 	cmsUInt32Number size;
-	guint8 *data = NULL;
+	guint8 *data = nullptr;
 
 	ctx = heif_context_alloc();
-	error_code = heif_context_read_from_file(ctx, fd->path, NULL);
+	error_code = heif_context_read_from_file(ctx, fd->path, nullptr);
 
 	if (error_code.code)
 		{
 		log_printf("warning: heif reader error: %s\n", error_code.message);
 		heif_context_free(ctx);
-		return NULL;
+		return nullptr;
 		}
 
 	error_code = heif_context_get_primary_image_handle(ctx, &handle);
@@ -753,7 +753,7 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 		{
 		log_printf("warning: heif reader error: %s\n", error_code.message);
 		heif_context_free(ctx);
-		return NULL;
+		return nullptr;
 		}
 
 	nclxcp = heif_nclx_color_profile_alloc();
@@ -770,7 +770,7 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 			log_printf("warning: heif reader error: %s\n", error_code.message);
 			heif_context_free(ctx);
 			heif_nclx_color_profile_free(nclxcp);
-			return NULL;
+			return nullptr;
 			}
 
 		DEBUG_1("heif color profile type: prof");
@@ -787,7 +787,7 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 			log_printf("warning: heif reader error: %s\n", error_code.message);
 			heif_context_free(ctx);
 			heif_nclx_color_profile_free(nclxcp);
-			return NULL;
+			return nullptr;
 			}
 
 		profile = nclx_to_lcms_profile(nclxcp, profile_len);

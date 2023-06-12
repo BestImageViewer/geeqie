@@ -44,7 +44,7 @@ struct UnmapData
 	libraw_data_t *lrdt;
 };
 
-static GList *libraw_unmap_list = 0;
+static GList *libraw_unmap_list = nullptr;
 
 void libraw_free_preview(guchar *buf)
 {
@@ -52,7 +52,7 @@ void libraw_free_preview(guchar *buf)
 
 	while (work)
 		{
-		UnmapData *ud = static_cast<UnmapData *>(work->data);
+		auto ud = static_cast<UnmapData *>(work->data);
 		if (ud->ptr == buf)
 			{
 			munmap(ud->map_data, ud->map_len);
@@ -76,34 +76,34 @@ guchar *libraw_get_preview(ImageLoader *il, guint *data_len)
 	size_t map_len;
 	int fd;
 
-	if (!filter_file_class(il->fd->path, FORMAT_CLASS_RAWIMAGE)) return NULL;
+	if (!filter_file_class(il->fd->path, FORMAT_CLASS_RAWIMAGE)) return nullptr;
 
 	fd = open(il->fd->path, O_RDONLY);
 	if (fd == -1)
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	if (fstat(fd, &st) == -1)
 		{
 		close(fd);
-		return NULL;
+		return nullptr;
 		}
 
 	map_len = st.st_size;
-	map_data = static_cast<guchar *>(mmap(0, map_len, PROT_READ, MAP_PRIVATE, fd, 0));
+	map_data = static_cast<guchar *>(mmap(nullptr, map_len, PROT_READ, MAP_PRIVATE, fd, 0));
 	close(fd);
 
 	if (map_data == MAP_FAILED)
 		{
-		return NULL;
+		return nullptr;
 		}
 
 	lrdt = libraw_init(0);
 	if (!lrdt)
 		{
 		log_printf("Warning: Cannot create libraw handle\n");
-		return NULL;
+		return nullptr;
 		}
 
 	ret = libraw_open_buffer(lrdt, map_data, map_len);
@@ -129,7 +129,7 @@ guchar *libraw_get_preview(ImageLoader *il, guint *data_len)
 
 	libraw_close(lrdt);
 
-	return NULL;
+	return nullptr;
 }
 
 #else /* !define HAVE_RAW */

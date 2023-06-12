@@ -90,7 +90,7 @@ enum SortType {
 };
 
 /**
- * @typedef DnDAction
+ * @enum DnDAction
  * drag and drop default action
  */
 enum DnDAction {
@@ -173,7 +173,7 @@ enum FileFormatClass {
 extern const gchar *format_class_list[]; /**< defined in preferences.cc */
 
 /**
- * @typedef SecureSaveErrno
+ * @enum SecureSaveErrno
  * see err field in #SecureSaveInfo
  */
 enum SecureSaveErrno {
@@ -317,48 +317,48 @@ enum SelectionType {
 	SELECTION_FOCUS		= 1 << 2
 };
 
-using ImageLoader = struct _ImageLoader;
-using ThumbLoader = struct _ThumbLoader;
+struct ImageLoader;
+struct ThumbLoader;
 
-using AnimationData = struct _AnimationData;
+struct AnimationData;
 
-using CollectInfo = struct _CollectInfo;
-using CollectionData = struct _CollectionData;
-using CollectTable = struct _CollectTable;
-using CollectWindow = struct _CollectWindow;
+struct CollectInfo;
+struct CollectionData;
+struct CollectTable;
+struct CollectWindow;
 
-using ImageWindow = struct _ImageWindow;
+struct ImageWindow;
 
-using FileData = struct _FileData;
-using FileDataChangeInfo = struct _FileDataChangeInfo;
+struct FileData;
+struct FileDataChangeInfo;
 
-using LayoutWindow = struct _LayoutWindow;
-using LayoutOptions = struct _LayoutOptions;
+struct LayoutWindow;
+struct LayoutOptions;
 
-using ViewDir = struct _ViewDir;
-using ViewDirInfoList = struct _ViewDirInfoList;
-using ViewDirInfoTree = struct _ViewDirInfoTree;
+struct ViewDir;
+struct ViewDirInfoList;
+struct ViewDirInfoTree;
 
-using ViewFile = struct _ViewFile;
-using ViewFileInfoList = struct _ViewFileInfoList;
-using ViewFileInfoIcon = struct _ViewFileInfoIcon;
+struct ViewFile;
+struct ViewFileInfoList;
+struct ViewFileInfoIcon;
 
-using SlideShowData = struct _SlideShowData;
-using FullScreenData = struct _FullScreenData;
+struct SlideShowData;
+struct FullScreenData;
 
-using PixmapFolders = struct _PixmapFolders;
-using Histogram = struct _Histogram;
-using HistMap = struct _HistMap;
+struct PixmapFolders;
+struct Histogram;
+struct HistMap;
 
-using SecureSaveInfo = struct _SecureSaveInfo;
+struct SecureSaveInfo;
 
 struct ExifData;
 
-using EditorDescription = struct _EditorDescription;
+struct EditorDescription;
 
-using CommandLine = struct _CommandLine;
+struct CommandLine;
 
-struct _Histogram {
+struct Histogram {
 	gint histogram_channel; /**< drawing mode for histogram */
 	gint histogram_mode;     /**< logarithmical or not */
 	guint vgrid; /**< number of vertical divisions, 0 for none */
@@ -374,13 +374,13 @@ struct _Histogram {
 
 
 
-struct _ImageLoader;
+struct ImageLoader;
 
 using ThumbLoaderFunc = void (*)(ThumbLoader *, gpointer);
 
 using FileUtilDoneFunc = void (*)(gboolean, const gchar *, gpointer);
 
-struct _ThumbLoader
+struct ThumbLoader
 {
 	gboolean standard_loader;
 
@@ -403,7 +403,7 @@ struct _ThumbLoader
 	guint idle_done_id; /**< event source id */
 };
 
-struct _AnimationData
+struct AnimationData
 {
 	ImageWindow *iw;
 	LayoutWindow *lw;
@@ -418,14 +418,14 @@ struct _AnimationData
 	GFileInputStream *gfstream;
 };
 
-struct _CollectInfo
+struct CollectInfo
 {
 	FileData *fd;
 	GdkPixbuf *pixbuf;
 	guint flag_mask;
 };
 
-struct _CollectionData
+struct CollectionData
 {
 	gchar *path;
 	gchar *name;
@@ -452,7 +452,7 @@ struct _CollectionData
 	GHashTable *existence;
 };
 
-struct _CollectTable
+struct CollectTable
 {
 	GtkWidget *scrolled;
 	GtkWidget *listview;
@@ -493,7 +493,7 @@ struct _CollectTable
 	GList *editmenu_fd_list; /**< file list for edit menu */
 };
 
-struct _CollectWindow
+struct CollectWindow
 {
 	GtkWidget *window;
 	CollectTable *table;
@@ -507,7 +507,7 @@ struct _CollectWindow
 using ImageTileRequestFunc = gint (*)(ImageWindow *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
 using ImageTileDisposeFunc = void (*)(ImageWindow *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
 
-struct _ImageWindow
+struct ImageWindow
 {
 	GtkWidget *widget;	/**< use this to add it and show it */
 	GtkWidget *pr;
@@ -593,7 +593,7 @@ struct _ImageWindow
 
 #define FILEDATA_MARKS_SIZE 10
 
-struct _FileDataChangeInfo {
+struct FileDataChangeInfo {
 	FileDataChangeType type;
 	gchar *source;
 	gchar *dest;
@@ -601,7 +601,7 @@ struct _FileDataChangeInfo {
 	gboolean regroup_when_finished;
 };
 
-struct _FileData {
+struct FileData {
 	guint magick;
 	gint type;
 	gchar *original_path; /**< key to file_data_pool hash table */
@@ -659,7 +659,7 @@ struct _FileData {
 	gint page_total;
 };
 
-struct _LayoutOptions
+struct LayoutOptions
 {
 	gchar *id;
 
@@ -777,7 +777,7 @@ struct _LayoutOptions
 	gchar *filter_key;
 };
 
-struct _LayoutWindow
+struct LayoutWindow
 {
 	LayoutOptions options;
 
@@ -900,7 +900,7 @@ struct _LayoutWindow
 	GtkWidget *log_window;
 };
 
-struct _ViewDir
+struct ViewDir
 {
 	DirViewType type;
 	gpointer info;
@@ -930,19 +930,19 @@ struct _ViewDir
 	PixmapFolders *pf;
 };
 
-struct _ViewDirInfoList
+struct ViewDirInfoList
 {
 	GList *list;
 };
 
-struct _ViewDirInfoTree
+struct ViewDirInfoTree
 {
 	guint drop_expand_id; /**< event source id */
 	gint busy_ref;
 };
 
 
-struct _ViewFile
+struct ViewFile
 {
 	FileViewType type; 	/**< @todo (xsdg): Turn this into a union (see VFLIST and VFICON from view-file.h). */
 
@@ -1002,7 +1002,7 @@ struct _ViewFile
 	guint read_metadata_in_idle_id;
 };
 
-struct _ViewFileInfoList
+struct ViewFileInfoList
 {
 	FileData *click_fd;
 	FileData *select_fd;
@@ -1012,7 +1012,7 @@ struct _ViewFileInfoList
 	guint select_idle_id; /**< event source id */
 };
 
-struct _ViewFileInfoIcon
+struct ViewFileInfoIcon
 {
 	/* table stuff */
 	gint columns;
@@ -1034,7 +1034,7 @@ struct _ViewFileInfoIcon
 	gboolean show_text;
 };
 
-struct _SlideShowData
+struct SlideShowData
 {
 	LayoutWindow *lw;        /**< use this window to display the slideshow */
 	ImageWindow *imd;        /**< use this window only if lw is not available,
@@ -1060,7 +1060,7 @@ struct _SlideShowData
 	gboolean paused;
 };
 
-struct _FullScreenData
+struct FullScreenData
 {
 	GtkWidget *window;
 	ImageWindow *imd;
@@ -1081,7 +1081,7 @@ struct _FullScreenData
 	gboolean same_region; /**< the returned region will overlap the current location of widget. */
 };
 
-struct _PixmapFolders
+struct PixmapFolders
 {
 	GdkPixbuf *close;
 	GdkPixbuf *open;
@@ -1091,7 +1091,7 @@ struct _PixmapFolders
 	GdkPixbuf *read_only;
 };
 
-struct _SecureSaveInfo {
+struct SecureSaveInfo {
 	FILE *fp; /**< file stream pointer */
 	gchar *file_name; /**< final file name */
 	gchar *tmp_file_name; /**< temporary file name */
@@ -1102,7 +1102,7 @@ struct _SecureSaveInfo {
 	gboolean unlink_on_error; /**< whether to remove temporary file on save failure, TRUE by default */
 };
 
-struct _CommandLine
+struct CommandLine
 {
 	int argc;
 	gchar **argv;
@@ -1125,7 +1125,7 @@ struct _CommandLine
 };
 
 /**
- * @struct _hard_coded_window_keys
+ * @struct hard_coded_window_keys
  * @brief hard coded window shortcut keys
  *
  * Used for two purposes:\n
@@ -1133,8 +1133,7 @@ struct _CommandLine
  * used by ./doc/create-shortcuts-xml.sh to generate shortcut documentation in the Help files
  *
  */
-using hard_coded_window_keys = struct _hard_coded_window_keys;
-struct _hard_coded_window_keys {
+struct hard_coded_window_keys {
 	GdkModifierType mask; /**< modifier key mask */
 	guint key_value;  /**< GDK_keyval */
 	const gchar *text;  /**< menu item label - NULL if end of list */

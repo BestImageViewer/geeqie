@@ -1551,7 +1551,7 @@ static void gr_print0(const gchar *UNUSED(text), GIOChannel *channel, gpointer U
 #ifdef HAVE_LUA
 static void gr_lua(const gchar *text, GIOChannel *channel, gpointer UNUSED(data))
 {
-	gchar *result = NULL;
+	gchar *result = nullptr;
 	gchar **lua_command;
 
 	lua_command = g_strsplit(text, ",", 2);
@@ -1559,22 +1559,22 @@ static void gr_lua(const gchar *text, GIOChannel *channel, gpointer UNUSED(data)
 	if (lua_command[0] && lua_command[1])
 		{
 		FileData *fd = file_data_new_group(lua_command[0]);
-		result = g_strdup(lua_callvalue(fd, lua_command[1], NULL));
+		result = g_strdup(lua_callvalue(fd, lua_command[1], nullptr));
 		if (result)
 			{
-			g_io_channel_write_chars(channel, result, -1, NULL, NULL);
+			g_io_channel_write_chars(channel, result, -1, nullptr, nullptr);
 			}
 		else
 			{
-			g_io_channel_write_chars(channel, N_("lua error: no data"), -1, NULL, NULL);
+			g_io_channel_write_chars(channel, N_("lua error: no data"), -1, nullptr, nullptr);
 			}
 		}
 	else
 		{
-		g_io_channel_write_chars(channel, N_("lua error: no data"), -1, NULL, NULL);
+		g_io_channel_write_chars(channel, N_("lua error: no data"), -1, nullptr, nullptr);
 		}
 
-	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, NULL, NULL);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
 	g_strfreev(lua_command);
 	g_free(result);
@@ -1628,7 +1628,7 @@ static RemoteCommandEntry remote_commands[] = {
 	{ nullptr, "--list-add:",          gr_list_add,            TRUE,  FALSE, N_("<FILE>"), N_("add FILE to command line collection list") },
 	{ nullptr, "--list-clear",         gr_list_clear,          FALSE, FALSE, nullptr, N_("clear command line collection list") },
 #ifdef HAVE_LUA
-	{ NULL, "--lua:",               gr_lua,                 TRUE, FALSE, N_("<FILE>,<lua script>"), N_("run lua script on FILE") },
+	{ nullptr, "--lua:",               gr_lua,                 TRUE, FALSE, N_("<FILE>,<lua script>"), N_("run lua script on FILE") },
 #endif
 	{ nullptr, "--new-window",         gr_new_window,          FALSE, FALSE, nullptr, N_("new window") },
 	{ "-n", "--next",               gr_image_next,          FALSE, FALSE, nullptr, N_("next image") },

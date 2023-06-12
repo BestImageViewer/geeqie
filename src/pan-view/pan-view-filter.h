@@ -45,7 +45,7 @@ struct PanFilterCallbackState
 	GList *filter_element;
 };
 
-struct _PanViewFilterUi
+struct PanViewFilterUi
 {
 	GtkWidget *filter_box;
 	GtkWidget *filter_entry;

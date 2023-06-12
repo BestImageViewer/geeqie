@@ -55,7 +55,7 @@ enum ZDInternalError {
     ZD_E_PARSE_HEADER
 };
 
-struct ZoneDetectOpaque {
+struct ZoneDetect {
 #if defined(_MSC_VER) || defined(__MINGW32__)
     HANDLE fd;
     HANDLE fdMap;

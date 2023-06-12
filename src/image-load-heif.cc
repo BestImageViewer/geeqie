@@ -46,7 +46,7 @@ static void free_buffer(guchar *UNUSED(pixels), gpointer data)
 
 static gboolean image_loader_heif_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
-	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
+	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	struct heif_context* ctx;
 	struct heif_image* img;
 	struct heif_error error_code;
@@ -59,7 +59,7 @@ static gboolean image_loader_heif_load(gpointer loader, const guchar *buf, gsize
 
 	ctx = heif_context_alloc();
 
-	error_code = heif_context_read_from_memory_without_copy(ctx, buf, count, NULL);
+	error_code = heif_context_read_from_memory_without_copy(ctx, buf, count, nullptr);
 	if (error_code.code)
 		{
 		log_printf("warning: heif reader error: %s\n", error_code.message);
@@ -85,7 +85,7 @@ static gboolean image_loader_heif_load(gpointer loader, const guchar *buf, gsize
 			}
 
 		// decode the image and convert colorspace to RGB, saved as 24bit interleaved
-		error_code = heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_24bit, NULL);
+		error_code = heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_24bit, nullptr);
 		if (error_code.code)
 			{
 			log_printf("warning: heif reader error: %s\n", error_code.message);
@@ -112,7 +112,7 @@ static gboolean image_loader_heif_load(gpointer loader, const guchar *buf, gsize
 
 static gpointer image_loader_heif_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
-	ImageLoaderHEIF *loader = g_new0(ImageLoaderHEIF, 1);
+	auto loader = g_new0(ImageLoaderHEIF, 1);
 	loader->area_updated_cb = area_updated_cb;
 	loader->size_cb = size_cb;
 	loader->area_prepared_cb = area_prepared_cb;
@@ -123,14 +123,14 @@ static gpointer image_loader_heif_new(ImageLoaderBackendCbAreaUpdated area_updat
 
 static void image_loader_heif_set_size(gpointer loader, int width, int height)
 {
-	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
+	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_heif_get_pixbuf(gpointer loader)
 {
-	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
+	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	return ld->pixbuf;
 }
 
@@ -141,20 +141,20 @@ static gchar* image_loader_heif_get_format_name(gpointer UNUSED(loader))
 
 static gchar** image_loader_heif_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"image/heic", NULL};
+	static const gchar *mime[] = {"image/heic", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
 static void image_loader_heif_set_page_num(gpointer loader, gint page_num)
 {
-	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
+	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 
 	ld->page_num = page_num;
 }
 
 static gint image_loader_heif_get_page_total(gpointer loader)
 {
-	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
+	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 
 	return ld->page_total;
 }
@@ -166,13 +166,13 @@ static gboolean image_loader_heif_close(gpointer UNUSED(loader), GError **UNUSED
 
 static void image_loader_heif_abort(gpointer loader)
 {
-	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
+	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	ld->abort = TRUE;
 }
 
 static void image_loader_heif_free(gpointer loader)
 {
-	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
+	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
@@ -182,7 +182,7 @@ void image_loader_backend_set_heif(ImageLoaderBackend *funcs)
 	funcs->loader_new = image_loader_heif_new;
 	funcs->set_size = image_loader_heif_set_size;
 	funcs->load = image_loader_heif_load;
-	funcs->write = NULL;
+	funcs->write = nullptr;
 	funcs->get_pixbuf = image_loader_heif_get_pixbuf;
 	funcs->close = image_loader_heif_close;
 	funcs->abort = image_loader_heif_abort;

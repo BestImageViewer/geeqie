@@ -1809,7 +1809,7 @@ static void layout_menu_keyword_autocomplete_cb(GtkAction *UNUSED(action), gpoin
 #ifdef HAVE_LCMS
 static void layout_color_menu_enable_cb(GtkToggleAction *action, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 
 	if (layout_image_color_profile_get_use(lw) == gtk_toggle_action_get_active(action)) return;
 
@@ -1826,7 +1826,7 @@ static void layout_color_menu_enable_cb()
 #ifdef HAVE_LCMS
 static void layout_color_menu_use_image_cb(GtkToggleAction *action, gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	gint input;
 	gboolean use_image;
 
@@ -1845,7 +1845,7 @@ static void layout_color_menu_use_image_cb()
 #ifdef HAVE_LCMS
 static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *UNUSED(current), gpointer data)
 {
-	LayoutWindow *lw = static_cast<LayoutWindow *>(data);
+	auto lw = static_cast<LayoutWindow *>(data);
 	gint type;
 	gint input;
 	gboolean use_image;

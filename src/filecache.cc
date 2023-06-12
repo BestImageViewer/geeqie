@@ -26,7 +26,7 @@ const gboolean debug_file_cache = FALSE;
 
 /* this implements a simple LRU algorithm */
 
-struct _FileCacheData {
+struct FileCacheData {
 	FileCacheReleaseFunc release;
 	GList *list;
 	gulong max_size;

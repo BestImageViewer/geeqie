@@ -45,7 +45,7 @@ enum EditorFlags {
 	EDITOR_ERROR_MASK         = ~0xffff,
 };
 
-struct _EditorDescription {
+struct EditorDescription {
 	gchar *key; 		/**< desktop file name, not including path, including extension */
 	gchar *name; 		/**< Name, localized name presented to user */
 	gchar *icon;		/**< Icon */

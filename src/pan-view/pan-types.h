@@ -178,10 +178,10 @@ struct PanViewSearchUi
 };
 
 /**
- * @typedef _PanViewFilterUi
+ * @struct PanViewFilterUi
  * Defined in pan-view-filter.h
  */
-using PanViewFilterUi = struct _PanViewFilterUi;
+struct PanViewFilterUi;
 
 struct PanWindow
 {

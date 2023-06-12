@@ -1237,7 +1237,7 @@ gchar *metadata_lua_info(FileData *fd, const gchar *key, MetadataFormat UNUSED(f
 	script_name_utf8 = g_strdup(key + 4);
 	script_name = path_from_utf8(script_name_utf8);
 
-	raw_data = lua_callvalue(fd, script_name, NULL);
+	raw_data = lua_callvalue(fd, script_name, nullptr);
 	valid_data = g_utf8_make_valid(raw_data, -1);
 	data = g_utf8_substring(valid_data, 0, 150);
 

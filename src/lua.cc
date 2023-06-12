@@ -77,7 +77,7 @@ static FileData *lua_check_image(lua_State *L, int index)
 	FileData **fd;
 	luaL_checktype(L, index, LUA_TUSERDATA);
 	fd = static_cast<FileData **>(luaL_checkudata(L, index, "Image"));
-	if (fd == NULL) luaL_typerror(L, index, "Image");
+	if (fd == nullptr) luaL_typerror(L, index, "Image");
 	return *fd;
 }
 
@@ -210,7 +210,7 @@ static ExifData *lua_check_exif(lua_State *L, int index)
 	ExifData **exif;
 	luaL_checktype(L, index, LUA_TUSERDATA);
 	exif = static_cast<ExifData **>(luaL_checkudata(L, index, "Exif"));
-	if (exif == NULL) luaL_typerror(L, index, "Exif");
+	if (exif == nullptr) luaL_typerror(L, index, "Exif");
 	return *exif;
 }
 
@@ -232,7 +232,7 @@ static ExifData *lua_check_exif(lua_State *L, int index)
 static int lua_exif_get_datum(lua_State *L)
 {
 	const gchar *key;
-	gchar *value = NULL;
+	gchar *value = nullptr;
 	ExifData *exif;
 	struct tm tm;
 	time_t datetime;
@@ -298,7 +298,7 @@ static const luaL_Reg image_methods[] = {
 		{"get_size", lua_image_get_size},
 		{"get_exif", lua_image_get_exif},
 		{"get_marks", lua_image_get_marks},
-		{NULL, NULL}
+		{nullptr, nullptr}
 };
 
 /**
@@ -312,20 +312,20 @@ static const luaL_Reg image_methods[] = {
  */
 static const luaL_Reg exif_methods[] = {
 		{"get_datum", lua_exif_get_datum},
-		{NULL, NULL}
+		{nullptr, nullptr}
 };
 
 /**
  * @brief Initialize the lua interpreter.
  */
-void lua_init(void)
+void lua_init()
 {
 	L = luaL_newstate();
 	luaL_openlibs(L); /* Open all libraries for lua programs */
 
 	/* Now create custom methodes to do something */
 	static const luaL_Reg meta_methods[] = {
-			{NULL, NULL}
+			{nullptr, nullptr}
 	};
 
 	LUA_register_global(L, "Image", image_methods);
@@ -359,11 +359,11 @@ void lua_init(void)
 gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 {
 	gint result;
-	gchar *data = NULL;
+	gchar *data = nullptr;
 	gchar *path;
 	FileData **image_data;
 	gchar *tmp;
-	GError *error = NULL;
+	GError *error = nullptr;
 	gboolean ok;
 
 	ok = access(g_build_filename(get_rc_dir(), "lua", file, NULL), R_OK);
@@ -412,7 +412,7 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 		return data;
 		}
 	data = g_strdup(lua_tostring(L, -1));
-	tmp = g_locale_to_utf8(data, strlen(data), NULL, NULL, &error);
+	tmp = g_locale_to_utf8(data, strlen(data), nullptr, nullptr, &error);
 	if (error)
 		{
 		log_printf("Error converting lua output from locale to UTF-8: %s\n", error->message);

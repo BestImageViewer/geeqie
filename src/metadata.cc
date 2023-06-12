@@ -718,7 +718,7 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 #ifdef HAVE_LUA
 	else if (strncmp(key, "lua.", 4) == 0)
 		{
-		return g_list_append(NULL, metadata_lua_info(fd, key, format));
+		return g_list_append(nullptr, metadata_lua_info(fd, key, format));
 		}
 #endif
 

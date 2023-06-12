@@ -45,7 +45,7 @@ static void free_buffer(guchar *pixels, gpointer UNUSED(data))
 	g_free (pixels);
 }
 
-struct opj_buffer_info {
+struct opj_buffer_info_t {
     OPJ_BYTE* buf;
     OPJ_BYTE* cur;
     OPJ_SIZE_T len;
