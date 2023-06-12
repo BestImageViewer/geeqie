@@ -63,7 +63,7 @@ static void free_buffer (guchar *pixels, gpointer UNUSED(data))
 static tsize_t
 tiff_load_read (thandle_t handle, tdata_t buf, tsize_t size)
 {
-	ImageLoaderTiff *context = (ImageLoaderTiff *)handle;
+	ImageLoaderTiff *context = static_cast<ImageLoaderTiff *>(handle);
 
 	if (context->pos + size > context->used)
 		return 0;
@@ -82,7 +82,7 @@ tiff_load_write (thandle_t UNUSED(handle), tdata_t UNUSED(buf), tsize_t UNUSED(s
 static toff_t
 tiff_load_seek (thandle_t handle, toff_t offset, int whence)
 {
-	ImageLoaderTiff *context = (ImageLoaderTiff *)handle;
+	ImageLoaderTiff *context = static_cast<ImageLoaderTiff *>(handle);
 
 	switch (whence)
 		{
@@ -117,16 +117,16 @@ tiff_load_close (thandle_t UNUSED(context))
 static toff_t
 tiff_load_size (thandle_t handle)
 {
-	ImageLoaderTiff *context = (ImageLoaderTiff *)handle;
+	ImageLoaderTiff *context = static_cast<ImageLoaderTiff *>(handle);
 	return context->used;
 }
 
 static int
 tiff_load_map_file (thandle_t handle, tdata_t *buf, toff_t *size)
 {
-	ImageLoaderTiff *context = (ImageLoaderTiff *)handle;
+	ImageLoaderTiff *context = static_cast<ImageLoaderTiff *>(handle);
 
-	*buf = (tdata_t *) context->buffer;
+	*buf = const_cast<guchar *>(context->buffer);
 	*size = context->used;
 
 	return 0;
@@ -139,7 +139,7 @@ tiff_load_unmap_file (thandle_t UNUSED(handle), tdata_t UNUSED(data), toff_t UNU
 
 static gboolean image_loader_tiff_load (gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
-	ImageLoaderTiff *lt = (ImageLoaderTiff *) loader;
+	ImageLoaderTiff *lt = static_cast<ImageLoaderTiff *>(loader);
 
 	TIFF *tiff;
 	guchar *pixels = NULL;
@@ -209,8 +209,8 @@ static gboolean image_loader_tiff_load (gpointer loader, const guchar *buf, gsiz
 		return FALSE;
 		}
 
-	bytes = (size_t) height * rowstride;
-	if (bytes / rowstride != (size_t) height)
+	bytes = static_cast<size_t>(height) * rowstride;
+	if (bytes / rowstride != static_cast<size_t>(height))
 		{ /* overflow */
 		DEBUG_1("Dimensions of TIFF image too large: height %d", height);
 		TIFFClose(tiff);
@@ -248,7 +248,7 @@ static gboolean image_loader_tiff_load (gpointer loader, const guchar *buf, gsiz
 		/* read by strip */
 		ptrdiff_t row;
 		const size_t line_bytes = width * sizeof(guint32);
-		guchar *wrk_line = (guchar *)g_malloc(line_bytes);
+		guchar *wrk_line = static_cast<guchar *>(g_malloc(line_bytes));
 
 		for (row = 0; row < height; row += rowsperstrip)
 			{
@@ -259,14 +259,14 @@ static gboolean image_loader_tiff_load (gpointer loader, const guchar *buf, gsiz
 			}
 
 			/* Read the strip into an RGBA array */
-			if (!TIFFReadRGBAStrip(tiff, row, (guint32 *)(pixels + row * rowstride))) {
+			if (!TIFFReadRGBAStrip(tiff, row, reinterpret_cast<guint32 *>(pixels + row * rowstride))) {
 				break;
 			}
 
 			/*
 			 * Figure out the number of scanlines actually in this strip.
 			*/
-			if (row + (int)rowsperstrip > height)
+			if (row + static_cast<int>(rowsperstrip) > height)
 				rows_to_write = height - row;
 			else
 				rows_to_write = rowsperstrip;
@@ -293,7 +293,7 @@ static gboolean image_loader_tiff_load (gpointer loader, const guchar *buf, gsiz
 	else
 		{
 		/* fallback, tiled tiff */
-		if (!TIFFReadRGBAImageOriented (tiff, width, height, (guint32 *)pixels, ORIENTATION_TOPLEFT, 1))
+		if (!TIFFReadRGBAImageOriented (tiff, width, height, reinterpret_cast<guint32 *>(pixels), ORIENTATION_TOPLEFT, 1))
 			{
 			TIFFClose(tiff);
 			return FALSE;
@@ -336,20 +336,20 @@ static gpointer image_loader_tiff_new(ImageLoaderBackendCbAreaUpdated area_updat
 	loader->size_cb = size_cb;
 	loader->area_prepared_cb = area_prepared_cb;
 	loader->data = data;
-	return (gpointer) loader;
+	return loader;
 }
 
 
 static void image_loader_tiff_set_size(gpointer loader, int width, int height)
 {
-	ImageLoaderTiff *lt = (ImageLoaderTiff *) loader;
+	ImageLoaderTiff *lt = static_cast<ImageLoaderTiff *>(loader);
 	lt->requested_width = width;
 	lt->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_tiff_get_pixbuf(gpointer loader)
 {
-	ImageLoaderTiff *lt = (ImageLoaderTiff *) loader;
+	ImageLoaderTiff *lt = static_cast<ImageLoaderTiff *>(loader);
 	return lt->pixbuf;
 }
 
@@ -370,27 +370,27 @@ static gboolean image_loader_tiff_close(gpointer UNUSED(loader), GError **UNUSED
 
 static void image_loader_tiff_abort(gpointer loader)
 {
-	ImageLoaderTiff *lt = (ImageLoaderTiff *) loader;
+	ImageLoaderTiff *lt = static_cast<ImageLoaderTiff *>(loader);
 	lt->abort = TRUE;
 }
 
 static void image_loader_tiff_free(gpointer loader)
 {
-	ImageLoaderTiff *lt = (ImageLoaderTiff *) loader;
+	ImageLoaderTiff *lt = static_cast<ImageLoaderTiff *>(loader);
 	if (lt->pixbuf) g_object_unref(lt->pixbuf);
 	g_free(lt);
 }
 
 static void image_loader_tiff_set_page_num(gpointer loader, gint page_num)
 {
-	ImageLoaderTiff *lt = (ImageLoaderTiff *) loader;
+	ImageLoaderTiff *lt = static_cast<ImageLoaderTiff *>(loader);
 
 	lt->page_num = page_num;
 }
 
 static gint image_loader_tiff_get_page_total(gpointer loader)
 {
-	ImageLoaderTiff *lt = (ImageLoaderTiff *) loader;
+	ImageLoaderTiff *lt = static_cast<ImageLoaderTiff *>(loader);
 
 	return lt->page_total;
 }

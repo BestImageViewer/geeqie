@@ -42,7 +42,7 @@ struct _ImageLoaderPDF {
 
 static gboolean image_loader_pdf_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
-	ImageLoaderPDF *ld = (ImageLoaderPDF *) loader;
+	ImageLoaderPDF *ld = static_cast<ImageLoaderPDF *>(loader);
 	GError *poppler_error = NULL;
 	PopplerPage *page;
 	PopplerDocument *document;
@@ -52,7 +52,7 @@ static gboolean image_loader_pdf_load(gpointer loader, const guchar *buf, gsize 
 	gboolean ret = FALSE;
 	gint page_total;
 
-	document = poppler_document_new_from_data((gchar *)buf, count, NULL, &poppler_error);
+	document = poppler_document_new_from_data((gchar *)(buf), count, NULL, &poppler_error);
 
 	if (poppler_error)
 		{
@@ -100,19 +100,19 @@ static gpointer image_loader_pdf_new(ImageLoaderBackendCbAreaUpdated area_update
 	loader->area_prepared_cb = area_prepared_cb;
 	loader->data = data;
 	loader->page_num = 0;
-	return (gpointer) loader;
+	return loader;
 }
 
 static void image_loader_pdf_set_size(gpointer loader, int width, int height)
 {
-	ImageLoaderPDF *ld = (ImageLoaderPDF *) loader;
+	ImageLoaderPDF *ld = static_cast<ImageLoaderPDF *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_pdf_get_pixbuf(gpointer loader)
 {
-	ImageLoaderPDF *ld = (ImageLoaderPDF *) loader;
+	ImageLoaderPDF *ld = static_cast<ImageLoaderPDF *>(loader);
 	return ld->pixbuf;
 }
 
@@ -129,14 +129,14 @@ static gchar** image_loader_pdf_get_format_mime_types(gpointer UNUSED(loader))
 
 static void image_loader_pdf_set_page_num(gpointer loader, gint page_num)
 {
-	ImageLoaderPDF *ld = (ImageLoaderPDF *) loader;
+	ImageLoaderPDF *ld = static_cast<ImageLoaderPDF *>(loader);
 
 	ld->page_num = page_num;
 }
 
 static gint image_loader_pdf_get_page_total(gpointer loader)
 {
-	ImageLoaderPDF *ld = (ImageLoaderPDF *) loader;
+	ImageLoaderPDF *ld = static_cast<ImageLoaderPDF *>(loader);
 
 	return ld->page_total;
 }
@@ -148,13 +148,13 @@ static gboolean image_loader_pdf_close(gpointer UNUSED(loader), GError **UNUSED(
 
 static void image_loader_pdf_abort(gpointer loader)
 {
-	ImageLoaderPDF *ld = (ImageLoaderPDF *) loader;
+	ImageLoaderPDF *ld = static_cast<ImageLoaderPDF *>(loader);
 	ld->abort = TRUE;
 }
 
 static void image_loader_pdf_free(gpointer loader)
 {
-	ImageLoaderPDF *ld = (ImageLoaderPDF *) loader;
+	ImageLoaderPDF *ld = static_cast<ImageLoaderPDF *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }

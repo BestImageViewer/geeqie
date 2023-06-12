@@ -511,7 +511,7 @@ static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 #ifdef HAVE_LCMS2
 				profileID[16] = '\0';
 				cmsGetHeaderProfileID(profile, profileID);
-				name = (gchar *) profileID;
+				name = reinterpret_cast<gchar *>(profileID);
 #else
 				name = (gchar *) cmsTakeProductName(profile);
 #endif

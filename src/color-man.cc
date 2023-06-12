@@ -500,9 +500,9 @@ static cmsToneCurve* colorspaces_create_transfer(int32_t size, double (*fct)(dou
 
 	for(int32_t i = 0; i < size; ++i)
 		{
-		const double x = (float)i / (size - 1);
+		const double x = static_cast<float>(i) / (size - 1);
 		const double y = MIN(fct(x), 1.0f);
-		values[i] = (float)y;
+		values[i] = static_cast<float>(y);
 		}
 
 	cmsToneCurve* result = cmsBuildTabulatedToneCurveFloat(NULL, size, values);
@@ -714,7 +714,7 @@ static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, 
 				*profile_len = size;
 				}
 			cmsCloseProfile(profile);
-			return (guchar *)data;
+			return static_cast<guchar *>(data);
 			}
 		else
 			{
@@ -778,7 +778,7 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 		heif_context_free(ctx);
 		heif_nclx_color_profile_free(nclxcp);
 
-		return (guchar *)data;
+		return static_cast<guchar *>(data);
 		}
 	else
 		{
@@ -797,7 +797,7 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 	heif_context_free(ctx);
 	heif_nclx_color_profile_free(nclxcp);
 
-	return (guchar *)profile;
+	return profile;
 }
 #else
 guchar *heif_color_profile(FileData *UNUSED(fd), guint *UNUSED(profile_len))

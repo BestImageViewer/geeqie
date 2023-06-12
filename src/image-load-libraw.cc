@@ -53,7 +53,7 @@ void libraw_free_preview(guchar *buf)
 
 	while (work)
 		{
-		UnmapData *ud = (UnmapData *)work->data;
+		UnmapData *ud = static_cast<UnmapData *>(work->data);
 		if (ud->ptr == buf)
 			{
 			munmap(ud->map_data, ud->map_len);
@@ -92,7 +92,7 @@ guchar *libraw_get_preview(ImageLoader *il, guint *data_len)
 		}
 
 	map_len = st.st_size;
-	map_data = (guchar *) mmap(0, map_len, PROT_READ, MAP_PRIVATE, fd, 0);
+	map_data = static_cast<guchar *>(mmap(0, map_len, PROT_READ, MAP_PRIVATE, fd, 0));
 	close(fd);
 
 	if (map_data == MAP_FAILED)
@@ -107,24 +107,24 @@ guchar *libraw_get_preview(ImageLoader *il, guint *data_len)
 		return NULL;
 		}
 
-	ret = libraw_open_buffer(lrdt, (void *)map_data, map_len);
+	ret = libraw_open_buffer(lrdt, map_data, map_len);
 	if (ret == LIBRAW_SUCCESS)
 		{
 		ret = libraw_unpack_thumb(lrdt);
 		if (ret == LIBRAW_SUCCESS)
 			{
-			il->mapped_file = (guchar *)lrdt->thumbnail.thumb;
+			il->mapped_file = reinterpret_cast<guchar *>(lrdt->thumbnail.thumb);
 			*data_len = lrdt->thumbnail.tlength;
 
 			ud = g_new(UnmapData, 1);
-			ud->ptr =(guchar *)lrdt->thumbnail.thumb;
+			ud->ptr =reinterpret_cast<guchar *>(lrdt->thumbnail.thumb);
 			ud->map_data = map_data;
 			ud->map_len = lrdt->thumbnail.tlength;
 			ud->lrdt = lrdt;
 
 			libraw_unmap_list = g_list_prepend(libraw_unmap_list, ud);
 
-			return (guchar *)lrdt->thumbnail.thumb;
+			return reinterpret_cast<guchar *>(lrdt->thumbnail.thumb);
 			}
 		}
 

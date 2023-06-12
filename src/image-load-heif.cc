@@ -42,12 +42,12 @@ struct _ImageLoaderHEIF {
 
 static void free_buffer(guchar *UNUSED(pixels), gpointer data)
 {
-	heif_image_release((const struct heif_image*)data);
+	heif_image_release(static_cast<const struct heif_image*>(data));
 }
 
 static gboolean image_loader_heif_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
-	ImageLoaderHEIF *ld = (ImageLoaderHEIF *) loader;
+	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
 	struct heif_context* ctx;
 	struct heif_image* img;
 	struct heif_error error_code;
@@ -119,19 +119,19 @@ static gpointer image_loader_heif_new(ImageLoaderBackendCbAreaUpdated area_updat
 	loader->area_prepared_cb = area_prepared_cb;
 	loader->data = data;
 	loader->page_num = 0;
-	return (gpointer) loader;
+	return loader;
 }
 
 static void image_loader_heif_set_size(gpointer loader, int width, int height)
 {
-	ImageLoaderHEIF *ld = (ImageLoaderHEIF *) loader;
+	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_heif_get_pixbuf(gpointer loader)
 {
-	ImageLoaderHEIF *ld = (ImageLoaderHEIF *) loader;
+	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
 	return ld->pixbuf;
 }
 
@@ -148,14 +148,14 @@ static gchar** image_loader_heif_get_format_mime_types(gpointer UNUSED(loader))
 
 static void image_loader_heif_set_page_num(gpointer loader, gint page_num)
 {
-	ImageLoaderHEIF *ld = (ImageLoaderHEIF *) loader;
+	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
 
 	ld->page_num = page_num;
 }
 
 static gint image_loader_heif_get_page_total(gpointer loader)
 {
-	ImageLoaderHEIF *ld = (ImageLoaderHEIF *) loader;
+	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
 
 	return ld->page_total;
 }
@@ -167,13 +167,13 @@ static gboolean image_loader_heif_close(gpointer UNUSED(loader), GError **UNUSED
 
 static void image_loader_heif_abort(gpointer loader)
 {
-	ImageLoaderHEIF *ld = (ImageLoaderHEIF *) loader;
+	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
 	ld->abort = TRUE;
 }
 
 static void image_loader_heif_free(gpointer loader)
 {
-	ImageLoaderHEIF *ld = (ImageLoaderHEIF *) loader;
+	ImageLoaderHEIF *ld = static_cast<ImageLoaderHEIF *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
