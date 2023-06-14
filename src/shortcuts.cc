@@ -106,7 +106,7 @@ static void shortcuts_add_cb(GtkWidget *button, gpointer data)
 	scd->dialog = file_util_file_dlg(title,
 					"add_shortcuts", button,
 					shortcuts_add_cancel_cb, scd);
-	file_dialog_add_button(scd->dialog, "dialog-ok", "OK", shortcuts_add_ok_cb, TRUE);
+	file_dialog_add_button(scd->dialog, GQ_ICON_OK, "OK", shortcuts_add_ok_cb, TRUE);
 
 	generic_dialog_add_message(GENERIC_DIALOG(scd->dialog), nullptr, title, nullptr, FALSE);
 
@@ -155,7 +155,7 @@ static GtkWidget *shortcuts_new(LayoutWindow *lw)
 
 	tbar = pref_toolbar_new(scd->vbox, GTK_TOOLBAR_ICONS);
 
-	scd->add_button = pref_toolbar_button(tbar, "list-add", _("Add"), FALSE,
+	scd->add_button = pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
 					_("Add Shortcut"),
 					G_CALLBACK(shortcuts_add_cb), scd);
 

@@ -433,8 +433,8 @@ static void bar_filter_help_dialog()
 				"sort_manager_operations", nullptr, TRUE, nullptr, nullptr);
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_INFO,
 				"Sort Manager Operations", _("Additional operations utilising plugins\nmay be included by setting:\n\nX-Geeqie-Filter=true\n\nin the plugin file."), TRUE);
-	generic_dialog_add_button(gd, "help-browser", _("Help"), bar_filter_help_cb, TRUE);
-	generic_dialog_add_button(gd, "dialog-ok", "OK", NULL, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_HELP, _("Help"), bar_filter_help_cb, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", NULL, TRUE);
 
 	gtk_widget_show(gd->dialog);
 }
@@ -573,7 +573,7 @@ static void bar_sort_add_cb(GtkWidget *button, gpointer data)
 	sd->dialog = file_util_file_dlg(title,
 				       "add_bookmark", button,
 				       bar_sort_add_cancel_cb, sd);
-	file_dialog_add_button(sd->dialog, "dialog-ok", "OK", bar_sort_add_ok_cb, TRUE);
+	file_dialog_add_button(sd->dialog, GQ_ICON_OK, "OK", bar_sort_add_ok_cb, TRUE);
 
 	generic_dialog_add_message(GENERIC_DIALOG(sd->dialog), nullptr, title, nullptr, FALSE);
 
@@ -743,13 +743,13 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 	tbar = pref_toolbar_new(sd->vbox, GTK_TOOLBAR_ICONS);
 	DEBUG_NAME(tbar);
 
-	sd->add_button = pref_toolbar_button(tbar, "list-add", _("Add"), FALSE,
+	sd->add_button = pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
 					     _("Add Bookmark"),
 					     G_CALLBACK(bar_sort_add_cb), sd);
-	sd->undo_button = pref_toolbar_button(tbar, "edit-undo", _("Undo"), FALSE,
+	sd->undo_button = pref_toolbar_button(tbar, GQ_ICON_UNDO, _("Undo"), FALSE,
 					      _("Undo last image"),
 					      G_CALLBACK(bar_sort_undo_cb), sd);
-	sd->help_button = pref_toolbar_button(tbar, "help-browser", _("Help"), FALSE,
+	sd->help_button = pref_toolbar_button(tbar, GQ_ICON_HELP, _("Help"), FALSE,
 					      _("Functions additional to Copy and Move"),
 					      G_CALLBACK(bar_sort_help_cb), sd);
 

@@ -398,7 +398,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	button = pref_button_new(nullptr, "font-select", _("Font"),
+	button = pref_button_new(nullptr, GQ_ICON_SELECT_FONT, _("Font"),
 				 G_CALLBACK(print_set_font_cb), (gpointer)"Image text font");
 
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
@@ -452,7 +452,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	button = pref_button_new(nullptr, "font-select", _("Font"),
+	button = pref_button_new(nullptr, GQ_ICON_SELECT_FONT, _("Font"),
 				 G_CALLBACK(print_set_font_cb), const_cast<char *>("Page text font"));
 
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);

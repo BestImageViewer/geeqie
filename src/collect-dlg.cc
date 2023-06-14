@@ -78,7 +78,7 @@ static gboolean collection_save_confirmed(FileDialog *fd, gboolean overwrite, Co
 		generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION,
 					   _("Overwrite existing file?"), fd->dest_path, TRUE);
 
-		generic_dialog_add_button(gd, "dialog-ok", _("_Overwrite"), collection_confirm_ok_cb, TRUE);
+		generic_dialog_add_button(gd, GQ_ICON_OK, _("_Overwrite"), collection_confirm_ok_cb, TRUE);
 
 		gtk_widget_show(gd->dialog);
 
@@ -200,14 +200,14 @@ static void collection_save_or_load_dialog(const gchar *path,
 		title = _("Save collection");
 		btntext = nullptr;
 		btnfunc = reinterpret_cast<gpointer>(collection_save_cb);
-		icon_name = "document-save";
+		icon_name = GQ_ICON_SAVE;
 		}
 	else if (type == DIALOG_LOAD)
 		{
 		title = _("Open collection");
 		btntext = nullptr;
 		btnfunc = reinterpret_cast<gpointer>(collection_load_cb);
-		icon_name = "document-open";
+		icon_name = GQ_ICON_OPEN;
 		}
 	else
 		{
@@ -216,6 +216,7 @@ static void collection_save_or_load_dialog(const gchar *path,
 		btntext = _("_Append");
 		btnfunc = reinterpret_cast<gpointer>(collection_append_cb);
 		icon_name = "list-add";
+		icon_name = GQ_ICON_ADD;
 		}
 
 	if (cd) collection_ref(cd);

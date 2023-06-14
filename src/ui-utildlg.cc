@@ -453,7 +453,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	if (gd->cancel_cb)
 		{
-		gd->cancel_button = generic_dialog_add_button(gd, "dialog-cancel", _("Cancel"), gd->cancel_cb, TRUE);
+		gd->cancel_button = generic_dialog_add_button(gd, GQ_ICON_CANCEL, _("Cancel"), gd->cancel_cb, TRUE);
 		}
 	else
 		{
@@ -498,7 +498,7 @@ GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 	GenericDialog *gd;
 
 	gd = generic_dialog_new(heading, "warning", parent, TRUE, nullptr, nullptr);
-	generic_dialog_add_button(gd, "dialog-ok", "OK", warning_dialog_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", warning_dialog_ok_cb, TRUE);
 
 	generic_dialog_add_message(gd, icon_stock_id, heading, text, TRUE);
 

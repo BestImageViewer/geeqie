@@ -385,10 +385,10 @@ void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent)
 				    parent, FALSE,
 				    nullptr, cm);
 	cm->gd->cancel_cb = cache_maintain_home_close_cb;
-	cm->button_close = generic_dialog_add_button(cm->gd, "window-close", _("Close"),
+	cm->button_close = generic_dialog_add_button(cm->gd, GQ_ICON_CLOSE, _("Close"),
 						     cache_maintain_home_close_cb, FALSE);
 	gtk_widget_set_sensitive(cm->button_close, FALSE);
-	cm->button_stop = generic_dialog_add_button(cm->gd, "process-stop", _("Stop"),
+	cm->button_stop = generic_dialog_add_button(cm->gd, GQ_ICON_STOP, _("Stop"),
 						    cache_maintain_home_stop_cb, FALSE);
 
 	generic_dialog_add_message(cm->gd, nullptr, msg, nullptr, FALSE);
@@ -885,11 +885,11 @@ static void cache_manager_render_dialog(GtkWidget *widget, const gchar *path)
 				    nullptr, cd);
 	gtk_window_set_default_size(GTK_WINDOW(cd->gd->dialog), PURGE_DIALOG_WIDTH, -1);
 	cd->gd->cancel_cb = cache_manager_render_close_cb;
-	cd->button_close = generic_dialog_add_button(cd->gd, "window-close", _("Close"),
+	cd->button_close = generic_dialog_add_button(cd->gd, GQ_ICON_CLOSE, _("Close"),
 						     cache_manager_render_close_cb, FALSE);
-	cd->button_start = generic_dialog_add_button(cd->gd, "dialog-ok", _("S_tart"),
+	cd->button_start = generic_dialog_add_button(cd->gd, GQ_ICON_OK, _("S_tart"),
 						     cache_manager_render_start_cb, FALSE);
-	cd->button_stop = generic_dialog_add_button(cd->gd, "process-stop", _("Stop"),
+	cd->button_stop = generic_dialog_add_button(cd->gd, GQ_ICON_STOP, _("Stop"),
 						    cache_manager_render_stop_cb, FALSE);
 	gtk_widget_set_sensitive(cd->button_stop, FALSE);
 
@@ -1144,12 +1144,12 @@ static void cache_manager_standard_process(GtkWidget *widget, gboolean clear)
 
 	if (clear)
 		{
-		icon_name = "edit-delete";
+		icon_name = GQ_ICON_DELETE;
 		msg = _("Clearing thumbnails...");
 		}
 	else
 		{
-		icon_name = "edit-clear";
+		icon_name = GQ_ICON_CLEAR;
 		msg = _("Removing old thumbnails...");
 		}
 
@@ -1158,11 +1158,11 @@ static void cache_manager_standard_process(GtkWidget *widget, gboolean clear)
 				    widget, FALSE,
 				    nullptr, cd);
 	cd->gd->cancel_cb = cache_manager_standard_clean_close_cb;
-	cd->button_close = generic_dialog_add_button(cd->gd, "window-close", _("Close"),
+	cd->button_close = generic_dialog_add_button(cd->gd, GQ_ICON_CLOSE, _("Close"),
 						     cache_manager_standard_clean_close_cb, FALSE);
-	cd->button_start = generic_dialog_add_button(cd->gd, "dialog-ok", _("S_tart"),
+	cd->button_start = generic_dialog_add_button(cd->gd, GQ_ICON_OK, _("S_tart"),
 						     cache_manager_standard_clean_start_cb, FALSE);
-	cd->button_stop = generic_dialog_add_button(cd->gd, "process-stop", _("Stop"),
+	cd->button_stop = generic_dialog_add_button(cd->gd, GQ_ICON_STOP, _("Stop"),
 						    cache_manager_standard_clean_stop_cb, FALSE);
 	gtk_widget_set_sensitive(cd->button_stop, FALSE);
 
@@ -1231,7 +1231,7 @@ void cache_manager_main_clear_confirm(GtkWidget *parent)
 				dummy_cancel_cb, nullptr);
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION, _("Clear cache"),
 				   _("This will remove all thumbnails and sim. files\nthat have been saved to disk, continue?"), TRUE);
-	generic_dialog_add_button(gd, "dialog-ok", "OK", cache_manager_main_clear_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", cache_manager_main_clear_ok_cb, TRUE);
 
 	gtk_widget_show(gd->dialog);
 }
@@ -1527,11 +1527,11 @@ static void cache_manager_sim_load_dialog(GtkWidget *widget, const gchar *path)
 	cd->gd = generic_dialog_new(_("Create sim. files"), "create_sim_files", widget, FALSE, nullptr, cd);
 	gtk_window_set_default_size(GTK_WINDOW(cd->gd->dialog), PURGE_DIALOG_WIDTH, -1);
 	cd->gd->cancel_cb = cache_manager_sim_close_cb;
-	cd->button_close = generic_dialog_add_button(cd->gd, "window-close", _("Close"),
+	cd->button_close = generic_dialog_add_button(cd->gd, GQ_ICON_CLOSE, _("Close"),
 						     cache_manager_sim_close_cb, FALSE);
-	cd->button_start = generic_dialog_add_button(cd->gd, "dialog-ok", _("S_tart"),
+	cd->button_start = generic_dialog_add_button(cd->gd, GQ_ICON_OK, _("S_tart"),
 						     cache_manager_sim_start_cb, FALSE);
-	cd->button_stop = generic_dialog_add_button(cd->gd, "process-stop", _("Stop"),
+	cd->button_stop = generic_dialog_add_button(cd->gd, GQ_ICON_STOP, _("Stop"),
 						    cache_manager_sim_stop_cb, FALSE);
 	gtk_widget_set_sensitive(cd->button_stop, FALSE);
 
@@ -1646,9 +1646,9 @@ static void cache_manager_cache_maintenance_load_dialog(GtkWidget *widget, const
 	cd->gd = generic_dialog_new(_("Background cache maintenance"), "background_cache_maintenance", widget, FALSE, nullptr, cd);
 	gtk_window_set_default_size(GTK_WINDOW(cd->gd->dialog), PURGE_DIALOG_WIDTH, -1);
 	cd->gd->cancel_cb = cache_manager_cache_maintenance_close_cb;
-	cd->button_close = generic_dialog_add_button(cd->gd, "window-close", _("Close"),
+	cd->button_close = generic_dialog_add_button(cd->gd, GQ_ICON_CLOSE, _("Close"),
 						     cache_manager_cache_maintenance_close_cb, FALSE);
-	cd->button_start = generic_dialog_add_button(cd->gd, "dialog-ok", _("S_tart"),
+	cd->button_start = generic_dialog_add_button(cd->gd, GQ_ICON_OK, _("S_tart"),
 						     cache_manager_cache_maintenance_start_cb, FALSE);
 
 	generic_dialog_add_message(cd->gd, nullptr, _("Recursively delete orphaned thumbnails\nand .sim files, and create new\nthumbnails and .sim files"), nullptr, FALSE);
@@ -1702,9 +1702,9 @@ void cache_manager_show()
 	gd = cache_manager->dialog;
 
 	gd->cancel_cb = cache_manager_close_cb;
-	generic_dialog_add_button(gd, "window-close", _("Close"),
+	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"),
 				  cache_manager_close_cb, FALSE);
-	generic_dialog_add_button(gd, "help-browser", _("Help"),
+	generic_dialog_add_button(gd, GQ_ICON_HELP, _("Help"),
 				  cache_manager_help_cb, FALSE);
 
 	generic_dialog_add_message(gd, nullptr, _("Cache and Data Maintenance"), nullptr, FALSE);
@@ -1717,12 +1717,12 @@ void cache_manager_show()
 
 	table = pref_table_new(group, 2, 2, FALSE, FALSE);
 
-	button = pref_table_button(table, 0, 0, "edit-clear", _("Clean up"),
+	button = pref_table_button(table, 0, 0, GQ_ICON_CLEAR, _("Clean up"),
 				   G_CALLBACK(cache_manager_main_clean_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 0, _("Remove orphaned or outdated thumbnails and sim. files."), 0.0);
 
-	button = pref_table_button(table, 0, 1, "edit-delete", _("Clear cache"),
+	button = pref_table_button(table, 0, 1, GQ_ICON_DELETE, _("Clear cache"),
 				   G_CALLBACK(cache_manager_main_clear_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 1, _("Delete all cached data."), 0.0);
@@ -1736,12 +1736,12 @@ void cache_manager_show()
 
 	table = pref_table_new(group, 2, 2, FALSE, FALSE);
 
-	button = pref_table_button(table, 0, 0, "edit-clear", _("Clean up"),
+	button = pref_table_button(table, 0, 0, GQ_ICON_CLEAR, _("Clean up"),
 				   G_CALLBACK(cache_manager_standard_clean_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 0, _("Remove orphaned or outdated thumbnails."), 0.0);
 
-	button = pref_table_button(table, 0, 1, "edit-delete", _("Clear cache"),
+	button = pref_table_button(table, 0, 1, GQ_ICON_DELETE, _("Clear cache"),
 				   G_CALLBACK(cache_manager_standard_clear_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 1, _("Delete all cached thumbnails."), 0.0);
@@ -1750,7 +1750,7 @@ void cache_manager_show()
 
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 
-	button = pref_table_button(table, 0, 1, "system-run", _("Render"),
+	button = pref_table_button(table, 0, 1, GQ_ICON_RUN, _("Render"),
 				   G_CALLBACK(cache_manager_render_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 1, _("Render thumbnails for a specific folder."), 0.0);
@@ -1760,7 +1760,7 @@ void cache_manager_show()
 
 	table = pref_table_new(group, 3, 2, FALSE, FALSE);
 
-	button = pref_table_button(table, 0, 0, "system-run", _("Create"),
+	button = pref_table_button(table, 0, 0, GQ_ICON_RUN, _("Create"),
 				   G_CALLBACK(cache_manager_sim_load_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 0, _("Create sim. files recursively."), 0.0);
@@ -1772,7 +1772,7 @@ void cache_manager_show()
 
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 
-	button = pref_table_button(table, 0, 0, "edit-clear", _("Clean up"),
+	button = pref_table_button(table, 0, 0, GQ_ICON_CLEAR, _("Clean up"),
 				   G_CALLBACK(cache_manager_metadata_clean_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 0, _("Remove orphaned keywords and comments."), 0.0);
@@ -1781,7 +1781,7 @@ void cache_manager_show()
 
 	table = pref_table_new(group, 3, 2, FALSE, FALSE);
 
-	button = pref_table_button(table, 0, 0, "system-run", _("Select"),
+	button = pref_table_button(table, 0, 0, GQ_ICON_RUN, _("Select"),
 				   G_CALLBACK(cache_manager_cache_maintenance_load_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 0, _("Run cache maintenance as a background job."), 0.0);

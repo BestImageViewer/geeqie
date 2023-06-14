@@ -1112,7 +1112,7 @@ static gint exit_confirm_dlg()
 	generic_dialog_add_message(exit_dialog, GTK_STOCK_DIALOG_QUESTION,
 				   msg, _("Collections have been modified. Quit anyway?"), TRUE);
 	g_free(msg);
-	generic_dialog_add_button(exit_dialog, "application-exit", _("Quit"), exit_confirm_exit_cb, TRUE);
+	generic_dialog_add_button(exit_dialog, GQ_ICON_QUIT, _("Quit"), exit_confirm_exit_cb, TRUE);
 
 	gtk_widget_show(exit_dialog->dialog);
 

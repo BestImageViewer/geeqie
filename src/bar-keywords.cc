@@ -475,7 +475,7 @@ static void bar_pane_keywords_populate_popup_cb(GtkTextView *UNUSED(textview), G
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 
 	menu_item_add_divider(GTK_WIDGET(menu));
-	menu_item_add_icon(GTK_WIDGET(menu), _("Add selected keywords to selected files"), "list-add", G_CALLBACK(bar_pane_keywords_sel_add_cb), pkd);
+	menu_item_add_icon(GTK_WIDGET(menu), _("Add selected keywords to selected files"), GQ_ICON_ADD, G_CALLBACK(bar_pane_keywords_sel_add_cb), pkd);
 	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing keywords in selected files with selected keywords"), "edit-find-replace", G_CALLBACK(bar_pane_keywords_sel_replace_cb), pkd);
 }
 
@@ -956,7 +956,7 @@ static void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_e
 
 	generic_dialog_add_message(gd, nullptr, name ? _("Configure keyword") : _("New keyword"), nullptr, FALSE);
 
-	generic_dialog_add_button(gd, "dialog-ok", "OK",
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK",
 				  bar_pane_keywords_edit_ok_cb, TRUE);
 
 	table = pref_table_new(gd->vbox, 3, 1, FALSE, TRUE);
@@ -1054,7 +1054,7 @@ static void bar_pane_keywords_disconnect_marks_cb(GtkWidget *menu_widget, gpoint
 				"marks_keywords", menu_widget, TRUE, dummy_cancel_cb, pkd);
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_WARNING,
 				"Disconnect all Marks Keywords connections?", message->str, TRUE);
-	generic_dialog_add_button(gd, "dialog-ok", "OK", bar_pane_keywords_disconnect_marks_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", bar_pane_keywords_disconnect_marks_ok_cb, TRUE);
 
 	gtk_widget_show(gd->dialog);
 
@@ -1299,7 +1299,7 @@ static void bar_pane_keywords_menu_popup(GtkWidget *UNUSED(widget), PaneKeywords
 
 	menu = popup_menu_short_lived();
 
-	menu_item_add_icon(menu, _("New keyword"), "document-new", G_CALLBACK(bar_pane_keywords_add_dialog_cb), pkd);
+	menu_item_add_icon(menu, _("New keyword"), GQ_ICON_NEW, G_CALLBACK(bar_pane_keywords_add_dialog_cb), pkd);
 
 	menu_item_add_divider(menu);
 
@@ -1324,7 +1324,7 @@ static void bar_pane_keywords_menu_popup(GtkWidget *UNUSED(widget), PaneKeywords
 		if (keyword)
 			{
 			text = g_strdup_printf(_("Add \"%s\" to all selected images"), name);
-			menu_item_add_icon(menu, text, "list-add", G_CALLBACK(bar_pane_keywords_add_to_selected_cb), pkd);
+			menu_item_add_icon(menu, text, GQ_ICON_ADD, G_CALLBACK(bar_pane_keywords_add_to_selected_cb), pkd);
 			g_free(text);
 			}
 		menu_item_add_divider(menu);
@@ -1352,24 +1352,24 @@ static void bar_pane_keywords_menu_popup(GtkWidget *UNUSED(widget), PaneKeywords
 		menu_item_add_divider(menu);
 
 		text = g_strdup_printf(_("Edit \"%s\""), name);
-		menu_item_add_icon(menu, text, "document-edit", G_CALLBACK(bar_pane_keywords_edit_dialog_cb), pkd);
+		menu_item_add_icon(menu, text, GQ_ICON_EDIT, G_CALLBACK(bar_pane_keywords_edit_dialog_cb), pkd);
 		g_free(text);
 		text = g_strdup_printf(_("Remove \"%s\""), name);
-		menu_item_add_icon(menu, text, "edit-delete", G_CALLBACK(bar_pane_keywords_delete_cb), pkd);
+		menu_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_delete_cb), pkd);
 		g_free(text);
 
 
 		if (mark && mark[0])
 			{
 			text = g_strdup_printf(_("Disconnect \"%s\" from mark %s"), name, mark);
-			menu_item_add_icon(menu, text, "edit-delete", G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
+			menu_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
 			g_free(text);
 			}
 
 		if (keyword)
 			{
 			text = g_strdup_printf(_("Disconnect all Mark Keyword connections"));
-			menu_item_add_icon(menu, text, "edit-delete", G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
+			menu_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
 			g_free(text);
 			}
 		menu_item_add_divider(menu);

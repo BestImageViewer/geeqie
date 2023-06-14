@@ -102,7 +102,7 @@ static void encoding_dialog(const gchar *path)
 
 	gd = generic_dialog_new(_("Filename encoding locale mismatch"),
 				"locale warning", nullptr, TRUE, nullptr, nullptr);
-	generic_dialog_add_button(gd, "window-close", _("Close"), nullptr, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), nullptr, TRUE);
 
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_WARNING,
 				   _("Filename encoding locale mismatch"), string->str, TRUE);

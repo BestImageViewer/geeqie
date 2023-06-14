@@ -133,6 +133,81 @@
 #define STAR_RATING_REJECTED 0x274C //Unicode Character 'Cross Mark'
 #define STAR_RATING_STAR 0x2738 //Unicode Character 'Heavy Eight Pointed Rectilinear Black Star'
 
+#define GQ_ICON_ADD "list-add"
+#define GQ_ICON_REMOVE "list-remove"
+#define GQ_ICON_UNDO "edit-undo"
+#define GQ_ICON_OPEN "document-open"
+#define GQ_ICON_SAVE "document-save"
+#define GQ_ICON_NEW "document-new"
+#define GQ_ICON_EDIT "document-edit"
+#define GQ_ICON_REVERT "document-revert"
+#define GQ_ICON_CLOSE "window-close"
+#define GQ_ICON_RUN "system-run"
+#define GQ_ICON_STOP "process-stop"
+#define GQ_ICON_FULLSCREEN "view-fullscreen"
+#define GQ_ICON_LEAVE_FULLSCREEN "view-restore"
+#define GQ_ICON_REFRESH "view-refresh"
+#define GQ_ICON_ABOUT "help-about"
+#define GQ_ICON_QUIT "application-exit"
+#define GQ_ICON_DELETE "edit-delete"
+#define GQ_ICON_CLEAR "edit-clear"
+#define GQ_ICON_COPY "edit-copy"
+#define GQ_ICON_FIND "edit-find"
+#define GQ_ICON_PRINT "document-print"
+
+#define GQ_ICON_GO_TOP "go-top"
+#define GQ_ICON_GO_BOTTOM "go-bottom"
+#define GQ_ICON_GO_UP "go-up"
+#define GQ_ICON_GO_DOWN "go-down"
+#define GQ_ICON_GO_FIRST "go-first"
+#define GQ_ICON_GO_LAST "go-last"
+#define GQ_ICON_GO_PREV "go-previous"
+#define GQ_ICON_GO_NEXT "go-next"
+#define GQ_ICON_HOME "go-home"
+
+#define GQ_ICON_PREV_PAGE "media-skip-backward"
+#define GQ_ICON_NEXT_PAGE "media-skip-forward"
+#define GQ_ICON_BACK_PAGE "media-seek-backward"
+#define GQ_ICON_FORWARD_PAGE "media-seek-forward"
+
+#define GQ_ICON_PLAY "media-playback-start"
+#define GQ_ICON_PAUSE "media-playback-pause"
+
+#define GQ_ICON_ZOOM_IN "zoom-in"
+#define GQ_ICON_ZOOM_OUT "zoom-out"
+#define GQ_ICON_ZOOM_100 "zoom-original"
+#define GQ_ICON_ZOOM_FIT "zoom-fit-best"
+
+// might need replacing
+#define GQ_ICON_PREFERENCES "preferences-system"
+#define GQ_ICON_HELP "help-contents" // "help-browser"?
+#define GQ_ICON_EXPORT "document-export" // use collection icon?
+
+// not available in some themes?
+#define GQ_ICON_OK "emblem-ok"
+#define GQ_ICON_APPLY "emblem-ok" // need something else?
+#define GQ_ICON_CANCEL "dialog-cancel" // missing in adwaita and others, seen in breeze
+#define GQ_ICON_INFO "dialog-information"
+#define GQ_ICON_UNREADABLE "emblem-unreadable"
+#define GQ_ICON_LINK "emblem-symbolic-link"
+#define GQ_ICON_READONLY "emblem-readonly"
+
+#define GQ_ICON_ROTATE "object-rotate-left"
+#define GQ_ICON_DIRECTORY "folder"
+#define GQ_ICON_MISSING_IMAGE "image-missing"
+#define GQ_ICON_STRIKETHROUGH "format-text-strikethrough"
+#define GQ_ICON_FILE "text-x-generic"
+#define GQ_ICON_GENERIC "text-x-generic"
+#define GQ_ICON_SELECT_FONT "font-select"
+#define GQ_ICON_SELECT_COLOR "color-select"
+#define GQ_ICON_COLOR_MANAGEMENT "preferences-color" // breeze has nicer "color-management" icon, missing in others
+
+// not done... plus many more
+#define GQ_ICON_COLLECTION GTK_STOCK_INDEX
+#define GQ_ICON_DND GTK_STOCK_DND_MULTIPLE
+// PIXBUF_INLINE_ICON_ZOOMFILLHOR
+// PIXBUF_INLINE_ICON_ZOOMFILLVERT
+
 /* From http://stackoverflow.com/questions/3417837/ */
 #ifdef UNUSED
 #elif defined(__GNUC__)

@@ -3121,7 +3121,7 @@ static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 	gd = file_util_gen_dlg("Image thumbprint debug info", "thumbprint",
 			       dw->window, TRUE,
 			       nullptr, nullptr);
-	generic_dialog_add_button(gd, "window-close", _("Close"), nullptr, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), nullptr, TRUE);
 
 	dupe_display_label(gd->vbox, "name:", di->fd->name);
 	buf = text_from_size(di->fd->size);
@@ -3502,7 +3502,7 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 
 	menu_item_add_sensitive(menu, _("_View"), on_row,
 				G_CALLBACK(dupe_menu_view_cb), dw);
-	menu_item_add_icon_sensitive(menu, _("View in _new window"), "document-new", on_row,
+	menu_item_add_icon_sensitive(menu, _("View in _new window"), GQ_ICON_NEW, on_row,
 				G_CALLBACK(dupe_menu_viewnew_cb), dw);
 	menu_item_add_divider(menu);
 	menu_item_add_sensitive(menu, _("Select all"), (dw->dupes != nullptr),
@@ -3529,10 +3529,10 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 								G_CALLBACK(dupe_pop_menu_collections_cb), dw);
 	gtk_widget_set_sensitive(item, on_row);
 
-	menu_item_add_icon_sensitive(menu, _("Print..."), "document-print", on_row,
+	menu_item_add_icon_sensitive(menu, _("Print..."), GQ_ICON_PRINT, on_row,
 				G_CALLBACK(dupe_menu_print_cb), dw);
 	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, _("_Copy..."), "edit-copy", on_row,
+	menu_item_add_icon_sensitive(menu, _("_Copy..."), GQ_ICON_COPY, on_row,
 				G_CALLBACK(dupe_menu_copy_cb), dw);
 	menu_item_add_sensitive(menu, _("_Move..."), on_row,
 				G_CALLBACK(dupe_menu_move_cb), dw);
@@ -3546,7 +3546,7 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	menu_item_add_divider(menu);
 	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_move_to_trash ? _("Move to Trash...") :
-					_("Move to Trash"), "edit-delete", on_row,
+					_("Move to Trash"), GQ_ICON_DELETE, on_row,
 				G_CALLBACK(dupe_menu_move_to_trash_cb), dw);
 	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
@@ -3554,12 +3554,12 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 				G_CALLBACK(dupe_menu_delete_cb), dw);
 
 	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, _("Rem_ove"), "list-remove", on_row,
+	menu_item_add_icon_sensitive(menu, _("Rem_ove"), GQ_ICON_REMOVE, on_row,
 				G_CALLBACK(dupe_menu_remove_cb), dw);
-	menu_item_add_icon_sensitive(menu, _("C_lear"), "edit-clear", (dw->list != nullptr),
+	menu_item_add_icon_sensitive(menu, _("C_lear"), GQ_ICON_CLEAR, (dw->list != nullptr),
 				G_CALLBACK(dupe_menu_clear_cb), dw);
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("Close _window"), "window-close",
+	menu_item_add_icon(menu, _("Close _window"), GQ_ICON_CLOSE,
 			    G_CALLBACK(dupe_menu_close_cb), dw);
 
 	return menu;
@@ -3840,7 +3840,7 @@ static GtkWidget *dupe_menu_popup_second(DupeWindow *dw, DupeItem *di)
 
 	menu_item_add_sensitive(menu, _("_View"), on_row,
 				G_CALLBACK(dupe_second_menu_view_cb), dw);
-	menu_item_add_icon_sensitive(menu, _("View in _new window"), "document-new", on_row,
+	menu_item_add_icon_sensitive(menu, _("View in _new window"), GQ_ICON_NEW, on_row,
 				G_CALLBACK(dupe_second_menu_viewnew_cb), dw);
 	menu_item_add_divider(menu);
 	menu_item_add_sensitive(menu, _("Select all"), notempty,
@@ -3848,12 +3848,12 @@ static GtkWidget *dupe_menu_popup_second(DupeWindow *dw, DupeItem *di)
 	menu_item_add_sensitive(menu, _("Select none"), notempty,
 				G_CALLBACK(dupe_second_menu_select_none_cb), dw);
 	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, _("Rem_ove"), "list-remove", on_row,
+	menu_item_add_icon_sensitive(menu, _("Rem_ove"), GQ_ICON_REMOVE, on_row,
 				      G_CALLBACK(dupe_second_menu_remove_cb), dw);
-	menu_item_add_icon_sensitive(menu, _("C_lear"), "edit-clear", notempty,
+	menu_item_add_icon_sensitive(menu, _("C_lear"), GQ_ICON_CLEAR, notempty,
 				   G_CALLBACK(dupe_second_menu_clear_cb), dw);
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("Close _window"), "window-close",
+	menu_item_add_icon(menu, _("Close _window"), GQ_ICON_CLOSE,
 			    G_CALLBACK(dupe_menu_close_cb), dw);
 
 	return menu;
@@ -4784,18 +4784,18 @@ DupeWindow *dupe_window_new()
 	gtk_box_pack_end(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
 
-	button = pref_button_new(nullptr, "help-browser", _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
+	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(button), "F1");
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	button = pref_button_new(nullptr, "process-stop", _("Stop"), G_CALLBACK(dupe_check_stop_cb), dw);
+	button = pref_button_new(nullptr, GQ_ICON_STOP, _("Stop"), G_CALLBACK(dupe_check_stop_cb), dw);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	button = pref_button_new(nullptr, "window-close", _("Close"), G_CALLBACK(dupe_window_close_cb), dw);
+	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(dupe_window_close_cb), dw);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(button), "Ctrl-W");
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_set_can_default(button, TRUE);
@@ -4909,13 +4909,13 @@ static GtkWidget *dupe_confirm_dir_list(DupeWindow *dw, GList *list)
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(confirm_dir_list_destroy), d);
 
-	menu_item_add_stock(menu, _("Dropped list includes folders."), GTK_STOCK_DND_MULTIPLE, nullptr, nullptr);
+	menu_item_add_stock(menu, _("Dropped list includes folders."), GQ_ICON_DND, nullptr, nullptr);
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("_Add contents"), "dialog-ok", G_CALLBACK(confirm_dir_list_add), d);
-	menu_item_add_icon(menu, _("Add contents _recursive"), "list-add", G_CALLBACK(confirm_dir_list_recurse), d);
-	menu_item_add_icon(menu, _("_Skip folders"), "list-remove", G_CALLBACK(confirm_dir_list_skip), d);
+	menu_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK, G_CALLBACK(confirm_dir_list_add), d);
+	menu_item_add_icon(menu, _("Add contents _recursive"), GQ_ICON_ADD, G_CALLBACK(confirm_dir_list_recurse), d);
+	menu_item_add_icon(menu, _("_Skip folders"), GQ_ICON_REMOVE, G_CALLBACK(confirm_dir_list_skip), d);
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("Cancel"), "dialog-cancel", G_CALLBACK(confirm_dir_list_cancel), d);
+	menu_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, G_CALLBACK(confirm_dir_list_cancel), d);
 
 	return menu;
 }
@@ -5353,7 +5353,7 @@ static void pop_menu_export(GList *UNUSED(selection_list), gpointer dupe_window,
 		}
 
 	generic_dialog_add_message(GENERIC_DIALOG(edd->dialog), nullptr, title, nullptr, FALSE);
-	file_dialog_add_button(edd->dialog, "document-save", _("Save"), export_duplicates_data_save_cb, TRUE);
+	file_dialog_add_button(edd->dialog, GQ_ICON_SAVE, _("Save"), export_duplicates_data_save_cb, TRUE);
 
 	previous_path = history_list_find_last_path_by_key("export_duplicates");
 
@@ -5389,9 +5389,9 @@ static GtkWidget *submenu_add_export(GtkWidget *menu, GtkWidget **menu_item, GCa
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
 	menu_item_add_icon_sensitive(submenu, _("Export to csv"),
-					"document-export", TRUE, G_CALLBACK(func), GINT_TO_POINTER(0));
+					GQ_ICON_EXPORT, TRUE, G_CALLBACK(func), GINT_TO_POINTER(0));
 	menu_item_add_icon_sensitive(submenu, _("Export to tab-delimited"),
-					"document-export", TRUE, G_CALLBACK(func), GINT_TO_POINTER(1));
+					GQ_ICON_EXPORT, TRUE, G_CALLBACK(func), GINT_TO_POINTER(1));
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 	if (menu_item) *menu_item = item;

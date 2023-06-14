@@ -776,10 +776,10 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 	g_object_set_data(G_OBJECT(menu), "window_keys", nullptr);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
-	menu_item_add_icon(menu, _("Zoom _in"), "zoom-in", G_CALLBACK(li_pop_menu_zoom_in_cb), lw);
-	menu_item_add_icon(menu, _("Zoom _out"), "zoom-out", G_CALLBACK(li_pop_menu_zoom_out_cb), lw);
-	menu_item_add_icon(menu, _("Zoom _1:1"), "zoom-original", G_CALLBACK(li_pop_menu_zoom_1_1_cb), lw);
-	menu_item_add_icon(menu, _("Zoom to fit"), "zoom-fit-best", G_CALLBACK(li_pop_menu_zoom_fit_cb), lw);
+	menu_item_add_icon(menu, _("Zoom _in"), GQ_ICON_ZOOM_IN, G_CALLBACK(li_pop_menu_zoom_in_cb), lw);
+	menu_item_add_icon(menu, _("Zoom _out"), GQ_ICON_ZOOM_OUT, G_CALLBACK(li_pop_menu_zoom_out_cb), lw);
+	menu_item_add_icon(menu, _("Zoom _1:1"), GQ_ICON_ZOOM_100, G_CALLBACK(li_pop_menu_zoom_1_1_cb), lw);
+	menu_item_add_icon(menu, _("Zoom to fit"), GQ_ICON_ZOOM_FIT, G_CALLBACK(li_pop_menu_zoom_fit_cb), lw);
 	menu_item_add_divider(menu);
 
 	editmenu_fd_list = layout_image_get_fd_list(lw);
@@ -790,13 +790,13 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 	menu_item_add_divider(submenu);
 	item = submenu_add_alter(menu, G_CALLBACK(li_pop_menu_alter_cb), lw);
 
-	item = menu_item_add_icon(menu, _("View in _new window"), "document-new", G_CALLBACK(li_pop_menu_new_cb), lw);
+	item = menu_item_add_icon(menu, _("View in _new window"), GQ_ICON_NEW, G_CALLBACK(li_pop_menu_new_cb), lw);
 	if (!path || fullscreen) gtk_widget_set_sensitive(item, FALSE);
 
 	item = menu_item_add(menu, _("_Go to directory view"), G_CALLBACK(li_set_layout_path_cb), lw);
 	if (!path || li_check_if_current_path(lw, path)) gtk_widget_set_sensitive(item, FALSE);
 
-	item = menu_item_add_icon(menu, _("Open archive"), "document-open", G_CALLBACK(li_open_archive_cb), lw);
+	item = menu_item_add_icon(menu, _("Open archive"), GQ_ICON_OPEN, G_CALLBACK(li_open_archive_cb), lw);
 	if (!path || lw->image->image_fd->format_class != FORMAT_CLASS_ARCHIVE)
 		{
 		gtk_widget_set_sensitive(item, FALSE);
@@ -804,7 +804,7 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	menu_item_add_divider(menu);
 
-	item = menu_item_add_icon(menu, _("_Copy..."), "edit-copy", G_CALLBACK(li_pop_menu_copy_cb), lw);
+	item = menu_item_add_icon(menu, _("_Copy..."), GQ_ICON_COPY, G_CALLBACK(li_pop_menu_copy_cb), lw);
 	if (!path) gtk_widget_set_sensitive(item, FALSE);
 	item = menu_item_add(menu, _("_Move..."), G_CALLBACK(li_pop_menu_move_cb), lw);
 	if (!path) gtk_widget_set_sensitive(item, FALSE);
@@ -818,7 +818,7 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	item = menu_item_add_icon(menu,
 				options->file_ops.confirm_move_to_trash ? _("Move to Trash...") :
-					_("Move to Trash"), "edit-delete",
+					_("Move to Trash"), GQ_ICON_DELETE,
 								G_CALLBACK(li_pop_menu_move_to_trash_cb), lw);
 	if (!path) gtk_widget_set_sensitive(item, FALSE);
 	item = menu_item_add_icon(menu,
@@ -856,11 +856,11 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	if (!fullscreen)
 		{
-		menu_item_add_icon(menu, _("_Full screen"), "view-fullscreen", G_CALLBACK(li_pop_menu_full_screen_cb), lw);
+		menu_item_add_icon(menu, _("_Full screen"), GQ_ICON_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
 		}
 	else
 		{
-		menu_item_add_icon(menu, _("Exit _full screen"), "view-restore", G_CALLBACK(li_pop_menu_full_screen_cb), lw);
+		menu_item_add_icon(menu, _("Exit _full screen"), GQ_ICON_LEAVE_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
 		}
 
 	menu_item_add_check(menu, _("GIF _animation"), lw->options.animate, G_CALLBACK(li_pop_menu_animate_cb), lw);

@@ -274,7 +274,7 @@ static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent
 
 	generic_dialog_add_message(gd, nullptr, _("Edit Bookmark"), nullptr, FALSE);
 
-	generic_dialog_add_button(gd, "dialog-ok", "OK",
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK",
 				  bookmark_edit_ok_cb, TRUE);
 
 	table = pref_table_new(gd->vbox, 3, 2, FALSE, TRUE);
@@ -387,11 +387,11 @@ static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button,
 	menu = popup_menu_short_lived();
 	menu_item_add_icon_sensitive(menu, _("_Properties..."), "document-properties", bm->editable,
 		      G_CALLBACK(bookmark_menu_prop_cb), bm);
-	menu_item_add_icon_sensitive(menu, _("Move _up"), "go-up", bm->editable,
+	menu_item_add_icon_sensitive(menu, _("Move _up"), GQ_ICON_GO_UP, bm->editable,
 		      G_CALLBACK(bookmark_menu_up_cb), bm);
-	menu_item_add_icon_sensitive(menu, _("Move _down"), "go-down", bm->editable,
+	menu_item_add_icon_sensitive(menu, _("Move _down"), GQ_ICON_GO_DOWN, bm->editable,
 		      G_CALLBACK(bookmark_menu_down_cb), bm);
-	menu_item_add_icon_sensitive(menu, _("_Remove"), "list-remove", bm->editable,
+	menu_item_add_icon_sensitive(menu, _("_Remove"), GQ_ICON_REMOVE, bm->editable,
 		      G_CALLBACK(bookmark_menu_remove_cb), bm);
 
 	if (local)
@@ -655,12 +655,12 @@ static void bookmark_populate(BookMarkData *bm)
 					}
 				else
 					{
-					b->image = gtk_image_new_from_icon_name("folder", GTK_ICON_SIZE_BUTTON);
+					b->image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
 					}
 				}
 			else
 				{
-				b->image = gtk_image_new_from_icon_name("folder", GTK_ICON_SIZE_BUTTON);
+				b->image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
 				}
 			gtk_box_pack_start(GTK_BOX(box), b->image, FALSE, FALSE, 0);
 			gtk_widget_show(b->image);
@@ -756,7 +756,7 @@ static void bookmark_dnd_get_data(GtkWidget *UNUSED(widget),
 				}
 			else if (isfile(path))
 				{
-				buf = bookmark_string(filename_from_path(path), path, "text-x-generic");
+				buf = bookmark_string(filename_from_path(path), path, GQ_ICON_FILE);
 				}
 			else
 				{
@@ -904,7 +904,7 @@ void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 		{
 		if (isfile(path))
 			{
-			buf = bookmark_string(name, path, "text-x-generic");
+			buf = bookmark_string(name, path, GQ_ICON_FILE);
 			}
 		else
 			{

@@ -1403,10 +1403,10 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 	g_object_set_data(G_OBJECT(menu), "window_keys", image_window_keys);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
-	menu_item_add_icon(menu, _("Zoom _in"), "zoom-in", G_CALLBACK(view_zoom_in_cb), vw);
-	menu_item_add_icon(menu, _("Zoom _out"), "zoom-out", G_CALLBACK(view_zoom_out_cb), vw);
-	menu_item_add_icon(menu, _("Zoom _1:1"), "zoom-original", G_CALLBACK(view_zoom_1_1_cb), vw);
-	menu_item_add_icon(menu, _("Zoom to fit"), "zoom-fit-best", G_CALLBACK(view_zoom_fit_cb), vw);
+	menu_item_add_icon(menu, _("Zoom _in"), GQ_ICON_ZOOM_IN, G_CALLBACK(view_zoom_in_cb), vw);
+	menu_item_add_icon(menu, _("Zoom _out"), GQ_ICON_ZOOM_OUT, G_CALLBACK(view_zoom_out_cb), vw);
+	menu_item_add_icon(menu, _("Zoom _1:1"), GQ_ICON_ZOOM_100, G_CALLBACK(view_zoom_1_1_cb), vw);
+	menu_item_add_icon(menu, _("Zoom to fit"), GQ_ICON_ZOOM_FIT, G_CALLBACK(view_zoom_fit_cb), vw);
 	menu_item_add_divider(menu);
 
  	editmenu_fd_list = view_window_get_fd_list(vw);
@@ -1417,11 +1417,11 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 
 	submenu_add_alter(menu, G_CALLBACK(view_alter_cb), vw);
 
-	menu_item_add_icon(menu, _("View in _new window"), "document-new", G_CALLBACK(view_new_window_cb), vw);
+	menu_item_add_icon(menu, _("View in _new window"), GQ_ICON_NEW, G_CALLBACK(view_new_window_cb), vw);
 	item = menu_item_add(menu, _("_Go to directory view"), G_CALLBACK(view_set_layout_path_cb), vw);
 
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("_Copy..."), "edit-copy", G_CALLBACK(view_copy_cb), vw);
+	menu_item_add_icon(menu, _("_Copy..."), GQ_ICON_COPY, G_CALLBACK(view_copy_cb), vw);
 	menu_item_add(menu, _("_Move..."), G_CALLBACK(view_move_cb), vw);
 	menu_item_add(menu, _("_Rename..."), G_CALLBACK(view_rename_cb), vw);
 	menu_item_add(menu, _("_Copy path"), G_CALLBACK(view_copy_path_cb), vw);
@@ -1430,7 +1430,7 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu,
 				options->file_ops.confirm_move_to_trash ? _("Move to Trash...") :
-					_("Move to Trash"), "edit-delete",
+					_("Move to Trash"), GQ_ICON_DELETE,
 				G_CALLBACK(view_move_to_trash_cb), vw);
 	menu_item_add_icon(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
@@ -1468,15 +1468,15 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 
 	if (vw->fs)
 		{
-		menu_item_add_icon(menu, _("Exit _full screen"), "view-restore", G_CALLBACK(view_fullscreen_cb), vw);
+		menu_item_add_icon(menu, _("Exit _full screen"), GQ_ICON_LEAVE_FULLSCREEN, G_CALLBACK(view_fullscreen_cb), vw);
 		}
 	else
 		{
-		menu_item_add_icon(menu, _("_Full screen"), "view-fullscreen", G_CALLBACK(view_fullscreen_cb), vw);
+		menu_item_add_icon(menu, _("_Full screen"), GQ_ICON_FULLSCREEN, G_CALLBACK(view_fullscreen_cb), vw);
 		}
 
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("C_lose window"), "window-close", G_CALLBACK(view_close_cb), vw);
+	menu_item_add_icon(menu, _("C_lose window"), GQ_ICON_CLOSE, G_CALLBACK(view_close_cb), vw);
 
 	return menu;
 }
@@ -1594,13 +1594,13 @@ static GtkWidget *view_confirm_dir_list(ViewWindow *vw, GList *list)
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(view_dir_list_destroy), d);
 
-	menu_item_add_stock(menu, _("Dropped list includes folders."), "GTK_STOCK_DND_MULTIPLE", nullptr, nullptr);
+	menu_item_add_stock(menu, _("Dropped list includes folders."), "GQ_ICON_DND", nullptr, nullptr);
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("_Add contents"), "dialog-ok", G_CALLBACK(view_dir_list_add), d);
-	menu_item_add_icon(menu, _("Add contents _recursive"), "list-add", G_CALLBACK(view_dir_list_recurse), d);
-	menu_item_add_icon(menu, _("_Skip folders"), "list-remove", G_CALLBACK(view_dir_list_skip), d);
+	menu_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK, G_CALLBACK(view_dir_list_add), d);
+	menu_item_add_icon(menu, _("Add contents _recursive"), GQ_ICON_ADD, G_CALLBACK(view_dir_list_recurse), d);
+	menu_item_add_icon(menu, _("_Skip folders"), GQ_ICON_REMOVE, G_CALLBACK(view_dir_list_skip), d);
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("Cancel"), "dialog-cancel", G_CALLBACK(view_dir_list_cancel), d);
+	menu_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, G_CALLBACK(view_dir_list_cancel), d);
 
 	return menu;
 }

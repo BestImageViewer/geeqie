@@ -216,7 +216,7 @@ static void bar_pane_gps_close_save_cb(GenericDialog *UNUSED(gd), gpointer data)
 							_("Write lat/long to meta-data?"),
 							message->str, TRUE);
 
-				generic_dialog_add_button(gd, "document-save", _("Save"),
+				generic_dialog_add_button(gd, GQ_ICON_SAVE, _("Save"),
 												bar_pane_gps_close_save_cb, TRUE);
 
 				gtk_widget_show(gd->dialog);
@@ -851,7 +851,7 @@ void bar_pane_gps_map_centreing(PaneGPSData *pgd)
 				"map_centering", nullptr, TRUE, nullptr, pgd);
 	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_INFO,
 				"Map Centering", message->str, TRUE);
-	generic_dialog_add_button(gd, "dialog-ok", "OK", NULL, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", NULL, TRUE);
 
 	gtk_widget_show(gd->dialog);
 
@@ -925,7 +925,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	GtkWidget *status, *state, *progress, *slider;
 	ChamplainMarkerLayer *layer;
 	ChamplainView *view;
-	const gchar *slider_list[] = {"zoom-in", "zoom-out", nullptr};
+	const gchar *slider_list[] = {GQ_ICON_ZOOM_IN, GQ_ICON_ZOOM_OUT, nullptr};
 	const gchar **slider_icons = slider_list;
 
 	pgd = g_new0(PaneGPSData, 1);

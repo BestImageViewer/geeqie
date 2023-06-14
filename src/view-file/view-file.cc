@@ -692,13 +692,13 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	submenu_add_edit(menu, &item, G_CALLBACK(vf_pop_menu_edit_cb), vf, vf->editmenu_fd_list);
 	gtk_widget_set_sensitive(item, active);
 
-	menu_item_add_icon_sensitive(menu, _("View in _new window"), "document-new", active,
+	menu_item_add_icon_sensitive(menu, _("View in _new window"), GQ_ICON_NEW, active,
 				      G_CALLBACK(vf_pop_menu_view_cb), vf);
 
-	menu_item_add_icon_sensitive(menu, _("Open archive"), "document-open", active & class_archive, G_CALLBACK(vf_pop_menu_open_archive_cb), vf);
+	menu_item_add_icon_sensitive(menu, _("Open archive"), GQ_ICON_OPEN, active & class_archive, G_CALLBACK(vf_pop_menu_open_archive_cb), vf);
 
 	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, _("_Copy..."), "edit-copy", active,
+	menu_item_add_icon_sensitive(menu, _("_Copy..."), GQ_ICON_COPY, active,
 				      G_CALLBACK(vf_pop_menu_copy_cb), vf);
 	menu_item_add_sensitive(menu, _("_Move..."), active,
 				G_CALLBACK(vf_pop_menu_move_cb), vf);
@@ -711,7 +711,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	menu_item_add_divider(menu);
 	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_move_to_trash ? _("Move to Trash...") :
-					_("Move to Trash"), "edit-delete", active,
+					_("Move to Trash"), GQ_ICON_DELETE, active,
 				G_CALLBACK(vf_pop_menu_move_to_trash_cb), vf);
 	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
@@ -725,7 +725,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 				G_CALLBACK(vf_pop_menu_disable_grouping_cb), vf);
 
 	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, _("_Find duplicates..."), "edit-find", active,
+	menu_item_add_icon_sensitive(menu, _("_Find duplicates..."), GQ_ICON_FIND, active,
 				G_CALLBACK(vf_pop_menu_duplicates_cb), vf);
 	menu_item_add_divider(menu);
 
@@ -773,7 +773,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 		break;
 	}
 
-	menu_item_add_icon(menu, _("Re_fresh"), "view-refresh", G_CALLBACK(vf_pop_menu_refresh_cb), vf);
+	menu_item_add_icon(menu, _("Re_fresh"), GQ_ICON_REFRESH, G_CALLBACK(vf_pop_menu_refresh_cb), vf);
 
 	return menu;
 }
@@ -902,9 +902,9 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 				     vf_marks_tooltip_cancel_cb, mte);
 	generic_dialog_add_message(mte->gd, GTK_STOCK_DIALOG_QUESTION, _("Set mark text"),
 				   _("This will set or clear the mark text."), FALSE);
-	generic_dialog_add_button(mte->gd, "dialog-ok", "OK",
+	generic_dialog_add_button(mte->gd, GQ_ICON_OK, "OK",
 				  vf_marks_tooltip_ok_cb, TRUE);
-	generic_dialog_add_button(mte->gd, "help-browser", _("Help"),
+	generic_dialog_add_button(mte->gd, GQ_ICON_HELP, _("Help"),
 				  vf_marks_tooltip_help_cb, FALSE);
 
 	table = pref_table_new(mte->gd->vbox, 3, 1, FALSE, TRUE);
