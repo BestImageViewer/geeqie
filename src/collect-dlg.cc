@@ -228,7 +228,7 @@ static void collection_save_or_load_dialog(const gchar *path,
 			     collection_save_or_load_dialog_close_cb, cd);
 
 	generic_dialog_add_message(GENERIC_DIALOG(fd), nullptr, title, nullptr, FALSE);
-	file_dialog_add_button(fd, stock_id, btntext, reinterpret_cast<void (*)(FileDialog *, gpointer)>(btnfunc), TRUE);
+	file_dialog_add_button(fd, icon_name, btntext, reinterpret_cast<void (*)(FileDialog *, gpointer)>(btnfunc), TRUE);
 
 	file_dialog_add_path_widgets(fd, get_collections_dir(), path,
 				     "collection_load_save", GQ_COLLECTION_EXT, _("Collection Files"));

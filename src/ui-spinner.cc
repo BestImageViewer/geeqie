@@ -157,7 +157,7 @@ GtkWidget *spinner_new(const gchar *path, gint interval)
 		}
 	else
 		{
-		sp->image = gtk_image_new_from_icon_name("image-missing", GTK_ICON_SIZE_DIALOG);
+		sp->image = gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_DIALOG);
 		}
 
 	g_object_set_data(G_OBJECT(sp->image), "spinner", sp);

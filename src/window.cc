@@ -393,7 +393,7 @@ void help_search_window_show()
 	gtk_widget_show(hsd->edit_widget);
 
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(hsd->edit_widget),
-						GTK_ENTRY_ICON_SECONDARY, "edit-clear");
+						GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(hsd->edit_widget),
 						GTK_ENTRY_ICON_SECONDARY, _("Clear"));
 	g_signal_connect(GTK_ENTRY(hsd->edit_widget), "icon-press",

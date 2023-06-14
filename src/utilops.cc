@@ -2018,7 +2018,7 @@ static void file_util_details_dialog(UtilityData *ud, FileData *fd)
 
 	gd = file_util_gen_dlg(_("File details"), "details", ud->gd->dialog, TRUE, nullptr, ud);
 	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), file_util_details_dialog_ok_cb, TRUE);
-	generic_dialog_add_button(gd, GTK_STOCK_REMOVE, _("Exclude file"), file_util_details_dialog_exclude_cb, FALSE);
+	generic_dialog_add_button(gd, GQ_ICON_REMOVE, _("Exclude file"), file_util_details_dialog_exclude_cb, FALSE);
 
 	g_object_set_data(G_OBJECT(gd->dialog), "file_data", fd);
 
@@ -2065,7 +2065,7 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 
 	gd = file_util_gen_dlg(_("Overview of changed metadata"), "details", ud->gd->dialog, TRUE, nullptr, ud);
 	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), file_util_details_dialog_ok_cb, TRUE);
-	generic_dialog_add_button(gd, GTK_STOCK_REMOVE, _("Exclude file"), file_util_details_dialog_exclude_cb, FALSE);
+	generic_dialog_add_button(gd, GQ_ICON_REMOVE, _("Exclude file"), file_util_details_dialog_exclude_cb, FALSE);
 	generic_dialog_add_button(gd, GQ_ICON_REVERT, _("Discard changes"), file_util_details_dialog_discard_cb, FALSE);
 
 	g_object_set_data(G_OBJECT(gd->dialog), "file_data", fd);
