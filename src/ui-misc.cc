@@ -700,37 +700,29 @@ GtkWidget *pref_toolbar_new(GtkWidget *parent_box, GtkToolbarStyle style)
 }
 
 GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
-			       const gchar *stock_id, const gchar *label, gboolean toggle,
+			       const gchar *icon_name, const gchar *label, gboolean toggle,
 			       const gchar *description,
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item;
 
-	if (toggle)
+	if (toggle) // TODO: TG seems no function uses toggle now
 		{
-		if (stock_id)
-			{
-			item = GTK_WIDGET(gtk_toggle_tool_button_new_from_stock(stock_id));
-			}
-		else
-			{
-			item = GTK_WIDGET(gtk_toggle_tool_button_new());
-			}
+		item = GTK_WIDGET(gtk_toggle_tool_button_new());
+		if (icon_name) gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(item), icon_name);
+		if (label) gtk_tool_button_set_label(GTK_TOOL_BUTTON(item), label);
 		}
 	else
 		{
-		if (stock_id)
+		GtkWidget *icon = nullptr;
+		if (icon_name)
 			{
-			item = GTK_WIDGET(gtk_tool_button_new_from_stock(stock_id));
+			icon = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_LARGE_TOOLBAR); // TODO: TG which size?
+			gtk_widget_show(icon);
 			}
-		else
-			{
-			item = GTK_WIDGET(gtk_tool_button_new(nullptr, nullptr));
-			}
+		item = GTK_WIDGET(gtk_tool_button_new(icon, label));
 		}
 	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(item), TRUE);
-
-	if (label) gtk_tool_button_set_label(GTK_TOOL_BUTTON(item), label);
 
 	if (func) g_signal_connect(item, "clicked", func, data);
 	gtk_container_add(GTK_CONTAINER(toolbar), item);
