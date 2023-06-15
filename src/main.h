@@ -164,6 +164,8 @@
 #define GQ_ICON_GO_PREV "go-previous"
 #define GQ_ICON_GO_NEXT "go-next"
 #define GQ_ICON_HOME "go-home"
+#define GQ_ICON_PAN_DOWN "pan-down"
+#define GQ_ICON_PAN_UP "pan-up"
 
 #define GQ_ICON_PREV_PAGE "media-skip-backward"
 #define GQ_ICON_NEXT_PAGE "media-skip-forward"
@@ -188,6 +190,7 @@
 #define GQ_ICON_APPLY "emblem-ok" // need something else?
 #define GQ_ICON_CANCEL "dialog-cancel" // missing in adwaita and others, seen in breeze
 #define GQ_ICON_INFO "dialog-information"
+#define GQ_ICON_QUESTION "dialog-question"
 #define GQ_ICON_UNREADABLE "emblem-unreadable"
 #define GQ_ICON_LINK "emblem-symbolic-link"
 #define GQ_ICON_READONLY "emblem-readonly"

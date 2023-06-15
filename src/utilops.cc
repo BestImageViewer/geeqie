@@ -3312,7 +3312,7 @@ gchar *new_folder(GtkWindow *window , gchar *path)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), PREF_PAD_GAP);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-	image = gtk_image_new_from_icon_name("dialog-question", GTK_ICON_SIZE_DIALOG);
+	image = gtk_image_new_from_icon_name(GQ_ICON_QUESTION, GTK_ICON_SIZE_DIALOG);
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	label = gtk_label_new(_("Create new folder"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);

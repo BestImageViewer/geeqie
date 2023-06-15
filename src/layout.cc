@@ -472,7 +472,7 @@ static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 	gtk_box_pack_start(GTK_BOX(box), frame, FALSE, FALSE, 0);
 	gtk_widget_show(frame);
 
-	image = gtk_image_new_from_icon_name("pan-down", GTK_ICON_SIZE_BUTTON);
+	image = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_BUTTON);
 	button = gtk_button_new_with_label(sort_type_get_text(lw->sort_method));
 	gtk_button_set_image(GTK_BUTTON(button), image);
 	g_signal_connect(G_OBJECT(button), "clicked",
@@ -570,7 +570,7 @@ static GtkWidget *layout_zoom_button(LayoutWindow *lw, GtkWidget *box, gint size
 
 	gtk_widget_show(frame);
 
-	image = gtk_image_new_from_icon_name("pan-down", GTK_ICON_SIZE_BUTTON);
+	image = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_BUTTON);
 	button = gtk_button_new_with_label("1:1");
 	gtk_button_set_image(GTK_BUTTON(button), image);
 	g_signal_connect(G_OBJECT(button), "clicked",
