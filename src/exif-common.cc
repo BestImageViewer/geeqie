@@ -19,6 +19,8 @@
 
 #include <config.h>
 
+#include <stdlib.h>
+
 #define _XOPEN_SOURCE
 
 #include <string.h>
