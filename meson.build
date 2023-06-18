@@ -190,6 +190,7 @@ option = get_option('execinfo')
 if not option.disabled()
     result = cc.check_header('execinfo.h')
     if result
+        libexecinfo_dep = cc.find_library('execinfo', required : false)
         conf_data.set('HAVE_EXECINFO_H', 1)
         summary({'execinfo' : ['stacktrace supported:', true]}, section : 'Debugging', bool_yn : true)
     else
