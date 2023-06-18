@@ -1438,7 +1438,7 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *UN
 				pane = bar_pane_gps_new_from_config(attribute_names, attribute_values);
 				bar_add(bar, pane);
 				}
-			options_parse_func_push(parser_data, options_parse_leaf, NULL, NULL);
+			options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
 			}
 		}
 #endif

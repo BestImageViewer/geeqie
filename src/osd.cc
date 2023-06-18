@@ -465,7 +465,7 @@ void osd_template_insert(GHashTable *vars, const gchar *keyword, const gchar *va
 
 	if (flags & OSDT_NO_DUP)
 		{
-		g_hash_table_insert(vars, const_cast<gchar *>(keyword), (gpointer)value);
+		g_hash_table_insert(vars, const_cast<gchar *>(keyword), const_cast<gchar *>(value));
 		return;
 		}
 	else

@@ -182,24 +182,24 @@ static gboolean image_loader_jpegxl_load(gpointer loader, const guchar *buf, gsi
 
 static gpointer image_loader_jpegxl_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
-	ImageLoaderJPEGXL *loader = g_new0(ImageLoaderJPEGXL, 1);
+	auto loader = g_new0(ImageLoaderJPEGXL, 1);
 	loader->area_updated_cb = area_updated_cb;
 	loader->size_cb = size_cb;
 	loader->area_prepared_cb = area_prepared_cb;
 	loader->data = data;
-	return (gpointer) loader;
+	return loader;
 }
 
 static void image_loader_jpegxl_set_size(gpointer loader, int width, int height)
 {
-	ImageLoaderJPEGXL *ld = (ImageLoaderJPEGXL *) loader;
+	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
 static GdkPixbuf* image_loader_jpegxl_get_pixbuf(gpointer loader)
 {
-	ImageLoaderJPEGXL *ld = (ImageLoaderJPEGXL *) loader;
+	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	return ld->pixbuf;
 }
 
@@ -221,13 +221,13 @@ static gboolean image_loader_jpegxl_close(gpointer UNUSED(loader), GError **UNUS
 
 static void image_loader_jpegxl_abort(gpointer loader)
 {
-	ImageLoaderJPEGXL *ld = (ImageLoaderJPEGXL *) loader;
+	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	ld->abort = TRUE;
 }
 
 static void image_loader_jpegxl_free(gpointer loader)
 {
-	ImageLoaderJPEGXL *ld = (ImageLoaderJPEGXL *) loader;
+	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
