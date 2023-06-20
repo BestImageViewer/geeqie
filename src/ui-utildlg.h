@@ -101,7 +101,7 @@ void file_dialog_add_path_widgets(FileDialog *fd, const gchar *default_path, con
 void file_dialog_clear_filter(FileDialog *fd);
 void file_dialog_sync_history(FileDialog *fd, gboolean dir_only);
 
-void generic_dialog_windows_load_config(const gchar **window_attributes, const gchar **attribute_values);
+void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values);
 void generic_dialog_windows_write_config(GString *outstr, gint indent);
 
 void appimage_notification();

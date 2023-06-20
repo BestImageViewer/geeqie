@@ -32,13 +32,13 @@ static void gqv_cell_renderer_icon_set_property(GObject		*object,
 						const GValue	*value,
 						GParamSpec	*pspec);
 static void gqv_cell_renderer_icon_init_wrapper(void *, void *);
-static void gqv_cell_renderer_icon_init(GQvCellRendererIcon *celltext);
+static void gqv_cell_renderer_icon_init(GQvCellRendererIcon *cellicon);
 static void gqv_cell_renderer_icon_class_init_wrapper(void *, void *);
 static void gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class);
 static void gqv_cell_renderer_icon_finalize(GObject *object);
 static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
 					    GtkWidget	       *widget,
-					    const GdkRectangle *rectangle,
+					    const GdkRectangle *cell_area,
 					    gint	       *x_offset,
 					    gint	       *y_offset,
 					    gint	       *width,

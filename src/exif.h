@@ -112,7 +112,7 @@ void exif_free_fd(FileData *fd, ExifData *exif);
  * this function gives access to the original data from the image.
  * original data are part of the processed data and should not be freed separately
  */
-ExifData *exif_get_original(ExifData *processed);
+ExifData *exif_get_original(ExifData *exif);
 
 
 gboolean exif_write(ExifData *exif);

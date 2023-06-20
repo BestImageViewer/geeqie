@@ -141,7 +141,7 @@ void image_loader_delay_area_ready(ImageLoader *il, gboolean enable);
  */
 void image_loader_set_requested_size(ImageLoader *il, gint width, gint height);
 
-void image_loader_set_buffer_size(ImageLoader *il, guint size);
+void image_loader_set_buffer_size(ImageLoader *il, guint count);
 
 /**
  * @headerfile image_loader_set_priority

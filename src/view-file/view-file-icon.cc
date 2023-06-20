@@ -52,7 +52,7 @@ enum {
 };
 
 static void vficon_toggle_filenames(ViewFile *vf);
-static void vficon_selection_remove(ViewFile *vf, FileData *id, SelectionType mask, GtkTreeIter *iter);
+static void vficon_selection_remove(ViewFile *vf, FileData *fd, SelectionType mask, GtkTreeIter *iter);
 static void vficon_move_focus(ViewFile *vf, gint row, gint col, gboolean relative);
 static void vficon_set_focus(ViewFile *vf, FileData *fd);
 static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint h, gboolean force);

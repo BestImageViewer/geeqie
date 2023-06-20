@@ -175,7 +175,7 @@ gboolean file_data_unregister_real_time_monitor(FileData *fd);
 void read_exif_time_data(FileData *file);
 void read_exif_time_digitized_data(FileData *file);
 
-gboolean marks_list_save(gchar *path, gboolean clear);
+gboolean marks_list_save(gchar *path, gboolean save);
 gboolean marks_list_load(const gchar *path);
 void marks_clear_all();
 void read_rating_data(FileData *file);

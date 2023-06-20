@@ -748,8 +748,6 @@ static void draw_page(GtkPrintOperation *UNUSED(operation), GtkPrintContext *con
 		}
 
 	if (rotated) g_object_unref(rotated);
-
-	return;
 }
 
 static void begin_print(GtkPrintOperation *operation,

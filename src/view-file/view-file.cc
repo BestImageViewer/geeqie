@@ -1838,8 +1838,6 @@ void vf_read_metadata_in_idle(ViewFile *vf)
 		{
 		vf->read_metadata_in_idle_id = g_idle_add_full(G_PRIORITY_LOW, vf_read_metadata_in_idle_cb, vf, vf_read_metadata_in_idle_finished_cb);
 		}
-
-	return;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

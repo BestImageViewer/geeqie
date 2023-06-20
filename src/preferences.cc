@@ -4214,8 +4214,6 @@ void show_about_window(LayoutWindow *lw)
 	g_object_unref(data_stream);
 	g_object_unref(in_stream_authors);
 	g_object_unref(in_stream_translators);
-
-	return;
 }
 
 static void image_overlay_set_text_colours()

@@ -1196,8 +1196,6 @@ static void file_util_fdlg_ok_cb(FileDialog *fdlg, gpointer data)
 	ud->phase = UTILITY_PHASE_ENTERING;
 
 	file_util_dialog_run(ud);
-
-	return;
 }
 
 static void file_util_dest_folder_entry_cb(GtkWidget *UNUSED(entry), gpointer data)

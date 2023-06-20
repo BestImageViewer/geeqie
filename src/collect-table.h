@@ -29,7 +29,7 @@ void collection_table_unselect_all(CollectTable *ct);
 
 void collection_table_add_filelist(CollectTable *ct, GList *list);
 
-void collection_table_file_update(CollectTable *ct, CollectInfo *ci);
+void collection_table_file_update(CollectTable *ct, CollectInfo *info);
 void collection_table_file_add(CollectTable *ct, CollectInfo *ci);
 void collection_table_file_insert(CollectTable *ct, CollectInfo *ci);
 void collection_table_file_remove(CollectTable *ct, CollectInfo *ci);

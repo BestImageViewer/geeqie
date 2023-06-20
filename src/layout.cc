@@ -2424,7 +2424,6 @@ void layout_sync_options_with_current_state(LayoutWindow *lw)
 			}
 		}
 #endif
-	return;
 }
 
 void layout_apply_options(LayoutWindow *lw, LayoutOptions *lop)

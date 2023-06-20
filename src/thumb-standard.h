@@ -93,7 +93,7 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf);
  * calling func_valid with the information when app is idle
  * for thumbnail's without a file: uri, validates against allowed_age in days
  */
-ThumbLoaderStd *thumb_loader_std_thumb_file_validate(const gchar *thumb_path, gint allowed_age,
+ThumbLoaderStd *thumb_loader_std_thumb_file_validate(const gchar *thumb_path, gint allowed_days,
 						     void (*func_valid)(const gchar *path, gboolean valid, gpointer data),
 						     gpointer data);
 void thumb_loader_std_thumb_file_validate_cancel(ThumbLoaderStd *tl);

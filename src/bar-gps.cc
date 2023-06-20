@@ -240,8 +240,6 @@ static void bar_pane_gps_close_save_cb(GenericDialog *UNUSED(gd), gpointer data)
 			}
 		g_free(location);
 		}
-
-	return;
 }
 
 static void bar_pane_gps_dnd_init(gpointer data)
