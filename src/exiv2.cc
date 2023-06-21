@@ -778,13 +778,13 @@ const char *exif_item_get_format_name(ExifItem *item, gboolean UNUSED(brief))
 }
 
 
-gchar *exif_item_get_data_as_text(ExifItem *item)
+gchar *exif_item_get_data_as_text(ExifItem *item, ExifData *exif)
 {
 	try {
 		if (!item) return nullptr;
 		auto metadatum = reinterpret_cast<Exiv2::Metadatum *>(item);
 #if EXIV2_TEST_VERSION(0,17,0)
-		return utf8_validate_or_convert(metadatum->print().c_str());
+		return utf8_validate_or_convert(metadatum->print(&exif->exifData()).c_str());
 #else
 		std::stringstream str;
 		Exiv2::Exifdatum *exifdatum;

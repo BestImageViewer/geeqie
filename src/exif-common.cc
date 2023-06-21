@@ -994,7 +994,7 @@ gchar *exif_get_data_as_text(ExifData *exif, const gchar *key)
 	if (key_valid) return text;
 
 	item = exif_get_item(exif, key);
-	if (item) return exif_item_get_data_as_text(item);
+	if (item) return exif_item_get_data_as_text(item, exif);
 
 	return nullptr;
 }

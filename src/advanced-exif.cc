@@ -120,7 +120,7 @@ static void advanced_exif_update(ExifWin *ew)
 		tag = g_strdup_printf("0x%04x", exif_item_get_tag_id(item));
 		tag_name = exif_item_get_tag_name(item);
 		format = exif_item_get_format_name(item, TRUE);
-		text = exif_item_get_data_as_text(item);
+		text = exif_item_get_data_as_text(item, exif);
 		utf8_text = utf8_validate_or_convert(text);
 		g_free(text);
 		elements = g_strdup_printf("%d", exif_item_get_elements(item));

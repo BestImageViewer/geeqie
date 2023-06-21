@@ -1454,7 +1454,7 @@ gchar *exif_item_get_string(ExifItem *item, gint UNUSED(idx))
 	return exif_item_get_data_as_text_full(item, METADATA_PLAIN);
 }
 
-gchar *exif_item_get_data_as_text(ExifItem *item)
+gchar *exif_item_get_data_as_text(ExifItem *item, ExifData *exif)
 {
 	return exif_item_get_data_as_text_full(item, METADATA_FORMATTED);
 }
@@ -1527,11 +1527,11 @@ gchar *exif_get_tag_description_by_key(const gchar *key)
 	return NULL;
 }
 
-static void exif_write_item(FILE *f, ExifItem *item)
+static void exif_write_item(FILE *f, ExifItem *item, ExifData *exif)
 {
 	gchar *text;
 
-	text = exif_item_get_data_as_text(item);
+	text = exif_item_get_data_as_text(item, exif);
 	if (text)
 		{
 		gchar *tag = exif_item_get_tag_name(item);
@@ -1578,7 +1578,7 @@ void exif_write_data_list(ExifData *exif, FILE *f, gint human_readable_list)
 			item = (ExifItem*)(work->data);
 			work = work->next;
 
-			exif_write_item(f, item);
+			exif_write_item(f, item, exif);
 			}
 		}
 	g_fprintf(f, "----------------------------------------------------\n");
