@@ -108,7 +108,7 @@ static gboolean image_loader_ft_load (gpointer loader, const guchar *UNUSED(buf)
 //	DEBUG_1("TG: FT requested size w=%d:h=%d for %s", lft->requested_width > 0, lft->requested_height, il->fd->path);
 	video_thumbnailer_set_size(lft->vt, lft->requested_width, lft->requested_height);
 #else
-	lft->vt->thumbnail_size = MAX(lft->requested_width,lft->requested_width);
+	lft->vt->thumbnail_size = MAX(lft->requested_width,lft->requested_height);
 #endif
 
 #ifdef HAVE_FFMPEGTHUMBNAILER_METADATA
