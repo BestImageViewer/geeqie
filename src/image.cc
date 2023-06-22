@@ -39,7 +39,6 @@
 
 static GList *image_list = nullptr;
 
-void image_update_title(ImageWindow *imd);
 static void image_read_ahead_start(ImageWindow *imd);
 static void image_cache_set(ImageWindow *imd, FileData *fd);
 

@@ -65,7 +65,7 @@ static gboolean image_loader_djvu_load(gpointer loader, const guchar *buf, gsize
 
 	doc = ddjvu_document_create(ctx, nullptr, FALSE);
 
-	ddjvu_stream_write(doc, 0, (char *)buf, count );
+	ddjvu_stream_write(doc, 0, reinterpret_cast<const char *>(buf), count );
 	while (!ddjvu_document_decoding_done(doc));
 
 	ld->page_total = ddjvu_document_get_pagenum(doc);

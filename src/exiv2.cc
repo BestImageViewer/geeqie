@@ -819,7 +819,7 @@ gchar *exif_item_get_string(ExifItem *item, int idx)
 #else
 		std::string str = em->toString(); /**< @FIXME ?? */
 #endif
-		if (idx == 0 && str == "") str = em->toString();
+		if (idx == 0 && str.empty()) str = em->toString();
 		if (str.length() > 5 && str.substr(0, 5) == "lang=")
 			{
 			std::string::size_type pos = str.find_first_of(' ');
