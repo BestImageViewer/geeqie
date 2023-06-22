@@ -839,7 +839,6 @@ static void end_print_cb(GtkPrintOperation *operation,
 
 void print_window_new(FileData *UNUSED(fd), GList *selection, GList *UNUSED(list), GtkWidget *parent)
 {
-	PrintWindow *pw;
 	GtkWidget *vbox;
 	GtkPrintOperation *operation;
 	GtkPageSetup *page_setup;
@@ -849,7 +848,7 @@ void print_window_new(FileData *UNUSED(fd), GList *selection, GList *UNUSED(list
 	gchar *path;
 	GtkPrintSettings *settings;
 
-	pw = g_new0(PrintWindow, 1);
+	auto pw = g_new0(PrintWindow, 1);
 
 	pw->source_selection = file_data_process_groups_in_selection(selection, FALSE, nullptr);
 

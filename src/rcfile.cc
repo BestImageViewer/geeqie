@@ -1739,9 +1739,8 @@ gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup)
 {
 	GMarkupParseContext *context;
 	gboolean ret = TRUE;
-	GQParserData *parser_data;
 
-	parser_data = g_new0(GQParserData, 1);
+	auto parser_data = g_new0(GQParserData, 1);
 
 	parser_data->startup = startup;
 	options_parse_func_push(parser_data, options_parse_toplevel, nullptr, nullptr);

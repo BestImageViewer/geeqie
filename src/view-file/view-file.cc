@@ -888,51 +888,48 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 {
 	GtkWidget *table;
 	gint i = GPOINTER_TO_INT(user_data);
-	MarksTextEntry *mte;
 
-	if (event->button == MOUSE_BUTTON_RIGHT)
+	if (event->button != MOUSE_BUTTON_RIGHT)
+		return FALSE;
+
+	auto mte = g_new0(MarksTextEntry, 1);
+	mte->mark_no = i;
+	mte->text_entry = g_strdup(options->marks_tooltips[i]);
+	mte->parent = widget;
+
+	mte->gd = generic_dialog_new(_("Mark text"), "mark_text",
+				     widget, FALSE,
+				     vf_marks_tooltip_cancel_cb, mte);
+	generic_dialog_add_message(mte->gd, GTK_STOCK_DIALOG_QUESTION, _("Set mark text"),
+				   _("This will set or clear the mark text."), FALSE);
+	generic_dialog_add_button(mte->gd, GTK_STOCK_OK, nullptr,
+				  vf_marks_tooltip_ok_cb, TRUE);
+	generic_dialog_add_button(mte->gd, GTK_STOCK_HELP, nullptr,
+				  vf_marks_tooltip_help_cb, FALSE);
+
+	table = pref_table_new(mte->gd->vbox, 3, 1, FALSE, TRUE);
+	pref_table_label(table, 0, 0, g_strdup_printf("%s%d", _("Mark "), mte->mark_no + 1), 1.0);
+	mte->edit_widget = gtk_entry_new();
+	gtk_widget_set_size_request(mte->edit_widget, 300, -1);
+	if (mte->text_entry)
 		{
-		mte = g_new0(MarksTextEntry, 1);
-		mte->mark_no = i;
-		mte->text_entry = g_strdup(options->marks_tooltips[i]);
-		mte->parent = widget;
-
-		mte->gd = generic_dialog_new(_("Mark text"), "mark_text",
-						widget, FALSE,
-						vf_marks_tooltip_cancel_cb, mte);
-		generic_dialog_add_message(mte->gd, GTK_STOCK_DIALOG_QUESTION, _("Set mark text"),
-					    _("This will set or clear the mark text."), FALSE);
-		generic_dialog_add_button(mte->gd, GTK_STOCK_OK, nullptr,
-							vf_marks_tooltip_ok_cb, TRUE);
-		generic_dialog_add_button(mte->gd, GTK_STOCK_HELP, nullptr,
-						vf_marks_tooltip_help_cb, FALSE);
-
-		table = pref_table_new(mte->gd->vbox, 3, 1, FALSE, TRUE);
-		pref_table_label(table, 0, 0, g_strdup_printf("%s%d", _("Mark "), mte->mark_no + 1), 1.0);
-		mte->edit_widget = gtk_entry_new();
-		gtk_widget_set_size_request(mte->edit_widget, 300, -1);
-		if (mte->text_entry)
-			{
-			gtk_entry_set_text(GTK_ENTRY(mte->edit_widget), mte->text_entry);
-			}
-		gtk_table_attach_defaults(GTK_TABLE(table), mte->edit_widget, 1, 2, 0, 1);
-		generic_dialog_attach_default(mte->gd, mte->edit_widget);
-
-		gtk_entry_set_icon_from_stock(GTK_ENTRY(mte->edit_widget),
-							GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
-		gtk_entry_set_icon_tooltip_text (GTK_ENTRY(mte->edit_widget),
-							GTK_ENTRY_ICON_SECONDARY, "Clear");
-		g_signal_connect(GTK_ENTRY(mte->edit_widget), "icon-press",
-							G_CALLBACK(vf_marks_filter_on_icon_press), mte);
-
-		gtk_widget_show(mte->edit_widget);
-		gtk_widget_grab_focus(mte->edit_widget);
-		gtk_widget_show(GTK_WIDGET(mte->gd->dialog));
-
-		return TRUE;
+		gtk_entry_set_text(GTK_ENTRY(mte->edit_widget), mte->text_entry);
 		}
+	gtk_table_attach_defaults(GTK_TABLE(table), mte->edit_widget, 1, 2, 0, 1);
+	generic_dialog_attach_default(mte->gd, mte->edit_widget);
 
-	return FALSE;
+	gtk_entry_set_icon_from_stock(GTK_ENTRY(mte->edit_widget),
+				      GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(mte->edit_widget),
+					GTK_ENTRY_ICON_SECONDARY, "Clear");
+	g_signal_connect(GTK_ENTRY(mte->edit_widget), "icon-press",
+			 G_CALLBACK(vf_marks_filter_on_icon_press), mte);
+
+	gtk_widget_show(mte->edit_widget);
+	gtk_widget_grab_focus(mte->edit_widget);
+	gtk_widget_show(GTK_WIDGET(mte->gd->dialog));
+
+	return TRUE;
 }
 
 static void vf_file_filter_save_cb(GtkWidget *UNUSED(widget), gpointer data)

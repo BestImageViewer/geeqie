@@ -376,9 +376,7 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 {
 	GtkTreeStore *store;
 	GtkTreeIter child;
-	NodeData *nd;
 	GdkPixbuf *pixbuf;
-	NodeData *end;
 	GtkTreeIter empty;
 	gchar *link = nullptr;
 
@@ -404,7 +402,7 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 		pixbuf = vd->pf->deny;
 		}
 
-	nd = g_new0(NodeData, 1);
+	auto nd = g_new0(NodeData, 1);
 	nd->fd = fd;
 	nd->version = fd->version;
 	nd->expanded = FALSE;
@@ -429,7 +427,7 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 
 	/* all nodes are created with an "empty" node, so that the expander is shown
 	 * this is removed when the child is populated */
-	end = g_new0(NodeData, 1);
+	auto end = g_new0(NodeData, 1);
 	end->fd = nullptr;
 	end->expanded = TRUE;
 

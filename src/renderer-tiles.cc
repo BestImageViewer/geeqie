@@ -281,9 +281,7 @@ static void rt_border_clear(RendererTiles *rt)
 
 static ImageTile *rt_tile_new(gint x, gint y, gint width, gint height)
 {
-	ImageTile *it;
-
-	it = g_new0(ImageTile, 1);
+	auto it = g_new0(ImageTile, 1);
 
 	it->x = x;
 	it->y = y;
@@ -744,7 +742,6 @@ gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint 
 {
 	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
-	OverlayData *od;
 	gint id;
 
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), -1);
@@ -753,7 +750,7 @@ gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint 
 	id = 1;
 	while (rt_overlay_find(rt, id)) id++;
 
-	od = g_new0(OverlayData, 1);
+	auto od = g_new0(OverlayData, 1);
 	od->id = id;
 	od->pixbuf = pixbuf;
 	g_object_ref(G_OBJECT(od->pixbuf));
@@ -789,9 +786,7 @@ static void rt_overlay_list_clear(RendererTiles *rt)
 {
 	while (rt->overlay_list)
 		{
-		OverlayData *od;
-
-		od = static_cast<OverlayData *>(rt->overlay_list->data);
+		auto od = static_cast<OverlayData *>(rt->overlay_list->data);
 		rt_overlay_free(rt, od);
 		}
 }
@@ -1846,15 +1841,13 @@ static gboolean rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gin
 					   j > rt->y_scroll + pr->vis_height)));
 			if (it)
 				{
-				QueueData *qd;
-
 				if ((render == TILE_RENDER_ALL && it->render_done != TILE_RENDER_ALL) ||
 				    (render == TILE_RENDER_AREA && it->render_todo != TILE_RENDER_ALL))
 					{
 					it->render_todo = render;
 					}
 
-				qd = g_new(QueueData, 1);
+				auto qd = g_new(QueueData, 1);
 				qd->it = it;
 				qd->new_data = new_data;
 

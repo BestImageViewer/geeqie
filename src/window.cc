@@ -360,13 +360,12 @@ static void help_search_window_cancel_cb(GenericDialog *UNUSED(gd), gpointer dat
 
 void help_search_window_show()
 {
-	HelpSearchData *hsd;
 	GenericDialog *gd;
 	GtkWidget *table;
 	GtkWidget *label1;
 	GtkWidget *label2;
 
-	hsd = g_new0(HelpSearchData, 1);
+	auto hsd = g_new0(HelpSearchData, 1);
 	hsd->gd = gd = generic_dialog_new(_("On-line help search"), "help_search",
 				nullptr, TRUE,
 				help_search_window_cancel_cb, hsd);

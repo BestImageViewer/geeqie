@@ -592,20 +592,18 @@ float* ZDPolygonToList(const ZoneDetect *library, uint32_t polygonId, size_t* le
     float* flData = nullptr;
     size_t length = 0;
 
-    if(!ZDFindPolygon(library, polygonId, nullptr, &polygonIndex)) {
-        goto fail;
-    }
+    if (!ZDFindPolygon(library, polygonId, nullptr, &polygonIndex))
+	    return nullptr;
 
     data = ZDPolygonToListInternal(library, polygonIndex, &length);
-
-    if(!data) {
-        goto fail;
-    }
+    if (!data)
+	    return nullptr;
 
     flData = static_cast<float *>(malloc(sizeof(float) * length));
     if(!flData) {
-        goto fail;
-    }
+	    free(data);
+	    return nullptr;
+	    }
 
     for(size_t i = 0; i<length; i+= 2) {
         int32_t lat = data[i];
@@ -620,15 +618,6 @@ float* ZDPolygonToList(const ZoneDetect *library, uint32_t polygonId, size_t* le
     }
 
     return flData;
-
-fail:
-    if(data) {
-        free(data);
-    }
-    if(flData) {
-        free(flData);
-    }
-    return nullptr;
 }
 
 static ZDLookupResult ZDPointInPolygon(const ZoneDetect *library, uint32_t polygonIndex, int32_t latFixedPoint, int32_t lonFixedPoint, uint64_t *distanceSqrMin)

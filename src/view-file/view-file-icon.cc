@@ -2172,7 +2172,6 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *UNUSED(tree_column), GtkCellR
 
 static void vficon_append_column(ViewFile *vf, gint n)
 {
-	ColumnData *cd;
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *renderer;
 
@@ -2191,7 +2190,7 @@ static void vficon_append_column(ViewFile *vf, gint n)
 	g_object_set_data(G_OBJECT(column), "column_number", GINT_TO_POINTER(n));
 	g_object_set_data(G_OBJECT(renderer), "column_number", GINT_TO_POINTER(n));
 
-	cd = g_new0(ColumnData, 1);
+	auto cd = g_new0(ColumnData, 1);
 	cd->vf = vf;
 	cd->number = n;
 	gtk_tree_view_column_set_cell_data_func(column, renderer, vficon_cell_data_cb, cd, g_free);

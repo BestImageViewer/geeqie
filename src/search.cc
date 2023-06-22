@@ -2415,9 +2415,7 @@ static gboolean search_file_next(SearchData *sd)
 
 	if (tested && match)
 		{
-		MatchFileData *mfd;
-
-		mfd = g_new(MatchFileData, 1);
+		auto mfd = g_new(MatchFileData, 1);
 		mfd->fd = fd;
 
 		mfd->width = width;
@@ -3282,7 +3280,6 @@ static void select_collection_clicked_cb(GtkWidget *UNUSED(widget), gpointer dat
 
 void search_new(FileData *dir_fd, FileData *example_file)
 {
-	SearchData *sd;
 	GtkWidget *vbox;
 	GtkWidget *hbox;
 	GtkWidget *hbox2;
@@ -3301,7 +3298,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	layout_valid(&lw);
 
-	sd = g_new0(SearchData, 1);
+	auto sd = g_new0(SearchData, 1);
 
 	sd->search_dir_fd = file_data_ref(dir_fd);
 	sd->search_path_recurse = TRUE;
