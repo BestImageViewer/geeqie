@@ -613,6 +613,8 @@ float* ZDPolygonToList(const ZoneDetect *library, uint32_t polygonId, size_t* le
         flData[i+1] = ZDFixedPointToFloat(lon, 180, library->precision);
     }
 
+    free(data);
+
     if(lengthPtr) {
         *lengthPtr = length;
     }

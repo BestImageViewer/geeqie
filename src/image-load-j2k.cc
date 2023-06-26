@@ -180,13 +180,12 @@ static gboolean image_loader_j2k_load(gpointer loader, const guchar *buf, gsize 
 	guchar *pixels;
 	gint  bytes_per_pixel;
 	opj_buffer_info_t *decode_buffer;
-    guchar *buf_copy;
 
 	stream = nullptr;
 	codec = nullptr;
 	image = nullptr;
 
-	buf_copy = static_cast<guchar *>(g_malloc(count));
+	auto buf_copy = static_cast<guchar *>(g_malloc(count));
 	memcpy(buf_copy, buf, count);
 
 	decode_buffer = g_new0(opj_buffer_info_t, 1);
@@ -194,23 +193,22 @@ static gboolean image_loader_j2k_load(gpointer loader, const guchar *buf, gsize 
 	decode_buffer->len = count;
 	decode_buffer->cur = buf_copy;
 
-	stream = opj_stream_create_buffer_stream(decode_buffer, OPJ_TRUE);
+	if (memcmp(buf_copy + 20, "jp2", 3) != 0)
+		{
+		log_printf(_("Unknown jpeg2000 decoder type"));
+		g_free(buf_copy);
+		return FALSE;
+		}
 
+	g_free(buf_copy);
+	stream = opj_stream_create_buffer_stream(decode_buffer, OPJ_TRUE);
 	if (!stream)
 		{
 		log_printf(_("Could not open file for reading"));
 		return FALSE;
 		}
 
-	if (memcmp(buf_copy + 20, "jp2", 3) == 0)
-		{
-		codec = opj_create_decompress(OPJ_CODEC_JP2);
-		}
-	else
-		{
-		log_printf(_("Unknown jpeg2000 decoder type"));
-		return FALSE;
-		}
+	codec = opj_create_decompress(OPJ_CODEC_JP2);
 
 	opj_set_default_decoder_parameters(&parameters);
 	if (opj_setup_decoder (codec, &parameters) != OPJ_TRUE)
@@ -268,7 +266,6 @@ static gboolean image_loader_j2k_load(gpointer loader, const guchar *buf, gsize 
 	ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
 
 	g_free(decode_buffer);
-	g_free(buf_copy);
 	if (image)
 		opj_image_destroy (image);
 	if (codec)

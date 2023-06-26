@@ -854,6 +854,7 @@ void print_window_new(FileData *UNUSED(fd), GList *selection, GList *UNUSED(list
 
 	if (print_layout_page_count(pw) == 0)
 		{
+		g_free(pw);
 		return;
 		}
 

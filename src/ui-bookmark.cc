@@ -135,6 +135,7 @@ static BookButtonData *bookmark_from_string(const gchar *text)
 	if (path_ptr && icon_ptr && icon_ptr < path_ptr)
 		{
 		log_printf("warning, bookmark icon must be after path\n");
+		free(b);
 		return nullptr;
 		}
 
