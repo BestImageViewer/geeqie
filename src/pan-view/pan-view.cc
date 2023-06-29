@@ -48,7 +48,7 @@
 #include "utilops.h"
 #include "window.h"
 
-#include <math.h>
+#include <cmath>
 
 
 #define PAN_WINDOW_DEFAULT_WIDTH 720

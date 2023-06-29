@@ -21,7 +21,7 @@
 
 #include "pan-calendar.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "misc.h"
 #include "pan-util.h"

@@ -21,8 +21,8 @@
 
 #ifndef HAVE_EXIV2
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <unistd.h>
 
 #include <glib.h>
@@ -214,48 +214,48 @@ static ExifTextList OlympusTagContrast[]= {
 
 
 static ExifMarker OlympusExifMarkersList[] = {
-{ 0x0001, EXIF_FORMAT_LONG_UNSIGNED, -1, "Konica/MinoltaSettings", "Konica / Minolta settings", NULL },
-{ 0x0003, EXIF_FORMAT_LONG_UNSIGNED, -1, "Konica/MinoltaSettings", "Konica / Minolta settings", NULL },
-{ 0x0040, EXIF_FORMAT_LONG_UNSIGNED, -1, "CompressedImageSize",	"Compressed image size", NULL },
-{ 0x0081, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailOffset",	"Thumbnail offset",	NULL },
-{ 0x0088, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailOffset",	"Thumbnail offset",	NULL },
-{ 0x0089, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailLength",	"Thumbnail length",	NULL },
+{ 0x0001, EXIF_FORMAT_LONG_UNSIGNED, -1, "Konica/MinoltaSettings", "Konica / Minolta settings", nullptr },
+{ 0x0003, EXIF_FORMAT_LONG_UNSIGNED, -1, "Konica/MinoltaSettings", "Konica / Minolta settings", nullptr },
+{ 0x0040, EXIF_FORMAT_LONG_UNSIGNED, -1, "CompressedImageSize",	"Compressed image size", nullptr },
+{ 0x0081, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailOffset",	"Thumbnail offset",	nullptr },
+{ 0x0088, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailOffset",	"Thumbnail offset",	nullptr },
+{ 0x0089, EXIF_FORMAT_LONG_UNSIGNED, 1,  "ThumbnailLength",	"Thumbnail length",	nullptr },
 { 0x0101, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Konica/Minolta.ColorMode", "Color mode",	KonMinTagColorMode },
 { 0x0102, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Konica/Minolta.Quality", "Quality",		KonMinTagQuality },
 { 0x0103, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Konica/Minolta.Quality", "Quality",		KonMinTagQuality },
-{ 0x0200, EXIF_FORMAT_LONG_UNSIGNED, 3,  "Olympus.SpecialMode",	"Special mode",		NULL },
+{ 0x0200, EXIF_FORMAT_LONG_UNSIGNED, 3,  "Olympus.SpecialMode",	"Special mode",		nullptr },
 { 0x0201, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.JpegQuality",	"Jpeg quality",		OlympusTagJpegQuality },
 { 0x0202, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Macro",	"Macro",		OlympusTagMacro },
-{ 0x0204, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Olympus.DigitalZoom", "Digital zoom",	NULL },
-{ 0x0207, EXIF_FORMAT_STRING, -1,	 "Olympus.Firmware",	"Firmware version",	NULL },
-{ 0x0208, EXIF_FORMAT_STRING, -1,	 "Olympus.PictureInfo",	"Picture info",		NULL },
-{ 0x0209, EXIF_FORMAT_UNDEFINED, -1,	 "Olympus.CameraID",	"Camera ID",		NULL },
-{ 0x020b, EXIF_FORMAT_LONG_UNSIGNED, 1,	 "Epson.ImageWidth",	"Image width",		NULL },
-{ 0x020c, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Epson.ImageHeight",	"Image height",		NULL },
-{ 0x020d, EXIF_FORMAT_STRING, -1,	 "Epson.Manufacturer",	"Manufacturer",		NULL },
-{ 0x0e00, EXIF_FORMAT_BYTE, -1,		 "Olympus.PrintImageMatching", "Print image matching", NULL },
+{ 0x0204, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Olympus.DigitalZoom", "Digital zoom",	nullptr },
+{ 0x0207, EXIF_FORMAT_STRING, -1,	 "Olympus.Firmware",	"Firmware version",	nullptr },
+{ 0x0208, EXIF_FORMAT_STRING, -1,	 "Olympus.PictureInfo",	"Picture info",		nullptr },
+{ 0x0209, EXIF_FORMAT_UNDEFINED, -1,	 "Olympus.CameraID",	"Camera ID",		nullptr },
+{ 0x020b, EXIF_FORMAT_LONG_UNSIGNED, 1,	 "Epson.ImageWidth",	"Image width",		nullptr },
+{ 0x020c, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Epson.ImageHeight",	"Image height",		nullptr },
+{ 0x020d, EXIF_FORMAT_STRING, -1,	 "Epson.Manufacturer",	"Manufacturer",		nullptr },
+{ 0x0e00, EXIF_FORMAT_BYTE, -1,		 "Olympus.PrintImageMatching", "Print image matching", nullptr },
 { 0x1004, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.FlashMode",	"Flash mode",		OlympusTagFlashMode },
-{ 0x1006, EXIF_FORMAT_RATIONAL, 1,	 "Olympus.Bracket",	"Bracket",		NULL },
+{ 0x1006, EXIF_FORMAT_RATIONAL, 1,	 "Olympus.Bracket",	"Bracket",		nullptr },
 { 0x100b, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.FocusMode",	"Focus mode",		OlympusTagFocusMode },
-{ 0x100c, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Olympus.FocusDistance", "Focus distance",	NULL },
-{ 0x100d, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Zoom",	"Zoom",			NULL },
-{ 0x1006, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.MacroFocus",	"Macro focus",		NULL },
+{ 0x100c, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Olympus.FocusDistance", "Focus distance",	nullptr },
+{ 0x100d, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Zoom",	"Zoom",			nullptr },
+{ 0x1006, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.MacroFocus",	"Macro focus",		nullptr },
 { 0x100f, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Sharpness",	"Sharpness",		OlympusTagSharpness },
-{ 0x1011, EXIF_FORMAT_SHORT_UNSIGNED, 9, "Olympus.ColorMatrix",	"Color matrix",		NULL },
-{ 0x1012, EXIF_FORMAT_SHORT_UNSIGNED, 4, "Olympus.BlackLevel",	"Black level",		NULL },
-{ 0x1015, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.WhiteBalance", "White balance",	NULL },
-{ 0x1017, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.RedBias",	"Red bias",		NULL },
-{ 0x1018, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.BlueBias",	"Blue bias",		NULL },
-{ 0x101a, EXIF_FORMAT_STRING, -1,	 "Olympus.SerialNumber", "Serial number",	NULL },
-{ 0x1023, EXIF_FORMAT_RATIONAL, 1,	 "Olympus.FlashBias",	"Flash bias",		NULL },
+{ 0x1011, EXIF_FORMAT_SHORT_UNSIGNED, 9, "Olympus.ColorMatrix",	"Color matrix",		nullptr },
+{ 0x1012, EXIF_FORMAT_SHORT_UNSIGNED, 4, "Olympus.BlackLevel",	"Black level",		nullptr },
+{ 0x1015, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.WhiteBalance", "White balance",	nullptr },
+{ 0x1017, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.RedBias",	"Red bias",		nullptr },
+{ 0x1018, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.BlueBias",	"Blue bias",		nullptr },
+{ 0x101a, EXIF_FORMAT_STRING, -1,	 "Olympus.SerialNumber", "Serial number",	nullptr },
+{ 0x1023, EXIF_FORMAT_RATIONAL, 1,	 "Olympus.FlashBias",	"Flash bias",		nullptr },
 { 0x1029, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.Contrast",	"Contrast",		OlympusTagContrast },
-{ 0x102a, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.SharpnessFactor", "Sharpness factor",	NULL },
-{ 0x102b, EXIF_FORMAT_SHORT_UNSIGNED, 6, "Olympus.ColorControl", "Color control",	NULL },
-{ 0x102c, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.ValidBits",	"Valid bits",		NULL },
-{ 0x102d, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.CoringFilter", "Coring filter",	NULL },
-{ 0x102e, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Olympus.FinalWidth",	"Final width",		NULL },
-{ 0x102f, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Olympus.FinalHeight",	"Final height",		NULL },
-{ 0x1034, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.CompressionRatio", "Compression ratio", NULL },
+{ 0x102a, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.SharpnessFactor", "Sharpness factor",	nullptr },
+{ 0x102b, EXIF_FORMAT_SHORT_UNSIGNED, 6, "Olympus.ColorControl", "Color control",	nullptr },
+{ 0x102c, EXIF_FORMAT_SHORT_UNSIGNED, 2, "Olympus.ValidBits",	"Valid bits",		nullptr },
+{ 0x102d, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.CoringFilter", "Coring filter",	nullptr },
+{ 0x102e, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Olympus.FinalWidth",	"Final width",		nullptr },
+{ 0x102f, EXIF_FORMAT_LONG_UNSIGNED, 1,  "Olympus.FinalHeight",	"Final height",		nullptr },
+{ 0x1034, EXIF_FORMAT_SHORT_UNSIGNED, 1, "Olympus.CompressionRatio", "Compression ratio", nullptr },
 EXIF_MARKER_LIST_END
 };
 
@@ -320,10 +320,10 @@ gboolean format_olympus_makernote(ExifData *exif, guchar *tiff, guint offset,
 	if (item && item->data_len == 3 * sizeof(guint32))
 		{
 		static ExifMarker marker = { 0x0200, EXIF_FORMAT_STRING, -1,
-					     "Olympus.ShootingMode", "Shooting mode", NULL };
-		guint32 *array = (guint32 *)item->data;
+					     "Olympus.ShootingMode", "Shooting mode", nullptr };
+		auto array = static_cast<guint32 *>(item->data);
 		gchar *mode;
-		gchar *pdir = NULL;
+		gchar *pdir = nullptr;
 		gchar *text;
 		gint l;
 
@@ -351,10 +351,10 @@ gboolean format_olympus_makernote(ExifData *exif, guchar *tiff, guint offset,
 	if (item && item->data_len == 2 * sizeof(guint16))
 		{
 		static ExifMarker marker = { 0x1015, EXIF_FORMAT_STRING, -1,
-					     "Olympus.WhiteBalance", "White balance", NULL };
-		guint16 *array = (guint16 *)item->data;
+					     "Olympus.WhiteBalance", "White balance", nullptr };
+		auto array = static_cast<guint16 *>(item->data);
 		gchar *mode;
-		gchar *color = NULL;
+		gchar *color = nullptr;
 		gchar *text;
 		gint l;
 

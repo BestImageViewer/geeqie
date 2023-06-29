@@ -275,7 +275,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 
       if (sscanf(buffer, "%" PRIx64 "-%" PRIx64 " %s %" PRIx64 " %x:%x %u %s\n", &low, &high, perms, &offset, &major, &minor, &inode, path) == 8)
       {
-        uint64_t addr = (uintptr_t)WAI_RETURN_ADDRESS();
+        auto addr = reinterpret_cast<uintptr_t>(WAI_RETURN_ADDRESS());
         if (low <= addr && addr <= high)
         {
           char* resolved;

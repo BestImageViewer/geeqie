@@ -19,13 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <signal.h>
+#include <csignal>
 #include <sys/mman.h>
 
 #ifdef G_OS_UNIX
 #include <pwd.h>
 #endif
-#include <locale.h>
+#include <clocale>
 
 #include "main.h"
 

@@ -21,7 +21,7 @@
 
 #include "pan-grid.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "pan-item.h"
 #include "pan-util.h"

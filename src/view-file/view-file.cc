@@ -558,7 +558,7 @@ static void vf_pop_menu_toggle_mark_sel_cb(GtkWidget *UNUSED(widget), gpointer d
 static void vf_pop_menu_toggle_view_type_cb(GtkWidget *widget, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	auto  new_type = static_cast<FileViewType>(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data")));
+	auto new_type = static_cast<FileViewType>(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data")));
 	if (!vf->layout) return;
 
 	layout_views_set(vf->layout, vf->layout->options.dir_view_type, new_type);
@@ -1635,26 +1635,26 @@ GRegex *vf_file_filter_get_filter(ViewFile *vf)
 
 	if (!gtk_widget_get_visible(vf->file_filter.combo))
 		{
-		return g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), nullptr);
+		return g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
 	file_filter_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
 
 	if (file_filter_text[0] != '\0')
 		{
-		ret = g_regex_new(file_filter_text, vf->file_filter.case_sensitive ? GRegexCompileFlags(0) : G_REGEX_CASELESS, GRegexMatchFlags(0), &error);
+		ret = g_regex_new(file_filter_text, vf->file_filter.case_sensitive ? static_cast<GRegexCompileFlags>(0) : G_REGEX_CASELESS, static_cast<GRegexMatchFlags>(0), &error);
 		if (error)
 			{
 			log_printf("Error: could not compile regular expression %s\n%s\n", file_filter_text, error->message);
 			g_error_free(error);
 			error = nullptr;
-			ret = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), nullptr);
+			ret = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 			}
 		g_free(file_filter_text);
 		}
 	else
 		{
-		ret = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), nullptr);
+		ret = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
 	return ret;
@@ -1734,7 +1734,7 @@ void vf_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	auto vf = static_cast<ViewFile *>(data);
 	gboolean refresh;
 
-	auto  interested = static_cast<NotifyType>(NOTIFY_CHANGE | NOTIFY_REREAD | NOTIFY_GROUPING);
+	auto interested = static_cast<NotifyType>(NOTIFY_CHANGE | NOTIFY_REREAD | NOTIFY_GROUPING);
 	if (vf->marks_enabled) interested = static_cast<NotifyType>(interested | NOTIFY_MARKS | NOTIFY_METADATA);
 	/** @FIXME NOTIFY_METADATA should be checked by the keyword-to-mark functions and converted to NOTIFY_MARKS only if there was a change */
 

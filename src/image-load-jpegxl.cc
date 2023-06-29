@@ -77,18 +77,18 @@ static void free_buffer(guchar *pixels, gpointer UNUSED(data))
 
 static uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t *stride,
                            size_t *xsize, size_t *ysize, int *has_alpha) {
-  JxlDecoder *dec = JxlDecoderCreate(NULL);
+  JxlDecoder *dec = JxlDecoderCreate(nullptr);
   *has_alpha = 1;
-  uint8_t *pixels = NULL;
+  uint8_t *pixels = nullptr;
   if (!dec) {
     log_printf("JxlDecoderCreate failed\n");
-    return 0;
+    return nullptr;
   }
   if (JXL_DEC_SUCCESS !=
       JxlDecoderSubscribeEvents(dec, JXL_DEC_BASIC_INFO | JXL_DEC_FULL_IMAGE)) {
     log_printf("JxlDecoderSubscribeEvents failed\n");
     JxlDecoderDestroy(dec);
-    return 0;
+    return nullptr;
   }
 
   JxlBasicInfo info;
@@ -127,7 +127,7 @@ static uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t *s
       }
       size_t pixels_buffer_size = buffer_size * sizeof(uint8_t);
       pixels = static_cast<uint8_t *>(malloc(pixels_buffer_size));
-      void *pixels_buffer = (void *)pixels;
+      auto pixels_buffer = (void *)pixels;
       if (JXL_DEC_SUCCESS != JxlDecoderSetImageOutBuffer(dec, &format,
                                                          pixels_buffer,
                                                          pixels_buffer_size)) {
@@ -152,25 +152,25 @@ static uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t *s
     return pixels;
   } else {
     free(pixels);
-    return NULL;
+    return nullptr;
   }
 }
 
 static gboolean image_loader_jpegxl_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
-	ImageLoaderJPEGXL *ld = (ImageLoaderJPEGXL *) loader;
+	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	gboolean ret = FALSE;
 	size_t stride;
 	size_t xsize;
 	size_t ysize;
 	int has_alpha;
-	uint8_t *decoded = NULL;
+	uint8_t *decoded = nullptr;
 
 	decoded = JxlMemoryToPixels(buf, count, &stride, &xsize, &ysize, &has_alpha);
 
 	if (decoded)
 		{
-		ld->pixbuf = gdk_pixbuf_new_from_data(decoded, GDK_COLORSPACE_RGB, has_alpha, 8, xsize, ysize, stride, free_buffer, NULL);
+		ld->pixbuf = gdk_pixbuf_new_from_data(decoded, GDK_COLORSPACE_RGB, has_alpha, 8, xsize, ysize, stride, free_buffer, nullptr);
 
 		ld->area_updated_cb(loader, 0, 0, xsize, ysize, ld->data);
 
@@ -210,7 +210,7 @@ static gchar* image_loader_jpegxl_get_format_name(gpointer UNUSED(loader))
 
 static gchar** image_loader_jpegxl_get_format_mime_types(gpointer UNUSED(loader))
 {
-	static const gchar *mime[] = {"image/jxl", NULL};
+	static const gchar *mime[] = {"image/jxl", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
@@ -237,7 +237,7 @@ void image_loader_backend_set_jpegxl(ImageLoaderBackend *funcs)
 	funcs->loader_new = image_loader_jpegxl_new;
 	funcs->set_size = image_loader_jpegxl_set_size;
 	funcs->load = image_loader_jpegxl_load;
-	funcs->write = NULL;
+	funcs->write = nullptr;
 	funcs->get_pixbuf = image_loader_jpegxl_get_pixbuf;
 	funcs->close = image_loader_jpegxl_close;
 	funcs->abort = image_loader_jpegxl_abort;

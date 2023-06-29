@@ -23,12 +23,12 @@
 
 #ifndef HAVE_EXIV2
 
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <cstdio>
+#include <cstring>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <glib.h>
 
@@ -65,7 +65,7 @@ static FormatRawEntry format_raw_list[] = {
 	FORMAT_RAW_OLYMPUS,
 	FORMAT_RAW_PENTAX,
 	FORMAT_RAW_SAMSUNG,
-	{ NULL, (FormatRawMatchType)0, 0, NULL, 0, (FormatRawExifType)0, NULL, NULL, NULL }
+	{ nullptr, static_cast<FormatRawMatchType>(0), 0, nullptr, 0, static_cast<FormatRawExifType>(0), nullptr, nullptr, nullptr }
 };
 
 
@@ -82,7 +82,7 @@ static FormatExifEntry format_exif_list[] = {
 	FORMAT_EXIF_FUJI,
 	FORMAT_EXIF_NIKON,
 	FORMAT_EXIF_OLYMPUS,
-	{ (FormatExifMatchType)0, NULL, 0, NULL, NULL }
+	{ static_cast<FormatExifMatchType>(0), nullptr, 0, nullptr, nullptr }
 };
 
 
@@ -231,7 +231,7 @@ static FormatRawEntry *format_raw_find(guchar *data, const guint len)
 		n++;
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 static gboolean format_raw_parse(FormatRawEntry *entry,
@@ -281,13 +281,13 @@ FormatRawExifType format_raw_exif_offset(guchar *data, const guint len, guint *e
 {
 	FormatRawEntry *entry;
 
-	if (!data || len < 1) return (FormatRawExifType)FALSE;
+	if (!data || len < 1) return static_cast<FormatRawExifType>FALSE;
 
 	entry = format_raw_find(data, len);
 
-	if (!entry || !entry->func_parse) return (FormatRawExifType)FALSE;
+	if (!entry || !entry->func_parse) return static_cast<FormatRawExifType>FALSE;
 
-	if (!format_raw_parse(entry, data, len, NULL, exif_offset)) return FORMAT_RAW_EXIF_NONE;
+	if (!format_raw_parse(entry, data, len, nullptr, exif_offset)) return FORMAT_RAW_EXIF_NONE;
 
 	if (entry->exif_type == FORMAT_RAW_EXIF_PROPRIETARY && exif_parse_func)
 		{
@@ -303,7 +303,7 @@ gboolean format_raw_img_exif_offsets_fd(gint fd, const gchar *path,
 				        guint *image_offset, guint *exif_offset)
 {
 	FormatRawEntry *entry;
-	gpointer map_data = NULL;
+	gpointer map_data = nullptr;
 	size_t map_len = 0;
 	struct stat st;
 	gboolean success;
@@ -351,14 +351,14 @@ gboolean format_raw_img_exif_offsets_fd(gint fd, const gchar *path,
 		return FALSE;
 		}
 	map_len = st.st_size;
-	map_data = mmap(0, map_len, PROT_READ, MAP_PRIVATE, fd, 0);
+	map_data = mmap(nullptr, map_len, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (map_data == MAP_FAILED)
 		{
 		log_printf("Failed to mmap file %d\n", fd);
 		return FALSE;
 		}
 
-	success = format_raw_parse(entry, (guchar*)map_data, map_len, image_offset, exif_offset);
+	success = format_raw_parse(entry, static_cast<guchar*>(map_data), map_len, image_offset, exif_offset);
 
 	if (munmap(map_data, map_len) == -1)
 		{
@@ -367,7 +367,7 @@ gboolean format_raw_img_exif_offsets_fd(gint fd, const gchar *path,
 
 	if (success && image_offset)
 		{
-		if (lseek(fd, *image_offset, SEEK_SET) != (off_t) *image_offset)
+		if (lseek(fd, *image_offset, SEEK_SET) != static_cast<off_t>(*image_offset))
 			{
 			log_printf("Failed to seek to embedded image\n");
 

@@ -808,7 +808,7 @@ static GString *append_quoted(GString *str, const char *s, gboolean single_quote
 
 EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, gboolean consider_sidecars, gchar **output)
 {
-	auto  flags = static_cast<EditorFlags>(0);
+	auto flags = static_cast<EditorFlags>(0);
 	const gchar *p;
 	GString *result = nullptr;
 	gboolean escape = FALSE;

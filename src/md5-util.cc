@@ -35,9 +35,9 @@
  * will fill a supplied 16-byte array with the digest.
  */
 
-#include <stdio.h>
-#include <string.h>
 #include "md5-util.h"
+#include <cstdio>
+#include <cstring>
 
 
 static void md5_transform(guint32 buf[4], const guint32 in[16]);

@@ -24,7 +24,7 @@
 #include "pixbuf-util.h"
 #include "filedata.h"
 
-#include <math.h>
+#include <cmath>
 
 /*
  *----------------------------------------------------------------------------

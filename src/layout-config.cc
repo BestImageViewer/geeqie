@@ -64,7 +64,7 @@ static const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
 static void layout_config_destroy(GtkWidget *UNUSED(widget), gpointer data)
 {
-	auto  lc = static_cast<LayoutConfig *>(data);
+	auto lc = static_cast<LayoutConfig *>(data);
 
 	g_list_free(lc->style_widgets);
 	g_free(lc);

@@ -21,9 +21,9 @@
 
 #define _XOPEN_SOURCE
 
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef HAVE_LCMS
 /*** color support enabled ***/

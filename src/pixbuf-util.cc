@@ -24,7 +24,7 @@
 #include "exif.h"
 #include "ui-fileops.h"
 
-#include <math.h>
+#include <cmath>
 
 
 /*

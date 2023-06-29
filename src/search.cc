@@ -22,6 +22,7 @@
 #include "main.h"
 #include "search.h"
 
+#include "bar-keywords.h"
 #include "cache.h"
 #include "collect-table.h"
 #include "dnd.h"
@@ -31,7 +32,6 @@
 #include "image-load.h"
 #include "img-view.h"
 #include "layout-util.h"
-#include "math.h"
 #include "menu.h"
 #include "metadata.h"
 #include "misc.h"
@@ -48,7 +48,7 @@
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
-#include "bar-keywords.h"
+#include <cmath>
 
 #define DEF_SEARCH_WIDTH  700
 #define DEF_SEARCH_HEIGHT 650
@@ -1988,13 +1988,13 @@ static gboolean search_file_next(SearchData *sd)
 				}
 			if (sd->search_name_match_case)
 				{
-				match = g_regex_match(sd->search_name_regex, fd_name_or_path, GRegexMatchFlags(0), nullptr);
+				match = g_regex_match(sd->search_name_regex, fd_name_or_path, static_cast<GRegexMatchFlags>(0), nullptr);
 				}
 			else
 				{
 				/* sd->search_name is converted in search_start() */
 				gchar *haystack = g_utf8_strdown(fd_name_or_path, -1);
-				match = g_regex_match(sd->search_name_regex, haystack, GRegexMatchFlags(0), nullptr);
+				match = g_regex_match(sd->search_name_regex, haystack, static_cast<GRegexMatchFlags>(0), nullptr);
 				g_free(haystack);
 				}
 			}
@@ -2185,11 +2185,11 @@ static gboolean search_file_next(SearchData *sd)
 
 			if (sd->match_comment == SEARCH_MATCH_CONTAINS)
 				{
-				match = g_regex_match(sd->search_comment_regex, comment, GRegexMatchFlags(0), nullptr);
+				match = g_regex_match(sd->search_comment_regex, comment, static_cast<GRegexMatchFlags>(0), nullptr);
 				}
 			else if (sd->match_comment == SEARCH_MATCH_NONE)
 				{
-				match = !g_regex_match(sd->search_comment_regex, comment, GRegexMatchFlags(0), nullptr);
+				match = !g_regex_match(sd->search_comment_regex, comment, static_cast<GRegexMatchFlags>(0), nullptr);
 				}
 			g_free(comment);
 			}
@@ -2578,13 +2578,13 @@ static void search_start(SearchData *sd)
 		g_regex_unref(sd->search_name_regex);
 		}
 
-	sd->search_name_regex = g_regex_new(sd->search_name, GRegexCompileFlags(0), GRegexMatchFlags(0), &error);
+	sd->search_name_regex = g_regex_new(sd->search_name, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), &error);
 	if (error)
 		{
 		log_printf("Error: could not compile regular expression %s\n%s\n", sd->search_name, error->message);
 		g_error_free(error);
 		error = nullptr;
-		sd->search_name_regex = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), nullptr);
+		sd->search_name_regex = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
 	if (!sd->search_comment_match_case)
@@ -2600,13 +2600,13 @@ static void search_start(SearchData *sd)
 		g_regex_unref(sd->search_comment_regex);
 		}
 
-	sd->search_comment_regex = g_regex_new(sd->search_comment, GRegexCompileFlags(0), GRegexMatchFlags(0), &error);
+	sd->search_comment_regex = g_regex_new(sd->search_comment, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), &error);
 	if (error)
 		{
 		log_printf("Error: could not compile regular expression %s\n%s\n", sd->search_comment, error->message);
 		g_error_free(error);
 		error = nullptr;
-		sd->search_comment_regex = g_regex_new("", GRegexCompileFlags(0), GRegexMatchFlags(0), nullptr);
+		sd->search_comment_regex = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
 	sd->search_count = 0;

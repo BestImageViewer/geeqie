@@ -109,7 +109,7 @@ gqv_cell_renderer_icon_get_type()
 
 		cell_icon_type = g_type_register_static(GTK_TYPE_CELL_RENDERER,
 							"GQvCellRendererIcon",
-							&cell_icon_info, GTypeFlags(0));
+							&cell_icon_info, static_cast<GTypeFlags>(0));
 		}
 
 	return cell_icon_type;

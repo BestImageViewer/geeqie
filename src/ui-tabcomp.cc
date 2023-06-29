@@ -19,9 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <string.h>
-#include <sys/types.h>
+#include <cstring>
 #include <dirent.h>
+#include <sys/types.h>
 
 #include "main.h"
 #include "ui-tabcomp.h"

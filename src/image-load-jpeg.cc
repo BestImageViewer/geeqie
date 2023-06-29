@@ -32,9 +32,9 @@
 
 #ifdef HAVE_JPEG
 
-#include <setjmp.h>
-#include <jpeglib.h>
+#include <csetjmp>
 #include <jerror.h>
+#include <jpeglib.h>
 
 struct ImageLoaderJpeg {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
@@ -218,7 +218,7 @@ static boolean fill_input_buffer (j_decompress_ptr cinfo)
 }
 static void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 {
-	auto  src = static_cast<struct jpeg_source_mgr*>(cinfo->src);
+	auto src = static_cast<struct jpeg_source_mgr*>(cinfo->src);
 
 	if (static_cast<gulong>(num_bytes) > src->bytes_in_buffer)
 		{

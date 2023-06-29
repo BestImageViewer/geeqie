@@ -39,9 +39,9 @@
 #include "rcfile.h"
 #include "view-file.h"
 
+#include <csignal>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <signal.h>
 
 #include "glua.h"
 

@@ -621,7 +621,7 @@ static void vd_pop_submenu_dir_view_as_cb(GtkWidget *widget, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
-	auto  new_type = static_cast<DirViewType>(GPOINTER_TO_INT((g_object_get_data(G_OBJECT(widget), "menu_item_radio_data"))));
+	auto new_type = static_cast<DirViewType>(GPOINTER_TO_INT((g_object_get_data(G_OBJECT(widget), "menu_item_radio_data"))));
 	layout_views_set(vd->layout, new_type, vd->layout->options.file_view_type);
 }
 

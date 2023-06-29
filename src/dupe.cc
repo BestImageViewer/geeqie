@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <inttypes.h>
+#include <cinttypes>
 
 #include "main.h"
 #include "dupe.h"
@@ -47,7 +47,7 @@
 #include "utilops.h"
 #include "window.h"
 
-#include <math.h>
+#include <cmath>
 
 
 #define DUPE_DEF_WIDTH 800

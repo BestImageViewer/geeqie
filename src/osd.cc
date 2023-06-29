@@ -32,7 +32,7 @@
 #include "ui-fileops.h"
 #include "ui-misc.h"
 
-#include <math.h>
+#include <cmath>
 
 static const gchar *predefined_tags[][2] = {
 	{"%name%",							N_("Name")},

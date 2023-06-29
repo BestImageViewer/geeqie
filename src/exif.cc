@@ -49,14 +49,14 @@
 
 #ifndef HAVE_EXIV2
 
-#include <stdio.h>
-#include <string.h>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
-#include <math.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <glib.h>
 #include <glib/gprintf.h>
@@ -91,7 +91,7 @@ ExifFormatAttrib ExifFormatList[] = {
 	{ EXIF_FORMAT_RATIONAL,		8, "srational",	"signed rational" },
 	{ EXIF_FORMAT_FLOAT,		4, "float",	"float" },
 	{ EXIF_FORMAT_DOUBLE,		8, "double",	"double" },
-	{ (ExifFormatType)-1, 0, NULL, NULL }
+	{ static_cast<ExifFormatType>(-1), 0, nullptr, nullptr }
 };
 
 /* tags that are special, or need special treatment */
@@ -319,115 +319,115 @@ Tags that don't match are not supported by exiv2 and should not be used anywhere
 */
 
 ExifMarker ExifKnownMarkersList[] = {
-{ 0x0100, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageWidth",	N_("Image Width"), NULL },
-{ 0x0101, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageLength",	N_("Image Height"), NULL },
-{ 0x0102, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.BitsPerSample",	N_("Bits per Sample/Pixel"), NULL },
+{ 0x0100, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageWidth",	N_("Image Width"), nullptr },
+{ 0x0101, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageLength",	N_("Image Height"), nullptr },
+{ 0x0102, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.BitsPerSample",	N_("Bits per Sample/Pixel"), nullptr },
 { 0x0103, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.Compression",	N_("Compression"), ExifCompressionList },
-{ 0x010e, EXIF_FORMAT_STRING, -1,		"Exif.Image.ImageDescription",	N_("Image description"), NULL },
-{ 0x010f, EXIF_FORMAT_STRING, -1,		"Exif.Image.Make",		N_("Camera make"), NULL },
-{ 0x0110, EXIF_FORMAT_STRING, -1,		"Exif.Image.Model",		N_("Camera model"), NULL },
+{ 0x010e, EXIF_FORMAT_STRING, -1,		"Exif.Image.ImageDescription",	N_("Image description"), nullptr },
+{ 0x010f, EXIF_FORMAT_STRING, -1,		"Exif.Image.Make",		N_("Camera make"), nullptr },
+{ 0x0110, EXIF_FORMAT_STRING, -1,		"Exif.Image.Model",		N_("Camera model"), nullptr },
 { 0x0112, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.Orientation",	N_("Orientation"), ExifOrientationList },
-{ 0x011a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.XResolution",	N_("X resolution"), NULL },
-{ 0x011b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.YResolution",	N_("Y Resolution"), NULL },
+{ 0x011a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.XResolution",	N_("X resolution"), nullptr },
+{ 0x011b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.YResolution",	N_("Y Resolution"), nullptr },
 { 0x0128, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.ResolutionUnit",	N_("Resolution units"), ExifUnitList },
-{ 0x0131, EXIF_FORMAT_STRING, -1, 		"Exif.Image.Software",		N_("Firmware"), NULL },
-{ 0x0132, EXIF_FORMAT_STRING, 20,		"Exif.Image.DateTime",		N_("Date"), NULL },
-{ 0x013e, EXIF_FORMAT_RATIONAL_UNSIGNED, 2,	"Exif.Image.WhitePoint",	N_("White point"), NULL },
-{ 0x013f, EXIF_FORMAT_RATIONAL_UNSIGNED, 6,	"Exif.Image.PrimaryChromaticities",N_("Primary chromaticities"), NULL },
-{ 0x0211, EXIF_FORMAT_RATIONAL_UNSIGNED, 3,	"Exif.Image.YCbCrCoefficients",	N_("YCbCy coefficients"), NULL },
+{ 0x0131, EXIF_FORMAT_STRING, -1, 		"Exif.Image.Software",		N_("Firmware"), nullptr },
+{ 0x0132, EXIF_FORMAT_STRING, 20,		"Exif.Image.DateTime",		N_("Date"), nullptr },
+{ 0x013e, EXIF_FORMAT_RATIONAL_UNSIGNED, 2,	"Exif.Image.WhitePoint",	N_("White point"), nullptr },
+{ 0x013f, EXIF_FORMAT_RATIONAL_UNSIGNED, 6,	"Exif.Image.PrimaryChromaticities",N_("Primary chromaticities"), nullptr },
+{ 0x0211, EXIF_FORMAT_RATIONAL_UNSIGNED, 3,	"Exif.Image.YCbCrCoefficients",	N_("YCbCy coefficients"), nullptr },
 { 0x0213, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.YCbCrPositioning",	N_("YCbCr positioning"), ExifYCbCrPosList },
-{ 0x0214, EXIF_FORMAT_RATIONAL_UNSIGNED, 6, 	"Exif.Image.ReferenceBlackWhite",N_("Black white reference"), NULL },
-{ 0x8298, EXIF_FORMAT_STRING, -1,		"Exif.Image.Copyright",		N_("Copyright"), NULL },
-{ 0x8769, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ExifTag",		N_("SubIFD Exif offset"), NULL },
+{ 0x0214, EXIF_FORMAT_RATIONAL_UNSIGNED, 6, 	"Exif.Image.ReferenceBlackWhite",N_("Black white reference"), nullptr },
+{ 0x8298, EXIF_FORMAT_STRING, -1,		"Exif.Image.Copyright",		N_("Copyright"), nullptr },
+{ 0x8769, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ExifTag",		N_("SubIFD Exif offset"), nullptr },
 	/* subIFD follows */
-{ 0x829a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureTime",	N_("Exposure time (seconds)"), NULL },
-{ 0x829d, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FNumber",		N_("FNumber"), NULL },
+{ 0x829a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureTime",	N_("Exposure time (seconds)"), nullptr },
+{ 0x829d, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FNumber",		N_("FNumber"), nullptr },
 { 0x8822, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.ExposureProgram",	N_("Exposure program"), ExifExposureProgramList },
-{ 0x8824, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SpectralSensitivity",N_("Spectral Sensitivity"), NULL },
-{ 0x8827, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.ISOSpeedRatings",	N_("ISO sensitivity"), NULL },
-{ 0x8828, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.OECF",		N_("Optoelectric conversion factor"), NULL },
-{ 0x9000, EXIF_FORMAT_UNDEFINED, 4,		"Exif.Photo.ExifVersion",	N_("Exif version"), NULL },
-{ 0x9003, EXIF_FORMAT_STRING, 20,		"Exif.Photo.DateTimeOriginal",	N_("Date original"), NULL },
-{ 0x9004, EXIF_FORMAT_STRING, 20,		"Exif.Photo.DateTimeDigitized",	N_("Date digitized"), NULL },
-{ 0x9101, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.ComponentsConfiguration",N_("Pixel format"), NULL },
-{ 0x9102, EXIF_FORMAT_RATIONAL_UNSIGNED,1,	"Exif.Photo.CompressedBitsPerPixel",N_("Compression ratio"), NULL },
-{ 0x9201, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.ShutterSpeedValue",	N_("Shutter speed"), NULL },
-{ 0x9202, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ApertureValue",	N_("Aperture"), NULL },
-{ 0x9203, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.BrightnessValue",	N_("Brightness"), NULL },
-{ 0x9204, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.ExposureBiasValue",	N_("Exposure bias"), NULL },
-{ 0x9205, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.MaxApertureValue",	N_("Maximum aperture"), NULL },
-{ 0x9206, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.SubjectDistance",	N_("Subject distance"), NULL },
+{ 0x8824, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SpectralSensitivity",N_("Spectral Sensitivity"), nullptr },
+{ 0x8827, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.ISOSpeedRatings",	N_("ISO sensitivity"), nullptr },
+{ 0x8828, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.OECF",		N_("Optoelectric conversion factor"), nullptr },
+{ 0x9000, EXIF_FORMAT_UNDEFINED, 4,		"Exif.Photo.ExifVersion",	N_("Exif version"), nullptr },
+{ 0x9003, EXIF_FORMAT_STRING, 20,		"Exif.Photo.DateTimeOriginal",	N_("Date original"), nullptr },
+{ 0x9004, EXIF_FORMAT_STRING, 20,		"Exif.Photo.DateTimeDigitized",	N_("Date digitized"), nullptr },
+{ 0x9101, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.ComponentsConfiguration",N_("Pixel format"), nullptr },
+{ 0x9102, EXIF_FORMAT_RATIONAL_UNSIGNED,1,	"Exif.Photo.CompressedBitsPerPixel",N_("Compression ratio"), nullptr },
+{ 0x9201, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.ShutterSpeedValue",	N_("Shutter speed"), nullptr },
+{ 0x9202, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ApertureValue",	N_("Aperture"), nullptr },
+{ 0x9203, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.BrightnessValue",	N_("Brightness"), nullptr },
+{ 0x9204, EXIF_FORMAT_RATIONAL, 1,		"Exif.Photo.ExposureBiasValue",	N_("Exposure bias"), nullptr },
+{ 0x9205, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.MaxApertureValue",	N_("Maximum aperture"), nullptr },
+{ 0x9206, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.SubjectDistance",	N_("Subject distance"), nullptr },
 { 0x9207, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.MeteringMode",	N_("Metering mode"), ExifMeteringModeList },
 { 0x9208, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.LightSource",	N_("Light source"), ExifLightSourceList },
 { 0x9209, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Flash",		N_("Flash"), ExifFlashList },
-{ 0x920a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, 	"Exif.Photo.FocalLength",	N_("Focal length"), NULL },
-{ 0x9214, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.SubjectArea",	N_("Subject area"), NULL },
-{ 0x927c, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.MakerNote",		N_("MakerNote"), NULL },
-{ 0x9286, EXIF_FORMAT_UNDEFINED, -1, 		"Exif.Photo.UserComment",	N_("UserComment"), NULL },
-{ 0x9290, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTime",	N_("Subsecond time"), NULL },
-{ 0x9291, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTimeOriginal",N_("Subsecond time original"), NULL },
-{ 0x9292, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTimeDigitized",N_("Subsecond time digitized"), NULL },
-{ 0xa000, EXIF_FORMAT_UNDEFINED, 4,		"Exif.Photo.FlashpixVersion",	N_("FlashPix version"), NULL },
+{ 0x920a, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, 	"Exif.Photo.FocalLength",	N_("Focal length"), nullptr },
+{ 0x9214, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.SubjectArea",	N_("Subject area"), nullptr },
+{ 0x927c, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.MakerNote",		N_("MakerNote"), nullptr },
+{ 0x9286, EXIF_FORMAT_UNDEFINED, -1, 		"Exif.Photo.UserComment",	N_("UserComment"), nullptr },
+{ 0x9290, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTime",	N_("Subsecond time"), nullptr },
+{ 0x9291, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTimeOriginal",N_("Subsecond time original"), nullptr },
+{ 0x9292, EXIF_FORMAT_STRING, -1,		"Exif.Photo.SubSecTimeDigitized",N_("Subsecond time digitized"), nullptr },
+{ 0xa000, EXIF_FORMAT_UNDEFINED, 4,		"Exif.Photo.FlashpixVersion",	N_("FlashPix version"), nullptr },
 { 0xa001, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.ColorSpace",	N_("Colorspace"), ExifColorSpaceList },
 	/* ExifImageWidth, ExifImageHeight can also be unsigned short */
-{ 0xa002, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Photo.PixelXDimension",	N_("Width"), NULL },
-{ 0xa003, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Photo.PixelYDimension",	N_("Height"), NULL },
-{ 0xa004, EXIF_FORMAT_STRING, -1,		"Exif.Photo.RelatedSoundFile",	N_("Audio data"), NULL },
-{ 0xa005, EXIF_FORMAT_LONG_UNSIGNED, 1,		"ExifInteroperabilityOffset",   N_("ExifR98 extension"), NULL },
-{ 0xa20b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FlashEnergy",	N_("Flash strength"), NULL },
-{ 0xa20c, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SpatialFrequencyResponse",N_("Spatial frequency response"), NULL },
-{ 0xa20e, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FocalPlaneXResolution", N_("X Pixel density"), NULL },
-{ 0xa20f, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FocalPlaneYResolution", N_("Y Pixel density"), NULL },
+{ 0xa002, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Photo.PixelXDimension",	N_("Width"), nullptr },
+{ 0xa003, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Photo.PixelYDimension",	N_("Height"), nullptr },
+{ 0xa004, EXIF_FORMAT_STRING, -1,		"Exif.Photo.RelatedSoundFile",	N_("Audio data"), nullptr },
+{ 0xa005, EXIF_FORMAT_LONG_UNSIGNED, 1,		"ExifInteroperabilityOffset",   N_("ExifR98 extension"), nullptr },
+{ 0xa20b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FlashEnergy",	N_("Flash strength"), nullptr },
+{ 0xa20c, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SpatialFrequencyResponse",N_("Spatial frequency response"), nullptr },
+{ 0xa20e, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FocalPlaneXResolution", N_("X Pixel density"), nullptr },
+{ 0xa20f, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FocalPlaneYResolution", N_("Y Pixel density"), nullptr },
 { 0xa210, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.FocalPlaneResolutionUnit", N_("Pixel density units"), ExifUnitList },
-{ 0x0214, EXIF_FORMAT_SHORT_UNSIGNED, 2,	"Exif.Photo.SubjectLocation",	N_("Subject location"), NULL },
-{ 0xa215, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureIndex",	N_("ISO sensitivity"), NULL },
+{ 0x0214, EXIF_FORMAT_SHORT_UNSIGNED, 2,	"Exif.Photo.SubjectLocation",	N_("Subject location"), nullptr },
+{ 0xa215, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureIndex",	N_("ISO sensitivity"), nullptr },
 { 0xa217, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"Exif.Photo.SensingMethod",	N_("Sensor type"), ExifSensorList },
 { 0xa300, EXIF_FORMAT_UNDEFINED, 1,		"Exif.Photo.FileSource",	N_("Source type"), ExifSourceList },
 { 0xa301, EXIF_FORMAT_UNDEFINED, 1,		"Exif.Photo.SceneType",		N_("Scene type"), ExifSceneList },
-{ 0xa302, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Image.CFAPattern",	N_("Color filter array pattern"), NULL },
+{ 0xa302, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Image.CFAPattern",	N_("Color filter array pattern"), nullptr },
 	/* tags a4xx were added for Exif 2.2 (not just these - some above, as well) */
 { 0xa401, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.CustomRendered",	N_("Render process"), ExifCustRenderList },
 { 0xa402, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.ExposureMode",	N_("Exposure mode"), ExifExposureModeList },
 { 0xa403, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.WhiteBalance",	N_("White balance"), ExifWhiteBalanceList },
-{ 0xa404, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.DigitalZoomRatio",	N_("Digital zoom ratio"), NULL },
-{ 0xa405, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.FocalLengthIn35mmFilm",N_("Focal length (35mm)"), NULL },
+{ 0xa404, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.DigitalZoomRatio",	N_("Digital zoom ratio"), nullptr },
+{ 0xa405, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.FocalLengthIn35mmFilm",N_("Focal length (35mm)"), nullptr },
 { 0xa406, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SceneCaptureType",	N_("Scene capture type"), ExifSceneCaptureList },
 { 0xa407, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.GainControl",	N_("Gain control"), ExifGainControlList },
 { 0xa408, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Contrast",		N_("Contrast"), ExifContrastList },
 { 0xa409, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Saturation",	N_("Saturation"), ExifSaturationList },
 { 0xa40a, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.Sharpness",		N_("Sharpness"), ExifSharpnessList },
-{ 0xa40b, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.DeviceSettingDescription",N_("Device setting"), NULL },
+{ 0xa40b, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.DeviceSettingDescription",N_("Device setting"), nullptr },
 { 0xa40c, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Photo.SubjectDistanceRange",N_("Subject range"), ExifSubjectRangeList },
-{ 0xa420, EXIF_FORMAT_STRING, -1,		"Exif.Photo.ImageUniqueID",	N_("Image serial number"), NULL },
+{ 0xa420, EXIF_FORMAT_STRING, -1,		"Exif.Photo.ImageUniqueID",	N_("Image serial number"), nullptr },
 	/* place known, but undocumented or lesser used tags here */
-{ 0x00fe, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.NewSubfileType",	NULL, NULL },
-{ 0x00ff, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"SubfileType",			NULL, NULL },
-{ 0x012d, EXIF_FORMAT_SHORT_UNSIGNED, 3,	"Exif.Image.TransferFunction",	NULL, NULL },
-{ 0x013b, EXIF_FORMAT_STRING, -1,		"Exif.Image.Artist",		"Artist", NULL },
-{ 0x013d, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Predictor",		NULL, NULL },
-{ 0x0142, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"TileWidth",		NULL, NULL },
-{ 0x0143, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"TileLength",		NULL, NULL },
-{ 0x0144, EXIF_FORMAT_LONG_UNSIGNED, -1,	"TileOffsets",		NULL, NULL },
-{ 0x0145, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"TileByteCounts",	NULL, NULL },
-{ 0x014a, EXIF_FORMAT_LONG_UNSIGNED, -1,	"Exif.Image.SubIFDs",		NULL, NULL },
-{ 0x015b, EXIF_FORMAT_UNDEFINED, -1,		"JPEGTables",		NULL, NULL },
-{ 0x828d, EXIF_FORMAT_SHORT_UNSIGNED, 2,	"Exif.Image.CFARepeatPatternDim",	NULL, NULL },
-{ 0x828e, EXIF_FORMAT_BYTE_UNSIGNED, -1,	"Exif.Image.CFAPattern",		NULL, NULL },
-{ 0x828f, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.BatteryLevel",		NULL, NULL },
-{ 0x83bb, EXIF_FORMAT_LONG_UNSIGNED, -1,	"IPTC/NAA",		NULL, NULL },
-{ 0x8773, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Image.InterColorProfile",		NULL, NULL },
-{ 0x8825, EXIF_FORMAT_LONG_UNSIGNED, 1,		"GPSInfo",		"SubIFD GPS offset", NULL },
-{ 0x8829, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Interlace",		NULL, NULL },
-{ 0x882a, EXIF_FORMAT_SHORT, 1,			"TimeZoneOffset",	NULL, NULL },
-{ 0x882b, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"SelfTimerMode",	NULL, NULL },
-{ 0x920b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FlashEnergy",		NULL, NULL },
-{ 0x920c, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.SpatialFrequencyResponse", NULL, NULL },
-{ 0x920d, EXIF_FORMAT_UNDEFINED, -1,		"Noise",		NULL, NULL },
-{ 0x9211, EXIF_FORMAT_LONG_UNSIGNED, 1,		"ImageNumber",		NULL, NULL },
-{ 0x9212, EXIF_FORMAT_STRING, 1,		"SecurityClassification", NULL, NULL },
-{ 0x9213, EXIF_FORMAT_STRING, -1,		"ImageHistory",		NULL, NULL },
-{ 0x9215, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureIndex",	NULL, NULL },
-{ 0x9216, EXIF_FORMAT_BYTE_UNSIGNED, 4,		"TIFF/EPStandardID",	NULL, NULL },
+{ 0x00fe, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.NewSubfileType",	nullptr, nullptr },
+{ 0x00ff, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"SubfileType",			nullptr, nullptr },
+{ 0x012d, EXIF_FORMAT_SHORT_UNSIGNED, 3,	"Exif.Image.TransferFunction",	nullptr, nullptr },
+{ 0x013b, EXIF_FORMAT_STRING, -1,		"Exif.Image.Artist",		"Artist", nullptr },
+{ 0x013d, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Predictor",		nullptr, nullptr },
+{ 0x0142, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"TileWidth",		nullptr, nullptr },
+{ 0x0143, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"TileLength",		nullptr, nullptr },
+{ 0x0144, EXIF_FORMAT_LONG_UNSIGNED, -1,	"TileOffsets",		nullptr, nullptr },
+{ 0x0145, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"TileByteCounts",	nullptr, nullptr },
+{ 0x014a, EXIF_FORMAT_LONG_UNSIGNED, -1,	"Exif.Image.SubIFDs",		nullptr, nullptr },
+{ 0x015b, EXIF_FORMAT_UNDEFINED, -1,		"JPEGTables",		nullptr, nullptr },
+{ 0x828d, EXIF_FORMAT_SHORT_UNSIGNED, 2,	"Exif.Image.CFARepeatPatternDim",	nullptr, nullptr },
+{ 0x828e, EXIF_FORMAT_BYTE_UNSIGNED, -1,	"Exif.Image.CFAPattern",		nullptr, nullptr },
+{ 0x828f, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Image.BatteryLevel",		nullptr, nullptr },
+{ 0x83bb, EXIF_FORMAT_LONG_UNSIGNED, -1,	"IPTC/NAA",		nullptr, nullptr },
+{ 0x8773, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Image.InterColorProfile",		nullptr, nullptr },
+{ 0x8825, EXIF_FORMAT_LONG_UNSIGNED, 1,		"GPSInfo",		"SubIFD GPS offset", nullptr },
+{ 0x8829, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Interlace",		nullptr, nullptr },
+{ 0x882a, EXIF_FORMAT_SHORT, 1,			"TimeZoneOffset",	nullptr, nullptr },
+{ 0x882b, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"SelfTimerMode",	nullptr, nullptr },
+{ 0x920b, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.FlashEnergy",		nullptr, nullptr },
+{ 0x920c, EXIF_FORMAT_UNDEFINED, -1,		"Exif.Photo.SpatialFrequencyResponse", nullptr, nullptr },
+{ 0x920d, EXIF_FORMAT_UNDEFINED, -1,		"Noise",		nullptr, nullptr },
+{ 0x9211, EXIF_FORMAT_LONG_UNSIGNED, 1,		"ImageNumber",		nullptr, nullptr },
+{ 0x9212, EXIF_FORMAT_STRING, 1,		"SecurityClassification", nullptr, nullptr },
+{ 0x9213, EXIF_FORMAT_STRING, -1,		"ImageHistory",		nullptr, nullptr },
+{ 0x9215, EXIF_FORMAT_RATIONAL_UNSIGNED, 1,	"Exif.Photo.ExposureIndex",	nullptr, nullptr },
+{ 0x9216, EXIF_FORMAT_BYTE_UNSIGNED, 4,		"TIFF/EPStandardID",	nullptr, nullptr },
 
 EXIF_MARKER_LIST_END
 };
@@ -436,54 +436,54 @@ ExifMarker ExifKnownGPSInfoMarkersList[] = {
         /* The following do not work at the moment as the tag value 0x0000 has a
          * special meaning. */
         /* { 0x0000, EXIF_FORMAT_BYTE, -1, "Exif.GPSInfo.GPSVersionID", NULL, NULL }, */
-        { 0x0001, EXIF_FORMAT_STRING, 2, "Exif.GPSInfo.GPSLatitudeRef", NULL, NULL },
-        { 0x0002, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSLatitude", NULL, NULL },
-        { 0x0003, EXIF_FORMAT_STRING, 2, "Exif.GPSInfo.GPSLongitudeRef", NULL, NULL },
-        { 0x0004, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSLongitude", NULL, NULL },
-        { 0x0005, EXIF_FORMAT_BYTE_UNSIGNED, 1, "Exif.GPSInfo.GPSAltitudeRef", NULL, NULL },
-        { 0x0006, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Exif.GPSInfo.GPSAltitude", NULL, NULL },
-        { 0x0007, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSTimeStamp", NULL, NULL },
-        { 0x0008, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSSatellites", NULL, NULL },
-        { 0x0009, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSStatus", NULL, NULL },
-        { 0x000a, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSMeasureMode", NULL, NULL },
-        { 0x000b, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDOP", NULL, NULL },
-        { 0x000c, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSSpeedRef", NULL, NULL },
-        { 0x000d, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSSpeed", NULL, NULL },
-        { 0x000e, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSTrackRef", NULL, NULL },
-        { 0x000f, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSTrack", NULL, NULL },
-        { 0x0010, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSImgDirectionRef", NULL, NULL },
-        { 0x0011, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSImgDirection", NULL, NULL },
-        { 0x0012, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSMapDatum", NULL, NULL },
-        { 0x0013, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestLatitudeRef", NULL, NULL },
-        { 0x0014, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestLatitude", NULL, NULL },
-        { 0x0015, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestLongitudeRef", NULL, NULL },
-        { 0x0016, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestLongitude", NULL, NULL },
-        { 0x0017, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestBearingRef", NULL, NULL },
-        { 0x0018, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestBearing", NULL, NULL },
-        { 0x0019, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestDistanceRef", NULL, NULL },
-        { 0x001a, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestDistance", NULL, NULL },
-        { 0x001b, EXIF_FORMAT_UNDEFINED, -1, "Exif.GPSInfo.GPSProcessingMethod", NULL, NULL },
-        { 0x001c, EXIF_FORMAT_UNDEFINED, -1, "Exif.GPSInfo.GPSAreaInformation", NULL, NULL },
-        { 0x001d, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSDateStamp", NULL, NULL },
-        { 0x001e, EXIF_FORMAT_SHORT, -1, "Exif.GPSInfo.GPSDifferential", NULL, NULL },
+        { 0x0001, EXIF_FORMAT_STRING, 2, "Exif.GPSInfo.GPSLatitudeRef", nullptr, nullptr },
+        { 0x0002, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSLatitude", nullptr, nullptr },
+        { 0x0003, EXIF_FORMAT_STRING, 2, "Exif.GPSInfo.GPSLongitudeRef", nullptr, nullptr },
+        { 0x0004, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSLongitude", nullptr, nullptr },
+        { 0x0005, EXIF_FORMAT_BYTE_UNSIGNED, 1, "Exif.GPSInfo.GPSAltitudeRef", nullptr, nullptr },
+        { 0x0006, EXIF_FORMAT_RATIONAL_UNSIGNED, 1, "Exif.GPSInfo.GPSAltitude", nullptr, nullptr },
+        { 0x0007, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSTimeStamp", nullptr, nullptr },
+        { 0x0008, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSSatellites", nullptr, nullptr },
+        { 0x0009, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSStatus", nullptr, nullptr },
+        { 0x000a, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSMeasureMode", nullptr, nullptr },
+        { 0x000b, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDOP", nullptr, nullptr },
+        { 0x000c, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSSpeedRef", nullptr, nullptr },
+        { 0x000d, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSSpeed", nullptr, nullptr },
+        { 0x000e, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSTrackRef", nullptr, nullptr },
+        { 0x000f, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSTrack", nullptr, nullptr },
+        { 0x0010, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSImgDirectionRef", nullptr, nullptr },
+        { 0x0011, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSImgDirection", nullptr, nullptr },
+        { 0x0012, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSMapDatum", nullptr, nullptr },
+        { 0x0013, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestLatitudeRef", nullptr, nullptr },
+        { 0x0014, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestLatitude", nullptr, nullptr },
+        { 0x0015, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestLongitudeRef", nullptr, nullptr },
+        { 0x0016, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestLongitude", nullptr, nullptr },
+        { 0x0017, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestBearingRef", nullptr, nullptr },
+        { 0x0018, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestBearing", nullptr, nullptr },
+        { 0x0019, EXIF_FORMAT_STRING, -1, "Exif.GPSInfo.GPSDestDistanceRef", nullptr, nullptr },
+        { 0x001a, EXIF_FORMAT_RATIONAL_UNSIGNED, -1, "Exif.GPSInfo.GPSDestDistance", nullptr, nullptr },
+        { 0x001b, EXIF_FORMAT_UNDEFINED, -1, "Exif.GPSInfo.GPSProcessingMethod", nullptr, nullptr },
+        { 0x001c, EXIF_FORMAT_UNDEFINED, -1, "Exif.GPSInfo.GPSAreaInformation", nullptr, nullptr },
+        { 0x001d, EXIF_FORMAT_RATIONAL_UNSIGNED, 3, "Exif.GPSInfo.GPSDateStamp", nullptr, nullptr },
+        { 0x001e, EXIF_FORMAT_SHORT, -1, "Exif.GPSInfo.GPSDifferential", nullptr, nullptr },
 
         EXIF_MARKER_LIST_END
 };
 
 ExifMarker ExifUnknownMarkersList[] = {
-{ 0x0000, EXIF_FORMAT_UNKNOWN, 0,		"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_BYTE_UNSIGNED, -1,	"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_STRING, -1,		"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_LONG_UNSIGNED, -1,	"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_RATIONAL_UNSIGNED, -1,	"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_BYTE, -1,			"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_UNDEFINED, -1,		"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_SHORT, -1,		"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_LONG, -1,			"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_RATIONAL, -1,		"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_FLOAT, -1,		"unknown",	NULL, NULL },
-{ 0x0000, EXIF_FORMAT_DOUBLE, -1,		"unknown",	NULL, NULL },
+{ 0x0000, EXIF_FORMAT_UNKNOWN, 0,		"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_BYTE_UNSIGNED, -1,	"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_STRING, -1,		"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_SHORT_UNSIGNED, -1,	"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_LONG_UNSIGNED, -1,	"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_RATIONAL_UNSIGNED, -1,	"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_BYTE, -1,			"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_UNDEFINED, -1,		"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_SHORT, -1,		"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_LONG, -1,			"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_RATIONAL, -1,		"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_FLOAT, -1,		"unknown",	nullptr, nullptr },
+{ 0x0000, EXIF_FORMAT_DOUBLE, -1,		"unknown",	nullptr, nullptr },
 };
 
 static const ExifMarker *exif_marker_from_tag(guint16 tag, const ExifMarker *list);
@@ -564,7 +564,7 @@ static void exif_item_free(ExifItem *item)
 
 gchar *exif_item_get_tag_name(ExifItem *item)
 {
-	if (!item || !item->marker) return NULL;
+	if (!item || !item->marker) return nullptr;
 	return g_strdup(item->marker->key);
 }
 
@@ -585,9 +585,9 @@ gchar *exif_item_get_data(ExifItem *item, guint *data_len)
 	if (data_len)
 		*data_len = item->data_len;
 #if GLIB_CHECK_VERSION(2,68,0)
-	return (gchar*)g_memdup2((gpointer)(item->data), item->data_len);
+	return static_cast<gchar*>(g_memdup2(item->data, item->data_len));
 #else
-	return (gchar*)g_memdup((gpointer)(item->data), item->data_len);
+	return static_cast<gchar*>(g_memdup(item->data, item->data_len));
 #endif
 }
 
@@ -600,13 +600,13 @@ guint exif_item_get_format_id(ExifItem *item)
 
 gchar *exif_item_get_description(ExifItem *item)
 {
-	if (!item || !item->marker) return NULL;
+	if (!item || !item->marker) return nullptr;
 	return g_strdup(_(item->marker->description));
 }
 
 const gchar *exif_item_get_format_name(ExifItem *item, gboolean brief)
 {
-	if (!item || !item->marker) return NULL;
+	if (!item || !item->marker) return nullptr;
 	return (brief) ? ExifFormatList[item->format].short_name : ExifFormatList[item->format].description;
 }
 
@@ -616,7 +616,7 @@ static GString *string_append_raw_bytes(GString *string, gpointer data, gint ne)
 
 	for (i = 0 ; i < ne; i++)
 		{
-		guchar c = ((gchar *)data)[i];
+		guchar c = (static_cast<gchar *>(data))[i];
 		if (c < 32 || c > 127) c = '.';
 		g_string_append_printf(string, "%c", c);
 		}
@@ -639,7 +639,7 @@ static GString *string_append_raw_bytes(GString *string, gpointer data, gint ne)
 			{
 			spacer = "";
 			}
-		g_string_append_printf(string, "%s%02x", spacer, ((gchar *)data)[i]);
+		g_string_append_printf(string, "%s%02x", spacer, (static_cast<gchar *>(data))[i]);
 		}
 
 	return string;
@@ -648,13 +648,13 @@ static GString *string_append_raw_bytes(GString *string, gpointer data, gint ne)
 
 gchar *exif_text_list_find_value(ExifTextList *list, guint value)
 {
-	gchar *result = NULL;
+	gchar *result = nullptr;
 	gint i;
 
 	i = 0;
 	while (!result && list[i].value >= 0)
 		{
-		if (value == (guint) list[i].value) result = g_strdup(_(list[i].description));
+		if (value == static_cast<guint>(list[i].value)) result = g_strdup(_(list[i].description));
 		i++;
 		}
 	if (!result) result = g_strdup_printf("%d (%s)", value, _("unknown"));
@@ -738,20 +738,20 @@ static const ExifMarker *exif_marker_from_tag(guint16 tag, const ExifMarker *lis
 {
 	gint i = 0;
 
-	if (!list) return NULL;
+	if (!list) return nullptr;
 
 	while (list[i].tag != 0 && list[i].tag != tag)
 		{
 		i++;
 		}
 
-	return (list[i].tag == 0 ? NULL : &list[i]);
+	return (list[i].tag == 0 ? nullptr : &list[i]);
 }
 
 static void rational_from_data(ExifRational *r, gpointer src, ExifByteOrder bo)
 {
-	r->num = exif_byte_get_int32((guchar *)src, bo);
-	r->den = exif_byte_get_int32((guchar *)src + sizeof(guint32), bo);
+	r->num = exif_byte_get_int32(static_cast<guchar *>(src), bo);
+	r->den = exif_byte_get_int32(static_cast<guchar *>(src) + sizeof(guint32), bo);
 }
 
 /* src_format and item->format must be compatible
@@ -790,13 +790,13 @@ void exif_item_copy_data(ExifItem *item, gpointer src, guint len,
 		case EXIF_FORMAT_STRING:
 			memcpy(dest, src, len);
 			/* string is NULL terminated, make sure this is true */
-			if (((gchar *)dest)[len - 1] != '\0') ((gchar *)dest)[len - 1] = '\0';
+			if ((static_cast<gchar *>(dest))[len - 1] != '\0') (static_cast<gchar *>(dest))[len - 1] = '\0';
 			break;
 		case EXIF_FORMAT_SHORT_UNSIGNED:
 		case EXIF_FORMAT_SHORT:
 			for (i = 0; i < ne; i++)
 				{
-				((guint16 *)dest)[i] = exif_byte_get_int16((guchar *)src + i * bs, bo);
+				(static_cast<guint16 *>(dest))[i] = exif_byte_get_int16(static_cast<guchar *>(src) + i * bs, bo);
 				}
 			break;
 		case EXIF_FORMAT_LONG_UNSIGNED:
@@ -810,16 +810,16 @@ void exif_item_copy_data(ExifItem *item, gpointer src, guint len,
 				ss = ExifFormatList[src_format].size;
 				for (i = 0; i < ne; i++)
 					{
-					((gint32 *)dest)[i] =
-						(gint32)exif_byte_get_int16((guchar *)src + i * ss, bo);
+					(static_cast<gint32 *>(dest))[i] =
+						static_cast<gint32>(exif_byte_get_int16(static_cast<guchar *>(src) + i * ss, bo));
 					}
 				}
 			else
 				{
 				for (i = 0; i < ne; i++)
 					{
-					((gint32 *)dest)[i] =
-						exif_byte_get_int32((guchar *)src + i * bs, bo);
+					(static_cast<gint32 *>(dest))[i] =
+						exif_byte_get_int32(static_cast<guchar *>(src) + i * bs, bo);
 					}
 				}
 			break;
@@ -827,13 +827,13 @@ void exif_item_copy_data(ExifItem *item, gpointer src, guint len,
 		case EXIF_FORMAT_RATIONAL:
 			for (i = 0; i < ne; i++)
 				{
-				rational_from_data(&((ExifRational *)dest)[i], (guchar *)src + i * bs, bo);
+				rational_from_data(&(static_cast<ExifRational *>(dest))[i], static_cast<guchar *>(src) + i * bs, bo);
 				}
 			break;
 		case EXIF_FORMAT_FLOAT:
 			for (i = 0; i < ne; i++)
 				{
-				((float *)dest)[i] = exif_byte_get_int32((guchar *)src + i * bs, bo);
+				(static_cast<float *>(dest))[i] = exif_byte_get_int32(static_cast<guchar *>(src) + i * bs, bo);
 				}
 			break;
 		case EXIF_FORMAT_DOUBLE:
@@ -841,8 +841,8 @@ void exif_item_copy_data(ExifItem *item, gpointer src, guint len,
 				{
 				ExifRational r;
 
-				rational_from_data(&r, (guchar *)src + i * bs, bo);
-				if (r.den) ((gdouble *)dest)[i] = (gdouble)r.num / r.den;
+				rational_from_data(&r, static_cast<guchar *>(src) + i * bs, bo);
+				if (r.den) (static_cast<gdouble *>(dest))[i] = static_cast<gdouble>(r.num) / r.den;
 				}
 			break;
 		}
@@ -914,7 +914,7 @@ static gint exif_parse_IFD_entry(ExifData *exif, guchar *tiff, guint offset,
 
 	/* Where is the data, is it available?
 	 */
-	if (marker->components > 0 && (guint) marker->components != count)
+	if (marker->components > 0 && static_cast<guint>(marker->components) != count)
 		{
 		log_printf("warning: exif tag %s has %d elements, exif spec requests %d\n",
 			marker->key, count, marker->components);
@@ -936,7 +936,7 @@ static gint exif_parse_IFD_entry(ExifData *exif, guchar *tiff, guint offset,
 		}
 
 	item = exif_item_new(marker->format, tag, count, marker);
-	exif_item_copy_data(item, tiff + data_offset, data_length, (ExifFormatType)format, bo);
+	exif_item_copy_data(item, tiff + data_offset, data_length, static_cast<ExifFormatType>(format), bo);
 	exif->items = g_list_prepend(exif->items, item);
 
 	if (list == ExifKnownMarkersList)
@@ -1055,7 +1055,7 @@ gint exif_tiff_parse(ExifData *exif, guchar *tiff, guint size, ExifMarker *list)
 	     length of NN... == SSSS - 2.
        NNN.: the data in this segment
  */
-static ExifMarker jpeg_color_marker = { 0x8773, EXIF_FORMAT_UNDEFINED, -1, "Exif.Image.InterColorProfile", NULL, NULL };
+static ExifMarker jpeg_color_marker = { 0x8773, EXIF_FORMAT_UNDEFINED, -1, "Exif.Image.InterColorProfile", nullptr, nullptr };
 
 void exif_add_jpeg_color_profile(ExifData *exif, guchar *cp_data, guint cp_length)
 {
@@ -1102,8 +1102,8 @@ guchar *exif_get_color_profile(ExifData *exif, guint *data_len)
 {
 	ExifItem *prof_item = exif_get_item(exif, "Exif.Image.InterColorProfile");
 	if (prof_item && exif_item_get_format_id(prof_item) == EXIF_FORMAT_UNDEFINED)
-		return (guchar *) exif_item_get_data(prof_item, data_len);
-	return NULL;
+		return reinterpret_cast<guchar *>(exif_item_get_data(prof_item, data_len));
+	return nullptr;
 }
 
 
@@ -1130,23 +1130,23 @@ ExifItem *exif_get_first_item(ExifData *exif)
 {
 	if (exif->items)
 		{
-		ExifItem *ret = (ExifItem *)exif->items->data;
+		auto ret = static_cast<ExifItem *>(exif->items->data);
 		exif->current = exif->items->next;
 		return ret;
 		}
-	exif->current = NULL;
-	return NULL;
+	exif->current = nullptr;
+	return nullptr;
 }
 
 ExifItem *exif_get_next_item(ExifData *exif)
 {
 	if (exif->current)
 		{
-		ExifItem *ret = (ExifItem *)exif->current->data;
+		auto ret = static_cast<ExifItem *>(exif->current->data);
 		exif->current = exif->current->next;
 		return ret;
 		}
-	return NULL;
+	return nullptr;
 }
 
 static gint map_file(const gchar *path, void **mapping, gint *size)
@@ -1170,7 +1170,7 @@ static gint map_file(const gchar *path, void **mapping, gint *size)
 
 	*size = fs.st_size;
 
-	*mapping = mmap(0, *size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+	*mapping = mmap(nullptr, *size, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
 	if (*mapping == MAP_FAILED)
 		{
 		perror(path);
@@ -1207,7 +1207,7 @@ void exif_free(ExifData *exif)
 	work = exif->items;
 	while (work)
 		{
-		ExifItem *item = static_cast<ExifItem *>(work->data);
+		auto item = static_cast<ExifItem *>(work->data);
 		work = work->next;
 		exif_item_free(item);
 		}
@@ -1224,23 +1224,23 @@ ExifData *exif_read(gchar *path, gchar *UNUSED(sidecar_path), GHashTable *UNUSED
 	gint size, res;
 	gchar *pathl;
 
-	if (!path) return NULL;
+	if (!path) return nullptr;
 
 	pathl = path_from_utf8(path);
 	if (map_file(pathl, &f, &size) == -1)
 		{
 		g_free(pathl);
-		return NULL;
+		return nullptr;
 		}
 	g_free(pathl);
 
 	exif = g_new0(ExifData, 1);
 	exif->path = g_strdup(path);
 
-	res = exif_jpeg_parse(exif, (guchar *)f, size, ExifKnownMarkersList);
+	res = exif_jpeg_parse(exif, static_cast<guchar *>(f), size, ExifKnownMarkersList);
 	if (res == -2)
 		{
-		res = exif_tiff_parse(exif, (guchar *)f, size, ExifKnownMarkersList);
+		res = exif_tiff_parse(exif, static_cast<guchar *>(f), size, ExifKnownMarkersList);
 		}
 
 	if (res != 0)
@@ -1249,23 +1249,23 @@ ExifData *exif_read(gchar *path, gchar *UNUSED(sidecar_path), GHashTable *UNUSED
 		FormatRawExifParseFunc exif_parse_func;
 		guint32 offset = 0;
 
-		exif_type = format_raw_exif_offset((guchar*)f, size, &offset, &exif_parse_func);
+		exif_type = format_raw_exif_offset(static_cast<guchar*>(f), size, &offset, &exif_parse_func);
 		switch (exif_type)
 			{
 			case FORMAT_RAW_EXIF_NONE:
 			default:
 				break;
 			case FORMAT_RAW_EXIF_TIFF:
-				res = exif_tiff_parse(exif, (guchar *)f + offset, size - offset,
+				res = exif_tiff_parse(exif, static_cast<guchar *>(f) + offset, size - offset,
 						      ExifKnownMarkersList);
 				break;
 			case FORMAT_RAW_EXIF_JPEG:
-				res = exif_jpeg_parse(exif, (guchar *)f + offset, size - offset,
+				res = exif_jpeg_parse(exif, static_cast<guchar *>(f) + offset, size - offset,
 						      ExifKnownMarkersList);
 				break;
 			case FORMAT_RAW_EXIF_IFD_II:
 			case FORMAT_RAW_EXIF_IFD_MM:
-				res = exif_parse_IFD_table(exif, (guchar *)f, offset, size - offset,
+				res = exif_parse_IFD_table(exif, static_cast<guchar *>(f), offset, size - offset,
 							   (exif_type == FORMAT_RAW_EXIF_IFD_II) ?
 								EXIF_BYTE_ORDER_INTEL : EXIF_BYTE_ORDER_MOTOROLA,
 							   0, ExifKnownMarkersList);
@@ -1273,7 +1273,7 @@ ExifData *exif_read(gchar *path, gchar *UNUSED(sidecar_path), GHashTable *UNUSED
 			case FORMAT_RAW_EXIF_PROPRIETARY:
 				if (exif_parse_func)
 					{
-					res = exif_parse_func((guchar *)f + offset, size - offset, exif);
+					res = exif_parse_func(static_cast<guchar *>(f) + offset, size - offset, exif);
 					}
 				break;
 			}
@@ -1282,7 +1282,7 @@ ExifData *exif_read(gchar *path, gchar *UNUSED(sidecar_path), GHashTable *UNUSED
 	if (res != 0)
 		{
 		exif_free(exif);
-		exif = NULL;
+		exif = nullptr;
 		}
 
 	unmap_file(f, size);
@@ -1296,18 +1296,18 @@ ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 {
 	GList *work;
 
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	work = exif->items;
 	while (work)
 		{
 		ExifItem *item;
 
-		item = (ExifItem*)(work->data);
+		item = static_cast<ExifItem*>(work->data);
 		work = work->next;
 		if (item->marker->key && strcmp(key, item->marker->key) == 0) return item;
 		}
-	return NULL;
+	return nullptr;
 }
 
 #define EXIF_DATA_AS_TEXT_MAX_COUNT 16
@@ -1322,10 +1322,10 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 	gint ne;
 	gint i;
 
-	if (!item) return NULL;
+	if (!item) return nullptr;
 
 	marker = item->marker;
-	if (!marker) return NULL;
+	if (!marker) return nullptr;
 
 	data = item->data;
 	ne = item->elements;
@@ -1346,14 +1346,14 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 				if (item->format == EXIF_FORMAT_BYTE_UNSIGNED ||
 				    item->format == EXIF_FORMAT_UNDEFINED)
 					{
-					val = ((guchar *)data)[0];
+					val = (static_cast<guchar *>(data))[0];
 					}
 				else
 					{
-					val = (guchar)(((gchar *)data)[0]);
+					val = static_cast<guchar>((static_cast<gchar *>(data))[0]);
 					}
 
-				result = exif_text_list_find_value(marker->list, (guint)val);
+				result = exif_text_list_find_value(marker->list, static_cast<guint>(val));
 				string = g_string_append(string, result);
 				g_free(result);
 				}
@@ -1370,21 +1370,21 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 				{
 				gchar *result;
 
-				result = exif_text_list_find_value(marker->list, ((guint16 *)data)[0]);
+				result = exif_text_list_find_value(marker->list, (static_cast<guint16 *>(data))[0]);
 				string = g_string_append(string, result);
 				g_free(result);
 				}
 			else for (i = 0; i < ne; i++)
 				{
 				g_string_append_printf(string, "%s%hd", (i > 0) ? ", " : "",
-							((guint16 *)data)[i]);
+							(static_cast<guint16 *>(data))[i]);
 				}
 			break;
 		case EXIF_FORMAT_LONG_UNSIGNED:
 			for (i = 0; i < ne; i++)
 				{
 				g_string_append_printf(string, "%s%ld", (i > 0) ? ", " : "",
-							(gulong)((guint32 *)data)[i]);
+							static_cast<gulong>((static_cast<guint32 *>(data))[i]));
 				}
 			break;
 		case EXIF_FORMAT_RATIONAL_UNSIGNED:
@@ -1392,23 +1392,23 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 				{
 				ExifRational *r;
 
-				r = &((ExifRational *)data)[i];
+				r = &(static_cast<ExifRational *>(data))[i];
 				g_string_append_printf(string, "%s%ld/%ld", (i > 0) ? ", " : "",
-							(gulong)r->num, (gulong)r->den);
+							static_cast<gulong>(r->num), static_cast<gulong>(r->den));
 				}
 			break;
 		case EXIF_FORMAT_SHORT:
 			for (i = 0; i < ne; i++)
 				{
 				g_string_append_printf(string, "%s%hd", (i > 0) ? ", " : "",
-							((gint16 *)data)[i]);
+							(static_cast<gint16 *>(data))[i]);
 				}
 			break;
 		case EXIF_FORMAT_LONG:
 			for (i = 0; i < ne; i++)
 				{
 				g_string_append_printf(string, "%s%ld", (i > 0) ? ", " : "",
-							(glong)((gint32 *)data)[i]);
+							static_cast<glong>((static_cast<gint32 *>(data))[i]));
 				}
 			break;
 		case EXIF_FORMAT_RATIONAL:
@@ -1416,23 +1416,23 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 				{
 				ExifRational *r;
 
-				r = &((ExifRational *)data)[i];
+				r = &(static_cast<ExifRational *>(data))[i];
 				g_string_append_printf(string, "%s%ld/%ld", (i > 0) ? ", " : "",
-							(glong)r->num, (glong)r->den);
+							static_cast<glong>(r->num), static_cast<glong>(r->den));
 				}
 			break;
 		case EXIF_FORMAT_FLOAT:
 			for (i = 0; i < ne; i++)
 				{
 				g_string_append_printf(string, "%s%f", (i > 0) ? ", " : "",
-							((float *)data)[i]);
+							(static_cast<float *>(data))[i]);
 				}
 			break;
 		case EXIF_FORMAT_DOUBLE:
 			for (i = 0; i < ne; i++)
 				{
 				g_string_append_printf(string, "%s%f", (i > 0) ? ", " : "",
-							((gdouble *)data)[i]);
+							(static_cast<gdouble *>(data))[i]);
 				}
 			break;
 		}
@@ -1467,19 +1467,19 @@ gint exif_item_get_integer(ExifItem *item, gint *value)
 	switch (item->format)
 		{
 		case EXIF_FORMAT_SHORT:
-			*value = (gint)(((gint16 *)(item->data))[0]);
+			*value = static_cast<gint>((static_cast<gint16 *>(item->data))[0]);
 			return TRUE;
 			break;
 		case EXIF_FORMAT_SHORT_UNSIGNED:
-			*value = (gint)(((guint16 *)(item->data))[0]);
+			*value = static_cast<gint>((static_cast<guint16 *>(item->data))[0]);
 			return TRUE;
 			break;
 		case EXIF_FORMAT_LONG:
-			*value = (gint)(((gint32 *)(item->data))[0]);
+			*value = static_cast<gint>((static_cast<gint32 *>(item->data))[0]);
 			return TRUE;
 			break;
 		case EXIF_FORMAT_LONG_UNSIGNED: /**< @FIXME overflow possible */
-			*value = (gint)(((guint32 *)(item->data))[0]);
+			*value = static_cast<gint>((static_cast<guint32 *>(item->data))[0]);
 			return TRUE;
 		default:
 			/* all other type return FALSE */
@@ -1491,24 +1491,24 @@ gint exif_item_get_integer(ExifItem *item, gint *value)
 
 ExifRational *exif_item_get_rational(ExifItem *item, gint *sign, guint n)
 {
-	if (!item) return NULL;
-	if (n >= item->elements) return NULL;
+	if (!item) return nullptr;
+	if (n >= item->elements) return nullptr;
 
 	if (item->format == EXIF_FORMAT_RATIONAL ||
 	    item->format == EXIF_FORMAT_RATIONAL_UNSIGNED)
 		{
 		if (sign) *sign = (item->format == EXIF_FORMAT_RATIONAL);
-		return &((ExifRational *)(item->data))[n];
+		return &(static_cast<ExifRational *>(item->data))[n];
 		}
 
-	return NULL;
+	return nullptr;
 }
 
 gchar *exif_get_tag_description_by_key(const gchar *key)
 {
 	gint i;
 
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	i = 0;
 	while (ExifKnownMarkersList[i].tag > 0)
@@ -1524,7 +1524,7 @@ gchar *exif_get_tag_description_by_key(const gchar *key)
 	   i++;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 static void exif_write_item(FILE *f, ExifItem *item, ExifData *exif)
@@ -1558,7 +1558,7 @@ void exif_write_data_list(ExifData *exif, FILE *f, gint human_readable_list)
 			{
 			gchar *text;
 
-			text = exif_get_formatted_by_key(exif, ExifFormattedList[i].key, NULL);
+			text = exif_get_formatted_by_key(exif, ExifFormattedList[i].key, nullptr);
 			if (text)
 				{
 				g_fprintf(f, "     %9s %30s %s\n", "string", ExifFormattedList[i].key, text);
@@ -1575,7 +1575,7 @@ void exif_write_data_list(ExifData *exif, FILE *f, gint human_readable_list)
 			{
 			ExifItem *item;
 
-			item = (ExifItem*)(work->data);
+			item = static_cast<ExifItem*>(work->data);
 			work = work->next;
 
 			exif_write_item(f, item, exif);
@@ -1607,7 +1607,7 @@ GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format
 	gchar *str;
 	ExifItem *item;
 
-	if (!key) return NULL;
+	if (!key) return nullptr;
 
 	/* convert xmp key to exif key */
 	if (strcmp(key, "Xmp.tiff.Orientation") == 0) key = "Exif.Image.Orientation";
@@ -1617,17 +1617,17 @@ GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format
 		gchar *text;
 		gint key_valid;
 		text = exif_get_formatted_by_key(exif, key, &key_valid);
-		if (key_valid) return g_list_append(NULL, text);
+		if (key_valid) return g_list_append(nullptr, text);
 		}
 
 	item = exif_get_item(exif, key);
-	if (!item) return NULL;
+	if (!item) return nullptr;
 
 	str = exif_item_get_data_as_text_full(item, format);
 
-	if (!str) return NULL;
+	if (!str) return nullptr;
 
-	return g_list_append(NULL, str);
+	return g_list_append(nullptr, str);
 }
 
 struct UnmapData
@@ -1637,7 +1637,7 @@ struct UnmapData
 	size_t map_len;
 };
 
-static GList *exif_unmap_list = 0;
+static GList *exif_unmap_list = nullptr;
 
 guchar *exif_get_preview(ExifData *exif, guint *data_len, gint UNUSED(requested_width), gint UNUSED(requested_height))
 {
@@ -1648,7 +1648,7 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint UNUSED(requested_
 	size_t map_len;
 	int fd;
 
-	if (!exif) return NULL;
+	if (!exif) return nullptr;
 	path = exif->path;
 
 	fd = open(path, O_RDONLY);
@@ -1656,24 +1656,24 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint UNUSED(requested_
 
 	if (fd == -1)
 		{
-		return 0;
+		return nullptr;
 		}
 
 	if (fstat(fd, &st) == -1)
 		{
 		close(fd);
-		return 0;
+		return nullptr;
 		}
 	map_len = st.st_size;
-	map_data = (guchar *) mmap(0, map_len, PROT_READ, MAP_PRIVATE, fd, 0);
+	map_data = static_cast<guchar *>(mmap(nullptr, map_len, PROT_READ, MAP_PRIVATE, fd, 0));
 	close(fd);
 
 	if (map_data == MAP_FAILED)
 		{
-		return 0;
+		return nullptr;
 		}
 
-	if (format_raw_img_exif_offsets(map_data, map_len, &offset, NULL) && offset)
+	if (format_raw_img_exif_offsets(map_data, map_len, &offset, nullptr) && offset)
 		{
 		UnmapData *ud;
 
@@ -1690,7 +1690,7 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint UNUSED(requested_
 		}
 
 	munmap(map_data, map_len);
-	return NULL;
+	return nullptr;
 
 }
 
@@ -1700,7 +1700,7 @@ void exif_free_preview(guchar *buf)
 
 	while (work)
 		{
-		UnmapData *ud = (UnmapData *)work->data;
+		auto ud = static_cast<UnmapData *>(work->data);
 		if (ud->ptr == buf)
 			{
 			exif_unmap_list = g_list_remove_link(exif_unmap_list, work);
@@ -1712,7 +1712,7 @@ void exif_free_preview(guchar *buf)
 	g_assert_not_reached();
 }
 
-void exif_init(void)
+void exif_init()
 {
 }
 #else

@@ -269,7 +269,7 @@ public:
 		{
 			if (data_len) *data_len = cp_length_;
 #if GLIB_CHECK_VERSION(2,68,0)
-			return (unsigned char *) g_memdup2(cp_data_, cp_length_);
+			return static_cast<unsigned char *>(g_memdup2(cp_data_, cp_length_));
 #else
 			return static_cast<unsigned char *>(g_memdup(cp_data_, cp_length_));
 #endif

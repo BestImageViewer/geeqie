@@ -35,7 +35,7 @@
 #include "ui-fileops.h"
 #include "filecache.h"
 
-#include <math.h>
+#include <cmath>
 
 static GList *image_list = nullptr;
 

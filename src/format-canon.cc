@@ -23,8 +23,8 @@
 
 #ifndef HAVE_EXIV2
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <unistd.h>
 
 #include <glib.h>
@@ -391,7 +391,7 @@ static ExifTextList CanonSet1FocusCont[] = {
 static ExifMarker CanonSet1[] = {
 /* 0 is length of array in bytes (2 x array size) */
 { 1,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.MacroMode",	"Macro mode",		CanonSet1MacroMode },
-{ 2,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.SelfTimer",	"Self timer (10ths of second)", NULL },
+{ 2,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.SelfTimer",	"Self timer (10ths of second)", nullptr },
 { 3,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.Quality",	"Quality",		CanonSet1Quality },
 { 4,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FlashMode",	"Flash mode",		CanonSet1FlashMode },
 { 5,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.DriveMode",	"Drive mode",		CanonSet1DriveMode },
@@ -410,11 +410,11 @@ static ExifMarker CanonSet1[] = {
 { 19,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.AutoFocus",	"AutoFocus point",	CanonSet1AutoFocusPoint },
 { 20,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.ExposureMode","Exposure mode",	CanonSet1ExposureMode },
  { 20,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "ExposureMode",		"Exposure mode",	CanonSet1ExposureMode },
-{ 23,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FocalLengthLong","Long focal length", NULL },
-{ 24,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FocalLengthShort","Short focal length", NULL },
-{ 25,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FocalLengthUnits","Focal units per mm", NULL },
+{ 23,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FocalLengthLong","Long focal length", nullptr },
+{ 24,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FocalLengthShort","Short focal length", nullptr },
+{ 25,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FocalLengthUnits","Focal units per mm", nullptr },
 { 28,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FlashFired",	"Flash fired",		CanonSet1FlashFired },
-{ 29,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FlashDetails","Flash details",	NULL },
+{ 29,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FlashDetails","Flash details",	nullptr },
 { 32,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.ContinuousFocus","Continuous focus",	CanonSet1FocusCont },
 EXIF_MARKER_LIST_END
 };
@@ -460,23 +460,23 @@ static ExifMarker CanonSet2[] = {
 /* 0 is length of array in bytes (2 x array size) */
 { 7,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.WhiteBalance","White balance",	CanonSet2WhiteBalance },
  { 7,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "LightSource",		"White balance",	CanonSet2WhiteBalance },
-{ 9,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.SequenceNumber","Sequence number",	NULL },
+{ 9,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.SequenceNumber","Sequence number",	nullptr },
 { 15,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.FlashBias",	"Flash bias",		CanonSet2FlashBias },
 /* distance needs more than just this (metric) value */
-{ 19,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.SubjectDistance",	"Subject Distance", NULL },
+{ 19,	EXIF_FORMAT_SHORT_UNSIGNED, 1, "MkN.Canon.SubjectDistance",	"Subject Distance", nullptr },
 EXIF_MARKER_LIST_END
 };
 
 
 static ExifMarker CanonExifMarkersList[] = {
-	{ 1,	EXIF_FORMAT_SHORT_UNSIGNED, -1, "MkN.Canon.Settings1",		NULL, NULL },
-	{ 4,	EXIF_FORMAT_SHORT_UNSIGNED, -1, "MkN.Canon.Settings2",		NULL, NULL },
-	{ 6,	EXIF_FORMAT_STRING, -1,		"MkN.Canon.ImageType",		"Image type", NULL },
-	{ 7,	EXIF_FORMAT_STRING, -1,		"MkN.Canon.FirmwareVersion",	"Firmware version", NULL },
-	{ 8,	EXIF_FORMAT_LONG_UNSIGNED, 1,	"MkN.Canon.ImageNumber",	"Image number", NULL },
-	{ 9,	EXIF_FORMAT_STRING, -1,		"MkN.Canon.OwnerName",		"Owner name", NULL },
-	{ 12,	EXIF_FORMAT_LONG_UNSIGNED, -1,	"MkN.Canon.SerialNumber",	"Camera serial number", NULL },
-	{ 15,	EXIF_FORMAT_SHORT_UNSIGNED, -1,	"MkN.Canon.CustomFunctions",	NULL, NULL },
+	{ 1,	EXIF_FORMAT_SHORT_UNSIGNED, -1, "MkN.Canon.Settings1",		nullptr, nullptr },
+	{ 4,	EXIF_FORMAT_SHORT_UNSIGNED, -1, "MkN.Canon.Settings2",		nullptr, nullptr },
+	{ 6,	EXIF_FORMAT_STRING, -1,		"MkN.Canon.ImageType",		"Image type", nullptr },
+	{ 7,	EXIF_FORMAT_STRING, -1,		"MkN.Canon.FirmwareVersion",	"Firmware version", nullptr },
+	{ 8,	EXIF_FORMAT_LONG_UNSIGNED, 1,	"MkN.Canon.ImageNumber",	"Image number", nullptr },
+	{ 9,	EXIF_FORMAT_STRING, -1,		"MkN.Canon.OwnerName",		"Owner name", nullptr },
+	{ 12,	EXIF_FORMAT_LONG_UNSIGNED, -1,	"MkN.Canon.SerialNumber",	"Camera serial number", nullptr },
+	{ 15,	EXIF_FORMAT_SHORT_UNSIGNED, -1,	"MkN.Canon.CustomFunctions",	nullptr, nullptr },
 	EXIF_MARKER_LIST_END
 };
 
@@ -516,13 +516,13 @@ gboolean format_canon_makernote(ExifData *exif, guchar *tiff, guint offset,
 	item = exif_get_item(exif, "MkN.Canon.Settings1");
 	if (item)
 		{
-		canon_mknote_parse_settings(exif, (guint16*)item->data, item->data_len, bo, CanonSet1);
+		canon_mknote_parse_settings(exif, static_cast<guint16*>(item->data), item->data_len, bo, CanonSet1);
 		}
 
 	item = exif_get_item(exif, "MkN.Canon.Settings2");
 	if (item)
 		{
-		canon_mknote_parse_settings(exif, (guint16*)item->data, item->data_len, bo, CanonSet2);
+		canon_mknote_parse_settings(exif, static_cast<guint16*>(item->data), item->data_len, bo, CanonSet2);
 		}
 
 	return TRUE;

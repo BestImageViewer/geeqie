@@ -286,7 +286,7 @@ static void free_context(PsdContext *ctx)
 static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
 	auto ld = static_cast<ImageLoaderPSD *>(loader);
-	auto  ctx = g_new0(PsdContext, 1);
+	auto ctx = g_new0(PsdContext, 1);
 	guint i;
 	guint32 j;
 	guint size = count;

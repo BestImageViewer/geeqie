@@ -490,8 +490,8 @@ void color_man_update()
 }
 
 #ifdef HAVE_HEIF
+#include <cmath>
 #include <libheif/heif.h>
-#include <math.h>
 
 static cmsToneCurve* colorspaces_create_transfer(int32_t size, double (*fct)(double))
 {

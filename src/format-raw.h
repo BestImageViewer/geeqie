@@ -39,11 +39,8 @@ enum FormatRawExifType {
 	FORMAT_RAW_EXIF_PROPRIETARY
 };
 
-typedef gboolean (* FormatRawParseFunc)(guchar *data, const guint len,
-				        guint *image_offset, guint *exif_offset);
-
-typedef gboolean (* FormatRawExifParseFunc)(guchar *data, const guint len,
-					    ExifData *exif);
+using FormatRawParseFunc = gboolean (*)(guchar *, const guint, guint *, guint *);
+using FormatRawExifParseFunc = gboolean (*)(guchar *, const guint, ExifData *);
 
 gboolean format_raw_img_exif_offsets(guchar *data, const guint len,
 				     guint *image_offset, guint *exif_offset);
@@ -60,8 +57,7 @@ enum FormatExifMatchType {
 	FORMAT_EXIF_MATCH_MAKERNOTE
 };
 
-typedef gint (* FormatExifParseFunc)(ExifData *exif, guchar *tiff, guint offset,
-				     guint size, ExifByteOrder bo);
+using FormatExifParseFunc = gint (*)(ExifData *, guchar *, guint, guint, ExifByteOrder);
 
 gboolean format_exif_makernote_parse(ExifData *exif, guchar *tiff, guint offset,
 				     guint size, ExifByteOrder bo);

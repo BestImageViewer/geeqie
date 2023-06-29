@@ -19,9 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 
 #include "main.h"
 #include "pixbuf-renderer.h"
@@ -174,7 +174,7 @@ GType pixbuf_renderer_get_type()
 			};
 
 		pixbuf_renderer_type = g_type_register_static(GTK_TYPE_EVENT_BOX, "PixbufRenderer",
-							      &pixbuf_renderer_info, GTypeFlags(0));
+							      &pixbuf_renderer_info, static_cast<GTypeFlags>(0));
 		}
 
 	return pixbuf_renderer_type;

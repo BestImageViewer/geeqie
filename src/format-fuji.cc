@@ -24,8 +24,8 @@
 
 #ifndef HAVE_EXIV2
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <unistd.h>
 
 #include <glib.h>
@@ -153,13 +153,13 @@ static ExifTextList FujiTagNoYes[]= {
 
 
 static ExifMarker FujiExifMarkersList[] = {
-{ 0x1000,	EXIF_FORMAT_STRING, 8,		"Fuji.Quality",		"Quality",	NULL },
+{ 0x1000,	EXIF_FORMAT_STRING, 8,		"Fuji.Quality",		"Quality",	nullptr },
 { 0x1001,	EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Fuji.Sharpness",	"Sharpness",	FujiTagSharpness },
 { 0x1002,	EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Fuji.WhiteBalance",	"White balance",FujiTagWhiteBalance },
 { 0x1003,	EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Fuji.Color",		"Color",	FujiTagColorTone },
 { 0x1004,	EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Fuji.Tone",		"Tone",		FujiTagColorTone },
 { 0x1010,	EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Fuji.FlashMode",	"Flash mode",	FujiTagFlashMode },
-{ 0x1011,	EXIF_FORMAT_RATIONAL, 1,	"Fuji.FlashStrength",	"Flash strength", NULL },
+{ 0x1011,	EXIF_FORMAT_RATIONAL, 1,	"Fuji.FlashStrength",	"Flash strength", nullptr },
 { 0x1020,	EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Fuji.Macro",		"Macro",	FujiTagOffOn },
 { 0x1021,	EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Fuji.FocusMode",	"Focus mode",	FujiTagFocusMode },
 { 0x1030,	EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Fuji.SlowSync",	"Slow synchro",	FujiTagOffOn },

@@ -25,16 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #include <windows.h>
 #elif defined(__APPLE__) || defined(__linux__) || defined(__unix__) || defined(_POSIX_VERSION)
-#include <errno.h>
-#include <sys/mman.h>
+#include <cerrno>
 #include <fcntl.h>
+#include <sys/mman.h>
 #include <unistd.h>
 #endif
 
@@ -542,7 +542,7 @@ static int32_t* ZDPolygonToListInternal(const ZoneDetect *library, uint32_t poly
     size_t listLength = 2 * 100;
     size_t listIndex = 0;
 
-    auto  list = static_cast<int32_t *>(malloc(sizeof(int32_t) * listLength));
+    auto list = static_cast<int32_t *>(malloc(sizeof(int32_t) * listLength));
     if(!list) {
         goto fail;
     }
@@ -904,7 +904,7 @@ ZoneDetectResult *ZDLookup(const ZoneDetect *library, float lat, float lon, floa
     const int32_t latFixedPoint = ZDFloatToFixedPoint(lat, 90, library->precision);
     const int32_t lonFixedPoint = ZDFloatToFixedPoint(lon, 180, library->precision);
     size_t numResults = 0;
-    auto  distanceSqrMin = static_cast<uint64_t>(-1);
+    auto distanceSqrMin = static_cast<uint64_t>(-1);
 
     /* Iterate over all polygons */
     uint32_t bboxIndex = library->bboxOffset;
