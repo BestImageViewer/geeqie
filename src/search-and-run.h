@@ -22,6 +22,10 @@
 #define SEARCH_AND_RUN_H
 
 
+#include <gtk/gtk.h>
+
+struct LayoutWindow;
+
 GtkWidget *search_and_run_new(LayoutWindow *lw);
 
 #endif

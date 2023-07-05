@@ -23,6 +23,9 @@
 #define UI_TABCOMP_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
 					   const gchar *history_key, gint max_levels,
 					   void (*enter_func)(const gchar *, gpointer), gpointer data);

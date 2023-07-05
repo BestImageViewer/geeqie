@@ -50,10 +50,17 @@
  *
  */
 
-#include "main.h"
+#include <cstdint>
+#include <cstdlib>
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <jxl/codestream_header.h>
+#include <jxl/types.h>
+
+#include "main.h"
 #include "image-load.h"
 #include "image-load-jpegxl.h"
+#include "debug.h"
 
 #ifdef HAVE_JPEGXL
 

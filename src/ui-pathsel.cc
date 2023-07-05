@@ -19,15 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cstring>
-
 #include <dirent.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <gdk/gdk.h>
+#include <cstring>
 
 #include "main.h"
 #include "ui-pathsel.h"
-
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
@@ -36,6 +34,12 @@
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
 #include "utilops.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
 
 
 #define DEST_WIDTH 250

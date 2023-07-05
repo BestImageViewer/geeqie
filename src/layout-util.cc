@@ -19,9 +19,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <dirent.h>
+#include <gio/gio.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "layout-util.h"
-
 #include "advanced-exif.h"
 #include "bar-sort.h"
 #include "bar.h"
@@ -57,9 +64,15 @@
 #include "window.h"
 #include "metadata.h"
 #include "desktop-file.h"
-
-#include <sys/wait.h>
 #include "keymap-template.h"
+#include "config.h"
+#include "debug.h"
+#include "filedata.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "ui-utildlg.h"
 
 #define MENU_EDIT_ACTION_OFFSET 16
 #define FILE_COLUMN_POINTER 0

@@ -22,6 +22,11 @@
 #ifndef BAR_KEYWORDS_H
 #define BAR_KEYWORDS_H
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct LayoutWindow;
+
 GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, const gchar **attribute_values);
 void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);

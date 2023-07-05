@@ -19,14 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+
+#include <gio/gio.h>
+#include <gtk/gtk.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "trash.h"
 #include "utilops.h"
 #include "window.h"
-
 #include "editors.h"
 #include "filedata.h"
 #include "ui-fileops.h"
+#include "debug.h"
+#include "intl.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
 
 /*
  *--------------------------------------------------------------------------

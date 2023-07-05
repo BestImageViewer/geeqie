@@ -18,15 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
+#include "main.h"
 #include "image-load.h"
 #include "image-load-djvu.h"
+#include "cairo.h"
 
 #ifdef HAVE_DJVU
 
 #include <libdjvu/ddjvuapi.h>
-#include <libdjvu/miniexp.h>
 
 struct ImageLoaderDJVU {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

@@ -19,9 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "layout.h"
-
 #include "filedata.h"
 #include "history-list.h"
 #include "image.h"
@@ -32,7 +38,6 @@
 #include "logwindow.h"
 #include "menu.h"
 #include "pixbuf-util.h"
-#include "utilops.h"
 #include "view-dir.h"
 #include "view-file.h"
 #include "ui-fileops.h"
@@ -46,6 +51,11 @@
 #include "bar-sort.h"
 #include "preferences.h"
 #include "shortcuts.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "pango/pango-layout.h"
+#include "ui-utildlg.h"
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
 #endif

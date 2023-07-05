@@ -25,10 +25,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
+#include <cstddef>
+#include <cstring>
 
+#include <fcntl.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <tiff.h>
+
+#include "main.h"
 #include "image-load.h"
 #include "image-load-tiff.h"
+#include "debug.h"
 
 #ifdef HAVE_TIFF
 

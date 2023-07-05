@@ -23,6 +23,12 @@
 #define MENU_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include "gobject/gclosure.h"
+#include "typedefs.h"
+
 gpointer submenu_item_get_data(GtkWidget *menu);
 
 GtkWidget *submenu_add_edit(GtkWidget *menu, GtkWidget **menu_item, GCallback func, gpointer data, GList *fd_list);

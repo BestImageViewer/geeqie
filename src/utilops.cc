@@ -19,9 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "utilops.h"
-
 #include "cache.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -34,6 +39,11 @@
 #include "editors.h"
 #include "metadata.h"
 #include "exif.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "pango/pango-layout.h"
+#include "ui-utildlg.h"
 
 #define DIALOG_WIDTH 750
 

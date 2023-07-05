@@ -19,15 +19,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
 #include "main.h"
 #include "bar.h"
-
-#include "bar-histogram.h"
 #include "filedata.h"
 #include "metadata.h"
 #include "rcfile.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
+#include "config.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "pango/pango-layout.h"
+#include "typedefs.h"
 
 struct KnownPanes
 {

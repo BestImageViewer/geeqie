@@ -21,12 +21,23 @@
 
 #include "pan-view-search.h"
 
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#include <glib.h>
+
 #include "image.h"
 #include "pan-calendar.h"
 #include "pan-util.h"
 #include "pan-view.h"
 #include "ui-tabcomp.h"
 #include "ui-misc.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "pan-view/pan-item.h"
+#include "pan-view/pan-types.h"
+#include "typedefs.h"
 
 PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 {

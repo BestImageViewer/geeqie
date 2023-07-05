@@ -21,6 +21,9 @@
 #ifndef IMAGE_LOAD_HEIF_H
 #define IMAGE_LOAD_HEIF_H
 
+#include "config.h"
+
+struct ImageLoaderBackend;
 #ifdef HAVE_HEIF
 void image_loader_backend_set_heif(ImageLoaderBackend *funcs);
 #endif

@@ -19,12 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include "main.h"
 #include "filefilter.h"
-
 #include "cache.h"
 #include "ui-fileops.h"
 #include "rcfile.h"
+#include "config.h"
+#include "debug.h"
 
 /*
  *-----------------------------------------------------------------------------

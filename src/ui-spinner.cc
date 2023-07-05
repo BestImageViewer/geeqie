@@ -19,11 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include "main.h"
 #include "ui-spinner.h"
-
 #include "ui_icons.h"
 #include "ui-fileops.h"
+#include "gobject/gclosure.h"
 
 
 #define SPINNER_FRAMES 19

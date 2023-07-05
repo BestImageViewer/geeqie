@@ -19,9 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk/gdk.h>
+
 #include "main.h"
 #include "advanced-exif.h"
-
 #include "exif.h"
 #include "filedata.h"
 #include "history-list.h"
@@ -30,6 +33,15 @@
 #include "ui-misc.h"
 #include "window.h"
 #include "dnd.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "pango/pango-layout.h"
+#include "typedefs.h"
+
+struct ExifData;
+struct ExifItem;
 
 #define ADVANCED_EXIF_DATA_COLUMN_WIDTH 200
 

@@ -22,6 +22,11 @@
 #ifndef IMAGE_OVERLAY_H
 #define IMAGE_OVERLAY_H
 
+#include <glib.h>
+
+struct Histogram;
+struct ImageWindow;
+
 enum ImageOSDFlag {
 	IMAGE_OSD_NONE = 0,
 	IMAGE_OSD_ROTATE_USER,

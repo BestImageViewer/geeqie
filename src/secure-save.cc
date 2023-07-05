@@ -18,11 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
+#include <cerrno>
+#include <cstdarg>
+#include <cstdio>
+
+#include <fcntl.h>
+#include <gdk/gdk.h>
 #include <glib/gprintf.h>
+#include <gtk/gtk.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <utime.h>
 
 #include "secure-save.h"
+#include "config.h"
+#include "debug.h"
+#include "intl.h"
 
 /**
  * @file secure-save.cc

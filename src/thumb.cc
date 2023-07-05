@@ -19,9 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+#include <cstring>
+
+#include <sys/types.h>
+#include <utime.h>
+
 #include "main.h"
 #include "thumb.h"
-
 #include "cache.h"
 #include "image-load.h"
 #include "filedata.h"
@@ -30,8 +35,9 @@
 #include "ui-fileops.h"
 #include "exif.h"
 #include "metadata.h"
-
-#include <utime.h>
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
 
 
 static void thumb_loader_error_cb(ImageLoader *il, gpointer data);

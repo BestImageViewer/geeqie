@@ -19,15 +19,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstddef>
+
+#include <glib.h>
+
 #include "main.h"
 #include "fullscreen.h"
-
 #include "image.h"
 #include "misc.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "window.h"
 #include "image-load.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "typedefs.h"
 
 enum {
 	FULLSCREEN_CURSOR_HIDDEN = 1 << 0,

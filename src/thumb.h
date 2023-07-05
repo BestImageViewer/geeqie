@@ -23,6 +23,11 @@
 #define THUMB_H
 
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+
+#include "typedefs.h"
+
 ThumbLoader *thumb_loader_new(gint width, gint height);
 void thumb_loader_set_callbacks(ThumbLoader *tl,
 				ThumbLoaderFunc func_done,

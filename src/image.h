@@ -23,6 +23,13 @@
 #define IMAGE_H
 
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 void image_set_frame(ImageWindow *imd, gboolean frame);
 ImageWindow *image_new(gboolean frame);
 

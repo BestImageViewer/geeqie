@@ -23,6 +23,13 @@
 #define PIXBUF_UTIL_H
 
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gtk/gtk.h>
+
+#include "pango/pango-layout.h"
+
+struct FileData;
+
 gboolean pixbuf_to_file_as_png (GdkPixbuf *pixbuf, const gchar *filename);
 
 void pixbuf_inline_register_stock_icons();

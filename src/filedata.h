@@ -22,6 +22,11 @@
 #ifndef FILEDATA_H
 #define FILEDATA_H
 
+#include <glib.h>
+#include <time.h>
+
+#include "config.h"
+#include "typedefs.h"
 #ifdef DEBUG
 #define DEBUG_FILEDATA
 #endif

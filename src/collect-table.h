@@ -22,7 +22,14 @@
 #ifndef COLLECT_TABLE_H
 #define COLLECT_TABLE_H
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 #include "collect.h"
+
+struct CollectInfo;
+struct CollectTable;
+struct CollectionData;
 
 void collection_table_select_all(CollectTable *ct);
 void collection_table_unselect_all(CollectTable *ct);

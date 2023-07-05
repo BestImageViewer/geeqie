@@ -3,6 +3,8 @@
 //   by Gregory Pakosz (@gpakosz)
 // https://github.com/gpakosz/whereami
 
+#include <climits>
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -167,10 +169,8 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 #elif defined(__linux__) || defined(__CYGWIN__) || defined(__sun) || defined(__GNU__) || defined(WAI_USE_PROC_SELF_EXE)
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #if defined(__linux__)
-#include <linux/limits.h>
 #else
 #include <limits.h>
 #endif

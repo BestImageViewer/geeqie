@@ -19,9 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gtk/gtk.h>
+
 #include "main.h"
 #include "image-overlay.h"
-
 #include "filedata.h"
 #include "histogram.h"
 #include "image.h"
@@ -32,6 +34,14 @@
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "image-load.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "pango/pango-font.h"
+#include "pango/pango-layout.h"
+#include "typedefs.h"
+
+struct HistMap;
 
 /*
  *----------------------------------------------------------------------------

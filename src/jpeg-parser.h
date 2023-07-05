@@ -22,6 +22,8 @@
 #ifndef JPEG_PARSER_H
 #define JPEG_PARSER_H
 
+#include <glib.h>
+
 #define JPEG_MARKER		0xFF
 #define JPEG_MARKER_SOI		0xD8
 #define JPEG_MARKER_EOI		0xD9

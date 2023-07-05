@@ -22,6 +22,13 @@
 #ifndef BAR_H
 #define BAR_H
 
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct FileData;
+struct LayoutWindow;
+
 enum PaneType {
 	PANE_UNDEF = 0,
 	PANE_COMMENT,

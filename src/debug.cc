@@ -18,19 +18,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include "main.h"
 #include "debug.h"
-
 #include "filedata.h"
 #include "logwindow.h"
 #include "misc.h"
 #include "ui-fileops.h"
+#include "intl.h"
 
 #ifdef HAVE_EXECINFO_H
 #include <execinfo.h>
 #endif
 
 #include <regex.h>
+#include <sys/time.h>
 
 /*
  * Logging functions

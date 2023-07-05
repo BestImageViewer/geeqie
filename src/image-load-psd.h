@@ -21,6 +21,8 @@
 #ifndef IMAGE_LOAD_PSD_H
 #define IMAGE_LOAD_PSD_H
 
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_psd(ImageLoaderBackend *funcs);
 
 #endif

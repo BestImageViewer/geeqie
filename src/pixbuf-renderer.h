@@ -22,6 +22,12 @@
 #ifndef PIXBUF_RENDERER_H
 #define PIXBUF_RENDERER_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 #define TYPE_PIXBUF_RENDERER		(pixbuf_renderer_get_type())
 #define PIXBUF_RENDERER(obj)		(G_TYPE_CHECK_INSTANCE_CAST((obj), TYPE_PIXBUF_RENDERER, PixbufRenderer))
 #define PIXBUF_RENDERER_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST((klass), TYPE_PIXBUF_RENDERER, PixbufRendererClass))
@@ -62,7 +68,6 @@
 
 
 struct RendererFuncs;
-
 struct PixbufRenderer;
 struct PixbufRendererClass;
 

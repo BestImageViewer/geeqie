@@ -19,15 +19,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include "main.h"
 #include "collect-io.h"
-
 #include "collect.h"
 #include "filedata.h"
 #include "layout-util.h"
 #include "secure-save.h"
 #include "thumb.h"
 #include "ui-fileops.h"
+#include "config.h"
+#include "debug.h"
+#include "intl.h"
 
 #define GQ_COLLECTION_MARKER "#" GQ_APPNAME
 

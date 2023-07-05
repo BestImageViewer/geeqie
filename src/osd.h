@@ -21,6 +21,11 @@
 #ifndef OSD_H
 #define OSD_H
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct FileData;
+
 enum OsdTemplateFlags {
 	OSDT_NONE 	= 0,
 	OSDT_FREE 	= 1 << 0,

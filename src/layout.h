@@ -22,6 +22,10 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
+#include <glib.h>
+
+#include "typedefs.h"
+
 #define LAYOUT_ID_CURRENT "_current_"
 
 extern GList *layout_window_list;

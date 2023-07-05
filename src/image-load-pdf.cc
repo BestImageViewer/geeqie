@@ -18,10 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
 
+#include "main.h"
 #include "image-load.h"
 #include "image-load-pdf.h"
+#include "cairo.h"
+#include "debug.h"
+#include "poppler-document.h"
+#include "poppler-page.h"
 
 #ifdef HAVE_PDF
 #include <poppler/glib/poppler.h>

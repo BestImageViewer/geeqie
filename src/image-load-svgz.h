@@ -21,6 +21,8 @@
 #ifndef IMAGE_LOAD_SVGZ_H
 #define IMAGE_LOAD_SVGZ_H
 
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_svgz(ImageLoaderBackend *funcs);
 
 #endif

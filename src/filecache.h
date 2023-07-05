@@ -21,10 +21,14 @@
 #ifndef FILECACHE_H
 #define FILECACHE_H
 
+#include <glib.h>
+
 #include "main.h"
 #include "filedata.h"
 
 struct FileCacheData;
+struct FileData;
+
 using FileCacheReleaseFunc = void (*)(FileData *);
 
 

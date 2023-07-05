@@ -21,6 +21,11 @@
 #ifndef SECURE_SAVE_H
 #define SECURE_SAVE_H
 
+#include <glib.h>
+#include <stddef.h>
+
+#include "typedefs.h"
+
 extern SecureSaveErrno secsave_errno; /**< internal secsave error number */
 
 SecureSaveInfo *secure_open(const gchar *);

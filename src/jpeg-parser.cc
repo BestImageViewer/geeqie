@@ -19,8 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <glib.h>
+
 #include "main.h"
 #include "jpeg-parser.h"
+#include "debug.h"
 
 gboolean jpeg_segment_find(const guchar *data, guint size,
 			    guchar app_marker, const gchar *magic, guint magic_len,

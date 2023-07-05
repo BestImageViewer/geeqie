@@ -18,15 +18,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "view-dir.h"
-
 #include "dnd.h"
 #include "dupe.h"
 #include "editors.h"
 #include "filedata.h"
 #include "layout-image.h"
-#include "layout-util.h"
 #include "menu.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
@@ -36,6 +40,11 @@
 #include "uri-utils.h"
 #include "view-dir-list.h"
 #include "view-dir-tree.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "typedefs.h"
 
 /* Folders icons to be used in tree or list directory view */
 static PixmapFolders *folder_icons_new(GtkWidget *widget)

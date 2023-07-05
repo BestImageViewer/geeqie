@@ -40,7 +40,6 @@
 
 #include <glib.h>
 
-
 struct MD5Context {
 	guint32 buf[4];
 	guint32 bits[2];

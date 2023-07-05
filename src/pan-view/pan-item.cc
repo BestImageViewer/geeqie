@@ -21,9 +21,23 @@
 
 #include "pan-item.h"
 
+#include <cstring>
+
+#include <gtk/gtk.h>
+
 #include "image.h"
 #include "pixbuf-util.h"
 #include "ui-misc.h"
+#include "cache.h"
+#include "filedata.h"
+#include "main.h"
+#include "pan-view/pan-types.h"
+#include "pango/pango-attributes.h"
+#include "pango/pango-font.h"
+#include "pango/pango-layout.h"
+#include "typedefs.h"
+
+struct PixbufRenderer;
 
 /*
  *-----------------------------------------------------------------------------

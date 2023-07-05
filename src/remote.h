@@ -23,7 +23,10 @@
 #define REMOTE_H
 
 
+#include <glib.h>
+
 struct RemoteConnection;
+struct CollectionData;
 
 using RemoteReadFunc = void (RemoteConnection *, const gchar *, GIOChannel *, gpointer);
 

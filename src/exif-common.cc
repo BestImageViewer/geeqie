@@ -17,13 +17,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#define _XOPEN_SOURCE
-
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
+
+#include <fcntl.h>
+#include <glib.h>
+
+#include "config.h"
 
 #ifdef HAVE_LCMS
 /*** color support enabled ***/
@@ -37,14 +39,21 @@
 
 #include "main.h"
 #include "exif.h"
-
 #include "filecache.h"
-#include "glua.h"
 #include "ui-fileops.h"
 #include "cache.h"
 #include "jpeg-parser.h"
 #include "misc.h"
 #include "zonedetect.h"
+#include "debug.h"
+#include "filedata.h"
+#include "intl.h"
+#include "typedefs.h"
+
+struct ExifData;
+struct ExifItem;
+struct FileCacheData;
+struct ZoneDetect;
 
 
 static gdouble exif_rational_to_double(ExifRational *r, gint sign)

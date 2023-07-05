@@ -18,12 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+
 #include "main.h"
 #include "logwindow.h"
-
 #include "misc.h"
 #include "ui-misc.h"
 #include "window.h"
+#include "config.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "typedefs.h"
 
 struct LogWindow
 {

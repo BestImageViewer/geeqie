@@ -22,17 +22,22 @@
  * used for the same purposes by the Print routines
  */
 
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk/gdk.h>
+
 #include "main.h"
 #include "osd.h"
-
 #include "dnd.h"
 #include "exif.h"
-#include "glua.h"
 #include "metadata.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
-
-#include <cmath>
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "typedefs.h"
 
 static const gchar *predefined_tags[][2] = {
 	{"%name%",							N_("Name")},

@@ -24,17 +24,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
+#include <cstddef>
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <jmorecfg.h>
+
+#include "main.h"
 #include "image-load.h"
 #include "image-load-jpeg.h"
 #include "jpeg-parser.h"
+#include "debug.h"
+#include "intl.h"
+#include "typedefs.h"
 
 #ifdef HAVE_JPEG
 
-#include <csetjmp>
 #include <jerror.h>
 #include <jpeglib.h>
+#include <csetjmp>
 
 struct ImageLoaderJpeg {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

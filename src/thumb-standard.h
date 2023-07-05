@@ -23,6 +23,11 @@
 #define THUMB_STANDARD_H
 
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <sys/types.h>
+
+#include "config.h"
+#include "main.h"
 #if GLIB_CHECK_VERSION (2, 34, 0)
 #define THUMB_FOLDER_GLOBAL "thumbnails"
 #else
@@ -36,6 +41,9 @@
 
 
 struct ThumbLoaderStd;
+struct FileData;
+struct ImageLoader;
+
 using ThumbLoaderStdFunc = void (*)(ThumbLoaderStd *, gpointer);
 
 struct ThumbLoaderStd

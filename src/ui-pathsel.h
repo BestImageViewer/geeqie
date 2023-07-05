@@ -23,6 +23,9 @@
 #define UI_PATHSEL_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 					 const gchar *filter, const gchar *filter_desc);
 

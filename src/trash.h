@@ -19,6 +19,8 @@
 #ifndef TRASH_H
 #define TRASH_H
 
+#include <glib.h>
+
 #include "ui-utildlg.h"
 
 void file_util_trash_clear();

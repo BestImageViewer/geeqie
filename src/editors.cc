@@ -19,15 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+#include <cstring>
+
+#include <dirent.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "editors.h"
-
 #include "filedata.h"
 #include "filefilter.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "ui-spinner.h"
 #include "utilops.h"
+#include "debug.h"
+#include "intl.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
 
 #define EDITOR_WINDOW_WIDTH 500
 #define EDITOR_WINDOW_HEIGHT 300

@@ -23,6 +23,8 @@
 #define SEARCH_H
 
 
+struct FileData;
+
 void search_new(FileData *dir_fd, FileData *example_file);
 
 

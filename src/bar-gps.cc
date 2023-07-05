@@ -19,27 +19,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+
 #include "main.h"
+#include "cairo.h"
+#include "config.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "pango/pango-layout.h"
+#include "typedefs.h"
 #ifdef HAVE_LIBCHAMPLAIN
 #ifdef HAVE_LIBCHAMPLAIN_GTK
 
-#include "bar-gps.h"
+#include <clutter-gtk/clutter-gtk.h>
+#include <champlain/champlain.h>
+#include <champlain-gtk/champlain-gtk.h>
 
+#include "bar-gps.h"
 #include "bar.h"
 #include "filedata.h"
 #include "layout.h"
 #include "metadata.h"
-#include "menu.h"
 #include "misc.h"
 #include "rcfile.h"
 #include "thumb.h"
 #include "ui-menu.h"
 #include "uri-utils.h"
 #include "ui-utildlg.h"
-
-#include <clutter-gtk/clutter-gtk.h>
-#include <champlain/champlain.h>
-#include <champlain-gtk/champlain-gtk.h>
 
 #define MARKER_COLOUR 0x00, 0x00, 0xff, 0xff
 #define TEXT_COLOUR 0x00, 0x00, 0x00, 0xff

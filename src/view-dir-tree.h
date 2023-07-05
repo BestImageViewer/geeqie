@@ -22,6 +22,14 @@
 #ifndef VIEW_DIR_TREE_H
 #define VIEW_DIR_TREE_H
 
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+#include <time.h>
+
+struct FileData;
+struct ViewDir;
+
 struct NodeData
 {
 	FileData *fd;

@@ -18,15 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+
 #include "main.h"
 #include "window.h"
-
 #include "misc.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "ui-help.h"
 #include "ui-misc.h"
 #include "ui-utildlg.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
 
 GtkWidget *window_new(GtkWindowType type, const gchar *role, const gchar *icon,
 		      const gchar *icon_file, const gchar *subtitle)

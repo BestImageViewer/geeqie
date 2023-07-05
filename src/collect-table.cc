@@ -19,9 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gio/gio.h>
+
 #include "main.h"
 #include "collect-table.h"
-
 #include "cellrenderericon.h"
 #include "collect-dlg.h"
 #include "collect-io.h"
@@ -41,6 +46,13 @@
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
 #include "view-file.h"
+#include "cairo.h"
+#include "collect.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "typedefs.h"
 
 /* between these, the icon width is increased by thumb_max_width / 2 */
 #define THUMB_MIN_ICON_WIDTH 128

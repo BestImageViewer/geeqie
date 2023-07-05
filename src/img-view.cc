@@ -19,9 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+
 #include "main.h"
 #include "img-view.h"
-
 #include "collect.h"
 #include "collect-io.h"
 #include "dnd.h"
@@ -42,6 +44,13 @@
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
 
 struct ViewWindow
 {

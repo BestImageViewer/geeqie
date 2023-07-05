@@ -22,12 +22,19 @@
 #include "pan-calendar.h"
 
 #include <cmath>
+#include <cstring>
+#include <ctime>
 
 #include "misc.h"
 #include "pan-util.h"
 #include "pan-view.h"
 #include "pan-view-filter.h"
 #include "pixbuf-util.h"
+#include "debug.h"
+#include "filedata.h"
+#include "pan-view/pan-item.h"
+#include "pan-view/pan-types.h"
+#include "typedefs.h"
 
 #define PAN_CAL_POPUP_COLOR 220, 220, 220
 #define PAN_CAL_POPUP_ALPHA 255

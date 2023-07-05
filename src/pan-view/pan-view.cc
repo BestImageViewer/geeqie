@@ -21,6 +21,13 @@
 
 #include "pan-view.h"
 
+#include <cmath>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+
 #include "bar-exif.h"
 #include "dnd.h"
 #include "editors.h"
@@ -47,8 +54,20 @@
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
-
-#include <cmath>
+#include "cache-loader.h"
+#include "cache.h"
+#include "debug.h"
+#include "filedata.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "image-load.h"
+#include "intl.h"
+#include "layout.h"
+#include "main.h"
+#include "pan-view/pan-item.h"
+#include "pan-view/pan-types.h"
+#include "pixbuf-renderer.h"
+#include "ui-utildlg.h"
 
 
 #define PAN_WINDOW_DEFAULT_WIDTH 720

@@ -18,12 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
+#include <cstdlib>
+#include <cstring>
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include "main.h"
 #include "image-load.h"
 #include "image-load-j2k.h"
-
 #include "misc.h"
+#include "debug.h"
+#include "intl.h"
 
 #ifdef HAVE_J2K
 

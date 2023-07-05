@@ -26,6 +26,7 @@
  */
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifndef INCL_ZONEDETECT_H_
 #define INCL_ZONEDETECT_H_

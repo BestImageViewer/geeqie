@@ -19,9 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include "main.h"
 #include "view-file-list.h"
-
 #include "collect.h"
 #include "dnd.h"
 #include "img-view.h"
@@ -35,6 +38,11 @@
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
 #include "view-file.h"
+#include "debug.h"
+#include "filedata.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
 
 /* Index to tree store */
 enum {

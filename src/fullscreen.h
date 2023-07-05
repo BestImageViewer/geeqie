@@ -22,6 +22,13 @@
 #ifndef FULLSCREEN_H
 #define FULLSCREEN_H
 
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct FullScreenData;
+struct ImageWindow;
+
 #define FULL_SCREEN_HIDE_MOUSE_DELAY 3000
 #define FULL_SCREEN_BUSY_MOUSE_DELAY 200
 

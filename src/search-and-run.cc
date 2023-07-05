@@ -18,11 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstddef>
+
+#include <gdk/gdk.h>
+#include <glib.h>
+
 #include "main.h"
 #include "search-and-run.h"
-
-#include "ui-misc.h"
-#include "window.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "pango/pango-markup.h"
+#include "typedefs.h"
 
 enum {
 	SAR_LABEL,

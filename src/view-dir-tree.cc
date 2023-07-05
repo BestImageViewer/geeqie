@@ -19,13 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+#include <cstring>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "view-dir-tree.h"
-
 #include "filedata.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
 #include "view-dir.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "typedefs.h"
 
 #define VDTREE(_vd_) ((ViewDirInfoTree *)(_vd_->info))
 

@@ -19,9 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gio/gio.h>
+
 #include "main.h"
 #include "preferences.h"
-
 #include "bar-keywords.h"
 #include "cache.h"
 //~ #include "authors.h"
@@ -52,6 +58,17 @@
 #include "ui-tabcomp.h"
 #include "window.h"
 #include "zonedetect.h"
+#include "config.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "pango/pango-font.h"
+#include "pango/pango-markup.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
+
+struct ZoneDetect;
 
 #ifdef HAVE_LCMS
 #ifdef HAVE_LCMS2

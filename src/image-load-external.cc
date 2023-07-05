@@ -18,13 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
+#include "main.h"
 #include "image-load.h"
 #include "image-load-external.h"
-
 #include "misc.h"
 #include "ui-fileops.h"
+#include "typedefs.h"
 
 struct ImageLoaderExternal {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

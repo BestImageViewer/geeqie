@@ -21,7 +21,15 @@
 
 #include "pan-util.h"
 
+#include <cstring>
+
+#include <glib.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "ui-fileops.h"
+#include "filedata.h"
+#include "main.h"
 
 
 /*

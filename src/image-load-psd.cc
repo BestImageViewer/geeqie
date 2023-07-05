@@ -48,10 +48,14 @@
  * - i18n
  */
 
-#include "main.h"
+#include <cstring>
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include "main.h"
 #include "image-load.h"
 #include "image-load-psd.h"
+#include "debug.h"
 
 struct ImageLoaderPSD {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

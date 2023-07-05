@@ -19,9 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+#include <cstring>
+
+#include <gdk/gdk.h>
+
 #include "main.h"
 #include "bar-keywords.h"
-
 #include "filedata.h"
 #include "metadata.h"
 #include "ui-fileops.h"
@@ -33,6 +37,10 @@
 #include "layout.h"
 #include "dnd.h"
 #include "secure-save.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "typedefs.h"
 
 
 //static void bar_pane_keywords_keyword_update_all(void);

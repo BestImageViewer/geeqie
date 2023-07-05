@@ -17,9 +17,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include "main.h"
 #include "options.h"
-
 #include "histogram.h" /* HCHAN_RGB */
 #include "image-overlay.h" /* OSD_SHOW_NOTHING */
 #include "layout.h"
@@ -27,6 +30,8 @@
 #include "rcfile.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
+#include "debug.h"
+#include "intl.h"
 
 ConfOptions *options;
 CommandLine *command_line;

@@ -21,6 +21,8 @@
 #ifndef IMAGE_LOAD_COLLECTION_H
 #define IMAGE_LOAD_COLLECTION_H
 
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_collection(ImageLoaderBackend *funcs);
 
 #endif

@@ -19,15 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gdk/gdk.h>
+
 #include "main.h"
 #include "menu.h"
-
 #include "collect-io.h"
 #include "collect-table.h"
 #include "editors.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
+#include "collect.h"
+#include "intl.h"
 
 static GtkWidget *real_submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data,
 					 GtkAccelGroup *accel_group);

@@ -18,15 +18,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
+#include <cstdint>
+#include <cstring>
+#include <exception>
+
+#include <list>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include <libintl.h>
+
+#include "config.h"
+#include "debug.h"
+#include "typedefs.h"
+
+struct ExifItem;
 
 #ifdef HAVE_EXIV2
 
-// Don't include the <exiv2/version.hpp> file directly
-// Early Exiv2 versions didn't have version.hpp and the macros.
-#include <exiv2/exiv2.hpp>
-#include <iostream>
 #include <string>
+
+#include <exiv2/basicio.hpp>
+#include <exiv2/convert.hpp>
+#include <exiv2/datasets.hpp>
+#include <exiv2/error.hpp>
+#include <exiv2/exif.hpp>
+#include <exiv2/exv_conf.h>
+#include <exiv2/image.hpp>
+#include <exiv2/iptc.hpp>
+#include <exiv2/metadatum.hpp>
+#include <exiv2/preview.hpp>
+#include <exiv2/properties.hpp>
+#include <exiv2/tags.hpp>
+#include <exiv2/types.hpp>
+#include <exiv2/version.hpp>
+#include <exiv2/xmp_exiv2.hpp>
+#include <exiv2/xmpsidecar.hpp>
 
 // EXIV2_TEST_VERSION is defined in Exiv2 0.15 and newer.
 #ifdef EXIV2_VERSION
@@ -42,12 +70,6 @@
 #define HAVE_EXIV2_ERROR_CODE
 #endif
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-
 #if EXIV2_TEST_VERSION(0,27,0)
 #define EXV_PACKAGE "exiv2"
 #endif
@@ -56,10 +78,8 @@
 
 #include "main.h"
 #include "exif.h"
-
 #include "filefilter.h"
 #include "ui-fileops.h"
-
 #include "misc.h"
 
 #if EXIV2_TEST_VERSION(0,28,0)

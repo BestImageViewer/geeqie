@@ -18,11 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+#include <cstring>
+
+#include <glib.h>
+
 #include "main.h"
 #include "history-list.h"
-
 #include "secure-save.h"
 #include "ui-fileops.h"
+#include "debug.h"
+#include "intl.h"
+#include "typedefs.h"
 
 static void update_recent_viewed_folder_image_list(const gchar *path);
 

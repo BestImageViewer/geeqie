@@ -19,13 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gtk/gtk.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "collect.h"
 #include "collect-dlg.h"
-
 #include "collect-io.h"
 #include "utilops.h"
 #include "ui-fileops.h"
+#include "intl.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
 
 enum {
 	DIALOG_SAVE,

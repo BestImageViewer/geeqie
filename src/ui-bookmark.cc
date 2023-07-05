@@ -19,11 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
 #include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
 
 #include "main.h"
 #include "ui-bookmark.h"
-
 #include "history-list.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
@@ -31,6 +34,12 @@
 #include "ui-utildlg.h"
 #include "ui-tabcomp.h"
 #include "uri-utils.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "pango/pango-layout.h"
+#include "typedefs.h"
 
 
 

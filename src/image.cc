@@ -19,9 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cmath>
+#include <cstring>
+
+#include <glib.h>
+
 #include "main.h"
 #include "image.h"
-
 #include "collect-table.h"
 #include "color-man.h"
 #include "exif.h"
@@ -34,8 +38,15 @@
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "filecache.h"
+#include "cairo.h"
+#include "collect.h"
+#include "debug.h"
+#include "filedata.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
 
-#include <cmath>
+struct ExifData;
+struct FileCacheData;
 
 static GList *image_list = nullptr;
 

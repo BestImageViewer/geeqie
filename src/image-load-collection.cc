@@ -18,13 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "image-load.h"
 #include "image-load-collection.h"
-
 #include "cache.h"
 #include "misc.h"
 #include "ui-fileops.h"
+#include "typedefs.h"
 
 struct ImageLoaderCOLLECTION {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

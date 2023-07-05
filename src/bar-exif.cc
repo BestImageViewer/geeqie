@@ -19,9 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk/gdk.h>
+
 #include "main.h"
 #include "bar-exif.h"
-
 #include "exif.h"
 #include "metadata.h"
 #include "filedata.h"
@@ -32,6 +35,11 @@
 #include "dnd.h"
 #include "ui-utildlg.h"
 #include "layout.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "pango/pango-layout.h"
+#include "typedefs.h"
 
 #define MIN_HEIGHT 25
 /*

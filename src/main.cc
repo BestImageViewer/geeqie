@@ -19,16 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <clocale>
 #include <csignal>
-#include <sys/mman.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#include <clutter/clutter.h>
+#include <gio/gio.h>
+#include <libintl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #ifdef G_OS_UNIX
 #include <pwd.h>
 #endif
-#include <clocale>
 
 #include "main.h"
-
 #include "cache.h"
 #include "collect.h"
 #include "collect-io.h"
@@ -51,8 +59,15 @@
 #include "exif.h"
 #include "histogram.h"
 #include "pixbuf-util.h"
-#include "glua.h"
 #include "whereami.h"
+#include "config.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "options.h"
+#include "similar.h"
+#include "typedefs.h"
 
 #ifdef HAVE_CLUTTER
 #include <clutter-gtk/clutter-gtk.h>

@@ -23,6 +23,10 @@
 #define UI_TREE_EDIT_H
 
 
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
 struct TreeEditData
 {
 	GtkWidget *window;

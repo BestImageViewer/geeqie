@@ -23,6 +23,11 @@
 #define EDITORS_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct FileData;
+
 enum EditorFlags {
 	EDITOR_KEEP_FS            = 0x00000001,
 	EDITOR_VERBOSE            = 0x00000002,

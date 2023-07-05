@@ -20,10 +20,17 @@
  */
 
 #include <cinttypes>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk/gdk.h>
+#include <gio/gio.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 #include "main.h"
 #include "dupe.h"
-
 #include "cache.h"
 #include "collect-table.h"
 #include "dnd.h"
@@ -46,8 +53,15 @@
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
-
-#include <cmath>
+#include "collect.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "similar.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
 
 
 #define DUPE_DEF_WIDTH 800

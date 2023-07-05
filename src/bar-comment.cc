@@ -19,9 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk/gdk.h>
+
 #include "main.h"
 #include "bar-comment.h"
-
 #include "bar.h"
 #include "metadata.h"
 #include "filedata.h"
@@ -29,6 +32,11 @@
 #include "ui-misc.h"
 #include "rcfile.h"
 #include "layout.h"
+#include "config.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "typedefs.h"
 
 #ifdef HAVE_SPELL
 #include <gspell/gspell.h>

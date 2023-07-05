@@ -19,12 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+
+#include <gio/gio.h>
+
 #include "main.h"
 #include "pixbuf-util.h"
 #include "exif.h"
 #include "ui-fileops.h"
-
-#include <cmath>
+#include "cairo.h"
+#include "config.h"
+#include "debug.h"
+#include "pango/pangocairo.h"
+#include "typedefs.h"
 
 
 /*

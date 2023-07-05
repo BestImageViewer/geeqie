@@ -19,15 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <langinfo.h>
 #include <cstdlib>
 #include <cstring>
 
 #include "main.h"
 #include "ui-misc.h"
-
 #include "history-list.h"
-
-#include <langinfo.h>
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "pango/pango-attributes.h"
+#include "pango/pango-font.h"
+#include "typedefs.h"
 
 /*
  *-----------------------------------------------------------------------------

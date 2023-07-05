@@ -19,13 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <sys/types.h>
+
 #include "main.h"
 #include "cache-loader.h"
-
 #include "filedata.h"
 #include "metadata.h"
 #include "ui-fileops.h"
-
+#include "cache.h"
+#include "gobject/gclosure.h"
+#include "image-load.h"
+#include "similar.h"
+#include "typedefs.h"
 
 static gboolean cache_loader_phase2_idle_cb(gpointer data);
 

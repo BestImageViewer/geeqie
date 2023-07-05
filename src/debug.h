@@ -22,6 +22,9 @@
 #define _DEBUG_H
 
 #include <glib.h>
+#include <gtk/gtk.h>
+
+#include "config.h"
 
 #define DOMAIN_DEBUG "debug"
 #define DOMAIN_INFO  "info"

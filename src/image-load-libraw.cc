@@ -25,11 +25,21 @@
  * LibRaw seems to be slower than exiv2, so let exiv2 have priority.
  */
 
-#include "main.h"
+#include <cstdio>
+
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "filefilter.h"
 #include "image-load.h"
 #include "image-load-libraw.h"
+#include "config.h"
+#include "debug.h"
+#include "libraw_types.h"
+#include "typedefs.h"
 
 #ifdef HAVE_RAW
 

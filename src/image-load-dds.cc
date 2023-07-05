@@ -24,8 +24,10 @@
 
  */
 
-#include "main.h"
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <sys/types.h>
 
+#include "main.h"
 #include "image-load.h"
 #include "image-load-dds.h"
 

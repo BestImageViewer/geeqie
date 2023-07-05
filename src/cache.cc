@@ -19,15 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <fcntl.h>
+#include <glib.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <utime.h>
+
 #include "main.h"
 #include "cache.h"
-
 #include "md5-util.h"
 #include "secure-save.h"
 #include "thumb-standard.h"
 #include "ui-fileops.h"
+#include "config.h"
+#include "debug.h"
+#include "intl.h"
+#include "similar.h"
 
-#include <utime.h>
+struct SecureSaveInfo;
 
 
 /**

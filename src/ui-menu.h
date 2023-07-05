@@ -23,6 +23,11 @@
 #define UI_MENU_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include "gobject/gclosure.h"
+
 GtkWidget *menu_item_add(GtkWidget *menu, const gchar *label,
 			 GCallback func, gpointer data);
 GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar *stock_id,

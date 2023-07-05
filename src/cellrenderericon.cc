@@ -17,8 +17,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstddef>
+
+#include <gdk/gdk.h>
+
 #include "main.h"
 #include "cellrenderericon.h"
+#include "cairo.h"
+#include "gobject/gmarshal.h"
+#include "gtk/gtkcssprovider.h"
+#include "pango/pango-attributes.h"
+#include "pango/pango-layout.h"
+#include "pango/pango-types.h"
 
 #define FIXED_ICON_SIZE_MAX 512
 

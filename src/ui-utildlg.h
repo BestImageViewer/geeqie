@@ -23,6 +23,12 @@
 #define UI_UTILDLG_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct FileData;
+struct GenericDialog;
+
 #define GENERIC_DIALOG(gd) ((GenericDialog *)gd)
 
 struct GenericDialog

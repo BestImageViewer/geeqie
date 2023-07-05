@@ -19,15 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstddef>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+#include <libintl.h>
+
 #include "main.h"
 #include "toolbar.h"
-
 #include "layout-util.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "pixbuf-util.h"
 #include "ui-menu.h"
 #include "editors.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
 
 /** Implements the user-definable toolbar function
  * Called from the Preferences/toolbar tab

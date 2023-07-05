@@ -19,9 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#include <glib.h>
+#include <sys/stat.h>
+
 #include "main.h"
 #include "thumb-standard.h"
-
 #include "cache.h"
 #include "image-load.h"
 #include "md5-util.h"
@@ -31,6 +37,11 @@
 #include "exif.h"
 #include "metadata.h"
 #include "color-man.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "typedefs.h"
+
+struct ExifData;
 
 
 /**

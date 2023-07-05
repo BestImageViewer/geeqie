@@ -26,6 +26,11 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <time.h>
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include "gobject/gclosure.h"
 
 
 /* these values are per GNOME HIG */

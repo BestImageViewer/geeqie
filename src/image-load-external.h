@@ -21,6 +21,8 @@
 #ifndef IMAGE_LOAD_EXTERNAL_H
 #define IMAGE_LOAD_EXTERNAL_H
 
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_external(ImageLoaderBackend *funcs);
 
 #endif

@@ -23,6 +23,8 @@
 #define UI_BOOKMARK_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
 /* bookmarks */
 
 GtkWidget *bookmark_list_new(const gchar *key,

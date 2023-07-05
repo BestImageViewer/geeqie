@@ -21,6 +21,9 @@
 #ifndef URI_UTILS_H
 #define URI_UTILS_H
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 void warning_dialog_dnd_uri_error(GList *uri_error_list);
 GList *uri_filelist_from_uris(gchar **uris, GList **uri_error_list);
 gchar **uris_from_pathlist(GList *list);

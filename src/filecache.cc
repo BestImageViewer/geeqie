@@ -18,8 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "filecache.h"
+#include "debug.h"
+#include "filedata.h"
+#include "typedefs.h"
 
 /* Set to TRUE to add file cache dumps to the debug output */
 const gboolean debug_file_cache = FALSE;

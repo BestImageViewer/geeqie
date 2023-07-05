@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
 #ifdef HAVE_LUA
 
 #define _XOPEN_SOURCE
@@ -27,7 +25,6 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
-
 #include <stdio.h>
 #include <glib.h>
 #include <string.h>

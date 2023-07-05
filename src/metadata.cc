@@ -20,10 +20,15 @@
  */
 
 #include <clocale>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <glib.h>
+#include <unistd.h>
 
 #include "main.h"
 #include "metadata.h"
-
 #include "cache.h"
 #include "exif.h"
 #include "filedata.h"
@@ -33,6 +38,11 @@
 #include "utilops.h"
 #include "layout-util.h"
 #include "rcfile.h"
+#include "config.h"
+#include "debug.h"
+#include "intl.h"
+
+struct ExifData;
 
 enum MetadataKey {
 	MK_NONE,

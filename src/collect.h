@@ -23,6 +23,11 @@
 #define COLLECT_H
 
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+
+#include "typedefs.h"
+
 CollectInfo *collection_info_new(FileData *fd, struct stat *st, GdkPixbuf *pixbuf);
 
 void collection_info_free_thumb(CollectInfo *ci);

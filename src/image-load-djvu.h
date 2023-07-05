@@ -21,6 +21,9 @@
 #ifndef IMAGE_LOAD_DJVU_H
 #define IMAGE_LOAD_DJVU_H
 
+#include "config.h"
+
+struct ImageLoaderBackend;
 #ifdef HAVE_DJVU
 void image_loader_backend_set_djvu(ImageLoaderBackend *funcs);
 #endif

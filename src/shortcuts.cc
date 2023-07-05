@@ -19,15 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <glib.h>
+
 #include "main.h"
 #include "shortcuts.h"
-
 #include "collect.h"
 #include "layout.h"
 #include "utilops.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "ui-utildlg.h"
+
+struct LayoutWindow;
 
 struct ShortcutsData
 {

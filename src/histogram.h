@@ -21,6 +21,13 @@
 #ifndef HISTOGRAM_H
 #define HISTOGRAM_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+
+#include "typedefs.h"
+
+struct HistMap;
+
 /* Note: The order is important */
 #define HCHAN_R 0
 #define HCHAN_G 1

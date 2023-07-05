@@ -18,9 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstddef>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+
 #include "main.h"
 #include "print.h"
-
 #include "exif.h"
 #include "filedata.h"
 #include "image-load.h"
@@ -28,6 +32,15 @@
 #include "pixbuf-util.h"
 #include "ui-misc.h"
 #include "ui-fileops.h"
+#include "cairo.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "pango/pango-font.h"
+#include "pango/pango-layout.h"
+#include "pango/pango-types.h"
+#include "pango/pangocairo.h"
+#include "typedefs.h"
 
 #define PRINT_SETTINGS "print_settings" // filename save printer settings
 #define PAGE_SETUP "page_setup" // filename save page setup

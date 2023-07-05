@@ -18,14 +18,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <clocale>
+#include <cerrno>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <gtk/gtk.h>
+#include <langinfo.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "main.h"
 #include "misc.h"
-
 #include "ui-fileops.h"
-
-#include <langinfo.h>
+#include "config.h"
+#include "debug.h"
+#include "intl.h"
+#include "typedefs.h"
 
 gdouble get_zoom_increment()
 {

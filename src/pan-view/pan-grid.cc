@@ -26,6 +26,8 @@
 #include "pan-item.h"
 #include "pan-util.h"
 #include "pan-view-filter.h"
+#include "pan-view/pan-types.h"
+#include "typedefs.h"
 
 void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height)
 {

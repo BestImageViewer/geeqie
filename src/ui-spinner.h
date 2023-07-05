@@ -22,9 +22,9 @@
 #ifndef UI_SPINNER_H
 #define UI_SPINNER_H
 
+#include <gtk/gtk.h>
 
 #define SPINNER_SPEED 100
-
 
 extern const guint8 icon_spinner[];
 extern const guint8 icon_tabcomp[];

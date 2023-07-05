@@ -19,9 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "desktop-file.h"
-
 #include "editors.h"
 #include "ui-misc.h"
 #include "ui-fileops.h"
@@ -29,6 +34,10 @@
 #include "window.h"
 #include "utilops.h"
 #include "layout-util.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "ui-utildlg.h"
 
 #define CONFIG_WINDOW_DEF_WIDTH		700
 #define CONFIG_WINDOW_DEF_HEIGHT	400

@@ -23,7 +23,14 @@
 #define UTILOPS_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 #include "ui-utildlg.h"
+#include "typedefs.h"
+
+struct FileDialog;
+struct GenericDialog;
 
 void file_maint_renamed(FileData *fd);
 void file_maint_moved(FileData *fd, GList *ignore_list);

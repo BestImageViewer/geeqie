@@ -23,6 +23,10 @@
 #define COLLECT_DLG_H
 
 
+#include <glib.h>
+
+struct CollectionData;
+
 void collection_dialog_save_as(gchar *path, CollectionData *cd);
 void collection_dialog_save_close(gchar *path, CollectionData *cd);
 

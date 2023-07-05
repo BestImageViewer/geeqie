@@ -19,9 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+#include <cstring>
+
+#include <dirent.h>
+#include <glib.h>
+#include <sys/types.h>
+
 #include "main.h"
 #include "cache-maint.h"
-
 #include "cache-loader.h"
 #include "filedata.h"
 #include "layout.h"
@@ -34,6 +40,10 @@
 #include "ui-tabcomp.h"
 #include "ui-utildlg.h"
 #include "window.h"
+#include "cache.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
 
 
 struct CMData

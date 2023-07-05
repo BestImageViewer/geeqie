@@ -19,9 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gio/gio.h>
+
 #include "main.h"
 #include "layout-image.h"
-
 #include "collect.h"
 #include "dnd.h"
 #include "editors.h"
@@ -44,6 +49,12 @@
 #include "uri-utils.h"
 #include "utilops.h"
 #include "view-file.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "pango/pango-attributes.h"
+#include "ui-utildlg.h"
 
 #define FILE_COLUMN_POINTER 0
 

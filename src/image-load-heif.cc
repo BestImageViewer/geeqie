@@ -18,11 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
+#include <vector>
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include "main.h"
 #include "image-load.h"
 #include "image-load-heif.h"
-#include <vector>
+#include "debug.h"
 #ifdef HAVE_HEIF
 #include <libheif/heif.h>
 

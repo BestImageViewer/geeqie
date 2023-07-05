@@ -23,7 +23,11 @@
 #define LAYOUT_CONFIG_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 #include "layout.h"
+#include "typedefs.h"
 
 
 GtkWidget *layout_config_new();

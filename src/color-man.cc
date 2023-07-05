@@ -19,11 +19,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdint>
+#include <cstring>
+
+#include <glib.h>
+
 #include "main.h"
 #include "color-man.h"
-
 #include "image.h"
 #include "ui-fileops.h"
+#include "config.h"
+#include "debug.h"
+#include "intl.h"
+#include "typedefs.h"
 
 
 #ifdef HAVE_LCMS
@@ -490,8 +498,8 @@ void color_man_update()
 }
 
 #ifdef HAVE_HEIF
-#include <cmath>
 #include <libheif/heif.h>
+#include <cmath>
 
 static cmsToneCurve* colorspaces_create_transfer(int32_t size, double (*fct)(double))
 {

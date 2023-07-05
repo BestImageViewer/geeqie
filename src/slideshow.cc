@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+
+#include <glib.h>
+
 #include "main.h"
 #include "collect.h"
 #include "image.h"
@@ -26,6 +30,7 @@
 #include "filedata.h"
 #include "layout.h"
 #include "layout-image.h"
+#include "typedefs.h"
 
 static void slideshow_timer_stop(SlideShowData *ss);
 

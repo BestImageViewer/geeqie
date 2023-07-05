@@ -19,9 +19,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+#include <sys/stat.h>
+
 #include "main.h"
 #include "collect.h"
-
 #include "collect-dlg.h"
 #include "collect-io.h"
 #include "collect-table.h"
@@ -36,6 +43,12 @@
 #include "ui-tree-edit.h"
 #include "utilops.h"
 #include "window.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "ui-utildlg.h"
 
 #define COLLECT_DEF_WIDTH 440
 #define COLLECT_DEF_HEIGHT 450

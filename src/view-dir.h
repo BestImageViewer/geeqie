@@ -21,6 +21,14 @@
 #ifndef VIEW_DIR_H
 #define VIEW_DIR_H
 
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct FileData;
+struct LayoutWindow;
+struct ViewDir;
+
 enum {
 	DIR_COLUMN_POINTER = 0,
 	DIR_COLUMN_ICON,

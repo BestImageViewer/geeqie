@@ -23,6 +23,11 @@
 #define ADVANCED_EXIF_H
 
 
+#include <gtk/gtk.h>
+
+struct FileData;
+struct LayoutWindow;
+
 GtkWidget *advanced_exif_new(LayoutWindow *lw);
 
 void advanced_exif_set_fd(GtkWidget *window, FileData *fd);

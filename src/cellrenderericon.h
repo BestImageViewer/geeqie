@@ -20,6 +20,13 @@
 #ifndef __GQV_CELL_RENDERER_ICON_H__
 #define __GQV_CELL_RENDERER_ICON_H__
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gtk/gtk.h>
+
+#include "pango/pango-color.h"
+
+struct GQvCellRendererIcon;
+
 #define TOGGLE_WIDTH 13
 #define TOGGLE_SPACING 16
 

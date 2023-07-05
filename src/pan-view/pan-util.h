@@ -22,8 +22,12 @@
 #ifndef PAN_VIEW_PAN_UTIL_H
 #define PAN_VIEW_PAN_UTIL_H
 
+#include <glib.h>
+#include <time.h>
+
 #include "main.h"
 #include "pan-types.h"
+#include "typedefs.h"
 
 enum PanDateLengthType {
 	PAN_DATE_LENGTH_EXACT,

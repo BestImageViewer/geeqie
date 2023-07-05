@@ -23,6 +23,11 @@
 #define CACHE_MAINT_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent);
 void cache_notify_cb(FileData *fd, NotifyType type, gpointer data);
 void cache_manager_show();

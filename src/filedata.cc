@@ -19,9 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <dirent.h>
+#include <glib.h>
+#include <grp.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "filedata.h"
-
 #include "filefilter.h"
 #include "cache.h"
 #include "thumb-standard.h"
@@ -30,11 +42,10 @@
 #include "trash.h"
 #include "histogram.h"
 #include "secure-save.h"
-
 #include "exif.h"
 #include "misc.h"
-
-#include <grp.h>
+#include "debug.h"
+#include "intl.h"
 
 #ifdef DEBUG_FILEDATA
 gint global_file_data_count = 0;

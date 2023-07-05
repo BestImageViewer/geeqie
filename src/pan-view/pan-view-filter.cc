@@ -21,11 +21,17 @@
 
 #include "pan-view-filter.h"
 
+#include <cstddef>
+
 #include "metadata.h"
 #include "pan-view.h"
 #include "ui-fileops.h"
 #include "ui-tabcomp.h"
 #include "ui-misc.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "main.h"
+#include "pan-view/pan-types.h"
 
 PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 {

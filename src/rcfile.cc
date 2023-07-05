@@ -19,9 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gtk/gtk.h>
+
 #include "main.h"
 #include "rcfile.h"
-
 #include "bar.h"
 #include "bar-comment.h"
 #include "bar-exif.h"
@@ -36,11 +41,15 @@
 #include "slideshow.h"
 #include "ui-fileops.h"
 #include "layout-util.h"
-#include "bar.h"
 #include "metadata.h"
 #include "bar-gps.h"
 #include "dupe.h"
 #include "ui-utildlg.h"
+#include "config.h"
+#include "debug.h"
+#include "intl.h"
+#include "layout.h"
+#include "typedefs.h"
 
 /*
  *-----------------------------------------------------------------------------

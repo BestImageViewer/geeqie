@@ -19,13 +19,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "view-dir-list.h"
-
 #include "filedata.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
 #include "view-dir.h"
+#include "gdk/gdkkeysyms.h"
+#include "typedefs.h"
 
 #define VDLIST(_vd_) ((ViewDirInfoList *)(_vd_->info))
 

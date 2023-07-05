@@ -19,12 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <gtk/gtk.h>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
 
 #include "main.h"
 #include "renderer-tiles.h"
+#include "cairo.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "pixbuf-renderer.h"
+#include "typedefs.h"
 
 /* comment this out if not using this from within Geeqie
  * defining GQ_BUILD does these things:
@@ -33,7 +42,6 @@
 #define GQ_BUILD 1
 
 #ifdef GQ_BUILD
-#include "main.h"
 #include "pixbuf-util.h"
 #include "exif.h"
 #else

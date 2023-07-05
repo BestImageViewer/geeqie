@@ -18,9 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <ctime>
+
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+
 #include "main.h"
 #include "view-file.h"
-
 #include "dupe.h"
 #include "history-list.h"
 #include "layout.h"
@@ -35,6 +39,12 @@
 #include "view-file/view-file-list.h"
 #include "view-file/view-file-icon.h"
 #include "window.h"
+#include "debug.h"
+#include "filedata.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
 
 /*
  *-----------------------------------------------------------------------------

@@ -22,7 +22,11 @@
 #ifndef VIEW_FILE_VIEW_FILE_LIST_H
 #define VIEW_FILE_VIEW_FILE_LIST_H
 
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+
 #include "filedata.h"
+#include "typedefs.h"
 
 gboolean vflist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean vflist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);

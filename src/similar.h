@@ -23,6 +23,8 @@
 #define SIMILAR_H
 
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 struct ImageSimilarityData
 {
 	guint8 avg_r[1024];

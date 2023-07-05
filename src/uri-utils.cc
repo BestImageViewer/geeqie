@@ -18,12 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "uri-utils.h"
-
 #include "filedata.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
+#include "debug.h"
+#include "intl.h"
 
 void warning_dialog_dnd_uri_error(GList *uri_error_list)
 {

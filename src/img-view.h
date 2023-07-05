@@ -23,6 +23,13 @@
 #define IMG_VIEW_H
 
 
+#include <glib.h>
+
+struct CollectInfo;
+struct CollectionData;
+struct FileData;
+struct ImageWindow;
+
 void view_window_new(FileData *fd);
 void view_window_new_from_list(GList *list);
 void view_window_new_from_collection(CollectionData *cd, CollectInfo *info);

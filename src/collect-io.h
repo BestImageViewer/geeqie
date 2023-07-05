@@ -22,6 +22,10 @@
 #ifndef COLLECT_IO_H
 #define COLLECT_IO_H
 
+#include <glib.h>
+
+#include "typedefs.h"
+
 enum CollectionLoadFlags {
 	COLLECTION_LOAD_NONE	= 0,
 	COLLECTION_LOAD_APPEND	= 1 << 0,

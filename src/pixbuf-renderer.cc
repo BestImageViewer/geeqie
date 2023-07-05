@@ -25,8 +25,10 @@
 
 #include "main.h"
 #include "pixbuf-renderer.h"
-
 #include "renderer-tiles.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "gobject/gmarshal.h"
 
 /* comment this out if not using this from within Geeqie
  * defining GQ_BUILD does these things:
@@ -35,7 +37,6 @@
 #define GQ_BUILD 1
 
 #ifdef GQ_BUILD
-#include "main.h"
 #include "pixbuf-util.h"
 #include "exif.h"
 #else

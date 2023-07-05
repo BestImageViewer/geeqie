@@ -22,6 +22,9 @@
 #ifndef COLOR_MAN_H
 #define COLOR_MAN_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+
 enum ColorManProfileType {
 	COLOR_PROFILE_NONE = -1,
 	COLOR_PROFILE_MEM = -2,
@@ -37,6 +40,9 @@ enum ColorManReturnType {
 };
 
 struct ColorMan;
+struct FileData;
+struct ImageWindow;
+
 using ColorManDoneFunc = void (*)(ColorMan *, ColorManReturnType, gpointer);
 
 

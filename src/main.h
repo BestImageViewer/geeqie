@@ -23,6 +23,7 @@
 #define MAIN_H
 
 #include <config.h>
+#include <glib.h>
 
 #include "intl.h"
 
@@ -56,7 +57,6 @@
 
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
-
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk-pixbuf/gdk-pixbuf-loader.h>
 

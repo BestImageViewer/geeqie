@@ -19,9 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <glib.h>
+
 #include "main.h"
 #include "view-file-icon.h"
-
 #include "cellrenderericon.h"
 #include "collect.h"
 #include "dnd.h"
@@ -35,6 +38,11 @@
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
 #include "view-file.h"
+#include "debug.h"
+#include "filedata.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
 
 /* between these, the icon width is increased by thumb_max_width / 2 */
 #define THUMB_MIN_ICON_WIDTH 128

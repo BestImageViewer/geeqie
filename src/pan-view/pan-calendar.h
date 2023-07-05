@@ -22,9 +22,15 @@
 #ifndef PAN_VIEW_PAN_CALENDAR_H
 #define PAN_VIEW_PAN_CALENDAR_H
 
+#include <glib.h>
+
 //#include "main.h"
 #include "pan-item.h"
 #include "pan-types.h"
+
+struct FileData;
+struct PanItem;
+struct PanWindow;
 
 void pan_calendar_update(PanWindow *pw, PanItem *pi_day);
 void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height);

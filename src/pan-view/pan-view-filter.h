@@ -22,8 +22,14 @@
 #ifndef PAN_VIEW_PAN_VIEW_FILTER_H
 #define PAN_VIEW_PAN_VIEW_FILTER_H
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 #include "main.h"
 #include "pan-types.h"
+#include "typedefs.h"
+
+struct PanWindow;
 
 enum PanViewFilterMode {
 	PAN_VIEW_FILTER_REQUIRE,

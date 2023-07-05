@@ -19,15 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gdk/gdk.h>
 #include <cstdio>
 #include <cstring>
 
 #include "main.h"
 #include "ui-help.h"
-
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "window.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
 
 
 #define HELP_WINDOW_WIDTH 650

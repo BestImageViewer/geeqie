@@ -22,6 +22,9 @@
 #ifndef BAR_RATING_H
 #define BAR_RATING_H
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const gchar **attribute_values);
 void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 

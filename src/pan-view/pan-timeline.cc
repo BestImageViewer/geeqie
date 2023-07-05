@@ -21,10 +21,15 @@
 
 #include "pan-timeline.h"
 
+#include <ctime>
+
 #include "pan-item.h"
 #include "pan-util.h"
 #include "pan-view.h"
 #include "pan-view-filter.h"
+#include "filedata.h"
+#include "pan-view/pan-types.h"
+#include "typedefs.h"
 
 void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height)
 {

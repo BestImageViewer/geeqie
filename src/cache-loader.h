@@ -23,11 +23,15 @@
 #define CACHE_LOADER_H
 
 
+#include <glib.h>
+
 #include "cache.h"
 #include "image-load.h"
 
-
 struct CacheLoader;
+struct CacheData;
+struct FileData;
+struct ImageLoader;
 
 using CacheLoaderDoneFunc = void (*)(CacheLoader *, gint, gpointer);
 

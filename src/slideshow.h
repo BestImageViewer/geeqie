@@ -23,6 +23,14 @@
 #define SLIDESHOW_H
 
 
+#include <glib.h>
+
+struct CollectInfo;
+struct CollectionData;
+struct ImageWindow;
+struct LayoutWindow;
+struct SlideShowData;
+
 #define SLIDESHOW_SUBSECOND_PRECISION 10
 #define SLIDESHOW_MIN_SECONDS    0.1
 #define SLIDESHOW_MAX_SECONDS 86399.0 /* 24 hours - 1 sec */

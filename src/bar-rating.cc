@@ -19,14 +19,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <glib.h>
+
 #include "main.h"
 #include "bar-rating.h"
-
 #include "bar.h"
 #include "filedata.h"
 #include "metadata.h"
 #include "rcfile.h"
 #include "ui-misc.h"
+#include "debug.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "typedefs.h"
 
 /**
  * @file

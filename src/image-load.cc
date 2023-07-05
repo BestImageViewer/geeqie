@@ -19,9 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "image-load.h"
-#include "image-load-cr3.h"
 #include "image-load-gdk.h"
 #include "image-load-jpeg.h"
 #include "image-load-tiff.h"
@@ -31,7 +37,6 @@
 #include "image-load-pdf.h"
 #include "image-load-psd.h"
 #include "image-load-heif.h"
-#include "image-load-ffmpegthumbnailer.h"
 #include "image-load-collection.h"
 #include "image-load-zxscr.h"
 #include "image-load-j2k.h"
@@ -39,14 +44,16 @@
 #include "image-load-libraw.h"
 #include "image-load-svgz.h"
 #include "misc.h"
-
 #include "exif.h"
 #include "filedata.h"
 #include "ui-fileops.h"
 #include "gq-marshal.h"
+#include "config.h"
+#include "debug.h"
+#include "gobject/gmarshal.h"
+#include "typedefs.h"
 
-#include <fcntl.h>
-#include <sys/mman.h>
+struct ExifData;
 
 #define IMAGE_LOADER_READ_BUFFER_SIZE_DEFAULT 	4096
 #define IMAGE_LOADER_IDLE_READ_LOOP_COUNT_DEFAULT 	1

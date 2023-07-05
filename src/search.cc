@@ -19,9 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+#include <sys/types.h>
+
 #include "main.h"
 #include "search.h"
-
 #include "bar-keywords.h"
 #include "cache.h"
 #include "collect-table.h"
@@ -48,7 +57,15 @@
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
-#include <cmath>
+#include "collect.h"
+#include "debug.h"
+#include "gdk/gdkkeysyms.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
+#include "layout.h"
+#include "similar.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
 
 #define DEF_SEARCH_WIDTH  700
 #define DEF_SEARCH_HEIGHT 650

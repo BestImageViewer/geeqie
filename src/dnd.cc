@@ -19,10 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <glib.h>
+
 #include "main.h"
 #include "dnd.h"
-
 #include "pixbuf-util.h"
+#include "gobject/gclosure.h"
+#include "pango/pango-layout.h"
 
 
 GtkTargetEntry dnd_file_drag_types[] = {

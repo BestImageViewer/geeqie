@@ -21,6 +21,9 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 GtkWidget *window_new(GtkWindowType type, const gchar *role, const gchar *icon,
 		      const gchar *icon_file, const gchar *subtitle);
 void window_set_icon(GtkWidget *window, const gchar *icon, const gchar *file);

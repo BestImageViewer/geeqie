@@ -19,10 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+
+#include <glib.h>
+
 #include "main.h"
 #include "layout-config.h"
-
 #include "ui-misc.h"
+#include "gobject/gclosure.h"
+#include "intl.h"
 
 
 enum {

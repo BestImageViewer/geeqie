@@ -19,9 +19,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cerrno>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <gtk/gtk.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/un.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "remote.h"
-
 #include "cache-maint.h"
 #include "collect.h"
 #include "collect-io.h"
@@ -38,12 +49,10 @@
 #include "ui-fileops.h"
 #include "rcfile.h"
 #include "view-file.h"
-
-#include <csignal>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include "glua.h"
+#include "debug.h"
+#include "intl.h"
+#include "layout.h"
+#include "typedefs.h"
 
 #define SERVER_MAX_CLIENTS 8
 

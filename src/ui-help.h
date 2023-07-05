@@ -23,6 +23,9 @@
 #define UI_HELP_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
 GtkWidget *help_window_new(const gchar *title,
 			   const gchar *subclass,
 			   const gchar *path, const gchar *key);

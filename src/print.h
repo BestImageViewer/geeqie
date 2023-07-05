@@ -23,6 +23,11 @@
 #define PRINT_H
 
 
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct FileData;
+
 /**
  * @headerfile print_window_new
  * do not free selection or list, the print window takes control of them

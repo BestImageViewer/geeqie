@@ -21,6 +21,10 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include <gdk/gdk.h>
+
+#include "typedefs.h"
+
 struct ConfOptions
 {
 	/* ui */
