@@ -485,8 +485,8 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	logwin->search_entry_box = gtk_entry_new();
 	gtk_box_pack_start(GTK_BOX(search_box), logwin->search_entry_box, FALSE, FALSE, 0);
 	gtk_widget_show(logwin->search_entry_box);
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_FIND);
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_PRIMARY, "edit-find");
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 	gtk_widget_show(search_box);
 	gtk_widget_set_tooltip_text(logwin->search_entry_box, _("Search for text in log window"));
 	g_signal_connect(logwin->search_entry_box, "icon-press", G_CALLBACK(search_entry_icon_cb), logwin);
@@ -527,7 +527,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 
 	textbox = gtk_entry_new();
 	gtk_box_pack_start(GTK_BOX(hbox), textbox, FALSE, FALSE, 0);
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(textbox), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(textbox), GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 	gtk_widget_show(textbox);
 	g_signal_connect(G_OBJECT(textbox), "activate",
 			 G_CALLBACK(log_window_regexp_cb), logwin);

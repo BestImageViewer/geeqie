@@ -392,8 +392,8 @@ void help_search_window_show()
 	generic_dialog_attach_default(gd, hsd->edit_widget);
 	gtk_widget_show(hsd->edit_widget);
 
-	gtk_entry_set_icon_from_stock(GTK_ENTRY(hsd->edit_widget),
-						GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(hsd->edit_widget),
+						GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(hsd->edit_widget),
 						GTK_ENTRY_ICON_SECONDARY, _("Clear"));
 	g_signal_connect(GTK_ENTRY(hsd->edit_widget), "icon-press",

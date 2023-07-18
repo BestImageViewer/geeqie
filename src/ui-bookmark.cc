@@ -655,13 +655,13 @@ static void bookmark_populate(BookMarkData *bm)
 					}
 				else
 					{
-					b->image = gtk_image_new_from_stock(GTK_STOCK_DIRECTORY,
+					b->image = gtk_image_new_from_icon_name("folder",
 									    GTK_ICON_SIZE_BUTTON);
 					}
 				}
 			else
 				{
-				b->image = gtk_image_new_from_stock(GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_BUTTON);
+				b->image = gtk_image_new_from_icon_name("folder", GTK_ICON_SIZE_BUTTON);
 				}
 			gtk_box_pack_start(GTK_BOX(box), b->image, FALSE, FALSE, 0);
 			gtk_widget_show(b->image);

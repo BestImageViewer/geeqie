@@ -2049,12 +2049,12 @@ static void config_tab_general(GtkWidget *notebook)
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 	gtk_widget_set_tooltip_text(star_rating_entry, _("Hexadecimal representation of a Unicode character. A list of all Unicode characters may be found on the Internet."));
-	gtk_entry_set_icon_from_stock(GTK_ENTRY(star_rating_entry),
-						GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
+						GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(star_rating_entry),
 						GTK_ENTRY_ICON_SECONDARY, _("Clear"));
-	gtk_entry_set_icon_from_stock(GTK_ENTRY(star_rating_entry),
-						GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_REVERT_TO_SAVED);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
+						GTK_ENTRY_ICON_PRIMARY, "document-revert");
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(star_rating_entry),
 						GTK_ENTRY_ICON_PRIMARY, _("Default"));
 	g_signal_connect(GTK_ENTRY(star_rating_entry), "icon-press",
@@ -2081,12 +2081,12 @@ static void config_tab_general(GtkWidget *notebook)
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 	gtk_widget_set_tooltip_text(star_rating_entry, _("Hexadecimal representation of a Unicode character. A list of all Unicode characters may be found on the Internet."));
-	gtk_entry_set_icon_from_stock(GTK_ENTRY(star_rating_entry),
-						GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
+						GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(star_rating_entry),
 						GTK_ENTRY_ICON_SECONDARY, _("Clear"));
-	gtk_entry_set_icon_from_stock(GTK_ENTRY(star_rating_entry),
-						GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_REVERT_TO_SAVED);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
+						GTK_ENTRY_ICON_PRIMARY, "document-revert");
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(star_rating_entry),
 						GTK_ENTRY_ICON_PRIMARY, _("Default"));
 	g_signal_connect(GTK_ENTRY(star_rating_entry), "icon-press",
@@ -2220,12 +2220,12 @@ static void config_tab_general(GtkWidget *notebook)
 
 	gtk_widget_set_tooltip_text(help_search_engine_entry, _("The format varies between search engines, e.g the format may be:\nhttps://www.search_engine.com/search?q=site:geeqie.org/help\nhttps://www.search_engine.com/?q=site:geeqie.org/help"));
 
-	gtk_entry_set_icon_from_stock(GTK_ENTRY(help_search_engine_entry),
-						GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(help_search_engine_entry),
+						GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(help_search_engine_entry),
 						GTK_ENTRY_ICON_SECONDARY, _("Clear"));
-	gtk_entry_set_icon_from_stock(GTK_ENTRY(help_search_engine_entry),
-						GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_REVERT_TO_SAVED);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(help_search_engine_entry),
+						GTK_ENTRY_ICON_PRIMARY, "document-revert");
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(help_search_engine_entry),
 						GTK_ENTRY_ICON_PRIMARY, _("Default"));
 	g_signal_connect(GTK_ENTRY(help_search_engine_entry), "icon-press",

@@ -918,8 +918,8 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 	gtk_table_attach_defaults(GTK_TABLE(table), mte->edit_widget, 1, 2, 0, 1);
 	generic_dialog_attach_default(mte->gd, mte->edit_widget);
 
-	gtk_entry_set_icon_from_stock(GTK_ENTRY(mte->edit_widget),
-				      GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(mte->edit_widget),
+				      GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(mte->edit_widget),
 					GTK_ENTRY_ICON_SECONDARY, "Clear");
 	g_signal_connect(GTK_ENTRY(mte->edit_widget), "icon-press",
@@ -1177,7 +1177,7 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	gtk_widget_show((GTK_WIDGET(vf->file_filter.combo)));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(vf->file_filter.combo), _("Use regular expressions"));
 
-	gtk_entry_set_icon_from_stock(GTK_ENTRY(combo_entry), GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(combo_entry), GTK_ENTRY_ICON_SECONDARY, "edit-clear");
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(combo_entry), GTK_ENTRY_ICON_SECONDARY, _("Clear"));
 	g_signal_connect(GTK_ENTRY(combo_entry), "icon-press", G_CALLBACK(file_filter_clear_cb), combo_entry);
 
