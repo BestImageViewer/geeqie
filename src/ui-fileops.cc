@@ -724,15 +724,9 @@ gchar *get_current_dir()
 	return path8;
 }
 
-void list_free_wrapper(void *data, void *UNUSED(userdata))
-{
-	g_free(data);
-}
-
 void string_list_free(GList *list)
 {
-	g_list_foreach(list, static_cast<GFunc>(list_free_wrapper), nullptr);
-	g_list_free(list);
+	g_list_free_full(list, g_free);
 }
 
 GList *string_list_copy(const GList *list)
