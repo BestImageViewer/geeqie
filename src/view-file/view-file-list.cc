@@ -1416,8 +1416,7 @@ static gboolean vflist_row_is_selected(ViewFile *vf, FileData *fd)
 		if (fd_n == fd) found = TRUE;
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return found;
 }
@@ -1466,8 +1465,7 @@ guint vflist_selection_count(ViewFile *vf, gint64 *bytes)
 		}
 
 	count = g_list_length(slist);
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return count;
 }
@@ -1508,8 +1506,7 @@ GList *vflist_selection_get_list(ViewFile *vf)
 
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return g_list_reverse(list);
 }
@@ -1538,8 +1535,7 @@ GList *vflist_selection_get_list_by_index(ViewFile *vf)
 
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return g_list_reverse(list);
 }
@@ -1793,8 +1789,7 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 }
 
 /*

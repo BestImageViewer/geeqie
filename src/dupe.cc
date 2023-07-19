@@ -847,8 +847,7 @@ static GList *dupe_listview_get_selection(DupeWindow *UNUSED(dw), GtkWidget *lis
 			}
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return g_list_reverse(list);
 }
@@ -875,8 +874,7 @@ static gboolean dupe_listview_item_is_selected(DupeWindow *UNUSED(dw), DupeItem 
 		if (di_n == di) found = TRUE;
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return found;
 }
@@ -3254,8 +3252,7 @@ static void dupe_window_remove_selection(DupeWindow *dw, GtkWidget *listview)
 		if (di) list = g_list_prepend(list, di);
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	dw->color_frozen = TRUE;
 	work = list;
@@ -4224,8 +4221,7 @@ static gboolean dupe_window_keypress_cb(GtkWidget *widget, GdkEventKey *event, g
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DUPE_COLUMN_POINTER, &di, -1);
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	if (event->state & GDK_CONTROL_MASK)
 		{

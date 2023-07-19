@@ -383,11 +383,6 @@ gint get_cpu_cores()
     return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-void tree_path_free_wrapper(void *data, void *UNUSED(useradata))
-{
-	gtk_tree_path_free(static_cast<GtkTreePath *>(data));
-}
-
 /* Copied from the libarchive .repo. examples */
 
 #ifndef HAVE_ARCHIVE

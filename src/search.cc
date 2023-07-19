@@ -491,8 +491,7 @@ static gboolean search_result_row_selected(SearchData *sd, FileData *fd)
 		if (mfd_n->fd == fd) found = TRUE;
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return found;
 }
@@ -530,8 +529,7 @@ static gint search_result_selection_util(SearchData *sd, gint64 *bytes, GList **
 
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	if (bytes) *bytes = total;
 	if (list) *list = g_list_reverse(plist);
@@ -748,8 +746,7 @@ static void search_result_remove_selection(SearchData *sd)
 		flist = g_list_prepend(flist, mfd->fd);
 		work = work->next;
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	work = flist;
 	while (work)
@@ -1350,8 +1347,7 @@ static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event,
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd, -1);
 		}
-	g_list_foreach(slist, static_cast<GFunc>(tree_path_free_wrapper), nullptr);
-	g_list_free(slist);
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	if (event->state & GDK_CONTROL_MASK)
 		{

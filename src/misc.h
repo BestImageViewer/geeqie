@@ -32,7 +32,6 @@ gchar *date_get_abbreviated_day_name(gint day);
 gchar *convert_rating_to_stars(gint rating);
 gchar *get_symbolic_link(const gchar *path_utf8);
 gint get_cpu_cores();
-void tree_path_free_wrapper(void *data, void *useradata);
 gchar *open_archive(FileData *fd);
 #endif /* MISC_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
