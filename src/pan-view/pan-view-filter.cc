@@ -398,7 +398,7 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 						break;
 					}
 				}
-			string_list_free(img_keywords);
+			g_list_free_full(img_keywords, g_free);
 			if (!should_reject && group_kw != nullptr) g_hash_table_add(seen_kw_table, group_kw);
 			group_kw = nullptr;  // group_kw references an item from img_keywords.
 			}

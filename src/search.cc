@@ -2153,7 +2153,7 @@ static gboolean search_file_next(SearchData *sd)
 
 				match = !found;
 				}
-			string_list_free(list);
+			g_list_free_full(list, g_free);
 			}
 		else
 			{
@@ -2713,7 +2713,7 @@ static void search_start_cb(GtkWidget *UNUSED(widget), gpointer data)
 			}
 		}
 
-	string_list_free(sd->search_keyword_list);
+	g_list_free_full(sd->search_keyword_list, g_free);
 	sd->search_keyword_list = keyword_list_pull(sd->entry_keywords);
 
 	date_selection_get(sd->date_sel, &sd->search_date_d, &sd->search_date_m, &sd->search_date_y);
@@ -3219,7 +3219,7 @@ static void search_window_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 		g_regex_unref(sd->search_comment_regex);
 		}
 	g_free(sd->search_similarity_path);
-	string_list_free(sd->search_keyword_list);
+	g_list_free_full(sd->search_keyword_list, g_free);
 
 	file_data_unregister_notify_func(search_notify_cb, sd);
 

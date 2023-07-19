@@ -3195,13 +3195,13 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 		path = layout_actions_editor_menu_path(editor);
 		layout_actions_editor_add(desc, path, old_path);
 
-		string_list_free(old_path);
+		g_list_free_full(old_path, g_free);
 		old_path = path;
 		work = work->next;
 		}
 
 	layout_actions_editor_add(desc, nullptr, old_path);
-	string_list_free(old_path);
+	g_list_free_full(old_path, g_free);
 
 	g_string_append(desc,   "  </menubar>"
 				"</ui>" );
@@ -3341,7 +3341,7 @@ void layout_editors_reload_start()
 	if (layout_editors_reload_idle_id != -1)
 		{
 		g_source_remove(layout_editors_reload_idle_id);
-		string_list_free(layout_editors_desktop_files);
+		g_list_free_full(layout_editors_desktop_files, g_free);
 		}
 
 	editor_table_clear();
@@ -3429,7 +3429,7 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 		gtk_ui_manager_remove_ui(lw->ui_manager, lw->toolbar_merge_id[type]);
 		gtk_ui_manager_ensure_update(lw->ui_manager);
 		}
-	string_list_free(lw->toolbar_actions[type]);
+	g_list_free_full(lw->toolbar_actions[type], g_free);
 	lw->toolbar_actions[type] = nullptr;
 
 	lw->toolbar_merge_id[type] = gtk_ui_manager_new_merge_id(lw->ui_manager);

@@ -100,7 +100,7 @@ static void metadata_cache_update(FileData *fd, const gchar *key, const GList *v
 			GList *old_values = entry->next;
 			entry->next = nullptr;
 			old_values->prev = nullptr;
-			string_list_free(old_values);
+			g_list_free_full(old_values, g_free);
 			work->data = g_list_append(entry, string_list_copy(values));
 			DEBUG_1("updated %s %s\n", key, fd->path);
 			return;
@@ -150,7 +150,7 @@ static void metadata_cache_remove(FileData *fd, const gchar *key)
 		if (strcmp(entry_key, key) == 0)
 			{
 			/* key found */
-			string_list_free(entry);
+			g_list_free_full(entry, g_free);
 			fd->cached_metadata = g_list_delete_link(fd->cached_metadata, work);
 			DEBUG_1("removed %s %s\n", key, fd->path);
 			return;
@@ -169,7 +169,7 @@ void metadata_cache_free(FileData *fd)
 	while (work)
 		{
 		auto entry = static_cast<GList *>(work->data);
-		string_list_free(entry);
+		g_list_free_full(entry, g_free);
 
 		work = work->next;
 		}
@@ -420,7 +420,7 @@ gboolean metadata_write_string(FileData *fd, const gchar *key, const char *value
 {
 	GList *list = g_list_append(nullptr, g_strdup(value));
 	gboolean ret = metadata_write_list(fd, key, list);
-	string_list_free(list);
+	g_list_free_full(list, g_free);
 	return ret;
 }
 
@@ -497,7 +497,7 @@ static gboolean metadata_legacy_write(FileData *fd)
 
 	g_free(metadata_pathl);
 	g_free(orig_comment);
-	string_list_free(orig_keywords);
+	g_list_free_full(orig_keywords, g_free);
 
 	return success;
 }
@@ -567,7 +567,7 @@ static gboolean metadata_file_read(gchar *path, GList **keywords, gchar **commen
 		}
 	else
 		{
-		string_list_free(list);
+		g_list_free_full(list, g_free);
 		}
 
 	if (comment_build)
@@ -745,7 +745,7 @@ gchar *metadata_read_string(FileData *fd, const gchar *key, MetadataFormat forma
 		{
 		auto str = static_cast<gchar *>(string_list->data);
 		string_list->data = nullptr;
-		string_list_free(string_list);
+		g_list_free_full(string_list, g_free);
 		return str;
 		}
 	return nullptr;
@@ -928,7 +928,7 @@ gboolean metadata_append_list(FileData *fd, const gchar *key, const GList *value
 		list = remove_duplicate_strings_from_list(list);
 
 		ret = metadata_write_list(fd, key, list);
-		string_list_free(list);
+		g_list_free_full(list, g_free);
 		return ret;
 		}
 }
@@ -1091,7 +1091,7 @@ gboolean meta_data_set_keyword_mark(FileData *fd, gint UNUSED(n), gboolean value
 		metadata_write_list(fd, KEYWORD_KEY, keywords);
 		}
 
-	string_list_free(keywords);
+	g_list_free_full(keywords, g_free);
 	return TRUE;
 }
 
@@ -1476,7 +1476,7 @@ gboolean keyword_tree_is_set(GtkTreeModel *keyword_tree, GtkTreeIter *iter, GLis
 
 		ret = keyword_tree_is_set_casefold(keyword_tree, *iter, casefold_list);
 
-		string_list_free(casefold_list);
+		g_list_free_full(casefold_list, g_free);
 		}
 
 	return ret;

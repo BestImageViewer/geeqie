@@ -71,7 +71,7 @@ gchar **uris_from_filelist(GList *list)
 {
 	GList *path_list = filelist_to_path_list(list);
 	gchar **ret = uris_from_pathlist(path_list);
-	string_list_free(path_list);
+	g_list_free_full(path_list, g_free);
 	return ret;
 }
 
@@ -139,7 +139,7 @@ GList *uri_filelist_from_uris(gchar **uris, GList **uri_error_list)
 {
 	GList *path_list = uri_pathlist_from_uris(uris, uri_error_list);
 	GList *filelist = filelist_from_path_list(path_list);
-	string_list_free(path_list);
+	g_list_free_full(path_list, g_free);
 	return filelist;
 }
 
@@ -151,7 +151,7 @@ GList *uri_filelist_from_gtk_selection_data(GtkSelectionData *selection_data)
 	if(errors)
 		{
 		warning_dialog_dnd_uri_error(errors);
-		string_list_free(errors);
+		g_list_free_full(errors, g_free);
 		}
 	g_strfreev(uris);
 	return ret;

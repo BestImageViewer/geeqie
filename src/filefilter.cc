@@ -377,18 +377,18 @@ void filter_rebuild()
 	GList *work;
 	guint i;
 
-	string_list_free(extension_list);
+	g_list_free_full(extension_list, g_free);
 	extension_list = nullptr;
 
-	string_list_free(file_writable_list);
+	g_list_free_full(file_writable_list, g_free);
 	file_writable_list = nullptr;
 
-	string_list_free(file_sidecar_list);
+	g_list_free_full(file_sidecar_list, g_free);
 	file_sidecar_list = nullptr;
 
 	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
 		{
-		string_list_free(file_class_extension_list[i]);
+		g_list_free_full(file_class_extension_list[i], g_free);
 		file_class_extension_list[i] = nullptr;
 		}
 

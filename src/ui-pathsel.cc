@@ -237,7 +237,7 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 		list = list->next;
 		}
 
-	string_list_free(path_list);
+	g_list_free_full(path_list, g_free);
 
 
 	if (dd->f_view)
@@ -261,7 +261,7 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 			list = list->next;
 			}
 
-		string_list_free(file_list);
+		g_list_free_full(file_list, g_free);
 		}
 
 	g_free(dd->path);
@@ -348,7 +348,7 @@ static void dest_dnd_set_data(GtkWidget *view,
 		g_free(str);
 		}
 
-	string_list_free(list);
+	g_list_free_full(list, g_free);
 }
 
 static void dest_dnd_init(Dest_Data *dd)
@@ -943,10 +943,10 @@ static void dest_filter_add(Dest_Data *dd, const gchar *filter, const gchar *des
 
 static void dest_filter_clear(Dest_Data *dd)
 {
-	string_list_free(dd->filter_list);
+	g_list_free_full(dd->filter_list, g_free);
 	dd->filter_list = nullptr;
 
-	string_list_free(dd->filter_text_list);
+	g_list_free_full(dd->filter_text_list, g_free);
 	dd->filter_text_list = nullptr;
 
 	dest_filter_add(dd, "*", _("All Files"), TRUE);

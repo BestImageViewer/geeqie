@@ -281,7 +281,7 @@ static void vflist_drag_data_received(GtkWidget *UNUSED(entry_widget), GdkDragCo
 			GList *kw_list = string_to_keywords_list(str);
 
 			metadata_append_list(fd, KEYWORD_KEY, kw_list);
-			string_list_free(kw_list);
+			g_list_free_full(kw_list, g_free);
 			g_free(str);
 		}
 	}

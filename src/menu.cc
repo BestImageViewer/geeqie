@@ -490,7 +490,7 @@ void pop_menu_collections(GList *selection_list, gpointer data)
 		name = collection_path(collection_name);
 		cw = collection_window_new(name);
 		g_free(name);
-		string_list_free(collection_list);
+		g_list_free_full(collection_list, g_free);
 		}
 	else
 		{

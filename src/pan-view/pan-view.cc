@@ -1405,7 +1405,7 @@ static void pan_info_add_exif(PanTextAlignment *ta, FileData *fd)
 		g_free(text);
 		}
 
-	string_list_free(exif_list);
+	g_list_free_full(exif_list, g_free);
 }
 
 

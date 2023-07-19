@@ -1155,7 +1155,7 @@ static void gr_collection_list(const gchar *UNUSED(text), GIOChannel *channel, g
 	g_io_channel_write_chars(channel, out_string->str, -1, nullptr, nullptr);
 	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
-	string_list_free(collection_list);
+	g_list_free_full(collection_list, g_free);
 	g_string_free(out_string, TRUE);
 }
 

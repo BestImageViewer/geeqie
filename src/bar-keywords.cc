@@ -164,7 +164,7 @@ static void bar_pane_keywords_write(PaneKeywordsData *pkd)
 
 	metadata_write_list(pkd->fd, KEYWORD_KEY, list);
 
-	string_list_free(list);
+	g_list_free_full(list, g_free);
 }
 
 gboolean bar_keyword_tree_expand_if_set_cb(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
@@ -208,7 +208,7 @@ static void bar_keyword_tree_sync(PaneKeywordsData *pkd)
 	keywords = keyword_list_pull(pkd->keyword_view);
 	keyword_show_set_in(GTK_TREE_STORE(keyword_tree), model, keywords);
 	if (pkd->hide_unchecked) keyword_hide_unset_in(GTK_TREE_STORE(keyword_tree), model, keywords);
-	string_list_free(keywords);
+	g_list_free_full(keywords, g_free);
 
 	gtk_tree_model_filter_refilter(GTK_TREE_MODEL_FILTER(model));
 
@@ -244,8 +244,8 @@ static void bar_pane_keywords_update(PaneKeywordsData *pkd)
 		bar_keyword_tree_sync(pkd);
 		g_signal_handlers_unblock_by_func(keyword_buffer, (gpointer)bar_pane_keywords_changed, pkd);
 		}
-	string_list_free(keywords);
-	string_list_free(orig_keywords);
+	g_list_free_full(keywords, g_free);
+	g_list_free_full(orig_keywords, g_free);
 }
 
 void bar_pane_keywords_set_fd(GtkWidget *pane, FileData *fd)
@@ -378,7 +378,7 @@ static void bar_pane_keywords_keyword_toggle(GtkCellRendererToggle *UNUSED(toggl
 
 	g_signal_handlers_block_by_func(keyword_buffer, (gpointer)bar_pane_keywords_changed, pkd);
 	keyword_list_push(pkd->keyword_view, list);
-	string_list_free(list);
+	g_list_free_full(list, g_free);
 	g_signal_handlers_unblock_by_func(keyword_buffer, (gpointer)bar_pane_keywords_changed, pkd);
 
 	/* call this just once in the end */
@@ -401,7 +401,7 @@ void bar_pane_keywords_filter_modify(GtkTreeModel *model, GtkTreeIter *iter, GVa
 			{
 			GList *keywords = keyword_list_pull(pkd->keyword_view);
 			gboolean set = keyword_tree_is_set(keyword_tree, &child_iter, keywords);
-			string_list_free(keywords);
+			g_list_free_full(keywords, g_free);
 
 			g_value_init(value, G_TYPE_BOOLEAN);
 			g_value_set_boolean(value, set);
@@ -454,7 +454,7 @@ static void bar_pane_keywords_set_selection(PaneKeywordsData *pkd, gboolean appe
 		}
 
 	filelist_free(list);
-	string_list_free(keywords);
+	g_list_free_full(keywords, g_free);
 }
 
 static void bar_pane_keywords_sel_add_cb(GtkWidget *UNUSED(button), gpointer data)
@@ -676,7 +676,7 @@ static void bar_pane_keywords_dnd_receive(GtkWidget *tree_view, GdkDragContext *
 			{
 			auto path = static_cast<GList *>(*reinterpret_cast<const gpointer *>(gtk_selection_data_get_data(selection_data)));
 			src_valid = keyword_tree_get_iter(keyword_tree, &src_kw_iter, path);
-			string_list_free(path);
+			g_list_free_full(path, g_free);
 			break;
 			}
 		default:
@@ -771,7 +771,7 @@ static void bar_pane_keywords_dnd_receive(GtkWidget *tree_view, GdkDragContext *
 			new_kw_iter = add;
 			}
 		}
-	string_list_free(new_keywords);
+	g_list_free_full(new_keywords, g_free);
 	bar_keyword_tree_sync(pkd);
 }
 
@@ -893,7 +893,7 @@ static void bar_pane_keywords_edit_ok_cb(GenericDialog *UNUSED(gd), gpointer dat
 			work = work->next;
 			}
 		}
-	string_list_free(keywords);
+	g_list_free_full(keywords, g_free);
 }
 
 static void bar_pane_keywords_conf_set_helper(GtkWidget *UNUSED(widget), gpointer data)
@@ -1109,7 +1109,7 @@ static void bar_pane_keywords_show_all_cb(GtkWidget *UNUSED(menu_widget), gpoint
 
 	GtkTreeModel *keyword_tree;
 
-	string_list_free(pkd->expanded_rows);
+	g_list_free_full(pkd->expanded_rows, g_free);
 	pkd->expanded_rows = nullptr;
 	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(pkd->keyword_treeview),
 								(bar_keyword_tree_get_expanded_cb), &pkd->expanded_rows);
@@ -1160,7 +1160,7 @@ static void bar_pane_keywords_collapse_all_cb(GtkWidget *UNUSED(menu_widget), gp
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 
-	string_list_free(pkd->expanded_rows);
+	g_list_free_full(pkd->expanded_rows, g_free);
 	pkd->expanded_rows = nullptr;
 	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(pkd->keyword_treeview),
 								(bar_keyword_tree_get_expanded_cb), &pkd->expanded_rows);
@@ -1206,7 +1206,7 @@ static void bar_pane_keywords_hide_unchecked_cb(GtkWidget *UNUSED(menu_widget), 
 
 	keywords = keyword_list_pull(pkd->keyword_view);
 	keyword_hide_unset_in(GTK_TREE_STORE(keyword_tree), model, keywords);
-	string_list_free(keywords);
+	g_list_free_full(keywords, g_free);
 	bar_keyword_tree_sync(pkd);
 }
 
@@ -1268,7 +1268,7 @@ static void bar_pane_keywords_add_to_selected_cb(GtkWidget *UNUSED(menu_widget),
 	keyword_tree_set(keyword_tree, &child_iter, &list);
 
 	keyword_list_push(pkd->keyword_view, list); /* Set the left keyword view */
-	string_list_free(list);
+	g_list_free_full(list, g_free);
 
 	bar_pane_keywords_changed(keyword_buffer, pkd); /* Get list of all keywords in the hierarchy */
 
@@ -1284,7 +1284,7 @@ static void bar_pane_keywords_add_to_selected_cb(GtkWidget *UNUSED(menu_widget),
 		metadata_append_list(fd, KEYWORD_KEY, keywords);
 		}
 	filelist_free(list);
-	string_list_free(keywords);
+	g_list_free_full(keywords, g_free);
 }
 
 static void bar_pane_keywords_menu_popup(GtkWidget *UNUSED(widget), PaneKeywordsData *pkd, gint x, gint y)
@@ -1441,7 +1441,7 @@ static void bar_pane_keywords_destroy(GtkWidget *UNUSED(widget), gpointer data)
 	path = g_build_filename(get_rc_dir(), "keywords", NULL);
 	autocomplete_keywords_list_save(path);
 
-	string_list_free(pkd->expanded_rows);
+	g_list_free_full(pkd->expanded_rows, g_free);
 	if (pkd->click_tpath) gtk_tree_path_free(pkd->click_tpath);
 	if (pkd->idle_id) g_source_remove(pkd->idle_id);
 	file_data_unregister_notify_func(bar_pane_keywords_notify_cb, pkd);

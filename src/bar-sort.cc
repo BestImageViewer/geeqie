@@ -166,13 +166,13 @@ static void bar_sort_mode_cb(GtkWidget *combo, gpointer data)
 /* this takes control of src_list */
 static void bar_sort_undo_set(SortData *sd, GList *src_list, const gchar *dest)
 {
-	string_list_free(sd->undo_src_list);
+	g_list_free_full(sd->undo_src_list, g_free);
 	sd->undo_src_list = filelist_to_path_list(src_list);
 
 	if (src_list)
 		{
 		/* we should create the undo_dest_list to use it later... */
-		string_list_free(sd->undo_dest_list);
+		g_list_free_full(sd->undo_dest_list, g_free);
 		sd->undo_dest_list=nullptr;
 
 		GList *work = sd->undo_src_list;
@@ -616,8 +616,8 @@ static void bar_sort_destroy(GtkWidget *UNUSED(widget), gpointer data)
 	bar_sort_add_close(sd);
 
 	g_free(sd->filter_key);
-	string_list_free(sd->undo_src_list);
-	string_list_free(sd->undo_dest_list);
+	g_list_free_full(sd->undo_src_list, g_free);
+	g_list_free_full(sd->undo_dest_list, g_free);
 	g_free(sd->undo_collection);
 	g_free(sd);
 }

@@ -90,7 +90,7 @@ void editor_description_free(EditorDescription *editor)
 	g_free(editor->menu_path);
 	g_free(editor->hotkey);
 	g_free(editor->comment);
-	string_list_free(editor->ext_list);
+	g_list_free_full(editor->ext_list, g_free);
 	g_free(editor->file);
 	g_free(editor);
 }

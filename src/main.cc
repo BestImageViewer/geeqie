@@ -656,7 +656,7 @@ static void parse_command_line(gint argc, gchar *argv[])
 		}
 	else
 		{
-		string_list_free(list);
+		g_list_free_full(list, g_free);
 		command_line->cmd_list = nullptr;
 		}
 
@@ -668,7 +668,7 @@ static void parse_command_line(gint argc, gchar *argv[])
 		command_line->file = nullptr;
 		filelist_free(command_line->cmd_list);
 		command_line->cmd_list = nullptr;
-		string_list_free(command_line->collection_list);
+		g_list_free_full(command_line->collection_list, g_free);
 		command_line->collection_list = nullptr;
 		}
 }

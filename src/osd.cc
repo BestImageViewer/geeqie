@@ -228,7 +228,7 @@ static gchar *keywords_to_string(FileData *fd)
 
 			g_string_append(kwstr, kw);
 			}
-		string_list_free(keywords);
+		g_list_free_full(keywords, g_free);
 		}
 
 	if (kwstr)

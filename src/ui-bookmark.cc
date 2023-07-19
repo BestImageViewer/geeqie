@@ -735,7 +735,7 @@ static void bookmark_dnd_get_data(GtkWidget *UNUSED(widget),
 		if(errors)
 			{
 			warning_dialog_dnd_uri_error(errors);
-			string_list_free(errors);
+			g_list_free_full(errors, g_free);
 			}
 		g_strfreev(uris);
 
@@ -768,7 +768,7 @@ static void bookmark_dnd_get_data(GtkWidget *UNUSED(widget),
 			g_free(real_path);
 			}
 
-		string_list_free(list);
+		g_list_free_full(list, g_free);
 
 		bookmark_populate_all(bm->key);
 		}

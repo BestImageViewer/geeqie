@@ -652,7 +652,7 @@ gchar *collection_info_list_to_dnd_data(CollectionData *cd, GList *list, gint *l
 
 	ptr[0] = '\0';
 
-	string_list_free(temp);
+	g_list_free_full(temp, g_free);
 
 	return uri_text;
 }

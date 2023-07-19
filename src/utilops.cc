@@ -3177,7 +3177,7 @@ static void clipboard_clear_func(GtkClipboard *UNUSED(clipboard), gpointer data)
 {
 	auto cbd = static_cast<ClipboardData *>(data);
 
-	string_list_free(cbd->path_list);
+	g_list_free_full(cbd->path_list, g_free);
 	g_free(cbd);
 }
 

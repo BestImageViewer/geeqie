@@ -3073,7 +3073,7 @@ static gboolean keywords_find_file(gpointer data)
 
 		gtk_entry_set_text(GTK_ENTRY(kfd->progress), fd->path);
 		file_data_unref(fd);
-		string_list_free(keywords);
+		g_list_free_full(keywords, g_free);
 
 		return (G_SOURCE_CONTINUE);
 		}
@@ -3234,7 +3234,7 @@ static void config_tab_keywords_save()
 
 	keyword_list_set(kw_list);
 
-	string_list_free(kw_list);
+	g_list_free_full(kw_list, g_free);
 	g_free(buffer_text);
 }
 
@@ -3911,7 +3911,7 @@ static void config_tab_advanced(GtkWidget *notebook)
 	gtk_widget_show(vbox);
 
 	g_slist_free(formats_list);
-	string_list_free(extensions_list);
+	g_list_free_full(extensions_list, g_free);
 	g_string_free(types_string, TRUE);
 
 	pref_spacer(group, PREF_PAD_GROUP);
