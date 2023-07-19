@@ -49,7 +49,7 @@ struct ScreenData {
 
 
 GList *fullscreen_prefs_list();
-void fullscreen_prefs_list_free(GList *list);
+void screen_data_free(ScreenData *sd);
 
 ScreenData *fullscreen_prefs_list_find(GList *list, gint screen);
 

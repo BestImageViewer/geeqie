@@ -454,21 +454,12 @@ GList *fullscreen_prefs_list()
 	return list;
 }
 
-void fullscreen_prefs_list_free(GList *list)
+void screen_data_free(ScreenData *sd)
 {
-	GList *work;
+	if (!sd) return;
 
-	work = list;
-	while (work)
-		{
-		auto sd = static_cast<ScreenData *>(work->data);
-		work = work->next;
-
-		g_free(sd->description);
-		g_free(sd);
-		}
-
-	g_list_free(list);
+	g_free(sd->description);
+	g_free(sd);
 }
 
 ScreenData *fullscreen_prefs_list_find(GList *list, gint screen)
@@ -585,7 +576,7 @@ void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, gint *x, gint
 		if (same_region) *same_region = TRUE;
 		}
 
-	fullscreen_prefs_list_free(list);
+	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(screen_data_free));
 }
 
 #pragma GCC diagnostic push
@@ -692,7 +683,7 @@ GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value,
 		work = work->next;
 		n++;
 		}
-	fullscreen_prefs_list_free(list);
+	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(screen_data_free));
 
 	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
 
