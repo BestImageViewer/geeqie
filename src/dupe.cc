@@ -466,18 +466,6 @@ static void dupe_item_free(DupeItem *di)
 	g_free(di);
 }
 
-static void dupe_list_free(GList *list)
-{
-	GList *work = list;
-	while (work)
-		{
-		auto di = static_cast<DupeItem *>(work->data);
-		work = work->next;
-		dupe_item_free(di);
-		}
-	g_list_free(list);
-}
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 static DupeItem *dupe_item_find_fd_by_list_unused(FileData *fd, GList *work)
@@ -3778,7 +3766,7 @@ static void dupe_second_clear(DupeWindow *dw)
 	g_list_free(dw->dupes);
 	dw->dupes = nullptr;
 
-	dupe_list_free(dw->second_list);
+	g_list_free_full(dw->second_list, reinterpret_cast<GDestroyNotify>(dupe_item_free));
 	dw->second_list = nullptr;
 
 	dupe_match_reset_list(dw->list);
@@ -4381,7 +4369,7 @@ void dupe_window_clear(DupeWindow *dw)
 	g_list_free(dw->dupes);
 	dw->dupes = nullptr;
 
-	dupe_list_free(dw->list);
+	g_list_free_full(dw->list, reinterpret_cast<GDestroyNotify>(dupe_item_free));
 	dw->list = nullptr;
 	dw->set_count = 0;
 
@@ -4416,9 +4404,9 @@ void dupe_window_close(DupeWindow *dw)
 	gtk_widget_destroy(dw->window);
 
 	g_list_free(dw->dupes);
-	dupe_list_free(dw->list);
+	g_list_free_full(dw->list, reinterpret_cast<GDestroyNotify>(dupe_item_free));
 
-	dupe_list_free(dw->second_list);
+	g_list_free_full(dw->second_list, reinterpret_cast<GDestroyNotify>(dupe_item_free));
 
 	file_data_unregister_notify_func(dupe_notify_cb, dw);
 
