@@ -253,18 +253,12 @@ static GList *parts_list(const gchar *path)
 	return list;
 }
 
-static void parts_list_free(GList *list)
+static void path_data_free(PathData *pd)
 {
-	GList *work = list;
-	while (work)
-		{
-		auto pd = static_cast<PathData *>(work->data);
-		g_free(pd->name);
-		g_free(pd);
-		work = work->next;
-		}
+	if (!pd) return;
 
-	g_list_free(list);
+	g_free(pd->name);
+	g_free(pd);
 }
 
 static GList *parts_list_add_node_points(ViewDir *vd, GList *list)
@@ -646,7 +640,7 @@ FileData *vdtree_populate_path(ViewDir *vd, FileData *target_fd, gboolean expand
 				{
 				/* should not happen */
 				log_printf("vdtree warning, root node not found\n");
-				parts_list_free(list);
+				g_list_free_full(list, reinterpret_cast<GDestroyNotify>(path_data_free));
 				vdtree_busy_pop(vd);
 				return nullptr;
 				}
@@ -658,7 +652,7 @@ FileData *vdtree_populate_path(ViewDir *vd, FileData *target_fd, gboolean expand
 			    (nd = vdtree_find_iter_by_name(vd, &parent_iter, pd->name, &iter)) == nullptr)
 				{
 				log_printf("vdtree warning, aborted at %s\n", parent_pd->name);
-				parts_list_free(list);
+				g_list_free_full(list, reinterpret_cast<GDestroyNotify>(path_data_free));
 				vdtree_busy_pop(vd);
 				return nullptr;
 				}
@@ -695,7 +689,7 @@ FileData *vdtree_populate_path(ViewDir *vd, FileData *target_fd, gboolean expand
 		auto pd = static_cast<PathData *>(work->data);
 		fd = pd->node;
 		}
-	parts_list_free(list);
+	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(path_data_free));
 
 	vdtree_busy_pop(vd);
 
