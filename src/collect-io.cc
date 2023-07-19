@@ -92,7 +92,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 
 		if (!append)
 			{
-			collection_list_free(cd->list);
+			g_list_free_full(cd->list, reinterpret_cast<GDestroyNotify>(collection_info_free));
 			cd->list = nullptr;
 			}
 		}

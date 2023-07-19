@@ -125,18 +125,6 @@ gboolean collection_info_load_thumb_unused(CollectInfo *ci)
 }
 #pragma GCC diagnostic pop
 
-void collection_list_free(GList *list)
-{
-	GList *work;
-	work = list;
-	while (work)
-		{
-		collection_info_free(static_cast<CollectInfo *>(work->data));
-		work = work->next;
-		}
-	g_list_free(list);
-}
-
 /* an ugly static var, well what ya gonna do ? */
 static SortType collection_list_sort_method = SORT_NAME;
 
@@ -506,7 +494,7 @@ void collection_free(CollectionData *cd)
 	DEBUG_1("collection \"%s\" freed", cd->name);
 
 	collection_load_stop(cd);
-	collection_list_free(cd->list);
+	g_list_free_full(cd->list, reinterpret_cast<GDestroyNotify>(collection_info_free));
 
 	file_data_unregister_notify_func(collection_notify_cb, cd);
 
