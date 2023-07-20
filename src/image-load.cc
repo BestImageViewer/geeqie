@@ -1158,9 +1158,8 @@ void image_loader_delay_area_ready(ImageLoader *il, gboolean enable)
 			work = work->next;
 
 			g_signal_emit(il, signals[SIGNAL_AREA_READY], 0, par->x, par->y, par->w, par->h);
-			g_free(par);
 			}
-		g_list_free(list);
+		g_list_free_full(list, g_free);
 		}
 	else
 		{

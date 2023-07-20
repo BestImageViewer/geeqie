@@ -959,20 +959,7 @@ static void pr_source_tile_free(SourceTile *st)
 
 static void pr_source_tile_free_all(PixbufRenderer *pr)
 {
-	GList *work;
-
-	work = pr->source_tiles;
-	while (work)
-		{
-		SourceTile *st;
-
-		st = static_cast<SourceTile *>(work->data);
-		work = work->next;
-
-		pr_source_tile_free(st);
-		}
-
-	g_list_free(pr->source_tiles);
+	g_list_free_full(pr->source_tiles, reinterpret_cast<GDestroyNotify>(pr_source_tile_free));
 	pr->source_tiles = nullptr;
 }
 

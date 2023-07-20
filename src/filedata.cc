@@ -791,15 +791,7 @@ static void file_data_consider_free(FileData *fd)
 	DEBUG_2("file_data_consider_free: deleting '%s', parent '%s'",
 		fd->path, fd->parent ? parent->path : "-");
 
-	work = parent->sidecar_files;
-	while (work)
-		{
-		auto sfd = static_cast<FileData *>(work->data);
-		file_data_free(sfd);
-		work = work->next;
-		}
-
-	g_list_free(parent->sidecar_files);
+	g_list_free_full(parent->sidecar_files, reinterpret_cast<GDestroyNotify>(file_data_free));
 	parent->sidecar_files = nullptr;
 
 	file_data_free(parent);

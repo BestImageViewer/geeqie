@@ -88,20 +88,10 @@ static gint tab_completion_do(TabCompData *td);
 
 static void tab_completion_free_list(TabCompData *td)
 {
-	GList *list;
-
 	g_free(td->dir_path);
 	td->dir_path = nullptr;
 
-	list = td->file_list;
-
-	while (list)
-		{
-		g_free(list->data);
-		list = list->next;
-		}
-
-	g_list_free(td->file_list);
+	g_list_free_full(td->file_list, g_free);
 	td->file_list = nullptr;
 }
 

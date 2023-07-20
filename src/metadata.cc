@@ -162,18 +162,13 @@ static void metadata_cache_remove(FileData *fd, const gchar *key)
 
 void metadata_cache_free(FileData *fd)
 {
-	GList *work;
 	if (fd->cached_metadata) DEBUG_1("freed %s\n", fd->path);
 
-	work = fd->cached_metadata;
-	while (work)
+	g_list_free_full(fd->cached_metadata, [](gpointer data)
 		{
-		auto entry = static_cast<GList *>(work->data);
+		auto entry = static_cast<GList *>(data);
 		g_list_free_full(entry, g_free);
-
-		work = work->next;
-		}
-	g_list_free(fd->cached_metadata);
+		});
 	fd->cached_metadata = nullptr;
 }
 

@@ -569,22 +569,13 @@ GList *pan_cache_sort(GList *list, SortType method, gboolean ascend)
 
 static void pan_cache_free(PanWindow *pw)
 {
-	GList *work;
-
-	work = pw->cache_list;
-	while (work)
+	g_list_free_full(pw->cache_list, [](gpointer data)
 		{
-		PanCacheData *pc;
-
-		pc = static_cast<PanCacheData *>(work->data);
-		work = work->next;
-
+		auto pc = static_cast<PanCacheData *>(data);
 		cache_sim_data_free(pc->cd);
 		file_data_unref(pc->fd);
 		g_free(pc);
-		}
-
-	g_list_free(pw->cache_list);
+		});
 	pw->cache_list = nullptr;
 
 	filelist_free(pw->cache_todo);
@@ -711,21 +702,12 @@ void pan_cache_sync_date(PanWindow *pw, GList *list)
 
 static void pan_grid_clear(PanWindow *pw)
 {
-	GList *work;
-
-	work = pw->list_grid;
-	while (work)
+	g_list_free_full(pw->list_grid, [](gpointer data)
 		{
-		PanGrid *pg;
-
-		pg = static_cast<PanGrid *>(work->data);
-		work = work->next;
-
+		auto pg = static_cast<PanGrid *>(data);
 		g_list_free(pg->list);
 		g_free(pg);
-		}
-
-	g_list_free(pw->list_grid);
+		});
 	pw->list_grid = nullptr;
 
 	pw->list = g_list_concat(pw->list, pw->list_static);
@@ -830,20 +812,9 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 
 static void pan_window_items_free(PanWindow *pw)
 {
-	GList *work;
-
 	pan_grid_clear(pw);
 
-	work = pw->list;
-	while (work)
-		{
-		auto pi = static_cast<PanItem *>(work->data);
-		work = work->next;
-
-		pan_item_free(pi);
-		}
-
-	g_list_free(pw->list);
+	g_list_free_full(pw->list, reinterpret_cast<GDestroyNotify>(pan_item_free));
 	pw->list = nullptr;
 
 	g_list_free(pw->queue);

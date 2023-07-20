@@ -305,20 +305,7 @@ static void rt_tile_free(ImageTile *it)
 
 static void rt_tile_free_all(RendererTiles *rt)
 {
-	GList *work;
-
-	work = rt->tiles;
-	while (work)
-		{
-		ImageTile *it;
-
-		it = static_cast<ImageTile *>(work->data);
-		work = work->next;
-
-		rt_tile_free(it);
-		}
-
-	g_list_free(rt->tiles);
+	g_list_free_full(rt->tiles, reinterpret_cast<GDestroyNotify>(rt_tile_free));
 	rt->tiles = nullptr;
 	rt->tile_cache_size = 0;
 }

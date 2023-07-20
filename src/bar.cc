@@ -564,21 +564,14 @@ GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id)
 void bar_clear(GtkWidget *bar)
 {
 	BarData *bd;
-	GList *list, *work;
+	GList *list;
 
 	bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
 	if (!bd) return;
 
 	list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
 
-	work = list;
-	while (work)
-		{
-		auto widget = static_cast<GtkWidget *>(work->data);
-		gtk_widget_destroy(widget);
-		work = work->next;
-		}
-	g_list_free(list);
+	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(gtk_widget_destroy));
 }
 
 void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)

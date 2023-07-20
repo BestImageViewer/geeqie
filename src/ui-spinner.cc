@@ -93,19 +93,10 @@ static void spinner_set_timeout(SpinnerData *sp, gint interval)
 static void spinner_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 {
 	auto sp = static_cast<SpinnerData *>(data);
-	GList *work;
 
 	spinner_set_timeout(sp, 0);
 
-	work = sp->list;
-	while (work)
-		{
-		auto pb = static_cast<GdkPixbuf *>(work->data);
-		work = work->next;
-
-		g_object_unref(pb);
-		}
-	g_list_free(sp->list);
+	g_list_free_full(sp->list, g_object_unref);
 	g_free(sp);
 }
 

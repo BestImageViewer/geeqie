@@ -1200,19 +1200,9 @@ ExifData *exif_get_original(ExifData *processed)
 
 void exif_free(ExifData *exif)
 {
-	GList *work;
-
 	if (!exif) return;
 
-	work = exif->items;
-	while (work)
-		{
-		auto item = static_cast<ExifItem *>(work->data);
-		work = work->next;
-		exif_item_free(item);
-		}
-
-	g_list_free(exif->items);
+	g_list_free_full(exif->items, reinterpret_cast<GDestroyNotify>(exif_item_free));
 	g_free(exif->path);
 	g_free(exif);
 }

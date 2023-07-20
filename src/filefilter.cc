@@ -160,17 +160,7 @@ static void filter_add_if_missing(const gchar *key, const gchar *description, co
 
 void filter_reset()
 {
-	GList *work;
-
-	work = filter_list;
-	while (work)
-		{
-		auto fe = static_cast<FilterEntry *>(work->data);
-		work = work->next;
-		filter_entry_free(fe);
-		}
-
-	g_list_free(filter_list);
+	g_list_free_full(filter_list, reinterpret_cast<GDestroyNotify>(filter_entry_free));
 	filter_list = nullptr;
 }
 
@@ -580,16 +570,7 @@ GList *sidecar_ext_get_list()
 
 static void sidecar_ext_free_list()
 {
-	GList *work;
-
-	work = sidecar_ext_list;
-	while (work)
-		{
-		auto ext = static_cast<gchar *>(work->data);
-		work = work->next;
-		g_free(ext);
-		}
-	g_list_free(sidecar_ext_list);
+	g_list_free_full(sidecar_ext_list, g_free);
 	sidecar_ext_list = nullptr;
 }
 

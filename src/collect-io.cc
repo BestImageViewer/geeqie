@@ -542,19 +542,7 @@ static void collect_manager_action_unref(CollectManagerAction *action)
 
 static void collect_manager_entry_free_data(CollectManagerEntry *entry)
 {
-	GList *work;
-
-	work = entry->add_list;
-	while (work)
-		{
-		CollectManagerAction *action;
-
-		action = static_cast<CollectManagerAction *>(work->data);
-		work = work->next;
-
-		collect_manager_action_unref(action);
-		}
-	g_list_free(entry->add_list);
+	g_list_free_full(entry->add_list, reinterpret_cast<GDestroyNotify>(collect_manager_action_unref));
 	if (g_hash_table_size(entry->oldpath_hash) > 0)
 		g_hash_table_destroy(entry->oldpath_hash);
 	else
