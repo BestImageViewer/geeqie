@@ -1004,20 +1004,21 @@ static void dupe_match_unlink(DupeItem *a, DupeItem *b)
  */
 static void dupe_match_link_clear(DupeItem *parent, gboolean unlink_children)
 {
-	GList *work;
-
-	work = parent->group;
-	while (work)
+	if (unlink_children)
 		{
-		auto dm = static_cast<DupeMatch *>(work->data);
-		work = work->next;
+		GList *work;
 
-		if (unlink_children) dupe_match_unlink_child(parent, dm->di);
+		work = parent->group;
+		while (work)
+			{
+			auto dm = static_cast<DupeMatch *>(work->data);
+			work = work->next;
 
-		g_free(dm);
+			dupe_match_unlink_child(parent, dm->di);
+			}
 		}
 
-	g_list_free(parent->group);
+	g_list_free_full(parent->group, g_free);
 	parent->group = nullptr;
 	parent->group_rank = 0.0;
 }

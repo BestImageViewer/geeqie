@@ -167,10 +167,11 @@ static void vflist_store_clear(ViewFile *vf, gboolean unlock_files)
 		{
 		// unlock locked files in this directory
 		filelist_read(vf->dir_fd, &files, nullptr);
-		while (files)
+		GList *work = files;
+		while (work)
 			{
-			auto fd = static_cast<FileData *>(files->data);
-			files = files->next;
+			auto fd = static_cast<FileData *>(work->data);
+			work = work->next;
 			file_data_unlock(fd);
 			file_data_unref(fd);  // undo the ref that got added in filelist_read
 			}

@@ -122,7 +122,6 @@ static void bar_pane_gps_close_save_cb(GenericDialog *UNUSED(gd), gpointer data)
 			metadata_write_GPS_coord(fd, "Xmp.exif.GPSLongitude", pgd->dest_longitude);
 			}
 		}
-	g_list_free(work);
 	g_list_free(pgd->geocode_list);
 }
 
@@ -174,7 +173,7 @@ static void bar_pane_gps_close_save_cb(GenericDialog *UNUSED(gd), gpointer data)
 						}
 					}
 				}
-			g_list_free(work);
+			g_list_free(list);
 
 			if(count)
 				{

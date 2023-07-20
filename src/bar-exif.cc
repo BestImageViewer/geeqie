@@ -752,10 +752,11 @@ GList * bar_pane_exif_list()
 		ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 
 		list = gtk_container_get_children(GTK_CONTAINER(ped->vbox));
-		while (list)
+		GList *work = list;
+		while (work)
 			{
-			entry = static_cast<GtkWidget *>(list->data);
-			list = list->next;
+			entry = static_cast<GtkWidget *>(work->data);
+			work = work->next;
 			ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(entry), "entry_data"));
 			exif_list = g_list_append(exif_list, g_strdup(ee->title));
 			exif_list = g_list_append(exif_list, g_strdup(ee->key));

@@ -314,14 +314,13 @@ static void bar_pane_keywords_write_config(GtkWidget *pane, GString *outstr, gin
 	gtk_tree_view_map_expanded_rows(GTK_TREE_VIEW(pkd->keyword_treeview),
 								(bar_keyword_tree_get_expanded_cb), &path_expanded);
 
-	g_list_first(path_expanded);
-	while (path_expanded)
+	GList *work = g_list_first(path_expanded);
+	while (work)
 		{
-		bar_pane_keywords_entry_write_config(static_cast<gchar *>(path_expanded->data), outstr, indent);
-		g_free(path_expanded->data);
-		path_expanded = path_expanded->next;
+		bar_pane_keywords_entry_write_config(static_cast<gchar *>(work->data), outstr, indent);
+		work = work->next;
 		}
-	g_list_free(path_expanded);
+	g_list_free_full(path_expanded, g_free);
 
 	indent--;
 	WRITE_NL();
