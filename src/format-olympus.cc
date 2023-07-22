@@ -19,7 +19,7 @@
 
 #include <config.h>
 
-#ifndef HAVE_EXIV2
+#if !HAVE_EXIV2
 
 #include "format-olympus.h"
 

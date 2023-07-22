@@ -22,6 +22,7 @@
 #ifndef UI_HELP_H
 #define UI_HELP_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 GtkWidget *help_window_new(const gchar *title,

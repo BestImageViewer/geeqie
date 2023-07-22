@@ -21,26 +21,33 @@
 
 #include "main.h"
 
-#include <sys/mman.h>
+#include <unistd.h>
 
 #include <clocale>
 #include <csignal>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 
 #include <config.h>
 
-#ifdef HAVE_CLUTTER
-#include <clutter-gtk/clutter-gtk.h>
+#if HAVE_CLUTTER
+#  include <clutter-gtk/clutter-gtk.h>
+#  include <clutter/clutter.h>
 #endif
 
-#ifdef HAVE_EXECINFO_H
+#if HAVE_EXECINFO_H
 #include <execinfo.h>
 #endif
 
-#ifdef G_OS_UNIX
-#include <pwd.h>
+#include <gio/gio.h>
+#include <glib-object.h>
+
+#ifdef ENABLE_NLS
+#  include <libintl.h>
 #endif
 
-#ifdef HAVE_DEVELOPER
+#if HAVE_DEVELOPER
 #include "backward.h"
 #endif
 
@@ -61,9 +68,11 @@
 #include "intl.h"
 #include "layout-image.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
+#include "options.h"
 #include "pixbuf-util.h"
 #include "rcfile.h"
 #include "remote.h"
@@ -95,7 +104,7 @@ void sig_handler_cb(int signo, siginfo_t *info, void *)
 	guint64 addr;
 	guint64 char_index;
 	ssize_t len;
-#ifdef HAVE_EXECINFO_H
+#if HAVE_EXECINFO_H
 	gint bt_size;
 	void *bt[1024];
 #endif
@@ -181,7 +190,7 @@ void sig_handler_cb(int signo, siginfo_t *info, void *)
 		len = write(STDERR_FILENO, "\n", 1);
 		}
 
-#ifdef HAVE_EXECINFO_H
+#if HAVE_EXECINFO_H
 	bt_size = backtrace(bt, 1024);
 	backtrace_symbols_fd(bt, bt_size, STDERR_FILENO);
 #endif
@@ -194,7 +203,7 @@ void sig_handler_cb(int signo, siginfo_t *info, void *)
 #else /* defined(SA_SIGINFO) */
 void sig_handler_cb(int)
 {
-#ifdef HAVE_EXECINFO_H
+#if HAVE_EXECINFO_H
 	gint bt_size;
 	void *bt[1024];
 #endif
@@ -202,7 +211,7 @@ void sig_handler_cb(int)
 	write(STDERR_FILENO, "Geeqie fatal error\n", 19);
 	write(STDERR_FILENO, "Signal: Segmentation fault\n", 27);
 
-#ifdef HAVE_EXECINFO_H
+#if HAVE_EXECINFO_H
 	bt_size = backtrace(bt, 1024);
 	backtrace_symbols_fd(bt, bt_size, STDERR_FILENO);
 #endif
@@ -707,7 +716,7 @@ static void parse_command_line_for_debug_option(gint argc, gchar *argv[])
 #endif
 }
 
-#ifdef HAVE_CLUTTER
+#if HAVE_CLUTTER
 static gboolean parse_command_line_for_clutter_option(gint argc, gchar *argv[])
 {
 	const gchar *clutter_option = "--disable-clutter";
@@ -1199,7 +1208,7 @@ static void setup_sigbus_handler_unused()
 }
 #pragma GCC diagnostic pop
 
-#ifndef HAVE_DEVELOPER
+#if !HAVE_DEVELOPER
 static void setup_sig_handler()
 {
 	struct sigaction sigsegv_action;
@@ -1307,7 +1316,7 @@ gint main(gint argc, gchar *argv[])
 	gdk_threads_enter();
 
 	/* seg. fault handler */
-#ifdef HAVE_DEVELOPER
+#if HAVE_DEVELOPER
 	backward::SignalHandling sh{};
 #else
 	setup_sig_handler();
@@ -1329,7 +1338,7 @@ gint main(gint argc, gchar *argv[])
 
 	exif_init();
 
-#ifdef HAVE_LUA
+#if HAVE_LUA
 	lua_init();
 #endif
 
@@ -1353,7 +1362,7 @@ gint main(gint argc, gchar *argv[])
 
 	parse_command_line_for_debug_option(argc, argv);
 	DEBUG_1("%s main: gtk_init", get_exec_time());
-#ifdef HAVE_CLUTTER
+#if HAVE_CLUTTER
 	if (parse_command_line_for_clutter_option(argc, argv))
 		{
 		disable_clutter	= TRUE;
@@ -1435,7 +1444,7 @@ gint main(gint argc, gchar *argv[])
 			filter_rebuild();
 			}
 
-	#ifdef HAVE_CLUTTER
+	#if HAVE_CLUTTER
 	/** @FIXME For the background of this see:
 	 * https://github.com/BestImageViewer/geeqie/issues/397
 	 * The feature CLUTTER_FEATURE_SWAP_EVENTS indictates if the

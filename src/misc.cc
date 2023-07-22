@@ -20,8 +20,18 @@
 
 #include "misc.h"
 
-#include <clocale>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <cerrno>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <memory>
+
+#include <langinfo.h>
+#include <pwd.h>
 
 #include <config.h>
 
@@ -32,9 +42,6 @@
 #include "main.h"
 #include "options.h"
 #include "ui-fileops.h"
-
-#include <langinfo.h>
-#include <pwd.h>
 
 gdouble get_zoom_increment()
 {
@@ -268,7 +275,7 @@ int runcmd(const gchar *cmd)
  */
 gint date_get_first_day_of_week()
 {
-#ifdef HAVE__NL_TIME_FIRST_WEEKDAY
+#if HAVE__NL_TIME_FIRST_WEEKDAY
 	return nl_langinfo(_NL_TIME_FIRST_WEEKDAY)[0];
 #else
 	gchar *dot;
@@ -389,7 +396,7 @@ gint get_cpu_cores()
     return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 void convert_gdkcolor_to_gdkrgba(gpointer data, GdkRGBA *gdk_rgba)
 {
 /* @FIXME GTK4 stub */
@@ -434,7 +441,7 @@ void gq_gtk_grid_attach_default(GtkGrid *grid, GtkWidget *child, guint left_atta
 
 /* Copied from the libarchive .repo. examples */
 
-#ifndef HAVE_ARCHIVE
+#if !HAVE_ARCHIVE
 gchar *open_archive(FileData *)
 {
 	log_printf("%s", _("Warning: libarchive not installed"));

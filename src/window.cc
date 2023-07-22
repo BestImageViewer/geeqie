@@ -20,6 +20,13 @@
 
 #include "window.h"
 
+#include <cstdio>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+
 #include <config.h>
 
 #include "debug.h"
@@ -39,7 +46,7 @@ GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *icon_fi
 	gchar *title;
 	GtkWidget *window;
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	window = gtk_window_new();
 #else
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);

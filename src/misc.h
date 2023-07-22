@@ -21,6 +21,8 @@
 #ifndef MISC_H
 #define MISC_H
 
+#include <gdk/gdk.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include <config.h>
@@ -43,7 +45,7 @@ void gq_gtk_entry_set_text(GtkEntry *entry, const gchar *text);
 void gq_gtk_grid_attach_default(GtkGrid *grid, GtkWidget *child, guint left_attach, guint right_attach, guint top_attach, guint bottom_attach);
 void gq_gtk_grid_attach(GtkGrid *grid, GtkWidget *child, guint left_attach, guint right_attach, guint top_attach, guint bottom_attach, GtkAttachOptions, GtkAttachOptions, guint, guint);
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 void convert_gdkcolor_to_gdkrgba(gpointer data, GdkRGBA *gdk_rgba);
 #else
 void convert_gdkcolor_to_gdkrgba(gpointer data, GdkRGBA *gdk_rgba);

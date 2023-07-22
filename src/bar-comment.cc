@@ -21,7 +21,15 @@
 
 #include "bar-comment.h"
 
+#include <cstring>
+
 #include <config.h>
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#if HAVE_SPELL
+#  include <gspell/gspell.h>
+#endif
 
 #include "bar.h"
 #include "compat.h"
@@ -31,13 +39,11 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "metadata.h"
+#include "options.h"
 #include "rcfile.h"
+#include "typedefs.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
-
-#ifdef HAVE_SPELL
-#include <gspell/gspell.h>
-#endif
 
 static void bar_pane_comment_changed(GtkTextBuffer *buffer, gpointer data);
 
@@ -57,7 +63,7 @@ struct PaneCommentData
 	FileData *fd;
 	gchar *key;
 	gint height;
-#ifdef HAVE_SPELL
+#if HAVE_SPELL
 	GspellTextView *gspell_view;
 #endif
 };
@@ -250,7 +256,7 @@ static void bar_pane_comment_destroy(GtkWidget *, gpointer data)
 	auto pcd = static_cast<PaneCommentData *>(data);
 
 	file_data_unregister_notify_func(bar_pane_comment_notify_cb, pcd);
-#ifdef HAVE_SPELL
+#if HAVE_SPELL
 	g_object_unref(pcd->gspell_view);
 #endif
 	file_data_unref(pcd->fd);
@@ -276,7 +282,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd->pane.title = bar_pane_expander_title(title);
 	pcd->pane.id = g_strdup(id);
 	pcd->pane.type = PANE_COMMENT;
-#ifdef HAVE_SPELL
+#if HAVE_SPELL
 	pcd->gspell_view = nullptr;
 #endif
 	pcd->pane.expanded = expanded;
@@ -305,7 +311,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 			 G_CALLBACK(bar_pane_comment_populate_popup), pcd);
 	gtk_widget_show(pcd->comment_view);
 
-#ifdef HAVE_SPELL
+#if HAVE_SPELL
 	if (g_strcmp0(key, "Xmp.xmp.Rating") != 0)
 		{
 		if (options->metadata.check_spelling)

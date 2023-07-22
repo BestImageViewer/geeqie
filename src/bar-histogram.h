@@ -22,6 +22,7 @@
 #ifndef BAR_HISTOGRAM_H
 #define BAR_HISTOGRAM_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, const gchar **attribute_values);

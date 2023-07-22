@@ -22,7 +22,12 @@
 #ifndef THUMB_STANDARD_H
 #define THUMB_STANDARD_H
 
+#include <sys/types.h>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+
+#include <config.h>
 
 #include "main-defines.h"
 

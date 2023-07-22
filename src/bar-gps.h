@@ -22,6 +22,7 @@
 #ifndef BAR_GPS_H
 #define BAR_GPS_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *map_id, gint zoom,

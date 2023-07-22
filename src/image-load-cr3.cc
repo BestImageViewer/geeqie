@@ -24,21 +24,25 @@
 /** @FIXME This is just a copy of image-load-jpeg.cc, with an adjusted
  * start address for a .cr3 file
  */
+#include <config.h>
+
+#if HAVE_JPEG
 #include "image-load-cr3.h"
 
-#include <config.h>
+#include <csetjmp>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <jerror.h>
+#include <jpeglib.h>
 
 #include "debug.h"
 #include "image-load.h"
 #include "intl.h"
 #include "jpeg-parser.h"
 #include "typedefs.h"
-
-#ifdef HAVE_JPEG
-
-#include <csetjmp>
-#include <jerror.h>
-#include <jpeglib.h>
 
 struct ImageLoaderJpeg {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

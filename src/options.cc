@@ -19,7 +19,9 @@
 
 #include "options.h"
 
-#include <config.h>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include "debug.h"
 #include "histogram.h" /* HCHAN_RGB */

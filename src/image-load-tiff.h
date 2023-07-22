@@ -24,7 +24,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_TIFF
+#if HAVE_TIFF
 struct ImageLoaderBackend;
 
 void image_loader_backend_set_tiff(ImageLoaderBackend *funcs);

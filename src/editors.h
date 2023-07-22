@@ -22,6 +22,7 @@
 #ifndef EDITORS_H
 #define EDITORS_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 struct FileData;

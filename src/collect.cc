@@ -21,7 +21,13 @@
 
 #include "collect.h"
 
-#include <config.h>
+#include <sys/stat.h>
+
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#include <glib-object.h>
 
 #include "collect-dlg.h"
 #include "collect-io.h"
@@ -33,12 +39,15 @@
 #include "intl.h"
 #include "layout-image.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "options.h"
 #include "pixbuf-util.h"
 #include "print.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 #include "window.h"
 

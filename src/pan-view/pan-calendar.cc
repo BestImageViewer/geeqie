@@ -22,14 +22,19 @@
 #include "pan-calendar.h"
 
 #include <cmath>
+#include <cstring>
+#include <ctime>
 
 #include "debug.h"
+#include "filedata.h"
 #include "misc.h"
 #include "pan-item.h"
+#include "pan-types.h"
 #include "pan-util.h"
 #include "pan-view-filter.h"
 #include "pan-view.h"
 #include "pixbuf-util.h"
+#include "typedefs.h"
 
 #define PAN_CAL_POPUP_COLOR 220, 220, 220
 enum {

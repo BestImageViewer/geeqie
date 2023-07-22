@@ -20,11 +20,15 @@
 
 #include "secure-save.h"
 
+#include <cerrno>
+#include <cstdarg>
 #include <memory>
 
-#include <glib/gprintf.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <utime.h>
+
+#include <glib/gprintf.h>
 
 #include <config.h>
 
@@ -126,7 +130,7 @@ secure_open_umask(const gchar *file_name)
 			/* Not a regular file, secure_save is disabled. */
 			ssi->secure_save = FALSE;
 		} else {
-#ifdef HAVE_ACCESS
+#if HAVE_ACCESS
 			/* XXX: access() do not work with setuid programs. */
 			if (access(ssi->file_name, R_OK | W_OK) < 0) {
 				ssi->err = errno;
@@ -250,11 +254,11 @@ secure_close(SecureSaveInfo *ssi)
 	if (ssi->secure_save) {
 		gboolean fail = FALSE;
 
-#ifdef HAVE_FFLUSH
+#if HAVE_FFLUSH
 		fail = (fflush(ssi->fp) == EOF);
 #endif
 
-#ifdef HAVE_FSYNC
+#if HAVE_FSYNC
 		if (!fail) fail = fsync(fileno(ssi->fp));
 #endif
 

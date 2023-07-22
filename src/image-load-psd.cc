@@ -50,7 +50,11 @@
 
 #include "image-load-psd.h"
 
-#include <config.h>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 
 #include "debug.h"
 #include "image-load.h"

@@ -21,6 +21,9 @@
 #ifndef VIEW_FILE_H
 #define VIEW_FILE_H
 
+#include <ctime>
+
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "typedefs.h"

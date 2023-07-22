@@ -21,6 +21,12 @@
 
 #include "bar-exif.h"
 
+#include <cstring>
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <pango/pango.h>
+
 #include <config.h>
 
 #include "bar.h"
@@ -35,6 +41,7 @@
 #include "metadata.h"
 #include "misc.h"
 #include "rcfile.h"
+#include "typedefs.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-utildlg.h"
@@ -614,7 +621,7 @@ static void bar_pane_exif_delete_entry_cb(GtkWidget *, gpointer data)
 	g_object_unref(entry);
 }
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 static void bar_pane_exif_copy_entry_cb(GtkWidget *, gpointer data)
 {
 /* @FIXME GTK4 stub */
@@ -684,7 +691,7 @@ static gboolean bar_pane_exif_menu_cb(GtkWidget *widget, GdkEventButton *bevent,
 	return FALSE;
 }
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 static gboolean bar_pane_exif_copy_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer)
 {
 /* @FIXME GTK4 stub */

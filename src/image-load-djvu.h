@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_DJVU
+#if HAVE_DJVU
 struct ImageLoaderBackend;
 
 void image_loader_backend_set_djvu(ImageLoaderBackend *funcs);

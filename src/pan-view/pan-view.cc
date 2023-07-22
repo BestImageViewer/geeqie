@@ -21,29 +21,42 @@
 
 #include "pan-view.h"
 
-#include <config.h>
+#include <cmath>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <gtk/gtk.h>
 
 #include "bar-exif.h"
+#include "cache-loader.h"
+#include "cache.h"
 #include "compat.h"
 #include "debug.h"
 #include "dnd.h"
 #include "editors.h"
 #include "exif.h"
+#include "filedata.h"
 #include "fullscreen.h"
+#include "image-load.h"
 #include "image.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "main.h"
 #include "menu.h"
 #include "metadata.h"
 #include "misc.h"
+#include "options.h"
 #include "pan-calendar.h"
 #include "pan-folder.h"
 #include "pan-grid.h"
 #include "pan-item.h"
 #include "pan-timeline.h"
+#include "pan-types.h"
 #include "pan-util.h"
 #include "pan-view-filter.h"
 #include "pan-view-search.h"
@@ -54,11 +67,10 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
+#include "ui-utildlg.h"
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
-
-#include <cmath>
 
 
 enum {

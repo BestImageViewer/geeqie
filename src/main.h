@@ -23,6 +23,7 @@
 #define MAIN_H
 
 #include <gdk/gdk.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 extern gboolean thumb_format_changed;

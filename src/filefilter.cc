@@ -21,11 +21,16 @@
 
 #include "filefilter.h"
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include <config.h>
 
 #include "cache.h"
 #include "debug.h"
 #include "main-defines.h"
+#include "options.h"
 #include "rcfile.h"
 #include "ui-fileops.h"
 
@@ -171,25 +176,25 @@ void filter_add_defaults()
 {
 	/* formats supported by custom loaders */
 	filter_add_if_missing("dds", "DirectDraw Surface", ".dds", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
-#ifdef HAVE_PDF
+#if HAVE_PDF
 	filter_add_if_missing("pdf", "Portable Document Format", ".pdf", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
 #endif
-#ifdef HAVE_HEIF
+#if HAVE_HEIF
 	filter_add_if_missing("heif/avif", "HEIF/AVIF Image", ".heif;.heic;.avif", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
 #endif
-#ifdef HAVE_WEBP
+#if HAVE_WEBP
 	filter_add_if_missing("webp", "WebP Format", ".webp", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
 #endif
-#ifdef HAVE_DJVU
+#if HAVE_DJVU
 	filter_add_if_missing("djvu", "DjVu Format", ".djvu;.djv", FORMAT_CLASS_DOCUMENT, FALSE, FALSE, TRUE);
 #endif
-#ifdef HAVE_JPEGXL
+#if HAVE_JPEGXL
 	filter_add_if_missing("jxl", "JXL", ".jxl", FORMAT_CLASS_IMAGE, FALSE, TRUE, TRUE);
 #endif
-#ifdef HAVE_J2K
+#if HAVE_J2K
 	filter_add_if_missing("jp2", "JPEG 2000", ".jp2", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
 #endif
-#ifdef HAVE_ARCHIVE
+#if HAVE_ARCHIVE
 	filter_add_if_missing("zip", "Archive files", ".zip;.rar;.tar;.tar.gz;.tar.bz2;.tar.xz;.tgz;.tbz;.txz;.cbr;.cbz;.gz;.bz2;.xz;.lzh;.lza;.7z", FORMAT_CLASS_ARCHIVE, FALSE, FALSE, TRUE);
 #endif
 	filter_add_if_missing("scr", "ZX Spectrum screen Format", ".scr", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);

@@ -22,6 +22,7 @@
 #ifndef UI_BOOKMARK_H
 #define UI_BOOKMARK_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 /* bookmarks */

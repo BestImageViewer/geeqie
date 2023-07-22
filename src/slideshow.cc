@@ -21,13 +21,14 @@
 
 #include "slideshow.h"
 
-#include <config.h>
+#include <cstdlib>
 
 #include "collect.h"
 #include "filedata.h"
 #include "image.h"
 #include "layout-image.h"
 #include "layout.h"
+#include "options.h"
 
 static void slideshow_timer_stop(SlideShowData *ss);
 

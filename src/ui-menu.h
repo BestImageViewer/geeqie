@@ -22,7 +22,9 @@
 #ifndef UI_MENU_H
 #define UI_MENU_H
 
-
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 /**

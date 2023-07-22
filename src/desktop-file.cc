@@ -21,7 +21,14 @@
 
 #include "desktop-file.h"
 
-#include <config.h>
+#include <unistd.h>
+
+#include <cstring>
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <gtk/gtk.h>
 
 #include "compat.h"
 #include "debug.h"
@@ -31,9 +38,11 @@
 #include "main-defines.h"
 #include "main.h"
 #include "misc.h"
+#include "options.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 #include "window.h"
 

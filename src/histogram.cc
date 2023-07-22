@@ -20,14 +20,14 @@
 
 #include "histogram.h"
 
-#include <config.h>
+#include <cmath>
+
+#include <glib-object.h>
 
 #include "debug.h"
 #include "filedata.h"
 #include "intl.h"
 #include "pixbuf-util.h"
-
-#include <cmath>
 
 /*
  *----------------------------------------------------------------------------

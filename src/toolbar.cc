@@ -21,14 +21,20 @@
 
 #include "toolbar.h"
 
+#include <cstddef>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
+
 #include <config.h>
 
 #include "compat.h"
 #include "editors.h"
 #include "intl.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
-#include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
@@ -219,7 +225,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	toolbar_entry->name = g_strdup(name);
 	toolbar_entry->stock_id = g_strdup(stock_id);
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	gesture = gtk_gesture_click_new();
 	gtk_widget_add_controller(toolbar_entry->button, GTK_EVENT_CONTROLLER(gesture));
 #else

@@ -21,11 +21,23 @@
 
 #include "search.h"
 
-#include <config.h>
+#include <sys/types.h>
+
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <gtk/gtk.h>
 
 #include "bar-keywords.h"
 #include "cache.h"
 #include "collect-table.h"
+#include "collect.h"
 #include "compat.h"
 #include "debug.h"
 #include "dnd.h"
@@ -36,24 +48,26 @@
 #include "img-view.h"
 #include "intl.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "menu.h"
 #include "metadata.h"
 #include "misc.h"
-#include "pixbuf-util.h"
+#include "options.h"
 #include "print.h"
+#include "similar.h"
 #include "thumb.h"
+#include "typedefs.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
 #include "ui-tree-edit.h"
+#include "ui-utildlg.h"
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
-
-#include <cmath>
 
 enum {
 	DEF_SEARCH_WIDTH =  700,

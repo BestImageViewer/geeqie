@@ -21,6 +21,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 GtkWidget *window_new(const gchar *role, const gchar *icon,

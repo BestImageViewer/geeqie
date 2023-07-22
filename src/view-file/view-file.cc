@@ -20,11 +20,13 @@
 
 #include "view-file.h"
 
-#include <config.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
 
 #include "compat.h"
 #include "debug.h"
 #include "dupe.h"
+#include "filedata.h"
 #include "history-list.h"
 #include "intl.h"
 #include "layout.h"
@@ -32,11 +34,12 @@
 #include "main.h"
 #include "menu.h"
 #include "misc.h"
-#include "pixbuf-util.h"
+#include "options.h"
 #include "thumb.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 #include "view-file/view-file-icon.h"
 #include "view-file/view-file-list.h"

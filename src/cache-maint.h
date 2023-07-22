@@ -22,6 +22,7 @@
 #ifndef CACHE_MAINT_H
 #define CACHE_MAINT_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "typedefs.h"

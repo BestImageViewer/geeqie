@@ -21,6 +21,10 @@
 
 #include "layout-config.h"
 
+#include <cstring>
+
+#include <glib-object.h>
+
 #include <config.h>
 
 #include "compat.h"
@@ -253,7 +257,7 @@ static GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint st
 
 	if (group)
 		{
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 		group = gtk_toggle_button_new();
 		gtk_toggle_button_set_group(button, group);
 #else
@@ -262,7 +266,7 @@ static GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint st
 		}
 	else
 		{
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 		group = gtk_toggle_button_new();
 #else
 		group = gtk_radio_button_new(nullptr);

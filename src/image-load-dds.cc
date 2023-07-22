@@ -26,7 +26,11 @@
 
 #include "image-load-dds.h"
 
-#include <config.h>
+#include <sys/types.h>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 
 #include "image-load.h"
 

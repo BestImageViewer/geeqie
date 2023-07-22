@@ -21,15 +21,15 @@
 
 #include "menu.h"
 
-#include <config.h>
+#include <gdk/gdk.h>
 
 #include "collect-io.h"
 #include "collect-table.h"
+#include "collect.h"
 #include "editors.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "pixbuf-util.h"
-#include "ui-fileops.h"
 #include "ui-menu.h"
 
 static GtkWidget *real_submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data,

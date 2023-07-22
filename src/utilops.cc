@@ -21,6 +21,14 @@
 
 #include "utilops.h"
 
+#include <unistd.h>
+
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+
 #include <config.h>
 
 #include "cache.h"
@@ -32,6 +40,7 @@
 #include "filefilter.h"
 #include "image.h"
 #include "intl.h"
+#include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
@@ -40,6 +49,7 @@
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
+#include "ui-utildlg.h"
 
 namespace
 {
@@ -51,9 +61,9 @@ struct PixmapErrors
 	GdkPixbuf *apply;
 };
 
-GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *widget)
+GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *)
 {
-	static PixmapErrors pe = [widget]() -> PixmapErrors
+	static PixmapErrors pe = []() -> PixmapErrors
 	{
 		GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
 
@@ -3167,7 +3177,7 @@ void file_util_rename_dir(FileData *source_fd, const gchar *new_path, GtkWidget 
  *
  *
  */
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 static void clipboard_get_func(GtkClipboard *clipboard, GtkSelectionData *selection_data, guint info, gpointer data)
 {
 /* @FIXME GTK4 stub */

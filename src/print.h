@@ -22,6 +22,7 @@
 #ifndef PRINT_H
 #define PRINT_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 struct FileData;

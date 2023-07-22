@@ -21,15 +21,21 @@
 
 #include "pan-view-search.h"
 
-#include <config.h>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#include <glib-object.h>
 
 #include "compat.h"
+#include "filedata.h"
 #include "image.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "misc.h"
 #include "pan-calendar.h"
 #include "pan-item.h"
+#include "pan-types.h"
 #include "pan-util.h"
 #include "pan-view.h"
 #include "ui-misc.h"

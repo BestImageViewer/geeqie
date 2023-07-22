@@ -20,11 +20,15 @@
 
 #include <config.h>
 
-#ifdef HAVE_PDF
+#if HAVE_PDF
 #include "image-load-pdf.h"
 
+#include <cairo.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
-#include <poppler/glib/poppler.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <poppler.h>
 
 #include "debug.h"
 #include "image-load.h"

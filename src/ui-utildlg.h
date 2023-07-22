@@ -22,11 +22,10 @@
 #ifndef UI_UTILDLG_H
 #define UI_UTILDLG_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 struct FileData;
-
-#define GENERIC_DIALOG(gd) ((GenericDialog *)gd)
 
 struct GenericDialog
 {
@@ -44,6 +43,8 @@ struct GenericDialog
 	GtkWidget *cancel_button; /**< private */
 
 };
+
+#define GENERIC_DIALOG(gd) ((GenericDialog *)gd)
 
 struct FileDialog
 {

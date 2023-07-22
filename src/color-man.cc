@@ -23,15 +23,19 @@
 
 #include <config.h>
 
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 /*** color support enabled ***/
 
+#include <cstdint>
+#include <cstring>
 #include <vector>
 
-#ifdef HAVE_LCMS2
-#include <lcms2.h>
+#include <glib-object.h>
+
+#if HAVE_LCMS2
+#  include <lcms2.h>
 #else
-#include <lcms.h>
+#  include <lcms.h>
 #endif
 
 #include "debug.h"
@@ -68,7 +72,7 @@ static void color_man_lib_init()
 	if (init_done) return;
 	init_done = TRUE;
 
-#ifndef HAVE_LCMS2
+#if !HAVE_LCMS2
 	cmsErrorAction(LCMS_ERROR_IGNORE);
 #endif
 }
@@ -76,7 +80,7 @@ static void color_man_lib_init()
 static cmsHPROFILE color_man_create_adobe_comp()
 {
 	/* ClayRGB1998 is AdobeRGB compatible */
-#include "ClayRGB1998_icc.h"
+#include "ClayRGB1998_icc.h" // IWYU pragma: keep
 	return cmsOpenProfileFromMem(ClayRGB1998_icc, ClayRGB1998_icc_len);
 }
 
@@ -458,7 +462,7 @@ static gchar *color_man_get_profile_name(ColorManProfileType type, cmsHPROFILE p
 		case COLOR_PROFILE_FILE:
 			if (profile)
 				{
-#ifdef HAVE_LCMS2
+#if HAVE_LCMS2
 				char buffer[20];
 				buffer[0] = '\0';
 				cmsGetProfileInfoASCII(profile, cmsInfoDescription, "en", "US", buffer, 20);
@@ -505,7 +509,7 @@ void color_man_update()
 	color_man_cache_reset();
 }
 
-#ifdef HAVE_HEIF
+#if HAVE_HEIF
 #include <cmath>
 #include <libheif/heif.h>
 

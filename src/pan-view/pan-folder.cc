@@ -23,9 +23,12 @@
 
 #include <cmath>
 
+#include "filedata.h"
 #include "pan-item.h"
+#include "pan-types.h"
 #include "pan-util.h"
 #include "pan-view-filter.h"
+#include "typedefs.h"
 
 static void pan_flower_size(PanWindow *pw, gint *width, gint *height)
 {

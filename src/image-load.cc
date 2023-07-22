@@ -21,6 +21,13 @@
 
 #include "image-load.h"
 
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <cstring>
+
 #include <config.h>
 
 #include "debug.h"
@@ -29,45 +36,46 @@
 #include "gq-marshal.h"
 #include "image-load-collection.h"
 #include "image-load-dds.h"
+#if HAVE_DJVU
+#  include "image-load-djvu.h"
+#endif
 #include "image-load-external.h"
+#if HAVE_FFMPEGTHUMBNAILER
+#  include "image-load-ffmpegthumbnailer.h"
+#endif
 #include "image-load-gdk.h"
+#if HAVE_HEIF
+#  include "image-load-heif.h"
+#endif
+#if HAVE_J2K
+#  include "image-load-j2k.h"
+#endif
+#if HAVE_JPEG
+#  if !HAVE_RAW
+#    include "image-load-cr3.h"
+#  endif
+#  include "image-load-jpeg.h"
+#endif
+#if HAVE_JPEGXL
+#  include "image-load-jpegxl.h"
+#endif
 #include "image-load-libraw.h"
+#if HAVE_PDF
+#  include "image-load-pdf.h"
+#endif
 #include "image-load-psd.h"
 #include "image-load-svgz.h"
+#if HAVE_TIFF
+#  include "image-load-tiff.h"
+#endif
 #include "image-load-webp.h"
 #include "image-load-zxscr.h"
 #include "misc.h"
 #include "options.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 
-#ifdef HAVE_DJVU
-	#include "image-load-djvu.h"
-#endif
-#ifdef HAVE_FFMPEGTHUMBNAILER
-	#include "image-load-ffmpegthumbnailer.h"
-#endif
-#ifdef HAVE_HEIF
-	#include "image-load-heif.h"
-#endif
-#ifdef HAVE_J2K
-	#include "image-load-j2k.h"
-#endif
-#ifdef HAVE_JPEG
-	#include "image-load-cr3.h"
-	#include "image-load-jpeg.h"
-#endif
-#ifdef HAVE_JPEGXL
-	#include "image-load-jpegxl.h"
-#endif
-#ifdef HAVE_PDF
-	#include "image-load-pdf.h"
-#endif
-#ifdef HAVE_TIFF
-	#include "image-load-tiff.h"
-#endif
-
-#include <fcntl.h>
-#include <sys/mman.h>
+struct ExifData;
 
 enum {
 	IMAGE_LOADER_READ_BUFFER_SIZE_DEFAULT = 	4096,
@@ -571,7 +579,7 @@ static void image_loader_size_cb(gpointer loader,
 		}
 	g_mutex_unlock(il->data_mutex);
 
-#ifdef HAVE_FFMPEGTHUMBNAILER
+#if HAVE_FFMPEGTHUMBNAILER
 	if (il->fd->format_class == FORMAT_CLASS_VIDEO)
 		scale = TRUE;
 #endif
@@ -668,7 +676,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		}
 	else
 		{
-#ifdef HAVE_FFMPEGTHUMBNAILER
+#if HAVE_FFMPEGTHUMBNAILER
 		if (il->fd->format_class == FORMAT_CLASS_VIDEO)
 			{
 			DEBUG_1("Using custom ffmpegthumbnailer loader");
@@ -676,7 +684,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			}
 		else
 #endif
-#ifdef HAVE_PDF
+#if HAVE_PDF
 		if (il->bytes_total >= 4 &&
 		    (memcmp(il->mapped_file + 0, "%PDF", 4) == 0))
 			{
@@ -685,7 +693,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			}
 		else
 #endif
-#ifdef HAVE_HEIF
+#if HAVE_HEIF
 		if (il->bytes_total >= 12 &&
 			((memcmp(il->mapped_file + 4, "ftypheic", 8) == 0) ||
 			(memcmp(il->mapped_file + 4, "ftypheix", 8) == 0) ||
@@ -698,7 +706,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			}
 		else
 	#endif
-	#ifdef HAVE_WEBP
+	#if HAVE_WEBP
 		if (il->bytes_total >= 12 &&
 			(memcmp(il->mapped_file, "RIFF", 4) == 0) &&
 			(memcmp(il->mapped_file + 8, "WEBP", 4) == 0))
@@ -708,7 +716,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			}
 		else
 #endif
-#ifdef HAVE_DJVU
+#if HAVE_DJVU
 		if (il->bytes_total >= 16 &&
 			(memcmp(il->mapped_file, "AT&TFORM", 8) == 0) &&
 			(memcmp(il->mapped_file + 12, "DJV", 3) == 0))
@@ -718,13 +726,13 @@ static void image_loader_setup_loader(ImageLoader *il)
 			}
 		else
 #endif
-#ifdef HAVE_JPEG
+#if HAVE_JPEG
 		if (il->bytes_total >= 2 && il->mapped_file[0] == 0xff && il->mapped_file[1] == 0xd8)
 			{
 			DEBUG_1("Using custom jpeg loader");
 			image_loader_backend_set_jpeg(&il->backend);
 			}
-#ifndef HAVE_RAW
+#if !HAVE_RAW
 		else
 		if (il->bytes_total >= 11 &&
 			(memcmp(il->mapped_file + 4, "ftypcrx", 7) == 0) &&
@@ -736,7 +744,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 #endif
 		else
 #endif
-#ifdef HAVE_TIFF
+#if HAVE_TIFF
 		if (il->bytes_total >= 10 &&
 		    (memcmp(il->mapped_file, "MM\0*", 4) == 0 ||
 		     memcmp(il->mapped_file, "MM\0+\0\x08\0\0", 8) == 0 ||
@@ -761,7 +769,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			image_loader_backend_set_psd(&il->backend);
 			}
 		else
-#ifdef HAVE_J2K
+#if HAVE_J2K
 		if (il->bytes_total >= 12 &&
 			(memcmp(il->mapped_file, "\0\0\0\x0CjP\x20\x20\x0D\x0A\x87\x0A", 12) == 0))
 			{
@@ -770,7 +778,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			}
 		else
 #endif
-#ifdef HAVE_JPEGXL
+#if HAVE_JPEGXL
 		if (il->bytes_total >= 12 &&
 			(memcmp(il->mapped_file, "\0\0\0\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A", 12) == 0))
 			{
@@ -810,7 +818,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 
 	il->loader = static_cast<void **>(il->backend.loader_new(image_loader_area_updated_cb, image_loader_size_cb, image_loader_area_prepared_cb, il));
 
-#ifdef HAVE_TIFF
+#if HAVE_TIFF
 	format = il->backend.get_format_name(il->loader);
 	if (g_strcmp0(format, "tiff") == 0)
 		{
@@ -819,7 +827,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 	g_free(format);
 #endif
 
-#ifdef HAVE_PDF
+#if HAVE_PDF
 	format = il->backend.get_format_name(il->loader);
 	if (g_strcmp0(format, "pdf") == 0)
 		{
@@ -828,7 +836,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 	g_free(format);
 #endif
 
-#ifdef HAVE_HEIF
+#if HAVE_HEIF
 	format = il->backend.get_format_name(il->loader);
 	if (g_strcmp0(format, "heif") == 0)
 		{
@@ -837,7 +845,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 	g_free(format);
 #endif
 
-#ifdef HAVE_DJVU
+#if HAVE_DJVU
 	format = il->backend.get_format_name(il->loader);
 	if (g_strcmp0(format, "djvu") == 0)
 		{
@@ -934,7 +942,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 		return FALSE;
 		}
 
-#ifdef HAVE_PDF
+#if HAVE_PDF
 	format = il->backend.get_format_name(il->loader);
 	if (g_strcmp0(format, "pdf") == 0)
 		{
@@ -943,7 +951,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 		}
 	g_free(format);
 #endif
-#ifdef HAVE_HEIF
+#if HAVE_HEIF
 	format = il->backend.get_format_name(il->loader);
 	if (g_strcmp0(format, "heif") == 0)
 		{
@@ -952,7 +960,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 		}
 	g_free(format);
 #endif
-#ifdef HAVE_DJVU
+#if HAVE_DJVU
 	format = il->backend.get_format_name(il->loader);
 	if (g_strcmp0(format, "djvu") == 0)
 		{
@@ -961,7 +969,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 		}
 	g_free(format);
 #endif
-#ifdef HAVE_TIFF
+#if HAVE_TIFF
 	format = il->backend.get_format_name(il->loader);
 	if (g_strcmp0(format, "tiff") == 0)
 		{

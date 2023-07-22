@@ -21,10 +21,11 @@
 
 #include "trash.h"
 
-#include <config.h>
+#include <unistd.h>
 
-#include "utilops.h"
-#include "window.h"
+#include <cstdlib>
+
+#include <gio/gio.h>
 
 #include "debug.h"
 #include "editors.h"
@@ -32,7 +33,11 @@
 #include "intl.h"
 #include "main-defines.h"
 #include "options.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
+#include "ui-utildlg.h"
+#include "utilops.h"
+#include "window.h"
 
 /*
  *--------------------------------------------------------------------------

@@ -21,7 +21,12 @@
 
 #include "image-overlay.h"
 
-#include <config.h>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <gtk/gtk.h>
+#include <pango/pango.h>
 
 #include "collect.h"
 #include "debug.h"
@@ -33,11 +38,15 @@
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"
+#include "options.h"
 #include "osd.h"
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "slideshow.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
+
+struct HistMap;
 
 /*
  *----------------------------------------------------------------------------

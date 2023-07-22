@@ -21,11 +21,12 @@
 
 #include "ui-tabcomp.h"
 
-#include <cstring>
 #include <dirent.h>
-#include <sys/types.h>
 
-#include <config.h>
+#include <cstring>
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
 
 #include "compat.h"
 #include "debug.h"

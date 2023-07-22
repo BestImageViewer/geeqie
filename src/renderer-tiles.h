@@ -22,8 +22,8 @@
 #ifndef RENDERER_TILES_H
 #define RENDERER_TILES_H
 
-#include <pixbuf-renderer.h>
-
+struct PixbufRenderer;
+struct RendererFuncs;
 
 RendererFuncs *renderer_tiles_new(PixbufRenderer *pr);
 

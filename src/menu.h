@@ -22,6 +22,8 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include <glib-object.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "typedefs.h"

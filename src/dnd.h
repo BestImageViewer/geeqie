@@ -22,7 +22,12 @@
 #ifndef DND_H
 #define DND_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib.h>
 #include <gtk/gtk.h>
+
+#include "main-defines.h"
 
 #define TARGET_APP_COLLECTION_MEMBER_STRING "application/x-" GQ_APPNAME_LC "-collection-member"
 #define TARGET_APP_EXIF_ENTRY_STRING "application/x-" GQ_APPNAME_LC "-exif-entry"

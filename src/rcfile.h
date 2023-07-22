@@ -22,8 +22,11 @@
 #ifndef RCFILE_H
 #define RCFILE_H
 
-#include "options.h"
+#include <gdk/gdk.h>
+#include <glib.h>
 
+struct ConfOptions;
+struct GQParserData;
 struct LayoutWindow;
 
 void write_indent(GString *str, gint indent);
@@ -77,8 +80,6 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 
 #define READ_DUMMY(_target_, _name_, _msg_) read_dummy_option(option, #_name_, _msg_)
 
-struct GQParserFuncData;
-struct GQParserData;
 using GQParserStartFunc = void (*)(GQParserData *, GMarkupParseContext *, const gchar *, const gchar **, const gchar **, gpointer, GError **);
 using GQParserEndFunc = void (*)(GQParserData *, GMarkupParseContext *, const gchar *, gpointer, GError **);
 

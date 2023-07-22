@@ -20,14 +20,17 @@
 
 #include "search-and-run.h"
 
-#include <config.h>
+#include <cstddef>
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <pango/pango.h>
 
 #include "compat.h"
 #include "debug.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "ui-misc.h"
-#include "window.h"
 
 enum {
 	SAR_LABEL,

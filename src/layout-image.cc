@@ -21,6 +21,14 @@
 
 #include "layout-image.h"
 
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gio/gio.h>
+#include <glib-object.h>
+#include <pango/pango.h>
+
 #include <config.h>
 
 #include "collect.h"
@@ -36,15 +44,17 @@
 #include "img-view.h"
 #include "intl.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "menu.h"
 #include "metadata.h"
 #include "misc.h"
+#include "options.h"
 #include "pixbuf-renderer.h"
-#include "pixbuf-util.h"
 #include "slideshow.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
+#include "ui-utildlg.h"
 #include "uri-utils.h"
 #include "utilops.h"
 #include "view-file.h"
@@ -601,7 +611,7 @@ static void li_pop_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), FALSE);
 }
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 static void li_pop_menu_copy_image_cb(GtkWidget *, gpointer data)
 {
 /* @FIXME GTK4 stub */

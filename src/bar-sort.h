@@ -22,6 +22,7 @@
 #ifndef BAR_SORT_H
 #define BAR_SORT_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 struct LayoutWindow;

@@ -22,7 +22,10 @@
 #ifndef FILEDATA_H
 #define FILEDATA_H
 
+#include <sys/types.h>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
 
 #include <config.h>
 

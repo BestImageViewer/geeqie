@@ -24,7 +24,8 @@
 #include <cstdio>
 #include <cstring>
 
-#include <config.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
 
 #include "compat.h"
 #include "debug.h"

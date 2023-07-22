@@ -22,7 +22,12 @@
 #ifndef PAN_VIEW_PAN_VIEW_H
 #define PAN_VIEW_PAN_VIEW_H
 
-#include "pan-types.h"
+#include <glib.h>
+
+#include "typedefs.h"
+
+struct PanItem;
+struct PanWindow;
 
 void pan_layout_update(PanWindow *pw);
 GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height);

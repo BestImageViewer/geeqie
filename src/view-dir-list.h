@@ -22,6 +22,8 @@
 #ifndef VIEW_DIR_LIST_H
 #define VIEW_DIR_LIST_H
 
+#include <gdk/gdk.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 struct FileData;

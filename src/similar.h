@@ -23,6 +23,7 @@
 #define SIMILAR_H
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
 
 struct ImageSimilarityData
 {

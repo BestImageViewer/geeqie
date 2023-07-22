@@ -21,7 +21,15 @@
 
 #include "layout-util.h"
 
-#include <sys/wait.h>
+#include <dirent.h>
+#include <unistd.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <gio/gio.h>
+#include <glib-object.h>
 
 #include <config.h>
 
@@ -30,7 +38,6 @@
 #include "bar-sort.h"
 #include "bar.h"
 #include "cache-maint.h"
-#include "collect-dlg.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "color-man.h"
@@ -49,11 +56,13 @@
 #include "intl.h"
 #include "keymap-template.h"
 #include "layout-image.h"
+#include "layout.h"
 #include "logwindow.h"
 #include "main-defines.h"
 #include "main.h"
 #include "metadata.h"
 #include "misc.h"
+#include "options.h"
 #include "pan-view.h"
 #include "pixbuf-util.h"
 #include "preferences.h"
@@ -65,6 +74,7 @@
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 #include "view-dir.h"
 #include "view-file.h"
@@ -1924,7 +1934,7 @@ static void layout_menu_keyword_autocomplete_cb(GtkAction *, gpointer data)
  * color profile button (and menu)
  *-----------------------------------------------------------------------------
  */
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 static void layout_color_menu_enable_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
@@ -1941,7 +1951,7 @@ static void layout_color_menu_enable_cb()
 }
 #endif
 
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 static void layout_color_menu_use_image_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
@@ -1960,7 +1970,7 @@ static void layout_color_menu_use_image_cb()
 }
 #endif
 
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
@@ -3699,7 +3709,7 @@ void layout_util_sync_color(LayoutWindow *lw)
 	gboolean use_image = FALSE;
 	gint i;
 	gchar action_name[15];
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 	gchar *image_profile;
 	gchar *screen_profile;
 #endif
@@ -3710,7 +3720,7 @@ void layout_util_sync_color(LayoutWindow *lw)
 	use_color = layout_image_color_profile_get_use(lw);
 
 	action = gtk_action_group_get_action(lw->action_group, "UseColorProfiles");
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), use_color);
 	if (layout_image_color_profile_get_status(lw, &image_profile, &screen_profile))
 		{

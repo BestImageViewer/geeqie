@@ -23,31 +23,42 @@
 #define _XOPEN_SOURCE
 #endif
 
+#include <sys/stat.h>
+
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
-#ifdef HAVE_LCMS
+#include <glib.h>
+
+#if HAVE_LCMS
 /*** color support enabled ***/
-
-#ifdef HAVE_LCMS2
-#include <lcms2.h>
-#else
-#include <lcms.h>
-#endif
+#  if HAVE_LCMS2
+#    include <lcms2.h>
+#  else
+#    include <lcms.h>
+#  endif
 #endif
 
 #include "cache.h"
 #include "debug.h"
 #include "exif.h"
 #include "filecache.h"
+#include "filedata.h"
 #include "glua.h"
 #include "intl.h"
 #include "jpeg-parser.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "zonedetect.h"
+
+struct ExifData;
+struct ExifItem;
+struct FileCacheData;
+struct ZoneDetect;
 
 
 static gdouble exif_rational_to_double(ExifRational *r, gint sign)
@@ -473,7 +484,7 @@ static gchar *exif_build_formatted_Resolution(ExifData *exif)
 
 static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 {
-#ifdef HAVE_LCMS2
+#if HAVE_LCMS2
 	cmsUInt8Number profileID[17];
 #endif
 	const gchar *name = "";
@@ -507,7 +518,7 @@ static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 	else
 		{
 		source = _("embedded");
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 
 			{
 			cmsHPROFILE profile;
@@ -515,7 +526,7 @@ static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 			profile = cmsOpenProfileFromMem(profile_data, profile_len);
 			if (profile)
 				{
-#ifdef HAVE_LCMS2
+#if HAVE_LCMS2
 				profileID[16] = '\0';
 				cmsGetHeaderProfileID(profile, profileID);
 				name = reinterpret_cast<gchar *>(profileID);
@@ -1035,7 +1046,7 @@ ExifData *exif_read_fd(FileData *fd)
 	 * not writable directly, thus it should contain the most up-to-date version */
 	sidecar_path = nullptr;
 
-#ifdef HAVE_EXIV2
+#if HAVE_EXIV2
 	/* we are not able to handle XMP sidecars without exiv2 */
 	sidecar_path = cache_find_location(CACHE_TYPE_XMP_METADATA, fd->path);
 
@@ -1232,7 +1243,7 @@ gchar *metadata_file_info(FileData *fd, const gchar *key, MetadataFormat)
 	return g_strdup("");
 }
 
-#ifdef HAVE_LUA
+#if HAVE_LUA
 gchar *metadata_lua_info(FileData *fd, const gchar *key, MetadataFormat)
 {
 	gchar *script_name;

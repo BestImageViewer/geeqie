@@ -22,11 +22,12 @@
 #ifndef UI_MISC_H
 #define UI_MISC_H
 
+#include <ctime>
 
-#include <sys/time.h>
-#include <sys/types.h>
-#include <time.h>
-
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 /* these values are per GNOME HIG */

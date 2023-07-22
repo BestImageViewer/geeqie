@@ -21,7 +21,7 @@
 
 #include "jpeg-parser.h"
 
-#include <config.h>
+#include <cstring>
 
 #include "debug.h"
 

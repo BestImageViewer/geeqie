@@ -21,11 +21,16 @@
 
 #include "view-file-list.h"
 
-#include <config.h>
+#include <cstring>
+#include <vector>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
 
 #include "collect.h"
 #include "debug.h"
 #include "dnd.h"
+#include "filedata.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"
@@ -33,14 +38,13 @@
 #include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
+#include "options.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
 #include "utilops.h"
 #include "view-file.h"
-
-#include <vector>
 
 /* Index to tree store */
 enum {

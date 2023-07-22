@@ -21,27 +21,37 @@
 
 #include "filedata.h"
 
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#include <glib-object.h>
+#include <grp.h>
+#include <pwd.h>
+
 #include <config.h>
 
 #include "cache.h"
 #include "debug.h"
+#include "exif.h"
 #include "filefilter.h"
 #include "histogram.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "main.h"
 #include "metadata.h"
+#include "misc.h"
 #include "options.h"
 #include "secure-save.h"
 #include "thumb-standard.h"
 #include "trash.h"
 #include "ui-fileops.h"
-
-#include "exif.h"
-#include "misc.h"
-
-#include <grp.h>
-#include <pwd.h>
 
 #ifdef DEBUG_FILEDATA
 gint global_file_data_count = 0;
@@ -2653,7 +2663,7 @@ gint file_data_verify_ci(FileData *fd, GList *list)
 			 * it's location regardless of the user's preference.
 			 */
 			gchar *metadata_path = nullptr;
-#ifdef HAVE_EXIV2
+#if HAVE_EXIV2
 			/* but ignore XMP if we are not able to write it */
 			metadata_path = cache_find_location(CACHE_TYPE_XMP_METADATA, fd->path);
 #endif

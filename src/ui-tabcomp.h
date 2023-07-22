@@ -22,6 +22,7 @@
 #ifndef UI_TABCOMP_H
 #define UI_TABCOMP_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,

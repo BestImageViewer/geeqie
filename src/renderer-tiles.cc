@@ -25,10 +25,17 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <config.h>
+#include <cairo.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <gtk/gtk.h>
 
 #include "debug.h"
 #include "options.h"
+#include "pixbuf-renderer.h"
+#include "typedefs.h"
 
 /* comment this out if not using this from within Geeqie
  * defining GQ_BUILD does these things:

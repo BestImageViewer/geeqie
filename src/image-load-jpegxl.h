@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_JPEGXL
+#if HAVE_JPEGXL
 struct ImageLoaderBackend;
 
 void image_loader_backend_set_jpegxl(ImageLoaderBackend *funcs);

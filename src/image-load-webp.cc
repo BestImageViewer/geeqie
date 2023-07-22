@@ -20,9 +20,12 @@
 
 #include <config.h>
 
-#ifdef HAVE_WEBP
+#if HAVE_WEBP
 #include "image-load-webp.h"
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 #include <webp/decode.h>
 
 #include "debug.h"

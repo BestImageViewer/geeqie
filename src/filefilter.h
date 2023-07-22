@@ -22,6 +22,8 @@
 #ifndef FILEFILTER_H
 #define FILEFILTER_H
 
+#include <glib.h>
+
 #include "typedefs.h"
 
 struct FilterEntry {

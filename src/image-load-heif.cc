@@ -22,9 +22,12 @@
 
 #include <config.h>
 
-#ifdef HAVE_HEIF
+#if HAVE_HEIF
 #include <vector>
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 #include <libheif/heif.h>
 
 #include "debug.h"

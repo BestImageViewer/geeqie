@@ -22,9 +22,15 @@
 #ifndef PIXBUF_RENDERER_H
 #define PIXBUF_RENDERER_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "typedefs.h"
+
+struct PixbufRenderer;
 
 #define TYPE_PIXBUF_RENDERER		(pixbuf_renderer_get_type())
 #define PIXBUF_RENDERER(obj)		(G_TYPE_CHECK_INSTANCE_CAST((obj), TYPE_PIXBUF_RENDERER, PixbufRenderer))
@@ -63,12 +69,6 @@
  * round A down to integer count of B
  */
 #define ROUND_DOWN(A,B) ((gint)(((A))/(B))*(B))
-
-
-struct RendererFuncs;
-
-struct PixbufRenderer;
-struct PixbufRendererClass;
 
 
 using PixbufRendererTileRequestFunc = gint (*)(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *, gpointer);

@@ -21,7 +21,7 @@
 
 #include "similar.h"
 
-#include <config.h>
+#include <cstdlib>
 
 #include "options.h"
 

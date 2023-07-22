@@ -20,7 +20,14 @@
 
 #include "print.h"
 
-#include <config.h>
+#include <cstddef>
+
+#include <cairo.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <pango/pango.h>
+#include <pango/pangocairo.h>
 
 #include "compat.h"
 #include "debug.h"

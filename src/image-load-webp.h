@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_WEBP
+#if HAVE_WEBP
 struct ImageLoaderBackend;
 
 void image_loader_backend_set_webp(ImageLoaderBackend *funcs);

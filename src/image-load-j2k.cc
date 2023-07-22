@@ -20,10 +20,16 @@
 
 #include <config.h>
 
-#ifdef HAVE_J2K
+#if HAVE_J2K
 
 #include "image-load-j2k.h"
 
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 #include <openjpeg.h>
 
 #include "debug.h"

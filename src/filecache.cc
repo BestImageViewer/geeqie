@@ -20,9 +20,9 @@
 
 #include "filecache.h"
 
-#include <config.h>
-
 #include "debug.h"
+#include "filedata.h"
+#include "typedefs.h"
 
 /* Set to TRUE to add file cache dumps to the debug output */
 const gboolean debug_file_cache = FALSE;

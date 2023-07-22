@@ -22,11 +22,13 @@
 
 #include <config.h>
 
-#ifdef HAVE_DJVU
+#if HAVE_DJVU
 
 #include <cairo.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 #include <libdjvu/ddjvuapi.h>
-#include <libdjvu/miniexp.h>
 
 #include "image-load.h"
 

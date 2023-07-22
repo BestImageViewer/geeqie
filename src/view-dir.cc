@@ -20,6 +20,13 @@
 
 #include "view-dir.h"
 
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <cstring>
+
+#include <glib-object.h>
+
 #include <config.h>
 
 #include "compat.h"
@@ -33,6 +40,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "menu.h"
+#include "options.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
@@ -1178,7 +1186,7 @@ static GdkRGBA *vd_color_shifted(GtkWidget *widget)
 	static GdkRGBA color;
 	static GtkWidget *done = nullptr;
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 /* @FIXME GTK4 no background color */
 #else
 	if (done != widget)

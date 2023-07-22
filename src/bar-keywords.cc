@@ -21,7 +21,11 @@
 
 #include "bar-keywords.h"
 
-#include <config.h>
+#include <cstdio>
+#include <cstring>
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
 
 #include "bar.h"
 #include "compat.h"
@@ -33,8 +37,10 @@
 #include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
+#include "options.h"
 #include "rcfile.h"
 #include "secure-save.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"

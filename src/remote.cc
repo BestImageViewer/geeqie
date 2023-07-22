@@ -21,7 +21,20 @@
 
 #include "remote.h"
 
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/un.h>
+#include <unistd.h>
+
+#include <cerrno>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <config.h>
+
+#include <gtk/gtk.h>
 
 #include "cache-maint.h"
 #include "collect-io.h"
@@ -31,27 +44,25 @@
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "glua.h"
 #include "image.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "main.h"
 #include "misc.h"
+#include "options.h"
 #include "pixbuf-renderer.h"
 #include "rcfile.h"
 #include "slideshow.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "utilops.h"
 #include "view-file.h"
-
-#include <csignal>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include "glua.h"
 
 enum {
 	SERVER_MAX_CLIENTS = 8
@@ -1653,7 +1664,7 @@ static void gr_print0(const gchar *, GIOChannel *channel, gpointer)
 	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 }
 
-#ifdef HAVE_LUA
+#if HAVE_LUA
 static void gr_lua(const gchar *text, GIOChannel *channel, gpointer)
 {
 	gchar *result = nullptr;
@@ -1734,7 +1745,7 @@ static RemoteCommandEntry remote_commands[] = {
 	{ nullptr, "--last",               gr_image_last,          FALSE, FALSE, nullptr, N_("last image") },
 	{ nullptr, "--list-add:",          gr_list_add,            TRUE,  FALSE, N_("<FILE>"), N_("add FILE to command line collection list") },
 	{ nullptr, "--list-clear",         gr_list_clear,          FALSE, FALSE, nullptr, N_("clear command line collection list") },
-#ifdef HAVE_LUA
+#if HAVE_LUA
 	{ nullptr, "--lua:",               gr_lua,                 TRUE, FALSE, N_("<FILE>,<lua script>"), N_("run lua script on FILE") },
 #endif
 	{ nullptr, "--new-window",         gr_new_window,          FALSE, FALSE, nullptr, N_("new window") },

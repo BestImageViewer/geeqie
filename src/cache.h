@@ -22,9 +22,11 @@
 #ifndef CACHE_H
 #define CACHE_H
 
+#include <sys/types.h>
 
-#include "similar.h"
+#include <glib.h>
 
+struct ImageSimilarityData;
 
 #define GQ_CACHE_THUMB		"thumbnails"
 #define GQ_CACHE_METADATA    	"metadata"

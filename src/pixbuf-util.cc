@@ -21,15 +21,23 @@
 
 #include "pixbuf-util.h"
 
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+
+#include <cairo.h>
+#include <gio/gio.h>
+#include <glib-object.h>
+#include <pango/pangocairo.h>
+
 #include <config.h>
 
 #include "debug.h"
 #include "exif.h"
 #include "filedata.h"
 #include "main-defines.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
-
-#include <cmath>
 
 
 /*

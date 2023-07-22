@@ -21,11 +21,19 @@
 
 #include "view-dir-tree.h"
 
-#include <config.h>
+#include <unistd.h>
+
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
 
 #include "debug.h"
 #include "filedata.h"
 #include "layout.h"
+#include "options.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
 #include "view-dir.h"

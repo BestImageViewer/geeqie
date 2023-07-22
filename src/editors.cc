@@ -21,7 +21,13 @@
 
 #include "editors.h"
 
-#include <config.h>
+#include <dirent.h>
+#include <unistd.h>
+
+#include <cstdlib>
+#include <cstring>
+
+#include <glib-object.h>
 
 #include "compat.h"
 #include "debug.h"
@@ -32,7 +38,9 @@
 #include "main.h"
 #include "options.h"
 #include "pixbuf-util.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 
 enum {

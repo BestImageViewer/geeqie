@@ -21,13 +21,17 @@
 
 #include "ui-fileops.h"
 
+#include <sys/stat.h>
+#include <unistd.h>
+#include <utime.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
 
-#include <unistd.h>
-#include <utime.h>
+#include <glib-object.h>
+#include <gtk/gtk.h>
 
 #include <config.h>
 
@@ -38,7 +42,10 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "md5-util.h"
+#include "options.h"
 #include "secure-save.h"
+#include "typedefs.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 
 /*

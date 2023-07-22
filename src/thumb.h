@@ -23,6 +23,7 @@
 #define THUMB_H
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
 
 #include "typedefs.h"
 

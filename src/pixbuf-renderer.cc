@@ -25,8 +25,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <config.h>
-
 #include "debug.h"
 #include "main-defines.h"
 #include "options.h"

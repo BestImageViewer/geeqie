@@ -21,7 +21,14 @@
 
 #include "metadata.h"
 
+#include <unistd.h>
+
 #include <clocale>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include <glib-object.h>
 
 #include <config.h>
 
@@ -33,10 +40,13 @@
 #include "layout-util.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "options.h"
 #include "rcfile.h"
 #include "secure-save.h"
 #include "ui-fileops.h"
 #include "utilops.h"
+
+struct ExifData;
 
 enum MetadataKey {
 	MK_NONE,
@@ -610,7 +620,7 @@ static void metadata_legacy_delete(FileData *fd, const gchar *except)
 		g_free(metadata_path);
 		}
 
-#ifdef HAVE_EXIV2
+#if HAVE_EXIV2
 	/* without exiv2: do not delete xmp metadata because we are not able to convert it,
 	   just ignore it */
 	metadata_path = cache_find_location(CACHE_TYPE_XMP_METADATA, fd->path);
@@ -717,7 +727,7 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 		{
 	        return g_list_append(nullptr, metadata_file_info(fd, key, format));
 		}
-#ifdef HAVE_LUA
+#if HAVE_LUA
 	else if (strncmp(key, "lua.", 4) == 0)
 		{
 		return g_list_append(nullptr, metadata_lua_info(fd, key, format));

@@ -22,9 +22,11 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "options.h"
+#include "typedefs.h"
 
 struct AnimationData;
 struct FileData;

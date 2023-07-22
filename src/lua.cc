@@ -20,16 +20,18 @@
 
 #include <config.h>
 
-#ifdef HAVE_LUA
+#if HAVE_LUA
 
 #define _XOPEN_SOURCE
 
 #include "glua.h"
 
-#include <cstdio>
+#include <unistd.h>
+
 #include <cstring>
 #include <ctime>
 #include <memory>
+#include <utility>
 
 #include <glib.h>
 #include <lua.hpp>
@@ -37,9 +39,10 @@
 #include "debug.h"
 #include "exif.h"
 #include "filedata.h"
-#include "main-defines.h"
 #include "main.h"
 #include "ui-fileops.h"
+
+struct ExifData;
 
 /**
  * @file

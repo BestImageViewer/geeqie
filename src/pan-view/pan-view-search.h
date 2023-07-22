@@ -22,7 +22,11 @@
 #ifndef PAN_VIEW_PAN_VIEW_SEARCH_H
 #define PAN_VIEW_PAN_VIEW_SEARCH_H
 
-#include "pan-types.h"
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct PanViewSearchUi;
+struct PanWindow;
 
 void pan_search_toggle_visible(PanWindow *pw, gboolean enable);
 void pan_search_activate(PanWindow *pw);

@@ -21,11 +21,22 @@
 
 #include "cache-loader.h"
 
-#include <config.h>
+#include <sys/types.h>
 
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+
+#include "cache.h"
 #include "filedata.h"
+#include "image-load.h"
 #include "metadata.h"
 #include "options.h"
+#include "similar.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 
 

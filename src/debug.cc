@@ -20,7 +20,19 @@
 
 #include "debug.h"
 
+#include <regex.h>
+#include <sys/time.h>
+
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <config.h>
+
+#if HAVE_EXECINFO_H
+#  include <execinfo.h>
+#endif
 
 #include "filedata.h"
 #include "intl.h"
@@ -30,12 +42,6 @@
 #include "misc.h"
 #include "options.h"
 #include "ui-fileops.h"
-
-#ifdef HAVE_EXECINFO_H
-#include <execinfo.h>
-#endif
-
-#include <regex.h>
 
 /*
  * Logging functions
@@ -260,7 +266,7 @@ gchar *get_regexp()
 	return g_strdup(regexp);
 }
 
-#ifdef HAVE_EXECINFO_H
+#if HAVE_EXECINFO_H
 /**
  * @brief Backtrace of geeqie files
  * @param file

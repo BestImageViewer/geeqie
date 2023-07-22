@@ -21,16 +21,19 @@
 
 #include "pan-view-filter.h"
 
-#include <config.h>
+#include <cstddef>
+
+#include <glib-object.h>
 
 #include "compat.h"
+#include "filedata.h"
 #include "image.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
+#include "pan-types.h"
 #include "pan-view.h"
-#include "ui-fileops.h"
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
 

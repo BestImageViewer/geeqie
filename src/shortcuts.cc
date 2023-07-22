@@ -21,7 +21,8 @@
 
 #include "shortcuts.h"
 
-#include <config.h>
+#include <glib-object.h>
+#include <glib.h>
 
 #include "collect.h"
 #include "compat.h"
@@ -31,6 +32,7 @@
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 
 struct ShortcutsData

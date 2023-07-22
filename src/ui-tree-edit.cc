@@ -23,7 +23,7 @@
 
 #include <cstring>
 
-#include <config.h>
+#include <glib-object.h>
 
 #include "compat.h"
 #include "misc.h"

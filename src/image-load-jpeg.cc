@@ -29,13 +29,16 @@
 
 #include <config.h>
 
-#ifdef HAVE_JPEG
+#if HAVE_JPEG
 
 #include "image-load-jpeg.h"
 
 #include <csetjmp>
 #include <cstdio> // for FILE and size_t in jpeglib.h
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 #include <jerror.h>
 #include <jpeglib.h>
 

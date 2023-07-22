@@ -22,7 +22,12 @@
 #ifndef COLLECT_TABLE_H
 #define COLLECT_TABLE_H
 
-#include "collect.h"
+#include <gdk/gdk.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+
+struct CollectInfo;
+struct CollectionData;
 
 struct CollectTable
 {

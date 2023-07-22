@@ -21,11 +21,17 @@
 
 #include "collect-table.h"
 
-#include <config.h>
+#include <cstddef>
+
+#include <cairo.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gio/gio.h>
+#include <glib-object.h>
 
 #include "cellrenderericon.h"
 #include "collect-dlg.h"
 #include "collect-io.h"
+#include "collect.h"
 #include "compat.h"
 #include "debug.h"
 #include "dnd.h"
@@ -39,8 +45,9 @@
 #include "menu.h"
 #include "metadata.h"
 #include "misc.h"
-#include "pixbuf-util.h"
+#include "options.h"
 #include "print.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-tree-edit.h"

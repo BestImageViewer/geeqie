@@ -21,6 +21,11 @@
 
 #include "bar-histogram.h"
 
+#include <cairo.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+
 #include <config.h>
 
 #include "bar.h"
@@ -30,8 +35,11 @@
 #include "histogram.h"
 #include "intl.h"
 #include "rcfile.h"
+#include "typedefs.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
+
+struct HistMap;
 
 /*
  *-------------------------------------------------------------------
@@ -299,7 +307,7 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 	gtk_widget_add_events(phd->drawing_area, GDK_BUTTON_PRESS_MASK);
 
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	gesture = gtk_gesture_click_new();
 	gtk_widget_add_controller(phd->drawing_area, GTK_EVENT_CONTROLLER(gesture));
 #else

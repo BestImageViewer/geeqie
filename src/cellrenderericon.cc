@@ -19,7 +19,10 @@
 
 #include "cellrenderericon.h"
 
-#include <config.h>
+#include <cstddef>
+
+#include <cairo.h>
+#include <gdk/gdk.h>
 
 enum {
 	FIXED_ICON_SIZE_MAX = 512

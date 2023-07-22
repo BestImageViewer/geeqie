@@ -21,11 +21,12 @@
 #ifndef FILECACHE_H
 #define FILECACHE_H
 
-#include "filedata.h"
+#include <glib.h>
 
 struct FileCacheData;
-using FileCacheReleaseFunc = void (*)(FileData *);
+struct FileData;
 
+using FileCacheReleaseFunc = void (*)(FileData *);
 
 FileCacheData *file_cache_new(FileCacheReleaseFunc release, gulong max_size);
 gboolean file_cache_get(FileCacheData *fc, FileData *fd);

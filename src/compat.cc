@@ -22,7 +22,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 {
 	if (GTK_IS_BUTTON(container))

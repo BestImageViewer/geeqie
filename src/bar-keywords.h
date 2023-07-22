@@ -22,6 +22,7 @@
 #ifndef BAR_KEYWORDS_H
 #define BAR_KEYWORDS_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 struct LayoutWindow;

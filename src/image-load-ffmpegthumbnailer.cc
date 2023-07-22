@@ -23,8 +23,13 @@
 
 #include <config.h>
 
-#ifdef HAVE_FFMPEGTHUMBNAILER
-#include <libffmpegthumbnailer/videothumbnailerc.h>
+#if HAVE_FFMPEGTHUMBNAILER
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <libffmpegthumbnailer/ffmpegthumbnailertypes.h>
+#include <libffmpegthumbnailer/imagetypes.h>
+#include <libffmpegthumbnailer/videothumbnailerc.h> //TODO Use videothumbnailer.h?
 
 #include "debug.h"
 #include "filedata.h"
@@ -108,13 +113,13 @@ static gboolean image_loader_ft_load (gpointer loader, const guchar *, gsize, GE
 
 	image_data *image = video_thumbnailer_create_image_data();
 
-#ifdef HAVE_FFMPEGTHUMBNAILER_WH
+#if HAVE_FFMPEGTHUMBNAILER_WH
 	video_thumbnailer_set_size(lft->vt, lft->requested_width, lft->requested_height);
 #else
 	lft->vt->thumbnail_size = MAX(lft->requested_width,lft->requested_height);
 #endif
 
-#ifdef HAVE_FFMPEGTHUMBNAILER_METADATA
+#if HAVE_FFMPEGTHUMBNAILER_METADATA
 	lft->vt->prefer_embedded_metadata = options->thumbnails.use_ft_metadata ? 1 : 0;
 #endif
 

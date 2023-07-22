@@ -20,7 +20,8 @@
 
 #include "history-list.h"
 
-#include <config.h>
+#include <cstdio>
+#include <cstring>
 
 #include "debug.h"
 #include "intl.h"

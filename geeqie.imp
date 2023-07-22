@@ -1,0 +1,32 @@
+[
+    { include: [ "<bits/types/sig_atomic_t.h>",        private, "<csignal>",               public ] },
+
+    { include: [ "\"cairo.h\"",                        private, "<cairo.h>",               public ] },
+
+    { include: [ "@\"champlain/champlain-[a-z-]+.h\"", private, "<champlain/champlain.h>", public ] },
+
+    { include: [ "@<exiv2/[a-z_]+.hpp>",               private, "<exiv2/exiv2.hpp>",       public ] },
+    { include: [ "<exiv2/exv_conf.h>",                 private, "<exiv2/exiv2.hpp>",       public ] },
+    { include: [ "<exiv2/xmp_exiv2.hpp>",              private, "<exiv2/exiv2.hpp>",       public ] },
+
+    { include: [ "\"gdk/gdkkeysyms.h\"",               private, "<gdk/gdk.h>",             public ] },
+
+    { include: [ "@\"gobject/.*\"",                    private, "<glib-object.h>",         public ] },
+
+    { include: [ "<glib/gtypes.h>",                    private, "<glib.h>",                public ] },
+
+    { include: [ "\"gtk/gtkcssprovider.h\"",           private, "<gtk/gtk.h>",             public ] },
+
+    { include: [ "<jmorecfg.h>",                       private, "<jpeglib.h>",             public ] },
+
+    { include: [ "\"libraw_types.h\"",                 private, "<libraw/libraw.h>",       public ] },
+
+    { include: [ "<lauxlib.h>",                        private, "<lua.hpp>",               public ] },
+    { include: [ "<lua.h>",                            private, "<lua.hpp>",               public ] },
+    { include: [ "<lualib.h>",                         private, "<lua.hpp>",               public ] },
+
+    { include: [ "@\"pango/pango-[a-z]+.h\"",          private, "<pango/pango.h>",         public ] },
+    { include: [ "\"pango/pangocairo.h\"",             private, "<pango/pangocairo.h>",    public ] },
+
+    { include: [ "@\"poppler-[a-z]+.h\"",              private, "<poppler.h>",             public ] },
+]

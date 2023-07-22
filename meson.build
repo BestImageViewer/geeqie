@@ -147,9 +147,9 @@ summary({'gq_appdir': gq_appdir,
 
 # Create the define constants used in the sources. Set via config.h.in
 conf_data = configuration_data()
-conf_data.set_quoted('VERSION', meson.project_version())
 conf_data.set('DEBUG', debug)
 
+conf_data.set('HAVE_GTK4', 0)
 option = get_option('gtk4')
 if option.enabled()
     gtk_dep = dependency('gtk4', required: true)
@@ -160,6 +160,7 @@ endif
 glib_dep = dependency('glib-2.0', version : '>=2.52', required: true)
 
 # Required only when backward-cpp is used
+conf_data.set('HAVE_DEVELOPER', 0)
 libdw_dep = []
 libunwind_dep = []
 option = get_option('devel')
@@ -181,6 +182,7 @@ else
 endif
 
 # Required only for seg. fault stacktrace and backtrace debugging
+conf_data.set('HAVE_EXECINFO_H', 0)
 option = get_option('execinfo')
 libexecinfo_dep = []
 if not option.disabled()
@@ -197,6 +199,7 @@ else
     summary({'execinfo' : ['stacktrace supported:', false]}, section : 'Debugging', bool_yn : true)
 endif
 
+conf_data.set('HAVE_ARCHIVE', 0)
 libarchive_dep = []
 req_version = '>=3.4.0'
 option = get_option('archive')
@@ -212,6 +215,8 @@ else
     summary({'archive' : ['disabled - archive files e.g. .zip supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_LCMS', 0)
+conf_data.set('HAVE_LCMS2', 0)
 lcms_dep = []
 req_version = '>=2.0'
 option = get_option('cms')
@@ -233,6 +238,7 @@ else
     summary({'cms' : ['disabled - color management supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_DJVU', 0)
 ddjvuapi_dep = []
 req_version = '>=2.5.27'
 option = get_option('djvu')
@@ -261,6 +267,7 @@ else
 endif
 
 # Required only for seg. fault stacktrace and backtrace debugging
+conf_data.set('HAVE_EXECINFO_H', 0)
 option = get_option('execinfo')
 if not option.disabled()
     result = cc.check_header('execinfo.h')
@@ -274,6 +281,7 @@ else
     summary({'execinfo' : ['stacktrace supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_EXIV2', 0)
 exiv2_dep = []
 req_version = '>=0.18'
 option = get_option('exiv2')
@@ -289,6 +297,9 @@ else
     summary({'exiv2' : ['disabled - image data processed by exiv2:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_CLUTTER', 0)
+conf_data.set('HAVE_LIBCHAMPLAIN', 0)
+conf_data.set('HAVE_LIBCHAMPLAIN_GTK', 0)
 champlain_dep = []
 champlain_gtk_dep = []
 clutter_dep = []
@@ -329,6 +340,7 @@ else
     summary({'gps-map' : ['disabled - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_HEIF', 0)
 libheif_dep = []
 req_version = '>=1.3.2'
 option = get_option('heif')
@@ -344,6 +356,7 @@ else
     summary({'heif' : ['disabled - heif files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_J2K', 0)
 libopenjp2_dep = []
 req_version = '>=2.3.0'
 option = get_option('j2k')
@@ -359,10 +372,11 @@ else
     summary({'j2k' : ['disabled - j2k files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_JPEG', 0)
 libjpeg_dep = []
 option = get_option('jpeg')
 if not option.disabled()
-libjpeg_dep = dependency('libjpeg', required : get_option('jpeg'))
+    libjpeg_dep = dependency('libjpeg', required : get_option('jpeg'))
     if libjpeg_dep.found()
         if cc.has_function('jpeg_destroy_decompress', dependencies : libjpeg_dep)
             conf_data.set('HAVE_JPEG', 1)
@@ -377,6 +391,7 @@ else
     summary({'jpeg' : ['disabled - jpeg files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_JPEGXL', 0)
 libjxl_dep = []
 req_version = '>=0.3.7'
 option = get_option('jpegxl')
@@ -392,6 +407,7 @@ else
     summary({'jpegxl' : ['disabled - jpegxl files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_RAW', 0)
 libraw_dep = []
 req_version = '>=0.20'
 option = get_option('libraw')
@@ -407,6 +423,7 @@ else
     summary({'libraw' : ['disabled - .cr3 files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_LUA', 0)
 lua_dep = []
 req_version = '>=5.3'
 option = get_option('lua')
@@ -444,6 +461,7 @@ else
 endif
 install_data('README.md', 'COPYING', 'TODO', install_dir : helpdir)
 
+conf_data.set('HAVE_PDF', 0)
 poppler_glib_dep = []
 req_version = '>=0.62'
 option = get_option('pdf')
@@ -459,6 +477,7 @@ else
     summary({'pdf' : ['disabled - pdf files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_SPELL', 0)
 gspell_dep = []
 req_version = '>=1.6'
 option = get_option('spell')
@@ -474,6 +493,7 @@ else
     summary({'spell' : ['disabled - spelling checks enabled', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_TIFF', 0)
 tiff_dep = []
 option = get_option('tiff')
 if not option.disabled()
@@ -492,6 +512,10 @@ else
     summary({'tiff' : ['disabled - tiff files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_FFMPEGTHUMBNAILER', 0)
+conf_data.set('HAVE_FFMPEGTHUMBNAILER_METADATA', 0)
+conf_data.set('HAVE_FFMPEGTHUMBNAILER_RGB', 0)
+conf_data.set('HAVE_FFMPEGTHUMBNAILER_WH', 0)
 libffmpegthumbnailer_dep = []
 req_version = '>=2.1.0'
 option = get_option('videothumbnailer')
@@ -528,6 +552,7 @@ else
     summary({'videothumbnailer' : ['disabled -thumbnails of video files supported', false]}, section : 'Configuration', bool_yn : true)
 endif
 
+conf_data.set('HAVE_WEBP', 0)
 libwebp_dep = []
 req_version = '>=0.6.1'
 option = get_option('webp')
@@ -544,6 +569,7 @@ else
 endif
 
 # Check for nl_langinfo and _NL_TIME_FIRST_WEEKDAY
+conf_data.set('HAVE__NL_TIME_FIRST_WEEKDAY', 0)
 code = '''#include <langinfo.h>
 #include<stdio.h>
 int main (int argc, char ** argv) {

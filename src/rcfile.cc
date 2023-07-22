@@ -21,6 +21,12 @@
 
 #include "rcfile.h"
 
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gtk/gtk.h>
+
 #include <config.h>
 
 #include "bar-comment.h"
@@ -37,11 +43,14 @@
 #include "filefilter.h"
 #include "intl.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "metadata.h"
+#include "options.h"
 #include "pixbuf-renderer.h"
 #include "secure-save.h"
 #include "slideshow.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
 
@@ -576,7 +585,7 @@ static void write_global_attributes(GString *outstr, gint indent)
 static void write_color_profile(GString *outstr, gint indent)
 {
 	gint i;
-#ifndef HAVE_LCMS
+#if !HAVE_LCMS
 	g_string_append_printf(outstr, "<!-- NOTICE: %s was not built with support for color profiles,\n"
 				"		 color profile options will have no effect.\n-->\n", GQ_APPNAME);
 #endif
@@ -1403,7 +1412,7 @@ static void options_parse_global(GQParserData *parser_data, GMarkupParseContext 
 
 static void options_parse_global_end(GQParserData *, GMarkupParseContext *, const gchar *, gpointer, GError **)
 {
-#ifndef HAVE_EXIV2
+#if !HAVE_EXIV2
 	/* some options do not work without exiv2 */
 	options->metadata.save_in_image_file = FALSE;
 	options->metadata.save_legacy_format = TRUE;
@@ -1460,8 +1469,8 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, 
 			}
 		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
 		}
-#ifdef HAVE_LIBCHAMPLAIN
-#ifdef HAVE_LIBCHAMPLAIN_GTK
+#if HAVE_LIBCHAMPLAIN
+#if HAVE_LIBCHAMPLAIN_GTK
 	else if (g_ascii_strcasecmp(element_name, "pane_gps") == 0)
 		{
 		/* Use this flag to determine if --disable-clutter has been issued */

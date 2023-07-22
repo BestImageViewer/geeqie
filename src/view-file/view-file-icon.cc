@@ -21,13 +21,16 @@
 
 #include "view-file-icon.h"
 
-#include <config.h>
+#include <cstring>
+
+#include <glib-object.h>
 
 #include "cellrenderericon.h"
 #include "collect.h"
 #include "compat.h"
 #include "debug.h"
 #include "dnd.h"
+#include "filedata.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"

@@ -21,9 +21,9 @@
 
 #include "collect-dlg.h"
 
-#include <memory>
-
-#include <config.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <gtk/gtk.h>
 
 #include "collect-io.h"
 #include "collect.h"
@@ -32,6 +32,7 @@
 #include "main-defines.h"
 #include "misc.h"
 #include "ui-fileops.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 
 enum {

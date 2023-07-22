@@ -21,7 +21,14 @@
 
 #include "layout.h"
 
-#include <config.h>
+#include <unistd.h>
+
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <pango/pango.h>
 
 #include "bar-sort.h"
 #include "bar.h"

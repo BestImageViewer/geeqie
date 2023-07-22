@@ -25,9 +25,9 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
-#include <config.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
 
 #include "compat.h"
 #include "debug.h"
@@ -35,12 +35,14 @@
 #include "main-defines.h"
 #include "misc.h"
 #include "options.h"
+#include "typedefs.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
 #include "ui-tree-edit.h"
+#include "ui-utildlg.h"
 #include "uri-utils.h"
 #include "utilops.h"
 

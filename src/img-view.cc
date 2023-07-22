@@ -21,7 +21,9 @@
 
 #include "img-view.h"
 
-#include <config.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <gtk/gtk.h>
 
 #include "collect-io.h"
 #include "collect.h"
@@ -36,15 +38,19 @@
 #include "image.h"
 #include "intl.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "main.h"
 #include "menu.h"
 #include "misc.h"
+#include "options.h"
 #include "pixbuf-util.h"
 #include "print.h"
 #include "slideshow.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
+#include "ui-utildlg.h"
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"

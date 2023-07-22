@@ -32,7 +32,7 @@
 #define	MAP_ANON	MAP_ANONYMOUS
 #endif
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	#define gq_gtk_box_pack_end(box, child, expand, fill, padding) gtk_box_append(box, child)
 	#define gq_gtk_box_pack_start(box, child, expand, fill, padding) gtk_box_prepend(box, child)
 	#define gq_gtk_frame_set_shadow_type(frame, type) ;

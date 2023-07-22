@@ -22,10 +22,12 @@
 #include "fullscreen.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <string>
 #include <vector>
 
-#include <config.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
 
 #include "compat.h"
 #include "debug.h"

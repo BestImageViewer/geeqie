@@ -21,6 +21,15 @@
 
 #include "cache.h"
 
+#include <sys/stat.h>
+#include <unistd.h>
+#include <utime.h>
+
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <config.h>
 
 #include "debug.h"
@@ -29,10 +38,9 @@
 #include "md5-util.h"
 #include "options.h"
 #include "secure-save.h"
+#include "similar.h"
 #include "thumb-standard.h"
 #include "ui-fileops.h"
-
-#include <utime.h>
 
 
 /**

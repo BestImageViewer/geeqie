@@ -20,7 +20,9 @@
 
 #include "image-load-svgz.h"
 
-#include <config.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 
 #include "image-load.h"
 

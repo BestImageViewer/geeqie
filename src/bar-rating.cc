@@ -21,6 +21,8 @@
 
 #include "bar-rating.h"
 
+#include <glib-object.h>
+
 #include <config.h>
 
 #include "bar.h"
@@ -30,6 +32,7 @@
 #include "intl.h"
 #include "metadata.h"
 #include "rcfile.h"
+#include "typedefs.h"
 #include "ui-misc.h"
 
 /**
@@ -113,7 +116,7 @@ static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer da
 	auto prd = static_cast<PaneRatingData *>(data);
 	gchar *rating;
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	const gchar *rating_label;
 
 	rating_label = gtk_check_button_get_label(checkbutton);
@@ -185,7 +188,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 	row_1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gq_gtk_box_pack_start(GTK_BOX(prd->widget), row_1, FALSE, FALSE, 0);
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	radio_rejected = gtk_check_button_new_with_label(_("Rejected"));
 #else
 	radio_rejected = gtk_radio_button_new_with_label(nullptr, _("Rejected"));
@@ -194,7 +197,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 	g_signal_connect(radio_rejected, "released", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 	prd->rating_buttons[0] = GTK_CHECK_BUTTON(radio_rejected);
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	radio_unrated = gtk_check_button_new_with_label(_("Unrated"));
 	gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_unrated), GTK_CHECK_BUTTON(radio_rejected));
 #else
@@ -212,7 +215,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 		{
 		i_str = g_strdup_printf("%d", i - 1);
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 		radio_rating = gtk_check_button_new_with_label(i_str);
 		gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_rating), GTK_CHECK_BUTTON(radio_rejected));
 #else

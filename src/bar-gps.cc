@@ -21,10 +21,22 @@
 
 #include <config.h>
 
-#ifdef HAVE_LIBCHAMPLAIN
-#ifdef HAVE_LIBCHAMPLAIN_GTK
+#if HAVE_LIBCHAMPLAIN
+#if HAVE_LIBCHAMPLAIN_GTK
 
 #include "bar-gps.h"
+
+#include <cstring>
+
+#include <cairo.h>
+#include <champlain-gtk/champlain-gtk.h>
+#include <champlain/champlain.h>
+#include <clutter-gtk/clutter-gtk.h>
+#include <clutter/clutter.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <pango/pango.h>
 
 #include "bar.h"
 #include "compat.h"
@@ -33,18 +45,14 @@
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "menu.h"
 #include "metadata.h"
 #include "misc.h"
 #include "rcfile.h"
 #include "thumb.h"
+#include "typedefs.h"
 #include "ui-menu.h"
 #include "ui-utildlg.h"
 #include "uri-utils.h"
-
-#include <champlain-gtk/champlain-gtk.h>
-#include <champlain/champlain.h>
-#include <clutter-gtk/clutter-gtk.h>
 
 #define MARKER_COLOUR 0x00, 0x00, 0xff, 0xff
 #define TEXT_COLOUR 0x00, 0x00, 0x00, 0xff
@@ -866,7 +874,7 @@ static void bar_pane_gps_map_centreing(PaneGPSData *pgd)
 	g_string_free(message, TRUE);
 }
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 static gboolean bar_pane_gps_map_keypress_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
 {
 /* @FIXME GTK4 stub */
@@ -971,7 +979,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	gtk_container_add(GTK_CONTAINER(frame), vbox);
 
 	status = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	slider = gtk_scale_button_new(1, 17, 1, slider_icons);
 #else
 	slider = gtk_scale_button_new(GTK_ICON_SIZE_SMALL_TOOLBAR, 1, 17, 1, slider_icons);
@@ -1152,7 +1160,7 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 	bar_update_expander(pane);
 }
 
-#endif
-#endif
+#endif // HAVE_LIBCHAMPLAIN_GTK
+#endif // HAVE_LIBCHAMPLAIN
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

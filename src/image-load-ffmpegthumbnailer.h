@@ -24,7 +24,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_FFMPEGTHUMBNAILER
+#if HAVE_FFMPEGTHUMBNAILER
 struct ImageLoaderBackend;
 
 void image_loader_backend_set_ft(ImageLoaderBackend *funcs);

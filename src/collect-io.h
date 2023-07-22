@@ -22,6 +22,8 @@
 #ifndef COLLECT_IO_H
 #define COLLECT_IO_H
 
+#include <glib.h>
+
 #include "typedefs.h"
 
 struct CollectionData;

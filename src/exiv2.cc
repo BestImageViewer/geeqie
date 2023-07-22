@@ -20,38 +20,43 @@
 
 #include <config.h>
 
-#ifdef HAVE_EXIV2
-
-// Don't include the <exiv2/version.hpp> file directly
-// Early Exiv2 versions didn't have version.hpp and the macros.
-#include <exiv2/exiv2.hpp>
-#include <iostream>
-#include <string>
-
-#if EXIV2_TEST_VERSION(0,27,0)
-#define HAVE_EXIV2_ERROR_CODE
-#endif
-
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-#if EXIV2_TEST_VERSION(0,27,0)
-#define EXV_PACKAGE "exiv2"
-#endif
-
-#include <glib.h>
+#if HAVE_EXIV2
 
 #include "exif.h"
+
+#include <algorithm>
+#include <cstdint>
+#include <cstring>
+#include <exception>
+#include <list>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <exiv2/exiv2.hpp>
+#include <glib.h>
+#ifdef ENABLE_NLS
+#  include <libintl.h>
+#endif
 
 #include "debug.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "misc.h"
 #include "options.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
+
+struct ExifItem;
+
+#if EXIV2_TEST_VERSION(0,27,0)
+#define HAVE_EXIV2_ERROR_CODE
+#endif
+
+#if EXIV2_TEST_VERSION(0,27,0)
+#define EXV_PACKAGE "exiv2"
+#endif
 
 #if EXIV2_TEST_VERSION(0,28,0)
 #define AnyError Error

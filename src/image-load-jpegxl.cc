@@ -52,13 +52,20 @@
 
 #include <config.h>
 
-#ifdef HAVE_JPEGXL
+#if HAVE_JPEGXL
 
 #include "image-load-jpegxl.h"
 
+#include <cstdint>
+#include <cstdlib>
 #include <memory>
 
-#include <jxl/decode.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <jxl/codestream_header.h>
+#include <jxl/decode.h> //TODO Use decode_cxx.h?
+#include <jxl/types.h>
 
 #include "debug.h"
 #include "image-load.h"

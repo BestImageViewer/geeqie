@@ -21,13 +21,21 @@
 
 #include "dupe.h"
 
+#include <sys/time.h>
+#include <sys/types.h>
+
 #include <cinttypes>
 #include <cmath>
+#include <cstdlib>
+#include <cstring>
 
-#include <config.h>
+#include <gdk/gdk.h>
+#include <gio/gio.h>
+#include <glib-object.h>
 
 #include "cache.h"
 #include "collect-table.h"
+#include "collect.h"
 #include "compat.h"
 #include "debug.h"
 #include "dnd.h"
@@ -38,17 +46,21 @@
 #include "intl.h"
 #include "layout-image.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "md5-util.h"
 #include "menu.h"
 #include "misc.h"
-#include "pixbuf-util.h"
+#include "options.h"
 #include "print.h"
+#include "similar.h"
 #include "thumb.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
+#include "ui-utildlg.h"
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"

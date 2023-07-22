@@ -22,14 +22,15 @@
 #ifndef DUPE_H
 #define DUPE_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
 #include <gtk/gtk.h>
-
-#include "similar.h"
 
 struct CollectInfo;
 struct CollectionData;
 struct FileData;
 struct ImageLoader;
+struct ImageSimilarityData;
 struct ThumbLoader;
 
 /** @enum DupeMatchType

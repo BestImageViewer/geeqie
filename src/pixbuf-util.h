@@ -22,7 +22,10 @@
 #ifndef PIXBUF_UTIL_H
 #define PIXBUF_UTIL_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
 #include <gtk/gtk.h>
+#include <pango/pango.h>
 
 struct FileData;
 

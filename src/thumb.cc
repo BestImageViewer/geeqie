@@ -21,7 +21,13 @@
 
 #include "thumb.h"
 
-#include <config.h>
+#include <sys/types.h>
+#include <utime.h>
+
+#include <cstdio>
+#include <cstring>
+
+#include <glib-object.h>
 
 #include "cache.h"
 #include "debug.h"
@@ -34,8 +40,6 @@
 #include "pixbuf-util.h"
 #include "thumb-standard.h"
 #include "ui-fileops.h"
-
-#include <utime.h>
 
 
 static void thumb_loader_error_cb(ImageLoader *il, gpointer data);

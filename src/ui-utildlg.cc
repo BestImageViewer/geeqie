@@ -21,7 +21,14 @@
 
 #include "ui-utildlg.h"
 
+#include <cstdint>
+#include <cstdio>
 #include <cstring>
+#include <ctime>
+
+#include <gdk/gdk.h>
+#include <gio/gio.h>
+#include <glib-object.h>
 
 #include <config.h>
 
@@ -31,6 +38,7 @@
 #include "intl.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "options.h"
 #include "rcfile.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"

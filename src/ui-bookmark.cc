@@ -21,10 +21,14 @@
 
 #include "ui-bookmark.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <memory>
 
-#include <config.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <pango/pango.h>
 
 #include "compat.h"
 #include "debug.h"

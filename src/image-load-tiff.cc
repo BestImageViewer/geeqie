@@ -27,10 +27,18 @@
 
 #include <config.h>
 
-#ifdef HAVE_TIFF
+#if HAVE_TIFF
 
 #include "image-load-tiff.h"
 
+#include <cstddef>
+#include <cstdio>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <tiff.h>
 #include <tiffio.h>
 
 #include "debug.h"

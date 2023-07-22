@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_J2K
+#if HAVE_J2K
 struct ImageLoaderBackend;
 
 void image_loader_backend_set_j2k(ImageLoaderBackend *funcs);

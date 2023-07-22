@@ -22,6 +22,7 @@
 #ifndef METADATA_H
 #define METADATA_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "typedefs.h"

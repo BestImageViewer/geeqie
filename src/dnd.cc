@@ -21,10 +21,10 @@
 
 #include "dnd.h"
 
-#include <config.h>
+#include <glib-object.h>
+#include <pango/pango.h>
 
 #include "compat.h"
-#include "main-defines.h"
 #include "options.h"
 #include "pixbuf-util.h"
 

@@ -22,11 +22,11 @@
 #ifndef CACHE_LOADER_H
 #define CACHE_LOADER_H
 
+#include <glib.h>
 
-#include "cache.h"
-#include "image-load.h"
-
+struct CacheData;
 struct FileData;
+struct ImageLoader;
 
 enum CacheDataType {
 	CACHE_LOADER_NONE       = 0,

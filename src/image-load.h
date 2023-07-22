@@ -23,6 +23,8 @@
 #define IMAGE_LOAD_H
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 
 struct FileData;
 

@@ -21,7 +21,9 @@
 
 #include "ui-menu.h"
 
-#include <config.h>
+#include <cstddef>
+
+#include <pango/pango.h>
 
 #include "layout.h"
 

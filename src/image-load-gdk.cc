@@ -21,7 +21,9 @@
 
 #include "image-load-gdk.h"
 
-#include <config.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 
 #include "filedata.h"
 #include "image-load.h"

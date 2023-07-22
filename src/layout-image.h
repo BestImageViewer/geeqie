@@ -22,6 +22,7 @@
 #ifndef LAYOUT_IMAGE_H
 #define LAYOUT_IMAGE_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "typedefs.h"

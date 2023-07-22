@@ -22,10 +22,13 @@
 #ifndef VIEW_FILE_VIEW_FILE_ICON_H
 #define VIEW_FILE_VIEW_FILE_ICON_H
 
+#include <gdk/gdk.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
-#include "filedata.h"
+#include "typedefs.h"
 
+struct FileData;
 struct ViewFile;
 
 gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);

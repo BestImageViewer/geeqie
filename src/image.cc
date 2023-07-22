@@ -21,26 +21,34 @@
 
 #include "image.h"
 
-#include <config.h>
+#include <cmath>
+#include <cstring>
+
+#include <cairo.h>
+#include <glib-object.h>
 
 #include "collect-table.h"
+#include "collect.h"
 #include "color-man.h"
 #include "compat.h"
 #include "debug.h"
 #include "exif.h"
 #include "filecache.h"
+#include "filedata.h"
 #include "history-list.h"
 #include "image-load.h"
 #include "intl.h"
 #include "layout-image.h"
 #include "layout.h"
 #include "metadata.h"
+#include "options.h"
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 
-#include <cmath>
+struct ExifData;
+struct FileCacheData;
 
 static GList *image_list = nullptr;
 

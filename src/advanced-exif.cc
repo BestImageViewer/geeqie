@@ -21,6 +21,13 @@
 
 #include "advanced-exif.h"
 
+#include <cstring>
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <glib.h>
+#include <pango/pango.h>
+
 #include <config.h>
 
 #include "compat.h"
@@ -31,9 +38,14 @@
 #include "history-list.h"
 #include "intl.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "misc.h"
+#include "options.h"
 #include "ui-misc.h"
 #include "window.h"
+
+struct ExifData;
+struct ExifItem;
 
 enum {
 	ADVANCED_EXIF_DATA_COLUMN_WIDTH = 200
@@ -337,7 +349,7 @@ static gint advanced_exif_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIt
 	return ret;
 }
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 static gboolean advanced_exif_mouseclick(GtkWidget *, GdkEventButton *, gpointer data)
 {
 /* @FIXME GTK4 stub */

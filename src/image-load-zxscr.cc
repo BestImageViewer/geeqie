@@ -20,7 +20,9 @@
 
 #include "image-load-zxscr.h"
 
-#include <config.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 
 #include "debug.h"
 #include "image-load.h"

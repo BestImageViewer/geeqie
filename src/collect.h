@@ -22,6 +22,9 @@
 #ifndef COLLECT_H
 #define COLLECT_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "typedefs.h"

@@ -21,6 +21,13 @@
 
 #include "collect-io.h"
 
+#include <cstdio>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+
 #include <config.h>
 
 #include "collect.h"
@@ -29,6 +36,7 @@
 #include "intl.h"
 #include "layout-util.h"
 #include "main-defines.h"
+#include "options.h"
 #include "secure-save.h"
 #include "thumb.h"
 #include "ui-fileops.h"

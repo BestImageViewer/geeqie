@@ -23,6 +23,28 @@
 
 #include <config.h>
 
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gio/gio.h>
+#include <glib-object.h>
+
+#if HAVE_SPELL
+#include <gspell/gspell.h>
+#endif
+
+#if HAVE_LCMS
+#if HAVE_LCMS2
+#include <lcms2.h>
+#else
+#include <lcms.h>
+#endif
+#endif
+
+#include <pango/pango.h>
+
 #include "bar-keywords.h"
 #include "cache.h"
 #include "color-man.h"
@@ -37,34 +59,28 @@
 #include "img-view.h"
 #include "intl.h"
 #include "layout-util.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "main.h"
 #include "metadata.h"
 #include "misc.h"
+#include "options.h"
 #include "osd.h"
 #include "pixbuf-util.h"
 #include "rcfile.h"
 #include "slideshow.h"
 #include "toolbar.h"
 #include "trash.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 #include "window.h"
 #include "zonedetect.h"
 
-#ifdef HAVE_LCMS
-#ifdef HAVE_LCMS2
-#include <lcms2.h>
-#else
-#include <lcms.h>
-#endif
-#endif
-
-#ifdef HAVE_SPELL
-#include <gspell/gspell.h>
-#endif
+struct ZoneDetect;
 
 enum {
 	EDITOR_NAME_MAX_LENGTH = 32,
@@ -274,7 +290,7 @@ static gboolean accel_apply_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *
 static void config_window_apply()
 {
 	gboolean refresh = FALSE;
-#ifdef HAVE_LCMS2
+#if HAVE_LCMS2
 	int i = 0;
 #endif
 
@@ -491,7 +507,7 @@ static void config_window_apply()
 	config_entry_to_option(log_window_f1_entry, &options->log_window.action, nullptr);
 #endif
 
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 	for (i = 0; i < COLOR_PROFILE_INPUTS; i++)
 		{
 		config_entry_to_option(color_profile_input_name_entry[i], &options->color_profile.input_name[i], nullptr);
@@ -2045,7 +2061,7 @@ static void config_tab_general(GtkWidget *notebook)
 				 options->thumbnails.collection_preview, &c_options->thumbnails.collection_preview);
 	gtk_widget_set_tooltip_text(spin, _("The maximum number of thumbnails shown in a Collection preview montage"));
 
-#ifdef HAVE_FFMPEGTHUMBNAILER_METADATA
+#if HAVE_FFMPEGTHUMBNAILER_METADATA
 	pref_checkbox_new_int(group, _("Use embedded metadata in video files as thumbnails when available"),
 			      options->thumbnails.use_ft_metadata, &c_options->thumbnails.use_ft_metadata);
 #endif
@@ -2884,7 +2900,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 
 
 	group = pref_group_new(vbox, FALSE, _("Metadata writing sequence"), GTK_ORIENTATION_VERTICAL);
-#ifndef HAVE_EXIV2
+#if !HAVE_EXIV2
 	label = pref_label_new(group, _("Warning: Geeqie is built without Exiv2. Some options are disabled."));
 #endif
 	label = pref_label_new(group, _("When writing metadata, Geeqie will follow these steps, if selected. This process will stop when the first successful write occurs."));
@@ -2902,7 +2918,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 	gtk_widget_set_tooltip_markup(ct_button, markup);
 	g_free(markup);
 
-#ifndef HAVE_EXIV2
+#if !HAVE_EXIV2
 	gtk_widget_set_sensitive(ct_button, FALSE);
 #endif
 
@@ -2923,7 +2939,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 	pref_spacer(group, PREF_PAD_GROUP);
 
 	group = pref_group_new(vbox, FALSE, _("Step 1 Options:"), GTK_ORIENTATION_VERTICAL);
-#ifndef HAVE_EXIV2
+#if !HAVE_EXIV2
 	gtk_widget_set_sensitive(group, FALSE);
 #endif
 
@@ -2947,7 +2963,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 	pref_spacer(group, PREF_PAD_GROUP);
 
 	group = pref_group_new(vbox, FALSE, _("Steps 2 and 3 Option:"), GTK_ORIENTATION_VERTICAL);
-#ifndef HAVE_EXIV2
+#if !HAVE_EXIV2
 	gtk_widget_set_sensitive(group, FALSE);
 #endif
 
@@ -2965,7 +2981,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 	ct_button = pref_checkbox_new_int(group, _("Write altered image orientation to the metadata"), options->metadata.write_orientation, &c_options->metadata.write_orientation);
 	gtk_widget_set_tooltip_text(ct_button, _("If checked, the results of orientation commands (Rotate, Mirror and Flip) issued on an image will be written to metadata\nNote: If this option is not checked, the results of orientation commands will be lost when Geeqie closes"));
 
-#ifndef HAVE_EXIV2
+#if !HAVE_EXIV2
 	gtk_widget_set_sensitive(ct_button, FALSE);
 #endif
 
@@ -2986,7 +3002,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 
 	pref_spacer(group, PREF_PAD_GROUP);
 
-#ifdef HAVE_SPELL
+#if HAVE_SPELL
 	group = pref_group_new(vbox, FALSE, _("Spelling checks"), GTK_ORIENTATION_VERTICAL);
 
 	ct_button = pref_checkbox_new_int(group, _("Check spelling - Requires restart"), options->metadata.check_spelling, &c_options->metadata.check_spelling);
@@ -3297,7 +3313,7 @@ static void config_tab_keywords(GtkWidget *notebook)
 	GtkTextIter iter;
 	GtkTextBuffer *buffer;
 	gchar *tmp;
-#ifdef HAVE_SPELL
+#if HAVE_SPELL
 	GspellTextView *gspell_view;
 #endif
 
@@ -3318,7 +3334,7 @@ static void config_tab_keywords(GtkWidget *notebook)
 	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
 	gtk_widget_show(scrolled);
 
-#ifdef HAVE_SPELL
+#if HAVE_SPELL
 	if (options->metadata.check_spelling)
 		{
 		gspell_view = gspell_text_view_get_from_gtk_text_view(GTK_TEXT_VIEW(keyword_text));
@@ -3359,7 +3375,7 @@ static void config_tab_keywords(GtkWidget *notebook)
 }
 
 /* metadata tab */
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 static void intent_menu_cb(GtkWidget *combo, gpointer data)
 {
 	auto option = static_cast<gint *>(data);
@@ -3427,7 +3443,7 @@ static void config_tab_color(GtkWidget *notebook)
 	vbox = scrolled_notebook_page(notebook, _("Color management"));
 
 	group =  pref_group_new(vbox, FALSE, _("Input profiles"), GTK_ORIENTATION_VERTICAL);
-#ifndef HAVE_LCMS
+#if !HAVE_LCMS
 	gtk_widget_set_sensitive(pref_group_parent(group), FALSE);
 #endif
 
@@ -3471,7 +3487,7 @@ static void config_tab_color(GtkWidget *notebook)
 		}
 
 	group =  pref_group_new(vbox, FALSE, _("Screen profile"), GTK_ORIENTATION_VERTICAL);
-#ifndef HAVE_LCMS
+#if !HAVE_LCMS
 	gtk_widget_set_sensitive(pref_group_parent(group), FALSE);
 #endif
 	pref_checkbox_new_int(group, _("Use system screen profile if available"),
@@ -3484,7 +3500,7 @@ static void config_tab_color(GtkWidget *notebook)
 				     options->color_profile.screen_file, nullptr, ".icc", "ICC Files", nullptr);
 	tab_completion_add_select_button(color_profile_screen_file_entry, _("Select color profile"), FALSE);
 	gtk_widget_set_size_request(color_profile_screen_file_entry, 160, -1);
-#ifdef HAVE_LCMS
+#if HAVE_LCMS
 	add_intent_menu(table, 0, 1, _("Render Intent:"), options->color_profile.render_intent, &c_options->color_profile.render_intent);
 #endif
 	gq_gtk_grid_attach(GTK_GRID(table), tabcomp, 1, 2, 0, 1, static_cast<GtkAttachOptions>(GTK_FILL | GTK_EXPAND), static_cast<GtkAttachOptions>(0), 0, 0);

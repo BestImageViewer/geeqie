@@ -21,9 +21,13 @@
 
 #include "bar.h"
 
+#include <cstring>
+
+#include <glib-object.h>
+#include <pango/pango.h>
+
 #include <config.h>
 
-#include "bar-histogram.h"
 #include "compat.h"
 #include "debug.h"
 #include "filedata.h"
@@ -32,6 +36,7 @@
 #include "main-defines.h"
 #include "metadata.h"
 #include "rcfile.h"
+#include "typedefs.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 
@@ -172,8 +177,8 @@ static const gchar default_config_copyright[] =
 "    </layout>"
 "</gq>";
 
-#ifdef HAVE_LIBCHAMPLAIN
-#ifdef HAVE_LIBCHAMPLAIN_GTK
+#if HAVE_LIBCHAMPLAIN
+#if HAVE_LIBCHAMPLAIN_GTK
 static const gchar default_config_gps[] =
 "<gq>"
 "    <layout id = '_current_'>"
@@ -202,8 +207,8 @@ static const KnownPanes known_panes[] = {
 	{PANE_EXIF,		"file_info",	N_("File info"),	default_config_file_info},
 	{PANE_EXIF,		"location",	N_("Location and GPS"),	default_config_location},
 	{PANE_EXIF,		"copyright",	N_("Copyright"),	default_config_copyright},
-#ifdef HAVE_LIBCHAMPLAIN
-#ifdef HAVE_LIBCHAMPLAIN_GTK
+#if HAVE_LIBCHAMPLAIN
+#if HAVE_LIBCHAMPLAIN_GTK
 	{PANE_GPS,		"gps",	N_("GPS Map"),	default_config_gps},
 #endif
 #endif
@@ -313,7 +318,7 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	list = gtk_container_get_children(GTK_CONTAINER(expander));
 	data_box = static_cast<GtkWidget *>(list->data);
 
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	window = gtk_window_new();
 #else
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -735,7 +740,7 @@ static void bar_destroy(GtkWidget *, gpointer data)
 	g_free(bd);
 }
 
-#ifdef HAVE_LIBCHAMPLAIN_GTK
+#if HAVE_LIBCHAMPLAIN_GTK
 /**
    @FIXME this is an ugly hack that works around this bug:
    https://bugzilla.gnome.org/show_bug.cgi?id=590692
@@ -810,7 +815,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 					     _("Add Pane"), G_CALLBACK(bar_menu_add_cb), bd);
 	gtk_widget_show(add_box);
 
-#ifdef HAVE_LIBCHAMPLAIN_GTK
+#if HAVE_LIBCHAMPLAIN_GTK
 	g_signal_connect(G_OBJECT(gtk_bin_get_child(GTK_BIN(scrolled))), "unrealize", G_CALLBACK(bar_unrealize_clutter_fix_cb), NULL);
 #endif
 

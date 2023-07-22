@@ -33,7 +33,6 @@
 #include "md5-util.h"
 
 #include <cstdio>
-#include <cstring>
 #include <memory>
 
 using GQChecksumPtr = std::unique_ptr<GChecksum, decltype(&g_checksum_free)>;

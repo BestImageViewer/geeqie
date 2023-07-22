@@ -21,7 +21,9 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include <cairo.h>
 #include <gdk/gdk.h>
+#include <glib.h>
 
 #include "typedefs.h"
 

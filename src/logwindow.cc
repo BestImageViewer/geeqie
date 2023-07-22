@@ -21,8 +21,14 @@
 #include "logwindow.h"
 
 #include <algorithm>
+#include <cstring>
 #include <deque>
 #include <string>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <glib-object.h>
+#include <gtk/gtk.h>
 
 #include <config.h>
 
@@ -32,6 +38,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "options.h"
 #include "ui-misc.h"
 #include "window.h"
 

@@ -21,7 +21,16 @@
 
 #include "pan-item.h"
 
+#include <cstring>
+
+#include <glib-object.h>
+#include <gtk/gtk.h>
+#include <pango/pango.h>
+
+#include "cache.h"
+#include "filedata.h"
 #include "image.h"
+#include "pan-types.h"
 #include "pixbuf-util.h"
 #include "ui-misc.h"
 

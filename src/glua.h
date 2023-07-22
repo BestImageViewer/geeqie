@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_LUA
+#if HAVE_LUA
 
 #include <glib.h>
 

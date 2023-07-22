@@ -24,6 +24,13 @@
 
 #include "osd.h"
 
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
+
 #include <config.h>
 
 #include "compat.h"
@@ -32,10 +39,8 @@
 #include "glua.h"
 #include "intl.h"
 #include "metadata.h"
-#include "ui-fileops.h"
+#include "typedefs.h"
 #include "ui-misc.h"
-
-#include <cmath>
 
 static const gchar *predefined_tags[][2] = {
 	{"%name%",							N_("Name")},
@@ -321,7 +326,7 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 			{
 			data = metadata_read_string(fd, RATING_KEY, METADATA_PLAIN);
 			}
-#ifdef HAVE_LUA
+#if HAVE_LUA
 		else if (strncmp(name, "lua/", 4) == 0)
 			{
 			gchar *tmp;

@@ -22,14 +22,18 @@
 #ifndef UI_FILEOPS_H
 #define UI_FILEOPS_H
 
-#include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/types.h>
-#include <time.h>
+
+#include <ctime>
 
 #include <gio/gio.h>
+#include <glib.h>
 
 #include <config.h>
+
+#ifdef DEBUG
+#define GQ_DEBUG_PATH_UTF8 1
+#endif
 
 void print_term(gboolean err, const gchar *text_utf8);
 

@@ -21,8 +21,12 @@
 
 #include "ui-misc.h"
 
+#include <langinfo.h>
+
 #include <cstdlib>
 #include <cstring>
+
+#include <pango/pango.h>
 
 #include <config.h>
 
@@ -32,9 +36,9 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "options.h"
+#include "typedefs.h"
 #include "utilops.h"
-
-#include <langinfo.h>
 
 /*
  *-----------------------------------------------------------------------------
@@ -360,7 +364,7 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 					    GCallback func, gpointer data)
 {
 	GtkWidget *button;
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	GtkToggleButton *group;;
 #else
 	GSList *group;
@@ -368,7 +372,7 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 
 	if (sibling)
 		{
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 		group = sibling;
 #else
 		group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(sibling));
@@ -381,7 +385,7 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 
 	if (mnemonic_text)
 		{
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 		button = gtk_toggle_button_new_with_mnemonic(text);
 		gtk_toggle_button_set_group(button, group);
 #else
@@ -390,7 +394,7 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 		}
 	else
 		{
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 		button = gtk_toggle_button_new_with_label(text);
 		gtk_toggle_button_set_group(button, group);
 #else
@@ -936,7 +940,7 @@ static void date_selection_popup(DateSelection *ds)
 	gtk_widget_show(ds->calendar);
 
 	date = date_selection_get(ds->box);
-#ifdef HAVE_GTK4
+#if HAVE_GTK4
 	gtk_calendar_select_day(GTK_CALENDAR(ds->calendar), date);
 #else
 	gtk_calendar_select_month(GTK_CALENDAR(ds->calendar), g_date_time_get_month(date), g_date_time_get_year(date));

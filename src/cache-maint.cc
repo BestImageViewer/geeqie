@@ -21,9 +21,16 @@
 
 #include "cache-maint.h"
 
-#include <config.h>
+#include <dirent.h>
+#include <sys/types.h>
+
+#include <cstdlib>
+#include <cstring>
+
+#include <glib-object.h>
 
 #include "cache-loader.h"
+#include "cache.h"
 #include "compat.h"
 #include "debug.h"
 #include "filedata.h"
@@ -32,6 +39,7 @@
 #include "main-defines.h"
 #include "main.h"
 #include "misc.h"
+#include "options.h"
 #include "pixbuf-util.h"
 #include "thumb-standard.h"
 #include "thumb.h"

@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_PDF
+#if HAVE_PDF
 struct ImageLoaderBackend;
 
 void image_loader_backend_set_pdf(ImageLoaderBackend *funcs);

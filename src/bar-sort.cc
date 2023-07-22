@@ -21,7 +21,10 @@
 
 #include "bar-sort.h"
 
-#include <config.h>
+#include <cstring>
+
+#include <gdk/gdk.h>
+#include <glib-object.h>
 
 #include "collect-io.h"
 #include "collect.h"
@@ -35,10 +38,13 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "options.h"
 #include "rcfile.h"
+#include "typedefs.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
+#include "ui-utildlg.h"
 #include "utilops.h"
 #include "window.h"
 

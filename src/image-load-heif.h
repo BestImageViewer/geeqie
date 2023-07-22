@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#ifdef HAVE_HEIF
+#if HAVE_HEIF
 struct ImageLoaderBackend;
 
 void image_loader_backend_set_heif(ImageLoaderBackend *funcs);

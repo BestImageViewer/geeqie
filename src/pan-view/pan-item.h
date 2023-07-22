@@ -22,8 +22,13 @@
 #ifndef PAN_VIEW_PAN_ITEM_H
 #define PAN_VIEW_PAN_ITEM_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib.h>
+
 #include "pan-types.h"
-#include "pixbuf-renderer.h"
+
+struct FileData;
+struct PixbufRenderer;
 
 void pan_item_free(PanItem *pi);
 

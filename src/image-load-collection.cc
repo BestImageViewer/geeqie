@@ -20,7 +20,13 @@
 
 #include "image-load-collection.h"
 
-#include <config.h>
+#include <unistd.h>
+
+#include <cstdio>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib-object.h>
+#include <glib.h>
 
 #include "cache.h"
 #include "filedata.h"

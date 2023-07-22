@@ -31,17 +31,19 @@
 
 #include "image-load.h"
 
-#ifdef HAVE_RAW
+#if HAVE_RAW
 
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <libraw/libraw.h>
 
 #include "debug.h"
 #include "filedata.h"
 #include "filefilter.h"
+#include "typedefs.h"
 
 struct UnmapData
 {

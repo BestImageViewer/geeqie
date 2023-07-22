@@ -256,7 +256,7 @@ gq_marshal_pragma = custom_target('gq-marshal-pragma',
 
 project_sources += gq_marshal_pragma
 
-if conf_data.has('HAVE_LCMS')
+if conf_data.get('HAVE_LCMS', 0) == 1
     xxd_sh = find_program('generate-ClayRGB1998-icc-h.sh', dirs : join_paths(meson.project_source_root(), 'scripts'))
 
     ClayRGB1998_icc_h = custom_target('ClayRGB1998',
