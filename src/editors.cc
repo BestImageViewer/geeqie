@@ -773,43 +773,84 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 	return pathl;
 }
 
-static GString *append_quoted(GString *str, const char *s, gboolean single_quotes, gboolean double_quotes)
+struct CommandBuilder
 {
-	const char *p;
+	~CommandBuilder()
+	{
+		if (!str) return;
 
-	if (!single_quotes)
-		{
-		if (!double_quotes)
-			g_string_append_c(str, '\'');
-		else
-			g_string_append(str, "\"'");
-		}
+		g_string_free(str, TRUE);
+	}
 
-	for (p = s; *p != '\0'; p++)
-		{
-		if (*p == '\'')
-			g_string_append(str, "'\\''");
-		else
-			g_string_append_c(str, *p);
-		}
+	void init()
+	{
+		if (str) return;
 
-	if (!single_quotes)
-		{
-		if (!double_quotes)
-			g_string_append_c(str, '\'');
-		else
-			g_string_append(str, "'\"");
-		}
+		str = g_string_new("");
+	}
 
-	return str;
-}
+	void append(const gchar *val)
+	{
+		if (!str) return;
+
+		str = g_string_append(str, val);
+	}
+
+	void append_c(gchar c)
+	{
+		if (!str) return;
+
+		str = g_string_append_c(str, c);
+	}
+
+	void append_quoted(const char *s, gboolean single_quotes, gboolean double_quotes)
+	{
+		if (!str) return;
+
+		if (!single_quotes)
+			{
+			if (!double_quotes)
+				str = g_string_append_c(str, '\'');
+			else
+				str = g_string_append(str, "\"'");
+			}
+
+		for (const char *p = s; *p != '\0'; p++)
+			{
+			if (*p == '\'')
+				str = g_string_append(str, "'\\''");
+			else
+				str = g_string_append_c(str, *p);
+			}
+
+		if (!single_quotes)
+			{
+			if (!double_quotes)
+				str = g_string_append_c(str, '\'');
+			else
+				str = g_string_append(str, "'\"");
+			}
+	}
+
+	gchar *get_command()
+	{
+		if (!str) return nullptr;
+
+		auto command = g_string_free(str, FALSE);
+		str = nullptr;
+		return command;
+	}
+
+private:
+	GString *str{nullptr};
+};
 
 
 EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, gboolean consider_sidecars, gchar **output)
 {
 	auto flags = static_cast<EditorFlags>(0);
 	const gchar *p;
-	GString *result = nullptr;
+	CommandBuilder result;
 	gboolean escape = FALSE;
 	gboolean single_quotes = FALSE;
 	gboolean double_quotes = FALSE;
@@ -817,12 +858,14 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 	DEBUG_2("editor_command_parse: %s %d %d", editor->key, consider_sidecars, !!output);
 
 	if (output)
-		result = g_string_new("");
+		{
+		*output = nullptr;
+		result.init();
+		}
 
 	if (editor->exec == nullptr || editor->exec[0] == '\0')
 		{
-		flags = static_cast<EditorFlags>(flags | EDITOR_ERROR_EMPTY);
-		goto err;
+		return static_cast<EditorFlags>(flags | EDITOR_ERROR_EMPTY);
 		}
 
 	p = editor->exec;
@@ -836,16 +879,16 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 		if (escape)
 			{
 			escape = FALSE;
-			if (output) result = g_string_append_c(result, *p);
+			result.append_c(*p);
 			}
 		else if (*p == '\\')
 			{
 			if (!single_quotes) escape = TRUE;
-			if (output) result = g_string_append_c(result, *p);
+			result.append_c(*p);
 			}
 		else if (*p == '\'')
 			{
-			if (output) result = g_string_append_c(result, *p);
+			result.append_c(*p);
 			if (!single_quotes && !double_quotes)
 				single_quotes = TRUE;
 			else if (single_quotes)
@@ -853,7 +896,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 			}
 		else if (*p == '"')
 			{
-			if (output) result = g_string_append_c(result, *p);
+			result.append_c(*p);
 			if (!single_quotes && !double_quotes)
 				double_quotes = TRUE;
 			else if (double_quotes)
@@ -872,16 +915,14 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 					flags = static_cast<EditorFlags>(flags | EDITOR_FOR_EACH);
 					if (flags & EDITOR_SINGLE_COMMAND)
 						{
-						flags = static_cast<EditorFlags>(flags | EDITOR_ERROR_INCOMPATIBLE);
-						goto err;
+						return static_cast<EditorFlags>(flags | EDITOR_ERROR_INCOMPATIBLE);
 						}
 					if (list)
 						{
 						/* use the first file from the list */
 						if (!list->data)
 							{
-							flags = static_cast<EditorFlags>(flags | EDITOR_ERROR_NO_FILE);
-							goto err;
+							return static_cast<EditorFlags>(flags | EDITOR_ERROR_NO_FILE);
 							}
 						pathl = editor_command_path_parse(static_cast<FileData *>(list->data),
 										  consider_sidecars,
@@ -906,13 +947,9 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 
 						if (!pathl)
 							{
-							flags = static_cast<EditorFlags>(flags | EDITOR_ERROR_NO_FILE);
-							goto err;
+							return static_cast<EditorFlags>(flags | EDITOR_ERROR_NO_FILE);
 							}
-						if (output)
-							{
-							result = append_quoted(result, pathl, single_quotes, double_quotes);
-							}
+						result.append_quoted(pathl, single_quotes, double_quotes);
 						g_free(pathl);
 						}
 					break;
@@ -922,8 +959,7 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 					flags = static_cast<EditorFlags>(flags | EDITOR_SINGLE_COMMAND);
 					if (flags & (EDITOR_FOR_EACH | EDITOR_DEST))
 						{
-						flags = static_cast<EditorFlags>(flags | EDITOR_ERROR_INCOMPATIBLE);
-						goto err;
+						return static_cast<EditorFlags>(flags | EDITOR_ERROR_INCOMPATIBLE);
 						}
 
 					if (list)
@@ -940,48 +976,37 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 								{
 								ok = TRUE;
 
-								if (output)
+								if (work != list)
 									{
-									ok = TRUE;
-									if (work != list) g_string_append_c(result, ' ');
-									result = append_quoted(result, pathl, single_quotes, double_quotes);
+									result.append_c(' ');
 									}
+								result.append_quoted(pathl, single_quotes, double_quotes);
 								g_free(pathl);
 								}
 							work = work->next;
 							}
 						if (!ok)
 							{
-							flags = static_cast<EditorFlags>(flags | EDITOR_ERROR_NO_FILE);
-							goto err;
+							return static_cast<EditorFlags>(flags | EDITOR_ERROR_NO_FILE);
 							}
 						}
 					break;
 				case 'i':
 					if (editor->icon && *editor->icon)
 						{
-						if (output)
-							{
-							result = g_string_append(result, "--icon ");
-							result = append_quoted(result, editor->icon, single_quotes, double_quotes);
-							}
+						result.append("--icon ");
+						result.append_quoted(editor->icon, single_quotes, double_quotes);
 						}
 					break;
 				case 'c':
-					if (output)
-						{
-						result = append_quoted(result, editor->name, single_quotes, double_quotes);
-						}
+					result.append_quoted(editor->name, single_quotes, double_quotes);
 					break;
 				case 'k':
-					if (output)
-						{
-						result = append_quoted(result, editor->file, single_quotes, double_quotes);
-						}
+					result.append_quoted(editor->file, single_quotes, double_quotes);
 					break;
 				case '%':
 					/* %% = % escaping */
-					if (output) result = g_string_append_c(result, *p);
+					result.append_c(*p);
 					break;
 				case 'd':
 				case 'D':
@@ -992,13 +1017,12 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 					/* deprecated according to spec, ignore */
 					break;
 				default:
-					flags = static_cast<EditorFlags>(flags | EDITOR_ERROR_SYNTAX);
-					goto err;
+					return static_cast<EditorFlags>(flags | EDITOR_ERROR_SYNTAX);
 				}
 			}
 		else
 			{
-			if (output) result = g_string_append_c(result, *p);
+			result.append_c(*p);
 			}
 		p++;
 		}
@@ -1007,19 +1031,10 @@ EditorFlags editor_command_parse(const EditorDescription *editor, GList *list, g
 
 	if (output)
 		{
-		*output = g_string_free(result, FALSE);
+		*output = result.get_command();
 		DEBUG_3("Editor cmd: %s", *output);
 		}
 
-	return flags;
-
-
-err:
-	if (output)
-		{
-		g_string_free(result, TRUE);
-		*output = nullptr;
-		}
 	return flags;
 }
 
