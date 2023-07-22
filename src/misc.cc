@@ -19,6 +19,7 @@
  */
 
 #include <clocale>
+#include <memory>
 
 #include "main.h"
 #include "misc.h"
@@ -137,7 +138,7 @@ gchar *expand_tilde(const gchar *filename)
 
 gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
 {
-	gchar *message;
+	std::unique_ptr<gchar, decltype(&g_free)> message{nullptr, g_free};
 	gchar *path = g_build_filename(path_dir, GEOCODE_NAME, NULL);
 	gchar *cmd = g_strconcat("echo \'", input_text, "\'  | awk -f ", path, NULL);
 
@@ -148,7 +149,7 @@ gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
 
 		if ((fp = popen(cmd, "r")) == nullptr)
 			{
-			message = g_strconcat("Error: opening pipe\n", input_text, NULL);
+			message.reset(g_strconcat("Error: opening pipe\n", input_text, NULL));
 			}
 		else
 			{
@@ -157,22 +158,22 @@ gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
 				DEBUG_1("Output: %s", buf);
 				}
 
-			message = g_strconcat(buf, NULL);
+			message.reset(g_strconcat(buf, NULL));
 
 			if(pclose(fp))
 				{
-				message = g_strconcat("Error: Command not found or exited with error status\n", input_text, NULL);
+				message.reset(g_strconcat("Error: Command not found or exited with error status\n", input_text, NULL));
 				}
 			}
 		}
 	else
 		{
-		message = g_strconcat(input_text, NULL);
+		message.reset(g_strconcat(input_text, NULL));
 		}
 
 	g_free(path);
 	g_free(cmd);
-	return message;
+	return message.release();
 }
 
 gchar *decode_geo_parameters(const gchar *input_text)

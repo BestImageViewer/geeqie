@@ -3423,7 +3423,6 @@ gboolean marks_list_save(gchar *path, gboolean save)
 {
 	SecureSaveInfo *ssi;
 	gchar *pathl;
-	GString  *marks = g_string_new("");
 
 	pathl = path_from_utf8(path);
 	ssi = secure_open(pathl);
@@ -3436,6 +3435,7 @@ gboolean marks_list_save(gchar *path, gboolean save)
 
 	secure_fprintf(ssi, "#Marks lists\n");
 
+	GString *marks = g_string_new("");
 	if (save)
 		{
 		g_hash_table_foreach(file_data_pool, marks_get_files, marks);

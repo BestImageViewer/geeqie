@@ -33,6 +33,8 @@
 #include <windows.h>
 #elif defined(__APPLE__) || defined(__linux__) || defined(__unix__) || defined(_POSIX_VERSION)
 #include <cerrno>
+#include <vector>
+
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -534,74 +536,52 @@ static int ZDFindPolygon(const ZoneDetect *library, uint32_t wantedId, uint32_t*
     return 0;
 }
 
-static int32_t* ZDPolygonToListInternal(const ZoneDetect *library, uint32_t polygonIndex, size_t* length)
+static std::vector<int32_t> ZDPolygonToListInternal(const ZoneDetect *library, uint32_t polygonIndex)
 {
     struct Reader reader;
     ZDReaderInit(&reader, library, polygonIndex);
 
-    size_t listLength = 2 * 100;
-    size_t listIndex = 0;
-
-    auto list = static_cast<int32_t *>(malloc(sizeof(int32_t) * listLength));
-    if(!list) {
-        goto fail;
-    }
+    constexpr size_t listLength = 2 * 100;
+    std::vector<int32_t> list;
+    list.reserve(listLength);
 
     while(true) {
         int32_t pointLat, pointLon;
         int result = ZDReaderGetPoint(&reader, &pointLat, &pointLon);
         if(result < 0) {
-            goto fail;
-        } else if(result == 0) {
+            return {};
+        }
+        if(result == 0) {
             break;
         }
 
-        if(listIndex >= listLength) {
-            listLength *= 2;
-            if(listLength >= 1048576) {
-                goto fail;
-            }
+        list.push_back(pointLat);
+        list.push_back(pointLon);
 
-            list = static_cast<int32_t *>(realloc(list, sizeof(int32_t) * listLength));
-            if(!list) {
-                goto fail;
-            }
+        if(list.size() >= 1048576) {
+            return {};
         }
-
-        list[listIndex++] = pointLat;
-        list[listIndex++] = pointLon;
-    }
-
-    if(length) {
-        *length = listIndex;
     }
 
     return list;
-
-fail:
-    if(list) {
-        free(list);
-    }
-    return nullptr;
 }
 
 float* ZDPolygonToList(const ZoneDetect *library, uint32_t polygonId, size_t* lengthPtr)
 {
     uint32_t polygonIndex;
-    int32_t* data = nullptr;
     float* flData = nullptr;
-    size_t length = 0;
 
     if (!ZDFindPolygon(library, polygonId, nullptr, &polygonIndex))
 	    return nullptr;
 
-    data = ZDPolygonToListInternal(library, polygonIndex, &length);
-    if (!data)
+    const auto data = ZDPolygonToListInternal(library, polygonIndex);
+    if (data.empty())
 	    return nullptr;
+
+    size_t length = data.size();
 
     flData = static_cast<float *>(malloc(sizeof(float) * length));
     if(!flData) {
-	    free(data);
 	    return nullptr;
 	    }
 
@@ -612,8 +592,6 @@ float* ZDPolygonToList(const ZoneDetect *library, uint32_t polygonId, size_t* le
         flData[i] = ZDFixedPointToFloat(lat, 90, library->precision);
         flData[i+1] = ZDFixedPointToFloat(lon, 180, library->precision);
     }
-
-    free(data);
 
     if(lengthPtr) {
         *lengthPtr = length;

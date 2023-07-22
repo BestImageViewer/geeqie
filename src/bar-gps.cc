@@ -666,8 +666,6 @@ static void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint ind
 	gint zoom;
 	ChamplainMapSource *mapsource;
 	const gchar *map_id;
-	gchar *str = nullptr;
-	GString *buffer = g_string_new(str);
 	gdouble position;
 	gint int_position;
 	gint w, h;
@@ -692,6 +690,8 @@ static void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint ind
 	WRITE_NL();
 	write_char_option(outstr, indent, "map-id", map_id);
 
+	GString *buffer = g_string_new(nullptr);
+
 	g_object_get(G_OBJECT(pgd->gps_view), "zoom-level", &zoom, NULL);
 	g_string_printf(buffer, "%d", zoom);
 	WRITE_NL();
@@ -713,8 +713,8 @@ static void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint ind
 	WRITE_NL();
 	WRITE_STRING("/>");
 
-  g_object_unref(mapsource);
-
+	g_string_free(buffer, TRUE);
+	g_object_unref(mapsource);
 }
 
 static void bar_pane_gps_slider_changed_cb(GtkScaleButton *slider,

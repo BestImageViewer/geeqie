@@ -702,13 +702,10 @@ enum PathType {
 
 static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_sidecars, PathType type, const EditorDescription *editor)
 {
-	GString *string;
 	gchar *pathl;
 	const gchar *p = nullptr;
 
 	DEBUG_2("editor_command_path_parse: %s %d %d %s", fd->path, consider_sidecars, type, editor->key);
-
-	string = g_string_new("");
 
 	if (type == PATH_FILE || type == PATH_FILE_URL)
 		{
@@ -757,8 +754,8 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 		}
 
 	g_assert(p);
-	string = g_string_append(string, p);
 
+	GString *string = g_string_new(p);
 	if (type == PATH_FILE_URL) g_string_prepend(string, "file://");
 	pathl = path_from_utf8(string->str);
 	g_string_free(string, TRUE);

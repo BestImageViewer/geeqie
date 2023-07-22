@@ -20,6 +20,7 @@
  */
 
 #include <cstring>
+#include <memory>
 
 #include "main.h"
 #include "ui-bookmark.h"
@@ -888,33 +889,31 @@ void bookmark_list_set_only_directories(GtkWidget *list, gboolean only_directori
 void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 {
 	BookMarkData *bm;
-	gchar *buf;
 	gchar *real_path;
 
 	bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
 	if (!bm) return;
 
-	buf = bookmark_string(name, path, nullptr);
+	std::unique_ptr<gchar, decltype(&g_free)> buf(bookmark_string(name, path, nullptr), g_free);
 	real_path = realpath(path, nullptr);
 
 	if (strstr(real_path, get_collections_dir()) && isfile(path))
 		{
-		buf = bookmark_string(name, path, "gq-collection");
+		buf.reset(bookmark_string(name, path, "gq-collection"));
 		}
 	else
 		{
 		if (isfile(path))
 			{
-			buf = bookmark_string(name, path, "gtk-file");
+			buf.reset(bookmark_string(name, path, "gtk-file"));
 			}
 		else
 			{
-			buf = bookmark_string(name, path, nullptr);
+			buf.reset(bookmark_string(name, path, nullptr));
 			}
 		}
 
-	history_list_add_to_key(bm->key, buf, 0);
-	g_free(buf);
+	history_list_add_to_key(bm->key, buf.get(), 0);
 	g_free(real_path);
 
 	bookmark_populate_all(bm->key);

@@ -832,7 +832,6 @@ static void get_filelist(const gchar *text, GIOChannel *channel, gboolean recurs
 	FileFormatClass format_class;
 	FileData *dir_fd;
 	FileData *fd;
-	GString *out_string = g_string_new(nullptr);
 	GList *work;
 	gchar *tilde_filename;
 
@@ -871,6 +870,7 @@ static void get_filelist(const gchar *text, GIOChannel *channel, gboolean recurs
 		filelist_read(dir_fd, &list, nullptr);
 		}
 
+	GString *out_string = g_string_new(nullptr);
 	work = list;
 	while (work)
 		{

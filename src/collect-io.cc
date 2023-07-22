@@ -78,7 +78,6 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	guint append = !!(flags & COLLECTION_LOAD_APPEND);
 	guint only_geometry = !!(flags & COLLECTION_LOAD_GEOMETRY);
 	gboolean reading_extended_filename = FALSE;
-	GString *extended_filename_buffer = g_string_new(nullptr);
 	gchar *buffer2;
 
 	if (!only_geometry)
@@ -115,6 +114,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		return FALSE;
 		}
 
+	GString *extended_filename_buffer = g_string_new(nullptr);
 	while (fgets(s_buf, sizeof(s_buf), f))
 		{
 		gchar *buf;

@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <memory>
+
 #include "main.h"
 #include "collect.h"
 #include "collect-dlg.h"
@@ -124,32 +126,32 @@ static void real_collection_button_pressed(FileDialog *fd, gpointer data, gint a
 {
 	auto cd = static_cast<CollectionData *>(data);
 	gboolean err = FALSE;
-	gchar *text = nullptr;
+	std::unique_ptr<gchar, decltype(&g_free)> text{nullptr, g_free};
 
 	if (!isname(fd->dest_path))
 		{
 		err = TRUE;
-		text = g_strdup_printf(_("No such file '%s'."), fd->dest_path);
+		text.reset(g_strdup_printf(_("No such file '%s'."), fd->dest_path));
 		}
 	if (!err && isdir(fd->dest_path))
 		{
 		err = TRUE;
-		text = g_strdup_printf(_("'%s' is a directory, not a collection file."), fd->dest_path);
+		text.reset(g_strdup_printf(_("'%s' is a directory, not a collection file."), fd->dest_path));
 		}
 	if (!err && !access_file(fd->dest_path, R_OK))
 		{
 		err = TRUE;
-		text = g_strdup_printf(_("You do not have read permissions on the file '%s'."), fd->dest_path);
+		text.reset(g_strdup_printf(_("You do not have read permissions on the file '%s'."), fd->dest_path));
 		}
 
-	if (err) {
-		if  (text)
+	if (err)
+		{
+		if (text)
 			{
-			file_util_warning_dialog(_("Can not open collection file"), text, GTK_STOCK_DIALOG_ERROR, nullptr);
-			g_free(text);
-		}
+			file_util_warning_dialog(_("Can not open collection file"), text.get(), GTK_STOCK_DIALOG_ERROR, nullptr);
+			}
 		return;
-	}
+		}
 
 	if (append)
 		{
