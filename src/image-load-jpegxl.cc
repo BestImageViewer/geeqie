@@ -57,7 +57,7 @@
 
 #ifdef HAVE_JPEGXL
 
-#include <vector>
+#include <memory>
 
 #include "jxl/decode.h"
 
@@ -77,103 +77,103 @@ static void free_buffer(guchar *pixels, gpointer UNUSED(data))
 	g_free(pixels);
 }
 
-static uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t *stride,
-                           size_t *xsize, size_t *ysize, int *has_alpha) {
-  JxlDecoder *dec = JxlDecoderCreate(nullptr);
-  *has_alpha = 1;
-  std::vector<uint8_t> pixels;
-  if (!dec) {
-    log_printf("JxlDecoderCreate failed\n");
-    return nullptr;
-  }
-  if (JXL_DEC_SUCCESS !=
-      JxlDecoderSubscribeEvents(dec, JXL_DEC_BASIC_INFO | JXL_DEC_FULL_IMAGE)) {
-    log_printf("JxlDecoderSubscribeEvents failed\n");
-    JxlDecoderDestroy(dec);
-    return nullptr;
-  }
+static uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, size_t &ysize, size_t &stride)
+{
+	std::unique_ptr<JxlDecoder, decltype(&JxlDecoderDestroy)> dec{JxlDecoderCreate(nullptr), JxlDecoderDestroy};
+	if (!dec)
+		{
+		log_printf("JxlDecoderCreate failed\n");
+		return nullptr;
+		}
+	if (JXL_DEC_SUCCESS != JxlDecoderSubscribeEvents(dec.get(), JXL_DEC_BASIC_INFO | JXL_DEC_FULL_IMAGE))
+		{
+		log_printf("JxlDecoderSubscribeEvents failed\n");
+		return nullptr;
+		}
 
-   /* Avoid compiler warning - used uninitialized */
-   /* This file will be replaced by libjxl at some time */
-   *stride = 0;
-   *ysize = 0;
-   
-  JxlBasicInfo info;
-  int success = 0;
-  JxlPixelFormat format = {4, JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
-  JxlDecoderSetInput(dec, next_in, size);
+	/* Avoid compiler warning - used uninitialized */
+	/* This file will be replaced by libjxl at some time */
+	ysize = 0;
+	stride = 0;
+	
+	std::unique_ptr<uint8_t, decltype(&free)> pixels{nullptr, free};
+	JxlBasicInfo info;
+	JxlPixelFormat format = {4, JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
+	JxlDecoderSetInput(dec.get(), next_in, size);
 
-  for (;;) {
-    JxlDecoderStatus status = JxlDecoderProcessInput(dec);
+	for (;;)
+		{
+		JxlDecoderStatus status = JxlDecoderProcessInput(dec.get());
 
-    if (status == JXL_DEC_ERROR) {
-      log_printf("Decoder error\n");
-      break;
-    } else if (status == JXL_DEC_NEED_MORE_INPUT) {
-      log_printf("Error, already provided all input\n");
-      break;
-    } else if (status == JXL_DEC_BASIC_INFO) {
-      if (JXL_DEC_SUCCESS != JxlDecoderGetBasicInfo(dec, &info)) {
-        log_printf("JxlDecoderGetBasicInfo failed\n");
-        break;
-      }
-      *xsize = info.xsize;
-      *ysize = info.ysize;
-      *stride = info.xsize * 4;
-    } else if (status == JXL_DEC_NEED_IMAGE_OUT_BUFFER) {
-      size_t buffer_size;
-      if (JXL_DEC_SUCCESS !=
-          JxlDecoderImageOutBufferSize(dec, &format, &buffer_size)) {
-        log_printf("JxlDecoderImageOutBufferSize failed\n");
-        break;
-      }
-      if (buffer_size != *stride * *ysize) {
-        log_printf("Invalid out buffer size %zu %zu\n", buffer_size,
-                *stride * *ysize);
-        break;
-      }
-      size_t pixels_buffer_size = buffer_size * sizeof(uint8_t);
-      pixels.reserve(buffer_size);
-      if (JXL_DEC_SUCCESS != JxlDecoderSetImageOutBuffer(dec, &format,
-                                                         pixels.data(),
-                                                         pixels_buffer_size)) {
-        log_printf("JxlDecoderSetImageOutBuffer failed\n");
-        break;
-      }
-    } else if (status == JXL_DEC_FULL_IMAGE) {
-      // This means the decoder has decoded all pixels into the buffer.
-      success = 1;
-      break;
-    } else if (status == JXL_DEC_SUCCESS) {
-      log_printf("Decoding finished before receiving pixel data\n");
-      break;
-    } else {
-      log_printf("Unexpected decoder status: %d\n", status);
-      break;
-    }
-  }
+		switch (status)
+			{
+			case JXL_DEC_ERROR:
+				log_printf("Decoder error\n");
+				return nullptr;
+			case JXL_DEC_NEED_MORE_INPUT:
+				log_printf("Error, already provided all input\n");
+				return nullptr;
+			case JXL_DEC_BASIC_INFO:
+				if (JXL_DEC_SUCCESS != JxlDecoderGetBasicInfo(dec.get(), &info))
+					{
+					log_printf("JxlDecoderGetBasicInfo failed\n");
+					return nullptr;
+					}
+				xsize = info.xsize;
+				ysize = info.ysize;
+				stride = info.xsize * 4;
+				break;
+			case JXL_DEC_NEED_IMAGE_OUT_BUFFER:
+				{
+				size_t buffer_size;
+				if (JXL_DEC_SUCCESS != JxlDecoderImageOutBufferSize(dec.get(), &format, &buffer_size))
+					{
+					log_printf("JxlDecoderImageOutBufferSize failed\n");
+					return nullptr;
+					}
+				if (buffer_size != stride * ysize)
+					{
+					log_printf("Invalid out buffer size %zu %zu\n", buffer_size, stride * ysize);
+					return nullptr;
+					}
+				size_t pixels_buffer_size = buffer_size * sizeof(uint8_t);
+				pixels.reset(static_cast<uint8_t *>(malloc(pixels_buffer_size)));
+				if (JXL_DEC_SUCCESS != JxlDecoderSetImageOutBuffer(dec.get(), &format, pixels.get(), pixels_buffer_size))
+					{
+					log_printf("JxlDecoderSetImageOutBuffer failed\n");
+					return nullptr;
+					}
+				}
+				break;
+			case JXL_DEC_FULL_IMAGE:
+				// This means the decoder has decoded all pixels into the buffer.
+				return pixels.release();
+			case JXL_DEC_SUCCESS:
+				log_printf("Decoding finished before receiving pixel data\n");
+				return nullptr;
+			default:
+				log_printf("Unexpected decoder status: %d\n", status);
+				return nullptr;
+			}
+		}
 
-  JxlDecoderDestroy(dec);
-  if (success)
-    return pixels.data();
-  return nullptr;
+	return nullptr;
 }
 
 static gboolean image_loader_jpegxl_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
 {
 	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	gboolean ret = FALSE;
-	size_t stride;
 	size_t xsize;
 	size_t ysize;
-	int has_alpha;
+	size_t stride;
 	uint8_t *decoded = nullptr;
 
-	decoded = JxlMemoryToPixels(buf, count, &stride, &xsize, &ysize, &has_alpha);
+	decoded = JxlMemoryToPixels(buf, count, xsize, ysize, stride);
 
 	if (decoded)
 		{
-		ld->pixbuf = gdk_pixbuf_new_from_data(decoded, GDK_COLORSPACE_RGB, has_alpha, 8, xsize, ysize, stride, free_buffer, nullptr);
+		ld->pixbuf = gdk_pixbuf_new_from_data(decoded, GDK_COLORSPACE_RGB, TRUE, 8, xsize, ysize, stride, free_buffer, nullptr);
 
 		ld->area_updated_cb(loader, 0, 0, xsize, ysize, ld->data);
 
