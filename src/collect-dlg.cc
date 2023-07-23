@@ -215,7 +215,6 @@ static void collection_save_or_load_dialog(const gchar *path,
 		title = _("Append collection");
 		btntext = _("_Append");
 		btnfunc = reinterpret_cast<gpointer>(collection_append_cb);
-		icon_name = "list-add";
 		icon_name = GQ_ICON_ADD;
 		}
 
