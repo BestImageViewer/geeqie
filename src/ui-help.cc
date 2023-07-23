@@ -143,13 +143,13 @@ static void help_window_load_text(GtkWidget *text, const gchar *path)
 	gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(text), &iter, 0.0, TRUE, 0, 0);
 }
 
-static gboolean help_window_delete_cb(GtkWidget *widget, GdkEventAny *UNUSED(event), gpointer UNUSED(data))
+static gboolean help_window_delete_cb(GtkWidget *widget, GdkEventAny *, gpointer)
 {
 	gtk_widget_destroy(widget);
 	return TRUE;
 }
 
-static void help_window_close(GtkWidget *UNUSED(widget), gpointer data)
+static void help_window_close(GtkWidget *, gpointer data)
 {
 	auto window = static_cast<GtkWidget *>(data);
 	gtk_widget_destroy(window);

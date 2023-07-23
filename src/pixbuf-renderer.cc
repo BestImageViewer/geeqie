@@ -143,12 +143,12 @@ static void pr_stereo_temp_disable(PixbufRenderer *pr, gboolean disable);
  *-------------------------------------------------------------------
  */
 
-static void pixbuf_renderer_class_init_wrapper(void *g_class, void *UNUSED(class_data))
+static void pixbuf_renderer_class_init_wrapper(void *g_class, void *)
 {
 	pixbuf_renderer_class_init(static_cast<PixbufRendererClass *>(g_class));
 }
 
-static void pixbuf_renderer_init_wrapper(PixbufRenderer *pr, void *UNUSED(class_data))
+static void pixbuf_renderer_init_wrapper(PixbufRenderer *pr, void *)
 {
 	pixbuf_renderer_init(pr);
 }
@@ -1916,7 +1916,7 @@ static void pr_size_sync(PixbufRenderer *pr, gint new_width, gint new_height)
 	pr_update_signal(pr);
 }
 
-static void pr_size_cb(GtkWidget *UNUSED(widget), GtkAllocation *allocation, gpointer data)
+static void pr_size_cb(GtkWidget *, GtkAllocation *allocation, gpointer data)
 {
 	auto pr = static_cast<PixbufRenderer *>(data);
 
@@ -2004,7 +2004,7 @@ void pixbuf_renderer_set_scroll_center(PixbufRenderer *pr, gdouble x, gdouble y)
  *-------------------------------------------------------------------
  */
 
-static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpointer UNUSED(data))
+static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpointer)
 {
 	PixbufRenderer *pr;
 	gint accel;
@@ -2073,7 +2073,7 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 	return FALSE;
 }
 
-static gboolean pr_leave_notify_cb(GtkWidget *widget, GdkEventCrossing *UNUSED(cevent), gpointer UNUSED(data))
+static gboolean pr_leave_notify_cb(GtkWidget *widget, GdkEventCrossing *, gpointer)
 {
 	PixbufRenderer *pr;
 
@@ -2085,7 +2085,7 @@ static gboolean pr_leave_notify_cb(GtkWidget *widget, GdkEventCrossing *UNUSED(c
 	return FALSE;
 }
 
-static gboolean pr_mouse_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer UNUSED(data))
+static gboolean pr_mouse_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer)
 {
 	PixbufRenderer *pr;
 	GtkWidget *parent;
@@ -2125,7 +2125,7 @@ static gboolean pr_mouse_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpo
 	return FALSE;
 }
 
-static gboolean pr_mouse_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer UNUSED(data))
+static gboolean pr_mouse_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer)
 {
 	PixbufRenderer *pr;
 
@@ -2161,7 +2161,7 @@ static gboolean pr_mouse_release_cb(GtkWidget *widget, GdkEventButton *bevent, g
 	return FALSE;
 }
 
-static gboolean pr_mouse_leave_cb(GtkWidget *widget, GdkEventCrossing *UNUSED(event), gpointer UNUSED(data))
+static gboolean pr_mouse_leave_cb(GtkWidget *widget, GdkEventCrossing *, gpointer)
 {
 	PixbufRenderer *pr;
 
@@ -2178,7 +2178,7 @@ static gboolean pr_mouse_leave_cb(GtkWidget *widget, GdkEventCrossing *UNUSED(ev
 	return FALSE;
 }
 
-static void pr_mouse_drag_cb(GtkWidget *widget, GdkDragContext *UNUSED(context), gpointer UNUSED(data))
+static void pr_mouse_drag_cb(GtkWidget *widget, GdkDragContext *, gpointer)
 {
 	PixbufRenderer *pr;
 
@@ -2986,7 +2986,7 @@ gboolean pixbuf_renderer_get_virtual_rect_unused(PixbufRenderer *pr, GdkRectangl
 }
 #pragma GCC diagnostic pop
 
-void pixbuf_renderer_set_size_early(PixbufRenderer *UNUSED(pr), guint UNUSED(width), guint UNUSED(height))
+void pixbuf_renderer_set_size_early(PixbufRenderer *, guint, guint)
 {
 #if 0
 	/** @FIXME this function does not consider the image orientation,

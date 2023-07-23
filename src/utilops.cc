@@ -201,7 +201,7 @@ FileDialog *file_util_file_dlg(const gchar *title,
  * because it does not have a mouse center option,
  * and we must center it before show, implement it here.
  */
-static void file_util_warning_dialog_ok_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void file_util_warning_dialog_ok_cb(GenericDialog *, gpointer)
 {
 	/* no op */
 }
@@ -548,7 +548,7 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 /* call file_util_perform_ci_internal or start_editor_from_filelist_full */
 
 
-static void file_util_resume_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void file_util_resume_cb(GenericDialog *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	if (ud->external)
@@ -557,7 +557,7 @@ static void file_util_resume_cb(GenericDialog *UNUSED(gd), gpointer data)
 		file_util_perform_ci_internal(ud);
 }
 
-static void file_util_abort_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void file_util_abort_cb(GenericDialog *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	if (ud->external)
@@ -855,7 +855,7 @@ static void file_util_perform_ci_dir(UtilityData *ud, gboolean internal, gboolea
 	file_util_dialog_run(ud);
 }
 
-static gint file_util_perform_ci_dir_cb(gpointer UNUSED(resume_data), EditorFlags flags, GList *UNUSED(list), gpointer data)
+static gint file_util_perform_ci_dir_cb(gpointer, EditorFlags flags, GList *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	file_util_perform_ci_dir(ud, FALSE, !EDITOR_ERRORS_BUT_SKIPPED(flags));
@@ -979,14 +979,14 @@ static GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget 
 		}
 }
 
-static void file_util_check_resume_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void file_util_check_resume_cb(GenericDialog *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	ud->phase = UTILITY_PHASE_CHECKED;
 	file_util_dialog_run(ud);
 }
 
-static void file_util_check_abort_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void file_util_check_abort_cb(GenericDialog *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	ud->phase = UTILITY_PHASE_START;
@@ -1198,7 +1198,7 @@ static void file_util_fdlg_ok_cb(FileDialog *fdlg, gpointer data)
 	file_util_dialog_run(ud);
 }
 
-static void file_util_dest_folder_entry_cb(GtkWidget *UNUSED(entry), gpointer data)
+static void file_util_dest_folder_entry_cb(GtkWidget *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	file_util_dest_folder_update_path(ud);
@@ -1419,13 +1419,13 @@ static void file_util_rename_preview_update(UtilityData *ud)
 
 }
 
-static void file_util_rename_preview_entry_cb(GtkWidget *UNUSED(entry), gpointer data)
+static void file_util_rename_preview_entry_cb(GtkWidget *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	file_util_rename_preview_update(ud);
 }
 
-static void file_util_rename_preview_adj_cb(GtkWidget *UNUSED(spin), gpointer data)
+static void file_util_rename_preview_adj_cb(GtkWidget *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	file_util_rename_preview_update(ud);
@@ -1441,8 +1441,7 @@ static gboolean file_util_rename_idle_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static void file_util_rename_preview_order_cb(GtkTreeModel *UNUSED(treemodel), GtkTreePath *UNUSED(tpath),
-					      GtkTreeIter *UNUSED(iter), gpointer data)
+static void file_util_rename_preview_order_cb(GtkTreeModel *, GtkTreePath *, GtkTreeIter *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 
@@ -1452,7 +1451,7 @@ static void file_util_rename_preview_order_cb(GtkTreeModel *UNUSED(treemodel), G
 }
 
 
-static gboolean file_util_preview_cb(GtkTreeSelection *UNUSED(selection), GtkTreeModel *store,
+static gboolean file_util_preview_cb(GtkTreeSelection *, GtkTreeModel *store,
 				     GtkTreePath *tpath, gboolean path_currently_selected,
 				     gpointer data)
 {
@@ -1499,7 +1498,7 @@ static void box_append_safe_delete_status(GenericDialog *gd)
 	gtk_widget_set_sensitive(label, FALSE);
 }
 
-static void file_util_details_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void file_util_details_cb(GenericDialog *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	if (ud->details_func && ud->sel_fd)
@@ -1919,7 +1918,7 @@ static void file_util_warn_op_in_progress(const gchar *title)
 	file_util_warning_dialog(title, _("Another operation in progress.\n"), GTK_STOCK_DIALOG_ERROR, nullptr);
 }
 
-static void file_util_details_dialog_close_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void file_util_details_dialog_close_cb(GtkWidget *, gpointer data)
 {
 	gtk_widget_destroy(GTK_WIDGET(data));
 
@@ -1932,7 +1931,7 @@ static void file_util_details_dialog_destroy_cb(GtkWidget *widget, gpointer data
 }
 
 
-static void file_util_details_dialog_ok_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void file_util_details_dialog_ok_cb(GenericDialog *, gpointer)
 {
 	/* no op */
 }
@@ -2939,7 +2938,7 @@ static gboolean file_util_write_metadata_first_after_done(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static void file_util_write_metadata_first_done(gboolean success, const gchar *UNUSED(done_path), gpointer data)
+static void file_util_write_metadata_first_done(gboolean success, const gchar *, gpointer data)
 {
 	auto dd = static_cast<UtilityDelayData *>(data);
 
@@ -3164,7 +3163,7 @@ static void clipboard_get_func(GtkClipboard *clipboard, GtkSelectionData *select
  *
  *
  */
-static void clipboard_clear_func(GtkClipboard *UNUSED(clipboard), gpointer data)
+static void clipboard_clear_func(GtkClipboard *, gpointer data)
 {
 	auto cbd = static_cast<ClipboardData *>(data);
 
@@ -3256,7 +3255,7 @@ void file_util_copy_path_list_to_clipboard(GList *fd_list, gboolean quoted)
 	filelist_free(fd_list);
 }
 
-static void new_folder_entry_activate_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void new_folder_entry_activate_cb(GtkWidget *, gpointer data)
 {
 	auto dialog = static_cast<GtkDialog *>(data);
 

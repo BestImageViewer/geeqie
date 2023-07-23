@@ -98,7 +98,7 @@ static void fullscreen_hide_mouse_reset(FullScreenData *fs)
 	fs->hide_mouse_id = g_timeout_add(FULL_SCREEN_HIDE_MOUSE_DELAY, fullscreen_hide_mouse_cb, fs);
 }
 
-static gboolean fullscreen_mouse_moved(GtkWidget *UNUSED(widget), GdkEventMotion *UNUSED(event), gpointer data)
+static gboolean fullscreen_mouse_moved(GtkWidget *, GdkEventMotion *, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -157,7 +157,7 @@ static void fullscreen_mouse_set_busy_idle(FullScreenData *fs)
 		}
 }
 
-static void fullscreen_image_update_cb(ImageWindow *UNUSED(imd), gpointer data)
+static void fullscreen_image_update_cb(ImageWindow *, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -168,7 +168,7 @@ static void fullscreen_image_update_cb(ImageWindow *UNUSED(imd), gpointer data)
 		}
 }
 
-static void fullscreen_image_complete_cb(ImageWindow *UNUSED(imd), gboolean preload, gpointer data)
+static void fullscreen_image_complete_cb(ImageWindow *, gboolean preload, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -195,7 +195,7 @@ static void fullscreen_saver_deactivate()
 		}
 }
 
-static gboolean fullscreen_saver_block_cb(gpointer UNUSED(data))
+static gboolean fullscreen_saver_block_cb(gpointer)
 {
 	if (options->fullscreen.disable_saver)
 		{
@@ -205,7 +205,7 @@ static gboolean fullscreen_saver_block_cb(gpointer UNUSED(data))
 	return TRUE;
 }
 
-static gboolean fullscreen_delete_cb(GtkWidget *UNUSED(widget), GdkEventAny *UNUSED(event), gpointer data)
+static gboolean fullscreen_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -636,7 +636,7 @@ static void fullscreen_prefs_selection_add(GtkListStore *store, const gchar *tex
 					 FS_MENU_COLUMN_VALUE, value, -1);
 }
 
-GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value, gboolean *UNUSED(above_value))
+GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value, gboolean *)
 {
 	GtkWidget *vbox;
 	GtkWidget *hbox;

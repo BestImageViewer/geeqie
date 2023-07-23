@@ -346,7 +346,7 @@ GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
  *-----------------------------------------------------------------------------
  */
 
-static void popup_menu_short_lived_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void popup_menu_short_lived_cb(GtkWidget *, gpointer data)
 {
 	/* destroy the menu */
 	g_object_unref(G_OBJECT(data));

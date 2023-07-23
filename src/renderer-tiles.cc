@@ -460,7 +460,7 @@ static ImageTile *rt_tile_get(RendererTiles *rt, gint x, gint y, gboolean only_e
 	return rt_tile_add(rt, x, y);
 }
 
-static gint pixmap_calc_size(cairo_surface_t *UNUSED(surface))
+static gint pixmap_calc_size(cairo_surface_t *)
 {
 	return options->image.tile_size * options->image.tile_size * 4 / 8;
 }
@@ -791,7 +791,7 @@ static void rt_overlay_list_reset_window(RendererTiles *rt)
 		}
 }
 
-void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint UNUSED(x), gint UNUSED(y))
+void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint, gint)
 {
 	auto rc = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rc->pr;
@@ -834,7 +834,7 @@ gboolean renderer_tiles_overlay_get(void *renderer, gint id, GdkPixbuf **pixbuf,
 	return TRUE;
 }
 
-static void rt_hierarchy_changed_cb(GtkWidget *UNUSED(widget), GtkWidget *UNUSED(previous_toplevel), gpointer data)
+static void rt_hierarchy_changed_cb(GtkWidget *, GtkWidget *, gpointer data)
 {
 	auto rt = static_cast<RendererTiles *>(data);
 	rt_overlay_list_reset_window(rt);
@@ -1087,7 +1087,7 @@ static void rt_tile_apply_orientation(RendererTiles *rt, gint orientation, GdkPi
 
 static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 				      gint x, gint y, gint w, gint h,
-				      gboolean UNUSED(new_data), gboolean fast)
+				      gboolean, gboolean fast)
 {
 	PixbufRenderer *pr = rt->pr;
 	GList *list;
@@ -2034,7 +2034,7 @@ static void renderer_redraw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 		 clamp, render, new_data, only_existing);
 }
 
-static void renderer_update_pixbuf(void *renderer, gboolean UNUSED(lazy))
+static void renderer_update_pixbuf(void *renderer, gboolean)
 {
 	rt_queue_clear(static_cast<RendererTiles *>(renderer));
 }
@@ -2159,7 +2159,7 @@ static gboolean rt_size_allocate_cb(GtkWidget *widget,  GdkRectangle *allocation
 	return FALSE;
 }
 
-static gboolean rt_draw_cb(GtkWidget *UNUSED(widget), cairo_t *cr, gpointer data)
+static gboolean rt_draw_cb(GtkWidget *, cairo_t *cr, gpointer data)
 {
 	auto rt = static_cast<RendererTiles *>(data);
 	GList *work;

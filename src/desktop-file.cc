@@ -106,7 +106,7 @@ static gboolean editor_window_save(EditorWindow *ew)
 	return ret;
 }
 
-static void editor_window_close_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void editor_window_close_cb(GtkWidget *, gpointer data)
 {
 	auto ew = static_cast<EditorWindow *>(data);
 
@@ -115,13 +115,13 @@ static void editor_window_close_cb(GtkWidget *UNUSED(widget), gpointer data)
 	g_free(ew);
 }
 
-static gint editor_window_delete_cb(GtkWidget *w, GdkEventAny *UNUSED(event), gpointer data)
+static gint editor_window_delete_cb(GtkWidget *w, GdkEventAny *, gpointer data)
 {
 	editor_window_close_cb(w, data);
 	return TRUE;
 }
 
-static void editor_window_save_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void editor_window_save_cb(GtkWidget *, gpointer data)
 {
 	auto ew = static_cast<EditorWindow *>(data);
 
@@ -135,7 +135,7 @@ static void editor_window_save_cb(GtkWidget *UNUSED(widget), gpointer data)
 	ew->modified = FALSE;
 }
 
-static void editor_window_text_modified_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void editor_window_text_modified_cb(GtkWidget *, gpointer data)
 {
 	auto ew = static_cast<EditorWindow *>(data);
 
@@ -146,7 +146,7 @@ static void editor_window_text_modified_cb(GtkWidget *UNUSED(widget), gpointer d
 		}
 }
 
-static void editor_window_entry_changed_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void editor_window_entry_changed_cb(GtkWidget *, gpointer data)
 {
 	auto ew = static_cast<EditorWindow *>(data);
 	const gchar *content = gtk_entry_get_text(GTK_ENTRY(ew->entry));
@@ -262,14 +262,14 @@ static void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 }
 
 
-static void editor_list_window_close_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void editor_list_window_close_cb(GtkWidget *, gpointer)
 {
 	gtk_widget_destroy(editor_list_window->window);
 	g_free(editor_list_window);
 	editor_list_window = nullptr;
 }
 
-static gboolean editor_list_window_delete(GtkWidget *UNUSED(widget), GdkEventAny *UNUSED(event), gpointer UNUSED(data))
+static gboolean editor_list_window_delete(GtkWidget *, GdkEventAny *, gpointer)
 {
 	editor_list_window_close_cb(nullptr, nullptr);
 	return TRUE;
@@ -277,7 +277,7 @@ static gboolean editor_list_window_delete(GtkWidget *UNUSED(widget), GdkEventAny
 
 static void editor_list_window_delete_dlg_cancel(GenericDialog *gd, gpointer data);
 
-static void editor_list_window_delete_dlg_cancel(GenericDialog *UNUSED(gd), gpointer data)
+static void editor_list_window_delete_dlg_cancel(GenericDialog *, gpointer data)
 {
 	auto ewdl = static_cast<EditorWindowDel_Data *>(data);
 
@@ -307,7 +307,7 @@ static void editor_list_window_delete_dlg_ok_cb(GenericDialog *gd, gpointer data
 	editor_list_window_delete_dlg_cancel(gd, data);
 }
 
-static void editor_list_window_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void editor_list_window_delete_cb(GtkWidget *, gpointer data)
 {
 	auto ewl = static_cast<EditorListWindow *>(data);
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));
@@ -352,7 +352,7 @@ static void editor_list_window_delete_cb(GtkWidget *UNUSED(widget), gpointer dat
 		}
 }
 
-static void editor_list_window_edit_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void editor_list_window_edit_cb(GtkWidget *, gpointer data)
 {
 	auto ewl = static_cast<EditorListWindow *>(data);
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));
@@ -373,17 +373,17 @@ static void editor_list_window_edit_cb(GtkWidget *UNUSED(widget), gpointer data)
 		}
 }
 
-static void editor_list_window_new_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void editor_list_window_new_cb(GtkWidget *, gpointer)
 {
 	editor_window_new(desktop_file_template, _("new.desktop"));
 }
 
-static void editor_list_window_help_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void editor_list_window_help_cb(GtkWidget *, gpointer)
 {
 	help_window_show("GuidePluginsConfig.html");
 }
 
-static void editor_list_window_selection_changed_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void editor_list_window_selection_changed_cb(GtkWidget *, gpointer data)
 {
 	auto ewl = static_cast<EditorListWindow *>(data);
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));
@@ -464,7 +464,7 @@ static gint editor_list_window_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkT
 	return ret;
 }
 
-static void plugin_disable_cb(GtkCellRendererToggle *UNUSED(renderer), gchar *path_str, gpointer data)
+static void plugin_disable_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
 {
 	auto ewl = static_cast<EditorListWindow *>(data);
 	GtkTreePath *tpath;
@@ -508,8 +508,8 @@ static void plugin_disable_cb(GtkCellRendererToggle *UNUSED(renderer), gchar *pa
 	layout_editors_reload_finish();
 }
 
-static void plugin_disable_set_func(GtkTreeViewColumn *UNUSED(tree_column), GtkCellRenderer *cell,
-							GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer UNUSED(data))
+static void plugin_disable_set_func(GtkTreeViewColumn *, GtkCellRenderer *cell,
+							GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer)
 {
 	gboolean disabled;
 

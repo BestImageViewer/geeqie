@@ -308,7 +308,7 @@ static void set_print_image_text_string(gchar **template_string, const gchar *va
 	*template_string = g_strdup(value);
 }
 
-static void image_text_template_view_changed_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void image_text_template_view_changed_cb(GtkWidget *, gpointer data)
 {
 	GtkWidget *pTextView;
 	GtkTextBuffer *pTextBuffer;
@@ -459,9 +459,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_widget_show(button);
 }
 
-static gboolean paginate_cb(GtkPrintOperation *UNUSED(operation),
-									GtkPrintContext *UNUSED(context),
-									gpointer data)
+static gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)
 {
 	auto pw = static_cast<PrintWindow *>(data);
 
@@ -538,8 +536,7 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 	return text;
 }
 
-static void draw_page(GtkPrintOperation *UNUSED(operation), GtkPrintContext *context,
-									gint page_nr, gpointer data)
+static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpointer data)
 {
 	auto pw = static_cast<PrintWindow *>(data);
 	FileData *fd;
@@ -750,9 +747,7 @@ static void draw_page(GtkPrintOperation *UNUSED(operation), GtkPrintContext *con
 	if (rotated) g_object_unref(rotated);
 }
 
-static void begin_print(GtkPrintOperation *operation,
-						GtkPrintContext *UNUSED(context),
-						gpointer user_data)
+static void begin_print(GtkPrintOperation *operation, GtkPrintContext *, gpointer user_data)
 {
 	auto pw = static_cast<PrintWindow *>(user_data);
 	gint page_count;
@@ -764,7 +759,7 @@ static void begin_print(GtkPrintOperation *operation,
 }
 
 
-GObject *option_tab_cb(GtkPrintOperation *UNUSED(operation), gpointer user_data)
+GObject *option_tab_cb(GtkPrintOperation *, gpointer user_data)
 {
 	auto pw = static_cast<PrintWindow *>(user_data);
 
@@ -783,8 +778,7 @@ static void print_pref_store(PrintWindow *pw)
 	g_free(tmp);
 }
 
-static void end_print_cb(GtkPrintOperation *operation,
-								GtkPrintContext *UNUSED(context), gpointer data)
+static void end_print_cb(GtkPrintOperation *operation, GtkPrintContext *, gpointer data)
 {
 	auto pw = static_cast<PrintWindow *>(data);
 	GList *work;
@@ -837,7 +831,7 @@ static void end_print_cb(GtkPrintOperation *operation,
 	g_free(pw);
 }
 
-void print_window_new(FileData *UNUSED(fd), GList *selection, GList *UNUSED(list), GtkWidget *parent)
+void print_window_new(FileData *, GList *selection, GList *, GtkWidget *parent)
 {
 	GtkWidget *vbox;
 	GtkPrintOperation *operation;

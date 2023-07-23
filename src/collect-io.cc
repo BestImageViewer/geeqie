@@ -293,7 +293,7 @@ static void collection_load_thumb_do(CollectionData *cd)
 	if (cd->info_updated_func) cd->info_updated_func(cd, cd->thumb_info, cd->info_updated_data);
 }
 
-static void collection_load_thumb_error_cb(ThumbLoader *UNUSED(tl), gpointer data)
+static void collection_load_thumb_error_cb(ThumbLoader *, gpointer data)
 {
 	auto cd = static_cast<CollectionData *>(data);
 
@@ -301,7 +301,7 @@ static void collection_load_thumb_error_cb(ThumbLoader *UNUSED(tl), gpointer dat
 	collection_load_thumb_step(cd);
 }
 
-static void collection_load_thumb_done_cb(ThumbLoader *UNUSED(tl), gpointer data)
+static void collection_load_thumb_done_cb(ThumbLoader *, gpointer data)
 {
 	auto cd = static_cast<CollectionData *>(data);
 
@@ -866,7 +866,7 @@ static gboolean collect_manager_process_entry_list()
 
 
 
-static gboolean collect_manager_process_cb(gpointer UNUSED(data))
+static gboolean collect_manager_process_cb(gpointer)
 {
 	if (collection_manager_action_list) collect_manager_refresh();
 	collect_manager_process_actions(COLLECT_MANAGER_ACTIONS_PER_IDLE);
@@ -878,7 +878,7 @@ static gboolean collect_manager_process_cb(gpointer UNUSED(data))
 	return G_SOURCE_REMOVE;
 }
 
-static gboolean collect_manager_timer_cb(gpointer UNUSED(data))
+static gboolean collect_manager_timer_cb(gpointer)
 {
 	DEBUG_1("collection manager timer expired");
 
@@ -983,7 +983,7 @@ void collect_manager_flush()
 	while (collect_manager_process_cb(nullptr));
 }
 
-void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(data))
+void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 

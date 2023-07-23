@@ -235,7 +235,7 @@ static void help_browser_run(const gchar *path)
 
 static GtkWidget *help_window = nullptr;
 
-static void help_window_destroy_cb(GtkWidget *UNUSED(window), gpointer UNUSED(data))
+static void help_window_destroy_cb(GtkWidget *, gpointer)
 {
 	help_window = nullptr;
 }
@@ -327,8 +327,7 @@ struct HelpSearchData {
 	gchar *text_entry;
 };
 
-static void help_search_window_show_icon_press(GtkEntry *UNUSED(entry), GtkEntryIconPosition UNUSED(pos),
-									GdkEvent *UNUSED(event), gpointer userdata)
+static void help_search_window_show_icon_press(GtkEntry *, GtkEntryIconPosition, GdkEvent *, gpointer userdata)
 {
 	auto hsd = static_cast<HelpSearchData *>(userdata);
 
@@ -337,7 +336,7 @@ static void help_search_window_show_icon_press(GtkEntry *UNUSED(entry), GtkEntry
 	gtk_entry_set_text(GTK_ENTRY(hsd->edit_widget), hsd->text_entry);
 }
 
-static void help_search_window_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void help_search_window_ok_cb(GenericDialog *, gpointer data)
 {
 	auto hsd = static_cast<HelpSearchData *>(data);
 	gchar *search_command;
@@ -351,7 +350,7 @@ static void help_search_window_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
 	g_free(hsd);
 }
 
-static void help_search_window_cancel_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void help_search_window_cancel_cb(GenericDialog *, gpointer data)
 {
 	auto hsd = static_cast<HelpSearchData *>(data);
 

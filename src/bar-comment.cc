@@ -135,14 +135,14 @@ static void bar_pane_comment_set_selection(PaneCommentData *pcd, gboolean append
 	g_free(comment);
 }
 
-static void bar_pane_comment_sel_add_cb(GtkWidget *UNUSED(button), gpointer data)
+static void bar_pane_comment_sel_add_cb(GtkWidget *, gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 
 	bar_pane_comment_set_selection(pcd, TRUE);
 }
 
-static void bar_pane_comment_sel_replace_cb(GtkWidget *UNUSED(button), gpointer data)
+static void bar_pane_comment_sel_replace_cb(GtkWidget *, gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 
@@ -222,7 +222,7 @@ static void bar_pane_comment_notify_cb(FileData *fd, NotifyType type, gpointer d
 		}
 }
 
-static void bar_pane_comment_changed(GtkTextBuffer *UNUSED(buffer), gpointer data)
+static void bar_pane_comment_changed(GtkTextBuffer *, gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 
@@ -230,7 +230,7 @@ static void bar_pane_comment_changed(GtkTextBuffer *UNUSED(buffer), gpointer dat
 }
 
 
-static void bar_pane_comment_populate_popup(GtkTextView *UNUSED(textview), GtkMenu *menu, gpointer data)
+static void bar_pane_comment_populate_popup(GtkTextView *, GtkMenu *menu, gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 
@@ -239,7 +239,7 @@ static void bar_pane_comment_populate_popup(GtkTextView *UNUSED(textview), GtkMe
 	menu_item_add_stock(GTK_WIDGET(menu), _("Replace existing text in selected files"), GTK_STOCK_CONVERT, G_CALLBACK(bar_pane_comment_sel_replace_cb), data);
 }
 
-static void bar_pane_comment_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_pane_comment_destroy(GtkWidget *, gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 

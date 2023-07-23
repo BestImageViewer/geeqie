@@ -96,7 +96,7 @@ static void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer da
 		}
 }
 
-static void bar_pane_rating_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_pane_rating_destroy(GtkWidget *, gpointer data)
 {
 	auto prd = static_cast<PaneRatingData *>(data);
 

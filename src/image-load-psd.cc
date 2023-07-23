@@ -283,7 +283,7 @@ static void free_context(PsdContext *ctx)
 	g_free(ctx);
 }
 
-static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
+static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	auto ctx = g_new0(PsdContext, 1);
@@ -549,18 +549,18 @@ static GdkPixbuf* image_loader_psd_get_pixbuf(gpointer loader)
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_psd_get_format_name(gpointer UNUSED(loader))
+static gchar* image_loader_psd_get_format_name(gpointer)
 {
 	return g_strdup("psd");
 }
 
-static gchar** image_loader_psd_get_format_mime_types(gpointer UNUSED(loader))
+static gchar** image_loader_psd_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"application/psd", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_psd_close(gpointer UNUSED(loader), GError **UNUSED(error))
+static gboolean image_loader_psd_close(gpointer, GError **)
 {
 	return TRUE;
 }

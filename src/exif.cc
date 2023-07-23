@@ -1107,13 +1107,13 @@ guchar *exif_get_color_profile(ExifData *exif, guint *data_len)
 }
 
 
-gchar* exif_get_image_comment(FileData* UNUSED(fd))
+gchar* exif_get_image_comment(FileData*)
 {
 	log_printf("%s", _("Can't get image comment: not compiled with Exiv2.\n"));
 	return g_strdup("");
 }
 
-void exif_set_image_comment(FileData* UNUSED(fd), const gchar* UNUSED(comment))
+void exif_set_image_comment(FileData*, const gchar*)
 {
 	log_printf("%s", _("Can't set image comment: not compiled with Exiv2.\n"));
 }
@@ -1207,7 +1207,7 @@ void exif_free(ExifData *exif)
 	g_free(exif);
 }
 
-ExifData *exif_read(gchar *path, gchar *UNUSED(sidecar_path), GHashTable *UNUSED(modified_xmp))
+ExifData *exif_read(gchar *path, gchar *, GHashTable *)
 {
 	ExifData *exif;
 	gpointer f;
@@ -1439,12 +1439,12 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 	return text;
 }
 
-gchar *exif_item_get_string(ExifItem *item, gint UNUSED(idx))
+gchar *exif_item_get_string(ExifItem *item, gint)
 {
 	return exif_item_get_data_as_text_full(item, METADATA_PLAIN);
 }
 
-gchar *exif_item_get_data_as_text(ExifItem *item, ExifData *UNUSED(exif))
+gchar *exif_item_get_data_as_text(ExifItem *item, ExifData *)
 {
 	return exif_item_get_data_as_text_full(item, METADATA_FORMATTED);
 }
@@ -1574,20 +1574,20 @@ void exif_write_data_list(ExifData *exif, FILE *f, gint human_readable_list)
 	g_fprintf(f, "----------------------------------------------------\n");
 }
 
-gboolean exif_write(ExifData *UNUSED(exif))
+gboolean exif_write(ExifData *)
 {
 	log_printf("Not compiled with EXIF write support\n");
 	return FALSE;
 }
 
-gboolean exif_write_sidecar(ExifData *UNUSED(exif), gchar *UNUSED(path))
+gboolean exif_write_sidecar(ExifData *, gchar *)
 {
 	log_printf("Not compiled with EXIF write support\n");
 	return FALSE;
 }
 
 
-gint exif_update_metadata(ExifData *UNUSED(exif), const gchar *UNUSED(key), const GList *UNUSED(values))
+gint exif_update_metadata(ExifData *, const gchar *, const GList *)
 {
 	return 0;
 }
@@ -1629,7 +1629,7 @@ struct UnmapData
 
 static GList *exif_unmap_list = nullptr;
 
-guchar *exif_get_preview(ExifData *exif, guint *data_len, gint UNUSED(requested_width), gint UNUSED(requested_height))
+guchar *exif_get_preview(ExifData *exif, guint *data_len, gint, gint)
 {
 	guint offset;
 	const gchar* path;

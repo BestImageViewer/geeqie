@@ -807,7 +807,7 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 	return profile;
 }
 #else
-guchar *heif_color_profile(FileData *UNUSED(fd), guint *UNUSED(profile_len))
+guchar *heif_color_profile(FileData *, guint *)
 {
 	return NULL;
 }
@@ -817,25 +817,25 @@ guchar *heif_color_profile(FileData *UNUSED(fd), guint *UNUSED(profile_len))
 /*** color support not enabled ***/
 
 
-ColorMan *color_man_new(ImageWindow *UNUSED(imd), GdkPixbuf *UNUSED(pixbuf),
-			ColorManProfileType UNUSED(input_type), const gchar *UNUSED(input_file),
-			ColorManProfileType UNUSED(screen_type), const gchar *UNUSED(screen_file),
-			guchar *UNUSED(screen_data), guint UNUSED(screen_data_len))
+ColorMan *color_man_new(ImageWindow *, GdkPixbuf *,
+			ColorManProfileType, const gchar *,
+			ColorManProfileType, const gchar *,
+			guchar *, guint)
 {
 	/* no op */
 	return nullptr;
 }
 
-ColorMan *color_man_new_embedded(ImageWindow *UNUSED(imd), GdkPixbuf *UNUSED(pixbuf),
-				 guchar *UNUSED(input_data), guint UNUSED(input_data_len),
-				 ColorManProfileType UNUSED(screen_type), const gchar *UNUSED(screen_file),
-				 guchar *UNUSED(screen_data), guint UNUSED(screen_data_len))
+ColorMan *color_man_new_embedded(ImageWindow *, GdkPixbuf *,
+				 guchar *, guint,
+				 ColorManProfileType, const gchar *,
+				 guchar *, guint)
 {
 	/* no op */
 	return nullptr;
 }
 
-void color_man_free(ColorMan *UNUSED(cm))
+void color_man_free(ColorMan *)
 {
 	/* no op */
 }
@@ -845,17 +845,17 @@ void color_man_update()
 	/* no op */
 }
 
-void color_man_correct_region(ColorMan *UNUSED(cm), GdkPixbuf *UNUSED(pixbuf), gint UNUSED(x), gint UNUSED(y), gint UNUSED(w), gint UNUSED(h))
+void color_man_correct_region(ColorMan *, GdkPixbuf *, gint, gint, gint, gint)
 {
 	/* no op */
 }
 
-gboolean color_man_get_status(ColorMan *UNUSED(cm), gchar **UNUSED(image_profile), gchar **UNUSED(screen_profile))
+gboolean color_man_get_status(ColorMan *, gchar **, gchar **)
 {
 	return FALSE;
 }
 
-guchar *heif_color_profile(FileData *UNUSED(fd), guint *UNUSED(profile_len))
+guchar *heif_color_profile(FileData *, guint *)
 {
 	return nullptr;
 }

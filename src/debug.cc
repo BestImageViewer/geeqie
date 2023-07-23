@@ -345,7 +345,7 @@ void log_print_backtrace(const gchar *file, const gchar *function, gint line)
 		}
 }
 #else
-void log_print_backtrace(const gchar *UNUSED(file), const gchar *UNUSED(function), gint UNUSED(line))
+void log_print_backtrace(const gchar *, const gchar *, gint)
 {
 }
 #endif

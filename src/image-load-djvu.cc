@@ -41,12 +41,12 @@ struct ImageLoaderDJVU {
 	gint page_total;
 };
 
-static void free_buffer(guchar *pixels, gpointer UNUSED(data))
+static void free_buffer(guchar *pixels, gpointer)
 {
 	g_free (pixels);;
 }
 
-static gboolean image_loader_djvu_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
+static gboolean image_loader_djvu_load(gpointer loader, const guchar *buf, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderDJVU *>(loader);
 	ddjvu_context_t *ctx;
@@ -135,12 +135,12 @@ static GdkPixbuf* image_loader_djvu_get_pixbuf(gpointer loader)
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_djvu_get_format_name(gpointer UNUSED(loader))
+static gchar* image_loader_djvu_get_format_name(gpointer)
 {
 	return g_strdup("djvu");
 }
 
-static gchar** image_loader_djvu_get_format_mime_types(gpointer UNUSED(loader))
+static gchar** image_loader_djvu_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/vnd.djvu", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
@@ -160,7 +160,7 @@ static gint image_loader_djvu_get_page_total(gpointer loader)
 	return ld->page_total;
 }
 
-static gboolean image_loader_djvu_close(gpointer UNUSED(loader), GError **UNUSED(error))
+static gboolean image_loader_djvu_close(gpointer, GError **)
 {
 	return TRUE;
 }

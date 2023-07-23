@@ -98,14 +98,14 @@ static GtkTargetEntry bar_pane_gps_drop_types[] = {
 };
 static gint n_gps_entry_drop_types = 2;
 
-static void bar_pane_gps_close_cancel_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void bar_pane_gps_close_cancel_cb(GenericDialog *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 
 	g_list_free(pgd->geocode_list);
 }
 
-static void bar_pane_gps_close_save_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 	FileData *fd;
@@ -125,10 +125,10 @@ static void bar_pane_gps_close_save_cb(GenericDialog *UNUSED(gd), gpointer data)
 	g_list_free(pgd->geocode_list);
 }
 
- static void bar_pane_gps_dnd_receive(GtkWidget *pane, GdkDragContext *UNUSED(context),
+ static void bar_pane_gps_dnd_receive(GtkWidget *pane, GdkDragContext *,
 									  gint x, gint y,
 									  GtkSelectionData *selection_data, guint info,
-									  guint UNUSED(time), gpointer UNUSED(data))
+									  guint, gpointer)
 {
 	PaneGPSData *pgd;
 	GenericDialog *gd;
@@ -254,8 +254,7 @@ static void bar_pane_gps_dnd_init(gpointer data)
 
 }
 
-static gboolean bar_gps_draw_direction (ClutterCanvas *UNUSED(canvas),
-				cairo_t *cr, gpointer UNUSED(data))
+static gboolean bar_gps_draw_direction (ClutterCanvas *, cairo_t *cr, gpointer)
 {
 	cairo_set_source_rgb(cr, 255, 0, 0);
 
@@ -285,12 +284,12 @@ static void bar_pane_gps_thumb_done_cb(ThumbLoader *tl, gpointer data)
 	thumb_loader_free(tl);
 }
 
-static void bar_pane_gps_thumb_error_cb(ThumbLoader *tl, gpointer UNUSED(data))
+static void bar_pane_gps_thumb_error_cb(ThumbLoader *tl, gpointer)
 {
 	thumb_loader_free(tl);
 }
 
-static gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButtonEvent *bevent, gpointer UNUSED(data))
+static gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButtonEvent *bevent, gpointer)
 {
 	FileData *fd;
 	ClutterActor *label_marker, *parent_marker;
@@ -581,7 +580,7 @@ void bar_pane_gps_set_map_source(PaneGPSData *pgd, const gchar *map_id)
 	g_object_unref(map_factory);
 }
 
-void bar_pane_gps_enable_markers_checked_toggle_cb(GtkWidget *UNUSED(menu_widget), gpointer data)
+void bar_pane_gps_enable_markers_checked_toggle_cb(GtkWidget *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 
@@ -595,7 +594,7 @@ void bar_pane_gps_enable_markers_checked_toggle_cb(GtkWidget *UNUSED(menu_widget
 		}
 }
 
-static void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *UNUSED(menu_widget), gpointer data)
+static void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 
@@ -732,9 +731,7 @@ static void bar_pane_gps_slider_changed_cb(GtkScaleButton *slider,
 	g_string_free(message, TRUE);
 
 }
-static void bar_pane_gps_view_state_changed_cb(ChamplainView *view,
-           				       GParamSpec *UNUSED(gobject),
-           				       gpointer data)
+static void bar_pane_gps_view_state_changed_cb(ChamplainView *view, GParamSpec *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
  	ChamplainState status;
@@ -858,7 +855,7 @@ void bar_pane_gps_map_centreing(PaneGPSData *pgd)
 	g_string_free(message, TRUE);
 }
 
-static gboolean bar_pane_gps_map_keypress_cb(GtkWidget *UNUSED(widget), GdkEventButton *bevent, gpointer data)
+static gboolean bar_pane_gps_map_keypress_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 	GtkWidget *menu;
@@ -896,7 +893,7 @@ static gboolean bar_pane_gps_map_keypress_cb(GtkWidget *UNUSED(widget), GdkEvent
 		}
 }
 
-static void bar_pane_gps_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_pane_gps_destroy(GtkWidget *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 

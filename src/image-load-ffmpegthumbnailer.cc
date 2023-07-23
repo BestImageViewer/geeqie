@@ -51,19 +51,19 @@ static void image_loader_ft_log_cb(ThumbnailerLogLevel log_level, const char* ms
 }
 #endif
 
-void image_loader_ft_destroy_image_data(guchar *UNUSED(pixels), gpointer data)
+void image_loader_ft_destroy_image_data(guchar *, gpointer data)
 {
 	auto image = static_cast<image_data *>(data);
 
 	video_thumbnailer_destroy_image_data (image);
 }
 
-static gchar* image_loader_ft_get_format_name(gpointer UNUSED(loader))
+static gchar* image_loader_ft_get_format_name(gpointer)
 {
 	return g_strdup("ffmpeg");
 }
 
-static gchar** image_loader_ft_get_format_mime_types(gpointer UNUSED(loader))
+static gchar** image_loader_ft_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"video/mp4", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
@@ -96,7 +96,7 @@ static void image_loader_ft_set_size(gpointer loader, int width, int height)
 	DEBUG_1("TG: setting size, w=%d, h=%d", width, height);
 }
 
-static gboolean image_loader_ft_load (gpointer loader, const guchar *UNUSED(buf), gsize UNUSED(count), GError **UNUSED(error))
+static gboolean image_loader_ft_load (gpointer loader, const guchar *, gsize, GError **)
 {
 	auto lft = static_cast<ImageLoaderFT *>(loader);
 	auto il = static_cast<ImageLoader *>(lft->data);
@@ -164,11 +164,11 @@ static GdkPixbuf* image_loader_ft_get_pixbuf(gpointer loader)
 	return lft->pixbuf;
 }
 
-static void image_loader_ft_abort(gpointer UNUSED(loader))
+static void image_loader_ft_abort(gpointer)
 {
 }
 
-static gboolean image_loader_ft_close(gpointer UNUSED(loader), GError **UNUSED(error))
+static gboolean image_loader_ft_close(gpointer, GError **)
 {
 	return TRUE;
 }

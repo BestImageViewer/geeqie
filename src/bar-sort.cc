@@ -291,7 +291,7 @@ static void bar_sort_undo_cb(GtkWidget *button, gpointer data)
 		}
 }
 
-static void bar_sort_bookmark_select_folder(SortData *sd, FileData *UNUSED(source), const gchar *path)
+static void bar_sort_bookmark_select_folder(SortData *sd, FileData *, const gchar *path)
 {
 	GList *orig_list;
 	GList *action_list;
@@ -420,7 +420,7 @@ static void bar_sort_set_filter_cb(GtkWidget *button, gpointer data)
 	bar_sort_set_action(sd, BAR_SORT_FILTER, key);
 }
 
-static void bar_filter_help_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void bar_filter_help_cb(GenericDialog *, gpointer)
 {
 	help_window_show("GuidePluginsConfig.html#Geeqieextensions");
 }
@@ -439,7 +439,7 @@ static void bar_filter_help_dialog()
 	gtk_widget_show(gd->dialog);
 }
 
-static gboolean bar_filter_message_cb(GtkWidget *UNUSED(widget), GdkEventButton *event, gpointer UNUSED(data))
+static gboolean bar_filter_message_cb(GtkWidget *, GdkEventButton *event, gpointer)
 {
 	if (event->button != MOUSE_BUTTON_RIGHT) return FALSE;
 
@@ -448,7 +448,7 @@ static gboolean bar_filter_message_cb(GtkWidget *UNUSED(widget), GdkEventButton 
 	return TRUE;
 }
 
-static void bar_sort_help_cb(gpointer UNUSED(data))
+static void bar_sort_help_cb(gpointer)
 {
 	bar_filter_help_dialog();
 }
@@ -542,7 +542,7 @@ static void bar_sort_add_ok_cb(FileDialog *fd, gpointer data)
 	bar_sort_add_close(sd);
 }
 
-static void bar_sort_add_cancel_cb(FileDialog *UNUSED(fd), gpointer data)
+static void bar_sort_add_cancel_cb(FileDialog *, gpointer data)
 {
 	auto sd = static_cast<SortData *>(data);
 
@@ -609,7 +609,7 @@ void bar_sort_close(GtkWidget *bar)
 	gtk_widget_destroy(sd->vbox);
 }
 
-static void bar_sort_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_sort_destroy(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SortData *>(data);
 
@@ -760,7 +760,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 	return sd->vbox;
 }
 
-GtkWidget *bar_sort_new_from_config(LayoutWindow *lw, const gchar **UNUSED(attribute_names), const gchar **UNUSED(attribute_values))
+GtkWidget *bar_sort_new_from_config(LayoutWindow *lw, const gchar **, const gchar **)
 {
 	GtkWidget *bar;
 

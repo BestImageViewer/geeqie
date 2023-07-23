@@ -217,23 +217,23 @@ static void layout_exit_fullscreen(LayoutWindow *lw)
 	layout_image_full_screen_stop(lw);
 }
 
-static void clear_marks_cancel_cb(GenericDialog *gd, gpointer UNUSED(data))
+static void clear_marks_cancel_cb(GenericDialog *gd, gpointer)
 {
 	generic_dialog_close(gd);
 }
 
-static void clear_marks_help_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void clear_marks_help_cb(GenericDialog *, gpointer)
 {
 	help_window_show("GuideMainWindowMenus.html");
 }
 
-void layout_menu_clear_marks_ok_cb(GenericDialog *gd, gpointer UNUSED(data))
+void layout_menu_clear_marks_ok_cb(GenericDialog *gd, gpointer)
 {
 	marks_clear_all();
 	generic_dialog_close(gd);
 }
 
-static void layout_menu_clear_marks_cb(GtkAction *UNUSED(action), gpointer UNUSED(data))
+static void layout_menu_clear_marks_cb(GtkAction *, gpointer)
 {
 	GenericDialog *gd;
 
@@ -249,7 +249,7 @@ static void layout_menu_clear_marks_cb(GtkAction *UNUSED(action), gpointer UNUSE
 	gtk_widget_show(gd->dialog);
 }
 
-static void layout_menu_new_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_new_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -257,7 +257,7 @@ static void layout_menu_new_cb(GtkAction *UNUSED(action), gpointer data)
 	collection_window_new(nullptr);
 }
 
-static void layout_menu_open_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_open_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -265,7 +265,7 @@ static void layout_menu_open_cb(GtkAction *UNUSED(action), gpointer data)
 	collection_dialog_load(nullptr);
 }
 
-static void layout_menu_search_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_search_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -273,7 +273,7 @@ static void layout_menu_search_cb(GtkAction *UNUSED(action), gpointer data)
 	search_new(lw->dir_fd, layout_image_get_fd(lw));
 }
 
-static void layout_menu_dupes_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_dupes_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -281,7 +281,7 @@ static void layout_menu_dupes_cb(GtkAction *UNUSED(action), gpointer data)
 	dupe_window_new();
 }
 
-static void layout_menu_pan_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_pan_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -289,56 +289,56 @@ static void layout_menu_pan_cb(GtkAction *UNUSED(action), gpointer data)
 	pan_window_new(lw->dir_fd);
 }
 
-static void layout_menu_print_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_print_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	print_window_new(layout_image_get_fd(lw), layout_selection_list(lw), layout_list(lw), layout_window(lw));
 }
 
-static void layout_menu_dir_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_dir_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	if (lw->vd) vd_new_folder(lw->vd, lw->dir_fd);
 }
 
-static void layout_menu_copy_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_copy_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_copy(nullptr, layout_selection_list(lw), nullptr, layout_window(lw));
 }
 
-static void layout_menu_copy_path_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_copy_path_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_copy_path_list_to_clipboard(layout_selection_list(lw), TRUE);
 }
 
-static void layout_menu_copy_path_unquoted_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_copy_path_unquoted_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_copy_path_list_to_clipboard(layout_selection_list(lw), FALSE);
 }
 
-static void layout_menu_move_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_move_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_move(nullptr, layout_selection_list(lw), nullptr, layout_window(lw));
 }
 
-static void layout_menu_rename_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_rename_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_rename(nullptr, layout_selection_list(lw), layout_window(lw));
 }
 
-static void layout_menu_delete_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_delete_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -346,7 +346,7 @@ static void layout_menu_delete_cb(GtkAction *UNUSED(action), gpointer data)
 	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw));
 }
 
-static void layout_menu_move_to_trash_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_move_to_trash_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -354,7 +354,7 @@ static void layout_menu_move_to_trash_cb(GtkAction *UNUSED(action), gpointer dat
 	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw));
 }
 
-static void layout_menu_move_to_trash_key_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_move_to_trash_key_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -365,21 +365,21 @@ static void layout_menu_move_to_trash_key_cb(GtkAction *UNUSED(action), gpointer
 		}
 }
 
-static void layout_menu_disable_grouping_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_disable_grouping_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_data_disable_grouping_list(layout_selection_list(lw), TRUE);
 }
 
-static void layout_menu_enable_grouping_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_enable_grouping_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_data_disable_grouping_list(layout_selection_list(lw), FALSE);
 }
 
-void layout_menu_close_cb(GtkAction *UNUSED(action), gpointer data)
+void layout_menu_close_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -387,89 +387,89 @@ void layout_menu_close_cb(GtkAction *UNUSED(action), gpointer data)
 	layout_close(lw);
 }
 
-static void layout_menu_exit_cb(GtkAction *UNUSED(action), gpointer UNUSED(data))
+static void layout_menu_exit_cb(GtkAction *, gpointer)
 {
 	exit_program();
 }
 
-static void layout_menu_alter_90_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_alter_90_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_alter_orientation(lw, ALTER_ROTATE_90);
 }
 
-static void layout_menu_rating_0_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_rating_0_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_rating(lw, "0");
 }
 
-static void layout_menu_rating_1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_rating_1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_rating(lw, "1");
 }
 
-static void layout_menu_rating_2_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_rating_2_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_rating(lw, "2");
 }
 
-static void layout_menu_rating_3_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_rating_3_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_rating(lw, "3");
 }
 
-static void layout_menu_rating_4_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_rating_4_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_rating(lw, "4");
 }
 
-static void layout_menu_rating_5_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_rating_5_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_rating(lw, "5");
 }
 
-static void layout_menu_rating_m1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_rating_m1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_rating(lw, "-1");
 }
 
-static void layout_menu_alter_90cc_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_alter_90cc_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_alter_orientation(lw, ALTER_ROTATE_90_CC);
 }
 
-static void layout_menu_alter_180_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_alter_180_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_alter_orientation(lw, ALTER_ROTATE_180);
 }
 
-static void layout_menu_alter_mirror_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_alter_mirror_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_alter_orientation(lw, ALTER_MIRROR);
 }
 
-static void layout_menu_alter_flip_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_alter_flip_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -492,7 +492,7 @@ static void layout_menu_alter_ignore_alpha_cb(GtkToggleAction *action, gpointer 
    layout_image_set_ignore_alpha(lw, gtk_toggle_action_get_active(action));
 }
 
-static void layout_menu_alter_none_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_alter_none_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -507,7 +507,7 @@ static void layout_menu_exif_rotate_cb(GtkToggleAction *action, gpointer data)
 	layout_image_reset_orientation(lw);
 }
 
-static void layout_menu_select_rectangle_cb(GtkToggleAction *action, gpointer UNUSED(data))
+static void layout_menu_select_rectangle_cb(GtkToggleAction *action, gpointer)
 {
 	options->draw_rectangle = gtk_toggle_action_get_active(action);
 }
@@ -526,7 +526,7 @@ static void layout_menu_select_overunderexposed_cb(GtkToggleAction *action, gpoi
 	layout_image_set_overunderexposed(lw, gtk_toggle_action_get_active(action));
 }
 
-static void layout_menu_write_rotate(GtkToggleAction *UNUSED(action), gpointer data, gboolean keep_date)
+static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean keep_date)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkTreeModel *store;
@@ -627,7 +627,7 @@ static void layout_menu_write_rotate_cb(GtkToggleAction *action, gpointer data)
 	layout_menu_write_rotate(action, data, FALSE);
 }
 
-static void layout_menu_config_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_config_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -635,7 +635,7 @@ static void layout_menu_config_cb(GtkAction *UNUSED(action), gpointer data)
 	show_config_window(lw);
 }
 
-static void layout_menu_editors_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_editors_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -643,7 +643,7 @@ static void layout_menu_editors_cb(GtkAction *UNUSED(action), gpointer data)
 	show_editor_list_window();
 }
 
-static void layout_menu_layout_config_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_layout_config_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -651,7 +651,7 @@ static void layout_menu_layout_config_cb(GtkAction *UNUSED(action), gpointer dat
 	layout_show_config_window(lw);
 }
 
-static void layout_menu_remove_thumb_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_remove_thumb_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -659,7 +659,7 @@ static void layout_menu_remove_thumb_cb(GtkAction *UNUSED(action), gpointer data
 	cache_manager_show();
 }
 
-static void layout_menu_wallpaper_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_wallpaper_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -667,83 +667,83 @@ static void layout_menu_wallpaper_cb(GtkAction *UNUSED(action), gpointer data)
 }
 
 /* single window zoom */
-static void layout_menu_zoom_in_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_in_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_adjust(lw, get_zoom_increment(), FALSE);
 }
 
-static void layout_menu_zoom_out_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_out_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_adjust(lw, -get_zoom_increment(), FALSE);
 }
 
-static void layout_menu_zoom_1_1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_1_1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 1.0, FALSE);
 }
 
-static void layout_menu_zoom_fit_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_fit_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 0.0, FALSE);
 }
 
-static void layout_menu_zoom_fit_hor_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_fit_hor_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set_fill_geometry(lw, FALSE, FALSE);
 }
 
-static void layout_menu_zoom_fit_vert_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_fit_vert_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set_fill_geometry(lw, TRUE, FALSE);
 }
 
-static void layout_menu_zoom_2_1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_2_1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 2.0, FALSE);
 }
 
-static void layout_menu_zoom_3_1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_3_1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 3.0, FALSE);
 }
-static void layout_menu_zoom_4_1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_4_1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 4.0, FALSE);
 }
 
-static void layout_menu_zoom_1_2_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_1_2_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, -2.0, FALSE);
 }
 
-static void layout_menu_zoom_1_3_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_1_3_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, -3.0, FALSE);
 }
 
-static void layout_menu_zoom_1_4_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_zoom_1_4_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -751,83 +751,83 @@ static void layout_menu_zoom_1_4_cb(GtkAction *UNUSED(action), gpointer data)
 }
 
 /* connected zoom */
-static void layout_menu_connect_zoom_in_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_in_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_adjust(lw, get_zoom_increment(), TRUE);
 }
 
-static void layout_menu_connect_zoom_out_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_out_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_adjust(lw, -get_zoom_increment(), TRUE);
 }
 
-static void layout_menu_connect_zoom_1_1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_1_1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 1.0, TRUE);
 }
 
-static void layout_menu_connect_zoom_fit_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_fit_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 0.0, TRUE);
 }
 
-static void layout_menu_connect_zoom_fit_hor_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_fit_hor_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set_fill_geometry(lw, FALSE, TRUE);
 }
 
-static void layout_menu_connect_zoom_fit_vert_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_fit_vert_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set_fill_geometry(lw, TRUE, TRUE);
 }
 
-static void layout_menu_connect_zoom_2_1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_2_1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 2.0, TRUE);
 }
 
-static void layout_menu_connect_zoom_3_1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_3_1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 3.0, TRUE);
 }
-static void layout_menu_connect_zoom_4_1_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_4_1_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, 4.0, TRUE);
 }
 
-static void layout_menu_connect_zoom_1_2_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_1_2_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, -2.0, TRUE);
 }
 
-static void layout_menu_connect_zoom_1_3_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_1_3_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_zoom_set(lw, -3.0, TRUE);
 }
 
-static void layout_menu_connect_zoom_1_4_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_connect_zoom_1_4_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -835,7 +835,7 @@ static void layout_menu_connect_zoom_1_4_cb(GtkAction *UNUSED(action), gpointer 
 }
 
 
-static void layout_menu_split_cb(GtkRadioAction *action, GtkRadioAction *UNUSED(current), gpointer data)
+static void layout_menu_split_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	ImageSplitMode mode;
@@ -854,7 +854,7 @@ static void layout_menu_thumb_cb(GtkToggleAction *action, gpointer data)
 }
 
 
-static void layout_menu_list_cb(GtkRadioAction *action, GtkRadioAction *UNUSED(current), gpointer data)
+static void layout_menu_list_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -878,7 +878,7 @@ static void layout_menu_view_dir_as_cb(GtkToggleAction *action,  gpointer data)
 		}
 }
 
-static void layout_menu_view_in_new_window_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_view_in_new_window_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -886,7 +886,7 @@ static void layout_menu_view_in_new_window_cb(GtkAction *UNUSED(action), gpointe
 	view_window_new(layout_image_get_fd(lw));
 }
 
-static void layout_menu_open_archive_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_open_archive_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	LayoutWindow *lw_new;
@@ -912,21 +912,21 @@ static void layout_menu_open_archive_cb(GtkAction *UNUSED(action), gpointer data
 		}
 }
 
-static void layout_menu_fullscreen_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_fullscreen_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_full_screen_toggle(lw);
 }
 
-static void layout_menu_escape_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_escape_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_exit_fullscreen(lw);
 }
 
-static void layout_menu_overlay_toggle_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_overlay_toggle_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -980,12 +980,12 @@ static void layout_menu_animate_cb(GtkToggleAction *action, gpointer data)
 	layout_image_animate_toggle(lw);
 }
 
-static void layout_menu_rectangular_selection_cb(GtkToggleAction *action, gpointer UNUSED(data))
+static void layout_menu_rectangular_selection_cb(GtkToggleAction *action, gpointer)
 {
 	options->collections.rectangular_selection = gtk_toggle_action_get_active(action);
 }
 
-static void layout_menu_histogram_toggle_channel_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_histogram_toggle_channel_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -993,7 +993,7 @@ static void layout_menu_histogram_toggle_channel_cb(GtkAction *UNUSED(action), g
 	layout_util_sync_views(lw);
 }
 
-static void layout_menu_histogram_toggle_mode_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_histogram_toggle_mode_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1001,7 +1001,7 @@ static void layout_menu_histogram_toggle_mode_cb(GtkAction *UNUSED(action), gpoi
 	layout_util_sync_views(lw);
 }
 
-static void layout_menu_histogram_channel_cb(GtkRadioAction *action, GtkRadioAction *UNUSED(current), gpointer data)
+static void layout_menu_histogram_channel_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint channel = gtk_radio_action_get_current_value(action);
@@ -1013,7 +1013,7 @@ static void layout_menu_histogram_channel_cb(GtkRadioAction *action, GtkRadioAct
 	image_osd_histogram_set_channel(lw->image, channel);
 }
 
-static void layout_menu_histogram_mode_cb(GtkRadioAction *action, GtkRadioAction *UNUSED(current), gpointer data)
+static void layout_menu_histogram_mode_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint mode = gtk_radio_action_get_current_value(action);
@@ -1025,14 +1025,14 @@ static void layout_menu_histogram_mode_cb(GtkRadioAction *action, GtkRadioAction
 	image_osd_histogram_set_mode(lw->image, mode);
 }
 
-static void layout_menu_refresh_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_refresh_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_refresh(lw);
 }
 
-static void layout_menu_bar_exif_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_bar_exif_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1040,7 +1040,7 @@ static void layout_menu_bar_exif_cb(GtkAction *UNUSED(action), gpointer data)
 	layout_exif_window_new(lw);
 }
 
-static void layout_menu_search_and_run_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_search_and_run_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1059,7 +1059,7 @@ static void layout_menu_float_cb(GtkToggleAction *action, gpointer data)
 	layout_tools_float_toggle(lw);
 }
 
-static void layout_menu_hide_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_hide_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1127,21 +1127,21 @@ static void layout_menu_slideshow_cb(GtkToggleAction *action, gpointer data)
 	layout_image_slideshow_toggle(lw);
 }
 
-static void layout_menu_slideshow_pause_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_slideshow_pause_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_image_slideshow_pause_toggle(lw);
 }
 
-static void layout_menu_slideshow_slower_cb(GtkAction *UNUSED(action), gpointer UNUSED(data))
+static void layout_menu_slideshow_slower_cb(GtkAction *, gpointer)
 {
 	options->slideshow.delay = options->slideshow.delay + 5;
 	if (options->slideshow.delay > SLIDESHOW_MAX_SECONDS)
 		options->slideshow.delay = SLIDESHOW_MAX_SECONDS;
 }
 
-static void layout_menu_slideshow_faster_cb(GtkAction *UNUSED(action), gpointer UNUSED(data))
+static void layout_menu_slideshow_faster_cb(GtkAction *, gpointer)
 {
 	options->slideshow.delay = options->slideshow.delay - 5;
 	if (options->slideshow.delay < SLIDESHOW_MIN_SECONDS * 10)
@@ -1149,7 +1149,7 @@ static void layout_menu_slideshow_faster_cb(GtkAction *UNUSED(action), gpointer 
 }
 
 
-static void layout_menu_stereo_mode_next_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_stereo_mode_next_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint mode = layout_image_stereo_pixbuf_get(lw);
@@ -1167,14 +1167,14 @@ static void layout_menu_stereo_mode_next_cb(GtkAction *UNUSED(action), gpointer 
 
 }
 
-static void layout_menu_stereo_mode_cb(GtkRadioAction *action, GtkRadioAction *UNUSED(current), gpointer data)
+static void layout_menu_stereo_mode_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint mode = gtk_radio_action_get_current_value(action);
 	layout_image_stereo_pixbuf_set(lw, mode);
 }
 
-static void layout_menu_help_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_help_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1182,7 +1182,7 @@ static void layout_menu_help_cb(GtkAction *UNUSED(action), gpointer data)
 	help_window_show("index.html");
 }
 
-static void layout_menu_help_search_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_help_search_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1190,7 +1190,7 @@ static void layout_menu_help_search_cb(GtkAction *UNUSED(action), gpointer data)
 	help_search_window_show();
 }
 
-static void layout_menu_help_keys_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_help_keys_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1198,7 +1198,7 @@ static void layout_menu_help_keys_cb(GtkAction *UNUSED(action), gpointer data)
 	help_window_show("GuideReferenceKeyboardShortcuts.html");
 }
 
-static void layout_menu_notes_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_notes_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1206,7 +1206,7 @@ static void layout_menu_notes_cb(GtkAction *UNUSED(action), gpointer data)
 	help_window_show("release_notes");
 }
 
-static void layout_menu_changelog_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_changelog_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1248,7 +1248,7 @@ static void layout_menu_foreach_func(
 					const gchar *accel_path,
 					guint accel_key,
 					GdkModifierType accel_mods,
-					gboolean UNUSED(changed))
+					gboolean)
 {
 	gchar *path, *name;
 	gchar *key_name, *menu_name;
@@ -1284,7 +1284,7 @@ static void layout_menu_foreach_func(
 	g_free(path);
 }
 
-static void layout_menu_kbd_map_cb(GtkAction *UNUSED(action), gpointer UNUSED(data))
+static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 {
 	gint fd = -1;
 	GPtrArray *array;
@@ -1374,7 +1374,7 @@ static void layout_menu_kbd_map_cb(GtkAction *UNUSED(action), gpointer UNUSED(da
 		}
 }
 
-static void layout_menu_about_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_about_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1382,7 +1382,7 @@ static void layout_menu_about_cb(GtkAction *UNUSED(action), gpointer data)
 	show_about_window(lw);
 }
 
-static void layout_menu_log_window_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_log_window_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1397,21 +1397,21 @@ static void layout_menu_log_window_cb(GtkAction *UNUSED(action), gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-static void layout_menu_select_all_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_select_all_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_select_all(lw);
 }
 
-static void layout_menu_unselect_all_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_unselect_all_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_select_none(lw);
 }
 
-static void layout_menu_invert_selection_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_invert_selection_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1513,13 +1513,13 @@ static void layout_menu_mark_filter_toggle_cb(GtkAction *action, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-static void layout_menu_image_first_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_image_first_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	layout_image_first(lw);
 }
 
-static void layout_menu_image_prev_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_image_prev_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint i;
@@ -1545,7 +1545,7 @@ static void layout_menu_image_prev_cb(GtkAction *UNUSED(action), gpointer data)
 		}
 }
 
-static void layout_menu_image_next_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_image_next_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint i;
@@ -1571,7 +1571,7 @@ static void layout_menu_image_next_cb(GtkAction *UNUSED(action), gpointer data)
 		}
 }
 
-static void layout_menu_page_first_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_page_first_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	FileData *fd = layout_image_get_fd(lw);
@@ -1582,7 +1582,7 @@ static void layout_menu_page_first_cb(GtkAction *UNUSED(action), gpointer data)
 		}
 }
 
-static void layout_menu_page_last_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_page_last_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	FileData *fd = layout_image_get_fd(lw);
@@ -1593,7 +1593,7 @@ static void layout_menu_page_last_cb(GtkAction *UNUSED(action), gpointer data)
 		}
 }
 
-static void layout_menu_page_next_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_page_next_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	FileData *fd = layout_image_get_fd(lw);
@@ -1604,7 +1604,7 @@ static void layout_menu_page_next_cb(GtkAction *UNUSED(action), gpointer data)
 		}
 }
 
-static void layout_menu_page_previous_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_page_previous_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	FileData *fd = layout_image_get_fd(lw);
@@ -1615,7 +1615,7 @@ static void layout_menu_page_previous_cb(GtkAction *UNUSED(action), gpointer dat
 		}
 }
 
-static void layout_menu_image_forward_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_image_forward_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1623,7 +1623,7 @@ static void layout_menu_image_forward_cb(GtkAction *UNUSED(action), gpointer dat
 	layout_set_path(lw, image_chain_forward());
 }
 
-static void layout_menu_image_back_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_image_back_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1631,7 +1631,7 @@ static void layout_menu_image_back_cb(GtkAction *UNUSED(action), gpointer data)
 	layout_set_path(lw, image_chain_back());
 }
 
-static void layout_menu_split_pane_next_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_split_pane_next_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint active_frame;
@@ -1649,7 +1649,7 @@ static void layout_menu_split_pane_next_cb(GtkAction *UNUSED(action), gpointer d
 	layout_image_activate(lw, active_frame, FALSE);
 }
 
-static void layout_menu_split_pane_prev_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_split_pane_prev_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint active_frame;
@@ -1671,7 +1671,7 @@ static void layout_menu_split_pane_prev_cb(GtkAction *UNUSED(action), gpointer d
 	layout_image_activate(lw, active_frame, FALSE);
 }
 
-static void layout_menu_split_pane_updown_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_split_pane_updown_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint active_frame;
@@ -1689,13 +1689,13 @@ static void layout_menu_split_pane_updown_cb(GtkAction *UNUSED(action), gpointer
 	layout_image_activate(lw, active_frame, FALSE);
 }
 
-static void layout_menu_image_last_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_image_last_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	layout_image_last(lw);
 }
 
-static void layout_menu_back_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_back_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	FileData *dir_fd;
@@ -1706,7 +1706,7 @@ static void layout_menu_back_cb(GtkAction *UNUSED(action), gpointer data)
 	file_data_unref(dir_fd);
 }
 
-static void layout_menu_forward_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_forward_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	FileData *dir_fd;
@@ -1717,7 +1717,7 @@ static void layout_menu_forward_cb(GtkAction *UNUSED(action), gpointer data)
 	file_data_unref(dir_fd);
 }
 
-static void layout_menu_home_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_home_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	const gchar *path;
@@ -1735,7 +1735,7 @@ static void layout_menu_home_cb(GtkAction *UNUSED(action), gpointer data)
 		}
 }
 
-static void layout_menu_up_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_up_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	ViewDir *vd = lw->vd;
@@ -1773,13 +1773,13 @@ static void layout_menu_edit_cb(GtkAction *action, gpointer data)
 }
 
 
-static void layout_menu_metadata_write_cb(GtkAction *UNUSED(action), gpointer UNUSED(data))
+static void layout_menu_metadata_write_cb(GtkAction *, gpointer)
 {
 	metadata_write_queue_confirm(TRUE, nullptr, nullptr);
 }
 
 static GtkWidget *last_focussed = nullptr;
-static void layout_menu_keyword_autocomplete_cb(GtkAction *UNUSED(action), gpointer data)
+static void layout_menu_keyword_autocomplete_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *tmp;
@@ -1840,7 +1840,7 @@ static void layout_color_menu_use_image_cb()
 #endif
 
 #ifdef HAVE_LCMS
-static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *UNUSED(current), gpointer data)
+static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint type;
@@ -1869,7 +1869,7 @@ static void layout_color_menu_input_cb()
  *-----------------------------------------------------------------------------
  */
 
-static void layout_menu_recent_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void layout_menu_recent_cb(GtkWidget *widget, gpointer)
 {
 	gint n;
 	gchar *path;
@@ -2052,7 +2052,7 @@ static GList *layout_window_menu_list(GList *listin)
 	return g_list_sort(listin, layout_window_menu_list_sort_cb);
 }
 
-static void layout_menu_new_window_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_menu_new_window_cb(GtkWidget *, gpointer data)
 {
 	gint n;
 
@@ -2116,7 +2116,7 @@ static void layout_menu_new_window_update(LayoutWindow *lw)
 		}
 }
 
-static void window_rename_cancel_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void window_rename_cancel_cb(GenericDialog *, gpointer data)
 {
 	auto rw = static_cast<RenameWindow *>(data);
 
@@ -2124,7 +2124,7 @@ static void window_rename_cancel_cb(GenericDialog *UNUSED(gd), gpointer data)
 	g_free(rw);
 }
 
-static void window_rename_ok(GenericDialog *UNUSED(gd), gpointer data)
+static void window_rename_ok(GenericDialog *, gpointer data)
 {
 	auto rw = static_cast<RenameWindow *>(data);
 	gchar *path;
@@ -2191,14 +2191,14 @@ static void window_rename_entry_activate_cb(GenericDialog *gd, gpointer data)
 	window_rename_ok(gd, rw);
 }
 
-static void window_delete_cancel_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void window_delete_cancel_cb(GenericDialog *, gpointer data)
 {
 	auto dw = static_cast<DeleteWindow *>(data);
 
 	g_free(dw);
 }
 
-static void window_delete_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void window_delete_ok_cb(GenericDialog *, gpointer data)
 {
 	auto dw = static_cast<DeleteWindow *>(data);
 	gchar *path;
@@ -2218,12 +2218,12 @@ static void window_delete_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
 	g_free(path);
 }
 
-static void layout_menu_window_default_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void layout_menu_window_default_cb(GtkWidget *, gpointer)
 {
 	layout_new_from_default();
 }
 
-static void layout_menu_windows_menu_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_menu_windows_menu_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *menu;
@@ -2253,7 +2253,7 @@ static void layout_menu_windows_menu_cb(GtkWidget *UNUSED(widget), gpointer data
 		}
 }
 
-static void layout_menu_view_menu_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_menu_view_menu_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *menu;
@@ -2340,7 +2340,7 @@ static void change_window_id(const gchar *infile, const gchar *outfile)
 	g_object_unref(in_file);
 }
 
-static void layout_menu_window_from_current_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_menu_window_from_current_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint fd_in = -1;
@@ -2376,14 +2376,14 @@ static void layout_menu_window_from_current_cb(GtkWidget *UNUSED(widget), gpoint
 	g_free(tmp_file_out);
 }
 
-static void layout_menu_window_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_menu_window_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_menu_new_window_update(lw);
 }
 
-static void layout_menu_window_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_menu_window_rename_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	RenameWindow *rw;
@@ -2414,7 +2414,7 @@ static void layout_menu_window_rename_cb(GtkWidget *UNUSED(widget), gpointer dat
 	gtk_widget_show(rw->gd->dialog);
 }
 
-static void layout_menu_window_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_menu_window_delete_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	DeleteWindow *dw;
@@ -2965,7 +2965,7 @@ static const gchar *menu_ui_description =
 "<accelerator action='ConnectZoomFitAlt1'/>"
 "</ui>";
 
-static gchar *menu_translate(const gchar *path, gpointer UNUSED(data))
+static gchar *menu_translate(const gchar *path, gpointer)
 {
 	return static_cast<gchar *>(_(path));
 }
@@ -3294,7 +3294,7 @@ void layout_actions_setup(LayoutWindow *lw)
 static gint layout_editors_reload_idle_id = -1;
 static GList *layout_editors_desktop_files = nullptr;
 
-static gboolean layout_editors_reload_idle_cb(gpointer UNUSED(data))
+static gboolean layout_editors_reload_idle_cb(gpointer)
 {
 	if (!layout_editors_desktop_files)
 		{
@@ -3923,7 +3923,7 @@ static gboolean layout_bar_enabled(LayoutWindow *lw)
 	return lw->bar && gtk_widget_get_visible(lw->bar);
 }
 
-static void layout_bar_destroyed(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_bar_destroyed(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -4016,7 +4016,7 @@ static gboolean layout_bar_sort_enabled(LayoutWindow *lw)
 }
 
 
-static void layout_bar_sort_destroyed(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_bar_sort_destroyed(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -4165,7 +4165,7 @@ void layout_bars_close(LayoutWindow *lw)
 	layout_bar_close(lw);
 }
 
-static gboolean layout_exif_window_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static gboolean layout_exif_window_destroy(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	lw->exif_window = nullptr;

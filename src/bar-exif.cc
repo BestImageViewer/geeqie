@@ -93,7 +93,7 @@ static gboolean bar_pane_exif_menu_cb(GtkWidget *widget, GdkEventButton *bevent,
 static void bar_pane_exif_notify_cb(FileData *fd, NotifyType type, gpointer data);
 static gboolean bar_pane_exif_copy_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);
 
-static void bar_pane_exif_entry_changed(GtkEntry *UNUSED(text_entry), gpointer data)
+static void bar_pane_exif_entry_changed(GtkEntry *, gpointer data)
 {
 	auto ee = static_cast<ExifEntry *>(data);
 	gchar *text;
@@ -104,7 +104,7 @@ static void bar_pane_exif_entry_changed(GtkEntry *UNUSED(text_entry), gpointer d
 	g_free(text);
 }
 
-static void bar_pane_exif_entry_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_pane_exif_entry_destroy(GtkWidget *, gpointer data)
 {
 	auto ee = static_cast<ExifEntry *>(data);
 
@@ -349,9 +349,9 @@ static GtkTargetEntry bar_pane_exif_drop_types[] = {
 static gint n_exif_entry_drop_types = 2;
 
 
-static void bar_pane_exif_entry_dnd_get(GtkWidget *entry, GdkDragContext *UNUSED(context),
+static void bar_pane_exif_entry_dnd_get(GtkWidget *entry, GdkDragContext *,
 				     GtkSelectionData *selection_data, guint info,
-				     guint UNUSED(time), gpointer UNUSED(data))
+				     guint, gpointer)
 {
 	auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(entry), "entry_data"));
 
@@ -370,10 +370,10 @@ static void bar_pane_exif_entry_dnd_get(GtkWidget *entry, GdkDragContext *UNUSED
 
 }
 
-static void bar_pane_exif_dnd_receive(GtkWidget *pane, GdkDragContext *UNUSED(context),
+static void bar_pane_exif_dnd_receive(GtkWidget *pane, GdkDragContext *,
 					  gint x, gint y,
 					  GtkSelectionData *selection_data, guint info,
-					  guint UNUSED(time), gpointer UNUSED(data))
+					  guint, gpointer)
 {
 	PaneExifData *ped;
 	GList *work, *list;
@@ -421,7 +421,7 @@ static void bar_pane_exif_dnd_receive(GtkWidget *pane, GdkDragContext *UNUSED(co
 	gtk_box_reorder_child(GTK_BOX(ped->vbox), new_entry, pos);
 }
 
-static void bar_pane_exif_entry_dnd_begin(GtkWidget *entry, GdkDragContext *context, gpointer UNUSED(data))
+static void bar_pane_exif_entry_dnd_begin(GtkWidget *entry, GdkDragContext *context, gpointer)
 {
 	auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(entry), "entry_data"));
 
@@ -429,7 +429,7 @@ static void bar_pane_exif_entry_dnd_begin(GtkWidget *entry, GdkDragContext *cont
 	dnd_set_drag_label(entry, context, ee->key);
 }
 
-static void bar_pane_exif_entry_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(context), gpointer UNUSED(data))
+static void bar_pane_exif_entry_dnd_end(GtkWidget *, GdkDragContext *, gpointer)
 {
 }
 
@@ -459,24 +459,24 @@ static void bar_pane_exif_dnd_init(GtkWidget *pane)
 			 G_CALLBACK(bar_pane_exif_dnd_receive), NULL);
 }
 
-static void bar_pane_exif_edit_close_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_pane_exif_edit_close_cb(GtkWidget *, gpointer data)
 {
 	auto gd = static_cast<GenericDialog *>(data);
 	generic_dialog_close(gd);
 }
 
-static void bar_pane_exif_edit_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_pane_exif_edit_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto cdd = static_cast<ConfDialogData *>(data);
 	g_signal_handlers_disconnect_by_func(cdd->widget, (gpointer)(bar_pane_exif_edit_close_cb), cdd->gd);
 	g_free(cdd);
 }
 
-static void bar_pane_exif_edit_cancel_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void bar_pane_exif_edit_cancel_cb(GenericDialog *, gpointer)
 {
 }
 
-static void bar_pane_exif_edit_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void bar_pane_exif_edit_ok_cb(GenericDialog *, gpointer data)
 {
 	auto cdd = static_cast<ConfDialogData *>(data);
 
@@ -590,19 +590,19 @@ static void bar_pane_exif_conf_dialog(GtkWidget *widget)
 	gtk_widget_show(gd->dialog);
 }
 
-static void bar_pane_exif_conf_dialog_cb(GtkWidget *UNUSED(menu_widget), gpointer data)
+static void bar_pane_exif_conf_dialog_cb(GtkWidget *, gpointer data)
 {
 	auto widget = static_cast<GtkWidget *>(data);
 	bar_pane_exif_conf_dialog(widget);
 }
 
-static void bar_pane_exif_delete_entry_cb(GtkWidget *UNUSED(menu_widget), gpointer data)
+static void bar_pane_exif_delete_entry_cb(GtkWidget *, gpointer data)
 {
 	auto entry = static_cast<GtkWidget *>(data);
 	gtk_widget_destroy(entry);
 }
 
-static void bar_pane_exif_copy_entry_cb(GtkWidget *UNUSED(menu_widget), gpointer data)
+static void bar_pane_exif_copy_entry_cb(GtkWidget *, gpointer data)
 {
 	auto widget = static_cast<GtkWidget *>(data);
 	GtkClipboard *clipboard;
@@ -615,7 +615,7 @@ static void bar_pane_exif_copy_entry_cb(GtkWidget *UNUSED(menu_widget), gpointer
 	gtk_clipboard_set_text(clipboard, value, -1);
 }
 
-static void bar_pane_exif_toggle_show_all_cb(GtkWidget *UNUSED(menu_widget), gpointer data)
+static void bar_pane_exif_toggle_show_all_cb(GtkWidget *, gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
 	ped->show_all = !ped->show_all;
@@ -665,7 +665,7 @@ static gboolean bar_pane_exif_menu_cb(GtkWidget *widget, GdkEventButton *bevent,
 	return FALSE;
 }
 
-static gboolean bar_pane_exif_copy_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer UNUSED(data))
+static gboolean bar_pane_exif_copy_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer)
 {
 	const gchar *value;
 	GtkClipboard *clipboard;
@@ -778,7 +778,7 @@ void bar_pane_exif_close_unused(GtkWidget *widget)
 }
 #pragma GCC diagnostic pop
 
-static void bar_pane_exif_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_pane_exif_destroy(GtkWidget *, gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
 
@@ -791,7 +791,7 @@ static void bar_pane_exif_destroy(GtkWidget *UNUSED(widget), gpointer data)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-static void bar_pane_exif_size_request_unused(GtkWidget *UNUSED(pane), GtkRequisition *requisition, gpointer data)
+static void bar_pane_exif_size_request_unused(GtkWidget *, GtkRequisition *requisition, gpointer data)
 {
 	PaneExifData *ped = static_cast<PaneExifData *>(data);
 	if (requisition->height < ped->min_height)
@@ -801,7 +801,7 @@ static void bar_pane_exif_size_request_unused(GtkWidget *UNUSED(pane), GtkRequis
 }
 #pragma GCC diagnostic pop
 
-static void bar_pane_exif_size_allocate(GtkWidget *UNUSED(pane), GtkAllocation *alloc, gpointer data)
+static void bar_pane_exif_size_allocate(GtkWidget *, GtkAllocation *alloc, gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
 	ped->min_height = alloc->height;

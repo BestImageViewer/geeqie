@@ -373,7 +373,7 @@ void save_options(ConfOptions *options)
 	g_free(rc_path);
 }
 
-gboolean load_options(ConfOptions *UNUSED(options))
+gboolean load_options(ConfOptions *)
 {
 	gboolean success;
 	gchar *rc_path;

@@ -1310,7 +1310,7 @@ static void file_data_basename_hash_insert_cb(gpointer fd, gpointer basename_has
 	file_data_basename_hash_insert(static_cast<GHashTable *>(basename_hash), static_cast<FileData *>(fd));
 }
 
-static void file_data_basename_hash_remove_list(gpointer UNUSED(key), gpointer value, gpointer UNUSED(data))
+static void file_data_basename_hash_remove_list(gpointer, gpointer value, gpointer)
 {
 	filelist_free(static_cast<GList *>(value));
 }
@@ -1347,7 +1347,7 @@ static GList *filelist_filter_out_sidecars(GList *flist)
 	return flist_filtered;
 }
 
-static void file_data_basename_hash_to_sidecars(gpointer UNUSED(key), gpointer value, gpointer UNUSED(data))
+static void file_data_basename_hash_to_sidecars(gpointer, gpointer value, gpointer)
 {
 	auto basename_list = static_cast<GList *>(value);
 	file_data_check_sidecars(basename_list);
@@ -1959,7 +1959,7 @@ GList *file_data_filter_class_list(GList *list, guint filter)
 	return list;
 }
 
-static void file_data_notify_mark_func(gpointer UNUSED(key), gpointer value, gpointer UNUSED(user_data))
+static void file_data_notify_mark_func(gpointer, gpointer value, gpointer)
 {
 	auto fd = static_cast<FileData *>(value);
 	file_data_increment_version(fd);
@@ -3278,7 +3278,7 @@ void file_data_send_notification(FileData *fd, NotifyType type)
 static GHashTable *file_data_monitor_pool = nullptr;
 static guint realtime_monitor_id = 0; /* event source id */
 
-static void realtime_monitor_check_cb(gpointer key, gpointer UNUSED(value), gpointer UNUSED(data))
+static void realtime_monitor_check_cb(gpointer key, gpointer, gpointer)
 {
 	auto fd = static_cast<FileData *>(key);
 
@@ -3287,7 +3287,7 @@ static void realtime_monitor_check_cb(gpointer key, gpointer UNUSED(value), gpoi
 	DEBUG_1("monitor %s", fd->path);
 }
 
-static gboolean realtime_monitor_cb(gpointer UNUSED(data))
+static gboolean realtime_monitor_cb(gpointer)
 {
 	if (!options->update_on_time_change) return TRUE;
 	g_hash_table_foreach(file_data_monitor_pool, realtime_monitor_check_cb, nullptr);
@@ -3447,7 +3447,7 @@ gboolean marks_list_save(gchar *path, gboolean save)
 	return (secure_close(ssi) == 0);
 }
 
-static void marks_clear(gpointer key, gpointer value, gpointer UNUSED(userdata))
+static void marks_clear(gpointer key, gpointer value, gpointer)
 {
 	auto file_name = static_cast<gchar *>(key);
 	gint mark_no;

@@ -704,7 +704,7 @@ FileData *vdtree_populate_path(ViewDir *vd, FileData *target_fd, gboolean expand
 
 static gboolean selection_is_ok = FALSE;
 
-static gboolean vdtree_select_cb(GtkTreeSelection *UNUSED(selection), GtkTreeModel *UNUSED(store), GtkTreePath *UNUSED(tpath), gboolean UNUSED(path_currently_selected), gpointer UNUSED(data))
+static gboolean vdtree_select_cb(GtkTreeSelection *, GtkTreeModel *, GtkTreePath *, gboolean, gpointer)
 {
 	return selection_is_ok;
 }
@@ -763,7 +763,7 @@ void vdtree_refresh(ViewDir *vd)
 	vdtree_populate_path(vd, vd->dir_fd, FALSE, TRUE);
 }
 
-const gchar *vdtree_row_get_path(ViewDir *UNUSED(vd), gint UNUSED(row))
+const gchar *vdtree_row_get_path(ViewDir *, gint)
 {
 /** @FIXME no get row path */
 	log_printf("FIXME: no get row path\n");
@@ -832,7 +832,7 @@ gboolean vdtree_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 }
 
 static gboolean vdtree_clicked_on_expander(GtkTreeView *treeview, GtkTreePath *tpath,
-				           GtkTreeViewColumn *column, gint x, gint UNUSED(y), gint *left_of_expander)
+				           GtkTreeViewColumn *column, gint x, gint, gint *left_of_expander)
 {
 	gint depth;
 	gint size;
@@ -968,7 +968,7 @@ static void vdtree_row_collapsed(GtkTreeView *treeview, GtkTreeIter *iter, GtkTr
 		}
 }
 
-static gint vdtree_sort_cb(GtkTreeModel *store, GtkTreeIter *a, GtkTreeIter *b, gpointer UNUSED(data))
+static gint vdtree_sort_cb(GtkTreeModel *store, GtkTreeIter *a, GtkTreeIter *b, gpointer)
 {
 	NodeData *nda;
 	NodeData *ndb;
@@ -1005,7 +1005,7 @@ static void vdtree_setup_root(ViewDir *vd)
 	vdtree_populate_path(vd, fd, FALSE, FALSE);
 }
 
-static gboolean vdtree_destroy_node_cb(GtkTreeModel *store, GtkTreePath *UNUSED(tpath), GtkTreeIter *iter, gpointer UNUSED(data))
+static gboolean vdtree_destroy_node_cb(GtkTreeModel *store, GtkTreePath *, GtkTreeIter *iter, gpointer)
 {
 	NodeData *nd;
 
@@ -1015,7 +1015,7 @@ static gboolean vdtree_destroy_node_cb(GtkTreeModel *store, GtkTreePath *UNUSED(
 	return FALSE;
 }
 
-void vdtree_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vdtree_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 	GtkTreeModel *store;
@@ -1028,7 +1028,7 @@ void vdtree_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 	gtk_tree_model_foreach(store, vdtree_destroy_node_cb, vd);
 }
 
-ViewDir *vdtree_new(ViewDir *vd, FileData *UNUSED(dir_fd))
+ViewDir *vdtree_new(ViewDir *vd, FileData *)
 {
 	GtkTreeStore *store;
 	GtkTreeSelection *selection;

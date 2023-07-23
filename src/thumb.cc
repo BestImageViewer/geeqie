@@ -112,7 +112,7 @@ static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failu
 	return success;
 }
 
-static void thumb_loader_percent_cb(ImageLoader *UNUSED(il), gdouble percent, gpointer data)
+static void thumb_loader_percent_cb(ImageLoader *, gdouble percent, gpointer data)
 {
 	auto tl = static_cast<ThumbLoader *>(data);
 
@@ -499,7 +499,7 @@ void thumb_loader_free(ThumbLoader *tl)
 }
 
 /* release thumb_pixbuf on file change - this forces reload. */
-void thumb_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(data))
+void thumb_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE)) && fd->thumb_pixbuf)
 		{
@@ -560,7 +560,7 @@ static guchar *load_xv_thumbnail(gchar *filename, gint *widthp, gint *heightp)
 }
 #undef XV_BUFFER
 
-static void free_rgb_buffer(guchar *pixels, gpointer UNUSED(data))
+static void free_rgb_buffer(guchar *pixels, gpointer)
 {
 	g_free(pixels);
 }

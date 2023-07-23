@@ -92,7 +92,7 @@ struct ViewFileFindRowData {
 	gint row;
 };
 
-static gboolean vflist_find_row_cb(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer data)
+static gboolean vflist_find_row_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
 {
 	auto find = static_cast<ViewFileFindRowData *>(data);
 	FileData *fd;
@@ -123,7 +123,7 @@ static gint vflist_find_row(ViewFile *vf, FileData *fd, GtkTreeIter *iter)
 	return -1;
 }
 
-static FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *UNUSED(iter))
+static FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *)
 {
 	GtkTreePath *tpath;
 	GtkTreeViewColumn *column;
@@ -146,7 +146,7 @@ static FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTree
 	return nullptr;
 }
 
-static gboolean vflist_store_clear_cb(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer UNUSED(data))
+static gboolean vflist_store_clear_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer)
 {
 	FileData *fd;
 	gtk_tree_model_get(model, iter, FILE_COLUMN_POINTER, &fd, -1);
@@ -212,9 +212,9 @@ static void vflist_move_cursor(ViewFile *vf, GtkTreeIter *iter)
  *-----------------------------------------------------------------------------
  */
 
-static void vflist_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(context),
-			   GtkSelectionData *selection_data, guint UNUSED(info),
-			   guint UNUSED(time), gpointer data)
+static void vflist_dnd_get(GtkWidget *, GdkDragContext *,
+			   GtkSelectionData *selection_data, guint,
+			   guint, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	GList *list = nullptr;
@@ -255,7 +255,7 @@ static void vflist_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointe
 		}
 }
 
-static void vflist_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *context, gpointer data)
+static void vflist_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -267,9 +267,9 @@ static void vflist_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *context, g
 		}
 }
 
-static void vflist_drag_data_received(GtkWidget *UNUSED(entry_widget), GdkDragContext *UNUSED(context),
+static void vflist_drag_data_received(GtkWidget *, GdkDragContext *,
 				      int x, int y, GtkSelectionData *selection,
-				      guint info, guint UNUSED(time), gpointer data)
+				      guint info, guint, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -360,7 +360,7 @@ GList *vflist_pop_menu_file_list(ViewFile *vf)
 }
 
 
-void vflist_pop_menu_view_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vflist_pop_menu_view_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -378,7 +378,7 @@ void vflist_pop_menu_view_cb(GtkWidget *UNUSED(widget), gpointer data)
 		}
 }
 
-void vflist_pop_menu_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vflist_pop_menu_rename_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	GList *list;
@@ -409,7 +409,7 @@ void vflist_pop_menu_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
 	file_util_rename(nullptr, list, vf->listview);
 }
 
-void vflist_pop_menu_thumbs_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vflist_pop_menu_thumbs_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -459,7 +459,7 @@ void vflist_star_rating_set(ViewFile *vf, gboolean enable)
 	g_list_free(columns);
 }
 
-void vflist_pop_menu_show_star_rating_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vflist_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -471,7 +471,7 @@ void vflist_pop_menu_show_star_rating_cb(GtkWidget *UNUSED(widget), gpointer dat
 	vflist_star_rating_set(vf, options->show_star_rating);
 }
 
-void vflist_pop_menu_refresh_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vflist_pop_menu_refresh_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -480,7 +480,7 @@ void vflist_pop_menu_refresh_cb(GtkWidget *UNUSED(widget), gpointer data)
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(vf->listview));
 }
 
-void vflist_popup_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vflist_popup_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
@@ -495,7 +495,7 @@ void vflist_popup_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-static gboolean vflist_row_rename_cb(TreeEditData *UNUSED(td), const gchar *old_name, const gchar *new_name, gpointer data)
+static gboolean vflist_row_rename_cb(TreeEditData *, const gchar *old_name, const gchar *new_name, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	gchar *new_path;
@@ -767,7 +767,7 @@ static void vflist_select_idle_cancel(ViewFile *vf)
 		}
 }
 
-static gboolean vflist_select_cb(GtkTreeSelection *UNUSED(selection), GtkTreeModel *store, GtkTreePath *tpath, gboolean path_currently_selected, gpointer data)
+static gboolean vflist_select_cb(GtkTreeSelection *, GtkTreeModel *store, GtkTreePath *tpath, gboolean path_currently_selected, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	GtkTreeIter iter;
@@ -795,13 +795,13 @@ static gboolean vflist_select_cb(GtkTreeSelection *UNUSED(selection), GtkTreeMod
 	return TRUE;
 }
 
-static void vflist_expand_cb(GtkTreeView *UNUSED(tree_view), GtkTreeIter *iter, GtkTreePath *UNUSED(path), gpointer data)
+static void vflist_expand_cb(GtkTreeView *, GtkTreeIter *iter, GtkTreePath *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vflist_set_expanded(vf, iter, TRUE);
 }
 
-static void vflist_collapse_cb(GtkTreeView *UNUSED(tree_view), GtkTreeIter *iter, GtkTreePath *UNUSED(path), gpointer data)
+static void vflist_collapse_cb(GtkTreeView *, GtkTreeIter *iter, GtkTreePath *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vflist_set_expanded(vf, iter, FALSE);
@@ -1987,7 +1987,7 @@ static GdkColor *vflist_listview_color_shifted(GtkWidget *widget)
 	return &color;
 }
 
-static void vflist_listview_color_cb(GtkTreeViewColumn *UNUSED(tree_column), GtkCellRenderer *cell,
+static void vflist_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 				     GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -2124,7 +2124,7 @@ gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd)
 	return ret;
 }
 
-void vflist_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vflist_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -2138,7 +2138,7 @@ void vflist_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 	filelist_free(vf->list);
 }
 
-ViewFile *vflist_new(ViewFile *vf, FileData *UNUSED(dir_fd))
+ViewFile *vflist_new(ViewFile *vf, FileData *)
 {
 	GtkTreeStore *store;
 	GtkTreeSelection *selection;

@@ -64,7 +64,7 @@ static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint h, gboolean f
  *-----------------------------------------------------------------------------
  */
 
-GList *vficon_selection_get_one(ViewFile *UNUSED(vf), FileData *fd)
+GList *vficon_selection_get_one(ViewFile *, FileData *fd)
 {
 	return g_list_prepend(filelist_copy(fd->sidecar_files), file_data_ref(fd));
 }
@@ -81,7 +81,7 @@ GList *vficon_pop_menu_file_list(ViewFile *vf)
 	return vficon_selection_get_one(vf, VFICON(vf)->click_fd);
 }
 
-void vficon_pop_menu_view_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vficon_pop_menu_view_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -101,14 +101,14 @@ void vficon_pop_menu_view_cb(GtkWidget *UNUSED(widget), gpointer data)
 		}
 }
 
-void vficon_pop_menu_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vficon_pop_menu_rename_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	file_util_rename(nullptr, vf_pop_menu_file_list(vf), vf->listview);
 }
 
-void vficon_pop_menu_show_names_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vficon_pop_menu_show_names_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -125,21 +125,21 @@ static void vficon_toggle_star_rating(ViewFile *vf)
 	vficon_populate_at_new_size(vf, allocation.width, allocation.height, TRUE);
 }
 
-void vficon_pop_menu_show_star_rating_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vficon_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	vficon_toggle_star_rating(vf);
 }
 
-void vficon_pop_menu_refresh_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vficon_pop_menu_refresh_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	vf_refresh(vf);
 }
 
-void vficon_popup_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vficon_popup_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vficon_selection_remove(vf, VFICON(vf)->click_fd, SELECTION_PRELIGHT, nullptr);
@@ -461,9 +461,9 @@ static void tip_update(ViewFile *vf, FileData *fd)
  *-------------------------------------------------------------------
  */
 
-static void vficon_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(context),
-			   GtkSelectionData *selection_data, guint UNUSED(info),
-			   guint UNUSED(time), gpointer data)
+static void vficon_dnd_get(GtkWidget *, GdkDragContext *,
+			   GtkSelectionData *selection_data, guint,
+			   guint, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	GList *list = nullptr;
@@ -484,9 +484,9 @@ static void vficon_dnd_get(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(con
 	filelist_free(list);
 }
 
-static void vficon_drag_data_received(GtkWidget *UNUSED(entry_widget), GdkDragContext *UNUSED(context),
+static void vficon_drag_data_received(GtkWidget *, GdkDragContext *,
 				      int x, int y, GtkSelectionData *selection,
-				      guint info, guint UNUSED(time), gpointer data)
+				      guint info, guint, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -524,7 +524,7 @@ static void vficon_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointe
 		}
 }
 
-static void vficon_dnd_end(GtkWidget *UNUSED(widget), GdkDragContext *context, gpointer data)
+static void vficon_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -605,14 +605,14 @@ static void vficon_selection_remove(ViewFile *vf, FileData *fd, SelectionType ma
 	vficon_selection_set(vf, fd, static_cast<SelectionType>(fd->selected & ~mask), iter);
 }
 
-void vficon_marks_set(ViewFile *vf, gint UNUSED(enable))
+void vficon_marks_set(ViewFile *vf, gint)
 {
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(vf->listview, &allocation);
 	vficon_populate_at_new_size(vf, allocation.width, allocation.height, TRUE);
 }
 
-void vficon_star_rating_set(ViewFile *vf, gint UNUSED(enable))
+void vficon_star_rating_set(ViewFile *vf, gint)
 {
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(vf->listview, &allocation);
@@ -1312,7 +1312,7 @@ gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
  *-------------------------------------------------------------------
  */
 
-static gboolean vficon_motion_cb(GtkWidget *UNUSED(widget), GdkEventMotion *event, gpointer data)
+static gboolean vficon_motion_cb(GtkWidget *, GdkEventMotion *event, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	FileData *fd;
@@ -1323,7 +1323,7 @@ static gboolean vficon_motion_cb(GtkWidget *UNUSED(widget), GdkEventMotion *even
 	return FALSE;
 }
 
-gboolean vficon_press_cb(GtkWidget *UNUSED(widget), GdkEventButton *bevent, gpointer data)
+gboolean vficon_press_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	GtkTreeIter iter;
@@ -1449,7 +1449,7 @@ gboolean vficon_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer d
 	return TRUE;
 }
 
-static gboolean vficon_leave_cb(GtkWidget *UNUSED(widget), GdkEventCrossing *UNUSED(event), gpointer data)
+static gboolean vficon_leave_cb(GtkWidget *, GdkEventCrossing *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -1463,7 +1463,7 @@ static gboolean vficon_leave_cb(GtkWidget *UNUSED(widget), GdkEventCrossing *UNU
  *-------------------------------------------------------------------
  */
 
-static gboolean vficon_destroy_node_cb(GtkTreeModel *store, GtkTreePath *UNUSED(tpath), GtkTreeIter *iter, gpointer UNUSED(data))
+static gboolean vficon_destroy_node_cb(GtkTreeModel *store, GtkTreePath *, GtkTreeIter *iter, gpointer)
 {
 	GList *list;
 
@@ -1643,7 +1643,7 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 	vf_star_update(vf);
 }
 
-static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint UNUSED(h), gboolean force)
+static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint, gboolean force)
 {
 	gint new_cols;
 	gint thumb_width;
@@ -1662,7 +1662,7 @@ static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint UNUSED(h), gb
 	DEBUG_1("col tab pop cols=%d rows=%d", VFICON(vf)->columns, VFICON(vf)->rows);
 }
 
-static void vficon_sized_cb(GtkWidget *UNUSED(widget), GtkAllocation *allocation, gpointer data)
+static void vficon_sized_cb(GtkWidget *, GtkAllocation *allocation, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -2066,7 +2066,7 @@ struct ColumnData
 	gint number;
 };
 
-static void vficon_cell_data_cb(GtkTreeViewColumn *UNUSED(tree_column), GtkCellRenderer *cell,
+static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 				GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
 	GList *list;
@@ -2234,7 +2234,7 @@ gboolean vficon_set_fd(ViewFile *vf, FileData *dir_fd)
 	return ret;
 }
 
-void vficon_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+void vficon_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -2251,7 +2251,7 @@ void vficon_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 	g_list_free(VFICON(vf)->selection);
 }
 
-ViewFile *vficon_new(ViewFile *vf, FileData *UNUSED(dir_fd))
+ViewFile *vficon_new(ViewFile *vf, FileData *)
 {
 	GtkListStore *store;
 	GtkTreeSelection *selection;

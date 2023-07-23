@@ -133,16 +133,6 @@
 #define STAR_RATING_REJECTED 0x274C //Unicode Character 'Cross Mark'
 #define STAR_RATING_STAR 0x2738 //Unicode Character 'Heavy Eight Pointed Rectilinear Black Star'
 
-/* From http://stackoverflow.com/questions/3417837/ */
-#ifdef UNUSED
-#elif defined(__GNUC__)
-# define UNUSED(x) UNUSED_ ## x __attribute__((unused))
-#elif defined(__LCLINT__)
-# define UNUSED(x) /*@unused@*/ x
-#else
-# define UNUSED(x) x
-#endif
-
 /*
  *----------------------------------------------------------------------------
  * main.cc

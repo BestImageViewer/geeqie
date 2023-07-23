@@ -376,7 +376,7 @@ gboolean editor_read_desktop_file(const gchar *path)
 	return TRUE;
 }
 
-static gboolean editor_remove_desktop_file_cb(gpointer UNUSED(key), gpointer value, gpointer UNUSED(user_data))
+static gboolean editor_remove_desktop_file_cb(gpointer, gpointer value, gpointer)
 {
 	auto editor = static_cast<EditorDescription *>(value);
 	return editor->hidden || editor->ignored;
@@ -471,7 +471,7 @@ GList *editor_get_desktop_files()
 	return list;
 }
 
-static void editor_list_add_cb(gpointer UNUSED(key), gpointer value, gpointer data)
+static void editor_list_add_cb(gpointer, gpointer value, gpointer data)
 {
 	auto listp = static_cast<GList **>(data);
 	auto editor = static_cast<EditorDescription *>(value);
@@ -556,7 +556,7 @@ static void editor_verbose_window_close(GenericDialog *gd, gpointer data)
 	if (ed->pid == -1) editor_data_free(ed); /* the process has already terminated */
 }
 
-static void editor_verbose_window_stop(GenericDialog *UNUSED(gd), gpointer data)
+static void editor_verbose_window_stop(GenericDialog *, gpointer data)
 {
 	auto ed = static_cast<EditorData *>(data);
 	ed->stopping = TRUE;

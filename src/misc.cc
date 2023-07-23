@@ -386,7 +386,7 @@ gint get_cpu_cores()
 /* Copied from the libarchive .repo. examples */
 
 #ifndef HAVE_ARCHIVE
-gchar *open_archive(FileData *UNUSED(fd))
+gchar *open_archive(FileData *)
 {
 	log_printf("%s", _("Warning: libarchive not installed"));
 	return NULL;

@@ -76,7 +76,7 @@ gchar *desktop_file_template;
 gchar *instance_identifier;
 
 #if defined(SA_SIGINFO)
-void sig_handler_cb(int signo, siginfo_t *info, void *UNUSED(context))
+void sig_handler_cb(int signo, siginfo_t *info, void *)
 {
 	gchar hex_char[16];
 	const gchar *signal_name = nullptr;
@@ -181,7 +181,7 @@ void sig_handler_cb(int signo, siginfo_t *info, void *UNUSED(context))
 	exit(EXIT_FAILURE);
 }
 #else /* defined(SA_SIGINFO) */
-void sig_handler_cb(int UNUSED(signo))
+void sig_handler_cb(int)
 {
 #ifdef HAVE_EXECINFO_H
 	gint bt_size;
@@ -273,8 +273,7 @@ static void parse_command_line_add_file(const gchar *file_path, gchar **path, gc
 		}
 }
 
-static void parse_command_line_add_dir(const gchar *dir, gchar **UNUSED(path), gchar **UNUSED(file),
-				       GList **UNUSED(list))
+static void parse_command_line_add_dir(const gchar *dir, gchar **, gchar **, GList **)
 {
 #if 0
 	/* This is broken because file filter is not initialized yet.
@@ -1069,13 +1068,13 @@ static void exit_program_final()
 
 static GenericDialog *exit_dialog = nullptr;
 
-static void exit_confirm_cancel_cb(GenericDialog *gd, gpointer UNUSED(data))
+static void exit_confirm_cancel_cb(GenericDialog *gd, gpointer)
 {
 	exit_dialog = nullptr;
 	generic_dialog_close(gd);
 }
 
-static void exit_confirm_exit_cb(GenericDialog *gd, gpointer UNUSED(data))
+static void exit_confirm_exit_cb(GenericDialog *gd, gpointer)
 {
 	exit_dialog = nullptr;
 	generic_dialog_close(gd);
@@ -1119,7 +1118,7 @@ static gint exit_confirm_dlg()
 	return TRUE;
 }
 
-static void exit_program_write_metadata_cb(gint success, const gchar *UNUSED(dest_path), gpointer UNUSED(data))
+static void exit_program_write_metadata_cb(gint success, const gchar *, gpointer)
 {
 	if (success) exit_program();
 }
@@ -1155,7 +1154,7 @@ void exit_program()
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 #if defined(SIGBUS) && defined(SA_SIGINFO)
-static void sigbus_handler_cb_unused(int UNUSED(signum), siginfo_t *info, void *UNUSED(context))
+static void sigbus_handler_cb_unused(int, siginfo_t *info, void *)
 {
 	/*
 	 * @FIXME Design and implement a POSIX-acceptable approach,
@@ -1229,7 +1228,7 @@ static void set_theme_bg_color()
 	view_window_colors_update();
 }
 
-static gboolean theme_change_cb(GObject *UNUSED(gobject), GParamSpec *UNUSED(pspec), gpointer UNUSED(data))
+static gboolean theme_change_cb(GObject *, GParamSpec *, gpointer)
 {
 	set_theme_bg_color();
 

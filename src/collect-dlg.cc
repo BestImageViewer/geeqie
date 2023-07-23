@@ -38,7 +38,7 @@ enum {
 static gboolean collection_save_confirmed(FileDialog *fd, gboolean overwrite, CollectionData *cd);
 
 
-static void collection_confirm_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void collection_confirm_ok_cb(GenericDialog *, gpointer data)
 {
 	auto fd = static_cast<FileDialog *>(data);
 	auto cd = static_cast<CollectionData *>(GENERIC_DIALOG(fd)->data);
@@ -50,7 +50,7 @@ static void collection_confirm_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
 		}
 }
 
-static void collection_confirm_cancel_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void collection_confirm_cancel_cb(GenericDialog *, gpointer)
 {
 	/* this is a no-op, so the cancel button is added */
 }

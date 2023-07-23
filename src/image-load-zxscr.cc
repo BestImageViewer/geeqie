@@ -56,12 +56,12 @@ const guchar palette[2][8][3] = {
 	}
 };
 
-static void free_buffer(guchar *pixels, gpointer UNUSED(data))
+static void free_buffer(guchar *pixels, gpointer)
 {
 	g_free(pixels);
 }
 
-static gboolean image_loader_zxscr_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
+static gboolean image_loader_zxscr_load(gpointer loader, const guchar *buf, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
 	guint8 *pixels;
@@ -166,18 +166,18 @@ static GdkPixbuf *image_loader_zxscr_get_pixbuf(gpointer loader)
 	return ld->pixbuf;
 }
 
-static gchar *image_loader_zxscr_get_format_name(gpointer UNUSED(loader))
+static gchar *image_loader_zxscr_get_format_name(gpointer)
 {
 	return g_strdup("zxscr");
 }
 
-static gchar **image_loader_zxscr_get_format_mime_types(gpointer UNUSED(loader))
+static gchar **image_loader_zxscr_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"application/octet-stream", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_zxscr_close(gpointer UNUSED(loader), GError **UNUSED(error))
+static gboolean image_loader_zxscr_close(gpointer, GError **)
 {
 	return TRUE;
 }

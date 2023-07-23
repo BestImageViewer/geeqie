@@ -40,7 +40,7 @@ struct ImageLoaderDDS {
 	gboolean abort;
 };
 
-static void free_buffer(guchar *pixels, gpointer UNUSED(data))
+static void free_buffer(guchar *pixels, gpointer)
 {
 	g_free(pixels);
 }
@@ -527,7 +527,7 @@ guchar *ddsReadX8R8G8B8(uint width, uint height, const unsigned char *buffer) {
 	return reinterpret_cast<guchar *>(pixels);
 }
 
-static gboolean image_loader_dds_load (gpointer loader, const guchar *buf, gsize UNUSED(count), GError **UNUSED(error))
+static gboolean image_loader_dds_load (gpointer loader, const guchar *buf, gsize, GError **)
 {
 	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	uint width = ddsGetWidth(buf);
@@ -583,17 +583,17 @@ static GdkPixbuf* image_loader_dds_get_pixbuf(gpointer loader)
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_dds_get_format_name(gpointer UNUSED(loader))
+static gchar* image_loader_dds_get_format_name(gpointer)
 {
 	return g_strdup("dds");
 }
-static gchar** image_loader_dds_get_format_mime_types(gpointer UNUSED(loader))
+static gchar** image_loader_dds_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/vnd-ms.dds", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_dds_close(gpointer UNUSED(loader), GError **UNUSED(error))
+static gboolean image_loader_dds_close(gpointer, GError **)
 {
 	return TRUE;
 }

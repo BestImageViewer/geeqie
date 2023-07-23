@@ -173,7 +173,7 @@ fatal_error_handler (j_common_ptr cinfo)
 }
 
 static void
-output_message_handler (j_common_ptr UNUSED(cinfo))
+output_message_handler (j_common_ptr)
 {
   /* This method keeps libjpeg from dumping crap to stderr */
 
@@ -213,7 +213,7 @@ void image_loader_jpeg_read_scanline(struct jpeg_decompress_struct *cinfo, gucha
 }
 
 
-static void init_source (j_decompress_ptr UNUSED(cinfo)) {}
+static void init_source (j_decompress_ptr) {}
 static boolean fill_input_buffer (j_decompress_ptr cinfo)
 {
 	ERREXIT(cinfo, JERR_INPUT_EMPTY);
@@ -233,7 +233,7 @@ static void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 		src->bytes_in_buffer -= static_cast<size_t>(num_bytes);
 		}
 }
-static void term_source (j_decompress_ptr UNUSED(cinfo)) {}
+static void term_source (j_decompress_ptr) {}
 static void set_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 {
 	struct jpeg_source_mgr* src;
@@ -440,17 +440,17 @@ static GdkPixbuf* image_loader_jpeg_get_pixbuf(gpointer loader)
 	return lj->pixbuf;
 }
 
-static gchar* image_loader_jpeg_get_format_name(gpointer UNUSED(loader))
+static gchar* image_loader_jpeg_get_format_name(gpointer)
 {
 	return g_strdup("jpeg");
 }
-static gchar** image_loader_jpeg_get_format_mime_types(gpointer UNUSED(loader))
+static gchar** image_loader_jpeg_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/jpeg", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_jpeg_close(gpointer UNUSED(loader), GError **UNUSED(error))
+static gboolean image_loader_jpeg_close(gpointer, GError **)
 {
 	return TRUE;
 }

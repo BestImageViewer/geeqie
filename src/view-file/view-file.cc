@@ -364,7 +364,7 @@ static void vf_pop_menu_view_cb(GtkWidget *widget, gpointer data)
 	}
 }
 
-static void vf_pop_menu_open_archive_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_open_archive_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	LayoutWindow *lw_new;
@@ -394,14 +394,14 @@ static void vf_pop_menu_open_archive_cb(GtkWidget *UNUSED(widget), gpointer data
 		}
 }
 
-static void vf_pop_menu_copy_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_copy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	file_util_copy(nullptr, vf_pop_menu_file_list(vf), nullptr, vf->listview);
 }
 
-static void vf_pop_menu_move_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_move_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -419,7 +419,7 @@ static void vf_pop_menu_rename_cb(GtkWidget *widget, gpointer data)
 	}
 }
 
-static void vf_pop_menu_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_delete_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -427,7 +427,7 @@ static void vf_pop_menu_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
 	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview);
 }
 
-static void vf_pop_menu_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_move_to_trash_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -435,28 +435,28 @@ static void vf_pop_menu_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer dat
 	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview);
 }
 
-static void vf_pop_menu_copy_path_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	file_util_copy_path_list_to_clipboard(vf_pop_menu_file_list(vf), TRUE);
 }
 
-static void vf_pop_menu_copy_path_unquoted_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	file_util_copy_path_list_to_clipboard(vf_pop_menu_file_list(vf), FALSE);
 }
 
-static void vf_pop_menu_enable_grouping_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_enable_grouping_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	file_data_disable_grouping_list(vf_pop_menu_file_list(vf), FALSE);
 }
 
-static void vf_pop_menu_duplicates_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_duplicates_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	DupeWindow *dw;
@@ -465,7 +465,7 @@ static void vf_pop_menu_duplicates_cb(GtkWidget *UNUSED(widget), gpointer data)
 	dupe_window_add_files(dw, vf_pop_menu_file_list(vf), FALSE);
 }
 
-static void vf_pop_menu_disable_grouping_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_disable_grouping_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -499,7 +499,7 @@ static void vf_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 		}
 }
 
-static void vf_pop_menu_sort_ascend_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_sort_ascend_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
@@ -513,43 +513,43 @@ static void vf_pop_menu_sort_ascend_cb(GtkWidget *UNUSED(widget), gpointer data)
 		}
 }
 
-static void vf_pop_menu_sel_mark_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_sel_mark_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_SET);
 }
 
-static void vf_pop_menu_sel_mark_and_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_sel_mark_and_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_AND);
 }
 
-static void vf_pop_menu_sel_mark_or_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_sel_mark_or_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_OR);
 }
 
-static void vf_pop_menu_sel_mark_minus_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_sel_mark_minus_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_MINUS);
 }
 
-static void vf_pop_menu_set_mark_sel_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_set_mark_sel_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_selection_to_mark(vf, vf->active_mark, STM_MODE_SET);
 }
 
-static void vf_pop_menu_res_mark_sel_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_res_mark_sel_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_selection_to_mark(vf, vf->active_mark, STM_MODE_RESET);
 }
 
-static void vf_pop_menu_toggle_mark_sel_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_pop_menu_toggle_mark_sel_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_selection_to_mark(vf, vf->active_mark, STM_MODE_TOGGLE);
@@ -832,7 +832,7 @@ static void vf_destroy_cb(GtkWidget *widget, gpointer data)
 	g_free(vf);
 }
 
-static void vf_marks_filter_toggle_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_marks_filter_toggle_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_refresh_idle(vf);
@@ -867,8 +867,7 @@ static void vf_marks_tooltip_ok_cb(GenericDialog *gd, gpointer data)
 	generic_dialog_close(gd);
 }
 
-void vf_marks_filter_on_icon_press(GtkEntry *UNUSED(entry), GtkEntryIconPosition UNUSED(pos),
-									GdkEvent *UNUSED(event), gpointer userdata)
+void vf_marks_filter_on_icon_press(GtkEntry *, GtkEntryIconPosition, GdkEvent *, gpointer userdata)
 {
 	auto mte = static_cast<MarksTextEntry *>(userdata);
 
@@ -877,7 +876,7 @@ void vf_marks_filter_on_icon_press(GtkEntry *UNUSED(entry), GtkEntryIconPosition
 	gtk_entry_set_text(GTK_ENTRY(mte->edit_widget), "");
 }
 
-static void vf_marks_tooltip_help_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void vf_marks_tooltip_help_cb(GenericDialog *, gpointer)
 {
 	help_window_show("GuideImageMarks.html");
 }
@@ -932,7 +931,7 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 	return TRUE;
 }
 
-static void vf_file_filter_save_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_file_filter_save_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	gchar *entry_text;
@@ -991,14 +990,14 @@ static void vf_file_filter_save_cb(GtkWidget *UNUSED(widget), gpointer data)
 	g_free(entry_text);
 }
 
-static void vf_file_filter_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void vf_file_filter_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	vf_refresh(vf);
 }
 
-static gboolean vf_file_filter_press_cb(GtkWidget *widget, GdkEventButton *UNUSED(bevent), gpointer data)
+static gboolean vf_file_filter_press_cb(GtkWidget *widget, GdkEventButton *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf->file_filter.last_selected = gtk_combo_box_get_active(GTK_COMBO_BOX(vf->file_filter.combo));
@@ -1148,7 +1147,7 @@ static void case_sensitive_cb(GtkWidget *widget, gpointer data)
 	vf_refresh(vf);
 }
 
-static void file_filter_clear_cb(GtkEntry *UNUSED(entry), GtkEntryIconPosition pos, GdkEvent *UNUSED(event), gpointer userdata)
+static void file_filter_clear_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
 {
 	if (pos == GTK_ENTRY_ICON_SECONDARY)
 		{
