@@ -2361,7 +2361,7 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 						G_CALLBACK(pan_move_to_trash_cb), pw);
 	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), "edit-delete-shred", active,
+					_("_Delete"), GQ_ICON_DELETE_SHRED, active,
 						G_CALLBACK(pan_delete_cb), pw);
 
 	menu_item_add_divider(menu);

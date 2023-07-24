@@ -385,7 +385,7 @@ static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button,
 	bm->active_button = b;
 
 	menu = popup_menu_short_lived();
-	menu_item_add_icon_sensitive(menu, _("_Properties..."), "document-properties", bm->editable,
+	menu_item_add_icon_sensitive(menu, _("_Properties..."), GQ_ICON_PROPERTIES, bm->editable,
 		      G_CALLBACK(bookmark_menu_prop_cb), bm);
 	menu_item_add_icon_sensitive(menu, _("Move _up"), GQ_ICON_GO_UP, bm->editable,
 		      G_CALLBACK(bookmark_menu_up_cb), bm);

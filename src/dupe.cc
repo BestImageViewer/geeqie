@@ -3550,7 +3550,7 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 				G_CALLBACK(dupe_menu_move_to_trash_cb), dw);
 	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), "edit-delete-shred", on_row,
+					_("_Delete"), GQ_ICON_DELETE_SHRED, on_row,
 				G_CALLBACK(dupe_menu_delete_cb), dw);
 
 	menu_item_add_divider(menu);

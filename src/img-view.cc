@@ -1434,7 +1434,7 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 				G_CALLBACK(view_move_to_trash_cb), vw);
 	menu_item_add_icon(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), "edit-delete-shred",
+					_("_Delete"), GQ_ICON_DELETE_SHRED,
 				G_CALLBACK(view_delete_cb), vw);
 
 	menu_item_add_divider(menu);

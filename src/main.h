@@ -138,6 +138,7 @@
 #define GQ_ICON_UNDO "edit-undo"
 #define GQ_ICON_OPEN "document-open"
 #define GQ_ICON_SAVE "document-save"
+#define GQ_ICON_SAVE_AS "document-save-as"
 #define GQ_ICON_NEW "document-new"
 #define GQ_ICON_EDIT "document-edit"
 #define GQ_ICON_REVERT "document-revert"
@@ -150,9 +151,11 @@
 #define GQ_ICON_ABOUT "help-about"
 #define GQ_ICON_QUIT "application-exit"
 #define GQ_ICON_DELETE "edit-delete"
+#define GQ_ICON_DELETE_SHRED "edit-delete-shred"
 #define GQ_ICON_CLEAR "edit-clear"
 #define GQ_ICON_COPY "edit-copy"
 #define GQ_ICON_FIND "edit-find"
+#define GQ_ICON_REPLACE "edit-find-replace"
 #define GQ_ICON_PRINT "document-print"
 
 #define GQ_ICON_GO_TOP "go-top"
@@ -163,6 +166,7 @@
 #define GQ_ICON_GO_LAST "go-last"
 #define GQ_ICON_GO_PREV "go-previous"
 #define GQ_ICON_GO_NEXT "go-next"
+#define GQ_ICON_GO_JUMP "go-jump"
 #define GQ_ICON_HOME "go-home"
 #define GQ_ICON_PAN_DOWN "pan-down"
 #define GQ_ICON_PAN_UP "pan-up"
@@ -205,6 +209,7 @@
 #define GQ_ICON_SELECT_COLOR "color-select"
 #define GQ_ICON_COLOR_MANAGEMENT "preferences-color" // breeze has nicer "color-management" icon, missing in others
 
+#define GQ_ICON_PROPERTIES "document-properties"
 // not done... plus many more
 #define GQ_ICON_COLLECTION GTK_STOCK_INDEX
 #define GQ_ICON_DND GTK_STOCK_DND_MULTIPLE

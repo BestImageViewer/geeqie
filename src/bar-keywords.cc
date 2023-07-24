@@ -476,7 +476,7 @@ static void bar_pane_keywords_populate_popup_cb(GtkTextView *UNUSED(textview), G
 
 	menu_item_add_divider(GTK_WIDGET(menu));
 	menu_item_add_icon(GTK_WIDGET(menu), _("Add selected keywords to selected files"), GQ_ICON_ADD, G_CALLBACK(bar_pane_keywords_sel_add_cb), pkd);
-	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing keywords in selected files with selected keywords"), "edit-find-replace", G_CALLBACK(bar_pane_keywords_sel_replace_cb), pkd);
+	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing keywords in selected files with selected keywords"), GQ_ICON_REPLACE, G_CALLBACK(bar_pane_keywords_sel_replace_cb), pkd);
 }
 
 

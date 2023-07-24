@@ -1181,7 +1181,7 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 				G_CALLBACK(sr_menu_move_to_trash_cb), sd);
 	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), "edit-delete-shred", on_row,
+					_("_Delete"), GQ_ICON_DELETE_SHRED, on_row,
 				G_CALLBACK(sr_menu_delete_cb), sd);
 
 	return menu;

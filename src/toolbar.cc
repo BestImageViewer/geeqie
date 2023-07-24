@@ -330,7 +330,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 		}
 	else
 		{
-		toolbar_entry->image = gtk_image_new_from_icon_name("go-jump",
+		toolbar_entry->image = gtk_image_new_from_icon_name(GQ_ICON_GO_JUMP,
 														GTK_ICON_SIZE_BUTTON);
 		}
 	gtk_box_pack_start(GTK_BOX(hbox), toolbar_entry->image, FALSE, FALSE, 0);

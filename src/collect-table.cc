@@ -1030,7 +1030,7 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 				G_CALLBACK(collection_table_popup_move_to_trash_cb), ct);
 	menu_item_add_icon_sensitive(menu,
 				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), "edit-delete-shred", over_icon,
+					_("_Delete"), GQ_ICON_DELETE_SHRED, over_icon,
 				G_CALLBACK(collection_table_popup_delete_cb), ct);
 
 	menu_item_add_divider(menu);
@@ -1048,7 +1048,7 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("_Save collection"), GQ_ICON_SAVE,
 			G_CALLBACK(collection_table_popup_save_cb), ct);
-	menu_item_add_icon(menu, _("Save collection _as..."), "document-save-as",
+	menu_item_add_icon(menu, _("Save collection _as..."), GQ_SAVE_AS,
 			G_CALLBACK(collection_table_popup_save_as_cb), ct);
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("_Find duplicates..."), GQ_ICON_FIND,
