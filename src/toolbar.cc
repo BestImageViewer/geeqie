@@ -119,7 +119,7 @@ static constexpr UseableToolbarItems useable_toolbar_items[] = {
 	{"Zoom300",	N_("Zoom 3:1"), GQ_ICON_GENERIC},
 	{"Zoom400",	N_("Zoom 4:1"), GQ_ICON_GENERIC},
 	{"Zoom50",	N_("Zoom 1:2"), GQ_ICON_GENERIC},
-	{"Zoom33",	N_("Zoom1:3"), GQ_ICON_GENERIC},
+	{"Zoom33",	N_("Zoom 1:3"), GQ_ICON_GENERIC},
 	{"Zoom25",	N_("Zoom 1:4"), GQ_ICON_GENERIC},
 	{"ConnectZoomIn",	N_("Connected Zoom in"), GQ_ICON_ZOOM_IN},
 	{"SplitPaneSync",	N_("Split Pane Sync"), PIXBUF_INLINE_SPLIT_PANE_SYNC},

@@ -1048,7 +1048,7 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("_Save collection"), GQ_ICON_SAVE,
 			G_CALLBACK(collection_table_popup_save_cb), ct);
-	menu_item_add_icon(menu, _("Save collection _as..."), GQ_SAVE_AS,
+	menu_item_add_icon(menu, _("Save collection _as..."), GQ_ICON_SAVE_AS,
 			G_CALLBACK(collection_table_popup_save_as_cb), ct);
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("_Find duplicates..."), GQ_ICON_FIND,

@@ -824,7 +824,7 @@ static const UseableMouseItems useable_mouse_items[] = {
 	{"Zoom300",	N_("Zoom 3:1"), GQ_ICON_GENERIC},
 	{"Zoom400",	N_("Zoom 4:1"), GQ_ICON_GENERIC},
 	{"Zoom50",	N_("Zoom 1:2"), GQ_ICON_GENERIC},
-	{"Zoom33",	N_("Zoom1:3"), GQ_ICON_GENERIC},
+	{"Zoom33",	N_("Zoom 1:3"), GQ_ICON_GENERIC},
 	{"Zoom25",	N_("Zoom 1:4"), GQ_ICON_GENERIC},
 	{"ConnectZoomIn",	N_("Connected Zoom in"), GQ_ICON_ZOOM_IN},
 	{"SplitPaneSync",	N_("Split Pane Sync"), PIXBUF_INLINE_SPLIT_PANE_SYNC},
@@ -3528,7 +3528,7 @@ static void config_tab_behavior(GtkWidget *notebook)
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = pref_button_new(NULL, GQ_ICON_CLEAR, nullptr,
+	button = pref_button_new(nullptr, GQ_ICON_CLEAR, nullptr,
 				 G_CALLBACK(safe_delete_clear_cb), nullptr);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
