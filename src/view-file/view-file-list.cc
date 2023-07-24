@@ -1071,12 +1071,13 @@ static void vflist_setup_iter_recursive(ViewFile *vf, GtkTreeStore *store, GtkTr
 		std::vector<gint> new_order;
 		new_order.reserve(num_total);
 
-		for (gint i = 0; i < num_total; i++)
+		for (gint i = 0; i < num_ordered; i++)
 			{
-			if (i < num_ordered)
-				new_order[i] = num_prepended + i;
-			else
-				new_order[i] = num_total - 1 - i;
+			new_order.push_back(num_prepended + i);
+			}
+		for (gint i = num_ordered; i < num_total; i++)
+			{
+			new_order.push_back(num_total - 1 - i);
 			}
 		gtk_tree_store_reorder(store, parent_iter, new_order.data());
 		}
@@ -1111,12 +1112,10 @@ void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend)
 	new_order.reserve(i);
 
 	work = vf->list;
-	i = 0;
 	while (work)
 		{
 		auto fd = static_cast<FileData *>(work->data);
-		new_order[i] = GPOINTER_TO_INT(g_hash_table_lookup(fd_idx_hash, fd));
-		i++;
+		new_order.push_back(GPOINTER_TO_INT(g_hash_table_lookup(fd_idx_hash, fd)));
 		work = work->next;
 		}
 

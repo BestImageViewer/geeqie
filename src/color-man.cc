@@ -511,7 +511,7 @@ static cmsToneCurve* colorspaces_create_transfer(int32_t size, double (*fct)(dou
 		{
 		const double x = static_cast<float>(i) / (size - 1);
 		const double y = MIN(fct(x), 1.0f);
-		values[i] = static_cast<float>(y);
+		values.push_back(static_cast<float>(y));
 		}
 
 	return cmsBuildTabulatedToneCurveFloat(nullptr, size, values.data());
