@@ -21,6 +21,10 @@
 #include "main.h"
 #include "logwindow.h"
 
+#include <algorithm>
+#include <deque>
+#include <string>
+
 #include "misc.h"
 #include "ui-misc.h"
 #include "window.h"
@@ -603,7 +607,12 @@ void log_window_new(LayoutWindow *lw)
 }
 
 struct LogMsg {
-	gchar *text;
+	LogMsg() = default;
+	LogMsg(const gchar *text, LogType type)
+		: text(text)
+		, type(type)
+	{}
+	std::string text;
 	LogType type;
 };
 
@@ -624,25 +633,19 @@ void log_window_append(const gchar *str, LogType type)
 	GtkTextView *text;
 	GtkTextBuffer *buffer;
 	GtkTextIter iter;
-	static GList *memory = nullptr;
+	static std::deque<LogMsg> memory;
 
 	if (logwindow == nullptr)
 		{
-		if (*str) {
-			auto msg = g_new(LogMsg, 1);
+		if (*str)
+			{
+			memory.emplace_front(str, type);
 
-			msg->text = g_strdup(str);
-			msg->type = type;
-
-			memory = g_list_prepend(memory, msg);
-
-			while (g_list_length(memory) >= static_cast<guint>(options->log_window_lines))
+			if (memory.size() >= static_cast<guint>(options->log_window_lines))
 				{
-				GList *work = g_list_last(memory);
-				auto oldest_msg = static_cast<LogMsg *>(work->data);
+				const auto count = std::max(options->log_window_lines - 1, 0);
 
-				g_free(oldest_msg->text);
-				memory = g_list_delete_link(memory, work);
+				memory.resize(count);
 				}
 			}
 		return;
@@ -663,22 +666,11 @@ void log_window_append(const gchar *str, LogType type)
 
 	gtk_text_buffer_get_end_iter(buffer, &iter);
 
-	{
-	GList *work = g_list_last(memory);
-
-	while (work)
+	std::for_each(memory.crbegin(), memory.crend(), [buffer, &iter](const LogMsg &oldest_msg)
 		{
-		GList *prev;
-		auto oldest_msg = static_cast<LogMsg *>(work->data);
-
-		log_window_insert_text(buffer, &iter, oldest_msg->text,
-									logwindow->color_tags[oldest_msg->type]);
-
-		prev = work->prev;
-		memory = g_list_delete_link(memory, work);
-		work = prev;
-		}
-	}
+		log_window_insert_text(buffer, &iter, oldest_msg.text.c_str(), logwindow->color_tags[oldest_msg.type]);
+		});
+	memory.clear();
 
 	log_window_insert_text(buffer, &iter, str, logwindow->color_tags[type]);
 
