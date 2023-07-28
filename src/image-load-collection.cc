@@ -37,7 +37,7 @@ struct ImageLoaderCOLLECTION {
 	gboolean abort;
 };
 
-static gboolean image_loader_collection_load(gpointer loader, const guchar *UNUSED(buf), gsize UNUSED(count), GError **UNUSED(error))
+static gboolean image_loader_collection_load(gpointer loader, const guchar *, gsize, GError **)
 {
 	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	auto il = static_cast<ImageLoader *>(ld->data);
@@ -136,17 +136,17 @@ static GdkPixbuf* image_loader_collection_get_pixbuf(gpointer loader)
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_collection_get_format_name(gpointer UNUSED(loader))
+static gchar* image_loader_collection_get_format_name(gpointer)
 {
 	return g_strdup("collection");
 }
-static gchar** image_loader_collection_get_format_mime_types(gpointer UNUSED(loader))
+static gchar** image_loader_collection_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/png", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_collection_close(gpointer UNUSED(loader), GError **UNUSED(error))
+static gboolean image_loader_collection_close(gpointer, GError **)
 {
 	return TRUE;
 }

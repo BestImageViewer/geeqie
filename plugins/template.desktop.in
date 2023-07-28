@@ -2,6 +2,10 @@
 Version=1.0
 Type=Application
 
+# The Desktop file MUST contain one or both of the following:
+Categories=Graphics;
+Categories=X-Geeqie;
+
 # The name which appears in the menu:
 Name=Template
 #Name[cs]=Šablona
@@ -46,7 +50,6 @@ Icon=gtk-file
 #TryExec=command
 
 # Desktop files that are usable only in Geeqie should be marked like this:
-Categories=X-Geeqie;
 OnlyShowIn=X-Geeqie;
 
 # This is a filter - see symlink.desktop and geeqie-symlink for an example

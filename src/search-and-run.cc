@@ -40,7 +40,7 @@ struct SarData
 	GtkBuilder *builder;
 };
 
-static gint sort_iter_compare_func (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer UNUSED(data))
+static gint sort_iter_compare_func (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer)
 {
 	gint ret = 0;
 	gchar *label1, *label2;
@@ -181,7 +181,7 @@ static gboolean search_and_run_destroy(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static gboolean entry_box_activate_cb(GtkWidget *UNUSED(widget), gpointer data)
+static gboolean entry_box_activate_cb(GtkWidget *, gpointer data)
 {
 	auto sar = static_cast<SarData *>(data);
 
@@ -195,7 +195,7 @@ static gboolean entry_box_activate_cb(GtkWidget *UNUSED(widget), gpointer data)
 	return TRUE;
 }
 
-static gboolean keypress_cb(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer data)
+static gboolean keypress_cb(GtkWidget *, GdkEventKey *event, gpointer data)
 {
 	auto sar = static_cast<SarData *>(data);
 	gboolean ret = FALSE;
@@ -216,7 +216,7 @@ static gboolean keypress_cb(GtkWidget *UNUSED(widget), GdkEventKey *event, gpoin
 	return ret;
 }
 
-static gboolean match_selected_cb(GtkEntryCompletion *UNUSED(widget), GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
+static gboolean match_selected_cb(GtkEntryCompletion *, GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
 	auto sar = static_cast<SarData *>(data);
 

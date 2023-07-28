@@ -386,7 +386,7 @@ gboolean histogram_draw(Histogram *histogram, const HistMap *histmap, GdkPixbuf 
 	return TRUE;
 }
 
-void histogram_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(data))
+void histogram_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if ((type & NOTIFY_REREAD) && fd->histmap)
 		{

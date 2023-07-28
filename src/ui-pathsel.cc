@@ -91,7 +91,7 @@ static void dest_view_delete_dlg_cancel(GenericDialog *gd, gpointer data);
  *-----------------------------------------------------------------------------
  */
 
-static void dest_free_data(GtkWidget *UNUSED(widget), gpointer data)
+static void dest_free_data(GtkWidget *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 
@@ -321,9 +321,9 @@ static GtkTargetEntry dest_drag_types[] = {
 #define dest_drag_types_n 2
 
 
-static void dest_dnd_set_data(GtkWidget *view,
-			      GdkDragContext *UNUSED(context), GtkSelectionData *selection_data,
-			      guint UNUSED(info), guint UNUSED(time), gpointer UNUSED(data))
+static void dest_dnd_set_data(GtkWidget *view, GdkDragContext *,
+				  GtkSelectionData *selection_data,
+				  guint, guint, gpointer)
 {
 	gchar *path = nullptr;
 	GList *list = nullptr;
@@ -462,7 +462,7 @@ static void dest_view_rename(Dest_Data *dd, GtkTreeView *view)
 	g_free(text);
 }
 
-static void dest_view_delete_dlg_cancel(GenericDialog *UNUSED(gd), gpointer data)
+static void dest_view_delete_dlg_cancel(GenericDialog *, gpointer data)
 {
 	auto dl = static_cast<DestDel_Data *>(data);
 
@@ -550,38 +550,37 @@ static void dest_view_bookmark(Dest_Data *dd, GtkTreeView *view)
 	g_free(path);
 }
 
-static void dest_popup_dir_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void dest_popup_dir_rename_cb(GtkWidget *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	dest_view_rename(dd, GTK_TREE_VIEW(dd->d_view));
 }
 
-static void dest_popup_dir_bookmark_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void dest_popup_dir_bookmark_cb(GtkWidget *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	dest_view_bookmark(dd, GTK_TREE_VIEW(dd->d_view));
 }
 
-static void dest_popup_file_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void dest_popup_file_rename_cb(GtkWidget *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	dest_view_rename(dd, GTK_TREE_VIEW(dd->f_view));
 }
 
-static void dest_popup_file_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void dest_popup_file_delete_cb(GtkWidget *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	dest_view_delete(dd, GTK_TREE_VIEW(dd->f_view));
 }
 
-static void dest_popup_file_bookmark_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void dest_popup_file_bookmark_cb(GtkWidget *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	dest_view_bookmark(dd, GTK_TREE_VIEW(dd->f_view));
 }
 
-static gboolean dest_popup_menu(Dest_Data *dd, GtkTreeView *view,
-			        guint UNUSED(button), guint32 UNUSED(time), gboolean local)
+static gboolean dest_popup_menu(Dest_Data *dd, GtkTreeView *view, guint, guint32, gboolean local)
 {
 	GtkWidget *menu;
 
@@ -788,7 +787,7 @@ static void dest_select_cb(GtkTreeSelection *selection, gpointer data)
 	g_free(path);
 }
 
-static void dest_activate_cb(GtkWidget *view, GtkTreePath *tpath, GtkTreeViewColumn *UNUSED(column), gpointer data)
+static void dest_activate_cb(GtkWidget *view, GtkTreePath *tpath, GtkTreeViewColumn *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	GtkTreeModel *store;
@@ -814,14 +813,14 @@ static void dest_activate_cb(GtkWidget *view, GtkTreePath *tpath, GtkTreeViewCol
 	g_free(path);
 }
 
-static void dest_home_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void dest_home_cb(GtkWidget *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 
 	dest_change_dir(dd, homedir(), (dd->f_view != nullptr));
 }
 
-static void dest_show_hidden_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void dest_show_hidden_cb(GtkWidget *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	gchar *buf;
@@ -833,7 +832,7 @@ static void dest_show_hidden_cb(GtkWidget *UNUSED(widget), gpointer data)
 	g_free(buf);
 }
 
-static void dest_entry_changed_cb(GtkEditable *UNUSED(editable), gpointer data)
+static void dest_entry_changed_cb(GtkEditable *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	const gchar *path;
@@ -952,7 +951,7 @@ static void dest_filter_clear(Dest_Data *dd)
 	dest_filter_add(dd, "*", _("All Files"), TRUE);
 }
 
-static void dest_filter_changed_cb(GtkEditable *UNUSED(editable), gpointer data)
+static void dest_filter_changed_cb(GtkEditable *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	GtkWidget *entry;

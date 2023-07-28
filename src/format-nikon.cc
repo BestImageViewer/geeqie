@@ -137,7 +137,7 @@ static guint nikon_tiff_table(guchar *data, const guint len, guint offset, ExifB
 }
 
 gboolean format_nikon_raw(guchar *data, const guint len,
-		          guint *image_offset, guint *UNUSED(exif_offset))
+		          guint *image_offset, guint *)
 {
 	guint i_off = 0;
 	guint i_len = 0;

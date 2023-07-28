@@ -140,7 +140,7 @@ static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 	g_free(pathl);
 }
 
-static void tab_completion_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void tab_completion_destroy(GtkWidget *, gpointer data)
 {
 	auto td = static_cast<TabCompData *>(data);
 
@@ -557,7 +557,7 @@ static gboolean tab_completion_key_pressed(GtkWidget *widget, GdkEventKey *event
 	return (stop_signal);
 }
 
-static void tab_completion_button_pressed(GtkWidget *UNUSED(widget), gpointer data)
+static void tab_completion_button_pressed(GtkWidget *, gpointer data)
 {
 	TabCompData *td;
 	auto entry = static_cast<GtkWidget *>(data);
@@ -882,7 +882,7 @@ static void tab_completion_select_show(TabCompData *td)
 	gtk_widget_show(GENERIC_DIALOG(td->fd)->dialog);
 }
 
-static void tab_completion_select_pressed(GtkWidget *UNUSED(widget), gpointer data)
+static void tab_completion_select_pressed(GtkWidget *, gpointer data)
 {
 	auto td = static_cast<TabCompData *>(data);
 

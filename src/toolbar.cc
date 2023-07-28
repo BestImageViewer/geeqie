@@ -154,8 +154,7 @@ static constexpr UseableToolbarItems useable_toolbar_items[] = {
  * @param single_step Move up/down one step, or to top/bottom
  *
  */
-static void toolbar_item_move(GtkWidget *UNUSED(widget), gpointer data,
-									gboolean up, gboolean single_step)
+static void toolbar_item_move(GtkWidget *, gpointer data, gboolean up, gboolean single_step)
 {
 	auto list_item = static_cast<GtkWidget *>(data);
 	GtkWidget *box;
@@ -200,7 +199,7 @@ static void toolbar_item_move_bottom_cb(GtkWidget *widget, gpointer data)
 	toolbar_item_move(widget, data, FALSE, FALSE);
 }
 
-static void toolbar_item_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void toolbar_item_delete_cb(GtkWidget *, gpointer data)
 {
 	gtk_widget_destroy(GTK_WIDGET(data));
 }
@@ -225,7 +224,7 @@ static void toolbar_menu_popup(GtkWidget *widget)
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }
 
-static gboolean toolbar_press_cb(GtkGesture *UNUSED(gesture), int UNUSED(n_press), double UNUSED(x), double UNUSED(y), gpointer data)
+static gboolean toolbar_press_cb(GtkGesture *, int, double, double, gpointer data)
 {
 	auto button_data = static_cast<ToolbarButtonData *>(data);
 
@@ -373,7 +372,7 @@ static void get_desktop_data(const gchar *name, gchar **label, gchar **stock_id)
 	g_list_free(editors_list);
 }
 
-static void toolbar_menu_add_popup(GtkWidget *UNUSED(widget), gpointer data)
+static void toolbar_menu_add_popup(GtkWidget *, gpointer data)
 {
 	GtkWidget *menu;
 	GList *editors_list;

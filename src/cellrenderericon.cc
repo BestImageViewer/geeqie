@@ -116,7 +116,7 @@ gqv_cell_renderer_icon_get_type()
 }
 
 static void
-gqv_cell_renderer_icon_init_wrapper(void *data, void *UNUSED(user_data))
+gqv_cell_renderer_icon_init_wrapper(void *data, void *)
 {
 	gqv_cell_renderer_icon_init(static_cast<GQvCellRendererIcon *>(data));
 }
@@ -129,7 +129,7 @@ gqv_cell_renderer_icon_init(GQvCellRendererIcon *cellicon)
 }
 
 static void
-gqv_cell_renderer_icon_class_init_wrapper(void *data, void *UNUSED(user_data))
+gqv_cell_renderer_icon_class_init_wrapper(void *data, void *)
 {
 	gqv_cell_renderer_icon_class_init(static_cast<GQvCellRendererIconClass *>(data));
 }
@@ -626,7 +626,7 @@ static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
 static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 					   cairo_t *cr,
 					   GtkWidget *widget,
-					   const GdkRectangle *UNUSED(background_area),
+					   const GdkRectangle *,
 					   const GdkRectangle *cell_area,
 					   GtkCellRendererState flags)
 
@@ -809,9 +809,9 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 						GdkEvent             *event,
 						GtkWidget            *widget,
 						const gchar          *path,
-						const GdkRectangle   *UNUSED(background_area),
+						const GdkRectangle   *,
 						const GdkRectangle   *cell_area,
-						GtkCellRendererState  UNUSED(flags))
+						GtkCellRendererState)
 {
 	auto cellicon = reinterpret_cast<GQvCellRendererIcon *>(cell);
 	GdkEventButton *bevent = &event->button;

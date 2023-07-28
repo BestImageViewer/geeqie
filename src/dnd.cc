@@ -171,7 +171,7 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 	g_object_unref(dest);
 }
 
-static void dnd_set_drag_label_end_cb(GtkWidget *widget, GdkDragContext *UNUSED(context), gpointer data)
+static void dnd_set_drag_label_end_cb(GtkWidget *widget, GdkDragContext *, gpointer data)
 {
 	auto window = static_cast<GtkWidget *>(data);
 	g_signal_handlers_disconnect_by_func(widget, (gpointer)dnd_set_drag_label_end_cb, data);

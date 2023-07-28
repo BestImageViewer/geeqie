@@ -420,7 +420,7 @@ static void pref_radiobutton_int_cb_unused(GtkWidget *widget, gpointer data)
 GtkWidget *pref_radiobutton_new_int_unused(GtkWidget *parent_box, GtkWidget *sibling,
 				    const gchar *text, gboolean active,
 				    gboolean *result, gboolean value,
-				    GCallback UNUSED(func), gpointer UNUSED(data))
+				    GCallback, gpointer)
 {
 	GtkWidget *button;
 
@@ -518,7 +518,7 @@ GtkWidget *pref_spin_new_int(GtkWidget *parent_box, const gchar *text, const gch
 			     G_CALLBACK(pref_spin_int_cb), value_var);
 }
 
-static void pref_link_sensitivity_cb(GtkWidget *watch, GtkStateType UNUSED(prev_state), gpointer data)
+static void pref_link_sensitivity_cb(GtkWidget *watch, GtkStateType, gpointer data)
 {
 	auto widget = static_cast<GtkWidget *>(data);
 
@@ -807,7 +807,7 @@ static void date_selection_popup_hide(DateSelection *ds)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), FALSE);
 }
 
-static gboolean date_selection_popup_release_cb(GtkWidget *UNUSED(widget), GdkEventButton *UNUSED(event), gpointer data)
+static gboolean date_selection_popup_release_cb(GtkWidget *, GdkEventButton *, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
 
@@ -815,7 +815,7 @@ static gboolean date_selection_popup_release_cb(GtkWidget *UNUSED(widget), GdkEv
 	return TRUE;
 }
 
-static gboolean date_selection_popup_press_cb(GtkWidget *UNUSED(widget), GdkEventButton *event, gpointer data)
+static gboolean date_selection_popup_press_cb(GtkWidget *, GdkEventButton *event, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
 	gint x, y;
@@ -849,7 +849,7 @@ static void date_selection_popup_sync(DateSelection *ds)
 	date_selection_set(ds->box, day, month + 1, year);
 }
 
-static gboolean date_selection_popup_keypress_cb(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer data)
+static gboolean date_selection_popup_keypress_cb(GtkWidget *, GdkEventKey *event, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
 
@@ -872,14 +872,14 @@ static gboolean date_selection_popup_keypress_cb(GtkWidget *UNUSED(widget), GdkE
 	return FALSE;
 }
 
-static void date_selection_day_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void date_selection_day_cb(GtkWidget *, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
 
 	date_selection_popup_sync(ds);
 }
 
-static void date_selection_doubleclick_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void date_selection_doubleclick_cb(GtkWidget *, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
 
@@ -946,7 +946,7 @@ static void date_selection_popup(DateSelection *ds)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), TRUE);
 }
 
-static void date_selection_button_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void date_selection_button_cb(GtkWidget *, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
 
@@ -984,7 +984,7 @@ static void spin_increase(GtkWidget *spin, gint value)
 	gtk_widget_set_size_request(spin, req.width + value, -1);
 }
 
-static void date_selection_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void date_selection_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
 
@@ -1388,7 +1388,7 @@ gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
 		}
 }
 
-gboolean defined_mouse_buttons(GtkWidget *UNUSED(widget), GdkEventButton *event, gpointer data)
+gboolean defined_mouse_buttons(GtkWidget *, GdkEventButton *event, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkAction *action;

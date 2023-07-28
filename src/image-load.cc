@@ -110,7 +110,7 @@ GType image_loader_get_type()
 	return type;
 }
 
-static void image_loader_init(GTypeInstance *instance, gpointer UNUSED(g_class))
+static void image_loader_init(GTypeInstance *instance, gpointer)
 {
 	auto il = reinterpret_cast<ImageLoader *>(instance);
 
@@ -146,7 +146,7 @@ static void image_loader_init(GTypeInstance *instance, gpointer UNUSED(g_class))
 	DEBUG_1("new image loader %p, bufsize=%" G_GSIZE_FORMAT " idle_loop=%u", (void *)il, il->read_buffer_size, il->idle_read_loop_count);
 }
 
-static void image_loader_class_init_wrapper(void *data, void *UNUSED(user_data))
+static void image_loader_class_init_wrapper(void *data, void *)
 {
 	image_loader_class_init(static_cast<ImageLoaderClass *>(data));
 }
@@ -484,7 +484,7 @@ static void image_loader_sync_pixbuf(ImageLoader *il)
 	g_mutex_unlock(il->data_mutex);
 }
 
-static void image_loader_area_updated_cb(gpointer UNUSED(loader),
+static void image_loader_area_updated_cb(gpointer,
 				 guint x, guint y, guint w, guint h,
 				 gpointer data)
 {
@@ -1240,7 +1240,7 @@ static void image_loader_thread_wait_high()
 }
 
 
-static void image_loader_thread_run(gpointer data, gpointer UNUSED(user_data))
+static void image_loader_thread_run(gpointer data, gpointer)
 {
 	auto il = static_cast<ImageLoader *>(data);
 	gboolean cont;

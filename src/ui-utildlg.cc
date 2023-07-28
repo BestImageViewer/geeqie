@@ -189,7 +189,7 @@ static gboolean generic_dialog_key_press_cb(GtkWidget *widget, GdkEventKey *even
 	return FALSE;
 }
 
-static gboolean generic_dialog_delete_cb(GtkWidget *UNUSED(w), GdkEventAny *UNUSED(event), gpointer data)
+static gboolean generic_dialog_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
 {
 	auto gd = static_cast<GenericDialog *>(data);
 	gboolean auto_close;
@@ -487,7 +487,7 @@ GenericDialog *generic_dialog_new(const gchar *title,
  *-----------------------------------------------------------------------------
  */
 
-static void warning_dialog_ok_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void warning_dialog_ok_cb(GenericDialog *, gpointer)
 {
 	/* no op */
 }
@@ -559,7 +559,7 @@ static gboolean appimage_notification_fade_cb(gpointer data)
 	return TRUE;
 }
 
-static gboolean user_close_cb(GtkWidget *UNUSED(widget), GdkEvent *UNUSED(event), gpointer data)
+static gboolean user_close_cb(GtkWidget *, GdkEvent *, gpointer data)
 {
 	auto appimage_data = static_cast<AppImageData *>(data);
 
@@ -588,7 +588,7 @@ static void show_notification_message(AppImageData *appimage_data)
 	g_free(ui_path);
 }
 
-void appimage_notification_func(gpointer data, gpointer UNUSED(user_data))
+void appimage_notification_func(gpointer data, gpointer)
 {
 	gboolean internet_available = FALSE;
 	gchar *architecture;
@@ -687,14 +687,14 @@ GtkWidget *file_dialog_add_button(FileDialog *fdlg, const gchar *stock_id, const
 					 reinterpret_cast<void(*)(GenericDialog *, gpointer)>(func_cb), is_default);
 }
 
-static void file_dialog_entry_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void file_dialog_entry_cb(GtkWidget *, gpointer data)
 {
 	auto fdlg = static_cast<FileDialog *>(data);
 	g_free(fdlg->dest_path);
 	fdlg->dest_path = remove_trailing_slash(gtk_entry_get_text(GTK_ENTRY(fdlg->entry)));
 }
 
-static void file_dialog_entry_enter_cb(const gchar *UNUSED(path), gpointer data)
+static void file_dialog_entry_enter_cb(const gchar *, gpointer data)
 {
 	auto gd = static_cast<GenericDialog *>(data);
 

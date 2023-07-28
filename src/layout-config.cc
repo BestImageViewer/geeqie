@@ -62,7 +62,7 @@ static gint layout_config_style_count = sizeof(layout_config_styles) / sizeof(La
 static const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
 
-static void layout_config_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void layout_config_destroy(GtkWidget *, gpointer data)
 {
 	auto lc = static_cast<LayoutConfig *>(data);
 
@@ -268,8 +268,8 @@ static GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint st
 	return group;
 }
 
-static void layout_config_number_cb(GtkTreeViewColumn *UNUSED(tree_column), GtkCellRenderer *cell,
-				    GtkTreeModel *store, GtkTreeIter *iter, gpointer UNUSED(data))
+static void layout_config_number_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
+				    GtkTreeModel *store, GtkTreeIter *iter, gpointer)
 {
 	GtkTreePath *tpath;
 	gint *indices;

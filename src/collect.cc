@@ -75,7 +75,7 @@ static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data);
  *-------------------------------------------------------------------
  */
 
-CollectInfo *collection_info_new(FileData *fd, struct stat *UNUSED(st), GdkPixbuf *pixbuf)
+CollectInfo *collection_info_new(FileData *fd, struct stat *, GdkPixbuf *pixbuf)
 {
 	CollectInfo *ci;
 
@@ -923,7 +923,7 @@ static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data)
  *-------------------------------------------------------------------
  */
 
-static gboolean collection_window_keypress(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer data)
+static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpointer data)
 {
 	auto cw = static_cast<CollectWindow *>(data);
 	gboolean stop_signal = FALSE;
@@ -1120,7 +1120,7 @@ static void collection_window_update_title(CollectWindow *cw)
 	g_free(buf);
 }
 
-static void collection_window_update_info(CollectionData *UNUSED(cd), CollectInfo *ci, gpointer data)
+static void collection_window_update_info(CollectionData *, CollectInfo *ci, gpointer data)
 {
 	auto cw = static_cast<CollectWindow *>(data);
 
@@ -1295,7 +1295,7 @@ gboolean collection_window_modified_exists()
 	return ret;
 }
 
-static gboolean collection_window_delete(GtkWidget *UNUSED(widget), GdkEvent *UNUSED(event), gpointer data)
+static gboolean collection_window_delete(GtkWidget *, GdkEvent *, gpointer data)
 {
 	auto cw = static_cast<CollectWindow *>(data);
 	collection_window_close(cw);

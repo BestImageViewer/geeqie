@@ -216,16 +216,6 @@
 // PIXBUF_INLINE_ICON_ZOOMFILLHOR
 // PIXBUF_INLINE_ICON_ZOOMFILLVERT
 
-/* From http://stackoverflow.com/questions/3417837/ */
-#ifdef UNUSED
-#elif defined(__GNUC__)
-# define UNUSED(x) UNUSED_ ## x __attribute__((unused))
-#elif defined(__LCLINT__)
-# define UNUSED(x) /*@unused@*/ x
-#else
-# define UNUSED(x) x
-#endif
-
 /*
  *----------------------------------------------------------------------------
  * main.cc

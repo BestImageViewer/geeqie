@@ -60,18 +60,18 @@ struct CMData
 static gchar *cache_maintenance_path = nullptr;
 static GtkStatusIcon *status_icon;
 
-static void cache_maintenance_sim_stop_cb(gpointer UNUSED(data))
+static void cache_maintenance_sim_stop_cb(gpointer)
 {
 	exit(EXIT_SUCCESS);
 }
 
-static void cache_maintenance_render_stop_cb(gpointer UNUSED(data))
+static void cache_maintenance_render_stop_cb(gpointer)
 {
 	gtk_status_icon_set_tooltip_text(status_icon, _("Geeqie: Creating sim data..."));
 	cache_manager_sim_remote(cache_maintenance_path, TRUE, reinterpret_cast<GDestroyNotify *>(cache_maintenance_sim_stop_cb));
 }
 
-static void cache_maintenance_clean_stop_cb(gpointer UNUSED(data))
+static void cache_maintenance_clean_stop_cb(gpointer)
 {
 	gtk_status_icon_set_tooltip_text(status_icon, _("Geeqie: Creating thumbs..."));
 	cache_manager_render_remote(cache_maintenance_path, TRUE, options->thumbnails.cache_into_dirs, reinterpret_cast<GDestroyNotify *>(cache_maintenance_render_stop_cb));
@@ -82,7 +82,7 @@ static void cache_maintenance_user_cancel_cb()
 	exit(EXIT_FAILURE);
 }
 
-static void cache_maintenance_status_icon_activate_cb(GtkStatusIcon *UNUSED(status), gpointer UNUSED(data))
+static void cache_maintenance_status_icon_activate_cb(GtkStatusIcon *, gpointer)
 {
 	GtkWidget *menu;
 	GtkWidget *item;
@@ -316,7 +316,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 	return G_SOURCE_CONTINUE;
 }
 
-static void cache_maintain_home_close_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void cache_maintain_home_close_cb(GenericDialog *, gpointer data)
 {
 	auto cm = static_cast<CMData *>(data);
 
@@ -325,7 +325,7 @@ static void cache_maintain_home_close_cb(GenericDialog *UNUSED(gd), gpointer dat
 	cache_maintain_home_close(cm);
 }
 
-static void cache_maintain_home_stop_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void cache_maintain_home_stop_cb(GenericDialog *, gpointer data)
 {
 	auto cm = static_cast<CMData *>(data);
 
@@ -573,7 +573,7 @@ static void cache_maint_copied(FileData *fd)
 	g_free(src_cache);
 }
 
-void cache_notify_cb(FileData *fd, NotifyType type, gpointer UNUSED(data))
+void cache_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if (!(type & NOTIFY_CHANGE) || !fd->change) return;
 
@@ -661,7 +661,7 @@ static void cache_manager_render_reset(CacheOpsData *cd)
 	cd->tl = nullptr;
 }
 
-static void cache_manager_render_close_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void cache_manager_render_close_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
@@ -687,7 +687,7 @@ static void cache_manager_render_finish(CacheOpsData *cd)
 		}
 }
 
-static void cache_manager_render_stop_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void cache_manager_render_stop_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
@@ -718,7 +718,7 @@ static void cache_manager_render_folder(CacheOpsData *cd, FileData *dir_fd)
 
 static gboolean cache_manager_render_file(CacheOpsData *cd);
 
-static void cache_manager_render_thumb_done_cb(ThumbLoader *UNUSED(tl), gpointer data)
+static void cache_manager_render_thumb_done_cb(ThumbLoader *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
@@ -792,7 +792,7 @@ static gboolean cache_manager_render_file(CacheOpsData *cd)
 	return FALSE;
 }
 
-static void cache_manager_render_start_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void cache_manager_render_start_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 	gchar *path;
@@ -956,7 +956,7 @@ void cache_manager_render_remote(const gchar *path, gboolean recurse, gboolean l
 	cache_manager_render_start_render_remote(cd, path);
 }
 
-static void cache_manager_standard_clean_close_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void cache_manager_standard_clean_close_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
@@ -992,7 +992,7 @@ static void cache_manager_standard_clean_done(CacheOpsData *cd)
 	cd->list = nullptr;
 }
 
-static void cache_manager_standard_clean_stop_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void cache_manager_standard_clean_stop_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
@@ -1074,7 +1074,7 @@ static void cache_manager_standard_clean_valid_cb(const gchar *path, gboolean va
 		}
 }
 
-static void cache_manager_standard_clean_start(GenericDialog *UNUSED(gd), gpointer data)
+static void cache_manager_standard_clean_start(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 	GList *list;
@@ -1195,29 +1195,29 @@ void cache_manager_standard_process_remote(gboolean clear)
 	cache_manager_standard_clean_start(nullptr, cd);
 }
 
-static void cache_manager_standard_clean_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_manager_standard_clean_cb(GtkWidget *widget, gpointer)
 {
 	cache_manager_standard_process(widget, FALSE);
 }
 
-static void cache_manager_standard_clear_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_manager_standard_clear_cb(GtkWidget *widget, gpointer)
 {
 	cache_manager_standard_process(widget, TRUE);
 }
 
 
-static void cache_manager_main_clean_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_manager_main_clean_cb(GtkWidget *widget, gpointer)
 {
 	cache_maintain_home(FALSE, FALSE, widget);
 }
 
 
-static void dummy_cancel_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void dummy_cancel_cb(GenericDialog *, gpointer)
 {
 	/* no op, only so cancel button appears */
 }
 
-static void cache_manager_main_clear_ok_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void cache_manager_main_clear_ok_cb(GenericDialog *, gpointer)
 {
 	cache_maintain_home(FALSE, TRUE, nullptr);
 }
@@ -1236,12 +1236,12 @@ void cache_manager_main_clear_confirm(GtkWidget *parent)
 	gtk_widget_show(gd->dialog);
 }
 
-static void cache_manager_main_clear_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_manager_main_clear_cb(GtkWidget *widget, gpointer)
 {
 	cache_manager_main_clear_confirm(widget);
 }
 
-static void cache_manager_render_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_manager_render_cb(GtkWidget *widget, gpointer)
 {
 	const gchar *path = layout_get_path(nullptr);
 
@@ -1249,7 +1249,7 @@ static void cache_manager_render_cb(GtkWidget *widget, gpointer UNUSED(data))
 	cache_manager_render_dialog(widget, path);
 }
 
-static void cache_manager_metadata_clean_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_manager_metadata_clean_cb(GtkWidget *widget, gpointer)
 {
 	cache_maintain_home(TRUE, FALSE, widget);
 }
@@ -1257,7 +1257,7 @@ static void cache_manager_metadata_clean_cb(GtkWidget *widget, gpointer UNUSED(d
 
 static CacheManager *cache_manager = nullptr;
 
-static void cache_manager_close_cb(GenericDialog *gd, gpointer UNUSED(data))
+static void cache_manager_close_cb(GenericDialog *gd, gpointer)
 {
 	generic_dialog_close(gd);
 
@@ -1265,7 +1265,7 @@ static void cache_manager_close_cb(GenericDialog *gd, gpointer UNUSED(data))
 	cache_manager = nullptr;
 }
 
-static void cache_manager_help_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void cache_manager_help_cb(GenericDialog *, gpointer)
 {
 	help_window_show("GuideReferenceManagement.html");
 }
@@ -1298,7 +1298,7 @@ static void cache_manager_sim_reset(CacheOpsData *cd)
 	cd->cl = nullptr;
 }
 
-static void cache_manager_sim_close_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void cache_manager_sim_close_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
@@ -1323,7 +1323,7 @@ static void cache_manager_sim_finish(CacheOpsData *cd)
 		}
 }
 
-static void cache_manager_sim_stop_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void cache_manager_sim_stop_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
@@ -1352,7 +1352,7 @@ static void cache_manager_sim_folder(CacheOpsData *cd, FileData *dir_fd)
 	cd->list_dir = g_list_concat(list_d, cd->list_dir);
 }
 
-static void cache_manager_sim_file_done_cb(CacheLoader *UNUSED(cl), gint UNUSED(error), gpointer data)
+static void cache_manager_sim_file_done_cb(CacheLoader *, gint, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
@@ -1461,7 +1461,7 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 	return FALSE;
 }
 
-static void cache_manager_sim_start_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void cache_manager_sim_start_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 	gchar *path;
@@ -1572,7 +1572,7 @@ static void cache_manager_sim_load_dialog(GtkWidget *widget, const gchar *path)
 	gtk_widget_show(cd->gd->dialog);
 }
 
-static void cache_manager_sim_load_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_manager_sim_load_cb(GtkWidget *widget, gpointer)
 {
 	const gchar *path = layout_get_path(nullptr);
 
@@ -1580,7 +1580,7 @@ static void cache_manager_sim_load_cb(GtkWidget *widget, gpointer UNUSED(data))
 	cache_manager_sim_load_dialog(widget, path);
 }
 
-static void cache_manager_cache_maintenance_close_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void cache_manager_cache_maintenance_close_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 
@@ -1591,7 +1591,7 @@ static void cache_manager_cache_maintenance_close_cb(GenericDialog *UNUSED(fd), 
 	g_free(cd);
 }
 
-static void cache_manager_cache_maintenance_start_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void cache_manager_cache_maintenance_start_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 	gchar *path;
@@ -1670,7 +1670,7 @@ static void cache_manager_cache_maintenance_load_dialog(GtkWidget *widget, const
 	gtk_widget_show(cd->gd->dialog);
 }
 
-static void cache_manager_cache_maintenance_load_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_manager_cache_maintenance_load_cb(GtkWidget *widget, gpointer)
 {
 	const gchar *path = layout_get_path(nullptr);
 

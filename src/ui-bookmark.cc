@@ -20,6 +20,7 @@
  */
 
 #include <cstring>
+#include <memory>
 
 #include "main.h"
 #include "ui-bookmark.h"
@@ -205,7 +206,7 @@ static void bookmark_select_cb(GtkWidget *button, gpointer data)
 	if (bm->select_func) bm->select_func(b->path, bm->select_data);
 }
 
-static void bookmark_edit_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void bookmark_edit_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto p = static_cast<BookPropData *>(data);
 
@@ -213,11 +214,11 @@ static void bookmark_edit_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
 	g_free(p);
 }
 
-static void bookmark_edit_cancel_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void bookmark_edit_cancel_cb(GenericDialog *, gpointer)
 {
 }
 
-static void bookmark_edit_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
 {
 	auto p = static_cast<BookPropData *>(data);
 	const gchar *name;
@@ -353,17 +354,17 @@ static void bookmark_menu_move(BookMarkData *bm, gint direction)
 	bookmark_move(bm, bm->active_button->button, direction);
 }
 
-static void bookmark_menu_up_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void bookmark_menu_up_cb(GtkWidget *, gpointer data)
 {
 	bookmark_menu_move(static_cast<BookMarkData *>(data), -1);
 }
 
-static void bookmark_menu_down_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void bookmark_menu_down_cb(GtkWidget *, gpointer data)
 {
 	bookmark_menu_move(static_cast<BookMarkData *>(data), 1);
 }
 
-static void bookmark_menu_remove_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void bookmark_menu_remove_cb(GtkWidget *, gpointer data)
 {
 	auto bm = static_cast<BookMarkData *>(data);
 
@@ -373,8 +374,7 @@ static void bookmark_menu_remove_cb(GtkWidget *UNUSED(widget), gpointer data)
 	bookmark_populate_all(bm->key);
 }
 
-static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button,
-				gint UNUSED(button_n), guint32 UNUSED(time), gboolean local)
+static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button, gint, guint32, gboolean local)
 {
 	GtkWidget *menu;
 	BookButtonData *b;
@@ -449,7 +449,7 @@ static gboolean bookmark_keypress_cb(GtkWidget *button, GdkEventKey *event, gpoi
 
 static void bookmark_drag_set_data(GtkWidget *button,
 				   GdkDragContext *context, GtkSelectionData *selection_data,
-				   guint UNUSED(info), guint UNUSED(time), gpointer data)
+				   guint, guint, gpointer data)
 {
 	auto bm = static_cast<BookMarkData *>(data);
 	BookButtonData *b;
@@ -476,7 +476,7 @@ static void bookmark_drag_set_data(GtkWidget *button,
 	g_list_free(list);
 }
 
-static void bookmark_drag_begin(GtkWidget *button, GdkDragContext *context, gpointer UNUSED(data))
+static void bookmark_drag_begin(GtkWidget *button, GdkDragContext *context, gpointer)
 {
 	GdkPixbuf *pixbuf;
 	GdkModifierType mask;
@@ -499,7 +499,7 @@ static void bookmark_drag_begin(GtkWidget *button, GdkDragContext *context, gpoi
 	g_object_unref(pixbuf);
 }
 
-static gboolean bookmark_path_tooltip_cb(GtkWidget *button, gpointer UNUSED(data))
+static gboolean bookmark_path_tooltip_cb(GtkWidget *button, gpointer)
 {
 	BookButtonData *b;
 
@@ -713,10 +713,10 @@ static void bookmark_populate_all(const gchar *key)
 		}
 }
 
-static void bookmark_dnd_get_data(GtkWidget *UNUSED(widget),
-				  GdkDragContext *UNUSED(context), gint UNUSED(x), gint UNUSED(y),
-				  GtkSelectionData *selection_data, guint UNUSED(info),
-				  guint UNUSED(time), gpointer data)
+static void bookmark_dnd_get_data(GtkWidget *, GdkDragContext *,
+				  gint, gint,
+				  GtkSelectionData *selection_data, guint,
+				  guint, gpointer data)
 {
 	auto bm = static_cast<BookMarkData *>(data);
 	GList *list = nullptr;
@@ -773,7 +773,7 @@ static void bookmark_dnd_get_data(GtkWidget *UNUSED(widget),
 		}
 }
 
-static void bookmark_list_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void bookmark_list_destroy(GtkWidget *, gpointer data)
 {
 	auto bm = static_cast<BookMarkData *>(data);
 
@@ -887,33 +887,31 @@ void bookmark_list_set_only_directories(GtkWidget *list, gboolean only_directori
 void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 {
 	BookMarkData *bm;
-	gchar *buf;
 	gchar *real_path;
 
 	bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
 	if (!bm) return;
 
-	buf = bookmark_string(name, path, nullptr);
+	std::unique_ptr<gchar, decltype(&g_free)> buf(bookmark_string(name, path, nullptr), g_free);
 	real_path = realpath(path, nullptr);
 
 	if (strstr(real_path, get_collections_dir()) && isfile(path))
 		{
-		buf = bookmark_string(name, path, "gq-collection");
+		buf.reset(bookmark_string(name, path, "gq-collection"));
 		}
 	else
 		{
 		if (isfile(path))
 			{
-			buf = bookmark_string(name, path, GQ_ICON_FILE);
+			buf.reset(bookmark_string(name, path, GQ_ICON_FILE));
 			}
 		else
 			{
-			buf = bookmark_string(name, path, nullptr);
+			buf.reset(bookmark_string(name, path, nullptr));
 			}
 		}
 
-	history_list_add_to_key(bm->key, buf, 0);
-	g_free(buf);
+	history_list_add_to_key(bm->key, buf.get(), 0);
 	g_free(real_path);
 
 	bookmark_populate_all(bm->key);
@@ -940,7 +938,7 @@ struct HistoryComboData
 	gint history_levels;
 };
 
-static void history_combo_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void history_combo_destroy(GtkWidget *, gpointer data)
 {
 	auto hc = static_cast<HistoryComboData *>(data);
 

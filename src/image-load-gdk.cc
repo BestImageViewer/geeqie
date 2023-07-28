@@ -65,7 +65,7 @@ static gpointer image_loader_gdk_new(ImageLoaderBackendCbAreaUpdated area_update
 	return loader;
 }
 
-static void image_loader_gdk_abort(gpointer UNUSED(loader))
+static void image_loader_gdk_abort(gpointer)
 {
 }
 

@@ -61,7 +61,7 @@ static void tree_edit_do(TreeEditData *ted)
 		}
 }
 
-static gboolean tree_edit_click_end_cb(GtkWidget *UNUSED(widget), GdkEventButton *UNUSED(event), gpointer data)
+static gboolean tree_edit_click_end_cb(GtkWidget *, GdkEventButton *, gpointer data)
 {
 	auto ted = static_cast<TreeEditData *>(data);
 
@@ -71,7 +71,7 @@ static gboolean tree_edit_click_end_cb(GtkWidget *UNUSED(widget), GdkEventButton
 	return TRUE;
 }
 
-static gboolean tree_edit_click_cb(GtkWidget *UNUSED(widget), GdkEventButton *event, gpointer data)
+static gboolean tree_edit_click_cb(GtkWidget *, GdkEventButton *event, gpointer data)
 {
 	auto ted = static_cast<TreeEditData *>(data);
 	GdkWindow *window = gtk_widget_get_window(ted->window);
@@ -98,7 +98,7 @@ static gboolean tree_edit_click_cb(GtkWidget *UNUSED(widget), GdkEventButton *ev
 	return FALSE;
 }
 
-static gboolean tree_edit_key_press_cb(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer data)
+static gboolean tree_edit_key_press_cb(GtkWidget *, GdkEventKey *event, gpointer data)
 {
 	auto ted = static_cast<TreeEditData *>(data);
 

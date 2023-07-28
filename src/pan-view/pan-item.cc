@@ -156,7 +156,7 @@ void pan_item_box_shadow(PanItem *pi, gint offset, gint fade)
 	pi->data = shadow;
 }
 
-gint pan_item_box_draw(PanWindow *UNUSED(pw), PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *UNUSED(pr),
+gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
 		       gint x, gint y, gint width, gint height)
 {
 	gint bw, bh;
@@ -250,7 +250,7 @@ gint pan_item_box_draw(PanWindow *UNUSED(pw), PanItem *pi, GdkPixbuf *pixbuf, Pi
  *-----------------------------------------------------------------------------
  */
 
-PanItem *pan_item_tri_new(PanWindow *pw, FileData *UNUSED(fd), gint x, gint y, gint width, gint height,
+PanItem *pan_item_tri_new(PanWindow *pw, FileData *, gint x, gint y, gint width, gint height,
 			  gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
 			  guint8 r, guint8 g, guint8 b, guint8 a)
 {
@@ -299,8 +299,7 @@ void pan_item_tri_border(PanItem *pi, gint borders,
 	pi->color2_a = a;
 }
 
-gint pan_item_tri_draw(PanWindow *UNUSED(pw), PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *UNUSED(pr),
-		       gint x, gint y, gint width, gint height)
+gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *, gint x, gint y, gint width, gint height)
 {
 	gint rx, ry, rw, rh;
 
@@ -434,8 +433,7 @@ PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
 	return pi;
 }
 
-gint pan_item_text_draw(PanWindow *UNUSED(pw), PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-			gint x, gint y, gint UNUSED(width), gint UNUSED(height))
+gint pan_item_text_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr, gint x, gint y, gint, gint)
 {
 	PangoLayout *layout;
 
@@ -473,8 +471,7 @@ PanItem *pan_item_thumb_new(PanWindow *pw, FileData *fd, gint x, gint y)
 	return pi;
 }
 
-gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *UNUSED(pr),
-			 gint x, gint y, gint width, gint height)
+gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *, gint x, gint y, gint width, gint height)
 {
 	gint tx, ty, tw, th;
 	gint rx, ry, rw, rh;
@@ -658,8 +655,7 @@ PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w,
 	return pi;
 }
 
-gint pan_item_image_draw(PanWindow *UNUSED(pw), PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *UNUSED(pr),
-			 gint x, gint y, gint width, gint height)
+gint pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *, gint x, gint y, gint width, gint height)
 {
 	gint rx, ry, rw, rh;
 

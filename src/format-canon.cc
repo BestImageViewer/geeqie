@@ -119,7 +119,7 @@ static gint canon_cr2_tiff_table(guchar *data, const guint len, guint offset, Ex
 }
 
 gboolean format_canon_raw_cr2(guchar *data, const guint len,
-			      guint *image_offset, guint *UNUSED(exif_offset))
+			      guint *image_offset, guint *)
 {
 	guint jpeg_offset = 0;
 	ExifByteOrder bo;
@@ -152,7 +152,7 @@ gboolean format_canon_raw_cr2(guchar *data, const guint len,
 #define CRW_DIR_ENTRY_SIZE	10
 
 gboolean format_canon_raw_crw(guchar *data, const guint len,
-			      guint *image_offset, guint *UNUSED(exif_offset))
+			      guint *image_offset, guint *)
 {
 	guint block_offset;
 	guint data_length;

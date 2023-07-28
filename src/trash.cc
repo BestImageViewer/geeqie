@@ -117,7 +117,7 @@ static gchar *file_util_safe_dest(const gchar *path)
 	return dest;
 }
 
-static void move_to_trash_failed_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void move_to_trash_failed_cb(GenericDialog *, gpointer)
 {
 	help_window_show("TrashFailed.html");
 }

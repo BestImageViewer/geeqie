@@ -145,7 +145,7 @@ static void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer
 		}
 }
 
-static gboolean bar_pane_histogram_draw_cb(GtkWidget *UNUSED(widget), cairo_t *cr, gpointer data)
+static gboolean bar_pane_histogram_draw_cb(GtkWidget *, cairo_t *cr, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if (!phd) return TRUE;
@@ -163,7 +163,7 @@ static gboolean bar_pane_histogram_draw_cb(GtkWidget *UNUSED(widget), cairo_t *c
 	return TRUE;
 }
 
-static void bar_pane_histogram_size_cb(GtkWidget *UNUSED(widget), GtkAllocation *allocation, gpointer data)
+static void bar_pane_histogram_size_cb(GtkWidget *, GtkAllocation *allocation, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 
@@ -172,7 +172,7 @@ static void bar_pane_histogram_size_cb(GtkWidget *UNUSED(widget), GtkAllocation 
 	bar_pane_histogram_update(phd);
 }
 
-static void bar_pane_histogram_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_pane_histogram_destroy(GtkWidget *, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 
@@ -242,7 +242,7 @@ static GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd)
 	return menu;
 }
 
-static gboolean bar_pane_histogram_press_cb(GtkGesture *UNUSED(gesture), gint UNUSED(n_press), gdouble UNUSED(x), gdouble UNUSED(y), gpointer data)
+static gboolean bar_pane_histogram_press_cb(GtkGesture *, gint, gdouble, gdouble, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	GtkWidget *menu;

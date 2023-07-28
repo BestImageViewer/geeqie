@@ -39,7 +39,7 @@ struct ImageLoaderPDF {
 	gint page_total;
 };
 
-static gboolean image_loader_pdf_load(gpointer loader, const guchar *buf, gsize count, GError **UNUSED(error))
+static gboolean image_loader_pdf_load(gpointer loader, const guchar *buf, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderPDF *>(loader);
 	GError *poppler_error = nullptr;
@@ -115,12 +115,12 @@ static GdkPixbuf* image_loader_pdf_get_pixbuf(gpointer loader)
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_pdf_get_format_name(gpointer UNUSED(loader))
+static gchar* image_loader_pdf_get_format_name(gpointer)
 {
 	return g_strdup("pdf");
 }
 
-static gchar** image_loader_pdf_get_format_mime_types(gpointer UNUSED(loader))
+static gchar** image_loader_pdf_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"application/pdf", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
@@ -140,7 +140,7 @@ static gint image_loader_pdf_get_page_total(gpointer loader)
 	return ld->page_total;
 }
 
-static gboolean image_loader_pdf_close(gpointer UNUSED(loader), GError **UNUSED(error))
+static gboolean image_loader_pdf_close(gpointer, GError **)
 {
 	return TRUE;
 }

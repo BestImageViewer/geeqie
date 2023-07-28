@@ -216,7 +216,7 @@ struct BarData
 	gint width;
 };
 
-static void bar_expander_move(GtkWidget *UNUSED(widget), gpointer data, gboolean up, gboolean single_step)
+static void bar_expander_move(GtkWidget *, gpointer data, gboolean up, gboolean single_step)
 {
 	auto expander = static_cast<GtkWidget *>(data);
 	GtkWidget *box;
@@ -268,7 +268,7 @@ static void height_spin_changed_cb(GtkSpinButton *spin, gpointer data)
 	gtk_widget_set_size_request(GTK_WIDGET(data), -1, gtk_spin_button_get_value_as_int(spin));
 }
 
-static void height_spin_key_press_cb(GtkEventControllerKey *UNUSED(controller), gint keyval, guint UNUSED(keycode), GdkModifierType UNUSED(state), gpointer data)
+static void height_spin_key_press_cb(GtkEventControllerKey *, gint keyval, guint, GdkModifierType, gpointer data)
 {
 	if ((keyval == GDK_KEY_Return || keyval == GDK_KEY_Escape))
 		{
@@ -276,7 +276,7 @@ static void height_spin_key_press_cb(GtkEventControllerKey *UNUSED(controller), 
 		}
 }
 
-static void bar_expander_height_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_expander_height_cb(GtkWidget *, gpointer data)
 {
 	auto expander = static_cast<GtkWidget *>(data);
 	GtkWidget *spin;
@@ -322,13 +322,13 @@ static void bar_expander_height_cb(GtkWidget *UNUSED(widget), gpointer data)
 	g_list_free(list);
 }
 
-static void bar_expander_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_expander_delete_cb(GtkWidget *, gpointer data)
 {
 	auto expander = static_cast<GtkWidget *>(data);
 	gtk_widget_destroy(expander);
 }
 
-static void bar_expander_add_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void bar_expander_add_cb(GtkWidget *widget, gpointer)
 {
 	const KnownPanes *pane = known_panes;
 	auto id = static_cast<const gchar *>(g_object_get_data(G_OBJECT(widget), "pane_add_id"));
@@ -426,7 +426,7 @@ static void bar_menu_add_popup(GtkWidget *widget)
 }
 
 
-static gboolean bar_menu_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer UNUSED(data))
+static gboolean bar_menu_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer)
 {
 	if (bevent->button == MOUSE_BUTTON_RIGHT)
 		{
@@ -436,7 +436,7 @@ static gboolean bar_menu_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer 
 	return FALSE;
 }
 
-static void bar_expander_cb(GObject *object, GParamSpec *UNUSED(param_spec), gpointer UNUSED(data))
+static void bar_expander_cb(GObject *object, GParamSpec *, gpointer)
 {
 	GtkExpander *expander;
 	GtkWidget *child;
@@ -454,7 +454,7 @@ static void bar_expander_cb(GObject *object, GParamSpec *UNUSED(param_spec), gpo
 		}
 }
 
-static gboolean bar_menu_add_cb(GtkWidget *widget, GdkEventButton *UNUSED(bevent), gpointer UNUSED(data))
+static gboolean bar_menu_add_cb(GtkWidget *widget, GdkEventButton *, gpointer)
 {
 	bar_menu_add_popup(widget);
 	return TRUE;
@@ -659,7 +659,7 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 
 }
 
-void bar_populate_default(GtkWidget *UNUSED(bar))
+void bar_populate_default(GtkWidget *)
 {
 	const gchar *populate_id[] = {"histogram", "title", "keywords", "comment", "rating", "exif", nullptr};
 	const gchar **id = populate_id;
@@ -672,7 +672,7 @@ void bar_populate_default(GtkWidget *UNUSED(bar))
 		}
 }
 
-static void bar_size_allocate(GtkWidget *UNUSED(widget), GtkAllocation *UNUSED(allocation), gpointer data)
+static void bar_size_allocate(GtkWidget *, GtkAllocation *, gpointer data)
 {
 	auto bd = static_cast<BarData *>(data);
 
@@ -702,7 +702,7 @@ void bar_close(GtkWidget *bar)
 	gtk_widget_destroy(bd->widget);
 }
 
-static void bar_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void bar_destroy(GtkWidget *, gpointer data)
 {
 	auto bd = static_cast<BarData *>(data);
 
@@ -718,7 +718,7 @@ static void bar_destroy(GtkWidget *UNUSED(widget), gpointer data)
    it should be removed as soon as a better solution exists
 */
 
-static void bar_unrealize_clutter_fix_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void bar_unrealize_clutter_fix_cb(GtkWidget *widget, gpointer)
 {
 	GtkWidget *child = gtk_bin_get_child(GTK_BIN(widget));
 	if (child) gtk_widget_unrealize(child);

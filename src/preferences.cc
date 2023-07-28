@@ -163,12 +163,12 @@ static GtkWidget *help_search_engine_entry;
  *-----------------------------------------------------------------------------
  */
 
-static void zoom_increment_cb(GtkWidget *spin, gpointer UNUSED(data))
+static void zoom_increment_cb(GtkWidget *spin, gpointer)
 {
 	c_options->image.zoom_increment = static_cast<gint>(gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)) * 100.0 + 0.01);
 }
 
-static void slideshow_delay_hours_cb(GtkWidget *spin, gpointer UNUSED(data))
+static void slideshow_delay_hours_cb(GtkWidget *spin, gpointer)
 {
 	gint mins_secs_tenths, delay;
 
@@ -183,7 +183,7 @@ static void slideshow_delay_hours_cb(GtkWidget *spin, gpointer UNUSED(data))
 													SLIDESHOW_SUBSECOND_PRECISION;
 }
 
-static void slideshow_delay_minutes_cb(GtkWidget *spin, gpointer UNUSED(data))
+static void slideshow_delay_minutes_cb(GtkWidget *spin, gpointer)
 {
 	gint hours, secs_tenths, delay;
 
@@ -198,7 +198,7 @@ static void slideshow_delay_minutes_cb(GtkWidget *spin, gpointer UNUSED(data))
 													SLIDESHOW_SUBSECOND_PRECISION;
 }
 
-static void slideshow_delay_seconds_cb(GtkWidget *spin, gpointer UNUSED(data))
+static void slideshow_delay_seconds_cb(GtkWidget *spin, gpointer)
 {
 	gint hours_mins, delay;
 
@@ -235,7 +235,7 @@ void config_entry_to_option(GtkWidget *entry, gchar **option, gchar *(*func)(con
 }
 
 
-static gboolean accel_apply_cb(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer UNUSED(data))
+static gboolean accel_apply_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer)
 {
 	gchar *accel_path, *accel;
 
@@ -508,14 +508,14 @@ static void config_window_apply()
  *-----------------------------------------------------------------------------
  */
 
-static void config_window_close_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void config_window_close_cb(GtkWidget *, gpointer)
 {
 	gtk_widget_destroy(configwindow);
 	configwindow = nullptr;
 	filter_store = nullptr;
 }
 
-static void config_window_help_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void config_window_help_cb(GtkWidget *, gpointer data)
 {
 	auto notebook = static_cast<GtkWidget *>(data);
 	gint i;
@@ -542,7 +542,7 @@ static void config_window_help_cb(GtkWidget *UNUSED(widget), gpointer data)
 	help_window_show(html_section[i]);
 }
 
-static gboolean config_window_delete(GtkWidget *UNUSED(widget), GdkEventAny *UNUSED(event), gpointer UNUSED(data))
+static gboolean config_window_delete(GtkWidget *, GdkEventAny *, gpointer)
 {
 	config_window_close_cb(nullptr, nullptr);
 	return TRUE;
@@ -905,7 +905,7 @@ static void add_mouse_selection_menu(GtkWidget *table, gint column, gint row, co
 	gtk_widget_show(combo);
 }
 
-static void thumb_size_menu_cb(GtkWidget *combo, gpointer UNUSED(data))
+static void thumb_size_menu_cb(GtkWidget *combo, gpointer)
 {
 	gint n;
 
@@ -1154,8 +1154,7 @@ static void filter_store_populate()
 		}
 }
 
-static void filter_store_ext_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *path_str,
-				     gchar *new_text, gpointer data)
+static void filter_store_ext_edit_cb(GtkCellRendererText *, gchar *path_str, gchar *new_text, gpointer data)
 {
 	auto model = static_cast<GtkWidget *>(data);
 	auto fe = static_cast<FilterEntry *>(data);
@@ -1175,8 +1174,7 @@ static void filter_store_ext_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *p
 	filter_rebuild();
 }
 
-static void filter_store_class_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *path_str,
-				       gchar *new_text, gpointer data)
+static void filter_store_class_edit_cb(GtkCellRendererText *, gchar *path_str, gchar *new_text, gpointer data)
 {
 	auto model = static_cast<GtkWidget *>(data);
 	auto fe = static_cast<FilterEntry *>(data);
@@ -1203,8 +1201,7 @@ static void filter_store_class_edit_cb(GtkCellRendererText *UNUSED(cell), gchar 
 	filter_rebuild();
 }
 
-static void filter_store_desc_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *path_str,
-				      gchar *new_text, gpointer data)
+static void filter_store_desc_edit_cb(GtkCellRendererText *, gchar *path_str, gchar *new_text, gpointer data)
 {
 	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
@@ -1223,8 +1220,7 @@ static void filter_store_desc_edit_cb(GtkCellRendererText *UNUSED(cell), gchar *
 	gtk_tree_path_free(tpath);
 }
 
-static void filter_store_enable_cb(GtkCellRendererToggle *UNUSED(renderer),
-				   gchar *path_str, gpointer data)
+static void filter_store_enable_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
 {
 	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
@@ -1241,8 +1237,7 @@ static void filter_store_enable_cb(GtkCellRendererToggle *UNUSED(renderer),
 	filter_rebuild();
 }
 
-static void filter_store_writable_cb(GtkCellRendererToggle *UNUSED(renderer),
-				     gchar *path_str, gpointer data)
+static void filter_store_writable_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
 {
 	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
@@ -1260,8 +1255,7 @@ static void filter_store_writable_cb(GtkCellRendererToggle *UNUSED(renderer),
 	filter_rebuild();
 }
 
-static void filter_store_sidecar_cb(GtkCellRendererToggle *UNUSED(renderer),
-				    gchar *path_str, gpointer data)
+static void filter_store_sidecar_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
 {
 	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
@@ -1279,7 +1273,7 @@ static void filter_store_sidecar_cb(GtkCellRendererToggle *UNUSED(renderer),
 	filter_rebuild();
 }
 
-static void filter_set_func(GtkTreeViewColumn *UNUSED(tree_column), GtkCellRenderer *cell,
+static void filter_set_func(GtkTreeViewColumn *, GtkCellRenderer *cell,
 			    GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
 	FilterEntry *fe;
@@ -1362,7 +1356,7 @@ static gboolean filter_add_scroll(gpointer data)
 	return(G_SOURCE_REMOVE);
 }
 
-static void filter_add_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void filter_add_cb(GtkWidget *, gpointer data)
 {
 	filter_add_unique("description", ".new", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
 	filter_store_populate();
@@ -1370,7 +1364,7 @@ static void filter_add_cb(GtkWidget *UNUSED(widget), gpointer data)
 	g_idle_add(static_cast<GSourceFunc>(filter_add_scroll), data);
 }
 
-static void filter_remove_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void filter_remove_cb(GtkWidget *, gpointer data)
 {
 	auto filter_view = static_cast<GtkWidget *>(data);
 	GtkTreeSelection *selection;
@@ -1407,7 +1401,7 @@ static gboolean filter_default_ok_scroll(GtkTreeView *data)
 	return(G_SOURCE_REMOVE);
 }
 
-static void filter_default_ok_cb(GenericDialog *gd, gpointer UNUSED(data))
+static void filter_default_ok_cb(GenericDialog *gd, gpointer)
 {
 	filter_reset();
 	filter_add_defaults();
@@ -1417,7 +1411,7 @@ static void filter_default_ok_cb(GenericDialog *gd, gpointer UNUSED(data))
 	g_idle_add(reinterpret_cast<GSourceFunc>(filter_default_ok_scroll), gd->data);
 }
 
-static void dummy_cancel_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void dummy_cancel_cb(GenericDialog *, gpointer)
 {
 	/* no op, only so cancel button appears */
 }
@@ -1443,17 +1437,17 @@ static void filter_disable_cb(GtkWidget *widget, gpointer data)
 				 !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
 }
 
-static void safe_delete_view_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void safe_delete_view_cb(GtkWidget *, gpointer)
 {
 	layout_set_path(nullptr, gtk_entry_get_text(GTK_ENTRY(safe_delete_path_entry)));
 }
 
-static void safe_delete_clear_ok_cb(GenericDialog *UNUSED(gd), gpointer UNUSED(data))
+static void safe_delete_clear_ok_cb(GenericDialog *, gpointer)
 {
 	file_util_trash_clear();
 }
 
-static void safe_delete_clear_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void safe_delete_clear_cb(GtkWidget *widget, gpointer)
 {
 	GenericDialog *gd;
 	GtkWidget *entry;
@@ -1472,7 +1466,7 @@ static void safe_delete_clear_cb(GtkWidget *widget, gpointer UNUSED(data))
 	gtk_widget_show(gd->dialog);
 }
 
-static void image_overlay_template_view_changed_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void image_overlay_template_view_changed_cb(GtkWidget *, gpointer data)
 {
 	GtkWidget *pTextView;
 	GtkTextBuffer *pTextBuffer;
@@ -1489,7 +1483,7 @@ static void image_overlay_template_view_changed_cb(GtkWidget *UNUSED(widget), gp
 					  gtk_text_buffer_get_text(pTextBuffer, &iStart, &iEnd, TRUE));
 }
 
-static void image_overlay_default_template_ok_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void image_overlay_default_template_ok_cb(GenericDialog *, gpointer data)
 {
 	auto text_view = static_cast<GtkTextView *>(data);
 	GtkTextBuffer *buffer;
@@ -1514,12 +1508,12 @@ static void image_overlay_default_template_cb(GtkWidget *widget, gpointer data)
 	gtk_widget_show(gd->dialog);
 }
 
-static void image_overlay_help_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void image_overlay_help_cb(GtkWidget *, gpointer)
 {
 	help_window_show("GuideOptionsOSD.html");
 }
 
-static void image_overlay_set_font_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void image_overlay_set_font_cb(GtkWidget *widget, gpointer)
 {
 	GtkWidget *dialog;
 	char *font;
@@ -1540,7 +1534,7 @@ static void image_overlay_set_font_cb(GtkWidget *widget, gpointer UNUSED(data))
 	gtk_widget_destroy(dialog);
 }
 
-static void image_overlay_set_text_colour_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void image_overlay_set_text_colour_cb(GtkWidget *widget, gpointer)
 {
 	GtkWidget *dialog;
 	GdkRGBA colour;
@@ -1565,7 +1559,7 @@ static void image_overlay_set_text_colour_cb(GtkWidget *widget, gpointer UNUSED(
 }
 
 
-static void image_overlay_set_background_colour_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void image_overlay_set_background_colour_cb(GtkWidget *widget, gpointer)
 {
 	GtkWidget *dialog;
 	GdkRGBA colour;
@@ -1650,12 +1644,12 @@ static void accel_store_populate()
 		}
 }
 
-static void accel_store_cleared_cb(GtkCellRendererAccel *UNUSED(accel), gchar *UNUSED(path_string), gpointer UNUSED(user_data))
+static void accel_store_cleared_cb(GtkCellRendererAccel *, gchar *, gpointer)
 {
 
 }
 
-static gboolean accel_remove_key_cb(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer data)
+static gboolean accel_remove_key_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
 {
 	auto accel1 = static_cast<gchar *>(data);
 	gchar *accel2;
@@ -1679,7 +1673,7 @@ static gboolean accel_remove_key_cb(GtkTreeModel *model, GtkTreePath *UNUSED(pat
 }
 
 
-static void accel_store_edited_cb(GtkCellRendererAccel *UNUSED(accel), gchar *path_string, guint accel_key, GdkModifierType accel_mods, guint UNUSED(hardware_keycode), gpointer UNUSED(user_data))
+static void accel_store_edited_cb(GtkCellRendererAccel *, gchar *path_string, guint accel_key, GdkModifierType accel_mods, guint, gpointer)
 {
 	auto model = reinterpret_cast<GtkTreeModel *>(accel_store);
 	GtkTreeIter iter;
@@ -1728,19 +1722,19 @@ static gboolean accel_default_scroll(GtkTreeView *data)
 	return(G_SOURCE_REMOVE);
 }
 
-static void accel_default_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void accel_default_cb(GtkWidget *, gpointer data)
 {
 	accel_store_populate();
 
 	g_idle_add(reinterpret_cast<GSourceFunc>(accel_default_scroll), data);
 }
 
-void accel_clear_selection(GtkTreeModel *UNUSED(model), GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer UNUSED(data))
+void accel_clear_selection(GtkTreeModel *, GtkTreePath *, GtkTreeIter *iter, gpointer)
 {
 	gtk_tree_store_set(accel_store, iter, AE_KEY, "", -1);
 }
 
-void accel_reset_selection(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTreeIter *iter, gpointer UNUSED(data))
+void accel_reset_selection(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer)
 {
 	GtkAccelKey key;
 	gchar *accel_path, *accel;
@@ -1756,7 +1750,7 @@ void accel_reset_selection(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTr
 	g_free(accel);
 }
 
-static void accel_clear_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void accel_clear_cb(GtkWidget *, gpointer data)
 {
 	GtkTreeSelection *selection;
 
@@ -1765,7 +1759,7 @@ static void accel_clear_cb(GtkWidget *UNUSED(widget), gpointer data)
 	gtk_tree_selection_selected_foreach(selection, &accel_clear_selection, nullptr);
 }
 
-static void accel_reset_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void accel_reset_cb(GtkWidget *, gpointer data)
 {
 	GtkTreeSelection *selection;
 
@@ -1803,7 +1797,7 @@ static GtkWidget *scrolled_notebook_page(GtkWidget *notebook, const gchar *title
 	return vbox;
 }
 
-static void cache_standard_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_standard_cb(GtkWidget *widget, gpointer)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
 		{
@@ -1812,7 +1806,7 @@ static void cache_standard_cb(GtkWidget *widget, gpointer UNUSED(data))
 		}
 }
 
-static void cache_geeqie_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_geeqie_cb(GtkWidget *widget, gpointer)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
 		{
@@ -1821,7 +1815,7 @@ static void cache_geeqie_cb(GtkWidget *widget, gpointer UNUSED(data))
 		}
 }
 
-static void cache_local_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void cache_local_cb(GtkWidget *widget, gpointer)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
 		{
@@ -1830,8 +1824,7 @@ static void cache_local_cb(GtkWidget *widget, gpointer UNUSED(data))
 		}
 }
 
-static void help_search_engine_entry_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIconPosition pos,
-									GdkEvent *UNUSED(event), gpointer userdata)
+static void help_search_engine_entry_icon_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
 {
 	if (pos == GTK_ENTRY_ICON_PRIMARY)
 		{
@@ -1843,8 +1836,7 @@ static void help_search_engine_entry_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIc
 		}
 }
 
-static void star_rating_star_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIconPosition pos,
-									GdkEvent *UNUSED(event), gpointer userdata)
+static void star_rating_star_icon_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
 {
 	gchar *rating_symbol;
 
@@ -1862,8 +1854,7 @@ static void star_rating_star_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIconPositi
 		}
 }
 
-static void star_rating_rejected_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIconPosition pos,
-									GdkEvent *UNUSED(event), gpointer userdata)
+static void star_rating_rejected_icon_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
 {
 	gchar *rating_symbol;
 
@@ -1881,7 +1872,7 @@ static void star_rating_rejected_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIconPo
 		}
 }
 
-static guint star_rating_symbol_test(GtkWidget *UNUSED(widget), gpointer data)
+static guint star_rating_symbol_test(GtkWidget *, gpointer data)
 {
 	auto hbox = static_cast<GtkContainer *>(data);
 	GString *str = g_string_new(nullptr);
@@ -2317,7 +2308,7 @@ static void config_tab_image(GtkWidget *notebook)
 
 /* windows tab */
 
-static void save_default_window_layout_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void save_default_window_layout_cb(GtkWidget *, gpointer)
 {
 	LayoutWindow *lw = nullptr;
 	gchar *default_path;
@@ -2345,7 +2336,7 @@ static gboolean popover_cb(gpointer data)
 	return FALSE;
 }
 
-static void default_layout_changed_cb(GtkWidget *UNUSED(button), GtkPopover *popover)
+static void default_layout_changed_cb(GtkWidget *, GtkPopover *popover)
 {
 	gtk_popover_popup(popover);
 
@@ -2630,7 +2621,7 @@ static gint filter_table_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIte
 	return ret;
 }
 
-static gboolean search_function_cb(GtkTreeModel *model, gint UNUSED(column), const gchar *key, GtkTreeIter *iter, gpointer UNUSED(search_data))
+static gboolean search_function_cb(GtkTreeModel *model, gint, const gchar *key, GtkTreeIter *iter, gpointer)
 {
 	FilterEntry *fe;
 	gboolean ret = TRUE;
@@ -3011,7 +3002,7 @@ static void keywords_find_reset(KeywordFindData *kfd)
 	kfd->list_dir = nullptr;
 }
 
-static void keywords_find_close_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void keywords_find_close_cb(GenericDialog *, gpointer data)
 {
 	auto kfd = static_cast<KeywordFindData *>(data);
 
@@ -3035,7 +3026,7 @@ static void keywords_find_finish(KeywordFindData *kfd)
 	gtk_widget_set_sensitive(kfd->button_close, TRUE);
 }
 
-static void keywords_find_stop_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void keywords_find_stop_cb(GenericDialog *, gpointer data)
 {
 	auto kfd = static_cast<KeywordFindData *>(data);
 
@@ -3096,7 +3087,7 @@ static gboolean keywords_find_file(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static void keywords_find_start_cb(GenericDialog *UNUSED(fd), gpointer data)
+static void keywords_find_start_cb(GenericDialog *, gpointer data)
 {
 	auto kfd = static_cast<KeywordFindData *>(data);
 	gchar *path;
@@ -3188,7 +3179,7 @@ static void keywords_find_dialog(GtkWidget *widget, const gchar *path)
 	gtk_widget_show(kfd->gd->dialog);
 }
 
-static void keywords_find_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void keywords_find_cb(GtkWidget *widget, gpointer)
 {
 	const gchar *path = layout_get_path(nullptr);
 
@@ -3448,7 +3439,7 @@ static void config_tab_color(GtkWidget *notebook)
 }
 
 /* advanced entry tab */
-static void use_geeqie_trash_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void use_geeqie_trash_cb(GtkWidget *widget, gpointer)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
 		{
@@ -3457,7 +3448,7 @@ static void use_geeqie_trash_cb(GtkWidget *widget, gpointer UNUSED(data))
 		}
 }
 
-static void use_system_trash_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void use_system_trash_cb(GtkWidget *widget, gpointer)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
 		{
@@ -3466,7 +3457,7 @@ static void use_system_trash_cb(GtkWidget *widget, gpointer UNUSED(data))
 		}
 }
 
-static void use_no_cache_cb(GtkWidget *widget, gpointer UNUSED(data))
+static void use_no_cache_cb(GtkWidget *widget, gpointer)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
 		{
@@ -3643,7 +3634,7 @@ static void config_tab_behavior(GtkWidget *notebook)
 
 /* accelerators tab */
 
-static gboolean accel_search_function_cb(GtkTreeModel *model, gint column, const gchar *key, GtkTreeIter *iter, gpointer UNUSED(data))
+static gboolean accel_search_function_cb(GtkTreeModel *model, gint column, const gchar *key, GtkTreeIter *iter, gpointer)
 {
 	gboolean ret = TRUE;
 	gchar *key_nocase;
@@ -3666,7 +3657,7 @@ static gboolean accel_search_function_cb(GtkTreeModel *model, gint column, const
 	return ret;
 }
 
-static void accel_row_activated_cb(GtkTreeView *tree_view, GtkTreePath *UNUSED(path), GtkTreeViewColumn *column, gpointer UNUSED(user_data))
+static void accel_row_activated_cb(GtkTreeView *tree_view, GtkTreePath *, GtkTreeViewColumn *column, gpointer)
 {
 	GList *list;
 	gint col_num = 0;
@@ -4313,7 +4304,7 @@ static void timezone_progress_cb(goffset current_num_bytes, goffset total_num_by
 		}
 }
 
-static void timezone_cancel_button_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void timezone_cancel_button_cb(GenericDialog *, gpointer data)
 {
 	auto tz = static_cast<TZData *>(data);
 

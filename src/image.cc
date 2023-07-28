@@ -56,7 +56,7 @@ static gint rect_id = 0;
  *-------------------------------------------------------------------
  */
 
-static void image_click_cb(PixbufRenderer *UNUSED(pr), GdkEventButton *event, gpointer data)
+static void image_click_cb(PixbufRenderer *, GdkEventButton *event, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	if (!options->image_lm_click_nav && event->button == MOUSE_BUTTON_MIDDLE)
@@ -289,7 +289,7 @@ static void image_complete_util(ImageWindow *imd, gboolean preload)
 	if (imd->func_complete) imd->func_complete(imd, preload, imd->data_complete);
 }
 
-static void image_render_complete_cb(PixbufRenderer *UNUSED(pr), gpointer data)
+static void image_render_complete_cb(PixbufRenderer *, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
@@ -315,7 +315,7 @@ static void image_state_unset(ImageWindow *imd, ImageState state)
 	if (imd->func_state) imd->func_state(imd, state, imd->data_state);
 }
 
-static void image_zoom_cb(PixbufRenderer *UNUSED(pr), gdouble UNUSED(zoom), gpointer data)
+static void image_zoom_cb(PixbufRenderer *, gdouble, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
@@ -566,7 +566,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 }
 
 
-static void image_post_process_tile_color_cb(PixbufRenderer *UNUSED(pr), GdkPixbuf **pixbuf, gint x, gint y, gint w, gint h, gpointer data)
+static void image_post_process_tile_color_cb(PixbufRenderer *, GdkPixbuf **pixbuf, gint x, gint y, gint w, gint h, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	if (imd->cm) color_man_correct_region(static_cast<ColorMan *>(imd->cm), *pixbuf, x, y, w, h);
@@ -727,7 +727,7 @@ static void image_read_ahead_cancel(ImageWindow *imd)
 	imd->read_ahead_fd = nullptr;
 }
 
-static void image_read_ahead_done_cb(ImageLoader *UNUSED(il), gpointer data)
+static void image_read_ahead_done_cb(ImageLoader *, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
@@ -813,7 +813,7 @@ static FileCacheData *image_get_cache()
 	return cache;
 }
 
-static void image_cache_set(ImageWindow *UNUSED(imd), FileData *fd)
+static void image_cache_set(ImageWindow *, FileData *fd)
 {
 	g_assert(fd->pixbuf);
 
@@ -866,7 +866,7 @@ static void image_load_area_cb(ImageLoader *il, guint x, guint y, guint w, guint
 	pixbuf_renderer_area_changed(pr, x, y, w, h);
 }
 
-static void image_load_done_cb(ImageLoader *UNUSED(il), gpointer data)
+static void image_load_done_cb(ImageLoader *, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
@@ -927,7 +927,7 @@ static void image_load_done_cb(ImageLoader *UNUSED(il), gpointer data)
 	image_read_ahead_start(imd);
 }
 
-static void image_load_size_cb(ImageLoader *UNUSED(il), guint width, guint height, gpointer data)
+static void image_load_size_cb(ImageLoader *, guint width, guint height, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
@@ -1174,7 +1174,7 @@ static void image_change_real(ImageWindow *imd, FileData *fd,
  *-------------------------------------------------------------------
  */
 
-static gboolean image_focus_in_cb(GtkWidget *UNUSED(widget), GdkEventFocus *UNUSED(event), gpointer data)
+static gboolean image_focus_in_cb(GtkWidget *, GdkEventFocus *, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
@@ -1186,7 +1186,7 @@ static gboolean image_focus_in_cb(GtkWidget *UNUSED(widget), GdkEventFocus *UNUS
 	return TRUE;
 }
 
-static gboolean image_scroll_cb(GtkWidget *UNUSED(widget), GdkEventScroll *event, gpointer data)
+static gboolean image_scroll_cb(GtkWidget *, GdkEventScroll *event, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	gboolean in_lw = FALSE;
@@ -2002,7 +2002,7 @@ void image_set_delay_flip(ImageWindow *imd, gboolean delay)
 		}
 }
 
-void image_to_root_window(ImageWindow *UNUSED(imd), gboolean UNUSED(scaled))
+void image_to_root_window(ImageWindow *, gboolean)
 {
 }
 
@@ -2112,13 +2112,13 @@ static void image_free(ImageWindow *imd)
 	g_free(imd);
 }
 
-static void image_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void image_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	image_free(imd);
 }
 
-gboolean selectable_frame_draw_cb(GtkWidget *widget, cairo_t *cr, gpointer UNUSED(data))
+gboolean selectable_frame_draw_cb(GtkWidget *widget, cairo_t *cr, gpointer)
 {
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(widget, &allocation);

@@ -50,7 +50,7 @@ enum LogWindowSearchDirection {
 
 static LogWindow *logwindow = nullptr;
 
-static void hide_cb(GtkWidget *UNUSED(widget), LogWindow *UNUSED(logwin))
+static void hide_cb(GtkWidget *, LogWindow *)
 {
 }
 
@@ -84,7 +84,7 @@ static gboolean iter_char_search_cb(gunichar ch, gpointer data)
  * <options->log_window.action> <selected text>
  *
 */
-static gboolean key_pressed(GtkWidget *UNUSED(widget), GdkEventKey *event, LogWindow *logwin)
+static gboolean key_pressed(GtkWidget *, GdkEventKey *event, LogWindow *logwin)
 {
 	GtkTextBuffer *buffer;
 	GtkTextIter chr_end;
@@ -142,12 +142,12 @@ static gboolean key_pressed(GtkWidget *UNUSED(widget), GdkEventKey *event, LogWi
 }
 
 
-static void log_window_pause_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void log_window_pause_cb(GtkWidget *, gpointer)
 {
 	options->log_window.paused = !options->log_window.paused;
 }
 
-static void log_window_line_wrap_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void log_window_line_wrap_cb(GtkWidget *, gpointer data)
 {
 	auto logwin = static_cast<LogWindow *>(data);
 
@@ -163,12 +163,12 @@ static void log_window_line_wrap_cb(GtkWidget *UNUSED(widget), gpointer data)
 		}
 }
 
-static void log_window_timer_data_cb(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void log_window_timer_data_cb(GtkWidget *, gpointer)
 {
 	options->log_window.timer_data = !options->log_window.timer_data;
 }
 
-static void log_window_regexp_cb(GtkWidget *text_entry, gpointer UNUSED(data))
+static void log_window_regexp_cb(GtkWidget *text_entry, gpointer)
 {
 	gchar *new_regexp;
 
@@ -211,7 +211,7 @@ static void remove_green_bg(LogWindow *logwin)
 		}
 }
 
-static void search_activate_event(GtkEntry *UNUSED(widget), LogWindow *logwin)
+static void search_activate_event(GtkEntry *, LogWindow *logwin)
 {
 	GtkTextIter start_find;
 	GtkTextIter start_match;
@@ -248,7 +248,7 @@ static void search_activate_event(GtkEntry *UNUSED(widget), LogWindow *logwin)
 		}
 }
 
-static gboolean search_keypress_event(GtkWidget *UNUSED(widget), GdkEventKey *UNUSED(event), LogWindow *logwin, LogWindowSearchDirection direction)
+static gboolean search_keypress_event(GtkWidget *, GdkEventKey *, LogWindow *logwin, LogWindowSearchDirection direction)
 {
 	GtkTextIter start_find;
 	GtkTextIter start_match;
@@ -342,14 +342,14 @@ static gboolean all_keypress_event_cb(GtkToggleButton *widget, LogWindow *logwin
 	return FALSE;
 }
 
-static gboolean debug_changed_cb(GtkSpinButton *widget, LogWindow *UNUSED(logwin))
+static gboolean debug_changed_cb(GtkSpinButton *widget, LogWindow *)
 {
 	set_debug_level((gtk_spin_button_get_value(widget)));
 
 	return FALSE;
 }
 
-static void search_entry_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIconPosition pos, GdkEvent *UNUSED(event), gpointer userdata)
+static void search_entry_icon_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
 {
 	auto logwin = static_cast<LogWindow *>(userdata);
 	GtkTextIter start_find;
@@ -368,7 +368,7 @@ static void search_entry_icon_cb(GtkEntry *UNUSED(entry), GtkEntryIconPosition p
 		}
 }
 
-static void filter_entry_icon_cb(GtkEntry *entry, GtkEntryIconPosition UNUSED(pos), GdkEvent *UNUSED(event), gpointer UNUSED(userdata))
+static void filter_entry_icon_cb(GtkEntry *entry, GtkEntryIconPosition, GdkEvent *, gpointer)
 {
 	const gchar *blank = "";
 	gtk_entry_set_text(entry, blank);

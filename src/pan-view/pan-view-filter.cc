@@ -282,7 +282,7 @@ void pan_filter_toggle_visible_unused(PanWindow *pw, gboolean enable)
 }
 #pragma GCC diagnostic pop
 
-void pan_filter_toggle_button_cb(GtkWidget *UNUSED(button), gpointer data)
+void pan_filter_toggle_button_cb(GtkWidget *, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
 	PanViewFilterUi *ui = pw->filter_ui;

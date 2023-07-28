@@ -379,7 +379,7 @@ static void view_step_to_end(ViewWindow *vw, gboolean last)
  *-----------------------------------------------------------------------------
  */
 
-static void view_window_press_cb(GtkWidget *UNUSED(widget), GdkEventButton *bevent, gpointer data)
+static void view_window_press_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
@@ -752,7 +752,7 @@ static void view_image_set_buttons(ViewWindow *vw, ImageWindow *imd)
 	image_set_scroll_func(imd, scroll_cb, vw);
 }
 
-static void view_fullscreen_stop_func(FullScreenData *UNUSED(fs), gpointer data)
+static void view_fullscreen_stop_func(FullScreenData *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
@@ -809,7 +809,7 @@ static void view_slideshow_prev(ViewWindow *vw)
 	if (vw->ss) slideshow_prev(vw->ss);
 }
 
-static void view_slideshow_stop_func(SlideShowData *UNUSED(fs), gpointer data)
+static void view_slideshow_stop_func(SlideShowData *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	GList *work;
@@ -866,7 +866,7 @@ static void view_slideshow_stop(ViewWindow *vw)
 	if (vw->ss) slideshow_free(vw->ss);
 }
 
-static void view_window_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_window_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
@@ -889,7 +889,7 @@ static void view_window_close(ViewWindow *vw)
 	gtk_widget_destroy(vw->window);
 }
 
-static gboolean view_window_delete_cb(GtkWidget *UNUSED(w), GdkEventAny *UNUSED(event), gpointer data)
+static gboolean view_window_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
@@ -1016,7 +1016,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	return vw;
 }
 
-static void view_window_collection_unref_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_window_collection_unref_cb(GtkWidget *, gpointer data)
 {
 	auto cd = static_cast<CollectionData *>(data);
 
@@ -1139,7 +1139,7 @@ gboolean view_window_find_image(ImageWindow *imd, gint *index, gint *total)
  *-----------------------------------------------------------------------------
  */
 
-static void view_new_window_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_new_window_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	CollectionData *cd;
@@ -1187,35 +1187,35 @@ static void view_alter_cb(GtkWidget *widget, gpointer data)
 	image_alter_orientation(vw->imd, vw->imd->image_fd, type);
 }
 
-static void view_zoom_in_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_zoom_in_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
 	image_zoom_adjust(view_window_active_image(vw), get_zoom_increment());
 }
 
-static void view_zoom_out_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_zoom_out_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
 	image_zoom_adjust(view_window_active_image(vw), -get_zoom_increment());
 }
 
-static void view_zoom_1_1_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_zoom_1_1_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
 	image_zoom_set(view_window_active_image(vw), 1.0);
 }
 
-static void view_zoom_fit_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_zoom_fit_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
 	image_zoom_set(view_window_active_image(vw), 0.0);
 }
 
-static void view_copy_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_copy_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	ImageWindow *imd;
@@ -1224,7 +1224,7 @@ static void view_copy_cb(GtkWidget *UNUSED(widget), gpointer data)
 	file_util_copy(image_get_fd(imd), nullptr, nullptr, imd->widget);
 }
 
-static void view_move_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_move_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	ImageWindow *imd;
@@ -1233,7 +1233,7 @@ static void view_move_cb(GtkWidget *UNUSED(widget), gpointer data)
 	file_util_move(image_get_fd(imd), nullptr, nullptr, imd->widget);
 }
 
-static void view_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_rename_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	ImageWindow *imd;
@@ -1242,7 +1242,7 @@ static void view_rename_cb(GtkWidget *UNUSED(widget), gpointer data)
 	file_util_rename(image_get_fd(imd), nullptr, imd->widget);
 }
 
-static void view_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_delete_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	ImageWindow *imd;
@@ -1252,7 +1252,7 @@ static void view_delete_cb(GtkWidget *UNUSED(widget), gpointer data)
 	file_util_delete(image_get_fd(imd), nullptr, imd->widget);
 }
 
-static void view_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_move_to_trash_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	ImageWindow *imd;
@@ -1262,7 +1262,7 @@ static void view_move_to_trash_cb(GtkWidget *UNUSED(widget), gpointer data)
 	file_util_delete(image_get_fd(imd), nullptr, imd->widget);
 }
 
-static void view_copy_path_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	ImageWindow *imd;
@@ -1271,7 +1271,7 @@ static void view_copy_path_cb(GtkWidget *UNUSED(widget), gpointer data)
 	file_util_copy_path_to_clipboard(image_get_fd(imd), TRUE);
 }
 
-static void view_copy_path_unquoted_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	ImageWindow *imd;
@@ -1280,35 +1280,35 @@ static void view_copy_path_unquoted_cb(GtkWidget *UNUSED(widget), gpointer data)
 	file_util_copy_path_to_clipboard(image_get_fd(imd), FALSE);
 }
 
-static void view_fullscreen_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_fullscreen_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
 	view_fullscreen_toggle(vw, FALSE);
 }
 
-static void view_slideshow_start_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_slideshow_start_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
 	view_slideshow_start(vw);
 }
 
-static void view_slideshow_stop_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_slideshow_stop_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
 	view_slideshow_stop(vw);
 }
 
-static void view_slideshow_pause_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_slideshow_pause_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
 	slideshow_pause_toggle(vw->ss);
 }
 
-static void view_close_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_close_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
@@ -1326,7 +1326,7 @@ static LayoutWindow *view_new_layout_with_fd(FileData *fd)
 }
 
 
-static void view_set_layout_path_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_set_layout_path_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	LayoutWindow *lw;
@@ -1344,7 +1344,7 @@ static void view_set_layout_path_cb(GtkWidget *UNUSED(widget), gpointer data)
 	view_window_close(vw);
 }
 
-static void view_popup_menu_destroy_cb(GtkWidget *UNUSED(widget), gpointer data)
+static void view_popup_menu_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto editmenu_fd_list = static_cast<GList *>(data);
 
@@ -1492,7 +1492,7 @@ struct CViewConfirmD {
 	GList *list;
 };
 
-static void view_dir_list_cancel(GtkWidget *UNUSED(widget), gpointer UNUSED(data))
+static void view_dir_list_cancel(GtkWidget *, gpointer)
 {
 	/* do nothing */
 }
@@ -1556,25 +1556,25 @@ static void view_dir_list_do(ViewWindow *vw, GList *list, gboolean skip, gboolea
 		}
 }
 
-static void view_dir_list_add(GtkWidget *UNUSED(widget), gpointer data)
+static void view_dir_list_add(GtkWidget *, gpointer data)
 {
 	auto d = static_cast<CViewConfirmD *>(data);
 	view_dir_list_do(d->vw, d->list, FALSE, FALSE);
 }
 
-static void view_dir_list_recurse(GtkWidget *UNUSED(widget), gpointer data)
+static void view_dir_list_recurse(GtkWidget *, gpointer data)
 {
 	auto d = static_cast<CViewConfirmD *>(data);
 	view_dir_list_do(d->vw, d->list, FALSE, TRUE);
 }
 
-static void view_dir_list_skip(GtkWidget *UNUSED(widget), gpointer data)
+static void view_dir_list_skip(GtkWidget *, gpointer data)
 {
 	auto d = static_cast<CViewConfirmD *>(data);
 	view_dir_list_do(d->vw, d->list, TRUE, FALSE);
 }
 
-static void view_dir_list_destroy(GtkWidget *UNUSED(widget), gpointer data)
+static void view_dir_list_destroy(GtkWidget *, gpointer data)
 {
 	auto d = static_cast<CViewConfirmD *>(data);
 	filelist_free(d->list);
@@ -1611,10 +1611,10 @@ static GtkWidget *view_confirm_dir_list(ViewWindow *vw, GList *list)
  *-----------------------------------------------------------------------------
  */
 
-static void view_window_get_dnd_data(GtkWidget *UNUSED(widget), GdkDragContext *context,
-				     gint UNUSED(x), gint UNUSED(y),
+static void view_window_get_dnd_data(GtkWidget *, GdkDragContext *context,
+				     gint, gint,
 				     GtkSelectionData *selection_data, guint info,
-				     guint UNUSED(time), gpointer data)
+				     guint, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	ImageWindow *imd;
@@ -1691,9 +1691,9 @@ static void view_window_get_dnd_data(GtkWidget *UNUSED(widget), GdkDragContext *
 		}
 }
 
-static void view_window_set_dnd_data(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(context),
-				     GtkSelectionData *selection_data, guint UNUSED(info),
-				     guint UNUSED(time), gpointer data)
+static void view_window_set_dnd_data(GtkWidget *, GdkDragContext *,
+				     GtkSelectionData *selection_data, guint,
+				     guint, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	FileData *fd;

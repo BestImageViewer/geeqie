@@ -182,9 +182,9 @@ static GtkTargetEntry advanced_exif_drag_types[] = {
 static gint n_exif_drag_types = 1;
 
 
-static void advanced_exif_dnd_get(GtkWidget *listview, GdkDragContext *UNUSED(context),
-				  GtkSelectionData *selection_data, guint UNUSED(info),
-				  guint UNUSED(time), gpointer UNUSED(data))
+static void advanced_exif_dnd_get(GtkWidget *listview, GdkDragContext *,
+				  GtkSelectionData *selection_data,
+				  guint, guint, gpointer)
 {
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
 	GtkTreeIter iter;
@@ -202,7 +202,7 @@ static void advanced_exif_dnd_get(GtkWidget *listview, GdkDragContext *UNUSED(co
 }
 
 
-static void advanced_exif_dnd_begin(GtkWidget *listview, GdkDragContext *context, gpointer UNUSED(data))
+static void advanced_exif_dnd_begin(GtkWidget *listview, GdkDragContext *context, gpointer)
 {
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
 	GtkTreeIter iter;
@@ -275,7 +275,7 @@ void advanced_exif_close(ExifWin *ew)
 	g_free(ew);
 }
 
-static gboolean advanced_exif_delete_cb(GtkWidget *UNUSED(widget), GdkEvent *UNUSED(event), gpointer data)
+static gboolean advanced_exif_delete_cb(GtkWidget *, GdkEvent *, gpointer data)
 {
 	auto ew = static_cast<ExifWin *>(data);
 
@@ -330,8 +330,7 @@ static gint advanced_exif_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIt
 	return ret;
 }
 
-static gboolean advanced_exif_mouseclick(GtkWidget *UNUSED(widget),
-						GdkEventButton *UNUSED(bevent), gpointer data)
+static gboolean advanced_exif_mouseclick(GtkWidget *, GdkEventButton *, gpointer data)
 {
 	auto ew = static_cast<ExifWin *>(data);
 	GtkTreePath *path;
@@ -365,7 +364,7 @@ static gboolean advanced_exif_mouseclick(GtkWidget *UNUSED(widget),
 	return TRUE;
 }
 
-static gboolean advanced_exif_keypress(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer data)
+static gboolean advanced_exif_keypress(GtkWidget *, GdkEventKey *event, gpointer data)
 {
 	auto ew = static_cast<ExifWin *>(data);
 	gboolean stop_signal = FALSE;
@@ -389,7 +388,7 @@ static gboolean advanced_exif_keypress(GtkWidget *UNUSED(widget), GdkEventKey *e
 	return stop_signal;
 }
 
-static gboolean search_function_cb(GtkTreeModel *model, gint column, const gchar *key, GtkTreeIter *iter, gpointer UNUSED(data))
+static gboolean search_function_cb(GtkTreeModel *model, gint column, const gchar *key, GtkTreeIter *iter, gpointer)
 {
 	gboolean ret = TRUE;
 	gchar *field_contents;

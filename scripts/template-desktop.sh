@@ -74,7 +74,7 @@ function get_menus()
 }
 
 /Valid sections/ {template_flag = 1; print; get_menus()}
-/This is a filter/ {template_flag = 0; print ""}
+/For other keys/ {template_flag = 0; print ""}
 (template_flag == 0) {print}
 '  "$templatepath" > "$tmp_file"
 

@@ -1052,7 +1052,7 @@ static void web_file_progress_cb(goffset current_num_bytes, goffset total_num_by
 		}
 }
 
-static void download_web_file_cancel_button_cb(GenericDialog *UNUSED(gd), gpointer data)
+static void download_web_file_cancel_button_cb(GenericDialog *, gpointer data)
 {
 	auto web = static_cast<WebData *>(data);
 

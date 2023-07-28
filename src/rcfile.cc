@@ -53,7 +53,7 @@ void write_indent(GString *str, gint indent)
 	g_string_append_printf(str, "\n%*s", indent * 4, "");
 }
 
-void write_char_option(GString *str, gint UNUSED(indent), const gchar *label, const gchar *text)
+void write_char_option(GString *str, gint, const gchar *label, const gchar *text)
 {
 	/* this is needed for overlay string, because g_markup_escape_text does not handle \n and such,
 	   ideas for improvement are welcome
@@ -129,7 +129,7 @@ gboolean read_color_option(const gchar *option, const gchar *label, const gchar 
 	return TRUE;
 }
 
-void write_int_option(GString *str, gint UNUSED(indent), const gchar *label, gint n)
+void write_int_option(GString *str, gint, const gchar *label, gint n)
 {
 	g_string_append_printf(str, "%s = \"%d\" ", label, n);
 }
@@ -156,7 +156,7 @@ gboolean read_int_option(const gchar *option, const gchar *label, const gchar *v
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-void write_ushort_option_unused(GString *str, gint UNUSED(indent), const gchar *label, guint16 n)
+void write_ushort_option_unused(GString *str, gint, const gchar *label, guint16 n)
 {
 	g_string_append_printf(str, "%s = \"%uh\" ", label, n);
 }
@@ -182,7 +182,7 @@ gboolean read_ushort_option(const gchar *option, const gchar *label, const gchar
 	return TRUE;
 }
 
-void write_uint_option(GString *str, gint UNUSED(indent), const gchar *label, guint n)
+void write_uint_option(GString *str, gint, const gchar *label, guint n)
 {
 	g_string_append_printf(str, "%s = \"%u\" ", label, n);
 }
@@ -228,7 +228,7 @@ gboolean read_int_option_clamp(const gchar *option, const gchar *label, const gc
 	return ret;
 }
 
-void write_int_unit_option(GString *str, gint UNUSED(indent), const gchar *label, gint n, gint subunits)
+void write_int_unit_option(GString *str, gint, const gchar *label, gint n, gint subunits)
 {
 	gint l, r;
 
@@ -277,7 +277,7 @@ gboolean read_int_unit_option(const gchar *option, const gchar *label, const gch
 	return TRUE;
 }
 
-void write_bool_option(GString *str, gint UNUSED(indent), const gchar *label, gint n)
+void write_bool_option(GString *str, gint, const gchar *label, gint n)
 {
 	g_string_append_printf(str, "%s = \"%s\" ", label, n ? "true" : "false");
 }
@@ -740,7 +740,7 @@ gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, Layou
 	return TRUE;
 }
 
-gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions *UNUSED(options), LayoutWindow *lw)
+gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions *, LayoutWindow *lw)
 {
 	SecureSaveInfo *ssi;
 	gchar *rc_pathl;
@@ -1037,7 +1037,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 	return TRUE;
 }
 
-static void options_load_color_profiles(GQParserData *UNUSED(parser_data), GMarkupParseContext *UNUSED(context), const gchar *UNUSED(element_name), const gchar **attribute_names, const gchar **attribute_values, gpointer UNUSED(data), GError **UNUSED(error))
+static void options_load_color_profiles(GQParserData *, GMarkupParseContext *, const gchar *, const gchar **attribute_names, const gchar **attribute_values, gpointer, GError **)
 {
 	while (*attribute_names)
 		{
@@ -1056,7 +1056,7 @@ static void options_load_color_profiles(GQParserData *UNUSED(parser_data), GMark
 
 }
 
-static void options_load_profile(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *UNUSED(element_name), const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_load_profile(GQParserData *parser_data, GMarkupParseContext *, const gchar *, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	gint i = GPOINTER_TO_INT(data);
 	if (i < 0 || i >= COLOR_PROFILE_INPUTS) return;
@@ -1075,7 +1075,7 @@ static void options_load_profile(GQParserData *parser_data, GMarkupParseContext 
 
 }
 
-static void options_load_marks_tooltips(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *UNUSED(element_name), const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_load_marks_tooltips(GQParserData *parser_data, GMarkupParseContext *, const gchar *, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	gint i = GPOINTER_TO_INT(data);
 	if (i < 0 || i >= FILEDATA_MARKS_SIZE) return;
@@ -1092,7 +1092,7 @@ static void options_load_marks_tooltips(GQParserData *parser_data, GMarkupParseC
 
 }
 
-static void options_load_disabled_plugins(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *UNUSED(element_name), const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_load_disabled_plugins(GQParserData *parser_data, GMarkupParseContext *, const gchar *, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	gint i = GPOINTER_TO_INT(data);
 	struct {
@@ -1141,7 +1141,7 @@ static const gchar *options_get_id(const gchar **attribute_names, const gchar **
 }
 
 
-void options_parse_leaf(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **UNUSED(attribute_names), const gchar **UNUSED(attribute_values), gpointer UNUSED(data), GError **UNUSED(error))
+void options_parse_leaf(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **, const gchar **, gpointer, GError **)
 {
 	log_printf("unexpected: %s\n", element_name);
 	options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
@@ -1237,7 +1237,7 @@ static void class_filter_load_filter_type(const gchar **attribute_names, const g
 		}
 }
 
-static void options_parse_class_filter(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer UNUSED(data), GError **UNUSED(error))
+static void options_parse_class_filter(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer, GError **)
 {
 	if (g_ascii_strcasecmp(element_name, "filter_type") == 0)
 		{
@@ -1265,7 +1265,7 @@ static void options_parse_disabled_plugins(GQParserData *parser_data, GMarkupPar
 		}
 }
 
-static void options_parse_filter(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer UNUSED(data), GError **UNUSED(error))
+static void options_parse_filter(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer, GError **)
 {
 	if (g_ascii_strcasecmp(element_name, "file_type") == 0)
 		{
@@ -1279,20 +1279,20 @@ static void options_parse_filter(GQParserData *parser_data, GMarkupParseContext 
 		}
 }
 
-static void options_parse_filter_end(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *UNUSED(element_name), gpointer UNUSED(data), GError **UNUSED(error))
+static void options_parse_filter_end(GQParserData *parser_data, GMarkupParseContext *, const gchar *, gpointer, GError **)
 {
 	if (parser_data->startup) filter_add_defaults();
 	filter_rebuild();
 }
 
-static void options_parse_keyword_end(GQParserData *UNUSED(parser_data), GMarkupParseContext *UNUSED(context), const gchar *UNUSED(element_name), gpointer data, GError **UNUSED(error))
+static void options_parse_keyword_end(GQParserData *, GMarkupParseContext *, const gchar *, gpointer data, GError **)
 {
 	auto iter_ptr = static_cast<GtkTreeIter *>(data);
 	gtk_tree_iter_free(iter_ptr);
 }
 
 
-static void options_parse_keyword(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_parse_keyword(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	auto iter_ptr = static_cast<GtkTreeIter *>(data);
 	if (g_ascii_strcasecmp(element_name, "keyword") == 0)
@@ -1309,7 +1309,7 @@ static void options_parse_keyword(GQParserData *parser_data, GMarkupParseContext
 
 
 
-static void options_parse_keyword_tree(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer UNUSED(data), GError **UNUSED(error))
+static void options_parse_keyword_tree(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer, GError **)
 {
 	if (g_ascii_strcasecmp(element_name, "keyword") == 0)
 		{
@@ -1361,7 +1361,7 @@ static void options_parse_global(GQParserData *parser_data, GMarkupParseContext 
 		}
 }
 
-static void options_parse_global_end(GQParserData *UNUSED(parser_data), GMarkupParseContext *UNUSED(context), const gchar *UNUSED(element_name), gpointer UNUSED(data), GError **UNUSED(error))
+static void options_parse_global_end(GQParserData *, GMarkupParseContext *, const gchar *, gpointer, GError **)
 {
 #ifndef HAVE_EXIV2
 	/* some options do not work without exiv2 */
@@ -1372,7 +1372,7 @@ static void options_parse_global_end(GQParserData *UNUSED(parser_data), GMarkupP
 #endif
 }
 
-static void options_parse_pane_exif(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_parse_pane_exif(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	auto pane = static_cast<GtkWidget *>(data);
 	if (g_ascii_strcasecmp(element_name, "entry") == 0)
@@ -1387,7 +1387,7 @@ static void options_parse_pane_exif(GQParserData *parser_data, GMarkupParseConte
 		}
 }
 
-static void options_parse_pane_keywords(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_parse_pane_keywords(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	auto pane = static_cast<GtkWidget *>(data);
 
@@ -1403,7 +1403,7 @@ static void options_parse_pane_keywords(GQParserData *parser_data, GMarkupParseC
 		}
 }
 
-static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	auto bar = static_cast<GtkWidget *>(data);
 	if (g_ascii_strcasecmp(element_name, "pane_comment") == 0)
@@ -1510,7 +1510,7 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *UN
 		}
 }
 
-static void options_parse_toolbar(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_parse_toolbar(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	if (g_ascii_strcasecmp(element_name, "toolitem") == 0)
@@ -1530,7 +1530,7 @@ static void options_parse_toolbar(GQParserData *parser_data, GMarkupParseContext
 		}
 }
 
-static void options_parse_statusbar(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_parse_statusbar(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	if (g_ascii_strcasecmp(element_name, "toolitem") == 0)
@@ -1550,7 +1550,7 @@ static void options_parse_statusbar(GQParserData *parser_data, GMarkupParseConte
 		}
 }
 
-static void options_parse_dialogs(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer UNUSED(data), GError **UNUSED(error))
+static void options_parse_dialogs(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer, GError **)
 {
 	if (g_ascii_strcasecmp(element_name, "window") == 0)
 		{
@@ -1564,7 +1564,7 @@ static void options_parse_dialogs(GQParserData *parser_data, GMarkupParseContext
 		}
 }
 
-static void options_parse_layout(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **UNUSED(error))
+static void options_parse_layout(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	if (g_ascii_strcasecmp(element_name, "bar") == 0)
@@ -1605,13 +1605,13 @@ static void options_parse_layout(GQParserData *parser_data, GMarkupParseContext 
 		}
 }
 
-static void options_parse_layout_end(GQParserData *UNUSED(parser_data), GMarkupParseContext *UNUSED(context), const gchar *UNUSED(element_name), gpointer data, GError **UNUSED(error))
+static void options_parse_layout_end(GQParserData *, GMarkupParseContext *, const gchar *, gpointer data, GError **)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	layout_util_sync(lw);
 }
 
-static void options_parse_toplevel(GQParserData *parser_data, GMarkupParseContext *UNUSED(context), const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer UNUSED(data), GError **UNUSED(error))
+static void options_parse_toplevel(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer, GError **)
 {
 	if (g_ascii_strcasecmp(element_name, "gq") == 0)
 		{
