@@ -90,7 +90,7 @@ static void generic_dialog_add_image(GenericDialog *gd, GtkWidget *box,
 
 		gtk_box_pack_start(GTK_BOX(preview_box), vbox, FALSE, TRUE, 0);
 
-		sep = gtk_hseparator_new();
+		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 		gtk_box_pack_start(GTK_BOX(preview_box), sep, FALSE, FALSE, 0);
 		gtk_widget_show(sep);
 		}

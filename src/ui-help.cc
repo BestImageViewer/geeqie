@@ -237,7 +237,7 @@ GtkWidget *help_window_new(const gchar *title,
 	gtk_text_buffer_create_tag(buffer, "monospace",
 				   "family", "monospace", NULL);
 
-	hbox = gtk_hbutton_box_new();
+	hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), PREF_PAD_BORDER);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_END);
 	gtk_box_pack_end(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);

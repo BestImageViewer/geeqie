@@ -169,15 +169,7 @@ GtkWidget *pref_line(GtkWidget *parent_box, gboolean padding)
 {
 	GtkWidget *spacer;
 
-	if (GTK_IS_HBOX(parent_box))
-		{
-		spacer = gtk_vseparator_new();
-		}
-	else
-		{
-		spacer = gtk_hseparator_new();
-		}
-
+	spacer = gtk_separator_new(GTK_IS_HBOX(parent_box) ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
 	gtk_box_pack_start(GTK_BOX(parent_box), spacer, FALSE, FALSE, padding / 2);
 	gtk_widget_show(spacer);
 

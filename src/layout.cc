@@ -2265,7 +2265,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	gtk_container_add(GTK_CONTAINER(lc->configwindow), win_vbox);
 	gtk_widget_show(win_vbox);
 
-	hbox = gtk_hbutton_box_new();
+	hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_END);
 	gtk_box_set_spacing(GTK_BOX(hbox), PREF_PAD_BUTTON_GAP);
 	gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);

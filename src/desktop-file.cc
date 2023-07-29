@@ -212,7 +212,7 @@ static void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_widget_show(ew->entry);
 	g_signal_connect(G_OBJECT(ew->entry), "changed", G_CALLBACK(editor_window_entry_changed_cb), ew);
 
-	button_hbox = gtk_hbutton_box_new();
+	button_hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(button_hbox), GTK_BUTTONBOX_END);
 	gtk_box_set_spacing(GTK_BOX(button_hbox), PREF_PAD_BUTTON_GAP);
 	gtk_box_pack_end(GTK_BOX(hbox), button_hbox, FALSE, FALSE, 0);
@@ -553,7 +553,7 @@ static void editor_list_window_create()
 	gtk_container_add(GTK_CONTAINER(ewl->window), win_vbox);
 	gtk_widget_show(win_vbox);
 
-	hbox = gtk_hbutton_box_new();
+	hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_END);
 	gtk_box_set_spacing(GTK_BOX(hbox), PREF_PAD_BUTTON_GAP);
 	gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);

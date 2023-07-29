@@ -1904,14 +1904,14 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	pan_image_set_buttons(pw, pw->imd);
 
-	pw->scrollbar_h = gtk_hscrollbar_new(nullptr);
+	pw->scrollbar_h = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, nullptr);
 	g_signal_connect(G_OBJECT(pw->scrollbar_h), "value_changed",
 			 G_CALLBACK(pan_window_scrollbar_h_value_cb), pw);
 	gtk_table_attach(GTK_TABLE(table), pw->scrollbar_h, 0, 1, 1, 2,
 			 static_cast<GtkAttachOptions>(GTK_FILL | GTK_EXPAND), static_cast<GtkAttachOptions>(0), 0, 0);
 	gtk_widget_show(pw->scrollbar_h);
 
-	pw->scrollbar_v = gtk_vscrollbar_new(nullptr);
+	pw->scrollbar_v = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, nullptr);
 	g_signal_connect(G_OBJECT(pw->scrollbar_v), "value_changed",
 			 G_CALLBACK(pan_window_scrollbar_v_value_cb), pw);
 	gtk_table_attach(GTK_TABLE(table), pw->scrollbar_v, 1, 2, 0, 1,
