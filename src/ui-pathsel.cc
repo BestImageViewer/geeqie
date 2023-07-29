@@ -1029,7 +1029,7 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	if (filter)
 		{
-		paned = gtk_hpaned_new();
+		paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 		DEBUG_NAME(paned);
 		gtk_table_attach(GTK_TABLE(table), paned, 0, 3, 1, 2,
 				 static_cast<GtkAttachOptions>(GTK_EXPAND | GTK_FILL), static_cast<GtkAttachOptions>(GTK_EXPAND | GTK_FILL), 0, 0);

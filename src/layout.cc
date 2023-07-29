@@ -367,7 +367,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 	g_signal_connect(G_OBJECT(gtk_widget_get_parent(gtk_widget_get_parent(lw->path_entry))), "changed",
 			 G_CALLBACK(layout_path_entry_changed_cb), lw);
 
-	box_folders = GTK_WIDGET(gtk_hpaned_new());
+	box_folders = GTK_WIDGET(gtk_paned_new(GTK_ORIENTATION_HORIZONTAL));
 	DEBUG_NAME(box_folders);
 	gtk_box_pack_start(GTK_BOX(box), box_folders, TRUE, TRUE, 0);
 
@@ -1645,16 +1645,8 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 
 	layout_status_setup(lw, vbox, TRUE);
 
-	if (vertical)
-		{
-		lw->tools_pane = gtk_vpaned_new();
-		DEBUG_NAME(lw->tools_pane);
-		}
-	else
-		{
-		lw->tools_pane = gtk_hpaned_new();
-		DEBUG_NAME(lw->tools_pane);
-		}
+	lw->tools_pane = gtk_paned_new(vertical ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
+	DEBUG_NAME(lw->tools_pane);
 	gtk_box_pack_start(GTK_BOX(vbox), lw->tools_pane, TRUE, TRUE, 0);
 	gtk_widget_show(lw->tools_pane);
 
@@ -1848,10 +1840,10 @@ static void layout_grid_setup(LayoutWindow *lw)
 
 	layout_grid_compute(lw, image_sb, tools, files, &w1, &w2, &w3);
 
-	v = lw->v_pane = gtk_vpaned_new();
+	v = lw->v_pane = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
 	DEBUG_NAME(v);
 
-	h = lw->h_pane = gtk_hpaned_new();
+	h = lw->h_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(h);
 
 	if (!layout_location_vertical(static_cast<LayoutLocation>(priority_location)))

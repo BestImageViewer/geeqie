@@ -2336,16 +2336,8 @@ GtkWidget *layout_image_setup_split_hv(LayoutWindow *lw, gboolean horizontal)
 	layout_image_setup_split_common(lw, 2);
 
 	/* horizontal split means vpaned and vice versa */
-	if (horizontal)
-		{
-		paned = gtk_vpaned_new();
-		DEBUG_NAME(paned);
-		}
-	else
-		{
-		paned = gtk_hpaned_new();
-		DEBUG_NAME(paned);
-		}
+	paned = gtk_paned_new(horizontal ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
+	DEBUG_NAME(paned);
 
 	gtk_paned_pack1(GTK_PANED(paned), lw->split_images[0]->widget, TRUE, TRUE);
 	gtk_paned_pack2(GTK_PANED(paned), lw->split_images[1]->widget, TRUE, TRUE);
@@ -2373,9 +2365,9 @@ static GtkWidget *layout_image_setup_split_triple(LayoutWindow *lw)
 
 	gtk_widget_get_allocation(lw->utility_paned, &allocation);
 
-	hpaned1 = gtk_hpaned_new();
+	hpaned1 = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(hpaned1);
-	hpaned2 = gtk_hpaned_new();
+	hpaned2 = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(hpaned2);
 
 	if (lw->bar && gtk_widget_get_visible(lw->bar))
@@ -2419,11 +2411,11 @@ GtkWidget *layout_image_setup_split_quad(LayoutWindow *lw)
 
 	layout_image_setup_split_common(lw, 4);
 
-	hpaned = gtk_hpaned_new();
+	hpaned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(hpaned);
-	vpaned1 = gtk_vpaned_new();
+	vpaned1 = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
 	DEBUG_NAME(vpaned1);
-	vpaned2 = gtk_vpaned_new();
+	vpaned2 = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
 	DEBUG_NAME(vpaned2);
 
 	gtk_paned_pack1(GTK_PANED(vpaned1), lw->split_images[0]->widget, TRUE, TRUE);

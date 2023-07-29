@@ -4146,7 +4146,7 @@ GtkWidget *layout_bars_prepare(LayoutWindow *lw, GtkWidget *image)
 {
 	if (lw->utility_box) return lw->utility_box;
 	lw->utility_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	lw->utility_paned = gtk_hpaned_new();
+	lw->utility_paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(lw->utility_paned);
 	gtk_box_pack_start(GTK_BOX(lw->utility_box), lw->utility_paned, TRUE, TRUE, 0);
 
