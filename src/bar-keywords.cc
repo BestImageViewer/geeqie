@@ -960,7 +960,7 @@ static void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_e
 				  bar_pane_keywords_edit_ok_cb, TRUE);
 
 	table = pref_table_new(gd->vbox, 3, 1, FALSE, TRUE);
-	pref_table_label(table, 0, 0, _("Keyword:"), 1.0);
+	pref_table_label(table, 0, 0, _("Keyword:"), GTK_ALIGN_END);
 	cdd->edit_widget = gtk_entry_new();
 	gtk_widget_set_size_request(cdd->edit_widget, 300, -1);
 	if (name) gtk_entry_set_text(GTK_ENTRY(cdd->edit_widget), name);

@@ -384,7 +384,7 @@ void help_search_window_show()
 	pref_spacer(GENERIC_DIALOG(gd)->vbox, 0);
 
 	table = pref_table_new(gd->vbox, 3, 1, FALSE, TRUE);
-	pref_table_label(table, 0, 0, _("Search terms:"), 1.0);
+	pref_table_label(table, 0, 0, _("Search terms:"), GTK_ALIGN_END);
 	hsd->edit_widget = gtk_entry_new();
 	gtk_widget_set_size_request(hsd->edit_widget, 300, -1);
 	gtk_table_attach_defaults(GTK_TABLE(table), hsd->edit_widget, 1, 2, 0, 1);

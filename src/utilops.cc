@@ -1714,10 +1714,10 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 
 	table = pref_table_new(page, 2, 2, FALSE, FALSE);
 
-	pref_table_label(table, 0, 0, _("Original name:"), 1.0);
-	ud->rename_label = pref_table_label(table, 1, 0, "", 0.0);
+	pref_table_label(table, 0, 0, _("Original name:"), GTK_ALIGN_END);
+	ud->rename_label = pref_table_label(table, 1, 0, "", GTK_ALIGN_START);
 
-	pref_table_label(table, 0, 1, _("New name:"), 1.0);
+	pref_table_label(table, 0, 1, _("New name:"), GTK_ALIGN_END);
 
 	ud->rename_entry = gtk_entry_new();
 	gtk_table_attach(GTK_TABLE(table), ud->rename_entry, 1, 2, 1, 2, static_cast<GtkAttachOptions>(GTK_EXPAND | GTK_FILL), static_cast<GtkAttachOptions>(0), 0, 0);

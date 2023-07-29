@@ -586,17 +586,15 @@ GtkWidget *pref_table_box(GtkWidget *table, gint column, gint row,
 }
 
 GtkWidget *pref_table_label(GtkWidget *table, gint column, gint row,
-			    const gchar *text, gfloat alignment)
+			    const gchar *text, GtkAlign alignment)
 {
 	GtkWidget *label;
-	GtkWidget *align;
 
-	align = gtk_alignment_new(alignment, 0.50, 0.0, 0.0);
-	gtk_table_attach(GTK_TABLE(table), align, column, column + 1, row, row + 1,
-			 GTK_FILL, static_cast<GtkAttachOptions>(0), 0, 0);
-	gtk_widget_show(align);
 	label = gtk_label_new(text);
-	gtk_container_add(GTK_CONTAINER(align), label);
+	gtk_widget_set_halign(label, alignment);
+	gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
+	gtk_table_attach(GTK_TABLE(table), label, column, column + 1, row, row + 1,
+			 GTK_FILL, static_cast<GtkAttachOptions>(0), 0, 0);
 	gtk_widget_show(label);
 
 	return label;
@@ -636,7 +634,7 @@ GtkWidget *pref_table_spin(GtkWidget *table, gint column, gint row,
 
 	if (text)
 		{
-		label = pref_table_label(table, column, row, text, 1.0);
+		label = pref_table_label(table, column, row, text, GTK_ALIGN_END);
 		pref_link_sensitivity(label, spin);
 		column++;
 		}

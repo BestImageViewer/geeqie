@@ -907,7 +907,7 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 				  vf_marks_tooltip_help_cb, FALSE);
 
 	table = pref_table_new(mte->gd->vbox, 3, 1, FALSE, TRUE);
-	pref_table_label(table, 0, 0, g_strdup_printf("%s%d", _("Mark "), mte->mark_no + 1), 1.0);
+	pref_table_label(table, 0, 0, g_strdup_printf("%s%d", _("Mark "), mte->mark_no + 1), GTK_ALIGN_END);
 	mte->edit_widget = gtk_entry_new();
 	gtk_widget_set_size_request(mte->edit_widget, 300, -1);
 	if (mte->text_entry)

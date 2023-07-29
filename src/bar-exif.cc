@@ -566,7 +566,7 @@ static void bar_pane_exif_conf_dialog(GtkWidget *widget)
 				  bar_pane_exif_edit_ok_cb, TRUE);
 
 	table = pref_table_new(gd->vbox, 3, 2, FALSE, TRUE);
-	pref_table_label(table, 0, 0, _("Key:"), 1.0);
+	pref_table_label(table, 0, 0, _("Key:"), GTK_ALIGN_END);
 
 	cdd->key_entry = gtk_entry_new();
 	gtk_widget_set_size_request(cdd->key_entry, 300, -1);
@@ -575,7 +575,7 @@ static void bar_pane_exif_conf_dialog(GtkWidget *widget)
 	generic_dialog_attach_default(gd, cdd->key_entry);
 	gtk_widget_show(cdd->key_entry);
 
-	pref_table_label(table, 0, 1, _("Title:"), 1.0);
+	pref_table_label(table, 0, 1, _("Title:"), GTK_ALIGN_END);
 
 	cdd->title_entry = gtk_entry_new();
 	gtk_widget_set_size_request(cdd->title_entry, 300, -1);

@@ -279,7 +279,7 @@ static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent
 				  bookmark_edit_ok_cb, TRUE);
 
 	table = pref_table_new(gd->vbox, 3, 2, FALSE, TRUE);
-	pref_table_label(table, 0, 0, _("Name:"), 1.0);
+	pref_table_label(table, 0, 0, _("Name:"), GTK_ALIGN_END);
 
 	p->name_entry = gtk_entry_new();
 	gtk_widget_set_size_request(p->name_entry, 300, -1);
@@ -288,7 +288,7 @@ static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent
 	generic_dialog_attach_default(gd, p->name_entry);
 	gtk_widget_show(p->name_entry);
 
-	pref_table_label(table, 0, 1, _("Path:"), 1.0);
+	pref_table_label(table, 0, 1, _("Path:"), GTK_ALIGN_END);
 
 	label = tab_completion_new_with_history(&p->path_entry, p->bb->path,
 						"bookmark_path", -1, nullptr, nullptr);
@@ -297,7 +297,7 @@ static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent
 	generic_dialog_attach_default(gd, p->path_entry);
 	gtk_widget_show(label);
 
-	pref_table_label(table, 0, 2, _("Icon:"), 1.0);
+	pref_table_label(table, 0, 2, _("Icon:"), GTK_ALIGN_END);
 
 	icon = p->bb->icon;
 	if (!icon) icon = "";

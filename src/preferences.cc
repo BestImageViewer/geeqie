@@ -650,7 +650,7 @@ static void add_quality_menu(GtkWidget *table, gint column, gint row, const gcha
 
 	*option_c = option;
 
-	pref_table_label(table, column, row, text, 0.0);
+	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
 
@@ -677,7 +677,7 @@ static void add_dnd_default_action_selection_menu(GtkWidget *table, gint column,
 
 	*option_c = option;
 
-	pref_table_label(table, column, row, text, 0.0);
+	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
 
@@ -705,7 +705,7 @@ static void add_clipboard_selection_menu(GtkWidget *table, gint column, gint row
 
 	*option_c = option;
 
-	pref_table_label(table, column, row, text, 0.0);
+	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
 
@@ -749,7 +749,7 @@ static void add_zoom_style_selection_menu(GtkWidget *table, gint column, gint ro
 
 	*option_c = option;
 
-	pref_table_label(table, column, row, text, 0.0);
+	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
 
@@ -879,7 +879,7 @@ static void add_mouse_selection_menu(GtkWidget *table, gint column, gint row, co
 
 	*option_c = option;
 
-	pref_table_label(table, column, row, text, 0.0);
+	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
 
@@ -933,7 +933,7 @@ static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, gchar *
 	c_options->thumbnails.max_width = options->thumbnails.max_width;
 	c_options->thumbnails.max_height = options->thumbnails.max_height;
 
-	pref_table_label(table, column, row, text, 0.0);
+	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
 
@@ -1035,7 +1035,7 @@ static void add_stereo_mode_menu(GtkWidget *table, gint column, gint row, const 
 
 	*option_c = option;
 
-	pref_table_label(table, column, row, text, 0.0);
+	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
 
@@ -1117,7 +1117,7 @@ static void add_video_menu(GtkWidget *table, gint column, gint row, const gchar 
 
 	*option_c = option;
 
-	pref_table_label(table, column, row, text, 0.0);
+	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
 	g_list_foreach(eds,video_menu_populate,combo);
@@ -3332,7 +3332,7 @@ static void add_intent_menu(GtkWidget *table, gint column, gint row, const gchar
 
 	*option_c = option;
 
-	pref_table_label(table, column, row, text, 0.0);
+	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
 
@@ -3376,13 +3376,13 @@ static void config_tab_color(GtkWidget *notebook)
 	table = pref_table_new(group, 3, COLOR_PROFILE_INPUTS + 1, FALSE, FALSE);
 	gtk_table_set_col_spacings(GTK_TABLE(table), PREF_PAD_GAP);
 
-	label = pref_table_label(table, 0, 0, _("Type"), 0.0);
+	label = pref_table_label(table, 0, 0, _("Type"), GTK_ALIGN_START);
 	pref_label_bold(label, TRUE, FALSE);
 
-	label = pref_table_label(table, 1, 0, _("Menu name"), 0.0);
+	label = pref_table_label(table, 1, 0, _("Menu name"), GTK_ALIGN_START);
 	pref_label_bold(label, TRUE, FALSE);
 
-	label = pref_table_label(table, 2, 0, _("File"), 0.0);
+	label = pref_table_label(table, 2, 0, _("File"), GTK_ALIGN_START);
 	pref_label_bold(label, TRUE, FALSE);
 
 	for (i = 0; i < COLOR_PROFILE_INPUTS; i++)
@@ -3391,7 +3391,7 @@ static void config_tab_color(GtkWidget *notebook)
 		gchar *buf;
 
 		buf = g_strdup_printf(_("Input %d:"), i + COLOR_PROFILE_FILE);
-		pref_table_label(table, 0, i + 1, buf, 1.0);
+		pref_table_label(table, 0, i + 1, buf, GTK_ALIGN_END);
 		g_free(buf);
 
 		entry = gtk_entry_new();
@@ -3423,7 +3423,7 @@ static void config_tab_color(GtkWidget *notebook)
 
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 
-	pref_table_label(table, 0, 0, _("Screen:"), 1.0);
+	pref_table_label(table, 0, 0, _("Screen:"), GTK_ALIGN_END);
 	tabcomp = tab_completion_new(&color_profile_screen_file_entry,
 				     options->color_profile.screen_file, nullptr, ".icc", "ICC Files", nullptr);
 	tab_completion_add_select_button(color_profile_screen_file_entry, _("Select color profile"), FALSE);

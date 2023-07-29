@@ -1720,12 +1720,12 @@ void cache_manager_show()
 	button = pref_table_button(table, 0, 0, GQ_ICON_CLEAR, _("Clean up"),
 				   G_CALLBACK(cache_manager_main_clean_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 0, _("Remove orphaned or outdated thumbnails and sim. files."), 0.0);
+	pref_table_label(table, 1, 0, _("Remove orphaned or outdated thumbnails and sim. files."), GTK_ALIGN_START);
 
 	button = pref_table_button(table, 0, 1, GQ_ICON_DELETE, _("Clear cache"),
 				   G_CALLBACK(cache_manager_main_clear_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 1, _("Delete all cached data."), 0.0);
+	pref_table_label(table, 1, 1, _("Delete all cached data."), GTK_ALIGN_START);
 
 
 	group = pref_group_new(gd->vbox, FALSE, _("Shared thumbnail cache"), GTK_ORIENTATION_VERTICAL);
@@ -1739,12 +1739,12 @@ void cache_manager_show()
 	button = pref_table_button(table, 0, 0, GQ_ICON_CLEAR, _("Clean up"),
 				   G_CALLBACK(cache_manager_standard_clean_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 0, _("Remove orphaned or outdated thumbnails."), 0.0);
+	pref_table_label(table, 1, 0, _("Remove orphaned or outdated thumbnails."), GTK_ALIGN_START);
 
 	button = pref_table_button(table, 0, 1, GQ_ICON_DELETE, _("Clear cache"),
 				   G_CALLBACK(cache_manager_standard_clear_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 1, _("Delete all cached thumbnails."), 0.0);
+	pref_table_label(table, 1, 1, _("Delete all cached thumbnails."), GTK_ALIGN_START);
 
 	group = pref_group_new(gd->vbox, FALSE, _("Create thumbnails"), GTK_ORIENTATION_VERTICAL);
 
@@ -1753,7 +1753,7 @@ void cache_manager_show()
 	button = pref_table_button(table, 0, 1, GQ_ICON_RUN, _("Render"),
 				   G_CALLBACK(cache_manager_render_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 1, _("Render thumbnails for a specific folder."), 0.0);
+	pref_table_label(table, 1, 1, _("Render thumbnails for a specific folder."), GTK_ALIGN_START);
 	gtk_widget_set_sensitive(group, options->thumbnails.enable_caching);
 
 	group = pref_group_new(gd->vbox, FALSE, _("File similarity cache"), GTK_ORIENTATION_VERTICAL);
@@ -1763,7 +1763,7 @@ void cache_manager_show()
 	button = pref_table_button(table, 0, 0, GQ_ICON_RUN, _("Create"),
 				   G_CALLBACK(cache_manager_sim_load_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 0, _("Create sim. files recursively."), 0.0);
+	pref_table_label(table, 1, 0, _("Create sim. files recursively."), GTK_ALIGN_START);
 	gtk_widget_set_sensitive(group, options->thumbnails.enable_caching);
 
 	group = pref_group_new(gd->vbox, FALSE, _("Metadata"), GTK_ORIENTATION_VERTICAL);
@@ -1775,7 +1775,7 @@ void cache_manager_show()
 	button = pref_table_button(table, 0, 0, GQ_ICON_CLEAR, _("Clean up"),
 				   G_CALLBACK(cache_manager_metadata_clean_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 0, _("Remove orphaned keywords and comments."), 0.0);
+	pref_table_label(table, 1, 0, _("Remove orphaned keywords and comments."), GTK_ALIGN_START);
 
 	group = pref_group_new(gd->vbox, FALSE, _("Background cache maintenance"), GTK_ORIENTATION_VERTICAL);
 
@@ -1784,7 +1784,7 @@ void cache_manager_show()
 	button = pref_table_button(table, 0, 0, GQ_ICON_RUN, _("Select"),
 				   G_CALLBACK(cache_manager_cache_maintenance_load_cb), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
-	pref_table_label(table, 1, 0, _("Run cache maintenance as a background job."), 0.0);
+	pref_table_label(table, 1, 0, _("Run cache maintenance as a background job."), GTK_ALIGN_START);
 	gtk_widget_set_sensitive(group, options->thumbnails.enable_caching);
 
 	gtk_widget_show(cache_manager->dialog->dialog);

@@ -162,7 +162,7 @@ GtkWidget *pref_table_box(GtkWidget *table, gint column, gint row,
 			  GtkOrientation orientation, const gchar *text);
 
 GtkWidget *pref_table_label(GtkWidget *table, gint column, gint row,
-			    const gchar *text, gfloat alignment);
+			    const gchar *text, GtkAlign alignment);
 
 GtkWidget *pref_table_button(GtkWidget *table, gint column, gint row,
 			     const gchar *stock_id, const gchar *text,
