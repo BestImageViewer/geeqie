@@ -239,7 +239,7 @@ static void layout_menu_clear_marks_cb(GtkAction *, gpointer)
 
 	gd = generic_dialog_new(_("Clear Marks"),
 				"marks_clear", nullptr, FALSE, clear_marks_cancel_cb, nullptr);
-	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION, "Clear all marks?",
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, "Clear all marks?",
 				"This will clear all marks for all images,\nincluding those linked to keywords",
 				TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", layout_menu_clear_marks_ok_cb, TRUE);
@@ -603,7 +603,7 @@ static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean 
 
 			gd = generic_dialog_new(_("Image orientation"),
 			"Image orientation", nullptr, TRUE, nullptr, nullptr);
-			generic_dialog_add_message(gd, GTK_STOCK_DIALOG_ERROR,
+			generic_dialog_add_message(gd, GQ_ICON_DIALOG_ERROR,
 			"Image orientation", message->str, TRUE);
 			generic_dialog_add_button(gd, GQ_ICON_OK, "OK", nullptr, TRUE);
 
@@ -907,7 +907,7 @@ static void layout_menu_open_archive_cb(GtkAction *, gpointer data)
 			}
 		else
 			{
-			warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, nullptr);
+			warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
 			}
 		}
 }
@@ -2143,7 +2143,7 @@ static void window_rename_ok(GenericDialog *, gpointer data)
 			{
 			gchar *buf;
 			buf = g_strdup_printf(_("Window layout name \"%s\" already exists."), new_id);
-			warning_dialog(_("Rename window"), buf, GTK_STOCK_DIALOG_WARNING, rw->gd->dialog);
+			warning_dialog(_("Rename window"), buf, GQ_ICON_DIALOG_WARNING, rw->gd->dialog);
 			g_free(buf);
 			window_layout_name_exists = TRUE;
 			break;

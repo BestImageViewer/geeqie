@@ -1423,7 +1423,7 @@ static void filter_default_cb(GtkWidget *widget, gpointer data)
 	gd = generic_dialog_new(_("Reset filters"),
 				"reset_filter", widget, TRUE,
 				dummy_cancel_cb, data);
-	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION, _("Reset filters"),
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Reset filters"),
 				   _("This will reset the file filters to the defaults.\nContinue?"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", filter_default_ok_cb, TRUE);
 	gtk_widget_show(gd->dialog);
@@ -1454,7 +1454,7 @@ static void safe_delete_clear_cb(GtkWidget *widget, gpointer)
 	gd = generic_dialog_new(_("Clear trash"),
 				"clear_trash", widget, TRUE,
 				dummy_cancel_cb, nullptr);
-	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION, _("Clear trash"),
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Clear trash"),
 				    _("This will remove the trash contents."), FALSE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", safe_delete_clear_ok_cb, TRUE);
 	entry = gtk_entry_new();
@@ -1502,7 +1502,7 @@ static void image_overlay_default_template_cb(GtkWidget *widget, gpointer data)
 	gd = generic_dialog_new(_("Reset image overlay template string"),
 				"reset_image_overlay_template_string", widget, TRUE,
 				dummy_cancel_cb, data);
-	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION, _("Reset image overlay template string"),
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Reset image overlay template string"),
 				   _("This will reset the image overlay template string to the default.\nContinue?"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", image_overlay_default_template_ok_cb, TRUE);
 	gtk_widget_show(gd->dialog);
@@ -3101,7 +3101,7 @@ static void keywords_find_start_cb(GenericDialog *, gpointer data)
 		{
 		warning_dialog(_("Invalid folder"),
 				_("The specified folder can not be found."),
-				GTK_STOCK_DIALOG_WARNING, kfd->gd->dialog);
+				GQ_ICON_DIALOG_WARNING, kfd->gd->dialog);
 		}
 	else
 		{
@@ -4269,7 +4269,7 @@ static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 				}
 			else
 				{
-				warning_dialog(_("Warning: Cannot open timezone database file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, nullptr);
+				warning_dialog(_("Warning: Cannot open timezone database file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
 				}
 
 			g_free(timezone_bin);
@@ -4277,14 +4277,14 @@ static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 			}
 		else
 			{
-			warning_dialog(_("Warning: Cannot open timezone database file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, nullptr);
+			warning_dialog(_("Warning: Cannot open timezone database file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
 			}
 		g_free(tmp_filename);
 		file_data_unref(fd);
 		}
 	else
 		{
-		file_util_warning_dialog(_("Error: Timezone database download failed"), error->message, GTK_STOCK_DIALOG_ERROR, nullptr);
+		file_util_warning_dialog(_("Error: Timezone database download failed"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
 		}
 
 	g_file_delete(tz->tmp_g_file, nullptr, &error);
@@ -4326,7 +4326,7 @@ static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 
 	if (error)
 		{
-		file_util_warning_dialog(_("Timezone database download failed"), error->message, GTK_STOCK_DIALOG_ERROR, nullptr);
+		file_util_warning_dialog(_("Timezone database download failed"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
 		log_printf("Error: Download timezone database failed:\n%s", error->message);
 		g_error_free(error);
 		g_object_unref(tz->tmp_g_file);
@@ -4337,7 +4337,7 @@ static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 
 		tz->gd = generic_dialog_new(_("Timezone database"), "download_timezone_database", nullptr, TRUE, timezone_cancel_button_cb, tz);
 
-		generic_dialog_add_message(tz->gd, GTK_STOCK_DIALOG_INFO, _("Downloading timezone database"), nullptr, FALSE);
+		generic_dialog_add_message(tz->gd, GQ_ICON_DIALOG_INFO, _("Downloading timezone database"), nullptr, FALSE);
 
 		tz->progress = gtk_progress_bar_new();
 		gtk_box_pack_start(GTK_BOX(tz->gd->vbox), tz->progress, FALSE, FALSE, 0);

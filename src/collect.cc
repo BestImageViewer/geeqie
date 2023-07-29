@@ -1190,7 +1190,7 @@ static void collection_close_save_cb(GenericDialog *gd, gpointer data)
 		{
 		gchar *buf;
 		buf = g_strdup_printf(_("Failed to save the collection:\n%s"), cw->cd->path);
-		warning_dialog(_("Save Failed"), buf, GTK_STOCK_DIALOG_ERROR, cw->window);
+		warning_dialog(_("Save Failed"), buf, GQ_ICON_DIALOG_ERROR, cw->window);
 		g_free(buf);
 		return;
 		}
@@ -1229,7 +1229,7 @@ static void collection_close_dlg_show(CollectWindow *cw)
 	gd = generic_dialog_new(_("Close collection"),
 				"close_collection", cw->window, FALSE,
 				collection_close_cancel_cb, cw);
-	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION,
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION,
 				   _("Close collection"),
 				   _("Collection has been modified.\nSave first?"), TRUE);
 

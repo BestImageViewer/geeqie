@@ -4971,7 +4971,7 @@ static void dupe_dnd_data_get(GtkWidget *widget, GdkDragContext *context,
 
 	if (dw->add_files_queue_id > 0)
 		{
-		warning_dialog(_("Find duplicates"), _("Please wait for the current file selection to be loaded."), GTK_STOCK_DIALOG_INFO, dw->window);
+		warning_dialog(_("Find duplicates"), _("Please wait for the current file selection to be loaded."), GQ_ICON_DIALOG_INFO, dw->window);
 
 		return;
 		}

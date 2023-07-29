@@ -40,7 +40,7 @@ void warning_dialog_dnd_uri_error(GList *uri_error_list)
 			g_free(prev);
 			}
 		}
-	warning_dialog(_("Drag and Drop failed"), msg, GTK_STOCK_DIALOG_WARNING, nullptr);
+	warning_dialog(_("Drag and Drop failed"), msg, GQ_ICON_DIALOG_WARNING, nullptr);
 	g_free(msg);
 }
 

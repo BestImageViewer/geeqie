@@ -38,7 +38,7 @@ FileDialog *file_util_file_dlg(const gchar *title,
 			       GtkWidget *parent,
 			       void (*cancel_cb)(FileDialog *, gpointer), gpointer data);
 GenericDialog *file_util_warning_dialog(const gchar *heading, const gchar *message,
-					const gchar *icon_stock_id, GtkWidget *parent);
+					const gchar *icon_name, GtkWidget *parent);
 
 /* all functions takes over the filelist and frees it when done */
 

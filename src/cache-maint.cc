@@ -812,7 +812,7 @@ static void cache_manager_render_start_cb(GenericDialog *, gpointer data)
 			{
 			warning_dialog(_("Invalid folder"),
 			_("The specified folder can not be found."),
-			GTK_STOCK_DIALOG_WARNING, cd->gd->dialog);
+			GQ_ICON_DIALOG_WARNING, cd->gd->dialog);
 			}
 		else
 			{
@@ -1229,7 +1229,7 @@ void cache_manager_main_clear_confirm(GtkWidget *parent)
 	gd = generic_dialog_new(_("Clear cache"),
 				"clear_cache", parent, TRUE,
 				dummy_cancel_cb, nullptr);
-	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION, _("Clear cache"),
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Clear cache"),
 				   _("This will remove all thumbnails and sim. files\nthat have been saved to disk, continue?"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", cache_manager_main_clear_ok_cb, TRUE);
 
@@ -1481,7 +1481,7 @@ static void cache_manager_sim_start_cb(GenericDialog *, gpointer data)
 			{
 			warning_dialog(_("Invalid folder"),
 			_("The specified folder can not be found."),
-			GTK_STOCK_DIALOG_WARNING, cd->gd->dialog);
+			GQ_ICON_DIALOG_WARNING, cd->gd->dialog);
 			}
 		else
 			{
@@ -1611,7 +1611,7 @@ static void cache_manager_cache_maintenance_start_cb(GenericDialog *, gpointer d
 			{
 			warning_dialog(_("Invalid folder"),
 			_("The specified folder can not be found."),
-			GTK_STOCK_DIALOG_WARNING, cd->gd->dialog);
+			GQ_ICON_DIALOG_WARNING, cd->gd->dialog);
 			}
 		else
 			{

@@ -77,7 +77,7 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_stock
 gboolean generic_dialog_get_alternative_button_order(GtkWidget *widget);
 
 GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
-			      const gchar *icon_stock_id, GtkWidget *parent);
+			      const gchar *icon_name, GtkWidget *parent);
 
 FileDialog *file_dialog_new(const gchar *title,
 			    const gchar *role,

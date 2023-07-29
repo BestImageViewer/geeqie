@@ -511,7 +511,7 @@ static void pan_warning_folder(const gchar *path, GtkWidget *parent)
 
 	message = g_strdup_printf(_("The pan view does not support the folder \"%s\"."), path);
 	warning_dialog(_("Folder not supported"), message,
-		      GTK_STOCK_DIALOG_INFO, parent);
+		      GQ_ICON_DIALOG_INFO, parent);
 	g_free(message);
 }
 
@@ -1746,7 +1746,7 @@ static void pan_window_entry_activate_cb(const gchar *new_text, gpointer data)
 		{
 		warning_dialog(_("Folder not found"),
 			       _("The entered path is not a folder"),
-			       GTK_STOCK_DIALOG_WARNING, pw->path_entry);
+			       GQ_ICON_DIALOG_WARNING, pw->path_entry);
 		}
 	else
 		{
@@ -2030,7 +2030,7 @@ static gboolean pan_warning(FileData *dir_fd)
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK",
 				  pan_warning_ok_cb, TRUE);
 
-	box = generic_dialog_add_message(gd, GTK_STOCK_DIALOG_INFO,
+	box = generic_dialog_add_message(gd, GQ_ICON_DIALOG_INFO,
 					 _("Pan view performance may be poor."),
 					 _("To improve the performance of thumbnails in\npan view the following options can be enabled.\n\nNote that both options must be enabled to\nnotice a change in performance."), TRUE);
 

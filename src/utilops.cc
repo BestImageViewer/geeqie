@@ -207,12 +207,12 @@ static void file_util_warning_dialog_ok_cb(GenericDialog *, gpointer)
 }
 
 GenericDialog *file_util_warning_dialog(const gchar *heading, const gchar *message,
-					const gchar *icon_stock_id, GtkWidget *parent)
+					const gchar *icon_name, GtkWidget *parent)
 {
 	GenericDialog *gd;
 
 	gd = file_util_gen_dlg(heading, "warning", parent, TRUE, nullptr, nullptr);
-	generic_dialog_add_message(gd, icon_stock_id, heading, message, TRUE);
+	generic_dialog_add_message(gd, icon_name, heading, message, TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", file_util_warning_dialog_ok_cb, TRUE);
 	if (options->place_dialogs_under_mouse)
 		{
@@ -597,7 +597,7 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 					      nullptr, TRUE,
 					      file_util_abort_cb, ud);
 
-			generic_dialog_add_message(d, GTK_STOCK_DIALOG_WARNING, nullptr, msg->str, TRUE);
+			generic_dialog_add_message(d, GQ_ICON_DIALOG_WARNING, nullptr, msg->str, TRUE);
 
 			generic_dialog_add_button(d, GQ_ICON_GO_NEXT, _("Co_ntinue"),
 						  file_util_resume_cb, TRUE);
@@ -606,7 +606,7 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 			}
 		else
 			{
-			file_util_warning_dialog(ud->messages.fail, msg->str, GTK_STOCK_DIALOG_ERROR, nullptr);
+			file_util_warning_dialog(ud->messages.fail, msg->str, GQ_ICON_DIALOG_ERROR, nullptr);
 			}
 		g_string_free(msg, TRUE);
 		}
@@ -717,7 +717,7 @@ static void file_util_perform_ci_dir(UtilityData *ud, gboolean internal, gboolea
 				gchar *text;
 
 				text = g_strdup_printf("%s:\n\n%s", ud->messages.fail, ud->dir_fd->path);
-				file_util_warning_dialog(ud->messages.fail, text, GTK_STOCK_DIALOG_ERROR, nullptr);
+				file_util_warning_dialog(ud->messages.fail, text, GQ_ICON_DIALOG_ERROR, nullptr);
 				g_free(text);
 				}
 			file_data_free_ci(ud->dir_fd);
@@ -770,7 +770,7 @@ static void file_util_perform_ci_dir(UtilityData *ud, gboolean internal, gboolea
 				GenericDialog *gd;
 
 				text = g_strdup_printf("%s:\n\n%s", ud->messages.fail, ud->dir_fd->path);
-				gd = file_util_warning_dialog(ud->messages.fail, text, GTK_STOCK_DIALOG_ERROR, nullptr);
+				gd = file_util_warning_dialog(ud->messages.fail, text, GQ_ICON_DIALOG_ERROR, nullptr);
 				g_free(text);
 
 				if (fail != ud->dir_fd)
@@ -823,7 +823,7 @@ static void file_util_perform_ci_dir(UtilityData *ud, gboolean internal, gboolea
 				gchar *text;
 
 				text = g_strdup_printf("%s:\n\n%s", ud->messages.fail, ud->dir_fd->path);
-				(void) file_util_warning_dialog(ud->messages.fail, text, GTK_STOCK_DIALOG_ERROR, nullptr);
+				file_util_warning_dialog(ud->messages.fail, text, GQ_ICON_DIALOG_ERROR, nullptr);
 				g_free(text);
 
 				file_data_unref(fail);
@@ -842,7 +842,7 @@ static void file_util_perform_ci_dir(UtilityData *ud, gboolean internal, gboolea
 				gchar *text;
 
 				text = g_strdup_printf("%s:\n\n%s", ud->messages.fail, ud->dir_fd->path);
-				(void) file_util_warning_dialog(ud->messages.fail, text, GTK_STOCK_DIALOG_ERROR, nullptr);
+				file_util_warning_dialog(ud->messages.fail, text, GQ_ICON_DIALOG_ERROR, nullptr);
 				g_free(text);
 				}
 
@@ -921,7 +921,7 @@ void file_util_perform_ci(UtilityData *ud)
 		if (EDITOR_ERRORS(flags))
 			{
 			gchar *text = g_strdup_printf(_("%s\nUnable to start external command.\n"), editor_get_error_str(flags));
-			file_util_warning_dialog(ud->messages.fail, text, GTK_STOCK_DIALOG_ERROR, nullptr);
+			file_util_warning_dialog(ud->messages.fail, text, GQ_ICON_DIALOG_ERROR, nullptr);
 			g_free(text);
 
 			ud->gd = nullptr;
@@ -1045,7 +1045,7 @@ void file_util_check_ci(UtilityData *ud)
 					ud->parent, TRUE,
 					file_util_check_abort_cb, ud);
 
-		generic_dialog_add_message(d, GTK_STOCK_DIALOG_WARNING, _("Really continue?"), desc, TRUE);
+		generic_dialog_add_message(d, GQ_ICON_DIALOG_WARNING, _("Really continue?"), desc, TRUE);
 
 		generic_dialog_add_button(d, GQ_ICON_GO_NEXT, _("Co_ntinue"),
 					  file_util_check_resume_cb, TRUE);
@@ -1059,7 +1059,7 @@ void file_util_check_ci(UtilityData *ud)
 		d = file_util_gen_dlg(ud->messages.title, "dlg_confirm",
 					ud->parent, TRUE,
 					file_util_check_abort_cb, ud);
-		generic_dialog_add_message(d, GTK_STOCK_DIALOG_WARNING, _("This operation can't continue:"), desc, TRUE);
+		generic_dialog_add_message(d, GQ_ICON_DIALOG_WARNING, _("This operation can't continue:"), desc, TRUE);
 
 		gtk_widget_show(d->dialog);
 		}
@@ -1173,7 +1173,7 @@ static void file_util_fdlg_rename_cb(FileDialog *fdlg, gpointer data)
 		d = file_util_gen_dlg(ud->messages.title, "dlg_confirm",
 					ud->parent, TRUE,
 					file_util_check_abort_cb, ud);
-		generic_dialog_add_message(d, GTK_STOCK_DIALOG_WARNING, _("This operation can't continue:"), desc, TRUE);
+		generic_dialog_add_message(d, GQ_ICON_DIALOG_WARNING, _("This operation can't continue:"), desc, TRUE);
 
 		gtk_widget_show(d->dialog);
 		ud->phase = UTILITY_PHASE_START;
@@ -1533,7 +1533,7 @@ static void file_util_dialog_init_simple_list(UtilityData *ud)
 	ud->gd = file_util_gen_dlg(ud->messages.title, "dlg_confirm",
 				   ud->parent, FALSE,  file_util_cancel_cb, ud);
 	if (ud->discard_func) generic_dialog_add_button(ud->gd, GQ_ICON_REVERT, _("Discard changes"), file_util_discard_cb, FALSE);
-	if (ud->details_func) generic_dialog_add_button(ud->gd, GQ_ICON_INFO, _("File details"), file_util_details_cb, FALSE);
+	if (ud->details_func) generic_dialog_add_button(ud->gd, GQ_ICON_DIALOG_INFO, _("File details"), file_util_details_cb, FALSE);
 
 	generic_dialog_add_button(ud->gd, icon_name, msg, file_util_ok_cb, TRUE);
 
@@ -1546,7 +1546,7 @@ static void file_util_dialog_init_simple_list(UtilityData *ud)
 		dir_msg = g_strdup("");
 		}
 
-	box = generic_dialog_add_message(ud->gd, GTK_STOCK_DIALOG_QUESTION,
+	box = generic_dialog_add_message(ud->gd, GQ_ICON_DIALOG_QUESTION,
 					 ud->messages.question,
 					 dir_msg, TRUE);
 
@@ -1658,7 +1658,7 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 	box = generic_dialog_add_message(ud->gd, nullptr, ud->messages.question, nullptr, TRUE);
 
 	if (ud->discard_func) generic_dialog_add_button(ud->gd, GQ_ICON_REVERT, _("Discard changes"), file_util_discard_cb, FALSE);
-	if (ud->details_func) generic_dialog_add_button(ud->gd, GQ_ICON_INFO, _("File details"), file_util_details_cb, FALSE);
+	if (ud->details_func) generic_dialog_add_button(ud->gd, GQ_ICON_DIALOG_INFO, _("File details"), file_util_details_cb, FALSE);
 
 	generic_dialog_add_button(ud->gd, GQ_ICON_OK, ud->messages.title, file_util_ok_cb, TRUE);
 
@@ -1918,7 +1918,7 @@ void file_util_dialog_run(UtilityData *ud)
 
 static void file_util_warn_op_in_progress(const gchar *title)
 {
-	file_util_warning_dialog(title, _("Another operation in progress.\n"), GTK_STOCK_DIALOG_ERROR, nullptr);
+	file_util_warning_dialog(title, _("Another operation in progress.\n"), GQ_ICON_DIALOG_ERROR, nullptr);
 }
 
 static void file_util_details_dialog_close_cb(GtkWidget *, gpointer data)
@@ -1970,7 +1970,7 @@ static void file_util_details_dialog_discard_cb(GenericDialog *gd, gpointer data
 	file_util_details_dialog_exclude(gd, data, TRUE);
 }
 
-static gchar *file_util_details_get_message(UtilityData *ud, FileData *fd, const gchar **stock_id)
+static gchar *file_util_details_get_message(UtilityData *ud, FileData *fd, const gchar **icon_name)
 {
 	GString *message = g_string_new("");
 	gint error;
@@ -1997,12 +1997,12 @@ static gchar *file_util_details_get_message(UtilityData *ud, FileData *fd, const
 		{
 		gchar *err_msg = file_data_get_error_string(error);
 		g_string_append(message, err_msg);
-		if (stock_id) *stock_id = (error & CHANGE_ERROR_MASK) ? GTK_STOCK_DIALOG_ERROR : GTK_STOCK_DIALOG_WARNING;
+		if (icon_name) *icon_name = (error & CHANGE_ERROR_MASK) ? GQ_ICON_DIALOG_ERROR : GQ_ICON_DIALOG_WARNING;
 		}
 	else
 		{
 		g_string_append(message, _("no problem detected"));
-		if (stock_id) *stock_id = GTK_STOCK_DIALOG_INFO;
+		if (icon_name) *icon_name = GQ_ICON_DIALOG_INFO;
 		}
 
 	return g_string_free(message, FALSE);;
@@ -2013,7 +2013,7 @@ static void file_util_details_dialog(UtilityData *ud, FileData *fd)
 	GenericDialog *gd;
 	GtkWidget *box;
 	gchar *message;
-	const gchar *stock_id;
+	const gchar *icon_name;
 
 	gd = file_util_gen_dlg(_("File details"), "details", ud->gd->dialog, TRUE, nullptr, ud);
 	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), file_util_details_dialog_ok_cb, TRUE);
@@ -2029,9 +2029,9 @@ static void file_util_details_dialog(UtilityData *ud, FileData *fd)
 			 G_CALLBACK(file_util_details_dialog_close_cb), gd->dialog);
 
 
-	message = file_util_details_get_message(ud, fd, &stock_id);
+	message = file_util_details_get_message(ud, fd, &icon_name);
 
-	box = generic_dialog_add_message(gd, stock_id, _("File details"), message, TRUE);
+	box = generic_dialog_add_message(gd, icon_name, _("File details"), message, TRUE);
 
 	generic_dialog_add_image(gd, box, fd, nullptr, FALSE, nullptr, nullptr, FALSE);
 
@@ -2052,7 +2052,7 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 	gchar *message1;
 	gchar *message2;
 	gint i;
-	const gchar *stock_id;
+	const gchar *icon_name;
 
 	if (fd && fd->modified_xmp)
 		{
@@ -2076,7 +2076,7 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 	g_signal_connect(G_OBJECT(ud->gd->dialog), "destroy",
 			 G_CALLBACK(file_util_details_dialog_close_cb), gd->dialog);
 
-	message1 = file_util_details_get_message(ud, fd, &stock_id);
+	message1 = file_util_details_get_message(ud, fd, &icon_name);
 
 	if (fd->change && fd->change->dest)
 		{
@@ -2087,7 +2087,7 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 		message2 = g_strdup_printf(_("The following metadata tags will be written to the image file itself."));
 		}
 
-	box = generic_dialog_add_message(gd, stock_id, _("Overview of changed metadata"), message1, TRUE);
+	box = generic_dialog_add_message(gd, icon_name, _("Overview of changed metadata"), message1, TRUE);
 
 	box = pref_group_new(box, TRUE, message2, GTK_ORIENTATION_HORIZONTAL);
 
@@ -2667,7 +2667,7 @@ static void file_util_delete_dir_full(FileData *fd, GtkWidget *parent, UtilityPh
 
 		text = g_strdup_printf(_("Unable to remove folder %s\n"
 					 "Permissions do not allow writing to the folder."), fd->path);
-		file_util_warning_dialog(_("Delete failed"), text, GTK_STOCK_DIALOG_ERROR, parent);
+		file_util_warning_dialog(_("Delete failed"), text, GQ_ICON_DIALOG_ERROR, parent);
 		g_free(text);
 
 		return;
@@ -2678,7 +2678,7 @@ static void file_util_delete_dir_full(FileData *fd, GtkWidget *parent, UtilityPh
 		gchar *text;
 
 		text = g_strdup_printf(_("Unable to list contents of folder %s"), fd->path);
-		file_util_warning_dialog(_("Delete failed"), text, GTK_STOCK_DIALOG_ERROR, parent);
+		file_util_warning_dialog(_("Delete failed"), text, GQ_ICON_DIALOG_ERROR, parent);
 		g_free(text);
 
 		return;
@@ -2698,7 +2698,7 @@ static void file_util_delete_dir_full(FileData *fd, GtkWidget *parent, UtilityPh
 		text = g_strdup_printf(_("Unable to delete the folder:\n\n%s\n\n"
 					 "This folder contains subfolders which must be moved before it can be deleted."),
 					fd->path);
-		box = generic_dialog_add_message(gd, GTK_STOCK_DIALOG_WARNING,
+		box = generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING,
 						 _("Folder contains subfolders"),
 						 text, TRUE);
 		g_free(text);
@@ -2735,7 +2735,7 @@ static void file_util_delete_dir_full(FileData *fd, GtkWidget *parent, UtilityPh
 			gchar *text;
 
 			text = g_strdup_printf(_("Unable to list contents of folder %s"), fd->path);
-			file_util_warning_dialog(_("Delete failed"), text, GTK_STOCK_DIALOG_ERROR, parent);
+			file_util_warning_dialog(_("Delete failed"), text, GQ_ICON_DIALOG_ERROR, parent);
 			g_free(text);
 			file_data_unref(ud->dir_fd);
 			file_util_data_free(ud);
@@ -3311,7 +3311,7 @@ gchar *new_folder(GtkWindow *window , gchar *path)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), PREF_PAD_GAP);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-	image = gtk_image_new_from_icon_name(GQ_ICON_QUESTION, GTK_ICON_SIZE_DIALOG);
+	image = gtk_image_new_from_icon_name(GQ_ICON_DIALOG_QUESTION, GTK_ICON_SIZE_DIALOG);
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	label = gtk_label_new(_("Create new folder"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);

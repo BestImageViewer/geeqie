@@ -431,7 +431,7 @@ static void bar_filter_help_dialog()
 
 	gd = generic_dialog_new(_("Sort Manager Operations"),
 				"sort_manager_operations", nullptr, TRUE, nullptr, nullptr);
-	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_INFO,
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_INFO,
 				"Sort Manager Operations", _("Additional operations utilising plugins\nmay be included by setting:\n\nX-Geeqie-Filter=true\n\nin the plugin file."), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_HELP, _("Help"), bar_filter_help_cb, TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", NULL, TRUE);
@@ -513,7 +513,7 @@ static void bar_sort_add_ok_cb(FileDialog *fd, gpointer data)
 		if (isfile(path))
 			{
 			gchar *text = g_strdup_printf(_("The collection:\n%s\nalready exists."), filename);
-			file_util_warning_dialog(_("Collection exists"), text, GTK_STOCK_DIALOG_INFO, nullptr);
+			file_util_warning_dialog(_("Collection exists"), text, GQ_ICON_DIALOG_INFO, nullptr);
 			g_free(text);
 			}
 		else
@@ -529,7 +529,7 @@ static void bar_sort_add_ok_cb(FileDialog *fd, gpointer data)
 				{
 				gchar *text = g_strdup_printf(_("Failed to save the collection:\n%s"), path);
 				file_util_warning_dialog(_("Save Failed"), text,
-							 GTK_STOCK_DIALOG_ERROR, GENERIC_DIALOG(fd)->dialog);
+							 GQ_ICON_DIALOG_ERROR, GENERIC_DIALOG(fd)->dialog);
 				g_free(text);
 				}
 			collection_unref(cd);

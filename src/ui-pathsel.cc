@@ -416,13 +416,13 @@ static gint dest_view_rename_cb(TreeEditData *ted, const gchar *old_name, const 
 	if (isname(new_path))
 		{
 		buf = g_strdup_printf(_("A file with name %s already exists."), new_name);
-		warning_dialog(_("Rename failed"), buf, GTK_STOCK_DIALOG_INFO, dd->entry);
+		warning_dialog(_("Rename failed"), buf, GQ_ICON_DIALOG_INFO, dd->entry);
 		g_free(buf);
 		}
 	else if (!rename_file(old_path, new_path))
 		{
 		buf = g_strdup_printf(_("Failed to rename %s to %s."), old_name, new_name);
-		warning_dialog(_("Rename failed"), buf, GTK_STOCK_DIALOG_ERROR, dd->entry);
+		warning_dialog(_("Rename failed"), buf, GQ_ICON_DIALOG_ERROR, dd->entry);
 		g_free(buf);
 		}
 	else
@@ -478,7 +478,7 @@ static void dest_view_delete_dlg_ok_cb(GenericDialog *gd, gpointer data)
 	if (!unlink_file(dl->path))
 		{
 		gchar *text = g_strdup_printf(_("Unable to delete file:\n%s"), dl->path);
-		warning_dialog(_("File deletion failed"), text, GTK_STOCK_DIALOG_WARNING, dl->dd->entry);
+		warning_dialog(_("File deletion failed"), text, GQ_ICON_DIALOG_WARNING, dl->dd->entry);
 		g_free(text);
 		}
 	else if (dl->dd->path)
@@ -527,7 +527,7 @@ static void dest_view_delete(Dest_Data *dd, GtkTreeView *view)
 	generic_dialog_add_button(dd->gd, GQ_ICON_DELETE, "Delete", dest_view_delete_dlg_ok_cb, TRUE);
 
 	text = g_strdup_printf(_("About to delete the file:\n %s"), path);
-	generic_dialog_add_message(dd->gd, GTK_STOCK_DIALOG_QUESTION,
+	generic_dialog_add_message(dd->gd, GQ_ICON_DIALOG_QUESTION,
 				   _("Delete file"), text, TRUE);
 	g_free(text);
 
@@ -728,7 +728,7 @@ static void dest_new_dir_cb(GtkWidget *widget, gpointer data)
 		gchar *text;
 
 		text = g_strdup_printf(_("Unable to create folder:\n%s"), filename_from_path(path));
-		warning_dialog(_("Error creating folder"), text, GTK_STOCK_DIALOG_ERROR, dd->entry);
+		warning_dialog(_("Error creating folder"), text, GQ_ICON_DIALOG_ERROR, dd->entry);
 		g_free(text);
 		}
 	else

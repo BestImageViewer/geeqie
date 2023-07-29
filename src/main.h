@@ -193,8 +193,12 @@
 #define GQ_ICON_OK "emblem-ok"
 #define GQ_ICON_APPLY "emblem-ok" // need something else?
 #define GQ_ICON_CANCEL "dialog-cancel" // missing in adwaita and others, seen in breeze
-#define GQ_ICON_INFO "dialog-information"
-#define GQ_ICON_QUESTION "dialog-question"
+
+#define GQ_ICON_DIALOG_ERROR "dialog-error"
+#define GQ_ICON_DIALOG_INFO "dialog-information"
+#define GQ_ICON_DIALOG_QUESTION "dialog-question"
+#define GQ_ICON_DIALOG_WARNING "dialog-warning"
+
 #define GQ_ICON_UNREADABLE "emblem-unreadable"
 #define GQ_ICON_LINK "emblem-symbolic-link"
 #define GQ_ICON_READONLY "emblem-readonly"

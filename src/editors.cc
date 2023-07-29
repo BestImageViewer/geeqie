@@ -1338,7 +1338,7 @@ EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const
 		{
 		gchar *text = g_strdup_printf(_("%s\n\"%s\""), editor_get_error_str(error), editor->file);
 
-		file_util_warning_dialog(_("Invalid editor command"), text, GTK_STOCK_DIALOG_ERROR, nullptr);
+		file_util_warning_dialog(_("Invalid editor command"), text, GQ_ICON_DIALOG_ERROR, nullptr);
 		g_free(text);
 		}
 

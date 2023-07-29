@@ -104,7 +104,7 @@ static void encoding_dialog(const gchar *path)
 				"locale warning", nullptr, TRUE, nullptr, nullptr);
 	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), nullptr, TRUE);
 
-	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_WARNING,
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING,
 				   _("Filename encoding locale mismatch"), string->str, TRUE);
 
 	gtk_widget_show(gd->dialog);
@@ -1033,7 +1033,7 @@ static void web_file_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 		}
 	else
 		{
-		file_util_warning_dialog(_("Web file download failed"), error->message, GTK_STOCK_DIALOG_ERROR, nullptr);
+		file_util_warning_dialog(_("Web file download failed"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
 		}
 
 	g_object_unref(web->tmp_g_file);
@@ -1099,7 +1099,7 @@ gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 				web->gd = generic_dialog_new(_("Download web file"), "download_web_file", nullptr, TRUE, download_web_file_cancel_button_cb, web);
 
 				message = g_strconcat(_("Downloading "), base, NULL);
-				generic_dialog_add_message(web->gd, GTK_STOCK_DIALOG_INFO, message, nullptr, FALSE);
+				generic_dialog_add_message(web->gd, GQ_ICON_DIALOG_INFO, message, nullptr, FALSE);
 
 				web->progress = gtk_progress_bar_new();
 				gtk_box_pack_start(GTK_BOX(web->gd->vbox), web->progress, FALSE, FALSE, 0);

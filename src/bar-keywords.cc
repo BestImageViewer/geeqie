@@ -1052,7 +1052,7 @@ static void bar_pane_keywords_disconnect_marks_cb(GtkWidget *menu_widget, gpoint
 
 	gd = generic_dialog_new(_("Marks Keywords"),
 				"marks_keywords", menu_widget, TRUE, dummy_cancel_cb, pkd);
-	generic_dialog_add_message(gd, GTK_STOCK_DIALOG_WARNING,
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING,
 				"Disconnect all Marks Keywords connections?", message->str, TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", bar_pane_keywords_disconnect_marks_ok_cb, TRUE);
 

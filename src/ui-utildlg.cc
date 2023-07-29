@@ -274,7 +274,7 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, 
  *
  *
  */
-GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_stock_id,
+GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 				      const gchar *heading, const gchar *text, gboolean expand)
 {
 	GtkWidget *hbox;
@@ -282,11 +282,11 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_stock
 	GtkWidget *label;
 
 	hbox = pref_box_new(gd->vbox, expand, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	if (icon_stock_id)
+	if (icon_name)
 		{
 		GtkWidget *image;
 
-		image = gtk_image_new_from_stock(icon_stock_id, GTK_ICON_SIZE_DIALOG);
+		image = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_DIALOG);
 		gtk_widget_set_halign(GTK_WIDGET(image), GTK_ALIGN_CENTER);
 		gtk_widget_set_valign(GTK_WIDGET(image), GTK_ALIGN_START);
 		gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
@@ -493,14 +493,14 @@ static void warning_dialog_ok_cb(GenericDialog *, gpointer)
 }
 
 GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
-			      const gchar *icon_stock_id, GtkWidget *parent)
+			      const gchar *icon_name, GtkWidget *parent)
 {
 	GenericDialog *gd;
 
 	gd = generic_dialog_new(heading, "warning", parent, TRUE, nullptr, nullptr);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", warning_dialog_ok_cb, TRUE);
 
-	generic_dialog_add_message(gd, icon_stock_id, heading, text, TRUE);
+	generic_dialog_add_message(gd, icon_name, heading, text, TRUE);
 
 	gtk_widget_show(gd->dialog);
 

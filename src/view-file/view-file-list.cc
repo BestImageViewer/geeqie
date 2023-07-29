@@ -507,7 +507,7 @@ static gboolean vflist_row_rename_cb(TreeEditData *, const gchar *old_name, cons
 	if (strchr(new_name, G_DIR_SEPARATOR) != nullptr)
 		{
 		gchar *text = g_strdup_printf(_("Invalid file name:\n%s"), new_name);
-		file_util_warning_dialog(_("Error renaming file"), text, GTK_STOCK_DIALOG_ERROR, vf->listview);
+		file_util_warning_dialog(_("Error renaming file"), text, GQ_ICON_DIALOG_ERROR, vf->listview);
 		g_free(text);
 		}
 	else

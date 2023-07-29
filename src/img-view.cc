@@ -668,7 +668,7 @@ static void button_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
 					}
 				else
 					{
-					warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, nullptr);
+					warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
 					}
 				}
 	 		else if (options->image_l_click_video && options->image_l_click_video_editor && imd->image_fd->format_class == FORMAT_CLASS_VIDEO)

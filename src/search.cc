@@ -2679,7 +2679,7 @@ static void search_start_cb(GtkWidget *, gpointer data)
 			{
 			file_util_warning_dialog(_("File not found"),
 						 _("Please enter an existing file for image content."),
-						 GTK_STOCK_DIALOG_WARNING, sd->window);
+						 GQ_ICON_DIALOG_WARNING, sd->window);
 			return;
 			}
 		tab_completion_append_to_history(sd->entry_similarity, sd->search_similarity_path);
@@ -2704,7 +2704,7 @@ static void search_start_cb(GtkWidget *, gpointer data)
 				{
 				file_util_warning_dialog(_(
 						"Entry does not contain a valid lat/long value"),
-							entry_text, GTK_STOCK_DIALOG_WARNING, sd->window);
+							entry_text, GQ_ICON_DIALOG_WARNING, sd->window);
 				return;
 				}
 			g_free(entry_text);
@@ -2754,7 +2754,7 @@ static void search_start_cb(GtkWidget *, gpointer data)
 			{
 			file_util_warning_dialog(_("Folder not found"),
 						 _("Please enter an existing folder to search."),
-						 GTK_STOCK_DIALOG_WARNING, sd->window);
+						 GQ_ICON_DIALOG_WARNING, sd->window);
 			}
 
 		g_free(path);
@@ -2799,7 +2799,7 @@ static void search_start_cb(GtkWidget *, gpointer data)
 			}
 		else
 			{
-			file_util_warning_dialog(_("Collection not found"), _("Please enter an existing collection name."), GTK_STOCK_DIALOG_WARNING, sd->window);
+			file_util_warning_dialog(_("Collection not found"), _("Please enter an existing collection name."), GQ_ICON_DIALOG_WARNING, sd->window);
 			}
 		g_free(collection);
 		}

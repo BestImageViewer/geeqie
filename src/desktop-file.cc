@@ -74,7 +74,7 @@ static gboolean editor_window_save(EditorWindow *ew)
 
 	if (!name || !name[0])
 		{
-		file_util_warning_dialog(_("Can't save"), _("Please specify file name."), GTK_STOCK_DIALOG_ERROR, nullptr);
+		file_util_warning_dialog(_("Can't save"), _("Please specify file name."), GQ_ICON_DIALOG_ERROR, nullptr);
 		return FALSE;
 		}
 
@@ -86,13 +86,13 @@ static gboolean editor_window_save(EditorWindow *ew)
 
 	if (!recursive_mkdir_if_not_exists(dir, 0755))
 		{
-		file_util_warning_dialog(_("Can't save"), _("Could not create directory"), GTK_STOCK_DIALOG_ERROR, nullptr);
+		file_util_warning_dialog(_("Can't save"), _("Could not create directory"), GQ_ICON_DIALOG_ERROR, nullptr);
 		ret = FALSE;
 		}
 
 	if (ret && !g_file_set_contents(path, text, -1, &error))
 		{
-		file_util_warning_dialog(_("Can't save"), error->message, GTK_STOCK_DIALOG_ERROR, nullptr);
+		file_util_warning_dialog(_("Can't save"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
 		g_error_free(error);
 		ret = FALSE;
 		}
@@ -293,7 +293,7 @@ static void editor_list_window_delete_dlg_ok_cb(GenericDialog *gd, gpointer data
 	if (!unlink_file(ewdl->path))
 		{
 		gchar *text = g_strdup_printf(_("Unable to delete file:\n%s"), ewdl->path);
-		warning_dialog(_("File deletion failed"), text, GTK_STOCK_DIALOG_WARNING, nullptr);
+		warning_dialog(_("File deletion failed"), text, GQ_ICON_DIALOG_WARNING, nullptr);
 		g_free(text);
 		}
 	else
@@ -344,7 +344,7 @@ static void editor_list_window_delete_cb(GtkWidget *, gpointer data)
 		generic_dialog_add_button(ewl->gd, GQ_ICON_DELETE, "Delete", editor_list_window_delete_dlg_ok_cb, TRUE);
 
 		text = g_strdup_printf(_("About to delete the file:\n %s"), path);
-		generic_dialog_add_message(ewl->gd, GTK_STOCK_DIALOG_QUESTION,
+		generic_dialog_add_message(ewl->gd, GQ_ICON_DIALOG_QUESTION,
 					   _("Delete file"), text, TRUE);
 		g_free(text);
 

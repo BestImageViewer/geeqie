@@ -390,7 +390,7 @@ static void vf_pop_menu_open_archive_cb(GtkWidget *, gpointer data)
 		}
 	else
 		{
-		warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GTK_STOCK_DIALOG_WARNING, nullptr);
+		warning_dialog(_("Cannot open archive file"), _("See the Log Window"), GQ_ICON_DIALOG_WARNING, nullptr);
 		}
 }
 
@@ -899,7 +899,7 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 	mte->gd = generic_dialog_new(_("Mark text"), "mark_text",
 				     widget, FALSE,
 				     vf_marks_tooltip_cancel_cb, mte);
-	generic_dialog_add_message(mte->gd, GTK_STOCK_DIALOG_QUESTION, _("Set mark text"),
+	generic_dialog_add_message(mte->gd, GQ_ICON_DIALOG_QUESTION, _("Set mark text"),
 				   _("This will set or clear the mark text."), FALSE);
 	generic_dialog_add_button(mte->gd, GQ_ICON_OK, "OK",
 				  vf_marks_tooltip_ok_cb, TRUE);

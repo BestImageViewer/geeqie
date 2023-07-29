@@ -64,7 +64,7 @@ static gboolean collection_save_confirmed(FileDialog *fd, gboolean overwrite, Co
 	if (isdir(fd->dest_path))
 		{
 		buf = g_strdup_printf(_("Specified path:\n%s\nis a folder, collections are files"), fd->dest_path);
-		file_util_warning_dialog(_("Invalid filename"), buf, GTK_STOCK_DIALOG_INFO, GENERIC_DIALOG(fd)->dialog);
+		file_util_warning_dialog(_("Invalid filename"), buf, GQ_ICON_DIALOG_INFO, GENERIC_DIALOG(fd)->dialog);
 		g_free(buf);
 		return FALSE;
 		}
@@ -77,7 +77,7 @@ static gboolean collection_save_confirmed(FileDialog *fd, gboolean overwrite, Co
 					GENERIC_DIALOG(fd)->dialog, TRUE,
 					collection_confirm_cancel_cb, fd);
 
-		generic_dialog_add_message(gd, GTK_STOCK_DIALOG_QUESTION,
+		generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION,
 					   _("Overwrite existing file?"), fd->dest_path, TRUE);
 
 		generic_dialog_add_button(gd, GQ_ICON_OK, _("_Overwrite"), collection_confirm_ok_cb, TRUE);
@@ -90,7 +90,7 @@ static gboolean collection_save_confirmed(FileDialog *fd, gboolean overwrite, Co
 	if (!collection_save(cd, fd->dest_path))
 		{
 		buf = g_strdup_printf(_("Failed to save the collection:\n%s"), fd->dest_path);
-		file_util_warning_dialog(_("Save Failed"), buf, GTK_STOCK_DIALOG_ERROR, GENERIC_DIALOG(fd)->dialog);
+		file_util_warning_dialog(_("Save Failed"), buf, GQ_ICON_DIALOG_ERROR, GENERIC_DIALOG(fd)->dialog);
 		g_free(buf);
 		}
 
@@ -148,7 +148,7 @@ static void real_collection_button_pressed(FileDialog *fd, gpointer data, gint a
 		{
 		if (text)
 			{
-			file_util_warning_dialog(_("Can not open collection file"), text.get(), GTK_STOCK_DIALOG_ERROR, nullptr);
+			file_util_warning_dialog(_("Can not open collection file"), text.get(), GQ_ICON_DIALOG_ERROR, nullptr);
 			}
 		return;
 		}
