@@ -123,10 +123,10 @@ static gint pan_search_by_path(PanWindow *pw, const gchar *path)
 	pan_info_update(pw, pi);
 	image_scroll_to_point(pw->imd, pi->x + pi->width / 2, pi->y + pi->height / 2, 0.5, 0.5);
 
-	buf = g_strdup_printf("%s ( %d / %d )",
-			      (path[0] == G_DIR_SEPARATOR) ? _("path found") : _("filename found"),
-			      g_list_index(list, pi) + 1,
-			      g_list_length(list));
+	buf = g_strdup_printf("%s ( %d / %u )",
+	                      (path[0] == G_DIR_SEPARATOR) ? _("path found") : _("filename found"),
+	                      g_list_index(list, pi) + 1,
+	                      g_list_length(list));
 	pan_search_status(pw, buf);
 	g_free(buf);
 
@@ -171,10 +171,10 @@ static gboolean pan_search_by_partial(PanWindow *pw, const gchar *text)
 	pan_info_update(pw, pi);
 	image_scroll_to_point(pw->imd, pi->x + pi->width / 2, pi->y + pi->height / 2, 0.5, 0.5);
 
-	buf = g_strdup_printf("%s ( %d / %d )",
-			      _("partial match"),
-			      g_list_index(list, pi) + 1,
-			      g_list_length(list));
+	buf = g_strdup_printf("%s ( %d / %u )",
+	                      _("partial match"),
+	                      g_list_index(list, pi) + 1,
+	                      g_list_length(list));
 	pan_search_status(pw, buf);
 	g_free(buf);
 
@@ -377,9 +377,9 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 	if (pi)
 		{
-		buf_count = g_strdup_printf("( %d / %d )",
-					    g_list_index(list, pi) + 1,
-					    g_list_length(list));
+		buf_count = g_strdup_printf("( %d / %u )",
+		                            g_list_index(list, pi) + 1,
+		                            g_list_length(list));
 		}
 	else
 		{

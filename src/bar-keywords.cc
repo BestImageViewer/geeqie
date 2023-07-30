@@ -1365,7 +1365,7 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 
 		if (keyword)
 			{
-			text = g_strdup_printf(_("Disconnect all Mark Keyword connections"));
+			text = g_strdup_printf("%s", _("Disconnect all Mark Keyword connections"));
 			menu_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
 			g_free(text);
 			}

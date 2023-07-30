@@ -331,7 +331,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 				fail++;
 				if (limit_failures && fail > GQ_COLLECTION_FAIL_MIN && fail * 100 / total > GQ_COLLECTION_FAIL_PERCENT)
 					{
-					log_printf("%d invalid filenames in unofficial collection file, closing: %s\n", fail, path);
+					log_printf("%u invalid filenames in unofficial collection file, closing: %s\n", fail, path);
 					success = FALSE;
 					break;
 					}
@@ -342,7 +342,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 
 	g_string_free(extended_filename_buffer, TRUE);
 
-	DEBUG_1("collection files: total = %d fail = %d official=%d gqview=%d geometry=%d", total, fail, has_official_header, has_gqview_header, has_geometry_header);
+	DEBUG_1("collection files: total = %u fail = %u official=%d gqview=%d geometry=%d", total, fail, has_official_header, has_gqview_header, has_geometry_header);
 
 	fclose(f);
 	if (only_geometry) return has_geometry_header;

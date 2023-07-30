@@ -456,8 +456,8 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 							static_cast<gdouble>(pgd->selection_count));
 
 	message = g_string_new("");
-	g_string_printf(message, "%i/%i", (pgd->selection_count - g_list_length(pgd->not_added)),
-																			pgd->selection_count);
+	g_string_printf(message, "%u/%i",
+	                pgd->selection_count - g_list_length(pgd->not_added), pgd->selection_count);
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), message->str);
 	g_string_free(message, TRUE);
 
@@ -877,11 +877,9 @@ gboolean bar_pane_gps_map_keypress_cb(GtkWidget *, GdkEventButton *bevent, gpoin
 	if (bevent->button == MOUSE_BUTTON_LEFT)
 		{
 		clipboard = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
-		geo_coords = g_strdup_printf("%lf %lf",
-							champlain_view_y_to_latitude(
-								CHAMPLAIN_VIEW(pgd->gps_view),bevent->y),
-							champlain_view_x_to_longitude(
-								CHAMPLAIN_VIEW(pgd->gps_view),bevent->x));
+		geo_coords = g_strdup_printf("%f %f",
+		                             champlain_view_y_to_latitude(CHAMPLAIN_VIEW(pgd->gps_view),bevent->y),
+		                             champlain_view_x_to_longitude(CHAMPLAIN_VIEW(pgd->gps_view),bevent->x));
 		gtk_clipboard_set_text(clipboard, geo_coords, -1);
 
 		g_free(geo_coords);

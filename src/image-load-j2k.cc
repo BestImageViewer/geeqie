@@ -217,7 +217,7 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 
 	if (!stream)
 		{
-		log_printf(_("Could not open file for reading"));
+		log_printf("%s", _("Could not open file for reading"));
 		return FALSE;
 		}
 
@@ -227,14 +227,14 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 		}
 	else
 		{
-		log_printf(_("Unknown jpeg2000 decoder type"));
+		log_printf("%s", _("Unknown jpeg2000 decoder type"));
 		return FALSE;
 		}
 
 	opj_set_default_decoder_parameters(&parameters);
 	if (opj_setup_decoder (codec, &parameters) != OPJ_TRUE)
 		{
-		log_printf(_("Couldn't set parameters on decoder for file."));
+		log_printf("%s", _("Couldn't set parameters on decoder for file."));
 		return FALSE;
 		}
 
@@ -242,26 +242,26 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 
 	if (opj_read_header(stream, codec, &image) != OPJ_TRUE)
 		{
-		log_printf(_("Couldn't read JP2 header from file"));
+		log_printf("%s", _("Couldn't read JP2 header from file"));
 		return FALSE;
 		}
 
 	if (opj_decode(codec, stream, image) != OPJ_TRUE)
 		{
-		log_printf(_("Couldn't decode JP2 image in file"));
+		log_printf("%s", _("Couldn't decode JP2 image in file"));
 		return FALSE;
 		}
 
 	if (opj_end_decompress(codec, stream) != OPJ_TRUE)
 		{
-		log_printf(_("Couldn't decompress JP2 image in file"));
+		log_printf("%s", _("Couldn't decompress JP2 image in file"));
 		return FALSE;
 		}
 
 	num_components = image->numcomps;
 	if (num_components != 3)
 		{
-		log_printf(_("JP2 image not rgb"));
+		log_printf("%s", _("JP2 image not rgb"));
 		return FALSE;
 		}
 

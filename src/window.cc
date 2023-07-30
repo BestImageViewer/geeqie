@@ -226,13 +226,11 @@ static void help_browser_run(const gchar *path)
 
 		DEBUG_1("Trying browser: name=%s command=%s", html_browser.binary, html_browser.command);
 
-		gchar *result = html_browser.command_result();
-		DEBUG_1("Result: %s", result);
+		g_autofree gchar *result = html_browser.command_result();
+		DEBUG_1("Result: %s", result ? result : "(null)");
 		if (!result) return false;
 
-		int ret = help_browser_command(result, path);
-		g_free(result);
-		return ret == 0;
+		return help_browser_command(result, path) == 0;
 	};
 
 	if (try_browser({options->helpers.html_browser.command_name, options->helpers.html_browser.command_line})) return;

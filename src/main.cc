@@ -475,7 +475,7 @@ static void parse_command_line(gint argc, gchar *argv[])
 			else if (strcmp(cmd_line, "-v") == 0 ||
 				 strcmp(cmd_line, "--version") == 0)
 				{
-				printf_term(FALSE, "%s %s GTK%d\n", GQ_APPNAME, VERSION, gtk_major_version);
+				printf_term(FALSE, "%s %s GTK%u\n", GQ_APPNAME, VERSION, gtk_major_version);
 				exit(0);
 				}
 			else if (strcmp(cmd_line, "-h") == 0 ||
@@ -1311,7 +1311,7 @@ gint main(gint argc, gchar *argv[])
 		log_printf("!!! This is a friendly warning.\n");
 		log_printf("!!! The version of GTK+ in use now is older than when %s was compiled.\n", GQ_APPNAME);
 		log_printf("!!!  compiled with GTK+-%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION);
-		log_printf("!!!   running with GTK+-%d.%d\n", gtk_major_version, gtk_minor_version);
+		log_printf("!!!   running with GTK+-%u.%u\n", gtk_major_version, gtk_minor_version);
 		log_printf("!!! %s may quit unexpectedly with a relocation error.\n", GQ_APPNAME);
 		}
 

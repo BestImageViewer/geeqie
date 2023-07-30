@@ -979,7 +979,7 @@ static void image_load_size_cb(ImageLoader *, guint width, guint height, gpointe
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
-	DEBUG_1("image_load_size_cb: %dx%d", width, height);
+	DEBUG_1("image_load_size_cb: %ux%u", width, height);
 	pixbuf_renderer_set_size_early(PIXBUF_RENDERER(imd->pr), width, height);
 }
 

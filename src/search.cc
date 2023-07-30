@@ -1598,8 +1598,8 @@ static void search_gps_dnd_received_cb(GtkWidget *, GdkDragContext *,
 			longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
 			if (latitude != 1000 && longitude != 1000)
 				{
-				gq_gtk_entry_set_text(GTK_ENTRY(sd->entry_gps_coord),
-							g_strdup_printf("%lf %lf", latitude, longitude));
+				g_autofree gchar *text = g_strdup_printf("%f %f", latitude, longitude);
+				gq_gtk_entry_set_text(GTK_ENTRY(sd->entry_gps_coord), text);
 				}
 			else
 				{

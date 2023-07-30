@@ -318,7 +318,7 @@ MPOData *jpeg_get_mpo_data(const guchar *data, guint size)
 			if (mpo->images[i].offset + mpo->images[i].length > size)
 				{
 				mpo->num_images = i;
-				DEBUG_1("MPO file truncated to %d valid images, %d %d", i, mpo->images[i].offset + mpo->images[i].length, size);
+				DEBUG_1("MPO file truncated to %u valid images, %u %u", i, mpo->images[i].offset + mpo->images[i].length, size);
 				break;
 				}
 			}
@@ -333,7 +333,7 @@ MPOData *jpeg_get_mpo_data(const guchar *data, guint size)
 				{
 				if (!jpeg_segment_find(data + mpo->images[i].offset, mpo->images[i].length, JPEG_MARKER_APP2, "MPF\x00", 4, &seg_offset, &seg_size) || seg_size <=16)
 					{
-					DEBUG_1("MPO image %d: MPO signature not found", i);
+					DEBUG_1("MPO image %u: MPO signature not found", i);
 					continue;
 					}
 
@@ -341,7 +341,7 @@ MPOData *jpeg_get_mpo_data(const guchar *data, guint size)
 				seg_size -= 4;
 				if (!tiff_directory_offset(data + mpo->images[i].offset + seg_offset, seg_size, &offset, &bo))
 					{
-					DEBUG_1("MPO image %d: invalid directory offset", i);
+					DEBUG_1("MPO image %u: invalid directory offset", i);
 					continue;
 					}
 

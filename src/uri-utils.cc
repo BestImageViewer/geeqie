@@ -31,7 +31,7 @@ void warning_dialog_dnd_uri_error(GList *uri_error_list)
 {
 	g_autoptr(GString) msg = g_string_new(nullptr);
 	guint count = g_list_length(uri_error_list);
-	g_string_printf(msg, "Failed to convert %d dropped item(s) to files\n", count);
+	g_string_printf(msg, "Failed to convert %u dropped item(s) to files\n", count);
 	if(count < 10)
 		{
 		for (GList *work = uri_error_list; work; work = work->next)

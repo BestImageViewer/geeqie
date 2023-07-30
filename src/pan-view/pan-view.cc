@@ -977,7 +977,7 @@ static void pan_layout_compute(PanWindow *pw, FileData *dir_fd,
 
 	pan_cache_free(pw);
 
-	DEBUG_1("computed %d objects", g_list_length(pw->list));
+	DEBUG_1("computed %u objects", g_list_length(pw->list));
 }
 
 static GList *pan_layout_intersect_l(GList *list, GList *item_list,

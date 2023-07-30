@@ -181,7 +181,7 @@ static gboolean remote_server_client_cb(GIOChannel *source, GIOCondition conditi
 		rc->clients = g_list_remove(rc->clients, client);
 
 		DEBUG_1("HUP detected, closing client.");
-		DEBUG_1("client count %d", g_list_length(rc->clients));
+		DEBUG_1("client count %u", g_list_length(rc->clients));
 
 		g_source_remove(client->channel_id);
 		close(client->fd);
@@ -213,7 +213,7 @@ static void remote_server_client_add(RemoteConnection *rc, gint fd)
 	g_io_channel_unref(channel);
 
 	rc->clients = g_list_append(rc->clients, client);
-	DEBUG_1("client count %d", g_list_length(rc->clients));
+	DEBUG_1("client count %u", g_list_length(rc->clients));
 }
 
 static void remote_server_clients_close(RemoteConnection *rc)
@@ -1406,7 +1406,7 @@ static void gr_config_load(const gchar *text, GIOChannel *, gpointer)
 		}
 	else
 		{
-		log_printf("remote sent filename that does not exist:\"%s\"\n", filename);
+		log_printf("remote sent filename that does not exist:\"%s\"\n", filename ? filename : "(null)");
 		layout_set_path(nullptr, homedir());
 		}
 
@@ -1850,7 +1850,7 @@ void remote_help()
 			}
 		i++;
 		}
-	printf_term(FALSE, _("\n\n  All other command line parameters are used as plain files if they exist.\n\n  The name of a collection, with or without either path or extension (.gqv) may be used.\n"));
+	printf_term(FALSE, "%s", _("\n\n  All other command line parameters are used as plain files if they exist.\n\n  The name of a collection, with or without either path or extension (.gqv) may be used.\n"));
 }
 
 GList *remote_build_list(GList *list, gint argc, gchar *argv[], GList **errors)

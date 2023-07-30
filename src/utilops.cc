@@ -2147,7 +2147,7 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 		}
 	else
 		{
-		message2 = g_strdup_printf(_("The following metadata tags will be written to the image file itself."));
+		message2 = g_strdup_printf("%s", _("The following metadata tags will be written to the image file itself."));
 		}
 
 	box = generic_dialog_add_message(gd, icon_name, _("Overview of changed metadata"), message1, TRUE);

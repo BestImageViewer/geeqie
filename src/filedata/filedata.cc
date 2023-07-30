@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -68,8 +69,6 @@ gchar *FileData::text_from_size(gint64 size)
 	gchar *b;
 	gchar *s;
 	gchar *d;
-	gint l;
-	gint n;
 	gint i;
 
 	/* what I would like to use is printf("%'d", size)
@@ -78,21 +77,21 @@ gchar *FileData::text_from_size(gint64 size)
 	if (size > G_MAXINT)
 		{
 		/* the %lld conversion is not valid in all libcs, so use a simple work-around */
-		a = g_strdup_printf("%d%09d", static_cast<guint>(size / 1000000000), static_cast<guint>(size % 1000000000));
+		a = g_strdup_printf("%u%09u", static_cast<guint>(size / 1000000000), static_cast<guint>(size % 1000000000));
 		}
 	else
 		{
-		a = g_strdup_printf("%d", static_cast<guint>(size));
+		a = g_strdup_printf("%" PRId64, size);
 		}
-	l = strlen(a);
-	n = (l - 1)/ 3;
+	gint len = strlen(a);
+	gint n = (len - ((size < 0) ? 2 : 1)) / 3;
 	if (n < 1) return a;
 
-	b = g_new(gchar, l + n + 1);
+	b = g_new(gchar, len + n + 1);
 
 	s = a;
 	d = b;
-	i = l - n * 3;
+	i = len - n * 3;
 	while (*s != '\0')
 		{
 		if (i < 1)
@@ -701,7 +700,7 @@ void FileData::file_data_dump()
 	GList *list = g_hash_table_get_values(context->file_data_pool);
 
 	log_printf("%d", context->global_file_data_count);
-	log_printf("%d", g_list_length(list));
+	log_printf("%u", g_list_length(list));
 
 	GList *work = list;
 	while (work)
@@ -2876,7 +2875,7 @@ static void marks_get_files(gpointer key, gpointer value, gpointer userdata)
 		fd = static_cast<FileData *>(value);
 		if (fd && fd->marks > 0)
 			{
-			g_string_append_printf(result, "%s,%i\n", fd->path, fd->marks);
+			g_string_append_printf(result, "%s,%u\n", fd->path, fd->marks);
 			}
 		}
 }

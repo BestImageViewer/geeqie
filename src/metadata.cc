@@ -896,7 +896,7 @@ gboolean metadata_write_GPS_coord(FileData *fd, const gchar *key, gdouble value)
 			}
 		setlocale(LC_ALL, "C");
 
-		coordinate = g_strdup_printf("%i,%lf,%s", deg, min, ref);
+		coordinate = g_strdup_printf("%i,%f,%s", deg, min, ref);
 		metadata_write_string(fd, key, coordinate );
 
 		setlocale(LC_ALL, saved_locale);

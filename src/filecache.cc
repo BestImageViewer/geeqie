@@ -170,13 +170,13 @@ void file_cache_dump(FileCacheData *fc)
 	GList *work = fc->list;
 	gulong n = 0;
 
-	DEBUG_1("cache dump: fc=%p max size:%ld size:%ld", (void *)fc, fc->max_size, fc->size);
+	DEBUG_1("cache dump: fc=%p max size:%lu size:%lu", (void *)fc, fc->max_size, fc->size);
 
 	while (work)
 		{
 		auto fe = static_cast<FileCacheEntry *>(work->data);
 		work = work->next;
-		DEBUG_1("cache entry: fc=%p [%lu] %s %ld", (void *)fc, ++n, fe->fd->path, fe->size);
+		DEBUG_1("cache entry: fc=%p [%lu] %s %lu", (void *)fc, ++n, fe->fd->path, fe->size);
 		}
 }
 

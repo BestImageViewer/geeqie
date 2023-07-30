@@ -69,11 +69,13 @@ TEST_F(FileDataTest, text_from_size_test)
 		{999, "999"},
 		{1000, "1,000"},
 		{1'000'000, "1,000,000"},
+		{2'147'483'648, "2,147,483,648"}, // INT_MAX + 1
+		{-1, "-1"},
+		{-10, "-10"},
+		{-100, "-100"},
 		{-1000, "-1,000"},
-
-		// The following test fails.  The right solution is probably to alter
-		// text_from_size to accept a guint64 instead of gint64.
-		// {-100'000, "-100,000"},
+		{-10'000, "-10,000"},
+		{-100'000, "-100,000"},
 	};
 
 	for (const auto &test_case : test_cases)

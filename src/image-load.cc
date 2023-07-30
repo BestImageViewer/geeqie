@@ -1269,7 +1269,7 @@ static gboolean image_loader_start_thread(ImageLoader *il)
 	il->can_destroy = FALSE; /* ImageLoader can't be freed until image_loader_thread_run finishes */
 
 	g_thread_pool_push(image_loader_thread_pool, il, nullptr);
-	DEBUG_1("Thread pool num threads: %d", g_thread_pool_get_num_threads(image_loader_thread_pool));
+	DEBUG_1("Thread pool num threads: %u", g_thread_pool_get_num_threads(image_loader_thread_pool));
 
 	return TRUE;
 }

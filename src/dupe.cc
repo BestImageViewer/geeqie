@@ -1392,9 +1392,9 @@ static void dupe_match_rank(DupeWindow *dw)
 
 	if (required_debug_level(2)) dupe_match_print_list(list);
 
-	DEBUG_1("Similar items: %d", g_list_length(list));
+	DEBUG_1("Similar items: %u", g_list_length(list));
 	list = dupe_match_group_trim(list, dw);
-	DEBUG_1("Unique groups: %d", g_list_length(list));
+	DEBUG_1("Unique groups: %u", g_list_length(list));
 
 	dupe_match_sort_groups(list);
 
@@ -5221,7 +5221,7 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 		output_string = g_string_append(output_string, sep);
 		g_free(name);
 
-		g_string_append_printf(output_string, "%" PRIu64, di->fd->size);
+		g_string_append_printf(output_string, "%" PRId64, di->fd->size);
 		output_string = g_string_append(output_string, sep);
 		output_string = g_string_append(output_string, text_from_time(di->fd->date));
 		output_string = g_string_append(output_string, sep);
