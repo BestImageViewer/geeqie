@@ -138,13 +138,11 @@ static gchar *thumb_std_cache_path(const gchar *path, const gchar *uri, gboolean
 {
 	gchar *result = nullptr;
 	gchar *md5_text;
-	guchar digest[16];
 	gchar *name;
 
 	if (!path || !uri || !cache_subfolder) return nullptr;
 
-	md5_get_digest(reinterpret_cast<const guchar *>(uri), strlen(uri), digest);
-	md5_text = md5_digest_to_text(digest);
+	md5_text = md5_get_string(reinterpret_cast<const guchar *>(uri), strlen(uri));
 
 	if (!md5_text) return nullptr;
 

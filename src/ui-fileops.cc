@@ -22,6 +22,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
+
 #include <unistd.h>
 #include <utime.h>
 
@@ -994,11 +996,11 @@ gboolean md5_get_digest_from_file_utf8(const gchar *path, guchar digest[16])
 
 gchar *md5_text_from_file_utf8(const gchar *path, const gchar *error_text)
 {
-	guchar digest[16];
+	std::unique_ptr<gchar, decltype(&g_free)> pathl{path_from_utf8(path), g_free};
 
-	if (!md5_get_digest_from_file_utf8(path, digest)) return g_strdup(error_text);
+	auto md5_text = md5_get_string_from_file(pathl.get());
 
-	return md5_digest_to_text(digest);
+	return md5_text ? md5_text : g_strdup(error_text);
 }
 
 /* Download web file
