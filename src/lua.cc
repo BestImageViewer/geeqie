@@ -24,12 +24,13 @@
 
 #define _XOPEN_SOURCE
 
-#include <lua.hpp>
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+#include <memory>
 
-#include <stdio.h>
 #include <glib.h>
-#include <string.h>
-#include <time.h>
+#include <lua.hpp>
 
 #include "main.h"
 #include "glua.h"
@@ -356,28 +357,12 @@ void lua_init()
  */
 gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 {
-	gint result;
-	gchar *data = nullptr;
-	gchar *path;
-	FileData **image_data;
-	gchar *tmp;
-	GError *error = nullptr;
-	gboolean ok;
-
-	ok = access(g_build_filename(get_rc_dir(), "lua", file, NULL), R_OK);
-	if (ok == 0)
-		{
-		path = g_build_filename(get_rc_dir(), "lua", file, NULL);
-		}
-	else
+	std::unique_ptr<gchar, decltype(&g_free)> path{g_build_filename(get_rc_dir(), "lua", file, NULL), g_free};
+	if (access(path.get(), R_OK) == -1)
 		{
 		/** @FIXME what is the correct way to find the scripts folder? */
-		ok = access(g_build_filename("/usr/local/lib", GQ_APPNAME_LC, file, NULL), R_OK);
-		if (ok == 0)
-			{
-			path = g_build_filename("/usr/local/lib", GQ_APPNAME_LC, file, NULL);
-			}
-		else
+		path.reset(g_build_filename("/usr/local/lib", GQ_APPNAME_LC, file, NULL));
+		if (access(path.get(), R_OK) == -1)
 			{
 			return g_strdup("");
 			}
@@ -388,29 +373,31 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 	lua_setglobal(L, "Collection");
 
 	/* Current Image */
-	image_data = static_cast<FileData **>(lua_newuserdata(L, sizeof(FileData *)));
+	auto image_data = static_cast<FileData **>(lua_newuserdata(L, sizeof(FileData *)));
 	luaL_getmetatable(L, "Image");
 	lua_setmetatable(L, -2);
 	lua_setglobal(L, "Image");
 
 	*image_data = fd;
+
+	gint result;
 	if (file[0] == '\0')
 		{
 		result = luaL_dostring(L, function);
 		}
 	else
 		{
-		result = luaL_dofile(L, path);
-		g_free(path);
+		result = luaL_dofile(L, path.get());
 		}
 
 	if (result)
 		{
-		data = g_strdup_printf("Error running lua script: %s", lua_tostring(L, -1));
-		return data;
+		return g_strdup_printf("Error running lua script: %s", lua_tostring(L, -1));
 		}
-	data = g_strdup(lua_tostring(L, -1));
-	tmp = g_locale_to_utf8(data, strlen(data), nullptr, nullptr, &error);
+
+	gchar *data = g_strdup(lua_tostring(L, -1));
+	GError *error = nullptr;
+	gchar *tmp = g_locale_to_utf8(data, strlen(data), nullptr, nullptr, &error);
 	if (error)
 		{
 		log_printf("Error converting lua output from locale to UTF-8: %s\n", error->message);
@@ -418,9 +405,9 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 		}
 	else
 		{
-		g_free(data);
-		data = g_strdup(tmp);
+		std::swap(data, tmp);
 		} // if (error) { ... } else
+	g_free(tmp);
 	return data;
 }
 #else
