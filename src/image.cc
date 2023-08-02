@@ -883,31 +883,7 @@ static void image_load_done_cb(ImageLoader *, gpointer data)
 
 	if (!image_loader_get_pixbuf(imd->il))
 		{
-		GdkPixbuf *pixbuf;
-
-		switch (imd->image_fd->format_class)
-			{
-			case FORMAT_CLASS_UNKNOWN:
-				pixbuf = pixbuf_inline(PIXBUF_INLINE_UNKNOWN);
-				break;
-			case FORMAT_CLASS_META:
-				pixbuf = pixbuf_inline(PIXBUF_INLINE_METADATA);
-				break;
-			case FORMAT_CLASS_VIDEO:
-				pixbuf = pixbuf_inline(PIXBUF_INLINE_VIDEO);
-				break;
-			case FORMAT_CLASS_COLLECTION:
-				pixbuf = pixbuf_inline(PIXBUF_INLINE_COLLECTION);
-				break;
-			case FORMAT_CLASS_DOCUMENT:
-				pixbuf = pixbuf_inline(PIXBUF_INLINE_ICON_PDF);
-				break;
-			case FORMAT_CLASS_ARCHIVE:
-				pixbuf = pixbuf_inline(PIXBUF_INLINE_ARCHIVE);
-				break;
-			default:
-				pixbuf = pixbuf_inline(PIXBUF_INLINE_BROKEN);
-			}
+		GdkPixbuf *pixbuf = pixbuf_fallback(imd->image_fd, 0, 0);
 
 		image_change_pixbuf(imd, pixbuf, image_zoom_get(imd), FALSE);
 		g_object_unref(pixbuf);
