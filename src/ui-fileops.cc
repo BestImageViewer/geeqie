@@ -538,25 +538,23 @@ static gboolean hard_linked(const gchar *a, const gchar *b)
 		sta.st_ino == stb.st_ino);
 }
 
+static void fclose_safe(FILE *fp)
+{
+	if (fp) fclose(fp);
+}
+
 gboolean copy_file(const gchar *s, const gchar *t)
 {
-	FILE *fi = nullptr;
-	FILE *fo = nullptr;
-	gchar *sl = nullptr;
-	gchar *tl = nullptr;
-	gchar *randname = nullptr;
 	gchar buf[16384];
 	size_t b;
-	gint ret = FALSE;
 	gint fd = -1;
 
-	sl = path_from_utf8(s);
-	tl = path_from_utf8(t);
+	std::unique_ptr<gchar, decltype(&g_free)> sl{path_from_utf8(s), g_free};
+	std::unique_ptr<gchar, decltype(&g_free)> tl{path_from_utf8(t), g_free};
 
-	if (hard_linked(sl, tl))
+	if (hard_linked(sl.get(), tl.get()))
 		{
-		ret = TRUE;
-		goto end;
+		return TRUE;
 		}
 
 	/* Do not dereference absolute symlinks, but copy them "as is".
@@ -564,9 +562,14 @@ gboolean copy_file(const gchar *s, const gchar *t)
 	* copied/moved to another dir to keep pointing it to same target as
 	* a relative symlink, so we turn it into absolute symlink using
 	* realpath() instead. */
-	struct stat st;
-	if (lstat_utf8(sl, &st) && S_ISLNK(st.st_mode))
+	auto copy_symlink = [](const gchar *sl, const gchar *tl) -> gboolean
 		{
+		struct stat st;
+		if (!lstat_utf8(sl, &st) && S_ISLNK(st.st_mode))
+			{
+			return FALSE;
+			}
+
 		gchar *link_target;
 		ssize_t i;
 
@@ -575,7 +578,7 @@ gboolean copy_file(const gchar *s, const gchar *t)
 		if (i<0)
 			{
 			g_free(link_target);
-			goto orig_copy;  // try a "normal" copy
+			return FALSE;  // try a "normal" copy
 			}
 		link_target[st.st_size] = '\0';
 
@@ -583,7 +586,7 @@ gboolean copy_file(const gchar *s, const gchar *t)
 			{
 			gchar *absolute;
 
-			gchar *lastslash = strrchr(sl, G_DIR_SEPARATOR);
+			const gchar *lastslash = strrchr(sl, G_DIR_SEPARATOR);
 			gint len = lastslash - sl + 1;
 
 			absolute = static_cast<gchar *>(g_malloc(len + st.st_size + 1));
@@ -604,7 +607,7 @@ gboolean copy_file(const gchar *s, const gchar *t)
 			else                 // could not get absolute path, got some error instead
 				{
 				g_free(link_target);
-				goto orig_copy;  // so try a "normal" copy
+				return FALSE;  // so try a "normal" copy
 				}
 			}
 
@@ -613,57 +616,56 @@ gboolean copy_file(const gchar *s, const gchar *t)
 		gint success = (symlink(link_target, tl) == 0);
 		g_free(link_target);
 
-		if (success)
-			{
-			ret = TRUE;
-			goto end;
-			}
-		} // if symlink did not succeed, continue on to try a copy procedure
-	orig_copy:
+		return success;
+		};
 
-	fi = fopen(sl, "rb");
-	if (!fi) goto end;
+	if (copy_symlink(sl.get(), tl.get()))
+		{
+		return TRUE;
+		}
+
+	// if symlink did not succeed, continue on to try a copy procedure
+	std::unique_ptr<FILE, decltype(&fclose_safe)> fi{fopen(sl.get(), "rb"), fclose_safe};
+	if (!fi)
+		{
+		return FALSE;
+		}
 
 	/* First we write to a temporary file, then we rename it on success,
 	   and attributes from original file are copied */
-	randname = g_strconcat(tl, ".tmp_XXXXXX", NULL);
-	if (!randname) goto end;
+	std::unique_ptr<gchar, decltype(&g_free)> randname{g_strconcat(tl.get(), ".tmp_XXXXXX", NULL), g_free};
+	if (!randname)
+		{
+		return FALSE;
+		}
 
-	fd = g_mkstemp(randname);
-	if (fd == -1) goto end;
+	fd = g_mkstemp(randname.get());
+	if (fd == -1)
+		{
+		return FALSE;
+		}
 
-	fo = fdopen(fd, "wb");
+	std::unique_ptr<FILE, decltype(&fclose_safe)> fo{fdopen(fd, "wb"), fclose_safe};
 	if (!fo) {
 		close(fd);
-		goto end;
+		return FALSE;
 	}
 
-	while ((b = fread(buf, sizeof(gchar), sizeof(buf), fi)) && b != 0)
+	while ((b = fread(buf, sizeof(gchar), sizeof(buf), fi.get())) && b != 0)
 		{
-		if (fwrite(buf, sizeof(gchar), b, fo) != b)
+		if (fwrite(buf, sizeof(gchar), b, fo.get()) != b)
 			{
-			unlink(randname);
-			goto end;
+			unlink(randname.get());
+			return FALSE;
 			}
 		}
 
-	fclose(fi); fi = nullptr;
-	fclose(fo); fo = nullptr;
-
-	if (rename(randname, tl) < 0) {
-		unlink(randname);
-		goto end;
+	if (rename(randname.get(), tl.get()) < 0) {
+		unlink(randname.get());
+		return FALSE;
 	}
 
-	ret = copy_file_attributes(s, t, TRUE, TRUE);
-
-end:
-	if (fi) fclose(fi);
-	if (fo) fclose(fo);
-	if (sl) g_free(sl);
-	if (tl) g_free(tl);
-	if (randname) g_free(randname);
-	return ret;
+	return copy_file_attributes(s, t, TRUE, TRUE);
 }
 
 gboolean move_file(const gchar *s, const gchar *t)
