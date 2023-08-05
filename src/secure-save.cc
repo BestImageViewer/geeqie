@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <memory>
+
 #include "main.h"
 #include <glib/gprintf.h>
 #include <utime.h>
@@ -81,24 +83,24 @@ static SecureSaveInfo *
 secure_open_umask(const gchar *file_name)
 {
 	struct stat st;
-	SecureSaveInfo *ssi;
 
 	secsave_errno = SS_ERR_NONE;
 
-	ssi = g_new0(SecureSaveInfo, 1);
+	std::unique_ptr<SecureSaveInfo, decltype(&g_free)> ssi{g_new0(SecureSaveInfo, 1), g_free};
 	if (!ssi) {
 		secsave_errno = SS_ERR_OUT_OF_MEM;
-		goto end;
+		return nullptr;
 	}
 
 	ssi->secure_save = TRUE;
 	ssi->preserve_perms = TRUE;
 	ssi->unlink_on_error = TRUE;
 
-	ssi->file_name = g_strdup(file_name);
+	std::unique_ptr<gchar, decltype(&g_free)> file_name_watcher{g_strdup(file_name), g_free};
+	ssi->file_name = file_name_watcher.get();
 	if (!ssi->file_name) {
 		secsave_errno = SS_ERR_OUT_OF_MEM;
-		goto free_f;
+		return nullptr;
 	}
 
 	/* Check properties of final file. */
@@ -112,7 +114,7 @@ secure_open_umask(const gchar *file_name)
 			/* lstat() error. */
 			ssi->err = errno;
 			secsave_errno = SS_ERR_STAT;
-			goto free_file_name;
+			return nullptr;
 		}
 	} else {
 		if (!S_ISREG(st.st_mode)) {
@@ -124,7 +126,7 @@ secure_open_umask(const gchar *file_name)
 			if (access(ssi->file_name, R_OK | W_OK) < 0) {
 				ssi->err = errno;
 				secsave_errno = SS_ERR_ACCESS;
-				goto free_file_name;
+				return nullptr;
 			}
 #else
 			FILE *f1;
@@ -138,7 +140,7 @@ secure_open_umask(const gchar *file_name)
 			} else {
 				ssi->err = errno;
 				secsave_errno = SS_ERR_OPEN_READ;
-				goto free_file_name;
+				return nullptr;
 			}
 #endif
 		}
@@ -154,7 +156,7 @@ secure_open_umask(const gchar *file_name)
 
 		if (!randname) {
 			secsave_errno = SS_ERR_OUT_OF_MEM;
-			goto free_file_name;
+			return nullptr;
 		}
 
 		/* No need to use safe_mkstemp() here. --Zas */
@@ -162,7 +164,7 @@ secure_open_umask(const gchar *file_name)
 		if (fd == -1) {
 			secsave_errno = SS_ERR_MKSTEMP;
 			g_free(randname);
-			goto free_file_name;
+			return nullptr;
 		}
 
 		ssi->fp = fdopen(fd, "wb");
@@ -170,7 +172,7 @@ secure_open_umask(const gchar *file_name)
 			secsave_errno = SS_ERR_OPEN_WRITE;
 			ssi->err = errno;
 			g_free(randname);
-			goto free_file_name;
+			return nullptr;
 		}
 
 		ssi->tmp_file_name = randname;
@@ -180,22 +182,12 @@ secure_open_umask(const gchar *file_name)
 		if (!ssi->fp) {
 			secsave_errno = SS_ERR_OPEN_WRITE;
 			ssi->err = errno;
-			goto free_file_name;
+			return nullptr;
 		}
 	}
 
-	return ssi;
-
-free_file_name:
-	g_free(ssi->file_name);
-	ssi->file_name = nullptr;
-
-free_f:
-	g_free(ssi);
-	ssi = nullptr;
-
-end:
-	return nullptr;
+	ssi->file_name = file_name_watcher.release();
+	return ssi.release();
 }
 
 SecureSaveInfo *
@@ -223,15 +215,25 @@ secure_open(const gchar *file_name)
 gint
 secure_close(SecureSaveInfo *ssi)
 {
-	gint ret = -1;
+	if (!ssi) return -1;
 
-	if (!ssi) return ret;
-	if (!ssi->fp) goto free;
+	auto ssi_free = [](SecureSaveInfo *ssi, gint ret)
+	{
+		if (ssi->tmp_file_name)
+			{
+			if (ret && ssi->unlink_on_error) unlink(ssi->tmp_file_name);
+			g_free(ssi->tmp_file_name);
+			}
+		if (ssi->file_name) g_free(ssi->file_name);
+		g_free(ssi);
+		return ret;
+	};
+
+	if (!ssi->fp) return ssi_free(ssi, -1);
 
 	if (ssi->err) {	/* Keep previous errno. */
-		ret = ssi->err;
 		fclose(ssi->fp); /* Close file */
-		goto free;
+		return ssi_free(ssi, ssi->err);
 	}
 
 	/* Ensure data is effectively written to disk, we first flush libc buffers
@@ -252,20 +254,19 @@ secure_close(SecureSaveInfo *ssi)
 #endif
 
 		if (fail) {
-			ret = errno;
+			gint ret = errno;
 			secsave_errno = SS_ERR_OTHER;
 
 			fclose(ssi->fp); /* Close file, ignore errors. */
-			goto free;
+			return ssi_free(ssi, ret);
 		}
 	}
 #endif
 
 	/* Close file. */
 	if (fclose(ssi->fp) == EOF) {
-		ret = errno;
 		secsave_errno = SS_ERR_OTHER;
-		goto free;
+		return ssi_free(ssi, errno);
 	}
 
 	if (ssi->secure_save && ssi->file_name && ssi->tmp_file_name) {
@@ -299,24 +300,12 @@ secure_close(SecureSaveInfo *ssi)
 				}
 			}
 		if (rename(ssi->tmp_file_name, ssi->file_name) == -1) {
-			ret = errno;
 			secsave_errno = SS_ERR_RENAME;
-			goto free;
+			return ssi_free(ssi, errno);
 		}
 	}
 
-	ret = 0;	/* Success. */
-
-free:
-	if (ssi->tmp_file_name)
-		{
-		if (ret && ssi->unlink_on_error) unlink(ssi->tmp_file_name);
-		g_free(ssi->tmp_file_name);
-		}
-	if (ssi->file_name) g_free(ssi->file_name);
-	if (ssi) g_free(ssi);
-
-	return ret;
+	return ssi_free(ssi, 0); /* Success. */
 }
 
 
