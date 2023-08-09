@@ -193,6 +193,7 @@
 #define GQ_ICON_OK "emblem-ok"
 #define GQ_ICON_APPLY "emblem-ok" // need something else?
 #define GQ_ICON_CANCEL "dialog-cancel" // missing in adwaita and others, seen in breeze
+#define GQ_ICON_CALENDAR "office-calendar"
 
 #define GQ_ICON_DIALOG_ERROR "dialog-error"
 #define GQ_ICON_DIALOG_INFO "dialog-information"

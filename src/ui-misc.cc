@@ -987,7 +987,7 @@ static void date_selection_destroy_cb(GtkWidget *, gpointer data)
 GtkWidget *date_selection_new()
 {
 	DateSelection *ds;
-	GtkWidget *arrow;
+	GtkWidget *icon;
 
 	ds = g_new0(DateSelection, 1);
 	gchar *date_format;
@@ -1033,9 +1033,9 @@ GtkWidget *date_selection_new()
 	g_signal_connect(G_OBJECT(ds->button), "size_allocate",
 			 G_CALLBACK(button_size_allocate_cb), ds->spin_y);
 
-	arrow = gtk_arrow_new(GTK_ARROW_DOWN, GTK_SHADOW_NONE);
-	gtk_container_add(GTK_CONTAINER(ds->button), arrow);
-	gtk_widget_show(arrow);
+	icon = gtk_image_new_from_icon_name(GQ_ICON_CALENDAR, GTK_ICON_SIZE_BUTTON);
+	gtk_container_add(GTK_CONTAINER(ds->button), icon);
+	gtk_widget_show(icon);
 
 	gtk_box_pack_start(GTK_BOX(ds->box), ds->button, FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(ds->button), "clicked",
