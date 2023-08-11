@@ -24,13 +24,13 @@
 
 #include "bar-keywords.h"
 #include "cache.h"
+#include "color-man.h"
 #include "editors.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "fullscreen.h"
 #include "image.h"
 #include "image-overlay.h"
-#include "color-man.h"
 #include "img-view.h"
 #include "layout-util.h"
 #include "metadata.h"
@@ -44,7 +44,6 @@
 #include "utilops.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
-#include "ui-spinner.h"
 #include "ui-tabcomp.h"
 #include "window.h"
 #include "zonedetect.h"
@@ -3013,7 +3012,7 @@ static void keywords_find_finish(KeywordFindData *kfd)
 	keywords_find_reset(kfd);
 
 	gtk_entry_set_text(GTK_ENTRY(kfd->progress), _("done"));
-	spinner_set_interval(kfd->spinner, -1);
+	gtk_spinner_stop(GTK_SPINNER(kfd->spinner));
 
 	gtk_widget_set_sensitive(kfd->group, TRUE);
 	gtk_widget_set_sensitive(kfd->button_start, TRUE);
@@ -3106,7 +3105,7 @@ static void keywords_find_start_cb(GenericDialog *, gpointer data)
 		gtk_widget_set_sensitive(kfd->button_start, FALSE);
 		gtk_widget_set_sensitive(kfd->button_stop, TRUE);
 		gtk_widget_set_sensitive(kfd->button_close, FALSE);
-		spinner_set_interval(kfd->spinner, SPINNER_SPEED);
+		gtk_spinner_start(GTK_SPINNER(kfd->spinner));
 
 		dir_fd = file_data_new_dir(path);
 		keywords_find_folder(kfd, dir_fd);
@@ -3165,7 +3164,7 @@ static void keywords_find_dialog(GtkWidget *widget, const gchar *path)
 	gtk_box_pack_start(GTK_BOX(hbox), kfd->progress, TRUE, TRUE, 0);
 	gtk_widget_show(kfd->progress);
 
-	kfd->spinner = spinner_new(nullptr, -1);
+	kfd->spinner = gtk_spinner_new();
 	gtk_box_pack_start(GTK_BOX(hbox), kfd->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(kfd->spinner);
 

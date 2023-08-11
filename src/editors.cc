@@ -26,7 +26,6 @@
 #include "filefilter.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
-#include "ui-spinner.h"
 #include "utilops.h"
 
 #define EDITOR_WINDOW_WIDTH 500
@@ -568,7 +567,7 @@ static void editor_verbose_window_enable_close(EditorVerboseData *vd)
 {
 	vd->gd->cancel_cb = editor_verbose_window_close;
 
-	spinner_set_interval(vd->spinner, -1);
+	gtk_spinner_stop(GTK_SPINNER(vd->spinner));
 	gtk_widget_set_sensitive(vd->button_stop, FALSE);
 	gtk_widget_set_sensitive(vd->button_close, TRUE);
 }
@@ -619,7 +618,8 @@ static EditorVerboseData *editor_verbose_window(EditorData *ed, const gchar *tex
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(vd->progress), TRUE);
 	gtk_widget_show(vd->progress);
 
-	vd->spinner = spinner_new(nullptr, SPINNER_SPEED);
+	vd->spinner = gtk_spinner_new();
+	gtk_spinner_start(GTK_SPINNER(vd->spinner));
 	gtk_box_pack_start(GTK_BOX(hbox), vd->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(vd->spinner);
 

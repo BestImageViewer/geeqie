@@ -117,7 +117,6 @@ src/ui-menu.cc
 src/ui-misc.cc
 src/ui-pathsel.cc
 src/ui/search-and-run.ui
-src/ui-spinner.cc
 src/ui-tabcomp.cc
 src/ui-tree-edit.cc
 src/ui-utildlg.cc

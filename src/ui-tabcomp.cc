@@ -29,7 +29,7 @@
 #include "history-list.h"
 #include "misc.h"	/* expand_tilde() */
 #include "ui-fileops.h"
-#include "ui-spinner.h"
+#include "ui_icons.h"
 #include "ui-utildlg.h"
 
 /* define this to enable a pop-up menu that shows possible matches

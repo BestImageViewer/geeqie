@@ -42,12 +42,12 @@
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
-#include "ui-spinner.h"
 #include "ui-tabcomp.h"
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
+
 #include <cmath>
 
 #define DEF_SEARCH_WIDTH  700
@@ -1730,7 +1730,7 @@ static void search_stop(SearchData *sd)
 	sd->match_broken_enable = FALSE;
 
 	gtk_widget_set_sensitive(sd->box_search, TRUE);
-	spinner_set_interval(sd->spinner, -1);
+	gtk_spinner_stop(GTK_SPINNER(sd->spinner));
 	gtk_widget_set_sensitive(sd->button_start, TRUE);
 	gtk_widget_set_sensitive(sd->button_stop, FALSE);
 	search_progress_update(sd, TRUE, -1.0);
@@ -2607,7 +2607,7 @@ static void search_start(SearchData *sd)
 	sd->search_total = 0;
 
 	gtk_widget_set_sensitive(sd->box_search, FALSE);
-	spinner_set_interval(sd->spinner, SPINNER_SPEED);
+	gtk_spinner_start(GTK_SPINNER(sd->spinner));
 	gtk_widget_set_sensitive(sd->button_start, FALSE);
 	gtk_widget_set_sensitive(sd->button_stop, TRUE);
 	search_progress_update(sd, TRUE, -1.0);
@@ -3697,7 +3697,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_box_pack_start(GTK_BOX(hbox), sd->label_progress, TRUE, TRUE, 0);
 	gtk_widget_show(sd->label_progress);
 
-	sd->spinner = spinner_new(nullptr, -1);
+	sd->spinner = gtk_spinner_new();
 	gtk_box_pack_start(GTK_BOX(hbox), sd->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(sd->spinner);
 

@@ -208,8 +208,6 @@ main_sources = files('advanced-exif.cc',
 'ui-misc.h',
 'ui-pathsel.cc',
 'ui-pathsel.h',
-'ui-spinner.cc',
-'ui-spinner.h',
 'ui-tabcomp.cc',
 'ui-tabcomp.h',
 'ui-tree-edit.cc',
@@ -256,7 +254,6 @@ gq_marshal_pragma = custom_target('gq-marshal-pragma',
 project_sources += gq_marshal_pragma
 
 icon_pairs = [
-'icon_spinner', files('ui_spinner.png'),
 'icon_tabcomp', files('ui_tabcomp.png'),
 ]
 

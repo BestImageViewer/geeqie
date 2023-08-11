@@ -30,7 +30,6 @@
 #include "thumb-standard.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
-#include "ui-spinner.h"
 #include "ui-tabcomp.h"
 #include "ui-utildlg.h"
 #include "window.h"
@@ -180,7 +179,7 @@ static void cache_maintain_home_stop(CMData *cm)
 	if (!cm->remote)
 		{
 		gtk_entry_set_text(GTK_ENTRY(cm->entry), _("done"));
-		spinner_set_interval(cm->spinner, -1);
+		gtk_spinner_stop(GTK_SPINNER(cm->spinner));
 
 		gtk_widget_set_sensitive(cm->button_stop, FALSE);
 		gtk_widget_set_sensitive(cm->button_close, TRUE);
@@ -404,7 +403,8 @@ void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent)
 	gtk_box_pack_start(GTK_BOX(hbox), cm->entry, TRUE, TRUE, 0);
 	gtk_widget_show(cm->entry);
 
-	cm->spinner = spinner_new(nullptr, SPINNER_SPEED);
+	cm->spinner = gtk_spinner_new();
+	gtk_spinner_start(GTK_SPINNER(cm->spinner));
 	gtk_box_pack_start(GTK_BOX(hbox), cm->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(cm->spinner);
 
@@ -678,7 +678,7 @@ static void cache_manager_render_finish(CacheOpsData *cd)
 	if (!cd->remote)
 		{
 		gtk_entry_set_text(GTK_ENTRY(cd->progress), _("done"));
-		spinner_set_interval(cd->spinner, -1);
+		gtk_spinner_stop(GTK_SPINNER(cd->spinner));
 
 		gtk_widget_set_sensitive(cd->group, TRUE);
 		gtk_widget_set_sensitive(cd->button_start, TRUE);
@@ -829,7 +829,7 @@ static void cache_manager_render_start_cb(GenericDialog *, gpointer data)
 			gtk_widget_set_sensitive(cd->button_stop, TRUE);
 			gtk_widget_set_sensitive(cd->button_close, FALSE);
 
-			spinner_set_interval(cd->spinner, SPINNER_SPEED);
+			gtk_spinner_start(GTK_SPINNER(cd->spinner));
 			}
 		dir_fd = file_data_new_dir(path);
 		cache_manager_render_folder(cd, dir_fd);
@@ -925,7 +925,7 @@ static void cache_manager_render_dialog(GtkWidget *widget, const gchar *path)
 	gtk_box_pack_start(GTK_BOX(cd->gd->vbox), cd->progress_bar, TRUE, TRUE, 0);
 	gtk_widget_show(cd->progress_bar);
 
-	cd->spinner = spinner_new(nullptr, -1);
+	cd->spinner = gtk_spinner_new();
 	gtk_box_pack_start(GTK_BOX(hbox), cd->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(cd->spinner);
 
@@ -1314,7 +1314,7 @@ static void cache_manager_sim_finish(CacheOpsData *cd)
 	cache_manager_sim_reset(cd);
 	if (!cd->remote)
 		{
-		spinner_set_interval(cd->spinner, -1);
+		gtk_spinner_stop(GTK_SPINNER(cd->spinner));
 
 		gtk_widget_set_sensitive(cd->group, TRUE);
 		gtk_widget_set_sensitive(cd->button_start, TRUE);
@@ -1498,7 +1498,7 @@ static void cache_manager_sim_start_cb(GenericDialog *, gpointer data)
 			gtk_widget_set_sensitive(cd->button_stop, TRUE);
 			gtk_widget_set_sensitive(cd->button_close, FALSE);
 
-			spinner_set_interval(cd->spinner, SPINNER_SPEED);
+			gtk_spinner_start(GTK_SPINNER(cd->spinner));
 			}
 		dir_fd = file_data_new_dir(path);
 		cache_manager_sim_folder(cd, dir_fd);
@@ -1563,7 +1563,7 @@ static void cache_manager_sim_load_dialog(GtkWidget *widget, const gchar *path)
 	gtk_box_pack_start(GTK_BOX(cd->gd->vbox), cd->progress_bar, TRUE, TRUE, 0);
 	gtk_widget_show(cd->progress_bar);
 
-	cd->spinner = spinner_new(nullptr, -1);
+	cd->spinner = gtk_spinner_new();
 	gtk_box_pack_start(GTK_BOX(hbox), cd->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(cd->spinner);
 
