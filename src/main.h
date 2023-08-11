@@ -168,8 +168,6 @@
 #define GQ_ICON_GO_NEXT "go-next"
 #define GQ_ICON_GO_JUMP "go-jump"
 #define GQ_ICON_HOME "go-home"
-#define GQ_ICON_PAN_DOWN "pan-down"
-#define GQ_ICON_PAN_UP "pan-up"
 
 #define GQ_ICON_PREV_PAGE "media-skip-backward"
 #define GQ_ICON_NEXT_PAGE "media-skip-forward"
@@ -189,11 +187,12 @@
 #define GQ_ICON_HELP "help-contents" // "help-browser"?
 #define GQ_ICON_EXPORT "document-export" // use collection icon?
 
-// not available in some themes?
+// not available in some themes
 #define GQ_ICON_OK "emblem-ok"
 #define GQ_ICON_APPLY "emblem-ok" // need something else?
 #define GQ_ICON_CANCEL "dialog-cancel" // missing in adwaita and others, seen in breeze
-#define GQ_ICON_CALENDAR "office-calendar"
+#define GQ_ICON_PAN_DOWN "pan-down-symbolic" // adwaita, breeze, hicolor supports this
+#define GQ_ICON_PAN_UP "pan-up-symbolic" // adwaita, breeze, hicolor supports this
 
 #define GQ_ICON_DIALOG_ERROR "dialog-error"
 #define GQ_ICON_DIALOG_INFO "dialog-information"
@@ -204,7 +203,11 @@
 #define GQ_ICON_LINK "emblem-symbolic-link"
 #define GQ_ICON_READONLY "emblem-readonly"
 
-#define GQ_ICON_ROTATE "object-rotate-left"
+#define GQ_ICON_FLIP_HORIZONTAL "object-flip-horizontal"
+#define GQ_ICON_FLIP_VERTICAL "object-flip-vertical"
+#define GQ_ICON_ROTATE_LEFT "object-rotate-left"
+#define GQ_ICON_ROTATE_RIGHT "object-rotate-right"
+
 #define GQ_ICON_DIRECTORY "folder"
 #define GQ_ICON_MISSING_IMAGE "image-missing"
 #define GQ_ICON_STRIKETHROUGH "format-text-strikethrough"

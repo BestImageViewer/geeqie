@@ -253,16 +253,6 @@ gq_marshal_pragma = custom_target('gq-marshal-pragma',
 
 project_sources += gq_marshal_pragma
 
-icon_pairs = [
-'icon_tabcomp', files('ui_tabcomp.png'),
-]
-
-ui_icons_h = custom_target('ui_icons', output : 'ui_icons.h',
-                command : [gdk_pixbuf_csource, '--raw', '--extern', '--build-list', icon_pairs],
-                capture : true)
-
-project_sources += ui_icons_h
-
 if conf_data.has('HAVE_LCMS')
     xxd_sh = find_program('generate-ClayRGB1998-icc-h.sh', dirs : join_paths(meson.project_source_root(), 'scripts'))
 

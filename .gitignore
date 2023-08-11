@@ -48,10 +48,6 @@ Makefile.in
 # /src/
 /src/.deps
 /src/geeqie
-/src/ui_icons.h
-
-# /src/icons/
-/src/icons/icons_inline.h
 
 # /src/pan-view/
 /src/pan-view/.deps

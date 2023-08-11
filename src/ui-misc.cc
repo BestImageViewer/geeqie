@@ -1034,7 +1034,7 @@ GtkWidget *date_selection_new()
 	g_signal_connect(G_OBJECT(ds->button), "size_allocate",
 			 G_CALLBACK(button_size_allocate_cb), ds->spin_y);
 
-	icon = gtk_image_new_from_icon_name(GQ_ICON_CALENDAR, GTK_ICON_SIZE_BUTTON);
+	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_BUTTON);
 	gtk_container_add(GTK_CONTAINER(ds->button), icon);
 	gtk_widget_show(icon);
 

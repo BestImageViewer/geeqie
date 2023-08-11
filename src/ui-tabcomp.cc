@@ -29,7 +29,6 @@
 #include "history-list.h"
 #include "misc.h"	/* expand_tilde() */
 #include "ui-fileops.h"
-#include "ui_icons.h"
 #include "ui-utildlg.h"
 
 /* define this to enable a pop-up menu that shows possible matches
@@ -598,22 +597,13 @@ static void tab_completion_button_size_allocate(GtkWidget *button, GtkAllocation
 static GtkWidget *tab_completion_create_complete_button(GtkWidget *entry, GtkWidget *parent)
 {
 	GtkWidget *button;
-	GtkWidget *icon;
-	GdkPixbuf *pixbuf;
 
-	button = gtk_button_new();
+	button = gtk_button_new_from_icon_name(GQ_ICON_GO_LAST, GTK_ICON_SIZE_BUTTON);
 	gtk_widget_set_can_focus(button, FALSE);
 	g_signal_connect(G_OBJECT(button), "size_allocate",
 			 G_CALLBACK(tab_completion_button_size_allocate), parent);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(tab_completion_button_pressed), entry);
-
-	pixbuf = gdk_pixbuf_new_from_inline(-1, icon_tabcomp, FALSE, nullptr);
-	icon = gtk_image_new_from_pixbuf(pixbuf);
-	g_object_unref(pixbuf);
-
-	gtk_container_add(GTK_CONTAINER(button), icon);
-	gtk_widget_show(icon);
 
 	return button;
 }

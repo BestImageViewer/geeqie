@@ -48,7 +48,7 @@ project(
     default_options : ['cpp_std=c++14', 'warning_level=3', 'buildtype=debugoptimized', 'cpp_link_args=-rdynamic']
 )
 
-# To inhibit warnings from the generated files icons_inline.h and ui_icons.h
+# To inhibit warnings from the generated file icons.h
 add_global_arguments('-Wno-overlength-strings', language : 'c')
 
 # To compile originally-C files as C++
