@@ -397,12 +397,12 @@ static FileData *file_data_new(const gchar *path_utf8, struct stat *st, gboolean
 
 	if (fd)
 		{
-		gboolean changed;
-
 		if (disable_sidecars) file_data_disable_grouping(fd, TRUE);
 
-
-		changed = file_data_check_changed_single_file(fd, st);
+#ifdef DEBUG_FILEDATA
+		gboolean changed =
+#endif
+		file_data_check_changed_single_file(fd, st);
 
 		DEBUG_2("file_data_pool hit: '%s' %s", fd->path, changed ? "(changed)" : "");
 
@@ -2663,7 +2663,6 @@ gint file_data_verify_ci(FileData *fd, GList *list)
 			if (access_file(metadata_path, W_OK) || (!isname(metadata_path) && access_file(dest_dir, W_OK)))
 				{
 				file_data_update_ci_dest(fd, metadata_path);
-				have_dest = TRUE;
 				}
 			else
 				{
