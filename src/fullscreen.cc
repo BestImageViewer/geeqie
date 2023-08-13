@@ -395,64 +395,57 @@ GList *fullscreen_prefs_list()
 {
 	GList *list = nullptr;
 	GdkDisplay *display;
-	gint number;
-	gint i;
+	GdkScreen *screen;
+	gint monitors;
+	gint j;
 
 	display = gdk_display_get_default();
-	number = gdk_display_get_n_screens(display);
+	screen = gdk_display_get_default_screen(display);
+	monitors = gdk_display_get_n_monitors(display);
 
-	for (i = 0; i < number; i++)
+	for (j = -1; j < monitors; j++)
 		{
-		GdkScreen *screen;
-		gint monitors;
-		gint j;
+		ScreenData *sd;
+		GdkRectangle rect;
+		gchar *name;
+		gchar *subname;
 
-		screen = gdk_display_get_screen(display, i);
-		monitors = gdk_screen_get_n_monitors(screen);
+		name = gdk_screen_make_display_name(screen);
 
-		for (j = -1; j < monitors; j++)
+		if (j < 0)
 			{
-			ScreenData *sd;
-			GdkRectangle rect;
-			gchar *name;
-			gchar *subname;
-
-			name = gdk_screen_make_display_name(screen);
-
-			if (j < 0)
-				{
-				rect.x = 0;
-				rect.y = 0;
-				rect.width = gdk_screen_get_width(screen);
-				rect.height = gdk_screen_get_height(screen);
-				subname = g_strdup(_("Full size"));
-				}
-			else
-				{
-				gdk_screen_get_monitor_geometry(screen, j, &rect);
-				subname = gdk_screen_get_monitor_plug_name(screen, j);
-				if (subname == nullptr)
-					{
-					subname = g_strdup_printf("%s %d", _("Monitor"), j + 1);
-					}
-				}
-
-			sd = g_new0(ScreenData, 1);
-			sd->number = (i+1) * 100 + j + 1;
-			sd->description = g_strdup_printf("%s %s, %s", _("Screen"), name, subname);
-			sd->x = rect.x;
-			sd->y = rect.y;
-			sd->width = rect.width;
-			sd->height = rect.height;
-
-			DEBUG_1("Screen %d %30s %4d,%4d (%4dx%4d)",
-					  sd->number, sd->description, sd->x, sd->y, sd->width, sd->height);
-
-			list = g_list_append(list, sd);
-
-			g_free(name);
-			g_free(subname);
+			rect.x = 0;
+			rect.y = 0;
+			rect.width = gdk_screen_get_width(screen);
+			rect.height = gdk_screen_get_height(screen);
+			subname = g_strdup(_("Full size"));
 			}
+		else
+			{
+			auto monitor = gdk_display_get_monitor(display, j);
+			gdk_monitor_get_geometry(monitor, &rect);
+			subname = g_strdup(gdk_monitor_get_model(monitor));
+			if (subname == nullptr)
+				{
+				subname = g_strdup_printf("%s %d", _("Monitor"), j + 1);
+				}
+			}
+
+		sd = g_new0(ScreenData, 1);
+		sd->number = 100 + j + 1;
+		sd->description = g_strdup_printf("%s %s, %s", _("Screen"), name, subname);
+		sd->x = rect.x;
+		sd->y = rect.y;
+		sd->width = rect.width;
+		sd->height = rect.height;
+
+		DEBUG_1("Screen %d %30s %4d,%4d (%4dx%4d)",
+				sd->number, sd->description, sd->x, sd->y, sd->width, sd->height);
+
+		list = g_list_append(list, sd);
+
+		g_free(name);
+		g_free(subname);
 		}
 
 	return list;
@@ -514,18 +507,9 @@ void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, gint *x, gint
 		{
 		GdkDisplay *display;
 		GdkScreen *screen;
-		gint n;
 
 		display = gdk_display_get_default();
-		n = sd->number / 100 - 1;
-		if (n >= 0 && n < gdk_display_get_n_screens(display))
-			{
-			screen = gdk_display_get_screen(display, n);
-			}
-		else
-			{
-			screen = gdk_display_get_default_screen(display);
-			}
+		screen = gdk_display_get_default_screen(display);
 
 		if (x) *x = sd->x;
 		if (y) *y = sd->y;
@@ -535,8 +519,8 @@ void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, gint *x, gint
 		if (dest_screen) *dest_screen = screen;
 		if (same_region) *same_region = (!widget || !gtk_widget_get_window(widget) ||
 					(screen == gtk_widget_get_screen(widget) &&
-					(sd->number%100 == 0 ||
-					 sd->number%100 == gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(widget))+1)));
+					 (sd->number%100 == 0 ||
+					  sd->number%100 == gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(widget))+1)));
 
 		}
 	else if (screen != 1 || !widget || !gtk_widget_get_window(widget))
@@ -562,21 +546,21 @@ void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, gint *x, gint
 		}
 	else
 		{
-		GdkScreen *screen;
-		gint monitor;
+		GdkDisplay *display;
+		GdkMonitor *monitor;
 		GdkRectangle rect;
 
-		screen = gtk_widget_get_screen(widget);
-		monitor = gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(widget));
+		display = gtk_widget_get_display(widget);
+		monitor = gdk_display_get_monitor_at_window(display, gtk_widget_get_window(widget));
 
-		gdk_screen_get_monitor_geometry(screen, monitor, &rect);
+		gdk_monitor_get_geometry(monitor, &rect);
 
 		if (x) *x = rect.x;
 		if (y) *y = rect.y;
 		if (width) *width = rect.width;
 		if (height) *height = rect.height;
 
-		if (dest_screen) *dest_screen = screen;
+		if (dest_screen) *dest_screen = gtk_widget_get_screen(widget);
 		if (same_region) *same_region = TRUE;
 		}
 
@@ -596,7 +580,7 @@ gint fullscreen_prefs_find_screen_for_widget_unused(GtkWidget *widget)
 	screen = gtk_widget_get_screen(widget);
 	monitor = gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(widget));
 
-	n = (gdk_screen_get_number(screen)+1) * 100 + monitor + 1;
+	n = 100 + monitor + 1;
 
 	DEBUG_1("Screen appears to be %d", n);
 
