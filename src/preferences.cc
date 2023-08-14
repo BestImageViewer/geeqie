@@ -2789,7 +2789,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 
 	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
 	gtk_label_set_yalign(GTK_LABEL(label), 0.5);
-	gtk_misc_set_padding(GTK_MISC(label), 22, 0);
+	gtk_widget_set_margin_start(label, 22);
 	pref_spacer(group, PREF_PAD_GROUP);
 
 	group = pref_group_new(vbox, FALSE, _("Step 1 Options:"), GTK_ORIENTATION_VERTICAL);

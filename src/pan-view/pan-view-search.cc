@@ -55,7 +55,7 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 	// Build the spin-button to show/hide the search UI.
 	ui->search_button = gtk_toggle_button_new();
 	gtk_button_set_relief(GTK_BUTTON(ui->search_button), GTK_RELIEF_NONE);
-	gtk_button_set_focus_on_click(GTK_BUTTON(ui->search_button), FALSE);
+	gtk_widget_set_focus_on_click(ui->search_button, FALSE);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gtk_container_add(GTK_CONTAINER(ui->search_button), hbox);
 	gtk_widget_show(hbox);

@@ -55,7 +55,7 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 				   0, PAN_VIEW_FILTER_GROUP, 1, _("Group"), 2, _("G"), -1);
 
 		ui->filter_mode_combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(ui->filter_mode_model));
-		gtk_combo_box_set_focus_on_click(GTK_COMBO_BOX(ui->filter_mode_combo), FALSE);
+		gtk_widget_set_focus_on_click(ui->filter_mode_combo, FALSE);
 		gtk_combo_box_set_active(GTK_COMBO_BOX(ui->filter_mode_combo), 0);
 
 		GtkCellRenderer *render = gtk_cell_renderer_text_new();
@@ -89,7 +89,7 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	// Build the spin-button to show/hide the filter UI.
 	ui->filter_button = gtk_toggle_button_new();
 	gtk_button_set_relief(GTK_BUTTON(ui->filter_button), GTK_RELIEF_NONE);
-	gtk_button_set_focus_on_click(GTK_BUTTON(ui->filter_button), FALSE);
+	gtk_widget_set_focus_on_click(ui->filter_button, FALSE);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gtk_container_add(GTK_CONTAINER(ui->filter_button), hbox);
 	gtk_widget_show(hbox);
