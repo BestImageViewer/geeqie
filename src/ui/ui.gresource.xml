@@ -25,6 +25,7 @@
   <gresource prefix="/org/geeqie/ui">
     <file>appimage-notification.ui</file>
     <file>custom.css</file>
+    <file>menu.ui</file>
     <file>search-and-run.ui</file>
   </gresource>
 </gresources>

@@ -1,0 +1,279 @@
+<ui>
+  <menubar name="MainMenu">
+    <menu action="FileMenu">
+      <menuitem action="NewCollection"/>
+      <menuitem action="OpenCollection"/>
+      <menuitem action="OpenRecent"/>
+      <placeholder name="OpenSection"/>
+      <separator/>
+      <menuitem action="Search"/>
+      <menuitem action="FindDupes"/>
+      <placeholder name="SearchSection"/>
+      <separator/>
+      <menuitem action="Print"/>
+      <placeholder name="PrintSection"/>
+      <separator/>
+      <menuitem action="NewFolder"/>
+      <menuitem action="Copy"/>
+      <menuitem action="Move"/>
+      <menuitem action="Rename"/>
+      <separator/>
+      <menuitem action="Delete"/>
+      <menuitem action="PermanentDelete"/>
+      <separator/>
+      <placeholder name="FileOpsSection"/>
+      <separator/>
+      <placeholder name="QuitSection"/>
+      <menuitem action="Quit"/>
+      <separator/>
+    </menu>
+    <menu action="GoMenu">
+      <menuitem action="FirstImage"/>
+      <menuitem action="PrevImage"/>
+      <menuitem action="NextImage"/>
+      <menuitem action="LastImage"/>
+      <menuitem action="ImageBack"/>
+      <menuitem action="ImageForward"/>
+      <separator/>
+      <menuitem action="Back"/>
+      <menuitem action="Forward"/>
+      <menuitem action="Up"/>
+      <menuitem action="Home"/>
+      <separator/>
+      <menuitem action="FirstPage"/>
+      <menuitem action="LastPage"/>
+      <menuitem action="NextPage"/>
+      <menuitem action="PrevPage"/>
+    </menu>
+    <menu action="SelectMenu">
+      <menuitem action="SelectAll"/>
+      <menuitem action="SelectNone"/>
+      <menuitem action="SelectInvert"/>
+      <menuitem action="RectangularSelection"/>
+      <menuitem action="ShowFileFilter"/>
+      <placeholder name="SelectSection"/>
+      <separator/>
+      <menuitem action="CopyPath"/>
+      <menuitem action="CopyPathUnquoted"/>
+      <placeholder name="ClipboardSection"/>
+      <separator/>
+      <menuitem action="ShowMarks"/>
+      <menuitem action="ClearMarks"/>
+      <placeholder name="MarksSection"/>
+      <separator/>
+    </menu>
+    <menu action="EditMenu">
+      <placeholder name="EditSection"/>
+      <separator/>
+      <menu action="OrientationMenu">
+        <menuitem action="RotateCW"/>
+        <menuitem action="RotateCCW"/>
+        <menuitem action="Rotate180"/>
+        <menuitem action="Mirror"/>
+        <menuitem action="Flip"/>
+        <menuitem action="AlterNone"/>
+        <separator/>
+        <menuitem action="ExifRotate"/>
+        <separator/>
+        <menuitem action="WriteRotation"/>
+        <menuitem action="WriteRotationKeepDate"/>
+        <separator/>
+      </menu>
+      <menu action="RatingMenu">
+        <menuitem action="Rating0"/>
+        <menuitem action="Rating1"/>
+        <menuitem action="Rating2"/>
+        <menuitem action="Rating3"/>
+        <menuitem action="Rating4"/>
+        <menuitem action="Rating5"/>
+        <menuitem action="RatingM1"/>
+        <separator/>
+      </menu>
+      <menuitem action="SaveMetadata"/>
+      <menuitem action="KeywordAutocomplete"/>
+      <placeholder name="PropertiesSection"/>
+      <separator/>
+      <menuitem action="DrawRectangle"/>
+      <separator/>
+      <menuitem action="Preferences"/>
+      <menuitem action="Plugins"/>
+      <menuitem action="LayoutConfig"/>
+      <menuitem action="Maintenance"/>
+      <placeholder name="PreferencesSection"/>
+      <separator/>
+      <separator/>
+    </menu>
+    <menu action="PluginsMenu"/>
+    <menu action="ViewMenu">
+      <menuitem action="ViewInNewWindow"/>
+      <menuitem action="PanView"/>
+      <menuitem action="ExifWin"/>
+      <menuitem action="OpenArchive"/>
+      <placeholder name="WindowSection"/>
+      <separator/>
+      <menu action="FileDirMenu">
+        <menuitem action="FolderTree"/>
+        <placeholder name="FolderSection"/>
+        <separator/>
+        <menuitem action="ViewList"/>
+        <menuitem action="ViewIcons"/>
+        <menuitem action="Thumbnails"/>
+        <placeholder name="ListSection"/>
+        <separator/>
+        <menuitem action="FloatTools"/>
+        <menuitem action="HideTools"/>
+      </menu>
+      <placeholder name="DirSection"/>
+      <separator/>
+      <menu action="ZoomMenu">
+        <menu action="ConnectZoomMenu">
+          <menuitem action="ConnectZoomIn"/>
+          <menuitem action="ConnectZoomOut"/>
+          <menuitem action="ConnectZoomFit"/>
+          <menuitem action="ConnectZoomFillHor"/>
+          <menuitem action="ConnectZoomFillVert"/>
+          <menuitem action="ConnectZoom100"/>
+          <menuitem action="ConnectZoom200"/>
+          <menuitem action="ConnectZoom300"/>
+          <menuitem action="ConnectZoom400"/>
+          <menuitem action="ConnectZoom50"/>
+          <menuitem action="ConnectZoom33"/>
+          <menuitem action="ConnectZoom25"/>
+        </menu>
+        <menuitem action="ZoomIn"/>
+        <menuitem action="ZoomOut"/>
+        <menuitem action="ZoomFit"/>
+        <menuitem action="ZoomFillHor"/>
+        <menuitem action="ZoomFillVert"/>
+        <menuitem action="Zoom100"/>
+        <menuitem action="Zoom200"/>
+        <menuitem action="Zoom300"/>
+        <menuitem action="Zoom400"/>
+        <menuitem action="Zoom50"/>
+        <menuitem action="Zoom33"/>
+        <menuitem action="Zoom25"/>
+      </menu>
+      <menu action="SplitMenu">
+        <menuitem action="SplitHorizontal"/>
+        <menuitem action="SplitVertical"/>
+        <menuitem action="SplitTriple"/>
+        <menuitem action="SplitQuad"/>
+        <menuitem action="SplitSingle"/>
+        <separator/>
+        <menuitem action="SplitNextPane"/>
+        <menuitem action="SplitPreviousPane"/>
+        <menuitem action="SplitUpPane"/>
+        <menuitem action="SplitDownPane"/>
+        <separator/>
+        <menuitem action="SplitPaneSync"/>
+      </menu>
+      <menu action="StereoMenu">
+        <menuitem action="StereoAuto"/>
+        <menuitem action="StereoSBS"/>
+        <menuitem action="StereoCross"/>
+        <menuitem action="StereoOff"/>
+        <separator/>
+        <menuitem action="StereoCycle"/>
+      </menu>
+      <menu action="ColorMenu">
+        <menuitem action="UseColorProfiles"/>
+        <menuitem action="UseImageProfile"/>
+        <menuitem action="ColorProfile0"/>
+        <menuitem action="ColorProfile1"/>
+        <menuitem action="ColorProfile2"/>
+        <menuitem action="ColorProfile3"/>
+        <menuitem action="ColorProfile4"/>
+        <menuitem action="ColorProfile5"/>
+        <separator/>
+        <menuitem action="Grayscale"/>
+      </menu>
+      <menu action="OverlayMenu">
+        <menuitem action="ImageOverlay"/>
+        <menuitem action="ImageHistogram"/>
+        <menuitem action="ImageOverlayCycle"/>
+        <separator/>
+        <menuitem action="HistogramChanR"/>
+        <menuitem action="HistogramChanG"/>
+        <menuitem action="HistogramChanB"/>
+        <menuitem action="HistogramChanRGB"/>
+        <menuitem action="HistogramChanV"/>
+        <menuitem action="HistogramChanCycle"/>
+        <separator/>
+        <menuitem action="HistogramModeLin"/>
+        <menuitem action="HistogramModeLog"/>
+        <menuitem action="HistogramModeCycle"/>
+      </menu>
+      <menuitem action="OverUnderExposed"/>
+      <menuitem action="FullScreen"/>
+      <placeholder name="ViewSection"/>
+      <separator/>
+      <menuitem action="SBar"/>
+      <menuitem action="SBarSort"/>
+      <menuitem action="HideBars"/>
+      <menuitem action="HideSelectableToolbars"/>
+      <menuitem action="ShowInfoPixel"/>
+      <menuitem action="IgnoreAlpha"/>
+      <placeholder name="ToolsSection"/>
+      <separator/>
+      <menuitem action="Animate"/>
+      <menuitem action="SlideShow"/>
+      <menuitem action="SlideShowPause"/>
+      <menuitem action="SlideShowFaster"/>
+      <menuitem action="SlideShowSlower"/>
+      <separator/>
+      <menuitem action="Refresh"/>
+      <placeholder name="SlideShowSection"/>
+      <separator/>
+    </menu>
+    <menu action="WindowsMenu">
+      <menu action="NewWindow">
+        <menuitem action="NewWindowDefault"/>
+        <menuitem action="NewWindowFromCurrent"/>
+        <separator/>
+      </menu>
+      <menuitem action="RenameWindow"/>
+      <menuitem action="DeleteWindow"/>
+      <menuitem action="CloseWindow"/>
+    </menu>
+    <menu action="HelpMenu">
+      <separator/>
+      <menuitem action="HelpContents"/>
+      <menuitem action="SearchAndRunCommand"/>
+      <menuitem action="HelpSearch"/>
+      <menuitem action="HelpShortcuts"/>
+      <menuitem action="HelpKbd"/>
+      <menuitem action="HelpNotes"/>
+      <menuitem action="HelpChangeLog"/>
+      <placeholder name="HelpSection"/>
+      <separator/>
+      <menuitem action="About"/>
+      <separator/>
+      <menuitem action="LogWindow"/>
+      <separator/>
+    </menu>
+  </menubar>
+
+  <toolbar name="ToolBar"/>
+  <toolbar name="StatusBar"/>
+
+  <accelerator action="PrevImageAlt1"/>
+  <accelerator action="PrevImageAlt2"/>
+  <accelerator action="NextImageAlt1"/>
+  <accelerator action="NextImageAlt2"/>
+  <accelerator action="DeleteAlt1"/>
+  <accelerator action="DeleteAlt2"/>
+  <accelerator action="FullScreenAlt1"/>
+  <accelerator action="FullScreenAlt2"/>
+  <accelerator action="Escape"/>
+  <accelerator action="EscapeAlt1"/>
+
+  <accelerator action="ZoomInAlt1"/>
+  <accelerator action="ZoomOutAlt1"/>
+  <accelerator action="Zoom100Alt1"/>
+  <accelerator action="ZoomFitAlt1"/>
+
+  <accelerator action="ConnectZoomInAlt1"/>
+  <accelerator action="ConnectZoomOutAlt1"/>
+  <accelerator action="ConnectZoom100Alt1"/>
+  <accelerator action="ConnectZoomFitAlt1"/>
+</ui>
