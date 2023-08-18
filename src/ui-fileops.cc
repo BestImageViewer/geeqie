@@ -76,8 +76,7 @@ static void encoding_dialog(const gchar *path)
 	lc = getenv("LANG");
 	bf = getenv("G_BROKEN_FILENAMES");
 
-	string = g_string_new("");
-	g_string_append(string, _("One or more filenames are not encoded with the preferred locale character set.\n"));
+	string = g_string_new(_("One or more filenames are not encoded with the preferred locale character set.\n"));
 	g_string_append_printf(string, _("Operations on, and display of these files with %s may not succeed.\n"), PACKAGE);
 	g_string_append(string, "\n");
 	g_string_append(string, _("If your filenames are not encoded in utf-8, try setting the environment variable G_BROKEN_FILENAMES=1\n"));

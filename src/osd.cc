@@ -201,7 +201,6 @@ static gchar *keywords_to_string(FileData *fd)
 {
 	GList *keywords;
 	GString *kwstr = nullptr;
-	gchar *ret = nullptr;
 
 	g_assert(fd);
 
@@ -229,11 +228,10 @@ static gchar *keywords_to_string(FileData *fd)
 
 	if (kwstr)
 		{
-		ret = g_strdup(kwstr->str);
-		g_string_free(kwstr, TRUE);
+		return g_string_free(kwstr, FALSE);
 		}
 
-	return ret;
+	return nullptr;
 }
 
 gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
@@ -443,12 +441,9 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 		g_string_erase(osd_info, start-osd_info->str, end-start-1);
 		}
 
-	g_strchomp(osd_info->str);
+	ret = g_string_free(osd_info, FALSE);
 
-	ret = g_strdup(osd_info->str);
-	g_string_free(osd_info, TRUE);
-
-	return ret;
+	return g_strchomp(ret);
 }
 
 void osd_template_insert(GHashTable *vars, const gchar *keyword, const gchar *value, OsdTemplateFlags flags)

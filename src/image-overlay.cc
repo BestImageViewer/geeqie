@@ -365,20 +365,20 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 
 		if (active_marks > 0)
 			{
-			GString *buf = g_string_sized_new(FILEDATA_MARKS_SIZE * 2);
+			GString *buf = g_string_sized_new(strlen(text) + 1 + FILEDATA_MARKS_SIZE * 2);
+
+			if (*text)
+				{
+				g_string_append_printf(buf, "%s\n", text);
+				}
 
 			for (mark = 0; mark < FILEDATA_MARKS_SIZE; mark++)
 				{
 				g_string_append_printf(buf, file_data_get_mark(fd, mark) ? " <span background='#FF00FF'>%c</span>" : " %c", '1' + (mark < 9 ? mark : -1) );
 				}
 
-			if (*text)
-				text2 = g_strdup_printf("%s\n%s", text, buf->str);
-			else
-				text2 = g_strdup(buf->str);
-			g_string_free(buf, TRUE);
 			g_free(text);
-			text = text2;
+			text = g_string_free(buf, FALSE);
 			}
 
 		if (with_hist)

@@ -319,31 +319,24 @@ gchar *date_get_abbreviated_day_name(gint day)
 
 gchar *convert_rating_to_stars(gint rating)
 {
-	gchar *ret;
 	GString *str = g_string_new(nullptr);
 
 	if (rating == -1)
 		{
 		str = g_string_append_unichar(str, options->star_rating.rejected);
-		ret = g_strdup(str->str);
-		g_string_free(str, TRUE);
-		}
-	else if (rating > 0 && rating < 6)
-		{
-		while (rating > 0)
-			{
-			str = g_string_append_unichar(str, options->star_rating.star);
-			rating = rating - 1;
-			}
-		ret = g_strdup(str->str);
-		g_string_free(str, TRUE);
-		}
-	else
-		{
-		ret = g_strdup("");
+		return g_string_free(str, FALSE);
 		}
 
-	return ret;
+	if (rating > 0 && rating < 6)
+		{
+		for (; rating > 0; --rating)
+			{
+			str = g_string_append_unichar(str, options->star_rating.star);
+			}
+		return g_string_free(str, FALSE);
+		}
+
+	return g_strdup("");
 }
 
 gchar *get_symbolic_link(const gchar *path_utf8)

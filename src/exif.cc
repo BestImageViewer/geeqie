@@ -1308,7 +1308,6 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 	const ExifMarker *marker;
 	gpointer data;
 	GString *string;
-	gchar *text;
 	gint ne;
 	gint i;
 
@@ -1433,10 +1432,7 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 		g_string_append(string, " ...");
 		}
 
-	text = g_strdup(string->str);
-	g_string_free(string, TRUE);
-
-	return text;
+	return g_string_free(string, FALSE);
 }
 
 gchar *exif_item_get_string(ExifItem *item, gint)

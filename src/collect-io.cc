@@ -198,7 +198,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 				}
 			}
 
-		if (strlen(extended_filename_buffer->str) > 0)
+		if (extended_filename_buffer->len > 0)
 			{
 			buffer2 = g_strdup(extended_filename_buffer->str);
 			g_string_erase(extended_filename_buffer, 0, -1);

@@ -99,15 +99,12 @@ static gboolean image_loader_collection_load(gpointer loader, const guchar *, gs
 
 				unlink(randname);
 				g_free(randname);
-				g_string_free(file_names, TRUE);
 				g_free(cmd_line);
 
 				ret = TRUE;
 				}
-			else
-				{
-				g_string_free(file_names, TRUE);
-				}
+
+			g_string_free(file_names, TRUE);
 			}
 		}
 	return ret;

@@ -673,9 +673,7 @@ void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 					}
 				g_string_append_printf(delay, "%.1fs]", sec);
 
-				ss = g_strdup(delay->str);
-
-				g_string_free(delay, TRUE);
+				ss = g_string_free(delay, FALSE);
 				}
 			else
 				{

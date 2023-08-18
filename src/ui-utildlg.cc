@@ -571,10 +571,8 @@ static gboolean user_close_cb(GtkWidget *, GdkEvent *, gpointer data)
 static void show_notification_message(AppImageData *appimage_data)
 {
 	GtkBuilder *builder;
-	gchar *ui_path;
 
-	ui_path = g_build_filename(GQ_RESOURCE_PATH_UI, "appimage-notification.ui", nullptr);
-	builder = gtk_builder_new_from_resource(ui_path);
+	builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/appimage-notification.ui");
 
 	appimage_data->window = GTK_WIDGET(gtk_builder_get_object(builder, "appimage_notification"));
 
@@ -584,8 +582,6 @@ static void show_notification_message(AppImageData *appimage_data)
 
 	g_object_unref(builder);
 	gtk_widget_show(appimage_data->window);
-
-	g_free(ui_path);
 }
 
 void appimage_notification_func(gpointer data, gpointer)

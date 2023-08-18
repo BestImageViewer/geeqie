@@ -280,14 +280,11 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 GtkWidget *search_and_run_new(LayoutWindow *lw)
 {
 	SarData *sar;
-	gchar *ui_path;
 
 	sar = g_new0(SarData, 1);
 	sar->lw = lw;
 
-	ui_path = g_build_filename(GQ_RESOURCE_PATH_UI, "search-and-run.ui", nullptr);
-
-	sar->builder = gtk_builder_new_from_resource(ui_path);
+	sar->builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/search-and-run.ui");
 	command_store_populate(sar);
 
 	sar->window = GTK_WIDGET(gtk_builder_get_object(sar->builder, "search_and_run"));
@@ -300,7 +297,6 @@ GtkWidget *search_and_run_new(LayoutWindow *lw)
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(sar->builder, "entry")), "activate", G_CALLBACK(entry_box_activate_cb), sar);
 
 	gtk_widget_show(sar->window);
-	g_free(ui_path);
 
 	return sar->window;
 }

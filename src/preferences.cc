@@ -4051,11 +4051,9 @@ void show_about_window(LayoutWindow *lw)
 	gchar *artists[2];
 	gchar *author_line;
 	gchar *authors[1000];
-	gchar *authors_path;
 	gchar *comment;
 	gchar *timezone_path;
 	gchar *translators;
-	gchar *translators_path;
 	gint i_authors = 0;
 	gint n = 0;
 	gsize bytes_read;
@@ -4082,9 +4080,7 @@ void show_about_window(LayoutWindow *lw)
 		}
 	g_free(timezone_path);
 
-	authors_path = g_build_filename(GQ_RESOURCE_PATH_CREDITS, "authors", NULL);
-
-	in_stream_authors = g_resources_open_stream(authors_path, G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
+	in_stream_authors = g_resources_open_stream(GQ_RESOURCE_PATH_CREDITS "/authors", G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
 
 	data_stream = g_data_input_stream_new(in_stream_authors);
 
@@ -4099,7 +4095,7 @@ void show_about_window(LayoutWindow *lw)
 
 	g_input_stream_close(in_stream_authors, nullptr, nullptr);
 
-	translators_path = g_build_filename(GQ_RESOURCE_PATH_CREDITS, "translators", NULL);
+	constexpr auto translators_path = GQ_RESOURCE_PATH_CREDITS "/translators";
 
 	g_resources_get_info(translators_path, G_RESOURCE_LOOKUP_FLAGS_NONE, &size, &flags, nullptr);
 
@@ -4141,10 +4137,8 @@ void show_about_window(LayoutWindow *lw)
 		}
 
 	g_free(artists[0]);
-	g_free(authors_path);
 	g_free(comment);
 	g_free(translators);
-	g_free(translators_path);
 	g_object_unref(data_stream);
 	g_object_unref(in_stream_authors);
 	g_object_unref(in_stream_translators);

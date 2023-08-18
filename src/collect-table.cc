@@ -1482,7 +1482,6 @@ static void collection_table_insert_marker(CollectTable *ct, CollectInfo *info, 
 	GError *error = nullptr;
 	GInputStream *in_stream;
 	GdkPixbuf *pb;
-	gchar *path;
 
 	parent = gtk_widget_get_window(gtk_widget_get_toplevel(ct->listview));
 	gdk_window_get_position(parent, &x_parent, &y_parent);
@@ -1505,10 +1504,7 @@ static void collection_table_insert_marker(CollectTable *ct, CollectInfo *info, 
 		GdkWindowAttr attributes;
 		gint attributes_mask;
 
-		path = g_build_filename(GQ_RESOURCE_PATH_ICONS, "gq-marker.xpm", NULL);
-		in_stream = g_resources_open_stream(path, G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
-		g_free(path);
-
+		in_stream = g_resources_open_stream(GQ_RESOURCE_PATH_ICONS "/gq-marker.xpm", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
 		pb = gdk_pixbuf_new_from_stream(in_stream, nullptr, &error);
 		g_object_unref(in_stream);
 

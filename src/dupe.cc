@@ -5315,7 +5315,7 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 		work = work->next;
 		}
 
-	g_output_stream_write(G_OUTPUT_STREAM(gfstream), output_string->str, strlen(output_string->str), nullptr, &error);
+	g_output_stream_write(G_OUTPUT_STREAM(gfstream), output_string->str, output_string->len, nullptr, &error);
 
 	g_free(sep);
 	g_string_free(output_string, TRUE);

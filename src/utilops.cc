@@ -3154,7 +3154,7 @@ static void clipboard_get_func(GtkClipboard *clipboard, GtkSelectionData *select
 			}
 		}
 
-	gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data), 8, reinterpret_cast<guchar *>(path_list_str->str), strlen(path_list_str->str));
+	gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data), 8, reinterpret_cast<guchar *>(path_list_str->str), path_list_str->len);
 
 	g_string_free(path_list_str, TRUE);
 }
