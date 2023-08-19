@@ -72,7 +72,6 @@ if option.enabled()
 endif
 
 # External programs
-gdk_pixbuf_csource = find_program('gdk-pixbuf-csource', required : true)
 glib_compile_resources = find_program('glib-compile-resources', required : true)
 glib_genmarshal = find_program('glib-genmarshal', required : true)
 
