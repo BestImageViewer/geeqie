@@ -5218,7 +5218,6 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 	GFileOutputStream *gfstream;
 	GFile *out_file;
 	GString *output_string;
-	gchar *sep;
 	gchar* rank;
 	GList *work;
 	GtkTreeSelection *selection;
@@ -5243,7 +5242,7 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 		return;
 		}
 
-	sep = g_strdup((edd->separator == EXPORT_CSV) ?  "," : "\t");
+	const gchar *sep = (edd->separator == EXPORT_CSV) ?  "," : "\t";
 	output_string = g_string_new(g_strjoin(sep, _("Match"), _("Group"), _("Similarity"), _("Set"), _("Thumbnail"), _("Name"), _("Size"), _("Date"), _("Width"), _("Height"), _("Path\n"), NULL));
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(edd->dupewindow->listview));
@@ -5269,7 +5268,7 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 			match_count++;
 			}
 		color_old = color_new;
-		output_string = g_string_append(output_string, g_strdup_printf("%d", match_count));
+		g_string_append_printf(output_string, "%d", match_count);
 		output_string = g_string_append(output_string, sep);
 
 		if ((dupe_match_find_parent(edd->dupewindow, di) == di))
@@ -5290,13 +5289,13 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 			}
 		else
 			{
-			output_string = g_string_append(output_string, g_strdup_printf("%s", rank_split[0]));
+			output_string = g_string_append(output_string, rank_split[0]);
 			}
 		output_string = g_string_append(output_string, sep);
 		g_free(rank);
 		g_strfreev(rank_split);
 
-		output_string = g_string_append(output_string, g_strdup_printf("%d", (di->second + 1)));
+		g_string_append_printf(output_string, "%d", di->second + 1);
 		output_string = g_string_append(output_string, sep);
 
 		thumb_cache = cache_find_location(CACHE_TYPE_THUMB, di->fd->path);
@@ -5316,13 +5315,13 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 		output_string = g_string_append(output_string, sep);
 		g_free(name);
 
-		output_string = g_string_append(output_string, g_strdup_printf("%" PRIu64, di->fd->size));
+		g_string_append_printf(output_string, "%" PRIu64, di->fd->size);
 		output_string = g_string_append(output_string, sep);
 		output_string = g_string_append(output_string, text_from_time(di->fd->date));
 		output_string = g_string_append(output_string, sep);
-		output_string = g_string_append(output_string, g_strdup_printf("%d", (di->width ? di->width : 0)));
+		g_string_append_printf(output_string, "%d", di->width);
 		output_string = g_string_append(output_string, sep);
-		output_string = g_string_append(output_string, g_strdup_printf("%d", (di->height ? di->height : 0)));
+		g_string_append_printf(output_string, "%d", di->height);
 		output_string = g_string_append(output_string, sep);
 		output_string = g_string_append(output_string, di->fd->path);
 		output_string = g_string_append_c(output_string, '\n');
@@ -5332,7 +5331,6 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 
 	g_output_stream_write(G_OUTPUT_STREAM(gfstream), output_string->str, output_string->len, nullptr, &error);
 
-	g_free(sep);
 	g_string_free(output_string, TRUE);
 	g_object_unref(gfstream);
 	g_object_unref(out_file);

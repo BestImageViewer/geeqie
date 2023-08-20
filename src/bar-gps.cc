@@ -191,12 +191,12 @@ static void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
 					}
 				if (geocoded_count == 1 && count == 1)
 					{
-					g_string_append_printf(message,
+					g_string_append(message,
 							_("\nThis image is already geocoded!"));
 					}
 				else if (geocoded_count == 1 && count > 1)
 					{
-					g_string_append_printf(message,
+					g_string_append(message,
 							_("\nOne image is already geocoded!"));
 					}
 				else if (geocoded_count > 1 && count > 1)
@@ -205,9 +205,7 @@ static void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
 							_("\n%i Images are already geocoded!"), geocoded_count);
 					}
 
-				location = g_strdup_printf("%lf %lf", pgd->dest_latitude,
-														pgd->dest_longitude);
-				g_string_append_printf(message, _("\n\nPosition: %s \n"), location);
+				g_string_append_printf(message, _("\n\nPosition: %lf %lf \n"), pgd->dest_latitude, pgd->dest_longitude);
 
 				gd = generic_dialog_new(_("Geocode images"),
 							"geocode_images", nullptr, TRUE,
@@ -220,7 +218,6 @@ static void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
 												bar_pane_gps_close_save_cb, TRUE);
 
 				gtk_widget_show(gd->dialog);
-				g_free(location);
 				g_string_free(message, TRUE);
 				}
 			}

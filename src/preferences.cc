@@ -4061,8 +4061,7 @@ void show_about_window(LayoutWindow *lw)
 	gsize size;
 	guint32 flags;
 
-	copyright = g_string_new(nullptr);
-	copyright = g_string_append(copyright, "This program comes with absolutely no warranty.\nGNU General Public License, version 2 or later.\nSee https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n\n");
+	copyright = g_string_new("This program comes with absolutely no warranty.\nGNU General Public License, version 2 or later.\nSee https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n\n");
 
 	timezone_path = g_build_filename(get_rc_dir(), TIMEZONE_DATABASE_FILE, NULL);
 	if (g_file_test(timezone_path, G_FILE_TEST_EXISTS))

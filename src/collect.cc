@@ -396,7 +396,7 @@ void collection_contents(const gchar *name, GString **contents)
 			{
 			ci = static_cast<CollectInfo *>(work->data);
 			fd = ci->fd;
-			*contents = g_string_append(*contents, g_strdup(fd->path));
+			*contents = g_string_append(*contents, fd->path);
 			*contents = g_string_append(*contents, "\n");
 
 			work = work->next;

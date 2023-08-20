@@ -601,8 +601,7 @@ static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean 
 			}
 		else
 			{
-			message = g_string_new("");
-			message = g_string_append(message, _("Operation failed:\n"));
+			message = g_string_new(_("Operation failed:\n"));
 
 			if (run_result == 1)
 				message = g_string_append(message, _("No file extension\n"));

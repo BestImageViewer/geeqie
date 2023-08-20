@@ -2021,6 +2021,7 @@ static gchar *file_util_details_get_message(UtilityData *ud, FileData *fd, const
 		gchar *err_msg = file_data_get_error_string(error);
 		g_string_append(message, err_msg);
 		if (icon_name) *icon_name = (error & CHANGE_ERROR_MASK) ? GQ_ICON_DIALOG_ERROR : GQ_ICON_DIALOG_WARNING;
+		g_free(err_msg);
 		}
 	else
 		{

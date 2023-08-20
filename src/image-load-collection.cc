@@ -70,7 +70,7 @@ static gboolean image_loader_collection_load(gpointer loader, const guchar *, gs
 					cache_found = cache_find_location(CACHE_TYPE_THUMB, split_line[1]);
 					if (cache_found)
 						{
-						file_names = g_string_append(file_names, g_strconcat("\"", cache_found,"\" ", NULL));
+						g_string_append_printf(file_names, "\"%s\" ", cache_found);
 						line_count++;
 						}
 					g_free(cache_found);

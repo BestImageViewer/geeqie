@@ -1046,19 +1046,14 @@ static void bar_pane_keywords_disconnect_marks_cb(GtkWidget *menu_widget, gpoint
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 
 	GenericDialog *gd;
-	GString *message = g_string_new("");
-
-	message = g_string_append(message, _("This will disconnect all Marks Keywords connections"));
 
 	gd = generic_dialog_new(_("Marks Keywords"),
 				"marks_keywords", menu_widget, TRUE, dummy_cancel_cb, pkd);
 	generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING,
-				"Disconnect all Marks Keywords connections?", message->str, TRUE);
+				"Disconnect all Marks Keywords connections?", _("This will disconnect all Marks Keywords connections"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", bar_pane_keywords_disconnect_marks_ok_cb, TRUE);
 
 	gtk_widget_show(gd->dialog);
-
-	g_string_free(message, TRUE);
 }
 
 static void bar_pane_keywords_delete_cb(GtkWidget *, gpointer data)

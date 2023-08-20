@@ -877,7 +877,7 @@ static void get_filelist(const gchar *text, GIOChannel *channel, gboolean recurs
 	while (work)
 		{
 		fd = static_cast<FileData *>(work->data);
-		g_string_append_printf(out_string, "%s", fd->path);
+		g_string_append(out_string, fd->path);
 		format_class = filter_file_get_class(fd->path);
 
 		switch (format_class)
@@ -1148,7 +1148,7 @@ static void gr_collection_list(const gchar *, GIOChannel *channel, gpointer)
 	while (work)
 		{
 		auto collection_name = static_cast<const gchar *>(work->data);
-		out_string = g_string_append(out_string, g_strdup(collection_name));
+		out_string = g_string_append(out_string, collection_name);
 		out_string = g_string_append(out_string, "\n");
 
 		work = work->next;

@@ -175,7 +175,7 @@ static void collection_save_or_append_dialog(gint type, CollectionData *cd)
 		while (work)
 			{
 			auto collection_name = static_cast<const gchar *>(work->data);
-			out_string = g_string_append(out_string, g_strdup(collection_name));
+			out_string = g_string_append(out_string, collection_name);
 			out_string = g_string_append(out_string, "\n");
 
 			work = work->next;
