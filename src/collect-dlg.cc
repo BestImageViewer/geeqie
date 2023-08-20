@@ -125,65 +125,41 @@ static void collection_append_menu_cb(GtkWidget *collection_append_combo, gpoint
 static void collection_save_or_append_dialog(gint type, CollectionData *cd)
 {
 	GenericDialog *gdlg;
-	GtkWidget *parent = nullptr;
-	CollectWindow *cw;
 	const gchar *title;
-	const gchar *btntext;
-	gpointer btnfunc;
-	const gchar *icon_name;
 	GList *collection_list = nullptr;
-	GList *work;
-	GString *out_string = g_string_new(nullptr);
-	GtkWidget *collection_append_combo;
-	GtkWidget *existing_collections;
-	GtkWidget *save_as_label;
-	GtkWidget *scrolled;
-	GtkWidget *viewport;
+
+	if (!cd) return;
+
+	collection_ref(cd);
 
 	if (type == DIALOG_SAVE || type == DIALOG_SAVE_CLOSE)
 		{
-		if (!cd) return;
+		GtkWidget *existing_collections;
+		GtkWidget *save_as_label;
+		GtkWidget *scrolled;
+		GtkWidget *viewport;
+
 		title = _("Save collection");
-		btntext = _("Save");
-		btnfunc = reinterpret_cast<gpointer>(collection_save_cb);
-		icon_name = GQ_ICON_SAVE;
-		}
-	else
-		{
-		if (!cd) return;
-		title = _("Append collection");
-		btntext = _("_Append");
-		btnfunc = reinterpret_cast<gpointer>(collection_append_cb);
-		icon_name = GQ_ICON_ADD;
-		}
 
-	if (cd) collection_ref(cd);
-
-	cw = collection_window_find(cd);
-	if (cw) parent = cw->window;
-
-	if (g_strcmp0(icon_name, GQ_ICON_SAVE) == 0)
-		{
 		gdlg = file_util_gen_dlg(title, "dlg_collection_save", NULL, FALSE, collection_save_or_load_dialog_close_cb, cd);
 
 		generic_dialog_add_message(GENERIC_DIALOG(gdlg), nullptr, title, _("Existing collections:"), FALSE);
-		generic_dialog_add_button(gdlg, icon_name, btntext, reinterpret_cast<void (*)(GenericDialog *, gpointer)>(btnfunc), TRUE);
+		generic_dialog_add_button(gdlg, GQ_ICON_SAVE, _("Save"), collection_save_cb, TRUE);
 
 		collect_manager_list(&collection_list, nullptr, nullptr);
 
-		work = collection_list;
-		while (work)
+		GString *out_string = g_string_new(nullptr);
+
+		for (GList *work = collection_list; work != nullptr; work = work->next)
 			{
 			auto collection_name = static_cast<const gchar *>(work->data);
 			out_string = g_string_append(out_string, collection_name);
 			out_string = g_string_append(out_string, "\n");
-
-			work = work->next;
 			}
-
 		string_list_free(collection_list);
 
 		existing_collections = gtk_label_new(out_string->str);
+		g_string_free(out_string, TRUE);
 
 		scrolled = gtk_scrolled_window_new(nullptr, nullptr);
 		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -212,24 +188,31 @@ static void collection_save_or_append_dialog(gint type, CollectionData *cd)
 		gtk_widget_grab_focus(cd->dialog_name_entry);
 		gtk_widget_show(GENERIC_DIALOG(gdlg)->dialog);
 		}
-	else if (g_strcmp0(icon_name, GQ_ICON_ADD) == 0)
+	else
 		{
+		CollectWindow *cw;
+		GtkWidget *parent = nullptr;
+		GtkWidget *collection_append_combo;
+
+		title = _("Append collection");
+
+		cw = collection_window_find(cd);
+		if (cw) parent = cw->window;
+
 		gdlg = file_util_gen_dlg(title, "dlg_collection_append", parent, true, nullptr, cd);
 
 		generic_dialog_add_message(GENERIC_DIALOG(gdlg), nullptr, title, _("Select from existing collections:"), FALSE);
 		generic_dialog_add_button(gdlg, GQ_ICON_CANCEL, _("Cancel"), nullptr, TRUE);
-		generic_dialog_add_button(gdlg, icon_name, btntext, reinterpret_cast<void (*)(GenericDialog *, gpointer)>(btnfunc), TRUE);
+		generic_dialog_add_button(gdlg, GQ_ICON_ADD, _("_Append"), collection_append_cb, TRUE);
 
 		collect_manager_list(&collection_list, nullptr, nullptr);
 
 		collection_append_combo = gtk_combo_box_text_new();
 
-		work = collection_list;
-		while (work)
+		for (GList *work = collection_list; work != nullptr; work = work->next)
 			{
 			auto collection_name = static_cast<const gchar *>(work->data);
 			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(collection_append_combo), collection_name);
-			work = work->next;
 			}
 		string_list_free(collection_list);
 
