@@ -1560,11 +1560,8 @@ static void gr_action(const gchar *text, GIOChannel *, gpointer)
 static void gr_action_list(const gchar *, GIOChannel *channel, gpointer)
 {
 	ActionItem *action_item;
-	gchar *action_list;
 	gint max_length = 0;
-	GList *list_final = nullptr;
 	GList *list = nullptr;
-	GList *work;
 	GString *out_string = g_string_new(nullptr);
 
 	if (!layout_valid(&lw_id))
@@ -1573,47 +1570,26 @@ static void gr_action_list(const gchar *, GIOChannel *channel, gpointer)
 		}
 
 	list = get_action_items();
-	work = list;
 
 	/* Get the length required for padding */
-	while (work)
+	for (GList *work = list; work; work = work->next)
 		{
 		action_item = static_cast<ActionItem *>(work->data);
-		if (g_utf8_strlen(action_item->name, -1) > max_length)
-			{
-			max_length = g_utf8_strlen(action_item->name, -1);
-			}
-
-		work = work->next;
+		const auto length = g_utf8_strlen(action_item->name, -1);
+		max_length = MAX(length, max_length);
 		}
 
-	work = list;
-
 	/* Pad the action names to the same column for readable output */
-	while (work)
+	for (GList *work = list; work; work = work->next)
 		{
 		action_item = static_cast<ActionItem *>(work->data);
 
-		action_list = g_strdup_printf("%-*s", max_length + 4, action_item->name);
-		list_final = g_list_prepend(list_final, g_strconcat(action_list, action_item->label, nullptr));
-
-		g_free(action_list);
-		work = work->next;
+		g_string_append_printf(out_string, "%-*s", max_length + 4, action_item->name);
+		out_string = g_string_append(out_string, action_item->label);
+		out_string = g_string_append(out_string, "\n");
 		}
 
 	action_items_free(list);
-
-	list_final = g_list_reverse(list_final);
-
-	work = list_final;
-	while (work)
-		{
-		out_string = g_string_append(out_string, static_cast<gchar *>(work->data) );
-		out_string = g_string_append(out_string, "\n");
-		work = work->next;
-		}
-
-	string_list_free(list_final);
 
 	g_io_channel_write_chars(channel, out_string->str, -1, nullptr, nullptr);
 	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
