@@ -111,15 +111,7 @@ guint vf_count(ViewFile *vf, gint64 *bytes)
 
 GList *vf_get_list(ViewFile *vf)
 {
-	GList *list = nullptr;
-	GList *work;
-	for (work = vf->list; work; work = work->next)
-		{
-		auto fd = static_cast<FileData *>(work->data);
-		list = g_list_prepend(list, file_data_ref(fd));
-		}
-
-	return g_list_reverse(list);
+	return filelist_copy(vf->list);
 }
 
 /*
