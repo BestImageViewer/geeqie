@@ -21,6 +21,7 @@
 #include "main.h"
 #include "search-and-run.h"
 
+#include "layout.h"
 #include "ui-misc.h"
 #include "window.h"
 

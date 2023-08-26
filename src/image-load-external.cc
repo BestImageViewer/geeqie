@@ -23,6 +23,7 @@
 #include "image-load.h"
 #include "image-load-external.h"
 
+#include "filedata.h"
 #include "misc.h"
 #include "ui-fileops.h"
 

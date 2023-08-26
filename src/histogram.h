@@ -21,6 +21,9 @@
 #ifndef HISTOGRAM_H
 #define HISTOGRAM_H
 
+struct FileData;
+struct HistMap;
+
 /* Note: The order is important */
 #define HCHAN_R 0
 #define HCHAN_G 1
@@ -29,6 +32,19 @@
 #define HCHAN_RGB 4
 #define HCHAN_COUNT 5
 #define HCHAN_DEFAULT HCHAN_RGB
+
+struct Histogram {
+	gint histogram_channel; /**< drawing mode for histogram */
+	gint histogram_mode;     /**< logarithmical or not */
+	guint vgrid; /**< number of vertical divisions, 0 for none */
+	guint hgrid; /**< number of horizontal divisions, 0 for none */
+	struct {
+		int R; /**< red */
+		int G; /**< green */
+		int B; /**< blue */
+		int A; /**< alpha */
+	} grid_color;  /**< grid color */
+};
 
 
 Histogram *histogram_new();

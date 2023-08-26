@@ -21,7 +21,9 @@
 
 #include "main.h"
 #include "pixbuf-util.h"
+
 #include "exif.h"
+#include "filedata.h"
 #include "ui-fileops.h"
 
 #include <cmath>

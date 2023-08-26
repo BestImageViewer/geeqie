@@ -217,7 +217,7 @@ static gboolean cache_loader_phase2_idle_cb(gpointer data)
 }
 
 CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
-			      CacheLoaderDoneFunc done_func, gpointer done_data)
+			      CacheLoader::DoneFunc done_func, gpointer done_data)
 {
 	CacheLoader *cl;
 	gchar *found;

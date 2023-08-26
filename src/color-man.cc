@@ -22,6 +22,7 @@
 #include "main.h"
 #include "color-man.h"
 
+#include "filedata.h"
 #include "image.h"
 #include "ui-fileops.h"
 
@@ -421,7 +422,7 @@ ColorMan *color_man_new(ImageWindow *imd, GdkPixbuf *pixbuf,
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-void color_man_start_bg_unused(ColorMan *cm, ColorManDoneFunc done_func, gpointer done_data)
+void color_man_start_bg_unused(ColorMan *cm, ColorMan::DoneFunc done_func, gpointer done_data)
 {
 	cm->func_done = done_func;
 	cm->func_done_data = done_data;

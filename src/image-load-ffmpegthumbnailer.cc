@@ -23,6 +23,8 @@
 #include "image-load.h"
 #include "image-load-ffmpegthumbnailer.h"
 
+#include "filedata.h"
+
 #ifdef HAVE_FFMPEGTHUMBNAILER
 #include <libffmpegthumbnailer/videothumbnailerc.h>
 

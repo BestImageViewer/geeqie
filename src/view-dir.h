@@ -21,6 +21,9 @@
 #ifndef VIEW_DIR_H
 #define VIEW_DIR_H
 
+struct FileData;
+struct LayoutWindow;
+
 enum {
 	DIR_COLUMN_POINTER = 0,
 	DIR_COLUMN_ICON,
@@ -29,6 +32,46 @@ enum {
 	DIR_COLUMN_DATE,
 	DIR_COLUMN_LINK,
 	DIR_COLUMN_COUNT
+};
+
+struct PixmapFolders
+{
+	GdkPixbuf *close;
+	GdkPixbuf *open;
+	GdkPixbuf *deny;
+	GdkPixbuf *parent;
+	GdkPixbuf *link;
+	GdkPixbuf *read_only;
+};
+
+struct ViewDir
+{
+	DirViewType type;
+	gpointer info;
+
+	GtkWidget *widget;
+	GtkWidget *view;
+
+	FileData *dir_fd;
+
+	FileData *click_fd;
+
+	FileData *drop_fd;
+	GList *drop_list;
+	guint drop_scroll_id; /**< event source id */
+
+	/* func list */
+	void (*select_func)(ViewDir *vd, FileData *fd, gpointer data);
+	gpointer select_data;
+
+	void (*dnd_drop_update_func)(ViewDir *vd);
+	void (*dnd_drop_leave_func)(ViewDir *vd);
+
+	LayoutWindow *layout;
+
+	GtkWidget *popup;
+
+	PixmapFolders *pf;
 };
 
 ViewDir *vd_new(LayoutWindow *lw);

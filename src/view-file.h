@@ -21,6 +21,103 @@
 #ifndef VIEW_FILE_H
 #define VIEW_FILE_H
 
+struct FileData;
+struct LayoutWindow;
+struct ThumbLoader;
+
+struct ViewFile
+{
+	FileViewType type; 	/**< @todo (xsdg): Turn this into a union (see VFLIST and VFICON). */
+
+	gpointer info;
+
+	GtkWidget *widget;
+	GtkWidget *listview;
+	GtkWidget *scrolled;
+	GtkWidget *filter;
+	GtkWidget *filter_check[FILEDATA_MARKS_SIZE];
+
+	struct {
+		GtkWidget *combo;
+		GtkWidget *frame;
+		gint count;
+		gint last_selected;
+		gboolean case_sensitive;
+	} file_filter;
+
+	FileData *dir_fd;
+	GList *list;
+
+	SortType sort_method;
+	gboolean sort_ascend;
+	gboolean sort_case;
+
+	/* func list */
+	void (*func_thumb_status)(ViewFile *vf, gdouble val, const gchar *text, gpointer data);
+	gpointer data_thumb_status;
+
+	void (*func_status)(ViewFile *vf, gpointer data);
+	gpointer data_status;
+
+	LayoutWindow *layout;
+
+	GtkWidget *popup;
+
+	/* thumbs updates*/
+	gboolean thumbs_running;
+	ThumbLoader *thumbs_loader;
+	FileData *thumbs_filedata;
+
+	/* marks */
+	gboolean marks_enabled;
+	gint active_mark;
+	gint clicked_mark;
+
+	/* stars */
+	FileData *stars_filedata;
+	guint stars_id;
+
+	/* refresh */
+	guint refresh_idle_id; /**< event source id */
+	time_t time_refresh_set; /**< time when refresh_idle_id was set */
+
+	GList *editmenu_fd_list; /**< file list for edit menu */
+
+	guint read_metadata_in_idle_id;
+};
+
+struct ViewFileInfoList
+{
+	FileData *click_fd;
+	FileData *select_fd;
+
+	gboolean thumbs_enabled;
+
+	guint select_idle_id; /**< event source id */
+};
+
+struct ViewFileInfoIcon
+{
+	/* table stuff */
+	gint columns;
+	gint rows;
+
+	GList *selection;
+	FileData *prev_selection;
+
+	GtkWidget *tip_window;
+	guint tip_delay_id; /**< event source id */
+	FileData *tip_fd;
+
+	FileData *click_fd;
+
+	FileData *focus_fd;
+	gint focus_row;
+	gint focus_column;
+
+	gboolean show_text;
+};
+
 #define VFLIST(_vf_) ((ViewFileInfoList *)(_vf_->info))
 #define VFICON(_vf_) ((ViewFileInfoIcon *)(_vf_->info))
 

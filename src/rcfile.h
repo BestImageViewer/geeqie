@@ -22,6 +22,7 @@
 #ifndef RCFILE_H
 #define RCFILE_H
 
+struct LayoutWindow;
 
 void write_indent(GString *str, gint indent);
 void write_char_option(GString *str, gint indent, const gchar *label, const gchar *text);
@@ -89,7 +90,6 @@ gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions
 
 gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup);
 gboolean load_config_from_file(const gchar *utf8_path, gboolean startup);
-
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

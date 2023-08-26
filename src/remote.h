@@ -22,10 +22,7 @@
 #ifndef REMOTE_H
 #define REMOTE_H
 
-
-struct RemoteConnection;
-
-using RemoteReadFunc = void (RemoteConnection *, const gchar *, GIOChannel *, gpointer);
+struct CollectionData;
 
 struct RemoteConnection {
 	gint server;
@@ -33,7 +30,9 @@ struct RemoteConnection {
 	gchar *path;
 
 	gint channel_id;
-	RemoteReadFunc *read_func;
+
+	using ReadFunc = void (RemoteConnection *, const gchar *, GIOChannel *, gpointer);
+	ReadFunc *read_func;
 	gpointer read_data;
 
 	GList *clients;

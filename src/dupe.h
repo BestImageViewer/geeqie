@@ -24,6 +24,12 @@
 
 #include "similar.h"
 
+struct CollectInfo;
+struct CollectionData;
+struct FileData;
+struct ImageLoader;
+struct ThumbLoader;
+
 /** @enum DupeMatchType
  *  match methods
  */

@@ -26,6 +26,8 @@
 #include <glib.h>
 #include "main.h"
 
+struct FileData;
+
 void lua_init();
 
 gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function);

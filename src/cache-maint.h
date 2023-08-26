@@ -22,6 +22,7 @@
 #ifndef CACHE_MAINT_H
 #define CACHE_MAINT_H
 
+struct FileData;
 
 void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent);
 void cache_notify_cb(FileData *fd, NotifyType type, gpointer data);

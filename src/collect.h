@@ -22,6 +22,16 @@
 #ifndef COLLECT_H
 #define COLLECT_H
 
+struct CollectTable;
+struct FileData;
+struct ThumbLoader;
+
+struct CollectInfo
+{
+	FileData *fd;
+	GdkPixbuf *pixbuf;
+	guint flag_mask;
+};
 
 CollectInfo *collection_info_new(FileData *fd, struct stat *st, GdkPixbuf *pixbuf);
 
@@ -36,6 +46,37 @@ GList *collection_list_insert(GList *list, CollectInfo *ci, CollectInfo *insert_
 GList *collection_list_remove(GList *list, CollectInfo *ci);
 CollectInfo *collection_list_find_fd(GList *list, FileData *fd);
 GList *collection_list_to_filelist(GList *list);
+
+struct CollectionData
+{
+	gchar *path;
+	gchar *name;
+	GList *list;
+	SortType sort_method;
+
+	ThumbLoader *thumb_loader;
+	CollectInfo *thumb_info;
+
+	void (*info_updated_func)(CollectionData *, CollectInfo *, gpointer);
+	gpointer info_updated_data;
+
+	gint ref;
+
+	/* geometry */
+	gint window_read;
+	gint window_x;
+	gint window_y;
+	gint window_w;
+	gint window_h;
+
+	gboolean changed; /**< contents changed since save flag */
+
+	GHashTable *existence;
+
+	GtkWidget *dialog_name_entry;
+	gchar *collection_path; /**< Full path to collection including extension */
+	gint collection_append_index;
+};
 
 CollectionData *collection_new(const gchar *path);
 void collection_free(CollectionData *cd);
@@ -78,6 +119,17 @@ void collection_remove_by_info_list(CollectionData *cd, GList *list);
 gboolean collection_rename(CollectionData *cd, FileData *fd);
 
 void collection_update_geometry(CollectionData *cd);
+
+struct CollectWindow
+{
+	GtkWidget *window;
+	CollectTable *table;
+	GtkWidget *status_box;
+
+	GtkWidget *close_dialog;
+
+	CollectionData *cd;
+};
 
 CollectWindow *collection_window_new(const gchar *path);
 void collection_window_close_by_collection(CollectionData *cd);

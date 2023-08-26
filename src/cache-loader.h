@@ -26,11 +26,7 @@
 #include "cache.h"
 #include "image-load.h"
 
-
-struct CacheLoader;
-
-using CacheLoaderDoneFunc = void (*)(CacheLoader *, gint, gpointer);
-
+struct FileData;
 
 enum CacheDataType {
 	CACHE_LOADER_NONE       = 0,
@@ -47,7 +43,8 @@ struct CacheLoader {
 	CacheDataType todo_mask;
 	CacheDataType done_mask;
 
-	CacheLoaderDoneFunc done_func;
+	using DoneFunc = void (*)(CacheLoader *, gint, gpointer);
+	DoneFunc done_func;
 	gpointer done_data;
 
 	gboolean error;
@@ -58,7 +55,7 @@ struct CacheLoader {
 
 
 CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
-			      CacheLoaderDoneFunc done_func, gpointer done_data);
+			      CacheLoader::DoneFunc done_func, gpointer done_data);
 
 void cache_loader_free(CacheLoader *cl);
 

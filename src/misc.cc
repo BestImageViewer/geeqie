@@ -24,6 +24,7 @@
 #include "main.h"
 #include "misc.h"
 
+#include "filedata.h"
 #include "ui-fileops.h"
 
 #include <langinfo.h>

@@ -27,6 +27,7 @@
 
 #include "main.h"
 
+#include "filedata.h"
 #include "filefilter.h"
 #include "image-load.h"
 #include "image-load-libraw.h"

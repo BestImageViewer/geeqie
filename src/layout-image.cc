@@ -284,6 +284,21 @@ static gboolean layout_image_slideshow_continue_check(LayoutWindow *lw)
  *----------------------------------------------------------------------------
  */
 
+struct AnimationData
+{
+	ImageWindow *iw;
+	LayoutWindow *lw;
+	GdkPixbufAnimation *gpa;
+	GdkPixbufAnimationIter *iter;
+	GdkPixbuf *gpb;
+	FileData *data_adr;
+	gint delay;
+	gboolean valid;
+	GCancellable *cancellable;
+	GFile *in_file;
+	GFileInputStream *gfstream;
+};
+
 static void image_animation_data_free(AnimationData *fd)
 {
 	if(!fd) return;

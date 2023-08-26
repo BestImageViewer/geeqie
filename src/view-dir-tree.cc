@@ -23,9 +23,16 @@
 #include "view-dir-tree.h"
 
 #include "filedata.h"
+#include "layout.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
 #include "view-dir.h"
+
+struct ViewDirInfoTree
+{
+	guint drop_expand_id; /**< event source id */
+	gint busy_ref;
+};
 
 #define VDTREE(_vd_) ((ViewDirInfoTree *)(_vd_->info))
 

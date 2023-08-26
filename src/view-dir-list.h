@@ -22,6 +22,8 @@
 #ifndef VIEW_DIR_LIST_H
 #define VIEW_DIR_LIST_H
 
+struct FileData;
+struct ViewDir;
 
 ViewDir *vdlist_new(ViewDir *vd, FileData *dir_fd);
 

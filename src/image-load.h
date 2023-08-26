@@ -22,6 +22,8 @@
 #ifndef IMAGE_LOAD_H
 #define IMAGE_LOAD_H
 
+struct FileData;
+
 #define TYPE_IMAGE_LOADER		(image_loader_get_type())
 
 using ImageLoaderBackendCbAreaPrepared = void (*)(gpointer, gpointer);

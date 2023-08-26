@@ -21,6 +21,23 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+struct SecureSaveInfo;
+
+/**
+ * @enum DnDAction
+ * drag and drop default action
+ */
+enum DnDAction {
+	DND_ACTION_ASK,
+	DND_ACTION_COPY,
+	DND_ACTION_MOVE
+};
+
+enum ZoomStyle {
+	ZOOM_GEOMETRIC	= 0,
+	ZOOM_ARITHMETIC	= 1
+};
+
 struct ConfOptions
 {
 	/* ui */
@@ -381,6 +398,28 @@ struct ConfOptions
 	GList *disabled_plugins;
 };
 
+struct CommandLine
+{
+	int argc;
+	gchar **argv;
+	gboolean startup_blank;
+	gboolean startup_full_screen;
+	gboolean startup_in_slideshow;
+	gboolean startup_command_line_collection;
+	gboolean tools_hide;
+	gboolean tools_show;
+	gboolean log_window_show;
+	gchar *path;
+	gchar *file;
+	GList *cmd_list;
+	GList *collection_list;
+	gchar *geometry;
+	gchar *regexp;
+	gchar *log_file;
+	SecureSaveInfo *ssi;
+	gboolean new_instance;
+};
+
 extern ConfOptions *options;
 extern CommandLine *command_line;
 
@@ -388,6 +427,157 @@ ConfOptions *init_options(ConfOptions *options);
 void setup_default_options(ConfOptions *options);
 void save_options(ConfOptions *options);
 gboolean load_options(ConfOptions *options);
+
+
+enum StartUpPath {
+	STARTUP_PATH_CURRENT	= 0,
+	STARTUP_PATH_LAST,
+	STARTUP_PATH_HOME,
+};
+
+enum SortActionType {
+	BAR_SORT_COPY = 0,
+	BAR_SORT_MOVE,
+	BAR_SORT_FILTER,
+	BAR_SORT_ACTION_COUNT
+};
+
+enum SortModeType {
+	BAR_SORT_MODE_FOLDER = 0,
+	BAR_SORT_MODE_COLLECTION,
+	BAR_SORT_MODE_COUNT
+};
+
+enum SortSelectionType {
+	BAR_SORT_SELECTION_IMAGE = 0,
+	BAR_SORT_SELECTION_SELECTED,
+	BAR_SORT_SELECTION_COUNT
+};
+
+struct LayoutOptions
+{
+	gchar *id;
+
+	gchar *order;
+	gint style;
+
+	DirViewType dir_view_type;
+	FileViewType file_view_type;
+
+	struct {
+		SortType method;
+		gboolean ascend;
+		gboolean case_sensitive;
+	} dir_view_list_sort;
+
+	struct {
+		SortType method;
+		gboolean ascend;
+		gboolean case_sensitive;
+	} file_view_list_sort;
+
+	gboolean show_thumbnails;
+	gboolean show_marks;
+	gboolean show_file_filter;
+	gboolean show_directory_date;
+	gboolean show_info_pixel;
+	gboolean split_pane_sync;
+	gboolean ignore_alpha;
+
+	struct {
+		gint w;
+		gint h;
+		gint x;
+		gint y;
+		gboolean maximized;
+		gint hdivider_pos;
+		gint vdivider_pos;
+	} main_window;
+
+	struct {
+		gint w;
+		gint h;
+		gint x;
+		gint y;
+		gint vdivider_pos;
+	} float_window;
+
+	struct {
+		gint vdivider_pos;
+	} folder_window;
+
+	struct {
+		gint w;
+		gint h;
+	} properties_window;
+
+	struct {
+		guint state;
+		gint histogram_channel;
+		gint histogram_mode;
+	} image_overlay;
+
+	struct {
+		gint w;
+		gint h;
+		gint x;
+		gint y;
+	} log_window;
+
+	struct {
+		gint w;
+		gint h;
+		gint x;
+		gint y;
+		gint page_number;
+	} preferences_window;
+
+	struct {
+		gint w;
+		gint h;
+		gint x;
+		gint y;
+	} search_window;
+
+	struct {
+		gint w;
+		gint h;
+		gint x;
+		gint y;
+	} dupe_window;
+
+	struct {
+		gint w;
+		gint h;
+		gint x;
+		gint y;
+	} advanced_exif_window;
+
+	gboolean tools_float;
+	gboolean tools_hidden;
+	gboolean toolbar_hidden;
+
+	struct {
+		gboolean info;
+		gboolean sort;
+		gboolean tools_float;
+		gboolean tools_hidden;
+		gboolean hidden;
+	} bars_state;
+
+	gchar *home_path;
+	gchar *last_path;
+
+	StartUpPath startup_path;
+
+	gboolean animate;
+	gint workspace;
+
+	SortActionType action;
+	SortModeType mode;
+	SortSelectionType selection;
+	gchar *filter_key;
+};
 
 void copy_layout_options(LayoutOptions *dest, const LayoutOptions *src);
 void free_layout_options_content(LayoutOptions *dest);

@@ -22,6 +22,10 @@
 #ifndef SLIDESHOW_H
 #define SLIDESHOW_H
 
+struct CollectInfo;
+struct CollectionData;
+struct ImageWindow;
+struct LayoutWindow;
 
 #define SLIDESHOW_SUBSECOND_PRECISION 10
 #define SLIDESHOW_MIN_SECONDS    0.1
@@ -31,6 +35,32 @@
  * It works like this, it uses path_list, if that does not exist, it uses
  * CollectionData, then finally falls back to the layout listing.
  */
+
+struct SlideShowData
+{
+	LayoutWindow *lw;        /**< use this window to display the slideshow */
+	ImageWindow *imd;        /**< use this window only if lw is not available,
+	                            @FIXME it is probably required only by img-view.cc and should be dropped with it */
+
+	GList *filelist;
+	CollectionData *cd;
+	FileData *dir_fd;
+
+	GList *list;
+	GList *list_done;
+
+	FileData *slide_fd;
+
+	guint slide_count;
+	guint timeout_id; /**< event source id */
+
+	gboolean from_selection;
+
+	void (*stop_func)(SlideShowData *, gpointer);
+	gpointer stop_data;
+
+	gboolean paused;
+};
 
 void slideshow_free(SlideShowData *ss);
 

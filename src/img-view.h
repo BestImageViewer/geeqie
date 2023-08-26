@@ -22,6 +22,10 @@
 #ifndef IMG_VIEW_H
 #define IMG_VIEW_H
 
+struct CollectInfo;
+struct CollectionData;
+struct FileData;
+struct ImageWindow;
 
 void view_window_new(FileData *fd);
 void view_window_new_from_list(GList *list);

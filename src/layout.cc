@@ -23,6 +23,7 @@
 #include "layout.h"
 
 #include "filedata.h"
+#include "histogram.h"
 #include "history-list.h"
 #include "image.h"
 #include "image-overlay.h"

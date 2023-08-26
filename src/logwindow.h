@@ -21,6 +21,8 @@
 #ifndef LOGWINDOW_H
 #define LOGWINDOW_H
 
+struct LayoutWindow;
+
 enum LogType
 {
 	LOG_NORMAL = 0,

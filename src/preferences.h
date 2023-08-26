@@ -22,6 +22,7 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
+struct LayoutWindow;
 
 void show_config_window(LayoutWindow *lw);
 void show_about_window(LayoutWindow *lw);

@@ -22,8 +22,11 @@
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
 
+struct LayoutWindow;
+
 GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar);
 void toolbar_apply(ToolbarType bar);
+
 #endif
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

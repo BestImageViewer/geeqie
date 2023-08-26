@@ -22,6 +22,9 @@
 #ifndef VIEW_DIR_TREE_H
 #define VIEW_DIR_TREE_H
 
+struct FileData;
+struct ViewDir;
+
 struct NodeData
 {
 	FileData *fd;

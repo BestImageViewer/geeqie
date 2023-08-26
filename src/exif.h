@@ -22,6 +22,10 @@
 #ifndef __EXIF_H
 #define __EXIF_H
 
+struct ExifData;
+struct ExifItem;
+struct FileData;
+
 #define EXIF_FORMATTED() "formatted."
 #define EXIF_FORMATTED_LEN (sizeof(EXIF_FORMATTED()) - 1)
 
@@ -55,8 +59,6 @@ enum ExifFormatType {
  * Data storage
  *-----------------------------------------------------------------------------
  */
-
-struct ExifItem;
 
 struct ExifRational
 {

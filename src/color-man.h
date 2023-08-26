@@ -22,6 +22,9 @@
 #ifndef COLOR_MAN_H
 #define COLOR_MAN_H
 
+struct FileData;
+struct ImageWindow;
+
 enum ColorManProfileType {
 	COLOR_PROFILE_NONE = -1,
 	COLOR_PROFILE_MEM = -2,
@@ -36,9 +39,6 @@ enum ColorManReturnType {
 	COLOR_RETURN_IMAGE_CHANGED
 };
 
-struct ColorMan;
-using ColorManDoneFunc = void (*)(ColorMan *, ColorManReturnType, gpointer);
-
 
 struct ColorMan {
 	ImageWindow *imd;
@@ -50,7 +50,8 @@ struct ColorMan {
 
 	guint idle_id; /* event source id */
 
-	ColorManDoneFunc func_done;
+	using DoneFunc = void (*)(ColorMan *, ColorManReturnType, gpointer);
+	DoneFunc func_done;
 	gpointer func_done_data;
 };
 

@@ -21,6 +21,7 @@
 #ifndef SEARCH_AND_RUN_H
 #define SEARCH_AND_RUN_H
 
+struct LayoutWindow;
 
 GtkWidget *search_and_run_new(LayoutWindow *lw);
 

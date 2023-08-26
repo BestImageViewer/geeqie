@@ -23,6 +23,7 @@
 #include "image-load-collection.h"
 
 #include "cache.h"
+#include "filedata.h"
 #include "misc.h"
 #include "ui-fileops.h"
 

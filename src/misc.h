@@ -21,6 +21,8 @@
 #ifndef MISC_H
 #define MISC_H
 
+struct FileData;
+
 gdouble get_zoom_increment();
 gchar *utf8_validate_or_convert(const gchar *text);
 gint utf8_compare(const gchar *s1, const gchar *s2, gboolean case_sensitive);

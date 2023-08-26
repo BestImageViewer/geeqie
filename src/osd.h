@@ -21,6 +21,8 @@
 #ifndef OSD_H
 #define OSD_H
 
+struct FileData;
+
 enum OsdTemplateFlags {
 	OSDT_NONE 	= 0,
 	OSDT_FREE 	= 1 << 0,

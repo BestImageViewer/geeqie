@@ -22,6 +22,7 @@
 #ifndef BAR_SORT_H
 #define BAR_SORT_H
 
+struct LayoutWindow;
 
 GtkWidget *bar_sort_new_default(LayoutWindow *lw);
 GtkWidget *bar_sort_new_from_config(LayoutWindow *lw, const gchar **attribute_names, const gchar **attribute_values);

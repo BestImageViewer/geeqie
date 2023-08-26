@@ -22,6 +22,9 @@
 #ifndef BAR_H
 #define BAR_H
 
+struct FileData;
+struct LayoutWindow;
+
 enum PaneType {
 	PANE_UNDEF = 0,
 	PANE_COMMENT,

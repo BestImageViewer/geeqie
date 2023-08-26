@@ -22,6 +22,109 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+struct CollectInfo;
+struct CollectionData;
+struct FileData;
+struct ImageLoader;
+
+enum ImageState {
+	IMAGE_STATE_NONE	= 0,
+	IMAGE_STATE_IMAGE	= 1 << 0,
+	IMAGE_STATE_LOADING	= 1 << 1,
+	IMAGE_STATE_ERROR	= 1 << 2,
+	IMAGE_STATE_COLOR_ADJ	= 1 << 3,
+	IMAGE_STATE_ROTATE_AUTO	= 1 << 4,
+	IMAGE_STATE_ROTATE_USER	= 1 << 5,
+	IMAGE_STATE_DELAY_FLIP	= 1 << 6
+};
+
+struct ImageWindow
+{
+	GtkWidget *widget;	/**< use this to add it and show it */
+	GtkWidget *pr;
+	GtkWidget *frame;
+
+	FileData *image_fd;
+
+	gboolean unknown;		/**< failed to load image */
+
+	ImageLoader *il;        /**< @FIXME image loader should probably go to FileData, but it must first support
+				   sending callbacks to multiple ImageWindows in parallel */
+
+	gint has_frame;  /**< not boolean, see image_new() */
+
+	/* top level (not necessarily parent) window */
+	gboolean top_window_sync;	/**< resize top_window when image dimensions change */
+	GtkWidget *top_window;	/**< window that gets title, and window to resize when 'fitting' */
+	gchar *title;		/**< window title to display left of file name */
+	gchar *title_right;	/**< window title to display right of file name */
+	gboolean title_show_zoom;	/**< option to include zoom in window title */
+
+	gboolean completed;
+	ImageState state;	/**< mask of IMAGE_STATE_* flags about current image */
+
+	void (*func_update)(ImageWindow *imd, gpointer data);
+	void (*func_complete)(ImageWindow *imd, gint preload, gpointer data);
+	void (*func_state)(ImageWindow *imd, ImageState state, gpointer data);
+
+	using TileRequestFunc = gint (*)(ImageWindow *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
+	TileRequestFunc func_tile_request;
+
+	using TileDisposeFunc = void (*)(ImageWindow *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
+	TileDisposeFunc func_tile_dispose;
+
+	gpointer data_update;
+	gpointer data_complete;
+	gpointer data_state;
+	gpointer data_tile;
+
+	/* button, scroll functions */
+	void (*func_button)(ImageWindow *, GdkEventButton *event, gpointer);
+	void (*func_drag)(ImageWindow *, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer);
+	void (*func_scroll)(ImageWindow *, GdkEventScroll *event, gpointer);
+	void (*func_focus_in)(ImageWindow *, gpointer);
+
+	gpointer data_button;
+	gpointer data_drag;
+	gpointer data_scroll;
+	gpointer data_focus_in;
+
+	/**
+	 * @headerfile func_scroll_notify
+	 * scroll notification (for scroll bar implementation)
+	 */
+	void (*func_scroll_notify)(ImageWindow *, gint x, gint y, gint width, gint height, gpointer);
+
+	gpointer data_scroll_notify;
+
+	/* collection info */
+	CollectionData *collection;
+	CollectInfo *collection_info;
+
+	/* color profiles */
+	gboolean color_profile_enable;
+	gint color_profile_input;
+	gboolean color_profile_use_image;
+	gint color_profile_from_image;
+	gpointer cm;
+
+	AlterType delay_alter_type;
+
+	FileData *read_ahead_fd;
+	ImageLoader *read_ahead_il;
+
+	gint prev_color_row;
+
+	gboolean auto_refresh;
+
+	gboolean delay_flip;
+	gint orientation;
+	gboolean desaturate;
+	gboolean overunderexposed;
+	gint user_stereo;
+
+	gboolean mouse_wheel_mode;
+};
 
 void image_set_frame(ImageWindow *imd, gboolean frame);
 ImageWindow *image_new(gboolean frame);
@@ -157,8 +260,8 @@ void image_to_root_window(ImageWindow *imd, gboolean scaled);
 
 void image_set_image_as_tiles(ImageWindow *imd, gint width, gint height,
 			      gint tile_width, gint tile_height, gint cache_size,
-			      ImageTileRequestFunc func_tile_request,
-			      ImageTileDisposeFunc func_tile_dispose,
+			      ImageWindow::TileRequestFunc func_tile_request,
+			      ImageWindow::TileDisposeFunc func_tile_dispose,
 			      gpointer data,
 			      gdouble zoom);
 

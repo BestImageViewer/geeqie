@@ -22,10 +22,128 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
+struct AnimationData;
+struct FileData;
+struct FullScreenData;
+struct ImageWindow;
+struct SlideShowData;
+struct ViewDir;
+struct ViewFile;
+
 #define LAYOUT_ID_CURRENT "_current_"
+#define MAX_SPLIT_IMAGES 4
 
 extern GList *layout_window_list;
 
+
+enum LayoutLocation {
+	LAYOUT_HIDE   = 0,
+	LAYOUT_LEFT   = 1 << 0,
+	LAYOUT_RIGHT  = 1 << 1,
+	LAYOUT_TOP    = 1 << 2,
+	LAYOUT_BOTTOM = 1 << 3
+};
+
+struct LayoutWindow
+{
+	LayoutOptions options;
+
+	FileData *dir_fd;
+
+	/* base */
+
+	GtkWidget *window;
+
+	GtkWidget *main_box;
+
+	GtkWidget *group_box;
+	GtkWidget *h_pane;
+	GtkWidget *v_pane;
+
+	/* menus, path selector */
+
+	GtkActionGroup *action_group;
+	GtkActionGroup *action_group_editors;
+	guint ui_editors_id;
+	GtkUIManager *ui_manager;
+	guint toolbar_merge_id[TOOLBAR_COUNT];
+	GList *toolbar_actions[TOOLBAR_COUNT];
+
+	GtkWidget *path_entry;
+
+	/* image */
+
+	LayoutLocation image_location;
+
+	ImageWindow *image;
+
+	ImageWindow *split_images[MAX_SPLIT_IMAGES];
+	ImageSplitMode split_mode;
+	gint active_split_image;
+
+	GtkWidget *split_image_widget;
+	GtkSizeGroup *split_image_sizegroup;
+
+	/* tools window (float) */
+
+	GtkWidget *tools;
+	GtkWidget *tools_pane;
+
+	GtkWidget *menu_tool_bar; /**< Combined menu and toolbar box */
+	GtkWidget *menu_bar; /**< referenced by lw, exist during whole lw lifetime */
+	/* toolbar */
+
+	GtkWidget *toolbar[TOOLBAR_COUNT]; /**< referenced by lw, exist during whole lw lifetime */
+
+	GtkWidget *back_button;
+
+	/* dir view */
+
+	LayoutLocation dir_location;
+
+	ViewDir *vd;
+	GtkWidget *dir_view;
+
+	/* file view */
+
+	LayoutLocation file_location;
+
+	ViewFile *vf;
+
+	GtkWidget *file_view;
+
+	GtkWidget *info_box; /**< status bar */
+	GtkWidget *info_progress_bar; /**< status bar */
+	GtkWidget *info_sort; /**< status bar */
+	GtkWidget *info_status; /**< status bar */
+	GtkWidget *info_details; /**< status bar */
+	GtkWidget *info_zoom; /**< status bar */
+	GtkWidget *info_pixel; /**< status bar */
+
+	/* slide show */
+
+	SlideShowData *slideshow;
+
+	/* full screen */
+
+	FullScreenData *full_screen;
+
+	/* misc */
+
+	GtkWidget *utility_box; /**< referenced by lw, exist during whole lw lifetime */
+	GtkWidget *utility_paned; /**< between image and bar */
+	GtkWidget *bar_sort;
+	GtkWidget *bar;
+
+	gboolean bar_sort_enabled; /**< Set during start-up, and checked when the editors have loaded */
+
+	GtkWidget *exif_window;
+	GtkWidget *sar_window; /**< Search and Run window */
+
+	AnimationData *animation;
+
+	GtkWidget *log_window;
+};
 
 LayoutWindow *layout_new(FileData *dir_fd, LayoutOptions *lop);
 LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,

@@ -296,9 +296,9 @@ static void thumb_loader_setup(ThumbLoader *tl, FileData *fd)
 }
 
 void thumb_loader_set_callbacks(ThumbLoader *tl,
-				ThumbLoaderFunc func_done,
-				ThumbLoaderFunc func_error,
-				ThumbLoaderFunc func_progress,
+				ThumbLoader::Func func_done,
+				ThumbLoader::Func func_error,
+				ThumbLoader::Func func_progress,
 				gpointer data)
 {
 	if (!tl) return;
@@ -306,9 +306,9 @@ void thumb_loader_set_callbacks(ThumbLoader *tl,
 	if (tl->standard_loader)
 		{
 		thumb_loader_std_set_callbacks(reinterpret_cast<ThumbLoaderStd *>(tl),
-					       reinterpret_cast<ThumbLoaderStdFunc>(func_done),
-					       reinterpret_cast<ThumbLoaderStdFunc>(func_error),
-					       reinterpret_cast<ThumbLoaderStdFunc>(func_progress),
+					       reinterpret_cast<ThumbLoaderStd::Func>(func_done),
+					       reinterpret_cast<ThumbLoaderStd::Func>(func_error),
+					       reinterpret_cast<ThumbLoaderStd::Func>(func_progress),
 					       data);
 		return;
 		}

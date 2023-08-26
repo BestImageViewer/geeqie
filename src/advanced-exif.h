@@ -22,6 +22,8 @@
 #ifndef ADVANCED_EXIF_H
 #define ADVANCED_EXIF_H
 
+struct FileData;
+struct LayoutWindow;
 
 GtkWidget *advanced_exif_new(LayoutWindow *lw);
 

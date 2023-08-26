@@ -34,8 +34,9 @@
 
 #include "main.h"
 #include "glua.h"
-#include "ui-fileops.h"
 #include "exif.h"
+#include "filedata.h"
+#include "ui-fileops.h"
 
 /**
  * @file

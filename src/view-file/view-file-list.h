@@ -24,6 +24,8 @@
 
 #include "filedata.h"
 
+struct ViewFile;
+
 gboolean vflist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
 gboolean vflist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);
 gboolean vflist_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);

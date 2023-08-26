@@ -94,9 +94,9 @@ ThumbLoaderStd *thumb_loader_std_new(gint width, gint height)
 }
 
 void thumb_loader_std_set_callbacks(ThumbLoaderStd *tl,
-				    ThumbLoaderStdFunc func_done,
-				    ThumbLoaderStdFunc func_error,
-				    ThumbLoaderStdFunc func_progress,
+				    ThumbLoaderStd::Func func_done,
+				    ThumbLoaderStd::Func func_error,
+				    ThumbLoaderStd::Func func_progress,
 				    gpointer data)
 {
 	if (!tl) return;

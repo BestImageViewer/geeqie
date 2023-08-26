@@ -21,7 +21,36 @@
 #ifndef SECURE_SAVE_H
 #define SECURE_SAVE_H
 
+/**
+ * @enum SecureSaveErrno
+ * see err field in #SecureSaveInfo
+ */
+enum SecureSaveErrno {
+	SS_ERR_NONE = 0,
+	SS_ERR_DISABLED, /**< secsave is disabled. */
+	SS_ERR_OUT_OF_MEM, /**< memory allocation failure */
+
+	SS_ERR_OPEN_READ,
+	SS_ERR_OPEN_WRITE,
+	SS_ERR_STAT,
+	SS_ERR_ACCESS,
+	SS_ERR_MKSTEMP,
+	SS_ERR_RENAME,
+	SS_ERR_OTHER,
+};
+
 extern SecureSaveErrno secsave_errno; /**< internal secsave error number */
+
+struct SecureSaveInfo {
+	FILE *fp; /**< file stream pointer */
+	gchar *file_name; /**< final file name */
+	gchar *tmp_file_name; /**< temporary file name */
+	gint err; /**< set to non-zero value in case of error */
+	gboolean secure_save; /**< use secure save for this file, internal use only */
+	gboolean preserve_perms; /**< whether to preserve perms, TRUE by default */
+	gboolean preserve_mtime; /**< whether to preserve mtime, FALSE by default */
+	gboolean unlink_on_error; /**< whether to remove temporary file on save failure, TRUE by default */
+};
 
 SecureSaveInfo *secure_open(const gchar *);
 

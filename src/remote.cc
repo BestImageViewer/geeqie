@@ -286,7 +286,7 @@ static RemoteConnection *remote_server_open(const gchar *path)
 	return rc;
 }
 
-static void remote_server_subscribe(RemoteConnection *rc, RemoteReadFunc *func, gpointer data)
+static void remote_server_subscribe(RemoteConnection *rc, RemoteConnection::ReadFunc *func, gpointer data)
 {
 	if (!rc || !rc->server) return;
 

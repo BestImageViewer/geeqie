@@ -57,10 +57,10 @@
 #include "main.h"
 #include "exif.h"
 
+#include "filedata.h"
 #include "filefilter.h"
-#include "ui-fileops.h"
-
 #include "misc.h"
+#include "ui-fileops.h"
 
 #if EXIV2_TEST_VERSION(0,28,0)
 #define AnyError Error

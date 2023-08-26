@@ -22,16 +22,18 @@
 #include "main.h"
 #include "image-overlay.h"
 
+#include "collect.h"
 #include "filedata.h"
 #include "histogram.h"
 #include "image.h"
+#include "image-load.h"
 #include "img-view.h"
 #include "layout.h"
 #include "osd.h"
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
+#include "slideshow.h"
 #include "ui-fileops.h"
-#include "image-load.h"
 
 /*
  *----------------------------------------------------------------------------

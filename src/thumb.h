@@ -22,12 +22,39 @@
 #ifndef THUMB_H
 #define THUMB_H
 
+struct FileData;
+struct ImageLoader;
+
+struct ThumbLoader
+{
+	gboolean standard_loader;
+
+	ImageLoader *il;
+	FileData *fd;           /**< fd->pixbuf contains final (scaled) image when done */
+
+	gboolean cache_enable;
+	gboolean cache_hit;
+	gdouble percent_done;
+
+	gint max_w;
+	gint max_h;
+
+	using Func = void (*)(ThumbLoader *, gpointer);
+	Func func_done;
+	Func func_error;
+	Func func_progress;
+
+	gpointer data;
+
+	guint idle_done_id; /**< event source id */
+};
+
 
 ThumbLoader *thumb_loader_new(gint width, gint height);
 void thumb_loader_set_callbacks(ThumbLoader *tl,
-				ThumbLoaderFunc func_done,
-				ThumbLoaderFunc func_error,
-				ThumbLoaderFunc func_progress,
+				ThumbLoader::Func func_done,
+				ThumbLoader::Func func_error,
+				ThumbLoader::Func func_progress,
 				gpointer data);
 void thumb_loader_set_cache(ThumbLoader *tl, gboolean enable_cache, gboolean local, gboolean retry_failed);
 

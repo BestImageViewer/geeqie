@@ -22,6 +22,8 @@
 #ifndef THUMB_STANDARD_H
 #define THUMB_STANDARD_H
 
+struct FileData;
+struct ImageLoader;
 
 #if GLIB_CHECK_VERSION (2, 34, 0)
 #define THUMB_FOLDER_GLOBAL "thumbnails"
@@ -34,9 +36,6 @@
 #define THUMB_FOLDER_FAIL   "fail" G_DIR_SEPARATOR_S GQ_APPNAME_LC "-" VERSION
 #define THUMB_NAME_EXTENSION ".png"
 
-
-struct ThumbLoaderStd;
-using ThumbLoaderStdFunc = void (*)(ThumbLoaderStd *, gpointer);
 
 struct ThumbLoaderStd
 {
@@ -65,9 +64,10 @@ struct ThumbLoaderStd
 
 	gdouble progress;
 
-	ThumbLoaderStdFunc func_done;
-	ThumbLoaderStdFunc func_error;
-	ThumbLoaderStdFunc func_progress;
+	using Func = void (*)(ThumbLoaderStd *, gpointer);
+	Func func_done;
+	Func func_error;
+	Func func_progress;
 
 	gpointer data;
 };
@@ -75,9 +75,9 @@ struct ThumbLoaderStd
 
 ThumbLoaderStd *thumb_loader_std_new(gint width, gint height);
 void thumb_loader_std_set_callbacks(ThumbLoaderStd *tl,
-				    ThumbLoaderStdFunc func_done,
-				    ThumbLoaderStdFunc func_error,
-				    ThumbLoaderStdFunc func_progress,
+				    ThumbLoaderStd::Func func_done,
+				    ThumbLoaderStd::Func func_error,
+				    ThumbLoaderStd::Func func_progress,
 				    gpointer data);
 void thumb_loader_std_set_cache(ThumbLoaderStd *tl, gboolean enable_cache, gboolean local, gboolean retry_failed);
 gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd);

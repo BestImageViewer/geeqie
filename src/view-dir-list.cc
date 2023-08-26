@@ -23,9 +23,15 @@
 #include "view-dir-list.h"
 
 #include "filedata.h"
+#include "layout.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
 #include "view-dir.h"
+
+struct ViewDirInfoList
+{
+	GList *list;
+};
 
 #define VDLIST(_vd_) ((ViewDirInfoList *)(_vd_->info))
 

@@ -22,6 +22,10 @@
 #ifndef LAYOUT_IMAGE_H
 #define LAYOUT_IMAGE_H
 
+struct CollectInfo;
+struct CollectionData;
+struct FileData;
+struct LayoutWindow;
 
 GtkWidget *layout_image_new(LayoutWindow *lw, gint i);
 void layout_image_activate(LayoutWindow *lw, gint i, gboolean force);

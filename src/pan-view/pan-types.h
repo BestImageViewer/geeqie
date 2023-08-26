@@ -25,6 +25,10 @@
 #include "cache-loader.h"
 #include "filedata.h"
 
+struct FullScreenData;
+struct ImageWindow;
+struct ThumbLoader;
+
 /* thumbnail sizes and spacing */
 
 #define PAN_THUMB_SIZE_DOTS 4

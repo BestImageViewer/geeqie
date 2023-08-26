@@ -22,6 +22,9 @@
 #ifndef COLLECT_IO_H
 #define COLLECT_IO_H
 
+struct CollectionData;
+struct FileData;
+
 enum CollectionLoadFlags {
 	COLLECTION_LOAD_NONE	= 0,
 	COLLECTION_LOAD_APPEND	= 1 << 0,

@@ -22,6 +22,7 @@
 #ifndef UI_UTILDLG_H
 #define UI_UTILDLG_H
 
+struct FileData;
 
 #define GENERIC_DIALOG(gd) ((GenericDialog *)gd)
 

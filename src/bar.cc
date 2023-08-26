@@ -24,6 +24,7 @@
 
 #include "bar-histogram.h"
 #include "filedata.h"
+#include "layout.h"
 #include "metadata.h"
 #include "rcfile.h"
 #include "ui-menu.h"

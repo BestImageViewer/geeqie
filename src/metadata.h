@@ -22,6 +22,8 @@
 #ifndef METADATA_H
 #define METADATA_H
 
+struct FileData;
+
 #define COMMENT_KEY "Xmp.dc.description"
 #define KEYWORD_KEY "Xmp.dc.subject"
 #define ORIENTATION_KEY "Xmp.tiff.Orientation"

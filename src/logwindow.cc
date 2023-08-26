@@ -25,6 +25,7 @@
 #include <deque>
 #include <string>
 
+#include "layout.h"
 #include "misc.h"
 #include "ui-misc.h"
 #include "window.h"

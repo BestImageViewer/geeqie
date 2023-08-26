@@ -22,6 +22,9 @@
 #ifndef FILEDATA_H
 #define FILEDATA_H
 
+struct ExifData;
+struct HistMap;
+
 #ifdef DEBUG
 #define DEBUG_FILEDATA
 #endif
@@ -31,6 +34,96 @@
 gchar *text_from_size(gint64 size);
 gchar *text_from_size_abrev(gint64 size);
 const gchar *text_from_time(time_t t);
+
+enum FileDataChangeType {
+	FILEDATA_CHANGE_DELETE,
+	FILEDATA_CHANGE_MOVE,
+	FILEDATA_CHANGE_RENAME,
+	FILEDATA_CHANGE_COPY,
+	FILEDATA_CHANGE_UNSPECIFIED,
+	FILEDATA_CHANGE_WRITE_METADATA
+};
+
+enum NotifyPriority {
+	NOTIFY_PRIORITY_HIGH = 0,
+	NOTIFY_PRIORITY_MEDIUM,
+	NOTIFY_PRIORITY_LOW
+};
+
+enum SelectionType {
+	SELECTION_NONE		= 0,
+	SELECTION_SELECTED	= 1 << 0,
+	SELECTION_PRELIGHT	= 1 << 1,
+	SELECTION_FOCUS		= 1 << 2
+};
+
+struct FileDataChangeInfo {
+	FileDataChangeType type;
+	gchar *source;
+	gchar *dest;
+	gint error;
+	gboolean regroup_when_finished;
+};
+
+struct FileData {
+	guint magick;
+	gint type;
+	gchar *original_path; /**< key to file_data_pool hash table */
+	gchar *path;
+	const gchar *name;
+	const gchar *extension;
+	gchar *extended_extension;
+	FileFormatClass format_class;
+	gchar *format_name; /**< set by the image loader */
+	gchar *collate_key_name;
+	gchar *collate_key_name_nocase;
+	gchar *collate_key_name_natural;
+	gchar *collate_key_name_nocase_natural;
+	gint64 size;
+	time_t date;
+	time_t cdate;
+	mode_t mode; /**< this is needed at least for notification in view_dir because it is preserved after the file/directory is deleted */
+	gint sidecar_priority;
+
+	guint marks; /**< each bit represents one mark */
+	guint valid_marks; /**< zero bit means that the corresponding mark needs to be reread */
+
+
+	GList *sidecar_files;
+	FileData *parent; /**< parent file if this is a sidecar file, NULL otherwise */
+	FileDataChangeInfo *change; /**< for rename, move ... */
+	GdkPixbuf *thumb_pixbuf;
+
+	GdkPixbuf *pixbuf; /**< full-size image, only complete images, NULL during loading
+			      all FileData with non-NULL pixbuf are referenced by image_cache */
+
+	HistMap *histmap;
+
+	gboolean locked;
+	gint ref;
+	gint version; /**< increased when any field in this structure is changed */
+	gboolean disable_grouping;
+
+	gint user_orientation;
+	gint exif_orientation;
+
+	ExifData *exif;
+	time_t exifdate;
+	time_t exifdate_digitized;
+	GHashTable *modified_xmp; /**< hash table which contains unwritten xmp metadata in format: key->list of string values */
+	GList *cached_metadata;
+	gint rating;
+	gboolean metadata_in_idle_loaded;
+
+	gchar *owner;
+	gchar *group;
+	gchar *sym_link;
+
+	SelectionType selected;  /**< Used by view-file-icon. */
+
+	gint page_num;
+	gint page_total;
+};
 
 /**
  * @headerfile file_data_new_group
