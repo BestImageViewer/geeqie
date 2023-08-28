@@ -848,7 +848,7 @@ GList *vficon_selection_get_list(ViewFile *vf)
 		auto fd = static_cast<FileData *>(work->data);
 		g_assert(fd->magick == FD_MAGICK);
 
-		list = g_list_prepend(list, filelist_copy(fd->sidecar_files));
+		list = g_list_concat(filelist_copy(fd->sidecar_files), list);
 		list = g_list_prepend(list, file_data_ref(fd));
 		}
 

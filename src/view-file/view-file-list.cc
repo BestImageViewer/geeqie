@@ -1485,7 +1485,7 @@ GList *vflist_selection_get_list(ViewFile *vf)
 		if (!fd->parent && !gtk_tree_view_row_expanded(GTK_TREE_VIEW(vf->listview), tpath))
 			{
 			/* unexpanded - add whole group */
-			list = g_list_prepend(list, filelist_copy(fd->sidecar_files));
+			list = g_list_concat(filelist_copy(fd->sidecar_files), list);
 			}
 
 		list = g_list_prepend(list, file_data_ref(fd));
