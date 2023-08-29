@@ -28,13 +28,6 @@ enum ZoomMode {
 	ZOOM_RESET_NONE		= 2
 };
 
-enum ClipboardDestination {
-	CLIPBOARD_TEXT_PLAIN	= 0,
-	CLIPBOARD_TEXT_URI_LIST	= 1,
-	CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES	= 2,
-	CLIPBOARD_UTF8_STRING	= 3
-};
-
 enum ClipboardSelection {
 	CLIPBOARD_PRIMARY	= 0,
 	CLIPBOARD_CLIPBOARD = 1,
@@ -93,7 +86,6 @@ enum AlterType {
 	ALTER_MIRROR,
 	ALTER_FLIP,
 };
-
 
 enum ImageSplitMode {
 	SPLIT_NONE = 0,

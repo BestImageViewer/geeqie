@@ -23,19 +23,26 @@
 #include "utilops.h"
 
 #include "cache.h"
+#include "editors.h"
+#include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "image.h"
+#include "metadata.h"
 #include "thumb-standard.h"
 #include "trash.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
-#include "editors.h"
-#include "metadata.h"
-#include "exif.h"
 
 #define DIALOG_WIDTH 750
+
+enum ClipboardDestination {
+	CLIPBOARD_TEXT_PLAIN	= 0,
+	CLIPBOARD_TEXT_URI_LIST	= 1,
+	CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES	= 2,
+	CLIPBOARD_UTF8_STRING	= 3
+};
 
 static GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *widget);
 
