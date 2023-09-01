@@ -246,9 +246,14 @@ static RemoteConnection *remote_server_open(const gchar *path)
 {
 	RemoteConnection *rc;
 	struct sockaddr_un addr;
-	gint sun_path_len;
 	gint fd;
 	GIOChannel *channel;
+
+	if (strlen(path) >= sizeof(addr.sun_path))
+		{
+		log_printf("Address is too long: %s\n", path);
+		return nullptr;
+		}
 
 	if (remote_server_exists(path))
 		{
@@ -260,8 +265,7 @@ static RemoteConnection *remote_server_open(const gchar *path)
 	if (fd == -1) return nullptr;
 
 	addr.sun_family = AF_UNIX;
-	sun_path_len = MIN(strlen(path) + 1, UNIX_PATH_MAX);
-	strncpy(addr.sun_path, path, sun_path_len);
+	strncpy(addr.sun_path, path, sizeof(addr.sun_path));
 	if (bind(fd, reinterpret_cast<const struct sockaddr*>(&addr), sizeof(addr)) == -1 ||
 	    listen(fd, REMOTE_SERVER_BACKLOG) == -1)
 		{
@@ -300,8 +304,9 @@ static RemoteConnection *remote_client_open(const gchar *path)
 	RemoteConnection *rc;
 	struct stat st;
 	struct sockaddr_un addr;
-	gint sun_path_len;
 	gint fd;
+
+	if (strlen(path) >= sizeof(addr.sun_path)) return nullptr;
 
 	if (stat(path, &st) != 0 || !S_ISSOCK(st.st_mode)) return nullptr;
 
@@ -309,8 +314,7 @@ static RemoteConnection *remote_client_open(const gchar *path)
 	if (fd == -1) return nullptr;
 
 	addr.sun_family = AF_UNIX;
-	sun_path_len = MIN(strlen(path) + 1, UNIX_PATH_MAX);
-	strncpy(addr.sun_path, path, sun_path_len);
+	strncpy(addr.sun_path, path, sizeof(addr.sun_path));
 	if (connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) == -1)
 		{
 		DEBUG_1("error connecting to socket: %s", strerror(errno));
