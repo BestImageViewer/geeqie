@@ -527,7 +527,7 @@ static gboolean appimage_notification_close_cb(gpointer data)
 {
 	auto appimage_data = static_cast<AppImageData *>(data);
 
-	if (appimage_data->window && gtk_window_get_opacity(GTK_WINDOW(appimage_data->window)) != 0)
+	if (appimage_data->window && gtk_widget_get_opacity(appimage_data->window) != 0)
 		{
 		g_source_remove(appimage_data->id);
 		}
@@ -547,9 +547,9 @@ static gboolean appimage_notification_fade_cb(gpointer data)
 {
 	auto appimage_data = static_cast<AppImageData *>(data);
 
-	gtk_window_set_opacity(GTK_WINDOW(appimage_data->window), (gtk_window_get_opacity(GTK_WINDOW(appimage_data->window)) - 0.02));
+	gtk_widget_set_opacity(appimage_data->window, (gtk_widget_get_opacity(appimage_data->window) - 0.02));
 
-	if (gtk_window_get_opacity(GTK_WINDOW(appimage_data->window)) == 0)
+	if (gtk_widget_get_opacity(appimage_data->window) == 0)
 		{
 		g_idle_add(appimage_notification_close_cb, data);
 
@@ -576,7 +576,10 @@ static void show_notification_message(AppImageData *appimage_data)
 
 	appimage_data->window = GTK_WIDGET(gtk_builder_get_object(builder, "appimage_notification"));
 
-	gtk_window_move(GTK_WINDOW(appimage_data->window), (gdk_screen_width() * 0.8), (gdk_screen_height() / 20));
+	GdkRectangle workarea;
+	gdk_monitor_get_workarea(gdk_display_get_primary_monitor(gdk_display_get_default()),
+                             &workarea);
+	gtk_window_move(GTK_WINDOW(appimage_data->window), workarea.width * 0.8, workarea.height / 20);
 	g_signal_connect(appimage_data->window, "focus-in-event", G_CALLBACK(user_close_cb), appimage_data);
 	appimage_data->id = g_timeout_add(100, appimage_notification_fade_cb, appimage_data);
 
