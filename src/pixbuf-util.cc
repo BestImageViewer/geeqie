@@ -1344,7 +1344,7 @@ static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
 			guint8 n;
 			gint r;
 
-			r = MIN(border, (gint)sqrt((i-sx)*(i-sx) + (j-sy)*(j-sy)));
+			r = MIN(border, (gint)hypot(i - sx, j - sy));
 			n = a - a * r / border;
 			*pp = (r * n + *pp * (256-n)) >> 8;
 			pp++;

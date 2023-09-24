@@ -305,7 +305,7 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 
 	group->width = pi_box->width;
 	group->height = pi_box->y + pi_box->height;
-	group->diameter = static_cast<gint>(sqrt(group->width * group->width + group->height * group->height));
+	group->diameter = static_cast<gint>(hypot(group->width, group->height));
 
 	group->children = nullptr;
 

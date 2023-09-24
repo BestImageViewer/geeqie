@@ -115,12 +115,11 @@ static gdouble get_crop_factor(ExifData *exif)
 
 	if (ratio < 0.5 || ratio > 2.0) return 0.0; /* reasonable ratio */
 
-	size = sqrt(xsize * xsize + ysize * ysize);
+	size = hypot(xsize, ysize);
 
 	if (size < 1.0 || size > 100.0) return 0.0; /* reasonable sensor size in mm */
 
-	return sqrt(36*36+24*24) / size;
-
+	return hypot(36, 24) / size;
 }
 
 static gboolean remove_suffix(gchar *str, const gchar *suffix, gint suffix_len)
