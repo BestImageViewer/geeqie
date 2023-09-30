@@ -136,6 +136,7 @@
 #define GQ_ICON_ADD "list-add"
 #define GQ_ICON_REMOVE "list-remove"
 #define GQ_ICON_UNDO "edit-undo"
+#define GQ_ICON_REDO "edit-redo"
 #define GQ_ICON_OPEN "document-open"
 #define GQ_ICON_SAVE "document-save"
 #define GQ_ICON_SAVE_AS "document-save-as"

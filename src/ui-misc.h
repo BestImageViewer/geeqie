@@ -238,5 +238,8 @@ GList* get_action_items();
 void action_items_free(GList *list);
 
 gboolean defined_mouse_buttons(GtkWidget *widget, GdkEventButton *event, gpointer data);
+
+// Copy pixbuf returned by gtk_icon_theme_load_icon() to avoid GTK+ keeping the old icon theme loaded
+GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

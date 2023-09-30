@@ -1626,4 +1626,15 @@ gboolean defined_mouse_buttons(GtkWidget *, GdkEventButton *event, gpointer data
 	return ret;
 }
 
+GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags)
+{
+	GError *error = nullptr;
+	GdkPixbuf *icon = gtk_icon_theme_load_icon(icon_theme, icon_name, size, flags, &error);
+	if (error) return nullptr;
+
+	GdkPixbuf *pixbuf = gdk_pixbuf_copy(icon);
+	g_object_unref(icon);
+	return pixbuf;
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

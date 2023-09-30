@@ -36,6 +36,51 @@
 #include "ui-fileops.h"
 #include "ui-misc.h"
 
+namespace
+{
+
+struct PixmapErrors
+{
+	GdkPixbuf *error;
+	GdkPixbuf *warning;
+	GdkPixbuf *apply;
+};
+
+GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *widget)
+{
+	static PixmapErrors pe = [widget]() -> PixmapErrors
+	{
+		GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
+
+		gint size;
+		if (!gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &size, &size))
+			{
+			size = 16;
+			}
+
+		GdkPixbuf *pb_error = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_DIALOG_ERROR, size, GTK_ICON_LOOKUP_USE_BUILTIN);
+		GdkPixbuf *pb_warning = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_DIALOG_WARNING, size, GTK_ICON_LOOKUP_USE_BUILTIN);
+		GdkPixbuf *pb_apply = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_APPLY, size, GTK_ICON_LOOKUP_USE_BUILTIN);
+		return {pb_error, pb_warning, pb_apply};
+	}();
+
+	gint error = file_data_sc_verify_ci(fd, list);
+
+	if (error & CHANGE_ERROR_MASK)
+		{
+		return pe.error;
+		}
+
+	if (error)
+		{
+		return pe.warning;
+		}
+
+	return pe.apply;
+}
+
+}
+
 #define DIALOG_WIDTH 750
 
 enum ClipboardDestination {
@@ -44,8 +89,6 @@ enum ClipboardDestination {
 	CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES	= 2,
 	CLIPBOARD_UTF8_STRING	= 3
 };
-
-static GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *widget);
 
 static GtkTargetEntry target_types[] =
 {
@@ -983,42 +1026,6 @@ void file_util_perform_ci(UtilityData *ud)
 			{
 			file_util_perform_ci_internal(ud);
 			}
-		}
-}
-
-static GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *widget)
-{
-	static GdkPixbuf *pb_warning;
-	static GdkPixbuf *pb_error;
-	static GdkPixbuf *pb_apply;
-	gint error;
-
-	if (!pb_warning)
-		{
-		pb_warning = gtk_widget_render_icon(widget, GTK_STOCK_DIALOG_WARNING, GTK_ICON_SIZE_MENU, nullptr);
-		}
-
-	if (!pb_error)
-		{
-		pb_error = gtk_widget_render_icon(widget, GTK_STOCK_DIALOG_ERROR, GTK_ICON_SIZE_MENU, nullptr);
-		}
-
-	if (!pb_apply)
-		{
-		pb_apply = gtk_widget_render_icon(widget, GTK_STOCK_APPLY, GTK_ICON_SIZE_MENU, nullptr);
-		}
-
-	error = file_data_sc_verify_ci(fd, list);
-
-	if (!error) return pb_apply;
-
-	if (error & CHANGE_ERROR_MASK)
-		{
-		return pb_error;
-		}
-	else
-		{
-		return pb_warning;
 		}
 }
 

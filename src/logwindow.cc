@@ -498,7 +498,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	g_signal_connect(logwin->search_entry_box, "activate", G_CALLBACK(search_activate_event), logwin);
 
 	theme = gtk_icon_theme_get_default();
-	pixbuf = gtk_icon_theme_load_icon(theme, "pan-up-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
+	pixbuf = gtk_icon_theme_load_icon(theme, GQ_ICON_PAN_UP, 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
 	image = gtk_image_new_from_pixbuf(pixbuf);
 	backwards_button = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(backwards_button), GTK_WIDGET(image));
@@ -508,7 +508,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	g_signal_connect(backwards_button, "button_release_event", G_CALLBACK(backwards_keypress_event_cb), logwin);
 	g_object_unref(pixbuf);
 
-	pixbuf = gtk_icon_theme_load_icon(theme, "pan-down-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
+	pixbuf = gtk_icon_theme_load_icon(theme, GQ_ICON_PAN_DOWN, 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
 	image = gtk_image_new_from_pixbuf(pixbuf);
 	forwards_button = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(forwards_button), GTK_WIDGET(image));

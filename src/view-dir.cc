@@ -37,103 +37,72 @@
 #include "view-dir-list.h"
 #include "view-dir-tree.h"
 
-/* Folders icons to be used in tree or list directory view */
-static PixmapFolders *folder_icons_new(GtkWidget *widget)
+namespace
 {
-	auto pf = g_new0(PixmapFolders, 1);
-	GError *error = nullptr;
-	GdkPixbuf *icon;
-	gint scale;
 
-	GtkIconSize size = GTK_ICON_SIZE_MENU;
-
-/** @FIXME Emblems should be attached to icons via e.g.: \n
- * GIcon *.... \n
- * icon = g_themed_icon_new("folder"); \n
- * emblem_icon = g_themed_icon_new("emblem_symbolic_link"); \n
- * emblem = g_emblem_new(emblem_icon); \n
- * emblemed = g_emblemed_icon_new(icon, emblem); \n
- * gtk_icon_info_load_icon(icon_info, NULL) \n
+/** @FIXME Emblems should be attached to icons via e.g.:
+ * GIcon *....
+ * icon = g_themed_icon_new("folder");
+ * emblem_icon = g_themed_icon_new("emblem_symbolic_link");
+ * emblem = g_emblem_new(emblem_icon);
+ * emblemed = g_emblemed_icon_new(icon, emblem);
+ * gtk_icon_info_load_icon(icon_info, NULL)
  * But there does not seem to be a way to get GtkIconInfo from a GIcon
  */
-
-	/* Attempt to use stock gtk icons */
-	pf->close  = gtk_widget_render_icon(widget, GTK_STOCK_DIRECTORY, size, nullptr);
-	pf->open   = gtk_widget_render_icon(widget, GTK_STOCK_OPEN, size, nullptr);
-	pf->parent = gtk_widget_render_icon(widget, GTK_STOCK_GO_UP, size, nullptr);
-
-	if (gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), GQ_ICON_UNREADABLE))
+GdkPixbuf *create_folder_icon_with_emblem(GtkIconTheme *icon_theme, const gchar *emblem, const gchar *fallback_icon, gint size)
+{
+	if (!gtk_icon_theme_has_icon(icon_theme, emblem))
 		{
-		icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), GQ_ICON_UNREADABLE, size, GTK_ICON_LOOKUP_USE_BUILTIN, &error);
-		if (error)
-			{
-			log_printf("Error: %s\n", error->message);
-			g_error_free(error);
+		return gq_gtk_icon_theme_load_icon_copy(icon_theme, fallback_icon, size, GTK_ICON_LOOKUP_USE_BUILTIN);
+		}
 
-			pf->deny = gdk_pixbuf_copy(gtk_widget_render_icon(widget, GTK_STOCK_STOP, size, nullptr));
-			}
-		else
-			{
-			pf->deny = gdk_pixbuf_copy(gtk_widget_render_icon(widget, GTK_STOCK_DIRECTORY, size, nullptr));
-			scale = gdk_pixbuf_get_width(icon) / 2;
-			gdk_pixbuf_composite(icon, pf->deny, scale, scale, scale, scale, scale, scale, 0.5, 0.5, GDK_INTERP_HYPER, 255);
-
-			}
-		g_object_unref(icon);
+	GError *error = nullptr;
+	GdkPixbuf *icon = gtk_icon_theme_load_icon(icon_theme, emblem, size, GTK_ICON_LOOKUP_USE_BUILTIN, &error);
+	GdkPixbuf *pixbuf;
+	if (error)
+		{
+		log_printf("Error: %s\n", error->message);
+		g_error_free(error);
+		pixbuf = gq_gtk_icon_theme_load_icon_copy(icon_theme, fallback_icon, size, GTK_ICON_LOOKUP_USE_BUILTIN);
 		}
 	else
 		{
-		pf->deny = gdk_pixbuf_copy(gtk_widget_render_icon(widget, GTK_STOCK_STOP, size, nullptr));
+		GdkPixbuf *directory_pixbuf = gtk_icon_theme_load_icon(icon_theme, GQ_ICON_DIRECTORY, size, GTK_ICON_LOOKUP_USE_BUILTIN, nullptr);
+		pixbuf = gdk_pixbuf_copy(directory_pixbuf);
+		g_object_unref(directory_pixbuf);
+		
+		gint scale = gdk_pixbuf_get_width(icon) / 2;
+		gdk_pixbuf_composite(icon, pixbuf, scale, scale, scale, scale, scale, scale, 0.5, 0.5, GDK_INTERP_HYPER, 255);
 		}
+	g_object_unref(icon);
 
-	if (gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), GQ_ICON_LINK))
+	return pixbuf;
+}
+
+/* Folders icons to be used in tree or list directory view */
+PixmapFolders *folder_icons_new()
+{
+	auto pf = g_new0(PixmapFolders, 1);
+	GtkIconTheme *icon_theme = gtk_icon_theme_get_default();
+
+	gint size;
+	if (!gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &size, &size))
 		{
-		icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), GQ_ICON_LINK, size, GTK_ICON_LOOKUP_USE_BUILTIN, &error);
-		if (error)
-			{
-			log_printf("Error: %s\n", error->message);
-			g_error_free(error);
-
-			pf->link = gdk_pixbuf_copy(gtk_widget_render_icon(widget, GTK_STOCK_REDO, size, nullptr));
-			}
-		else
-			{
-			pf->link = gdk_pixbuf_copy(gtk_widget_render_icon(widget, GTK_STOCK_DIRECTORY, size, nullptr));
-			scale = gdk_pixbuf_get_width(icon) / 2;
-			gdk_pixbuf_composite(icon, pf->link, scale, scale, scale, scale, scale, scale, 0.5, 0.5, GDK_INTERP_HYPER, 255);
-			}
-		g_object_unref(icon);
-		}
-	else
-		{
-		pf->link = gdk_pixbuf_copy(gtk_widget_render_icon(widget, GTK_STOCK_REDO, size, nullptr));
+		size = 16;
 		}
 
-	pf->read_only = gdk_pixbuf_copy(gtk_widget_render_icon(widget, GTK_STOCK_DIRECTORY, size, nullptr));
+	pf->close  = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_DIRECTORY, size, GTK_ICON_LOOKUP_USE_BUILTIN);
+	pf->open   = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_OPEN, size, GTK_ICON_LOOKUP_USE_BUILTIN);
+	pf->parent = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_GO_UP, size, GTK_ICON_LOOKUP_USE_BUILTIN);
 
-	if (gtk_icon_theme_has_icon(gtk_icon_theme_get_default(), GQ_ICON_READONLY))
-		{
-		icon = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), GQ_ICON_READONLY, size, GTK_ICON_LOOKUP_USE_BUILTIN, &error);
-		if (error)
-			{
-			log_printf("Error: %s\n", error->message);
-			g_error_free(error);
-
-			pf->read_only = gdk_pixbuf_copy(gtk_widget_render_icon(widget, GTK_STOCK_DIRECTORY, size, nullptr));
-			}
-		else
-			{
-			gint scale = gdk_pixbuf_get_width(icon) / 2;
-			gdk_pixbuf_composite(icon, pf->read_only, scale, scale, scale, scale, scale, scale, 0.5, 0.5, GDK_INTERP_HYPER, 255);
-
-			}
-		g_object_unref(icon);
-		}
+	pf->deny = create_folder_icon_with_emblem(icon_theme, GQ_ICON_UNREADABLE, GQ_ICON_STOP, size);
+	pf->link = create_folder_icon_with_emblem(icon_theme, GQ_ICON_LINK, GQ_ICON_REDO, size);
+	pf->read_only = create_folder_icon_with_emblem(icon_theme, GQ_ICON_READONLY, GQ_ICON_DIRECTORY, size);
 
 	return pf;
 }
 
-static void folder_icons_free(PixmapFolders *pf)
+void folder_icons_free(PixmapFolders *pf)
 {
 	if (!pf) return;
 
@@ -147,7 +116,7 @@ static void folder_icons_free(PixmapFolders *pf)
 	g_free(pf);
 }
 
-
+}
 
 static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data);
 
@@ -189,7 +158,7 @@ ViewDir *vd_new(LayoutWindow *lw)
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 
 	vd->layout = lw;
-	vd->pf = folder_icons_new(vd->widget);
+	vd->pf = folder_icons_new();
 
 	switch (lw->options.dir_view_type)
 		{
