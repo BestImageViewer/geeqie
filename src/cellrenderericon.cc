@@ -169,7 +169,7 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 
 	g_object_class_install_property(object_class,
 					PROP_BACKGROUND_GDK,
-					g_param_spec_boxed("background_gdk",
+					g_param_spec_boxed("background_rgba",
 							"Background color",
 							"Background color as a GdkRGBA",
 							GDK_TYPE_RGBA,
@@ -177,7 +177,7 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 
 	g_object_class_install_property(object_class,
 					PROP_FOREGROUND_GDK,
-					g_param_spec_boxed("foreground_gdk",
+					g_param_spec_boxed("foreground_rgba",
 							"Foreground color",
 							"Foreground color as a GdkRGBA",
 							GDK_TYPE_RGBA,

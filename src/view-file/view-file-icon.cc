@@ -2150,7 +2150,7 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 					"show_marks", vf->marks_enabled,
 					"cell-background-rgba", &color_bg,
 					"cell-background-set", TRUE,
-					"foreground-gdk", &color_fg,
+					"foreground-rgba", &color_fg,
 					"foreground-set", TRUE,
 					"has-focus", (VFICON(vf)->focus_fd == fd), NULL);
 		g_free(name_sidecars);

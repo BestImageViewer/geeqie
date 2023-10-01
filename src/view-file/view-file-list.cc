@@ -1981,7 +1981,7 @@ static void vflist_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 
 	gtk_tree_model_get(tree_model, iter, FILE_COLUMN_COLOR, &set, -1);
 	g_object_set(G_OBJECT(cell),
-		     "cell-background-gdk", vflist_listview_color_shifted(vf->listview),
+		     "cell-background-rgba", vflist_listview_color_shifted(vf->listview),
 		     "cell-background-set", set, NULL);
 }
 

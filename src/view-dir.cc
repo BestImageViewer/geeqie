@@ -25,8 +25,8 @@
 #include "dupe.h"
 #include "editors.h"
 #include "filedata.h"
+#include "layout.h"
 #include "layout-image.h"
-#include "layout-util.h"
 #include "menu.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
@@ -1200,7 +1200,7 @@ void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_
 
 	gtk_tree_model_get(tree_model, iter, DIR_COLUMN_COLOR, &set, -1);
 	g_object_set(G_OBJECT(cell),
-		     "cell-background-gdk", vd_color_shifted(vd->view),
+		     "cell-background-rgba", vd_color_shifted(vd->view),
 		     "cell-background-set", set, NULL);
 }
 

@@ -4023,7 +4023,7 @@ static void dupe_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 
 	gtk_tree_model_get(tree_model, iter, DUPE_COLUMN_COLOR, &set, -1);
 	g_object_set(G_OBJECT(cell),
-		     "cell-background-gdk", dupe_listview_color_shifted(dw->listview),
+		     "cell-background-rgba", dupe_listview_color_shifted(dw->listview),
 		     "cell-background-set", set, NULL);
 }
 

@@ -2570,9 +2570,9 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 			{
 			g_object_set(cell,	"pixbuf", info->pixbuf,
 						"text",  display_text,
-						"cell-background-gdk", &color_bg,
+						"cell-background-rgba", &color_bg,
 						"cell-background-set", TRUE,
-						"foreground-gdk", &color_fg,
+						"foreground-rgba", &color_fg,
 						"foreground-set", TRUE,
 						"has-focus", (ct->focus_info == info), NULL);
 			}
