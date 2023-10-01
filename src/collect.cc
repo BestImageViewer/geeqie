@@ -455,8 +455,8 @@ CollectionData *collection_new(const gchar *path)
 
 	cd->ref = 1;	/* starts with a ref of 1 */
 	cd->sort_method = SORT_NONE;
-	cd->window_w = COLLECT_DEF_WIDTH;
-	cd->window_h = COLLECT_DEF_HEIGHT;
+	cd->window.width = COLLECT_DEF_WIDTH;
+	cd->window.height = COLLECT_DEF_HEIGHT;
 	cd->existence = g_hash_table_new(nullptr, nullptr);
 
 	if (path)
@@ -1088,9 +1088,9 @@ static void collection_window_get_geometry(CollectWindow *cw)
 
 	cd = cw->cd;
 	window = gtk_widget_get_window(cw->window);
-	gdk_window_get_position(window, &cd->window_x, &cd->window_y);
-	cd->window_w = gdk_window_get_width(window);
-	cd->window_h = gdk_window_get_height(window);
+	gdk_window_get_position(window, &cd->window.x, &cd->window.y);
+	cd->window.width = gdk_window_get_width(window);
+	cd->window.height = gdk_window_get_height(window);
 	cd->window_read = TRUE;
 }
 
@@ -1347,8 +1347,8 @@ CollectWindow *collection_window_new(const gchar *path)
 
 	if (options->save_window_positions && path && collection_load_only_geometry(cw->cd, path))
 		{
-		gtk_window_set_default_size(GTK_WINDOW(cw->window), cw->cd->window_w, cw->cd->window_h);
-		gq_gtk_window_move(GTK_WINDOW(cw->window), cw->cd->window_x, cw->cd->window_y);
+		gtk_window_set_default_size(GTK_WINDOW(cw->window), cw->cd->window.width, cw->cd->window.height);
+		gq_gtk_window_move(GTK_WINDOW(cw->window), cw->cd->window.x, cw->cd->window.y);
 		}
 	else
 		{

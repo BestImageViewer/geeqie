@@ -44,19 +44,23 @@ static CollectManagerEntry *collect_manager_get_entry(const gchar *path);
 static void collect_manager_entry_reset(CollectManagerEntry *entry);
 static gint collect_manager_process_action(CollectManagerEntry *entry, gchar **path_ptr);
 
+namespace
+{
 
-static gboolean scan_geometry(gchar *buffer, gint *x, gint *y, gint *w, gint *h)
+gboolean scan_geometry(gchar *buffer, GdkRectangle &window)
 {
 	gint nx, ny, nw, nh;
 
 	if (sscanf(buffer, "%d %d %d %d", &nx, &ny, &nw, &nh) != 4) return FALSE;
 
-	*x = nx;
-	*y = ny;
-	*w = nw;
-	*h = nh;
+	window.x = nx;
+	window.y = ny;
+	window.width = nw;
+	window.height = nh;
 
 	return TRUE;
+}
+
 }
 
 static gboolean collection_load_private(CollectionData *cd, const gchar *path, CollectionLoadFlags flags)
@@ -141,7 +145,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 					limit_failures = FALSE;
 					}
 				else if (strncmp(p, "#geometry:", 10 ) == 0 &&
-					 scan_geometry(p + 10, &cd->window_x, &cd->window_y, &cd->window_w, &cd->window_h))
+					 scan_geometry(p + 10, cd->window))
 					{
 					has_geometry_header = TRUE;
 					cd->window_read = TRUE;
@@ -412,7 +416,7 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 	collection_update_geometry(cd);
 	if (cd->window_read)
 		{
-		secure_fprintf(ssi, "#geometry: %d %d %d %d\n", cd->window_x, cd->window_y, cd->window_w, cd->window_h);
+		secure_fprintf(ssi, "#geometry: %d %d %d %d\n", cd->window.x, cd->window.y, cd->window.width, cd->window.height);
 		}
 
 	work = cd->list;

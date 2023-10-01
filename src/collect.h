@@ -63,11 +63,8 @@ struct CollectionData
 	gint ref;
 
 	/* geometry */
-	gint window_read;
-	gint window_x;
-	gint window_y;
-	gint window_w;
-	gint window_h;
+	gboolean window_read;
+	GdkRectangle window;
 
 	gboolean changed; /**< contents changed since save flag */
 
