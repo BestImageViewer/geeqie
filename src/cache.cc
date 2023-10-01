@@ -533,65 +533,87 @@ gboolean cache_sim_data_filled(ImageSimilarityData *sd)
  *-------------------------------------------------------------------
  */
 
-
-static void cache_path_parts(CacheType type,
-			     const gchar **cache_rc, const gchar **cache_local, const gchar **cache_ext)
+struct CachePathParts
 {
-	switch (type)
-		{
-		case CACHE_TYPE_THUMB:
-			*cache_rc = get_thumbnails_cache_dir();
-			*cache_local = GQ_CACHE_LOCAL_THUMB;
-			*cache_ext = GQ_CACHE_EXT_THUMB;
-			break;
-		case CACHE_TYPE_SIM:
-			*cache_rc = get_thumbnails_cache_dir();
-			*cache_local = GQ_CACHE_LOCAL_THUMB;
-			*cache_ext = GQ_CACHE_EXT_SIM;
-			break;
-		case CACHE_TYPE_METADATA:
-			*cache_rc = get_metadata_cache_dir();
-			*cache_local = GQ_CACHE_LOCAL_METADATA;
-			*cache_ext = GQ_CACHE_EXT_METADATA;
-			break;
-		case CACHE_TYPE_XMP_METADATA:
-			*cache_rc = get_metadata_cache_dir();
-			*cache_local = GQ_CACHE_LOCAL_METADATA;
-			*cache_ext = GQ_CACHE_EXT_XMP_METADATA;
-			break;
-		}
-}
+	CachePathParts(CacheType type)
+	{
+		switch (type)
+			{
+			case CACHE_TYPE_THUMB:
+				rc = get_thumbnails_cache_dir();
+				local = GQ_CACHE_LOCAL_THUMB;
+				ext = GQ_CACHE_EXT_THUMB;
+				break;
+			case CACHE_TYPE_SIM:
+				rc = get_thumbnails_cache_dir();
+				local = GQ_CACHE_LOCAL_THUMB;
+				ext = GQ_CACHE_EXT_SIM;
+				break;
+			case CACHE_TYPE_METADATA:
+				rc = get_metadata_cache_dir();
+				local = GQ_CACHE_LOCAL_METADATA;
+				ext = GQ_CACHE_EXT_METADATA;
+				break;
+			case CACHE_TYPE_XMP_METADATA:
+				rc = get_metadata_cache_dir();
+				local = GQ_CACHE_LOCAL_METADATA;
+				ext = GQ_CACHE_EXT_XMP_METADATA;
+				break;
+			}
+	}
+
+	gchar *build_path_local(const gchar *source) const
+	{
+		gchar *base = remove_level_from_path(source);
+		gchar *name = g_strconcat(filename_from_path(source), ext, nullptr);
+		gchar *path = g_build_filename(base, local, name, nullptr);
+		g_free(name);
+		g_free(base);
+
+		return path;
+	}
+
+	gchar *build_path_rc(const gchar *source) const
+	{
+		gchar *name = g_strconcat(source, ext, nullptr);
+		gchar *path = g_build_filename(rc, name, nullptr);
+		g_free(name);
+
+		return path;
+	}
+
+	const gchar *rc = nullptr;
+	const gchar *local = nullptr;
+	const gchar *ext = nullptr;
+};
 
 gchar *cache_get_location(CacheType type, const gchar *source, gint include_name, mode_t *mode)
 {
 	gchar *path = nullptr;
 	gchar *base;
 	gchar *name = nullptr;
-	const gchar *cache_rc;
-	const gchar *cache_local;
-	const gchar *cache_ext;
 
 	if (!source) return nullptr;
 
-	cache_path_parts(type, &cache_rc, &cache_local, &cache_ext);
+	const CachePathParts cache{type};
 
 	base = remove_level_from_path(source);
 	if (include_name)
 		{
-		name = g_strconcat(filename_from_path(source), cache_ext, NULL);
+		name = g_strconcat(filename_from_path(source), cache.ext, NULL);
 		}
 
 	if (((type != CACHE_TYPE_METADATA && type != CACHE_TYPE_XMP_METADATA && options->thumbnails.cache_into_dirs) ||
 	     ((type == CACHE_TYPE_METADATA || type == CACHE_TYPE_XMP_METADATA) && options->metadata.enable_metadata_dirs)) &&
 	    access_file(base, W_OK))
 		{
-		path = g_build_filename(base, cache_local, name, NULL);
+		path = g_build_filename(base, cache.local, name, NULL);
 		if (mode) *mode = 0775;
 		}
 
 	if (!path)
 		{
-		path = g_build_filename(cache_rc, base, name, NULL);
+		path = g_build_filename(cache.rc, base, name, NULL);
 		if (mode) *mode = 0755;
 		}
 
@@ -601,39 +623,14 @@ gchar *cache_get_location(CacheType type, const gchar *source, gint include_name
 	return path;
 }
 
-static gchar *cache_build_path_local(const gchar *source, const gchar *cache_local, const gchar *cache_ext)
-{
-	gchar *path;
-	gchar *base = remove_level_from_path(source);
-	gchar *name = g_strconcat(filename_from_path(source), cache_ext, NULL);
-	path = g_build_filename(base, cache_local, name, NULL);
-	g_free(name);
-	g_free(base);
-
-	return path;
-}
-
-static gchar *cache_build_path_rc(const gchar *source, const gchar *cache_rc, const gchar *cache_ext)
-{
-	gchar *path;
-	gchar *name = g_strconcat(source, cache_ext, NULL);
-	path = g_build_filename(cache_rc, name, NULL);
-	g_free(name);
-
-	return path;
-}
-
 gchar *cache_find_location(CacheType type, const gchar *source)
 {
 	gchar *path;
-	const gchar *cache_rc;
-	const gchar *cache_local;
-	const gchar *cache_ext;
 	gboolean prefer_local;
 
 	if (!source) return nullptr;
 
-	cache_path_parts(type, &cache_rc, &cache_local, &cache_ext);
+	const CachePathParts cache{type};
 
 	if (type == CACHE_TYPE_METADATA || type == CACHE_TYPE_XMP_METADATA)
 		{
@@ -646,11 +643,11 @@ gchar *cache_find_location(CacheType type, const gchar *source)
 
 	if (prefer_local)
 		{
-		path = cache_build_path_local(source, cache_local, cache_ext);
+		path = cache.build_path_local(source);
 		}
 	else
 		{
-		path = cache_build_path_rc(source, cache_rc, cache_ext);
+		path = cache.build_path_rc(source);
 		}
 
 	if (!isfile(path))
@@ -660,11 +657,11 @@ gchar *cache_find_location(CacheType type, const gchar *source)
 		/* try the opposite method if not found */
 		if (!prefer_local)
 			{
-			path = cache_build_path_local(source, cache_local, cache_ext);
+			path = cache.build_path_local(source);
 			}
 		else
 			{
-			path = cache_build_path_rc(source, cache_rc, cache_ext);
+			path = cache.build_path_rc(source);
 			}
 
 		if (!isfile(path))
