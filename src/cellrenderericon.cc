@@ -663,7 +663,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 		}
 	else
 		{
-		if (gtk_widget_get_state(widget) == GTK_STATE_INSENSITIVE)
+		if (!gtk_widget_is_sensitive(widget))
 			state = GTK_STATE_FLAG_INSENSITIVE;
 		else
 			state = GTK_STATE_FLAG_NORMAL;
