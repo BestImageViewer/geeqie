@@ -411,8 +411,9 @@ lua_dep = []
 req_version = '>=5.3'
 option = get_option('lua')
 if not option.disabled()
-    foreach name : ['lua', 'lua5.3', 'lua-5.3', 'lua53']
-        lua_dep = dependency(name, version: req_version, required: get_option('lua'))
+    lua_names = ['lua5.3', 'lua-5.3', 'lua53', 'lua']
+    foreach name : lua_names
+        lua_dep = dependency(name, version: req_version, required: name == lua_names[-1] ? get_option('lua') : false)
         if lua_dep.found()
             break
         endif
