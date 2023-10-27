@@ -35,6 +35,8 @@ enum {
 	FULLSCREEN_CURSOR_BUSY   = 1 << 2
 };
 
+static void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRectangle &geometry,
+				   GdkScreen **dest_screen, gboolean *same_region);
 
 /*
  *----------------------------------------------------------------------------
@@ -222,8 +224,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 {
 	FullScreenData *fs;
 	GdkScreen *screen;
-	gint x, y;
-	gint w, h;
+	GdkRectangle rect;
 	GdkGeometry geometry;
 
 	if (!window || !imd) return nullptr;
@@ -239,7 +240,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	fs->stop_data = stop_data;
 
 	DEBUG_1("full screen requests screen %d", options->fullscreen.screen);
-	fullscreen_prefs_get_geometry(options->fullscreen.screen, window, &x, &y, &w, &h,
+	fullscreen_prefs_get_geometry(options->fullscreen.screen, window, rect,
 				      &screen, &fs->same_region);
 
 	fs->window = window_new("fullscreen", nullptr, nullptr, _("Full screen"));
@@ -258,8 +259,8 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	}
 
 	/* set default size and position, so the window appears where it was before */
-	gtk_window_set_default_size(GTK_WINDOW(fs->window), w, h);
-	gq_gtk_window_move(GTK_WINDOW(fs->window), x, y);
+	gtk_window_set_default_size(GTK_WINDOW(fs->window), rect.width, rect.height);
+	gq_gtk_window_move(GTK_WINDOW(fs->window), rect.x, rect.y);
 
 	/* By setting USER_POS and USER_SIZE, most window managers will
 	 * not request positioning of the full screen window (for example twm).
@@ -270,8 +271,8 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	 */
 	geometry.min_width = 1;
 	geometry.min_height = 1;
-	geometry.base_width = w;
-	geometry.base_height = h;
+	geometry.base_width = rect.width;
+	geometry.base_height = rect.height;
 	geometry.win_gravity = GDK_GRAVITY_STATIC;
 	gtk_window_set_geometry_hints(GTK_WINDOW(fs->window), fs->window, &geometry,
 			static_cast<GdkWindowHints>(GDK_HINT_WIN_GRAVITY | GDK_HINT_USER_POS | GDK_HINT_USER_SIZE));
@@ -391,7 +392,21 @@ void fullscreen_stop(FullScreenData *fs)
  *----------------------------------------------------------------------------
  */
 
-GList *fullscreen_prefs_list()
+/**
+ * @struct ScreenData
+ * screen numbers for fullscreen_prefs are as follows: \n
+ *   0  use default display size \n
+ * 101  screen 0, monitor 0 \n
+ * 102  screen 0, monitor 1 \n
+ * 201  screen 1, monitor 0 \n
+ */
+struct ScreenData {
+	gint number;
+	gchar *description;
+	GdkRectangle geometry;
+};
+
+static GList *fullscreen_prefs_list()
 {
 	GList *list = nullptr;
 	GdkDisplay *display;
@@ -434,13 +449,10 @@ GList *fullscreen_prefs_list()
 		sd = g_new0(ScreenData, 1);
 		sd->number = 100 + j + 1;
 		sd->description = g_strdup_printf("%s %s, %s", _("Screen"), name, subname);
-		sd->x = rect.x;
-		sd->y = rect.y;
-		sd->width = rect.width;
-		sd->height = rect.height;
+		sd->geometry = rect;
 
 		DEBUG_1("Screen %d %30s %4d,%4d (%4dx%4d)",
-				sd->number, sd->description, sd->x, sd->y, sd->width, sd->height);
+		        sd->number, sd->description, sd->geometry.x, sd->geometry.y, sd->geometry.width, sd->geometry.height);
 
 		list = g_list_append(list, sd);
 
@@ -451,7 +463,7 @@ GList *fullscreen_prefs_list()
 	return list;
 }
 
-void screen_data_free(ScreenData *sd)
+static void screen_data_free(ScreenData *sd)
 {
 	if (!sd) return;
 
@@ -459,7 +471,7 @@ void screen_data_free(ScreenData *sd)
 	g_free(sd);
 }
 
-ScreenData *fullscreen_prefs_list_find(GList *list, gint screen)
+static ScreenData *fullscreen_prefs_list_find(GList *list, gint screen)
 {
 	GList *work;
 
@@ -486,7 +498,7 @@ ScreenData *fullscreen_prefs_list_find(GList *list, gint screen)
  * dest_screen: screen to place widget [use gtk_window_set_screen()]
  * same_region: the returned region will overlap the current location of widget.
  */
-void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, gint *x, gint *y, gint *width, gint *height,
+static void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRectangle &geometry,
 				   GdkScreen **dest_screen, gboolean *same_region)
 {
 	GList *list;
@@ -511,10 +523,7 @@ void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, gint *x, gint
 		display = gdk_display_get_default();
 		screen = gdk_display_get_default_screen(display);
 
-		if (x) *x = sd->x;
-		if (y) *y = sd->y;
-		if (width) *width = sd->width;
-		if (height) *height = sd->height;
+		geometry = sd->geometry;
 
 		if (dest_screen) *dest_screen = screen;
 		if (same_region) *same_region = (!widget || !gtk_widget_get_window(widget) ||
@@ -536,10 +545,10 @@ void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, gint *x, gint
 			screen = gdk_screen_get_default();
 			}
 
-		if (x) *x = 0;
-		if (y) *y = 0;
-		if (width) *width = gdk_screen_get_width(screen);
-		if (height) *height = gdk_screen_get_height(screen);
+		geometry.x = 0;
+		geometry.y = 0;
+		geometry.width = gdk_screen_get_width(screen);
+		geometry.height = gdk_screen_get_height(screen);
 
 		if (dest_screen) *dest_screen = screen;
 		if (same_region) *same_region = TRUE;
@@ -548,17 +557,11 @@ void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, gint *x, gint
 		{
 		GdkDisplay *display;
 		GdkMonitor *monitor;
-		GdkRectangle rect;
 
 		display = gtk_widget_get_display(widget);
 		monitor = gdk_display_get_monitor_at_window(display, gtk_widget_get_window(widget));
 
-		gdk_monitor_get_geometry(monitor, &rect);
-
-		if (x) *x = rect.x;
-		if (y) *y = rect.y;
-		if (width) *width = rect.width;
-		if (height) *height = rect.height;
+		gdk_monitor_get_geometry(monitor, &geometry);
 
 		if (dest_screen) *dest_screen = gtk_widget_get_screen(widget);
 		if (same_region) *same_region = TRUE;

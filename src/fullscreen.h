@@ -53,32 +53,6 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 void fullscreen_stop(FullScreenData *fs);
 
 
-/**
- * @struct ScreenData
- * screen numbers for fullscreen_prefs are as follows: \n
- *   0  use default display size \n
- * 101  screen 0, monitor 0 \n
- * 102  screen 0, monitor 1 \n
- * 201  screen 1, monitor 0 \n
- */
-struct ScreenData {
-	gint number;
-	gchar *description;
-	gint x;
-	gint y;
-	gint width;
-	gint height;
-};
-
-
-GList *fullscreen_prefs_list();
-void screen_data_free(ScreenData *sd);
-
-ScreenData *fullscreen_prefs_list_find(GList *list, gint screen);
-
-void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, gint *x, gint *y, gint *width, gint *height,
-				   GdkScreen **dest_screen, gboolean *same_region);
-
 GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value, gboolean *above_value);
 
 
