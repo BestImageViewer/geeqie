@@ -24,9 +24,6 @@
 
 struct ImageWindow;
 
-#define FULL_SCREEN_HIDE_MOUSE_DELAY 3000
-#define FULL_SCREEN_BUSY_MOUSE_DELAY 200
-
 struct FullScreenData
 {
 	GtkWidget *window;
@@ -42,14 +39,15 @@ struct FullScreenData
 
 	guint saver_block_id; /**< event source id */
 
-	void (*stop_func)(FullScreenData *, gpointer);
+	using StopFunc = void (*)(FullScreenData *, gpointer);
+	StopFunc stop_func;
 	gpointer stop_data;
 
 	gboolean same_region; /**< the returned region will overlap the current location of widget. */
 };
 
 FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
-				 void (*stop_func)(FullScreenData *, gpointer), gpointer stop_data);
+				 FullScreenData::StopFunc stop_func, gpointer stop_data);
 void fullscreen_stop(FullScreenData *fs);
 
 

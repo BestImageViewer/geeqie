@@ -33,14 +33,7 @@
 #include "ui-misc.h"
 #include "window.h"
 
-enum {
-	FULLSCREEN_CURSOR_HIDDEN = 1 << 0,
-	FULLSCREEN_CURSOR_NORMAL = 1 << 1,
-	FULLSCREEN_CURSOR_BUSY   = 1 << 2
-};
-
-static void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRectangle &geometry,
-				   GdkScreen **dest_screen, gboolean *same_region);
+namespace {
 
 /*
  *----------------------------------------------------------------------------
@@ -48,7 +41,16 @@ static void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRec
  *----------------------------------------------------------------------------
  */
 
-static void clear_mouse_cursor(GtkWidget *widget, gint state)
+#define FULL_SCREEN_HIDE_MOUSE_DELAY 3000
+#define FULL_SCREEN_BUSY_MOUSE_DELAY 200
+
+enum {
+	FULLSCREEN_CURSOR_HIDDEN = 1 << 0,
+	FULLSCREEN_CURSOR_NORMAL = 1 << 1,
+	FULLSCREEN_CURSOR_BUSY   = 1 << 2
+};
+
+void clear_mouse_cursor(GtkWidget *widget, gint state)
 {
 	GdkWindow *window = gtk_widget_get_window(widget);
 	GdkDisplay *display;
@@ -79,7 +81,7 @@ static void clear_mouse_cursor(GtkWidget *widget, gint state)
 		}
 }
 
-static gboolean fullscreen_hide_mouse_cb(gpointer data)
+gboolean fullscreen_hide_mouse_cb(gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -93,7 +95,7 @@ static gboolean fullscreen_hide_mouse_cb(gpointer data)
 	return FALSE;
 }
 
-static void fullscreen_hide_mouse_disable(FullScreenData *fs)
+void fullscreen_hide_mouse_disable(FullScreenData *fs)
 {
 	if (fs->hide_mouse_id)
 		{
@@ -102,13 +104,13 @@ static void fullscreen_hide_mouse_disable(FullScreenData *fs)
 		}
 }
 
-static void fullscreen_hide_mouse_reset(FullScreenData *fs)
+void fullscreen_hide_mouse_reset(FullScreenData *fs)
 {
 	fullscreen_hide_mouse_disable(fs);
 	fs->hide_mouse_id = g_timeout_add(FULL_SCREEN_HIDE_MOUSE_DELAY, fullscreen_hide_mouse_cb, fs);
 }
 
-static gboolean fullscreen_mouse_moved(GtkWidget *, GdkEventMotion *, gpointer data)
+gboolean fullscreen_mouse_moved(GtkWidget *, GdkEventMotion *, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -122,7 +124,7 @@ static gboolean fullscreen_mouse_moved(GtkWidget *, GdkEventMotion *, gpointer d
 	return FALSE;
 }
 
-static void fullscreen_busy_mouse_disable(FullScreenData *fs)
+void fullscreen_busy_mouse_disable(FullScreenData *fs)
 {
 	if (fs->busy_mouse_id)
 		{
@@ -131,7 +133,7 @@ static void fullscreen_busy_mouse_disable(FullScreenData *fs)
 		}
 }
 
-static void fullscreen_mouse_set_busy(FullScreenData *fs, gboolean busy)
+void fullscreen_mouse_set_busy(FullScreenData *fs, gboolean busy)
 {
 	fullscreen_busy_mouse_disable(fs);
 
@@ -149,7 +151,7 @@ static void fullscreen_mouse_set_busy(FullScreenData *fs, gboolean busy)
 	clear_mouse_cursor(fs->window, fs->cursor_state);
 }
 
-static gboolean fullscreen_mouse_set_busy_cb(gpointer data)
+gboolean fullscreen_mouse_set_busy_cb(gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -158,7 +160,7 @@ static gboolean fullscreen_mouse_set_busy_cb(gpointer data)
 	return FALSE;
 }
 
-static void fullscreen_mouse_set_busy_idle(FullScreenData *fs)
+void fullscreen_mouse_set_busy_idle(FullScreenData *fs)
 {
 	if (!fs->busy_mouse_id)
 		{
@@ -167,7 +169,7 @@ static void fullscreen_mouse_set_busy_idle(FullScreenData *fs)
 		}
 }
 
-static void fullscreen_image_update_cb(ImageWindow *, gpointer data)
+void fullscreen_image_update_cb(ImageWindow *, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -178,7 +180,7 @@ static void fullscreen_image_update_cb(ImageWindow *, gpointer data)
 		}
 }
 
-static void fullscreen_image_complete_cb(ImageWindow *, gboolean preload, gpointer data)
+void fullscreen_image_complete_cb(ImageWindow *, gboolean preload, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -188,7 +190,7 @@ static void fullscreen_image_complete_cb(ImageWindow *, gboolean preload, gpoint
 #define XSCREENSAVER_BINARY	"xscreensaver-command"
 #define XSCREENSAVER_COMMAND	"xscreensaver-command -deactivate >&- 2>&- &"
 
-static void fullscreen_saver_deactivate()
+void fullscreen_saver_deactivate()
 {
 	static gboolean checked = FALSE;
 	static gboolean found = FALSE;
@@ -205,7 +207,7 @@ static void fullscreen_saver_deactivate()
 		}
 }
 
-static gboolean fullscreen_saver_block_cb(gpointer)
+gboolean fullscreen_saver_block_cb(gpointer)
 {
 	if (options->fullscreen.disable_saver)
 		{
@@ -215,178 +217,12 @@ static gboolean fullscreen_saver_block_cb(gpointer)
 	return TRUE;
 }
 
-static gboolean fullscreen_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
+gboolean fullscreen_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
 	fullscreen_stop(fs);
 	return TRUE;
-}
-
-FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
-				 void (*stop_func)(FullScreenData *, gpointer), gpointer stop_data)
-{
-	FullScreenData *fs;
-	GdkScreen *screen;
-	GdkRectangle rect;
-	GdkGeometry geometry;
-
-	if (!window || !imd) return nullptr;
-
-	fs = g_new0(FullScreenData, 1);
-
-	fs->cursor_state = FULLSCREEN_CURSOR_HIDDEN;
-
-	fs->normal_window = window;
-	fs->normal_imd = imd;
-
-	fs->stop_func = stop_func;
-	fs->stop_data = stop_data;
-
-	DEBUG_1("full screen requests screen %d", options->fullscreen.screen);
-	fullscreen_prefs_get_geometry(options->fullscreen.screen, window, rect,
-				      &screen, &fs->same_region);
-
-	fs->window = window_new("fullscreen", nullptr, nullptr, _("Full screen"));
-	DEBUG_NAME(fs->window);
-
-	g_signal_connect(G_OBJECT(fs->window), "delete_event",
-			 G_CALLBACK(fullscreen_delete_cb), fs);
-
-	/* few cosmetic details */
-	gtk_window_set_decorated(GTK_WINDOW(fs->window), FALSE);
-	gtk_container_set_border_width(GTK_CONTAINER(fs->window), 0);
-
-	/* keep window above others, if requested */
-	if (options->fullscreen.above) {
-		gq_gtk_window_set_keep_above(GTK_WINDOW(fs->window), TRUE);
-	}
-
-	/* set default size and position, so the window appears where it was before */
-	gtk_window_set_default_size(GTK_WINDOW(fs->window), rect.width, rect.height);
-	gq_gtk_window_move(GTK_WINDOW(fs->window), rect.x, rect.y);
-
-	/* By setting USER_POS and USER_SIZE, most window managers will
-	 * not request positioning of the full screen window (for example twm).
-	 *
-	 * In addition, setting gravity to STATIC will result in the
-	 * decorations of twm to not effect the requested window position,
-	 * the decorations will simply be off screen, except in multi monitor setups :-/
-	 */
-	geometry.min_width = 1;
-	geometry.min_height = 1;
-	geometry.base_width = rect.width;
-	geometry.base_height = rect.height;
-	geometry.win_gravity = GDK_GRAVITY_STATIC;
-	gtk_window_set_geometry_hints(GTK_WINDOW(fs->window), fs->window, &geometry,
-			static_cast<GdkWindowHints>(GDK_HINT_WIN_GRAVITY | GDK_HINT_USER_POS | GDK_HINT_USER_SIZE));
-
-	gtk_widget_realize(fs->window);
-
-	if ((options->fullscreen.screen % 100) == 0)
-		{
-		GdkWindow *gdkwin;
-		gdkwin = gtk_widget_get_window(fs->window);
-		if (gdkwin != nullptr)
-			gdk_window_set_fullscreen_mode(gdkwin, GDK_FULLSCREEN_ON_ALL_MONITORS);
-		}
-
-	/* make window fullscreen -- let Gtk do it's job, don't screw it in any way */
-	gtk_window_fullscreen(GTK_WINDOW(fs->window));
-
-	/* move it to requested screen */
-	if (options->fullscreen.screen >= 0)
-		{
-		gtk_window_set_screen(GTK_WINDOW(fs->window), screen);
-		}
-
-	fs->imd = image_new(FALSE);
-
-	gq_gtk_container_add(GTK_WIDGET(fs->window), fs->imd->widget);
-
-	image_background_set_color_from_options(fs->imd, TRUE);
-	image_set_delay_flip(fs->imd, options->fullscreen.clean_flip);
-	image_auto_refresh_enable(fs->imd, fs->normal_imd->auto_refresh);
-
-	if (options->fullscreen.clean_flip)
-		{
-		image_set_update_func(fs->imd, fullscreen_image_update_cb, fs);
-		image_set_complete_func(fs->imd, fullscreen_image_complete_cb, fs);
-		}
-
-	gtk_widget_show(fs->imd->widget);
-
-	if (fs->same_region)
-		{
-		DEBUG_2("Original window is not visible, enabling std. fullscreen mode");
-		image_move_from_image(fs->imd, fs->normal_imd);
-		}
-	else
-		{
-		DEBUG_2("Original window is still visible, enabling presentation fullscreen mode");
-		image_copy_from_image(fs->imd, fs->normal_imd);
-		}
-
-	if (options->stereo.enable_fsmode) {
-		image_stereo_set(fs->imd, options->stereo.fsmode);
-	}
-
-	gtk_widget_show(fs->window);
-
-	/* for hiding the mouse */
-	g_signal_connect(G_OBJECT(fs->imd->pr), "motion_notify_event",
-			   G_CALLBACK(fullscreen_mouse_moved), fs);
-	clear_mouse_cursor(fs->window, fs->cursor_state);
-
-	/* set timer to block screen saver */
-	fs->saver_block_id = g_timeout_add(60 * 1000, fullscreen_saver_block_cb, fs);
-
-	/* hide normal window */
-	 /** @FIXME properly restore this window on show
-	 */
-	if (fs->same_region)
-		{
-		if (options->hide_window_in_fullscreen)
-			{
-			gtk_widget_hide(fs->normal_window);
-			}
-		image_change_fd(fs->normal_imd, nullptr, image_zoom_get(fs->normal_imd));
-		}
-
-	return fs;
-}
-
-void fullscreen_stop(FullScreenData *fs)
-{
-	if (!fs) return;
-
-	if (fs->saver_block_id) g_source_remove(fs->saver_block_id);
-
-	fullscreen_hide_mouse_disable(fs);
-	fullscreen_busy_mouse_disable(fs);
-	gdk_keyboard_ungrab(GDK_CURRENT_TIME);
-
-	if (fs->same_region)
-		{
-		image_move_from_image(fs->normal_imd, fs->imd);
-		if (options->hide_window_in_fullscreen)
-			{
-			gtk_widget_show(fs->normal_window);
-			}
-		if (options->stereo.enable_fsmode)
-			{
-			image_stereo_set(fs->normal_imd, options->stereo.mode);
-			}
-		}
-
-
-	if (fs->stop_func) fs->stop_func(fs, fs->stop_data);
-
-	gq_gtk_widget_destroy(fs->window);
-
-	gtk_window_present(GTK_WINDOW(fs->normal_window));
-
-	g_free(fs);
 }
 
 
@@ -410,7 +246,7 @@ struct ScreenData {
 	GdkRectangle geometry;
 };
 
-static std::vector<ScreenData> fullscreen_prefs_list()
+std::vector<ScreenData> fullscreen_prefs_list()
 {
 	std::vector<ScreenData> list;
 	GdkDisplay *display;
@@ -476,7 +312,7 @@ static std::vector<ScreenData> fullscreen_prefs_list()
  * dest_screen: screen to place widget [use gtk_window_set_screen()]
  * same_region: the returned region will overlap the current location of widget.
  */
-static void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRectangle &geometry,
+void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRectangle &geometry,
 				   GdkScreen **dest_screen, gboolean *same_region)
 {
 	ScreenData sd;
@@ -574,7 +410,7 @@ enum {
 
 #define BUTTON_ABOVE_KEY  "button_above"
 
-static void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer data)
+void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer data)
 {
 	auto value = static_cast<gint *>(data);
 	GtkTreeModel *store;
@@ -594,7 +430,7 @@ static void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer data)
 		}
 }
 
-static void fullscreen_prefs_selection_add(GtkListStore *store, const gchar *text, gint value)
+void fullscreen_prefs_selection_add(GtkListStore *store, const gchar *text, gint value)
 {
 	GtkTreeIter iter;
 
@@ -602,6 +438,190 @@ static void fullscreen_prefs_selection_add(GtkListStore *store, const gchar *tex
 	gtk_list_store_set(store, &iter, FS_MENU_COLUMN_NAME, text,
 					 FS_MENU_COLUMN_VALUE, value, -1);
 }
+
+} // namespace
+
+
+/*
+ *----------------------------------------------------------------------------
+ * full screen functions
+ *----------------------------------------------------------------------------
+ */
+
+FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
+				 FullScreenData::StopFunc stop_func, gpointer stop_data)
+{
+	FullScreenData *fs;
+	GdkScreen *screen;
+	GdkRectangle rect;
+	GdkGeometry geometry;
+
+	if (!window || !imd) return nullptr;
+
+	fs = g_new0(FullScreenData, 1);
+
+	fs->cursor_state = FULLSCREEN_CURSOR_HIDDEN;
+
+	fs->normal_window = window;
+	fs->normal_imd = imd;
+
+	fs->stop_func = stop_func;
+	fs->stop_data = stop_data;
+
+	DEBUG_1("full screen requests screen %d", options->fullscreen.screen);
+	fullscreen_prefs_get_geometry(options->fullscreen.screen, window, rect,
+				      &screen, &fs->same_region);
+
+	fs->window = window_new("fullscreen", nullptr, nullptr, _("Full screen"));
+	DEBUG_NAME(fs->window);
+
+	g_signal_connect(G_OBJECT(fs->window), "delete_event",
+			 G_CALLBACK(fullscreen_delete_cb), fs);
+
+	/* few cosmetic details */
+	gtk_window_set_decorated(GTK_WINDOW(fs->window), FALSE);
+	gtk_container_set_border_width(GTK_CONTAINER(fs->window), 0);
+
+	/* keep window above others, if requested */
+	if (options->fullscreen.above)
+		{
+		gq_gtk_window_set_keep_above(GTK_WINDOW(fs->window), TRUE);
+		}
+
+	/* set default size and position, so the window appears where it was before */
+	gtk_window_set_default_size(GTK_WINDOW(fs->window), rect.width, rect.height);
+	gq_gtk_window_move(GTK_WINDOW(fs->window), rect.x, rect.y);
+
+	/* By setting USER_POS and USER_SIZE, most window managers will
+	 * not request positioning of the full screen window (for example twm).
+	 *
+	 * In addition, setting gravity to STATIC will result in the
+	 * decorations of twm to not effect the requested window position,
+	 * the decorations will simply be off screen, except in multi monitor setups :-/
+	 */
+	geometry.min_width = 1;
+	geometry.min_height = 1;
+	geometry.base_width = rect.width;
+	geometry.base_height = rect.height;
+	geometry.win_gravity = GDK_GRAVITY_STATIC;
+	gtk_window_set_geometry_hints(GTK_WINDOW(fs->window), fs->window, &geometry,
+			static_cast<GdkWindowHints>(GDK_HINT_WIN_GRAVITY | GDK_HINT_USER_POS | GDK_HINT_USER_SIZE));
+
+	gtk_widget_realize(fs->window);
+
+	if ((options->fullscreen.screen % 100) == 0)
+		{
+		GdkWindow *gdkwin;
+		gdkwin = gtk_widget_get_window(fs->window);
+		if (gdkwin != nullptr)
+			gdk_window_set_fullscreen_mode(gdkwin, GDK_FULLSCREEN_ON_ALL_MONITORS);
+		}
+
+	/* make window fullscreen -- let Gtk do it's job, don't screw it in any way */
+	gtk_window_fullscreen(GTK_WINDOW(fs->window));
+
+	/* move it to requested screen */
+	if (options->fullscreen.screen >= 0)
+		{
+		gtk_window_set_screen(GTK_WINDOW(fs->window), screen);
+		}
+
+	fs->imd = image_new(FALSE);
+
+	gq_gtk_container_add(GTK_WIDGET(fs->window), fs->imd->widget);
+
+	image_background_set_color_from_options(fs->imd, TRUE);
+	image_set_delay_flip(fs->imd, options->fullscreen.clean_flip);
+	image_auto_refresh_enable(fs->imd, fs->normal_imd->auto_refresh);
+
+	if (options->fullscreen.clean_flip)
+		{
+		image_set_update_func(fs->imd, fullscreen_image_update_cb, fs);
+		image_set_complete_func(fs->imd, fullscreen_image_complete_cb, fs);
+		}
+
+	gtk_widget_show(fs->imd->widget);
+
+	if (fs->same_region)
+		{
+		DEBUG_2("Original window is not visible, enabling std. fullscreen mode");
+		image_move_from_image(fs->imd, fs->normal_imd);
+		}
+	else
+		{
+		DEBUG_2("Original window is still visible, enabling presentation fullscreen mode");
+		image_copy_from_image(fs->imd, fs->normal_imd);
+		}
+
+	if (options->stereo.enable_fsmode)
+		{
+		image_stereo_set(fs->imd, options->stereo.fsmode);
+		}
+
+	gtk_widget_show(fs->window);
+
+	/* for hiding the mouse */
+	g_signal_connect(G_OBJECT(fs->imd->pr), "motion_notify_event",
+			   G_CALLBACK(fullscreen_mouse_moved), fs);
+	clear_mouse_cursor(fs->window, fs->cursor_state);
+
+	/* set timer to block screen saver */
+	fs->saver_block_id = g_timeout_add(60 * 1000, fullscreen_saver_block_cb, fs);
+
+	/* hide normal window */
+	 /** @FIXME properly restore this window on show
+	 */
+	if (fs->same_region)
+		{
+		if (options->hide_window_in_fullscreen)
+			{
+			gtk_widget_hide(fs->normal_window);
+			}
+		image_change_fd(fs->normal_imd, nullptr, image_zoom_get(fs->normal_imd));
+		}
+
+	return fs;
+}
+
+void fullscreen_stop(FullScreenData *fs)
+{
+	if (!fs) return;
+
+	if (fs->saver_block_id) g_source_remove(fs->saver_block_id);
+
+	fullscreen_hide_mouse_disable(fs);
+	fullscreen_busy_mouse_disable(fs);
+	gdk_keyboard_ungrab(GDK_CURRENT_TIME);
+
+	if (fs->same_region)
+		{
+		image_move_from_image(fs->normal_imd, fs->imd);
+		if (options->hide_window_in_fullscreen)
+			{
+			gtk_widget_show(fs->normal_window);
+			}
+		if (options->stereo.enable_fsmode)
+			{
+			image_stereo_set(fs->normal_imd, options->stereo.mode);
+			}
+		}
+
+
+	if (fs->stop_func) fs->stop_func(fs, fs->stop_data);
+
+	gq_gtk_widget_destroy(fs->window);
+
+	gtk_window_present(GTK_WINDOW(fs->normal_window));
+
+	g_free(fs);
+}
+
+
+/*
+ *----------------------------------------------------------------------------
+ * full screen preferences and utils
+ *----------------------------------------------------------------------------
+ */
 
 GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value, gboolean *)
 {
