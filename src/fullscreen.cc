@@ -22,12 +22,16 @@
 #include "main.h"
 #include "fullscreen.h"
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
 #include "image.h"
+#include "image-load.h"
 #include "misc.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "window.h"
-#include "image-load.h"
 
 enum {
 	FULLSCREEN_CURSOR_HIDDEN = 1 << 0,
@@ -402,25 +406,23 @@ void fullscreen_stop(FullScreenData *fs)
  */
 struct ScreenData {
 	gint number;
-	gchar *description;
+	std::string description;
 	GdkRectangle geometry;
 };
 
-static GList *fullscreen_prefs_list()
+static std::vector<ScreenData> fullscreen_prefs_list()
 {
-	GList *list = nullptr;
+	std::vector<ScreenData> list;
 	GdkDisplay *display;
 	GdkScreen *screen;
 	gint monitors;
-	gint j;
 
 	display = gdk_display_get_default();
 	screen = gdk_display_get_default_screen(display);
 	monitors = gdk_display_get_n_monitors(display);
 
-	for (j = -1; j < monitors; j++)
+	for (gint j = -1; j < monitors; j++)
 		{
-		ScreenData *sd;
 		GdkRectangle rect;
 		gchar *name;
 		gchar *subname;
@@ -446,45 +448,21 @@ static GList *fullscreen_prefs_list()
 				}
 			}
 
-		sd = g_new0(ScreenData, 1);
-		sd->number = 100 + j + 1;
-		sd->description = g_strdup_printf("%s %s, %s", _("Screen"), name, subname);
-		sd->geometry = rect;
+		ScreenData sd;
+		sd.number = 100 + j + 1;
+		sd.description = std::string(_("Screen")) + " " + name + ", " + subname;
+		sd.geometry = rect;
 
 		DEBUG_1("Screen %d %30s %4d,%4d (%4dx%4d)",
-		        sd->number, sd->description, sd->geometry.x, sd->geometry.y, sd->geometry.width, sd->geometry.height);
+		        sd.number, sd.description.c_str(), sd.geometry.x, sd.geometry.y, sd.geometry.width, sd.geometry.height);
 
-		list = g_list_append(list, sd);
+		list.push_back(sd);
 
 		g_free(name);
 		g_free(subname);
 		}
 
 	return list;
-}
-
-static void screen_data_free(ScreenData *sd)
-{
-	if (!sd) return;
-
-	g_free(sd->description);
-	g_free(sd);
-}
-
-static ScreenData *fullscreen_prefs_list_find(GList *list, gint screen)
-{
-	GList *work;
-
-	work = list;
-	while (work)
-		{
-		auto sd = static_cast<ScreenData *>(work->data);
-		work = work->next;
-
-		if (sd->number == screen) return sd;
-		}
-
-	return nullptr;
 }
 
 /* screen is interpreted as such:
@@ -501,21 +479,22 @@ static ScreenData *fullscreen_prefs_list_find(GList *list, gint screen)
 static void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRectangle &geometry,
 				   GdkScreen **dest_screen, gboolean *same_region)
 {
-	GList *list;
-	ScreenData *sd;
+	ScreenData sd;
+	bool found = false; /// @todo: use std::optional in c++17
 
-	list = fullscreen_prefs_list();
 	if (screen >= 100)
 		{
-		sd = fullscreen_prefs_list_find(list, screen);
+		std::vector<ScreenData> list = fullscreen_prefs_list();
+		auto it = std::find_if(list.cbegin(), list.cend(), [screen](const ScreenData &sd){ return sd.number == screen; });
+		if (it != list.cend())
+			{
+			sd = *it;
+			found = true;
+			}
 		}
-	else
-		{
-		sd = nullptr;
-		if (screen < 0) screen = 1;
-		}
+	else if (screen < 0) screen = 1;
 
-	if (sd)
+	if (found)
 		{
 		GdkDisplay *display;
 		GdkScreen *screen;
@@ -523,14 +502,13 @@ static void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRec
 		display = gdk_display_get_default();
 		screen = gdk_display_get_default_screen(display);
 
-		geometry = sd->geometry;
+		geometry = sd.geometry;
 
 		if (dest_screen) *dest_screen = screen;
 		if (same_region) *same_region = (!widget || !gtk_widget_get_window(widget) ||
 					(screen == gtk_widget_get_screen(widget) &&
-					 (sd->number%100 == 0 ||
-					  sd->number%100 == gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(widget))+1)));
-
+					 (sd.number%100 == 0 ||
+					  sd.number%100 == gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(widget))+1)));
 		}
 	else if (screen != 1 || !widget || !gtk_widget_get_window(widget))
 		{
@@ -566,8 +544,6 @@ static void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRec
 		if (dest_screen) *dest_screen = gtk_widget_get_screen(widget);
 		if (same_region) *same_region = TRUE;
 		}
-
-	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(screen_data_free));
 }
 
 #pragma GCC diagnostic push
@@ -634,8 +610,6 @@ GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value,
 	GtkWidget *combo;
 	GtkListStore *store;
 	GtkCellRenderer *renderer;
-	GList *list;
-	GList *work;
 	gint current = 0;
 	gint n;
 
@@ -662,19 +636,14 @@ GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value,
 	if (*screen_value == 1) current = 2;
 
 	n = 3;
-	list = fullscreen_prefs_list();
-	work = list;
-	while (work)
+	std::vector<ScreenData> list = fullscreen_prefs_list();
+	for (const ScreenData &sd : list)
 		{
-		auto sd = static_cast<ScreenData *>(work->data);
+		fullscreen_prefs_selection_add(store, sd.description.c_str(), sd.number);
+		if (*screen_value == sd.number) current = n;
 
-		fullscreen_prefs_selection_add(store, sd->description, sd->number);
-		if (*screen_value == sd->number) current = n;
-
-		work = work->next;
 		n++;
 		}
-	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(screen_data_free));
 
 	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
 
