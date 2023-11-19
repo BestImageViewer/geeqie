@@ -246,6 +246,18 @@ struct ScreenData {
 	GdkRectangle geometry;
 };
 
+GdkRectangle get_screen_default_geometry(GdkScreen *screen)
+{
+	GdkRectangle geometry;
+
+	geometry.x = 0;
+	geometry.y = 0;
+	geometry.width = gdk_screen_get_width(screen);
+	geometry.height = gdk_screen_get_height(screen);
+
+	return geometry;
+}
+
 std::vector<ScreenData> fullscreen_prefs_list()
 {
 	std::vector<ScreenData> list;
@@ -267,10 +279,7 @@ std::vector<ScreenData> fullscreen_prefs_list()
 
 		if (j < 0)
 			{
-			rect.x = 0;
-			rect.y = 0;
-			rect.width = gdk_screen_get_width(screen);
-			rect.height = gdk_screen_get_height(screen);
+			rect = get_screen_default_geometry(screen);
 			subname = g_strdup(_("Full size"));
 			}
 		else
@@ -301,7 +310,7 @@ std::vector<ScreenData> fullscreen_prefs_list()
 	return list;
 }
 
-/* screen is interpreted as such:
+/* screen_num is interpreted as such:
  *  -1  window manager determines size and position, fallback is (1) active monitor
  *   0  full size of screen containing widget
  *   1  size of monitor containing widget
@@ -312,60 +321,40 @@ std::vector<ScreenData> fullscreen_prefs_list()
  * dest_screen: screen to place widget [use gtk_window_set_screen()]
  * same_region: the returned region will overlap the current location of widget.
  */
-void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRectangle &geometry,
-				   GdkScreen **dest_screen, gboolean *same_region)
+GdkRectangle fullscreen_prefs_get_geometry(gint screen_num, GtkWidget *widget, GdkScreen *&dest_screen, gboolean &same_region)
 {
-	ScreenData sd;
-	bool found = false; /// @todo: use std::optional in c++17
-
-	if (screen >= 100)
+	if (screen_num >= 100)
 		{
 		std::vector<ScreenData> list = fullscreen_prefs_list();
-		auto it = std::find_if(list.cbegin(), list.cend(), [screen](const ScreenData &sd){ return sd.number == screen; });
+		auto it = std::find_if(list.cbegin(), list.cend(), [screen_num](const ScreenData &sd){ return sd.number == screen_num; });
 		if (it != list.cend())
 			{
-			sd = *it;
-			found = true;
+			GdkDisplay *display = gdk_display_get_default();
+
+			dest_screen = gdk_display_get_default_screen(display);
+			same_region = (!widget || !gtk_widget_get_window(widget) ||
+			               (dest_screen == gtk_widget_get_screen(widget) &&
+			                (it->number%100 == 0 ||
+			                 it->number%100 == gdk_screen_get_monitor_at_window(dest_screen, gtk_widget_get_window(widget)) + 1)));
+			return it->geometry;
 			}
 		}
-	else if (screen < 0) screen = 1;
+	else if (screen_num < 0) screen_num = 1;
 
-	if (found)
+	GdkRectangle geometry;
+
+	if (screen_num != 1 || !widget || !gtk_widget_get_window(widget))
 		{
-		GdkDisplay *display;
-		GdkScreen *screen;
-
-		display = gdk_display_get_default();
-		screen = gdk_display_get_default_screen(display);
-
-		geometry = sd.geometry;
-
-		if (dest_screen) *dest_screen = screen;
-		if (same_region) *same_region = (!widget || !gtk_widget_get_window(widget) ||
-					(screen == gtk_widget_get_screen(widget) &&
-					 (sd.number%100 == 0 ||
-					  sd.number%100 == gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(widget))+1)));
-		}
-	else if (screen != 1 || !widget || !gtk_widget_get_window(widget))
-		{
-		GdkScreen *screen;
-
 		if (widget)
 			{
-			screen = gtk_widget_get_screen(widget);
+			dest_screen = gtk_widget_get_screen(widget);
 			}
 		else
 			{
-			screen = gdk_screen_get_default();
+			dest_screen = gdk_screen_get_default();
 			}
 
-		geometry.x = 0;
-		geometry.y = 0;
-		geometry.width = gdk_screen_get_width(screen);
-		geometry.height = gdk_screen_get_height(screen);
-
-		if (dest_screen) *dest_screen = screen;
-		if (same_region) *same_region = TRUE;
+		geometry = get_screen_default_geometry(dest_screen);
 		}
 	else
 		{
@@ -377,9 +366,11 @@ void fullscreen_prefs_get_geometry(gint screen, GtkWidget *widget, GdkRectangle 
 
 		gdk_monitor_get_geometry(monitor, &geometry);
 
-		if (dest_screen) *dest_screen = gtk_widget_get_screen(widget);
-		if (same_region) *same_region = TRUE;
+		dest_screen = gtk_widget_get_screen(widget);
 		}
+
+	same_region = TRUE;
+	return geometry;
 }
 
 #pragma GCC diagnostic push
@@ -453,7 +444,6 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 {
 	FullScreenData *fs;
 	GdkScreen *screen;
-	GdkRectangle rect;
 	GdkGeometry geometry;
 
 	if (!window || !imd) return nullptr;
@@ -469,8 +459,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	fs->stop_data = stop_data;
 
 	DEBUG_1("full screen requests screen %d", options->fullscreen.screen);
-	fullscreen_prefs_get_geometry(options->fullscreen.screen, window, rect,
-				      &screen, &fs->same_region);
+	GdkRectangle rect = fullscreen_prefs_get_geometry(options->fullscreen.screen, window, screen, fs->same_region);
 
 	fs->window = window_new("fullscreen", nullptr, nullptr, _("Full screen"));
 	DEBUG_NAME(fs->window);
