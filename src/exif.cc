@@ -1038,12 +1038,6 @@ gint exif_tiff_parse(ExifData *exif, guchar *tiff, guint size, ExifMarker *list)
  *-------------------------------------------------------------------
  */
 
-#define JPEG_MARKER		0xFF
-#define JPEG_MARKER_SOI		0xD8
-#define JPEG_MARKER_EOI		0xD9
-#define JPEG_MARKER_APP1	0xE1
-#define JPEG_MARKER_APP2	0xE2
-
 /* jpeg container format:
      all data markers start with 0XFF
      2 byte long file start and end markers: 0xFFD8(SOI) and 0XFFD9(EOI)
