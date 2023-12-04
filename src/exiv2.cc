@@ -1219,19 +1219,13 @@ guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, 
 
 			Exiv2::PreviewImage image = pm.getPreviewImage(*pos);
 
-			Exiv2::DataBuf buf = image.copy();
-
-#if EXIV2_TEST_VERSION(0,28,0)
-                       *data_len = buf.size();
-                       auto b = buf.data();
-                       buf.reset();
-                       return b;
-#else
-			std::pair<Exiv2::byte*, long> p = buf.release();
-
-			*data_len = p.second;
-			return p.first;
-#endif
+			// Let's not touch data_len until we finish copy.
+			// Just in case we run into OOM.
+			size_t img_sz = image.size();
+			Exiv2::byte* b = new Exiv2::byte[img_sz];
+			std::copy_n(image.pData(), img_sz, b);
+			*data_len = img_sz;
+			return b;
 			}
 		return nullptr;
 	}
