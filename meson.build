@@ -554,9 +554,9 @@ if not option.disabled()
 	if cmd.found()
         if pkg_res.returncode() == 0
             pkg_list = pkg_res.stdout().split()
-            px = pkg_list.get(1)
+            px = pkg_list.get(0)
             pkg_list2 = px.split('-')
-            webp_pixbuf_loader_version= pkg_list.get(1).split('-').get(0)
+            webp_pixbuf_loader_version= pkg_list.get(0).split('-').get(0)
         endif
 
         # Loader version 0.2.1 is OK. Versions 0.2.2 to 0.2.4 need patching via a subproject
