@@ -1,3 +1,22 @@
+Geeqie 2.2
+============
+
+- Enhanced debug output with -Ddevel=enabled option
+- GitHub workflows for code tests and AppImage building
+- Modify Collections user interface
+- Remote keyboard actions
+- Allow .desktop files to be linked to programmable mouse buttons
+- Option to show-hide selectable bars
+- On exit additional check for multiple windows open
+- Plugin to resize an image
+- Include a separator as a toolbar option
+- Change all .desktop files to RDNS style
+- GTK "Open With" feature menu option
+- Reduce the height of toolbars
+- Option to select "hamburger" menu style
+- More progress in GTK4 migration
+- Many bug fixes
+
 Geeqie 2.1
 ============
 

@@ -7,8 +7,8 @@
 <refmeta>
 <refentrytitle>GEEQIE</refentrytitle>
 <manvolnum>1</manvolnum>
-<refmiscinfo class='source'>October 2023</refmiscinfo>
-<refmiscinfo class='manual'>Geeqie 2.1+git20231026-2338cf60 GTK3</refmiscinfo>
+<refmiscinfo class='source'>January 2024</refmiscinfo>
+<refmiscinfo class='manual'>Geeqie 2.2 GTK3</refmiscinfo>
 </refmeta>
 <refnamediv>
 <refname>Geeqie</refname>
@@ -30,7 +30,7 @@ zooming, panning, thumbnails and sorting images into collections.</para>
 
 <para>Generated for version:</para>
 
-<para>Geeqie 2.1+git20231026-2338cf60</para>
+<para>Geeqie 2.2</para>
 
 <refsect2 id='valid_options'><title>Valid options:</title>
 <variablelist remap='TP'>
@@ -482,7 +482,7 @@ can be used to modify this behavior on an individual basis e.g.</para>
 </refsect1>
 
 <refsect1 id='copyright'><title>COPYRIGHT</title>
-<para>Copyright (C) 1999-2004 by John Ellis. Copyright (C) 2004-2023 by The Geeqie Team. Use this software  at  your
+<para>Copyright (C) 1999-2004 by John Ellis. Copyright (C) 2004-2024 by The Geeqie Team. Use this software  at  your
 own  risk! This  software released under the GNU General Public License. Please read the COPYING file for more
 information.</para>
 </refsect1>
