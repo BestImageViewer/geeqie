@@ -44,7 +44,7 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
-#include "utilops.h"
+#include "ui-utildlg.h"
 #include "view-dir.h"
 #include "view-file.h"
 #include "window.h"
@@ -1547,8 +1547,7 @@ gboolean layout_geometry_get_tools(LayoutWindow *lw, gint *x, gint *y, gint *w, 
 	return TRUE;
 }
 
-gboolean layout_geometry_get_log_window(LayoutWindow *lw, gint *x, gint *y,
-														gint *w, gint *h)
+static gboolean layout_geometry_get_log_window(LayoutWindow *lw, GdkRectangle &log_window)
 {
 	GdkWindow *window;
 
@@ -1560,9 +1559,9 @@ gboolean layout_geometry_get_log_window(LayoutWindow *lw, gint *x, gint *y,
 		}
 
 	window = gtk_widget_get_window(lw->log_window);
-	gdk_window_get_root_origin(window, x, y);
-	*w = gdk_window_get_width(window);
-	*h = gdk_window_get_height(window);
+	gdk_window_get_root_origin(window, &log_window.x, &log_window.y);
+	log_window.width = gdk_window_get_width(window);
+	log_window.height = gdk_window_get_height(window);
 
 	return TRUE;
 }
@@ -2477,8 +2476,7 @@ void layout_sync_options_with_current_state(LayoutWindow *lw)
 	g_free(lw->options.last_path);
 	lw->options.last_path = g_strdup(layout_get_path(lw));
 
-	layout_geometry_get_log_window(lw, &lw->options.log_window.x, &lw->options.log_window.y,
-	                                 &lw->options.log_window.w, &lw->options.log_window.h);
+	layout_geometry_get_log_window(lw, lw->options.log_window);
 
 #ifdef GDK_WINDOWING_X11
 	GdkDisplay *display;
@@ -2821,8 +2819,8 @@ void layout_write_attributes(LayoutOptions *layout, GString *outstr, gint indent
 
 	WRITE_NL(); WRITE_INT(*layout, log_window.x);
 	WRITE_NL(); WRITE_INT(*layout, log_window.y);
-	WRITE_NL(); WRITE_INT(*layout, log_window.w);
-	WRITE_NL(); WRITE_INT(*layout, log_window.h);
+	WRITE_NL(); WRITE_INT(*layout, log_window.width);
+	WRITE_NL(); WRITE_INT(*layout, log_window.height);
 
 	WRITE_NL(); WRITE_INT(*layout, preferences_window.x);
 	WRITE_NL(); WRITE_INT(*layout, preferences_window.y);
@@ -2938,8 +2936,8 @@ void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names
 
 		if (READ_INT(*layout, log_window.x)) continue;
 		if (READ_INT(*layout, log_window.y)) continue;
-		if (READ_INT(*layout, log_window.w)) continue;
-		if (READ_INT(*layout, log_window.h)) continue;
+		if (READ_INT(*layout, log_window.width)) continue;
+		if (READ_INT(*layout, log_window.height)) continue;
 
 		if (READ_INT(*layout, preferences_window.x)) continue;
 		if (READ_INT(*layout, preferences_window.y)) continue;

@@ -21,6 +21,8 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include <gdk/gdk.h>
+
 struct SecureSaveInfo;
 
 /**
@@ -531,12 +533,7 @@ struct LayoutOptions
 		gint histogram_mode;
 	} image_overlay;
 
-	struct {
-		gint w;
-		gint h;
-		gint x;
-		gint y;
-	} log_window;
+	GdkRectangle log_window;
 
 	struct {
 		gint w;

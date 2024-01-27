@@ -386,8 +386,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	gq_gtk_container_add(GTK_WIDGET(window), win_vbox);
 	gtk_widget_show(win_vbox);
 
-	gtk_window_resize(GTK_WINDOW(window), lw->options.log_window.w,
-											lw->options.log_window.h);
+	gtk_window_resize(GTK_WINDOW(window), lw->options.log_window.width, lw->options.log_window.height);
 	gq_gtk_window_move(GTK_WINDOW(window), lw->options.log_window.x, lw->options.log_window.y);
 
 	g_signal_connect(G_OBJECT(window), "delete_event",
