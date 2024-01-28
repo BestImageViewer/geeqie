@@ -19,7 +19,9 @@
 
 #include <config.h>
 
+#ifdef __linux__
 #define _XOPEN_SOURCE
+#endif
 
 #include <cmath>
 #include <cstdlib>
