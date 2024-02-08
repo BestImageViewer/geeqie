@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <config.h>
+
+#include "main.h"
+
 #include <csignal>
 #include <sys/mman.h>
 
@@ -27,7 +31,9 @@
 #endif
 #include <clocale>
 
-#include "main.h"
+#ifdef HAVE_DEVELOPER
+#include "backward.h"
+#endif
 
 #include "cache.h"
 #include "collect.h"

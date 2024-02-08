@@ -26,10 +26,6 @@
 
 #include "intl.h"
 
-#ifdef HAVE_DEVELOPER
-#include "backward.h"
-#endif
-
 /*
  *-------------------------------------
  * Standard library includes
