@@ -19,11 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "filedata.h"
+
+#include <config.h>
 
 #include "filefilter.h"
 #include "cache.h"
+#include "debug.h"
+#include "intl.h"
+#include "main.h"
+#include "main-defines.h"
+#include "options.h"
 #include "thumb-standard.h"
 #include "ui-fileops.h"
 #include "metadata.h"
@@ -35,6 +41,7 @@
 #include "misc.h"
 
 #include <grp.h>
+#include <pwd.h>
 
 #ifdef DEBUG_FILEDATA
 gint global_file_data_count = 0;

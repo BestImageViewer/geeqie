@@ -22,7 +22,6 @@
 #ifndef PAN_VIEW_PAN_VIEW_FILTER_H
 #define PAN_VIEW_PAN_VIEW_FILTER_H
 
-#include "main.h"
 #include "pan-types.h"
 
 enum PanViewFilterMode {

@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <time.h>
 
+#include <gtk/gtk.h>
 
 /* these values are per GNOME HIG */
 

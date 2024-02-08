@@ -22,6 +22,8 @@
 #ifndef REMOTE_H
 #define REMOTE_H
 
+#include <glib.h>
+
 struct CollectionData;
 
 struct RemoteConnection {

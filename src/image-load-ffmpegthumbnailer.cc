@@ -19,14 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-#include "image-load.h"
 #include "image-load-ffmpegthumbnailer.h"
 
-#include "filedata.h"
+#include <config.h>
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
 #include <libffmpegthumbnailer/videothumbnailerc.h>
+
+#include "debug.h"
+#include "filedata.h"
+#include "image-load.h"
+#include "options.h"
 
 struct ImageLoaderFT {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

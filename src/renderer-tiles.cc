@@ -19,12 +19,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "renderer-tiles.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
 
-#include "main.h"
-#include "renderer-tiles.h"
+#include <config.h>
+
+#include "debug.h"
+#include "options.h"
 
 /* comment this out if not using this from within Geeqie
  * defining GQ_BUILD does these things:
@@ -33,7 +37,6 @@
 #define GQ_BUILD 1
 
 #ifdef GQ_BUILD
-#include "main.h"
 #include "pixbuf-util.h"
 #include "exif.h"
 #else

@@ -22,6 +22,8 @@
 #ifndef ADVANCED_EXIF_H
 #define ADVANCED_EXIF_H
 
+#include <gtk/gtk.h>
+
 struct FileData;
 struct LayoutWindow;
 

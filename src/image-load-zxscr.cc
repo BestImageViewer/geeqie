@@ -18,10 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-
-#include "image-load.h"
 #include "image-load-zxscr.h"
+
+#include <config.h>
+
+#include "debug.h"
+#include "image-load.h"
 
 struct ImageLoaderZXSCR {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

@@ -19,15 +19,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ui-misc.h"
+
 #include <cstdlib>
 #include <cstring>
 
-#include "main.h"
+#include <config.h>
 
+#include "compat.h"
+#include "debug.h"
 #include "history-list.h"
 #include "layout.h"
+#include "main-defines.h"
 #include "misc.h"
-#include "ui-misc.h"
 #include "utilops.h"
 
 #include <langinfo.h>

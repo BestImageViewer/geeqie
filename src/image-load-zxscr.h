@@ -21,6 +21,8 @@
 #ifndef IMAGE_LOAD_ZXSCR_H
 #define IMAGE_LOAD_ZXSCR_H
 
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_zxscr(ImageLoaderBackend *funcs);
 
 #endif

@@ -21,6 +21,8 @@
 #ifndef OSD_H
 #define OSD_H
 
+#include <gtk/gtk.h>
+
 struct FileData;
 
 enum OsdTemplateFlags {

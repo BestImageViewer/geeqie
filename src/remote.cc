@@ -19,19 +19,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "remote.h"
+
+#include <config.h>
 
 #include "cache-maint.h"
 #include "collect.h"
 #include "collect-io.h"
+#include "compat.h"
+#include "debug.h"
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "image.h"
 #include "img-view.h"
+#include "intl.h"
 #include "layout-image.h"
 #include "layout-util.h"
+#include "main.h"
+#include "main-defines.h"
 #include "misc.h"
 #include "pixbuf-renderer.h"
 #include "slideshow.h"

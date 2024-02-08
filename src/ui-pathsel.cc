@@ -19,16 +19,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ui-pathsel.h"
+
 #include <cstring>
 
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "main.h"
-#include "ui-pathsel.h"
+#include <config.h>
 
+#include "compat.h"
+#include "debug.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "misc.h"
+#include "options.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"

@@ -18,12 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "debug.h"
 
+#include <config.h>
+
 #include "filedata.h"
+#include "intl.h"
 #include "logwindow.h"
+#include "main.h"
+#include "main-defines.h"
 #include "misc.h"
+#include "options.h"
 #include "ui-fileops.h"
 
 #ifdef HAVE_EXECINFO_H

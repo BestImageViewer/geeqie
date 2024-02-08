@@ -22,6 +22,8 @@
 #ifndef VIEW_FILE_VIEW_FILE_ICON_H
 #define VIEW_FILE_VIEW_FILE_ICON_H
 
+#include <gtk/gtk.h>
+
 #include "filedata.h"
 
 struct ViewFile;

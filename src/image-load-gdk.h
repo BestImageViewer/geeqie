@@ -22,6 +22,8 @@
 #ifndef IMAGE_LOAD_GDK_H
 #define IMAGE_LOAD_GDK_H
 
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_default(ImageLoaderBackend *funcs);
 
 #endif

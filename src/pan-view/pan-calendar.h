@@ -22,8 +22,6 @@
 #ifndef PAN_VIEW_PAN_CALENDAR_H
 #define PAN_VIEW_PAN_CALENDAR_H
 
-//#include "main.h"
-#include "pan-item.h"
 #include "pan-types.h"
 
 void pan_calendar_update(PanWindow *pw, PanItem *pi_day);

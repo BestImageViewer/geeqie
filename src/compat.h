@@ -21,6 +21,9 @@
 #ifndef COMPAT_H
 #define COMPAT_H
 
+#include <gtk/gtk.h>
+
+#include <config.h>
 
 /* Some systems (BSD,MacOsX,HP-UX,...) define MAP_ANON and not MAP_ANONYMOUS */
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)

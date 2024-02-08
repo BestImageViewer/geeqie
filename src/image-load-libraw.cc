@@ -25,17 +25,21 @@
  * LibRaw seems to be slower than exiv2, so let exiv2 have priority.
  */
 
-#include "main.h"
+#include "image-load-libraw.h"
 
+#include <config.h>
+
+#include "debug.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "image-load.h"
-#include "image-load-libraw.h"
 
 #ifdef HAVE_RAW
 
 #include <libraw/libraw.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 struct UnmapData
 {

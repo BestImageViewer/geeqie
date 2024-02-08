@@ -22,7 +22,6 @@
 #ifndef PAN_VIEW_PAN_FOLDER_H
 #define PAN_VIEW_PAN_FOLDER_H
 
-#include "main.h"
 #include "pan-types.h"
 
 void pan_flower_compute(PanWindow *pw, FileData *dir_fd,

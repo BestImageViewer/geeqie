@@ -22,6 +22,8 @@
 #ifndef BAR_SORT_H
 #define BAR_SORT_H
 
+#include <gtk/gtk.h>
+
 struct LayoutWindow;
 
 GtkWidget *bar_sort_new_default(LayoutWindow *lw);

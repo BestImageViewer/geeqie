@@ -19,14 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <clocale>
-
-#include "main.h"
 #include "metadata.h"
 
+#include <clocale>
+
+#include <config.h>
+
 #include "cache.h"
+#include "debug.h"
 #include "exif.h"
 #include "filedata.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "misc.h"
 #include "secure-save.h"
 #include "ui-fileops.h"

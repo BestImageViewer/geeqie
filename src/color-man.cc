@@ -19,17 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "color-man.h"
 
-#include "filedata.h"
-#include "image.h"
-#include "ui-fileops.h"
-
-#include <vector>
+#include <config.h>
 
 #ifdef HAVE_LCMS
 /*** color support enabled ***/
+
+#include <vector>
 
 #ifdef HAVE_LCMS2
 #include <lcms2.h>
@@ -37,6 +34,12 @@
 #include <lcms.h>
 #endif
 
+#include "debug.h"
+#include "filedata.h"
+#include "image.h"
+#include "intl.h"
+#include "options.h"
+#include "ui-fileops.h"
 
 struct ColorManCache {
 	cmsHPROFILE   profile_in;

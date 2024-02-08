@@ -19,12 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "preferences.h"
+
+#include <config.h>
 
 #include "bar-keywords.h"
 #include "cache.h"
 #include "color-man.h"
+#include "compat.h"
+#include "debug.h"
 #include "editors.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -32,7 +35,10 @@
 #include "image.h"
 #include "image-overlay.h"
 #include "img-view.h"
+#include "intl.h"
 #include "layout-util.h"
+#include "main.h"
+#include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
 #include "osd.h"
@@ -309,8 +315,8 @@ static void config_window_apply()
 	if (options->thumbnails.max_width != c_options->thumbnails.max_width
 	    || options->thumbnails.max_height != c_options->thumbnails.max_height
 	    || options->thumbnails.quality != c_options->thumbnails.quality)
-	        {
-	    	thumb_format_changed = TRUE;
+		{
+		thumb_format_changed = TRUE;
 		refresh = TRUE;
 		options->thumbnails.max_width = c_options->thumbnails.max_width;
 		options->thumbnails.max_height = c_options->thumbnails.max_height;

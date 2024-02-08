@@ -22,6 +22,8 @@
 #ifndef SHORTCUTS_H
 #define SHORTCUTS_H
 
+#include <gtk/gtk.h>
+
 struct LayoutWindow;
 
 GtkWidget *shortcuts_new_default(LayoutWindow *lw);

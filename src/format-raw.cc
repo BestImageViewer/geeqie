@@ -23,6 +23,8 @@
 
 #ifndef HAVE_EXIV2
 
+#include "format-raw.h"
+
 #include <cstdio>
 #include <cstring>
 #include <sys/mman.h>
@@ -32,11 +34,7 @@
 
 #include <glib.h>
 
-#include "intl.h"
-
-#include "main.h"
-#include "format-raw.h"
-
+#include "debug.h"
 #include "format-canon.h"
 #include "format-fuji.h"
 #include "format-nikon.h"

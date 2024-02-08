@@ -22,7 +22,6 @@
 #ifndef PAN_VIEW_PAN_TIMELINE_H
 #define PAN_VIEW_PAN_TIMELINE_H
 
-#include "main.h"
 #include "pan-types.h"
 
 void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height);

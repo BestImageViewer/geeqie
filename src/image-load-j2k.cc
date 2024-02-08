@@ -18,16 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-
-#include "image-load.h"
-#include "image-load-j2k.h"
-
-#include "misc.h"
+#include <config.h>
 
 #ifdef HAVE_J2K
 
-#include "openjpeg.h"
+#include "image-load-j2k.h"
+
+#include <openjpeg.h>
+
+#include "debug.h"
+#include "image-load.h"
+#include "intl.h"
+#include "misc.h"
 
 struct ImageLoaderJ2K {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

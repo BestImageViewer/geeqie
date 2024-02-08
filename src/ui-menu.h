@@ -23,6 +23,8 @@
 #define UI_MENU_H
 
 
+#include <gtk/gtk.h>
+
 /**
  * @struct hard_coded_window_keys
  * @brief hard coded window shortcut keys

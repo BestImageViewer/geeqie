@@ -22,6 +22,10 @@
 #ifndef COLLECT_H
 #define COLLECT_H
 
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 struct CollectTable;
 struct FileData;
 struct ThumbLoader;

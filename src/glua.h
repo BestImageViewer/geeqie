@@ -21,10 +21,11 @@
 #ifndef __GLUA_H
 #define __GLUA_H
 
+#include <config.h>
+
 #ifdef HAVE_LUA
 
 #include <glib.h>
-#include "main.h"
 
 struct FileData;
 

@@ -19,11 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "shortcuts.h"
 
+#include <config.h>
+
 #include "collect.h"
+#include "compat.h"
+#include "intl.h"
 #include "layout.h"
+#include "main-defines.h"
 #include "utilops.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"

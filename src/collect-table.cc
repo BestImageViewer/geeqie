@@ -19,18 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "collect-table.h"
+
+#include <config.h>
 
 #include "cellrenderericon.h"
 #include "collect-dlg.h"
 #include "collect-io.h"
+#include "compat.h"
+#include "debug.h"
 #include "dnd.h"
 #include "dupe.h"
 #include "filedata.h"
 #include "img-view.h"
+#include "intl.h"
 #include "layout.h"
 #include "layout-image.h"
+#include "main-defines.h"
 #include "menu.h"
 #include "metadata.h"
 #include "misc.h"

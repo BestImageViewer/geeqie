@@ -21,6 +21,9 @@
 
 #include "pan-util.h"
 
+#include <config.h>
+
+#include "main-defines.h"
 #include "ui-fileops.h"
 
 

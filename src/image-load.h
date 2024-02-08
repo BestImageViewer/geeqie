@@ -22,6 +22,8 @@
 #ifndef IMAGE_LOAD_H
 #define IMAGE_LOAD_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 struct FileData;
 
 #define TYPE_IMAGE_LOADER		(image_loader_get_type())

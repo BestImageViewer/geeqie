@@ -22,7 +22,11 @@
 #ifndef IMAGE_LOAD_TIFF_H
 #define IMAGE_LOAD_TIFF_H
 
+#include <config.h>
+
 #ifdef HAVE_TIFF
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_tiff(ImageLoaderBackend *funcs);
 #endif
 

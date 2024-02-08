@@ -32,10 +32,12 @@
 #include <glib.h>
 #include <lua.hpp>
 
-#include "main.h"
 #include "glua.h"
+#include "debug.h"
 #include "exif.h"
 #include "filedata.h"
+#include "main.h"
+#include "main-defines.h"
 #include "ui-fileops.h"
 
 /**

@@ -21,13 +21,15 @@
 
 #ifndef UI_FILEOPS_H
 #define UI_FILEOPS_H
-#include <config.h>
+
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <time.h>
 
+#include <gio/gio.h>
 
+#include <config.h>
 
 void print_term(gboolean err, const gchar *text_utf8);
 

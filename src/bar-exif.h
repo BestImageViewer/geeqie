@@ -22,6 +22,8 @@
 #ifndef BAR_EXIF_H
 #define BAR_EXIF_H
 
+#include <gtk/gtk.h>
+
 GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gchar **attribute_values);
 void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 

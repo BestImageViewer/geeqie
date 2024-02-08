@@ -19,11 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "cache-loader.h"
+
+#include <config.h>
 
 #include "filedata.h"
 #include "metadata.h"
+#include "options.h"
 #include "ui-fileops.h"
 
 

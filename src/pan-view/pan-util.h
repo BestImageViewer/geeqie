@@ -22,7 +22,6 @@
 #ifndef PAN_VIEW_PAN_UTIL_H
 #define PAN_VIEW_PAN_UTIL_H
 
-#include "main.h"
 #include "pan-types.h"
 
 enum PanDateLengthType {

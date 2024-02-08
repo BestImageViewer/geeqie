@@ -19,10 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "filefilter.h"
 
+#include <config.h>
+
 #include "cache.h"
+#include "debug.h"
+#include "main-defines.h"
 #include "ui-fileops.h"
 #include "rcfile.h"
 

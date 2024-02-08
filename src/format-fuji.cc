@@ -24,17 +24,13 @@
 
 #ifndef HAVE_EXIV2
 
+#include "format-fuji.h"
+
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
 
 #include <glib.h>
-
-#include "intl.h"
-
-#include "main.h"
-#include "format-fuji.h"
-#include "format-raw.h"
 
 #include "exif.h"
 

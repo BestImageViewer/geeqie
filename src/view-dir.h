@@ -21,6 +21,10 @@
 #ifndef VIEW_DIR_H
 #define VIEW_DIR_H
 
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 struct FileData;
 struct LayoutWindow;
 

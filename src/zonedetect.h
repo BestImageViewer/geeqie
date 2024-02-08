@@ -25,7 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
 #ifndef INCL_ZONEDETECT_H_
 #define INCL_ZONEDETECT_H_

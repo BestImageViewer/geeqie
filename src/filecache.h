@@ -21,7 +21,6 @@
 #ifndef FILECACHE_H
 #define FILECACHE_H
 
-#include "main.h"
 #include "filedata.h"
 
 struct FileCacheData;

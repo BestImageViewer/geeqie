@@ -19,13 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pixbuf-renderer.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
 
-#include "main.h"
-#include "pixbuf-renderer.h"
+#include <config.h>
 
+#include "debug.h"
+#include "main-defines.h"
+#include "options.h"
 #include "renderer-tiles.h"
 
 /* comment this out if not using this from within Geeqie
@@ -35,7 +39,6 @@
 #define GQ_BUILD 1
 
 #ifdef GQ_BUILD
-#include "main.h"
 #include "pixbuf-util.h"
 #include "exif.h"
 #else

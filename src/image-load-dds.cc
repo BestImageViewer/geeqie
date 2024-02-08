@@ -24,10 +24,11 @@
 
  */
 
-#include "main.h"
+#include "image-load-dds.h"
+
+#include <config.h>
 
 #include "image-load.h"
-#include "image-load-dds.h"
 
 struct ImageLoaderDDS {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

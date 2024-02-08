@@ -19,12 +19,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ui-tree-edit.h"
+
 #include <cstring>
 
-#include "main.h"
+#include <config.h>
 
+#include "compat.h"
 #include "misc.h"
-#include "ui-tree-edit.h"
 
 /*
  *-------------------------------------------------------------------

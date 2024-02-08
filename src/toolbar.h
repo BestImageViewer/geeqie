@@ -22,6 +22,10 @@
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
 
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 struct LayoutWindow;
 
 GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar);

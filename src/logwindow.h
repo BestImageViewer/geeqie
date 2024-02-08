@@ -21,6 +21,8 @@
 #ifndef LOGWINDOW_H
 #define LOGWINDOW_H
 
+#include <glib.h>
+
 struct LayoutWindow;
 
 enum LogType

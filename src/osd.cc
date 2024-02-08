@@ -22,12 +22,15 @@
  * used for the same purposes by the Print routines
  */
 
-#include "main.h"
 #include "osd.h"
 
+#include <config.h>
+
+#include "compat.h"
 #include "dnd.h"
 #include "exif.h"
 #include "glua.h"
+#include "intl.h"
 #include "metadata.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"

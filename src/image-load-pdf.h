@@ -21,7 +21,11 @@
 #ifndef IMAGE_LOAD_PDF_H
 #define IMAGE_LOAD_PDF_H
 
+#include <config.h>
+
 #ifdef HAVE_PDF
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_pdf(ImageLoaderBackend *funcs);
 #endif
 

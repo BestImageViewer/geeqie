@@ -22,7 +22,6 @@
 #ifndef PAN_VIEW_PAN_VIEW_SEARCH_H
 #define PAN_VIEW_PAN_VIEW_SEARCH_H
 
-#include "main.h"
 #include "pan-types.h"
 
 void pan_search_toggle_visible(PanWindow *pw, gboolean enable);

@@ -22,6 +22,8 @@
 #ifndef VIEW_DIR_TREE_H
 #define VIEW_DIR_TREE_H
 
+#include <gtk/gtk.h>
+
 struct FileData;
 struct ViewDir;
 

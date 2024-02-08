@@ -23,6 +23,8 @@
 
 #include <glib.h>
 
+#include <config.h>
+
 #define DOMAIN_DEBUG "debug"
 #define DOMAIN_INFO  "info"
 

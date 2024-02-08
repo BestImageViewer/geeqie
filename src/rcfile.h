@@ -22,6 +22,8 @@
 #ifndef RCFILE_H
 #define RCFILE_H
 
+#include "options.h"
+
 struct LayoutWindow;
 
 void write_indent(GString *str, gint indent);

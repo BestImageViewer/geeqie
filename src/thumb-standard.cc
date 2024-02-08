@@ -19,18 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "thumb-standard.h"
 
+#include <config.h>
+
 #include "cache.h"
+#include "color-man.h"
+#include "debug.h"
+#include "exif.h"
+#include "filedata.h"
 #include "image-load.h"
 #include "md5-util.h"
+#include "metadata.h"
+#include "options.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
-#include "filedata.h"
-#include "exif.h"
-#include "metadata.h"
-#include "color-man.h"
 
 
 /**

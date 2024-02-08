@@ -22,6 +22,10 @@
 #ifndef CACHE_MAINT_H
 #define CACHE_MAINT_H
 
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 struct FileData;
 
 void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent);

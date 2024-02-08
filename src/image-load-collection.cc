@@ -18,13 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-#include "image-load.h"
 #include "image-load-collection.h"
+
+#include <config.h>
 
 #include "cache.h"
 #include "filedata.h"
+#include "image-load.h"
 #include "misc.h"
+#include "options.h"
 #include "ui-fileops.h"
 
 struct ImageLoaderCOLLECTION {

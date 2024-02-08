@@ -22,6 +22,10 @@
 #ifndef THUMB_H
 #define THUMB_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include "typedefs.h"
+
 struct FileData;
 struct ImageLoader;
 

@@ -21,7 +21,11 @@
 #ifndef IMAGE_LOAD_CR3_H
 #define IMAGE_LOAD_CR3_H
 
+#include <config.h>
+
 #ifdef HAVE_JPEG
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_cr3(ImageLoaderBackend *funcs);
 #endif
 

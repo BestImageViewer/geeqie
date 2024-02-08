@@ -19,16 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "fullscreen.h"
 
 #include <algorithm>
 #include <string>
 #include <vector>
 
+#include <config.h>
+
+#include "compat.h"
+#include "debug.h"
 #include "image.h"
 #include "image-load.h"
+#include "intl.h"
 #include "misc.h"
+#include "options.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "window.h"

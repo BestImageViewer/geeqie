@@ -61,13 +61,12 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 
-#include "intl.h"
-
-#include "main.h"
 #include "exif-int.h"
 #include "jpeg-parser.h"
 
+#include "debug.h"
 #include "format-raw.h"
+#include "intl.h"
 #include "ui-fileops.h"
 
 

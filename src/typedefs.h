@@ -22,6 +22,8 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+#include <glib.h>
+
 enum ZoomMode {
 	ZOOM_RESET_ORIGINAL	= 0,
 	ZOOM_RESET_FIT_WINDOW	= 1,

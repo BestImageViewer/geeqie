@@ -22,7 +22,7 @@
 #ifndef UTILOPS_H
 #define UTILOPS_H
 
-
+#include "typedefs.h"
 #include "ui-utildlg.h"
 
 struct FileData;

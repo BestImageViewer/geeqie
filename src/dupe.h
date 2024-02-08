@@ -22,6 +22,8 @@
 #ifndef DUPE_H
 #define DUPE_H
 
+#include <gtk/gtk.h>
+
 #include "similar.h"
 
 struct CollectInfo;

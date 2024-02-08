@@ -21,7 +21,11 @@
 #ifndef IMAGE_LOAD_WEBP_H
 #define IMAGE_LOAD_WEBP_H
 
+#include <config.h>
+
 #ifdef HAVE_WEBP
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_webp(ImageLoaderBackend *funcs);
 #endif
 

@@ -23,17 +23,13 @@
 
 #ifndef HAVE_EXIV2
 
+#include "format-canon.h"
+
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
 
 #include <glib.h>
-
-#include "intl.h"
-
-#include "main.h"
-#include "format-canon.h"
-#include "format-raw.h"
 
 #include "exif.h"
 

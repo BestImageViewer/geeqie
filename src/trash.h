@@ -19,7 +19,7 @@
 #ifndef TRASH_H
 #define TRASH_H
 
-#include "ui-utildlg.h"
+#include <glib.h>
 
 void file_util_trash_clear();
 gboolean file_util_safe_unlink(const gchar *path);

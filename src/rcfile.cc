@@ -19,8 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "rcfile.h"
+
+#include <config.h>
 
 #include "bar.h"
 #include "bar-comment.h"
@@ -29,8 +30,11 @@
 #include "bar-keywords.h"
 #include "bar-rating.h"
 #include "bar-sort.h"
+#include "debug.h"
 #include "editors.h"
 #include "filefilter.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "pixbuf-renderer.h"
 #include "secure-save.h"
 #include "slideshow.h"

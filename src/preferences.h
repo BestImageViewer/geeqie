@@ -22,6 +22,8 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
+#include <gtk/gtk.h>
+
 struct LayoutWindow;
 
 void show_config_window(LayoutWindow *lw);

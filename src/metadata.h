@@ -22,6 +22,10 @@
 #ifndef METADATA_H
 #define METADATA_H
 
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 struct FileData;
 
 #define COMMENT_KEY "Xmp.dc.description"

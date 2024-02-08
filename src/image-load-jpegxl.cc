@@ -50,16 +50,18 @@
  *
  */
 
-#include "main.h"
-
-#include "image-load.h"
-#include "image-load-jpegxl.h"
+#include <config.h>
 
 #ifdef HAVE_JPEGXL
 
+#include "image-load-jpegxl.h"
+
 #include <memory>
 
-#include "jxl/decode.h"
+#include <jxl/decode.h>
+
+#include "debug.h"
+#include "image-load.h"
 
 struct ImageLoaderJPEGXL {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

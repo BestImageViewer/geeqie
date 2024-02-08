@@ -22,6 +22,8 @@
 #ifndef __EXIF_INT_H
 #define __EXIF_INT_H
 
+#include <cstdio>
+
 #include "exif.h"
 
 /*

@@ -22,6 +22,10 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 struct CollectInfo;
 struct CollectionData;
 struct FileData;

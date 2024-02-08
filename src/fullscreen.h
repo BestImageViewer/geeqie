@@ -22,6 +22,8 @@
 #ifndef FULLSCREEN_H
 #define FULLSCREEN_H
 
+#include <gtk/gtk.h>
+
 struct ImageWindow;
 
 struct FullScreenData

@@ -22,7 +22,6 @@
 #ifndef PAN_VIEW_PAN_VIEW_H
 #define PAN_VIEW_PAN_VIEW_H
 
-#include "main.h"
 #include "pan-types.h"
 
 void pan_layout_update(PanWindow *pw);

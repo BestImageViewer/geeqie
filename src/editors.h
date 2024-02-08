@@ -22,6 +22,8 @@
 #ifndef EDITORS_H
 #define EDITORS_H
 
+#include <gtk/gtk.h>
+
 struct FileData;
 
 enum EditorFlags {

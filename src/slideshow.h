@@ -22,8 +22,11 @@
 #ifndef SLIDESHOW_H
 #define SLIDESHOW_H
 
+#include <glib.h>
+
 struct CollectInfo;
 struct CollectionData;
+struct FileData;
 struct ImageWindow;
 struct LayoutWindow;
 

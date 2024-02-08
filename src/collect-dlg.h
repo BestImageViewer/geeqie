@@ -22,6 +22,7 @@
 #ifndef COLLECT_DLG_H
 #define COLLECT_DLG_H
 
+struct CollectionData;
 
 void collection_dialog_save_as(CollectionData *cd);
 void collection_dialog_save_close(CollectionData *cd);

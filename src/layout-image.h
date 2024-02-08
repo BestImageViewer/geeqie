@@ -22,6 +22,10 @@
 #ifndef LAYOUT_IMAGE_H
 #define LAYOUT_IMAGE_H
 
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
+
 struct CollectInfo;
 struct CollectionData;
 struct FileData;

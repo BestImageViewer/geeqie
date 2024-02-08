@@ -22,6 +22,8 @@
 #ifndef IMG_VIEW_H
 #define IMG_VIEW_H
 
+#include <glib.h>
+
 struct CollectInfo;
 struct CollectionData;
 struct FileData;
@@ -34,7 +36,6 @@ void view_window_new_from_collection(CollectionData *cd, CollectInfo *info);
 void view_window_colors_update();
 
 gboolean view_window_find_image(ImageWindow *imd, gint *index, gint *total);
-
 
 
 #endif

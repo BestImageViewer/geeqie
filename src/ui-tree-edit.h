@@ -22,6 +22,7 @@
 #ifndef UI_TREE_EDIT_H
 #define UI_TREE_EDIT_H
 
+#include <gtk/gtk.h>
 
 struct TreeEditData
 {

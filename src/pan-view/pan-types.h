@@ -22,6 +22,8 @@
 #ifndef PAN_VIEW_PAN_TYPES_H
 #define PAN_VIEW_PAN_TYPES_H
 
+#include <gtk/gtk.h>
+
 #include "cache-loader.h"
 #include "filedata.h"
 

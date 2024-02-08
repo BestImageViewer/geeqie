@@ -22,6 +22,7 @@
 #ifndef FILEFILTER_H
 #define FILEFILTER_H
 
+#include "typedefs.h"
 
 struct FilterEntry {
 	gchar *key;

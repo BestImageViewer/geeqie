@@ -18,8 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "compat.h"
+
+#include <config.h>
 
 #ifdef HAVE_GTK4
 void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)

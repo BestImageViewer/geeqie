@@ -19,15 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ui-bookmark.h"
+
 #include <cstring>
 #include <memory>
 
-#include "main.h"
-#include "ui-bookmark.h"
+#include <config.h>
 
+#include "compat.h"
+#include "debug.h"
 #include "history-list.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "misc.h"
 #include "pixbuf-util.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"

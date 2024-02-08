@@ -22,6 +22,10 @@
 #ifndef THUMB_STANDARD_H
 #define THUMB_STANDARD_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include "main-defines.h"
+
 struct FileData;
 struct ImageLoader;
 

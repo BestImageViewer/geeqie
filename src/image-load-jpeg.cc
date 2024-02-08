@@ -27,17 +27,23 @@
 /** This is a Will Not Fix */
 #pragma GCC diagnostic ignored "-Wclobbered"
 
-#include "main.h"
-
-#include "image-load.h"
-#include "image-load-jpeg.h"
-#include "jpeg-parser.h"
+#include <config.h>
 
 #ifdef HAVE_JPEG
 
+#include "image-load-jpeg.h"
+
 #include <csetjmp>
+#include <cstdio> // for FILE and size_t in jpeglib.h
+
 #include <jerror.h>
 #include <jpeglib.h>
+
+#include "debug.h"
+#include "image-load.h"
+#include "intl.h"
+#include "jpeg-parser.h"
+#include "typedefs.h"
 
 struct ImageLoaderJpeg {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
@@ -492,8 +498,6 @@ void image_loader_backend_set_jpeg(ImageLoaderBackend *funcs)
 }
 
 
-
 #endif
-
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -22,6 +22,10 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
+#include <gtk/gtk.h>
+
+#include "options.h"
+
 struct AnimationData;
 struct FileData;
 struct FullScreenData;

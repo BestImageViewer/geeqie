@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ui-fileops.h"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -27,11 +29,14 @@
 #include <unistd.h>
 #include <utime.h>
 
-#include "main.h"
-#include "ui-fileops.h"
+#include <config.h>
 
+#include "compat.h"
+#include "debug.h"
+#include "main-defines.h"
 #include "md5-util.h"
 #include "filefilter.h"
+#include "intl.h"
 #include "layout.h"
 #include "utilops.h"
 #include "secure-save.h"

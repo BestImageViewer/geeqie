@@ -21,6 +21,10 @@
 #ifndef MISC_H
 #define MISC_H
 
+#include <gtk/gtk.h>
+
+#include <config.h>
+
 struct FileData;
 
 const gchar *gq_gtk_entry_get_text(GtkEntry *entry);

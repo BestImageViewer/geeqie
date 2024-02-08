@@ -19,15 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ui-tabcomp.h"
+
 #include <cstring>
 #include <dirent.h>
 #include <sys/types.h>
 
-#include "main.h"
-#include "ui-tabcomp.h"
+#include <config.h>
 
+#include "compat.h"
+#include "debug.h"
 #include "history-list.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "misc.h"	/* expand_tilde() */
+#include "options.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
 

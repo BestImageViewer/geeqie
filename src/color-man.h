@@ -22,6 +22,8 @@
 #ifndef COLOR_MAN_H
 #define COLOR_MAN_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 struct FileData;
 struct ImageWindow;
 

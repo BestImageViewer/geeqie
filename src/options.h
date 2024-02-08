@@ -23,7 +23,11 @@
 
 #include <gdk/gdk.h>
 
+#include "typedefs.h"
+
 struct SecureSaveInfo;
+
+#define COLOR_PROFILE_INPUTS 4
 
 /**
  * @enum DnDAction

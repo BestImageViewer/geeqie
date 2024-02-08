@@ -21,7 +21,11 @@
 #ifndef IMAGE_LOAD_J2K_H
 #define IMAGE_LOAD_J2K_H
 
+#include <config.h>
+
 #ifdef HAVE_J2K
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_j2k(ImageLoaderBackend *funcs);
 #endif
 

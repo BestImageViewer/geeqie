@@ -19,12 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ui-help.h"
+
 #include <cstdio>
 #include <cstring>
 
-#include "main.h"
-#include "ui-help.h"
+#include <config.h>
 
+#include "compat.h"
+#include "debug.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "window.h"

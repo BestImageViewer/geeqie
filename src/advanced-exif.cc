@@ -19,17 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "advanced-exif.h"
 
+#include <config.h>
+
+#include "compat.h"
+#include "debug.h"
+#include "dnd.h"
 #include "exif.h"
 #include "filedata.h"
 #include "history-list.h"
+#include "intl.h"
 #include "layout-util.h"
 #include "misc.h"
 #include "ui-misc.h"
 #include "window.h"
-#include "dnd.h"
 
 enum {
 	ADVANCED_EXIF_DATA_COLUMN_WIDTH = 200

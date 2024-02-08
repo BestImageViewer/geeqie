@@ -22,6 +22,9 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include <gtk/gtk.h>
+
+#include "typedefs.h"
 
 gpointer submenu_item_get_data(GtkWidget *menu);
 

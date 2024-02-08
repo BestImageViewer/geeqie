@@ -21,17 +21,13 @@
 
 #ifndef HAVE_EXIV2
 
+#include "format-olympus.h"
+
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
 
 #include <glib.h>
-
-#include "intl.h"
-
-#include "main.h"
-#include "format-olympus.h"
-#include "format-raw.h"
 
 #include "exif.h"
 

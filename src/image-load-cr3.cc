@@ -24,11 +24,15 @@
 /** @FIXME This is just a copy of image-load-jpeg.cc, with an adjusted
  * start address for a .cr3 file
  */
-#include "main.h"
-
-#include "image-load.h"
 #include "image-load-cr3.h"
+
+#include <config.h>
+
+#include "debug.h"
+#include "image-load.h"
+#include "intl.h"
 #include "jpeg-parser.h"
+#include "typedefs.h"
 
 #ifdef HAVE_JPEG
 

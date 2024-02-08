@@ -19,10 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "cache.h"
 
+#include <config.h>
+
+#include "debug.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "md5-util.h"
+#include "options.h"
 #include "secure-save.h"
 #include "thumb-standard.h"
 #include "ui-fileops.h"

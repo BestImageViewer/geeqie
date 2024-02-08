@@ -18,9 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-#include "image-load.h"
 #include "image-load-svgz.h"
+
+#include <config.h>
+
+#include "image-load.h"
 
 
 static gchar* image_loader_svgz_get_format_name(gpointer)

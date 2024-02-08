@@ -17,13 +17,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
-#include "main.h"
 #include "options.h"
 
+#include <config.h>
+
+#include "debug.h"
 #include "histogram.h" /* HCHAN_RGB */
 #include "image-overlay.h" /* OSD_SHOW_NOTHING */
+#include "intl.h"
 #include "layout.h"
 #include "layout-image.h"
+#include "main-defines.h"
 #include "misc.h"
 #include "rcfile.h"
 #include "ui-bookmark.h"

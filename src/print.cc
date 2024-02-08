@@ -18,12 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "print.h"
 
+#include <config.h>
+
+#include "compat.h"
+#include "debug.h"
 #include "exif.h"
 #include "filedata.h"
 #include "image-load.h"
+#include "intl.h"
+#include "main-defines.h"
+#include "options.h"
 #include "osd.h"
 #include "pixbuf-util.h"
 #include "ui-misc.h"

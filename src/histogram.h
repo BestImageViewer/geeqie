@@ -21,6 +21,10 @@
 #ifndef HISTOGRAM_H
 #define HISTOGRAM_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include "typedefs.h"
+
 struct FileData;
 struct HistMap;
 

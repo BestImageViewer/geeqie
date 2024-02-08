@@ -19,13 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <memory>
-
-#include "main.h"
-#include "collect.h"
 #include "collect-dlg.h"
 
+#include <memory>
+
+#include <config.h>
+
+#include "collect.h"
 #include "collect-io.h"
+#include "compat.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "misc.h"
 #include "ui-fileops.h"
 #include "utilops.h"

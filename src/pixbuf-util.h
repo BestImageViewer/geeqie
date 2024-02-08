@@ -22,6 +22,8 @@
 #ifndef PIXBUF_UTIL_H
 #define PIXBUF_UTIL_H
 
+#include <gtk/gtk.h>
+
 struct FileData;
 
 gboolean pixbuf_to_file_as_png (GdkPixbuf *pixbuf, const gchar *filename);

@@ -22,6 +22,8 @@
 #ifndef BAR_H
 #define BAR_H
 
+#include <gtk/gtk.h>
+
 struct FileData;
 struct LayoutWindow;
 

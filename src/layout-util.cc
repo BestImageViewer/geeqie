@@ -19,8 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "layout-util.h"
+
+#include <config.h>
 
 #include "advanced-exif.h"
 #include "bar-sort.h"
@@ -31,17 +32,23 @@
 #include "collect-dlg.h"
 #include "collect-io.h"
 #include "color-man.h"
+#include "compat.h"
+#include "debug.h"
 #include "desktop-file.h"
 #include "dupe.h"
 #include "editors.h"
+#include "filedata.h"
 #include "fullscreen.h"
 #include "histogram.h"
 #include "history-list.h"
 #include "image.h"
 #include "image-overlay.h"
 #include "img-view.h"
+#include "intl.h"
 #include "layout-image.h"
 #include "logwindow.h"
+#include "main.h"
+#include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
 #include "pan-view.h"

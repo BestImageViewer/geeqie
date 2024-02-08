@@ -19,20 +19,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cinttypes>
-
-#include "main.h"
 #include "dupe.h"
+
+#include <cinttypes>
+#include <cmath>
+
+#include <config.h>
 
 #include "cache.h"
 #include "collect-table.h"
+#include "compat.h"
+#include "debug.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "history-list.h"
 #include "image-load.h"
 #include "img-view.h"
+#include "intl.h"
 #include "layout-image.h"
 #include "layout-util.h"
+#include "main-defines.h"
 #include "md5-util.h"
 #include "menu.h"
 #include "misc.h"
@@ -46,9 +52,6 @@
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
-
-#include <cmath>
-
 
 enum {
 	DUPE_DEF_WIDTH = 800,

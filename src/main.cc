@@ -19,8 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
 #include "main.h"
 
 #include <csignal>
@@ -31,6 +29,8 @@
 #endif
 #include <clocale>
 
+#include <config.h>
+
 #ifdef HAVE_DEVELOPER
 #include "backward.h"
 #endif
@@ -38,13 +38,17 @@
 #include "cache.h"
 #include "collect.h"
 #include "collect-io.h"
+#include "compat.h"
+#include "debug.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "history-list.h"
 #include "image.h"
 #include "img-view.h"
+#include "intl.h"
 #include "layout-image.h"
 #include "layout-util.h"
+#include "main-defines.h"
 #include "misc.h"
 #include "rcfile.h"
 #include "remote.h"

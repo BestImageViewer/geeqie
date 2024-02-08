@@ -19,9 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "image-load.h"
 
+#include <config.h>
+
+#include "debug.h"
 #include "exif.h"
 #include "filedata.h"
 #include "gq-marshal.h"
@@ -35,6 +37,7 @@
 #include "image-load-webp.h"
 #include "image-load-zxscr.h"
 #include "misc.h"
+#include "options.h"
 #include "ui-fileops.h"
 
 #ifdef HAVE_DJVU

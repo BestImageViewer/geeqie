@@ -17,8 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "cellrenderericon.h"
+
+#include <config.h>
 
 enum {
 	FIXED_ICON_SIZE_MAX = 512

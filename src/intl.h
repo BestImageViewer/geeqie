@@ -22,6 +22,8 @@
 #ifndef __INTL_H__
 #define __INTL_H__
 
+#include <config.h>
+
 #ifdef ENABLE_NLS
 #  include <libintl.h>
 #  define _(String) dgettext(PACKAGE,String)

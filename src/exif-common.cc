@@ -37,11 +37,12 @@
 #endif
 #endif
 
-#include "main.h"
+#include "debug.h"
 #include "exif.h"
-
 #include "filecache.h"
 #include "glua.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "ui-fileops.h"
 #include "cache.h"
 #include "jpeg-parser.h"

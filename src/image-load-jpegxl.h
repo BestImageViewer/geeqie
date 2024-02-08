@@ -21,7 +21,11 @@
 #ifndef IMAGE_LOAD_JPEGXL_H
 #define IMAGE_LOAD_JPEGXL_H
 
+#include <config.h>
+
 #ifdef HAVE_JPEGXL
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_jpegxl(ImageLoaderBackend *funcs);
 #endif
 

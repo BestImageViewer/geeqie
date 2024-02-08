@@ -22,7 +22,6 @@
 #ifndef PAN_VIEW_PAN_ITEM_H
 #define PAN_VIEW_PAN_ITEM_H
 
-#include "main.h"
 #include "pan-types.h"
 #include "pixbuf-renderer.h"
 

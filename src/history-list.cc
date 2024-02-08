@@ -18,9 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "history-list.h"
 
+#include <config.h>
+
+#include "debug.h"
+#include "intl.h"
+#include "options.h"
 #include "secure-save.h"
 #include "ui-fileops.h"
 

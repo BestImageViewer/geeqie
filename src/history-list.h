@@ -21,6 +21,8 @@
 #ifndef HISTORY_LIST_H
 #define HISTORY_LIST_H
 
+#include <glib.h>
+
 /* history lists */
 
 gboolean history_list_load(const gchar *path);

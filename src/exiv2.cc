@@ -54,12 +54,13 @@
 
 #include <glib.h>
 
-#include "main.h"
 #include "exif.h"
 
+#include "debug.h"
 #include "filedata.h"
 #include "filefilter.h"
 #include "misc.h"
+#include "options.h"
 #include "ui-fileops.h"
 
 #if EXIV2_TEST_VERSION(0,28,0)

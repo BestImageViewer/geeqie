@@ -20,6 +20,8 @@
 #ifndef __GQV_CELL_RENDERER_ICON_H__
 #define __GQV_CELL_RENDERER_ICON_H__
 
+#include <gtk/gtk.h>
+
 #define TOGGLE_WIDTH 13
 #define TOGGLE_SPACING 16
 

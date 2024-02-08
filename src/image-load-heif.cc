@@ -18,13 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-
-#include "image-load.h"
 #include "image-load-heif.h"
-#include <vector>
+
+#include <config.h>
+
 #ifdef HAVE_HEIF
+#include <vector>
+
 #include <libheif/heif.h>
+
+#include "debug.h"
+#include "image-load.h"
 
 struct ImageLoaderHEIF {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

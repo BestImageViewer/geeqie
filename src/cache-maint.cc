@@ -19,12 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "cache-maint.h"
 
+#include <config.h>
+
 #include "cache-loader.h"
+#include "compat.h"
+#include "debug.h"
 #include "filedata.h"
+#include "intl.h"
 #include "layout.h"
+#include "main.h"
+#include "main-defines.h"
 #include "misc.h"
 #include "pixbuf-util.h"
 #include "thumb.h"

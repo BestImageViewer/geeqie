@@ -18,13 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-
-#include "image-load.h"
-#include "image-load-webp.h"
+#include <config.h>
 
 #ifdef HAVE_WEBP
+#include "image-load-webp.h"
+
 #include <webp/decode.h>
+
+#include "debug.h"
+#include "image-load.h"
 
 using ImageLoaderWEBP = struct _ImageLoaderWEBP;
 struct _ImageLoaderWEBP {

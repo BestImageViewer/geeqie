@@ -22,7 +22,11 @@
 #ifndef IMAGE_LOAD_JPEG_H
 #define IMAGE_LOAD_JPEG_H
 
+#include <config.h>
+
 #ifdef HAVE_JPEG
+struct ImageLoaderBackend;
+
 void image_loader_backend_set_jpeg(ImageLoaderBackend *funcs);
 #endif
 

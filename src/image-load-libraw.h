@@ -21,6 +21,10 @@
 #ifndef IMAGE_LOAD_RAW_H
 #define IMAGE_LOAD_RAW_H
 
+#include <glib.h>
+
+struct ImageLoader;
+
 guchar *libraw_get_preview(ImageLoader *il, guint *data_len);
 void libraw_free_preview(const guchar *buf);
 

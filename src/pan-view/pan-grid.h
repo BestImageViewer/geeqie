@@ -22,7 +22,6 @@
 #ifndef PAN_VIEW_PAN_GRID_H
 #define PAN_VIEW_PAN_GRID_H
 
-#include "main.h"
 #include "pan-types.h"
 
 void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height);

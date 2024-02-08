@@ -21,6 +21,10 @@
 #ifndef SECURE_SAVE_H
 #define SECURE_SAVE_H
 
+#include <cstdio>
+
+#include <glib.h>
+
 /**
  * @enum SecureSaveErrno
  * see err field in #SecureSaveInfo

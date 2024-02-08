@@ -21,7 +21,12 @@
 
 #include "pan-view-filter.h"
 
+#include <config.h>
+
+#include "compat.h"
 #include "image.h"
+#include "intl.h"
+#include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
 #include "pan-view.h"

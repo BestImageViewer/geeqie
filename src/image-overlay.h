@@ -22,6 +22,8 @@
 #ifndef IMAGE_OVERLAY_H
 #define IMAGE_OVERLAY_H
 
+#include <glib.h>
+
 struct Histogram;
 struct ImageWindow;
 

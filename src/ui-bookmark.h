@@ -22,6 +22,7 @@
 #ifndef UI_BOOKMARK_H
 #define UI_BOOKMARK_H
 
+#include <gtk/gtk.h>
 
 /* bookmarks */
 
@@ -45,7 +46,6 @@ void bookmark_add_default(const gchar *name, const gchar *path);
 GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
 			     const gchar *history_key, gint max_levels);
 void history_combo_append_history(GtkWidget *widget, const gchar *text);
-
 
 
 #endif

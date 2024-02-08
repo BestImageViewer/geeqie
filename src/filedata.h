@@ -22,6 +22,12 @@
 #ifndef FILEDATA_H
 #define FILEDATA_H
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include <config.h>
+
+#include "typedefs.h"
+
 struct ExifData;
 struct HistMap;
 

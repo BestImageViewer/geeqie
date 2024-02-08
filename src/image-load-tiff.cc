@@ -25,14 +25,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
-
-#include "image-load.h"
-#include "image-load-tiff.h"
+#include <config.h>
 
 #ifdef HAVE_TIFF
 
+#include "image-load-tiff.h"
+
 #include <tiffio.h>
+
+#include "debug.h"
+#include "image-load.h"
 
 struct ImageLoaderTiff {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;

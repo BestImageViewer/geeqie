@@ -23,6 +23,8 @@
 #define LAYOUT_CONFIG_H
 
 
+#include <gtk/gtk.h>
+
 #include "layout.h"
 
 

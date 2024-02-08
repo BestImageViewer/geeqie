@@ -19,16 +19,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "main.h"
 #include "view-file-icon.h"
+
+#include <config.h>
 
 #include "cellrenderericon.h"
 #include "collect.h"
+#include "compat.h"
+#include "debug.h"
 #include "dnd.h"
 #include "img-view.h"
+#include "intl.h"
 #include "layout-image.h"
+#include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
+#include "options.h"
 #include "utilops.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
