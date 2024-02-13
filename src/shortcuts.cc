@@ -28,10 +28,10 @@
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "utilops.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
+#include "utilops.h"
 
 struct ShortcutsData
 {

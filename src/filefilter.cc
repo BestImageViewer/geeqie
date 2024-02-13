@@ -26,8 +26,8 @@
 #include "cache.h"
 #include "debug.h"
 #include "main-defines.h"
-#include "ui-fileops.h"
 #include "rcfile.h"
+#include "ui-fileops.h"
 
 /*
  *-----------------------------------------------------------------------------

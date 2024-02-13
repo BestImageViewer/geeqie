@@ -21,6 +21,7 @@
 Checks: >
   -*,
   bugprone-*,
+  llvm-*,
   misc-*,
   modernize-*,
   performance-*,
@@ -35,6 +36,9 @@ Checks: >
   -bugprone-reserved-identifier,
   -bugprone-sizeof-expression,
   -bugprone-suspicious-missing-comma,
+  -llvm-header-guard,
+  -llvm-namespace-comment,
+  -llvm-qualified-auto,
   -misc-const-correctness,
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,
@@ -51,7 +55,6 @@ Checks: >
   -readability-named-parameter,
   -readability-qualified-auto,
   -readability-simplify-boolean-expr,
-
 
 ExtraArgs: [-Wno-unknown-warning-option, -Wno-unused-lambda-capture, -Wno-unused-but-set-variable]
 WarningsAsErrors: "*"

@@ -25,8 +25,8 @@
 
 #include <config.h>
 
-#include "collect.h"
 #include "collect-io.h"
+#include "collect.h"
 #include "compat.h"
 #include "intl.h"
 #include "main-defines.h"

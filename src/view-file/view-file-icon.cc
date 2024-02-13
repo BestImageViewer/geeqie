@@ -35,11 +35,11 @@
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
-#include "utilops.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
+#include "utilops.h"
 #include "view-file.h"
 
 /* between these, the icon width is increased by thumb_max_width / 2 */

@@ -29,17 +29,19 @@
 
 #include <config.h>
 
-#include "debug.h"
-#include "filedata.h"
-#include "filefilter.h"
 #include "image-load.h"
 
 #ifdef HAVE_RAW
 
-#include <libraw/libraw.h>
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+
+#include <libraw/libraw.h>
+
+#include "debug.h"
+#include "filedata.h"
+#include "filefilter.h"
 
 struct UnmapData
 {

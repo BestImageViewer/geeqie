@@ -24,6 +24,8 @@
 
 #define _XOPEN_SOURCE
 
+#include "glua.h"
+
 #include <cstdio>
 #include <cstring>
 #include <ctime>
@@ -32,12 +34,11 @@
 #include <glib.h>
 #include <lua.hpp>
 
-#include "glua.h"
 #include "debug.h"
 #include "exif.h"
 #include "filedata.h"
-#include "main.h"
 #include "main-defines.h"
+#include "main.h"
 #include "ui-fileops.h"
 
 /**

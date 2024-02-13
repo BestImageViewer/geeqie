@@ -21,16 +21,18 @@
 
 #include "layout-util.h"
 
+#include <sys/wait.h>
+
 #include <config.h>
 
 #include "advanced-exif.h"
+#include "bar-keywords.h"
 #include "bar-sort.h"
 #include "bar.h"
-#include "bar-keywords.h"
 #include "cache-maint.h"
-#include "collect.h"
 #include "collect-dlg.h"
 #include "collect-io.h"
+#include "collect.h"
 #include "color-man.h"
 #include "compat.h"
 #include "debug.h"
@@ -41,14 +43,15 @@
 #include "fullscreen.h"
 #include "histogram.h"
 #include "history-list.h"
-#include "image.h"
 #include "image-overlay.h"
+#include "image.h"
 #include "img-view.h"
 #include "intl.h"
+#include "keymap-template.h"
 #include "layout-image.h"
 #include "logwindow.h"
-#include "main.h"
 #include "main-defines.h"
+#include "main.h"
 #include "metadata.h"
 #include "misc.h"
 #include "pan-view.h"
@@ -56,8 +59,8 @@
 #include "preferences.h"
 #include "print.h"
 #include "rcfile.h"
-#include "search.h"
 #include "search-and-run.h"
+#include "search.h"
 #include "slideshow.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
@@ -66,9 +69,6 @@
 #include "view-dir.h"
 #include "view-file.h"
 #include "window.h"
-
-#include <sys/wait.h>
-#include "keymap-template.h"
 
 enum {
 	MENU_EDIT_ACTION_OFFSET = 16,

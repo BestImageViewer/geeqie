@@ -25,8 +25,8 @@
 #include "histogram.h" /* HCHAN_RGB */
 #include "image-overlay.h" /* OSD_SHOW_NOTHING */
 #include "intl.h"
-#include "layout.h"
 #include "layout-image.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
 #include "rcfile.h"

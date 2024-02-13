@@ -42,11 +42,11 @@
 #define HAVE_EXIV2_ERROR_CODE
 #endif
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #if EXIV2_TEST_VERSION(0,27,0)
 #define EXV_PACKAGE "exiv2"

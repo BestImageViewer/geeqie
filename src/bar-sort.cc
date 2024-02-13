@@ -23,16 +23,16 @@
 
 #include <config.h>
 
-#include "collect.h"
 #include "collect-io.h"
+#include "collect.h"
 #include "compat.h"
 #include "debug.h"
 #include "editors.h"
 #include "filedata.h"
 #include "history-list.h"
 #include "intl.h"
-#include "layout.h"
 #include "layout-image.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
 #include "rcfile.h"

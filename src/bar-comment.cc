@@ -26,14 +26,14 @@
 #include "bar.h"
 #include "compat.h"
 #include "debug.h"
+#include "filedata.h"
 #include "intl.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "metadata.h"
-#include "filedata.h"
+#include "rcfile.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
-#include "rcfile.h"
-#include "layout.h"
 
 #ifdef HAVE_SPELL
 #include <gspell/gspell.h>

@@ -39,8 +39,8 @@
 #define GQ_BUILD 1
 
 #ifdef GQ_BUILD
-#include "pixbuf-util.h"
 #include "exif.h"
+#include "pixbuf-util.h"
 #else
 enum ExifOrientationType {
 	EXIF_ORIENTATION_UNKNOWN	= 0,

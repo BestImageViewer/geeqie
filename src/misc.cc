@@ -28,8 +28,8 @@
 #include "debug.h"
 #include "filedata.h"
 #include "intl.h"
-#include "main.h"
 #include "main-defines.h"
+#include "main.h"
 #include "options.h"
 #include "ui-fileops.h"
 

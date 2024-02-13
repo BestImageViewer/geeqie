@@ -24,10 +24,10 @@
 #include <config.h>
 
 #include "collect.h"
-#include "image.h"
 #include "filedata.h"
-#include "layout.h"
+#include "image.h"
 #include "layout-image.h"
+#include "layout.h"
 
 static void slideshow_timer_stop(SlideShowData *ss);
 

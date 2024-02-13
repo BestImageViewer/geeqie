@@ -33,13 +33,13 @@
 
 #include "compat.h"
 #include "debug.h"
-#include "main-defines.h"
-#include "md5-util.h"
 #include "filefilter.h"
 #include "intl.h"
 #include "layout.h"
-#include "utilops.h"
+#include "main-defines.h"
+#include "md5-util.h"
 #include "secure-save.h"
+#include "utilops.h"
 
 /*
  *-----------------------------------------------------------------------------

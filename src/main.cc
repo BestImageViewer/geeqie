@@ -21,48 +21,12 @@
 
 #include "main.h"
 
-#include <csignal>
 #include <sys/mman.h>
 
-#ifdef G_OS_UNIX
-#include <pwd.h>
-#endif
 #include <clocale>
+#include <csignal>
 
 #include <config.h>
-
-#ifdef HAVE_DEVELOPER
-#include "backward.h"
-#endif
-
-#include "cache.h"
-#include "collect.h"
-#include "collect-io.h"
-#include "compat.h"
-#include "debug.h"
-#include "filedata.h"
-#include "filefilter.h"
-#include "history-list.h"
-#include "image.h"
-#include "img-view.h"
-#include "intl.h"
-#include "layout-image.h"
-#include "layout-util.h"
-#include "main-defines.h"
-#include "misc.h"
-#include "rcfile.h"
-#include "remote.h"
-#include "secure-save.h"
-#include "ui-fileops.h"
-#include "ui-utildlg.h"
-#include "cache-maint.h"
-#include "thumb.h"
-#include "metadata.h"
-#include "exif.h"
-#include "histogram.h"
-#include "pixbuf-util.h"
-#include "glua.h"
-#include "whereami.h"
 
 #ifdef HAVE_CLUTTER
 #include <clutter-gtk/clutter-gtk.h>
@@ -71,6 +35,43 @@
 #ifdef HAVE_EXECINFO_H
 #include <execinfo.h>
 #endif
+
+#ifdef G_OS_UNIX
+#include <pwd.h>
+#endif
+
+#ifdef HAVE_DEVELOPER
+#include "backward.h"
+#endif
+
+#include "cache-maint.h"
+#include "cache.h"
+#include "collect-io.h"
+#include "collect.h"
+#include "compat.h"
+#include "debug.h"
+#include "exif.h"
+#include "filedata.h"
+#include "filefilter.h"
+#include "glua.h"
+#include "histogram.h"
+#include "history-list.h"
+#include "image.h"
+#include "img-view.h"
+#include "intl.h"
+#include "layout-image.h"
+#include "layout-util.h"
+#include "main-defines.h"
+#include "metadata.h"
+#include "misc.h"
+#include "pixbuf-util.h"
+#include "rcfile.h"
+#include "remote.h"
+#include "secure-save.h"
+#include "thumb.h"
+#include "ui-fileops.h"
+#include "ui-utildlg.h"
+#include "whereami.h"
 
 gboolean thumb_format_changed = FALSE;
 static RemoteConnection *remote_connection = nullptr;

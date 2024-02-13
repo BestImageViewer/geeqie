@@ -28,16 +28,16 @@
 #include "dnd.h"
 #include "img-view.h"
 #include "intl.h"
-#include "layout.h"
 #include "layout-image.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "metadata.h"
 #include "misc.h"
-#include "utilops.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
+#include "utilops.h"
 #include "view-file.h"
 
 #include <vector>

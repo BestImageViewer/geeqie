@@ -24,14 +24,14 @@
 #include <config.h>
 
 #include "compat.h"
+#include "editors.h"
 #include "intl.h"
 #include "layout-util.h"
 #include "main-defines.h"
-#include "ui-fileops.h"
-#include "ui-misc.h"
 #include "pixbuf-util.h"
+#include "ui-fileops.h"
 #include "ui-menu.h"
-#include "editors.h"
+#include "ui-misc.h"
 
 /** Implements the user-definable toolbar function
  * Called from the Preferences/toolbar tab

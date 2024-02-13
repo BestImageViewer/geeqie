@@ -23,19 +23,19 @@
 
 #include <config.h>
 
-#include "filefilter.h"
 #include "cache.h"
 #include "debug.h"
-#include "intl.h"
-#include "main.h"
-#include "main-defines.h"
-#include "options.h"
-#include "thumb-standard.h"
-#include "ui-fileops.h"
-#include "metadata.h"
-#include "trash.h"
+#include "filefilter.h"
 #include "histogram.h"
+#include "intl.h"
+#include "main-defines.h"
+#include "main.h"
+#include "metadata.h"
+#include "options.h"
 #include "secure-save.h"
+#include "thumb-standard.h"
+#include "trash.h"
+#include "ui-fileops.h"
 
 #include "exif.h"
 #include "misc.h"

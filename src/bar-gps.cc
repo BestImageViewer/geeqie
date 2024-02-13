@@ -32,19 +32,19 @@
 #include "filedata.h"
 #include "intl.h"
 #include "layout.h"
-#include "metadata.h"
 #include "main-defines.h"
 #include "menu.h"
+#include "metadata.h"
 #include "misc.h"
 #include "rcfile.h"
 #include "thumb.h"
 #include "ui-menu.h"
-#include "uri-utils.h"
 #include "ui-utildlg.h"
+#include "uri-utils.h"
 
-#include <clutter-gtk/clutter-gtk.h>
-#include <champlain/champlain.h>
 #include <champlain-gtk/champlain-gtk.h>
+#include <champlain/champlain.h>
+#include <clutter-gtk/clutter-gtk.h>
 
 #define MARKER_COLOUR 0x00, 0x00, 0xff, 0xff
 #define TEXT_COLOUR 0x00, 0x00, 0x00, 0xff

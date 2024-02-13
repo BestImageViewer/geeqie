@@ -32,8 +32,8 @@
 #include "options.h"
 #include "osd.h"
 #include "pixbuf-util.h"
-#include "ui-misc.h"
 #include "ui-fileops.h"
+#include "ui-misc.h"
 
 #define PRINT_SETTINGS "print_settings" // filename save printer settings
 #define PAGE_SETUP "page_setup" // filename save page setup

@@ -24,8 +24,8 @@
 #include <cstring>
 
 #include <dirent.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #include <config.h>
 

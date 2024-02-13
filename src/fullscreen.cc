@@ -29,8 +29,8 @@
 
 #include "compat.h"
 #include "debug.h"
-#include "image.h"
 #include "image-load.h"
+#include "image.h"
 #include "intl.h"
 #include "misc.h"
 #include "options.h"

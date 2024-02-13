@@ -24,8 +24,8 @@
 #include <config.h>
 
 #include "cache-maint.h"
-#include "collect.h"
 #include "collect-io.h"
+#include "collect.h"
 #include "compat.h"
 #include "debug.h"
 #include "exif.h"
@@ -36,15 +36,15 @@
 #include "intl.h"
 #include "layout-image.h"
 #include "layout-util.h"
-#include "main.h"
 #include "main-defines.h"
+#include "main.h"
 #include "misc.h"
 #include "pixbuf-renderer.h"
+#include "rcfile.h"
 #include "slideshow.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "utilops.h"
-#include "rcfile.h"
 #include "view-file.h"
 
 #include <csignal>

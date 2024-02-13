@@ -203,6 +203,8 @@ Headers:
 #ifndef _FILENAME_H
 ```
 
+Use [Names and Order of Includes](https://google.github.io/styleguide/cppguide.html#Names_and_Order_of_Includes) for headers include order.
+
 Use spaces around every operator (except `.`, `->`, `++` and `--`).  
 Unary operator `*` and `&` are missing the space from right, (and also unary `-`).
 

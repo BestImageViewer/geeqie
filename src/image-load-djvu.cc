@@ -24,9 +24,9 @@
 
 #ifdef HAVE_DJVU
 
+#include <cairo.h>
 #include <libdjvu/ddjvuapi.h>
 #include <libdjvu/miniexp.h>
-#include <cairo.h>
 
 #include "image-load.h"
 

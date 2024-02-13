@@ -24,8 +24,8 @@
 
 #include "debug.h"
 #include "intl.h"
-#include "main.h"
 #include "main-defines.h"
+#include "main.h"
 #include "misc.h"
 #include "options.h"
 #include "pixbuf-util.h"

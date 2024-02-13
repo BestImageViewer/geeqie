@@ -23,26 +23,26 @@
 
 #include <config.h>
 
-#include "bar.h"
 #include "bar-comment.h"
 #include "bar-exif.h"
+#include "bar-gps.h"
 #include "bar-histogram.h"
 #include "bar-keywords.h"
 #include "bar-rating.h"
 #include "bar-sort.h"
+#include "bar.h"
 #include "debug.h"
+#include "dupe.h"
 #include "editors.h"
 #include "filefilter.h"
 #include "intl.h"
+#include "layout-util.h"
 #include "main-defines.h"
+#include "metadata.h"
 #include "pixbuf-renderer.h"
 #include "secure-save.h"
 #include "slideshow.h"
 #include "ui-fileops.h"
-#include "layout-util.h"
-#include "metadata.h"
-#include "bar-gps.h"
-#include "dupe.h"
 #include "ui-utildlg.h"
 
 /*
