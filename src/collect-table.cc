@@ -2510,9 +2510,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 	gchar *display_text = nullptr;
 	gchar *star_rating = nullptr;
 	GdkRGBA color_bg;
-	GdkRGBA color_bg_style;
 	GdkRGBA color_fg;
-	GdkRGBA color_fg_style;
 	GList *list;
 	GtkStyle *style;
 
@@ -2532,22 +2530,13 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 	style = gtk_widget_get_style(ct->listview);
 	if (info && (info->flag_mask & SELECTION_SELECTED) )
 		{
-		convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_SELECTED], &color_fg_style);
-		convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_SELECTED], &color_bg_style);
-
-		memcpy(&color_fg, &color_fg_style, sizeof(color_fg));
-		memcpy(&color_bg, &color_bg_style, sizeof(color_bg));
+		convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_SELECTED], &color_fg);
+		convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_SELECTED], &color_bg);
 		}
 	else
 		{
-		convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_NORMAL], &color_fg_style);
-		convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL], &color_bg_style);
-
-		memcpy(&color_fg, &color_fg_style, sizeof(color_fg));
-		memcpy(&color_bg, &color_bg_style, sizeof(color_bg));
-
-		memcpy(&color_fg, &color_fg_style, sizeof(color_fg));
-		memcpy(&color_bg, &color_bg_style, sizeof(color_bg));
+		convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_NORMAL], &color_fg);
+		convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL], &color_bg);
 		}
 
 	if (info && (info->flag_mask & SELECTION_PRELIGHT))

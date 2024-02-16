@@ -1176,7 +1176,6 @@ void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *,
 static GdkRGBA *vd_color_shifted(GtkWidget *widget)
 {
 	static GdkRGBA color;
-	static GdkRGBA color_style;
 	static GtkWidget *done = nullptr;
 
 #ifdef HAVE_GTK4
@@ -1187,9 +1186,7 @@ static GdkRGBA *vd_color_shifted(GtkWidget *widget)
 		GtkStyleContext *style_context;
 
 		style_context = gtk_widget_get_style_context(widget);
-		gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &color_style);
-
-		memcpy(&color, &color_style, sizeof(color_style));
+		gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &color);
 
 		shift_color(&color, -1, 0);
 		done = widget;

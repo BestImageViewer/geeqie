@@ -2100,8 +2100,6 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 		gchar *name_sidecars = nullptr;
 		GdkRGBA color_bg;
 		GdkRGBA color_fg;
-		GdkRGBA color_bg_style;
-		GdkRGBA color_fg_style;
 		GtkStateType state = GTK_STATE_NORMAL;
 		GtkStyle *style;
 
@@ -2158,11 +2156,8 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 			state = GTK_STATE_SELECTED;
 			}
 
-		convert_gdkcolor_to_gdkrgba(&style->text[state], &color_fg_style);
-		convert_gdkcolor_to_gdkrgba(&style->base[state], &color_bg_style);
-
-		memcpy(&color_fg, &color_fg_style, sizeof(color_fg));
-		memcpy(&color_bg, &color_bg_style, sizeof(color_bg));
+		convert_gdkcolor_to_gdkrgba(&style->text[state], &color_fg);
+		convert_gdkcolor_to_gdkrgba(&style->base[state], &color_bg);
 
 		if (fd->selected & SELECTION_PRELIGHT)
 			{

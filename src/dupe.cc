@@ -3997,7 +3997,6 @@ void cell_renderer_height_override(GtkCellRenderer *renderer)
 static GdkRGBA *dupe_listview_color_shifted(GtkWidget *widget)
 {
 	static GdkRGBA color;
-	static GdkRGBA color_style;
 	static GtkWidget *done = nullptr;
 
 	if (done != widget)
@@ -4005,9 +4004,8 @@ static GdkRGBA *dupe_listview_color_shifted(GtkWidget *widget)
 		GtkStyle *style;
 
 		style = gtk_widget_get_style(widget);
-		convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL], &color_style);
+		convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL], &color);
 
-		memcpy(&color, &color_style, sizeof(color));
 		shift_color(&color, -1, 0);
 		done = widget;
 		}
