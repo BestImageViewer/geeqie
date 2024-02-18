@@ -275,7 +275,7 @@ else
 endif
 
 exiv2_dep = []
-req_version = '>=0.11'
+req_version = '>=0.18'
 option = get_option('exiv2')
 if not option.disabled()
     exiv2_dep = dependency('exiv2', version : req_version, required : get_option('exiv2'))
