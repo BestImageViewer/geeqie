@@ -270,7 +270,7 @@ static void set_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 }
 
 
-static gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsize count, GError **error)
+gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsize count, GError **error)
 {
 	auto lj = static_cast<ImageLoaderJpeg *>(loader);
 	struct jpeg_decompress_struct cinfo;

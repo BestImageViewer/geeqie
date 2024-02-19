@@ -23,12 +23,12 @@
 
 #include <config.h>
 
-#if HAVE_JPEG
+#if HAVE_JPEG && !HAVE_RAW
 struct ImageLoaderBackend;
 
 void image_loader_backend_set_cr3(ImageLoaderBackend *funcs);
 #endif
 
-#endif
+#endif // IMAGE_LOAD_CR3_H
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
