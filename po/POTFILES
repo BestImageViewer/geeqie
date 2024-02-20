@@ -6,7 +6,6 @@ plugins/image-crop/org.geeqie.image-crop.desktop.in
 plugins/open-with/org.geeqie.open-with.desktop.in
 plugins/org.geeqie.template.desktop.in
 plugins/random-image/org.geeqie.random-image.desktop.in
-plugins/refresh-thumbnail/org.geeqie.refresh-thumbnail.desktop.in
 plugins/resize-image/org.geeqie.resize-image.desktop.in
 plugins/rotate/org.geeqie.rotate.desktop.in
 plugins/symlink/org.geeqie.symlink.desktop.in
