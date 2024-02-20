@@ -647,7 +647,7 @@ static void image_loader_stop_loader(ImageLoader *il)
 
 static void image_loader_setup_loader(ImageLoader *il)
 {
-#if defined HAVE_TIFF || defined HAVE_PDF || defined HAVE_HEIF || defined HAVE_DJVU
+#if HAVE_TIFF || HAVE_PDF || HAVE_HEIF || HAVE_DJVU
 	gchar *format;
 #endif
 
@@ -915,7 +915,7 @@ static gboolean image_loader_continue(ImageLoader *il)
 
 static gboolean image_loader_begin(ImageLoader *il)
 {
-#if defined HAVE_TIFF || defined HAVE_PDF || defined HAVE_HEIF || defined HAVE_DJVU
+#if HAVE_TIFF || HAVE_PDF || HAVE_HEIF || HAVE_DJVU
 	gchar *format;
 #endif
 	gssize b;

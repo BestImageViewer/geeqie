@@ -250,7 +250,7 @@ secure_close(SecureSaveInfo *ssi)
 	 * fclose() (which call fflush() again, but the first one is needed since
 	 * it doesn't make much sense to flush kernel buffers and then libc buffers,
 	 * while closing file releases file descriptor we need to call fsync(). */
-#if defined(HAVE_FFLUSH) || defined(HAVE_FSYNC)
+#if HAVE_FFLUSH || HAVE_FSYNC
 	if (ssi->secure_save) {
 		gboolean fail = FALSE;
 
