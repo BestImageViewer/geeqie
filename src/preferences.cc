@@ -2339,7 +2339,7 @@ static void config_tab_image(GtkWidget *notebook)
 	gtk_widget_set_tooltip_text(GTK_WIDGET(hbox), _("Enable this to allow Geeqie to increase the image size for images that are smaller than the current view area when the zoom is set to \"Fit image to window\". This value sets the maximum expansion permitted in percent i.e. 100% is full-size."));
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	ct_button = pref_checkbox_new_int(hbox, _("Virtual window size (% of actual window):"),
+	ct_button = pref_checkbox_new_int(hbox, _("Virtual window size (%% of actual window):"),
 					  options->image.limit_autofit_size, &c_options->image.limit_autofit_size);
 	spin = pref_spin_new_int(hbox, nullptr, nullptr,
 				 10, 150, 1,
