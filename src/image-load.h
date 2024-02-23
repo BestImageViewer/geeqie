@@ -36,8 +36,7 @@ using ImageLoaderBackendCbAreaUpdated = void (*)(gpointer, guint, guint, guint, 
 
 using ImageLoaderBackendFuncLoaderNew = gpointer (*)(ImageLoaderBackendCbAreaUpdated, ImageLoaderBackendCbSize, ImageLoaderBackendCbAreaPrepared, gpointer);
 using ImageLoaderBackendFuncSetSize = void (*)(gpointer, int, int);
-using ImageLoaderBackendFuncLoad = gboolean (*)(gpointer, const guchar *, gsize, GError **); /* optional, load whole image at once */
-using ImageLoaderBackendFuncWrite = gboolean (*)(gpointer, const guchar *, gsize, GError **);
+using ImageLoaderBackendFuncWrite = gboolean (*)(gpointer, const guchar *, gsize &, gsize, GError **);
 using ImageLoaderBackendFuncGetPixbuf = GdkPixbuf *(*)(gpointer);
 using ImageLoaderBackendFuncClose = gboolean (*)(gpointer, GError **);
 using ImageLoaderBackendFuncAbort = void (*)(gpointer);
@@ -51,7 +50,6 @@ struct ImageLoaderBackend
 {
 	ImageLoaderBackendFuncLoaderNew loader_new;
 	ImageLoaderBackendFuncSetSize set_size;
-	ImageLoaderBackendFuncLoad load;
 	ImageLoaderBackendFuncWrite write;
 	ImageLoaderBackendFuncGetPixbuf get_pixbuf;
 	ImageLoaderBackendFuncClose close;

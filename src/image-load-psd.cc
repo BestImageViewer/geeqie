@@ -59,6 +59,9 @@
 #include "debug.h"
 #include "image-load.h"
 
+namespace
+{
+
 struct ImageLoaderPSD {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -145,14 +148,12 @@ struct PsdContext
 };
 
 
-static guint16
-read_uint16 (const guchar* buf)
+guint16 read_uint16 (const guchar* buf)
 {
 	return (buf[0] << 8) | buf[1];
 }
 
-static guint32
-read_uint32 (const guchar* buf)
+guint32 read_uint32 (const guchar* buf)
 {
 	return (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
 }
@@ -163,8 +164,7 @@ read_uint32 (const guchar* buf)
  *
  * str is expected to be at least PSD_HEADER_SIZE long
  */
-static PsdHeader
-psd_parse_header (guchar* str)
+PsdHeader psd_parse_header (guchar* str)
 {
 	PsdHeader hd;
 
@@ -185,7 +185,7 @@ psd_parse_header (guchar* str)
  * Returns true if there were enough bytes and false otherwise
  * (which means we need to call feed_buffer again)
  */
-static gboolean
+gboolean
 feed_buffer (guchar*        buffer,
              guint*         bytes_read,
              const guchar** data,
@@ -209,8 +209,7 @@ feed_buffer (guchar*        buffer,
  * Returns true when finishes consuming block data, otherwise false
  * (false means we need to call skip_block again)
  */
-static gboolean
-skip_block (PsdContext* context, const guchar** data, guint* size)
+gboolean skip_block (PsdContext* context, const guchar** data, guint* size)
 {
 	if (!context->bytes_to_skip_known) {
 		context->bytes_read = 0;
@@ -238,8 +237,7 @@ skip_block (PsdContext* context, const guchar** data, guint* size)
 /*
  * Decodes RLE-compressed data
  */
-static void
-decompress_line(const guchar* src, guint line_length, guchar* dest)
+void decompress_line(const guchar* src, guint line_length, guchar* dest)
 {
 	guint16 bytes_read = 0;
 	int k;
@@ -281,15 +279,14 @@ decompress_line(const guchar* src, guint line_length, guchar* dest)
 		}
 }
 
-static void
-reset_context_buffer(PsdContext* ctx)
+void reset_context_buffer(PsdContext* ctx)
 {
 	ctx->bytes_read = 0;
 	ctx->bytes_to_skip = 0;
 	ctx->bytes_to_skip_known = FALSE;
 }
 
-static void free_context(PsdContext *ctx)
+void free_context(PsdContext *ctx)
 {
 	g_free(ctx->buffer);
 	g_free(ctx->lines_lengths);
@@ -302,7 +299,7 @@ static void free_context(PsdContext *ctx)
 	g_free(ctx);
 }
 
-static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize count, GError **)
+gboolean image_loader_psd_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	auto ctx = g_new0(PsdContext, 1);
@@ -536,6 +533,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 		ld->area_updated_cb(loader, 0, 0, ctx->width, ctx->height, ld->data);
 		free_context(ctx);
 
+		chunk_size = count;
 		return TRUE;
 	}
 
@@ -545,7 +543,7 @@ static gboolean image_loader_psd_load(gpointer loader, const guchar *buf, gsize 
 
 /* ------- Geeqie ------------ */
 
-static gpointer image_loader_psd_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_psd_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderPSD, 1);
 	loader->area_updated_cb = area_updated_cb;
@@ -555,54 +553,55 @@ static gpointer image_loader_psd_new(ImageLoaderBackendCbAreaUpdated area_update
 	return loader;
 }
 
-static void image_loader_psd_set_size(gpointer loader, int width, int height)
+void image_loader_psd_set_size(gpointer loader, int width, int height)
 {
 	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_psd_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_psd_get_pixbuf(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_psd_get_format_name(gpointer)
+gchar* image_loader_psd_get_format_name(gpointer)
 {
 	return g_strdup("psd");
 }
 
-static gchar** image_loader_psd_get_format_mime_types(gpointer)
+gchar** image_loader_psd_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"application/psd", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_psd_close(gpointer, GError **)
+gboolean image_loader_psd_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_psd_abort(gpointer loader)
+void image_loader_psd_abort(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	ld->abort = TRUE;
 }
 
-static void image_loader_psd_free(gpointer loader)
+void image_loader_psd_free(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
 
+} // namespace
+
 void image_loader_backend_set_psd(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_psd_new;
 	funcs->set_size = image_loader_psd_set_size;
-	funcs->load = image_loader_psd_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_psd_write;
 	funcs->get_pixbuf = image_loader_psd_get_pixbuf;
 	funcs->close = image_loader_psd_close;
 	funcs->abort = image_loader_psd_abort;

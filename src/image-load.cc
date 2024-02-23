@@ -878,7 +878,6 @@ static void image_loader_error(ImageLoader *il)
 
 static gboolean image_loader_continue(ImageLoader *il)
 {
-	gint b;
 	gint c;
 
 	if (!il) return G_SOURCE_REMOVE;
@@ -886,15 +885,21 @@ static gboolean image_loader_continue(ImageLoader *il)
 	c = il->idle_read_loop_count ? il->idle_read_loop_count : 1;
 	while (c > 0 && !image_loader_get_stopping(il))
 		{
-		b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
-
-		if (b == 0)
+		if (il->bytes_total == il->bytes_read)
 			{
 			image_loader_done(il);
 			return G_SOURCE_REMOVE;
 			}
 
-		if (b < 0 || (b > 0 && !il->backend.write(il->loader, il->mapped_file + il->bytes_read, b, &il->error)))
+		if (il->bytes_total < il->bytes_read)
+			{
+			image_loader_error(il);
+			return G_SOURCE_REMOVE;
+			}
+
+		gsize b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
+
+		if (!il->backend.write(il->loader, il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
 			{
 			image_loader_error(il);
 			return G_SOURCE_REMOVE;
@@ -918,25 +923,17 @@ static gboolean image_loader_begin(ImageLoader *il)
 #if HAVE_TIFF || HAVE_PDF || HAVE_HEIF || HAVE_DJVU
 	gchar *format;
 #endif
-	gssize b;
 
 	if (il->pixbuf) return FALSE;
 
-	b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
-	if (b < 1) return FALSE;
+	if (il->bytes_total <= il->bytes_read) return FALSE;
+
+	gsize b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
 
 	image_loader_setup_loader(il);
 
 	g_assert(il->bytes_read == 0);
-	if (il->backend.load) {
-		b = il->bytes_total;
-		if (!il->backend.load(il->loader, il->mapped_file, b, &il->error))
-			{
-			image_loader_stop_loader(il);
-			return FALSE;
-			}
-	}
-	else if (!il->backend.write(il->loader, il->mapped_file, b, &il->error))
+	if (!il->backend.write(il->loader, il->mapped_file, b, il->bytes_total, &il->error))
 		{
 		image_loader_stop_loader(il);
 		return FALSE;
@@ -984,8 +981,14 @@ static gboolean image_loader_begin(ImageLoader *il)
 	/* read until size is known */
 	while (il->loader && !il->backend.get_pixbuf(il->loader) && b > 0 && !image_loader_get_stopping(il))
 		{
+		if (il->bytes_total < il->bytes_read)
+			{
+			image_loader_stop_loader(il);
+			return FALSE;
+			}
+
 		b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
-		if (b < 0 || (b > 0 && !il->backend.write(il->loader, il->mapped_file + il->bytes_read, b, &il->error)))
+		if (b > 0 && !il->backend.write(il->loader, il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
 			{
 			image_loader_stop_loader(il);
 			return FALSE;

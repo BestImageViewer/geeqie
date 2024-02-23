@@ -28,8 +28,10 @@
 #include "filedata.h"
 #include "image-load.h"
 
+namespace
+{
 
-static gchar* image_loader_gdk_get_format_name(gpointer loader)
+gchar* image_loader_gdk_get_format_name(gpointer loader)
 {
 	GdkPixbufFormat *format;
 
@@ -42,12 +44,12 @@ static gchar* image_loader_gdk_get_format_name(gpointer loader)
 	return nullptr;
 }
 
-static gchar** image_loader_gdk_get_format_mime_types(gpointer loader)
+gchar** image_loader_gdk_get_format_mime_types(gpointer loader)
 {
 	return gdk_pixbuf_format_get_mime_types(gdk_pixbuf_loader_get_format(GDK_PIXBUF_LOADER(loader)));
 }
 
-static gpointer image_loader_gdk_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_gdk_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
 	GdkPixbufLoader *loader;
@@ -69,21 +71,27 @@ static gpointer image_loader_gdk_new(ImageLoaderBackendCbAreaUpdated area_update
 	return loader;
 }
 
-static void image_loader_gdk_abort(gpointer)
+gboolean image_loader_gdk_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize, GError **error)
+{
+	return gdk_pixbuf_loader_write(GDK_PIXBUF_LOADER(loader), buf, chunk_size, error);
+}
+
+void image_loader_gdk_abort(gpointer)
 {
 }
 
-static void image_loader_gdk_free(gpointer loader)
+void image_loader_gdk_free(gpointer loader)
 {
 	g_object_unref(G_OBJECT(loader));
 }
+
+} // namespace
 
 void image_loader_backend_set_default(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_gdk_new;
 	funcs->set_size = reinterpret_cast<ImageLoaderBackendFuncSetSize>(gdk_pixbuf_loader_set_size);
-	funcs->load = nullptr;
-	funcs->write = reinterpret_cast<ImageLoaderBackendFuncWrite>(gdk_pixbuf_loader_write);
+	funcs->write = image_loader_gdk_write;
 	funcs->get_pixbuf = reinterpret_cast<ImageLoaderBackendFuncGetPixbuf>(gdk_pixbuf_loader_get_pixbuf);
 	funcs->close = reinterpret_cast<ImageLoaderBackendFuncClose>(gdk_pixbuf_loader_close);
 	funcs->abort = image_loader_gdk_abort;
@@ -92,6 +100,5 @@ void image_loader_backend_set_default(ImageLoaderBackend *funcs)
 	funcs->get_format_name = image_loader_gdk_get_format_name;
 	funcs->get_format_mime_types = image_loader_gdk_get_format_mime_types;
 }
-
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

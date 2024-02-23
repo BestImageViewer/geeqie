@@ -35,6 +35,9 @@
 #include "options.h"
 #include "ui-fileops.h"
 
+namespace
+{
+
 struct ImageLoaderCOLLECTION {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -46,7 +49,7 @@ struct ImageLoaderCOLLECTION {
 	gboolean abort;
 };
 
-static gboolean image_loader_collection_load(gpointer loader, const guchar *, gsize, GError **)
+gboolean image_loader_collection_write(gpointer loader, const guchar *, gsize &chunk_size, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	auto il = static_cast<ImageLoader *>(ld->data);
@@ -116,10 +119,11 @@ static gboolean image_loader_collection_load(gpointer loader, const guchar *, gs
 			g_string_free(file_names, TRUE);
 			}
 		}
+	chunk_size = count;
 	return ret;
 }
 
-static gpointer image_loader_collection_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_collection_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderCOLLECTION, 1);
 	loader->area_updated_cb = area_updated_cb;
@@ -129,53 +133,55 @@ static gpointer image_loader_collection_new(ImageLoaderBackendCbAreaUpdated area
 	return loader;
 }
 
-static void image_loader_collection_set_size(gpointer loader, int width, int height)
+void image_loader_collection_set_size(gpointer loader, int width, int height)
 {
 	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_collection_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_collection_get_pixbuf(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_collection_get_format_name(gpointer)
+gchar* image_loader_collection_get_format_name(gpointer)
 {
 	return g_strdup("collection");
 }
-static gchar** image_loader_collection_get_format_mime_types(gpointer)
+
+gchar** image_loader_collection_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/png", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_collection_close(gpointer, GError **)
+gboolean image_loader_collection_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_collection_abort(gpointer loader)
+void image_loader_collection_abort(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	ld->abort = TRUE;
 }
 
-static void image_loader_collection_free(gpointer loader)
+void image_loader_collection_free(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderCOLLECTION *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
 
+} // namespace
+
 void image_loader_backend_set_collection(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_collection_new;
 	funcs->set_size = image_loader_collection_set_size;
-	funcs->load = image_loader_collection_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_collection_write;
 	funcs->get_pixbuf = image_loader_collection_get_pixbuf;
 	funcs->close = image_loader_collection_close;
 	funcs->abort = image_loader_collection_abort;

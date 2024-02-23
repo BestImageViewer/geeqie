@@ -44,6 +44,9 @@
 #include "debug.h"
 #include "image-load.h"
 
+namespace
+{
+
 struct ImageLoaderTiff {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -64,13 +67,12 @@ struct ImageLoaderTiff {
 	gint page_total;
 };
 
-static void free_buffer (guchar *pixels, gpointer)
+void free_buffer (guchar *pixels, gpointer)
 {
 	g_free (pixels);
 }
 
-static tsize_t
-tiff_load_read (thandle_t handle, tdata_t buf, tsize_t size)
+tsize_t tiff_load_read (thandle_t handle, tdata_t buf, tsize_t size)
 {
 	auto context = static_cast<ImageLoaderTiff *>(handle);
 
@@ -82,14 +84,12 @@ tiff_load_read (thandle_t handle, tdata_t buf, tsize_t size)
 	return size;
 }
 
-static tsize_t
-tiff_load_write (thandle_t, tdata_t, tsize_t)
+tsize_t tiff_load_write (thandle_t, tdata_t, tsize_t)
 {
 	return -1;
 }
 
-static toff_t
-tiff_load_seek (thandle_t handle, toff_t offset, int whence)
+toff_t tiff_load_seek (thandle_t handle, toff_t offset, int whence)
 {
 	auto context = static_cast<ImageLoaderTiff *>(handle);
 
@@ -117,21 +117,18 @@ tiff_load_seek (thandle_t handle, toff_t offset, int whence)
 	return context->pos;
 }
 
-static int
-tiff_load_close (thandle_t)
+int tiff_load_close (thandle_t)
 {
 	return 0;
 }
 
-static toff_t
-tiff_load_size (thandle_t handle)
+toff_t tiff_load_size (thandle_t handle)
 {
 	auto context = static_cast<ImageLoaderTiff *>(handle);
 	return context->used;
 }
 
-static int
-tiff_load_map_file (thandle_t handle, tdata_t *buf, toff_t *size)
+int tiff_load_map_file (thandle_t handle, tdata_t *buf, toff_t *size)
 {
 	auto context = static_cast<ImageLoaderTiff *>(handle);
 
@@ -141,12 +138,11 @@ tiff_load_map_file (thandle_t handle, tdata_t *buf, toff_t *size)
 	return 0;
 }
 
-static void
-tiff_load_unmap_file (thandle_t, tdata_t, toff_t)
+void tiff_load_unmap_file (thandle_t, tdata_t, toff_t)
 {
 }
 
-static gboolean image_loader_tiff_load (gpointer loader, const guchar *buf, gsize count, GError **)
+gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	auto lt = static_cast<ImageLoaderTiff *>(loader);
 
@@ -335,11 +331,12 @@ static gboolean image_loader_tiff_load (gpointer loader, const guchar *buf, gsiz
 		}
 	TIFFClose(tiff);
 
+	chunk_size = count;
 	return TRUE;
 }
 
 
-static gpointer image_loader_tiff_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_tiff_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderTiff, 1);
 
@@ -351,67 +348,69 @@ static gpointer image_loader_tiff_new(ImageLoaderBackendCbAreaUpdated area_updat
 }
 
 
-static void image_loader_tiff_set_size(gpointer loader, int width, int height)
+void image_loader_tiff_set_size(gpointer loader, int width, int height)
 {
 	auto lt = static_cast<ImageLoaderTiff *>(loader);
 	lt->requested_width = width;
 	lt->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_tiff_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_tiff_get_pixbuf(gpointer loader)
 {
 	auto lt = static_cast<ImageLoaderTiff *>(loader);
 	return lt->pixbuf;
 }
 
-static gchar* image_loader_tiff_get_format_name(gpointer)
+gchar* image_loader_tiff_get_format_name(gpointer)
 {
 	return g_strdup("tiff");
 }
-static gchar** image_loader_tiff_get_format_mime_types(gpointer)
+
+gchar** image_loader_tiff_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/tiff", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_tiff_close(gpointer, GError **)
+gboolean image_loader_tiff_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_tiff_abort(gpointer loader)
+void image_loader_tiff_abort(gpointer loader)
 {
 	auto lt = static_cast<ImageLoaderTiff *>(loader);
 	lt->abort = TRUE;
 }
 
-static void image_loader_tiff_free(gpointer loader)
+void image_loader_tiff_free(gpointer loader)
 {
 	auto lt = static_cast<ImageLoaderTiff *>(loader);
 	if (lt->pixbuf) g_object_unref(lt->pixbuf);
 	g_free(lt);
 }
 
-static void image_loader_tiff_set_page_num(gpointer loader, gint page_num)
+void image_loader_tiff_set_page_num(gpointer loader, gint page_num)
 {
 	auto lt = static_cast<ImageLoaderTiff *>(loader);
 
 	lt->page_num = page_num;
 }
 
-static gint image_loader_tiff_get_page_total(gpointer loader)
+gint image_loader_tiff_get_page_total(gpointer loader)
 {
 	auto lt = static_cast<ImageLoaderTiff *>(loader);
 
 	return lt->page_total;
 }
 
+} // namespace
+
 void image_loader_backend_set_tiff(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_tiff_new;
 	funcs->set_size = image_loader_tiff_set_size;
-	funcs->load = image_loader_tiff_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_tiff_write;
 	funcs->get_pixbuf = image_loader_tiff_get_pixbuf;
 	funcs->close = image_loader_tiff_close;
 	funcs->abort = image_loader_tiff_abort;
@@ -423,8 +422,6 @@ void image_loader_backend_set_tiff(ImageLoaderBackend *funcs)
 	funcs->set_page_num = image_loader_tiff_set_page_num;
 	funcs->get_page_total = image_loader_tiff_get_page_total;
 }
-
-
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

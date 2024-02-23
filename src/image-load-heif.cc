@@ -33,6 +33,9 @@
 #include "debug.h"
 #include "image-load.h"
 
+namespace
+{
+
 struct ImageLoaderHEIF {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -46,12 +49,12 @@ struct ImageLoaderHEIF {
 	gint page_total;
 };
 
-static void free_buffer(guchar *, gpointer data)
+void free_buffer(guchar *, gpointer data)
 {
 	heif_image_release(static_cast<const struct heif_image*>(data));
 }
 
-static gboolean image_loader_heif_load(gpointer loader, const guchar *buf, gsize count, GError **)
+gboolean image_loader_heif_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	struct heif_context* ctx;
@@ -113,10 +116,11 @@ static gboolean image_loader_heif_load(gpointer loader, const guchar *buf, gsize
 
 	heif_context_free(ctx);
 
+	chunk_size = count;
 	return TRUE;
 }
 
-static gpointer image_loader_heif_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_heif_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderHEIF, 1);
 	loader->area_updated_cb = area_updated_cb;
@@ -127,68 +131,69 @@ static gpointer image_loader_heif_new(ImageLoaderBackendCbAreaUpdated area_updat
 	return loader;
 }
 
-static void image_loader_heif_set_size(gpointer loader, int width, int height)
+void image_loader_heif_set_size(gpointer loader, int width, int height)
 {
 	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_heif_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_heif_get_pixbuf(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_heif_get_format_name(gpointer)
+gchar* image_loader_heif_get_format_name(gpointer)
 {
 	return g_strdup("heif");
 }
 
-static gchar** image_loader_heif_get_format_mime_types(gpointer)
+gchar** image_loader_heif_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/heic", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static void image_loader_heif_set_page_num(gpointer loader, gint page_num)
+void image_loader_heif_set_page_num(gpointer loader, gint page_num)
 {
 	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 
 	ld->page_num = page_num;
 }
 
-static gint image_loader_heif_get_page_total(gpointer loader)
+gint image_loader_heif_get_page_total(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 
 	return ld->page_total;
 }
 
-static gboolean image_loader_heif_close(gpointer, GError **)
+gboolean image_loader_heif_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_heif_abort(gpointer loader)
+void image_loader_heif_abort(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	ld->abort = TRUE;
 }
 
-static void image_loader_heif_free(gpointer loader)
+void image_loader_heif_free(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
 
+} // namespace
+
 void image_loader_backend_set_heif(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_heif_new;
 	funcs->set_size = image_loader_heif_set_size;
-	funcs->load = image_loader_heif_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_heif_write;
 	funcs->get_pixbuf = image_loader_heif_get_pixbuf;
 	funcs->close = image_loader_heif_close;
 	funcs->abort = image_loader_heif_abort;

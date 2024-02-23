@@ -70,6 +70,9 @@
 #include "debug.h"
 #include "image-load.h"
 
+namespace
+{
+
 struct ImageLoaderJPEGXL {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -81,12 +84,12 @@ struct ImageLoaderJPEGXL {
 	gboolean abort;
 };
 
-static void free_buffer(guchar *pixels, gpointer)
+void free_buffer(guchar *pixels, gpointer)
 {
 	g_free(pixels);
 }
 
-static uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, size_t &ysize, size_t &stride)
+uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, size_t &ysize, size_t &stride)
 {
 	std::unique_ptr<JxlDecoder, decltype(&JxlDecoderDestroy)> dec{JxlDecoderCreate(nullptr), JxlDecoderDestroy};
 	if (!dec)
@@ -169,7 +172,7 @@ static uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &x
 	return nullptr;
 }
 
-static gboolean image_loader_jpegxl_load(gpointer loader, const guchar *buf, gsize count, GError **)
+gboolean image_loader_jpegxl_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	gboolean ret = FALSE;
@@ -186,13 +189,14 @@ static gboolean image_loader_jpegxl_load(gpointer loader, const guchar *buf, gsi
 
 		ld->area_updated_cb(loader, 0, 0, xsize, ysize, ld->data);
 
+		chunk_size = count;
 		ret = TRUE;
 		}
 
 	return ret;
 }
 
-static gpointer image_loader_jpegxl_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_jpegxl_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderJPEGXL, 1);
 	loader->area_updated_cb = area_updated_cb;
@@ -202,54 +206,55 @@ static gpointer image_loader_jpegxl_new(ImageLoaderBackendCbAreaUpdated area_upd
 	return loader;
 }
 
-static void image_loader_jpegxl_set_size(gpointer loader, int width, int height)
+void image_loader_jpegxl_set_size(gpointer loader, int width, int height)
 {
 	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_jpegxl_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_jpegxl_get_pixbuf(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_jpegxl_get_format_name(gpointer)
+gchar* image_loader_jpegxl_get_format_name(gpointer)
 {
 	return g_strdup("jxl");
 }
 
-static gchar** image_loader_jpegxl_get_format_mime_types(gpointer)
+gchar** image_loader_jpegxl_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/jxl", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_jpegxl_close(gpointer, GError **)
+gboolean image_loader_jpegxl_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_jpegxl_abort(gpointer loader)
+void image_loader_jpegxl_abort(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	ld->abort = TRUE;
 }
 
-static void image_loader_jpegxl_free(gpointer loader)
+void image_loader_jpegxl_free(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderJPEGXL *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
 
+} // namespace
+
 void image_loader_backend_set_jpegxl(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_jpegxl_new;
 	funcs->set_size = image_loader_jpegxl_set_size;
-	funcs->load = image_loader_jpegxl_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_jpegxl_write;
 	funcs->get_pixbuf = image_loader_jpegxl_get_pixbuf;
 	funcs->close = image_loader_jpegxl_close;
 	funcs->abort = image_loader_jpegxl_abort;

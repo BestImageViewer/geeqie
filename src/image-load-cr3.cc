@@ -36,7 +36,7 @@
 namespace
 {
 
-gboolean image_loader_cr3_load(gpointer loader, const guchar *buf, gsize count, GError **error)
+gboolean image_loader_cr3_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **error)
 {
 	/** @FIXME Just start search at where full size jpeg should be,
 	 * then search through the file looking for a jpeg end-marker
@@ -78,7 +78,12 @@ gboolean image_loader_cr3_load(gpointer loader, const guchar *buf, gsize count, 
 		return FALSE;
 		}
 
-	return image_loader_jpeg_load(loader, buf + n + 12, i, error);
+	gboolean ret = image_loader_jpeg_write(loader, buf + n + 12, chunk_size, i, error);;
+	if (ret)
+		{
+		chunk_size = count;
+		}
+	return ret;
 }
 
 gchar* image_loader_cr3_get_format_name(gpointer)
@@ -98,7 +103,7 @@ void image_loader_backend_set_cr3(ImageLoaderBackend *funcs)
 {
 	image_loader_backend_set_jpeg(funcs);
 
-	funcs->load = image_loader_cr3_load;
+	funcs->write = image_loader_cr3_write;
 
 	funcs->get_format_name = image_loader_cr3_get_format_name;
 	funcs->get_format_mime_types = image_loader_cr3_get_format_mime_types;

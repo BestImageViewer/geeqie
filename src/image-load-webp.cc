@@ -31,6 +31,9 @@
 #include "debug.h"
 #include "image-load.h"
 
+namespace
+{
+
 using ImageLoaderWEBP = struct _ImageLoaderWEBP;
 struct _ImageLoaderWEBP {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
@@ -43,12 +46,12 @@ struct _ImageLoaderWEBP {
 	gboolean abort;
 };
 
-static void free_buffer(guchar *pixels, gpointer)
+void free_buffer(guchar *pixels, gpointer)
 {
 	g_free(pixels);
 }
 
-static gboolean image_loader_webp_load(gpointer loader, const guchar *buf, gsize count, GError **)
+gboolean image_loader_webp_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	auto *ld = (ImageLoaderWEBP *) loader;
 	guint8* data;
@@ -85,10 +88,11 @@ static gboolean image_loader_webp_load(gpointer loader, const guchar *buf, gsize
 
 	ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
 
+	chunk_size = count;
 	return TRUE;
 }
 
-static gpointer image_loader_webp_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_webp_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto *loader = g_new0(ImageLoaderWEBP, 1);
 	loader->area_updated_cb = area_updated_cb;
@@ -99,55 +103,56 @@ static gpointer image_loader_webp_new(ImageLoaderBackendCbAreaUpdated area_updat
 	return (gpointer) loader;
 }
 
-static void image_loader_webp_set_size(gpointer loader, int width, int height)
+void image_loader_webp_set_size(gpointer loader, int width, int height)
 {
 	auto *ld = (ImageLoaderWEBP *) loader;
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_webp_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_webp_get_pixbuf(gpointer loader)
 {
 	auto *ld = (ImageLoaderWEBP *) loader;
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_webp_get_format_name(gpointer)
+gchar* image_loader_webp_get_format_name(gpointer)
 {
 	return g_strdup("webp");
 }
 
-static gchar** image_loader_webp_get_format_mime_types(gpointer)
+gchar** image_loader_webp_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/webp", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_webp_close(gpointer, GError **)
+gboolean image_loader_webp_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_webp_abort(gpointer loader)
+void image_loader_webp_abort(gpointer loader)
 {
 	auto *ld = (ImageLoaderWEBP *) loader;
 	ld->abort = TRUE;
 }
 
-static void image_loader_webp_free(gpointer loader)
+void image_loader_webp_free(gpointer loader)
 {
 	auto *ld = (ImageLoaderWEBP *) loader;
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
 
+} // namespace
+
 void image_loader_backend_set_webp(ImageLoaderBackend *funcs)
 {
 DEBUG_0("        "     );
 	funcs->loader_new = image_loader_webp_new;
 	funcs->set_size = image_loader_webp_set_size;
-	funcs->load = image_loader_webp_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_webp_write;
 	funcs->get_pixbuf = image_loader_webp_get_pixbuf;
 	funcs->close = image_loader_webp_close;
 	funcs->abort = image_loader_webp_abort;

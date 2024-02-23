@@ -270,7 +270,7 @@ static void set_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 }
 
 
-gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsize count, GError **error)
+gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **error)
 {
 	auto lj = static_cast<ImageLoaderJpeg *>(loader);
 	struct jpeg_decompress_struct cinfo;
@@ -324,9 +324,9 @@ gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsize count
 	cinfo.err = jpeg_std_error (&jerr.pub);
 	if (lj->stereo) cinfo2.err = jpeg_std_error (&jerr.pub);
 	jerr.pub.error_exit = fatal_error_handler;
-        jerr.pub.output_message = output_message_handler;
+	jerr.pub.output_message = output_message_handler;
 
-        jerr.error = error;
+	jerr.error = error;
 
 
 	if (sigsetjmp(jerr.setjmp_buffer, 0))
@@ -409,7 +409,7 @@ gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsize count
 		{
 		jpeg_destroy_decompress (&cinfo);
 		if (lj->stereo) jpeg_destroy_decompress (&cinfo2);
-		return 0;
+		return FALSE;
 		}
 	if (lj->stereo) g_object_set_data(G_OBJECT(lj->pixbuf), "stereo_data", GINT_TO_POINTER(STEREO_PIXBUF_CROSS));
 	lj->area_prepared_cb(loader, lj->data);
@@ -440,6 +440,7 @@ gboolean image_loader_jpeg_load (gpointer loader, const guchar *buf, gsize count
 		jpeg_destroy_decompress(&cinfo);
 		}
 
+	chunk_size = count;
 	return TRUE;
 }
 
@@ -460,6 +461,7 @@ static gchar* image_loader_jpeg_get_format_name(gpointer)
 {
 	return g_strdup("jpeg");
 }
+
 static gchar** image_loader_jpeg_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/jpeg", nullptr};
@@ -484,13 +486,11 @@ static void image_loader_jpeg_free(gpointer loader)
 	g_free(lj);
 }
 
-
 void image_loader_backend_set_jpeg(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_jpeg_new;
 	funcs->set_size = image_loader_jpeg_set_size;
-	funcs->load = image_loader_jpeg_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_jpeg_write;
 	funcs->get_pixbuf = image_loader_jpeg_get_pixbuf;
 	funcs->close = image_loader_jpeg_close;
 	funcs->abort = image_loader_jpeg_abort;

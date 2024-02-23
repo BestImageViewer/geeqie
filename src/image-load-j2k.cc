@@ -37,6 +37,9 @@
 #include "intl.h"
 #include "misc.h"
 
+namespace
+{
+
 struct ImageLoaderJ2K {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -48,134 +51,139 @@ struct ImageLoaderJ2K {
 	gboolean abort;
 };
 
-static void free_buffer(guchar *pixels, gpointer)
+void free_buffer(guchar *pixels, gpointer)
 {
 	g_free (pixels);
 }
 
 struct opj_buffer_info_t {
-    OPJ_BYTE* buf;
-    OPJ_BYTE* cur;
-    OPJ_SIZE_T len;
+	OPJ_BYTE* buf;
+	OPJ_BYTE* cur;
+	OPJ_SIZE_T len;
 };
 
-static OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, opj_buffer_info_t* psrc)
+OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, opj_buffer_info_t* psrc)
 {
-    OPJ_SIZE_T n = psrc->buf + psrc->len - psrc->cur;
+	OPJ_SIZE_T n = psrc->buf + psrc->len - psrc->cur;
 
-    if (n) {
-        if (n > len)
-            n = len;
+	if (n)
+		{
+		if (n > len)
+			n = len;
 
-        memcpy (pdst, psrc->cur, n);
-        psrc->cur += n;
-    }
-    else
-        n = static_cast<OPJ_SIZE_T>(-1);
+		memcpy (pdst, psrc->cur, n);
+		psrc->cur += n;
+		}
+	else
+		n = static_cast<OPJ_SIZE_T>(-1);
 
-    return n;
+	return n;
 }
 
-static OPJ_SIZE_T opj_write_to_buffer (void* p_buffer, OPJ_SIZE_T p_nb_bytes,
+OPJ_SIZE_T opj_write_to_buffer (void* p_buffer, OPJ_SIZE_T p_nb_bytes,
                      opj_buffer_info_t* p_source_buffer)
 {
-    void* pbuf = p_source_buffer->buf;
-    void* pcur = p_source_buffer->cur;
+	void* pbuf = p_source_buffer->buf;
+	void* pcur = p_source_buffer->cur;
 
-    OPJ_SIZE_T len = p_source_buffer->len;
+	OPJ_SIZE_T len = p_source_buffer->len;
 
-    if (0 == len)
-        len = 1;
+	if (0 == len)
+		len = 1;
 
-    OPJ_SIZE_T dist = static_cast<guchar *>(pcur) - static_cast<guchar *>(pbuf);
-    OPJ_SIZE_T n = len - dist;
-    g_assert (dist <= len);
+	OPJ_SIZE_T dist = static_cast<guchar *>(pcur) - static_cast<guchar *>(pbuf);
+	OPJ_SIZE_T n = len - dist;
+	g_assert (dist <= len);
 
-    while (n < p_nb_bytes) {
-        len *= 2;
-        n = len - dist;
-    }
+	while (n < p_nb_bytes)
+		{
+		len *= 2;
+		n = len - dist;
+		}
 
-    if (len != p_source_buffer->len) {
-        pbuf = malloc (len);
+	if (len != p_source_buffer->len)
+		{
+		pbuf = malloc (len);
 
-        if (nullptr == pbuf)
-            return static_cast<OPJ_SIZE_T>(-1);
+		if (nullptr == pbuf)
+			return static_cast<OPJ_SIZE_T>(-1);
 
-        if (p_source_buffer->buf) {
-            memcpy (pbuf, p_source_buffer->buf, dist);
-            free (p_source_buffer->buf);
-        }
+		if (p_source_buffer->buf)
+			{
+			memcpy (pbuf, p_source_buffer->buf, dist);
+			free (p_source_buffer->buf);
+			}
 
-        p_source_buffer->buf = static_cast<OPJ_BYTE *>(pbuf);
-        p_source_buffer->cur = static_cast<guchar *>(pbuf) + dist;
-        p_source_buffer->len = len;
-    }
+		p_source_buffer->buf = static_cast<OPJ_BYTE *>(pbuf);
+		p_source_buffer->cur = static_cast<guchar *>(pbuf) + dist;
+		p_source_buffer->len = len;
+		}
 
-    memcpy (p_source_buffer->cur, p_buffer, p_nb_bytes);
-    p_source_buffer->cur += p_nb_bytes;
+	memcpy (p_source_buffer->cur, p_buffer, p_nb_bytes);
+	p_source_buffer->cur += p_nb_bytes;
 
-    return p_nb_bytes;
+	return p_nb_bytes;
 }
 
-static OPJ_SIZE_T opj_skip_from_buffer (OPJ_SIZE_T len, opj_buffer_info_t* psrc)
+OPJ_SIZE_T opj_skip_from_buffer (OPJ_SIZE_T len, opj_buffer_info_t* psrc)
 {
-    OPJ_SIZE_T n = psrc->buf + psrc->len - psrc->cur;
+	OPJ_SIZE_T n = psrc->buf + psrc->len - psrc->cur;
 
-    if (n) {
-        if (n > len)
-            n = len;
+	if (n)
+		{
+		if (n > len)
+			n = len;
 
-        psrc->cur += len;
-    }
-    else
-        n = static_cast<OPJ_SIZE_T>(-1);
+		psrc->cur += len;
+		}
+	else
+		n = static_cast<OPJ_SIZE_T>(-1);
 
-    return n;
+	return n;
 }
 
-static OPJ_BOOL opj_seek_from_buffer (OPJ_OFF_T len, opj_buffer_info_t* psrc)
+OPJ_BOOL opj_seek_from_buffer (OPJ_OFF_T len, opj_buffer_info_t* psrc)
 {
-    OPJ_SIZE_T n = psrc->len;
+	OPJ_SIZE_T n = psrc->len;
 
-    if (n > static_cast<gulong>(len))
-        n = len;
+	if (n > static_cast<gulong>(len))
+		n = len;
 
-    psrc->cur = psrc->buf + n;
+	psrc->cur = psrc->buf + n;
 
-    return OPJ_TRUE;
+	return OPJ_TRUE;
 }
 
 opj_stream_t* OPJ_CALLCONV opj_stream_create_buffer_stream (opj_buffer_info_t* psrc, OPJ_BOOL input)
 {
-    if (!psrc)
-        return nullptr;
+	if (!psrc)
+		return nullptr;
 
-    opj_stream_t* ps = opj_stream_default_create (input);
+	opj_stream_t* ps = opj_stream_default_create (input);
 
-    if (nullptr == ps)
-        return nullptr;
+	if (nullptr == ps)
+		return nullptr;
 
-    opj_stream_set_user_data        (ps, psrc, nullptr);
-    opj_stream_set_user_data_length (ps, psrc->len);
+	opj_stream_set_user_data        (ps, psrc, nullptr);
+	opj_stream_set_user_data_length (ps, psrc->len);
 
-    if (input)
-        opj_stream_set_read_function (
-            ps, reinterpret_cast<opj_stream_read_fn>(opj_read_from_buffer));
-    else
-        opj_stream_set_write_function(
-            ps,reinterpret_cast<opj_stream_write_fn>(opj_write_to_buffer));
+	if (input)
+		opj_stream_set_read_function (
+		    ps, reinterpret_cast<opj_stream_read_fn>(opj_read_from_buffer));
+	else
+		opj_stream_set_write_function(
+		    ps,reinterpret_cast<opj_stream_write_fn>(opj_write_to_buffer));
 
-    opj_stream_set_skip_function (
-        ps, reinterpret_cast<opj_stream_skip_fn>(opj_skip_from_buffer));
+	opj_stream_set_skip_function (
+	    ps, reinterpret_cast<opj_stream_skip_fn>(opj_skip_from_buffer));
 
-    opj_stream_set_seek_function (
-        ps, reinterpret_cast<opj_stream_seek_fn>(opj_seek_from_buffer));
+	opj_stream_set_seek_function (
+	    ps, reinterpret_cast<opj_stream_seek_fn>(opj_seek_from_buffer));
 
-    return ps;
+	return ps;
 }
 
-static gboolean image_loader_j2k_load(gpointer loader, const guchar *buf, gsize count, GError **)
+gboolean image_loader_j2k_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderJ2K *>(loader);
 	opj_stream_t *stream;
@@ -287,10 +295,11 @@ static gboolean image_loader_j2k_load(gpointer loader, const guchar *buf, gsize 
 	if (stream)
 		opj_stream_destroy (stream);
 
+	chunk_size = count;
 	return TRUE;
 }
 
-static gpointer image_loader_j2k_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_j2k_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderJ2K, 1);
 	loader->area_updated_cb = area_updated_cb;
@@ -300,54 +309,55 @@ static gpointer image_loader_j2k_new(ImageLoaderBackendCbAreaUpdated area_update
 	return loader;
 }
 
-static void image_loader_j2k_set_size(gpointer loader, int width, int height)
+void image_loader_j2k_set_size(gpointer loader, int width, int height)
 {
 	auto ld = static_cast<ImageLoaderJ2K *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_j2k_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_j2k_get_pixbuf(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderJ2K *>(loader);
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_j2k_get_format_name(gpointer)
+gchar* image_loader_j2k_get_format_name(gpointer)
 {
 	return g_strdup("j2k");
 }
 
-static gchar** image_loader_j2k_get_format_mime_types(gpointer)
+gchar** image_loader_j2k_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/jp2", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_j2k_close(gpointer, GError **)
+gboolean image_loader_j2k_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_j2k_abort(gpointer loader)
+void image_loader_j2k_abort(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderJ2K *>(loader);
 	ld->abort = TRUE;
 }
 
-static void image_loader_j2k_free(gpointer loader)
+void image_loader_j2k_free(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderJ2K *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
 
+} // namespace
+
 void image_loader_backend_set_j2k(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_j2k_new;
 	funcs->set_size = image_loader_j2k_set_size;
-	funcs->load = image_loader_j2k_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_j2k_write;
 	funcs->get_pixbuf = image_loader_j2k_get_pixbuf;
 	funcs->close = image_loader_j2k_close;
 	funcs->abort = image_loader_j2k_abort;

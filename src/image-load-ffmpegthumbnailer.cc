@@ -36,6 +36,9 @@
 #include "image-load.h"
 #include "options.h"
 
+namespace
+{
+
 struct ImageLoaderFT {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -52,7 +55,7 @@ struct ImageLoaderFT {
 };
 
 #if HAVE_FFMPEGTHUMBNAILER_RGB
-static void image_loader_ft_log_cb(ThumbnailerLogLevel log_level, const char* msg)
+void image_loader_ft_log_cb(ThumbnailerLogLevel log_level, const char* msg)
 {
 	if (log_level == ThumbnailerLogLevelError)
 		log_printf("ImageLoaderFFmpegthumbnailer: %s",msg);
@@ -68,18 +71,18 @@ void image_loader_ft_destroy_image_data(guchar *, gpointer data)
 	video_thumbnailer_destroy_image_data (image);
 }
 
-static gchar* image_loader_ft_get_format_name(gpointer)
+gchar* image_loader_ft_get_format_name(gpointer)
 {
 	return g_strdup("ffmpeg");
 }
 
-static gchar** image_loader_ft_get_format_mime_types(gpointer)
+gchar** image_loader_ft_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"video/mp4", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gpointer image_loader_ft_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_ft_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderFT, 1);
 
@@ -98,7 +101,7 @@ static gpointer image_loader_ft_new(ImageLoaderBackendCbAreaUpdated area_updated
 	return loader;
 }
 
-static void image_loader_ft_set_size(gpointer loader, int width, int height)
+void image_loader_ft_set_size(gpointer loader, int width, int height)
 {
 	auto lft = static_cast<ImageLoaderFT *>(loader);
 	lft->requested_width = width;
@@ -106,7 +109,7 @@ static void image_loader_ft_set_size(gpointer loader, int width, int height)
 	DEBUG_1("TG: setting size, w=%d, h=%d", width, height);
 }
 
-static gboolean image_loader_ft_load (gpointer loader, const guchar *, gsize, GError **)
+gboolean image_loader_ft_write (gpointer loader, const guchar *, gsize &chunk_size, gsize count, GError **)
 {
 	auto lft = static_cast<ImageLoaderFT *>(loader);
 	auto il = static_cast<ImageLoader *>(lft->data);
@@ -140,11 +143,11 @@ static gboolean image_loader_ft_load (gpointer loader, const guchar *, gsize, GE
 	image_stream = g_memory_input_stream_new_from_data (image->image_data_ptr, image->image_data_size, nullptr);
 
 	if (image_stream == nullptr)
-	{
-	video_thumbnailer_destroy_image_data (image);
-	DEBUG_1("FFmpegthumbnailer: cannot open stream for %s", il->fd->path);
-	return FALSE;
-    }
+		{
+		video_thumbnailer_destroy_image_data (image);
+		DEBUG_1("FFmpegthumbnailer: cannot open stream for %s", il->fd->path);
+		return FALSE;
+		}
 
 	lft->pixbuf  = gdk_pixbuf_new_from_stream (image_stream, nullptr, nullptr);
 	lft->size_cb(loader, gdk_pixbuf_get_width(lft->pixbuf), gdk_pixbuf_get_height(lft->pixbuf), lft->data);
@@ -158,32 +161,33 @@ static gboolean image_loader_ft_load (gpointer loader, const guchar *, gsize, GE
 		return FALSE;
 		}
 
-/** See comment in image_loader_area_prepared_cb
- * Geeqie uses area_prepared signal to fill pixbuf with background color.
- * We can't do it here as pixbuf already contains the data
- * lft->area_prepared_cb(loader, lft->data);
- */
+	/** See comment in image_loader_area_prepared_cb
+	 * Geeqie uses area_prepared signal to fill pixbuf with background color.
+	 * We can't do it here as pixbuf already contains the data
+	 * lft->area_prepared_cb(loader, lft->data);
+	 */
 	lft->area_updated_cb(loader, 0, 0, gdk_pixbuf_get_width(lft->pixbuf), gdk_pixbuf_get_height(lft->pixbuf), lft->data);
 
+	chunk_size = count;
 	return TRUE;
 }
 
-static GdkPixbuf* image_loader_ft_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_ft_get_pixbuf(gpointer loader)
 {
 	auto lft = static_cast<ImageLoaderFT *>(loader);
 	return lft->pixbuf;
 }
 
-static void image_loader_ft_abort(gpointer)
+void image_loader_ft_abort(gpointer)
 {
 }
 
-static gboolean image_loader_ft_close(gpointer, GError **)
+gboolean image_loader_ft_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_ft_free(gpointer loader)
+void image_loader_ft_free(gpointer loader)
 {
 	auto lft = static_cast<ImageLoaderFT *>(loader);
 	if (lft->pixbuf) g_object_unref(lft->pixbuf);
@@ -192,12 +196,13 @@ static void image_loader_ft_free(gpointer loader)
 	g_free(lft);
 }
 
+} // namespace
+
 void image_loader_backend_set_ft(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_ft_new;
 	funcs->set_size = image_loader_ft_set_size;
-	funcs->load = image_loader_ft_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_ft_write;
 	funcs->get_pixbuf = image_loader_ft_get_pixbuf;
 	funcs->close = image_loader_ft_close;
 	funcs->abort = image_loader_ft_abort;

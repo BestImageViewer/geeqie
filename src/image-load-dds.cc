@@ -34,6 +34,9 @@
 
 #include "image-load.h"
 
+namespace
+{
+
 struct ImageLoaderDDS {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -45,7 +48,7 @@ struct ImageLoaderDDS {
 	gboolean abort;
 };
 
-static void free_buffer(guchar *pixels, gpointer)
+void free_buffer(guchar *pixels, gpointer)
 {
 	g_free(pixels);
 }
@@ -113,22 +116,22 @@ enum {
 };
 
 // RGBA Masks
-static const uint A1R5G5B5_MASKS[] = { 0x7C00, 0x03E0, 0x001F, 0x8000 };
-static const uint X1R5G5B5_MASKS[] = { 0x7C00, 0x03E0, 0x001F, 0x0000 };
-static const uint A4R4G4B4_MASKS[] = { 0x0F00, 0x00F0, 0x000F, 0xF000 };
-static const uint X4R4G4B4_MASKS[] = { 0x0F00, 0x00F0, 0x000F, 0x0000 };
-static const uint R5G6B5_MASKS[] = { 0xF800, 0x07E0, 0x001F, 0x0000 };
-static const uint R8G8B8_MASKS[] = { 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 };
-static const uint A8B8G8R8_MASKS[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
-static const uint X8B8G8R8_MASKS[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000 };
-static const uint A8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000 };
-static const uint X8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000 };
+constexpr uint A1R5G5B5_MASKS[] = { 0x7C00, 0x03E0, 0x001F, 0x8000 };
+constexpr uint X1R5G5B5_MASKS[] = { 0x7C00, 0x03E0, 0x001F, 0x0000 };
+constexpr uint A4R4G4B4_MASKS[] = { 0x0F00, 0x00F0, 0x000F, 0xF000 };
+constexpr uint X4R4G4B4_MASKS[] = { 0x0F00, 0x00F0, 0x000F, 0x0000 };
+constexpr uint R5G6B5_MASKS[] = { 0xF800, 0x07E0, 0x001F, 0x0000 };
+constexpr uint R8G8B8_MASKS[] = { 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 };
+constexpr uint A8B8G8R8_MASKS[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
+constexpr uint X8B8G8R8_MASKS[] = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000 };
+constexpr uint A8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000 };
+constexpr uint X8R8G8B8_MASKS[] = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000 };
 
 // BIT4 = 17 * index;
-static const uint BIT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132, 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
-static const uint BIT6[] = { 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 130, 134, 138, 142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198, 202, 206, 210, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251, 255 };
+constexpr uint BIT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132, 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
+constexpr uint BIT6[] = { 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 130, 134, 138, 142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198, 202, 206, 210, 215, 219, 223, 227, 231, 235, 239, 243, 247, 251, 255 };
 
-static uint ddsGetType(const unsigned char *buffer) {
+uint ddsGetType(const unsigned char *buffer) {
 	uint type = 0;
 	uint flags = ddsGetPixelFormatFlags(buffer);
 	if ((flags & 0x04) != 0) {
@@ -534,7 +537,7 @@ guchar *ddsReadX8R8G8B8(uint width, uint height, const unsigned char *buffer) {
 	return reinterpret_cast<guchar *>(pixels);
 }
 
-static gboolean image_loader_dds_load (gpointer loader, const guchar *buf, gsize, GError **)
+gboolean image_loader_dds_write (gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	uint width = ddsGetWidth(buf);
@@ -563,11 +566,12 @@ static gboolean image_loader_dds_load (gpointer loader, const guchar *buf, gsize
 		}
 		ld->pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8, width, height, rowstride, free_buffer, nullptr);
 		ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
+		chunk_size = count;
 		return TRUE;
 	}
 }
 
-static gpointer image_loader_dds_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_dds_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderDDS, 1);
 	loader->area_updated_cb = area_updated_cb;
@@ -577,53 +581,55 @@ static gpointer image_loader_dds_new(ImageLoaderBackendCbAreaUpdated area_update
 	return loader;
 }
 
-static void image_loader_dds_set_size(gpointer loader, int width, int height)
+void image_loader_dds_set_size(gpointer loader, int width, int height)
 {
 	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_dds_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_dds_get_pixbuf(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_dds_get_format_name(gpointer)
+gchar* image_loader_dds_get_format_name(gpointer)
 {
 	return g_strdup("dds");
 }
-static gchar** image_loader_dds_get_format_mime_types(gpointer)
+
+gchar** image_loader_dds_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"image/vnd-ms.dds", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_dds_close(gpointer, GError **)
+gboolean image_loader_dds_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_dds_abort(gpointer loader)
+void image_loader_dds_abort(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	ld->abort = TRUE;
 }
 
-static void image_loader_dds_free(gpointer loader)
+void image_loader_dds_free(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
 
+} // namespace
+
 void image_loader_backend_set_dds(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_dds_new;
 	funcs->set_size = image_loader_dds_set_size;
-	funcs->load = image_loader_dds_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_dds_write;
 	funcs->get_pixbuf = image_loader_dds_get_pixbuf;
 	funcs->close = image_loader_dds_close;
 	funcs->abort = image_loader_dds_abort;

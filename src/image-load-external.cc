@@ -30,6 +30,9 @@
 #include "options.h"
 #include "ui-fileops.h"
 
+namespace
+{
+
 struct ImageLoaderExternal {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -41,7 +44,7 @@ struct ImageLoaderExternal {
 	gboolean abort;
 };
 
-static gboolean image_loader_external_load(gpointer loader, const guchar *, gsize, GError **)
+gboolean image_loader_external_write(gpointer loader, const guchar *, gsize &chunk_size, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	auto il = static_cast<ImageLoader *>(ld->data);
@@ -67,10 +70,11 @@ static gboolean image_loader_external_load(gpointer loader, const guchar *, gsiz
 	g_free(randname);
 	g_free(tilde_filename);
 
+	chunk_size = count;
 	return TRUE;
 }
 
-static gpointer image_loader_external_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_external_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderExternal, 1);
 	loader->area_updated_cb = area_updated_cb;
@@ -80,54 +84,55 @@ static gpointer image_loader_external_new(ImageLoaderBackendCbAreaUpdated area_u
 	return loader;
 }
 
-static void image_loader_external_set_size(gpointer loader, int width, int height)
+void image_loader_external_set_size(gpointer loader, int width, int height)
 {
 	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_external_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_external_get_pixbuf(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_external_get_format_name(gpointer)
+gchar* image_loader_external_get_format_name(gpointer)
 {
 	return g_strdup("external");
 }
 
-static gchar** image_loader_external_get_format_mime_types(gpointer)
+gchar** image_loader_external_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"application/octet-stream", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_external_close(gpointer, GError **)
+gboolean image_loader_external_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_external_abort(gpointer loader)
+void image_loader_external_abort(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	ld->abort = TRUE;
 }
 
-static void image_loader_external_free(gpointer loader)
+void image_loader_external_free(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderExternal *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
 
+} // namespace
+
 void image_loader_backend_set_external(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_external_new;
 	funcs->set_size = image_loader_external_set_size;
-	funcs->load = image_loader_external_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_external_write;
 	funcs->get_pixbuf = image_loader_external_get_pixbuf;
 	funcs->close = image_loader_external_close;
 	funcs->abort = image_loader_external_abort;

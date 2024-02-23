@@ -33,6 +33,9 @@
 #include "debug.h"
 #include "image-load.h"
 
+namespace
+{
+
 struct ImageLoaderPDF {
 	ImageLoaderBackendCbAreaUpdated area_updated_cb;
 	ImageLoaderBackendCbSize size_cb;
@@ -46,7 +49,7 @@ struct ImageLoaderPDF {
 	gint page_total;
 };
 
-static gboolean image_loader_pdf_load(gpointer loader, const guchar *buf, gsize count, GError **)
+gboolean image_loader_pdf_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	auto ld = static_cast<ImageLoaderPDF *>(loader);
 	GError *poppler_error = nullptr;
@@ -91,6 +94,7 @@ static gboolean image_loader_pdf_load(gpointer loader, const guchar *buf, gsize 
 		cairo_destroy (cr);
 		cairo_surface_destroy(surface);
 		g_object_unref(page);
+		chunk_size = count;
 		ret = TRUE;
 		}
 
@@ -99,7 +103,7 @@ static gboolean image_loader_pdf_load(gpointer loader, const guchar *buf, gsize 
 	return ret;
 }
 
-static gpointer image_loader_pdf_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+gpointer image_loader_pdf_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
 {
 	auto loader = g_new0(ImageLoaderPDF, 1);
 	loader->area_updated_cb = area_updated_cb;
@@ -110,68 +114,69 @@ static gpointer image_loader_pdf_new(ImageLoaderBackendCbAreaUpdated area_update
 	return loader;
 }
 
-static void image_loader_pdf_set_size(gpointer loader, int width, int height)
+void image_loader_pdf_set_size(gpointer loader, int width, int height)
 {
 	auto ld = static_cast<ImageLoaderPDF *>(loader);
 	ld->requested_width = width;
 	ld->requested_height = height;
 }
 
-static GdkPixbuf* image_loader_pdf_get_pixbuf(gpointer loader)
+GdkPixbuf* image_loader_pdf_get_pixbuf(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderPDF *>(loader);
 	return ld->pixbuf;
 }
 
-static gchar* image_loader_pdf_get_format_name(gpointer)
+gchar* image_loader_pdf_get_format_name(gpointer)
 {
 	return g_strdup("pdf");
 }
 
-static gchar** image_loader_pdf_get_format_mime_types(gpointer)
+gchar** image_loader_pdf_get_format_mime_types(gpointer)
 {
 	static const gchar *mime[] = {"application/pdf", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static void image_loader_pdf_set_page_num(gpointer loader, gint page_num)
+void image_loader_pdf_set_page_num(gpointer loader, gint page_num)
 {
 	auto ld = static_cast<ImageLoaderPDF *>(loader);
 
 	ld->page_num = page_num;
 }
 
-static gint image_loader_pdf_get_page_total(gpointer loader)
+gint image_loader_pdf_get_page_total(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderPDF *>(loader);
 
 	return ld->page_total;
 }
 
-static gboolean image_loader_pdf_close(gpointer, GError **)
+gboolean image_loader_pdf_close(gpointer, GError **)
 {
 	return TRUE;
 }
 
-static void image_loader_pdf_abort(gpointer loader)
+void image_loader_pdf_abort(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderPDF *>(loader);
 	ld->abort = TRUE;
 }
 
-static void image_loader_pdf_free(gpointer loader)
+void image_loader_pdf_free(gpointer loader)
 {
 	auto ld = static_cast<ImageLoaderPDF *>(loader);
 	if (ld->pixbuf) g_object_unref(ld->pixbuf);
 	g_free(ld);
 }
 
+} // namespace
+
 void image_loader_backend_set_pdf(ImageLoaderBackend *funcs)
 {
 	funcs->loader_new = image_loader_pdf_new;
 	funcs->set_size = image_loader_pdf_set_size;
-	funcs->load = image_loader_pdf_load;
-	funcs->write = nullptr;
+	funcs->write = image_loader_pdf_write;
 	funcs->get_pixbuf = image_loader_pdf_get_pixbuf;
 	funcs->close = image_loader_pdf_close;
 	funcs->abort = image_loader_pdf_abort;

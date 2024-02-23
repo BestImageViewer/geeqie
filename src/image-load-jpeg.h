@@ -29,7 +29,7 @@
 
 struct ImageLoaderBackend;
 
-gboolean image_loader_jpeg_load(gpointer loader, const guchar *buf, gsize count, GError **error);
+gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **error);
 
 void image_loader_backend_set_jpeg(ImageLoaderBackend *funcs);
 #endif
