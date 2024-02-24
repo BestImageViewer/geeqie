@@ -21,9 +21,11 @@
 #ifndef IMAGE_LOAD_DDS_H
 #define IMAGE_LOAD_DDS_H
 
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_dds(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_dds();
 
 #endif
 

@@ -29,63 +29,80 @@
 namespace
 {
 
-gchar* image_loader_svgz_get_format_name(gpointer)
+struct ImageLoaderSvgz : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderSvgz() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void set_size(int width, int height) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gboolean close(GError **error) override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+
+private:
+	GdkPixbufLoader *loader;
+};
+
+gchar *ImageLoaderSvgz::get_format_name()
 {
 	return g_strdup("svg");
-
 }
 
-gchar** image_loader_svgz_get_format_mime_types(gpointer)
+gchar **ImageLoaderSvgz::get_format_mime_types()
 {
 	static const gchar *mime[] = {"image/svg", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-gpointer image_loader_svgz_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderSvgz::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data)
 {
 	GError *error = nullptr;
 
-	GdkPixbufLoader *loader = gdk_pixbuf_loader_new_with_mime_type("image/svg", &error);
+	loader = gdk_pixbuf_loader_new_with_mime_type("image/svg", &error);
 	if (error)
 		{
 		g_error_free(error);
-		return nullptr;
+		return;
 		}
 
 	g_signal_connect(G_OBJECT(loader), "area_updated", G_CALLBACK(area_updated_cb), data);
-	g_signal_connect(G_OBJECT(loader), "size_prepared", G_CALLBACK(size_cb), data);
+	g_signal_connect(G_OBJECT(loader), "size_prepared", G_CALLBACK(size_prepared_cb), data);
 	g_signal_connect(G_OBJECT(loader), "area_prepared", G_CALLBACK(area_prepared_cb), data);
-	return loader;
 }
 
-gboolean image_loader_svgz_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize, GError **error)
+void ImageLoaderSvgz::set_size(int width, int height)
 {
-	return gdk_pixbuf_loader_write(GDK_PIXBUF_LOADER(loader), buf, chunk_size, error);
+	gdk_pixbuf_loader_set_size(loader, width, height);
 }
 
-void image_loader_svgz_abort(gpointer)
+gboolean ImageLoaderSvgz::write(const guchar *buf, gsize &chunk_size, gsize, GError **error)
 {
+	return gdk_pixbuf_loader_write(loader, buf, chunk_size, error);
 }
 
-void image_loader_svgz_free(gpointer loader)
+GdkPixbuf *ImageLoaderSvgz::get_pixbuf()
+{
+	return gdk_pixbuf_loader_get_pixbuf(loader);
+}
+
+gboolean ImageLoaderSvgz::close(GError **error)
+{
+	return gdk_pixbuf_loader_close(loader, error);
+}
+
+ImageLoaderSvgz::~ImageLoaderSvgz()
 {
 	g_object_unref(G_OBJECT(loader));
 }
 
 } // namespace
 
-void image_loader_backend_set_svgz(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_svgz()
 {
-	funcs->loader_new = image_loader_svgz_new;
-	funcs->set_size = reinterpret_cast<ImageLoaderBackendFuncSetSize>(gdk_pixbuf_loader_set_size);
-	funcs->write = image_loader_svgz_write;
-	funcs->get_pixbuf = reinterpret_cast<ImageLoaderBackendFuncGetPixbuf>(gdk_pixbuf_loader_get_pixbuf);
-	funcs->close = reinterpret_cast<ImageLoaderBackendFuncClose>(gdk_pixbuf_loader_close);
-	funcs->abort = image_loader_svgz_abort;
-	funcs->free = image_loader_svgz_free;
-
-	funcs->get_format_name = image_loader_svgz_get_format_name;
-	funcs->get_format_mime_types = image_loader_svgz_get_format_mime_types;
+	return std::make_unique<ImageLoaderSvgz>();
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

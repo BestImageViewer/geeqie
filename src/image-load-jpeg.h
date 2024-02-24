@@ -25,13 +25,42 @@
 #include <config.h>
 
 #if HAVE_JPEG
+#include <memory>
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
 
-struct ImageLoaderBackend;
+#include "image-load.h"
 
-gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **error);
+struct ImageLoaderJpeg : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderJpeg() override;
 
-void image_loader_backend_set_jpeg(ImageLoaderBackend *funcs);
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void set_size(int width, int height) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	void abort() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
+	SizePreparedCb size_prepared_cb;
+	AreaPreparedCb area_prepared_cb;
+
+	gpointer data;
+
+	GdkPixbuf *pixbuf;
+	guint requested_width;
+	guint requested_height;
+
+	gboolean aborted;
+	gboolean stereo;
+};
+
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_jpeg();
 #endif
 
 #endif

@@ -48,27 +48,11 @@
 #include "jpeg-parser.h"
 #include "typedefs.h"
 
-struct ImageLoaderJpeg {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
-
-	gpointer data;
-
-	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-
-	gboolean abort;
-	gboolean stereo;
-
-};
-
 /* error handler data */
 struct error_handler_data {
 	struct jpeg_error_mgr pub;
 	sigjmp_buf setjmp_buffer;
-        GError **error;
+	GError **error;
 };
 
 /* explode gray image data from jpeg library into rgb components in pixbuf */
@@ -146,15 +130,12 @@ convert_cmyk_to_rgb (struct jpeg_decompress_struct *cinfo,
 }
 
 
-static gpointer image_loader_jpeg_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderJpeg::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data)
 {
-        auto loader = g_new0(ImageLoaderJpeg, 1);
-
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->size_prepared_cb = size_prepared_cb;
+	this->area_prepared_cb = area_prepared_cb;
+	this->data = data;
 }
 
 static void
@@ -270,9 +251,8 @@ static void set_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 }
 
 
-gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **error)
+gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize count, GError **error)
 {
-	auto lj = static_cast<ImageLoaderJpeg *>(loader);
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_decompress_struct cinfo2;
 	guchar *dptr;
@@ -283,7 +263,7 @@ gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chun
 
 	struct error_handler_data jerr;
 
-	lj->stereo = FALSE;
+	stereo = FALSE;
 
 	MPOData *mpo = jpeg_get_mpo_data(buf, count);
 	if (mpo && mpo->num_images > 1)
@@ -311,7 +291,7 @@ gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chun
 
 		if (idx1 >= 0 && idx2 >= 0)
 			{
-			lj->stereo = TRUE;
+			stereo = TRUE;
 			stereo_buf2 = const_cast<unsigned char *>(buf) + mpo->images[idx2].offset;
 			stereo_length = mpo->images[idx2].length;
 			buf = const_cast<unsigned char *>(buf) + mpo->images[idx1].offset;
@@ -322,7 +302,7 @@ gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chun
 
 	/* setup error handler */
 	cinfo.err = jpeg_std_error (&jerr.pub);
-	if (lj->stereo) cinfo2.err = jpeg_std_error (&jerr.pub);
+	if (stereo) cinfo2.err = jpeg_std_error (&jerr.pub);
 	jerr.pub.error_exit = fatal_error_handler;
 	jerr.pub.output_message = output_message_handler;
 
@@ -335,7 +315,7 @@ gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chun
 		 * We need to clean up the JPEG object, close the input file, and return.
 		*/
 		jpeg_destroy_decompress(&cinfo);
-		if (lj->stereo) jpeg_destroy_decompress(&cinfo2);
+		if (stereo) jpeg_destroy_decompress(&cinfo2);
 		return FALSE;
 		}
 
@@ -346,7 +326,7 @@ gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chun
 
 	jpeg_read_header(&cinfo, TRUE);
 
-	if (lj->stereo)
+	if (stereo)
 		{
 		jpeg_create_decompress(&cinfo2);
 		set_mem_src(&cinfo2, stereo_buf2, stereo_length);
@@ -357,26 +337,25 @@ gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chun
 			{
 			DEBUG_1("stereo data with different size");
 			jpeg_destroy_decompress(&cinfo2);
-			lj->stereo = FALSE;
+			stereo = FALSE;
 			}
 		}
 
 
-
-	lj->requested_width = lj->stereo ? cinfo.image_width * 2: cinfo.image_width;
-	lj->requested_height = cinfo.image_height;
-	lj->size_cb(loader, lj->requested_width, lj->requested_height, lj->data);
+	requested_width = stereo ? cinfo.image_width * 2: cinfo.image_width;
+	requested_height = cinfo.image_height;
+	size_prepared_cb(nullptr, requested_width, requested_height, data);
 
 	cinfo.scale_num = 1;
 	for (cinfo.scale_denom = 2; cinfo.scale_denom <= 8; cinfo.scale_denom *= 2) {
 		jpeg_calc_output_dimensions(&cinfo);
-		if (cinfo.output_width < (lj->stereo ? lj->requested_width / 2 : lj->requested_width) || cinfo.output_height < lj->requested_height) {
+		if (cinfo.output_width < (stereo ? requested_width / 2 : requested_width) || cinfo.output_height < requested_height) {
 			cinfo.scale_denom /= 2;
 			break;
 		}
 	}
 	jpeg_calc_output_dimensions(&cinfo);
-	if (lj->stereo)
+	if (stereo)
 		{
 		cinfo2.scale_num = cinfo.scale_num;
 		cinfo2.scale_denom = cinfo.scale_denom;
@@ -388,7 +367,7 @@ gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chun
 	jpeg_start_decompress(&cinfo);
 
 
-	if (lj->stereo)
+	if (stereo)
 		{
 		if (cinfo.output_width != cinfo2.output_width ||
 		    cinfo.output_height != cinfo2.output_height ||
@@ -396,45 +375,45 @@ gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chun
 			{
 			DEBUG_1("stereo data with different output size");
 			jpeg_destroy_decompress(&cinfo2);
-			lj->stereo = FALSE;
+			stereo = FALSE;
 			}
 		}
 
 
-	lj->pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
+	pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
 				     cinfo.out_color_components == 4 ? TRUE : FALSE,
-				     8, lj->stereo ? cinfo.output_width * 2: cinfo.output_width, cinfo.output_height);
+	                 8, stereo ? cinfo.output_width * 2: cinfo.output_width, cinfo.output_height);
 
-	if (!lj->pixbuf)
+	if (!pixbuf)
 		{
 		jpeg_destroy_decompress (&cinfo);
-		if (lj->stereo) jpeg_destroy_decompress (&cinfo2);
+		if (stereo) jpeg_destroy_decompress (&cinfo2);
 		return FALSE;
 		}
-	if (lj->stereo) g_object_set_data(G_OBJECT(lj->pixbuf), "stereo_data", GINT_TO_POINTER(STEREO_PIXBUF_CROSS));
-	lj->area_prepared_cb(loader, lj->data);
+	if (stereo) g_object_set_data(G_OBJECT(pixbuf), "stereo_data", GINT_TO_POINTER(STEREO_PIXBUF_CROSS));
+	area_prepared_cb(nullptr, data);
 
-	rowstride = gdk_pixbuf_get_rowstride(lj->pixbuf);
-	dptr = gdk_pixbuf_get_pixels(lj->pixbuf);
-	dptr2 = gdk_pixbuf_get_pixels(lj->pixbuf) + ((cinfo.out_color_components == 4) ? 4 * cinfo.output_width : 3 * cinfo.output_width);
+	rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+	dptr = gdk_pixbuf_get_pixels(pixbuf);
+	dptr2 = gdk_pixbuf_get_pixels(pixbuf) + ((cinfo.out_color_components == 4) ? 4 * cinfo.output_width : 3 * cinfo.output_width);
 
 
-	while (cinfo.output_scanline < cinfo.output_height && !lj->abort)
+	while (cinfo.output_scanline < cinfo.output_height && !aborted)
 		{
 		guint scanline = cinfo.output_scanline;
 		image_loader_jpeg_read_scanline(&cinfo, &dptr, rowstride);
-		lj->area_updated_cb(loader, 0, scanline, cinfo.output_width, cinfo.rec_outbuf_height, lj->data);
-		if (lj->stereo)
+		area_updated_cb(nullptr, 0, scanline, cinfo.output_width, cinfo.rec_outbuf_height, data);
+		if (stereo)
 			{
 			guint scanline = cinfo2.output_scanline;
 			image_loader_jpeg_read_scanline(&cinfo2, &dptr2, rowstride);
-			lj->area_updated_cb(loader, cinfo.output_width, scanline, cinfo2.output_width, cinfo2.rec_outbuf_height, lj->data);
+			area_updated_cb(nullptr, cinfo.output_width, scanline, cinfo2.output_width, cinfo2.rec_outbuf_height, data);
 			}
 		}
 
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
-	if (lj->stereo)
+	if (stereo)
 		{
 		jpeg_finish_decompress(&cinfo);
 		jpeg_destroy_decompress(&cinfo);
@@ -444,62 +423,42 @@ gboolean image_loader_jpeg_write(gpointer loader, const guchar *buf, gsize &chun
 	return TRUE;
 }
 
-static void image_loader_jpeg_set_size(gpointer loader, int width, int height)
+void ImageLoaderJpeg::set_size(int width, int height)
 {
-	auto lj = static_cast<ImageLoaderJpeg *>(loader);
-	lj->requested_width = width;
-	lj->requested_height = height;
+	requested_width = width;
+	requested_height = height;
 }
 
-static GdkPixbuf* image_loader_jpeg_get_pixbuf(gpointer loader)
+GdkPixbuf *ImageLoaderJpeg::get_pixbuf()
 {
-	auto lj = static_cast<ImageLoaderJpeg *>(loader);
-	return lj->pixbuf;
+	return pixbuf;
 }
 
-static gchar* image_loader_jpeg_get_format_name(gpointer)
+gchar *ImageLoaderJpeg::get_format_name()
 {
 	return g_strdup("jpeg");
 }
 
-static gchar** image_loader_jpeg_get_format_mime_types(gpointer)
+gchar **ImageLoaderJpeg::get_format_mime_types()
 {
 	static const gchar *mime[] = {"image/jpeg", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-static gboolean image_loader_jpeg_close(gpointer, GError **)
+void ImageLoaderJpeg::abort()
 {
-	return TRUE;
+	aborted = TRUE;
 }
 
-static void image_loader_jpeg_abort(gpointer loader)
+ImageLoaderJpeg::~ImageLoaderJpeg()
 {
-	auto lj = static_cast<ImageLoaderJpeg *>(loader);
-	lj->abort = TRUE;
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
-static void image_loader_jpeg_free(gpointer loader)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_jpeg()
 {
-	auto lj = static_cast<ImageLoaderJpeg *>(loader);
-	if (lj->pixbuf) g_object_unref(lj->pixbuf);
-	g_free(lj);
+	return std::make_unique<ImageLoaderJpeg>();
 }
-
-void image_loader_backend_set_jpeg(ImageLoaderBackend *funcs)
-{
-	funcs->loader_new = image_loader_jpeg_new;
-	funcs->set_size = image_loader_jpeg_set_size;
-	funcs->write = image_loader_jpeg_write;
-	funcs->get_pixbuf = image_loader_jpeg_get_pixbuf;
-	funcs->close = image_loader_jpeg_close;
-	funcs->abort = image_loader_jpeg_abort;
-	funcs->free = image_loader_jpeg_free;
-
-	funcs->get_format_name = image_loader_jpeg_get_format_name;
-	funcs->get_format_mime_types = image_loader_jpeg_get_format_mime_types;
-}
-
 
 #endif
 

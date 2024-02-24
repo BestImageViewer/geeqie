@@ -35,15 +35,24 @@
 namespace
 {
 
-struct ImageLoaderDJVU {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderDJVU : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderDJVU() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+	void set_page_num(gint page_num) override;
+	gint get_page_total() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
 	gpointer data;
+
 	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-	gboolean abort;
 	gint page_num;
 	gint page_total;
 };
@@ -53,9 +62,8 @@ void free_buffer(guchar *pixels, gpointer)
 	g_free (pixels);
 }
 
-gboolean image_loader_djvu_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderDJVU::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	auto ld = static_cast<ImageLoaderDJVU *>(loader);
 	ddjvu_context_t *ctx;
 	ddjvu_document_t *doc;
 	ddjvu_page_t *page;
@@ -76,9 +84,9 @@ gboolean image_loader_djvu_write(gpointer loader, const guchar *buf, gsize &chun
 	ddjvu_stream_write(doc, 0, reinterpret_cast<const char *>(buf), count );
 	while (!ddjvu_document_decoding_done(doc));
 
-	ld->page_total = ddjvu_document_get_pagenum(doc);
+	page_total = ddjvu_document_get_pagenum(doc);
 
-	page = ddjvu_page_create_by_pageno(doc, ld->page_num);
+	page = ddjvu_page_create_by_pageno(doc, page_num);
 	while (!ddjvu_page_decoding_done(page));
 
 	fmt = ddjvu_format_create(DDJVU_FORMAT_RGB24, 0, nullptr);
@@ -107,10 +115,9 @@ gboolean image_loader_djvu_write(gpointer loader, const guchar *buf, gsize &chun
 	tmp2 = gdk_pixbuf_flip(tmp1, TRUE);
 	g_object_unref(tmp1);
 
-	ld->pixbuf = gdk_pixbuf_rotate_simple(tmp2,GDK_PIXBUF_ROTATE_UPSIDEDOWN);
+	pixbuf = gdk_pixbuf_rotate_simple(tmp2, GDK_PIXBUF_ROTATE_UPSIDEDOWN);
 
-	ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
-
+	area_updated_cb(nullptr, 0, 0, width, height, data);
 
 	cairo_surface_destroy(surface);
 	ddjvu_page_release(page);
@@ -121,87 +128,48 @@ gboolean image_loader_djvu_write(gpointer loader, const guchar *buf, gsize &chun
 	return TRUE;
 }
 
-gpointer image_loader_djvu_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderDJVU::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
 {
-	auto loader = g_new0(ImageLoaderDJVU, 1);
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->data = data;
 }
 
-void image_loader_djvu_set_size(gpointer loader, int width, int height)
+GdkPixbuf *ImageLoaderDJVU::get_pixbuf()
 {
-	auto ld = static_cast<ImageLoaderDJVU *>(loader);
-	ld->requested_width = width;
-	ld->requested_height = height;
+	return pixbuf;
 }
 
-GdkPixbuf* image_loader_djvu_get_pixbuf(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderDJVU *>(loader);
-	return ld->pixbuf;
-}
-
-gchar* image_loader_djvu_get_format_name(gpointer)
+gchar *ImageLoaderDJVU::get_format_name()
 {
 	return g_strdup("djvu");
 }
 
-gchar** image_loader_djvu_get_format_mime_types(gpointer)
+gchar **ImageLoaderDJVU::get_format_mime_types()
 {
 	static const gchar *mime[] = {"image/vnd.djvu", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-void image_loader_djvu_set_page_num(gpointer loader, gint page_num)
+void ImageLoaderDJVU::set_page_num(gint page_num)
 {
-	auto ld = static_cast<ImageLoaderDJVU *>(loader);
-
-	ld->page_num = page_num;
+	this->page_num = page_num;
 }
 
-gint image_loader_djvu_get_page_total(gpointer loader)
+gint ImageLoaderDJVU::get_page_total()
 {
-	auto ld = static_cast<ImageLoaderDJVU *>(loader);
-
-	return ld->page_total;
+	return page_total;
 }
 
-gboolean image_loader_djvu_close(gpointer, GError **)
+ImageLoaderDJVU::~ImageLoaderDJVU()
 {
-	return TRUE;
-}
-
-void image_loader_djvu_abort(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderDJVU *>(loader);
-	ld->abort = TRUE;
-}
-
-void image_loader_djvu_free(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderDJVU *>(loader);
-	if (ld->pixbuf) g_object_unref(ld->pixbuf);
-	g_free(ld);
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
 } // namespace
 
-void image_loader_backend_set_djvu(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_djvu()
 {
-	funcs->loader_new = image_loader_djvu_new;
-	funcs->set_size = image_loader_djvu_set_size;
-	funcs->write = image_loader_djvu_write;
-	funcs->get_pixbuf = image_loader_djvu_get_pixbuf;
-	funcs->close = image_loader_djvu_close;
-	funcs->abort = image_loader_djvu_abort;
-	funcs->free = image_loader_djvu_free;
-	funcs->get_format_name = image_loader_djvu_get_format_name;
-	funcs->get_format_mime_types = image_loader_djvu_get_format_mime_types;
-	funcs->set_page_num = image_loader_djvu_set_page_num;
-	funcs->get_page_total = image_loader_djvu_get_page_total;
+	return std::make_unique<ImageLoaderDJVU>();
 }
 
 #endif

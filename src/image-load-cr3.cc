@@ -36,7 +36,15 @@
 namespace
 {
 
-gboolean image_loader_cr3_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **error)
+struct ImageLoaderCr3 : public ImageLoaderJpeg
+{
+public:
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+};
+
+gboolean ImageLoaderCr3::write(const guchar *buf, gsize &chunk_size, gsize count, GError **error)
 {
 	/** @FIXME Just start search at where full size jpeg should be,
 	 * then search through the file looking for a jpeg end-marker
@@ -78,7 +86,7 @@ gboolean image_loader_cr3_write(gpointer loader, const guchar *buf, gsize &chunk
 		return FALSE;
 		}
 
-	gboolean ret = image_loader_jpeg_write(loader, buf + n + 12, chunk_size, i, error);;
+	gboolean ret = ImageLoaderJpeg::write(buf + n + 12, chunk_size, i, error);
 	if (ret)
 		{
 		chunk_size = count;
@@ -86,12 +94,12 @@ gboolean image_loader_cr3_write(gpointer loader, const guchar *buf, gsize &chunk
 	return ret;
 }
 
-gchar* image_loader_cr3_get_format_name(gpointer)
+gchar *ImageLoaderCr3::get_format_name()
 {
 	return g_strdup("cr3");
 }
 
-gchar** image_loader_cr3_get_format_mime_types(gpointer)
+gchar **ImageLoaderCr3::get_format_mime_types()
 {
 	static const gchar *mime[] = {"image/x-canon-cr3", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
@@ -99,14 +107,9 @@ gchar** image_loader_cr3_get_format_mime_types(gpointer)
 
 } // namespace
 
-void image_loader_backend_set_cr3(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_cr3()
 {
-	image_loader_backend_set_jpeg(funcs);
-
-	funcs->write = image_loader_cr3_write;
-
-	funcs->get_format_name = image_loader_cr3_get_format_name;
-	funcs->get_format_mime_types = image_loader_cr3_get_format_mime_types;
+	return std::make_unique<ImageLoaderCr3>();
 }
 
 #endif // HAVE_JPEG && !HAVE_RAW

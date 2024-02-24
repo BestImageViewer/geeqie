@@ -24,9 +24,11 @@
 #include <config.h>
 
 #if HAVE_J2K
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_j2k(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_j2k();
 #endif
 
 #endif

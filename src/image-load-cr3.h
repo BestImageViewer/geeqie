@@ -24,9 +24,11 @@
 #include <config.h>
 
 #if HAVE_JPEG && !HAVE_RAW
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_cr3(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_cr3();
 #endif
 
 #endif // IMAGE_LOAD_CR3_H

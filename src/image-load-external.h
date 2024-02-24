@@ -21,9 +21,11 @@
 #ifndef IMAGE_LOAD_EXTERNAL_H
 #define IMAGE_LOAD_EXTERNAL_H
 
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_external(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_external();
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

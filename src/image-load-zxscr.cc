@@ -30,15 +30,22 @@
 namespace
 {
 
-struct ImageLoaderZXSCR {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderZXSCR : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderZXSCR() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
 	gpointer data;
+
 	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-	gboolean abort;
 };
 
 constexpr guchar palette[2][8][3] = {
@@ -68,9 +75,8 @@ void free_buffer(guchar *pixels, gpointer)
 	g_free(pixels);
 }
 
-gboolean image_loader_zxscr_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderZXSCR::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
 	guint8 *pixels;
 	gint width;
 	gint height;
@@ -102,9 +108,9 @@ gboolean image_loader_zxscr_write(gpointer loader, const guchar *buf, gsize &chu
 		return FALSE;
 		}
 
-	ld->pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE, 8, width, height, width * 3, free_buffer, nullptr);
+	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE, 8, width, height, width * 3, free_buffer, nullptr);
 
-	if (!ld->pixbuf)
+	if (!pixbuf)
 		{
 		g_free(pixels);
 		DEBUG_1("Insufficient memory to open ZXSCR file");
@@ -153,76 +159,43 @@ gboolean image_loader_zxscr_write(gpointer loader, const guchar *buf, gsize &chu
 				}
 			}
 
-	ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
+	area_updated_cb(nullptr, 0, 0, width, height, data);
 
 	chunk_size = count;
 	return TRUE;
 }
 
-gpointer image_loader_zxscr_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderZXSCR::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
 {
-	auto loader = g_new0(ImageLoaderZXSCR, 1);
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->data = data;
 }
 
-void image_loader_zxscr_set_size(gpointer loader, int width, int height)
+GdkPixbuf *ImageLoaderZXSCR::get_pixbuf()
 {
-	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
-	ld->requested_width = width;
-	ld->requested_height = height;
+	return pixbuf;
 }
 
-GdkPixbuf *image_loader_zxscr_get_pixbuf(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
-	return ld->pixbuf;
-}
-
-gchar *image_loader_zxscr_get_format_name(gpointer)
+gchar *ImageLoaderZXSCR::get_format_name()
 {
 	return g_strdup("zxscr");
 }
 
-gchar **image_loader_zxscr_get_format_mime_types(gpointer)
+gchar **ImageLoaderZXSCR::get_format_mime_types()
 {
 	static const gchar *mime[] = {"application/octet-stream", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-gboolean image_loader_zxscr_close(gpointer, GError **)
+ImageLoaderZXSCR::~ImageLoaderZXSCR()
 {
-	return TRUE;
-}
-
-void image_loader_zxscr_abort(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
-	ld->abort = TRUE;
-}
-
-void image_loader_zxscr_free(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderZXSCR *>(loader);
-	if (ld->pixbuf) g_object_unref(ld->pixbuf);
-	g_free(ld);
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
 } // namespace
 
-void image_loader_backend_set_zxscr(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_zxscr()
 {
-	funcs->loader_new = image_loader_zxscr_new;
-	funcs->set_size = image_loader_zxscr_set_size;
-	funcs->write = image_loader_zxscr_write;
-	funcs->get_pixbuf = image_loader_zxscr_get_pixbuf;
-	funcs->close = image_loader_zxscr_close;
-	funcs->abort = image_loader_zxscr_abort;
-	funcs->free = image_loader_zxscr_free;
-	funcs->get_format_name = image_loader_zxscr_get_format_name;
-	funcs->get_format_mime_types = image_loader_zxscr_get_format_mime_types;
+	return std::make_unique<ImageLoaderZXSCR>();
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

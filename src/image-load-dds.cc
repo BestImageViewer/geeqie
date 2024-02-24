@@ -37,15 +37,22 @@
 namespace
 {
 
-struct ImageLoaderDDS {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderDDS : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderDDS() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
 	gpointer data;
+
 	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-	gboolean abort;
 };
 
 void free_buffer(guchar *pixels, gpointer)
@@ -537,9 +544,8 @@ guchar *ddsReadX8R8G8B8(uint width, uint height, const unsigned char *buffer) {
 	return reinterpret_cast<guchar *>(pixels);
 }
 
-gboolean image_loader_dds_write (gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderDDS::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	auto ld = static_cast<ImageLoaderDDS *>(loader);
 	uint width = ddsGetWidth(buf);
 	uint height = ddsGetHeight(buf);
 	uint type = ddsGetType(buf);
@@ -564,78 +570,45 @@ gboolean image_loader_dds_write (gpointer loader, const guchar *buf, gsize &chun
 		case A8R8G8B8: pixels = ddsReadA8R8G8B8(width, height, buf); break;
 		case X8R8G8B8: pixels = ddsReadX8R8G8B8(width, height, buf); break;
 		}
-		ld->pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8, width, height, rowstride, free_buffer, nullptr);
-		ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
+		pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8, width, height, rowstride, free_buffer, nullptr);
+		area_updated_cb(nullptr, 0, 0, width, height, data);
 		chunk_size = count;
 		return TRUE;
 	}
 }
 
-gpointer image_loader_dds_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderDDS::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
 {
-	auto loader = g_new0(ImageLoaderDDS, 1);
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->data = data;
 }
 
-void image_loader_dds_set_size(gpointer loader, int width, int height)
+GdkPixbuf *ImageLoaderDDS::get_pixbuf()
 {
-	auto ld = static_cast<ImageLoaderDDS *>(loader);
-	ld->requested_width = width;
-	ld->requested_height = height;
+	return pixbuf;
 }
 
-GdkPixbuf* image_loader_dds_get_pixbuf(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderDDS *>(loader);
-	return ld->pixbuf;
-}
-
-gchar* image_loader_dds_get_format_name(gpointer)
+gchar *ImageLoaderDDS::get_format_name()
 {
 	return g_strdup("dds");
 }
 
-gchar** image_loader_dds_get_format_mime_types(gpointer)
+gchar **ImageLoaderDDS::get_format_mime_types()
 {
 	static const gchar *mime[] = {"image/vnd-ms.dds", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-gboolean image_loader_dds_close(gpointer, GError **)
+ImageLoaderDDS::~ImageLoaderDDS()
 {
-	return TRUE;
-}
-
-void image_loader_dds_abort(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderDDS *>(loader);
-	ld->abort = TRUE;
-}
-
-void image_loader_dds_free(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderDDS *>(loader);
-	if (ld->pixbuf) g_object_unref(ld->pixbuf);
-	g_free(ld);
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
 } // namespace
 
-void image_loader_backend_set_dds(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_dds()
 {
-	funcs->loader_new = image_loader_dds_new;
-	funcs->set_size = image_loader_dds_set_size;
-	funcs->write = image_loader_dds_write;
-	funcs->get_pixbuf = image_loader_dds_get_pixbuf;
-	funcs->close = image_loader_dds_close;
-	funcs->abort = image_loader_dds_abort;
-	funcs->free = image_loader_dds_free;
-	funcs->get_format_name = image_loader_dds_get_format_name;
-	funcs->get_format_mime_types = image_loader_dds_get_format_mime_types;
+	return std::make_unique<ImageLoaderDDS>();
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

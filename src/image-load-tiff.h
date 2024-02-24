@@ -25,9 +25,11 @@
 #include <config.h>
 
 #if HAVE_TIFF
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_tiff(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_tiff();
 #endif
 
 #endif

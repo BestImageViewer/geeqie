@@ -36,15 +36,24 @@
 namespace
 {
 
-struct ImageLoaderHEIF {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderHEIF : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderHEIF() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+	void set_page_num(gint page_num) override;
+	gint get_page_total() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
 	gpointer data;
+
 	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-	gboolean abort;
 	gint page_num;
 	gint page_total;
 };
@@ -54,19 +63,17 @@ void free_buffer(guchar *, gpointer data)
 	heif_image_release(static_cast<const struct heif_image*>(data));
 }
 
-gboolean image_loader_heif_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderHEIF::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	auto ld = static_cast<ImageLoaderHEIF *>(loader);
 	struct heif_context* ctx;
 	struct heif_image* img;
 	struct heif_error error_code;
 	struct heif_image_handle* handle;
-	guint8* data;
+	guint8* pixels;
 	gint width;
 	gint height;
 	gint stride;
 	gboolean alpha;
-	gint page_total;
 
 	ctx = heif_context_alloc();
 
@@ -79,17 +86,16 @@ gboolean image_loader_heif_write(gpointer loader, const guchar *buf, gsize &chun
 		}
 
 	page_total = heif_context_get_number_of_top_level_images(ctx);
-	ld->page_total = page_total;
 
 	std::vector<heif_item_id> IDs(page_total);
 
 	/* get list of all (top level) image IDs */
 	heif_context_get_list_of_top_level_image_IDs(ctx, IDs.data(), page_total);
 
-	error_code = heif_context_get_image_handle(ctx, IDs[ld->page_num], &handle);
+	error_code = heif_context_get_image_handle(ctx, IDs[page_num], &handle);
 	if (error_code.code)
 		{
-		log_printf("warning:  heif reader error: %s\n", error_code.message);
+		log_printf("warning: heif reader error: %s\n", error_code.message);
 		heif_context_free(ctx);
 		return FALSE;
 		}
@@ -103,16 +109,16 @@ gboolean image_loader_heif_write(gpointer loader, const guchar *buf, gsize &chun
 		return FALSE;
 		}
 
-	data = heif_image_get_plane(img, heif_channel_interleaved, &stride);
+	pixels = heif_image_get_plane(img, heif_channel_interleaved, &stride);
 
 	height = heif_image_get_height(img,heif_channel_interleaved);
 	width = heif_image_get_width(img,heif_channel_interleaved);
 	alpha = heif_image_handle_has_alpha_channel(handle);
 	heif_image_handle_release(handle);
 
-	ld->pixbuf = gdk_pixbuf_new_from_data(data, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, img);
+	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, img);
 
-	ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
+	area_updated_cb(nullptr, 0, 0, width, height, data);
 
 	heif_context_free(ctx);
 
@@ -120,88 +126,49 @@ gboolean image_loader_heif_write(gpointer loader, const guchar *buf, gsize &chun
 	return TRUE;
 }
 
-gpointer image_loader_heif_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderHEIF::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
 {
-	auto loader = g_new0(ImageLoaderHEIF, 1);
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	loader->page_num = 0;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->data = data;
+	page_num = 0;
 }
 
-void image_loader_heif_set_size(gpointer loader, int width, int height)
+GdkPixbuf *ImageLoaderHEIF::get_pixbuf()
 {
-	auto ld = static_cast<ImageLoaderHEIF *>(loader);
-	ld->requested_width = width;
-	ld->requested_height = height;
+	return pixbuf;
 }
 
-GdkPixbuf* image_loader_heif_get_pixbuf(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderHEIF *>(loader);
-	return ld->pixbuf;
-}
-
-gchar* image_loader_heif_get_format_name(gpointer)
+gchar *ImageLoaderHEIF::get_format_name()
 {
 	return g_strdup("heif");
 }
 
-gchar** image_loader_heif_get_format_mime_types(gpointer)
+gchar **ImageLoaderHEIF::get_format_mime_types()
 {
 	static const gchar *mime[] = {"image/heic", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-void image_loader_heif_set_page_num(gpointer loader, gint page_num)
+void ImageLoaderHEIF::set_page_num(gint page_num)
 {
-	auto ld = static_cast<ImageLoaderHEIF *>(loader);
-
-	ld->page_num = page_num;
+	this->page_num = page_num;
 }
 
-gint image_loader_heif_get_page_total(gpointer loader)
+gint ImageLoaderHEIF::get_page_total()
 {
-	auto ld = static_cast<ImageLoaderHEIF *>(loader);
-
-	return ld->page_total;
+	return page_total;
 }
 
-gboolean image_loader_heif_close(gpointer, GError **)
+ImageLoaderHEIF::~ImageLoaderHEIF()
 {
-	return TRUE;
-}
-
-void image_loader_heif_abort(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderHEIF *>(loader);
-	ld->abort = TRUE;
-}
-
-void image_loader_heif_free(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderHEIF *>(loader);
-	if (ld->pixbuf) g_object_unref(ld->pixbuf);
-	g_free(ld);
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
 } // namespace
 
-void image_loader_backend_set_heif(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_heif()
 {
-	funcs->loader_new = image_loader_heif_new;
-	funcs->set_size = image_loader_heif_set_size;
-	funcs->write = image_loader_heif_write;
-	funcs->get_pixbuf = image_loader_heif_get_pixbuf;
-	funcs->close = image_loader_heif_close;
-	funcs->abort = image_loader_heif_abort;
-	funcs->free = image_loader_heif_free;
-	funcs->get_format_name = image_loader_heif_get_format_name;
-	funcs->get_format_mime_types = image_loader_heif_get_format_mime_types;
-	funcs->set_page_num = image_loader_heif_set_page_num;
-	funcs->get_page_total = image_loader_heif_get_page_total;
+	return std::make_unique<ImageLoaderHEIF>();
 }
 
 #endif

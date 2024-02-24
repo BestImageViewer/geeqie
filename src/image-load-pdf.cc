@@ -36,22 +36,30 @@
 namespace
 {
 
-struct ImageLoaderPDF {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderPDF : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderPDF() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+	void set_page_num(gint page_num) override;
+	gint get_page_total() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
 	gpointer data;
+
 	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-	gboolean abort;
 	gint page_num;
 	gint page_total;
 };
 
-gboolean image_loader_pdf_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderPDF::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	auto ld = static_cast<ImageLoaderPDF *>(loader);
 	GError *poppler_error = nullptr;
 	PopplerPage *page;
 	PopplerDocument *document;
@@ -79,10 +87,10 @@ gboolean image_loader_pdf_write(gpointer loader, const guchar *buf, gsize &chunk
 		page_total = poppler_document_get_n_pages(document);
 		if (page_total > 0)
 			{
-			ld->page_total = page_total;
+			this->page_total = page_total;
 			}
 
-		page = poppler_document_get_page(document, ld->page_num);
+		page = poppler_document_get_page(document, page_num);
 		poppler_page_get_size(page, &width, &height);
 
 		surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
@@ -93,8 +101,8 @@ gboolean image_loader_pdf_write(gpointer loader, const guchar *buf, gsize &chunk
 		cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 		cairo_paint(cr);
 
-		ld->pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
-		ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
+		pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, width, height);
+		area_updated_cb(nullptr, 0, 0, width, height, data);
 
 		cairo_destroy (cr);
 		cairo_surface_destroy(surface);
@@ -111,88 +119,49 @@ gboolean image_loader_pdf_write(gpointer loader, const guchar *buf, gsize &chunk
 	return ret;
 }
 
-gpointer image_loader_pdf_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderPDF::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
 {
-	auto loader = g_new0(ImageLoaderPDF, 1);
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	loader->page_num = 0;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->data = data;
+	page_num = 0;
 }
 
-void image_loader_pdf_set_size(gpointer loader, int width, int height)
+GdkPixbuf *ImageLoaderPDF::get_pixbuf()
 {
-	auto ld = static_cast<ImageLoaderPDF *>(loader);
-	ld->requested_width = width;
-	ld->requested_height = height;
+	return pixbuf;
 }
 
-GdkPixbuf* image_loader_pdf_get_pixbuf(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderPDF *>(loader);
-	return ld->pixbuf;
-}
-
-gchar* image_loader_pdf_get_format_name(gpointer)
+gchar *ImageLoaderPDF::get_format_name()
 {
 	return g_strdup("pdf");
 }
 
-gchar** image_loader_pdf_get_format_mime_types(gpointer)
+gchar **ImageLoaderPDF::get_format_mime_types()
 {
 	static const gchar *mime[] = {"application/pdf", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-void image_loader_pdf_set_page_num(gpointer loader, gint page_num)
+void ImageLoaderPDF::set_page_num(gint page_num)
 {
-	auto ld = static_cast<ImageLoaderPDF *>(loader);
-
-	ld->page_num = page_num;
+	this->page_num = page_num;
 }
 
-gint image_loader_pdf_get_page_total(gpointer loader)
+gint ImageLoaderPDF::get_page_total()
 {
-	auto ld = static_cast<ImageLoaderPDF *>(loader);
-
-	return ld->page_total;
+	return page_total;
 }
 
-gboolean image_loader_pdf_close(gpointer, GError **)
+ImageLoaderPDF::~ImageLoaderPDF()
 {
-	return TRUE;
-}
-
-void image_loader_pdf_abort(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderPDF *>(loader);
-	ld->abort = TRUE;
-}
-
-void image_loader_pdf_free(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderPDF *>(loader);
-	if (ld->pixbuf) g_object_unref(ld->pixbuf);
-	g_free(ld);
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
 } // namespace
 
-void image_loader_backend_set_pdf(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_pdf()
 {
-	funcs->loader_new = image_loader_pdf_new;
-	funcs->set_size = image_loader_pdf_set_size;
-	funcs->write = image_loader_pdf_write;
-	funcs->get_pixbuf = image_loader_pdf_get_pixbuf;
-	funcs->close = image_loader_pdf_close;
-	funcs->abort = image_loader_pdf_abort;
-	funcs->free = image_loader_pdf_free;
-	funcs->get_format_name = image_loader_pdf_get_format_name;
-	funcs->get_format_mime_types = image_loader_pdf_get_format_mime_types;
-	funcs->set_page_num = image_loader_pdf_set_page_num;
-	funcs->get_page_total = image_loader_pdf_get_page_total;
+	return std::make_unique<ImageLoaderPDF>();
 }
 
 #endif

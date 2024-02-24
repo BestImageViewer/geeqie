@@ -21,9 +21,11 @@
 #ifndef IMAGE_LOAD_PSD_H
 #define IMAGE_LOAD_PSD_H
 
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_psd(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_psd();
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

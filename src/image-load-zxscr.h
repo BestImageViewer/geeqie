@@ -21,9 +21,11 @@
 #ifndef IMAGE_LOAD_ZXSCR_H
 #define IMAGE_LOAD_ZXSCR_H
 
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_zxscr(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_zxscr();
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

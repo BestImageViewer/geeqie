@@ -24,9 +24,11 @@
 #include <config.h>
 
 #if HAVE_PDF
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_pdf(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_pdf();
 #endif
 
 #endif

@@ -132,7 +132,7 @@ static void image_loader_init(GTypeInstance *instance, gpointer)
 	il->idle_id = 0;
 	il->idle_priority = G_PRIORITY_DEFAULT_IDLE;
 	il->done = FALSE;
-	il->loader = nullptr;
+	il->backend.reset(nullptr);
 
 	il->bytes_read = 0;
 	il->bytes_total = 0;
@@ -475,13 +475,13 @@ static void image_loader_sync_pixbuf(ImageLoader *il)
 
 	g_mutex_lock(il->data_mutex);
 
-	if (!il->loader)
+	if (!il->backend)
 		{
 		g_mutex_unlock(il->data_mutex);
 		return;
 		}
 
-	pb = il->backend.get_pixbuf(il->loader);
+	pb = il->backend->get_pixbuf();
 
 	if (pb == il->pixbuf)
 		{
@@ -523,12 +523,12 @@ static void image_loader_area_updated_cb(gpointer,
 	else
 		image_loader_emit_area_ready(il, x, y, w, h);
 
-	if (il->stopping) il->backend.abort(il->loader);
+	if (il->stopping) il->backend->abort();
 
 	g_mutex_unlock(il->data_mutex);
 }
 
-static void image_loader_area_prepared_cb(gpointer loader, gpointer data)
+static void image_loader_area_prepared_cb(gpointer, gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
 	GdkPixbuf *pb;
@@ -540,7 +540,7 @@ static void image_loader_area_prepared_cb(gpointer loader, gpointer data)
 	   https://bugzilla.gnome.org/show_bug.cgi?id=547669
 	   https://bugzilla.gnome.org/show_bug.cgi?id=589334
 	*/
-	gchar *format = il->backend.get_format_name(loader);
+	gchar *format = il->backend->get_format_name();
 	if (strcmp(format, "svg") == 0 ||
 	    strcmp(format, "xpm") == 0)
 		{
@@ -550,7 +550,7 @@ static void image_loader_area_prepared_cb(gpointer loader, gpointer data)
 
 	g_free(format);
 
-	pb = il->backend.get_pixbuf(loader);
+	pb = il->backend->get_pixbuf();
 
 	h = gdk_pixbuf_get_height(pb);
 	rs = gdk_pixbuf_get_rowstride(pb);
@@ -560,7 +560,7 @@ static void image_loader_area_prepared_cb(gpointer loader, gpointer data)
 
 }
 
-static void image_loader_size_cb(gpointer loader,
+static void image_loader_size_cb(gpointer,
 				 gint width, gint height, gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
@@ -583,7 +583,7 @@ static void image_loader_size_cb(gpointer loader,
 	if (il->fd->format_class == FORMAT_CLASS_VIDEO)
 		scale = TRUE;
 #endif
-	mime_types = il->backend.get_format_mime_types(loader);
+	mime_types = il->backend->get_format_mime_types();
 	n = 0;
 	while (mime_types[n] && !scale)
 		{
@@ -620,7 +620,7 @@ static void image_loader_size_cb(gpointer loader,
 
 		il->actual_width = nw;
 		il->actual_height = nh;
-		il->backend.set_size(loader, nw, nh);
+		il->backend->set_size(nw, nh);
 		il->shrunk = TRUE;
 		}
 
@@ -632,13 +632,12 @@ static void image_loader_stop_loader(ImageLoader *il)
 {
 	if (!il) return;
 
-	if (il->loader)
+	if (il->backend)
 		{
 		/* some loaders do not have a pixbuf till close, order is important here */
-		il->backend.close(il->loader, il->error ? nullptr : &il->error); /* we are interested in the first error only */
+		il->backend->close(il->error ? nullptr : &il->error); /* we are interested in the first error only */
 		image_loader_sync_pixbuf(il);
-		il->backend.free(il->loader);
-		il->loader = nullptr;
+		il->backend.reset(nullptr);
 		}
 	g_mutex_lock(il->data_mutex);
 	il->done = TRUE;
@@ -672,7 +671,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 	if (external_preview == 0)
 		{
 		DEBUG_1("Using custom external loader");
-		image_loader_backend_set_external(&il->backend);
+		il->backend = get_image_loader_backend_external();
 		}
 	else
 		{
@@ -680,7 +679,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		if (il->fd->format_class == FORMAT_CLASS_VIDEO)
 			{
 			DEBUG_1("Using custom ffmpegthumbnailer loader");
-			image_loader_backend_set_ft(&il->backend);
+			il->backend = get_image_loader_backend_ft();
 			}
 		else
 #endif
@@ -689,20 +688,20 @@ static void image_loader_setup_loader(ImageLoader *il)
 		    (memcmp(il->mapped_file + 0, "%PDF", 4) == 0))
 			{
 			DEBUG_1("Using custom pdf loader");
-			image_loader_backend_set_pdf(&il->backend);
+			il->backend = get_image_loader_backend_pdf();
 			}
 		else
 #endif
 #if HAVE_HEIF
 		if (il->bytes_total >= 12 &&
-			((memcmp(il->mapped_file + 4, "ftypheic", 8) == 0) ||
-			(memcmp(il->mapped_file + 4, "ftypheix", 8) == 0) ||
-			(memcmp(il->mapped_file + 4, "ftypmsf1", 8) == 0) ||
-			(memcmp(il->mapped_file + 4, "ftypmif1", 8) == 0) ||
-			(memcmp(il->mapped_file + 4, "ftypavif", 8) == 0)))
+		    ((memcmp(il->mapped_file + 4, "ftypheic", 8) == 0) ||
+		     (memcmp(il->mapped_file + 4, "ftypheix", 8) == 0) ||
+		     (memcmp(il->mapped_file + 4, "ftypmsf1", 8) == 0) ||
+		     (memcmp(il->mapped_file + 4, "ftypmif1", 8) == 0) ||
+		     (memcmp(il->mapped_file + 4, "ftypavif", 8) == 0)))
 			{
 			DEBUG_1("Using custom heif loader");
-			image_loader_backend_set_heif(&il->backend);
+			il->backend = get_image_loader_backend_heif();
 			}
 		else
 	#endif
@@ -712,7 +711,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			(memcmp(il->mapped_file + 8, "WEBP", 4) == 0))
 			{
 			DEBUG_1("Using custom webp loader");
-			image_loader_backend_set_webp(&il->backend);
+			il->backend = get_image_loader_backend_webp();
 			}
 		else
 #endif
@@ -722,7 +721,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			(memcmp(il->mapped_file + 12, "DJV", 3) == 0))
 			{
 			DEBUG_1("Using custom djvu loader");
-			image_loader_backend_set_djvu(&il->backend);
+			il->backend = get_image_loader_backend_djvu();
 			}
 		else
 #endif
@@ -730,16 +729,16 @@ static void image_loader_setup_loader(ImageLoader *il)
 		if (il->bytes_total >= 2 && il->mapped_file[0] == 0xff && il->mapped_file[1] == 0xd8)
 			{
 			DEBUG_1("Using custom jpeg loader");
-			image_loader_backend_set_jpeg(&il->backend);
+			il->backend = get_image_loader_backend_jpeg();
 			}
 #if !HAVE_RAW
 		else
 		if (il->bytes_total >= 11 &&
-			(memcmp(il->mapped_file + 4, "ftypcrx", 7) == 0) &&
-			(memcmp(il->mapped_file + 64, "CanonCR3", 8) == 0))
+		    (memcmp(il->mapped_file + 4, "ftypcrx", 7) == 0) &&
+		    (memcmp(il->mapped_file + 64, "CanonCR3", 8) == 0))
 			{
 			DEBUG_1("Using custom cr3 loader");
-			image_loader_backend_set_cr3(&il->backend);
+			il->backend = get_image_loader_backend_cr3();
 			}
 #endif
 		else
@@ -752,21 +751,21 @@ static void image_loader_setup_loader(ImageLoader *il)
 		     memcmp(il->mapped_file, "II*\0", 4) == 0))
 		     	{
 			DEBUG_1("Using custom tiff loader");
-			image_loader_backend_set_tiff(&il->backend);
+			il->backend = get_image_loader_backend_tiff();
 			}
 		else
 #endif
 		if (il->bytes_total >= 3 && il->mapped_file[0] == 0x44 && il->mapped_file[1] == 0x44 && il->mapped_file[2] == 0x53)
 			{
 			DEBUG_1("Using dds loader");
-			image_loader_backend_set_dds(&il->backend);
+			il->backend = get_image_loader_backend_dds();
 			}
 		else
 		if (il->bytes_total >= 6 &&
 			(memcmp(il->mapped_file, "8BPS\0\x01", 6) == 0))
 			{
 			DEBUG_1("Using custom psd loader");
-			image_loader_backend_set_psd(&il->backend);
+			il->backend = get_image_loader_backend_psd();
 			}
 		else
 #if HAVE_J2K
@@ -774,23 +773,18 @@ static void image_loader_setup_loader(ImageLoader *il)
 			(memcmp(il->mapped_file, "\0\0\0\x0CjP\x20\x20\x0D\x0A\x87\x0A", 12) == 0))
 			{
 			DEBUG_1("Using custom j2k loader");
-			image_loader_backend_set_j2k(&il->backend);
+			il->backend = get_image_loader_backend_j2k();
 			}
 		else
 #endif
 #if HAVE_JPEGXL
-		if (il->bytes_total >= 12 &&
-			(memcmp(il->mapped_file, "\0\0\0\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A", 12) == 0))
+		if ((il->bytes_total >= 12 &&
+		     (memcmp(il->mapped_file, "\0\0\0\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A", 12) == 0)) ||
+		    (il->bytes_total >= 2 &&
+		     (memcmp(il->mapped_file, "\xFF\x0A", 2) == 0)))
 			{
 			DEBUG_1("Using custom jpeg xl loader");
-			image_loader_backend_set_jpegxl(&il->backend);
-			}
-		else
-		if (il->bytes_total >= 2 &&
-			(memcmp(il->mapped_file, "\xFF\x0A", 2) == 0))
-			{
-			DEBUG_1("Using custom jpeg xl loader");
-			image_loader_backend_set_jpegxl(&il->backend);
+			il->backend = get_image_loader_backend_jpegxl();
 			}
 		else
 #endif
@@ -798,63 +792,63 @@ static void image_loader_setup_loader(ImageLoader *il)
 			(file_extension_match(il->fd->path, ".scr")))
 			{
 			DEBUG_1("Using custom zxscr loader");
-			image_loader_backend_set_zxscr(&il->backend);
+			il->backend = get_image_loader_backend_zxscr();
 			}
 		else
 		if (il->fd->format_class == FORMAT_CLASS_COLLECTION)
 			{
 			DEBUG_1("Using custom collection loader");
-			image_loader_backend_set_collection(&il->backend);
+			il->backend = get_image_loader_backend_collection();
 			}
 		else
 		if (g_strcmp0(strrchr(il->fd->path, '.'), ".svgz") == 0)
 			{
 			DEBUG_1("Using custom svgz loader");
-			image_loader_backend_set_svgz(&il->backend);
+			il->backend = get_image_loader_backend_svgz();
 			}
 		else
-			image_loader_backend_set_default(&il->backend);
+			il->backend = get_image_loader_backend_default();
 		}
 
-	il->loader = static_cast<void **>(il->backend.loader_new(image_loader_area_updated_cb, image_loader_size_cb, image_loader_area_prepared_cb, il));
+	il->backend->init(image_loader_area_updated_cb, image_loader_size_cb, image_loader_area_prepared_cb, il);
 
 #if HAVE_TIFF
-	format = il->backend.get_format_name(il->loader);
+	format = il->backend->get_format_name();
 	if (g_strcmp0(format, "tiff") == 0)
 		{
-		il->backend.set_page_num(il->loader, il->fd->page_num);
+		il->backend->set_page_num(il->fd->page_num);
 		}
 	g_free(format);
 #endif
 
 #if HAVE_PDF
-	format = il->backend.get_format_name(il->loader);
+	format = il->backend->get_format_name();
 	if (g_strcmp0(format, "pdf") == 0)
 		{
-		il->backend.set_page_num(il->loader, il->fd->page_num);
+		il->backend->set_page_num(il->fd->page_num);
 		}
 	g_free(format);
 #endif
 
 #if HAVE_HEIF
-	format = il->backend.get_format_name(il->loader);
+	format = il->backend->get_format_name();
 	if (g_strcmp0(format, "heif") == 0)
 		{
-		il->backend.set_page_num(il->loader, il->fd->page_num);
+		il->backend->set_page_num(il->fd->page_num);
 		}
 	g_free(format);
 #endif
 
 #if HAVE_DJVU
-	format = il->backend.get_format_name(il->loader);
+	format = il->backend->get_format_name();
 	if (g_strcmp0(format, "djvu") == 0)
 		{
-		il->backend.set_page_num(il->loader, il->fd->page_num);
+		il->backend->set_page_num(il->fd->page_num);
 		}
 	g_free(format);
 #endif
 
-	il->fd->format_name = il->backend.get_format_name(il->loader);
+	il->fd->format_name = il->backend->get_format_name();
 
 	g_mutex_unlock(il->data_mutex);
 }
@@ -899,7 +893,7 @@ static gboolean image_loader_continue(ImageLoader *il)
 
 		gsize b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
 
-		if (!il->backend.write(il->loader, il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
+		if (!il->backend->write(il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
 			{
 			image_loader_error(il);
 			return G_SOURCE_REMOVE;
@@ -933,44 +927,44 @@ static gboolean image_loader_begin(ImageLoader *il)
 	image_loader_setup_loader(il);
 
 	g_assert(il->bytes_read == 0);
-	if (!il->backend.write(il->loader, il->mapped_file, b, il->bytes_total, &il->error))
+	if (!il->backend->write(il->mapped_file, b, il->bytes_total, &il->error))
 		{
 		image_loader_stop_loader(il);
 		return FALSE;
 		}
 
 #if HAVE_PDF
-	format = il->backend.get_format_name(il->loader);
+	format = il->backend->get_format_name();
 	if (g_strcmp0(format, "pdf") == 0)
 		{
-		gint i = il->backend.get_page_total(il->loader);
+		gint i = il->backend->get_page_total();
 		file_data_set_page_total(il->fd, i);
 		}
 	g_free(format);
 #endif
 #if HAVE_HEIF
-	format = il->backend.get_format_name(il->loader);
+	format = il->backend->get_format_name();
 	if (g_strcmp0(format, "heif") == 0)
 		{
-		gint i = il->backend.get_page_total(il->loader);
+		gint i = il->backend->get_page_total();
 		file_data_set_page_total(il->fd, i);
 		}
 	g_free(format);
 #endif
 #if HAVE_DJVU
-	format = il->backend.get_format_name(il->loader);
+	format = il->backend->get_format_name();
 	if (g_strcmp0(format, "djvu") == 0)
 		{
-		gint i = il->backend.get_page_total(il->loader);
+		gint i = il->backend->get_page_total();
 		file_data_set_page_total(il->fd, i);
 		}
 	g_free(format);
 #endif
 #if HAVE_TIFF
-	format = il->backend.get_format_name(il->loader);
+	format = il->backend->get_format_name();
 	if (g_strcmp0(format, "tiff") == 0)
 		{
-		gint i = il->backend.get_page_total(il->loader);
+		gint i = il->backend->get_page_total();
 		file_data_set_page_total(il->fd, i);
 		}
 	g_free(format);
@@ -979,7 +973,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 	il->bytes_read += b;
 
 	/* read until size is known */
-	while (il->loader && !il->backend.get_pixbuf(il->loader) && b > 0 && !image_loader_get_stopping(il))
+	while (il->backend && !il->backend->get_pixbuf() && b > 0 && !image_loader_get_stopping(il))
 		{
 		if (il->bytes_total < il->bytes_read)
 			{
@@ -988,7 +982,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 			}
 
 		b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
-		if (b > 0 && !il->backend.write(il->loader, il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
+		if (b > 0 && !il->backend->write(il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
 			{
 			image_loader_stop_loader(il);
 			return FALSE;
@@ -1026,7 +1020,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 	struct stat st;
 	gchar *pathl;
 
-	if (!il || il->loader || il->mapped_file) return FALSE;
+	if (!il || il->backend || il->mapped_file) return FALSE;
 
 	il->mapped_file = nullptr;
 

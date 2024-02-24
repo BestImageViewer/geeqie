@@ -33,21 +33,27 @@
 namespace
 {
 
-struct ImageLoaderExternal {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderExternal : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderExternal() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
 	gpointer data;
+
 	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-	gboolean abort;
 };
 
-gboolean image_loader_external_write(gpointer loader, const guchar *, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderExternal::write(const guchar *, gsize &chunk_size, gsize count, GError **)
 {
-	auto ld = static_cast<ImageLoaderExternal *>(loader);
-	auto il = static_cast<ImageLoader *>(ld->data);
+	auto il = static_cast<ImageLoader *>(data);
 	gchar *cmd_line;
 	gchar *randname;
 	gchar *tilde_filename;
@@ -61,9 +67,9 @@ gboolean image_loader_external_write(gpointer loader, const guchar *, gsize &chu
 
 	runcmd(cmd_line);
 
-	ld->pixbuf = gdk_pixbuf_new_from_file(randname, nullptr);
+	pixbuf = gdk_pixbuf_new_from_file(randname, nullptr);
 
-	ld->area_updated_cb(loader, 0, 0, gdk_pixbuf_get_width(ld->pixbuf), gdk_pixbuf_get_height(ld->pixbuf), ld->data);
+	area_updated_cb(nullptr, 0, 0, gdk_pixbuf_get_width(pixbuf), gdk_pixbuf_get_height(pixbuf), data);
 
 	g_free(cmd_line);
 	unlink_file(randname);
@@ -74,72 +80,38 @@ gboolean image_loader_external_write(gpointer loader, const guchar *, gsize &chu
 	return TRUE;
 }
 
-gpointer image_loader_external_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderExternal::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
 {
-	auto loader = g_new0(ImageLoaderExternal, 1);
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->data = data;
 }
 
-void image_loader_external_set_size(gpointer loader, int width, int height)
+GdkPixbuf *ImageLoaderExternal::get_pixbuf()
 {
-	auto ld = static_cast<ImageLoaderExternal *>(loader);
-	ld->requested_width = width;
-	ld->requested_height = height;
+	return pixbuf;
 }
 
-GdkPixbuf* image_loader_external_get_pixbuf(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderExternal *>(loader);
-	return ld->pixbuf;
-}
-
-gchar* image_loader_external_get_format_name(gpointer)
+gchar *ImageLoaderExternal::get_format_name()
 {
 	return g_strdup("external");
 }
 
-gchar** image_loader_external_get_format_mime_types(gpointer)
+gchar **ImageLoaderExternal::get_format_mime_types()
 {
 	static const gchar *mime[] = {"application/octet-stream", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-gboolean image_loader_external_close(gpointer, GError **)
+ImageLoaderExternal::~ImageLoaderExternal()
 {
-	return TRUE;
-}
-
-void image_loader_external_abort(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderExternal *>(loader);
-	ld->abort = TRUE;
-}
-
-void image_loader_external_free(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderExternal *>(loader);
-	if (ld->pixbuf) g_object_unref(ld->pixbuf);
-	g_free(ld);
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
 } // namespace
 
-void image_loader_backend_set_external(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_external()
 {
-	funcs->loader_new = image_loader_external_new;
-	funcs->set_size = image_loader_external_set_size;
-	funcs->write = image_loader_external_write;
-	funcs->get_pixbuf = image_loader_external_get_pixbuf;
-	funcs->close = image_loader_external_close;
-	funcs->abort = image_loader_external_abort;
-	funcs->free = image_loader_external_free;
-	funcs->get_format_name = image_loader_external_get_format_name;
-	funcs->get_format_mime_types = image_loader_external_get_format_mime_types;
+	return std::make_unique<ImageLoaderExternal>();
 }
-
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -62,15 +62,22 @@
 namespace
 {
 
-struct ImageLoaderPSD {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderPSD : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderPSD() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
 	gpointer data;
+
 	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-	gboolean abort;
 };
 
 struct PsdHeader
@@ -123,8 +130,8 @@ struct PsdContext
 {
 	PsdReadState       state;
 
-	GdkPixbuf*                  pixbuf;
-	gpointer                    user_data;
+	GdkPixbuf*         pixbuf;
+	gpointer           user_data;
 
 	guchar*            buffer;
 	guint              bytes_read;
@@ -299,9 +306,8 @@ void free_context(PsdContext *ctx)
 	g_free(ctx);
 }
 
-gboolean image_loader_psd_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderPSD::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	auto ld = static_cast<ImageLoaderPSD *>(loader);
 	auto ctx = g_new0(PsdContext, 1);
 	guint i;
 	guint32 j;
@@ -529,8 +535,8 @@ gboolean image_loader_psd_write(gpointer loader, const guchar *buf, gsize &chunk
 			}
 		}
 		ctx->finalized = TRUE;
-		ld->pixbuf = ctx->pixbuf;
-		ld->area_updated_cb(loader, 0, 0, ctx->width, ctx->height, ld->data);
+		pixbuf = ctx->pixbuf;
+		area_updated_cb(nullptr, 0, 0, ctx->width, ctx->height, data);
 		free_context(ctx);
 
 		chunk_size = count;
@@ -543,70 +549,37 @@ gboolean image_loader_psd_write(gpointer loader, const guchar *buf, gsize &chunk
 
 /* ------- Geeqie ------------ */
 
-gpointer image_loader_psd_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderPSD::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
 {
-	auto loader = g_new0(ImageLoaderPSD, 1);
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->data = data;
 }
 
-void image_loader_psd_set_size(gpointer loader, int width, int height)
+GdkPixbuf *ImageLoaderPSD::get_pixbuf()
 {
-	auto ld = static_cast<ImageLoaderPSD *>(loader);
-	ld->requested_width = width;
-	ld->requested_height = height;
+	return pixbuf;
 }
 
-GdkPixbuf* image_loader_psd_get_pixbuf(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderPSD *>(loader);
-	return ld->pixbuf;
-}
-
-gchar* image_loader_psd_get_format_name(gpointer)
+gchar *ImageLoaderPSD::get_format_name()
 {
 	return g_strdup("psd");
 }
 
-gchar** image_loader_psd_get_format_mime_types(gpointer)
+gchar **ImageLoaderPSD::get_format_mime_types()
 {
 	static const gchar *mime[] = {"application/psd", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-gboolean image_loader_psd_close(gpointer, GError **)
+ImageLoaderPSD::~ImageLoaderPSD()
 {
-	return TRUE;
-}
-
-void image_loader_psd_abort(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderPSD *>(loader);
-	ld->abort = TRUE;
-}
-
-void image_loader_psd_free(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderPSD *>(loader);
-	if (ld->pixbuf) g_object_unref(ld->pixbuf);
-	g_free(ld);
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
 } // namespace
 
-void image_loader_backend_set_psd(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_psd()
 {
-	funcs->loader_new = image_loader_psd_new;
-	funcs->set_size = image_loader_psd_set_size;
-	funcs->write = image_loader_psd_write;
-	funcs->get_pixbuf = image_loader_psd_get_pixbuf;
-	funcs->close = image_loader_psd_close;
-	funcs->abort = image_loader_psd_abort;
-	funcs->free = image_loader_psd_free;
-	funcs->get_format_name = image_loader_psd_get_format_name;
-	funcs->get_format_mime_types = image_loader_psd_get_format_mime_types;
+	return std::make_unique<ImageLoaderPSD>();
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

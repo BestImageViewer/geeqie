@@ -22,6 +22,8 @@
 #ifndef IMAGE_LOAD_H
 #define IMAGE_LOAD_H
 
+#include <memory>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib-object.h>
 #include <glib.h>
@@ -30,35 +32,25 @@ struct FileData;
 
 #define TYPE_IMAGE_LOADER		(image_loader_get_type())
 
-using ImageLoaderBackendCbAreaPrepared = void (*)(gpointer, gpointer);
-using ImageLoaderBackendCbSize = void (*)(gpointer, gint, gint, gpointer);
-using ImageLoaderBackendCbAreaUpdated = void (*)(gpointer, guint, guint, guint, guint, gpointer);
-
-using ImageLoaderBackendFuncLoaderNew = gpointer (*)(ImageLoaderBackendCbAreaUpdated, ImageLoaderBackendCbSize, ImageLoaderBackendCbAreaPrepared, gpointer);
-using ImageLoaderBackendFuncSetSize = void (*)(gpointer, int, int);
-using ImageLoaderBackendFuncWrite = gboolean (*)(gpointer, const guchar *, gsize &, gsize, GError **);
-using ImageLoaderBackendFuncGetPixbuf = GdkPixbuf *(*)(gpointer);
-using ImageLoaderBackendFuncClose = gboolean (*)(gpointer, GError **);
-using ImageLoaderBackendFuncAbort = void (*)(gpointer);
-using ImageLoaderBackendFuncFree = void (*)(gpointer);
-using ImageLoaderBackendFuncGetFormatName = gchar *(*)(gpointer);
-using ImageLoaderBackendFuncGetFormatMimeTypes = gchar **(*)(gpointer);
-using ImageLoaderBackendFuncSetPageNum = void (*)(gpointer, gint);
-using ImageLoaderBackendFuncGetPageTotal = gint (*)(gpointer);
-
 struct ImageLoaderBackend
 {
-	ImageLoaderBackendFuncLoaderNew loader_new;
-	ImageLoaderBackendFuncSetSize set_size;
-	ImageLoaderBackendFuncWrite write;
-	ImageLoaderBackendFuncGetPixbuf get_pixbuf;
-	ImageLoaderBackendFuncClose close;
-	ImageLoaderBackendFuncAbort abort;
-	ImageLoaderBackendFuncFree free;
-	ImageLoaderBackendFuncGetFormatName get_format_name;
-	ImageLoaderBackendFuncGetFormatMimeTypes get_format_mime_types;
-	ImageLoaderBackendFuncSetPageNum set_page_num;
-	ImageLoaderBackendFuncGetPageTotal get_page_total;
+public:
+	virtual ~ImageLoaderBackend() = default;
+
+	using AreaUpdatedCb = void (*)(gpointer, guint, guint, guint, guint, gpointer);
+	using SizePreparedCb = void (*)(gpointer, gint, gint, gpointer);
+	using AreaPreparedCb = void (*)(gpointer, gpointer);
+
+	virtual void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) = 0;
+	virtual void set_size(int /*width*/, int /*height*/) {};
+	virtual gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) = 0;
+	virtual GdkPixbuf *get_pixbuf() = 0;
+	virtual gboolean close(GError **/*error*/) { return TRUE; };
+	virtual void abort() {};
+	virtual gchar *get_format_name() = 0;
+	virtual gchar **get_format_mime_types() = 0;
+	virtual void set_page_num(gint /*page_num*/) {};
+	virtual gint get_page_total() { return 0; };
 };
 
 enum ImageLoaderPreview {
@@ -94,9 +86,8 @@ struct ImageLoader
 	guint idle_id; /**< event source id */
 	gint idle_priority;
 
-	gpointer *loader;
 	GError *error;
-	ImageLoaderBackend backend;
+	std::unique_ptr<ImageLoaderBackend> backend;
 
 	guint idle_done_id; /**< event source id */
 	GList *area_param_list;

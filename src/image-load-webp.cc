@@ -34,16 +34,22 @@
 namespace
 {
 
-using ImageLoaderWEBP = struct _ImageLoaderWEBP;
-struct _ImageLoaderWEBP {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderWEBP : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderWEBP() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
 	gpointer data;
+
 	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-	gboolean abort;
 };
 
 void free_buffer(guchar *pixels, gpointer)
@@ -51,10 +57,9 @@ void free_buffer(guchar *pixels, gpointer)
 	g_free(pixels);
 }
 
-gboolean image_loader_webp_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderWEBP::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	auto *ld = (ImageLoaderWEBP *) loader;
-	guint8* data;
+	guint8* pixels;
 	gint width;
 	gint height;
 	gboolean res_info;
@@ -77,88 +82,55 @@ gboolean image_loader_webp_write(gpointer loader, const guchar *buf, gsize &chun
 
 	if (features.has_alpha)
 		{
-		data = WebPDecodeRGBA(buf, count, &width, &height);
+		pixels = WebPDecodeRGBA(buf, count, &width, &height);
 		}
 	else
 		{
-		data = WebPDecodeRGB(buf, count, &width, &height);
+		pixels = WebPDecodeRGB(buf, count, &width, &height);
 		}
 
-	ld->pixbuf = gdk_pixbuf_new_from_data(data, GDK_COLORSPACE_RGB, features.has_alpha, 8, width, height, width * (features.has_alpha ? 4 : 3), free_buffer, nullptr);
+	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, features.has_alpha, 8, width, height, width * (features.has_alpha ? 4 : 3), free_buffer, nullptr);
 
-	ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
+	area_updated_cb(nullptr, 0, 0, width, height, data);
 
 	chunk_size = count;
 	return TRUE;
 }
 
-gpointer image_loader_webp_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderWEBP::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
 {
-	auto *loader = g_new0(ImageLoaderWEBP, 1);
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-
-	return (gpointer) loader;
+	this->area_updated_cb = area_updated_cb;
+	this->data = data;
 }
 
-void image_loader_webp_set_size(gpointer loader, int width, int height)
+GdkPixbuf *ImageLoaderWEBP::get_pixbuf()
 {
-	auto *ld = (ImageLoaderWEBP *) loader;
-	ld->requested_width = width;
-	ld->requested_height = height;
+	return pixbuf;
 }
 
-GdkPixbuf* image_loader_webp_get_pixbuf(gpointer loader)
-{
-	auto *ld = (ImageLoaderWEBP *) loader;
-	return ld->pixbuf;
-}
-
-gchar* image_loader_webp_get_format_name(gpointer)
+gchar *ImageLoaderWEBP::get_format_name()
 {
 	return g_strdup("webp");
 }
 
-gchar** image_loader_webp_get_format_mime_types(gpointer)
+gchar **ImageLoaderWEBP::get_format_mime_types()
 {
 	static const gchar *mime[] = {"image/webp", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-gboolean image_loader_webp_close(gpointer, GError **)
+ImageLoaderWEBP::~ImageLoaderWEBP()
 {
-	return TRUE;
-}
-
-void image_loader_webp_abort(gpointer loader)
-{
-	auto *ld = (ImageLoaderWEBP *) loader;
-	ld->abort = TRUE;
-}
-
-void image_loader_webp_free(gpointer loader)
-{
-	auto *ld = (ImageLoaderWEBP *) loader;
-	if (ld->pixbuf) g_object_unref(ld->pixbuf);
-	g_free(ld);
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
 } // namespace
 
-void image_loader_backend_set_webp(ImageLoaderBackend *funcs)
+
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_webp()
 {
-DEBUG_0("        "     );
-	funcs->loader_new = image_loader_webp_new;
-	funcs->set_size = image_loader_webp_set_size;
-	funcs->write = image_loader_webp_write;
-	funcs->get_pixbuf = image_loader_webp_get_pixbuf;
-	funcs->close = image_loader_webp_close;
-	funcs->abort = image_loader_webp_abort;
-	funcs->free = image_loader_webp_free;
-	funcs->get_format_name = image_loader_webp_get_format_name;
-	funcs->get_format_mime_types = image_loader_webp_get_format_mime_types;
+	DEBUG_0("        "     );
+	return std::make_unique<ImageLoaderWEBP>();
 }
 
 #endif

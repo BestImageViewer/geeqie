@@ -47,24 +47,42 @@
 namespace
 {
 
-struct ImageLoaderTiff {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderTiff : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderTiff() override;
 
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void set_size(int width, int height) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	void abort() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+	void set_page_num(gint page_num) override;
+	gint get_page_total() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
+	SizePreparedCb size_prepared_cb;
+	AreaPreparedCb area_prepared_cb;
 	gpointer data;
 
 	GdkPixbuf *pixbuf;
 	guint requested_width;
 	guint requested_height;
 
-	gboolean abort;
+	gboolean aborted;
 
+	gint page_num;
+	gint page_total;
+};
+
+struct GqTiffContext
+{
 	const guchar *buffer;
 	toff_t used;
 	toff_t pos;
-	gint page_num;
-	gint page_total;
 };
 
 void free_buffer (guchar *pixels, gpointer)
@@ -74,7 +92,7 @@ void free_buffer (guchar *pixels, gpointer)
 
 tsize_t tiff_load_read (thandle_t handle, tdata_t buf, tsize_t size)
 {
-	auto context = static_cast<ImageLoaderTiff *>(handle);
+	auto context = static_cast<GqTiffContext *>(handle);
 
 	if (context->pos + size > context->used)
 		return 0;
@@ -91,7 +109,7 @@ tsize_t tiff_load_write (thandle_t, tdata_t, tsize_t)
 
 toff_t tiff_load_seek (thandle_t handle, toff_t offset, int whence)
 {
-	auto context = static_cast<ImageLoaderTiff *>(handle);
+	auto context = static_cast<GqTiffContext *>(handle);
 
 	switch (whence)
 		{
@@ -124,13 +142,13 @@ int tiff_load_close (thandle_t)
 
 toff_t tiff_load_size (thandle_t handle)
 {
-	auto context = static_cast<ImageLoaderTiff *>(handle);
+	auto context = static_cast<GqTiffContext *>(handle);
 	return context->used;
 }
 
 int tiff_load_map_file (thandle_t handle, tdata_t *buf, toff_t *size)
 {
-	auto context = static_cast<ImageLoaderTiff *>(handle);
+	auto context = static_cast<GqTiffContext *>(handle);
 
 	*buf = const_cast<guchar *>(context->buffer);
 	*size = context->used;
@@ -142,10 +160,8 @@ void tiff_load_unmap_file (thandle_t, tdata_t, toff_t)
 {
 }
 
-gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	auto lt = static_cast<ImageLoaderTiff *>(loader);
-
 	TIFF *tiff;
 	guchar *pixels = nullptr;
 	gint width;
@@ -155,13 +171,10 @@ gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chu
 	guint32 rowsperstrip;
 	gint dircount = 0;
 
-	lt->buffer = buf;
-	lt->used = count;
-	lt->pos = 0;
-
 	TIFFSetWarningHandler(nullptr);
 
-	tiff = TIFFClientOpen (	"libtiff-geeqie", "r", lt,
+	GqTiffContext context{buf, count, 0};
+	tiff = TIFFClientOpen (	"libtiff-geeqie", "r", &context,
 							tiff_load_read, tiff_load_write,
 							tiff_load_seek, tiff_load_close,
 							tiff_load_size,
@@ -176,9 +189,9 @@ gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chu
 		dircount++;
 		} while (TIFFReadDirectory(tiff));
 
-	lt->page_total = dircount;
+	page_total = dircount;
 
-    if (!TIFFSetDirectory(tiff, lt->page_num))
+	if (!TIFFSetDirectory(tiff, page_num))
 		{
 		DEBUG_1("Failed to open TIFF image");
 		TIFFClose(tiff);
@@ -222,9 +235,9 @@ gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chu
 		return FALSE;
 		}
 
-	lt->requested_width = width;
-	lt->requested_height = height;
-	lt->size_cb(loader, lt->requested_width, lt->requested_height, lt->data);
+	requested_width = width;
+	requested_height = height;
+	size_prepared_cb(nullptr, requested_width, requested_height, data);
 
 	pixels = static_cast<guchar *>(g_try_malloc (bytes));
 
@@ -235,10 +248,10 @@ gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chu
 		return FALSE;
 		}
 
-	lt->pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8,
+	pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8,
 										   width, height, rowstride,
 										   free_buffer, nullptr);
-	if (!lt->pixbuf)
+	if (!pixbuf)
 		{
 		g_free (pixels);
 		DEBUG_1("Insufficient memory to open TIFF file");
@@ -246,7 +259,7 @@ gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chu
 		return FALSE;
 		}
 
-	lt->area_prepared_cb(loader, lt->data);
+	area_prepared_cb(nullptr, data);
 
 	if (TIFFGetField(tiff, TIFFTAG_ROWSPERSTRIP, &rowsperstrip))
 		{
@@ -260,7 +273,7 @@ gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chu
 			int rows_to_write;
 			int i_row;
 
-			if (lt->abort) {
+			if (aborted) {
 				break;
 			}
 
@@ -293,7 +306,7 @@ gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chu
 				memcpy(top_line, bottom_line, line_bytes);
 				memcpy(bottom_line, wrk_line, line_bytes);
 				}
-			lt->area_updated_cb(loader, 0, row, width, rows_to_write, lt->data);
+			area_updated_cb(nullptr, 0, row, width, rows_to_write, data);
 			}
 		g_free(wrk_line);
 		}
@@ -327,7 +340,7 @@ gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chu
 		}
 #endif
 
-		lt->area_updated_cb(loader, 0, 0, width, height, lt->data);
+		area_updated_cb(nullptr, 0, 0, width, height, data);
 		}
 	TIFFClose(tiff);
 
@@ -336,91 +349,61 @@ gboolean image_loader_tiff_write (gpointer loader, const guchar *buf, gsize &chu
 }
 
 
-gpointer image_loader_tiff_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderTiff::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data)
 {
-	auto loader = g_new0(ImageLoaderTiff, 1);
-
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->size_prepared_cb = size_prepared_cb;
+	this->area_prepared_cb = area_prepared_cb;
+	this->data = data;
 }
 
-
-void image_loader_tiff_set_size(gpointer loader, int width, int height)
+void ImageLoaderTiff::set_size(int width, int height)
 {
-	auto lt = static_cast<ImageLoaderTiff *>(loader);
-	lt->requested_width = width;
-	lt->requested_height = height;
+	requested_width = width;
+	requested_height = height;
 }
 
-GdkPixbuf* image_loader_tiff_get_pixbuf(gpointer loader)
+GdkPixbuf *ImageLoaderTiff::get_pixbuf()
 {
-	auto lt = static_cast<ImageLoaderTiff *>(loader);
-	return lt->pixbuf;
+	return pixbuf;
 }
 
-gchar* image_loader_tiff_get_format_name(gpointer)
+gchar *ImageLoaderTiff::get_format_name()
 {
 	return g_strdup("tiff");
 }
 
-gchar** image_loader_tiff_get_format_mime_types(gpointer)
+gchar **ImageLoaderTiff::get_format_mime_types()
 {
 	static const gchar *mime[] = {"image/tiff", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-gboolean image_loader_tiff_close(gpointer, GError **)
+void ImageLoaderTiff::abort()
 {
-	return TRUE;
+	aborted = TRUE;
 }
 
-void image_loader_tiff_abort(gpointer loader)
+ImageLoaderTiff::~ImageLoaderTiff()
 {
-	auto lt = static_cast<ImageLoaderTiff *>(loader);
-	lt->abort = TRUE;
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
-void image_loader_tiff_free(gpointer loader)
+void ImageLoaderTiff::set_page_num(gint page_num)
 {
-	auto lt = static_cast<ImageLoaderTiff *>(loader);
-	if (lt->pixbuf) g_object_unref(lt->pixbuf);
-	g_free(lt);
+	this->page_num = page_num;
 }
 
-void image_loader_tiff_set_page_num(gpointer loader, gint page_num)
+gint ImageLoaderTiff::get_page_total()
 {
-	auto lt = static_cast<ImageLoaderTiff *>(loader);
-
-	lt->page_num = page_num;
-}
-
-gint image_loader_tiff_get_page_total(gpointer loader)
-{
-	auto lt = static_cast<ImageLoaderTiff *>(loader);
-
-	return lt->page_total;
+	return page_total;
 }
 
 } // namespace
 
-void image_loader_backend_set_tiff(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_tiff()
 {
-	funcs->loader_new = image_loader_tiff_new;
-	funcs->set_size = image_loader_tiff_set_size;
-	funcs->write = image_loader_tiff_write;
-	funcs->get_pixbuf = image_loader_tiff_get_pixbuf;
-	funcs->close = image_loader_tiff_close;
-	funcs->abort = image_loader_tiff_abort;
-	funcs->free = image_loader_tiff_free;
-
-	funcs->get_format_name = image_loader_tiff_get_format_name;
-	funcs->get_format_mime_types = image_loader_tiff_get_format_mime_types;
-
-	funcs->set_page_num = image_loader_tiff_set_page_num;
-	funcs->get_page_total = image_loader_tiff_get_page_total;
+	return std::make_unique<ImageLoaderTiff>();
 }
 
 #endif

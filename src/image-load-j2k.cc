@@ -40,15 +40,22 @@
 namespace
 {
 
-struct ImageLoaderJ2K {
-	ImageLoaderBackendCbAreaUpdated area_updated_cb;
-	ImageLoaderBackendCbSize size_cb;
-	ImageLoaderBackendCbAreaPrepared area_prepared_cb;
+struct ImageLoaderJ2K : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderJ2K() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+
+private:
+	AreaUpdatedCb area_updated_cb;
 	gpointer data;
+
 	GdkPixbuf *pixbuf;
-	guint requested_width;
-	guint requested_height;
-	gboolean abort;
 };
 
 void free_buffer(guchar *pixels, gpointer)
@@ -183,9 +190,8 @@ opj_stream_t* OPJ_CALLCONV opj_stream_create_buffer_stream (opj_buffer_info_t* p
 	return ps;
 }
 
-gboolean image_loader_j2k_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	auto ld = static_cast<ImageLoaderJ2K *>(loader);
 	opj_stream_t *stream;
 	opj_codec_t *codec;
 	opj_dparameters_t parameters;
@@ -282,9 +288,9 @@ gboolean image_loader_j2k_write(gpointer loader, const guchar *buf, gsize &chunk
 			}
 		}
 
-	ld->pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE , 8, width, height, width * bytes_per_pixel, free_buffer, nullptr);
+	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE , 8, width, height, width * bytes_per_pixel, free_buffer, nullptr);
 
-	ld->area_updated_cb(loader, 0, 0, width, height, ld->data);
+	area_updated_cb(nullptr, 0, 0, width, height, data);
 
 	g_free(decode_buffer);
 	g_free(buf_copy);
@@ -299,71 +305,38 @@ gboolean image_loader_j2k_write(gpointer loader, const guchar *buf, gsize &chunk
 	return TRUE;
 }
 
-gpointer image_loader_j2k_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderJ2K::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
 {
-	auto loader = g_new0(ImageLoaderJ2K, 1);
-	loader->area_updated_cb = area_updated_cb;
-	loader->size_cb = size_cb;
-	loader->area_prepared_cb = area_prepared_cb;
-	loader->data = data;
-	return loader;
+	this->area_updated_cb = area_updated_cb;
+	this->data = data;
 }
 
-void image_loader_j2k_set_size(gpointer loader, int width, int height)
+GdkPixbuf *ImageLoaderJ2K::get_pixbuf()
 {
-	auto ld = static_cast<ImageLoaderJ2K *>(loader);
-	ld->requested_width = width;
-	ld->requested_height = height;
+	return pixbuf;
 }
 
-GdkPixbuf* image_loader_j2k_get_pixbuf(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderJ2K *>(loader);
-	return ld->pixbuf;
-}
-
-gchar* image_loader_j2k_get_format_name(gpointer)
+gchar *ImageLoaderJ2K::get_format_name()
 {
 	return g_strdup("j2k");
 }
 
-gchar** image_loader_j2k_get_format_mime_types(gpointer)
+gchar **ImageLoaderJ2K::get_format_mime_types()
 {
 	static const gchar *mime[] = {"image/jp2", nullptr};
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-gboolean image_loader_j2k_close(gpointer, GError **)
+ImageLoaderJ2K::~ImageLoaderJ2K()
 {
-	return TRUE;
-}
-
-void image_loader_j2k_abort(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderJ2K *>(loader);
-	ld->abort = TRUE;
-}
-
-void image_loader_j2k_free(gpointer loader)
-{
-	auto ld = static_cast<ImageLoaderJ2K *>(loader);
-	if (ld->pixbuf) g_object_unref(ld->pixbuf);
-	g_free(ld);
+	if (pixbuf) g_object_unref(pixbuf);
 }
 
 } // namespace
 
-void image_loader_backend_set_j2k(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_j2k()
 {
-	funcs->loader_new = image_loader_j2k_new;
-	funcs->set_size = image_loader_j2k_set_size;
-	funcs->write = image_loader_j2k_write;
-	funcs->get_pixbuf = image_loader_j2k_get_pixbuf;
-	funcs->close = image_loader_j2k_close;
-	funcs->abort = image_loader_j2k_abort;
-	funcs->free = image_loader_j2k_free;
-	funcs->get_format_name = image_loader_j2k_get_format_name;
-	funcs->get_format_mime_types = image_loader_j2k_get_format_mime_types;
+	return std::make_unique<ImageLoaderJ2K>();
 }
 
 #endif

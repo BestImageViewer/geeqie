@@ -24,9 +24,11 @@
 #include <config.h>
 
 #if HAVE_WEBP
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_webp(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_webp();
 #endif
 
 #endif

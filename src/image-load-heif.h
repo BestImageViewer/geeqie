@@ -24,9 +24,11 @@
 #include <config.h>
 
 #if HAVE_HEIF
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_heif(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_heif();
 #endif
 
 #endif

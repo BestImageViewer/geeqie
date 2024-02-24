@@ -31,11 +31,28 @@
 namespace
 {
 
-gchar* image_loader_gdk_get_format_name(gpointer loader)
+struct ImageLoaderGdk : public ImageLoaderBackend
+{
+public:
+	~ImageLoaderGdk() override;
+
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void set_size(int width, int height) override;
+	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
+	GdkPixbuf *get_pixbuf() override;
+	gboolean close(GError **error) override;
+	gchar *get_format_name() override;
+	gchar **get_format_mime_types() override;
+
+private:
+	GdkPixbufLoader *loader;
+};
+
+gchar *ImageLoaderGdk::get_format_name()
 {
 	GdkPixbufFormat *format;
 
-	format = gdk_pixbuf_loader_get_format(GDK_PIXBUF_LOADER(loader));
+	format = gdk_pixbuf_loader_get_format(loader);
 	if (format)
 		{
 		return gdk_pixbuf_format_get_name(format);
@@ -44,15 +61,14 @@ gchar* image_loader_gdk_get_format_name(gpointer loader)
 	return nullptr;
 }
 
-gchar** image_loader_gdk_get_format_mime_types(gpointer loader)
+gchar **ImageLoaderGdk::get_format_mime_types()
 {
-	return gdk_pixbuf_format_get_mime_types(gdk_pixbuf_loader_get_format(GDK_PIXBUF_LOADER(loader)));
+	return gdk_pixbuf_format_get_mime_types(gdk_pixbuf_loader_get_format(loader));
 }
 
-gpointer image_loader_gdk_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, ImageLoaderBackendCbSize size_cb, ImageLoaderBackendCbAreaPrepared area_prepared_cb, gpointer data)
+void ImageLoaderGdk::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
-	GdkPixbufLoader *loader;
 
 	/** @FIXME gdk-pixbuf-loader does not recognize .xbm files unless
 	 * the mime type is given. There should be a general case */
@@ -66,39 +82,40 @@ gpointer image_loader_gdk_new(ImageLoaderBackendCbAreaUpdated area_updated_cb, I
 		}
 
 	g_signal_connect(G_OBJECT(loader), "area_updated", G_CALLBACK(area_updated_cb), data);
-	g_signal_connect(G_OBJECT(loader), "size_prepared", G_CALLBACK(size_cb), data);
+	g_signal_connect(G_OBJECT(loader), "size_prepared", G_CALLBACK(size_prepared_cb), data);
 	g_signal_connect(G_OBJECT(loader), "area_prepared", G_CALLBACK(area_prepared_cb), data);
-	return loader;
 }
 
-gboolean image_loader_gdk_write(gpointer loader, const guchar *buf, gsize &chunk_size, gsize, GError **error)
+void ImageLoaderGdk::set_size(int width, int height)
 {
-	return gdk_pixbuf_loader_write(GDK_PIXBUF_LOADER(loader), buf, chunk_size, error);
+	gdk_pixbuf_loader_set_size(loader, width, height);
 }
 
-void image_loader_gdk_abort(gpointer)
+gboolean ImageLoaderGdk::write(const guchar *buf, gsize &chunk_size, gsize, GError **error)
 {
+	return gdk_pixbuf_loader_write(loader, buf, chunk_size, error);
 }
 
-void image_loader_gdk_free(gpointer loader)
+GdkPixbuf *ImageLoaderGdk::get_pixbuf()
+{
+	return gdk_pixbuf_loader_get_pixbuf(loader);
+}
+
+gboolean ImageLoaderGdk::close(GError **error)
+{
+	return gdk_pixbuf_loader_close(loader, error);
+}
+
+ImageLoaderGdk::~ImageLoaderGdk()
 {
 	g_object_unref(G_OBJECT(loader));
 }
 
 } // namespace
 
-void image_loader_backend_set_default(ImageLoaderBackend *funcs)
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_default()
 {
-	funcs->loader_new = image_loader_gdk_new;
-	funcs->set_size = reinterpret_cast<ImageLoaderBackendFuncSetSize>(gdk_pixbuf_loader_set_size);
-	funcs->write = image_loader_gdk_write;
-	funcs->get_pixbuf = reinterpret_cast<ImageLoaderBackendFuncGetPixbuf>(gdk_pixbuf_loader_get_pixbuf);
-	funcs->close = reinterpret_cast<ImageLoaderBackendFuncClose>(gdk_pixbuf_loader_close);
-	funcs->abort = image_loader_gdk_abort;
-	funcs->free = image_loader_gdk_free;
-
-	funcs->get_format_name = image_loader_gdk_get_format_name;
-	funcs->get_format_mime_types = image_loader_gdk_get_format_mime_types;
+	return std::make_unique<ImageLoaderGdk>();
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

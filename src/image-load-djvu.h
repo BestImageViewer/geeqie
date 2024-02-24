@@ -24,9 +24,11 @@
 #include <config.h>
 
 #if HAVE_DJVU
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_djvu(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_djvu();
 #endif
 
 #endif

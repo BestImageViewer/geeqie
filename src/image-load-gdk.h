@@ -22,9 +22,11 @@
 #ifndef IMAGE_LOAD_GDK_H
 #define IMAGE_LOAD_GDK_H
 
+#include <memory>
+
 struct ImageLoaderBackend;
 
-void image_loader_backend_set_default(ImageLoaderBackend *funcs);
+std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_default();
 
 #endif
 
