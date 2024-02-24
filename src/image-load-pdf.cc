@@ -62,7 +62,12 @@ gboolean image_loader_pdf_write(gpointer loader, const guchar *buf, gsize &chunk
 	gboolean ret = FALSE;
 	gint page_total;
 
+#if POPPLER_CHECK_VERSION(0,82,0)
+	GBytes *bytes = g_bytes_new_static(buf, count);
+	document = poppler_document_new_from_bytes(bytes, nullptr, &poppler_error);
+#else
 	document = poppler_document_new_from_data((gchar *)(buf), count, nullptr, &poppler_error);
+#endif
 
 	if (poppler_error)
 		{
@@ -99,6 +104,9 @@ gboolean image_loader_pdf_write(gpointer loader, const guchar *buf, gsize &chunk
 		}
 
 	g_object_unref(document);
+#if POPPLER_CHECK_VERSION(0,82,0)
+	g_bytes_unref(bytes);
+#endif
 
 	return ret;
 }
