@@ -646,10 +646,6 @@ static void image_loader_stop_loader(ImageLoader *il)
 
 static void image_loader_setup_loader(ImageLoader *il)
 {
-#if HAVE_TIFF || HAVE_PDF || HAVE_HEIF || HAVE_DJVU
-	gchar *format;
-#endif
-
 	gint external_preview = 1;
 
 	g_mutex_lock(il->data_mutex);
@@ -811,42 +807,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 		}
 
 	il->backend->init(image_loader_area_updated_cb, image_loader_size_cb, image_loader_area_prepared_cb, il);
-
-#if HAVE_TIFF
-	format = il->backend->get_format_name();
-	if (g_strcmp0(format, "tiff") == 0)
-		{
-		il->backend->set_page_num(il->fd->page_num);
-		}
-	g_free(format);
-#endif
-
-#if HAVE_PDF
-	format = il->backend->get_format_name();
-	if (g_strcmp0(format, "pdf") == 0)
-		{
-		il->backend->set_page_num(il->fd->page_num);
-		}
-	g_free(format);
-#endif
-
-#if HAVE_HEIF
-	format = il->backend->get_format_name();
-	if (g_strcmp0(format, "heif") == 0)
-		{
-		il->backend->set_page_num(il->fd->page_num);
-		}
-	g_free(format);
-#endif
-
-#if HAVE_DJVU
-	format = il->backend->get_format_name();
-	if (g_strcmp0(format, "djvu") == 0)
-		{
-		il->backend->set_page_num(il->fd->page_num);
-		}
-	g_free(format);
-#endif
+	il->backend->set_page_num(il->fd->page_num);
 
 	il->fd->format_name = il->backend->get_format_name();
 
@@ -914,10 +875,6 @@ static gboolean image_loader_continue(ImageLoader *il)
 
 static gboolean image_loader_begin(ImageLoader *il)
 {
-#if HAVE_TIFF || HAVE_PDF || HAVE_HEIF || HAVE_DJVU
-	gchar *format;
-#endif
-
 	if (il->pixbuf) return FALSE;
 
 	if (il->bytes_total <= il->bytes_read) return FALSE;
@@ -933,42 +890,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 		return FALSE;
 		}
 
-#if HAVE_PDF
-	format = il->backend->get_format_name();
-	if (g_strcmp0(format, "pdf") == 0)
-		{
-		gint i = il->backend->get_page_total();
-		file_data_set_page_total(il->fd, i);
-		}
-	g_free(format);
-#endif
-#if HAVE_HEIF
-	format = il->backend->get_format_name();
-	if (g_strcmp0(format, "heif") == 0)
-		{
-		gint i = il->backend->get_page_total();
-		file_data_set_page_total(il->fd, i);
-		}
-	g_free(format);
-#endif
-#if HAVE_DJVU
-	format = il->backend->get_format_name();
-	if (g_strcmp0(format, "djvu") == 0)
-		{
-		gint i = il->backend->get_page_total();
-		file_data_set_page_total(il->fd, i);
-		}
-	g_free(format);
-#endif
-#if HAVE_TIFF
-	format = il->backend->get_format_name();
-	if (g_strcmp0(format, "tiff") == 0)
-		{
-		gint i = il->backend->get_page_total();
-		file_data_set_page_total(il->fd, i);
-		}
-	g_free(format);
-#endif
+	file_data_set_page_total(il->fd, il->backend->get_page_total());
 
 	il->bytes_read += b;
 
