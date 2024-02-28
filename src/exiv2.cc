@@ -332,14 +332,15 @@ public:
 			copyXmpToExif(xmpData_, exifData_);
 			Exiv2::Image *image = imageData_->image();
 
+			if (!image)
 #ifdef HAVE_EXIV2_ERROR_CODE
-#if EXIV2_TEST_VERSION(0,28,0)
-            if (!image) throw Exiv2::Error(Exiv2::ErrorCode::kerInputDataReadFailed);
+#  if EXIV2_TEST_VERSION(0,28,0)
+				throw Exiv2::Error(Exiv2::ErrorCode::kerInputDataReadFailed);
+#  else
+				throw Exiv2::Error(Exiv2::kerInputDataReadFailed);
+#  endif
 #else
-			if (!image) throw Exiv2::Error(Exiv2::kerInputDataReadFailed);
-#endif
-#else
-			if (!image) throw Exiv2::Error(21);
+				throw Exiv2::Error(21);
 #endif
 			image->setExifData(exifData_);
 			image->setIptcData(iptcData_);
@@ -648,7 +649,7 @@ char *exif_item_get_data(ExifItem *item, guint *data_len)
 		auto md = reinterpret_cast<Exiv2::Metadatum *>(item);
 		if (data_len) *data_len = md->size();
 		auto data = static_cast<char *>(g_malloc(md->size()));
-		long res = md->copy(reinterpret_cast<Exiv2::byte *>(data), Exiv2::littleEndian /* should not matter */);
+		auto res = md->copy(reinterpret_cast<Exiv2::byte *>(data), Exiv2::littleEndian /* should not matter */);
 		g_assert(res == md->size());
 		return data;
 	}
@@ -955,7 +956,11 @@ static GList *exif_add_value_to_glist(GList *list, Exiv2::Metadatum &item, Metad
 	else
 		{
 		/* read as a list */
-		gint i;
+#if EXIV2_TEST_VERSION(0,28,0)
+		size_t i;
+#else
+		long i;
+#endif
 		for (i = 0; i < item.count(); i++)
 			list = g_list_append(list, utf8_validate_or_convert(item.toString(i).c_str()));
 		}
