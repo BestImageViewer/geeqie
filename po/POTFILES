@@ -131,6 +131,6 @@ src/view-dir-tree.cc
 src/view-file/view-file.cc
 src/view-file/view-file-icon.cc
 src/view-file/view-file-list.cc
-src/whereami.cc
+src/third-party/whereami.cc
 src/window.cc
-src/zonedetect.cc
+src/third-party/zonedetect.cc
