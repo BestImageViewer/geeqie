@@ -23,6 +23,7 @@
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
+#include "archives.h"
 #include "compat.h"
 #include "debug.h"
 #include "dupe.h"

@@ -45,6 +45,7 @@
 
 #include <pango/pango.h>
 
+#include "archives.h"
 #include "bar-keywords.h"
 #include "cache.h"
 #include "color-man.h"

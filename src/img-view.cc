@@ -25,6 +25,7 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
+#include "archives.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "compat.h"

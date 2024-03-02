@@ -31,6 +31,7 @@
 
 #include <config.h>
 
+#include "archives.h"
 #include "collect.h"
 #include "debug.h"
 #include "dnd.h"

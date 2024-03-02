@@ -49,7 +49,6 @@
 #include "main.h"
 #include "menu.h"
 #include "metadata.h"
-#include "misc.h"
 #include "options.h"
 #include "pan-calendar.h"
 #include "pan-folder.h"

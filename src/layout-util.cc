@@ -34,6 +34,7 @@
 #include <config.h>
 
 #include "advanced-exif.h"
+#include "archives.h"
 #include "bar-keywords.h"
 #include "bar-sort.h"
 #include "bar.h"

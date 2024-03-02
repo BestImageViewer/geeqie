@@ -27,8 +27,6 @@
 
 #include <config.h>
 
-struct FileData;
-
 const gchar *gq_gtk_entry_get_text(GtkEntry *entry);
 gchar *convert_rating_to_stars(gint rating);
 gchar *date_get_abbreviated_day_name(gint day);
@@ -49,8 +47,7 @@ void gq_gtk_grid_attach(GtkGrid *grid, GtkWidget *child, guint left_attach, guin
 void convert_gdkcolor_to_gdkrgba(gpointer data, GdkRGBA *gdk_rgba);
 #else
 void convert_gdkcolor_to_gdkrgba(gpointer data, GdkRGBA *gdk_rgba);
-#endif
+#endif /* HAVE_GTK4 */
 
-gchar *open_archive(FileData *fd);
 #endif /* MISC_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
