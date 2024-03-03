@@ -21,15 +21,11 @@
 #ifndef IMAGE_LOAD_HEIF_H
 #define IMAGE_LOAD_HEIF_H
 
-#include <config.h>
-
-#if HAVE_HEIF
 #include <memory>
 
 struct ImageLoaderBackend;
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_heif();
-#endif
 
-#endif
+#endif /* IMAGE_LOAD_HEIF_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

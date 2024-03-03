@@ -19,11 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#if HAVE_LIBCHAMPLAIN
-#if HAVE_LIBCHAMPLAIN_GTK
-
 #include "bar-gps.h"
 
 #include <cstring>
@@ -37,6 +32,8 @@
 #include <gdk/gdk.h>
 #include <glib-object.h>
 #include <pango/pango.h>
+
+#include <config.h>
 
 #include "bar.h"
 #include "compat.h"
@@ -138,7 +135,7 @@ static void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
 	g_list_free(pgd->geocode_list);
 }
 
- static void bar_pane_gps_dnd_receive(GtkWidget *pane, GdkDragContext *,
+static void bar_pane_gps_dnd_receive(GtkWidget *pane, GdkDragContext *,
 									  gint x, gint y,
 									  GtkSelectionData *selection_data, guint info,
 									  guint, gpointer)
@@ -1158,8 +1155,5 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 	gtk_widget_set_size_request(pgd->widget, -1, pgd->height);
 	bar_update_expander(pane);
 }
-
-#endif // HAVE_LIBCHAMPLAIN_GTK
-#endif // HAVE_LIBCHAMPLAIN
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

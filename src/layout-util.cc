@@ -1942,13 +1942,7 @@ static void layout_color_menu_enable_cb(GtkToggleAction *action, gpointer data)
 	layout_util_sync_color(lw);
 	layout_image_refresh(lw);
 }
-#else
-static void layout_color_menu_enable_cb()
-{
-}
-#endif
 
-#if HAVE_LCMS
 static void layout_color_menu_use_image_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
@@ -1961,13 +1955,7 @@ static void layout_color_menu_use_image_cb(GtkToggleAction *action, gpointer dat
 	layout_util_sync_color(lw);
 	layout_image_refresh(lw);
 }
-#else
-static void layout_color_menu_use_image_cb()
-{
-}
-#endif
 
-#if HAVE_LCMS
 static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
@@ -1985,6 +1973,14 @@ static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *,
 	layout_image_refresh(lw);
 }
 #else
+static void layout_color_menu_enable_cb()
+{
+}
+
+static void layout_color_menu_use_image_cb()
+{
+}
+
 static void layout_color_menu_input_cb()
 {
 }

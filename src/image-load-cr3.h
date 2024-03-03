@@ -21,16 +21,12 @@
 #ifndef IMAGE_LOAD_CR3_H
 #define IMAGE_LOAD_CR3_H
 
-#include <config.h>
-
-#if HAVE_JPEG && !HAVE_RAW
 #include <memory>
 
 struct ImageLoaderBackend;
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_cr3();
-#endif
 
-#endif // IMAGE_LOAD_CR3_H
+#endif /* IMAGE_LOAD_CR3_H */
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

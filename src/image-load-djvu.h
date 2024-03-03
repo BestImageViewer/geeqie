@@ -21,15 +21,11 @@
 #ifndef IMAGE_LOAD_DJVU_H
 #define IMAGE_LOAD_DJVU_H
 
-#include <config.h>
-
-#if HAVE_DJVU
 #include <memory>
 
 struct ImageLoaderBackend;
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_djvu();
-#endif
 
-#endif
+#endif /* IMAGE_LOAD_DJVU_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

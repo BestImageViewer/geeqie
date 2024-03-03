@@ -1469,8 +1469,7 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, 
 			}
 		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
 		}
-#if HAVE_LIBCHAMPLAIN
-#if HAVE_LIBCHAMPLAIN_GTK
+#if HAVE_LIBCHAMPLAIN && HAVE_LIBCHAMPLAIN_GTK
 	else if (g_ascii_strcasecmp(element_name, "pane_gps") == 0)
 		{
 		/* Use this flag to determine if --disable-clutter has been issued */
@@ -1489,7 +1488,6 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, 
 			options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
 			}
 		}
-#endif
 #endif
 	else if (g_ascii_strcasecmp(element_name, "pane_exif") == 0)
 		{

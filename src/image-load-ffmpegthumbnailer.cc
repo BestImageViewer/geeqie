@@ -21,15 +21,14 @@
 
 #include "image-load-ffmpegthumbnailer.h"
 
-#include <config.h>
-
-#if HAVE_FFMPEGTHUMBNAILER
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib-object.h>
 #include <glib.h>
 #include <libffmpegthumbnailer/ffmpegthumbnailertypes.h>
 #include <libffmpegthumbnailer/imagetypes.h>
 #include <libffmpegthumbnailer/videothumbnailerc.h> //TODO Use videothumbnailer.h?
+
+#include <config.h>
 
 #include "debug.h"
 #include "filedata.h"
@@ -194,5 +193,4 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_ft()
 	return std::make_unique<ImageLoaderFT>();
 }
 
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -20,9 +20,6 @@
 
 #include "image-load-heif.h"
 
-#include <config.h>
-
-#if HAVE_HEIF
 #include <vector>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -171,5 +168,4 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_heif()
 	return std::make_unique<ImageLoaderHEIF>();
 }
 
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

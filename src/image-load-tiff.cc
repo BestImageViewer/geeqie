@@ -25,10 +25,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#if HAVE_TIFF
-
 #include "image-load-tiff.h"
 
 #include <cstddef>
@@ -406,5 +402,4 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_tiff()
 	return std::make_unique<ImageLoaderTiff>();
 }
 
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

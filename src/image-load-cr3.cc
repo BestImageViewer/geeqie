@@ -21,9 +21,6 @@
 /** This is a Will Not Fix */
 #pragma GCC diagnostic ignored "-Wclobbered"
 
-#include <config.h>
-
-#if HAVE_JPEG && !HAVE_RAW
 #include "image-load-cr3.h"
 
 #include <cstring>
@@ -111,7 +108,5 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_cr3()
 {
 	return std::make_unique<ImageLoaderCr3>();
 }
-
-#endif // HAVE_JPEG && !HAVE_RAW
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

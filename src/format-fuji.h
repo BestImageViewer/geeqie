@@ -23,6 +23,7 @@
 #ifndef __FORMAT_FUJI_H
 #define __FORMAT_FUJI_H
 
+#include <glib.h>
 
 #include "exif-int.h"
 
@@ -33,7 +34,7 @@ gboolean format_fuji_raw(guchar *data, guint len,
 
 #define FORMAT_RAW_FUJI { "raf", \
 			  FORMAT_RAW_MATCH_MAGIC, 0, "FUJIFILM", 8, \
-			  FORMAT_RAW_EXIF_JPEG, NULL, \
+			  FORMAT_RAW_EXIF_JPEG, nullptr, \
 			  "Fuji raw", format_fuji_raw }
 
 

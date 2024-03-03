@@ -18,10 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#if HAVE_EXIV2
-
 #include "exif.h"
 
 #include <algorithm>
@@ -33,6 +29,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <config.h>
 
 #include <exiv2/exiv2.hpp>
 #include <glib.h>
@@ -1131,5 +1129,4 @@ void exif_free_preview(const guchar *buf)
 	delete[] static_cast<const Exiv2::byte*>(buf);
 }
 
-#endif /* HAVE_EXIV2 */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

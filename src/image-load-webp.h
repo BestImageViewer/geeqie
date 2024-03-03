@@ -21,15 +21,11 @@
 #ifndef IMAGE_LOAD_WEBP_H
 #define IMAGE_LOAD_WEBP_H
 
-#include <config.h>
-
-#if HAVE_WEBP
 #include <memory>
 
 struct ImageLoaderBackend;
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_webp();
-#endif
 
-#endif
+#endif /* IMAGE_LOAD_WEBP_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -50,10 +50,6 @@
  *
  */
 
-#include <config.h>
-
-#if HAVE_JPEGXL
-
 #include "image-load-jpegxl.h"
 
 #include <cstdint>
@@ -236,5 +232,4 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_jpegxl()
 	return std::make_unique<ImageLoaderJPEGXL>();
 }
 
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

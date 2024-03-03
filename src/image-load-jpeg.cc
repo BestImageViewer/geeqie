@@ -27,10 +27,6 @@
 /** This is a Will Not Fix */
 #pragma GCC diagnostic ignored "-Wclobbered"
 
-#include <config.h>
-
-#if HAVE_JPEG
-
 #include "image-load-jpeg.h"
 
 #include <csetjmp>
@@ -459,7 +455,5 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_jpeg()
 {
 	return std::make_unique<ImageLoaderJpeg>();
 }
-
-#endif
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -22,6 +22,8 @@
 #ifndef __EXIF_H
 #define __EXIF_H
 
+#include <glib.h>
+
 #include "typedefs.h"
 
 struct ExifData;

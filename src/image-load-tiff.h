@@ -22,16 +22,12 @@
 #ifndef IMAGE_LOAD_TIFF_H
 #define IMAGE_LOAD_TIFF_H
 
-#include <config.h>
-
-#if HAVE_TIFF
 #include <memory>
 
 struct ImageLoaderBackend;
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_tiff();
-#endif
 
-#endif
+#endif /* IMAGE_LOAD_TIFF_H */
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

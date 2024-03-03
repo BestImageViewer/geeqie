@@ -18,9 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#if HAVE_PDF
 #include "image-load-pdf.h"
 
 #include <cairo.h>
@@ -164,5 +161,4 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_pdf()
 	return std::make_unique<ImageLoaderPDF>();
 }
 
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

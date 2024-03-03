@@ -45,30 +45,28 @@
  *     Add support for marker tag 0x0000
  */
 
-#include <config.h>
+#include "exif.h"
 
-#if !HAVE_EXIV2
-
-#include <cmath>
-#include <cstdio>
-#include <cstring>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
+
+#include <cstdio>
+#include <cstring>
 
 #include <glib.h>
 #include <glib/gprintf.h>
 
-#include "exif-int.h"
-#include "jpeg-parser.h"
-
 #include "debug.h"
+#include "exif-int.h"
 #include "format-raw.h"
 #include "intl.h"
+#include "jpeg-parser.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 
+struct FileData;
 
 /*
  *-----------------------------------------------------------------------------
@@ -1694,8 +1692,5 @@ void exif_free_preview(const guchar *buf)
 void exif_init()
 {
 }
-#else
-using dummy_variable = int;
-#endif
-/* not HAVE_EXIV2 */
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

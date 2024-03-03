@@ -19,22 +19,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#if !HAVE_EXIV2
-
 #include "format-raw.h"
+
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <cstdio>
 #include <cstring>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include <glib.h>
 
 #include "debug.h"
+#include "exif.h"
 #include "format-canon.h"
 #include "format-fuji.h"
 #include "format-nikon.h"
@@ -564,8 +561,4 @@ gboolean format_debug_tiff_raw(guchar *data, const guint len,
 	return FALSE;
 }
 #endif
-#else
-using dummy_variable = int;
-#endif
-/* not HAVE_EXIV2 */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

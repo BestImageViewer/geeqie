@@ -19,15 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#if !HAVE_EXIV2
-
 #include "format-nikon.h"
 
-#include <cstdio>
 #include <cstring>
-#include <unistd.h>
 
 #include <glib.h>
 
@@ -428,8 +422,4 @@ gboolean format_nikon_makernote(ExifData *exif, guchar *tiff, guint offset,
 	return TRUE;
 }
 
-#else
-using dummy_variable = int;
-#endif
-/* not HAVE_EXIV2 */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

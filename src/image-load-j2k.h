@@ -21,15 +21,11 @@
 #ifndef IMAGE_LOAD_J2K_H
 #define IMAGE_LOAD_J2K_H
 
-#include <config.h>
-
-#if HAVE_J2K
 #include <memory>
 
 struct ImageLoaderBackend;
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_j2k();
-#endif
 
-#endif
+#endif /* IMAGE_LOAD_J2K_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

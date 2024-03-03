@@ -21,8 +21,6 @@ main_sources = files('advanced-exif.cc',
 'bar-comment.h',
 'bar-exif.cc',
 'bar-exif.h',
-'bar-gps.cc',
-'bar-gps.h',
 'bar-histogram.cc',
 'bar-histogram.h',
 'bar-keywords.cc',
@@ -40,9 +38,9 @@ main_sources = files('advanced-exif.cc',
 'cellrenderericon.cc',
 'cellrenderericon.h',
 'collect.cc',
+'collect.h',
 'collect-dlg.cc',
 'collect-dlg.h',
-'collect.h',
 'collect-io.cc',
 'collect-io.h',
 'collect-table.cc',
@@ -61,30 +59,16 @@ main_sources = files('advanced-exif.cc',
 'dupe.h',
 'editors.cc',
 'editors.h',
-'exif.cc',
 'exif-common.cc',
 'exif.h',
-'exif-int.h',
-'exiv2.cc',
 'filecache.cc',
 'filecache.h',
 'filedata.cc',
 'filedata.h',
 'filefilter.cc',
 'filefilter.h',
-'format-canon.cc',
-'format-canon.h',
-'format-fuji.cc',
-'format-fuji.h',
-'format-nikon.cc',
-'format-nikon.h',
-'format-olympus.cc',
-'format-olympus.h',
-'format-raw.cc',
-'format-raw.h',
 'fullscreen.cc',
 'fullscreen.h',
-'glua.h',
 'histogram.cc',
 'histogram.h',
 'history-list.cc',
@@ -92,41 +76,21 @@ main_sources = files('advanced-exif.cc',
 'image.cc',
 'image.h',
 'image-load.cc',
+'image-load.h',
 'image-load-collection.cc',
 'image-load-collection.h',
-'image-load-cr3.cc',
-'image-load-cr3.h',
 'image-load-dds.cc',
 'image-load-dds.h',
-'image-load-djvu.cc',
-'image-load-djvu.h',
 'image-load-external.cc',
 'image-load-external.h',
-'image-load-ffmpegthumbnailer.cc',
-'image-load-ffmpegthumbnailer.h',
 'image-load-gdk.cc',
 'image-load-gdk.h',
-'image-load.h',
-'image-load-heif.cc',
-'image-load-heif.h',
-'image-load-j2k.cc',
-'image-load-j2k.h',
-'image-load-jpeg.cc',
-'image-load-jpeg.h',
-'image-load-jpegxl.cc',
-'image-load-jpegxl.h',
 'image-load-libraw.cc',
 'image-load-libraw.h',
-'image-load-pdf.cc',
-'image-load-pdf.h',
 'image-load-psd.cc',
 'image-load-psd.h',
 'image-load-svgz.cc',
 'image-load-svgz.h',
-'image-load-tiff.cc',
-'image-load-tiff.h',
-'image-load-webp.cc',
-'image-load-webp.h',
 'image-load-zxscr.cc',
 'image-load-zxscr.h',
 'image-overlay.cc',
@@ -139,16 +103,15 @@ main_sources = files('advanced-exif.cc',
 'keymap-template.cc',
 'keymap-template.h',
 'layout.cc',
+'layout.h',
 'layout-config.cc',
 'layout-config.h',
-'layout.h',
 'layout-image.cc',
 'layout-image.h',
 'layout-util.cc',
 'layout-util.h',
 'logwindow.cc',
 'logwindow.h',
-'lua.cc',
 'main.cc',
 'main.h',
 'main-defines.h',
@@ -231,6 +194,111 @@ main_sources = files('advanced-exif.cc',
 'view-file.h',
 'window.cc',
 'window.h')
+
+if conf_data.get('HAVE_DJVU', 0) == 1
+    main_sources += files(
+        'image-load-djvu.cc',
+        'image-load-djvu.h',
+    )
+endif
+
+if conf_data.get('HAVE_EXIV2', 0) == 1
+    main_sources += files(
+        'exiv2.cc',
+    )
+else
+    main_sources += files(
+        'exif.cc',
+        'exif-int.h',
+        'format-canon.cc',
+        'format-canon.h',
+        'format-fuji.cc',
+        'format-fuji.h',
+        'format-nikon.cc',
+        'format-nikon.h',
+        'format-olympus.cc',
+        'format-olympus.h',
+        'format-raw.cc',
+        'format-raw.h',
+    )
+endif
+
+if conf_data.get('HAVE_FFMPEGTHUMBNAILER', 0) == 1
+    main_sources += files(
+        'image-load-ffmpegthumbnailer.cc',
+        'image-load-ffmpegthumbnailer.h',
+    )
+endif
+
+if conf_data.get('HAVE_HEIF', 0) == 1
+    main_sources += files(
+        'image-load-heif.cc',
+        'image-load-heif.h',
+    )
+endif
+
+if conf_data.get('HAVE_J2K', 0) == 1
+    main_sources += files(
+        'image-load-j2k.cc',
+        'image-load-j2k.h',
+    )
+endif
+
+if conf_data.get('HAVE_JPEG', 0) == 1
+    main_sources += files(
+        'image-load-jpeg.cc',
+        'image-load-jpeg.h',
+    )
+
+    if conf_data.get('HAVE_RAW', 0) == 0
+        main_sources += files(
+            'image-load-cr3.cc',
+            'image-load-cr3.h',
+        )
+    endif
+endif
+
+if conf_data.get('HAVE_JPEGXL', 0) == 1
+    main_sources += files(
+        'image-load-jpegxl.cc',
+        'image-load-jpegxl.h',
+    )
+endif
+
+if conf_data.get('HAVE_LIBCHAMPLAIN', 0) == 1 and conf_data.get('HAVE_LIBCHAMPLAIN_GTK', 0) == 1
+    main_sources += files(
+        'bar-gps.cc',
+        'bar-gps.h',
+    )
+endif
+
+if conf_data.get('HAVE_LUA', 0) == 1
+    main_sources += files(
+        'glua.h',
+        'lua.cc',
+    )
+endif
+
+if conf_data.get('HAVE_PDF', 0) == 1
+    main_sources += files(
+        'image-load-pdf.cc',
+        'image-load-pdf.h',
+    )
+endif
+
+if conf_data.get('HAVE_TIFF', 0) == 1
+    main_sources += files(
+        'image-load-tiff.cc',
+        'image-load-tiff.h',
+    )
+endif
+
+if conf_data.get('HAVE_WEBP', 0) == 1
+    main_sources += files(
+        'image-load-webp.cc',
+        'image-load-webp.h',
+    )
+endif
 
 project_sources += main_sources
 

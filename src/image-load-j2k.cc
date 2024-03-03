@@ -18,10 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#if HAVE_J2K
-
 #include "image-load-j2k.h"
 
 #include <cstdlib>
@@ -339,5 +335,4 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_j2k()
 	return std::make_unique<ImageLoaderJ2K>();
 }
 
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

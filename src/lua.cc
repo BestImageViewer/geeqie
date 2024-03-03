@@ -18,10 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#if HAVE_LUA
-
 #define _XOPEN_SOURCE
 
 #include "glua.h"
@@ -413,7 +409,5 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 	g_free(tmp);
 	return data;
 }
-#else
-using dummy_variable = int;
-#endif
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

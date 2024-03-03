@@ -176,5 +176,5 @@
 // PIXBUF_INLINE_ICON_ZOOMFILLHOR
 // PIXBUF_INLINE_ICON_ZOOMFILLVERT
 
-#endif // _MAIN_DEFINES_H
+#endif /* _MAIN_DEFINES_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

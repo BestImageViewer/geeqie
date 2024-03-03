@@ -20,6 +20,7 @@
 #ifndef __FORMAT_OLYMPUS_H
 #define __FORMAT_OLYMPUS_H
 
+#include <glib.h>
 
 #include "exif-int.h"
 
@@ -30,7 +31,7 @@ gboolean format_olympus_raw(guchar *data, guint len,
 
 #define FORMAT_RAW_OLYMPUS { "orf", \
 			     FORMAT_RAW_MATCH_MAGIC, 0, "IIR", 3, \
-			     FORMAT_RAW_EXIF_IFD_II, NULL, \
+			     FORMAT_RAW_EXIF_IFD_II, nullptr, \
 			     "Olympus raw", format_olympus_raw }
 
 

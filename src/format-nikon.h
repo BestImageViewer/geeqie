@@ -20,6 +20,7 @@
 #ifndef __FORMAT_NIKON_H
 #define __FORMAT_NIKON_H
 
+#include <glib.h>
 
 #include "exif-int.h"
 
@@ -28,7 +29,7 @@ gboolean format_nikon_raw(guchar *data, guint len,
 
 #define FORMAT_RAW_NIKON { "nef", \
 			   FORMAT_RAW_MATCH_TIFF_MAKE, 0, "NIKON CORPORATION", 17, \
-			   FORMAT_RAW_EXIF_TIFF, NULL, \
+			   FORMAT_RAW_EXIF_TIFF, nullptr, \
 			   "Nikon raw", format_nikon_raw }
 
 /* If your format is basically just TIFF with an embedded jpeg,
@@ -36,12 +37,12 @@ gboolean format_nikon_raw(guchar *data, guint len,
  */
 #define FORMAT_RAW_PENTAX { "pef", \
 			    FORMAT_RAW_MATCH_TIFF_MAKE, 0, "PENTAX Corporation", 18, \
-			    FORMAT_RAW_EXIF_TIFF, NULL, \
+			    FORMAT_RAW_EXIF_TIFF, nullptr, \
 			    "Pentax raw", format_nikon_raw }
 
 #define FORMAT_RAW_SAMSUNG { "pef", \
 			    FORMAT_RAW_MATCH_TIFF_MAKE, 0, "SAMSUNG TECHWIN", 15, \
-			    FORMAT_RAW_EXIF_TIFF, NULL, \
+			    FORMAT_RAW_EXIF_TIFF, nullptr, \
 			    "Samsung raw", format_nikon_raw }
 
 gboolean format_nikon_makernote(ExifData *exif, guchar *tiff, guint offset,

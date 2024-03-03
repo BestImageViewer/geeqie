@@ -21,10 +21,6 @@
 #ifndef __GLUA_H
 #define __GLUA_H
 
-#include <config.h>
-
-#if HAVE_LUA
-
 #include <glib.h>
 
 struct FileData;
@@ -33,6 +29,5 @@ void lua_init();
 
 gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function);
 
-#endif
-#endif
+#endif /* __GLUA_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

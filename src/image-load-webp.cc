@@ -18,9 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <config.h>
-
-#if HAVE_WEBP
 #include "image-load-webp.h"
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -133,5 +130,4 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_webp()
 	return std::make_unique<ImageLoaderWEBP>();
 }
 
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

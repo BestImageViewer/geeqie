@@ -22,9 +22,6 @@
 #ifndef IMAGE_LOAD_JPEG_H
 #define IMAGE_LOAD_JPEG_H
 
-#include <config.h>
-
-#if HAVE_JPEG
 #include <memory>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -61,8 +58,7 @@ private:
 };
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_jpeg();
-#endif
 
-#endif
+#endif /* IMAGE_LOAD_JPEG_H */
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

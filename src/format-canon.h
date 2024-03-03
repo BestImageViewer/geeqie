@@ -22,6 +22,7 @@
 #ifndef __FORMAT_CANON_H
 #define __FORMAT_CANON_H
 
+#include <glib.h>
 
 #include "exif-int.h"
 
@@ -34,11 +35,11 @@ gboolean format_canon_raw_cr2(guchar *data, guint len,
 
 #define FORMAT_RAW_CANON { "crw", \
 			   FORMAT_RAW_MATCH_MAGIC,     6, "HEAPCCDR", 8, \
-			   FORMAT_RAW_EXIF_NONE, NULL, \
+			   FORMAT_RAW_EXIF_NONE, nullptr, \
 			   "Canon crw", format_canon_raw_crw }, \
 			 { "cr2", \
 			   FORMAT_RAW_MATCH_TIFF_MAKE, 0, "Canon", 5, \
-			   FORMAT_RAW_EXIF_TIFF, NULL, \
+			   FORMAT_RAW_EXIF_TIFF, nullptr, \
 			   "Canon cr2", format_canon_raw_cr2 }
 
 

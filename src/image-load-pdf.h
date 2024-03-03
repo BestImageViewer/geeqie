@@ -21,15 +21,11 @@
 #ifndef IMAGE_LOAD_PDF_H
 #define IMAGE_LOAD_PDF_H
 
-#include <config.h>
-
-#if HAVE_PDF
 #include <memory>
 
 struct ImageLoaderBackend;
 
 std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_pdf();
-#endif
 
-#endif
+#endif /* IMAGE_LOAD_PDF_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

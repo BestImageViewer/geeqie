@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 20019 - The Geeqie Team
+ * Copyright (C) 2019 - The Geeqie Team
  *
  * Author: Colin Clark
  *
@@ -19,10 +19,6 @@
  */
 
 #include "image-load-djvu.h"
-
-#include <config.h>
-
-#if HAVE_DJVU
 
 #include <cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -172,5 +168,4 @@ std::unique_ptr<ImageLoaderBackend> get_image_loader_backend_djvu()
 	return std::make_unique<ImageLoaderDJVU>();
 }
 
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
