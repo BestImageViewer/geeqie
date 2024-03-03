@@ -301,7 +301,6 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 		gint day;
 		gint days;
 		gint col;
-		gint row;
 		time_t dt;
 		gchar *buf;
 
@@ -326,7 +325,6 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 		col = pan_date_value(dt, PAN_DATE_LENGTH_WEEK);
 		col = col - (date_get_first_day_of_week() - 1);
 		if (col < 0) col = col + 7;
-		row = 1;
 
 		x = PAN_BOX_BORDER;
 
@@ -442,7 +440,6 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 			if (col > 6)
 				{
 				col = 0;
-				row++;
 				x = PAN_BOX_BORDER;
 				y += PAN_CAL_DAY_HEIGHT;
 				}

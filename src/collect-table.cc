@@ -1943,19 +1943,16 @@ static void collection_table_sync(CollectTable *ct)
 	GtkTreeIter iter;
 	GList *work;
 	gint r;
-	gint c;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
 
 	r = -1;
-	c = 0;
 
 	work = ct->cd->list;
 	while (work)
 		{
 		GList *list;
 		r++;
-		c = 0;
 		if (gtk_tree_model_iter_nth_child(store, &iter, nullptr, r))
 			{
 			gtk_tree_model_get(store, &iter, CTABLE_COLUMN_POINTER, &list, -1);
@@ -1973,7 +1970,6 @@ static void collection_table_sync(CollectTable *ct)
 				{
 				info = static_cast<CollectInfo *>(work->data);
 				work = work->next;
-				c++;
 				}
 			else
 				{

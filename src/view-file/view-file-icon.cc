@@ -1522,7 +1522,6 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 	GList *work;
 	FileData *visible_fd = nullptr;
 	gint r;
-	gint c;
 	gboolean valid;
 	GtkTreeIter iter;
 
@@ -1581,7 +1580,6 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 		}
 
 	r = -1;
-	c = 0;
 
 	valid = gtk_tree_model_iter_children(store, &iter, nullptr);
 
@@ -1590,7 +1588,6 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 		{
 		GList *list;
 		r++;
-		c = 0;
 		if (valid)
 			{
 			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &list, -1);
@@ -1609,7 +1606,6 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 				{
 				fd = static_cast<FileData *>(work->data);
 				work = work->next;
-				c++;
 				}
 			else
 				{
