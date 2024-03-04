@@ -27,6 +27,9 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
+#ifdef GDK_WINDOWING_X11
+#  include <gdk/gdkx.h>
+#endif
 #include <glib-object.h>
 #include <pango/pango.h>
 
@@ -62,32 +65,37 @@
 #include "view-file.h"
 #include "window.h"
 
-#ifdef GDK_WINDOWING_X11
-#include <gdk/gdkx.h>
-#endif
+namespace
+{
 
-enum {
-	MAINWINDOW_DEF_WIDTH = 700,
-	MAINWINDOW_DEF_HEIGHT = 500
+constexpr gint MAINWINDOW_DEF_WIDTH = 700;
+constexpr gint MAINWINDOW_DEF_HEIGHT = 500;
+
+constexpr gint MAIN_WINDOW_DIV_HPOS = MAINWINDOW_DEF_WIDTH / 2;
+constexpr gint MAIN_WINDOW_DIV_VPOS = MAINWINDOW_DEF_HEIGHT / 2;
+
+constexpr gint TOOLWINDOW_DEF_WIDTH = 260;
+constexpr gint TOOLWINDOW_DEF_HEIGHT = 450;
+
+constexpr gint PROGRESS_WIDTH = 150;
+
+constexpr gint ZOOM_LABEL_WIDTH = 120;
+
+constexpr gint CONFIG_WINDOW_DEF_WIDTH = 600;
+constexpr gint CONFIG_WINDOW_DEF_HEIGHT = 400;
+
+struct LayoutConfig
+{
+	LayoutWindow *lw;
+
+	GtkWidget *configwindow;
+	GtkWidget *home_path_entry;
+	GtkWidget *layout_widget;
+
+	LayoutOptions options;
 };
 
-#define MAIN_WINDOW_DIV_HPOS (MAINWINDOW_DEF_WIDTH / 2)
-#define MAIN_WINDOW_DIV_VPOS (MAINWINDOW_DEF_HEIGHT / 2)
-
-enum {
-	TOOLWINDOW_DEF_WIDTH = 260,
-	TOOLWINDOW_DEF_HEIGHT = 450
-};
-
-enum {
-	PROGRESS_WIDTH = 150,
-	ZOOM_LABEL_WIDTH = 120
-};
-
-enum {
-	PANE_DIVIDER_SIZE = 10
-};
-
+} // namespace
 
 GList *layout_window_list = nullptr;
 LayoutWindow *current_lw = nullptr;
@@ -2251,22 +2259,6 @@ void layout_info_pixel_set(LayoutWindow *lw, gboolean show)
  *-----------------------------------------------------------------------------
  */
 
-enum {
-	CONFIG_WINDOW_DEF_WIDTH =		600,
-	CONFIG_WINDOW_DEF_HEIGHT =	400
-};
-
-struct LayoutConfig
-{
-	LayoutWindow *lw;
-
-	GtkWidget *configwindow;
-	GtkWidget *home_path_entry;
-	GtkWidget *layout_widget;
-
-	LayoutOptions options;
-};
-
 static gint layout_config_delete_cb(GtkWidget *w, GdkEventAny *event, gpointer data);
 
 static void layout_config_close_cb(GtkWidget *, gpointer data)
@@ -3149,6 +3141,5 @@ LayoutWindow *layout_new_from_default()
 
 	return lw;
 }
-
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

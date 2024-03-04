@@ -45,26 +45,33 @@
 #include "utilops.h"
 #include "view-file.h"
 
+namespace
+{
+
 /* between these, the icon width is increased by thumb_max_width / 2 */
-enum {
-	THUMB_MIN_ICON_WIDTH = 128,
-	THUMB_MAX_ICON_WIDTH = 160
-};
-#define THUMB_MIN_ICON_WIDTH_WITH_MARKS TOGGLE_SPACING * FILEDATA_MARKS_SIZE
+constexpr gint THUMB_MIN_ICON_WIDTH = 128;
+constexpr gint THUMB_MAX_ICON_WIDTH = 160;
 
-enum {
-	VFICON_MAX_COLUMNS = 32,
-	THUMB_BORDER_PADDING = 2
-};
+constexpr gint THUMB_MIN_ICON_WIDTH_WITH_MARKS = TOGGLE_SPACING * FILEDATA_MARKS_SIZE;
 
-enum {
-	VFICON_TIP_DELAY = 500
-};
+constexpr gint VFICON_MAX_COLUMNS = 32;
+
+constexpr gint THUMB_BORDER_PADDING = 2;
+
+constexpr gint VFICON_TIP_DELAY = 500;
 
 enum {
 	FILE_COLUMN_POINTER = 0,
 	FILE_COLUMN_COUNT
 };
+
+struct ColumnData
+{
+	ViewFile *vf;
+	gint number;
+};
+
+} // namespace
 
 static void vficon_toggle_filenames(ViewFile *vf);
 static void vficon_selection_remove(ViewFile *vf, FileData *fd, SelectionType mask, GtkTreeIter *iter);
@@ -2071,12 +2078,6 @@ gboolean vficon_refresh(ViewFile *vf)
  * draw, etc.
  *-----------------------------------------------------------------------------
  */
-
-struct ColumnData
-{
-	ViewFile *vf;
-	gint number;
-};
 
 static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 				GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)

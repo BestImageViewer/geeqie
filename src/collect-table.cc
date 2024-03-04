@@ -55,29 +55,37 @@
 #include "utilops.h"
 #include "view-file.h"
 
+namespace
+{
+
 /* between these, the icon width is increased by thumb_max_width / 2 */
-enum {
-	THUMB_MIN_ICON_WIDTH = 128,
-	THUMB_MAX_ICON_WIDTH = 150
-};
+constexpr gint THUMB_MIN_ICON_WIDTH = 128;
+constexpr gint THUMB_MAX_ICON_WIDTH = 150;
 
-enum {
-	COLLECT_TABLE_MAX_COLUMNS = 32,
-	THUMB_BORDER_PADDING = 2
-};
+constexpr gint COLLECT_TABLE_MAX_COLUMNS = 32;
 
-enum {
-	COLLECT_TABLE_TIP_DELAY = 500,
-	COLLECT_TABLE_TIP_DELAY_PATH = 850
-};
+constexpr gint THUMB_BORDER_PADDING = 2;
+
+constexpr gint COLLECT_TABLE_TIP_DELAY = 500;
+constexpr gint COLLECT_TABLE_TIP_DELAY_PATH = 850;
 
 enum {
 	CTABLE_COLUMN_POINTER = 0,
 	CTABLE_COLUMN_COUNT
 };
 
-#define INFO_SELECTED(x) ((x)->flag_mask & SELECTION_SELECTED)
+struct ColumnData
+{
+	CollectTable *ct;
+	gint number;
+};
 
+inline gboolean info_selected(const CollectInfo *info)
+{
+	return info->flag_mask & SELECTION_SELECTED;
+}
+
+} // namespace
 
 static void collection_table_populate_at_new_size(CollectTable *ct, gint w, gint h, gboolean force);
 
@@ -441,7 +449,7 @@ static void collection_table_select_invert_all(CollectTable *ct)
 		{
 		auto info = static_cast<CollectInfo *>(work->data);
 
-		if (INFO_SELECTED(info))
+		if (info_selected(info))
 			{
 			collection_table_selection_remove(ct, info, SELECTION_SELECTED, nullptr);
 			}
@@ -465,7 +473,7 @@ void collection_table_select(CollectTable *ct, CollectInfo *info)
 {
 	ct->prev_selection = info;
 
-	if (!info || INFO_SELECTED(info)) return;
+	if (!info || info_selected(info)) return;
 
 	ct->selection = g_list_append(ct->selection, info);
 	collection_table_selection_add(ct, info, SELECTION_SELECTED, nullptr);
@@ -477,7 +485,7 @@ static void collection_table_unselect(CollectTable *ct, CollectInfo *info)
 {
 	ct->prev_selection = info;
 
-	if (!info || !INFO_SELECTED(info) ) return;
+	if (!info || !info_selected(info) ) return;
 
 	ct->selection = g_list_remove(ct->selection, info);
 	collection_table_selection_remove(ct, info, SELECTION_SELECTED, nullptr);
@@ -726,7 +734,7 @@ static GList *collection_table_popup_file_list(CollectTable *ct)
 {
 	if (!ct->click_info) return nullptr;
 
-	if (INFO_SELECTED(ct->click_info))
+	if (info_selected(ct->click_info))
 		{
 		return collection_table_selection_get_list(ct);
 		}
@@ -878,7 +886,7 @@ static void collection_table_popup_remove_cb(GtkWidget *, gpointer data)
 
 	if (!ct->click_info) return;
 
-	if (INFO_SELECTED(ct->click_info))
+	if (info_selected(ct->click_info))
 		{
 		list = g_list_copy(ct->selection);
 		}
@@ -1310,7 +1318,7 @@ static gboolean collection_table_press_key_cb(GtkWidget *widget, GdkEventKey *ev
 				ct->click_info = info;
 				if (event->state & GDK_CONTROL_MASK)
 					{
-					collection_table_select_util(ct, info, !INFO_SELECTED(info));
+					collection_table_select_util(ct, info, !info_selected(info));
 					}
 				else
 					{
@@ -1770,7 +1778,7 @@ static gboolean collection_table_release_cb(GtkWidget *, GdkEventButton *bevent,
 
 		if (bevent->state & GDK_CONTROL_MASK)
 			{
-			gboolean select = !INFO_SELECTED(info);
+			gboolean select = !info_selected(info);
 
 			if ((bevent->state & GDK_SHIFT_MASK) && ct->prev_selection)
 				{
@@ -1799,7 +1807,7 @@ static gboolean collection_table_release_cb(GtkWidget *, GdkEventButton *bevent,
 	else if (bevent->button == MOUSE_BUTTON_MIDDLE &&
 		 info && ct->click_info == info)
 		{
-		collection_table_select_util(ct, info, !INFO_SELECTED(info));
+		collection_table_select_util(ct, info, !info_selected(info));
 		}
 
 	return TRUE;
@@ -2166,7 +2174,7 @@ void collection_table_file_insert(CollectTable *ct, CollectInfo *)
 
 void collection_table_file_remove(CollectTable *ct, CollectInfo *ci)
 {
-	if (ci && INFO_SELECTED(ci))
+	if (ci && info_selected(ci))
 		{
 		ct->selection = g_list_remove(ct->selection, ci);
 		}
@@ -2301,7 +2309,7 @@ static void collection_table_dnd_get(GtkWidget *, GdkDragContext *,
 
 	if (!ct->click_info) return;
 
-	selected = INFO_SELECTED(ct->click_info);
+	selected = info_selected(ct->click_info);
 
 	switch (info)
 		{
@@ -2433,7 +2441,7 @@ static void collection_table_dnd_begin(GtkWidget *widget, GdkDragContext *contex
 		{
 		gint items;
 
-		if (INFO_SELECTED(ct->click_info))
+		if (info_selected(ct->click_info))
 			items = g_list_length(ct->selection);
 		else
 			items = 1;
@@ -2497,12 +2505,6 @@ static void collection_table_dnd_init(CollectTable *ct)
  * draw, etc.
  *-----------------------------------------------------------------------------
  */
-
-struct ColumnData
-{
-	CollectTable *ct;
-	gint number;
-};
 
 static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 					  GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)

@@ -31,12 +31,13 @@
 #include "intl.h"
 #include "ui-misc.h"
 
+namespace
+{
 
 enum {
 	COLUMN_TEXT = 0,
 	COLUMN_KEY
 };
-
 
 struct LayoutStyle
 {
@@ -55,8 +56,10 @@ struct LayoutConfig
 	gint a, b, c;
 };
 
+constexpr gint LAYOUT_STYLE_SIZE = 48;
 
-static LayoutStyle layout_config_styles[] = {
+// @todo Use std::array
+constexpr LayoutStyle layout_config_styles[] = {
 	/* 1, 2, 3 */
 	{ static_cast<LayoutLocation>(LAYOUT_LEFT | LAYOUT_TOP), static_cast<LayoutLocation>(LAYOUT_LEFT | LAYOUT_BOTTOM), LAYOUT_RIGHT },
 	{ static_cast<LayoutLocation>(LAYOUT_LEFT | LAYOUT_TOP), static_cast<LayoutLocation>(LAYOUT_RIGHT | LAYOUT_TOP), LAYOUT_BOTTOM },
@@ -64,12 +67,12 @@ static LayoutStyle layout_config_styles[] = {
 	{ LAYOUT_TOP, static_cast<LayoutLocation>(LAYOUT_LEFT | LAYOUT_BOTTOM), static_cast<LayoutLocation>(LAYOUT_RIGHT | LAYOUT_BOTTOM) }
 };
 
-static gint layout_config_style_count = sizeof(layout_config_styles) / sizeof(LayoutStyle);
+constexpr gint layout_config_style_count = sizeof(layout_config_styles) / sizeof(LayoutStyle);
 
-static const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
+const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
 
-static void layout_config_destroy(GtkWidget *, gpointer data)
+void layout_config_destroy(GtkWidget *, gpointer data)
 {
 	auto lc = static_cast<LayoutConfig *>(data);
 
@@ -77,7 +80,7 @@ static void layout_config_destroy(GtkWidget *, gpointer data)
 	g_free(lc);
 }
 
-static void layout_config_set_order(LayoutLocation l, gint n,
+void layout_config_set_order(LayoutLocation l, gint n,
 				    LayoutLocation *a, LayoutLocation *b, LayoutLocation *c)
 {
 	switch (n)
@@ -94,7 +97,7 @@ static void layout_config_set_order(LayoutLocation l, gint n,
 		}
 }
 
-static void layout_config_from_data(gint style, gint oa, gint ob, gint oc,
+void layout_config_from_data(gint style, gint oa, gint ob, gint oc,
 				    LayoutLocation *la, LayoutLocation *lb, LayoutLocation *lc)
 {
 	LayoutStyle ls;
@@ -108,18 +111,7 @@ static void layout_config_from_data(gint style, gint oa, gint ob, gint oc,
 	layout_config_set_order(ls.c, oc, la, lb, lc);
 }
 
-void layout_config_parse(gint style, const gchar *order,
-			 LayoutLocation *a, LayoutLocation *b, LayoutLocation *c)
-{
-	gint na;
-	gint nb;
-	gint nc;
-
-	layout_config_order_from_text(order, &na, &nb, &nc);
-	layout_config_from_data(style, na, nb, nc, a, b, c);
-}
-
-static void layout_config_list_order_set(LayoutConfig *lc, gint src, gint dest)
+void layout_config_list_order_set(LayoutConfig *lc, gint src, gint dest)
 {
 	GtkListStore *store;
 	GtkTreeIter iter;
@@ -142,7 +134,7 @@ static void layout_config_list_order_set(LayoutConfig *lc, gint src, gint dest)
 		}
 }
 
-static gint layout_config_list_order_get(LayoutConfig *lc, gint n)
+gint layout_config_list_order_get(LayoutConfig *lc, gint n)
 {
 	GtkTreeModel *store;
 	GtkTreeIter iter;
@@ -164,6 +156,163 @@ static gint layout_config_list_order_get(LayoutConfig *lc, gint n)
 		valid = gtk_tree_model_iter_next(store, &iter);
 		}
 	return 0;
+}
+
+void layout_config_widget_click_cb(GtkWidget *widget, gpointer data)
+{
+	LayoutConfig *lc;
+
+	lc = static_cast<LayoutConfig *>(g_object_get_data(G_OBJECT(widget), "layout_config"));
+
+	if (lc) lc->style = GPOINTER_TO_INT(data);
+}
+
+void layout_config_table_button(GtkWidget *table, LayoutLocation l, const gchar *text)
+{
+	GtkWidget *button;
+
+	gint x1;
+	gint y1;
+	gint x2;
+	gint y2;
+
+	x1 = 0;
+	y1 = 0;
+	x2 = 2;
+	y2 = 2;
+
+	if (l & LAYOUT_LEFT) x2 = 1;
+	if (l & LAYOUT_RIGHT) x1 = 1;
+	if (l & LAYOUT_TOP) y2 = 1;
+	if (l & LAYOUT_BOTTOM) y1 = 1;
+
+	button = gtk_button_new_with_label(text);
+	gtk_widget_set_sensitive(button, FALSE);
+	gtk_widget_set_can_focus(button, FALSE);
+	gtk_grid_attach(GTK_GRID(table), button, x1, y1, x2 - x1, y2 - y1);
+	gtk_widget_show(button);
+}
+
+GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, LayoutConfig *lc)
+{
+	GtkWidget *table;
+	LayoutStyle ls;
+
+	ls = layout_config_styles[style];
+
+	if (group)
+		{
+#if HAVE_GTK4
+		group = gtk_toggle_button_new();
+		gtk_toggle_button_set_group(button, group);
+#else
+		group = gtk_radio_button_new(gtk_radio_button_get_group(GTK_RADIO_BUTTON(group)));
+#endif
+		}
+	else
+		{
+#if HAVE_GTK4
+		group = gtk_toggle_button_new();
+#else
+		group = gtk_radio_button_new(nullptr);
+#endif
+		}
+	g_object_set_data(G_OBJECT(group), "layout_config", lc);
+	g_signal_connect(G_OBJECT(group), "clicked",
+	                 G_CALLBACK(layout_config_widget_click_cb), GINT_TO_POINTER(style));
+	gq_gtk_box_pack_start(GTK_BOX(box), group, FALSE, FALSE, 0);
+
+	table = gtk_grid_new();
+
+	layout_config_table_button(table, ls.a, "1");
+	layout_config_table_button(table, ls.b, "2");
+	layout_config_table_button(table, ls.c, "3");
+
+	gtk_widget_set_size_request(table, LAYOUT_STYLE_SIZE, LAYOUT_STYLE_SIZE);
+	gq_gtk_container_add(GTK_WIDGET(group), table);
+	gtk_widget_show(table);
+
+	gtk_widget_show(group);
+
+	return group;
+}
+
+void layout_config_number_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
+                    GtkTreeModel *store, GtkTreeIter *iter, gpointer)
+{
+	GtkTreePath *tpath;
+	gint *indices;
+	gchar *buf;
+
+	tpath = gtk_tree_model_get_path(store, iter);
+	indices = gtk_tree_path_get_indices(tpath);
+	buf = g_strdup_printf("%d", indices[0] + 1);
+	gtk_tree_path_free(tpath);
+	g_object_set(G_OBJECT(cell), "text", buf, NULL);
+	g_free(buf);
+}
+
+gchar num_to_text_char(gint n)
+{
+	switch (n)
+		{
+		case 1:
+			return '2';
+			break;
+		case 2:
+			return '3';
+			break;
+		}
+	return '1';
+}
+
+gchar *layout_config_order_to_text(gint a, gint b, gint c)
+{
+	gchar *text;
+
+	text = g_strdup("   ");
+
+	text[0] = num_to_text_char(a);
+	text[1] = num_to_text_char(b);
+	text[2] = num_to_text_char(c);
+
+	return text;
+}
+
+gint text_char_to_num(const gchar *text, gint n)
+{
+	if (text[n] == '3') return 2;
+	if (text[n] == '2') return 1;
+	return 0;
+}
+
+void layout_config_order_from_text(const gchar *text, gint *a, gint *b, gint *c)
+{
+	if (!text || strlen(text) < 3)
+		{
+		*a = 0;
+		*b = 1;
+		*c = 2;
+		}
+	else
+		{
+		*a = text_char_to_num(text, 0);
+		*b = text_char_to_num(text, 1);
+		*c = text_char_to_num(text, 2);
+		}
+}
+
+} // namespace
+
+void layout_config_parse(gint style, const gchar *order,
+			 LayoutLocation *a, LayoutLocation *b, LayoutLocation *c)
+{
+	gint na;
+	gint nb;
+	gint nc;
+
+	layout_config_order_from_text(order, &na, &nb, &nc);
+	layout_config_from_data(style, na, nb, nc, a, b, c);
 }
 
 void layout_config_set(GtkWidget *widget, gint style, const gchar *order)
@@ -207,104 +356,6 @@ gchar *layout_config_get(GtkWidget *widget, gint *style)
 	lc->c = layout_config_list_order_get(lc, 2);
 
 	return layout_config_order_to_text(lc->a, lc->b, lc->c);
-}
-
-static void layout_config_widget_click_cb(GtkWidget *widget, gpointer data)
-{
-	LayoutConfig *lc;
-
-	lc = static_cast<LayoutConfig *>(g_object_get_data(G_OBJECT(widget), "layout_config"));
-
-	if (lc) lc->style = GPOINTER_TO_INT(data);
-}
-
-static void layout_config_table_button(GtkWidget *table, LayoutLocation l, const gchar *text)
-{
-	GtkWidget *button;
-
-	gint x1;
-	gint y1;
-	gint x2;
-	gint y2;
-
-	x1 = 0;
-	y1 = 0;
-	x2 = 2;
-	y2 = 2;
-
-	if (l & LAYOUT_LEFT) x2 = 1;
-	if (l & LAYOUT_RIGHT) x1 = 1;
-	if (l & LAYOUT_TOP) y2 = 1;
-	if (l & LAYOUT_BOTTOM) y1 = 1;
-
-	button = gtk_button_new_with_label(text);
-	gtk_widget_set_sensitive(button, FALSE);
-	gtk_widget_set_can_focus(button, FALSE);
-	gtk_grid_attach(GTK_GRID(table), button, x1, y1, x2 - x1, y2 - y1);
-	gtk_widget_show(button);
-}
-
-enum {
-	LAYOUT_STYLE_SIZE = 48
-};
-
-static GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, LayoutConfig *lc)
-{
-	GtkWidget *table;
-	LayoutStyle ls;
-
-	ls = layout_config_styles[style];
-
-	if (group)
-		{
-#if HAVE_GTK4
-		group = gtk_toggle_button_new();
-		gtk_toggle_button_set_group(button, group);
-#else
-		group = gtk_radio_button_new(gtk_radio_button_get_group(GTK_RADIO_BUTTON(group)));
-#endif
-		}
-	else
-		{
-#if HAVE_GTK4
-		group = gtk_toggle_button_new();
-#else
-		group = gtk_radio_button_new(nullptr);
-#endif
-		}
-	g_object_set_data(G_OBJECT(group), "layout_config", lc);
-	g_signal_connect(G_OBJECT(group), "clicked",
-			 G_CALLBACK(layout_config_widget_click_cb), GINT_TO_POINTER(style));
-	gq_gtk_box_pack_start(GTK_BOX(box), group, FALSE, FALSE, 0);
-
-	table = gtk_grid_new();
-
-	layout_config_table_button(table, ls.a, "1");
-	layout_config_table_button(table, ls.b, "2");
-	layout_config_table_button(table, ls.c, "3");
-
-	gtk_widget_set_size_request(table, LAYOUT_STYLE_SIZE, LAYOUT_STYLE_SIZE);
-	gq_gtk_container_add(GTK_WIDGET(group), table);
-	gtk_widget_show(table);
-
-	gtk_widget_show(group);
-
-	return group;
-}
-
-static void layout_config_number_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
-				    GtkTreeModel *store, GtkTreeIter *iter, gpointer)
-{
-	GtkTreePath *tpath;
-	gint *indices;
-	gchar *buf;
-
-	tpath = gtk_tree_model_get_path(store, iter);
-	indices = gtk_tree_path_get_indices(tpath);
-	buf = g_strdup_printf("%d", indices[0] + 1);
-	gtk_tree_path_free(tpath);
-	g_object_set(G_OBJECT(cell), "text", buf, NULL);
-	g_free(buf);
 }
 
 GtkWidget *layout_config_new()
@@ -377,55 +428,5 @@ GtkWidget *layout_config_new()
 	pref_label_new(lc->box, _("(drag to change order)"));
 
 	return lc->box;
-}
-
-static gchar num_to_text_char(gint n)
-{
-	switch (n)
-		{
-		case 1:
-			return '2';
-			break;
-		case 2:
-			return '3';
-			break;
-		}
-	return '1';
-}
-
-gchar *layout_config_order_to_text(gint a, gint b, gint c)
-{
-	gchar *text;
-
-	text = g_strdup("   ");
-
-	text[0] = num_to_text_char(a);
-	text[1] = num_to_text_char(b);
-	text[2] = num_to_text_char(c);
-
-	return text;
-}
-
-static gint text_char_to_num(const gchar *text, gint n)
-{
-	if (text[n] == '3') return 2;
-	if (text[n] == '2') return 1;
-	return 0;
-}
-
-void layout_config_order_from_text(const gchar *text, gint *a, gint *b, gint *c)
-{
-	if (!text || strlen(text) < 3)
-		{
-		*a = 0;
-		*b = 1;
-		*c = 2;
-		}
-	else
-		{
-		*a = text_char_to_num(text, 0);
-		*b = text_char_to_num(text, 1);
-		*c = text_char_to_num(text, 2);
-		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
