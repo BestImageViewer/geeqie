@@ -38,6 +38,15 @@
 #include "options.h"
 #include "ui-fileops.h"
 
+namespace
+{
+
+constexpr int BUFSIZE = 128;
+
+constexpr gint CELL_HEIGHT_OVERRIDE = 512;
+
+} // namespace
+
 gdouble get_zoom_increment()
 {
 	return ((options->image.zoom_increment != 0) ? static_cast<gdouble>(options->image.zoom_increment) / 100.0 : 1.0);
@@ -146,9 +155,6 @@ gchar *expand_tilde(const gchar *filename)
  */
 
 #define GEOCODE_NAME "geocode-parameters.awk"
-enum {
-	BUFSIZE = 128
-};
 
 gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
 {
@@ -432,6 +438,21 @@ void gq_gtk_grid_attach(GtkGrid *grid, GtkWidget *child, guint left_attach, guin
 void gq_gtk_grid_attach_default(GtkGrid *grid, GtkWidget *child, guint left_attach, guint right_attach, guint top_attach, guint bottom_attach )
 {
 	gtk_grid_attach(grid, child, left_attach, top_attach, right_attach - left_attach, bottom_attach - top_attach);
+}
+
+/* this overrides the low default of a GtkCellRenderer from 100 to CELL_HEIGHT_OVERRIDE, something sane for our purposes */
+void cell_renderer_height_override(GtkCellRenderer *renderer)
+{
+	GParamSpec *spec;
+
+	spec = g_object_class_find_property(G_OBJECT_GET_CLASS(G_OBJECT(renderer)), "height");
+	if (spec && G_IS_PARAM_SPEC_INT(spec))
+		{
+		GParamSpecInt *spec_int;
+
+		spec_int = G_PARAM_SPEC_INT(spec);
+		if (spec_int->maximum < CELL_HEIGHT_OVERRIDE) spec_int->maximum = CELL_HEIGHT_OVERRIDE;
+		}
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

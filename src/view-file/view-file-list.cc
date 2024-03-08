@@ -1944,27 +1944,6 @@ gboolean vflist_refresh(ViewFile *vf)
 }
 
 
-
-/* this overrides the low default of a GtkCellRenderer from 100 to CELL_HEIGHT_OVERRIDE, something sane for our purposes */
-
-enum {
-	CELL_HEIGHT_OVERRIDE = 512
-};
-
-static void cell_renderer_height_override(GtkCellRenderer *renderer)
-{
-	GParamSpec *spec;
-
-	spec = g_object_class_find_property(G_OBJECT_GET_CLASS(G_OBJECT(renderer)), "height");
-	if (spec && G_IS_PARAM_SPEC_INT(spec))
-		{
-		GParamSpecInt *spec_int;
-
-		spec_int = G_PARAM_SPEC_INT(spec);
-		if (spec_int->maximum < CELL_HEIGHT_OVERRIDE) spec_int->maximum = CELL_HEIGHT_OVERRIDE;
-		}
-}
-
 static GdkRGBA *vflist_listview_color_shifted(GtkWidget *widget)
 {
 	static GdkRGBA color;

@@ -41,7 +41,6 @@
 #include "compat.h"
 #include "debug.h"
 #include "dnd.h"
-#include "dupe.h"
 #include "editors.h"
 #include "filedata.h"
 #include "image-load.h"

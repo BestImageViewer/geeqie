@@ -165,7 +165,5 @@ void dupe_window_close(DupeWindow *dw);
 void dupe_window_add_collection(DupeWindow *dw, CollectionData *collection);
 void dupe_window_add_files(DupeWindow *dw, GList *list, gboolean recurse);
 
-void cell_renderer_height_override(GtkCellRenderer *renderer); /**< cell max with/height hack utility */
-
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
