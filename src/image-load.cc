@@ -86,10 +86,13 @@
 
 struct ExifData;
 
-enum {
-	IMAGE_LOADER_READ_BUFFER_SIZE_DEFAULT = 	4096,
-	IMAGE_LOADER_IDLE_READ_LOOP_COUNT_DEFAULT = 	1
-};
+namespace
+{
+
+constexpr gsize IMAGE_LOADER_READ_BUFFER_SIZE_DEFAULT = 4096;
+constexpr guint IMAGE_LOADER_IDLE_READ_LOOP_COUNT_DEFAULT = 1;
+
+} // namespace
 
 /* image loader class */
 
@@ -145,8 +148,8 @@ static void image_loader_init(GTypeInstance *instance, gpointer)
 
 	il->idle_done_id = 0;
 
-	il->idle_read_loop_count = IMAGE_LOADER_IDLE_READ_LOOP_COUNT_DEFAULT;
 	il->read_buffer_size = IMAGE_LOADER_READ_BUFFER_SIZE_DEFAULT;
+	il->idle_read_loop_count = IMAGE_LOADER_IDLE_READ_LOOP_COUNT_DEFAULT;
 	il->input_buffer = nullptr;
 	il->preview_free = nullptr;
 
