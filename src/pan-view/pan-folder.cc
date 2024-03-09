@@ -203,9 +203,8 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 
 		pi = pan_item_tri_new(pw, nullptr, x1, y1, x2 - x1, y2 - y1,
 				      px, py, gx, gy, gx + 5, gy + 5,
-				      255, 40, 40, 128);
-		pan_item_tri_border(pi, PAN_BORDER_1 | PAN_BORDER_3,
-				    255, 0, 0, 128);
+				      {255, 40, 40, 128});
+		pan_item_tri_border(pi, PAN_BORDER_1 | PAN_BORDER_3, {255, 0, 0, 128});
 		}
 
 	pw->list = g_list_concat(group->items, pw->list);
@@ -260,7 +259,7 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 
 	pi_box = pan_item_text_new(pw, x, y, dir_fd->path, PAN_TEXT_ATTR_NONE,
 				   PAN_BORDER_3,
-				   PAN_TEXT_COLOR, 255);
+				   {PAN_TEXT_COLOR, 255});
 
 	y += pi_box->height;
 
@@ -268,8 +267,8 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 				  x, y,
 				  PAN_BOX_BORDER * 2, PAN_BOX_BORDER * 2,
 				  PAN_BOX_OUTLINE_THICKNESS,
-				  PAN_BOX_COLOR, PAN_BOX_ALPHA,
-				  PAN_BOX_OUTLINE_COLOR, PAN_BOX_OUTLINE_ALPHA);
+				  {PAN_BOX_COLOR, PAN_BOX_ALPHA},
+				  {PAN_BOX_OUTLINE_COLOR, PAN_BOX_OUTLINE_ALPHA});
 
 	x += PAN_BOX_BORDER;
 	y += PAN_BOX_BORDER;
@@ -397,7 +396,7 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 
 	pi_box = pan_item_text_new(pw, *x, *y, dir_fd->path, PAN_TEXT_ATTR_NONE,
 				   PAN_BORDER_3,
-				   PAN_TEXT_COLOR, 255);
+				   {PAN_TEXT_COLOR, 255});
 
 	*y += pi_box->height;
 
@@ -405,8 +404,8 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 				  *x, *y,
 				  PAN_BOX_BORDER, PAN_BOX_BORDER,
 				  PAN_BOX_OUTLINE_THICKNESS,
-				  PAN_BOX_COLOR, PAN_BOX_ALPHA,
-				  PAN_BOX_OUTLINE_COLOR, PAN_BOX_OUTLINE_ALPHA);
+				  {PAN_BOX_COLOR, PAN_BOX_ALPHA},
+				  {PAN_BOX_OUTLINE_COLOR, PAN_BOX_OUTLINE_ALPHA});
 
 	*x += PAN_BOX_BORDER;
 	*y += PAN_BOX_BORDER;

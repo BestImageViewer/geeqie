@@ -74,17 +74,27 @@
 namespace
 {
 
+constexpr gint PAN_WINDOW_DEFAULT_WIDTH = 720;
+constexpr gint PAN_WINDOW_DEFAULT_HEIGHT = 500;
+
 constexpr gint PAN_TILE_SIZE = 512;
+
+constexpr gdouble ZOOM_INCREMENT = 1.0;
 constexpr gint ZOOM_LABEL_WIDTH = 64;
 
+constexpr gint PAN_GRID_SIZE = 60;
+constexpr gint PAN_GRID_ALPHA = 20;
+#define PAN_GRID_COLOR 0, 0, 0, PAN_GRID_ALPHA
+
+#define PAN_BACKGROUND_COLOR 150, 150, 150, 255
+
+/* popup info box */
+constexpr gint PAN_POPUP_BORDER = 1;
+constexpr guint8 PAN_POPUP_ALPHA = 255;
+constexpr PanColor PAN_POPUP_COLOR{255, 255, 225, PAN_POPUP_ALPHA};
+constexpr PanColor PAN_POPUP_BORDER_COLOR{0, 0, 0, PAN_POPUP_ALPHA};
+
 } // namespace
-
-enum {
-	PAN_WINDOW_DEFAULT_WIDTH = 720,
-	PAN_WINDOW_DEFAULT_HEIGHT = 500
-};
-
-#define ZOOM_INCREMENT 1.0
 
 #define PAN_PREF_GROUP		"pan_view_options"
 #define PAN_PREF_HIDE_WARNING	"hide_performance_warning"
@@ -355,7 +365,7 @@ static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
 
 	pixbuf_set_rect_fill(pixbuf,
 			     0, 0, width, height,
-			     PAN_BACKGROUND_COLOR, 255);
+			     PAN_BACKGROUND_COLOR);
 
 	for (i = (x / PAN_GRID_SIZE) * PAN_GRID_SIZE; i < x + width; i += PAN_GRID_SIZE)
 		{
@@ -370,7 +380,7 @@ static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
-					      PAN_GRID_COLOR, PAN_GRID_ALPHA);
+					      PAN_GRID_COLOR);
 			}
 		}
 	for (i = (y / PAN_GRID_SIZE) * PAN_GRID_SIZE; i < y + height; i += PAN_GRID_SIZE)
@@ -386,7 +396,7 @@ static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
-					      PAN_GRID_COLOR, PAN_GRID_ALPHA);
+					      PAN_GRID_COLOR);
 			}
 		}
 
@@ -1449,9 +1459,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	DEBUG_1("info set to %s", pi->fd->path);
 
 	pbox = pan_item_box_new(pw, nullptr, pi->x + pi->width + 4, pi->y, 10, 10,
-				PAN_POPUP_BORDER,
-				PAN_POPUP_COLOR, PAN_POPUP_ALPHA,
-				PAN_POPUP_BORDER_COLOR, PAN_POPUP_ALPHA);
+				PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
 	pan_item_set_key(pbox, "info");
 
 	if (pi->type == PAN_ITEM_THUMB && pi->pixbuf)
@@ -1477,8 +1485,8 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 
 	p = pan_item_tri_new(pw, nullptr, x, y, w, h,
 			     x1, y1, x2, y2, x3, y3,
-			     PAN_POPUP_COLOR, PAN_POPUP_ALPHA);
-	pan_item_tri_border(p, PAN_BORDER_1 | PAN_BORDER_3, PAN_POPUP_BORDER_COLOR, PAN_POPUP_ALPHA);
+			     PAN_POPUP_COLOR);
+	pan_item_tri_border(p, PAN_BORDER_1 | PAN_BORDER_3, PAN_POPUP_BORDER_COLOR);
 	pan_item_set_key(p, "info");
 	pan_item_added(pw, p);
 
@@ -1535,9 +1543,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 			ih = MAX(1, ih * scale / 100);
 
 			pbox = pan_item_box_new(pw, nullptr, pbox->x, pbox->y + pbox->height + 8, 10, 10,
-						PAN_POPUP_BORDER,
-						PAN_POPUP_COLOR, PAN_POPUP_ALPHA,
-						PAN_POPUP_BORDER_COLOR, PAN_POPUP_ALPHA);
+						PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
 			pan_item_set_key(pbox, "info");
 
 			p = pan_item_image_new(pw, file_data_new_group(pi->fd->path),

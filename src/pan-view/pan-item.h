@@ -51,26 +51,22 @@ PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
 
 // Item box type
 PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
-			  gint border_size,
-			  guint8 base_r, guint8 base_g, guint8 base_b, guint8 base_a,
-			  guint8 bord_r, guint8 bord_g, guint8 bord_b, guint8 bord_a);
+                          gint border_size, const PanColor &base, const PanColor &bord);
 void pan_item_box_shadow(PanItem *pi, gint offset, gint fade);
 gint pan_item_box_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
 		       gint x, gint y, gint width, gint height);
 
 // Item triangle type
 PanItem *pan_item_tri_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
-			  gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
-			  guint8 r, guint8 g, guint8 b, guint8 a);
-void pan_item_tri_border(PanItem *pi, gint borders,
-			 guint8 r, guint8 g, guint8 b, guint8 a);
+                          gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
+                          const PanColor &color);
+void pan_item_tri_border(PanItem *pi, gint borders, const PanColor &color);
 gint pan_item_tri_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
 		       gint x, gint y, gint width, gint height);
 
 // Item text type
 PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
-			   PanTextAttrType attr, PanBorderType border,
-			   guint8 r, guint8 g, guint8 b, guint8 a);
+                           PanTextAttrType attr, PanBorderType border, const PanColor &color);
 gint pan_item_text_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
 			gint x, gint y, gint width, gint height);
 

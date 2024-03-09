@@ -34,6 +34,19 @@
 #include "pixbuf-util.h"
 #include "ui-misc.h"
 
+namespace
+{
+
+constexpr gint PAN_OUTLINE_THICKNESS = 1;
+#define PAN_OUTLINE_ALPHA 180
+#define PAN_OUTLINE_COLOR_1 255, 255, 255, PAN_OUTLINE_ALPHA
+#define PAN_OUTLINE_COLOR_2 64, 64, 64, PAN_OUTLINE_ALPHA
+
+/* popup info box */
+constexpr PanColor PAN_POPUP_TEXT_COLOR{0, 0, 0, 225};
+
+} // namespace
+
 /*
  *-----------------------------------------------------------------------------
  * item base functions
@@ -111,9 +124,7 @@ void pan_item_size_coordinates(PanItem *pi, gint border, gint *w, gint *h)
  */
 
 PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
-			  gint border_size,
-			  guint8 base_r, guint8 base_g, guint8 base_b, guint8 base_a,
-			  guint8 bord_r, guint8 bord_g, guint8 bord_b, guint8 bord_a)
+                          gint border_size, const PanColor &base, const PanColor &bord)
 {
 	PanItem *pi;
 
@@ -125,15 +136,9 @@ PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint widt
 	pi->width = width;
 	pi->height = height;
 
-	pi->color_r = base_r;
-	pi->color_g = base_g;
-	pi->color_b = base_b;
-	pi->color_a = base_a;
+	pi->color = base;
 
-	pi->color2_r = bord_r;
-	pi->color2_g = bord_g;
-	pi->color2_b = bord_b;
-	pi->color2_a = bord_a;
+	pi->color2 = bord;
 	pi->border = border_size;
 
 	pw->list = g_list_prepend(pw->list, pi);
@@ -185,7 +190,7 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 		bw -= shadow[0];
 		bh -= shadow[0];
 
-		if (pi->color_a > 254)
+		if (pi->color.a > 254)
 			{
 			pixbuf_draw_shadow(pixbuf, pi->x - x + bw, pi->y - y + shadow[0],
 					   shadow[0], bh - shadow[0],
@@ -201,7 +206,7 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 		else
 			{
 			gint a;
-			a = pi->color_a * PAN_SHADOW_ALPHA >> 8;
+			a = pi->color.a * PAN_SHADOW_ALPHA >> 8;
 			pixbuf_draw_shadow(pixbuf, pi->x - x + shadow[0], pi->y - y + shadow[0],
 					   bw, bh,
 					   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
@@ -216,7 +221,7 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
-				      pi->color_r, pi->color_g, pi->color_b, pi->color_a);
+				      pi->color.r, pi->color.g, pi->color.b, pi->color.a);
 		}
 	if (util_clip_region(x, y, width, height,
 			     pi->x, pi->y, bw, pi->border,
@@ -224,7 +229,7 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
-				      pi->color2_r, pi->color2_g, pi->color2_b, pi->color2_a);
+				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 		}
 	if (util_clip_region(x, y, width, height,
 			     pi->x, pi->y + pi->border, pi->border, bh - pi->border * 2,
@@ -232,7 +237,7 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
-				      pi->color2_r, pi->color2_g, pi->color2_b, pi->color2_a);
+				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 		}
 	if (util_clip_region(x, y, width, height,
 			     pi->x + bw - pi->border, pi->y + pi->border,
@@ -241,7 +246,7 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
-				      pi->color2_r, pi->color2_g, pi->color2_b, pi->color2_a);
+				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 		}
 	if (util_clip_region(x, y, width, height,
 			     pi->x, pi->y + bh - pi->border,
@@ -250,7 +255,7 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
-				      pi->color2_r, pi->color2_g, pi->color2_b, pi->color2_a);
+				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 		}
 
 	return FALSE;
@@ -264,8 +269,8 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
  */
 
 PanItem *pan_item_tri_new(PanWindow *pw, FileData *, gint x, gint y, gint width, gint height,
-			  gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
-			  guint8 r, guint8 g, guint8 b, guint8 a)
+                          gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
+                          const PanColor &color)
 {
 	PanItem *pi;
 	gint *coord;
@@ -277,10 +282,7 @@ PanItem *pan_item_tri_new(PanWindow *pw, FileData *, gint x, gint y, gint width,
 	pi->width = width;
 	pi->height = height;
 
-	pi->color_r = r;
-	pi->color_g = g;
-	pi->color_b = b;
-	pi->color_a = a;
+	pi->color = color;
 
 	coord = g_new0(gint, 6);
 	coord[0] = x1;
@@ -299,17 +301,13 @@ PanItem *pan_item_tri_new(PanWindow *pw, FileData *, gint x, gint y, gint width,
 	return pi;
 }
 
-void pan_item_tri_border(PanItem *pi, gint borders,
-			 guint8 r, guint8 g, guint8 b, guint8 a)
+void pan_item_tri_border(PanItem *pi, gint borders, const PanColor &color)
 {
 	if (!pi || pi->type != PAN_ITEM_TRIANGLE) return;
 
 	pi->border = borders;
 
-	pi->color2_r = r;
-	pi->color2_g = g;
-	pi->color2_b = b;
-	pi->color2_a = a;
+	pi->color2 = color;
 }
 
 gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *, gint x, gint y, gint width, gint height)
@@ -329,7 +327,7 @@ gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 				     coord[0] - x, coord[1] - y,
 				     coord[2] - x, coord[3] - y,
 				     coord[4] - x, coord[5] - y,
-				     pi->color_r, pi->color_g, pi->color_b, pi->color_a);
+				     pi->color.r, pi->color.g, pi->color.b, pi->color.a);
 
 		if (pi->border & PAN_BORDER_1)
 			{
@@ -337,7 +335,7 @@ gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 					 rx - x, ry - y, rw, rh,
 					 coord[0] - x, coord[1] - y,
 					 coord[2] - x, coord[3] - y,
-					 pi->color2_r, pi->color2_g, pi->color2_b, pi->color2_a);
+					 pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 			}
 		if (pi->border & PAN_BORDER_2)
 			{
@@ -345,7 +343,7 @@ gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 					 rx - x, ry - y, rw, rh,
 					 coord[2] - x, coord[3] - y,
 					 coord[4] - x, coord[5] - y,
-					 pi->color2_r, pi->color2_g, pi->color2_b, pi->color2_a);
+					 pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 			}
 		if (pi->border & PAN_BORDER_3)
 			{
@@ -353,7 +351,7 @@ gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 					 rx - x, ry - y, rw, rh,
 					 coord[4] - x, coord[5] - y,
 					 coord[0] - x, coord[1] - y,
-					 pi->color2_r, pi->color2_g, pi->color2_b, pi->color2_a);
+					 pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 			}
 		}
 
@@ -423,8 +421,7 @@ static void pan_item_text_compute_size(PanItem *pi, GtkWidget *widget)
 }
 
 PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
-			   PanTextAttrType attr, PanBorderType border,
-			   guint8 r, guint8 g, guint8 b, guint8 a)
+                           PanTextAttrType attr, PanBorderType border, const PanColor &color)
 {
 	PanItem *pi;
 
@@ -435,10 +432,7 @@ PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
 	pi->text = g_strdup(text);
 	pi->text_attr = attr;
 
-	pi->color_r = r;
-	pi->color_g = g;
-	pi->color_b = b;
-	pi->color_a = a;
+	pi->color = color;
 
 	pi->border = border;
 
@@ -456,7 +450,7 @@ gint pan_item_text_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRende
 	layout = pan_item_text_layout(pi, reinterpret_cast<GtkWidget *>(pr));
 	pixbuf_draw_layout(pixbuf, layout, reinterpret_cast<GtkWidget *>(pr),
 			   pi->x - x + pi->border, pi->y - y + pi->border,
-			   pi->color_r, pi->color_g, pi->color_b, pi->color_a);
+			   pi->color.r, pi->color.g, pi->color.b, pi->color.a);
 	g_object_unref(G_OBJECT(layout));
 
 	return FALSE;
@@ -561,7 +555,7 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
-					      PAN_OUTLINE_COLOR_1, PAN_OUTLINE_ALPHA);
+					      PAN_OUTLINE_COLOR_1);
 			}
 		if (util_clip_region(x, y, width, height,
 				     tx, ty, PAN_OUTLINE_THICKNESS, th,
@@ -569,7 +563,7 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
-					      PAN_OUTLINE_COLOR_1, PAN_OUTLINE_ALPHA);
+					      PAN_OUTLINE_COLOR_1);
 			}
 		if (util_clip_region(x, y, width, height,
 				     tx + tw - PAN_OUTLINE_THICKNESS, ty +  PAN_OUTLINE_THICKNESS,
@@ -578,7 +572,7 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
-					      PAN_OUTLINE_COLOR_2, PAN_OUTLINE_ALPHA);
+					      PAN_OUTLINE_COLOR_2);
 			}
 		if (util_clip_region(x, y, width, height,
 				     tx +  PAN_OUTLINE_THICKNESS, ty + th - PAN_OUTLINE_THICKNESS,
@@ -587,7 +581,7 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
-					      PAN_OUTLINE_COLOR_2, PAN_OUTLINE_ALPHA);
+					      PAN_OUTLINE_COLOR_2);
 			}
 		}
 	else
@@ -663,12 +657,12 @@ PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w,
 	pi->x = x;
 	pi->y = y;
 
-	pi->color_a = 255;
+	pi->color.a = 255;
 
-	pi->color2_r = 0;
-	pi->color2_g = 0;
-	pi->color2_b = 0;
-	pi->color2_a = PAN_SHADOW_ALPHA / 2;
+	pi->color2.r = 0;
+	pi->color2.g = 0;
+	pi->color2.b = 0;
+	pi->color2.a = PAN_SHADOW_ALPHA / 2;
 
 	pan_item_image_find_size(pw, pi, w, h);
 
@@ -694,13 +688,13 @@ gint pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRend
 					     static_cast<gdouble>(pi->x) - x,
 					     static_cast<gdouble>(pi->y) - y,
 					     1.0, 1.0, GDK_INTERP_NEAREST,
-					     pi->color_a);
+					     pi->color.a);
 			}
 		else
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
-					      pi->color2_r, pi->color2_g, pi->color2_b, pi->color2_a);
+					      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 			}
 		}
 
@@ -901,8 +895,7 @@ PanItem *pan_text_alignment_add(PanTextAlignment *ta, const gchar *label, const 
 	if (label)
 		{
 		item = pan_item_text_new(ta->pw, ta->x, ta->y, label,
-					 PAN_TEXT_ATTR_BOLD, PAN_BORDER_NONE,
-					 PAN_POPUP_TEXT_COLOR, 255);
+					 PAN_TEXT_ATTR_BOLD, PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
 		pan_item_set_key(item, ta->key);
 		}
 	else
@@ -914,8 +907,7 @@ PanItem *pan_text_alignment_add(PanTextAlignment *ta, const gchar *label, const 
 	if (text)
 		{
 		item = pan_item_text_new(ta->pw, ta->x, ta->y, text,
-					 PAN_TEXT_ATTR_NONE, PAN_BORDER_NONE,
-					 PAN_POPUP_TEXT_COLOR, 255);
+					 PAN_TEXT_ATTR_NONE, PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
 		pan_item_set_key(item, ta->key);
 		}
 	else

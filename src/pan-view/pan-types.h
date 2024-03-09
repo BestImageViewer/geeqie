@@ -54,17 +54,6 @@ struct ThumbLoader;
 #define PAN_SHADOW_COLOR 0, 0, 0
 #define PAN_SHADOW_ALPHA 64
 
-#define PAN_OUTLINE_THICKNESS 1
-#define PAN_OUTLINE_COLOR_1 255, 255, 255
-#define PAN_OUTLINE_COLOR_2 64, 64, 64
-#define PAN_OUTLINE_ALPHA 180
-
-#define PAN_BACKGROUND_COLOR 150, 150, 150
-
-#define PAN_GRID_SIZE 60
-#define PAN_GRID_COLOR 0, 0, 0
-#define PAN_GRID_ALPHA 20
-
 #define PAN_BOX_COLOR 255, 255, 255
 #define PAN_BOX_ALPHA 100
 #define PAN_BOX_BORDER 20
@@ -73,16 +62,7 @@ struct ThumbLoader;
 #define PAN_BOX_OUTLINE_COLOR 0, 0, 0
 #define PAN_BOX_OUTLINE_ALPHA 128
 
-#define PAN_TEXT_BORDER_SIZE 4
 #define PAN_TEXT_COLOR 0, 0, 0
-
-/* popup info box */
-
-#define PAN_POPUP_COLOR 255, 255, 225
-#define PAN_POPUP_ALPHA 255
-#define PAN_POPUP_BORDER 1
-#define PAN_POPUP_BORDER_COLOR 0, 0, 0
-#define PAN_POPUP_TEXT_COLOR 0, 0, 0
 
 
 #define PAN_GROUP_MAX 16
@@ -142,6 +122,13 @@ enum PanBorderType {
 #define PAN_BORDER_LEFT		PAN_BORDER_4
 
 
+struct PanColor {
+	guint8 r;
+	guint8 g;
+	guint8 b;
+	guint8 a;
+};
+
 struct PanItem {
 	PanItemType type;
 	gint x;
@@ -158,15 +145,9 @@ struct PanItem {
 	gchar *text;
 	PanTextAttrType text_attr;
 
-	guint8 color_r;
-	guint8 color_g;
-	guint8 color_b;
-	guint8 color_a;
+	PanColor color;
 
-	guint8 color2_r;
-	guint8 color2_g;
-	guint8 color2_b;
-	guint8 color2_a;
+	PanColor color2;
 	gint border;
 
 	gpointer data;
