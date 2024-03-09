@@ -188,7 +188,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	x3 = pbox->x + 1;
 	y3 = MAX(pbox->y, y2 - 30);
 	util_clip_triangle(x1, y1, x2, y2, x3, y3,
-			   &x, &y, &w, &h);
+	                   x, y, w, h);
 
 	pi = pan_item_tri_new(pw, nullptr, x, y, w, h,
 			      x1, y1, x2, y2, x3, y3,

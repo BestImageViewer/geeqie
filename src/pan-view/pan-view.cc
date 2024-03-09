@@ -1481,7 +1481,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	x3 = pbox->x + 1;
 	y3 = pbox->y + 12;
 	util_clip_triangle(x1, y1, x2, y2, x3, y3,
-			   &x, &y, &w, &h);
+	                   x, y, w, h);
 
 	p = pan_item_tri_new(pw, nullptr, x, y, w, h,
 			     x1, y1, x2, y2, x3, y3,

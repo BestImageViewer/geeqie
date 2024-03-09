@@ -21,6 +21,7 @@
 
 #include "pixbuf-util.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -1003,26 +1004,12 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout, GtkWidget *,
  */
 
 void util_clip_triangle(gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
-			gint *rx, gint *ry, gint *rw, gint *rh)
+                        gint &rx, gint &ry, gint &rw, gint &rh)
 {
-	gint tx;
-	gint ty;
-	gint tw;
-	gint th;
-
-	tx = MIN(x1, x2);
-	tx = MIN(tx, x3);
-	ty = MIN(y1, y2);
-	ty = MIN(ty, y3);
-	tw = MAX(abs(x1 - x2), abs(x2 - x3));
-	tw = MAX(tw, abs(x3 - x1));
-	th = MAX(abs(y1 - y2), abs(y2 - y3));
-	th = MAX(th, abs(y3 - y1));
-
-	*rx = tx;
-	*ry = ty;
-	*rw = tw;
-	*rh = th;
+	rx = std::min({x1, x2, x3});
+	ry = std::min({y1, y2, y3});
+	rw = std::max({abs(x1 - x2), abs(x2 - x3), abs(x3 - x1)});
+	rh = std::max({abs(y1 - y2), abs(y2 - y3), abs(y3 - y1)});
 }
 
 void pixbuf_draw_triangle(GdkPixbuf *pb,
@@ -1069,7 +1056,7 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 			      &rx, &ry, &rw, &rh)) return;
 
 	util_clip_triangle(x1, y1, x2, y2, x3, y3,
-			   &tx, &ty, &tw, &th);
+	                   tx, ty, tw, th);
 
 	if (!util_clip_region(rx, ry, rw, rh,
 			      tx, ty, tw, th,

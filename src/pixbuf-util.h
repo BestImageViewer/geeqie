@@ -131,7 +131,7 @@ gboolean util_clip_region(gint x, gint y, gint w, gint h,
 		          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
 		          gint *rx, gint *ry, gint *rw, gint *rh);
 void util_clip_triangle(gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
-			gint *rx, gint *ry, gint *rw, gint *rh);
+                        gint &rx, gint &ry, gint &rw, gint &rh);
 
 
 #endif
