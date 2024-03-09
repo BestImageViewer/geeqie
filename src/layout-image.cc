@@ -60,10 +60,6 @@
 #include "utilops.h"
 #include "view-file.h"
 
-enum {
-	FILE_COLUMN_POINTER = 0
-};
-
 static GtkWidget *layout_image_pop_menu(LayoutWindow *lw);
 static void layout_image_set_buttons(LayoutWindow *lw);
 static gboolean layout_image_animate_new_file(LayoutWindow *lw);
@@ -1263,7 +1259,7 @@ void layout_image_alter_orientation(LayoutWindow *lw, AlterType type)
 			{
 			tpath = static_cast<GtkTreePath *>(work->data);
 			gtk_tree_model_get_iter(store, &iter, tpath);
-			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd_n, -1);
+			gtk_tree_model_get(store, &iter, VIEW_FILE_COLUMN_POINTER, &fd_n, -1);
 			work = work->next;
 			}
 
@@ -1312,7 +1308,7 @@ void layout_image_rating(LayoutWindow *lw, const gchar *rating)
 			{
 			tpath = static_cast<GtkTreePath *>(work->data);
 			gtk_tree_model_get_iter(store, &iter, tpath);
-			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd_n, -1);
+			gtk_tree_model_get(store, &iter, VIEW_FILE_COLUMN_POINTER, &fd_n, -1);
 			work = work->next;
 			}
 

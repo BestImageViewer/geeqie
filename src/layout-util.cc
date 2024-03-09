@@ -83,7 +83,6 @@
 
 enum {
 	MENU_EDIT_ACTION_OFFSET = 16,
-	FILE_COLUMN_POINTER = 0
 };
 
 static gboolean layout_bar_enabled(LayoutWindow *lw);
@@ -605,7 +604,7 @@ static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean 
 			{
 			tpath = static_cast<GtkTreePath *>(work->data);
 			gtk_tree_model_get_iter(store, &iter, tpath);
-			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd_n, -1);
+			gtk_tree_model_get(store, &iter, VIEW_FILE_COLUMN_POINTER, &fd_n, -1);
 			work = work->next;
 			}
 

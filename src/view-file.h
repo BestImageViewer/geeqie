@@ -128,6 +128,8 @@ struct ViewFileInfoIcon
 #define VFLIST(_vf_) ((ViewFileInfoList *)(_vf_->info))
 #define VFICON(_vf_) ((ViewFileInfoIcon *)(_vf_->info))
 
+const gint VIEW_FILE_COLUMN_POINTER = 0; // @todo Use inline constexpr in C++17
+
 void vf_send_update(ViewFile *vf);
 
 ViewFile *vf_new(FileViewType type, FileData *dir_fd);
