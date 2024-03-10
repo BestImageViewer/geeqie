@@ -21,7 +21,9 @@
 
 #include "pan-util.h"
 
-#include <features.h>
+#ifdef __linux__
+#  include <features.h>
+#endif
 #include <sys/stat.h>
 #include <unistd.h>
 

@@ -23,6 +23,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <config.h>
+
+#if !HAVE__NL_TIME_FIRST_WEEKDAY
+#  include <clocale>
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -30,8 +35,6 @@
 
 #include <langinfo.h>
 #include <pwd.h>
-
-#include <config.h>
 
 #include "debug.h"
 #include "main.h"
