@@ -732,18 +732,17 @@ void pixbuf_draw_rect_fill(GdkPixbuf *pb,
 	prs = gdk_pixbuf_get_rowstride(pb);
 	p_pix = gdk_pixbuf_get_pixels(pb);
 
+	const gint p_step = has_alpha ? 4 : 3;
+
 	for (i = 0; i < h; i++)
 		{
-		pp = p_pix + (y + i) * prs + (x * (has_alpha ? 4 : 3));
+		pp = p_pix + (y + i) * prs + (x * p_step);
 		for (j = 0; j < w; j++)
 			{
-			*pp = (r * a + *pp * (256-a)) >> 8;
-			pp++;
-			*pp = (g * a + *pp * (256-a)) >> 8;
-			pp++;
-			*pp = (b * a + *pp * (256-a)) >> 8;
-			pp++;
-			if (has_alpha) pp++;
+			pp[0] = (r * a + pp[0] * (256-a)) >> 8;
+			pp[1] = (g * a + pp[1] * (256-a)) >> 8;
+			pp[2] = (b * a + pp[2] * (256-a)) >> 8;
+			pp += p_step;
 			}
 		}
 }
@@ -791,9 +790,11 @@ void pixbuf_set_rect_fill(GdkPixbuf *pb,
 	prs = gdk_pixbuf_get_rowstride(pb);
 	p_pix = gdk_pixbuf_get_pixels(pb);
 
+	const gint p_step = has_alpha ? 4 : 3;
+
 	for (i = 0; i < h; i++)
 		{
-		pp = p_pix + (y + i) * prs + (x * (has_alpha ? 4 : 3));
+		pp = p_pix + (y + i) * prs + (x * p_step);
 		for (j = 0; j < w; j++)
 			{
 			*pp = r; pp++;
@@ -1123,13 +1124,10 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 
 		while (xa < xb)
 			{
-			*pp = (r * a + *pp * (256-a)) >> 8;
-			pp++;
-			*pp = (g * a + *pp * (256-a)) >> 8;
-			pp++;
-			*pp = (b * a + *pp * (256-a)) >> 8;
-			pp++;
-			if (has_alpha) pp++;
+			pp[0] = (r * a + pp[0] * (256-a)) >> 8;
+			pp[1] = (g * a + pp[1] * (256-a)) >> 8;
+			pp[2] = (b * a + pp[2] * (256-a)) >> 8;
+			pp += p_step;
 
 			xa++;
 			}
@@ -1372,13 +1370,10 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
 		for (i = x1; i < x2; i++)
 			{
 			if (vertical) n = a - a * abs(i - s) / border;
-			*pp = (r * n + *pp * (256-n)) >> 8;
-			pp++;
-			*pp = (g * n + *pp * (256-n)) >> 8;
-			pp++;
-			*pp = (b * n + *pp * (256-n)) >> 8;
-			pp++;
-			if (has_alpha) pp++;
+			pp[0] = (r * n + pp[0] * (256-n)) >> 8;
+			pp[1] = (g * n + pp[1] * (256-n)) >> 8;
+			pp[2] = (b * n + pp[2] * (256-n)) >> 8;
+			pp += p_step;
 			}
 		}
 }
@@ -1404,13 +1399,10 @@ static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
 
 			r = MIN(border, (gint)hypot(i - sx, j - sy));
 			n = a - a * r / border;
-			*pp = (r * n + *pp * (256-n)) >> 8;
-			pp++;
-			*pp = (g * n + *pp * (256-n)) >> 8;
-			pp++;
-			*pp = (b * n + *pp * (256-n)) >> 8;
-			pp++;
-			if (has_alpha) pp++;
+			pp[0] = (r * n + pp[0] * (256-n)) >> 8;
+			pp[1] = (g * n + pp[1] * (256-n)) >> 8;
+			pp[2] = (b * n + pp[2] * (256-n)) >> 8;
+			pp += p_step;
 			}
 		}
 }
@@ -1561,21 +1553,20 @@ void pixbuf_desaturate_rect(GdkPixbuf *pb,
 	prs = gdk_pixbuf_get_rowstride(pb);
 	p_pix = gdk_pixbuf_get_pixels(pb);
 
+	const gint p_step = has_alpha ? 4 : 3;
+
 	for (i = 0; i < h; i++)
 		{
-		pp = p_pix + (y + i) * prs + (x * (has_alpha ? 4 : 3));
+		pp = p_pix + (y + i) * prs + (x * p_step);
 		for (j = 0; j < w; j++)
 			{
 			guint8 grey;
 
 			grey = (pp[0] + pp[1] + pp[2]) / 3;
-			*pp = grey;
-			pp++;
-			*pp = grey;
-			pp++;
-			*pp = grey;
-			pp++;
-			if (has_alpha) pp++;
+			pp[0] = grey;
+			pp[1] = grey;
+			pp[2] = grey;
+			pp += p_step;
 			}
 		}
 }
@@ -1607,26 +1598,20 @@ void pixbuf_highlight_overunderexposed(GdkPixbuf *pb, gint x, gint y, gint w, gi
 	prs = gdk_pixbuf_get_rowstride(pb);
 	p_pix = gdk_pixbuf_get_pixels(pb);
 
+	const gint p_step = has_alpha ? 4 : 3;
+
 	for (i = 0; i < h; i++)
 		{
-		pp = p_pix + (y + i) * prs + (x * (has_alpha ? 4 : 3));
+		pp = p_pix + (y + i) * prs + (x * p_step);
 		for (j = 0; j < w; j++)
 			{
 			if (pp[0] == 255 || pp[1] == 255 || pp[2] == 255 || pp[0] == 0 || pp[1] == 0 || pp[2] == 0)
 				{
-				*pp = 255;
-				pp++;
-				*pp = 0;
-				pp++;
-				*pp = 0;
-				pp++;
-				if (has_alpha) pp++;
+				pp[0] = 255;
+				pp[1] = 0;
+				pp[2] = 0;
 				}
-			else
-				{
-				pp = pp + 3;
-				if (has_alpha) pp++;
-				}
+			pp += p_step;
 			}
 		}
 }

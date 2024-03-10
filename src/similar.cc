@@ -247,10 +247,10 @@ void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 				p = xpos + (y * rs);
 				for (x = i; x < i + x_inc; x++)
 					{
-					r += *p; p++;
-					g += *p; p++;
-					b += *p; p++;
-					if (has_alpha) p++;
+					r += p[0];
+					g += p[1];
+					b += p[2];
+					p += p_step;
 					}
 				}
 
