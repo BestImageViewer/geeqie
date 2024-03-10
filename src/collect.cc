@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <utility>
 
 #include <glib-object.h>
 
@@ -214,7 +215,6 @@ GList *collection_list_randomize(GList *list)
 	guint random;
 	guint length;
 	guint i;
-	gpointer tmp;
 	GList *nlist;
 	GList *olist;
 
@@ -228,9 +228,7 @@ GList *collection_list_randomize(GList *list)
 		random = static_cast<guint>(1.0 * length * rand()/(RAND_MAX + 1.0));
 		olist = g_list_nth(list, i);
 		nlist = g_list_nth(list, random);
-		tmp = olist->data;
-		olist->data = nlist->data;
-		nlist->data = tmp;
+		std::swap(olist->data, nlist->data);
 		}
 
 	return list;

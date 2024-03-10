@@ -22,6 +22,7 @@
 #include "slideshow.h"
 
 #include <cstdlib>
+#include <utility>
 
 #include "collect.h"
 #include "filedata.h"
@@ -93,21 +94,13 @@ static GPtrArray *generate_ptr_array_from_list(GList *src_list)
 	return arr;
 }
 
-static void swap(GPtrArray *array, guint index1, guint index2)
-{
-	gpointer temp = g_ptr_array_index(array, index1);
-
-	g_ptr_array_index(array, index1) = g_ptr_array_index(array, index2);
-	g_ptr_array_index(array, index2) = temp;
-}
-
 static void ptr_array_random_shuffle(GPtrArray *array)
 {
 	guint i;
 	for (i = 0; i < array->len; ++i)
 		{
 		guint p = static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) + 1.0) * array->len;
-		swap(array, i, p);
+		std::swap(g_ptr_array_index(array, i), g_ptr_array_index(array, p));
 		}
 }
 

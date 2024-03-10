@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 #include <cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -1512,14 +1513,11 @@ static void rt_tile_render(RendererTiles *rt, ImageTile *it,
 
 		switch (orientation)
 			{
-			gdouble tmp;
 			case EXIF_ORIENTATION_LEFT_TOP:
 			case EXIF_ORIENTATION_RIGHT_TOP:
 			case EXIF_ORIENTATION_RIGHT_BOTTOM:
 			case EXIF_ORIENTATION_LEFT_BOTTOM:
-				tmp = scale_x;
-				scale_x = scale_y;
-				scale_y = tmp;
+				std::swap(scale_x, scale_y);
 				break;
 			default:
 				/* nothing to do */

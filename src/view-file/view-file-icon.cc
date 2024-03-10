@@ -22,6 +22,7 @@
 #include "view-file-icon.h"
 
 #include <cstring>
+#include <utility>
 
 #include <glib-object.h>
 
@@ -772,7 +773,6 @@ static void vficon_select_region_util(ViewFile *vf, FileData *start, FileData *e
 	gint col1;
 	gint row2;
 	gint col2;
-	gint t;
 	gint i;
 	gint j;
 
@@ -787,9 +787,7 @@ static void vficon_select_region_util(ViewFile *vf, FileData *start, FileData *e
 
 		if (g_list_index(vf->list, start) > g_list_index(vf->list, end))
 			{
-			FileData *tmp = start;
-			start = end;
-			end = tmp;
+			std::swap(start, end);
 			}
 
 		work = g_list_find(vf->list, start);
@@ -809,15 +807,11 @@ static void vficon_select_region_util(ViewFile *vf, FileData *start, FileData *e
 	// rectangular_selection==true.
 	if (row2 < row1)
 		{
-		t = row1;
-		row1 = row2;
-		row2 = t;
+		std::swap(row1, row2);
 		}
 	if (col2 < col1)
 		{
-		t = col1;
-		col1 = col2;
-		col2 = t;
+		std::swap(col1, col2);
 		}
 
 	DEBUG_1("table: %d x %d to %d x %d", row1, col1, row2, col2);

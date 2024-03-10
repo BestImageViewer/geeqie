@@ -25,6 +25,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 #include <cairo.h>
 #include <gio/gio.h>
@@ -1044,7 +1045,6 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 	gint slope1_x;
 	gint slope1_y;
 	gint y;
-	gint t;
 	gboolean middle = FALSE;
 
 	if (!pb) return;
@@ -1073,18 +1073,18 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 
 	if (y1 > y2)
 		{
-		t = x1; x1 = x2; x2 = t;
-		t = y1; y1 = y2; y2 = t;
+		std::swap(x1, x2);
+		std::swap(y1, y2);
 		}
 	if (y2 > y3)
 		{
-		t = x2; x2 = x3; x3 = t;
-		t = y2; y2 = y3; y3 = t;
+		std::swap(x2, x3);
+		std::swap(y2, y3);
 		}
 	if (y1 > y2)
 		{
-		t = x1; x1 = x2; x2 = t;
-		t = y1; y1 = y2; y2 = t;
+		std::swap(x1, x2);
+		std::swap(y1, y2);
 		}
 
 	slope1 = static_cast<gdouble>(y2 - y1);
@@ -1114,7 +1114,7 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 
 		if (xa > xb)
 			{
-			t = xa; xa = xb; xb = t;
+			std::swap(xa, xb);
 			}
 
 		xa = CLAMP(xa, fx1, fx2);
@@ -1149,10 +1149,8 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
 
 	if (x1 > x2)
 		{
-		gdouble t;
-
-		t = x1; x1 = x2; x2 = t;
-		t = y1; y1 = y2; y2 = t;
+		std::swap(x1, x2);
+		std::swap(y1, y2);
 		flip = TRUE;
 		}
 
@@ -1191,12 +1189,10 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
 		}
 	else
 		{
-		gdouble t;
-
 		if (y1 < clip_y || y2 > clip_y + clip_h) return FALSE;
 
-		t = x1; x1 = x2; x2 = t;
-		t = y1; y1 = y2; y2 = t;
+		std::swap(x1, x2);
+		std::swap(y1, y2);
 		flip = !flip;
 		}
 
@@ -1293,9 +1289,8 @@ void pixbuf_draw_line(GdkPixbuf *pb,
 		{
 		if (rx1 > rx2)
 			{
-			gdouble t;
-			t = rx1; rx1 = rx2; rx2 = t;
-			t = ry1; ry1 = ry2; ry2 = t;
+			std::swap(rx1, rx2);
+			std::swap(ry1, ry2);
 			}
 
 		slope = rx2 - rx1;
@@ -1320,9 +1315,8 @@ void pixbuf_draw_line(GdkPixbuf *pb,
 		{
 		if (ry1 > ry2)
 			{
-			gdouble t;
-			t = rx1; rx1 = rx2; rx2 = t;
-			t = ry1; ry1 = ry2; ry2 = t;
+			std::swap(rx1, rx2);
+			std::swap(ry1, ry2);
 			}
 
 		slope = ry2 - ry1;

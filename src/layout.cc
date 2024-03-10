@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <utility>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -1915,11 +1916,7 @@ static void layout_grid_setup(LayoutWindow *lw)
 
 	if (!layout_location_vertical(static_cast<LayoutLocation>(priority_location)))
 		{
-		GtkWidget *tmp;
-
-		tmp = v;
-		v = h;
-		h = tmp;
+		std::swap(v, h);
 		}
 
 	gq_gtk_box_pack_start(GTK_BOX(lw->group_box), v, TRUE, TRUE, 0);

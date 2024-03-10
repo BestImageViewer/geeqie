@@ -30,6 +30,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <utility>
 
 #include <glib-object.h>
 #include <grp.h>
@@ -1171,9 +1172,7 @@ gint filelist_sort_compare_filedata(FileData *fa, FileData *fb)
 	gint ret;
 	if (!filelist_sort_ascend)
 		{
-		FileData *tmp = fa;
-		fa = fb;
-		fb = tmp;
+		std::swap(fa, fb);
 		}
 
 	switch (filelist_sort_method)

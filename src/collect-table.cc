@@ -22,6 +22,7 @@
 #include "collect-table.h"
 
 #include <cstddef>
+#include <utility>
 
 #include <cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -511,7 +512,6 @@ static void collection_table_select_region_util(CollectTable *ct, CollectInfo *s
 	gint col1;
 	gint row2;
 	gint col2;
-	gint t;
 	gint i;
 	gint j;
 
@@ -548,15 +548,11 @@ static void collection_table_select_region_util(CollectTable *ct, CollectInfo *s
 
 	if (row2 < row1)
 		{
-		t = row1;
-		row1 = row2;
-		row2 = t;
+		std::swap(row1, row2);
 		}
 	if (col2 < col1)
 		{
-		t = col1;
-		col1 = col2;
-		col2 = t;
+		std::swap(col1, col2);
 		}
 
 	DEBUG_1("table: %d x %d to %d x %d", row1, col1, row2, col2);
