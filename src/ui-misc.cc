@@ -77,7 +77,8 @@ GtkWidget *pref_group_new(GtkWidget *parent_box, gboolean fill,
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
 	/* add additional spacing if necessary */
-	if (GTK_IS_VBOX(parent_box))
+	if (GTK_IS_ORIENTABLE(parent_box) &&
+	    gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box)) == GTK_ORIENTATION_VERTICAL)
 		{
 		GList *list = gtk_container_get_children(GTK_CONTAINER(parent_box));
 		if (list)
@@ -178,9 +179,11 @@ GtkWidget *pref_spacer(GtkWidget *parent_box, gboolean padding)
 
 GtkWidget *pref_line(GtkWidget *parent_box, gboolean padding)
 {
+	GtkOrientation orientation;
 	GtkWidget *spacer;
 
-	spacer = gtk_separator_new(GTK_IS_HBOX(parent_box) ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
+	orientation = gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box));
+	spacer = gtk_separator_new((orientation == GTK_ORIENTATION_HORIZONTAL) ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), spacer, FALSE, FALSE, padding / 2);
 	gtk_widget_show(spacer);
 
@@ -752,15 +755,15 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-void pref_toolbar_button_set_icon_unused(GtkWidget *button, GtkWidget *widget, const gchar *stock_id)
+void pref_toolbar_button_set_icon_unused(GtkWidget *button, GtkWidget *widget, const gchar *icon_name)
 {
 	if (widget)
 		{
 		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(button), widget);
 		}
-	else if (stock_id)
+	else if (icon_name)
 		{
-		gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(button), stock_id);
+		gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(button), icon_name);
 		}
 }
 

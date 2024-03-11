@@ -2018,11 +2018,11 @@ void image_select(ImageWindow *imd, gboolean select)
 
 	if (select)
 		{
-		gtk_widget_set_state(imd->widget, GTK_STATE_SELECTED);
-		gtk_widget_set_state(imd->pr, GTK_STATE_NORMAL); /* do not propagate */
+		gtk_widget_set_state_flags(imd->widget, GTK_STATE_FLAG_SELECTED, TRUE);
+		gtk_widget_set_state_flags(imd->pr, GTK_STATE_FLAG_NORMAL, TRUE); /* do not propagate */
 		}
 	else
-		gtk_widget_set_state(imd->widget, GTK_STATE_NORMAL);
+		gtk_widget_set_state_flags(imd->widget, GTK_STATE_FLAG_NORMAL, TRUE);
 }
 
 void image_set_selectable(ImageWindow *imd, gboolean selectable)

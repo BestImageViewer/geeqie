@@ -429,6 +429,9 @@ GtkWidget *popup_menu_short_lived()
 	return menu;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+// @todo Used only in vd_menu_position_cb_unused(). Remove?
 gboolean popup_menu_position_clamp(GtkMenu *menu, gint *x, gint *y, gint height)
 {
 	gboolean adjusted = FALSE;
@@ -475,4 +478,5 @@ gboolean popup_menu_position_clamp(GtkMenu *menu, gint *x, gint *y, gint height)
 
 	return adjusted;
 }
+#pragma GCC diagnostic pop
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
