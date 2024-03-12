@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component>
+<component type="desktop">
   <id>org.geeqie.Geeqie</id>
   <metadata_license>CC-BY-SA-4.0</metadata_license>
   <content_rating type="oars-1.1" />
@@ -11,6 +11,9 @@
     <p>Geeqie is an image viewer that makes navigation of images easy. Images can be viewed as thumbnails, in multiple windows or in full screen mode. Geeqie is an image manager, with complete copy, move, rename, and delete functions available at the press of a button. Extensive image collections can be easily handled using a combination of Geeqie's flexible Keyword facility and powerful Image searches.</p>
     <p>Image collections can be refined with a duplicate image finder. Geeqie is ideal for making presentations. A slide-show feature is built in, and Geeqie can be remotely controlled either via command line scripts. Information such as f-stop, shutter speed and descriptive text can be overlaid onto the image display. There is no need to import images into Geeqie - simply point Geeqie to a folder containing images, and your data will be displayed.</p>
   </description>
+  <developer id="org.geeqie">
+    <name>Geeqie developers</name>
+  </developer>
   <launchable type="desktop-id">org.geeqie.Geeqie.desktop</launchable>
   <screenshots>
     <screenshot type="default">
