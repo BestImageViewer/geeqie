@@ -21,9 +21,7 @@
 
 #include "pan-util.h"
 
-#ifdef __linux__
-#  include <features.h>
-#endif
+// IWYU pragma: no_include <features.h>
 #include <sys/stat.h>
 #include <unistd.h>
 

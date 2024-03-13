@@ -22,6 +22,7 @@
 #include "layout-util.h"
 
 #include <dirent.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <cstdio>
