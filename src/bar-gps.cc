@@ -24,7 +24,10 @@
 #include <cstring>
 
 #include <cairo.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <champlain-gtk/champlain-gtk.h>
+#pragma GCC diagnostic pop
 #include <champlain/champlain.h>
 #include <clutter-gtk/clutter-gtk.h>
 #include <clutter/clutter.h>
