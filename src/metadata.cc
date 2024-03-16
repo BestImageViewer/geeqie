@@ -23,6 +23,8 @@
 
 #include <unistd.h>
 
+#include <algorithm>
+#include <array>
 #include <clocale>
 #include <cstdio>
 #include <cstdlib>
@@ -61,8 +63,7 @@ enum MetadataKey {
 /**
  *  @brief Tags that will be written to all files in a group - selected by: options->metadata.sync_grouped_files, Preferences/Metadata/Write The Same Description Tags To All Grouped Sidecars
  */
-// @todo Use std::array
-const gchar *group_keys[] = {
+constexpr std::array<const gchar *, 21> group_keys{
 	"Xmp.dc.title",
 	"Xmp.photoshop.Urgency",
 	"Xmp.photoshop.Category",
@@ -84,7 +85,6 @@ const gchar *group_keys[] = {
 	"Xmp.dc.rights",
 	"Xmp.dc.description",
 	"Xmp.photoshop.CaptionWriter",
-	nullptr
 };
 
 inline gboolean is_keywords_separator(gchar c)
@@ -373,18 +373,6 @@ gint metadata_queue_length()
 	return g_list_length(metadata_write_queue);
 }
 
-static gboolean metadata_check_key(const gchar *keys[], const gchar *key)
-{
-	const gchar **k = keys;
-
-	while (*k)
-		{
-		if (strcmp(key, *k) == 0) return TRUE;
-		k++;
-		}
-	return FALSE;
-}
-
 gboolean metadata_write_revert(FileData *fd, const gchar *key)
 {
 	if (!fd->modified_xmp) return FALSE;
@@ -422,7 +410,8 @@ gboolean metadata_write_list(FileData *fd, const gchar *key, const GList *values
 	file_data_increment_version(fd);
 	file_data_send_notification(fd, NOTIFY_METADATA);
 
-	if (options->metadata.sync_grouped_files && metadata_check_key(group_keys, key))
+	auto metadata_check_key = [key](const gchar *k) { return strcmp(key, k) == 0; };
+	if (options->metadata.sync_grouped_files && std::any_of(group_keys.cbegin(), group_keys.cend(), metadata_check_key))
 		{
 		GList *work = fd->sidecar_files;
 
