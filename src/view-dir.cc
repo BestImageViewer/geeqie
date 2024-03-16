@@ -926,7 +926,7 @@ static void vd_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
 	vd_dest_set(vd, TRUE);
 }
 
-static void vd_dnd_drop_receive(GtkWidget *widget, GdkDragContext *,
+static void vd_dnd_drop_receive(GtkWidget *widget, GdkDragContext *context,
 				gint x, gint y,
 				GtkSelectionData *selection_data, guint info,
 				guint, gpointer data)
@@ -934,7 +934,6 @@ static void vd_dnd_drop_receive(GtkWidget *widget, GdkDragContext *,
 	auto vd = static_cast<ViewDir *>(data);
 	GtkTreePath *tpath;
 	FileData *fd = nullptr;
-	GdkDragAction action = GDK_ACTION_ASK;
 
 	vd->click_fd = nullptr;
 
@@ -962,41 +961,30 @@ static void vd_dnd_drop_receive(GtkWidget *widget, GdkDragContext *,
 
 		if (active)
 			{
-/** @FIXME With GTK2 gdk_drag_context_get_actions() shows the state of the
- * shift and control keys during the drag operation. With GTK3 this is not
- * so. This is a workaround.
- */
+			/** @FIXME With GTK2 gdk_drag_context_get_actions() shows the state of the
+			 * shift and control keys during the drag operation. With GTK3 this is not
+			 * so. This is a workaround.
+			 */
 			GdkModifierType mask;
+			DnDAction action = options->dnd_default_action;
 
-			gdk_window_get_pointer(gtk_widget_get_window(widget), nullptr, nullptr, &mask);
+			gdk_window_get_device_position(gtk_widget_get_window(widget), gdk_drag_context_get_device(context), nullptr, nullptr, &mask);
 			if (mask & GDK_CONTROL_MASK)
 				{
-				action = GDK_ACTION_COPY;
+				action = DND_ACTION_COPY;
 				}
 			else if (mask & GDK_SHIFT_MASK)
 				{
-				action = GDK_ACTION_MOVE;
+				action = DND_ACTION_MOVE;
 				}
 
-			if (action != GDK_ACTION_COPY && action != GDK_ACTION_MOVE)
-				{
-				if (options->dnd_default_action == DND_ACTION_COPY)
-					{
-					action = GDK_ACTION_COPY;
-					}
-				else if (options->dnd_default_action == DND_ACTION_MOVE)
-					{
-					action = GDK_ACTION_MOVE;
-					}
-				}
-
-			if (action == GDK_ACTION_COPY)
+			if (action == DND_ACTION_COPY)
 				{
 				file_util_copy_simple(list, fd->path, vd->widget);
 				done = TRUE;
 				list = nullptr;
 				}
-			else if (action == GDK_ACTION_MOVE)
+			else if (action == DND_ACTION_MOVE)
 				{
 				file_util_move_simple(list, fd->path, vd->widget);
 				done = TRUE;
