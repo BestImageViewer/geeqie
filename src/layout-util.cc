@@ -3878,12 +3878,14 @@ static void layout_util_sync_views(LayoutWindow *lw)
 	action = gtk_action_group_get_action(lw->action_group, "ConnectZoomMenu");
 	gtk_action_set_sensitive(action, lw->split_mode != SPLIT_NONE);
 
+	// @todo `which` is deprecated, use command -v
+	gboolean is_write_rotation = !runcmd("which exiftran >/dev/null 2>&1")
+	                          && !runcmd("which mogrify >/dev/null 2>&1")
+	                          && !options->metadata.write_orientation;
 	action = gtk_action_group_get_action(lw->action_group, "WriteRotation");
-	gtk_action_set_sensitive(action, !(runcmd("which exiftran >/dev/null 2>&1") ||
-							runcmd("which mogrify >/dev/null 2>&1") || options->metadata.write_orientation));
+	gtk_action_set_sensitive(action, is_write_rotation);
 	action = gtk_action_group_get_action(lw->action_group, "WriteRotationKeepDate");
-	gtk_action_set_sensitive(action, !(runcmd("which exiftran >/dev/null 2>&1") ||
-							runcmd("which mogrify >/dev/null 2>&1") || options->metadata.write_orientation));
+	gtk_action_set_sensitive(action, is_write_rotation);
 
 	action = gtk_action_group_get_action(lw->action_group, "StereoAuto");
 	gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), layout_image_stereo_pixbuf_get(lw));

@@ -83,7 +83,7 @@ static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
 		work = work->next;
 		gboolean active = TRUE;
 
-		if (fd_list && EDITOR_ERRORS(editor_command_parse(editor, fd_list, FALSE, nullptr)))
+		if (fd_list && editor_errors(editor_command_parse(editor, fd_list, FALSE, nullptr)))
 			active = FALSE;
 
 		if (active)

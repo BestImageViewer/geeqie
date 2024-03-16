@@ -1260,7 +1260,7 @@ void image_attach_window(ImageWindow *imd, GtkWidget *window,
 
 	lw = layout_find_by_image(imd);
 
-	if (!(options->image.fit_window_to_image && lw && (lw->options.tools_float || lw->options.tools_hidden))) window = nullptr;
+	if (!options->image.fit_window_to_image || !lw || (!lw->options.tools_float && !lw->options.tools_hidden)) window = nullptr;
 
 	pixbuf_renderer_set_parent(reinterpret_cast<PixbufRenderer *>(imd->pr), reinterpret_cast<GtkWindow *>(window));
 

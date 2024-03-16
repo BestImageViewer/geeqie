@@ -211,7 +211,7 @@ static void bar_sort_undo_folder(SortData *sd, GtkWidget *button)
 {
 	gchar *origin;
 
-	if (!(sd->undo_src_list && sd->undo_dest_list)) return;
+	if (!sd->undo_src_list || !sd->undo_dest_list) return;
 
 	switch (sd->undo_action)
 		{

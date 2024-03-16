@@ -1559,7 +1559,7 @@ static void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		{
 		cairo_t *cr;
 
-		if (pr->func_post_process && !(pr->post_process_slow && fast))
+		if (pr->func_post_process && (!pr->post_process_slow || !fast))
 			pr->func_post_process(pr, &it->pixbuf, x, y, w, h, pr->post_process_user_data);
 
 		cr = cairo_create(it->surface);

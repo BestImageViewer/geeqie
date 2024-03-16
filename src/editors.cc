@@ -1077,7 +1077,7 @@ static EditorFlags editor_command_one(const EditorDescription *editor, GList *li
 	ed->flags = editor->flags;
 	ed->flags = static_cast<EditorFlags>(ed->flags | editor_command_parse(editor, list, TRUE, &command));
 
-	ok = !EDITOR_ERRORS(ed->flags);
+	ok = !editor_errors(ed->flags);
 
 	if (ok)
 		{
@@ -1173,7 +1173,7 @@ static EditorFlags editor_command_one(const EditorDescription *editor, GList *li
 
 	g_free(command);
 
-	return static_cast<EditorFlags>(EDITOR_ERRORS(ed->flags));
+	return static_cast<EditorFlags>(editor_errors(ed->flags));
 }
 
 static EditorFlags editor_command_next_start(EditorData *ed)
@@ -1250,7 +1250,7 @@ static EditorFlags editor_command_next_finish(EditorData *ed, gint status)
 	switch (cont)
 		{
 		case EDITOR_CB_SUSPEND:
-			return static_cast<EditorFlags>(EDITOR_ERRORS(ed->flags));
+		return static_cast<EditorFlags>(editor_errors(ed->flags));
 		case EDITOR_CB_SKIP:
 			return editor_command_done(ed);
 		}
@@ -1286,7 +1286,7 @@ static EditorFlags editor_command_done(EditorData *ed)
 
 	ed->count = 0;
 
-	flags = static_cast<EditorFlags>(EDITOR_ERRORS(ed->flags));
+	flags = static_cast<EditorFlags>(editor_errors(ed->flags));
 
 	if (!ed->vd) editor_data_free(ed);
 
@@ -1308,7 +1308,7 @@ static EditorFlags editor_command_start(const EditorDescription *editor, const g
 	EditorData *ed;
 	EditorFlags flags = editor->flags;
 
-	if (EDITOR_ERRORS(flags)) return static_cast<EditorFlags>(EDITOR_ERRORS(flags));
+	if (editor_errors(flags)) return static_cast<EditorFlags>(editor_errors(flags));
 
 	ed = g_new0(EditorData, 1);
 	ed->list = filelist_copy(list);
@@ -1327,7 +1327,7 @@ static EditorFlags editor_command_start(const EditorDescription *editor, const g
 
 	editor_command_next_start(ed);
 	/* errors from editor_command_next_start will be handled via callback */
-	return static_cast<EditorFlags>(EDITOR_ERRORS(flags));
+	return static_cast<EditorFlags>(editor_errors(flags));
 }
 
 gboolean is_valid_editor_command(const gchar *key)
@@ -1349,11 +1349,11 @@ EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const
 
 	error = editor_command_parse(editor, list, TRUE, nullptr);
 
-	if (EDITOR_ERRORS(error)) return error;
+	if (editor_errors(error)) return error;
 
 	error = static_cast<EditorFlags>(error | editor_command_start(editor, editor->name, list, working_directory, cb, data));
 
-	if (EDITOR_ERRORS(error))
+	if (editor_errors(error))
 		{
 		gchar *text = g_strdup_printf(_("%s\n\"%s\""), editor_get_error_str(error), editor->file);
 
@@ -1361,7 +1361,7 @@ EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const
 		g_free(text);
 		}
 
-	return static_cast<EditorFlags>(EDITOR_ERRORS(error));
+	return static_cast<EditorFlags>(editor_errors(error));
 }
 
 EditorFlags start_editor_from_filelist(const gchar *key, GList *list)

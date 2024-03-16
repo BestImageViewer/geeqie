@@ -680,7 +680,7 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 
 	ud->resume_data = resume_data;
 
-	if (EDITOR_ERRORS_BUT_SKIPPED(flags))
+	if (editor_errors_but_skipped(flags))
 		{
 		GString *msg = g_string_new(editor_get_error_str(flags));
 		GenericDialog *d;
@@ -722,7 +722,7 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 		auto fd = static_cast<FileData *>(list->data);
 		list = list->next;
 
-		if (!EDITOR_ERRORS(flags)) /* files were successfully deleted, call the maint functions */
+		if (!editor_errors(flags)) /* files were successfully deleted, call the maint functions */
 			{
 			if (ud->with_sidecars)
 				file_data_sc_apply_ci(fd);
@@ -963,7 +963,7 @@ static void file_util_perform_ci_dir(UtilityData *ud, gboolean internal, gboolea
 static gint file_util_perform_ci_dir_cb(gpointer, EditorFlags flags, GList *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
-	file_util_perform_ci_dir(ud, FALSE, !EDITOR_ERRORS_BUT_SKIPPED(flags));
+	file_util_perform_ci_dir(ud, FALSE, !editor_errors_but_skipped(flags));
 	return EDITOR_CB_CONTINUE; /* does not matter, there was just single directory */
 }
 
@@ -1023,7 +1023,7 @@ void file_util_perform_ci(UtilityData *ud)
 				}
 			}
 
-		if (EDITOR_ERRORS(flags))
+		if (editor_errors(flags))
 			{
 			gchar *text = g_strdup_printf(_("%s\nUnable to start external command.\n"), editor_get_error_str(flags));
 			file_util_warning_dialog(ud->messages.fail, text, GQ_ICON_DIALOG_ERROR, nullptr);

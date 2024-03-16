@@ -48,6 +48,9 @@
 
 struct ExifData;
 
+namespace
+{
+
 enum MetadataKey {
 	MK_NONE,
 	MK_KEYWORDS,
@@ -58,7 +61,8 @@ enum MetadataKey {
 /**
  *  @brief Tags that will be written to all files in a group - selected by: options->metadata.sync_grouped_files, Preferences/Metadata/Write The Same Description Tags To All Grouped Sidecars
  */
-static const gchar *group_keys[] = {
+// @todo Use std::array
+const gchar *group_keys[] = {
 	"Xmp.dc.title",
 	"Xmp.photoshop.Urgency",
 	"Xmp.photoshop.Category",
@@ -80,7 +84,19 @@ static const gchar *group_keys[] = {
 	"Xmp.dc.rights",
 	"Xmp.dc.description",
 	"Xmp.photoshop.CaptionWriter",
-	nullptr};
+	nullptr
+};
+
+inline gboolean is_keywords_separator(gchar c)
+{
+	return c == ','
+	    || c == ';'
+	    || c == '\n'
+	    || c == '\r'
+	    || c == '\b';
+}
+
+} // namespace
 
 static gboolean metadata_write_queue_idle_cb(gpointer data);
 static gboolean metadata_legacy_write(FileData *fd);
@@ -1014,8 +1030,6 @@ gchar *find_string_in_list(GList *list, const gchar *string)
 	return find_string_in_list_utf8nocase(list, string);
 }
 
-#define KEYWORDS_SEPARATOR(c) ((c) == ',' || (c) == ';' || (c) == '\n' || (c) == '\r' || (c) == '\b')
-
 GList *string_to_keywords_list(const gchar *text)
 {
 	GList *list = nullptr;
@@ -1026,9 +1040,9 @@ GList *string_to_keywords_list(const gchar *text)
 		const gchar *begin;
 		gint l = 0;
 
-		while (KEYWORDS_SEPARATOR(*ptr)) ptr++;
+		while (is_keywords_separator(*ptr)) ptr++;
 		begin = ptr;
-		while (*ptr != '\0' && !KEYWORDS_SEPARATOR(*ptr))
+		while (*ptr != '\0' && !is_keywords_separator(*ptr))
 			{
 			ptr++;
 			l++;

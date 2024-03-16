@@ -65,8 +65,8 @@ struct EditorDescription {
 	gboolean disabled;	/**< display disabled by user */
 };
 
-#define EDITOR_ERRORS(flags) ((flags) & EDITOR_ERROR_MASK)
-#define EDITOR_ERRORS_BUT_SKIPPED(flags) (!!(((flags) & EDITOR_ERROR_MASK) && !((flags) & EDITOR_ERROR_SKIPPED)))
+inline gint editor_errors(EditorFlags flags) { return flags & EDITOR_ERROR_MASK; }
+inline gboolean editor_errors_but_skipped(EditorFlags flags) { return !!(editor_errors(flags) && !(flags & EDITOR_ERROR_SKIPPED)); }
 
 
 /**

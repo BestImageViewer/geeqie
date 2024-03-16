@@ -477,7 +477,7 @@ static gboolean bar_pane_gps_create_markers_cb(gpointer data)
 		longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 0);
 		compass = metadata_read_GPS_direction(fd, "Xmp.exif.GPSImgDirection", 1000);
 
-		if (!(latitude == 0 && longitude == 0))
+		if (latitude != 0 || longitude != 0)
 			{
 			pgd->num_added++;
 

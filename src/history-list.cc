@@ -465,7 +465,7 @@ void history_list_item_change(const gchar *key, const gchar *oldpath, const gcha
 		{
 		auto buf = static_cast<gchar *>(work->data);
 
-		if (!(g_str_has_prefix(buf, ".") && !newpath))
+		if (!g_str_has_prefix(buf, ".") || newpath)
 			{
 			if (strcmp(buf, oldpath) == 0)
 				{
