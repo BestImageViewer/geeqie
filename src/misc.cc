@@ -34,6 +34,7 @@
 #include <memory>
 
 #include <langinfo.h>
+#include <locale.h>
 #include <pwd.h>
 
 #include "debug.h"
