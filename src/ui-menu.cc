@@ -429,8 +429,6 @@ GtkWidget *popup_menu_short_lived()
 	return menu;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 // @todo Used only in vd_menu_position_cb_unused(). Remove?
 gboolean popup_menu_position_clamp(GtkMenu *menu, gint *x, gint *y, gint height)
 {
@@ -441,11 +439,13 @@ gboolean popup_menu_position_clamp(GtkMenu *menu, gint *x, gint *y, gint height)
 	gint xh;
 	GtkRequisition requisition;
 
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS;
 	gtk_widget_get_requisition(GTK_WIDGET(menu), &requisition);
 	w = requisition.width;
 	h = requisition.height;
 	xw = gdk_screen_width();
 	xh = gdk_screen_height();
+	G_GNUC_END_IGNORE_DEPRECATIONS;
 
 	if (*x + w > xw)
 		{
@@ -478,5 +478,4 @@ gboolean popup_menu_position_clamp(GtkMenu *menu, gint *x, gint *y, gint height)
 
 	return adjusted;
 }
-#pragma GCC diagnostic pop
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

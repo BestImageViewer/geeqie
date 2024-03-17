@@ -388,7 +388,9 @@ gint fullscreen_prefs_find_screen_for_widget_unused(GtkWidget *widget)
 	if (!widget || !gtk_widget_get_window(widget)) return 0;
 
 	screen = gtk_widget_get_screen(widget);
+	G_GNUC_BEGIN_IGNORE_DEPRECATIONS;
 	monitor = gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(widget));
+	G_GNUC_END_IGNORE_DEPRECATIONS;
 
 	n = 100 + monitor + 1;
 
