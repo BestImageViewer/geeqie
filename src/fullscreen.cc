@@ -269,23 +269,21 @@ std::vector<ScreenData> fullscreen_prefs_list()
 {
 	std::vector<ScreenData> list;
 	GdkDisplay *display;
-	GdkScreen *screen;
 	gint monitors;
+	const gchar *name;
 
 	display = gdk_display_get_default();
-	screen = gdk_display_get_default_screen(display);
 	monitors = gdk_display_get_n_monitors(display);
+	name = gdk_display_get_name(display);
 
 	for (gint j = -1; j < monitors; j++)
 		{
 		GdkRectangle rect;
-		gchar *name;
 		gchar *subname;
-
-		name = gdk_screen_make_display_name(screen);
 
 		if (j < 0)
 			{
+			GdkScreen *screen = gdk_display_get_default_screen(display);
 			rect = get_screen_default_geometry(screen);
 			subname = g_strdup(_("Full size"));
 			}
@@ -310,7 +308,6 @@ std::vector<ScreenData> fullscreen_prefs_list()
 
 		list.push_back(sd);
 
-		g_free(name);
 		g_free(subname);
 		}
 
