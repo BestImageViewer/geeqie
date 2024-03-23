@@ -125,7 +125,6 @@ struct RendererTiles
 
 	gint tile_width;
 	gint tile_height;
-	gint tile_cols;		/* count of tile columns */
 	GList *tiles;		/* list of buffer tiles */
 	gint tile_cache_size;	/* allocated size of pixmaps/pixbufs */
 	GList *draw_queue;	/* list of areas to redraw */
