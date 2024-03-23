@@ -64,10 +64,6 @@ enum ExifOrientationType {
 namespace
 {
 
-constexpr size_t COLOR_BYTES = 3; /* rgb */
-
-} // namespace
-
 struct QueueData;
 
 struct ImageTile
@@ -153,32 +149,32 @@ struct RendererTiles
 	gint hidpi_scale;
 };
 
+constexpr size_t COLOR_BYTES = 3; /* rgb */
 
 
-static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h);
+inline gint get_right_pixbuf_offset(RendererTiles *rt)
+{
+	return (!!(rt->stereo_mode & PR_STEREO_RIGHT) != !!(rt->stereo_mode & PR_STEREO_SWAP)) ?
+	       rt->pr->stereo_pixbuf_offset_right : rt->pr->stereo_pixbuf_offset_left;
+}
+
+inline gint get_left_pixbuf_offset(RendererTiles *rt)
+{
+	return (!!(rt->stereo_mode & PR_STEREO_RIGHT) == !!(rt->stereo_mode & PR_STEREO_SWAP)) ?
+	       rt->pr->stereo_pixbuf_offset_right : rt->pr->stereo_pixbuf_offset_left;
+}
+
+} // namespace
+
+
 static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h, ImageTile *it);
 
-
-static void rt_tile_free_all(RendererTiles *rt);
-static void rt_tile_invalidate_region(RendererTiles *rt, gint x, gint y, gint w, gint h);
 static gboolean rt_tile_is_visible(RendererTiles *rt, ImageTile *it);
-static void rt_queue_clear(RendererTiles *rt);
 static void rt_queue_merge(QueueData *parent, QueueData *qd);
 static void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
 		     gint clamp, ImageRenderType render, gboolean new_data, gboolean only_existing);
 
-static void rt_hierarchy_changed_cb(GtkWidget *widget, GtkWidget *previous_toplevel, gpointer data);
 static gint rt_queue_draw_idle_cb(gpointer data);
-
-#define GET_RIGHT_PIXBUF_OFFSET(rt) \
-        (( ((rt)->stereo_mode & PR_STEREO_RIGHT) && !((rt)->stereo_mode & PR_STEREO_SWAP)) || \
-         (!((rt)->stereo_mode & PR_STEREO_RIGHT) &&  ((rt)->stereo_mode & PR_STEREO_SWAP)) ?  \
-          (rt)->pr->stereo_pixbuf_offset_right : (rt)->pr->stereo_pixbuf_offset_left )
-
-#define GET_LEFT_PIXBUF_OFFSET(rt) \
-        ((!((rt)->stereo_mode & PR_STEREO_RIGHT) && !((rt)->stereo_mode & PR_STEREO_SWAP)) || \
-         ( ((rt)->stereo_mode & PR_STEREO_RIGHT) &&  ((rt)->stereo_mode & PR_STEREO_SWAP)) ?  \
-          (rt)->pr->stereo_pixbuf_offset_right : (rt)->pr->stereo_pixbuf_offset_left )
 
 
 static void rt_sync_scroll(RendererTiles *rt)
@@ -1531,23 +1527,23 @@ static void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		if (pr->image_width > 32767) wide_image = TRUE;
 
 		rt_tile_get_region(has_alpha, pr->ignore_alpha,
-				   pr->pixbuf, it->pixbuf, pb_x, pb_y, pb_w, pb_h,
-				   static_cast<gdouble>(0.0) - src_x - GET_RIGHT_PIXBUF_OFFSET(rt) * scale_x,
-				   static_cast<gdouble>(0.0) - src_y,
-				   scale_x, scale_y,
-				   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
-				   it->x + pb_x, it->y + pb_y, wide_image);
+		                   pr->pixbuf, it->pixbuf, pb_x, pb_y, pb_w, pb_h,
+		                   static_cast<gdouble>(0.0) - src_x - get_right_pixbuf_offset(rt) * scale_x,
+		                   static_cast<gdouble>(0.0) - src_y,
+		                   scale_x, scale_y,
+		                   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
+		                   it->x + pb_x, it->y + pb_y, wide_image);
 		if (rt->stereo_mode & PR_STEREO_ANAGLYPH &&
 		    (pr->stereo_pixbuf_offset_right > 0 || pr->stereo_pixbuf_offset_left > 0))
 			{
 			GdkPixbuf *right_pb = rt_get_spare_tile(rt);
 			rt_tile_get_region(has_alpha, pr->ignore_alpha,
-					   pr->pixbuf, right_pb, pb_x, pb_y, pb_w, pb_h,
-					   static_cast<gdouble>(0.0) - src_x - GET_LEFT_PIXBUF_OFFSET(rt) * scale_x,
-					   static_cast<gdouble>(0.0) - src_y,
-					   scale_x, scale_y,
-					   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
-					   it->x + pb_x, it->y + pb_y, wide_image);
+			                   pr->pixbuf, right_pb, pb_x, pb_y, pb_w, pb_h,
+			                   static_cast<gdouble>(0.0) - src_x - get_left_pixbuf_offset(rt) * scale_x,
+			                   static_cast<gdouble>(0.0) - src_y,
+			                   scale_x, scale_y,
+			                   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
+			                   it->x + pb_x, it->y + pb_y, wide_image);
 			pr_create_anaglyph(rt->stereo_mode, it->pixbuf, right_pb, pb_x, pb_y, pb_w, pb_h);
 			/* do not care about freeing spare_tile, it will be reused */
 			}
@@ -2097,11 +2093,11 @@ static void renderer_area_changed(void *renderer, gint src_x, gint src_y, gint s
 
 	gint orientation = rt_get_orientation(rt);
 	pr_coords_map_orientation_reverse(orientation,
-				     src_x - GET_RIGHT_PIXBUF_OFFSET(rt), src_y,
-				     pr->image_width, pr->image_height,
-				     src_w, src_h,
-				     &x, &y,
-				     &width, &height);
+	                                  src_x - get_right_pixbuf_offset(rt), src_y,
+	                                  pr->image_width, pr->image_height,
+	                                  src_w, src_h,
+	                                  &x, &y,
+	                                  &width, &height);
 
 	if (pr->scale != 1.0 && pr->zoom_quality != GDK_INTERP_NEAREST)
 		{
