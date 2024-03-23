@@ -8,7 +8,7 @@
 <refentrytitle>GEEQIE</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class='source'>March 2024</refmiscinfo>
-<refmiscinfo class='manual'>Geeqie 2.2+git20240323-51d72a08 GTK3</refmiscinfo>
+<refmiscinfo class='manual'>Geeqie 2.4 GTK3</refmiscinfo>
 </refmeta>
 <refnamediv>
 <refname>Geeqie</refname>
@@ -30,7 +30,7 @@ zooming, panning, thumbnails and sorting images into collections.</para>
 
 <para>Generated for version:</para>
 
-<para>Geeqie 2.2+git20240323-51d72a08</para>
+<para>Geeqie 2.4</para>
 
 <refsect2 id='valid_options'><title>Valid options:</title>
 <variablelist remap='TP'>
