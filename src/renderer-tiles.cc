@@ -1781,32 +1781,21 @@ static gboolean rt_queue_draw_idle_cb(gpointer data)
 		return rt_queue_schedule_next_draw(rt, FALSE);
 }
 
-static void rt_queue_list_free(GList *list)
+static void rt_queue_data_free(gpointer data)
 {
-	GList *work;
+	auto *qd = static_cast<QueueData *>(data);
 
-	work = list;
-	while (work)
-		{
-		QueueData *qd;
-
-		qd = static_cast<QueueData *>(work->data);
-		work = work->next;
-
-		qd->it->qd = nullptr;
-		qd->it->qd2 = nullptr;
-		g_free(qd);
-		}
-
-	g_list_free(list);
+	qd->it->qd = nullptr;
+	qd->it->qd2 = nullptr;
+	g_free(qd);
 }
 
 static void rt_queue_clear(RendererTiles *rt)
 {
-	rt_queue_list_free(rt->draw_queue);
+	g_list_free_full(rt->draw_queue, rt_queue_data_free);
 	rt->draw_queue = nullptr;
 
-	rt_queue_list_free(rt->draw_queue_2pass);
+	g_list_free_full(rt->draw_queue_2pass, rt_queue_data_free);
 	rt->draw_queue_2pass = nullptr;
 
 	if (rt->draw_idle_id)
