@@ -213,6 +213,14 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 
 	cr = cairo_create(rt->surface);
 
+	auto draw = [rt, pr, cr](gint x, gint y, gint w, gint h)
+	{
+		cairo_set_source_rgb(cr, static_cast<double>(pr->color.red), static_cast<double>(pr->color.green), static_cast<double>(pr->color.blue));
+		cairo_rectangle(cr, x + rt->stereo_off_x, y + rt->stereo_off_y, w, h);
+		cairo_fill(cr);
+		rt_overlay_draw(rt, x, y, w, h, nullptr);
+	};
+
 	if (!pr->pixbuf && !pr->source_tiles_enabled)
 		{
 		if (pr_clip_region(x, y, w, h,
@@ -220,10 +228,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->viewport_width, pr->viewport_height,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red), static_cast<double>(pr->color.green), static_cast<double>(pr->color.blue));
-			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
-			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
+			draw(rx, ry, rw, rh);
 			}
 		cairo_destroy(cr);
 		return;
@@ -237,10 +242,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->x_offset, pr->viewport_height,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red), static_cast<double>(pr->color.green), static_cast<double>(pr->color.blue));
-			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
-			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
+			draw(rx, ry, rw, rh);
 			}
 		if (pr->viewport_width - pr->vis_width - pr->x_offset > 0 &&
 		    pr_clip_region(x, y, w, h,
@@ -248,10 +250,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->viewport_width - pr->vis_width - pr->x_offset, pr->viewport_height,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red), static_cast<double>(pr->color.green), static_cast<double>(pr->color.blue));
-			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
-			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
+			draw(rx, ry, rw, rh);
 			}
 		}
 	if (pr->vis_height < pr->viewport_height)
@@ -262,10 +261,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->vis_width, pr->y_offset,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red), static_cast<double>(pr->color.green), static_cast<double>(pr->color.blue));
-			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
-			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
+			draw(rx, ry, rw, rh);
 			}
 		if (pr->viewport_height - pr->vis_height - pr->y_offset > 0 &&
 		    pr_clip_region(x, y, w, h,
@@ -273,10 +269,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 				   pr->vis_width, pr->viewport_height - pr->vis_height - pr->y_offset,
 				   &rx, &ry, &rw, &rh))
 			{
-			cairo_set_source_rgb(cr, static_cast<double>(pr->color.red), static_cast<double>(pr->color.green), static_cast<double>(pr->color.blue));
-			cairo_rectangle(cr, rx + rt->stereo_off_x, ry + rt->stereo_off_y, rw, rh);
-			cairo_fill(cr);
-			rt_overlay_draw(rt, rx, ry, rw, rh, nullptr);
+			draw(rx, ry, rw, rh);
 			}
 		}
 	cairo_destroy(cr);
