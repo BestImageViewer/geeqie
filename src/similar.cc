@@ -21,7 +21,9 @@
 
 #include "similar.h"
 
+#include <algorithm>
 #include <cstdlib>
+#include <functional>
 
 #include "options.h"
 
@@ -50,6 +52,60 @@
  * generally only a match of > 0.85 are significant at all, and >.95 is useful to
  * find images that have been re-saved to other formats, dimensions, or compression.
  */
+
+namespace
+{
+
+using ImageSimilarityCheckAbort = std::function<bool(gdouble)>;
+
+/*
+ * 4 rotations (0, 90, 180, 270) combined with two mirrors (0, H)
+ * generate all possible isometric transformations
+ * = 8 tests
+ * = change dir of x, change dir of y, exchange x and y = 2^3 = 8
+ */
+gdouble image_sim_data_compare_transfo(const ImageSimilarityData *a, const ImageSimilarityData *b, gchar transfo, const ImageSimilarityCheckAbort &check_abort)
+{
+	if (!a || !b || !a->filled || !b->filled) return 0.0;
+
+	gint sim = 0.0;
+	gint i2;
+	gint *i;
+	gint j2;
+	gint *j;
+
+	if (transfo & 1) { i = &j2; j = &i2; } else { i = &i2; j = &j2; }
+	for (gint j1 = 0; j1 < 32; j1++)
+		{
+		if (transfo & 2) *j = 31-j1; else *j = j1;
+		for (gint i1 = 0; i1 < 32; i1++)
+			{
+			if (transfo & 4) *i = 31-i1; else *i = i1;
+			sim += abs(a->avg_r[i1*32+j1] - b->avg_r[i2*32+j2]);
+			sim += abs(a->avg_g[i1*32+j1] - b->avg_g[i2*32+j2]);
+			sim += abs(a->avg_b[i1*32+j1] - b->avg_b[i2*32+j2]);
+			/* check for abort, if so return 0.0 */
+			if (check_abort(sim)) return 0.0;
+			}
+		}
+
+	return 1.0 - (static_cast<gdouble>(sim) / (255.0 * 1024.0 * 3.0));
+}
+
+gdouble image_sim_data_compare(const ImageSimilarityData *a, const ImageSimilarityData *b, const ImageSimilarityCheckAbort &check_abort)
+{
+	gchar max_t = (options->rot_invariant_sim ? 8 : 1);
+	gdouble max_score = 0;
+
+	for (gchar t = 0; t < max_t; t++)
+	{
+		max_score = std::max(image_sim_data_compare_transfo(a, b, t, check_abort), max_score);
+	}
+
+	return max_score;
+}
+
+} // namespace
 
 ImageSimilarityData *image_sim_new()
 {
@@ -284,7 +340,7 @@ ImageSimilarityData *image_sim_new_from_pixbuf(GdkPixbuf *pixbuf)
 	return sd;
 }
 
-static gdouble alternate_image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min)
+static gdouble alternate_image_sim_compare_fast(const ImageSimilarityData *a, const ImageSimilarityData *b, gdouble min)
 {
 	gint sim;
 	gint i;
@@ -293,7 +349,6 @@ static gdouble alternate_image_sim_compare_fast(ImageSimilarityData *a, ImageSim
 
 	if (!a || !b || !a->filled || !b->filled) return 0.0;
 
-	min = 1.0 - min;
 	sim = 0.0;
 	ld = 0;
 
@@ -321,95 +376,9 @@ static gdouble alternate_image_sim_compare_fast(ImageSimilarityData *a, ImageSim
 	return (1.0 - ((gdouble)sim / (255.0 * 1024.0 * 4.0)) );
 }
 
-gdouble image_sim_compare_transfo(ImageSimilarityData *a, ImageSimilarityData *b, gchar transfo)
-{
-	gint sim;
-	gint i1;
-	gint i2;
-	gint *i;
-	gint j1;
-	gint j2;
-	gint *j;
-
-	if (!a || !b || !a->filled || !b->filled) return 0.0;
-
-	sim = 0.0;
-
-	if (transfo & 1) { i = &j2; j = &i2; } else { i = &i2; j = &j2; }
-	for (j1 = 0; j1 < 32; j1++)
-		{
-		if (transfo & 2) *j = 31-j1; else *j = j1;
-		for (i1 = 0; i1 < 32; i1++)
-			{
-			if (transfo & 4) *i = 31-i1; else *i = i1;
-			sim += abs(a->avg_r[i1*32+j1] - b->avg_r[i2*32+j2]);
-			sim += abs(a->avg_g[i1*32+j1] - b->avg_g[i2*32+j2]);
-			sim += abs(a->avg_b[i1*32+j1] - b->avg_b[i2*32+j2]);
-			}
-		}
-
-	return 1.0 - (static_cast<gdouble>(sim) / (255.0 * 1024.0 * 3.0));
-}
-
 gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b)
 {
-	gint max_t = (options->rot_invariant_sim ? 8 : 1);
-
-	gint t;
-	gdouble score;
-	gdouble max_score = 0;
-
-	for(t = 0; t < max_t; t++)
-	{
-		score = image_sim_compare_transfo(a, b, t);
-		if (score > max_score) max_score = score;
-	}
-	return max_score;
-}
-
-
-/*
-4 rotations (0, 90, 180, 270) combined with two mirrors (0, H)
-generate all possible isometric transformations
-= 8 tests
-= change dir of x, change dir of y, exchange x and y = 2^3 = 8
-*/
-gdouble image_sim_compare_fast_transfo(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min, gchar transfo)
-{
-	gint sim;
-	gint i1;
-	gint i2;
-	gint *i;
-	gint j1;
-	gint j2;
-	gint *j;
-
-	if (options->alternate_similarity_algorithm.enabled)
-		{
-		return alternate_image_sim_compare_fast(a, b, min);
-		}
-
-	if (!a || !b || !a->filled || !b->filled) return 0.0;
-
-	min = 1.0 - min;
-	sim = 0.0;
-
-	if (transfo & 1) { i = &j2; j = &i2; } else { i = &i2; j = &j2; }
-	for (j1 = 0; j1 < 32; j1++)
-		{
-		if (transfo & 2) *j = 31-j1; else *j = j1;
-		for (i1 = 0; i1 < 32; i1++)
-			{
-			if (transfo & 4) *i = 31-i1; else *i = i1;
-			sim += abs(a->avg_r[i1*32+j1] - b->avg_r[i2*32+j2]);
-			sim += abs(a->avg_g[i1*32+j1] - b->avg_g[i2*32+j2]);
-			sim += abs(a->avg_b[i1*32+j1] - b->avg_b[i2*32+j2]);
-			}
-		/* check for abort, if so return 0.0 */
-		if (static_cast<gdouble>(sim) / (255.0 * 1024.0 * 3.0) > min) return 0.0;
-		}
-
-	return (1.0 - (static_cast<gdouble>(sim) / (255.0 * 1024.0 * 3.0)) );
+	return image_sim_data_compare(a, b, [](gdouble){ return false; });
 }
 
 /* this uses a cutoff point so that it can abort early when it gets to
@@ -417,17 +386,13 @@ gdouble image_sim_compare_fast_transfo(ImageSimilarityData *a, ImageSimilarityDa
  */
 gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min)
 {
-	gint max_t = (options->rot_invariant_sim ? 8 : 1);
+	min = 1.0 - min;
 
-	gint t;
-	gdouble score;
-	gdouble max_score = 0;
+	if (options->alternate_similarity_algorithm.enabled)
+		{
+		return alternate_image_sim_compare_fast(a, b, min);
+		}
 
-	for(t = 0; t < max_t; t++)
-	{
-		score = image_sim_compare_fast_transfo(a, b, min, t);
-		if (score > max_score) max_score = score;
-	}
-	return max_score;
+	return image_sim_data_compare(a, b, [min](gdouble sim){ return (sim / (255.0 * 1024.0 * 3.0)) > min; });
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
