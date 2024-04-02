@@ -25,6 +25,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <functional>
+#include <vector>
 
 #include "options.h"
 
@@ -58,6 +59,32 @@ namespace
 {
 
 using ImageSimilarityCheckAbort = std::function<bool(gdouble)>;
+
+void image_sim_channel_equal(guint8 *pix, gsize len)
+{
+	struct IndexedPix
+	{
+		gsize index;
+		guint8 pix;
+	};
+
+	std::vector<IndexedPix> buf;
+	buf.reserve(len);
+
+	for (gsize i = 0; i < len; i++)
+		{
+		buf.push_back({i, pix[i]});
+		}
+
+	std::sort(buf.begin(), buf.end(), [](const IndexedPix &a, const IndexedPix &b){ return a.pix < b.pix; });
+
+	for (gsize i = 0; i < len; i++)
+		{
+		gint n = buf[i].index;
+
+		pix[n] = static_cast<guint8>(255 * i / len);
+		}
+}
 
 /*
  * 4 rotations (0, 90, 180, 270) combined with two mirrors (0, H)
@@ -118,47 +145,6 @@ ImageSimilarityData *image_sim_new()
 void image_sim_free(ImageSimilarityData *sd)
 {
 	g_free(sd);
-}
-
-static gint image_sim_channel_eq_sort_cb(gconstpointer a, gconstpointer b)
-{
-	auto pa = static_cast<const gint *>(a);
-	auto pb = static_cast<const gint *>(b);
-	if (pa[1] < pb[1]) return -1;
-	if (pa[1] > pb[1]) return 1;
-	return 0;
-}
-
-static void image_sim_channel_equal(guint8 *pix, gint len)
-{
-	gint *buf;
-	gint i;
-	gint p;
-
-	buf = g_new0(gint, len * 2);
-
-	p = 0;
-	for (i = 0; i < len; i++)
-		{
-		buf[p] = i;
-		p++;
-		buf[p] = static_cast<gint>(pix[i]);
-		p++;
-		}
-
-	qsort(buf, len, sizeof(gint) * 2, image_sim_channel_eq_sort_cb);
-
-	p = 0;
-	for (i = 0; i < len; i++)
-		{
-		gint n;
-
-		n = buf[p];
-		p += 2;
-		pix[n] = static_cast<guint8>(255 * i / len);
-		}
-
-	g_free(buf);
 }
 
 static void image_sim_channel_norm(guint8 *pix, gint len)
