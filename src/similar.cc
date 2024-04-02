@@ -22,6 +22,7 @@
 #include "similar.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <functional>
 
@@ -218,13 +219,6 @@ void image_sim_alternate_processing(ImageSimilarityData *sd)
 		}
 }
 
-gint mround(gdouble x)
-{
-	gint ipart = x;
-	gdouble fpart = x-ipart;
-	return (fpart < 0.5 ? ipart : ipart+1);
-}
-
 void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 {
 	gint w;
@@ -278,7 +272,7 @@ void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 	for (ys = 0; ys < 32; ys++)
 		{
 		if (y_small) j = static_cast<gdouble>(h) / 32 * ys;
-		else y_inc = mround(static_cast<gdouble>(h_left)/(32-ys));
+		else y_inc = std::lround(static_cast<gdouble>(h_left)/(32-ys));
 		i = 0;
 
 		w_left = w;
@@ -293,7 +287,7 @@ void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 			guchar *xpos;
 
 			if (x_small) i = static_cast<gdouble>(w) / 32 * xs;
-			else x_inc = mround(static_cast<gdouble>(w_left)/(32-xs));
+			else x_inc = std::lround(static_cast<gdouble>(w_left)/(32-xs));
 			xy_inc = x_inc * y_inc;
 			r = g = b = 0;
 			xpos = pix + (i * p_step);
