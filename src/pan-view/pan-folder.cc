@@ -124,8 +124,6 @@ static void pan_flower_move(FlowerGroup *group, gint x, gint y)
 	group->y += y;
 }
 
-#define PI 3.14159265
-
 static void pan_flower_position(FlowerGroup *group, FlowerGroup *parent,
 							     gint *result_x, gint *result_y)
 {
@@ -134,10 +132,10 @@ static void pan_flower_position(FlowerGroup *group, FlowerGroup *parent,
 	gint radius;
 	gdouble a;
 
-	radius = parent->circumference / (2*PI);
+	radius = parent->circumference / (2*G_PI);
 	radius = MAX(radius, parent->diameter / 2 + group->diameter / 2);
 
-	a = 2*PI * group->diameter / parent->circumference;
+	a = 2*G_PI * group->diameter / parent->circumference;
 
 	x = static_cast<gint>(static_cast<gdouble>(radius) * cos(parent->angle + a / 2));
 	y = static_cast<gint>(static_cast<gdouble>(radius) * sin(parent->angle + a / 2));
