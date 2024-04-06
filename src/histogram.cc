@@ -20,6 +20,7 @@
 
 #include "histogram.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include <glib-object.h>
@@ -194,9 +195,7 @@ static gboolean histmap_read(HistMap *histmap, gboolean whole)
 		guchar *sp = s_pix + (i * srs); /* 8bit */
 		for (j = 0; j < w; j++)
 			{
-			guint max = sp[0];
-			if (sp[1] > max) max = sp[1];
-			if (sp[2] > max) max = sp[2];
+			guint max = std::max({sp[0], sp[1], sp[2]});
 
 			histmap->r[sp[0]]++;
 			histmap->g[sp[1]]++;
@@ -305,10 +304,7 @@ gboolean histogram_draw(Histogram *histogram, const HistMap *histmap, GdkPixbuf 
 	/* exclude overexposed and underexposed */
 	for (i = 1; i < HISTMAP_SIZE - 1; i++)
 		{
-		if (histmap->r[i] > max) max = histmap->r[i];
-		if (histmap->g[i] > max) max = histmap->g[i];
-		if (histmap->b[i] > max) max = histmap->b[i];
-		if (histmap->max[i] > max) max = histmap->max[i];
+		max = std::max({histmap->r[i], histmap->g[i], histmap->b[i], histmap->max[i], max});
 		}
 
 	if (max > 0)
