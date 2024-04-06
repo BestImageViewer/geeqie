@@ -29,6 +29,19 @@
 #include "secure-save.h"
 #include "ui-fileops.h"
 
+namespace
+{
+
+gint dirname_compare(gconstpointer data, gconstpointer user_data)
+{
+	gchar *dirname = g_path_get_dirname(static_cast<const gchar *>(data));
+	int result = g_strcmp0(dirname, static_cast<const gchar *>(user_data));
+	g_free(dirname);
+	return result;
+}
+
+} // namespace
+
 static void update_recent_viewed_folder_image_list(const gchar *path);
 
 /**
@@ -337,18 +350,10 @@ gboolean history_list_save(const gchar *path)
 
 static void history_list_free(HistoryData *hd)
 {
-	GList *work;
-
 	if (!hd) return;
 
-	work = hd->list;
-	while (work)
-		{
-		g_free(work->data);
-		work = work->next;
-		}
-
 	g_free(hd->key);
+	g_list_free_full(hd->list, g_free);
 	g_free(hd);
 }
 
@@ -358,12 +363,17 @@ static HistoryData *history_list_find_by_key(const gchar *key)
 
 	if (!key) return nullptr;
 
-	while (work)
+	work = g_list_find_custom(history_list, key, [](gconstpointer data, gconstpointer user_data)
+	{
+		auto *hd = static_cast<const HistoryData *>(data);
+		return strcmp(hd->key, static_cast<const gchar *>(user_data));
+	});
+
+	if (work)
 		{
-		auto hd = static_cast<HistoryData *>(work->data);
-		if (strcmp(hd->key, key) == 0) return hd;
-		work = work->next;
+		return static_cast<HistoryData *>(work->data);
 		}
+
 	return nullptr;
 }
 
@@ -404,22 +414,18 @@ void history_list_add_to_key(const gchar *key, const gchar *path, gint max)
 		}
 
 	/* if already in the list, simply move it to the top */
-	work = hd->list;
-	while (work)
+	work = g_list_find_custom(hd->list, path, reinterpret_cast<GCompareFunc>(strcmp));
+	if (work)
 		{
-		auto buf = static_cast<gchar *>(work->data);
-
-		if (strcmp(buf, path) == 0)
+		/* if not first, move it */
+		if (work != hd->list)
 			{
-			/* if not first, move it */
-			if (work != hd->list)
-				{
-				hd->list = g_list_remove(hd->list, buf);
-				hd->list = g_list_prepend(hd->list, buf);
-				}
-			return;
+			auto buf = static_cast<gchar *>(work->data);
+
+			hd->list = g_list_remove(hd->list, buf);
+			hd->list = g_list_prepend(hd->list, buf);
 			}
-		work = work->next;
+		return;
 		}
 
 	hd->list = g_list_prepend(hd->list, g_strdup(path));
@@ -427,26 +433,17 @@ void history_list_add_to_key(const gchar *key, const gchar *path, gint max)
 	if (max == -1) max = options->open_recent_list_maxsize;
 	if (max > 0)
 		{
-		gint len = 0;
-		GList *work = hd->list;
-		GList *last = nullptr;
-
-		while (work)
+		work = g_list_nth(hd->list, max);
+		if (work)
 			{
-			len++;
-			last = work;
-			work = work->next;
-			}
+			GList *last = work->prev;
+			if (last)
+				{
+				last->next = nullptr;
+				}
 
-		work = last;
-		while (work && len > max)
-			{
-			GList *node = work;
-			work = work->prev;
-
-			g_free(node->data);
-			hd->list = g_list_delete_link(hd->list, node);
-			len--;
+			work->prev = nullptr;
+			g_list_free_full(work, g_free);
 			}
 		}
 }
@@ -495,27 +492,20 @@ void history_list_item_move(const gchar *key, const gchar *path, gint direction)
 {
 	HistoryData *hd;
 	GList *work;
-	gint p = 0;
 
 	if (!path) return;
 	hd = history_list_find_by_key(key);
 	if (!hd) return;
 
-	work = hd->list;
-	while (work)
-		{
-		auto buf = static_cast<gchar *>(work->data);
-		if (strcmp(buf, path) == 0)
-			{
-			p += direction;
-			if (p < 0) return;
-			hd->list = g_list_remove(hd->list, buf);
-			hd->list = g_list_insert(hd->list, buf, p);
-			return;
-			}
-		work = work->next;
-		p++;
-		}
+	work = g_list_find_custom(hd->list, path, reinterpret_cast<GCompareFunc>(strcmp));
+	if (!work) return;
+
+	gint p = g_list_position(hd->list, work) + direction;
+	if (p < 0) return;
+
+	auto buf = static_cast<gchar *>(work->data);
+	hd->list = g_list_remove(hd->list, buf);
+	hd->list = g_list_insert(hd->list, buf, p);
 }
 
 void history_list_item_remove(const gchar *key, const gchar *path)
@@ -544,8 +534,6 @@ gchar *get_recent_viewed_folder_image(gchar *path)
 {
 	HistoryData *hd;
 	GList *work;
-	gchar *dirname;
-	gchar *ret = nullptr;
 
 	if (options->recent_folder_image_list_maxsize == 0)
 		{
@@ -562,27 +550,13 @@ gchar *get_recent_viewed_folder_image(gchar *path)
 		history_list = g_list_prepend(history_list, hd);
 		}
 
-	work = hd->list;
-
-	while (work)
+	work = g_list_find_custom(hd->list, path, dirname_compare);
+	if (!work || !isfile(static_cast<const gchar *>(work->data)))
 		{
-		dirname = g_path_get_dirname(static_cast<const gchar *>(work->data));
-
-		if (g_strcmp0(dirname, path) == 0)
-			{
-			if (isfile(static_cast<const gchar *>(work->data)))
-				{
-				ret = g_strdup(static_cast<const gchar *>(work->data));
-				}
-			g_free(dirname);
-			break;
-			}
-
-		g_free(dirname);
-		work = work->next;
+		return nullptr;
 		}
 
-	return ret;
+	return g_strdup(static_cast<const gchar *>(work->data));
 }
 
 static void update_recent_viewed_folder_image_list(const gchar *path)
@@ -590,15 +564,12 @@ static void update_recent_viewed_folder_image_list(const gchar *path)
 	HistoryData *hd;
 	GList *work;
 	gchar *image_dir = nullptr;
-	gchar *list_dir = nullptr;
-	gboolean found = FALSE;
 
 	if (options->recent_folder_image_list_maxsize == 0)
 		{
 		return;
 		}
 
-	image_dir = g_path_get_dirname(path);
 	hd = history_list_find_by_key("image_list");
 	if (!hd)
 		{
@@ -608,30 +579,18 @@ static void update_recent_viewed_folder_image_list(const gchar *path)
 		history_list = g_list_prepend(history_list, hd);
 		}
 
-	work = hd->list;
-
-	while (work)
-		{
-		list_dir = g_path_get_dirname(static_cast<const gchar *>(work->data));
-
-		/* If folder already in list, update and move to start of list */
-		if (g_strcmp0(list_dir, image_dir) == 0)
-			{
-			g_free(work->data);
-			work->data = g_strdup(path);
-			hd->list = g_list_remove_link(hd->list, work);
-			hd->list = g_list_concat(work, hd->list);
-			found = TRUE;
-			g_free(list_dir);
-			break;
-			}
-		g_free(list_dir);
-		work = work->next;
-		}
-
+	image_dir = g_path_get_dirname(path);
+	work = g_list_find_custom(hd->list, image_dir, dirname_compare);
 	g_free(image_dir);
 
-	if (!found)
+	if (work)
+		{
+		g_free(work->data);
+		work->data = g_strdup(path);
+		hd->list = g_list_remove_link(hd->list, work);
+		hd->list = g_list_concat(work, hd->list);
+		}
+	else
 		{
 		hd->list = g_list_prepend(hd->list, g_strdup(path));
 		}
