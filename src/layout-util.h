@@ -30,6 +30,8 @@
 
 struct LayoutWindow;
 
+void keyboard_scroll_calc(gint &x, gint &y, const GdkEventKey *event);
+
 gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
 
 void layout_util_sync_thumb(LayoutWindow *lw);

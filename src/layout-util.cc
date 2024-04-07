@@ -114,6 +114,51 @@ static gboolean layout_key_match(guint keyval)
 	return FALSE;
 }
 
+void keyboard_scroll_calc(gint &x, gint &y, const GdkEventKey *event)
+{
+	static gint delta = 0;
+	static guint32 time_old = 0;
+	static guint keyval_old = 0;
+
+	if (event->state & GDK_SHIFT_MASK)
+		{
+		x *= 3;
+		y *= 3;
+		}
+
+	if (event->state & GDK_CONTROL_MASK)
+		{
+		if (x < 0) x = G_MININT / 2;
+		if (x > 0) x = G_MAXINT / 2;
+		if (y < 0) y = G_MININT / 2;
+		if (y > 0) y = G_MAXINT / 2;
+
+		return;
+		}
+
+	if (options->progressive_key_scrolling)
+		{
+		guint32 time_diff;
+
+		time_diff = event->time - time_old;
+
+		/* key pressed within 125ms ? (1/8 second) */
+		if (time_diff > 125 || event->keyval != keyval_old) delta = 0;
+
+		time_old = event->time;
+		keyval_old = event->keyval;
+
+		delta += 2;
+		}
+	else
+		{
+		delta = 8;
+		}
+
+	x *= delta * options->keyboard_scroll_step;
+	y *= delta * options->keyboard_scroll_step;
+}
+
 gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
@@ -200,12 +245,7 @@ gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
 	if (x != 0 || y!= 0)
 		{
-		if (event->state & GDK_SHIFT_MASK)
-			{
-			x *= 3;
-			y *= 3;
-			}
-		keyboard_scroll_calc(&x, &y, event);
+		keyboard_scroll_calc(x, y, event);
 		layout_image_scroll(lw, x, y, (event->state & GDK_SHIFT_MASK));
 		}
 

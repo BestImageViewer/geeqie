@@ -40,8 +40,10 @@
 #include <execinfo.h>
 #endif
 
+#include <gdk/gdk.h>
 #include <gio/gio.h>
 #include <glib-object.h>
+#include <gtk/gtk.h>
 
 #ifdef ENABLE_NLS
 #  include <libintl.h>
@@ -219,53 +221,6 @@ void sig_handler_cb(int)
 	exit(EXIT_FAILURE);
 }
 #endif /* defined(SA_SIGINFO) */
-
-/*
- *-----------------------------------------------------------------------------
- * keyboard functions
- *-----------------------------------------------------------------------------
- */
-
-void keyboard_scroll_calc(gint *x, gint *y, GdkEventKey *event)
-{
-	static gint delta = 0;
-	static guint32 time_old = 0;
-	static guint keyval_old = 0;
-
-	if (event->state & GDK_CONTROL_MASK)
-		{
-		if (*x < 0) *x = G_MININT / 2;
-		if (*x > 0) *x = G_MAXINT / 2;
-		if (*y < 0) *y = G_MININT / 2;
-		if (*y > 0) *y = G_MAXINT / 2;
-
-		return;
-		}
-
-	if (options->progressive_key_scrolling)
-		{
-		guint32 time_diff;
-
-		time_diff = event->time - time_old;
-
-		/* key pressed within 125ms ? (1/8 second) */
-		if (time_diff > 125 || event->keyval != keyval_old) delta = 0;
-
-		time_old = event->time;
-		keyval_old = event->keyval;
-
-		delta += 2;
-		}
-	else
-		{
-		delta = 8;
-		}
-
-	*x = *x * delta * options->keyboard_scroll_step;
-	*y = *y * delta * options->keyboard_scroll_step;
-}
-
-
 
 /*
  *-----------------------------------------------------------------------------

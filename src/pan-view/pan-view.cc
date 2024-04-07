@@ -46,7 +46,6 @@
 #include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "main.h"
 #include "menu.h"
 #include "metadata.h"
 #include "options.h"
@@ -1250,12 +1249,7 @@ static gboolean pan_window_key_press_cb(GtkWidget *widget, GdkEventKey *event, g
 
 		if (x != 0 || y!= 0)
 			{
-			if (event->state & GDK_SHIFT_MASK)
-				{
-				x *= 3;
-				y *= 3;
-				}
-			keyboard_scroll_calc(&x, &y, event);
+			keyboard_scroll_calc(x, y, event);
 			pixbuf_renderer_scroll(pr, x, y);
 			}
 		}

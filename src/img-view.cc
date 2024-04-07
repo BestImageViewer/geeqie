@@ -41,7 +41,6 @@
 #include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "main.h"
 #include "menu.h"
 #include "misc.h"
 #include "options.h"
@@ -442,13 +441,7 @@ static gboolean view_window_key_press_cb(GtkWidget * (widget), GdkEventKey *even
 
 	if (x != 0 || y!= 0)
 		{
-		if (event->state & GDK_SHIFT_MASK)
-			{
-			x *= 3;
-			y *= 3;
-			}
-
-		keyboard_scroll_calc(&x, &y, event);
+		keyboard_scroll_calc(x, y, event);
 		image_scroll(imd, x, y);
 		}
 
