@@ -44,12 +44,14 @@
 namespace
 {
 
+constexpr gint SIDEBAR_DEFAULT_WIDTH = 250;
+
 void remove_child_from_parent(gpointer data)
 {
 	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(GTK_WIDGET(data))), GTK_WIDGET(data));
 }
 
-}
+} // namespace
 
 struct KnownPanes
 {

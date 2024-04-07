@@ -60,6 +60,13 @@
 #include "utilops.h"
 #include "view-file.h"
 
+namespace
+{
+
+constexpr gint IMAGE_MIN_WIDTH = 100;
+
+} // namespace
+
 static GtkWidget *layout_image_pop_menu(LayoutWindow *lw);
 static void layout_image_set_buttons(LayoutWindow *lw);
 static gboolean layout_image_animate_new_file(LayoutWindow *lw);

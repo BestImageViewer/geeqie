@@ -45,23 +45,19 @@
 
 #define GQ_COLLECTION_EXT ".gqv"
 
+// @todo Merge with PixbufRendererScrollResetType ?
 #define SCROLL_RESET_TOPLEFT 0
 #define SCROLL_RESET_CENTER 1
 #define SCROLL_RESET_NOCHANGE 2
 
+// @todo Deduplicate mousewheel_scrolls processing
 #define MOUSEWHEEL_SCROLL_SIZE 20
 
 
 #define GQ_DEFAULT_SHELL_PATH "/bin/sh"
 #define GQ_DEFAULT_SHELL_OPTIONS "-c"
 
-#define DEFAULT_THUMB_WIDTH	96
-#define DEFAULT_THUMB_HEIGHT	72
-
 #define DEFAULT_MINIMAL_WINDOW_SIZE 100
-
-#define IMAGE_MIN_WIDTH 100
-#define SIDEBAR_DEFAULT_WIDTH 250
 
 
 #define DEFAULT_OVERLAY_INFO	"%collection:<i>*</i>\\n%" \
