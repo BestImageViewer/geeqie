@@ -535,14 +535,7 @@ static void layout_sort_button_press_cb(GtkWidget *, gpointer data)
 	menu = submenu_add_sort(nullptr, G_CALLBACK(layout_sort_menu_cb), lw, FALSE, FALSE, TRUE, lw->options.file_view_list_sort.method);
 
 	/* take ownership of menu */
-#ifdef GTK_OBJECT_FLOATING
-	/* GTK+ < 2.10 */
-	g_object_ref(G_OBJECT(menu));
-	gtk_object_sink(GTK_OBJECT(menu));
-#else
-	/* GTK+ >= 2.10 */
 	g_object_ref_sink(G_OBJECT(menu));
-#endif
 
 	/* ascending option */
 	menu_item_add_divider(menu);
@@ -618,14 +611,7 @@ static void layout_zoom_button_press_cb(GtkWidget *, gpointer data)
 			lw, FALSE, FALSE, TRUE, options->image.zoom_mode);
 
 	/* take ownership of menu */
-#ifdef GTK_OBJECT_FLOATING
-	/* GTK+ < 2.10 */
-	g_object_ref(G_OBJECT(menu));
-	gtk_object_sink(GTK_OBJECT(menu));
-#else
-	/* GTK+ >= 2.10 */
 	g_object_ref_sink(G_OBJECT(menu));
-#endif
 
 	menu_item_add_divider(menu);
 

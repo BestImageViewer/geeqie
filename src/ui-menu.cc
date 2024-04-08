@@ -415,14 +415,7 @@ GtkWidget *popup_menu_short_lived()
 	menu = gtk_menu_new();
 
 	/* take ownership of menu */
-#ifdef GTK_OBJECT_FLOATING
-	/* GTK+ < 2.10 */
-	g_object_ref(G_OBJECT(menu));
-	gtk_object_sink(GTK_OBJECT(menu));
-#else
-	/* GTK+ >= 2.10 */
 	g_object_ref_sink(G_OBJECT(menu));
-#endif
 
 	g_signal_connect(G_OBJECT(menu), "selection_done",
 			 G_CALLBACK(popup_menu_short_lived_cb), menu);
