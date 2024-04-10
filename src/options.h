@@ -166,7 +166,7 @@ struct ConfOptions
 	/* image */
 	struct {
 		gboolean exif_rotate_enable;
-		guint scroll_reset_method;
+		ScrollReset scroll_reset_method;
 		gboolean fit_window_to_image;
 		gboolean limit_window_size;
 		gint max_window_size;

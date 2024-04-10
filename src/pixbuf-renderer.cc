@@ -239,14 +239,14 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 							     FALSE,
 							     static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 	g_object_class_install_property(gobject_class,
-					PROP_SCROLL_RESET,
-					g_param_spec_uint("scroll_reset",
-							  "New image scroll reset",
-							  nullptr,
-							  PR_SCROLL_RESET_TOPLEFT,
-							  PR_SCROLL_RESET_NOCHANGE,
-							  PR_SCROLL_RESET_TOPLEFT,
-							  static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
+	                                PROP_SCROLL_RESET,
+	                                g_param_spec_uint("scroll_reset",
+	                                                  "New image scroll reset",
+	                                                  nullptr,
+	                                                  ScrollReset::TOPLEFT,
+	                                                  ScrollReset::NOCHANGE,
+	                                                  ScrollReset::TOPLEFT,
+	                                                  static_cast<GParamFlags>(G_PARAM_READABLE | G_PARAM_WRITABLE)));
 
 	g_object_class_install_property(gobject_class,
 					PROP_DELAY_FLIP,
@@ -426,7 +426,7 @@ static void pixbuf_renderer_init(PixbufRenderer *pr)
 	pr->scale = 1.0;
 	pr->aspect_ratio = 1.0;
 
-	pr->scroll_reset = PR_SCROLL_RESET_TOPLEFT;
+	pr->scroll_reset = ScrollReset::TOPLEFT;
 
 	pr->scroller_id = 0;
 	pr->scroller_overlay = -1;
@@ -507,7 +507,7 @@ static void pixbuf_renderer_set_property(GObject *object, guint prop_id,
 			pr->zoom_expand = g_value_get_boolean(value);
 			break;
 		case PROP_SCROLL_RESET:
-			pr->scroll_reset = static_cast<PixbufRendererScrollResetType>(g_value_get_uint(value));
+			pr->scroll_reset = static_cast<ScrollReset>(g_value_get_uint(value));
 			break;
 		case PROP_DELAY_FLIP:
 			pr->delay_flip = g_value_get_boolean(value);
@@ -1798,17 +1798,17 @@ static void pr_zoom_sync(PixbufRenderer *pr, gdouble zoom,
 		{
 		switch (pr->scroll_reset)
 			{
-			case PR_SCROLL_RESET_NOCHANGE:
+			case ScrollReset::NOCHANGE:
 				/* maintain old scroll position */
 				pr->x_scroll = (static_cast<gdouble>(pr->image_width) * old_center_x * pr->scale) - pr->vis_width / 2.0;
 				pr->y_scroll = (static_cast<gdouble>(pr->image_height) * old_center_y * pr->scale * pr->aspect_ratio) - pr->vis_height / 2.0;
 				break;
-			case PR_SCROLL_RESET_CENTER:
+			case ScrollReset::CENTER:
 				/* center new image */
 				pr->x_scroll = (static_cast<gdouble>(pr->image_width) / 2.0 * pr->scale) - pr->vis_width / 2.0;
 				pr->y_scroll = (static_cast<gdouble>(pr->image_height) / 2.0 * pr->scale * pr->aspect_ratio) - pr->vis_height / 2.0;
 				break;
-			case PR_SCROLL_RESET_TOPLEFT:
+			case ScrollReset::TOPLEFT:
 			default:
 				/* reset to upper left */
 				pr->x_scroll = 0;
@@ -2602,7 +2602,7 @@ void pixbuf_renderer_set_post_process_func(PixbufRenderer *pr, PixbufRendererPos
 void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 {
 	GObject *object;
-	PixbufRendererScrollResetType scroll_reset;
+	ScrollReset scroll_reset;
 
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 	g_return_if_fail(IS_PIXBUF_RENDERER(source));
@@ -2623,7 +2623,7 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 	pr->y_mouse  = source->y_mouse;
 
 	scroll_reset = pr->scroll_reset;
-	pr->scroll_reset = PR_SCROLL_RESET_NOCHANGE;
+	pr->scroll_reset = ScrollReset::NOCHANGE;
 
 	pr->func_post_process = source->func_post_process;
 	pr->post_process_user_data = source->post_process_user_data;
@@ -2664,7 +2664,7 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 {
 	GObject *object;
-	PixbufRendererScrollResetType scroll_reset;
+	ScrollReset scroll_reset;
 
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 	g_return_if_fail(IS_PIXBUF_RENDERER(source));
@@ -2685,7 +2685,7 @@ void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 	pr->y_mouse  = source->y_mouse;
 
 	scroll_reset = pr->scroll_reset;
-	pr->scroll_reset = PR_SCROLL_RESET_NOCHANGE;
+	pr->scroll_reset = ScrollReset::NOCHANGE;
 
 	pr->orientation = source->orientation;
 	pr->stereo_data = source->stereo_data;

@@ -45,11 +45,6 @@
 
 #define GQ_COLLECTION_EXT ".gqv"
 
-// @todo Merge with PixbufRendererScrollResetType ?
-#define SCROLL_RESET_TOPLEFT 0
-#define SCROLL_RESET_CENTER 1
-#define SCROLL_RESET_NOCHANGE 2
-
 // @todo Deduplicate mousewheel_scrolls processing
 #define MOUSEWHEEL_SCROLL_SIZE 20
 

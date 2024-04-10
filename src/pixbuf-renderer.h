@@ -76,13 +76,6 @@ using PixbufRendererTileDisposeFunc = void (*)(PixbufRenderer *, gint, gint, gin
 
 using PixbufRendererPostProcessFunc = void (*)(PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint, gpointer);
 
-enum PixbufRendererScrollResetType {
-	PR_SCROLL_RESET_TOPLEFT = 0,
-	PR_SCROLL_RESET_CENTER,
-	PR_SCROLL_RESET_NOCHANGE,
-	PR_SCROLL_RESET_COUNT,
-};
-
 enum ImageRenderType {
 	TILE_RENDER_NONE = 0, /**< do nothing */
 	TILE_RENDER_AREA, /**< render an area of the tile */
@@ -146,7 +139,7 @@ struct PixbufRenderer
 	gint y_scroll;
 
 	gdouble norm_center_x;	/**< coordinates of viewport center in the image, in range 0.0 - 1.0 */
-	gdouble norm_center_y;  /**< these coordinates are used for PR_SCROLL_RESET_NOCHANGE and should be preserved over periods with NULL pixbuf */
+	gdouble norm_center_y;  /**< these coordinates are used for ScrollReset::NOCHANGE and should be preserved over periods with NULL pixbuf */
 
 	gdouble subpixel_x_scroll; /**< subpixel scroll alignment, used to prevent accumulation of rounding errors */
 	gdouble subpixel_y_scroll;
@@ -162,7 +155,7 @@ struct PixbufRenderer
 	gboolean zoom_2pass;
 	gboolean zoom_expand;
 
-	PixbufRendererScrollResetType scroll_reset;
+	ScrollReset scroll_reset;
 
 	gboolean has_frame;
 

@@ -211,6 +211,13 @@ enum StereoPixbufData {
 	STEREO_PIXBUF_NONE     = 3
 };
 
+enum ScrollReset : guint {
+	TOPLEFT  = 0,
+	CENTER   = 1,
+	NOCHANGE = 2,
+	COUNT /**< Keep it last */
+};
+
 using FileUtilDoneFunc = void (*)(gboolean, const gchar *, gpointer);
 
 #define FILEDATA_MARKS_SIZE 10

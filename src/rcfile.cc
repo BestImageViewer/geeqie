@@ -928,7 +928,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, image.limit_autofit_size)) continue;
 		if (READ_INT(*options, image.max_autofit_size)) continue;
 		if (READ_INT(*options, image.max_enlargement_size)) continue;
-		if (READ_UINT_CLAMP(*options, image.scroll_reset_method, 0, PR_SCROLL_RESET_COUNT - 1)) continue;
+		if (READ_UINT_ENUM_CLAMP(*options, image.scroll_reset_method, 0, ScrollReset::COUNT - 1)) continue;
 		if (READ_INT(*options, image.tile_cache_max)) continue;
 		if (READ_INT(*options, image.image_cache_max)) continue;
 		if (READ_UINT_CLAMP(*options, image.zoom_quality, GDK_INTERP_NEAREST, GDK_INTERP_BILINEAR)) continue;

@@ -587,12 +587,9 @@ static void layout_zoom_menu_cb(GtkWidget *widget, gpointer data)
 
 static void layout_scroll_menu_cb(GtkWidget *widget, gpointer data)
 {
-	guint scroll_type;
-
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	scroll_type = GPOINTER_TO_UINT(data);
-	options->image.scroll_reset_method = scroll_type;
+	options->image.scroll_reset_method = static_cast<ScrollReset>(GPOINTER_TO_UINT(data));
 	image_options_sync();
 }
 
@@ -616,20 +613,20 @@ static void layout_zoom_button_press_cb(GtkWidget *, gpointer data)
 	menu_item_add_divider(menu);
 
 	menu_item_add_radio(menu, _("Scroll to top left corner"),
-			GUINT_TO_POINTER(SCROLL_RESET_TOPLEFT),
-			options->image.scroll_reset_method == SCROLL_RESET_TOPLEFT,
-			G_CALLBACK(layout_scroll_menu_cb),
-			GUINT_TO_POINTER(SCROLL_RESET_TOPLEFT));
+	                    GUINT_TO_POINTER(ScrollReset::TOPLEFT),
+	                    options->image.scroll_reset_method == ScrollReset::TOPLEFT,
+	                    G_CALLBACK(layout_scroll_menu_cb),
+	                    GUINT_TO_POINTER(ScrollReset::TOPLEFT));
 	menu_item_add_radio(menu, _("Scroll to image center"),
-			GUINT_TO_POINTER(SCROLL_RESET_CENTER),
-			options->image.scroll_reset_method == SCROLL_RESET_CENTER,
-			G_CALLBACK(layout_scroll_menu_cb),
-			GUINT_TO_POINTER(SCROLL_RESET_CENTER));
+	                    GUINT_TO_POINTER(ScrollReset::CENTER),
+	                    options->image.scroll_reset_method == ScrollReset::CENTER,
+	                    G_CALLBACK(layout_scroll_menu_cb),
+	                    GUINT_TO_POINTER(ScrollReset::CENTER));
 	menu_item_add_radio(menu, _("Keep the region from previous image"),
-			GUINT_TO_POINTER(SCROLL_RESET_NOCHANGE),
-			options->image.scroll_reset_method == SCROLL_RESET_NOCHANGE,
-			G_CALLBACK(layout_scroll_menu_cb),
-			GUINT_TO_POINTER(SCROLL_RESET_NOCHANGE));
+	                    GUINT_TO_POINTER(ScrollReset::NOCHANGE),
+	                    options->image.scroll_reset_method == ScrollReset::NOCHANGE,
+	                    G_CALLBACK(layout_scroll_menu_cb),
+	                    GUINT_TO_POINTER(ScrollReset::NOCHANGE));
 
 	g_signal_connect(G_OBJECT(menu), "selection_done",
 			 G_CALLBACK(layout_zoom_menu_hide_cb), NULL);
