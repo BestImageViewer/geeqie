@@ -25,8 +25,16 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-struct PanViewSearchUi;
 struct PanWindow;
+
+struct PanViewSearchUi
+{
+	GtkWidget *search_box;
+	GtkWidget *search_entry;
+	GtkWidget *search_label;
+	GtkWidget *search_button;
+	GtkWidget *search_button_arrow;
+};
 
 void pan_search_toggle_visible(PanWindow *pw, gboolean enable);
 void pan_search_activate(PanWindow *pw);

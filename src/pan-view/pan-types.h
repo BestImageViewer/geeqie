@@ -29,6 +29,8 @@
 
 struct FullScreenData;
 struct ImageWindow;
+struct PanViewFilterUi;
+struct PanViewSearchUi;
 struct ThumbLoader;
 
 /* thumbnail sizes and spacing */
@@ -63,10 +65,6 @@ struct ThumbLoader;
 #define PAN_BOX_OUTLINE_ALPHA 128
 
 #define PAN_TEXT_COLOR 0, 0, 0
-
-
-#define PAN_GROUP_MAX 16
-
 
 
 enum PanLayoutType {
@@ -155,21 +153,6 @@ struct PanItem {
 	gboolean queued;
 };
 
-struct PanViewSearchUi
-{
-	GtkWidget *search_box;
-	GtkWidget *search_entry;
-	GtkWidget *search_label;
-	GtkWidget *search_button;
-	GtkWidget *search_button_arrow;
-};
-
-/**
- * @struct PanViewFilterUi
- * Defined in pan-view-filter.h
- */
-struct PanViewFilterUi;
-
 struct PanWindow
 {
 	GtkWidget *window;
@@ -223,14 +206,6 @@ struct PanWindow
 	PanItem *search_pi;
 
 	gint idle_id;
-};
-
-struct PanGrid {
-	gint x;
-	gint y;
-	gint w;
-	gint h;
-	GList *list;
 };
 
 struct PanCacheData {

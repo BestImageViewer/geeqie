@@ -31,6 +31,13 @@
 #include "pan-view.h"
 #include "typedefs.h"
 
+namespace
+{
+
+constexpr gint PAN_GROUP_MAX = 16;
+
+} // namespace
+
 void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height)
 {
 	GList *list;

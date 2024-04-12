@@ -73,6 +73,14 @@
 namespace
 {
 
+struct PanGrid {
+	gint x;
+	gint y;
+	gint w;
+	gint h;
+	GList *list;
+};
+
 constexpr gint PAN_WINDOW_DEFAULT_WIDTH = 720;
 constexpr gint PAN_WINDOW_DEFAULT_HEIGHT = 500;
 
