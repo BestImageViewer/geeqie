@@ -894,8 +894,8 @@ static void pan_window_items_free(PanWindow *pw)
  */
 
 static void pan_layout_compute(PanWindow *pw, FileData *dir_fd,
-			       gint *width, gint *height,
-			       gint *scroll_x, gint *scroll_y)
+                               gint &width, gint &height,
+                               gint &scroll_x, gint &scroll_y)
 {
 	pan_window_items_free(pw);
 
@@ -944,10 +944,10 @@ static void pan_layout_compute(PanWindow *pw, FileData *dir_fd,
 			break;
 		}
 
-	*width = 0;
-	*height = 0;
-	*scroll_x = 0;
-	*scroll_y = 0;
+	width = 0;
+	height = 0;
+	scroll_x = 0;
+	scroll_y = 0;
 
 	switch (pw->layout)
 		{
@@ -1122,7 +1122,7 @@ static gint pan_layout_update_idle_cb(gpointer data)
 			}
 		}
 
-	pan_layout_compute(pw, pw->dir_fd, &width, &height, &scroll_x, &scroll_y);
+	pan_layout_compute(pw, pw->dir_fd, width, height, scroll_x, scroll_y);
 
 	pan_window_zoom_limit(pw);
 

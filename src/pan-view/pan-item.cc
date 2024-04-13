@@ -21,6 +21,7 @@
 
 #include "pan-item.h"
 
+#include <algorithm>
 #include <cstring>
 
 #include <glib-object.h>
@@ -108,12 +109,12 @@ void pan_item_size_by_item(PanItem *pi, PanItem *child, gint border)
 		pi->height = child->y + child->height + border - pi->y;
 }
 
-void pan_item_size_coordinates(PanItem *pi, gint border, gint *w, gint *h)
+void pan_item_size_coordinates(PanItem *pi, gint border, gint &w, gint &h)
 {
 	if (!pi) return;
 
-	if (*w < pi->x + pi->width + border) *w = pi->x + pi->width + border;
-	if (*h < pi->y + pi->height + border) *h = pi->y + pi->height + border;
+	w = std::max(w, pi->x + pi->width + border);
+	h = std::max(h, pi->y + pi->height + border);
 }
 
 

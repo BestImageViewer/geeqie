@@ -21,6 +21,7 @@
 
 #include "pan-folder.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "filedata.h"
@@ -30,7 +31,7 @@
 #include "pan-view-filter.h"
 #include "typedefs.h"
 
-static void pan_flower_size(PanWindow *pw, gint *width, gint *height)
+static void pan_flower_size(PanWindow *pw, gint &width, gint &height)
 {
 	GList *work;
 	gint x1;
@@ -87,8 +88,8 @@ static void pan_flower_size(PanWindow *pw, gint *width, gint *height)
 			}
 		}
 
-	if (width) *width = x2 - x1;
-	if (height) *height = y2 - y1;
+	width = x2 - x1;
+	height = y2 - y1;
 }
 
 struct FlowerGroup {
@@ -350,8 +351,8 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 }
 
 void pan_flower_compute(PanWindow *pw, FileData *dir_fd,
-			gint *width, gint *height,
-			gint *scroll_x, gint *scroll_y)
+                        gint &width, gint &height,
+                        gint &scroll_x, gint &scroll_y)
 {
 	FlowerGroup *group;
 	GList *list;
@@ -365,16 +366,16 @@ void pan_flower_compute(PanWindow *pw, FileData *dir_fd,
 	if (list)
 		{
 		auto pi = static_cast<PanItem *>(list->data);
-		*scroll_x = pi->x + pi->width / 2;
-		*scroll_y = pi->y + pi->height / 2;
+		scroll_x = pi->x + pi->width / 2;
+		scroll_y = pi->y + pi->height / 2;
 		}
 	g_list_free(list);
 }
 
 static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
-				 gint *x, gint *y, gint *level,
-				 PanItem *parent,
-				 gint *width, gint *height)
+                                 gint &x, gint &y, gint level,
+                                 PanItem *parent,
+                                 gint &width, gint &height)
 {
 	GList *f;
 	GList *d;
@@ -390,23 +391,23 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 
 	pan_filter_fd_list(&f, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 
-	*x = PAN_BOX_BORDER + ((*level) * MAX(PAN_BOX_BORDER, PAN_THUMB_GAP));
+	x = PAN_BOX_BORDER + (level * MAX(PAN_BOX_BORDER, PAN_THUMB_GAP));
 
-	pi_box = pan_item_text_new(pw, *x, *y, dir_fd->path, PAN_TEXT_ATTR_NONE,
-				   PAN_BORDER_3,
-				   {PAN_TEXT_COLOR, 255});
+	pi_box = pan_item_text_new(pw, x, y, dir_fd->path, PAN_TEXT_ATTR_NONE,
+	                           PAN_BORDER_3,
+	                           {PAN_TEXT_COLOR, 255});
 
-	*y += pi_box->height;
+	y += pi_box->height;
 
 	pi_box = pan_item_box_new(pw, file_data_ref(dir_fd),
-				  *x, *y,
-				  PAN_BOX_BORDER, PAN_BOX_BORDER,
-				  PAN_BOX_OUTLINE_THICKNESS,
-				  {PAN_BOX_COLOR, PAN_BOX_ALPHA},
-				  {PAN_BOX_OUTLINE_COLOR, PAN_BOX_OUTLINE_ALPHA});
+	                          x, y,
+	                          PAN_BOX_BORDER, PAN_BOX_BORDER,
+	                          PAN_BOX_OUTLINE_THICKNESS,
+	                          {PAN_BOX_COLOR, PAN_BOX_ALPHA},
+	                          {PAN_BOX_OUTLINE_COLOR, PAN_BOX_OUTLINE_ALPHA});
 
-	*x += PAN_BOX_BORDER;
-	*y += PAN_BOX_BORDER;
+	x += PAN_BOX_BORDER;
+	y += PAN_BOX_BORDER;
 
 	work = f;
 	while (work)
@@ -419,21 +420,21 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 
 		if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)
 			{
-			pi = pan_item_image_new(pw, fd, *x, *y, 10, 10);
-			*x += pi->width + PAN_THUMB_GAP;
+			pi = pan_item_image_new(pw, fd, x, y, 10, 10);
+			x += pi->width + PAN_THUMB_GAP;
 			if (pi->height > y_height) y_height = pi->height;
 			}
 		else
 			{
-			pi = pan_item_thumb_new(pw, fd, *x, *y);
-			*x += PAN_THUMB_SIZE + PAN_THUMB_GAP;
+			pi = pan_item_thumb_new(pw, fd, x, y);
+			x += PAN_THUMB_SIZE + PAN_THUMB_GAP;
 			y_height = PAN_THUMB_SIZE;
 			}
 
 		pan_item_size_by_item(pi_box, pi, PAN_BOX_BORDER);
 		}
 
-	if (f) *y = pi_box->y + pi_box->height;
+	if (f) y = pi_box->y + pi_box->height;
 
 	g_list_free(f);
 
@@ -447,9 +448,7 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 
 		if (!pan_is_ignored(fd->path, pw->ignore_symlinks))
 			{
-			*level = *level + 1;
-			pan_folder_tree_path(pw, fd, x, y, level, pi_box, width, height);
-			*level = *level - 1;
+			pan_folder_tree_path(pw, fd, x, y, level + 1, pi_box, width, height);
 			}
 		}
 
@@ -457,29 +456,21 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 
 	pan_item_size_by_item(parent, pi_box, PAN_BOX_BORDER);
 
-	if (*y < pi_box->y + pi_box->height + PAN_BOX_BORDER)
-		*y = pi_box->y + pi_box->height + PAN_BOX_BORDER;
+	y = std::max(y, pi_box->y + pi_box->height + PAN_BOX_BORDER);
 
 	pan_item_size_coordinates(pi_box, PAN_BOX_BORDER, width, height);
 }
 
-void pan_folder_tree_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height)
+void pan_folder_tree_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height)
 {
 	gint x;
 	gint y;
-	gint level;
-	gint w;
-	gint h;
 
-	level = 0;
 	x = PAN_BOX_BORDER;
 	y = PAN_BOX_BORDER;
-	w = PAN_BOX_BORDER * 2;
-	h = PAN_BOX_BORDER * 2;
+	width = PAN_BOX_BORDER * 2;
+	height = PAN_BOX_BORDER * 2;
 
-	pan_folder_tree_path(pw, dir_fd, &x, &y, &level, nullptr, &w, &h);
-
-	if (width) *width = w;
-	if (height) *height = h;
+	pan_folder_tree_path(pw, dir_fd, x, y, 0, nullptr, width, height);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

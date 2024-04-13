@@ -38,7 +38,7 @@ constexpr gint PAN_GROUP_MAX = 16;
 
 } // namespace
 
-void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height)
+void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height)
 {
 	GList *list;
 	GList *work;
@@ -67,8 +67,8 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 	pw->cache_list = pan_cache_sort(pw->cache_list, SORT_TIME, TRUE, TRUE);
 	list = filelist_sort(list, SORT_TIME, TRUE, TRUE);
 
-	*width = PAN_BOX_BORDER * 2;
-	*height = PAN_BOX_BORDER * 2;
+	width = PAN_BOX_BORDER * 2;
+	height = PAN_BOX_BORDER * 2;
 
 	x = 0;
 	y = 0;

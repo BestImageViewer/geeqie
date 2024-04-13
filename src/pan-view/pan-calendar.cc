@@ -203,7 +203,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	pan_layout_resize(pw);
 }
 
-void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height)
+void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height)
 {
 	GList *list;
 	GList *work;
@@ -275,8 +275,8 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 		end_month = pan_date_value(fd->date, PAN_DATE_LENGTH_MONTH);
 		}
 
-	*width = PAN_BOX_BORDER * 2;
-	*height = PAN_BOX_BORDER * 2;
+	width = PAN_BOX_BORDER * 2;
+	height = PAN_BOX_BORDER * 2;
 
 	x = PAN_BOX_BORDER;
 	y = PAN_BOX_BORDER;
@@ -441,8 +441,8 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *he
 			}
 		}
 
-	*width += grid;
-	*height = MAX(*height, grid + PAN_BOX_BORDER * 2 * 2);
+	width += grid;
+	height = MAX(height, grid + PAN_BOX_BORDER * 2 * 2);
 
 	g_list_free(list);
 }

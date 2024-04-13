@@ -29,7 +29,7 @@
 #include "pan-view-filter.h"
 #include "typedefs.h"
 
-void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height)
+void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height)
 {
 	GList *list;
 	GList *work;
@@ -53,8 +53,8 @@ void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint *width, gint *height
 
 	next_y = 0;
 
-	*width = PAN_BOX_BORDER * 2;
-	*height = PAN_BOX_BORDER * 2;
+	width = PAN_BOX_BORDER * 2;
+	height = PAN_BOX_BORDER * 2;
 
 	x = PAN_THUMB_GAP;
 	y = PAN_THUMB_GAP;
