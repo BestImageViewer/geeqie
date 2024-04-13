@@ -616,14 +616,11 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
  *-----------------------------------------------------------------------------
  */
 
-static void pan_item_image_find_size(PanWindow *pw, PanItem *pi, gint w, gint h)
+static void pan_item_image_find_size(PanWindow *pw, const FileData *fd, gint &w, gint &h)
 {
 	GList *work;
 
-	pi->width = w;
-	pi->height = h;
-
-	if (!pi->fd) return;
+	if (!fd) return;
 
 	work = pw->cache_list;
 	while (work)
@@ -634,10 +631,10 @@ static void pan_item_image_find_size(PanWindow *pw, PanItem *pi, gint w, gint h)
 		work = work->next;
 
 		if (pc->cd && pc->cd->dimensions &&
-		    pc->fd && pc->fd == pi->fd)
+		    pc->fd == fd)
 			{
-			pi->width = MAX(1, pc->cd->width * pw->image_size / 100);
-			pi->height = MAX(1, pc->cd->height * pw->image_size / 100);
+			w = MAX(1, pc->cd->width * pw->image_size / 100);
+			h = MAX(1, pc->cd->height * pw->image_size / 100);
 
 			pw->cache_list = g_list_remove(pw->cache_list, pc);
 			cache_sim_data_free(pc->cd);
@@ -652,11 +649,15 @@ PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w,
 {
 	PanItem *pi;
 
+	pan_item_image_find_size(pw, fd, w, h);
+
 	pi = g_new0(PanItem, 1);
 	pi->type = PAN_ITEM_IMAGE;
 	pi->fd = fd;
 	pi->x = x;
 	pi->y = y;
+	pi->width = w;
+	pi->height = h;
 
 	pi->color.a = 255;
 
@@ -664,8 +665,6 @@ PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w,
 	pi->color2.g = 0;
 	pi->color2.b = 0;
 	pi->color2.a = PAN_SHADOW_ALPHA / 2;
-
-	pan_item_image_find_size(pw, pi, w, h);
 
 	pw->list = g_list_prepend(pw->list, pi);
 
