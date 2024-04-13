@@ -618,13 +618,7 @@ GList *pan_cache_sort(GList *list, SortType method, gboolean ascend, gboolean ca
 
 static void pan_cache_free(PanWindow *pw)
 {
-	g_list_free_full(pw->cache_list, [](gpointer data)
-		{
-		auto pc = static_cast<PanCacheData *>(data);
-		cache_sim_data_free(pc->cd);
-		file_data_unref(pc->fd);
-		g_free(pc);
-		});
+	g_list_free_full(pw->cache_list, reinterpret_cast<GDestroyNotify>(pan_cache_data_free));
 	pw->cache_list = nullptr;
 
 	filelist_free(pw->cache_todo);

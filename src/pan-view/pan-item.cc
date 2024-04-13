@@ -640,9 +640,7 @@ static void pan_item_image_find_size(PanWindow *pw, PanItem *pi, gint w, gint h)
 			pi->height = MAX(1, pc->cd->height * pw->image_size / 100);
 
 			pw->cache_list = g_list_remove(pw->cache_list, pc);
-			cache_sim_data_free(pc->cd);
-			file_data_unref(pc->fd);
-			g_free(pc);
+			pan_cache_data_free(pc);
 			return;
 			}
 		}
@@ -988,5 +986,21 @@ void pan_text_alignment_calc(PanTextAlignment *ta, PanItem *box)
 
 		y += height;
 		}
+}
+
+
+/*
+ *-----------------------------------------------------------------------------
+ * cache data
+ *-----------------------------------------------------------------------------
+ */
+
+void pan_cache_data_free(PanCacheData *pc)
+{
+	if (!pc) return;
+
+	cache_sim_data_free(pc->cd);
+	file_data_unref(pc->fd);
+	g_free(pc);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

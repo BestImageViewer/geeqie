@@ -98,4 +98,7 @@ void pan_text_alignment_free(PanTextAlignment *ta);
 PanItem *pan_text_alignment_add(PanTextAlignment *ta, const gchar *label, const gchar *text);
 void pan_text_alignment_calc(PanTextAlignment *ta, PanItem *box);
 
+// Cache data
+void pan_cache_data_free(PanCacheData *pc);
+
 #endif
