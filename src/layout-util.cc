@@ -610,61 +610,25 @@ static void layout_menu_select_overunderexposed_cb(GtkToggleAction *action, gpoi
 static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean keep_date)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	GtkTreeModel *store;
-	GList *work;
-	GtkTreeSelection *selection;
-	GtkTreePath *tpath;
-	FileData *fd_n;
-	GtkTreeIter iter;
-	gchar *rotation;
-	gchar *command;
-	gint run_result;
-	GenericDialog *gd;
-	GString *message;
-	int cmdstatus;
 
 	if (!layout_valid(&lw)) return;
-
 	if (!lw || !lw->vf) return;
 
-	if (lw->vf->type == FILEVIEW_ICON)
-		{
-		if (!VFICON(lw->vf)->selection) return;
-		work = VFICON(lw->vf)->selection;
-		}
-	else
-		{
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(lw->vf->listview));
-		work = gtk_tree_selection_get_selected_rows(selection, &store);
-		}
+	const gchar *keep_date_arg = keep_date ? "-t" : "";
 
-	while (work)
-		{
-		if (lw->vf->type == FILEVIEW_ICON)
-			{
-			fd_n = static_cast<FileData *>(work->data);
-			work = work->next;
-			}
-		else
-			{
-			tpath = static_cast<GtkTreePath *>(work->data);
-			gtk_tree_model_get_iter(store, &iter, tpath);
-			gtk_tree_model_get(store, &iter, VIEW_FILE_COLUMN_POINTER, &fd_n, -1);
-			work = work->next;
-			}
-
-		rotation = g_strdup_printf("%d", fd_n->user_orientation);
-		command = g_strconcat(gq_bindir, "/geeqie-rotate -r ", rotation,
-								keep_date ? " -t \"" : " \"", fd_n->path, "\"", NULL);
-		cmdstatus = runcmd(command);
-		run_result = WEXITSTATUS(cmdstatus);
+	vf_selection_foreach(lw->vf, [keep_date_arg](FileData *fd_n)
+	{
+		gchar *command = g_strdup_printf("%s/geeqie-rotate -r %d %s \"%s\"",
+		                                 gq_bindir, fd_n->user_orientation, keep_date_arg, fd_n->path);
+		int cmdstatus = runcmd(command);
+		gint run_result = WEXITSTATUS(cmdstatus);
 		if (!run_result)
 			{
 			fd_n->user_orientation = 0;
 			}
 		else
 			{
-			message = g_string_new(_("Operation failed:\n"));
+			GString *message = g_string_new(_("Operation failed:\n"));
 
 			if (run_result == 1)
 				message = g_string_append(message, _("No file extension\n"));
@@ -681,7 +645,7 @@ static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean 
 
 			message = g_string_append(message, fd_n->name);
 
-			gd = generic_dialog_new(_("Image orientation"), "image_orientation", nullptr, TRUE, nullptr, nullptr);
+			GenericDialog *gd = generic_dialog_new(_("Image orientation"), "image_orientation", nullptr, TRUE, nullptr, nullptr);
 			generic_dialog_add_message(gd, GQ_ICON_DIALOG_ERROR, _("Image orientation"), message->str, TRUE);
 			generic_dialog_add_button(gd, GQ_ICON_OK, "OK", nullptr, TRUE);
 
@@ -690,9 +654,8 @@ static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean 
 			g_string_free(message, TRUE);
 			}
 
-		g_free(rotation);
 		g_free(command);
-		}
+	});
 }
 
 static void layout_menu_write_rotate_keep_date_cb(GtkToggleAction *action, gpointer data)

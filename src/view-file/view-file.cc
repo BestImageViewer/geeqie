@@ -230,6 +230,43 @@ GList *vf_selection_get_list_by_index(ViewFile *vf)
 	return ret;
 }
 
+void vf_selection_foreach(ViewFile *vf, const ViewFileSelectionCallback &func)
+{
+	GtkTreeModel *store;
+	GList *work;
+	FileData *fd_n;
+	GtkTreeIter iter;
+
+	if (!vf) return;
+
+	if (vf->type == FILEVIEW_ICON)
+		{
+		if (!VFICON(vf)->selection) return;
+		work = VFICON(vf)->selection;
+		}
+	else
+		{
+		GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+		work = gtk_tree_selection_get_selected_rows(selection, &store);
+		}
+
+	for (; work; work = work->next)
+		{
+		if (vf->type == FILEVIEW_ICON)
+			{
+			fd_n = static_cast<FileData *>(work->data);
+			}
+		else
+			{
+			auto *tpath = static_cast<GtkTreePath *>(work->data);
+			gtk_tree_model_get_iter(store, &iter, tpath);
+			gtk_tree_model_get(store, &iter, VIEW_FILE_COLUMN_POINTER, &fd_n, -1);
+			}
+
+		func(fd_n);
+		}
+}
+
 void vf_select_all(ViewFile *vf)
 {
 	switch (vf->type)

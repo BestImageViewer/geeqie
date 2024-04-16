@@ -22,6 +22,7 @@
 #define VIEW_FILE_H
 
 #include <ctime>
+#include <functional>
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -165,6 +166,8 @@ GList *vf_get_list(ViewFile *vf);
 guint vf_selection_count(ViewFile *vf, gint64 *bytes);
 GList *vf_selection_get_list(ViewFile *vf);
 GList *vf_selection_get_list_by_index(ViewFile *vf);
+using ViewFileSelectionCallback = std::function<void(FileData *)>;
+void vf_selection_foreach(ViewFile *vf, const ViewFileSelectionCallback &func);
 
 void vf_select_all(ViewFile *vf);
 void vf_select_none(ViewFile *vf);
