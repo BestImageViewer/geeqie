@@ -407,20 +407,9 @@ static void vf_pop_menu_open_archive_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	LayoutWindow *lw_new;
-	FileData *fd = nullptr;
 	gchar *dest_dir;
 
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST:
-		fd = (VFLIST(vf)->click_fd);
-		break;
-	case FILEVIEW_ICON:
-		fd = (VFICON(vf)->click_fd);
-		break;
-	}
-
-	dest_dir = open_archive(fd);
+	dest_dir = open_archive(vf->click_fd);
 	if (dest_dir)
 		{
 		lw_new = layout_new_from_default();
@@ -677,18 +666,13 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	gboolean class_archive = FALSE;
 	GtkAccelGroup *accel_group;
 
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST:
-		vflist_color_set(vf, VFLIST(vf)->click_fd, TRUE);
-		active = (VFLIST(vf)->click_fd != nullptr);
-		class_archive = (VFLIST(vf)->click_fd != nullptr && VFLIST(vf)->click_fd->format_class == FORMAT_CLASS_ARCHIVE);
-		break;
-	case FILEVIEW_ICON:
-		active = (VFICON(vf)->click_fd != nullptr);
-		class_archive = (VFICON(vf)->click_fd != nullptr && VFICON(vf)->click_fd->format_class == FORMAT_CLASS_ARCHIVE);
-		break;
-	}
+	if (vf->type == FILEVIEW_LIST)
+		{
+		vflist_color_set(vf, vf->click_fd, TRUE);
+		}
+
+	active = (vf->click_fd != nullptr);
+	class_archive = (vf->click_fd != nullptr && vf->click_fd->format_class == FORMAT_CLASS_ARCHIVE);
 
 	menu = popup_menu_short_lived();
 

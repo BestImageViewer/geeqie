@@ -227,15 +227,15 @@ static void vflist_dnd_get(GtkWidget *, GdkDragContext *,
 	auto vf = static_cast<ViewFile *>(data);
 	GList *list = nullptr;
 
-	if (!VFLIST(vf)->click_fd) return;
+	if (!vf->click_fd) return;
 
-	if (vflist_row_is_selected(vf, VFLIST(vf)->click_fd))
+	if (vflist_row_is_selected(vf, vf->click_fd))
 		{
 		list = vf_selection_get_list(vf);
 		}
 	else
 		{
-		list = g_list_append(nullptr, file_data_ref(VFLIST(vf)->click_fd));
+		list = g_list_append(nullptr, file_data_ref(vf->click_fd));
 		}
 
 	if (!list) return;
@@ -247,19 +247,19 @@ static void vflist_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointe
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	vflist_color_set(vf, VFLIST(vf)->click_fd, TRUE);
+	vflist_color_set(vf, vf->click_fd, TRUE);
 
 	if (VFLIST(vf)->thumbs_enabled &&
-	    VFLIST(vf)->click_fd && VFLIST(vf)->click_fd->thumb_pixbuf)
+	    vf->click_fd && vf->click_fd->thumb_pixbuf)
 		{
 		guint items;
 
-		if (vflist_row_is_selected(vf, VFLIST(vf)->click_fd))
+		if (vflist_row_is_selected(vf, vf->click_fd))
 			items = vf_selection_count(vf, nullptr);
 		else
 			items = 1;
 
-		dnd_set_drag_icon(widget, context, VFLIST(vf)->click_fd->thumb_pixbuf, items);
+		dnd_set_drag_icon(widget, context, vf->click_fd->thumb_pixbuf, items);
 		}
 }
 
@@ -267,7 +267,7 @@ static void vflist_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
+	vflist_color_set(vf, vf->click_fd, FALSE);
 
 	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
 		{
@@ -351,13 +351,13 @@ GList *vflist_selection_get_one(ViewFile *vf, FileData *fd)
 
 GList *vflist_pop_menu_file_list(ViewFile *vf)
 {
-	if (!VFLIST(vf)->click_fd) return nullptr;
+	if (!vf->click_fd) return nullptr;
 
-	if (vflist_row_is_selected(vf, VFLIST(vf)->click_fd))
+	if (vflist_row_is_selected(vf, vf->click_fd))
 		{
 		return vf_selection_get_list(vf);
 		}
-	return vflist_selection_get_one(vf, VFLIST(vf)->click_fd);
+	return vflist_selection_get_one(vf, vf->click_fd);
 }
 
 
@@ -365,7 +365,7 @@ void vflist_pop_menu_view_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	if (vflist_row_is_selected(vf, VFLIST(vf)->click_fd))
+	if (vflist_row_is_selected(vf, vf->click_fd))
 		{
 		GList *list;
 
@@ -375,7 +375,7 @@ void vflist_pop_menu_view_cb(GtkWidget *, gpointer data)
 		}
 	else
 		{
-		view_window_new(VFLIST(vf)->click_fd);
+		view_window_new(vf->click_fd);
 		}
 }
 
@@ -386,7 +386,7 @@ void vflist_pop_menu_rename_cb(GtkWidget *, gpointer data)
 
 	list = vf_pop_menu_file_list(vf);
 	if (options->file_ops.enable_in_place_rename &&
-	    list && !list->next && VFLIST(vf)->click_fd)
+	    list && !list->next && vf->click_fd)
 		{
 		GtkTreeModel *store;
 		GtkTreeIter iter;
@@ -394,14 +394,14 @@ void vflist_pop_menu_rename_cb(GtkWidget *, gpointer data)
 		filelist_free(list);
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-		if (vflist_find_row(vf, VFLIST(vf)->click_fd, &iter) >= 0)
+		if (vflist_find_row(vf, vf->click_fd, &iter) >= 0)
 			{
 			GtkTreePath *tpath;
 
 			tpath = gtk_tree_model_get_path(store, &iter);
 			tree_edit_by_path(GTK_TREE_VIEW(vf->listview), tpath,
-					  FILE_VIEW_COLUMN_FORMATTED, VFLIST(vf)->click_fd->name,
-					  vflist_row_rename_cb, vf);
+			                  FILE_VIEW_COLUMN_FORMATTED, vf->click_fd->name,
+			                  vflist_row_rename_cb, vf);
 			gtk_tree_path_free(tpath);
 			}
 		return;
@@ -414,7 +414,7 @@ void vflist_pop_menu_thumbs_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
+	vflist_color_set(vf, vf->click_fd, FALSE);
 	if (vf->layout)
 		{
 		layout_thumb_set(vf->layout, !VFLIST(vf)->thumbs_enabled);
@@ -469,7 +469,7 @@ void vflist_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)
 
 	vflist_populate_view(vf, TRUE);
 
-	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
+	vflist_color_set(vf, vf->click_fd, FALSE);
 	vflist_star_rating_set(vf, options->show_star_rating);
 }
 
@@ -477,7 +477,7 @@ void vflist_pop_menu_refresh_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
+	vflist_color_set(vf, vf->click_fd, FALSE);
 	vf_refresh(vf);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(vf->listview));
 }
@@ -485,8 +485,8 @@ void vflist_pop_menu_refresh_cb(GtkWidget *, gpointer data)
 void vflist_popup_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
-	VFLIST(vf)->click_fd = nullptr;
+	vflist_color_set(vf, vf->click_fd, FALSE);
+	vf->click_fd = nullptr;
 	vf->popup = nullptr;
 }
 
@@ -541,12 +541,12 @@ gboolean vflist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &VFLIST(vf)->click_fd, -1);
+		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &vf->click_fd, -1);
 		gtk_tree_path_free(tpath);
 		}
 	else
 		{
-		VFLIST(vf)->click_fd = nullptr;
+		vf->click_fd = nullptr;
 		}
 
 	vf->popup = vf_pop_menu(vf);
@@ -585,7 +585,7 @@ gboolean vflist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 		gtk_tree_path_free(tpath);
 		}
 
-	VFLIST(vf)->click_fd = fd;
+	vf->click_fd = fd;
 
 	if (bevent->button == MOUSE_BUTTON_RIGHT)
 		{
@@ -626,9 +626,9 @@ gboolean vflist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 
 	if (bevent->button == MOUSE_BUTTON_LEFT && bevent->type == GDK_2BUTTON_PRESS)
 		{
-		if (VFLIST(vf)->click_fd->format_class == FORMAT_CLASS_COLLECTION)
+		if (vf->click_fd->format_class == FORMAT_CLASS_COLLECTION)
 			{
-			collection_window_new(VFLIST(vf)->click_fd->path);
+			collection_window_new(vf->click_fd->path);
 			}
 		else
 			{
@@ -653,7 +653,7 @@ gboolean vflist_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer d
 
 	if (bevent->button == MOUSE_BUTTON_MIDDLE)
 		{
-		vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);
+		vflist_color_set(vf, vf->click_fd, FALSE);
 		}
 
 	if (bevent->button != MOUSE_BUTTON_LEFT && bevent->button != MOUSE_BUTTON_MIDDLE)
@@ -675,7 +675,7 @@ gboolean vflist_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer d
 
 	if (bevent->button == MOUSE_BUTTON_MIDDLE)
 		{
-		if (fd && VFLIST(vf)->click_fd == fd)
+		if (fd && vf->click_fd == fd)
 			{
 			GtkTreeSelection *selection;
 
@@ -692,7 +692,7 @@ gboolean vflist_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer d
 		return TRUE;
 		}
 
-	if (fd && VFLIST(vf)->click_fd == fd &&
+	if (fd && vf->click_fd == fd &&
 	    !(bevent->state & GDK_SHIFT_MASK ) &&
 	    !(bevent->state & GDK_CONTROL_MASK ) &&
 	    vflist_row_is_selected(vf, fd))

@@ -94,23 +94,23 @@ GList *vficon_selection_get_one(ViewFile *, FileData *fd)
 
 GList *vficon_pop_menu_file_list(ViewFile *vf)
 {
-	if (!VFICON(vf)->click_fd) return nullptr;
+	if (!vf->click_fd) return nullptr;
 
-	if (VFICON(vf)->click_fd->selected & SELECTION_SELECTED)
+	if (vf->click_fd->selected & SELECTION_SELECTED)
 		{
 		return vf_selection_get_list(vf);
 		}
 
-	return vficon_selection_get_one(vf, VFICON(vf)->click_fd);
+	return vficon_selection_get_one(vf, vf->click_fd);
 }
 
 void vficon_pop_menu_view_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	if (!VFICON(vf)->click_fd) return;
+	if (!vf->click_fd) return;
 
-	if (VFICON(vf)->click_fd->selected & SELECTION_SELECTED)
+	if (vf->click_fd->selected & SELECTION_SELECTED)
 		{
 		GList *list;
 
@@ -120,7 +120,7 @@ void vficon_pop_menu_view_cb(GtkWidget *, gpointer data)
 		}
 	else
 		{
-		view_window_new(VFICON(vf)->click_fd);
+		view_window_new(vf->click_fd);
 		}
 }
 
@@ -165,8 +165,8 @@ void vficon_pop_menu_refresh_cb(GtkWidget *, gpointer data)
 void vficon_popup_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	vficon_selection_remove(vf, VFICON(vf)->click_fd, SELECTION_PRELIGHT, nullptr);
-	VFICON(vf)->click_fd = nullptr;
+	vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
+	vf->click_fd = nullptr;
 	vf->popup = nullptr;
 }
 
@@ -494,15 +494,15 @@ static void vficon_dnd_get(GtkWidget *, GdkDragContext *,
 	auto vf = static_cast<ViewFile *>(data);
 	GList *list = nullptr;
 
-	if (!VFICON(vf)->click_fd) return;
+	if (!vf->click_fd) return;
 
-	if (VFICON(vf)->click_fd->selected & SELECTION_SELECTED)
+	if (vf->click_fd->selected & SELECTION_SELECTED)
 		{
 		list = vf_selection_get_list(vf);
 		}
 	else
 		{
-		list = g_list_append(nullptr, file_data_ref(VFICON(vf)->click_fd));
+		list = g_list_append(nullptr, file_data_ref(vf->click_fd));
 		}
 
 	if (!list) return;
@@ -537,16 +537,16 @@ static void vficon_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointe
 
 	tip_unschedule(vf);
 
-	if (VFICON(vf)->click_fd && VFICON(vf)->click_fd->thumb_pixbuf)
+	if (vf->click_fd && vf->click_fd->thumb_pixbuf)
 		{
 		gint items;
 
-		if (VFICON(vf)->click_fd->selected & SELECTION_SELECTED)
+		if (vf->click_fd->selected & SELECTION_SELECTED)
 			items = g_list_length(VFICON(vf)->selection);
 		else
 			items = 1;
 
-		dnd_set_drag_icon(widget, context, VFICON(vf)->click_fd->thumb_pixbuf, items);
+		dnd_set_drag_icon(widget, context, vf->click_fd->thumb_pixbuf, items);
 		}
 }
 
@@ -554,7 +554,7 @@ static void vficon_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	vficon_selection_remove(vf, VFICON(vf)->click_fd, SELECTION_PRELIGHT, nullptr);
+	vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
 
 	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
 		{
@@ -1232,7 +1232,7 @@ gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 			fd = vficon_find_data(vf, VFICON(vf)->focus_row, VFICON(vf)->focus_column, nullptr);
 			if (fd)
 				{
-				VFICON(vf)->click_fd = fd;
+				vf->click_fd = fd;
 				if (event->state & GDK_CONTROL_MASK)
 					{
 					gint selected;
@@ -1258,9 +1258,9 @@ gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 			break;
 		case GDK_KEY_Menu:
 			fd = vficon_find_data(vf, VFICON(vf)->focus_row, VFICON(vf)->focus_column, nullptr);
-			VFICON(vf)->click_fd = fd;
+			vf->click_fd = fd;
 
-			vficon_selection_add(vf, VFICON(vf)->click_fd, SELECTION_PRELIGHT, nullptr);
+			vficon_selection_add(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
 			tip_unschedule(vf);
 
 			vf->popup = vf_pop_menu(vf);
@@ -1290,18 +1290,18 @@ gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 					}
 				else
 					{
-					vficon_select_region_util(vf, VFICON(vf)->click_fd, old_fd, FALSE);
+					vficon_select_region_util(vf, vf->click_fd, old_fd, FALSE);
 					}
-				vficon_select_region_util(vf, VFICON(vf)->click_fd, new_fd, TRUE);
+				vficon_select_region_util(vf, vf->click_fd, new_fd, TRUE);
 				vficon_send_layout_select(vf, new_fd);
 				}
 			else if (event->state & GDK_CONTROL_MASK)
 				{
-				VFICON(vf)->click_fd = new_fd;
+				vf->click_fd = new_fd;
 				}
 			else
 				{
-				VFICON(vf)->click_fd = new_fd;
+				vf->click_fd = new_fd;
 				vf_select_none(vf);
 				vficon_select(vf, new_fd);
 				vficon_send_layout_select(vf, new_fd);
@@ -1346,8 +1346,8 @@ gboolean vficon_press_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
 
 	if (fd)
 		{
-		VFICON(vf)->click_fd = fd;
-		vficon_selection_add(vf, VFICON(vf)->click_fd, SELECTION_PRELIGHT, &iter);
+		vf->click_fd = fd;
+		vficon_selection_add(vf, vf->click_fd, SELECTION_PRELIGHT, &iter);
 
 		switch (bevent->button)
 			{
@@ -1359,13 +1359,13 @@ gboolean vficon_press_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
 
 				if (bevent->type == GDK_2BUTTON_PRESS && vf->layout)
 					{
-					if (VFICON(vf)->click_fd->format_class == FORMAT_CLASS_COLLECTION)
+					if (vf->click_fd->format_class == FORMAT_CLASS_COLLECTION)
 						{
-						collection_window_new(VFICON(vf)->click_fd->path);
+						collection_window_new(vf->click_fd->path);
 						}
 					else
 						{
-						vficon_selection_remove(vf, VFICON(vf)->click_fd, SELECTION_PRELIGHT, &iter);
+						vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, &iter);
 						layout_image_full_screen_start(vf->layout);
 						}
 					}
@@ -1401,12 +1401,12 @@ gboolean vficon_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer d
 		fd = vficon_find_data_by_coord(vf, static_cast<gint>(bevent->x), static_cast<gint>(bevent->y), &iter);
 		}
 
-	if (VFICON(vf)->click_fd)
+	if (vf->click_fd)
 		{
-		vficon_selection_remove(vf, VFICON(vf)->click_fd, SELECTION_PRELIGHT, nullptr);
+		vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
 		}
 
-	if (!fd || VFICON(vf)->click_fd != fd) return TRUE;
+	if (!fd || vf->click_fd != fd) return TRUE;
 
 	was_selected = !!(fd->selected & SELECTION_SELECTED);
 
@@ -1990,7 +1990,7 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 			GList *to_delete = work;
 			work = work->next;
 			if (fd == VFICON(vf)->prev_selection) VFICON(vf)->prev_selection = nullptr;
-			if (fd == VFICON(vf)->click_fd) VFICON(vf)->click_fd = nullptr;
+			if (fd == vf->click_fd) vf->click_fd = nullptr;
 			file_data_unref(fd);
 			vf->list = g_list_delete_link(vf->list, to_delete);
 			}

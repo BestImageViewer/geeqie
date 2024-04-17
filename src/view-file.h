@@ -56,6 +56,8 @@ struct ViewFile
 	FileData *dir_fd;
 	GList *list;
 
+	FileData *click_fd;
+
 	SortType sort_method;
 	gboolean sort_ascend;
 	gboolean sort_case;
@@ -96,7 +98,6 @@ struct ViewFile
 
 struct ViewFileInfoList
 {
-	FileData *click_fd;
 	FileData *select_fd;
 
 	gboolean thumbs_enabled;
@@ -116,8 +117,6 @@ struct ViewFileInfoIcon
 	GtkWidget *tip_window;
 	guint tip_delay_id; /**< event source id */
 	FileData *tip_fd;
-
-	FileData *click_fd;
 
 	FileData *focus_fd;
 	gint focus_row;
