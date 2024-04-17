@@ -52,6 +52,7 @@ GList *vflist_selection_get_one(ViewFile *vf, FileData *fd);
 GList *vflist_pop_menu_file_list(ViewFile *vf);
 void vflist_pop_menu_view_cb(GtkWidget *widget, gpointer data);
 void vflist_pop_menu_rename_cb(GtkWidget *widget, gpointer data);
+void vflist_pop_menu_show_star_rating_cb(ViewFile *vf);
 void vflist_pop_menu_refresh_cb(GtkWidget *widget, gpointer data);
 void vflist_popup_destroy_cb(GtkWidget *widget, gpointer data);
 void vflist_pop_menu_thumbs_cb(GtkWidget *widget, gpointer data);
@@ -81,7 +82,6 @@ void vflist_read_metadata_progress_count(GList *list, gint *count, gint *done);
 void vflist_set_thumb_fd(ViewFile *vf, FileData *fd);
 FileData *vflist_thumb_next_fd(ViewFile *vf);
 void vflist_thumb_reset_all(ViewFile *vf);
-void vflist_pop_menu_show_star_rating_cb(GtkWidget *widget, gpointer data);
 
 FileData *vflist_star_next_fd(ViewFile *vf);
 void vflist_set_star_fd(ViewFile *vf, FileData *fd);

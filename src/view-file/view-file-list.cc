@@ -461,12 +461,8 @@ void vflist_star_rating_set(ViewFile *vf, gboolean enable)
 	g_list_free(columns);
 }
 
-void vflist_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)
+void vflist_pop_menu_show_star_rating_cb(ViewFile *vf)
 {
-	auto vf = static_cast<ViewFile *>(data);
-
-	options->show_star_rating = !options->show_star_rating;
-
 	vflist_populate_view(vf, TRUE);
 
 	vflist_color_set(vf, VFLIST(vf)->click_fd, FALSE);

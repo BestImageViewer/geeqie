@@ -668,6 +668,19 @@ static void vf_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	filelist_free(selection_list);
 }
 
+static void vf_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+
+	options->show_star_rating = !options->show_star_rating;
+
+	switch (vf->type)
+	{
+	case FILEVIEW_LIST: vflist_pop_menu_show_star_rating_cb(vf); break;
+	case FILEVIEW_ICON: vficon_pop_menu_show_star_rating_cb(vf); break;
+	}
+}
+
 GtkWidget *vf_pop_menu(ViewFile *vf)
 {
 	GtkWidget *menu;
@@ -825,17 +838,8 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 		break;
 	}
 
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST:
-		menu_item_add_check(menu, _("Show star rating"), options->show_star_rating,
-				    G_CALLBACK(vflist_pop_menu_show_star_rating_cb), vf);
-		break;
-	case FILEVIEW_ICON:
-		menu_item_add_check(menu, _("Show star rating"), options->show_star_rating,
-				    G_CALLBACK(vficon_pop_menu_show_star_rating_cb), vf);
-		break;
-	}
+	menu_item_add_check(menu, _("Show star rating"), options->show_star_rating,
+	                    G_CALLBACK(vf_pop_menu_show_star_rating_cb), vf);
 
 	menu_item_add_icon(menu, _("Re_fresh"), GQ_ICON_REFRESH, G_CALLBACK(vf_pop_menu_refresh_cb), vf);
 

@@ -138,21 +138,12 @@ void vficon_pop_menu_show_names_cb(GtkWidget *, gpointer data)
 	vficon_toggle_filenames(vf);
 }
 
-static void vficon_toggle_star_rating(ViewFile *vf)
+void vficon_pop_menu_show_star_rating_cb(ViewFile *vf)
 {
 	GtkAllocation allocation;
 
-	options->show_star_rating = !options->show_star_rating;
-
 	gtk_widget_get_allocation(vf->listview, &allocation);
 	vficon_populate_at_new_size(vf, allocation.width, allocation.height, TRUE);
-}
-
-void vficon_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
-	vficon_toggle_star_rating(vf);
 }
 
 void vficon_pop_menu_refresh_cb(GtkWidget *, gpointer data)
