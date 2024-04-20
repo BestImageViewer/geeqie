@@ -94,41 +94,9 @@ struct ViewFile
 	GList *editmenu_fd_list; /**< file list for edit menu */
 
 	guint read_metadata_in_idle_id;
+
+	using SelectionCallback = std::function<void(FileData *)>;
 };
-
-struct ViewFileInfoList
-{
-	FileData *select_fd;
-
-	gboolean thumbs_enabled;
-
-	guint select_idle_id; /**< event source id */
-};
-
-struct ViewFileInfoIcon
-{
-	/* table stuff */
-	gint columns;
-	gint rows;
-
-	GList *selection;
-	FileData *prev_selection;
-
-	GtkWidget *tip_window;
-	guint tip_delay_id; /**< event source id */
-	FileData *tip_fd;
-
-	FileData *focus_fd;
-	gint focus_row;
-	gint focus_column;
-
-	gboolean show_text;
-};
-
-#define VFLIST(_vf_) ((ViewFileInfoList *)(_vf_->info))
-#define VFICON(_vf_) ((ViewFileInfoIcon *)(_vf_->info))
-
-const gint VIEW_FILE_COLUMN_POINTER = 0; // @todo Use inline constexpr in C++17
 
 void vf_send_update(ViewFile *vf);
 
@@ -165,8 +133,7 @@ GList *vf_get_list(ViewFile *vf);
 guint vf_selection_count(ViewFile *vf, gint64 *bytes);
 GList *vf_selection_get_list(ViewFile *vf);
 GList *vf_selection_get_list_by_index(ViewFile *vf);
-using ViewFileSelectionCallback = std::function<void(FileData *)>;
-void vf_selection_foreach(ViewFile *vf, const ViewFileSelectionCallback &func);
+void vf_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func);
 
 void vf_select_all(ViewFile *vf);
 void vf_select_none(ViewFile *vf);

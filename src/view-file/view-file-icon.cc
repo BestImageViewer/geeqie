@@ -40,6 +40,7 @@
 #include "misc.h"
 #include "options.h"
 #include "ui-fileops.h"
+#include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
@@ -62,7 +63,7 @@ constexpr gint THUMB_BORDER_PADDING = 2;
 constexpr gint VFICON_TIP_DELAY = 500;
 
 enum {
-	FILE_COLUMN_POINTER = VIEW_FILE_COLUMN_POINTER,
+	FILE_COLUMN_POINTER = 0,
 	FILE_COLUMN_COUNT
 };
 
@@ -104,10 +105,8 @@ GList *vficon_pop_menu_file_list(ViewFile *vf)
 	return vficon_selection_get_one(vf, vf->click_fd);
 }
 
-void vficon_pop_menu_view_cb(GtkWidget *, gpointer data)
+void vficon_pop_menu_view_cb(ViewFile *vf)
 {
-	auto vf = static_cast<ViewFile *>(data);
-
 	if (!vf->click_fd) return;
 
 	if (vf->click_fd->selected & SELECTION_SELECTED)
@@ -124,18 +123,22 @@ void vficon_pop_menu_view_cb(GtkWidget *, gpointer data)
 		}
 }
 
-void vficon_pop_menu_rename_cb(GtkWidget *, gpointer data)
+void vficon_pop_menu_rename_cb(ViewFile *vf)
 {
-	auto vf = static_cast<ViewFile *>(data);
-
 	file_util_rename(nullptr, vf_pop_menu_file_list(vf), vf->listview);
 }
 
-void vficon_pop_menu_show_names_cb(GtkWidget *, gpointer data)
+static void vficon_pop_menu_show_names_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	vficon_toggle_filenames(vf);
+}
+
+void vficon_pop_menu_add_items(ViewFile *vf, GtkWidget *menu)
+{
+	menu_item_add_check(menu, _("Show filename _text"), VFICON(vf)->show_text,
+	                    G_CALLBACK(vficon_pop_menu_show_names_cb), vf);
 }
 
 void vficon_pop_menu_show_star_rating_cb(ViewFile *vf)
@@ -146,19 +149,14 @@ void vficon_pop_menu_show_star_rating_cb(ViewFile *vf)
 	vficon_populate_at_new_size(vf, allocation.width, allocation.height, TRUE);
 }
 
-void vficon_pop_menu_refresh_cb(GtkWidget *, gpointer data)
+void vficon_pop_menu_refresh_cb(ViewFile *vf)
 {
-	auto vf = static_cast<ViewFile *>(data);
-
 	vf_refresh(vf);
 }
 
-void vficon_popup_destroy_cb(GtkWidget *, gpointer data)
+void vficon_popup_destroy_cb(ViewFile *vf)
 {
-	auto vf = static_cast<ViewFile *>(data);
 	vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
-	vf->click_fd = nullptr;
-	vf->popup = nullptr;
 }
 
 /*
@@ -883,6 +881,16 @@ GList *vficon_selection_get_list_by_index(ViewFile *vf)
 	return g_list_reverse(list);
 }
 
+void vficon_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func)
+{
+	for (GList *work = VFICON(vf)->selection; work; work = work->next)
+		{
+		auto *fd_n = static_cast<FileData *>(work->data);
+
+		func(fd_n);
+		}
+}
+
 void vficon_select_by_fd(ViewFile *vf, FileData *fd)
 {
 	if (!fd) return;
@@ -1182,9 +1190,8 @@ static gint page_height(ViewFile *vf)
  *-------------------------------------------------------------------
  */
 
-gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
+gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *widget, GdkEventKey *event)
 {
-	auto vf = static_cast<ViewFile *>(data);
 	gint focus_row = 0;
 	gint focus_col = 0;
 	FileData *fd;
@@ -1325,9 +1332,8 @@ static gboolean vficon_motion_cb(GtkWidget *, GdkEventMotion *event, gpointer da
 	return FALSE;
 }
 
-gboolean vficon_press_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
+gboolean vficon_press_cb(ViewFile *vf, GtkWidget *, GdkEventButton *bevent)
 {
-	auto vf = static_cast<ViewFile *>(data);
 	GtkTreeIter iter;
 	FileData *fd;
 
@@ -1373,9 +1379,8 @@ gboolean vficon_press_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
 	return FALSE;
 }
 
-gboolean vficon_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+gboolean vficon_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent)
 {
-	auto vf = static_cast<ViewFile *>(data);
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
 	gboolean was_selected;
@@ -1696,29 +1701,25 @@ void vficon_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case
  *-----------------------------------------------------------------------------
  */
 
-void vficon_thumb_progress_count(GList *list, gint *count, gint *done)
+void vficon_thumb_progress_count(const GList *list, gint &count, gint &done)
 {
-	GList *work = list;
-	while (work)
+	for (const GList *work = list; work; work = work->next)
 		{
 		auto fd = static_cast<FileData *>(work->data);
-		work = work->next;
 
-		if (fd->thumb_pixbuf) (*done)++;
-		(*count)++;
+		if (fd->thumb_pixbuf) done++;
+		count++;
 		}
 }
 
-void vficon_read_metadata_progress_count(GList *list, gint *count, gint *done)
+void vficon_read_metadata_progress_count(const GList *list, gint &count, gint &done)
 {
-	GList *work = list;
-	while (work)
+	for (const GList *work = list; work; work = work->next)
 		{
 		auto fd = static_cast<FileData *>(work->data);
-		work = work->next;
 
-		if (fd->metadata_in_idle_loaded) (*done)++;
-		(*count)++;
+		if (fd->metadata_in_idle_loaded) done++;
+		count++;
 		}
 }
 
@@ -1870,23 +1871,11 @@ FileData *vficon_star_next_fd(ViewFile *vf)
  *-----------------------------------------------------------------------------
  */
 
-gint vficon_index_by_fd(ViewFile *vf, FileData *in_fd)
+gint vficon_index_by_fd(const ViewFile *vf, const FileData *fd)
 {
-	gint p = 0;
-	GList *work;
+	if (!fd) return -1;
 
-	if (!in_fd) return -1;
-
-	work = vf->list;
-	while (work)
-		{
-		auto fd = static_cast<FileData *>(work->data);
-		if (fd == in_fd) return p;
-		work = work->next;
-		p++;
-		}
-
-	return -1;
+	return g_list_index(vf->list, fd);
 }
 
 /*
@@ -2232,10 +2221,8 @@ gboolean vficon_set_fd(ViewFile *vf, FileData *dir_fd)
 	return ret;
 }
 
-void vficon_destroy_cb(GtkWidget *, gpointer data)
+void vficon_destroy_cb(ViewFile *vf)
 {
-	auto vf = static_cast<ViewFile *>(data);
-
 	vf_refresh_idle_cancel(vf);
 
 	file_data_unregister_notify_func(vf_notify_cb, vf);
@@ -2249,7 +2236,7 @@ void vficon_destroy_cb(GtkWidget *, gpointer data)
 	g_list_free(VFICON(vf)->selection);
 }
 
-ViewFile *vficon_new(ViewFile *vf, FileData *)
+ViewFile *vficon_new(ViewFile *vf)
 {
 	GtkListStore *store;
 	GtkTreeSelection *selection;

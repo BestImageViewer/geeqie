@@ -27,18 +27,29 @@
 #include <gtk/gtk.h>
 
 #include "typedefs.h"
+#include "view-file.h"
 
 struct FileData;
-struct ViewFile;
 
-gboolean vflist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
-gboolean vflist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);
-gboolean vflist_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);
+struct ViewFileInfoList
+{
+	FileData *select_fd;
+
+	gboolean thumbs_enabled;
+
+	guint select_idle_id; /**< event source id */
+};
+
+#define VFLIST(_vf_) ((ViewFileInfoList *)((_vf_)->info))
+
+gboolean vflist_press_key_cb(ViewFile *vf, GtkWidget *widget, GdkEventKey *event);
+gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent);
+gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent);
 
 void vflist_dnd_init(ViewFile *vf);
 
-void vflist_destroy_cb(GtkWidget *widget, gpointer data);
-ViewFile *vflist_new(ViewFile *vf, FileData *dir_fd);
+void vflist_destroy_cb(ViewFile *vf);
+ViewFile *vflist_new(ViewFile *vf);
 
 gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd);
 gboolean vflist_refresh(ViewFile *vf);
@@ -50,21 +61,19 @@ void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case
 
 GList *vflist_selection_get_one(ViewFile *vf, FileData *fd);
 GList *vflist_pop_menu_file_list(ViewFile *vf);
-void vflist_pop_menu_view_cb(GtkWidget *widget, gpointer data);
-void vflist_pop_menu_rename_cb(GtkWidget *widget, gpointer data);
+void vflist_pop_menu_view_cb(ViewFile *vf);
+void vflist_pop_menu_rename_cb(ViewFile *vf);
+void vflist_pop_menu_add_items(ViewFile *vf, GtkWidget *menu);
 void vflist_pop_menu_show_star_rating_cb(ViewFile *vf);
-void vflist_pop_menu_refresh_cb(GtkWidget *widget, gpointer data);
-void vflist_popup_destroy_cb(GtkWidget *widget, gpointer data);
-void vflist_pop_menu_thumbs_cb(GtkWidget *widget, gpointer data);
+void vflist_pop_menu_refresh_cb(ViewFile *vf);
+void vflist_popup_destroy_cb(ViewFile *vf);
 
-FileData *vflist_index_get_data(ViewFile *vf, gint row);
-gint vflist_index_by_fd(ViewFile *vf, FileData *fd);
-guint vflist_count(ViewFile *vf, gint64 *bytes);
-GList *vflist_get_list(ViewFile *vf);
+gint vflist_index_by_fd(const ViewFile *vf, const FileData *fd);
 
 guint vflist_selection_count(ViewFile *vf, gint64 *bytes);
 GList *vflist_selection_get_list(ViewFile *vf);
 GList *vflist_selection_get_list_by_index(ViewFile *vf);
+void vflist_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func);
 
 void vflist_select_all(ViewFile *vf);
 void vflist_select_none(ViewFile *vf);
@@ -77,11 +86,10 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 
 void vflist_color_set(ViewFile *vf, FileData *fd, gboolean color_set);
 
-void vflist_thumb_progress_count(GList *list, gint *count, gint *done);
-void vflist_read_metadata_progress_count(GList *list, gint *count, gint *done);
+void vflist_thumb_progress_count(const GList *list, gint &count, gint &done);
+void vflist_read_metadata_progress_count(const GList *list, gint &count, gint &done);
 void vflist_set_thumb_fd(ViewFile *vf, FileData *fd);
 FileData *vflist_thumb_next_fd(ViewFile *vf);
-void vflist_thumb_reset_all(ViewFile *vf);
 
 FileData *vflist_star_next_fd(ViewFile *vf);
 void vflist_set_star_fd(ViewFile *vf, FileData *fd);

@@ -27,44 +27,64 @@
 #include <gtk/gtk.h>
 
 #include "typedefs.h"
+#include "view-file.h"
 
 struct FileData;
-struct ViewFile;
 
-gboolean vficon_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
-gboolean vficon_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);
-gboolean vficon_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);
+struct ViewFileInfoIcon
+{
+	/* table stuff */
+	gint columns;
+	gint rows;
+
+	GList *selection;
+	FileData *prev_selection;
+
+	GtkWidget *tip_window;
+	guint tip_delay_id; /**< event source id */
+	FileData *tip_fd;
+
+	FileData *focus_fd;
+	gint focus_row;
+	gint focus_column;
+
+	gboolean show_text;
+};
+
+#define VFICON(_vf_) ((ViewFileInfoIcon *)((_vf_)->info))
+
+gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *widget, GdkEventKey *event);
+gboolean vficon_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent);
+gboolean vficon_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent);
 
 void vficon_dnd_init(ViewFile *vf);
 
-void vficon_destroy_cb(GtkWidget *widget, gpointer data);
-ViewFile *vficon_new(ViewFile *vf, FileData *dir_fd);
+void vficon_destroy_cb(ViewFile *vf);
+ViewFile *vficon_new(ViewFile *vf);
 
 gboolean vficon_set_fd(ViewFile *vf, FileData *dir_fd);
 gboolean vficon_refresh(ViewFile *vf);
 
-void vficon_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive);
 
 void vficon_marks_set(ViewFile *vf, gboolean enable);
 void vficon_star_rating_set(ViewFile *vf, gboolean enable);
+void vficon_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive);
 
 GList *vficon_selection_get_one(ViewFile *vf, FileData *fd);
 GList *vficon_pop_menu_file_list(ViewFile *vf);
-void vficon_pop_menu_view_cb(GtkWidget *widget, gpointer data);
-void vficon_pop_menu_rename_cb(GtkWidget *widget, gpointer data);
+void vficon_pop_menu_view_cb(ViewFile *vf);
+void vficon_pop_menu_rename_cb(ViewFile *vf);
+void vficon_pop_menu_add_items(ViewFile *vf, GtkWidget *menu);
 void vficon_pop_menu_show_star_rating_cb(ViewFile *vf);
-void vficon_pop_menu_refresh_cb(GtkWidget *widget, gpointer data);
-void vficon_popup_destroy_cb(GtkWidget *widget, gpointer data);
-void vficon_pop_menu_show_names_cb(GtkWidget *widget, gpointer data);
+void vficon_pop_menu_refresh_cb(ViewFile *vf);
+void vficon_popup_destroy_cb(ViewFile *vf);
 
-FileData *vficon_index_get_data(ViewFile *vf, gint row);
-gint vficon_index_by_fd(ViewFile *vf, FileData *in_fd);
-guint vficon_count(ViewFile *vf, gint64 *bytes);
-GList *vficon_get_list(ViewFile *vf);
+gint vficon_index_by_fd(const ViewFile *vf, const FileData *fd);
 
 guint vficon_selection_count(ViewFile *vf, gint64 *bytes);
 GList *vficon_selection_get_list(ViewFile *vf);
 GList *vficon_selection_get_list_by_index(ViewFile *vf);
+void vficon_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func);
 
 void vficon_select_all(ViewFile *vf);
 void vficon_select_none(ViewFile *vf);
@@ -76,11 +96,10 @@ void vficon_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 void vficon_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode);
 
 
-void vficon_thumb_progress_count(GList *list, gint *count, gint *done);
-void vficon_read_metadata_progress_count(GList *list, gint *count, gint *done);
+void vficon_thumb_progress_count(const GList *list, gint &count, gint &done);
+void vficon_read_metadata_progress_count(const GList *list, gint &count, gint &done);
 void vficon_set_thumb_fd(ViewFile *vf, FileData *fd);
 FileData *vficon_thumb_next_fd(ViewFile *vf);
-void vficon_thumb_reset_all(ViewFile *vf);
 
 FileData *vficon_star_next_fd(ViewFile *vf);
 void vficon_set_star_fd(ViewFile *vf, FileData *fd);
