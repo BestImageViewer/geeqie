@@ -229,7 +229,7 @@ void vflist_dnd_begin(ViewFile *vf, GtkWidget *widget, GdkDragContext *context)
 		guint items;
 
 		if (vflist_row_is_selected(vf, vf->click_fd))
-			items = vf_selection_count(vf, nullptr);
+			items = vflist_selection_count(vf, nullptr);
 		else
 			items = 1;
 
@@ -243,7 +243,7 @@ void vflist_dnd_end(ViewFile *vf, GdkDragContext *context)
 
 	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
 		{
-		vf_refresh(vf);
+		vflist_refresh(vf);
 		}
 }
 
@@ -379,7 +379,7 @@ void vflist_pop_menu_show_star_rating_cb(ViewFile *vf)
 void vflist_pop_menu_refresh_cb(ViewFile *vf)
 {
 	vflist_color_set(vf, vf->click_fd, FALSE);
-	vf_refresh(vf);
+	vflist_refresh(vf);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(vf->listview));
 }
 
@@ -1999,7 +1999,7 @@ gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd)
 	filelist_free(vf->list);
 	vf->list = nullptr;
 
-	ret = vf_refresh(vf);
+	ret = vflist_refresh(vf);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(vf->listview));
 	return ret;
 }
@@ -2104,7 +2104,7 @@ void vflist_thumb_set(ViewFile *vf, gboolean enable)
 
 	VFLIST(vf)->thumbs_enabled = enable;
 
-	/* vflist_populate_view is better than vf_refresh:
+	/* vflist_populate_view is better than vflist_refresh:
 	   - no need to re-read the directory
 	   - force update because the formatted string has changed
 	*/

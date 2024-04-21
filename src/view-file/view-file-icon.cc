@@ -118,7 +118,7 @@ void vficon_pop_menu_show_star_rating_cb(ViewFile *vf)
 
 void vficon_pop_menu_refresh_cb(ViewFile *vf)
 {
-	vf_refresh(vf);
+	vficon_refresh(vf);
 }
 
 void vficon_popup_destroy_cb(ViewFile *vf)
@@ -466,7 +466,7 @@ void vficon_dnd_end(ViewFile *vf, GdkDragContext *context)
 
 	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
 		{
-		vf_refresh(vf);
+		vficon_refresh(vf);
 		}
 
 	tip_unschedule(vf);
@@ -803,7 +803,7 @@ void vficon_select_by_fd(ViewFile *vf, FileData *fd)
 
 	if (!(fd->selected & SELECTION_SELECTED))
 		{
-		vf_select_none(vf);
+		vficon_select_none(vf);
 		vficon_select(vf, fd);
 		}
 
@@ -875,7 +875,7 @@ void vficon_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
-	slist = vf_selection_get_list(vf);
+	slist = vficon_selection_get_list(vf);
 	work = slist;
 	while (work)
 		{
@@ -1153,7 +1153,7 @@ gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *widget, GdkEventKey *event
 					}
 				else
 					{
-					vf_select_none(vf);
+					vficon_select_none(vf);
 					vficon_select(vf, fd);
 					vficon_send_layout_select(vf, fd);
 					}
@@ -1205,7 +1205,7 @@ gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *widget, GdkEventKey *event
 			else
 				{
 				vf->click_fd = new_fd;
-				vf_select_none(vf);
+				vficon_select_none(vf);
 				vficon_select(vf, new_fd);
 				vficon_send_layout_select(vf, new_fd);
 				}
@@ -1333,7 +1333,7 @@ gboolean vficon_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *beve
 				}
 			else
 				{
-				vf_select_none(vf);
+				vficon_select_none(vf);
 
 				if ((bevent->state & GDK_SHIFT_MASK) && VFICON(vf)->prev_selection)
 					{
@@ -1597,7 +1597,7 @@ void vficon_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case
 
 	if (!vf->list) return;
 
-	vf_refresh(vf);
+	vficon_refresh(vf);
 }
 
 /*
