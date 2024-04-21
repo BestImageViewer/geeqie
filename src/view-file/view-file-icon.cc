@@ -32,7 +32,6 @@
 #include "debug.h"
 #include "dnd.h"
 #include "filedata.h"
-#include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"
 #include "main-defines.h"
@@ -89,36 +88,6 @@ static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint h, gboolean f
 GList *vficon_selection_get_one(ViewFile *, FileData *fd)
 {
 	return g_list_prepend(filelist_copy(fd->sidecar_files), file_data_ref(fd));
-}
-
-GList *vficon_pop_menu_file_list(ViewFile *vf)
-{
-	if (!vf->click_fd) return nullptr;
-
-	if (vf->click_fd->selected & SELECTION_SELECTED)
-		{
-		return vf_selection_get_list(vf);
-		}
-
-	return vficon_selection_get_one(vf, vf->click_fd);
-}
-
-void vficon_pop_menu_view_cb(ViewFile *vf)
-{
-	if (!vf->click_fd) return;
-
-	if (vf->click_fd->selected & SELECTION_SELECTED)
-		{
-		GList *list;
-
-		list = vf_selection_get_list(vf);
-		view_window_new_from_list(list);
-		filelist_free(list);
-		}
-	else
-		{
-		view_window_new(vf->click_fd);
-		}
 }
 
 void vficon_pop_menu_rename_cb(ViewFile *vf)

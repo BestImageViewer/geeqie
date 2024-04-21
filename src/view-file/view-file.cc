@@ -30,6 +30,7 @@
 #include "dupe.h"
 #include "filedata.h"
 #include "history-list.h"
+#include "img-view.h"
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"
@@ -430,16 +431,14 @@ static void vf_dnd_init(ViewFile *vf)
 
 GList *vf_pop_menu_file_list(ViewFile *vf)
 {
-	GList *ret;
+	if (!vf->click_fd) return nullptr;
 
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST: ret = vflist_pop_menu_file_list(vf); break;
-	case FILEVIEW_ICON: ret = vficon_pop_menu_file_list(vf); break;
-	default: ret = nullptr;
-	}
+	if (vf_is_selected(vf, vf->click_fd))
+		{
+		return vf_selection_get_list(vf);
+		}
 
-	return ret;
+	return vf_selection_get_one(vf, vf->click_fd);
 }
 
 GList *vf_selection_get_one(ViewFile *vf, FileData *fd)
@@ -472,11 +471,20 @@ static void vf_pop_menu_view_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST: vflist_pop_menu_view_cb(vf); break;
-	case FILEVIEW_ICON: vficon_pop_menu_view_cb(vf); break;
-	}
+	if (!vf->click_fd) return;
+
+	if (vf_is_selected(vf, vf->click_fd))
+		{
+		GList *list;
+
+		list = vf_selection_get_list(vf);
+		view_window_new_from_list(list);
+		filelist_free(list);
+		}
+	else
+		{
+		view_window_new(vf->click_fd);
+		}
 }
 
 static void vf_pop_menu_open_archive_cb(GtkWidget *, gpointer data)

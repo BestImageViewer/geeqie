@@ -31,7 +31,6 @@
 #include "debug.h"
 #include "dnd.h"
 #include "filedata.h"
-#include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"
 #include "layout.h"
@@ -280,34 +279,6 @@ GList *vflist_selection_get_one(ViewFile *vf, FileData *fd)
 		}
 
 	return g_list_prepend(list, file_data_ref(fd));
-}
-
-GList *vflist_pop_menu_file_list(ViewFile *vf)
-{
-	if (!vf->click_fd) return nullptr;
-
-	if (vflist_row_is_selected(vf, vf->click_fd))
-		{
-		return vf_selection_get_list(vf);
-		}
-	return vflist_selection_get_one(vf, vf->click_fd);
-}
-
-
-void vflist_pop_menu_view_cb(ViewFile *vf)
-{
-	if (vflist_row_is_selected(vf, vf->click_fd))
-		{
-		GList *list;
-
-		list = vf_selection_get_list(vf);
-		view_window_new_from_list(list);
-		filelist_free(list);
-		}
-	else
-		{
-		view_window_new(vf->click_fd);
-		}
 }
 
 void vflist_pop_menu_rename_cb(ViewFile *vf)

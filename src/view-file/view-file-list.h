@@ -63,8 +63,6 @@ void vflist_star_rating_set(ViewFile *vf, gboolean enable);
 void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive);
 
 GList *vflist_selection_get_one(ViewFile *vf, FileData *fd);
-GList *vflist_pop_menu_file_list(ViewFile *vf);
-void vflist_pop_menu_view_cb(ViewFile *vf);
 void vflist_pop_menu_rename_cb(ViewFile *vf);
 void vflist_pop_menu_add_items(ViewFile *vf, GtkWidget *menu);
 void vflist_pop_menu_show_star_rating_cb(ViewFile *vf);
