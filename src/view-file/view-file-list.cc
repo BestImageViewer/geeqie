@@ -43,7 +43,6 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
-#include "uri-utils.h"
 #include "utilops.h"
 #include "view-file.h"
 
@@ -132,7 +131,7 @@ static gint vflist_find_row(const ViewFile *vf, const FileData *fd, GtkTreeIter 
 	return -1;
 }
 
-static FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *)
+FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *)
 {
 	GtkTreePath *tpath;
 	GtkTreeViewColumn *column;
@@ -221,33 +220,8 @@ static void vflist_move_cursor(ViewFile *vf, GtkTreeIter *iter)
  *-----------------------------------------------------------------------------
  */
 
-static void vflist_dnd_get(GtkWidget *, GdkDragContext *,
-			   GtkSelectionData *selection_data, guint,
-			   guint, gpointer data)
+void vflist_dnd_begin(ViewFile *vf, GtkWidget *widget, GdkDragContext *context)
 {
-	auto vf = static_cast<ViewFile *>(data);
-	GList *list = nullptr;
-
-	if (!vf->click_fd) return;
-
-	if (vflist_row_is_selected(vf, vf->click_fd))
-		{
-		list = vf_selection_get_list(vf);
-		}
-	else
-		{
-		list = g_list_append(nullptr, file_data_ref(vf->click_fd));
-		}
-
-	if (!list) return;
-	uri_selection_data_set_uris_from_filelist(selection_data, list);
-	filelist_free(list);
-}
-
-static void vflist_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
 	vflist_color_set(vf, vf->click_fd, TRUE);
 
 	if (VFLIST(vf)->thumbs_enabled &&
@@ -264,56 +238,14 @@ static void vflist_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointe
 		}
 }
 
-static void vflist_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
+void vflist_dnd_end(ViewFile *vf, GdkDragContext *context)
 {
-	auto vf = static_cast<ViewFile *>(data);
-
 	vflist_color_set(vf, vf->click_fd, FALSE);
 
 	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
 		{
 		vf_refresh(vf);
 		}
-}
-
-static void vflist_drag_data_received(GtkWidget *, GdkDragContext *,
-				      int x, int y, GtkSelectionData *selection,
-				      guint info, guint, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
-	if (info == TARGET_TEXT_PLAIN) {
-		FileData *fd = vflist_find_data_by_coord(vf, x, y, nullptr);
-
-		if (fd) {
-			/* Add keywords to file */
-			auto str = reinterpret_cast<gchar *>(gtk_selection_data_get_text(selection));
-			GList *kw_list = string_to_keywords_list(str);
-
-			metadata_append_list(fd, KEYWORD_KEY, kw_list);
-			g_list_free_full(kw_list, g_free);
-			g_free(str);
-		}
-	}
-}
-
-void vflist_dnd_init(ViewFile *vf)
-{
-	gtk_drag_source_set(vf->listview, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-			    dnd_file_drag_types, dnd_file_drag_types_count,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gtk_drag_dest_set(vf->listview, GTK_DEST_DEFAULT_ALL,
-			    dnd_file_drag_types, dnd_file_drag_types_count,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-
-	g_signal_connect(G_OBJECT(vf->listview), "drag_data_get",
-			 G_CALLBACK(vflist_dnd_get), vf);
-	g_signal_connect(G_OBJECT(vf->listview), "drag_begin",
-			 G_CALLBACK(vflist_dnd_begin), vf);
-	g_signal_connect(G_OBJECT(vf->listview), "drag_end",
-			 G_CALLBACK(vflist_dnd_end), vf);
-	g_signal_connect(G_OBJECT(vf->listview), "drag_data_received",
-			 G_CALLBACK(vflist_drag_data_received), vf);
 }
 
 /*
@@ -1413,6 +1345,11 @@ gboolean vflist_index_is_selected_unused(ViewFile *vf, gint row)
 	return vflist_row_is_selected(vf, fd);
 }
 #pragma GCC diagnostic pop
+
+gboolean vflist_is_selected(ViewFile *vf, FileData *fd)
+{
+	return vflist_row_is_selected(vf, fd);
+}
 
 guint vflist_selection_count(ViewFile *vf, gint64 *bytes)
 {

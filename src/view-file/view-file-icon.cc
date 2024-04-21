@@ -36,14 +36,12 @@
 #include "intl.h"
 #include "layout-image.h"
 #include "main-defines.h"
-#include "metadata.h"
 #include "misc.h"
 #include "options.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
-#include "uri-utils.h"
 #include "utilops.h"
 #include "view-file.h"
 
@@ -278,7 +276,7 @@ static FileData *vficon_find_data(ViewFile *vf, gint row, gint col, GtkTreeIter 
 	return nullptr;
 }
 
-static FileData *vficon_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
+FileData *vficon_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
 {
 	GtkTreePath *tpath;
 	GtkTreeViewColumn *column;
@@ -476,54 +474,8 @@ static void tip_update(ViewFile *vf, FileData *fd)
  *-------------------------------------------------------------------
  */
 
-static void vficon_dnd_get(GtkWidget *, GdkDragContext *,
-			   GtkSelectionData *selection_data, guint,
-			   guint, gpointer data)
+void vficon_dnd_begin(ViewFile *vf, GtkWidget *widget, GdkDragContext *context)
 {
-	auto vf = static_cast<ViewFile *>(data);
-	GList *list = nullptr;
-
-	if (!vf->click_fd) return;
-
-	if (vf->click_fd->selected & SELECTION_SELECTED)
-		{
-		list = vf_selection_get_list(vf);
-		}
-	else
-		{
-		list = g_list_append(nullptr, file_data_ref(vf->click_fd));
-		}
-
-	if (!list) return;
-	uri_selection_data_set_uris_from_filelist(selection_data, list);
-	filelist_free(list);
-}
-
-static void vficon_drag_data_received(GtkWidget *, GdkDragContext *,
-				      int x, int y, GtkSelectionData *selection,
-				      guint info, guint, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
-	if (info == TARGET_TEXT_PLAIN) {
-		FileData *fd = vficon_find_data_by_coord(vf, x, y, nullptr);
-
-		if (fd) {
-			/* Add keywords to file */
-			auto str = reinterpret_cast<gchar *>(gtk_selection_data_get_text(selection));
-			GList *kw_list = string_to_keywords_list(str);
-
-			metadata_append_list(fd, KEYWORD_KEY, kw_list);
-			g_list_free_full(kw_list, g_free);
-			g_free(str);
-		}
-	}
-}
-
-static void vficon_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
 	tip_unschedule(vf);
 
 	if (vf->click_fd && vf->click_fd->thumb_pixbuf)
@@ -539,10 +491,8 @@ static void vficon_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointe
 		}
 }
 
-static void vficon_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
+void vficon_dnd_end(ViewFile *vf, GdkDragContext *context)
 {
-	auto vf = static_cast<ViewFile *>(data);
-
 	vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
 
 	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
@@ -551,25 +501,6 @@ static void vficon_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
 		}
 
 	tip_unschedule(vf);
-}
-
-void vficon_dnd_init(ViewFile *vf)
-{
-	gtk_drag_source_set(vf->listview, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-			    dnd_file_drag_types, dnd_file_drag_types_count,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gtk_drag_dest_set(vf->listview, GTK_DEST_DEFAULT_ALL,
-			    dnd_file_drag_types, dnd_file_drag_types_count,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-
-	g_signal_connect(G_OBJECT(vf->listview), "drag_data_get",
-			 G_CALLBACK(vficon_dnd_get), vf);
-	g_signal_connect(G_OBJECT(vf->listview), "drag_begin",
-			 G_CALLBACK(vficon_dnd_begin), vf);
-	g_signal_connect(G_OBJECT(vf->listview), "drag_end",
-			 G_CALLBACK(vficon_dnd_end), vf);
-	g_signal_connect(G_OBJECT(vf->listview), "drag_data_received",
-			 G_CALLBACK(vficon_drag_data_received), vf);
 }
 
 /*
@@ -823,9 +754,14 @@ gboolean vficon_index_is_selected_unused(ViewFile *vf, gint row)
 
 	if (!fd) return FALSE;
 
-	return (fd->selected & SELECTION_SELECTED);
+	return vficon_is_selected(vf, fd);
 }
 #pragma GCC diagnostic pop
+
+gboolean vficon_is_selected(ViewFile *, FileData *fd)
+{
+	return (fd->selected & SELECTION_SELECTED);
+}
 
 guint vficon_selection_count(ViewFile *vf, gint64 *bytes)
 {

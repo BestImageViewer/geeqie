@@ -26,6 +26,7 @@
 #include "archives.h"
 #include "compat.h"
 #include "debug.h"
+#include "dnd.h"
 #include "dupe.h"
 #include "filedata.h"
 #include "history-list.h"
@@ -34,6 +35,7 @@
 #include "main-defines.h"
 #include "main.h"
 #include "menu.h"
+#include "metadata.h"
 #include "misc.h"
 #include "options.h"
 #include "thumb.h"
@@ -41,6 +43,7 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-utildlg.h"
+#include "uri-utils.h"
 #include "utilops.h"
 #include "view-file/view-file-icon.h"
 #include "view-file/view-file-list.h"
@@ -310,14 +313,113 @@ void vf_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
  *-----------------------------------------------------------------------------
  */
 
-
-static void vf_dnd_init(ViewFile *vf)
+static gboolean vf_is_selected(ViewFile *vf, FileData *fd)
 {
 	switch (vf->type)
 	{
-	case FILEVIEW_LIST: vflist_dnd_init(vf); break;
-	case FILEVIEW_ICON: vficon_dnd_init(vf); break;
+	case FILEVIEW_LIST: return vflist_is_selected(vf, fd);
+	case FILEVIEW_ICON: return vficon_is_selected(vf, fd);
 	}
+
+	return FALSE;
+}
+
+static void vf_dnd_get(GtkWidget *, GdkDragContext *,
+                       GtkSelectionData *selection_data, guint,
+                       guint, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+
+	if (!vf->click_fd) return;
+
+	GList *list = nullptr;
+
+	if (vf_is_selected(vf, vf->click_fd))
+		{
+		list = vf_selection_get_list(vf);
+		}
+	else
+		{
+		list = g_list_append(nullptr, file_data_ref(vf->click_fd));
+		}
+
+	if (!list) return;
+
+	uri_selection_data_set_uris_from_filelist(selection_data, list);
+	filelist_free(list);
+}
+
+static void vf_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+
+	switch (vf->type)
+	{
+	case FILEVIEW_LIST: vflist_dnd_begin(vf, widget, context); break;
+	case FILEVIEW_ICON: vficon_dnd_begin(vf, widget, context); break;
+	}
+}
+
+static void vf_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+
+	switch (vf->type)
+	{
+	case FILEVIEW_LIST: vflist_dnd_end(vf, context); break;
+	case FILEVIEW_ICON: vficon_dnd_end(vf, context); break;
+	}
+}
+
+static FileData *vf_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
+{
+	switch (vf->type)
+	{
+	case FILEVIEW_LIST: return vflist_find_data_by_coord(vf, x, y, iter);
+	case FILEVIEW_ICON: return vficon_find_data_by_coord(vf, x, y, iter);
+	}
+
+	return nullptr;
+}
+
+static void vf_drag_data_received(GtkWidget *, GdkDragContext *,
+                                  int x, int y, GtkSelectionData *selection,
+                                  guint info, guint, gpointer data)
+{
+	if (info != TARGET_TEXT_PLAIN) return;
+
+	auto *vf = static_cast<ViewFile *>(data);
+
+	FileData *fd = vf_find_data_by_coord(vf, x, y, nullptr);
+	if (!fd) return;
+
+	/* Add keywords to file */
+	auto str = reinterpret_cast<gchar *>(gtk_selection_data_get_text(selection));
+	GList *kw_list = string_to_keywords_list(str);
+
+	metadata_append_list(fd, KEYWORD_KEY, kw_list);
+
+	g_list_free_full(kw_list, g_free);
+	g_free(str);
+}
+
+static void vf_dnd_init(ViewFile *vf)
+{
+	gtk_drag_source_set(vf->listview, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
+	                    dnd_file_drag_types, dnd_file_drag_types_count,
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gtk_drag_dest_set(vf->listview, GTK_DEST_DEFAULT_ALL,
+	                  dnd_file_drag_types, dnd_file_drag_types_count,
+	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+
+	g_signal_connect(G_OBJECT(vf->listview), "drag_data_get",
+	                 G_CALLBACK(vf_dnd_get), vf);
+	g_signal_connect(G_OBJECT(vf->listview), "drag_begin",
+	                 G_CALLBACK(vf_dnd_begin), vf);
+	g_signal_connect(G_OBJECT(vf->listview), "drag_end",
+	                 G_CALLBACK(vf_dnd_end), vf);
+	g_signal_connect(G_OBJECT(vf->listview), "drag_data_received",
+	                 G_CALLBACK(vf_drag_data_received), vf);
 }
 
 /*

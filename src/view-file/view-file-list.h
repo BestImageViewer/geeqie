@@ -46,7 +46,10 @@ gboolean vflist_press_key_cb(ViewFile *vf, GtkWidget *widget, GdkEventKey *event
 gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent);
 gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent);
 
-void vflist_dnd_init(ViewFile *vf);
+FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter);
+
+void vflist_dnd_begin(ViewFile *vf, GtkWidget *widget, GdkDragContext *context);
+void vflist_dnd_end(ViewFile *vf, GdkDragContext *context);
 
 void vflist_destroy_cb(ViewFile *vf);
 ViewFile *vflist_new(ViewFile *vf);
@@ -70,6 +73,7 @@ void vflist_popup_destroy_cb(ViewFile *vf);
 
 gint vflist_index_by_fd(const ViewFile *vf, const FileData *fd);
 
+gboolean vflist_is_selected(ViewFile *vf, FileData *fd);
 guint vflist_selection_count(ViewFile *vf, gint64 *bytes);
 GList *vflist_selection_get_list(ViewFile *vf);
 GList *vflist_selection_get_list_by_index(ViewFile *vf);
