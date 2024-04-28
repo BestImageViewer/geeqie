@@ -481,18 +481,10 @@ static void rt_hidpi_aware_draw(
 	cairo_t *cr,
 	GdkPixbuf *pixbuf,
 	double x,
-	double y,
-        gboolean should_scale = TRUE)
+	double y)
 {
 	cairo_surface_t *surface;
-        if (should_scale)
-		{
-		surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, rt->hidpi_scale, nullptr);
-		}
-	else
-		{
-		surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, 1, nullptr);
-		}
+	surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, rt->hidpi_scale, nullptr);
 	cairo_set_source_surface(cr, surface, x, y);
 	cairo_fill(cr);
 	cairo_surface_destroy(surface);
