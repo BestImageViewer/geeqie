@@ -210,6 +210,9 @@ void file_data_set_mark(FileData *fd, gint n, gboolean value);
 gboolean file_data_filter_marks(FileData *fd, guint filter);
 GList *file_data_filter_marks_list(GList *list, guint filter);
 
+gboolean file_data_mark_to_selection(FileData *fd, gint mark, MarkToSelectionMode mode, gboolean selected);
+void file_data_selection_to_mark(FileData *fd, gint mark, SelectionToMarkMode mode);
+
 gboolean file_data_filter_file_filter(FileData *fd, GRegex *filter);
 GList *file_data_filter_file_filter_list(GList *list, GRegex *filter);
 

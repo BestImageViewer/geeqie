@@ -1596,7 +1596,6 @@ void vflist_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 	GtkTreeIter iter;
 	GtkTreeSelection *selection;
 	gboolean valid;
-	gint n = mark - 1;
 
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
@@ -1607,24 +1606,10 @@ void vflist_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 	while (valid)
 		{
 		FileData *fd;
-		gboolean mark_val;
 		gboolean selected;
 		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, FILE_COLUMN_POINTER, &fd, -1);
 
-		mark_val = file_data_get_mark(fd, n);
-		selected = gtk_tree_selection_iter_is_selected(selection, &iter);
-
-		switch (mode)
-			{
-			case MTS_MODE_SET: selected = mark_val;
-				break;
-			case MTS_MODE_OR: selected = mark_val || selected;
-				break;
-			case MTS_MODE_AND: selected = mark_val && selected;
-				break;
-			case MTS_MODE_MINUS: selected = !mark_val && selected;
-				break;
-			}
+		selected = file_data_mark_to_selection(fd, mark, mode, gtk_tree_selection_iter_is_selected(selection, &iter));
 
 		if (selected)
 			gtk_tree_selection_select_iter(selection, &iter);
@@ -1640,15 +1625,12 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 	GtkTreeModel *store;
 	GtkTreeSelection *selection;
 	GList *slist;
-	GList *work;
-	gint n = mark - 1;
 
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
-	while (work)
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
 		FileData *fd;
@@ -1661,15 +1643,7 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 		   complete re-read of the directory - try to do only minimal update instead */
 		file_data_unregister_notify_func(vf_notify_cb, vf); /* we don't need the notification */
 
-		switch (mode)
-			{
-			case STM_MODE_SET: file_data_set_mark(fd, n, 1);
-				break;
-			case STM_MODE_RESET: file_data_set_mark(fd, n, 0);
-				break;
-			case STM_MODE_TOGGLE: file_data_set_mark(fd, n, !file_data_get_mark(fd, n));
-				break;
-			}
+		file_data_selection_to_mark(fd, mark, mode);
 
 		if (!file_data_filter_marks(fd, vf_marks_get_filter(vf))) /* file no longer matches the filter -> remove it */
 			{
@@ -1683,10 +1657,7 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 			vflist_setup_iter_recursive(vf, GTK_TREE_STORE(store), &iter, fd->sidecar_files, nullptr, FALSE);
 			}
 
-
 		file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
-
-		work = work->next;
 		}
 	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 }

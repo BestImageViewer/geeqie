@@ -832,65 +832,33 @@ void vficon_select_list(ViewFile *vf, GList *list)
 
 void vficon_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 {
-	GList *work;
-	gint n = mark - 1;
-
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
-	work = vf->list;
-	while (work)
+	for (GList *work = vf->list; work; work = work->next)
 		{
 		auto fd = static_cast<FileData *>(work->data);
-		gboolean mark_val;
 		gboolean selected;
 
 		g_assert(fd->magick == FD_MAGICK);
 
-		mark_val = file_data_get_mark(fd, n);
-		selected = fd->selected & SELECTION_SELECTED;
-
-		switch (mode)
-			{
-			case MTS_MODE_SET: selected = mark_val;
-				break;
-			case MTS_MODE_OR: selected = mark_val || selected;
-				break;
-			case MTS_MODE_AND: selected = mark_val && selected;
-				break;
-			case MTS_MODE_MINUS: selected = !mark_val && selected;
-				break;
-			}
+		selected = file_data_mark_to_selection(fd, mark, mode, fd->selected & SELECTION_SELECTED);
 
 		vficon_select_util(vf, fd, selected);
-
-		work = work->next;
 		}
 }
 
 void vficon_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 {
 	GList *slist;
-	GList *work;
-	gint n = mark -1;
 
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
 	slist = vficon_selection_get_list(vf);
-	work = slist;
-	while (work)
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 
-		switch (mode)
-			{
-			case STM_MODE_SET: file_data_set_mark(fd, n, 1);
-				break;
-			case STM_MODE_RESET: file_data_set_mark(fd, n, 0);
-				break;
-			case STM_MODE_TOGGLE: file_data_set_mark(fd, n, !file_data_get_mark(fd, n));
-				break;
-			}
-		work = work->next;
+		file_data_selection_to_mark(fd, mark, mode);
 		}
 	filelist_free(slist);
 }

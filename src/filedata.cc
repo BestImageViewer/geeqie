@@ -1921,6 +1921,34 @@ GList *file_data_filter_marks_list(GList *list, guint filter)
 	return list;
 }
 
+gboolean file_data_mark_to_selection(FileData *fd, gint mark, MarkToSelectionMode mode, gboolean selected)
+{
+	gint n = mark - 1;
+	gboolean mark_val = file_data_get_mark(fd, n);
+
+	switch (mode)
+		{
+		case MTS_MODE_MINUS: return !mark_val && selected;
+		case MTS_MODE_SET: return mark_val;
+		case MTS_MODE_OR: return mark_val || selected;
+		case MTS_MODE_AND: return mark_val && selected;
+		}
+
+	return selected; // arbitrary value, we shouldn't get here
+}
+
+void file_data_selection_to_mark(FileData *fd, gint mark, SelectionToMarkMode mode)
+{
+	gint n = mark - 1;
+
+	switch (mode)
+		{
+		case STM_MODE_RESET: file_data_set_mark(fd, n, FALSE); break;
+		case STM_MODE_SET: file_data_set_mark(fd, n, TRUE); break;
+		case STM_MODE_TOGGLE: file_data_set_mark(fd, n, !file_data_get_mark(fd, n)); break;
+		}
+}
+
 gboolean file_data_filter_file_filter(FileData *fd, GRegex *filter)
 {
 	return g_regex_match(filter, fd->name, static_cast<GRegexMatchFlags>(0), nullptr);
