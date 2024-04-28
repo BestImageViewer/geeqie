@@ -1143,126 +1143,72 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 				      gboolean, gboolean fast)
 {
 	PixbufRenderer *pr = rt->pr;
-	GList *list;
-	GList *work;
 	gboolean draw = FALSE;
 
-	if (FALSE && (pr->zoom == 1.0 || pr->scale == 1.0))
-		{
-		list = pr_source_tile_compute_region(pr, it->x + x, it->y + y, w, h, TRUE);
-		work = list;
-		while (work)
-			{
-			SourceTile *st;
-			gint rx;
-			gint ry;
-			gint rw;
-			gint rh;
+	if (pr->image_width == 0 || pr->image_height == 0) return FALSE;
 
-			st = static_cast<SourceTile *>(work->data);
-			work = work->next;
+	const gdouble scale_x = static_cast<gdouble>(pr->width) / pr->image_width;
+	const gdouble scale_y = static_cast<gdouble>(pr->height) / pr->image_height;
 
-			if (pr_clip_region(st->x, st->y, pr->source_tile_width, pr->source_tile_height,
-					   it->x + x, it->y + y, w, h,
-					   &rx, &ry, &rw, &rh))
-				{
-				cairo_t *cr;
-				cr = cairo_create(it->surface);
-				cairo_rectangle (cr, rx - it->x, ry - it->y, rw, rh);
+	const gint sx = static_cast<gdouble>(it->x + x) / scale_x;
+	const gint sy = static_cast<gdouble>(it->y + y) / scale_y;
+	const gint sw = static_cast<gdouble>(w) / scale_x;
+	const gint sh = static_cast<gdouble>(h) / scale_y;
 
-				if (st->blank)
-					{
-					cairo_set_source_rgb(cr, 0, 0, 0);
-					cairo_fill (cr);
-					}
-				else /* (pr->zoom == 1.0 || pr->scale == 1.0) */
-					{
-					rt_hidpi_aware_draw(rt, cr, st->pixbuf, -it->x + st->x, -it->y + st->y, FALSE);
-					}
-				cairo_destroy (cr);
-				}
-			}
-		}
-	else
-		{
-		gdouble scale_x;
-		gdouble scale_y;
-		gint sx;
-		gint sy;
-		gint sw;
-		gint sh;
-
-		if (pr->image_width == 0 || pr->image_height == 0) return FALSE;
-		scale_x = static_cast<gdouble>(pr->width) / pr->image_width;
-		scale_y = static_cast<gdouble>(pr->height) / pr->image_height;
-
-		sx = static_cast<gdouble>(it->x + x) / scale_x;
-		sy = static_cast<gdouble>(it->y + y) / scale_y;
-		sw = static_cast<gdouble>(w) / scale_x;
-		sh = static_cast<gdouble>(h) / scale_y;
-
-		if (pr->width < PR_MIN_SCALE_SIZE || pr->height < PR_MIN_SCALE_SIZE) fast = TRUE;
+	if (pr->width < PR_MIN_SCALE_SIZE || pr->height < PR_MIN_SCALE_SIZE) fast = TRUE;
 
 #if 1
-		/* draws red over draw region, to check for leaks (regions not filled) */
-		pixbuf_set_rect_fill(it->pixbuf, x, y, 2*w, 2*h, 255, 0, 0, 255);
+	/* draws red over draw region, to check for leaks (regions not filled) */
+	pixbuf_set_rect_fill(it->pixbuf, x, y, 2*w, 2*h, 255, 0, 0, 255);
 #endif
 
-		list = pr_source_tile_compute_region(pr, sx, sy, sw, sh, TRUE);
-		work = list;
-		while (work)
+	GList *list = pr_source_tile_compute_region(pr, sx, sy, sw, sh, TRUE);
+	GList *work = list;
+	while (work)
+		{
+		const auto st = static_cast<SourceTile *>(work->data);
+		work = work->next;
+
+		const gint stx = floor(st->x * scale_x);
+		const gint sty = floor(st->y * scale_y);
+		const gint stw = ceil((st->x + pr->source_tile_width) * scale_x) - stx;
+		const gint sth = ceil((st->y + pr->source_tile_height) * scale_y) - sty;
+
+		gint rx, ry, rw, rh;
+		if (pr_clip_region(stx, sty, stw, sth,
+				   it->x + x, it->y + y, w, h,
+				   &rx, &ry, &rw, &rh))
 			{
-			SourceTile *st;
-			gint rx;
-			gint ry;
-			gint rw;
-			gint rh;
-			gint stx;
-			gint sty;
-			gint stw;
-			gint sth;
 
-			st = static_cast<SourceTile *>(work->data);
-			work = work->next;
-
-			stx = floor(static_cast<gdouble>(st->x) * scale_x);
-			sty = floor(static_cast<gdouble>(st->y) * scale_y);
-			stw = ceil(static_cast<gdouble>(st->x + pr->source_tile_width) * scale_x) - stx;
-			sth = ceil(static_cast<gdouble>(st->y + pr->source_tile_height) * scale_y) - sty;
-
-			if (pr_clip_region(stx, sty, stw, sth,
-					   it->x + x, it->y + y, w, h,
-					   &rx, &ry, &rw, &rh))
+			if (st->blank)
 				{
+				cairo_t *cr = cairo_create(it->surface);
+				cairo_rectangle (cr, rx - st->x, ry - st->y, rt->hidpi_scale * rw, rt->hidpi_scale * rh);
+				cairo_set_source_rgb(cr, 0, 0, 0);
+				cairo_fill (cr);
+				cairo_destroy (cr);
+				}
+			else
+				{
+				// In all cases, we'll have:
+				// it->pixbuf->width = rt->hidpi_scale * it->width
+				//
+				// So for hidpi rendering, we need to multiply the scale by that additional
+				// scale factor, and _also_ multiply the offset, width, and height by that factor.
 
-				if (st->blank)
-					{
-					cairo_t *cr;
-					cr = cairo_create(it->surface);
-					cairo_rectangle (cr, rx - st->x, ry - st->y, rt->hidpi_scale * rw, rt->hidpi_scale * rh);
-					cairo_set_source_rgb(cr, 0, 0, 0);
-					cairo_fill (cr);
-					cairo_destroy (cr);
-					}
-				else
-					{
-					// In all cases, we'll have:
-					// it->pixbuf->width = rt->hidpi_scale * it->width
-					//
-					// So for hidpi rendering, we need to multiply the scale by that additional
-					// scale factor, and _also_ multiply the offset, width, and height by that factor.
+				/* may need to use unfloored stx,sty values here */
+				const gdouble offset_x = rt->hidpi_scale * static_cast<gdouble>(stx - it->x);
+				const gdouble offset_y = rt->hidpi_scale * static_cast<gdouble>(sty - it->y);
 
-					/* may need to use unfloored stx,sty values here */
-					const gdouble offset_x = rt->hidpi_scale * static_cast<gdouble>(stx - it->x);
-					const gdouble offset_y = rt->hidpi_scale * static_cast<gdouble>(sty - it->y);
-
-					gdk_pixbuf_scale(st->pixbuf, it->pixbuf, rx - it->x, ry - it->y, rt->hidpi_scale *  rw, rt->hidpi_scale * rh,
-						 static_cast<gdouble>(0.0) + offset_x,
-						 static_cast<gdouble>(0.0) + offset_y,
-						 rt->hidpi_scale * scale_x, rt->hidpi_scale * scale_y,
-						 (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality);
-					draw = TRUE;
-					}
+				// TODO(xsdg): Just draw instead of usign scale-draw for the case where
+				// (pr->zoom == 1.0 || pr->scale == 1.0)
+				gdk_pixbuf_scale(
+					st->pixbuf, it->pixbuf,
+					rx - it->x, ry - it->y, rt->hidpi_scale *  rw, rt->hidpi_scale * rh,
+					offset_x, offset_y,
+					rt->hidpi_scale * scale_x, rt->hidpi_scale * scale_y,
+					(fast) ? GDK_INTERP_NEAREST : pr->zoom_quality);
+				draw = TRUE;
 				}
 			}
 		}
