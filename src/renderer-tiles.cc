@@ -481,10 +481,18 @@ static void rt_hidpi_aware_draw(
 	cairo_t *cr,
 	GdkPixbuf *pixbuf,
 	double x,
-	double y)
+	double y,
+        gboolean should_scale = TRUE)
 {
 	cairo_surface_t *surface;
-	surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, rt->hidpi_scale, nullptr);
+        if (should_scale)
+		{
+		surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, rt->hidpi_scale, nullptr);
+		}
+	else
+		{
+		surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, 1, nullptr);
+		}
 	cairo_set_source_surface(cr, surface, x, y);
 	cairo_fill(cr);
 	cairo_surface_destroy(surface);
@@ -1139,7 +1147,7 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 	GList *work;
 	gboolean draw = FALSE;
 
-	if (pr->zoom == 1.0 || pr->scale == 1.0)
+	if (FALSE && (pr->zoom == 1.0 || pr->scale == 1.0))
 		{
 		list = pr_source_tile_compute_region(pr, it->x + x, it->y + y, w, h, TRUE);
 		work = list;
@@ -1169,7 +1177,7 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 					}
 				else /* (pr->zoom == 1.0 || pr->scale == 1.0) */
 					{
-					rt_hidpi_aware_draw(rt, cr, st->pixbuf, -it->x + st->x, -it->y + st->y);
+					rt_hidpi_aware_draw(rt, cr, st->pixbuf, -it->x + st->x, -it->y + st->y, FALSE);
 					}
 				cairo_destroy (cr);
 				}
@@ -1195,9 +1203,9 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 
 		if (pr->width < PR_MIN_SCALE_SIZE || pr->height < PR_MIN_SCALE_SIZE) fast = TRUE;
 
-#if 0
+#if 1
 		/* draws red over draw region, to check for leaks (regions not filled) */
-		pixbuf_set_rect_fill(it->pixbuf, x, y, w, h, 255, 0, 0, 255);
+		pixbuf_set_rect_fill(it->pixbuf, x, y, 2*w, 2*h, 255, 0, 0, 255);
 #endif
 
 		list = pr_source_tile_compute_region(pr, sx, sy, sw, sh, TRUE);
@@ -1231,24 +1239,27 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 					{
 					cairo_t *cr;
 					cr = cairo_create(it->surface);
-					cairo_rectangle (cr, rx - st->x, ry - st->y, rw, rh);
+					cairo_rectangle (cr, rx - st->x, ry - st->y, rt->hidpi_scale * rw, rt->hidpi_scale * rh);
 					cairo_set_source_rgb(cr, 0, 0, 0);
 					cairo_fill (cr);
 					cairo_destroy (cr);
 					}
 				else
 					{
-					gdouble offset_x;
-					gdouble offset_y;
+					// In all cases, we'll have:
+					// it->pixbuf->width = rt->hidpi_scale * it->width
+					//
+					// So for hidpi rendering, we need to multiply the scale by that additional
+					// scale factor, and _also_ multiply the offset, width, and height by that factor.
 
 					/* may need to use unfloored stx,sty values here */
-					offset_x = static_cast<gdouble>(stx - it->x);
-					offset_y = static_cast<gdouble>(sty - it->y);
+					const gdouble offset_x = rt->hidpi_scale * static_cast<gdouble>(stx - it->x);
+					const gdouble offset_y = rt->hidpi_scale * static_cast<gdouble>(sty - it->y);
 
-					gdk_pixbuf_scale(st->pixbuf, it->pixbuf, rx - it->x, ry - it->y, rw, rh,
+					gdk_pixbuf_scale(st->pixbuf, it->pixbuf, rx - it->x, ry - it->y, rt->hidpi_scale *  rw, rt->hidpi_scale * rh,
 						 static_cast<gdouble>(0.0) + offset_x,
 						 static_cast<gdouble>(0.0) + offset_y,
-						 scale_x, scale_y,
+						 rt->hidpi_scale * scale_x, rt->hidpi_scale * scale_y,
 						 (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality);
 					draw = TRUE;
 					}
