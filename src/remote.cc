@@ -1597,10 +1597,10 @@ static void gr_action(const gchar *text, GIOChannel *, gpointer)
 		}
 	else
 		{
-		action = gtk_action_group_get_action(lw_id->action_group, text);
+		action = gq_gtk_action_group_get_action(lw_id->action_group, text);
 		if (action)
 			{
-			gtk_action_activate(action);
+			gq_gtk_action_activate(action);
 			}
 		else
 			{

@@ -1654,14 +1654,14 @@ static void accel_store_populate()
 	lw = static_cast<LayoutWindow *>(layout_window_list->data); /* get the actions from the first window, it should not matter, they should be the same in all windows */
 
 	g_assert(lw && lw->ui_manager);
-	groups = gtk_ui_manager_get_action_groups(lw->ui_manager);
+	groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager);
 	while (groups)
 		{
-		actions = gtk_action_group_list_actions(GTK_ACTION_GROUP(groups->data));
+		actions = gq_gtk_action_group_list_actions(GTK_ACTION_GROUP(groups->data));
 		while (actions)
 			{
 			action = GTK_ACTION(actions->data);
-			accel_path = gtk_action_get_accel_path(action);
+			accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{
 				gchar *label;
@@ -1680,7 +1680,7 @@ static void accel_store_populate()
 					}
 
 				accel = gtk_accelerator_name(key.accel_key, key.accel_mods);
-				icon_name = gtk_action_get_icon_name(action);
+				icon_name = gq_gtk_action_get_icon_name(action);
 
 				if (tooltip)
 					{

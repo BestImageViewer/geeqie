@@ -561,16 +561,16 @@ static void layout_menu_alter_desaturate_cb(GtkToggleAction *action, gpointer da
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	layout_image_set_desaturate(lw, gtk_toggle_action_get_active(action));
+	layout_image_set_desaturate(lw, gq_gtk_toggle_action_get_active(action));
 }
 
 static void layout_menu_alter_ignore_alpha_cb(GtkToggleAction *action, gpointer data)
 {
    auto lw = static_cast<LayoutWindow *>(data);
 
-	if (lw->options.ignore_alpha == gtk_toggle_action_get_active(action)) return;
+	if (lw->options.ignore_alpha == gq_gtk_toggle_action_get_active(action)) return;
 
-   layout_image_set_ignore_alpha(lw, gtk_toggle_action_get_active(action));
+   layout_image_set_ignore_alpha(lw, gq_gtk_toggle_action_get_active(action));
 }
 
 static void layout_menu_alter_none_cb(GtkAction *, gpointer data)
@@ -584,27 +584,27 @@ static void layout_menu_exif_rotate_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	options->image.exif_rotate_enable = gtk_toggle_action_get_active(action);
+	options->image.exif_rotate_enable = gq_gtk_toggle_action_get_active(action);
 	layout_image_reset_orientation(lw);
 }
 
 static void layout_menu_select_rectangle_cb(GtkToggleAction *action, gpointer)
 {
-	options->draw_rectangle = gtk_toggle_action_get_active(action);
+	options->draw_rectangle = gq_gtk_toggle_action_get_active(action);
 }
 
 static void layout_menu_split_pane_sync_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	lw->options.split_pane_sync = gtk_toggle_action_get_active(action);
+	lw->options.split_pane_sync = gq_gtk_toggle_action_get_active(action);
 }
 
 static void layout_menu_select_overunderexposed_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	layout_image_set_overunderexposed(lw, gtk_toggle_action_get_active(action));
+	layout_image_set_overunderexposed(lw, gq_gtk_toggle_action_get_active(action));
 }
 
 static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean keep_date)
@@ -918,7 +918,7 @@ static void layout_menu_split_cb(GtkRadioAction *action, GtkRadioAction *, gpoin
 	ImageSplitMode mode;
 
 	layout_exit_fullscreen(lw);
-	mode = static_cast<ImageSplitMode>(gtk_radio_action_get_current_value(action));
+	mode = static_cast<ImageSplitMode>(gq_gtk_radio_action_get_current_value(action));
 	layout_split_change(lw, mode);
 }
 
@@ -927,7 +927,7 @@ static void layout_menu_thumb_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	layout_thumb_set(lw, gtk_toggle_action_get_active(action));
+	layout_thumb_set(lw, gq_gtk_toggle_action_get_active(action));
 }
 
 
@@ -936,7 +936,7 @@ static void layout_menu_list_cb(GtkRadioAction *action, GtkRadioAction *, gpoint
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_exit_fullscreen(lw);
-	layout_views_set(lw, lw->options.dir_view_type, static_cast<FileViewType>(gtk_radio_action_get_current_value(action)));
+	layout_views_set(lw, lw->options.dir_view_type, static_cast<FileViewType>(gq_gtk_radio_action_get_current_value(action)));
 }
 
 static void layout_menu_view_dir_as_cb(GtkToggleAction *action,  gpointer data)
@@ -945,7 +945,7 @@ static void layout_menu_view_dir_as_cb(GtkToggleAction *action,  gpointer data)
 
 	layout_exit_fullscreen(lw);
 
-	if (gtk_toggle_action_get_active(action))
+	if (gq_gtk_toggle_action_get_active(action))
 		{
 		layout_views_set(lw, DIRVIEW_TREE, lw->options.file_view_type);
 		}
@@ -1105,7 +1105,7 @@ static void layout_menu_overlay_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (gtk_toggle_action_get_active(action))
+	if (gq_gtk_toggle_action_get_active(action))
 		{
 		OsdShowFlags flags = image_osd_get(lw->image);
 
@@ -1114,10 +1114,10 @@ static void layout_menu_overlay_cb(GtkToggleAction *action, gpointer data)
 		}
 	else
 		{
-		GtkToggleAction *histogram_action = GTK_TOGGLE_ACTION(gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
+		GtkToggleAction *histogram_action = GTK_TOGGLE_ACTION(gq_gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
 
 		image_osd_set(lw->image, OSD_SHOW_NOTHING);
-		gtk_toggle_action_set_active(histogram_action, FALSE); /* this calls layout_menu_histogram_cb */
+		gq_gtk_toggle_action_set_active(histogram_action, FALSE); /* this calls layout_menu_histogram_cb */
 		}
 }
 
@@ -1125,7 +1125,7 @@ static void layout_menu_histogram_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (gtk_toggle_action_get_active(action))
+	if (gq_gtk_toggle_action_get_active(action))
 		{
 		image_osd_set(lw->image, static_cast<OsdShowFlags>(OSD_SHOW_INFO | OSD_SHOW_STATUS | OSD_SHOW_HISTOGRAM));
 		layout_util_sync_views(lw); /* show the overlay state, default channel and mode in the menu */
@@ -1142,13 +1142,13 @@ static void layout_menu_animate_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (lw->options.animate == gtk_toggle_action_get_active(action)) return;
+	if (lw->options.animate == gq_gtk_toggle_action_get_active(action)) return;
 	layout_image_animate_toggle(lw);
 }
 
 static void layout_menu_rectangular_selection_cb(GtkToggleAction *action, gpointer)
 {
-	options->collections.rectangular_selection = gtk_toggle_action_get_active(action);
+	options->collections.rectangular_selection = gq_gtk_toggle_action_get_active(action);
 }
 
 static void layout_menu_histogram_toggle_channel_cb(GtkAction *, gpointer data)
@@ -1170,24 +1170,24 @@ static void layout_menu_histogram_toggle_mode_cb(GtkAction *, gpointer data)
 static void layout_menu_histogram_channel_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint channel = gtk_radio_action_get_current_value(action);
-	GtkToggleAction *histogram_action = GTK_TOGGLE_ACTION(gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
+	gint channel = gq_gtk_radio_action_get_current_value(action);
+	GtkToggleAction *histogram_action = GTK_TOGGLE_ACTION(gq_gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
 
 	if (channel < 0 || channel >= HCHAN_COUNT) return;
 
-	gtk_toggle_action_set_active(histogram_action, TRUE); /* this calls layout_menu_histogram_cb */
+	gq_gtk_toggle_action_set_active(histogram_action, TRUE); /* this calls layout_menu_histogram_cb */
 	image_osd_histogram_set_channel(lw->image, channel);
 }
 
 static void layout_menu_histogram_mode_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint mode = gtk_radio_action_get_current_value(action);
-	GtkToggleAction *histogram_action = GTK_TOGGLE_ACTION(gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
+	gint mode = gq_gtk_radio_action_get_current_value(action);
+	GtkToggleAction *histogram_action = GTK_TOGGLE_ACTION(gq_gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
 
 	if (mode < 0 || mode > 1) return;
 
-	gtk_toggle_action_set_active(histogram_action, TRUE); /* this calls layout_menu_histogram_cb */
+	gq_gtk_toggle_action_set_active(histogram_action, TRUE); /* this calls layout_menu_histogram_cb */
 	image_osd_histogram_set_mode(lw->image, mode);
 }
 
@@ -1219,7 +1219,7 @@ static void layout_menu_float_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (lw->options.tools_float == gtk_toggle_action_get_active(action)) return;
+	if (lw->options.tools_float == gq_gtk_toggle_action_get_active(action)) return;
 
 	layout_exit_fullscreen(lw);
 	layout_tools_float_toggle(lw);
@@ -1237,7 +1237,7 @@ static void layout_menu_selectable_toolbars_cb(GtkToggleAction *action, gpointer
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (lw->options.selectable_toolbars_hidden == gtk_toggle_action_get_active(action)) return;
+	if (lw->options.selectable_toolbars_hidden == gq_gtk_toggle_action_get_active(action)) return;
 
 	layout_exit_fullscreen(lw);
 	layout_selectable_toolbars_toggle(lw);
@@ -1247,7 +1247,7 @@ static void layout_menu_info_pixel_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (lw->options.show_info_pixel == gtk_toggle_action_get_active(action)) return;
+	if (lw->options.show_info_pixel == gq_gtk_toggle_action_get_active(action)) return;
 
 	layout_exit_fullscreen(lw);
 	layout_info_pixel_set(lw, !lw->options.show_info_pixel);
@@ -1258,7 +1258,7 @@ static void layout_menu_bar_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (layout_bar_enabled(lw) == gtk_toggle_action_get_active(action)) return;
+	if (layout_bar_enabled(lw) == gq_gtk_toggle_action_get_active(action)) return;
 
 	layout_exit_fullscreen(lw);
 	layout_bar_toggle(lw);
@@ -1268,7 +1268,7 @@ static void layout_menu_bar_sort_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (layout_bar_sort_enabled(lw) == gtk_toggle_action_get_active(action)) return;
+	if (layout_bar_sort_enabled(lw) == gq_gtk_toggle_action_get_active(action)) return;
 
 	layout_exit_fullscreen(lw);
 	layout_bar_sort_toggle(lw);
@@ -1278,7 +1278,7 @@ static void layout_menu_hide_bars_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (lw->options.bars_state.hidden == gtk_toggle_action_get_active(action))
+	if (lw->options.bars_state.hidden == gq_gtk_toggle_action_get_active(action))
 		{
 		return;
 		}
@@ -1289,7 +1289,7 @@ static void layout_menu_slideshow_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (layout_image_slideshow_active(lw) == gtk_toggle_action_get_active(action)) return;
+	if (layout_image_slideshow_active(lw) == gq_gtk_toggle_action_get_active(action)) return;
 	layout_image_slideshow_toggle(lw);
 }
 
@@ -1323,8 +1323,8 @@ static void layout_menu_stereo_mode_next_cb(GtkAction *, gpointer data)
 	/* 0->1, 1->2, 2->3, 3->1 - disable auto, then cycle */
 	mode = mode % 3 + 1;
 
-	GtkAction *radio = gtk_action_group_get_action(lw->action_group, "StereoAuto");
-	gtk_radio_action_set_current_value(GTK_RADIO_ACTION(radio), mode);
+	GtkAction *radio = gq_gtk_action_group_get_action(lw->action_group, "StereoAuto");
+	gq_gtk_radio_action_set_current_value(GTK_RADIO_ACTION(radio), mode);
 
 	/*
 	this is called via fallback in layout_menu_stereo_mode_cb
@@ -1336,7 +1336,7 @@ static void layout_menu_stereo_mode_next_cb(GtkAction *, gpointer data)
 static void layout_menu_stereo_mode_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint mode = gtk_radio_action_get_current_value(action);
+	gint mode = gq_gtk_radio_action_get_current_value(action);
 	layout_image_stereo_pixbuf_set(lw, mode);
 }
 
@@ -1593,14 +1593,14 @@ static void layout_menu_file_filter_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	layout_file_filter_set(lw, gtk_toggle_action_get_active(action));
+	layout_file_filter_set(lw, gq_gtk_toggle_action_get_active(action));
 }
 
 static void layout_menu_marks_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	layout_marks_set(lw, gtk_toggle_action_get_active(action));
+	layout_marks_set(lw, gq_gtk_toggle_action_get_active(action));
 }
 
 
@@ -1935,7 +1935,7 @@ static void layout_menu_up_cb(GtkAction *, gpointer data)
 static void layout_menu_edit_cb(GtkAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	const gchar *key = gtk_action_get_name(action);
+	const gchar *key = gq_gtk_action_get_name(action);
 
 	if (!editor_window_flag_set(key))
 		layout_exit_fullscreen(lw);
@@ -1979,9 +1979,9 @@ static void layout_color_menu_enable_cb(GtkToggleAction *action, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (layout_image_color_profile_get_use(lw) == gtk_toggle_action_get_active(action)) return;
+	if (layout_image_color_profile_get_use(lw) == gq_gtk_toggle_action_get_active(action)) return;
 
-	layout_image_color_profile_set_use(lw, gtk_toggle_action_get_active(action));
+	layout_image_color_profile_set_use(lw, gq_gtk_toggle_action_get_active(action));
 	layout_util_sync_color(lw);
 	layout_image_refresh(lw);
 }
@@ -1993,8 +1993,8 @@ static void layout_color_menu_use_image_cb(GtkToggleAction *action, gpointer dat
 	gboolean use_image;
 
 	if (!layout_image_color_profile_get(lw, &input, &use_image)) return;
-	if (use_image == gtk_toggle_action_get_active(action)) return;
-	layout_image_color_profile_set(lw, input, gtk_toggle_action_get_active(action));
+	if (use_image == gq_gtk_toggle_action_get_active(action)) return;
+	layout_image_color_profile_set(lw, input, gq_gtk_toggle_action_get_active(action));
 	layout_util_sync_color(lw);
 	layout_image_refresh(lw);
 }
@@ -2006,7 +2006,7 @@ static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *,
 	gint input;
 	gboolean use_image;
 
-	type = gtk_radio_action_get_current_value(action);
+	type = gq_gtk_radio_action_get_current_value(action);
 	if (type < 0 || type >= COLOR_PROFILE_FILE + COLOR_PROFILE_INPUTS) return;
 
 	if (!layout_image_color_profile_get(lw, &input, &use_image)) return;
@@ -2096,7 +2096,7 @@ static void layout_menu_collection_recent_update(LayoutWindow *lw)
 		menu_item_add(menu, _("Empty"), nullptr, nullptr);
 		}
 
-	recent = gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/FileMenu/OpenRecent" : "/MainMenu/FileMenu/OpenRecent");
+	recent = gq_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/FileMenu/OpenRecent" : "/MainMenu/FileMenu/OpenRecent");
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(recent), menu);
 	gtk_widget_set_sensitive(recent, (n != 0));
 }
@@ -2152,7 +2152,7 @@ static void layout_menu_collection_open_update(LayoutWindow *lw)
 		menu_item_add(menu, _("Empty"), nullptr, nullptr);
 		}
 
-	recent = gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/FileMenu/OpenCollection" : "/MainMenu/FileMenu/OpenCollection");
+	recent = gq_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/FileMenu/OpenCollection" : "/MainMenu/FileMenu/OpenCollection");
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(recent), menu);
 	gtk_widget_set_sensitive(recent, (n != 0));
 }
@@ -2312,7 +2312,7 @@ static void layout_menu_new_window_update(LayoutWindow *lw)
 
 	list = layout_window_menu_list(list);
 
-	menu = gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/NewWindow" : "/MainMenu/WindowsMenu/NewWindow");
+	menu = gq_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/NewWindow" : "/MainMenu/WindowsMenu/NewWindow");
 	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(menu));
 
 	children = gtk_container_get_children(GTK_CONTAINER(sub_menu));
@@ -2458,7 +2458,7 @@ static void layout_menu_windows_menu_cb(GtkWidget *, gpointer data)
 	GList *iter;
 	gint i;
 
-	menu = gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/" : "/MainMenu/WindowsMenu/");
+	menu = gq_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/" : "/MainMenu/WindowsMenu/");
 
 	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(menu));
 
@@ -2491,7 +2491,7 @@ static void layout_menu_view_menu_cb(GtkWidget *, gpointer data)
 	gint i;
 	FileData *fd;
 
-	menu = gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/ViewMenu/" : "/MainMenu/ViewMenu/");
+	menu = gq_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/ViewMenu/" : "/MainMenu/ViewMenu/");
 	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(menu));
 
 	fd = layout_image_get_fd(lw);
@@ -2936,8 +2936,8 @@ static void layout_actions_setup_mark(LayoutWindow *lw, gint mark, const gchar *
 	else
 		entry.tooltip = nullptr;
 
-	gtk_action_group_add_actions(lw->action_group, &entry, 1, lw);
-	action = gtk_action_group_get_action(lw->action_group, name);
+	gq_gtk_action_group_add_actions(lw->action_group, &entry, 1, lw);
+	action = gq_gtk_action_group_get_action(lw->action_group, name);
 	g_object_set_data(G_OBJECT(action), "mark_num", GINT_TO_POINTER(mark > 0 ? mark : 10));
 }
 
@@ -3007,7 +3007,7 @@ static void layout_actions_setup_marks(LayoutWindow *lw)
 	g_string_append(desc,   "</ui>" );
 
 	error = nullptr;
-	if (!gtk_ui_manager_add_ui_from_string(lw->ui_manager, desc->str, -1, &error))
+	if (!gq_gtk_ui_manager_add_ui_from_string(lw->ui_manager, desc->str, -1, &error))
 		{
 		g_message("building menus failed: %s", error->message);
 		g_error_free(error);
@@ -3110,16 +3110,16 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 
 	if (lw->ui_editors_id)
 		{
-		gtk_ui_manager_remove_ui(lw->ui_manager, lw->ui_editors_id);
+		gq_gtk_ui_manager_remove_ui(lw->ui_manager, lw->ui_editors_id);
 		}
 
 	if (lw->action_group_editors)
 		{
-		gtk_ui_manager_remove_action_group(lw->ui_manager, lw->action_group_editors);
+		gq_gtk_ui_manager_remove_action_group(lw->ui_manager, lw->action_group_editors);
 		g_object_unref(lw->action_group_editors);
 		}
-	lw->action_group_editors = gtk_action_group_new("MenuActionsExternal");
-	gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group_editors, 1);
+	lw->action_group_editors = gq_gtk_action_group_new("MenuActionsExternal");
+	gq_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group_editors, 1);
 
 	/* lw->action_group_editors contains translated entries, no translate func is required */
 	desc = g_string_new(
@@ -3150,7 +3150,7 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 			{
 			entry.stock_id = editor->key;
 			}
-		gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
+		gq_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
 
 		path = layout_actions_editor_menu_path(editor);
 		layout_actions_editor_add(desc, path, old_path);
@@ -3173,7 +3173,7 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 
 	error = nullptr;
 
-	lw->ui_editors_id = gtk_ui_manager_add_ui_from_string(lw->ui_manager, desc->str, -1, &error);
+	lw->ui_editors_id = gq_gtk_ui_manager_add_ui_from_string(lw->ui_manager, desc->str, -1, &error);
 	if (!lw->ui_editors_id)
 		{
 		g_message("building menus failed: %s", error->message);
@@ -3203,44 +3203,44 @@ void layout_actions_setup(LayoutWindow *lw)
 	DEBUG_1("%s layout_actions_setup: start", get_exec_time());
 	if (lw->ui_manager) return;
 
-	lw->action_group = gtk_action_group_new("MenuActions");
-	gtk_action_group_set_translate_func(lw->action_group, menu_translate, nullptr, nullptr);
+	lw->action_group = gq_gtk_action_group_new("MenuActions");
+	gq_gtk_action_group_set_translate_func(lw->action_group, menu_translate, nullptr, nullptr);
 
-	gtk_action_group_add_actions(lw->action_group,
+	gq_gtk_action_group_add_actions(lw->action_group,
 				     menu_entries, G_N_ELEMENTS(menu_entries), lw);
-	gtk_action_group_add_toggle_actions(lw->action_group,
+	gq_gtk_action_group_add_toggle_actions(lw->action_group,
 					    menu_toggle_entries, G_N_ELEMENTS(menu_toggle_entries), lw);
-	gtk_action_group_add_radio_actions(lw->action_group,
+	gq_gtk_action_group_add_radio_actions(lw->action_group,
 					   menu_radio_entries, G_N_ELEMENTS(menu_radio_entries),
 					   0, G_CALLBACK(layout_menu_list_cb), lw);
-	gtk_action_group_add_radio_actions(lw->action_group,
+	gq_gtk_action_group_add_radio_actions(lw->action_group,
 					   menu_split_radio_entries, G_N_ELEMENTS(menu_split_radio_entries),
 					   0, G_CALLBACK(layout_menu_split_cb), lw);
-	gtk_action_group_add_toggle_actions(lw->action_group,
+	gq_gtk_action_group_add_toggle_actions(lw->action_group,
 					   menu_view_dir_toggle_entries, G_N_ELEMENTS(menu_view_dir_toggle_entries),
 					    lw);
-	gtk_action_group_add_radio_actions(lw->action_group,
+	gq_gtk_action_group_add_radio_actions(lw->action_group,
 					   menu_color_radio_entries, COLOR_PROFILE_FILE + COLOR_PROFILE_INPUTS,
 					   0, G_CALLBACK(layout_color_menu_input_cb), lw);
-	gtk_action_group_add_radio_actions(lw->action_group,
+	gq_gtk_action_group_add_radio_actions(lw->action_group,
 					   menu_histogram_channel, G_N_ELEMENTS(menu_histogram_channel),
 					   0, G_CALLBACK(layout_menu_histogram_channel_cb), lw);
-	gtk_action_group_add_radio_actions(lw->action_group,
+	gq_gtk_action_group_add_radio_actions(lw->action_group,
 					   menu_histogram_mode, G_N_ELEMENTS(menu_histogram_mode),
 					   0, G_CALLBACK(layout_menu_histogram_mode_cb), lw);
-	gtk_action_group_add_radio_actions(lw->action_group,
+	gq_gtk_action_group_add_radio_actions(lw->action_group,
 					   menu_stereo_mode_entries, G_N_ELEMENTS(menu_stereo_mode_entries),
 					   0, G_CALLBACK(layout_menu_stereo_mode_cb), lw);
 
 
-	lw->ui_manager = gtk_ui_manager_new();
-	gtk_ui_manager_set_add_tearoffs(lw->ui_manager, TRUE);
-	gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group, 0);
+	lw->ui_manager = gq_gtk_ui_manager_new();
+	gq_gtk_ui_manager_set_add_tearoffs(lw->ui_manager, TRUE);
+	gq_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group, 0);
 
 	DEBUG_1("%s layout_actions_setup: add menu", get_exec_time());
 	error = nullptr;
 
-	if (!gtk_ui_manager_add_ui_from_resource(lw->ui_manager, options->hamburger_menu ? GQ_RESOURCE_PATH_UI "/menu-hamburger.ui" : GQ_RESOURCE_PATH_UI "/menu-classic.ui" , &error))
+	if (!gq_gtk_ui_manager_add_ui_from_resource(lw->ui_manager, options->hamburger_menu ? GQ_RESOURCE_PATH_UI "/menu-hamburger.ui" : GQ_RESOURCE_PATH_UI "/menu-classic.ui" , &error))
 		{
 		g_message("building menus failed: %s", error->message);
 		g_error_free(error);
@@ -3337,14 +3337,14 @@ void layout_actions_add_window(LayoutWindow *lw, GtkWidget *window)
 
 	if (!lw->ui_manager) return;
 
-	group = gtk_ui_manager_get_accel_group(lw->ui_manager);
+	group = gq_gtk_ui_manager_get_accel_group(lw->ui_manager);
 	gtk_window_add_accel_group(GTK_WINDOW(window), group);
 }
 
 GtkWidget *layout_actions_menu_bar(LayoutWindow *lw)
 {
 	if (lw->menu_bar) return lw->menu_bar;
-	lw->menu_bar = gtk_ui_manager_get_widget(lw->ui_manager, "/MainMenu");
+	lw->menu_bar = gq_gtk_ui_manager_get_widget(lw->ui_manager, "/MainMenu");
 	g_object_ref(lw->menu_bar);
 	return lw->menu_bar;
 }
@@ -3403,13 +3403,13 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 {
 	if (lw->toolbar_merge_id[type])
 		{
-		gtk_ui_manager_remove_ui(lw->ui_manager, lw->toolbar_merge_id[type]);
-		gtk_ui_manager_ensure_update(lw->ui_manager);
+		gq_gtk_ui_manager_remove_ui(lw->ui_manager, lw->toolbar_merge_id[type]);
+		gq_gtk_ui_manager_ensure_update(lw->ui_manager);
 		}
 	g_list_free_full(lw->toolbar_actions[type], g_free);
 	lw->toolbar_actions[type] = nullptr;
 
-	lw->toolbar_merge_id[type] = gtk_ui_manager_new_merge_id(lw->ui_manager);
+	lw->toolbar_merge_id[type] = gq_gtk_ui_manager_new_merge_id(lw->ui_manager);
 
 	if (lw->toolbar[type])
 		{
@@ -3435,15 +3435,15 @@ void action_toggle_activate_cb(GtkAction* self, gpointer data)
 {
 	auto button = static_cast<GtkToggleButton *>(data);
 
-	if (gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(self)) != gtk_toggle_button_get_active(button))
+	if (gq_gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(self)) != gtk_toggle_button_get_active(button))
 		{
-		gtk_toggle_button_set_active(button, gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(self)));
+		gtk_toggle_button_set_active(button, gq_gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(self)));
 		}
 }
 
 gboolean toolbar_button_press_event_cb(GtkWidget *, GdkEvent *, gpointer data)
 {
-	gtk_action_activate(GTK_ACTION(data));
+	gq_gtk_action_activate(GTK_ACTION(data));
 
 	return TRUE;
 }
@@ -3482,10 +3482,10 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 		   create a dummy action for now */
 		if (!lw->action_group_editors)
 			{
-			lw->action_group_editors = gtk_action_group_new("MenuActionsExternal");
-			gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group_editors, 1);
+			lw->action_group_editors = gq_gtk_action_group_new("MenuActionsExternal");
+			gq_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group_editors, 1);
 			}
-		if (!gtk_action_group_get_action(lw->action_group_editors, action_name))
+		if (!gq_gtk_action_group_get_action(lw->action_group_editors, action_name))
 			{
 			GtkActionEntry entry = { action_name,
 			                         GQ_ICON_MISSING_IMAGE,
@@ -3495,7 +3495,7 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 			                         nullptr
 			                       };
 			DEBUG_1("Creating temporary action %s", action_name);
-			gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
+			gq_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
 			}
 		}
 
@@ -3505,25 +3505,21 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 		}
 	else
 		{
-		action = gtk_action_group_get_action(lw->action_group, action_name);
+		action = gq_gtk_action_group_get_action(lw->action_group, action_name);
 
-		action_icon = gtk_action_create_icon(action, GTK_ICON_SIZE_SMALL_TOOLBAR);
-		tooltip_text = gtk_action_get_tooltip(action);
+		action_icon = gq_gtk_action_create_icon(action, GTK_ICON_SIZE_SMALL_TOOLBAR);
+		tooltip_text = gq_gtk_action_get_tooltip(action);
 
-		gtk_ui_manager_add_ui(lw->ui_manager, lw->toolbar_merge_id[type], path, action_name, action_name, GTK_UI_MANAGER_TOOLITEM, FALSE);
+		gq_gtk_ui_manager_add_ui(lw->ui_manager, lw->toolbar_merge_id[type], path, action_name, action_name, GTK_UI_MANAGER_TOOLITEM, FALSE);
 
-		if (GTK_IS_RADIO_ACTION(action) || GTK_IS_TOGGLE_ACTION(action))
+		if (GQ_GTK_IS_RADIO_ACTION(action) || GQ_GTK_IS_TOGGLE_ACTION(action))
 			{
 			button = gtk_toggle_button_new();
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), gq_gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
 			}
 		else
 			{
 			button = gtk_button_new();
-			}
-
-		if (GTK_IS_TOGGLE_ACTION(action) || GTK_IS_RADIO_ACTION(action))
-			{
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), gtk_toggle_action_get_active(GTK_TOGGLE_ACTION(action)));
 			}
 
 		if (action_icon)
@@ -3538,12 +3534,12 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 		gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 		gtk_widget_set_tooltip_text(button, tooltip_text);
 
-		if (GTK_IS_RADIO_ACTION(action))
+		if (GQ_GTK_IS_RADIO_ACTION(action))
 			{
 			id = g_signal_connect(G_OBJECT(action), "changed", G_CALLBACK(action_radio_changed_cb), button);
 			g_object_set_data(G_OBJECT(button), "id", GUINT_TO_POINTER(id));
 			}
-		else if (GTK_IS_TOGGLE_ACTION(action))
+		else if (GQ_GTK_IS_TOGGLE_ACTION(action))
 			{
 			id = g_signal_connect(G_OBJECT(action), "activate", G_CALLBACK(action_toggle_activate_cb), button);
 			g_object_set_data(G_OBJECT(button), "id", GUINT_TO_POINTER(id));
@@ -3709,8 +3705,8 @@ void layout_util_status_update_write(LayoutWindow *lw)
 {
 	GtkAction *action;
 	gint n = metadata_queue_length();
-	action = gtk_action_group_get_action(lw->action_group, "SaveMetadata");
-	gtk_action_set_sensitive(action, n > 0);
+	action = gq_gtk_action_group_get_action(lw->action_group, "SaveMetadata");
+	gq_gtk_action_set_sensitive(action, n > 0);
 	if (n > 0)
 		{
 		gchar *buf = g_strdup_printf(_("Number of files with unsaved metadata: %d"), n);
@@ -3761,9 +3757,9 @@ void layout_util_sync_color(LayoutWindow *lw)
 
 	use_color = layout_image_color_profile_get_use(lw);
 
-	action = gtk_action_group_get_action(lw->action_group, "UseColorProfiles");
+	action = gq_gtk_action_group_get_action(lw->action_group, "UseColorProfiles");
 #if HAVE_LCMS
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), use_color);
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), use_color);
 	if (layout_image_color_profile_get_status(lw, &image_profile, &screen_profile))
 		{
 		gchar *buf;
@@ -3778,19 +3774,19 @@ void layout_util_sync_color(LayoutWindow *lw)
 		g_object_set(G_OBJECT(action), "tooltip", _("Click to enable color management"), NULL);
 		}
 #else
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), FALSE);
-	gtk_action_set_sensitive(action, FALSE);
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), FALSE);
+	gq_gtk_action_set_sensitive(action, FALSE);
 	g_object_set(G_OBJECT(action), "tooltip", _("Color profiles not supported"), NULL);
 #endif
 
-	action = gtk_action_group_get_action(lw->action_group, "UseImageProfile");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), use_image);
-	gtk_action_set_sensitive(action, use_color);
+	action = gq_gtk_action_group_get_action(lw->action_group, "UseImageProfile");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), use_image);
+	gq_gtk_action_set_sensitive(action, use_color);
 
 	for (i = 0; i < COLOR_PROFILE_FILE + COLOR_PROFILE_INPUTS; i++)
 		{
 		sprintf(action_name, "ColorProfile%d", i);
-		action = gtk_action_group_get_action(lw->action_group, action_name);
+		action = gq_gtk_action_group_get_action(lw->action_group, action_name);
 
 		if (i >= COLOR_PROFILE_FILE)
 			{
@@ -3808,15 +3804,15 @@ void layout_util_sync_color(LayoutWindow *lw)
 			g_object_set(G_OBJECT(action), "label", buf, NULL);
 			g_free(buf);
 
-			gtk_action_set_visible(action, file && file[0]);
+			gq_gtk_action_set_visible(action, file && file[0]);
 			}
 
-		gtk_action_set_sensitive(action, !use_image);
-		gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), (i == input));
+		gq_gtk_action_set_sensitive(action, !use_image);
+		gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), (i == input));
 		}
 
-	action = gtk_action_group_get_action(lw->action_group, "Grayscale");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_image_get_desaturate(lw));
+	action = gq_gtk_action_group_get_action(lw->action_group, "Grayscale");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_image_get_desaturate(lw));
 }
 
 void layout_util_sync_file_filter(LayoutWindow *lw)
@@ -3825,8 +3821,8 @@ void layout_util_sync_file_filter(LayoutWindow *lw)
 
 	if (!lw->action_group) return;
 
-	action = gtk_action_group_get_action(lw->action_group, "ShowFileFilter");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_file_filter);
+	action = gq_gtk_action_group_get_action(lw->action_group, "ShowFileFilter");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_file_filter);
 }
 
 void layout_util_sync_marks(LayoutWindow *lw)
@@ -3835,8 +3831,8 @@ void layout_util_sync_marks(LayoutWindow *lw)
 
 	if (!lw->action_group) return;
 
-	action = gtk_action_group_get_action(lw->action_group, "ShowMarks");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_marks);
+	action = gq_gtk_action_group_get_action(lw->action_group, "ShowMarks");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_marks);
 }
 
 static void layout_util_sync_views(LayoutWindow *lw)
@@ -3846,98 +3842,98 @@ static void layout_util_sync_views(LayoutWindow *lw)
 
 	if (!lw->action_group) return;
 
-	action = gtk_action_group_get_action(lw->action_group, "FolderTree");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.dir_view_type);
+	action = gq_gtk_action_group_get_action(lw->action_group, "FolderTree");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.dir_view_type);
 
-	action = gtk_action_group_get_action(lw->action_group, "SplitSingle");
-	gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), lw->split_mode);
+	action = gq_gtk_action_group_get_action(lw->action_group, "SplitSingle");
+	gq_gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), lw->split_mode);
 
-	action = gtk_action_group_get_action(lw->action_group, "SplitNextPane");
-	gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
-	action = gtk_action_group_get_action(lw->action_group, "SplitPreviousPane");
-	gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
-	action = gtk_action_group_get_action(lw->action_group, "SplitUpPane");
-	gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
-	action = gtk_action_group_get_action(lw->action_group, "SplitDownPane");
-	gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
+	action = gq_gtk_action_group_get_action(lw->action_group, "SplitNextPane");
+	gq_gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
+	action = gq_gtk_action_group_get_action(lw->action_group, "SplitPreviousPane");
+	gq_gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
+	action = gq_gtk_action_group_get_action(lw->action_group, "SplitUpPane");
+	gq_gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
+	action = gq_gtk_action_group_get_action(lw->action_group, "SplitDownPane");
+	gq_gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
 
-	action = gtk_action_group_get_action(lw->action_group, "SplitPaneSync");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.split_pane_sync);
+	action = gq_gtk_action_group_get_action(lw->action_group, "SplitPaneSync");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.split_pane_sync);
 
-	action = gtk_action_group_get_action(lw->action_group, "ViewIcons");
-	gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), lw->options.file_view_type);
+	action = gq_gtk_action_group_get_action(lw->action_group, "ViewIcons");
+	gq_gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), lw->options.file_view_type);
 
-	action = gtk_action_group_get_action(lw->action_group, "FloatTools");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.tools_float);
+	action = gq_gtk_action_group_get_action(lw->action_group, "FloatTools");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.tools_float);
 
-	action = gtk_action_group_get_action(lw->action_group, "SBar");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_bar_enabled(lw));
+	action = gq_gtk_action_group_get_action(lw->action_group, "SBar");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_bar_enabled(lw));
 
-	action = gtk_action_group_get_action(lw->action_group, "SBarSort");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_bar_sort_enabled(lw));
+	action = gq_gtk_action_group_get_action(lw->action_group, "SBarSort");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_bar_sort_enabled(lw));
 
-	action = gtk_action_group_get_action(lw->action_group, "HideSelectableToolbars");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.selectable_toolbars_hidden);
+	action = gq_gtk_action_group_get_action(lw->action_group, "HideSelectableToolbars");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.selectable_toolbars_hidden);
 
-	action = gtk_action_group_get_action(lw->action_group, "ShowInfoPixel");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_info_pixel);
+	action = gq_gtk_action_group_get_action(lw->action_group, "ShowInfoPixel");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_info_pixel);
 
-	action = gtk_action_group_get_action(lw->action_group, "SlideShow");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_image_slideshow_active(lw));
+	action = gq_gtk_action_group_get_action(lw->action_group, "SlideShow");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), layout_image_slideshow_active(lw));
 
-	action = gtk_action_group_get_action(lw->action_group, "IgnoreAlpha");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.ignore_alpha);
+	action = gq_gtk_action_group_get_action(lw->action_group, "IgnoreAlpha");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.ignore_alpha);
 
-	action = gtk_action_group_get_action(lw->action_group, "Animate");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.animate);
+	action = gq_gtk_action_group_get_action(lw->action_group, "Animate");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.animate);
 
-	action = gtk_action_group_get_action(lw->action_group, "ImageOverlay");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), osd_flags != OSD_SHOW_NOTHING);
+	action = gq_gtk_action_group_get_action(lw->action_group, "ImageOverlay");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), osd_flags != OSD_SHOW_NOTHING);
 
-	action = gtk_action_group_get_action(lw->action_group, "ImageHistogram");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), osd_flags & OSD_SHOW_HISTOGRAM);
+	action = gq_gtk_action_group_get_action(lw->action_group, "ImageHistogram");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), osd_flags & OSD_SHOW_HISTOGRAM);
 
-	action = gtk_action_group_get_action(lw->action_group, "ExifRotate");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), options->image.exif_rotate_enable);
+	action = gq_gtk_action_group_get_action(lw->action_group, "ExifRotate");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), options->image.exif_rotate_enable);
 
-	action = gtk_action_group_get_action(lw->action_group, "OverUnderExposed");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), options->overunderexposed);
+	action = gq_gtk_action_group_get_action(lw->action_group, "OverUnderExposed");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), options->overunderexposed);
 
-	action = gtk_action_group_get_action(lw->action_group, "DrawRectangle");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), options->draw_rectangle);
+	action = gq_gtk_action_group_get_action(lw->action_group, "DrawRectangle");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), options->draw_rectangle);
 
-	action = gtk_action_group_get_action(lw->action_group, "RectangularSelection");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), options->collections.rectangular_selection);
+	action = gq_gtk_action_group_get_action(lw->action_group, "RectangularSelection");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), options->collections.rectangular_selection);
 
-	action = gtk_action_group_get_action(lw->action_group, "ShowFileFilter");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_file_filter);
+	action = gq_gtk_action_group_get_action(lw->action_group, "ShowFileFilter");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_file_filter);
 
-	action = gtk_action_group_get_action(lw->action_group, "HideBars");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), (lw->options.bars_state.hidden));
+	action = gq_gtk_action_group_get_action(lw->action_group, "HideBars");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), (lw->options.bars_state.hidden));
 
 	if (osd_flags & OSD_SHOW_HISTOGRAM)
 		{
-		action = gtk_action_group_get_action(lw->action_group, "HistogramChanR");
-		gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), image_osd_histogram_get_channel(lw->image));
+		action = gq_gtk_action_group_get_action(lw->action_group, "HistogramChanR");
+		gq_gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), image_osd_histogram_get_channel(lw->image));
 
-		action = gtk_action_group_get_action(lw->action_group, "HistogramModeLin");
-		gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), image_osd_histogram_get_mode(lw->image));
+		action = gq_gtk_action_group_get_action(lw->action_group, "HistogramModeLin");
+		gq_gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), image_osd_histogram_get_mode(lw->image));
 		}
 
-	action = gtk_action_group_get_action(lw->action_group, "ConnectZoomMenu");
-	gtk_action_set_sensitive(action, lw->split_mode != SPLIT_NONE);
+	action = gq_gtk_action_group_get_action(lw->action_group, "ConnectZoomMenu");
+	gq_gtk_action_set_sensitive(action, lw->split_mode != SPLIT_NONE);
 
 	// @todo `which` is deprecated, use command -v
 	gboolean is_write_rotation = !runcmd("which exiftran >/dev/null 2>&1")
 	                          && !runcmd("which mogrify >/dev/null 2>&1")
 	                          && !options->metadata.write_orientation;
-	action = gtk_action_group_get_action(lw->action_group, "WriteRotation");
-	gtk_action_set_sensitive(action, is_write_rotation);
-	action = gtk_action_group_get_action(lw->action_group, "WriteRotationKeepDate");
-	gtk_action_set_sensitive(action, is_write_rotation);
+	action = gq_gtk_action_group_get_action(lw->action_group, "WriteRotation");
+	gq_gtk_action_set_sensitive(action, is_write_rotation);
+	action = gq_gtk_action_group_get_action(lw->action_group, "WriteRotationKeepDate");
+	gq_gtk_action_set_sensitive(action, is_write_rotation);
 
-	action = gtk_action_group_get_action(lw->action_group, "StereoAuto");
-	gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), layout_image_stereo_pixbuf_get(lw));
+	action = gq_gtk_action_group_get_action(lw->action_group, "StereoAuto");
+	gq_gtk_radio_action_set_current_value(GTK_RADIO_ACTION(action), layout_image_stereo_pixbuf_get(lw));
 
 	layout_util_sync_marks(lw);
 	layout_util_sync_color(lw);
@@ -3950,8 +3946,8 @@ void layout_util_sync_thumb(LayoutWindow *lw)
 
 	if (!lw->action_group) return;
 
-	action = gtk_action_group_get_action(lw->action_group, "Thumbnails");
-	gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_thumbnails);
+	action = gq_gtk_action_group_get_action(lw->action_group, "Thumbnails");
+	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.show_thumbnails);
 	g_object_set(action, "sensitive", (lw->options.file_view_type == FILEVIEW_LIST), NULL);
 }
 

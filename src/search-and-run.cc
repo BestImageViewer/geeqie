@@ -104,14 +104,14 @@ static void command_store_populate(SarData* sar)
 
 	gtk_tree_sortable_set_sort_column_id(sortable, SAR_LABEL, GTK_SORT_ASCENDING);
 
-	groups = gtk_ui_manager_get_action_groups(sar->lw->ui_manager);
+	groups = gq_gtk_ui_manager_get_action_groups(sar->lw->ui_manager);
 	while (groups)
 		{
-		actions = gtk_action_group_list_actions(GTK_ACTION_GROUP(groups->data));
+		actions = gq_gtk_action_group_list_actions(GTK_ACTION_GROUP(groups->data));
 		while (actions)
 			{
 			action = GTK_ACTION(actions->data);
-			accel_path = gtk_action_get_accel_path(action);
+			accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{
 				g_object_get(action, "tooltip", &tooltip, "label", &label, NULL);
@@ -199,7 +199,7 @@ static gboolean entry_box_activate_cb(GtkWidget *, gpointer data)
 
 	if (sar->action)
 		{
-		gtk_action_activate(sar->action);
+		gq_gtk_action_activate(sar->action);
 		}
 
 	search_and_run_destroy(sar);
@@ -236,7 +236,7 @@ static gboolean match_selected_cb(GtkEntryCompletion *, GtkTreeModel *model, Gtk
 
 	if (sar->action)
 		{
-		gtk_action_activate(sar->action);
+		gq_gtk_action_activate(sar->action);
 		}
 
 	g_idle_add(static_cast<GSourceFunc>(search_and_run_destroy), sar);

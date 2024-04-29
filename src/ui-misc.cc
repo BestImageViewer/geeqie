@@ -1504,14 +1504,14 @@ GList* get_action_items()
 		return nullptr;
 		}
 
-	groups = gtk_ui_manager_get_action_groups(lw->ui_manager);
+	groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager);
 	while (groups)
 		{
-		actions = gtk_action_group_list_actions(GTK_ACTION_GROUP(groups->data));
+		actions = gq_gtk_action_group_list_actions(GTK_ACTION_GROUP(groups->data));
 		while (actions)
 			{
 			action = GTK_ACTION(actions->data);
-			accel_path = gtk_action_get_accel_path(action);
+			accel_path = gq_gtk_action_get_accel_path(action);
 
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, nullptr))
 				{
@@ -1544,7 +1544,7 @@ GList* get_action_items()
 						}
 
 					action_item->name = action_name;
-					action_item->icon_name = g_strdup(gtk_action_get_stock_id(action));
+					action_item->icon_name = g_strdup(gq_gtk_action_get_stock_id(action));
 
 					list_duplicates = g_list_prepend(list_duplicates, action_item);
 					}
@@ -1609,10 +1609,10 @@ gboolean defined_mouse_buttons(GtkWidget *, GdkEventButton *event, gpointer data
 					}
 				else
 					{
-					action = gtk_action_group_get_action(lw->action_group, options->mouse_button_8);
+					action = gq_gtk_action_group_get_action(lw->action_group, options->mouse_button_8);
 					if (action)
 						{
-						gtk_action_activate(action);
+						gq_gtk_action_activate(action);
 						}
 					ret = TRUE;
 					}
@@ -1627,11 +1627,11 @@ gboolean defined_mouse_buttons(GtkWidget *, GdkEventButton *event, gpointer data
 					}
 				else
 					{
-					action = gtk_action_group_get_action(lw->action_group, options->mouse_button_9);
+					action = gq_gtk_action_group_get_action(lw->action_group, options->mouse_button_9);
 					ret = TRUE;
 					if (action)
 						{
-						gtk_action_activate(action);
+						gq_gtk_action_activate(action);
 						}
 					ret = TRUE;
 					}
