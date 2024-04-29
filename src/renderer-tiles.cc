@@ -1193,7 +1193,7 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 
 		// We find the overlapping region (r{x,y,w,h}) between the ImageTile (output)
 		// region and the region that's covered by this SourceTile (input).
-		gint rx, ry, rw, rh;
+		gint rx, ry, rw, rh;  // NOLINT(readability-isolate-declaration)
 		if (pr_clip_region(stx, sty, stw, sth,
 				   it->x + x, it->y + y, w, h,
 				   &rx, &ry, &rw, &rh))
