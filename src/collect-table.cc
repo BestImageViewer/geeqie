@@ -2259,7 +2259,7 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(collection_table_popup_destroy_cb), ct);
 
-	menu_item_add_stock(menu, _("Dropped list includes folders."), GQ_ICON_DND, nullptr, nullptr);
+	menu_item_add_icon(menu, _("Dropped list includes folders."), GQ_ICON_DIRECTORY, nullptr, nullptr);
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK,
 			    G_CALLBACK(confirm_dir_list_add), ct);

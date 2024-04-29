@@ -459,8 +459,8 @@ GtkWidget *submenu_add_collections(GtkWidget *menu, GtkWidget **menu_item,
 	submenu = gtk_menu_new();
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
-	menu_item_add_stock_sensitive(submenu, _("New collection"),
-					GQ_ICON_COLLECTION, TRUE, G_CALLBACK(func), GINT_TO_POINTER(-1));
+	menu_item_add_icon_sensitive(submenu, _("New collection"),
+	                             PIXBUF_INLINE_COLLECTION, TRUE, G_CALLBACK(func), GINT_TO_POINTER(-1));
 	menu_item_add_divider(submenu);
 
 	collect_manager_list(&collection_list,nullptr,nullptr);

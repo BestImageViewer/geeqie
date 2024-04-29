@@ -770,7 +770,7 @@ static void bookmark_dnd_get_data(GtkWidget *, GdkDragContext *,
 
 			if (strstr(real_path, get_collections_dir()) && isfile(path))
 				{
-				buf = bookmark_string(filename_from_path(path), path, "gq-icon-collection");
+				buf = bookmark_string(filename_from_path(path), path, PIXBUF_INLINE_COLLECTION);
 				}
 			else if (isfile(path))
 				{
@@ -916,7 +916,7 @@ void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 
 	if (strstr(real_path, get_collections_dir()) && isfile(path))
 		{
-		buf.reset(bookmark_string(name, path, "gq-icon-collection"));
+		buf.reset(bookmark_string(name, path, PIXBUF_INLINE_COLLECTION));
 		}
 	else
 		{
