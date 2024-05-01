@@ -710,28 +710,24 @@ static void vflist_collapse_cb(GtkTreeView *, GtkTreeIter *iter, GtkTreePath *, 
  *-----------------------------------------------------------------------------
  */
 
-
-static gchar* vflist_get_formatted(ViewFile *vf, const gchar *name, const gchar *sidecars, const gchar *size, const gchar *time, gboolean expanded, gboolean with_stars, const gchar *star_rating)
- {
+static gchar* vflist_get_formatted(ViewFile *vf, const gchar *name, const gchar *sidecars, const gchar *size, const gchar *time, gboolean expanded, const gchar *star_rating)
+{
 	gboolean multiline = vflist_is_multiline(vf);
-	gchar *text;
+	GString *text = g_string_new(nullptr);
+
+	g_string_printf(text, "%s %s", name, expanded ? "" : sidecars);
 
 	if (multiline)
 		{
-		if (with_stars)
+		g_string_append_printf(text, "\n%s\n%s", size, time);
+
+		if (star_rating)
 			{
-					text = g_strdup_printf("%s %s\n%s\n%s\n%s", name, expanded ? "" : sidecars, size, time, star_rating);
-			}
-		else
-			{
-			text = g_strdup_printf("%s %s\n%s\n%s", name, expanded ? "" : sidecars, size, time);
+			g_string_append_printf(text, "\n%s", star_rating);
 			}
 		}
-	else
-		{
-		text = g_strdup_printf("%s %s", name, expanded ? "" : sidecars);
-		}
-	return text;
+
+	return g_string_free(text, FALSE);
 }
 
 static void vflist_set_expanded(ViewFile *vf, GtkTreeIter *iter, gboolean expanded)
@@ -754,8 +750,8 @@ static void vflist_set_expanded(ViewFile *vf, GtkTreeIter *iter, gboolean expand
 					FILE_COLUMN_STAR_RATING, &star_rating,
 					-1);
 
-	formatted = vflist_get_formatted(vf, name, sidecars, size, time, expanded, FALSE, nullptr);
-	formatted_with_stars = vflist_get_formatted(vf, name, sidecars, size, time, expanded, TRUE, star_rating);
+	formatted = vflist_get_formatted(vf, name, sidecars, size, time, expanded, nullptr);
+	formatted_with_stars = vflist_get_formatted(vf, name, sidecars, size, time, expanded, star_rating);
 
 	gtk_tree_store_set(store, iter, FILE_COLUMN_FORMATTED, formatted,
 					FILE_COLUMN_EXPANDED, expanded,
@@ -804,8 +800,8 @@ static void vflist_setup_iter(ViewFile *vf, GtkTreeStore *store, GtkTreeIter *it
 	name = g_strdup_printf("%s%s%s", link, fd->name, disabled_grouping);
 	size = text_from_size(fd->size);
 
-	formatted = vflist_get_formatted(vf, name, sidecars, size, time, expanded, FALSE, nullptr);
-	formatted_with_stars = vflist_get_formatted(vf, name, sidecars, size, time, expanded, TRUE, star_rating);
+	formatted = vflist_get_formatted(vf, name, sidecars, size, time, expanded, nullptr);
+	formatted_with_stars = vflist_get_formatted(vf, name, sidecars, size, time, expanded, star_rating);
 
 	gtk_tree_store_set(store, iter, FILE_COLUMN_POINTER, fd,
 					FILE_COLUMN_VERSION, fd->version,
@@ -1158,7 +1154,7 @@ void vflist_set_star_fd(ViewFile *vf, FileData *fd)
 					FILE_COLUMN_EXPANDED, &expanded,
 					-1);
 
-	formatted_with_stars = vflist_get_formatted(vf, name, sidecars, size, time, expanded, TRUE, star_rating);
+	formatted_with_stars = vflist_get_formatted(vf, name, sidecars, size, time, expanded, star_rating);
 
 	gtk_tree_store_set(store, &iter, FILE_COLUMN_FORMATTED_WITH_STARS, formatted_with_stars,
 					FILE_COLUMN_EXPANDED, expanded,
