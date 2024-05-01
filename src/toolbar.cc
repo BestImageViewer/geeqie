@@ -59,7 +59,6 @@ struct ToolbarButtonData
 	GtkWidget *image;
 
 	const gchar *name; /* GtkActionEntry terminology */
-	const gchar *stock_id;
 };
 
 static ToolbarData *toolbarlist[2];
@@ -190,7 +189,6 @@ static void toolbar_item_free(ToolbarButtonData *tbbd)
 	if (!tbbd) return;
 
 	g_free(const_cast<gchar *>(tbbd->name));
-	g_free(const_cast<gchar *>(tbbd->stock_id));
 	g_free(const_cast<ToolbarButtonData *>(tbbd));
 }
 
@@ -223,7 +221,6 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 
 	toolbar_entry->button_label = gtk_label_new(label);
 	toolbar_entry->name = g_strdup(name);
-	toolbar_entry->stock_id = g_strdup(stock_id);
 
 #if HAVE_GTK4
 	gesture = gtk_gesture_click_new();
@@ -234,11 +231,11 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), MOUSE_BUTTON_RIGHT);
 	g_signal_connect(gesture, "released", G_CALLBACK(toolbar_press_cb), toolbar_entry);
 
-	if (toolbar_entry->stock_id)
+	if (stock_id)
 		{
 		GdkPixbuf *pixbuf;
 		gchar *iconl;
-		iconl = path_from_utf8(toolbar_entry->stock_id);
+		iconl = path_from_utf8(stock_id);
 		pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
 		g_free(iconl);
 		if (pixbuf)
@@ -259,8 +256,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 			}
 		else
 			{
-			toolbar_entry->image = gtk_image_new_from_stock(toolbar_entry->stock_id,
-														GTK_ICON_SIZE_BUTTON);
+			toolbar_entry->image = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
 			}
 		}
 	else
