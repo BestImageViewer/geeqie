@@ -45,30 +45,15 @@
 
 struct ToolbarData
 {
-	GtkWidget *widget;
 	GtkWidget *vbox;
-	GtkWidget *add_button;
-
-	LayoutWindow *lw;
 };
 
 struct ToolbarButtonData
 {
-	GtkWidget *button;
-	GtkWidget *button_label;
-	GtkWidget *image;
-
-	const gchar *name; /* GtkActionEntry terminology */
+	gchar *name; /* GtkActionEntry terminology */
 };
 
 static ToolbarData *toolbarlist[2];
-
-struct UseableToolbarItems
-{
-	const gchar *name; /* GtkActionEntry terminology */
-	const gchar *label;
-	const gchar *stock_id;
-};
 
 /**
  * @brief
@@ -150,9 +135,9 @@ static void toolbar_menu_popup(GtkWidget *widget)
 
 static gboolean toolbar_press_cb(GtkGesture *, int, double, double, gpointer data)
 {
-	auto button_data = static_cast<ToolbarButtonData *>(data);
+	auto *button = static_cast<GtkWidget *>(data);
 
-	toolbar_menu_popup(button_data->button);
+	toolbar_menu_popup(button);
 
 	return TRUE;
 }
@@ -188,7 +173,7 @@ static void toolbar_item_free(ToolbarButtonData *tbbd)
 {
 	if (!tbbd) return;
 
-	g_free(const_cast<gchar *>(tbbd->name));
+	g_free(tbbd->name);
 	g_free(tbbd);
 }
 
@@ -207,30 +192,30 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	GtkGesture *gesture;
 
 	toolbar_entry = g_new(ToolbarButtonData,1);
-	toolbar_entry->button = gtk_button_new();
-	gtk_button_set_relief(GTK_BUTTON(toolbar_entry->button), GTK_RELIEF_NONE);
-	gq_gtk_box_pack_start(GTK_BOX(box), toolbar_entry->button, FALSE, FALSE, 0);
-	gtk_widget_show(toolbar_entry->button);
+	toolbar_entry->name = g_strdup(name);
 
-	g_object_set_data_full(G_OBJECT(toolbar_entry->button), "toolbarbuttondata",
-	toolbar_entry, reinterpret_cast<GDestroyNotify>(toolbar_item_free));
+	GtkWidget *button = gtk_button_new();
+	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
+	gtk_widget_show(button);
+
+	g_object_set_data_full(G_OBJECT(button), "toolbarbuttondata",
+	                       toolbar_entry, reinterpret_cast<GDestroyNotify>(toolbar_item_free));
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-	gq_gtk_container_add(GTK_WIDGET(toolbar_entry->button), hbox);
+	gq_gtk_container_add(GTK_WIDGET(button), hbox);
 	gtk_widget_show(hbox);
-
-	toolbar_entry->button_label = gtk_label_new(label);
-	toolbar_entry->name = g_strdup(name);
 
 #if HAVE_GTK4
 	gesture = gtk_gesture_click_new();
-	gtk_widget_add_controller(toolbar_entry->button, GTK_EVENT_CONTROLLER(gesture));
+	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(gesture));
 #else
-	gesture = gtk_gesture_multi_press_new(toolbar_entry->button);
+	gesture = gtk_gesture_multi_press_new(button);
 #endif
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), MOUSE_BUTTON_RIGHT);
-	g_signal_connect(gesture, "released", G_CALLBACK(toolbar_press_cb), toolbar_entry);
+	g_signal_connect(gesture, "released", G_CALLBACK(toolbar_press_cb), button);
 
+	GtkWidget *image;
 	if (stock_id)
 		{
 		GdkPixbuf *pixbuf;
@@ -249,25 +234,26 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 
 			scaled = gdk_pixbuf_scale_simple(pixbuf, w, h,
 							 GDK_INTERP_BILINEAR);
-			toolbar_entry->image = gtk_image_new_from_pixbuf(scaled);
+			image = gtk_image_new_from_pixbuf(scaled);
 
 			g_object_unref(scaled);
 			g_object_unref(pixbuf);
 			}
 		else
 			{
-			toolbar_entry->image = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
+			image = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
 			}
 		}
 	else
 		{
-		toolbar_entry->image = gtk_image_new_from_icon_name(GQ_ICON_GO_JUMP,
-														GTK_ICON_SIZE_BUTTON);
+		image = gtk_image_new_from_icon_name(GQ_ICON_GO_JUMP, GTK_ICON_SIZE_BUTTON);
 		}
-	gq_gtk_box_pack_start(GTK_BOX(hbox), toolbar_entry->image, FALSE, FALSE, 0);
-	gtk_widget_show(toolbar_entry->image);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), toolbar_entry->button_label, FALSE, FALSE, 0);
-	gtk_widget_show(toolbar_entry->button_label);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
+	gtk_widget_show(image);
+
+	GtkWidget *button_label = gtk_label_new(label);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), button_label, FALSE, FALSE, 0);
+	gtk_widget_show(button_label);
 }
 
 static void toolbarlist_add_cb(GtkWidget *widget, gpointer data)
@@ -304,10 +290,10 @@ static void get_desktop_data(const gchar *name, gchar **label, gchar **stock_id)
 	g_list_free(editors_list);
 }
 
-static void toolbar_menu_add_popup(GtkWidget *, gpointer data)
+// toolbar_menu_add_popup
+static gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
 {
 	ActionItem *action_item;
-	auto toolbarlist = static_cast<ToolbarData *>(data);
 	GList *list;
 	GList *work;
 	GtkWidget *item;
@@ -315,7 +301,7 @@ static void toolbar_menu_add_popup(GtkWidget *, gpointer data)
 
 	menu = popup_menu_short_lived();
 
-	item = menu_item_add_stock(menu, "Separator", "Separator", G_CALLBACK(toolbarlist_add_cb), toolbarlist);
+	item = menu_item_add_stock(menu, "Separator", "Separator", G_CALLBACK(toolbarlist_add_cb), data);
 	g_object_set_data(G_OBJECT(item), "toolbar_add_name", g_strdup("Separator"));
 	g_object_set_data(G_OBJECT(item), "toolbar_add_label", g_strdup("Separator"));
 	g_object_set_data(G_OBJECT(item), "toolbar_add_stock_id", g_strdup("no-icon"));
@@ -328,7 +314,7 @@ static void toolbar_menu_add_popup(GtkWidget *, gpointer data)
 		{
 		action_item = static_cast<ActionItem *>(work->data);
 
-		item = menu_item_add_stock(menu, action_item->label, action_item->icon_name, G_CALLBACK(toolbarlist_add_cb), toolbarlist);
+		item = menu_item_add_stock(menu, action_item->label, action_item->icon_name, G_CALLBACK(toolbarlist_add_cb), data);
 		g_object_set_data(G_OBJECT(item), "toolbar_add_name", g_strdup(action_item->name));
 		g_object_set_data(G_OBJECT(item), "toolbar_add_label", g_strdup(action_item->label));
 		g_object_set_data(G_OBJECT(item), "toolbar_add_stock_id", g_strdup(action_item->icon_name));
@@ -340,13 +326,7 @@ static void toolbar_menu_add_popup(GtkWidget *, gpointer data)
 	action_items_free(list);
 
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-}
 
-static gboolean toolbar_menu_add_cb(GtkWidget *widget, gpointer data)
-{
-	auto toolbarlist = static_cast<ToolbarData *>(data);
-
-	toolbar_menu_add_popup(widget, toolbarlist);
 	return TRUE;
 }
 
@@ -438,16 +418,15 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 		{
 		toolbarlist[bar] = g_new0(ToolbarData, 1);
 		}
-	toolbarlist[bar]->lw = lw;
 
-	toolbarlist[bar]->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	gtk_widget_show(toolbarlist[bar]->widget);
+	GtkWidget *widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	gtk_widget_show(widget);
 
 	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 							GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_NONE);
-	gq_gtk_box_pack_start(GTK_BOX(toolbarlist[bar]->widget), scrolled, TRUE, TRUE, 0);
+	gq_gtk_box_pack_start(GTK_BOX(widget), scrolled, TRUE, TRUE, 0);
 	gtk_widget_show(scrolled);
 
 	toolbarlist[bar]->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -458,16 +437,17 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 
 	add_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_show(add_box);
-	gq_gtk_box_pack_end(GTK_BOX(toolbarlist[bar]->widget), add_box, FALSE, FALSE, 0);
+	gq_gtk_box_pack_end(GTK_BOX(widget), add_box, FALSE, FALSE, 0);
 	tbar = pref_toolbar_new(add_box);
-	toolbarlist[bar]->add_button = pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
-											_("Add Toolbar Item"),
-											G_CALLBACK(toolbar_menu_add_cb), toolbarlist[bar]);
-	gtk_widget_show(toolbarlist[bar]->add_button);
+
+	GtkWidget *add_button = pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
+	                                            _("Add Toolbar Item"),
+	                                            G_CALLBACK(toolbar_menu_add_cb), toolbarlist[bar]);
+	gtk_widget_show(add_button);
 
 	toolbarlist_populate(lw,GTK_BOX(toolbarlist[bar]->vbox), bar);
 
-	return toolbarlist[bar]->widget;
+	return widget;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
