@@ -59,6 +59,11 @@ enum MetadataKey {
 	MK_COMMENT
 };
 
+struct MetadataCacheEntry {
+	gchar *key;
+	GList *values;
+};
+
 /* If contents change, keep GuideOptionsMetadata.xml up to date */
 /**
  *  @brief Tags that will be written to all files in a group - selected by: options->metadata.sync_grouped_files, Preferences/Metadata/Write The Same Description Tags To All Grouped Sidecars
@@ -88,10 +93,18 @@ constexpr std::array<const gchar *, 22> group_keys{
 	"Xmp.xmp.Rating",
 };
 
-gint metadata_cache_compare_key(const GList *list, const gchar *key)
+gint metadata_cache_entry_compare_key(const MetadataCacheEntry *entry, const gchar *key)
 {
-	auto *entry_key = static_cast<gchar *>(list->data);
-	return strcmp(entry_key, key);
+	return strcmp(entry->key, key);
+}
+
+void metadata_cache_entry_free(MetadataCacheEntry *entry)
+{
+	if (!entry) return;
+
+	g_free(entry->key);
+	g_list_free_full(entry->values, g_free);
+	g_free(entry);
 }
 
 inline gboolean is_keywords_separator(gchar c)
@@ -117,32 +130,30 @@ static gboolean metadata_file_read(gchar *path, GList **keywords, gchar **commen
  *-------------------------------------------------------------------
  */
 
-/* fd->cached metadata list of lists
-   each particular list contains key as a first entry, then the values
-*/
+/* fd->cached_metadata list of MetadataCacheEntry */
 
 static void metadata_cache_update(FileData *fd, const gchar *key, const GList *values)
 {
 	GList *work;
 
-	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_compare_key));
+	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_entry_compare_key));
 	if (work)
 		{
 		/* key found - just replace values */
-		auto entry = static_cast<GList *>(work->data);
+		auto *entry = static_cast<MetadataCacheEntry *>(work->data);
 
-		GList *old_values = entry->next;
-		entry->next = nullptr;
-		old_values->prev = nullptr;
-		g_list_free_full(old_values, g_free);
-		work->data = g_list_append(entry, string_list_copy(values));
+		g_list_free_full(entry->values, g_free);
+		entry->values = string_list_copy(values);
 		DEBUG_1("updated %s %s\n", key, fd->path);
 		return;
 		}
 
 	/* key not found - prepend new entry */
-	fd->cached_metadata = g_list_prepend(fd->cached_metadata,
-				g_list_prepend(string_list_copy(values), g_strdup(key)));
+	auto *entry = g_new0(MetadataCacheEntry, 1);
+	entry->key = g_strdup(key);
+	entry->values = string_list_copy(values);
+
+	fd->cached_metadata = g_list_prepend(fd->cached_metadata, entry);
 	DEBUG_1("added %s %s\n", key, fd->path);
 }
 
@@ -150,14 +161,14 @@ static const GList *metadata_cache_get(FileData *fd, const gchar *key)
 {
 	GList *work;
 
-	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_compare_key));
+	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_entry_compare_key));
 	if (work)
 		{
 		/* key found */
-		auto entry = static_cast<GList *>(work->data);
+		auto *entry = static_cast<MetadataCacheEntry *>(work->data);
 
 		DEBUG_1("found %s %s\n", key, fd->path);
-		return entry;
+		return entry->values;
 		}
 	DEBUG_1("not found %s %s\n", key, fd->path);
 	return nullptr;
@@ -167,13 +178,13 @@ static void metadata_cache_remove(FileData *fd, const gchar *key)
 {
 	GList *work;
 
-	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_compare_key));
+	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_entry_compare_key));
 	if (work)
 		{
 		/* key found */
-		auto entry = static_cast<GList *>(work->data);
+		auto *entry = static_cast<MetadataCacheEntry *>(work->data);
 
-		g_list_free_full(entry, g_free);
+		metadata_cache_entry_free(entry);
 		fd->cached_metadata = g_list_delete_link(fd->cached_metadata, work);
 		DEBUG_1("removed %s %s\n", key, fd->path);
 		return;
@@ -185,17 +196,9 @@ void metadata_cache_free(FileData *fd)
 {
 	if (fd->cached_metadata) DEBUG_1("freed %s\n", fd->path);
 
-	g_list_free_full(fd->cached_metadata, [](gpointer data)
-		{
-		auto entry = static_cast<GList *>(data);
-		g_list_free_full(entry, g_free);
-		});
+	g_list_free_full(fd->cached_metadata, reinterpret_cast<GDestroyNotify>(metadata_cache_entry_free));
 	fd->cached_metadata = nullptr;
 }
-
-
-
-
 
 
 /*
@@ -679,21 +682,21 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 {
 	ExifData *exif;
 	GList *list = nullptr;
-	const GList *cache_entry;
+	const GList *cache_values;
 	if (!fd) return nullptr;
 
 	/* unwritten data override everything */
 	if (fd->modified_xmp && format == METADATA_PLAIN)
 		{
-	        list = static_cast<GList *>(g_hash_table_lookup(fd->modified_xmp, key));
+		list = static_cast<GList *>(g_hash_table_lookup(fd->modified_xmp, key));
 		if (list) return string_list_copy(list);
 		}
 
 
 	if (format == METADATA_PLAIN && strcmp(key, KEYWORD_KEY) == 0
-	    && (cache_entry = metadata_cache_get(fd, key)))
+	    && (cache_values = metadata_cache_get(fd, key)))
 		{
-		return string_list_copy(cache_entry->next);
+		return string_list_copy(cache_values);
 		}
 
 	/*
