@@ -1275,20 +1275,15 @@ ExifData *exif_read(gchar *path, gchar *, GHashTable *)
 
 ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 {
-	GList *work;
-
 	if (!key) return nullptr;
 
-	work = exif->items;
-	while (work)
-		{
-		ExifItem *item;
+	const auto exif_item_compare_marker_key = [](gconstpointer data, gconstpointer user_data)
+	{
+		return g_strcmp0(static_cast<const ExifItem *>(data)->marker->key, static_cast<const gchar *>(user_data));
+	};
 
-		item = static_cast<ExifItem*>(work->data);
-		work = work->next;
-		if (item->marker->key && strcmp(key, item->marker->key) == 0) return item;
-		}
-	return nullptr;
+	GList *work = g_list_find_custom(exif->items, key, exif_item_compare_marker_key);
+	return work ? static_cast<ExifItem*>(work->data) : nullptr;
 }
 
 #define EXIF_DATA_AS_TEXT_MAX_COUNT 16

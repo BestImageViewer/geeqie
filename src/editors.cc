@@ -197,8 +197,6 @@ gboolean editor_read_desktop_file(const gchar *path)
 	gchar *try_exec;
 	GtkTreeIter iter;
 	gboolean category_geeqie = FALSE;
-	GList *work;
-	gboolean disabled;
 
 	if (g_hash_table_lookup(editors, key)) return FALSE; /* the file found earlier wins */
 
@@ -367,20 +365,7 @@ gboolean editor_read_desktop_file(const gchar *path)
 
 	if (editor->ignored) return TRUE;
 
-	work = options->disabled_plugins;
-
-	disabled = FALSE;
-	while (work)
-		{
-		if (g_strcmp0(path, static_cast<const gchar *>(work->data)) == 0)
-			{
-			disabled = TRUE;
-			break;
-			}
-		work = work->next;
-		}
-
-	editor->disabled = disabled;
+	editor->disabled = g_list_find_custom(options->disabled_plugins, path, reinterpret_cast<GCompareFunc>(g_strcmp0)) ? TRUE : FALSE;
 
 	gtk_list_store_append(desktop_file_list, &iter);
 	gtk_list_store_set(desktop_file_list, &iter,
@@ -733,9 +718,13 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 			p = fd->path;
 		else
 			{
+			const auto file_data_compare_ext = [](gconstpointer data, gconstpointer user_data)
+			{
+				return g_ascii_strcasecmp(static_cast<const FileData *>(data)->extension, static_cast<const gchar *>(user_data));
+			};
+
 			while (work)
 				{
-				GList *work2;
 				auto ext = static_cast<gchar *>(work->data);
 				work = work->next;
 
@@ -746,20 +735,19 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 					break;
 					}
 
-				work2 = consider_sidecars ? fd->sidecar_files : nullptr;
-				while (work2)
+				if (consider_sidecars)
 					{
-					auto sfd = static_cast<FileData *>(work2->data);
-					work2 = work2->next;
-
-					if (g_ascii_strcasecmp(ext, sfd->extension) == 0)
+					GList *work2 = g_list_find_custom(fd->sidecar_files, ext, file_data_compare_ext);
+					if (work2)
 						{
+						auto sfd = static_cast<FileData *>(work2->data);
 						p = sfd->path;
-						break;
 						}
 					}
+
 				if (p) break;
 				}
+
 			if (!p) return nullptr;
 			}
 		}

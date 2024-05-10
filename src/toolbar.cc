@@ -144,7 +144,6 @@ static gboolean toolbar_press_cb(GtkGesture *, int, double, double, gpointer dat
 
 static void get_toolbar_item(const gchar *name, gchar **label, gchar **stock_id)
 {
-	ActionItem *action_item;
 	GList *list;
 	GList *work;
 	*label = nullptr;
@@ -152,18 +151,17 @@ static void get_toolbar_item(const gchar *name, gchar **label, gchar **stock_id)
 
 	list = get_action_items();
 
-	work = list;
-	while (work)
+	const auto action_item_compare_name = [](gconstpointer data, gconstpointer user_data)
+	{
+		return g_strcmp0(static_cast<const ActionItem *>(data)->name, static_cast<const gchar *>(user_data));
+	};
+	work = g_list_find_custom(list, name, action_item_compare_name);
+	if (work)
 		{
-		action_item = static_cast<ActionItem *>(work->data);
-		if (g_strcmp0(action_item->name, name) == 0)
-			{
-			*label = g_strdup(action_item->label);
-			*stock_id = g_strdup(action_item->icon_name);
-			break;
-			}
+		auto *action_item = static_cast<ActionItem *>(work->data);
 
-		work = work->next;
+		*label = g_strdup(action_item->label);
+		*stock_id = g_strdup(action_item->icon_name);
 		}
 
 	action_items_free(list);
@@ -274,18 +272,17 @@ static void get_desktop_data(const gchar *name, gchar **label, gchar **stock_id)
 	*stock_id = nullptr;
 
 	editors_list = editor_list_get();
-	work = editors_list;
-	while (work)
+	const auto editor_compare_key = [](gconstpointer data, gconstpointer user_data)
+	{
+		return g_strcmp0(static_cast<const EditorDescription *>(data)->key, static_cast<const gchar *>(user_data));
+	};
+	work = g_list_find_custom(editors_list, name, editor_compare_key);
+	if (work)
 		{
 		auto editor = static_cast<const EditorDescription *>(work->data);
 
-		if (g_strcmp0(name, editor->key) == 0)
-			{
-			*label = g_strdup(editor->name);
-			*stock_id = g_strconcat(editor->icon, ".desktop", NULL);
-			break;
-			}
-		work = work->next;
+		*label = g_strdup(editor->name);
+		*stock_id = g_strconcat(editor->icon, ".desktop", NULL);
 		}
 	g_list_free(editors_list);
 }

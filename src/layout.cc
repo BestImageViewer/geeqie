@@ -167,17 +167,13 @@ LayoutWindow *layout_find_by_layout_id(const gchar *id)
 		return nullptr;
 		}
 
-	work = layout_window_list;
-	while (work)
-		{
-		auto lw = static_cast<LayoutWindow *>(work->data);
-		work = work->next;
+	work = g_list_find_custom(layout_window_list, id, reinterpret_cast<GCompareFunc>(layout_compare_options_id));
+	return work ? static_cast<LayoutWindow *>(work->data) : nullptr;
+}
 
-		if (lw->options.id && strcmp(id, lw->options.id) == 0)
-			return lw;
-		}
-
-	return nullptr;
+gint layout_compare_options_id(const LayoutWindow *lw, const gchar *id)
+{
+	return g_strcmp0(lw->options.id, id);
 }
 
 gchar *layout_get_unique_id()

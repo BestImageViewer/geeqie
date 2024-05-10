@@ -2115,24 +2115,16 @@ static gboolean search_file_next(SearchData *sd)
 
 		if (list)
 			{
-			GList *needle;
-			GList *haystack;
+			GList *needle = sd->search_keyword_list;
 
 			if (sd->match_keywords == SEARCH_MATCH_ALL)
 				{
 				gboolean found = TRUE;
 
-				needle = sd->search_keyword_list;
 				while (needle && found)
 					{
-					found = FALSE;
-					haystack = list;
-					while (haystack && !found)
-						{
-						found = (g_ascii_strcasecmp(static_cast<gchar *>(needle->data),
-								    static_cast<gchar *>(haystack->data)) == 0);
-						haystack = haystack->next;
-						}
+					found = (g_list_find_custom(list, needle->data,
+					                            reinterpret_cast<GCompareFunc>(g_ascii_strcasecmp)) != nullptr);
 					needle = needle->next;
 					}
 
@@ -2142,16 +2134,10 @@ static gboolean search_file_next(SearchData *sd)
 				{
 				gboolean found = FALSE;
 
-				needle = sd->search_keyword_list;
 				while (needle && !found)
 					{
-					haystack = list;
-					while (haystack && !found)
-						{
-						found = (g_ascii_strcasecmp(static_cast<gchar *>(needle->data),
-								    static_cast<gchar *>(haystack->data)) == 0);
-						haystack = haystack->next;
-						}
+					found = (g_list_find_custom(list, needle->data,
+					                            reinterpret_cast<GCompareFunc>(g_ascii_strcasecmp)) != nullptr);
 					needle = needle->next;
 					}
 
@@ -2161,16 +2147,10 @@ static gboolean search_file_next(SearchData *sd)
 				{
 				gboolean found = FALSE;
 
-				needle = sd->search_keyword_list;
 				while (needle && !found)
 					{
-					haystack = list;
-					while (haystack && !found)
-						{
-						found = (g_ascii_strcasecmp(static_cast<gchar *>(needle->data),
-								    static_cast<gchar *>(haystack->data)) == 0);
-						haystack = haystack->next;
-						}
+					found = (g_list_find_custom(list, needle->data,
+					                            reinterpret_cast<GCompareFunc>(g_ascii_strcasecmp)) != nullptr);
 					needle = needle->next;
 					}
 

@@ -93,20 +93,15 @@ void filter_remove_entry(FilterEntry *fe)
 
 static FilterEntry *filter_get_by_key(const gchar *key)
 {
-	GList *work;
-
 	if (!key) return nullptr;
 
-	work = filter_list;
-	while (work)
-		{
-		auto fe = static_cast<FilterEntry *>(work->data);
-		work = work->next;
+	const auto filter_entry_compare_key = [](gconstpointer data, gconstpointer user_data)
+	{
+		return g_strcmp0(static_cast<const FilterEntry *>(data)->key, static_cast<const gchar *>(user_data));
+	};
 
-		if (strcmp(fe->key, key) == 0) return fe;
-		}
-
-	return nullptr;
+	GList *work = g_list_find_custom(filter_list, key, filter_entry_compare_key);
+	return work ? static_cast<FilterEntry *>(work->data) : nullptr;
 }
 
 static gboolean filter_key_exists(const gchar *key)
@@ -140,27 +135,20 @@ void filter_add_unique(const gchar *description, const gchar *extensions, FileFo
 
 static void filter_add_if_missing(const gchar *key, const gchar *description, const gchar *extensions, FileFormatClass file_class, gboolean writable, gboolean allow_sidecar, gboolean enabled)
 {
-	GList *work;
-
 	if (!key) return;
 
-	work = filter_list;
-	while (work)
+	FilterEntry *fe = filter_get_by_key(key);
+	if (fe)
 		{
-		auto fe = static_cast<FilterEntry *>(work->data);
-		work = work->next;
-		if (fe->key && strcmp(fe->key, key) == 0)
-			{
-			if (fe->file_class == FORMAT_CLASS_UNKNOWN)
-				fe->file_class = file_class;	/* for compatibility */
+		if (fe->file_class == FORMAT_CLASS_UNKNOWN)
+			fe->file_class = file_class;	/* for compatibility */
 
-			if (fe->writable && fe->allow_sidecar)
-				{
-				fe->writable = writable;
-				fe->allow_sidecar = allow_sidecar;
-				}
-			return;
+		if (fe->writable && fe->allow_sidecar)
+			{
+			fe->writable = writable;
+			fe->allow_sidecar = allow_sidecar;
 			}
+		return;
 		}
 
 	filter_add(key, description, extensions, file_class, writable, allow_sidecar, enabled);

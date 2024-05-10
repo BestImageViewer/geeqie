@@ -821,7 +821,6 @@ static void add_zoom_style_selection_menu(GtkWidget *table, gint column, gint ro
 
 static void mouse_buttons_selection_menu_cb(GtkWidget *combo, gpointer data)
 {
-	ActionItem *action_item = nullptr;
 	auto option = static_cast<gchar **>(data);
 	gchar *label;
 	GList *list;
@@ -830,20 +829,15 @@ static void mouse_buttons_selection_menu_cb(GtkWidget *combo, gpointer data)
 	label = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
 
 	list = get_action_items();
-	work = list;
-
-	while (work)
+	work = g_list_find_custom(list, label, reinterpret_cast<GCompareFunc>(action_item_compare_label));
+	if (work)
 		{
-		action_item = static_cast<ActionItem *>(work->data);
-		if (g_strcmp0(action_item->label, label) == 0)
-			{
-			break;
-			}
-		work=work->next;
+		auto *action_item = static_cast<ActionItem *>(work->data);
+
+		g_free(*option);
+		*option = g_strdup(action_item->name);
 		}
 
-	g_free(*option);
-	*option = g_strdup(action_item->name);
 	g_free(label);
 	action_items_free(list);
 }
@@ -3281,10 +3275,8 @@ static void config_tab_keywords_save()
 	GtkTextIter end;
 	GtkTextBuffer *buffer;
 	GList *kw_list = nullptr;
-	GList *work;
 	gchar *buffer_text;
 	gchar *kw_split;
-	gboolean found;
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(keyword_text));
 	gtk_text_buffer_get_bounds(buffer, &start, &end);
@@ -3294,18 +3286,7 @@ static void config_tab_keywords_save()
 	kw_split = strtok(buffer_text, "\n");
 	while (kw_split != nullptr)
 		{
-		work = kw_list;
-		found = FALSE;
-		while (work)
-			{
-			if (g_strcmp0(static_cast<const gchar *>(work->data), kw_split) == 0)
-				{
-				found = TRUE;
-				break;
-				}
-			work = work->next;
-			}
-		if (!found)
+		if (!g_list_find_custom(kw_list, kw_split, reinterpret_cast<GCompareFunc>(g_strcmp0)))
 			{
 			kw_list = g_list_append(kw_list, g_strdup(kw_split));
 			}
@@ -3930,11 +3911,6 @@ static void config_tab_toolbar_status(GtkWidget *notebook)
 }
 
 /* advanced tab */
-static gint extension_sort_cb(gconstpointer a, gconstpointer b)
-{
-	return g_strcmp0(static_cast<const gchar *>(a), static_cast<const gchar *>(b));
-}
-
 static void config_tab_advanced(GtkWidget *notebook)
 {
 	gchar **extensions;
@@ -3969,7 +3945,7 @@ static void config_tab_advanced(GtkWidget *notebook)
 		i = 0;
 		while (extensions[i])
 			{
-			extensions_list = g_list_insert_sorted(extensions_list, g_strdup(extensions[i]), extension_sort_cb);
+			extensions_list = g_list_insert_sorted(extensions_list, g_strdup(extensions[i]), reinterpret_cast<GCompareFunc>(g_strcmp0));
 			i++;
 			}
 

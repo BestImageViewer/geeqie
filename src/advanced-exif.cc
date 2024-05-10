@@ -93,18 +93,9 @@ gint display_order [6] = {
 
 static gboolean advanced_exif_row_enabled(const gchar *name)
 {
-	GList *list;
-
 	if (!name) return FALSE;
 
-	list = history_list_get_by_key("exif_extras");
-	while (list)
-		{
-		if (strcmp(name, static_cast<gchar *>(list->data)) == 0) return TRUE;
-		list = list->next;
-	}
-
-	return FALSE;
+	return g_list_find_custom(history_list_get_by_key("exif_extras"), name, reinterpret_cast<GCompareFunc>(strcmp)) ? TRUE : FALSE;
 }
 
 static void advanced_exif_update(ExifWin *ew)

@@ -2221,9 +2221,7 @@ static gint layout_window_menu_list_sort_cb(gconstpointer a, gconstpointer b)
 
 static GList *layout_window_menu_list(GList *listin)
 {
-	GList *list;
 	WindowNames *wn;
-	gboolean dupe;
 	DIR *dp;
 	struct dirent *dir;
 	gchar *pathl;
@@ -2243,30 +2241,16 @@ static GList *layout_window_menu_list(GList *listin)
 
 		if (g_str_has_suffix(name_file, ".xml"))
 			{
-			LayoutWindow *lw_tmp ;
 			gchar *name_utf8 = path_to_utf8(name_file);
 			gchar *name_base = g_strndup(name_utf8, strlen(name_utf8) - 4);
-			list = layout_window_list;
-			dupe = FALSE;
-			while (list)
-				{
-				lw_tmp = static_cast<LayoutWindow *>(list->data);
-				if (g_strcmp0(lw_tmp->options.id, name_base) == 0)
-					{
-					dupe = TRUE;
-					}
-				list = list->next;
-				}
-			gchar *dpath = g_build_filename(pathl, name_utf8, NULL);
+
 			wn  = g_new0(WindowNames, 1);
-			wn->displayed = dupe;
-			wn->name = g_strdup(name_base);
-			wn->path = g_strdup(dpath);
+			wn->displayed = g_list_find_custom(layout_window_list, name_base, reinterpret_cast<GCompareFunc>(layout_compare_options_id)) ? TRUE : FALSE;
+			wn->name = name_base;
+			wn->path = g_build_filename(pathl, name_utf8, NULL);
 			listin = g_list_append(listin, wn);
 
-			g_free(dpath);
 			g_free(name_utf8);
-			g_free(name_base);
 			}
 		}
 	closedir(dp);
@@ -2353,30 +2337,24 @@ static void window_rename_ok(GenericDialog *, gpointer data)
 {
 	auto rw = static_cast<RenameWindow *>(data);
 	gchar *path;
-	gboolean window_layout_name_exists = FALSE;
-	GList *list = nullptr;
 	gchar *xml_name;
 	gchar *new_id;
 
 	new_id = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(rw->window_name_entry)));
 
-	list = layout_window_menu_list(list);
-	while (list)
-		{
-		auto ln = static_cast<WindowNames *>(list->data);
-		if (g_strcmp0(ln->name, new_id) == 0)
-			{
-			gchar *buf;
-			buf = g_strdup_printf(_("Window layout name \"%s\" already exists."), new_id);
-			warning_dialog(_("Rename window"), buf, GQ_ICON_DIALOG_WARNING, rw->gd->dialog);
-			g_free(buf);
-			window_layout_name_exists = TRUE;
-			break;
-			}
-		list = list->next;
-		}
+	const auto window_names_compare_name = [](gconstpointer data, gconstpointer user_data)
+	{
+		return g_strcmp0(static_cast<const WindowNames *>(data)->name, static_cast<const gchar *>(user_data));
+	};
 
-	if (!window_layout_name_exists)
+	if (g_list_find_custom(layout_window_menu_list(nullptr), new_id, window_names_compare_name))
+		{
+		gchar *buf;
+		buf = g_strdup_printf(_("Window layout name \"%s\" already exists."), new_id);
+		warning_dialog(_("Rename window"), buf, GQ_ICON_DIALOG_WARNING, rw->gd->dialog);
+		g_free(buf);
+		}
+	else
 		{
 		xml_name = g_strdup_printf("%s.xml", rw->lw->options.id);
 		path = g_build_filename(get_window_layouts_dir(), xml_name, NULL);

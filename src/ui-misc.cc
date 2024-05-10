@@ -1445,17 +1445,6 @@ gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
 	
 }
 
-static gint simple_sort_cb(gconstpointer a, gconstpointer b)
-{
-	const ActionItem *a_action;
-	const ActionItem *b_action;
-
-	a_action = static_cast<const ActionItem *>(a);
-	b_action = static_cast<const ActionItem *>(b);
-
-	return g_strcmp0(a_action->name, b_action->name);
-}
-
 void free_action_items_cb(gpointer data)
 {
 	ActionItem *action_item;
@@ -1486,7 +1475,6 @@ GList* get_action_items()
 {
 	ActionItem *action_item;
 	const gchar *accel_path;
-	gboolean duplicate;
 	gchar *action_name;
 	gchar *label;
 	gchar *tooltip;
@@ -1494,8 +1482,6 @@ GList* get_action_items()
 	GList *groups;
 	GList *list_duplicates = nullptr;
 	GList *list_unique = nullptr;
-	GList *work1;
-	GList *work2;
 	GtkAction *action;
 	LayoutWindow *lw = nullptr;
 
@@ -1556,39 +1542,33 @@ GList* get_action_items()
 		}
 
 	/* Use the shortest name i.e. ignore -Alt versions. Sort makes the shortest first in the list */
-	list_duplicates = g_list_sort(list_duplicates, simple_sort_cb);
+	const auto action_item_compare_names = [](gconstpointer a, gconstpointer b)
+	{
+		return g_strcmp0(static_cast<const ActionItem *>(a)->name, static_cast<const ActionItem *>(b)->name);
+	};
+	list_duplicates = g_list_sort(list_duplicates, action_item_compare_names);
 
 	/* Ignore duplicate entries */
-	work1 = list_duplicates;
-	while (work1)
+	for (GList *work = list_duplicates; work; work = work->next)
 		{
-		duplicate = FALSE;
-		work2 = list_unique;
-		/* The first entry must be unique, list_unique is null so control bypasses the while */
-		while (work2)
-			{
-			if (g_strcmp0(static_cast<ActionItem *>(work2->data)->label, static_cast<ActionItem *>(work1->data)->label) == 0)
-				{
-				duplicate = TRUE;
-				break;
-				}
-			work2 = work2->next;
-			}
-
-		if (!duplicate)
+		if (!g_list_find_custom(list_unique, static_cast<ActionItem *>(work->data)->label, reinterpret_cast<GCompareFunc>(action_item_compare_label)))
 			{
 			action_item = g_new0(ActionItem, 1);
-			action_item->name = g_strdup(static_cast<ActionItem *>(work1->data)->name);
-			action_item->label = g_strdup(static_cast<ActionItem *>(work1->data)->label);
-			action_item->icon_name = g_strdup(static_cast<ActionItem *>(work1->data)->icon_name);
+			action_item->name = g_strdup(static_cast<ActionItem *>(work->data)->name);
+			action_item->label = g_strdup(static_cast<ActionItem *>(work->data)->label);
+			action_item->icon_name = g_strdup(static_cast<ActionItem *>(work->data)->icon_name);
 			list_unique = g_list_append(list_unique, action_item);
 			}
-		work1 = work1->next;
 		}
 
 	g_list_free_full(list_duplicates, free_action_items_cb);
 
 	return list_unique;
+}
+
+gint action_item_compare_label(const ActionItem *action_item, const gchar *label)
+{
+	return g_strcmp0(action_item->label, label);
 }
 
 gboolean defined_mouse_buttons(GtkWidget *, GdkEventButton *event, gpointer data)

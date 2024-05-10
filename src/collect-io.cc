@@ -693,22 +693,14 @@ static void collect_manager_entry_reset(CollectManagerEntry *entry)
 
 static CollectManagerEntry *collect_manager_get_entry(const gchar *path)
 {
-	GList *work;
+	const auto collect_manager_entry_compare_path = [](gconstpointer data, gconstpointer user_data)
+	{
+		return strcmp(static_cast<const CollectManagerEntry *>(data)->path, static_cast<const gchar *>(user_data));
+	};
 
-	work = collection_manager_entry_list;
-	while (work)
-		{
-		CollectManagerEntry *entry;
+	GList *work = g_list_find_custom(collection_manager_entry_list, path, collect_manager_entry_compare_path);
 
-		entry = static_cast<CollectManagerEntry *>(work->data);
-		work = work->next;
-		if (strcmp(entry->path, path) == 0)
-			{
-			return entry;
-			}
-		}
-	return nullptr;
-
+	return work ? static_cast<CollectManagerEntry *>(work->data) : nullptr;
 }
 
 static void collect_manager_entry_add_action(CollectManagerEntry *entry, CollectManagerAction *action)
@@ -1104,14 +1096,6 @@ void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer)
 		}
 }
 
-static gint collection_manager_sort_cb(gconstpointer a, gconstpointer b)
-{
-	auto char_a = static_cast<const gchar *>(a);
-	auto char_b = static_cast<const gchar *>(b);
-
-	return g_strcmp0(char_a, char_b);
-}
-
 /**
  * @brief Creates sorted list of collections
  * @param[out] names_exc sorted list of collections names excluding extension
@@ -1150,19 +1134,19 @@ void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 			if (names_exc != nullptr)
 				{
 				*names_exc = g_list_insert_sorted(*names_exc, g_strdup(name),
-											collection_manager_sort_cb);
+				                                  reinterpret_cast<GCompareFunc>(g_strcmp0));
 				*names_exc = g_list_first(*names_exc);
 				}
 			if (names_inc != nullptr)
 				{
 				*names_inc = g_list_insert_sorted(*names_inc,filename,
-											collection_manager_sort_cb);
+				                                  reinterpret_cast<GCompareFunc>(g_strcmp0));
 				*names_inc = g_list_first(*names_inc);
 				}
 			if (paths != nullptr)
 				{
 				*paths = g_list_insert_sorted(*paths, g_strdup(fd->path),
-											collection_manager_sort_cb);
+				                              reinterpret_cast<GCompareFunc>(g_strcmp0));
 				*paths = g_list_first(*paths);
 				}
 			g_free(name);

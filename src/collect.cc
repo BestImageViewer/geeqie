@@ -321,19 +321,15 @@ CollectWindow *collection_window_find(CollectionData *cd)
 
 CollectWindow *collection_window_find_by_path(const gchar *path)
 {
-	GList *work;
-
 	if (!path) return nullptr;
 
-	work = collection_window_list;
-	while (work)
-		{
-		auto cw = static_cast<CollectWindow *>(work->data);
-		if (cw->cd->path && strcmp(cw->cd->path, path) == 0) return cw;
-		work = work->next;
-		}
+	const auto collect_window_compare_data_path = [](gconstpointer data, gconstpointer user_data)
+	{
+		return g_strcmp0(static_cast<const CollectWindow *>(data)->cd->path, static_cast<const gchar *>(user_data));
+	};
 
-	return nullptr;
+	GList *work = g_list_find_custom(collection_window_list, path, collect_window_compare_data_path);
+	return work ? static_cast<CollectWindow *>(work->data) : nullptr;
 }
 
 /**

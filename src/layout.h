@@ -176,7 +176,7 @@ void layout_write_config(LayoutWindow *lw, GString *outstr, gint indent);
 LayoutWindow *layout_find_by_image(ImageWindow *imd);
 LayoutWindow *layout_find_by_image_fd(ImageWindow *imd);
 LayoutWindow *layout_find_by_layout_id(const gchar *id);
-
+gint layout_compare_options_id(const LayoutWindow *lw, const gchar *id);
 
 const gchar *layout_get_path(LayoutWindow *lw);
 gboolean layout_set_path(LayoutWindow *lw, const gchar *path);

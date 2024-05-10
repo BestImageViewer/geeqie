@@ -88,6 +88,12 @@ constexpr std::array<const gchar *, 22> group_keys{
 	"Xmp.xmp.Rating",
 };
 
+gint metadata_cache_compare_key(const GList *list, const gchar *key)
+{
+	auto *entry_key = static_cast<gchar *>(list->data);
+	return strcmp(entry_key, key);
+}
+
 inline gboolean is_keywords_separator(gchar c)
 {
 	return c == ','
@@ -119,74 +125,58 @@ static void metadata_cache_update(FileData *fd, const gchar *key, const GList *v
 {
 	GList *work;
 
-	work = fd->cached_metadata;
-	while (work)
+	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_compare_key));
+	if (work)
 		{
+		/* key found - just replace values */
 		auto entry = static_cast<GList *>(work->data);
-		auto entry_key = static_cast<gchar *>(entry->data);
 
-		if (strcmp(entry_key, key) == 0)
-			{
-			/* key found - just replace values */
-			GList *old_values = entry->next;
-			entry->next = nullptr;
-			old_values->prev = nullptr;
-			g_list_free_full(old_values, g_free);
-			work->data = g_list_append(entry, string_list_copy(values));
-			DEBUG_1("updated %s %s\n", key, fd->path);
-			return;
-			}
-		work = work->next;
+		GList *old_values = entry->next;
+		entry->next = nullptr;
+		old_values->prev = nullptr;
+		g_list_free_full(old_values, g_free);
+		work->data = g_list_append(entry, string_list_copy(values));
+		DEBUG_1("updated %s %s\n", key, fd->path);
+		return;
 		}
 
 	/* key not found - prepend new entry */
 	fd->cached_metadata = g_list_prepend(fd->cached_metadata,
 				g_list_prepend(string_list_copy(values), g_strdup(key)));
 	DEBUG_1("added %s %s\n", key, fd->path);
-
 }
 
 static const GList *metadata_cache_get(FileData *fd, const gchar *key)
 {
 	GList *work;
 
-	work = fd->cached_metadata;
-	while (work)
+	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_compare_key));
+	if (work)
 		{
+		/* key found */
 		auto entry = static_cast<GList *>(work->data);
-		auto entry_key = static_cast<gchar *>(entry->data);
 
-		if (strcmp(entry_key, key) == 0)
-			{
-			/* key found */
-			DEBUG_1("found %s %s\n", key, fd->path);
-			return entry;
-			}
-		work = work->next;
+		DEBUG_1("found %s %s\n", key, fd->path);
+		return entry;
 		}
-	return nullptr;
 	DEBUG_1("not found %s %s\n", key, fd->path);
+	return nullptr;
 }
 
 static void metadata_cache_remove(FileData *fd, const gchar *key)
 {
 	GList *work;
 
-	work = fd->cached_metadata;
-	while (work)
+	work = g_list_find_custom(fd->cached_metadata, key, reinterpret_cast<GCompareFunc>(metadata_cache_compare_key));
+	if (work)
 		{
+		/* key found */
 		auto entry = static_cast<GList *>(work->data);
-		auto entry_key = static_cast<gchar *>(entry->data);
 
-		if (strcmp(entry_key, key) == 0)
-			{
-			/* key found */
-			g_list_free_full(entry, g_free);
-			fd->cached_metadata = g_list_delete_link(fd->cached_metadata, work);
-			DEBUG_1("removed %s %s\n", key, fd->path);
-			return;
-			}
-		work = work->next;
+		g_list_free_full(entry, g_free);
+		fd->cached_metadata = g_list_delete_link(fd->cached_metadata, work);
+		DEBUG_1("removed %s %s\n", key, fd->path);
+		return;
 		}
 	DEBUG_1("not removed %s %s\n", key, fd->path);
 }
@@ -1395,20 +1385,8 @@ static gboolean keyword_tree_is_set_casefold(GtkTreeModel *keyword_tree, GtkTree
 
 		if (keyword_get_is_keyword(keyword_tree, &iter))
 			{
-			GList *work = casefold_list;
-			gboolean found = FALSE;
 			gchar *iter_casefold = keyword_get_casefold(keyword_tree, &iter);
-			while (work)
-				{
-				auto casefold = static_cast<const gchar *>(work->data);
-				work = work->next;
-
-				if (strcmp(iter_casefold, casefold) == 0)
-					{
-					found = TRUE;
-					break;
-					}
-				}
+			GList *found = g_list_find_custom(casefold_list, iter_casefold, reinterpret_cast<GCompareFunc>(strcmp));
 			g_free(iter_casefold);
 			if (!found) return FALSE;
 			}
@@ -1442,20 +1420,8 @@ static gboolean keyword_tree_is_set_casefull(GtkTreeModel *keyword_tree, GtkTree
 
 		if (keyword_get_is_keyword(keyword_tree, &iter))
 			{
-			GList *work = kw_list;
-			gboolean found = FALSE;
 			gchar *iter_name = keyword_get_name(keyword_tree, &iter);
-			while (work)
-				{
-				auto name = static_cast<const gchar *>(work->data);
-				work = work->next;
-
-				if (strcmp(iter_name, name) == 0)
-					{
-					found = TRUE;
-					break;
-					}
-				}
+			GList *found = g_list_find_custom(kw_list, iter_name, reinterpret_cast<GCompareFunc>(strcmp));
 			g_free(iter_name);
 			if (!found) return FALSE;
 			}

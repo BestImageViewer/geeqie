@@ -237,6 +237,7 @@ struct ActionItem
 };
 
 GList* get_action_items();
+gint action_item_compare_label(const ActionItem *action_item, const gchar *label);
 void action_items_free(GList *list);
 
 gboolean defined_mouse_buttons(GtkWidget *widget, GdkEventButton *event, gpointer data);
