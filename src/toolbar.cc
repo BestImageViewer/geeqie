@@ -43,17 +43,19 @@
  * Called from the Preferences/toolbar tab
  **/
 
+namespace
+{
+
 struct ToolbarData
 {
 	GtkWidget *vbox;
 };
 
-struct ToolbarButtonData
-{
-	gchar *name; /* GtkActionEntry terminology */
-};
+const gchar *action_name_key = "action_name";
 
-static ToolbarData *toolbarlist[2];
+ToolbarData *toolbarlist[2];
+
+} // namespace
 
 /**
  * @brief
@@ -167,14 +169,6 @@ static void get_toolbar_item(const gchar *name, gchar **label, gchar **stock_id)
 	action_items_free(list);
 }
 
-static void toolbar_item_free(ToolbarButtonData *tbbd)
-{
-	if (!tbbd) return;
-
-	g_free(tbbd->name);
-	g_free(tbbd);
-}
-
 static void toolbar_button_free(GtkWidget *widget)
 {
 	g_free(g_object_get_data(G_OBJECT(widget), "toolbar_add_name"));
@@ -185,20 +179,15 @@ static void toolbar_button_free(GtkWidget *widget)
 static void toolbarlist_add_button(const gchar *name, const gchar *label,
 									const gchar *stock_id, GtkBox *box)
 {
-	ToolbarButtonData *toolbar_entry;
 	GtkWidget *hbox;
 	GtkGesture *gesture;
-
-	toolbar_entry = g_new(ToolbarButtonData,1);
-	toolbar_entry->name = g_strdup(name);
 
 	GtkWidget *button = gtk_button_new();
 	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	g_object_set_data_full(G_OBJECT(button), "toolbarbuttondata",
-	                       toolbar_entry, reinterpret_cast<GDestroyNotify>(toolbar_item_free));
+	g_object_set_data_full(G_OBJECT(button), action_name_key, g_strdup(name), g_free);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gq_gtk_container_add(GTK_WIDGET(button), hbox);
@@ -334,33 +323,25 @@ static gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
  */
 void toolbar_apply(ToolbarType bar)
 {
-	LayoutWindow *lw;
-	GList *work_windows;
-	GList *work_toolbar;
-
-	work_windows = layout_window_list;
-	while (work_windows)
-		{
-		lw = static_cast<LayoutWindow *>(work_windows->data);
+	const auto layout_toolbar_apply = [](gpointer data, gpointer user_data)
+	{
+		auto *lw = static_cast<LayoutWindow *>(data);
+		auto bar = static_cast<ToolbarType>(GPOINTER_TO_INT(user_data));
 
 		layout_toolbar_clear(lw, bar);
 
-		work_toolbar = gtk_container_get_children(GTK_CONTAINER(toolbarlist[bar]->vbox));
-		while (work_toolbar)
+		GList *work_toolbar = gtk_container_get_children(GTK_CONTAINER(toolbarlist[bar]->vbox));
+		for (GList *work = work_toolbar; work; work = work->next)
 			{
-			auto button = static_cast<GtkButton *>(work_toolbar->data);
-			ToolbarButtonData *tbbd;
+			auto button = static_cast<GtkButton *>(work->data);
+			auto *action_name = static_cast<gchar *>(g_object_get_data(G_OBJECT(button), action_name_key));
 
-			tbbd = static_cast<ToolbarButtonData *>(g_object_get_data(G_OBJECT(button),"toolbarbuttondata"));
-			layout_toolbar_add(lw, bar, tbbd->name);
-
-			work_toolbar = work_toolbar->next;
+			layout_toolbar_add(lw, bar, action_name);
 			}
 		g_list_free(work_toolbar);
+	};
 
-		work_windows = work_windows->next;
-		}
-
+	g_list_foreach(layout_window_list, layout_toolbar_apply, GINT_TO_POINTER(bar));
 }
 
 /**
