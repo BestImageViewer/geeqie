@@ -233,8 +233,8 @@ void pixbuf_ignore_alpha_rect(GdkPixbuf *pb,
  * @retval TRUE The intersection operation was performed, and the output params were set.
  */
 gboolean util_clip_region(gint x, gint y, gint w, gint h,
-		          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-		          gint *rx, gint *ry, gint *rw, gint *rh);
+                          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
+                          gint &rx, gint &ry, gint &rw, gint &rh);
 
 // TODO(xsdg): Rename this function to util_triangle_bounding_box.
 /**

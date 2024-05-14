@@ -395,30 +395,23 @@ GdkPixbuf *pixbuf_fallback(FileData *fd, gint requested_width, gint requested_he
  */
 
 gboolean util_clip_region(gint x, gint y, gint w, gint h,
-			  gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-			  gint *rx, gint *ry, gint *rw, gint *rh)
+                          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
+                          gint &rx, gint &ry, gint &rw, gint &rh)
 {
-	// Ensures that clip region and main region have some overlap (they aren't
-	// completely disjoint).
-	if (clip_x + clip_w <= x ||  /* assert(x < clip_right) && */
-	    clip_x >= x + w ||       /* assert(clip_x < right) && */
-	    clip_y + clip_h <= y ||  /* assert(y < clip_bottom && */
-	    clip_y >= y + h)         /* assert(bottom < clip_y) */
+	GdkRectangle main{x, y, w, h};
+	GdkRectangle clip{clip_x, clip_y, clip_w, clip_h};
+	GdkRectangle r;
+
+	const gboolean rectangles_intersect = gdk_rectangle_intersect(&main, &clip, &r);
+	if (rectangles_intersect)
 		{
-		return FALSE;
+		rx = r.x;
+		ry = r.y;
+		rw = r.width;
+		rh = r.height;
 		}
 
-	// We choose the right-most x coordinate.
-	*rx = MAX(x, clip_x);
-	// And the narrowest width.
-	*rw = MIN((x + w), (clip_x + clip_w)) - *rx;
-
-	// We choose the bottom-most y coordinate.
-	*ry = MAX(y, clip_y);
-	// And the shortest height.
-	*rh = MIN((y + h), (clip_y + clip_h)) - *ry;
-
-	return TRUE;
+	return rectangles_intersect;
 }
 
 /*
@@ -1070,8 +1063,8 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 	// Intersects the clip region with the pixbuf. r{x,y,w,h} is that
 	// intersecting region.
 	if (!util_clip_region(0, 0, pw, ph,
-			      clip_x, clip_y, clip_w, clip_h,
-			      &rx, &ry, &rw, &rh)) return;
+	                      clip_x, clip_y, clip_w, clip_h,
+	                      rx, ry, rw, rh)) return;
 
 	// Determine the bounding box for the triangle.
 	util_clip_triangle(x1, y1, x2, y2, x3, y3,
@@ -1079,8 +1072,8 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 
 	// And now clip the triangle bounding box to the pixbuf clipping region.
 	if (!util_clip_region(rx, ry, rw, rh,
-			      tx, ty, tw, th,
-			      &fx1, &fy1, &fw, &fh)) return;
+	                      tx, ty, tw, th,
+	                      fx1, fy1, fw, fh)) return;
 	fx2 = fx1 + fw;
 	fy2 = fy1 + fh;
 
@@ -1322,8 +1315,8 @@ void pixbuf_draw_line(GdkPixbuf *pb,
 	// Intersects the clip region with the pixbuf. r{x,y,w,h} is that
 	// intersecting region.
 	if (!util_clip_region(0, 0, pw, ph,
-			      clip_x, clip_y, clip_w, clip_h,
-			      &rx, &ry, &rw, &rh)) return;
+	                      clip_x, clip_y, clip_w, clip_h,
+	                      rx, ry, rw, rh)) return;
 	// TODO(xsdg): These explicit casts are unnecessary and harm readability.
 	// Clips the specified line segment to the intersecting region from above.
 	if (!util_clip_line(static_cast<gdouble>(rx), static_cast<gdouble>(ry), static_cast<gdouble>(rw), static_cast<gdouble>(rh),
@@ -1528,8 +1521,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 	// Intersects the clip region with the pixbuf. r{x,y,w,h} is that
 	// intersecting region.
 	if (!util_clip_region(0, 0, pw, ph,
-			      clip_x, clip_y, clip_w, clip_h,
-			      &rx, &ry, &rw, &rh)) return;
+	                      clip_x, clip_y, clip_w, clip_h,
+	                      rx, ry, rw, rh)) return;
 
 	has_alpha = gdk_pixbuf_get_has_alpha(pb);
 	prs = gdk_pixbuf_get_rowstride(pb);
@@ -1539,8 +1532,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 	// as contracted by `border` pixels, with a composition fraction that's defined
 	// by the supplied `a` parameter.
 	if (util_clip_region(x + border, y + border, w - border * 2, h - border * 2,
-			     rx, ry, rw, rh,
-			     &fx, &fy, &fw, &fh))
+	                     rx, ry, rw, rh,
+	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_rect_fill(pb, fx, fy, fw, fh, r, g, b, a);
 		}
@@ -1549,8 +1542,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 
 	// Draws linear gradients along each of the 4 edges.
 	if (util_clip_region(x, y + border, border, h - border * 2,
-			     rx, ry, rw, rh,
-			     &fx, &fy, &fw, &fh))
+	                     rx, ry, rw, rh,
+	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
 					x + border, TRUE, border,
@@ -1558,8 +1551,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 					r, g, b, a);
 		}
 	if (util_clip_region(x + w - border, y + border, border, h - border * 2,
-			     rx, ry, rw, rh,
-			     &fx, &fy, &fw, &fh))
+	                     rx, ry, rw, rh,
+	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
 					x + w - border, TRUE, border,
@@ -1567,8 +1560,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 					r, g, b, a);
 		}
 	if (util_clip_region(x + border, y, w - border * 2, border,
-			     rx, ry, rw, rh,
-			     &fx, &fy, &fw, &fh))
+	                     rx, ry, rw, rh,
+	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
 					y + border, FALSE, border,
@@ -1576,8 +1569,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 					r, g, b, a);
 		}
 	if (util_clip_region(x + border, y + h - border, w - border * 2, border,
-			     rx, ry, rw, rh,
-			     &fx, &fy, &fw, &fh))
+	                     rx, ry, rw, rh,
+	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
 					y + h - border, FALSE, border,
@@ -1586,8 +1579,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 		}
 	// Draws radial gradients at each of the 4 corners.
 	if (util_clip_region(x, y, border, border,
-			     rx, ry, rw, rh,
-			     &fx, &fy, &fw, &fh))
+	                     rx, ry, rw, rh,
+	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
 					x + border, y + border, border,
@@ -1595,8 +1588,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 					r, g, b, a);
 		}
 	if (util_clip_region(x + w - border, y, border, border,
-			     rx, ry, rw, rh,
-			     &fx, &fy, &fw, &fh))
+	                     rx, ry, rw, rh,
+	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
 					x + w - border, y + border, border,
@@ -1604,8 +1597,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 					r, g, b, a);
 		}
 	if (util_clip_region(x, y + h - border, border, border,
-			     rx, ry, rw, rh,
-			     &fx, &fy, &fw, &fh))
+	                     rx, ry, rw, rh,
+	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
 					x + border, y + h - border, border,
@@ -1613,8 +1606,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 					r, g, b, a);
 		}
 	if (util_clip_region(x + w - border, y + h - border, border, border,
-			     rx, ry, rw, rh,
-			     &fx, &fy, &fw, &fh))
+	                     rx, ry, rw, rh,
+	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
 					x + w - border, y + h - border, border,

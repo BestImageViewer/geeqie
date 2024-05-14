@@ -40,8 +40,8 @@ class ClipRegionTest : public ::testing::Test
 TEST_F(ClipRegionTest, RegionAContainsRegionB)
 {
 	ASSERT_TRUE(util_clip_region(0, 0, 1000, 1000,
-				     50, 50, 100, 100,
-				     &rx, &ry, &rw, &rh));
+	                             50, 50, 100, 100,
+	                             rx, ry, rw, rh));
 
 	ASSERT_EQ(50, rx);
 	ASSERT_EQ(50, ry);
@@ -52,8 +52,8 @@ TEST_F(ClipRegionTest, RegionAContainsRegionB)
 TEST_F(ClipRegionTest, RegionBContainsRegionA)
 {
 	ASSERT_TRUE(util_clip_region(50, 50, 100, 100,
-				     0, 0, 1000, 1000,
-				     &rx, &ry, &rw, &rh));
+	                             0, 0, 1000, 1000,
+	                             rx, ry, rw, rh));
 
 	ASSERT_EQ(50, rx);
 	ASSERT_EQ(50, ry);
@@ -64,8 +64,8 @@ TEST_F(ClipRegionTest, RegionBContainsRegionA)
 TEST_F(ClipRegionTest, PartialOverlapWithBAfterA)
 {
 	ASSERT_TRUE(util_clip_region(0, 0, 1000, 1000,
-				     500, 500, 1000, 1000,
-				     &rx, &ry, &rw, &rh));
+	                             500, 500, 1000, 1000,
+	                             rx, ry, rw, rh));
 
 	ASSERT_EQ(500, rx);
 	ASSERT_EQ(500, ry);
@@ -76,8 +76,8 @@ TEST_F(ClipRegionTest, PartialOverlapWithBAfterA)
 TEST_F(ClipRegionTest, PartialOverlapWithAAfterB)
 {
 	ASSERT_TRUE(util_clip_region(500, 500, 1000, 1000,
-				     0, 0, 1000, 1000,
-				     &rx, &ry, &rw, &rh));
+	                             0, 0, 1000, 1000,
+	                             rx, ry, rw, rh));
 
 	ASSERT_EQ(500, rx);
 	ASSERT_EQ(500, ry);

@@ -382,8 +382,8 @@ static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
 		gint rh;
 
 		if (util_clip_region(x, y, width, height,
-				     i, y, 1, height,
-				     &rx, &ry, &rw, &rh))
+		                     i, y, 1, height,
+		                     rx, ry, rw, rh))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
@@ -398,8 +398,8 @@ static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
 		gint rh;
 
 		if (util_clip_region(x, y, width, height,
-				     x, i, width, 1,
-				     &rx, &ry, &rw, &rh))
+		                     x, i, width, 1,
+		                     rx, ry, rw, rh))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
@@ -829,8 +829,8 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 			grid = grid->next;
 
 			if (util_clip_region(pi->x, pi->y, pi->width, pi->height,
-					     pg->x, pg->y, pg->w, pg->h,
-					     &rx, &ry, &rw, &rh))
+			                     pg->x, pg->y, pg->w, pg->h,
+			                     rx, ry, rw, rh))
 				{
 				pg->list = g_list_prepend(pg->list, pi);
 				}
@@ -986,8 +986,8 @@ static GList *pan_layout_intersect_l(GList *list, GList *item_list,
 		work = work->next;
 
 		if (util_clip_region(x, y, width, height,
-				     pi->x, pi->y, pi->width, pi->height,
-				     &rx, &ry, &rw, &rh))
+		                     pi->x, pi->y, pi->width, pi->height,
+		                     rx, ry, rw, rh))
 			{
 			list = g_list_prepend(list, pi);
 			}

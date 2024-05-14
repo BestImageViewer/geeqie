@@ -217,42 +217,42 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 		}
 
 	if (util_clip_region(x, y, width, height,
-			     pi->x, pi->y, bw, bh,
-			     &rx, &ry, &rw, &rh))
+	                     pi->x, pi->y, bw, bh,
+	                     rx, ry, rw, rh))
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
 				      pi->color.r, pi->color.g, pi->color.b, pi->color.a);
 		}
 	if (util_clip_region(x, y, width, height,
-			     pi->x, pi->y, bw, pi->border,
-			     &rx, &ry, &rw, &rh))
+	                     pi->x, pi->y, bw, pi->border,
+	                     rx, ry, rw, rh))
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
 				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 		}
 	if (util_clip_region(x, y, width, height,
-			     pi->x, pi->y + pi->border, pi->border, bh - pi->border * 2,
-			     &rx, &ry, &rw, &rh))
+	                     pi->x, pi->y + pi->border, pi->border, bh - pi->border * 2,
+	                     rx, ry, rw, rh))
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
 				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 		}
 	if (util_clip_region(x, y, width, height,
-			     pi->x + bw - pi->border, pi->y + pi->border,
-			     pi->border, bh - pi->border * 2,
-			     &rx, &ry, &rw, &rh))
+	                     pi->x + bw - pi->border, pi->y + pi->border,
+	                     pi->border, bh - pi->border * 2,
+	                     rx, ry, rw, rh))
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
 				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 		}
 	if (util_clip_region(x, y, width, height,
-			     pi->x, pi->y + bh - pi->border,
-			     bw,  pi->border,
-			     &rx, &ry, &rw, &rh))
+	                     pi->x, pi->y + bh - pi->border,
+	                     bw,  pi->border,
+	                     rx, ry, rw, rh))
 		{
 		pixbuf_draw_rect_fill(pixbuf,
 				      rx - x, ry - y, rw, rh,
@@ -319,8 +319,8 @@ gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 	gint rh;
 
 	if (util_clip_region(x, y, width, height,
-			     pi->x, pi->y, pi->width, pi->height,
-			     &rx, &ry, &rw, &rh) && pi->data)
+	                     pi->x, pi->y, pi->width, pi->height,
+	                     rx, ry, rw, rh) && pi->data)
 		{
 		auto coord = static_cast<gint *>(pi->data);
 		pixbuf_draw_triangle(pixbuf,
@@ -504,8 +504,8 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 		if (gdk_pixbuf_get_has_alpha(pi->pixbuf))
 			{
 			if (util_clip_region(x, y, width, height,
-					     tx + PAN_SHADOW_OFFSET, ty + PAN_SHADOW_OFFSET, tw, th,
-					     &rx, &ry, &rw, &rh))
+			                     tx + PAN_SHADOW_OFFSET, ty + PAN_SHADOW_OFFSET, tw, th,
+			                     rx, ry, rw, rh))
 				{
 				pixbuf_draw_shadow(pixbuf,
 						   rx - x, ry - y, rw, rh,
@@ -517,9 +517,9 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 		else
 			{
 			if (util_clip_region(x, y, width, height,
-					     tx + tw, ty + PAN_SHADOW_OFFSET,
-					     PAN_SHADOW_OFFSET, th - PAN_SHADOW_OFFSET,
-					     &rx, &ry, &rw, &rh))
+			                     tx + tw, ty + PAN_SHADOW_OFFSET,
+			                     PAN_SHADOW_OFFSET, th - PAN_SHADOW_OFFSET,
+			                     rx, ry, rw, rh))
 				{
 				pixbuf_draw_shadow(pixbuf,
 						   rx - x, ry - y, rw, rh,
@@ -528,8 +528,8 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 						   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
 				}
 			if (util_clip_region(x, y, width, height,
-					     tx + PAN_SHADOW_OFFSET, ty + th, tw, PAN_SHADOW_OFFSET,
-					     &rx, &ry, &rw, &rh))
+			                     tx + PAN_SHADOW_OFFSET, ty + th, tw, PAN_SHADOW_OFFSET,
+			                     rx, ry, rw, rh))
 				{
 				pixbuf_draw_shadow(pixbuf,
 						   rx - x, ry - y, rw, rh,
@@ -540,8 +540,8 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			}
 
 		if (util_clip_region(x, y, width, height,
-				     tx, ty, tw, th,
-				     &rx, &ry, &rw, &rh))
+		                     tx, ty, tw, th,
+		                     rx, ry, rw, rh))
 			{
 			gdk_pixbuf_composite(pi->pixbuf, pixbuf, rx - x, ry - y, rw, rh,
 					     static_cast<gdouble>(tx) - x,
@@ -551,34 +551,34 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			}
 
 		if (util_clip_region(x, y, width, height,
-				     tx, ty, tw, PAN_OUTLINE_THICKNESS,
-				     &rx, &ry, &rw, &rh))
+		                     tx, ty, tw, PAN_OUTLINE_THICKNESS,
+		                     rx, ry, rw, rh))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
 					      PAN_OUTLINE_COLOR_1);
 			}
 		if (util_clip_region(x, y, width, height,
-				     tx, ty, PAN_OUTLINE_THICKNESS, th,
-				     &rx, &ry, &rw, &rh))
+		                     tx, ty, PAN_OUTLINE_THICKNESS, th,
+		                     rx, ry, rw, rh))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
 					      PAN_OUTLINE_COLOR_1);
 			}
 		if (util_clip_region(x, y, width, height,
-				     tx + tw - PAN_OUTLINE_THICKNESS, ty +  PAN_OUTLINE_THICKNESS,
-				     PAN_OUTLINE_THICKNESS, th - PAN_OUTLINE_THICKNESS,
-				     &rx, &ry, &rw, &rh))
+		                     tx + tw - PAN_OUTLINE_THICKNESS, ty +  PAN_OUTLINE_THICKNESS,
+		                     PAN_OUTLINE_THICKNESS, th - PAN_OUTLINE_THICKNESS,
+		                     rx, ry, rw, rh))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
 					      PAN_OUTLINE_COLOR_2);
 			}
 		if (util_clip_region(x, y, width, height,
-				     tx +  PAN_OUTLINE_THICKNESS, ty + th - PAN_OUTLINE_THICKNESS,
-				     tw - PAN_OUTLINE_THICKNESS * 2, PAN_OUTLINE_THICKNESS,
-				     &rx, &ry, &rw, &rh))
+		                     tx +  PAN_OUTLINE_THICKNESS, ty + th - PAN_OUTLINE_THICKNESS,
+		                     tw - PAN_OUTLINE_THICKNESS * 2, PAN_OUTLINE_THICKNESS,
+		                     rx, ry, rw, rh))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
 					      rx - x, ry - y, rw, rh,
@@ -593,8 +593,8 @@ gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 		ty = pi->y + PAN_SHADOW_OFFSET;
 
 		if (util_clip_region(x, y, width, height,
-				     tx, ty, tw, th,
-				     &rx, &ry, &rw, &rh))
+		                     tx, ty, tw, th,
+		                     rx, ry, rw, rh))
 			{
 			gint d;
 
@@ -677,8 +677,8 @@ gint pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRend
 	gint rh;
 
 	if (util_clip_region(x, y, width, height,
-			     pi->x, pi->y, pi->width, pi->height,
-			     &rx, &ry, &rw, &rh))
+	                     pi->x, pi->y, pi->width, pi->height,
+	                     rx, ry, rw, rh))
 		{
 		if (pi->pixbuf)
 			{
