@@ -368,42 +368,35 @@ static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
 	auto pw = static_cast<PanWindow *>(data);
 	GList *list;
 	GList *work;
-	gint i;
+	const GdkRectangle request_rect{x, y, width, height};
+	GdkRectangle pan_grid_rect;
+	GdkRectangle r;
 
 	pixbuf_set_rect_fill(pixbuf,
 			     0, 0, width, height,
 			     PAN_BACKGROUND_COLOR);
 
-	for (i = (x / PAN_GRID_SIZE) * PAN_GRID_SIZE; i < x + width; i += PAN_GRID_SIZE)
+	pan_grid_rect = request_rect;
+	pan_grid_rect.width = 1;
+	for (pan_grid_rect.x = (x / PAN_GRID_SIZE) * PAN_GRID_SIZE; pan_grid_rect.x < x + width; pan_grid_rect.x += PAN_GRID_SIZE)
 		{
-		gint rx;
-		gint ry;
-		gint rw;
-		gint rh;
-
-		if (util_clip_region(x, y, width, height,
-		                     i, y, 1, height,
-		                     rx, ry, rw, rh))
+		if (gdk_rectangle_intersect(&request_rect, &pan_grid_rect, &r))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
-					      rx - x, ry - y, rw, rh,
-					      PAN_GRID_COLOR);
+			                      r.x - x, r.y - y, r.width, r.height,
+			                      PAN_GRID_COLOR);
 			}
 		}
-	for (i = (y / PAN_GRID_SIZE) * PAN_GRID_SIZE; i < y + height; i += PAN_GRID_SIZE)
-		{
-		gint rx;
-		gint ry;
-		gint rw;
-		gint rh;
 
-		if (util_clip_region(x, y, width, height,
-		                     x, i, width, 1,
-		                     rx, ry, rw, rh))
+	pan_grid_rect = request_rect;
+	pan_grid_rect.height = 1;
+	for (pan_grid_rect.y = (y / PAN_GRID_SIZE) * PAN_GRID_SIZE; pan_grid_rect.y < y + height; pan_grid_rect.y += PAN_GRID_SIZE)
+		{
+		if (gdk_rectangle_intersect(&request_rect, &pan_grid_rect, &r))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
-					      rx - x, ry - y, rw, rh,
-					      PAN_GRID_COLOR);
+			                      r.x - x, r.y - y, r.width, r.height,
+			                      PAN_GRID_COLOR);
 			}
 		}
 
@@ -759,7 +752,6 @@ static void pan_grid_clear(PanWindow *pw)
 
 static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_size)
 {
-	GList *work;
 	gint col;
 	gint row;
 	gint cw;
@@ -807,43 +799,30 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 			}
 		}
 
-	work = pw->list;
-	while (work)
+	for (GList *work = pw->list; work; work = work->next)
 		{
-		PanItem *pi;
-		GList *grid;
+		auto *pi = static_cast<PanItem *>(work->data);
 
-		pi = static_cast<PanItem *>(work->data);
-		work = work->next;
+		// @todo use GdkRectangle in PanItem
+		const GdkRectangle pi_rect{pi->x, pi->y, pi->width, pi->height};
 
-		grid = pw->list_grid;
-		while (grid)
+		for (GList *grid = pw->list_grid; grid; grid = grid->next)
 			{
-			PanGrid *pg;
-			gint rx;
-			gint ry;
-			gint rw;
-			gint rh;
+			auto *pg = static_cast<PanGrid *>(grid->data);
 
-			pg = static_cast<PanGrid *>(grid->data);
-			grid = grid->next;
+			// @todo use GdkRectangle in PanGrid
+			const GdkRectangle pg_rect{pg->x, pg->y, pg->w, pg->h};
 
-			if (util_clip_region(pi->x, pi->y, pi->width, pi->height,
-			                     pg->x, pg->y, pg->w, pg->h,
-			                     rx, ry, rw, rh))
+			if (gdk_rectangle_intersect(&pi_rect, &pg_rect, nullptr))
 				{
 				pg->list = g_list_prepend(pg->list, pi);
 				}
 			}
 		}
 
-	work = pw->list_grid;
-	while (work)
+	for (GList *grid = pw->list_grid; grid; grid = grid->next)
 		{
-		PanGrid *pg;
-
-		pg = static_cast<PanGrid *>(work->data);
-		work = work->next;
+		auto *pg = static_cast<PanGrid *>(grid->data);
 
 		pg->list = g_list_reverse(pg->list);
 		}
@@ -969,25 +948,14 @@ static void pan_layout_compute(PanWindow *pw, FileData *dir_fd,
 }
 
 static GList *pan_layout_intersect_l(GList *list, GList *item_list,
-				     gint x, gint y, gint width, gint height)
+                                     const GdkRectangle &rect)
 {
-	GList *work;
-
-	work = item_list;
-	while (work)
+	for (GList *work = item_list; work; work = work->next)
 		{
-		PanItem *pi;
-		gint rx;
-		gint ry;
-		gint rw;
-		gint rh;
+		auto *pi = static_cast<PanItem *>(work->data);
+		const GdkRectangle pi_rect = {pi->x, pi->y, pi->width, pi->height};
 
-		pi = static_cast<PanItem *>(work->data);
-		work = work->next;
-
-		if (util_clip_region(x, y, width, height,
-		                     pi->x, pi->y, pi->width, pi->height,
-		                     rx, ry, rw, rh))
+		if (gdk_rectangle_intersect(&rect, &pi_rect, nullptr))
 			{
 			list = g_list_prepend(list, pi);
 			}
@@ -1001,6 +969,7 @@ GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint heig
 	GList *list = nullptr;
 	GList *grid;
 	PanGrid *pg = nullptr;
+	const GdkRectangle rect{x, y, width, height};
 
 	grid = pw->list_grid;
 	while (grid && !pg)
@@ -1015,15 +984,15 @@ GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint heig
 			}
 		}
 
-	list = pan_layout_intersect_l(list, pw->list, x, y, width, height);
+	list = pan_layout_intersect_l(list, pw->list, rect);
 
 	if (pg)
 		{
-		list = pan_layout_intersect_l(list, pg->list, x, y, width, height);
+		list = pan_layout_intersect_l(list, pg->list, rect);
 		}
 	else
 		{
-		list = pan_layout_intersect_l(list, pw->list_static, x, y, width, height);
+		list = pan_layout_intersect_l(list, pw->list_static, rect);
 		}
 
 	return list;
