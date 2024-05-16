@@ -1410,10 +1410,6 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	gint y2;
 	gint x3;
 	gint y3;
-	gint x;
-	gint y;
-	gint w;
-	gint h;
 
 	if (pw->click_pi == pi) return;
 	if (pi && !pi->fd) pi = nullptr;
@@ -1431,8 +1427,8 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 
 	if (pi->type == PAN_ITEM_THUMB && pi->pixbuf)
 		{
-		w = gdk_pixbuf_get_width(pi->pixbuf);
-		h = gdk_pixbuf_get_height(pi->pixbuf);
+		gint w = gdk_pixbuf_get_width(pi->pixbuf);
+		gint h = gdk_pixbuf_get_height(pi->pixbuf);
 
 		x1 = pi->x + pi->width - (pi->width - w) / 2 - 8;
 		y1 = pi->y + (pi->height - h) / 2 + 8;
@@ -1447,12 +1443,10 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	y2 = pbox->y + 36;
 	x3 = pbox->x + 1;
 	y3 = pbox->y + 12;
-	util_clip_triangle(x1, y1, x2, y2, x3, y3,
-	                   x, y, w, h);
 
-	p = pan_item_tri_new(pw, nullptr, x, y, w, h,
-			     x1, y1, x2, y2, x3, y3,
-			     PAN_POPUP_COLOR);
+	p = pan_item_tri_new(pw,
+	                     x1, y1, x2, y2, x3, y3,
+	                     PAN_POPUP_COLOR);
 	pan_item_tri_border(p, PAN_BORDER_1 | PAN_BORDER_3, PAN_POPUP_BORDER_COLOR);
 	pan_item_set_key(p, "info");
 	pan_item_added(pw, p);

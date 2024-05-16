@@ -269,7 +269,7 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
  *-----------------------------------------------------------------------------
  */
 
-PanItem *pan_item_tri_new(PanWindow *pw, FileData *, gint x, gint y, gint width, gint height,
+PanItem *pan_item_tri_new(PanWindow *pw,
                           gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
                           const PanColor &color)
 {
@@ -278,12 +278,10 @@ PanItem *pan_item_tri_new(PanWindow *pw, FileData *, gint x, gint y, gint width,
 
 	pi = g_new0(PanItem, 1);
 	pi->type = PAN_ITEM_TRIANGLE;
-	pi->x = x;
-	pi->y = y;
-	pi->width = width;
-	pi->height = height;
-
 	pi->color = color;
+
+	util_clip_triangle(x1, y1, x2, y2, x3, y3,
+	                   pi->x, pi->y, pi->width, pi->height);
 
 	coord = g_new0(gint, 6);
 	coord[0] = x1;

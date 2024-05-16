@@ -57,7 +57,7 @@ gint pan_item_box_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRend
 		       gint x, gint y, gint width, gint height);
 
 // Item triangle type
-PanItem *pan_item_tri_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
+PanItem *pan_item_tri_new(PanWindow *pw,
                           gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
                           const PanColor &color);
 void pan_item_tri_border(PanItem *pi, gint borders, const PanColor &color);

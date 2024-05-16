@@ -183,10 +183,6 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 		gint py;
 		gint gx;
 		gint gy;
-		gint x1;
-		gint y1;
-		gint x2;
-		gint y2;
 
 		px = parent->x + parent->width / 2;
 		py = parent->y + parent->height / 2;
@@ -194,15 +190,9 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 		gx = group->x + group->width / 2;
 		gy = group->y + group->height / 2;
 
-		x1 = MIN(px, gx);
-		y1 = MIN(py, gy);
-
-		x2 = MAX(px, gx + 5);
-		y2 = MAX(py, gy + 5);
-
-		pi = pan_item_tri_new(pw, nullptr, x1, y1, x2 - x1, y2 - y1,
-				      px, py, gx, gy, gx + 5, gy + 5,
-				      {255, 40, 40, 128});
+		pi = pan_item_tri_new(pw,
+		                      px, py, gx, gy, gx + 5, gy + 5,
+		                      {255, 40, 40, 128});
 		pan_item_tri_border(pi, PAN_BORDER_1 | PAN_BORDER_3, {255, 0, 0, 128});
 		}
 
