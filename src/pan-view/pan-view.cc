@@ -74,10 +74,7 @@ namespace
 {
 
 struct PanGrid {
-	gint x;
-	gint y;
-	gint w;
-	gint h;
+	GdkRectangle rect;
 	GList *list;
 };
 
@@ -788,14 +785,14 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 			PanGrid *pg;
 
 			pg = g_new0(PanGrid, 1);
-			pg->x = i * cw / 2;
-			pg->y = j * ch / 2;
-			pg->w = cw;
-			pg->h = ch;
+			pg->rect.x = i * cw / 2;
+			pg->rect.y = j * ch / 2;
+			pg->rect.width = cw;
+			pg->rect.height = ch;
 
 			pw->list_grid = g_list_prepend(pw->list_grid, pg);
 
-			DEBUG_1("grid section: %d,%d (%dx%d)", pg->x, pg->y, pg->w, pg->h);
+			DEBUG_1("grid section: %d,%d (%dx%d)", pg->rect.x, pg->rect.y, pg->rect.width, pg->rect.height);
 			}
 		}
 
@@ -810,10 +807,7 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 			{
 			auto *pg = static_cast<PanGrid *>(grid->data);
 
-			// @todo use GdkRectangle in PanGrid
-			const GdkRectangle pg_rect{pg->x, pg->y, pg->w, pg->h};
-
-			if (gdk_rectangle_intersect(&pi_rect, &pg_rect, nullptr))
+			if (gdk_rectangle_intersect(&pi_rect, &pg->rect, nullptr))
 				{
 				pg->list = g_list_prepend(pg->list, pi);
 				}
@@ -967,28 +961,25 @@ static GList *pan_layout_intersect_l(GList *list, GList *item_list,
 GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height)
 {
 	GList *list = nullptr;
-	GList *grid;
-	PanGrid *pg = nullptr;
 	const GdkRectangle rect{x, y, width, height};
 
-	grid = pw->list_grid;
-	while (grid && !pg)
-		{
-		pg = static_cast<PanGrid *>(grid->data);
-		grid = grid->next;
+	const auto pan_grid_contains_rect = [](gconstpointer data, gconstpointer user_data) -> gint
+	{
+		const auto *pg = static_cast<const PanGrid *>(data);
+		const auto *rect = static_cast<const GdkRectangle *>(user_data);
 
-		if (x < pg->x || x + width > pg->x + pg->w ||
-		    y < pg->y || y + height > pg->y + pg->h)
-			{
-			pg = nullptr;
-			}
-		}
+		GdkRectangle intersection;
+		if (!gdk_rectangle_intersect(&pg->rect, rect, &intersection)) return 1;
+
+		return gdk_rectangle_equal(rect, &intersection) ? 0 : 1;
+	};
 
 	list = pan_layout_intersect_l(list, pw->list, rect);
 
-	if (pg)
+	GList *grid = g_list_find_custom(pw->list_grid, &rect, pan_grid_contains_rect);
+	if (grid)
 		{
-		list = pan_layout_intersect_l(list, pg->list, rect);
+		list = pan_layout_intersect_l(list, static_cast<PanGrid *>(grid->data)->list, rect);
 		}
 	else
 		{
