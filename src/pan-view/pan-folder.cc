@@ -76,15 +76,13 @@ static void pan_flower_size(PanWindow *pw, gint &width, gint &height)
 
 		if (pi->type == PAN_ITEM_TRIANGLE && pi->data)
 			{
-			gint *coord;
+			auto *coord = static_cast<GdkPoint *>(pi->data);
 
-			coord = static_cast<gint *>(pi->data);
-			coord[0] -= x1;
-			coord[1] -= y1;
-			coord[2] -= x1;
-			coord[3] -= y1;
-			coord[4] -= x1;
-			coord[5] -= y1;
+			for (gint i = 0; i < 3; ++i)
+				{
+				coord[i].x -= x1;
+				coord[i].y -= y1;
+				}
 			}
 		}
 

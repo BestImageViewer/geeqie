@@ -274,7 +274,6 @@ PanItem *pan_item_tri_new(PanWindow *pw,
                           const PanColor &color)
 {
 	PanItem *pi;
-	gint *coord;
 
 	pi = g_new0(PanItem, 1);
 	pi->type = PAN_ITEM_TRIANGLE;
@@ -283,13 +282,10 @@ PanItem *pan_item_tri_new(PanWindow *pw,
 	util_clip_triangle(x1, y1, x2, y2, x3, y3,
 	                   pi->x, pi->y, pi->width, pi->height);
 
-	coord = g_new0(gint, 6);
-	coord[0] = x1;
-	coord[1] = y1;
-	coord[2] = x2;
-	coord[3] = y2;
-	coord[4] = x3;
-	coord[5] = y3;
+	auto *coord = g_new0(GdkPoint, 3);
+	coord[0] = {x1, y1};
+	coord[1] = {x2, y2};
+	coord[2] = {x3, y3};
 
 	pi->data = coord;
 
@@ -320,38 +316,26 @@ gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 	                     pi->x, pi->y, pi->width, pi->height,
 	                     rx, ry, rw, rh) && pi->data)
 		{
-		auto coord = static_cast<gint *>(pi->data);
+		auto coord = static_cast<GdkPoint *>(pi->data);
 		pixbuf_draw_triangle(pixbuf,
-				     rx - x, ry - y, rw, rh,
-				     coord[0] - x, coord[1] - y,
-				     coord[2] - x, coord[3] - y,
-				     coord[4] - x, coord[5] - y,
-				     pi->color.r, pi->color.g, pi->color.b, pi->color.a);
+		                     rx - x, ry - y, rw, rh,
+		                     coord[0].x - x, coord[0].y - y,
+		                     coord[1].x - x, coord[1].y - y,
+		                     coord[2].x - x, coord[2].y - y,
+		                     pi->color.r, pi->color.g, pi->color.b, pi->color.a);
 
-		if (pi->border & PAN_BORDER_1)
-			{
+		const auto draw_line = [pixbuf, rx, ry, rw, rh, x, y, &color = pi->color2](const GdkPoint &start, const GdkPoint &end)
+		{
 			pixbuf_draw_line(pixbuf,
-					 rx - x, ry - y, rw, rh,
-					 coord[0] - x, coord[1] - y,
-					 coord[2] - x, coord[3] - y,
-					 pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
-			}
-		if (pi->border & PAN_BORDER_2)
-			{
-			pixbuf_draw_line(pixbuf,
-					 rx - x, ry - y, rw, rh,
-					 coord[2] - x, coord[3] - y,
-					 coord[4] - x, coord[5] - y,
-					 pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
-			}
-		if (pi->border & PAN_BORDER_3)
-			{
-			pixbuf_draw_line(pixbuf,
-					 rx - x, ry - y, rw, rh,
-					 coord[4] - x, coord[5] - y,
-					 coord[0] - x, coord[1] - y,
-					 pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
-			}
+			                 rx - x, ry - y, rw, rh,
+			                 start.x - x, start.y - y,
+			                 end.x - x, end.y - y,
+			                 color.r, color.g, color.b, color.a);
+		};
+
+		if (pi->border & PAN_BORDER_1) draw_line(coord[0], coord[1]);
+		if (pi->border & PAN_BORDER_2) draw_line(coord[1], coord[2]);
+		if (pi->border & PAN_BORDER_3) draw_line(coord[2], coord[0]);
 		}
 
 	return FALSE;
