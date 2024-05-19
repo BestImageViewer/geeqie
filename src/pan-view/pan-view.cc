@@ -1437,8 +1437,8 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 
 	p = pan_item_tri_new(pw,
 	                     x1, y1, x2, y2, x3, y3,
-	                     PAN_POPUP_COLOR);
-	pan_item_tri_border(p, PAN_BORDER_1 | PAN_BORDER_3, PAN_POPUP_BORDER_COLOR);
+	                     PAN_POPUP_COLOR,
+	                     PAN_BORDER_1 | PAN_BORDER_3, PAN_POPUP_BORDER_COLOR);
 	pan_item_set_key(p, "info");
 	pan_item_added(pw, p);
 

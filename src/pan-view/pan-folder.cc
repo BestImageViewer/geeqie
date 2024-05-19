@@ -190,8 +190,8 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 
 		pi = pan_item_tri_new(pw,
 		                      px, py, gx, gy, gx + 5, gy + 5,
-		                      {255, 40, 40, 128});
-		pan_item_tri_border(pi, PAN_BORDER_1 | PAN_BORDER_3, {255, 0, 0, 128});
+		                      {255, 40, 40, 128},
+		                      PAN_BORDER_1 | PAN_BORDER_3, {255, 0, 0, 128});
 		}
 
 	pw->list = g_list_concat(group->items, pw->list);

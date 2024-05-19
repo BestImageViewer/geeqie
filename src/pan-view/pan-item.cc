@@ -271,7 +271,8 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 
 PanItem *pan_item_tri_new(PanWindow *pw,
                           gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
-                          const PanColor &color)
+                          const PanColor &color,
+                          gint borders, const PanColor &border_color)
 {
 	PanItem *pi;
 
@@ -289,20 +290,12 @@ PanItem *pan_item_tri_new(PanWindow *pw,
 
 	pi->data = coord;
 
-	pi->border = PAN_BORDER_NONE;
+	pi->border = borders;
+	pi->color2 = border_color;
 
 	pw->list = g_list_prepend(pw->list, pi);
 
 	return pi;
-}
-
-void pan_item_tri_border(PanItem *pi, gint borders, const PanColor &color)
-{
-	if (!pi || pi->type != PAN_ITEM_TRIANGLE) return;
-
-	pi->border = borders;
-
-	pi->color2 = color;
 }
 
 gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *, gint x, gint y, gint width, gint height)

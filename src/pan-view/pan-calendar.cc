@@ -188,8 +188,8 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 
 	pi = pan_item_tri_new(pw,
 	                      x1, y1, x2, y2, x3, y3,
-	                      PAN_CAL_POPUP_COLOR);
-	pan_item_tri_border(pi, PAN_BORDER_1 | PAN_BORDER_3, PAN_CAL_POPUP_BORDER_COLOR);
+	                      PAN_CAL_POPUP_COLOR,
+	                      PAN_BORDER_1 | PAN_BORDER_3, PAN_CAL_POPUP_BORDER_COLOR);
 	pan_item_set_key(pi, "day_bubble");
 	pan_item_added(pw, pi);
 
