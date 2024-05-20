@@ -642,27 +642,6 @@ static void widget_set_cursor(GtkWidget *widget, gint icon)
 	if (cursor) g_object_unref(G_OBJECT(cursor));
 }
 
-gboolean pr_clip_region(gint x, gint y, gint w, gint h,
-			       gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-			       gint *rx, gint *ry, gint *rw, gint *rh)
-{
-	if (clip_x + clip_w <= x ||
-	    clip_x >= x + w ||
-	    clip_y + clip_h <= y ||
-	    clip_y >= y + h)
-		{
-		return FALSE;
-		}
-
-	*rx = MAX(x, clip_x);
-	*rw = MIN((x + w), (clip_x + clip_w)) - *rx;
-
-	*ry = MAX(y, clip_y);
-	*rh = MIN((y + h), (clip_y + clip_h)) - *ry;
-
-	return TRUE;
-}
-
 static gboolean pr_parent_window_sizable(PixbufRenderer *pr)
 {
 	GdkWindowState state;
@@ -1151,9 +1130,9 @@ static void pr_source_tile_changed(PixbufRenderer *pr, gint x, gint y, gint widt
 		st = static_cast<SourceTile *>(work->data);
 		work = work->next;
 
-		if (pr_clip_region(st->x, st->y, pr->source_tile_width, pr->source_tile_height,
-				   x, y, width, height,
-				   &rx, &ry, &rw, &rh))
+		if (util_clip_region(st->x, st->y, pr->source_tile_width, pr->source_tile_height,
+		                     x, y, width, height,
+		                     rx, ry, rw, rh))
 			{
 			GdkPixbuf *pixbuf;
 

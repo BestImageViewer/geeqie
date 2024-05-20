@@ -223,10 +223,10 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 
 	if (!pr->pixbuf && !pr->source_tiles_enabled)
 		{
-		if (pr_clip_region(x, y, w, h,
-				   0, 0,
-				   pr->viewport_width, pr->viewport_height,
-				   &rx, &ry, &rw, &rh))
+		if (util_clip_region(x, y, w, h,
+		                     0, 0,
+		                     pr->viewport_width, pr->viewport_height,
+		                     rx, ry, rw, rh))
 			{
 			draw(rx, ry, rw, rh);
 			}
@@ -237,18 +237,18 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 	if (pr->vis_width < pr->viewport_width)
 		{
 		if (pr->x_offset > 0 &&
-		    pr_clip_region(x, y, w, h,
-				   0, 0,
-				   pr->x_offset, pr->viewport_height,
-				   &rx, &ry, &rw, &rh))
+		    util_clip_region(x, y, w, h,
+		                     0, 0,
+		                     pr->x_offset, pr->viewport_height,
+		                     rx, ry, rw, rh))
 			{
 			draw(rx, ry, rw, rh);
 			}
 		if (pr->viewport_width - pr->vis_width - pr->x_offset > 0 &&
-		    pr_clip_region(x, y, w, h,
-				   pr->x_offset + pr->vis_width, 0,
-				   pr->viewport_width - pr->vis_width - pr->x_offset, pr->viewport_height,
-				   &rx, &ry, &rw, &rh))
+		    util_clip_region(x, y, w, h,
+		                     pr->x_offset + pr->vis_width, 0,
+		                     pr->viewport_width - pr->vis_width - pr->x_offset, pr->viewport_height,
+		                     rx, ry, rw, rh))
 			{
 			draw(rx, ry, rw, rh);
 			}
@@ -256,18 +256,18 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 	if (pr->vis_height < pr->viewport_height)
 		{
 		if (pr->y_offset > 0 &&
-		    pr_clip_region(x, y, w, h,
-				   pr->x_offset, 0,
-				   pr->vis_width, pr->y_offset,
-				   &rx, &ry, &rw, &rh))
+		    util_clip_region(x, y, w, h,
+		                     pr->x_offset, 0,
+		                     pr->vis_width, pr->y_offset,
+		                     rx, ry, rw, rh))
 			{
 			draw(rx, ry, rw, rh);
 			}
 		if (pr->viewport_height - pr->vis_height - pr->y_offset > 0 &&
-		    pr_clip_region(x, y, w, h,
-				   pr->x_offset, pr->y_offset + pr->vis_height,
-				   pr->vis_width, pr->viewport_height - pr->vis_height - pr->y_offset,
-				   &rx, &ry, &rw, &rh))
+		    util_clip_region(x, y, w, h,
+		                     pr->x_offset, pr->y_offset + pr->vis_height,
+		                     pr->vis_width, pr->viewport_height - pr->vis_height - pr->y_offset,
+		                     rx, ry, rw, rh))
 			{
 			draw(rx, ry, rw, rh);
 			}
@@ -598,7 +598,7 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 		if (!od->window) rt_overlay_init_window(rt, od);
 
 		rt_overlay_get_position(rt, od, px, py, pw, ph);
-		if (pr_clip_region(x, y, w, h, px, py, pw, ph, &rx, &ry, &rw, &rh))
+		if (util_clip_region(x, y, w, h, px, py, pw, ph, rx, ry, rw, rh))
 			{
 			if (!rt->overlay_buffer)
 				{
@@ -1194,9 +1194,9 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 		// We find the overlapping region (r{x,y,w,h}) between the ImageTile (output)
 		// region and the region that's covered by this SourceTile (input).
 		gint rx, ry, rw, rh;  // NOLINT(readability-isolate-declaration)
-		if (pr_clip_region(stx, sty, stw, sth,
-				   it->x + x, it->y + y, w, h,
-				   &rx, &ry, &rw, &rh))
+		if (util_clip_region(stx, sty, stw, sth,
+		                     it->x + x, it->y + y, w, h,
+		                     rx, ry, rw, rh))
 			{
 
 			if (st->blank)

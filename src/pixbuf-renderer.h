@@ -371,9 +371,6 @@ struct SourceTile
 };
 
 
-gboolean pr_clip_region(gint x, gint y, gint w, gint h,
-			       gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-			       gint *rx, gint *ry, gint *rw, gint *rh);
 void pr_render_complete_signal(PixbufRenderer *pr);
 
 void pr_tile_coords_map_orientation(gint orientation,
