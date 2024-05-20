@@ -53,32 +53,32 @@ PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
 PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
                           gint border_size, const PanColor &base, const PanColor &bord);
 void pan_item_box_shadow(PanItem *pi, gint offset, gint fade);
-gint pan_item_box_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-		       gint x, gint y, gint width, gint height);
+gboolean pan_item_box_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
+                           gint x, gint y, gint width, gint height);
 
 // Item triangle type
 PanItem *pan_item_tri_new(PanWindow *pw,
                           gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
                           const PanColor &color,
                           gint borders, const PanColor &border_color);
-gint pan_item_tri_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-		       gint x, gint y, gint width, gint height);
+gboolean pan_item_tri_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
+                           gint x, gint y, gint width, gint height);
 
 // Item text type
 PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
                            PanTextAttrType attr, PanBorderType border, const PanColor &color);
-gint pan_item_text_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-			gint x, gint y, gint width, gint height);
+gboolean pan_item_text_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
+                            gint x, gint y, gint width, gint height);
 
 // Item thumbnail type
 PanItem *pan_item_thumb_new(PanWindow *pw, FileData *fd, gint x, gint y);
-gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-			 gint x, gint y, gint width, gint height);
+gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
+                             gint x, gint y, gint width, gint height);
 
 // Item image type
 PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w, gint h);
-gint pan_item_image_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-			 gint x, gint y, gint width, gint height);
+gboolean pan_item_image_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
+                             gint x, gint y, gint width, gint height);
 
 // Alignment
 struct PanTextAlignment {

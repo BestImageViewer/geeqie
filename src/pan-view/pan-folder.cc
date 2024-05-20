@@ -176,7 +176,6 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 
 	if (parent)
 		{
-		PanItem *pi;
 		gint px;
 		gint py;
 		gint gx;
@@ -188,10 +187,10 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 		gx = group->x + group->width / 2;
 		gy = group->y + group->height / 2;
 
-		pi = pan_item_tri_new(pw,
-		                      px, py, gx, gy, gx + 5, gy + 5,
-		                      {255, 40, 40, 128},
-		                      PAN_BORDER_1 | PAN_BORDER_3, {255, 0, 0, 128});
+		pan_item_tri_new(pw,
+		                 px, py, gx, gy, gx + 5, gy + 5,
+		                 {255, 40, 40, 128},
+		                 PAN_BORDER_1 | PAN_BORDER_3, {255, 0, 0, 128});
 		}
 
 	pw->list = g_list_concat(group->items, pw->list);

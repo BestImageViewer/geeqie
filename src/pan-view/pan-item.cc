@@ -171,16 +171,12 @@ void pan_item_box_shadow(PanItem *pi, gint offset, gint fade)
 	pi->data = shadow;
 }
 
-gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
-		       gint x, gint y, gint width, gint height)
+gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
+                           gint x, gint y, gint width, gint height)
 {
 	gint bw;
 	gint bh;
 	gint *shadow;
-	gint rx;
-	gint ry;
-	gint rw;
-	gint rh;
 
 	bw = pi->width;
 	bh = pi->height;
@@ -216,48 +212,23 @@ gint pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRender
 			}
 		}
 
-	if (util_clip_region(x, y, width, height,
-	                     pi->x, pi->y, bw, bh,
-	                     rx, ry, rw, rh))
-		{
+	const GdkRectangle request_rect{x, y, width, height};
+	const auto draw_rect_if_intersect = [pixbuf, &request_rect, x, y](const GdkRectangle &box_rect, const PanColor &color)
+	{
+		GdkRectangle r;
+		if (!gdk_rectangle_intersect(&request_rect, &box_rect, &r)) return;
+
 		pixbuf_draw_rect_fill(pixbuf,
-				      rx - x, ry - y, rw, rh,
-				      pi->color.r, pi->color.g, pi->color.b, pi->color.a);
-		}
-	if (util_clip_region(x, y, width, height,
-	                     pi->x, pi->y, bw, pi->border,
-	                     rx, ry, rw, rh))
-		{
-		pixbuf_draw_rect_fill(pixbuf,
-				      rx - x, ry - y, rw, rh,
-				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
-		}
-	if (util_clip_region(x, y, width, height,
-	                     pi->x, pi->y + pi->border, pi->border, bh - pi->border * 2,
-	                     rx, ry, rw, rh))
-		{
-		pixbuf_draw_rect_fill(pixbuf,
-				      rx - x, ry - y, rw, rh,
-				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
-		}
-	if (util_clip_region(x, y, width, height,
-	                     pi->x + bw - pi->border, pi->y + pi->border,
-	                     pi->border, bh - pi->border * 2,
-	                     rx, ry, rw, rh))
-		{
-		pixbuf_draw_rect_fill(pixbuf,
-				      rx - x, ry - y, rw, rh,
-				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
-		}
-	if (util_clip_region(x, y, width, height,
-	                     pi->x, pi->y + bh - pi->border,
-	                     bw,  pi->border,
-	                     rx, ry, rw, rh))
-		{
-		pixbuf_draw_rect_fill(pixbuf,
-				      rx - x, ry - y, rw, rh,
-				      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
-		}
+		                      r.x - x, r.y - y, r.width, r.height,
+		                      color.r, color.g, color.b, color.a);
+	};
+
+	draw_rect_if_intersect({pi->x, pi->y, bw, bh}, pi->color);
+
+	draw_rect_if_intersect({pi->x, pi->y, bw, pi->border}, pi->color2);
+	draw_rect_if_intersect({pi->x, pi->y + pi->border, pi->border, bh - pi->border * 2}, pi->color2);
+	draw_rect_if_intersect({pi->x + bw - pi->border, pi->y + pi->border, pi->border, bh - pi->border * 2}, pi->color2);
+	draw_rect_if_intersect({pi->x, pi->y + bh - pi->border, bw, pi->border}, pi->color2);
 
 	return FALSE;
 }
@@ -298,29 +269,27 @@ PanItem *pan_item_tri_new(PanWindow *pw,
 	return pi;
 }
 
-gint pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *, gint x, gint y, gint width, gint height)
+gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
+                           gint x, gint y, gint width, gint height)
 {
-	gint rx;
-	gint ry;
-	gint rw;
-	gint rh;
+	const GdkRectangle request_rect{x, y, width, height};
+	const GdkRectangle pi_rect{pi->x, pi->y, pi->width, pi->height};
+	GdkRectangle r;
 
-	if (util_clip_region(x, y, width, height,
-	                     pi->x, pi->y, pi->width, pi->height,
-	                     rx, ry, rw, rh) && pi->data)
+	if (pi->data && gdk_rectangle_intersect(&request_rect, &pi_rect, &r))
 		{
 		auto coord = static_cast<GdkPoint *>(pi->data);
 		pixbuf_draw_triangle(pixbuf,
-		                     rx - x, ry - y, rw, rh,
+		                     r.x - x, r.y - y, r.width, r.height,
 		                     coord[0].x - x, coord[0].y - y,
 		                     coord[1].x - x, coord[1].y - y,
 		                     coord[2].x - x, coord[2].y - y,
 		                     pi->color.r, pi->color.g, pi->color.b, pi->color.a);
 
-		const auto draw_line = [pixbuf, rx, ry, rw, rh, x, y, &color = pi->color2](const GdkPoint &start, const GdkPoint &end)
+		const auto draw_line = [pixbuf, &r, x, y, &color = pi->color2](const GdkPoint &start, const GdkPoint &end)
 		{
 			pixbuf_draw_line(pixbuf,
-			                 rx - x, ry - y, rw, rh,
+			                 r.x - x, r.y - y, r.width, r.height,
 			                 start.x - x, start.y - y,
 			                 end.x - x, end.y - y,
 			                 color.r, color.g, color.b, color.a);
@@ -419,7 +388,8 @@ PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
 	return pi;
 }
 
-gint pan_item_text_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr, gint x, gint y, gint, gint)
+gboolean pan_item_text_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
+                            gint x, gint y, gint, gint)
 {
 	PangoLayout *layout;
 
@@ -457,127 +427,113 @@ PanItem *pan_item_thumb_new(PanWindow *pw, FileData *fd, gint x, gint y)
 	return pi;
 }
 
-gint pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *, gint x, gint y, gint width, gint height)
+gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
+                             gint x, gint y, gint width, gint height)
 {
-	gint tx;
-	gint ty;
-	gint tw;
-	gint th;
-	gint rx;
-	gint ry;
-	gint rw;
-	gint rh;
+	const GdkRectangle request_rect{x, y, width, height};
+	GdkRectangle thumb_rect;
+	GdkRectangle r;
 
 	if (pi->pixbuf)
 		{
-		tw = gdk_pixbuf_get_width(pi->pixbuf);
-		th = gdk_pixbuf_get_height(pi->pixbuf);
+		gint tw = gdk_pixbuf_get_width(pi->pixbuf);
+		gint th = gdk_pixbuf_get_height(pi->pixbuf);
 
-		tx = pi->x + (pi->width - tw) / 2;
-		ty = pi->y + (pi->height - th) / 2;
+		gint tx = pi->x + (pi->width - tw) / 2;
+		gint ty = pi->y + (pi->height - th) / 2;
 
 		if (gdk_pixbuf_get_has_alpha(pi->pixbuf))
 			{
-			if (util_clip_region(x, y, width, height,
-			                     tx + PAN_SHADOW_OFFSET, ty + PAN_SHADOW_OFFSET, tw, th,
-			                     rx, ry, rw, rh))
+			thumb_rect = {tx + PAN_SHADOW_OFFSET, ty + PAN_SHADOW_OFFSET, tw, th};
+			if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 				{
 				pixbuf_draw_shadow(pixbuf,
-						   rx - x, ry - y, rw, rh,
-						   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
-						   PAN_SHADOW_FADE,
-						   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+				                   r.x - x, r.y - y, r.width, r.height,
+				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
+				                   PAN_SHADOW_FADE,
+				                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
 				}
 			}
 		else
 			{
-			if (util_clip_region(x, y, width, height,
-			                     tx + tw, ty + PAN_SHADOW_OFFSET,
-			                     PAN_SHADOW_OFFSET, th - PAN_SHADOW_OFFSET,
-			                     rx, ry, rw, rh))
+			thumb_rect = {tx + tw, ty + PAN_SHADOW_OFFSET, PAN_SHADOW_OFFSET, th - PAN_SHADOW_OFFSET};
+			if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 				{
 				pixbuf_draw_shadow(pixbuf,
-						   rx - x, ry - y, rw, rh,
-						   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
-						   PAN_SHADOW_FADE,
-						   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+				                   r.x - x, r.y - y, r.width, r.height,
+				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
+				                   PAN_SHADOW_FADE,
+				                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
 				}
-			if (util_clip_region(x, y, width, height,
-			                     tx + PAN_SHADOW_OFFSET, ty + th, tw, PAN_SHADOW_OFFSET,
-			                     rx, ry, rw, rh))
+
+			thumb_rect = {tx + PAN_SHADOW_OFFSET, ty + th, tw, PAN_SHADOW_OFFSET};
+			if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 				{
 				pixbuf_draw_shadow(pixbuf,
-						   rx - x, ry - y, rw, rh,
+				           r.x - x, r.y - y, r.width, r.height,
 						   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
 						   PAN_SHADOW_FADE,
 						   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
 				}
 			}
 
-		if (util_clip_region(x, y, width, height,
-		                     tx, ty, tw, th,
-		                     rx, ry, rw, rh))
+		thumb_rect = {tx, ty, tw, th};
+		if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
-			gdk_pixbuf_composite(pi->pixbuf, pixbuf, rx - x, ry - y, rw, rh,
+			gdk_pixbuf_composite(pi->pixbuf, pixbuf, r.x - x, r.y - y, r.width, r.height,
 					     static_cast<gdouble>(tx) - x,
 					     static_cast<gdouble>(ty) - y,
 					     1.0, 1.0, GDK_INTERP_NEAREST,
 					     255);
 			}
 
-		if (util_clip_region(x, y, width, height,
-		                     tx, ty, tw, PAN_OUTLINE_THICKNESS,
-		                     rx, ry, rw, rh))
+		thumb_rect = {tx, ty, tw, PAN_OUTLINE_THICKNESS};
+		if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
-					      rx - x, ry - y, rw, rh,
-					      PAN_OUTLINE_COLOR_1);
+			                      r.x - x, r.y - y, r.width, r.height,
+			                      PAN_OUTLINE_COLOR_1);
 			}
-		if (util_clip_region(x, y, width, height,
-		                     tx, ty, PAN_OUTLINE_THICKNESS, th,
-		                     rx, ry, rw, rh))
+
+		thumb_rect = {tx, ty, PAN_OUTLINE_THICKNESS, th};
+		if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
-					      rx - x, ry - y, rw, rh,
-					      PAN_OUTLINE_COLOR_1);
+			                      r.x - x, r.y - y, r.width, r.height,
+			                      PAN_OUTLINE_COLOR_1);
 			}
-		if (util_clip_region(x, y, width, height,
-		                     tx + tw - PAN_OUTLINE_THICKNESS, ty +  PAN_OUTLINE_THICKNESS,
-		                     PAN_OUTLINE_THICKNESS, th - PAN_OUTLINE_THICKNESS,
-		                     rx, ry, rw, rh))
+
+		thumb_rect = {tx + tw - PAN_OUTLINE_THICKNESS, ty +  PAN_OUTLINE_THICKNESS,
+		              PAN_OUTLINE_THICKNESS, th - PAN_OUTLINE_THICKNESS};
+		if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
-					      rx - x, ry - y, rw, rh,
-					      PAN_OUTLINE_COLOR_2);
+			                      r.x - x, r.y - y, r.width, r.height,
+			                      PAN_OUTLINE_COLOR_2);
 			}
-		if (util_clip_region(x, y, width, height,
-		                     tx +  PAN_OUTLINE_THICKNESS, ty + th - PAN_OUTLINE_THICKNESS,
-		                     tw - PAN_OUTLINE_THICKNESS * 2, PAN_OUTLINE_THICKNESS,
-		                     rx, ry, rw, rh))
+
+		thumb_rect = {tx +  PAN_OUTLINE_THICKNESS, ty + th - PAN_OUTLINE_THICKNESS,
+		              tw - PAN_OUTLINE_THICKNESS * 2, PAN_OUTLINE_THICKNESS};
+		if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
 			pixbuf_draw_rect_fill(pixbuf,
-					      rx - x, ry - y, rw, rh,
-					      PAN_OUTLINE_COLOR_2);
+			                      r.x - x, r.y - y, r.width, r.height,
+			                      PAN_OUTLINE_COLOR_2);
 			}
 		}
 	else
 		{
-		tw = pi->width - PAN_SHADOW_OFFSET * 2;
-		th = pi->height - PAN_SHADOW_OFFSET * 2;
-		tx = pi->x + PAN_SHADOW_OFFSET;
-		ty = pi->y + PAN_SHADOW_OFFSET;
-
-		if (util_clip_region(x, y, width, height,
-		                     tx, ty, tw, th,
-		                     rx, ry, rw, rh))
+		thumb_rect = {pi->x + PAN_SHADOW_OFFSET, pi->y + PAN_SHADOW_OFFSET,
+		              pi->width - PAN_SHADOW_OFFSET * 2, pi->height - PAN_SHADOW_OFFSET * 2 };
+		if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
 			gint d;
 
 			d = (pw->size <= PAN_IMAGE_SIZE_THUMB_NONE) ? 2 : 8;
 			pixbuf_draw_rect_fill(pixbuf,
-					      rx - x, ry - y, rw, rh,
-					      PAN_SHADOW_COLOR,
-					      PAN_SHADOW_ALPHA / d);
+			                      r.x - x, r.y - y, r.width, r.height,
+			                      PAN_SHADOW_COLOR,
+			                      PAN_SHADOW_ALPHA / d);
 			}
 		}
 
@@ -644,30 +600,28 @@ PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w,
 	return pi;
 }
 
-gint pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *, gint x, gint y, gint width, gint height)
+gboolean pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
+                             gint x, gint y, gint width, gint height)
 {
-	gint rx;
-	gint ry;
-	gint rw;
-	gint rh;
+	const GdkRectangle request_rect{x, y, width, height};
+	const GdkRectangle pi_rect{pi->x, pi->y, pi->width, pi->height};
+	GdkRectangle r;
 
-	if (util_clip_region(x, y, width, height,
-	                     pi->x, pi->y, pi->width, pi->height,
-	                     rx, ry, rw, rh))
+	if (gdk_rectangle_intersect(&request_rect, &pi_rect, &r))
 		{
 		if (pi->pixbuf)
 			{
-			gdk_pixbuf_composite(pi->pixbuf, pixbuf, rx - x, ry - y, rw, rh,
-					     static_cast<gdouble>(pi->x) - x,
-					     static_cast<gdouble>(pi->y) - y,
-					     1.0, 1.0, GDK_INTERP_NEAREST,
-					     pi->color.a);
+			gdk_pixbuf_composite(pi->pixbuf, pixbuf, r.x - x, r.y - y, r.width, r.height,
+			                     static_cast<gdouble>(pi->x) - x,
+			                     static_cast<gdouble>(pi->y) - y,
+			                     1.0, 1.0, GDK_INTERP_NEAREST,
+			                     pi->color.a);
 			}
 		else
 			{
 			pixbuf_draw_rect_fill(pixbuf,
-					      rx - x, ry - y, rw, rh,
-					      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
+			                      r.x - x, r.y - y, r.width, r.height,
+			                      pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
 			}
 		}
 
