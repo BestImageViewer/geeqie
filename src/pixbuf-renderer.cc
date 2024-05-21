@@ -1114,36 +1114,34 @@ GList *pr_source_tile_compute_region(PixbufRenderer *pr, gint x, gint y, gint w,
 
 static void pr_source_tile_changed(PixbufRenderer *pr, gint x, gint y, gint width, gint height)
 {
-	GList *work;
-
 	if (width < 1 || height < 1) return;
 
-	work = pr->source_tiles;
-	while (work)
+	const GdkRectangle request_rect{x, y, width, height};
+	GdkRectangle st_rect{0, 0, pr->source_tile_width, pr->source_tile_height};
+	GdkRectangle r;
+
+	for (GList *work = pr->source_tiles; work; work = work->next)
 		{
-		SourceTile *st;
-		gint rx;
-		gint ry;
-		gint rw;
-		gint rh;
+		auto *st = static_cast<SourceTile *>(work->data);
 
-		st = static_cast<SourceTile *>(work->data);
-		work = work->next;
+		st_rect.x = st->x;
+		st_rect.y = st->y;
 
-		if (util_clip_region(st->x, st->y, pr->source_tile_width, pr->source_tile_height,
-		                     x, y, width, height,
-		                     rx, ry, rw, rh))
+		if (gdk_rectangle_intersect(&st_rect, &request_rect, &r))
 			{
 			GdkPixbuf *pixbuf;
 
-			pixbuf = gdk_pixbuf_new_subpixbuf(st->pixbuf, rx - st->x, ry - st->y, rw, rh);
+			pixbuf = gdk_pixbuf_new_subpixbuf(st->pixbuf, r.x - st->x, r.y - st->y, r.width, r.height);
 			if (pr->func_tile_request &&
-			    pr->func_tile_request(pr, rx, ry, rw, rh, pixbuf, pr->func_tile_data))
+			    pr->func_tile_request(pr, r.x, r.y, r.width, r.height, pixbuf, pr->func_tile_data))
 				{
-					pr->renderer->invalidate_region(pr->renderer, rx * pr->scale, ry * pr->scale,
-							      rw * pr->scale, rh * pr->scale);
-					if (pr->renderer2) pr->renderer2->invalidate_region(pr->renderer2, rx * pr->scale, ry * pr->scale,
-								rw * pr->scale, rh * pr->scale);
+				r.x *= pr->scale;
+				r.y *= pr->scale;
+				r.width *= pr->scale;
+				r.height *= pr->scale;
+
+				pr->renderer->invalidate_region(pr->renderer, r.x, r.y, r.width, r.height);
+				if (pr->renderer2) pr->renderer2->invalidate_region(pr->renderer2, r.x, r.y, r.width, r.height);
 				}
 			g_object_unref(pixbuf);
 			}
