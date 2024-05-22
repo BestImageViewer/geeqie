@@ -200,10 +200,6 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 	PixbufRenderer *pr = rt->pr;
 	GtkWidget *box;
 	GdkWindow *window;
-	gint rx;
-	gint ry;
-	gint rw;
-	gint rh;
 	cairo_t *cr;
 
 	box = GTK_WIDGET(pr);
@@ -213,65 +209,53 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 
 	cr = cairo_create(rt->surface);
 
-	auto draw = [rt, pr, cr](gint x, gint y, gint w, gint h)
+	const GdkRectangle border_rect{x, y, w, h};
+	auto draw_if_intersect = [&border_rect, rt, pr, cr](const GdkRectangle &rect)
 	{
-		cairo_set_source_rgb(cr, static_cast<double>(pr->color.red), static_cast<double>(pr->color.green), static_cast<double>(pr->color.blue));
-		cairo_rectangle(cr, x + rt->stereo_off_x, y + rt->stereo_off_y, w, h);
+		GdkRectangle r;
+		if (!gdk_rectangle_intersect(&border_rect, &rect, &r)) return;
+
+		cairo_set_source_rgb(cr, pr->color.red, pr->color.green, pr->color.blue);
+		cairo_rectangle(cr, r.x + rt->stereo_off_x, r.y + rt->stereo_off_y, r.width, r.height);
 		cairo_fill(cr);
-		rt_overlay_draw(rt, x, y, w, h, nullptr);
+		rt_overlay_draw(rt, r.x, r.y, r.width, r.height, nullptr);
 	};
 
 	if (!pr->pixbuf && !pr->source_tiles_enabled)
 		{
-		if (util_clip_region(x, y, w, h,
-		                     0, 0,
-		                     pr->viewport_width, pr->viewport_height,
-		                     rx, ry, rw, rh))
-			{
-			draw(rx, ry, rw, rh);
-			}
+		draw_if_intersect({0, 0, pr->viewport_width, pr->viewport_height});
 		cairo_destroy(cr);
 		return;
 		}
 
 	if (pr->vis_width < pr->viewport_width)
 		{
-		if (pr->x_offset > 0 &&
-		    util_clip_region(x, y, w, h,
-		                     0, 0,
-		                     pr->x_offset, pr->viewport_height,
-		                     rx, ry, rw, rh))
+		if (pr->x_offset > 0)
 			{
-			draw(rx, ry, rw, rh);
+			draw_if_intersect({0, 0, pr->x_offset, pr->viewport_height});
 			}
-		if (pr->viewport_width - pr->vis_width - pr->x_offset > 0 &&
-		    util_clip_region(x, y, w, h,
-		                     pr->x_offset + pr->vis_width, 0,
-		                     pr->viewport_width - pr->vis_width - pr->x_offset, pr->viewport_height,
-		                     rx, ry, rw, rh))
+
+		gint right_edge = pr->x_offset + pr->vis_width;
+		if (pr->viewport_width > right_edge)
 			{
-			draw(rx, ry, rw, rh);
+			draw_if_intersect({right_edge, 0, pr->viewport_width - right_edge, pr->viewport_height});
 			}
 		}
+
 	if (pr->vis_height < pr->viewport_height)
 		{
-		if (pr->y_offset > 0 &&
-		    util_clip_region(x, y, w, h,
-		                     pr->x_offset, 0,
-		                     pr->vis_width, pr->y_offset,
-		                     rx, ry, rw, rh))
+		if (pr->y_offset > 0)
 			{
-			draw(rx, ry, rw, rh);
+			draw_if_intersect({pr->x_offset, 0, pr->vis_width, pr->y_offset});
 			}
-		if (pr->viewport_height - pr->vis_height - pr->y_offset > 0 &&
-		    util_clip_region(x, y, w, h,
-		                     pr->x_offset, pr->y_offset + pr->vis_height,
-		                     pr->vis_width, pr->viewport_height - pr->vis_height - pr->y_offset,
-		                     rx, ry, rw, rh))
+
+		gint bottom_edge = pr->y_offset + pr->vis_height;
+		if (pr->viewport_height  > bottom_edge)
 			{
-			draw(rx, ry, rw, rh);
+			draw_if_intersect({pr->x_offset, bottom_edge, pr->vis_width, pr->viewport_height - bottom_edge});
 			}
 		}
+
 	cairo_destroy(cr);
 }
 
@@ -577,28 +561,19 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 			    ImageTile *it)
 {
 	PixbufRenderer *pr = rt->pr;
-	GList *work;
+	const GdkRectangle request_rect{x, y, w, h};
 
-	work = rt->overlay_list;
-	while (work)
+	for (GList *work = rt->overlay_list; work; work = work->next)
 		{
-		OverlayData *od;
-		gint px;
-		gint py;
-		gint pw;
-		gint ph;
-		gint rx;
-		gint ry;
-		gint rw;
-		gint rh;
-
-		od = static_cast<OverlayData *>(work->data);
-		work = work->next;
+		auto *od = static_cast<OverlayData *>(work->data);
 
 		if (!od->window) rt_overlay_init_window(rt, od);
 
-		rt_overlay_get_position(rt, od, px, py, pw, ph);
-		if (util_clip_region(x, y, w, h, px, py, pw, ph, rx, ry, rw, rh))
+		GdkRectangle od_rect;
+		rt_overlay_get_position(rt, od, od_rect.x, od_rect.y, od_rect.width, od_rect.height);
+
+		GdkRectangle r;
+		if (gdk_rectangle_intersect(&request_rect, &od_rect, &r))
 			{
 			if (!rt->overlay_buffer)
 				{
@@ -612,48 +587,45 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 				cairo_t *cr;
 
 				cr = cairo_create(rt->overlay_buffer);
-				cairo_set_source_surface(cr, it->surface, (pr->x_offset + (it->x - rt->x_scroll)) - rx, (pr->y_offset + (it->y - rt->y_scroll)) - ry);
-				cairo_rectangle(cr, 0, 0, rw, rh);
+				cairo_set_source_surface(cr, it->surface, (pr->x_offset + (it->x - rt->x_scroll)) - r.x, (pr->y_offset + (it->y - rt->y_scroll)) - r.y);
+				cairo_rectangle(cr, 0, 0, r.width, r.height);
 				cairo_fill_preserve(cr);
 
-				gdk_cairo_set_source_pixbuf(cr, od->pixbuf, px - rx, py - ry);
+				gdk_cairo_set_source_pixbuf(cr, od->pixbuf, od_rect.x - r.x, od_rect.y - r.y);
 				cairo_fill(cr);
 				cairo_destroy (cr);
 
 				cr = gdk_cairo_create(od->window);
-				cairo_set_source_surface(cr, rt->overlay_buffer, rx - px, ry - py);
-				cairo_rectangle (cr, rx - px, ry - py, rw, rh);
+				cairo_set_source_surface(cr, rt->overlay_buffer, r.x - od_rect.x, r.y - od_rect.y);
+				cairo_rectangle (cr, r.x - od_rect.x, r.y - od_rect.y, r.width, r.height);
 				cairo_fill (cr);
 				cairo_destroy (cr);
 				}
 			else
 				{
 				/* no ImageTile means region may be larger than our scratch buffer */
-				gint sx;
-				gint sy;
-
-				for (sx = rx; sx < rx + rw; sx += rt->tile_width)
-				    for (sy = ry; sy < ry + rh; sy += rt->tile_height)
+				for (gint sx = r.x; sx < r.x + r.width; sx += rt->tile_width)
+				    for (gint sy = r.y; sy < r.y + r.height; sy += rt->tile_height)
 					{
 					gint sw;
 					gint sh;
 					cairo_t *cr;
 
-					sw = MIN(rx + rw - sx, rt->tile_width);
-					sh = MIN(ry + rh - sy, rt->tile_height);
+					sw = MIN(r.x + r.width - sx, rt->tile_width);
+					sh = MIN(r.y + r.height - sy, rt->tile_height);
 
 					cr = cairo_create(rt->overlay_buffer);
 					cairo_set_source_rgb(cr, 0, 0, 0);
 					cairo_rectangle(cr, 0, 0, sw, sh);
 					cairo_fill_preserve(cr);
 
-					gdk_cairo_set_source_pixbuf(cr, od->pixbuf, px - sx, py - sy);
+					gdk_cairo_set_source_pixbuf(cr, od->pixbuf, od_rect.x - sx, od_rect.y - sy);
 					cairo_fill (cr);
 					cairo_destroy (cr);
 
 					cr = gdk_cairo_create(od->window);
-					cairo_set_source_surface(cr, rt->overlay_buffer, sx - px, sy - py);
-					cairo_rectangle (cr, sx - px, sy - py, sw, sh);
+					cairo_set_source_surface(cr, rt->overlay_buffer, sx - od_rect.x, sy - od_rect.y);
+					cairo_rectangle (cr, sx - od_rect.x, sy - od_rect.y, sw, sh);
 					cairo_fill(cr);
 					cairo_destroy(cr);
 					}
@@ -1164,6 +1136,7 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 	 * small sizes for anything but GDK_INTERP_NEAREST
 	 */
 	const gboolean force_nearest = pr->width < PR_MIN_SCALE_SIZE || pr->height < PR_MIN_SCALE_SIZE;
+	GdkInterpType interp_type = force_nearest ? GDK_INTERP_NEAREST : pr->zoom_quality;
 
 #if 0
 	// Draws red over draw region, to check for leaks (regions not filled)
@@ -1177,34 +1150,31 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 	// This will render the relevant SourceTiles if needed, or pull from the cache if
 	// they've already been generated.
 	GList *list = pr_source_tile_compute_region(pr, sx, sy, sw, sh, TRUE);
-	GList *work = list;
-	while (work)
+	const GdkRectangle it_rect{it->x + x, it->y + y, w, h};
+	GdkRectangle st_rect;
+	for (GList *work = list; work; work = work->next)
 		{
 		const auto st = static_cast<SourceTile *>(work->data);
-		work = work->next;
 
 		// The scaled (output) coordinates that are covered by this SourceTile.
 		// To avoid aliasing line artifacts due to under-drawing, we expand the
 		// render area to the nearest whole pixel.
-		const gint stx = floor(st->x * scale_x);
-		const gint sty = floor(st->y * scale_y);
-		const gint stw = ceil((st->x + pr->source_tile_width) * scale_x) - stx;
-		const gint sth = ceil((st->y + pr->source_tile_height) * scale_y) - sty;
+		st_rect.x = floor(st->x * scale_x);
+		st_rect.y = floor(st->y * scale_y);
+		st_rect.width = ceil((st->x + pr->source_tile_width) * scale_x) - st_rect.x;
+		st_rect.height = ceil((st->y + pr->source_tile_height) * scale_y) - st_rect.y;
 
-		// We find the overlapping region (r{x,y,w,h}) between the ImageTile (output)
+		// We find the overlapping region r between the ImageTile (output)
 		// region and the region that's covered by this SourceTile (input).
-		gint rx, ry, rw, rh;  // NOLINT(readability-isolate-declaration)
-		if (util_clip_region(stx, sty, stw, sth,
-		                     it->x + x, it->y + y, w, h,
-		                     rx, ry, rw, rh))
+		GdkRectangle r;
+		if (gdk_rectangle_intersect(&st_rect, &it_rect, &r))
 			{
-
 			if (st->blank)
 				{
 				// If this SourceTile has no contents, we just paint a black rect
 				// of the appropriate size.
 				cairo_t *cr = cairo_create(it->surface);
-				cairo_rectangle (cr, rx - st->x, ry - st->y, rt->hidpi_scale * rw, rt->hidpi_scale * rh);
+				cairo_rectangle (cr, r.x - st->x, r.y - st->y, rt->hidpi_scale * r.width, rt->hidpi_scale * r.height);
 				cairo_set_source_rgb(cr, 0, 0, 0);
 				cairo_fill (cr);
 				cairo_destroy (cr);
@@ -1226,8 +1196,8 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 				// applied to the offset (explained below), width, and height.
 
 				// (May need to use unfloored stx,sty values here)
-				const gdouble offset_x = rt->hidpi_scale * static_cast<gdouble>(stx - it->x);
-				const gdouble offset_y = rt->hidpi_scale * static_cast<gdouble>(sty - it->y);
+				const gdouble offset_x = rt->hidpi_scale * static_cast<gdouble>(st_rect.x - it->x);
+				const gdouble offset_y = rt->hidpi_scale * static_cast<gdouble>(st_rect.y - it->y);
 
 				// TODO(xsdg): Just draw instead of usign scale-draw for the case where
 				// (pr->zoom == 1.0 || pr->scale == 1.0)
@@ -1240,7 +1210,7 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 				// coordinates_ in it->pixbuf.
 				//
 				// At this point, recall that we may need to render into ImageTile from multiple
-				// SourceTiles.  The region specified by r{x,y,w,h} accounts for this, and thus,
+				// SourceTiles.  The region specified by r accounts for this, and thus,
 				// those are the coordinates _within the current SourceTile_ that need to be
 				// rendered into the ImageTile.
 				//
@@ -1249,12 +1219,11 @@ static gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 				// coordinates are not necessarily aligned, an offset will be negative if this
 				// SourceTile starts left of or above the ImageTile, positive if it starts in
 				// the middle of the ImageTile, or zero if the left or top edges are aligned.
-				gdk_pixbuf_scale(
-					st->pixbuf, it->pixbuf,
-					rx - it->x, ry - it->y, rt->hidpi_scale * rw, rt->hidpi_scale * rh,
-					offset_x, offset_y,
-					rt->hidpi_scale * scale_x, rt->hidpi_scale * scale_y,
-					(force_nearest) ? GDK_INTERP_NEAREST : pr->zoom_quality);
+				gdk_pixbuf_scale(st->pixbuf, it->pixbuf,
+				                 r.x - it->x, r.y - it->y, rt->hidpi_scale * r.width, rt->hidpi_scale * r.height,
+				                 offset_x, offset_y,
+				                 rt->hidpi_scale * scale_x, rt->hidpi_scale * scale_y,
+				                 interp_type);
 				draw = TRUE;
 				}
 			}
