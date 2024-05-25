@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <utility>
 
 #include <cairo.h>
@@ -582,12 +583,10 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 		                                            rt->tile_width, rt->tile_height);
 				}
 
-			if (it)
-				{
-				cairo_t *cr;
-
-				cr = cairo_create(rt->overlay_buffer);
-				cairo_set_source_surface(cr, it->surface, (pr->x_offset + (it->x - rt->x_scroll)) - r.x, (pr->y_offset + (it->y - rt->y_scroll)) - r.y);
+			const auto draw = [rt, od, &od_rect](const GdkRectangle &r, const std::function<void(cairo_t *)> &set_source)
+			{
+				cairo_t *cr = cairo_create(rt->overlay_buffer);
+				set_source(cr);
 				cairo_rectangle(cr, 0, 0, r.width, r.height);
 				cairo_fill_preserve(cr);
 
@@ -600,6 +599,15 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 				cairo_rectangle (cr, r.x - od_rect.x, r.y - od_rect.y, r.width, r.height);
 				cairo_fill (cr);
 				cairo_destroy (cr);
+			};
+
+			if (it)
+				{
+				const auto set_source = [rt, pr, it, &r](cairo_t *cr)
+				{
+					cairo_set_source_surface(cr, it->surface, (pr->x_offset + (it->x - rt->x_scroll)) - r.x, (pr->y_offset + (it->y - rt->y_scroll)) - r.y);
+				};
+				draw(r, set_source);
 				}
 			else
 				{
@@ -607,27 +615,10 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 				for (gint sx = r.x; sx < r.x + r.width; sx += rt->tile_width)
 				    for (gint sy = r.y; sy < r.y + r.height; sy += rt->tile_height)
 					{
-					gint sw;
-					gint sh;
-					cairo_t *cr;
+					gint sw = MIN(r.x + r.width - sx, rt->tile_width);
+					gint sh = MIN(r.y + r.height - sy, rt->tile_height);
 
-					sw = MIN(r.x + r.width - sx, rt->tile_width);
-					sh = MIN(r.y + r.height - sy, rt->tile_height);
-
-					cr = cairo_create(rt->overlay_buffer);
-					cairo_set_source_rgb(cr, 0, 0, 0);
-					cairo_rectangle(cr, 0, 0, sw, sh);
-					cairo_fill_preserve(cr);
-
-					gdk_cairo_set_source_pixbuf(cr, od->pixbuf, od_rect.x - sx, od_rect.y - sy);
-					cairo_fill (cr);
-					cairo_destroy (cr);
-
-					cr = gdk_cairo_create(od->window);
-					cairo_set_source_surface(cr, rt->overlay_buffer, sx - od_rect.x, sy - od_rect.y);
-					cairo_rectangle (cr, sx - od_rect.x, sy - od_rect.y, sw, sh);
-					cairo_fill(cr);
-					cairo_destroy(cr);
+					draw({sx, sy, sw, sh}, [](cairo_t *cr){ cairo_set_source_rgb(cr, 0, 0, 0); });
 					}
 				}
 			}
