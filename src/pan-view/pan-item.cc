@@ -241,7 +241,7 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
  */
 
 PanItem *pan_item_tri_new(PanWindow *pw,
-                          gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
+                          const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
                           const PanColor &color,
                           gint borders, const PanColor &border_color)
 {
@@ -251,13 +251,13 @@ PanItem *pan_item_tri_new(PanWindow *pw,
 	pi->type = PAN_ITEM_TRIANGLE;
 	pi->color = color;
 
-	util_clip_triangle(x1, y1, x2, y2, x3, y3,
+	util_clip_triangle(c1, c2, c3,
 	                   pi->x, pi->y, pi->width, pi->height);
 
 	auto *coord = g_new0(GdkPoint, 3);
-	coord[0] = {x1, y1};
-	coord[1] = {x2, y2};
-	coord[2] = {x3, y3};
+	coord[0] = c1;
+	coord[1] = c2;
+	coord[2] = c3;
 
 	pi->data = coord;
 
@@ -281,9 +281,9 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 		auto coord = static_cast<GdkPoint *>(pi->data);
 		pixbuf_draw_triangle(pixbuf,
 		                     r.x - x, r.y - y, r.width, r.height,
-		                     coord[0].x - x, coord[0].y - y,
-		                     coord[1].x - x, coord[1].y - y,
-		                     coord[2].x - x, coord[2].y - y,
+		                     {coord[0].x - x, coord[0].y - y},
+		                     {coord[1].x - x, coord[1].y - y},
+		                     {coord[2].x - x, coord[2].y - y},
 		                     pi->color.r, pi->color.g, pi->color.b, pi->color.a);
 
 		const auto draw_line = [pixbuf, &r, x, y, &color = pi->color2](const GdkPoint &start, const GdkPoint &end)

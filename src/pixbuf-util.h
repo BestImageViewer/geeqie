@@ -143,17 +143,17 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout, GtkWidget *widge
  * @brief Draws a filled triangle of the specified color into the pixbuf, constrained
  *        to the specified clip region.
  * @param pb The `GdkPixbuf` to paint into.
- * @param x1,y1 Coordinates of the first corner of the triangle.
- * @param x2,y2 Coordinates of the second corner of the triangle.
- * @param x3,y3 Coordinates of the third corner of the triangle.
+ * @param c1 Coordinates of the first corner of the triangle.
+ * @param c2 Coordinates of the second corner of the triangle.
+ * @param c3 Coordinates of the third corner of the triangle.
  * @param clip_x,clip_y Coordinates of the top-left corner of the clipping region.
  * @param clip_w,clip_h Extent of the clipping region.
  * @param r,g,b,a Color and alpha.
  */
 void pixbuf_draw_triangle(GdkPixbuf *pb,
-			  gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-			  gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
-			  guint8 r, guint8 g, guint8 b, guint8 a);
+                          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
+                          const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
+                          guint8 r, guint8 g, guint8 b, guint8 a);
 
 /**
  * @brief Draws the sub-segment of the specified line segment that lies within the
@@ -239,13 +239,13 @@ gboolean util_clip_region(gint x, gint y, gint w, gint h,
 // TODO(xsdg): Rename this function to util_triangle_bounding_box.
 /**
  * @brief Computes the bounding box for the specified triangle.
- * @param[in] x1,y1 Coordinates of the first corner of the triangle.
- * @param[in] x2,y2 Coordinates of the second corner of the triangle.
- * @param[in] x3,y3 Coordinates of the third corner of the triangle.
+ * @param[in] c1 Coordinates of the first corner of the triangle.
+ * @param[in] c2 Coordinates of the second corner of the triangle.
+ * @param[in] c3 Coordinates of the third corner of the triangle.
  * @param[out] rx,ry Computed coordinates of the top-left corner of the bounding box.
  * @param[out] rw,rh Computed extent of the bounding box.
  */
-void util_clip_triangle(gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
+void util_clip_triangle(const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
                         gint &rx, gint &ry, gint &rw, gint &rh);
 
 

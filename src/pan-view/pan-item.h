@@ -58,7 +58,7 @@ gboolean pan_item_box_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixbuf
 
 // Item triangle type
 PanItem *pan_item_tri_new(PanWindow *pw,
-                          gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
+                          const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
                           const PanColor &color,
                           gint borders, const PanColor &border_color);
 gboolean pan_item_tri_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,

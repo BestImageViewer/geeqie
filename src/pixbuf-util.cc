@@ -25,7 +25,9 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <tuple>
 #include <utility>
+#include <vector>
 
 #include <cairo.h>
 #include <gio/gio.h>
@@ -1016,19 +1018,22 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout, GtkWidget *,
  *-----------------------------------------------------------------------------
  */
 
-void util_clip_triangle(gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
+void util_clip_triangle(const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
                         gint &rx, gint &ry, gint &rw, gint &rh)
 {
-	rx = std::min({x1, x2, x3});
-	ry = std::min({y1, y2, y3});
-	rw = std::max({abs(x1 - x2), abs(x2 - x3), abs(x3 - x1)});
-	rh = std::max({abs(y1 - y2), abs(y2 - y3), abs(y3 - y1)});
+	gint x_max;
+	std::tie(rx, x_max) = std::minmax({c1.x, c2.x, c3.x});
+	rw = x_max - rx;
+
+	gint y_max;
+	std::tie(ry, y_max) = std::minmax({c1.y, c2.y, c3.y});
+	rh = y_max - ry;
 }
 
 void pixbuf_draw_triangle(GdkPixbuf *pb,
-			  gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-			  gint x1, gint y1, gint x2, gint y2, gint x3, gint y3,
-			  guint8 r, guint8 g, guint8 b, guint8 a)
+                          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
+                          const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
+                          guint8 r, guint8 g, guint8 b, guint8 a)
 {
 	gboolean has_alpha;
 	gint pw;
@@ -1051,11 +1056,6 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 	guchar *p_pix;
 	guchar *pp;
 	gint p_step;
-	gdouble slope1;
-	gdouble slope2;
-	gint slope1_x;
-	gint slope1_y;
-	gint y;
 	gboolean middle = FALSE;
 
 	if (!pb) return;
@@ -1070,7 +1070,7 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 	                      rx, ry, rw, rh)) return;
 
 	// Determine the bounding box for the triangle.
-	util_clip_triangle(x1, y1, x2, y2, x3, y3,
+	util_clip_triangle(c1, c2, c3,
 	                   tx, ty, tw, th);
 
 	// And now clip the triangle bounding box to the pixbuf clipping region.
@@ -1087,67 +1087,52 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 	p_step = (has_alpha) ? 4 : 3;
 
 	// Ensure that points are ordered by increasing y coordinate.
-	if (y1 > y2)
-		{
-		std::swap(x1, x2);
-		std::swap(y1, y2);
-		}
-	if (y2 > y3)
-		{
-		std::swap(x2, x3);
-		std::swap(y2, y3);
-		}
-	if (y1 > y2)
-		{
-		std::swap(x1, x2);
-		std::swap(y1, y2);
-		}
+	std::vector<GdkPoint> v{c1, c2, c3};
+	std::sort(v.begin(), v.end(), [](const GdkPoint &l, const GdkPoint &r){ return l.y < r.y; });
 
-	// TODO(xsdg): Drop these explicit casts.  Int will always promote to
-	// double without issue.
-	slope1 = static_cast<gdouble>(y2 - y1);
-	if (slope1) slope1 = static_cast<gdouble>(x2 - x1) / slope1;
-	slope1_x = x1;
-	slope1_y = y1;
-	slope2 = static_cast<gdouble>(y3 - y1);
-	if (slope2) slope2 = static_cast<gdouble>(x3 - x1) / slope2;
+	const auto get_slope = [](const GdkPoint &start, const GdkPoint &end)
+	{
+		gdouble slope = end.y - start.y;
+		if (slope) slope = static_cast<gdouble>(end.x - start.x) / slope;
+		return slope;
+	};
 
-	for (y = fy1; y < fy2; y++)
+	gdouble slope1 = get_slope(v[0], v[1]);
+	GdkPoint slope1_start = v[0];
+	const gdouble slope2 = get_slope(v[0], v[2]);
+	const GdkPoint &slope2_start = v[0];
+
+	for (gint y = fy1; y < fy2; y++)
 		{
-		gint xa;
-		gint xb;
-
-		if (!middle && y > y2)
+		if (!middle && y > v[1].y)
 			{
-			slope1 = static_cast<gdouble>(y3 - y2);
-			if (slope1) slope1 = static_cast<gdouble>(x3 - x2) / slope1;
-			slope1_x = x2;
-			slope1_y = y2;
+			slope1 = get_slope(v[1], v[2]);
+			slope1_start = v[1];
 
 			middle = TRUE;
 			}
 
-		xa = slope1_x + (slope1 * (y - slope1_y) + 0.5);
-		xb = x1 + (slope2 * (y - y1) + 0.5);
+		gint x1 = slope1_start.x + (slope1 * (y - slope1_start.y) + 0.5);
+		gint x2 = slope2_start.x + (slope2 * (y - slope2_start.y) + 0.5);
 
-		if (xa > xb)
+		if (x1 > x2)
 			{
-			std::swap(xa, xb);
+			std::swap(x1, x2);
 			}
 
-		xa = CLAMP(xa, fx1, fx2);
-		xb = CLAMP(xb, fx1, fx2);
+		x1 = CLAMP(x1, fx1, fx2);
+		x2 = CLAMP(x2, fx1, fx2);
 
-		pp = p_pix + y * prs + xa * p_step;
+		pp = p_pix + y * prs + x1 * p_step;
 
-		while (xa < xb)
+		while (x1 < x2)
 			{
 			pp[0] = (r * a + pp[0] * (256-a)) >> 8;
 			pp[1] = (g * a + pp[1] * (256-a)) >> 8;
 			pp[2] = (b * a + pp[2] * (256-a)) >> 8;
 			pp += p_step;
 
-			xa++;
+			x1++;
 			}
 		}
 }

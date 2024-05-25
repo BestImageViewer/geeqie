@@ -80,12 +80,6 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	PanItem *pi;
 	GList *list;
 	GList *work;
-	gint x1;
-	gint y1;
-	gint x2;
-	gint y2;
-	gint x3;
-	gint y3;
 	gint x;
 	gint y;
 	gint grid;
@@ -179,15 +173,12 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 			}
 		}
 
-	x1 = pi_day->x + pi_day->width - 8;
-	y1 = pi_day->y + 8;
-	x2 = pbox->x + 1;
-	y2 = pbox->y + MIN(42, pbox->height);
-	x3 = pbox->x + 1;
-	y3 = MAX(pbox->y, y2 - 30);
+	GdkPoint c1{pi_day->x + pi_day->width - 8, pi_day->y + 8};
+	GdkPoint c2{pbox->x + 1, pbox->y + MIN(42, pbox->height)};
+	GdkPoint c3{pbox->x + 1, MAX(pbox->y, c2.y - 30)};
 
 	pi = pan_item_tri_new(pw,
-	                      x1, y1, x2, y2, x3, y3,
+	                      c1, c2, c3,
 	                      PAN_CAL_POPUP_COLOR,
 	                      PAN_BORDER_1 | PAN_BORDER_3, PAN_CAL_POPUP_BORDER_COLOR);
 	pan_item_set_key(pi, "day_bubble");

@@ -1395,12 +1395,6 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	PanItem *pbox;
 	PanItem *p;
 	gchar *buf;
-	gint x1;
-	gint y1;
-	gint x2;
-	gint y2;
-	gint x3;
-	gint y3;
 
 	if (pw->click_pi == pi) return;
 	if (pi && !pi->fd) pi = nullptr;
@@ -1416,27 +1410,21 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 				PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
 	pan_item_set_key(pbox, "info");
 
+	GdkPoint c1{pi->x + pi->width - 8, pi->y + 8};
 	if (pi->type == PAN_ITEM_THUMB && pi->pixbuf)
 		{
 		gint w = gdk_pixbuf_get_width(pi->pixbuf);
 		gint h = gdk_pixbuf_get_height(pi->pixbuf);
 
-		x1 = pi->x + pi->width - (pi->width - w) / 2 - 8;
-		y1 = pi->y + (pi->height - h) / 2 + 8;
-		}
-	else
-		{
-		x1 = pi->x + pi->width - 8;
-		y1 = pi->y + 8;
+		c1.x -= (pi->width - w) / 2;
+		c1.y += (pi->height - h) / 2;
 		}
 
-	x2 = pbox->x + 1;
-	y2 = pbox->y + 36;
-	x3 = pbox->x + 1;
-	y3 = pbox->y + 12;
+	GdkPoint c2{pbox->x + 1, pbox->y + 36};
+	GdkPoint c3{pbox->x + 1, pbox->y + 12};
 
 	p = pan_item_tri_new(pw,
-	                     x1, y1, x2, y2, x3, y3,
+	                     c1, c2, c3,
 	                     PAN_POPUP_COLOR,
 	                     PAN_BORDER_1 | PAN_BORDER_3, PAN_POPUP_BORDER_COLOR);
 	pan_item_set_key(p, "info");
