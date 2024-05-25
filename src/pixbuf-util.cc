@@ -41,6 +41,13 @@
 #include "typedefs.h"
 #include "ui-fileops.h"
 
+namespace
+{
+
+constexpr gint ROTATE_BUFFER_WIDTH = 48;
+constexpr gint ROTATE_BUFFER_HEIGHT = 48;
+
+} // namespace
 
 /*
  *-----------------------------------------------------------------------------
@@ -316,23 +323,24 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 }
 
 gboolean pixbuf_scale_aspect(gint req_w, gint req_h,
-			     gint old_w, gint old_h,
-			     gint *new_w, gint *new_h)
+                             gint old_w, gint old_h,
+                             gint &new_w, gint &new_h)
 {
-	if ((static_cast<gdouble>(req_w) / old_w) < (static_cast<gdouble>(req_h) / old_h))
+	auto ratio_w = static_cast<gdouble>(req_w) / old_w;
+	auto ratio_h = static_cast<gdouble>(req_h) / old_h;
+
+	if (ratio_w < ratio_h)
 		{
-		*new_w = req_w;
-		*new_h = static_cast<gdouble>(*new_w) / old_w * old_h;
-		if (*new_h < 1) *new_h = 1;
+		new_w = req_w;
+		new_h = std::max<gint>(ratio_w * old_h, 1);
 		}
 	else
 		{
-		*new_h = req_h;
-		*new_w = static_cast<gdouble>(*new_h) / old_h * old_w;
-		if (*new_w < 1) *new_w = 1;
+		new_w = std::max<gint>(ratio_h * old_w, 1);
+		new_h = req_h;
 		}
 
-	return (*new_w != old_w || *new_h != old_h);
+	return (new_w != old_w || new_h != old_h);
 }
 
 GdkPixbuf *pixbuf_fallback(FileData *fd, gint requested_width, gint requested_height)
@@ -374,7 +382,7 @@ GdkPixbuf *pixbuf_fallback(FileData *fd, gint requested_width, gint requested_he
 			gint nh;
 
 			if (pixbuf_scale_aspect(requested_width, requested_height,
-							  w, h, &nw, &nh))
+			                        w, h, nw, nh))
 				{
 				GdkPixbuf *tmp;
 
@@ -465,11 +473,6 @@ static void pixbuf_copy_block(guchar *src, gint src_row_stride, gint w, gint h,
 		memcpy(dp, sp, w * bytes_per_pixel);
 		}
 }
-
-enum {
-	ROTATE_BUFFER_WIDTH = 48,
-	ROTATE_BUFFER_HEIGHT = 48
-};
 
 /*
  * Returns a copy of pixbuf src rotated 90 degrees clockwise or 90 counterclockwise
@@ -1167,8 +1170,8 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
  * @retval TRUE The clip operation was performed, and the output params were set.
  */
 static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, gdouble clip_h,
-			       gdouble x1, gdouble y1, gdouble x2, gdouble y2,
-			       gdouble *rx1, gdouble *ry1, gdouble *rx2, gdouble *ry2)
+                               gdouble x1, gdouble y1, gdouble x2, gdouble y2,
+                               gdouble &rx1, gdouble &ry1, gdouble &rx2, gdouble &ry2)
 {
 	gboolean flip = FALSE;
 	gdouble d;
@@ -1261,17 +1264,17 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
 	// happened during normalization.
 	if (flip)
 		{
-		*rx1 = x2;
-		*ry1 = y2;
-		*rx2 = x1;
-		*ry2 = y1;
+		rx1 = x2;
+		ry1 = y2;
+		rx2 = x1;
+		ry2 = y1;
 		}
 	else
 		{
-		*rx1 = x1;
-		*ry1 = y1;
-		*rx2 = x2;
-		*ry2 = y2;
+		rx1 = x1;
+		ry1 = y1;
+		rx2 = x2;
+		ry2 = y2;
 		}
 
 	return TRUE;
@@ -1317,11 +1320,10 @@ void pixbuf_draw_line(GdkPixbuf *pb,
 	if (!util_clip_region(0, 0, pw, ph,
 	                      clip_x, clip_y, clip_w, clip_h,
 	                      rx, ry, rw, rh)) return;
-	// TODO(xsdg): These explicit casts are unnecessary and harm readability.
 	// Clips the specified line segment to the intersecting region from above.
-	if (!util_clip_line(static_cast<gdouble>(rx), static_cast<gdouble>(ry), static_cast<gdouble>(rw), static_cast<gdouble>(rh),
-			    static_cast<gdouble>(x1), static_cast<gdouble>(y1), static_cast<gdouble>(x2), static_cast<gdouble>(y2),
-			    &rx1, &ry1, &rx2, &ry2)) return;
+	if (!util_clip_line(rx, ry, rw, rh,
+	                    x1, y1, x2, y2,
+	                    rx1, ry1, rx2, ry2)) return;
 
 	cx1 = rx;
 	cy1 = ry;

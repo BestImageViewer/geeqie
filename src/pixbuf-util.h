@@ -37,7 +37,7 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon);
 GdkPixbuf *pixbuf_inline(const gchar *key);
 GdkPixbuf *pixbuf_fallback(FileData *fd, gint requested_width, gint requested_height);
 
-gboolean pixbuf_scale_aspect(gint req_w, gint req_h, gint old_w, gint old_h, gint *new_w, gint *new_h);
+gboolean pixbuf_scale_aspect(gint req_w, gint req_h, gint old_w, gint old_h, gint &new_w, gint &new_h);
 
 #define PIXBUF_INLINE_ARCHIVE               "gq-icon-archive-file"
 #define PIXBUF_INLINE_BROKEN                "gq-icon-broken"

@@ -618,7 +618,7 @@ static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h
 		pixbuf = gdk_pixbuf_new_from_data(rgb_data, GDK_COLORSPACE_RGB, FALSE, 8,
 						  width, height, 3 * width, free_rgb_buffer, nullptr);
 
-		if (pixbuf_scale_aspect(width, height, max_w, max_h, &width, &height))
+		if (pixbuf_scale_aspect(width, height, max_w, max_h, width, height))
 			{
 			/* scale */
 			GdkPixbuf *tmp;

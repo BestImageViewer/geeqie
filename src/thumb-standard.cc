@@ -560,7 +560,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 				struct stat st;
 
 				if (pixbuf_scale_aspect(cache_w, cache_h, sw, sh,
-								  &thumb_w, &thumb_h))
+				                        thumb_w, thumb_h))
 					{
 					pixbuf_thumb = gdk_pixbuf_scale_simple(pixbuf, thumb_w, thumb_h,
 									       static_cast<GdkInterpType>(options->thumbnails.quality));
@@ -616,7 +616,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 			}
 
 		if (pixbuf_scale_aspect(tl->requested_width, tl->requested_height, sw, sh,
-						  &thumb_w, &thumb_h))
+		                        thumb_w, thumb_h))
 			{
 			result = gdk_pixbuf_scale_simple(pixbuf, thumb_w, thumb_h,
 							 static_cast<GdkInterpType>(options->thumbnails.quality));
