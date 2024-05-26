@@ -46,6 +46,19 @@
 namespace
 {
 
+// Intersects the clip region with the pixbuf. r{x,y,w,h} is that
+// intersecting region.
+gboolean pixbuf_clip_region(const GdkPixbuf *pb, const GdkRectangle &clip,
+                            gint &rx, gint &ry, gint &rw, gint &rh)
+{
+	gint pw = gdk_pixbuf_get_width(pb);
+	gint ph = gdk_pixbuf_get_height(pb);
+
+	return util_clip_region(0, 0, pw, ph,
+	                        clip.x, clip.y, clip.width, clip.height,
+	                        rx, ry, rw, rh);
+}
+
 constexpr gint ROTATE_BUFFER_WIDTH = 48;
 constexpr gint ROTATE_BUFFER_HEIGHT = 48;
 
@@ -1030,14 +1043,11 @@ void util_clip_triangle(const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &
 	rh = y_max - ry;
 }
 
-void pixbuf_draw_triangle(GdkPixbuf *pb,
-                          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
+void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
                           const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
                           guint8 r, guint8 g, guint8 b, guint8 a)
 {
 	gboolean has_alpha;
-	gint pw;
-	gint ph;
 	gint prs;
 	gint rx;
 	gint ry;
@@ -1060,14 +1070,8 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
 
 	if (!pb) return;
 
-	pw = gdk_pixbuf_get_width(pb);
-	ph = gdk_pixbuf_get_height(pb);
-
-	// Intersects the clip region with the pixbuf. r{x,y,w,h} is that
-	// intersecting region.
-	if (!util_clip_region(0, 0, pw, ph,
-	                      clip_x, clip_y, clip_w, clip_h,
-	                      rx, ry, rw, rh)) return;
+	if (!pixbuf_clip_region(pb, clip,
+	                        rx, ry, rw, rh)) return;
 
 	// Determine the bounding box for the triangle.
 	util_clip_triangle(c1, c2, c3,
@@ -1265,14 +1269,11 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
 	return TRUE;
 }
 
-void pixbuf_draw_line(GdkPixbuf *pb,
-		      gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-		      gint x1, gint y1, gint x2, gint y2,
-		      guint8 r, guint8 g, guint8 b, guint8 a)
+void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
+                      gint x1, gint y1, gint x2, gint y2,
+                      guint8 r, guint8 g, guint8 b, guint8 a)
 {
 	gboolean has_alpha;
-	gint pw;
-	gint ph;
 	gint prs;
 	gint rx;
 	gint ry;
@@ -1297,14 +1298,8 @@ void pixbuf_draw_line(GdkPixbuf *pb,
 
 	if (!pb) return;
 
-	pw = gdk_pixbuf_get_width(pb);
-	ph = gdk_pixbuf_get_height(pb);
-
-	// Intersects the clip region with the pixbuf. r{x,y,w,h} is that
-	// intersecting region.
-	if (!util_clip_region(0, 0, pw, ph,
-	                      clip_x, clip_y, clip_w, clip_h,
-	                      rx, ry, rw, rh)) return;
+	if (!pixbuf_clip_region(pb, clip,
+	                        rx, ry, rw, rh)) return;
 	// Clips the specified line segment to the intersecting region from above.
 	if (!util_clip_line(rx, ry, rw, rh,
 	                    x1, y1, x2, y2,
@@ -1481,14 +1476,11 @@ static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
 		}
 }
 
-void pixbuf_draw_shadow(GdkPixbuf *pb,
-			gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-			gint x, gint y, gint w, gint h, gint border,
-			guint8 r, guint8 g, guint8 b, guint8 a)
+void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
+                        gint x, gint y, gint w, gint h, gint border,
+                        guint8 r, guint8 g, guint8 b, guint8 a)
 {
 	gint has_alpha;
-	gint pw;
-	gint ph;
 	gint prs;
 	gint rx;
 	gint ry;
@@ -1502,14 +1494,8 @@ void pixbuf_draw_shadow(GdkPixbuf *pb,
 
 	if (!pb) return;
 
-	pw = gdk_pixbuf_get_width(pb);
-	ph = gdk_pixbuf_get_height(pb);
-
-	// Intersects the clip region with the pixbuf. r{x,y,w,h} is that
-	// intersecting region.
-	if (!util_clip_region(0, 0, pw, ph,
-	                      clip_x, clip_y, clip_w, clip_h,
-	                      rx, ry, rw, rh)) return;
+	if (!pixbuf_clip_region(pb, clip,
+	                        rx, ry, rw, rh)) return;
 
 	has_alpha = gdk_pixbuf_get_has_alpha(pb);
 	prs = gdk_pixbuf_get_rowstride(pb);

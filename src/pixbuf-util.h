@@ -143,15 +143,13 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout, GtkWidget *widge
  * @brief Draws a filled triangle of the specified color into the pixbuf, constrained
  *        to the specified clip region.
  * @param pb The `GdkPixbuf` to paint into.
+ * @param clip Clipping region.
  * @param c1 Coordinates of the first corner of the triangle.
  * @param c2 Coordinates of the second corner of the triangle.
  * @param c3 Coordinates of the third corner of the triangle.
- * @param clip_x,clip_y Coordinates of the top-left corner of the clipping region.
- * @param clip_w,clip_h Extent of the clipping region.
  * @param r,g,b,a Color and alpha.
  */
-void pixbuf_draw_triangle(GdkPixbuf *pb,
-                          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
+void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
                           const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
                           guint8 r, guint8 g, guint8 b, guint8 a);
 
@@ -159,24 +157,21 @@ void pixbuf_draw_triangle(GdkPixbuf *pb,
  * @brief Draws the sub-segment of the specified line segment that lies within the
  *        clip region into the pixbuf.
  * @param pb The `GdkPixbuf` to paint into.
- * @param clip_x,clip_y Coordinates of the top-left corner of the clipping region.
- * @param clip_w,clip_h Extent of the clipping region.
+ * @param clip Clipping region.
  * @param x1,y1 Coordinates of the first point of the line segment.
  * @param x2,y2 Coordinates of the second point of the line segment.
  * @param r,g,b,a Color and alpha.
  */
-void pixbuf_draw_line(GdkPixbuf *pb,
-		      gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-		      gint x1, gint y1, gint x2, gint y2,
-		      guint8 r, guint8 g, guint8 b, guint8 a);
+void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
+                      gint x1, gint y1, gint x2, gint y2,
+                      guint8 r, guint8 g, guint8 b, guint8 a);
 
 /**
  * @brief Composites a "shaded" region of the specified color and with the
  *        specified size and border gradient width into the clip region of the
  *        specified pixbuf.
  * @param pb The `GdkPixbuf` to paint into.
- * @param clip_x,clip_y Coordinates of the top-left corner of the clipping region.
- * @param clip_w,clip_h Extent of the clipping region.
+ * @param clip Clipping region.
  * @param x,y Coordinates of the top-left corner of the shaded region.
  * @param w,h Extent of the shaded region.
  * @param border The thickness, in pixels, of the gradient border around the
@@ -185,10 +180,9 @@ void pixbuf_draw_line(GdkPixbuf *pb,
  * @param a The max shadow composition fraction.  Note that any alpha value of the
  *          original pixel will remain untouched.
  */
-void pixbuf_draw_shadow(GdkPixbuf *pb,
-			gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-			gint x, gint y, gint w, gint h, gint border,
-			guint8 r, guint8 g, guint8 b, guint8 a);
+void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
+                        gint x, gint y, gint w, gint h, gint border,
+                        guint8 r, guint8 g, guint8 b, guint8 a);
 
 /**
  * @brief Sets the r, g, and b values for each pixel within the specified region

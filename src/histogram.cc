@@ -248,20 +248,17 @@ gboolean histmap_start_idle(FileData *fd)
 }
 
 
-static void histogram_vgrid(Histogram *histogram, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height)
+static void histogram_vgrid(Histogram *histogram, GdkPixbuf *pixbuf, const GdkRectangle &rect)
 {
-	guint i;
-	float add;
-
 	if (histogram->vgrid == 0) return;
 
-	add = width / static_cast<float>(histogram->vgrid);
+	float add = rect.width / static_cast<float>(histogram->vgrid);
 
-	for (i = 1; i < histogram->vgrid; i++)
+	for (guint i = 1; i < histogram->vgrid; i++)
 		{
-		gint xpos = x + static_cast<int>(i * add + 0.5);
+		gint xpos = rect.x + static_cast<int>(i * add + 0.5);
 
-		pixbuf_draw_line(pixbuf, x, y, width, height, xpos, y, xpos, y + height,
+		pixbuf_draw_line(pixbuf, rect, xpos, rect.y, xpos, rect.y + rect.height,
 				 histogram->grid_color.R,
 				 histogram->grid_color.G,
 				 histogram->grid_color.B,
@@ -269,20 +266,17 @@ static void histogram_vgrid(Histogram *histogram, GdkPixbuf *pixbuf, gint x, gin
 		}
 }
 
-static void histogram_hgrid(Histogram *histogram, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height)
+static void histogram_hgrid(Histogram *histogram, GdkPixbuf *pixbuf, const GdkRectangle &rect)
 {
-	guint i;
-	float add;
-
 	if (histogram->hgrid == 0) return;
 
-	add = height / static_cast<float>(histogram->hgrid);
+	float add = rect.height / static_cast<float>(histogram->hgrid);
 
-	for (i = 1; i < histogram->hgrid; i++)
+	for (guint i = 1; i < histogram->hgrid; i++)
 		{
-		gint ypos = y + static_cast<int>(i * add + 0.5);
+		gint ypos = rect.y + static_cast<int>(i * add + 0.5);
 
-		pixbuf_draw_line(pixbuf, x, y, width, height, x, ypos, x + width, ypos,
+		pixbuf_draw_line(pixbuf, rect, rect.x, ypos, rect.x + rect.width, ypos,
 				 histogram->grid_color.R,
 				 histogram->grid_color.G,
 				 histogram->grid_color.B,
@@ -302,8 +296,9 @@ gboolean histogram_draw(Histogram *histogram, const HistMap *histmap, GdkPixbuf 
 	if (!histogram || !histmap) return FALSE;
 
 	/* Draw the grid */
-	histogram_vgrid(histogram, pixbuf, x, y, width, height);
-	histogram_hgrid(histogram, pixbuf, x, y, width, height);
+	const GdkRectangle rect{x, y, width, height};
+	histogram_vgrid(histogram, pixbuf, rect);
+	histogram_hgrid(histogram, pixbuf, rect);
 
 	/* exclude overexposed and underexposed */
 	for (i = 1; i < HISTMAP_SIZE - 1; i++)
@@ -392,10 +387,9 @@ gboolean histogram_draw(Histogram *histogram, const HistMap *histmap, GdkPixbuf 
 				else
 					pt = (static_cast<gdouble>(v[chanmax])) / max * (height - 1);
 
-				pixbuf_draw_line(pixbuf,
-					x, y, width, height,
-					xpos, ypos, xpos, ypos - pt,
-					r, g, b, 255);
+				pixbuf_draw_line(pixbuf, rect,
+				                 xpos, ypos, xpos, ypos - pt,
+				                 r, g, b, 255);
 				}
 
 			v[chanmax] = -1;

@@ -189,26 +189,26 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 
 		if (pi->color.a > 254)
 			{
-			pixbuf_draw_shadow(pixbuf, pi->x - x + bw, pi->y - y + shadow[0],
-					   shadow[0], bh - shadow[0],
-					   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
-					   shadow[1],
-					   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
-			pixbuf_draw_shadow(pixbuf, pi->x - x + shadow[0], pi->y - y + bh,
-					   bw, shadow[0],
-					   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
-					   shadow[1],
-					   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+			pixbuf_draw_shadow(pixbuf,
+			                   {pi->x - x + bw, pi->y - y + shadow[0], shadow[0], bh - shadow[0]},
+			                   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
+			                   shadow[1],
+			                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+			pixbuf_draw_shadow(pixbuf,
+			                   {pi->x - x + shadow[0], pi->y - y + bh, bw, shadow[0]},
+			                   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
+			                   shadow[1],
+			                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
 			}
 		else
 			{
 			gint a;
 			a = pi->color.a * PAN_SHADOW_ALPHA >> 8;
-			pixbuf_draw_shadow(pixbuf, pi->x - x + shadow[0], pi->y - y + shadow[0],
-					   bw, bh,
-					   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
-					   shadow[1],
-					   PAN_SHADOW_COLOR, a);
+			pixbuf_draw_shadow(pixbuf,
+			                   {pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh},
+			                   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
+			                   shadow[1],
+			                   PAN_SHADOW_COLOR, a);
 			}
 		}
 
@@ -279,8 +279,9 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 	if (pi->data && gdk_rectangle_intersect(&request_rect, &pi_rect, &r))
 		{
 		auto coord = static_cast<GdkPoint *>(pi->data);
-		pixbuf_draw_triangle(pixbuf,
-		                     r.x - x, r.y - y, r.width, r.height,
+		r.x -= x;
+		r.y -= y;
+		pixbuf_draw_triangle(pixbuf, r,
 		                     {coord[0].x - x, coord[0].y - y},
 		                     {coord[1].x - x, coord[1].y - y},
 		                     {coord[2].x - x, coord[2].y - y},
@@ -288,8 +289,7 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 
 		const auto draw_line = [pixbuf, &r, x, y, &color = pi->color2](const GdkPoint &start, const GdkPoint &end)
 		{
-			pixbuf_draw_line(pixbuf,
-			                 r.x - x, r.y - y, r.width, r.height,
+			pixbuf_draw_line(pixbuf, r,
 			                 start.x - x, start.y - y,
 			                 end.x - x, end.y - y,
 			                 color.r, color.g, color.b, color.a);
@@ -448,7 +448,7 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 			if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 				{
 				pixbuf_draw_shadow(pixbuf,
-				                   r.x - x, r.y - y, r.width, r.height,
+				                   {r.x - x, r.y - y, r.width, r.height},
 				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
 				                   PAN_SHADOW_FADE,
 				                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
@@ -460,7 +460,7 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 			if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 				{
 				pixbuf_draw_shadow(pixbuf,
-				                   r.x - x, r.y - y, r.width, r.height,
+				                   {r.x - x, r.y - y, r.width, r.height},
 				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
 				                   PAN_SHADOW_FADE,
 				                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
@@ -470,10 +470,10 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 			if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 				{
 				pixbuf_draw_shadow(pixbuf,
-				           r.x - x, r.y - y, r.width, r.height,
-						   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
-						   PAN_SHADOW_FADE,
-						   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+				                   {r.x - x, r.y - y, r.width, r.height},
+				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
+				                   PAN_SHADOW_FADE,
+				                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
 				}
 			}
 
