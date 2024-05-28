@@ -1445,13 +1445,10 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
  *          value associated with the original pixel is unmodified.
  */
 static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
-				    gint sx, gint sy, gint border,
-				    gint x1, gint y1, gint x2, gint y2,
-				    guint8, guint8 g, guint8 b, guint8 a)
+                                    gint sx, gint sy, gint border,
+                                    gint x1, gint y1, gint x2, gint y2,
+                                    guint8 r, guint8 g, guint8 b, guint8 a)
 {
-	// TODO(xsdg): r (red) was shadowed by r (radius), and was removed from
-	// the params list by an automated cleanup.  Fix this and distinguish the
-	// red param from the radius temporary variable.
 	guchar *pp;
 	gint p_step;
 	gint i;
@@ -1463,11 +1460,9 @@ static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
 		pp = p_pix + j * prs + x1 * p_step;
 		for (i = x1; i < x2; i++)
 			{
-			guint8 n;
-			gint r;
+			gint radius = std::min(border, static_cast<gint>(hypot(i - sx, j - sy)));
+			guint8 n = a - a * radius / border;
 
-			r = MIN(border, (gint)hypot(i - sx, j - sy));
-			n = a - a * r / border;
 			pp[0] = (r * n + pp[0] * (256-n)) >> 8;
 			pp[1] = (g * n + pp[1] * (256-n)) >> 8;
 			pp[2] = (b * n + pp[2] * (256-n)) >> 8;
