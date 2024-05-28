@@ -303,6 +303,7 @@ endif
 project_sources += main_sources
 
 subdir('authors')
+subdir('filedata')
 subdir('icons')
 subdir('pan-view')
 subdir('third-party')
