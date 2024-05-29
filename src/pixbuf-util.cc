@@ -1382,9 +1382,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 
 /**
  * @brief Composites a horizontal or vertical linear gradient into the rectangular
- *        region defined by corners `(x1, y1)` and `(x2, y2)`.  Note that the
- *        current implementation breaks if the max distance between `s` and
- *        `x1/x2/y1/y2` is greater than `border`.
+ *        region defined by corners `(x1, y1)` and `(x2, y2)`.
  * @param p_pix The pixel buffer to paint into.
  * @param prs The pixel row stride (how many pixels per row of the buffer).
  * @param has_alpha TRUE if the p_pix representation is rgba.  FALSE if just rgb.
@@ -1408,7 +1406,6 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
 {
 	guchar *pp;
 	gint p_step;
-	guint8 n = a;
 	gint i;
 	gint j;
 
@@ -1416,10 +1413,12 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
 	for (j = y1; j < y2; j++)
 		{
 		pp = p_pix + j * prs + x1 * p_step;
-		if (!vertical) n = a - a * abs(j - s) / border;
 		for (i = x1; i < x2; i++)
 			{
-			if (vertical) n = a - a * abs(i - s) / border;
+			gint coord = vertical ? i : j;
+			gint distance = std::min(border, abs(coord - s));
+			guint8 n = a - a * distance / border;
+
 			pp[0] = (r * n + pp[0] * (256-n)) >> 8;
 			pp[1] = (g * n + pp[1] * (256-n)) >> 8;
 			pp[2] = (b * n + pp[2] * (256-n)) >> 8;
