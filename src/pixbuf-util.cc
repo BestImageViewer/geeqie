@@ -25,6 +25,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -46,6 +47,11 @@
 namespace
 {
 
+using GetAlpha = std::function<guint8(gint, gint)>;
+
+constexpr gint ROTATE_BUFFER_WIDTH = 48;
+constexpr gint ROTATE_BUFFER_HEIGHT = 48;
+
 // Intersects the clip region with the pixbuf. r{x,y,w,h} is that
 // intersecting region.
 gboolean pixbuf_clip_region(const GdkPixbuf *pb, const GdkRectangle &clip,
@@ -59,8 +65,34 @@ gboolean pixbuf_clip_region(const GdkPixbuf *pb, const GdkRectangle &clip,
 	                        rx, ry, rw, rh);
 }
 
-constexpr gint ROTATE_BUFFER_WIDTH = 48;
-constexpr gint ROTATE_BUFFER_HEIGHT = 48;
+/*
+ * Fills rectangular region of pixbuf defined by
+ * corners `(x1, y1)` and `(x2, y2)`
+ * with colors red (r), green (g), blue (b)
+ * applying alpha (a) from get_alpha function.
+ */
+void pixbuf_draw_rect_fill(guchar *p_pix, gint prs, gboolean has_alpha,
+                           gint x1, gint y1, gint x2, gint y2,
+                           guint8 r, guint8 g, guint8 b,
+                           const GetAlpha &get_alpha)
+{
+	const gint p_step = has_alpha ? 4 : 3;
+
+	for (gint y = y1; y < y2; y++)
+		{
+		guchar *pp = p_pix + y * prs + x1 * p_step;
+
+		for (gint x = x1; x < x2; x++)
+			{
+			guint8 a = get_alpha(x, y);
+
+			pp[0] = (r * a + pp[0] * (256-a)) >> 8;
+			pp[1] = (g * a + pp[1] * (256-a)) >> 8;
+			pp[2] = (b * a + pp[2] * (256-a)) >> 8;
+			pp += p_step;
+			}
+		}
+}
 
 } // namespace
 
@@ -720,11 +752,6 @@ GdkPixbuf *pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation)
  *-----------------------------------------------------------------------------
  */
 
-/*
- * Fills region of pixbuf at x,y over w,h
- * with colors red (r), green (g), blue (b)
- * applying alpha (a), use a=255 for solid.
- */
 void pixbuf_draw_rect_fill(GdkPixbuf *pb,
 			   gint x, gint y, gint w, gint h,
 			   gint r, gint g, gint b, gint a)
@@ -734,9 +761,6 @@ void pixbuf_draw_rect_fill(GdkPixbuf *pb,
 	gint ph;
 	gint prs;
 	guchar *p_pix;
-	guchar *pp;
-	gint i;
-	gint j;
 
 	if (!pb) return;
 
@@ -750,21 +774,14 @@ void pixbuf_draw_rect_fill(GdkPixbuf *pb,
 	prs = gdk_pixbuf_get_rowstride(pb);
 	p_pix = gdk_pixbuf_get_pixels(pb);
 
-	const gint p_step = has_alpha ? 4 : 3;
+	const auto get_a = [a](gint, gint){ return a; };
 
-	for (i = 0; i < h; i++)
-		{
-		pp = p_pix + (y + i) * prs + (x * p_step);
-		for (j = 0; j < w; j++)
-			{
-			pp[0] = (r * a + pp[0] * (256-a)) >> 8;
-			pp[1] = (g * a + pp[1] * (256-a)) >> 8;
-			pp[2] = (b * a + pp[2] * (256-a)) >> 8;
-                        // TODO(xsdg): Should we do anything about a potential
-                        // existing alpha value here?
-			pp += p_step;
-			}
-		}
+	// TODO(xsdg): Should we do anything about a potential
+	// existing alpha value here?
+
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha,
+	                      x, y, x + w, y + h,
+	                      r, g, b, get_a);
 }
 
 #pragma GCC diagnostic push
@@ -1382,7 +1399,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 
 /**
  * @brief Composites a horizontal or vertical linear gradient into the rectangular
- *        region defined by corners `(x1, y1)` and `(x2, y2)`.
+ *        region `{x,y,w,h}`.
  * @param p_pix The pixel buffer to paint into.
  * @param prs The pixel row stride (how many pixels per row of the buffer).
  * @param has_alpha TRUE if the p_pix representation is rgba.  FALSE if just rgb.
@@ -1392,52 +1409,40 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
  * @param vertical When `TRUE`, the gradient color will vary vertically.  When `FALSE`,
  *                 horizontally.
  * @param border The maximum extent of the gradient, in pixels.
- * @param x1,y1 Coordinates of the first corner of the region.
- * @param x2,y2 Coordinates of the second corner of the region.
+ * @param x,y Coordinates of the top-left corner of the region.
+ * @param w,h Extent of the region.
  * @param r,g,b Base color of the gradient.
  * @param a The peak alpha value when compositing the gradient.  The alpha varies
  *          from this value down to 0 (fully transparent).  Note that any alpha
  *          value associated with the original pixel is unmodified.
  */
 static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
-				    gint s, gboolean vertical, gint border,
-				    gint x1, gint y1, gint x2, gint y2,
-				    guint8 r, guint8 g, guint8 b, guint8 a)
+                                    gint s, gboolean vertical, gint border,
+                                    gint x, gint y, gint w, gint h,
+                                    guint8 r, guint8 g, guint8 b, guint8 a)
 {
-	guchar *pp;
-	gint p_step;
-	gint i;
-	gint j;
+	const auto get_a = [s, vertical, border, a](gint x, gint y)
+	{
+		gint coord = vertical ? x : y;
+		gint distance = std::min(border, abs(coord - s));
+		return a - a * distance / border;
+	};
 
-	p_step = (has_alpha) ? 4 : 3;
-	for (j = y1; j < y2; j++)
-		{
-		pp = p_pix + j * prs + x1 * p_step;
-		for (i = x1; i < x2; i++)
-			{
-			gint coord = vertical ? i : j;
-			gint distance = std::min(border, abs(coord - s));
-			guint8 n = a - a * distance / border;
-
-			pp[0] = (r * n + pp[0] * (256-n)) >> 8;
-			pp[1] = (g * n + pp[1] * (256-n)) >> 8;
-			pp[2] = (b * n + pp[2] * (256-n)) >> 8;
-			pp += p_step;
-			}
-		}
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha,
+	                      x, y, x + w, y + h,
+	                      r, g, b, get_a);
 }
 
 /**
- * @brief Composites a radial gradient into the rectangular region defined by
- *        corners `(x1, y1)` and `(x2, y2)`.
+ * @brief Composites a radial gradient into the rectangular region `{x,y,w,h}`.
  * @param p_pix The pixel buffer to paint into.
  * @param prs The pixel row stride (how many pixels per row of the buffer).
  * @param has_alpha TRUE if the p_pix representation is rgba.  FALSE if just rgb.
  * @param sx,sy The coordinates of the center of the gradient.
  * @param border The max radius, in pixels, of the gradient.  Pixels farther away
  *               from the center than this will be unaffected.
- * @param x1,y1 Coordinates of the first corner of the region.
- * @param x2,y2 Coordinates of the second corner of the region.
+ * @param x,y Coordinates of the top-left corner of the region.
+ * @param w,h Extent of the region.
  * @param r,g,b Base color of the gradient.
  * @param a The peak alpha value when compositing the gradient.  The alpha varies
  *          from this value down to 0 (fully transparent).  Note that any alpha
@@ -1445,29 +1450,18 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
  */
 static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
                                     gint sx, gint sy, gint border,
-                                    gint x1, gint y1, gint x2, gint y2,
+                                    gint x, gint y, gint w, gint h,
                                     guint8 r, guint8 g, guint8 b, guint8 a)
 {
-	guchar *pp;
-	gint p_step;
-	gint i;
-	gint j;
+	const auto get_a = [sx, sy, border, a](gint x, gint y)
+	{
+		gint radius = std::min(border, static_cast<gint>(hypot(x - sx, y - sy)));
+		return a - a * radius / border;
+	};
 
-	p_step = (has_alpha) ? 4 : 3;
-	for (j = y1; j < y2; j++)
-		{
-		pp = p_pix + j * prs + x1 * p_step;
-		for (i = x1; i < x2; i++)
-			{
-			gint radius = std::min(border, static_cast<gint>(hypot(i - sx, j - sy)));
-			guint8 n = a - a * radius / border;
-
-			pp[0] = (r * n + pp[0] * (256-n)) >> 8;
-			pp[1] = (g * n + pp[1] * (256-n)) >> 8;
-			pp[2] = (b * n + pp[2] * (256-n)) >> 8;
-			pp += p_step;
-			}
-		}
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha,
+	                      x, y, x + w, y + h,
+	                      r, g, b, get_a);
 }
 
 void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
@@ -1513,36 +1507,36 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
 	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
-					x + border, TRUE, border,
-					fx, fy, fx + fw, fy + fh,
-					r, g, b, a);
+		                        x + border, TRUE, border,
+		                        fx, fy, fw, fh,
+		                        r, g, b, a);
 		}
 	if (util_clip_region(x + w - border, y + border, border, h - border * 2,
 	                     rx, ry, rw, rh,
 	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
-					x + w - border, TRUE, border,
-					fx, fy, fx + fw, fy + fh,
-					r, g, b, a);
+		                        x + w - border, TRUE, border,
+		                        fx, fy, fw, fh,
+		                        r, g, b, a);
 		}
 	if (util_clip_region(x + border, y, w - border * 2, border,
 	                     rx, ry, rw, rh,
 	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
-					y + border, FALSE, border,
-					fx, fy, fx + fw, fy + fh,
-					r, g, b, a);
+		                        y + border, FALSE, border,
+		                        fx, fy, fw, fh,
+		                        r, g, b, a);
 		}
 	if (util_clip_region(x + border, y + h - border, w - border * 2, border,
 	                     rx, ry, rw, rh,
 	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
-					y + h - border, FALSE, border,
-					fx, fy, fx + fw, fy + fh,
-					r, g, b, a);
+		                        y + h - border, FALSE, border,
+		                        fx, fy, fw, fh,
+		                        r, g, b, a);
 		}
 	// Draws radial gradients at each of the 4 corners.
 	if (util_clip_region(x, y, border, border,
@@ -1550,36 +1544,36 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
 	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
-					x + border, y + border, border,
-					fx, fy, fx + fw, fy + fh,
-					r, g, b, a);
+		                        x + border, y + border, border,
+		                        fx, fy, fw, fh,
+		                        r, g, b, a);
 		}
 	if (util_clip_region(x + w - border, y, border, border,
 	                     rx, ry, rw, rh,
 	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
-					x + w - border, y + border, border,
-					fx, fy, fx + fw, fy + fh,
-					r, g, b, a);
+		                        x + w - border, y + border, border,
+		                        fx, fy, fw, fh,
+		                        r, g, b, a);
 		}
 	if (util_clip_region(x, y + h - border, border, border,
 	                     rx, ry, rw, rh,
 	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
-					x + border, y + h - border, border,
-					fx, fy, fx + fw, fy + fh,
-					r, g, b, a);
+		                        x + border, y + h - border, border,
+		                        fx, fy, fw, fh,
+		                        r, g, b, a);
 		}
 	if (util_clip_region(x + w - border, y + h - border, border, border,
 	                     rx, ry, rw, rh,
 	                     fx, fy, fw, fh))
 		{
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
-					x + w - border, y + h - border, border,
-					fx, fy, fx + fw, fy + fh,
-					r, g, b, a);
+		                        x + w - border, y + h - border, border,
+		                        fx, fy, fw, fh,
+		                        r, g, b, a);
 		}
 }
 
