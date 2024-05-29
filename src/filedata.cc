@@ -19,26 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FILEDATA_H
-#define FILEDATA_H
-
-#include <sys/types.h>
-
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#include <glib.h>
-
-#include <config.h>
-
-#include "typedefs.h"
-
-struct ExifData;
-struct HistMap;
-
-#ifdef DEBUG
-#define DEBUG_FILEDATA
-#endif
-
-#define FD_MAGICK 0x12345678u
+#include "filedata.h"
 
 gchar *text_from_size(gint64 size)
 {
@@ -50,99 +31,10 @@ gchar *text_from_size_abrev(gint64 size)
 	return FileData::text_from_size_abrev(size);
 }
 
-const gchar *text_from_time(time_t t);
-
-enum FileDataChangeType {
-	FILEDATA_CHANGE_DELETE,
-	FILEDATA_CHANGE_MOVE,
-	FILEDATA_CHANGE_RENAME,
-	FILEDATA_CHANGE_COPY,
-	FILEDATA_CHANGE_UNSPECIFIED,
-	FILEDATA_CHANGE_WRITE_METADATA
-};
-
-enum NotifyPriority {
-	NOTIFY_PRIORITY_HIGH = 0,
-	NOTIFY_PRIORITY_MEDIUM,
-	NOTIFY_PRIORITY_LOW
-};
-
-enum SelectionType {
-	SELECTION_NONE		= 0,
-	SELECTION_SELECTED	= 1 << 0,
-	SELECTION_PRELIGHT	= 1 << 1,
-	SELECTION_FOCUS		= 1 << 2
-};
-
-struct FileDataChangeInfo {
-	FileDataChangeType type;
-	gchar *source;
-	gchar *dest;
-	gint error;
-	gboolean regroup_when_finished;
-};
-
-class FileData {
-    public:
-	// Public members from the original API
-	guint magick;
-	gint type;
-	gchar *original_path; /**< key to file_data_pool hash table */
-	gchar *path;
-	const gchar *name;
-	const gchar *extension;
-	gchar *extended_extension;
-	FileFormatClass format_class;
-	gchar *format_name; /**< set by the image loader */
-	gchar *collate_key_name;
-	gchar *collate_key_name_nocase;
-	gchar *collate_key_name_natural;
-	gchar *collate_key_name_nocase_natural;
-	gint64 size;
-	time_t date;
-	time_t cdate;
-	mode_t mode; /**< this is needed at least for notification in view_dir because it is preserved after the file/directory is deleted */
-	gint sidecar_priority;
-
-	guint marks; /**< each bit represents one mark */
-	guint valid_marks; /**< zero bit means that the corresponding mark needs to be reread */
-
-
-	GList *sidecar_files;
-	FileData *parent; /**< parent file if this is a sidecar file, NULL otherwise */
-	FileDataChangeInfo *change; /**< for rename, move ... */
-	GdkPixbuf *thumb_pixbuf;
-
-	GdkPixbuf *pixbuf; /**< full-size image, only complete images, NULL during loading
-			      all FileData with non-NULL pixbuf are referenced by image_cache */
-
-	HistMap *histmap;
-
-	gboolean locked;
-	gint ref;
-	gint version; /**< increased when any field in this structure is changed */
-	gboolean disable_grouping;
-
-	gint user_orientation;
-	gint exif_orientation;
-
-	ExifData *exif;
-	time_t exifdate;
-	time_t exifdate_digitized;
-	GHashTable *modified_xmp; /**< hash table which contains unwritten xmp metadata in format: key->list of string values */
-	GList *cached_metadata;
-	gint rating;
-	gboolean metadata_in_idle_loaded;
-
-	gchar *owner;
-	gchar *group;
-	gchar *sym_link;
-
-	SelectionType selected;  /**< Used by view-file-icon. */
-
-	gint page_num;
-	gint page_total;
-};
+const gchar *text_from_time(time_t t)
+{
+	return FileData::text_from_time(t);
+}
 
 /**
  * @headerfile file_data_new_group
@@ -150,7 +42,7 @@ class FileData {
  */
 FileData *file_data_new_group(const gchar *path_utf8)
 {
-	return FileData::file_data_new_group(const gchar *path_utf8);
+	return FileData::file_data_new_group(path_utf8);
 }
 
 
@@ -160,7 +52,7 @@ FileData *file_data_new_group(const gchar *path_utf8)
  */
 FileData *file_data_new_no_grouping(const gchar *path_utf8)
 {
-	return FileData::file_data_new_no_grouping(const gchar *path_utf8);
+	return FileData::file_data_new_no_grouping(path_utf8);
 }
 
 
@@ -170,37 +62,39 @@ FileData *file_data_new_no_grouping(const gchar *path_utf8)
  */
 FileData *file_data_new_dir(const gchar *path_utf8)
 {
-	return FileData::file_data_new_dir(const gchar *path_utf8);
+	return FileData::file_data_new_dir(path_utf8);
 }
 
 
 FileData *file_data_new_simple(const gchar *path_utf8)
 {
-	return FileData::file_data_new_simple(const gchar *path_utf8);
+	return FileData::file_data_new_simple(path_utf8);
 }
 
 
 #ifdef DEBUG_FILEDATA
 FileData *file_data_ref_debug(const gchar *file, gint line, FileData *fd)
 {
-	return FileData::file_data_ref_debug(file, line, fd);
+	if (fd == nullptr) return nullptr;
+	return fd->file_data_ref_debug(file, line, fd);
 }
 
 void file_data_unref_debug(const gchar *file, gint line, FileData *fd)
 {
-	FileData::file_data_unref_debug(file, line, fd);
+	if (fd == nullptr) return;
+	fd->file_data_unref_debug(file, line, fd);
 }
 
-#define file_data_ref(fd) file_data_ref_debug(__FILE__, __LINE__, fd)
-#define file_data_unref(fd) file_data_unref_debug(__FILE__, __LINE__, fd)
 #else
 FileData *file_data_ref(FileData *fd)
 {
-	return FileData::file_data_ref(fd);
+	if (fd == nullptr) return nullptr;
+	return fd->file_data_ref(fd);
 }
 
 void file_data_unref(FileData *fd)
 {
+	if (fd == nullptr) return;
 	fd->file_data_unref(fd);
 }
 
@@ -208,11 +102,13 @@ void file_data_unref(FileData *fd)
 
 void file_data_lock(FileData *fd)
 {
+	if (fd == nullptr) return;
 	fd->file_data_lock(fd);
 }
 
 void file_data_unlock(FileData *fd)
 {
+	if (fd == nullptr) return;
 	fd->file_data_unlock(fd);
 }
 
@@ -246,7 +142,7 @@ gboolean file_data_add_change_info(FileData *fd, FileDataChangeType type, const 
 
 void file_data_change_info_free(FileDataChangeInfo *fdci, FileData *fd)
 {
-	FileData::file_data_change_info_free(fdci, fd);
+	fd->file_data_change_info_free(fdci, fd);
 }
 
 
@@ -263,12 +159,12 @@ void file_data_disable_grouping_list(GList *fd_list, gboolean disable)
 
 gint filelist_sort_compare_filedata(FileData *fa, FileData *fb)
 {
-	return fa->filelist_sort_compare_filedata(fa, fb);
+	return FileData::filelist_sort_compare_filedata(fa, fb);
 }
 
 gint filelist_sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend)
 {
-	return fa->filelist_sort_compare_filedata_full(fa, fb, method, ascend);
+	return FileData::filelist_sort_compare_filedata_full(fa, fb, method, ascend);
 }
 
 GList *filelist_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
@@ -289,12 +185,12 @@ GList *filelist_insert_sort_full(GList *list, gpointer data, SortType method, gb
 
 gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs)
 {
-	return dir->filelist_read(dir_fd, GList **files, GList **dirs);
+	return dir_fd->filelist_read(dir_fd, files, dirs);
 }
 
 gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs)
 {
-	return dir->filelist_read_lstat(dir_fd, GList **files, GList **dirs);
+	return dir_fd->filelist_read_lstat(dir_fd, files, dirs);
 }
 
 void filelist_free(GList *list)
@@ -410,13 +306,13 @@ GList *file_data_filter_class_list(GList *list, guint filter)
 
 gchar *file_data_sc_list_to_string(FileData *fd)
 {
-	return FileData::file_data_sc_list_to_string(fd);
+	return fd->file_data_sc_list_to_string(fd);
 }
 
 
 gchar *file_data_get_sidecar_path(FileData *fd, gboolean existing_only)
 {
-	return FileData::file_data_get_sidecar_path(fd, existing_only);
+	return fd->file_data_get_sidecar_path(fd, existing_only);
 }
 
 
@@ -685,5 +581,4 @@ void file_data_dump()
 	FileData::file_data_dump();
 }
 
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
