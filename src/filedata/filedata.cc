@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+// NOLINTBEGIN(readability-convert-member-functions-to-static)
+
 #include "filedata.h"
 
 #include <dirent.h>
@@ -3577,5 +3579,7 @@ void FileData::file_data_set_page_total(FileData *fd, gint page_total)
 {
 	fd->page_total = page_total;
 }
+
+// NOLINTEND(readability-convert-member-functions-to-static)
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
