@@ -18,8 +18,8 @@ msgstr ""
 "Project-Id-Version: geeqie-1.6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-03-23 11:12+0000\n"
-"PO-Revision-Date: 2023-10-25 17:13+0100\n"
-"Last-Translator: Colin Clark <cclark@TallTrees>\n"
+"PO-Revision-Date: 2024-05-30 23:20+0300\n"
+"Last-Translator: Dunaevskii Maxim <dunmaksim@yandex.ru>\n"
 "Language-Team: Russian <gnome-cyr@lists.gnome.org>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
@@ -33,7 +33,7 @@ msgstr "Geeqie"
 
 #: org.geeqie.Geeqie.appdata.xml.in:8
 msgid "A lightweight image viewer"
-msgstr ""
+msgstr "Легковесный просмотрщик изображений"
 
 #: org.geeqie.Geeqie.appdata.xml.in:10
 msgid ""
@@ -98,7 +98,7 @@ msgstr "Импорт из камеры"
 
 #: plugins/camera-import/org.geeqie.camera-import.desktop.in:6
 msgid "Import all images from camera"
-msgstr ""
+msgstr "Импорт всех изображений из камеры"
 
 #: plugins/export-jpeg/org.geeqie.export-jpeg.desktop.in:5
 msgid "Export jpeg"
@@ -118,7 +118,7 @@ msgstr ""
 
 #: plugins/open-with/org.geeqie.open-with.desktop.in:5
 msgid "Open With"
-msgstr ""
+msgstr "Открыть с помощью"
 
 #: plugins/open-with/org.geeqie.open-with.desktop.in:6
 msgid "Call the gtk application chooser dialog"
@@ -134,20 +134,19 @@ msgstr "Случайное изображение"
 
 #: plugins/random-image/org.geeqie.random-image.desktop.in:6
 msgid "Display random image from Collections and current folder"
-msgstr ""
+msgstr "Показать случайное изображение из Коллекции или текущего каталога"
 
 #: plugins/resize-image/org.geeqie.resize-image.desktop.in:5
-#, fuzzy
 msgid "Resize image"
-msgstr "Единственное изображение"
+msgstr "Изменить размер изображения"
 
 #: plugins/resize-image/org.geeqie.resize-image.desktop.in:6
 msgid "Downsize an image"
-msgstr ""
+msgstr "Уменьшить размер изображения"
 
 #: plugins/rotate/org.geeqie.rotate.desktop.in:5
 msgid "Apply the orientation to image content"
-msgstr "Изменить ориентацию прямо в изображении"
+msgstr "Изменить ориентацию изображения"
 
 #: plugins/symlink/org.geeqie.symlink.desktop.in:5
 msgid "Symlink"
@@ -162,9 +161,8 @@ msgid "Video player"
 msgstr ""
 
 #: plugins/video-player/org.geeqie.video-player.desktop.in:6
-#, fuzzy
 msgid "Display videos in Geeqie"
-msgstr "Удаление файлов - Geeqie"
+msgstr "Воспроизведение видео в Geeqie"
 
 #: src/advanced-exif.cc:456 src/cache-maint.cc:1788 src/preferences.cc:159
 #: src/preferences.cc:2909 src/search.cc:2274 src/search.cc:3619
@@ -187,7 +185,7 @@ msgstr "Название"
 
 #: src/advanced-exif.cc:514
 msgid "Tag"
-msgstr "Поле"
+msgstr "Тег"
 
 #: src/advanced-exif.cc:515
 msgid "Format"
@@ -198,23 +196,22 @@ msgid "Elements"
 msgstr "Элементы"
 
 #: src/archives.cc:183
-#, fuzzy
 msgid "Open Archive - Cannot create directory: "
-msgstr "Невозможно создать каталог"
+msgstr "Открытие архива - Не удалось создать каталог: "
 
 #: src/archives.cc:192 src/archives.cc:204
 msgid "Open Archive - Cannot change directory to: "
-msgstr ""
+msgstr "Открытие архива - Не удалось сменить каталог на :"
 
 #: src/archives.cc:192 src/archives.cc:204
 msgid ""
 "\n"
 "  Error code: "
-msgstr ""
+msgstr "\n  Код ошибки: "
 
 #: src/archives.cc:222
 msgid "Warning: libarchive not installed"
-msgstr ""
+msgstr "Предупреждение: библиотека libarchive не установлена"
 
 #: src/bar.cc:208
 msgid "Histogram"
@@ -242,7 +239,7 @@ msgstr "Заголовок"
 
 #: src/bar.cc:214
 msgid "Exif"
-msgstr "Данные Exif"
+msgstr "Exif"
 
 #: src/bar.cc:216
 msgid "File info"
@@ -277,9 +274,8 @@ msgid "Move to _bottom"
 msgstr "Разместить сни_зу"
 
 #: src/bar.cc:429
-#, fuzzy
 msgid "Height..."
-msgstr "Высота"
+msgstr "Высота..."
 
 #: src/bar.cc:433 src/collect-table.cc:107 src/dupe.cc:165
 #: src/preferences.cc:2886 src/search.cc:374 src/toolbar.cc:145
@@ -288,9 +284,8 @@ msgstr "Удалить"
 
 #: src/bar.cc:821 src/bar-sort.cc:759 src/preferences.cc:2891
 #: src/shortcuts.cc:164 src/toolbar.cc:467
-#, fuzzy
 msgid "Add"
-msgstr "Добавить Alt"
+msgstr "Добавить"
 
 #: src/bar.cc:822
 msgid "Add Pane"
@@ -400,10 +395,7 @@ msgid ""
 "\n"
 "\n"
 "Position: %lf %lf \n"
-msgstr ""
-"\n"
-"\n"
-"Расположение: %s\n"
+msgstr "\n\nРасположение: %lf %lf\n"
 
 #: src/bar-gps.cc:231
 msgid "Geocode images"
@@ -416,7 +408,7 @@ msgstr "Записать lat/long в метаданные?"
 #: src/bar-gps.cc:238 src/collect.cc:1259 src/collect-dlg.cc:153
 #: src/desktop-file.cc:240 src/dupe.cc:5365
 msgid "Save"
-msgstr ""
+msgstr "Сохранить"
 
 #: src/bar-gps.cc:750
 #, c-format
@@ -430,7 +422,7 @@ msgstr "Уровень масштабирования %i"
 
 #: src/bar-gps.cc:771
 msgid "Loading map"
-msgstr "Загружается карта"
+msgstr "Загрузка карты"
 
 #: src/bar-gps.cc:837
 msgid "Enable markers"
@@ -542,7 +534,7 @@ msgstr "Помощник"
 
 #: src/bar-keywords.cc:1053
 msgid "Marks Keywords"
-msgstr "Пометить Ключевые слова"
+msgstr "Пометить ключевые слова"
 
 #: src/bar-keywords.cc:1056
 #, fuzzy
@@ -576,7 +568,7 @@ msgstr "Добавить \"%s\" в пометку"
 #: src/bar-keywords.cc:1353
 #, c-format
 msgid "Edit \"%s\""
-msgstr "Выйти из \"%s\""
+msgstr "Изменить \"%s\""
 
 #: src/bar-keywords.cc:1363
 #, c-format
@@ -636,7 +628,7 @@ msgstr "Сбросить выделенные"
 #: src/bar-rating.cc:201 src/bar-rating.cc:204
 #, fuzzy
 msgid "Unrated"
-msgstr "некалиброванный"
+msgstr "Без оценки"
 
 #: src/bar-sort.cc:444 src/bar-sort.cc:447
 msgid "Sort Manager Operations"
@@ -692,7 +684,7 @@ msgstr ""
 
 #: src/bar-sort.cc:543 src/collect.cc:1216 src/collect-dlg.cc:80
 msgid "Save Failed"
-msgstr "Не удалось сохранить"
+msgstr "Ошибка сохранения"
 
 #: src/bar-sort.cc:578 src/bar-sort.cc:760
 msgid "Add Bookmark"
@@ -720,7 +712,7 @@ msgstr "Коллекции"
 
 #: src/bar-sort.cc:697
 msgid "See the Help file for additional functions"
-msgstr ""
+msgstr "Обратитесь к справке для получения информации о дополнительных функциях"
 
 #: src/bar-sort.cc:700 src/collect-table.cc:102 src/dupe.cc:160
 #: src/img-view.cc:98 src/pan-view/pan-view.cc:127 src/preferences.cc:737
@@ -744,7 +736,7 @@ msgstr "Добавить выделение"
 
 #: src/bar-sort.cc:762
 msgid "Undo"
-msgstr ""
+msgstr "Отменить"
 
 #: src/bar-sort.cc:763
 msgid "Undo last image"
@@ -764,14 +756,12 @@ msgstr ""
 "ошибка: %s\n"
 
 #: src/cache-maint.cc:88
-#, fuzzy
 msgid "Geeqie: Creating sim data..."
-msgstr "Загружаем данные об изображениях..."
+msgstr "Geeqie: Создание данных sim..."
 
 #: src/cache-maint.cc:94
-#, fuzzy
 msgid "Geeqie: Creating thumbs..."
-msgstr "Удаляются миниатюры..."
+msgstr "Geeqie: Создание эскизов..."
 
 #: src/cache-maint.cc:110
 #, fuzzy
@@ -781,7 +771,7 @@ msgstr "Обслуживание кэша"
 #: src/cache-maint.cc:127
 #, fuzzy
 msgid "Geeqie: Cleaning thumbs..."
-msgstr "Удаляются миниатюры..."
+msgstr "Geeqie: Удаление эскизов..."
 
 #: src/cache-maint.cc:200 src/cache-maint.cc:699 src/cache-maint.cc:802
 #: src/cache-maint.cc:999 src/cache-maint.cc:1470 src/editors.cc:1269
@@ -791,19 +781,19 @@ msgstr "готово"
 
 #: src/cache-maint.cc:390
 msgid "Removing old metadata..."
-msgstr "Удаляются старые метаданные..."
+msgstr "Удаление старых метаданных..."
 
 #: src/cache-maint.cc:394
 msgid "Clearing cached thumbnails..."
-msgstr "Удаляются кэшированные миниатюры..."
+msgstr "Удаление кэшированных эскизов..."
 
 #: src/cache-maint.cc:398 src/cache-maint.cc:1172
 msgid "Removing old thumbnails..."
-msgstr "Удаляются старые миниатюры..."
+msgstr "Удаление старрых эскизов..."
 
 #: src/cache-maint.cc:401 src/cache-maint.cc:1175
 msgid "Maintenance"
-msgstr "Управление"
+msgstr "Обслуживание"
 
 #: src/cache-maint.cc:406 src/cache-maint.cc:907 src/cache-maint.cc:1180
 #: src/cache-maint.cc:1549 src/cache-maint.cc:1668 src/cache-maint.cc:1724
@@ -819,12 +809,11 @@ msgstr "близкий"
 #: src/cache-maint.cc:1553 src/dupe.cc:4804 src/preferences.cc:3222
 #: src/search.cc:3757
 msgid "Stop"
-msgstr ""
+msgstr "Стоп"
 
 #: src/cache-maint.cc:713 src/cache-maint.cc:1349
-#, fuzzy
 msgid "stopped"
-msgstr "остановлено пользователем"
+msgstr "остановлено"
 
 #: src/cache-maint.cc:832 src/cache-maint.cc:1501 src/cache-maint.cc:1631
 #: src/preferences.cc:3181
@@ -834,11 +823,11 @@ msgstr "Неправильный каталог"
 #: src/cache-maint.cc:833 src/cache-maint.cc:1502 src/cache-maint.cc:1632
 #: src/preferences.cc:3182
 msgid "The specified folder can not be found."
-msgstr "Выбранный каталог не может быть найден."
+msgstr "Указанный каталог не найден."
 
 #: src/cache-maint.cc:901 src/cache-maint.cc:915 src/cache-maint.cc:1768
 msgid "Create thumbnails"
-msgstr "Создать миниатюры"
+msgstr "Создать эскизы"
 
 #: src/cache-maint.cc:909 src/cache-maint.cc:1182 src/cache-maint.cc:1551
 #: src/cache-maint.cc:1670 src/preferences.cc:3220
@@ -861,7 +850,7 @@ msgstr "Включать подкаталоги"
 
 #: src/cache-maint.cc:930
 msgid "Store thumbnails local to source images"
-msgstr "Сохранять миниатюры в одном каталоге с изображениями"
+msgstr "Сохранять эскизы в одном каталоге с изображениями"
 
 #: src/cache-maint.cc:939 src/cache-maint.cc:1191 src/cache-maint.cc:1577
 #: src/preferences.cc:3248
@@ -870,11 +859,11 @@ msgstr "нажмите «Начать» для запуска"
 
 #: src/cache-maint.cc:1111 src/editors.cc:1195
 msgid "running..."
-msgstr "выполняю..."
+msgstr "выполнение..."
 
 #: src/cache-maint.cc:1167
 msgid "Clearing thumbnails..."
-msgstr "Удаляются миниатюры..."
+msgstr "Удаление эскизов..."
 
 #: src/cache-maint.cc:1248 src/cache-maint.cc:1251 src/cache-maint.cc:1744
 #: src/cache-maint.cc:1763
@@ -882,11 +871,12 @@ msgid "Clear cache"
 msgstr "Очистить кэш"
 
 #: src/cache-maint.cc:1252
-#, fuzzy
 msgid ""
 "This will remove all thumbnails and sim. files\n"
 "that have been saved to disk, continue?"
-msgstr "Все сохраненные на диск миниатюры будут удалены. Продолжить?"
+msgstr ""
+"Это удалит все эскизы и sim-файлы, сохраненные\n"
+"на диск. Продолжить?"
 
 #: src/cache-maint.cc:1297
 #, c-format
@@ -894,19 +884,16 @@ msgid "Location: %s"
 msgstr "Расположение: %s"
 
 #: src/cache-maint.cc:1546
-#, fuzzy
 msgid "Create sim. files"
-msgstr "Невозможно создать временный файл"
+msgstr "Создать sim-файл"
 
 #: src/cache-maint.cc:1557
-#, fuzzy
 msgid "Create sim. files recursively"
-msgstr "отрендерить миниатюры рекурсивно"
+msgstr "Создать sim-файлы рекурсивно"
 
 #: src/cache-maint.cc:1665 src/cache-maint.cc:1799
-#, fuzzy
 msgid "Background cache maintenance"
-msgstr "Обслуживание кэша"
+msgstr "Фоновое обслуживание кэша"
 
 #: src/cache-maint.cc:1673
 msgid ""
@@ -914,33 +901,34 @@ msgid ""
 "and .sim files, and create new\n"
 "thumbnails and .sim files"
 msgstr ""
+"Рекурсивное удалить осиротевшие эскизы\n"
+"и sim-файлов, после чего создать новые\n"
+"эскизы и sim-файлы"
 
 #: src/cache-maint.cc:1717
-#, fuzzy
 msgid "Cache Maintenance"
 msgstr "Обслуживание кэша"
 
 #: src/cache-maint.cc:1729
 msgid "Cache and Data Maintenance"
-msgstr "Управление кэшем и данными"
+msgstr "Обслуживание кэша и данных"
 
 #: src/cache-maint.cc:1733
 #, fuzzy
 msgid "Geeqie thumbnail and sim. cache"
-msgstr "Кэш миниатюр Geeqie"
+msgstr "Кэш эскизов и sim-файлов Geeqie"
 
 #: src/cache-maint.cc:1739 src/cache-maint.cc:1758 src/cache-maint.cc:1794
 msgid "Clean up"
 msgstr "Очистить"
 
 #: src/cache-maint.cc:1742
-#, fuzzy
 msgid "Remove orphaned or outdated thumbnails and sim. files."
-msgstr "Удалить осиротевшие или устаревшие миниатюры."
+msgstr "Удалить осиротевшие или устаревшие эскизы и sim-файлы."
 
 #: src/cache-maint.cc:1747
 msgid "Delete all cached data."
-msgstr "Удалить все закэшированные миниатюры."
+msgstr "Удалить все данные кэша."
 
 #: src/cache-maint.cc:1750
 msgid "Shared thumbnail cache"
@@ -948,11 +936,11 @@ msgstr "Общий кэш миниатюр"
 
 #: src/cache-maint.cc:1761
 msgid "Remove orphaned or outdated thumbnails."
-msgstr "Удалить осиротевшие или устаревшие миниатюры."
+msgstr "Удалить осиротевшие или устаревшие эскизы."
 
 #: src/cache-maint.cc:1766
 msgid "Delete all cached thumbnails."
-msgstr "Удалить все закэшированные миниатюры."
+msgstr "Удалить все закэшированные эскизы."
 
 #: src/cache-maint.cc:1772
 msgid "Render"
@@ -960,22 +948,19 @@ msgstr "Создать"
 
 #: src/cache-maint.cc:1775
 msgid "Render thumbnails for a specific folder."
-msgstr "Создать миниатюры для выбранного каталога."
+msgstr "Создать эскизы для выбранного каталога."
 
 #: src/cache-maint.cc:1778
-#, fuzzy
 msgid "File similarity cache"
-msgstr "Очистить кэш"
+msgstr "Кэш похожести файлов"
 
 #: src/cache-maint.cc:1782
-#, fuzzy
 msgid "Create"
-msgstr "творчество"
+msgstr "Создать"
 
 #: src/cache-maint.cc:1785
-#, fuzzy
 msgid "Create sim. files recursively."
-msgstr "отрендерить миниатюры рекурсивно"
+msgstr "Создать sim-файлы рекурсивно"
 
 #: src/cache-maint.cc:1797
 msgid "Remove orphaned keywords and comments."
@@ -988,7 +973,7 @@ msgstr "В_ыделение"
 
 #: src/cache-maint.cc:1806
 msgid "Run cache maintenance as a background job."
-msgstr ""
+msgstr "Запустить обслуживание кэша в фоновом режиме."
 
 #: src/collect.cc:489 src/image.cc:377 src/image-overlay.cc:285
 #: src/image-overlay.cc:364
@@ -1535,11 +1520,11 @@ msgstr ""
 
 #: src/dupe.cc:3522
 msgid "Select group _1 duplicates"
-msgstr "Выбрать повторяющуюся группу _1"
+msgstr "Выбрать группу дубликатов _1"
 
 #: src/dupe.cc:3524
 msgid "Select group _2 duplicates"
-msgstr "Выбрать повторяющуюся группу _2"
+msgstr "Выбрать группу дубликатов _2"
 
 #: src/dupe.cc:3569 src/dupe.cc:3863
 msgid "C_lear"
@@ -1572,26 +1557,23 @@ msgstr "Дата"
 
 #: src/dupe.cc:3968 src/dupe.cc:4663 src/osd.cc:51 src/search.cc:3707
 msgid "Dimensions"
-msgstr "Размеры изображений"
+msgstr "Размеры"
 
 #: src/dupe.cc:3969
 msgid "Checksum"
 msgstr "Контрольная сумма"
 
 #: src/dupe.cc:3971
-#, fuzzy
 msgid "Similarity (high - 95)"
-msgstr "Похожесть (высокая)"
+msgstr "Похожесть (высокая - 95)"
 
 #: src/dupe.cc:3972
-#, fuzzy
 msgid "Similarity (med. - 90)"
-msgstr "Похожесть (низкая)"
+msgstr "Похожесть (срдн. - 90)"
 
 #: src/dupe.cc:3973
-#, fuzzy
 msgid "Similarity (low - 85)"
-msgstr "Похожесть (низкая)"
+msgstr "Похожесть (низкая - 85)"
 
 #: src/dupe.cc:3974
 msgid "Similarity (custom)"
@@ -1600,12 +1582,12 @@ msgstr "Похожесть (заданная)"
 #: src/dupe.cc:3975
 #, fuzzy
 msgid "Name ≠ content"
-msgstr "Содержимое изображения"
+msgstr "Название ≠ содержимое"
 
 #: src/dupe.cc:3976
 #, fuzzy
 msgid "Name case-insensitive ≠ content"
-msgstr "Не учитывать регистр символов"
+msgstr "Название без учета регистра ≠ содержимое"
 
 #: src/dupe.cc:4594 src/dupe.cc:4985 src/search.cc:384
 msgid "Find duplicates"
@@ -1618,7 +1600,7 @@ msgstr "Ранг"
 #: src/dupe.cc:4659 src/search.cc:3703
 #, fuzzy
 msgid "Thumb"
-msgstr "Миниатюры"
+msgstr "Эскиз"
 
 #: src/dupe.cc:4665 src/dupe.cc:5242 src/preferences.cc:2100
 #: src/preferences.cc:2132 src/preferences.cc:2481
@@ -1631,7 +1613,7 @@ msgstr "Сравнить с:"
 
 #: src/dupe.cc:4739 src/preferences.cc:2027 src/search.cc:3721
 msgid "Thumbnails"
-msgstr "Миниатюры"
+msgstr "Эскизы"
 
 #: src/dupe.cc:4748
 msgid "Compare by:"
@@ -1653,12 +1635,12 @@ msgstr "Сортировать по пути"
 #: src/dupe.cc:4773
 #, fuzzy
 msgid "Ignore Orientation"
-msgstr "Игнорировать вращение"
+msgstr "Игнорировать ориентацию"
 
 #: src/dupe.cc:4774
 #, fuzzy
 msgid "Ignore image orientation"
-msgstr "Ориентация изображения"
+msgstr "Игнорировать ориентацию изображения"
 
 #: src/dupe.cc:4781
 msgid "Compare two file sets"
@@ -1671,9 +1653,7 @@ msgstr ""
 #: src/dupe.cc:5236
 #, fuzzy, c-format
 msgid "Error creating Export duplicates data file: Error: %s\n"
-msgstr ""
-"ошибка сохранения кэш-данных sim: %s\n"
-"ошибка: %s\n"
+msgstr "Ошибка создания файла данных экспорта дубликатов: Ошибка: %s\n"
 
 #: src/dupe.cc:5242
 #, fuzzy
@@ -1691,7 +1671,7 @@ msgstr "Похожесть"
 #: src/dupe.cc:5242
 #, fuzzy
 msgid "Thumbnail"
-msgstr "Миниатюры"
+msgstr "Эскиз"
 
 #: src/dupe.cc:5242 src/exif.cc:370 src/preferences.cc:4097
 msgid "Width"
@@ -1704,7 +1684,7 @@ msgstr "Высота"
 #: src/dupe.cc:5242
 #, fuzzy
 msgid "Path\n"
-msgstr "Путь"
+msgstr "Путь\n"
 
 #: src/dupe.cc:5341
 msgid "Export duplicates data"
