@@ -76,7 +76,7 @@ static gboolean filelist_sort_case = TRUE;
  *-----------------------------------------------------------------------------
  */
 
-gchar *text_from_size(gint64 size)
+gchar *FileData::text_from_size(gint64 size)
 {
 	gchar *a;
 	gchar *b;
@@ -127,7 +127,7 @@ gchar *text_from_size(gint64 size)
 	return b;
 }
 
-gchar *text_from_size_abrev(gint64 size)
+gchar *FileData::text_from_size_abrev(gint64 size)
 {
 	if (size < static_cast<gint64>(1024))
 		{
@@ -148,7 +148,7 @@ gchar *text_from_size_abrev(gint64 size)
 }
 
 /* note: returned string is valid until next call to text_from_time() */
-const gchar *text_from_time(time_t t)
+const gchar *FileData::text_from_time(time_t t)
 {
 	static gchar *ret = nullptr;
 	gchar buf[128];
@@ -180,7 +180,7 @@ const gchar *text_from_time(time_t t)
  *-----------------------------------------------------------------------------
  */
 
-void file_data_increment_version(FileData *fd)
+void FileData::file_data_increment_version(FileData *fd)
 {
 	fd->version++;
 	fd->valid_marks = 0;
@@ -242,7 +242,7 @@ static gboolean file_data_check_changed_files_recursive(FileData *fd, struct sta
 }
 
 
-gboolean file_data_check_changed_files(FileData *fd)
+gboolean FileData::file_data_check_changed_files(FileData *fd)
 {
 	gboolean ret = FALSE;
 	struct stat st;
@@ -488,7 +488,7 @@ static FileData *file_data_new_local(const gchar *path, struct stat *st, gboolea
 	return ret;
 }
 
-FileData *file_data_new_simple(const gchar *path_utf8)
+FileData *FileData::file_data_new_simple(const gchar *path_utf8)
 {
 	struct stat st;
 	FileData *fd;
@@ -509,7 +509,7 @@ FileData *file_data_new_simple(const gchar *path_utf8)
 	return fd;
 }
 
-void read_exif_time_data(FileData *file)
+void FileData::read_exif_time_data(FileData *file)
 {
 	if (file->exifdate > 0)
 		{
@@ -552,7 +552,7 @@ void read_exif_time_data(FileData *file)
 		}
 }
 
-void read_exif_time_digitized_data(FileData *file)
+void FileData::read_exif_time_digitized_data(FileData *file)
 {
 	if (file->exifdate_digitized > 0)
 		{
@@ -595,7 +595,7 @@ void read_exif_time_digitized_data(FileData *file)
 		}
 }
 
-void read_rating_data(FileData *file)
+void FileData::read_rating_data(FileData *file)
 {
 	gchar *rating_str;
 
@@ -613,7 +613,7 @@ void read_rating_data(FileData *file)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-void set_exif_time_data_unused(GList *files)
+void FileData::set_exif_time_data_unused(GList *files)
 {
 	DEBUG_1("%s set_exif_time_data: ...", get_exec_time());
 
@@ -626,7 +626,7 @@ void set_exif_time_data_unused(GList *files)
 		}
 }
 
-void set_exif_time_digitized_data_unused(GList *files)
+void FileData::set_exif_time_digitized_data_unused(GList *files)
 {
 	DEBUG_1("%s set_exif_time_digitized_data: ...", get_exec_time());
 
@@ -639,7 +639,7 @@ void set_exif_time_digitized_data_unused(GList *files)
 		}
 }
 
-void set_rating_data_unused(GList *files)
+void FileData::set_rating_data_unused(GList *files)
 {
 	gchar *rating_str;
 	DEBUG_1("%s set_rating_data: ...", get_exec_time());
@@ -658,7 +658,7 @@ void set_rating_data_unused(GList *files)
 }
 #pragma GCC diagnostic pop
 
-FileData *file_data_new_no_grouping(const gchar *path_utf8)
+FileData *FileData::file_data_new_no_grouping(const gchar *path_utf8)
 {
 	struct stat st;
 
@@ -671,7 +671,7 @@ FileData *file_data_new_no_grouping(const gchar *path_utf8)
 	return file_data_new(path_utf8, &st, TRUE);
 }
 
-FileData *file_data_new_dir(const gchar *path_utf8)
+FileData *FileData::file_data_new_dir(const gchar *path_utf8)
 {
 	struct stat st;
 
@@ -694,9 +694,9 @@ FileData *file_data_new_dir(const gchar *path_utf8)
  */
 
 #ifdef DEBUG_FILEDATA
-FileData *file_data_ref_debug(const gchar *file, gint line, FileData *fd)
+FileData *FileData::file_data_ref_debug(const gchar *file, gint line, FileData *fd)
 #else
-FileData *file_data_ref(FileData *fd)
+FileData *FileData::file_data_ref(FileData *fd)
 #endif
 {
 	if (fd == nullptr) return nullptr;
@@ -726,7 +726,7 @@ FileData *file_data_ref(FileData *fd)
  *
  * Used only by debug_fd()
  */
-void file_data_dump()
+void FileData::file_data_dump()
 {
 #ifdef DEBUG_FILEDATA
 	FileData *fd;
@@ -827,9 +827,9 @@ static void file_data_consider_free(FileData *fd)
 }
 
 #ifdef DEBUG_FILEDATA
-void file_data_unref_debug(const gchar *file, gint line, FileData *fd)
+void FileData::file_data_unref_debug(const gchar *file, gint line, FileData *fd)
 #else
-void file_data_unref(FileData *fd)
+void FileData::file_data_unref(FileData *fd)
 #endif
 {
 	if (fd == nullptr) return;
@@ -864,7 +864,7 @@ void file_data_unref(FileData *fd)
  * Note: This differs from file_data_ref in that the behavior is reentrant -- after N calls to
  * file_data_lock, a single call to file_data_unlock will unlock the FileData.
  */
-void file_data_lock(FileData *fd)
+void FileData::file_data_lock(FileData *fd)
 {
 	if (fd == nullptr) return;
 	if (fd->magick != FD_MAGICK) log_printf("Error: fd magick mismatch fd=%p", (void *)fd);
@@ -882,7 +882,7 @@ void file_data_lock(FileData *fd)
  * the FileData if its refcount is already zero (which will happen if the lock is the only thing
  * keeping it from being freed.
  */
-void file_data_unlock(FileData *fd)
+void FileData::file_data_unlock(FileData *fd)
 {
 	if (fd == nullptr) return;
 	if (fd->magick != FD_MAGICK) log_printf("Error: fd magick mismatch fd=%p", (void *)fd);
@@ -899,7 +899,7 @@ void file_data_unlock(FileData *fd)
  *
  * @see file_data_lock(#FileData)
  */
-void file_data_lock_list(GList *list)
+void FileData::file_data_lock_list(GList *list)
 {
 	GList *work;
 
@@ -917,7 +917,7 @@ void file_data_lock_list(GList *list)
  *
  * @see #file_data_unlock(#FileData)
  */
-void file_data_unlock_list(GList *list)
+void FileData::file_data_unlock_list(GList *list)
 {
 	GList *work;
 
@@ -1102,7 +1102,7 @@ static void file_data_disconnect_sidecar_file(FileData *target, FileData *sfd)
 }
 
 /* disables / enables grouping for particular file, sends UPDATE notification */
-void file_data_disable_grouping(FileData *fd, gboolean disable)
+void FileData::file_data_disable_grouping(FileData *fd, gboolean disable)
 {
 	if (!fd->disable_grouping == !disable) return;
 
@@ -1144,7 +1144,7 @@ void file_data_disable_grouping(FileData *fd, gboolean disable)
 	file_data_send_notification(fd, NOTIFY_GROUPING);
 }
 
-void file_data_disable_grouping_list(GList *fd_list, gboolean disable)
+void FileData::file_data_disable_grouping_list(GList *fd_list, gboolean disable)
 {
 	GList *work;
 
@@ -1167,7 +1167,7 @@ void file_data_disable_grouping_list(GList *fd_list, gboolean disable)
  */
 
 
-gint filelist_sort_compare_filedata(FileData *fa, FileData *fb)
+gint FileData::filelist_sort_compare_filedata(FileData *fa, FileData *fb)
 {
 	gint ret;
 	if (!filelist_sort_ascend)
@@ -1236,7 +1236,7 @@ gint filelist_sort_compare_filedata(FileData *fa, FileData *fb)
 	return strcmp(fa->original_path, fb->original_path);
 }
 
-gint filelist_sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend)
+gint FileData::filelist_sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend)
 {
 	filelist_sort_method = method;
 	filelist_sort_ascend = ascend;
@@ -1248,7 +1248,7 @@ static gint filelist_sort_file_cb(gpointer a, gpointer b)
 	return filelist_sort_compare_filedata(static_cast<FileData *>(a), static_cast<FileData *>(b));
 }
 
-GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb)
+GList *FileData::filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb)
 {
 	filelist_sort_method = method;
 	filelist_sort_ascend = ascend;
@@ -1256,7 +1256,7 @@ GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolea
 	return g_list_sort(list, cb);
 }
 
-GList *filelist_insert_sort_full(GList *list, gpointer data, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb)
+GList *FileData::filelist_insert_sort_full(GList *list, gpointer data, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb)
 {
 	filelist_sort_method = method;
 	filelist_sort_ascend = ascend;
@@ -1264,14 +1264,14 @@ GList *filelist_insert_sort_full(GList *list, gpointer data, SortType method, gb
 	return g_list_insert_sorted(list, data, cb);
 }
 
-GList *filelist_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
+GList *FileData::filelist_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
 {
 	return filelist_sort_full(list, method, ascend, case_sensitive, reinterpret_cast<GCompareFunc>(filelist_sort_file_cb));
 }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-GList *filelist_insert_sort_unused(GList *list, FileData *fd, SortType method, gboolean ascend)
+GList *FileData::filelist_insert_sort_unused(GList *list, FileData *fd, SortType method, gboolean ascend)
 {
 	return filelist_insert_sort_full(list, fd, method, ascend, ascend, (GCompareFunc) filelist_sort_file_cb);
 }
@@ -1507,17 +1507,17 @@ static gboolean filelist_read_real(const gchar *dir_path, GList **files, GList *
 	return TRUE;
 }
 
-gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs)
+gboolean FileData::filelist_read(FileData *dir_fd, GList **files, GList **dirs)
 {
 	return filelist_read_real(dir_fd->path, files, dirs, TRUE);
 }
 
-gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs)
+gboolean FileData::filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs)
 {
 	return filelist_read_real(dir_fd->path, files, dirs, FALSE);
 }
 
-FileData *file_data_new_group(const gchar *path_utf8)
+FileData *FileData::file_data_new_group(const gchar *path_utf8)
 {
 	gchar *dir;
 	struct stat st;
@@ -1555,7 +1555,7 @@ FileData *file_data_new_group(const gchar *path_utf8)
 }
 
 
-void filelist_free(GList *list)
+void FileData::filelist_free(GList *list)
 {
 	GList *work;
 
@@ -1570,7 +1570,7 @@ void filelist_free(GList *list)
 }
 
 
-GList *filelist_copy(GList *list)
+GList *FileData::filelist_copy(GList *list)
 {
 	GList *new_list = nullptr;
 
@@ -1584,7 +1584,7 @@ GList *filelist_copy(GList *list)
 	return g_list_reverse(new_list);
 }
 
-GList *filelist_from_path_list(GList *list)
+GList *FileData::filelist_from_path_list(GList *list)
 {
 	GList *new_list = nullptr;
 	GList *work;
@@ -1603,7 +1603,7 @@ GList *filelist_from_path_list(GList *list)
 	return g_list_reverse(new_list);
 }
 
-GList *filelist_to_path_list(GList *list)
+GList *FileData::filelist_to_path_list(GList *list)
 {
 	GList *new_list = nullptr;
 	GList *work;
@@ -1622,7 +1622,7 @@ GList *filelist_to_path_list(GList *list)
 	return g_list_reverse(new_list);
 }
 
-GList *filelist_filter(GList *list, gboolean is_dir_list)
+GList *FileData::filelist_filter(GList *list, gboolean is_dir_list)
 {
 	GList *work;
 
@@ -1661,7 +1661,7 @@ static gint filelist_sort_path_cb(gconstpointer a, gconstpointer b)
 	return CASE_SORT(((FileData *)a)->path, ((FileData *)b)->path);
 }
 
-GList *filelist_sort_path(GList *list)
+GList *FileData::filelist_sort_path(GList *list)
 {
 	return g_list_sort(list, filelist_sort_path_cb);
 }
@@ -1720,7 +1720,7 @@ static void filelist_recursive_append_full(GList **list, GList *dirs, SortType m
 		}
 }
 
-GList *filelist_recursive(FileData *dir_fd)
+GList *FileData::filelist_recursive(FileData *dir_fd)
 {
 	GList *list;
 	GList *d;
@@ -1737,7 +1737,7 @@ GList *filelist_recursive(FileData *dir_fd)
 	return list;
 }
 
-GList *filelist_recursive_full(FileData *dir_fd, SortType method, gboolean ascend, gboolean case_sensitive)
+GList *FileData::filelist_recursive_full(FileData *dir_fd, SortType method, gboolean ascend, gboolean case_sensitive)
 {
 	GList *list;
 	GList *d;
@@ -1761,7 +1761,7 @@ GList *filelist_recursive_full(FileData *dir_fd, SortType method, gboolean ascen
  */
 
 
-void file_data_change_info_free(FileDataChangeInfo *fdci, FileData *fd)
+void FileData::file_data_change_info_free(FileDataChangeInfo *fdci, FileData *fd)
 {
 	if (!fdci && fd) fdci = fd->change;
 
@@ -1785,7 +1785,7 @@ static gboolean file_data_can_write_sidecar(FileData *fd)
 	return filter_name_allow_sidecar(fd->extension) && !filter_name_is_writable(fd->extension);
 }
 
-gchar *file_data_get_sidecar_path(FileData *fd, gboolean existing_only)
+gchar *FileData::file_data_get_sidecar_path(FileData *fd, gboolean existing_only)
 {
 	gchar *sidecar_path = nullptr;
 	GList *work;
@@ -1830,7 +1830,7 @@ static FileDataSetMarkFunc file_data_set_mark_func[FILEDATA_MARKS_SIZE];
 static gpointer file_data_mark_func_data[FILEDATA_MARKS_SIZE];
 static GDestroyNotify file_data_destroy_mark_func[FILEDATA_MARKS_SIZE];
 
-gboolean file_data_get_mark(FileData *fd, gint n)
+gboolean FileData::file_data_get_mark(FileData *fd, gint n)
 {
 	gboolean valid = (fd->valid_marks & (1 << n));
 
@@ -1858,14 +1858,14 @@ gboolean file_data_get_mark(FileData *fd, gint n)
 	return !!(fd->marks & (1 << n));
 }
 
-guint file_data_get_marks(FileData *fd)
+guint FileData::file_data_get_marks(FileData *fd)
 {
 	gint i;
 	for (i = 0; i < FILEDATA_MARKS_SIZE; i++) file_data_get_mark(fd, i);
 	return fd->marks;
 }
 
-void file_data_set_mark(FileData *fd, gint n, gboolean value)
+void FileData::file_data_set_mark(FileData *fd, gint n, gboolean value)
 {
 	guint old;
 	if (!value == !file_data_get_mark(fd, n)) return;
@@ -1892,14 +1892,14 @@ void file_data_set_mark(FileData *fd, gint n, gboolean value)
 	file_data_send_notification(fd, NOTIFY_MARKS);
 }
 
-gboolean file_data_filter_marks(FileData *fd, guint filter)
+gboolean FileData::file_data_filter_marks(FileData *fd, guint filter)
 {
 	gint i;
 	for (i = 0; i < FILEDATA_MARKS_SIZE; i++) if (filter & (1 << i)) file_data_get_mark(fd, i);
 	return ((fd->marks & filter) == filter);
 }
 
-GList *file_data_filter_marks_list(GList *list, guint filter)
+GList *FileData::file_data_filter_marks_list(GList *list, guint filter)
 {
 	GList *work;
 
@@ -1921,7 +1921,7 @@ GList *file_data_filter_marks_list(GList *list, guint filter)
 	return list;
 }
 
-gboolean file_data_mark_to_selection(FileData *fd, gint mark, MarkToSelectionMode mode, gboolean selected)
+gboolean FileData::file_data_mark_to_selection(FileData *fd, gint mark, MarkToSelectionMode mode, gboolean selected)
 {
 	gint n = mark - 1;
 	gboolean mark_val = file_data_get_mark(fd, n);
@@ -1937,7 +1937,7 @@ gboolean file_data_mark_to_selection(FileData *fd, gint mark, MarkToSelectionMod
 	return selected; // arbitrary value, we shouldn't get here
 }
 
-void file_data_selection_to_mark(FileData *fd, gint mark, SelectionToMarkMode mode)
+void FileData::file_data_selection_to_mark(FileData *fd, gint mark, SelectionToMarkMode mode)
 {
 	gint n = mark - 1;
 
@@ -1949,12 +1949,12 @@ void file_data_selection_to_mark(FileData *fd, gint mark, SelectionToMarkMode mo
 		}
 }
 
-gboolean file_data_filter_file_filter(FileData *fd, GRegex *filter)
+gboolean FileData::file_data_filter_file_filter(FileData *fd, GRegex *filter)
 {
 	return g_regex_match(filter, fd->name, static_cast<GRegexMatchFlags>(0), nullptr);
 }
 
-GList *file_data_filter_file_filter_list(GList *list, GRegex *filter)
+GList *FileData::file_data_filter_file_filter_list(GList *list, GRegex *filter)
 {
 	GList *work;
 
@@ -1994,7 +1994,7 @@ static gboolean file_data_filter_class(FileData *fd, guint filter)
 	return FALSE;
 }
 
-GList *file_data_filter_class_list(GList *list, guint filter)
+GList *FileData::file_data_filter_class_list(GList *list, guint filter)
 {
 	GList *work;
 
@@ -2023,7 +2023,7 @@ static void file_data_notify_mark_func(gpointer, gpointer value, gpointer)
 	file_data_send_notification(fd, NOTIFY_MARKS);
 }
 
-gboolean file_data_register_mark_func(gint n, FileDataGetMarkFunc get_mark_func, FileDataSetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify)
+gboolean FileData::file_data_register_mark_func(gint n, FileDataGetMarkFunc get_mark_func, FileDataSetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify)
 {
 	if (n < 0 || n >= FILEDATA_MARKS_SIZE) return FALSE;
 
@@ -2043,7 +2043,7 @@ gboolean file_data_register_mark_func(gint n, FileDataGetMarkFunc get_mark_func,
         return TRUE;
 }
 
-void file_data_get_registered_mark_func(gint n, FileDataGetMarkFunc *get_mark_func, FileDataSetMarkFunc *set_mark_func, gpointer *data)
+void FileData::file_data_get_registered_mark_func(gint n, FileDataGetMarkFunc *get_mark_func, FileDataSetMarkFunc *set_mark_func, gpointer *data)
 {
 	if (get_mark_func) *get_mark_func = file_data_get_mark_func[n];
 	if (set_mark_func) *set_mark_func = file_data_set_mark_func[n];
@@ -2052,12 +2052,12 @@ void file_data_get_registered_mark_func(gint n, FileDataGetMarkFunc *get_mark_fu
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-gint file_data_get_user_orientation_unused(FileData *fd)
+gint FileData::file_data_get_user_orientation_unused(FileData *fd)
 {
 	return fd->user_orientation;
 }
 
-void file_data_set_user_orientation_unused(FileData *fd, gint value)
+void FileData::file_data_set_user_orientation_unused(FileData *fd, gint value)
 {
 	if (fd->user_orientation == value) return;
 
@@ -2075,7 +2075,7 @@ void file_data_set_user_orientation_unused(FileData *fd, gint value)
 
 
 /* return list of sidecar file extensions in a string */
-gchar *file_data_sc_list_to_string(FileData *fd)
+gchar *FileData::file_data_sc_list_to_string(FileData *fd)
 {
 	GList *work;
 	GString *result = g_string_new("");
@@ -2118,7 +2118,7 @@ gchar *file_data_sc_list_to_string(FileData *fd)
    UPDATE - file size, date or grouping has been changed
 */
 
-gboolean file_data_add_ci(FileData *fd, FileDataChangeType type, const gchar *src, const gchar *dest)
+gboolean FileData::file_data_add_ci(FileData *fd, FileDataChangeType type, const gchar *src, const gchar *dest)
 {
 	FileDataChangeInfo *fdci;
 
@@ -2162,7 +2162,7 @@ static void file_data_planned_change_remove(FileData *fd)
 }
 
 
-void file_data_free_ci(FileData *fd)
+void FileData::file_data_free_ci(FileData *fd)
 {
 	FileDataChangeInfo *fdci = fd->change;
 
@@ -2180,7 +2180,7 @@ void file_data_free_ci(FileData *fd)
 	fd->change = nullptr;
 }
 
-void file_data_set_regroup_when_finished(FileData *fd, gboolean enable)
+void FileData::file_data_set_regroup_when_finished(FileData *fd, gboolean enable)
 {
 	FileDataChangeInfo *fdci = fd->change;
 	if (!fdci) return;
@@ -2239,45 +2239,45 @@ static gboolean file_data_sc_check_ci(FileData *fd, FileDataChangeType type)
 }
 
 
-gboolean file_data_sc_add_ci_copy(FileData *fd, const gchar *dest_path)
+gboolean FileData::file_data_sc_add_ci_copy(FileData *fd, const gchar *dest_path)
 {
 	if (!file_data_sc_add_ci(fd, FILEDATA_CHANGE_COPY)) return FALSE;
 	file_data_sc_update_ci_copy(fd, dest_path);
 	return TRUE;
 }
 
-gboolean file_data_sc_add_ci_move(FileData *fd, const gchar *dest_path)
+gboolean FileData::file_data_sc_add_ci_move(FileData *fd, const gchar *dest_path)
 {
 	if (!file_data_sc_add_ci(fd, FILEDATA_CHANGE_MOVE)) return FALSE;
 	file_data_sc_update_ci_move(fd, dest_path);
 	return TRUE;
 }
 
-gboolean file_data_sc_add_ci_rename(FileData *fd, const gchar *dest_path)
+gboolean FileData::file_data_sc_add_ci_rename(FileData *fd, const gchar *dest_path)
 {
 	if (!file_data_sc_add_ci(fd, FILEDATA_CHANGE_RENAME)) return FALSE;
 	file_data_sc_update_ci_rename(fd, dest_path);
 	return TRUE;
 }
 
-gboolean file_data_sc_add_ci_delete(FileData *fd)
+gboolean FileData::file_data_sc_add_ci_delete(FileData *fd)
 {
 	return file_data_sc_add_ci(fd, FILEDATA_CHANGE_DELETE);
 }
 
-gboolean file_data_sc_add_ci_unspecified(FileData *fd, const gchar *dest_path)
+gboolean FileData::file_data_sc_add_ci_unspecified(FileData *fd, const gchar *dest_path)
 {
 	if (!file_data_sc_add_ci(fd, FILEDATA_CHANGE_UNSPECIFIED)) return FALSE;
 	file_data_sc_update_ci_unspecified(fd, dest_path);
 	return TRUE;
 }
 
-gboolean file_data_add_ci_write_metadata(FileData *fd)
+gboolean FileData::file_data_add_ci_write_metadata(FileData *fd)
 {
 	return file_data_add_ci(fd, FILEDATA_CHANGE_WRITE_METADATA, nullptr, nullptr);
 }
 
-void file_data_sc_free_ci(FileData *fd)
+void FileData::file_data_sc_free_ci(FileData *fd)
 {
 	GList *work;
 
@@ -2295,7 +2295,7 @@ void file_data_sc_free_ci(FileData *fd)
 		}
 }
 
-gboolean file_data_sc_add_ci_delete_list(GList *fd_list)
+gboolean FileData::file_data_sc_add_ci_delete_list(GList *fd_list)
 {
 	GList *work;
 	gboolean ret = TRUE;
@@ -2346,27 +2346,27 @@ static gboolean file_data_sc_add_ci_list_call_func(GList *fd_list, const gchar *
 	return TRUE;
 }
 
-gboolean file_data_sc_add_ci_copy_list(GList *fd_list, const gchar *dest)
+gboolean FileData::file_data_sc_add_ci_copy_list(GList *fd_list, const gchar *dest)
 {
 	return file_data_sc_add_ci_list_call_func(fd_list, dest, file_data_sc_add_ci_copy);
 }
 
-gboolean file_data_sc_add_ci_move_list(GList *fd_list, const gchar *dest)
+gboolean FileData::file_data_sc_add_ci_move_list(GList *fd_list, const gchar *dest)
 {
 	return file_data_sc_add_ci_list_call_func(fd_list, dest, file_data_sc_add_ci_move);
 }
 
-gboolean file_data_sc_add_ci_rename_list(GList *fd_list, const gchar *dest)
+gboolean FileData::file_data_sc_add_ci_rename_list(GList *fd_list, const gchar *dest)
 {
 	return file_data_sc_add_ci_list_call_func(fd_list, dest, file_data_sc_add_ci_rename);
 }
 
-gboolean file_data_sc_add_ci_unspecified_list(GList *fd_list, const gchar *dest)
+gboolean FileData::file_data_sc_add_ci_unspecified_list(GList *fd_list, const gchar *dest)
 {
 	return file_data_sc_add_ci_list_call_func(fd_list, dest, file_data_sc_add_ci_unspecified);
 }
 
-gboolean file_data_add_ci_write_metadata_list(GList *fd_list)
+gboolean FileData::file_data_add_ci_write_metadata_list(GList *fd_list)
 {
 	GList *work;
 	gboolean ret = TRUE;
@@ -2383,7 +2383,7 @@ gboolean file_data_add_ci_write_metadata_list(GList *fd_list)
 	return ret;
 }
 
-void file_data_free_ci_list(GList *fd_list)
+void FileData::file_data_free_ci_list(GList *fd_list)
 {
 	GList *work;
 
@@ -2397,7 +2397,7 @@ void file_data_free_ci_list(GList *fd_list)
 		}
 }
 
-void file_data_sc_free_ci_list(GList *fd_list)
+void FileData::file_data_sc_free_ci_list(GList *fd_list)
 {
 	GList *work;
 
@@ -2519,22 +2519,22 @@ static gboolean file_data_sc_check_update_ci(FileData *fd, const gchar *dest_pat
 	return TRUE;
 }
 
-gboolean file_data_sc_update_ci_copy(FileData *fd, const gchar *dest_path)
+gboolean FileData::file_data_sc_update_ci_copy(FileData *fd, const gchar *dest_path)
 {
 	return file_data_sc_check_update_ci(fd, dest_path, FILEDATA_CHANGE_COPY);
 }
 
-gboolean file_data_sc_update_ci_move(FileData *fd, const gchar *dest_path)
+gboolean FileData::file_data_sc_update_ci_move(FileData *fd, const gchar *dest_path)
 {
 	return file_data_sc_check_update_ci(fd, dest_path, FILEDATA_CHANGE_MOVE);
 }
 
-gboolean file_data_sc_update_ci_rename(FileData *fd, const gchar *dest_path)
+gboolean FileData::file_data_sc_update_ci_rename(FileData *fd, const gchar *dest_path)
 {
 	return file_data_sc_check_update_ci(fd, dest_path, FILEDATA_CHANGE_RENAME);
 }
 
-gboolean file_data_sc_update_ci_unspecified(FileData *fd, const gchar *dest_path)
+gboolean FileData::file_data_sc_update_ci_unspecified(FileData *fd, const gchar *dest_path)
 {
 	return file_data_sc_check_update_ci(fd, dest_path, FILEDATA_CHANGE_UNSPECIFIED);
 }
@@ -2558,17 +2558,17 @@ static gboolean file_data_sc_update_ci_list_call_func(GList *fd_list,
 	return ret;
 }
 
-gboolean file_data_sc_update_ci_move_list(GList *fd_list, const gchar *dest)
+gboolean FileData::file_data_sc_update_ci_move_list(GList *fd_list, const gchar *dest)
 {
 	return file_data_sc_update_ci_list_call_func(fd_list, dest, file_data_sc_update_ci_move);
 }
 
-gboolean file_data_sc_update_ci_copy_list(GList *fd_list, const gchar *dest)
+gboolean FileData::file_data_sc_update_ci_copy_list(GList *fd_list, const gchar *dest)
 {
 	return file_data_sc_update_ci_list_call_func(fd_list, dest, file_data_sc_update_ci_copy);
 }
 
-gboolean file_data_sc_update_ci_unspecified_list(GList *fd_list, const gchar *dest)
+gboolean FileData::file_data_sc_update_ci_unspecified_list(GList *fd_list, const gchar *dest)
 {
 	return file_data_sc_update_ci_list_call_func(fd_list, dest, file_data_sc_update_ci_unspecified);
 }
@@ -2579,7 +2579,7 @@ gboolean file_data_sc_update_ci_unspecified_list(GList *fd_list, const gchar *de
  * it should detect all possible problems with the planned operation
  */
 
-gint file_data_verify_ci(FileData *fd, GList *list)
+gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 {
 	gint ret = CHANGE_OK;
 	gchar *dir;
@@ -2825,7 +2825,7 @@ gint file_data_verify_ci(FileData *fd, GList *list)
 }
 
 
-gint file_data_sc_verify_ci(FileData *fd, GList *list)
+gint FileData::file_data_sc_verify_ci(FileData *fd, GList *list)
 {
 	GList *work;
 	gint ret;
@@ -2844,7 +2844,7 @@ gint file_data_sc_verify_ci(FileData *fd, GList *list)
 	return ret;
 }
 
-gchar *file_data_get_error_string(gint error)
+gchar *FileData::file_data_get_error_string(gint error)
 {
 	GString *result = g_string_new("");
 
@@ -2929,7 +2929,7 @@ gchar *file_data_get_error_string(gint error)
 	return g_string_free(result, FALSE);
 }
 
-gint file_data_verify_ci_list(GList *list, gchar **desc, gboolean with_sidecars)
+gint FileData::file_data_verify_ci_list(GList *list, gchar **desc, gboolean with_sidecars)
 {
 	GList *work;
 	gint all_errors = 0;
@@ -3032,7 +3032,7 @@ static gboolean file_data_perform_delete(FileData *fd)
 	return unlink_file(fd->path);
 }
 
-gboolean file_data_perform_ci(FileData *fd)
+gboolean FileData::file_data_perform_ci(FileData *fd)
 {
 	/** @FIXME When a directory that is a symbolic link is deleted,
 	 * at this point fd->change is null because no FileDataChangeInfo
@@ -3067,7 +3067,7 @@ gboolean file_data_perform_ci(FileData *fd)
 
 
 
-gboolean file_data_sc_perform_ci(FileData *fd)
+gboolean FileData::file_data_sc_perform_ci(FileData *fd)
 {
 	GList *work;
 	gboolean ret = TRUE;
@@ -3093,7 +3093,7 @@ gboolean file_data_sc_perform_ci(FileData *fd)
  * updates FileData structure according to FileDataChangeInfo
  */
 
-gboolean file_data_apply_ci(FileData *fd)
+gboolean FileData::file_data_apply_ci(FileData *fd)
 {
 	FileDataChangeType type = fd->change->type;
 
@@ -3124,7 +3124,7 @@ gboolean file_data_apply_ci(FileData *fd)
 	return TRUE;
 }
 
-gboolean file_data_sc_apply_ci(FileData *fd)
+gboolean FileData::file_data_sc_apply_ci(FileData *fd)
 {
 	GList *work;
 	FileDataChangeType type = fd->change->type;
@@ -3160,7 +3160,7 @@ static gboolean file_data_list_contains_whole_group(GList *list, FileData *fd)
 	return TRUE;
 }
 
-GList *file_data_process_groups_in_selection(GList *list, gboolean ungroup, GList **ungrouped_list)
+GList *FileData::file_data_process_groups_in_selection(GList *list, gboolean ungroup, GList **ungrouped_list)
 {
 	GList *out = nullptr;
 	GList *work = list;
@@ -3242,7 +3242,7 @@ static gint file_data_notify_sort(gconstpointer a, gconstpointer b)
 	return 0;
 }
 
-gboolean file_data_register_notify_func(FileDataNotifyFunc func, gpointer data, NotifyPriority priority)
+gboolean FileData::file_data_register_notify_func(FileDataNotifyFunc func, gpointer data, NotifyPriority priority)
 {
 	NotifyData *nd;
 	GList *work = notify_func_list;
@@ -3270,7 +3270,7 @@ gboolean file_data_register_notify_func(FileDataNotifyFunc func, gpointer data, 
 	return TRUE;
 }
 
-gboolean file_data_unregister_notify_func(FileDataNotifyFunc func, gpointer data)
+gboolean FileData::file_data_unregister_notify_func(FileDataNotifyFunc func, gpointer data)
 {
 	GList *work = notify_func_list;
 
@@ -3294,7 +3294,7 @@ gboolean file_data_unregister_notify_func(FileDataNotifyFunc func, gpointer data
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-gboolean file_data_send_notification_idle_cb_unused(gpointer data)
+gboolean FileData::file_data_send_notification_idle_cb_unused(gpointer data)
 {
 	auto *nid = (NotifyIdleData *)data;
 	GList *work = notify_func_list;
@@ -3312,7 +3312,7 @@ gboolean file_data_send_notification_idle_cb_unused(gpointer data)
 }
 #pragma GCC diagnostic pop
 
-void file_data_send_notification(FileData *fd, NotifyType type)
+void FileData::file_data_send_notification(FileData *fd, NotifyType type)
 {
 	GList *work = notify_func_list;
 
@@ -3350,7 +3350,7 @@ static gboolean realtime_monitor_cb(gpointer)
 	return TRUE;
 }
 
-gboolean file_data_register_real_time_monitor(FileData *fd)
+gboolean FileData::file_data_register_real_time_monitor(FileData *fd)
 {
 	gint count;
 
@@ -3374,7 +3374,7 @@ gboolean file_data_register_real_time_monitor(FileData *fd)
 	return TRUE;
 }
 
-gboolean file_data_unregister_real_time_monitor(FileData *fd)
+gboolean FileData::file_data_unregister_real_time_monitor(FileData *fd)
 {
 	gint count;
 
@@ -3428,7 +3428,7 @@ static void marks_get_files(gpointer key, gpointer value, gpointer userdata)
 		}
 }
 
-gboolean marks_list_load(const gchar *path)
+gboolean FileData::marks_list_load(const gchar *path)
 {
 	FILE *f;
 	gchar s_buf[1024];
@@ -3475,7 +3475,7 @@ gboolean marks_list_load(const gchar *path)
 	return TRUE;
 }
 
-gboolean marks_list_save(gchar *path, gboolean save)
+gboolean FileData::marks_list_save(gchar *path, gboolean save)
 {
 	SecureSaveInfo *ssi;
 	gchar *pathl;
@@ -3529,12 +3529,12 @@ static void marks_clear(gpointer key, gpointer value, gpointer)
 		}
 }
 
-void marks_clear_all()
+void FileData::marks_clear_all()
 {
 	g_hash_table_foreach(file_data_pool, marks_clear, nullptr);
 }
 
-void file_data_set_page_num(FileData *fd, gint page_num)
+void FileData::file_data_set_page_num(FileData *fd, gint page_num)
 {
 	if (fd->page_total > 1 && page_num < 0)
 		{
@@ -3551,7 +3551,7 @@ void file_data_set_page_num(FileData *fd, gint page_num)
 	file_data_send_notification(fd, NOTIFY_REREAD);
 }
 
-void file_data_inc_page_num(FileData *fd)
+void FileData::file_data_inc_page_num(FileData *fd)
 {
 	if (fd->page_total > 0 && fd->page_num < fd->page_total - 1)
 		{
@@ -3564,7 +3564,7 @@ void file_data_inc_page_num(FileData *fd)
 	file_data_send_notification(fd, NOTIFY_REREAD);
 }
 
-void file_data_dec_page_num(FileData *fd)
+void FileData::file_data_dec_page_num(FileData *fd)
 {
 	if (fd->page_num > 0)
 		{
@@ -3573,7 +3573,7 @@ void file_data_dec_page_num(FileData *fd)
 	file_data_send_notification(fd, NOTIFY_REREAD);
 }
 
-void file_data_set_page_total(FileData *fd, gint page_total)
+void FileData::file_data_set_page_total(FileData *fd, gint page_total)
 {
 	fd->page_total = page_total;
 }
