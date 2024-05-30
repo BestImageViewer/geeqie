@@ -950,27 +950,17 @@ static void pixbuf_copy_font(GdkPixbuf *src, gint sx, gint sy,
 				guint8 asub;
 
 				asub = a * sp[0] / 255;
-				*dp = (r * asub + *dp * (256-asub)) >> 8;
-				dp++;
+				dp[0] = (r * asub + dp[0] * (256-asub)) >> 8;
 				asub = a * sp[1] / 255;
-				*dp = (g * asub + *dp * (256-asub)) >> 8;
-				dp++;
+				dp[1] = (g * asub + dp[1] * (256-asub)) >> 8;
 				asub = a * sp[2] / 255;
-				*dp = (b * asub + *dp * (256-asub)) >> 8;
-				dp++;
+				dp[2] = (b * asub + dp[2] * (256-asub)) >> 8;
 
-				if (d_alpha)
-					{
-					*dp = MAX(*dp, a * ((sp[0] + sp[1] + sp[2]) / 3) / 255);
-					dp++;
-					}
-				}
-			else
-				{
-				dp += d_step;
+				if (d_alpha) dp[3] = MAX(dp[3], a * ((sp[0] + sp[1] + sp[2]) / 3) / 255);
 				}
 
 			sp += s_step;
+			dp += d_step;
 			}
 		}
 }
@@ -1301,17 +1291,12 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 	gdouble rx2;
 	gdouble ry2;
 	guchar *p_pix;
-	guchar *pp;
 	gint p_step;
 	gdouble slope;
 	gdouble x;
 	gdouble y;
 	gint px;
 	gint py;
-	gint cx1;
-	gint cy1;
-	gint cx2;
-	gint cy2;
 
 	if (!pb) return;
 
@@ -1322,16 +1307,21 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 	                    x1, y1, x2, y2,
 	                    rx1, ry1, rx2, ry2)) return;
 
-	cx1 = rx;
-	cy1 = ry;
-	cx2 = rx + rw;
-	cy2 = ry + rh;
-
 	has_alpha = gdk_pixbuf_get_has_alpha(pb);
 	prs = gdk_pixbuf_get_rowstride(pb);
 	p_pix = gdk_pixbuf_get_pixels(pb);
 
 	p_step = (has_alpha) ? 4 : 3;
+
+	const auto fill_pixel = [rx, ry, rw, rh, p_pix, prs, p_step, r, g, b, a](gint x, gint y)
+	{
+		if (x < rx || x >= rx + rw || y < ry || y >= ry + rh) return;
+
+		guchar *pp = p_pix + y * prs + x * p_step;
+		pp[0] = (r * a + pp[0] * (256-a)) >> 8;
+		pp[1] = (g * a + pp[1] * (256-a)) >> 8;
+		pp[2] = (b * a + pp[2] * (256-a)) >> 8;
+	};
 
 	// We draw the clipped line segment along the longer axis first, and
 	// allow the shorter axis to follow.  This is because our raster line segment
@@ -1352,15 +1342,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 			px = static_cast<gint>(x + 0.5);
 			py = static_cast<gint>(ry1 + (x - rx1) * slope + 0.5);
 
-			if (px >=  cx1 && px < cx2 && py >= cy1 && py < cy2)
-				{
-				pp = p_pix + py * prs + px * p_step;
-				*pp = (r * a + *pp * (256-a)) >> 8;
-				pp++;
-				*pp = (g * a + *pp * (256-a)) >> 8;
-				pp++;
-				*pp = (b * a + *pp * (256-a)) >> 8;
-				}
+			fill_pixel(px, py);
 			}
 		}
 	else
@@ -1378,15 +1360,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 			px = static_cast<gint>(rx1 + (y - ry1) * slope + 0.5);
 			py = static_cast<gint>(y + 0.5);
 
-			if (px >=  cx1 && px < cx2 && py >= cy1 && py < cy2)
-				{
-				pp = p_pix + py * prs + px * p_step;
-				*pp = (r * a + *pp * (256-a)) >> 8;
-				pp++;
-				*pp = (g * a + *pp * (256-a)) >> 8;
-				pp++;
-				*pp = (b * a + *pp * (256-a)) >> 8;
-				}
+			fill_pixel(px, py);
 			}
 		}
 }
