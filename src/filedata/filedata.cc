@@ -908,7 +908,7 @@ void FileData::file_data_lock_list(GList *list)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 		work = work->next;
-		file_data_lock(fd);
+		::file_data_lock(fd);
 		}
 }
 
@@ -926,7 +926,7 @@ void FileData::file_data_unlock_list(GList *list)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 		work = work->next;
-		file_data_unlock(fd);
+		::file_data_unlock(fd);
 		}
 }
 
@@ -1153,7 +1153,7 @@ void FileData::file_data_disable_grouping_list(GList *fd_list, gboolean disable)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 
-		file_data_disable_grouping(fd, disable);
+		::file_data_disable_grouping(fd, disable);
 		work = work->next;
 		}
 }
@@ -1725,7 +1725,7 @@ GList *FileData::filelist_recursive(FileData *dir_fd)
 	GList *list;
 	GList *d;
 
-	if (!filelist_read(dir_fd, &list, &d)) return nullptr;
+	if (!::filelist_read(dir_fd, &list, &d)) return nullptr;
 	list = filelist_filter(list, FALSE);
 	list = filelist_sort_path(list);
 
@@ -1742,7 +1742,7 @@ GList *FileData::filelist_recursive_full(FileData *dir_fd, SortType method, gboo
 	GList *list;
 	GList *d;
 
-	if (!filelist_read(dir_fd, &list, &d)) return nullptr;
+	if (!::filelist_read(dir_fd, &list, &d)) return nullptr;
 	list = filelist_filter(list, FALSE);
 	list = filelist_sort_full(list, method, ascend, case_sensitive, reinterpret_cast<GCompareFunc>(filelist_sort_file_cb));
 
@@ -1910,7 +1910,7 @@ GList *FileData::file_data_filter_marks_list(GList *list, guint filter)
 		GList *link = work;
 		work = work->next;
 
-		if (!file_data_filter_marks(fd, filter))
+		if (!::file_data_filter_marks(fd, filter))
 			{
 			list = g_list_remove_link(list, link);
 			file_data_unref(fd);
@@ -1965,7 +1965,7 @@ GList *FileData::file_data_filter_file_filter_list(GList *list, GRegex *filter)
 		GList *link = work;
 		work = work->next;
 
-		if (!file_data_filter_file_filter(fd, filter))
+		if (!::file_data_filter_file_filter(fd, filter))
 			{
 			list = g_list_remove_link(list, link);
 			file_data_unref(fd);
@@ -2305,7 +2305,7 @@ gboolean FileData::file_data_sc_add_ci_delete_list(GList *fd_list)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 
-		if (!file_data_sc_add_ci_delete(fd)) ret = FALSE;
+		if (!::file_data_sc_add_ci_delete(fd)) ret = FALSE;
 		work = work->next;
 		}
 
@@ -2348,22 +2348,22 @@ static gboolean file_data_sc_add_ci_list_call_func(GList *fd_list, const gchar *
 
 gboolean FileData::file_data_sc_add_ci_copy_list(GList *fd_list, const gchar *dest)
 {
-	return file_data_sc_add_ci_list_call_func(fd_list, dest, file_data_sc_add_ci_copy);
+	return file_data_sc_add_ci_list_call_func(fd_list, dest, ::file_data_sc_add_ci_copy);
 }
 
 gboolean FileData::file_data_sc_add_ci_move_list(GList *fd_list, const gchar *dest)
 {
-	return file_data_sc_add_ci_list_call_func(fd_list, dest, file_data_sc_add_ci_move);
+	return file_data_sc_add_ci_list_call_func(fd_list, dest, ::file_data_sc_add_ci_move);
 }
 
 gboolean FileData::file_data_sc_add_ci_rename_list(GList *fd_list, const gchar *dest)
 {
-	return file_data_sc_add_ci_list_call_func(fd_list, dest, file_data_sc_add_ci_rename);
+	return file_data_sc_add_ci_list_call_func(fd_list, dest, ::file_data_sc_add_ci_rename);
 }
 
 gboolean FileData::file_data_sc_add_ci_unspecified_list(GList *fd_list, const gchar *dest)
 {
-	return file_data_sc_add_ci_list_call_func(fd_list, dest, file_data_sc_add_ci_unspecified);
+	return file_data_sc_add_ci_list_call_func(fd_list, dest, ::file_data_sc_add_ci_unspecified);
 }
 
 gboolean FileData::file_data_add_ci_write_metadata_list(GList *fd_list)
@@ -2376,7 +2376,7 @@ gboolean FileData::file_data_add_ci_write_metadata_list(GList *fd_list)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 
-		if (!file_data_add_ci_write_metadata(fd)) ret = FALSE;
+		if (!::file_data_add_ci_write_metadata(fd)) ret = FALSE;
 		work = work->next;
 		}
 
@@ -2392,7 +2392,7 @@ void FileData::file_data_free_ci_list(GList *fd_list)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 
-		file_data_free_ci(fd);
+		::file_data_free_ci(fd);
 		work = work->next;
 		}
 }
@@ -2406,7 +2406,7 @@ void FileData::file_data_sc_free_ci_list(GList *fd_list)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 
-		file_data_sc_free_ci(fd);
+		::file_data_sc_free_ci(fd);
 		work = work->next;
 		}
 }
@@ -2560,17 +2560,17 @@ static gboolean file_data_sc_update_ci_list_call_func(GList *fd_list,
 
 gboolean FileData::file_data_sc_update_ci_move_list(GList *fd_list, const gchar *dest)
 {
-	return file_data_sc_update_ci_list_call_func(fd_list, dest, file_data_sc_update_ci_move);
+	return file_data_sc_update_ci_list_call_func(fd_list, dest, ::file_data_sc_update_ci_move);
 }
 
 gboolean FileData::file_data_sc_update_ci_copy_list(GList *fd_list, const gchar *dest)
 {
-	return file_data_sc_update_ci_list_call_func(fd_list, dest, file_data_sc_update_ci_copy);
+	return file_data_sc_update_ci_list_call_func(fd_list, dest, ::file_data_sc_update_ci_copy);
 }
 
 gboolean FileData::file_data_sc_update_ci_unspecified_list(GList *fd_list, const gchar *dest)
 {
-	return file_data_sc_update_ci_list_call_func(fd_list, dest, file_data_sc_update_ci_unspecified);
+	return file_data_sc_update_ci_list_call_func(fd_list, dest, ::file_data_sc_update_ci_unspecified);
 }
 
 
@@ -2952,7 +2952,7 @@ gint FileData::file_data_verify_ci_list(GList *list, gchar **desc, gboolean with
 		fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
-		error = with_sidecars ? file_data_sc_verify_ci(fd, list) : file_data_verify_ci(fd, list);
+		error = with_sidecars ? ::file_data_sc_verify_ci(fd, list) : ::file_data_verify_ci(fd, list);
 		all_errors |= error;
 		common_errors &= error;
 
@@ -3175,7 +3175,7 @@ GList *FileData::file_data_process_groups_in_selection(GList *list, gboolean ung
 
 			if (!file_data_list_contains_whole_group(list, fd))
 				{
-				file_data_disable_grouping(fd, TRUE);
+				::file_data_disable_grouping(fd, TRUE);
 				if (ungrouped_list)
 					{
 					*ungrouped_list = g_list_prepend(*ungrouped_list, file_data_ref(fd));
@@ -3464,7 +3464,7 @@ gboolean FileData::marks_list_load(const gchar *path)
 					gint mark_no = 1 << n;
 					if (atoi(marks_value) & mark_no)
 						{
-						file_data_set_mark(fd, n , 1);
+						::file_data_set_mark(fd, n , 1);
 						}
 					n++;
 					}
