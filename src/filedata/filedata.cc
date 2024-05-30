@@ -265,7 +265,7 @@ gboolean FileData::file_data_check_changed_files(FileData *fd)
 		/* file_data_disconnect_sidecar_file might delete the file,
 		   we have to keep the reference to prevent this */
 		sidecars = filelist_copy(fd->sidecar_files);
-		file_data_ref(fd);
+		::file_data_ref(fd);
 		work = sidecars;
 		while (work)
 			{
@@ -279,7 +279,7 @@ gboolean FileData::file_data_check_changed_files(FileData *fd)
 		filelist_free(sidecars);
 		file_data_increment_version(fd);
 		file_data_send_notification(fd, NOTIFY_REREAD);
-		file_data_unref(fd);
+		::file_data_unref(fd);
 		}
 	else
 		{
@@ -505,7 +505,7 @@ FileData *FileData::file_data_new_simple(const gchar *path_utf8)
 	if (!fd) fd = file_data_new(path_utf8, &st, TRUE);
 	if (fd)
 		{
-		file_data_ref(fd);
+		::file_data_ref(fd);
 		}
 
 	return fd;
@@ -696,11 +696,13 @@ FileData *FileData::file_data_new_dir(const gchar *path_utf8)
  */
 
 #ifdef DEBUG_FILEDATA
-FileData *FileData::file_data_ref_debug(const gchar *file, gint line, FileData *fd)
+FileData *FileData::file_data_ref(const gchar *file, gint line)
 #else
-FileData *FileData::file_data_ref(FileData *fd)
+FileData *FileData::file_data_ref()
 #endif
 {
+	FileData *fd = this;
+        // TODO(xsdg): Do null checks at call-sites, if necessary.  The following is a no-op.
 	if (fd == nullptr) return nullptr;
 	if (fd->magick != FD_MAGICK)
 #ifdef DEBUG_FILEDATA
@@ -829,11 +831,12 @@ static void file_data_consider_free(FileData *fd)
 }
 
 #ifdef DEBUG_FILEDATA
-void FileData::file_data_unref_debug(const gchar *file, gint line, FileData *fd)
+void FileData::file_data_unref(const gchar *file, gint line)
 #else
-void FileData::file_data_unref(FileData *fd)
+void FileData::file_data_unref()
 #endif
 {
+	FileData *fd = this;  // TODO(xsdg): clean this up across the board.
 	if (fd == nullptr) return;
 	if (fd->magick != FD_MAGICK)
 #ifdef DEBUG_FILEDATA
@@ -1114,10 +1117,10 @@ void FileData::file_data_disable_grouping(FileData *fd, gboolean disable)
 		{
 		if (fd->parent)
 			{
-			FileData *parent = file_data_ref(fd->parent);
+			FileData *parent = ::file_data_ref(fd->parent);
 			file_data_disconnect_sidecar_file(parent, fd);
 			file_data_send_notification(parent, NOTIFY_GROUPING);
-			file_data_unref(parent);
+			::file_data_unref(parent);
 			}
 		else if (fd->sidecar_files)
 			{
@@ -1548,7 +1551,7 @@ FileData *FileData::file_data_new_group(const gchar *path_utf8)
 	if (!fd) fd = file_data_new(path_utf8, &st, TRUE);
 	if (fd)
 		{
-		file_data_ref(fd);
+		::file_data_ref(fd);
 		}
 
 	filelist_free(files);
@@ -1564,7 +1567,7 @@ void FileData::filelist_free(GList *list)
 	work = list;
 	while (work)
 		{
-		file_data_unref((FileData *)work->data);
+		::file_data_unref((FileData *)work->data);
 		work = work->next;
 		}
 
@@ -1580,7 +1583,7 @@ GList *FileData::filelist_copy(GList *list)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 
-		new_list = g_list_prepend(new_list, file_data_ref(fd));
+		new_list = g_list_prepend(new_list, ::file_data_ref(fd));
 		}
 
 	return g_list_reverse(new_list);
@@ -1644,7 +1647,7 @@ GList *FileData::filelist_filter(GList *list, gboolean is_dir_list)
 						       strcmp(name, GQ_CACHE_LOCAL_METADATA) == 0)) )
 			{
 			list = g_list_remove_link(list, link);
-			file_data_unref(fd);
+			::file_data_unref(fd);
 			g_list_free(link);
 			}
 		}
@@ -1849,11 +1852,11 @@ gboolean FileData::file_data_get_mark(FileData *fd, gint n)
 		fd->valid_marks |= (1 << n);
 		if (old && !fd->marks) /* keep files with non-zero marks in memory */
 			{
-			file_data_unref(fd);
+			::file_data_unref(fd);
 			}
 		else if (!old && fd->marks)
 			{
-			file_data_ref(fd);
+			::file_data_ref(fd);
 			}
 		}
 
@@ -1883,11 +1886,11 @@ void FileData::file_data_set_mark(FileData *fd, gint n, gboolean value)
 
 	if (old && !fd->marks) /* keep files with non-zero marks in memory */
 		{
-		file_data_unref(fd);
+		::file_data_unref(fd);
 		}
 	else if (!old && fd->marks)
 		{
-		file_data_ref(fd);
+		::file_data_ref(fd);
 		}
 
 	file_data_increment_version(fd);
@@ -1915,7 +1918,7 @@ GList *FileData::file_data_filter_marks_list(GList *list, guint filter)
 		if (!::file_data_filter_marks(fd, filter))
 			{
 			list = g_list_remove_link(list, link);
-			file_data_unref(fd);
+			::file_data_unref(fd);
 			g_list_free(link);
 			}
 		}
@@ -1970,7 +1973,7 @@ GList *FileData::file_data_filter_file_filter_list(GList *list, GRegex *filter)
 		if (!::file_data_filter_file_filter(fd, filter))
 			{
 			list = g_list_remove_link(list, link);
-			file_data_unref(fd);
+			::file_data_unref(fd);
 			g_list_free(link);
 			}
 		}
@@ -2010,7 +2013,7 @@ GList *FileData::file_data_filter_class_list(GList *list, guint filter)
 		if (!file_data_filter_class(fd, filter))
 			{
 			list = g_list_remove_link(list, link);
-			file_data_unref(fd);
+			::file_data_unref(fd);
 			g_list_free(link);
 			}
 		}
@@ -2152,7 +2155,7 @@ static void file_data_planned_change_remove(FileData *fd)
 			{
 			DEBUG_1("planned change: removing %s -> %s", fd->change->dest, fd->path);
 			g_hash_table_remove(file_data_planned_change_hash, fd->change->dest);
-			file_data_unref(fd);
+			::file_data_unref(fd);
 			if (g_hash_table_size(file_data_planned_change_hash) == 0)
 				{
 				g_hash_table_destroy(file_data_planned_change_hash);
@@ -2433,7 +2436,7 @@ static void file_data_update_planned_change_hash(FileData *fd, const gchar *old_
 			{
 			DEBUG_1("planned change: removing %s -> %s", old_path, fd->path);
 			g_hash_table_remove(file_data_planned_change_hash, old_path);
-			file_data_unref(fd);
+			::file_data_unref(fd);
 			}
 
 		ofd = static_cast<FileData *>(g_hash_table_lookup(file_data_planned_change_hash, new_path));
@@ -2443,11 +2446,11 @@ static void file_data_update_planned_change_hash(FileData *fd, const gchar *old_
 				{
 				DEBUG_1("planned change: replacing %s -> %s", new_path, ofd->path);
 				g_hash_table_remove(file_data_planned_change_hash, new_path);
-				file_data_unref(ofd);
+				::file_data_unref(ofd);
 				}
 
 			DEBUG_1("planned change: inserting %s -> %s", new_path, fd->path);
-			file_data_ref(fd);
+			::file_data_ref(fd);
 			g_hash_table_insert(file_data_planned_change_hash, new_path, fd);
 			}
 		}
@@ -3180,7 +3183,7 @@ GList *FileData::file_data_process_groups_in_selection(GList *list, gboolean ung
 				::file_data_disable_grouping(fd, TRUE);
 				if (ungrouped_list)
 					{
-					*ungrouped_list = g_list_prepend(*ungrouped_list, file_data_ref(fd));
+					*ungrouped_list = g_list_prepend(*ungrouped_list, ::file_data_ref(fd));
 					}
 				}
 			}
@@ -3197,7 +3200,7 @@ GList *FileData::file_data_process_groups_in_selection(GList *list, gboolean ung
 		if (!fd->parent ||
 		    (!ungroup && !file_data_list_contains_whole_group(list, fd)))
 			{
-			out = g_list_prepend(out, file_data_ref(fd));
+			out = g_list_prepend(out, ::file_data_ref(fd));
 			}
 		}
 
@@ -3308,7 +3311,7 @@ gboolean FileData::file_data_send_notification_idle_cb_unused(gpointer data)
 		nd->func(nid->fd, nid->type, nd->data);
 		work = work->next;
 		}
-	file_data_unref(nid->fd);
+	::file_data_unref(nid->fd);
 	g_free(nid);
 	return FALSE;
 }
@@ -3327,7 +3330,7 @@ void FileData::file_data_send_notification(FileData *fd, NotifyType type)
 		}
     /*
 	NotifyIdleData *nid = g_new0(NotifyIdleData, 1);
-	nid->fd = file_data_ref(fd);
+	nid->fd = ::file_data_ref(fd);
 	nid->type = type;
 	g_idle_add_full(G_PRIORITY_HIGH, file_data_send_notification_idle_cb, nid, NULL);
     */
@@ -3356,7 +3359,7 @@ gboolean FileData::file_data_register_real_time_monitor(FileData *fd)
 {
 	gint count;
 
-	file_data_ref(fd);
+	::file_data_ref(fd);
 
 	if (!file_data_monitor_pool)
 		file_data_monitor_pool = g_hash_table_new(g_direct_hash, g_direct_equal);
@@ -3395,7 +3398,7 @@ gboolean FileData::file_data_unregister_real_time_monitor(FileData *fd)
 	else
 		g_hash_table_insert(file_data_monitor_pool, fd, GINT_TO_POINTER(count));
 
-	file_data_unref(fd);
+	::file_data_unref(fd);
 
 	if (g_hash_table_size(file_data_monitor_pool) == 0)
 		{
@@ -3459,7 +3462,7 @@ gboolean FileData::marks_list_load(const gchar *path)
 			if (isfile(file_path))
 				{
 				FileData *fd = file_data_new_no_grouping(file_path);
-				file_data_ref(fd);
+				::file_data_ref(fd);
 				gint n = 0;
 				while (n <= 9)
 					{

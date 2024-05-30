@@ -71,31 +71,32 @@ FileData *file_data_new_simple(const gchar *path_utf8)
 	return FileData::file_data_new_simple(path_utf8);
 }
 
-
 #ifdef DEBUG_FILEDATA
-FileData *file_data_ref_debug(const gchar *file, gint line, FileData *fd)
+
+FileData *file_data_ref(FileData *fd, const gchar *file, gint line)
 {
 	if (fd == nullptr) return nullptr;
-	return fd->file_data_ref_debug(file, line, fd);
+	return fd->file_data_ref(file, line);
 }
 
-void file_data_unref_debug(const gchar *file, gint line, FileData *fd)
+void file_data_unref(FileData *fd, const gchar *file, gint line)
 {
 	if (fd == nullptr) return;
-	fd->file_data_unref_debug(file, line, fd);
+	fd->file_data_unref(file, line);
 }
 
 #else
+
 FileData *file_data_ref(FileData *fd)
 {
 	if (fd == nullptr) return nullptr;
-	return fd->file_data_ref(fd);
+	return fd->file_data_ref();
 }
 
 void file_data_unref(FileData *fd)
 {
 	if (fd == nullptr) return;
-	fd->file_data_unref(fd);
+	fd->file_data_unref();
 }
 
 #endif

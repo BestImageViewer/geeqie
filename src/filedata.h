@@ -158,13 +158,11 @@ class FileData {
 	static FileData *file_data_new_simple(const gchar *path_utf8);
 
 #ifdef DEBUG_FILEDATA
-	FileData *file_data_ref_debug(const gchar *file, gint line, FileData *fd);
-	void file_data_unref_debug(const gchar *file, gint line, FileData *fd);
-	#define file_data_ref(fd) file_data_ref_debug(__FILE__, __LINE__, fd)
-	#define file_data_unref(fd) file_data_unref_debug(__FILE__, __LINE__, fd)
+	FileData *file_data_ref(const gchar *file = __builtin_FILE(), gint line = __builtin_LINE());
+	void file_data_unref(const gchar *file = __builtin_FILE(), gint line = __builtin_LINE());
 #else
-	FileData *file_data_ref(FileData *fd);
-	void file_data_unref(FileData *fd);
+	FileData *file_data_ref();
+	void file_data_unref();
 #endif
 
 	void file_data_lock(FileData *fd);
@@ -331,10 +329,8 @@ FileData *file_data_new_dir(const gchar *path_utf8);
 FileData *file_data_new_simple(const gchar *path_utf8);
 
 #ifdef DEBUG_FILEDATA
-FileData *file_data_ref_debug(const gchar *file, gint line, FileData *fd);
-void file_data_unref_debug(const gchar *file, gint line, FileData *fd);
-#define file_data_ref(fd) file_data_ref_debug(__FILE__, __LINE__, fd)
-#define file_data_unref(fd) file_data_unref_debug(__FILE__, __LINE__, fd)
+FileData *file_data_ref(FileData *fd, const gchar *file = __builtin_FILE(), gint line = __builtin_LINE());
+void file_data_unref(FileData *fd, const gchar *file = __builtin_FILE(), gint line = __builtin_LINE());
 #else
 FileData *file_data_ref(FileData *fd);
 void file_data_unref(FileData *fd);
