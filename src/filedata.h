@@ -176,7 +176,6 @@ class FileData {
 
 	void file_data_increment_version(FileData *fd);
 
-	gboolean file_data_add_change_info(FileData *fd, FileDataChangeType type, const gchar *src, const gchar *dest);
 	void file_data_change_info_free(FileDataChangeInfo *fdci, FileData *fd);
 
 	void file_data_disable_grouping(FileData *fd, gboolean disable);
@@ -238,6 +237,7 @@ class FileData {
 	static gboolean file_data_sc_add_ci_move_list(GList *fd_list, const gchar *dest);
 	static gboolean file_data_sc_add_ci_rename_list(GList *fd_list, const gchar *dest);
 	static gboolean file_data_sc_add_ci_unspecified_list(GList *fd_list, const gchar *dest);
+	gboolean file_data_add_ci_write_metadata(FileData *fd);
 	static gboolean file_data_add_ci_write_metadata_list(GList *fd_list);
 
 	static gboolean file_data_sc_update_ci_copy_list(GList *fd_list, const gchar *dest);
@@ -349,7 +349,6 @@ gboolean file_data_check_changed_files(FileData *fd);
 
 void file_data_increment_version(FileData *fd);
 
-gboolean file_data_add_change_info(FileData *fd, FileDataChangeType type, const gchar *src, const gchar *dest);
 void file_data_change_info_free(FileDataChangeInfo *fdci, FileData *fd);
 
 void file_data_disable_grouping(FileData *fd, gboolean disable);
@@ -411,6 +410,7 @@ gboolean file_data_sc_add_ci_copy_list(GList *fd_list, const gchar *dest);
 gboolean file_data_sc_add_ci_move_list(GList *fd_list, const gchar *dest);
 gboolean file_data_sc_add_ci_rename_list(GList *fd_list, const gchar *dest);
 gboolean file_data_sc_add_ci_unspecified_list(GList *fd_list, const gchar *dest);
+gboolean file_data_add_ci_write_metadata(FileData *fd);
 gboolean file_data_add_ci_write_metadata_list(GList *fd_list);
 
 gboolean file_data_sc_update_ci_copy_list(GList *fd_list, const gchar *dest);

@@ -135,11 +135,6 @@ void file_data_increment_version(FileData *fd)
 }
 
 
-gboolean file_data_add_change_info(FileData *fd, FileDataChangeType type, const gchar *src, const gchar *dest)
-{
-	return fd->file_data_add_change_info(fd, type, src, dest);
-}
-
 void file_data_change_info_free(FileDataChangeInfo *fdci, FileData *fd)
 {
 	fd->file_data_change_info_free(fdci, fd);
@@ -371,6 +366,11 @@ gboolean file_data_sc_add_ci_rename_list(GList *fd_list, const gchar *dest)
 gboolean file_data_sc_add_ci_unspecified_list(GList *fd_list, const gchar *dest)
 {
 	return FileData::file_data_sc_add_ci_unspecified_list(fd_list, dest);
+}
+
+gboolean file_data_add_ci_write_metadata(FileData *fd)
+{
+	return fd->file_data_add_ci_write_metadata(fd);
 }
 
 gboolean file_data_add_ci_write_metadata_list(GList *fd_list)
