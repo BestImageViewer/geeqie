@@ -2768,84 +2768,84 @@ msgid "Lens"
 msgstr "Šošovky"
 
 # src/dupe.cc:67 src/dupe.cc:1449
-#: src/filedata.cc:134
+#: src/filedata/filedata.cc:134
 #, c-format
 msgid "%d bytes"
 msgstr "%d bajtov"
 
-#: src/filedata.cc:138
+#: src/filedata/filedata.cc:138
 #, c-format
 msgid "%.1f KiB"
 msgstr "%.1f KiB"
 
-#: src/filedata.cc:142
+#: src/filedata/filedata.cc:142
 #, c-format
 msgid "%.1f MiB"
 msgstr "%.1f MiB"
 
-#: src/filedata.cc:147
+#: src/filedata/filedata.cc:147
 #, c-format
 msgid "%.1f GiB"
 msgstr "%.1f GiB"
 
-#: src/filedata.cc:2826
+#: src/filedata/filedata.cc:2826
 msgid "file or directory does not exist"
 msgstr "súbor alebo adresár neexistuje"
 
 # src/filelist.c:814
-#: src/filedata.cc:2832
+#: src/filedata/filedata.cc:2832
 msgid "destination already exists"
 msgstr "cieľ už existuje"
 
-#: src/filedata.cc:2838
+#: src/filedata/filedata.cc:2838
 msgid "destination can't be overwritten"
 msgstr "cieľové umiestnenie sa nedá prepísať"
 
-#: src/filedata.cc:2844
+#: src/filedata/filedata.cc:2844
 msgid "destination directory is not writable"
 msgstr "do cieľového adresára nie je možné zapisovať"
 
-#: src/filedata.cc:2850
+#: src/filedata/filedata.cc:2850
 msgid "destination directory does not exist"
 msgstr "cieľový adresár neexistuje"
 
-#: src/filedata.cc:2856
+#: src/filedata/filedata.cc:2856
 msgid "source directory is not writable"
 msgstr "do zdrojového adresára nie je možné zapisovať"
 
-#: src/filedata.cc:2862
+#: src/filedata/filedata.cc:2862
 msgid "no read permission"
 msgstr "chýbajúce práva na čítanie"
 
-#: src/filedata.cc:2868
+#: src/filedata/filedata.cc:2868
 msgid "file is readonly"
 msgstr "súbor je určený len na čítanie"
 
-#: src/filedata.cc:2874
+#: src/filedata/filedata.cc:2874
 msgid "destination already exists and will be overwritten"
 msgstr "cieľ už existuje a bude prepísaný"
 
 # src/utilops.cc:451
-#: src/filedata.cc:2880
+#: src/filedata/filedata.cc:2880
 msgid "source and destination are the same"
 msgstr "zdroj a cieľ sú totožné"
 
 # src/utilops.cc:451
-#: src/filedata.cc:2886
+#: src/filedata/filedata.cc:2886
 msgid "source and destination have different extension"
 msgstr "zdroj a cieľ majú rozdielne prípony"
 
-#: src/filedata.cc:2892
+#: src/filedata/filedata.cc:2892
 msgid "there are unsaved metadata changes for the file"
 msgstr "metadáta súboru čakajú na uloženie"
 
 # src/utilops.cc:451
-#: src/filedata.cc:2898
+#: src/filedata/filedata.cc:2898
 msgid "another destination file has the same filename"
 msgstr "iný cieľový súbor má rovnaké meno"
 
 # src/ui-tabcomp.cc:171
-#: src/filedata.cc:3460
+#: src/filedata/filedata.cc:3460
 #, c-format
 msgid "Error: Unable to write marks lists to: %s\n"
 msgstr "Chyba: Nemožno zapísať zoznamy značiek do: %s\n"

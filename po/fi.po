@@ -2925,87 +2925,87 @@ msgid "Lens"
 msgstr ""
 
 # src/dupe.cc:67 src/dupe.cc:1449
-#: src/filedata.cc:134
+#: src/filedata/filedata.cc:134
 #, c-format
 msgid "%d bytes"
 msgstr "%d tavua"
 
-#: src/filedata.cc:138
+#: src/filedata/filedata.cc:138
 #, fuzzy, c-format
 msgid "%.1f KiB"
 msgstr "%.1f kt"
 
-#: src/filedata.cc:142
+#: src/filedata/filedata.cc:142
 #, fuzzy, c-format
 msgid "%.1f MiB"
 msgstr "%.1f Mt"
 
-#: src/filedata.cc:147
+#: src/filedata/filedata.cc:147
 #, fuzzy, c-format
 msgid "%.1f GiB"
 msgstr "%.1f Gt"
 
-#: src/filedata.cc:2826
+#: src/filedata/filedata.cc:2826
 msgid "file or directory does not exist"
 msgstr ""
 
 # src/filelist.c:816
-#: src/filedata.cc:2832
+#: src/filedata/filedata.cc:2832
 #, fuzzy
 msgid "destination already exists"
 msgstr "Tiedosto %s on jo olemassa."
 
-#: src/filedata.cc:2838
+#: src/filedata/filedata.cc:2838
 msgid "destination can't be overwritten"
 msgstr ""
 
-#: src/filedata.cc:2844
+#: src/filedata/filedata.cc:2844
 msgid "destination directory is not writable"
 msgstr ""
 
-#: src/filedata.cc:2850
+#: src/filedata/filedata.cc:2850
 msgid "destination directory does not exist"
 msgstr ""
 
-#: src/filedata.cc:2856
+#: src/filedata/filedata.cc:2856
 msgid "source directory is not writable"
 msgstr ""
 
-#: src/filedata.cc:2862
+#: src/filedata/filedata.cc:2862
 #, fuzzy
 msgid "no read permission"
 msgstr "(ei lukuoikeutta) %s tavua"
 
-#: src/filedata.cc:2868
+#: src/filedata/filedata.cc:2868
 msgid "file is readonly"
 msgstr ""
 
-#: src/filedata.cc:2874
+#: src/filedata/filedata.cc:2874
 msgid "destination already exists and will be overwritten"
 msgstr ""
 
 # src/utilops.cc:451
-#: src/filedata.cc:2880
+#: src/filedata/filedata.cc:2880
 #, fuzzy
 msgid "source and destination are the same"
 msgstr "Lähde ja kohde ovat samat, toiminto peruutettu."
 
 # src/utilops.cc:451
-#: src/filedata.cc:2886
+#: src/filedata/filedata.cc:2886
 #, fuzzy
 msgid "source and destination have different extension"
 msgstr "Lähde ja kohde ovat samat, toiminto peruutettu."
 
-#: src/filedata.cc:2892
+#: src/filedata/filedata.cc:2892
 msgid "there are unsaved metadata changes for the file"
 msgstr ""
 
-#: src/filedata.cc:2898
+#: src/filedata/filedata.cc:2898
 msgid "another destination file has the same filename"
 msgstr ""
 
 # src/ui-tabcomp.cc:171
-#: src/filedata.cc:3460
+#: src/filedata/filedata.cc:3460
 #, fuzzy, c-format
 msgid "Error: Unable to write marks lists to: %s\n"
 msgstr "Historialistojen kirjoitus ei onnistunut kohteeseen: %s\n"

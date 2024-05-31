@@ -2566,80 +2566,80 @@ msgstr "%d. stranica"
 msgid "Lens"
 msgstr ""
 
-#: src/filedata.cc:134
+#: src/filedata/filedata.cc:134
 #, c-format
 msgid "%d bytes"
 msgstr "%d bajtova"
 
-#: src/filedata.cc:138
+#: src/filedata/filedata.cc:138
 #, fuzzy, c-format
 msgid "%.1f KiB"
 msgstr "%.1f K"
 
-#: src/filedata.cc:142
+#: src/filedata/filedata.cc:142
 #, fuzzy, c-format
 msgid "%.1f MiB"
 msgstr "%.1f MB"
 
-#: src/filedata.cc:147
+#: src/filedata/filedata.cc:147
 #, fuzzy, c-format
 msgid "%.1f GiB"
 msgstr "%.1f GB"
 
-#: src/filedata.cc:2826
+#: src/filedata/filedata.cc:2826
 msgid "file or directory does not exist"
 msgstr "ne postoji datoteka ili direktorijum"
 
-#: src/filedata.cc:2832
+#: src/filedata/filedata.cc:2832
 msgid "destination already exists"
 msgstr "odredište već postoji"
 
-#: src/filedata.cc:2838
+#: src/filedata/filedata.cc:2838
 msgid "destination can't be overwritten"
 msgstr "ne mogu da prepišem preko odredišta"
 
-#: src/filedata.cc:2844
+#: src/filedata/filedata.cc:2844
 msgid "destination directory is not writable"
 msgstr "ne mogu da pišem u ciljni direktirijum"
 
-#: src/filedata.cc:2850
+#: src/filedata/filedata.cc:2850
 msgid "destination directory does not exist"
 msgstr "ciljni direktorijum ne postoji"
 
-#: src/filedata.cc:2856
+#: src/filedata/filedata.cc:2856
 msgid "source directory is not writable"
 msgstr "ne mogu da pišem u izvorni direktorijum"
 
-#: src/filedata.cc:2862
+#: src/filedata/filedata.cc:2862
 msgid "no read permission"
 msgstr "nemate ovlašćenja za čitanje"
 
-#: src/filedata.cc:2868
+#: src/filedata/filedata.cc:2868
 msgid "file is readonly"
 msgstr "možete samo čitati ovu datoteku"
 
-#: src/filedata.cc:2874
+#: src/filedata/filedata.cc:2874
 msgid "destination already exists and will be overwritten"
 msgstr "već postoji odredište i neću ga prepisati"
 
-#: src/filedata.cc:2880
+#: src/filedata/filedata.cc:2880
 msgid "source and destination are the same"
 msgstr "izvor i odredište su isti"
 
-#: src/filedata.cc:2886
+#: src/filedata/filedata.cc:2886
 msgid "source and destination have different extension"
 msgstr "izvor i odredište imaju različite ekstenzije"
 
-#: src/filedata.cc:2892
+#: src/filedata/filedata.cc:2892
 msgid "there are unsaved metadata changes for the file"
 msgstr "ima nesačuvanih izmena u metapodacima datoteke"
 
-#: src/filedata.cc:2898
+#: src/filedata/filedata.cc:2898
 #, fuzzy
 msgid "another destination file has the same filename"
 msgstr "izvor i odredište su isti"
 
-#: src/filedata.cc:3460
+#: src/filedata/filedata.cc:3460
 #, fuzzy, c-format
 msgid "Error: Unable to write marks lists to: %s\n"
 msgstr "Ne mogu da upišem istorijat u %s\n"

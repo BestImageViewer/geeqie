@@ -40,7 +40,7 @@ src/exif.cc
 src/exif-common.cc
 src/exiv2.cc
 src/filecache.cc
-src/filedata.cc
+src/filedata/filedata.cc
 src/filefilter.cc
 src/format-canon.cc
 src/format-fuji.cc

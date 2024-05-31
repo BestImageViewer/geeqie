@@ -2491,79 +2491,79 @@ msgstr "페이지 번호."
 msgid "Lens"
 msgstr "렌즈"
 
-#: src/filedata.cc:134
+#: src/filedata/filedata.cc:134
 #, c-format
 msgid "%d bytes"
 msgstr "%d 바이트"
 
-#: src/filedata.cc:138
+#: src/filedata/filedata.cc:138
 #, c-format
 msgid "%.1f KiB"
 msgstr "%.1f KiB"
 
-#: src/filedata.cc:142
+#: src/filedata/filedata.cc:142
 #, c-format
 msgid "%.1f MiB"
 msgstr "%.1f MiB"
 
-#: src/filedata.cc:147
+#: src/filedata/filedata.cc:147
 #, c-format
 msgid "%.1f GiB"
 msgstr "%.1f GiB"
 
-#: src/filedata.cc:2826
+#: src/filedata/filedata.cc:2826
 msgid "file or directory does not exist"
 msgstr "파일 또는 디렉터리가 존재하지 않습니다"
 
-#: src/filedata.cc:2832
+#: src/filedata/filedata.cc:2832
 msgid "destination already exists"
 msgstr "대상이 이미 존재합니다"
 
-#: src/filedata.cc:2838
+#: src/filedata/filedata.cc:2838
 msgid "destination can't be overwritten"
 msgstr "대상을 덮어쓸 수 없습니다"
 
-#: src/filedata.cc:2844
+#: src/filedata/filedata.cc:2844
 msgid "destination directory is not writable"
 msgstr "대상 디렉터리는 기록할 수 없습니다"
 
-#: src/filedata.cc:2850
+#: src/filedata/filedata.cc:2850
 msgid "destination directory does not exist"
 msgstr "대상 디렉터리가 존재하지 않습니다"
 
-#: src/filedata.cc:2856
+#: src/filedata/filedata.cc:2856
 msgid "source directory is not writable"
 msgstr "소스 디렉터리는 기록할 수 없습니다"
 
-#: src/filedata.cc:2862
+#: src/filedata/filedata.cc:2862
 msgid "no read permission"
 msgstr "읽기 권한이 없습니다"
 
-#: src/filedata.cc:2868
+#: src/filedata/filedata.cc:2868
 msgid "file is readonly"
 msgstr "파일이 읽기 전용입니다"
 
-#: src/filedata.cc:2874
+#: src/filedata/filedata.cc:2874
 msgid "destination already exists and will be overwritten"
 msgstr "대상이 이미 존재하며 덮어쓰게 됩니다"
 
-#: src/filedata.cc:2880
+#: src/filedata/filedata.cc:2880
 msgid "source and destination are the same"
 msgstr "소스와 대상이 같습니다"
 
-#: src/filedata.cc:2886
+#: src/filedata/filedata.cc:2886
 msgid "source and destination have different extension"
 msgstr "소스와 대상의 확장자가 다릅니다"
 
-#: src/filedata.cc:2892
+#: src/filedata/filedata.cc:2892
 msgid "there are unsaved metadata changes for the file"
 msgstr "파일에 대해 저장되지 않은 메타데이터 변경사항이 있습니다"
 
-#: src/filedata.cc:2898
+#: src/filedata/filedata.cc:2898
 msgid "another destination file has the same filename"
 msgstr "다른 대상 파일의 파일이름이 같습니다"
 
-#: src/filedata.cc:3460
+#: src/filedata/filedata.cc:3460
 #, c-format
 msgid "Error: Unable to write marks lists to: %s\n"
 msgstr "오류: 다음 위치에 마크 목록을 기록할 수 없음: %s\n"

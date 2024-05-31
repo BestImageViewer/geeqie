@@ -2619,80 +2619,80 @@ msgstr "第 %d 页"
 msgid "Lens"
 msgstr ""
 
-#: src/filedata.cc:134
+#: src/filedata/filedata.cc:134
 #, c-format
 msgid "%d bytes"
 msgstr "%d 字节"
 
-#: src/filedata.cc:138
+#: src/filedata/filedata.cc:138
 #, c-format
 msgid "%.1f KiB"
 msgstr ""
 
-#: src/filedata.cc:142
+#: src/filedata/filedata.cc:142
 #, c-format
 msgid "%.1f MiB"
 msgstr ""
 
-#: src/filedata.cc:147
+#: src/filedata/filedata.cc:147
 #, c-format
 msgid "%.1f GiB"
 msgstr ""
 
-#: src/filedata.cc:2826
+#: src/filedata/filedata.cc:2826
 msgid "file or directory does not exist"
 msgstr "文件或目录不存在"
 
-#: src/filedata.cc:2832
+#: src/filedata/filedata.cc:2832
 msgid "destination already exists"
 msgstr "目标文件已存在"
 
-#: src/filedata.cc:2838
+#: src/filedata/filedata.cc:2838
 msgid "destination can't be overwritten"
 msgstr "目标文件不能覆盖"
 
-#: src/filedata.cc:2844
+#: src/filedata/filedata.cc:2844
 msgid "destination directory is not writable"
 msgstr "目标目录不可写"
 
-#: src/filedata.cc:2850
+#: src/filedata/filedata.cc:2850
 msgid "destination directory does not exist"
 msgstr "目标目录不存在"
 
-#: src/filedata.cc:2856
+#: src/filedata/filedata.cc:2856
 msgid "source directory is not writable"
 msgstr "源目录不可写"
 
-#: src/filedata.cc:2862
+#: src/filedata/filedata.cc:2862
 msgid "no read permission"
 msgstr "无读取权限"
 
-#: src/filedata.cc:2868
+#: src/filedata/filedata.cc:2868
 msgid "file is readonly"
 msgstr "文件为只读"
 
-#: src/filedata.cc:2874
+#: src/filedata/filedata.cc:2874
 msgid "destination already exists and will be overwritten"
 msgstr "目标文件已存在并将被覆盖"
 
-#: src/filedata.cc:2880
+#: src/filedata/filedata.cc:2880
 msgid "source and destination are the same"
 msgstr "源和目标相同"
 
-#: src/filedata.cc:2886
+#: src/filedata/filedata.cc:2886
 msgid "source and destination have different extension"
 msgstr "源和目标扩展名不一致"
 
-#: src/filedata.cc:2892
+#: src/filedata/filedata.cc:2892
 msgid "there are unsaved metadata changes for the file"
 msgstr "文件有未保存的元数据更改"
 
-#: src/filedata.cc:2898
+#: src/filedata/filedata.cc:2898
 #, fuzzy
 msgid "another destination file has the same filename"
 msgstr "源和目标相同"
 
-#: src/filedata.cc:3460
+#: src/filedata/filedata.cc:3460
 #, fuzzy, c-format
 msgid "Error: Unable to write marks lists to: %s\n"
 msgstr "无法保存历史记录至: %s\n"

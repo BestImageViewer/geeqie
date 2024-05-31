@@ -2693,82 +2693,82 @@ msgstr "Filter:"
 msgid "Lens"
 msgstr ""
 
-#: src/filedata.cc:134
+#: src/filedata/filedata.cc:134
 #, fuzzy, c-format
 msgid "%d bytes"
 msgstr "%d filer"
 
-#: src/filedata.cc:138
+#: src/filedata/filedata.cc:138
 #, c-format
 msgid "%.1f KiB"
 msgstr ""
 
-#: src/filedata.cc:142
+#: src/filedata/filedata.cc:142
 #, c-format
 msgid "%.1f MiB"
 msgstr ""
 
-#: src/filedata.cc:147
+#: src/filedata/filedata.cc:147
 #, c-format
 msgid "%.1f GiB"
 msgstr ""
 
-#: src/filedata.cc:2826
+#: src/filedata/filedata.cc:2826
 msgid "file or directory does not exist"
 msgstr ""
 
-#: src/filedata.cc:2832
+#: src/filedata/filedata.cc:2832
 #, fuzzy
 msgid "destination already exists"
 msgstr "Fil ved navn %s finnes allerede."
 
-#: src/filedata.cc:2838
+#: src/filedata/filedata.cc:2838
 msgid "destination can't be overwritten"
 msgstr ""
 
-#: src/filedata.cc:2844
+#: src/filedata/filedata.cc:2844
 msgid "destination directory is not writable"
 msgstr ""
 
-#: src/filedata.cc:2850
+#: src/filedata/filedata.cc:2850
 msgid "destination directory does not exist"
 msgstr ""
 
-#: src/filedata.cc:2856
+#: src/filedata/filedata.cc:2856
 msgid "source directory is not writable"
 msgstr ""
 
-#: src/filedata.cc:2862
+#: src/filedata/filedata.cc:2862
 msgid "no read permission"
 msgstr ""
 
-#: src/filedata.cc:2868
+#: src/filedata/filedata.cc:2868
 msgid "file is readonly"
 msgstr ""
 
-#: src/filedata.cc:2874
+#: src/filedata/filedata.cc:2874
 msgid "destination already exists and will be overwritten"
 msgstr ""
 
-#: src/filedata.cc:2880
+#: src/filedata/filedata.cc:2880
 #, fuzzy
 msgid "source and destination are the same"
 msgstr "Bane og destinasjon er den samme, operasjonen ble avbrutt."
 
-#: src/filedata.cc:2886
+#: src/filedata/filedata.cc:2886
 #, fuzzy
 msgid "source and destination have different extension"
 msgstr "Bane og destinasjon er den samme, operasjonen ble avbrutt."
 
-#: src/filedata.cc:2892
+#: src/filedata/filedata.cc:2892
 msgid "there are unsaved metadata changes for the file"
 msgstr ""
 
-#: src/filedata.cc:2898
+#: src/filedata/filedata.cc:2898
 msgid "another destination file has the same filename"
 msgstr ""
 
-#: src/filedata.cc:3460
+#: src/filedata/filedata.cc:3460
 #, fuzzy, c-format
 msgid "Error: Unable to write marks lists to: %s\n"
 msgstr "Kunne ikke skrive historieliste til: %s\n"
