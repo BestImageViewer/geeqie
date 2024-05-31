@@ -40,10 +40,6 @@ struct HistMap;
 
 #define FD_MAGICK 0x12345678u
 
-gchar *text_from_size(gint64 size);
-gchar *text_from_size_abrev(gint64 size);
-const gchar *text_from_time(time_t t);
-
 enum FileDataChangeType {
 	FILEDATA_CHANGE_DELETE,
 	FILEDATA_CHANGE_MOVE,
@@ -74,7 +70,11 @@ struct FileDataChangeInfo {
 	gboolean regroup_when_finished;
 };
 
-struct FileData {
+class FileData {
+    FileData() = delete;
+
+    public:
+	// Public members from the original API
 	guint magick;
 	gint type;
 	gchar *original_path; /**< key to file_data_pool hash table */
@@ -132,7 +132,183 @@ struct FileData {
 
 	gint page_num;
 	gint page_total;
+
+	static gchar *text_from_size(gint64 size);
+	static gchar *text_from_size_abrev(gint64 size);
+	static const gchar *text_from_time(time_t t);
+
+	/**
+	 * @headerfile file_data_new_group
+	 * scan for sidecar files - expensive
+	 */
+	static FileData *file_data_new_group(const gchar *path_utf8);
+
+	/**
+	 * @headerfile file_data_new_no_grouping
+	 * should be used on helper files which can't have sidecars
+	 */
+	static FileData *file_data_new_no_grouping(const gchar *path_utf8);
+
+	/**
+	 * @headerfile file_data_new_dir
+	 * should be used on dirs
+	 */
+	static FileData *file_data_new_dir(const gchar *path_utf8);
+
+	static FileData *file_data_new_simple(const gchar *path_utf8);
+
+#ifdef DEBUG_FILEDATA
+	FileData *file_data_ref_debug(const gchar *file, gint line, FileData *fd);
+	void file_data_unref_debug(const gchar *file, gint line, FileData *fd);
+	#define file_data_ref(fd) file_data_ref_debug(__FILE__, __LINE__, fd)
+	#define file_data_unref(fd) file_data_unref_debug(__FILE__, __LINE__, fd)
+#else
+	FileData *file_data_ref(FileData *fd);
+	void file_data_unref(FileData *fd);
+#endif
+
+	void file_data_lock(FileData *fd);
+	void file_data_unlock(FileData *fd);
+	static void file_data_lock_list(GList *list);
+	static void file_data_unlock_list(GList *list);
+
+	gboolean file_data_check_changed_files(FileData *fd);
+
+	void file_data_increment_version(FileData *fd);
+
+	gboolean file_data_add_change_info(FileData *fd, FileDataChangeType type, const gchar *src, const gchar *dest);
+	void file_data_change_info_free(FileDataChangeInfo *fdci, FileData *fd);
+
+	void file_data_disable_grouping(FileData *fd, gboolean disable);
+	static void file_data_disable_grouping_list(GList *fd_list, gboolean disable);
+
+	static gint filelist_sort_compare_filedata(FileData *fa, FileData *fb);
+	static gint filelist_sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend);
+	static GList *filelist_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive);
+	static GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
+	static GList *filelist_insert_sort_full(GList *list, gpointer data, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
+
+	gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs);
+	gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs);
+	static void filelist_free(GList *list);
+	static GList *filelist_copy(GList *list);
+	static GList *filelist_from_path_list(GList *list);
+	static GList *filelist_to_path_list(GList *list);
+
+	static GList *filelist_filter(GList *list, gboolean is_dir_list);
+
+	static GList *filelist_sort_path(GList *list);
+	static GList *filelist_recursive(FileData *dir_fd);
+	static GList *filelist_recursive_full(FileData *dir_fd, SortType method, gboolean ascend, gboolean case_sensitive);
+
+	using FileDataGetMarkFunc = gboolean (*)(FileData *, gint, gpointer);
+	using FileDataSetMarkFunc = gboolean (*)(FileData *, gint, gboolean, gpointer);
+	static gboolean file_data_register_mark_func(gint n, FileDataGetMarkFunc get_mark_func, FileDataSetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify);
+	static void file_data_get_registered_mark_func(gint n, FileDataGetMarkFunc *get_mark_func, FileDataSetMarkFunc *set_mark_func, gpointer *data);
+
+
+	gboolean file_data_get_mark(FileData *fd, gint n);
+	guint file_data_get_marks(FileData *fd);
+	void file_data_set_mark(FileData *fd, gint n, gboolean value);
+	gboolean file_data_filter_marks(FileData *fd, guint filter);
+	static GList *file_data_filter_marks_list(GList *list, guint filter);
+
+	gboolean file_data_mark_to_selection(FileData *fd, gint mark, MarkToSelectionMode mode, gboolean selected);
+	void file_data_selection_to_mark(FileData *fd, gint mark, SelectionToMarkMode mode);
+
+	gboolean file_data_filter_file_filter(FileData *fd, GRegex *filter);
+	static GList *file_data_filter_file_filter_list(GList *list, GRegex *filter);
+
+	static GList *file_data_filter_class_list(GList *list, guint filter);
+
+	gchar *file_data_sc_list_to_string(FileData *fd);
+
+	gchar *file_data_get_sidecar_path(FileData *fd, gboolean existing_only);
+
+
+	gboolean file_data_add_ci(FileData *fd, FileDataChangeType type, const gchar *src, const gchar *dest);
+	gboolean file_data_sc_add_ci_copy(FileData *fd, const gchar *dest_path);
+	gboolean file_data_sc_add_ci_move(FileData *fd, const gchar *dest_path);
+	gboolean file_data_sc_add_ci_rename(FileData *fd, const gchar *dest_path);
+	gboolean file_data_sc_add_ci_delete(FileData *fd);
+	gboolean file_data_sc_add_ci_unspecified(FileData *fd, const gchar *dest_path);
+
+	static gboolean file_data_sc_add_ci_delete_list(GList *fd_list);
+	static gboolean file_data_sc_add_ci_copy_list(GList *fd_list, const gchar *dest);
+	static gboolean file_data_sc_add_ci_move_list(GList *fd_list, const gchar *dest);
+	static gboolean file_data_sc_add_ci_rename_list(GList *fd_list, const gchar *dest);
+	static gboolean file_data_sc_add_ci_unspecified_list(GList *fd_list, const gchar *dest);
+	static gboolean file_data_add_ci_write_metadata_list(GList *fd_list);
+
+	static gboolean file_data_sc_update_ci_copy_list(GList *fd_list, const gchar *dest);
+	static gboolean file_data_sc_update_ci_move_list(GList *fd_list, const gchar *dest);
+	static gboolean file_data_sc_update_ci_unspecified_list(GList *fd_list, const gchar *dest);
+
+
+	gboolean file_data_sc_update_ci_copy(FileData *fd, const gchar *dest_path);
+	gboolean file_data_sc_update_ci_move(FileData *fd, const gchar *dest_path);
+	gboolean file_data_sc_update_ci_rename(FileData *fd, const gchar *dest_path);
+	gboolean file_data_sc_update_ci_unspecified(FileData *fd, const gchar *dest_path);
+
+	static gchar *file_data_get_error_string(gint error);
+
+	gint file_data_verify_ci(FileData *fd, GList *list);
+	static gint file_data_verify_ci_list(GList *list, gchar **desc, gboolean with_sidecars);
+
+	gboolean file_data_perform_ci(FileData *fd);
+	gboolean file_data_apply_ci(FileData *fd);
+	void file_data_free_ci(FileData *fd);
+	static void file_data_free_ci_list(GList *fd_list);
+
+	void file_data_set_regroup_when_finished(FileData *fd, gboolean enable);
+
+	gint file_data_sc_verify_ci(FileData *fd, GList *list);
+
+	gboolean file_data_sc_perform_ci(FileData *fd);
+	gboolean file_data_sc_apply_ci(FileData *fd);
+	void file_data_sc_free_ci(FileData *fd);
+	static void file_data_sc_free_ci_list(GList *fd_list);
+
+	static GList *file_data_process_groups_in_selection(GList *list, gboolean ungroup, GList **ungrouped);
+
+
+	using FileDataNotifyFunc = void (*)(FileData *, NotifyType, gpointer);
+	static gboolean file_data_register_notify_func(FileDataNotifyFunc func, gpointer data, NotifyPriority priority);
+	static gboolean file_data_unregister_notify_func(FileDataNotifyFunc func, gpointer data);
+	void file_data_send_notification(FileData *fd, NotifyType type);
+
+	gboolean file_data_register_real_time_monitor(FileData *fd);
+	gboolean file_data_unregister_real_time_monitor(FileData *fd);
+
+	void read_exif_time_data(FileData *file);
+	void read_exif_time_digitized_data(FileData *file);
+
+	static gboolean marks_list_save(gchar *path, gboolean save);
+	static gboolean marks_list_load(const gchar *path);
+	static void marks_clear_all();
+	void read_rating_data(FileData *file);
+
+	void file_data_inc_page_num(FileData *fd);
+	void file_data_dec_page_num(FileData *fd);
+	void file_data_set_page_total(FileData *fd, gint page_total);
+	void file_data_set_page_num(FileData *fd, gint page_num);
+
+	static void file_data_dump();
+
+    private:
+	void set_exif_time_data_unused(GList *files);
+	void set_exif_time_digitized_data_unused(GList *files);
+	void set_rating_data_unused(GList *files);
+	GList *filelist_insert_sort_unused(GList *list, FileData *fd, SortType method, gboolean ascend);
+	gint file_data_get_user_orientation_unused(FileData *fd);
+	void file_data_set_user_orientation_unused(FileData *fd, gint value);
+	gboolean file_data_send_notification_idle_cb_unused(gpointer data);
 };
+
+// C-style compatibility API.
+gchar *text_from_size(gint64 size);
+gchar *text_from_size_abrev(gint64 size);
+const gchar *text_from_time(time_t t);
 
 /**
  * @headerfile file_data_new_group
@@ -291,5 +467,6 @@ void file_data_set_page_total(FileData *fd, gint page_total);
 void file_data_set_page_num(FileData *fd, gint page_num);
 
 void file_data_dump();
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
