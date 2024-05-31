@@ -1,6 +1,7 @@
 org.geeqie.Geeqie.appdata.xml.in
 org.geeqie.Geeqie.desktop.in
 plugins/camera-import/org.geeqie.camera-import.desktop.in
+plugins/exif-datetime-to-file/org.geeqie.exif-datetime-to-file.desktop.in
 plugins/export-jpeg/org.geeqie.export-jpeg.desktop.in
 plugins/image-crop/org.geeqie.image-crop.desktop.in
 plugins/open-with/org.geeqie.open-with.desktop.in
@@ -40,6 +41,7 @@ src/exif.cc
 src/exif-common.cc
 src/exiv2.cc
 src/filecache.cc
+src/filedata.cc
 src/filedata/filedata.cc
 src/filefilter.cc
 src/format-canon.cc
@@ -109,6 +111,7 @@ src/secure-save.cc
 src/shortcuts.cc
 src/similar.cc
 src/slideshow.cc
+src/tests/pixbuf-util.cc
 src/third-party/whereami.cc
 src/third-party/zonedetect.cc
 src/thumb.cc
