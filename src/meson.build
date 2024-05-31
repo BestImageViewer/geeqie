@@ -300,7 +300,7 @@ if conf_data.get('HAVE_WEBP', 0) == 1
     )
 endif
 
-project_sources += main_sources
+code_sources += main_sources
 
 subdir('authors')
 subdir('filedata')
@@ -313,6 +313,9 @@ subdir('view-file')
 if conf_data.get('ENABLE_UNIT_TESTS', 0) == 1
     subdir('tests')
 endif
+
+# We assume that code_sources is only set above.
+project_sources += code_sources
 
 gq_marshal = gnome.genmarshal('gq-marshal', prefix : 'gq_marshal', sources : 'gq-marshal.list')
 

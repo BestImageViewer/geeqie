@@ -30,4 +30,5 @@ pan_view_sources = files('pan-calendar.cc',
 'pan-view.h',
 'pan-view-search.cc',
 'pan-view-search.h')
-project_sources += pan_view_sources
+
+code_sources += pan_view_sources

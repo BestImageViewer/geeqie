@@ -21,4 +21,4 @@
 
 filedata_sources = files('filedata.cc')
 
-project_sources += filedata_sources
+code_sources += filedata_sources

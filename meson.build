@@ -56,6 +56,10 @@ add_global_arguments('-Wno-overlength-strings', language : 'c')
 add_global_arguments('-Wno-error=deprecated-declarations', language : 'cpp')
 
 # Project requirements
+# code_sources is all human-written geeqie C/C++ code
+code_sources = []
+# project_sources will include code_sources, as well as auto-generated code,
+# third-party code, and some other code-like dependencies.
 project_sources = []
 gnome = import('gnome')
 thread_dep = dependency('threads')
@@ -729,7 +733,7 @@ if running_from_git
     if clang_tidy_exe.found()
         git_exe = find_program('git', required : true)
 
-        foreach source_file : main_sources + pan_view_sources + view_file_sources
+        foreach source_file : code_sources
             if fs.name(source_file).endswith('.cc')
                 source_file_name = fs.name(source_file)
                 config_file = join_paths(meson.project_source_root(), '.clang-tidy')
@@ -749,7 +753,7 @@ endif
 # Single value enum checks
 enum_check_sh = find_program('enum-check.sh', dirs : scriptsdir, required : true)
 if enum_check_sh.found()
-    foreach source_file : main_sources + pan_view_sources + view_file_sources
+    foreach source_file : code_sources
         source_file_name = fs.name(source_file)
         test('Single Value enum_ ' + source_file_name, enum_check_sh, args : [source_file], timeout : 100, suite : 'analysis')
     endforeach
@@ -762,7 +766,7 @@ endif
 # Debug statement checks
 debug_check_sh = find_program('debug-check.sh', dirs : scriptsdir, required : true)
 if debug_check_sh.found()
-    foreach source_file : main_sources + pan_view_sources + view_file_sources
+    foreach source_file : code_sources
         source_file_name = fs.name(source_file)
         if (source_file_name != 'debug.h')
             test('Debug Statements_ ' + source_file_name, debug_check_sh, args : [source_file], timeout : 100, suite : 'analysis')
@@ -777,7 +781,7 @@ endif
 # Temporary comments checks
 tmp_comments_check_sh = find_program('temporary-comments-check.sh', dirs : scriptsdir, required : true)
 if tmp_comments_check_sh.found()
-    foreach source_file : main_sources + pan_view_sources + view_file_sources
+    foreach source_file : code_sources
         source_file_name = fs.name(source_file)
         if (source_file_name != 'debug.h')
             test('Temporary Comments_ ' + source_file_name, tmp_comments_check_sh, args : [source_file], timeout : 100, suite : 'analysis')
@@ -794,7 +798,7 @@ gtk4_migration_check_sh = find_program('gtk4-migration-regression-check.sh', dir
 if gtk4_migration_check_sh.found()
     compat_cc = join_paths(meson.project_source_root(), 'src', 'compat.cc')
     compat_h = join_paths(meson.project_source_root(), 'src', 'compat.h')
-    foreach source_file : main_sources + pan_view_sources + view_file_sources
+    foreach source_file : code_sources
         source_file_name = fs.name(source_file)
         if (source_file_name != 'debug.h')
             test('GTK4 migration_ ' + source_file_name, gtk4_migration_check_sh, args : [source_file, compat_cc, compat_h], timeout : 100, suite : 'analysis')
@@ -809,7 +813,7 @@ endif
 # Untranslated text checks
 untranslated_text_sh = find_program('untranslated-text.sh', dirs : scriptsdir, required : true)
 if untranslated_text_sh.found()
-     foreach source_file : main_sources + pan_view_sources + view_file_sources
+     foreach source_file : code_sources
         if fs.name(source_file).endswith('.cc')
             source_file_name = fs.name(source_file)
             test('Untranslated Text_ ' + source_file_name, untranslated_text_sh, args : [source_file], timeout : 200, suite : 'analysis')

@@ -21,4 +21,4 @@
 
 unit_test_sources = files('pixbuf-util.cc')
 
-project_sources += unit_test_sources
+code_sources += unit_test_sources
