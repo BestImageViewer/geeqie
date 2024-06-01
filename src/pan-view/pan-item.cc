@@ -38,6 +38,12 @@
 namespace
 {
 
+struct PanItemBoxShadow
+{
+	gint offset;
+	gint fade;
+};
+
 constexpr gint PAN_OUTLINE_THICKNESS = 1;
 #define PAN_OUTLINE_ALPHA 180
 #define PAN_OUTLINE_COLOR_1 255, 255, 255, PAN_OUTLINE_ALPHA
@@ -149,20 +155,18 @@ PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint widt
 
 void pan_item_box_shadow(PanItem *pi, gint offset, gint fade)
 {
-	gint *shadow;
-
 	if (!pi || pi->type != PAN_ITEM_BOX) return;
 
-	shadow = static_cast<gint *>(pi->data);
+	auto *shadow = static_cast<PanItemBoxShadow *>(pi->data);
 	if (shadow)
 		{
-		pi->width -= shadow[0];
-		pi->height -= shadow[0];
+		pi->width -= shadow->offset;
+		pi->height -= shadow->offset;
 		}
 
-	shadow = g_new0(gint, 2);
-	shadow[0] = offset;
-	shadow[1] = fade;
+	shadow = g_new0(PanItemBoxShadow, 1);
+	shadow->offset = offset;
+	shadow->fade = fade;
 
 	pi->width += offset;
 	pi->height += offset;
@@ -176,28 +180,27 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 {
 	gint bw;
 	gint bh;
-	gint *shadow;
 
 	bw = pi->width;
 	bh = pi->height;
 
-	shadow = static_cast<gint *>(pi->data);
+	auto *shadow = static_cast<PanItemBoxShadow *>(pi->data);
 	if (shadow)
 		{
-		bw -= shadow[0];
-		bh -= shadow[0];
+		bw -= shadow->offset;
+		bh -= shadow->offset;
 
 		if (pi->color.a > 254)
 			{
 			pixbuf_draw_shadow(pixbuf,
-			                   {pi->x - x + bw, pi->y - y + shadow[0], shadow[0], bh - shadow[0]},
-			                   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
-			                   shadow[1],
+			                   {pi->x - x + bw, pi->y - y + shadow->offset, shadow->offset, bh - shadow->offset},
+			                   pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh,
+			                   shadow->fade,
 			                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
 			pixbuf_draw_shadow(pixbuf,
-			                   {pi->x - x + shadow[0], pi->y - y + bh, bw, shadow[0]},
-			                   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
-			                   shadow[1],
+			                   {pi->x - x + shadow->offset, pi->y - y + bh, bw, shadow->offset},
+			                   pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh,
+			                   shadow->fade,
 			                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
 			}
 		else
@@ -205,9 +208,9 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			gint a;
 			a = pi->color.a * PAN_SHADOW_ALPHA >> 8;
 			pixbuf_draw_shadow(pixbuf,
-			                   {pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh},
-			                   pi->x - x + shadow[0], pi->y - y + shadow[0], bw, bh,
-			                   shadow[1],
+			                   {pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh},
+			                   pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh,
+			                   shadow->fade,
 			                   PAN_SHADOW_COLOR, a);
 			}
 		}
