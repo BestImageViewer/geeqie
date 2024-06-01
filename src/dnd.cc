@@ -173,8 +173,8 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 
 	if (layout)
 		{
-		pixbuf_draw_layout(dest, layout, nullptr, x+1, y+1, 0, 0, 0, 255);
-		pixbuf_draw_layout(dest, layout, nullptr, x, y, 255, 255, 255, 255);
+		pixbuf_draw_layout(dest, layout, x + 1, y + 1, 0, 0, 0, 255);
+		pixbuf_draw_layout(dest, layout, x, y, 255, 255, 255, 255);
 
 		g_object_unref(G_OBJECT(layout));
 		}

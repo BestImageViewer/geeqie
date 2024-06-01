@@ -134,9 +134,9 @@ void pixbuf_set_rect(GdkPixbuf *pb,
 void pixbuf_pixel_set(GdkPixbuf *pb, gint x, gint y, gint r, gint g, gint b, gint a);
 
 
-void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout, GtkWidget *widget,
-			gint x, gint y,
-			guint8 r, guint8 g, guint8 b, guint8 a);
+void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,
+                        gint x, gint y,
+                        guint8 r, guint8 g, guint8 b, guint8 a);
 
 
 /**
