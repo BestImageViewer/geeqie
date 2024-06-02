@@ -1109,9 +1109,6 @@ void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 {
 	FileData *dir_fd;
 	GList *list = nullptr;
-	gchar *name;
-	FileData *fd;
-	gchar *filename;
 
 	if (names_exc == nullptr && names_inc == nullptr && paths == nullptr)
 		{
@@ -1122,37 +1119,29 @@ void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 
 	filelist_read(dir_fd, &list, nullptr);
 
-	while (list)
+	for (GList *work = list; work; work = work->next)
 		{
-		fd = static_cast<FileData *>(list->data);
-		filename = g_strdup(filename_from_path(fd->path));
+		auto *fd = static_cast<FileData *>(work->data);
+		const gchar *filename = filename_from_path(fd->path);
 
 		if (file_extension_match(filename, GQ_COLLECTION_EXT))
 			{
-			name = remove_extension_from_path(filename);
-
 			if (names_exc != nullptr)
 				{
-				*names_exc = g_list_insert_sorted(*names_exc, g_strdup(name),
+				*names_exc = g_list_insert_sorted(*names_exc, remove_extension_from_path(filename),
 				                                  reinterpret_cast<GCompareFunc>(g_strcmp0));
-				*names_exc = g_list_first(*names_exc);
 				}
 			if (names_inc != nullptr)
 				{
-				*names_inc = g_list_insert_sorted(*names_inc,filename,
+				*names_inc = g_list_insert_sorted(*names_inc, g_strdup(filename),
 				                                  reinterpret_cast<GCompareFunc>(g_strcmp0));
-				*names_inc = g_list_first(*names_inc);
 				}
 			if (paths != nullptr)
 				{
 				*paths = g_list_insert_sorted(*paths, g_strdup(fd->path),
 				                              reinterpret_cast<GCompareFunc>(g_strcmp0));
-				*paths = g_list_first(*paths);
 				}
-			g_free(name);
 			}
-		list = list->next;
-		g_free(filename);
 		}
 
 	filelist_free(list);

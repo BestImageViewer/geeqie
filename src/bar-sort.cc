@@ -187,13 +187,11 @@ static void bar_sort_undo_set(SortData *sd, GList *src_list, const gchar *dest)
 		g_list_free_full(sd->undo_dest_list, g_free);
 		sd->undo_dest_list=nullptr;
 
-		GList *work = sd->undo_src_list;
-		while(work)
+		for (GList *work = sd->undo_src_list; work; work = work->next)
 			{
-			gchar *filename = g_strdup(filename_from_path(static_cast<const gchar *>(work->data)));
-			gchar *dest_path = g_build_filename(g_strdup(dest), filename, NULL);
-			sd->undo_dest_list = g_list_prepend(sd->undo_dest_list, g_strdup(dest_path));
-			work = work->next;
+			const gchar *filename = filename_from_path(static_cast<gchar *>(work->data));
+			gchar *dest_path = g_build_filename(dest, filename, NULL);
+			sd->undo_dest_list = g_list_prepend(sd->undo_dest_list, dest_path);
 			}
 		sd->undo_dest_list = g_list_reverse(sd->undo_dest_list);
 		}
