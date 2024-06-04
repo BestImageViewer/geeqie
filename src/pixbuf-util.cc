@@ -52,17 +52,14 @@ using GetAlpha = std::function<guint8(gint, gint)>;
 constexpr gint ROTATE_BUFFER_WIDTH = 48;
 constexpr gint ROTATE_BUFFER_HEIGHT = 48;
 
-// Intersects the clip region with the pixbuf. r{x,y,w,h} is that
-// intersecting region.
-gboolean pixbuf_clip_region(const GdkPixbuf *pb, const GdkRectangle &clip,
-                            gint &rx, gint &ry, gint &rw, gint &rh)
+// Intersects the clip region with the pixbuf. r is that intersecting region.
+gboolean pixbuf_clip_region(const GdkPixbuf *pb, const GdkRectangle &clip, GdkRectangle &r)
 {
 	gint pw = gdk_pixbuf_get_width(pb);
 	gint ph = gdk_pixbuf_get_height(pb);
+	const GdkRectangle pb_rect{0, 0, pw, ph};
 
-	return util_clip_region(0, 0, pw, ph,
-	                        clip.x, clip.y, clip.width, clip.height,
-	                        rx, ry, rw, rh);
+	return gdk_rectangle_intersect(&pb_rect, &clip, &r);
 }
 
 /*
@@ -442,32 +439,6 @@ GdkPixbuf *pixbuf_fallback(FileData *fd, gint requested_width, gint requested_he
 	return pixbuf;
 }
 
-
-/*
- *-----------------------------------------------------------------------------
- * misc utils
- *-----------------------------------------------------------------------------
- */
-
-gboolean util_clip_region(gint x, gint y, gint w, gint h,
-                          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-                          gint &rx, gint &ry, gint &rw, gint &rh)
-{
-	GdkRectangle main{x, y, w, h};
-	GdkRectangle clip{clip_x, clip_y, clip_w, clip_h};
-	GdkRectangle r;
-
-	const gboolean rectangles_intersect = gdk_rectangle_intersect(&main, &clip, &r);
-	if (rectangles_intersect)
-		{
-		rx = r.x;
-		ry = r.y;
-		rw = r.width;
-		rh = r.height;
-		}
-
-	return rectangles_intersect;
-}
 
 /*
  *-----------------------------------------------------------------------------
@@ -1056,20 +1027,8 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
 {
 	gboolean has_alpha;
 	gint prs;
-	gint rx;
-	gint ry;
-	gint rw;
-	gint rh;
-	gint tx;
-	gint ty;
-	gint tw;
-	gint th;
-	gint fx1;
-	gint fy1;
 	gint fx2;
 	gint fy2;
-	gint fw;
-	gint fh;
 	guchar *p_pix;
 	guchar *pp;
 	gint p_step;
@@ -1077,19 +1036,20 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
 
 	if (!pb) return;
 
-	if (!pixbuf_clip_region(pb, clip,
-	                        rx, ry, rw, rh)) return;
+	GdkRectangle pb_rect;
+	if (!pixbuf_clip_region(pb, clip, pb_rect)) return;
 
 	// Determine the bounding box for the triangle.
+	GdkRectangle tri_rect;
 	util_clip_triangle(c1, c2, c3,
-	                   tx, ty, tw, th);
+	                   tri_rect.x, tri_rect.y, tri_rect.width, tri_rect.height);
 
 	// And now clip the triangle bounding box to the pixbuf clipping region.
-	if (!util_clip_region(rx, ry, rw, rh,
-	                      tx, ty, tw, th,
-	                      fx1, fy1, fw, fh)) return;
-	fx2 = fx1 + fw;
-	fy2 = fy1 + fh;
+	GdkRectangle f;
+	if (!gdk_rectangle_intersect(&pb_rect, &tri_rect, &f)) return;
+
+	fx2 = f.x + f.width;
+	fy2 = f.y + f.height;
 
 	has_alpha = gdk_pixbuf_get_has_alpha(pb);
 	prs = gdk_pixbuf_get_rowstride(pb);
@@ -1113,7 +1073,7 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
 	const gdouble slope2 = get_slope(v[0], v[2]);
 	const GdkPoint &slope2_start = v[0];
 
-	for (gint y = fy1; y < fy2; y++)
+	for (gint y = f.y; y < fy2; y++)
 		{
 		if (!middle && y > v[1].y)
 			{
@@ -1131,8 +1091,8 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
 			std::swap(x1, x2);
 			}
 
-		x1 = CLAMP(x1, fx1, fx2);
-		x2 = CLAMP(x2, fx1, fx2);
+		x1 = CLAMP(x1, f.x, fx2);
+		x2 = CLAMP(x2, f.x, fx2);
 
 		pp = p_pix + y * prs + x1 * p_step;
 
@@ -1282,10 +1242,6 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 {
 	gboolean has_alpha;
 	gint prs;
-	gint rx;
-	gint ry;
-	gint rw;
-	gint rh;
 	gdouble rx1;
 	gdouble ry1;
 	gdouble rx2;
@@ -1300,10 +1256,11 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 
 	if (!pb) return;
 
-	if (!pixbuf_clip_region(pb, clip,
-	                        rx, ry, rw, rh)) return;
+	GdkRectangle pb_rect;
+	if (!pixbuf_clip_region(pb, clip, pb_rect)) return;
+
 	// Clips the specified line segment to the intersecting region from above.
-	if (!util_clip_line(rx, ry, rw, rh,
+	if (!util_clip_line(pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height,
 	                    x1, y1, x2, y2,
 	                    rx1, ry1, rx2, ry2)) return;
 
@@ -1313,9 +1270,10 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 
 	p_step = (has_alpha) ? 4 : 3;
 
-	const auto fill_pixel = [rx, ry, rw, rh, p_pix, prs, p_step, r, g, b, a](gint x, gint y)
+	const auto fill_pixel = [pb_rect, p_pix, prs, p_step, r, g, b, a](gint x, gint y)
 	{
-		if (x < rx || x >= rx + rw || y < ry || y >= ry + rh) return;
+		if (x < pb_rect.x || x >= pb_rect.x + pb_rect.width ||
+		    y < pb_rect.y || y >= pb_rect.y + pb_rect.height) return;
 
 		guchar *pp = p_pix + y * prs + x * p_step;
 		pp[0] = (r * a + pp[0] * (256-a)) >> 8;
@@ -1373,7 +1331,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
 
 /**
  * @brief Composites a horizontal or vertical linear gradient into the rectangular
- *        region `{x,y,w,h}`.
+ *        region `fade_rect`.
  * @param p_pix The pixel buffer to paint into.
  * @param prs The pixel row stride (how many pixels per row of the buffer).
  * @param has_alpha TRUE if the p_pix representation is rgba.  FALSE if just rgb.
@@ -1383,8 +1341,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
  * @param vertical When `TRUE`, the gradient color will vary vertically.  When `FALSE`,
  *                 horizontally.
  * @param border The maximum extent of the gradient, in pixels.
- * @param x,y Coordinates of the top-left corner of the region.
- * @param w,h Extent of the region.
+ * @param fade_rect The region.
  * @param r,g,b Base color of the gradient.
  * @param a The peak alpha value when compositing the gradient.  The alpha varies
  *          from this value down to 0 (fully transparent).  Note that any alpha
@@ -1392,7 +1349,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
  */
 static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
                                     gint s, gboolean vertical, gint border,
-                                    gint x, gint y, gint w, gint h,
+                                    const GdkRectangle &fade_rect,
                                     guint8 r, guint8 g, guint8 b, guint8 a)
 {
 	const auto get_a = [s, vertical, border, a](gint x, gint y)
@@ -1403,20 +1360,19 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
 	};
 
 	pixbuf_draw_rect_fill(p_pix, prs, has_alpha,
-	                      x, y, x + w, y + h,
+	                      fade_rect.x, fade_rect.y, fade_rect.x + fade_rect.width, fade_rect.y + fade_rect.height,
 	                      r, g, b, get_a);
 }
 
 /**
- * @brief Composites a radial gradient into the rectangular region `{x,y,w,h}`.
+ * @brief Composites a radial gradient into the rectangular region `fade_rect`.
  * @param p_pix The pixel buffer to paint into.
  * @param prs The pixel row stride (how many pixels per row of the buffer).
  * @param has_alpha TRUE if the p_pix representation is rgba.  FALSE if just rgb.
  * @param sx,sy The coordinates of the center of the gradient.
  * @param border The max radius, in pixels, of the gradient.  Pixels farther away
  *               from the center than this will be unaffected.
- * @param x,y Coordinates of the top-left corner of the region.
- * @param w,h Extent of the region.
+ * @param fade_rect The region.
  * @param r,g,b Base color of the gradient.
  * @param a The peak alpha value when compositing the gradient.  The alpha varies
  *          from this value down to 0 (fully transparent).  Note that any alpha
@@ -1424,7 +1380,7 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
  */
 static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
                                     gint sx, gint sy, gint border,
-                                    gint x, gint y, gint w, gint h,
+                                    const GdkRectangle &fade_rect,
                                     guint8 r, guint8 g, guint8 b, guint8 a)
 {
 	const auto get_a = [sx, sy, border, a](gint x, gint y)
@@ -1434,7 +1390,7 @@ static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
 	};
 
 	pixbuf_draw_rect_fill(p_pix, prs, has_alpha,
-	                      x, y, x + w, y + h,
+	                      fade_rect.x, fade_rect.y, fade_rect.x + fade_rect.width, fade_rect.y + fade_rect.height,
 	                      r, g, b, get_a);
 }
 
@@ -1444,20 +1400,12 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
 {
 	gint has_alpha;
 	gint prs;
-	gint rx;
-	gint ry;
-	gint rw;
-	gint rh;
-	gint fx;
-	gint fy;
-	gint fw;
-	gint fh;
 	guchar *p_pix;
 
 	if (!pb) return;
 
-	if (!pixbuf_clip_region(pb, clip,
-	                        rx, ry, rw, rh)) return;
+	GdkRectangle pb_rect;
+	if (!pixbuf_clip_region(pb, clip, pb_rect)) return;
 
 	has_alpha = gdk_pixbuf_get_has_alpha(pb);
 	prs = gdk_pixbuf_get_rowstride(pb);
@@ -1466,89 +1414,48 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
 	// Composites the specified color into the rectangle specified by x, y, w, h,
 	// as contracted by `border` pixels, with a composition fraction that's defined
 	// by the supplied `a` parameter.
-	if (util_clip_region(x + border, y + border, w - border * 2, h - border * 2,
-	                     rx, ry, rw, rh,
-	                     fx, fy, fw, fh))
+	const GdkRectangle contracted_rect{x + border, y + border, w - border * 2, h - border * 2};
+	GdkRectangle f;
+	if (gdk_rectangle_intersect(&contracted_rect, &pb_rect, &f))
 		{
-		pixbuf_draw_rect_fill(pb, fx, fy, fw, fh, r, g, b, a);
+		pixbuf_draw_rect_fill(pb, f.x, f.y, f.width, f.height, r, g, b, a);
 		}
 
 	if (border < 1) return;
 
 	// Draws linear gradients along each of the 4 edges.
-	if (util_clip_region(x, y + border, border, h - border * 2,
-	                     rx, ry, rw, rh,
-	                     fx, fy, fw, fh))
-		{
+	const auto draw_fade_linear_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, r, g, b, a](const GdkRectangle &rect, gint s, gboolean vertical)
+	{
+		GdkRectangle fade_rect;
+		if (!gdk_rectangle_intersect(&rect, &pb_rect, &fade_rect)) return;
+
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
-		                        x + border, TRUE, border,
-		                        fx, fy, fw, fh,
+		                        s, vertical, border,
+		                        fade_rect,
 		                        r, g, b, a);
-		}
-	if (util_clip_region(x + w - border, y + border, border, h - border * 2,
-	                     rx, ry, rw, rh,
-	                     fx, fy, fw, fh))
-		{
-		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
-		                        x + w - border, TRUE, border,
-		                        fx, fy, fw, fh,
-		                        r, g, b, a);
-		}
-	if (util_clip_region(x + border, y, w - border * 2, border,
-	                     rx, ry, rw, rh,
-	                     fx, fy, fw, fh))
-		{
-		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
-		                        y + border, FALSE, border,
-		                        fx, fy, fw, fh,
-		                        r, g, b, a);
-		}
-	if (util_clip_region(x + border, y + h - border, w - border * 2, border,
-	                     rx, ry, rw, rh,
-	                     fx, fy, fw, fh))
-		{
-		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
-		                        y + h - border, FALSE, border,
-		                        fx, fy, fw, fh,
-		                        r, g, b, a);
-		}
+	};
+
+	draw_fade_linear_if_intersect({x, y + border, border, h - border * 2}, x + border, TRUE);
+	draw_fade_linear_if_intersect({x + w - border, y + border, border, h - border * 2}, x + w - border, TRUE);
+	draw_fade_linear_if_intersect({x + border, y, w - border * 2, border}, y + border, FALSE);
+	draw_fade_linear_if_intersect({x + border, y + h - border, w - border * 2, border}, y + h - border, FALSE);
+
 	// Draws radial gradients at each of the 4 corners.
-	if (util_clip_region(x, y, border, border,
-	                     rx, ry, rw, rh,
-	                     fx, fy, fw, fh))
-		{
+	const auto draw_fade_radius_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, r, g, b, a](const GdkRectangle &rect, gint sx, gint sy)
+	{
+		GdkRectangle fade_rect;
+		if (!gdk_rectangle_intersect(&rect, &pb_rect, &fade_rect)) return;
+
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
-		                        x + border, y + border, border,
-		                        fx, fy, fw, fh,
+		                        sx, sy, border,
+		                        fade_rect,
 		                        r, g, b, a);
-		}
-	if (util_clip_region(x + w - border, y, border, border,
-	                     rx, ry, rw, rh,
-	                     fx, fy, fw, fh))
-		{
-		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
-		                        x + w - border, y + border, border,
-		                        fx, fy, fw, fh,
-		                        r, g, b, a);
-		}
-	if (util_clip_region(x, y + h - border, border, border,
-	                     rx, ry, rw, rh,
-	                     fx, fy, fw, fh))
-		{
-		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
-		                        x + border, y + h - border, border,
-		                        fx, fy, fw, fh,
-		                        r, g, b, a);
-		}
-	if (util_clip_region(x + w - border, y + h - border, border, border,
-	                     rx, ry, rw, rh,
-	                     fx, fy, fw, fh))
-		{
-		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
-		                        x + w - border, y + h - border, border,
-		                        fx, fy, fw, fh,
-		                        r, g, b, a);
-		}
+	};
+
+	draw_fade_radius_if_intersect({x, y, border, border}, x + border, y + border);
+	draw_fade_radius_if_intersect({x + w - border, y, border, border}, x + w - border, y + border);
+	draw_fade_radius_if_intersect({x, y + h - border, border, border}, x + border, y + h - border);
+	draw_fade_radius_if_intersect({x + w - border, y + h - border, border, border}, x + w - border, y + h - border);
 }
 
 

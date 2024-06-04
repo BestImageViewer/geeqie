@@ -214,22 +214,6 @@ void pixbuf_ignore_alpha_rect(GdkPixbuf *pb,
 
 /* clipping utils */
 
-// TODO(xsdg): Rename this function to util_intersect_regions.
-/**
- * @brief Performs an intersection of the two specified regions.
- * @param[in] x,y Coordinates of the top-left corner of the first region.
- * @param[in] w,h Extent of the first region.
- * @param[in] clip_x,clip_y Coordinates of the top-left corner of the second region.
- * @param[in] clip_w,clip_h Extent of the second region.
- * @param[out] rx,ry Computed coordinates of the top-left corner of the intersection.
- * @param[out] rw,rh Computed extent of the intersection.
- * @retval FALSE The specified regions are non-overlapping.
- * @retval TRUE The intersection operation was performed, and the output params were set.
- */
-gboolean util_clip_region(gint x, gint y, gint w, gint h,
-                          gint clip_x, gint clip_y, gint clip_w, gint clip_h,
-                          gint &rx, gint &ry, gint &rw, gint &rh);
-
 // TODO(xsdg): Rename this function to util_triangle_bounding_box.
 /**
  * @brief Computes the bounding box for the specified triangle.
