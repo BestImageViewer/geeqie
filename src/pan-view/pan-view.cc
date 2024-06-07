@@ -367,34 +367,33 @@ static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
 	GList *work;
 	const GdkRectangle request_rect{x, y, width, height};
 	GdkRectangle pan_grid_rect;
-	GdkRectangle r;
 
 	pixbuf_set_rect_fill(pixbuf,
 			     0, 0, width, height,
 			     PAN_BACKGROUND_COLOR);
 
+	const auto draw_rect_if_intersect = [pixbuf, &request_rect, x, y](const GdkRectangle &pan_grid_rect)
+	{
+		GdkRectangle r;
+		if (!gdk_rectangle_intersect(&request_rect, &pan_grid_rect, &r)) return;
+
+		r.x -= x;
+		r.y -= y;
+		pixbuf_draw_rect_fill(pixbuf, r, PAN_GRID_COLOR);
+	};
+
 	pan_grid_rect = request_rect;
 	pan_grid_rect.width = 1;
 	for (pan_grid_rect.x = (x / PAN_GRID_SIZE) * PAN_GRID_SIZE; pan_grid_rect.x < x + width; pan_grid_rect.x += PAN_GRID_SIZE)
 		{
-		if (gdk_rectangle_intersect(&request_rect, &pan_grid_rect, &r))
-			{
-			pixbuf_draw_rect_fill(pixbuf,
-			                      r.x - x, r.y - y, r.width, r.height,
-			                      PAN_GRID_COLOR);
-			}
+		draw_rect_if_intersect(pan_grid_rect);
 		}
 
 	pan_grid_rect = request_rect;
 	pan_grid_rect.height = 1;
 	for (pan_grid_rect.y = (y / PAN_GRID_SIZE) * PAN_GRID_SIZE; pan_grid_rect.y < y + height; pan_grid_rect.y += PAN_GRID_SIZE)
 		{
-		if (gdk_rectangle_intersect(&request_rect, &pan_grid_rect, &r))
-			{
-			pixbuf_draw_rect_fill(pixbuf,
-			                      r.x - x, r.y - y, r.width, r.height,
-			                      PAN_GRID_COLOR);
-			}
+		draw_rect_if_intersect(pan_grid_rect);
 		}
 
 	list = pan_layout_intersect(pw, x, y, width, height);

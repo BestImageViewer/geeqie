@@ -64,15 +64,19 @@ gboolean pixbuf_clip_region(const GdkPixbuf *pb, const GdkRectangle &clip, GdkRe
 
 /*
  * Fills rectangular region of pixbuf defined by
- * corners `(x1, y1)` and `(x2, y2)`
+ * corners `(x1, y1)` and `(x2, y2)` from `rect`
  * with colors red (r), green (g), blue (b)
- * applying alpha (a) from get_alpha function.
+ * applying alpha (a) from `get_alpha` function.
  */
 void pixbuf_draw_rect_fill(guchar *p_pix, gint prs, gboolean has_alpha,
-                           gint x1, gint y1, gint x2, gint y2,
+                           const GdkRectangle &rect,
                            guint8 r, guint8 g, guint8 b,
                            const GetAlpha &get_alpha)
 {
+	const gint x1 = rect.x;
+	const gint y1 = rect.y;
+	const gint x2 = rect.x + rect.width;
+	const gint y2 = rect.y + rect.height;
 	const gint p_step = has_alpha ? 4 : 3;
 
 	for (gint y = y1; y < y2; y++)
@@ -724,8 +728,8 @@ GdkPixbuf *pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation)
  */
 
 void pixbuf_draw_rect_fill(GdkPixbuf *pb,
-			   gint x, gint y, gint w, gint h,
-			   gint r, gint g, gint b, gint a)
+                           const GdkRectangle &rect,
+                           gint r, gint g, gint b, gint a)
 {
 	gboolean has_alpha;
 	gint pw;
@@ -738,8 +742,8 @@ void pixbuf_draw_rect_fill(GdkPixbuf *pb,
 	pw = gdk_pixbuf_get_width(pb);
 	ph = gdk_pixbuf_get_height(pb);
 
-	if (x < 0 || x + w > pw) return;
-	if (y < 0 || y + h > ph) return;
+	if (rect.x < 0 || rect.x + rect.width > pw) return;
+	if (rect.y < 0 || rect.y + rect.height > ph) return;
 
 	has_alpha = gdk_pixbuf_get_has_alpha(pb);
 	prs = gdk_pixbuf_get_rowstride(pb);
@@ -750,9 +754,7 @@ void pixbuf_draw_rect_fill(GdkPixbuf *pb,
 	// TODO(xsdg): Should we do anything about a potential
 	// existing alpha value here?
 
-	pixbuf_draw_rect_fill(p_pix, prs, has_alpha,
-	                      x, y, x + w, y + h,
-	                      r, g, b, get_a);
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, rect, r, g, b, get_a);
 }
 
 #pragma GCC diagnostic push
@@ -762,14 +764,18 @@ void pixbuf_draw_rect_unused(GdkPixbuf *pb,
 		      gint r, gint g, gint b, gint a,
 		      gint left, gint right, gint top, gint bottom)
 {
-	pixbuf_draw_rect_fill(pb, x + left, y, w - left - right, top,
-			      r, g, b ,a);
-	pixbuf_draw_rect_fill(pb, x + w - right, y, right, h,
-			      r, g, b ,a);
-	pixbuf_draw_rect_fill(pb, x + left, y + h - bottom, w - left - right, bottom,
-			      r, g, b ,a);
-	pixbuf_draw_rect_fill(pb, x, y, left, h,
-			      r, g, b ,a);
+	pixbuf_draw_rect_fill(pb,
+	                      {x + left, y, w - left - right, top},
+	                      r, g, b, a);
+	pixbuf_draw_rect_fill(pb,
+	                      {x + w - right, y, right, h},
+	                      r, g, b, a);
+	pixbuf_draw_rect_fill(pb,
+	                      {x + left, y + h - bottom, w - left - right, bottom},
+	                      r, g, b, a);
+	pixbuf_draw_rect_fill(pb,
+	                      {x, y, left, h},
+	                      r, g, b, a);
 }
 #pragma GCC diagnostic pop
 
@@ -1359,9 +1365,7 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
 		return a - a * distance / border;
 	};
 
-	pixbuf_draw_rect_fill(p_pix, prs, has_alpha,
-	                      fade_rect.x, fade_rect.y, fade_rect.x + fade_rect.width, fade_rect.y + fade_rect.height,
-	                      r, g, b, get_a);
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, fade_rect, r, g, b, get_a);
 }
 
 /**
@@ -1389,9 +1393,7 @@ static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
 		return a - a * radius / border;
 	};
 
-	pixbuf_draw_rect_fill(p_pix, prs, has_alpha,
-	                      fade_rect.x, fade_rect.y, fade_rect.x + fade_rect.width, fade_rect.y + fade_rect.height,
-	                      r, g, b, get_a);
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, fade_rect, r, g, b, get_a);
 }
 
 void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
@@ -1418,7 +1420,7 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
 	GdkRectangle f;
 	if (gdk_rectangle_intersect(&contracted_rect, &pb_rect, &f))
 		{
-		pixbuf_draw_rect_fill(pb, f.x, f.y, f.width, f.height, r, g, b, a);
+		pixbuf_draw_rect_fill(pb, f, r, g, b, a);
 		}
 
 	if (border < 1) return;

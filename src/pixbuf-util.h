@@ -87,15 +87,14 @@ GdkPixbuf* pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation);
  *        within the specified region, with a proportion set by the alpha (`a`)
  *        parameter.
  * @param pb The `GdkPixbuf` to paint into.
- * @param x,y Coordinates of the top-left corner of the first region.
- * @param w,h Extent of the first region.
+ * @param rect The specified region.
  * @param r,g,b Fill color.
  * @param a The alpha to use for compositing. a=255 is solid (fully the new
  *          color).  a=0 is tranparent (fully the original contents).
  */
 void pixbuf_draw_rect_fill(GdkPixbuf *pb,
-			   gint x, gint y, gint w, gint h,
-			   gint r, gint g, gint b, gint a);
+                           const GdkRectangle &rect,
+                           gint r, gint g, gint b, gint a);
 
 /**
  * @brief Fills the specified region of the pixbuf with the specified color.
