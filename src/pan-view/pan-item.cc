@@ -248,14 +248,15 @@ PanItem *pan_item_tri_new(PanWindow *pw,
                           const PanColor &color,
                           gint borders, const PanColor &border_color)
 {
-	PanItem *pi;
+	GdkRectangle tri_rect = util_triangle_bounding_box(c1, c2, c3);
 
-	pi = g_new0(PanItem, 1);
+	auto *pi = g_new0(PanItem, 1);
 	pi->type = PAN_ITEM_TRIANGLE;
+	pi->x = tri_rect.x;
+	pi->y = tri_rect.y;
+	pi->width = tri_rect.width;
+	pi->height = tri_rect.height;
 	pi->color = color;
-
-	util_clip_triangle(c1, c2, c3,
-	                   pi->x, pi->y, pi->width, pi->height);
 
 	auto *coord = g_new0(GdkPoint, 3);
 	coord[0] = c1;

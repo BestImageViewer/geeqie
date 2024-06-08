@@ -1015,16 +1015,19 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,
  *-----------------------------------------------------------------------------
  */
 
-void util_clip_triangle(const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
-                        gint &rx, gint &ry, gint &rw, gint &rh)
+GdkRectangle util_triangle_bounding_box(const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3)
 {
+	GdkRectangle bounding_box;
+
 	gint x_max;
-	std::tie(rx, x_max) = std::minmax({c1.x, c2.x, c3.x});
-	rw = x_max - rx;
+	std::tie(bounding_box.x, x_max) = std::minmax({c1.x, c2.x, c3.x});
+	bounding_box.width = x_max - bounding_box.x;
 
 	gint y_max;
-	std::tie(ry, y_max) = std::minmax({c1.y, c2.y, c3.y});
-	rh = y_max - ry;
+	std::tie(bounding_box.y, y_max) = std::minmax({c1.y, c2.y, c3.y});
+	bounding_box.height = y_max - bounding_box.y;
+
+	return bounding_box;
 }
 
 void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
@@ -1046,9 +1049,7 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
 	if (!pixbuf_clip_region(pb, clip, pb_rect)) return;
 
 	// Determine the bounding box for the triangle.
-	GdkRectangle tri_rect;
-	util_clip_triangle(c1, c2, c3,
-	                   tri_rect.x, tri_rect.y, tri_rect.width, tri_rect.height);
+	GdkRectangle tri_rect = util_triangle_bounding_box(c1, c2, c3);
 
 	// And now clip the triangle bounding box to the pixbuf clipping region.
 	GdkRectangle f;

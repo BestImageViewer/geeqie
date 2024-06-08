@@ -213,17 +213,14 @@ void pixbuf_ignore_alpha_rect(GdkPixbuf *pb,
 
 /* clipping utils */
 
-// TODO(xsdg): Rename this function to util_triangle_bounding_box.
 /**
  * @brief Computes the bounding box for the specified triangle.
  * @param[in] c1 Coordinates of the first corner of the triangle.
  * @param[in] c2 Coordinates of the second corner of the triangle.
  * @param[in] c3 Coordinates of the third corner of the triangle.
- * @param[out] rx,ry Computed coordinates of the top-left corner of the bounding box.
- * @param[out] rw,rh Computed extent of the bounding box.
+ * @return The computed bounding box.
  */
-void util_clip_triangle(const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
-                        gint &rx, gint &ry, gint &rw, gint &rh);
+GdkRectangle util_triangle_bounding_box(const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3);
 
 
 #endif
