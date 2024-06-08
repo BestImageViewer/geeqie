@@ -49,6 +49,53 @@ namespace
 
 using GetAlpha = std::function<guint8(gint, gint)>;
 
+struct PixbufInline
+{
+	const gchar *key;
+	const gchar *data;
+};
+
+constexpr PixbufInline inline_pixbuf_data[] = {
+	{ PIXBUF_INLINE_ARCHIVE,                "gq-icon-archive-file" },
+	{ PIXBUF_INLINE_BROKEN,                 "gq-icon-broken" },
+	{ PIXBUF_INLINE_COLLECTION,             "gq-icon-collection" },
+	{ PIXBUF_INLINE_ICON_180,               "gq-icon-rotate-180" },
+	{ PIXBUF_INLINE_ICON_BOOK,              "gq-icon-book" },
+	{ PIXBUF_INLINE_ICON_CONFIG,            "gq-icon-config" },
+	{ PIXBUF_INLINE_ICON_DRAW_RECTANGLE,    "gq-icon-draw-rectangle" },
+	{ PIXBUF_INLINE_ICON_EXIF,              "gq-icon-exif" },
+	{ PIXBUF_INLINE_ICON_EXPOSURE,          "gq-icon-exposure" },
+	{ PIXBUF_INLINE_ICON_FLOAT,             "gq-icon-float" },
+	{ PIXBUF_INLINE_ICON,                   "gqview-icon" },
+	{ PIXBUF_INLINE_ICON_GRAYSCALE,         "gq-icon-grayscale" },
+	{ PIXBUF_INLINE_ICON_HEIF,              "gq-icon-heic" },
+	{ PIXBUF_INLINE_ICON_HIDETOOLS,         "gq-icon-hidetools" },
+	{ PIXBUF_INLINE_ICON_MAINTENANCE,       "gq-icon-maintenance" },
+	{ PIXBUF_INLINE_ICON_MARKS,             "gq-icon-marks" },
+	{ PIXBUF_INLINE_ICON_MOVE,              "gq-icon-move" },
+	{ PIXBUF_INLINE_ICON_ORIGINAL,          "gq-icon-original" },
+	{ PIXBUF_INLINE_ICON_PANORAMA,          "gq-icon-panorama" },
+	{ PIXBUF_INLINE_ICON_PDF,               "gq-icon-pdf" },
+	{ PIXBUF_INLINE_ICON_PROPERTIES,        "gq-icon-properties" },
+	{ PIXBUF_INLINE_ICON_RENAME,            "gq-icon-rename" },
+	{ PIXBUF_INLINE_ICON_SELECT_ALL,        "gq-icon-select-all" },
+	{ PIXBUF_INLINE_ICON_SELECT_INVERT,     "gq-icon-select-invert" },
+	{ PIXBUF_INLINE_ICON_SELECT_NONE,       "gq-icon-select-none" },
+	{ PIXBUF_INLINE_ICON_SELECT_RECTANGLE,  "gq-icon-select-rectangle" },
+	{ PIXBUF_INLINE_ICON_SORT,              "gq-icon-sort" },
+	{ PIXBUF_INLINE_ICON_THUMB,             "gq-icon-thumb" },
+	{ PIXBUF_INLINE_ICON_TOOLS,             "gq-icon-tools" },
+	{ PIXBUF_INLINE_ICON_VIEW,              "gq-icon-view" },
+	{ PIXBUF_INLINE_ICON_ZOOMFILLHOR,       "gq-icon-zoomfillhor" },
+	{ PIXBUF_INLINE_ICON_ZOOMFILLVERT,      "gq-icon-zoomfillvert" },
+	{ PIXBUF_INLINE_LOGO,                   "geeqie-logo" },
+	{ PIXBUF_INLINE_METADATA,               "gq-icon-metadata" },
+	{ PIXBUF_INLINE_SCROLLER,               "gq-scroller" },
+	{ PIXBUF_INLINE_SPLIT_PANE_SYNC,        "gq-icon-split-pane-sync" },
+	{ PIXBUF_INLINE_UNKNOWN,                "gq-icon-unknown" },
+	{ PIXBUF_INLINE_VIDEO,                  "gq-icon-video" },
+};
+
 constexpr gint ROTATE_BUFFER_WIDTH = 48;
 constexpr gint ROTATE_BUFFER_HEIGHT = 48;
 
@@ -165,124 +212,64 @@ gboolean pixbuf_to_file_as_jpg_unused(GdkPixbuf *pixbuf, const gchar *filename, 
  *-----------------------------------------------------------------------------
  */
 
-struct PixbufInline
-{
-	const gchar *key;
-	const gchar *data;
-};
-
-static PixbufInline inline_pixbuf_data[] = {
-	{  PIXBUF_INLINE_ARCHIVE,                "gq-icon-archive-file" },
-	{  PIXBUF_INLINE_BROKEN,                 "gq-icon-broken" },
-	{  PIXBUF_INLINE_COLLECTION,             "gq-icon-collection" },
-	{  PIXBUF_INLINE_ICON_180,               "gq-icon-rotate-180" },
-	{  PIXBUF_INLINE_ICON_BOOK,              "gq-icon-book" },
-	{  PIXBUF_INLINE_ICON_CONFIG,            "gq-icon-config" },
-	{  PIXBUF_INLINE_ICON_DRAW_RECTANGLE,    "gq-icon-draw-rectangle" },
-	{  PIXBUF_INLINE_ICON_EXIF,              "gq-icon-exif" },
-	{  PIXBUF_INLINE_ICON_EXPOSURE,          "gq-icon-exposure" },
-	{  PIXBUF_INLINE_ICON_FLOAT,             "gq-icon-float" },
-	{  PIXBUF_INLINE_ICON,                   "gqview-icon" },
-	{  PIXBUF_INLINE_ICON_GRAYSCALE,         "gq-icon-grayscale" },
-	{  PIXBUF_INLINE_ICON_HEIF,              "gq-icon-heic" },
-	{  PIXBUF_INLINE_ICON_HIDETOOLS,         "gq-icon-hidetools" },
-	{  PIXBUF_INLINE_ICON_MAINTENANCE,       "gq-icon-maintenance" },
-	{  PIXBUF_INLINE_ICON_MARKS,             "gq-icon-marks" },
-	{  PIXBUF_INLINE_ICON_MOVE,              "gq-icon-move" },
-	{  PIXBUF_INLINE_ICON_ORIGINAL,          "gq-icon-original" },
-	{  PIXBUF_INLINE_ICON_PANORAMA,          "gq-icon-panorama" },
-	{  PIXBUF_INLINE_ICON_PDF,               "gq-icon-pdf" },
-	{  PIXBUF_INLINE_ICON_PROPERTIES,        "gq-icon-properties" },
-	{  PIXBUF_INLINE_ICON_RENAME,            "gq-icon-rename" },
-	{  PIXBUF_INLINE_ICON_SELECT_ALL,        "gq-icon-select-all" },
-	{  PIXBUF_INLINE_ICON_SELECT_INVERT,     "gq-icon-select-invert" },
-	{  PIXBUF_INLINE_ICON_SELECT_NONE,       "gq-icon-select-none" },
-	{  PIXBUF_INLINE_ICON_SELECT_RECTANGLE,  "gq-icon-select-rectangle" },
-	{  PIXBUF_INLINE_ICON_SORT,              "gq-icon-sort" },
-	{  PIXBUF_INLINE_ICON_THUMB,             "gq-icon-thumb" },
-	{  PIXBUF_INLINE_ICON_TOOLS,             "gq-icon-tools" },
-	{  PIXBUF_INLINE_ICON_VIEW,              "gq-icon-view" },
-	{  PIXBUF_INLINE_ICON_ZOOMFILLHOR,       "gq-icon-zoomfillhor" },
-	{  PIXBUF_INLINE_ICON_ZOOMFILLVERT,      "gq-icon-zoomfillvert" },
-	{  PIXBUF_INLINE_LOGO,                   "geeqie-logo" },
-	{  PIXBUF_INLINE_METADATA,               "gq-icon-metadata" },
-	{  PIXBUF_INLINE_SCROLLER,               "gq-scroller" },
-	{  PIXBUF_INLINE_SPLIT_PANE_SYNC,        "gq-icon-split-pane-sync" },
-	{  PIXBUF_INLINE_UNKNOWN,                "gq-icon-unknown" },
-	{  PIXBUF_INLINE_VIDEO,                  "gq-icon-video" },
-	{  nullptr,                              nullptr }
-};
-
 GdkPixbuf *pixbuf_inline(const gchar *key)
 {
-	gboolean dark = FALSE;
-	gchar *file_name = nullptr;
-	gchar *path;
 	gchar *theme_name;
-	GdkPixbuf *icon_pixbuf;
 	GError *error = nullptr;
 	GInputStream *in_stream;
-	gint i;
-	GtkSettings *settings;
 
 	if (!key) return nullptr;
 
-	settings = gtk_settings_get_default();
+	GtkSettings *settings = gtk_settings_get_default();
 	g_object_get(settings, "gtk-theme-name", &theme_name, nullptr);
-	dark = g_str_has_suffix(theme_name, "dark");
+	gboolean dark = g_str_has_suffix(theme_name, "dark");
 	g_free(theme_name);
 
-	i = 0;
-	while (inline_pixbuf_data[i].key)
+	const auto it = std::find_if(std::cbegin(inline_pixbuf_data), std::cend(inline_pixbuf_data),
+	                             [key](const PixbufInline &pi){ return strcmp(pi.key, key) == 0; });
+	if (it == std::cend(inline_pixbuf_data))
 		{
-		if (strcmp(inline_pixbuf_data[i].key, key) == 0)
-			{
-			file_name = g_strconcat(inline_pixbuf_data[i].data, dark ? "-dark" : "", ".png", nullptr);
-			path = g_build_filename(GQ_RESOURCE_PATH_ICONS, file_name, nullptr);
-			g_free(file_name);
-
-			in_stream = g_resources_open_stream(path, G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
-			g_free(path);
-
-			if (error)
-				{
-				g_error_free(error);
-				error = nullptr;
-
-				file_name = g_strconcat(inline_pixbuf_data[i].data, ".png", nullptr);
-				path = g_build_filename(GQ_RESOURCE_PATH_ICONS, file_name, nullptr);
-				g_free(file_name);
-
-				in_stream = g_resources_open_stream(path, G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
-				g_free(path);
-				}
-
-			if (error)
-				{
-				log_printf("warning: inline pixbuf error: %s", error->message);
-				g_error_free(error);
-				g_object_unref(in_stream);
-				return nullptr;
-				}
-
-			icon_pixbuf = gdk_pixbuf_new_from_stream(in_stream, nullptr, &error);
-			g_object_unref(in_stream);
-
-			if (error)
-				{
-				log_printf("warning: inline pixbuf error: %s", error->message);
-				g_error_free(error);
-				return nullptr;
-				}
-
-			return icon_pixbuf;
-			}
-		i++;
+		log_printf("warning: inline pixbuf key \"%s\" not found.\n", key);
+		return nullptr;
 		}
 
-	log_printf("warning: inline pixbuf key \"%s\" not found.\n", key);
+	const auto get_input_stream = [](const gchar *data, gboolean dark, GError **error) -> GInputStream *
+	{
+		gchar *file_name = g_strconcat(data, dark ? "-dark" : "", ".png", nullptr);
+		gchar *path = g_build_filename(GQ_RESOURCE_PATH_ICONS, file_name, nullptr);
+		GInputStream *in_stream = g_resources_open_stream(path, G_RESOURCE_LOOKUP_FLAGS_NONE, error);
+		g_free(path);
+		g_free(file_name);
+		return in_stream;
+	};
 
-	return nullptr;
+	in_stream = get_input_stream(it->data, dark, &error);
+	if (error && dark)
+		{
+		g_error_free(error);
+		error = nullptr;
+		in_stream = get_input_stream(it->data, !dark, &error);
+		}
+
+	if (error)
+		{
+		log_printf("warning: inline pixbuf error: %s", error->message);
+		g_error_free(error);
+		g_object_unref(in_stream);
+		return nullptr;
+		}
+
+	GdkPixbuf *icon_pixbuf = gdk_pixbuf_new_from_stream(in_stream, nullptr, &error);
+	g_object_unref(in_stream);
+
+	if (error)
+		{
+		log_printf("warning: inline pixbuf error: %s", error->message);
+		g_error_free(error);
+		return nullptr;
+		}
+
+	return icon_pixbuf;
 }
 
 static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
@@ -303,13 +290,9 @@ static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
 
 void pixbuf_inline_register_stock_icons()
 {
-	gint i;
-
-	i = 0;
-	while (inline_pixbuf_data[i].key)
+	for (const PixbufInline &pi : inline_pixbuf_data)
 		{
-		register_stock_icon(inline_pixbuf_data[i].key, pixbuf_inline(inline_pixbuf_data[i].key));
-		i++;
+		register_stock_icon(pi.key, pixbuf_inline(pi.key));
 		}
 }
 
