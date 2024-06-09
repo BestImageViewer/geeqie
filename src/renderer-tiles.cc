@@ -167,7 +167,7 @@ inline gint get_left_pixbuf_offset(RendererTiles *rt)
 } // namespace
 
 
-static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h, ImageTile *it);
+static void rt_overlay_draw(RendererTiles *rt, const GdkRectangle &request_rect, ImageTile *it);
 
 static gboolean rt_tile_is_visible(RendererTiles *rt, ImageTile *it);
 static void rt_queue_merge(QueueData *parent, QueueData *qd);
@@ -219,7 +219,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 		cairo_set_source_rgb(cr, pr->color.red, pr->color.green, pr->color.blue);
 		cairo_rectangle(cr, r.x + rt->stereo_off_x, r.y + rt->stereo_off_y, r.width, r.height);
 		cairo_fill(cr);
-		rt_overlay_draw(rt, r.x, r.y, r.width, r.height, nullptr);
+		rt_overlay_draw(rt, r, nullptr);
 	};
 
 	if (!pr->pixbuf && !pr->source_tiles_enabled)
@@ -556,12 +556,8 @@ static void rt_overlay_init_window(RendererTiles *rt, OverlayData *od)
 	gdk_window_show(od->window);
 }
 
-static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
-			    ImageTile *it)
+static void rt_overlay_draw(RendererTiles *rt, const GdkRectangle &request_rect, ImageTile *it)
 {
-	PixbufRenderer *pr = rt->pr;
-	const GdkRectangle request_rect{x, y, w, h};
-
 	for (GList *work = rt->overlay_list; work; work = work->next)
 		{
 		auto *od = static_cast<OverlayData *>(work->data);
@@ -575,9 +571,9 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 			{
 			if (!rt->overlay_buffer)
 				{
-				rt->overlay_buffer = gdk_window_create_similar_surface(gtk_widget_get_window(reinterpret_cast<GtkWidget *>(pr)),
-		                                            CAIRO_CONTENT_COLOR,
-		                                            rt->tile_width, rt->tile_height);
+				rt->overlay_buffer = gdk_window_create_similar_surface(gtk_widget_get_window(reinterpret_cast<GtkWidget *>(rt->pr)),
+				                                                       CAIRO_CONTENT_COLOR,
+				                                                       rt->tile_width, rt->tile_height);
 				}
 
 			const auto draw = [rt, od, &od_rect](const GdkRectangle &r, const std::function<void(cairo_t *)> &set_source)
@@ -600,9 +596,9 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 
 			if (it)
 				{
-				const auto set_source = [rt, pr, it, &r](cairo_t *cr)
+				const auto set_source = [rt, pr = rt->pr, it, &r](cairo_t *cr)
 				{
-					cairo_set_source_surface(cr, it->surface, (pr->x_offset + (it->x - rt->x_scroll)) - r.x, (pr->y_offset + (it->y - rt->y_scroll)) - r.y);
+					cairo_set_source_surface(cr, it->surface, pr->x_offset + (it->x - rt->x_scroll) - r.x, pr->y_offset + (it->y - rt->y_scroll) - r.y);
 				};
 				draw(r, set_source);
 				}
@@ -1541,10 +1537,11 @@ static void rt_tile_expose(RendererTiles *rt, ImageTile *it,
 
 	if (rt->overlay_list)
 		{
-		rt_overlay_draw(rt, pr->x_offset + (it->x - rt->x_scroll) + x,
-				pr->y_offset + (it->y - rt->y_scroll) + y,
-				w, h,
-				it);
+		rt_overlay_draw(rt,
+		                {pr->x_offset + (it->x - rt->x_scroll) + x,
+		                 pr->y_offset + (it->y - rt->y_scroll) + y,
+		                 w, h},
+		                it);
 		}
 
 	gtk_widget_queue_draw(GTK_WIDGET(rt->pr));
