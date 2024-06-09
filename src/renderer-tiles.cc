@@ -196,7 +196,7 @@ static void rt_sync_scroll(RendererTiles *rt)
  *-------------------------------------------------------------------
  */
 
-static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
+static void rt_border_draw(RendererTiles *rt, const GdkRectangle &border_rect)
 {
 	PixbufRenderer *pr = rt->pr;
 	GtkWidget *box;
@@ -210,7 +210,6 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 
 	cr = cairo_create(rt->surface);
 
-	const GdkRectangle border_rect{x, y, w, h};
 	auto draw_if_intersect = [&border_rect, rt, pr, cr](const GdkRectangle &rect)
 	{
 		GdkRectangle r;
@@ -263,7 +262,7 @@ static void rt_border_draw(RendererTiles *rt, gint x, gint y, gint w, gint h)
 static void rt_border_clear(RendererTiles *rt)
 {
 	PixbufRenderer *pr = rt->pr;
-	rt_border_draw(rt, 0, 0, pr->viewport_width, pr->viewport_height);
+	rt_border_draw(rt, {0, 0, pr->viewport_width, pr->viewport_height});
 }
 
 
@@ -636,7 +635,7 @@ static void rt_overlay_queue_draw(RendererTiles *rt, OverlayData *od, gint x1, g
 	         od_rect.width, od_rect.height,
 	         FALSE, TILE_RENDER_ALL, FALSE, FALSE);
 
-	rt_border_draw(rt, od_rect.x, od_rect.y, od_rect.width, od_rect.height);
+	rt_border_draw(rt, od_rect);
 }
 
 static void rt_overlay_queue_all(RendererTiles *rt, gint x1, gint y1, gint x2, gint y2)
@@ -2044,7 +2043,7 @@ static void renderer_redraw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 	x -= rt->stereo_off_x;
 	y -= rt->stereo_off_y;
 
-	rt_border_draw(rt, x, y, w, h);
+	rt_border_draw(rt, {x, y, w, h});
 
 	x = MAX(0, x - pr->x_offset + pr->x_scroll);
 	y = MAX(0, y - pr->y_offset + pr->y_scroll);
