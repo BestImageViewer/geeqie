@@ -28,7 +28,7 @@
 
 #include "typedefs.h"
 
-struct FileData;
+class FileData;
 struct LayoutWindow;
 
 enum {

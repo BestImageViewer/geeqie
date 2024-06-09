@@ -29,7 +29,7 @@
 #include "typedefs.h"
 
 struct AnimationData;
-struct FileData;
+class FileData;
 struct FullScreenData;
 struct ImageWindow;
 struct SlideShowData;

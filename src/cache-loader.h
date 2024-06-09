@@ -25,7 +25,7 @@
 #include <glib.h>
 
 struct CacheData;
-struct FileData;
+class FileData;
 struct ImageLoader;
 
 enum CacheDataType {

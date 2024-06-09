@@ -27,7 +27,7 @@
 #include "typedefs.h"
 
 struct CollectionData;
-struct FileData;
+class FileData;
 
 enum CollectionLoadFlags {
 	COLLECTION_LOAD_NONE	= 0,

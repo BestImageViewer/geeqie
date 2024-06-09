@@ -24,7 +24,7 @@
 
 #include <glib.h>
 
-struct FileData;
+class FileData;
 struct PanItem;
 struct PanWindow;
 

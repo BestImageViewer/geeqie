@@ -27,7 +27,7 @@
 
 #include "typedefs.h"
 
-struct FileData;
+class FileData;
 
 #define COMMENT_KEY "Xmp.dc.description"
 #define KEYWORD_KEY "Xmp.dc.subject"

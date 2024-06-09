@@ -23,7 +23,7 @@
 
 #include <glib.h>
 
-struct FileData;
+class FileData;
 
 void lua_init();
 

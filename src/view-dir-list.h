@@ -26,7 +26,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-struct FileData;
+class FileData;
 struct ViewDir;
 
 ViewDir *vdlist_new(ViewDir *vd, FileData *dir_fd);

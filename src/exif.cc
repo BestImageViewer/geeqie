@@ -66,7 +66,7 @@
 #include "typedefs.h"
 #include "ui-fileops.h"
 
-struct FileData;
+class FileData;
 
 /*
  *-----------------------------------------------------------------------------

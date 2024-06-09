@@ -27,7 +27,7 @@
 #include <gtk/gtk.h>
 #include <pango/pango.h>
 
-struct FileData;
+class FileData;
 
 gboolean pixbuf_to_file_as_png (GdkPixbuf *pixbuf, const gchar *filename);
 

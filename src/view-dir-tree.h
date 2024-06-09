@@ -28,7 +28,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-struct FileData;
+class FileData;
 struct ViewDir;
 
 struct NodeData

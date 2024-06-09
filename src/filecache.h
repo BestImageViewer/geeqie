@@ -24,7 +24,7 @@
 #include <glib.h>
 
 struct FileCacheData;
-struct FileData;
+class FileData;
 
 using FileCacheReleaseFunc = void (*)(FileData *);
 

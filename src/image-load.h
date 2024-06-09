@@ -28,7 +28,7 @@
 #include <glib-object.h>
 #include <glib.h>
 
-struct FileData;
+class FileData;
 
 #define TYPE_IMAGE_LOADER		(image_loader_get_type())
 

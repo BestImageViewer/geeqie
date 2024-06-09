@@ -22,7 +22,7 @@
 #ifndef PAN_VIEW_H
 #define PAN_VIEW_H
 
-struct FileData;
+class FileData;
 
 void pan_window_new(FileData *dir_fd);
 

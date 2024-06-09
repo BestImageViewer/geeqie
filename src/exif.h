@@ -28,7 +28,7 @@
 
 struct ExifData;
 struct ExifItem;
-struct FileData;
+class FileData;
 
 #define EXIF_FORMATTED() "formatted."
 #define EXIF_FORMATTED_LEN (sizeof(EXIF_FORMATTED()) - 1)

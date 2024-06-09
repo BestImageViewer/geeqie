@@ -28,7 +28,7 @@
 
 #include "typedefs.h"
 
-struct FileData;
+class FileData;
 
 enum PanDateLengthType {
 	PAN_DATE_LENGTH_EXACT,

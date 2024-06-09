@@ -23,7 +23,7 @@
 
 #include <glib.h>
 
-struct FileData;
+class FileData;
 
 gchar *open_archive(const FileData *fd);
 

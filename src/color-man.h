@@ -25,7 +25,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
 
-struct FileData;
+class FileData;
 struct ImageWindow;
 
 enum ColorManProfileType {

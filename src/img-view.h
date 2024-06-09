@@ -26,7 +26,7 @@
 
 struct CollectInfo;
 struct CollectionData;
-struct FileData;
+class FileData;
 struct ImageWindow;
 
 void view_window_new(FileData *fd);

@@ -31,7 +31,7 @@
 
 #include "main-defines.h"
 
-struct FileData;
+class FileData;
 struct ImageLoader;
 
 #if GLIB_CHECK_VERSION (2, 34, 0)

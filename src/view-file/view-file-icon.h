@@ -29,7 +29,7 @@
 #include "typedefs.h"
 #include "view-file.h"
 
-struct FileData;
+class FileData;
 
 struct ViewFileInfoIcon
 {

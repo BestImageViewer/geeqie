@@ -24,7 +24,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-struct FileData;
+class FileData;
 
 enum OsdTemplateFlags {
 	OSDT_NONE 	= 0,

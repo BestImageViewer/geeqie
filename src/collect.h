@@ -30,7 +30,7 @@
 #include "typedefs.h"
 
 struct CollectTable;
-struct FileData;
+class FileData;
 struct ThumbLoader;
 
 struct CollectInfo

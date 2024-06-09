@@ -27,7 +27,7 @@
 
 #include "pan-types.h"
 
-struct FileData;
+class FileData;
 struct PixbufRenderer;
 
 void pan_item_free(PanItem *pi);

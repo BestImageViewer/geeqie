@@ -26,7 +26,7 @@
 
 #include "typedefs.h"
 
-struct FileData;
+class FileData;
 struct HistMap;
 
 /* Note: The order is important */

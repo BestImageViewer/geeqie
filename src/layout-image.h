@@ -29,7 +29,7 @@
 
 struct CollectInfo;
 struct CollectionData;
-struct FileData;
+class FileData;
 struct LayoutWindow;
 
 GtkWidget *layout_image_new(LayoutWindow *lw, gint i);

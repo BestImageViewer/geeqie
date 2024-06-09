@@ -25,7 +25,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-struct FileData;
+class FileData;
 
 /**
  * @headerfile print_window_new

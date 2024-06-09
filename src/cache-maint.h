@@ -27,7 +27,7 @@
 
 #include "typedefs.h"
 
-struct FileData;
+class FileData;
 
 void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent);
 void cache_notify_cb(FileData *fd, NotifyType type, gpointer data);

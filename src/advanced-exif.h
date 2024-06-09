@@ -24,7 +24,7 @@
 
 #include <gtk/gtk.h>
 
-struct FileData;
+class FileData;
 struct LayoutWindow;
 
 GtkWidget *advanced_exif_new(LayoutWindow *lw);

@@ -24,7 +24,7 @@
 
 #include <glib.h>
 
-struct FileData;
+class FileData;
 struct PanWindow;
 
 void pan_flower_compute(PanWindow *pw, FileData *dir_fd,

@@ -25,7 +25,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-struct FileData;
+class FileData;
 
 enum EditorFlags {
 	EDITOR_KEEP_FS            = 0x00000001,

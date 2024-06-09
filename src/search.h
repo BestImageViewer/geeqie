@@ -22,7 +22,7 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-struct FileData;
+class FileData;
 
 void search_new(FileData *dir_fd, FileData *example_file);
 

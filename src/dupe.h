@@ -28,7 +28,7 @@
 
 struct CollectInfo;
 struct CollectionData;
-struct FileData;
+class FileData;
 struct ImageLoader;
 struct ImageSimilarityData;
 struct ThumbLoader;
