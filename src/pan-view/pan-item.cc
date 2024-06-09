@@ -787,126 +787,72 @@ PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
  *-----------------------------------------------------------------------------
  */
 
-PanTextAlignment *pan_text_alignment_new(PanWindow *pw, gint x, gint y, const gchar *key)
+PanTextAlignment::PanTextAlignment(PanWindow *pw, gint x, gint y, const gchar *key)
+	: pw(pw)
+	, x(x)
+	, y(y)
+	, key(g_strdup(key))
 {
-	PanTextAlignment *ta;
-
-	ta = g_new0(PanTextAlignment, 1);
-
-	ta->pw = pw;
-	ta->x = x;
-	ta->y = y;
-	ta->key = g_strdup(key);
-
-	return ta;
 }
 
-void pan_text_alignment_free(PanTextAlignment *ta)
+PanTextAlignment::~PanTextAlignment()
 {
-	if (!ta) return;
-
-	g_list_free(ta->column1);
-	g_list_free(ta->column2);
-	g_free(ta->key);
-	g_free(ta);
+	g_free(key);
 }
 
-PanItem *pan_text_alignment_add(PanTextAlignment *ta, const gchar *label, const gchar *text)
+void PanTextAlignment::add(const gchar *label, const gchar *text)
 {
-	PanItem *item;
+	Items items;
 
 	if (label)
 		{
-		item = pan_item_text_new(ta->pw, ta->x, ta->y, label,
-					 PAN_TEXT_ATTR_BOLD, PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
-		pan_item_set_key(item, ta->key);
+		items.label = pan_item_text_new(pw, x, y, label,
+		                                PAN_TEXT_ATTR_BOLD, PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
+		pan_item_set_key(items.label, key);
 		}
-	else
-		{
-		item = nullptr;
-		}
-	ta->column1 = g_list_append(ta->column1, item);
 
 	if (text)
 		{
-		item = pan_item_text_new(ta->pw, ta->x, ta->y, text,
-					 PAN_TEXT_ATTR_NONE, PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
-		pan_item_set_key(item, ta->key);
+		items.text = pan_item_text_new(pw, x, y, text,
+		                               PAN_TEXT_ATTR_NONE, PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
+		pan_item_set_key(items.text, key);
 		}
-	else
-		{
-		item = nullptr;
-		}
-	ta->column2 = g_list_append(ta->column2, item);
 
-	return item;
+	columns.push_back(items);
 }
 
-void pan_text_alignment_calc(PanTextAlignment *ta, PanItem *box)
+void PanTextAlignment::calc(PanItem *box)
 {
-	gint cw1;
-	gint cw2;
-	gint x;
-	gint y;
-	GList *work1;
-	GList *work2;
-
-	cw1 = 0;
-	cw2 = 0;
-
-	work1 = ta->column1;
-	while (work1)
+	gint label_column_width = 0;
+	for (const Items &items : columns)
 		{
-		PanItem *p;
-
-		p = static_cast<PanItem *>(work1->data);
-		work1 = work1->next;
-
-		if (p && p->width > cw1) cw1 = p->width;
+		if (items.label) label_column_width = std::max(label_column_width, items.label->width);
 		}
 
-	work2 = ta->column2;
-	while (work2)
+	gint y = this->y;
+	for (Items &items : columns)
 		{
-		PanItem *p;
-
-		p = static_cast<PanItem *>(work2->data);
-		work2 = work2->next;
-
-		if (p && p->width > cw2) cw2 = p->width;
-		}
-
-	x = ta->x;
-	y = ta->y;
-	work1 = ta->column1;
-	work2 = ta->column2;
-	while (work1 && work2)
-		{
-		PanItem *p1;
-		PanItem *p2;
+		PanItem *pi_label = items.label;
+		PanItem *pi_text = items.text;
 		gint height = 0;
 
-		p1 = static_cast<PanItem *>(work1->data);
-		p2 = static_cast<PanItem *>(work2->data);
-		work1 = work1->next;
-		work2 = work2->next;
-
-		if (p1)
+		if (pi_label)
 			{
-			p1->x = x;
-			p1->y = y;
-			pan_item_size_by_item(box, p1, PREF_PAD_BORDER);
-			height = p1->height;
-			}
-		if (p2)
-			{
-			p2->x = x + cw1 + PREF_PAD_SPACE;
-			p2->y = y;
-			pan_item_size_by_item(box, p2, PREF_PAD_BORDER);
-			if (height < p2->height) height = p2->height;
+			pi_label->x = x;
+			pi_label->y = y;
+			pan_item_size_by_item(box, pi_label, PREF_PAD_BORDER);
+			height = pi_label->height;
 			}
 
-		if (!p1 && !p2) height = PREF_PAD_GROUP;
+		if (pi_text)
+			{
+			pi_text->x = x + label_column_width + PREF_PAD_SPACE;
+			pi_text->y = y;
+			pan_item_size_by_item(box, pi_text, PREF_PAD_BORDER);
+			height = std::max(height, pi_text->height);
+			}
+
+		if (!pi_label && !pi_text) height = PREF_PAD_GROUP;
 
 		y += height;
 		}

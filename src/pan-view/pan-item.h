@@ -22,6 +22,8 @@
 #ifndef PAN_VIEW_PAN_ITEM_H
 #define PAN_VIEW_PAN_ITEM_H
 
+#include <vector>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
 
@@ -81,22 +83,30 @@ gboolean pan_item_image_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
                              gint x, gint y, gint width, gint height);
 
 // Alignment
-struct PanTextAlignment {
+class PanTextAlignment
+{
+public:
+	PanTextAlignment(PanWindow *pw, gint x, gint y, const gchar *key);
+	~PanTextAlignment();
+
+	void add(const gchar *label, const gchar *text);
+	void calc(PanItem *box);
+
+private:
 	PanWindow *pw;
 
-	GList *column1;
-	GList *column2;
+	struct Items
+	{
+		PanItem *label = nullptr;
+		PanItem *text = nullptr;
+	};
+
+	std::vector<Items> columns;
 
 	gint x;
 	gint y;
 	gchar *key;
 };
-
-PanTextAlignment *pan_text_alignment_new(PanWindow *pw, gint x, gint y, const gchar *key);
-void pan_text_alignment_free(PanTextAlignment *ta);
-
-PanItem *pan_text_alignment_add(PanTextAlignment *ta, const gchar *label, const gchar *text);
-void pan_text_alignment_calc(PanTextAlignment *ta, PanItem *box);
 
 // Cache data
 void pan_cache_data_free(PanCacheData *pc);

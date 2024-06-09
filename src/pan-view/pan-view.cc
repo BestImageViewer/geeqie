@@ -1358,7 +1358,7 @@ static gboolean pan_window_key_press_cb(GtkWidget *widget, GdkEventKey *event, g
  *-----------------------------------------------------------------------------
  */
 
-static void pan_info_add_exif(PanTextAlignment *ta, FileData *fd)
+static void pan_info_add_exif(PanTextAlignment &ta, FileData *fd)
 {
 	GList *exif_list;
 	gchar *text;
@@ -1378,7 +1378,7 @@ static void pan_info_add_exif(PanTextAlignment *ta, FileData *fd)
 		text = metadata_read_string(fd, key, METADATA_FORMATTED);
 		if (text && text[0] != '\0')
 			{
-			pan_text_alignment_add(ta, title, text);
+			ta.add(title, text);
 			}
 
 		g_free(text);
@@ -1387,13 +1387,34 @@ static void pan_info_add_exif(PanTextAlignment *ta, FileData *fd)
 	g_list_free_full(exif_list, g_free);
 }
 
+static void pan_info_calc_text_alignment(PanWindow *pw, PanItem *pbox, FileData *fd)
+{
+	PanTextAlignment ta{pw, pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, "info"};
+
+	ta.add(_("Filename:"), fd->name);
+
+	gchar *buf = remove_level_from_path(fd->path);
+	ta.add(_("Location:"), buf);
+	g_free(buf);
+
+	ta.add(_("Date:"), text_from_time(fd->date));
+
+	buf = text_from_size(fd->size);
+	ta.add(_("Size:"), buf);
+	g_free(buf);
+
+	if (pw->info_includes_exif)
+		{
+		pan_info_add_exif(ta, fd);
+		}
+
+	ta.calc(pbox);
+}
 
 void pan_info_update(PanWindow *pw, PanItem *pi)
 {
-	PanTextAlignment *ta;
 	PanItem *pbox;
 	PanItem *p;
-	gchar *buf;
 
 	if (pw->click_pi == pi) return;
 	if (pi && !pi->fd) pi = nullptr;
@@ -1429,24 +1450,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	pan_item_set_key(p, "info");
 	pan_item_added(pw, p);
 
-	ta = pan_text_alignment_new(pw, pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, "info");
-
-	pan_text_alignment_add(ta, _("Filename:"), pi->fd->name);
-	buf = remove_level_from_path(pi->fd->path);
-	pan_text_alignment_add(ta, _("Location:"), buf);
-	g_free(buf);
-	pan_text_alignment_add(ta, _("Date:"), text_from_time(pi->fd->date));
-	buf = text_from_size(pi->fd->size);
-	pan_text_alignment_add(ta, _("Size:"), buf);
-	g_free(buf);
-
-	if (pw->info_includes_exif)
-		{
-		pan_info_add_exif(ta, pi->fd);
-		}
-
-	pan_text_alignment_calc(ta, pbox);
-	pan_text_alignment_free(ta);
+	pan_info_calc_text_alignment(pw, pbox, pi->fd);
 
 	pan_item_box_shadow(pbox, PAN_SHADOW_OFFSET * 2, PAN_SHADOW_FADE * 2);
 	pan_item_added(pw, pbox);
