@@ -516,45 +516,43 @@ static void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
  *-------------------------------------------------------------------
  */
 
-static void rt_overlay_get_position(const RendererTiles *rt, const OverlayData *od,
-                                    gint &x, gint &y, gint &w, gint &h)
+static GdkRectangle rt_overlay_get_position(const RendererTiles *rt, const OverlayData *od)
 {
-	PixbufRenderer *pr = rt->pr;
+	GdkRectangle od_rect;
 
-	x = od->x;
-	y = od->y;
-	w = gdk_pixbuf_get_width(od->pixbuf);
-	h = gdk_pixbuf_get_height(od->pixbuf);
+	od_rect.x = od->x;
+	od_rect.y = od->y;
+	od_rect.width = gdk_pixbuf_get_width(od->pixbuf);
+	od_rect.height = gdk_pixbuf_get_height(od->pixbuf);
 
 	if (od->flags & OVL_RELATIVE)
 		{
-		if (x < 0) x = pr->viewport_width - w + x;
-		if (y < 0) y = pr->viewport_height - h + y;
+		PixbufRenderer *pr = rt->pr;
+		if (od_rect.x < 0) od_rect.x += pr->viewport_width - od_rect.width;
+		if (od_rect.y < 0) od_rect.y += pr->viewport_height - od_rect.height;
 		}
+
+	return od_rect;
 }
 
 static void rt_overlay_init_window(RendererTiles *rt, OverlayData *od)
 {
 	PixbufRenderer *pr = rt->pr;
-	gint px;
-	gint py;
-	gint pw;
-	gint ph;
 	GdkWindowAttr attributes;
 	gint attributes_mask;
 
-	rt_overlay_get_position(rt, od, px, py, pw, ph);
+	GdkRectangle od_rect = rt_overlay_get_position(rt, od);
 
 	attributes.window_type = GDK_WINDOW_CHILD;
 	attributes.wclass = GDK_INPUT_OUTPUT;
-	attributes.width = pw;
-	attributes.height = ph;
+	attributes.width = od_rect.width;
+	attributes.height = od_rect.height;
 	attributes.event_mask = GDK_EXPOSURE_MASK;
 	attributes_mask = 0;
 
 	od->window = gdk_window_new(gtk_widget_get_window(GTK_WIDGET(pr)), &attributes, attributes_mask);
 	gdk_window_set_user_data(od->window, pr);
-	gdk_window_move(od->window, px + rt->stereo_off_x, py + rt->stereo_off_y);
+	gdk_window_move(od->window, od_rect.x + rt->stereo_off_x, od_rect.y + rt->stereo_off_y);
 	gdk_window_show(od->window);
 }
 
@@ -570,8 +568,7 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 
 		if (!od->window) rt_overlay_init_window(rt, od);
 
-		GdkRectangle od_rect;
-		rt_overlay_get_position(rt, od, od_rect.x, od_rect.y, od_rect.width, od_rect.height);
+		GdkRectangle od_rect = rt_overlay_get_position(rt, od);
 
 		GdkRectangle r;
 		if (gdk_rectangle_intersect(&request_rect, &od_rect, &r))
@@ -628,25 +625,22 @@ static void rt_overlay_draw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 static void rt_overlay_queue_draw(RendererTiles *rt, OverlayData *od, gint x1, gint y1, gint x2, gint y2)
 {
 	PixbufRenderer *pr = rt->pr;
-	gint x;
-	gint y;
-	gint w;
-	gint h;
 
-	rt_overlay_get_position(rt, od, x, y, w, h);
+	GdkRectangle od_rect = rt_overlay_get_position(rt, od);
 
 	/* add borders */
-	x -= x1;
-	y -= y1;
-	w += x1 + x2;
-	h += y1 + y2;
+	od_rect.x -= x1;
+	od_rect.y -= y1;
+	od_rect.width += x1 + x2;
+	od_rect.height += y1 + y2;
 
-	rt_queue(rt, rt->x_scroll - pr->x_offset + x,
-		 rt->y_scroll - pr->y_offset + y,
-		 w, h,
-		 FALSE, TILE_RENDER_ALL, FALSE, FALSE);
+	rt_queue(rt,
+	         rt->x_scroll - pr->x_offset + od_rect.x,
+	         rt->y_scroll - pr->y_offset + od_rect.y,
+	         od_rect.width, od_rect.height,
+	         FALSE, TILE_RENDER_ALL, FALSE, FALSE);
 
-	rt_border_draw(rt, x, y, w, h);
+	rt_border_draw(rt, od_rect.x, od_rect.y, od_rect.width, od_rect.height);
 }
 
 static void rt_overlay_queue_all(RendererTiles *rt, gint x1, gint y1, gint x2, gint y2)
@@ -665,25 +659,20 @@ static void rt_overlay_queue_all(RendererTiles *rt, gint x1, gint y1, gint x2, g
 
 static void rt_overlay_update_sizes(RendererTiles *rt)
 {
-	GList *work;
-
-	work = rt->overlay_list;
-	while (work)
+	for (GList *work = rt->overlay_list; work; work = work->next)
 		{
 		auto od = static_cast<OverlayData *>(work->data);
-		work = work->next;
 
 		if (!od->window) rt_overlay_init_window(rt, od);
 
 		if (od->flags & OVL_RELATIVE)
 			{
-			gint x;
-			gint y;
-			gint w;
-			gint h;
-
-			rt_overlay_get_position(rt, od, x, y, w, h);
-			gdk_window_move_resize(od->window, x + rt->stereo_off_x, y + rt->stereo_off_y, w, h);
+			GdkRectangle od_rect = rt_overlay_get_position(rt, od);
+			gdk_window_move_resize(od->window,
+			                       od_rect.x + rt->stereo_off_x,
+			                       od_rect.y + rt->stereo_off_y,
+			                       od_rect.width,
+			                       od_rect.height);
 			}
 		}
 }
@@ -2198,8 +2187,6 @@ static gboolean rt_size_allocate_cb(GtkWidget *widget,  GdkRectangle *allocation
 static gboolean rt_draw_cb(GtkWidget *, cairo_t *cr, gpointer data)
 {
 	auto rt = static_cast<RendererTiles *>(data);
-	GList *work;
-	OverlayData *od;
 
 	if (rt->stereo_mode & (PR_STEREO_HORIZ | PR_STEREO_VERT))
 		{
@@ -2231,20 +2218,13 @@ static gboolean rt_draw_cb(GtkWidget *, cairo_t *cr, gpointer data)
 		cairo_paint(cr);
 		}
 
-	work = rt->overlay_list;
-	while (work)
+	for (GList *work = rt->overlay_list; work; work = work->next)
 		{
-		od = static_cast<OverlayData *>(work->data);
-		gint px;
-		gint py;
-		gint pw;
-		gint ph;
+		auto *od = static_cast<OverlayData *>(work->data);
+		GdkRectangle od_rect = rt_overlay_get_position(rt, od);
 
-		rt_overlay_get_position(rt, od, px, py, pw, ph);
-
-		gdk_cairo_set_source_pixbuf(cr, od->pixbuf, px, py);
+		gdk_cairo_set_source_pixbuf(cr, od->pixbuf, od_rect.x, od_rect.y);
 		cairo_paint(cr);
-		work = work->next;
 		}
 
 	return FALSE;
