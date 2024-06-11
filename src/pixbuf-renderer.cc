@@ -62,14 +62,6 @@ constexpr gint PR_DRAG_SCROLL_THRESHHOLD = 4;
 /* increase pan rate when holding down shift */
 constexpr gint PR_PAN_SHIFT_MULTIPLIER = 6;
 
-void scale_rectangle(GdkRectangle &rect, gdouble scale)
-{
-	rect.x *= scale;
-	rect.y *= scale;
-	rect.width *= scale;
-	rect.height *= scale;
-}
-
 } // namespace
 
 /* default min and max zoom */
@@ -1056,7 +1048,7 @@ static SourceTile *pr_source_tile_request(PixbufRenderer *pr, gint x, gint y)
 		}
 
 	GdkRectangle rect{st->x, st->y, pr->source_tile_width, pr->source_tile_height};
-	scale_rectangle(rect, pr->scale);
+	pr_scale_region(rect, pr->scale);
 
 	pr->renderer->invalidate_region(pr->renderer, rect);
 	if (pr->renderer2) pr->renderer2->invalidate_region(pr->renderer2, rect);
@@ -1144,7 +1136,7 @@ static void pr_source_tile_changed(PixbufRenderer *pr, gint x, gint y, gint widt
 			if (pr->func_tile_request &&
 			    pr->func_tile_request(pr, r.x, r.y, r.width, r.height, pixbuf, pr->func_tile_data))
 				{
-				scale_rectangle(r, pr->scale);
+				pr_scale_region(r, pr->scale);
 
 				pr->renderer->invalidate_region(pr->renderer, r);
 				if (pr->renderer2) pr->renderer2->invalidate_region(pr->renderer2, r);
@@ -1357,13 +1349,13 @@ static void pr_update_pixel_signal(PixbufRenderer *pr)
 
 
 void pr_tile_coords_map_orientation(gint orientation,
-				     gdouble tile_x, gdouble tile_y, /* coordinates of the tile */
-				     gdouble image_w, gdouble image_h,
-				     gdouble tile_w, gdouble tile_h,
-				     gdouble *res_x, gdouble *res_y)
+                                    gdouble tile_x, gdouble tile_y, /* coordinates of the tile */
+                                    gdouble image_w, gdouble image_h,
+                                    gdouble tile_w, gdouble tile_h,
+                                    gdouble &res_x, gdouble &res_y)
 {
-	*res_x = tile_x;
-	*res_y = tile_y;
+	res_x = tile_x;
+	res_y = tile_y;
 	switch (orientation)
 		{
 		case EXIF_ORIENTATION_TOP_LEFT:
@@ -1371,34 +1363,34 @@ void pr_tile_coords_map_orientation(gint orientation,
 			break;
 		case EXIF_ORIENTATION_TOP_RIGHT:
 			/* mirrored */
-			*res_x = image_w - tile_x - tile_w;
+			res_x = image_w - tile_x - tile_w;
 			break;
 		case EXIF_ORIENTATION_BOTTOM_RIGHT:
 			/* upside down */
-			*res_x = image_w - tile_x - tile_w;
-			*res_y = image_h - tile_y - tile_h;
+			res_x = image_w - tile_x - tile_w;
+			res_y = image_h - tile_y - tile_h;
 			break;
 		case EXIF_ORIENTATION_BOTTOM_LEFT:
 			/* flipped */
-			*res_y = image_h - tile_y - tile_h;
+			res_y = image_h - tile_y - tile_h;
 			break;
 		case EXIF_ORIENTATION_LEFT_TOP:
-			*res_x = tile_y;
-			*res_y = tile_x;
+			res_x = tile_y;
+			res_y = tile_x;
 			break;
 		case EXIF_ORIENTATION_RIGHT_TOP:
 			/* rotated -90 (270) */
-			*res_x = tile_y;
-			*res_y = image_w - tile_x - tile_w;
+			res_x = tile_y;
+			res_y = image_w - tile_x - tile_w;
 			break;
 		case EXIF_ORIENTATION_RIGHT_BOTTOM:
-			*res_x = image_h - tile_y - tile_h;
-			*res_y = image_w - tile_x - tile_w;
+			res_x = image_h - tile_y - tile_h;
+			res_y = image_w - tile_x - tile_w;
 			break;
 		case EXIF_ORIENTATION_LEFT_BOTTOM:
 			/* rotated 90 */
-			*res_x = image_h - tile_y - tile_h;
-			*res_y = tile_x;
+			res_x = image_h - tile_y - tile_h;
+			res_y = tile_x;
 			break;
 		default:
 			/* The other values are out of range */
@@ -1406,17 +1398,11 @@ void pr_tile_coords_map_orientation(gint orientation,
 		}
 }
 
-void pr_tile_region_map_orientation(gint orientation,
-				     gint area_x, gint area_y, /* coordinates of the area inside tile */
-				     gint tile_w, gint tile_h,
-				     gint area_w, gint area_h,
-				     gint *res_x, gint *res_y,
-				     gint *res_w, gint *res_h)
+GdkRectangle pr_tile_region_map_orientation(gint orientation,
+                                            const GdkRectangle &area, /* coordinates of the area inside tile */
+                                            gint tile_w, gint tile_h)
 {
-	*res_x = area_x;
-	*res_y = area_y;
-	*res_w = area_w;
-	*res_h = area_h;
+	GdkRectangle res = area;
 
 	switch (orientation)
 		{
@@ -1425,60 +1411,56 @@ void pr_tile_region_map_orientation(gint orientation,
 			break;
 		case EXIF_ORIENTATION_TOP_RIGHT:
 			/* mirrored */
-			*res_x = tile_w - area_x - area_w;
+			res.x = tile_w - area.x - area.width;
 			break;
 		case EXIF_ORIENTATION_BOTTOM_RIGHT:
 			/* upside down */
-			*res_x = tile_w - area_x - area_w;
-			*res_y = tile_h - area_y - area_h;
+			res.x = tile_w - area.x - area.width;
+			res.y = tile_h - area.y - area.height;
 			break;
 		case EXIF_ORIENTATION_BOTTOM_LEFT:
 			/* flipped */
-			*res_y = tile_h - area_y - area_h;
+			res.y = tile_h - area.y - area.height;
 			break;
 		case EXIF_ORIENTATION_LEFT_TOP:
-			*res_x = area_y;
-			*res_y = area_x;
-			*res_w = area_h;
-			*res_h = area_w;
+			res.x = area.y;
+			res.y = area.x;
+			res.width = area.height;
+			res.height = area.width;
 			break;
 		case EXIF_ORIENTATION_RIGHT_TOP:
 			/* rotated -90 (270) */
-			*res_x = area_y;
-			*res_y = tile_w - area_x - area_w;
-			*res_w = area_h;
-			*res_h = area_w;
+			res.x = area.y;
+			res.y = tile_w - area.x - area.width;
+			res.width = area.height;
+			res.height = area.width;
 			break;
 		case EXIF_ORIENTATION_RIGHT_BOTTOM:
-			*res_x = tile_h - area_y - area_h;
-			*res_y = tile_w - area_x - area_w;
-			*res_w = area_h;
-			*res_h = area_w;
+			res.x = tile_h - area.y - area.height;
+			res.y = tile_w - area.x - area.width;
+			res.width = area.height;
+			res.height = area.width;
 			break;
 		case EXIF_ORIENTATION_LEFT_BOTTOM:
 			/* rotated 90 */
-			*res_x = tile_h - area_y - area_h;
-			*res_y = area_x;
-			*res_w = area_h;
-			*res_h = area_w;
+			res.x = tile_h - area.y - area.height;
+			res.y = area.x;
+			res.width = area.height;
+			res.height = area.width;
 			break;
 		default:
 			/* The other values are out of range */
 			break;
 		}
+
+	return res;
 }
 
-void pr_coords_map_orientation_reverse(gint orientation,
-				     gint area_x, gint area_y,
-				     gint tile_w, gint tile_h,
-				     gint area_w, gint area_h,
-				     gint *res_x, gint *res_y,
-				     gint *res_w, gint *res_h)
+GdkRectangle pr_coords_map_orientation_reverse(gint orientation,
+                                               const GdkRectangle &area,
+                                               gint tile_w, gint tile_h)
 {
-	*res_x = area_x;
-	*res_y = area_y;
-	*res_w = area_w;
-	*res_h = area_h;
+	GdkRectangle res = area;
 
 	switch (orientation)
 		{
@@ -1487,47 +1469,57 @@ void pr_coords_map_orientation_reverse(gint orientation,
 			break;
 		case EXIF_ORIENTATION_TOP_RIGHT:
 			/* mirrored */
-			*res_x = tile_w - area_x - area_w;
+			res.x = tile_w - area.x - area.width;
 			break;
 		case EXIF_ORIENTATION_BOTTOM_RIGHT:
 			/* upside down */
-			*res_x = tile_w - area_x - area_w;
-			*res_y = tile_h - area_y - area_h;
+			res.x = tile_w - area.x - area.width;
+			res.y = tile_h - area.y - area.height;
 			break;
 		case EXIF_ORIENTATION_BOTTOM_LEFT:
 			/* flipped */
-			*res_y = tile_h - area_y - area_h;
+			res.y = tile_h - area.y - area.height;
 			break;
 		case EXIF_ORIENTATION_LEFT_TOP:
-			*res_x = area_y;
-			*res_y = area_x;
-			*res_w = area_h;
-			*res_h = area_w;
+			res.x = area.y;
+			res.y = area.x;
+			res.width = area.height;
+			res.height = area.width;
 			break;
 		case EXIF_ORIENTATION_RIGHT_TOP:
 			/* rotated -90 (270) */
-			*res_x = tile_w - area_y - area_h;
-			*res_y = area_x;
-			*res_w = area_h;
-			*res_h = area_w;
+			res.x = tile_w - area.y - area.height;
+			res.y = area.x;
+			res.width = area.height;
+			res.height = area.width;
 			break;
 		case EXIF_ORIENTATION_RIGHT_BOTTOM:
-			*res_x = tile_w - area_y - area_h;
-			*res_y = tile_h - area_x - area_w;
-			*res_w = area_h;
-			*res_h = area_w;
+			res.x = tile_w - area.y - area.height;
+			res.y = tile_h - area.x - area.width;
+			res.width = area.height;
+			res.height = area.width;
 			break;
 		case EXIF_ORIENTATION_LEFT_BOTTOM:
 			/* rotated 90 */
-			*res_x = area_y;
-			*res_y = tile_h - area_x - area_w;
-			*res_w = area_h;
-			*res_h = area_w;
+			res.x = area.y;
+			res.y = tile_h - area.x - area.width;
+			res.width = area.height;
+			res.height = area.width;
 			break;
 		default:
 			/* The other values are out of range */
 			break;
 		}
+
+	return res;
+}
+
+void pr_scale_region(GdkRectangle &region, gdouble scale)
+{
+	region.x *= scale;
+	region.y *= scale;
+	region.width *= scale;
+	region.height *= scale;
 }
 
 
@@ -2860,10 +2852,6 @@ gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, gint x_pixel, gint
 	gint prs;
 	guchar *p_pix;
 	guchar *pp;
-	gint map_x;
-	gint map_y;
-	gint map_w;
-	gint map_h;
 	size_t xoff;
 	size_t yoff;
 
@@ -2880,22 +2868,19 @@ gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, gint x_pixel, gint
 
 	if (!pb) return FALSE;
 
-	pr_tile_region_map_orientation(pr->orientation,
-					x_pixel, y_pixel,
-					pr->image_width, pr->image_height,
-					1, 1, /*single pixel */
-					&map_x, &map_y,
-					&map_w, &map_h);
+	GdkRectangle map_rect = pr_tile_region_map_orientation(pr->orientation,
+	                                                       {x_pixel, y_pixel, 1, 1}, /*single pixel */
+	                                                       pr->image_width, pr->image_height);
 
-	if (map_x < 0 || map_x > gdk_pixbuf_get_width(pr->pixbuf) - 1) return  FALSE;
-	if (map_y < 0 || map_y > gdk_pixbuf_get_height(pr->pixbuf) - 1) return  FALSE;
+	if (map_rect.x < 0 || map_rect.x > gdk_pixbuf_get_width(pr->pixbuf) - 1) return FALSE;
+	if (map_rect.y < 0 || map_rect.y > gdk_pixbuf_get_height(pr->pixbuf) - 1) return FALSE;
 
 	p_alpha = gdk_pixbuf_get_has_alpha(pb);
 	prs = gdk_pixbuf_get_rowstride(pb);
 	p_pix = gdk_pixbuf_get_pixels(pb);
 
-	xoff = static_cast<size_t>(map_x) * (p_alpha ? 4 : 3);
-	yoff = static_cast<size_t>(map_y) * prs;
+	xoff = static_cast<size_t>(map_rect.x) * (p_alpha ? 4 : 3);
+	yoff = static_cast<size_t>(map_rect.y) * prs;
 	pp = p_pix + yoff + xoff;
 	*r_mouse = *pp;
 	pp++;

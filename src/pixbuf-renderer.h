@@ -374,22 +374,17 @@ struct SourceTile
 void pr_render_complete_signal(PixbufRenderer *pr);
 
 void pr_tile_coords_map_orientation(gint orientation,
-				     gdouble tile_x, gdouble tile_y, /**< coordinates of the tile */
-				     gdouble image_w, gdouble image_h,
-				     gdouble tile_w, gdouble tile_h,
-				     gdouble *res_x, gdouble *res_y);
-void pr_tile_region_map_orientation(gint orientation,
-				     gint area_x, gint area_y, /**< coordinates of the area inside tile */
-				     gint tile_w, gint tile_h,
-				     gint area_w, gint area_h,
-				     gint *res_x, gint *res_y,
-				     gint *res_w, gint *res_h);
-void pr_coords_map_orientation_reverse(gint orientation,
-				     gint area_x, gint area_y,
-				     gint tile_w, gint tile_h,
-				     gint area_w, gint area_h,
-				     gint *res_x, gint *res_y,
-				     gint *res_w, gint *res_h);
+                                    gdouble tile_x, gdouble tile_y, /**< coordinates of the tile */
+                                    gdouble image_w, gdouble image_h,
+                                    gdouble tile_w, gdouble tile_h,
+                                    gdouble &res_x, gdouble &res_y);
+GdkRectangle pr_tile_region_map_orientation(gint orientation,
+                                            const GdkRectangle &area, /**< coordinates of the area inside tile */
+                                            gint tile_w, gint tile_h);
+GdkRectangle pr_coords_map_orientation_reverse(gint orientation,
+                                               const GdkRectangle &area,
+                                               gint tile_w, gint tile_h);
+void pr_scale_region(GdkRectangle &region, gdouble scale);
 
 GList *pr_source_tile_compute_region(PixbufRenderer *pr, gint x, gint y, gint w, gint h, gboolean request);
 

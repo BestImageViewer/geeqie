@@ -1401,10 +1401,6 @@ static void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		gdouble scale_y;
 		gdouble src_x;
 		gdouble src_y;
-		gint pb_x;
-		gint pb_y;
-		gint pb_w;
-		gint pb_h;
 
 		if (pr->image_width == 0 || pr->image_height == 0) return;
 
@@ -1412,21 +1408,17 @@ static void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		scale_y = rt->hidpi_scale * static_cast<gdouble>(pr->height) / pr->image_height;
 
 		pr_tile_coords_map_orientation(orientation, it->x, it->y,
-					    pr->width, pr->height,
-					    rt->tile_width, rt->tile_height,
-					    &src_x, &src_y);
-		pr_tile_region_map_orientation(orientation, x, y,
-					    rt->tile_width, rt->tile_height,
-					    w, h,
-					    &pb_x, &pb_y,
-					    &pb_w, &pb_h);
+		                               pr->width, pr->height,
+		                               rt->tile_width, rt->tile_height,
+		                               src_x, src_y);
+		GdkRectangle pb_rect = pr_tile_region_map_orientation(orientation,
+		                                                      {x, y, w, h},
+		                                                      rt->tile_width,
+		                                                      rt->tile_height);
 
 		src_x *= rt->hidpi_scale;
 		src_y *= rt->hidpi_scale;
-		pb_x *= rt->hidpi_scale;
-		pb_y *= rt->hidpi_scale;
-		pb_w *= rt->hidpi_scale;
-		pb_h *= rt->hidpi_scale;
+		pr_scale_region(pb_rect, rt->hidpi_scale);
 
 		switch (orientation)
 			{
@@ -1448,27 +1440,27 @@ static void rt_tile_render(RendererTiles *rt, ImageTile *it,
 		if (pr->image_width > 32767) wide_image = TRUE;
 
 		rt_tile_get_region(has_alpha, pr->ignore_alpha,
-		                   pr->pixbuf, it->pixbuf, pb_x, pb_y, pb_w, pb_h,
+		                   pr->pixbuf, it->pixbuf, pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height,
 		                   static_cast<gdouble>(0.0) - src_x - get_right_pixbuf_offset(rt) * scale_x,
 		                   static_cast<gdouble>(0.0) - src_y,
 		                   scale_x, scale_y,
 		                   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
-		                   it->x + pb_x, it->y + pb_y, wide_image);
+		                   it->x + pb_rect.x, it->y + pb_rect.y, wide_image);
 		if (rt->stereo_mode & PR_STEREO_ANAGLYPH &&
 		    (pr->stereo_pixbuf_offset_right > 0 || pr->stereo_pixbuf_offset_left > 0))
 			{
 			GdkPixbuf *right_pb = rt_get_spare_tile(rt);
 			rt_tile_get_region(has_alpha, pr->ignore_alpha,
-			                   pr->pixbuf, right_pb, pb_x, pb_y, pb_w, pb_h,
+			                   pr->pixbuf, right_pb, pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height,
 			                   static_cast<gdouble>(0.0) - src_x - get_left_pixbuf_offset(rt) * scale_x,
 			                   static_cast<gdouble>(0.0) - src_y,
 			                   scale_x, scale_y,
 			                   (fast) ? GDK_INTERP_NEAREST : pr->zoom_quality,
-			                   it->x + pb_x, it->y + pb_y, wide_image);
-			pr_create_anaglyph(rt->stereo_mode, it->pixbuf, right_pb, pb_x, pb_y, pb_w, pb_h);
+			                   it->x + pb_rect.x, it->y + pb_rect.y, wide_image);
+			pr_create_anaglyph(rt->stereo_mode, it->pixbuf, right_pb, pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height);
 			/* do not care about freeing spare_tile, it will be reused */
 			}
-		rt_tile_apply_orientation(rt, orientation, &it->pixbuf, pb_x, pb_y, pb_w, pb_h);
+		rt_tile_apply_orientation(rt, orientation, &it->pixbuf, pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height);
 		draw = TRUE;
 		}
 
@@ -1993,34 +1985,28 @@ static void renderer_area_changed(void *renderer, gint src_x, gint src_y, gint s
 {
 	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
-	gint x;
-	gint y;
-	gint width;
-	gint height;
 	gint x1;
 	gint y1;
 	gint x2;
 	gint y2;
 
 	gint orientation = rt_get_orientation(rt);
-	pr_coords_map_orientation_reverse(orientation,
-	                                  src_x - get_right_pixbuf_offset(rt), src_y,
-	                                  pr->image_width, pr->image_height,
-	                                  src_w, src_h,
-	                                  &x, &y,
-	                                  &width, &height);
+	src_x -= get_right_pixbuf_offset(rt);
+	GdkRectangle rect = pr_coords_map_orientation_reverse(orientation,
+	                                                      {src_x, src_y, src_w, src_h},
+	                                                      pr->image_width, pr->image_height);
 
 	if (pr->scale != 1.0 && pr->zoom_quality != GDK_INTERP_NEAREST)
 		{
 		/* increase region when using a zoom quality that may access surrounding pixels */
-		y -= 1;
-		height += 2;
+		rect.y -= 1;
+		rect.height += 2;
 		}
 
-	x1 = static_cast<gint>(floor(static_cast<gdouble>(x) * pr->scale));
-	y1 = static_cast<gint>(floor(static_cast<gdouble>(y) * pr->scale * pr->aspect_ratio));
-	x2 = static_cast<gint>(ceil(static_cast<gdouble>(x + width) * pr->scale));
-	y2 = static_cast<gint>(ceil(static_cast<gdouble>(y + height) * pr->scale * pr->aspect_ratio));
+	x1 = static_cast<gint>(floor(static_cast<gdouble>(rect.x) * pr->scale));
+	y1 = static_cast<gint>(floor(static_cast<gdouble>(rect.y) * pr->scale * pr->aspect_ratio));
+	x2 = static_cast<gint>(ceil(static_cast<gdouble>(rect.x + rect.width) * pr->scale));
+	y2 = static_cast<gint>(ceil(static_cast<gdouble>(rect.y + rect.height) * pr->scale * pr->aspect_ratio));
 
 	rt_queue(rt, x1, y1, x2 - x1, y2 - y1, FALSE, TILE_RENDER_AREA, TRUE, TRUE);
 }

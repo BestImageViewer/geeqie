@@ -878,35 +878,27 @@ static void layout_menu_connect_zoom_1_4_cb(GtkAction *, gpointer data)
 static void layout_menu_zoom_to_rectangle_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	PixbufRenderer *pr;
-	gdouble zoom_height;
-	gdouble zoom_width;
-	gint center_x;
-	gint center_y;
-	gint height;
-	gint vis_height;
-	gint vis_width;
-	gint width;
 	gint x1;
 	gint x2;
-	gint x;
 	gint y1;
 	gint y2;
-	gint y;
 
 	image_get_rectangle(&x1, &y1, &x2, &y2);
 
-	pr = reinterpret_cast<PixbufRenderer *>(lw->image->pr);
+	auto *pr = reinterpret_cast<PixbufRenderer *>(lw->image->pr);
 
-	vis_width = pr->vis_width;
-	vis_height = pr->vis_height;
-	zoom_width = (gdouble(vis_width) / (x2 - x1));
-	zoom_height = (gdouble(vis_height) / (y2 - y1));
+	gint image_width = x2 - x1;
+	gint image_height = y2 - y1;
 
-	pr_coords_map_orientation_reverse(pr->orientation, x1, y1, pr->image_width, pr->image_height, x2 - x1, y2 - y1, &x, &y, &width, &height);
+	gdouble zoom_width = static_cast<gdouble>(pr->vis_width) / image_width;
+	gdouble zoom_height = static_cast<gdouble>(pr->vis_height) / image_height;
 
-	center_x = (width / 2) + x;
-	center_y = (height / 2) + y;
+	const GdkRectangle rect = pr_coords_map_orientation_reverse(pr->orientation,
+	                                                            {x1, y1, image_width, image_height},
+	                                                            pr->image_width, pr->image_height);
+
+	gint center_x = (rect.width / 2) + rect.x;
+	gint center_y = (rect.height / 2) + rect.y;
 
 	layout_image_zoom_set(lw, zoom_width > zoom_height ? zoom_height : zoom_width, FALSE);
 	image_scroll_to_point(lw->image, center_x, center_y, 0.5, 0.5);
