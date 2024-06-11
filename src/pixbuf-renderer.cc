@@ -62,6 +62,14 @@ constexpr gint PR_DRAG_SCROLL_THRESHHOLD = 4;
 /* increase pan rate when holding down shift */
 constexpr gint PR_PAN_SHIFT_MULTIPLIER = 6;
 
+void scale_rectangle(GdkRectangle &rect, gdouble scale)
+{
+	rect.x *= scale;
+	rect.y *= scale;
+	rect.width *= scale;
+	rect.height *= scale;
+}
+
 } // namespace
 
 /* default min and max zoom */
@@ -1047,10 +1055,11 @@ static SourceTile *pr_source_tile_request(PixbufRenderer *pr, gint x, gint y)
 		st->blank = FALSE;
 		}
 
-	pr->renderer->invalidate_region(pr->renderer, st->x * pr->scale, st->y * pr->scale,
-				  pr->source_tile_width * pr->scale, pr->source_tile_height * pr->scale);
-	if (pr->renderer2) pr->renderer2->invalidate_region(pr->renderer2, st->x * pr->scale, st->y * pr->scale,
-				  pr->source_tile_width * pr->scale, pr->source_tile_height * pr->scale);
+	GdkRectangle rect{st->x, st->y, pr->source_tile_width, pr->source_tile_height};
+	scale_rectangle(rect, pr->scale);
+
+	pr->renderer->invalidate_region(pr->renderer, rect);
+	if (pr->renderer2) pr->renderer2->invalidate_region(pr->renderer2, rect);
 	return st;
 }
 
@@ -1135,13 +1144,10 @@ static void pr_source_tile_changed(PixbufRenderer *pr, gint x, gint y, gint widt
 			if (pr->func_tile_request &&
 			    pr->func_tile_request(pr, r.x, r.y, r.width, r.height, pixbuf, pr->func_tile_data))
 				{
-				r.x *= pr->scale;
-				r.y *= pr->scale;
-				r.width *= pr->scale;
-				r.height *= pr->scale;
+				scale_rectangle(r, pr->scale);
 
-				pr->renderer->invalidate_region(pr->renderer, r.x, r.y, r.width, r.height);
-				if (pr->renderer2) pr->renderer2->invalidate_region(pr->renderer2, r.x, r.y, r.width, r.height);
+				pr->renderer->invalidate_region(pr->renderer, r);
+				if (pr->renderer2) pr->renderer2->invalidate_region(pr->renderer2, r);
 				}
 			g_object_unref(pixbuf);
 			}

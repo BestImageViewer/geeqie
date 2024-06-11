@@ -399,27 +399,17 @@ static void rt_tile_invalidate_all(RendererTiles *rt)
 		}
 }
 
-static void rt_tile_invalidate_region(RendererTiles *rt, gint x, gint y, gint w, gint h)
+static void rt_tile_invalidate_region(RendererTiles *rt, const GdkRectangle &region)
 {
-	gint x1;
-	gint x2;
-	gint y1;
-	gint y2;
-	GList *work;
+	gint x1 = ROUND_DOWN(region.x, rt->tile_width);
+	gint x2 = ROUND_UP(region.x + region.width, rt->tile_width);
 
-	x1 = ROUND_DOWN(x, rt->tile_width);
-	x2 = ROUND_UP(x + w, rt->tile_width);
+	gint y1 = ROUND_DOWN(region.y, rt->tile_height);
+	gint y2 = ROUND_UP(region.y + region.height, rt->tile_height);
 
-	y1 = ROUND_DOWN(y, rt->tile_height);
-	y2 = ROUND_UP(y + h, rt->tile_height);
-
-	work = rt->tiles;
-	while (work)
+	for (GList *work = rt->tiles; work; work = work->next)
 		{
-		ImageTile *it;
-
-		it = static_cast<ImageTile *>(work->data);
-		work = work->next;
+		auto *it = static_cast<ImageTile *>(work->data);
 
 		if (it->x < x2 && it->x + it->w > x1 &&
 		    it->y < y2 && it->y + it->h > y1)
@@ -2073,9 +2063,9 @@ static void renderer_update_zoom(void *renderer, gboolean lazy)
 	rt_border_clear(rt);
 }
 
-static void renderer_invalidate_region(void *renderer, gint x, gint y, gint w, gint h)
+static void renderer_invalidate_region(void *renderer, const GdkRectangle &region)
 {
-	rt_tile_invalidate_region(static_cast<RendererTiles *>(renderer), x, y, w, h);
+	rt_tile_invalidate_region(static_cast<RendererTiles *>(renderer), region);
 }
 
 static void renderer_update_viewport(void *renderer)

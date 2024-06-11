@@ -90,8 +90,8 @@ enum OverlayRendererFlags {
 
 struct RendererFuncs
 {
-    void (*area_changed)(void *renderer, gint src_x, gint src_y, gint src_w, gint src_h); /**< pixbuf area changed */
-	void (*invalidate_region)(void *renderer, gint x, gint y, gint w, gint h);
+	void (*area_changed)(void *renderer, gint src_x, gint src_y, gint src_w, gint src_h); /**< pixbuf area changed */
+	void (*invalidate_region)(void *renderer, const GdkRectangle &region);
 	void (*scroll)(void *renderer, gint x_off, gint y_off); /**< scroll */
 	void (*update_viewport)(void *renderer); /**< window / wiewport / border color has changed */
 	void (*update_pixbuf)(void *renderer, gboolean lazy); /**< pixbuf has changed */
