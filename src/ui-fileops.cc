@@ -58,19 +58,15 @@
 
 void print_term(gboolean err, const gchar *text_utf8)
 {
-	gchar *text_l;
+	gchar *text_l = g_locale_from_utf8(text_utf8, -1, nullptr, nullptr, nullptr);
+	const gchar *text = text_l ? text_l : text_utf8;
 
-	text_l = g_locale_from_utf8(text_utf8, -1, nullptr, nullptr, nullptr);
-	if (err)
-		{
-		fputs((text_l) ? text_l : text_utf8, stderr);
-		}
-	else
-		{
-		fputs((text_l) ? text_l : text_utf8, stdout);
-		}
+	fputs(text, err ? stderr : stdout);
+
 	if(command_line && command_line->ssi)
-		secure_fputs(command_line->ssi, (text_l) ? text_l : text_utf8);
+		{
+		secure_fputs(command_line->ssi, text);
+		}
 	g_free(text_l);
 }
 

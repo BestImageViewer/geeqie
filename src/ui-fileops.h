@@ -38,11 +38,13 @@
 void print_term(gboolean err, const gchar *text_utf8);
 
 #define printf_term(err, ...) \
-	do { \
+	G_STMT_START \
+		{ \
 		gchar *msg = g_strdup_printf(__VA_ARGS__); \
 		print_term(err, msg); \
 		g_free(msg); \
-	} while (0)
+		} \
+	G_STMT_END
 
 #if GQ_DEBUG_PATH_UTF8
 #define path_to_utf8(path) path_to_utf8_debug(path, __FILE__, __LINE__)

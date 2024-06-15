@@ -49,24 +49,26 @@ gint required_debug_level(gint level);
 const gchar *get_exec_time();
 void init_exec_time();
 
-#define DEBUG_N(n, ...) do \
-				{                                                      \
-				_Pragma("GCC diagnostic push")                         \
-				_Pragma("GCC diagnostic ignored  \"-Wformat\"")        \
-				gint debug_level = get_debug_level(); \
-				if (debug_level >= (n)) 	\
-					{ 		\
-					if (debug_level != 1) \
-						{ \
-						log_domain_print_debug(DOMAIN_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__);\
-						} \
-					else \
-						{ \
-						log_domain_printf(DOMAIN_DEBUG, __VA_ARGS__); \
-						} \
-					}                                                  \
-				_Pragma("GCC diagnostic pop")                          \
-				} while (0)
+#define DEBUG_N(n, ...) \
+	G_STMT_START \
+		{                                                      \
+		_Pragma("GCC diagnostic push")                         \
+		_Pragma("GCC diagnostic ignored  \"-Wformat\"")        \
+		gint debug_level = get_debug_level(); \
+		if (debug_level >= (n)) \
+			{ \
+			if (debug_level != 1) \
+				{ \
+				log_domain_print_debug(DOMAIN_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__); \
+				} \
+			else \
+				{ \
+				log_domain_printf(DOMAIN_DEBUG, __VA_ARGS__); \
+				} \
+			}                                                  \
+		_Pragma("GCC diagnostic pop")                          \
+		} \
+	G_STMT_END
 
 /**
  * @brief For use with the GTKInspector (>GTK 3.14)
@@ -75,36 +77,42 @@ void init_exec_time();
  * Sample command line call:
  * GTK_DEBUG=interactive src/geeqie
  */
-#define DEBUG_NAME(widget) do \
-				{ \
-				gtk_widget_set_name(GTK_WIDGET(widget), g_strdup_printf("%s:%d", __FILE__, __LINE__)); \
-				} while(0)
+#define DEBUG_NAME(widget) \
+	G_STMT_START \
+		{ \
+		gtk_widget_set_name(GTK_WIDGET(widget), g_strdup_printf("%s:%d", __FILE__, __LINE__)); \
+		} \
+	G_STMT_END
 
-#define DEBUG_BT() do \
-				{ \
-				log_print_backtrace(__FILE__, __LINE__, __func__);     \
-				} while(0)
+#define DEBUG_BT() \
+	G_STMT_START \
+		{ \
+		log_print_backtrace(__FILE__, __LINE__, __func__); \
+		} \
+	G_STMT_END
 
-#define DEBUG_FD() do \
-				{ \
-				log_print_file_data_dump(__FILE__, __LINE__, __func__);\
-				} while(0)
+#define DEBUG_FD() \
+	G_STMT_START \
+		{ \
+		log_print_file_data_dump(__FILE__, __LINE__, __func__); \
+		} \
+	G_STMT_END
 #else /* DEBUG */
 
 #define get_regexp() (0)
-#define set_regexp(regexp) do { } while(0)
+#define set_regexp(regexp) G_STMT_START { } G_STMT_END
 #define get_debug_level() (0)
-#define set_debug_level(new_level) do { } while(0)
-#define debug_level_add(delta) do { } while(0)
+#define set_debug_level(new_level) G_STMT_START { } G_STMT_END
+#define debug_level_add(delta) G_STMT_START { } G_STMT_END
 #define required_debug_level(level) (0)
 #define get_exec_time() ""
-#define init_exec_time() do { } while(0)
+#define init_exec_time() G_STMT_START { } G_STMT_END
 
-#define DEBUG_N(n, ...)  do { } while(0)
+#define DEBUG_N(n, ...) G_STMT_START { } G_STMT_END
 
-#define DEBUG_NAME(widget) do { } while(0)
-#define DEBUG_BT() do { } while(0)
-#define DEBUG_FD() do { } while(0)
+#define DEBUG_NAME(widget) G_STMT_START { } G_STMT_END
+#define DEBUG_BT() G_STMT_START { } G_STMT_END
+#define DEBUG_FD() G_STMT_START { } G_STMT_END
 
 #endif /* DEBUG */
 
