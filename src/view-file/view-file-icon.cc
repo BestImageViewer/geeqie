@@ -1930,97 +1930,79 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 				GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
 	auto cd = static_cast<ColumnData *>(data);
-	FileData *fd;
-	gchar *star_rating;
 	GList *list;
-	ViewFile *vf = cd->vf;
 
 	if (!GQV_IS_CELL_RENDERER_ICON(cell)) return;
 
 	gtk_tree_model_get(tree_model, iter, FILE_COLUMN_POINTER, &list, -1);
 
-	fd = static_cast<FileData *>(g_list_nth_data(list, cd->number));
-
+	auto *fd = static_cast<FileData *>(g_list_nth_data(list, cd->number));
 	if (fd)
 		{
-		const gchar *link;
-		gchar *name_sidecars = nullptr;
-		GdkRGBA color_bg;
-		GdkRGBA color_fg;
-		GtkStateType state = GTK_STATE_NORMAL;
-		GtkStyle *style;
+		ViewFile *vf = cd->vf;
 
 		g_assert(fd->magick == FD_MAGICK);
 
-		if (options->show_star_rating && fd->rating != STAR_RATING_NOT_READ)
+		GString *name_sidecars = g_string_new(nullptr);
+
+		if (VFICON(vf)->show_text)
 			{
-			star_rating = convert_rating_to_stars(fd->rating);
-			}
-		else
-			{
-			star_rating = nullptr;
+			if (islink(fd->path))
+				{
+				name_sidecars = g_string_append(name_sidecars, GQ_LINK_STR);
+				}
+
+			name_sidecars = g_string_append(name_sidecars, fd->name);
+
+			if (fd->sidecar_files)
+				{
+				gchar *sidecars = file_data_sc_list_to_string(fd);
+				g_string_append_printf(name_sidecars, " %s", sidecars);
+				g_free(sidecars);
+				}
+			else if (fd->disable_grouping)
+				{
+				name_sidecars = g_string_append(name_sidecars, _(" [NO GROUPING]"));
+				}
 			}
 
-		link = islink(fd->path) ? GQ_LINK_STR : "";
-		if (fd->sidecar_files)
+		if (options->show_star_rating)
 			{
-			gchar *sidecars = file_data_sc_list_to_string(fd);
-			if (options->show_star_rating && VFICON(vf)->show_text)
+			if (name_sidecars->len > 0)
 				{
-				name_sidecars = g_strdup_printf("%s%s %s\n%s", link, fd->name, sidecars, star_rating);
+				name_sidecars = g_string_append_c(name_sidecars, '\n');
 				}
-			else if (options->show_star_rating)
-				{
-				name_sidecars = g_strdup_printf("%s", star_rating);
-				}
-			else if (VFICON(vf)->show_text)
-				{
-				name_sidecars = g_strdup_printf("%s%s %s", link, fd->name, sidecars);
-				}
-			g_free(sidecars);
-			}
-		else
-			{
-			const gchar *disabled_grouping = fd->disable_grouping ? _(" [NO GROUPING]") : "";
-			if (options->show_star_rating && VFICON(vf)->show_text)
-				{
-				name_sidecars = g_strdup_printf("%s%s%s\n%s", link, fd->name, disabled_grouping, star_rating);
-				}
-			else if (options->show_star_rating)
-				{
-				name_sidecars = g_strdup_printf("%s", star_rating);
-				}
-			else if (VFICON(vf)->show_text)
-				{
-				name_sidecars = g_strdup_printf("%s%s%s", link, fd->name, disabled_grouping);
-				}
-			}
-		g_free(star_rating);
 
-		style = gtk_widget_get_style(vf->listview);
-		if (fd->selected & SELECTION_SELECTED)
-			{
-			state = GTK_STATE_SELECTED;
+			gchar *star_rating = (fd->rating != STAR_RATING_NOT_READ) ? convert_rating_to_stars(fd->rating) : nullptr;
+			name_sidecars = g_string_append(name_sidecars, star_rating);
+			g_free(star_rating);
 			}
 
+		GtkStyle *style = gtk_widget_get_style(vf->listview);
+		GtkStateType state = (fd->selected & SELECTION_SELECTED) ? GTK_STATE_SELECTED : GTK_STATE_NORMAL;
+
+		GdkRGBA color_fg;
 		convert_gdkcolor_to_gdkrgba(&style->text[state], &color_fg);
-		convert_gdkcolor_to_gdkrgba(&style->base[state], &color_bg);
 
+		GdkRGBA color_bg;
+		convert_gdkcolor_to_gdkrgba(&style->base[state], &color_bg);
 		if (fd->selected & SELECTION_PRELIGHT)
 			{
 			shift_color(&color_bg, -1, 0);
 			}
 
-		g_object_set(cell, "pixbuf", fd->thumb_pixbuf,
-					"text", name_sidecars,
-					"marks", file_data_get_marks(fd),
-					"show_marks", vf->marks_enabled,
-					"cell-background-rgba", &color_bg,
-					"cell-background-set", TRUE,
-					"foreground-rgba", &color_fg,
-					"foreground-set", TRUE,
-					"has-focus", (VFICON(vf)->focus_fd == fd), NULL);
-		g_free(name_sidecars);
+		g_object_set(cell,
+		             "pixbuf", fd->thumb_pixbuf,
+		             "text", name_sidecars->str,
+		             "marks", file_data_get_marks(fd),
+		             "show_marks", vf->marks_enabled,
+		             "cell-background-rgba", &color_bg,
+		             "cell-background-set", TRUE,
+		             "foreground-rgba", &color_fg,
+		             "foreground-set", TRUE,
+		             "has-focus", VFICON(vf)->focus_fd == fd,
+		             NULL);
+		g_string_free(name_sidecars, TRUE);
 		}
 	else
 		{
