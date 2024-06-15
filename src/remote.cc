@@ -26,6 +26,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cerrno>
 #include <csignal>
 #include <cstdio>
@@ -811,32 +812,28 @@ static void gr_pixel_info(const gchar *, GIOChannel *channel, gpointer)
 
 static void gr_rectangle(const gchar *, GIOChannel *channel, gpointer)
 {
-	gchar *rectangle_info;
-	PixbufRenderer *pr;
+	if (!options->draw_rectangle) return;
+	if (!layout_valid(&lw_id)) return;
+
+	auto *pr = reinterpret_cast<PixbufRenderer *>(lw_id->image->pr);
+	if (!pr) return;
+
 	gint x1;
 	gint y1;
 	gint x2;
 	gint y2;
+	image_get_rectangle(x1, y1, x2, y2);
 
-	if (!options->draw_rectangle) return;
-	if (!layout_valid(&lw_id)) return;
+	gchar *rectangle_info = g_strdup_printf(_("%dx%d+%d+%d"),
+	                                        std::abs(x1 - x2),
+	                                        std::abs(y1 - y2),
+	                                        std::min(x1, x2),
+	                                        std::min(y1, y2));
 
-	pr = reinterpret_cast<PixbufRenderer*>(lw_id->image->pr);
+	g_io_channel_write_chars(channel, rectangle_info, -1, nullptr, nullptr);
+	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
-	if (pr)
-		{
-		image_get_rectangle(&x1, &y1, &x2, &y2);
-		rectangle_info = g_strdup_printf(_("%dx%d+%d+%d"),
-					(x2 > x1) ? x2 - x1 : x1 - x2,
-					(y2 > y1) ? y2 - y1 : y1 - y2,
-					(x2 > x1) ? x1 : x2,
-					(y2 > y1) ? y1 : y2);
-
-		g_io_channel_write_chars(channel, rectangle_info, -1, nullptr, nullptr);
-		g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
-
-		g_free(rectangle_info);
-		}
+	g_free(rectangle_info);
 }
 
 static void gr_render_intent(const gchar *, GIOChannel *channel, gpointer)

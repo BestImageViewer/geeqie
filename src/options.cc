@@ -380,8 +380,8 @@ static void sync_options_with_current_state(ConfOptions *options)
 
 		options->color_profile.enabled = layout_image_color_profile_get_use(lw);
 		layout_image_color_profile_get(lw,
-					       &options->color_profile.input_type,
-					       &options->color_profile.use_image);
+		                               options->color_profile.input_type,
+		                               options->color_profile.use_image);
 		}
 
 }

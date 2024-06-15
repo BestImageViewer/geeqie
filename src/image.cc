@@ -1977,9 +1977,7 @@ void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscre
 	image_background_set_color(imd, color);
 }
 
-void image_color_profile_set(ImageWindow *imd,
-			     gint input_type,
-			     gboolean use_image)
+void image_color_profile_set(ImageWindow *imd, gint input_type, gboolean use_image)
 {
 	if (!imd) return;
 
@@ -1992,14 +1990,12 @@ void image_color_profile_set(ImageWindow *imd,
 	imd->color_profile_use_image = use_image;
 }
 
-gboolean image_color_profile_get(ImageWindow *imd,
-			 	 gint *input_type,
-			     	 gboolean *use_image)
+gboolean image_color_profile_get(const ImageWindow *imd, gint &input_type, gboolean &use_image)
 {
 	if (!imd) return FALSE;
 
-	if (input_type) *input_type = imd->color_profile_input;
-	if (use_image) *use_image = imd->color_profile_use_image;
+	input_type = imd->color_profile_input;
+	use_image = imd->color_profile_use_image;
 
 	return TRUE;
 }
@@ -2288,12 +2284,12 @@ ImageWindow *image_new(gboolean frame)
 	return imd;
 }
 
-void image_get_rectangle(gint *x1, gint *y1, gint *x2, gint *y2)
+void image_get_rectangle(gint &x1, gint &y1, gint &x2, gint &y2)
 {
-	*x1 = rect_x1;
-	*y1 = rect_y1;
-	*x2 = rect_x2;
-	*y2 = rect_y2;
+	x1 = rect_x1;
+	y1 = rect_y1;
+	x2 = rect_x2;
+	y2 = rect_y2;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

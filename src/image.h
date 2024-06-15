@@ -250,12 +250,8 @@ void image_background_set_color(ImageWindow *imd, GdkRGBA *color);
 void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscreen);
 
 /* color profiles */
-void image_color_profile_set(ImageWindow *imd,
-			     gint input_type,
-			     gboolean use_image);
-gboolean image_color_profile_get(ImageWindow *imd,
-			     gint *input_type,
-			     gboolean *use_image);
+void image_color_profile_set(ImageWindow *imd, gint input_type, gboolean use_image);
+gboolean image_color_profile_get(const ImageWindow *imd, gint &input_type, gboolean &use_image);
 void image_color_profile_set_use(ImageWindow *imd, gboolean enable);
 gboolean image_color_profile_get_use(ImageWindow *imd);
 gboolean image_color_profile_get_status(ImageWindow *imd, gchar **image_profile, gchar **screen_profile);
@@ -287,7 +283,7 @@ void image_set_image_as_tiles(ImageWindow *imd, gint width, gint height,
  */
 void image_options_sync();
 
-void image_get_rectangle(gint *x1, gint *y1, gint *x2, gint *y2);
+void image_get_rectangle(gint &x1, gint &y1, gint &x2, gint &y2);
 void image_update_title(ImageWindow *imd);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -883,7 +883,7 @@ static void layout_menu_zoom_to_rectangle_cb(GtkAction *, gpointer data)
 	gint y1;
 	gint y2;
 
-	image_get_rectangle(&x1, &y1, &x2, &y2);
+	image_get_rectangle(x1, y1, x2, y2);
 
 	auto *pr = reinterpret_cast<PixbufRenderer *>(lw->image->pr);
 
@@ -1996,7 +1996,7 @@ static void layout_color_menu_use_image_cb(GtkToggleAction *action, gpointer dat
 	gint input;
 	gboolean use_image;
 
-	if (!layout_image_color_profile_get(lw, &input, &use_image)) return;
+	if (!layout_image_color_profile_get(lw, input, use_image)) return;
 	if (use_image == gq_gtk_toggle_action_get_active(action)) return;
 	layout_image_color_profile_set(lw, input, gq_gtk_toggle_action_get_active(action));
 	layout_util_sync_color(lw);
@@ -2013,7 +2013,7 @@ static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *,
 	type = gq_gtk_radio_action_get_current_value(action);
 	if (type < 0 || type >= COLOR_PROFILE_FILE + COLOR_PROFILE_INPUTS) return;
 
-	if (!layout_image_color_profile_get(lw, &input, &use_image)) return;
+	if (!layout_image_color_profile_get(lw, input, use_image)) return;
 	if (type == input) return;
 
 	layout_image_color_profile_set(lw, type, use_image);
@@ -3748,7 +3748,7 @@ void layout_util_sync_color(LayoutWindow *lw)
 #endif
 
 	if (!lw->action_group) return;
-	if (!layout_image_color_profile_get(lw, &input, &use_image)) return;
+	if (!layout_image_color_profile_get(lw, input, use_image)) return;
 
 	use_color = layout_image_color_profile_get_use(lw);
 

@@ -1555,18 +1555,14 @@ void layout_image_refresh(LayoutWindow *lw)
 	image_reload(lw->image);
 }
 
-void layout_image_color_profile_set(LayoutWindow *lw,
-				    gint input_type,
-				    gboolean use_image)
+void layout_image_color_profile_set(LayoutWindow *lw, gint input_type, gboolean use_image)
 {
 	if (!layout_valid(&lw)) return;
 
 	image_color_profile_set(lw->image, input_type, use_image);
 }
 
-gboolean layout_image_color_profile_get(LayoutWindow *lw,
-				    	gint *input_type,
-				    	gboolean *use_image)
+gboolean layout_image_color_profile_get(LayoutWindow *lw, gint &input_type, gboolean &use_image)
 {
 	if (!layout_valid(&lw)) return FALSE;
 
