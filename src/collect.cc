@@ -546,7 +546,7 @@ void collection_path_changed(CollectionData *cd)
 	collection_window_update_title(collection_window_find(cd));
 }
 
-gint collection_to_number(CollectionData *cd)
+gint collection_to_number(const CollectionData *cd)
 {
 	return g_list_index(collection_list, cd);
 }
@@ -601,62 +601,29 @@ CollectionData *collection_from_dnd_data(const gchar *data, GList **list, GList 
 	return cd;
 }
 
-gchar *collection_info_list_to_dnd_data(CollectionData *cd, GList *list, gint *length)
+gchar *collection_info_list_to_dnd_data(const CollectionData *cd, const GList *list, gint &length)
 {
-	GList *work;
-	GList *temp = nullptr;
-	gchar *ptr;
-	gchar *text;
-	gchar *uri_text;
-	gint collection_number;
-
-	*length = 0;
+	length = 0;
 	if (!list) return nullptr;
 
-	collection_number = collection_to_number(cd);
+	gint collection_number = collection_to_number(cd);
 	if (collection_number < 0) return nullptr;
 
-	text = g_strdup_printf("COLLECTION:%d\n", collection_number);
-	*length += strlen(text);
-	temp = g_list_prepend(temp, text);
+	GString *text = g_string_new(nullptr);
+	g_string_printf(text, "COLLECTION:%d\n", collection_number);
 
-	work = list;
-	while (work)
+	for (const GList *work = list; work; work = work->next)
 		{
 		gint item_number = g_list_index(cd->list, work->data);
 
-		work = work->next;
-
 		if (item_number < 0) continue;
 
-		text = g_strdup_printf("%d\n", item_number);
-		temp = g_list_prepend(temp, text);
-		*length += strlen(text);
+		g_string_append_printf(text, "%d\n", item_number);
 		}
 
-	*length += 1; /* ending nul char */
+	length = text->len + 1; /* ending nul char */
 
-	uri_text = static_cast<gchar *>(g_malloc(*length));
-	ptr = uri_text;
-
-	work = g_list_last(temp);
-	while (work)
-		{
-		gint len;
-		auto text = static_cast<gchar *>(work->data);
-
-		work = work->prev;
-
-		len = strlen(text);
-		memcpy(ptr, text, len);
-		ptr += len;
-		}
-
-	ptr[0] = '\0';
-
-	g_list_free_full(temp, g_free);
-
-	return uri_text;
+	return g_string_free(text, FALSE);
 }
 
 gint collection_info_valid(CollectionData *cd, CollectInfo *info)

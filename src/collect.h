@@ -90,7 +90,7 @@ void collection_unref(CollectionData *cd);
 
 void collection_path_changed(CollectionData *cd);
 
-gint collection_to_number(CollectionData *cd);
+gint collection_to_number(const CollectionData *cd);
 CollectionData *collection_from_number(gint n);
 
 /**
@@ -101,7 +101,7 @@ CollectionData *collection_from_number(gint n);
  * CollectInfo pointers into CollectionData
  */
 CollectionData *collection_from_dnd_data(const gchar *data, GList **list, GList **info_list);
-gchar *collection_info_list_to_dnd_data(CollectionData *cd, GList *list, gint *length);
+gchar *collection_info_list_to_dnd_data(const CollectionData *cd, const GList *list, gint &length);
 
 gint collection_info_valid(CollectionData *cd, CollectInfo *info);
 

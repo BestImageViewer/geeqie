@@ -2201,12 +2201,12 @@ static void collection_table_dnd_get(GtkWidget *, GdkDragContext *,
 		case TARGET_APP_COLLECTION_MEMBER:
 			if (selected)
 				{
-				uri_text = collection_info_list_to_dnd_data(ct->cd, ct->selection, &total);
+				uri_text = collection_info_list_to_dnd_data(ct->cd, ct->selection, total);
 				}
 			else
 				{
 				list = g_list_append(nullptr, ct->click_info);
-				uri_text = collection_info_list_to_dnd_data(ct->cd, list, &total);
+				uri_text = collection_info_list_to_dnd_data(ct->cd, list, total);
 				g_list_free(list);
 				}
 			gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data),
