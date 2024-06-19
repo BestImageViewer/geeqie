@@ -558,46 +558,33 @@ CollectionData *collection_from_number(gint n)
 
 CollectionData *collection_from_dnd_data(const gchar *data, GList **list, GList **info_list)
 {
-	CollectionData *cd;
-	gint collection_number;
-	const gchar *ptr;
-
 	if (list) *list = nullptr;
 	if (info_list) *info_list = nullptr;
 
 	if (strncmp(data, "COLLECTION:", 11) != 0) return nullptr;
 
-	ptr = data + 11;
+	data += 11;
 
-	collection_number = atoi(ptr);
-	cd = collection_from_number(collection_number);
+	gint collection_number = atoi(data);
+	CollectionData *cd = collection_from_number(collection_number);
 	if (!cd) return nullptr;
 
 	if (!list && !info_list) return cd;
 
-	while (*ptr != '\0' && *ptr != '\n' ) ptr++;
-	if (*ptr == '\0') return cd;
-	ptr++;
-
-	while (*ptr != '\0')
+	GStrv numbers = g_strsplit(data, "\n", -1);
+	for (gint i = 1; numbers[i] != nullptr; i++)
 		{
-		guint item_number;
-		CollectInfo *info;
+		if (!numbers[i + 1]) break; // numbers[i] is data after last \n, skip it
 
-		item_number = static_cast<guint>(atoi(ptr));
-		while (*ptr != '\n' && *ptr != '\0') ptr++;
-		if (*ptr == '\0')
-			break;
-
-		while (*ptr == '\n') ptr++;
-
-		info = static_cast<CollectInfo *>(g_list_nth_data(cd->list, item_number));
+		auto item_number = static_cast<guint>(atoi(numbers[i]));
+		auto *info = static_cast<CollectInfo *>(g_list_nth_data(cd->list, item_number));
 		if (!info) continue;
 
 		if (list) *list = g_list_append(*list, file_data_ref(info->fd));
 		if (info_list) *info_list = g_list_append(*info_list, info);
 		}
 
+	g_strfreev(numbers);
 	return cd;
 }
 
