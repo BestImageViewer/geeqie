@@ -53,20 +53,6 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 
 
 /**
- * @headerfile tree_view_get_cell_origin
- * returns location of cell in screen coordinates
- */
-gboolean tree_view_get_cell_origin(GtkTreeView *widget, GtkTreePath *tpath, gint column, gboolean text_cell_only,
-			           gint *x, gint *y, gint *width, gint *height);
-
-/**
- * @headerfile tree_view_get_cell_clamped
- * similar to above, but limits the returned area to that of the tree window
- */
-void tree_view_get_cell_clamped(GtkTreeView *widget, GtkTreePath *tpath, gint column, gboolean text_cell_only,
-			       gint *x, gint *y, gint *width, gint *height);
-
-/**
  * @headerfile tree_view_row_get_visibility
  * return 0 = row visible, -1 = row is above, 1 = row is below visible region \n
  * if fully_visible is TRUE, the behavior changes to return -1/1 if _any_ part of the cell is out of view

@@ -72,12 +72,6 @@ void layout_image_set_ignore_alpha(LayoutWindow *lw, gboolean ignore_alpha);
 
 void layout_image_rating(LayoutWindow *lw, const gchar *rating);
 
-/*
-gint layout_image_stereo_get(LayoutWindow *lw);
-void layout_image_stereo_set(LayoutWindow *lw, gint stereo_mode);
-*/
-void layout_image_stereo_swap(LayoutWindow *lw);
-
 gint layout_image_stereo_pixbuf_get(LayoutWindow *lw);
 void layout_image_stereo_pixbuf_set(LayoutWindow *lw, gint stereo_mode);
 

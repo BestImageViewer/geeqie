@@ -69,13 +69,5 @@ GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
 
 GtkWidget *popup_menu_short_lived();
 
-/**
- * @headerfile popup_menu_position_clamp
- * clamp a menu's position to within the screen
- * if menu will attempt to stay out of region y to y+height
- */
-gboolean popup_menu_position_clamp(GtkMenu *menu, gint *x, gint *y, gint height);
-
-
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

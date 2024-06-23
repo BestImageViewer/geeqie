@@ -24,6 +24,7 @@
 #endif
 
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #include <cmath>
 #include <cstdlib>

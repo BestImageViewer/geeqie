@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include <gdk/gdk.h>
 #include <glib-object.h>
 
 #include "debug.h"

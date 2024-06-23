@@ -132,19 +132,6 @@ void file_cache_put(FileCacheData *fc, FileData *fd, gulong size)
 	file_cache_set_size(fc, fc->max_size);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gulong file_cache_get_max_size_unused(FileCacheData *fc)
-{
-	return fc->max_size;
-}
-
-gulong file_cache_get_size_unused(FileCacheData *fc)
-{
-	return fc->size;
-}
-#pragma GCC diagnostic pop
-
 void file_cache_set_max_size(FileCacheData *fc, gulong size)
 {
 	fc->max_size = size;

@@ -42,7 +42,6 @@ struct CollectInfo
 
 CollectInfo *collection_info_new(FileData *fd, struct stat *st, GdkPixbuf *pixbuf);
 
-void collection_info_free_thumb(CollectInfo *ci);
 void collection_info_free(CollectInfo *ci);
 
 void collection_info_set_thumb(CollectInfo *ci, GdkPixbuf *pixbuf);

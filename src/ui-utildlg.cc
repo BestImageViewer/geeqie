@@ -21,7 +21,6 @@
 
 #include "ui-utildlg.h"
 
-#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
@@ -816,21 +815,6 @@ void file_dialog_add_path_widgets(FileDialog *fdlg, const gchar *default_path, c
 	g_signal_connect(G_OBJECT(fdlg->entry), "changed",
 			 G_CALLBACK(file_dialog_entry_cb), fdlg);
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void file_dialog_add_filter_unused(FileDialog *fdlg, const gchar *filter, const gchar *filter_desc, gboolean set)
-{
-	if (!fdlg->entry) return;
-	path_selection_add_filter(fdlg->entry, filter, filter_desc, set);
-}
-
-void file_dialog_clear_filter_unused(FileDialog *fdlg)
-{
-	if (!fdlg->entry) return;
-	path_selection_clear_filter(fdlg->entry);
-}
-#pragma GCC diagnostic pop
 
 void file_dialog_sync_history(FileDialog *fdlg, gboolean dir_only)
 {

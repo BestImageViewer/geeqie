@@ -1375,23 +1375,6 @@ void layout_marks_set(LayoutWindow *lw, gboolean enable)
 	layout_list_sync_marks(lw);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gboolean layout_thumb_get_unused(LayoutWindow *lw)
-{
-	if (!layout_valid(&lw)) return FALSE;
-
-	return lw->options.show_thumbnails;
-}
-
-gboolean layout_marks_get_unused(LayoutWindow *lw)
-{
-	if (!layout_valid(&lw)) return FALSE;
-
-	return lw->options.show_marks;
-}
-#pragma GCC diagnostic pop
-
 void layout_sort_set_files(LayoutWindow *lw, SortType type, gboolean ascend, gboolean case_sensitive)
 {
 	if (!layout_valid(&lw)) return;
@@ -1493,19 +1476,6 @@ void layout_views_set_sort_dir(LayoutWindow *lw, SortType method, gboolean ascen
 
 	layout_style_set(lw, -1, nullptr);
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gboolean layout_views_get_unused(LayoutWindow *lw, DirViewType *dir_view_type, FileViewType *file_view_type)
-{
-	if (!layout_valid(&lw)) return FALSE;
-
-	*dir_view_type = lw->options.dir_view_type;
-	*file_view_type = lw->options.file_view_type;
-
-	return TRUE;
-}
-#pragma GCC diagnostic pop
 
 /*
  *-----------------------------------------------------------------------------
@@ -2348,15 +2318,6 @@ static void startup_path_set_home_cb(GtkWidget *widget, gpointer data)
 	lc->options.startup_path = STARTUP_PATH_HOME;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-static void layout_config_save_cb_unused(GtkWidget *, gpointer)
-{
-	//layout_config_apply();
-	save_options(options);
-}
-#pragma GCC diagnostic pop
-
 void layout_show_config_window(LayoutWindow *lw)
 {
 	LayoutConfig *lc;
@@ -2404,13 +2365,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	gtk_widget_show(button);
 
 	ct_button = button;
-/*
-	button = pref_button_new(NULL, GQ_ICON_SAVE, _("Save"), FALSE,
-				 G_CALLBACK(layout_config_save_cb), NULL);
-	gq_gtk_container_add(GTK_WIDGET(hbox), button);
-	GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
-	gtk_widget_show(button);
-*/
+
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(layout_config_help_cb), lc);
 	gq_gtk_container_add(GTK_WIDGET(hbox), button);

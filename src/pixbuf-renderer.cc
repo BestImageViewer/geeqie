@@ -703,16 +703,6 @@ void pixbuf_renderer_set_parent(PixbufRenderer *pr, GtkWindow *window)
 	pr->parent_window = GTK_WIDGET(window);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-GtkWindow *pixbuf_renderer_get_parent_unused(PixbufRenderer *pr)
-{
-	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), NULL);
-
-	return GTK_WINDOW(pr->parent_window);
-}
-#pragma GCC diagnostic pop
-
 
 /*
  *-------------------------------------------------------------------
@@ -2541,15 +2531,6 @@ void pixbuf_renderer_set_orientation(PixbufRenderer *pr, gint orientation)
 	pr_zoom_sync(pr, pr->zoom, PR_ZOOM_FORCE, 0, 0);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gint pixbuf_renderer_get_orientation_unused(PixbufRenderer *pr)
-{
-	if (!pr) return 1;
-	return pr->orientation;
-}
-#pragma GCC diagnostic pop
-
 void pixbuf_renderer_set_stereo_data(PixbufRenderer *pr, StereoPixbufData stereo_data)
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
@@ -2820,11 +2801,6 @@ void pixbuf_renderer_stereo_fixed_set(PixbufRenderer *pr, gint width, gint heigh
 	pr->stereo_fixed_y_right = y2;
 }
 
-gint pixbuf_renderer_stereo_get(PixbufRenderer *pr)
-{
-	return pr->stereo_mode;
-}
-
 static void pr_stereo_temp_disable(PixbufRenderer *pr, gboolean disable)
 {
 	if (pr->stereo_temp_disable == disable) return;
@@ -2985,30 +2961,6 @@ gboolean pixbuf_renderer_get_visible_rect(PixbufRenderer *pr, GdkRectangle *rect
 	rect->height = static_cast<gint>(static_cast<gdouble>(pr->vis_height) / pr->scale / pr->aspect_ratio);
 	return TRUE;
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gboolean pixbuf_renderer_get_virtual_rect_unused(PixbufRenderer *pr, GdkRectangle *rect)
-{
-	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(rect != nullptr, FALSE);
-
-	if ((!pr->pixbuf && !pr->source_tiles_enabled))
-		{
-		rect->x = 0;
-		rect->y = 0;
-		rect->width = 0;
-		rect->height = 0;
-		return FALSE;
-		}
-
-	rect->x = pr->x_scroll;
-	rect->y = pr->y_scroll;
-	rect->width = pr->vis_width;
-	rect->height = pr->vis_height;
-	return TRUE;
-}
-#pragma GCC diagnostic pop
 
 void pixbuf_renderer_set_size_early(PixbufRenderer *, guint, guint)
 {

@@ -33,6 +33,7 @@
 #include <cstring>
 #include <memory>
 
+#include <glib-object.h>
 #include <langinfo.h>
 #include <pwd.h>
 

@@ -25,6 +25,7 @@
 #include <memory>
 
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <utime.h>
 

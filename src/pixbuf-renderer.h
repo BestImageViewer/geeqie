@@ -355,7 +355,6 @@ void pixbuf_renderer_set_size_early(PixbufRenderer *pr, guint width, guint heigh
 
 /* stereo */
 void pixbuf_renderer_stereo_set(PixbufRenderer *pr, gint stereo_mode);
-gint pixbuf_renderer_stereo_get(PixbufRenderer *pr);
 void pixbuf_renderer_stereo_fixed_set(PixbufRenderer *pr, gint width, gint height, gint x1, gint y1, gint x2, gint y2);
 
 /**

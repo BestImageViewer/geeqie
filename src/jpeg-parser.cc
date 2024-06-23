@@ -102,41 +102,6 @@ guint32 tiff_byte_get_int32(const guchar *f, TiffByteOrder bo)
 	return GUINT32_FROM_BE(align_buf); // NOLINT
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void tiff_byte_put_int16_unused(guchar *f, guint16 n, TiffByteOrder bo)
-{
-	guint16 align_buf;
-
-	if (bo == TIFF_BYTE_ORDER_INTEL)
-		{
-		align_buf = GUINT16_TO_LE(n);
-		}
-	else
-		{
-		align_buf = GUINT16_TO_BE(n);
-		}
-
-	memcpy(f, &align_buf, sizeof(guint16));
-}
-
-void tiff_byte_put_int32_unused(guchar *f, guint32 n, TiffByteOrder bo)
-{
-	guint32 align_buf;
-
-	if (bo == TIFF_BYTE_ORDER_INTEL)
-		{
-		align_buf = GUINT32_TO_LE(n);
-		}
-	else
-		{
-		align_buf = GUINT32_TO_BE(n); // NOLINT
-		}
-
-	memcpy(f, &align_buf, sizeof(guint32));
-}
-#pragma GCC diagnostic pop
-
 gint tiff_directory_offset(const guchar *data, const guint len,
 				guint *offset, TiffByteOrder *bo)
 {

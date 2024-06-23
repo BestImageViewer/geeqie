@@ -1815,20 +1815,6 @@ gboolean autocomplete_keywords_list_save(gchar *path)
  *-------------------------------------------------------------------
  */
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void bar_pane_keywords_close_unused(GtkWidget *bar)
-{
-	PaneKeywordsData *pkd;
-
-	pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
-	if (!pkd) return;
-
-	g_free(pkd->pane.id);
-	g_object_unref(pkd->widget);
-}
-#pragma GCC diagnostic pop
-
 GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
 	gchar *id = g_strdup("keywords");

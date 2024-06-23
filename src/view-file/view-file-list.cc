@@ -332,7 +332,7 @@ void vflist_pop_menu_add_items(ViewFile *vf, GtkWidget *menu)
 	                    G_CALLBACK(vflist_pop_menu_thumbs_cb), vf);
 }
 
-void vflist_star_rating_set(ViewFile *vf, gboolean enable)
+static void vflist_star_rating_set(ViewFile *vf, gboolean enable)
 {
 	GList *columns;
 	GList *work;
@@ -1301,17 +1301,6 @@ static gboolean vflist_row_is_selected(ViewFile *vf, FileData *fd)
 
 	return found;
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gboolean vflist_index_is_selected_unused(ViewFile *vf, gint row)
-{
-	FileData *fd;
-
-	fd = vf_index_get_data(vf, row);
-	return vflist_row_is_selected(vf, fd);
-}
-#pragma GCC diagnostic pop
 
 gboolean vflist_is_selected(ViewFile *vf, FileData *fd)
 {

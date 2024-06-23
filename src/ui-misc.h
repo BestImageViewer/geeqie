@@ -117,35 +117,20 @@ GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *icon_name,
 
 GtkWidget *pref_checkbox_new(GtkWidget *parent_box, const gchar *text, gboolean active,
 			     GCallback func, gpointer data);
-GtkWidget *pref_checkbox_new_mnemonic(GtkWidget *parent_box, const gchar *text, gboolean active,
-				      GCallback func, gpointer data);
 
 GtkWidget *pref_checkbox_new_int(GtkWidget *parent_box, const gchar *text, gboolean active,
 				 gboolean *result);
 
 void pref_checkbox_link_sensitivity(GtkWidget *button, GtkWidget *widget);
-void pref_checkbox_link_sensitivity_swap(GtkWidget *button, GtkWidget *widget);
 
 GtkWidget *pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *sibling,
 				const gchar *text, gboolean active,
 				GCallback func, gpointer data);
-GtkWidget *pref_radiobutton_new_mnemonic(GtkWidget *parent_box, GtkWidget *sibling,
-					 const gchar *text, gboolean active,
-					 GCallback func, gpointer data);
-
-GtkWidget *pref_radiobutton_new_int(GtkWidget *parent_box, GtkWidget *sibling,
-				    const gchar *text, gboolean active,
-				    gboolean *result, gboolean value,
-				    GCallback func, gpointer data);
 
 GtkWidget *pref_spin_new(GtkWidget *parent_box, const gchar *text, const gchar *suffix,
 			 gdouble min, gdouble max, gdouble step, gint digits,
 			 gdouble value,
 			 GCallback func, gpointer data);
-GtkWidget *pref_spin_new_mnemonic(GtkWidget *parent_box, const gchar *text, const gchar *suffix,
-				  gdouble min, gdouble max, gdouble step, gint digits,
-				  gdouble value,
-				  GCallback func, gpointer data);
 
 GtkWidget *pref_spin_new_int(GtkWidget *parent_box, const gchar *text, const gchar *suffix,
 			     gint min, gint max, gint step,
@@ -186,8 +171,6 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 			       const gchar *icon_name, const gchar *label, gboolean toggle,
 			       const gchar *description,
 			       GCallback func, gpointer data);
-void pref_toolbar_button_set_icon(GtkWidget *button, GtkWidget *widget, const gchar *stock_id);
-GtkWidget *pref_toolbar_spacer(GtkWidget *toolbar);
 
 
 GtkWidget *date_selection_new();
@@ -196,7 +179,6 @@ void date_selection_set(GtkWidget *widget, gint day, gint month, gint year);
 GDateTime *date_selection_get(GtkWidget *widget);
 
 void date_selection_time_set(GtkWidget *widget, time_t t);
-time_t date_selection_time_get(GtkWidget *widget);
 
 
 enum SizerPositionType {
@@ -213,12 +195,6 @@ void sizer_set_limits(GtkWidget *sizer,
 
 void pref_list_int_set(const gchar *group, const gchar *key, gint value);
 gboolean pref_list_int_get(const gchar *group, const gchar *key, gint *result);
-
-void pref_list_double_set(const gchar *group, const gchar *key, gdouble value);
-gboolean pref_list_double_get(const gchar *group, const gchar *key, gdouble *result);
-
-void pref_list_string_set(const gchar *group, const gchar *key, const gchar *value);
-gboolean pref_list_string_get(const gchar *group, const gchar *key, const gchar **result);
 
 
 void pref_color_button_set_cb(GtkWidget *widget, gpointer data);

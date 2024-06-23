@@ -27,35 +27,21 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include <cerrno>
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <utility>
 
-#include <glib-object.h>
-#include <grp.h>
-#include <pwd.h>
-
-#include <config.h>
+#include <glib.h>
 
 #include "cache.h"
 #include "debug.h"
-#include "exif.h"
 #include "filefilter.h"
-#include "histogram.h"
-#include "intl.h"
-#include "main-defines.h"
 #include "main.h"
-#include "metadata.h"
-#include "misc.h"
 #include "options.h"
-#include "secure-save.h"
 #include "thumb-standard.h"
-#include "trash.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 
 
@@ -305,26 +291,10 @@ GList *FileData::FileList::sort_full(GList *list, SortType method, gboolean asce
 	return g_list_sort(list, cb);
 }
 
-GList *FileData::FileList::insert_sort_full(GList *list, gpointer data, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb)
-{
-	sort_method = method;
-	sort_ascend = ascend;
-	sort_case = case_sensitive;
-	return g_list_insert_sorted(list, data, cb);
-}
-
 GList *FileData::FileList::sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
 {
 	return sort_full(list, method, ascend, case_sensitive, reinterpret_cast<GCompareFunc>(sort_file_cb));
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-GList *FileData::FileList::insert_sort_unused(GList *list, FileData *fd, SortType method, gboolean ascend)
-{
-	return insert_sort_full(list, fd, method, ascend, ascend, (GCompareFunc) sort_file_cb);
-}
-#pragma GCC diagnostic pop
 
 gboolean FileData::FileList::read_list(FileData *dir_fd, GList **files, GList **dirs)
 {

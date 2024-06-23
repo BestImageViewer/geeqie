@@ -527,13 +527,6 @@ void vficon_marks_set(ViewFile *vf, gint)
 	vficon_populate_at_new_size(vf, allocation.width, allocation.height, TRUE);
 }
 
-void vficon_star_rating_set(ViewFile *vf, gint)
-{
-	GtkAllocation allocation;
-	gtk_widget_get_allocation(vf->listview, &allocation);
-	vficon_populate_at_new_size(vf, allocation.width, allocation.height, TRUE);
-}
-
 /*
  *-------------------------------------------------------------------
  * selections
@@ -714,18 +707,6 @@ static void vficon_select_region_util(ViewFile *vf, FileData *start, FileData *e
 			}
 		}
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gboolean vficon_index_is_selected_unused(ViewFile *vf, gint row)
-{
-	auto *fd = static_cast<FileData *>(g_list_nth_data(vf->list, row));
-
-	if (!fd) return FALSE;
-
-	return vficon_is_selected(vf, fd);
-}
-#pragma GCC diagnostic pop
 
 gboolean vficon_is_selected(ViewFile *, FileData *fd)
 {

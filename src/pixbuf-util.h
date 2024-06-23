@@ -23,8 +23,8 @@
 #define PIXBUF_UTIL_H
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
 #include <glib.h>
-#include <gtk/gtk.h>
 #include <pango/pango.h>
 
 class FileData;

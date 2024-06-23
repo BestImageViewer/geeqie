@@ -23,16 +23,13 @@
 
 #include "filedata.h"
 
-#include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <utility>
 
 #include <glib-object.h>
 #include <grp.h>
@@ -47,12 +44,10 @@
 #include "histogram.h"
 #include "intl.h"
 #include "main-defines.h"
-#include "main.h"
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
 #include "secure-save.h"
-#include "thumb-standard.h"
 #include "trash.h"
 #include "ui-fileops.h"
 
@@ -511,7 +506,7 @@ void FileData::read_exif_time_data(FileData *file)
 {
 	if (file->exifdate > 0)
 		{
-		DEBUG_1("%s set_exif_time_data: Already exists for %s", get_exec_time(), file->path);
+		DEBUG_1("%s read_exif_time_data: Already exists for %s", get_exec_time(), file->path);
 		return;
 		}
 
@@ -523,7 +518,7 @@ void FileData::read_exif_time_data(FileData *file)
 	if (file->exif)
 		{
 		gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeOriginal");
-		DEBUG_2("%s set_exif_time_data: reading %p %s", get_exec_time(), (void *)file, file->path);
+		DEBUG_2("%s read_exif_time_data: reading %p %s", get_exec_time(), (void *)file, file->path);
 
 		if (tmp)
 			{
@@ -554,7 +549,7 @@ void FileData::read_exif_time_digitized_data(FileData *file)
 {
 	if (file->exifdate_digitized > 0)
 		{
-		DEBUG_1("%s set_exif_time_digitized_data: Already exists for %s", get_exec_time(), file->path);
+		DEBUG_1("%s read_exif_time_digitized_data: Already exists for %s", get_exec_time(), file->path);
 		return;
 		}
 
@@ -566,7 +561,7 @@ void FileData::read_exif_time_digitized_data(FileData *file)
 	if (file->exif)
 		{
 		gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeDigitized");
-		DEBUG_2("%s set_exif_time_digitized_data: reading %p %s", get_exec_time(), (void *)file, file->path);
+		DEBUG_2("%s read_exif_time_digitized_data: reading %p %s", get_exec_time(), (void *)file, file->path);
 
 		if (tmp)
 			{
@@ -608,53 +603,6 @@ void FileData::read_rating_data(FileData *file)
 		file->rating = 0;
 		}
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void FileData::set_exif_time_data_unused(GList *files)
-{
-	DEBUG_1("%s set_exif_time_data: ...", get_exec_time());
-
-	while (files)
-		{
-		auto *file = static_cast<FileData *>(files->data);
-
-		read_exif_time_data(file);
-		files = files->next;
-		}
-}
-
-void FileData::set_exif_time_digitized_data_unused(GList *files)
-{
-	DEBUG_1("%s set_exif_time_digitized_data: ...", get_exec_time());
-
-	while (files)
-		{
-		auto *file = static_cast<FileData *>(files->data);
-
-		read_exif_time_digitized_data(file);
-		files = files->next;
-		}
-}
-
-void FileData::set_rating_data_unused(GList *files)
-{
-	gchar *rating_str;
-	DEBUG_1("%s set_rating_data: ...", get_exec_time());
-
-	while (files)
-		{
-		auto *file = static_cast<FileData *>(files->data);
-		rating_str = metadata_read_string(file, RATING_KEY, METADATA_PLAIN);
-		if (rating_str )
-			{
-			file->rating = atoi(rating_str);
-			g_free(rating_str);
-			}
-		files = files->next;
-		}
-}
-#pragma GCC diagnostic pop
 
 FileData *FileData::file_data_new_no_grouping(const gchar *path_utf8)
 {
@@ -1577,23 +1525,6 @@ void FileData::file_data_get_registered_mark_func(gint n, FileDataGetMarkFunc *g
 	if (set_mark_func) *set_mark_func = file_data_set_mark_func[n];
 	if (data) *data = file_data_mark_func_data[n];
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gint FileData::file_data_get_user_orientation_unused(FileData *fd)
-{
-	return fd->user_orientation;
-}
-
-void FileData::file_data_set_user_orientation_unused(FileData *fd, gint value)
-{
-	if (fd->user_orientation == value) return;
-
-	fd->user_orientation = value;
-	file_data_increment_version(fd);
-	file_data_send_notification(fd, NOTIFY_ORIENTATION);
-}
-#pragma GCC diagnostic pop
 
 
 /*
@@ -2820,26 +2751,6 @@ gboolean FileData::file_data_unregister_notify_func(FileDataNotifyFunc func, gpo
 	return FALSE;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gboolean FileData::file_data_send_notification_idle_cb_unused(gpointer data)
-{
-	auto *nid = (NotifyIdleData *)data;
-	GList *work = notify_func_list;
-
-	while (work)
-		{
-		auto *nd = (NotifyData *)work->data;
-
-		nd->func(nid->fd, nid->type, nd->data);
-		work = work->next;
-		}
-	::file_data_unref(nid->fd);
-	g_free(nid);
-	return FALSE;
-}
-#pragma GCC diagnostic pop
-
 void FileData::file_data_send_notification(FileData *fd, NotifyType type)
 {
 	GList *work = notify_func_list;
@@ -2851,12 +2762,6 @@ void FileData::file_data_send_notification(FileData *fd, NotifyType type)
 		nd->func(fd, type, nd->data);
 		work = work->next;
 		}
-    /*
-	NotifyIdleData *nid = g_new0(NotifyIdleData, 1);
-	nid->fd = ::file_data_ref(fd);
-	nid->type = type;
-	g_idle_add_full(G_PRIORITY_HIGH, file_data_send_notification_idle_cb, nid, NULL);
-    */
 }
 
 static GHashTable *file_data_monitor_pool = nullptr;

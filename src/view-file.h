@@ -113,7 +113,6 @@ void vf_refresh_idle(ViewFile *vf);
 
 void vf_thumb_set(ViewFile *vf, gboolean enable);
 void vf_marks_set(ViewFile *vf, gboolean enable);
-void vf_star_rating_set(ViewFile *vf, gboolean enable);
 void vf_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive);
 
 guint vf_marks_get_filter(ViewFile *vf);

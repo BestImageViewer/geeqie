@@ -486,57 +486,6 @@ static void dupe_item_free(DupeItem *di)
 	g_free(di);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-static DupeItem *dupe_item_find_fd_by_list_unused(FileData *fd, GList *work)
-{
-	while (work)
-		{
-		auto *di = static_cast<DupeItem *>(work->data);
-
-		if (di->fd == fd) return di;
-
-		work = work->next;
-		}
-
-	return nullptr;
-}
-
-static DupeItem *dupe_item_find_fd_unused(DupeWindow *dw, FileData *fd)
-{
-	DupeItem *di;
-
-	di = dupe_item_find_fd_by_list_unused(fd, dw->list);
-	if (!di && dw->second_set) di = dupe_item_find_fd_by_list_unused(fd, dw->second_list);
-
-	return di;
-}
-
-static DupeItem *dupe_item_find_path_by_list_unused(const gchar *path, GList *work)
-{
-	while (work)
-		{
-		auto *di = static_cast<DupeItem *>(work->data);
-
-		if (strcmp(di->fd->path, path) == 0) return di;
-
-		work = work->next;
-		}
-
-	return nullptr;
-}
-
-static DupeItem *dupe_item_find_path_unused(DupeWindow *dw, const gchar *path)
-{
-	DupeItem *di;
-
-	di = dupe_item_find_path_by_list_unused(path, dw->list);
-	if (!di && dw->second_set) di = dupe_item_find_path_by_list_unused(path, dw->second_list);
-
-	return di;
-}
-#pragma GCC diagnostic pop
-
 /*
  * ------------------------------------------------------------------
  * Image property cache
@@ -2728,21 +2677,6 @@ static void dupe_item_remove(DupeWindow *dw, DupeItem *di)
 
 	dupe_window_update_count(dw, FALSE);
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-static gboolean dupe_item_remove_by_path_unused(DupeWindow *dw, const gchar *path)
-{
-	DupeItem *di;
-
-	di = dupe_item_find_path_unused(dw, path);
-	if (!di) return FALSE;
-
-	dupe_item_remove(dw, di);
-
-	return TRUE;
-}
-#pragma GCC diagnostic pop
 
 static gboolean dupe_files_add_queue_cb(gpointer data)
 {

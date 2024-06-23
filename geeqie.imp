@@ -1,6 +1,7 @@
 [
     { include: [ "<bits/types/sig_atomic_t.h>",        private, "<csignal>",               public ] },
     { include: [ "<bits/types/struct_FILE.h>",         private, "<cstdio>",                public ] },
+    { include: [ "<bits/std_abs.h>",                   private, "<cstdlib>",               public ] },
 
     { include: [ "\"cairo.h\"",                        private, "<cairo.h>",               public ] },
 
@@ -11,6 +12,8 @@
     { include: [ "<exiv2/xmp_exiv2.hpp>",              private, "<exiv2/exiv2.hpp>",       public ] },
 
     { include: [ "\"gdk/gdkkeysyms.h\"",               private, "<gdk/gdk.h>",             public ] },
+
+    { include: [ "\"gio/gemblem.h\"",                  private, "<gio/gio.h>",             public ] },
 
     { include: [ "@\"gobject/.*\"",                    private, "<glib-object.h>",         public ] },
 

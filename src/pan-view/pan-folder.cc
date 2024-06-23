@@ -24,6 +24,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <gdk/gdk.h>
+
 #include "filedata.h"
 #include "pan-item.h"
 #include "pan-types.h"

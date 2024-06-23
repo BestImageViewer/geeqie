@@ -22,6 +22,7 @@
 #include "collect-io.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>

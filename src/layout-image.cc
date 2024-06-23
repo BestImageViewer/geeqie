@@ -75,20 +75,6 @@ static void layout_image_animate_update_image(LayoutWindow *lw);
 
 /*
  *----------------------------------------------------------------------------
- * full screen overlay
- *----------------------------------------------------------------------------
- */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-static void layout_image_overlay_toggle_unused(LayoutWindow *lw)
-{
-	if (!lw) return;
-	image_osd_toggle(lw->image);
-}
-#pragma GCC diagnostic pop
-
-/*
- *----------------------------------------------------------------------------
  * full screen
  *----------------------------------------------------------------------------
  */
@@ -1316,17 +1302,6 @@ void layout_image_set_overunderexposed(LayoutWindow *lw, gboolean overunderexpos
 	image_set_overunderexposed(lw->image, overunderexposed);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gboolean layout_image_get_overunderexposed_unused(LayoutWindow *lw)
-{
-	if (!layout_valid(&lw)) return FALSE;
-
-//	return image_get_overunderexposed(lw->image);
-	return FALSE;
-}
-#pragma GCC diagnostic pop
-
 void layout_image_set_ignore_alpha(LayoutWindow *lw, gboolean ignore_alpha)
 {
    if (!layout_valid(&lw)) return;
@@ -1336,30 +1311,6 @@ void layout_image_set_ignore_alpha(LayoutWindow *lw, gboolean ignore_alpha)
 }
 
 /* stereo */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gint layout_image_stereo_get_unused(LayoutWindow *lw)
-{
-	if (!layout_valid(&lw)) return 0;
-
-//	return image_stereo_get(lw->image);
-	return 0;
-}
-
-void layout_image_stereo_set_unused(LayoutWindow *lw, gint stereo_mode)
-{
-	if (!layout_valid(&lw)) return;
-
-	image_stereo_set(lw->image, stereo_mode);
-}
-void layout_image_stereo_swap_unused(LayoutWindow *lw)
-{
-	if (!layout_valid(&lw)) return;
-
-//	image_stereo_swap(lw->image);
-}
-#pragma GCC diagnostic pop
-
 gint layout_image_stereo_pixbuf_get(LayoutWindow *lw)
 {
 	if (!layout_valid(&lw)) return 0;
@@ -1380,16 +1331,6 @@ const gchar *layout_image_get_path(LayoutWindow *lw)
 
 	return image_get_path(lw->image);
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-const gchar *layout_image_get_name_unused(LayoutWindow *lw)
-{
-	if (!layout_valid(&lw)) return nullptr;
-
-	return image_get_name(lw->image);
-}
-#pragma GCC diagnostic pop
 
 FileData *layout_image_get_fd(LayoutWindow *lw)
 {

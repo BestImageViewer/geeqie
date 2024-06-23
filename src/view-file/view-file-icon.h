@@ -70,7 +70,6 @@ gboolean vficon_refresh(ViewFile *vf);
 
 
 void vficon_marks_set(ViewFile *vf, gboolean enable);
-void vficon_star_rating_set(ViewFile *vf, gboolean enable);
 void vficon_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive);
 
 GList *vficon_selection_get_one(ViewFile *vf, FileData *fd);

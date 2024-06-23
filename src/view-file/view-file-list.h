@@ -59,7 +59,6 @@ gboolean vflist_refresh(ViewFile *vf);
 
 void vflist_thumb_set(ViewFile *vf, gboolean enable);
 void vflist_marks_set(ViewFile *vf, gboolean enable);
-void vflist_star_rating_set(ViewFile *vf, gboolean enable);
 void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive);
 
 GList *vflist_selection_get_one(ViewFile *vf, FileData *fd);

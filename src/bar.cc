@@ -717,19 +717,6 @@ static void bar_size_allocate(GtkWidget *, GtkAllocation *, gpointer data)
 	bd->width = gtk_paned_get_position(GTK_PANED(bd->lw->utility_paned));
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gint bar_get_width_unused(GtkWidget *bar)
-{
-	BarData *bd;
-
-	bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
-	if (!bd) return 0;
-
-	return bd->width;
-}
-#pragma GCC diagnostic pop
-
 void bar_close(GtkWidget *bar)
 {
 	BarData *bd;

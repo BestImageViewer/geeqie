@@ -785,13 +785,6 @@ void vdtree_refresh(ViewDir *vd)
 	vdtree_populate_path(vd, vd->dir_fd, FALSE, TRUE);
 }
 
-const gchar *vdtree_row_get_path(ViewDir *, gint)
-{
-/** @FIXME no get row path */
-	log_printf("FIXME: no get row path\n");
-	return nullptr;
-}
-
 /*
  *----------------------------------------------------------------------------
  * callbacks

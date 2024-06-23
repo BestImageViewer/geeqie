@@ -780,18 +780,6 @@ void bar_pane_exif_destroy(GtkWidget *, gpointer data)
 	g_free(ped);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void bar_pane_exif_size_request_unused(GtkWidget *, GtkRequisition *requisition, gpointer data)
-{
-	auto *ped = static_cast<PaneExifData *>(data);
-	if (requisition->height < ped->min_height)
-		{
-		requisition->height = ped->min_height;
-		}
-}
-#pragma GCC diagnostic pop
-
 void bar_pane_exif_size_allocate(GtkWidget *, GtkAllocation *alloc, gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
@@ -875,19 +863,6 @@ GList * bar_pane_exif_list()
 		}
 	return exif_list;
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void bar_pane_exif_close_unused(GtkWidget *widget)
-{
-	PaneExifData *ped;
-
-	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
-	if (!ped) return;
-
-	g_object_unref(ped->vbox);
-}
-#pragma GCC diagnostic pop
 
 GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {

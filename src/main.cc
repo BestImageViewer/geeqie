@@ -25,6 +25,7 @@
 
 #include <clocale>
 #include <csignal>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -1122,50 +1123,6 @@ void exit_program()
 	exit_program_final();
 }
 
-/* This code attempts to handle situation when a file mmaped by image_loader
- * or by exif loader is truncated by some other process.
- * This code is incorrect according to POSIX, because:
- *
- *   mmap is not async-signal-safe and thus may not be called from a signal handler
- *
- *   mmap must be called with a valid file descriptor.  POSIX requires that
- *   a fildes argument of -1 must cause mmap to return EBADF.
- *
- * See https://github.com/BestImageViewer/geeqie/issues/1052 for discussion of
- * an alternative approach.
- */
-/** @FIXME this probably needs some better ifdefs. Please report any compilation problems */
-/** @FIXME This section needs revising */
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#if defined(SIGBUS) && defined(SA_SIGINFO)
-static void sigbus_handler_cb_unused(int, siginfo_t *info, void *)
-{
-	/*
-	 * @FIXME Design and implement a POSIX-acceptable approach,
-	 * after first documenting the sitations where SIGBUS occurs.
-	 * See https://github.com/BestImageViewer/geeqie/issues/1052 for discussion
-	 */
-
-	DEBUG_1("SIGBUS %p NOT HANDLED", info->si_addr);
-	exit(EXIT_FAILURE);
-}
-#endif
-
-static void setup_sigbus_handler_unused()
-{
-#if defined(SIGBUS) && defined(SA_SIGINFO)
-	struct sigaction sigbus_action;
-	sigfillset(&sigbus_action.sa_mask);
-	sigbus_action.sa_sigaction = sigbus_handler_cb_unused;
-	sigbus_action.sa_flags = SA_SIGINFO;
-
-	sigaction(SIGBUS, &sigbus_action, nullptr);
-#endif
-}
-#pragma GCC diagnostic pop
-
 #if !HAVE_DEVELOPER
 static void setup_sig_handler()
 {
@@ -1315,11 +1272,6 @@ gint main(gint argc, gchar *argv[])
 
 	/* setup random seed for random slideshow */
 	srand(time(nullptr));
-
-#if 0
-	/* See later comment; this handler leads to UB. */
-	setup_sigbus_handler();
-#endif
 
 	/* register global notify functions */
 	file_data_register_notify_func(cache_notify_cb, nullptr, NOTIFY_PRIORITY_HIGH);

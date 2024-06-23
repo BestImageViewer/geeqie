@@ -249,24 +249,6 @@ gboolean metadata_write_queue_remove(FileData *fd)
 	return TRUE;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gboolean metadata_write_queue_remove_list_unused(GList *list)
-{
-	GList *work;
-	gboolean ret = TRUE;
-
-	work = list;
-	while (work)
-		{
-		auto *fd = static_cast<FileData *>(work->data);
-		work = work->next;
-		ret = ret && metadata_write_queue_remove(fd);
-		}
-	return ret;
-}
-#pragma GCC diagnostic pop
-
 void metadata_notify_cb(FileData *fd, NotifyType type, gpointer)
 {
 	if (type & (NOTIFY_REREAD | NOTIFY_CHANGE))

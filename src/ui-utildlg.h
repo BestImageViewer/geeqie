@@ -102,7 +102,6 @@ GtkWidget *file_dialog_add_button(FileDialog *fd, const gchar *stock_id, const g
 void file_dialog_add_path_widgets(FileDialog *fd, const gchar *default_path, const gchar *path,
 				  const gchar *history_key, const gchar *filter, const gchar *filter_desc);
 
-void file_dialog_clear_filter(FileDialog *fd);
 void file_dialog_sync_history(FileDialog *fd, gboolean dir_only);
 
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values);

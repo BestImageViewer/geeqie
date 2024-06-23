@@ -68,13 +68,6 @@ uint ddsGetWidth(unsigned const char * buffer) {
 	return (buffer[16] & 0xFF) | (buffer[17] & 0xFF) << 8 | (buffer[18] & 0xFF) << 16 | (buffer[19] & 0xFF) << 24;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-uint ddsGetMipmap_unused(unsigned const char * buffer) {
-	return (buffer[28] & 0xFF) | (buffer[29] & 0xFF) << 8 | (buffer[30] & 0xFF) << 16 | (buffer[31] & 0xFF) << 24;
-}
-#pragma GCC diagnostic pop
-
 uint ddsGetPixelFormatFlags(unsigned const char * buffer) {
 	return (buffer[80] & 0xFF) | (buffer[81] & 0xFF) << 8 | (buffer[82] & 0xFF) << 16 | (buffer[83] & 0xFF) << 24;
 }

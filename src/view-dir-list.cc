@@ -131,17 +131,6 @@ static void vdlist_scroll_to_row(ViewDir *vd, FileData *fd, gfloat y_align)
  *-----------------------------------------------------------------------------
  */
 
-const gchar *vdlist_row_get_path(ViewDir *vd, gint row)
-{
-	FileData *fd;
-
-	fd = static_cast<FileData *>(g_list_nth_data(VDLIST(vd)->list, row));
-
-	if (fd) return fd->path;
-
-	return nullptr;
-}
-
 static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 {
 	GtkListStore *store;

@@ -377,29 +377,6 @@ GdkRectangle fullscreen_prefs_get_geometry(gint screen_num, GtkWidget *widget, G
 	return geometry;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gint fullscreen_prefs_find_screen_for_widget_unused(GtkWidget *widget)
-{
-	GdkScreen *screen;
-	gint monitor;
-	gint n;
-
-	if (!widget || !gtk_widget_get_window(widget)) return 0;
-
-	screen = gtk_widget_get_screen(widget);
-	G_GNUC_BEGIN_IGNORE_DEPRECATIONS;
-	monitor = gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(widget));
-	G_GNUC_END_IGNORE_DEPRECATIONS;
-
-	n = 100 + monitor + 1;
-
-	DEBUG_1("Screen appears to be %d", n);
-
-	return n;
-}
-#pragma GCC diagnostic pop
-
 enum {
 	FS_MENU_COLUMN_NAME = 0,
 	FS_MENU_COLUMN_VALUE

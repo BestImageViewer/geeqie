@@ -39,6 +39,7 @@
 #include "intl.h"
 #include "layout-util.h"
 #include "layout.h"
+#include "main-defines.h"
 #include "misc.h"
 #include "options.h"
 #include "ui-misc.h"

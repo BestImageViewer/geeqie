@@ -24,9 +24,6 @@
 #include <cstddef>
 #include <utility>
 
-#include <cairo.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#include <gio/gio.h>
 #include <glib-object.h>
 
 #include "cellrenderericon.h"

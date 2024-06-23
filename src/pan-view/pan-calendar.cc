@@ -25,6 +25,8 @@
 #include <cstring>
 #include <ctime>
 
+#include <gdk/gdk.h>
+
 #include "debug.h"
 #include "filedata.h"
 #include "misc.h"
@@ -33,7 +35,6 @@
 #include "pan-util.h"
 #include "pan-view-filter.h"
 #include "pan-view.h"
-#include "pixbuf-util.h"
 #include "typedefs.h"
 
 namespace

@@ -47,7 +47,6 @@
 #include "main-defines.h"
 #include "metadata.h"
 #include "options.h"
-#include "pixbuf-renderer.h"
 #include "secure-save.h"
 #include "slideshow.h"
 #include "typedefs.h"
@@ -186,14 +185,6 @@ gboolean read_int_option(const gchar *option, const gchar *label, const gchar *v
 
 	return TRUE;
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void write_ushort_option_unused(GString *str, gint, const gchar *label, guint16 n)
-{
-	g_string_append_printf(str, "%s = \"%uh\" ", label, n);
-}
-#pragma GCC diagnostic pop
 
 gboolean read_ushort_option(const gchar *option, const gchar *label, const gchar *value, guint16 *n)
 {

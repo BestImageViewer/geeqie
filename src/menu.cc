@@ -28,7 +28,6 @@
 #include "collect.h"
 #include "editors.h"
 #include "intl.h"
-#include "main-defines.h"
 #include "pixbuf-util.h"
 #include "ui-menu.h"
 

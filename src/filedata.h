@@ -288,14 +288,6 @@ class FileData {
 	static void file_data_basename_hash_remove_list(gpointer, gpointer value, gpointer);
 	static void file_data_basename_hash_free(GHashTable *basename_hash);
 	static void file_data_basename_hash_to_sidecars(gpointer, gpointer value, gpointer);
-
-    private:
-	void set_exif_time_data_unused(GList *files);
-	void set_exif_time_digitized_data_unused(GList *files);
-	void set_rating_data_unused(GList *files);
-	gint file_data_get_user_orientation_unused(FileData *fd);
-	void file_data_set_user_orientation_unused(FileData *fd, gint value);
-	gboolean file_data_send_notification_idle_cb_unused(gpointer data);
 };
 
 class FileData::FileList
@@ -314,7 +306,6 @@ class FileData::FileList
 	static gint sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend);
 	static GList *sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive);
 	static GList *sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
-	static GList *insert_sort_full(GList *list, gpointer data, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
 
 	static gboolean read_list(FileData *dir_fd, GList **files, GList **dirs);
 	static gboolean read_list_lstat(FileData *dir_fd, GList **files, GList **dirs);
@@ -337,9 +328,6 @@ class FileData::FileList
 	static gint sort_path_cb(gconstpointer a, gconstpointer b);
 	static void recursive_append(GList **list, GList *dirs);
 	static void recursive_append_full(GList **list, GList *dirs, SortType method, gboolean ascend, gboolean case_sensitive);
-
-    private:
-	static GList *insert_sort_unused(GList *list, FileData *fd, SortType method, gboolean ascend);
 };
 
 // C-style compatibility API.
@@ -393,7 +381,6 @@ gint filelist_sort_compare_filedata(FileData *fa, FileData *fb);
 gint filelist_sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend);
 GList *filelist_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive);
 GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
-GList *filelist_insert_sort_full(GList *list, gpointer data, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
 
 gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs);
 gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs);

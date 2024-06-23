@@ -1221,38 +1221,6 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 	return table;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-GtkWidget *path_selection_new_unused(const gchar *path, GtkWidget *entry)
-{
-	return path_selection_new_with_files(entry, path, nullptr, nullptr);
-}
-
-void path_selection_sync_to_entry_unused(GtkWidget *entry)
-{
-	auto *dd = static_cast<Dest_Data *>(g_object_get_data(G_OBJECT(entry), "destination_data"));
-	const gchar *path;
-
-	if (!dd) return;
-
-	path = gq_gtk_entry_get_text(GTK_ENTRY(entry));
-
-	if (isdir(path) && (!dd->path || strcmp(path, dd->path) != 0))
-		{
-		dest_populate(dd, path);
-		}
-	else
-		{
-		gchar *buf = remove_level_from_path(path);
-		if (isdir(buf) && (!dd->path || strcmp(buf, dd->path) != 0))
-			{
-			dest_populate(dd, buf);
-			}
-		g_free(buf);
-		}
-}
-#pragma GCC diagnostic pop
-
 void path_selection_add_select_func(GtkWidget *entry,
 				    void (*func)(const gchar *, gpointer), gpointer data)
 {
@@ -1262,24 +1230,5 @@ void path_selection_add_select_func(GtkWidget *entry,
 
 	dd->select_func = func;
 	dd->select_data = data;
-}
-
-void path_selection_add_filter(GtkWidget *entry, const gchar *filter, const gchar *description, gboolean set)
-{
-	auto dd = static_cast<Dest_Data *>(g_object_get_data(G_OBJECT(entry), "destination_data"));
-
-	if (!dd) return;
-	if (!filter) return;
-
-	dest_filter_add(dd, filter, description, set);
-}
-
-void path_selection_clear_filter(GtkWidget *entry)
-{
-	auto dd = static_cast<Dest_Data *>(g_object_get_data(G_OBJECT(entry), "destination_data"));
-
-	if (!dd) return;
-
-	dest_filter_clear(dd);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -1727,21 +1727,6 @@ void vf_marks_set(ViewFile *vf, gboolean enable)
 
 	vf_refresh_idle(vf);
 }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void vf_star_rating_set_unused(ViewFile *vf, gboolean enable)
-{
-	if (options->show_star_rating == enable) return;
-	options->show_star_rating = enable;
-
-	switch (vf->type)
-		{
-		case FILEVIEW_LIST: vflist_star_rating_set(vf, enable); break;
-		case FILEVIEW_ICON: vficon_star_rating_set(vf, enable); break;
-		}
-	vf_refresh_idle(vf);
-}
-#pragma GCC diagnostic pop
 
 guint vf_marks_get_filter(ViewFile *vf)
 {

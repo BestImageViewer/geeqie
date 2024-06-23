@@ -503,17 +503,6 @@ void cache_sim_data_set_dimensions(CacheData *cd, gint w, gint h)
 	cd->dimensions = TRUE;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void cache_sim_data_set_date_unused(CacheData *cd, time_t date)
-{
-	if (!cd) return;
-
-	cd->date = date;
-	cd->have_date = TRUE;
-}
-#pragma GCC diagnostic pop
-
 void cache_sim_data_set_md5sum(CacheData *cd, const guchar digest[16])
 {
 	gint i;

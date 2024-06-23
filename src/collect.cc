@@ -107,7 +107,7 @@ CollectInfo *collection_info_new(FileData *fd, struct stat *, GdkPixbuf *pixbuf)
 	return ci;
 }
 
-void collection_info_free_thumb(CollectInfo *ci)
+static void collection_info_free_thumb(CollectInfo *ci)
 {
 	if (ci->pixbuf) g_object_unref(ci->pixbuf);
 	ci->pixbuf = nullptr;
@@ -128,19 +128,6 @@ void collection_info_set_thumb(CollectInfo *ci, GdkPixbuf *pixbuf)
 	collection_info_free_thumb(ci);
 	ci->pixbuf = pixbuf;
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gboolean collection_info_load_thumb_unused(CollectInfo *ci)
-{
-	if (!ci) return FALSE;
-
-	collection_info_free_thumb(ci);
-
-	log_printf("collection_info_load_thumb not implemented!\n(because an instant thumb loader not implemented)");
-	return FALSE;
-}
-#pragma GCC diagnostic pop
 
 /* an ugly static var, well what ya gonna do ? */
 static SortType collection_list_sort_method = SORT_NAME;

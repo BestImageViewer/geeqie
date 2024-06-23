@@ -34,7 +34,6 @@ ViewDir *vdlist_new(ViewDir *vd, FileData *dir_fd);
 gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd);
 void vdlist_refresh(ViewDir *vd);
 
-const gchar *vdlist_row_get_path(ViewDir *vd, gint row);
 gboolean vdlist_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter);
 
 void vdlist_rename_by_row(ViewDir *vd, FileData *fd);

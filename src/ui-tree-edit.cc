@@ -263,106 +263,6 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
  *-------------------------------------------------------------------
  */
 
-gboolean tree_view_get_cell_origin(GtkTreeView *widget, GtkTreePath *tpath, gint column, gboolean text_cell_only,
-			           gint *x, gint *y, gint *width, gint *height)
-{
-	gint x_origin;
-	gint y_origin;
-	gint x_offset;
-	gint y_offset;
-	gint header_size;
-	GtkTreeViewColumn *tv_column;
-	GdkRectangle rect;
-
-	tv_column = gtk_tree_view_get_column(widget, column);
-	if (!tv_column || !tpath) return FALSE;
-
-	/* hmm, appears the rect will not account for X scroll, but does for Y scroll
-	 * use x_offset instead for X scroll (sigh)
-	 */
-	gtk_tree_view_get_cell_area(widget, tpath, tv_column, &rect);
-	gtk_tree_view_convert_tree_to_widget_coords(widget, 0, 0, &x_offset, &y_offset);
-	gdk_window_get_origin(gtk_widget_get_window(GTK_WIDGET(widget)), &x_origin, &y_origin);
-
-	if (gtk_tree_view_get_headers_visible(widget))
-		{
-		GtkAllocation allocation;
-		gtk_widget_get_allocation(gtk_tree_view_column_get_button(tv_column), &allocation);
-		header_size = allocation.height;
-		}
-	else
-		{
-		header_size = 0;
-		}
-
-	if (text_cell_only)
-		{
-		GtkCellRenderer *cell = nullptr;
-		GList *renderers;
-		GList *work;
-		gint cell_x;
-		gint cell_width;
-
-		renderers = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(tv_column));
-		work = renderers;
-		while (work && !cell)
-			{
-			cell = static_cast<GtkCellRenderer *>(work->data);
-			work = work->next;
-			if (!GTK_IS_CELL_RENDERER_TEXT(cell)) cell = nullptr;
-			}
-		g_list_free(renderers);
-
-		if (!cell) return FALSE;
-
-		if (!gtk_tree_view_column_cell_get_position(tv_column, cell, &cell_x, &cell_width))
-			{
-			cell_x = 0;
-			cell_width = rect.width;
-			}
-		*x = x_origin + x_offset + rect.x + cell_x;
-		*width = cell_width;
-		}
-	else
-		{
-		*x = x_origin + x_offset + rect.x;
-		*width = rect.width;
-		}
-	*y = y_origin + rect.y + header_size;
-	*height = rect.height;
-	return TRUE;
-}
-
-void tree_view_get_cell_clamped(GtkTreeView *widget, GtkTreePath *tpath, gint column, gboolean text_cell_only,
-				gint *x, gint *y, gint *width, gint *height)
-{
-	gint wx;
-	gint wy;
-	gint ww;
-	gint wh;
-	GdkWindow *window;
-
-	window = gtk_widget_get_window(GTK_WIDGET(widget));
-	gdk_window_get_origin(window, &wx, &wy);
-
-	ww = gdk_window_get_width(window);
-	wh = gdk_window_get_height(window);
-
-	if (!tree_view_get_cell_origin(widget, tpath, column, text_cell_only, x,  y, width, height))
-		{
-		*x = wx;
-		*y = wy;
-		*width = ww;
-		*height = wh;
-		return;
-		}
-
-	*width = MIN(*width, ww);
-	*x = CLAMP(*x, wx, wx + ww - (*width));
-	*y = CLAMP(*y, wy, wy + wh);
-	*height = MIN(*height, wy + wh - (*y));
-}
-
 /* an implementation that uses gtk_tree_view_get_visible_range */
 gint tree_view_row_get_visibility(GtkTreeView *widget, GtkTreeIter *iter, gboolean fully_visible)
 {
@@ -479,19 +379,6 @@ gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboo
 
 	return move;
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-gint tree_path_to_row_unused(GtkTreePath *tpath)
-{
-	gint *indices;
-
-	indices = gtk_tree_path_get_indices(tpath);
-	if (indices) return indices[0];
-
-	return -1;
-}
-#pragma GCC diagnostic pop
 
 
 /*

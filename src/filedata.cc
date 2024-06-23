@@ -173,11 +173,6 @@ GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolea
 	return FileData::FileList::sort_full(list, method, ascend, case_sensitive, cb);
 }
 
-GList *filelist_insert_sort_full(GList *list, gpointer data, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb)
-{
-	return FileData::FileList::insert_sort_full(list, data, method, ascend, case_sensitive, cb);
-}
-
 
 gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs)
 {

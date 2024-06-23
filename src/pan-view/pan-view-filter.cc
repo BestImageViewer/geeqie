@@ -27,7 +27,6 @@
 
 #include "compat.h"
 #include "filedata.h"
-#include "image.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "metadata.h"
@@ -207,18 +206,6 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 	pan_layout_update(pw);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void pan_filter_activate_unused(PanWindow *pw)
-{
-	gchar *text;
-
-	text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(pw->filter_ui->filter_entry)));
-	pan_filter_activate_cb(text, pw);
-	g_free(text);
-}
-#pragma GCC diagnostic pop
-
 void pan_filter_toggle_cb(GtkWidget *button, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
@@ -259,38 +246,6 @@ void pan_filter_toggle_cb(GtkWidget *button, gpointer data)
 		gtk_widget_grab_focus(ui->filter_entry);
 		}
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-void pan_filter_toggle_visible_unused(PanWindow *pw, gboolean enable)
-{
-	PanViewFilterUi *ui = pw->filter_ui;
-	if (pw->fs) return;
-
-	if (enable)
-		{
-		if (gtk_widget_get_visible(ui->filter_box))
-			{
-			gtk_widget_grab_focus(ui->filter_entry);
-			}
-		else
-			{
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ui->filter_button), TRUE);
-			}
-		}
-	else
-		{
-		if (gtk_widget_get_visible(ui->filter_entry))
-			{
-			if (gtk_widget_has_focus(ui->filter_entry))
-				{
-				gtk_widget_grab_focus(GTK_WIDGET(pw->imd->widget));
-				}
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ui->filter_button), FALSE);
-			}
-		}
-}
-#pragma GCC diagnostic pop
 
 void pan_filter_toggle_button_cb(GtkWidget *, gpointer data)
 {
