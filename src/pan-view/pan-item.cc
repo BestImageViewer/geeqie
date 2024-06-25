@@ -28,10 +28,10 @@
 #include <gtk/gtk.h>
 #include <pango/pango.h>
 
-#include "cache.h"
 #include "filedata.h"
 #include "image.h"
 #include "pan-types.h"
+#include "pan-view.h"
 #include "pixbuf-util.h"
 #include "ui-misc.h"
 
@@ -542,38 +542,11 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
  *-----------------------------------------------------------------------------
  */
 
-static void pan_item_image_find_size(PanWindow *pw, const FileData *fd, gint &w, gint &h)
-{
-	GList *work;
-
-	if (!fd) return;
-
-	work = pw->cache_list;
-	while (work)
-		{
-		PanCacheData *pc;
-
-		pc = static_cast<PanCacheData *>(work->data);
-		work = work->next;
-
-		if (pc->cd && pc->cd->dimensions &&
-		    pc->fd == fd)
-			{
-			w = MAX(1, pc->cd->width * pw->image_size / 100);
-			h = MAX(1, pc->cd->height * pw->image_size / 100);
-
-			pw->cache_list = g_list_remove(pw->cache_list, pc);
-			pan_cache_data_free(pc);
-			return;
-			}
-		}
-}
-
 PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w, gint h)
 {
 	PanItem *pi;
 
-	pan_item_image_find_size(pw, fd, w, h);
+	pan_cache_get_image_size(pw, fd, w, h);
 
 	pi = g_new0(PanItem, 1);
 	pi->type = PAN_ITEM_IMAGE;
@@ -856,21 +829,5 @@ void PanTextAlignment::calc(PanItem *box)
 
 		y += height;
 		}
-}
-
-
-/*
- *-----------------------------------------------------------------------------
- * cache data
- *-----------------------------------------------------------------------------
- */
-
-void pan_cache_data_free(PanCacheData *pc)
-{
-	if (!pc) return;
-
-	cache_sim_data_free(pc->cd);
-	file_data_unref(pc->fd);
-	g_free(pc);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

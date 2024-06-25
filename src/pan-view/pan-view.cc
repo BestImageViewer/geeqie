@@ -21,6 +21,7 @@
 
 #include "pan-view.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 
@@ -73,6 +74,11 @@
 namespace
 {
 
+struct PanCacheData {
+	FileData *fd;
+	CacheData *cd;
+};
+
 struct PanGrid {
 	GdkRectangle rect;
 	GList *list;
@@ -97,6 +103,15 @@ constexpr gint PAN_POPUP_BORDER = 1;
 constexpr guint8 PAN_POPUP_ALPHA = 255;
 constexpr PanColor PAN_POPUP_COLOR{255, 255, 225, PAN_POPUP_ALPHA};
 constexpr PanColor PAN_POPUP_BORDER_COLOR{0, 0, 0, PAN_POPUP_ALPHA};
+
+void pan_cache_data_free(PanCacheData *pc)
+{
+	if (!pc) return;
+
+	cache_sim_data_free(pc->cd);
+	file_data_unref(pc->fd);
+	g_free(pc);
+}
 
 } // namespace
 
@@ -599,11 +614,11 @@ static gint pan_cache_sort_file_cb(gpointer a, gpointer b)
 	auto pcb = static_cast<PanCacheData *>(b);
 	return filelist_sort_compare_filedata(pca->fd, pcb->fd);
 }
+
 GList *pan_cache_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
 {
 	return filelist_sort_full(list, method, ascend, case_sensitive, reinterpret_cast<GCompareFunc>(pan_cache_sort_file_cb));
 }
-
 
 static void pan_cache_free(PanWindow *pw)
 {
@@ -724,6 +739,28 @@ void pan_cache_sync_date(PanWindow *pw, GList *list)
 		}
 
 	g_list_free(haystack);
+}
+
+void pan_cache_get_image_size(PanWindow *pw, const FileData *fd, gint &w, gint &h)
+{
+	if (!fd) return;
+
+	const auto pan_cache_data_cd_dimensions_compare_fd = [](gconstpointer data, gconstpointer user_data)
+	{
+		auto *pc = static_cast<const PanCacheData *>(data);
+		return (pc->cd && pc->cd->dimensions && pc->fd == user_data) ? 0 : 1;
+	};
+
+	GList *work = g_list_find_custom(pw->cache_list, fd, pan_cache_data_cd_dimensions_compare_fd);
+	if (!work) return;
+
+	auto *pc = static_cast<PanCacheData *>(work->data);
+
+	w = std::max(1, pc->cd->width * pw->image_size / 100);
+	h = std::max(1, pc->cd->height * pw->image_size / 100);
+
+	pw->cache_list = g_list_remove(pw->cache_list, pc);
+	pan_cache_data_free(pc);
 }
 
 /*

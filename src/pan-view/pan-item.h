@@ -109,7 +109,4 @@ private:
 	gchar *key;
 };
 
-// Cache data
-void pan_cache_data_free(PanCacheData *pc);
-
 #endif

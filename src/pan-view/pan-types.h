@@ -190,7 +190,7 @@ struct PanWindow
 	GList *list_static;
 	GList *list_grid;
 
-	GList *cache_list;
+	GList *cache_list; // element type is PanCacheData
 	GList *cache_todo;
 	gint cache_count;
 	gint cache_total;
@@ -206,11 +206,6 @@ struct PanWindow
 	PanItem *search_pi;
 
 	gint idle_id;
-};
-
-struct PanCacheData {
-	FileData *fd;
-	CacheData *cd;
 };
 
 #endif
