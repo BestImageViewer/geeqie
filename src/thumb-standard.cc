@@ -369,7 +369,7 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 					  NULL);
 		if (success)
 			{
-			chmod(pathl, (tl->cache_local) ? tl->source_mode : S_IRUSR & S_IWUSR);
+			chmod(pathl, (tl->cache_local) ? tl->source_mode : S_IRUSR | S_IWUSR);
 			success = rename_file(tmp_path, tl->thumb_path);
 			}
 
