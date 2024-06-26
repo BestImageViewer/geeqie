@@ -370,10 +370,28 @@ static void file_data_set_path(FileData *fd, const gchar *path)
 
 /*
  *-----------------------------------------------------------------------------
+ * FileData context
+ *-----------------------------------------------------------------------------
+ */
+std::mutex GlobalFileDataContext::s_instance_mutex;
+std::unique_ptr<GlobalFileDataContext> GlobalFileDataContext::s_instance;
+
+GlobalFileDataContext &GlobalFileDataContext::get_instance()
+{
+	std::lock_guard<std::mutex> instance_lock(GlobalFileDataContext::s_instance_mutex);
+	if (GlobalFileDataContext::s_instance == nullptr)
+		{
+		GlobalFileDataContext::s_instance = std::make_unique<GlobalFileDataContext>();
+		}
+
+	return *GlobalFileDataContext::s_instance;
+}
+
+/*
+ *-----------------------------------------------------------------------------
  * create or reuse Filedata
  *-----------------------------------------------------------------------------
  */
-
 FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gboolean disable_sidecars)
 {
 	FileData *fd;

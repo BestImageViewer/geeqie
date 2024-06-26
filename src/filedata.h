@@ -22,6 +22,8 @@
 #ifndef FILEDATA_H
 #define FILEDATA_H
 
+#include <memory>
+#include <mutex>
 #include <sys/types.h>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -68,6 +70,44 @@ struct FileDataChangeInfo {
 	gchar *dest;
 	gint error;
 	gboolean regroup_when_finished;
+};
+
+class FileDataContext
+{
+    public:
+	FileDataContext() :
+		file_data_pool(g_hash_table_new(g_str_hash, g_str_equal)),
+		planned_change_map(g_hash_table_new(g_str_hash, g_str_equal))
+		{ }
+
+	FileDataContext(FileDataContext &) = delete;  // Not copyable.
+	FileDataContext &operator=(const FileDataContext &) = delete;  // Not assignable.
+	~FileDataContext()
+		{
+		g_hash_table_destroy(planned_change_map);
+		g_hash_table_destroy(file_data_pool);
+		}
+
+#ifdef DEBUG_FILEDATA
+	gint global_file_data_count = 0;
+#endif
+	GHashTable *file_data_pool;
+	GHashTable *planned_change_map;
+};
+
+class GlobalFileDataContext
+{
+    public:
+	static GlobalFileDataContext &get_instance();
+
+	FileDataContext &context() { return context_; }
+
+    private:
+	static std::mutex s_instance_mutex;
+	// TODO(xsdg): Maybe use mutex annotations from absl?  clang has them but gcc doesn't.
+	// GUARDED_BY(s_instance_mutex);
+	static std::unique_ptr<GlobalFileDataContext> s_instance;
+	FileDataContext context_;
 };
 
 class FileData {
