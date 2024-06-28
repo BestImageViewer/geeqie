@@ -557,7 +557,7 @@ static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
 					    gint	       *width,
 					    gint	       *height)
 {
-	auto cellicon = reinterpret_cast<GQvCellRendererIcon *>(cell);
+	GQvCellRendererIcon *cellicon = GQV_CELL_RENDERER_ICON(cell);
 	gint calc_width;
 	gint calc_height;
 	gint xpad;
@@ -638,7 +638,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 
 {
 	GtkStyleContext *context = gtk_widget_get_style_context(widget);
-	auto cellicon = reinterpret_cast<GQvCellRendererIcon *>(cell);
+	GQvCellRendererIcon *cellicon = GQV_CELL_RENDERER_ICON(cell);
 	GdkPixbuf *pixbuf;
 	const gchar *text;
 	GdkRectangle cell_rect;
@@ -806,7 +806,7 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 						const GdkRectangle   *cell_area,
 						GtkCellRendererState)
 {
-	auto cellicon = reinterpret_cast<GQvCellRendererIcon *>(cell);
+	GQvCellRendererIcon *cellicon = GQV_CELL_RENDERER_ICON(cell);
 	GdkEventButton *bevent = &event->button;
 
 	if (cellicon->show_marks &&

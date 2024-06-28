@@ -153,12 +153,12 @@ void file_data_disable_grouping_list(GList *fd_list, gboolean disable)
 }
 
 
-gint filelist_sort_compare_filedata(FileData *fa, FileData *fb)
+gint filelist_sort_compare_filedata(const FileData *fa, const FileData *fb)
 {
 	return FileData::FileList::sort_compare_filedata(fa, fb);
 }
 
-gint filelist_sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend)
+gint filelist_sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend)
 {
 	return FileData::FileList::sort_compare_filedata_full(fa, fb, method, ascend);
 }

@@ -73,26 +73,31 @@ struct CMData
 
 /*
  *-----------------------------------------------------------------------------
- * Command line cache maintenance program functions *-----------------------------------------------------------------------------
+ * Command line cache maintenance program functions
+ *-----------------------------------------------------------------------------
  */
 static gchar *cache_maintenance_path = nullptr;
 static GtkStatusIcon *status_icon;
 
-static void cache_maintenance_sim_stop_cb(gpointer)
+static void cache_manager_sim_remote(const gchar *path, gboolean recurse, GSourceFunc destroy_func);
+
+static gboolean cache_maintenance_sim_stop_cb(gpointer)
 {
 	exit(EXIT_SUCCESS);
+	return G_SOURCE_REMOVE;
 }
 
-static void cache_maintenance_render_stop_cb(gpointer)
+static gboolean cache_maintenance_render_stop_cb(gpointer)
 {
 	gtk_status_icon_set_tooltip_text(status_icon, _("Geeqie: Creating sim data..."));
-	cache_manager_sim_remote(cache_maintenance_path, TRUE, reinterpret_cast<GDestroyNotify *>(cache_maintenance_sim_stop_cb));
+	cache_manager_sim_remote(cache_maintenance_path, TRUE, cache_maintenance_sim_stop_cb);
+	return G_SOURCE_REMOVE;
 }
 
 static void cache_maintenance_clean_stop_cb(gpointer)
 {
 	gtk_status_icon_set_tooltip_text(status_icon, _("Geeqie: Creating thumbs..."));
-	cache_manager_render_remote(cache_maintenance_path, TRUE, options->thumbnails.cache_into_dirs, reinterpret_cast<GDestroyNotify *>(cache_maintenance_render_stop_cb));
+	cache_manager_render_remote(cache_maintenance_path, TRUE, options->thumbnails.cache_into_dirs, cache_maintenance_render_stop_cb);
 }
 
 static void cache_maintenance_user_cancel_cb()
@@ -128,7 +133,7 @@ void cache_maintenance(const gchar *path)
 	gtk_status_icon_set_visible(status_icon, TRUE);
 	g_signal_connect(G_OBJECT(status_icon), "activate", G_CALLBACK(cache_maintenance_status_icon_activate_cb), NULL);
 
-	cache_maintain_home_remote(FALSE, FALSE, reinterpret_cast<GDestroyNotify *>(cache_maintenance_clean_stop_cb));
+	cache_maintain_home_remote(FALSE, FALSE, cache_maintenance_clean_stop_cb);
 }
 
 /*
@@ -440,7 +445,7 @@ void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent)
  *
  *
  */
-void cache_maintain_home_remote(gboolean metadata, gboolean clear, GDestroyNotify *func)
+void cache_maintain_home_remote(gboolean metadata, gboolean clear, GDestroyNotify func)
 {
 	CMData *cm;
 	GList *dlist;
@@ -472,7 +477,7 @@ void cache_maintain_home_remote(gboolean metadata, gboolean clear, GDestroyNotif
 	cm->metadata = metadata;
 	cm->remote = TRUE;
 
-	cm->idle_id = g_idle_add_full(G_PRIORITY_LOW, cache_maintain_home_cb, cm, reinterpret_cast<GDestroyNotify>(func));
+	cm->idle_id = g_idle_add_full(G_PRIORITY_LOW, cache_maintain_home_cb, cm, func);
 }
 
 static void cache_file_move(const gchar *src, const gchar *dest)
@@ -639,7 +644,7 @@ struct CacheOpsData
 	GenericDialog *gd;
 	ThumbLoaderStd *tl;
 	CacheLoader *cl;
-	GDestroyNotify *destroy_func; /* Used by the command line prog. functions */
+	GSourceFunc destroy_func; /* Used by the command line prog. functions */
 
 	GList *list;
 	GList *list_dir;
@@ -805,7 +810,7 @@ static gboolean cache_manager_render_file(CacheOpsData *cd)
 
 	if (cd->destroy_func)
 		{
-		g_idle_add(reinterpret_cast<GSourceFunc>(cd->destroy_func), nullptr);
+		g_idle_add(cd->destroy_func, nullptr);
 		}
 
 	return FALSE;
@@ -958,11 +963,11 @@ static void cache_manager_render_dialog(GtkWidget *widget, const gchar *path)
  * @param path Path to image folder
  * @param recurse
  * @param local Create thumbnails in same folder as images
- * @param func Function called when idle loop function terminates
+ * @param destroy_func Function called when idle loop function terminates
  *
  *
  */
-void cache_manager_render_remote(const gchar *path, gboolean recurse, gboolean local, GDestroyNotify *func)
+void cache_manager_render_remote(const gchar *path, gboolean recurse, gboolean local, GSourceFunc destroy_func)
 {
 	CacheOpsData *cd;
 
@@ -970,7 +975,7 @@ void cache_manager_render_remote(const gchar *path, gboolean recurse, gboolean l
 	cd->recurse = recurse;
 	cd->local = local;
 	cd->remote = TRUE;
-	cd->destroy_func = func;
+	cd->destroy_func = destroy_func;
 
 	cache_manager_render_start_render_remote(cd, path);
 }
@@ -1409,18 +1414,18 @@ static void cache_manager_sim_start_sim_remote(CacheOpsData *cd, const gchar *us
  * @brief Generate .sim files
  * @param path Path to image folder
  * @param recurse
- * @param func Function called when idle loop function terminates
+ * @param destroy_func Function called when idle loop function terminates
  *
  *
  */
-void cache_manager_sim_remote(const gchar *path, gboolean recurse, GDestroyNotify *func)
+static void cache_manager_sim_remote(const gchar *path, gboolean recurse, GSourceFunc destroy_func)
 {
 	CacheOpsData *cd;
 
 	cd = g_new0(CacheOpsData, 1);
 	cd->recurse = recurse;
 	cd->remote = TRUE;
-	cd->destroy_func = func;
+	cd->destroy_func = destroy_func;
 
 	cache_manager_sim_start_sim_remote(cd, path);
 }
@@ -1474,7 +1479,7 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 
 	if (cd->destroy_func)
 		{
-		g_idle_add(reinterpret_cast<GSourceFunc>(cd->destroy_func), nullptr);
+		g_idle_add(cd->destroy_func, nullptr);
 		}
 
 	return FALSE;

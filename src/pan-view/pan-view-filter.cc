@@ -118,9 +118,9 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 		gtk_widget_show(ui->filter_check_buttons[i]);
 	}
 
-	gtk_toggle_button_set_active(reinterpret_cast<GtkToggleButton *>(ui->filter_check_buttons[FORMAT_CLASS_IMAGE]), TRUE);
-	gtk_toggle_button_set_active(reinterpret_cast<GtkToggleButton *>(ui->filter_check_buttons[FORMAT_CLASS_RAWIMAGE]), TRUE);
-	gtk_toggle_button_set_active(reinterpret_cast<GtkToggleButton *>(ui->filter_check_buttons[FORMAT_CLASS_VIDEO]), TRUE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ui->filter_check_buttons[FORMAT_CLASS_IMAGE]), TRUE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ui->filter_check_buttons[FORMAT_CLASS_RAWIMAGE]), TRUE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ui->filter_check_buttons[FORMAT_CLASS_VIDEO]), TRUE);
 	ui->filter_classes = (1 << FORMAT_CLASS_IMAGE) | (1 << FORMAT_CLASS_RAWIMAGE) | (1 << FORMAT_CLASS_VIDEO);
 
 	// Connecting the signal before setting the state causes segfault as pw is not yet prepared
@@ -257,7 +257,7 @@ void pan_filter_toggle_button_cb(GtkWidget *, gpointer data)
 
 	for (gint i = 0; i < FILE_FORMAT_CLASSES; i++)
 	{
-		ui->filter_classes |= gtk_toggle_button_get_active(reinterpret_cast<GtkToggleButton *>(ui->filter_check_buttons[i])) ? 1 << i : 0;
+		ui->filter_classes |= gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ui->filter_check_buttons[i])) ? 1 << i : 0;
 	}
 
 	if (ui->filter_classes != old_classes) 

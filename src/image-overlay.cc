@@ -551,17 +551,17 @@ static GdkPixbuf *image_osd_icon_pixbuf(ImageOSDFlag flag)
 static gint image_overlay_add(ImageWindow *imd, GdkPixbuf *pixbuf, gint x, gint y,
 			      OverlayRendererFlags flags)
 {
-	return pixbuf_renderer_overlay_add(reinterpret_cast<PixbufRenderer *>(imd->pr), pixbuf, x, y, flags);
+	return pixbuf_renderer_overlay_add(PIXBUF_RENDERER(imd->pr), pixbuf, x, y, flags);
 }
 
 static void image_overlay_set(ImageWindow *imd, gint id, GdkPixbuf *pixbuf, gint x, gint y)
 {
-	pixbuf_renderer_overlay_set(reinterpret_cast<PixbufRenderer *>(imd->pr), id, pixbuf, x, y);
+	pixbuf_renderer_overlay_set(PIXBUF_RENDERER(imd->pr), id, pixbuf, x, y);
 }
 
 static void image_overlay_remove(ImageWindow *imd, gint id)
 {
-	pixbuf_renderer_overlay_remove(reinterpret_cast<PixbufRenderer *>(imd->pr), id);
+	pixbuf_renderer_overlay_remove(PIXBUF_RENDERER(imd->pr), id);
 }
 
 static void image_osd_icon_show(OverlayStateData *osd, ImageOSDFlag flag)

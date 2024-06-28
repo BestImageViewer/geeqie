@@ -327,7 +327,6 @@ static gboolean show_next_frame(gpointer data)
 {
 	auto fd = static_cast<AnimationData*>(data);
 	int delay;
-	PixbufRenderer *pr;
 
 	if(animation_should_continue(fd)==FALSE)
 		{
@@ -335,7 +334,7 @@ static gboolean show_next_frame(gpointer data)
 		return FALSE;
 		}
 
-	pr = reinterpret_cast<PixbufRenderer*>(fd->iw->pr);
+	PixbufRenderer *pr = PIXBUF_RENDERER(fd->iw->pr);
 
 	if (gdk_pixbuf_animation_iter_advance(fd->iter,nullptr)==FALSE)
 		{
@@ -473,7 +472,7 @@ static gboolean layout_image_animate_new_file(LayoutWindow *lw)
 	if (gfstream)
 		{
 		animation->gfstream = gfstream;
-		gdk_pixbuf_animation_new_from_stream_async(reinterpret_cast<GInputStream*>(gfstream), animation->cancellable, animation_async_ready_cb, animation);
+		gdk_pixbuf_animation_new_from_stream_async(G_INPUT_STREAM(gfstream), animation->cancellable, animation_async_ready_cb, animation);
 		}
 	else
 		{
@@ -1278,7 +1277,7 @@ void layout_image_reset_orientation(LayoutWindow *lw)
 		 imd->orientation = imd->image_fd->user_orientation;
 		}
 
-	pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), imd->orientation);
+	pixbuf_renderer_set_orientation(PIXBUF_RENDERER(imd->pr), imd->orientation);
 }
 
 void layout_image_set_desaturate(LayoutWindow *lw, gboolean desaturate)

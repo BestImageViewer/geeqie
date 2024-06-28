@@ -608,16 +608,16 @@ static void pan_window_zoom_limit(PanWindow *pw)
  *-----------------------------------------------------------------------------
  */
 
-static gint pan_cache_sort_file_cb(gpointer a, gpointer b)
+static gint pan_cache_sort_file_cb(gconstpointer a, gconstpointer b)
 {
-	auto pca = static_cast<PanCacheData *>(a);
-	auto pcb = static_cast<PanCacheData *>(b);
+	auto pca = static_cast<const PanCacheData *>(a);
+	auto pcb = static_cast<const PanCacheData *>(b);
 	return filelist_sort_compare_filedata(pca->fd, pcb->fd);
 }
 
 GList *pan_cache_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
 {
-	return filelist_sort_full(list, method, ascend, case_sensitive, reinterpret_cast<GCompareFunc>(pan_cache_sort_file_cb));
+	return filelist_sort_full(list, method, ascend, case_sensitive, pan_cache_sort_file_cb);
 }
 
 static void pan_cache_free(PanWindow *pw)

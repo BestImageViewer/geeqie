@@ -75,21 +75,17 @@ static GList *generate_list(SlideShowData *ss)
 	return list;
 }
 
-static void ptr_array_add(gpointer data, GPtrArray *array)
-{
-	g_ptr_array_add(array, data);
-}
-
-static void list_prepend(gpointer data, GList **list)
-{
-	*list = g_list_prepend(*list, data);
-}
-
 static GPtrArray *generate_ptr_array_from_list(GList *src_list)
 {
 	GPtrArray *arr = g_ptr_array_sized_new(g_list_length(src_list));
 
-	g_list_foreach(src_list, reinterpret_cast<GFunc>(ptr_array_add), arr);
+	static const auto ptr_array_add = [](gpointer data, gpointer user_data)
+	{
+		auto *array = static_cast<GPtrArray *>(user_data);
+		g_ptr_array_add(array, data);
+	};
+
+	g_list_foreach(src_list, ptr_array_add, arr);
 
 	return arr;
 }
@@ -114,8 +110,14 @@ static GList *generate_random_list(SlideShowData *ss)
 	src_array = generate_ptr_array_from_list(src_list);
 	g_list_free(src_list);
 
+	static const auto list_prepend = [](gpointer data, gpointer user_data)
+	{
+		auto list = static_cast<GList **>(user_data);
+		*list = g_list_prepend(*list, data);
+	};
+
 	ptr_array_random_shuffle(src_array);
-	g_ptr_array_foreach(src_array, reinterpret_cast<GFunc>(list_prepend), &list);
+	g_ptr_array_foreach(src_array, list_prepend, &list);
 	g_ptr_array_free(src_array, TRUE);
 
 	return list;

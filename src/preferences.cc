@@ -1361,7 +1361,7 @@ static void filter_remove_cb(GtkWidget *, gpointer data)
 	filter_store_populate();
 }
 
-static gboolean filter_default_ok_scroll(GtkTreeView *data)
+static gboolean filter_default_ok_scroll(gpointer data)
 {
 	GtkTreeIter iter;
 	GtkTreePath *path;
@@ -1377,7 +1377,7 @@ static gboolean filter_default_ok_scroll(GtkTreeView *data)
 
 	gtk_tree_path_free(path);
 
-	return(G_SOURCE_REMOVE);
+	return G_SOURCE_REMOVE;
 }
 
 static void filter_default_ok_cb(GenericDialog *gd, gpointer)
@@ -1387,7 +1387,7 @@ static void filter_default_ok_cb(GenericDialog *gd, gpointer)
 	filter_rebuild();
 	filter_store_populate();
 
-	g_idle_add(reinterpret_cast<GSourceFunc>(filter_default_ok_scroll), gd->data);
+	g_idle_add(filter_default_ok_scroll, gd->data);
 }
 
 static void dummy_cancel_cb(GenericDialog *, gpointer)
@@ -1731,7 +1731,7 @@ static gboolean accel_remove_key_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeI
 
 static void accel_store_edited_cb(GtkCellRendererAccel *, gchar *path_string, guint accel_key, GdkModifierType accel_mods, guint, gpointer)
 {
-	auto model = reinterpret_cast<GtkTreeModel *>(accel_store);
+	GtkTreeModel *model = GTK_TREE_MODEL(accel_store);
 	GtkTreeIter iter;
 	gchar *acc;
 	gchar *accel_path;
@@ -1760,7 +1760,7 @@ static void accel_store_edited_cb(GtkCellRendererAccel *, gchar *path_string, gu
 	g_free(acc);
 }
 
-static gboolean accel_default_scroll(GtkTreeView *data)
+static gboolean accel_default_scroll(gpointer data)
 {
 	GtkTreeIter iter;
 	GtkTreePath *path;
@@ -1776,14 +1776,14 @@ static gboolean accel_default_scroll(GtkTreeView *data)
 
 	gtk_tree_path_free(path);
 
-	return(G_SOURCE_REMOVE);
+	return G_SOURCE_REMOVE;
 }
 
 static void accel_default_cb(GtkWidget *, gpointer data)
 {
 	accel_store_populate();
 
-	g_idle_add(reinterpret_cast<GSourceFunc>(accel_default_scroll), data);
+	g_idle_add(accel_default_scroll, data);
 }
 
 void accel_clear_selection(GtkTreeModel *, GtkTreePath *, GtkTreeIter *iter, gpointer)

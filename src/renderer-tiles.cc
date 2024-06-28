@@ -472,7 +472,7 @@ static void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 		cairo_surface_t *surface;
 		guint size;
 
-		surface = gdk_window_create_similar_surface(gtk_widget_get_window(reinterpret_cast<GtkWidget *>(pr)),
+		surface = gdk_window_create_similar_surface(gtk_widget_get_window(GTK_WIDGET(pr)),
 		                                            CAIRO_CONTENT_COLOR,
 		                                            rt->tile_width, rt->tile_height);
 
@@ -560,7 +560,7 @@ static void rt_overlay_draw(RendererTiles *rt, const GdkRectangle &request_rect,
 			{
 			if (!rt->overlay_buffer)
 				{
-				rt->overlay_buffer = gdk_window_create_similar_surface(gtk_widget_get_window(reinterpret_cast<GtkWidget *>(rt->pr)),
+				rt->overlay_buffer = gdk_window_create_similar_surface(gtk_widget_get_window(GTK_WIDGET(rt->pr)),
 				                                                       CAIRO_CONTENT_COLOR,
 				                                                       rt->tile_width, rt->tile_height);
 				}

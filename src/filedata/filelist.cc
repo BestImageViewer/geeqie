@@ -202,7 +202,7 @@ gboolean FileData::FileList::read_list_real(const gchar *dir_path, GList **files
  */
 
 
-gint FileData::FileList::sort_compare_filedata(FileData *fa, FileData *fb)
+gint FileData::FileList::sort_compare_filedata(const FileData *fa, const FileData *fb)
 {
 	gint ret;
 	if (!sort_ascend)
@@ -271,16 +271,16 @@ gint FileData::FileList::sort_compare_filedata(FileData *fa, FileData *fb)
 	return strcmp(fa->original_path, fb->original_path);
 }
 
-gint FileData::FileList::sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend)
+gint FileData::FileList::sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend)
 {
 	sort_method = method;
 	sort_ascend = ascend;
 	return sort_compare_filedata(fa, fb);
 }
 
-gint FileData::FileList::sort_file_cb(gpointer a, gpointer b)
+gint FileData::FileList::sort_file_cb(gconstpointer a, gconstpointer b)
 {
-	return FileData::FileList::sort_compare_filedata(static_cast<FileData *>(a), static_cast<FileData *>(b));
+	return FileData::FileList::sort_compare_filedata(static_cast<const FileData *>(a), static_cast<const FileData *>(b));
 }
 
 GList *FileData::FileList::sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb)
@@ -293,7 +293,7 @@ GList *FileData::FileList::sort_full(GList *list, SortType method, gboolean asce
 
 GList *FileData::FileList::sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
 {
-	return sort_full(list, method, ascend, case_sensitive, reinterpret_cast<GCompareFunc>(sort_file_cb));
+	return sort_full(list, method, ascend, case_sensitive, sort_file_cb);
 }
 
 gboolean FileData::FileList::read_list(FileData *dir_fd, GList **files, GList **dirs)
@@ -458,7 +458,7 @@ void FileData::FileList::recursive_append_full(GList **list, GList *dirs, SortTy
 		if (read_list(fd, &f, &d))
 			{
 			f = filter(f, FALSE);
-			f = sort_full(f, method, ascend, case_sensitive, reinterpret_cast<GCompareFunc>(sort_file_cb));
+			f = sort_full(f, method, ascend, case_sensitive, sort_file_cb);
 			*list = g_list_concat(*list, f);
 
 			d = filter(d, TRUE);
@@ -495,7 +495,7 @@ GList *FileData::FileList::recursive_full(FileData *dir_fd, SortType method, gbo
 
 	if (!read_list(dir_fd, &list, &d)) return nullptr;
 	list = filter(list, FALSE);
-	list = sort_full(list, method, ascend, case_sensitive, reinterpret_cast<GCompareFunc>(sort_file_cb));
+	list = sort_full(list, method, ascend, case_sensitive, sort_file_cb);
 
 	d = filter(d, TRUE);
 	d = sort_path(d);

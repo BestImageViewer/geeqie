@@ -776,7 +776,7 @@ static void gr_pixel_info(const gchar *, GIOChannel *channel, gpointer)
 
 	if (!layout_valid(&lw_id)) return;
 
-	pr = reinterpret_cast<PixbufRenderer*>(lw_id->image->pr);
+	pr = PIXBUF_RENDERER(lw_id->image->pr);
 
 	if (pr)
 		{
@@ -815,7 +815,7 @@ static void gr_rectangle(const gchar *, GIOChannel *channel, gpointer)
 	if (!options->draw_rectangle) return;
 	if (!layout_valid(&lw_id)) return;
 
-	auto *pr = reinterpret_cast<PixbufRenderer *>(lw_id->image->pr);
+	auto *pr = PIXBUF_RENDERER(lw_id->image->pr);
 	if (!pr) return;
 
 	gint x1;

@@ -155,9 +155,9 @@ static gboolean dest_check_filter(const gchar *filter, const gchar *file)
 #define CASE_SORT strcmp
 #endif
 
-static gint dest_sort_cb(gpointer a, gpointer b)
+static gint dest_sort_cb(gconstpointer a, gconstpointer b)
 {
-	return CASE_SORT((gchar *)a, (gchar *)b);
+	return CASE_SORT(static_cast<const gchar *>(a), static_cast<const gchar *>(b));
 }
 
 static gboolean is_hidden(const gchar *name)
@@ -216,8 +216,8 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 	closedir(dp);
 	g_free(pathl);
 
-	path_list = g_list_sort(path_list, reinterpret_cast<GCompareFunc>(dest_sort_cb));
-	file_list = g_list_sort(file_list, reinterpret_cast<GCompareFunc>(dest_sort_cb));
+	path_list = g_list_sort(path_list, dest_sort_cb);
+	file_list = g_list_sort(file_list, dest_sort_cb);
 
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dd->d_view)));
 	gtk_list_store_clear(store);

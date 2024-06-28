@@ -302,8 +302,8 @@ class FileData::FileList
 	static gboolean sort_case;
 
     public:
-	static gint sort_compare_filedata(FileData *fa, FileData *fb);
-	static gint sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend);
+	static gint sort_compare_filedata(const FileData *fa, const FileData *fb);
+	static gint sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend);
 	static GList *sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive);
 	static GList *sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
 
@@ -324,7 +324,7 @@ class FileData::FileList
 	static GList *filter_out_sidecars(GList *flist);
 	static gboolean is_hidden_file(const gchar *name);
 	static gboolean read_list_real(const gchar *dir_path, GList **files, GList **dirs, gboolean follow_symlinks);
-	static gint sort_file_cb(gpointer a, gpointer b);
+	static gint sort_file_cb(gconstpointer a, gconstpointer b);
 	static gint sort_path_cb(gconstpointer a, gconstpointer b);
 	static void recursive_append(GList **list, GList *dirs);
 	static void recursive_append_full(GList **list, GList *dirs, SortType method, gboolean ascend, gboolean case_sensitive);
@@ -377,8 +377,8 @@ void file_data_change_info_free(FileDataChangeInfo *fdci, FileData *fd);
 void file_data_disable_grouping(FileData *fd, gboolean disable);
 void file_data_disable_grouping_list(GList *fd_list, gboolean disable);
 
-gint filelist_sort_compare_filedata(FileData *fa, FileData *fb);
-gint filelist_sort_compare_filedata_full(FileData *fa, FileData *fb, SortType method, gboolean ascend);
+gint filelist_sort_compare_filedata(const FileData *fa, const FileData *fb);
+gint filelist_sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend);
 GList *filelist_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive);
 GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
 

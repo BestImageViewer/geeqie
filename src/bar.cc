@@ -608,7 +608,7 @@ void bar_clear(GtkWidget *bar)
 
 	list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
 
-	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(remove_child_from_parent));
+	g_list_free_full(list, remove_child_from_parent);
 }
 
 void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)

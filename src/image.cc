@@ -184,7 +184,7 @@ static void image_press_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer d
 
 	if (rect_id)
 		{
-		pixbuf_renderer_overlay_remove(reinterpret_cast<PixbufRenderer *>(imd->pr), rect_id);
+		pixbuf_renderer_overlay_remove(PIXBUF_RENDERER(imd->pr), rect_id);
 		}
 
 	lw = layout_find_by_image(imd);
@@ -288,7 +288,7 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 
 		if (rect_id)
 			{
-			pixbuf_renderer_overlay_remove(reinterpret_cast<PixbufRenderer *>(imd->pr), rect_id);
+			pixbuf_renderer_overlay_remove(PIXBUF_RENDERER(imd->pr), rect_id);
 			}
 
 		rect_width = pr->drag_last_x - pixbuf_start_x;
@@ -319,7 +319,7 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 		pixbuf_set_rect(rect_pixbuf, 1, 1, rect_width-2, rect_height - 2, 0, 0, 0, 255, 1, 1, 1, 1);
 		pixbuf_set_rect(rect_pixbuf, 0, 0, rect_width, rect_height, 255, 255, 255, 255, 1, 1, 1, 1);
 
-		rect_id = pixbuf_renderer_overlay_add(reinterpret_cast<PixbufRenderer *>(imd->pr), rect_pixbuf, pixbuf_start_x, pixbuf_start_y, OVL_NORMAL);
+		rect_id = pixbuf_renderer_overlay_add(PIXBUF_RENDERER(imd->pr), rect_pixbuf, pixbuf_start_x, pixbuf_start_y, OVL_NORMAL);
 		}
 
 	pixbuf_renderer_get_scaled_size(pr, &width, &height);
@@ -751,7 +751,7 @@ void image_alter_orientation(ImageWindow *imd, FileData *fd_n, AlterType type)
 	if (imd->image_fd == fd_n && (!options->metadata.write_orientation || options->image.exif_rotate_enable))
 		{
 		imd->orientation = orientation;
-		pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), orientation);
+		pixbuf_renderer_set_orientation(PIXBUF_RENDERER(imd->pr), orientation);
 		}
 }
 
@@ -759,10 +759,10 @@ void image_set_desaturate(ImageWindow *imd, gboolean desaturate)
 {
 	imd->desaturate = desaturate;
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 	else
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, TRUE);
-	pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), imd->orientation);
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, nullptr, TRUE);
+	pixbuf_renderer_set_orientation(PIXBUF_RENDERER(imd->pr), imd->orientation);
 }
 
 gboolean image_get_desaturate(ImageWindow *imd)
@@ -774,15 +774,15 @@ void image_set_overunderexposed(ImageWindow *imd, gboolean overunderexposed)
 {
 	imd->overunderexposed = overunderexposed;
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 	else
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, TRUE);
-	pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), imd->orientation);
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, nullptr, TRUE);
+	pixbuf_renderer_set_orientation(PIXBUF_RENDERER(imd->pr), imd->orientation);
 }
 
 void image_set_ignore_alpha(ImageWindow *imd, gboolean ignore_alpha)
 {
-   pixbuf_renderer_set_ignore_alpha(reinterpret_cast<PixbufRenderer *>(imd->pr), ignore_alpha);
+   pixbuf_renderer_set_ignore_alpha(PIXBUF_RENDERER(imd->pr), ignore_alpha);
 }
 
 /*
@@ -926,9 +926,7 @@ static void image_load_pixbuf_ready(ImageWindow *imd)
 static void image_load_area_cb(ImageLoader *il, guint x, guint y, guint w, guint h, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
-	PixbufRenderer *pr;
-
-	pr = reinterpret_cast<PixbufRenderer *>(imd->pr);
+	PixbufRenderer *pr = PIXBUF_RENDERER(imd->pr);
 
 	if (imd->delay_flip &&
 	    pr->pixbuf != image_loader_get_pixbuf(il))
@@ -983,7 +981,7 @@ static void image_load_size_cb(ImageLoader *, guint width, guint height, gpointe
 	auto imd = static_cast<ImageWindow *>(data);
 
 	DEBUG_1("image_load_size_cb: %dx%d", width, height);
-	pixbuf_renderer_set_size_early(reinterpret_cast<PixbufRenderer *>(imd->pr), width, height);
+	pixbuf_renderer_set_size_early(PIXBUF_RENDERER(imd->pr), width, height);
 }
 
 static void image_load_error_cb(ImageLoader *il, gpointer data)
@@ -1306,7 +1304,7 @@ void image_attach_window(ImageWindow *imd, GtkWidget *window,
 
 	if (!options->image.fit_window_to_image || !lw || (!lw->options.tools_float && !lw->options.tools_hidden)) window = nullptr;
 
-	pixbuf_renderer_set_parent(reinterpret_cast<PixbufRenderer *>(imd->pr), reinterpret_cast<GtkWindow *>(window));
+	pixbuf_renderer_set_parent(PIXBUF_RENDERER(imd->pr), GTK_WINDOW(window));
 
 	image_update_title(imd);
 }
@@ -1419,7 +1417,7 @@ gboolean image_get_image_size(ImageWindow *imd, gint *width, gint *height)
 
 GdkPixbuf *image_get_pixbuf(ImageWindow *imd)
 {
-	return pixbuf_renderer_get_pixbuf(reinterpret_cast<PixbufRenderer *>(imd->pr));
+	return pixbuf_renderer_get_pixbuf(PIXBUF_RENDERER(imd->pr));
 }
 
 void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboolean lazy)
@@ -1462,7 +1460,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 			}
 		}
 
-	pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, FALSE);
+	pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, nullptr, FALSE);
 	if (imd->cm)
 		{
 		color_man_free(static_cast<ColorMan *>(imd->cm));
@@ -1471,13 +1469,13 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 
 	if (lazy)
 		{
-		pixbuf_renderer_set_pixbuf_lazy(reinterpret_cast<PixbufRenderer *>(imd->pr), pixbuf, zoom, imd->orientation, stereo_data);
+		pixbuf_renderer_set_pixbuf_lazy(PIXBUF_RENDERER(imd->pr), pixbuf, zoom, imd->orientation, stereo_data);
 		}
 	else
 		{
-		pixbuf_renderer_set_pixbuf(reinterpret_cast<PixbufRenderer *>(imd->pr), pixbuf, zoom);
-		pixbuf_renderer_set_orientation(reinterpret_cast<PixbufRenderer *>(imd->pr), imd->orientation);
-		pixbuf_renderer_set_stereo_data(reinterpret_cast<PixbufRenderer *>(imd->pr), stereo_data);
+		pixbuf_renderer_set_pixbuf(PIXBUF_RENDERER(imd->pr), pixbuf, zoom);
+		pixbuf_renderer_set_orientation(PIXBUF_RENDERER(imd->pr), imd->orientation);
+		pixbuf_renderer_set_stereo_data(PIXBUF_RENDERER(imd->pr), stereo_data);
 		}
 
 	if (pixbuf) g_object_unref(pixbuf);
@@ -1490,7 +1488,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 		}
 
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 
 	image_state_set(imd, IMAGE_STATE_IMAGE);
 }
@@ -1613,9 +1611,9 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	pixbuf_renderer_move(PIXBUF_RENDERER(imd->pr), PIXBUF_RENDERER(source->pr));
 
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 	else
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, TRUE);
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, nullptr, TRUE);
 
 }
 
@@ -1675,9 +1673,9 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	pixbuf_renderer_copy(PIXBUF_RENDERER(imd->pr), PIXBUF_RENDERER(source->pr));
 
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
 	else
-		pixbuf_renderer_set_post_process_func(reinterpret_cast<PixbufRenderer *>(imd->pr), nullptr, nullptr, TRUE);
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, nullptr, TRUE);
 
 }
 
@@ -1686,25 +1684,25 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 
 void image_area_changed(ImageWindow *imd, gint x, gint y, gint width, gint height)
 {
-	pixbuf_renderer_area_changed(reinterpret_cast<PixbufRenderer *>(imd->pr), x, y, width, height);
+	pixbuf_renderer_area_changed(PIXBUF_RENDERER(imd->pr), x, y, width, height);
 }
 
 void image_reload(ImageWindow *imd)
 {
-	if (pixbuf_renderer_get_tiles(reinterpret_cast<PixbufRenderer *>(imd->pr))) return;
+	if (pixbuf_renderer_get_tiles(PIXBUF_RENDERER(imd->pr))) return;
 
 	image_change_complete(imd, image_zoom_get(imd));
 }
 
 void image_scroll(ImageWindow *imd, gint x, gint y)
 {
-	pixbuf_renderer_scroll(reinterpret_cast<PixbufRenderer *>(imd->pr), x, y);
+	pixbuf_renderer_scroll(PIXBUF_RENDERER(imd->pr), x, y);
 }
 
 void image_scroll_to_point(ImageWindow *imd, gint x, gint y,
 			   gdouble x_align, gdouble y_align)
 {
-	pixbuf_renderer_scroll_to_point(reinterpret_cast<PixbufRenderer *>(imd->pr), x, y, x_align, y_align);
+	pixbuf_renderer_scroll_to_point(PIXBUF_RENDERER(imd->pr), x, y, x_align, y_align);
 }
 
 void image_get_scroll_center(ImageWindow *imd, gdouble *x, gdouble *y)
@@ -1719,32 +1717,30 @@ void image_set_scroll_center(ImageWindow *imd, gdouble x, gdouble y)
 
 void image_zoom_adjust(ImageWindow *imd, gdouble increment)
 {
-	pixbuf_renderer_zoom_adjust(reinterpret_cast<PixbufRenderer *>(imd->pr), increment);
+	pixbuf_renderer_zoom_adjust(PIXBUF_RENDERER(imd->pr), increment);
 }
 
 void image_zoom_adjust_at_point(ImageWindow *imd, gdouble increment, gint x, gint y)
 {
-	pixbuf_renderer_zoom_adjust_at_point(reinterpret_cast<PixbufRenderer *>(imd->pr), increment, x, y);
+	pixbuf_renderer_zoom_adjust_at_point(PIXBUF_RENDERER(imd->pr), increment, x, y);
 }
 
 void image_zoom_set_limits(ImageWindow *imd, gdouble min, gdouble max)
 {
-	pixbuf_renderer_zoom_set_limits(reinterpret_cast<PixbufRenderer *>(imd->pr), min, max);
+	pixbuf_renderer_zoom_set_limits(PIXBUF_RENDERER(imd->pr), min, max);
 }
 
 void image_zoom_set(ImageWindow *imd, gdouble zoom)
 {
-	pixbuf_renderer_zoom_set(reinterpret_cast<PixbufRenderer *>(imd->pr), zoom);
+	pixbuf_renderer_zoom_set(PIXBUF_RENDERER(imd->pr), zoom);
 }
 
 void image_zoom_set_fill_geometry(ImageWindow *imd, gboolean vertical)
 {
-	PixbufRenderer *pr;
+	PixbufRenderer *pr = PIXBUF_RENDERER(imd->pr);
 	gdouble zoom;
 	gint width;
 	gint height;
-
-	pr = reinterpret_cast<PixbufRenderer *>(imd->pr);
 
 	if (!pixbuf_renderer_get_pixbuf(pr) ||
 	    !pixbuf_renderer_get_image_size(pr, &width, &height)) return;
@@ -1768,12 +1764,12 @@ void image_zoom_set_fill_geometry(ImageWindow *imd, gboolean vertical)
 
 gdouble image_zoom_get(ImageWindow *imd)
 {
-	return pixbuf_renderer_zoom_get(reinterpret_cast<PixbufRenderer *>(imd->pr));
+	return pixbuf_renderer_zoom_get(PIXBUF_RENDERER(imd->pr));
 }
 
 gdouble image_zoom_get_real(ImageWindow *imd)
 {
-	return pixbuf_renderer_zoom_get_scale(reinterpret_cast<PixbufRenderer *>(imd->pr));
+	return pixbuf_renderer_zoom_get_scale(PIXBUF_RENDERER(imd->pr));
 }
 
 gchar *image_zoom_get_as_text(ImageWindow *imd)
@@ -1840,7 +1836,7 @@ gdouble image_zoom_get_default(ImageWindow *imd)
 void image_stereo_set(ImageWindow *imd, gint stereo_mode)
 {
 	DEBUG_1("Setting stereo mode %04x for imd %p", stereo_mode, (void *)imd);
-	pixbuf_renderer_stereo_set(reinterpret_cast<PixbufRenderer *>(imd->pr), stereo_mode);
+	pixbuf_renderer_stereo_set(PIXBUF_RENDERER(imd->pr), stereo_mode);
 }
 
 StereoPixbufData image_stereo_pixbuf_get(ImageWindow *imd)
@@ -1858,7 +1854,7 @@ void image_stereo_pixbuf_set(ImageWindow *imd, StereoPixbufData stereo_mode)
 
 void image_prebuffer_set(ImageWindow *imd, FileData *fd)
 {
-	if (pixbuf_renderer_get_tiles(reinterpret_cast<PixbufRenderer *>(imd->pr))) return;
+	if (pixbuf_renderer_get_tiles(PIXBUF_RENDERER(imd->pr))) return;
 
 	if (fd)
 		{
@@ -1914,7 +1910,7 @@ void image_top_window_set_sync(ImageWindow *imd, gboolean allow_sync)
 
 void image_background_set_color(ImageWindow *imd, GdkRGBA *color)
 {
-	pixbuf_renderer_set_color(reinterpret_cast<PixbufRenderer *>(imd->pr), color);
+	pixbuf_renderer_set_color(PIXBUF_RENDERER(imd->pr), color);
 }
 
 void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscreen)
@@ -2079,10 +2075,10 @@ static void image_options_set(ImageWindow *imd)
 
 					NULL);
 
-	pixbuf_renderer_set_parent(reinterpret_cast<PixbufRenderer *>(imd->pr), reinterpret_cast<GtkWindow *>(imd->top_window));
+	pixbuf_renderer_set_parent(PIXBUF_RENDERER(imd->pr), GTK_WINDOW(imd->top_window));
 
 	image_stereo_set(imd, options->stereo.mode);
-	pixbuf_renderer_stereo_fixed_set(reinterpret_cast<PixbufRenderer *>(imd->pr),
+	pixbuf_renderer_stereo_fixed_set(PIXBUF_RENDERER(imd->pr),
 					options->stereo.fixed_w, options->stereo.fixed_h,
 					options->stereo.fixed_x1, options->stereo.fixed_y1,
 					options->stereo.fixed_x2, options->stereo.fixed_y2);

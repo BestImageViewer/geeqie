@@ -397,7 +397,7 @@ gboolean pan_item_text_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufR
 {
 	PangoLayout *layout;
 
-	layout = pan_item_text_layout(pi, reinterpret_cast<GtkWidget *>(pr));
+	layout = pan_item_text_layout(pi, GTK_WIDGET(pr));
 	pixbuf_draw_layout(pixbuf, layout,
 	                   pi->x - x + pi->border, pi->y - y + pi->border,
 	                   pi->color.r, pi->color.g, pi->color.b, pi->color.a);

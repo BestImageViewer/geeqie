@@ -65,8 +65,9 @@ struct opj_buffer_info_t {
 	OPJ_SIZE_T len;
 };
 
-OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, opj_buffer_info_t* psrc)
+OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, void* user_data)
 {
+	auto *psrc = static_cast<opj_buffer_info_t *>(user_data);
 	OPJ_SIZE_T n = psrc->buf + psrc->len - psrc->cur;
 
 	if (n)
@@ -83,9 +84,9 @@ OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, opj_buffer_info_t* 
 	return n;
 }
 
-OPJ_SIZE_T opj_write_to_buffer (void* p_buffer, OPJ_SIZE_T p_nb_bytes,
-                     opj_buffer_info_t* p_source_buffer)
+OPJ_SIZE_T opj_write_to_buffer (void* p_buffer, OPJ_SIZE_T p_nb_bytes, void* user_data)
 {
+	auto *p_source_buffer = static_cast<opj_buffer_info_t *>(user_data);
 	void* pbuf = p_source_buffer->buf;
 	void* pcur = p_source_buffer->cur;
 
@@ -128,13 +129,14 @@ OPJ_SIZE_T opj_write_to_buffer (void* p_buffer, OPJ_SIZE_T p_nb_bytes,
 	return p_nb_bytes;
 }
 
-OPJ_SIZE_T opj_skip_from_buffer (OPJ_SIZE_T len, opj_buffer_info_t* psrc)
+OPJ_OFF_T opj_skip_from_buffer (OPJ_OFF_T len, void* user_data)
 {
+	auto *psrc = static_cast<opj_buffer_info_t *>(user_data);
 	OPJ_SIZE_T n = psrc->buf + psrc->len - psrc->cur;
 
 	if (n)
 		{
-		if (n > len)
+		if (n > static_cast<gulong>(len))
 			n = len;
 
 		psrc->cur += len;
@@ -145,8 +147,9 @@ OPJ_SIZE_T opj_skip_from_buffer (OPJ_SIZE_T len, opj_buffer_info_t* psrc)
 	return n;
 }
 
-OPJ_BOOL opj_seek_from_buffer (OPJ_OFF_T len, opj_buffer_info_t* psrc)
+OPJ_BOOL opj_seek_from_buffer (OPJ_OFF_T len, void* user_data)
 {
+	auto *psrc = static_cast<opj_buffer_info_t *>(user_data);
 	OPJ_SIZE_T n = psrc->len;
 
 	if (n > static_cast<gulong>(len))
@@ -171,17 +174,12 @@ opj_stream_t* OPJ_CALLCONV opj_stream_create_buffer_stream (opj_buffer_info_t* p
 	opj_stream_set_user_data_length (ps, psrc->len);
 
 	if (input)
-		opj_stream_set_read_function (
-		    ps, reinterpret_cast<opj_stream_read_fn>(opj_read_from_buffer));
+		opj_stream_set_read_function (ps, opj_read_from_buffer);
 	else
-		opj_stream_set_write_function(
-		    ps,reinterpret_cast<opj_stream_write_fn>(opj_write_to_buffer));
+		opj_stream_set_write_function(ps, opj_write_to_buffer);
 
-	opj_stream_set_skip_function (
-	    ps, reinterpret_cast<opj_stream_skip_fn>(opj_skip_from_buffer));
-
-	opj_stream_set_seek_function (
-	    ps, reinterpret_cast<opj_stream_seek_fn>(opj_seek_from_buffer));
+	opj_stream_set_skip_function (ps, opj_skip_from_buffer);
+	opj_stream_set_seek_function (ps, opj_seek_from_buffer);
 
 	return ps;
 }

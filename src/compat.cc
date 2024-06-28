@@ -73,7 +73,7 @@ void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 #else
 void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 {
-	gtk_container_add(reinterpret_cast<GtkContainer *>(container), widget);
+	gtk_container_add(GTK_CONTAINER(container), widget);
 }
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
