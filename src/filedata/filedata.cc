@@ -1301,8 +1301,8 @@ gchar *FileData::file_data_get_sidecar_path(FileData *fd, gboolean existing_only
  * marks and orientation
  */
 
-static FileDataGetMarkFunc file_data_get_mark_func[FILEDATA_MARKS_SIZE];
-static FileDataSetMarkFunc file_data_set_mark_func[FILEDATA_MARKS_SIZE];
+static FileData::GetMarkFunc file_data_get_mark_func[FILEDATA_MARKS_SIZE];
+static FileData::SetMarkFunc file_data_set_mark_func[FILEDATA_MARKS_SIZE];
 static gpointer file_data_mark_func_data[FILEDATA_MARKS_SIZE];
 static GDestroyNotify file_data_destroy_mark_func[FILEDATA_MARKS_SIZE];
 
@@ -1499,16 +1499,16 @@ static void file_data_notify_mark_func(gpointer, gpointer value, gpointer)
 	file_data_send_notification(fd, NOTIFY_MARKS);
 }
 
-gboolean FileData::file_data_register_mark_func(gint n, FileDataGetMarkFunc get_mark_func, FileDataSetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify)
+gboolean FileData::file_data_register_mark_func(gint n, GetMarkFunc get_mark_func, SetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify)
 {
 	if (n < 0 || n >= FILEDATA_MARKS_SIZE) return FALSE;
 
 	if (file_data_destroy_mark_func[n]) (file_data_destroy_mark_func[n])(file_data_mark_func_data[n]);
 
 	file_data_get_mark_func[n] = get_mark_func;
-        file_data_set_mark_func[n] = set_mark_func;
-        file_data_mark_func_data[n] = data;
-        file_data_destroy_mark_func[n] = notify;
+	file_data_set_mark_func[n] = set_mark_func;
+	file_data_mark_func_data[n] = data;
+	file_data_destroy_mark_func[n] = notify;
 
 	if (get_mark_func && file_data_pool)
 		{
@@ -1516,10 +1516,10 @@ gboolean FileData::file_data_register_mark_func(gint n, FileDataGetMarkFunc get_
 		g_hash_table_foreach(file_data_pool, file_data_notify_mark_func, nullptr);
 		}
 
-        return TRUE;
+	return TRUE;
 }
 
-void FileData::file_data_get_registered_mark_func(gint n, FileDataGetMarkFunc *get_mark_func, FileDataSetMarkFunc *set_mark_func, gpointer *data)
+void FileData::file_data_get_registered_mark_func(gint n, GetMarkFunc *get_mark_func, SetMarkFunc *set_mark_func, gpointer *data)
 {
 	if (get_mark_func) *get_mark_func = file_data_get_mark_func[n];
 	if (set_mark_func) *set_mark_func = file_data_set_mark_func[n];
@@ -2684,7 +2684,7 @@ struct NotifyIdleData {
 
 
 struct NotifyData {
-	FileDataNotifyFunc func;
+	FileData::NotifyFunc func;
 	gpointer data;
 	NotifyPriority priority;
 };
@@ -2701,7 +2701,7 @@ static gint file_data_notify_sort(gconstpointer a, gconstpointer b)
 	return 0;
 }
 
-gboolean FileData::file_data_register_notify_func(FileDataNotifyFunc func, gpointer data, NotifyPriority priority)
+gboolean FileData::file_data_register_notify_func(NotifyFunc func, gpointer data, NotifyPriority priority)
 {
 	NotifyData *nd;
 	GList *work = notify_func_list;
@@ -2729,7 +2729,7 @@ gboolean FileData::file_data_register_notify_func(FileDataNotifyFunc func, gpoin
 	return TRUE;
 }
 
-gboolean FileData::file_data_unregister_notify_func(FileDataNotifyFunc func, gpointer data)
+gboolean FileData::file_data_unregister_notify_func(NotifyFunc func, gpointer data)
 {
 	GList *work = notify_func_list;
 

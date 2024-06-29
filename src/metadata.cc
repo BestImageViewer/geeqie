@@ -1087,8 +1087,8 @@ gboolean meta_data_set_keyword_mark(FileData *fd, gint, gboolean value, gpointer
 void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter *kw_iter, gint mark)
 {
 
-	FileDataGetMarkFunc get_mark_func;
-	FileDataSetMarkFunc set_mark_func;
+	FileData::GetMarkFunc get_mark_func;
+	FileData::SetMarkFunc set_mark_func;
 	gpointer mark_func_data;
 
 	gint i;

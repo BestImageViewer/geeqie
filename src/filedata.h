@@ -183,10 +183,10 @@ class FileData {
 	void file_data_disable_grouping(FileData *fd, gboolean disable);
 	static void file_data_disable_grouping_list(GList *fd_list, gboolean disable);
 
-	using FileDataGetMarkFunc = gboolean (*)(FileData *, gint, gpointer);
-	using FileDataSetMarkFunc = gboolean (*)(FileData *, gint, gboolean, gpointer);
-	static gboolean file_data_register_mark_func(gint n, FileDataGetMarkFunc get_mark_func, FileDataSetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify);
-	static void file_data_get_registered_mark_func(gint n, FileDataGetMarkFunc *get_mark_func, FileDataSetMarkFunc *set_mark_func, gpointer *data);
+	using GetMarkFunc = gboolean (*)(FileData *, gint, gpointer);
+	using SetMarkFunc = gboolean (*)(FileData *, gint, gboolean, gpointer);
+	static gboolean file_data_register_mark_func(gint n, GetMarkFunc get_mark_func, SetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify);
+	static void file_data_get_registered_mark_func(gint n, GetMarkFunc *get_mark_func, SetMarkFunc *set_mark_func, gpointer *data);
 
 
 	gboolean file_data_get_mark(FileData *fd, gint n);
@@ -255,9 +255,9 @@ class FileData {
 	static GList *file_data_process_groups_in_selection(GList *list, gboolean ungroup, GList **ungrouped);
 
 
-	using FileDataNotifyFunc = void (*)(FileData *, NotifyType, gpointer);
-	static gboolean file_data_register_notify_func(FileDataNotifyFunc func, gpointer data, NotifyPriority priority);
-	static gboolean file_data_unregister_notify_func(FileDataNotifyFunc func, gpointer data);
+	using NotifyFunc = void (*)(FileData *, NotifyType, gpointer);
+	static gboolean file_data_register_notify_func(NotifyFunc func, gpointer data, NotifyPriority priority);
+	static gboolean file_data_unregister_notify_func(NotifyFunc func, gpointer data);
 	void file_data_send_notification(FileData *fd, NotifyType type);
 
 	gboolean file_data_register_real_time_monitor(FileData *fd);
@@ -395,10 +395,8 @@ GList *filelist_sort_path(GList *list);
 GList *filelist_recursive(FileData *dir_fd);
 GList *filelist_recursive_full(FileData *dir_fd, SortType method, gboolean ascend, gboolean case_sensitive);
 
-using FileDataGetMarkFunc = gboolean (*)(FileData *, gint, gpointer);
-using FileDataSetMarkFunc = gboolean (*)(FileData *, gint, gboolean, gpointer);
-gboolean file_data_register_mark_func(gint n, FileDataGetMarkFunc get_mark_func, FileDataSetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify);
-void file_data_get_registered_mark_func(gint n, FileDataGetMarkFunc *get_mark_func, FileDataSetMarkFunc *set_mark_func, gpointer *data);
+gboolean file_data_register_mark_func(gint n, FileData::GetMarkFunc get_mark_func, FileData::SetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify);
+void file_data_get_registered_mark_func(gint n, FileData::GetMarkFunc *get_mark_func, FileData::SetMarkFunc *set_mark_func, gpointer *data);
 
 
 gboolean file_data_get_mark(FileData *fd, gint n);
@@ -467,9 +465,8 @@ void file_data_sc_free_ci_list(GList *fd_list);
 GList *file_data_process_groups_in_selection(GList *list, gboolean ungroup, GList **ungrouped);
 
 
-using FileDataNotifyFunc = void (*)(FileData *, NotifyType, gpointer);
-gboolean file_data_register_notify_func(FileDataNotifyFunc func, gpointer data, NotifyPriority priority);
-gboolean file_data_unregister_notify_func(FileDataNotifyFunc func, gpointer data);
+gboolean file_data_register_notify_func(FileData::NotifyFunc func, gpointer data, NotifyPriority priority);
+gboolean file_data_unregister_notify_func(FileData::NotifyFunc func, gpointer data);
 void file_data_send_notification(FileData *fd, NotifyType type);
 
 gboolean file_data_register_real_time_monitor(FileData *fd);
