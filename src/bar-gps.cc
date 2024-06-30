@@ -683,16 +683,7 @@ static gint bar_pane_gps_event(GtkWidget *bar, GdkEvent *event)
 
 static void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 {
-	PaneGPSData *pgd;
-	gint zoom;
-	ChamplainMapSource *mapsource;
-	const gchar *map_id;
-	gdouble position;
-	gint int_position;
-	gint w;
-	gint h;
-
-	pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	auto *pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pgd) return;
 
 	WRITE_NL();
@@ -701,42 +692,37 @@ static void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint ind
 	write_char_option(outstr, indent, "title", gtk_label_get_text(GTK_LABEL(pgd->pane.title)));
 	WRITE_BOOL(pgd->pane, expanded);
 
-	gtk_widget_get_size_request(GTK_WIDGET(pane), &w, &h);
-	pgd->height = h;
-
+	gint w;
+	gtk_widget_get_size_request(GTK_WIDGET(pane), &w, &pgd->height);
 	WRITE_INT(*pgd, height);
 	indent++;
 
+	ChamplainMapSource *mapsource;
 	g_object_get(G_OBJECT(pgd->gps_view), "map-source", &mapsource, NULL);
-	map_id = champlain_map_source_get_id(mapsource);
+	const gchar *map_id = champlain_map_source_get_id(mapsource);
 	WRITE_NL();
 	write_char_option(outstr, indent, "map-id", map_id);
+	g_object_unref(mapsource);
 
-	GString *buffer = g_string_new(nullptr);
-
+	gint zoom;
 	g_object_get(G_OBJECT(pgd->gps_view), "zoom-level", &zoom, NULL);
-	g_string_printf(buffer, "%d", zoom);
 	WRITE_NL();
-	write_char_option(outstr, indent, "zoom-level", buffer->str);
+	write_int_option(outstr, indent, "zoom-level", zoom);
 
-	g_object_get(G_OBJECT(pgd->gps_view), "latitude", &position, NULL);
-	int_position = position * 1000000;
-	g_string_printf(buffer, "%i", int_position);
-	WRITE_NL();
-	write_char_option(outstr, indent, "latitude", buffer->str);
-
-	g_object_get(G_OBJECT(pgd->gps_view), "longitude", &position, NULL);
-	int_position = position * 1000000;
-	g_string_printf(buffer, "%i", int_position);
-	WRITE_NL();
-	write_char_option(outstr, indent, "longitude", buffer->str);
+	const auto write_lat_long_option = [pgd, outstr, indent](const gchar *option)
+	{
+		gdouble position;
+		g_object_get(G_OBJECT(pgd->gps_view), option, &position, NULL);
+		const gint int_position = position * 1000000;
+		WRITE_NL();
+		write_int_option(outstr, indent, option, int_position);
+	};
+	write_lat_long_option("latitude");
+	write_lat_long_option("longitude");
 
 	indent--;
 	WRITE_NL();
 	WRITE_STRING("/>");
-
-	g_string_free(buffer, TRUE);
-	g_object_unref(mapsource);
 }
 
 static void bar_pane_gps_slider_changed_cb(GtkScaleButton *slider,
