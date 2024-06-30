@@ -25,6 +25,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <string>
 
 #include <pango/pango.h>
 
@@ -1145,11 +1146,7 @@ static void pref_list_set(const gchar *group, const gchar *key, const gchar *mar
 
 void pref_list_int_set(const gchar *group, const gchar *key, gint value)
 {
-	gchar *text;
-
-	text = g_strdup_printf("%d", value);
-	pref_list_set(group, key, PREF_LIST_MARKER_INT, text);
-	g_free(text);
+	pref_list_set(group, key, PREF_LIST_MARKER_INT, std::to_string(value).c_str());
 }
 
 gboolean pref_list_int_get(const gchar *group, const gchar *key, gint *result)

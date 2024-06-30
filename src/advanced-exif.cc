@@ -22,6 +22,7 @@
 #include "advanced-exif.h"
 
 #include <cstring>
+#include <string>
 
 #include <gdk/gdk.h>
 #include <glib-object.h>
@@ -129,7 +130,7 @@ static void advanced_exif_update(ExifWin *ew)
 		gchar *text;
 		gchar *utf8_text;
 		const gchar *format;
-		gchar *elements;
+		gint elements;
 		gchar *description;
 
 		tag = g_strdup_printf("0x%04x", exif_item_get_tag_id(item));
@@ -138,7 +139,7 @@ static void advanced_exif_update(ExifWin *ew)
 		text = exif_item_get_data_as_text(item, exif);
 		utf8_text = utf8_validate_or_convert(text);
 		g_free(text);
-		elements = g_strdup_printf("%d", exif_item_get_elements(item));
+		elements = exif_item_get_elements(item);
 		description = exif_item_get_description(item);
 		if (!description || *description == '\0')
 			{
@@ -148,16 +149,16 @@ static void advanced_exif_update(ExifWin *ew)
 
 		gtk_list_store_append(store, &iter);
 		gtk_list_store_set(store, &iter,
-				EXIF_ADVCOL_ENABLED, advanced_exif_row_enabled(tag_name),
-				EXIF_ADVCOL_TAG, tag,
-				EXIF_ADVCOL_NAME, tag_name,
-				EXIF_ADVCOL_VALUE, utf8_text,
-				EXIF_ADVCOL_FORMAT, format,
-				EXIF_ADVCOL_ELEMENTS, elements,
-				EXIF_ADVCOL_DESCRIPTION, description, -1);
+		                   EXIF_ADVCOL_ENABLED, advanced_exif_row_enabled(tag_name),
+		                   EXIF_ADVCOL_TAG, tag,
+		                   EXIF_ADVCOL_NAME, tag_name,
+		                   EXIF_ADVCOL_VALUE, utf8_text,
+		                   EXIF_ADVCOL_FORMAT, format,
+		                   EXIF_ADVCOL_ELEMENTS, std::to_string(elements).c_str(),
+		                   EXIF_ADVCOL_DESCRIPTION, description,
+		                   -1);
 		g_free(tag);
 		g_free(utf8_text);
-		g_free(elements);
 		g_free(description);
 		g_free(tag_name);
 		item = exif_get_next_item(exif_original);

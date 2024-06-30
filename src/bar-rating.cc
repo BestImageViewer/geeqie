@@ -21,6 +21,8 @@
 
 #include "bar-rating.h"
 
+#include <string>
+
 #include <glib-object.h>
 
 #include <config.h>
@@ -114,10 +116,10 @@ static void bar_pane_rating_destroy(GtkWidget *, gpointer data)
 static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer data)
 {
 	auto prd = static_cast<PaneRatingData *>(data);
-	gchar *rating;
 
 #if HAVE_GTK4
 	const gchar *rating_label;
+	gchar *rating;
 
 	rating_label = gtk_check_button_get_label(checkbutton);
 
@@ -138,22 +140,15 @@ static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer da
 
 	g_free(rating);
 #else
-	gint i;
-
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbutton)))
 		{
-		i = 0;
-		while (i < 7)
+		for (gint i = 0; i < 7; i++)
 			{
 			if (prd->rating_buttons[i] == checkbutton)
 				{
-				rating = g_strdup_printf("%d",   i - 1 );
-				metadata_write_string(prd->fd, RATING_KEY, rating);
-				g_free(rating);
+				metadata_write_string(prd->fd, RATING_KEY, std::to_string(i - 1).c_str());
 				break;
 				}
-
-			i++;
 			}
 		}
 #endif
@@ -167,8 +162,6 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 	GtkWidget *radio_rating;
 	GtkWidget *row_1;
 	GtkWidget *row_2;
-	gint i;
-	gchar *i_str;
 
 	prd = g_new0(PaneRatingData, 1);
 
@@ -210,24 +203,20 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 	row_2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gq_gtk_box_pack_start(GTK_BOX(prd->widget), row_2, FALSE, FALSE, 0);
 
-	i = 2;
-	while (i <= 6)
+	for (gint i = 2; i <= 6; i++)
 		{
-		i_str = g_strdup_printf("%d", i - 1);
+		const std::string i_str = std::to_string(i - 1);
 
 #if HAVE_GTK4
-		radio_rating = gtk_check_button_new_with_label(i_str);
+		radio_rating = gtk_check_button_new_with_label(i_str.c_str());
 		gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_rating), GTK_CHECK_BUTTON(radio_rejected));
 #else
-		radio_rating = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio_rejected), i_str);
+		radio_rating = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio_rejected), i_str.c_str());
 #endif
 		g_signal_connect(radio_rating, "released", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 
 		gq_gtk_box_pack_start(GTK_BOX(row_2), radio_rating, FALSE, FALSE, 1);
-		prd->rating_buttons[i ] = GTK_CHECK_BUTTON(radio_rating);
-
-		g_free(i_str);
-		i++;
+		prd->rating_buttons[i] = GTK_CHECK_BUTTON(radio_rating);
 		}
 
 	prd->radio_button_first = radio_rating;

@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 
 #include <glib-object.h>
 
@@ -416,10 +417,7 @@ gboolean metadata_write_string(FileData *fd, const gchar *key, const char *value
 
 gboolean metadata_write_int(FileData *fd, const gchar *key, guint64 value)
 {
-	gchar string[50];
-
-	g_snprintf(string, sizeof(string), "%llu", static_cast<unsigned long long>(value));
-	return metadata_write_string(fd, key, string);
+	return metadata_write_string(fd, key, std::to_string(static_cast<unsigned long long>(value)).c_str());
 }
 
 /*
@@ -1115,13 +1113,12 @@ void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter
 	if (mark >= 0 && mark < FILEDATA_MARKS_SIZE)
 		{
 		GList *path;
-		gchar *mark_str;
 		path = keyword_tree_get_path(keyword_tree, kw_iter);
 		file_data_register_mark_func(mark, meta_data_get_keyword_mark, meta_data_set_keyword_mark, path, reinterpret_cast<GDestroyNotify>(string_list_free));
 
-		mark_str = g_strdup_printf("%d", (mark < 9 ? mark : -1) + 1);
-		gtk_tree_store_set(GTK_TREE_STORE(keyword_tree), kw_iter, KEYWORD_COLUMN_MARK, mark_str, -1);
-		g_free(mark_str);
+		gtk_tree_store_set(GTK_TREE_STORE(keyword_tree), kw_iter,
+		                   KEYWORD_COLUMN_MARK, std::to_string((mark < 9) ? (mark + 1) : 0).c_str(),
+		                   -1);
 		}
 }
 

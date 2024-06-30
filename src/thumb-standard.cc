@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <string>
 
 #include <glib-object.h>
 
@@ -353,20 +354,19 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 		{
 		const gchar *mark_uri;
 		gchar *mark_app;
-		gchar *mark_mtime;
 		gchar *pathl;
 		gboolean success;
 
 		mark_uri = (tl->cache_local) ? tl->local_uri :tl->thumb_uri;
 
 		mark_app = g_strdup_printf("%s %s", GQ_APPNAME, VERSION);
-		mark_mtime = g_strdup_printf("%llu", static_cast<unsigned long long>(tl->source_mtime));
+		const std::string mark_mtime = std::to_string(static_cast<unsigned long long>(tl->source_mtime));
 		pathl = path_from_utf8(tmp_path);
 		success = gdk_pixbuf_save(pixbuf, pathl, "png", nullptr,
-					  THUMB_MARKER_URI, mark_uri,
-					  THUMB_MARKER_MTIME, mark_mtime,
-					  THUMB_MARKER_APP, mark_app,
-					  NULL);
+		                          THUMB_MARKER_URI, mark_uri,
+		                          THUMB_MARKER_MTIME, mark_mtime.c_str(),
+		                          THUMB_MARKER_APP, mark_app,
+		                          NULL);
 		if (success)
 			{
 			chmod(pathl, (tl->cache_local) ? tl->source_mode : S_IRUSR | S_IWUSR);
@@ -374,17 +374,14 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 			}
 
 		g_free(pathl);
-
-		g_free(mark_mtime);
 		g_free(mark_app);
-
 		g_free(tmp_path);
+
 		if (!success)
 			{
 			DEBUG_1("thumb save failed: %s", tl->fd->path);
 			DEBUG_1("            thumb: %s", tl->thumb_path);
 			}
-
 		}
 
 	g_object_unref(G_OBJECT(pixbuf));

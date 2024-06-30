@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cstring>
 #include <ctime>
+#include <string>
 
 #include <gdk/gdk.h>
 
@@ -390,10 +391,9 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 				pi->y = pi_day->y + (pi_day->height - pi->height) / 2;
 				}
 
-			buf = g_strdup_printf("%d", day);
-			pi_day_number = pan_item_text_new(pw, x + 4, y + 4, buf, static_cast<PanTextAttrType>(PAN_TEXT_ATTR_BOLD | PAN_TEXT_ATTR_HEADING),
-					  PAN_BORDER_3, PAN_CAL_DAY_TEXT_COLOR);
-			g_free(buf);
+			pi_day_number = pan_item_text_new(pw, x + 4, y + 4, std::to_string(day).c_str(),
+			                                  static_cast<PanTextAttrType>(PAN_TEXT_ATTR_BOLD | PAN_TEXT_ATTR_HEADING),
+			                                  PAN_BORDER_3, PAN_CAL_DAY_TEXT_COLOR);
 
 			day_of_week = date_get_first_day_of_week() + col;
 			if (day_of_week > 7) day_of_week = day_of_week - 7;

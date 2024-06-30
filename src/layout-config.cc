@@ -22,6 +22,7 @@
 #include "layout-config.h"
 
 #include <cstring>
+#include <string>
 
 #include <glib-object.h>
 
@@ -242,14 +243,13 @@ void layout_config_number_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 {
 	GtkTreePath *tpath;
 	gint *indices;
-	gchar *buf;
 
 	tpath = gtk_tree_model_get_path(store, iter);
 	indices = gtk_tree_path_get_indices(tpath);
-	buf = g_strdup_printf("%d", indices[0] + 1);
+	g_object_set(G_OBJECT(cell),
+	             "text", std::to_string(indices[0] + 1).c_str(),
+	             NULL);
 	gtk_tree_path_free(tpath);
-	g_object_set(G_OBJECT(cell), "text", buf, NULL);
-	g_free(buf);
 }
 
 gchar num_to_text_char(gint n)
