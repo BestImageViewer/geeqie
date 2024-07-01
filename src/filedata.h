@@ -330,6 +330,22 @@ class FileData::FileList
 	static void recursive_append_full(GList **list, GList *dirs, SortType method, gboolean ascend, gboolean case_sensitive);
 };
 
+/**
+ * @class FileDataRef
+ * @brief RAII object that holds a ref to the specified FileData.
+ */
+class FileDataRef
+{
+    public:
+	explicit FileDataRef(FileData &fd);
+	FileDataRef(FileDataRef &) = delete;  // Not copyable.
+	FileDataRef &operator=(const FileDataRef &) = delete;  // Not assignable.
+	~FileDataRef();
+
+    private:
+	FileData &fd_;
+};
+
 // C-style compatibility API.
 gchar *text_from_size(gint64 size);
 gchar *text_from_size_abrev(gint64 size);

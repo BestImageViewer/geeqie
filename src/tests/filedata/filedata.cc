@@ -142,6 +142,34 @@ TEST_F(FileDataTest, BasicIncrementVersionWithParent)
 	ASSERT_EQ(0x0, parent_fd->valid_marks);
 }
 
+TEST_F(FileDataTest, FileDataRef)
+{
+	fd = g_new0(FileData, 1);
+	fd->magick = FD_MAGICK;
+	// Avoids having the FileData object automatically freed when its
+	// refcount drops back to zero.
+	file_data_lock(fd);
+
+	// Refcount is 0 outside of the FileDataRef scope.
+	ASSERT_EQ(0, fd->ref);
+
+	{
+		// Refcount is 0 inside of the FileDataRef scope, but before it's defined.
+		ASSERT_EQ(0, fd->ref);
+
+		// Refcount should increase by 1 after the FileDataRef is created.
+		FileDataRef fd_ref(*fd);
+		ASSERT_EQ(1, fd->ref);
+
+		// Refcount should increase by 1 more with the second FileDataRef.
+		FileDataRef fd_ref2(*fd);
+		ASSERT_EQ(2, fd->ref);
+	}
+
+	// And refcount drops back down to 0 after both of the FileDataRefs go out of scope.
+	ASSERT_EQ(0, fd->ref);
+}
+
 }  // anonymous namespace
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

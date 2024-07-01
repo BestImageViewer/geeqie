@@ -3011,6 +3011,16 @@ void FileData::file_data_set_page_total(FileData *fd, gint page_total)
 	fd->page_total = page_total;
 }
 
+FileDataRef::FileDataRef(FileData &fd) : fd_(fd)
+{
+        fd_.file_data_ref();
+}
+
+FileDataRef::~FileDataRef()
+{
+        fd_.file_data_unref();
+}
+
 // NOLINTEND(readability-convert-member-functions-to-static)
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
