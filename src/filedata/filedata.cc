@@ -496,7 +496,7 @@ FileData *FileData::file_data_new_local(const gchar *path, struct stat *st, gboo
 
 FileData *FileData::file_data_new_simple(const gchar *path_utf8, FileDataContext *context)
 {
-	struct stat st;
+	struct stat st{};
 
 	if (!stat_utf8(path_utf8, &st))
 		{
@@ -510,11 +510,11 @@ FileData *FileData::file_data_new_simple(const gchar *path_utf8, FileDataContext
 		}
 
 	auto *fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
-	// TODO(xsdg): This looks like it double-refs fd if it needed to be
-	// created.  Figure out what should happen here and either fix or
-	// document.
-	if (!fd) fd = file_data_new(path_utf8, &st, TRUE, context);
-	if (fd)
+	if (!fd)
+		{
+		fd = file_data_new(path_utf8, &st, TRUE, context);
+		}
+	else
 		{
 		::file_data_ref(fd);
 		}
@@ -1211,16 +1211,12 @@ void FileData::file_data_basename_hash_to_sidecars(gpointer, gpointer value, gpo
 
 FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext *context)
 {
-	gchar *dir;
-	struct stat st;
-	FileData *fd;
-	GList *files;
-
 	if (context == nullptr)
 		{
 		context = FileData::DefaultFileDataContext();
 		}
 
+	struct stat st{};
 	if (!stat_utf8(path_utf8, &st))
 		{
 		st.st_size = 0;
@@ -1230,13 +1226,17 @@ FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext 
 	if (S_ISDIR(st.st_mode))
 		return file_data_new(path_utf8, &st, TRUE, context);
 
-	dir = remove_level_from_path(path_utf8);
+	gchar *dir = remove_level_from_path(path_utf8);
 
+        GList *files;
 	FileList::read_list_real(dir, &files, nullptr, TRUE);
 
-	fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
-	if (!fd) fd = file_data_new(path_utf8, &st, TRUE, context);
-	if (fd)
+	auto *fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
+	if (!fd)
+		{
+		fd = file_data_new(path_utf8, &st, TRUE, context);
+		}
+	else
 		{
 		::file_data_ref(fd);
 		}

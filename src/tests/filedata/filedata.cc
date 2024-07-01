@@ -124,7 +124,6 @@ TEST_F(FileDataTest, FileDataNewSimpleAndFree)
 	auto *_fd = FileData::file_data_new_simple("/does/not/exist.jpg", &context);
 	ASSERT_NE(_fd, nullptr);
 	ASSERT_EQ(1, context.global_file_data_count);
-	// This currently fails because of a bug in file_data_new_simple.
 	ASSERT_EQ(1, _fd->ref);
 
 	_fd->file_data_unref();
@@ -139,7 +138,6 @@ TEST_F(FileDataTest, FileDataNewGroupAndFree)
 	auto *_fd = FileData::file_data_new_group("/does/not/exist/file.jpg", &context);
 	ASSERT_NE(_fd, nullptr);
 	EXPECT_EQ(1, context.global_file_data_count);
-	// This currently fails because of a bug in file_data_new_group.
 	ASSERT_EQ(1, _fd->ref);
 
 	_fd->file_data_unref();
