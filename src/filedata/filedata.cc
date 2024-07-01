@@ -51,13 +51,6 @@
 #include "trash.h"
 #include "ui-fileops.h"
 
-#ifdef DEBUG_FILEDATA
-gint global_file_data_count = 0;
-#endif
-
-static GHashTable *file_data_pool = nullptr;
-static GHashTable *file_data_planned_change_hash = nullptr;
-
 static gint sidecar_file_priority(const gchar *extension);
 static void file_data_check_sidecars(const GList *basename_list);
 static void file_data_disconnect_sidecar_file(FileData *target, FileData *sfd);
@@ -306,66 +299,66 @@ static void file_data_set_collate_keys(FileData *fd)
 	g_free(caseless_name);
 }
 
-static void file_data_set_path(FileData *fd, const gchar *path)
+void FileData::set_path(const gchar *new_path)
 {
-	g_assert(path /* && *path*/); /* view_dir_tree uses FileData with zero length path */
-	g_assert(file_data_pool);
+	g_assert(new_path /* && *new_path*/); /* view_dir_tree uses FileData with zero length path */
+	g_assert(context->file_data_pool);
 
-	g_free(fd->path);
+	g_free(path);
 
-	if (fd->original_path)
+	if (original_path)
 		{
-		g_hash_table_remove(file_data_pool, fd->original_path);
-		g_free(fd->original_path);
+		g_hash_table_remove(context->file_data_pool, original_path);
+		g_free(original_path);
 		}
 
-	g_assert(!g_hash_table_lookup(file_data_pool, path));
+	g_assert(!g_hash_table_lookup(context->file_data_pool, new_path));
 
-	fd->original_path = g_strdup(path);
-	g_hash_table_insert(file_data_pool, fd->original_path, fd);
+	original_path = g_strdup(new_path);
+	g_hash_table_insert(context->file_data_pool, original_path, this);
 
-	if (strcmp(path, G_DIR_SEPARATOR_S) == 0)
+	if (strcmp(new_path, G_DIR_SEPARATOR_S) == 0)
 		{
-		fd->path = g_strdup(path);
-		fd->name = fd->path;
-		fd->extension = fd->name + 1;
-		file_data_set_collate_keys(fd);
+		path = g_strdup(new_path);
+		name = path;
+		extension = name + 1;
+		file_data_set_collate_keys(this);
 		return;
 		}
 
-	fd->path = g_strdup(path);
-	fd->name = filename_from_path(fd->path);
+	path = g_strdup(new_path);
+	name = filename_from_path(path);
 
-	if (strcmp(fd->name, "..") == 0)
+	if (strcmp(name, "..") == 0)
 		{
-		gchar *dir = remove_level_from_path(path);
-		g_free(fd->path);
-		fd->path = remove_level_from_path(dir);
+		gchar *dir = remove_level_from_path(new_path);
+		g_free(path);
+		path = remove_level_from_path(dir);
 		g_free(dir);
-		fd->name = "..";
-		fd->extension = fd->name + 2;
-		file_data_set_collate_keys(fd);
+		name = "..";
+		extension = name + 2;
+		file_data_set_collate_keys(this);
 		return;
 		}
 
-	if (strcmp(fd->name, ".") == 0)
+	if (strcmp(name, ".") == 0)
 		{
-		g_free(fd->path);
-		fd->path = remove_level_from_path(path);
-		fd->name = ".";
-		fd->extension = fd->name + 1;
-		file_data_set_collate_keys(fd);
+		g_free(path);
+		path = remove_level_from_path(new_path);
+		name = ".";
+		extension = name + 1;
+		file_data_set_collate_keys(this);
 		return;
 		}
 
-	fd->extension = registered_extension_from_path(fd->path);
-	if (fd->extension == nullptr)
+	extension = registered_extension_from_path(path);
+	if (extension == nullptr)
 		{
-		fd->extension = fd->name + strlen(fd->name);
+		extension = name + strlen(name);
 		}
 
-	fd->sidecar_priority = sidecar_file_priority(fd->extension);
-	file_data_set_collate_keys(fd);
+	sidecar_priority = sidecar_file_priority(extension);
+	file_data_set_collate_keys(this);
 }
 
 /*
@@ -392,8 +385,13 @@ GlobalFileDataContext &GlobalFileDataContext::get_instance()
  * create or reuse Filedata
  *-----------------------------------------------------------------------------
  */
-FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gboolean disable_sidecars)
+FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gboolean disable_sidecars, FileDataContext *context)
 {
+	if (context == nullptr)
+		{
+		context = FileData::DefaultFileDataContext();
+		}
+
 	FileData *fd;
 	struct passwd *user;
 	struct group *group;
@@ -402,18 +400,14 @@ FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gbool
 
 	if (S_ISDIR(st->st_mode)) disable_sidecars = TRUE;
 
-	if (!file_data_pool)
-		file_data_pool = g_hash_table_new(g_str_hash, g_str_equal);
-
-	fd = static_cast<FileData *>(g_hash_table_lookup(file_data_pool, path_utf8));
+	fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
 	if (fd)
 		{
 		::file_data_ref(fd);
 		}
-
-	if (!fd && file_data_planned_change_hash)
+	else
 		{
-		fd = static_cast<FileData *>(g_hash_table_lookup(file_data_planned_change_hash, path_utf8));
+		fd = static_cast<FileData *>(g_hash_table_lookup(context->planned_change_map, path_utf8));
 		if (fd)
 			{
 			DEBUG_1("planned change: using %s -> %s", path_utf8, fd->path);
@@ -445,10 +439,11 @@ FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gbool
 
 	fd = g_new0(FileData, 1);
 #ifdef DEBUG_FILEDATA
-	global_file_data_count++;
-	DEBUG_2("file data count++: %d", global_file_data_count);
+	context->global_file_data_count++;
+	DEBUG_2("file data count++: %d", context->global_file_data_count);
 #endif
 
+	fd->context = context;
 	fd->size = st->st_size;
 	fd->date = st->st_mtime;
 	fd->cdate = st->st_ctime;
@@ -485,24 +480,23 @@ FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gbool
 
 	if (disable_sidecars) fd->disable_grouping = TRUE;
 
-	file_data_set_path(fd, path_utf8); /* set path, name, collate_key_*, original_path */
+	fd->set_path(path_utf8); /* set path, name, collate_key_*, original_path */
 
 	return fd;
 }
 
-FileData *FileData::file_data_new_local(const gchar *path, struct stat *st, gboolean disable_sidecars)
+FileData *FileData::file_data_new_local(const gchar *path, struct stat *st, gboolean disable_sidecars, FileDataContext *context)
 {
 	gchar *path_utf8 = path_to_utf8(path);
-	FileData *ret = file_data_new(path_utf8, st, disable_sidecars);
+	FileData *ret = file_data_new(path_utf8, st, disable_sidecars, context);
 
 	g_free(path_utf8);
 	return ret;
 }
 
-FileData *FileData::file_data_new_simple(const gchar *path_utf8)
+FileData *FileData::file_data_new_simple(const gchar *path_utf8, FileDataContext *context)
 {
 	struct stat st;
-	FileData *fd;
 
 	if (!stat_utf8(path_utf8, &st))
 		{
@@ -510,8 +504,16 @@ FileData *FileData::file_data_new_simple(const gchar *path_utf8)
 		st.st_mtime = 0;
 		}
 
-	fd = static_cast<FileData *>(g_hash_table_lookup(file_data_pool, path_utf8));
-	if (!fd) fd = file_data_new(path_utf8, &st, TRUE);
+	if (context == nullptr)
+		{
+		context = FileData::DefaultFileDataContext();
+		}
+
+	auto *fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
+	// TODO(xsdg): This looks like it double-refs fd if it needed to be
+	// created.  Figure out what should happen here and either fix or
+	// document.
+	if (!fd) fd = file_data_new(path_utf8, &st, TRUE, context);
 	if (fd)
 		{
 		::file_data_ref(fd);
@@ -622,7 +624,7 @@ void FileData::read_rating_data(FileData *file)
 		}
 }
 
-FileData *FileData::file_data_new_no_grouping(const gchar *path_utf8)
+FileData *FileData::file_data_new_no_grouping(const gchar *path_utf8, FileDataContext *context)
 {
 	struct stat st;
 
@@ -632,10 +634,10 @@ FileData *FileData::file_data_new_no_grouping(const gchar *path_utf8)
 		st.st_mtime = 0;
 		}
 
-	return file_data_new(path_utf8, &st, TRUE);
+	return file_data_new(path_utf8, &st, TRUE, context);
 }
 
-FileData *FileData::file_data_new_dir(const gchar *path_utf8)
+FileData *FileData::file_data_new_dir(const gchar *path_utf8, FileDataContext *context)
 {
 	struct stat st;
 
@@ -648,7 +650,7 @@ FileData *FileData::file_data_new_dir(const gchar *path_utf8)
 		/* dir or non-existing yet */
 		g_assert(S_ISDIR(st.st_mode));
 
-	return file_data_new(path_utf8, &st, TRUE);
+	return file_data_new(path_utf8, &st, TRUE, context);
 }
 
 /*
@@ -695,42 +697,38 @@ FileData *FileData::file_data_ref()
 void FileData::file_data_dump()
 {
 #ifdef DEBUG_FILEDATA
-	FileData *fd;
-	GList *list;
+	FileDataContext *context = FileData::DefaultFileDataContext();
+	GList *list = g_hash_table_get_values(context->file_data_pool);
 
-	if (file_data_pool)
+	log_printf("%d", context->global_file_data_count);
+	log_printf("%d", g_list_length(list));
+
+	GList *work = list;
+	while (work)
 		{
-		list = g_hash_table_get_values(file_data_pool);
-
-		log_printf("%d", global_file_data_count);
-		log_printf("%d", g_list_length(list));
-
-		GList *work = list;
-		while (work)
-			{
-			fd = static_cast<FileData *>(work->data);
-			log_printf("%-4d %s", fd->ref, fd->path);
-			work = work->next;
-			}
-
-		g_list_free(list);
+		auto *fd = static_cast<FileData *>(work->data);
+		log_printf("%-4d %s", fd->ref, fd->path);
+		work = work->next;
 		}
+
+	g_list_free(list);
+
 #endif
 }
 
-static void file_data_free(FileData *fd)
+void FileData::file_data_free(FileData *fd)
 {
 	g_assert(fd->magick == FD_MAGICK);
 	g_assert(fd->ref == 0);
 	g_assert(!fd->locked);
 
 #ifdef DEBUG_FILEDATA
-	global_file_data_count--;
-	DEBUG_2("file data count--: %d", global_file_data_count);
+	fd->context->global_file_data_count--;
+	DEBUG_2("file data count--: %d", fd->context->global_file_data_count);
 #endif
 
 	metadata_cache_free(fd);
-	g_hash_table_remove(file_data_pool, fd->original_path);
+	g_hash_table_remove(fd->context->file_data_pool, fd->original_path);
 
 	g_free(fd->path);
 	g_free(fd->original_path);
@@ -745,7 +743,7 @@ static void file_data_free(FileData *fd)
 	g_free(fd->format_name);
 	g_assert(fd->sidecar_files == nullptr); /* sidecar files must be freed before calling this */
 
-	file_data_change_info_free(nullptr, fd);
+	::file_data_change_info_free(nullptr, fd);
 	g_free(fd);
 }
 
@@ -765,7 +763,7 @@ static gboolean file_data_check_has_ref(FileData *fd)
  * This function will free a FileData and its children provided that neither its parent nor it has
  * a positive refcount, and provided that neither is locked.
  */
-static void file_data_consider_free(FileData *fd)
+void FileData::file_data_consider_free(FileData *fd)
 {
 	GList *work;
 	FileData *parent = fd->parent ? fd->parent : fd;
@@ -786,7 +784,7 @@ static void file_data_consider_free(FileData *fd)
 	DEBUG_2("file_data_consider_free: deleting '%s', parent '%s'",
 		fd->path, fd->parent ? parent->path : "-");
 
-	g_list_free_full(parent->sidecar_files, reinterpret_cast<GDestroyNotify>(file_data_free));
+	g_list_free_full(parent->sidecar_files, reinterpret_cast<GDestroyNotify>(FileData::file_data_free));
 	parent->sidecar_files = nullptr;
 
 	file_data_free(parent);
@@ -1155,7 +1153,7 @@ GList *FileData::file_data_basename_hash_insert(GHashTable *basename_hash, FileD
 			DEBUG_1("TG: parent extension %s",parent_extension);
 			gchar *parent_basename = g_strndup(basename, parent_extension - basename);
 			DEBUG_1("TG: parent basename %s",parent_basename);
-			auto parent_fd = static_cast<FileData *>(g_hash_table_lookup(file_data_pool, basename));
+			auto parent_fd = static_cast<FileData *>(g_hash_table_lookup(fd->context->file_data_pool, basename));
 			if (parent_fd)
 				{
 				DEBUG_1("TG: parent fd found");
@@ -1211,16 +1209,16 @@ void FileData::file_data_basename_hash_to_sidecars(gpointer, gpointer value, gpo
 }
 
 
-FileData *FileData::file_data_new_group(const gchar *path_utf8)
+FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext *context)
 {
 	gchar *dir;
 	struct stat st;
 	FileData *fd;
 	GList *files;
 
-	if (!file_data_pool)
+	if (context == nullptr)
 		{
-		file_data_pool = g_hash_table_new(g_str_hash, g_str_equal);
+		context = FileData::DefaultFileDataContext();
 		}
 
 	if (!stat_utf8(path_utf8, &st))
@@ -1230,14 +1228,14 @@ FileData *FileData::file_data_new_group(const gchar *path_utf8)
 		}
 
 	if (S_ISDIR(st.st_mode))
-		return file_data_new(path_utf8, &st, TRUE);
+		return file_data_new(path_utf8, &st, TRUE, context);
 
 	dir = remove_level_from_path(path_utf8);
 
 	FileList::read_list_real(dir, &files, nullptr, TRUE);
 
-	fd = static_cast<FileData *>(g_hash_table_lookup(file_data_pool, path_utf8));
-	if (!fd) fd = file_data_new(path_utf8, &st, TRUE);
+	fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
+	if (!fd) fd = file_data_new(path_utf8, &st, TRUE, context);
 	if (fd)
 		{
 		::file_data_ref(fd);
@@ -1528,10 +1526,11 @@ gboolean FileData::file_data_register_mark_func(gint n, GetMarkFunc get_mark_fun
 	file_data_mark_func_data[n] = data;
 	file_data_destroy_mark_func[n] = notify;
 
-	if (get_mark_func && file_data_pool)
+	FileDataContext *context = FileData::DefaultFileDataContext();
+	if (get_mark_func)
 		{
 		/* this effectively changes all known files */
-		g_hash_table_foreach(file_data_pool, file_data_notify_mark_func, nullptr);
+		g_hash_table_foreach(context->file_data_pool, file_data_notify_mark_func, nullptr);
 		}
 
 	return TRUE;
@@ -1618,20 +1617,21 @@ gboolean FileData::file_data_add_ci(FileData *fd, FileDataChangeType type, const
 	return TRUE;
 }
 
-static void file_data_planned_change_remove(FileData *fd)
+void FileData::planned_change_remove()
 {
-	if (file_data_planned_change_hash &&
-	    (fd->change->type == FILEDATA_CHANGE_MOVE || fd->change->type == FILEDATA_CHANGE_RENAME))
+        // Avoids potentially having the class destructed out from under us.
+        FileDataRef this_ref(*this);
+
+	if (g_hash_table_size(context->planned_change_map) != 0 &&
+	    (change->type == FILEDATA_CHANGE_MOVE || change->type == FILEDATA_CHANGE_RENAME))
 		{
-		if (g_hash_table_lookup(file_data_planned_change_hash, fd->change->dest) == fd)
+		if (g_hash_table_lookup(context->planned_change_map, change->dest) == this)
 			{
-			DEBUG_1("planned change: removing %s -> %s", fd->change->dest, fd->path);
-			g_hash_table_remove(file_data_planned_change_hash, fd->change->dest);
-			::file_data_unref(fd);
-			if (g_hash_table_size(file_data_planned_change_hash) == 0)
+			DEBUG_1("planned change: removing %s -> %s", change->dest, path);
+			g_hash_table_remove(context->planned_change_map, change->dest);
+			::file_data_unref(this);
+			if (g_hash_table_size(context->planned_change_map) == 0)
 				{
-				g_hash_table_destroy(file_data_planned_change_hash);
-				file_data_planned_change_hash = nullptr;
 				DEBUG_1("planned change: empty");
 				}
 			}
@@ -1645,7 +1645,7 @@ void FileData::file_data_free_ci(FileData *fd)
 
 	if (!fdci) return;
 
-	file_data_planned_change_remove(fd);
+	fd->planned_change_remove();
 
 	if (fdci->regroup_when_finished) file_data_disable_grouping(fd, FALSE);
 
@@ -1893,64 +1893,64 @@ void FileData::file_data_sc_free_ci_list(GList *fd_list)
  * fails if fd->change does not exist or the change type does not match
  */
 
-static void file_data_update_planned_change_hash(FileData *fd, const gchar *old_path, gchar *new_path)
+void FileData::update_planned_change_hash(const gchar *old_path, gchar *new_path)
 {
-	FileDataChangeType type = fd->change->type;
+        // Avoids potentially having the class destructed out from under us.
+        FileDataRef this_ref(*this);
+
+	FileDataChangeType type = change->type;
 
 	if (type == FILEDATA_CHANGE_MOVE || type == FILEDATA_CHANGE_RENAME)
 		{
 		FileData *ofd;
 
-		if (!file_data_planned_change_hash)
-			file_data_planned_change_hash = g_hash_table_new(g_str_hash, g_str_equal);
-
-		if (old_path && g_hash_table_lookup(file_data_planned_change_hash, old_path) == fd)
+		if (old_path && g_hash_table_lookup(context->planned_change_map, old_path) == this)
 			{
-			DEBUG_1("planned change: removing %s -> %s", old_path, fd->path);
-			g_hash_table_remove(file_data_planned_change_hash, old_path);
-			::file_data_unref(fd);
+			DEBUG_1("planned change: removing %s -> %s", old_path, path);
+			g_hash_table_remove(context->planned_change_map, old_path);
+			::file_data_unref(this);
 			}
 
-		ofd = static_cast<FileData *>(g_hash_table_lookup(file_data_planned_change_hash, new_path));
-		if (ofd != fd)
+		ofd = static_cast<FileData *>(g_hash_table_lookup(context->planned_change_map, new_path));
+		if (ofd != this)
 			{
 			if (ofd)
 				{
 				DEBUG_1("planned change: replacing %s -> %s", new_path, ofd->path);
-				g_hash_table_remove(file_data_planned_change_hash, new_path);
+				g_hash_table_remove(context->planned_change_map, new_path);
 				::file_data_unref(ofd);
 				}
 
-			DEBUG_1("planned change: inserting %s -> %s", new_path, fd->path);
-			::file_data_ref(fd);
-			g_hash_table_insert(file_data_planned_change_hash, new_path, fd);
+			DEBUG_1("planned change: inserting %s -> %s", new_path, path);
+			::file_data_ref(this);
+			g_hash_table_insert(context->planned_change_map, new_path, this);
 			}
 		}
 }
 
-static void file_data_update_ci_dest(FileData *fd, const gchar *dest_path)
+void FileData::file_data_update_ci_dest(FileData *fd, const gchar *dest_path)
 {
 	gchar *old_path = fd->change->dest;
 
 	fd->change->dest = g_strdup(dest_path);
-	file_data_update_planned_change_hash(fd, old_path, fd->change->dest);
+	fd->update_planned_change_hash(old_path, fd->change->dest);
 	g_free(old_path);
 }
 
-static void file_data_update_ci_dest_preserve_ext(FileData *fd, const gchar *dest_path)
+void FileData::file_data_update_ci_dest_preserve_ext(FileData *fd, const gchar *dest_path)
 {
 	const gchar *extension = registered_extension_from_path(fd->change->source);
 	gchar *base = remove_extension_from_path(dest_path);
 	gchar *old_path = fd->change->dest;
 
 	fd->change->dest = g_strconcat(base, fd->extended_extension ? fd->extended_extension : extension, NULL);
-	file_data_update_planned_change_hash(fd, old_path, fd->change->dest);
+	fd->update_planned_change_hash(old_path, fd->change->dest);
 
 	g_free(old_path);
 	g_free(base);
 }
 
-static void file_data_sc_update_ci(FileData *fd, const gchar *dest_path)
+void FileData::file_data_sc_update_ci(FileData *fd, const gchar *dest_path)
 {
 	GList *work;
 	gchar *dest_path_full = nullptr;
@@ -1989,7 +1989,7 @@ static void file_data_sc_update_ci(FileData *fd, const gchar *dest_path)
 	g_free(dest_path_full);
 }
 
-static gboolean file_data_sc_check_update_ci(FileData *fd, const gchar *dest_path, FileDataChangeType type)
+gboolean FileData::file_data_sc_check_update_ci(FileData *fd, const gchar *dest_path, FileDataChangeType type)
 {
 	if (!file_data_sc_check_ci(fd, type)) return FALSE;
 	file_data_sc_update_ci(fd, dest_path);
@@ -2578,9 +2578,9 @@ gboolean FileData::file_data_apply_ci(FileData *fd)
 	if (type == FILEDATA_CHANGE_MOVE || type == FILEDATA_CHANGE_RENAME)
 		{
 		DEBUG_1("planned change: applying %s -> %s", fd->change->dest, fd->path);
-		file_data_planned_change_remove(fd);
+		fd->planned_change_remove();
 
-		if (g_hash_table_lookup(file_data_pool, fd->change->dest))
+		if (g_hash_table_lookup(fd->context->file_data_pool, fd->change->dest))
 			{
 			/* this change overwrites another file which is already known to other modules
 			   renaming fd would create duplicate FileData structure
@@ -2592,7 +2592,7 @@ gboolean FileData::file_data_apply_ci(FileData *fd)
 			}
 		else
 			{
-			file_data_set_path(fd, fd->change->dest);
+			fd->set_path(fd->change->dest);
 			}
 		}
 	file_data_increment_version(fd);
@@ -2945,7 +2945,8 @@ gboolean FileData::marks_list_save(gchar *path, gboolean save)
 	GString *marks = g_string_new("");
 	if (save)
 		{
-		g_hash_table_foreach(file_data_pool, marks_get_files, marks);
+		FileDataContext *context = FileData::DefaultFileDataContext();
+		g_hash_table_foreach(context->file_data_pool, marks_get_files, marks);
 		}
 	secure_fprintf(ssi, "%s", marks->str);
 	g_string_free(marks, TRUE);
@@ -2982,7 +2983,8 @@ static void marks_clear(gpointer key, gpointer value, gpointer)
 
 void FileData::marks_clear_all()
 {
-	g_hash_table_foreach(file_data_pool, marks_clear, nullptr);
+	FileDataContext *context = FileData::DefaultFileDataContext();
+	g_hash_table_foreach(context->file_data_pool, marks_clear, nullptr);
 }
 
 void FileData::file_data_set_page_num(FileData *fd, gint page_num)

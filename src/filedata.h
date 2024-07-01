@@ -114,6 +114,14 @@ class FileData {
     private:
 	FileData() = delete;
 
+	// TODO(xsdg): Switch FileData to using new/delete, so that FileDataContext
+	// can be a non-const reference that's set by an initializer.
+	FileDataContext *context = nullptr;
+	static FileDataContext *DefaultFileDataContext()
+		{
+		return &(GlobalFileDataContext::get_instance().context());
+		}
+
     public:
 	// Child classes that encapsulate some functionality.
 	class FileList;
@@ -185,21 +193,21 @@ class FileData {
 	 * @headerfile file_data_new_group
 	 * scan for sidecar files - expensive
 	 */
-	static FileData *file_data_new_group(const gchar *path_utf8);
+	static FileData *file_data_new_group(const gchar *path_utf8, FileDataContext *context = nullptr);
 
 	/**
 	 * @headerfile file_data_new_no_grouping
 	 * should be used on helper files which can't have sidecars
 	 */
-	static FileData *file_data_new_no_grouping(const gchar *path_utf8);
+	static FileData *file_data_new_no_grouping(const gchar *path_utf8, FileDataContext *context = nullptr);
 
 	/**
 	 * @headerfile file_data_new_dir
 	 * should be used on dirs
 	 */
-	static FileData *file_data_new_dir(const gchar *path_utf8);
+	static FileData *file_data_new_dir(const gchar *path_utf8, FileDataContext *context = nullptr);
 
-	static FileData *file_data_new_simple(const gchar *path_utf8);
+	static FileData *file_data_new_simple(const gchar *path_utf8, FileDataContext *context = nullptr);
 
 #ifdef DEBUG_FILEDATA
 	FileData *file_data_ref(const gchar *file = __builtin_FILE(), gint line = __builtin_LINE());
@@ -319,8 +327,8 @@ class FileData {
 	static void file_data_dump();
 
     protected:
-	static FileData *file_data_new(const gchar *path_utf8, struct stat *st, gboolean disable_sidecars);
-	static FileData *file_data_new_local(const gchar *path, struct stat *st, gboolean disable_sidecars);
+	static FileData *file_data_new(const gchar *path_utf8, struct stat *st, gboolean disable_sidecars, FileDataContext *context = nullptr);
+	static FileData *file_data_new_local(const gchar *path, struct stat *st, gboolean disable_sidecars, FileDataContext *context = nullptr);
 
 	static GHashTable *file_data_basename_hash_new();
 	static GList *file_data_basename_hash_insert(GHashTable *basename_hash, FileData *fd);
@@ -328,6 +336,18 @@ class FileData {
 	static void file_data_basename_hash_remove_list(gpointer, gpointer value, gpointer);
 	static void file_data_basename_hash_free(GHashTable *basename_hash);
 	static void file_data_basename_hash_to_sidecars(gpointer, gpointer value, gpointer);
+	static void file_data_free(FileData *fd);
+	static void file_data_consider_free(FileData *fd);
+	static void file_data_update_ci_dest(FileData *fd, const gchar *dest_path);
+	static void file_data_update_ci_dest_preserve_ext(FileData *fd, const gchar *dest_path);
+	static void file_data_sc_update_ci(FileData *fd, const gchar *dest_path);
+	static gboolean file_data_sc_check_update_ci(FileData *fd, const gchar *dest_path, FileDataChangeType type);
+
+
+	// static methods that have already been switched to C++-style.
+	void set_path(const gchar *new_path);
+	void planned_change_remove();
+	void update_planned_change_hash(const gchar *old_path, gchar *new_path);
 };
 
 class FileData::FileList
