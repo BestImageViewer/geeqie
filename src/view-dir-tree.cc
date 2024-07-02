@@ -32,6 +32,7 @@
 #include "debug.h"
 #include "filedata.h"
 #include "layout.h"
+#include "misc.h"
 #include "options.h"
 #include "typedefs.h"
 #include "ui-fileops.h"
@@ -63,18 +64,11 @@ static void vdtree_row_expanded(GtkTreeView *treeview, GtkTreeIter *iter, GtkTre
  *----------------------------------------------------------------------------
  */
 
-static void set_cursor(GtkWidget *widget, GdkCursorType cursor_type)
+static void set_cursor(GtkWidget *widget, gint cursor_type)
 {
-	GdkCursor *cursor = nullptr;
-	GdkDisplay *display;
+	if (!widget) return;
 
-	if (!widget || !gtk_widget_get_window(widget)) return;
-
-	display = gdk_display_get_default();
-
-	if (cursor_type > -1) cursor = gdk_cursor_new_for_display(display, cursor_type);
-	gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
-	if (cursor) g_object_unref(G_OBJECT(cursor));
+	widget_set_cursor(widget, cursor_type);
 	gdk_flush();
 }
 
@@ -86,7 +80,7 @@ static void vdtree_busy_push(ViewDir *vd)
 
 static void vdtree_busy_pop(ViewDir *vd)
 {
-	if (VDTREE(vd)->busy_ref == 1) set_cursor(vd->view, GDK_CURSOR_IS_PIXMAP);
+	if (VDTREE(vd)->busy_ref == 1) set_cursor(vd->view, -1);
 	if (VDTREE(vd)->busy_ref > 0) VDTREE(vd)->busy_ref--;
 }
 

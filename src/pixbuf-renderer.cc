@@ -27,6 +27,7 @@
 
 #include "debug.h"
 #include "main-defines.h"
+#include "misc.h"
 #include "options.h"
 #include "renderer-tiles.h"
 
@@ -618,29 +619,6 @@ static void pixbuf_renderer_get_property(GObject *object, guint prop_id,
  * misc utilities
  *-------------------------------------------------------------------
  */
-
-static void widget_set_cursor(GtkWidget *widget, gint icon)
-{
-	GdkCursor *cursor;
-	GdkDisplay *display;
-
-	if (!gtk_widget_get_window(widget)) return;
-
-	display = gdk_display_get_default();
-
-	if (icon == -1)
-		{
-		cursor = nullptr;
-		}
-	else
-		{
-		cursor = gdk_cursor_new_for_display(display, static_cast<GdkCursorType>(icon));
-		}
-
-	gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
-
-	if (cursor) g_object_unref(G_OBJECT(cursor));
-}
 
 static gboolean pr_parent_window_sizable(PixbufRenderer *pr)
 {

@@ -394,28 +394,6 @@ static void dupe_window_update_progress(DupeWindow *dw, const gchar *status, gdo
 	if (status_text) gtk_progress_bar_set_text(GTK_PROGRESS_BAR(dw->extra_label), status_text);
 }
 
-static void widget_set_cursor(GtkWidget *widget, gint icon)
-{
-	GdkCursor *cursor;
-	GdkDisplay *display;
-
-	if (!gtk_widget_get_window(widget)) return;
-
-	if (icon == -1)
-		{
-		cursor = nullptr;
-		}
-	else
-		{
-		display = gdk_display_get_default();
-		cursor = gdk_cursor_new_for_display(display, static_cast<GdkCursorType>(icon));
-		}
-
-	gdk_window_set_cursor(gtk_widget_get_window(widget), cursor);
-
-	if (cursor) g_object_unref(G_OBJECT(cursor));
-}
-
 /*
  * ------------------------------------------------------------------
  * row color utils

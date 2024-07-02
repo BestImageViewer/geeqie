@@ -463,4 +463,29 @@ void cell_renderer_height_override(GtkCellRenderer *renderer)
 		}
 }
 
+/**
+ * @brief Set cursor for widget's window.
+ * @param widget Widget for which cursor is set
+ * @param icon Cursor type from GdkCursorType.
+ *        Value -1 means using the cursor of its parent window.
+ * @todo Use std::optional for icon since C++17 instead of special -1 value
+ */
+void widget_set_cursor(GtkWidget *widget, gint icon)
+{
+	GdkWindow *window = gtk_widget_get_window(widget);
+	if (!window) return;
+
+	GdkCursor *cursor = nullptr;
+
+	if (icon != -1)
+		{
+		GdkDisplay *display = gdk_display_get_default();
+		cursor = gdk_cursor_new_for_display(display, static_cast<GdkCursorType>(icon));
+		}
+
+	gdk_window_set_cursor(window, cursor);
+
+	if (cursor) g_object_unref(cursor);
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
