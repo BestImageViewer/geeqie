@@ -258,7 +258,7 @@ GtkWidget *bar_pane_rating_new_from_config(const gchar **attribute_names, const 
 void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	PaneRatingData *prd;
-	gchar *title = nullptr;
+	g_autofree gchar *title = nullptr;
 
 	prd = static_cast<PaneRatingData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!prd) return;
@@ -268,9 +268,9 @@ void bar_pane_rating_update_from_config(GtkWidget *pane, const gchar **attribute
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_CHAR_FULL("id", prd->pane.id)) continue;
-		if (READ_BOOL_FULL("expanded", prd->pane.expanded)) continue;
+		if (READ_CHAR_FULL("title", title)) continue; // FIXME Is it intended to set title to GTK_LABEL(prd->pane.title) or simply avoid "unknown attribute"?
+		if (READ_CHAR(prd->pane, id)) continue;
+		if (READ_BOOL(prd->pane, expanded)) continue;
 
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}

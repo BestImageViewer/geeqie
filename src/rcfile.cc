@@ -1141,18 +1141,16 @@ static void options_load_marks_tooltips(GQParserData *parser_data, GMarkupParseC
 static void options_load_disabled_plugins(GQParserData *parser_data, GMarkupParseContext *, const gchar *, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **)
 {
 	gint i = GPOINTER_TO_INT(data);
-	struct {
-		gchar *path;
-	} tmp;
 
 	while (*attribute_names)
 		{
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
-		tmp.path = nullptr;
-		if (READ_CHAR_FULL("path", tmp.path))
+
+		gchar *path = nullptr;
+		if (READ_CHAR_FULL("path", path))
 			{
-			options->disabled_plugins = g_list_append(options->disabled_plugins, g_strdup(tmp.path));
+			options->disabled_plugins = g_list_append(options->disabled_plugins, path);
 			continue;
 			}
 

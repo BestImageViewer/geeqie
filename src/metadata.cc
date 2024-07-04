@@ -1842,9 +1842,9 @@ void keyword_tree_disconnect_marks()
 
 GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *parent, const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *name = nullptr;
+	g_autofree gchar *name = nullptr;
 	gboolean is_kw = TRUE;
-	gchar *mark_str = nullptr;
+	g_autofree gchar *mark_str = nullptr;
 
 	while (*attribute_names)
 		{
@@ -1857,6 +1857,7 @@ GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *pa
 
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}
+
 	if (name && name[0])
 		{
 		GtkTreeIter iter;
@@ -1876,10 +1877,9 @@ GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *pa
 											&iter, i - 1);
 			}
 
-		g_free(name);
 		return gtk_tree_iter_copy(&iter);
 		}
-	g_free(name);
+
 	return nullptr;
 }
 

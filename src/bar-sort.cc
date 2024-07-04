@@ -818,10 +818,8 @@ void bar_sort_cold_start(LayoutWindow *lw, const gchar **attribute_names, const 
 	lw->options.action = static_cast<SortActionType>(action);
 	lw->options.mode = static_cast<SortModeType>(mode);
 	lw->options.selection = static_cast<SortSelectionType>(selection);
-	lw->options.filter_key = g_strdup(filter_key);
+	lw->options.filter_key = filter_key;
 	lw->bar_sort_enabled = enabled;
-
-	g_free(filter_key);
 }
 
 GtkWidget *bar_sort_new_default(LayoutWindow *lw)

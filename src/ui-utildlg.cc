@@ -335,38 +335,31 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	auto dw =  g_new0(DialogWindow, 1);
-	gchar *title = nullptr;
-	gchar *role = nullptr;
-	gint x = 0;
-	gint y = 0;
-	gint w = 0;
-	gint h = 0;
+	auto dw = g_new0(DialogWindow, 1);
 
 	while (*attribute_names)
 		{
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_CHAR_FULL("role", role)) continue;
-		if (READ_INT_FULL("x", x)) continue;
-		if (READ_INT_FULL("y", y)) continue;
-		if (READ_INT_FULL("w", w)) continue;
-		if (READ_INT_FULL("h", h)) continue;
+		if (READ_CHAR(*dw, title)) continue;
+		if (READ_CHAR(*dw, role)) continue;
+		if (READ_INT(*dw, x)) continue;
+		if (READ_INT(*dw, y)) continue;
+		if (READ_INT(*dw, w)) continue;
+		if (READ_INT(*dw, h)) continue;
 
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}
 
-	if (title && title[0] != 0)
+	if (dw->title && dw->title[0] != 0)
 		{
-		dw->title = g_strdup(title);
-		dw->role = g_strdup(role);
-		dw->x = x;
-		dw->y = y;
-		dw->w = w;
-		dw->h = h;
-
 		dialog_windows = g_list_append(dialog_windows, dw);
+		}
+	else
+		{
+		g_free(dw->title);
+		g_free(dw->role);
+		g_free(dw);
 		}
 }
 
