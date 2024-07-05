@@ -20,6 +20,7 @@
 # Build file to configure and run unit tests.
 
 unit_test_sources = files('filedata/filedata.cc',
+'filedata/filelist.cc',
 'pixbuf-util.cc')
 
 code_sources += unit_test_sources
