@@ -3035,9 +3035,9 @@ void FileData::file_data_set_page_total(FileData *fd, gint page_total)
 	fd->page_total = page_total;
 }
 
-FileDataRef::FileDataRef(FileData &fd) : fd_(fd)
+FileDataRef::FileDataRef(FileData &fd, gboolean skip_ref) : fd_(fd)
 {
-        fd_.file_data_ref();
+        if (!skip_ref) fd_.file_data_ref();
 }
 
 FileDataRef::~FileDataRef()

@@ -400,7 +400,7 @@ class FileData::FileList
 class FileDataRef
 {
     public:
-	explicit FileDataRef(FileData &fd);
+	explicit FileDataRef(FileData &fd, gboolean skip_ref = FALSE);
 	FileDataRef(FileDataRef &) = delete;  // Not copyable.
 	FileDataRef &operator=(const FileDataRef &) = delete;  // Not assignable.
 	~FileDataRef();
