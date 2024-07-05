@@ -245,7 +245,15 @@ gint FileData::FileList::sort_compare_filedata(
 			/* fall back to name */
 			break;
 		case SORT_NUMBER:
-			ret = strcmp(fa->collate_key_name_natural, fb->collate_key_name_natural);
+			if (settings->case_sensitive)
+				{
+				ret = strcmp(fa->collate_key_name_natural,
+					     fb->collate_key_name_natural);
+			} else {
+				ret = strcmp(fa->collate_key_name_nocase_natural,
+					     fb->collate_key_name_nocase_natural);
+			}
+
 			if (ret != 0) return ret;
 			/* fall back to name */
 			break;
