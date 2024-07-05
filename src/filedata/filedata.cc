@@ -732,8 +732,12 @@ void FileData::file_data_free(FileData *fd)
 
 	g_free(fd->path);
 	g_free(fd->original_path);
-	g_free(fd->collate_key_name);
+
 	g_free(fd->collate_key_name_nocase);
+	g_free(fd->collate_key_name);
+	g_free(fd->collate_key_name_nocase_natural);
+	g_free(fd->collate_key_name_natural);
+
 	g_free(fd->extended_extension);
 	if (fd->thumb_pixbuf) g_object_unref(fd->thumb_pixbuf);
 	histmap_free(fd->histmap);
