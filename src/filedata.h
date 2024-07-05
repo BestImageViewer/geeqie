@@ -356,16 +356,19 @@ class FileData::FileList
 	FileList() = delete;
 	friend class FileData;  // Allows FileData to access protected API.
 
-	// Globals.
-	static SortType sort_method;
-	static gboolean sort_ascend;
-	static gboolean sort_case;
-
     public:
-	static gint sort_compare_filedata(const FileData *fa, const FileData *fb);
+	// Note that this struct will be moved to a new Util class in a subsequent commit.
+	struct SortSettings
+	{
+		SortType method = SORT_NONE;
+		gboolean ascending = TRUE;
+		gboolean case_sensitive = TRUE;
+	};
+
+	static gint sort_compare_filedata(const FileData *fa, const FileData *fb, SortSettings *settings);
 	static gint sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend);
-	static GList *sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive);
-	static GList *sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
+	static GList *sort(GList *list, SortType method, gboolean ascending, gboolean case_sensitive);
+	static GList *sort_full(GList *list, SortType method, gboolean ascending, gboolean case_sensitive, GCompareDataFunc cb);
 
 	static gboolean read_list(FileData *dir_fd, GList **files, GList **dirs);
 	static gboolean read_list_lstat(FileData *dir_fd, GList **files, GList **dirs);
@@ -384,7 +387,7 @@ class FileData::FileList
 	static GList *filter_out_sidecars(GList *flist);
 	static gboolean is_hidden_file(const gchar *name);
 	static gboolean read_list_real(const gchar *dir_path, GList **files, GList **dirs, gboolean follow_symlinks);
-	static gint sort_file_cb(gconstpointer a, gconstpointer b);
+	static gint sort_file_cb(gconstpointer a, gconstpointer b, gpointer data);
 	static gint sort_path_cb(gconstpointer a, gconstpointer b);
 	static void recursive_append(GList **list, GList *dirs);
 	static void recursive_append_full(GList **list, GList *dirs, SortType method, gboolean ascend, gboolean case_sensitive);
@@ -441,10 +444,10 @@ void file_data_change_info_free(FileDataChangeInfo *fdci, FileData *fd);
 void file_data_disable_grouping(FileData *fd, gboolean disable);
 void file_data_disable_grouping_list(GList *fd_list, gboolean disable);
 
-gint filelist_sort_compare_filedata(const FileData *fa, const FileData *fb);
+gint filelist_sort_compare_filedata(const FileData *fa, const FileData *fb, FileData::FileList::SortSettings *settings);
 gint filelist_sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend);
-GList *filelist_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive);
-GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb);
+GList *filelist_sort(GList *list, SortType method, gboolean ascending, gboolean case_sensitive);
+GList *filelist_sort_full(GList *list, SortType method, gboolean ascending, gboolean case_sensitive, GCompareDataFunc cb);
 
 gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs);
 gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs);

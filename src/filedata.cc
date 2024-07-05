@@ -148,9 +148,9 @@ void file_data_disable_grouping_list(GList *fd_list, gboolean disable)
 }
 
 
-gint filelist_sort_compare_filedata(const FileData *fa, const FileData *fb)
+gint filelist_sort_compare_filedata(const FileData *fa, const FileData *fb, FileData::FileList::SortSettings *settings)
 {
-	return FileData::FileList::sort_compare_filedata(fa, fb);
+	return FileData::FileList::sort_compare_filedata(fa, fb, settings);
 }
 
 gint filelist_sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend)
@@ -163,7 +163,7 @@ GList *filelist_sort(GList *list, SortType method, gboolean ascend, gboolean cas
 	return FileData::FileList::sort(list, method, ascend, case_sensitive);
 }
 
-GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb)
+GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareDataFunc cb)
 {
 	return FileData::FileList::sort_full(list, method, ascend, case_sensitive, cb);
 }

@@ -45,12 +45,6 @@
 #include "ui-fileops.h"
 
 
-// Globals.
-SortType FileData::FileList::sort_method = SORT_NONE;
-gboolean FileData::FileList::sort_ascend = TRUE;
-gboolean FileData::FileList::sort_case = TRUE;
-
-
 /*
  *-----------------------------------------------------------------------------
  * handling sidecars in filelist
@@ -202,15 +196,16 @@ gboolean FileData::FileList::read_list_real(const gchar *dir_path, GList **files
  */
 
 
-gint FileData::FileList::sort_compare_filedata(const FileData *fa, const FileData *fb)
+gint FileData::FileList::sort_compare_filedata(
+	const FileData *fa, const FileData *fb, SortSettings *settings)
 {
 	gint ret;
-	if (!sort_ascend)
+	if (!settings->ascending)
 		{
 		std::swap(fa, fb);
 		}
 
-	switch (sort_method)
+	switch (settings->method)
 		{
 		case SORT_NAME:
 			break;
@@ -258,7 +253,7 @@ gint FileData::FileList::sort_compare_filedata(const FileData *fa, const FileDat
 			break;
 		}
 
-	if (sort_case)
+	if (settings->case_sensitive)
 		ret = strcmp(fa->collate_key_name, fb->collate_key_name);
 	else
 		ret = strcmp(fa->collate_key_name_nocase, fb->collate_key_name_nocase);
@@ -271,29 +266,29 @@ gint FileData::FileList::sort_compare_filedata(const FileData *fa, const FileDat
 	return strcmp(fa->original_path, fb->original_path);
 }
 
-gint FileData::FileList::sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend)
+gint FileData::FileList::sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascending)
 {
-	sort_method = method;
-	sort_ascend = ascend;
-	return sort_compare_filedata(fa, fb);
+	SortSettings settings = {method, ascending, /*case_sensitive=*/TRUE};
+	return sort_compare_filedata(fa, fb, &settings);
 }
 
-gint FileData::FileList::sort_file_cb(gconstpointer a, gconstpointer b)
+gint FileData::FileList::sort_file_cb(gconstpointer a, gconstpointer b, gpointer data)
 {
-	return FileData::FileList::sort_compare_filedata(static_cast<const FileData *>(a), static_cast<const FileData *>(b));
+	return FileData::FileList::sort_compare_filedata(
+                static_cast<const FileData *>(a),
+                static_cast<const FileData *>(b),
+                static_cast<SortSettings *>(data));
 }
 
-GList *FileData::FileList::sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareFunc cb)
+GList *FileData::FileList::sort_full(GList *list, SortType method, gboolean ascending, gboolean case_sensitive, GCompareDataFunc cb)
 {
-	sort_method = method;
-	sort_ascend = ascend;
-	sort_case = case_sensitive;
-	return g_list_sort(list, cb);
+	SortSettings settings = {method, ascending, case_sensitive};
+	return g_list_sort_with_data(list, cb, &settings);
 }
 
-GList *FileData::FileList::sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
+GList *FileData::FileList::sort(GList *list, SortType method, gboolean ascending, gboolean case_sensitive)
 {
-	return sort_full(list, method, ascend, case_sensitive, sort_file_cb);
+	return sort_full(list, method, ascending, case_sensitive, sort_file_cb);
 }
 
 gboolean FileData::FileList::read_list(FileData *dir_fd, GList **files, GList **dirs)

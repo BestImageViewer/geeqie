@@ -608,11 +608,12 @@ static void pan_window_zoom_limit(PanWindow *pw)
  *-----------------------------------------------------------------------------
  */
 
-static gint pan_cache_sort_file_cb(gconstpointer a, gconstpointer b)
+static gint pan_cache_sort_file_cb(gconstpointer a, gconstpointer b, gpointer data)
 {
 	auto pca = static_cast<const PanCacheData *>(a);
 	auto pcb = static_cast<const PanCacheData *>(b);
-	return filelist_sort_compare_filedata(pca->fd, pcb->fd);
+	auto settings = static_cast<FileData::FileList::SortSettings *>(data);
+	return filelist_sort_compare_filedata(pca->fd, pcb->fd, settings);
 }
 
 GList *pan_cache_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
