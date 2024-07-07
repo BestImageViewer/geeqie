@@ -8,7 +8,7 @@ Package Status:
 [![Packaging status](https://repology.org/badge/tiny-repos/geeqie.svg)](https://repology.org/project/geeqie/versions)
 [![latest packaged version(s)](https://repology.org/badge/latest-versions/geeqie.svg)](https://repology.org/project/geeqie/versions)
 
-## ![][image_ref_geeqie_png] Geeqie - an image viewer
+## ![Geeqie icon][image_ref_geeqie_png] Geeqie - an image viewer
 
 This is Geeqie, a successor of GQview.
 
@@ -34,7 +34,6 @@ The project website is <https://www.geeqie.org/> and you will find the latest so
 * [Installation Scripts](#installation-scripts)
 * [Compiling and Installing](#compiling-and-installing)
 * [Notes and changes for the latest release](#notes-and-changes-for-the-latest-release)
-* [Requirements](#requirements)
 * [Required libraries](#required-libraries)
 
 ### Features
@@ -121,17 +120,17 @@ The Continuous Build release version has AppImages that are automatically genera
 
 The minimal version can display jpegs, pngs and some other formats, but does not have the range of the full version.
 
-This script file will download to $HOME/bin the latest Continuous Build AppImages for you:
+This script file will download to `$HOME/bin` the latest Continuous Build AppImages for you:
 
 ```sh
 wget https://raw.githubusercontent.com/BestImageViewer/geeqie/master/scripts/geeqie-download-appimage.sh
 chmod +x geeqie-download-appimage.sh
 ```
 
-The script can download either the full size or the minimal version of the AppIamge, and sets a symbolic link to the executable file. The ```--help``` option lists all options.
+The script can download either the full size or the minimal version of the AppIamge, and sets a symbolic link to the executable file. The `--help` option lists all options.
 
 The full version takes a noticeable time to load, and runs slightly slower than a normal packaged release.
-The above script has the option ```--extract``` which extracts the contents of either AppImage to a sub-directory under $HOME/bin.
+The above script has the option `--extract` which extracts the contents of either AppImage to a sub-directory under `$HOME/bin`.
 With this option the loading and run time is the same as for a packaged release.
 
 There are also options to install desktop icons, menu items, and to revert to earlier downloaded versions.
@@ -177,36 +176,53 @@ If you wish to compile the sources yourself you may download the latest version 
 
 ### Compiling and Installing
 
-`meson setup build`  
-`ninja -C build install`
+```sh
+meson setup build
+ninja -C build install
+```
 
-List compile options:  
-`meson configure build`
+List compile options:
 
-Apply options e.g.:  
-`sudo ninja -C build uninstall`  
-`meson configure build -Dpdf=enabled -Dwebp=disabled`  
-`ninja -C build install`
+```sh
+meson configure build
+```
 
-Re-display configuration data:  
-`ninja -C build reconfigure`
+Apply options e.g.:
+
+```sh
+sudo ninja -C build uninstall
+meson configure build -Dpdf=enabled -Dwebp=disabled
+ninja -C build install
+```
+
+Re-display configuration data:
+
+```sh
+ninja -C build reconfigure
+```
 
 Meaning of options:  
 `auto` If the library is not found, continue the installation  
 `enabled` If the library is not found, stop the installation  
 `disabled` Do not look for the library  
 
-Uninstall:  
-`sudo ninja -C build uninstall`
+Uninstall:
 
-Install new version:  
-`sudo ninja -C build uninstall`  
-`git pull`  
-`ninja -C build install`
+```sh
+sudo ninja -C build uninstall
+```
+
+Install new version:
+
+```sh
+sudo ninja -C build uninstall
+git pull
+ninja -C build install
+```
 
 #### Note
 
-It is recommended to always use `git clone  git://git.geeqie.org/geeqie.git` to download Geeqie. After installing Geeqie you may delete the folder you have cloned Geeqie into.
+It is recommended to always use `git clone git://git.geeqie.org/geeqie.git` to download Geeqie. After installing Geeqie you may delete the folder you have cloned Geeqie into.
 
 However if you leave the folder intact, whenever new features or patches are available, execute:
 
