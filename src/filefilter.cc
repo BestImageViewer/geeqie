@@ -190,59 +190,36 @@ void filter_add_defaults()
 	filter_add_if_missing("apng", "Animated Portable Network Graphic", ".apng", FORMAT_CLASS_IMAGE, FALSE, FALSE, TRUE);
 
 	/* formats supported by gdk-pixbuf */
-	GSList *list;
-	GSList *work;
-
-	list = gdk_pixbuf_get_formats();
-	work = list;
-	while (work)
+	GSList *list = gdk_pixbuf_get_formats();
+	for (GSList *work = list; work; work = work->next)
 		{
-		GdkPixbufFormat *format;
-		gchar *name;
-		gchar *desc;
-		gchar **extensions;
-		GString *filter = nullptr;
-		guint i;
+		auto *format = static_cast<GdkPixbufFormat *>(work->data);
 
-		format = static_cast<GdkPixbufFormat *>(work->data);
-		work = work->next;
-
-		name = gdk_pixbuf_format_get_name(format);
-
+		g_autofree gchar *name = gdk_pixbuf_format_get_name(format);
 		if (strcmp(name, "Digital camera RAW") == 0)
 			{
 			DEBUG_1("Skipped '%s' from loader", name);
-			g_free(name);
 			continue;
 			}
 
-		desc = gdk_pixbuf_format_get_description(format);
-		extensions = gdk_pixbuf_format_get_extensions(format);
+		g_autofree gchar *desc = gdk_pixbuf_format_get_description(format);
 
-		i = 0;
-		while (extensions[i])
+		g_autoptr(GString) filter = g_string_new(nullptr);
+		g_auto(GStrv) extensions = gdk_pixbuf_format_get_extensions(format);
+
+		const guint extensions_count = g_strv_length(extensions);
+		for (guint i = 0; i < extensions_count; i++)
 			{
-			if (!filter)
+			if (filter->len > 0)
 				{
-				filter = g_string_new(".");
-				filter = g_string_append(filter, extensions[i]);
+				filter = g_string_append_c(filter, ';');
 				}
-			else
-				{
-				filter = g_string_append(filter, ";.");
-				filter = g_string_append(filter, extensions[i]);
-				}
-			i++;
+			g_string_append_printf(filter, ".%s", extensions[i]);
 			}
 
 		DEBUG_1("loader reported [%s] [%s] [%s]", name, desc, filter->str);
 
 		filter_add_if_missing(name, desc, filter->str, FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
-
-		g_free(name);
-		g_free(desc);
-		g_strfreev(extensions);
-		g_string_free(filter, TRUE);
 		}
 	g_slist_free(list);
 

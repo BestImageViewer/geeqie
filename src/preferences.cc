@@ -3915,12 +3915,7 @@ static void config_tab_toolbar_status(GtkWidget *notebook)
 /* advanced tab */
 static void config_tab_advanced(GtkWidget *notebook)
 {
-	gchar **extensions;
-	GdkPixbufFormat *fm;
-	gint i;
 	GList *extensions_list = nullptr;
-	GSList *formats_list;
-	GString *types_string = g_string_new(nullptr);
 	GtkWidget *alternate_checkbox;
 	GtkWidget *dupes_threads_spin;
 	GtkWidget *group;
@@ -3937,38 +3932,30 @@ static void config_tab_advanced(GtkWidget *notebook)
 
 	pref_spacer(group, PREF_PAD_GROUP);
 
-	formats_list = gdk_pixbuf_get_formats();
-
-	while (formats_list)
+	GSList *formats_list = gdk_pixbuf_get_formats();
+	for (GSList *work = formats_list; work; work = work->next)
 		{
-		fm = static_cast<GdkPixbufFormat *>(formats_list->data);
-		extensions = gdk_pixbuf_format_get_extensions(fm);
+		auto *fm = static_cast<GdkPixbufFormat *>(work->data);
+		g_auto(GStrv) extensions = gdk_pixbuf_format_get_extensions(fm);
+		const guint extensions_count = g_strv_length(extensions);
 
-		i = 0;
-		while (extensions[i])
+		for (guint i = 0; i < extensions_count; i++)
 			{
 			extensions_list = g_list_insert_sorted(extensions_list, g_strdup(extensions[i]), reinterpret_cast<GCompareFunc>(g_strcmp0));
-			i++;
 			}
-
-		g_strfreev(extensions);
-		formats_list = formats_list->next;
 		}
+	g_slist_free(formats_list);
 
-	while (extensions_list)
+	g_autoptr(GString) types_string = g_string_new(nullptr);
+	for (GList *work = extensions_list; work; work = work->next)
 		{
-		if (types_string->len == 0)
-			{
-			types_string = g_string_append(types_string, static_cast<const gchar *>(extensions_list->data));
-			}
-		else
+		if (types_string->len > 0)
 			{
 			types_string = g_string_append(types_string, ", ");
-			types_string = g_string_append(types_string, static_cast<const gchar *>(extensions_list->data));
 			}
-
-		extensions_list = extensions_list->next;
+		types_string = g_string_append(types_string, static_cast<gchar *>(work->data));
 		}
+	g_list_free_full(extensions_list, g_free);
 
 	types_string = g_string_prepend(types_string, _("Usable file types:\n"));
 	types_string_label = pref_label_new(group, types_string->str);
@@ -3991,10 +3978,6 @@ static void config_tab_advanced(GtkWidget *notebook)
 	gtk_widget_show(tabcomp);
 
 	gtk_widget_show(vbox);
-
-	g_slist_free(formats_list);
-	g_list_free_full(extensions_list, g_free);
-	g_string_free(types_string, TRUE);
 
 	pref_spacer(group, PREF_PAD_GROUP);
 

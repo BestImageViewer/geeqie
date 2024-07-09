@@ -797,7 +797,6 @@ static GtkWidget *bar_pane_gps_menu(PaneGPSData *pgd)
 	GtkWidget *map_centre;
 	ChamplainMapSourceFactory *map_factory;
 	GSList *map_list;
-	ChamplainMapSourceDesc *map_desc;
 	const gchar *current;
 
 	menu = popup_menu_short_lived();
@@ -806,18 +805,18 @@ static GtkWidget *bar_pane_gps_menu(PaneGPSData *pgd)
 	map_list = champlain_map_source_factory_get_registered(map_factory);
 	current = bar_pane_gps_get_map_id(pgd);
 
-	while (map_list)
+	for (GSList *work = map_list; work; work = work->next)
 		{
-		map_desc = static_cast<ChamplainMapSourceDesc *>(map_list->data);
+		auto *map_desc = static_cast<ChamplainMapSourceDesc *>(work->data);
+		const gchar *map_desc_id = champlain_map_source_desc_get_id(map_desc);
 
 		menu_item_add_radio(menu,
 		                    champlain_map_source_desc_get_name(map_desc),
-		                    const_cast<gchar *>(champlain_map_source_desc_get_id(map_desc)),
-		                    strcmp(champlain_map_source_desc_get_id(map_desc), current) == 0,
+		                    const_cast<gchar *>(map_desc_id),
+		                    strcmp(map_desc_id, current) == 0,
 		                    G_CALLBACK(bar_pane_gps_change_map_cb), pgd);
-
-		map_list = g_slist_next(map_list);
 		}
+	g_slist_free(map_list);
 
 	menu_item_add_divider(menu);
 	menu_item_add_check(menu, _("Enable markers"), pgd->enable_markers_checked,
@@ -829,7 +828,6 @@ static GtkWidget *bar_pane_gps_menu(PaneGPSData *pgd)
 		gtk_widget_set_sensitive(map_centre, FALSE);
 		}
 
-	g_slist_free(map_list);
 	g_object_unref(map_factory);
 
 	return menu;
