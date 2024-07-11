@@ -27,6 +27,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <utility>
 
 #include <pango/pango.h>
 
@@ -1282,17 +1283,56 @@ ActionItem::ActionItem(const gchar *name, const gchar *label, const gchar *icon_
 {}
 
 ActionItem::ActionItem(const ActionItem &other)
-{
-	name = g_strdup(other.name);
-	label = g_strdup(other.label);
-	icon_name = g_strdup(other.icon_name);
-}
+    : name(g_strdup(other.name))
+    , label(g_strdup(other.label))
+    , icon_name(g_strdup(other.icon_name))
+{}
+
+ActionItem::ActionItem(ActionItem &&other) noexcept
+    : name(std::exchange(other.name, nullptr))
+    , label(std::exchange(other.label, nullptr))
+    , icon_name(std::exchange(other.icon_name, nullptr))
+{}
 
 ActionItem::~ActionItem()
 {
 	g_free(name);
 	g_free(label);
 	g_free(icon_name);
+}
+
+ActionItem &ActionItem::operator=(const ActionItem &other)
+{
+	if (this != &other)
+		{
+		g_free(name);
+		name = g_strdup(other.name);
+
+		g_free(label);
+		label = g_strdup(other.label);
+
+		g_free(icon_name);
+		icon_name = g_strdup(other.icon_name);
+		}
+
+	return *this;
+}
+
+ActionItem &ActionItem::operator=(ActionItem &&other) noexcept
+{
+	if (this != &other)
+		{
+		g_free(name);
+		name = std::exchange(other.name, nullptr);
+
+		g_free(label);
+		label = std::exchange(other.label, nullptr);
+
+		g_free(icon_name);
+		icon_name = std::exchange(other.icon_name, nullptr);
+		}
+
+	return *this;
 }
 
 bool ActionItem::has_label(const gchar *label) const

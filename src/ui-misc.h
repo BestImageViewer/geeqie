@@ -210,7 +210,10 @@ struct ActionItem
 {
 	ActionItem(const gchar *name, const gchar *label, const gchar *icon_name);
 	ActionItem(const ActionItem &other);
+	ActionItem(ActionItem &&other) noexcept;
 	~ActionItem();
+	ActionItem &operator=(const ActionItem &other);
+	ActionItem &operator=(ActionItem &&other) noexcept;
 
 	bool has_label(const gchar *label) const;
 
