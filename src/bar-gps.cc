@@ -56,6 +56,8 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 namespace
 {
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(ChamplainMapSource, g_object_unref)
+
 constexpr gint THUMB_SIZE = 100;
 constexpr int DIRECTION_SIZE = 300;
 
@@ -681,6 +683,14 @@ static gint bar_pane_gps_event(GtkWidget *bar, GdkEvent *event)
 	return FALSE;
 }
 
+static const gchar *bar_pane_gps_get_map_id(const PaneGPSData *pgd)
+{
+	g_autoptr(ChamplainMapSource) mapsource = nullptr;
+	g_object_get(pgd->gps_view, "map-source", &mapsource, NULL);
+
+	return champlain_map_source_get_id(mapsource);
+}
+
 static void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 {
 	auto *pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
@@ -697,12 +707,9 @@ static void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint ind
 	WRITE_INT(*pgd, height);
 	indent++;
 
-	ChamplainMapSource *mapsource;
-	g_object_get(G_OBJECT(pgd->gps_view), "map-source", &mapsource, NULL);
-	const gchar *map_id = champlain_map_source_get_id(mapsource);
+	const gchar *map_id = bar_pane_gps_get_map_id(pgd);
 	WRITE_NL();
 	write_char_option(outstr, indent, "map-id", map_id);
-	g_object_unref(mapsource);
 
 	gint zoom;
 	g_object_get(G_OBJECT(pgd->gps_view), "zoom-level", &zoom, NULL);
@@ -776,19 +783,6 @@ static void bar_pane_gps_notify_cb(FileData *fd, NotifyType type, gpointer data)
 		{
 		bar_pane_gps_update(pgd);
 		}
-}
-
-static const gchar *bar_pane_gps_get_map_id(PaneGPSData *pgd)
-{
-	const gchar *map_id;
-	ChamplainMapSource *mapsource;
-
-	g_object_get(G_OBJECT(pgd->gps_view), "map-source", &mapsource, NULL);
-	map_id = champlain_map_source_get_id(mapsource);
-
-	g_object_unref(mapsource);
-
-	return map_id;
 }
 
 static GtkWidget *bar_pane_gps_menu(PaneGPSData *pgd)
