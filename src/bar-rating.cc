@@ -103,7 +103,7 @@ static void bar_pane_rating_notify_cb(FileData *fd, NotifyType type, gpointer da
 		}
 }
 
-static void bar_pane_rating_destroy(GtkWidget *, gpointer data)
+static void bar_pane_rating_destroy(gpointer data)
 {
 	auto prd = static_cast<PaneRatingData *>(data);
 
@@ -175,8 +175,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 
 	prd->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
-	g_object_set_data(G_OBJECT(prd->widget), "pane_data", prd);
-	g_signal_connect(G_OBJECT(prd->widget), "destroy", G_CALLBACK(bar_pane_rating_destroy), prd);
+	g_object_set_data_full(G_OBJECT(prd->widget), "pane_data", prd, bar_pane_rating_destroy);
 
 	row_1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gq_gtk_box_pack_start(GTK_BOX(prd->widget), row_1, FALSE, FALSE, 0);

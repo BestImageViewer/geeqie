@@ -251,7 +251,7 @@ static void bar_pane_comment_populate_popup(GtkTextView *, GtkMenu *menu, gpoint
 	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing text in selected files"), GQ_ICON_REPLACE, G_CALLBACK(bar_pane_comment_sel_replace_cb), data);
 }
 
-static void bar_pane_comment_destroy(GtkWidget *, gpointer data)
+static void bar_pane_comment_destroy(gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 
@@ -293,9 +293,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 
 	pcd->widget = scrolled;
-	g_object_set_data(G_OBJECT(pcd->widget), "pane_data", pcd);
-	g_signal_connect(G_OBJECT(pcd->widget), "destroy",
-			 G_CALLBACK(bar_pane_comment_destroy), pcd);
+	g_object_set_data_full(G_OBJECT(pcd->widget), "pane_data", pcd, bar_pane_comment_destroy);
 
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),

@@ -122,13 +122,13 @@ static void osd_dnd_get_cb(GtkWidget *btn, GdkDragContext *, GtkSelectionData *s
 	gtk_widget_grab_focus(GTK_WIDGET(image_overlay_template_view));
 }
 
-static void osd_btn_destroy_cb(GtkWidget *btn, GdkDragContext *, GtkSelectionData *, guint, guint, gpointer)
+static void tag_data_free(gpointer data)
 {
-	TagData *td;
+	auto *td = static_cast<TagData *>(data);
 
-	td = static_cast<TagData *>(g_object_get_data(G_OBJECT(btn), "tag_data"));
 	g_free(td->key);
 	g_free(td->title);
+	g_free(td);
 }
 
 static void set_osd_button(GtkGrid *grid, const gint rows, const gint cols, const gchar *key, const gchar *title, GtkWidget *template_view)
@@ -144,13 +144,11 @@ static void set_osd_button(GtkGrid *grid, const gint rows, const gint cols, cons
 	td->key = g_strdup(key);
 	td->title = g_strdup(title);
 
-	g_object_set_data(G_OBJECT(new_button), "tag_data", td);
+	g_object_set_data_full(G_OBJECT(new_button), "tag_data", td, tag_data_free);
 
 	gtk_drag_source_set(new_button, GDK_BUTTON1_MASK, osd_drag_types, 1, GDK_ACTION_COPY);
 	g_signal_connect(G_OBJECT(new_button), "drag_data_get",
 							G_CALLBACK(osd_dnd_get_cb), template_view);
-	g_signal_connect(G_OBJECT(new_button), "destroy",
-							G_CALLBACK(osd_btn_destroy_cb), new_button);
 
 	gtk_grid_attach(grid, new_button, cols, rows, 1, 1);
 

@@ -1418,7 +1418,7 @@ gboolean bar_pane_keywords_menu_cb(GtkWidget *widget, GdkEventButton *bevent, gp
  *-------------------------------------------------------------------
  */
 
-void bar_pane_keywords_destroy(GtkWidget *, gpointer data)
+void bar_pane_keywords_destroy(gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 	gchar *path;
@@ -1474,9 +1474,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gq_gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
 
 	pkd->widget = vbox;
-	g_object_set_data(G_OBJECT(pkd->widget), "pane_data", pkd);
-	g_signal_connect(G_OBJECT(pkd->widget), "destroy",
-			 G_CALLBACK(bar_pane_keywords_destroy), pkd);
+	g_object_set_data_full(G_OBJECT(pkd->widget), "pane_data", pkd, bar_pane_keywords_destroy);
 	gtk_widget_set_size_request(pkd->widget, -1, height);
 	gtk_widget_show(hbox);
 

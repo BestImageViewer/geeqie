@@ -728,7 +728,7 @@ void bar_close(GtkWidget *bar)
 	gq_gtk_widget_destroy(bd->widget);
 }
 
-static void bar_destroy(GtkWidget *, gpointer data)
+static void bar_destroy(gpointer data)
 {
 	auto bd = static_cast<BarData *>(data);
 
@@ -765,9 +765,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 
 	bd->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	DEBUG_NAME(bd->widget);
-	g_object_set_data(G_OBJECT(bd->widget), "bar_data", bd);
-	g_signal_connect(G_OBJECT(bd->widget), "destroy",
-			 G_CALLBACK(bar_destroy), bd);
+	g_object_set_data_full(G_OBJECT(bd->widget), "bar_data", bd, bar_destroy);
 
 	g_signal_connect(G_OBJECT(bd->widget), "size-allocate",
 			 G_CALLBACK(bar_size_allocate), bd);

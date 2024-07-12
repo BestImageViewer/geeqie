@@ -73,7 +73,7 @@ constexpr gint layout_config_style_count = sizeof(layout_config_styles) / sizeof
 const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
 
-void layout_config_destroy(GtkWidget *, gpointer data)
+void layout_config_destroy(gpointer data)
 {
 	auto lc = static_cast<LayoutConfig *>(data);
 
@@ -374,10 +374,7 @@ GtkWidget *layout_config_new()
 	lc = g_new0(LayoutConfig, 1);
 
 	lc->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	g_object_set_data(G_OBJECT(lc->box), "layout_config", lc);
-
-	g_signal_connect(G_OBJECT(lc->box), "destroy",
-			 G_CALLBACK(layout_config_destroy), lc);
+	g_object_set_data_full(G_OBJECT(lc->box), "layout_config", lc, layout_config_destroy);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(lc->box), hbox, FALSE, FALSE, 0);

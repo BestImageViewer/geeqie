@@ -184,7 +184,7 @@ static void bar_pane_histogram_size_cb(GtkWidget *, GtkAllocation *allocation, g
 	bar_pane_histogram_update(phd);
 }
 
-static void bar_pane_histogram_destroy(GtkWidget *, gpointer data)
+static void bar_pane_histogram_destroy(gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 
@@ -287,12 +287,7 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 	histogram_set_mode(phd->histogram, histogram_mode);
 
 	phd->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-
-	g_object_set_data(G_OBJECT(phd->widget), "pane_data", phd);
-	g_signal_connect(G_OBJECT(phd->widget), "destroy",
-			 G_CALLBACK(bar_pane_histogram_destroy), phd);
-
-
+	g_object_set_data_full(G_OBJECT(phd->widget), "pane_data", phd, bar_pane_histogram_destroy);
 	gtk_widget_set_size_request(GTK_WIDGET(phd->widget), -1, height);
 
 	phd->drawing_area = gtk_drawing_area_new();

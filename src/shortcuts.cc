@@ -130,7 +130,7 @@ static void shortcuts_add_cb(GtkWidget *button, gpointer data)
 	gtk_widget_show(GENERIC_DIALOG(scd->dialog)->dialog);
 }
 
-static void shortcuts_destroy(GtkWidget *, gpointer data)
+static void shortcuts_destroy(gpointer data)
 {
 	auto scd = static_cast<ShortcutsData *>(data);
 
@@ -151,9 +151,7 @@ static GtkWidget *shortcuts_new(LayoutWindow *lw)
 	scd->lw = lw;
 
 	scd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	g_object_set_data(G_OBJECT(scd->vbox), "shortcuts_data", scd);
-	g_signal_connect(G_OBJECT(scd->vbox), "destroy",
-			G_CALLBACK(shortcuts_destroy), scd);
+	g_object_set_data_full(G_OBJECT(scd->vbox), "shortcuts_data", scd, shortcuts_destroy);
 
 	scd->bookmarks = bookmark_list_new(SHORTCUTS, shortcuts_bookmark_select, scd);
 	gq_gtk_box_pack_start(GTK_BOX(scd->vbox), scd->bookmarks, TRUE, TRUE, 0);

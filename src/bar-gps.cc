@@ -901,7 +901,7 @@ static gboolean bar_pane_gps_map_keypress_cb(GtkWidget *, GdkEventButton *bevent
 }
 #endif
 
-static void bar_pane_gps_destroy(GtkWidget *, gpointer data)
+static void bar_pane_gps_destroy(gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 
@@ -1004,8 +1004,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 				     NULL);
 	champlain_view_center_on(view, latitude, longitude);
 	pgd->centre_map_checked = TRUE;
-	g_object_set_data(G_OBJECT(pgd->widget), "pane_data", pgd);
-	g_signal_connect(G_OBJECT(pgd->widget), "destroy", G_CALLBACK(bar_pane_gps_destroy), pgd);
+	g_object_set_data_full(G_OBJECT(pgd->widget), "pane_data", pgd, bar_pane_gps_destroy);
 
 	gq_gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
 

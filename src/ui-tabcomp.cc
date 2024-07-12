@@ -146,7 +146,7 @@ static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 	g_free(pathl);
 }
 
-static void tab_completion_destroy(GtkWidget *, gpointer data)
+static void tab_completion_destroy(gpointer data)
 {
 	auto td = static_cast<TabCompData *>(data);
 
@@ -763,12 +763,10 @@ void tab_completion_add_to_entry(GtkWidget *entry, void (*enter_func)(const gcha
 	td->filter = g_strdup(filter);
 	td->filter_desc = g_strdup(filter_desc);
 
-	g_object_set_data(G_OBJECT(td->entry), "tab_completion_data", td);
+	g_object_set_data_full(G_OBJECT(entry), "tab_completion_data", td, tab_completion_destroy);
 
 	g_signal_connect(G_OBJECT(entry), "key_press_event",
 			 G_CALLBACK(tab_completion_key_pressed), td);
-	g_signal_connect(G_OBJECT(entry), "destroy",
-			 G_CALLBACK(tab_completion_destroy), td);
 }
 
 void tab_completion_add_tab_func(GtkWidget *entry, void (*tab_func)(const gchar *, gpointer), gpointer data)

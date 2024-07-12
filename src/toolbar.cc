@@ -164,13 +164,6 @@ static void get_toolbar_item(const gchar *name, gchar **label, gchar **stock_id)
 		}
 }
 
-static void toolbar_button_free(GtkWidget *widget)
-{
-	g_free(g_object_get_data(G_OBJECT(widget), "toolbar_add_name"));
-	g_free(g_object_get_data(G_OBJECT(widget), "toolbar_add_label"));
-	g_free(g_object_get_data(G_OBJECT(widget), "toolbar_add_stock_id"));
-}
-
 static void toolbarlist_add_button(const gchar *name, const gchar *label,
 									const gchar *stock_id, GtkBox *box)
 {
@@ -280,20 +273,18 @@ static gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
 	menu = popup_menu_short_lived();
 
 	item = menu_item_add_stock(menu, "Separator", "Separator", G_CALLBACK(toolbarlist_add_cb), data);
-	g_object_set_data(G_OBJECT(item), "toolbar_add_name", g_strdup("Separator"));
-	g_object_set_data(G_OBJECT(item), "toolbar_add_label", g_strdup("Separator"));
-	g_object_set_data(G_OBJECT(item), "toolbar_add_stock_id", g_strdup("no-icon"));
-	g_signal_connect(G_OBJECT(item), "destroy", G_CALLBACK(toolbar_button_free), item);
+	g_object_set_data_full(G_OBJECT(item), "toolbar_add_name", g_strdup("Separator"), g_free);
+	g_object_set_data_full(G_OBJECT(item), "toolbar_add_label", g_strdup("Separator"), g_free);
+	g_object_set_data_full(G_OBJECT(item), "toolbar_add_stock_id", g_strdup("no-icon"), g_free);
 
 	std::vector<ActionItem> list = get_action_items();
 
 	for (const ActionItem &action_item : list)
 		{
 		item = menu_item_add_stock(menu, action_item.label, action_item.icon_name, G_CALLBACK(toolbarlist_add_cb), data);
-		g_object_set_data(G_OBJECT(item), "toolbar_add_name", g_strdup(action_item.name));
-		g_object_set_data(G_OBJECT(item), "toolbar_add_label", g_strdup(action_item.label));
-		g_object_set_data(G_OBJECT(item), "toolbar_add_stock_id", g_strdup(action_item.icon_name));
-		g_signal_connect(G_OBJECT(item), "destroy", G_CALLBACK(toolbar_button_free), item);
+		g_object_set_data_full(G_OBJECT(item), "toolbar_add_name", g_strdup(action_item.name), g_free);
+		g_object_set_data_full(G_OBJECT(item), "toolbar_add_label", g_strdup(action_item.label), g_free);
+		g_object_set_data_full(G_OBJECT(item), "toolbar_add_stock_id", g_strdup(action_item.icon_name), g_free);
 		}
 
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);

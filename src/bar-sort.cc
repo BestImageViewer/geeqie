@@ -619,7 +619,7 @@ void bar_sort_close(GtkWidget *bar)
 	gq_gtk_widget_destroy(sd->vbox);
 }
 
-static void bar_sort_destroy(GtkWidget *, gpointer data)
+static void bar_sort_destroy(gpointer data)
 {
 	auto sd = static_cast<SortData *>(data);
 
@@ -630,11 +630,6 @@ static void bar_sort_destroy(GtkWidget *, gpointer data)
 	g_list_free_full(sd->undo_dest_list, g_free);
 	g_free(sd->undo_collection);
 	g_free(sd);
-}
-
-static void bar_sort_edit_button_free(gpointer data)
-{
-	g_free(data);
 }
 
 static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
@@ -671,9 +666,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 
 	sd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	DEBUG_NAME(sd->vbox);
-	g_object_set_data(G_OBJECT(sd->vbox), "bar_sort_data", sd);
-	g_signal_connect(G_OBJECT(sd->vbox), "destroy",
-			 G_CALLBACK(bar_sort_destroy), sd);
+	g_object_set_data_full(G_OBJECT(sd->vbox), "bar_sort_data", sd, bar_sort_destroy);
 
 	label = gtk_label_new(_("Sort Manager"));
 	pref_label_bold(label, TRUE, FALSE);
@@ -731,7 +724,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 					      G_CALLBACK(bar_sort_set_filter_cb), sd);
 		g_signal_connect(G_OBJECT(button), "button_press_event", G_CALLBACK(bar_filter_message_cb), NULL);
 
-		g_object_set_data_full(G_OBJECT(button), "filter_key", key, bar_sort_edit_button_free);
+		g_object_set_data_full(G_OBJECT(button), "filter_key", key, g_free);
 		}
 	g_list_free(editors_list);
 

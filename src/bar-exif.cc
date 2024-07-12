@@ -121,7 +121,7 @@ void bar_pane_exif_entry_changed(GtkEntry *, gpointer data)
 	g_free(text);
 }
 
-void bar_pane_exif_entry_destroy(GtkWidget *, gpointer data)
+void bar_pane_exif_entry_destroy(gpointer data)
 {
 	auto ee = static_cast<ExifEntry *>(data);
 
@@ -191,9 +191,7 @@ GtkWidget *bar_pane_exif_add_entry(PaneExifData *ped, const gchar *key, const gc
 	ee->ped = ped;
 
 	ee->ebox = gtk_event_box_new();
-	g_object_set_data(G_OBJECT(ee->ebox), "entry_data", ee);
-	g_signal_connect_after(G_OBJECT(ee->ebox), "destroy",
-			       G_CALLBACK(bar_pane_exif_entry_destroy), ee);
+	g_object_set_data_full(G_OBJECT(ee->ebox), "entry_data", ee, bar_pane_exif_entry_destroy);
 
 	gq_gtk_box_pack_start(GTK_BOX(ped->vbox), ee->ebox, FALSE, FALSE, 0);
 
@@ -769,7 +767,7 @@ void bar_pane_exif_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	WRITE_NL(); WRITE_STRING("</pane_exif>");
 }
 
-void bar_pane_exif_destroy(GtkWidget *, gpointer data)
+void bar_pane_exif_destroy(gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
 
@@ -809,9 +807,7 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 	gtk_widget_show(ped->vbox);
 
 	ped->min_height = MIN_HEIGHT;
-	g_object_set_data(G_OBJECT(ped->widget), "pane_data", ped);
-	g_signal_connect_after(G_OBJECT(ped->widget), "destroy",
-			       G_CALLBACK(bar_pane_exif_destroy), ped);
+	g_object_set_data_full(G_OBJECT(ped->widget), "pane_data", ped, bar_pane_exif_destroy);
 	gtk_widget_set_size_request(ped->widget, -1, ped->min_height);
 	g_signal_connect(G_OBJECT(ped->widget), "size-allocate",
 			 G_CALLBACK(bar_pane_exif_size_allocate), ped);

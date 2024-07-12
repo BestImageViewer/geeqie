@@ -793,7 +793,7 @@ static void bookmark_dnd_get_data(GtkWidget *, GdkDragContext *,
 		}
 }
 
-static void bookmark_list_destroy(GtkWidget *, gpointer data)
+static void bookmark_list_destroy(gpointer data)
 {
 	auto bm = static_cast<BookMarkData *>(data);
 
@@ -840,9 +840,7 @@ GtkWidget *bookmark_list_new(const gchar *key,
 
 	bookmark_populate(bm);
 
-	g_signal_connect(G_OBJECT(bm->box), "destroy",
-			 G_CALLBACK(bookmark_list_destroy), bm);
-	g_object_set_data(G_OBJECT(bm->box), BOOKMARK_DATA_KEY, bm);
+	g_object_set_data_full(G_OBJECT(bm->box), BOOKMARK_DATA_KEY, bm, bookmark_list_destroy);
 	g_object_set_data(G_OBJECT(scrolled), BOOKMARK_DATA_KEY, bm);
 	bm->widget = scrolled;
 
@@ -962,7 +960,7 @@ struct HistoryComboData
 	gint history_levels;
 };
 
-static void history_combo_destroy(GtkWidget *, gpointer data)
+static void history_combo_destroy(gpointer data)
 {
 	auto hc = static_cast<HistoryComboData *>(data);
 
@@ -986,10 +984,8 @@ GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
 
 	hc->entry = gtk_bin_get_child(GTK_BIN(hc->combo));
 
-	g_object_set_data(G_OBJECT(hc->combo), "history_combo_data", hc);
+	g_object_set_data_full(G_OBJECT(hc->combo), "history_combo_data", hc, history_combo_destroy);
 	g_object_set_data(G_OBJECT(hc->entry), "history_combo_data", hc);
-	g_signal_connect(G_OBJECT(hc->combo), "destroy",
-			 G_CALLBACK(history_combo_destroy), hc);
 
 	work = history_list_get_by_key(hc->history_key);
 	while (work)
