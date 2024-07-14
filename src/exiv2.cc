@@ -410,8 +410,10 @@ void exif_init()
 	bind_textdomain_codeset (EXV_PACKAGE, "UTF-8");
 #endif
 
+#if !EXIV2_TEST_VERSION(0,28,3)
 #ifdef EXV_ENABLE_BMFF
-	Exiv2::enableBMFF(TRUE);
+	Exiv2::enableBMFF(true);
+#endif
 #endif
 }
 
