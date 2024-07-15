@@ -28,7 +28,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <memory>
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
@@ -524,21 +523,16 @@ static gboolean hard_linked(const gchar *a, const gchar *b)
 		sta.st_ino == stb.st_ino);
 }
 
-static void fclose_safe(FILE *fp)
-{
-	if (fp) fclose(fp);
-}
-
 gboolean copy_file(const gchar *s, const gchar *t)
 {
 	gchar buf[16384];
 	size_t b;
 	gint fd = -1;
 
-	std::unique_ptr<gchar, decltype(&g_free)> sl{path_from_utf8(s), g_free};
-	std::unique_ptr<gchar, decltype(&g_free)> tl{path_from_utf8(t), g_free};
+	g_autofree gchar *sl = path_from_utf8(s);
+	g_autofree gchar *tl = path_from_utf8(t);
 
-	if (hard_linked(sl.get(), tl.get()))
+	if (hard_linked(sl, tl))
 		{
 		return TRUE;
 		}
@@ -556,14 +550,9 @@ gboolean copy_file(const gchar *s, const gchar *t)
 			return FALSE;
 			}
 
-		gchar *link_target;
-		ssize_t i;
-
-		link_target = static_cast<gchar *>(g_malloc(st.st_size + 1));
-		i = readlink(sl, link_target, st.st_size);
-		if (i<0)
+		g_autofree auto *link_target = static_cast<gchar *>(g_malloc(st.st_size + 1));
+		if (readlink(sl, link_target, st.st_size) < 0)
 			{
-			g_free(link_target);
 			return FALSE;  // try a "normal" copy
 			}
 		link_target[st.st_size] = '\0';
@@ -581,37 +570,28 @@ gboolean copy_file(const gchar *s, const gchar *t)
 			g_free(link_target);
 			link_target = absolute;
 
-			gchar *realPath;
-			realPath = realpath(link_target, nullptr);
-
-			if (realPath != nullptr) // successfully resolved into an absolute path
+			gchar *realPath = realpath(link_target, nullptr);
+			if (!realPath) // could not get absolute path, got some error instead
 				{
-				g_free(link_target);
-				link_target = g_strdup(realPath);
-				g_free(realPath);
-				}
-			else                 // could not get absolute path, got some error instead
-				{
-				g_free(link_target);
 				return FALSE;  // so try a "normal" copy
 				}
+
+			g_free(link_target);
+			link_target = realPath; // successfully resolved into an absolute path
 			}
 
 		if (stat_utf8(tl, &st)) unlink(tl); // first try to remove directory entry in destination directory if such entry exists
 
-		gint success = (symlink(link_target, tl) == 0);
-		g_free(link_target);
-
-		return success;
+		return symlink(link_target, tl) == 0;
 		};
 
-	if (copy_symlink(sl.get(), tl.get()))
+	if (copy_symlink(sl, tl))
 		{
 		return TRUE;
 		}
 
 	// if symlink did not succeed, continue on to try a copy procedure
-	std::unique_ptr<FILE, decltype(&fclose_safe)> fi{fopen(sl.get(), "rb"), fclose_safe};
+	g_autoptr(FILE) fi = fopen(sl, "rb");
 	if (!fi)
 		{
 		return FALSE;
@@ -619,37 +599,39 @@ gboolean copy_file(const gchar *s, const gchar *t)
 
 	/* First we write to a temporary file, then we rename it on success,
 	   and attributes from original file are copied */
-	std::unique_ptr<gchar, decltype(&g_free)> randname{g_strconcat(tl.get(), ".tmp_XXXXXX", NULL), g_free};
+	g_autofree gchar *randname = g_strconcat(tl, ".tmp_XXXXXX", NULL);
 	if (!randname)
 		{
 		return FALSE;
 		}
 
-	fd = g_mkstemp(randname.get());
+	fd = g_mkstemp(randname);
 	if (fd == -1)
 		{
 		return FALSE;
 		}
 
-	std::unique_ptr<FILE, decltype(&fclose_safe)> fo{fdopen(fd, "wb"), fclose_safe};
-	if (!fo) {
+	g_autoptr(FILE) fo = fdopen(fd, "wb");
+	if (!fo)
+		{
 		close(fd);
 		return FALSE;
-	}
+		}
 
-	while ((b = fread(buf, sizeof(gchar), sizeof(buf), fi.get())) && b != 0)
+	while ((b = fread(buf, sizeof(gchar), sizeof(buf), fi)) && b != 0)
 		{
-		if (fwrite(buf, sizeof(gchar), b, fo.get()) != b)
+		if (fwrite(buf, sizeof(gchar), b, fo) != b)
 			{
-			unlink(randname.get());
+			unlink(randname);
 			return FALSE;
 			}
 		}
 
-	if (rename(randname.get(), tl.get()) < 0) {
-		unlink(randname.get());
+	if (rename(randname, tl) < 0)
+		{
+		unlink(randname);
 		return FALSE;
-	}
+		}
 
 	return copy_file_attributes(s, t, TRUE, TRUE);
 }
@@ -967,9 +949,9 @@ gboolean md5_get_digest_from_file_utf8(const gchar *path, guchar digest[16])
  */
 gchar *md5_text_from_file_utf8(const gchar *path, const gchar *error_text)
 {
-	std::unique_ptr<gchar, decltype(&g_free)> pathl{path_from_utf8(path), g_free};
+	g_autofree gchar *pathl = path_from_utf8(path);
 
-	auto md5_text = md5_get_string_from_file(pathl.get());
+	auto md5_text = md5_get_string_from_file(pathl);
 
 	return md5_text ? md5_text : g_strdup(error_text);
 }

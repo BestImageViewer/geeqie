@@ -26,7 +26,6 @@
 
 #include <cstring>
 #include <ctime>
-#include <memory>
 #include <utility>
 
 #include <glib.h>
@@ -357,11 +356,12 @@ void lua_init()
  */
 gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 {
-	std::unique_ptr<gchar, decltype(&g_free)> path{g_build_filename(get_rc_dir(), "lua", file, NULL), g_free};
-	if (access(path.get(), R_OK) == -1)
+	g_autofree gchar *path = g_build_filename(get_rc_dir(), "lua", file, NULL);
+	if (access(path, R_OK) == -1)
 		{
-		path.reset(g_build_filename(gq_bindir, file, NULL));
-		if (access(path.get(), R_OK) == -1)
+		g_free(path);
+		path = g_build_filename(gq_bindir, file, NULL);
+		if (access(path, R_OK) == -1)
 			{
 			return g_strdup("");
 			}
@@ -386,7 +386,7 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 		}
 	else
 		{
-		result = luaL_dofile(L, path.get());
+		result = luaL_dofile(L, path);
 		}
 
 	if (result)

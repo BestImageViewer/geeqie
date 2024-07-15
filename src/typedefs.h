@@ -22,6 +22,8 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+#include <cstdio>
+
 #include <glib.h>
 
 enum ZoomMode {
@@ -217,6 +219,8 @@ enum ScrollReset : guint {
 	NOCHANGE = 2,
 	COUNT /**< Keep it last */
 };
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, fclose)
 
 using FileUtilDoneFunc = void (*)(gboolean, const gchar *, gpointer);
 

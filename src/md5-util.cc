@@ -33,9 +33,11 @@
 #include "md5-util.h"
 
 #include <cstdio>
-#include <memory>
 
-using GQChecksumPtr = std::unique_ptr<GChecksum, decltype(&g_checksum_free)>;
+#include "typedefs.h"
+
+namespace
+{
 
 constexpr gsize MD5_SIZE = 16;
 
@@ -47,14 +49,12 @@ constexpr gsize MD5_SIZE = 16;
  *
  * Get the md5 hash of a file.
  **/
-static gboolean md5_update_from_file(GChecksum *md5, const gchar *path)
+gboolean md5_update_from_file(GChecksum *md5, const gchar *path)
 {
 	guchar tmp_buf[1024];
 	gint nb_bytes_read;
-	FILE *fp;
-	gint success;
 
-	fp = fopen(path, "r");
+	g_autoptr(FILE) fp = fopen(path, "r");
 	if (!fp) return FALSE;
 
 	while ((nb_bytes_read = fread(tmp_buf, sizeof (guchar), sizeof(tmp_buf), fp)) > 0)
@@ -62,11 +62,10 @@ static gboolean md5_update_from_file(GChecksum *md5, const gchar *path)
 		g_checksum_update(md5, tmp_buf, nb_bytes_read);
 		}
 
-	success = (ferror(fp) == 0);
-	fclose(fp);
-
-	return success;
+	return ferror(fp) == 0;
 }
+
+} // namespace
 
 /**
  * @brief Get the md5 hash of a buffer
@@ -79,12 +78,12 @@ static gboolean md5_update_from_file(GChecksum *md5, const gchar *path)
  **/
 gchar *md5_get_string(const guchar *buffer, gint buffer_size)
 {
-	GQChecksumPtr md5{g_checksum_new(G_CHECKSUM_MD5), g_checksum_free};
+	g_autoptr(GChecksum) md5 = g_checksum_new(G_CHECKSUM_MD5);
 	if (!md5) return nullptr;
 
-	g_checksum_update(md5.get(), buffer, buffer_size);
+	g_checksum_update(md5, buffer, buffer_size);
 
-	return g_strdup(g_checksum_get_string(md5.get()));
+	return g_strdup(g_checksum_get_string(md5));
 }
 
 /**
@@ -98,13 +97,13 @@ gchar *md5_get_string(const guchar *buffer, gint buffer_size)
  **/
 gboolean md5_get_digest_from_file(const gchar *path, guchar digest[16])
 {
-	GQChecksumPtr md5{g_checksum_new(G_CHECKSUM_MD5), g_checksum_free};
+	g_autoptr(GChecksum) md5 = g_checksum_new(G_CHECKSUM_MD5);
 	if (!md5) return FALSE;
 
-	if (!md5_update_from_file(md5.get(), path)) return FALSE;
+	if (!md5_update_from_file(md5, path)) return FALSE;
 
 	gsize digest_size = MD5_SIZE;
-	g_checksum_get_digest(md5.get(), digest, &digest_size);
+	g_checksum_get_digest(md5, digest, &digest_size);
 	if (digest_size != MD5_SIZE) return FALSE;
 
 	return TRUE;
@@ -120,12 +119,12 @@ gboolean md5_get_digest_from_file(const gchar *path, guchar digest[16])
  **/
 gchar *md5_get_string_from_file(const gchar *path)
 {
-	GQChecksumPtr md5{g_checksum_new(G_CHECKSUM_MD5), g_checksum_free};
+	g_autoptr(GChecksum) md5 = g_checksum_new(G_CHECKSUM_MD5);
 	if (!md5) return nullptr;
 
-	if (!md5_update_from_file(md5.get(), path)) return nullptr;
+	if (!md5_update_from_file(md5, path)) return nullptr;
 
-	return g_strdup(g_checksum_get_string(md5.get()));
+	return g_strdup(g_checksum_get_string(md5));
 }
 
 /**

@@ -22,7 +22,6 @@
 
 #include <cerrno>
 #include <cstdarg>
-#include <memory>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -96,7 +95,7 @@ secure_open_umask(const gchar *file_name)
 
 	secsave_errno = SS_ERR_NONE;
 
-	std::unique_ptr<SecureSaveInfo, decltype(&g_free)> ssi{g_new0(SecureSaveInfo, 1), g_free};
+	g_autofree auto *ssi = g_new0(SecureSaveInfo, 1);
 	if (!ssi) {
 		secsave_errno = SS_ERR_OUT_OF_MEM;
 		return nullptr;
@@ -106,12 +105,12 @@ secure_open_umask(const gchar *file_name)
 	ssi->preserve_perms = TRUE;
 	ssi->unlink_on_error = TRUE;
 
-	std::unique_ptr<gchar, decltype(&g_free)> file_name_watcher{g_strdup(file_name), g_free};
-	ssi->file_name = file_name_watcher.get();
+	ssi->file_name = g_strdup(file_name);
 	if (!ssi->file_name) {
 		secsave_errno = SS_ERR_OUT_OF_MEM;
 		return nullptr;
 	}
+	g_autofree gchar *file_name_watcher = ssi->file_name;
 
 	/* Check properties of final file. */
 #ifndef NO_UNIX_SOFTLINKS
@@ -162,7 +161,7 @@ secure_open_umask(const gchar *file_name)
 		 * then converted to FILE * using fdopen().
 		 */
 		gint fd;
-		gchar *randname = g_strconcat(ssi->file_name, ".tmp_XXXXXX", NULL);
+		g_autofree gchar *randname = g_strconcat(ssi->file_name, ".tmp_XXXXXX", NULL);
 
 		if (!randname) {
 			secsave_errno = SS_ERR_OUT_OF_MEM;
@@ -173,7 +172,6 @@ secure_open_umask(const gchar *file_name)
 		fd = g_mkstemp(randname);
 		if (fd == -1) {
 			secsave_errno = SS_ERR_MKSTEMP;
-			g_free(randname);
 			return nullptr;
 		}
 
@@ -181,11 +179,10 @@ secure_open_umask(const gchar *file_name)
 		if (!ssi->fp) {
 			secsave_errno = SS_ERR_OPEN_WRITE;
 			ssi->err = errno;
-			g_free(randname);
 			return nullptr;
 		}
 
-		ssi->tmp_file_name = randname;
+		ssi->tmp_file_name = g_steal_pointer(&randname);
 	} else {
 		/* No need to create a temporary file here. */
 		ssi->fp = fopen(ssi->file_name, "wb");
@@ -196,8 +193,8 @@ secure_open_umask(const gchar *file_name)
 		}
 	}
 
-	ssi->file_name = file_name_watcher.release();
-	return ssi.release();
+	file_name_watcher = nullptr;
+	return g_steal_pointer(&ssi);
 }
 
 SecureSaveInfo *

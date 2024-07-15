@@ -31,7 +31,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <memory>
 
 #include <glib-object.h>
 #include <langinfo.h>
@@ -162,42 +161,32 @@ gchar *expand_tilde(const gchar *filename)
 
 gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
 {
-	std::unique_ptr<gchar, decltype(&g_free)> message{nullptr, g_free};
-	gchar *path = g_build_filename(path_dir, GEOCODE_NAME, NULL);
-	gchar *cmd = g_strconcat("echo \'", input_text, "\'  | awk -W posix -f ", path, NULL);
-
-	if (g_file_test(path, G_FILE_TEST_EXISTS))
+	g_autofree gchar *path = g_build_filename(path_dir, GEOCODE_NAME, NULL);
+	if (!g_file_test(path, G_FILE_TEST_EXISTS))
 		{
-		gchar buf[BUFSIZE];
-		FILE *fp;
-
-		if ((fp = popen(cmd, "r")) == nullptr)
-			{
-			message.reset(g_strconcat("Error: opening pipe\n", input_text, NULL));
-			}
-		else
-			{
-			while (fgets(buf, BUFSIZE, fp))
-				{
-				DEBUG_1("Output: %s", buf);
-				}
-
-			message.reset(g_strconcat(buf, NULL));
-
-			if(pclose(fp))
-				{
-				message.reset(g_strconcat("Error: Command not found or exited with error status\n", input_text, NULL));
-				}
-			}
-		}
-	else
-		{
-		message.reset(g_strconcat(input_text, NULL));
+		return g_strconcat(input_text, NULL);
 		}
 
-	g_free(path);
-	g_free(cmd);
-	return message.release();
+	g_autofree gchar *cmd = g_strconcat("echo \'", input_text, "\'  | awk -W posix -f ", path, NULL);
+
+	FILE *fp = popen(cmd, "r");
+	if (!fp)
+		{
+		return g_strconcat("Error: opening pipe\n", input_text, NULL);
+		}
+
+	gchar buf[BUFSIZE];
+	while (fgets(buf, BUFSIZE, fp))
+		{
+		DEBUG_1("Output: %s", buf);
+		}
+
+	if(pclose(fp))
+		{
+		return g_strconcat("Error: Command not found or exited with error status\n", input_text, NULL);
+		}
+
+	return g_strconcat(buf, NULL);
 }
 
 gchar *decode_geo_parameters(const gchar *input_text)

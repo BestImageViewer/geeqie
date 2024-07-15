@@ -23,7 +23,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <memory>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -906,32 +905,28 @@ void bookmark_list_set_only_directories(GtkWidget *list, gboolean only_directori
 void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 {
 	BookMarkData *bm;
-	gchar *real_path;
 
 	bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
 	if (!bm) return;
 
-	std::unique_ptr<gchar, decltype(&g_free)> buf(bookmark_string(name, path, nullptr), g_free);
-	real_path = realpath(path, nullptr);
+	const gchar *icon = nullptr;
 
-	if (strstr(real_path, get_collections_dir()) && isfile(path))
+	if (isfile(path))
 		{
-		buf.reset(bookmark_string(name, path, PIXBUF_INLINE_COLLECTION));
-		}
-	else
-		{
-		if (isfile(path))
+		g_autofree gchar *real_path = realpath(path, nullptr);
+
+		if (strstr(real_path, get_collections_dir()))
 			{
-			buf.reset(bookmark_string(name, path, GQ_ICON_FILE));
+			icon = PIXBUF_INLINE_COLLECTION;
 			}
 		else
 			{
-			buf.reset(bookmark_string(name, path, nullptr));
+			icon = GQ_ICON_FILE;
 			}
 		}
 
-	history_list_add_to_key(bm->key, buf.get(), 0);
-	g_free(real_path);
+	g_autofree gchar *buf = bookmark_string(name, path, icon);
+	history_list_add_to_key(bm->key, buf, 0);
 
 	bookmark_populate_all(bm->key);
 }
