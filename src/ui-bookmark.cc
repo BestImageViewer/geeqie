@@ -60,6 +60,15 @@ namespace
 constexpr gint bookmark_drop_types_n = 3;
 constexpr gint bookmark_drag_types_n = 2;
 
+const gchar *bookmark_icon(const gchar *path)
+{
+	if (!isfile(path)) return nullptr;
+
+	g_autofree gchar *real_path = realpath(path, nullptr);
+
+	return strstr(real_path, get_collections_dir()) ? PIXBUF_INLINE_COLLECTION : GQ_ICON_FILE;
+}
+
 } // namespace
 
 struct BookButtonData;
@@ -740,8 +749,6 @@ static void bookmark_dnd_get_data(GtkWidget *, GdkDragContext *,
 	auto bm = static_cast<BookMarkData *>(data);
 	GList *list = nullptr;
 	GList *errors = nullptr;
-	GList *work;
-	gchar *real_path;
 	gchar **uris;
 
 	if (!bm->editable) return;
@@ -757,33 +764,14 @@ static void bookmark_dnd_get_data(GtkWidget *, GdkDragContext *,
 			}
 		g_strfreev(uris);
 
-		work = list;
-		while (work)
+		for (GList *work = list; work; work = work->next)
 			{
 			auto path = static_cast<gchar *>(work->data);
-			gchar *buf;
-
-			work = work->next;
 
 			if (bm->only_directories && !isdir(path)) continue;
 
-			real_path = realpath(path, nullptr);
-
-			if (strstr(real_path, get_collections_dir()) && isfile(path))
-				{
-				buf = bookmark_string(filename_from_path(path), path, PIXBUF_INLINE_COLLECTION);
-				}
-			else if (isfile(path))
-				{
-				buf = bookmark_string(filename_from_path(path), path, GQ_ICON_FILE);
-				}
-			else
-				{
-				buf = bookmark_string(filename_from_path(path), path, nullptr);
-				}
+			g_autofree gchar *buf = bookmark_string(filename_from_path(path), path, bookmark_icon(path));
 			history_list_add_to_key(bm->key, buf, 0);
-			g_free(buf);
-			g_free(real_path);
 			}
 
 		g_list_free_full(list, g_free);
@@ -909,23 +897,7 @@ void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 	bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
 	if (!bm) return;
 
-	const gchar *icon = nullptr;
-
-	if (isfile(path))
-		{
-		g_autofree gchar *real_path = realpath(path, nullptr);
-
-		if (strstr(real_path, get_collections_dir()))
-			{
-			icon = PIXBUF_INLINE_COLLECTION;
-			}
-		else
-			{
-			icon = GQ_ICON_FILE;
-			}
-		}
-
-	g_autofree gchar *buf = bookmark_string(name, path, icon);
+	g_autofree gchar *buf = bookmark_string(name, path, bookmark_icon(path));
 	history_list_add_to_key(bm->key, buf, 0);
 
 	bookmark_populate_all(bm->key);
