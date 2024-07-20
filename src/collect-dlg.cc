@@ -105,7 +105,7 @@ static void real_collection_button_pressed(GenericDialog *, gpointer data)
 	collection_load(cd, append_collection_path, COLLECTION_LOAD_APPEND);
 
 	collection_unref(cd);
-	string_list_free(collection_list);
+	g_list_free_full(collection_list, g_free);
 }
 
 static void collection_append_cb(GenericDialog *gd, gpointer data)
@@ -162,7 +162,7 @@ static void collection_save_or_append_dialog(gint type, CollectionData *cd)
 			out_string = g_string_append(out_string, collection_name);
 			out_string = g_string_append(out_string, "\n");
 			}
-		string_list_free(collection_list);
+		g_list_free_full(collection_list, g_free);
 
 		existing_collections = gtk_label_new(out_string->str);
 		g_string_free(out_string, TRUE);
@@ -220,7 +220,7 @@ static void collection_save_or_append_dialog(gint type, CollectionData *cd)
 			auto collection_name = static_cast<const gchar *>(work->data);
 			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(collection_append_combo), collection_name);
 			}
-		string_list_free(collection_list);
+		g_list_free_full(collection_list, g_free);
 
 		gtk_combo_box_set_active(GTK_COMBO_BOX(collection_append_combo), 0);
 

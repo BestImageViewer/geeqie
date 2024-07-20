@@ -1120,7 +1120,7 @@ void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer)
  * @param[out] paths sorted list of collection paths
  *
  * Lists of type gchar.
- * Used lists must be freed with string_list_free()
+ * Used lists must be freed with data.
  */
 void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 {

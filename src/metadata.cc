@@ -108,6 +108,11 @@ void metadata_cache_entry_free(MetadataCacheEntry *entry)
 	g_free(entry);
 }
 
+void string_list_free(gpointer data)
+{
+	g_list_free_full(static_cast<GList *>(data), g_free);
+}
+
 inline gboolean is_keywords_separator(gchar c)
 {
 	return c == ','
@@ -373,7 +378,7 @@ gboolean metadata_write_list(FileData *fd, const gchar *key, const GList *values
 {
 	if (!fd->modified_xmp)
 		{
-		fd->modified_xmp = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, reinterpret_cast<GDestroyNotify>(string_list_free));
+		fd->modified_xmp = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, string_list_free);
 		}
 	g_hash_table_insert(fd->modified_xmp, g_strdup(key), string_list_copy(const_cast<GList *>(values)));
 
@@ -1114,7 +1119,7 @@ void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter
 		{
 		GList *path;
 		path = keyword_tree_get_path(keyword_tree, kw_iter);
-		file_data_register_mark_func(mark, meta_data_get_keyword_mark, meta_data_set_keyword_mark, path, reinterpret_cast<GDestroyNotify>(string_list_free));
+		file_data_register_mark_func(mark, meta_data_get_keyword_mark, meta_data_set_keyword_mark, path, string_list_free);
 
 		gtk_tree_store_set(GTK_TREE_STORE(keyword_tree), kw_iter,
 		                   KEYWORD_COLUMN_MARK, std::to_string((mark < 9) ? (mark + 1) : 0).c_str(),

@@ -86,7 +86,6 @@ gboolean move_file(const gchar *s, const gchar *t);
 gboolean rename_file(const gchar *s, const gchar *t);
 gchar *get_current_dir();
 
-void string_list_free(GList *list);
 GList *string_list_copy(const GList *list);
 
 gchar *unique_filename(const gchar *path, const gchar *ext, const gchar *divider, gboolean pad);

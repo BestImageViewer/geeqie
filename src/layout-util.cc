@@ -336,7 +336,7 @@ static void layout_menu_open_cb(GtkAction *widget, gpointer data)
 		g_free(path);
 		}
 
-	string_list_free(collection_list);
+	g_list_free_full(collection_list, g_free);
 }
 
 static void layout_menu_search_cb(GtkAction *, gpointer data)
@@ -2149,7 +2149,7 @@ static void layout_menu_collection_open_update(LayoutWindow *lw)
 		n++;
 		}
 
-	string_list_free(collection_list);
+	g_list_free_full(collection_list, g_free);
 
 	if (n == 0)
 		{

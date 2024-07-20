@@ -698,15 +698,6 @@ gchar *get_current_dir()
 	return path8;
 }
 
-/**
- * @brief return True on success, it is up to you to free
- * the lists with string_list_free()
- */
-void string_list_free(GList *list)
-{
-	g_list_free_full(list, g_free);
-}
-
 GList *string_list_copy(const GList *list)
 {
 	GList *new_list = nullptr;
