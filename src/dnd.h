@@ -22,6 +22,8 @@
 #ifndef DND_H
 #define DND_H
 
+#include <array>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #include <glib.h>
@@ -42,11 +44,8 @@ enum {
 };
 
 
-extern GtkTargetEntry dnd_file_drag_types[];
-extern gint dnd_file_drag_types_count;
-
-extern GtkTargetEntry dnd_file_drop_types[];
-extern gint dnd_file_drop_types_count;
+extern const std::array<GtkTargetEntry, 2> dnd_file_drag_types;
+extern const std::array<GtkTargetEntry, 3> dnd_file_drop_types;
 
 void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pixbuf, gint items);
 

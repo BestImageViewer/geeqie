@@ -23,6 +23,7 @@
 
 #include <unistd.h>
 
+#include <array>
 #include <cstring>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -54,17 +55,42 @@
 namespace
 {
 
-constexpr gint DIALOG_WIDTH = 750;
-
-/* thumbnail spec has a max depth of 4 (.thumb??/fail/appname/??.png) */
-constexpr gint UTILITY_DELETE_MAX_DEPTH = 5;
-
 struct PixmapErrors
 {
 	GdkPixbuf *error;
 	GdkPixbuf *warning;
 	GdkPixbuf *apply;
 };
+
+struct ClipboardData
+{
+	GList *path_list; /**< g_strdup(fd->path) */
+	gboolean quoted;
+	gboolean action_copy;
+};
+
+enum ClipboardDestination {
+	CLIPBOARD_TEXT_PLAIN	= 0,
+	CLIPBOARD_TEXT_URI_LIST	= 1,
+	CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES	= 2,
+	CLIPBOARD_UTF8_STRING	= 3
+};
+
+constexpr std::array<GtkTargetEntry, 4> target_types
+{{
+	{const_cast<gchar *>("text/plain"), 0, CLIPBOARD_TEXT_PLAIN},
+	{const_cast<gchar *>("text/uri-list"), 0, CLIPBOARD_TEXT_URI_LIST},
+	{const_cast<gchar *>("x-special/gnome-copied-files"), 0, CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES},
+	{const_cast<gchar *>("UTF8_STRING"), 0, CLIPBOARD_UTF8_STRING},
+}};
+
+constexpr gint DIALOG_DEF_IMAGE_DIM_X = 150;
+constexpr gint DIALOG_DEF_IMAGE_DIM_Y = 100;
+
+constexpr gint DIALOG_WIDTH = 750;
+
+/* thumbnail spec has a max depth of 4 (.thumb??/fail/appname/??.png) */
+constexpr gint UTILITY_DELETE_MAX_DEPTH = 5;
 
 GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *)
 {
@@ -101,39 +127,11 @@ GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *)
 
 } // namespace
 
-enum ClipboardDestination {
-	CLIPBOARD_TEXT_PLAIN	= 0,
-	CLIPBOARD_TEXT_URI_LIST	= 1,
-	CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES	= 2,
-	CLIPBOARD_UTF8_STRING	= 3
-};
-
-static GtkTargetEntry target_types[] =
-{
-	{const_cast<gchar *>("text/plain"), 0, CLIPBOARD_TEXT_PLAIN},
-	{const_cast<gchar *>("text/uri-list"), 0, CLIPBOARD_TEXT_URI_LIST},
-	{const_cast<gchar *>("x-special/gnome-copied-files"), 0, CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES},
-	{const_cast<gchar *>("UTF8_STRING"), 0, CLIPBOARD_UTF8_STRING},
-};
-static gint target_types_n = 4;
-
-struct ClipboardData
-{
-	GList *path_list; /**< g_strdup(fd->path) */
-	gboolean quoted;
-	gboolean action_copy;
-};
-
 /*
  *--------------------------------------------------------------------------
  * Adds 1 or 2 images (if 2, side by side) to a GenericDialog
  *--------------------------------------------------------------------------
  */
-
-enum {
-	DIALOG_DEF_IMAGE_DIM_X = 150,
-	DIALOG_DEF_IMAGE_DIM_Y = 100
-};
 
 static void generic_dialog_add_image(GenericDialog *gd, GtkWidget *box,
 				     FileData *fd1, const gchar *header1,
@@ -3263,7 +3261,7 @@ void file_util_copy_path_to_clipboard(FileData *fd, gboolean quoted, gboolean ac
 		cbd->action_copy = action_copy;
 		cbd->path_list = g_list_append(cbd->path_list, g_strdup(fd->path));
 
-		gtk_clipboard_set_with_data(gtk_clipboard_get(GDK_SELECTION_PRIMARY), target_types, target_types_n, clipboard_get_func, clipboard_clear_func, cbd);
+		gtk_clipboard_set_with_data(gtk_clipboard_get(GDK_SELECTION_PRIMARY), target_types.data(), target_types.size(), clipboard_get_func, clipboard_clear_func, cbd);
 		}
 
 	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD || options->clipboard_selection == CLIPBOARD_BOTH)
@@ -3274,7 +3272,7 @@ void file_util_copy_path_to_clipboard(FileData *fd, gboolean quoted, gboolean ac
 		cbd->action_copy = action_copy;
 		cbd->path_list = g_list_append(cbd->path_list, g_strdup(fd->path));
 
-		gtk_clipboard_set_with_data(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD), target_types, target_types_n, clipboard_get_func, clipboard_clear_func, cbd);
+		gtk_clipboard_set_with_data(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD), target_types.data(), target_types.size(), clipboard_get_func, clipboard_clear_func, cbd);
 		}
 }
 
@@ -3310,7 +3308,7 @@ void file_util_path_list_to_clipboard(GList *fd_list, gboolean quoted, gboolean 
 			cbd->path_list = g_list_append(cbd->path_list, g_strdup(fd->path));
 			}
 
-			gtk_clipboard_set_with_data(gtk_clipboard_get(GDK_SELECTION_PRIMARY), target_types, target_types_n, clipboard_get_func, clipboard_clear_func, cbd);
+		gtk_clipboard_set_with_data(gtk_clipboard_get(GDK_SELECTION_PRIMARY), target_types.data(), target_types.size(), clipboard_get_func, clipboard_clear_func, cbd);
 		}
 
 	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD || options->clipboard_selection == CLIPBOARD_BOTH)
@@ -3331,7 +3329,7 @@ void file_util_path_list_to_clipboard(GList *fd_list, gboolean quoted, gboolean 
 			cbd->path_list = g_list_append(cbd->path_list, g_strdup(fd->path));
 			}
 
-			gtk_clipboard_set_with_data(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD), target_types, target_types_n, clipboard_get_func, clipboard_clear_func, cbd);
+		gtk_clipboard_set_with_data(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD), target_types.data(), target_types.size(), clipboard_get_func, clipboard_clear_func, cbd);
 		}
 
 	filelist_free(fd_list);

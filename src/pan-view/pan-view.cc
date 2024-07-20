@@ -2529,15 +2529,15 @@ static void pan_window_dnd_init(PanWindow *pw)
 	widget = pw->imd->pr;
 
 	gtk_drag_source_set(widget, GDK_BUTTON2_MASK,
-			    dnd_file_drag_types, dnd_file_drag_types_count,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                    dnd_file_drag_types.data(), dnd_file_drag_types.size(),
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(widget), "drag_data_get",
 			 G_CALLBACK(pan_window_set_dnd_data), pw);
 
 	gtk_drag_dest_set(widget,
-			  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
-			  dnd_file_drop_types, dnd_file_drop_types_count,
-			  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
+	                  dnd_file_drop_types.data(), dnd_file_drop_types.size(),
+	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(widget), "drag_data_received",
 			 G_CALLBACK(pan_window_get_dnd_data), pw);
 }

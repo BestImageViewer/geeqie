@@ -21,6 +21,7 @@
 
 #include "collect-table.h"
 
+#include <array>
 #include <cstddef>
 #include <utility>
 
@@ -56,6 +57,17 @@
 namespace
 {
 
+enum {
+	CTABLE_COLUMN_POINTER = 0,
+	CTABLE_COLUMN_COUNT
+};
+
+struct ColumnData
+{
+	CollectTable *ct;
+	gint number;
+};
+
 /* between these, the icon width is increased by thumb_max_width / 2 */
 constexpr gint THUMB_MIN_ICON_WIDTH = 128;
 constexpr gint THUMB_MAX_ICON_WIDTH = 150;
@@ -67,16 +79,16 @@ constexpr gint THUMB_BORDER_PADDING = 2;
 constexpr gint COLLECT_TABLE_TIP_DELAY = 500;
 constexpr gint COLLECT_TABLE_TIP_DELAY_PATH = 850;
 
-enum {
-	CTABLE_COLUMN_POINTER = 0,
-	CTABLE_COLUMN_COUNT
-};
+constexpr std::array<GtkTargetEntry, 3> collection_drag_types{{
+	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
+	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
+	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
+}};
 
-struct ColumnData
-{
-	CollectTable *ct;
-	gint number;
-};
+constexpr std::array<GtkTargetEntry, 2> collection_drop_types{{
+	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
+	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST }
+}};
 
 inline gboolean info_selected(const CollectInfo *info)
 {
@@ -2169,20 +2181,6 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
  *-------------------------------------------------------------------
  */
 
-static GtkTargetEntry collection_drag_types[] = {
-	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-};
-static gint n_collection_drag_types = 3;
-
-static GtkTargetEntry collection_drop_types[] = {
-	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST }
-};
-static gint n_collection_drop_types = 2;
-
-
 static void collection_table_dnd_get(GtkWidget *, GdkDragContext *,
 				     GtkSelectionData *selection_data, guint info,
 				     guint, gpointer data)
@@ -2364,8 +2362,8 @@ static void collection_table_dnd_leave(GtkWidget *, GdkDragContext *, guint, gpo
 static void collection_table_dnd_init(CollectTable *ct)
 {
 	gtk_drag_source_set(ct->listview, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-			    collection_drag_types, n_collection_drag_types,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                    collection_drag_types.data(), collection_drag_types.size(),
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(ct->listview), "drag_data_get",
 			 G_CALLBACK(collection_table_dnd_get), ct);
 	g_signal_connect(G_OBJECT(ct->listview), "drag_begin",
@@ -2374,9 +2372,9 @@ static void collection_table_dnd_init(CollectTable *ct)
 			 G_CALLBACK(collection_table_dnd_end), ct);
 
 	gtk_drag_dest_set(ct->listview,
-			  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
-			  collection_drop_types, n_collection_drop_types,
-			  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_ASK));
+	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
+	                  collection_drop_types.data(), collection_drop_types.size(),
+	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_ASK));
 	g_signal_connect(G_OBJECT(ct->listview), "drag_motion",
 			 G_CALLBACK(collection_table_dnd_motion), ct);
 	g_signal_connect(G_OBJECT(ct->listview), "drag_leave",

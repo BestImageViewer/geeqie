@@ -24,6 +24,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#include <array>
 #include <cinttypes>
 #include <cmath>
 #include <cstdlib>
@@ -65,11 +66,7 @@
 #include "utilops.h"
 #include "window.h"
 
-enum {
-	DUPE_DEF_WIDTH = 800,
-	DUPE_DEF_HEIGHT = 400
-};
-#define DUPE_PROGRESS_PULSE_STEP 0.0001
+namespace {
 
 /** column assignment order (simply change them here)
  */
@@ -114,8 +111,25 @@ struct DupeSearchMatch
 	gint index; /**< The order items pushed onto thread pool. Used to sort returned matches */
 };
 
-static DupeMatchType param_match_mask;
-static GList *dupe_window_list = nullptr;	/**< list of open DupeWindow *s */
+constexpr gint DUPE_DEF_WIDTH = 800;
+constexpr gint DUPE_DEF_HEIGHT = 400;
+
+constexpr gdouble DUPE_PROGRESS_PULSE_STEP = 0.0001;
+
+constexpr std::array<GtkTargetEntry, 2> dupe_drag_types{{
+	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
+	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
+}};
+
+constexpr std::array<GtkTargetEntry, 2> dupe_drop_types{{
+	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
+	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST }
+}};
+
+DupeMatchType param_match_mask;
+GList *dupe_window_list = nullptr;	/**< list of open DupeWindow *s */
+
+} // namespace
 
 /*
  * Well, after adding the 'compare two sets' option things got a little sloppy in here
@@ -4851,18 +4865,6 @@ static GtkWidget *dupe_confirm_dir_list(DupeWindow *dw, GList *list)
  *-------------------------------------------------------------------
  */
 
-static GtkTargetEntry dupe_drag_types[] = {
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-};
-static gint n_dupe_drag_types = 2;
-
-static GtkTargetEntry dupe_drop_types[] = {
-	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST }
-};
-static gint n_dupe_drop_types = 2;
-
 static void dupe_dnd_data_set(GtkWidget *widget, GdkDragContext *,
 			      GtkSelectionData *selection_data, guint info,
 			      guint, gpointer data)
@@ -4944,9 +4946,9 @@ static void dupe_dest_set(GtkWidget *widget, gboolean enable)
 	if (enable)
 		{
 		gtk_drag_dest_set(widget,
-			static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
-			dupe_drop_types, n_dupe_drop_types,
-			static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_ASK));
+		                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
+		                  dupe_drop_types.data(), dupe_drop_types.size(),
+		                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_ASK));
 
 		}
 	else
@@ -5005,8 +5007,8 @@ static void dupe_dnd_end(GtkWidget *, GdkDragContext *, gpointer data)
 static void dupe_dnd_init(DupeWindow *dw)
 {
 	gtk_drag_source_set(dw->listview, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-			    dupe_drag_types, n_dupe_drag_types,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                    dupe_drag_types.data(), dupe_drag_types.size(),
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(dw->listview), "drag_data_get",
 			 G_CALLBACK(dupe_dnd_data_set), dw);
 	g_signal_connect(G_OBJECT(dw->listview), "drag_begin",
@@ -5019,8 +5021,8 @@ static void dupe_dnd_init(DupeWindow *dw)
 			 G_CALLBACK(dupe_dnd_data_get), dw);
 
 	gtk_drag_source_set(dw->second_listview, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-			    dupe_drag_types, n_dupe_drag_types,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                    dupe_drag_types.data(), dupe_drag_types.size(),
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(dw->second_listview), "drag_data_get",
 			 G_CALLBACK(dupe_dnd_data_set), dw);
 	g_signal_connect(G_OBJECT(dw->second_listview), "drag_begin",

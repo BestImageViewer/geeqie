@@ -407,10 +407,10 @@ static void vf_drag_data_received(GtkWidget *, GdkDragContext *,
 static void vf_dnd_init(ViewFile *vf)
 {
 	gtk_drag_source_set(vf->listview, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-	                    dnd_file_drag_types, dnd_file_drag_types_count,
+	                    dnd_file_drag_types.data(), dnd_file_drag_types.size(),
 	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	gtk_drag_dest_set(vf->listview, GTK_DEST_DEFAULT_ALL,
-	                  dnd_file_drag_types, dnd_file_drag_types_count,
+	                  dnd_file_drag_types.data(), dnd_file_drag_types.size(),
 	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 
 	g_signal_connect(G_OBJECT(vf->listview), "drag_data_get",

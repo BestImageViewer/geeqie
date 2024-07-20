@@ -1084,17 +1084,17 @@ static void layout_image_dnd_init(LayoutWindow *lw, gint i)
 	ImageWindow *imd = lw->split_images[i];
 
 	gtk_drag_source_set(imd->pr, GDK_BUTTON2_MASK,
-			    dnd_file_drag_types, dnd_file_drag_types_count,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                    dnd_file_drag_types.data(), dnd_file_drag_types.size(),
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(imd->pr), "drag_data_get",
 			 G_CALLBACK(layout_image_dnd_get), lw);
 	g_signal_connect(G_OBJECT(imd->pr), "drag_end",
 			 G_CALLBACK(layout_image_dnd_end), lw);
 
 	gtk_drag_dest_set(imd->pr,
-			  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
-			  dnd_file_drop_types, dnd_file_drop_types_count,
-			  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
+	                  dnd_file_drop_types.data(), dnd_file_drop_types.size(),
+	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(imd->pr), "drag_data_received",
 			 G_CALLBACK(layout_image_dnd_receive), lw);
 }

@@ -24,6 +24,7 @@
 
 #include "osd.h"
 
+#include <array>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -42,7 +43,15 @@
 #include "typedefs.h"
 #include "ui-misc.h"
 
-static const gchar *predefined_tags[][2] = {
+namespace {
+
+struct TagData
+{
+	gchar *key;
+	gchar *title;
+};
+
+const gchar *predefined_tags[][2] = {
 	{"%name%",							N_("Name")},
 	{"%path:60%",						N_("Path")},
 	{"%date%",							N_("Date")},
@@ -88,15 +97,11 @@ static const gchar *predefined_tags[][2] = {
 	{"%Xmp.dc.rights%",					N_("© Rights")},
 	{nullptr, nullptr}};
 
-static GtkTargetEntry osd_drag_types[] = {
+constexpr std::array<GtkTargetEntry, 1> osd_drag_types{{
 	{ const_cast<gchar *>("text/plain"), GTK_TARGET_SAME_APP, TARGET_TEXT_PLAIN }
-};
+}};
 
-struct TagData
-{
-	gchar *key;
-	gchar *title;
-};
+} // namespace
 
 static void tag_button_cb(GtkWidget *widget, gpointer data)
 {
@@ -146,7 +151,7 @@ static void set_osd_button(GtkGrid *grid, const gint rows, const gint cols, cons
 
 	g_object_set_data_full(G_OBJECT(new_button), "tag_data", td, tag_data_free);
 
-	gtk_drag_source_set(new_button, GDK_BUTTON1_MASK, osd_drag_types, 1, GDK_ACTION_COPY);
+	gtk_drag_source_set(new_button, GDK_BUTTON1_MASK, osd_drag_types.data(), osd_drag_types.size(), GDK_ACTION_COPY);
 	g_signal_connect(G_OBJECT(new_button), "drag_data_get",
 							G_CALLBACK(osd_dnd_get_cb), template_view);
 

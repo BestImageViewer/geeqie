@@ -23,6 +23,7 @@
 
 #include <sys/types.h>
 
+#include <array>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -68,19 +69,7 @@
 #include "utilops.h"
 #include "window.h"
 
-enum {
-	DEF_SEARCH_WIDTH =  700,
-	DEF_SEARCH_HEIGHT = 650
-};
-
-enum {
-	SEARCH_BUFFER_MATCH_LOAD = 20,
-	SEARCH_BUFFER_MATCH_HIT =  5,
-	SEARCH_BUFFER_MATCH_MISS = 1,
-	SEARCH_BUFFER_FLUSH_SIZE = 99
-};
-
-#define FORMAT_CLASS_BROKEN static_cast<FileFormatClass>(FILE_FORMAT_CLASSES + 1)
+namespace {
 
 enum MatchType {
 	SEARCH_MATCH_NONE,
@@ -293,74 +282,95 @@ struct MatchList
 	MatchType type;
 };
 
-static const MatchList text_search_menu_path[] = {
+const MatchList text_search_menu_path[] = {
 	{ N_("folder"),		SEARCH_MATCH_NONE },
 	{ N_("comments"),	SEARCH_MATCH_ALL },
 	{ N_("results"),	SEARCH_MATCH_CONTAINS },
 	{ N_("collection"),	SEARCH_MATCH_COLLECTION }
 };
 
-static const MatchList text_search_menu_name[] = {
+const MatchList text_search_menu_name[] = {
 	{ N_("name contains"),	SEARCH_MATCH_NAME_CONTAINS },
 	{ N_("name is"),	SEARCH_MATCH_NAME_EQUAL },
 	{ N_("path contains"),	SEARCH_MATCH_PATH_CONTAINS }
 };
 
-static const MatchList text_search_menu_size[] = {
+const MatchList text_search_menu_size[] = {
 	{ N_("equal to"),	SEARCH_MATCH_EQUAL },
 	{ N_("less than"),	SEARCH_MATCH_UNDER },
 	{ N_("greater than"),	SEARCH_MATCH_OVER },
 	{ N_("between"),	SEARCH_MATCH_BETWEEN }
 };
 
-static const MatchList text_search_menu_date[] = {
+const MatchList text_search_menu_date[] = {
 	{ N_("equal to"),	SEARCH_MATCH_EQUAL },
 	{ N_("before"),		SEARCH_MATCH_UNDER },
 	{ N_("after"),		SEARCH_MATCH_OVER },
 	{ N_("between"),	SEARCH_MATCH_BETWEEN }
 };
 
-static const MatchList text_search_menu_keyword[] = {
+const MatchList text_search_menu_keyword[] = {
 	{ N_("match all"),	SEARCH_MATCH_ALL },
 	{ N_("match any"),	SEARCH_MATCH_ANY },
 	{ N_("exclude"),	SEARCH_MATCH_NONE }
 };
 
-static const MatchList text_search_menu_comment[] = {
+const MatchList text_search_menu_comment[] = {
 	{ N_("contains"),	SEARCH_MATCH_CONTAINS },
 	{ N_("miss"),		SEARCH_MATCH_NONE }
 };
 
-static const MatchList text_search_menu_exif[] = {
+const MatchList text_search_menu_exif[] = {
 	{ N_("contains"),	SEARCH_MATCH_CONTAINS },
 	{ N_("miss"),		SEARCH_MATCH_NONE }
 };
 
-static const MatchList text_search_menu_rating[] = {
+const MatchList text_search_menu_rating[] = {
 	{ N_("equal to"),	SEARCH_MATCH_EQUAL },
 	{ N_("less than"),	SEARCH_MATCH_UNDER },
 	{ N_("greater than"),	SEARCH_MATCH_OVER },
 	{ N_("between"),	SEARCH_MATCH_BETWEEN }
 };
 
-static const MatchList text_search_menu_gps[] = {
+const MatchList text_search_menu_gps[] = {
 	{ N_("not geocoded"),	SEARCH_MATCH_NONE },
 	{ N_("less than"),	SEARCH_MATCH_UNDER },
 	{ N_("greater than"),	SEARCH_MATCH_OVER }
 };
 
-static const MatchList text_search_menu_class[] = {
+const MatchList text_search_menu_class[] = {
 	{ N_("is"),	SEARCH_MATCH_EQUAL },
 	{ N_("is not"),	SEARCH_MATCH_NONE }
 };
 
-static const MatchList text_search_menu_marks[] = {
+const MatchList text_search_menu_marks[] = {
 	{ N_("is"),	SEARCH_MATCH_EQUAL },
 	{ N_("is not"),	SEARCH_MATCH_NONE }
 };
 
-static GList *search_window_list = nullptr;
+constexpr gint DEF_SEARCH_WIDTH = 700;
+constexpr gint DEF_SEARCH_HEIGHT = 650;
 
+constexpr gint SEARCH_BUFFER_MATCH_LOAD = 20;
+constexpr gint SEARCH_BUFFER_MATCH_HIT = 5;
+constexpr gint SEARCH_BUFFER_MATCH_MISS = 1;
+constexpr gint SEARCH_BUFFER_FLUSH_SIZE = 99;
+
+constexpr auto FORMAT_CLASS_BROKEN = static_cast<FileFormatClass>(FILE_FORMAT_CLASSES + 1);
+
+constexpr std::array<GtkTargetEntry, 2> result_drag_types{{
+	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
+	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
+}};
+
+constexpr std::array<GtkTargetEntry, 2> result_drop_types{{
+	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
+	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
+}};
+
+GList *search_window_list = nullptr;
+
+} // namespace
 
 static gint search_result_selection_count(SearchData *sd, gint64 *bytes);
 static gint search_result_count(SearchData *sd, gint64 *bytes);
@@ -1520,18 +1530,6 @@ static gboolean search_window_keypress_cb(GtkWidget *, GdkEventKey *event, gpoin
  *-------------------------------------------------------------------
  */
 
-static GtkTargetEntry result_drag_types[] = {
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-};
-static gint n_result_drag_types = 2;
-
-static GtkTargetEntry result_drop_types[] = {
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-};
-static gint n_result_drop_types = 2;
-
 static void search_dnd_data_set(GtkWidget *, GdkDragContext *,
 				GtkSelectionData *selection_data, guint,
 				guint, gpointer data)
@@ -1679,33 +1677,33 @@ static void search_image_content_dnd_received_cb(GtkWidget *, GdkDragContext *,
 static void search_dnd_init(SearchData *sd)
 {
 	gtk_drag_source_set(sd->result_view, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-			    result_drag_types, n_result_drag_types,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                    result_drag_types.data(), result_drag_types.size(),
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(sd->result_view), "drag_data_get",
 			 G_CALLBACK(search_dnd_data_set), sd);
 	g_signal_connect(G_OBJECT(sd->result_view), "drag_begin",
 			 G_CALLBACK(search_dnd_begin), sd);
 
 	gtk_drag_dest_set(GTK_WIDGET(sd->entry_gps_coord),
-					 GTK_DEST_DEFAULT_ALL,
-					  result_drop_types, n_result_drop_types,
-					 GDK_ACTION_COPY);
+	                  GTK_DEST_DEFAULT_ALL,
+	                  result_drop_types.data(), result_drop_types.size(),
+	                  GDK_ACTION_COPY);
 
 	g_signal_connect(G_OBJECT(sd->entry_gps_coord), "drag_data_received",
 					G_CALLBACK(search_gps_dnd_received_cb), sd);
 
 	gtk_drag_dest_set(GTK_WIDGET(sd->path_entry),
-					GTK_DEST_DEFAULT_ALL,
-					result_drop_types, n_result_drop_types,
-					GDK_ACTION_COPY);
+	                  GTK_DEST_DEFAULT_ALL,
+	                  result_drop_types.data(), result_drop_types.size(),
+	                  GDK_ACTION_COPY);
 
 	g_signal_connect(G_OBJECT(sd->path_entry), "drag_data_received",
 					G_CALLBACK(search_path_entry_dnd_received_cb), sd);
 
 	gtk_drag_dest_set(GTK_WIDGET(sd->entry_similarity),
-					GTK_DEST_DEFAULT_ALL,
-					result_drop_types, n_result_drop_types,
-					GDK_ACTION_COPY);
+	                  GTK_DEST_DEFAULT_ALL,
+	                  result_drop_types.data(), result_drop_types.size(),
+	                  GDK_ACTION_COPY);
 
 	g_signal_connect(G_OBJECT(sd->entry_similarity), "drag_data_received",
 					G_CALLBACK(search_image_content_dnd_received_cb), sd);

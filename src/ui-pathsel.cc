@@ -21,6 +21,7 @@
 
 #include "ui-pathsel.h"
 
+#include <array>
 #include <cstring>
 
 #include <dirent.h>
@@ -48,17 +49,6 @@
 
 namespace
 {
-
-constexpr gint dest_drag_types_n = 2;
-
-} // namespace
-
-enum {
-	DEST_WIDTH = 250,
-	DEST_HEIGHT = 210
-};
-
-#define PATH_SEL_USE_HEADINGS FALSE
 
 enum {
 	FILTER_COLUMN_NAME = 0,
@@ -96,6 +86,22 @@ struct DestDel_Data
 	gchar *path;
 };
 
+enum {
+	TARGET_URI_LIST,
+	TARGET_TEXT_PLAIN
+};
+
+constexpr std::array<GtkTargetEntry, 2> dest_drag_types{{
+	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
+	{ const_cast<gchar *>("text/plain"),    0, TARGET_TEXT_PLAIN }
+}};
+
+constexpr gint DEST_WIDTH = 250;
+constexpr gint DEST_HEIGHT = 210;
+
+constexpr gboolean PATH_SEL_USE_HEADINGS = FALSE;
+
+} // namespace
 
 static void dest_view_delete_dlg_cancel(GenericDialog *gd, gpointer data);
 
@@ -324,16 +330,6 @@ static void dest_change_dir(Dest_Data *dd, const gchar *path, gboolean retain_na
  *-----------------------------------------------------------------------------
  */
 
-enum {
-	TARGET_URI_LIST,
-	TARGET_TEXT_PLAIN
-};
-
-static GtkTargetEntry dest_drag_types[] = {
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"),    0, TARGET_TEXT_PLAIN }
-};
-
 static void dest_dnd_set_data(GtkWidget *view, GdkDragContext *,
 				  GtkSelectionData *selection_data,
 				  guint, guint, gpointer)
@@ -367,16 +363,16 @@ static void dest_dnd_set_data(GtkWidget *view, GdkDragContext *,
 static void dest_dnd_init(Dest_Data *dd)
 {
 	gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(dd->d_view), GDK_BUTTON1_MASK,
-					       dest_drag_types, dest_drag_types_n,
-					       static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK));
+	                                       dest_drag_types.data(), dest_drag_types.size(),
+	                                       static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK));
 	g_signal_connect(G_OBJECT(dd->d_view), "drag_data_get",
 			 G_CALLBACK(dest_dnd_set_data), dd);
 
 	if (dd->f_view)
 		{
 		gtk_tree_view_enable_model_drag_source(GTK_TREE_VIEW(dd->f_view), GDK_BUTTON1_MASK,
-						       dest_drag_types, dest_drag_types_n,
-						       static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK));
+		                                       dest_drag_types.data(), dest_drag_types.size(),
+		                                       static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK));
 		g_signal_connect(G_OBJECT(dd->f_view), "drag_data_get",
 				 G_CALLBACK(dest_dnd_set_data), dd);
 		}

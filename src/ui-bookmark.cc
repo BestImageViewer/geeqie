@@ -21,6 +21,7 @@
 
 #include "ui-bookmark.h"
 
+#include <array>
 #include <cstdlib>
 #include <cstring>
 
@@ -57,21 +58,18 @@
 namespace
 {
 
-constexpr gint bookmark_drop_types_n = 3;
-constexpr gint bookmark_drag_types_n = 2;
-
-const gchar *bookmark_icon(const gchar *path)
+struct BookButtonData
 {
-	if (!isfile(path)) return nullptr;
+	GtkWidget *button;
+	GtkWidget *image;
+	GtkWidget *label;
 
-	g_autofree gchar *real_path = realpath(path, nullptr);
-
-	return strstr(real_path, get_collections_dir()) ? PIXBUF_INLINE_COLLECTION : GQ_ICON_FILE;
-}
-
-} // namespace
-
-struct BookButtonData;
+	gchar *key;
+	gchar *name;
+	gchar *path;
+	gchar *icon;
+	gchar *parent;
+};
 
 struct BookMarkData
 {
@@ -89,19 +87,6 @@ struct BookMarkData
 	BookButtonData *active_button;
 };
 
-struct BookButtonData
-{
-	GtkWidget *button;
-	GtkWidget *image;
-	GtkWidget *label;
-
-	gchar *key;
-	gchar *name;
-	gchar *path;
-	gchar *icon;
-	gchar *parent;
-};
-
 struct BookPropData
 {
 	GtkWidget *name_entry;
@@ -117,20 +102,30 @@ enum {
 	TARGET_TEXT_PLAIN
 };
 
-static GtkTargetEntry bookmark_drop_types[] = {
+constexpr std::array<GtkTargetEntry, 3> bookmark_drop_types{{
 	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
 	{ const_cast<gchar *>("x-url/http"),    0, TARGET_X_URL },
 	{ const_cast<gchar *>("_NETSCAPE_URL"), 0, TARGET_X_URL }
-};
+}};
 
-static GtkTargetEntry bookmark_drag_types[] = {
+constexpr std::array<GtkTargetEntry, 2> bookmark_drag_types{{
 	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
 	{ const_cast<gchar *>("text/plain"),    0, TARGET_TEXT_PLAIN }
-};
+}};
 
-static GList *bookmark_widget_list = nullptr;
-static GList *bookmark_default_list = nullptr;
+GList *bookmark_widget_list = nullptr;
+GList *bookmark_default_list = nullptr;
 
+const gchar *bookmark_icon(const gchar *path)
+{
+	if (!isfile(path)) return nullptr;
+
+	g_autofree gchar *real_path = realpath(path, nullptr);
+
+	return strstr(real_path, get_collections_dir()) ? PIXBUF_INLINE_COLLECTION : GQ_ICON_FILE;
+}
+
+} // namespace
 
 static void bookmark_populate_all(const gchar *key);
 
@@ -705,8 +700,8 @@ static void bookmark_populate(BookMarkData *bm)
 					 G_CALLBACK(bookmark_keypress_cb), bm);
 
 			gtk_drag_source_set(b->button, GDK_BUTTON1_MASK,
-					    bookmark_drag_types, bookmark_drag_types_n,
-					    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+			                    bookmark_drag_types.data(), bookmark_drag_types.size(),
+			                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 			g_signal_connect(G_OBJECT(b->button), "drag_data_get",
 					 G_CALLBACK(bookmark_drag_set_data), bm);
 			g_signal_connect(G_OBJECT(b->button), "drag_begin",
@@ -832,9 +827,9 @@ GtkWidget *bookmark_list_new(const gchar *key,
 	bm->widget = scrolled;
 
 	gtk_drag_dest_set(scrolled,
-			  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
-			  bookmark_drop_types, bookmark_drop_types_n,
-			  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
+	                  bookmark_drop_types.data(), bookmark_drop_types.size(),
+	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(scrolled), "drag_data_received",
 			 G_CALLBACK(bookmark_dnd_get_data), bm);
 

@@ -21,6 +21,7 @@
 
 #include "advanced-exif.h"
 
+#include <array>
 #include <cstring>
 #include <string>
 
@@ -46,15 +47,11 @@
 #include "ui-misc.h"
 #include "window.h"
 
-namespace
-{
-
-constexpr gint ADVANCED_EXIF_DATA_COLUMN_WIDTH = 200;
-
-} // namespace
-
 struct ExifData;
 struct ExifItem;
+
+namespace
+{
 
 /*
  *-------------------------------------------------------------------
@@ -86,7 +83,7 @@ enum {
 	EXIF_ADVCOL_COUNT
 };
 
-gint display_order [6] = {
+constexpr gint display_order[6] = {
 	EXIF_ADVCOL_DESCRIPTION,
 	EXIF_ADVCOL_VALUE,
 	EXIF_ADVCOL_NAME,
@@ -94,6 +91,14 @@ gint display_order [6] = {
 	EXIF_ADVCOL_FORMAT,
 	EXIF_ADVCOL_ELEMENTS
 };
+
+constexpr gint ADVANCED_EXIF_DATA_COLUMN_WIDTH = 200;
+
+constexpr std::array<GtkTargetEntry, 1> advanced_exif_drag_types{{
+	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
+}};
+
+} // namespace
 
 static gboolean advanced_exif_row_enabled(const gchar *name)
 {
@@ -191,11 +196,6 @@ void advanced_exif_set_fd(GtkWidget *window, FileData *fd)
 	advanced_exif_clear(ew);
 	advanced_exif_update(ew);
 }
-
-static GtkTargetEntry advanced_exif_drag_types[] = {
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-};
-static gint n_exif_drag_types = 1;
 
 
 static void advanced_exif_dnd_get(GtkWidget *listview, GdkDragContext *,
@@ -536,9 +536,9 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(ew->listview), search_function_cb, ew, nullptr);
 
 	gtk_drag_source_set(ew->listview,
-			   static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-			   advanced_exif_drag_types, n_exif_drag_types,
-			   static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                    static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
+	                    advanced_exif_drag_types.data(), advanced_exif_drag_types.size(),
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 
 	g_signal_connect(G_OBJECT(ew->listview), "drag_data_get",
 			 G_CALLBACK(advanced_exif_dnd_get), ew);

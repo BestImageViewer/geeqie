@@ -21,6 +21,7 @@
 
 #include "bar-keywords.h"
 
+#include <array>
 #include <cstdio>
 #include <cstring>
 
@@ -523,20 +524,15 @@ void bar_pane_keywords_changed(GtkTextBuffer *, gpointer data)
  *-------------------------------------------------------------------
  */
 
-// @todo Use std::array
-constexpr GtkTargetEntry bar_pane_keywords_drag_types[] = {
+constexpr std::array<GtkTargetEntry, 2> bar_pane_keywords_drag_types{{
 	{ const_cast<gchar *>(TARGET_APP_KEYWORD_PATH_STRING), GTK_TARGET_SAME_WIDGET, TARGET_APP_KEYWORD_PATH },
 	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-};
-constexpr gint n_keywords_drag_types = 2;
+}};
 
-// @todo Use std::array
-constexpr GtkTargetEntry bar_pane_keywords_drop_types[] = {
+constexpr std::array<GtkTargetEntry, 2> bar_pane_keywords_drop_types{{
 	{ const_cast<gchar *>(TARGET_APP_KEYWORD_PATH_STRING), GTK_TARGET_SAME_WIDGET, TARGET_APP_KEYWORD_PATH },
 	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-};
-constexpr gint n_keywords_drop_types = 2;
-
+}};
 
 void bar_pane_keywords_dnd_get(GtkWidget *tree_view, GdkDragContext *,
 				     GtkSelectionData *selection_data, guint info,
@@ -1579,9 +1575,9 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_tree_view_set_expander_column(GTK_TREE_VIEW(pkd->keyword_treeview), column);
 
 	gtk_drag_source_set(pkd->keyword_treeview,
-			    static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-			    bar_pane_keywords_drag_types, n_keywords_drag_types,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                    static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
+	                    bar_pane_keywords_drag_types.data(), bar_pane_keywords_drag_types.size(),
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 
 	g_signal_connect(G_OBJECT(pkd->keyword_treeview), "drag_data_get",
 			 G_CALLBACK(bar_pane_keywords_dnd_get), pkd);
@@ -1592,9 +1588,9 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 			 G_CALLBACK(bar_pane_keywords_dnd_end), pkd);
 
 	gtk_drag_dest_set(pkd->keyword_treeview,
-			  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
-			  bar_pane_keywords_drop_types, n_keywords_drop_types,
-			  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
+	                  bar_pane_keywords_drop_types.data(), bar_pane_keywords_drop_types.size(),
+	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 
 	g_signal_connect(G_OBJECT(pkd->keyword_treeview), "drag_data_received",
 			 G_CALLBACK(bar_pane_keywords_dnd_receive), pkd);

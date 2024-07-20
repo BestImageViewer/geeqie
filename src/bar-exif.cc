@@ -21,6 +21,7 @@
 
 #include "bar-exif.h"
 
+#include <array>
 #include <cstring>
 
 #include <gdk/gdk.h>
@@ -57,7 +58,20 @@ constexpr gint MIN_HEIGHT = 25;
  *-------------------------------------------------------------------
  */
 
-struct PaneExifData;
+struct PaneExifData
+{
+	PaneData pane;
+	GtkWidget *vbox;
+	GtkWidget *widget;
+	GtkSizeGroup *size_group;
+
+	gint min_height;
+
+	gboolean all_hidden;
+	gboolean show_all;
+
+	FileData *fd;
+};
 
 struct ExifEntry
 {
@@ -73,22 +87,6 @@ struct ExifEntry
 	gboolean editable;
 
 	PaneExifData *ped;
-};
-
-
-struct PaneExifData
-{
-	PaneData pane;
-	GtkWidget *vbox;
-	GtkWidget *widget;
-	GtkSizeGroup *size_group;
-
-	gint min_height;
-
-	gboolean all_hidden;
-	gboolean show_all;
-
-	FileData *fd;
 };
 
 struct ConfDialogData
@@ -356,19 +354,15 @@ void bar_pane_exif_notify_cb(FileData *fd, NotifyType type, gpointer data)
  *-------------------------------------------------------------------
  */
 
-// @todo Use std::array
-constexpr GtkTargetEntry bar_pane_exif_drag_types[] = {
+constexpr std::array<GtkTargetEntry, 2> bar_pane_exif_drag_types{{
 	{ const_cast<gchar *>(TARGET_APP_EXIF_ENTRY_STRING), GTK_TARGET_SAME_APP, TARGET_APP_EXIF_ENTRY },
 	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-};
-constexpr gint n_exif_entry_drag_types = 2;
+}};
 
-// @todo Use std::array
-constexpr GtkTargetEntry bar_pane_exif_drop_types[] = {
+constexpr std::array<GtkTargetEntry, 2> bar_pane_exif_drop_types{{
 	{ const_cast<gchar *>(TARGET_APP_EXIF_ENTRY_STRING), GTK_TARGET_SAME_APP, TARGET_APP_EXIF_ENTRY },
 	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-};
-constexpr gint n_exif_entry_drop_types = 2;
+}};
 
 
 void bar_pane_exif_entry_dnd_get(GtkWidget *entry, GdkDragContext *,
@@ -462,8 +456,8 @@ void bar_pane_exif_entry_dnd_init(GtkWidget *entry)
 	auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(entry), "entry_data"));
 
 	gtk_drag_source_set(entry, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-			    bar_pane_exif_drag_types, n_exif_entry_drag_types,
-			    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	                    bar_pane_exif_drag_types.data(), bar_pane_exif_drag_types.size(),
+	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(G_OBJECT(entry), "drag_data_get",
 			 G_CALLBACK(bar_pane_exif_entry_dnd_get), ee);
 
@@ -476,9 +470,9 @@ void bar_pane_exif_entry_dnd_init(GtkWidget *entry)
 void bar_pane_exif_dnd_init(GtkWidget *pane)
 {
 	gtk_drag_dest_set(pane,
-			  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
-			  bar_pane_exif_drop_types, n_exif_entry_drop_types,
-			  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
+	                  bar_pane_exif_drop_types.data(), bar_pane_exif_drop_types.size(),
+	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 	g_signal_connect(G_OBJECT(pane), "drag_data_received",
 			 G_CALLBACK(bar_pane_exif_dnd_receive), NULL);
 }
