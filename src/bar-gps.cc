@@ -41,6 +41,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 #include "bar.h"
 #include "compat.h"
 #include "debug.h"
+#include "dnd.h"
 #include "filedata.h"
 #include "intl.h"
 #include "layout.h"
@@ -102,13 +103,6 @@ struct PaneGPSData
  * drag-and-drop
  *-------------------------------------------------------------------
  */
-enum {
-	TARGET_APP_COLLECTION_MEMBER,
-	TARGET_APP_EXIF_ENTRY,
-	TARGET_APP_KEYWORD_PATH,
-	TARGET_URI_LIST,
-	TARGET_TEXT_PLAIN
-};
 
 constexpr std::array<GtkTargetEntry, 2> bar_pane_gps_drop_types{{
 	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
