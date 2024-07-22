@@ -115,8 +115,6 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 {
 	gchar *menu_label;
 	gchar *menu_label_text;
-	gchar *action_label;
-	gchar *action_label_text;
 	LayoutWindow *lw;
 	GList *groups;
 	GList *actions;
@@ -144,8 +142,10 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 			accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{
+				g_autofree gchar *action_label = nullptr;
 				g_object_get(action, "label", &action_label, NULL);
 
+				g_autofree gchar *action_label_text = nullptr;
 				pango_parse_markup(action_label, -1, '_', nullptr, &action_label_text, nullptr, nullptr);
 
 				if (g_strcmp0(action_label_text, menu_label_text) == 0)
@@ -157,8 +157,6 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 						break;
 						}
 					}
-				g_free(action_label_text);
-				g_free(action_label);
 				}
 			actions = actions->next;
 			}

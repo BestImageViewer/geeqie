@@ -1342,8 +1342,8 @@ bool ActionItem::has_label(const gchar *label) const
 
 static gchar *get_action_label(GtkAction *action, const gchar *action_name)
 {
-	gchar *tooltip;
-	gchar *label;
+	g_autofree gchar *tooltip = nullptr;
+	g_autofree gchar *label = nullptr;
 	g_object_get(action, "tooltip", &tooltip, "label", &label, NULL);
 
 	/* .desktop items need the program name, Geeqie menu items need the tooltip */

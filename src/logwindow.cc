@@ -179,7 +179,6 @@ static void remove_green_bg(LogWindow *logwin)
 	GtkTextIter end_match;
 	GtkTextBuffer *buffer;
 	const gchar *text;
-	gchar *tag_name;
 	gint offset;
 
 	text = gq_gtk_entry_get_text(GTK_ENTRY(logwin->search_entry_box));
@@ -191,6 +190,7 @@ static void remove_green_bg(LogWindow *logwin)
 		GSList *list = gtk_text_iter_get_tags(&start_match);
 		for (GSList *work = list; work; work = work->next)
 			{
+			g_autofree gchar *tag_name = nullptr;
 			g_object_get(work->data, "name", &tag_name, NULL);
 			if (g_strcmp0(tag_name, "green_bg") == 0)
 				{
