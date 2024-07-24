@@ -142,21 +142,6 @@ void cache_maintenance(const gchar *path)
  *-------------------------------------------------------------------
  */
 
-static gchar *extension_find_dot(gchar *path)
-{
-	gchar *dot = nullptr;
-
-	if (!path) return nullptr;
-
-	while (*path != '\0')
-		{
-		if (*path == '.') dot = path;
-		path++;
-		}
-
-	return dot;
-}
-
 static gboolean isempty(const gchar *path)
 {
 	DIR *dp;
@@ -268,9 +253,8 @@ static gboolean cache_maintain_home_cb(gpointer data)
 				{
 				auto fd_list = static_cast<FileData *>(work->data);
 				gchar *path_buf = g_strdup(fd_list->path);
-				gchar *dot;
 
-				dot = extension_find_dot(path_buf);
+				gchar *dot = strrchr(path_buf, '.');
 
 				if (dot) *dot = '\0';
 				if ((!cm->metadata && cm->clear) ||
@@ -480,92 +464,68 @@ void cache_maintain_home_remote(gboolean metadata, gboolean clear, GDestroyNotif
 	cm->idle_id = g_idle_add_full(G_PRIORITY_LOW, cache_maintain_home_cb, cm, func);
 }
 
-static void cache_file_move(const gchar *src, const gchar *dest)
-{
-	if (!dest || !src || !isfile(src)) return;
-
-	if (!move_file(src, dest))
-		{
-		DEBUG_1("Failed to move cache file \"%s\" to \"%s\"", src, dest);
-		/* we remove it anyway - it's stale */
-		unlink_file(src);
-		}
-}
-
 static void cache_maint_moved(FileData *fd)
 {
-	gchar *base;
-	mode_t mode = 0755;
 	const gchar *src = fd->change->source;
 	const gchar *dest = fd->change->dest;
 
 	if (!src || !dest) return;
 
-	base = cache_get_location(CACHE_TYPE_THUMB, dest, FALSE, &mode);
-	if (recursive_mkdir_if_not_exists(base, mode))
+	const auto cache_move = [src, dest](CacheType cache_type)
+	{
+		g_autofree gchar *src_path = cache_find_location(cache_type, src);
+		if (!src_path || !isfile(src_path)) return;
+
+		g_autofree gchar *dest_path = cache_get_location(cache_type, dest, TRUE, nullptr);
+		if (!dest_path) return;
+
+		if (!move_file(src_path, dest_path))
+			{
+			DEBUG_1("Failed to move cache file \"%s\" to \"%s\"", src_path, dest_path);
+			/* we remove it anyway - it's stale */
+			unlink_file(src_path);
+			}
+	};
+
+	mode_t mode = 0755;
+	g_autofree gchar *dest_base = cache_get_location(CACHE_TYPE_THUMB, dest, FALSE, &mode);
+	if (recursive_mkdir_if_not_exists(dest_base, mode))
 		{
-		gchar *buf;
-		gchar *d;
-
-		buf = cache_find_location(CACHE_TYPE_THUMB, src);
-		d = cache_get_location(CACHE_TYPE_THUMB, dest, TRUE, nullptr);
-		cache_file_move(buf, d);
-		g_free(d);
-		g_free(buf);
-
-		buf = cache_find_location(CACHE_TYPE_SIM, src);
-		d = cache_get_location(CACHE_TYPE_SIM, dest, TRUE, nullptr);
-		cache_file_move(buf, d);
-		g_free(d);
-		g_free(buf);
+		cache_move(CACHE_TYPE_THUMB);
+		cache_move(CACHE_TYPE_SIM);
 		}
 	else
 		{
-		log_printf("Failed to create cache dir for move %s\n", base);
+		log_printf("Failed to create cache dir for move %s\n", dest_base);
 		}
-	g_free(base);
 
-	base = cache_get_location(CACHE_TYPE_METADATA, dest, FALSE, &mode);
-	if (recursive_mkdir_if_not_exists(base, mode))
+	g_free(dest_base);
+	dest_base = cache_get_location(CACHE_TYPE_METADATA, dest, FALSE, &mode);
+	if (recursive_mkdir_if_not_exists(dest_base, mode))
 		{
-		gchar *buf;
-		gchar *d;
-
-		buf = cache_find_location(CACHE_TYPE_METADATA, src);
-		d = cache_get_location(CACHE_TYPE_METADATA, dest, TRUE, nullptr);
-		cache_file_move(buf, d);
-		g_free(d);
-		g_free(buf);
+		cache_move(CACHE_TYPE_METADATA);
 		}
-	g_free(base);
 
 	if (options->thumbnails.enable_caching && options->thumbnails.spec_standard)
 		thumb_std_maint_moved(src, dest);
 }
 
-static void cache_file_remove(const gchar *path)
-{
-	if (path && isfile(path) && !unlink_file(path))
-		{
-		DEBUG_1("Failed to remove cache file %s", path);
-		}
-}
-
 static void cache_maint_removed(FileData *fd)
 {
-	gchar *buf;
+	const auto cache_remove = [fd](CacheType cache_type)
+	{
+		g_autofree gchar *path = cache_find_location(cache_type, fd->path);
+		if (!path || !isfile(path)) return;
 
-	buf = cache_find_location(CACHE_TYPE_THUMB, fd->path);
-	cache_file_remove(buf);
-	g_free(buf);
+		if (!unlink_file(path))
+			{
+			DEBUG_1("Failed to remove cache file %s", path);
+			}
+	};
 
-	buf = cache_find_location(CACHE_TYPE_SIM, fd->path);
-	cache_file_remove(buf);
-	g_free(buf);
-
-	buf = cache_find_location(CACHE_TYPE_METADATA, fd->path);
-	cache_file_remove(buf);
-	g_free(buf);
+	cache_remove(CACHE_TYPE_THUMB);
+	cache_remove(CACHE_TYPE_SIM);
+	cache_remove(CACHE_TYPE_METADATA);
 
 	if (options->thumbnails.enable_caching && options->thumbnails.spec_standard)
 		thumb_std_maint_removed(fd->path);
@@ -573,28 +533,18 @@ static void cache_maint_removed(FileData *fd)
 
 static void cache_maint_copied(FileData *fd)
 {
-	gchar *dest_base;
-	gchar *src_cache;
+	g_autofree gchar *src_path = cache_find_location(CACHE_TYPE_METADATA, fd->change->source);
+	if (!src_path) return;
+
 	mode_t mode = 0755;
+	g_autofree gchar *dest_base = cache_get_location(CACHE_TYPE_METADATA, fd->change->dest, FALSE, &mode);
+	if (!recursive_mkdir_if_not_exists(dest_base, mode)) return;
 
-	src_cache = cache_find_location(CACHE_TYPE_METADATA, fd->change->source);
-	if (!src_cache) return;
-
-	dest_base = cache_get_location(CACHE_TYPE_METADATA, fd->change->dest, FALSE, &mode);
-	if (recursive_mkdir_if_not_exists(dest_base, mode))
+	g_autofree gchar *dest_path = cache_get_location(CACHE_TYPE_METADATA, fd->change->dest, TRUE, nullptr);
+	if (!copy_file(src_path, dest_path))
 		{
-		gchar *path;
-
-		path = cache_get_location(CACHE_TYPE_METADATA, fd->change->dest, TRUE, nullptr);
-		if (!copy_file(src_cache, path))
-			{
-			DEBUG_1("failed to copy metadata %s to %s", src_cache, path);
-			}
-		g_free(path);
+		DEBUG_1("failed to copy metadata %s to %s", src_path, dest_path);
 		}
-
-	g_free(dest_base);
-	g_free(src_cache);
 }
 
 void cache_notify_cb(FileData *fd, NotifyType type, gpointer)
