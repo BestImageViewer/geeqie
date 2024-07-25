@@ -22,7 +22,6 @@
 #include "cache-maint.h"
 
 #include <dirent.h>
-#include <sys/types.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -476,7 +475,7 @@ static void cache_maint_moved(FileData *fd)
 		g_autofree gchar *src_path = cache_find_location(cache_type, src);
 		if (!src_path || !isfile(src_path)) return;
 
-		g_autofree gchar *dest_path = cache_get_location(cache_type, dest, TRUE, nullptr);
+		g_autofree gchar *dest_path = cache_get_location(cache_type, dest);
 		if (!dest_path) return;
 
 		if (!move_file(src_path, dest_path))
@@ -487,9 +486,8 @@ static void cache_maint_moved(FileData *fd)
 			}
 	};
 
-	mode_t mode = 0755;
-	g_autofree gchar *dest_base = cache_get_location(CACHE_TYPE_THUMB, dest, FALSE, &mode);
-	if (recursive_mkdir_if_not_exists(dest_base, mode))
+	g_autofree gchar *dest_base = cache_create_location(CACHE_TYPE_THUMB, dest);
+	if (dest_base)
 		{
 		cache_move(CACHE_TYPE_THUMB);
 		cache_move(CACHE_TYPE_SIM);
@@ -500,8 +498,8 @@ static void cache_maint_moved(FileData *fd)
 		}
 
 	g_free(dest_base);
-	dest_base = cache_get_location(CACHE_TYPE_METADATA, dest, FALSE, &mode);
-	if (recursive_mkdir_if_not_exists(dest_base, mode))
+	dest_base = cache_create_location(CACHE_TYPE_METADATA, dest);
+	if (dest_base)
 		{
 		cache_move(CACHE_TYPE_METADATA);
 		}
@@ -536,11 +534,10 @@ static void cache_maint_copied(FileData *fd)
 	g_autofree gchar *src_path = cache_find_location(CACHE_TYPE_METADATA, fd->change->source);
 	if (!src_path) return;
 
-	mode_t mode = 0755;
-	g_autofree gchar *dest_base = cache_get_location(CACHE_TYPE_METADATA, fd->change->dest, FALSE, &mode);
-	if (!recursive_mkdir_if_not_exists(dest_base, mode)) return;
+	g_autofree gchar *dest_base = cache_create_location(CACHE_TYPE_METADATA, fd->change->dest);
+	if (!dest_base) return;
 
-	g_autofree gchar *dest_path = cache_get_location(CACHE_TYPE_METADATA, fd->change->dest, TRUE, nullptr);
+	g_autofree gchar *dest_path = cache_get_location(CACHE_TYPE_METADATA, fd->change->dest);
 	if (!copy_file(src_path, dest_path))
 		{
 		DEBUG_1("failed to copy metadata %s to %s", src_path, dest_path);

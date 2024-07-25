@@ -20,6 +20,8 @@
 
 #include "view-file.h"
 
+#include <array>
+
 #include <gdk/gdk.h>
 #include <glib-object.h>
 

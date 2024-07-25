@@ -21,6 +21,7 @@
 
 #include "layout-image.h"
 
+#include <array>
 #include <cstring>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>

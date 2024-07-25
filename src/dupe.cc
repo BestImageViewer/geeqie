@@ -22,7 +22,6 @@
 #include "dupe.h"
 
 #include <sys/time.h>
-#include <sys/types.h>
 
 #include <array>
 #include <cinttypes>
@@ -526,18 +525,15 @@ static void dupe_item_read_cache(DupeItem *di)
 
 static void dupe_item_write_cache(DupeItem *di)
 {
-	gchar *base;
-	mode_t mode = 0755;
-
 	if (!di) return;
 
-	base = cache_get_location(CACHE_TYPE_SIM, di->fd->path, FALSE, &mode);
-	if (recursive_mkdir_if_not_exists(base, mode))
+	g_autofree gchar *base = cache_create_location(CACHE_TYPE_SIM, di->fd->path);
+	if (base)
 		{
 		CacheData *cd;
 
 		cd = cache_sim_data_new();
-		cd->path = cache_get_location(CACHE_TYPE_SIM, di->fd->path, TRUE, nullptr);
+		cd->path = cache_get_location(CACHE_TYPE_SIM, di->fd->path);
 
 		if (di->width != 0) cache_sim_data_set_dimensions(cd, di->width, di->height);
 		if (di->md5sum)
@@ -553,7 +549,6 @@ static void dupe_item_write_cache(DupeItem *di)
 			}
 		cache_sim_data_free(cd);
 		}
-	g_free(base);
 }
 
 /*

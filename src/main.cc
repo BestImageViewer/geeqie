@@ -21,6 +21,7 @@
 
 #include "main.h"
 
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <clocale>

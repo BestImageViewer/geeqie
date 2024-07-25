@@ -38,6 +38,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <cstddef>
+
 #include <libraw/libraw.h>
 
 #include "debug.h"

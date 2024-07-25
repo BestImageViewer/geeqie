@@ -1,5 +1,6 @@
 [
     { include: [ "<bits/types/sig_atomic_t.h>",        private, "<csignal>",               public ] },
+    { include: [ "<__stdarg_va_arg.h>",                private, "<cstdarg>",               public ] },
     { include: [ "<bits/types/struct_FILE.h>",         private, "<cstdio>",                public ] },
     { include: [ "<bits/std_abs.h>",                   private, "<cstdlib>",               public ] },
 

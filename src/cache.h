@@ -76,7 +76,8 @@ void cache_sim_data_set_md5sum(CacheData *cd, const guchar digest[16]);
 void cache_sim_data_set_similarity(CacheData *cd, ImageSimilarityData *sd);
 gint cache_sim_data_filled(ImageSimilarityData *sd);
 
-gchar *cache_get_location(CacheType type, const gchar *source, gint include_name, mode_t *mode);
+gchar *cache_create_location(CacheType cache_type, const gchar *source);
+gchar *cache_get_location(CacheType cache_type, const gchar *source);
 gchar *cache_find_location(CacheType type, const gchar *source);
 
 const gchar *get_thumbnails_cache_dir();

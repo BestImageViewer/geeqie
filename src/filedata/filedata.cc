@@ -2185,10 +2185,8 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 
 			if (!metadata_path)
 				{
-				mode_t mode = 0755;
-
-				dest_dir = cache_get_location(CACHE_TYPE_METADATA, fd->path, FALSE, &mode);
-				if (recursive_mkdir_if_not_exists(dest_dir, mode))
+				dest_dir = cache_create_location(CACHE_TYPE_METADATA, fd->path);
+				if (dest_dir)
 					{
 					gchar *filename = g_strconcat(fd->name, options->metadata.save_legacy_format ? GQ_CACHE_EXT_METADATA : GQ_CACHE_EXT_XMP_METADATA, NULL);
 

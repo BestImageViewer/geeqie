@@ -21,8 +21,6 @@
 
 #include "cache-loader.h"
 
-#include <sys/types.h>
-
 #include <cstdio>
 #include <cstring>
 #include <ctime>
@@ -186,20 +184,16 @@ static gboolean cache_loader_phase2_process(CacheLoader *cl)
 		if (options->thumbnails.enable_caching &&
 		    cl->done_mask != CACHE_LOADER_NONE)
 			{
-			gchar *base;
-			mode_t mode = 0755;
-
-			base = cache_get_location(CACHE_TYPE_SIM, cl->fd->path, FALSE, &mode);
-			if (recursive_mkdir_if_not_exists(base, mode))
+			g_autofree gchar *base = cache_create_location(CACHE_TYPE_SIM, cl->fd->path);
+			if (base)
 				{
 				g_free(cl->cd->path);
-				cl->cd->path = cache_get_location(CACHE_TYPE_SIM, cl->fd->path, TRUE, nullptr);
+				cl->cd->path = cache_get_location(CACHE_TYPE_SIM, cl->fd->path);
 				if (cache_sim_data_save(cl->cd))
 					{
 					filetime_set(cl->cd->path, filetime(cl->fd->path));
 					}
 				}
-			g_free(base);
 			}
 
 		cl->idle_id = 0;

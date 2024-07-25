@@ -21,6 +21,8 @@
 
 #include "img-view.h"
 
+#include <array>
+
 #include <gdk/gdk.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>

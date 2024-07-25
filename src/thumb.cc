@@ -21,7 +21,6 @@
 
 #include "thumb.h"
 
-#include <sys/types.h>
 #include <utime.h>
 
 #include <cstdio>
@@ -58,16 +57,13 @@ static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h
  * or just mark failed thumbnail with 0 byte file (mark_failure = TRUE) */
 static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failure)
 {
-	gchar *cache_dir;
 	gboolean success = FALSE;
-	mode_t mode = 0755;
 
 	if (!tl || !tl->fd) return FALSE;
 	if (!mark_failure && !tl->fd->thumb_pixbuf) return FALSE;
 
-	cache_dir = cache_get_location(CACHE_TYPE_THUMB, tl->fd->path, FALSE, &mode);
-
-	if (recursive_mkdir_if_not_exists(cache_dir, mode))
+	g_autofree gchar *cache_dir = cache_create_location(CACHE_TYPE_THUMB, tl->fd->path);
+	if (cache_dir)
 		{
 		gchar *cache_path;
 		gchar *pathl;
@@ -114,8 +110,6 @@ static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failu
 		g_free(pathl);
 		g_free(cache_path);
 		}
-
-	g_free(cache_dir);
 
 	return success;
 }
