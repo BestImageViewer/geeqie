@@ -68,28 +68,33 @@ namespace
 
 struct CachePathParts
 {
-	CachePathParts(CacheType type)
+	CachePathParts(CacheType cache_type)
 	{
-		switch (type)
+		if (cache_type == CACHE_TYPE_METADATA || cache_type == CACHE_TYPE_XMP_METADATA)
+			{
+			rc = get_metadata_cache_dir();
+			local = GQ_CACHE_LOCAL_METADATA;
+			use_local_dir = options->metadata.enable_metadata_dirs;
+			}
+		else
+			{
+			rc = get_thumbnails_cache_dir();
+			local = GQ_CACHE_LOCAL_THUMB;
+			use_local_dir = options->thumbnails.cache_into_dirs;
+			}
+
+		switch (cache_type)
 			{
 			case CACHE_TYPE_THUMB:
-				rc = get_thumbnails_cache_dir();
-				local = GQ_CACHE_LOCAL_THUMB;
 				ext = GQ_CACHE_EXT_THUMB;
 				break;
 			case CACHE_TYPE_SIM:
-				rc = get_thumbnails_cache_dir();
-				local = GQ_CACHE_LOCAL_THUMB;
 				ext = GQ_CACHE_EXT_SIM;
 				break;
 			case CACHE_TYPE_METADATA:
-				rc = get_metadata_cache_dir();
-				local = GQ_CACHE_LOCAL_METADATA;
 				ext = GQ_CACHE_EXT_METADATA;
 				break;
 			case CACHE_TYPE_XMP_METADATA:
-				rc = get_metadata_cache_dir();
-				local = GQ_CACHE_LOCAL_METADATA;
 				ext = GQ_CACHE_EXT_XMP_METADATA;
 				break;
 			}
@@ -113,6 +118,7 @@ struct CachePathParts
 	const gchar *rc = nullptr;
 	const gchar *local = nullptr;
 	const gchar *ext = nullptr;
+	gboolean use_local_dir = FALSE;
 };
 
 constexpr gint CACHE_LOAD_LINE_NOISE = 8;
@@ -133,9 +139,7 @@ gchar *cache_get_location(CacheType type, const gchar *source, gint include_name
 
 	gchar *path = nullptr;
 
-	if (((type != CACHE_TYPE_METADATA && type != CACHE_TYPE_XMP_METADATA && options->thumbnails.cache_into_dirs) ||
-	     ((type == CACHE_TYPE_METADATA || type == CACHE_TYPE_XMP_METADATA) && options->metadata.enable_metadata_dirs)) &&
-	    access_file(base, W_OK))
+	if (cache.use_local_dir && access_file(base, W_OK))
 		{
 		path = g_build_filename(base, cache.local, name, NULL);
 		if (mode) *mode = 0775;
@@ -642,22 +646,12 @@ gchar *cache_get_location(CacheType cache_type, const gchar *source)
 gchar *cache_find_location(CacheType type, const gchar *source)
 {
 	gchar *path;
-	gboolean prefer_local;
 
 	if (!source) return nullptr;
 
 	const CachePathParts cache{type};
 
-	if (type == CACHE_TYPE_METADATA || type == CACHE_TYPE_XMP_METADATA)
-		{
-		prefer_local = options->metadata.enable_metadata_dirs;
-		}
-	else
-		{
-		prefer_local = options->thumbnails.cache_into_dirs;
-		}
-
-	if (prefer_local)
+	if (cache.use_local_dir)
 		{
 		path = cache.build_path_local(source);
 		}
@@ -671,7 +665,7 @@ gchar *cache_find_location(CacheType type, const gchar *source)
 		g_free(path);
 
 		/* try the opposite method if not found */
-		if (!prefer_local)
+		if (!cache.use_local_dir)
 			{
 			path = cache.build_path_local(source);
 			}
