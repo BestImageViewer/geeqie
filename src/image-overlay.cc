@@ -489,11 +489,11 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
  */
 static GdkPixbuf *image_osd_icon_pixbuf(ImageOSDFlag flag)
 {
-	static GdkPixbuf **icons = nullptr;
-	GdkPixbuf *icon = nullptr;
+	static auto **icons = g_new0(GdkPixbuf *, IMAGE_OSD_COUNT);
 
-	if (!icons) icons = g_new0(GdkPixbuf *, IMAGE_OSD_COUNT);
 	if (icons[flag]) return icons[flag];
+
+	GdkPixbuf *icon = nullptr;
 
 	if (osd_icons[flag].key)
 		{

@@ -184,13 +184,13 @@ gchar *path_from_utf8(const gchar *utf8)
 /* first we try the HOME environment var, if that doesn't work, we try g_get_homedir(). */
 const gchar *homedir()
 {
-	static gchar *home = nullptr;
+	static gchar *home = []()
+	{
+		gchar *home = path_to_utf8(getenv("HOME"));
+		if (home) return home;
 
-	if (!home)
-		home = path_to_utf8(getenv("HOME"));
-
-	if (!home)
-		home = path_to_utf8(g_get_home_dir());
+		return path_to_utf8(g_get_home_dir());
+	}();
 
 	DEBUG_1("Home directory: %s", home);
 
@@ -203,8 +203,8 @@ static gchar *xdg_dir_get(const gchar *key, const gchar *fallback)
 
 	if (!dir || dir[0] == '\0')
 		{
-    		return g_build_filename(homedir(), fallback, NULL);
-    		}
+		return g_build_filename(homedir(), fallback, NULL);
+		}
 
 	DEBUG_1("Got xdg %s: %s", key, dir);
 
@@ -213,105 +213,65 @@ static gchar *xdg_dir_get(const gchar *key, const gchar *fallback)
 
 const gchar *xdg_data_home_get()
 {
-	static const gchar *xdg_data_home = nullptr;
-
-	if (xdg_data_home) return xdg_data_home;
-
-	xdg_data_home = xdg_dir_get("XDG_DATA_HOME", ".local/share");
+	static const gchar *xdg_data_home = xdg_dir_get("XDG_DATA_HOME", ".local/share");
 
 	return xdg_data_home;
 }
 
 const gchar *xdg_config_home_get()
 {
-	static const gchar *xdg_config_home = nullptr;
-
-	if (xdg_config_home) return xdg_config_home;
-
-	xdg_config_home = xdg_dir_get("XDG_CONFIG_HOME", ".config");
+	static const gchar *xdg_config_home = xdg_dir_get("XDG_CONFIG_HOME", ".config");
 
 	return xdg_config_home;
 }
 
 const gchar *xdg_cache_home_get()
 {
-	static const gchar *xdg_cache_home = nullptr;
-
-	if (xdg_cache_home) return xdg_cache_home;
-
-	xdg_cache_home = xdg_dir_get("XDG_CACHE_HOME", ".cache");
+	static const gchar *xdg_cache_home = xdg_dir_get("XDG_CACHE_HOME", ".cache");
 
 	return xdg_cache_home;
 }
 
 const gchar *get_rc_dir()
 {
-	static gchar *rc_dir = nullptr;
-
-	if (rc_dir) return rc_dir;
-
-	if (USE_XDG)
-		{
-		rc_dir = g_build_filename(xdg_config_home_get(), GQ_APPNAME_LC, NULL);
-		}
-	else
-		{
-		rc_dir = g_build_filename(homedir(), GQ_RC_DIR, NULL);
-		}
+#if USE_XDG
+	static gchar *rc_dir = g_build_filename(xdg_config_home_get(), GQ_APPNAME_LC, NULL);
+#else
+	static gchar *rc_dir = g_build_filename(homedir(), GQ_RC_DIR, NULL);
+#endif
 
 	return rc_dir;
 }
 
 const gchar *get_collections_dir()
 {
-	static gchar *collections_dir = nullptr;
-
-	if (collections_dir) return collections_dir;
-
-	if (USE_XDG)
-		{
-		collections_dir = g_build_filename(xdg_data_home_get(), GQ_APPNAME_LC, GQ_COLLECTIONS_DIR, NULL);
-		}
-	else
-		{
-		collections_dir = g_build_filename(get_rc_dir(), GQ_COLLECTIONS_DIR, NULL);
-		}
+#if USE_XDG
+	static gchar *collections_dir = g_build_filename(xdg_data_home_get(), GQ_APPNAME_LC, GQ_COLLECTIONS_DIR, NULL);
+#else
+	static gchar *collections_dir = g_build_filename(get_rc_dir(), GQ_COLLECTIONS_DIR, NULL);
+#endif
 
 	return collections_dir;
 }
 
 const gchar *get_trash_dir()
 {
-	static gchar *trash_dir = nullptr;
-
-	if (trash_dir) return trash_dir;
-
-	if (USE_XDG)
-		{
-		trash_dir = g_build_filename(xdg_data_home_get(), GQ_APPNAME_LC, GQ_TRASH_DIR, NULL);
-		}
-	else
-		{
-		trash_dir = g_build_filename(get_rc_dir(), GQ_TRASH_DIR, NULL);
-	}
+#if USE_XDG
+	static gchar *trash_dir = g_build_filename(xdg_data_home_get(), GQ_APPNAME_LC, GQ_TRASH_DIR, NULL);
+#else
+	static gchar *trash_dir = g_build_filename(get_rc_dir(), GQ_TRASH_DIR, NULL);
+#endif
 
 	return trash_dir;
 }
 
 const gchar *get_window_layouts_dir()
 {
-	static gchar *window_layouts_dir = nullptr;
-
-	if (window_layouts_dir) return window_layouts_dir;
-
-	if (USE_XDG)
-		{
-		window_layouts_dir = g_build_filename(xdg_config_home_get(), GQ_APPNAME_LC, GQ_WINDOW_LAYOUTS_DIR, NULL);
-		}
-	else
-		{
-		window_layouts_dir = g_build_filename(get_rc_dir(), GQ_WINDOW_LAYOUTS_DIR, NULL);
-		}
+#if USE_XDG
+	static gchar *window_layouts_dir = g_build_filename(xdg_config_home_get(), GQ_APPNAME_LC, GQ_WINDOW_LAYOUTS_DIR, NULL);
+#else
+	static gchar *window_layouts_dir = g_build_filename(get_rc_dir(), GQ_WINDOW_LAYOUTS_DIR, NULL);
+#endif
 
 	return window_layouts_dir;
 }

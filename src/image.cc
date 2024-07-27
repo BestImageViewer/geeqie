@@ -882,8 +882,7 @@ static void image_cache_release_cb(FileData *fd)
 
 static FileCacheData *image_get_cache()
 {
-	static FileCacheData *cache = nullptr;
-	if (!cache) cache = file_cache_new(image_cache_release_cb, 1);
+	static FileCacheData *cache = file_cache_new(image_cache_release_cb, 1);
 	file_cache_set_max_size(cache, static_cast<gulong>(options->image.image_cache_max) * 1048576); /* update from options */
 	return cache;
 }

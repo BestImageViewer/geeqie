@@ -726,53 +726,34 @@ gboolean cache_time_valid(const gchar *cache, const gchar *path)
 
 const gchar *get_thumbnails_cache_dir()
 {
-	static gchar *thumbnails_cache_dir = nullptr;
-
-	if (thumbnails_cache_dir) return thumbnails_cache_dir;
-
-	if (USE_XDG)
-		{
-		thumbnails_cache_dir = g_build_filename(xdg_cache_home_get(),
-								GQ_APPNAME_LC, GQ_CACHE_THUMB, NULL);
-		}
-	else
-		{
-		thumbnails_cache_dir = g_build_filename(get_rc_dir(), GQ_CACHE_THUMB, NULL);
-		}
+#if USE_XDG
+	static gchar *thumbnails_cache_dir = g_build_filename(xdg_cache_home_get(), GQ_APPNAME_LC, GQ_CACHE_THUMB, NULL);
+#else
+	static gchar *thumbnails_cache_dir = g_build_filename(get_rc_dir(), GQ_CACHE_THUMB, NULL);
+#endif
 
 	return thumbnails_cache_dir;
 }
 
 const gchar *get_thumbnails_standard_cache_dir()
 {
-	static gchar *thumbnails_standard_cache_dir = nullptr;
-
-	if (thumbnails_standard_cache_dir) return thumbnails_standard_cache_dir;
-
-	thumbnails_standard_cache_dir = g_build_filename(xdg_cache_home_get(),
-										THUMB_FOLDER_GLOBAL, NULL);
+	static gchar *thumbnails_standard_cache_dir = g_build_filename(xdg_cache_home_get(),
+	                                                               THUMB_FOLDER_GLOBAL, NULL);
 
 	return thumbnails_standard_cache_dir;
 }
 
 const gchar *get_metadata_cache_dir()
 {
-	static gchar *metadata_cache_dir = nullptr;
-
-	if (metadata_cache_dir) return metadata_cache_dir;
-
-	if (USE_XDG)
-		{
-		/* Metadata go to $XDG_DATA_HOME.
-		 * "Keywords and comments, among other things, are irreplaceable and cannot be auto-generated,
-		 * so I don't think they'd be appropriate for the cache directory." -- Omari Stephens on geeqie-devel ml
-		 */
-		metadata_cache_dir = g_build_filename(xdg_data_home_get(), GQ_APPNAME_LC, GQ_CACHE_METADATA, NULL);
-		}
-	else
-		{
-		metadata_cache_dir = g_build_filename(get_rc_dir(), GQ_CACHE_METADATA, NULL);
-		}
+#if USE_XDG
+	/* Metadata go to $XDG_DATA_HOME.
+	 * "Keywords and comments, among other things, are irreplaceable and cannot be auto-generated,
+	 * so I don't think they'd be appropriate for the cache directory." -- Omari Stephens on geeqie-devel ml
+	 */
+	static gchar *metadata_cache_dir = g_build_filename(xdg_data_home_get(), GQ_APPNAME_LC, GQ_CACHE_METADATA, NULL);
+#else
+	static gchar *metadata_cache_dir = g_build_filename(get_rc_dir(), GQ_CACHE_METADATA, NULL);
+#endif
 
 	return metadata_cache_dir;
 }

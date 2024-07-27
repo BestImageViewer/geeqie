@@ -104,23 +104,20 @@ static void image_loader_stop(ImageLoader *il);
 
 GType image_loader_get_type()
 {
-	static GType type = 0;
-	if (type == 0)
-		{
-		static const GTypeInfo info = {
-			sizeof(ImageLoaderClass),
-			nullptr,   /* base_init */
-			nullptr,   /* base_finalize */
-			static_cast<GClassInitFunc>(image_loader_class_init_wrapper), /* class_init */
-			nullptr,   /* class_finalize */
-			nullptr,   /* class_data */
-			sizeof(ImageLoader),
-			0,      /* n_preallocs */
-			static_cast<GInstanceInitFunc>(image_loader_init), /* instance_init */
-			nullptr	/* value_table */
-			};
-		type = g_type_register_static(G_TYPE_OBJECT, "ImageLoaderType", &info, static_cast<GTypeFlags>(0));
-		}
+	static const GTypeInfo info = {
+	    sizeof(ImageLoaderClass),
+	    nullptr,   /* base_init */
+	    nullptr,   /* base_finalize */
+	    static_cast<GClassInitFunc>(image_loader_class_init_wrapper), /* class_init */
+	    nullptr,   /* class_finalize */
+	    nullptr,   /* class_data */
+	    sizeof(ImageLoader),
+	    0,      /* n_preallocs */
+	    static_cast<GInstanceInitFunc>(image_loader_init), /* instance_init */
+	    nullptr	/* value_table */
+	};
+	static GType type = g_type_register_static(G_TYPE_OBJECT, "ImageLoaderType", &info, static_cast<GTypeFlags>(0));
+
 	return type;
 }
 

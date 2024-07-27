@@ -97,28 +97,21 @@ static gpointer parent_class;
 GType
 gqv_cell_renderer_icon_get_type()
 {
-	static GType cell_icon_type = 0;
-
-	if (!cell_icon_type)
-		{
-		static const GTypeInfo cell_icon_info =
-			{
-			sizeof(GQvCellRendererIconClass), /* class_size */
-			nullptr,		/* base_init */
-			nullptr,		/* base_finalize */
-			static_cast<GClassInitFunc>(gqv_cell_renderer_icon_class_init_wrapper), /* class_init */
-			nullptr,		/* class_finalize */
-			nullptr,		/* class_data */
-			sizeof(GQvCellRendererIcon), /* instance_size */
-			0,		/* n_preallocs */
-			reinterpret_cast<GInstanceInitFunc>(gqv_cell_renderer_icon_init_wrapper), /* instance_init */
-			nullptr,		/* value_table */
-			};
-
-		cell_icon_type = g_type_register_static(GTK_TYPE_CELL_RENDERER,
-							"GQvCellRendererIcon",
-							&cell_icon_info, static_cast<GTypeFlags>(0));
-		}
+	static const GTypeInfo cell_icon_info = {
+	    sizeof(GQvCellRendererIconClass), /* class_size */
+	    nullptr,		/* base_init */
+	    nullptr,		/* base_finalize */
+	    static_cast<GClassInitFunc>(gqv_cell_renderer_icon_class_init_wrapper), /* class_init */
+	    nullptr,		/* class_finalize */
+	    nullptr,		/* class_data */
+	    sizeof(GQvCellRendererIcon), /* instance_size */
+	    0,		/* n_preallocs */
+	    reinterpret_cast<GInstanceInitFunc>(gqv_cell_renderer_icon_init_wrapper), /* instance_init */
+	    nullptr,		/* value_table */
+	};
+	static GType cell_icon_type = g_type_register_static(GTK_TYPE_CELL_RENDERER,
+	                                                     "GQvCellRendererIcon",
+	                                                     &cell_icon_info, static_cast<GTypeFlags>(0));
 
 	return cell_icon_type;
 }

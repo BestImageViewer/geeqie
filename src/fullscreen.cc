@@ -184,14 +184,7 @@ void fullscreen_image_complete_cb(ImageWindow *, gboolean preload, gpointer data
 
 void fullscreen_saver_deactivate()
 {
-	static gboolean checked = FALSE;
-	static gboolean found = FALSE;
-
-	if (!checked)
-		{
-		checked = TRUE;
-		found = file_in_path(XSCREENSAVER_BINARY);
-		}
+	static gboolean found = file_in_path(XSCREENSAVER_BINARY);
 
 	if (found)
 		{

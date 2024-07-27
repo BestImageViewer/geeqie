@@ -239,16 +239,14 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 
 static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
 {
-	static GtkIconFactory *icon_factory = nullptr;
-	GtkIconSet *icon_set;
-
-	if (!icon_factory)
-		{
-		icon_factory = gtk_icon_factory_new();
+	static GtkIconFactory *icon_factory = []()
+	{
+		GtkIconFactory *icon_factory = gtk_icon_factory_new();
 		gtk_icon_factory_add_default(icon_factory);
-		}
+		return icon_factory;
+	}();
 
-	icon_set = gtk_icon_set_new_from_pixbuf(pixbuf);
+	GtkIconSet *icon_set = gtk_icon_set_new_from_pixbuf(pixbuf);
 	gtk_icon_factory_add(icon_factory, key, icon_set);
 }
 

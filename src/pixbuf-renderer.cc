@@ -158,27 +158,20 @@ static void pixbuf_renderer_init_wrapper(PixbufRenderer *pr, void *)
 
 GType pixbuf_renderer_get_type()
 {
-	static GType pixbuf_renderer_type = 0;
-
-	if (!pixbuf_renderer_type)
-		{
-		static const GTypeInfo pixbuf_renderer_info =
-			{
-			sizeof(PixbufRendererClass), /* class_size */
-			nullptr,		/* base_init */
-			nullptr,		/* base_finalize */
-			static_cast<GClassInitFunc>(pixbuf_renderer_class_init_wrapper),
-			nullptr,		/* class_finalize */
-			nullptr,		/* class_data */
-			sizeof(PixbufRenderer), /* instance_size */
-			0,		/* n_preallocs */
-			reinterpret_cast<GInstanceInitFunc>(pixbuf_renderer_init_wrapper), /* instance_init */
-			nullptr,		/* value_table */
-			};
-
-		pixbuf_renderer_type = g_type_register_static(GTK_TYPE_EVENT_BOX, "PixbufRenderer",
-							      &pixbuf_renderer_info, static_cast<GTypeFlags>(0));
-		}
+	static const GTypeInfo pixbuf_renderer_info = {
+	    sizeof(PixbufRendererClass), /* class_size */
+	    nullptr,		/* base_init */
+	    nullptr,		/* base_finalize */
+	    static_cast<GClassInitFunc>(pixbuf_renderer_class_init_wrapper),
+	    nullptr,		/* class_finalize */
+	    nullptr,		/* class_data */
+	    sizeof(PixbufRenderer), /* instance_size */
+	    0,		/* n_preallocs */
+	    reinterpret_cast<GInstanceInitFunc>(pixbuf_renderer_init_wrapper), /* instance_init */
+	    nullptr,		/* value_table */
+	};
+	static GType pixbuf_renderer_type = g_type_register_static(GTK_TYPE_EVENT_BOX, "PixbufRenderer",
+	                                                           &pixbuf_renderer_info, static_cast<GTypeFlags>(0));
 
 	return pixbuf_renderer_type;
 }

@@ -789,7 +789,6 @@ void thumb_loader_std_set_cache(ThumbLoaderStd *tl, gboolean enable_cache, gbool
 
 gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 {
-	static gchar *thumb_cache = nullptr;
 	struct stat st;
 
 	if (!tl || !fd) return FALSE;
@@ -807,10 +806,7 @@ gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 	tl->source_size = st.st_size;
 	tl->source_mode = st.st_mode;
 
-	if (!thumb_cache)
-		{
-		thumb_cache = g_strdup(get_thumbnails_standard_cache_dir());
-		}
+	static const gchar *thumb_cache = get_thumbnails_standard_cache_dir();
 
 	if (strncmp(tl->fd->path, thumb_cache, strlen(thumb_cache)) != 0)
 		{
