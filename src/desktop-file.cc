@@ -428,8 +428,6 @@ static gint editor_list_window_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkT
 {
 	gint n = GPOINTER_TO_INT(data);
 	gint ret = 0;
-	gboolean bool1;
-	gboolean bool2;
 
 	switch (n)
 		{
@@ -438,48 +436,22 @@ static gint editor_list_window_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkT
 		case DESKTOP_FILE_COLUMN_PATH:
 		case DESKTOP_FILE_COLUMN_HIDDEN:
 			{
-			gchar *s1;
-			gchar *s2;
-
-			gtk_tree_model_get(model, a, n, &s1, -1);
-			gtk_tree_model_get(model, b, n, &s2, -1);
-
-			if (!s1 || !s2)
-				{
-			  	if (!s1 && !s2) break;
-			  	ret = s1 ? 1 : -1;
-				}
-			else
-				{
-			  	ret = g_utf8_collate(s1, s2);
-				}
-
-			g_free(s1);
-			g_free(s2);
+			ret = gq_gtk_tree_iter_utf8_collate(model, a, b, n);
 			}
 			break;
 		case DESKTOP_FILE_COLUMN_DISABLED:
 			{
+			gboolean bool1;
+			gboolean bool2;
 			gtk_tree_model_get(model, a, n, &bool1, -1);
 			gtk_tree_model_get(model, b, n, &bool2, -1);
 
-			if (bool1 == bool2)
-				{
-				ret = 0;
-				}
-			else if (bool1 > bool2)
-				{
-				ret = -1;
-				}
-			else
-				{
-				ret = 1;
-				}
+			ret = bool2 - bool1;
 			break;
 			}
 
-    		default:
-       			g_return_val_if_reached(0);
+		default:
+			g_return_val_if_reached(0);
 		}
 
 	return ret;

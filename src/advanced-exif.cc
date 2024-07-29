@@ -311,17 +311,7 @@ static gint advanced_exif_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIt
 
 	if (n < EXIF_ADVCOL_TAG || n > EXIF_ADVCOL_DESCRIPTION) g_return_val_if_reached(0);
 
-	g_autofree gchar *sa = nullptr;
-	gtk_tree_model_get(model, a, n, &sa, -1);
-
-	g_autofree gchar *sb = nullptr;
-	gtk_tree_model_get(model, b, n, &sb, -1);
-
-	if (sa && sb) return g_utf8_collate(sa, sb);
-
-	if (!sa && !sb) return 0;
-
-	return sa ? 1 : -1;
+	return gq_gtk_tree_iter_utf8_collate(model, a, b, n);
 }
 
 #if HAVE_GTK4

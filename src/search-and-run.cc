@@ -31,6 +31,7 @@
 #include "debug.h"
 #include "layout.h"
 #include "main-defines.h"
+#include "misc.h"
 
 enum {
 	SAR_LABEL,
@@ -50,33 +51,7 @@ struct SarData
 
 static gint sort_iter_compare_func (GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer)
 {
-	gint ret = 0;
-	gchar *label1;
-	gchar *label2;
-
-	gtk_tree_model_get(model, a, SAR_LABEL, &label1, -1);
-	gtk_tree_model_get(model, b, SAR_LABEL, &label2, -1);
-
-	if (label1 == nullptr || label2 == nullptr)
-		{
-		if (label1 == nullptr && label2 == nullptr)
-			{
-			ret = 0;
-			}
-		else
-			{
-			ret = (label1 == nullptr) ? -1 : 1;
-			}
-		}
-	else
-		{
-		ret = g_utf8_collate(label1, label2);
-		}
-
-	g_free(label1);
-	g_free(label2);
-
-	return ret;
+	return gq_gtk_tree_iter_utf8_collate(model, a, b, SAR_LABEL);
 }
 
 static void command_store_populate(SarData* sar)

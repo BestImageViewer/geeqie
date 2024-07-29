@@ -107,6 +107,25 @@ gint utf8_compare(const gchar *s1, const gchar *s2, gboolean case_sensitive)
 	return ret;
 }
 
+gint gq_gtk_tree_iter_utf8_collate(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gint sort_column_id)
+{
+	g_autofree gchar *str_a = nullptr;
+	gtk_tree_model_get(model, a,
+	                   sort_column_id, &str_a,
+	                   -1);
+
+	g_autofree gchar *str_b = nullptr;
+	gtk_tree_model_get(model, b,
+	                   sort_column_id, &str_b,
+	                   -1);
+
+	if (str_a && str_b) return g_utf8_collate(str_a, str_b);
+
+	if (!str_a && !str_b) return 0;
+
+	return (!str_a) ? -1 : 1;
+}
+
 /* Borrowed from gtkfilesystemunix.c */
 gchar *expand_tilde(const gchar *filename)
 {

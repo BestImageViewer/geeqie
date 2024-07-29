@@ -1678,33 +1678,7 @@ gint autocomplete_sort_iter_compare_func (GtkTreeModel *model,
 									GtkTreeIter *b,
 									gpointer)
 {
-	gint ret = 0;
-	gchar *name1;
-	gchar *name2;
-
-	gtk_tree_model_get(model, a, 0, &name1, -1);
-	gtk_tree_model_get(model, b, 0, &name2, -1);
-
-	if (name1 == nullptr || name2 == nullptr)
-		{
-		if (name1 == nullptr && name2 == nullptr)
-			{
-			ret = 0;
-			}
-		else
-			{
-			ret = (name1 == nullptr) ? -1 : 1;
-			}
-		}
-	else
-		{
-		ret = g_utf8_collate(name1,name2);
-		}
-
-	g_free(name1);
-	g_free(name2);
-
-	return ret;
+	return gq_gtk_tree_iter_utf8_collate(model, a, b, 0);
 }
 
 void autocomplete_keywords_list_load(const gchar *path)
