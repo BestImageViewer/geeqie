@@ -308,43 +308,20 @@ static gboolean advanced_exif_delete_cb(GtkWidget *, GdkEvent *, gpointer data)
 static gint advanced_exif_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
 	gint n = GPOINTER_TO_INT(data);
-	gint ret = 0;
 
-	switch (n)
-		{
-		case EXIF_ADVCOL_DESCRIPTION:
-		case EXIF_ADVCOL_VALUE:
-		case EXIF_ADVCOL_NAME:
-		case EXIF_ADVCOL_TAG:
-		case EXIF_ADVCOL_FORMAT:
-		case EXIF_ADVCOL_ELEMENTS:
-			{
-			gchar *s1;
-			gchar *s2;
+	if (n < EXIF_ADVCOL_TAG || n > EXIF_ADVCOL_DESCRIPTION) g_return_val_if_reached(0);
 
-			gtk_tree_model_get(model, a, n, &s1, -1);
-			gtk_tree_model_get(model, b, n, &s2, -1);
+	g_autofree gchar *sa = nullptr;
+	gtk_tree_model_get(model, a, n, &sa, -1);
 
-			if (!s1 || !s2)
-				{
-			  	if (!s1 && !s2) break;
-			  	ret = s1 ? 1 : -1;
-				}
-			else
-				{
-			  	ret = g_utf8_collate(s1, s2);
-				}
+	g_autofree gchar *sb = nullptr;
+	gtk_tree_model_get(model, b, n, &sb, -1);
 
-			g_free(s1);
-			g_free(s2);
-			}
-			break;
+	if (sa && sb) return g_utf8_collate(sa, sb);
 
-    		default:
-       			g_return_val_if_reached(0);
-		}
+	if (!sa && !sb) return 0;
 
-	return ret;
+	return sa ? 1 : -1;
 }
 
 #if HAVE_GTK4
@@ -463,7 +440,6 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	GtkListStore *store;
 	GtkTreeSortable *sortable;
 	GtkWidget *box;
-	gint n;
 	GtkWidget *button_box;
 	GtkWidget *hbox;
 
@@ -512,12 +488,12 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	/* set up sorting */
 	sortable = GTK_TREE_SORTABLE(store);
-	for (n = EXIF_ADVCOL_DESCRIPTION; n <= EXIF_ADVCOL_ELEMENTS; n++)
+	for (gint n = EXIF_ADVCOL_TAG; n <= EXIF_ADVCOL_DESCRIPTION; n++)
 		gtk_tree_sortable_set_sort_func(sortable, n, advanced_exif_sort_cb,
-				  		GINT_TO_POINTER(n), nullptr);
+		                                GINT_TO_POINTER(n), nullptr);
 
 	/* set initial sort order */
-    	gtk_tree_sortable_set_sort_column_id(sortable, EXIF_ADVCOL_NAME, GTK_SORT_ASCENDING);
+	gtk_tree_sortable_set_sort_column_id(sortable, EXIF_ADVCOL_NAME, GTK_SORT_ASCENDING);
 
 	ew->listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
