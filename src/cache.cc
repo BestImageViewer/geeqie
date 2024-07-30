@@ -633,7 +633,11 @@ gchar *cache_create_location(CacheType cache_type, const gchar *source)
 	mode_t mode = 0755;
 	g_autofree gchar *path = cache_get_location(cache_type, source, FALSE, &mode);
 
-	if (!recursive_mkdir_if_not_exists(path, mode)) return nullptr;
+	if (!recursive_mkdir_if_not_exists(path, mode))
+		{
+		log_printf("Failed to create cache dir %s\n", path);
+		return nullptr;
+		}
 
 	return g_steal_pointer(&path);
 }

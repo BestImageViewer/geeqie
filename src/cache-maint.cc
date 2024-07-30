@@ -475,6 +475,9 @@ static void cache_maint_moved(FileData *fd)
 		g_autofree gchar *src_path = cache_find_location(cache_type, src);
 		if (!src_path || !isfile(src_path)) return;
 
+		g_autofree gchar *dest_base = cache_create_location(cache_type, dest);
+		if (!dest_base) return;
+
 		g_autofree gchar *dest_path = cache_get_location(cache_type, dest);
 		if (!dest_path) return;
 
@@ -486,23 +489,9 @@ static void cache_maint_moved(FileData *fd)
 			}
 	};
 
-	g_autofree gchar *dest_base = cache_create_location(CACHE_TYPE_THUMB, dest);
-	if (dest_base)
-		{
-		cache_move(CACHE_TYPE_THUMB);
-		cache_move(CACHE_TYPE_SIM);
-		}
-	else
-		{
-		log_printf("Failed to create cache dir for move %s\n", dest_base);
-		}
-
-	g_free(dest_base);
-	dest_base = cache_create_location(CACHE_TYPE_METADATA, dest);
-	if (dest_base)
-		{
-		cache_move(CACHE_TYPE_METADATA);
-		}
+	cache_move(CACHE_TYPE_THUMB);
+	cache_move(CACHE_TYPE_SIM);
+	cache_move(CACHE_TYPE_METADATA);
 
 	if (options->thumbnails.enable_caching && options->thumbnails.spec_standard)
 		thumb_std_maint_moved(src, dest);
