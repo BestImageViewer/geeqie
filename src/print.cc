@@ -572,6 +572,15 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 	return text;
 }
 
+static gchar *print_get_page_text(const PrintWindow *pw)
+{
+	GtkTextIter start;
+	GtkTextIter end;
+	gtk_text_buffer_get_bounds(pw->page_text, &start, &end);
+
+	return gtk_text_buffer_get_text(pw->page_text, &start, &end, FALSE);
+}
+
 static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpointer data)
 {
 	auto pw = static_cast<PrintWindow *>(data);
@@ -604,9 +613,6 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 	gdouble pango_height;
 	gdouble pango_image_height;
 	gdouble pango_page_height;
-	GtkTextIter start;
-	GtkTextIter end;
-	gchar *tmp;
 	gint total;
 
 	fd = static_cast<FileData *>(g_list_nth_data(pw->source_selection, page_nr));
@@ -629,12 +635,9 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 
 	if (options->printer.show_page_text)
 		{
-		gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(pw->page_text), &start, &end);
+		g_autofree gchar *tmp = print_get_page_text(pw);
 
-		tmp = gtk_text_buffer_get_text(GTK_TEXT_BUFFER(pw->page_text), &start, &end, FALSE);
 		page_text = g_string_append(page_text, tmp);
-
-		g_free(tmp);
 		}
 
 	cr = gtk_print_context_get_cairo_context(context);
@@ -811,19 +814,6 @@ GObject *option_tab_cb(GtkPrintOperation *, gpointer user_data)
 	return G_OBJECT(pw->vbox);
 }
 
-static void print_pref_store(PrintWindow *pw)
-{
-	gchar *tmp;
-	GtkTextIter start;
-	GtkTextIter end;
-
-	gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(pw->page_text), &start, &end);
-	tmp = gtk_text_buffer_get_text(GTK_TEXT_BUFFER(pw->page_text), &start, &end, FALSE);
-	g_free(options->printer.page_text);
-	options->printer.page_text = g_strdup(tmp);
-	g_free(tmp);
-}
-
 static void end_print_cb(GtkPrintOperation *operation, GtkPrintContext *, gpointer data)
 {
 	auto pw = static_cast<PrintWindow *>(data);
@@ -860,7 +850,8 @@ static void end_print_cb(GtkPrintOperation *operation, GtkPrintContext *, gpoint
 	g_free(path);
 	g_object_unref(page_setup);
 
-	print_pref_store(pw);
+	g_free(options->printer.page_text);
+	options->printer.page_text = print_get_page_text(pw);
 
 	work = pw->print_pixbuf_queue;
 	while (work)
