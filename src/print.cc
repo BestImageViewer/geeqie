@@ -596,27 +596,18 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 	GdkPixbuf *rotated = nullptr;
 	PangoLayout *layout_image = nullptr;
 	PangoLayout *layout_page = nullptr;
-	PangoFontDescription *desc;
-	GString *image_text = g_string_new(nullptr);
-	GString *page_text = g_string_new(nullptr);
-	PangoRectangle ink_rect;
-	PangoRectangle logical_rect;
 	gdouble w;
 	gdouble h;
 	gdouble scale;
 	gdouble image_text_width;
-	gdouble image_text_height;
 	gdouble page_text_width;
-	gdouble page_text_height;
 	gint image_y;
 	gint incr_y;
 	gdouble pango_height;
 	gdouble pango_image_height;
 	gdouble pango_page_height;
-	gint total;
 
 	fd = static_cast<FileData *>(g_list_nth_data(pw->source_selection, page_nr));
-	total = g_list_length(pw->source_selection);
 
 	pixbuf = static_cast<GdkPixbuf *>(g_list_nth_data(pw->print_pixbuf_queue, page_nr));
 	if (fd->exif_orientation != EXIF_ORIENTATION_TOP_LEFT)
@@ -628,65 +619,54 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 	pixbuf_image_width = gdk_pixbuf_get_width(pixbuf);
 	pixbuf_image_height = gdk_pixbuf_get_height(pixbuf);
 
-	if (options->printer.show_image_text)
-		{
-		image_text = g_string_append(image_text, form_image_text(options->printer.template_string, fd, pw, page_nr, total));
-		}
-
-	if (options->printer.show_page_text)
-		{
-		g_autofree gchar *tmp = print_get_page_text(pw);
-
-		page_text = g_string_append(page_text, tmp);
-		}
-
 	cr = gtk_print_context_get_cairo_context(context);
 	context_width = gtk_print_context_get_width(context);
 	context_height = gtk_print_context_get_height(context);
+
+	const auto create_layout = [cr](const gchar *text, const gchar *font, gdouble &text_width, gdouble &pango_height) -> PangoLayout *
+	{
+		if (!text) return nullptr;
+
+		size_t text_len = strlen(text);
+		if (text_len == 0) return nullptr;
+
+		PangoLayout *layout = pango_cairo_create_layout(cr);
+
+		pango_layout_set_text(layout, text, text_len);
+
+		g_autoptr(PangoFontDescription) desc = pango_font_description_from_string(font);
+		pango_layout_set_font_description(layout, desc);
+
+		PangoRectangle ink_rect;
+		PangoRectangle logical_rect;
+		pango_layout_get_extents(layout, &ink_rect, &logical_rect);
+		text_width = static_cast<gdouble>(logical_rect.width) / PANGO_SCALE;
+		pango_height = static_cast<gdouble>(logical_rect.height) / PANGO_SCALE + PRINT_TEXT_PADDING * 2;
+
+		pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+		pango_layout_set_text(layout, text, text_len);
+
+		return layout;
+	};
 
 	pango_image_height = 0;
 	pango_page_height = 0;
 	image_text_width = 0;
 	page_text_width = 0;
 
-	if (image_text->len > 0)
+	if (options->printer.show_image_text)
 		{
-		layout_image = pango_cairo_create_layout(cr);
+		gint total = g_list_length(pw->source_selection);
+		g_autofree gchar *image_text = form_image_text(options->printer.template_string, fd, pw, page_nr, total);
 
-		pango_layout_set_text(layout_image, image_text->str, -1);
-		desc = pango_font_description_from_string(options->printer.image_font);
-		pango_layout_set_font_description(layout_image, desc);
-
-		pango_layout_get_extents(layout_image, &ink_rect, &logical_rect);
-		image_text_width = (static_cast<gdouble>(logical_rect.width) / PANGO_SCALE) ;
-		image_text_height = (static_cast<gdouble>(logical_rect.height) / PANGO_SCALE);
-
-		pango_layout_set_alignment(layout_image, PANGO_ALIGN_CENTER);
-		pango_layout_set_text(layout_image, image_text->str, -1);
-
-		pango_image_height = image_text_height + PRINT_TEXT_PADDING * 2;
-
-		pango_font_description_free(desc);
+		layout_image = create_layout(image_text, options->printer.image_font, image_text_width, pango_image_height);
 		}
 
-	if (page_text->len > 0)
+	if (options->printer.show_page_text)
 		{
-		layout_page = pango_cairo_create_layout(cr);
+		g_autofree gchar *page_text = print_get_page_text(pw);
 
-		pango_layout_set_text(layout_page, page_text->str, -1);
-		desc = pango_font_description_from_string(options->printer.page_font);
-		pango_layout_set_font_description(layout_page, desc);
-
-		pango_layout_get_extents(layout_page, &ink_rect, &logical_rect);
-		page_text_width = (static_cast<gdouble>(logical_rect.width) / PANGO_SCALE) ;
-		page_text_height = (static_cast<gdouble>(logical_rect.height) / PANGO_SCALE);
-
-		pango_layout_set_alignment(layout_page, PANGO_ALIGN_CENTER);
-		pango_layout_set_text(layout_page, page_text->str, -1);
-
-		pango_page_height = page_text_height + PRINT_TEXT_PADDING * 2;
-
-		pango_font_description_free(desc);
+		layout_page = create_layout(page_text, options->printer.page_font, page_text_width, pango_page_height);
 		}
 
 	pango_height = pango_image_height + pango_page_height;
@@ -710,7 +690,7 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 
 	incr_y = height_offset;
 
-	if (options->printer.page_text_position == HEADER_1 && page_text->len > 0)
+	if (options->printer.page_text_position == HEADER_1 && layout_page)
 		{
 		cairo_move_to(cr, (w / 2) - (page_text_width / 2) + width_offset, incr_y);
 		pango_cairo_show_layout(cr, layout_page);
@@ -718,7 +698,7 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 		incr_y = incr_y + pango_page_height;
 		}
 
-	if (options->printer.image_text_position == HEADER_1 && image_text->len > 0)
+	if (options->printer.image_text_position == HEADER_1 && layout_image)
 		{
 		cairo_move_to(cr, (w / 2) - (image_text_width / 2) + width_offset, incr_y + PRINT_TEXT_PADDING);
 		pango_cairo_show_layout(cr, layout_image);
@@ -726,7 +706,7 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 		incr_y = incr_y + pango_image_height;
 		}
 
-	if (options->printer.page_text_position == HEADER_2 && page_text->len > 0)
+	if (options->printer.page_text_position == HEADER_2 && layout_page)
 		{
 		cairo_move_to(cr, (w / 2) - (page_text_width / 2) + width_offset, incr_y);
 		pango_cairo_show_layout(cr, layout_page);
@@ -734,7 +714,7 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 		incr_y = incr_y + pango_page_height;
 		}
 
-	if (options->printer.image_text_position == HEADER_2 && image_text->len > 0)
+	if (options->printer.image_text_position == HEADER_2 && layout_image)
 		{
 		cairo_move_to(cr, (w / 2) - (image_text_width / 2) + width_offset, incr_y);
 		pango_cairo_show_layout(cr, layout_image);
@@ -745,7 +725,7 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 	image_y = incr_y;
 	incr_y = incr_y + h;
 
-	if (options->printer.page_text_position == FOOTER_1 && page_text->len > 0)
+	if (options->printer.page_text_position == FOOTER_1 && layout_page)
 		{
 		cairo_move_to(cr, (w / 2) - (page_text_width / 2) + width_offset, incr_y + PRINT_TEXT_PADDING);
 		pango_cairo_show_layout(cr, layout_page);
@@ -753,7 +733,7 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 		incr_y = incr_y + pango_page_height;
 		}
 
-	if (options->printer.image_text_position == FOOTER_1 && image_text->len > 0)
+	if (options->printer.image_text_position == FOOTER_1 && layout_image)
 		{
 		cairo_move_to(cr, (w / 2) - (image_text_width / 2) + width_offset, incr_y);
 		pango_cairo_show_layout(cr, layout_image);
@@ -761,7 +741,7 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 		incr_y = incr_y + pango_image_height;
 		}
 
-	if (options->printer.page_text_position == FOOTER_2 && page_text->len > 0)
+	if (options->printer.page_text_position == FOOTER_2 && layout_page)
 		{
 		cairo_move_to(cr, (w / 2) - (page_text_width / 2) + width_offset, incr_y);
 		pango_cairo_show_layout(cr, layout_page);
@@ -769,7 +749,7 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 		incr_y = incr_y + pango_page_height;
 		}
 
-	if (options->printer.image_text_position == FOOTER_2 && image_text->len > 0)
+	if (options->printer.image_text_position == FOOTER_2 && layout_image)
 		{
 		cairo_move_to(cr, (w / 2) - (image_text_width / 2) + width_offset, incr_y);
 		pango_cairo_show_layout(cr, layout_image);
@@ -781,17 +761,8 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 	gdk_cairo_set_source_pixbuf(cr, pixbuf, width_offset / scale, image_y / scale);
 	cairo_fill(cr);
 
-	if (image_text->len > 0)
-		{
-		g_object_unref(layout_image);
-		g_string_free(image_text, TRUE);
-		}
-	if (page_text->len > 0)
-		{
-		g_object_unref(layout_page);
-		g_string_free(page_text, TRUE);
-		}
-
+	if (layout_image) g_object_unref(layout_image);
+	if (layout_page) g_object_unref(layout_page);
 	if (rotated) g_object_unref(rotated);
 }
 
