@@ -500,12 +500,7 @@ static gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer dat
 {
 	auto pw = static_cast<PrintWindow *>(data);
 
-	if (pw->job_render_finished)
-		{
-		return TRUE;
-		}
-
-	return FALSE;
+	return pw->job_render_finished;
 }
 
 gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *pw, gint page_nr, gint total)
