@@ -210,132 +210,72 @@ static gint set_toggle(GSList *list, TextPosition pos)
 	return new_pos;
 }
 
+static void image_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
+{
+	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
+
+	auto pw = static_cast<PrintWindow *>(data);
+	gint new_set = set_toggle(pw->page_group, pos);
+	if (new_set >= 0)
+		{
+		options->printer.page_text_position = new_set;
+		}
+
+	options->printer.image_text_position = pos;
+}
+
 static void image_text_position_h1_cb(GtkWidget *widget, gpointer data)
 {
-	auto pw = static_cast<PrintWindow *>(data);
-	gint new_set;
-
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		new_set = set_toggle(pw->page_group, HEADER_1);
-		if (new_set >= 0)
-			{
-			options->printer.page_text_position = new_set;
-			}
-		options->printer.image_text_position = HEADER_1;
-		}
+	image_text_position_cb(widget, data, HEADER_1);
 }
 
 static void image_text_position_h2_cb(GtkWidget *widget, gpointer data)
 {
-	auto pw = static_cast<PrintWindow *>(data);
-	gint new_set;
-
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		new_set = set_toggle(pw->page_group, HEADER_2);
-		if (new_set >= 0)
-			{
-			options->printer.page_text_position = new_set;
-			}
-		options->printer.image_text_position = HEADER_2;
-		}
+	image_text_position_cb(widget, data, HEADER_2);
 }
 
 static void image_text_position_f1_cb(GtkWidget *widget, gpointer data)
 {
-	auto pw = static_cast<PrintWindow *>(data);
-	gint new_set;
-
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		new_set = set_toggle(pw->page_group, FOOTER_1);
-		if (new_set >= 0)
-			{
-			options->printer.page_text_position = new_set;
-			}
-		options->printer.image_text_position = FOOTER_1;
-		}
+	image_text_position_cb(widget, data, FOOTER_1);
 }
 
 static void image_text_position_f2_cb(GtkWidget *widget, gpointer data)
 {
-	auto pw = static_cast<PrintWindow *>(data);
-	gint new_set;
+	image_text_position_cb(widget, data, FOOTER_2);
+}
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+static void page_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
+{
+	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
+
+	auto pw = static_cast<PrintWindow *>(data);
+	gint new_set = set_toggle(pw->image_group, pos);
+	if (new_set >= 0)
 		{
-		new_set = set_toggle(pw->page_group, FOOTER_2);
-		if (new_set >= 0)
-			{
-			options->printer.page_text_position = new_set;
-			}
-		options->printer.image_text_position = FOOTER_2;
+		options->printer.image_text_position = new_set;
 		}
+
+	options->printer.page_text_position = pos;
 }
 
 static void page_text_position_h1_cb(GtkWidget *widget, gpointer data)
 {
-	auto pw = static_cast<PrintWindow *>(data);
-	gint new_set;
-
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		new_set = set_toggle(pw->image_group, HEADER_1);
-		if (new_set >= 0)
-			{
-			options->printer.image_text_position = new_set;
-			}
-		options->printer.page_text_position = HEADER_1;
-		}
+	page_text_position_cb(widget, data, HEADER_1);
 }
 
 static void page_text_position_h2_cb(GtkWidget *widget, gpointer data)
 {
-	auto pw = static_cast<PrintWindow *>(data);
-	gint new_set;
-
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		new_set = set_toggle(pw->image_group, HEADER_2);
-		if (new_set >= 0)
-			{
-			options->printer.image_text_position = new_set;
-			}
-		options->printer.page_text_position = HEADER_2;
-		}
+	page_text_position_cb(widget, data, HEADER_2);
 }
 
 static void page_text_position_f1_cb(GtkWidget *widget, gpointer data)
 {
-	auto pw = static_cast<PrintWindow *>(data);
-	gint new_set;
-
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		new_set = set_toggle(pw->image_group, FOOTER_1);
-		if (new_set >= 0)
-			{
-			options->printer.image_text_position = new_set;
-			}
-		options->printer.page_text_position = FOOTER_1;
-		}
+	page_text_position_cb(widget, data, FOOTER_1);
 }
 
 static void page_text_position_f2_cb(GtkWidget *widget, gpointer data)
 {
-	auto pw = static_cast<PrintWindow *>(data);
-	gint new_set;
-
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		new_set = set_toggle(pw->image_group, FOOTER_2);
-		if (new_set >= 0)
-			{
-			options->printer.image_text_position = new_set;
-			}
-		options->printer.page_text_position = FOOTER_2;
-		}
+	page_text_position_cb(widget, data, FOOTER_2);
 }
 
 static void set_print_image_text_string(gchar **template_string, const gchar *value)
