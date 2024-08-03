@@ -27,6 +27,14 @@
 
 class FileData;
 
+/* reverse order is important */
+enum TextPosition : gint {
+	FOOTER_2,
+	FOOTER_1,
+	HEADER_2,
+	HEADER_1,
+};
+
 void print_window_new(FileData *fd, GList *selection, GList *list, GtkWidget *parent);
 
 #endif

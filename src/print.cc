@@ -21,6 +21,7 @@
 #include "print.h"
 
 #include <cstddef>
+#include <cstring>
 
 #include <cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -57,14 +58,6 @@ namespace
 constexpr gint PRE_FORMATTED_COLUMNS = 4;
 
 } // namespace
-
-/* reverse order is important */
-enum TextPosition {
-	FOOTER_2,
-	FOOTER_1,
-	HEADER_2,
-	HEADER_1
-};
 
 struct PrintWindow
 {
@@ -218,7 +211,7 @@ static void image_text_position_cb(GtkWidget *widget, gpointer data, TextPositio
 	gint new_set = set_toggle(pw->page_group, pos);
 	if (new_set >= 0)
 		{
-		options->printer.page_text_position = new_set;
+		options->printer.page_text_position = static_cast<TextPosition>(new_set);
 		}
 
 	options->printer.image_text_position = pos;
@@ -252,7 +245,7 @@ static void page_text_position_cb(GtkWidget *widget, gpointer data, TextPosition
 	gint new_set = set_toggle(pw->image_group, pos);
 	if (new_set >= 0)
 		{
-		options->printer.image_text_position = new_set;
+		options->printer.image_text_position = static_cast<TextPosition>(new_set);
 		}
 
 	options->printer.page_text_position = pos;

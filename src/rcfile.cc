@@ -1054,8 +1054,8 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_CHAR(*options, printer.image_font)) continue;
 		if (READ_CHAR(*options, printer.page_font)) continue;
 		if (READ_CHAR(*options, printer.page_text)) continue;
-		if (READ_INT(*options, printer.image_text_position)) continue;
-		if (READ_INT(*options, printer.page_text_position)) continue;
+		if (READ_INT_ENUM(*options, printer.image_text_position)) continue;
+		if (READ_INT_ENUM(*options, printer.page_text_position)) continue;
 		if (READ_BOOL(*options, printer.show_image_text)) continue;
 		if (READ_BOOL(*options, printer.show_page_text)) continue;
 

@@ -60,6 +60,7 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 
 #define READ_BOOL(_target_, _name_) read_bool_option(option, #_name_, value, &(_target_)._name_)
 #define READ_INT(_target_, _name_) read_int_option(option, #_name_, value, &(_target_)._name_)
+#define READ_INT_ENUM(_target_, _name_) read_int_option(option, #_name_, value, (gint*)&(_target_)._name_)
 #define READ_UINT(_target_, _name_) read_uint_option(option, #_name_, value, &(_target_)._name_)
 #define READ_UINT_ENUM(_target_, _name_) read_uint_option(option, #_name_, value, (guint*)&(_target_)._name_)
 #define READ_USHORT(_target_, _name_) read_ushort_option(option, #_name_, value, &(_target_)._name_)

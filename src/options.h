@@ -28,6 +28,8 @@
 #include "image.h"
 #include "typedefs.h"
 
+enum TextPosition : gint;
+
 struct SecureSaveInfo;
 
 #define COLOR_PROFILE_INPUTS 4
@@ -388,8 +390,8 @@ struct ConfOptions
 		gboolean show_image_text;
 		gboolean show_page_text;
 		gchar *page_text;
-		gint image_text_position;
-		gint page_text_position;
+		TextPosition image_text_position;
+		TextPosition page_text_position;
 		gchar *template_string;
 	} printer;
 

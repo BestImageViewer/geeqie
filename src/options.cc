@@ -32,6 +32,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "print.h"
 #include "rcfile.h"
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
@@ -233,8 +234,8 @@ ConfOptions *init_options(ConfOptions *options)
 	options->printer.image_font = g_strdup("Serif 10");
 	options->printer.page_font = g_strdup("Serif 10");
 	options->printer.page_text = nullptr;
-	options->printer.image_text_position = 1;
-	options->printer.page_text_position = 3;
+	options->printer.image_text_position = FOOTER_1;
+	options->printer.page_text_position = HEADER_1;
 
 	options->threads.duplicates = get_cpu_cores() - 1;
 
