@@ -138,7 +138,7 @@ void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 		gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(ee->box)), ee->box);
 		}
 
-	ee->box = horizontal ? gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0) : gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	ee->box = gtk_box_new(horizontal ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_container_add(GTK_WIDGET(ee->ebox), ee->box);
 	gtk_widget_show(ee->box);
 

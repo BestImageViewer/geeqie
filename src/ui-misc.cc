@@ -52,16 +52,7 @@
 GtkWidget *pref_box_new(GtkWidget *parent_box, gboolean fill,
 			GtkOrientation orientation, gboolean padding)
 {
-	GtkWidget *box;
-
-	if (orientation == GTK_ORIENTATION_HORIZONTAL)
-		{
-		box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, padding);
-		}
-	else
-		{
-		box = gtk_box_new(GTK_ORIENTATION_VERTICAL, padding);
-		}
+	GtkWidget *box = gtk_box_new(orientation, padding);
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), box, fill, fill, 0);
 	gtk_widget_show(box);
@@ -154,14 +145,7 @@ GtkWidget *pref_frame_new(GtkWidget *parent_box, gboolean fill,
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), frame, fill, fill, 0);
 	gtk_widget_show(frame);
 
-	if (orientation == GTK_ORIENTATION_HORIZONTAL)
-		{
-		box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, padding);
-		}
-	else
-		{
-		box = gtk_box_new(GTK_ORIENTATION_VERTICAL, padding);
-		}
+	box = gtk_box_new(orientation, padding);
 	gq_gtk_container_add(GTK_WIDGET(frame), box);
 	gtk_container_set_border_width(GTK_CONTAINER(box), PREF_PAD_BORDER);
 	gtk_widget_show(box);
