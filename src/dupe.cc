@@ -2480,9 +2480,8 @@ static gboolean dupe_check_cb(gpointer data)
 					return G_SOURCE_CONTINUE;
 					}
 				}
-			g_list_free(dw->search_matches);
+			g_list_free(dw->search_matches); // FIXME dw->search_matches doesn't point at the start of the list after g_list_sort() call
 			dw->search_matches = nullptr;
-			g_list_free(dw->search_matches_sorted);
 			dw->search_matches_sorted = nullptr;
 			dw->setup_count = 0;
 			}

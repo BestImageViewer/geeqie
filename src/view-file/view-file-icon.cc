@@ -1862,18 +1862,16 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 		GList *reversed_old_selected;
 
 		reversed_old_selected = g_list_reverse(old_selected);
-		while (reversed_old_selected)
+		for (old_selected = reversed_old_selected; old_selected; old_selected = old_selected->next)
 			{
-			GList *tmp;
-			tmp = g_list_find(VFICON(vf)->selection, reversed_old_selected->data);
+			GList *tmp = g_list_find(VFICON(vf)->selection, old_selected->data);
 			if (tmp)
 				{
 				VFICON(vf)->selection = g_list_remove_link(VFICON(vf)->selection, tmp);
 				VFICON(vf)->selection = g_list_concat(tmp, VFICON(vf)->selection);
 				}
-			reversed_old_selected = reversed_old_selected->next;
 			}
-		g_list_free(old_selected);
+		g_list_free(reversed_old_selected);
 		}
 
 	filelist_free(new_filelist);

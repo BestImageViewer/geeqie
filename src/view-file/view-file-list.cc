@@ -168,11 +168,11 @@ static gboolean vflist_store_clear_cb(GtkTreeModel *model, GtkTreePath *, GtkTre
 static void vflist_store_clear(ViewFile *vf, gboolean unlock_files)
 {
 	GtkTreeModel *store;
-	GList *files = nullptr;
 
 	if (unlock_files && vf->marks_enabled)
 		{
 		// unlock locked files in this directory
+		GList *files = nullptr;
 		filelist_read(vf->dir_fd, &files, nullptr);
 		GList *work = files;
 		while (work)
@@ -182,9 +182,9 @@ static void vflist_store_clear(ViewFile *vf, gboolean unlock_files)
 			file_data_unlock(fd);
 			file_data_unref(fd);  // undo the ref that got added in filelist_read
 			}
+		g_list_free(files);
 		}
 
-	g_list_free(files);
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 	gtk_tree_model_foreach(store, vflist_store_clear_cb, nullptr);
 	gtk_tree_store_clear(GTK_TREE_STORE(store));

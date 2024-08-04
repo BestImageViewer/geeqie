@@ -1957,15 +1957,15 @@ gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)
 	pane = bar_find_pane_by_id(lw->bar, PANE_KEYWORDS, "keywords");
 
 	children = gtk_container_get_children(GTK_CONTAINER(pane));
-	children = g_list_last(children);
 
-	if (current_focus == children->data)
+	const GList *last_child = g_list_last(children);
+	if (current_focus == last_child->data)
 		{
 		ret = TRUE;
 		}
 	else
 		{
-		gtk_widget_grab_focus(GTK_WIDGET(children->data));
+		gtk_widget_grab_focus(GTK_WIDGET(last_child->data));
 		ret = FALSE;
 		}
 

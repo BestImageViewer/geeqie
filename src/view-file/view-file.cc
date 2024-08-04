@@ -1207,7 +1207,6 @@ static gboolean vf_file_filter_class_set_all_cb(GtkWidget *widget, gpointer data
 	auto vf = static_cast<ViewFile *>(data);
 	GtkWidget *parent;
 	GList *children;
-	GtkWidget *child;
 	gint i;
 	gboolean state;
 
@@ -1228,15 +1227,13 @@ static gboolean vf_file_filter_class_set_all_cb(GtkWidget *widget, gpointer data
 	i = 0;
 	parent = gtk_widget_get_parent(widget);
 	children = gtk_container_get_children(GTK_CONTAINER(parent));
-	while (children)
+	for (GList *work = children; work; work = work->next)
 		{
-		child = static_cast<GtkWidget *>(children->data);
 		if (i < FILE_FORMAT_CLASSES)
 			{
-			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(child), state);
+			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(work->data), state);
 			}
 		i++;
-		children = children->next;
 		}
 	g_list_free(children);
 	vf_refresh(vf);
