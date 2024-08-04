@@ -3173,7 +3173,7 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 					}
 				else
 					{
-					image = gtk_image_new_from_stock(GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
+					image = gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
 					}
 				gtk_button_set_image(GTK_BUTTON(work_button_list->data), GTK_WIDGET(image));
 				gtk_widget_set_tooltip_text(GTK_WIDGET(work_button_list->data), editor->name);
