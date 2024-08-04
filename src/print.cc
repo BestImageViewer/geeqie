@@ -530,7 +530,6 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 	gdouble image_text_width;
 	gdouble page_text_width;
 	gint image_y;
-	gint incr_y;
 	gdouble pango_height;
 	gdouble pango_image_height;
 	gdouble pango_page_height;
@@ -616,69 +615,58 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 		width_offset = (context_width - (pixbuf_image_width * scale)) / 2;
 		}
 
-	incr_y = height_offset;
+	image_y = height_offset;
 
-	if (options->printer.page_text_position == HEADER_1 && layout_page)
+	if (layout_page)
 		{
+		gint incr_y = height_offset;
+
+		if (layout_image && options->printer.page_text_position < options->printer.image_text_position)
+			{
+			incr_y += pango_image_height;
+			}
+
+		if (options->printer.page_text_position < HEADER_2)
+			{
+			incr_y += h;
+			}
+		else
+			{
+			image_y += pango_page_height;
+			}
+
+		if (options->printer.page_text_position == FOOTER_1)
+			{
+			incr_y += PRINT_TEXT_PADDING;
+			}
+
 		cairo_move_to(cr, (w / 2) - (page_text_width / 2) + width_offset, incr_y);
 		pango_cairo_show_layout(cr, layout_page);
-
-		incr_y = incr_y + pango_page_height;
 		}
 
-	if (options->printer.image_text_position == HEADER_1 && layout_image)
+	if (layout_image)
 		{
-		cairo_move_to(cr, (w / 2) - (image_text_width / 2) + width_offset, incr_y + PRINT_TEXT_PADDING);
-		pango_cairo_show_layout(cr, layout_image);
+		gint incr_y = height_offset;
 
-		incr_y = incr_y + pango_image_height;
-		}
+		if (layout_page && options->printer.image_text_position <= options->printer.page_text_position)
+			{
+			incr_y += pango_page_height;
+			}
 
-	if (options->printer.page_text_position == HEADER_2 && layout_page)
-		{
-		cairo_move_to(cr, (w / 2) - (page_text_width / 2) + width_offset, incr_y);
-		pango_cairo_show_layout(cr, layout_page);
+		if (options->printer.image_text_position < HEADER_2)
+			{
+			incr_y += h;
+			}
+		else
+			{
+			image_y += pango_image_height;
+			}
 
-		incr_y = incr_y + pango_page_height;
-		}
+		if (options->printer.image_text_position == HEADER_1)
+			{
+			incr_y += PRINT_TEXT_PADDING;
+			}
 
-	if (options->printer.image_text_position == HEADER_2 && layout_image)
-		{
-		cairo_move_to(cr, (w / 2) - (image_text_width / 2) + width_offset, incr_y);
-		pango_cairo_show_layout(cr, layout_image);
-
-		incr_y = incr_y + pango_image_height;
-		}
-
-	image_y = incr_y;
-	incr_y = incr_y + h;
-
-	if (options->printer.page_text_position == FOOTER_1 && layout_page)
-		{
-		cairo_move_to(cr, (w / 2) - (page_text_width / 2) + width_offset, incr_y + PRINT_TEXT_PADDING);
-		pango_cairo_show_layout(cr, layout_page);
-
-		incr_y = incr_y + pango_page_height;
-		}
-
-	if (options->printer.image_text_position == FOOTER_1 && layout_image)
-		{
-		cairo_move_to(cr, (w / 2) - (image_text_width / 2) + width_offset, incr_y);
-		pango_cairo_show_layout(cr, layout_image);
-
-		incr_y = incr_y + pango_image_height;
-		}
-
-	if (options->printer.page_text_position == FOOTER_2 && layout_page)
-		{
-		cairo_move_to(cr, (w / 2) - (page_text_width / 2) + width_offset, incr_y);
-		pango_cairo_show_layout(cr, layout_page);
-
-		incr_y = incr_y + pango_page_height;
-		}
-
-	if (options->printer.image_text_position == FOOTER_2 && layout_image)
-		{
 		cairo_move_to(cr, (w / 2) - (image_text_width / 2) + width_offset, incr_y);
 		pango_cairo_show_layout(cr, layout_image);
 		}
