@@ -27,6 +27,7 @@
 #include <cstring>
 
 #include <glib-object.h>
+#include <gtk/gtk.h>
 
 #include "cache-loader.h"
 #include "cache.h"
@@ -51,10 +52,6 @@
 namespace
 {
 
-constexpr gint PURGE_DIALOG_WIDTH = 400;
-
-} // namespace
-
 struct CMData
 {
 	GList *list;
@@ -69,6 +66,35 @@ struct CMData
 	gboolean metadata;
 	gboolean remote;
 };
+
+constexpr gint PURGE_DIALOG_WIDTH = 400;
+
+/* sorry for complexity (cm->done_list), but need it to remove empty dirs */
+CMData *cache_maintain_data_new(gboolean clear, gboolean metadata, gboolean remote)
+{
+	const gchar *cache_folder = metadata ? get_metadata_cache_dir() : get_thumbnails_cache_dir();
+	FileData *dir_fd = file_data_new_dir(cache_folder);
+
+	GList *dlist;
+	if (!filelist_read(dir_fd, nullptr, &dlist))
+		{
+		file_data_unref(dir_fd);
+		return nullptr;
+		}
+
+	dlist = g_list_append(dlist, dir_fd);
+
+	auto *cm = g_new0(CMData, 1);
+	cm->list = dlist;
+	cm->done_list = nullptr;
+	cm->clear = clear;
+	cm->metadata = metadata;
+	cm->remote = remote;
+
+	return cm;
+}
+
+} // namespace
 
 /*
  *-----------------------------------------------------------------------------
@@ -338,40 +364,13 @@ static void cache_maintain_home_stop_cb(GenericDialog *, gpointer data)
 	cache_maintain_home_stop(cm);
 }
 
-/* sorry for complexity (cm->done_list), but need it to remove empty dirs */
-void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent)
+static void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent)
 {
-	CMData *cm;
-	GList *dlist;
-	FileData *dir_fd;
+	CMData *cm = cache_maintain_data_new(clear, metadata, FALSE);
+	if (!cm) return;
+
 	const gchar *msg;
-	const gchar *cache_folder;
 	GtkWidget *hbox;
-
-	if (metadata)
-		{
-		cache_folder = get_metadata_cache_dir();
-		}
-	else
-		{
-		cache_folder = get_thumbnails_cache_dir();
-		}
-
-	dir_fd = file_data_new_dir(cache_folder);
-	if (!filelist_read(dir_fd, nullptr, &dlist))
-		{
-		file_data_unref(dir_fd);
-		return;
-		}
-
-	dlist = g_list_append(dlist, dir_fd);
-
-	cm = g_new0(CMData, 1);
-	cm->list = dlist;
-	cm->done_list = nullptr;
-	cm->clear = clear;
-	cm->metadata = metadata;
-	cm->remote = FALSE;
 
 	if (metadata)
 		{
@@ -430,35 +429,8 @@ void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *parent)
  */
 void cache_maintain_home_remote(gboolean metadata, gboolean clear, GDestroyNotify func)
 {
-	CMData *cm;
-	GList *dlist;
-	FileData *dir_fd;
-	const gchar *cache_folder;
-
-	if (metadata)
-		{
-		cache_folder = get_metadata_cache_dir();
-		}
-	else
-		{
-		cache_folder = get_thumbnails_cache_dir();
-		}
-
-	dir_fd = file_data_new_dir(cache_folder);
-	if (!filelist_read(dir_fd, nullptr, &dlist))
-		{
-		file_data_unref(dir_fd);
-		return;
-		}
-
-	dlist = g_list_append(dlist, dir_fd);
-
-	cm = g_new0(CMData, 1);
-	cm->list = dlist;
-	cm->done_list = nullptr;
-	cm->clear = clear;
-	cm->metadata = metadata;
-	cm->remote = TRUE;
+	CMData *cm = cache_maintain_data_new(clear, metadata, TRUE);
+	if (!cm) return;
 
 	cm->idle_id = g_idle_add_full(G_PRIORITY_LOW, cache_maintain_home_cb, cm, func);
 }
