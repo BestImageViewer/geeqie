@@ -592,21 +592,21 @@ static void li_pop_menu_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), TRUE, TRUE);
+	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), TRUE, ClipboardAction::COPY);
 }
 
 static void li_pop_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), FALSE, TRUE);
+	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), FALSE, ClipboardAction::COPY);
 }
 
 static void li_pop_menu_cut_path_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), FALSE, FALSE);
+	file_util_copy_path_to_clipboard(layout_image_get_fd(lw), FALSE, ClipboardAction::CUT);
 }
 
 #if HAVE_GTK4

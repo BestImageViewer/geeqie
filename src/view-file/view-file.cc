@@ -553,21 +553,21 @@ static void vf_pop_menu_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	file_util_path_list_to_clipboard(vf_pop_menu_file_list(vf), TRUE, TRUE);
+	file_util_path_list_to_clipboard(vf_pop_menu_file_list(vf), TRUE, ClipboardAction::COPY);
 }
 
 static void vf_pop_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	file_util_path_list_to_clipboard(vf_pop_menu_file_list(vf), FALSE, TRUE);
+	file_util_path_list_to_clipboard(vf_pop_menu_file_list(vf), FALSE, ClipboardAction::COPY);
 }
 
 static void vf_pop_menu_cut_path_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	file_util_path_list_to_clipboard(vf_pop_menu_file_list(vf), FALSE, FALSE);
+	file_util_path_list_to_clipboard(vf_pop_menu_file_list(vf), FALSE, ClipboardAction::CUT);
 }
 
 static void vf_pop_menu_enable_grouping_cb(GtkWidget *, gpointer data)

@@ -2246,7 +2246,7 @@ static void pan_copy_path_cb(GtkWidget *, gpointer data)
 	FileData *fd;
 
 	fd = pan_menu_click_fd(pw);
-	if (fd) file_util_copy_path_to_clipboard(fd, TRUE, TRUE);
+	if (fd) file_util_copy_path_to_clipboard(fd, TRUE, ClipboardAction::COPY);
 }
 
 static void pan_copy_path_unquoted_cb(GtkWidget *, gpointer data)
@@ -2255,7 +2255,7 @@ static void pan_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 	FileData *fd;
 
 	fd = pan_menu_click_fd(pw);
-	if (fd) file_util_copy_path_to_clipboard(fd, FALSE, TRUE);
+	if (fd) file_util_copy_path_to_clipboard(fd, FALSE, ClipboardAction::COPY);
 }
 
 static void pan_exif_date_toggle_cb(GtkWidget *widget, gpointer data)

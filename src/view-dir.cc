@@ -583,7 +583,7 @@ static void vd_pop_menu_copy_path_cb(GtkWidget *, gpointer data)
 
 	if (!vd->click_fd) return;
 
-	file_util_copy_path_to_clipboard(vd->click_fd, TRUE, TRUE);
+	file_util_copy_path_to_clipboard(vd->click_fd, TRUE, ClipboardAction::COPY);
 }
 
 static void vd_pop_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
@@ -592,7 +592,7 @@ static void vd_pop_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 
 	if (!vd->click_fd) return;
 
-	file_util_copy_path_to_clipboard(vd->click_fd, FALSE, TRUE);
+	file_util_copy_path_to_clipboard(vd->click_fd, FALSE, ClipboardAction::COPY);
 }
 
 static void vd_pop_menu_cut_path_cb(GtkWidget *, gpointer data)
@@ -601,7 +601,7 @@ static void vd_pop_menu_cut_path_cb(GtkWidget *, gpointer data)
 
 	if (!vd->click_fd) return;
 
-	file_util_copy_path_to_clipboard(vd->click_fd, FALSE, FALSE);
+	file_util_copy_path_to_clipboard(vd->click_fd, FALSE, ClipboardAction::CUT);
 }
 
 static void vd_pop_submenu_dir_view_as_cb(GtkWidget *widget, gpointer data)

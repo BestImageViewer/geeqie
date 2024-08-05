@@ -3339,14 +3339,14 @@ static void dupe_menu_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	file_util_path_list_to_clipboard(dupe_listview_get_selection(dw, dw->listview), TRUE, TRUE);
+	file_util_path_list_to_clipboard(dupe_listview_get_selection(dw, dw->listview), TRUE, ClipboardAction::COPY);
 }
 
 static void dupe_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	file_util_path_list_to_clipboard(dupe_listview_get_selection(dw, dw->listview), FALSE, TRUE);
+	file_util_path_list_to_clipboard(dupe_listview_get_selection(dw, dw->listview), FALSE, ClipboardAction::COPY);
 }
 
 static void dupe_menu_remove_cb(GtkWidget *, gpointer data)

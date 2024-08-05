@@ -388,14 +388,14 @@ static void layout_menu_copy_path_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	file_util_path_list_to_clipboard(layout_selection_list(lw), TRUE, TRUE);
+	file_util_path_list_to_clipboard(layout_selection_list(lw), TRUE, ClipboardAction::COPY);
 }
 
 static void layout_menu_copy_path_unquoted_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	file_util_path_list_to_clipboard(layout_selection_list(lw), FALSE, TRUE);
+	file_util_path_list_to_clipboard(layout_selection_list(lw), FALSE, ClipboardAction::COPY);
 }
 
 static void layout_menu_copy_image_cb(GtkAction *, gpointer data)
@@ -413,7 +413,7 @@ static void layout_menu_cut_path_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	file_util_path_list_to_clipboard(layout_selection_list(lw), FALSE, FALSE);
+	file_util_path_list_to_clipboard(layout_selection_list(lw), FALSE, ClipboardAction::CUT);
 }
 
 static void layout_menu_move_cb(GtkAction *, gpointer data)

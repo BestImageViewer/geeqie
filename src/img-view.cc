@@ -1277,7 +1277,7 @@ static void view_copy_path_cb(GtkWidget *, gpointer data)
 	ImageWindow *imd;
 
 	imd = view_window_active_image(vw);
-	file_util_copy_path_to_clipboard(image_get_fd(imd), TRUE, TRUE);
+	file_util_copy_path_to_clipboard(image_get_fd(imd), TRUE, ClipboardAction::COPY);
 }
 
 static void view_copy_path_unquoted_cb(GtkWidget *, gpointer data)
@@ -1286,7 +1286,7 @@ static void view_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 	ImageWindow *imd;
 
 	imd = view_window_active_image(vw);
-	file_util_copy_path_to_clipboard(image_get_fd(imd), FALSE, TRUE);
+	file_util_copy_path_to_clipboard(image_get_fd(imd), FALSE, ClipboardAction::COPY);
 }
 
 static void view_fullscreen_cb(GtkWidget *, gpointer data)

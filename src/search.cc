@@ -1121,14 +1121,14 @@ static void sr_menu_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	file_util_path_list_to_clipboard(search_result_selection_list(sd), TRUE, TRUE);
+	file_util_path_list_to_clipboard(search_result_selection_list(sd), TRUE, ClipboardAction::COPY);
 }
 
 static void sr_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	file_util_path_list_to_clipboard(search_result_selection_list(sd), FALSE, TRUE);
+	file_util_path_list_to_clipboard(search_result_selection_list(sd), FALSE, ClipboardAction::COPY);
 }
 
 static void sr_menu_play_cb(GtkWidget *, gpointer data)

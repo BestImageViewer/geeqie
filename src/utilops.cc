@@ -66,7 +66,7 @@ struct ClipboardData
 {
 	GList *path_list; /**< g_strdup(fd->path) */
 	gboolean quoted;
-	gboolean action_copy;
+	ClipboardAction action;
 };
 
 enum ClipboardDestination {
@@ -3179,7 +3179,15 @@ static void clipboard_get_func(GtkClipboard *clipboard, GtkSelectionData *select
 
 	if (clipboard == gtk_clipboard_get(GDK_SELECTION_CLIPBOARD) && info == CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES)
 		{
-		g_string_append(path_list_str, cbd->action_copy ? "copy" : "cut");
+		switch (cbd->action)
+			{
+			case ClipboardAction::COPY:
+				g_string_append(path_list_str, "copy");
+				break;
+			case ClipboardAction::CUT:
+				g_string_append(path_list_str, "cut");
+				break;
+			}
 
 		while (work)
 			{
@@ -3238,12 +3246,12 @@ static void clipboard_clear_func(GtkClipboard *, gpointer data)
 	g_free(cbd);
 }
 
-static gboolean path_list_to_clipboard(GList *path_list, gboolean quoted, gboolean action_copy, GdkAtom selection)
+static gboolean path_list_to_clipboard(GList *path_list, gboolean quoted, ClipboardAction action, GdkAtom selection)
 {
 	auto *cbd = g_new0(ClipboardData, 1);
 	cbd->path_list = path_list;
 	cbd->quoted = quoted;
-	cbd->action_copy = action_copy;
+	cbd->action = action;
 
 	return gtk_clipboard_set_with_data(gtk_clipboard_get(selection), target_types.data(), target_types.size(), clipboard_get_func, clipboard_clear_func, cbd);
 }
@@ -3252,11 +3260,9 @@ static gboolean path_list_to_clipboard(GList *path_list, gboolean quoted, gboole
  * @brief
  * @param fd
  * @param quoted
- * @param action_copy True: action is "copy". False: action is "cut"
- *
- *
+ * @param action
  */
-void file_util_copy_path_to_clipboard(FileData *fd, gboolean quoted, gboolean action_copy)
+void file_util_copy_path_to_clipboard(FileData *fd, gboolean quoted, ClipboardAction action)
 {
 	if (!fd || !*fd->path) return;
 
@@ -3264,14 +3270,14 @@ void file_util_copy_path_to_clipboard(FileData *fd, gboolean quoted, gboolean ac
 		{
 		GList *path_list = g_list_append(nullptr, g_strdup(fd->path));
 
-		path_list_to_clipboard(path_list, quoted, action_copy, GDK_SELECTION_PRIMARY);
+		path_list_to_clipboard(path_list, quoted, action, GDK_SELECTION_PRIMARY);
 		}
 
 	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD || options->clipboard_selection == CLIPBOARD_BOTH)
 		{
 		GList *path_list = g_list_append(nullptr, g_strdup(fd->path));
 
-		path_list_to_clipboard(path_list, quoted, action_copy, GDK_SELECTION_CLIPBOARD);
+		path_list_to_clipboard(path_list, quoted, action, GDK_SELECTION_CLIPBOARD);
 		}
 }
 
@@ -3279,11 +3285,9 @@ void file_util_copy_path_to_clipboard(FileData *fd, gboolean quoted, gboolean ac
  * @brief
  * @param fd_list List of fd
  * @param quoted
- * @param action_copy True: action is "copy". False: action is "cut"
- *
- *
+ * @param action
  */
-void file_util_path_list_to_clipboard(GList *fd_list, gboolean quoted, gboolean action_copy)
+void file_util_path_list_to_clipboard(GList *fd_list, gboolean quoted, ClipboardAction action)
 {
 	// FIXME Is it safe to use FileList::to_path_list()?
 	static const auto get_path_list = [](GList *fd_list)
@@ -3304,12 +3308,12 @@ void file_util_path_list_to_clipboard(GList *fd_list, gboolean quoted, gboolean 
 
 	if (options->clipboard_selection == CLIPBOARD_PRIMARY || options->clipboard_selection == CLIPBOARD_BOTH)
 		{
-		path_list_to_clipboard(get_path_list(fd_list), quoted, action_copy, GDK_SELECTION_PRIMARY);
+		path_list_to_clipboard(get_path_list(fd_list), quoted, action, GDK_SELECTION_PRIMARY);
 		}
 
 	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD || options->clipboard_selection == CLIPBOARD_BOTH)
 		{
-		path_list_to_clipboard(get_path_list(fd_list), quoted, action_copy, GDK_SELECTION_CLIPBOARD);
+		path_list_to_clipboard(get_path_list(fd_list), quoted, action, GDK_SELECTION_CLIPBOARD);
 		}
 
 	filelist_free(fd_list);
