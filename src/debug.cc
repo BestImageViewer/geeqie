@@ -20,7 +20,6 @@
 
 #include "debug.h"
 
-#include <regex.h>
 #include <sys/time.h>
 
 #include <cstdarg>
@@ -91,42 +90,22 @@ static gboolean log_normal_cb(gpointer data)
 	return FALSE;
 }
 
-void log_domain_print_message(const gchar *domain, gchar *buf)
+static void log_domain_print_message(const gchar *domain, const gchar *buf)
 {
-	gchar *buf_nl;
-	regex_t regex;
-	gint ret_comp;
-	gint ret_exec;
+	gchar *buf_nl = g_strconcat(buf, "\n", NULL);
 
-	buf_nl = g_strconcat(buf, "\n", NULL);
-
-	if (regexp && command_line)
+	if (regexp && command_line &&
+	    !g_regex_match_simple(regexp, buf_nl, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0)))
 		{
-			ret_comp = regcomp(&regex, regexp, 0);
-			if (!ret_comp)
-				{
-				ret_exec = regexec(&regex, buf_nl, 0, nullptr, 0);
-
-				if (!ret_exec)
-					{
-					print_term(FALSE, buf_nl);
-					if (strcmp(domain, DOMAIN_INFO) == 0)
-						g_idle_add(log_normal_cb, buf_nl);
-					else
-						g_idle_add(log_msg_cb, buf_nl);
-					}
-				regfree(&regex);
-				}
+		return;
 		}
+
+	print_term(FALSE, buf_nl);
+
+	if (strcmp(domain, DOMAIN_INFO) == 0)
+		g_idle_add(log_normal_cb, buf_nl);
 	else
-		{
-		print_term(FALSE, buf_nl);
-		if (strcmp(domain, DOMAIN_INFO) == 0)
-			g_idle_add(log_normal_cb, buf_nl);
-		else
-			g_idle_add(log_msg_cb, buf_nl);
-		}
-	g_free(buf);
+		g_idle_add(log_msg_cb, buf_nl);
 }
 
 void log_domain_print_debug(const gchar *domain, const gchar *file_name, int line_number, const gchar *function_name, const gchar *format, ...)
@@ -134,7 +113,6 @@ void log_domain_print_debug(const gchar *domain, const gchar *file_name, int lin
 	va_list ap;
 	gchar *message;
 	gchar *location;
-	gchar *buf;
 
 	va_start(ap, format);
 	message = g_strdup_vprintf(format, ap);
@@ -149,8 +127,8 @@ void log_domain_print_debug(const gchar *domain, const gchar *file_name, int lin
 		location = g_strdup_printf("%s:%d:%s:", file_name, line_number, function_name);
 		}
 
-	buf = g_strconcat(location, message, NULL);
-	log_domain_print_message(domain,buf);
+	g_autofree gchar *buf = g_strconcat(location, message, NULL);
+	log_domain_print_message(domain, buf);
 	g_free(location);
 	g_free(message);
 }
@@ -158,10 +136,9 @@ void log_domain_print_debug(const gchar *domain, const gchar *file_name, int lin
 void log_domain_printf(const gchar *domain, const gchar *format, ...)
 {
 	va_list ap;
-	gchar *buf;
 
 	va_start(ap, format);
-	buf = g_strdup_vprintf(format, ap);
+	g_autofree gchar *buf = g_strdup_vprintf(format, ap);
 	va_end(ap);
 
 	log_domain_print_message(domain, buf);
