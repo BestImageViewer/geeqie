@@ -1009,9 +1009,6 @@ static void cache_manager_standard_clean_valid_cb(const gchar *path, gboolean va
 static void cache_manager_standard_clean_start(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
-	GList *list;
-	gchar *path;
-	FileData *dir_fd;
 
 	if (!cd->remote)
 	{
@@ -1024,26 +1021,21 @@ static void cache_manager_standard_clean_start(GenericDialog *, gpointer data)
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(cd->progress), _("running..."));
 	}
 
-	path = g_build_filename(get_thumbnails_standard_cache_dir(), THUMB_FOLDER_NORMAL, NULL);
-	dir_fd = file_data_new_dir(path);
-	filelist_read(dir_fd, &list, nullptr);
-	cd->list = list;
-	file_data_unref(dir_fd);
-	g_free(path);
+	const auto get_thumbnails_folder_files = [](const gchar *thumb_folder)
+	{
+		g_autofree gchar *path = g_build_filename(get_thumbnails_standard_cache_dir(), thumb_folder, NULL);
+		FileData *dir_fd = file_data_new_dir(path);
 
-	path = g_build_filename(get_thumbnails_standard_cache_dir(), THUMB_FOLDER_LARGE, NULL);
-	dir_fd = file_data_new_dir(path);
-	filelist_read(dir_fd, &list, nullptr);
-	cd->list = g_list_concat(cd->list, list);
-	file_data_unref(dir_fd);
-	g_free(path);
+		GList *list = nullptr;
+		filelist_read(dir_fd, &list, nullptr);
+		file_data_unref(dir_fd);
 
-	path = g_build_filename(get_thumbnails_standard_cache_dir(), THUMB_FOLDER_FAIL, NULL);
-	dir_fd = file_data_new_dir(path);
-	filelist_read(dir_fd, &list, nullptr);
-	cd->list = g_list_concat(cd->list, list);
-	file_data_unref(dir_fd);
-	g_free(path);
+		return list;
+	};
+
+	cd->list = get_thumbnails_folder_files(THUMB_FOLDER_NORMAL);
+	cd->list = g_list_concat(cd->list, get_thumbnails_folder_files(THUMB_FOLDER_LARGE));
+	cd->list = g_list_concat(cd->list, get_thumbnails_folder_files(THUMB_FOLDER_FAIL));
 
 	cd->count_total = g_list_length(cd->list);
 	cd->count_done = 0;
