@@ -29,21 +29,17 @@
 
 void warning_dialog_dnd_uri_error(GList *uri_error_list)
 {
-	GList *work = uri_error_list;
-	guint count = g_list_length(work);
-	gchar *msg = g_strdup_printf("Failed to convert %d dropped item(s) to files\n", count);
+	g_autoptr(GString) msg = g_string_new(nullptr);
+	guint count = g_list_length(uri_error_list);
+	g_string_printf(msg, "Failed to convert %d dropped item(s) to files\n", count);
 	if(count < 10)
 		{
-		while (work)
+		for (GList *work = uri_error_list; work; work = work->next)
 			{
-			gchar *prev = msg;
-			msg = g_strdup_printf("%s\n%s", prev, static_cast<gchar *>(work->data));
-			work = work->next;
-			g_free(prev);
+			g_string_append_printf(msg, "\n%s", static_cast<gchar *>(work->data));
 			}
 		}
-	warning_dialog(_("Drag and Drop failed"), msg, GQ_ICON_DIALOG_WARNING, nullptr);
-	g_free(msg);
+	warning_dialog(_("Drag and Drop failed"), msg->str, GQ_ICON_DIALOG_WARNING, nullptr);
 }
 
 gchar **uris_from_pathlist(GList *list)

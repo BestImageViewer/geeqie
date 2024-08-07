@@ -1064,7 +1064,7 @@ static void file_util_check_abort_cb(GenericDialog *, gpointer data)
 void file_util_check_ci(UtilityData *ud)
 {
 	gint error = CHANGE_OK;
-	gchar *desc = nullptr;
+	g_autofree gchar *desc = nullptr;
 
 	if (ud->type != UTILITY_TYPE_CREATE_FOLDER &&
 	    ud->type != UTILITY_TYPE_RENAME_FOLDER)
@@ -1087,13 +1087,10 @@ void file_util_check_ci(UtilityData *ud)
 		}
 	else
 		{
-		if (ud->type == UTILITY_TYPE_CREATE_FOLDER || ud->type == UTILITY_TYPE_RENAME_FOLDER)
+		if (isdir(ud->dest_path) || isfile(ud->dest_path))
 			{
-			if (isdir(ud->dest_path) || isfile(ud->dest_path))
-				{
-				error = CHANGE_DEST_EXISTS;
-				desc = g_strdup_printf(_("%s already exists"), ud->dest_path);
-				}
+			error = CHANGE_DEST_EXISTS;
+			desc = g_strdup_printf(_("%s already exists"), ud->dest_path);
 			}
 		}
 
@@ -1104,34 +1101,23 @@ void file_util_check_ci(UtilityData *ud)
 		return;
 		}
 
+	GenericDialog *d = file_util_gen_dlg(ud->messages.title, "dlg_confirm",
+	                                     ud->parent, TRUE,
+	                                     file_util_check_abort_cb, ud);
 	if (!(error & CHANGE_ERROR_MASK))
 		{
 		/* just a warning */
-		GenericDialog *d;
-
-		d = file_util_gen_dlg(ud->messages.title, "dlg_confirm",
-					ud->parent, TRUE,
-					file_util_check_abort_cb, ud);
-
 		generic_dialog_add_message(d, GQ_ICON_DIALOG_WARNING, _("Really continue?"), desc, TRUE);
 
 		generic_dialog_add_button(d, GQ_ICON_GO_NEXT, _("Co_ntinue"),
 					  file_util_check_resume_cb, TRUE);
-		gtk_widget_show(d->dialog);
 		}
 	else
 		{
 		/* fatal error */
-		GenericDialog *d;
-
-		d = file_util_gen_dlg(ud->messages.title, "dlg_confirm",
-					ud->parent, TRUE,
-					file_util_check_abort_cb, ud);
 		generic_dialog_add_message(d, GQ_ICON_DIALOG_WARNING, _("This operation can't continue:"), desc, TRUE);
-
-		gtk_widget_show(d->dialog);
 		}
-	g_free(desc);
+	gtk_widget_show(d->dialog);
 }
 
 
