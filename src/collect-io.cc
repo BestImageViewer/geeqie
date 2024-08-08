@@ -69,6 +69,11 @@ static gint collect_manager_process_action(CollectManagerEntry *entry, gchar **p
 namespace
 {
 
+const size_t GQ_COLLECTION_MARKER_LEN = strlen(GQ_COLLECTION_MARKER);
+
+constexpr gchar gqview_collection_marker[] = "#GQview collection";
+const size_t gqview_collection_marker_len = strlen(gqview_collection_marker);
+
 gboolean scan_geometry(gchar *buffer, GdkRectangle &window)
 {
 	gint nx;
@@ -86,7 +91,7 @@ gboolean scan_geometry(gchar *buffer, GdkRectangle &window)
 	return TRUE;
 }
 
-}
+} // namespace
 
 static gboolean collection_load_private(CollectionData *cd, const gchar *path, CollectionLoadFlags flags)
 {
@@ -158,7 +163,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			if (*p == '#')
 				{
 				if (!need_header) continue;
-				if (g_ascii_strncasecmp(p, GQ_COLLECTION_MARKER, strlen(GQ_COLLECTION_MARKER)) == 0)
+				if (g_ascii_strncasecmp(p, GQ_COLLECTION_MARKER, GQ_COLLECTION_MARKER_LEN) == 0)
 					{
 					/* Looks like an official collection, allow unchecked input.
 					 * All this does is allow adding files that may not exist,
@@ -174,7 +179,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 					cd->window_read = TRUE;
 					if (only_geometry) break;
 					}
-				else if (g_ascii_strncasecmp(p, "#GQview collection", strlen("#GQview collection")) == 0)
+				else if (g_ascii_strncasecmp(p, gqview_collection_marker, gqview_collection_marker_len) == 0)
 					{
 					/* As 2008/04/15 there is no difference between our collection file format
 					 * and GQview 2.1.5 collection file format so ignore failures as well. */

@@ -302,12 +302,16 @@ void log_print_backtrace(const gchar *file, gint line, const gchar *function)
 					{
 					while (fgets(path, sizeof(path), fp) != nullptr)
 						{
-						/* Remove redundant newline */
-						path[strlen(path) - 1] = '\0';
+						if (path[0] == '\0') continue;
 
-						if (g_strstr_len(path, strlen(path), "(") != nullptr)
+						/* Remove redundant newline */
+						const size_t path_len = strlen(path) - 1;
+						path[path_len] = '\0';
+
+						gchar *paren = g_strstr_len(path, path_len, "(");
+						if (paren != nullptr)
 							{
-							function_name = g_strndup(path, g_strstr_len(path, strlen(path), "(") - path);
+							function_name = g_strndup(path, paren - path);
 							}
 						else
 							{

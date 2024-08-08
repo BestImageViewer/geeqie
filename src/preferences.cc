@@ -271,7 +271,7 @@ void config_entry_to_option(GtkWidget *entry, gchar **option, gchar *(*func)(con
 	g_free(*option);
 	*option = nullptr;
 	buf = gq_gtk_entry_get_text(GTK_ENTRY(entry));
-	if (buf && strlen(buf) > 0)
+	if (buf && buf[0] != '\0')
 		{
 		if (func)
 			*option = func(buf);

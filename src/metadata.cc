@@ -537,7 +537,7 @@ static gboolean metadata_file_read(gchar *path, GList **keywords, gchar **commen
 				{
 				while (*ptr != '\n' && *ptr != '\0') ptr++;
 				*ptr = '\0';
-				if (strlen(s_buf) > 0)
+				if (s_buf[0] != '\0')
 					{
 					gchar *kw = utf8_validate_or_convert(s_buf);
 

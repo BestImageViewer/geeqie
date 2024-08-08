@@ -249,7 +249,8 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 {
 	gchar delim = '%';
 	gchar imp = '|';
-	gchar sep[] = " - ";
+	constexpr gchar sep[] = " - ";
+	const size_t sep_len = strlen(sep);
 	gchar *start;
 	gchar *end;
 	guint pos;
@@ -423,7 +424,7 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 				{
 				/* insert separator */
 				g_string_insert(osd_info, pos, sep);
-				pos += strlen(sep);
+				pos += sep_len;
 				want_separator = FALSE;
 				}
 

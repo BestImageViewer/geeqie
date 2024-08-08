@@ -425,7 +425,7 @@ static gboolean tab_completion_do(TabCompData *td)
 	if (ptr > entry_dir) ptr--;
 	ptr[0] = '\0';
 
-	if (strlen(entry_dir) == 0)
+	if (entry_dir[0] == '\0')
 		{
 		g_free(entry_dir);
 		entry_dir = g_strdup(G_DIR_SEPARATOR_S); /** @FIXME win32 */
@@ -860,7 +860,7 @@ static void tab_completion_select_show(TabCompData *td)
 		}
 
 	path = gq_gtk_entry_get_text(GTK_ENTRY(td->entry));
-	if (strlen(path) == 0) path = nullptr;
+	if (path[0] == '\0') path = nullptr;
 	if (td->fd_folders_only)
 		{
 		file_dialog_add_path_widgets(td->fd, nullptr, path, td->history_key, nullptr, nullptr);

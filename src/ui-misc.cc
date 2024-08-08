@@ -1079,7 +1079,7 @@ static gboolean pref_list_get(const gchar *group, const gchar *key, const gchar 
 	if (work)
 		{
 		*result = static_cast<const gchar *>(work->data) + strlen(token);
-		if (strlen(*result) == 0) *result = nullptr;
+		if (*result[0] == '\0') *result = nullptr;
 		ret = TRUE;
 		}
 	else

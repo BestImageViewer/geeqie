@@ -102,7 +102,7 @@ static gboolean key_pressed(GtkWidget *, GdkEventKey *event, LogWindow *logwin)
 
 	if (event && event->keyval == GDK_KEY_F1)
 		{
-		if (strlen(options->log_window.action) > 0)
+		if (options->log_window.action[0] != '\0')
 			{
 			buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text));
 
@@ -260,7 +260,7 @@ static gboolean search_keypress_event(GtkWidget *, GdkEventKey *, LogWindow *log
 	gtk_text_buffer_get_start_iter(buffer, &start_find);
 
 	text = gq_gtk_entry_get_text(GTK_ENTRY(logwin->search_entry_box));
-	if (strlen(text) == 0)
+	if (text[0] == '\0')
 		{
 		selected = gtk_text_buffer_get_selection_bounds(buffer, &start_sel, &end_sel);
 		if (selected)

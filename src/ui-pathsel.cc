@@ -134,12 +134,13 @@ static gboolean dest_check_filter(const gchar *filter, const gchar *file)
 	const gchar *f_ptr = filter;
 	const gchar *strt_ptr;
 	gint i;
-	gint l;
-
-	l = strlen(file);
 
 	if (filter[0] == '*') return TRUE;
-	while (f_ptr < filter + strlen(filter))
+
+	const gchar *filter_end = filter + strlen(filter);
+	const gint l = strlen(file);
+
+	while (f_ptr < filter_end)
 		{
 		strt_ptr = f_ptr;
 		i=0;
@@ -315,10 +316,10 @@ static void dest_change_dir(Dest_Data *dd, const gchar *path, gboolean retain_na
 
 	if (old_name)
 		{
-		gchar *basename = g_path_get_basename(full_path);
+		const size_t full_path_len = strlen(full_path);
+		g_autofree gchar *basename = g_path_get_basename(full_path);
 
-		gtk_editable_select_region(GTK_EDITABLE(dd->entry), strlen(full_path) - strlen(basename), strlen(full_path));
-		g_free(basename);
+		gtk_editable_select_region(GTK_EDITABLE(dd->entry), full_path_len - strlen(basename), full_path_len);
 		}
 
 	g_free(full_path);
@@ -968,7 +969,7 @@ static void dest_filter_changed_cb(GtkEditable *, gpointer data)
 
 	g_free(dd->filter);
 	dd->filter = nullptr;
-	if (strlen(buf) > 0) dd->filter = g_strdup(buf);
+	if (buf[0] != '\0') dd->filter = g_strdup(buf);
 
 	path = g_strdup(dd->path);
 	dest_populate(dd, path);
