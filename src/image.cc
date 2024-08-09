@@ -2148,7 +2148,7 @@ static void image_destroy_cb(GtkWidget *, gpointer data)
 	image_free(imd);
 }
 
-gboolean selectable_frame_draw_cb(GtkWidget *widget, cairo_t *cr, gpointer)
+static gboolean selectable_frame_draw_cb(GtkWidget *widget, cairo_t *cr, gpointer)
 {
 	GtkAllocation allocation;
 	gtk_widget_get_allocation(widget, &allocation);

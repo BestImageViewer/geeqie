@@ -1779,12 +1779,12 @@ static void accel_default_cb(GtkWidget *, gpointer data)
 	g_idle_add(accel_default_scroll, data);
 }
 
-void accel_clear_selection(GtkTreeModel *, GtkTreePath *, GtkTreeIter *iter, gpointer)
+static void accel_clear_selection(GtkTreeModel *, GtkTreePath *, GtkTreeIter *iter, gpointer)
 {
 	gtk_tree_store_set(accel_store, iter, AE_KEY, "", -1);
 }
 
-void accel_reset_selection(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer)
+static void accel_reset_selection(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer)
 {
 	GtkAccelKey key;
 	gchar *accel_path;

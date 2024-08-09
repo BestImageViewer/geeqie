@@ -286,7 +286,7 @@ static void clear_marks_help_cb(GenericDialog *, gpointer)
 	help_window_show("GuideMainWindowMenus.html");
 }
 
-void layout_menu_clear_marks_ok_cb(GenericDialog *gd, gpointer)
+static void layout_menu_clear_marks_ok_cb(GenericDialog *gd, gpointer)
 {
 	marks_clear_all();
 	generic_dialog_close(gd);
@@ -973,7 +973,7 @@ struct OpenWithData
 	GtkWidget *app_chooser_dialog;
 };
 
-void open_with_response_cb(GtkDialog *, gint response_id, gpointer data)
+static void open_with_response_cb(GtkDialog *, gint response_id, gpointer data)
 {
 	GError *error = nullptr;
 	auto open_with_data = static_cast<OpenWithData *>(data);
@@ -3418,7 +3418,7 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 	return lw->menu_tool_bar;
 }
 
-void toolbar_clear_cb(GtkWidget *widget, gpointer)
+static void toolbar_clear_cb(GtkWidget *widget, gpointer)
 {
 	GtkAction *action;
 
@@ -3451,7 +3451,7 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 		}
 }
 
-void action_radio_changed_cb(GtkAction *action, GtkAction *current, gpointer data)
+static void action_radio_changed_cb(GtkAction *action, GtkAction *current, gpointer data)
 {
 	auto button = static_cast<GtkToggleButton *>(data);
 
@@ -3465,7 +3465,7 @@ void action_radio_changed_cb(GtkAction *action, GtkAction *current, gpointer dat
 		}
 }
 
-void action_toggle_activate_cb(GtkAction* self, gpointer data)
+static void action_toggle_activate_cb(GtkAction* self, gpointer data)
 {
 	auto button = static_cast<GtkToggleButton *>(data);
 
@@ -3475,7 +3475,7 @@ void action_toggle_activate_cb(GtkAction* self, gpointer data)
 		}
 }
 
-gboolean toolbar_button_press_event_cb(GtkWidget *, GdkEvent *, gpointer data)
+static gboolean toolbar_button_press_event_cb(GtkWidget *, GdkEvent *, gpointer data)
 {
 	gq_gtk_action_activate(GTK_ACTION(data));
 

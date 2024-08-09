@@ -201,7 +201,7 @@ static void tab_completion_emit_tab_signal(TabCompData *td)
 }
 
 #ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
-void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
+static void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
 {
 	auto td = static_cast<TabCompData *>(data);
 	GtkWidget *child;

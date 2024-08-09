@@ -197,7 +197,7 @@ GList *collection_list_sort(GList *list, SortType method)
 	return g_list_sort(list, collection_list_sort_cb);
 }
 
-GList *collection_list_randomize(GList *list)
+static GList *collection_list_randomize(GList *list)
 {
 	guint random;
 	guint length;

@@ -78,7 +78,7 @@ enum {
 
 
 
-guint16 tiff_byte_get_int16(const guchar *f, TiffByteOrder bo)
+static guint16 tiff_byte_get_int16(const guchar *f, TiffByteOrder bo)
 {
 	guint16 align_buf;
 
@@ -90,7 +90,7 @@ guint16 tiff_byte_get_int16(const guchar *f, TiffByteOrder bo)
 	return GUINT16_FROM_BE(align_buf);
 }
 
-guint32 tiff_byte_get_int32(const guchar *f, TiffByteOrder bo)
+static guint32 tiff_byte_get_int32(const guchar *f, TiffByteOrder bo)
 {
 	guint32 align_buf;
 
@@ -102,8 +102,8 @@ guint32 tiff_byte_get_int32(const guchar *f, TiffByteOrder bo)
 	return GUINT32_FROM_BE(align_buf); // NOLINT
 }
 
-gint tiff_directory_offset(const guchar *data, const guint len,
-				guint *offset, TiffByteOrder *bo)
+static gint tiff_directory_offset(const guchar *data, const guint len,
+                                  guint *offset, TiffByteOrder *bo)
 {
 	if (len < 8) return FALSE;
 
@@ -133,10 +133,10 @@ gint tiff_directory_offset(const guchar *data, const guint len,
 using FuncParseIFDEntry = gint (*)(const guchar *, guint, guint, TiffByteOrder, gpointer);
 
 
-gint tiff_parse_IFD_table(const guchar *tiff, guint offset,
-			  guint size, TiffByteOrder bo,
-			  guint *next_offset,
-			  FuncParseIFDEntry parse_entry, gpointer data)
+static gint tiff_parse_IFD_table(const guchar *tiff, guint offset,
+                                 guint size, TiffByteOrder bo,
+                                 guint *next_offset,
+                                 FuncParseIFDEntry parse_entry, gpointer data)
 {
 	guint count;
 	guint i;

@@ -95,7 +95,7 @@ gboolean editors_finished = FALSE;
 #define DESKTOP_GROUP "Desktop Entry"
 #endif
 
-void editor_description_free(EditorDescription *editor)
+static void editor_description_free(EditorDescription *editor)
 {
 	if (!editor) return;
 

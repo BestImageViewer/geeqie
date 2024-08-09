@@ -104,7 +104,7 @@ gchar *desktop_file_template;
 gchar *instance_identifier;
 
 #if defined(SA_SIGINFO)
-void sig_handler_cb(int signo, siginfo_t *info, void *)
+static void sig_handler_cb(int signo, siginfo_t *info, void *)
 {
 	gchar hex_char[16];
 	const gchar *signal_name = nullptr;

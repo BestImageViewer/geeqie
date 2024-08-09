@@ -508,41 +508,6 @@ ExifItem *exif_get_item(ExifData *exif, const gchar *key)
 	}
 }
 
-ExifItem *exif_add_item(ExifData *exif, const gchar *key)
-{
-	try {
-		Exiv2::Metadatum *item = nullptr;
-		try {
-			Exiv2::ExifKey ekey(key);
-			exif->exifData().add(ekey, nullptr);
-			auto pos = exif->exifData().end(); // a hack, there should be a better way to get the currently added item
-			pos--;
-			item = &*pos;
-		}
-		catch (Exiv2::AnyError& e) {
-			try {
-				Exiv2::IptcKey ekey(key);
-				exif->iptcData().add(ekey, nullptr);
-				auto pos = exif->iptcData().end();
-				pos--;
-				item = &*pos;
-			}
-			catch (Exiv2::AnyError& e) {
-				Exiv2::XmpKey ekey(key);
-				exif->xmpData().add(ekey, nullptr);
-				auto pos = exif->xmpData().end();
-				pos--;
-				item = &*pos;
-			}
-		}
-		return reinterpret_cast<ExifItem *>(item);
-	}
-	catch (Exiv2::AnyError& e) {
-		debug_exception(e);
-		return nullptr;
-	}
-}
-
 
 ExifItem *exif_get_first_item(ExifData *exif)
 {

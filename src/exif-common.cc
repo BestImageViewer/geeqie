@@ -664,7 +664,7 @@ static void zd_tz(ZoneDetectResult *results, gchar **timezone, gchar **countryna
 	g_free(timezone_id);
 }
 
-void ZoneDetect_onError(int errZD, int errNative)
+static void ZoneDetect_onError(int errZD, int errNative)
 {
 	log_printf("Error: ZoneDetect %s (0x%08X)\n", ZDGetErrorString(errZD), (unsigned)errNative);
 }
@@ -1021,13 +1021,13 @@ gchar *exif_get_data_as_text(ExifData *exif, const gchar *key)
 
 static FileCacheData *exif_cache;
 
-void exif_release_cb(FileData *fd)
+static void exif_release_cb(FileData *fd)
 {
 	exif_free(fd->exif);
 	fd->exif = nullptr;
 }
 
-void exif_init_cache()
+static void exif_init_cache()
 {
 	g_assert(!exif_cache);
 	exif_cache = file_cache_new(exif_release_cb, 4);

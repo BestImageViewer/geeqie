@@ -172,7 +172,7 @@ output_message_handler (j_common_ptr)
 }
 
 
-void image_loader_jpeg_read_scanline(struct jpeg_decompress_struct *cinfo, guchar **dptr, guint rowstride)
+static void image_loader_jpeg_read_scanline(struct jpeg_decompress_struct *cinfo, guchar **dptr, guint rowstride)
 {
 	guchar *lines[4];
 	guchar **lptr;

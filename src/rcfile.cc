@@ -1185,7 +1185,7 @@ static const gchar *options_get_id(const gchar **attribute_names, const gchar **
 }
 
 
-void options_parse_leaf(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **, const gchar **, gpointer, GError **)
+static void options_parse_leaf(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **, const gchar **, gpointer, GError **)
 {
 	log_printf("unexpected: %s\n", element_name);
 	options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);

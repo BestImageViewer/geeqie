@@ -31,6 +31,7 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
+#include "../pan-view.h"
 #include "bar-exif.h"
 #include "cache-loader.h"
 #include "cache.h"
@@ -1185,7 +1186,7 @@ static void pan_layout_set_fd(PanWindow *pw, FileData *dir_fd)
  *-----------------------------------------------------------------------------
  */
 
-FileData *pan_menu_click_fd(PanWindow *pw)
+static FileData *pan_menu_click_fd(PanWindow *pw)
 {
 	if (pw->click_pi && pw->click_pi->fd) return pw->click_pi->fd;
 	return nullptr;

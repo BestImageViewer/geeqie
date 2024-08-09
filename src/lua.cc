@@ -56,7 +56,7 @@ static lua_State *L; /** The LUA object needed for all operations (NOTE: That is
 
 /* Taking that definition from lua 5.1 source */
 #if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 502
-int luaL_typerror(lua_State *L, int narg, const char *tname)
+static int luaL_typerror(lua_State *L, int narg, const char *tname)
 {
 	const char *msg = lua_pushfstring(L, "%s expected, got %s", tname, luaL_typename(L, narg));
 	return luaL_argerror(L, narg, msg);

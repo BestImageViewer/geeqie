@@ -261,7 +261,7 @@ void vd_refresh(ViewDir *vd)
 /* the calling stack is this:
    vd_select_row -> select_func -> layout_set_fd -> vd_set_fd
 */
-void vd_select_row(ViewDir *vd, FileData *fd)
+static void vd_select_row(ViewDir *vd, FileData *fd)
 {
 	if (fd && vd->select_func)
 		{
@@ -282,7 +282,7 @@ gboolean vd_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter)
 	return ret;
 }
 
-FileData *vd_get_fd_from_tree_path(ViewDir *vd, GtkTreeView *tview, GtkTreePath *tpath)
+static FileData *vd_get_fd_from_tree_path(ViewDir *vd, GtkTreeView *tview, GtkTreePath *tpath)
 {
 	GtkTreeIter iter;
 	FileData *fd = nullptr;

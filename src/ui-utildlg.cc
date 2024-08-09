@@ -607,7 +607,7 @@ static void show_notification_message(AppImageData *appimage_data)
 	gtk_widget_show(appimage_data->window);
 }
 
-void appimage_notification_func(gpointer data, gpointer)
+static void appimage_notification_func(gpointer data, gpointer)
 {
 	FILE *pipe;
 	GNetworkMonitor *net_mon;

@@ -1002,7 +1002,7 @@ static void vf_marks_tooltip_ok_cb(GenericDialog *gd, gpointer data)
 	generic_dialog_close(gd);
 }
 
-void vf_marks_filter_on_icon_press(GtkEntry *, GtkEntryIconPosition, GdkEvent *, gpointer userdata)
+static void vf_marks_filter_on_icon_press(GtkEntry *, GtkEntryIconPosition, GdkEvent *, gpointer userdata)
 {
 	auto mte = static_cast<MarksTextEntry *>(userdata);
 

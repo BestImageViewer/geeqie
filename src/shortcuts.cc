@@ -35,6 +35,9 @@
 #include "ui-utildlg.h"
 #include "utilops.h"
 
+namespace
+{
+
 struct ShortcutsData
 {
 	GtkWidget *vbox;
@@ -49,7 +52,7 @@ struct ShortcutsData
 
 #define SHORTCUTS     "shortcuts"
 
-static void shortcuts_bookmark_select(const gchar *path, gpointer data)
+void shortcuts_bookmark_select(const gchar *path, gpointer data)
 {
 	auto scd = static_cast<ShortcutsData *>(data);
 
@@ -64,14 +67,14 @@ static void shortcuts_bookmark_select(const gchar *path, gpointer data)
 
 }
 
-static void shortcuts_add_close(ShortcutsData *scd)
+void shortcuts_add_close(ShortcutsData *scd)
 {
 	if (scd->dialog) file_dialog_close(scd->dialog);
 	scd->dialog_name_entry = nullptr;
 	scd->dialog = nullptr;
 }
 
-static void shortcuts_add_ok_cb(FileDialog *fd, gpointer data)
+void shortcuts_add_ok_cb(FileDialog *fd, gpointer data)
 {
 	auto scd = static_cast<ShortcutsData *>(data);
 	const gchar *name = gtk_entry_get_text(GTK_ENTRY(scd->dialog_name_entry));
@@ -89,14 +92,14 @@ static void shortcuts_add_ok_cb(FileDialog *fd, gpointer data)
 	shortcuts_add_close(scd);
 }
 
-static void shortcuts_add_cancel_cb(FileDialog *, gpointer data)
+void shortcuts_add_cancel_cb(FileDialog *, gpointer data)
 {
 	auto scd = static_cast<ShortcutsData *>(data);
 
 	shortcuts_add_close(scd);
 }
 
-static void shortcuts_add_cb(GtkWidget *button, gpointer data)
+void shortcuts_add_cb(GtkWidget *button, gpointer data)
 {
 	auto scd = static_cast<ShortcutsData *>(data);
 	GtkWidget *hbox;
@@ -130,7 +133,7 @@ static void shortcuts_add_cb(GtkWidget *button, gpointer data)
 	gtk_widget_show(GENERIC_DIALOG(scd->dialog)->dialog);
 }
 
-static void shortcuts_destroy(gpointer data)
+void shortcuts_destroy(gpointer data)
 {
 	auto scd = static_cast<ShortcutsData *>(data);
 
@@ -139,7 +142,7 @@ static void shortcuts_destroy(gpointer data)
 	g_free(scd);
 }
 
-static GtkWidget *shortcuts_new(LayoutWindow *lw)
+GtkWidget *shortcuts_new(LayoutWindow *lw)
 {
 	ShortcutsData *scd;
 	GtkWidget *tbar;
@@ -175,6 +178,8 @@ GtkWidget *shortcuts_new_from_config(LayoutWindow *lw, const gchar **, const gch
 
 	return shortcuts_bar;
 }
+
+} // namespace
 
 GtkWidget *shortcuts_new_default(LayoutWindow *lw)
 {

@@ -178,7 +178,7 @@ gchar *expand_tilde(const gchar *filename)
 
 #define GEOCODE_NAME "geocode-parameters.awk"
 
-gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
+static gchar *decode_geo_script(const gchar *path_dir, const gchar *input_text)
 {
 	g_autofree gchar *path = g_build_filename(path_dir, GEOCODE_NAME, NULL);
 	if (!g_file_test(path, G_FILE_TEST_EXISTS))

@@ -279,7 +279,7 @@ static void advanced_exif_window_get_geometry(ExifWin *ew)
 	lw->options.advanced_exif_window.h = gdk_window_get_height(window);
 }
 
-void advanced_exif_close(ExifWin *ew)
+static void advanced_exif_close(ExifWin *ew)
 {
 	if (!ew) return;
 

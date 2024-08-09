@@ -2013,7 +2013,7 @@ static gint num_length(gint num)
 	return len;
 }
 
-void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
+static void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint x_pixel;
@@ -2107,7 +2107,7 @@ GtkWidget *layout_image_new(LayoutWindow *lw, gint i)
 	return lw->split_images[i]->widget;
 }
 
-void layout_image_deactivate(LayoutWindow *lw, gint i)
+static void layout_image_deactivate(LayoutWindow *lw, gint i)
 {
 	if (!lw->split_images[i]) return;
 	image_set_update_func(lw->split_images[i], nullptr, nullptr);
@@ -2326,7 +2326,7 @@ static GtkWidget *layout_image_setup_split_triple(LayoutWindow *lw)
 	return lw->split_image_widget;
 }
 
-GtkWidget *layout_image_setup_split_quad(LayoutWindow *lw)
+static GtkWidget *layout_image_setup_split_quad(LayoutWindow *lw)
 {
 	GtkWidget *hpaned;
 	GtkWidget *vpaned1;

@@ -1146,7 +1146,7 @@ static void cache_manager_main_clear_ok_cb(GenericDialog *, gpointer)
 	cache_maintain_home(FALSE, TRUE, nullptr);
 }
 
-void cache_manager_main_clear_confirm(GtkWidget *parent)
+static void cache_manager_main_clear_confirm(GtkWidget *parent)
 {
 	GenericDialog *gd;
 

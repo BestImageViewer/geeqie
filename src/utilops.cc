@@ -966,7 +966,7 @@ static gint file_util_perform_ci_dir_cb(gpointer, EditorFlags flags, GList *, gp
 	return EDITOR_CB_CONTINUE; /* does not matter, there was just single directory */
 }
 
-void file_util_perform_ci(UtilityData *ud)
+static void file_util_perform_ci(UtilityData *ud)
 {
 	switch (ud->type)
 		{
@@ -1061,7 +1061,7 @@ static void file_util_check_abort_cb(GenericDialog *, gpointer data)
 	file_util_dialog_run(ud);
 }
 
-void file_util_check_ci(UtilityData *ud)
+static void file_util_check_ci(UtilityData *ud)
 {
 	gint error = CHANGE_OK;
 	g_autofree gchar *desc = nullptr;

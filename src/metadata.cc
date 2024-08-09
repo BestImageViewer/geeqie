@@ -928,7 +928,7 @@ gboolean metadata_append_list(FileData *fd, const gchar *key, const GList *value
 /**
  * @see find_string_in_list
  */
-gchar *find_string_in_list_utf8nocase(GList *list, const gchar *string)
+static gchar *find_string_in_list_utf8nocase(GList *list, const gchar *string)
 {
 	gchar *string_casefold = g_utf8_casefold(string, -1);
 
@@ -961,7 +961,7 @@ gchar *find_string_in_list_utf8nocase(GList *list, const gchar *string)
 /**
  * @see find_string_in_list
  */
-gchar *find_string_in_list_utf8case(GList *list, const gchar *string)
+static gchar *find_string_in_list_utf8case(GList *list, const gchar *string)
 {
 	while (list)
 		{
@@ -990,7 +990,7 @@ gchar *find_string_in_list_utf8case(GList *list, const gchar *string)
  * @see find_string_in_list_utf8case
  * @see find_string_in_list_utf8nocase
  */
-gchar *find_string_in_list(GList *list, const gchar *string)
+static gchar *find_string_in_list(GList *list, const gchar *string)
 {
 	if (options->metadata.keywords_case_sensitive)
 		return find_string_in_list_utf8case(list, string);
@@ -1816,7 +1816,7 @@ void keyword_tree_write_config(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_STRING("</keyword_tree>");
 }
 
- void keyword_tree_node_disconnect_marks(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr)
+static void keyword_tree_node_disconnect_marks(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr)
 {
 	GtkTreeIter iter = *iter_ptr;
 

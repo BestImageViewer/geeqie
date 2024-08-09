@@ -256,7 +256,7 @@ GtkWidget *submenu_add_dir_sort(GtkWidget *menu, GCallback func, gpointer data,
 	return submenu;
 }
 
-gchar *zoom_type_get_text(ZoomMode method)
+static gchar *zoom_type_get_text(ZoomMode method)
 {
 	switch (method)
 		{

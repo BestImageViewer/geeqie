@@ -55,10 +55,6 @@
 namespace
 {
 
-constexpr gint PRE_FORMATTED_COLUMNS = 4;
-
-} // namespace
-
 struct PrintWindow
 {
 	GtkWidget *vbox;
@@ -76,7 +72,9 @@ struct PrintWindow
 	GSList *page_group;
 };
 
-static gint print_layout_page_count(PrintWindow *pw)
+constexpr gint PRE_FORMATTED_COLUMNS = 4;
+
+gint print_layout_page_count(PrintWindow *pw)
 {
 	gint images;
 
@@ -87,9 +85,9 @@ static gint print_layout_page_count(PrintWindow *pw)
 	return images;
 }
 
-static gboolean print_job_render_image(PrintWindow *pw);
+gboolean print_job_render_image(PrintWindow *pw);
 
-static void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
+void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
 {
 	auto pw = static_cast<PrintWindow *>(data);
 	GdkPixbuf *pixbuf;
@@ -110,7 +108,7 @@ static void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
 		}
 }
 
-static gboolean print_job_render_image(PrintWindow *pw)
+gboolean print_job_render_image(PrintWindow *pw)
 {
 	FileData *fd = nullptr;
 
@@ -134,7 +132,7 @@ static gboolean print_job_render_image(PrintWindow *pw)
 }
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
-static void font_activated_cb(GtkFontChooser *widget, gchar *fontname, gpointer option)
+void font_activated_cb(GtkFontChooser *widget, gchar *fontname, gpointer option)
 {
 	option = g_strdup(fontname);
 
@@ -144,7 +142,7 @@ static void font_activated_cb(GtkFontChooser *widget, gchar *fontname, gpointer 
 }
 #pragma GCC diagnostic pop
 
-static void font_response_cb(GtkDialog *dialog, int response_id, gpointer option)
+void font_response_cb(GtkDialog *dialog, int response_id, gpointer option)
 {
 	gchar *font;
 
@@ -159,7 +157,7 @@ static void font_response_cb(GtkDialog *dialog, int response_id, gpointer option
 	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
-static void print_set_font_cb(GtkWidget *widget, gpointer data)
+void print_set_font_cb(GtkWidget *widget, gpointer data)
 {
 	gpointer option;
 	GtkWidget *dialog;
@@ -183,7 +181,7 @@ static void print_set_font_cb(GtkWidget *widget, gpointer data)
 	gtk_widget_show(dialog);
 }
 
-static gint set_toggle(GSList *list, TextPosition pos)
+gint set_toggle(GSList *list, TextPosition pos)
 {
 	GtkToggleButton *current_sel;
 	GtkToggleButton *new_sel;
@@ -203,7 +201,7 @@ static gint set_toggle(GSList *list, TextPosition pos)
 	return new_pos;
 }
 
-static void image_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
+void image_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
 {
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
 
@@ -217,27 +215,27 @@ static void image_text_position_cb(GtkWidget *widget, gpointer data, TextPositio
 	options->printer.image_text_position = pos;
 }
 
-static void image_text_position_h1_cb(GtkWidget *widget, gpointer data)
+void image_text_position_h1_cb(GtkWidget *widget, gpointer data)
 {
 	image_text_position_cb(widget, data, HEADER_1);
 }
 
-static void image_text_position_h2_cb(GtkWidget *widget, gpointer data)
+void image_text_position_h2_cb(GtkWidget *widget, gpointer data)
 {
 	image_text_position_cb(widget, data, HEADER_2);
 }
 
-static void image_text_position_f1_cb(GtkWidget *widget, gpointer data)
+void image_text_position_f1_cb(GtkWidget *widget, gpointer data)
 {
 	image_text_position_cb(widget, data, FOOTER_1);
 }
 
-static void image_text_position_f2_cb(GtkWidget *widget, gpointer data)
+void image_text_position_f2_cb(GtkWidget *widget, gpointer data)
 {
 	image_text_position_cb(widget, data, FOOTER_2);
 }
 
-static void page_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
+void page_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
 {
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
 
@@ -251,27 +249,27 @@ static void page_text_position_cb(GtkWidget *widget, gpointer data, TextPosition
 	options->printer.page_text_position = pos;
 }
 
-static void page_text_position_h1_cb(GtkWidget *widget, gpointer data)
+void page_text_position_h1_cb(GtkWidget *widget, gpointer data)
 {
 	page_text_position_cb(widget, data, HEADER_1);
 }
 
-static void page_text_position_h2_cb(GtkWidget *widget, gpointer data)
+void page_text_position_h2_cb(GtkWidget *widget, gpointer data)
 {
 	page_text_position_cb(widget, data, HEADER_2);
 }
 
-static void page_text_position_f1_cb(GtkWidget *widget, gpointer data)
+void page_text_position_f1_cb(GtkWidget *widget, gpointer data)
 {
 	page_text_position_cb(widget, data, FOOTER_1);
 }
 
-static void page_text_position_f2_cb(GtkWidget *widget, gpointer data)
+void page_text_position_f2_cb(GtkWidget *widget, gpointer data)
 {
 	page_text_position_cb(widget, data, FOOTER_2);
 }
 
-static void set_print_image_text_string(gchar **template_string, const gchar *value)
+void set_print_image_text_string(gchar **template_string, const gchar *value)
 {
 	g_assert(template_string);
 
@@ -279,7 +277,7 @@ static void set_print_image_text_string(gchar **template_string, const gchar *va
 	*template_string = g_strdup(value);
 }
 
-static void image_text_template_view_changed_cb(GtkWidget *, gpointer data)
+void image_text_template_view_changed_cb(GtkWidget *, gpointer data)
 {
 	GtkWidget *pTextView;
 	GtkTextBuffer *pTextBuffer;
@@ -296,7 +294,7 @@ static void image_text_template_view_changed_cb(GtkWidget *, gpointer data)
 					  gtk_text_buffer_get_text(pTextBuffer, &iStart, &iEnd, TRUE));
 }
 
-static void print_text_menu(GtkWidget *box, PrintWindow *pw)
+void print_text_menu(GtkWidget *box, PrintWindow *pw)
 {
 	GtkWidget *group;
 	GtkWidget *hbox;
@@ -429,7 +427,7 @@ static void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_widget_show(button);
 }
 
-static gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)
+gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)
 {
 	auto pw = static_cast<PrintWindow *>(data);
 
@@ -500,7 +498,7 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 	return text;
 }
 
-static gchar *print_get_page_text(const PrintWindow *pw)
+gchar *print_get_page_text(const PrintWindow *pw)
 {
 	GtkTextIter start;
 	GtkTextIter end;
@@ -509,7 +507,7 @@ static gchar *print_get_page_text(const PrintWindow *pw)
 	return gtk_text_buffer_get_text(pw->page_text, &start, &end, FALSE);
 }
 
-static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpointer data)
+void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpointer data)
 {
 	auto pw = static_cast<PrintWindow *>(data);
 	FileData *fd;
@@ -682,7 +680,7 @@ static void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_n
 	if (rotated) g_object_unref(rotated);
 }
 
-static void begin_print(GtkPrintOperation *operation, GtkPrintContext *, gpointer user_data)
+void begin_print(GtkPrintOperation *operation, GtkPrintContext *, gpointer user_data)
 {
 	auto pw = static_cast<PrintWindow *>(user_data);
 	gint page_count;
@@ -701,7 +699,7 @@ GObject *option_tab_cb(GtkPrintOperation *, gpointer user_data)
 	return G_OBJECT(pw->vbox);
 }
 
-static void end_print_cb(GtkPrintOperation *operation, GtkPrintContext *, gpointer data)
+void end_print_cb(GtkPrintOperation *operation, GtkPrintContext *, gpointer data)
 {
 	auto pw = static_cast<PrintWindow *>(data);
 	GList *work;
@@ -755,10 +753,12 @@ static void end_print_cb(GtkPrintOperation *operation, GtkPrintContext *, gpoint
 	g_free(pw);
 }
 
-static void print_response_cb(GtkDialog *dialog, gint, gpointer)
+void print_response_cb(GtkDialog *dialog, gint, gpointer)
 {
 	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
 }
+
+} // namespace
 
 /**
  * @brief Do not free selection or list, the print window takes control of them
