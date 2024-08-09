@@ -137,17 +137,15 @@ gboolean FileData::FileList::read_list_real(const gchar *dir_path, GList **files
 
 	while ((dir = readdir(dp)) != nullptr)
 		{
-		struct stat ent_sbuf;
 		const gchar *name = dir->d_name;
-		gchar *filepath;
-
-		filepath = g_build_filename(pathl, name, NULL);
+		g_autofree gchar *filepath = g_build_filename(pathl, name, NULL);
 
 		if (!options->file_filter.show_hidden_files && is_hidden_file(filepath))
 			{
 			continue;
 			}
 
+		struct stat ent_sbuf;
 		if (stat_func(filepath, &ent_sbuf) >= 0)
 			{
 			if (S_ISDIR(ent_sbuf.st_mode))
@@ -185,7 +183,6 @@ gboolean FileData::FileList::read_list_real(const gchar *dir_path, GList **files
 				log_printf("stat(): EOVERFLOW, skip '%s'", filepath);
 				}
 			}
-		g_free(filepath);
 		}
 
 	closedir(dp);

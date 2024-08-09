@@ -97,6 +97,7 @@ static void log_domain_print_message(const gchar *domain, const gchar *buf)
 	if (regexp && command_line &&
 	    !g_regex_match_simple(regexp, buf_nl, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0)))
 		{
+		g_free(buf_nl);
 		return;
 		}
 
