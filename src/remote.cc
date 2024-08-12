@@ -1288,10 +1288,6 @@ static void gr_file_info(const gchar *, GIOChannel *channel, gpointer)
 {
 	gchar *filename;
 	FileData *fd;
-	gchar *country_name;
-	gchar *country_code;
-	gchar *timezone;
-	gchar *local_time;
 	GString *out_string;
 	FileFormatClass format_class;
 
@@ -1321,32 +1317,28 @@ static void gr_file_info(const gchar *, GIOChannel *channel, gpointer)
 
 		if (fd->exif)
 			{
-			country_name = exif_get_data_as_text(fd->exif, "formatted.countryname");
+			g_autofree gchar *country_name = exif_get_data_as_text(fd->exif, "formatted.countryname");
 			if (country_name)
 				{
 				g_string_append_printf(out_string, _("Country name: %s\n"), country_name);
-				g_free(country_name);
 				}
 
-			country_code = exif_get_data_as_text(fd->exif, "formatted.countrycode");
-			if (country_name)
+			g_autofree gchar *country_code = exif_get_data_as_text(fd->exif, "formatted.countrycode");
+			if (country_code)
 				{
 				g_string_append_printf(out_string, _("Country code: %s\n"), country_code);
-				g_free(country_code);
 				}
 
-			timezone = exif_get_data_as_text(fd->exif, "formatted.timezone");
+			g_autofree gchar *timezone = exif_get_data_as_text(fd->exif, "formatted.timezone");
 			if (timezone)
 				{
 				g_string_append_printf(out_string, _("Timezone: %s\n"), timezone);
-				g_free(timezone);
 				}
 
-			local_time = exif_get_data_as_text(fd->exif, "formatted.localtime");
+			g_autofree gchar *local_time = exif_get_data_as_text(fd->exif, "formatted.localtime");
 			if (local_time)
 				{
 				g_string_append_printf(out_string, ("Local time: %s\n"), local_time);
-				g_free(local_time);
 				}
 			}
 

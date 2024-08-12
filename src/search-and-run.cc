@@ -71,7 +71,6 @@ static void command_store_populate(SarData* sar)
 	gchar *existing_command;
 	gboolean iter_found;
 	gboolean duplicate_command;
-	gchar *accel;
 
 	sar->command_store = GTK_LIST_STORE(gtk_builder_get_object(sar->builder, "command_store"));
 	sortable = GTK_TREE_SORTABLE(sar->command_store);
@@ -90,7 +89,6 @@ static void command_store_populate(SarData* sar)
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{
 				g_object_get(action, "tooltip", &tooltip, "label", &label, NULL);
-				accel = gtk_accelerator_get_label(key.accel_key, key.accel_mods);
 
 				/* menu items with no tooltip are placeholders */
 				if (g_strrstr(accel_path, ".desktop") != nullptr || tooltip != nullptr)
@@ -108,6 +106,8 @@ static void command_store_populate(SarData* sar)
 							tooltip = tooltip2;
 							}
 						}
+
+					g_autofree gchar *accel = gtk_accelerator_get_label(key.accel_key, key.accel_mods);
 
 					new_command = g_string_new(nullptr);
 					if (g_strcmp0(label, tooltip) == 0)
@@ -145,7 +145,6 @@ static void command_store_populate(SarData* sar)
 						}
 					g_free(label);
 					g_free(tooltip);
-					g_free(accel);
 					g_string_free(new_command, TRUE);
 					}
 				}
