@@ -814,7 +814,8 @@ void layout_status_update_image(LayoutWindow *lw)
 
 		if (lw->image->unknown)
 			{
-			if (image_get_path(lw->image) && !access_file(image_get_path(lw->image), R_OK))
+			const gchar *filename = image_get_path(lw->image);
+			if (filename && !access_file(filename, R_OK))
 				{
 				text = g_strdup_printf(_("(no read permission) %s bytes"), b);
 				}

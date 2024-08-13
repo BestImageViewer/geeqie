@@ -1256,20 +1256,20 @@ static void gr_filelist_recurse(const gchar *text, GIOChannel *channel, gpointer
 static void gr_file_tell(const gchar *, GIOChannel *channel, gpointer)
 {
 	gchar *out_string;
-	gchar *collection_name = nullptr;
 
 	if (!layout_valid(&lw_id)) return;
 
-	if (image_get_path(lw_id->image))
+	const gchar *filename = image_get_path(lw_id->image);
+	if (filename)
 		{
 		if (lw_id->image->collection && lw_id->image->collection->name)
 			{
-			collection_name = remove_extension_from_path(lw_id->image->collection->name);
-			out_string = g_strconcat(image_get_path(lw_id->image), "    Collection: ", collection_name, NULL);
+			g_autofree gchar *collection_name = remove_extension_from_path(lw_id->image->collection->name);
+			out_string = g_strconcat(filename, "    Collection: ", collection_name, NULL);
 			}
 		else
 			{
-			out_string = g_strconcat(image_get_path(lw_id->image), NULL);
+			out_string = g_strconcat(filename, NULL);
 			}
 		}
 	else
@@ -1280,28 +1280,26 @@ static void gr_file_tell(const gchar *, GIOChannel *channel, gpointer)
 	g_io_channel_write_chars(channel, out_string, -1, nullptr, nullptr);
 	g_io_channel_write_chars(channel, "<gq_end_of_command>", -1, nullptr, nullptr);
 
-	g_free(collection_name);
 	g_free(out_string);
 }
 
 static void gr_file_info(const gchar *, GIOChannel *channel, gpointer)
 {
-	gchar *filename;
 	FileData *fd;
 	GString *out_string;
 	FileFormatClass format_class;
 
 	if (!layout_valid(&lw_id)) return;
 
-	if (image_get_path(lw_id->image))
+	const gchar *filename = image_get_path(lw_id->image);
+	if (filename)
 		{
-		filename = g_strdup(image_get_path(lw_id->image));
 		fd = file_data_new_group(filename);
 		out_string = g_string_new(nullptr);
 
 		if (fd->pixbuf)
 			{
-			format_class = filter_file_get_class(image_get_path(lw_id->image));
+			format_class = filter_file_get_class(filename);
 			}
 		else
 			{
@@ -1347,7 +1345,6 @@ static void gr_file_info(const gchar *, GIOChannel *channel, gpointer)
 
 		g_string_free(out_string, TRUE);
 		file_data_unref(fd);
-		g_free(filename);
 		}
 }
 
