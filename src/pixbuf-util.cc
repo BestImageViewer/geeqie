@@ -255,7 +255,8 @@ void pixbuf_inline_register_stock_icons()
 {
 	for (const PixbufInline &pi : inline_pixbuf_data)
 		{
-		register_stock_icon(pi.key, pixbuf_inline(pi.key));
+		g_autoptr(GdkPixbuf) pixbuf = pixbuf_inline(pi.key);
+		register_stock_icon(pi.key, pixbuf);
 		}
 }
 

@@ -4194,8 +4194,6 @@ void show_about_window(LayoutWindow *lw)
 	GInputStream *in_stream_authors;
 	GInputStream *in_stream_translators;
 	GString *copyright;
-	GdkPixbuf *pixbuf_icon;
-	GdkPixbuf *pixbuf_logo;
 	ZoneDetect *cd;
 	gchar *artists[2];
 	gchar *author_line;
@@ -4259,24 +4257,24 @@ void show_about_window(LayoutWindow *lw)
 	artists[0] = g_strdup("Néstor Díaz Valencia <nestor@estudionexos.com>");
 	artists[1] = nullptr;
 
-	pixbuf_logo = pixbuf_inline(PIXBUF_INLINE_LOGO);
-	pixbuf_icon = pixbuf_inline(PIXBUF_INLINE_ICON);
+	g_autoptr(GdkPixbuf) pixbuf_icon = pixbuf_inline(PIXBUF_INLINE_ICON);
+
 	gtk_show_about_dialog(GTK_WINDOW(lw->window),
-		"title", _("About Geeqie"),
-		"resizable", TRUE,
-		"program-name", GQ_APPNAME,
-		"version", VERSION,
-		"logo", pixbuf_logo,
-		"icon", pixbuf_icon,
-		"website", GQ_WEBSITE,
-		"website-label", _("Website"),
-		"comments", comment,
-		"artists", artists,
-		"authors", authors,
-		"translator-credits", translators,
-		"wrap-license", TRUE,
-		"license", copyright->str,
-		NULL);
+	                      "title", _("About Geeqie"),
+	                      "resizable", TRUE,
+	                      "program-name", GQ_APPNAME,
+	                      "version", VERSION,
+	                      "logo-icon-name", PIXBUF_INLINE_LOGO,
+	                      "icon", pixbuf_icon,
+	                      "website", GQ_WEBSITE,
+	                      "website-label", _("Website"),
+	                      "comments", comment,
+	                      "artists", artists,
+	                      "authors", authors,
+	                      "translator-credits", translators,
+	                      "wrap-license", TRUE,
+	                      "license", copyright->str,
+	                      NULL);
 
 	g_string_free(copyright, TRUE);
 

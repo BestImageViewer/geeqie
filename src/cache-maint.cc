@@ -153,7 +153,8 @@ void cache_maintenance(const gchar *path)
 {
 	cache_maintenance_path = g_strdup(path);
 
-	status_icon = gtk_status_icon_new_from_pixbuf(pixbuf_inline(PIXBUF_INLINE_ICON));
+	g_autoptr(GdkPixbuf) pixbuf_icon = pixbuf_inline(PIXBUF_INLINE_ICON);
+	status_icon = gtk_status_icon_new_from_pixbuf(pixbuf_icon);
 	gtk_status_icon_set_tooltip_text(status_icon, _("Geeqie: Cleaning thumbs..."));
 	gtk_status_icon_set_visible(status_icon, TRUE);
 	g_signal_connect(G_OBJECT(status_icon), "activate", G_CALLBACK(cache_maintenance_status_icon_activate_cb), NULL);
