@@ -26,7 +26,6 @@
 #include <glib.h>
 
 struct ConfOptions;
-struct GQParserData;
 struct LayoutWindow;
 
 void write_indent(GString *str, gint indent);
@@ -80,13 +79,6 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 #define READ_COLOR_FULL(_name_, _target_) read_color_option(option, _name_, value, &(_target_))
 
 #define READ_DUMMY(_target_, _name_, _msg_) read_dummy_option(option, #_name_, _msg_)
-
-using GQParserStartFunc = void (*)(GQParserData *, GMarkupParseContext *, const gchar *, const gchar **, const gchar **, gpointer, GError **);
-using GQParserEndFunc = void (*)(GQParserData *, GMarkupParseContext *, const gchar *, gpointer, GError **);
-
-void options_parse_func_push(GQParserData *parser_data, GQParserStartFunc start_func, GQParserEndFunc end_func, gpointer data);
-void options_parse_func_pop(GQParserData *parser_data);
-void options_parse_func_set_data(GQParserData *parser_data, gpointer data);
 
 
 gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, LayoutWindow *lw);

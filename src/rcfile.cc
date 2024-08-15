@@ -23,6 +23,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <stack>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gtk/gtk.h>
@@ -52,6 +53,61 @@
 #include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
+
+namespace
+{
+
+struct GQParserData
+{
+	using StartFunc = void (*)(GQParserData *, GMarkupParseContext *, const gchar *, const gchar **, const gchar **, gpointer, GError **);
+	using EndFunc = void (*)(GQParserData *, GMarkupParseContext *, const gchar *, gpointer, GError **);
+
+	struct ParseFunc
+	{
+		StartFunc start_func;
+		EndFunc end_func;
+		gpointer data;
+	};
+
+	void func_push(StartFunc start_func, EndFunc end_func, gpointer data)
+	{
+		ParseFunc parse_func{start_func, end_func, data};
+
+		parse_func_stack.push(parse_func);
+	}
+
+	void func_pop()
+	{
+		parse_func_stack.pop();
+	}
+
+	void func_set_data(gpointer data)
+	{
+		auto& func = parse_func_stack.top();
+		func.data = data;
+	}
+
+	void start_func(GMarkupParseContext *context, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, GError **error)
+	{
+		auto& func = parse_func_stack.top();
+		if (!func.start_func) return;
+
+		func.start_func(this, context, element_name, attribute_names, attribute_values, func.data, error);
+	}
+
+	void end_func(GMarkupParseContext *context, const gchar *element_name, GError **error)
+	{
+		auto& func = parse_func_stack.top();
+		if (!func.end_func) return;
+
+		func.end_func(this, context, element_name, func.data, error);
+	}
+
+	std::stack<ParseFunc> parse_func_stack;
+	gboolean startup = FALSE; /* reading config for the first time - add commandline and defaults */
+};
+
+} // namespace
 
 /*
  *-----------------------------------------------------------------------------
@@ -1117,7 +1173,7 @@ static void options_load_profile(GQParserData *parser_data, GMarkupParseContext 
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}
 	i++;
-	options_parse_func_set_data(parser_data, GINT_TO_POINTER(i));
+	parser_data->func_set_data(GINT_TO_POINTER(i));
 
 }
 
@@ -1134,7 +1190,7 @@ static void options_load_marks_tooltips(GQParserData *parser_data, GMarkupParseC
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}
 	i++;
-	options_parse_func_set_data(parser_data, GINT_TO_POINTER(i));
+	parser_data->func_set_data(GINT_TO_POINTER(i));
 
 }
 
@@ -1157,7 +1213,7 @@ static void options_load_disabled_plugins(GQParserData *parser_data, GMarkupPars
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}
 	i++;
-	options_parse_func_set_data(parser_data, GINT_TO_POINTER(i));
+	parser_data->func_set_data(GINT_TO_POINTER(i));
 }
 
 /*
@@ -1165,12 +1221,6 @@ static void options_load_disabled_plugins(GQParserData *parser_data, GMarkupPars
  * xml file structure (private)
  *-----------------------------------------------------------------------------
  */
-struct GQParserData
-{
-	GList *parse_func_stack;
-	gboolean startup; /* reading config for the first time - add commandline and defaults */
-};
-
 static const gchar *options_get_id(const gchar **attribute_names, const gchar **attribute_values)
 {
 	while (*attribute_names)
@@ -1188,7 +1238,7 @@ static const gchar *options_get_id(const gchar **attribute_names, const gchar **
 static void options_parse_leaf(GQParserData *parser_data, GMarkupParseContext *, const gchar *element_name, const gchar **, const gchar **, gpointer, GError **)
 {
 	log_printf("unexpected: %s\n", element_name);
-	options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 }
 
 static void options_parse_color_profiles(GQParserData *parser_data, GMarkupParseContext *context, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data, GError **error)
@@ -1196,12 +1246,12 @@ static void options_parse_color_profiles(GQParserData *parser_data, GMarkupParse
 	if (g_ascii_strcasecmp(element_name, "profile") == 0)
 		{
 		options_load_profile(parser_data, context, element_name, attribute_names, attribute_values, data, error);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <profile>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1210,12 +1260,12 @@ static void options_parse_marks_tooltips(GQParserData *parser_data, GMarkupParse
 	if (g_ascii_strcasecmp(element_name, "tooltip") == 0)
 		{
 		options_load_marks_tooltips(parser_data, context, element_name, attribute_names, attribute_values, data, error);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <profile>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1286,12 +1336,12 @@ static void options_parse_class_filter(GQParserData *parser_data, GMarkupParseCo
 	if (g_ascii_strcasecmp(element_name, "filter_type") == 0)
 		{
 		class_filter_load_filter_type(attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <profile>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1300,12 +1350,12 @@ static void options_parse_disabled_plugins(GQParserData *parser_data, GMarkupPar
 	if (g_ascii_strcasecmp(element_name, "plugin") == 0)
 		{
 		options_load_disabled_plugins(parser_data, context, element_name, attribute_names, attribute_values, data, error);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <profile>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1314,12 +1364,12 @@ static void options_parse_filter(GQParserData *parser_data, GMarkupParseContext 
 	if (g_ascii_strcasecmp(element_name, "file_type") == 0)
 		{
 		filter_load_file_type(attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <filter>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1342,12 +1392,12 @@ static void options_parse_keyword(GQParserData *parser_data, GMarkupParseContext
 	if (g_ascii_strcasecmp(element_name, "keyword") == 0)
 		{
 		GtkTreeIter *child = keyword_add_from_config(keyword_tree, iter_ptr, attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_keyword, options_parse_keyword_end, child);
+		parser_data->func_push(options_parse_keyword, options_parse_keyword_end, child);
 		}
 	else
 		{
 		log_printf("unexpected in <keyword>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1358,12 +1408,12 @@ static void options_parse_keyword_tree(GQParserData *parser_data, GMarkupParseCo
 	if (g_ascii_strcasecmp(element_name, "keyword") == 0)
 		{
 		GtkTreeIter *iter_ptr = keyword_add_from_config(keyword_tree, nullptr, attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_keyword, options_parse_keyword_end, iter_ptr);
+		parser_data->func_push(options_parse_keyword, options_parse_keyword_end, iter_ptr);
 		}
 	else
 		{
 		log_printf("unexpected in <keyword_tree>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1373,35 +1423,35 @@ static void options_parse_global(GQParserData *parser_data, GMarkupParseContext 
 	if (g_ascii_strcasecmp(element_name, "color_profiles") == 0)
 		{
 		options_load_color_profiles(parser_data, context, element_name, attribute_names, attribute_values, data, error);
-		options_parse_func_push(parser_data, options_parse_color_profiles, nullptr, GINT_TO_POINTER(0));
+		parser_data->func_push(options_parse_color_profiles, nullptr, GINT_TO_POINTER(0));
 		}
 	else if (g_ascii_strcasecmp(element_name, "filter") == 0)
 		{
-		options_parse_func_push(parser_data, options_parse_filter, options_parse_filter_end, nullptr);
+		parser_data->func_push(options_parse_filter, options_parse_filter_end, nullptr);
 		}
 	else if (g_ascii_strcasecmp(element_name, "marks_tooltips") == 0)
 		{
 		options_load_marks_tooltips(parser_data, context, element_name, attribute_names, attribute_values, data, error);
-		options_parse_func_push(parser_data, options_parse_marks_tooltips, nullptr, nullptr);
+		parser_data->func_push(options_parse_marks_tooltips, nullptr, nullptr);
 		}
 	else if (g_ascii_strcasecmp(element_name, "class_filter") == 0)
 		{
-		options_parse_func_push(parser_data, options_parse_class_filter, nullptr, nullptr);
+		parser_data->func_push(options_parse_class_filter, nullptr, nullptr);
 		}
 	else if (g_ascii_strcasecmp(element_name, "keyword_tree") == 0)
 		{
 		if (!keyword_tree) keyword_tree_new();
-		options_parse_func_push(parser_data, options_parse_keyword_tree, nullptr, nullptr);
+		parser_data->func_push(options_parse_keyword_tree, nullptr, nullptr);
 		}
 	else if (g_ascii_strcasecmp(element_name, "disabled_plugins") == 0)
 		{
 		options_load_disabled_plugins(parser_data, context, element_name, attribute_names, attribute_values, data, error);
-		options_parse_func_push(parser_data, options_parse_disabled_plugins, nullptr, nullptr);
+		parser_data->func_push(options_parse_disabled_plugins, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <global>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1422,12 +1472,12 @@ static void options_parse_pane_exif(GQParserData *parser_data, GMarkupParseConte
 	if (g_ascii_strcasecmp(element_name, "entry") == 0)
 		{
 		bar_pane_exif_entry_add_from_config(pane, attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <pane_exif>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1438,12 +1488,12 @@ static void options_parse_pane_keywords(GQParserData *parser_data, GMarkupParseC
 	if (g_ascii_strcasecmp(element_name, "expanded") == 0)
 		{
 		bar_pane_keywords_entry_add_from_config(pane, attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <pane_keywords>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1462,7 +1512,7 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, 
 			pane = bar_pane_comment_new_from_config(attribute_names, attribute_values);
 			bar_add(bar, pane);
 			}
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 #if HAVE_LIBCHAMPLAIN && HAVE_LIBCHAMPLAIN_GTK
 	else if (g_ascii_strcasecmp(element_name, "pane_gps") == 0)
@@ -1480,7 +1530,7 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, 
 				pane = bar_pane_gps_new_from_config(attribute_names, attribute_values);
 				bar_add(bar, pane);
 				}
-			options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+			parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 			}
 		}
 #endif
@@ -1496,7 +1546,7 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, 
 			pane = bar_pane_exif_new_from_config(attribute_names, attribute_values);
 			bar_add(bar, pane);
 			}
-		options_parse_func_push(parser_data, options_parse_pane_exif, nullptr, pane);
+		parser_data->func_push(options_parse_pane_exif, nullptr, pane);
 		}
 	else if (g_ascii_strcasecmp(element_name, "pane_histogram") == 0)
 		{
@@ -1510,7 +1560,7 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, 
 			pane = bar_pane_histogram_new_from_config(attribute_names, attribute_values);
 			bar_add(bar, pane);
 			}
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else if (g_ascii_strcasecmp(element_name, "pane_rating") == 0)
 		{
@@ -1524,7 +1574,7 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, 
 			pane = bar_pane_rating_new_from_config(attribute_names, attribute_values);
 			bar_add(bar, pane);
 			}
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else if (g_ascii_strcasecmp(element_name, "pane_keywords") == 0)
 		{
@@ -1538,17 +1588,17 @@ static void options_parse_bar(GQParserData *parser_data, GMarkupParseContext *, 
 			pane = bar_pane_keywords_new_from_config(attribute_names, attribute_values);
 			bar_add(bar, pane);
 			}
-		options_parse_func_push(parser_data, options_parse_pane_keywords, nullptr, pane);
+		parser_data->func_push(options_parse_pane_keywords, nullptr, pane);
 		}
 	else if (g_ascii_strcasecmp(element_name, "clear") == 0)
 		{
 		bar_clear(bar);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <bar>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1558,17 +1608,17 @@ static void options_parse_toolbar(GQParserData *parser_data, GMarkupParseContext
 	if (g_ascii_strcasecmp(element_name, "toolitem") == 0)
 		{
 		layout_toolbar_add_from_config(lw, TOOLBAR_MAIN, attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else if (g_ascii_strcasecmp(element_name, "clear") == 0)
 		{
 		layout_toolbar_clear(lw, TOOLBAR_MAIN);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <toolbar>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1578,17 +1628,17 @@ static void options_parse_statusbar(GQParserData *parser_data, GMarkupParseConte
 	if (g_ascii_strcasecmp(element_name, "toolitem") == 0)
 		{
 		layout_toolbar_add_from_config(lw, TOOLBAR_STATUS, attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else if (g_ascii_strcasecmp(element_name, "clear") == 0)
 		{
 		layout_toolbar_clear(lw, TOOLBAR_STATUS);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <statusbar>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1597,12 +1647,12 @@ static void options_parse_dialogs(GQParserData *parser_data, GMarkupParseContext
 	if (g_ascii_strcasecmp(element_name, "window") == 0)
 		{
 		generic_dialog_windows_load_config(attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <dialogs>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1621,7 +1671,7 @@ static void options_parse_layout(GQParserData *parser_data, GMarkupParseContext 
 			bar_update_from_config(lw->bar, attribute_names, attribute_values, lw, FALSE);
 			}
 
-		options_parse_func_push(parser_data, options_parse_bar, nullptr, lw->bar);
+		parser_data->func_push(options_parse_bar, nullptr, lw->bar);
 		}
 	else if (g_ascii_strcasecmp(element_name, "bar_sort") == 0)
 		{
@@ -1635,24 +1685,24 @@ static void options_parse_layout(GQParserData *parser_data, GMarkupParseContext 
 			layout_bar_sort_set(lw, bar);
 			gtk_widget_show(lw->bar_sort);
 			}
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 	else if (g_ascii_strcasecmp(element_name, "toolbar") == 0)
 		{
-		options_parse_func_push(parser_data, options_parse_toolbar, nullptr, lw);
+		parser_data->func_push(options_parse_toolbar, nullptr, lw);
 		}
 	else if (g_ascii_strcasecmp(element_name, "statusbar") == 0)
 		{
-		options_parse_func_push(parser_data, options_parse_statusbar, nullptr, lw);
+		parser_data->func_push(options_parse_statusbar, nullptr, lw);
 		}
 	else if (g_ascii_strcasecmp(element_name, "dialogs") == 0)
 		{
-		options_parse_func_push(parser_data, options_parse_dialogs, nullptr, nullptr);
+		parser_data->func_push(options_parse_dialogs, nullptr, nullptr);
 		}
 	else
 		{
 		log_printf("unexpected in <layout>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
 
@@ -1667,13 +1717,13 @@ static void options_parse_toplevel(GQParserData *parser_data, GMarkupParseContex
 	if (g_ascii_strcasecmp(element_name, "gq") == 0)
 		{
 		/* optional top-level node */
-		options_parse_func_push(parser_data, options_parse_toplevel, nullptr, nullptr);
+		parser_data->func_push(options_parse_toplevel, nullptr, nullptr);
 		return;
 		}
 	if (g_ascii_strcasecmp(element_name, "global") == 0)
 		{
 		load_global_params(attribute_names, attribute_values);
-		options_parse_func_push(parser_data, options_parse_global, options_parse_global_end, nullptr);
+		parser_data->func_push(options_parse_global, options_parse_global_end, nullptr);
 		return;
 		}
 
@@ -1689,17 +1739,14 @@ static void options_parse_toplevel(GQParserData *parser_data, GMarkupParseContex
 			{
 			lw = layout_new_from_config(attribute_names, attribute_values, parser_data->startup);
 			}
-		options_parse_func_push(parser_data, options_parse_layout, options_parse_layout_end, lw);
+		parser_data->func_push(options_parse_layout, options_parse_layout_end, lw);
 		}
 	else
 		{
 		log_printf("unexpected in <toplevel>: <%s>\n", element_name);
-		options_parse_func_push(parser_data, options_parse_leaf, nullptr, nullptr);
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 }
-
-
-
 
 
 /*
@@ -1707,37 +1754,6 @@ static void options_parse_toplevel(GQParserData *parser_data, GMarkupParseContex
  * parser
  *-----------------------------------------------------------------------------
  */
-
-
-struct GQParserFuncData
-{
-	GQParserStartFunc start_func;
-	GQParserEndFunc end_func;
-	gpointer data;
-};
-
-void options_parse_func_push(GQParserData *parser_data, GQParserStartFunc start_func, GQParserEndFunc end_func, gpointer data)
-{
-	auto func_data = g_new0(GQParserFuncData, 1);
-	func_data->start_func = start_func;
-	func_data->end_func = end_func;
-	func_data->data = data;
-
-	parser_data->parse_func_stack = g_list_prepend(parser_data->parse_func_stack, func_data);
-}
-
-void options_parse_func_pop(GQParserData *parser_data)
-{
-	g_free(parser_data->parse_func_stack->data);
-	parser_data->parse_func_stack = g_list_delete_link(parser_data->parse_func_stack, parser_data->parse_func_stack);
-}
-
-void options_parse_func_set_data(GQParserData *parser_data, gpointer data)
-{
-	auto func = static_cast<GQParserFuncData *>(parser_data->parse_func_stack->data);
-	func->data = data;
-}
-
 
 static void start_element(GMarkupParseContext *context,
 			  const gchar *element_name,
@@ -1747,11 +1763,9 @@ static void start_element(GMarkupParseContext *context,
 			  GError **error)
 {
 	auto parser_data = static_cast<GQParserData *>(user_data);
-	auto func = static_cast<GQParserFuncData *>(parser_data->parse_func_stack->data);
 	DEBUG_2("start %s", element_name);
 
-	if (func->start_func)
-		func->start_func(parser_data, context, element_name, attribute_names, attribute_values, func->data, error);
+	parser_data->start_func(context, element_name, attribute_names, attribute_values, error);
 }
 
 static void end_element(GMarkupParseContext *context,
@@ -1760,22 +1774,11 @@ static void end_element(GMarkupParseContext *context,
 			  GError **error)
 {
 	auto parser_data = static_cast<GQParserData *>(user_data);
-	auto func = static_cast<GQParserFuncData *>(parser_data->parse_func_stack->data);
 	DEBUG_2("end %s", element_name);
 
-	if (func->end_func)
-		func->end_func(parser_data, context, element_name, func->data, error);
-
-	options_parse_func_pop(parser_data);
+	parser_data->end_func(context, element_name, error);
+	parser_data->func_pop();
 }
-
-static GMarkupParser parser = {
-	start_element,
-	end_element,
-	nullptr,
-	nullptr,
-	nullptr
-};
 
 /*
  *-----------------------------------------------------------------------------
@@ -1785,23 +1788,29 @@ static GMarkupParser parser = {
 
 gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup)
 {
+	static GMarkupParser parser = {
+	    start_element,
+	    end_element,
+	    nullptr,
+	    nullptr,
+	    nullptr
+	};
+
 	GMarkupParseContext *context;
 	gboolean ret = TRUE;
 
-	auto parser_data = g_new0(GQParserData, 1);
+	GQParserData parser_data;
 
-	parser_data->startup = startup;
-	options_parse_func_push(parser_data, options_parse_toplevel, nullptr, nullptr);
+	parser_data.startup = startup;
+	parser_data.func_push(options_parse_toplevel, nullptr, nullptr);
 
-	context = g_markup_parse_context_new(&parser, static_cast<GMarkupParseFlags>(0), parser_data, nullptr);
+	context = g_markup_parse_context_new(&parser, static_cast<GMarkupParseFlags>(0), &parser_data, nullptr);
 
 	if (g_markup_parse_context_parse(context, buf, size, nullptr) == FALSE)
 		{
 		ret = FALSE;
 		DEBUG_1("Parse failed");
 		}
-
-	g_free(parser_data);
 
 	g_markup_parse_context_free(context);
 	return ret;
@@ -1821,7 +1830,5 @@ gboolean load_config_from_file(const gchar *utf8_path, gboolean startup)
 	g_free(buf);
 	return ret;
 }
-
-
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
