@@ -94,6 +94,15 @@ CMData *cache_maintain_data_new(gboolean clear, gboolean metadata, gboolean remo
 	return cm;
 }
 
+void cache_maintain_home_close(CMData *cm)
+{
+	if (cm->idle_id) g_source_remove(cm->idle_id);
+	if (cm->gd) generic_dialog_close(cm->gd);
+	filelist_free(cm->list);
+	g_list_free(cm->done_list);
+	g_free(cm);
+}
+
 } // namespace
 
 /*
@@ -106,21 +115,24 @@ static GtkStatusIcon *status_icon;
 
 static void cache_manager_sim_remote(const gchar *path, gboolean recurse, GSourceFunc destroy_func);
 
-static gboolean cache_maintenance_sim_stop_cb(gpointer)
+static gboolean cache_maintenance_sim_stop_cb(gpointer data)
 {
+	g_free(data);
 	exit(EXIT_SUCCESS);
 	return G_SOURCE_REMOVE;
 }
 
-static gboolean cache_maintenance_render_stop_cb(gpointer)
+static gboolean cache_maintenance_render_stop_cb(gpointer data)
 {
+	g_free(data);
 	gtk_status_icon_set_tooltip_text(status_icon, _("Geeqie: Creating sim data..."));
 	cache_manager_sim_remote(cache_maintenance_path, TRUE, cache_maintenance_sim_stop_cb);
 	return G_SOURCE_REMOVE;
 }
 
-static void cache_maintenance_clean_stop_cb(gpointer)
+static void cache_maintenance_clean_stop_cb(gpointer data)
 {
+	cache_maintain_home_close(static_cast<CMData *>(data));
 	gtk_status_icon_set_tooltip_text(status_icon, _("Geeqie: Creating thumbs..."));
 	cache_manager_render_remote(cache_maintenance_path, TRUE, options->thumbnails.cache_into_dirs, cache_maintenance_render_stop_cb);
 }
@@ -192,15 +204,6 @@ static gboolean isempty(const gchar *path)
 
 	closedir(dp);
 	return TRUE;
-}
-
-static void cache_maintain_home_close(CMData *cm)
-{
-	if (cm->idle_id) g_source_remove(cm->idle_id);
-	if (cm->gd) generic_dialog_close(cm->gd);
-	filelist_free(cm->list);
-	g_list_free(cm->done_list);
-	g_free(cm);
 }
 
 static void cache_maintain_home_stop(CMData *cm)
@@ -719,7 +722,7 @@ static gboolean cache_manager_render_file(CacheOpsData *cd)
 
 	if (cd->destroy_func)
 		{
-		g_idle_add(cd->destroy_func, nullptr);
+		g_idle_add(cd->destroy_func, cd);
 		}
 
 	return FALSE;
@@ -1371,16 +1374,16 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 		return TRUE;
 		}
 
-		if (!cd->remote)
-			{
-			gq_gtk_entry_set_text(GTK_ENTRY(cd->progress), _("done"));
-			}
+	if (!cd->remote)
+		{
+		gq_gtk_entry_set_text(GTK_ENTRY(cd->progress), _("done"));
+		}
 
 	cache_manager_sim_finish(cd);
 
 	if (cd->destroy_func)
 		{
-		g_idle_add(cd->destroy_func, nullptr);
+		g_idle_add(cd->destroy_func, cd);
 		}
 
 	return FALSE;

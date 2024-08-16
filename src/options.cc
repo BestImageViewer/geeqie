@@ -259,7 +259,9 @@ void setup_default_options(ConfOptions *options)
 	gchar *path;
 	gint i;
 
-	bookmark_add_default(".", get_current_dir());
+	path = get_current_dir();
+	bookmark_add_default(".", path);
+	g_free(path);
 	bookmark_add_default(_("Home"), homedir());
 	path = g_build_filename(homedir(), "Desktop", NULL);
 	bookmark_add_default(_("Desktop"), path);
