@@ -215,45 +215,32 @@ static void bar_sort_undo_folder(SortData *sd, GtkWidget *button)
 		{
 		case BAR_SORT_MOVE:
 			{
-			GList *list;
-			gchar *src_dir;
-			gchar *src_path;
-
-			if (sd->undo_src_list)
+			GList *list = nullptr;
+			for (GList *work = sd->undo_dest_list; work; work = work->next)
 				{
-				GList *work = nullptr;
-
-				src_path = g_strdup(static_cast<const gchar *>(sd->undo_src_list->data));
-				src_dir = remove_level_from_path(src_path);
-				list = sd->undo_dest_list;
-				while (list)
-					{
-					work = g_list_prepend(work, file_data_new_group(static_cast<const gchar *>(list->data)));
-					list=list->next;
-					}
-				file_util_move_simple(work, src_dir, sd->lw->window);
-				g_free(src_dir);
-				g_free(src_path);
+				list = g_list_prepend(list, file_data_new_group(static_cast<gchar *>(work->data)));
 				}
+
+			const auto *src_path = static_cast<const gchar *>(sd->undo_src_list->data);
+			g_autofree gchar *src_dir = remove_level_from_path(src_path);
+
+			file_util_move_simple(list, src_dir, sd->lw->window);
 			}
 			break;
 
 		case BAR_SORT_COPY:
 		case BAR_SORT_FILTER:
-			if (sd->undo_src_list)
+			{
+			GList *delete_list = nullptr;
+			for (GList *work = sd->undo_dest_list; work; work = work->next)
 				{
-				GList *delete_list;
-				GList *work = nullptr;
-
-				delete_list = sd->undo_dest_list;
-				while (delete_list)
-					{
-					work = g_list_append(work, file_data_new_group(static_cast<const gchar *>(delete_list->data)));
-					delete_list = delete_list->next;
-					}
-				options->file_ops.safe_delete_enable = TRUE;
-				file_util_delete(nullptr, work, button);
+				delete_list = g_list_append(delete_list, file_data_new_group(static_cast<gchar *>(work->data)));
 				}
+
+			options->file_ops.safe_delete_enable = TRUE;
+
+			file_util_delete(nullptr, delete_list, button);
+			}
 			break;
 
 		default:

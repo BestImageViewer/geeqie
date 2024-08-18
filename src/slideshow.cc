@@ -271,7 +271,6 @@ static gboolean slideshow_step(SlideShowData *ss, gboolean forward)
 		gint r;
 		if (forward)
 			{
-			if (!ss->list) return TRUE;
 			r = GPOINTER_TO_INT(ss->list->data);
 			}
 		else

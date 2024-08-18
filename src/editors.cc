@@ -363,8 +363,6 @@ gboolean editor_read_desktop_file(const gchar *path)
 
 	g_key_file_free(key_file);
 
-	if (editor->ignored) return TRUE;
-
 	editor->disabled = g_list_find_custom(options->disabled_plugins, path, reinterpret_cast<GCompareFunc>(g_strcmp0)) ? TRUE : FALSE;
 
 	gtk_list_store_append(desktop_file_list, &iter);

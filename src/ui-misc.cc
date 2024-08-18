@@ -1444,7 +1444,6 @@ gboolean defined_mouse_buttons(GtkWidget *, GdkEventButton *event, gpointer data
 				else
 					{
 					action = gq_gtk_action_group_get_action(lw->action_group, options->mouse_button_9);
-					ret = TRUE;
 					if (action)
 						{
 						gq_gtk_action_activate(action);

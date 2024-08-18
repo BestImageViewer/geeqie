@@ -2506,7 +2506,7 @@ static gboolean search_step_cb(gpointer data)
 		return G_SOURCE_CONTINUE;
 		}
 
-	if (!sd->search_file_list && !sd->search_folder_list)
+	if (!sd->search_folder_list)
 		{
 		sd->search_idle_id = 0;
 

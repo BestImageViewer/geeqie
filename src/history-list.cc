@@ -359,22 +359,16 @@ static void history_list_free(HistoryData *hd)
 
 static HistoryData *history_list_find_by_key(const gchar *key)
 {
-	GList *work = history_list;
-
 	if (!key) return nullptr;
 
-	work = g_list_find_custom(history_list, key, [](gconstpointer data, gconstpointer user_data)
+	static const auto history_data_compare_key = [](gconstpointer data, gconstpointer user_data)
 	{
 		auto *hd = static_cast<const HistoryData *>(data);
 		return strcmp(hd->key, static_cast<const gchar *>(user_data));
-	});
+	};
 
-	if (work)
-		{
-		return static_cast<HistoryData *>(work->data);
-		}
-
-	return nullptr;
+	GList *work = g_list_find_custom(history_list, key, history_data_compare_key);
+	return work ? static_cast<HistoryData *>(work->data) : nullptr;
 }
 
 const gchar *history_list_find_last_path_by_key(const gchar *key)

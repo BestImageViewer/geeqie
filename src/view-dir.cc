@@ -704,8 +704,7 @@ static void vd_pop_menu_sort_ascend_cb(GtkWidget *widget, gpointer data)
 
 	ascend = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 	layout_views_set_sort_dir(vd->layout, vd->layout->options.dir_view_list_sort.method, ascend, vd->layout->options.dir_view_list_sort.case_sensitive);
-
-	if (vd->layout) layout_refresh(vd->layout);
+	layout_refresh(vd->layout);
 }
 
 static void vd_pop_menu_sort_case_cb(GtkWidget *widget, gpointer data)
@@ -719,8 +718,7 @@ static void vd_pop_menu_sort_case_cb(GtkWidget *widget, gpointer data)
 
 	case_sensitive = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 	layout_views_set_sort_dir(vd->layout, vd->layout->options.dir_view_list_sort.method, vd->layout->options.dir_view_list_sort.ascend, case_sensitive);
-
-	if (vd->layout) layout_refresh(vd->layout);
+	layout_refresh(vd->layout);
 }
 
 static void vd_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
@@ -738,8 +736,7 @@ static void vd_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 	if (type == SORT_NAME || type == SORT_NUMBER || type == SORT_TIME)
 		{
 		layout_views_set_sort_dir(vd->layout, type, vd->layout->options.dir_view_list_sort.ascend, vd->layout->options.dir_view_list_sort.case_sensitive);
-
-		if (vd->layout) layout_refresh(vd->layout);
+		layout_refresh(vd->layout);
 		}
 }
 
@@ -771,11 +768,10 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 			{
 			if (fd)
 				{
-				gchar *parent;
-				new_folder_active = (fd && access_file(fd->path, W_OK | X_OK));
-				parent = remove_level_from_path(fd->path);
+				new_folder_active = access_file(fd->path, W_OK | X_OK);
+
+				g_autofree gchar *parent = remove_level_from_path(fd->path);
 				rename_delete_active = access_file(parent, W_OK | X_OK);
-				g_free(parent);
 				};
 			}
 			break;

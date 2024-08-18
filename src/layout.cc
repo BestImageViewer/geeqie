@@ -751,27 +751,19 @@ void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 
 			layout_bars_new_selection(lw, s);
 
+			g_autofree gchar *b = text_from_size_abrev(n_bytes);
+
 			if (s > 0)
 				{
-				gchar *b = text_from_size_abrev(n_bytes);
-				gchar *sb = text_from_size_abrev(s_bytes);
+				g_autofree gchar *sb = text_from_size_abrev(s_bytes);
 				buf = g_strdup_printf(_("%s, %d files (%s, %d)%s"), b, n, sb, s, ss);
-				g_free(b);
-				g_free(sb);
-				g_free(ss);
-				}
-			else if (n > 0)
-				{
-				gchar *b = text_from_size_abrev(n_bytes);
-				buf = g_strdup_printf(_("%s, %d files%s"), b, n, ss);
-				g_free(b);
-				g_free(ss);
 				}
 			else
 				{
-				buf = g_strdup_printf(_("%d files%s"), n, ss);
-				g_free(ss);
+				buf = g_strdup_printf(_("%s, %d files%s"), b, n, ss);
 				}
+
+			g_free(ss);
 
 			text = buf;
 
@@ -781,7 +773,7 @@ void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 			{
 			text = "";
 			}
-	}
+		}
 
 	if (lw->info_status) gtk_label_set_text(GTK_LABEL(lw->info_status), text);
 	g_free(buf);

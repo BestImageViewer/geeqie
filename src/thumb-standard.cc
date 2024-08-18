@@ -578,8 +578,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 					}
 				}
 			}
-		else if (tl->cache_hit &&
-			 tl->cache_local && !tl->thumb_path_local)
+		else if (tl->cache_local && !tl->thumb_path_local)
 			{
 			/* A local cache save was requested, but a valid thumb is in $HOME,
 			 * so specifically save as a local thumbnail.

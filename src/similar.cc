@@ -254,7 +254,6 @@ void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 
 	j = 0;
 
-	h_left = h;
 	for (ys = 0; ys < 32; ys++)
 		{
 		if (y_small) j = static_cast<gdouble>(h) / 32 * ys;

@@ -448,16 +448,18 @@ gboolean copy_file_attributes(const gchar *s, const gchar *t, gint perms, gint m
 
 		if (perms)
 			{
-			ret = chown(tl, st.st_uid, st.st_gid);
 			/* Ignores chown errors, while still doing chown
 			   (so root still can copy files preserving ownership) */
-			ret = TRUE;
-			if (chmod(tl, st.st_mode) < 0) {
-                            struct stat st2;
-                            if (stat(tl, &st2) != 0 || st2.st_mode != st.st_mode) {
-                                ret = FALSE;
-                            }
-                        }
+			chown(tl, st.st_uid, st.st_gid);
+
+			if (chmod(tl, st.st_mode) < 0)
+				{
+				struct stat st2;
+				if (stat(tl, &st2) != 0 || st2.st_mode != st.st_mode)
+					{
+					ret = FALSE;
+					}
+				}
 			}
 
 		tb.actime = st.st_atime;
@@ -578,7 +580,7 @@ gboolean copy_file(const gchar *s, const gchar *t)
 		return FALSE;
 		}
 
-	while ((b = fread(buf, sizeof(gchar), sizeof(buf), fi)) && b != 0)
+	while ((b = fread(buf, sizeof(gchar), sizeof(buf), fi)) != 0)
 		{
 		if (fwrite(buf, sizeof(gchar), b, fo) != b)
 			{

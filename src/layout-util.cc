@@ -1708,20 +1708,16 @@ static void layout_menu_image_first_cb(GtkAction *, gpointer data)
 static void layout_menu_image_prev_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint i;
 
 	if (lw->options.split_pane_sync)
 		{
-		for (i = 0; i < MAX_SPLIT_IMAGES; i++)
+		for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
 			{
 			if (lw->split_images[i])
 				{
-				if (i != -1)
-					{
-					DEBUG_1("image activate scroll %d", i);
-					layout_image_activate(lw, i, FALSE);
-					layout_image_prev(lw);
-					}
+				DEBUG_1("image activate scroll %d", i);
+				layout_image_activate(lw, i, FALSE);
+				layout_image_prev(lw);
 				}
 			}
 		}
@@ -1734,20 +1730,16 @@ static void layout_menu_image_prev_cb(GtkAction *, gpointer data)
 static void layout_menu_image_next_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint i;
 
 	if (lw->options.split_pane_sync)
 		{
-		for (i = 0; i < MAX_SPLIT_IMAGES; i++)
+		for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
 			{
 			if (lw->split_images[i])
 				{
-				if (i != -1)
-					{
-					DEBUG_1("image activate scroll %d", i);
-					layout_image_activate(lw, i, FALSE);
-					layout_image_next(lw);
-					}
+				DEBUG_1("image activate scroll %d", i);
+				layout_image_activate(lw, i, FALSE);
+				layout_image_next(lw);
 				}
 			}
 		}

@@ -2457,7 +2457,7 @@ static void pr_set_pixbuf(PixbufRenderer *pr, GdkPixbuf *pixbuf, gdouble zoom, P
 
 	if (pr->stereo_mode & PR_STEREO_TEMP_DISABLE)
 		{
-		gint disable = !pr->pixbuf || ! pr->stereo_data;
+		gint disable = !pr->stereo_data;
 		pr_stereo_temp_disable(pr, disable);
 		}
 

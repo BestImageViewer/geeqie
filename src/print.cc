@@ -436,7 +436,6 @@ gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)
 
 gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *pw, gint page_nr, gint total)
 {
-	const gchar *name;
 	gchar *text = nullptr;
 	GHashTable *vars;
 	gchar *window_title;
@@ -444,8 +443,6 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 	gchar *collection_name;
 
 	if (!fd) return nullptr;
-
-	name = fd->name;
 
 	vars = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, g_free);
 
@@ -468,9 +465,9 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 
 	osd_template_insert(vars, "number", g_strdup_printf("%d", page_nr + 1), OSDT_NO_DUP);
 	osd_template_insert(vars, "total", g_strdup_printf("%d", total), OSDT_NO_DUP);
-	osd_template_insert(vars, "name", const_cast<gchar *>(name), OSDT_NONE);
-	osd_template_insert(vars, "date", fd ? (const_cast<gchar *>(text_from_time(fd->date))) : "", OSDT_NONE);
-	osd_template_insert(vars, "size", fd ? (text_from_size_abrev(fd->size)) : g_strdup(""), OSDT_FREE);
+	osd_template_insert(vars, "name", fd->name, OSDT_NONE);
+	osd_template_insert(vars, "date", text_from_time(fd->date), OSDT_NONE);
+	osd_template_insert(vars, "size", text_from_size_abrev(fd->size), OSDT_FREE);
 
 	if (fd->pixbuf)
 		{

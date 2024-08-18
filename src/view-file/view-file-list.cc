@@ -613,7 +613,7 @@ static void vflist_select_image(ViewFile *vf, FileData *sel_fd)
 	row = g_list_index(vf->list, sel_fd);
 	/** @FIXME sidecar data */
 
-	if (sel_fd && options->image.enable_read_ahead && row >= 0)
+	if (options->image.enable_read_ahead && row >= 0)
 		{
 		if (row > g_list_index(vf->list, cur_fd) &&
 		    static_cast<guint>(row + 1) < vf_count(vf, nullptr))

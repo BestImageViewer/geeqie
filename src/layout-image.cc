@@ -546,11 +546,8 @@ static void li_pop_menu_edit_cb(GtkWidget *widget, gpointer data)
 
 static void li_pop_menu_alter_cb(GtkWidget *widget, gpointer data)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-	AlterType type;
-
-	lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
-	type = static_cast<AlterType>GPOINTER_TO_INT(data);
+	auto *lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
+	auto type = static_cast<AlterType>GPOINTER_TO_INT(data);
 
 	image_alter_orientation(lw->image, lw->image->image_fd, type);
 }
@@ -1794,7 +1791,7 @@ static void layout_image_button_cb(ImageWindow *imd, GdkEventButton *event, gpoi
 	switch (event->button)
 		{
 		case MOUSE_BUTTON_LEFT:
-			if (event->button == MOUSE_BUTTON_LEFT && event->type == GDK_2BUTTON_PRESS)
+			if (event->type == GDK_2BUTTON_PRESS)
 				{
 				layout_image_full_screen_toggle(lw);
 				}

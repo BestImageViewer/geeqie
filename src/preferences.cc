@@ -1674,12 +1674,12 @@ static void accel_store_populate()
 					{
 					gtk_tree_store_append(accel_store, &iter, nullptr);
 					gtk_tree_store_set(accel_store, &iter,
-							   AE_ACTION, label,
-							   AE_KEY, accel,
-							   AE_TOOLTIP, tooltip ? tooltip : "",
-							   AE_ACCEL, accel_path,
-							   AE_ICON, icon_name,
-							   -1);
+					                   AE_ACTION, label,
+					                   AE_KEY, accel,
+					                   AE_TOOLTIP, tooltip,
+					                   AE_ACCEL, accel_path,
+					                   AE_ICON, icon_name,
+					                   -1);
 					}
 
 				g_free(accel);

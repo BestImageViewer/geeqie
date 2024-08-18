@@ -1762,11 +1762,9 @@ static RemoteCommandEntry remote_commands[] = {
 
 static RemoteCommandEntry *remote_command_find(const gchar *text, const gchar **offset)
 {
-	gboolean match = FALSE;
-	gint i;
+	gint i = 0;
 
-	i = 0;
-	while (!match && remote_commands[i].func != nullptr)
+	while (remote_commands[i].func != nullptr)
 		{
 		if (remote_commands[i].needs_extra)
 			{

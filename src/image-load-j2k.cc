@@ -292,8 +292,7 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 		opj_image_destroy (image);
 	if (codec)
 		opj_destroy_codec (codec);
-	if (stream)
-		opj_stream_destroy (stream);
+	opj_stream_destroy (stream);
 
 	chunk_size = count;
 	return TRUE;

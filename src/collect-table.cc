@@ -1869,7 +1869,7 @@ static void collection_table_sync(CollectTable *ct)
 			list = collection_table_add_row(ct, &iter);
 			}
 
-		while (list)
+		for (; list; list = list->next)
 			{
 			CollectInfo *info;
 			if (work)
@@ -1881,11 +1881,8 @@ static void collection_table_sync(CollectTable *ct)
 				{
 				info = nullptr;
 				}
-			if (list)
-				{
-				list->data = info;
-				list = list->next;
-				}
+
+			list->data = info;
 			}
 		}
 

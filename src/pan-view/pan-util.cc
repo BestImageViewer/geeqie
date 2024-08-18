@@ -99,10 +99,15 @@ gint pan_date_value(time_t d, PanDateLengthType length)
 gchar *pan_date_value_string(time_t d, PanDateLengthType length)
 {
 	struct tm td;
-	gchar buf[128];
-	const gchar *format = nullptr;
-
 	if (!localtime_r(&d, &td)) return g_strdup("");
+
+	const auto format_date = [&td](const gchar *format) -> gchar *
+	{
+		gchar buf[128];
+		if (!strftime(buf, sizeof(buf), format, &td)) return nullptr;
+
+		return g_locale_to_utf8(buf, -1, nullptr, nullptr, nullptr);
+	};
 
 	switch (length)
 		{
@@ -110,14 +115,20 @@ gchar *pan_date_value_string(time_t d, PanDateLengthType length)
 			return g_strdup_printf("%d", td.tm_mday);
 			break;
 		case PAN_DATE_LENGTH_WEEK:
-			format = "%A %e";
+			{
+			gchar *ret = format_date("%A %e");
+			if (ret) return ret;
+			}
 			break;
 		case PAN_DATE_LENGTH_MONTH:
+			{
 #if defined(HAS_GLIBC_STRFTIME_EXTENSIONS) || defined(__FreeBSD__)
-			format = "%OB %Y";
+			gchar *ret = format_date("%OB %Y");
 #else
-			format = "%B %Y";
+			gchar *ret = format_date("%B %Y");
 #endif
+			if (ret) return ret;
+			}
 			break;
 		case PAN_DATE_LENGTH_YEAR:
 			return g_strdup_printf("%d", td.tm_year + 1900);
@@ -126,13 +137,6 @@ gchar *pan_date_value_string(time_t d, PanDateLengthType length)
 		default:
 			return g_strdup(text_from_time(d));
 			break;
-		}
-
-
-	if (format && strftime(buf, sizeof(buf), format, &td) > 0)
-		{
-		gchar *ret = g_locale_to_utf8(buf, -1, nullptr, nullptr, nullptr);
-		if (ret) return ret;
 		}
 
 	return g_strdup("");

@@ -442,7 +442,7 @@ static gint dest_view_rename_cb(TreeEditData *ted, const gchar *old_name, const 
 		gtk_list_store_set(GTK_LIST_STORE(model), &iter, 0, new_name, 1, new_path, -1);
 
 		text = gq_gtk_entry_get_text(GTK_ENTRY(dd->entry));
-		if (text && old_path && strcmp(text, old_path) == 0)
+		if (text && strcmp(text, old_path) == 0)
 			{
 			gq_gtk_entry_set_text(GTK_ENTRY(dd->entry), new_path);
 			}

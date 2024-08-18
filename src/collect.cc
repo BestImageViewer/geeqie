@@ -1106,7 +1106,6 @@ static void collection_window_insert(CollectWindow *cw, CollectInfo *ci)
 
 	if (!ci->pixbuf) collection_load_thumb_idle(cw->cd);
 	collection_table_file_insert(cw->table, ci);
-	if (!cw) return;
 }
 
 static void collection_window_remove(CollectWindow *cw, CollectInfo *ci)

@@ -664,9 +664,7 @@ FileData *FileData::file_data_ref(const gchar *file, gint line)
 FileData *FileData::file_data_ref()
 #endif
 {
-	FileData *fd = this;
-        // TODO(xsdg): Do null checks at call-sites, if necessary.  The following is a no-op.
-	if (fd == nullptr) return nullptr;
+	FileData *fd = this; // TODO(xsdg): Do null checks at call-sites, if necessary.
 	if (fd->magick != FD_MAGICK)
 #ifdef DEBUG_FILEDATA
 		log_printf("Error: fd magick mismatch @ %s:%d  fd=%p", file, line, (void *)fd);
@@ -800,7 +798,6 @@ void FileData::file_data_unref()
 #endif
 {
 	FileData *fd = this;  // TODO(xsdg): clean this up across the board.
-	if (fd == nullptr) return;
 	if (fd->magick != FD_MAGICK)
 #ifdef DEBUG_FILEDATA
 		log_printf("Error: fd magick mismatch @ %s:%d  fd=%p", file, line, (void *)fd);

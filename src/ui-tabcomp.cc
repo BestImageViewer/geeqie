@@ -476,7 +476,6 @@ static gboolean tab_completion_do(TabCompData *td)
 			while (!done)
 				{
 				list = poss;
-				if (!list) done = TRUE;
 				while (list && !done)
 					{
 					auto file = static_cast<gchar *>(list->data);
@@ -650,8 +649,6 @@ GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
 	td->has_history = TRUE;
 	td->history_key = g_strdup(history_key);
 	td->history_levels = max_levels;
-
-	work = history_list_get_by_key(td->history_key);
 
 	work = history_list_get_by_key(history_key);
 	while (work)

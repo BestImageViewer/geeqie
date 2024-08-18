@@ -1817,16 +1817,14 @@ gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup)
 gboolean load_config_from_file(const gchar *utf8_path, gboolean startup)
 {
 	gsize size;
-	gchar *buf;
-	gboolean ret = TRUE;
+	g_autofree gchar *buf = nullptr;
 
 	if (g_file_get_contents(utf8_path, &buf, &size, nullptr) == FALSE)
 		{
 		return FALSE;
 		}
-	ret = load_config_from_buf(buf, size, startup);
-	g_free(buf);
-	return ret;
+
+	return load_config_from_buf(buf, size, startup);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

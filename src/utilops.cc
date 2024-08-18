@@ -2572,8 +2572,6 @@ static gboolean file_util_delete_dir_empty_path(UtilityData *ud, FileData *fd, g
 	GList *flist;
 	GList *work;
 
-	gboolean ok = TRUE;
-
 	DEBUG_1("deltree into: %s", fd->path);
 
 	level++;
@@ -2590,15 +2588,12 @@ static gboolean file_util_delete_dir_empty_path(UtilityData *ud, FileData *fd, g
 		return 0;
 		}
 
+	gboolean ok = file_data_sc_add_ci_delete(fd);
 	if (ok)
 		{
-		ok = file_data_sc_add_ci_delete(fd);
-		if (ok)
-			{
-			ud->content_list = g_list_prepend(ud->content_list, fd);
-			}
-		// ud->fail_fd = fd
+		ud->content_list = g_list_prepend(ud->content_list, fd);
 		}
+	// ud->fail_fd = fd
 
 	work = dlist;
 	while (work && ok)
@@ -2631,7 +2626,6 @@ static gboolean file_util_delete_dir_empty_path(UtilityData *ud, FileData *fd, g
 
 	filelist_free(dlist);
 	filelist_free(flist);
-
 
 	DEBUG_1("deltree done: %s", fd->path);
 

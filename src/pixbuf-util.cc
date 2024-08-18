@@ -213,7 +213,7 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 		{
 		g_error_free(error);
 		error = nullptr;
-		in_stream = get_input_stream(it->data, !dark, &error);
+		in_stream = get_input_stream(it->data, FALSE, &error);
 		}
 
 	if (error)
