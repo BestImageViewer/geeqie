@@ -518,19 +518,19 @@ ExifItem *exif_get_first_item(ExifData *exif)
 		if (exif->exifIter != exif->exifData().end())
 			{
 			const Exiv2::Metadatum *item = &*exif->exifIter;
-			exif->exifIter++;
+			++exif->exifIter;
 			return (ExifItem *)item;
 			}
 		if (exif->iptcIter != exif->iptcData().end())
 			{
 			const Exiv2::Metadatum *item = &*exif->iptcIter;
-			exif->iptcIter++;
+			++exif->iptcIter;
 			return (ExifItem *)item;
 			}
 		if (exif->xmpIter != exif->xmpData().end())
 			{
 			const Exiv2::Metadatum *item = &*exif->xmpIter;
-			exif->xmpIter++;
+			++exif->xmpIter;
 			return (ExifItem *)item;
 			}
 		return nullptr;
@@ -548,19 +548,19 @@ ExifItem *exif_get_next_item(ExifData *exif)
 		if (exif->exifIter != exif->exifData().end())
 			{
 			const Exiv2::Metadatum *item = &*exif->exifIter;
-			exif->exifIter++;
+			++exif->exifIter;
 			return (ExifItem *)item;
 		}
 		if (exif->iptcIter != exif->iptcData().end())
 			{
 			const Exiv2::Metadatum *item = &*exif->iptcIter;
-			exif->iptcIter++;
+			++exif->iptcIter;
 			return (ExifItem *)item;
 		}
 		if (exif->xmpIter != exif->xmpData().end())
 			{
 			const Exiv2::Metadatum *item = &*exif->xmpIter;
-			exif->xmpIter++;
+			++exif->xmpIter;
 			return (ExifItem *)item;
 		}
 		return nullptr;

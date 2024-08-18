@@ -1428,29 +1428,20 @@ static void layout_menu_foreach_func(
 	gchar *name;
 	gchar *key_name;
 	gchar *menu_name;
-	gchar **subset_lt_arr;
-	gchar **subset_gt_arr;
-	gchar *subset_lt;
-	gchar *converted_name;
 	auto array = static_cast<GPtrArray *>(data);
 
 	path = g_strescape(accel_path, nullptr);
 	name = gtk_accelerator_name(accel_key, accel_mods);
 
-	menu_name = g_strdup(g_strrstr(path, "/")+1);
+	menu_name = g_strdup(strrchr(path, '/') + 1);
 
-	if (g_strrstr(name, ">"))
+	if (strrchr(name, '>'))
 		{
-		subset_lt_arr = g_strsplit_set(name,"<", 4);
-		subset_lt = g_strjoinv("&lt;", subset_lt_arr);
-		subset_gt_arr = g_strsplit_set(subset_lt,">", 4);
-		converted_name = g_strjoinv("&gt;", subset_gt_arr);
-		key_name = g_strdup(converted_name);
+		g_auto(GStrv) subset_lt_arr = g_strsplit_set(name, "<", 4);
+		g_autofree gchar *subset_lt = g_strjoinv("&lt;", subset_lt_arr);
+		g_auto(GStrv) subset_gt_arr = g_strsplit_set(subset_lt, ">", 4);
 
-		g_free(converted_name);
-		g_free(subset_lt);
-		g_strfreev(subset_lt_arr);
-		g_strfreev(subset_gt_arr);
+		key_name = g_strjoinv("&gt;", subset_gt_arr);
 		}
 	else
 		key_name = g_strdup(name);
