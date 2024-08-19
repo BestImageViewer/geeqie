@@ -464,8 +464,7 @@ void remote_close(RemoteConnection *rc)
 		unlink(rc->path);
 		}
 
-	if (rc->read_data)
-		g_free(rc->read_data);
+	g_free(rc->read_data);
 
 	close(rc->fd);
 

@@ -231,7 +231,7 @@ secure_close(SecureSaveInfo *ssi)
 			if (ret && ssi->unlink_on_error) unlink(ssi->tmp_file_name);
 			g_free(ssi->tmp_file_name);
 			}
-		if (ssi->file_name) g_free(ssi->file_name);
+		g_free(ssi->file_name);
 		g_free(ssi);
 		return ret;
 	};

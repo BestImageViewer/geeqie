@@ -173,11 +173,11 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 	case DIRVIEW_TREE: vdtree_destroy_cb(widget, data); break;
 	}
 
-	if (vd->pf) folder_icons_free(vd->pf);
-	if (vd->drop_list) filelist_free(vd->drop_list);
+	folder_icons_free(vd->pf);
+	filelist_free(vd->drop_list);
 
-	if (vd->dir_fd) file_data_unref(vd->dir_fd);
-	if (vd->info) g_free(vd->info);
+	file_data_unref(vd->dir_fd);
+	g_free(vd->info);
 
 	g_free(vd);
 }

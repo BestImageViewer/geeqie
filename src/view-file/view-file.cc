@@ -1071,9 +1071,6 @@ static void vf_file_filter_save_cb(GtkWidget *, gpointer data)
 	auto vf = static_cast<ViewFile *>(data);
 	gchar *entry_text;
 	gchar *remove_text = nullptr;
-	gchar *index_text = nullptr;
-	gboolean text_found = FALSE;
-	gint i;
 
 	entry_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(vf->file_filter.combo)))));
 
@@ -1094,15 +1091,13 @@ static void vf_file_filter_save_cb(GtkWidget *, gpointer data)
 		{
 		if (entry_text[0] != '\0')
 			{
-			for (i = 0; i < vf->file_filter.count; i++)
-				{
-				if (index_text)
-					{
-					g_free(index_text);
-					}
-				gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), i);
-				index_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
+			gboolean text_found = FALSE;
 
+			for (gint i = 0; i < vf->file_filter.count; i++)
+				{
+				gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), i);
+
+				g_autofree gchar *index_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
 				if (g_strcmp0(index_text, entry_text) == 0)
 					{
 					text_found = TRUE;
@@ -1110,7 +1105,6 @@ static void vf_file_filter_save_cb(GtkWidget *, gpointer data)
 					}
 				}
 
-			g_free(index_text);
 			if (!text_found)
 				{
 				history_list_add_to_key("file_filter", entry_text, 10);

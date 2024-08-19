@@ -69,8 +69,6 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 	gint line_count = 0;
 	GString *file_names = g_string_new(nullptr);
 	gchar line[LINE_LENGTH];
-	gchar **split_line = nullptr;
-	gchar *cache_found;
 	gchar *pathl;
 
 	if (runcmd("which montage >/dev/null 2>&1") == 0)
@@ -84,20 +82,14 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 				{
 				if (line[0] && line[0] != '#')
 					{
-					split_line = g_strsplit(line, "\"", 4);
-					cache_found = cache_find_location(CACHE_TYPE_THUMB, split_line[1]);
+					g_auto(GStrv) split_line = g_strsplit(line, "\"", 4);
+					g_autofree gchar *cache_found = cache_find_location(CACHE_TYPE_THUMB, split_line[1]);
 					if (cache_found)
 						{
 						g_string_append_printf(file_names, "\"%s\" ", cache_found);
 						line_count++;
 						}
-					g_free(cache_found);
 					}
-					if (split_line)
-						{
-						g_strfreev(split_line);
-						}
-					split_line = nullptr;
 				}
 			fclose(fp);
 

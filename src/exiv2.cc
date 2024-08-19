@@ -208,8 +208,8 @@ public:
 
 	~ExifDataOriginal() override
 	{
-		if (cp_data_) g_free(cp_data_);
-		if (pathl_) g_free(pathl_);
+		g_free(cp_data_);
+		g_free(pathl_);
 	}
 
 	Exiv2::Image *image() override
@@ -238,7 +238,7 @@ public:
 
 	void add_jpeg_color_profile(unsigned char *cp_data, guint cp_length) override
 	{
-		if (cp_data_) g_free(cp_data_);
+		g_free(cp_data_);
 		cp_data_ = cp_data;
 		cp_length_ = cp_length;
 	}

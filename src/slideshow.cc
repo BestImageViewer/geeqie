@@ -125,13 +125,10 @@ static GList *generate_random_list(SlideShowData *ss)
 
 static void slideshow_list_init(SlideShowData *ss, gint start_index)
 {
-	if (ss->list_done)
-		{
-		g_list_free(ss->list_done);
-		ss->list_done = nullptr;
-		}
+	g_list_free(ss->list_done);
+	ss->list_done = nullptr;
 
-	if (ss->list) g_list_free(ss->list);
+	g_list_free(ss->list);
 
 	if (options->slideshow.random)
 		{

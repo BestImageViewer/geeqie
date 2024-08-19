@@ -410,8 +410,6 @@ void image_update_title(ImageWindow *imd)
 	gchar *title = nullptr;
 	gchar *zoom = nullptr;
 	gchar *collection = nullptr;
-	LayoutWindow *lw;
-	gchar *lw_ident = nullptr;
 
 	if (!imd->top_window) return;
 
@@ -429,25 +427,24 @@ void image_update_title(ImageWindow *imd)
 		g_free(buf);
 		}
 
-	lw = layout_find_by_image(imd);
-	if (lw)
+	g_autofree gchar *lw_ident = nullptr;
+	if (options->show_window_ids)
 		{
-		lw_ident = g_strconcat(" (", lw->options.id, ")", NULL);
+		LayoutWindow *lw = layout_find_by_image(imd);
+		if (lw)
+			{
+			lw_ident = g_strconcat(" (", lw->options.id, ")", NULL);
+			}
 		}
 
 	title = g_strdup_printf("%s%s%s%s%s%s%s",
-		imd->title ? imd->title : "",
-		imd->image_fd ? imd->image_fd->name : "",
-		zoom ? zoom : "",
-		collection ? collection : "",
-		imd->image_fd ? " - " : "",
-		imd->title_right ? imd->title_right : "",
-		options->show_window_ids ? (lw_ident ? lw_ident : "") : ""
-		);
-	if (lw_ident)
-		{
-		g_free(lw_ident);
-		}
+	                        imd->title ? imd->title : "",
+	                        imd->image_fd ? imd->image_fd->name : "",
+	                        zoom ? zoom : "",
+	                        collection ? collection : "",
+	                        imd->image_fd ? " - " : "",
+	                        imd->title_right ? imd->title_right : "",
+	                        lw_ident ? lw_ident : "");
 
 	gtk_window_set_title(GTK_WINDOW(imd->top_window), title);
 

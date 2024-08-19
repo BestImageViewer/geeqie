@@ -356,12 +356,10 @@ MPOData *jpeg_get_mpo_data(const guchar *data, guint size)
 
 void jpeg_mpo_data_free(MPOData *mpo)
 {
-	if (mpo)
-		{
-		if (mpo->images) g_free(mpo->images);
-		g_free(mpo);
-		}
-}
+	if (!mpo) return;
 
+	g_free(mpo->images);
+	g_free(mpo);
+}
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

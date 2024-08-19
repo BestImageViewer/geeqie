@@ -321,11 +321,11 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 {
 	gboolean ret;
-	gchar *old_path = nullptr; /* Used to store directory for walking up */
 
 	if (!dir_fd) return FALSE;
 	if (vd->dir_fd == dir_fd) return TRUE;
 
+	g_autofree gchar *old_path = nullptr; /* Used to store directory for walking up */
 	if (vd->dir_fd)
 		{
 		gchar *base;
@@ -356,8 +356,6 @@ gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 		}
 
 	if (found) vdlist_scroll_to_row(vd, found, 0.5);
-
-	if (old_path) g_free(old_path);
 
 	return ret;
 }
