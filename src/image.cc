@@ -407,50 +407,38 @@ static void image_zoom_cb(PixbufRenderer *, gdouble, gpointer data)
 
 void image_update_title(ImageWindow *imd)
 {
-	gchar *title = nullptr;
-	gchar *zoom = nullptr;
-	gchar *collection = nullptr;
-
 	if (!imd->top_window) return;
+
+	g_autoptr(GString) title = g_string_new(imd->title);
+
+	if (imd->image_fd) title = g_string_append(title, imd->image_fd->name);
+
+	if (imd->title_show_zoom)
+		{
+		g_autofree gchar *buf = image_zoom_get_as_text(imd);
+		g_string_append_printf(title, " [%s]", buf);
+		}
 
 	if (imd->collection && collection_to_number(imd->collection) >= 0)
 		{
 		const gchar *name = imd->collection->name;
 		if (!name) name = _("Untitled");
-		collection = g_strdup_printf(_(" (Collection %s)"), name);
+		g_string_append_printf(title, _(" (Collection %s)"), name);
 		}
 
-	if (imd->title_show_zoom)
-		{
-		gchar *buf = image_zoom_get_as_text(imd);
-		zoom = g_strconcat(" [", buf, "]", NULL);
-		g_free(buf);
-		}
+	if (imd->image_fd) title = g_string_append(title, " - ");
+	if (imd->title_right) title = g_string_append(title, imd->title_right);
 
-	g_autofree gchar *lw_ident = nullptr;
 	if (options->show_window_ids)
 		{
 		LayoutWindow *lw = layout_find_by_image(imd);
 		if (lw)
 			{
-			lw_ident = g_strconcat(" (", lw->options.id, ")", NULL);
+			g_string_append_printf(title, " (%s)", lw->options.id);
 			}
 		}
 
-	title = g_strdup_printf("%s%s%s%s%s%s%s",
-	                        imd->title ? imd->title : "",
-	                        imd->image_fd ? imd->image_fd->name : "",
-	                        zoom ? zoom : "",
-	                        collection ? collection : "",
-	                        imd->image_fd ? " - " : "",
-	                        imd->title_right ? imd->title_right : "",
-	                        lw_ident ? lw_ident : "");
-
-	gtk_window_set_title(GTK_WINDOW(imd->top_window), title);
-
-	g_free(title);
-	g_free(zoom);
-	g_free(collection);
+	gtk_window_set_title(GTK_WINDOW(imd->top_window), title->str);
 }
 
 /*
