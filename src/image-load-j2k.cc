@@ -36,6 +36,10 @@
 namespace
 {
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(opj_stream_t, opj_stream_destroy)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(opj_codec_t, opj_destroy_codec)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(opj_image_t, opj_image_destroy)
+
 struct ImageLoaderJ2K : public ImageLoaderBackend
 {
 public:
@@ -59,7 +63,8 @@ void free_buffer(guchar *pixels, gpointer)
 	g_free (pixels);
 }
 
-struct opj_buffer_info_t {
+struct OpjBufferInfo
+{
 	OPJ_BYTE* buf;
 	OPJ_BYTE* cur;
 	OPJ_SIZE_T len;
@@ -67,7 +72,7 @@ struct opj_buffer_info_t {
 
 OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, void* user_data)
 {
-	auto *psrc = static_cast<opj_buffer_info_t *>(user_data);
+	auto *psrc = static_cast<OpjBufferInfo *>(user_data);
 	OPJ_SIZE_T n = psrc->buf + psrc->len - psrc->cur;
 
 	if (n)
@@ -86,7 +91,7 @@ OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, void* user_data)
 
 OPJ_SIZE_T opj_write_to_buffer (void* p_buffer, OPJ_SIZE_T p_nb_bytes, void* user_data)
 {
-	auto *p_source_buffer = static_cast<opj_buffer_info_t *>(user_data);
+	auto *p_source_buffer = static_cast<OpjBufferInfo *>(user_data);
 	void* pbuf = p_source_buffer->buf;
 	void* pcur = p_source_buffer->cur;
 
@@ -131,7 +136,7 @@ OPJ_SIZE_T opj_write_to_buffer (void* p_buffer, OPJ_SIZE_T p_nb_bytes, void* use
 
 OPJ_OFF_T opj_skip_from_buffer (OPJ_OFF_T len, void* user_data)
 {
-	auto *psrc = static_cast<opj_buffer_info_t *>(user_data);
+	auto *psrc = static_cast<OpjBufferInfo *>(user_data);
 	OPJ_SIZE_T n = psrc->buf + psrc->len - psrc->cur;
 
 	if (n)
@@ -149,7 +154,7 @@ OPJ_OFF_T opj_skip_from_buffer (OPJ_OFF_T len, void* user_data)
 
 OPJ_BOOL opj_seek_from_buffer (OPJ_OFF_T len, void* user_data)
 {
-	auto *psrc = static_cast<opj_buffer_info_t *>(user_data);
+	auto *psrc = static_cast<OpjBufferInfo *>(user_data);
 	OPJ_SIZE_T n = psrc->len;
 
 	if (n > static_cast<gulong>(len))
@@ -160,7 +165,7 @@ OPJ_BOOL opj_seek_from_buffer (OPJ_OFF_T len, void* user_data)
 	return OPJ_TRUE;
 }
 
-opj_stream_t* OPJ_CALLCONV opj_stream_create_buffer_stream (opj_buffer_info_t* psrc, OPJ_BOOL input)
+opj_stream_t* OPJ_CALLCONV opj_stream_create_buffer_stream (OpjBufferInfo* psrc, OPJ_BOOL input)
 {
 	if (!psrc)
 		return nullptr;
@@ -186,60 +191,41 @@ opj_stream_t* OPJ_CALLCONV opj_stream_create_buffer_stream (opj_buffer_info_t* p
 
 gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	opj_stream_t *stream;
-	opj_codec_t *codec;
-	opj_dparameters_t parameters;
-	opj_image_t *image;
-	gint width;
-	gint height;
-	gint num_components;
-	gint i;
-	gint j;
-	gint k;
-	guchar *pixels;
-	gint  bytes_per_pixel;
-	opj_buffer_info_t *decode_buffer;
-    guchar *buf_copy;
-
-	stream = nullptr;
-	codec = nullptr;
-	image = nullptr;
-
-	buf_copy = static_cast<guchar *>(g_malloc(count));
+	g_autofree auto *buf_copy = static_cast<guchar *>(g_malloc(count));
 	memcpy(buf_copy, buf, count);
 
-	decode_buffer = g_new0(opj_buffer_info_t, 1);
-	decode_buffer->buf = buf_copy;
-	decode_buffer->len = count;
-	decode_buffer->cur = buf_copy;
+	OpjBufferInfo decode_buffer{buf_copy, buf_copy, count};
 
-	stream = opj_stream_create_buffer_stream(decode_buffer, OPJ_TRUE);
-
+	g_autoptr(opj_stream_t) stream = opj_stream_create_buffer_stream(&decode_buffer, OPJ_TRUE);
 	if (!stream)
 		{
 		log_printf("%s", _("Could not open file for reading"));
 		return FALSE;
 		}
 
-	if (memcmp(buf_copy + 20, "jp2", 3) == 0)
-		{
-		codec = opj_create_decompress(OPJ_CODEC_JP2);
-		}
-	else
+	if (memcmp(buf_copy + 20, "jp2", 3) != 0)
 		{
 		log_printf("%s", _("Unknown jpeg2000 decoder type"));
 		return FALSE;
 		}
 
+	opj_dparameters_t parameters;
 	opj_set_default_decoder_parameters(&parameters);
+
+	g_autoptr(opj_codec_t) codec = opj_create_decompress(OPJ_CODEC_JP2);
 	if (opj_setup_decoder (codec, &parameters) != OPJ_TRUE)
 		{
 		log_printf("%s", _("Couldn't set parameters on decoder for file."));
 		return FALSE;
 		}
 
-	opj_codec_set_threads(codec, get_cpu_cores());
+	if (opj_codec_set_threads(codec, get_cpu_cores()) != OPJ_TRUE)
+		{
+		log_printf("%s", _("Couldn't allocate worker threads on decoder for file."));
+		return FALSE;
+		}
 
+	g_autoptr(opj_image_t) image = nullptr;
 	if (opj_read_header(stream, codec, &image) != OPJ_TRUE)
 		{
 		log_printf("%s", _("Couldn't read JP2 header from file"));
@@ -258,24 +244,24 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 		return FALSE;
 		}
 
-	num_components = image->numcomps;
+	const gint num_components = image->numcomps;
 	if (num_components != 3)
 		{
 		log_printf("%s", _("JP2 image not rgb"));
 		return FALSE;
 		}
 
-	width = image->comps[0].w;
-	height = image->comps[0].h;
+	const gint width = image->comps[0].w;
+	const gint height = image->comps[0].h;
 
-	bytes_per_pixel = 3;
+	constexpr gint bytes_per_pixel = 3;
 
-	pixels = g_new0(guchar, width * bytes_per_pixel * height);
-	for (i = 0; i < height; i++)
+	auto *pixels = g_new0(guchar, width * bytes_per_pixel * height);
+	for (gint i = 0; i < height; i++)
 		{
-		for (j = 0; j < num_components; j++)
+		for (gint j = 0; j < num_components; j++)
 			{
-			for (k = 0; k < width; k++)
+			for (gint k = 0; k < width; k++)
 				{
 				pixels[(k * bytes_per_pixel + j) + (i * width * bytes_per_pixel)] =   image->comps[j].data[i * width + k];
 				}
@@ -285,14 +271,6 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE , 8, width, height, width * bytes_per_pixel, free_buffer, nullptr);
 
 	area_updated_cb(nullptr, 0, 0, width, height, data);
-
-	g_free(decode_buffer);
-	g_free(buf_copy);
-	if (image)
-		opj_image_destroy (image);
-	if (codec)
-		opj_destroy_codec (codec);
-	opj_stream_destroy (stream);
 
 	chunk_size = count;
 	return TRUE;
