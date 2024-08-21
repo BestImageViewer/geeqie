@@ -65,9 +65,15 @@ void free_buffer(guchar *pixels, gpointer)
 
 struct OpjBufferInfo
 {
-	OPJ_BYTE* buf;
-	OPJ_BYTE* cur;
-	OPJ_SIZE_T len;
+	OpjBufferInfo(const OPJ_BYTE *buffer, OPJ_SIZE_T size)
+	    : buf(buffer)
+	    , cur(buffer)
+	    , len(size)
+	{}
+
+	const OPJ_BYTE *buf;
+	const OPJ_BYTE *cur;
+	const OPJ_SIZE_T len;
 };
 
 OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, void* user_data)
@@ -87,51 +93,6 @@ OPJ_SIZE_T opj_read_from_buffer (void* pdst, OPJ_SIZE_T len, void* user_data)
 		n = static_cast<OPJ_SIZE_T>(-1);
 
 	return n;
-}
-
-OPJ_SIZE_T opj_write_to_buffer (void* p_buffer, OPJ_SIZE_T p_nb_bytes, void* user_data)
-{
-	auto *p_source_buffer = static_cast<OpjBufferInfo *>(user_data);
-	void* pbuf = p_source_buffer->buf;
-	void* pcur = p_source_buffer->cur;
-
-	OPJ_SIZE_T len = p_source_buffer->len;
-
-	if (0 == len)
-		len = 1;
-
-	OPJ_SIZE_T dist = static_cast<guchar *>(pcur) - static_cast<guchar *>(pbuf);
-	OPJ_SIZE_T n = len - dist;
-	g_assert (dist <= len);
-
-	while (n < p_nb_bytes)
-		{
-		len *= 2;
-		n = len - dist;
-		}
-
-	if (len != p_source_buffer->len)
-		{
-		pbuf = malloc (len);
-
-		if (nullptr == pbuf)
-			return static_cast<OPJ_SIZE_T>(-1);
-
-		if (p_source_buffer->buf)
-			{
-			memcpy (pbuf, p_source_buffer->buf, dist);
-			free (p_source_buffer->buf);
-			}
-
-		p_source_buffer->buf = static_cast<OPJ_BYTE *>(pbuf);
-		p_source_buffer->cur = static_cast<guchar *>(pbuf) + dist;
-		p_source_buffer->len = len;
-		}
-
-	memcpy (p_source_buffer->cur, p_buffer, p_nb_bytes);
-	p_source_buffer->cur += p_nb_bytes;
-
-	return p_nb_bytes;
 }
 
 OPJ_OFF_T opj_skip_from_buffer (OPJ_OFF_T len, void* user_data)
@@ -165,49 +126,28 @@ OPJ_BOOL opj_seek_from_buffer (OPJ_OFF_T len, void* user_data)
 	return OPJ_TRUE;
 }
 
-opj_stream_t* OPJ_CALLCONV opj_stream_create_buffer_stream (OpjBufferInfo* psrc, OPJ_BOOL input)
-{
-	if (!psrc)
-		return nullptr;
-
-	opj_stream_t* ps = opj_stream_default_create (input);
-
-	if (nullptr == ps)
-		return nullptr;
-
-	opj_stream_set_user_data        (ps, psrc, nullptr);
-	opj_stream_set_user_data_length (ps, psrc->len);
-
-	if (input)
-		opj_stream_set_read_function (ps, opj_read_from_buffer);
-	else
-		opj_stream_set_write_function(ps, opj_write_to_buffer);
-
-	opj_stream_set_skip_function (ps, opj_skip_from_buffer);
-	opj_stream_set_seek_function (ps, opj_seek_from_buffer);
-
-	return ps;
-}
-
 gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	g_autofree auto *buf_copy = static_cast<guchar *>(g_malloc(count));
-	memcpy(buf_copy, buf, count);
+	if (memcmp(buf + 20, "jp2", 3) != 0)
+		{
+		log_printf("%s", _("Unknown jpeg2000 decoder type"));
+		return FALSE;
+		}
 
-	OpjBufferInfo decode_buffer{buf_copy, buf_copy, count};
-
-	g_autoptr(opj_stream_t) stream = opj_stream_create_buffer_stream(&decode_buffer, OPJ_TRUE);
+	g_autoptr(opj_stream_t) stream = opj_stream_default_create(OPJ_TRUE);
 	if (!stream)
 		{
 		log_printf("%s", _("Could not open file for reading"));
 		return FALSE;
 		}
 
-	if (memcmp(buf_copy + 20, "jp2", 3) != 0)
-		{
-		log_printf("%s", _("Unknown jpeg2000 decoder type"));
-		return FALSE;
-		}
+	OpjBufferInfo decode_buffer{buf, count};
+	opj_stream_set_user_data(stream, &decode_buffer, nullptr);
+	opj_stream_set_user_data_length(stream, count);
+
+	opj_stream_set_read_function(stream, opj_read_from_buffer);
+	opj_stream_set_skip_function(stream, opj_skip_from_buffer);
+	opj_stream_set_seek_function(stream, opj_seek_from_buffer);
 
 	opj_dparameters_t parameters;
 	opj_set_default_decoder_parameters(&parameters);
@@ -244,8 +184,8 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 		return FALSE;
 		}
 
-	const gint num_components = image->numcomps;
-	if (num_components != 3)
+	constexpr gint bytes_per_pixel = 3; // rgb
+	if (image->numcomps != bytes_per_pixel)
 		{
 		log_printf("%s", _("JP2 image not rgb"));
 		return FALSE;
@@ -254,16 +194,14 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 	const gint width = image->comps[0].w;
 	const gint height = image->comps[0].h;
 
-	constexpr gint bytes_per_pixel = 3;
-
 	auto *pixels = g_new0(guchar, width * bytes_per_pixel * height);
-	for (gint i = 0; i < height; i++)
+	for (gint y = 0; y < height; y++)
 		{
-		for (gint j = 0; j < num_components; j++)
+		for (gint b = 0; b < bytes_per_pixel; b++)
 			{
-			for (gint k = 0; k < width; k++)
+			for (gint x = 0; x < width; x++)
 				{
-				pixels[(k * bytes_per_pixel + j) + (i * width * bytes_per_pixel)] =   image->comps[j].data[i * width + k];
+				pixels[(y * width + x) * bytes_per_pixel + b] = image->comps[b].data[y * width + x];
 				}
 			}
 		}
