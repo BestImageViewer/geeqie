@@ -23,9 +23,7 @@
 
 #include <glib.h>
 
-struct ImageLoader;
-
-guchar *libraw_get_preview(ImageLoader *il, guint *data_len);
+guchar *libraw_get_preview(const gchar *path, gsize &data_len);
 void libraw_free_preview(const guchar *buf);
 
 #endif

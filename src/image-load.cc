@@ -958,7 +958,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 			}
 		else
 			{
-			il->mapped_file = libraw_get_preview(il, reinterpret_cast<guint *>(&il->bytes_total));
+			il->mapped_file = libraw_get_preview(il->fd->path, il->bytes_total);
 
 			if (il->mapped_file)
 				{

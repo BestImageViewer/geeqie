@@ -29,8 +29,6 @@
 
 #include <config.h>
 
-#include "image-load.h"
-
 #if HAVE_RAW
 
 #include <fcntl.h>
@@ -43,7 +41,6 @@
 #include <libraw/libraw.h>
 
 #include "debug.h"
-#include "filedata.h"
 #include "filefilter.h"
 #include "typedefs.h"
 
@@ -77,19 +74,18 @@ void libraw_free_preview(const guchar *buf)
 	g_assert_not_reached();
 }
 
-guchar *libraw_get_preview(ImageLoader *il, guint *data_len)
+guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 {
 	libraw_data_t *lrdt;
 	int ret;
-	UnmapData *ud;
 	struct stat st;
 	guchar *map_data;
 	size_t map_len;
 	int fd;
 
-	if (!filter_file_class(il->fd->path, FORMAT_CLASS_RAWIMAGE)) return nullptr;
+	if (!filter_file_class(path, FORMAT_CLASS_RAWIMAGE)) return nullptr;
 
-	fd = open(il->fd->path, O_RDONLY);
+	fd = open(path, O_RDONLY);
 	if (fd == -1)
 		{
 		return nullptr;
@@ -123,18 +119,16 @@ guchar *libraw_get_preview(ImageLoader *il, guint *data_len)
 		ret = libraw_unpack_thumb(lrdt);
 		if (ret == LIBRAW_SUCCESS)
 			{
-			il->mapped_file = reinterpret_cast<guchar *>(lrdt->thumbnail.thumb);
-			*data_len = lrdt->thumbnail.tlength;
-
-			ud = g_new(UnmapData, 1);
-			ud->ptr =reinterpret_cast<guchar *>(lrdt->thumbnail.thumb);
+			auto *ud = g_new(UnmapData, 1);
+			ud->ptr = reinterpret_cast<guchar *>(lrdt->thumbnail.thumb);
 			ud->map_data = map_data;
 			ud->map_len = lrdt->thumbnail.tlength;
 			ud->lrdt = lrdt;
 
 			libraw_unmap_list = g_list_prepend(libraw_unmap_list, ud);
 
-			return reinterpret_cast<guchar *>(lrdt->thumbnail.thumb);
+			data_len = ud->map_len;
+			return ud->ptr;
 			}
 		}
 
@@ -149,7 +143,7 @@ void libraw_free_preview(const guchar *)
 {
 }
 
-guchar *libraw_get_preview(ImageLoader *, guint *)
+guchar *libraw_get_preview(const gchar *, gsize &)
 {
 	return nullptr;
 }
