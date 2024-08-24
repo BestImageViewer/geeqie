@@ -21,10 +21,7 @@
 
 #include "image-load.h"
 
-#include <fcntl.h>
 #include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include <cstring>
 
@@ -936,9 +933,6 @@ static gboolean image_loader_begin(ImageLoader *il)
 
 static gboolean image_loader_setup_source(ImageLoader *il)
 {
-	struct stat st;
-	gchar *pathl;
-
 	if (!il || il->backend || il->mapped_file) return FALSE;
 
 	il->mapped_file = nullptr;
@@ -1002,32 +996,14 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 		exif_free_fd(il->fd, exif);
 		}
 
-
 	if (!il->mapped_file)
 		{
 		/* normal file */
-		gint load_fd;
+		g_autofree gchar *pathl = path_from_utf8(il->fd->path);
 
-		pathl = path_from_utf8(il->fd->path);
-		load_fd = open(pathl, O_RDONLY | O_NONBLOCK);
-		g_free(pathl);
-		if (load_fd == -1) return FALSE;
-
-		if (fstat(load_fd, &st) == 0)
+		il->mapped_file = map_file(pathl, il->bytes_total);
+		if (!il->mapped_file)
 			{
-			il->bytes_total = st.st_size;
-			}
-		else
-			{
-			close(load_fd);
-			return FALSE;
-			}
-
-		il->mapped_file = static_cast<guchar *>(mmap(nullptr, il->bytes_total, PROT_READ|PROT_WRITE, MAP_PRIVATE, load_fd, 0));
-		close(load_fd);
-		if (il->mapped_file == MAP_FAILED)
-			{
-			il->mapped_file = nullptr;
 			return FALSE;
 			}
 		il->preview = IMAGE_LOADER_PREVIEW_NONE;

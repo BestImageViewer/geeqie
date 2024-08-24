@@ -110,5 +110,7 @@ gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error);
 gint scale_factor();
 
+guchar *map_file(const gchar *path, gsize &map_len);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

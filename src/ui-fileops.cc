@@ -21,6 +21,8 @@
 
 #include "ui-fileops.h"
 
+#include <fcntl.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <utime.h>
@@ -53,7 +55,13 @@
  *-----------------------------------------------------------------------------
  */
 
+namespace
+{
 
+using FileDescriptor = int;
+G_DEFINE_AUTO_CLEANUP_FREE_FUNC(FileDescriptor, close, -1) // NOLINT(readability-non-const-parameter)
+
+} // namespace
 
 void print_term(gboolean err, const gchar *text_utf8)
 {
@@ -1071,5 +1079,20 @@ gint scale_factor()
 
 	layout_valid(&lw);
 	return gtk_widget_get_scale_factor(lw->window);
+}
+
+guchar *map_file(const gchar *path, gsize &map_len)
+{
+	g_auto(FileDescriptor) fd = open(path, O_RDONLY | O_NONBLOCK);
+	if (fd == -1) return nullptr;
+
+	struct stat st;
+	if (fstat(fd, &st) == -1) return nullptr;
+
+	auto *map_data = static_cast<guchar *>(mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
+	if (map_data == MAP_FAILED) return nullptr;
+
+	map_len = st.st_size;
+	return map_data;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

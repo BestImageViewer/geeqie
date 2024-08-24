@@ -31,10 +31,7 @@
 
 #if HAVE_RAW
 
-#include <fcntl.h>
 #include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include <cstddef>
 
@@ -43,6 +40,7 @@
 #include "debug.h"
 #include "filefilter.h"
 #include "typedefs.h"
+#include "ui-fileops.h"
 
 struct UnmapData
 {
@@ -78,30 +76,12 @@ guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 {
 	libraw_data_t *lrdt;
 	int ret;
-	struct stat st;
-	guchar *map_data;
-	size_t map_len;
-	int fd;
 
 	if (!filter_file_class(path, FORMAT_CLASS_RAWIMAGE)) return nullptr;
 
-	fd = open(path, O_RDONLY);
-	if (fd == -1)
-		{
-		return nullptr;
-		}
-
-	if (fstat(fd, &st) == -1)
-		{
-		close(fd);
-		return nullptr;
-		}
-
-	map_len = st.st_size;
-	map_data = static_cast<guchar *>(mmap(nullptr, map_len, PROT_READ, MAP_PRIVATE, fd, 0));
-	close(fd);
-
-	if (map_data == MAP_FAILED)
+	size_t map_len;
+	guchar *map_data = map_file(path, map_len);
+	if (!map_data)
 		{
 		return nullptr;
 		}
