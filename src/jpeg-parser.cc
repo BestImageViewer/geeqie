@@ -25,6 +25,13 @@
 
 #include "debug.h"
 
+gboolean is_jpeg_container(const guchar *data, guint size)
+{
+	return data != nullptr && size >= 2
+	    && data[0] == JPEG_MARKER
+	    && data[1] == JPEG_MARKER_SOI;
+}
+
 gboolean jpeg_segment_find(const guchar *data, guint size,
 			    guchar app_marker, const gchar *magic, guint magic_len,
 			    guint *seg_offset, guint *seg_length)
