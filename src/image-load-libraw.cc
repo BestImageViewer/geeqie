@@ -63,8 +63,8 @@ void libraw_free_preview(const guchar *buf)
 			{
 			munmap(ud->map_data, ud->map_len);
 			libraw_close(ud->lrdt);
-			libraw_unmap_list = g_list_remove_link(libraw_unmap_list, work);
 			g_free(ud);
+			libraw_unmap_list = g_list_delete_link(libraw_unmap_list, work);
 			return;
 			}
 		work = work->next;
@@ -102,12 +102,12 @@ guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 			auto *ud = g_new(UnmapData, 1);
 			ud->ptr = reinterpret_cast<guchar *>(lrdt->thumbnail.thumb);
 			ud->map_data = map_data;
-			ud->map_len = lrdt->thumbnail.tlength;
+			ud->map_len = map_len;
 			ud->lrdt = lrdt;
 
 			libraw_unmap_list = g_list_prepend(libraw_unmap_list, ud);
 
-			data_len = ud->map_len;
+			data_len = lrdt->thumbnail.tlength;
 			return ud->ptr;
 			}
 		}

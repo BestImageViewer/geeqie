@@ -960,6 +960,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 				 * section that is not a jpeg */
 				if (il->mapped_file[0] != 0xFF || il->mapped_file[1] != 0xD8)
 					{
+					libraw_free_preview(il->mapped_file);
 					il->mapped_file = nullptr;
 					}
 				else
@@ -980,6 +981,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 				 * section that is not a jpeg */
 				if (il->mapped_file[0] != 0xFF || il->mapped_file[1] != 0xD8)
 					{
+					exif_free_preview(il->mapped_file);
 					il->mapped_file = nullptr;
 					}
 				else
