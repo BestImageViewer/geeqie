@@ -105,17 +105,15 @@ gboolean ImageLoaderDJVU::write(const guchar *buf, gsize &chunk_size, gsize coun
 
 	/**
 	 * @FIXME implementation of rotation is not correct */
-	GdkPixbuf *tmp1;
-	GdkPixbuf *tmp2;
-	tmp1 = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, nullptr);
-	tmp2 = gdk_pixbuf_flip(tmp1, TRUE);
-	g_object_unref(tmp1);
+	g_autoptr(GdkPixbuf) tmp1 = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, nullptr);
+	g_autoptr(GdkPixbuf) tmp2 = gdk_pixbuf_flip(tmp1, TRUE);
 
 	pixbuf = gdk_pixbuf_rotate_simple(tmp2, GDK_PIXBUF_ROTATE_UPSIDEDOWN);
 
 	area_updated_cb(nullptr, 0, 0, width, height, data);
 
 	cairo_surface_destroy(surface);
+	ddjvu_format_release(fmt);
 	ddjvu_page_release(page);
 	ddjvu_document_release(doc);
 	ddjvu_context_release(ctx);
