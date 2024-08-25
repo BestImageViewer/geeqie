@@ -296,11 +296,11 @@ void free_context(PsdContext *ctx)
 	g_free(ctx->buffer);
 	g_free(ctx->lines_lengths);
 	if (ctx->ch_bufs) {
-		int i;
-		for (i = 0; i < ctx->channels; i++) {
+		for (int i = 0; i < ctx->channels; i++) {
 			g_free(ctx->ch_bufs[i]);
 		}
 	}
+	g_free(ctx->ch_bufs);
 	g_free(ctx);
 }
 
