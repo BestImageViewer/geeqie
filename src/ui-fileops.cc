@@ -818,35 +818,21 @@ void parse_out_relatives(gchar *path)
 
 gboolean file_in_path(const gchar *name)
 {
-	gchar *path;
-	gchar *namel;
-	gint p;
-	gint l;
-	gboolean ret = FALSE;
-
 	if (!name) return FALSE;
-	path = g_strdup(getenv("PATH"));
+
+	g_autofree gchar *path = g_strdup(getenv("PATH"));
 	if (!path) return FALSE;
-	namel = path_from_utf8(name);
 
-	p = 0;
-	l = strlen(path);
-	while (p < l && !ret)
+	g_auto(GStrv) paths = g_strsplit(path, ":", 0);
+	g_autofree gchar *namel = path_from_utf8(name);
+
+	for (gint i = 0; paths[i]; i++)
 		{
-		gchar *f;
-		gint e = p;
-		while (path[e] != ':' && path[e] != '\0') e++;
-		path[e] = '\0';
-		e++;
-		f = g_build_filename(path + p, namel, NULL);
-		if (isfile(f)) ret = TRUE;
-		g_free(f);
-		p = e;
+		g_autofree gchar *f = g_build_filename(paths[i], namel, NULL);
+		if (isfile(f)) return TRUE;
 		}
-	g_free(namel);
-	g_free(path);
 
-	return ret;
+	return FALSE;
 }
 
 gboolean recursive_mkdir_if_not_exists(const gchar *path, mode_t mode)
