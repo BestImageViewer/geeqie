@@ -963,72 +963,55 @@ static void download_web_file_cancel_button_cb(GenericDialog *, gpointer data)
 
 gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 {
-	gchar *scheme;
-	auto lw = static_cast<LayoutWindow *>(data);
-	gchar *tmp_dir;
-	GError *error = nullptr;
-	WebData *web;
-	gchar *base;
-	gboolean ret = FALSE;
-	gchar *message;
-	FileFormatClass format_class;
-
-	scheme = g_uri_parse_scheme(text);
-	if (g_strcmp0("http", scheme) == 0 || g_strcmp0("https", scheme) == 0)
+	g_autofree gchar *scheme = g_uri_parse_scheme(text);
+	if (g_strcmp0("http", scheme) != 0 && g_strcmp0("https", scheme) != 0)
 		{
-		format_class = filter_file_get_class(text);
-
-		if (format_class == FORMAT_CLASS_IMAGE || format_class == FORMAT_CLASS_RAWIMAGE || format_class == FORMAT_CLASS_VIDEO || format_class == FORMAT_CLASS_DOCUMENT)
-			{
-			tmp_dir = g_dir_make_tmp("geeqie_XXXXXX", &error);
-			if (error)
-				{
-				log_printf("Error: could not create temporary file n%s\n", error->message);
-				g_error_free(error);
-				error = nullptr;
-				ret = FALSE;
-				}
-			else
-				{
-				web = g_new0(WebData, 1);
-				web->lw = lw;
-
-				web->web_file = g_file_new_for_uri(text);
-
-				base = g_strdup(g_file_get_basename(web->web_file));
-				web->tmp_g_file = g_file_new_for_path(g_build_filename(tmp_dir, base, NULL));
-
-				web->gd = generic_dialog_new(_("Download web file"), "download_web_file", nullptr, TRUE, download_web_file_cancel_button_cb, web);
-
-				message = g_strconcat(_("Downloading "), base, NULL);
-				generic_dialog_add_message(web->gd, GQ_ICON_DIALOG_INFO, message, nullptr, FALSE);
-
-				web->progress = gtk_progress_bar_new();
-				gq_gtk_box_pack_start(GTK_BOX(web->gd->vbox), web->progress, FALSE, FALSE, 0);
-				gtk_widget_show(web->progress);
-				if (minimized)
-					{
-					gtk_window_iconify(GTK_WINDOW(web->gd->dialog));
-					}
-
-				gtk_widget_show(web->gd->dialog);
-				web->cancellable = g_cancellable_new();
-				g_file_copy_async(web->web_file, web->tmp_g_file, G_FILE_COPY_OVERWRITE, G_PRIORITY_LOW, web->cancellable, web_file_progress_cb, web, web_file_async_ready_cb, web);
-
-				g_free(base);
-				g_free(message);
-				ret = TRUE;
-				}
-			}
-		}
-	else
-		{
-		ret = FALSE;
+		return FALSE;
 		}
 
-	g_free(scheme);
-	return ret;
+	FileFormatClass format_class = filter_file_get_class(text);
+	if (format_class != FORMAT_CLASS_IMAGE &&
+	    format_class != FORMAT_CLASS_RAWIMAGE &&
+	    format_class != FORMAT_CLASS_VIDEO &&
+	    format_class != FORMAT_CLASS_DOCUMENT)
+		{
+		return FALSE;
+		}
 
+	g_autoptr(GError) error = nullptr;
+	g_autofree gchar *tmp_dir = g_dir_make_tmp("geeqie_XXXXXX", &error);
+	if (error)
+		{
+		log_printf("Error: could not create temporary file n%s\n", error->message);
+		return FALSE;
+		}
+
+	auto *web = g_new0(WebData, 1);
+	web->lw = static_cast<LayoutWindow *>(data);
+
+	web->web_file = g_file_new_for_uri(text);
+
+	g_autofree gchar *base = g_file_get_basename(web->web_file);
+	web->tmp_g_file = g_file_new_for_path(g_build_filename(tmp_dir, base, NULL));
+
+	web->gd = generic_dialog_new(_("Download web file"), "download_web_file", nullptr, TRUE, download_web_file_cancel_button_cb, web);
+
+	g_autofree gchar *message = g_strconcat(_("Downloading "), base, NULL);
+	generic_dialog_add_message(web->gd, GQ_ICON_DIALOG_INFO, message, nullptr, FALSE);
+
+	web->progress = gtk_progress_bar_new();
+	gq_gtk_box_pack_start(GTK_BOX(web->gd->vbox), web->progress, FALSE, FALSE, 0);
+	gtk_widget_show(web->progress);
+	if (minimized)
+		{
+		gtk_window_iconify(GTK_WINDOW(web->gd->dialog));
+		}
+
+	gtk_widget_show(web->gd->dialog);
+	web->cancellable = g_cancellable_new();
+	g_file_copy_async(web->web_file, web->tmp_g_file, G_FILE_COPY_OVERWRITE, G_PRIORITY_LOW, web->cancellable, web_file_progress_cb, web, web_file_async_ready_cb, web);
+
+	return TRUE;
 }
 
 gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error)
