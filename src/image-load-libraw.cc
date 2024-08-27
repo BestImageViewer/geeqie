@@ -37,7 +37,6 @@
 
 #include <libraw/libraw.h>
 
-#include "debug.h"
 #include "filefilter.h"
 #include "typedefs.h"
 #include "ui-fileops.h"
@@ -47,7 +46,7 @@ struct UnmapData
 	guchar *ptr;
 	guchar *map_data;
 	size_t map_len;
-	libraw_data_t *lrdt;
+	LibRaw *lr;
 };
 
 static GList *libraw_unmap_list = nullptr;
@@ -62,7 +61,7 @@ void libraw_free_preview(const guchar *buf)
 		if (ud->ptr == buf)
 			{
 			munmap(ud->map_data, ud->map_len);
-			libraw_close(ud->lrdt);
+			delete ud->lr;
 			g_free(ud);
 			libraw_unmap_list = g_list_delete_link(libraw_unmap_list, work);
 			return;
@@ -74,9 +73,6 @@ void libraw_free_preview(const guchar *buf)
 
 guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 {
-	libraw_data_t *lrdt;
-	int ret;
-
 	if (!filter_file_class(path, FORMAT_CLASS_RAWIMAGE)) return nullptr;
 
 	size_t map_len;
@@ -86,33 +82,28 @@ guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 		return nullptr;
 		}
 
-	lrdt = libraw_init(0);
-	if (!lrdt)
-		{
-		log_printf("Warning: Cannot create libraw handle\n");
-		return nullptr;
-		}
+	auto lr = std::make_unique<LibRaw>();
 
-	ret = libraw_open_buffer(lrdt, map_data, map_len);
+	int ret = lr->open_buffer(map_data, map_len);
 	if (ret == LIBRAW_SUCCESS)
 		{
-		ret = libraw_unpack_thumb(lrdt);
-		if (ret == LIBRAW_SUCCESS)
+		ret = lr->unpack_thumb();
+		if (ret == LIBRAW_SUCCESS && lr->is_jpeg_thumb())
 			{
 			auto *ud = g_new(UnmapData, 1);
-			ud->ptr = reinterpret_cast<guchar *>(lrdt->thumbnail.thumb);
+			ud->ptr = reinterpret_cast<guchar *>(lr->imgdata.thumbnail.thumb);
 			ud->map_data = map_data;
 			ud->map_len = map_len;
-			ud->lrdt = lrdt;
+			ud->lr = lr.release();
 
 			libraw_unmap_list = g_list_prepend(libraw_unmap_list, ud);
 
-			data_len = lrdt->thumbnail.tlength;
+			data_len = ud->lr->imgdata.thumbnail.tlength;
 			return ud->ptr;
 			}
 		}
 
-	libraw_close(lrdt);
+	munmap(map_data, map_len);
 
 	return nullptr;
 }

@@ -957,17 +957,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 
 			if (il->mapped_file)
 				{
-				/* Both exiv2 and libraw sometimes return a pointer to a file
-				 * section that is not a jpeg */
-				if (!is_jpeg_container(il->mapped_file, il->bytes_total))
-					{
-					libraw_free_preview(il->mapped_file);
-					il->mapped_file = nullptr;
-					}
-				else
-					{
-					il->preview = IMAGE_LOADER_PREVIEW_LIBRAW;
-					}
+				il->preview = IMAGE_LOADER_PREVIEW_LIBRAW;
 				}
 			}
 
@@ -978,8 +968,7 @@ static gboolean image_loader_setup_source(ImageLoader *il)
 
 			if (il->mapped_file)
 				{
-				/* Both exiv2 and libraw sometimes return a pointer to a file
-				 * section that is not a jpeg */
+				/* exiv2 sometimes returns a pointer to a file section that is not a jpeg */
 				if (!is_jpeg_container(il->mapped_file, il->bytes_total))
 					{
 					exif_free_preview(il->mapped_file);
