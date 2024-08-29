@@ -21,8 +21,6 @@
 
 #include "cache-loader.h"
 
-#include <cstdio>
-#include <cstring>
 #include <ctime>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -151,28 +149,19 @@ static gboolean cache_loader_phase2_process(CacheLoader *cl)
 	else if (cl->todo_mask & CACHE_LOADER_DATE &&
 		 !cl->cd->have_date)
 		{
-		time_t date = -1;
-		gchar *text;
+		static const auto get_date = [](FileData *fd) -> time_t
+		{
+			g_autofree gchar *text = metadata_read_string(fd, "Exif.Image.DateTime", METADATA_FORMATTED);
+			if (!text) return -1;
 
-		text =  metadata_read_string(cl->fd, "Exif.Image.DateTime", METADATA_FORMATTED);
-		if (text)
-			{
-			struct tm t;
+			std::tm t{};
+			if (!strptime(text, "%Y:%m:%d %H:%M:%S", &t)) return -1;
 
-			memset(&t, 0, sizeof(t));
+			t.tm_isdst = -1;
+			return mktime(&t);
+		};
 
-			if (sscanf(text, "%d:%d:%d %d:%d:%d", &t.tm_year, &t.tm_mon, &t.tm_mday,
-				   &t.tm_hour, &t.tm_min, &t.tm_sec) == 6)
-				{
-				t.tm_year -= 1900;
-				t.tm_mon -= 1;
-				t.tm_isdst = -1;
-				date = mktime(&t);
-				}
-			g_free(text);
-			}
-
-		cl->cd->date = date;
+		cl->cd->date = get_date(cl->fd);
 		cl->cd->have_date = TRUE;
 
 		cl->done_mask = static_cast<CacheDataType>(cl->done_mask | CACHE_LOADER_DATE);

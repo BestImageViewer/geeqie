@@ -536,30 +536,15 @@ void FileData::read_exif_time_data(FileData *file)
 
 	if (file->exif)
 		{
-		gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeOriginal");
+		g_autofree gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeOriginal");
 		DEBUG_2("%s read_exif_time_data: reading %p %s", get_exec_time(), (void *)file, file->path);
 
 		if (tmp)
 			{
-			struct tm time_str;
-			uint year;
-			uint month;
-			uint day;
-			uint hour;
-			uint min;
-			uint sec;
-
-			sscanf(tmp, "%4u:%2u:%2u %2u:%2u:%2u", &year, &month, &day, &hour, &min, &sec);
-			time_str.tm_year  = year - 1900;
-			time_str.tm_mon   = month - 1;
-			time_str.tm_mday  = day;
-			time_str.tm_hour  = hour;
-			time_str.tm_min   = min;
-			time_str.tm_sec   = sec;
-			time_str.tm_isdst = 0;
+			std::tm time_str{};
+			strptime(tmp, "%Y:%m:%d %H:%M:%S", &time_str);
 
 			file->exifdate = mktime(&time_str);
-			g_free(tmp);
 			}
 		}
 }
@@ -579,30 +564,15 @@ void FileData::read_exif_time_digitized_data(FileData *file)
 
 	if (file->exif)
 		{
-		gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeDigitized");
+		g_autofree gchar *tmp = exif_get_data_as_text(file->exif, "Exif.Photo.DateTimeDigitized");
 		DEBUG_2("%s read_exif_time_digitized_data: reading %p %s", get_exec_time(), (void *)file, file->path);
 
 		if (tmp)
 			{
-			struct tm time_str;
-			uint year;
-			uint month;
-			uint day;
-			uint hour;
-			uint min;
-			uint sec;
-
-			sscanf(tmp, "%4u:%2u:%2u %2u:%2u:%2u", &year, &month, &day, &hour, &min, &sec);
-			time_str.tm_year  = year - 1900;
-			time_str.tm_mon   = month - 1;
-			time_str.tm_mday  = day;
-			time_str.tm_hour  = hour;
-			time_str.tm_min   = min;
-			time_str.tm_sec   = sec;
-			time_str.tm_isdst = 0;
+			std::tm time_str{};
+			strptime(tmp, "%Y:%m:%d %H:%M:%S", &time_str);
 
 			file->exifdate_digitized = mktime(&time_str);
-			g_free(tmp);
 			}
 		}
 }

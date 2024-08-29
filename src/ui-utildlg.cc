@@ -616,14 +616,6 @@ static void appimage_notification_func(gpointer data, gpointer)
 	char buffer[max_buffer_size];
 	char result[max_buffer_size];
 	gboolean internet_available = FALSE;
-	gchar **github_split;
-	gchar **version_split;
-	gchar *start_date;
-	struct tm current_version_date;
-	struct tm github_version_date;
-	unsigned int day;
-	unsigned int month;
-	unsigned int year;
 
 	/* If this is a release version, do not check for updates */
 	if (g_strrstr(VERSION, "git"))
@@ -639,18 +631,6 @@ static void appimage_notification_func(gpointer data, gpointer)
 
 		if (internet_available)
 			{
-			/* VERSION looks like: 2.0.1+git20220116-c791cbee */
-			version_split = g_strsplit_set(VERSION, "+-", -1);
-
-			sscanf(version_split[1] + 3, "%4u%2u%2u", &year, &month, &day);
-			current_version_date.tm_year  = year - 1900;
-			current_version_date.tm_mon   = month - 1;
-			current_version_date.tm_mday  = day;
-			current_version_date.tm_hour  = 0;
-			current_version_date.tm_min   = 0;
-			current_version_date.tm_sec   = 0;
-			current_version_date.tm_isdst = 0;
-
 			pipe = popen("curl --max-time 2 --silent https://api.github.com/repos/BestImageViewer/geeqie/releases/tags/continuous", "r");
 
 			if (pipe == nullptr)
@@ -666,31 +646,24 @@ static void appimage_notification_func(gpointer data, gpointer)
 				pclose(pipe);
 
 				/* GitHub date looks like: "published_at": "2024-04-17T08:50:08Z" */
-				start_date = g_strstr_len(result, -1, "published");
-				start_date[26] = '\0';
+				gchar *start_date = g_strstr_len(result, -1, "published_at");
+				start_date += 16; // skip 'published_at": "' part
+				start_date[10] = '\0'; // drop everything after YYYY-mm-dd part
 
-				github_split = g_strsplit_set(start_date, "\"-", -1);
+				std::tm github_version_date{};
+				strptime(start_date, "%Y-%m-%d", &github_version_date);
 
-				sscanf(github_split[2], "%4u", &year);
-				sscanf(github_split[3], "%2u", &month);
-				sscanf(github_split[4], "%2u", &day);
+				/* VERSION looks like: 2.0.1+git20220116-c791cbee */
+				g_auto(GStrv) version_split = g_strsplit_set(VERSION, "+-", -1);
 
-				github_version_date.tm_year  = year - 1900;
-				github_version_date.tm_mon   = month - 1;
-				github_version_date.tm_mday  = day;
-				github_version_date.tm_hour  = 0;
-				github_version_date.tm_min   = 0;
-				github_version_date.tm_sec   = 0;
-				github_version_date.tm_isdst = 0;
+				std::tm current_version_date{};
+				strptime(version_split[1] + 3, "%Y-%m-%d", &current_version_date);
 
 				if (mktime(&github_version_date) > mktime(&current_version_date))
 					{
 					show_notification_message(appimage_data);
 					}
-
-				g_strfreev(github_split);
 				}
-			g_strfreev(version_split);
 			}
 		}
 }
