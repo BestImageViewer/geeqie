@@ -102,7 +102,7 @@ constexpr gint ROTATE_BUFFER_WIDTH = 48;
 constexpr gint ROTATE_BUFFER_HEIGHT = 48;
 
 // Intersects the clip region with the pixbuf. r is that intersecting region.
-gboolean pixbuf_clip_region(const GdkPixbuf *pb, const GdkRectangle &clip, GdkRectangle &r)
+gboolean pixbuf_clip_region(const GdkPixbuf *pb, GdkRectangle clip, GdkRectangle &r)
 {
 	gint pw = gdk_pixbuf_get_width(pb);
 	gint ph = gdk_pixbuf_get_height(pb);
@@ -118,7 +118,7 @@ gboolean pixbuf_clip_region(const GdkPixbuf *pb, const GdkRectangle &clip, GdkRe
  * applying alpha (a) from `get_alpha` function.
  */
 void pixbuf_draw_rect_fill(guchar *p_pix, gint prs, gboolean has_alpha,
-                           const GdkRectangle &rect,
+                           GdkRectangle rect,
                            guint8 r, guint8 g, guint8 b,
                            const GetAlpha &get_alpha)
 {
@@ -685,7 +685,7 @@ GdkPixbuf *pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation)
  *          color).  a=0 is tranparent (fully the original contents).
  */
 void pixbuf_draw_rect_fill(GdkPixbuf *pb,
-                           const GdkRectangle &rect,
+                           GdkRectangle rect,
                            gint r, gint g, gint b, gint a)
 {
 	gboolean has_alpha;
@@ -982,7 +982,7 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,
  * @param[in] c3 Coordinates of the third corner of the triangle.
  * @return The computed bounding box.
  */
-GdkRectangle util_triangle_bounding_box(const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3)
+GdkRectangle util_triangle_bounding_box(GdkPoint c1, GdkPoint c2, GdkPoint c3)
 {
 	GdkRectangle bounding_box;
 
@@ -1007,8 +1007,8 @@ GdkRectangle util_triangle_bounding_box(const GdkPoint &c1, const GdkPoint &c2, 
  * @param c3 Coordinates of the third corner of the triangle.
  * @param r,g,b,a Color and alpha.
  */
-void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
-                          const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
+void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
+                          GdkPoint c1, GdkPoint c2, GdkPoint c3,
                           guint8 r, guint8 g, guint8 b, guint8 a)
 {
 	gboolean has_alpha;
@@ -1045,7 +1045,7 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
 	std::vector<GdkPoint> v{c1, c2, c3};
 	std::sort(v.begin(), v.end(), [](const GdkPoint &l, const GdkPoint &r){ return l.y < r.y; });
 
-	const auto get_slope = [](const GdkPoint &start, const GdkPoint &end)
+	const auto get_slope = [](GdkPoint start, GdkPoint end)
 	{
 		gdouble slope = end.y - start.y;
 		if (slope) slope = static_cast<gdouble>(end.x - start.x) / slope;
@@ -1229,7 +1229,7 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
  * @param x2,y2 Coordinates of the second point of the line segment.
  * @param r,g,b,a Color and alpha.
  */
-void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
+void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
                       gint x1, gint y1, gint x2, gint y2,
                       guint8 r, guint8 g, guint8 b, guint8 a)
 {
@@ -1342,7 +1342,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
  */
 static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
                                     gint s, gboolean vertical, gint border,
-                                    const GdkRectangle &fade_rect,
+                                    GdkRectangle fade_rect,
                                     guint8 r, guint8 g, guint8 b, guint8 a)
 {
 	const auto get_a = [s, vertical, border, a](gint x, gint y)
@@ -1371,7 +1371,7 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
  */
 static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
                                     gint sx, gint sy, gint border,
-                                    const GdkRectangle &fade_rect,
+                                    GdkRectangle fade_rect,
                                     guint8 r, guint8 g, guint8 b, guint8 a)
 {
 	const auto get_a = [sx, sy, border, a](gint x, gint y)
@@ -1397,7 +1397,7 @@ static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
  * @param a The max shadow composition fraction.  Note that any alpha value of the
  *          original pixel will remain untouched.
  */
-void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
+void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
                         gint x, gint y, gint w, gint h, gint border,
                         guint8 r, guint8 g, guint8 b, guint8 a)
 {
@@ -1427,7 +1427,7 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
 	if (border < 1) return;
 
 	// Draws linear gradients along each of the 4 edges.
-	const auto draw_fade_linear_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, r, g, b, a](const GdkRectangle &rect, gint s, gboolean vertical)
+	const auto draw_fade_linear_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, r, g, b, a](GdkRectangle rect, gint s, gboolean vertical)
 	{
 		GdkRectangle fade_rect;
 		if (!gdk_rectangle_intersect(&rect, &pb_rect, &fade_rect)) return;
@@ -1444,7 +1444,7 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
 	draw_fade_linear_if_intersect({x + border, y + h - border, w - border * 2, border}, y + h - border, FALSE);
 
 	// Draws radial gradients at each of the 4 corners.
-	const auto draw_fade_radius_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, r, g, b, a](const GdkRectangle &rect, gint sx, gint sy)
+	const auto draw_fade_radius_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, r, g, b, a](GdkRectangle rect, gint sx, gint sy)
 	{
 		GdkRectangle fade_rect;
 		if (!gdk_rectangle_intersect(&rect, &pb_rect, &fade_rect)) return;

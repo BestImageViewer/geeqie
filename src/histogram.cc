@@ -249,7 +249,7 @@ gboolean histmap_start_idle(FileData *fd)
 }
 
 
-static void histogram_vgrid(Histogram *histogram, GdkPixbuf *pixbuf, const GdkRectangle &rect)
+static void histogram_vgrid(Histogram *histogram, GdkPixbuf *pixbuf, GdkRectangle rect)
 {
 	if (histogram->vgrid == 0) return;
 
@@ -267,7 +267,7 @@ static void histogram_vgrid(Histogram *histogram, GdkPixbuf *pixbuf, const GdkRe
 		}
 }
 
-static void histogram_hgrid(Histogram *histogram, GdkPixbuf *pixbuf, const GdkRectangle &rect)
+static void histogram_hgrid(Histogram *histogram, GdkPixbuf *pixbuf, GdkRectangle rect)
 {
 	if (histogram->hgrid == 0) return;
 

@@ -83,7 +83,7 @@ GdkPixbuf *pixbuf_copy_mirror(GdkPixbuf *src, gboolean mirror, gboolean flip);
 GdkPixbuf* pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation);
 
 void pixbuf_draw_rect_fill(GdkPixbuf *pb,
-                           const GdkRectangle &rect,
+                           GdkRectangle rect,
                            gint r, gint g, gint b, gint a);
 
 void pixbuf_set_rect_fill(GdkPixbuf *pb,
@@ -102,15 +102,15 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,
                         gint x, gint y,
                         guint8 r, guint8 g, guint8 b, guint8 a);
 
-void pixbuf_draw_triangle(GdkPixbuf *pb, const GdkRectangle &clip,
-                          const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3,
+void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
+                          GdkPoint c1, GdkPoint c2, GdkPoint c3,
                           guint8 r, guint8 g, guint8 b, guint8 a);
 
-void pixbuf_draw_line(GdkPixbuf *pb, const GdkRectangle &clip,
+void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
                       gint x1, gint y1, gint x2, gint y2,
                       guint8 r, guint8 g, guint8 b, guint8 a);
 
-void pixbuf_draw_shadow(GdkPixbuf *pb, const GdkRectangle &clip,
+void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
                         gint x, gint y, gint w, gint h, gint border,
                         guint8 r, guint8 g, guint8 b, guint8 a);
 
@@ -125,7 +125,7 @@ void pixbuf_ignore_alpha_rect(GdkPixbuf *pb,
 
 /* clipping utils */
 
-GdkRectangle util_triangle_bounding_box(const GdkPoint &c1, const GdkPoint &c2, const GdkPoint &c3);
+GdkRectangle util_triangle_bounding_box(GdkPoint c1, GdkPoint c2, GdkPoint c3);
 
 
 #endif

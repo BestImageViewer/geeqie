@@ -91,7 +91,7 @@ enum OverlayRendererFlags {
 struct RendererFuncs
 {
 	void (*area_changed)(void *renderer, gint src_x, gint src_y, gint src_w, gint src_h); /**< pixbuf area changed */
-	void (*invalidate_region)(void *renderer, const GdkRectangle &region);
+	void (*invalidate_region)(void *renderer, GdkRectangle region);
 	void (*scroll)(void *renderer, gint x_off, gint y_off); /**< scroll */
 	void (*update_viewport)(void *renderer); /**< window / wiewport / border color has changed */
 	void (*update_pixbuf)(void *renderer, gboolean lazy); /**< pixbuf has changed */
@@ -343,10 +343,10 @@ void pr_tile_coords_map_orientation(gint orientation,
                                     gdouble tile_w, gdouble tile_h,
                                     gdouble &res_x, gdouble &res_y);
 GdkRectangle pr_tile_region_map_orientation(gint orientation,
-                                            const GdkRectangle &area, /**< coordinates of the area inside tile */
+                                            GdkRectangle area, /**< coordinates of the area inside tile */
                                             gint tile_w, gint tile_h);
 GdkRectangle pr_coords_map_orientation_reverse(gint orientation,
-                                               const GdkRectangle &area,
+                                               GdkRectangle area,
                                                gint tile_w, gint tile_h);
 void pr_scale_region(GdkRectangle &region, gdouble scale);
 

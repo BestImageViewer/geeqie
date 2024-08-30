@@ -165,7 +165,7 @@ inline gint get_left_pixbuf_offset(RendererTiles *rt)
 }
 
 
-void rt_overlay_draw(RendererTiles *rt, const GdkRectangle &request_rect, ImageTile *it);
+void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it);
 
 gboolean rt_tile_is_visible(RendererTiles *rt, ImageTile *it);
 void rt_queue_merge(QueueData *parent, QueueData *qd);
@@ -194,7 +194,7 @@ void rt_sync_scroll(RendererTiles *rt)
  *-------------------------------------------------------------------
  */
 
-void rt_border_draw(RendererTiles *rt, const GdkRectangle &border_rect)
+void rt_border_draw(RendererTiles *rt, GdkRectangle border_rect)
 {
 	PixbufRenderer *pr = rt->pr;
 	GtkWidget *box;
@@ -208,7 +208,7 @@ void rt_border_draw(RendererTiles *rt, const GdkRectangle &border_rect)
 
 	cr = cairo_create(rt->surface);
 
-	auto draw_if_intersect = [&border_rect, rt, pr, cr](const GdkRectangle &rect)
+	auto draw_if_intersect = [&border_rect, rt, pr, cr](GdkRectangle rect)
 	{
 		GdkRectangle r;
 		if (!gdk_rectangle_intersect(&border_rect, &rect, &r)) return;
@@ -397,7 +397,7 @@ void rt_tile_invalidate_all(RendererTiles *rt)
 		}
 }
 
-void rt_tile_invalidate_region(RendererTiles *rt, const GdkRectangle &region)
+void rt_tile_invalidate_region(RendererTiles *rt, GdkRectangle region)
 {
 	gint x1 = ROUND_DOWN(region.x, rt->tile_width);
 	gint x2 = ROUND_UP(region.x + region.width, rt->tile_width);
@@ -542,7 +542,7 @@ void rt_overlay_init_window(RendererTiles *rt, OverlayData *od)
 	gdk_window_show(od->window);
 }
 
-void rt_overlay_draw(RendererTiles *rt, const GdkRectangle &request_rect, ImageTile *it)
+void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it)
 {
 	for (GList *work = rt->overlay_list; work; work = work->next)
 		{
@@ -562,7 +562,7 @@ void rt_overlay_draw(RendererTiles *rt, const GdkRectangle &request_rect, ImageT
 				                                                       rt->tile_width, rt->tile_height);
 				}
 
-			const auto draw = [rt, od, &od_rect](const GdkRectangle &r, const std::function<void(cairo_t *)> &set_source)
+			const auto draw = [rt, od, &od_rect](GdkRectangle r, const std::function<void(cairo_t *)> &set_source)
 			{
 				cairo_t *cr = cairo_create(rt->overlay_buffer);
 				set_source(cr);
@@ -1216,7 +1216,7 @@ gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
  */
 void rt_tile_get_region(gboolean has_alpha, gboolean ignore_alpha,
                         const GdkPixbuf *src, GdkPixbuf *dest,
-                        const GdkRectangle &pb_rect,
+                        GdkRectangle pb_rect,
                         double offset_x, double offset_y, double scale_x, double scale_y,
                         GdkInterpType interp_type,
                         int check_x, int check_y, gboolean wide_image)
@@ -2029,7 +2029,7 @@ void renderer_update_zoom(void *renderer, gboolean lazy)
 	rt_border_clear(rt);
 }
 
-void renderer_invalidate_region(void *renderer, const GdkRectangle &region)
+void renderer_invalidate_region(void *renderer, GdkRectangle region)
 {
 	rt_tile_invalidate_region(static_cast<RendererTiles *>(renderer), region);
 }

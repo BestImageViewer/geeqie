@@ -1366,7 +1366,7 @@ void pr_tile_coords_map_orientation(gint orientation,
 }
 
 GdkRectangle pr_tile_region_map_orientation(gint orientation,
-                                            const GdkRectangle &area, /* coordinates of the area inside tile */
+                                            GdkRectangle area, /* coordinates of the area inside tile */
                                             gint tile_w, gint tile_h)
 {
 	GdkRectangle res = area;
@@ -1424,7 +1424,7 @@ GdkRectangle pr_tile_region_map_orientation(gint orientation,
 }
 
 GdkRectangle pr_coords_map_orientation_reverse(gint orientation,
-                                               const GdkRectangle &area,
+                                               GdkRectangle area,
                                                gint tile_w, gint tile_h)
 {
 	GdkRectangle res = area;

@@ -389,7 +389,7 @@ static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
 			     0, 0, width, height,
 			     PAN_BACKGROUND_COLOR);
 
-	const auto draw_rect_if_intersect = [pixbuf, &request_rect, x, y](const GdkRectangle &pan_grid_rect)
+	const auto draw_rect_if_intersect = [pixbuf, &request_rect, x, y](GdkRectangle pan_grid_rect)
 	{
 		GdkRectangle r;
 		if (!gdk_rectangle_intersect(&request_rect, &pan_grid_rect, &r)) return;
@@ -981,7 +981,7 @@ static void pan_layout_compute(PanWindow *pw, FileData *dir_fd,
 }
 
 static GList *pan_layout_intersect_l(GList *list, GList *item_list,
-                                     const GdkRectangle &rect)
+                                     GdkRectangle rect)
 {
 	for (GList *work = item_list; work; work = work->next)
 		{
