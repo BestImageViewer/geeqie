@@ -59,17 +59,14 @@ constexpr gint max_buffer_size = 16384;
 
 struct DialogWindow
 {
-	gint x;
-	gint y;
-	gint w;
-	gint h;
+	GdkRectangle rect;
 	gchar *title;
 	gchar *role;
 };
 
 static GList *dialog_windows = nullptr;
 
-static void generic_dialog_save_window(const gchar *title, const gchar *role, gint x, gint y, gint h, gint w)
+static void generic_dialog_save_window(const gchar *title, const gchar *role, GdkRectangle rect)
 {
 	GList *work;
 
@@ -79,27 +76,21 @@ static void generic_dialog_save_window(const gchar *title, const gchar *role, gi
 		auto dw = static_cast<DialogWindow *>(work->data);
 		if (g_strcmp0(dw->title ,title) == 0 && g_strcmp0(dw->role, role) == 0)
 			{
-			dw->x = x;
-			dw->y = y;
-			dw->w = w;
-			dw->h = h;
+			dw->rect = rect;
 			return;
 			}
 		work = work->next;
 		}
 
 	auto dw = g_new0(DialogWindow, 1);
+	dw->rect = rect;
 	dw->title = g_strdup(title);
 	dw->role = g_strdup(role);
-	dw->x = x;
-	dw->y = y;
-	dw->w = w;
-	dw->h = h;
 
 	dialog_windows = g_list_append(dialog_windows, dw);
 }
 
-static gboolean generic_dialog_find_window(const gchar *title, const gchar *role, gint *x, gint *y, gint *h, gint *w)
+static gboolean generic_dialog_find_window(const gchar *title, const gchar *role, GdkRectangle &rect)
 {
 	GList *work;
 
@@ -110,10 +101,7 @@ static gboolean generic_dialog_find_window(const gchar *title, const gchar *role
 
 		if (g_strcmp0(dw->title,title) == 0 && g_strcmp0(dw->role, role) == 0)
 			{
-			*x = dw->x;
-			*y = dw->y;
-			*w = dw->w;
-			*h = dw->h;
+			rect = dw->rect;
 			return TRUE;
 			}
 		work = work->next;
@@ -126,14 +114,11 @@ void generic_dialog_close(GenericDialog *gd)
 	gchar *ident_string;
 	gchar *full_title;
 	gchar *actual_title;
-	gint x;
-	gint y;
-	gint h;
-	gint w;
 
-	gdk_window_get_root_origin(gtk_widget_get_window (gd->dialog), &x, &y);
-	w = gdk_window_get_width(gtk_widget_get_window (gd->dialog));
-	h = gdk_window_get_height(gtk_widget_get_window (gd->dialog));
+	GdkRectangle rect;
+	gdk_window_get_root_origin(gtk_widget_get_window (gd->dialog), &rect.x, &rect.y);
+	rect.width = gdk_window_get_width(gtk_widget_get_window (gd->dialog));
+	rect.height = gdk_window_get_height(gtk_widget_get_window (gd->dialog));
 
 	/* The window title is modified in window.cc: window_new()
 	 * by appending the string " - Geeqie"
@@ -142,7 +127,7 @@ void generic_dialog_close(GenericDialog *gd)
 	full_title = g_strdup(gtk_window_get_title(GTK_WINDOW(gd->dialog)));
 	actual_title = strndup(full_title, g_strrstr(full_title, ident_string) - full_title);
 
-	generic_dialog_save_window(actual_title, gtk_window_get_role(GTK_WINDOW(gd->dialog)), x, y, w, h);
+	generic_dialog_save_window(actual_title, gtk_window_get_role(GTK_WINDOW(gd->dialog)), rect);
 
 	gq_gtk_widget_destroy(gd->dialog);
 	g_free(gd);
@@ -343,10 +328,10 @@ void generic_dialog_windows_load_config(const gchar **attribute_names, const gch
 		const gchar *value = *attribute_values++;
 		if (READ_CHAR(*dw, title)) continue;
 		if (READ_CHAR(*dw, role)) continue;
-		if (READ_INT(*dw, x)) continue;
-		if (READ_INT(*dw, y)) continue;
-		if (READ_INT(*dw, w)) continue;
-		if (READ_INT(*dw, h)) continue;
+		if (READ_INT(dw->rect, x)) continue;
+		if (READ_INT(dw->rect, y)) continue;
+		if (READ_INT_FULL("w", dw->rect.width)) continue;
+		if (READ_INT_FULL("h", dw->rect.height)) continue;
 
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}
@@ -379,10 +364,10 @@ void generic_dialog_windows_write_config(GString *outstr, gint indent)
 			WRITE_NL(); WRITE_STRING("<window ");
 			write_char_option(outstr, indent + 1, "title", dw->title);
 			write_char_option(outstr, indent + 1, "role", dw->role);
-			WRITE_INT(*dw, x);
-			WRITE_INT(*dw, y);
-			WRITE_INT(*dw, w);
-			WRITE_INT(*dw, h);
+			WRITE_INT(dw->rect, x);
+			WRITE_INT(dw->rect, y);
+			write_int_option(outstr, indent, "w", dw->rect.width);
+			write_int_option(outstr, indent, "h", dw->rect.height);
 			WRITE_STRING("/>");
 			work = work->next;
 			}
@@ -398,10 +383,6 @@ static void generic_dialog_setup(GenericDialog *gd,
 				 void (*cancel_cb)(GenericDialog *, gpointer), gpointer data)
 {
 	GtkWidget *vbox;
-	gint x;
-	gint y;
-	gint w;
-	gint h;
 	GtkWidget *scrolled;
 
 	gd->auto_close = auto_close;
@@ -414,10 +395,11 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	if (options->save_dialog_window_positions)
 		{
-		if (generic_dialog_find_window(title, role, &x, &y, &w, &h))
+		GdkRectangle rect;
+		if (generic_dialog_find_window(title, role, rect))
 			{
-			gtk_window_set_default_size(GTK_WINDOW(gd->dialog), w, h);
-			gq_gtk_window_move(GTK_WINDOW(gd->dialog), x, y);
+			gtk_window_set_default_size(GTK_WINDOW(gd->dialog), rect.width, rect.height);
+			gq_gtk_window_move(GTK_WINDOW(gd->dialog), rect.x, rect.y);
 			}
 		}
 
