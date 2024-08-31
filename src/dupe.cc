@@ -4321,8 +4321,8 @@ static void dupe_window_get_geometry(DupeWindow *dw)
 
 	window = gtk_widget_get_window(dw->window);
 	gdk_window_get_position(window, &lw->options.dupe_window.x, &lw->options.dupe_window.y);
-	lw->options.dupe_window.w = gdk_window_get_width(window);
-	lw->options.dupe_window.h = gdk_window_get_height(window);
+	lw->options.dupe_window.width = gdk_window_get_width(window);
+	lw->options.dupe_window.height = gdk_window_get_height(window);
 }
 
 void dupe_window_close(DupeWindow *dw)
@@ -4525,7 +4525,7 @@ DupeWindow *dupe_window_new()
 
 	if (lw && options->save_window_positions)
 		{
-		gtk_window_set_default_size(GTK_WINDOW(dw->window), lw->options.dupe_window.w, lw->options.dupe_window.h);
+		gtk_window_set_default_size(GTK_WINDOW(dw->window), lw->options.dupe_window.width, lw->options.dupe_window.height);
 		gq_gtk_window_move(GTK_WINDOW(dw->window), lw->options.dupe_window.x, lw->options.dupe_window.y);
 		}
 	else

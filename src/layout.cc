@@ -1392,15 +1392,15 @@ gboolean layout_sort_get(LayoutWindow *lw, SortType *type, gboolean *ascend, gbo
 	return TRUE;
 }
 
-gboolean layout_geometry_get(LayoutWindow *lw, gint *x, gint *y, gint *w, gint *h)
+static gboolean layout_geometry_get(LayoutWindow *lw, GdkRectangle &rect)
 {
 	GdkWindow *window;
 	if (!layout_valid(&lw)) return FALSE;
 
 	window = gtk_widget_get_window(lw->window);
-	gdk_window_get_root_origin(window, x, y);
-	*w = gdk_window_get_width(window);
-	*h = gdk_window_get_height(window);
+	gdk_window_get_root_origin(window, &rect.x, &rect.y);
+	rect.width = gdk_window_get_width(window);
+	rect.height = gdk_window_get_height(window);
 
 	return TRUE;
 }
@@ -1530,7 +1530,7 @@ static void layout_location_compute(LayoutLocation l1, LayoutLocation l2,
  *-----------------------------------------------------------------------------
  */
 
-gboolean layout_geometry_get_tools(LayoutWindow *lw, gint *x, gint *y, gint *w, gint *h, gint *divider_pos)
+static gboolean layout_geometry_get_tools(LayoutWindow *lw, GdkRectangle &rect, gint &divider_pos)
 {
 	GdkWindow *window;
 	GtkAllocation allocation;
@@ -1540,24 +1540,24 @@ gboolean layout_geometry_get_tools(LayoutWindow *lw, gint *x, gint *y, gint *w, 
 		{
 		/* use the stored values (sort of breaks success return value) */
 
-		*divider_pos = lw->options.float_window.vdivider_pos;
+		divider_pos = lw->options.float_window.vdivider_pos;
 
 		return FALSE;
 		}
 
 	window = gtk_widget_get_window(lw->tools);
-	gdk_window_get_root_origin(window, x, y);
-	*w = gdk_window_get_width(window);
-	*h = gdk_window_get_height(window);
+	gdk_window_get_root_origin(window, &rect.x, &rect.y);
+	rect.width = gdk_window_get_width(window);
+	rect.height = gdk_window_get_height(window);
 	gtk_widget_get_allocation(gtk_paned_get_child1(GTK_PANED(lw->tools_pane)), &allocation);
 
 	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(lw->tools_pane)) == GTK_ORIENTATION_VERTICAL)
 		{
-		*divider_pos = allocation.height;
+		divider_pos = allocation.height;
 		}
 	else
 		{
-		*divider_pos = allocation.width;
+		divider_pos = allocation.width;
 		}
 
 	return TRUE;
@@ -1584,8 +1584,7 @@ static gboolean layout_geometry_get_log_window(LayoutWindow *lw, GdkRectangle &l
 
 static void layout_tools_geometry_sync(LayoutWindow *lw)
 {
-	layout_geometry_get_tools(lw, &lw->options.float_window.x, &lw->options.float_window.y,
-				  &lw->options.float_window.w, &lw->options.float_window.h, &lw->options.float_window.vdivider_pos);
+	layout_geometry_get_tools(lw, lw->options.float_window.rect, lw->options.float_window.vdivider_pos);
 }
 
 static void layout_tools_hide(LayoutWindow *lw, gboolean hide)
@@ -1701,8 +1700,8 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 		{
 		if (options->save_window_positions)
 			{
-			gtk_window_set_default_size(GTK_WINDOW(lw->tools), lw->options.float_window.w, lw->options.float_window.h);
-			gq_gtk_window_move(GTK_WINDOW(lw->tools), lw->options.float_window.x, lw->options.float_window.y);
+			gtk_window_set_default_size(GTK_WINDOW(lw->tools), lw->options.float_window.rect.width, lw->options.float_window.rect.height);
+			gq_gtk_window_move(GTK_WINDOW(lw->tools), lw->options.float_window.rect.x, lw->options.float_window.rect.y);
 			}
 		else
 			{
@@ -2448,14 +2447,12 @@ void layout_sync_options_with_current_state(LayoutWindow *lw)
 	lw->options.main_window.maximized =  window_maximized(lw->window);
 	if (!lw->options.main_window.maximized)
 		{
-		layout_geometry_get(lw, &lw->options.main_window.x, &lw->options.main_window.y,
-				    &lw->options.main_window.w, &lw->options.main_window.h);
+		layout_geometry_get(lw, lw->options.main_window.rect);
 		}
 
 	layout_geometry_get_dividers(lw, &lw->options.main_window.hdivider_pos, &lw->options.main_window.vdivider_pos);
 
-	layout_geometry_get_tools(lw, &lw->options.float_window.x, &lw->options.float_window.y,
-				  &lw->options.float_window.w, &lw->options.float_window.h, &lw->options.float_window.vdivider_pos);
+	layout_geometry_get_tools(lw, lw->options.float_window.rect, lw->options.float_window.vdivider_pos);
 
 	lw->options.image_overlay.state = image_osd_get(lw->image);
 	histogram = image_osd_get_histogram(lw->image);
@@ -2667,8 +2664,8 @@ LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
 
 	if (options->save_window_positions || isfile(default_path))
 		{
-		gtk_window_set_default_size(GTK_WINDOW(lw->window), lw->options.main_window.w, lw->options.main_window.h);
-		gq_gtk_window_move(GTK_WINDOW(lw->window), lw->options.main_window.x, lw->options.main_window.y);
+		gtk_window_set_default_size(GTK_WINDOW(lw->window), lw->options.main_window.rect.width, lw->options.main_window.rect.height);
+		gq_gtk_window_move(GTK_WINDOW(lw->window), lw->options.main_window.rect.x, lw->options.main_window.rect.y);
 		if (lw->options.main_window.maximized) gtk_window_maximize(GTK_WINDOW(lw->window));
 
 		g_idle_add(move_window_to_workspace_cb, lw);
@@ -2764,10 +2761,10 @@ void layout_write_attributes(LayoutOptions *layout, GString *outstr, gint indent
 	WRITE_NL(); WRITE_UINT(*layout, startup_path);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_INT(*layout, main_window.x);
-	WRITE_NL(); WRITE_INT(*layout, main_window.y);
-	WRITE_NL(); WRITE_INT(*layout, main_window.w);
-	WRITE_NL(); WRITE_INT(*layout, main_window.h);
+	WRITE_NL(); WRITE_INT_FULL("main_window.x", layout->main_window.rect.x);
+	WRITE_NL(); WRITE_INT_FULL("main_window.y", layout->main_window.rect.y);
+	WRITE_NL(); WRITE_INT_FULL("main_window.w", layout->main_window.rect.width);
+	WRITE_NL(); WRITE_INT_FULL("main_window.h", layout->main_window.rect.height);
 	WRITE_NL(); WRITE_BOOL(*layout, main_window.maximized);
 	WRITE_NL(); WRITE_INT(*layout, main_window.hdivider_pos);
 	WRITE_NL(); WRITE_INT(*layout, main_window.vdivider_pos);
@@ -2777,10 +2774,10 @@ void layout_write_attributes(LayoutOptions *layout, GString *outstr, gint indent
 	WRITE_NL(); WRITE_INT(*layout, folder_window.vdivider_pos);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_INT(*layout, float_window.x);
-	WRITE_NL(); WRITE_INT(*layout, float_window.y);
-	WRITE_NL(); WRITE_INT(*layout, float_window.w);
-	WRITE_NL(); WRITE_INT(*layout, float_window.h);
+	WRITE_NL(); WRITE_INT_FULL("float_window.x", layout->float_window.rect.x);
+	WRITE_NL(); WRITE_INT_FULL("float_window.y", layout->float_window.rect.y);
+	WRITE_NL(); WRITE_INT_FULL("float_window.w", layout->float_window.rect.width);
+	WRITE_NL(); WRITE_INT_FULL("float_window.h", layout->float_window.rect.height);
 	WRITE_NL(); WRITE_INT(*layout, float_window.vdivider_pos);
 	WRITE_SEPARATOR();
 
@@ -2808,26 +2805,26 @@ void layout_write_attributes(LayoutOptions *layout, GString *outstr, gint indent
 	WRITE_NL(); WRITE_INT(*layout, log_window.width);
 	WRITE_NL(); WRITE_INT(*layout, log_window.height);
 
-	WRITE_NL(); WRITE_INT(*layout, preferences_window.x);
-	WRITE_NL(); WRITE_INT(*layout, preferences_window.y);
-	WRITE_NL(); WRITE_INT(*layout, preferences_window.w);
-	WRITE_NL(); WRITE_INT(*layout, preferences_window.h);
+	WRITE_NL(); WRITE_INT_FULL("preferences_window.x", layout->preferences_window.rect.x);
+	WRITE_NL(); WRITE_INT_FULL("preferences_window.y", layout->preferences_window.rect.y);
+	WRITE_NL(); WRITE_INT_FULL("preferences_window.w", layout->preferences_window.rect.width);
+	WRITE_NL(); WRITE_INT_FULL("preferences_window.h", layout->preferences_window.rect.height);
 	WRITE_NL(); WRITE_INT(*layout, preferences_window.page_number);
 
 	WRITE_NL(); WRITE_INT(*layout, search_window.x);
 	WRITE_NL(); WRITE_INT(*layout, search_window.y);
-	WRITE_NL(); WRITE_INT(*layout, search_window.w);
-	WRITE_NL(); WRITE_INT(*layout, search_window.h);
+	WRITE_NL(); WRITE_INT_FULL("search_window.w", layout->search_window.width);
+	WRITE_NL(); WRITE_INT_FULL("search_window.h", layout->search_window.height);
 
 	WRITE_NL(); WRITE_INT(*layout, dupe_window.x);
 	WRITE_NL(); WRITE_INT(*layout, dupe_window.y);
-	WRITE_NL(); WRITE_INT(*layout, dupe_window.w);
-	WRITE_NL(); WRITE_INT(*layout, dupe_window.h);
+	WRITE_NL(); WRITE_INT_FULL("dupe_window.w", layout->dupe_window.width);
+	WRITE_NL(); WRITE_INT_FULL("dupe_window.h", layout->dupe_window.height);
 
 	WRITE_NL(); WRITE_INT(*layout, advanced_exif_window.x);
 	WRITE_NL(); WRITE_INT(*layout, advanced_exif_window.y);
-	WRITE_NL(); WRITE_INT(*layout, advanced_exif_window.w);
-	WRITE_NL(); WRITE_INT(*layout, advanced_exif_window.h);
+	WRITE_NL(); WRITE_INT_FULL("advanced_exif_window.w", layout->advanced_exif_window.width);
+	WRITE_NL(); WRITE_INT_FULL("advanced_exif_window.h", layout->advanced_exif_window.height);
 	WRITE_SEPARATOR();
 
 	WRITE_NL(); WRITE_BOOL(*layout, animate);
@@ -2886,20 +2883,20 @@ void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names
 
 		/* window positions */
 
-		if (READ_INT(*layout, main_window.x)) continue;
-		if (READ_INT(*layout, main_window.y)) continue;
-		if (READ_INT(*layout, main_window.w)) continue;
-		if (READ_INT(*layout, main_window.h)) continue;
+		if (READ_INT_FULL("main_window.x", layout->main_window.rect.x)) continue;
+		if (READ_INT_FULL("main_window.y", layout->main_window.rect.y)) continue;
+		if (READ_INT_FULL("main_window.w", layout->main_window.rect.width)) continue;
+		if (READ_INT_FULL("main_window.h", layout->main_window.rect.height)) continue;
 		if (READ_BOOL(*layout, main_window.maximized)) continue;
 		if (READ_INT(*layout, main_window.hdivider_pos)) continue;
 		if (READ_INT(*layout, main_window.vdivider_pos)) continue;
 
 		if (READ_INT_CLAMP(*layout, folder_window.vdivider_pos, 1, 1000)) continue;
 
-		if (READ_INT(*layout, float_window.x)) continue;
-		if (READ_INT(*layout, float_window.y)) continue;
-		if (READ_INT(*layout, float_window.w)) continue;
-		if (READ_INT(*layout, float_window.h)) continue;
+		if (READ_INT_FULL("float_window.x", layout->float_window.rect.x)) continue;
+		if (READ_INT_FULL("float_window.y", layout->float_window.rect.y)) continue;
+		if (READ_INT_FULL("float_window.w", layout->float_window.rect.width)) continue;
+		if (READ_INT_FULL("float_window.h", layout->float_window.rect.height)) continue;
 		if (READ_INT(*layout, float_window.vdivider_pos)) continue;
 
 		if (READ_BOOL(*layout, tools_float)) continue;
@@ -2922,26 +2919,26 @@ void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names
 		if (READ_INT(*layout, log_window.width)) continue;
 		if (READ_INT(*layout, log_window.height)) continue;
 
-		if (READ_INT(*layout, preferences_window.x)) continue;
-		if (READ_INT(*layout, preferences_window.y)) continue;
-		if (READ_INT(*layout, preferences_window.w)) continue;
-		if (READ_INT(*layout, preferences_window.h)) continue;
+		if (READ_INT_FULL("preferences_window.x", layout->preferences_window.rect.x)) continue;
+		if (READ_INT_FULL("preferences_window.y", layout->preferences_window.rect.y)) continue;
+		if (READ_INT_FULL("preferences_window.w", layout->preferences_window.rect.width)) continue;
+		if (READ_INT_FULL("preferences_window.h", layout->preferences_window.rect.height)) continue;
 		if (READ_INT(*layout, preferences_window.page_number)) continue;
 
 		if (READ_INT(*layout, search_window.x)) continue;
 		if (READ_INT(*layout, search_window.y)) continue;
-		if (READ_INT(*layout, search_window.w)) continue;
-		if (READ_INT(*layout, search_window.h)) continue;
+		if (READ_INT_FULL("search_window.w", layout->search_window.width)) continue;
+		if (READ_INT_FULL("search_window.h", layout->search_window.height)) continue;
 
 		if (READ_INT(*layout, dupe_window.x)) continue;
 		if (READ_INT(*layout, dupe_window.y)) continue;
-		if (READ_INT(*layout, dupe_window.w)) continue;
-		if (READ_INT(*layout, dupe_window.h)) continue;
+		if (READ_INT_FULL("dupe_window.w", layout->dupe_window.width)) continue;
+		if (READ_INT_FULL("dupe_window.h", layout->dupe_window.height)) continue;
 
 		if (READ_INT(*layout, advanced_exif_window.x)) continue;
 		if (READ_INT(*layout, advanced_exif_window.y)) continue;
-		if (READ_INT(*layout, advanced_exif_window.w)) continue;
-		if (READ_INT(*layout, advanced_exif_window.h)) continue;
+		if (READ_INT_FULL("advanced_exif_window.w", layout->advanced_exif_window.width)) continue;
+		if (READ_INT_FULL("advanced_exif_window.h", layout->advanced_exif_window.height)) continue;
 
 		if (READ_BOOL(*layout, animate)) continue;
 		if (READ_INT(*layout, workspace)) continue;

@@ -610,25 +610,18 @@ static void config_window_ok_cb(GtkWidget *widget, gpointer data)
 	LayoutWindow *lw;
 	auto notebook = static_cast<GtkNotebook *>(data);
 	GdkWindow *window;
-	gint x;
-	gint y;
-	gint w;
-	gint h;
-	gint page_number;
 
 	lw = static_cast<LayoutWindow *>(layout_window_list->data);
 
 	window = gtk_widget_get_window(widget);
-	gdk_window_get_root_origin(window, &x, &y);
-	w = gdk_window_get_width(window);
-	h = gdk_window_get_height(window);
-	page_number = gtk_notebook_get_current_page(notebook);
 
-	lw->options.preferences_window.x = x;
-	lw->options.preferences_window.y = y;
-	lw->options.preferences_window.w = w;
-	lw->options.preferences_window.h = h;
-	lw->options.preferences_window.page_number = page_number;
+	GdkRectangle rect;
+	gdk_window_get_root_origin(window, &rect.x, &rect.y);
+	rect.width = gdk_window_get_width(window);
+	rect.height = gdk_window_get_height(window);
+
+	lw->options.preferences_window.rect = rect;
+	lw->options.preferences_window.page_number = gtk_notebook_get_current_page(notebook);
 
 	config_window_apply();
 	layout_util_sync(lw);
@@ -4092,8 +4085,8 @@ static void config_window_create(LayoutWindow *lw)
 			 G_CALLBACK(config_window_delete), NULL);
 	if (options->save_dialog_window_positions)
 		{
-		gtk_window_resize(GTK_WINDOW(configwindow), lw->options.preferences_window.w, lw->options.preferences_window.h);
-		gq_gtk_window_move(GTK_WINDOW(configwindow), lw->options.preferences_window.x, lw->options.preferences_window.y);
+		gtk_window_resize(GTK_WINDOW(configwindow), lw->options.preferences_window.rect.width, lw->options.preferences_window.rect.height);
+		gq_gtk_window_move(GTK_WINDOW(configwindow), lw->options.preferences_window.rect.x, lw->options.preferences_window.rect.y);
 		}
 	else
 		{

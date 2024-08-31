@@ -510,20 +510,14 @@ struct LayoutOptions
 	gboolean ignore_alpha;
 
 	struct {
-		gint w;
-		gint h;
-		gint x;
-		gint y;
+		GdkRectangle rect;
 		gboolean maximized;
 		gint hdivider_pos;
 		gint vdivider_pos;
 	} main_window;
 
 	struct {
-		gint w;
-		gint h;
-		gint x;
-		gint y;
+		GdkRectangle rect;
 		gint vdivider_pos;
 	} float_window;
 
@@ -540,33 +534,15 @@ struct LayoutOptions
 	GdkRectangle log_window;
 
 	struct {
-		gint w;
-		gint h;
-		gint x;
-		gint y;
+		GdkRectangle rect;
 		gint page_number;
 	} preferences_window;
 
-	struct {
-		gint w;
-		gint h;
-		gint x;
-		gint y;
-	} search_window;
+	GdkRectangle search_window;
 
-	struct {
-		gint w;
-		gint h;
-		gint x;
-		gint y;
-	} dupe_window;
+	GdkRectangle dupe_window;
 
-	struct {
-		gint w;
-		gint h;
-		gint x;
-		gint y;
-	} advanced_exif_window;
+	GdkRectangle advanced_exif_window;
 
 	gboolean tools_float;
 	gboolean tools_hidden;

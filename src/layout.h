@@ -219,7 +219,6 @@ void layout_file_filter_set(LayoutWindow *lw, gboolean enable);
 void layout_sort_set_files(LayoutWindow *lw, SortType type, gboolean ascend, gboolean case_sensitive);
 gboolean layout_sort_get(LayoutWindow *lw, SortType *type, gboolean *ascend, gboolean *case_sensitive);
 
-gboolean layout_geometry_get(LayoutWindow *lw, gint *x, gint *y, gint *w, gint *h);
 gboolean layout_geometry_get_dividers(LayoutWindow *lw, gint *h, gint *v);
 
 void layout_views_set(LayoutWindow *lw, DirViewType dir_view_type, FileViewType file_view_type);
@@ -235,7 +234,6 @@ void layout_styles_update();
 void layout_colors_update();
 
 
-gboolean layout_geometry_get_tools(LayoutWindow *lw, gint *x, gint *y, gint *w, gint *h, gint *divider_pos);
 void layout_tools_float_set(LayoutWindow *lw, gboolean popped, gboolean hidden);
 gboolean layout_tools_float_get(LayoutWindow *lw, gboolean *popped, gboolean *hidden);
 

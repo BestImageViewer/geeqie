@@ -275,8 +275,8 @@ static void advanced_exif_window_get_geometry(ExifWin *ew)
 
 	window = gtk_widget_get_window(ew->window);
 	gdk_window_get_position(window, &lw->options.advanced_exif_window.x, &lw->options.advanced_exif_window.y);
-	lw->options.advanced_exif_window.w = gdk_window_get_width(window);
-	lw->options.advanced_exif_window.h = gdk_window_get_height(window);
+	lw->options.advanced_exif_window.width = gdk_window_get_width(window);
+	lw->options.advanced_exif_window.height = gdk_window_get_height(window);
 }
 
 static void advanced_exif_close(ExifWin *ew)
@@ -444,7 +444,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	gtk_window_set_resizable(GTK_WINDOW(ew->window), TRUE);
 
-	gtk_window_resize(GTK_WINDOW(ew->window), lw->options.advanced_exif_window.w, lw->options.advanced_exif_window.h);
+	gtk_window_resize(GTK_WINDOW(ew->window), lw->options.advanced_exif_window.width, lw->options.advanced_exif_window.height);
 	if (lw->options.advanced_exif_window.x != 0 && lw->options.advanced_exif_window.y != 0)
 		{
 		gq_gtk_window_move(GTK_WINDOW(ew->window), lw->options.advanced_exif_window.x, lw->options.advanced_exif_window.y);

@@ -53,6 +53,8 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 #define WRITE_CHAR(_source_, _name_) write_char_option(outstr, indent, #_name_, (_source_)._name_)
 #define WRITE_COLOR(_source_, _name_) write_color_option(outstr, indent, #_name_, &(_source_)._name_)
 
+#define WRITE_INT_FULL(_name_, _source_) write_int_option(outstr, indent, _name_, _source_)
+
 #define WRITE_NL() write_indent(outstr, indent)
 #define WRITE_SEPARATOR() g_string_append(outstr, "\n")
 #define WRITE_STRING(...) g_string_append_printf(outstr, __VA_ARGS__)

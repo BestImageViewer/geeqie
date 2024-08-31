@@ -3256,8 +3256,8 @@ static void search_window_get_geometry(SearchData *sd)
 
 	window = gtk_widget_get_window(sd->window);
 	gdk_window_get_position(window, &lw->options.search_window.x, &lw->options.search_window.y);
-	lw->options.search_window.w = gdk_window_get_width(window);
-	lw->options.search_window.h = gdk_window_get_height(window);
+	lw->options.search_window.width = gdk_window_get_width(window);
+	lw->options.search_window.height = gdk_window_get_height(window);
 }
 
 static void search_window_close(SearchData *sd)
@@ -3441,7 +3441,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	if (lw && options->save_window_positions)
 		{
-		gtk_window_set_default_size(GTK_WINDOW(sd->window), lw->options.search_window.w, lw->options.search_window.h);
+		gtk_window_set_default_size(GTK_WINDOW(sd->window), lw->options.search_window.width, lw->options.search_window.height);
 		gq_gtk_window_move(GTK_WINDOW(sd->window), lw->options.search_window.x, lw->options.search_window.y);
 		}
 	else
