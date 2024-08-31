@@ -535,11 +535,6 @@ struct LayoutOptions
 	} folder_window;
 
 	struct {
-		gint w;
-		gint h;
-	} properties_window;
-
-	struct {
 		guint state;
 		gint histogram_channel;
 		gint histogram_mode;

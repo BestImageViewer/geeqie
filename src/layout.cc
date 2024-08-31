@@ -2784,10 +2784,6 @@ void layout_write_attributes(LayoutOptions *layout, GString *outstr, gint indent
 	WRITE_NL(); WRITE_INT(*layout, float_window.vdivider_pos);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_INT(*layout, properties_window.w);
-	WRITE_NL(); WRITE_INT(*layout, properties_window.h);
-	WRITE_SEPARATOR();
-
 	WRITE_NL(); WRITE_BOOL(*layout, tools_float);
 	WRITE_NL(); WRITE_BOOL(*layout, tools_hidden);
 	WRITE_SEPARATOR();
@@ -2905,9 +2901,6 @@ void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names
 		if (READ_INT(*layout, float_window.w)) continue;
 		if (READ_INT(*layout, float_window.h)) continue;
 		if (READ_INT(*layout, float_window.vdivider_pos)) continue;
-
-		if (READ_INT(*layout, properties_window.w)) continue;
-		if (READ_INT(*layout, properties_window.h)) continue;
 
 		if (READ_BOOL(*layout, tools_float)) continue;
 		if (READ_BOOL(*layout, tools_hidden)) continue;
