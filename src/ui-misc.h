@@ -228,5 +228,10 @@ gboolean defined_mouse_buttons(GtkWidget *widget, GdkEventButton *event, gpointe
 
 // Copy pixbuf returned by gtk_icon_theme_load_icon() to avoid GTK+ keeping the old icon theme loaded
 GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags);
+
+gboolean window_get_pointer_position(GdkWindow *window, GdkPoint &pos);
+GdkRectangle window_get_position_geometry(GdkWindow *window);
+GdkRectangle window_get_root_origin_geometry(GdkWindow *window);
+gboolean window_received_event(GdkWindow *window, GdkPoint event);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

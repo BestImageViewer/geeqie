@@ -4320,9 +4320,7 @@ static void dupe_window_get_geometry(DupeWindow *dw)
 	if (!dw || !lw) return;
 
 	window = gtk_widget_get_window(dw->window);
-	gdk_window_get_position(window, &lw->options.dupe_window.x, &lw->options.dupe_window.y);
-	lw->options.dupe_window.width = gdk_window_get_width(window);
-	lw->options.dupe_window.height = gdk_window_get_height(window);
+	lw->options.dupe_window = window_get_position_geometry(window);
 }
 
 void dupe_window_close(DupeWindow *dw)

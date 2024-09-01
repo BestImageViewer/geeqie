@@ -1032,27 +1032,15 @@ void vd_dnd_drop_scroll_cancel(ViewDir *vd)
 static gboolean vd_auto_scroll_idle_cb(gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	GdkSeat *seat;
-	GdkDevice *device;
 
 	if (vd->drop_fd)
 		{
-		GdkWindow *window;
-		gint x;
-		gint y;
-		gint w;
-		gint h;
+		GdkWindow *window = gtk_widget_get_window(vd->view);
 
-		window = gtk_widget_get_window(vd->view);
-		seat = gdk_display_get_default_seat(gdk_window_get_display(window));
-		device = gdk_seat_get_pointer(seat);
-		gdk_window_get_device_position(window, device, &x, &y, nullptr);
-
-		w = gdk_window_get_width(window);
-		h = gdk_window_get_height(window);
-		if (x >= 0 && x < w && y >= 0 && y < h)
+		GdkPoint pos;
+		if (window_get_pointer_position(window, pos))
 			{
-			vd_dnd_drop_update(vd, x, y);
+			vd_dnd_drop_update(vd, pos.x, pos.y);
 			}
 		}
 

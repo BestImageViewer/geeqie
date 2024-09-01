@@ -115,17 +115,14 @@ void generic_dialog_close(GenericDialog *gd)
 	gchar *full_title;
 	gchar *actual_title;
 
-	GdkRectangle rect;
-	gdk_window_get_root_origin(gtk_widget_get_window (gd->dialog), &rect.x, &rect.y);
-	rect.width = gdk_window_get_width(gtk_widget_get_window (gd->dialog));
-	rect.height = gdk_window_get_height(gtk_widget_get_window (gd->dialog));
-
 	/* The window title is modified in window.cc: window_new()
 	 * by appending the string " - Geeqie"
 	 */
 	ident_string = g_strconcat(" - ", GQ_APPNAME, NULL);
 	full_title = g_strdup(gtk_window_get_title(GTK_WINDOW(gd->dialog)));
 	actual_title = strndup(full_title, g_strrstr(full_title, ident_string) - full_title);
+
+	GdkRectangle rect = window_get_root_origin_geometry(gtk_widget_get_window(gd->dialog));
 
 	generic_dialog_save_window(actual_title, gtk_window_get_role(GTK_WINDOW(gd->dialog)), rect);
 

@@ -1398,9 +1398,7 @@ static gboolean layout_geometry_get(LayoutWindow *lw, GdkRectangle &rect)
 	if (!layout_valid(&lw)) return FALSE;
 
 	window = gtk_widget_get_window(lw->window);
-	gdk_window_get_root_origin(window, &rect.x, &rect.y);
-	rect.width = gdk_window_get_width(window);
-	rect.height = gdk_window_get_height(window);
+	rect = window_get_root_origin_geometry(window);
 
 	return TRUE;
 }
@@ -1546,9 +1544,7 @@ static gboolean layout_geometry_get_tools(LayoutWindow *lw, GdkRectangle &rect, 
 		}
 
 	window = gtk_widget_get_window(lw->tools);
-	gdk_window_get_root_origin(window, &rect.x, &rect.y);
-	rect.width = gdk_window_get_width(window);
-	rect.height = gdk_window_get_height(window);
+	rect = window_get_root_origin_geometry(window);
 	gtk_widget_get_allocation(gtk_paned_get_child1(GTK_PANED(lw->tools_pane)), &allocation);
 
 	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(lw->tools_pane)) == GTK_ORIENTATION_VERTICAL)
@@ -1575,9 +1571,7 @@ static gboolean layout_geometry_get_log_window(LayoutWindow *lw, GdkRectangle &l
 		}
 
 	window = gtk_widget_get_window(lw->log_window);
-	gdk_window_get_root_origin(window, &log_window.x, &log_window.y);
-	log_window.width = gdk_window_get_width(window);
-	log_window.height = gdk_window_get_height(window);
+	log_window = window_get_root_origin_geometry(window);
 
 	return TRUE;
 }

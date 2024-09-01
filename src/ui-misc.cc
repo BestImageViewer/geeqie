@@ -720,23 +720,12 @@ static gboolean date_selection_popup_release_cb(GtkWidget *, GdkEventButton *, g
 static gboolean date_selection_popup_press_cb(GtkWidget *, GdkEventButton *event, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
-	gint x;
-	gint y;
-	gint w;
-	gint h;
-	gint xr;
-	gint yr;
-	GdkWindow *window;
+	GdkWindow *window = gtk_widget_get_window(ds->window);
 
-	xr = static_cast<gint>(event->x_root);
-	yr = static_cast<gint>(event->y_root);
+	auto xr = static_cast<gint>(event->x_root);
+	auto yr = static_cast<gint>(event->y_root);
 
-	window = gtk_widget_get_window(ds->window);
-	gdk_window_get_origin(window, &x, &y);
-	w = gdk_window_get_width(window);
-	h = gdk_window_get_height(window);
-
-	if (xr < x || yr < y || xr > x + w || yr > y + h)
+	if (!window_received_event(window, {xr, yr}))
 		{
 		g_signal_connect(G_OBJECT(ds->window), "button_release_event",
 				 G_CALLBACK(date_selection_popup_release_cb), ds);
@@ -1466,6 +1455,54 @@ GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gcha
 	if (error) return nullptr;
 
 	return gdk_pixbuf_copy(icon);
+}
+
+gboolean window_get_pointer_position(GdkWindow *window, GdkPoint &pos)
+{
+	GdkSeat *seat = gdk_display_get_default_seat(gdk_window_get_display(window));
+	GdkDevice *device = gdk_seat_get_pointer(seat);
+
+	gdk_window_get_device_position(window, device, &pos.x, &pos.y, nullptr);
+	gint width = gdk_window_get_width(window);
+	gint height = gdk_window_get_height(window);
+
+	return 0 <= pos.x && pos.x < width &&
+	       0 <= pos.y && pos.y < height;
+}
+
+GdkRectangle window_get_position_geometry(GdkWindow *window)
+{
+	GdkRectangle rect;
+
+	gdk_window_get_position(window, &rect.x, &rect.y);
+	rect.width = gdk_window_get_width(window);
+	rect.height = gdk_window_get_height(window);
+
+	return rect;
+}
+
+GdkRectangle window_get_root_origin_geometry(GdkWindow *window)
+{
+	GdkRectangle rect;
+
+	gdk_window_get_root_origin(window, &rect.x, &rect.y);
+	rect.width = gdk_window_get_width(window);
+	rect.height = gdk_window_get_height(window);
+
+	return rect;
+}
+
+gboolean window_received_event(GdkWindow *window, GdkPoint event)
+{
+	gint x;
+	gint y;
+	gdk_window_get_origin(window, &x, &y);
+
+	gint widht = gdk_window_get_width(window);
+	gint height = gdk_window_get_height(window);
+
+	return x <= event.x && event.x <= x + widht &&
+	       y <= event.y && event.y <= y + height;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

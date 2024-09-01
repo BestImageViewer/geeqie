@@ -3255,9 +3255,7 @@ static void search_window_get_geometry(SearchData *sd)
 	if (!sd || !lw) return;
 
 	window = gtk_widget_get_window(sd->window);
-	gdk_window_get_position(window, &lw->options.search_window.x, &lw->options.search_window.y);
-	lw->options.search_window.width = gdk_window_get_width(window);
-	lw->options.search_window.height = gdk_window_get_height(window);
+	lw->options.search_window = window_get_position_geometry(window);
 }
 
 static void search_window_close(SearchData *sd)

@@ -27,6 +27,7 @@
 
 #include "compat.h"
 #include "misc.h"
+#include "ui-misc.h"
 
 /*
  *-------------------------------------------------------------------
@@ -80,22 +81,10 @@ static gboolean tree_edit_click_cb(GtkWidget *, GdkEventButton *event, gpointer 
 	auto ted = static_cast<TreeEditData *>(data);
 	GdkWindow *window = gtk_widget_get_window(ted->window);
 
-	gint x;
-	gint y;
-	gint w;
-	gint h;
+	auto xr = static_cast<gint>(event->x_root);
+	auto yr = static_cast<gint>(event->y_root);
 
-	gint xr;
-	gint yr;
-
-	xr = static_cast<gint>(event->x_root);
-	yr = static_cast<gint>(event->y_root);
-
-	gdk_window_get_origin(window, &x, &y);
-	w = gdk_window_get_width(window);
-	h = gdk_window_get_height(window);
-
-	if (xr < x || yr < y || xr > x + w || yr > y + h)
+	if (!window_received_event(window, {xr, yr}))
 		{
 		/* gobble the release event, so it does not propgate to an underlying widget */
 		g_signal_connect(G_OBJECT(ted->window), "button_release_event",
@@ -474,50 +463,40 @@ void widget_auto_scroll_stop(GtkWidget *widget)
 static gboolean widget_auto_scroll_cb(gpointer data)
 {
 	auto sd = static_cast<AutoScrollData *>(data);
-	GdkWindow *window;
-	gint x;
-	gint y;
-	gint w;
-	gint h;
 	gint amt = 0;
-	GdkSeat *seat;
-	GdkDevice *device;
 
 	if (sd->max_step < sd->region_size)
 		{
 		sd->max_step = MIN(sd->region_size, sd->max_step + 2);
 		}
 
-	window = gtk_widget_get_window(sd->widget);
-	seat = gdk_display_get_default_seat(gdk_window_get_display(window));
-	device = gdk_seat_get_pointer(seat);
-	gdk_window_get_device_position(window, device, &x, &y, nullptr);
+	GdkWindow *window = gtk_widget_get_window(sd->widget);
 
-	w = gdk_window_get_width(window);
-	h = gdk_window_get_height(window);
-
-	if (x < 0 || x >= w || y < 0 || y >= h)
+	GdkPoint pos;
+	if (!window_get_pointer_position(window, pos))
 		{
 		sd->timer_id = 0;
 		widget_auto_scroll_stop(sd->widget);
 		return FALSE;
 		}
 
+	gint h = gdk_window_get_height(window);
+
 	if (h < sd->region_size * 3)
 		{
 		/* height is cramped, nicely divide into three equal regions */
-		if (y < h / 3 || y > h / 3 * 2)
+		if (pos.y < h / 3 || pos.y > h / 3 * 2)
 			{
-			amt = (y < h / 2) ? 0 - ((h / 2) - y) : y - (h / 2);
+			amt = (pos.y < h / 2) ? 0 - ((h / 2) - pos.y) : pos.y - (h / 2);
 			}
 		}
-	else if (y < sd->region_size)
+	else if (pos.y < sd->region_size)
 		{
-		amt = 0 - (sd->region_size - y);
+		amt = 0 - (sd->region_size - pos.y);
 		}
-	else if (y >= h - sd->region_size)
+	else if (pos.y >= h - sd->region_size)
 		{
-		amt = y - (h - sd->region_size);
+		amt = pos.y - (h - sd->region_size);
 		}
 
 	if (amt != 0)
@@ -527,7 +506,7 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 		if (gtk_adjustment_get_value(sd->adj) != CLAMP(gtk_adjustment_get_value(sd->adj) + amt, gtk_adjustment_get_lower(sd->adj), gtk_adjustment_get_upper(sd->adj) - gtk_adjustment_get_page_size(sd->adj)))
 			{
 			/* only notify when scrolling is needed */
-			if (sd->notify_func && !sd->notify_func(sd->widget, x, y, sd->notify_data))
+			if (sd->notify_func && !sd->notify_func(sd->widget, pos.x, pos.y, sd->notify_data))
 				{
 				sd->timer_id = 0;
 				widget_auto_scroll_stop(sd->widget);

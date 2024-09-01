@@ -49,6 +49,7 @@
 #include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
+#include "ui-misc.h"
 #include "ui-tree-edit.h"
 #include "uri-utils.h"
 #include "utilops.h"
@@ -1540,26 +1541,15 @@ static void collection_table_motion_update(CollectTable *ct, gint x, gint y, gbo
 static gboolean collection_table_auto_scroll_idle_cb(gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
-	GdkWindow *window;
-	gint x;
-	gint y;
-	gint w;
-	gint h;
-	GdkSeat *seat;
-	GdkDevice *device;
 
 	if (!ct->drop_idle_id) return G_SOURCE_REMOVE;
 
-	window = gtk_widget_get_window(ct->listview);
-	seat = gdk_display_get_default_seat(gdk_window_get_display(window));
-	device = gdk_seat_get_pointer(seat);
-	gdk_window_get_device_position(window, device, &x, &y, nullptr);
+	GdkWindow *window = gtk_widget_get_window(ct->listview);
 
-	w = gdk_window_get_width(window);
-	h = gdk_window_get_height(window);
-	if (x >= 0 && x < w && y >= 0 && y < h)
+	GdkPoint pos;
+	if (window_get_pointer_position(window, pos))
 		{
-		collection_table_motion_update(ct, x, y, TRUE);
+		collection_table_motion_update(ct, pos.x, pos.y, TRUE);
 		}
 
 	ct->drop_idle_id = 0;

@@ -274,9 +274,7 @@ static void advanced_exif_window_get_geometry(ExifWin *ew)
 	if (!ew || !lw) return;
 
 	window = gtk_widget_get_window(ew->window);
-	gdk_window_get_position(window, &lw->options.advanced_exif_window.x, &lw->options.advanced_exif_window.y);
-	lw->options.advanced_exif_window.width = gdk_window_get_width(window);
-	lw->options.advanced_exif_window.height = gdk_window_get_height(window);
+	lw->options.advanced_exif_window = window_get_position_geometry(window);
 }
 
 static void advanced_exif_close(ExifWin *ew)

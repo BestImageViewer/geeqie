@@ -615,12 +615,7 @@ static void config_window_ok_cb(GtkWidget *widget, gpointer data)
 
 	window = gtk_widget_get_window(widget);
 
-	GdkRectangle rect;
-	gdk_window_get_root_origin(window, &rect.x, &rect.y);
-	rect.width = gdk_window_get_width(window);
-	rect.height = gdk_window_get_height(window);
-
-	lw->options.preferences_window.rect = rect;
+	lw->options.preferences_window.rect = window_get_root_origin_geometry(window);
 	lw->options.preferences_window.page_number = gtk_notebook_get_current_page(notebook);
 
 	config_window_apply();

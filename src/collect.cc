@@ -47,6 +47,7 @@
 #include "pixbuf-util.h"
 #include "print.h"
 #include "ui-fileops.h"
+#include "ui-misc.h"
 #include "ui-tree-edit.h"
 #include "ui-utildlg.h"
 #include "utilops.h"
@@ -1048,9 +1049,7 @@ static void collection_window_get_geometry(CollectWindow *cw)
 
 	cd = cw->cd;
 	window = gtk_widget_get_window(cw->window);
-	gdk_window_get_position(window, &cd->window.x, &cd->window.y);
-	cd->window.width = gdk_window_get_width(window);
-	cd->window.height = gdk_window_get_height(window);
+	cd->window = window_get_position_geometry(window);
 	cd->window_read = TRUE;
 }
 
