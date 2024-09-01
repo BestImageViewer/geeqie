@@ -492,17 +492,14 @@ struct LayoutOptions
 	DirViewType dir_view_type;
 	FileViewType file_view_type;
 
-	struct {
+	struct SortParams
+	{
 		SortType method;
 		gboolean ascend;
 		gboolean case_sensitive;
-	} dir_view_list_sort;
-
-	struct {
-		SortType method;
-		gboolean ascend;
-		gboolean case_sensitive;
-	} file_view_list_sort;
+	};
+	SortParams dir_view_list_sort;
+	SortParams file_view_list_sort;
 
 	gboolean show_thumbnails;
 	gboolean show_marks;
