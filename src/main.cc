@@ -802,27 +802,33 @@ static void process_command_line_for_cache_maintenance_option(gint argc, gchar *
 static void setup_env_path()
 {
 	const gchar *old_path = g_getenv("PATH");
-	gchar *path = g_strconcat(gq_bindir, ":", old_path, NULL);
-        g_setenv("PATH", path, TRUE);
-	g_free(path);
+	g_autofree gchar *path = g_strconcat(gq_bindir, ":", old_path, NULL);
+	g_setenv("PATH", path, TRUE);
+}
+
+static const gchar *get_history_path()
+{
+#if USE_XDG
+	static gchar *history_path = g_build_filename(xdg_data_home_get(), GQ_APPNAME_LC, RC_HISTORY_NAME, NULL);
+#else
+	static gchar *history_path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
+#endif
+
+	return history_path;
 }
 
 static void keys_load()
 {
-	gchar *path;
+	const gchar *path = get_history_path();
 
-	path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
 	history_list_load(path);
-	g_free(path);
 }
 
 static void keys_save()
 {
-	gchar *path;
+	const gchar *path = get_history_path();
 
-	path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
 	history_list_save(path);
-	g_free(path);
 }
 
 static void marks_load()

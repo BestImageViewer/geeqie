@@ -205,37 +205,23 @@ const gchar *homedir()
 	return home;
 }
 
-static gchar *xdg_dir_get(const gchar *key, const gchar *fallback)
-{
-	gchar *dir = getenv(key);
-
-	if (!dir || dir[0] == '\0')
-		{
-		return g_build_filename(homedir(), fallback, NULL);
-		}
-
-	DEBUG_1("Got xdg %s: %s", key, dir);
-
-	return path_to_utf8(dir);
-}
-
 const gchar *xdg_data_home_get()
 {
-	static const gchar *xdg_data_home = xdg_dir_get("XDG_DATA_HOME", ".local/share");
+	static const gchar *xdg_data_home = path_to_utf8(g_get_user_data_dir());
 
 	return xdg_data_home;
 }
 
 const gchar *xdg_config_home_get()
 {
-	static const gchar *xdg_config_home = xdg_dir_get("XDG_CONFIG_HOME", ".config");
+	static const gchar *xdg_config_home = path_to_utf8(g_get_user_config_dir());
 
 	return xdg_config_home;
 }
 
 const gchar *xdg_cache_home_get()
 {
-	static const gchar *xdg_cache_home = xdg_dir_get("XDG_CACHE_HOME", ".cache");
+	static const gchar *xdg_cache_home = path_to_utf8(g_get_user_cache_dir());
 
 	return xdg_cache_home;
 }
