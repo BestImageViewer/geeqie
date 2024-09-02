@@ -31,6 +31,7 @@
 #include "misc.h"
 #include "options.h"
 #include "renderer-tiles.h"
+#include "ui-misc.h"
 
 /* comment this out if not using this from within Geeqie
  * defining GQ_BUILD does these things:
@@ -1983,7 +1984,7 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 	pr->mouse.y = event->y;
 	pr_update_pixel_signal(pr);
 
-	if (!pr->in_drag || !gq_gdk_pointer_is_grabbed()) return FALSE;
+	if (!pr->in_drag || !gdk_display_device_is_grabbed(gdk_device_get_display(device), device)) return FALSE;
 
 	if (pr->drag_moved < PR_DRAG_SCROLL_THRESHHOLD)
 		{
@@ -2049,10 +2050,8 @@ static gboolean pr_mouse_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpo
 			pr->drag_last_x = bevent->x;
 			pr->drag_last_y = bevent->y;
 			pr->drag_moved = 0;
-			gq_gdk_pointer_grab(gtk_widget_get_window(widget), FALSE,
-			                    static_cast<GdkEventMask>(GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_RELEASE_MASK),
-			                    nullptr, nullptr, bevent->time);
-			gtk_grab_add(widget);
+			widget_input_grab(widget, GDK_SEAT_CAPABILITY_ALL_POINTING, FALSE,
+			                  static_cast<GdkEventMask>(GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_RELEASE_MASK));
 			break;
 		case GDK_BUTTON_MIDDLE:
 			pr->drag_moved = 0;
@@ -2085,10 +2084,11 @@ static gboolean pr_mouse_release_cb(GtkWidget *widget, GdkEventButton *bevent, g
 		return TRUE;
 		}
 
-	if (gq_gdk_pointer_is_grabbed() && gtk_widget_has_grab(GTK_WIDGET(pr)))
+	GdkSeat *seat = gdk_display_get_default_seat(gdk_window_get_display(bevent->window));
+	GdkDevice *device = gdk_seat_get_pointer(seat);
+	if (gdk_display_device_is_grabbed(gdk_device_get_display(device), device) && gtk_widget_has_grab(GTK_WIDGET(pr)))
 		{
-		gtk_grab_remove(widget);
-		gq_gdk_pointer_ungrab(bevent->time);
+		widget_input_ungrab(widget);
 		widget_set_cursor(widget, -1);
 		}
 

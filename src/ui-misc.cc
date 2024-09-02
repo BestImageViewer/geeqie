@@ -696,9 +696,7 @@ static void date_selection_popup_hide(DateSelection *ds)
 
 	if (gtk_widget_has_grab(ds->window))
 		{
-		gtk_grab_remove(ds->window);
-		gq_gdk_keyboard_ungrab(GDK_CURRENT_TIME);
-		gq_gdk_pointer_ungrab(GDK_CURRENT_TIME);
+		widget_input_ungrab(ds->window);
 		}
 
 	gtk_widget_hide(ds->window);
@@ -838,11 +836,8 @@ static void date_selection_popup(DateSelection *ds)
 	gtk_widget_show(ds->window);
 
 	gtk_widget_grab_focus(ds->calendar);
-	gq_gdk_pointer_grab(gtk_widget_get_window(ds->window), TRUE,
-	                    static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK),
-	                    nullptr, nullptr, GDK_CURRENT_TIME);
-	gq_gdk_keyboard_grab(gtk_widget_get_window(ds->window), TRUE, GDK_CURRENT_TIME);
-	gtk_grab_add(ds->window);
+	widget_input_grab(ds->window, GDK_SEAT_CAPABILITY_ALL, TRUE,
+	                  static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK));
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), TRUE);
 }
@@ -1417,6 +1412,29 @@ void widget_remove_from_parent(GtkWidget *widget)
 void widget_remove_from_parent_cb(GtkWidget *, gpointer data)
 {
 	widget_remove_from_parent(static_cast<GtkWidget *>(data));
+}
+
+void widget_input_grab(GtkWidget *widget, GdkSeatCapabilities capabilities, gboolean owner_events, GdkEventMask event_mask)
+{
+	GdkWindow *window = gtk_widget_get_window(widget);
+	gdk_window_set_events(window, event_mask); // TODO Is this needed?
+	GdkDisplay *display = gdk_window_get_display(window);
+	GdkSeat *seat = gdk_display_get_default_seat(display);
+
+	gdk_seat_grab(seat, window, capabilities, owner_events,
+	              nullptr, nullptr, nullptr, nullptr);
+
+	gtk_grab_add(widget);
+}
+
+void widget_input_ungrab(GtkWidget *widget)
+{
+	GdkWindow *window = gtk_widget_get_window(widget);
+	GdkDisplay *display = gdk_window_get_display(window);
+	GdkSeat *seat = gdk_display_get_default_seat(display);
+
+	gdk_seat_ungrab(seat);
+	gtk_grab_remove(widget);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

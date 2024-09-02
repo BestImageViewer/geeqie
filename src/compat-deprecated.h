@@ -75,7 +75,6 @@ const auto gq_gtk_ui_manager_set_add_tearoffs = gtk_ui_manager_set_add_tearoffs;
 // Hide other Gdk/Gtk deprecation warnings
 const auto gq_gdk_cairo_create = gdk_cairo_create;
 const auto gq_gdk_flush = gdk_flush;
-const auto gq_gdk_keyboard_ungrab = gdk_keyboard_ungrab;
 const auto gq_gdk_pixbuf_animation_get_iter = gdk_pixbuf_animation_get_iter;
 const auto gq_gdk_pixbuf_animation_iter_advance = gdk_pixbuf_animation_iter_advance;
 const auto gq_gdk_pixbuf_animation_iter_get_delay_time = gdk_pixbuf_animation_iter_get_delay_time;
@@ -83,9 +82,6 @@ const auto gq_gdk_pixbuf_animation_iter_get_pixbuf = gdk_pixbuf_animation_iter_g
 const auto gq_gdk_pixbuf_animation_is_static_image = gdk_pixbuf_animation_is_static_image;
 const auto gq_gdk_pixbuf_animation_new_from_stream_async = gdk_pixbuf_animation_new_from_stream_async;
 const auto gq_gdk_pixbuf_animation_new_from_stream_finish = gdk_pixbuf_animation_new_from_stream_finish;
-const auto gq_gdk_pointer_grab = gdk_pointer_grab;
-const auto gq_gdk_pointer_is_grabbed = gdk_pointer_is_grabbed;
-const auto gq_gdk_pointer_ungrab = gdk_pointer_ungrab;
 const auto gq_gdk_screen_get_height = gdk_screen_get_height;
 const auto gq_gdk_screen_get_monitor_at_window = gdk_screen_get_monitor_at_window;
 const auto gq_gdk_screen_get_width = gdk_screen_get_width;

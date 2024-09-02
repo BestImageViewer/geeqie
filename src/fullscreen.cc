@@ -559,7 +559,7 @@ void fullscreen_stop(FullScreenData *fs)
 
 	g_clear_handle_id(&fs->hide_mouse_id, g_source_remove);
 	g_clear_handle_id(&fs->busy_mouse_id, g_source_remove);
-	gq_gdk_keyboard_ungrab(GDK_CURRENT_TIME);
+	widget_input_ungrab(fs->window);
 
 	if (fs->same_region)
 		{

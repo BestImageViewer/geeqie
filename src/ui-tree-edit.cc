@@ -59,9 +59,7 @@ struct AutoScrollData
 
 static void tree_edit_close(TreeEditData *ted)
 {
-	gtk_grab_remove(ted->window);
-	gq_gdk_keyboard_ungrab(GDK_CURRENT_TIME);
-	gq_gdk_pointer_ungrab(GDK_CURRENT_TIME);
+	widget_input_ungrab(ted->window);
 
 	gq_gtk_widget_destroy(ted->window);
 
@@ -186,11 +184,8 @@ static gboolean tree_edit_by_path_idle_cb(gpointer data)
 	 * is not set, and causes no edit cursor to appear ( popups not allowed focus? )
 	 */
 	gtk_widget_grab_focus(ted->entry);
-	gtk_grab_add(ted->window);
-	gq_gdk_pointer_grab(gtk_widget_get_window(ted->window), TRUE,
-	                    static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK),
-	                    nullptr, nullptr, GDK_CURRENT_TIME);
-	gq_gdk_keyboard_grab(gtk_widget_get_window(ted->window), TRUE, GDK_CURRENT_TIME);
+	widget_input_grab(ted->window, GDK_SEAT_CAPABILITY_ALL, TRUE,
+	                  static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK));
 
 	return G_SOURCE_REMOVE;
 }

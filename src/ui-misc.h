@@ -218,5 +218,8 @@ gboolean window_received_event(GdkWindow *window, GdkPoint event);
 
 void widget_remove_from_parent(GtkWidget *widget);
 void widget_remove_from_parent_cb(GtkWidget *, gpointer data);
+
+void widget_input_grab(GtkWidget *widget, GdkSeatCapabilities capabilities, gboolean owner_events, GdkEventMask event_mask);
+void widget_input_ungrab(GtkWidget *widget);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

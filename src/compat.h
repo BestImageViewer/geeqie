@@ -34,7 +34,6 @@
 #endif
 
 #if HAVE_GTK4
-	#define gq_gdk_keyboard_grab(window, owner_events, time) gtk_widget_grab_focus(widget)
 	#define gq_gtk_box_pack_end(box, child, expand, fill, padding) gtk_box_append(box, child)
 	#define gq_gtk_box_pack_start(box, child, expand, fill, padding) gtk_box_prepend(box, child)
 	#define gq_gtk_frame_set_shadow_type(frame, type) ;
@@ -49,7 +48,6 @@
 	#define gq_gtk_window_set_position(window, position) ;
 	#define gq_gtk_window_fullscreen_on_monitor(window, monitor) ;
 #else
-	#define gq_gdk_keyboard_grab(window, owner_events, time) gdk_keyboard_grab(window, owner_events, time)
 	#define gq_gtk_box_pack_end(box, child, expand, fill, padding) gtk_box_pack_end(box, child, expand, fill, padding)
 	#define gq_gtk_box_pack_start(box, child, expand, fill, padding) gtk_box_pack_start(box, child, expand, fill, padding)
 	#define gq_gtk_frame_set_shadow_type(frame, type) gtk_frame_set_shadow_type(frame, type)
