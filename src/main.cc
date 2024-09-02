@@ -718,76 +718,60 @@ static gboolean parse_command_line_for_cache_maintenance_option(gint argc, gchar
 
 static void process_command_line_for_cache_maintenance_option(gint argc, gchar *argv[])
 {
-	gchar *rc_path;
-	gchar *folder_path = nullptr;
-	gsize size;
-	gsize i = 0;
-	gchar *buf_config_file;
-	gint diff_count;
-
-	const gchar *cache_maintenance_option = "--cache-maintenance=";
-	gint len = strlen(cache_maintenance_option);
-
-	if (argc >= 2)
-		{
-		folder_path = expand_tilde(argv[1] + len);
-
-		if (isdir(folder_path))
-			{
-			rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
-
-			if (isfile(rc_path))
-				{
-				if (g_file_get_contents(rc_path, &buf_config_file, &size, nullptr))
-					{
-					while (i < size)
-						{
-						diff_count = strncmp("</global>", &buf_config_file[i], 9);
-						if (diff_count == 0)
-							{
-							break;
-							}
-						i++;
-						}
-					/* Load only the <global> section */
-					load_config_from_buf(buf_config_file, i + 9, FALSE);
-
-					if (options->thumbnails.enable_caching)
-						{
-						cache_maintenance(folder_path);
-						}
-					else
-						{
-						print_term(TRUE, "Caching not enabled\n");
-						exit(EXIT_FAILURE);
-						}
-					g_free(buf_config_file);
-					}
-				else
-					{
-					print_term(TRUE, g_strconcat(_("Cannot load "), rc_path, "\n", NULL));
-					exit(EXIT_FAILURE);
-					}
-				}
-			else
-				{
-				print_term(TRUE, g_strconcat(_("Configuration file path "), rc_path, _(" is not a file\n"), NULL));
-				exit(EXIT_FAILURE);
-				}
-			g_free(rc_path);
-			}
-		else
-			{
-			print_term(TRUE, g_strconcat(argv[1] + len, _(" is not a folder\n"), NULL));
-			exit(EXIT_FAILURE);
-			}
-		g_free(folder_path);
-		}
-	else
+	if (argc < 2)
 		{
 		print_term(TRUE, _("No path parameter given\n"));
 		exit(EXIT_FAILURE);
 		}
+
+	const gchar *cache_maintenance_option = "--cache-maintenance=";
+	const gint len = strlen(cache_maintenance_option);
+
+	g_autofree gchar *folder_path = expand_tilde(argv[1] + len);
+	if (!isdir(folder_path))
+		{
+		print_term(TRUE, g_strconcat(argv[1] + len, _(" is not a folder\n"), NULL));
+		exit(EXIT_FAILURE);
+		}
+
+	g_autofree gchar *rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
+	if (!isfile(rc_path))
+		{
+		print_term(TRUE, g_strconcat(_("Configuration file path "), rc_path, _(" is not a file\n"), NULL));
+		exit(EXIT_FAILURE);
+		}
+
+	g_autofree gchar *buf_config_file = nullptr;
+	gsize size;
+	if (!g_file_get_contents(rc_path, &buf_config_file, &size, nullptr))
+		{
+		print_term(TRUE, g_strconcat(_("Cannot load "), rc_path, "\n", NULL));
+		exit(EXIT_FAILURE);
+		}
+
+	/* Load only the <global> section */
+	const gchar *global_tag_end = "</global>";
+	const gint global_tag_end_len = strlen(global_tag_end);
+
+	gsize global_section_size = size;
+	for (gsize i = 0; i < size; i++)
+		{
+		if (strncmp(global_tag_end, buf_config_file + i, global_tag_end_len) == 0)
+			{
+			global_section_size = i + global_tag_end_len;
+			break;
+			}
+		}
+
+	load_config_from_buf(buf_config_file, global_section_size, FALSE);
+
+	if (!options->thumbnails.enable_caching)
+		{
+		print_term(TRUE, "Caching not enabled\n");
+		exit(EXIT_FAILURE);
+		}
+
+	cache_maintenance(folder_path);
 }
 
 /*
