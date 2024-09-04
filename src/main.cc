@@ -1107,7 +1107,7 @@ void exit_program()
 
 	if (metadata_write_queue_confirm(FALSE, exit_program_write_metadata_cb, nullptr)) return;
 
-	options->marks_save ? marks_save(TRUE) : marks_save(FALSE);
+	marks_save(options->marks_save);
 
 	if (exit_confirm_dlg()) return;
 
