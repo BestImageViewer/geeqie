@@ -1,75 +1,20 @@
-*.o
 *.bak
-Makefile
-Makefile.in
 *~
 *.rej
 *.orig
-
-# GNOME .desktop files
-*.desktop
-
-# /
-/aclocal.m4
-/autom4te.cache
-/config.cache
-/config.guess
-/config.h
-/config.log
-/config.report
-/config.status
-/config.sub
-/configure
-/configure.scan
-/missing
-/mkinstalldirs
-/COPYING
-/install-sh
-/stamp-h
-/stamp-h.in
-/INSTALL
-/geeqie.spec
-/intl
-/ABOUT-NLS
-/depcomp
-/auxdir
-/stamp-h1
-
-# /po/
-/po/Makefile.in.in
-/po/cat-id-tbl.c
-/po/gqview.pot
-/po/stamp-cat-id
-/po/*.gmo
-/po/geeqie.pot
-/po/*.mo
-/po/stamp-it
-
-# /src/
-/src/.deps
-/src/geeqie
-
-# /src/pan-view/
-/src/pan-view/.deps
-/src/pan-view/.dirstamp
-
-# /src/view_file/
-/src/view_file/.deps
-/src/view_file/.dirstamp
 
 # /subprojects
 /subprojects/packagecache
 /subprojects/googletest-release-*
 
 /build
-/build-stamp
 /debian/geeqie*
 /debian/files
 /geeqie-cppcheck-build-dir
 
 # The files that are autocreated(!)
-/src/gq-marshal.[ch]
-ChangeLog.html
 README.html
-ChangeLog
-/org.geeqie.Geeqie.appdata.xml
+
+# Development tools (IDE, linters, etc) files
+.vscode
+meson.build.user
