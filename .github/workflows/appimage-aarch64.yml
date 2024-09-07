@@ -50,7 +50,7 @@ jobs:
             yes | sudo apt-get install meson
             yes | sudo apt-get install pandoc
             yes | sudo apt-get install python3 python3-pip python3-setuptools python3-wheel ninja-build
-            yes | sudo apt-get install yelp-tools
+            yes | sudo apt-get install wkhtmltopdf yelp-tools
             mkdir -p $GITHUB_WORKSPACE/AppDir
             mkdir -p $GITHUB_WORKSPACE/AppDir/usr
             meson setup -Ddoxygen=disabled -Dyelp-build=disabled -Dprefix=$GITHUB_WORKSPACE/AppDir/usr build

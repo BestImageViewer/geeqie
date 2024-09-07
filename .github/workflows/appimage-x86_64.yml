@@ -25,7 +25,7 @@ jobs:
     - run: sudo apt-get install libwebp-dev
     - run: sudo apt-get install libwebp7
     - run: sudo apt-get install pandoc
-    - run: sudo apt-get install yelp-tools
+    - run: sudo apt-get install wkhtmltopdf yelp-tools
 
     - uses: actions/checkout@v4
     - run: git fetch --tags --force

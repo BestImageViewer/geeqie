@@ -49,13 +49,16 @@ if running_from_git
     endif
 endif
 
-help_pdf_sh = find_program('help-html-to-pdf.sh', dirs : scriptsdir, required : false)
-if help_pdf_sh.found()
-    htmldir = join_paths(meson.project_build_root(), 'doc', 'html')
-    help_pdf = custom_target(
-        'help.pdf',
-        output: 'help.pdf',
-        command: [help_pdf_sh, htmldir, meson.project_build_root(), '@OUTPUT@'],
-        install: true,
-        install_dir: helpdir)
+wkhtmltopdf = find_program('wkhtmltopdf', required : false)
+if wkhtmltopdf.found()
+    help_pdf_sh = find_program('help-html-to-pdf.sh', dirs : scriptsdir, required : false)
+    if help_pdf_sh.found()
+        htmldir = join_paths(meson.project_build_root(), 'doc', 'html')
+        help_pdf = custom_target(
+            'help.pdf',
+            output: 'help.pdf',
+            command: [help_pdf_sh, htmldir, meson.project_build_root(), '@OUTPUT@'],
+            install: true,
+            install_dir: helpdir)
+    endif
 endif
