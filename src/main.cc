@@ -482,7 +482,7 @@ static void parse_command_line(gint argc, gchar *argv[])
 				 strcmp(cmd_line, "--version") == 0)
 				{
 				printf_term(FALSE, "%s %s GTK%u\n", GQ_APPNAME, VERSION, gtk_major_version);
-				exit(0);
+				exit(EXIT_SUCCESS);
 				}
 			else if (strcmp(cmd_line, "-h") == 0 ||
 				 strcmp(cmd_line, "--help") == 0)
@@ -515,8 +515,7 @@ static void parse_command_line(gint argc, gchar *argv[])
 
 				remote_help();
 
-
-				exit(0);
+				exit(EXIT_SUCCESS);
 				}
 			else if (!remote_do)
 				{
@@ -1279,7 +1278,7 @@ gint main(gint argc, gchar *argv[])
 			{
 			log_printf("Can't initialize clutter-gtk.\nStart Geeqie with the option \"geeqie --disable-clutter\"");
 			runcmd("zenity --error --title=\"Geeqie\" --text \"Can't initialize clutter-gtk.\n\nStart Geeqie with the option:\n geeqie --disable-clutter\" --width=300");
-			exit(1);
+			exit(EXIT_FAILURE);
 			}
 		}
 #else

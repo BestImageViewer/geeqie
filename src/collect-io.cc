@@ -270,7 +270,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 						{
 						/* It is assumed this will never fail */
 						perror("setmntent");
-						exit(1);
+						exit(EXIT_FAILURE);
 						}
 
 					while (nullptr != (mount_entry = getmntent(mount_entries)))
@@ -294,7 +294,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 						{
 						/* It is assumed this will never fail */
 						perror("setmntent");
-						exit(1);
+						exit(EXIT_FAILURE);
 						}
 
 					for (int i = 0; i < num_mounts; i++)
