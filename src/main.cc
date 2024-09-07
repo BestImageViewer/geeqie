@@ -329,6 +329,16 @@ static void parse_command_line_process_file(const gchar *file_path, gchar **path
 	parse_command_line_add_file(file_path, path, file, list, collection_list);
 }
 
+static void show_invalid_parameters_warning_dialog(const gchar *command_line_errors)
+{
+	g_autoptr(GtkWidget) dialog_warning = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+	                                                             "%s", _("Invalid parameter(s):"));
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog_warning), "%s", command_line_errors);
+	gtk_window_set_title(GTK_WINDOW(dialog_warning), GQ_APPNAME);
+	gq_gtk_window_set_keep_above(GTK_WINDOW(dialog_warning), TRUE);
+	gtk_dialog_run(GTK_DIALOG(dialog_warning));
+}
+
 static void parse_command_line(gint argc, gchar *argv[])
 {
 	GList *list = nullptr;
@@ -340,21 +350,17 @@ static void parse_command_line(gint argc, gchar *argv[])
 	gchar *pwd;
 	gchar *current_dir;
 	gchar *geometry = nullptr;
-	GtkWidget *dialog_warning;
-	GString *command_line_errors = g_string_new(nullptr);
 
 	command_line = g_new0(CommandLine, 1);
-
 	command_line->argc = argc;
 	command_line->argv = argv;
 	command_line->regexp = nullptr;
 
 	if (argc > 1)
 		{
-		gint i;
 		gchar *base_dir = get_current_dir();
-		i = 1;
-		while (i < argc)
+		g_autoptr(GString) command_line_errors = g_string_new(nullptr);
+		for (gint i = 1; i < argc; i++)
 			{
 			gchar *cmd_line = path_to_utf8(argv[i]);
 			gchar *cmd_all = g_build_filename(base_dir, cmd_line, NULL);
@@ -519,18 +525,11 @@ static void parse_command_line(gint argc, gchar *argv[])
 
 			g_free(cmd_all);
 			g_free(cmd_line);
-			i++;
 			}
 
 		if (command_line_errors->len > 0)
 			{
-			dialog_warning = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", "Invalid parameter(s):");
-			gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog_warning), "%s", command_line_errors->str);
-			gtk_window_set_title(GTK_WINDOW(dialog_warning), GQ_APPNAME);
-			gq_gtk_window_set_keep_above(GTK_WINDOW(dialog_warning), TRUE);
-			gtk_dialog_run(GTK_DIALOG(dialog_warning));
-			g_object_unref(dialog_warning);
-			g_string_free(command_line_errors, TRUE);
+			show_invalid_parameters_warning_dialog(command_line_errors->str);
 
 			exit(EXIT_FAILURE);
 			}
@@ -574,24 +573,16 @@ static void parse_command_line(gint argc, gchar *argv[])
 		{
 		if (remote_errors)
 			{
-			GList *work = remote_errors;
+			g_autoptr(GString) command_line_errors = g_string_new(nullptr);
 
-			while (work)
+			for (GList *work = remote_errors; work; work = work->next)
 				{
 				auto opt = static_cast<gchar *>(work->data);
 
-				command_line_errors = g_string_append(command_line_errors, opt);
-				command_line_errors = g_string_append(command_line_errors, "\n");
-				work = work->next;
+				g_string_append_printf(command_line_errors, "%s\n", opt);
 				}
 
-			dialog_warning = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", "Invalid parameter(s):");
-			gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog_warning), "%s", command_line_errors->str);
-			gtk_window_set_title(GTK_WINDOW(dialog_warning), GQ_APPNAME);
-			gq_gtk_window_set_keep_above(GTK_WINDOW(dialog_warning), TRUE);
-			gtk_dialog_run(GTK_DIALOG(dialog_warning));
-			g_object_unref(dialog_warning);
-			g_string_free(command_line_errors, TRUE);
+			show_invalid_parameters_warning_dialog(command_line_errors->str);
 
 			exit(EXIT_FAILURE);
 			}
