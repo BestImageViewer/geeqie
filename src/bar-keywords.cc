@@ -55,7 +55,7 @@ GtkListStore *keyword_store = nullptr;
 void bar_pane_keywords_changed(GtkTextBuffer *buffer, gpointer data);
 
 void autocomplete_keywords_list_load(const gchar *path);
-gboolean autocomplete_keywords_list_save(gchar *path);
+gboolean autocomplete_keywords_list_save(const gchar *path);
 gboolean autocomplete_activate_cb(GtkWidget *widget, gpointer data);
 
 /*
@@ -1417,9 +1417,8 @@ gboolean bar_pane_keywords_menu_cb(GtkWidget *widget, GdkEventButton *bevent, gp
 void bar_pane_keywords_destroy(gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
-	gchar *path;
 
-	path = g_build_filename(get_rc_dir(), "keywords", NULL);
+	g_autofree gchar *path = g_build_filename(get_rc_dir(), "keywords", NULL);
 	autocomplete_keywords_list_save(path);
 
 	g_list_free_full(pkd->expanded_rows, g_free);
@@ -1737,7 +1736,7 @@ void autocomplete_keywords_list_load(const gchar *path)
 	fclose(f);
 }
 
-gboolean autocomplete_keywords_list_save(gchar *path)
+gboolean autocomplete_keywords_list_save(const gchar *path)
 {
 	SecureSaveInfo *ssi;
 	gchar *pathl;
