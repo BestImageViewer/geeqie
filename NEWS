@@ -1,3 +1,20 @@
+Geeqie 2.5
+============
+
+- Plugin to set file mtime to Exif.Image.DateTime
+- Bash command line completion
+- Option to hide window decorations
+- Improve Search and Run list display
+- Exif tag search option in Search window
+- Include Help And Close buttons in Exif window
+- Assign shortcuts to multi-page documents
+- Show alpha value in --pixel-info
+- Include the Help file in pdf format
+- Extensive code refactoring
+- Unit test framework
+- Bug fixes
+- Updated translations
+
 Geeqie 2.4
 ============
 
