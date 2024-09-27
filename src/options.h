@@ -79,6 +79,7 @@ struct ConfOptions
 
 	guint duplicates_similarity_threshold;
 	guint duplicates_match;
+	gchar *duplicates_program;
 	gboolean duplicates_thumbnails;
 	guint duplicates_select_type;
 	gboolean rot_invariant_sim;

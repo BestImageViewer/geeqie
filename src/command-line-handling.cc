@@ -20,6 +20,9 @@
 
 #include "command-line-handling.h"
 
+#include <cstring>
+#include <map>
+#include <sys/wait.h>
 #include <vector>
 
 #include "cache-maint.h"
@@ -40,6 +43,7 @@
 #include "main-defines.h"
 #include "main.h"
 #include "misc.h"
+#include "pic_equiv.h"
 #include "pixbuf-renderer.h"
 #include "rcfile.h"
 #include "secure-save.h"
@@ -405,6 +409,114 @@ void gq_delay(GtkApplication *, GApplicationCommandLine *app_command_line, GVari
 		}
 
 	options->slideshow.delay = static_cast<gint>(n * 10.0 + 0.01);
+}
+
+void gq_duplicates_threshold(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	const gint thresh_min = 0;
+	const gint thresh_max = 100;
+	gint thresh = 0;
+	gboolean res;
+
+	res = g_variant_dict_lookup(command_line_options_dict, "duplicates-threshold", "i", &thresh);
+	if (res)
+		{
+		if (thresh < thresh_min || thresh > thresh_max)
+			{
+			printf_term(TRUE, "Image similarity threshold " BOLD_ON "%d" BOLD_OFF " out of range (%d to %d)\n", thresh, thresh_min, thresh_max);
+			return;
+			}
+		}
+	else
+		{
+		thresh = 99;
+		}
+
+	options->duplicates_similarity_threshold = static_cast<guint>(thresh);
+	DEBUG_1("threshold set to %d", options->duplicates_similarity_threshold);
+}
+
+void gq_duplicates_program(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text = nullptr;
+
+	g_variant_dict_lookup(command_line_options_dict, "duplicates-program", "&s", &text);
+
+	g_free(options->duplicates_program);
+	options->duplicates_program = g_strdup(text);
+	DEBUG_1("duplicates program set to \"%s\"", options->duplicates_program);
+}
+
+void gq_process_duplicates(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *file_list)
+{
+	std::map<std::string, std::unique_ptr<pic_equiv>> pics;
+	for (GList *work = file_list; work; work = work->next)
+		{
+		const char *fd = static_cast<const char *>(work->data);
+		std::string name(fd);
+		pics[name] = std::make_unique<pic_equiv>(fd);
+		}
+	DEBUG_1("processing %d files in set", pics.size());
+
+	// Compute similarity score for every pair, build equivalence sets.
+	for (auto outer_iter = pics.begin(); outer_iter != pics.end(); ++outer_iter)
+		{
+		auto inner_iter = outer_iter;
+		inner_iter++;
+		for (; inner_iter != pics.end(); ++inner_iter)
+			{
+			double similarity = outer_iter->second->compare(*inner_iter->second);
+			DEBUG_1("%s vs %s: %f", outer_iter->second->name.c_str(), inner_iter->second->name.c_str(), similarity);
+			if (similarity < options->duplicates_similarity_threshold)
+				continue;
+			outer_iter->second->equivalent.insert(inner_iter->second->equivalent.begin(), inner_iter->second->equivalent.end());
+			for (auto const &sibling : outer_iter->second->equivalent)
+				{
+				pics[sibling]->equivalent.insert(outer_iter->second->equivalent.begin(), outer_iter->second->equivalent.end());
+				}
+			}
+		}
+
+	std::set<std::string> processed;
+	for (auto const &pic : pics)
+		{
+		if (pic.second->equivalent.size() < 2)
+			// skip this pic if not similar to any other one but itself
+			continue;
+		if (processed.find(pic.second->name) != processed.end())
+			// skip this pic if it was already processed (when processing a similar image)
+			continue;
+		std::vector<const char *> cmd;
+		cmd.push_back(options->duplicates_program);
+		for (auto const &sibling : pic.second->equivalent)
+			{
+			cmd.push_back(sibling.c_str());
+			processed.insert(sibling);
+			}
+		cmd.push_back(nullptr);
+		pid_t pid = fork();
+		if (pid == -1)
+			{
+			log_printf("failed creating child process: %s\n", strerror(errno));
+			return;
+			}
+		if (pid == 0)
+			{
+			execvp(const_cast<char *>(cmd[0]), const_cast<char **>(cmd.data()));
+			perror("execv");
+			exit(1);
+			}
+		else
+			{
+			int status;
+			wait(&status);
+			if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+				{
+				log_printf("subprocess failed, aborting further duplicate processing\n");
+				return;
+				}
+			}
+		}
 }
 
 void file_load_no_raise(const gchar *text, GApplicationCommandLine *app_command_line)
@@ -1487,6 +1599,8 @@ CommandLineOptionEntry command_line_options[] =
 	{ "debug",                       gq_debug,                       PRIMARY_REMOTE, GUI  },
 #endif
 	{ "delay",                       gq_delay,                       PRIMARY_REMOTE, GUI  },
+	{ "duplicates-program",          gq_duplicates_program,          PRIMARY_REMOTE, GUI  },
+	{ "duplicates-threshold",        gq_duplicates_threshold,        PRIMARY_REMOTE, GUI  },
 	{ "file",                        gq_file,                        PRIMARY_REMOTE, GUI  },
 	{ "File",                        gq_File,                        PRIMARY_REMOTE, GUI  },
 	{ "file-extensions",             gq_file_extensions,             PRIMARY_REMOTE, TEXT },
@@ -1513,6 +1627,7 @@ CommandLineOptionEntry command_line_options[] =
 	{ "new-window",                  gq_new_window,                  PRIMARY_REMOTE, GUI  },
 	{ "next",                        gq_next,                        PRIMARY_REMOTE, GUI  },
 	{ "pixel-info",                  gq_pixel_info,                  REMOTE        , N_A  },
+	{ "process-duplicates",          gq_process_duplicates,          PRIMARY_REMOTE, TEXT },
 	{ "quit",                        gq_quit,                        PRIMARY_REMOTE, GUI  },
 	{ "raise",                       gq_raise,                       PRIMARY_REMOTE, GUI  },
 	{ "selection-add",               gq_selection_add,               REMOTE        , N_A  },

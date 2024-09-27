@@ -66,6 +66,7 @@ ConfOptions *init_options(ConfOptions *options)
 	options->dnd_icon_size = 48;
 	options->dnd_default_action = DND_ACTION_ASK;
 	options->duplicates_similarity_threshold = 99;
+	options->duplicates_program = g_strdup("echo");
 	options->rot_invariant_sim = TRUE;
 	options->sort_totals = FALSE;
 	options->rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE;
