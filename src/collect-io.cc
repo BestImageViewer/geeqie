@@ -51,6 +51,10 @@
 
 #define GQ_COLLECTION_MARKER "#" GQ_APPNAME
 
+#ifdef __NetBSD__
+#define statfs statvfs
+#endif
+
 enum {
 	GQ_COLLECTION_FAIL_MIN =     300,
 	GQ_COLLECTION_FAIL_PERCENT = 98,
