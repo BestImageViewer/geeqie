@@ -21,9 +21,11 @@
 
 #include "remote.h"
 
+#include <stdio.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -32,6 +34,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
+#include <memory>
 #include <vector>
 
 #include <gtk/gtk.h>
@@ -57,8 +61,10 @@
 #include "main.h"
 #include "misc.h"
 #include "options.h"
+#include "pic.h"
 #include "pixbuf-renderer.h"
 #include "rcfile.h"
+#include "similar.h"
 #include "slideshow.h"
 #include "typedefs.h"
 #include "ui-fileops.h"
@@ -680,6 +686,102 @@ static void gr_slideshow_delay(const gchar *text, GIOChannel *, gpointer)
 		}
 
 	options->slideshow.delay = static_cast<gint>(n * 10.0 + 0.01);
+}
+
+static void gr_duplicates_threshold(const gchar *text, GIOChannel *, gpointer)
+{
+	gint thresh;
+	gint n;
+	gint res;
+
+	res = sscanf(text, "%d", &thresh);
+	if (res == 1)
+		{
+		n = thresh;
+		if (n < 0 || n > 100)
+			{
+			printf_term(TRUE, "Image similarity threshold out of range (%d to %d)\n", 0, 100);
+			return;
+			}
+		}
+	else
+		{
+		n = 99;
+		}
+
+	options->duplicates_similarity_threshold = static_cast<guint>(n);
+	DEBUG_0("threshold set to %d", options->duplicates_similarity_threshold);
+}
+
+static void gr_duplicates_program(const gchar *text, GIOChannel *, gpointer)
+{
+	g_strdup(options->duplicates_program);
+	options->duplicates_program = g_strdup(text);
+	DEBUG_0("duplicates program set to \"%s\"", options->duplicates_program);
+}
+
+static void gr_process_duplicates(const gchar *, GIOChannel *, gpointer data)
+{
+	auto remote_data = static_cast<RemoteData *>(data);
+    std::map<std::string, std::unique_ptr<pic>> pics;
+	GList *work = remote_data->file_list;
+	while (work)
+	{
+		FileData *fd = static_cast<FileData *>(work->data);
+        std::string name(fd->path);
+        pics[name] = std::unique_ptr<pic>(new pic(fd->path));
+		work = work->next;
+	}
+	DEBUG_1("processing %d files in set", pics.size());
+
+	// Compute similarity score for every pair, build equivalence sets.
+    for (auto a = pics.begin(); a != pics.end(); ++a) {
+        auto b = a;
+        b++;
+        for (; b != pics.end(); ++b) {
+            double similarity = a->second->compare(*b->second);
+            DEBUG_1("%s vs %s: %f", a->second->name.c_str(), b->second->name.c_str(), similarity);
+            if (similarity < options->duplicates_similarity_threshold)
+                continue;
+            a->second->equivalent.insert(b->second->equivalent.begin(), b->second->equivalent.end());
+            for (auto const &f: a->second->equivalent) {
+                pics[f]->equivalent.insert(a->second->equivalent.begin(), a->second->equivalent.end());
+            }
+        }
+    }
+
+    std::set<std::string> printed;
+    for (auto const &f: pics) {
+        if (f.second->equivalent.size() < 2)
+            // skip this pic if not similar to any other one but itself
+            continue;
+        if (printed.find(f.second->name) != printed.end())
+            // skip this pic if it was already printed (when processing a similar image)
+            continue;
+        std::vector<const char *> cmd;
+		cmd.push_back(options->duplicates_program);
+        for (auto const &e: f.second->equivalent) {
+            cmd.push_back(e.c_str());
+            printed.insert(e);
+        }
+        cmd.push_back(NULL);
+        pid_t pid = fork();
+        if (pid == -1) {
+            perror("fork");
+            exit(1);
+        } else if (pid == 0) {
+            execvp(const_cast<char *>(cmd[0]), const_cast<char **>(&(cmd[0])));
+            perror("execv");
+            exit(1);
+        } else {
+            int status;
+            wait(&status);
+            if (!WIFEXITED(status) || WEXITSTATUS(status)!=0) {
+                fprintf(stderr, "subprocess failed, aborting\n");
+                exit(1);
+            }
+        }
+    }
 }
 
 static void gr_tools_show(const gchar *, GIOChannel *, gpointer)
@@ -1718,6 +1820,8 @@ static RemoteCommandEntry remote_commands[] = {
 	{ nullptr, "--cache-shared=",         gr_cache_shared,         TRUE,  FALSE, N_("clean|clear"),       N_("clean or clear shared thumbnail cache") },
 	{ nullptr, "--cache-thumbs=",         gr_cache_thumb,          TRUE,  FALSE, N_("clean|clear"),       N_("clean or clear thumbnail cache") },
 	{ "-d",    "--delay=",                gr_slideshow_delay,      TRUE,  FALSE, N_("<[H:][M:][N][.M]>"), N_("set slide show delay to Hrs Mins N.M seconds") },
+	{ nullptr, "--duplicates-program=",   gr_duplicates_program,   TRUE,  FALSE, N_("<PROGRAM>"),         N_("run program with each identified set of duplicate images") },
+	{ nullptr, "--duplicates-threshold=", gr_duplicates_threshold, TRUE,  FALSE, N_("<N>"),               N_("set similarity threshold for what is considered a duplicate") },
 	{ nullptr, "--first",                 gr_image_first,          FALSE, FALSE, nullptr,                 N_("first image") },
 	{ "-f",    "--fullscreen",            gr_fullscreen_toggle,    FALSE, TRUE,  nullptr,                 N_("toggle full screen") },
 	{ nullptr, "--file=",                 gr_file_load,            TRUE,  FALSE, N_("<FILE>|<URL>"),      N_("open FILE or URL, bring Geeqie window to the top") },
@@ -1749,6 +1853,7 @@ static RemoteCommandEntry remote_commands[] = {
 	{ "-n",    "--next",                  gr_image_next,           FALSE, FALSE, nullptr,                 N_("next image") },
 	{ nullptr, "--pixel-info",            gr_pixel_info,           FALSE, FALSE, nullptr,                 N_("print pixel info of mouse pointer on current image") },
 	{ nullptr, "--print0",                gr_print0,               TRUE,  FALSE, nullptr,                 N_("terminate returned data with null character instead of newline") },
+	{ "-p",    "--process-duplicates",    gr_process_duplicates,   FALSE, FALSE, nullptr,                 N_("group duplicate pictures in current collection and process them") },
 	{ nullptr, "--PWD=",                  gr_pwd,                  TRUE,  FALSE, N_("<PWD>"),             N_("use PWD as working directory for following commands") },
 	{ "-q",    "--quit",                  gr_quit,                 FALSE, FALSE, nullptr,                 N_("quit") },
 	{ nullptr, "--raise",                 gr_raise,                FALSE, FALSE, nullptr,                 N_("bring the Geeqie window to the top") },
