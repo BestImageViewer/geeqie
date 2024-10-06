@@ -647,7 +647,7 @@ static void appimage_notification_func(gpointer data, gpointer)
 		}
 }
 
-void appimage_notification()
+void appimage_notification(GtkApplication *)
 {
 	AppImageData *appimage_data;
 

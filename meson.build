@@ -672,6 +672,14 @@ i18n.merge_file(
     install_dir : join_paths(datadir, 'applications'))
 
 i18n.merge_file(
+    input : 'org.geeqie.cache-maintenance.desktop.in',
+    output : 'org.geeqie.cache-maintenance.desktop',
+    type : 'desktop',
+    po_dir : podir,
+    install : true,
+    install_dir : join_paths(datadir, 'applications'))
+
+i18n.merge_file(
     input : 'org.geeqie.Geeqie.appdata.xml.in',
     output : 'org.geeqie.Geeqie.appdata.xml',
     type : 'xml',
@@ -717,7 +725,7 @@ if option.enabled()
 
             should_fail = image_name.startswith('fail')
             test_cmd = [image_test_py.full_path(), geeqie_exe.full_path(), image]
-            test('Image_ ' + image_name, isolate_test_sh, args: test_cmd, should_fail : should_fail, timeout: 100, suite: ['functional', 'image'])
+            test('Image_ ' + image_name, isolate_test_sh, args: test_cmd, should_fail : should_fail, timeout: 100, is_parallel : false, suite: ['functional', 'image'])
         endforeach
         summary({'Image tests' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
     else

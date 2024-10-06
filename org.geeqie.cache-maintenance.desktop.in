@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=Geeqie
+Name=Geeqie Cache Maintenance
 GenericName=Image Viewer
 Comment=View and manage images
-Exec=geeqie -r %F
+Exec=/bin/true
 Icon=geeqie
 Type=Application
 Terminal=false

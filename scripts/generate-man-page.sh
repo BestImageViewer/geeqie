@@ -39,9 +39,6 @@ zooming, panning, thumbnails and sorting images into collections.
 
 Generated for version:
 
-[SEE ALSO]
-Full documentation: https://www.geeqie.org/help/GuideIndex.html
-
 [BUGS]
 Please send bug reports and feedback to https://github.com/BestImageViewer/geeqie/issues
 

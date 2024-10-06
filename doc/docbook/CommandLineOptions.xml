@@ -474,6 +474,32 @@ can be used to modify this behavior on an individual basis e.g.</para>
   </listitem>
   </varlistentry>
 </variablelist>
+
+<para>All other command line parameters are used as plain files if they exist, or a URL or a folder.
+The name of a collection, with or without either path or extension (.gqv) may be used.</para>
+
+<para>If more than one folder is on the command line, only the last will be used.</para>
+</refsect2>
+
+<refsect2 id='if_more_than_one_file_is_on_the_command_'><title>If more than one file is on the command line:</title>
+
+<para>If they are in the same folder, that folder will be opened and those files will be selected.
+If they are not in the same folder, a new Collection containing those files will be opened.</para>
+
+<para>To run Geeqie as a new instance, use:
+GQ_NON_UNIQUE=1 geeqie
+Normally a single set of configuration files is used for all instances.
+However, the environment variables XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME
+can be used to modify this behavior on an individual basis e.g.
+XDG_CONFIG_HOME=/tmp/a XDG_CACHE_HOME=/tmp/b GQ_NON_UNIQUE=1 geeqie</para>
+
+<para>To disable Clutter use:
+GQ_DISABLE_CLUTTER=1 geeqie</para>
+
+<para>To run or stop Geeqie in cache maintenance (non-GUI) mode use:
+GQ_CACHE_MAINTENANCE=1 geeqie <emphasis role='strong' remap='B'>--help</emphasis></para>
+
+<para>User manual: https://www.geeqie.org/help/GuideIndex.html</para>
 </refsect2>
 </refsect1>
 

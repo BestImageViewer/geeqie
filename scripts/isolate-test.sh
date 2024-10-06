@@ -28,6 +28,8 @@
 ## $1 Test executable
 ##
 ##
+## @FIXME It should be possible to use dbus-run-session, thus allowing
+## is_parallel=true in meson.build for image tests
 
 set -e
 
@@ -63,6 +65,13 @@ chmod 0700 "$XDG_RUNTIME_DIR"
 cd
 mkdir -p "$XDG_CONFIG_HOME"
 
+# Primary and remote instances of GtkApplication communicate with dbus
+dbus-launch
+
+# Inhibit shellcheck warning SC2154 - var is referenced but not assigned
+echo "${DBUS_SESSION_BUS_ADDRESS:-}"
+echo "${DBUS_SESSION_BUS_PID:-}"
+
 # This will automatically pass the command name and args in the expected order.
 # And `set -e` (above) means that we'll automatically exit with the same return
 # code as our sub-command.
@@ -71,4 +80,5 @@ mkdir -p "$XDG_CONFIG_HOME"
 # G_DEBUG="fatal-warnings" will force an abort if a warning or
 # critical error is encountered.
 # https://docs.gtk.org/glib/running.html#environment-variables
-env -i G_DEBUG="fatal-warnings" HOME="$HOME" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
+env -i DBUS_SESSION_BUS_PID="$DBUS_SESSION_BUS_PID" DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" G_DEBUG="fatal-warnings" HOME="$HOME" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
+

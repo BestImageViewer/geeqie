@@ -1,0 +1,1742 @@
+/*
+ * Copyright (C) 2024 The Geeqie Team
+ *
+ * Author: Colin Clark
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "command-line-handling.h"
+
+#include <vector>
+
+#include "cache-maint.h"
+#include "collect-io.h"
+#include "collect.h"
+#include "compat.h"
+#include "debug.h"
+#include "exif.h"
+#include "filedata.h"
+#include "filefilter.h"
+#include "glua.h"
+#include "img-view.h"
+#include "intl.h"
+#include "layout-image.h"
+#include "layout-util.h"
+#include "layout.h"
+#include "logwindow.h"
+#include "main-defines.h"
+#include "main.h"
+#include "misc.h"
+#include "pixbuf-renderer.h"
+#include "rcfile.h"
+#include "secure-save.h"
+#include "slideshow.h"
+#include "ui-fileops.h"
+#include "ui-misc.h"
+#include "utilops.h"
+
+namespace
+{
+
+struct CommandLineOptionEntry
+{
+	const gchar *option_name;
+	void (*func)(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *);
+};
+
+#define BOLD_ON "\033[1m"
+#define BOLD_OFF "\033[0m"
+
+LayoutWindow *lw_id = nullptr; /* points to the window set by the --id option */
+
+/* To enable file names containing newlines to be processed correctly,
+ * the --print0 remote option sets returned data to be terminated with a null
+ * character rather a newline
+ */
+gboolean print0 = FALSE;
+
+/**
+ * @brief Ensures file path is absolute.
+ * @param[in] filename Filepath, absolute or relative to calling directory
+ * @param[in] app_command_line
+ * @returns absolute path
+ *
+ * If first character of input filepath is not the directory
+ * separator, assume it as a relative path and prepend
+ * the directory the remote command was initiated from
+ *
+ * Return value must be freed with g_free()
+ */
+gchar *set_cwd(gchar *filename, GApplicationCommandLine *app_command_line)
+{
+	gchar *temp;
+
+	if (strncmp(filename, G_DIR_SEPARATOR_S, 1) != 0)
+		{
+		temp = g_build_filename(g_application_command_line_get_cwd(app_command_line), filename, NULL);
+		}
+	else
+		{
+		temp = g_strdup(filename);
+		}
+
+	return temp;
+}
+
+gboolean close_window_cb(gpointer)
+{
+	if (!layout_valid(&lw_id)) return FALSE;
+
+	layout_menu_close_cb(nullptr, lw_id);
+
+	return G_SOURCE_REMOVE;
+}
+
+gchar *config_file_path(const gchar *param)
+{
+	gchar *path = nullptr;
+	gchar *full_name = nullptr;
+
+	if (file_extension_match(param, ".xml"))
+		{
+		path = g_build_filename(get_window_layouts_dir(), param, NULL);
+		}
+	else if (file_extension_match(param, nullptr))
+		{
+		full_name = g_strconcat(param, ".xml", NULL);
+		path = g_build_filename(get_window_layouts_dir(), full_name, NULL);
+		}
+
+	if (!isfile(path))
+		{
+		g_free(path);
+		path = nullptr;
+		}
+
+	g_free(full_name);
+	return path;
+}
+
+gboolean is_config_file(const gchar *param)
+{
+	gchar *name = nullptr;
+
+	name = config_file_path(param);
+	if (name)
+		{
+		g_free(name);
+		return TRUE;
+		}
+	return FALSE;
+}
+
+/**
+ * @brief If this is not a remote instance, exit the applcation 
+ * @param GtkApplication 
+ * @param app_command_line 
+ * @param option 
+ * 
+ * 
+ */
+void remote_command(GtkApplication *, GApplicationCommandLine *app_command_line, const gchar *option)
+{
+	gboolean remote_instance;
+
+	remote_instance = g_application_command_line_get_is_remote(app_command_line);
+
+	if (!remote_instance)
+		{
+		g_application_command_line_print(app_command_line, "%s%s%s%s%s", _("Geeqie is not running: --"), BOLD_ON, option, BOLD_OFF, _(" is a Remote command\n"));
+
+		exit(EXIT_FAILURE);
+		}
+}
+
+gboolean wait_cb(gpointer data)
+{
+	gint position = GPOINTER_TO_INT(data);
+	gint x = position >> 16;
+	gint y = position - (x << 16);
+
+	gq_gtk_window_move(GTK_WINDOW(lw_id->window), x, y);
+
+	return G_SOURCE_REMOVE;
+}
+
+void gq_action(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	gboolean remote_instance;
+
+	remote_instance = g_application_command_line_get_is_remote(app_command_line);
+
+	g_variant_dict_lookup(command_line_options_dict, "action", "s", &text);
+
+	layout_valid(&lw_id);
+
+	if (g_strstr_len(text, -1, ".desktop") != nullptr)
+		{
+		file_util_start_editor_from_filelist(text, layout_selection_list(lw_id), layout_get_path(lw_id), lw_id->window);
+		}
+	else
+		{
+		GtkAction *action;
+
+		action = gq_gtk_action_group_get_action(lw_id->action_group, text);
+		if (action)
+			{
+			gq_gtk_action_activate(action);
+			}
+		else
+			{
+			g_application_command_line_print(app_command_line, _("Action %s is unknown\n"), text);
+			if (!remote_instance)
+				{
+				g_application_quit(G_APPLICATION(app));
+				}
+			}
+		}
+	g_free(text);
+}
+
+void gq_action_list(GtkApplication *app, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
+{
+	gint max_length = 0;
+	GString *out_string = g_string_new(nullptr);
+	gboolean remote_instance;
+	remote_instance = g_application_command_line_get_is_remote(app_command_line);
+
+	std::vector<ActionItem> list = get_action_items();
+
+	/* Get the length required for padding */
+	for (const ActionItem &action_item : list)
+		{
+		const auto length = g_utf8_strlen(action_item.name, -1);
+		max_length = MAX(length, max_length);
+		}
+
+	/* Pad the action names to the same column for readable output */
+	for (const ActionItem &action_item : list)
+		{
+		g_string_append_printf(out_string, "%-*s", max_length + 4, action_item.name);
+		out_string = g_string_append(out_string, action_item.label);
+		out_string = g_string_append(out_string, "\n");
+		}
+
+	g_application_command_line_print(app_command_line, "%s\n", out_string->str);
+
+	g_string_free(out_string, TRUE);
+
+	if (!remote_instance)
+		{
+		g_application_quit(G_APPLICATION(app));
+		}
+}
+
+void gq_back(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	layout_image_prev(lw_id);
+}
+
+void gq_cache_metadata(GtkApplication *app, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	cache_maintain_home_remote(app, TRUE, FALSE, nullptr);
+}
+
+void gq_cache_render(GtkApplication *app, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar* text;
+
+	g_variant_dict_lookup(command_line_options_dict, "cache-render", "&s", &text);
+
+	cache_manager_render_remote(app, text, FALSE, FALSE, nullptr);
+}
+
+void gq_cache_render_recurse(GtkApplication *app, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar* text;
+
+	g_variant_dict_lookup(command_line_options_dict, "cache-render-recurse", "&s", &text);
+
+	cache_manager_render_remote(app, text, TRUE, FALSE, nullptr);
+}
+
+void gq_cache_render_shared(GtkApplication *app, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar* text;
+
+	g_variant_dict_lookup(command_line_options_dict, "cache-render-shared", "&s", &text);
+
+	if(options->thumbnails.spec_standard)
+		{
+		cache_manager_render_remote(app, text, FALSE, TRUE, nullptr);
+		}
+}
+
+void gq_cache_render_shared_recurse(GtkApplication *app, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar* text;
+
+	g_variant_dict_lookup(command_line_options_dict, "cache-shared-recurse", "&s", &text);
+
+	if(options->thumbnails.spec_standard)
+		{
+		cache_manager_render_remote(app, text, TRUE, TRUE, nullptr);
+		}
+}
+
+void gq_cache_shared(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar* text;
+
+	g_variant_dict_lookup(command_line_options_dict, "cache-shared", "&s", &text);
+
+	if (!g_strcmp0(text, "clear"))
+		{
+		cache_manager_standard_process_remote(TRUE);
+		}
+	else if (!g_strcmp0(text, "clean"))
+		{
+		cache_manager_standard_process_remote(FALSE);
+		}
+}
+
+void gq_cache_thumbs(GtkApplication *app, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar* text;
+
+	g_variant_dict_lookup(command_line_options_dict, "cache-thumbs", "&s", &text);
+
+	if (!g_strcmp0(text, "clear"))
+		{
+		cache_maintain_home_remote(app, FALSE, TRUE, nullptr);
+		}
+	else if (!g_strcmp0(text, "clean"))
+		{
+		cache_maintain_home_remote(app, FALSE, FALSE, nullptr);
+		}
+}
+
+void gq_close_window(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	g_idle_add((close_window_cb), nullptr);
+}
+
+void gq_config_load(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "config-load", "&s", &text);
+	gchar *filename = expand_tilde(text);
+
+	if (!g_strstr_len(filename, -1, G_DIR_SEPARATOR_S))
+		{
+		if (is_config_file(filename))
+			{
+			gchar *tmp = config_file_path(filename);
+			g_free(filename);
+			filename = tmp;
+			}
+		}
+
+	if (isfile(filename))
+		{
+		load_config_from_file(filename, FALSE);
+		}
+	else
+		{
+		g_application_command_line_print(app_command_line, "remote sent filename that does not exist:\"%s\"\n", filename);
+		layout_set_path(nullptr, homedir());
+		}
+
+	g_free(filename);
+}
+
+void gq_debug(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gint debug_level;
+	g_variant_dict_lookup(command_line_options_dict, "debug", "i", &debug_level);
+	set_debug_level(debug_level);
+}
+
+void gq_delay(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "delay", "&s", &text);
+
+	gdouble t1;
+	gdouble t2;
+	gdouble t3;
+	gdouble n;
+	gint res;
+
+	res = sscanf(text, "%lf:%lf:%lf", &t1, &t2, &t3);
+	if (res == 3)
+		{
+		n = (t1 * 3600) + (t2 * 60) + t3;
+		if (n < SLIDESHOW_MIN_SECONDS || n > SLIDESHOW_MAX_SECONDS ||
+		        t1 >= 24 || t2 >= 60 || t3 >= 60)
+			{
+			g_application_command_line_print(app_command_line, _("Remote slideshow delay out of range (%.1f to %.1f)\n"),
+			                                 SLIDESHOW_MIN_SECONDS, SLIDESHOW_MAX_SECONDS);
+			return;
+			}
+		}
+	else if (res == 2)
+		{
+		n = t1 * 60 + t2;
+		if (n < SLIDESHOW_MIN_SECONDS || n > SLIDESHOW_MAX_SECONDS ||
+		        t1 >= 60 || t2 >= 60)
+			{
+			g_application_command_line_print(app_command_line, _("Remote slideshow delay out of range (%.1f to %.1f)\n"),
+			                                 SLIDESHOW_MIN_SECONDS, SLIDESHOW_MAX_SECONDS);
+			return;
+			}
+		}
+	else if (res == 1)
+		{
+		n = t1;
+		if (n < SLIDESHOW_MIN_SECONDS || n > SLIDESHOW_MAX_SECONDS)
+			{
+			g_application_command_line_print(app_command_line,_("Remote slideshow delay out of range (%.1f to %.1f)\n"),
+			                                 SLIDESHOW_MIN_SECONDS, SLIDESHOW_MAX_SECONDS);
+			return;
+			}
+		}
+	else
+		{
+		n = 0;
+		}
+
+	options->slideshow.delay = static_cast<gint>(n * 10.0 + 0.01);
+}
+
+void file_load_no_raise(const gchar *text, GApplicationCommandLine *app_command_line)
+{
+	gchar *filename;
+	gchar *tilde_filename;
+	g_autofree gchar *tmp_file = nullptr;
+
+	tmp_file = download_web_file(text, TRUE, nullptr);
+
+	if (!tmp_file)
+		{
+		tilde_filename = expand_tilde(text);
+		}
+	else
+		{
+		tilde_filename = g_strdup(tmp_file);
+		}
+		
+	filename = set_cwd(tilde_filename, app_command_line);
+
+	if (isfile(filename))
+		{
+		if (file_extension_match(filename, GQ_COLLECTION_EXT))
+			{
+			collection_window_new(filename);
+			}
+		else
+			{
+			layout_set_path(lw_id, filename);
+			}
+		}
+	else if (isdir(filename))
+		{
+		layout_set_path(lw_id, filename);
+		}
+	else
+		{
+		/* shoould not happen */
+		g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " does not exist\n",  filename);
+		}
+
+	g_free(filename);
+	g_free(tilde_filename);
+}
+
+void gq_file(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+
+	gchar *text = nullptr;
+	g_variant_dict_lookup(command_line_options_dict, "file", "&s", &text);
+
+	if (text)
+		{
+		file_load_no_raise(text, app_command_line);
+		gtk_window_present(GTK_WINDOW(lw_id->window));
+		}
+}
+
+void gq_File(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "File", "&s", &text);
+
+	file_load_no_raise(text, app_command_line);
+}
+
+void gq_first(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	layout_image_first(lw_id);
+}
+
+void gq_fullscreen(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	layout_image_full_screen_toggle(lw_id);
+}
+
+void gq_geometry(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar **geometry;
+	gchar *text;
+
+	g_variant_dict_lookup(command_line_options_dict, "geometry", "&s", &text);
+
+	if (text[0] == '+')
+		{
+		geometry = g_strsplit_set(text, "+", 3);
+		if (geometry[1] != nullptr && geometry[2] != nullptr )
+			{
+			gq_gtk_window_move(GTK_WINDOW(lw_id->window), atoi(geometry[1]), atoi(geometry[2]));
+			}
+		}
+	else
+		{
+		geometry = g_strsplit_set(text, "+x", 4);
+		if (geometry[0] != nullptr && geometry[1] != nullptr)
+			{
+			gtk_window_resize(GTK_WINDOW(lw_id->window), atoi(geometry[0]), atoi(geometry[1]));
+			}
+		if (geometry[2] != nullptr && geometry[3] != nullptr)
+			{
+			/* There is an occasional problem with a window_move immediately after a window_resize */
+			g_idle_add(wait_cb, GINT_TO_POINTER((atoi(geometry[2]) << 16) + atoi(geometry[3])));
+			}
+		}
+
+	g_strfreev(geometry);
+}
+
+void gq_get_collection(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "get-collection", "&s", &text);
+
+	gboolean remote_instance;
+	remote_instance = g_application_command_line_get_is_remote(app_command_line);
+
+	GString *contents = g_string_new(nullptr);
+
+	if (is_collection(text))
+		{
+		collection_contents(text, &contents);
+		g_application_command_line_print(app_command_line, "%s%c",  contents->str, print0 ? 0 : '\n');
+		}
+	else
+		{
+		g_application_command_line_print(app_command_line, "%s%s%s%s%s", "Collection ", BOLD_ON, text, BOLD_OFF, " does not exist\n");
+		}
+
+	g_string_free(contents, TRUE);
+
+	if (!remote_instance)
+		{
+		g_application_quit(G_APPLICATION(app));
+		}
+}
+
+void gq_get_collection_list(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "get-collection-list", "&s", &text);
+
+	GList *collection_list = nullptr;
+	GList *work;
+	GString *out_string = g_string_new(nullptr);
+
+	collect_manager_list(&collection_list, nullptr, nullptr);
+
+	work = collection_list;
+	while (work)
+		{
+		auto collection_name = static_cast<const gchar *>(work->data);
+		out_string = g_string_append(out_string, collection_name);
+		out_string = g_string_append_c(out_string, print0 ? 0 : '\n');
+
+		work = work->next;
+		}
+
+	g_application_command_line_print(app_command_line, "%s%c", out_string->str, print0 ? 0 : '\n');
+
+	g_list_free_full(collection_list, g_free);
+	g_string_free(out_string, TRUE);
+}
+
+void gq_get_destination(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	remote_command(app, app_command_line, "get-selection");
+
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "get-destination", "&s", &text);
+
+	gchar *filename = expand_tilde(text);
+	FileData *fd = file_data_new_group(filename);
+
+	if (fd->change && fd->change->dest)
+		{
+		g_application_command_line_print(app_command_line, "%s",  fd->change->dest);
+		}
+
+	g_free(filename);
+}
+
+void gq_get_file_info(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
+{
+	gchar *filename;
+	FileData *fd;
+	gchar *country_name;
+	gchar *country_code;
+	gchar *timezone;
+	gchar *local_time;
+	GString *out_string;
+	FileFormatClass format_class;
+
+	remote_command(app, app_command_line, "get-file-info");
+
+	if (!layout_valid(&lw_id)) return;
+
+	if (image_get_path(lw_id->image))
+		{
+		filename = g_strdup(image_get_path(lw_id->image));
+
+		fd = file_data_new_group(filename);
+		out_string = g_string_new(nullptr);
+
+		if (fd->pixbuf)
+			{
+DEBUG_0("       "    );
+			format_class = filter_file_get_class(image_get_path(lw_id->image));
+			}
+		else
+			{
+DEBUG_0("       "    );
+			format_class = FORMAT_CLASS_UNKNOWN;
+			}
+
+		g_string_append_printf(out_string, _("Class: %s\n"), format_class_list[format_class]);
+
+		if (fd->page_total > 1)
+			{
+			g_string_append_printf(out_string, _("Page no: %d/%d\n"), fd->page_num + 1, fd->page_total);
+			}
+
+		if (fd->exif)
+			{
+			country_name = exif_get_data_as_text(fd->exif, "formatted.countryname");
+			if (country_name)
+				{
+				g_string_append_printf(out_string, _("Country name: %s\n"), country_name);
+				g_free(country_name);
+				}
+
+			country_code = exif_get_data_as_text(fd->exif, "formatted.countrycode");
+			if (country_name)
+				{
+				g_string_append_printf(out_string, _("Country code: %s\n"), country_code);
+				g_free(country_code);
+				}
+
+			timezone = exif_get_data_as_text(fd->exif, "formatted.timezone");
+			if (timezone)
+				{
+				g_string_append_printf(out_string, _("Timezone: %s\n"), timezone);
+				g_free(timezone);
+				}
+
+			local_time = exif_get_data_as_text(fd->exif, "formatted.localtime");
+			if (local_time)
+				{
+				g_string_append_printf(out_string, ("Local time: %s\n"), local_time);
+				g_free(local_time);
+				}
+			}
+
+		g_application_command_line_print(app_command_line, "%s%c", out_string->str, print0 ? 0 : '\n');
+		g_string_free(out_string, TRUE);
+		file_data_unref(fd);
+		g_free(filename);
+		}
+}
+
+
+
+
+
+void get_filelist(GApplicationCommandLine *app_command_line, const gchar *text, gboolean recurse)
+{
+	GList *list = nullptr;
+	FileFormatClass format_class;
+	FileData *dir_fd;
+	FileData *fd;
+	GList *work;
+	gchar *tilde_filename;
+
+	if (strcmp(text, "") == 0)
+		{
+		if (layout_valid(&lw_id))
+			{
+			dir_fd = file_data_new_dir(lw_id->dir_fd->path);
+			}
+		else
+			{
+			return;
+			}
+		}
+	else
+		{
+		tilde_filename = expand_tilde(text);
+		if (isdir(tilde_filename))
+			{
+			dir_fd = file_data_new_dir(tilde_filename);
+			}
+		else
+			{
+			g_free(tilde_filename);
+			return;
+			}
+		g_free(tilde_filename);
+		}
+
+	if (recurse)
+		{
+		list = filelist_recursive(dir_fd);
+		}
+	else
+		{
+		filelist_read(dir_fd, &list, nullptr);
+		}
+
+	GString *out_string = g_string_new(nullptr);
+	work = list;
+	while (work)
+		{
+		fd = static_cast<FileData *>(work->data);
+		g_string_append(out_string, fd->path);
+		format_class = filter_file_get_class(fd->path);
+
+		switch (format_class)
+			{
+			case FORMAT_CLASS_IMAGE:
+				out_string = g_string_append(out_string, "    Class: Image");
+				break;
+			case FORMAT_CLASS_RAWIMAGE:
+				out_string = g_string_append(out_string, "    Class: RAW image");
+				break;
+			case FORMAT_CLASS_META:
+				out_string = g_string_append(out_string, "    Class: Metadata");
+				break;
+			case FORMAT_CLASS_VIDEO:
+				out_string = g_string_append(out_string, "    Class: Video");
+				break;
+			case FORMAT_CLASS_COLLECTION:
+				out_string = g_string_append(out_string, "    Class: Collection");
+				break;
+			case FORMAT_CLASS_DOCUMENT:
+				out_string = g_string_append(out_string, "    Class: Document");
+				break;
+			case FORMAT_CLASS_ARCHIVE:
+				out_string = g_string_append(out_string, "    Class: Archive");
+				break;
+			case FORMAT_CLASS_UNKNOWN:
+				out_string = g_string_append(out_string, "    Class: Unknown");
+				break;
+			default:
+				out_string = g_string_append(out_string, "    Class: Unknown");
+				break;
+			}
+		out_string = g_string_append(out_string, "\n");
+		work = work->next;
+		}
+
+	g_application_command_line_print(app_command_line, "%s\n",  out_string->str);
+
+	g_string_free(out_string, TRUE);
+	filelist_free(list);
+	file_data_unref(dir_fd);
+}
+
+void gq_get_filelist(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "get-filelist", "&s", &text);
+
+	get_filelist(app_command_line, text, FALSE);
+}
+
+
+void gq_get_filelist_recurse(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "get-filelist-recurse", "&s", &text);
+
+	get_filelist(app_command_line, text, TRUE);
+}
+
+void gq_get_rectangle(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
+{
+	remote_command(app, app_command_line, "get-rectangle");
+
+	if (!options->draw_rectangle) return;
+	if (!layout_valid(&lw_id)) return;
+
+	auto *pr = PIXBUF_RENDERER(lw_id->image->pr);
+	if (!pr) return;
+
+	gint x1;
+	gint y1;
+	gint x2;
+	gint y2;
+
+	image_get_rectangle(x1, y1, x2, y2);
+
+	gchar *rectangle_info = g_strdup_printf(_("%dx%d+%d+%d"),
+	                                        std::abs(x1 - x2),
+	                                        std::abs(y1 - y2),
+	                                        std::min(x1, x2),
+	                                        std::min(y1, y2));
+
+	g_application_command_line_print(app_command_line, "%s\n", rectangle_info);
+
+	g_free(rectangle_info);
+}
+
+void gq_get_render_intent(GtkApplication *app, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
+{
+	gchar *render_intent;
+
+	remote_command(app, app_command_line, "get-render-intent");
+
+	switch (options->color_profile.render_intent)
+		{
+		case 0:
+			render_intent = g_strdup("Perceptual");
+			break;
+		case 1:
+			render_intent = g_strdup("Relative Colorimetric");
+			break;
+		case 2:
+			render_intent = g_strdup("Saturation");
+			break;
+		case 3:
+			render_intent = g_strdup("Absolute Colorimetric");
+			break;
+		default:
+			render_intent = g_strdup("none");
+			break;
+		}
+
+	g_application_command_line_print(app_command_line, "%s\n",  render_intent);
+
+	g_free(render_intent);
+}
+
+void gq_get_selection(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
+{
+	remote_command(app, app_command_line, "get-selection");
+
+	if (!layout_valid(&lw_id)) return;
+
+	GList *selected = layout_selection_list(lw_id);  // Keep copy to free.
+	GString *out_string = g_string_new(nullptr);
+
+	GList *work = selected;
+	while (work)
+		{
+		auto fd = static_cast<FileData *>(work->data);
+		g_assert(fd->magick == FD_MAGICK);
+
+		g_string_append_printf(out_string, "%s    %s\n",
+		                       fd->path,
+		                       format_class_list[filter_file_get_class(fd->path)]);
+
+		work = work->next;
+		}
+
+	g_application_command_line_print(app_command_line, "%s\n",  out_string->str);
+
+	filelist_free(selected);
+	g_string_free(out_string, TRUE);
+}
+
+
+void gq_get_sidecars(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	remote_command(app, app_command_line, "get-sidecars");
+
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "file", "&s", &text);
+	gchar *filename = expand_tilde(text);
+	FileData *fd = file_data_new_group(filename);
+
+	GList *work;
+	if (fd->parent)
+		{
+		fd = fd->parent;
+		}
+
+	g_application_command_line_print(app_command_line, "%s\n", fd->path);
+
+	work = fd->sidecar_files;
+
+	while (work)
+		{
+		fd = static_cast<FileData *>(work->data);
+		work = work->next;
+		g_application_command_line_print(app_command_line, "%s\n", fd->path);
+		}
+	g_free(filename);
+}
+
+void gq_grep(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "file", "&s", &text);
+
+	set_regexp(g_strdup(text));
+}
+
+void gq_id(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	remote_command(app, app_command_line, "id=");
+
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "id", "s", &text);
+
+	lw_id = layout_find_by_layout_id(text);
+	if (!lw_id)
+		{
+		g_application_command_line_print(app_command_line, "Layout window ID " BOLD_ON "%s" BOLD_OFF " does not exist\n",text);
+		}
+}
+
+void gq_last(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	layout_image_last(lw_id);
+}
+
+void gq_log_file(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "log-file", "s", &text);
+
+	gchar *pathl;
+	gchar *path = g_strdup(text);
+
+	pathl = path_from_utf8(path);
+	command_line->ssi = secure_open(pathl);
+}
+
+void gq_lua(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+#if HAVE_LUA
+	gchar *result = nullptr;
+	gchar **lua_command;
+	gchar *text;
+
+	remote_command(app, app_command_line, "lua");
+
+	g_variant_dict_lookup(command_line_options_dict, "lua", "&s", &text);
+
+	lua_command = g_strsplit(text, ",", 2);
+
+	if (lua_command[0] && lua_command[1])
+		{
+		FileData *fd = file_data_new_group(lua_command[0]);
+		result = g_strdup(lua_callvalue(fd, lua_command[1], nullptr));
+		if (result)
+			{
+			g_application_command_line_print(app_command_line, "%s\n", result);
+			}
+		else
+			{
+			g_application_command_line_print(app_command_line, _("lua error: no data\n"));
+			}
+		}
+	else
+		{
+		g_application_command_line_print(app_command_line, _("lua error: no data\n"));
+		}
+
+	g_strfreev(lua_command);
+	g_free(result);
+#else
+	g_application_command_line_print(app_command_line, _("Lua is not available\n"));
+#endif
+}
+
+void gq_new_window(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
+{
+	LayoutWindow *lw = nullptr;
+
+	if (!layout_valid(&lw)) return;
+
+	lw_id = layout_new_from_default();
+
+	layout_set_path(lw_id, g_application_command_line_get_cwd(app_command_line));
+}
+
+void gq_next(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	layout_image_next(lw_id);
+}
+
+void gq_pixel_info(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
+{
+	gchar *pixel_info;
+	gint x_pixel;
+	gint y_pixel;
+	gint width;
+	gint height;
+	gint r_mouse;
+	gint g_mouse;
+	gint b_mouse;
+	gint a_mouse;
+	PixbufRenderer *pr;
+
+	remote_command(app, app_command_line, "pixel-info");
+
+	if (!layout_valid(&lw_id)) return;
+
+	pr = PIXBUF_RENDERER(lw_id->image->pr);
+
+	if (pr)
+		{
+		pixbuf_renderer_get_image_size(pr, &width, &height);
+		if (width < 1 || height < 1) return;
+
+		pixbuf_renderer_get_mouse_position(pr, &x_pixel, &y_pixel);
+
+		if (x_pixel >= 0 && y_pixel >= 0)
+			{
+			pixbuf_renderer_get_pixel_colors(pr, x_pixel, y_pixel, &r_mouse, &g_mouse, &b_mouse, &a_mouse);
+
+			if (gdk_pixbuf_get_has_alpha(pr->pixbuf))
+				{
+				pixel_info = g_strdup_printf(_("[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"),
+				x_pixel, y_pixel,
+				r_mouse, g_mouse, b_mouse, a_mouse);
+				}
+			else
+				{
+				pixel_info = g_strdup_printf(_("[%d,%d]: RGB(%3d,%3d,%3d)"),
+				x_pixel, y_pixel,
+				r_mouse, g_mouse, b_mouse);
+				}
+
+			g_application_command_line_print(app_command_line, "%s\n", pixel_info);
+
+			g_free(pixel_info);
+			}
+		else
+			{
+			return;
+			}
+		}
+	else
+		{
+		return;
+		}
+}
+
+void gq_print0(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	print0 = TRUE;
+
+}
+
+gboolean gq_quit_idle_cb(gpointer)
+{
+	exit_program();
+
+	return G_SOURCE_REMOVE;
+}
+
+void gq_quit(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	/* Schedule exit when idle. If done directly this error is generated:
+	 * GDBus.Error:org.freedesktop.DBus.Error.NoReply: Message recipient disconnected from message bus without replying
+	 */
+	g_idle_add(gq_quit_idle_cb, nullptr);
+}
+
+void gq_raise(GtkApplication *, GApplicationCommandLine *,GVariantDict *, GList *)
+{
+	gtk_window_present(GTK_WINDOW(lw_id->window));
+}
+
+void gq_selection_add(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "selection-add", "&s", &text);
+
+	FileData *fd_to_select = nullptr;
+	if (strcmp(text, "") == 0)
+		{
+		// No file specified, use current fd.
+		fd_to_select = layout_image_get_fd(lw_id);
+		}
+	else
+		{
+		// Search through the current file list for a file matching the specified path.
+		// "Match" is either a basename match or a file path match.
+		gchar *path = expand_tilde(text);
+		gchar *filename = g_path_get_basename(path);
+		gchar *slash_plus_filename = g_strdup_printf("%s%s", G_DIR_SEPARATOR_S, filename);
+
+		GList *file_list = layout_list(lw_id);
+		for (GList *work = file_list; work && !fd_to_select; work = work->next)
+			{
+			auto fd = static_cast<FileData *>(work->data);
+			if (!strcmp(path, fd->path) || g_str_has_suffix(fd->path, slash_plus_filename))
+				{
+				fd_to_select = file_data_ref(fd);
+				continue;  // will exit loop.
+				}
+
+			for (GList *sidecar = fd->sidecar_files; sidecar && !fd_to_select; sidecar = sidecar->next)
+				{
+				auto side_fd = static_cast<FileData *>(sidecar->data);
+				if (!strcmp(path, side_fd->path)
+				        || g_str_has_suffix(side_fd->path, slash_plus_filename))
+					{
+					fd_to_select = file_data_ref(side_fd);
+					continue;  // will exit both nested loops.
+					}
+				}
+			}
+
+		if (!fd_to_select)
+			{
+			g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " is not in the current folder " BOLD_ON "%s" BOLD_OFF "%c", filename, g_application_command_line_get_cwd(app_command_line), print0 ? 0 : '\n');
+			}
+
+		filelist_free(file_list);
+		g_free(slash_plus_filename);
+		g_free(filename);
+		g_free(path);
+		}
+
+	if (fd_to_select)
+		{
+		GList *to_select = g_list_append(nullptr, fd_to_select);
+		// Using the "_list" variant doesn't clear the existing selection.
+		layout_select_list(lw_id, to_select);
+		filelist_free(to_select);
+		}
+}
+
+void gq_selection_clear(GtkApplication *app, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
+{
+	remote_command(app, app_command_line, "selection-clear");
+
+	layout_select_none(lw_id);  // Checks lw_id validity internally.
+}
+
+void gq_selection_remove(GtkApplication *app, GApplicationCommandLine *app_command_line,GVariantDict *command_line_options_dict, GList *)
+{
+	remote_command(app, app_command_line, "get-remove");
+
+	gchar *text = nullptr;
+	g_variant_dict_lookup(command_line_options_dict, "selectin-remove", "s", &text);
+
+	GList *selected = layout_selection_list(lw_id);  // Keep copy to free.
+	if (!selected)
+		{
+		g_application_command_line_print(app_command_line, _("remote sent --selection-remove with empty selection.\n"));
+
+		return;
+		}
+
+	FileData *fd_to_deselect = nullptr;
+	gchar *path = nullptr;
+	gchar *filename = nullptr;
+	gchar *slash_plus_filename = nullptr;
+
+	if (!text || strcmp(text, "") == 0)
+		{
+		// No file specified, use current fd.
+		fd_to_deselect = layout_image_get_fd(lw_id);
+		if (!fd_to_deselect)
+			{
+			filelist_free(selected);
+			g_application_command_line_print(app_command_line, _("remote sent \"--selection-remove:\" with no current image\n"));
+			return;
+			}
+		}
+	else
+		{
+		// Search through the selection list for a file matching the specified path.
+		// "Match" is either a basename match or a file path match.
+		path = expand_tilde(text);
+		filename = g_path_get_basename(path);
+		slash_plus_filename = g_strdup_printf("%s%s", G_DIR_SEPARATOR_S, filename);
+		}
+
+	GList *prior_link = nullptr;  // Stash base for link removal to avoid a second traversal.
+	GList *link_to_remove = nullptr;
+	for (GList *work = selected; work; prior_link = work, work = work->next)
+		{
+		auto fd = static_cast<FileData *>(work->data);
+		if (fd_to_deselect)
+			{
+			if (fd == fd_to_deselect)
+				{
+				link_to_remove = work;
+				break;
+				}
+			}
+		else
+			{
+			// path, filename, and slash_plus_filename should be defined.
+
+			if (!strcmp(path, fd->path) || g_str_has_suffix(fd->path, slash_plus_filename))
+				{
+				link_to_remove = work;
+				break;
+				}
+			}
+		}
+
+	if (!link_to_remove)
+		{
+		if (fd_to_deselect)
+			{
+			g_application_command_line_print(app_command_line, _("remote sent \"--selection-remove=\" but current image is not selected\n"));
+			}
+		else
+			{
+			g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " is not selected\n", filename);
+			}
+		}
+	else
+		{
+		if (link_to_remove == selected)
+			{
+			// Remove first link.
+			selected = g_list_remove_link(selected, link_to_remove);
+			filelist_free(link_to_remove);
+			link_to_remove = nullptr;
+			}
+		else
+			{
+			// Remove a subsequent link.
+			prior_link = g_list_remove_link(prior_link, link_to_remove);
+			filelist_free(link_to_remove);
+			link_to_remove = nullptr;
+			}
+
+		// Re-select all but the deselected item.
+		layout_select_none(lw_id);
+		layout_select_list(lw_id, selected);
+		}
+
+	filelist_free(selected);
+	file_data_unref(fd_to_deselect);
+	g_free(slash_plus_filename);
+	g_free(filename);
+	g_free(path);
+}
+
+void gq_show_log_window(GtkApplication *, GApplicationCommandLine *,GVariantDict *, GList *)
+{
+	log_window_new(lw_id);
+}
+
+void gq_slideshow(GtkApplication *, GApplicationCommandLine *,GVariantDict *, GList *)
+{
+	layout_image_slideshow_toggle(lw_id);
+}
+
+void gq_slideshow_recurse(GtkApplication *, GApplicationCommandLine *,GVariantDict *command_line_options_dict, GList *)
+{
+	GList *list;
+	gchar *tilde_filename;
+	gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, "slideshow-recurse", "&s", &text);
+
+	tilde_filename = expand_tilde(text);
+
+	FileData *dir_fd = file_data_new_dir(tilde_filename);
+	g_free(tilde_filename);
+
+	layout_valid(&lw_id);
+	list = filelist_recursive_full(dir_fd, lw_id->options.file_view_list_sort.method, lw_id->options.file_view_list_sort.ascend, lw_id->options.file_view_list_sort.case_sensitive);
+	file_data_unref(dir_fd);
+	if (!list) return;
+
+	layout_image_slideshow_stop(lw_id);
+	layout_image_slideshow_start_from_list(lw_id, list);
+}
+
+void gq_tell(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
+{
+	gchar *out_string;
+	gchar *collection_name = nullptr;
+
+	remote_command(app, app_command_line, "tell");
+
+	layout_valid(&lw_id);
+
+	if (image_get_path(lw_id->image))
+		{
+		if (lw_id->image->collection && lw_id->image->collection->name)
+			{
+			collection_name = remove_extension_from_path(lw_id->image->collection->name);
+			out_string = g_strconcat(image_get_path(lw_id->image), "    Collection: ", collection_name, NULL);
+			}
+		else
+			{
+			out_string = g_strconcat(image_get_path(lw_id->image), NULL);
+			}
+		}
+	else
+		{
+		out_string = g_strconcat(lw_id->dir_fd->path, G_DIR_SEPARATOR_S, NULL);
+		}
+
+	g_application_command_line_print(app_command_line, "%s%c", out_string, print0 ? 0 : '\n');
+	g_free(collection_name);
+	g_free(out_string);
+}
+
+void gq_tools(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	gboolean popped;
+	gboolean hidden;
+
+	layout_tools_float_get(lw_id, &popped, &hidden) && hidden;
+	layout_tools_float_set(lw_id, popped, !hidden);
+}
+
+void gq_version(GtkApplication *app, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
+{
+	gboolean remote_instance;
+
+	remote_instance = g_application_command_line_get_is_remote(app_command_line);
+
+	g_application_command_line_print(app_command_line, "%s %s GTK%d\n", GQ_APPNAME, VERSION, gtk_major_version);
+
+	if (!remote_instance)
+		{
+		g_application_quit(G_APPLICATION(app));
+		}
+}
+
+void gq_get_window_list(GtkApplication *app, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
+{
+	remote_command(app, app_command_line, "get-window-list");
+
+	GString *window_list;
+
+	window_list = layout_get_window_list();
+
+	g_application_command_line_print(app_command_line, "%s\n", window_list->str);
+
+	g_string_free(window_list, TRUE);
+}
+
+void gq_view(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *filename;
+	gchar *tilde_filename;
+	gchar *text;
+
+	g_variant_dict_lookup(command_line_options_dict, "view", "&s", &text);
+	tilde_filename = expand_tilde(text);
+
+	filename = set_cwd(tilde_filename, app_command_line);
+
+	view_window_new(file_data_new_group(filename));
+	g_free(filename);
+	g_free(tilde_filename);
+}
+
+/**
+ * @brief Parse all non-option command line parameters
+ * @param app_command_line
+ * @returns List of files on command line (*gchar)
+ *
+ */
+GList *directories_collections_files(GtkApplication *app, GApplicationCommandLine *app_command_line)
+{
+	GList *file_list = nullptr;
+	const gchar *current_arg;
+	gboolean remote_instance;
+	gchar **argv=nullptr;
+	gchar *download_web_tmp_file;
+	gchar *real_path;
+	gint argc;
+
+	remote_instance = g_application_command_line_get_is_remote(app_command_line);
+
+	argv = g_application_command_line_get_arguments(app_command_line, &argc);
+
+	for (gint i = 1; i < argc; i++)
+		{
+		current_arg = argv[i];
+		real_path =  realpath(current_arg, nullptr);
+
+		if (isdir(real_path))
+			{
+			layout_set_path(lw_id, real_path);
+			}
+		else if (is_collection(current_arg))
+			{
+
+			CollectWindow *cw;
+
+			const gchar *path = collection_path(current_arg);
+			collection_window_new(path);
+			}
+		else if (isfile(real_path))
+			{
+			file_list = g_list_append(file_list, real_path);
+			}
+		else
+			{
+			download_web_tmp_file = download_web_file(current_arg, FALSE, nullptr);
+
+			if (download_web_tmp_file)
+				{
+				file_list = g_list_append(file_list, download_web_tmp_file);
+				}
+			else
+				{
+				g_application_command_line_print(app_command_line, "%s%s%s%s%s", "Unknown parameter: ", BOLD_ON, current_arg, BOLD_OFF, "\n");
+				if (!remote_instance)
+					{
+					g_application_quit(G_APPLICATION(app));
+					}
+				}
+			}
+		}
+
+	return file_list;
+}
+
+/**
+ * @brief Process command line file or dir parameters
+ * @param file_list (*gchar)
+ *
+ */
+void process_files(GList *file_list)
+{
+	if (file_list)
+		{
+		GList *work;
+		gboolean multiple_dirs = FALSE;
+		work = file_list;
+
+		gchar *basepath;
+		basepath = g_path_get_dirname(static_cast<const gchar *>(work->data));
+		while (work)
+			{
+			gchar *newpath;
+			newpath = g_path_get_dirname(static_cast<const gchar *>(work->data));
+			if (g_strcmp0(newpath, basepath) != 0)
+				{
+				multiple_dirs = TRUE;
+				break;
+				}
+			g_free(newpath);
+			work = work->next;
+			}
+
+		if (multiple_dirs)
+			{
+			CollectWindow *cw;
+
+			cw = collection_window_new(nullptr);
+			CollectionData *cd = nullptr;
+			cd = cw->cd;
+			g_free(cd->path);
+			cd->path = nullptr;
+
+			work = file_list;
+			while (work)
+				{
+				collection_add(cd, file_data_new_no_grouping((gchar *)(work->data)), FALSE);
+				work = work->next;
+				}
+			}
+		else
+			{
+			GList *work;
+			GList *selected;
+			FileData *fd;
+			layout_valid(&lw_id);
+
+			selected = nullptr;
+			work = file_list;
+			layout_set_path(lw_id, g_path_get_dirname(static_cast<const gchar *>(work->data)));
+			while (work)
+				{
+				fd = file_data_new_simple(static_cast<gchar *>(work->data));
+				selected = g_list_append(selected, fd);
+				layout_list_sync_fd(lw_id, fd);
+				file_data_unref(fd);
+				work = work->next;
+				}
+			layout_select_list(lw_id, selected);
+			}
+		}
+}
+
+/* print0 and id are first so that they can affect other command line entries */
+CommandLineOptionEntry command_line_options[] =
+{
+	{ "print0", gq_print0 },
+	{ "id", gq_id },
+	{ "action", gq_action },
+	{ "action-list", gq_action_list },
+	{ "back", gq_back },
+	{ "cache-metadata", gq_cache_metadata },
+	{ "cache-render", gq_cache_render },
+	{ "cache-render-recurse", gq_cache_render_recurse },
+	{ "cache-render-shared", gq_cache_render_shared },
+	{ "cache-render-shared-recurse", gq_cache_render_shared_recurse },
+	{ "cache-shared", gq_cache_shared },
+	{ "cache-thumbs", gq_cache_thumbs },
+	{ "close-window", gq_close_window },
+	{ "config-load", gq_config_load },
+	{ "debug", gq_debug },
+	{ "delay", gq_delay },
+	{ "file", gq_file },
+	{ "File", gq_File },
+	{ "first", gq_first },
+	{ "fullscreen", gq_fullscreen },
+	{ "geometry", gq_geometry },
+	{ "get-collection", gq_get_collection },
+	{ "get-collection-list", gq_get_collection_list },
+	{ "get-destination", gq_get_destination },
+	{ "get-file-info", gq_get_file_info },
+	{ "get-filelist", gq_get_filelist },
+	{ "get-filelist-recurse", gq_get_filelist_recurse },
+	{ "get-rectangle", gq_get_rectangle },
+	{ "get-render-intent", gq_get_render_intent },
+	{ "get-render-intent", gq_get_render_intent },
+	{ "get-selection", gq_get_selection },
+	{ "get-sidecars", gq_get_sidecars },
+	{ "get-window-list", gq_get_window_list },
+	{ "grep", gq_grep },
+	{ "last", gq_last },
+	{ "log-file", gq_log_file },
+	{ "lua", gq_lua },
+	{ "new-window", gq_new_window },
+	{ "next", gq_next },
+	{ "pixel-info", gq_pixel_info },
+	{ "quit", gq_quit },
+	{ "raise", gq_raise },
+	{ "selection-add", gq_selection_add },
+	{ "selection-clear", gq_selection_clear },
+	{ "selection-remove", gq_selection_remove },
+	{ "show-log-window", gq_show_log_window },
+	{ "slideshow-recurse", gq_slideshow_recurse },
+	{ "slideshow", gq_slideshow },
+	{ "tell", gq_tell },
+	{ "tools", gq_tools },
+	{ "version", gq_version },
+	{ "view", gq_view },
+	{ nullptr, nullptr }
+};
+
+/*
+ * Cache Maintenance
+ */
+
+void gq_cm_quit(GtkApplication *app, GApplicationCommandLine *, GVariantDict *, GList *)
+{
+	g_application_withdraw_notification(G_APPLICATION(app), "cache_maintenance");
+
+	g_application_quit(G_APPLICATION(app));
+}
+
+void gq_cm_dir(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+{
+	gboolean remote_instance;
+	gchar *buf_config_file;
+	gchar *folder_path = nullptr;
+	gchar *path;
+	gchar *rc_path;
+	gint diff_count;
+	gsize i = 0;
+	gsize size;
+
+	remote_instance = g_application_command_line_get_is_remote(app_command_line);
+
+	if (remote_instance)
+		{
+		g_application_command_line_print(app_command_line, _("Cache Maintenance is already running\n"));
+
+		return;
+		}
+
+	g_variant_dict_lookup(command_line_options_dict, "cache-maintenance", "&s", &path);
+
+	folder_path = expand_tilde(path);
+
+	if (isdir(folder_path))
+		{
+		rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, nullptr);
+
+		if (isfile(rc_path))
+			{
+			if (g_file_get_contents(rc_path, &buf_config_file, &size, nullptr))
+				{
+				while (i < size)
+					{
+					diff_count = strncmp("</global>", &buf_config_file[i], 9);
+					if (diff_count == 0)
+						{
+						break;
+						}
+					i++;
+					}
+				/* Load only the <global> section */
+				load_config_from_buf(buf_config_file, i + 9, FALSE);
+
+				if (options->thumbnails.enable_caching)
+					{
+					cache_maintenance(app, folder_path);
+					}
+				else
+					{
+					g_autofree gchar *notification_message = g_strdup(_("Caching not enabled"));
+					cache_maintenance_notification(app, notification_message, FALSE);
+					g_application_command_line_print(app_command_line, _("Caching not enabled\n"));
+
+					exit(EXIT_FAILURE);
+					}
+				g_free(buf_config_file);
+				}
+			else
+				{
+				g_autofree gchar *notification_message = g_strconcat(_("Cannot load "), rc_path, nullptr);
+				cache_maintenance_notification(app, notification_message, FALSE);
+				g_application_command_line_print(app_command_line, "%s%s\n", _("Cannot load "), rc_path);
+
+				exit(EXIT_FAILURE);
+				}
+			}
+		else
+			{
+			g_autofree gchar *notification_message = g_strconcat(_("Configuration file path "), rc_path, _(" is not a file"), NULL, nullptr);
+			cache_maintenance_notification(app, notification_message, FALSE);
+			g_application_command_line_print(app_command_line, "%s%s%s\n", _("Configuration file path "), rc_path, _(" is not a file"));
+
+			exit(EXIT_FAILURE);
+			}
+		g_free(rc_path);
+		}
+	else
+		{
+		g_autofree gchar *notification_message = g_strconcat("\"", folder_path, "\"", _(" is not a folder"), nullptr);
+		cache_maintenance_notification(app, notification_message, FALSE);
+		g_application_command_line_print(app_command_line, "%s%s%s%s\n", "\"", folder_path, "\"", _(" is not a folder"));
+
+		exit(EXIT_FAILURE);
+		}
+
+	g_free(folder_path);
+}
+
+CommandLineOptionEntry command_line_options_cache_maintenance[] =
+{
+	{ "cache-maintenance", gq_cm_dir },
+	{ "quit", gq_cm_quit },
+	{ nullptr, nullptr }
+};
+
+} // namespace
+
+gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer )
+{
+	GVariantDict* command_line_options_dict;
+	gint i;
+	GList *file_list = nullptr;
+
+	/* These values are used for the rest of this command line */
+	/* Make lw_id point to current window */
+	layout_valid(&lw_id);
+	print0 = FALSE;
+
+	command_line_options_dict = g_application_command_line_get_options_dict(app_command_line);
+
+	/* Parse other command line arguments, which should be files, URLs, directories
+	 * or collections. An option handler might clear this file list. */
+	file_list = directories_collections_files(app, app_command_line);
+
+	/* Execute the command line options */
+	i = 0;
+	while (command_line_options[i].func != nullptr)
+		{
+		if (g_variant_dict_contains(command_line_options_dict, command_line_options[i].option_name))
+			{
+			command_line_options[i].func(app, app_command_line, command_line_options_dict, file_list);
+			}
+
+		i++;
+		}
+
+	process_files(file_list);
+
+	return EXIT_SUCCESS;
+}
+
+gint process_command_line_cache_maintenance(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer)
+{
+	gboolean option_found = FALSE;
+	gint i;
+	GVariantDict* command_line_options_dict;
+
+	command_line_options_dict = g_application_command_line_get_options_dict(app_command_line);
+
+	/* Execute the command line options */
+	i = 0;
+	while (command_line_options_cache_maintenance[i].func != nullptr)
+		{
+		if (g_variant_dict_contains(command_line_options_dict, command_line_options_cache_maintenance[i].option_name))
+			{
+			command_line_options_cache_maintenance[i].func(app, app_command_line, command_line_options_dict, nullptr);
+
+			option_found = TRUE;
+			}
+
+		i++;
+		}
+
+	if (!option_found)
+		{
+		g_application_command_line_print(app_command_line, "%s", _("No option specified\n"));
+		cache_maintenance_notification(app, _("No option specified"), FALSE);
+
+		g_application_quit(G_APPLICATION(app));
+		}
+
+	return 0;
+}
+
+/* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
