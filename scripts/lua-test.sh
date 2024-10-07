@@ -26,6 +26,8 @@
 ##
 ## Create a basic image and run all lua built-in functions on it.
 ## The image file and the Lua test file are created within this script.
+##
+## @FIXME Running on GitHub gives additional dbind-WARNINGs. The data required is the last n lines.
 
 geeqie_exe="$1"
 
@@ -63,7 +65,7 @@ printf  "%s" "$lua_test" > "$lua_test_file"
 xvfb-run --auto-servernum "$geeqie_exe" &
 
 # Wait for remote to initialize
-while [ ! -e "$config_home/geeqie/.command" ] ;
+while [ ! -e "$config_home/geeqie/layouts" ] ;
 do
 	sleep 1
 done
@@ -71,8 +73,8 @@ done
 sleep 2
 
 base_lua=$(basename "$lua_test_file")
-result=$(xvfb-run --auto-servernum "$geeqie_exe" --remote --lua="$lua_test_image","$base_lua")
-xvfb-run --auto-servernum "$geeqie_exe" --remote --quit
+result=$(xvfb-run --auto-servernum "$geeqie_exe" --lua="$lua_test_image","$base_lua")
+xvfb-run --auto-servernum "$geeqie_exe" --quit
 
 ## @FIXME Running on GitHub gives additional dbind-WARNINGs. The data required is the last n lines.
 result_tail=$(printf "%s" "$result" | tail --lines=7)

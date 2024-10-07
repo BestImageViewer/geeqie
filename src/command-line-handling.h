@@ -1,8 +1,7 @@
 /*
- * Copyright (C) 2004 John Ellis
- * Copyright (C) 2008 - 2016 The Geeqie Team
+ * Copyright (C) 2024 The Geeqie Team
  *
- * Author: John Ellis
+ * Author: Colin Clark
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,25 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef CACHE_MAINT_H
-#define CACHE_MAINT_H
+#ifndef COMMAND_LINE_HANDLING_H
+#define COMMAND_LINE_HANDLING_H
 
-#include <glib.h>
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
-
-class FileData;
-
-void cache_notify_cb(FileData *fd, NotifyType type, gpointer data);
-void cache_manager_show();
-
-void cache_maintain_home_remote(GtkApplication *app, gboolean metadata, gboolean clear, GDestroyNotify func);
-void cache_manager_standard_process_remote(gboolean clear);
-void cache_manager_render_remote(GtkApplication *app, const gchar *path, gboolean recurse, gboolean local, GSourceFunc destroy_func);
-void cache_maintenance(GtkApplication *app, const gchar *path);
-
-void cache_maintenance_notification(GtkApplication *app, const gchar *message, gboolean show_quit_button);
+gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer data);
+gint process_command_line_cache_maintenance(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer data);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

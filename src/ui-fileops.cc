@@ -947,8 +947,19 @@ static void download_web_file_cancel_button_cb(GenericDialog *, gpointer data)
 	g_cancellable_cancel(web->cancellable);
 }
 
-gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
+/**
+ * @brief Determine if file is a web URL
+ * @param text File name to check
+ * @param minimized
+ * @param data Layout window or null
+ * @returns Full path to the created temporary file or null
+ *
+ * If the file is a web file, start a background load to a temporary file.
+ */
+gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data)
 {
+	gchar *tmp_file_path = nullptr;
+
 	g_autofree gchar *scheme = g_uri_parse_scheme(text);
 	if (g_strcmp0("http", scheme) != 0 && g_strcmp0("https", scheme) != 0)
 		{
@@ -969,7 +980,7 @@ gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 	if (error)
 		{
 		log_printf("Error: could not create temporary file n%s\n", error->message);
-		return FALSE;
+		return nullptr;
 		}
 
 	auto *web = g_new0(WebData, 1);
@@ -997,7 +1008,7 @@ gboolean download_web_file(const gchar *text, gboolean minimized, gpointer data)
 	web->cancellable = g_cancellable_new();
 	g_file_copy_async(web->web_file, web->tmp_g_file, G_FILE_COPY_OVERWRITE, G_PRIORITY_LOW, web->cancellable, web_file_progress_cb, web, web_file_async_ready_cb, web);
 
-	return TRUE;
+	return g_file_get_path(web->tmp_g_file);
 }
 
 gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error)

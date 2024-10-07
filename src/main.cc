@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <cctype>
 #include <clocale>
 #include <csignal>
 #include <cstdio>
@@ -59,7 +60,7 @@
 #include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
-#include "compat.h"
+#include "command-line-handling.h"
 #include "debug.h"
 #include "exif.h"
 #include "filedata.h"
@@ -67,7 +68,6 @@
 #include "glua.h"
 #include "histogram.h"
 #include "history-list.h"
-#include "image.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"
@@ -75,11 +75,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "metadata.h"
-#include "misc.h"
-#include "options.h"
 #include "pixbuf-util.h"
-#include "rcfile.h"
-#include "remote.h"
 #include "secure-save.h"
 #include "third-party/whereami.h"
 #include "thumb.h"
@@ -91,7 +87,6 @@
 #endif
 
 gboolean thumb_format_changed = FALSE;
-static RemoteConnection *remote_connection = nullptr;
 
 gchar *gq_prefix;
 gchar *gq_localedir;
@@ -103,8 +98,106 @@ gchar *gq_executable_path;
 gchar *desktop_file_template;
 gchar *instance_identifier;
 
+namespace
+{
+
+const gchar *option_context_description = _(" \
+All other command line parameters are used as plain files if they exist, or a URL or a folder.\n \
+The name of a collection, with or without either path or extension (.gqv) may be used.\n\n \
+If more than one folder is on the command line, only the last will be used.\n\n \
+If more than one file is on the command line:\n \
+    If they are in the same folder, that folder will be opened and those files will be selected.\n \
+    If they are not in the same folder, a new Collection containing those files will be opened.\n\n \
+To run Geeqie as a new instance, use:\n \
+GQ_NEW_INSTANCE=y[es] geeqie\n \
+Normally a single set of configuration files is used for all instances.\n \
+However, the environment variables XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME\n \
+can be used to modify this behavior on an individual basis e.g.\n \
+XDG_CONFIG_HOME=/tmp/a XDG_CACHE_HOME=/tmp/b GQ_NON_UNIQUE= geeqie\n\n \
+To disable Clutter use:\n \
+GQ_DISABLE_CLUTTER=y[es] geeqie\n\n \
+To run or stop Geeqie in cache maintenance (non-GUI) mode use:\n \
+GQ_CACHE_MAINTENANCE=y[es] geeqie --help (This is disabled in this version and will be fixed in a future version.)\n\n \
+User manual: https://www.geeqie.org/help/GuideIndex.html\n \
+           : https://www.geeqie.org/help-pdf/help.pdf");
+
+const gchar *option_context_description_cache_maintenance = _(" \
+This will recursively remove orphaned thumbnails and .sim files, and create thumbnails\n \
+and similarity data for all images found under FOLDER.\n \
+It may also be called from cron or anacron thus enabling automatic updating of the cached\n \
+data for all your images.\n\n \
+User manual: https://www.geeqie.org/help/GuideIndex.html\n \
+           : https://www.geeqie.org/help-pdf/help.pdf");
+
+GOptionEntry command_line_options[] =
+{
+	{ "action"                    ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("execute keyboard action (See Help/Reference/Remote Keyboard Actions)")        , "<ACTION>" },
+	{ "action-list"               ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("list available keyboard actions (some are redundant)")                        , nullptr },
+	{ "back"                      , 'b', 0, G_OPTION_ARG_NONE  , nullptr, _("previous image")                                                              , nullptr },
+	{ "cache-metadata"            ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("clean the metadata cache")                                                    , nullptr },
+	{ "cache-render"              ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("render thumbnails")                                                           , "<folder>" },
+	{ "cache-render-recurse"      ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("render thumbnails recursively")                                               , "<folder>" },
+	{ "cache-render-shared"       ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("render thumbnails (see Help)")                                                , "<folder>" },
+	{ "cache-render-shared-recurse",  0, 0, G_OPTION_ARG_STRING, nullptr, _("render thumbnails recursively (see Help)")                                    , "<folder>" },
+	{ "cache-shared"              ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("clear or clean shared thumbnail cache")                                       , "clean|clear" },
+	{ "cache-thumbs"              ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("clear or clean thumbnail cache")                                              , "clear|clean" },
+	{ "close-window"              ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("close window")                                                                , nullptr },
+	{ "config-load"               ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("load configuration from FILE")                                                , "<FILE>" },
+#ifdef DEBUG
+	{ "debug"                     ,   0, 0, G_OPTION_ARG_INT   , nullptr, _("turn on debug output")                                                        , "[level]" },
+#endif
+	{ "delay"                     , 'd', 0, G_OPTION_ARG_STRING, nullptr, _("set slide show delay to Hrs Mins N.M seconds,")                               , "<[H:][M:][N][.M]>" },
+	{ "file"                      ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL bring Geeqie window to the top")                             , "<FILE>|<URL>" },
+	{ "File"                      ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL do not bring Geeqie window to the top")                      , "<FILE>|<URL>" },
+	{ "first"                     ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("first image")                                                                 , nullptr },
+	{ "fullscreen"                , 'f', 0, G_OPTION_ARG_NONE  , nullptr, _("start / toggle in full screen mode")                                          , nullptr },
+	{ "geometry"                  ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("set main window location and geometry")                                       , "<W>x<H>[+<XOFF>+<YOFF>]" },
+	{ "get-collection"            ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("get collection content")                                                      , "<COLLECTION>" },
+	{ "get-collection-list"       ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("get collection list")                                                         , nullptr },
+	{ "get-destination"           ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("get destination path of FILE (See Plugins Configuration)")                    , "<FILE>" },
+	{ "get-file-info"             ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("get file info")                                                               , nullptr},
+	{ "get-filelist"              ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("get list of files and class")                                                 , "[<FOLDER>]" },
+	{ "get-filelist-recurse"      ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("get list of files and class recursive")                                       , "[<FOLDER>]" },
+	{ "get-rectangle"             ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("get rectangle coordinates")                                                   , nullptr },
+	{ "get-render-intent"         ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("get render intent")                                                           , nullptr },
+	{ "get-selection"             ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("get list of selected files")                                                  , nullptr },
+	{ "get-sidecars"              ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("get list of sidecars of FILE")                                                , "<FILE>" },
+	{ "get-window-list"           ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("get list of windows")                                                         , nullptr },
+#ifdef DEBUG
+	{ "grep"                      , 'g', 0, G_OPTION_ARG_STRING, nullptr, _("filter debug output")                                                         , "<regexp>" },
+#endif
+	{ "id"                        ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("window id for following commands")                                            , "<ID>" },
+	{ "last"                      ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("last image")                                                                  , nullptr },
+	{ "log-file"                  , 'o', 0, G_OPTION_ARG_STRING, nullptr, _("open collection window for command line")                                     , "<file>" },
+	{ "lua"                       ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("run lua script on FILE")                                                      , "<FILE>,<lua script>" },
+	{ "new-window"                ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("new window")                                                                  , nullptr },
+	{ "next"                      , 'n', 0, G_OPTION_ARG_NONE  , nullptr, _("next image")                                                                  , nullptr },
+	{ "pixel-info"                ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("print pixel info of mouse pointer on current image")                          , nullptr },
+	{ "print0"                    ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("terminate returned data with null character instead of newline")              , nullptr },
+	{ "quit"                      , 'q', 0, G_OPTION_ARG_NONE  , nullptr, _("quit")                                                                        , nullptr },
+	{ "raise"                     ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("bring the Geeqie window to the top")                                          , nullptr },
+	{ "selection-add"             ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("adds the current file (or the specified file) to the current selection")      ,"[<FILE>]" },
+	{ "selection-clear"           ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("clears the current selection")                                                , nullptr },
+	{ "selection-remove"          ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("removes the current file (or the specified file) from the current selection") ,"[<FILE>]" },
+	{ "show-log-window"           , 'w', 0, G_OPTION_ARG_NONE  , nullptr, _("show log window")                                                             , nullptr },
+	{ "slideshow-recurse"         ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("start recursive slide show in FOLDER")                                        ,"<FOLDER>" },
+	{ "slideshow"                 , 's', 0, G_OPTION_ARG_NONE  , nullptr, _("toggle slide show")                                                           , nullptr },
+	{ "tell"                      ,   0, 0, G_OPTION_ARG_NONE  , nullptr, _("print filename [and Collection] of current image")                            , nullptr },
+	{ "tools"                     , 't', 0, G_OPTION_ARG_NONE  , nullptr, _("toggle tools")                                                                , nullptr },
+	{ "version"                   , 'v', 0, G_OPTION_ARG_NONE  , nullptr, _("print version info")                                                          , nullptr },
+	{ "view"                      ,   0, 0, G_OPTION_ARG_STRING, nullptr, _("open FILE in new window")                                                     , "<FILE>"  },
+	{ nullptr                     ,   0, 0, G_OPTION_ARG_NONE  , nullptr, nullptr                                                                          , nullptr },
+};
+
+GOptionEntry command_line_options_cache_maintenance[] =
+{
+	{ "cache-maintenance", 'c', 0, G_OPTION_ARG_STRING, nullptr, _("execute cache maintenance recursively on FOLDER"), "<FOLDER>" },
+	{ "quit"             , 'q', 0, G_OPTION_ARG_NONE  , nullptr, _("stop cache maintenance")                         , nullptr },
+	{ nullptr            ,   0, 0, G_OPTION_ARG_NONE  , nullptr, nullptr                                             , nullptr },
+};
+
 #if defined(SA_SIGINFO)
-static void sig_handler_cb(int signo, siginfo_t *info, void *)
+void sig_handler_cb(int signo, siginfo_t *info, void *)
 {
 	gchar hex_char[16];
 	const gchar *signal_name = nullptr;
@@ -228,434 +321,7 @@ void sig_handler_cb(int)
 }
 #endif /* defined(SA_SIGINFO) */
 
-/*
- *-----------------------------------------------------------------------------
- * command line parser (private) hehe, who needs popt anyway?
- *-----------------------------------------------------------------------------
- */
-
-static void parse_command_line_add_file(const gchar *file_path, gchar **path, gchar **file,
-					GList **list, GList **collection_list)
-{
-	gchar *path_parsed;
-
-	path_parsed = g_strdup(file_path);
-	parse_out_relatives(path_parsed);
-
-	if (file_extension_match(path_parsed, GQ_COLLECTION_EXT))
-		{
-		*collection_list = g_list_append(*collection_list, path_parsed);
-		}
-	else
-		{
-		if (!*path) *path = remove_level_from_path(path_parsed);
-		if (!*file) *file = g_strdup(path_parsed);
-		*list = g_list_prepend(*list, path_parsed);
-		}
-}
-
-static void parse_command_line_add_dir(const gchar *dir, gchar **, gchar **, GList **)
-{
-#if 0
-	/* This is broken because file filter is not initialized yet.
-	*/
-	GList *files;
-	gchar *path_parsed;
-	FileData *dir_fd;
-
-	path_parsed = g_strdup(dir);
-	parse_out_relatives(path_parsed);
-	dir_fd = file_data_new_dir(path_parsed);
-
-
-	if (filelist_read(dir_fd, &files, NULL))
-		{
-		GList *work;
-
-		files = filelist_filter(files, FALSE);
-		files = filelist_sort_path(files);
-
-		work = files;
-		while (work)
-			{
-			FileData *fd = static_cast<FileData *>(work->data);
-			if (!*path) *path = remove_level_from_path(fd->path);
-			if (!*file) *file = g_strdup(fd->path);
-			*list = g_list_prepend(*list, fd);
-
-			work = work->next;
-			}
-
-		g_list_free(files);
-		}
-
-	g_free(path_parsed);
-	file_data_unref(dir_fd);
-#else
-	DEBUG_1("multiple directories specified, ignoring: %s", dir);
-#endif
-}
-
-static void parse_command_line_process_dir(const gchar *dir, gchar **path, gchar **file,
-					   GList **list, gchar **first_dir)
-{
-
-	if (!*list && !*first_dir)
-		{
-		*first_dir = g_strdup(dir);
-		}
-	else
-		{
-		if (*first_dir)
-			{
-			parse_command_line_add_dir(*first_dir, path, file, list);
-			g_free(*first_dir);
-			*first_dir = nullptr;
-			}
-		parse_command_line_add_dir(dir, path, file, list);
-		}
-}
-
-static void parse_command_line_process_file(const gchar *file_path, gchar **path, gchar **file,
-					    GList **list, GList **collection_list, gchar **first_dir)
-{
-
-	if (*first_dir)
-		{
-		parse_command_line_add_dir(*first_dir, path, file, list);
-		g_free(*first_dir);
-		*first_dir = nullptr;
-		}
-	parse_command_line_add_file(file_path, path, file, list, collection_list);
-}
-
-static void show_invalid_parameters_warning_dialog(const gchar *command_line_errors)
-{
-	g_autoptr(GtkWidget) dialog_warning = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
-	                                                             "%s", _("Invalid parameter(s):"));
-	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog_warning), "%s", command_line_errors);
-	gtk_window_set_title(GTK_WINDOW(dialog_warning), GQ_APPNAME);
-	gq_gtk_window_set_keep_above(GTK_WINDOW(dialog_warning), TRUE);
-	gtk_dialog_run(GTK_DIALOG(dialog_warning));
-}
-
-static void parse_command_line(gint argc, gchar *argv[])
-{
-	GList *list = nullptr;
-	GList *remote_list = nullptr;
-	GList *remote_errors = nullptr;
-	gboolean remote_do = FALSE;
-	gchar *first_dir = nullptr;
-	gchar *app_lock;
-	gchar *pwd;
-	gchar *current_dir;
-	gchar *geometry = nullptr;
-
-	command_line = g_new0(CommandLine, 1);
-	command_line->argc = argc;
-	command_line->argv = argv;
-	command_line->regexp = nullptr;
-
-	if (argc > 1)
-		{
-		gchar *base_dir = get_current_dir();
-		g_autoptr(GString) command_line_errors = g_string_new(nullptr);
-		for (gint i = 1; i < argc; i++)
-			{
-			gchar *cmd_line = path_to_utf8(argv[i]);
-			gchar *cmd_all = g_build_filename(base_dir, cmd_line, NULL);
-
-			if (cmd_line[0] == G_DIR_SEPARATOR && isdir(cmd_line))
-				{
-				parse_command_line_process_dir(cmd_line, &command_line->path, &command_line->file, &list, &first_dir);
-				}
-			else if (isdir(cmd_all))
-				{
-				parse_command_line_process_dir(cmd_all, &command_line->path, &command_line->file, &list, &first_dir);
-				}
-			else if (cmd_line[0] == G_DIR_SEPARATOR && isfile(cmd_line))
-				{
-				parse_command_line_process_file(cmd_line, &command_line->path, &command_line->file,
-								&list, &command_line->collection_list, &first_dir);
-				}
-			else if (isfile(cmd_all))
-				{
-				parse_command_line_process_file(cmd_all, &command_line->path, &command_line->file,
-								&list, &command_line->collection_list, &first_dir);
-				}
-			else if (download_web_file(cmd_line, FALSE, nullptr))
-				{
-				}
-			else if (is_collection(cmd_line))
-				{
-				gchar *path = nullptr;
-
-				path = collection_path(cmd_line);
-				parse_command_line_process_file(path, &command_line->path, &command_line->file,
-								&list, &command_line->collection_list, &first_dir);
-				g_free(path);
-				}
-			else if (strncmp(cmd_line, "--debug", 7) == 0 && (cmd_line[7] == '\0' || cmd_line[7] == '='))
-				{
-				/* do nothing but do not produce warnings */
-				}
-			else if (strncmp(cmd_line, "--disable-clutter", 17) == 0 && (cmd_line[17] == '\0'))
-				{
-				/* do nothing but do not produce warnings */
-				}
-			else if (strcmp(cmd_line, "-T") == 0 ||
-				 strcmp(cmd_line, "--with-tools") == 0)
-				{
-				command_line->tools_show = TRUE;
-
-				remote_list = g_list_append(remote_list, g_strdup("-T"));
-				}
-			else if (strcmp(cmd_line, "-t") == 0 ||
-				 strcmp(cmd_line, "--without-tools") == 0)
-				{
-				command_line->tools_hide = TRUE;
-
-				remote_list = g_list_append(remote_list, g_strdup("-t"));
-				}
-			else if (strcmp(cmd_line, "-f") == 0 ||
-				 strcmp(cmd_line, "--fullscreen") == 0)
-				{
-				command_line->startup_full_screen = TRUE;
-				}
-			else if (strcmp(cmd_line, "-s") == 0 ||
-				 strcmp(cmd_line, "--slideshow") == 0)
-				{
-				command_line->startup_in_slideshow = TRUE;
-				}
-			else if (strcmp(cmd_line, "-l") == 0 ||
-				 strcmp(cmd_line, "--list") == 0)
-				{
-				command_line->startup_command_line_collection = TRUE;
-				}
-			else if (strncmp(cmd_line, "--geometry=", 11) == 0)
-				{
-				if (!command_line->geometry) command_line->geometry = g_strdup(cmd_line + 11);
-				}
-			else if (strcmp(cmd_line, "-r") == 0 ||
-				 strcmp(cmd_line, "--remote") == 0)
-				{
-				if (!remote_do)
-					{
-					remote_do = TRUE;
-					remote_list = remote_build_list(remote_list, argc - i, &argv[i], &remote_errors);
-					}
-				}
-			else if ((strcmp(cmd_line, "-w") == 0) ||
-						strcmp(cmd_line, "--show-log-window") == 0)
-				{
-				command_line->log_window_show = TRUE;
-				}
-			else if (strncmp(cmd_line, "-o", 2) == 0)
-				{
-				command_line->log_file = g_strdup(cmd_line + 2);
-				}
-			else if (strncmp(cmd_line, "--log-file=", 11) == 0)
-				{
-				command_line->log_file = g_strdup(cmd_line + 11);
-				}
-			else if (strncmp(cmd_line, "-g", 2) == 0)
-				{
-				set_regexp(g_strdup(cmd_line + 2));
-				}
-			else if (strncmp(cmd_line, "--grep=", 7) == 0)
-				{
-				set_regexp(g_strdup(cmd_line + 7));
-				}
-			else if (strncmp(cmd_line, "-n", 2) == 0)
-				{
-				command_line->new_instance = TRUE;
-				}
-			else if (strncmp(cmd_line, "--new-instance", 14) == 0)
-				{
-				command_line->new_instance = TRUE;
-				}
-			else if (strcmp(cmd_line, "--blank") == 0)
-				{
-				command_line->startup_blank = TRUE;
-				}
-			else if (strcmp(cmd_line, "-v") == 0 ||
-				 strcmp(cmd_line, "--version") == 0)
-				{
-				printf_term(FALSE, "%s %s GTK%u\n", GQ_APPNAME, VERSION, gtk_major_version);
-				exit(EXIT_SUCCESS);
-				}
-			else if (strcmp(cmd_line, "-h") == 0 ||
-				 strcmp(cmd_line, "--help") == 0)
-				{
-				printf_term(FALSE, "%s %s\n", GQ_APPNAME, VERSION);
-				printf_term(FALSE, _("Usage: %s [options] [path]\n\n"), GQ_APPNAME_LC);
-				print_term(FALSE, _("Valid options:\n"));
-				print_term(FALSE, _("      --blank                      start with blank file list\n"));
-				print_term(FALSE, _("      --cache-maintenance=<path>   run cache maintenance in non-GUI mode\n"));
-				print_term(FALSE, _("      --disable-clutter            disable use of Clutter library (i.e. GPU accel.)\n"));
-				print_term(FALSE, _("  -f, --fullscreen                 start in full screen mode\n"));
-				print_term(FALSE, _("      --geometry=WxH+XOFF+YOFF     set main window location\n"));
-				print_term(FALSE, _("  -h, --help                       show this message\n"));
-				print_term(FALSE, _("  -l, --list [files] [collections] open collection window for command line\n"));
-				print_term(FALSE, _("  -n, --new-instance               open a new instance of Geeqie *\n"));
-				print_term(FALSE, _("  -o, --log-file=<file>            save log data to file\n"));
-				print_term(FALSE, _("  -r, --remote                     send following commands to open window\n"));
-				print_term(FALSE, _("  -s, --slideshow                  start in slideshow mode\n"));
-				print_term(FALSE, _("  -T, --with-tools                 force show of tools\n"));
-				print_term(FALSE, _("  -t, --without-tools              force hide of tools\n"));
-				print_term(FALSE, _("  -v, --version                    print version info\n"));
-				print_term(FALSE, _("  -w, --show-log-window            show log window\n"));
-#ifdef DEBUG
-				print_term(FALSE, _("      --debug=[level]              turn on debug output\n"));
-				print_term(FALSE, _("  -g, --grep=<regexp>              filter debug output\n"));
-#endif
-
-				print_term(FALSE, "\n");
-				print_term(FALSE, "* Normally a single set of configuration files is used for all instances.\nHowever, the environment variables XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME\ncan be used to modify this behavior on an individual basis e.g.\n\nXDG_CONFIG_HOME=/tmp/a XDG_CACHE_HOME=/tmp/b geeqie\n\n");
-
-				remote_help();
-
-				exit(EXIT_SUCCESS);
-				}
-			else if (!remote_do)
-				{
-				g_string_append_printf(command_line_errors, is_remote_command(cmd_line) ? _("%s\n\nThis is a --remote command option\n") : _("%s\n\nThis option is unknown\n"), cmd_line);
-				}
-
-			g_free(cmd_all);
-			g_free(cmd_line);
-			}
-
-		if (command_line_errors->len > 0)
-			{
-			show_invalid_parameters_warning_dialog(command_line_errors->str);
-
-			exit(EXIT_FAILURE);
-			}
-
-		g_free(base_dir);
-		parse_out_relatives(command_line->path);
-		parse_out_relatives(command_line->file);
-		}
-
-	list = g_list_reverse(list);
-
-	if (!command_line->path && first_dir)
-		{
-		command_line->path = first_dir;
-		first_dir = nullptr;
-
-		parse_out_relatives(command_line->path);
-		}
-	g_free(first_dir);
-
-	if (!command_line->new_instance)
-		{
-		/* If Geeqie is already running, prevent a second instance
-		 * from being started. Open a new window instead.
-		 */
-		app_lock = g_build_filename(get_rc_dir(), ".command", NULL);
-		if (remote_server_exists(app_lock) && !remote_do)
-			{
-			remote_do = TRUE;
-			if (command_line->geometry)
-				{
-				geometry = g_strdup_printf("--geometry=%s", command_line->geometry);
-				remote_list = g_list_prepend(remote_list, geometry);
-				}
-			remote_list = g_list_prepend(remote_list, g_strdup("--new-window"));
-			}
-		g_free(app_lock);
-		}
-
-	if (remote_do)
-		{
-		if (remote_errors)
-			{
-			g_autoptr(GString) command_line_errors = g_string_new(nullptr);
-
-			for (GList *work = remote_errors; work; work = work->next)
-				{
-				auto opt = static_cast<gchar *>(work->data);
-
-				g_string_append_printf(command_line_errors, "%s\n", opt);
-				}
-
-			show_invalid_parameters_warning_dialog(command_line_errors->str);
-
-			exit(EXIT_FAILURE);
-			}
-
-		/* prepend the current dir the remote command was made from,
-		 * for use by any remote command that needs it
-		 */
-		current_dir = g_get_current_dir();
-		pwd = g_strconcat("--PWD=", current_dir, NULL);
-		remote_list = g_list_prepend(remote_list, pwd);
-
-		remote_control(argv[0], remote_list, command_line->path, list, command_line->collection_list);
-		/* There is no return to this point
-		 */
-		g_free(pwd);
-		g_free(current_dir);
-		}
-	g_free(geometry);
-	g_list_free(remote_list);
-
-	if (list && list->next)
-		{
-		command_line->cmd_list = list;
-		}
-	else
-		{
-		g_list_free_full(list, g_free);
-		command_line->cmd_list = nullptr;
-		}
-
-	if (command_line->startup_blank)
-		{
-		g_free(command_line->path);
-		command_line->path = nullptr;
-		g_free(command_line->file);
-		command_line->file = nullptr;
-		filelist_free(command_line->cmd_list);
-		command_line->cmd_list = nullptr;
-		g_list_free_full(command_line->collection_list, g_free);
-		command_line->collection_list = nullptr;
-		}
-}
-
-static void parse_command_line_for_debug_option(gint argc, gchar *argv[])
-{
-#ifdef DEBUG
-	const gchar *debug_option = "--debug";
-	const gint len = strlen(debug_option);
-
-	for (gint i = 1; i < argc; i++)
-		{
-		// TODO(xsdg): Replace this with a regex match.  Simpler and less error-prone.
-		const gchar *cmd_line = argv[i];
-		if (strncmp(cmd_line, debug_option, len) == 0)
-			{
-			const gint cmd_line_len = strlen(cmd_line);
-
-			/* we now increment the debug state for verbosity */
-			if (cmd_line_len == len)
-				debug_level_add(1);
-			else if (cmd_line[len] == '=' && g_ascii_isdigit(cmd_line[len+1]))
-				{
-				gint n = atoi(cmd_line + len + 1);
-				if (n < 0) n = 1;
-				debug_level_add(n);
-				}
-			}
-		}
-
-	DEBUG_1("debugging output enabled (level %d)", get_debug_level());
-#endif
-}
-
-static gboolean search_command_line_for_option(const gint argc, const gchar* const argv[], const gchar* option_name)
+gboolean search_command_line_for_option(const gint argc, const gchar* const argv[], const gchar* option_name)
 {
 	const gint name_len = strlen(option_name);
 
@@ -677,19 +343,25 @@ static gboolean search_command_line_for_option(const gint argc, const gchar* con
 	return FALSE;
 }
 
-static gboolean search_command_line_for_unit_test_option(gint argc, gchar *argv[])
+gboolean search_command_line_for_unit_test_option(gint argc, gchar *argv[])
 {
 	return search_command_line_for_option(argc, argv, "--run-unit-tests");
 }
 
-#if HAVE_CLUTTER
-static gboolean search_command_line_for_clutter_option(gint argc, gchar *argv[])
+/**
+ * @brief Notification Quit button pressed
+ * @param action
+ * @param parameter
+ * @param app
+ *
+ *
+ */
+void quit_activated_cb(GSimpleAction *, GVariant *, gpointer app)
 {
-	return search_command_line_for_option(argc, argv, "--disable-clutter");
+	g_application_quit(G_APPLICATION(app));
 }
-#endif
 
-static gboolean parse_command_line_for_cache_maintenance_option(gint argc, gchar *argv[])
+gboolean parse_command_line_for_cache_maintenance_option(gint argc, gchar *argv[])
 {
 	const gchar *cache_maintenance_option = "--cache-maintenance=";
 	const gint len = strlen(cache_maintenance_option);
@@ -706,64 +378,6 @@ static gboolean parse_command_line_for_cache_maintenance_option(gint argc, gchar
 	return FALSE;
 }
 
-static void process_command_line_for_cache_maintenance_option(gint argc, gchar *argv[])
-{
-	if (argc < 2)
-		{
-		print_term(TRUE, _("No path parameter given\n"));
-		exit(EXIT_FAILURE);
-		}
-
-	const gchar *cache_maintenance_option = "--cache-maintenance=";
-	const gint len = strlen(cache_maintenance_option);
-
-	g_autofree gchar *folder_path = expand_tilde(argv[1] + len);
-	if (!isdir(folder_path))
-		{
-		print_term(TRUE, g_strconcat(argv[1] + len, _(" is not a folder\n"), NULL));
-		exit(EXIT_FAILURE);
-		}
-
-	g_autofree gchar *rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
-	if (!isfile(rc_path))
-		{
-		print_term(TRUE, g_strconcat(_("Configuration file path "), rc_path, _(" is not a file\n"), NULL));
-		exit(EXIT_FAILURE);
-		}
-
-	g_autofree gchar *buf_config_file = nullptr;
-	gsize size;
-	if (!g_file_get_contents(rc_path, &buf_config_file, &size, nullptr))
-		{
-		print_term(TRUE, g_strconcat(_("Cannot load "), rc_path, "\n", NULL));
-		exit(EXIT_FAILURE);
-		}
-
-	/* Load only the <global> section */
-	const gchar *global_tag_end = "</global>";
-	const gint global_tag_end_len = strlen(global_tag_end);
-
-	gsize global_section_size = size;
-	for (gsize i = 0; i < size; i++)
-		{
-		if (strncmp(global_tag_end, buf_config_file + i, global_tag_end_len) == 0)
-			{
-			global_section_size = i + global_tag_end_len;
-			break;
-			}
-		}
-
-	load_config_from_buf(buf_config_file, global_section_size, FALSE);
-
-	if (!options->thumbnails.enable_caching)
-		{
-		print_term(TRUE, "Caching not enabled\n");
-		exit(EXIT_FAILURE);
-		}
-
-	cache_maintenance(folder_path);
-}
-
 /*
  *-----------------------------------------------------------------------------
  * startup, init, and exit
@@ -773,39 +387,33 @@ static void process_command_line_for_cache_maintenance_option(gint argc, gchar *
 #define RC_HISTORY_NAME "history"
 #define RC_MARKS_NAME "marks"
 
-static void setup_env_path()
+void setup_env_path()
 {
 	const gchar *old_path = g_getenv("PATH");
-	g_autofree gchar *path = g_strconcat(gq_bindir, ":", old_path, NULL);
-	g_setenv("PATH", path, TRUE);
+	gchar *path = g_strconcat(gq_bindir, ":", old_path, NULL);
+        g_setenv("PATH", path, TRUE);
+	g_free(path);
 }
 
-static const gchar *get_history_path()
+void keys_load()
 {
-#if USE_XDG
-	static gchar *history_path = g_build_filename(xdg_data_home_get(), GQ_APPNAME_LC, RC_HISTORY_NAME, NULL);
-#else
-	static gchar *history_path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
-#endif
+	gchar *path;
 
-	return history_path;
-}
-
-static void keys_load()
-{
-	const gchar *path = get_history_path();
-
+	path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
 	history_list_load(path);
+	g_free(path);
 }
 
-static void keys_save()
+void keys_save()
 {
-	const gchar *path = get_history_path();
+	gchar *path;
 
+	path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
 	history_list_save(path);
+	g_free(path);
 }
 
-static void marks_load()
+void marks_load()
 {
 	gchar *path;
 
@@ -814,7 +422,7 @@ static void marks_load()
 	g_free(path);
 }
 
-static void marks_save(gboolean save)
+void marks_save(gboolean save)
 {
 	gchar *path;
 
@@ -823,7 +431,7 @@ static void marks_save(gboolean save)
 	g_free(path);
 }
 
-static void mkdir_if_not_exists(const gchar *path)
+void mkdir_if_not_exists(const gchar *path)
 {
 	if (isdir(path)) return;
 
@@ -835,12 +443,11 @@ static void mkdir_if_not_exists(const gchar *path)
 		}
 }
 
-
 /* We add to duplicate and modify  gtk_accel_map_print() and gtk_accel_map_save()
  * to improve the reliability in special cases (especially when disk is full)
  * These functions are now using secure saving stuff.
  */
-static void gq_accel_map_print(
+void gq_accel_map_print(
 		    gpointer 	data,
 		    const gchar	*accel_path,
 		    guint	accel_key,
@@ -873,7 +480,7 @@ static void gq_accel_map_print(
 	g_string_free(gstring, TRUE);
 }
 
-static gboolean gq_accel_map_save(const gchar *path)
+gboolean gq_accel_map_save(const gchar *path)
 {
 	gchar *pathl;
 	SecureSaveInfo *ssi;
@@ -911,12 +518,12 @@ static gboolean gq_accel_map_save(const gchar *path)
 	return TRUE;
 }
 
-static gchar *accep_map_filename()
+gchar *accep_map_filename()
 {
 	return g_build_filename(get_rc_dir(), "accels", NULL);
 }
 
-static void accel_map_save()
+void accel_map_save()
 {
 	gchar *path;
 
@@ -925,7 +532,7 @@ static void accel_map_save()
 	g_free(path);
 }
 
-static void accel_map_load()
+void accel_map_load()
 {
 	gchar *path;
 	gchar *pathl;
@@ -937,7 +544,7 @@ static void accel_map_load()
 	g_free(path);
 }
 
-static void gtkrc_load()
+void gtkrc_load()
 {
 	gchar *path;
 	gchar *pathl;
@@ -952,7 +559,7 @@ static void gtkrc_load()
 	g_free(path);
 }
 
-static void exit_program_final()
+void exit_program_final()
 {
 	LayoutWindow *lw = nullptr;
 	GList *list;
@@ -962,8 +569,6 @@ static void exit_program_final()
 
 	 /* make sure that external editors are loaded, we would save incomplete configuration otherwise */
 	layout_editors_reload_finish();
-
-	remote_close(remote_connection);
 
 	collect_manager_flush();
 
@@ -1014,25 +619,26 @@ static void exit_program_final()
 
 	secure_close(command_line->ssi);
 
-	gtk_main_quit();
+	exit(EXIT_SUCCESS);
 }
 
-static GenericDialog *exit_dialog = nullptr;
+GenericDialog *exit_dialog = nullptr;
 
-static void exit_confirm_cancel_cb(GenericDialog *gd, gpointer)
+void exit_confirm_cancel_cb(GenericDialog *gd, gpointer)
 {
 	exit_dialog = nullptr;
 	generic_dialog_close(gd);
 }
 
-static void exit_confirm_exit_cb(GenericDialog *gd, gpointer)
+void exit_confirm_exit_cb(GenericDialog *gd, gpointer)
 {
 	exit_dialog = nullptr;
 	generic_dialog_close(gd);
+
 	exit_program_final();
 }
 
-static gint exit_confirm_dlg()
+gint exit_confirm_dlg()
 {
 	GtkWidget *parent;
 	LayoutWindow *lw;
@@ -1086,26 +692,46 @@ static gint exit_confirm_dlg()
 	return TRUE;
 }
 
-static void exit_program_write_metadata_cb(gint success, const gchar *, gpointer)
+void exit_program_write_metadata_cb(gint success, const gchar *, gpointer)
 {
 	if (success) exit_program();
 }
 
-void exit_program()
+/* This code attempts to handle situation when a file mmaped by image_loader
+ * or by exif loader is truncated by some other process.
+ * This code is incorrect according to POSIX, because:
+ *
+ *   mmap is not async-signal-safe and thus may not be called from a signal handler
+ *
+ *   mmap must be called with a valid file descriptor.  POSIX requires that
+ *   a fildes argument of -1 must cause mmap to return EBADF.
+ *
+ * See https://github.com/BestImageViewer/geeqie/issues/1052 for discussion of
+ * an alternative approach.
+ */
+/** @FIXME this probably needs some better ifdefs. Please report any compilation problems */
+/** @FIXME This section needs revising */
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#if defined(SIGBUS) && defined(SA_SIGINFO)
+void sigbus_handler_cb_unused(int, siginfo_t *info, void *)
 {
-	layout_image_full_screen_stop(nullptr);
+	/*
+	 * @FIXME Design and implement a POSIX-acceptable approach,
+	 * after first documenting the sitations where SIGBUS occurs.
+	 * See https://github.com/BestImageViewer/geeqie/issues/1052 for discussion
+	 */
 
-	if (metadata_write_queue_confirm(FALSE, exit_program_write_metadata_cb, nullptr)) return;
-
-	marks_save(options->marks_save);
-
-	if (exit_confirm_dlg()) return;
-
-	exit_program_final();
+	DEBUG_1("SIGBUS %p NOT HANDLED", info->si_addr);
+	exit(EXIT_FAILURE);
 }
+#endif
+
+#pragma GCC diagnostic pop
 
 #if !HAVE_DEVELOPER
-static void setup_sig_handler()
+void setup_sig_handler()
 {
 	struct sigaction sigsegv_action;
 	sigfillset(&sigsegv_action.sa_mask);
@@ -1121,7 +747,7 @@ static void setup_sig_handler()
 }
 #endif
 
-static void set_theme_bg_color()
+void set_theme_bg_color()
 {
 	GdkRGBA bg_color;
 	GdkRGBA theme_color;
@@ -1152,7 +778,7 @@ static void set_theme_bg_color()
 	view_window_colors_update();
 }
 
-static gboolean theme_change_cb(GObject *, GParamSpec *, gpointer)
+gboolean theme_change_cb(GObject *, GParamSpec *, gpointer)
 {
 	set_theme_bg_color();
 
@@ -1168,7 +794,7 @@ static gboolean theme_change_cb(GObject *, GParamSpec *, gpointer)
  * They are now variables, all defined relative to one level above the
  * directory that the executable is run from.
  */
-static void create_application_paths()
+void create_application_paths()
 {
 	gchar *dirname;
 	gint length;
@@ -1194,39 +820,36 @@ static void create_application_paths()
 	g_free(path);
 }
 
-gint main(gint argc, gchar *argv[])
+gint command_line_cb(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer)
 {
-	// We handle unit tests here because it takes the place of running the
-	// rest of the app.
-	if (search_command_line_for_unit_test_option(argc, argv))
-	{
-#if ENABLE_UNIT_TESTS
-		testing::InitGoogleTest(&argc, argv);
-		return RUN_ALL_TESTS();
-#else
-		fprintf(stderr, "Unit tests are not enabled in this build.\n");
-		return 1;
-#endif
-	}
+	gint ret;
 
-	CollectionData *cd = nullptr;
-	CollectionData *first_collection = nullptr;
-	gboolean disable_clutter = FALSE;
-	gboolean single_dir = TRUE;
-	gchar *buf;
-	GdkScreen *screen;
-	GtkCssProvider *provider;
-	GtkSettings *default_settings;
-	LayoutWindow *lw;
+	ret = process_command_line((app), app_command_line, nullptr);
 
-	gdk_set_allowed_backends("x11,*");
+	g_application_activate(G_APPLICATION(app));
 
-	gdk_threads_init();
-	gdk_threads_enter();
+	return ret;
+}
 
+gint shutdown_cache_maintenance_cb(GtkApplication *, gpointer)
+{
+	exit(EXIT_SUCCESS);
+}
+
+gint command_line_cache_maintenance_cb(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer)
+{
+	gint ret;
+
+	ret = process_command_line_cache_maintenance(app, app_command_line, nullptr);
+
+	return ret;
+}
+
+void startup_common(GtkApplication *, gpointer)
+{
 	/* seg. fault handler */
 #if HAVE_DEVELOPER
-	backward::SignalHandling sh{};
+	backward::SignalHandling sh {};
 #else
 	setup_sig_handler();
 #endif
@@ -1254,6 +877,11 @@ gint main(gint argc, gchar *argv[])
 	/* setup random seed for random slideshow */
 	srand(time(nullptr));
 
+#if 0
+	/* See later comment; this handler leads to UB. */
+	setup_sigbus_handler();
+#endif
+
 	/* register global notify functions */
 	file_data_register_notify_func(cache_notify_cb, nullptr, NOTIFY_PRIORITY_HIGH);
 	file_data_register_notify_func(thumb_notify_cb, nullptr, NOTIFY_PRIORITY_HIGH);
@@ -1261,32 +889,10 @@ gint main(gint argc, gchar *argv[])
 	file_data_register_notify_func(collect_manager_notify_cb, nullptr, NOTIFY_PRIORITY_LOW);
 	file_data_register_notify_func(metadata_notify_cb, nullptr, NOTIFY_PRIORITY_LOW);
 
-
 	gtkrc_load();
 
-	parse_command_line_for_debug_option(argc, argv);
-	DEBUG_1("%s main: gtk_init", get_exec_time());
-#if HAVE_CLUTTER
-	if (search_command_line_for_clutter_option(argc, argv))
-		{
-		disable_clutter	= TRUE;
-		gtk_init(&argc, &argv);
-		}
-	else
-		{
-		if (gtk_clutter_init(&argc, &argv) != CLUTTER_INIT_SUCCESS)
-			{
-			log_printf("Can't initialize clutter-gtk.\nStart Geeqie with the option \"geeqie --disable-clutter\"");
-			runcmd("zenity --error --title=\"Geeqie\" --text \"Can't initialize clutter-gtk.\n\nStart Geeqie with the option:\n geeqie --disable-clutter\" --width=300");
-			exit(EXIT_FAILURE);
-			}
-		}
-#else
-	gtk_init(&argc, &argv);
-#endif
-
 	if (gtk_major_version < GTK_MAJOR_VERSION ||
-	    (gtk_major_version == GTK_MAJOR_VERSION && gtk_minor_version < GTK_MINOR_VERSION) )
+	        (gtk_major_version == GTK_MAJOR_VERSION && gtk_minor_version < GTK_MINOR_VERSION) )
 		{
 		log_printf("!!! This is a friendly warning.\n");
 		log_printf("!!! The version of GTK+ in use now is older than when %s was compiled.\n", GQ_APPNAME);
@@ -1302,11 +908,6 @@ gint main(gint argc, gchar *argv[])
 	DEBUG_1("%s main: setting default options before commandline handling", get_exec_time());
 	options = init_options(nullptr);
 	setup_default_options(options);
-	if (disable_clutter)
-		{
-		options->disable_gpu = TRUE;
-		}
-
 	/* Generate a unique identifier used by the open archive function */
 	instance_identifier = g_strdup_printf("%x", g_random_int());
 
@@ -1320,223 +921,243 @@ gint main(gint argc, gchar *argv[])
 
 	setup_env_path();
 
-	screen = gdk_screen_get_default();
-	provider = gtk_css_provider_new();
-	gtk_css_provider_load_from_resource(provider, GQ_RESOURCE_PATH_UI "/custom.css");
-	gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	keys_load();
+	accel_map_load();
 
-	if (parse_command_line_for_cache_maintenance_option(argc, argv))
+	command_line = g_new0(CommandLine, 1);
+
+	const gchar *gq_disable_clutter = g_getenv("GQ_DISABLE_CLUTTER");
+
+	if (gq_disable_clutter && (gq_disable_clutter[0] == 'y' || gq_disable_clutter[0] == 'Y'))
 		{
-		process_command_line_for_cache_maintenance_option(argc, argv);
+		options->disable_gpu = TRUE;
 		}
-	else
-		{
-		DEBUG_1("%s main: parse_command_line", get_exec_time());
-		parse_command_line(argc, argv);
 
-		keys_load();
-		accel_map_load();
-
-		/* restore session from the config file */
-
-
-		DEBUG_1("%s main: load_options", get_exec_time());
-		if (!load_options(options))
-			{
-			/* load_options calls these functions after it parses global options, we have to call it here if it fails */
-			filter_add_defaults();
-			filter_rebuild();
-			}
-
-	#if HAVE_CLUTTER
+#if HAVE_CLUTTER
 	/** @FIXME For the background of this see:
 	 * https://github.com/BestImageViewer/geeqie/issues/397
 	 * The feature CLUTTER_FEATURE_SWAP_EVENTS indictates if the
 	 * system is liable to exhibit this problem.
 	 * The user is provided with an override in Preferences/Behavior
 	 */
-		if (!options->override_disable_gpu && !options->disable_gpu)
+	if (!options->override_disable_gpu && !options->disable_gpu)
+		{
+		DEBUG_1("CLUTTER_FEATURE_SWAP_EVENTS %d",clutter_feature_available(CLUTTER_FEATURE_SWAP_EVENTS));
+		if (clutter_feature_available(CLUTTER_FEATURE_SWAP_EVENTS) != 0)
 			{
-			DEBUG_1("CLUTTER_FEATURE_SWAP_EVENTS %d",clutter_feature_available(CLUTTER_FEATURE_SWAP_EVENTS));
-			if (clutter_feature_available(CLUTTER_FEATURE_SWAP_EVENTS) != 0)
-				{
-				options->disable_gpu = TRUE;
-				}
+			options->disable_gpu = TRUE;
 			}
-	#endif
-
-		/* handle missing config file and commandline additions*/
-		if (!layout_window_list)
-			{
-			/* broken or no config file or no <layout> section */
-			layout_new_from_default();
-			}
-
-		layout_editors_reload_start();
-
-		/* If no --list option, open a separate collection window for each
-		 * .gqv file on the command line
-		 */
-		if (command_line->collection_list && !command_line->startup_command_line_collection)
-			{
-			GList *work;
-
-			work = command_line->collection_list;
-			while (work)
-				{
-				CollectWindow *cw;
-				const gchar *path;
-
-				path = static_cast<const gchar *>(work->data);
-				work = work->next;
-
-				cw = collection_window_new(path);
-				if (!first_collection && cw) first_collection = cw->cd;
-				}
-			}
-
-		if (command_line->log_file)
-			{
-			gchar *pathl;
-			gchar *path = g_strdup(command_line->log_file);
-
-			pathl = path_from_utf8(path);
-			command_line->ssi = secure_open(pathl);
-			}
-
-		/* If there is a files list on the command line and no --list option,
-		 * check if they are all in the same folder
-		 */
-		if (command_line->cmd_list && !(command_line->startup_command_line_collection))
-			{
-			GList *work;
-			gchar *path = nullptr;
-
-			work = command_line->cmd_list;
-
-			while (work && single_dir)
-				{
-				gchar *dirname;
-
-				dirname = g_path_get_dirname(static_cast<const gchar *>(work->data));
-				if (!path)
-					{
-					path = g_strdup(dirname);
-					}
-				else
-					{
-					if (g_strcmp0(path, dirname) != 0)
-						{
-						single_dir = FALSE;
-						}
-					}
-				g_free(dirname);
-				work = work->next;
-				}
-			g_free(path);
-			}
-
-		/* Files from multiple folders, or --list option given
-		 * then open an unnamed collection and insert all files
-		 */
-		if ((command_line->cmd_list && !single_dir) || (command_line->startup_command_line_collection && command_line->cmd_list))
-			{
-			GList *work;
-			CollectWindow *cw;
-
-			cw = collection_window_new(nullptr);
-			cd = cw->cd;
-
-			collection_path_changed(cd);
-
-			work = command_line->cmd_list;
-			while (work)
-				{
-				FileData *fd;
-
-				fd = file_data_new_simple(static_cast<const gchar *>(work->data));
-				collection_add(cd, fd, FALSE);
-				file_data_unref(fd);
-				work = work->next;
-				}
-
-			work = command_line->collection_list;
-			while (work)
-				{
-				collection_load(cd, static_cast<gchar *>(work->data), COLLECTION_LOAD_APPEND);
-				work = work->next;
-				}
-
-			if (cd->list) layout_image_set_collection(nullptr, cd, static_cast<CollectInfo *>(cd->list->data));
-
-			/* mem leak, we never unref this collection when !startup_command_line_collection
-			 * (the image view of the main window does not hold a ref to the collection)
-			 * this is sort of unavoidable, for if it did hold a ref, next/back
-			 * may not work as expected when closing collection windows.
-			 *
-			 * collection_unref(cd);
-			 */
-
-			}
-		else if (first_collection)
-			{
-			layout_image_set_collection(nullptr, first_collection,
-						    collection_get_first(first_collection));
-			}
-
-		/* If the files on the command line are from one folder, select those files
-		 * unless it is a command line collection - then leave focus on collection window
-		 */
-		lw = nullptr;
-		layout_valid(&lw);
-
-		if (single_dir && command_line->cmd_list && !command_line->startup_command_line_collection)
-			{
-			GList *work;
-			GList *selected;
-			FileData *fd;
-
-			selected = nullptr;
-			work = command_line->cmd_list;
-			while (work)
-				{
-				fd = file_data_new_simple(static_cast<gchar *>(work->data));
-				selected = g_list_append(selected, fd);
-				file_data_unref(fd);
-				work = work->next;
-				}
-			layout_select_list(lw, selected);
-			}
-
-		buf = g_build_filename(get_rc_dir(), ".command", NULL);
-		remote_connection = remote_server_init(buf, cd);
-		g_free(buf);
-
-		marks_load();
-
-		default_settings = gtk_settings_get_default();
-		g_signal_connect(default_settings, "notify::gtk-theme-name", G_CALLBACK(theme_change_cb), NULL);
-		set_theme_bg_color();
 		}
+#endif
+}
+
+void activate_cb(GtkApplication *, gpointer)
+{
+	LayoutWindow *lw = nullptr;
+
+	layout_valid(&lw);
+
+	/* If Geeqie is not running and a command line option like --version
+	 * is executed, display of the Geeqie window has to be inhibited.
+	 *
+	 * The startup signal is issued before the command_line signal, therefore
+	 * the window layout processing is done before the command line processing.
+	 *
+	 * Function layout_new_with_geometry() does not execute a gtk_window_show()
+	 * if this is the first window - i.e. Geeqie is not yet fully running.
+	 *
+	 * The activate signal is issued in command_line_cb() after the
+	 * command line signal has been processed. This function will
+	 * issue the gtk_window_show() command.
+	 *
+	 * In the case of a text-output option that does not require the window,
+	 * the shutdown happens in process_command_line().
+	 */
+	if (lw->window)
+		{
+		gtk_widget_show(lw->window);
+		}
+}
+
+void startup_cb(GtkApplication *app, gpointer)
+{
+	GtkSettings *default_settings;
+
+	startup_common(app, nullptr);
+
+	/* restore session from the config file */
+
+	if (!load_options(options))
+		{
+		/* load_options calls these functions after it parses global options, we have to call it here if it fails */
+		filter_add_defaults();
+		filter_rebuild();
+		}
+
+	/* handle missing config file and commandline additions*/
+	if (!layout_window_list)
+		{
+		/* broken or no config file or no <layout> section */
+		layout_new_from_default();
+		}
+
+	layout_editors_reload_start();
+
+	marks_load();
+
+	default_settings = gtk_settings_get_default();
+
+	g_signal_connect(default_settings, "notify::gtk-theme-name", G_CALLBACK(theme_change_cb), nullptr);
+	set_theme_bg_color();
 
 	/* Show a fade-out notification window if the server has a newer AppImage version */
 	if (options->appimage_notifications)
 		{
 		if (g_getenv("APPDIR") && strstr(g_getenv("APPDIR"), "/tmp/.mount_Geeqie"))
 			{
-			appimage_notification();
+			appimage_notification(app);
 			}
 		else if (g_strstr_len(gq_executable_path, -1, "squashfs-root"))
 			{
 			/* Probably running an extracted AppImage */
-			appimage_notification();
+			appimage_notification(app);
 			}
 		}
 
-	DEBUG_1("%s main: gtk_main", get_exec_time());
-	gtk_main();
-
-	gdk_threads_leave();
-	return 0;
+	gtk_application_window_new(app);
 }
+
+void startup_cache_maintenance_cb(GtkApplication *app, gpointer)
+{
+	startup_common(app, nullptr);
+
+	g_application_hold(G_APPLICATION(app));
+}
+
+} // namespace
+
+void exit_program()
+{
+	layout_image_full_screen_stop(nullptr);
+
+	if (metadata_write_queue_confirm(FALSE, exit_program_write_metadata_cb, nullptr)) return;
+
+	marks_save(options->marks_save);
+
+	if (exit_confirm_dlg())
+		{
+		return;
+		}
+
+	exit_program_final();
+}
+
+gint main(gint argc, gchar *argv[])
+{
+	gdk_set_allowed_backends("x11, *");
+
+	gint status;
+	gchar *version_string;
+	GtkApplication *app;
+	// We handle unit tests here because it takes the place of running the
+	// rest of the app.
+	if (search_command_line_for_unit_test_option(argc, argv))
+		{
+#if ENABLE_UNIT_TESTS
+		testing::InitGoogleTest(&argc, argv);
+		return RUN_ALL_TESTS();
+#else
+		fprintf(stderr, "Unit tests are not enabled in this build.\n");
+		return 1;
+#endif
+		}
+
+#if HAVE_CLUTTER
+	const gchar *gq_disable_clutter = g_getenv("GQ_DISABLE_CLUTTER");
+
+	if (!gq_disable_clutter || tolower(gq_disable_clutter[0]) != 'y')
+		{
+		if (clutter_init(nullptr, nullptr) != CLUTTER_INIT_SUCCESS)
+			{
+			fprintf(stderr,
+				_("Can't initialize clutter-gtk. \n \
+				To start Geeqie use: \n \
+				GQ_DISABLE_CLUTTER=y geeqie\n\n"));
+
+			return EXIT_FAILURE;
+			}
+		}
+#endif
+	const gchar *gq_cache_maintenance = g_getenv("GQ_CACHE_MAINTENANCE");
+	if (gq_cache_maintenance && tolower(gq_cache_maintenance[0]) == 'y')
+		{
+		/* Disabled at the moment */
+		log_printf("Command line cache maintenance is disabled in this version.\nThis will be fixed in a future version.");
+		return 1;
+
+		app = gtk_application_new("org.geeqie.cache-maintenance", static_cast<GApplicationFlags>( G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_SEND_ENVIRONMENT));
+		g_application_add_main_option_entries(G_APPLICATION(app), command_line_options_cache_maintenance);
+
+		g_application_set_option_context_parameter_string (G_APPLICATION(app), \
+_("\n\nUsage for cache maintenance:\n \
+GQ_CACHE_MAINTENANCE= geeqie OPTION"));
+
+		version_string = g_strconcat( \
+_("Geeqie Cache Maintenance. \n \
+Version: Geeqie "), VERSION, nullptr);
+
+		g_application_set_option_context_summary (G_APPLICATION(app), version_string);
+		g_free(version_string);
+		g_application_set_option_context_description (G_APPLICATION(app),option_context_description_cache_maintenance);
+
+		g_signal_connect(app, "startup", G_CALLBACK(startup_cache_maintenance_cb), nullptr);
+		g_signal_connect(app, "command-line", G_CALLBACK(command_line_cache_maintenance_cb), nullptr);
+		g_signal_connect(app, "shutdown", G_CALLBACK(shutdown_cache_maintenance_cb), nullptr);
+
+		/* The quit action is linked to the Quit button on the notifications */
+		GSimpleAction *quit_action = g_simple_action_new("quit", nullptr);
+		g_signal_connect(quit_action, "activate", G_CALLBACK(quit_activated_cb), app);
+		g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(quit_action));
+
+		status = g_application_run(G_APPLICATION(app), argc, argv);
+
+		g_object_unref(app);
+
+		return status;
+		}
+
+	const gchar *gq_new_instance = g_getenv("GQ_NEW_INSTANCE");
+	if (gq_new_instance && tolower(gq_new_instance[0]) == 'y')
+		{
+		app = gtk_application_new("org.geeqie.Geeqie", static_cast<GApplicationFlags>(G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_NON_UNIQUE | G_APPLICATION_SEND_ENVIRONMENT));
+		}
+	else
+		{
+		app = gtk_application_new("org.geeqie.Geeqie", static_cast<GApplicationFlags>(G_APPLICATION_HANDLES_COMMAND_LINE | G_APPLICATION_SEND_ENVIRONMENT)) ;
+		}
+
+	g_application_add_main_option_entries(G_APPLICATION(app), command_line_options);
+
+	g_application_set_option_context_parameter_string (G_APPLICATION(app), "[path...]");
+
+	version_string = g_strconcat( \
+_("Geeqie is an image viewer.\n \
+Version: Geeqie "), VERSION, nullptr);
+
+	g_application_set_option_context_summary (G_APPLICATION(app), version_string);
+	g_free(version_string);
+
+	g_application_set_option_context_description (G_APPLICATION(app), option_context_description);
+
+	g_signal_connect(app, "activate", G_CALLBACK(activate_cb), nullptr);
+	g_signal_connect(app, "command-line", G_CALLBACK(command_line_cb), nullptr);
+	g_signal_connect(app, "startup", G_CALLBACK(startup_cb), nullptr);
+
+	status = g_application_run(G_APPLICATION(app), argc, argv);
+
+	g_object_unref(app);
+
+	return status;
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

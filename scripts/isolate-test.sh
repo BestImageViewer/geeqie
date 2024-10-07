@@ -25,8 +25,9 @@
 ##        that might be running on the host.  Passes all args through and passes
 ##        the return code back.
 ##
-## $1 Test executable
-##
+## $1 Full path to dbus-session.sh
+## $2 Path to test executable
+## $3 Path to file to test
 ##
 
 set -e
@@ -63,12 +64,8 @@ chmod 0700 "$XDG_RUNTIME_DIR"
 cd
 mkdir -p "$XDG_CONFIG_HOME"
 
-# This will automatically pass the command name and args in the expected order.
-# And `set -e` (above) means that we'll automatically exit with the same return
-# code as our sub-command.
-# Start with a clean environment containing only these variables.
-#
-# G_DEBUG="fatal-warnings" will force an abort if a warning or
-# critical error is encountered.
-# https://docs.gtk.org/glib/running.html#environment-variables
-env -i G_DEBUG="fatal-warnings" HOME="$HOME" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$@"
+# Primary and remote instances of GtkApplication communicate with D-Bus
+dbus_session_sh="$1"
+shift
+
+exec dbus-run-session -- "$dbus_session_sh" "$@" 2>/dev/null

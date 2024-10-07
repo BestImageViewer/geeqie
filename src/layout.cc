@@ -2713,7 +2713,6 @@ LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
 			}
 		}
 
-	gtk_widget_show(lw->window);
 	layout_tools_hide(lw, lw->options.tools_hidden);
 
 	image_osd_set(lw->image, static_cast<OsdShowFlags>(lw->options.image_overlay.state));
@@ -2723,6 +2722,19 @@ LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
 	histogram->histogram_mode = lw->options.image_overlay.histogram_mode;
 
 	layout_window_list = g_list_append(layout_window_list, lw);
+
+	/* Refer to the activate signal in main */
+#if HAVE_GTK4
+	if (g_list_length(layout_window_list) == 1)
+		{
+		gtk_widget_hide(lw->window);
+		}
+#else
+	if (g_list_length(layout_window_list) > 1)
+		{
+		gtk_widget_show(lw->window);
+		}
+#endif
 
 	file_data_register_notify_func(layout_image_notify_cb, lw, NOTIFY_PRIORITY_LOW);
 
