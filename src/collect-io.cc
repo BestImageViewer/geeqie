@@ -29,7 +29,7 @@
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
-#if defined(__linux__)
+#if defined(__GLIBC__)
 #include <mntent.h>
 #else
 #include <sys/mount.h>
@@ -265,7 +265,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 				if (!g_str_has_prefix(buffer2, "/home") && !g_str_has_prefix(buffer2, "/tmp") && !g_str_has_prefix(buffer2, "/usr"))
 					{
 					/* The file was on a mounted drive and either has been deleted or the drive is not mounted */
-#if defined(__linux__)
+#if defined(__GLIBC__)
 					struct mntent *mount_entry;
 					FILE *mount_entries;
 
