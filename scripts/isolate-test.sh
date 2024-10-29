@@ -30,6 +30,8 @@
 ## $3 Path to file to test
 ##
 
+#~ FAKE NO-OP CHANGE
+
 set -e
 
 TEST_HOME=$(mktemp -d)
