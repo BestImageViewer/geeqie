@@ -583,6 +583,12 @@ gboolean copy_file(const gchar *s, const gchar *t)
 			}
 		}
 
+        /* close explicitly the files before rename and copy_file_attributes,
+        to avoid buffered data being flushed after copy_file_attributes,
+        which would reset mtime to current time (cf issue #1535) */
+	fclose(fi); fi = nullptr;
+	fclose(fo); fo = nullptr;
+
 	if (rename(randname, tl) < 0)
 		{
 		unlink(randname);
