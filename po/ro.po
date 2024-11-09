@@ -8944,15 +8944,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Afișează ca _icon-uri"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "Batch UFRaw"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Editează fișierul ID al UFRaw"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Batch UFRaw recursiv"
-
 #, fuzzy
 #~ msgid "_Show Guidelines"
 #~ msgstr "Afişează fişierele ascunse"

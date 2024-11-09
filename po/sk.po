@@ -9543,24 +9543,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Zobraziť ako _ikony"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "Dávka UFRaw"
-
-#~ msgid "Search for new RAW files or modified UFRaw ID files"
-#~ msgstr "Hľadať nové súbory RAW alebo zmenené UFRaw ID súbory"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Upraviť ID súbor UFRaw"
-
-#~ msgid "Create UFRaw ID files for RAW files"
-#~ msgstr "Vytvoriť UFRaw ID súbory zo súborov RAW"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Rekurzívna dávka UFRaw"
-
-#~ msgid "Search for new RAW files or modified UFRaw ID files recursively"
-#~ msgstr "Hľadať nové súbory RAW alebo zmenené UFRaw ID súbory rekurzívne"
-
 # src/ui-pathsel.cc:764
 #~ msgid "_Show Guidelines"
 #~ msgstr "Zobraziť _vodiace čiary"
@@ -10171,9 +10153,6 @@ msgstr ""
 # src/main.cc:561
 #~ msgid "Xpaint"
 #~ msgstr "Xpaint"
-
-#~ msgid "UFraw"
-#~ msgstr "UFraw"
 
 #~ msgid "Add XMP sidecar"
 #~ msgstr "Pridať XMP prívesok"

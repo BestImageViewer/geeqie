@@ -8941,15 +8941,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Προβολή ως Ε_ικονίδια"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "Ομαδική UFRaw"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Επεξεργασία του αρχείου Ταυτότητας του UFRaw"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Ομαδική UFRaw, εις βάθος"
-
 #, fuzzy
 #~ msgid "_Show Guidelines"
 #~ msgstr "Προβολή κρυφών"

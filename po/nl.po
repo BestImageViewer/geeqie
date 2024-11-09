@@ -8743,25 +8743,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Als _pictogrammen weergeven"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "UFRaw Batch"
-
-#~ msgid "Search for new RAW files or modified UFRaw ID files"
-#~ msgstr "Zoek naar nieuwe RAW-bestanden of gewijzigde UFRAW ID-bestanden"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Pas UFRaw ID bestand aan"
-
-#~ msgid "Create UFRaw ID files for RAW files"
-#~ msgstr "Maak bestanden met UFRAW ID aan voor RAW-bestanden"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Recursieve UFRaw Batch"
-
-#~ msgid "Search for new RAW files or modified UFRaw ID files recursively"
-#~ msgstr ""
-#~ "Zoek recursief naar nieuwe RAW-bestanden of gewijzigde UFRAW ID-bestanden"
-
 #~ msgid "_Show Guidelines"
 #~ msgstr "_Richtlijnen weergeven"
 

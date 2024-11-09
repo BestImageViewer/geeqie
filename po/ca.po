@@ -8693,24 +8693,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Visualitza com a _icones"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "Lot UFRaw"
-
-#~ msgid "Search for new RAW files or modified UFRaw ID files"
-#~ msgstr "Cerca per nous IDs de fitxers RAW o UFRaw modificats"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Edita la ID del fitxer UFRAW"
-
-#~ msgid "Create UFRaw ID files for RAW files"
-#~ msgstr "Crea IDs de fitxers UFRaw o RAW"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Lot recursiu UFRaw"
-
-#~ msgid "Search for new RAW files or modified UFRaw ID files recursively"
-#~ msgstr "Cerca per nous fitxers RAW o UFRaw modificats recursivament"
-
 #~ msgid "_Show Guidelines"
 #~ msgstr "Mostra les Línies guia"
 
@@ -9250,9 +9232,6 @@ msgstr ""
 
 #~ msgid "Xpaint"
 #~ msgstr "Xpaint"
-
-#~ msgid "UFraw"
-#~ msgstr "UFraw"
 
 #~ msgid "Rotate jpeg clockwise"
 #~ msgstr "Gira el jpeg - horari"

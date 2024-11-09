@@ -8625,15 +8625,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Visa som _ikoner"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "UFRaw batch"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Redigera ID-filen till UFRaw"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "UFRaw batch, rekursivt"
-
 #, fuzzy
 #~ msgid "_Show Guidelines"
 #~ msgstr "Visa dolda"

@@ -8946,15 +8946,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Voir en _Icônes"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "Traitement par lots UFRaw"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Éditer un fichier UFRaw ID"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Traitement par lots UFRaw récursif"
-
 #, fuzzy
 #~ msgid "_Show Guidelines"
 #~ msgstr "Montrer les fichiers cachés"

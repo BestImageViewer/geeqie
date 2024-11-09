@@ -8886,15 +8886,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Гледај као _иконице"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "Пакетно развиј у НЛRaw-у"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Измени НЛRaw ИБ датотеку"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Пакетно развиј све садржано"
-
 #, fuzzy
 #~ msgid "_Show Guidelines"
 #~ msgstr "Прикажи скривено"

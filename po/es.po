@@ -8888,15 +8888,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Ver como _iconos"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "Lote UFRaw"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Editar archivo ID de UFRaw"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Lote UFRaw recursivo"
-
 #, fuzzy
 #~ msgid "_Show Guidelines"
 #~ msgstr "Mostrar ocultos"

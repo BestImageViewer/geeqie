@@ -8886,15 +8886,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "S_imge olarak görüntüle"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "UFRaw Yığını"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "UFRaw Kimlik dosyasını düzenle"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "UFRaw Toplu özyinelemeli"
-
 #, fuzzy
 #~ msgid "_Show Guidelines"
 #~ msgstr "Gizlileri göster"

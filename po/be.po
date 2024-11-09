@@ -9511,9 +9511,6 @@ msgstr ""
 #~ msgid "Xpaint"
 #~ msgstr "Xpaint"
 
-#~ msgid "UFraw"
-#~ msgstr "UFraw"
-
 #~ msgid "Rotate jpeg clockwise"
 #~ msgstr "Паварот jpeg па гадзіннікавай стрэлцы"
 

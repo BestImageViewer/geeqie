@@ -8675,15 +8675,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Показать как _пиктограммы"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "Пакетная обработка UFRaw"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Редактировать ID-файл UFRaw"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Рекурсивная пакетная обработка UFRaw"
-
 #~ msgid "_Show Guidelines"
 #~ msgstr "_Показать направляющие"
 
@@ -9204,9 +9195,6 @@ msgstr ""
 
 #~ msgid "Xpaint"
 #~ msgstr "Xpaint"
-
-#~ msgid "UFraw"
-#~ msgstr "UFRaw"
 
 #~ msgid "Add XMP sidecar"
 #~ msgstr "Добавить внешний файл XMP"

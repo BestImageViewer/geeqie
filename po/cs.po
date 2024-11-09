@@ -8630,15 +8630,6 @@ msgstr ""
 #~ msgid "View as _Icons"
 #~ msgstr "Zobrazit jako _ikony"
 
-#~ msgid "UFRaw Batch"
-#~ msgstr "Hromadné zpracování v UFRaw"
-
-#~ msgid "Edit UFRaw ID file"
-#~ msgstr "Upravit UFRaw ID soubor"
-
-#~ msgid "UFRaw Batch recursive"
-#~ msgstr "Hromadné zpracování adresáře v UFRaw"
-
 #, fuzzy
 #~ msgid "_Show Guidelines"
 #~ msgstr "Zobrazit skryté"
