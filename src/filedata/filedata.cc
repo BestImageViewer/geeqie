@@ -2820,48 +2820,43 @@ static void marks_get_files(gpointer key, gpointer value, gpointer userdata)
 
 gboolean FileData::marks_list_load(const gchar *path)
 {
-	FILE *f;
-	gchar s_buf[1024];
-	gchar *pathl;
-	gchar *file_path;
-	gchar *marks_value;
+	g_autofree gchar *pathl = path_from_utf8(path);
 
-	pathl = path_from_utf8(path);
-	f = fopen(pathl, "r");
-	g_free(pathl);
+	g_autoptr(FILE) f = fopen(pathl, "r");
 	if (!f) return FALSE;
+
+	gchar s_buf[1024];
 
 	/* first line must start with Marks comment */
 	if (!fgets(s_buf, sizeof(s_buf), f) ||
-					strncmp(s_buf, "#Marks", 6) != 0)
+	    strncmp(s_buf, "#Marks", 6) != 0)
 		{
-		fclose(f);
 		return FALSE;
 		}
 
 	while (fgets(s_buf, sizeof(s_buf), f))
 		{
 		if (s_buf[0]=='#') continue;
-			file_path = strtok(s_buf, ",");
-			marks_value = strtok(nullptr, ",");
-			if (isfile(file_path))
+
+		const gchar *file_path = strtok(s_buf, ",");
+		if (!isfile(file_path)) continue;
+
+		const gchar *marks_str = strtok(nullptr, ",");
+		const gint marks_value = atoi(marks_str); // marks_str is guaranteed to contain a non-zero number
+
+		FileData *fd = file_data_new_no_grouping(file_path);
+		::file_data_ref(fd);
+
+		for (gint n = 0; n <= 9; n++)
+			{
+			gint mark_no = 1 << n;
+			if (marks_value & mark_no)
 				{
-				FileData *fd = file_data_new_no_grouping(file_path);
-				::file_data_ref(fd);
-				gint n = 0;
-				while (n <= 9)
-					{
-					gint mark_no = 1 << n;
-					if (atoi(marks_value) & mark_no)
-						{
-						::file_data_set_mark(fd, n , 1);
-						}
-					n++;
-					}
+				::file_data_set_mark(fd, n, 1);
 				}
+			}
 		}
 
-	fclose(f);
 	return TRUE;
 }
 
