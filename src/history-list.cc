@@ -240,13 +240,12 @@ static gchar *quoted_from_text(const gchar *text)
 
 gboolean history_list_load(const gchar *path)
 {
-	FILE *f;
 	gchar *key = nullptr;
 	gchar s_buf[1024];
 	gchar *pathl;
 
 	pathl = path_from_utf8(path);
-	f = fopen(pathl, "r");
+	g_autoptr(FILE) f = fopen(pathl, "r");
 	g_free(pathl);
 	if (!f) return FALSE;
 
@@ -254,7 +253,6 @@ gboolean history_list_load(const gchar *path)
 	if (!fgets(s_buf, sizeof(s_buf), f) ||
 	    strncmp(s_buf, "#History", 8) != 0)
 		{
-		fclose(f);
 		return FALSE;
 		}
 
@@ -285,8 +283,6 @@ gboolean history_list_load(const gchar *path)
 			g_free(value);
 			}
 		}
-
-	fclose(f);
 
 	g_free(key);
 

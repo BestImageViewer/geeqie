@@ -1682,9 +1682,7 @@ gint autocomplete_sort_iter_compare_func (GtkTreeModel *model,
 
 void autocomplete_keywords_list_load(const gchar *path)
 {
-	FILE *f;
 	gchar s_buf[1024];
-	gchar *pathl;
 	gint len;
 	GtkTreeIter iter;
 	GtkTreeSortable *sortable;
@@ -1698,27 +1696,22 @@ void autocomplete_keywords_list_load(const gchar *path)
 
 	gtk_tree_sortable_set_sort_column_id(sortable, 0, GTK_SORT_ASCENDING);
 
-	pathl = path_from_utf8(path);
-	f = fopen(pathl, "r");
+	g_autofree gchar *pathl = path_from_utf8(path);
+	g_autoptr(FILE) f = fopen(pathl, "r");
 
 	if (!f)
 		{
 		log_printf("Warning: keywords file %s not loaded", pathl);
-		g_free(pathl);
 		return;
 		}
 
 	/* first line must start with Keywords comment */
 	if (!fgets(s_buf, sizeof(s_buf), f) ||
-					strncmp(s_buf, "#Keywords", 9) != 0)
+	    strncmp(s_buf, "#Keywords", 9) != 0)
 		{
-		fclose(f);
 		log_printf("Warning: keywords file %s not loaded", pathl);
-		g_free(pathl);
 		return;
 		}
-
-	g_free(pathl);
 
 	while (fgets(s_buf, sizeof(s_buf), f))
 		{
@@ -1732,8 +1725,6 @@ void autocomplete_keywords_list_load(const gchar *path)
 		gtk_list_store_append (keyword_store, &iter);
 		gtk_list_store_set(keyword_store, &iter, 0, g_strdup(s_buf), -1);
 		}
-
-	fclose(f);
 }
 
 gboolean autocomplete_keywords_list_save(const gchar *path)
