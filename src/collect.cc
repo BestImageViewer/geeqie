@@ -53,10 +53,11 @@
 #include "utilops.h"
 #include "window.h"
 
-enum {
-	COLLECT_DEF_WIDTH = 440,
-	COLLECT_DEF_HEIGHT = 450
-};
+namespace
+{
+
+constexpr gint COLLECT_DEF_WIDTH = 440;
+constexpr gint COLLECT_DEF_HEIGHT = 450;
 
 /**
  *  list of paths to collections */
@@ -66,14 +67,16 @@ enum {
  *
  * Type ::_CollectionData
  */
-static GList *collection_list = nullptr;
+GList *collection_list = nullptr;
 
 /**
  * @brief  List of currently open Collection windows.
  *
  * Type ::_CollectWindow
  */
-static GList *collection_window_list = nullptr;
+GList *collection_window_list = nullptr;
+
+} // namespace
 
 static void collection_window_get_geometry(CollectWindow *cw);
 static void collection_window_refresh(CollectWindow *cw);

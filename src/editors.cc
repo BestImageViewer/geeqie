@@ -43,12 +43,8 @@
 #include "ui-utildlg.h"
 #include "utilops.h"
 
-enum {
-	EDITOR_WINDOW_WIDTH = 500,
-	EDITOR_WINDOW_HEIGHT = 300
-};
-
-
+namespace
+{
 
 struct EditorVerboseData {
 	GenericDialog *gd;
@@ -73,6 +69,10 @@ struct EditorData {
 	gchar *working_directory; /* fallback if no files are given (editor_no_param) */
 };
 
+constexpr gint EDITOR_WINDOW_WIDTH = 500;
+constexpr gint EDITOR_WINDOW_HEIGHT = 300;
+
+} // namespace
 
 static void editor_verbose_window_progress(EditorData *ed, const gchar *text);
 static EditorFlags editor_command_next_start(EditorData *ed);

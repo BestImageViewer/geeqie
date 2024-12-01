@@ -35,12 +35,11 @@
 #include "ui-misc.h"
 #include "window.h"
 
+namespace
+{
 
-enum {
-	HELP_WINDOW_WIDTH = 650,
-	HELP_WINDOW_HEIGHT = 350
-};
-
+constexpr gint HELP_WINDOW_WIDTH = 650;
+constexpr gint HELP_WINDOW_HEIGHT = 350;
 
 /*
  *-----------------------------------------------------------------------------
@@ -50,7 +49,7 @@ enum {
 
 #define SCROLL_MARKNAME "scroll_point"
 
-static void help_window_scroll(GtkWidget *text, const gchar *key)
+void help_window_scroll(GtkWidget *text, const gchar *key)
 {
 	gchar *needle;
 	GtkTextBuffer *buffer;
@@ -93,7 +92,7 @@ static void help_window_scroll(GtkWidget *text, const gchar *key)
 	g_free(needle);
 }
 
-static void help_window_load_text(GtkWidget *text, const gchar *path)
+void help_window_load_text(GtkWidget *text, const gchar *path)
 {
 	gchar *pathl;
 	FILE *f;
@@ -153,17 +152,19 @@ static void help_window_load_text(GtkWidget *text, const gchar *path)
 	gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(text), &iter, 0.0, TRUE, 0, 0);
 }
 
-static gboolean help_window_delete_cb(GtkWidget *widget, GdkEventAny *, gpointer)
+gboolean help_window_delete_cb(GtkWidget *widget, GdkEventAny *, gpointer)
 {
 	gq_gtk_widget_destroy(widget);
 	return TRUE;
 }
 
-static void help_window_close(GtkWidget *, gpointer data)
+void help_window_close(GtkWidget *, gpointer data)
 {
 	auto window = static_cast<GtkWidget *>(data);
 	gq_gtk_widget_destroy(window);
 }
+
+} // namespace
 
 void help_window_set_key(GtkWidget *window, const gchar *key)
 {

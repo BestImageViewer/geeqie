@@ -91,10 +91,8 @@ constexpr gint DIALOG_WIDTH = 750;
 
 /** @FIXME It would be better if the window size was auto-adjusted.
  */
-enum RenameWindowDimensions {
-	RENAME_WINDOW_WIDTH = 625,
-	RENAME_WINDOW_HEIGHT = 635
-};
+constexpr gint RENAME_WINDOW_WIDTH = 625;
+constexpr gint RENAME_WINDOW_HEIGHT = 635;
 
 /* thumbnail spec has a max depth of 4 (.thumb??/fail/appname/??.png) */
 constexpr gint UTILITY_DELETE_MAX_DEPTH = 5;
