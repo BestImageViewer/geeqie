@@ -46,13 +46,6 @@
 #include "typedefs.h"
 #include "ui-fileops.h"
 
-namespace
-{
-
-constexpr gint IMAGE_OSD_DEFAULT_DURATION = 30;
-
-} // namespace
-
 struct HistMap;
 
 /*
@@ -61,6 +54,8 @@ struct HistMap;
  *----------------------------------------------------------------------------
  */
 
+namespace
+{
 
 struct OverlayStateData {
 	ImageWindow *imd;
@@ -85,7 +80,6 @@ struct OverlayStateData {
 	gulong destroy_id;
 };
 
-
 struct OSDIcon {
 	gboolean reset;	/* reset on new image */
 	gint x;		/* x, y offset */
@@ -93,7 +87,7 @@ struct OSDIcon {
 	gchar *key;	/* inline pixbuf */
 };
 
-static OSDIcon osd_icons[] = {
+const OSDIcon osd_icons[] = {
 	{  TRUE,   0,   0, nullptr },			/* none */
 	{  TRUE, -10, -10, nullptr },			/* auto rotated */
 	{  TRUE, -10, -10, nullptr },			/* user rotated */
@@ -104,12 +98,12 @@ static OSDIcon osd_icons[] = {
 	{ FALSE, 0, 0, nullptr }
 };
 
-#define OSD_DATA "overlay-data"
+constexpr gint HISTOGRAM_WIDTH = 256;
+constexpr gint HISTOGRAM_HEIGHT = 140;
 
-enum {
-	HISTOGRAM_HEIGHT = 140,
-	HISTOGRAM_WIDTH =  256
-};
+constexpr gint IMAGE_OSD_DEFAULT_DURATION = 30;
+
+} // namespace
 
 static void image_osd_timer_schedule(OverlayStateData *osd);
 

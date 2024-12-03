@@ -87,6 +87,9 @@ constexpr std::array<GtkTargetEntry, 4> target_types
 constexpr gint DIALOG_DEF_IMAGE_DIM_X = 150;
 constexpr gint DIALOG_DEF_IMAGE_DIM_Y = 100;
 
+constexpr gint UTILITY_LIST_MIN_WIDTH = 250;
+constexpr gint UTILITY_LIST_MIN_HEIGHT = 150;
+
 constexpr gint DIALOG_WIDTH = 750;
 
 /** @FIXME It would be better if the window size was auto-adjusted.
@@ -500,11 +503,6 @@ static void generic_dialog_image_set(UtilityData *ud, FileData *fd)
 }
 
 static gboolean file_util_write_metadata_first(UtilityType type, UtilityPhase phase, GList *flist, const gchar *dest_path, const gchar *editor_key, GtkWidget *parent);
-
-enum {
-	UTILITY_LIST_MIN_WIDTH =  250,
-	UTILITY_LIST_MIN_HEIGHT = 150
-};
 
 static UtilityData *file_util_data_new(UtilityType type)
 {
