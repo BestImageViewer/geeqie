@@ -233,7 +233,6 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 	gint year;
 	gint month = -1;
 	gint day = -1;
-	gchar *ptr;
 	gchar *mptr;
 	struct tm *lt;
 	time_t t;
@@ -243,7 +242,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 	if (!text) return FALSE;
 
-	ptr = const_cast<gchar *>(text);
+	const gchar *ptr = text;
 	while (*ptr != '\0')
 		{
 		if (!g_unichar_isdigit(*ptr) && !valid_date_separator(*ptr)) return FALSE;

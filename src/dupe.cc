@@ -641,10 +641,7 @@ static void dupe_listview_add(DupeWindow *dw, DupeItem *parent, DupeItem *child)
 		text[DUPE_COLUMN_RANK] = g_strdup_printf("%d%s", rank, (di->second) ? " (2)" : "");
 		}
 
-	text[DUPE_COLUMN_THUMB] = nullptr;
-	text[DUPE_COLUMN_NAME] = const_cast<gchar *>(di->fd->name);
 	text[DUPE_COLUMN_SIZE] = text_from_size(di->fd->size);
-	text[DUPE_COLUMN_DATE] = const_cast<gchar *>(text_from_time(di->fd->date));
 	if (di->width > 0 && di->height > 0)
 		{
 		text[DUPE_COLUMN_DIMENSIONS] = g_strdup_printf("%d x %d", di->width, di->height);
@@ -653,22 +650,20 @@ static void dupe_listview_add(DupeWindow *dw, DupeItem *parent, DupeItem *child)
 		{
 		text[DUPE_COLUMN_DIMENSIONS] = g_strdup("");
 		}
-	text[DUPE_COLUMN_PATH] = di->fd->path;
-	text[DUPE_COLUMN_COLOR] = nullptr;
 
 	gtk_list_store_insert(store, &iter, row);
 	gtk_list_store_set(store, &iter,
-				DUPE_COLUMN_POINTER, di,
-				DUPE_COLUMN_RANK, text[DUPE_COLUMN_RANK],
-				DUPE_COLUMN_THUMB, NULL,
-				DUPE_COLUMN_NAME, text[DUPE_COLUMN_NAME],
-				DUPE_COLUMN_SIZE, text[DUPE_COLUMN_SIZE],
-				DUPE_COLUMN_DATE, text[DUPE_COLUMN_DATE],
-				DUPE_COLUMN_DIMENSIONS, text[DUPE_COLUMN_DIMENSIONS],
-				DUPE_COLUMN_PATH, text[DUPE_COLUMN_PATH],
-				DUPE_COLUMN_COLOR, color_set,
-				DUPE_COLUMN_SET, dw->set_count,
-				-1);
+	                   DUPE_COLUMN_POINTER, di,
+	                   DUPE_COLUMN_RANK, text[DUPE_COLUMN_RANK],
+	                   DUPE_COLUMN_THUMB, NULL,
+	                   DUPE_COLUMN_NAME, di->fd->name,
+	                   DUPE_COLUMN_SIZE, text[DUPE_COLUMN_SIZE],
+	                   DUPE_COLUMN_DATE, text_from_time(di->fd->date),
+	                   DUPE_COLUMN_DIMENSIONS, text[DUPE_COLUMN_DIMENSIONS],
+	                   DUPE_COLUMN_PATH, di->fd->path,
+	                   DUPE_COLUMN_COLOR, color_set,
+	                   DUPE_COLUMN_SET, dw->set_count,
+	                   -1);
 
 	g_free(text[DUPE_COLUMN_RANK]);
 	g_free(text[DUPE_COLUMN_SIZE]);

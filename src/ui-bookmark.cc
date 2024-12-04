@@ -75,7 +75,7 @@ struct BookMarkData
 {
 	GtkWidget *widget;
 	GtkWidget *box;
-	const gchar *key;
+	gchar *key;
 
 	void (*select_func)(const gchar *path, gpointer data);
 	gpointer select_data;
@@ -331,24 +331,19 @@ static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent
 
 static void bookmark_move(BookMarkData *bm, GtkWidget *button, gint direction)
 {
-	BookButtonData *b;
-	gint p;
-	GList *list;
-	const gchar *key_holder;
-
 	if (!bm->editable) return;
 
-	b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
+	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
 	if (!b) return;
 
-	list = gtk_container_get_children(GTK_CONTAINER(bm->box));
-	p = g_list_index(list, button);
+	GList *list = gtk_container_get_children(GTK_CONTAINER(bm->box));
+	gint p = g_list_index(list, button);
 	g_list_free(list);
 
 	if (p < 0 || p + direction < 0) return;
 
-	key_holder = bm->key;
-	bm->key = "_TEMPHOLDER";
+	gchar *key_holder = bm->key;
+	bm->key = const_cast<gchar *>("_TEMPHOLDER");
 	history_list_item_move(key_holder, b->key, -direction);
 	bookmark_populate_all(key_holder);
 	bm->key = key_holder;
@@ -781,7 +776,7 @@ static void bookmark_list_destroy(gpointer data)
 
 	bookmark_widget_list = g_list_remove(bookmark_widget_list, bm);
 
-	g_free(const_cast<gchar *>(bm->key));
+	g_free(bm->key);
 	g_free(bm);
 }
 
@@ -849,7 +844,7 @@ void bookmark_list_set_key(GtkWidget *list, const gchar *key)
 
 	if (bm->key && strcmp(bm->key, key) == 0) return;
 
-	g_free(const_cast<gchar *>(bm->key));
+	g_free(bm->key);
 	bm->key = g_strdup(key);
 
 	bookmark_populate(bm);

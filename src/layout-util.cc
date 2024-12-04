@@ -2107,7 +2107,6 @@ static void layout_menu_collection_recent_update(LayoutWindow *lw)
 
 static void layout_menu_collection_open_update(LayoutWindow *lw)
 {
-	gboolean free_name = FALSE;
 	gchar *name;
 	gint n;
 	GList *collection_list = nullptr;
@@ -2127,20 +2126,20 @@ static void layout_menu_collection_open_update(LayoutWindow *lw)
 	work = collection_list;
 	while (work)
 		{
-		const gchar *filename = static_cast<gchar *>(work->data);
+		auto *filename = static_cast<gchar *>(work->data);
 
-		if (file_extension_match(filename, GQ_COLLECTION_EXT))
+		const gboolean has_extension = file_extension_match(filename, GQ_COLLECTION_EXT);
+		if (has_extension)
 			{
 			name = remove_extension_from_path(filename);
-			free_name = TRUE;
 			}
 		else
 			{
-			name = const_cast<gchar *>(filename);
+			name = filename;
 			}
 
 		item = menu_item_add_simple(menu, name, G_CALLBACK(layout_menu_open_cb), lw);
-		if (free_name)
+		if (has_extension)
 			{
 			g_free(name);
 			}
