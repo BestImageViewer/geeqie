@@ -147,6 +147,8 @@ GOptionEntry command_line_options[] =
 	{ "debug"                     ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_INT   , nullptr, _("turn on debug output")                                                        , "[level]" },
 #endif
 	{ "delay"                     , 'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("set slide show delay to Hrs Mins N.M seconds,")                               , "<[H:][M:][N][.M]>" },
+	{ "duplicates-program"        ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("run program with each identified set of duplicate images, by default 'echo'") , "<PROGRAM>" },
+	{ "duplicates-threshold"      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,    nullptr, _("set similarity threshold (0-100) for what is considered a duplicate")         , "<N>" },
 	{ "file"                      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL bring Geeqie window to the top")                             , "<FILE>|<URL>" },
 	{ "File"                      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL do not bring Geeqie window to the top")                      , "<FILE>|<URL>" },
 	{ "file-extensions"           ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("list known file extensions")                                                  , nullptr },
@@ -175,6 +177,7 @@ GOptionEntry command_line_options[] =
 	{ "next"                      , 'n', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("next image")                                                                  , nullptr },
 	{ "pixel-info"                ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("print pixel info of mouse pointer on current image")                          , nullptr },
 	{ "print0"                    ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("terminate returned data with null character instead of newline")              , nullptr },
+	{ "process-duplicates"        , 'p', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("group duplicate pictures in current collection and process them")             , nullptr },
 	{ "quit"                      , 'q', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("quit")                                                                        , nullptr },
 	{ "raise"                     ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("bring the Geeqie window to the top")                                          , nullptr },
 	{ "selection-add"             ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("adds the current file (or the specified file) to the current selection")      ,"[<FILE>]" },
