@@ -1697,10 +1697,6 @@ msgstr "Šířka"
 msgid "Height"
 msgstr "Délka"
 
-#: src/dupe.cc:5150
-msgid "Path\n"
-msgstr "Cesta\n"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

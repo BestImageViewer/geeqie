@@ -1991,12 +1991,6 @@ msgstr "Leveys"
 msgid "Height"
 msgstr "Korkeus"
 
-# src/dupe.cc:1657 src/dupe.cc:1945
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Polku"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

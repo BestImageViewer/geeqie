@@ -1721,10 +1721,6 @@ msgstr "Breedte"
 msgid "Height"
 msgstr "Hoogte"
 
-#: src/dupe.cc:5150
-msgid "Path\n"
-msgstr "Pad\n"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

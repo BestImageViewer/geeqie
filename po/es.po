@@ -1748,11 +1748,6 @@ msgstr "Anchura"
 msgid "Height"
 msgstr "Altura"
 
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Ruta"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

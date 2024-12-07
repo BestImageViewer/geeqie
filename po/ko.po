@@ -1697,10 +1697,6 @@ msgstr "너비"
 msgid "Height"
 msgstr "높이"
 
-#: src/dupe.cc:5150
-msgid "Path\n"
-msgstr "경로\n"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

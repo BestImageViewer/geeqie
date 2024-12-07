@@ -1735,11 +1735,6 @@ msgstr "Πλάτος"
 msgid "Height"
 msgstr "Ύψος"
 
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Διαδρομή"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

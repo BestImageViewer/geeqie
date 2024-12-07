@@ -1773,11 +1773,6 @@ msgstr "Larĝo"
 msgid "Height"
 msgstr "Alto"
 
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Raŭto"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

@@ -1816,11 +1816,6 @@ msgstr ""
 msgid "Height"
 msgstr ""
 
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Mål"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

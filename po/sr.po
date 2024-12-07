@@ -1740,11 +1740,6 @@ msgstr "Ширина"
 msgid "Height"
 msgstr "Висина"
 
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Путања"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

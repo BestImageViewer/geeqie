@@ -1769,11 +1769,6 @@ msgstr "Rộng"
 msgid "Height"
 msgstr "Cao"
 
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Đường dẫn"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

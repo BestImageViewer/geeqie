@@ -1748,11 +1748,6 @@ msgstr "Genişlik"
 msgid "Height"
 msgstr "Yükseklik"
 
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Yol"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

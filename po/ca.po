@@ -1716,10 +1716,6 @@ msgstr "Amplada"
 msgid "Height"
 msgstr "Alçada"
 
-#: src/dupe.cc:5150
-msgid "Path\n"
-msgstr "Camí\n"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

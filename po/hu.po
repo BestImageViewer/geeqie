@@ -2028,12 +2028,6 @@ msgstr "Szélesség"
 msgid "Height"
 msgstr "Magasság"
 
-# src/dupe.cc:1657 src/dupe.cc:1945
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Elérési út"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

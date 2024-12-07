@@ -1710,10 +1710,6 @@ msgstr "Ширина"
 msgid "Height"
 msgstr "Высота"
 
-#: src/dupe.cc:5150
-msgid "Path\n"
-msgstr "Путь\n"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr "Экспорт данных дубликатов"

@@ -1701,10 +1701,6 @@ msgstr "Bredd"
 msgid "Height"
 msgstr "Höjd"
 
-#: src/dupe.cc:5150
-msgid "Path\n"
-msgstr "Sökväg\n"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr "Exportera dubblett-data"

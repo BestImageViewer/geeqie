@@ -1771,11 +1771,6 @@ msgstr "Zabalera"
 msgid "Height"
 msgstr "Altuera"
 
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "Bidea"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

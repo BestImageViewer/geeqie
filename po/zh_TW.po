@@ -2019,12 +2019,6 @@ msgstr "寬度"
 msgid "Height"
 msgstr "高度"
 
-# src/dupe.cc:1657 src/dupe.cc:1945
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "路徑"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

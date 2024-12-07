@@ -1790,11 +1790,6 @@ msgstr "العرض"
 msgid "Height"
 msgstr "الإرتفاع"
 
-#: src/dupe.cc:5150
-#, fuzzy
-msgid "Path\n"
-msgstr "المسار"
-
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
 msgstr ""

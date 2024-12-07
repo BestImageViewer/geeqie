@@ -5116,7 +5116,6 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 	DupeItem *di;
 	GFileOutputStream *gfstream;
 	GFile *out_file;
-	GString *output_string;
 	gchar* rank;
 	GList *work;
 	GtkTreeSelection *selection;
@@ -5142,7 +5141,10 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 		}
 
 	const gchar *sep = (edd->separator == EXPORT_CSV) ?  "," : "\t";
-	output_string = g_string_new(g_strjoin(sep, _("Match"), _("Group"), _("Similarity"), _("Set"), _("Thumbnail"), _("Name"), _("Size"), _("Date"), _("Width"), _("Height"), _("Path\n"), NULL));
+	g_autofree gchar *header = g_strjoin(sep, _("Match"), _("Group"), _("Similarity"), _("Set"), _("Thumbnail"), _("Name"), _("Size"), _("Date"), _("Width"), _("Height"), _("Path"), NULL);
+
+	g_autoptr(GString) output_string = g_string_new(header);
+	output_string = g_string_append_c(output_string, '\n');
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(edd->dupewindow->listview));
 	slist = gtk_tree_selection_get_selected_rows(selection, &store);
@@ -5230,7 +5232,6 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 
 	g_output_stream_write(G_OUTPUT_STREAM(gfstream), output_string->str, output_string->len, nullptr, &error);
 
-	g_string_free(output_string, TRUE);
 	g_object_unref(gfstream);
 	g_object_unref(out_file);
 
