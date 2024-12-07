@@ -21,19 +21,18 @@
 #ifndef OSD_H
 #define OSD_H
 
+#include <string>
+#include <unordered_map>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
 class FileData;
 
-enum OsdTemplateFlags {
-	OSDT_NONE 	= 0,
-	OSDT_FREE 	= 1 << 0,
-	OSDT_NO_DUP 	= 1 << 1
-};
+using OsdTemplate = std::unordered_map<std::string, std::string>;
 
 GtkWidget *osd_new(gint max_cols, GtkWidget *template_view);
-gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars);
-void osd_template_insert(GHashTable *vars, const gchar *keyword, const gchar *value, OsdTemplateFlags flags);
+gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars);
+void osd_template_insert(OsdTemplate &vars, const gchar *keyword, const gchar *value);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

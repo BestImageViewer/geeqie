@@ -28,6 +28,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <stdexcept>
 
 #include <gdk/gdk.h>
 #include <glib-object.h>
@@ -245,7 +246,7 @@ static gchar *keywords_to_string(FileData *fd)
 	return nullptr;
 }
 
-gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
+gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)
 {
 	gchar delim = '%';
 	gchar imp = '|';
@@ -343,9 +344,14 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 #endif
 		else
 			{
-			data = g_strdup(static_cast<const gchar *>(g_hash_table_lookup(vars, static_cast<gconstpointer>(name))));
-			if (!data)
+			try
+				{
+				data = g_strdup(vars.at(name).c_str());
+				}
+			catch (const std::out_of_range &)
+				{
 				data = metadata_read_string(fd, name, METADATA_FORMATTED);
+				}
 			}
 
 		if (data && *data && limit > 0 && strlen(data) > limit + 3)
@@ -463,22 +469,8 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, GHashTable *vars)
 	return g_strchomp(ret);
 }
 
-void osd_template_insert(GHashTable *vars, const gchar *keyword, const gchar *value, OsdTemplateFlags flags)
+void osd_template_insert(OsdTemplate &vars, const gchar *keyword, const gchar *value)
 {
-	if (!value)
-		{
-		g_hash_table_insert(vars, const_cast<gchar *>(keyword), g_strdup(""));
-		return;
-		}
-
-	if (flags & OSDT_NO_DUP)
-		{
-		g_hash_table_insert(vars, const_cast<gchar *>(keyword), const_cast<gchar *>(value));
-		return;
-		}
-
-	g_hash_table_insert(vars, const_cast<gchar *>(keyword), g_strdup(value));
-
-	if (flags & OSDT_FREE) g_free(const_cast<gchar *>(value));
+	vars[keyword] = value ? value : "";
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -258,9 +258,7 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 		gint t;
 		CollectionData *cd;
 		CollectInfo *info;
-		GHashTable *vars;
-
-		vars = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, g_free);
+		OsdTemplate vars;
 
 		cd = image_get_collection(imd, &info);
 		if (cd)
@@ -270,13 +268,18 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 			if (cd->name)
 				{
 				if (file_extension_match(cd->name, GQ_COLLECTION_EXT))
-					osd_template_insert(vars, "collection", remove_extension_from_path(cd->name), OSDT_FREE);
+					{
+					g_autofree gchar *collection_str = remove_extension_from_path(cd->name);
+					osd_template_insert(vars, "collection", collection_str);
+					}
 				else
-					osd_template_insert(vars, "collection", cd->name, OSDT_NONE);
+					{
+					osd_template_insert(vars, "collection", cd->name);
+					}
 				}
 			else
 				{
-				osd_template_insert(vars, "collection", _("Untitled"), OSDT_NONE);
+				osd_template_insert(vars, "collection", _("Untitled"));
 				}
 			}
 		else
@@ -309,16 +312,20 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 			if (n < 1) n = 1;
 			if (t < 1) t = 1;
 
-			osd_template_insert(vars, "collection", nullptr, OSDT_NONE);
+			osd_template_insert(vars, "collection", nullptr);
 			}
 
-		osd_template_insert(vars, "number", g_strdup_printf("%d", n), OSDT_NO_DUP);
-		osd_template_insert(vars, "total", g_strdup_printf("%d", t), OSDT_NO_DUP);
-		osd_template_insert(vars, "name", name, OSDT_NONE);
-		osd_template_insert(vars, "path", image_get_path(imd), OSDT_NONE);
-		osd_template_insert(vars, "date", imd->image_fd ? text_from_time(imd->image_fd->date) : "", OSDT_NONE);
-		osd_template_insert(vars, "size", imd->image_fd ? text_from_size_abrev(imd->image_fd->size) : g_strdup(""), OSDT_FREE);
-		osd_template_insert(vars, "zoom", image_zoom_get_as_text(imd), OSDT_FREE);
+		osd_template_insert(vars, "number", std::to_string(n).c_str());
+		osd_template_insert(vars, "total", std::to_string(t).c_str());
+		osd_template_insert(vars, "name", name);
+		osd_template_insert(vars, "path", image_get_path(imd));
+		osd_template_insert(vars, "date", imd->image_fd ? text_from_time(imd->image_fd->date) : "");
+
+		g_autofree gchar *size_str = imd->image_fd ? text_from_size_abrev(imd->image_fd->size) : nullptr;
+		osd_template_insert(vars, "size", size_str);
+
+		g_autofree gchar *zoom_str = image_zoom_get_as_text(imd);
+		osd_template_insert(vars, "zoom", zoom_str);
 
 		if (!imd->unknown)
 			{
@@ -339,20 +346,20 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 				}
 
 
-			osd_template_insert(vars, "width", g_strdup_printf("%d", w), OSDT_NO_DUP);
-	 		osd_template_insert(vars, "height", g_strdup_printf("%d", h), OSDT_NO_DUP);
-	 		osd_template_insert(vars, "res", g_strdup_printf("%d × %d", w, h), OSDT_FREE);
+			osd_template_insert(vars, "width", std::to_string(w).c_str());
+			osd_template_insert(vars, "height", std::to_string(h).c_str());
+
+			g_autofree gchar *res_str = g_strdup_printf("%d × %d", w, h);
+			osd_template_insert(vars, "res", res_str);
 	 		}
 		else
 			{
-			osd_template_insert(vars, "width", nullptr, OSDT_NONE);
-	 		osd_template_insert(vars, "height", nullptr, OSDT_NONE);
-	 		osd_template_insert(vars, "res", nullptr, OSDT_NONE);
+			osd_template_insert(vars, "width", nullptr);
+			osd_template_insert(vars, "height", nullptr);
+			osd_template_insert(vars, "res", nullptr);
 			}
 
 		text = image_osd_mkinfo(options->image_overlay.template_string, imd->image_fd, vars);
-		g_hash_table_destroy(vars);
-
 	} else {
 		/* When does this occur ?? */
 		text = g_markup_escape_text(_("Untitled"), -1);

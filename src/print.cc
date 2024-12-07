@@ -436,38 +436,25 @@ gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)
 
 gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *pw, gint page_nr, gint total)
 {
-	gchar *text = nullptr;
-	GHashTable *vars;
-	gchar *window_title;
-	gchar *delimiter;
-	gchar *collection_name;
-
 	if (!fd) return nullptr;
 
-	vars = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, g_free);
+	OsdTemplate vars;
 
-	window_title = g_strdup(gtk_window_get_title(GTK_WINDOW(pw->parent)));
-	delimiter = g_strstr_len(window_title, -1, " - Collection - ");
+	const gchar *window_title = gtk_window_get_title(GTK_WINDOW(pw->parent));
+	gchar *delimiter = g_strstr_len(window_title, -1, " - Collection - ");
 	if (delimiter)
 		{
-		collection_name = g_strndup(window_title, delimiter - window_title);
-		}
-	else
-		{
-		collection_name = nullptr;
-		}
-	g_free(window_title);
-
-	if (collection_name)
-		{
-		osd_template_insert(vars, "collection", collection_name, OSDT_NONE);
+		g_autofree gchar *collection_name = g_strndup(window_title, delimiter - window_title);
+		osd_template_insert(vars, "collection", collection_name);
 		}
 
-	osd_template_insert(vars, "number", g_strdup_printf("%d", page_nr + 1), OSDT_NO_DUP);
-	osd_template_insert(vars, "total", g_strdup_printf("%d", total), OSDT_NO_DUP);
-	osd_template_insert(vars, "name", fd->name, OSDT_NONE);
-	osd_template_insert(vars, "date", text_from_time(fd->date), OSDT_NONE);
-	osd_template_insert(vars, "size", text_from_size_abrev(fd->size), OSDT_FREE);
+	osd_template_insert(vars, "number", std::to_string(page_nr + 1).c_str());
+	osd_template_insert(vars, "total", std::to_string(total).c_str());
+	osd_template_insert(vars, "name", fd->name);
+	osd_template_insert(vars, "date", text_from_time(fd->date));
+
+	g_autofree gchar *size_str = text_from_size_abrev(fd->size);
+	osd_template_insert(vars, "size", size_str);
 
 	if (fd->pixbuf)
 		{
@@ -476,23 +463,20 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 		w = gdk_pixbuf_get_width(fd->pixbuf);
 		h = gdk_pixbuf_get_height(fd->pixbuf);
 
-		osd_template_insert(vars, "width", g_strdup_printf("%d", w), OSDT_NO_DUP);
- 		osd_template_insert(vars, "height", g_strdup_printf("%d", h), OSDT_NO_DUP);
- 		osd_template_insert(vars, "res", g_strdup_printf("%d × %d", w, h), OSDT_FREE);
+		osd_template_insert(vars, "width", std::to_string(w).c_str());
+		osd_template_insert(vars, "height", std::to_string(h).c_str());
+
+		g_autofree gchar *res_str = g_strdup_printf("%d × %d", w, h);
+		osd_template_insert(vars, "res", res_str);
  		}
 	else
 		{
-		osd_template_insert(vars, "width", nullptr, OSDT_NONE);
- 		osd_template_insert(vars, "height", nullptr, OSDT_NONE);
- 		osd_template_insert(vars, "res", nullptr, OSDT_NONE);
+		osd_template_insert(vars, "width", nullptr);
+		osd_template_insert(vars, "height", nullptr);
+		osd_template_insert(vars, "res", nullptr);
 		}
 
-	text = image_osd_mkinfo(template_string, fd, vars);
-	g_hash_table_destroy(vars);
-
-	g_free(collection_name);
-
-	return text;
+	return image_osd_mkinfo(template_string, fd, vars);
 }
 
 gchar *print_get_page_text(const PrintWindow *pw)
