@@ -699,6 +699,7 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 	if (error_code.code)
 		{
 		log_printf("warning: heif reader error: %s\n", error_code.message);
+		heif_image_handle_release(handle);
 		heif_context_free(ctx);
 		return nullptr;
 		}
@@ -715,12 +716,14 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 		if (error_code.code)
 			{
 			log_printf("warning: heif reader error: %s\n", error_code.message);
+			heif_image_handle_release(handle);
 			heif_context_free(ctx);
 			heif_nclx_color_profile_free(nclxcp);
 			return nullptr;
 			}
 
 		DEBUG_1("heif color profile type: prof");
+		heif_image_handle_release(handle);
 		heif_context_free(ctx);
 		heif_nclx_color_profile_free(nclxcp);
 
@@ -730,7 +733,11 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 	error_code = heif_image_handle_get_nclx_color_profile(handle, &nclxcp);
 	if (error_code.code)
 		{
-		log_printf("warning: heif reader error: %s\n", error_code.message);
+		if (error_code.code != heif_error_Color_profile_does_not_exist)
+			{
+			log_printf("warning: heif reader error: %d (%s)\n", error_code.code, error_code.message);
+			}
+		heif_image_handle_release(handle);
 		heif_context_free(ctx);
 		heif_nclx_color_profile_free(nclxcp);
 		return nullptr;
@@ -738,6 +745,7 @@ guchar *heif_color_profile(FileData *fd, guint *profile_len)
 
 	profile = nclx_to_lcms_profile(nclxcp, profile_len);
 
+	heif_image_handle_release(handle);
 	heif_context_free(ctx);
 	heif_nclx_color_profile_free(nclxcp);
 
