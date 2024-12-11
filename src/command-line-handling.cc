@@ -411,43 +411,7 @@ void gq_delay(GtkApplication *, GApplicationCommandLine *app_command_line, GVari
 	options->slideshow.delay = static_cast<gint>(n * 10.0 + 0.01);
 }
 
-void gq_duplicates_threshold(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
-{
-	const gint thresh_min = 0;
-	const gint thresh_max = 100;
-	gint thresh = 0;
-	gboolean res;
-
-	res = g_variant_dict_lookup(command_line_options_dict, "duplicates-threshold", "i", &thresh);
-	if (res)
-		{
-		if (thresh < thresh_min || thresh > thresh_max)
-			{
-			printf_term(TRUE, "Image similarity threshold " BOLD_ON "%d" BOLD_OFF " out of range (%d to %d)\n", thresh, thresh_min, thresh_max);
-			return;
-			}
-		}
-	else
-		{
-		thresh = 99;
-		}
-
-	options->duplicates_similarity_threshold = static_cast<guint>(thresh);
-	DEBUG_1("threshold set to %d", options->duplicates_similarity_threshold);
-}
-
-void gq_duplicates_program(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
-{
-	gchar *text = nullptr;
-
-	g_variant_dict_lookup(command_line_options_dict, "duplicates-program", "&s", &text);
-
-	g_free(options->duplicates_program);
-	options->duplicates_program = g_strdup(text);
-	DEBUG_1("duplicates program set to \"%s\"", options->duplicates_program);
-}
-
-void gq_process_duplicates(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *file_list)
+void gq_duplicates_process(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *file_list)
 {
 	std::map<std::string, std::unique_ptr<pic_equiv>> pics;
 	for (GList *work = file_list; work; work = work->next)
@@ -517,6 +481,42 @@ void gq_process_duplicates(GtkApplication *, GApplicationCommandLine *, GVariant
 				}
 			}
 		}
+}
+
+void gq_duplicates_program(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	gchar *text = nullptr;
+
+	g_variant_dict_lookup(command_line_options_dict, "duplicates-program", "&s", &text);
+
+	g_free(options->duplicates_program);
+	options->duplicates_program = g_strdup(text);
+	DEBUG_1("duplicates program set to \"%s\"", options->duplicates_program);
+}
+
+void gq_duplicates_threshold(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
+{
+	const gint thresh_min = 0;
+	const gint thresh_max = 100;
+	gint thresh = 0;
+	gboolean res;
+
+	res = g_variant_dict_lookup(command_line_options_dict, "duplicates-threshold", "i", &thresh);
+	if (res)
+		{
+		if (thresh < thresh_min || thresh > thresh_max)
+			{
+			printf_term(TRUE, "Image similarity threshold " BOLD_ON "%d" BOLD_OFF " out of range (%d to %d)\n", thresh, thresh_min, thresh_max);
+			return;
+			}
+		}
+	else
+		{
+		thresh = 99;
+		}
+
+	options->duplicates_similarity_threshold = static_cast<guint>(thresh);
+	DEBUG_1("threshold set to %d", options->duplicates_similarity_threshold);
 }
 
 void file_load_no_raise(const gchar *text, GApplicationCommandLine *app_command_line)
@@ -1599,6 +1599,7 @@ CommandLineOptionEntry command_line_options[] =
 	{ "debug",                       gq_debug,                       PRIMARY_REMOTE, GUI  },
 #endif
 	{ "delay",                       gq_delay,                       PRIMARY_REMOTE, GUI  },
+	{ "duplicates-process",          gq_duplicates_process,          PRIMARY_REMOTE, TEXT },
 	{ "duplicates-program",          gq_duplicates_program,          PRIMARY_REMOTE, GUI  },
 	{ "duplicates-threshold",        gq_duplicates_threshold,        PRIMARY_REMOTE, GUI  },
 	{ "file",                        gq_file,                        PRIMARY_REMOTE, GUI  },
@@ -1627,7 +1628,6 @@ CommandLineOptionEntry command_line_options[] =
 	{ "new-window",                  gq_new_window,                  PRIMARY_REMOTE, GUI  },
 	{ "next",                        gq_next,                        PRIMARY_REMOTE, GUI  },
 	{ "pixel-info",                  gq_pixel_info,                  REMOTE        , N_A  },
-	{ "process-duplicates",          gq_process_duplicates,          PRIMARY_REMOTE, TEXT },
 	{ "quit",                        gq_quit,                        PRIMARY_REMOTE, GUI  },
 	{ "raise",                       gq_raise,                       PRIMARY_REMOTE, GUI  },
 	{ "selection-add",               gq_selection_add,               REMOTE        , N_A  },
