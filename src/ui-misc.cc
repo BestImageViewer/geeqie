@@ -1052,9 +1052,7 @@ static GList *pref_list_find(const gchar *group, const gchar *token)
 
 static gboolean pref_list_get(const gchar *group, const gchar *key, const gchar *marker, const gchar **result)
 {
-	gchar *token;
 	GList *work;
-	gboolean ret;
 
 	if (!group || !key || !marker)
 		{
@@ -1062,36 +1060,28 @@ static gboolean pref_list_get(const gchar *group, const gchar *key, const gchar 
 		return FALSE;
 		}
 
-	token = g_strconcat(key, marker, NULL);
+	g_autofree gchar *token = g_strconcat(key, marker, NULL);
 
 	work = pref_list_find(group, token);
-	if (work)
-		{
-		*result = static_cast<const gchar *>(work->data) + strlen(token);
-		if (*result[0] == '\0') *result = nullptr;
-		ret = TRUE;
-		}
-	else
+	if (!work)
 		{
 		*result = nullptr;
-		ret = FALSE;
+		return FALSE;
 		}
 
-	g_free(token);
-
-	return ret;
+	*result = static_cast<const gchar *>(work->data) + strlen(token);
+	if (*result[0] == '\0') *result = nullptr;
+	return TRUE;
 }
 
 static void pref_list_set(const gchar *group, const gchar *key, const gchar *marker, const gchar *text)
 {
-	gchar *token;
-	gchar *path;
 	GList *work;
 
 	if (!group || !key || !marker) return;
 
-	token = g_strconcat(key, marker, NULL);
-	path = g_strconcat(token, text, NULL);
+	g_autofree gchar *token = g_strconcat(key, marker, NULL);
+	g_autofree gchar *path = g_strconcat(token, text, NULL);
 
 	work = pref_list_find(group, token);
 	if (work)
@@ -1100,8 +1090,7 @@ static void pref_list_set(const gchar *group, const gchar *key, const gchar *mar
 
 		if (text)
 			{
-			work->data = path;
-			path = nullptr;
+			work->data = g_steal_pointer(&path);
 
 			g_free(old_path);
 			}
@@ -1114,9 +1103,6 @@ static void pref_list_set(const gchar *group, const gchar *key, const gchar *mar
 		{
 		history_list_add_to_key(group, path, 0);
 		}
-
-	g_free(path);
-	g_free(token);
 }
 
 void pref_list_int_set(const gchar *group, const gchar *key, gint value)

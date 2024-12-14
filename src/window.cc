@@ -111,7 +111,7 @@ gchar *HtmlBrowser::command_result() const
 
 GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *icon_file, const gchar *subtitle)
 {
-	gchar *title;
+	g_autofree gchar *title = nullptr;
 	GtkWidget *window;
 
 #if HAVE_GTK4
@@ -131,7 +131,6 @@ GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *icon_fi
 		}
 
 	gtk_window_set_title(GTK_WINDOW(window), title);
-	g_free(title);
 
 	window_set_icon(window, icon, icon_file);
 	gtk_window_set_role(GTK_WINDOW(window), role);
@@ -183,8 +182,7 @@ gboolean window_maximized(GtkWidget *window)
 
 static int help_browser_command(const gchar *command, const gchar *path)
 {
-	gchar *result;
-	gchar *buf;
+	g_autofree gchar *result = nullptr;
 	gchar *begin;
 	gchar *end;
 	int retval = -1;
@@ -193,7 +191,7 @@ static int help_browser_command(const gchar *command, const gchar *path)
 
 	DEBUG_1("Help command pre \"%s\", \"%s\"", command, path);
 
-	buf = g_strdup(command);
+	g_autofree gchar *buf = g_strdup(command);
 	begin = strstr(buf, "%s");
 	if (begin)
 		{
@@ -207,14 +205,12 @@ static int help_browser_command(const gchar *command, const gchar *path)
 		{
 		result = g_strdup_printf("%s \"%s\" &", command, path);
 		}
-	g_free(buf);
 
 	DEBUG_1("Help command post [%s]", result);
 
 	retval = runcmd(result);
 	DEBUG_1("Help command exit code: %d", retval);
 
-	g_free(result);
 	return retval;
 }
 
@@ -258,13 +254,12 @@ static void help_window_destroy_cb(GtkWidget *, gpointer)
 
 void help_window_show(const gchar *key)
 {
-	gchar *path;
-
 	if (key && strstr(key, ".html") != nullptr)
 		{
-		path = g_build_filename(gq_htmldir, key, NULL);
+		g_autofree gchar *path = g_build_filename(gq_htmldir, key, NULL);
 		if (!isfile(path))
 			{
+			g_free(path);
 			if (g_strcmp0(key, "index.html") == 0)
 				{
 				path = g_build_filename("https://www.geeqie.org/help/", "GuideIndex.html", NULL);
@@ -275,7 +270,6 @@ void help_window_show(const gchar *key)
 				}
 			}
 		help_browser_run(path);
-		g_free(path);
 		return;
 		}
 
@@ -288,20 +282,18 @@ void help_window_show(const gchar *key)
 
 	if (!strcmp(key, "release_notes"))
 		{
-		path = g_build_filename(gq_helpdir, "README.html", NULL);
+		g_autofree gchar *path = g_build_filename(gq_helpdir, "README.html", NULL);
 		if (isfile(path))
 			{
 			g_free(path);
 			path = g_build_filename("file://", gq_helpdir, "README.html", NULL);
 			help_browser_run(path);
-			g_free(path);
 			}
 		else
 			{
 			g_free(path);
 			path = g_build_filename(gq_helpdir, "README.md", NULL);
 			help_window = help_window_new(_("Help"), "help", path, key);
-			g_free(path);
 
 			g_signal_connect(G_OBJECT(help_window), "destroy",
 					 G_CALLBACK(help_window_destroy_cb), NULL);
@@ -309,25 +301,22 @@ void help_window_show(const gchar *key)
 		}
 	else
 		{
-		path = g_build_filename(gq_helpdir, "ChangeLog.html", NULL);
+		g_autofree gchar *path = g_build_filename(gq_helpdir, "ChangeLog.html", NULL);
 		if (isfile(path))
 			{
 			g_free(path);
 			path = g_build_filename("file://", gq_helpdir, "ChangeLog.html", NULL);
 			help_browser_run(path);
-			g_free(path);
 			}
 		else
 			{
 			g_free(path);
 			path = g_build_filename(gq_helpdir, "ChangeLog", NULL);
 			help_window = help_window_new(_("Help"), "help", path, key);
-			g_free(path);
 
 			g_signal_connect(G_OBJECT(help_window), "destroy",
 					 G_CALLBACK(help_window_destroy_cb), NULL);
 			}
-
 		}
 }
 
@@ -355,22 +344,18 @@ static void help_search_window_show_icon_press(GtkEntry *, GtkEntryIconPosition,
 static void help_search_window_ok_cb(GenericDialog *, gpointer data)
 {
 	auto hsd = static_cast<HelpSearchData *>(data);
-	gchar *search_command;
 
-	search_command = g_strconcat(options->help_search_engine,
-						gq_gtk_entry_get_text(GTK_ENTRY(hsd->edit_widget)),
-						NULL);
+	g_autofree gchar *search_command = g_strconcat(options->help_search_engine,
+	                                               gq_gtk_entry_get_text(GTK_ENTRY(hsd->edit_widget)),
+	                                               NULL);
 	help_browser_run(search_command);
-	g_free(search_command);
 
 	g_free(hsd);
 }
 
 static void help_search_window_cancel_cb(GenericDialog *, gpointer data)
 {
-	auto hsd = static_cast<HelpSearchData *>(data);
-
-	g_free(hsd);
+	g_free(data);
 }
 
 void help_search_window_show()
@@ -421,26 +406,21 @@ void help_search_window_show()
 
 void help_pdf()
 {
-	GError *error = nullptr;
-	gchar *path;
-	gchar *command;
-
-	path = g_build_filename(gq_helpdir, "help.pdf", NULL);
+	g_autofree gchar *path = g_build_filename(gq_helpdir, "help.pdf", NULL);
 
 	if (!isfile(path))
 		{
+		g_free(path);
 		path = g_build_filename("https://www.geeqie.org/help-pdf/help.pdf", NULL);
 		}
 
-	command = g_strdup_printf("xdg-open %s", path);
+	g_autofree gchar *command = g_strdup_printf("xdg-open %s", path);
+	GError *error = nullptr;
 
 	if (!g_spawn_command_line_async(command, &error))
 		{
 		log_printf(_("Warning: Failed to execute command: %s\n"), error->message);
 		g_error_free(error);
 		}
-
-	g_free(path);
-	g_free(command);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -1939,9 +1939,8 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 
 			if (fd->sidecar_files)
 				{
-				gchar *sidecars = file_data_sc_list_to_string(fd);
+				g_autofree gchar *sidecars = file_data_sc_list_to_string(fd);
 				g_string_append_printf(name_sidecars, " %s", sidecars);
-				g_free(sidecars);
 				}
 			else if (fd->disable_grouping)
 				{
@@ -1956,9 +1955,8 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 				name_sidecars = g_string_append_c(name_sidecars, '\n');
 				}
 
-			gchar *star_rating = (fd->rating != STAR_RATING_NOT_READ) ? convert_rating_to_stars(fd->rating) : nullptr;
+			g_autofree gchar *star_rating = (fd->rating != STAR_RATING_NOT_READ) ? convert_rating_to_stars(fd->rating) : nullptr;
 			name_sidecars = g_string_append(name_sidecars, star_rating);
-			g_free(star_rating);
 			}
 
 		GtkStyle *style = gtk_widget_get_style(vf->listview);

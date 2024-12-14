@@ -137,14 +137,12 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	GList *work;
 	GtkTreeIter iter;
 	gboolean valid;
-	gchar *filepath;
 	GList *old_list;
 	gboolean ret;
 	FileData *fd;
 	SortType sort_type = SORT_NAME;
 	gboolean sort_ascend = TRUE;
 	gboolean sort_case = TRUE;
-	gchar *link = nullptr;
 
 	if (vd->layout)
 		{
@@ -162,19 +160,17 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 
 	if (options->file_filter.show_parent_directory && strcmp(vd->dir_fd->path, G_DIR_SEPARATOR_S) != 0)
 		{
-		filepath = g_build_filename(vd->dir_fd->path, "..", NULL);
+		g_autofree gchar *filepath = g_build_filename(vd->dir_fd->path, "..", NULL);
 		fd = file_data_new_dir(filepath);
 		VDLIST(vd)->list = g_list_prepend(VDLIST(vd)->list, fd);
-		g_free(filepath);
 		}
 
 	if (options->file_filter.show_dot_directory)
 		{
-		filepath = g_build_filename(vd->dir_fd->path, ".", NULL);
+		g_autofree gchar *filepath = g_build_filename(vd->dir_fd->path, ".", NULL);
 		fd = file_data_new_dir(filepath);
 		VDLIST(vd)->list = g_list_prepend(VDLIST(vd)->list, fd);
-		g_free(filepath);
-	}
+		}
 
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view)));
 	if (clear) gtk_list_store_clear(store);
@@ -248,13 +244,10 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 				match = -1;
 				}
 
+			g_autofree gchar *link = nullptr;
 			if (islink(fd->path))
 				{
 				link = realpath(fd->path, nullptr);
-				}
-			else
-				{
-				link = nullptr;
 				}
 
 			if (match < 0)
@@ -314,7 +307,6 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	vd->drop_fd = nullptr;
 
 	filelist_free(old_list);
-	g_free(link);
 	return ret;
 }
 
@@ -328,14 +320,11 @@ gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 	g_autofree gchar *old_path = nullptr; /* Used to store directory for walking up */
 	if (vd->dir_fd)
 		{
-		gchar *base;
-
-		base = remove_level_from_path(vd->dir_fd->path);
+		g_autofree gchar *base = remove_level_from_path(vd->dir_fd->path);
 		if (strcmp(base, dir_fd->path) == 0)
 			{
 			old_path = g_strdup(filename_from_path(vd->dir_fd->path));
 			}
-		g_free(base);
 		}
 
 	file_data_unref(vd->dir_fd);

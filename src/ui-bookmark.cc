@@ -240,15 +240,13 @@ static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
 {
 	auto p = static_cast<BookPropData *>(data);
 	const gchar *name;
-	gchar *path;
 	const gchar *icon;
-	gchar *new_string;
 
 	name = gq_gtk_entry_get_text(GTK_ENTRY(p->name_entry));
-	path = remove_trailing_slash(gq_gtk_entry_get_text(GTK_ENTRY(p->path_entry)));
+	g_autofree gchar *path = remove_trailing_slash(gq_gtk_entry_get_text(GTK_ENTRY(p->path_entry)));
 	icon = gq_gtk_entry_get_text(GTK_ENTRY(p->icon_entry));
 
-	new_string = bookmark_string(name, path, icon);
+	g_autofree gchar *new_string = bookmark_string(name, path, icon);
 
 	if (p->bb->key)
 		{
@@ -261,9 +259,6 @@ static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
 
 	if (path && path[0] != '\0') tab_completion_append_to_history(p->path_entry, path);
 	if (icon && icon[0] != '\0') tab_completion_append_to_history(p->icon_entry, icon);
-
-	g_free(path);
-	g_free(new_string);
 
 	bookmark_populate_all(p->bb->parent);
 }
@@ -482,9 +477,8 @@ static void bookmark_drag_set_data(GtkWidget *button,
 	gboolean ret = gtk_selection_data_set_uris(selection_data, uris);
 	if (!ret)
 		{
-		char *str = g_strjoinv("\r\n", uris);
+		g_autofree char *str = g_strjoinv("\r\n", uris);
 		ret = gtk_selection_data_set_text(selection_data, str, -1);
-		g_free(str);
 		}
 
 	g_strfreev(uris);
@@ -543,59 +537,45 @@ static void bookmark_populate(BookMarkData *bm)
 
 	if (!bm->no_defaults && !history_list_get_by_key(bm->key))
 		{
-		gchar *buf;
-		gchar *path;
-
 		if (!bookmark_default_list)
 			{
-			buf = bookmark_string(_("Home"), homedir(), nullptr);
-			history_list_add_to_key(bm->key, buf, 0);
-			g_free(buf);
+			g_autofree gchar *home_buf = bookmark_string(_("Home"), homedir(), nullptr);
+			history_list_add_to_key(bm->key, home_buf, 0);
 
 			if (g_strcmp0(bm->key, "shortcuts") != 0)
 				{
-				buf = bookmark_string(".", g_strdup(history_list_find_last_path_by_key("path_list")), nullptr);
+				g_autofree gchar *buf = bookmark_string(".", g_strdup(history_list_find_last_path_by_key("path_list")), nullptr);
 				history_list_add_to_key(bm->key, buf, 0);
-				g_free(buf);
 				}
 
-			path = g_build_filename(homedir(), "Desktop", NULL);
+			g_autofree gchar *path = g_build_filename(homedir(), "Desktop", NULL);
 			if (isname(path))
 				{
-				buf = bookmark_string(_("Desktop"), path, nullptr);
+				g_autofree gchar *buf = bookmark_string(_("Desktop"), path, nullptr);
 				history_list_add_to_key(bm->key, buf, 0);
-				g_free(buf);
 				}
-			g_free(path);
 			}
 
 		work = bookmark_default_list;
 		while (work && work->next)
 			{
-			gchar *name;
-
-			name = static_cast<gchar *>(work->data);
+			auto *name = static_cast<gchar *>(work->data);
 			work = work->next;
-			path = static_cast<gchar *>(work->data);
+			auto *path = static_cast<gchar *>(work->data);
 			work = work->next;
 
+			g_autofree gchar *buf = nullptr;
 			if (strcmp(name, ".") == 0)
 				{
-				if (g_strcmp0(bm->key, "shortcuts") != 0)
-					{
-					buf = bookmark_string(name, g_strdup(history_list_find_last_path_by_key("path_list")), nullptr);
-					}
-				else
-					{
-					continue;
-					}
+				if (g_strcmp0(bm->key, "shortcuts") == 0) continue;
+
+				buf = bookmark_string(name, g_strdup(history_list_find_last_path_by_key("path_list")), nullptr);
 				}
 			else
 				{
 				buf = bookmark_string(name, path, nullptr);
 				}
 			history_list_add_to_key(bm->key, buf, 0);
-			g_free(buf);
 			}
 		}
 
@@ -615,8 +595,7 @@ static void bookmark_populate(BookMarkData *bm)
 				b->path = g_strdup(history_list_find_last_path_by_key("path_list"));
 				buf = bookmark_string(".", b->path, b->icon);
 				history_list_item_change("bookmarks", b->key, buf);
-				b->key = g_strdup(buf);
-				g_free(buf);
+				b->key = buf;
 				}
 			GtkWidget *box;
 
@@ -635,9 +614,8 @@ static void bookmark_populate(BookMarkData *bm)
 			if (b->icon)
 				{
 				GdkPixbuf *pixbuf = nullptr;
-				gchar *iconl;
 
-				iconl = path_from_utf8(b->icon);
+				g_autofree gchar *iconl = path_from_utf8(b->icon);
 				pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
 
 				if (isfile(b->icon))
@@ -655,7 +633,6 @@ static void bookmark_populate(BookMarkData *bm)
 					pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), b->icon, w, GTK_ICON_LOOKUP_NO_SVG, nullptr);
 					}
 
-				g_free(iconl);
 				if (pixbuf)
 					{
 					GdkPixbuf *scaled;
@@ -971,7 +948,6 @@ GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
 void history_combo_append_history(GtkWidget *widget, const gchar *text)
 {
 	HistoryComboData *hc;
-	gchar *new_text;
 
 	hc = static_cast<HistoryComboData *>(g_object_get_data(G_OBJECT(widget), "history_combo_data"));
 	if (!hc)
@@ -980,14 +956,7 @@ void history_combo_append_history(GtkWidget *widget, const gchar *text)
 		return;
 		}
 
-	if (text)
-		{
-		new_text = g_strdup(text);
-		}
-	else
-		{
-		new_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(hc->entry)));
-		}
+	g_autofree gchar *new_text = g_strdup(text ? text : gq_gtk_entry_get_text(GTK_ENTRY(hc->entry)));
 
 	if (new_text && new_text[0] != '\0')
 		{
@@ -1008,7 +977,5 @@ void history_combo_append_history(GtkWidget *widget, const gchar *text)
 			work = work->next;
 			}
 		}
-
-	g_free(new_text);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

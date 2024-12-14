@@ -53,9 +53,8 @@ gchar **uris_from_pathlist(GList *list)
 	while (work)
 		{
 		auto path = static_cast<const gchar *>(work->data);
-		gchar *local_path = path_from_utf8(path);
+		g_autofree gchar *local_path = path_from_utf8(path);
 		uris[i] = g_filename_to_uri(local_path, nullptr, nullptr);
-		g_free(local_path);
 
 		i++;
 		work = work->next;
@@ -79,9 +78,8 @@ gboolean uri_selection_data_set_uris_from_filelist(GtkSelectionData *selection_d
 	gboolean ret = gtk_selection_data_set_uris(selection_data, uris);
 	if (!ret)
 		{
-		char *str = g_strjoinv("\r\n", uris);
+		g_autofree char *str = g_strjoinv("\r\n", uris);
 		ret = gtk_selection_data_set_text(selection_data, str, -1);
-		g_free(str);
 		}
 
 	g_strfreev(uris);
@@ -96,7 +94,7 @@ GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
 
 	while (uris[i])
 		{
-		gchar *local_path = g_filename_from_uri(uris[i], nullptr, &error);
+		g_autofree gchar *local_path = g_filename_from_uri(uris[i], nullptr, &error);
 		if (error)
 			{
 			DEBUG_1("g_filename_from_uri failed on uri \"%s\"", uris[i]);
@@ -104,7 +102,7 @@ GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
 			if (error->code == G_CONVERT_ERROR_BAD_URI)
 				{
 				GError *retry_error = nullptr;
-				gchar *escaped = g_uri_escape_string(uris[i], ":/", TRUE);
+				g_autofree gchar *escaped = g_uri_escape_string(uris[i], ":/", TRUE);
 				local_path = g_filename_from_uri(escaped, nullptr, &retry_error);
 				if(retry_error)
 					{
@@ -112,7 +110,6 @@ GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
 					DEBUG_1("   error %d: %s", retry_error->code, retry_error->message);
 					g_error_free(retry_error);
 					}
-				g_free(escaped);
 				}
 			g_error_free(error);
 			error = nullptr;
@@ -124,7 +121,6 @@ GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
 				}
 			}
 		gchar *path = path_to_utf8(local_path);
-		g_free(local_path);
 		list = g_list_prepend(list, path);
 		i++;
 		}

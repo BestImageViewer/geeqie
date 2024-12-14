@@ -46,13 +46,12 @@
  */
 static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_group, hard_coded_window_keys *window_keys)
 {
-	gchar *label;
-	gchar *label_text;
 	gchar **label_stripped;
 	gint i = 0;
 
-	label = g_strdup(gtk_menu_item_get_label(GTK_MENU_ITEM(menu)));
+	const gchar *label = gtk_menu_item_get_label(GTK_MENU_ITEM(menu));
 
+	g_autofree gchar *label_text = nullptr;
 	pango_parse_markup(label, -1, '_', nullptr, &label_text, nullptr, nullptr);
 
 	label_stripped = g_strsplit(label_text, "...", 2);
@@ -68,8 +67,6 @@ static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_grou
 		i++;
 		}
 
-	g_free(label);
-	g_free(label_text);
 	g_strfreev(label_stripped);
 }
 
@@ -113,8 +110,6 @@ static gint actions_sort_cb(gconstpointer a, gconstpointer b)
  */
 static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup *accel_group)
 {
-	gchar *menu_label;
-	gchar *menu_label_text;
 	LayoutWindow *lw;
 	GList *groups;
 	GList *actions;
@@ -122,8 +117,9 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 	const gchar *accel_path;
 	GtkAccelKey key;
 
-	menu_label = g_strdup(gtk_menu_item_get_label(GTK_MENU_ITEM(menu)));
+	const gchar *menu_label = gtk_menu_item_get_label(GTK_MENU_ITEM(menu));
 
+	g_autofree gchar *menu_label_text = nullptr;
 	pango_parse_markup(menu_label, -1, '_', nullptr, &menu_label_text, nullptr, nullptr);
 
 	lw = static_cast<LayoutWindow *>(layout_window_list->data); /* get the actions from the first window, it should not matter, they should be the same in all windows */
@@ -162,9 +158,6 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 			}
 		groups = groups->next;
 		}
-
-	g_free(menu_label);
-	g_free(menu_label_text);
 }
 
 static void menu_item_finish(GtkWidget *menu, GtkWidget *item, GCallback func, gpointer data)

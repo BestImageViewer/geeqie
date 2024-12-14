@@ -328,19 +328,14 @@ static gboolean vd_rename_cb(TreeEditData *td, const gchar *, const gchar *new_n
 {
 	auto vd = static_cast<ViewDir *>(data);
 	FileData *fd;
-	gchar *new_path;
-	gchar *base;
 
 	fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(vd->view), td->path);
 	if (!fd) return FALSE;
 
-	base = remove_level_from_path(fd->path);
-	new_path = g_build_filename(base, new_name, NULL);
-	g_free(base);
+	g_autofree gchar *base = remove_level_from_path(fd->path);
+	g_autofree gchar *new_path = g_build_filename(base, new_name, NULL);
 
 	file_util_rename_dir(fd, new_path, vd->view, vd_rename_finished_cb, vd);
-
-	g_free(new_path);
 
 	return FALSE;
 }
@@ -492,19 +487,16 @@ GtkWidget *vd_drop_menu(ViewDir *vd, gint active)
 static void vd_pop_menu_up_cb(GtkWidget *, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	gchar *path;
 
 	if (!vd->dir_fd || strcmp(vd->dir_fd->path, G_DIR_SEPARATOR_S) == 0) return;
-	path = remove_level_from_path(vd->dir_fd->path);
 
 	if (vd->select_func)
 		{
+		g_autofree gchar *path = remove_level_from_path(vd->dir_fd->path);
 		FileData *fd = file_data_new_dir(path);
 		vd->select_func(vd, fd, vd->select_data);
 		file_data_unref(fd);
 		}
-
-	g_free(path);
 }
 
 static void vd_pop_menu_slide_cb(GtkWidget *, gpointer data)
@@ -1267,13 +1259,12 @@ static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 	gboolean refresh;
-	gchar *base;
 
 	if (!S_ISDIR(fd->mode)) return; /* this gives correct results even on recently deleted files/directories */
 
 	DEBUG_1("Notify vd: %s %04x", fd->path, type);
 
-	base = remove_level_from_path(fd->path);
+	g_autofree gchar *base = remove_level_from_path(fd->path);
 
 	if (vd->type == DIRVIEW_LIST)
 		{
@@ -1288,16 +1279,14 @@ static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 			{
 			if (!refresh && fd->change->dest)
 				{
-				gchar *dest_base = remove_level_from_path(fd->change->dest);
+				g_autofree gchar *dest_base = remove_level_from_path(fd->change->dest);
 				refresh = (strcmp(dest_base, vd->dir_fd->path) == 0);
-				g_free(dest_base);
 				}
 
 			if (!refresh && fd->change->source)
 				{
-				gchar *source_base = remove_level_from_path(fd->change->source);
+				g_autofree gchar *source_base = remove_level_from_path(fd->change->source);
 				refresh = (strcmp(source_base, vd->dir_fd->path) == 0);
-				g_free(source_base);
 				}
 			}
 
@@ -1316,7 +1305,5 @@ static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 		file_data_unref(base_fd);
 		}
-
-	g_free(base);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

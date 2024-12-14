@@ -40,9 +40,8 @@ void print_term(gboolean err, const gchar *text_utf8);
 #define printf_term(err, ...) \
 	G_STMT_START \
 		{ \
-		gchar *msg = g_strdup_printf(__VA_ARGS__); \
+		g_autofree gchar *msg = g_strdup_printf(__VA_ARGS__); \
 		print_term(err, msg); \
-		g_free(msg); \
 		} \
 	G_STMT_END
 

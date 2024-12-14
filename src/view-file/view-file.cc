@@ -397,13 +397,12 @@ static void vf_drag_data_received(GtkWidget *, GdkDragContext *,
 	if (!fd) return;
 
 	/* Add keywords to file */
-	auto str = reinterpret_cast<gchar *>(gtk_selection_data_get_text(selection));
+	g_autofree auto str = reinterpret_cast<gchar *>(gtk_selection_data_get_text(selection));
 	GList *kw_list = string_to_keywords_list(str);
 
 	metadata_append_list(fd, KEYWORD_KEY, kw_list);
 
 	g_list_free_full(kw_list, g_free);
-	g_free(str);
 }
 
 static void vf_dnd_init(ViewFile *vf)
@@ -493,14 +492,12 @@ static void vf_pop_menu_open_archive_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	LayoutWindow *lw_new;
-	gchar *dest_dir;
 
-	dest_dir = open_archive(vf->click_fd);
+	g_autofree gchar *dest_dir = open_archive(vf->click_fd);
 	if (dest_dir)
 		{
 		lw_new = layout_new_from_default();
 		layout_set_path(lw_new, dest_dir);
-		g_free(dest_dir);
 		}
 	else
 		{
@@ -790,13 +787,13 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	if (vf->clicked_mark > 0)
 		{
 		gint mark = vf->clicked_mark;
-		gchar *str_set_mark = g_strdup_printf(_("_Set mark %d"), mark);
-		gchar *str_res_mark = g_strdup_printf(_("_Reset mark %d"), mark);
-		gchar *str_toggle_mark = g_strdup_printf(_("_Toggle mark %d"), mark);
-		gchar *str_sel_mark = g_strdup_printf(_("_Select mark %d"), mark);
-		gchar *str_sel_mark_or = g_strdup_printf(_("_Add mark %d"), mark);
-		gchar *str_sel_mark_and = g_strdup_printf(_("_Intersection with mark %d"), mark);
-		gchar *str_sel_mark_minus = g_strdup_printf(_("_Unselect mark %d"), mark);
+		g_autofree gchar *str_set_mark = g_strdup_printf(_("_Set mark %d"), mark);
+		g_autofree gchar *str_res_mark = g_strdup_printf(_("_Reset mark %d"), mark);
+		g_autofree gchar *str_toggle_mark = g_strdup_printf(_("_Toggle mark %d"), mark);
+		g_autofree gchar *str_sel_mark = g_strdup_printf(_("_Select mark %d"), mark);
+		g_autofree gchar *str_sel_mark_or = g_strdup_printf(_("_Add mark %d"), mark);
+		g_autofree gchar *str_sel_mark_and = g_strdup_printf(_("_Intersection with mark %d"), mark);
+		g_autofree gchar *str_sel_mark_minus = g_strdup_printf(_("_Unselect mark %d"), mark);
 
 		g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
@@ -824,14 +821,6 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 					G_CALLBACK(vf_pop_menu_sel_mark_minus_cb), vf);
 
 		menu_item_add_divider(menu);
-
-		g_free(str_set_mark);
-		g_free(str_res_mark);
-		g_free(str_toggle_mark);
-		g_free(str_sel_mark);
-		g_free(str_sel_mark_and);
-		g_free(str_sel_mark_or);
-		g_free(str_sel_mark_minus);
 		}
 
 	vf->editmenu_fd_list = vf_pop_menu_file_list(vf);
@@ -1069,18 +1058,15 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 static void vf_file_filter_save_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	gchar *entry_text;
-	gchar *remove_text = nullptr;
 
-	entry_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(vf->file_filter.combo)))));
+	g_autofree gchar *entry_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(vf->file_filter.combo)))));
 
 	if (entry_text[0] == '\0' && vf->file_filter.last_selected >= 0)
 		{
 		gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), vf->file_filter.last_selected);
-		remove_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
+		g_autofree gchar *remove_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
 		history_list_item_remove("file_filter", remove_text);
 		gtk_combo_box_text_remove(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), vf->file_filter.last_selected);
-		g_free(remove_text);
 
 		gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), -1);
 		vf->file_filter.last_selected = - 1;
@@ -1115,8 +1101,6 @@ static void vf_file_filter_save_cb(GtkWidget *, gpointer data)
 			}
 		}
 	vf_refresh(vf);
-
-	g_free(entry_text);
 }
 
 static void vf_file_filter_cb(GtkWidget *, gpointer data)
@@ -1741,14 +1725,13 @@ GRegex *vf_file_filter_get_filter(ViewFile *vf)
 {
 	GRegex *ret = nullptr;
 	GError *error = nullptr;
-	gchar *file_filter_text = nullptr;
 
 	if (!gtk_widget_get_visible(vf->file_filter.combo))
 		{
 		return g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
-	file_filter_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
+	g_autofree gchar *file_filter_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
 
 	if (file_filter_text[0] != '\0')
 		{
@@ -1760,7 +1743,6 @@ GRegex *vf_file_filter_get_filter(ViewFile *vf)
 			error = nullptr;
 			ret = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 			}
-		g_free(file_filter_text);
 		}
 	else
 		{
@@ -1854,25 +1836,22 @@ void vf_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (!refresh)
 		{
-		gchar *base = remove_level_from_path(fd->path);
+		g_autofree gchar *base = remove_level_from_path(fd->path);
 		refresh = (g_strcmp0(base, vf->dir_fd->path) == 0);
-		g_free(base);
 		}
 
 	if ((type & NOTIFY_CHANGE) && fd->change)
 		{
 		if (!refresh && fd->change->dest)
 			{
-			gchar *dest_base = remove_level_from_path(fd->change->dest);
+			g_autofree gchar *dest_base = remove_level_from_path(fd->change->dest);
 			refresh = (g_strcmp0(dest_base, vf->dir_fd->path) == 0);
-			g_free(dest_base);
 			}
 
 		if (!refresh && fd->change->source)
 			{
-			gchar *source_base = remove_level_from_path(fd->change->source);
+			g_autofree gchar *source_base = remove_level_from_path(fd->change->source);
 			refresh = (g_strcmp0(source_base, vf->dir_fd->path) == 0);
-			g_free(source_base);
 			}
 		}
 

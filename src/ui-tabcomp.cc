@@ -106,44 +106,40 @@ static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 	DIR *dp;
 	struct dirent *dir;
 	GList *list = nullptr;
-	gchar *pathl;
 
 	tab_completion_free_list(td);
 
-	pathl = path_from_utf8(path);
+	g_autofree gchar *pathl = path_from_utf8(path);
 	dp = opendir(pathl);
 	if (!dp)
 		{
 		/* dir not found */
-		g_free(pathl);
 		return;
 		}
+
 	while ((dir = readdir(dp)) != nullptr)
 		{
 		gchar *name = dir->d_name;
 		if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0 &&
 						(name[0] != '.' || options->file_filter.show_hidden_files))
 			{
-			gchar *abspath = g_build_filename(pathl, name, NULL);
+			g_autofree gchar *abspath = g_build_filename(pathl, name, NULL);
 
 			if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
 				{
-				gchar *dname = g_strconcat(name, G_DIR_SEPARATOR_S, NULL);
+				g_autofree gchar *dname = g_strconcat(name, G_DIR_SEPARATOR_S, NULL);
 				list = g_list_prepend(list, path_to_utf8(dname));
-				g_free(dname);
 				}
 			else
 				{
 				list = g_list_prepend(list, path_to_utf8(name));
 				}
-			g_free(abspath);
 			}
 		}
 	closedir(dp);
 
 	td->dir_path = g_strdup(path);
 	td->file_list = list;
-	g_free(pathl);
 }
 
 static void tab_completion_destroy(gpointer data)
@@ -170,9 +166,8 @@ static gchar *tab_completion_get_text(TabCompData *td)
 
 	if (text[0] == '~')
 		{
-		gchar *t = text;
+		g_autofree gchar *t = text;
 		text = expand_tilde(text);
-		g_free(t);
 		}
 
 	return text;
@@ -180,24 +175,20 @@ static gchar *tab_completion_get_text(TabCompData *td)
 
 static gboolean tab_completion_emit_enter_signal(TabCompData *td)
 {
-	gchar *text;
 	if (!td->enter_func) return FALSE;
 
-	text = tab_completion_get_text(td);
+	g_autofree gchar *text = tab_completion_get_text(td);
 	td->enter_func(text, td->enter_data);
-	g_free(text);
 
 	return TRUE;
 }
 
 static void tab_completion_emit_tab_signal(TabCompData *td)
 {
-	gchar *text;
 	if (!td->tab_func) return;
 
-	text = tab_completion_get_text(td);
+	g_autofree gchar *text = tab_completion_get_text(td);
 	td->tab_func(text, td->tab_data);
-	g_free(text);
 }
 
 #ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
@@ -267,15 +258,13 @@ static void tab_completion_popup_cb(GtkWidget *widget, gpointer data)
 {
 	auto name = static_cast<gchar *>(data);
 	TabCompData *td;
-	gchar *buf;
 
 	td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(widget), "tab_completion_data"));
 	if (!td) return;
 
-	buf = g_build_filename(td->dir_path, name, NULL);
+	g_autofree gchar *buf = g_build_filename(td->dir_path, name, NULL);
 	gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
 	gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
-	g_free(buf);
 
 	tab_completion_emit_tab_signal(td);
 }
@@ -333,18 +322,18 @@ static gboolean tab_completion_do(TabCompData *td)
 {
 	const gchar *entry_text = gq_gtk_entry_get_text(GTK_ENTRY(td->entry));
 	const gchar *entry_file;
-	gchar *entry_dir;
 	gchar *ptr;
 	gboolean home_exp = FALSE;
 
 	if (entry_text[0] == '\0')
 		{
-		entry_dir = g_strdup(G_DIR_SEPARATOR_S); /** @FIXME root directory win32 */
+		g_autofree gchar *entry_dir = g_strdup(G_DIR_SEPARATOR_S); /** @FIXME root directory win32 */
 		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
 		gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(entry_dir));
-		g_free(entry_dir);
 		return FALSE;
 		}
+
+	g_autofree gchar *entry_dir = nullptr;
 
 	/* home dir expansion */
 	if (entry_text[0] == '~')
@@ -364,7 +353,6 @@ static gboolean tab_completion_do(TabCompData *td)
 			gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
 			gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(entry_dir));
 			}
-		g_free(entry_dir);
 		return home_exp;
 		}
 
@@ -385,39 +373,31 @@ static gboolean tab_completion_do(TabCompData *td)
 			td->file_list = g_list_sort(td->file_list, simple_sort);
 			if (td->file_list && !td->file_list->next)
 				{
-				gchar *buf;
 				const gchar *file;
 
 				file = static_cast<const gchar *>(td->file_list->data);
-				buf = g_build_filename(entry_dir, file, NULL);
+				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
 				if (isdir(buf))
 					{
-					gchar *tmp = g_strconcat(buf, G_DIR_SEPARATOR_S, NULL);
-					g_free(buf);
-					buf = tmp;
+					g_autofree gchar *tmp = buf;
+					buf = g_strconcat(buf, G_DIR_SEPARATOR_S, NULL);
 					}
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
-				g_free(buf);
 				}
-
 #ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
-
 			else
 				{
 				tab_completion_popup_list(td, td->file_list);
 				}
 #endif
 
-			g_free(entry_dir);
 			return home_exp;
 			}
 
-		gchar *buf = g_strconcat(entry_dir, G_DIR_SEPARATOR_S, NULL);
+		g_autofree gchar *buf = g_strconcat(entry_dir, G_DIR_SEPARATOR_S, NULL);
 		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
 		gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
-		g_free(buf);
-		g_free(entry_dir);
 		return TRUE;
 		}
 
@@ -458,14 +438,11 @@ static gboolean tab_completion_do(TabCompData *td)
 			if (!poss->next)
 				{
 				auto file = static_cast<gchar *>(poss->data);
-				gchar *buf;
 
-				buf = g_build_filename(entry_dir, file, NULL);
+				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
-				g_free(buf);
 				g_list_free(poss);
-				g_free(entry_dir);
 				return TRUE;
 				}
 
@@ -490,33 +467,24 @@ static gboolean tab_completion_do(TabCompData *td)
 			c -= 2;
 			if (c > 0)
 				{
-				gchar *file;
-				gchar *buf;
-				file = g_strdup(test_file);
+				g_autofree gchar *file = g_strdup(test_file);
 				file[c] = '\0';
-				buf = g_build_filename(entry_dir, file, NULL);
+				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
 
 #ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
-
 				poss = g_list_sort(poss, simple_sort);
 				tab_completion_popup_list(td, poss);
-
 #endif
 
-				g_free(file);
-				g_free(buf);
 				g_list_free(poss);
-				g_free(entry_dir);
 				return TRUE;
 				}
 
 			g_list_free(poss);
 			}
 		}
-
-	g_free(entry_dir);
 
 	return FALSE;
 }

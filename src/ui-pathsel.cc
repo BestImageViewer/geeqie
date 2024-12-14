@@ -184,18 +184,17 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 	GList *file_list = nullptr;
 	GList *list;
 	GtkListStore *store;
-	gchar *pathl;
 
 	if (!path) return;
 
-	pathl = path_from_utf8(path);
+	g_autofree gchar *pathl = path_from_utf8(path);
 	dp = opendir(pathl);
 	if (!dp)
 		{
 		/* dir not found */
-		g_free(pathl);
 		return;
 		}
+
 	while ((dir = readdir(dp)) != nullptr)
 		{
 		if (!options->file_filter.show_dot_directory
@@ -207,7 +206,7 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 		if (dd->show_hidden || !is_hidden(dir->d_name))
 			{
 			gchar *name = dir->d_name;
-			gchar *filepath = g_build_filename(pathl, name, NULL);
+			g_autofree gchar *filepath = g_build_filename(pathl, name, NULL);
 			if (stat(filepath, &ent_sbuf) >= 0 && S_ISDIR(ent_sbuf.st_mode))
 				{
 				path_list = g_list_prepend(path_list, path_to_utf8(name));
@@ -217,11 +216,9 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 				if (!dd->filter || (dd->filter && dest_check_filter(dd->filter, name)))
 					file_list = g_list_prepend(file_list, path_to_utf8(name));
 				}
-			g_free(filepath);
 			}
 		}
 	closedir(dp);
-	g_free(pathl);
 
 	path_list = g_list_sort(path_list, dest_sort_cb);
 	file_list = g_list_sort(file_list, dest_sort_cb);
@@ -233,7 +230,7 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 	while (list)
 		{
 		GtkTreeIter iter;
-		gchar *filepath;
+		g_autofree gchar *filepath = nullptr;
 
 		if (strcmp(static_cast<const gchar *>(list->data), ".") == 0)
 			{
@@ -255,7 +252,6 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 		gtk_list_store_append(store, &iter);
 		gtk_list_store_set(store, &iter, 0, list->data, 1, filepath, -1);
 
-		g_free(filepath);
 		list = list->next;
 		}
 
@@ -271,15 +267,13 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 		while (list)
 			{
 			GtkTreeIter iter;
-			gchar *filepath;
 			auto name = static_cast<const gchar *>(list->data);
 
-			filepath = g_build_filename(path, name, NULL);
+			g_autofree gchar *filepath = g_build_filename(path, name, NULL);
 
 			gtk_list_store_append(store, &iter);
 			gtk_list_store_set(store, &iter, 0, name, 1, filepath, -1);
 
-			g_free(filepath);
 			list = list->next;
 			}
 
@@ -293,8 +287,6 @@ static void dest_populate(Dest_Data *dd, const gchar *path)
 static void dest_change_dir(Dest_Data *dd, const gchar *path, gboolean retain_name)
 {
 	const gchar *old_name = nullptr;
-	gchar *full_path;
-	gchar *new_directory;
 
 	if (retain_name)
 		{
@@ -303,16 +295,12 @@ static void dest_change_dir(Dest_Data *dd, const gchar *path, gboolean retain_na
 		if (!isdir(buf)) old_name = filename_from_path(buf);
 		}
 
-	full_path = g_build_filename(path, old_name, NULL);
-	if (old_name)
-		new_directory = g_path_get_dirname(full_path);
-	else
-		new_directory = g_strdup(full_path);
+	g_autofree gchar *full_path = g_build_filename(path, old_name, NULL);
+	g_autofree gchar *new_directory = old_name ? g_path_get_dirname(full_path) : g_strdup(full_path);
 
 	gq_gtk_entry_set_text(GTK_ENTRY(dd->entry), full_path);
 
 	dest_populate(dd, new_directory);
-	g_free(new_directory);
 
 	if (old_name)
 		{
@@ -321,8 +309,6 @@ static void dest_change_dir(Dest_Data *dd, const gchar *path, gboolean retain_na
 
 		gtk_editable_select_region(GTK_EDITABLE(dd->entry), full_path_len - strlen(basename), full_path_len);
 		}
-
-	g_free(full_path);
 }
 
 /*
@@ -353,9 +339,8 @@ static void dest_dnd_set_data(GtkWidget *view, GdkDragContext *,
 	gboolean ret = gtk_selection_data_set_uris(selection_data, uris);
 	if (!ret)
 		{
-		char *str = g_strjoinv("\r\n", uris);
+		g_autofree char *str = g_strjoinv("\r\n", uris);
 		ret = gtk_selection_data_set_text(selection_data, str, -1);
-		g_free(str);
 		}
 
 	g_list_free_full(list, g_free);
@@ -409,31 +394,26 @@ static gint dest_view_rename_cb(TreeEditData *ted, const gchar *old_name, const 
 	auto dd = static_cast<Dest_Data *>(data);
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *buf;
-	gchar *old_path;
-	gchar *new_path;
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(ted->tree));
 	gtk_tree_model_get_iter(model, &iter, dd->right_click_path);
 
+	g_autofree gchar *old_path = nullptr;
 	gtk_tree_model_get(model, &iter, 1, &old_path, -1);
 	if (!old_path) return FALSE;
 
-	buf = remove_level_from_path(old_path);
-	new_path = g_build_filename(buf, new_name, NULL);
-	g_free(buf);
+	g_autofree gchar *parent = remove_level_from_path(old_path);
+	g_autofree gchar *new_path = g_build_filename(parent, new_name, NULL);
 
 	if (isname(new_path))
 		{
-		buf = g_strdup_printf(_("A file with name %s already exists."), new_name);
+		g_autofree gchar *buf = g_strdup_printf(_("A file with name %s already exists."), new_name);
 		warning_dialog(_("Rename failed"), buf, GQ_ICON_DIALOG_INFO, dd->entry);
-		g_free(buf);
 		}
 	else if (!rename_file(old_path, new_path))
 		{
-		buf = g_strdup_printf(_("Failed to rename %s to %s."), old_name, new_name);
+		g_autofree gchar *buf = g_strdup_printf(_("Failed to rename %s to %s."), old_name, new_name);
 		warning_dialog(_("Rename failed"), buf, GQ_ICON_DIALOG_ERROR, dd->entry);
-		g_free(buf);
 		}
 	else
 		{
@@ -448,9 +428,6 @@ static gint dest_view_rename_cb(TreeEditData *ted, const gchar *old_name, const 
 			}
 		}
 
-	g_free(old_path);
-	g_free(new_path);
-
 	return TRUE;
 }
 
@@ -458,18 +435,17 @@ static void dest_view_rename(Dest_Data *dd, GtkTreeView *view)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *text;
 
 	if (!dd->right_click_path) return;
 
 	model = gtk_tree_view_get_model(view);
 	gtk_tree_model_get_iter(model, &iter, dd->right_click_path);
+
+	g_autofree gchar *text = nullptr;
 	gtk_tree_model_get(model, &iter, 0, &text, -1);
 
 	tree_edit_by_path(view, dd->right_click_path, 0, text,
 			  dest_view_rename_cb, dd);
-
-	g_free(text);
 }
 
 static void dest_view_delete_dlg_cancel(GenericDialog *, gpointer data)
@@ -487,16 +463,14 @@ static void dest_view_delete_dlg_ok_cb(GenericDialog *gd, gpointer data)
 
 	if (!unlink_file(dl->path))
 		{
-		gchar *text = g_strdup_printf(_("Unable to delete file:\n%s"), dl->path);
+		g_autofree gchar *text = g_strdup_printf(_("Unable to delete file:\n%s"), dl->path);
 		warning_dialog(_("File deletion failed"), text, GQ_ICON_DIALOG_WARNING, dl->dd->entry);
-		g_free(text);
 		}
 	else if (dl->dd->path)
 		{
 		/* refresh list */
-		gchar *path = g_strdup(dl->dd->path);
+		g_autofree gchar *path = g_strdup(dl->dd->path);
 		dest_populate(dl->dd, path);
-		g_free(path);
 		}
 
 	dest_view_delete_dlg_cancel(gd, data);
@@ -505,7 +479,6 @@ static void dest_view_delete_dlg_ok_cb(GenericDialog *gd, gpointer data)
 static void dest_view_delete(Dest_Data *dd, GtkTreeView *view)
 {
 	gchar *path;
-	gchar *text;
 	DestDel_Data *dl;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -536,10 +509,9 @@ static void dest_view_delete(Dest_Data *dd, GtkTreeView *view)
 
 	generic_dialog_add_button(dd->gd, GQ_ICON_DELETE, _("Delete"), dest_view_delete_dlg_ok_cb, TRUE);
 
-	text = g_strdup_printf(_("About to delete the file:\n %s"), path);
+	g_autofree gchar *text = g_strdup_printf(_("About to delete the file:\n %s"), path);
 	generic_dialog_add_message(dd->gd, GQ_ICON_DIALOG_QUESTION,
 				   _("Delete file"), text, TRUE);
-	g_free(text);
 
 	gtk_widget_show(dd->gd->dialog);
 }
@@ -548,16 +520,16 @@ static void dest_view_bookmark(Dest_Data *dd, GtkTreeView *view)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *path;
 
 	if (!dd->right_click_path) return;
 
 	model = gtk_tree_view_get_model(view);
 	gtk_tree_model_get_iter(model, &iter, dd->right_click_path);
+
+	g_autofree gchar *path = nullptr;
 	gtk_tree_model_get(model, &iter, 1, &path, -1);
 
 	bookmark_list_add(dd->bookmark_list, filename_from_path(path), path);
-	g_free(path);
 }
 
 static void dest_popup_dir_rename_cb(GtkWidget *, gpointer data)
@@ -773,7 +745,7 @@ static void dest_select_cb(GtkTreeSelection *selection, gpointer data)
 	GtkTreeView *view;
 	GtkTreeModel *store;
 	GtkTreeIter iter;
-	gchar *path;
+	g_autofree gchar *path = nullptr;
 
 	if (!gtk_tree_selection_get_selected(selection, nullptr, &iter)) return;
 
@@ -789,8 +761,6 @@ static void dest_select_cb(GtkTreeSelection *selection, gpointer data)
 		{
 		gq_gtk_entry_set_text(GTK_ENTRY(dd->entry), path);
 		}
-
-	g_free(path);
 }
 
 static void dest_activate_cb(GtkWidget *view, GtkTreePath *tpath, GtkTreeViewColumn *, gpointer data)
@@ -798,7 +768,7 @@ static void dest_activate_cb(GtkWidget *view, GtkTreePath *tpath, GtkTreeViewCol
 	auto dd = static_cast<Dest_Data *>(data);
 	GtkTreeModel *store;
 	GtkTreeIter iter;
-	gchar *path;
+	g_autofree gchar *path = nullptr;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
 	gtk_tree_model_get_iter(store, &iter, tpath);
@@ -815,8 +785,6 @@ static void dest_activate_cb(GtkWidget *view, GtkTreePath *tpath, GtkTreeViewCol
 			dd->select_func(path, dd->select_data);
 			}
 		}
-
-	g_free(path);
 }
 
 static void dest_home_cb(GtkWidget *, gpointer data)
@@ -829,29 +797,26 @@ static void dest_home_cb(GtkWidget *, gpointer data)
 static void dest_show_hidden_cb(GtkWidget *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
-	gchar *buf;
 
 	dd->show_hidden = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dd->hidden_button));
 
-	buf = g_strdup(dd->path);
+	g_autofree gchar *buf = g_strdup(dd->path);
 	dest_populate(dd, buf);
-	g_free(buf);
 }
 
 static void dest_entry_changed_cb(GtkEditable *, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 	const gchar *path;
-	gchar *buf;
 
 	path = gq_gtk_entry_get_text(GTK_ENTRY(dd->entry));
 	if (dd->path && strcmp(path, dd->path) == 0) return;
 
-	buf = remove_level_from_path(path);
+	g_autofree gchar *buf = remove_level_from_path(path);
 
 	if (buf && (!dd->path || strcmp(buf, dd->path) != 0))
 		{
-		gchar *tmp = remove_trailing_slash(path);
+		g_autofree gchar *tmp = remove_trailing_slash(path);
 		if (isdir(tmp))
 			{
 			dest_populate(dd, tmp);
@@ -860,23 +825,20 @@ static void dest_entry_changed_cb(GtkEditable *, gpointer data)
 			{
 			dest_populate(dd, buf);
 			}
-		g_free(tmp);
 		}
-	g_free(buf);
 }
 
 static void dest_filter_list_sync(Dest_Data *dd)
 {
 	GtkWidget *entry;
 	GtkListStore *store;
-	gchar *old_text;
 	GList *fwork;
 	GList *twork;
 
 	if (!dd->filter_list || !dd->filter_combo) return;
 
 	entry = gtk_bin_get_child(GTK_BIN(dd->filter_combo));
-	old_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(entry)));
+	g_autofree gchar *old_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(entry)));
 
 	store = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(dd->filter_combo)));
 	gtk_list_store_clear(store);
@@ -904,8 +866,6 @@ static void dest_filter_list_sync(Dest_Data *dd)
 		fwork = fwork->next;
 		twork = twork->next;
 		}
-
-	g_free(old_text);
 }
 
 static void dest_filter_add(Dest_Data *dd, const gchar *filter, const gchar *description, gboolean set)
@@ -962,7 +922,6 @@ static void dest_filter_changed_cb(GtkEditable *, gpointer data)
 	auto dd = static_cast<Dest_Data *>(data);
 	GtkWidget *entry;
 	const gchar *buf;
-	gchar *path;
 
 	entry = gtk_bin_get_child(GTK_BIN(dd->filter_combo));
 	buf = gq_gtk_entry_get_text(GTK_ENTRY(entry));
@@ -971,9 +930,8 @@ static void dest_filter_changed_cb(GtkEditable *, gpointer data)
 	dd->filter = nullptr;
 	if (buf[0] != '\0') dd->filter = g_strdup(buf);
 
-	path = g_strdup(dd->path);
+	g_autofree gchar *path = g_strdup(dd->path);
 	dest_populate(dd, path);
-	g_free(path);
 }
 
 static void dest_bookmark_select_cb(const gchar *path, gpointer data)
@@ -1189,7 +1147,7 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 		}
 	else
 		{
-		gchar *buf = remove_level_from_path(path);
+		g_autofree gchar *buf = remove_level_from_path(path);
 		if (buf && buf[0] == G_DIR_SEPARATOR && isdir(buf))
 			{
 			dest_populate(dd, buf);
@@ -1202,7 +1160,6 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 			if (path) gtk_editable_insert_text(GTK_EDITABLE(dd->entry), G_DIR_SEPARATOR_S, -1, &pos);
 			if (path) gtk_editable_insert_text(GTK_EDITABLE(dd->entry), path, -1, &pos);
 			}
-		g_free(buf);
 		}
 
 	if (dd->filter_combo)

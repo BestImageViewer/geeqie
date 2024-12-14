@@ -111,16 +111,12 @@ gboolean generic_dialog_find_window(const gchar *title, const gchar *role, GdkRe
 
 void generic_dialog_close(GenericDialog *gd)
 {
-	gchar *ident_string;
-	gchar *full_title;
-	gchar *actual_title;
-
 	/* The window title is modified in window.cc: window_new()
 	 * by appending the string " - Geeqie"
 	 */
-	ident_string = g_strconcat(" - ", GQ_APPNAME, NULL);
-	full_title = g_strdup(gtk_window_get_title(GTK_WINDOW(gd->dialog)));
-	actual_title = strndup(full_title, g_strrstr(full_title, ident_string) - full_title);
+	static const gchar *ident_string = " - " GQ_APPNAME;
+	g_autofree gchar *full_title = g_strdup(gtk_window_get_title(GTK_WINDOW(gd->dialog)));
+	g_autofree gchar *actual_title = strndup(full_title, g_strrstr(full_title, ident_string) - full_title);
 
 	GdkRectangle rect = window_get_root_origin_geometry(gtk_widget_get_window(gd->dialog));
 
@@ -128,9 +124,6 @@ void generic_dialog_close(GenericDialog *gd)
 
 	gq_gtk_widget_destroy(gd->dialog);
 	g_free(gd);
-	g_free(ident_string);
-	g_free(full_title);
-	g_free(actual_title);
 }
 
 static void generic_dialog_click_cb(GtkWidget *widget, gpointer data)
@@ -731,9 +724,8 @@ void file_dialog_sync_history(FileDialog *fdlg, gboolean dir_only)
 		}
 	else
 		{
-		gchar *buf = remove_level_from_path(fdlg->dest_path);
+		g_autofree gchar *buf = remove_level_from_path(fdlg->dest_path);
 		tab_completion_append_to_history(fdlg->entry, buf);
-		g_free(buf);
 		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
