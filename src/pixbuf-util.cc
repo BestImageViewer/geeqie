@@ -179,16 +179,15 @@ gboolean pixbuf_to_file_as_png(GdkPixbuf *pixbuf, const gchar *filename)
 
 GdkPixbuf *pixbuf_inline(const gchar *key)
 {
-	gchar *theme_name;
 	GError *error = nullptr;
 	GInputStream *in_stream;
 
 	if (!key) return nullptr;
 
 	GtkSettings *settings = gtk_settings_get_default();
+	g_autofree gchar *theme_name = nullptr;
 	g_object_get(settings, "gtk-theme-name", &theme_name, nullptr);
 	gboolean dark = g_str_has_suffix(theme_name, "dark");
-	g_free(theme_name);
 
 	const auto it = std::find_if(std::cbegin(inline_pixbuf_data), std::cend(inline_pixbuf_data),
 	                             [key](const PixbufInline &pi){ return strcmp(pi.key, key) == 0; });
@@ -200,12 +199,9 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 
 	const auto get_input_stream = [](const gchar *data, gboolean dark, GError **error) -> GInputStream *
 	{
-		gchar *file_name = g_strconcat(data, dark ? "-dark" : "", ".png", nullptr);
-		gchar *path = g_build_filename(GQ_RESOURCE_PATH_ICONS, file_name, nullptr);
-		GInputStream *in_stream = g_resources_open_stream(path, G_RESOURCE_LOOKUP_FLAGS_NONE, error);
-		g_free(path);
-		g_free(file_name);
-		return in_stream;
+		g_autofree gchar *file_name = g_strconcat(data, dark ? "-dark" : "", ".png", nullptr);
+		g_autofree gchar *path = g_build_filename(GQ_RESOURCE_PATH_ICONS, file_name, nullptr);
+		return g_resources_open_stream(path, G_RESOURCE_LOOKUP_FLAGS_NONE, error);
 	};
 
 	in_stream = get_input_stream(it->data, dark, &error);
@@ -287,7 +283,7 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 		if (strchr(icon, '.'))
 			{
 			/* try again without extension */
-			gchar *icon2 = remove_extension_from_path(icon);
+			g_autofree gchar *icon2 = remove_extension_from_path(icon);
 			pixbuf = gtk_icon_theme_load_icon(icon_theme,
 		                           icon2, /* icon name */
 		                           64, /* size */
@@ -307,7 +303,6 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 					g_error_free(error);
 					}
 				}
-			g_free(icon2);
 			}
 		}
 

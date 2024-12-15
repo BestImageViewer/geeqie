@@ -134,9 +134,7 @@ gboolean print_job_render_image(PrintWindow *pw)
 #pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
 void font_activated_cb(GtkFontChooser *widget, gchar *fontname, gpointer option)
 {
-	option = g_strdup(fontname);
-
-	g_free(fontname);
+	option = fontname;
 
 	gq_gtk_widget_destroy(GTK_WIDGET(widget));
 }
@@ -144,14 +142,10 @@ void font_activated_cb(GtkFontChooser *widget, gchar *fontname, gpointer option)
 
 void font_response_cb(GtkDialog *dialog, int response_id, gpointer option)
 {
-	gchar *font;
-
 	if (response_id == GTK_RESPONSE_OK)
 		{
-		font = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(dialog));
 		g_free(option);
-		option = g_strdup(font);
-		g_free(font);
+		option = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(dialog));
 		}
 
 	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
@@ -685,35 +679,32 @@ void end_print_cb(GtkPrintOperation *operation, GtkPrintContext *, gpointer data
 	auto pw = static_cast<PrintWindow *>(data);
 	GList *work;
 	GdkPixbuf *pixbuf;
-	gchar *path;
 	GtkPrintSettings *print_settings;
 	GtkPageSetup *page_setup;
 	GError *error = nullptr;
 
 	print_settings = gtk_print_operation_get_print_settings(operation);
-	path = g_build_filename(get_rc_dir(), PRINT_SETTINGS, NULL);
+	g_autofree gchar *print_settings_path = g_build_filename(get_rc_dir(), PRINT_SETTINGS, NULL);
 
-	gtk_print_settings_to_file(print_settings, path, &error);
+	gtk_print_settings_to_file(print_settings, print_settings_path, &error);
 	if (error)
 		{
 		log_printf("Error: Print settings save failed:\n%s", error->message);
 		g_error_free(error);
 		error = nullptr;
 		}
-	g_free(path);
 	g_object_unref(print_settings);
 
 	page_setup = gtk_print_operation_get_default_page_setup(operation);
-	path = g_build_filename(get_rc_dir(), PAGE_SETUP, NULL);
+	g_autofree gchar *page_setup_path = g_build_filename(get_rc_dir(), PAGE_SETUP, NULL);
 
-	gtk_page_setup_to_file(page_setup, path, &error);
+	gtk_page_setup_to_file(page_setup, page_setup_path, &error);
 	if (error)
 		{
 		log_printf("Error: Print page setup save failed:\n%s", error->message);
 		g_error_free(error);
 		error = nullptr;
 		}
-	g_free(path);
 	g_object_unref(page_setup);
 
 	g_free(options->printer.page_text);
@@ -749,10 +740,8 @@ void print_window_new(FileData *, GList *selection, GList *, GtkWidget *parent)
 	GtkWidget *vbox;
 	GtkPrintOperation *operation;
 	GtkPageSetup *page_setup;
-	gchar *uri;
 	const gchar *dir;
 	GError *error = nullptr;
-	gchar *path;
 	GtkPrintSettings *settings;
 
 	auto pw = g_new0(PrintWindow, 1);
@@ -791,12 +780,11 @@ void print_window_new(FileData *, GList *selection, GList *, GtkWidget *parent)
 		dir = g_get_home_dir();
 		}
 
-	uri = g_build_filename("file:/", dir, "geeqie-file.pdf", NULL);
+	g_autofree gchar *uri = g_build_filename("file:/", dir, "geeqie-file.pdf", NULL);
 	gtk_print_settings_set(settings, GTK_PRINT_SETTINGS_OUTPUT_URI, uri);
-	g_free(uri);
 
-	path = g_build_filename(get_rc_dir(), PRINT_SETTINGS, NULL);
-	gtk_print_settings_load_file(settings, path, &error);
+	g_autofree gchar *print_settings_path = g_build_filename(get_rc_dir(), PRINT_SETTINGS, NULL);
+	gtk_print_settings_load_file(settings, print_settings_path, &error);
 	if (error)
 		{
 		log_printf("Error: Printer settings load failed:\n%s", error->message);
@@ -804,11 +792,10 @@ void print_window_new(FileData *, GList *selection, GList *, GtkWidget *parent)
 		error = nullptr;
 		}
 	gtk_print_operation_set_print_settings(operation, settings);
-	g_free(path);
 
 	page_setup = gtk_page_setup_new();
-	path = g_build_filename(get_rc_dir(), PAGE_SETUP, NULL);
-	gtk_page_setup_load_file(page_setup, path, &error);
+	g_autofree gchar *page_setup_path = g_build_filename(get_rc_dir(), PAGE_SETUP, NULL);
+	gtk_page_setup_load_file(page_setup, page_setup_path, &error);
 	if (error)
 		{
 		log_printf("Error: Print page setup load failed:\n%s", error->message);
@@ -816,7 +803,6 @@ void print_window_new(FileData *, GList *selection, GList *, GtkWidget *parent)
 		error = nullptr;
 		}
 	gtk_print_operation_set_default_page_setup(operation, page_setup);
-	g_free(path);
 
 	g_signal_connect (G_OBJECT (operation), "begin-print",
 					G_CALLBACK (begin_print), pw);

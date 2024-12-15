@@ -57,58 +57,48 @@ static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h
  * or just mark failed thumbnail with 0 byte file (mark_failure = TRUE) */
 static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failure)
 {
-	gboolean success = FALSE;
-
 	if (!tl || !tl->fd) return FALSE;
 	if (!mark_failure && !tl->fd->thumb_pixbuf) return FALSE;
 
 	g_autofree gchar *cache_dir = cache_create_location(CACHE_TYPE_THUMB, tl->fd->path);
-	if (cache_dir)
+	if (!cache_dir) return FALSE;
+
+	g_autofree gchar *name = g_strconcat(filename_from_path(tl->fd->path), GQ_CACHE_EXT_THUMB, NULL);
+	g_autofree gchar *cache_path = g_build_filename(cache_dir, name, NULL);
+	g_autofree gchar *pathl = path_from_utf8(cache_path);
+	gboolean success = FALSE;
+
+	if (mark_failure)
 		{
-		gchar *cache_path;
-		gchar *pathl;
-		gchar *name = g_strconcat(filename_from_path(tl->fd->path), GQ_CACHE_EXT_THUMB, NULL);
+		FILE *f = fopen(pathl, "w");
 
-		cache_path = g_build_filename(cache_dir, name, NULL);
-		g_free(name);
-
-		pathl = path_from_utf8(cache_path);
-
-		if (mark_failure)
+		DEBUG_1("Marking thumb failure: %s", cache_path);
+		if (f)
 			{
-			FILE *f = fopen(pathl, "w"); ;
-
-			DEBUG_1("Marking thumb failure: %s", cache_path);
-			if (f)
-				{
-				fclose(f);
-				success = TRUE;
-				}
+			fclose(f);
+			success = TRUE;
 			}
-		else
+		}
+	else
+		{
+		DEBUG_1("Saving thumb: %s", cache_path);
+		success = pixbuf_to_file_as_png(tl->fd->thumb_pixbuf, pathl);
+		}
+
+	if (success)
+		{
+		struct utimbuf ut;
+		/* set thumb time to that of source file */
+
+		ut.actime = ut.modtime = filetime(tl->fd->path);
+		if (ut.modtime > 0)
 			{
-			DEBUG_1("Saving thumb: %s", cache_path);
-			success = pixbuf_to_file_as_png(tl->fd->thumb_pixbuf, pathl);
+			utime(pathl, &ut);
 			}
-
-		if (success)
-			{
-			struct utimbuf ut;
-			/* set thumb time to that of source file */
-
-			ut.actime = ut.modtime = filetime(tl->fd->path);
-			if (ut.modtime > 0)
-				{
-				utime(pathl, &ut);
-				}
-			}
-		else
-			{
-			DEBUG_1("Saving failed: %s", pathl);
-			}
-
-		g_free(pathl);
-		g_free(cache_path);
+		}
+	else
+		{
+		DEBUG_1("Saving failed: %s", pathl);
 		}
 
 	return success;
@@ -328,8 +318,6 @@ void thumb_loader_set_cache(ThumbLoader *tl, gboolean enable_cache, gboolean loc
 
 gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 {
-	gchar *cache_path = nullptr;
-
 	if (!tl) return FALSE;
 
 	if (tl->standard_loader)
@@ -347,32 +335,24 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 		return FALSE;
 		}
 
-	if (tl->cache_enable)
+	g_autofree gchar *cache_path = tl->cache_enable ? cache_find_location(CACHE_TYPE_THUMB, tl->fd->path) : nullptr;
+	if (cache_time_valid(cache_path, tl->fd->path))
 		{
-		cache_path = cache_find_location(CACHE_TYPE_THUMB, tl->fd->path);
+		DEBUG_1("Found in cache:%s", tl->fd->path);
 
-		if (cache_path)
+		if (filesize(cache_path) == 0)
 			{
-			if (cache_time_valid(cache_path, tl->fd->path))
-				{
-				DEBUG_1("Found in cache:%s", tl->fd->path);
-
-				if (filesize(cache_path) == 0)
-					{
-					DEBUG_1("Broken image mark found:%s", cache_path);
-					g_free(cache_path);
-					thumb_loader_set_fallback(tl);
-					return FALSE;
-					}
-
-				DEBUG_1("Cache location:%s", cache_path);
-				}
-			else
-				{
-				g_free(cache_path);
-				cache_path = nullptr;
-				}
+			DEBUG_1("Broken image mark found:%s", cache_path);
+			thumb_loader_set_fallback(tl);
+			return FALSE;
 			}
+
+		DEBUG_1("Cache location:%s", cache_path);
+		}
+	else
+		{
+		g_free(cache_path);
+		cache_path = nullptr;
 		}
 
 	if (!cache_path && options->thumbnails.use_xvpics)
@@ -391,7 +371,6 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 		FileData *fd = file_data_new_no_grouping(cache_path);
 		thumb_loader_setup(tl, fd);
 		file_data_unref(fd);
-		g_free(cache_path);
 		tl->cache_hit = TRUE;
 		}
 	else
@@ -563,56 +542,39 @@ static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h
 {
 	gint width;
 	gint height;
-	gchar *thumb_name;
-	gchar *path;
-	gchar *directory;
-	gchar *name;
-	guchar *packed_data;
 
-	path = path_from_utf8(thumb_filename);
-	directory = g_path_get_dirname(path);
-	name = g_path_get_basename(path);
+	g_autofree gchar *path = path_from_utf8(thumb_filename);
+	g_autofree gchar *directory = g_path_get_dirname(path);
+	g_autofree gchar *name = g_path_get_basename(path);
+	g_autofree gchar *thumb_name = g_build_filename(directory, ".xvpics", name, NULL);
 
-	thumb_name = g_build_filename(directory, ".xvpics", name, NULL);
+	g_autofree guchar *packed_data = load_xv_thumbnail(thumb_name, &width, &height);
+	if (!packed_data) return nullptr;
 
-	g_free(name);
-	g_free(directory);
-	g_free(path);
+	guchar *rgb_data;
+	GdkPixbuf *pixbuf;
 
-	packed_data = load_xv_thumbnail(thumb_name, &width, &height);
-	g_free(thumb_name);
-
-	if (packed_data)
+	rgb_data = g_new(guchar, width * height * 3);
+	for (gint i = 0; i < width * height; i++)
 		{
-		guchar *rgb_data;
-		GdkPixbuf *pixbuf;
-		gint i;
-
-		rgb_data = g_new(guchar, width * height * 3);
-		for (i = 0; i < width * height; i++)
-			{
-			rgb_data[(i * 3) + 0] = (packed_data[i] >> 5) * 36;
-			rgb_data[(i * 3) + 1] = ((packed_data[i] & 28) >> 2) * 36;
-			rgb_data[(i * 3) + 2] = (packed_data[i] & 3) * 85;
-			}
-		g_free(packed_data);
-
-		pixbuf = gdk_pixbuf_new_from_data(rgb_data, GDK_COLORSPACE_RGB, FALSE, 8,
-						  width, height, 3 * width, free_rgb_buffer, nullptr);
-
-		if (pixbuf_scale_aspect(width, height, max_w, max_h, width, height))
-			{
-			/* scale */
-			GdkPixbuf *tmp;
-
-			tmp = pixbuf;
-			pixbuf = gdk_pixbuf_scale_simple(tmp, width, height, GDK_INTERP_NEAREST);
-			g_object_unref(tmp);
-			}
-
-		return pixbuf;
+		rgb_data[(i * 3) + 0] = (packed_data[i] >> 5) * 36;
+		rgb_data[(i * 3) + 1] = ((packed_data[i] & 28) >> 2) * 36;
+		rgb_data[(i * 3) + 2] = (packed_data[i] & 3) * 85;
 		}
 
-	return nullptr;
+	pixbuf = gdk_pixbuf_new_from_data(rgb_data, GDK_COLORSPACE_RGB, FALSE, 8,
+	                                  width, height, 3 * width, free_rgb_buffer, nullptr);
+
+	if (pixbuf_scale_aspect(width, height, max_w, max_h, width, height))
+		{
+		/* scale */
+		GdkPixbuf *tmp;
+
+		tmp = pixbuf;
+		pixbuf = gdk_pixbuf_scale_simple(tmp, width, height, GDK_INTERP_NEAREST);
+		g_object_unref(tmp);
+		}
+
+	return pixbuf;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

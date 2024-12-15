@@ -117,15 +117,11 @@ void file_util_trash_clear()
 static gchar *file_util_safe_dest(const gchar *path)
 {
 	gint n;
-	gchar *name;
-	gchar *dest;
 
 	n = file_util_safe_number(filesize(path));
-	name = g_strdup_printf("%06d_%s", n, filename_from_path(path));
-	dest = g_build_filename(options->file_ops.safe_delete_path, name, NULL);
-	g_free(name);
+	g_autofree gchar *name = g_strdup_printf("%06d_%s", n, filename_from_path(path));
 
-	return dest;
+	return g_build_filename(options->file_ops.safe_delete_path, name, NULL);
 }
 
 static void move_to_trash_failed_cb(GenericDialog *, gpointer)
@@ -138,7 +134,6 @@ gboolean file_util_safe_unlink(const gchar *path)
 	static GenericDialog *gd = nullptr;
 	gchar *result = nullptr;
 	gboolean success = TRUE;
-	gchar *message;
 
 	if (!isfile(path)) return FALSE;
 
@@ -166,9 +161,7 @@ gboolean file_util_safe_unlink(const gchar *path)
 
 		if (success)
 			{
-			gchar *dest;
-
-			dest = file_util_safe_dest(path);
+			g_autofree gchar *dest = file_util_safe_dest(path);
 			if (dest)
 				{
 				DEBUG_1("safe deleting %s to %s", path, dest);
@@ -183,16 +176,12 @@ gboolean file_util_safe_unlink(const gchar *path)
 				{
 				result = _("Permission denied");
 				}
-			g_free(dest);
 			}
 
 		if (result && !gd)
 			{
-			gchar *buf;
-
-			buf = g_strdup_printf(_("Unable to access or create the trash folder.\n\"%s\""), options->file_ops.safe_delete_path);
+			g_autofree gchar *buf = g_strdup_printf(_("Unable to access or create the trash folder.\n\"%s\""), options->file_ops.safe_delete_path);
 			gd = file_util_warning_dialog(result, buf, GQ_ICON_DIALOG_WARNING, nullptr);
-			g_free(buf);
 			}
 		}
 	else
@@ -202,11 +191,10 @@ gboolean file_util_safe_unlink(const gchar *path)
 
 		if (!g_file_trash(tmp, FALSE, &error) )
 			{
-			message = g_strconcat(_("See the Help file for a possible workaround.\n\n"), error->message, NULL);
+			g_autofree gchar *message = g_strconcat(_("See the Help file for a possible workaround.\n\n"), error->message, NULL);
 			gd = warning_dialog(_("Move to trash failed\n\n"), message, GQ_ICON_DIALOG_ERROR, nullptr);
 			generic_dialog_add_button(gd, GQ_ICON_HELP, _("Help"), move_to_trash_failed_cb, FALSE);
 
-			g_free(message);
 			g_error_free(error);
 
 			/* A second warning dialog is not necessary */
@@ -232,14 +220,13 @@ gchar *file_util_safe_delete_status()
 		{
 		if (!options->file_ops.use_system_trash)
 			{
-			gchar *buf2;
+			g_autofree gchar *buf2 = nullptr;
 			if (options->file_ops.safe_delete_folder_maxsize > 0)
 				buf2 = g_strdup_printf(_(" (max. %d MiB)"), options->file_ops.safe_delete_folder_maxsize);
 			else
 				buf2 = g_strdup("");
 
 			buf = g_strdup_printf(_("Using Geeqie Trash bin\n%s"), buf2);
-			g_free(buf2);
 			}
 		else
 			{

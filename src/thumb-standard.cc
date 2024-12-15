@@ -147,35 +147,21 @@ static void thumb_loader_std_reset(ThumbLoaderStd *tl)
 static gchar *thumb_std_cache_path(const gchar *path, const gchar *uri, gboolean local,
 				   const gchar *cache_subfolder)
 {
-	gchar *result = nullptr;
-	gchar *md5_text;
-	gchar *name;
-
 	if (!path || !uri || !cache_subfolder) return nullptr;
 
-	md5_text = md5_get_string(reinterpret_cast<const guchar *>(uri), strlen(uri));
-
+	g_autofree gchar *md5_text = md5_get_string(reinterpret_cast<const guchar *>(uri), strlen(uri));
 	if (!md5_text) return nullptr;
 
-	name = g_strconcat(md5_text, THUMB_NAME_EXTENSION, NULL);
+	g_autofree gchar *name = g_strconcat(md5_text, THUMB_NAME_EXTENSION, NULL);
 
 	if (local)
 		{
-		gchar *base = remove_level_from_path(path);
+		g_autofree gchar *base = remove_level_from_path(path);
 
-		result = g_build_filename(base, THUMB_FOLDER_LOCAL, cache_subfolder, name, NULL);
-		g_free(base);
-		}
-	else
-		{
-		result = g_build_filename(get_thumbnails_standard_cache_dir(),
-													cache_subfolder, name, NULL);
+		return g_build_filename(base, THUMB_FOLDER_LOCAL, cache_subfolder, name, NULL);
 		}
 
-	g_free(name);
-	g_free(md5_text);
-
-	return result;
+	return g_build_filename(get_thumbnails_standard_cache_dir(), cache_subfolder, name, NULL);
 }
 
 static gchar *thumb_loader_std_cache_path(ThumbLoaderStd *tl, gboolean local, GdkPixbuf *pixbuf, gboolean fail)
@@ -217,45 +203,34 @@ static gchar *thumb_loader_std_cache_path(ThumbLoaderStd *tl, gboolean local, Gd
 
 static gboolean thumb_loader_std_fail_check(ThumbLoaderStd *tl)
 {
-	gchar *fail_path;
+	g_autofree gchar *fail_path = thumb_loader_std_cache_path(tl, FALSE, nullptr, TRUE);
+	if (!isfile(fail_path)) return FALSE;
+
 	gboolean result = FALSE;
+	GdkPixbuf *pixbuf = nullptr;
 
-	fail_path = thumb_loader_std_cache_path(tl, FALSE, nullptr, TRUE);
-	if (isfile(fail_path))
+	if (!tl->cache_retry)
 		{
-		GdkPixbuf *pixbuf;
-
-		if (tl->cache_retry)
-			{
-			pixbuf = nullptr;
-			}
-		else
-			{
-			gchar *pathl;
-
-			pathl = path_from_utf8(fail_path);
-			pixbuf = gdk_pixbuf_new_from_file(pathl, nullptr);
-			g_free(pathl);
-			}
-
-		if (pixbuf)
-			{
-			const gchar *mtime_str;
-
-			mtime_str = gdk_pixbuf_get_option(pixbuf, THUMB_MARKER_MTIME);
-			if (mtime_str && strtol(mtime_str, nullptr, 10) == tl->source_mtime)
-				{
-				result = TRUE;
-				DEBUG_1("thumb fail valid: %s", tl->fd->path);
-				DEBUG_1("           thumb: %s", fail_path);
-				}
-
-			g_object_unref(G_OBJECT(pixbuf));
-			}
-
-		if (!result) unlink_file(fail_path);
+		g_autofree gchar *pathl = path_from_utf8(fail_path);
+		pixbuf = gdk_pixbuf_new_from_file(pathl, nullptr);
 		}
-	g_free(fail_path);
+
+	if (pixbuf)
+		{
+		const gchar *mtime_str;
+
+		mtime_str = gdk_pixbuf_get_option(pixbuf, THUMB_MARKER_MTIME);
+		if (mtime_str && strtol(mtime_str, nullptr, 10) == tl->source_mtime)
+			{
+			result = TRUE;
+			DEBUG_1("thumb fail valid: %s", tl->fd->path);
+			DEBUG_1("           thumb: %s", fail_path);
+			}
+
+		g_object_unref(G_OBJECT(pixbuf));
+		}
+
+	if (!result) unlink_file(fail_path);
 
 	return result;
 }
@@ -293,8 +268,6 @@ static gboolean thumb_loader_std_validate(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 
 static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 {
-	gchar *base_path;
-	gchar *tmp_path;
 	gboolean fail;
 
 	if (!tl->cache_enable || tl->cache_hit) return;
@@ -323,45 +296,40 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 	tl->thumb_path_local = tl->cache_local;
 
 	/* create thumbnail dir if needed */
-	base_path = remove_level_from_path(tl->thumb_path);
+	g_autofree gchar *base_path = remove_level_from_path(tl->thumb_path);
 	if (tl->cache_local)
 		{
 		if (!isdir(base_path))
 			{
+			g_autofree gchar *source_base = remove_level_from_path(tl->fd->path);
 			struct stat st;
-			gchar *source_base;
 
-			source_base = remove_level_from_path(tl->fd->path);
 			if (stat_utf8(source_base, &st))
 				{
 				recursive_mkdir_if_not_exists(base_path, st.st_mode);
 				}
-			g_free(source_base);
 			}
 		}
 	else
 		{
 		recursive_mkdir_if_not_exists(base_path, S_IRWXU);
 		}
-	g_free(base_path);
 
 	DEBUG_1("thumb saving: %s", tl->fd->path);
 	DEBUG_1("       saved: %s", tl->thumb_path);
 
 	/* save thumb, using a temp file then renaming into place */
-	tmp_path = unique_filename(tl->thumb_path, ".tmp", "_", 2);
+	g_autofree gchar *tmp_path = unique_filename(tl->thumb_path, ".tmp", "_", 2);
 	if (tmp_path)
 		{
 		const gchar *mark_uri;
-		gchar *mark_app;
-		gchar *pathl;
 		gboolean success;
 
 		mark_uri = (tl->cache_local) ? tl->local_uri :tl->thumb_uri;
 
-		mark_app = g_strdup_printf("%s %s", GQ_APPNAME, VERSION);
+		g_autofree gchar *mark_app = g_strdup_printf("%s %s", GQ_APPNAME, VERSION);
 		const std::string mark_mtime = std::to_string(static_cast<unsigned long long>(tl->source_mtime));
-		pathl = path_from_utf8(tmp_path);
+		g_autofree gchar *pathl = path_from_utf8(tmp_path);
 		success = gdk_pixbuf_save(pixbuf, pathl, "png", nullptr,
 		                          THUMB_MARKER_URI, mark_uri,
 		                          THUMB_MARKER_MTIME, mark_mtime.c_str(),
@@ -372,10 +340,6 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 			chmod(pathl, (tl->cache_local) ? tl->source_mode : S_IRUSR | S_IWUSR);
 			success = rename_file(tmp_path, tl->thumb_path);
 			}
-
-		g_free(pathl);
-		g_free(mark_app);
-		g_free(tmp_path);
 
 		if (!success)
 			{
@@ -395,13 +359,12 @@ static void thumb_loader_std_set_fallback(ThumbLoaderStd *tl)
 
 
 void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf) {
-	ColorMan *cm = nullptr;
 	ExifData *exif = nullptr;
 	gint color_profile_from_image = COLOR_PROFILE_NONE;
 	ColorManProfileType input_type = COLOR_PROFILE_MEM;
 	ColorManProfileType screen_type;
 	const gchar *input_file = nullptr;
-	guchar *profile = nullptr;
+	g_autofree guchar *profile = nullptr;
 	guint profile_len;
 	gint sw;
 	gint sh;
@@ -415,90 +378,87 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf) {
 	sh = gdk_pixbuf_get_height(pixbuf);
 
 	exif = exif_read_fd(fd);
+	if (!exif) return;
 
-	if (exif)
+	if (g_strcmp0(fd->format_name, "heif") == 0)
 		{
-		if (g_strcmp0(fd->format_name, "heif") == 0)
-			{
-			profile = heif_color_profile(fd, &profile_len);
-			}
+		profile = heif_color_profile(fd, &profile_len);
+		}
 
-		if (!profile)
-			{
-			profile = exif_get_color_profile(exif, &profile_len);
-			}
+	if (!profile)
+		{
+		profile = exif_get_color_profile(exif, &profile_len);
+		}
 
-		if (profile)
+	if (profile)
+		{
+		DEBUG_1("Found embedded color profile");
+		color_profile_from_image = COLOR_PROFILE_MEM;
+		}
+	else
+		{
+		g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
+
+		if (interop_index)
 			{
-			DEBUG_1("Found embedded color profile");
-			color_profile_from_image = COLOR_PROFILE_MEM;
+			/* Exif 2.21 specification */
+			if (!strcmp(interop_index, "R98"))
+				{
+				color_profile_from_image = COLOR_PROFILE_SRGB;
+				DEBUG_1("Found EXIF 2.21 ColorSpace of sRGB");
+				}
+			else if (!strcmp(interop_index, "R03"))
+				{
+				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
+				DEBUG_1("Found EXIF 2.21 ColorSpace of AdobeRGB");
+				}
 			}
 		else
 			{
-			gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
+			gint cs;
 
-			if (interop_index)
+			/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
+			if (!exif_get_integer(exif, "Exif.Photo.ColorSpace", &cs)) cs = 0;
+			if (cs == 1)
 				{
-				/* Exif 2.21 specification */
-				if (!strcmp(interop_index, "R98"))
-					{
-					color_profile_from_image = COLOR_PROFILE_SRGB;
-					DEBUG_1("Found EXIF 2.21 ColorSpace of sRGB");
-					}
-				else if (!strcmp(interop_index, "R03"))
-					{
-					color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-					DEBUG_1("Found EXIF 2.21 ColorSpace of AdobeRGB");
-					}
-				g_free(interop_index);
+				color_profile_from_image = COLOR_PROFILE_SRGB;
+				DEBUG_1("Found EXIF 2.2 ColorSpace of sRGB");
 				}
-			else
+			else if (cs == 2)
 				{
-				gint cs;
-
-				/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
-				if (!exif_get_integer(exif, "Exif.Photo.ColorSpace", &cs)) cs = 0;
-				if (cs == 1)
-					{
-					color_profile_from_image = COLOR_PROFILE_SRGB;
-					DEBUG_1("Found EXIF 2.2 ColorSpace of sRGB");
-					}
-				else if (cs == 2)
-					{
-					/* non-standard way of specifying AdobeRGB (used by some software) */
-					color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-					DEBUG_1("Found EXIF 2.2 ColorSpace of AdobeRGB");
-					}
+				/* non-standard way of specifying AdobeRGB (used by some software) */
+				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
+				DEBUG_1("Found EXIF 2.2 ColorSpace of AdobeRGB");
 				}
 			}
-
-		if(color_profile_from_image != COLOR_PROFILE_NONE)
-			{
-				// transform image, we always use sRGB as target for thumbnails
-				screen_type = COLOR_PROFILE_SRGB;
-
-				if (profile)
-					{
-					cm = color_man_new_embedded(nullptr, pixbuf,
-									profile, profile_len,
-									screen_type, nullptr, nullptr, 0);
-					g_free(profile);
-					}
-				else
-					{
-					cm = color_man_new(nullptr, pixbuf,
-							input_type, input_file,
-							screen_type, nullptr, nullptr, 0);
-					}
-
-				if(cm) {
-					color_man_correct_region(cm, cm->pixbuf, 0, 0, sw, sh);
-					g_free(cm);
-				}
-
-			}
-		exif_free_fd(fd, exif);
 		}
+
+	if(color_profile_from_image != COLOR_PROFILE_NONE)
+		{
+		// transform image, we always use sRGB as target for thumbnails
+		screen_type = COLOR_PROFILE_SRGB;
+
+		g_autofree ColorMan *cm = nullptr;
+		if (profile)
+			{
+			cm = color_man_new_embedded(nullptr, pixbuf,
+			                            profile, profile_len,
+			                            screen_type, nullptr, nullptr, 0);
+			}
+		else
+			{
+			cm = color_man_new(nullptr, pixbuf,
+			                   input_type, input_file,
+			                   screen_type, nullptr, nullptr, 0);
+			}
+
+		if(cm)
+			{
+			color_man_correct_region(cm, cm->pixbuf, 0, 0, sw, sh);
+			}
+		}
+
+	exif_free_fd(fd, exif);
 }
 
 static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf, gboolean shrunk)
@@ -809,12 +769,9 @@ gboolean thumb_loader_std_start(ThumbLoaderStd *tl, FileData *fd)
 
 	if (strncmp(tl->fd->path, thumb_cache, strlen(thumb_cache)) != 0)
 		{
-		gchar *pathl;
-
-		pathl = path_from_utf8(fd->path);
+		g_autofree gchar *pathl = path_from_utf8(fd->path);
 		tl->thumb_uri = g_filename_to_uri(pathl, nullptr, nullptr);
 		tl->local_uri = filename_from_path(tl->thumb_uri);
-		g_free(pathl);
 		}
 
 	if (tl->cache_enable)
@@ -945,15 +902,13 @@ static void thumb_loader_std_thumb_file_validate_done_cb(ThumbLoaderStd *, gpoin
 			if (strncmp(uri, "file:", strlen("file:")) == 0)
 				{
 				struct stat st;
-				gchar *target;
 
-				target = g_filename_from_uri(uri, nullptr, nullptr);
+				g_autofree gchar *target = g_filename_from_uri(uri, nullptr, nullptr);
 				if (stat(target, &st) == 0 &&
 				    st.st_mtime == strtol(mtime_str, nullptr, 10))
 					{
 					valid = TRUE;
 					}
-				g_free(target);
 				}
 			else
 				{
@@ -1042,28 +997,22 @@ ThumbLoaderStd *thumb_loader_std_thumb_file_validate(const gchar *thumb_path, gi
 static void thumb_std_maint_remove_one(const gchar *source, const gchar *uri, gboolean local,
 				       const gchar *subfolder)
 {
-	gchar *thumb_path;
-
-	thumb_path = thumb_std_cache_path(source,
-					  (local) ? filename_from_path(uri) : uri,
-					  local, subfolder);
+	g_autofree gchar *thumb_path = thumb_std_cache_path(source,
+	                                                    local ? filename_from_path(uri) : uri,
+	                                                    local,
+	                                                    subfolder);
 	if (isfile(thumb_path))
 		{
 		DEBUG_1("thumb removing: %s", thumb_path);
 		unlink_file(thumb_path);
 		}
-	g_free(thumb_path);
 }
 
 /* this also removes local thumbnails (the source is gone so it makes sense) */
 void thumb_std_maint_removed(const gchar *source)
 {
-	gchar *uri;
-	gchar *sourcel;
-
-	sourcel = path_from_utf8(source);
-	uri = g_filename_to_uri(sourcel, nullptr, nullptr);
-	g_free(sourcel);
+	g_autofree gchar *sourcel = path_from_utf8(source);
+	g_autofree gchar *uri = g_filename_to_uri(sourcel, nullptr, nullptr);
 
 	/* all this to remove a thumbnail? */
 
@@ -1072,8 +1021,6 @@ void thumb_std_maint_removed(const gchar *source)
 	thumb_std_maint_remove_one(source, uri, FALSE, THUMB_FOLDER_FAIL);
 	thumb_std_maint_remove_one(source, uri, TRUE, THUMB_FOLDER_NORMAL);
 	thumb_std_maint_remove_one(source, uri, TRUE, THUMB_FOLDER_LARGE);
-
-	g_free(uri);
 }
 
 struct TMaintMove
@@ -1114,8 +1061,6 @@ static void thumb_std_maint_move_validate_cb(const gchar *, gboolean, gpointer d
 
 		if (uri && mtime_str && strcmp(uri, tm->source_uri) == 0)
 			{
-			gchar *pathl;
-
 			/* The validation utility abuses ThumbLoader, and we
 			 * abuse the utility just to load the thumbnail,
 			 * but the loader needs to look sane for the save to complete.
@@ -1128,11 +1073,10 @@ static void thumb_std_maint_move_validate_cb(const gchar *, gboolean, gpointer d
 			tm->tl->fd = file_data_new_group(tm->dest);
 			tm->tl->source_mtime = strtol(mtime_str, nullptr, 10);
 
-			pathl = path_from_utf8(tm->tl->fd->path);
+			g_autofree gchar *pathl = path_from_utf8(tm->tl->fd->path);
 			g_free(tm->tl->thumb_uri);
 			tm->tl->thumb_uri = g_filename_to_uri(pathl, nullptr, nullptr);
 			tm->tl->local_uri = filename_from_path(tm->tl->thumb_uri);
-			g_free(pathl);
 
 			g_free(tm->tl->thumb_path);
 			tm->tl->thumb_path = nullptr;
@@ -1182,7 +1126,6 @@ static void thumb_std_maint_move_step(TMaintMove *tm)
 static gboolean thumb_std_maint_move_idle(gpointer)
 {
 	TMaintMove *tm;
-	gchar *pathl;
 
 	if (!thumb_std_maint_move_list) return G_SOURCE_REMOVE;
 
@@ -1191,9 +1134,8 @@ static gboolean thumb_std_maint_move_idle(gpointer)
 	thumb_std_maint_move_list = g_list_remove(thumb_std_maint_move_list, tm);
 	if (!thumb_std_maint_move_list) thumb_std_maint_move_tail = nullptr;
 
-	pathl = path_from_utf8(tm->source);
+	g_autofree gchar *pathl = path_from_utf8(tm->source);
 	tm->source_uri = g_filename_to_uri(pathl, nullptr, nullptr);
-	g_free(pathl);
 
 	tm->pass = 0;
 

@@ -140,11 +140,9 @@ void write_char_option(GString *str, gint, const gchar *label, const gchar *text
 		'"',  0 /* '"' is handled in g_markup_escape_text */
 	};
 
-	gchar *escval1 = g_strescape(text ? text : "", reinterpret_cast<const gchar *>(no_quote_utf));
-	gchar *escval2 = g_markup_escape_text(escval1, -1);
+	g_autofree gchar *escval1 = g_strescape(text ? text : "", reinterpret_cast<const gchar *>(no_quote_utf));
+	g_autofree gchar *escval2 = g_markup_escape_text(escval1, -1);
 	g_string_append_printf(str, "%s = \"%s\" ", label, escval2);
-	g_free(escval2);
-	g_free(escval1);
 }
 
 /* dummy read for old/obsolete/futur/deprecated/unused options */
@@ -170,10 +168,9 @@ void write_color_option(GString *str, gint indent, const gchar *label, GdkRGBA *
 {
 	if (color)
 		{
-		gchar *colorstring = gdk_rgba_to_string(color);
+		g_autofree gchar *colorstring = gdk_rgba_to_string(color);
 
 		write_char_option(str, indent, label, colorstring);
-		g_free(colorstring);
 		}
 	else
 		write_char_option(str, indent, label, "");
@@ -332,12 +329,11 @@ gboolean read_int_unit_option(const gchar *option, const gchar *label, const gch
 	gint l;
 	gint r;
 	gchar *ptr;
-	gchar *buf;
 
 	if (g_ascii_strcasecmp(option, label) != 0) return FALSE;
 	if (!n) return FALSE;
 
-	buf = g_strdup(value);
+	g_autofree gchar *buf = g_strdup(value);
 	ptr = buf;
 	while (*ptr != '\0' && *ptr != '.') ptr++;
 	if (*ptr == '.')
@@ -355,7 +351,6 @@ gboolean read_int_unit_option(const gchar *option, const gchar *label, const gch
 		}
 
 	*n = l * subunits + r;
-	g_free(buf);
 
 	return TRUE;
 }
@@ -699,7 +694,6 @@ static void write_disabled_plugins(GString *outstr, gint indent)
 	GtkTreeIter iter;
 	gboolean valid;
 	gboolean disabled;
-	gchar *desktop_path;
 
 	WRITE_NL(); WRITE_STRING("<disabled_plugins>");
 	indent++;
@@ -710,15 +704,15 @@ static void write_disabled_plugins(GString *outstr, gint indent)
 		while (valid)
 			{
 			gtk_tree_model_get(GTK_TREE_MODEL(desktop_file_list), &iter, DESKTOP_FILE_COLUMN_DISABLED, &disabled, -1);
-			gtk_tree_model_get(GTK_TREE_MODEL(desktop_file_list), &iter, DESKTOP_FILE_COLUMN_PATH, &desktop_path, -1);
 
 			if (disabled)
 				{
+				g_autofree gchar *desktop_path = nullptr;
+				gtk_tree_model_get(GTK_TREE_MODEL(desktop_file_list), &iter, DESKTOP_FILE_COLUMN_PATH, &desktop_path, -1);
 				WRITE_NL();
 				write_char_option(outstr, indent, "<plugin path", desktop_path);
 				WRITE_STRING("/>");
 				}
-			g_free(desktop_path);
 			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(desktop_file_list), &iter);
 			}
 		}
@@ -736,14 +730,12 @@ static void write_disabled_plugins(GString *outstr, gint indent)
 gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, LayoutWindow *lw)
 {
 	SecureSaveInfo *ssi;
-	gchar *rc_pathl;
 	GString *outstr;
 	gint indent = 0;
 	GList *work;
 
-	rc_pathl = path_from_utf8(utf8_path);
+	g_autofree gchar *rc_pathl = path_from_utf8(utf8_path);
 	ssi = secure_open(rc_pathl);
-	g_free(rc_pathl);
 	if (!ssi)
 		{
 		log_printf(_("error saving config file: %s\n"), utf8_path);
@@ -836,13 +828,11 @@ gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, Layou
 gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions *, LayoutWindow *lw)
 {
 	SecureSaveInfo *ssi;
-	gchar *rc_pathl;
 	GString *outstr;
 	gint indent = 0;
 
-	rc_pathl = path_from_utf8(utf8_path);
+	g_autofree gchar *rc_pathl = path_from_utf8(utf8_path);
 	ssi = secure_open(rc_pathl);
-	g_free(rc_pathl);
 	if (!ssi)
 		{
 		log_printf(_("error saving default layout file: %s\n"), utf8_path);

@@ -194,11 +194,8 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	GtkWidget *image;
 	if (stock_id)
 		{
-		GdkPixbuf *pixbuf;
-		gchar *iconl;
-		iconl = path_from_utf8(stock_id);
-		pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
-		g_free(iconl);
+		g_autofree gchar *iconl = path_from_utf8(stock_id);
+		GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
 		if (pixbuf)
 			{
 			GdkPixbuf *scaled;

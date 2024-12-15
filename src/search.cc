@@ -431,41 +431,34 @@ static time_t convert_dmy_to_time(gint day, gint month, gint year)
 
 static void search_status_update(SearchData *sd)
 {
-	gchar *buf;
+	g_autofree gchar *buf = nullptr;
 	gint t;
 	gint s;
 	gint64 t_bytes;
 	gint64 s_bytes;
-	gchar *tt;
 
 	t = search_result_count(sd, &t_bytes);
 	s = search_result_selection_count(sd, &s_bytes);
 
-	tt = text_from_size_abrev(t_bytes);
+	g_autofree gchar *tt = text_from_size_abrev(t_bytes);
 
 	if (s > 0)
 		{
-		gchar *ts = text_from_size_abrev(s_bytes);
+		g_autofree gchar *ts = text_from_size_abrev(s_bytes);
 		buf = g_strdup_printf(_("%s, %d files (%s, %d)"), tt, t, ts, s);
-		g_free(ts);
 		}
 	else
 		{
 		buf = g_strdup_printf(_("%s, %d files"), tt, t);
 		}
 
-	g_free(tt);
-
 	gtk_label_set_text(GTK_LABEL(sd->label_status), buf);
-	g_free(buf);
 }
 
 static void search_progress_update(SearchData *sd, gboolean search, gdouble thumbs)
 {
-
 	if (search || thumbs >= 0.0)
 		{
-		gchar *buf;
 		const gchar *message;
 
 		if (search && (sd->search_folder_list || sd->search_file_list))
@@ -475,11 +468,10 @@ static void search_progress_update(SearchData *sd, gboolean search, gdouble thum
 		else
 			message = "";
 
-		buf = g_strdup_printf("%s(%d / %d)", message, sd->search_count, sd->search_total);
+		g_autofree gchar *buf = g_strdup_printf("%s(%d / %d)", message, sd->search_count, sd->search_total);
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(sd->label_progress), buf);
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(sd->label_progress),
 					      (thumbs >= 0.0) ? thumbs : 0.0);
-		g_free(buf);
 		}
 	else
 		{
@@ -648,14 +640,13 @@ static void search_result_append(SearchData *sd, MatchFileData *mfd)
 	FileData *fd;
 	GtkListStore *store;
 	GtkTreeIter iter;
-	gchar *text_size;
-	gchar *text_dim = nullptr;
+	g_autofree gchar *text_dim = nullptr;
 
 	fd = mfd->fd;
 
 	if (!fd) return;
 
-	text_size = text_from_size(fd->size);
+	g_autofree gchar *text_size = text_from_size(fd->size);
 	if (mfd->width > 0 && mfd->height > 0) text_dim = g_strdup_printf("%d x %d", mfd->width, mfd->height);
 
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(sd->result_view)));
@@ -670,9 +661,6 @@ static void search_result_append(SearchData *sd, MatchFileData *mfd)
 				SEARCH_COLUMN_DIMENSIONS, text_dim,
 				SEARCH_COLUMN_PATH, fd->path,
 				-1);
-
-	g_free(text_size);
-	g_free(text_dim);
 }
 
 static GList *search_result_refine_list(SearchData *sd)
@@ -1844,16 +1832,13 @@ static gboolean search_file_do_extra(SearchData *sd, FileData *fd, gint *match,
 
 	if (!sd->img_cd)
 		{
-		gchar *cd_path;
-
 		new_data = TRUE;
 
-		cd_path = cache_find_location(CACHE_TYPE_SIM, fd->path);
+		g_autofree gchar *cd_path = cache_find_location(CACHE_TYPE_SIM, fd->path);
 		if (cd_path && filetime(fd->path) == filetime(cd_path))
 			{
 			sd->img_cd = cache_sim_data_load(cd_path);
 			}
-		g_free(cd_path);
 		}
 
 	if (!sd->img_cd)
@@ -2019,9 +2004,8 @@ static gboolean search_file_next(SearchData *sd)
 				else
 					{
 					/* sd->search_name is converted in search_start() */
-					gchar *haystack = g_utf8_strdown(fd_name_or_path, -1);
+					g_autofree gchar *haystack = g_utf8_strdown(fd_name_or_path, -1);
 					match = g_regex_match(sd->search_name_regex, haystack, static_cast<GRegexMatchFlags>(0), nullptr);
-					g_free(haystack);
 					}
 				}
 			}
@@ -2174,20 +2158,17 @@ static gboolean search_file_next(SearchData *sd)
 
 	if (match && sd->match_comment_enable && sd->search_comment && strlen(sd->search_comment))
 		{
-		gchar *comment;
-
 		tested = TRUE;
 		match = FALSE;
 
-		comment = metadata_read_string(fd, COMMENT_KEY, METADATA_PLAIN);
+		g_autofree gchar *comment = metadata_read_string(fd, COMMENT_KEY, METADATA_PLAIN);
 
 		if (comment)
 			{
 			if (!sd->search_comment_match_case)
 				{
-				gchar *tmp = g_utf8_strdown(comment, -1);
-				g_free(comment);
-				comment = tmp;
+				g_autofree gchar *tmp = g_utf8_strdown(comment, -1);
+				std::swap(comment, tmp);
 				}
 
 			if (sd->match_comment == SEARCH_MATCH_CONTAINS)
@@ -2198,7 +2179,6 @@ static gboolean search_file_next(SearchData *sd)
 				{
 				match = !g_regex_match(sd->search_comment_regex, comment, static_cast<GRegexMatchFlags>(0), nullptr);
 				}
-			g_free(comment);
 			}
 		else
 			{
@@ -2208,20 +2188,17 @@ static gboolean search_file_next(SearchData *sd)
 
 	if (match && sd->match_exif_enable && sd->search_exif_tag && strlen(sd->search_exif_tag))
 		{
-		gchar *exif_tag_result;
-
 		tested = TRUE;
 		match = FALSE;
 
-		exif_tag_result = metadata_read_string(fd, sd->search_exif_tag, METADATA_FORMATTED);
+		g_autofree gchar *exif_tag_result = metadata_read_string(fd, sd->search_exif_tag, METADATA_FORMATTED);
 
 		if (exif_tag_result)
 			{
 			if (!sd->search_exif_match_case)
 				{
-				gchar *tmp = g_utf8_strdown(exif_tag_result, -1);
-				g_free(exif_tag_result);
-				exif_tag_result = tmp;
+				g_autofree gchar *tmp = g_utf8_strdown(exif_tag_result, -1);
+				std::swap(exif_tag_result, tmp);
 				}
 
 			if (sd->match_exif == SEARCH_MATCH_CONTAINS)
@@ -2232,7 +2209,6 @@ static gboolean search_file_next(SearchData *sd)
 				{
 				match = !g_regex_match(sd->search_exif_regex, exif_tag_result, static_cast<GRegexMatchFlags>(0), nullptr);
 				}
-			g_free(exif_tag_result);
 			}
 		else
 			{
@@ -2343,8 +2319,6 @@ static gboolean search_file_next(SearchData *sd)
 		tested = TRUE;
 		match = FALSE;
 		gint search_marks = -1;
-		gint i = 0;
-		gchar *marks_string = nullptr;
 
 		if (g_strcmp0(gtk_combo_box_text_get_active_text(
 						GTK_COMBO_BOX_TEXT(sd->marks_type)), _("Any mark")) == 0)
@@ -2353,24 +2327,21 @@ static gboolean search_file_next(SearchData *sd)
 			}
 		else
 			{
-			for (i = 0; i < FILEDATA_MARKS_SIZE; i++)
+			for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
 				{
-				marks_string = g_strdup_printf("%s%d", _("Mark "), i + 1);
-				if (g_strcmp0(marks_string, options->marks_tooltips[i]) != 0)
+				g_autoptr(GString) marks_string = g_string_new(_("Mark "));
+				g_string_append_printf(marks_string, "%d", i + 1);
+
+				if (g_strcmp0(marks_string->str, options->marks_tooltips[i]) != 0)
 					{
-					g_free(marks_string);
-					marks_string = g_strdup_printf("%s%d %s", _("Mark "), i + 1,
-													options->marks_tooltips[i]);
+					g_string_append_printf(marks_string, " %s", options->marks_tooltips[i]);
 					}
 
-				if (g_strcmp0(gtk_combo_box_text_get_active_text(
-								GTK_COMBO_BOX_TEXT(sd->marks_type)),
-								marks_string) == 0)
+				if (g_strcmp0(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->marks_type)),
+				              marks_string->str) == 0)
 					{
 					search_marks = 1 << i;
 					}
-				g_free(marks_string);
-				marks_string = nullptr;
 				}
 			}
 
@@ -2553,19 +2524,17 @@ static gboolean search_step_cb(gpointer data)
 					{
 					FileData *fdp;
 					GList *link;
-					gchar *meta_path;
 
 					fdp = static_cast<FileData *>(work->data);
 					link = work;
 					work = work->next;
 
-					meta_path = cache_find_location(CACHE_TYPE_METADATA, fdp->path);
+					g_autofree gchar *meta_path = cache_find_location(CACHE_TYPE_METADATA, fdp->path);
 					if (!meta_path)
 						{
 						list = g_list_delete_link(list, link);
 						file_data_unref(fdp);
 						}
-					g_free(meta_path);
 					}
 				}
 			}
@@ -2693,14 +2662,11 @@ static void search_start(SearchData *sd)
 	    !sd->search_similarity_cd &&
 	    isfile(sd->search_similarity_path))
 		{
-		gchar *cd_path;
-
-		cd_path = cache_find_location(CACHE_TYPE_SIM, sd->search_similarity_path);
+		g_autofree gchar *cd_path = cache_find_location(CACHE_TYPE_SIM, sd->search_similarity_path);
 		if (cd_path && filetime(sd->search_similarity_path) == filetime(cd_path))
 			{
 			sd->search_similarity_cd = cache_sim_data_load(cd_path);
 			}
-		g_free(cd_path);
 
 		if (!sd->search_similarity_cd || !sd->search_similarity_cd->similarity)
 			{
@@ -2719,7 +2685,6 @@ static void search_start(SearchData *sd)
 			image_loader_free(sd->img_loader);
 			sd->img_loader = nullptr;
 			}
-
 		}
 
 	sd->search_idle_id = g_idle_add(search_step_cb, sd);
@@ -2728,9 +2693,6 @@ static void search_start(SearchData *sd)
 static void search_start_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
-	gchar *collection;
-	gchar *entry_text;
-	gchar *path;
 	GDateTime *date;
 	GtkTreeViewColumn *column;
 
@@ -2776,8 +2738,7 @@ static void search_start_cb(GtkWidget *, gpointer data)
 		{
 		if (sd->match_gps != SEARCH_MATCH_NONE)
 			{
-			entry_text = decode_geo_parameters(gq_gtk_entry_get_text(
-										GTK_ENTRY(sd->entry_gps_coord)));
+			g_autofree gchar *entry_text = decode_geo_parameters(gq_gtk_entry_get_text(GTK_ENTRY(sd->entry_gps_coord)));
 
 			sd->search_lat = 1000;
 			sd->search_lon = 1000;
@@ -2789,7 +2750,6 @@ static void search_start_cb(GtkWidget *, gpointer data)
 				file_util_warning_dialog(_("Entry does not contain a valid lat/long value"), entry_text, GQ_ICON_DIALOG_WARNING, sd->window);
 				return;
 				}
-			g_free(entry_text);
 			}
 		}
 
@@ -2830,8 +2790,7 @@ static void search_start_cb(GtkWidget *, gpointer data)
 	if (sd->search_type == SEARCH_MATCH_NONE)
 		{
 		/* search path */
-
-		path = remove_trailing_slash(gq_gtk_entry_get_text(GTK_ENTRY(sd->path_entry)));
+		g_autofree gchar *path = remove_trailing_slash(gq_gtk_entry_get_text(GTK_ENTRY(sd->path_entry)));
 		if (isdir(path))
 			{
 			file_data_unref(sd->search_dir_fd);
@@ -2847,8 +2806,6 @@ static void search_start_cb(GtkWidget *, gpointer data)
 						 _("Please enter an existing folder to search."),
 						 GQ_ICON_DIALOG_WARNING, sd->window);
 			}
-
-		g_free(path);
 		}
 	else if (sd->search_type == SEARCH_MATCH_ALL)
 		{
@@ -2873,7 +2830,7 @@ static void search_start_cb(GtkWidget *, gpointer data)
 		}
 	else if (sd->search_type == SEARCH_MATCH_COLLECTION)
 		{
-		collection = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(sd->collection_entry)));
+		const gchar *collection = gq_gtk_entry_get_text(GTK_ENTRY(sd->collection_entry));
 
 		if (is_collection(collection))
 			{
@@ -2892,7 +2849,6 @@ static void search_start_cb(GtkWidget *, gpointer data)
 			{
 			file_util_warning_dialog(_("Collection not found"), _("Please enter an existing collection name."), GQ_ICON_DIALOG_WARNING, sd->window);
 			}
-		g_free(collection);
 		}
 }
 
@@ -3330,20 +3286,13 @@ static void select_collection_dialog_close_cb(FileDialog *fdlg, gpointer)
 static void select_collection_dialog_ok_cb(FileDialog *fdlg, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
-	gchar *path;
-	gchar *path_noext;
-	gchar *collection;
 
-	path = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(fdlg->entry)));
-	path_noext = remove_extension_from_path(path);
-	collection = g_path_get_basename(path_noext);
+	const gchar *path = gq_gtk_entry_get_text(GTK_ENTRY(fdlg->entry));
+	g_autofree gchar *path_noext = remove_extension_from_path(path);
+	g_autofree gchar *collection = g_path_get_basename(path_noext);
 
 	gq_gtk_entry_set_text(GTK_ENTRY(sd->collection_entry), collection);
 	file_dialog_close(fdlg);
-
-	g_free(path);
-	g_free(path_noext);
-	g_free(collection);
 }
 
 static void select_collection_clicked_cb(GtkWidget *, gpointer data)
@@ -3384,8 +3333,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	GtkTreeViewColumn *column;
 	GtkWidget *combo;
 	GdkGeometry geometry;
-	gint i;
-	gchar *marks_string;
 	LayoutWindow *lw = nullptr;
 
 	layout_valid(&lw);
@@ -3716,21 +3663,17 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	sd->marks_type = gtk_combo_box_text_new();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->marks_type), _("Any mark"));
-	for (i = 0; i < FILEDATA_MARKS_SIZE; i++)
+	for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
 		{
-		marks_string = g_strdup_printf("%s%d", _("Mark "), i + 1);
-		if (g_strcmp0(marks_string, options->marks_tooltips[i]) != 0)
+		g_autoptr(GString) marks_string = g_string_new(_("Mark "));
+		g_string_append_printf(marks_string, "%d", i + 1);
+
+		if (g_strcmp0(marks_string->str, options->marks_tooltips[i]) != 0)
 			{
-			g_free(marks_string);
-			marks_string = g_strdup_printf("%s%d %s", _("Mark "), i + 1,
-											options->marks_tooltips[i]);
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->marks_type), marks_string);
+			g_string_append_printf(marks_string, " %s", options->marks_tooltips[i]);
 			}
-		else
-			{
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->marks_type), marks_string);
-			}
-		g_free(marks_string);
+
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->marks_type), marks_string->str);
 		}
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->marks_type, FALSE, FALSE, 0);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(sd->marks_type), 0);
