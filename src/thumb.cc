@@ -23,7 +23,6 @@
 
 #include <utime.h>
 
-#include <algorithm>
 #include <cstdio>
 #include <cstring>
 
@@ -204,24 +203,12 @@ static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 
 	if (pw > tl->max_w || ph > tl->max_h)
 		{
-		gint w;
-		gint h;
-
-		if ((static_cast<gdouble>(tl->max_w) / pw) < (static_cast<gdouble>(tl->max_h) / ph))
-			{
-			w = tl->max_w;
-			h = static_cast<gdouble>(w) / pw * ph;
-			h = std::max(h, 1);
-			}
-		else
-			{
-			h = tl->max_h;
-			w = static_cast<gdouble>(h) / ph * pw;
-			w = std::max(w, 1);
-			}
-
 		if (tl->fd)
 			{
+			gint w;
+			gint h;
+			pixbuf_scale_aspect(tl->max_w, tl->max_h, pw, ph, w, h);
+
 			if (tl->fd->thumb_pixbuf) g_object_unref(tl->fd->thumb_pixbuf);
 			tl->fd->thumb_pixbuf = gdk_pixbuf_scale_simple(pixbuf, w, h, static_cast<GdkInterpType>(options->thumbnails.quality));
 			}
