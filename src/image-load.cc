@@ -23,7 +23,6 @@
 
 #include <sys/mman.h>
 
-#include <algorithm>
 #include <cstring>
 
 #include <config.h>
@@ -80,6 +79,7 @@
 #include "jpeg-parser.h"
 #include "misc.h"
 #include "options.h"
+#include "pixbuf-util.h"
 #include "typedefs.h"
 #include "ui-fileops.h"
 
@@ -605,27 +605,11 @@ static void image_loader_size_cb(gpointer,
 
 	g_mutex_lock(il->data_mutex);
 
-	gint nw;
-	gint nh;
 	if (width > il->requested_width || height > il->requested_height)
 		{
+		pixbuf_scale_aspect(il->requested_width, il->requested_height, width, height, il->actual_width, il->actual_height);
 
-		if ((static_cast<gdouble>(il->requested_width) / width) < (static_cast<gdouble>(il->requested_height) / height))
-			{
-			nw = il->requested_width;
-			nh = static_cast<gdouble>(nw) / width * height;
-			nh = std::max(nh, 1);
-			}
-		else
-			{
-			nh = il->requested_height;
-			nw = static_cast<gdouble>(nh) / height * width;
-			nw = std::max(nw, 1);
-			}
-
-		il->actual_width = nw;
-		il->actual_height = nh;
-		il->backend->set_size(nw, nh);
+		il->backend->set_size(il->actual_width, il->actual_height);
 		il->shrunk = TRUE;
 		}
 
