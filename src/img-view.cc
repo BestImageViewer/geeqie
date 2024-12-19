@@ -267,24 +267,7 @@ static void view_list_step(ViewWindow *vw, gboolean next)
 		}
 	else
 		{
-		gboolean found = FALSE;
-
-		work = vw->list;
-		while (work && !found)
-			{
-			FileData *temp;
-
-			temp = static_cast<FileData *>(work->data);
-
-			if (fd == temp)
-				{
-				found = TRUE;
-				}
-			else
-				{
-				work = work->next;
-				}
-			}
+		work = g_list_find(vw->list, fd);
 		}
 	if (!work) return;
 
@@ -821,27 +804,15 @@ static void view_slideshow_prev(ViewWindow *vw)
 static void view_slideshow_stop_func(SlideShowData *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
-	GList *work;
-	FileData *fd;
 
 	vw->ss = nullptr;
 
-	work = vw->list;
-	fd = image_get_fd(view_window_active_image(vw));
-	while (work)
-		{
-		FileData *temp;
+	FileData *fd = image_get_fd(view_window_active_image(vw));
 
-		temp = static_cast<FileData *>(work->data);
-		if (fd == temp)
-			{
-			vw->list_pointer = work;
-			work = nullptr;
-			}
-		else
-			{
-			work = work->next;
-			}
+	GList *work = g_list_find(vw->list, fd);
+	if (work)
+		{
+		vw->list_pointer = work;
 		}
 }
 
