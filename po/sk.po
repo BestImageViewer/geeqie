@@ -3,17 +3,17 @@
 # Copyright (C) 2000,2004 Free Software Foundation, Inc.
 # Translators:
 # Martin Pekar <cortex@nextra.sk>, 2000.
-# Ivan Priesol <priesol@iris-sk.sk>, 2001,2004.
-# Jose Riha <jose 1711 gmail com>, 2020.
+# Ivan Priesol <priesol@iris-sk.sk>, 2001, 2004.
+# Jose Riha <jose 1711 gmail com>, 2020, 2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geeqie-1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-09-21 15:50+0100\n"
-"PO-Revision-Date: 2023-11-09 10:42+0100\n"
-"Last-Translator: Colin Clark <cclark@TallTrees>\n"
-"Language-Team: Peter Tuhársky <tuharsky@misbb.sk>\n"
+"PO-Revision-Date: 2024-12-20 14:26+0100\n"
+"Last-Translator: Jose Riha <jose1711@gmail.com>\n"
+"Language-Team: Slovak\n"
 "Language: sk_SK\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,14 +31,15 @@ msgid "A lightweight image viewer"
 msgstr "Odľahčený prehliadač obrázkov"
 
 #: org.geeqie.Geeqie.appdata.xml.in:10
-#, fuzzy
 msgid ""
 "Geeqie is a lightweight image viewer for Linux, BSDs and compatibles. It can "
 "be used as a simple, fast, database-free image viewer, but equally it can be "
 "used to manage large collections of images."
 msgstr ""
-"Poslúži ako jednoduchý, rýchly, bezdatabázový prehliadač obrázkov, ale "
-"takisto ho môžete použiť aj na správu veľkých zbierok obrázkov."
+"Geeqie je rýchly prehliadač obrázkov pre Linux, BSD a kompatibilné systémy. "
+"Môžete ho používať ako jednoduchý, rýchly prehliadač obrázkov, ktorý "
+"nevyžaduje databázu, ale rovnako ho môžete využiť na správu veľkých zbierok "
+"obrázkov."
 
 #: org.geeqie.Geeqie.appdata.xml.in:11
 msgid ""
@@ -49,6 +50,13 @@ msgid ""
 "easily handled using a combination of Geeqie's flexible Keyword facility and "
 "powerful Image searches."
 msgstr ""
+"Geeqie je prehliadač obrázkov, ktorý uľahčuje orientáciu v obrázkoch. "
+"Obrázky môžete prezerať vo forme miniatúr, vo viacerých oknách alebo v "
+"režime celej obrazovky. Geeqie je správca obrázkov s kompletnými funkciami "
+"kopírovania, presúvania, premenovania a odstraňovania, ktoré sú viete "
+"vyvolať jednoduchým stlačením tlačidla. Rozsiahle zbierky obrázkov možno "
+"ľahko spracovať pomocou kombinácie flexibilného nástroja pre kľúčové slová a "
+"výkonného vyhľadávania obrázkov."
 
 #: org.geeqie.Geeqie.appdata.xml.in:12
 msgid ""
@@ -59,31 +67,35 @@ msgid ""
 "display. There is no need to import images into Geeqie - simply point Geeqie "
 "to a folder containing images, and your data will be displayed."
 msgstr ""
+"Zbierky obrázkov môžete vylepšiť pomocou vyhľadávača duplicitných obrázkov. "
+"Geeqie je ideálny na vytváranie prezentácií. Funkcia prezentácie je jeho "
+"súčasťou a Geeqie možno tiež ovládať na diaľku prostredníctvom skriptov "
+"príkazového riadka. Informácie ako číslo clony, rýchlosť uzávierky a popisný "
+"text môžete nechať zobraziť v obrázku. Obrázky do Geeqie nie je potrebné "
+"importovať obrázky - jednoducho nasmerujte aplikáciu na priečinok obsahujúci "
+"obrázky a vaše údaje sa zobrazia."
 
 # src/window.cc:234
 #: org.geeqie.Geeqie.appdata.xml.in:15
-#, fuzzy
 msgid "Geeqie developers"
-msgstr "Geeqie : Nástroje"
+msgstr "Vývojári Geeqie"
 
 # src/preferences.cc:676
 #: org.geeqie.Geeqie.appdata.xml.in:32
-#, fuzzy
 msgid "image"
-msgstr "Obrázok"
+msgstr "obrázok"
 
 #: org.geeqie.Geeqie.appdata.xml.in:33
-#, fuzzy
 msgid "photography"
-msgstr "Fotografovanie priamo do PC (tethered)"
+msgstr "fotografovanie"
 
 #: org.geeqie.Geeqie.appdata.xml.in:34
 msgid "fast"
-msgstr ""
+msgstr "rýchly"
 
 #: org.geeqie.Geeqie.appdata.xml.in:35
 msgid "graphics"
-msgstr ""
+msgstr "grafika"
 
 # src/preferences.cc:676
 #: org.geeqie.Geeqie.desktop.in:4
@@ -97,7 +109,7 @@ msgstr "Prehliadanie a organizovanie obrázkov"
 
 #: org.geeqie.Geeqie.desktop.in:16
 msgid "Picture;Slideshow;Graphics;"
-msgstr ""
+msgstr "obrázok;prezentácia;grafika;"
 
 #: plugins/camera-import/org.geeqie.camera-import.desktop.in:5
 msgid "Camera import"
@@ -109,13 +121,13 @@ msgstr "Importovať všetky obrázky z fotoaparátu"
 
 # src/utilops.cc:339 src/utilops.cc:459 src/utilops.cc:826 src/utilops.cc:1032
 #: plugins/exif-datetime-to-file/org.geeqie.exif-datetime-to-file.desktop.in:5
-#, fuzzy
 msgid "Exif datetime to file"
-msgstr "Zapísať do súboru"
+msgstr "EXIF dátum/čas do súboru"
 
 #: plugins/exif-datetime-to-file/org.geeqie.exif-datetime-to-file.desktop.in:6
 msgid "Sets file mtime to the Exif.Image.DateTimeOriginal of the file"
 msgstr ""
+"Nastaví čas poslednej zmeny súboru na hodnotu Exif.Image.DateTimeOriginal"
 
 #: plugins/export-jpeg/org.geeqie.export-jpeg.desktop.in:5
 msgid "Export jpeg"
@@ -135,13 +147,12 @@ msgstr "Orezať obrázok podľa vyznačeného obdĺžnika"
 
 # src/collect-dlg.cc:174
 #: plugins/open-with/org.geeqie.open-with.desktop.in:5
-#, fuzzy
 msgid "Open With"
-msgstr "Otvoriť"
+msgstr "Otvoriť pomocou"
 
 #: plugins/open-with/org.geeqie.open-with.desktop.in:6
 msgid "Call the gtk application chooser dialog"
-msgstr ""
+msgstr "Vyvolať dialógové okno výberu aplikácie gtk"
 
 #: plugins/org.geeqie.template.desktop.in:10
 msgid "Template"
@@ -158,13 +169,12 @@ msgstr "Zobraziť náhodný obrázok zo Zbierok a aktuálneho priečinka"
 
 # src/preferences.cc:660
 #: plugins/resize-image/org.geeqie.resize-image.desktop.in:5
-#, fuzzy
 msgid "Resize image"
-msgstr "Samostatný obrázok"
+msgstr "Zmeniť veľkosť obrázku"
 
 #: plugins/resize-image/org.geeqie.resize-image.desktop.in:6
 msgid "Downsize an image"
-msgstr ""
+msgstr "Zmenšiť veľkosť obrázka"
 
 # src/utilops.cc:544
 #: plugins/rotate/org.geeqie.rotate.desktop.in:5
@@ -181,13 +191,12 @@ msgstr "Fotografovanie priamo do PC (tethered)"
 
 #: plugins/video-player/org.geeqie.video-player.desktop.in:5
 msgid "Video player"
-msgstr ""
+msgstr "Prehrávač videa"
 
 # src/utilops.cc:707
 #: plugins/video-player/org.geeqie.video-player.desktop.in:6
-#, fuzzy
 msgid "Display videos in Geeqie"
-msgstr "Mazanie súborov - Geeqie"
+msgstr "Prehrávajte videá v Geeqie"
 
 #: src/advanced-exif.cc:436 src/cache-maint.cc:1697 src/preferences.cc:161
 #: src/preferences.cc:2892 src/search.cc:2296 src/search.cc:3703
@@ -238,13 +247,12 @@ msgstr "Pomocník"
 #: src/dupe.cc:3053 src/dupe.cc:4729 src/editors.cc:595 src/preferences.cc:3201
 #: src/search.cc:3846 src/ui-fileops.cc:121 src/utilops.cc:2082
 #: src/utilops.cc:2129 src/utilops.cc:2762
-#, fuzzy
 msgid "Close"
-msgstr "zavrieť"
+msgstr "Zavrieť"
 
 #: src/advanced-exif.cc:540 src/dupe.cc:4730 src/search.cc:3847
 msgid "Ctrl-W"
-msgstr ""
+msgstr "Ctrl-W"
 
 # src/utilops.cc:1151
 #: src/archives.cc:183
@@ -298,7 +306,7 @@ msgstr "Nadpis"
 # src/main.cc:622
 #: src/bar.cc:216 src/search.cc:3621
 msgid "Exif"
-msgstr "Exif"
+msgstr "EXIF"
 
 #: src/bar.cc:218
 msgid "File info"
@@ -461,7 +469,7 @@ msgstr ""
 "%i obrázky sú už geokódované!"
 
 #: src/bar-gps.cc:223
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "\n"
@@ -469,7 +477,7 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Miesto: %s \n"
+"Poloha: %lf %lf \n"
 
 # src/preferences.cc:660
 #: src/bar-gps.cc:225
@@ -534,7 +542,6 @@ msgstr "Centrovanie mapy"
 
 # src/preferences.cc:693
 #: src/bar-gps.cc:842
-#, fuzzy
 msgid "Map Centering"
 msgstr "Centrovanie mapy"
 
@@ -622,9 +629,8 @@ msgid "Marks Keywords"
 msgstr "Kľúčové slová značiek"
 
 #: src/bar-keywords.cc:1054
-#, fuzzy
 msgid "Disconnect all Marks Keywords connections?"
-msgstr "Odpojiť všetky prepojenia kľúčových slov so značkami"
+msgstr "Odpojiť všetky prepojenia kľúčových slov so značkami?"
 
 #: src/bar-keywords.cc:1054
 msgid "This will disconnect all Marks Keywords connections"
@@ -709,14 +715,12 @@ msgstr "Chyba: Nemožno zapísať zoznam kľúčových slov do: %s\n"
 
 # src/utilops.cc:707
 #: src/bar-rating.cc:184 src/bar-rating.cc:186
-#, fuzzy
 msgid "Rejected"
-msgstr "Vynulovať vybrané"
+msgstr "Odmietnuté"
 
 #: src/bar-rating.cc:193 src/bar-rating.cc:196
-#, fuzzy
 msgid "Unrated"
-msgstr "nekalibrované"
+msgstr "Nehodnotené"
 
 # src/menu.cc:526
 #: src/bar-sort.cc:429 src/bar-sort.cc:432
@@ -801,7 +805,7 @@ msgstr "Zbierky"
 
 #: src/bar-sort.cc:675
 msgid "See the Help file for additional functions"
-msgstr ""
+msgstr "Ďalšie funkcie nájdete v súbore Pomocníka"
 
 # src/utilops.cc:592
 #: src/bar-sort.cc:678 src/collect-table.cc:112 src/dupe.cc:173
@@ -829,7 +833,7 @@ msgstr "Pridať výber"
 
 #: src/bar-sort.cc:740
 msgid "Undo"
-msgstr ""
+msgstr "Späť"
 
 #: src/bar-sort.cc:741
 msgid "Undo last image"
@@ -837,7 +841,7 @@ msgstr "Vrátiť posledný obrázok"
 
 #: src/bar-sort.cc:744
 msgid "Functions additional to Copy and Move"
-msgstr ""
+msgstr "Dodatočné funkcie pre kopírovanie a presun"
 
 # src/rcfile.cc:132
 #: src/cache.cc:278
@@ -860,9 +864,8 @@ msgid "Geeqie: Creating thumbs..."
 msgstr "Geeqie: Vytváram náhľady..."
 
 #: src/cache-maint.cc:152
-#, fuzzy
 msgid "Exit Geeqie Cache Maintenance"
-msgstr "Údržba vyrovnávacej pamäte"
+msgstr "Ukončiť správu vyrovnávacej pamäte Geeqie"
 
 # src/cache-maint.cc:245
 #: src/cache-maint.cc:170
@@ -899,7 +902,7 @@ msgstr "Údržba"
 #: src/cache-maint.cc:1462 src/dupe.cc:4724 src/preferences.cc:3205
 #: src/search.cc:3841
 msgid "Stop"
-msgstr ""
+msgstr "Zastaviť"
 
 # src/menu.cc:522
 #: src/cache-maint.cc:630 src/cache-maint.cc:1258
@@ -1121,17 +1124,13 @@ msgstr "_Zahodiť"
 
 # src/collect-dlg.cc:68
 #: src/collect-dlg.cc:68
-#, fuzzy
 msgid "Overwrite collection"
-msgstr ""
-"Prepísať súbor zbierky:\n"
-"%s"
+msgstr "Prepísať zbierku"
 
 # src/utilops.cc:339 src/utilops.cc:459 src/utilops.cc:826 src/utilops.cc:1032
 #: src/collect-dlg.cc:69
-#, fuzzy
 msgid "Overwrite existing collection?"
-msgstr "Prepísať existujúci súbor?"
+msgstr "Prepísať existujúcu zbierku?"
 
 # src/collect-dlg.cc:73 src/utilops.cc:463 src/utilops.cc:830 src/utilops.cc:1036
 #: src/collect-dlg.cc:70
@@ -1150,9 +1149,8 @@ msgstr "Otvoriť zbierky:"
 
 # src/collect-dlg.cc:165 src/collect-table.cc:641
 #: src/collect-dlg.cc:183
-#, fuzzy
 msgid "Save collection as:"
-msgstr "Uložiť zbierku ako"
+msgstr "Uložiť zbierku ako:"
 
 # src/collect-dlg.cc:180
 #: src/collect-dlg.cc:203
@@ -1186,12 +1184,16 @@ msgid ""
 "Collection: %s\n"
 "File: %s\n"
 msgstr ""
+"Zbierka sa nedá otvoriť, pretože odkazuje na súbor na zariadení, ktoré ešte "
+"nie je pripojené.\n"
+"\n"
+"Zbierka: %s\n"
+"Súbor: %s\n"
 
 # src/collect-dlg.cc:82 src/collect.cc:1011
 #: src/collect-io.cc:318
-#, fuzzy
 msgid "Cannot open Collection"
-msgstr "Nepodarilo sa otvoriť súbor zbierky"
+msgstr "Nepodarilo sa otvoriť Zbierku"
 
 # src/collect-dlg.cc:82 src/collect.cc:1011
 #: src/collect-io.cc:508
@@ -1221,9 +1223,8 @@ msgstr "Premenovať"
 #: src/collect-table.cc:115 src/collect-table.cc:1074 src/dupe.cc:176
 #: src/dupe.cc:3479 src/search.cc:396 src/search.cc:1225
 #: src/view-file/view-file.cc:862
-#, fuzzy
 msgid "Move selection to Trash"
-msgstr "Presunúť do koša"
+msgstr "Presunúť výber do koša"
 
 # src/dupe.cc:1415 src/dupe.cc:1573 src/img-view.cc:841
 #: src/collect-table.cc:116 src/dupe.cc:183 src/img-view.cc:105
@@ -1436,23 +1437,20 @@ msgstr "_Kopírovať cestu bez úvodzoviek"
 #: src/collect-table.cc:1073 src/dupe.cc:3478 src/layout-util.cc:2694
 #: src/layout-util.cc:2695 src/layout-util.cc:2696 src/search.cc:1224
 #: src/view-file/view-file.cc:861
-#, fuzzy
 msgid "Move selection to Trash..."
-msgstr "Presunúť do koša..."
+msgstr "Presunúť výber do koša..."
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
 #: src/collect-table.cc:1077 src/dupe.cc:3482 src/search.cc:1228
 #: src/view-file/view-file.cc:865
-#, fuzzy
 msgid "_Delete selection..."
-msgstr "Opačný výber"
+msgstr "O_dstrániť výber..."
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
 #: src/collect-table.cc:1078 src/dupe.cc:3483 src/search.cc:1229
 #: src/view-file/view-file.cc:866
-#, fuzzy
 msgid "_Delete selection"
-msgstr "Opačný výber"
+msgstr "O_dstrániť výber"
 
 # src/preferences.cc:645
 #: src/collect-table.cc:1084
@@ -1608,7 +1606,7 @@ msgstr "Zásuvné moduly"
 
 #: src/desktop-file.cc:556
 msgid "New"
-msgstr ""
+msgstr "Nový"
 
 # src/menu.cc:726
 #: src/desktop-file.cc:562
@@ -1631,9 +1629,8 @@ msgstr "Cesta"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
 #: src/dupe.cc:177 src/search.cc:397
-#, fuzzy
 msgid "Delete selection"
-msgstr "Opačný výber"
+msgstr "Odstrániť výber"
 
 # src/dupe.cc:1412 src/dupe.cc:1570
 #: src/dupe.cc:179 src/preferences.cc:2087 src/preferences.cc:2119
@@ -1728,7 +1725,7 @@ msgstr "Načítavam zoznam súborov"
 
 #: src/dupe.cc:3050
 msgid "Image thumbprint debug info"
-msgstr ""
+msgstr "Informácie pre ladenie odtlačku obrázka"
 
 #: src/dupe.cc:3442
 msgid "Select group _1 duplicates"
@@ -1844,7 +1841,7 @@ msgstr "Náhľady"
 
 #: src/dupe.cc:4660 src/search.cc:3807
 msgid "Ctrl-T"
-msgstr ""
+msgstr "Ctrl-T"
 
 # src/dupe.cc:2045
 #: src/dupe.cc:4668
@@ -1861,6 +1858,8 @@ msgid ""
 "Custom similarity threshold\n"
 "(Use tab key to set value)"
 msgstr ""
+"Vlastný prah pre podobnosť\n"
+"(Pre nastavenie hodnoty použite kláves Tab)"
 
 # src/menu.cc:559
 #: src/dupe.cc:4686 src/menu.cc:224 src/menu.cc:251
@@ -1869,9 +1868,8 @@ msgstr "Usporiadať"
 
 # src/menu.cc:519
 #: src/dupe.cc:4687
-#, fuzzy
 msgid "Sort by group totals"
-msgstr "Usporiadať podľa cesty"
+msgstr "Usporiadať podľa súčtov skupín"
 
 # src/dupe.cc:1655 src/dupe.cc:1944
 #: src/dupe.cc:4693
@@ -1880,9 +1878,8 @@ msgstr "Ignorovať orientáciu"
 
 # src/dupe.cc:1655 src/dupe.cc:1944
 #: src/dupe.cc:4694
-#, fuzzy
 msgid "Ignore image orientation"
-msgstr "Orientácia obrázka"
+msgstr "Ignorovať orientáciu obrázkov"
 
 # src/dupe.cc:2060
 #: src/dupe.cc:4701
@@ -1927,7 +1924,7 @@ msgstr "Výška"
 
 #: src/dupe.cc:5249
 msgid "Export duplicates data"
-msgstr ""
+msgstr "Exportovať údaje duplikátov"
 
 #: src/dupe.cc:5277
 msgid "Export Files"
@@ -2422,7 +2419,7 @@ msgstr "Čierno-biela referencia"
 
 #: src/exif.cc:338
 msgid "SubIFD Exif offset"
-msgstr "SubIFD Exif posun"
+msgstr "SubIFD EXIF posun"
 
 #: src/exif.cc:340
 msgid "Exposure time (seconds)"
@@ -2991,9 +2988,8 @@ msgid "Couldn't set parameters on decoder for file."
 msgstr "Nepodarilo sa nastaviť parametre dekodéra súboru."
 
 #: src/image-load-j2k.cc:164
-#, fuzzy
 msgid "Couldn't allocate worker threads on decoder for file."
-msgstr "Nepodarilo sa nastaviť parametre dekodéra súboru."
+msgstr "Nepodarilo sa prideliť pracovné vlákna pre dekodér súboru."
 
 #: src/image-load-j2k.cc:171
 msgid "Couldn't read JP2 header from file"
@@ -3253,9 +3249,8 @@ msgstr "_Zavrieť okno"
 
 # src/collect-dlg.cc:173
 #: src/layout.cc:438
-#, fuzzy
 msgid "Open application menu"
-msgstr "Otvoriť zbierku z:"
+msgstr "Otvoriť ponuku aplikácie"
 
 # src/window.cc:87
 #: src/layout.cc:538 src/view-dir.cc:831 src/view-file/view-file.cc:888
@@ -3265,7 +3260,7 @@ msgstr "Vzostupne"
 #: src/layout.cc:539 src/view-dir.cc:832 src/view-file/view-file.cc:890
 #: src/view-file/view-file.cc:1333
 msgid "Case"
-msgstr ""
+msgstr "Veľkosť písmen"
 
 #: src/layout.cc:611
 msgid "Scroll to top left corner"
@@ -3363,7 +3358,7 @@ msgstr "Voľby okien a rozloženie"
 
 #: src/layout.cc:2361
 msgid "Apply"
-msgstr ""
+msgstr "Použiť"
 
 # src/preferences.cc:551
 #: src/layout.cc:2387
@@ -3437,26 +3432,23 @@ msgstr "Otvoriť archív"
 #: src/layout-image.cc:846 src/layout-util.cc:2690
 #: src/pan-view/pan-view.cc:2394 src/view-dir.cc:808
 #: src/view-file/view-file.cc:853
-#, fuzzy
 msgid "_Copy to clipboard"
-msgstr "_Kopírovať cestu do schránky"
+msgstr "_Kopírovať do schránky"
 
 # src/utilops.cc:592
 #: src/layout-image.cc:847 src/layout-util.cc:2691
 #: src/pan-view/pan-view.cc:2396 src/view-dir.cc:811
 #: src/view-file/view-file.cc:855
-#, fuzzy
 msgid "_Copy to clipboard (unquoted)"
-msgstr "_Kopírovať cestu bez úvodzoviek"
+msgstr "_Kopírovať do schránky (bez úvodzoviek)"
 
 #: src/layout-image.cc:848
 msgid "Copy _image to clipboard"
 msgstr "Kopírovať o_brázok do schránky"
 
 #: src/layout-image.cc:849 src/layout-util.cc:2693
-#, fuzzy
 msgid "Cut to clipboard"
-msgstr "Kopírovať cestu do schránky"
+msgstr "Vystrihnúť do schránky"
 
 #: src/layout-image.cc:900
 msgid "GIF _animation"
@@ -3473,9 +3465,9 @@ msgid "Hide Selectable Bars"
 msgstr "Skryť vyberateľné panely"
 
 #: src/layout-image.cc:2043
-#, fuzzy, c-format
+#, c-format
 msgid "[%*d,%*d]: RGBA(%3d,%3d,%3d,%3d)"
-msgstr "[%*d,%*d]: RGB(%3d,%3d,%3d)"
+msgstr "[%*d,%*d]: RGBA(%3d,%3d,%3d,%3d)"
 
 #: src/layout-image.cc:2050
 #, c-format
@@ -3494,15 +3486,16 @@ msgstr "Vyčistiť značky"
 
 # src/preferences.cc:163 src/preferences.cc:604
 #: src/layout-util.cc:301
-#, fuzzy
 msgid "Clear all marks?"
-msgstr "Vyčistiť značky"
+msgstr "Vyčistiť všetky značky"
 
 #: src/layout-util.cc:301
 msgid ""
 "This will clear all marks for all images,\n"
 "including those linked to keywords"
 msgstr ""
+"Toto vyčistí značky vo všetkých obrázkoch,\n"
+"vrátane tých, ktoré sú prepojené s kľúčovými slovami"
 
 # src/ui-pathsel.cc:344 src/utilops.cc:728
 #: src/layout-util.cc:642
@@ -3596,7 +3589,7 @@ msgstr "Otočiť obrázok do pôvodného stavu"
 
 #: src/layout-util.cc:2666
 msgid "Aspect Ratio"
-msgstr ""
+msgstr "Pomer strán"
 
 #: src/layout-util.cc:2667
 msgid "_Back"
@@ -3713,36 +3706,30 @@ msgid "Copy..."
 msgstr "Kopírovať..."
 
 #: src/layout-util.cc:2689
-#, fuzzy
 msgid "_Copy image to clipboard"
 msgstr "Kopírovať o_brázok do schránky"
 
 #: src/layout-util.cc:2689
-#, fuzzy
 msgid "Copy image to clipboard"
-msgstr "Kopírovať o_brázok do schránky"
+msgstr "Kopírovať obrázok do schránky"
 
 #: src/layout-util.cc:2690
-#, fuzzy
 msgid "Copy to clipboard"
-msgstr "Kopírovať cestu do schránky"
+msgstr "Kopírovať do schránky"
 
 # src/utilops.cc:592
 #: src/layout-util.cc:2691
-#, fuzzy
 msgid "Copy to clipboard (unquoted)"
-msgstr "_Kopírovať cestu bez úvodzoviek"
+msgstr "Kopírovať do schránky (bez úvodzoviek)"
 
 #: src/layout-util.cc:2692
-#, fuzzy
 msgid "Crop Rectangle"
-msgstr "Nakresliť obdĺžnik"
+msgstr "Obdĺžnik pre orez"
 
 # src/utilops.cc:592
 #: src/layout-util.cc:2693 src/view-dir.cc:814 src/view-file/view-file.cc:857
-#, fuzzy
 msgid "_Cut to clipboard"
-msgstr "_Kopírovať cestu do schránky"
+msgstr "_Vystrihnúť do schránky"
 
 # src/preferences.cc:823
 #: src/layout-util.cc:2698 src/view-file/view-file.cc:872
@@ -3888,13 +3875,12 @@ msgstr "Čítajma"
 
 # src/ui-pathsel.cc:799
 #: src/layout-util.cc:2720
-#, fuzzy
 msgid "Help in pdf format"
-msgstr "Formát pixlov"
+msgstr "Pomoc vo formáte PDF"
 
 #: src/layout-util.cc:2720
 msgid "Help in pdf formast"
-msgstr ""
+msgstr "Pomoc vo formáte PDF"
 
 #: src/layout-util.cc:2721 src/window.cc:384
 msgid "On-line help search"
@@ -4103,7 +4089,7 @@ msgstr "Otvoriť zbierku..."
 
 #: src/layout-util.cc:2749
 msgid "☰"
-msgstr ""
+msgstr "☰"
 
 # src/menu.cc:713
 #: src/layout-util.cc:2750
@@ -4117,9 +4103,8 @@ msgstr "Otvoriť minulú zbierku"
 
 # src/collect-dlg.cc:172
 #: src/layout-util.cc:2751
-#, fuzzy
 msgid "Open With..."
-msgstr "Otvoriť zbierku..."
+msgstr "Otvoriť pomocou..."
 
 # src/dupe.cc:1655 src/dupe.cc:1944
 #: src/layout-util.cc:2752 src/menu.cc:401
@@ -4140,9 +4125,8 @@ msgstr "Rozšírený pohľad"
 
 # src/collect-table.cc:628 src/dupe.cc:1393 src/dupe.cc:1565
 #: src/layout-util.cc:2755
-#, fuzzy
 msgid "Delete selection..."
-msgstr "Opačný výber"
+msgstr "Odstrániť výber..."
 
 # src/menu.cc:1087
 #: src/layout-util.cc:2756
@@ -4503,9 +4487,8 @@ msgstr "_Lupa"
 
 # src/collect-table.cc:627 src/dupe.cc:1391 src/dupe.cc:1563
 #: src/layout-util.cc:2820
-#, fuzzy
 msgid "Zoom to rectangle"
-msgstr "Vybrať obdĺžnik"
+msgstr "Zväčšiť obdĺžnik"
 
 #: src/layout-util.cc:2825
 msgid "_Animation"
@@ -4550,9 +4533,8 @@ msgid "Toggle grayscale"
 msgstr "Prepnúť šedotón"
 
 #: src/layout-util.cc:2830
-#, fuzzy
 msgid "Hide Bars and Files"
-msgstr "_Súbory a priečinky"
+msgstr "Skryť panely a súbory"
 
 # src/menu.cc:754
 #: src/layout-util.cc:2832
@@ -4719,12 +4701,11 @@ msgstr "Jedno okno"
 
 #: src/layout-util.cc:2862
 msgid "_Triple"
-msgstr ""
+msgstr "_Trojité"
 
 #: src/layout-util.cc:2862
-#, fuzzy
 msgid "Split panes triple"
-msgstr "Rozdeliť podokná zvisle."
+msgstr "Rozdeliť okno na tretiny"
 
 #: src/layout-util.cc:2863
 msgid "_Vertical"
@@ -4853,19 +4834,19 @@ msgstr "Žiadna"
 
 #: src/layout-util.cc:2897
 msgid "1:1"
-msgstr ""
+msgstr "1:1"
 
 #: src/layout-util.cc:2898
 msgid "4:3"
-msgstr ""
+msgstr "4:3"
 
 #: src/layout-util.cc:2899
 msgid "3:2"
-msgstr ""
+msgstr "3:2"
 
 #: src/layout-util.cc:2900
 msgid "16:9"
-msgstr ""
+msgstr "16:9"
 
 #: src/layout-util.cc:2955
 #, c-format
@@ -5012,9 +4993,8 @@ msgstr "Zapnúť zalamovanie riadkov"
 
 # src/ui-pathsel.cc:799
 #: src/logwindow.cc:462
-#, fuzzy
 msgid "Timer"
-msgstr "Časový údaj"
+msgstr "Časovač"
 
 # src/ui-pathsel.cc:799
 #: src/logwindow.cc:463
@@ -5044,9 +5024,8 @@ msgstr "Filter pomocou reg. výrazu"
 
 # src/collect-dlg.cc:59
 #: src/main.cc:335
-#, fuzzy
 msgid "Invalid parameter(s):"
-msgstr "Nesprávny tvar\n"
+msgstr "Neplatný/é parameter/e:"
 
 # src/main.cc:457
 #: src/main.cc:491
@@ -5068,11 +5047,10 @@ msgid "      --blank                      start with blank file list\n"
 msgstr "      --blank                      začať s čistým zoznamom súborov\n"
 
 #: src/main.cc:494
-#, fuzzy
 msgid ""
 "      --cache-maintenance=<path>   run cache maintenance in non-GUI mode\n"
 msgstr ""
-"      --cache-maintenance <cesta>  spustiť údržbu vyrovnávacej pamäte v "
+"      --cache-maintenance=<cesta>  spustiť údržbu vyrovnávacej pamäte v "
 "režime bez GUI\n"
 
 #: src/main.cc:495
@@ -5108,14 +5086,12 @@ msgstr ""
 
 # src/main.cc:465
 #: src/main.cc:500
-#, fuzzy
 msgid "  -n, --new-instance               open a new instance of Geeqie *\n"
-msgstr "  -n, --new-instance               spustiť novú inštanciu Geeqie\n"
+msgstr "  -n, --new-instance               spustiť novú inštanciu Geeqie *\n"
 
 #: src/main.cc:501
-#, fuzzy
 msgid "  -o, --log-file=<file>            save log data to file\n"
-msgstr "  -o:, --log-file:<file>           uložiť údaje ladenia do súboru\n"
+msgstr "  -o, --log-file:<súbor>           uložiť údaje ladenia do súboru\n"
 
 # src/main.cc:463
 #: src/main.cc:502
@@ -5131,9 +5107,8 @@ msgstr "  -s, --slideshow                  spustiť v režime prezentácie\n"
 
 # src/main.cc:459
 #: src/main.cc:504
-#, fuzzy
 msgid "  -T, --with-tools                 force show of tools\n"
-msgstr "  +t, --with-tools                 vynútiť zobrazenie nástrojov\n"
+msgstr "  -T, --with-tools                 vynútiť zobrazenie nástrojov\n"
 
 # src/main.cc:460
 #: src/main.cc:505
@@ -5147,20 +5122,17 @@ msgstr "  -v, --version                    vypísať verziu programu\n"
 
 # src/main.cc:459
 #: src/main.cc:507
-#, fuzzy
 msgid "  -w, --show-log-window            show log window\n"
-msgstr "  +w, --show-log-window            zobraziť okno so záznamom\n"
+msgstr "  -w, --show-log-window            zobraziť okno so záznamom\n"
 
 # src/main.cc:464
 #: src/main.cc:509
-#, fuzzy
 msgid "      --debug=[level]              turn on debug output\n"
-msgstr "      --debug[=úroveň]             zapnúť ladiaci výstup\n"
+msgstr "      --debug=[úroveň]             zapnúť ladiaci výstup\n"
 
 #: src/main.cc:510
-#, fuzzy
 msgid "  -g, --grep=<regexp>              filter debug output\n"
-msgstr "  -g:, --grep:<regexp>             filtrovať výstup ladenia\n"
+msgstr "  -g, --grep=<regexp>              filtrovať výstup ladenia\n"
 
 #: src/main.cc:522
 #, c-format
@@ -5169,6 +5141,9 @@ msgid ""
 "\n"
 "This is a --remote command option\n"
 msgstr ""
+"%s\n"
+"\n"
+"Toto je voľba príkazového riadka --remote\n"
 
 #: src/main.cc:522
 #, c-format
@@ -5177,6 +5152,9 @@ msgid ""
 "\n"
 "This option is unknown\n"
 msgstr ""
+"%s\n"
+"\n"
+"Táto voľba je neznáma\n"
 
 #: src/main.cc:713
 msgid "No path parameter given\n"
@@ -5252,10 +5230,12 @@ msgid ""
 "%d windows are open.\n"
 "\n"
 msgstr ""
+"Je otvorených %d okien.\n"
+"\n"
 
 #: src/main.cc:1076
 msgid "Quit anyway?"
-msgstr ""
+msgstr "Aj tak ukončiť?"
 
 # src/menu.cc:513
 #: src/menu.cc:146
@@ -6133,19 +6113,16 @@ msgstr ""
 "Pokračovať?"
 
 #: src/preferences.cc:1507
-#, fuzzy
 msgid "Image Overlay Font"
-msgstr "Prekrytie obrázka"
+msgstr "Písmo v prekrytí obrázka"
 
 #: src/preferences.cc:1553
-#, fuzzy
 msgid "Image Overlay Text Color"
-msgstr "Prekrytie obrázka"
+msgstr "Farba textu v prekrytí obrázka"
 
 #: src/preferences.cc:1602
-#, fuzzy
 msgid "Image Overlay Background Color"
-msgstr "Farba pozadia"
+msgstr "Farba pozadia v prekrytí obrázka"
 
 # src/preferences.cc:551
 #: src/preferences.cc:2003
@@ -6280,83 +6257,77 @@ msgstr "Obnoviť pri zmene súboru"
 
 # src/preferences.cc:930
 #: src/preferences.cc:2178
-#, fuzzy
 msgid "Menu style"
-msgstr "Názov ponuky"
+msgstr "Štýl ponuky"
 
 #: src/preferences.cc:2180
-#, fuzzy
 msgid ""
 "☰ style menu button (NOTE! Geeqie must be restarted for change to take "
 "effect)"
 msgstr ""
-"Roztiahnuť ponuku a nástrojovú lištu (POZNÁMKA! Pre použitie zmien musíte "
-"reštartovať Geeqie)"
+"Štýl tlačidla ponuky ☰ (POZNÁMKA! Pre použitie zmien musíte reštartovať "
+"Geeqie)"
 
 #: src/preferences.cc:2182
 msgid ""
 "Use a ☰ style menu button instead of the classic style across the top of the "
 "frame"
 msgstr ""
+"Použiť hamburgerovú ponuku (☰) miesto klasickej ponuky v hornej časti okna"
 
 #: src/preferences.cc:2186
-#, fuzzy
 msgid "Expand toolbar"
-msgstr "Roztiahnuť ponuku a nástrojovú lištu"
+msgstr "Roztiahnuť nástrojovú lištu"
 
 #: src/preferences.cc:2188
-#, fuzzy
 msgid ""
 "Expand menu/toolbar (NOTE! Geeqie must be restarted for change to take "
 "effect)"
 msgstr ""
-"Roztiahnuť ponuku a nástrojovú lištu (POZNÁMKA! Pre použitie zmien musíte "
+"Roztiahnuť ponuku/nástrojovú lištu (POZNÁMKA! Pre použitie zmien musíte "
 "reštartovať Geeqie)"
 
 #: src/preferences.cc:2190
-#, fuzzy
 msgid "Expand the menu/toolbar to the full width of the window"
-msgstr "Natiahnuť ponuku a nástrojovú lištu na celú šírku okna"
+msgstr "Roztiahnuť ponuku/nástrojovú lištu na celú šírku okna"
 
 # src/preferences.cc:930
 #: src/preferences.cc:2196
-#, fuzzy
 msgid "Menu bar"
-msgstr "Názov ponuky"
+msgstr "Lišta ponuky"
 
 # src/preferences.cc:368
 #: src/preferences.cc:2199
-#, fuzzy
 msgid "Tool bar"
-msgstr "Hlavná nástrojová lišta"
+msgstr "Nástrojová lišta"
 
 #: src/preferences.cc:2202
-#, fuzzy
 msgid "Status bar"
-msgstr ""
-"\n"
-"Stav: "
+msgstr "Stavová lišta"
 
 #: src/preferences.cc:2204
 msgid ""
 "The Hide Selectable Bars menu item (default keystroke is control-backtick) "
 "will toggle the display of the bars selected here"
 msgstr ""
+"Položka ponuky Skryť vyberateľné lišty (predvolený kláves je Ctrl-backtick) "
+"prepne zobrazenie tu vybraných pruhov"
 
 #: src/preferences.cc:2210
 msgid "AppImage updates notifications"
-msgstr ""
+msgstr "Upozornenia na aktualizácie AppImage"
 
 #: src/preferences.cc:2212
-#, fuzzy
 msgid "Enable"
-msgstr "Vypnutý"
+msgstr "Zapnúť"
 
 #: src/preferences.cc:2213
 msgid ""
 "Show a notification on start-up if the server has a newer version than the "
 "current. Requires an Internet connection"
 msgstr ""
+"Pri štarte zobraziť upozornenie, ak sa na serveri nachádza novšia ako "
+"aktuálne nainštalovaná verzia. Vyžaduje pripojenie k internetu"
 
 # src/ui-pathsel.cc:799
 #: src/preferences.cc:2227 src/preferences.cc:4395
@@ -6429,7 +6400,7 @@ msgid "Allow enlargement of image (max. size in %)"
 msgstr "Povoliť zväčšenie obrázka (max. veľkosť v %)"
 
 #: src/preferences.cc:2330
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Enable this to allow Geeqie to increase the image size for images that are "
 "smaller than the current view area when the zoom is set to 'Fit image to "
@@ -6438,16 +6409,15 @@ msgid ""
 msgstr ""
 "Zapnite túto voľbu, ak chcete, aby Geeqie zväčšoval obrázky, ktoré sú menšie "
 "ako aktuálna veľkosť okna pri aktívnej voľbe \"Prispôsobiť obrázok oknu\". "
-"Táto voľba nastavuje maximálne povolené zväčšenie v percentách, t. j. "
-"100% je plná veľkosť."
+"Táto voľba nastavuje maximálne povolené zväčšenie v percentách, t. j. 100% "
+"je plná veľkosť."
 
 #: src/preferences.cc:2333
-#, fuzzy, c-format
+#, c-format
 msgid "Virtual window size (%% of actual window):"
-msgstr "Virtuálna veľkosť okna (ako % aktuálneho okna):"
+msgstr "Virtuálna veľkosť okna (vyjadrená v %% aktuálneho okna):"
 
 #: src/preferences.cc:2339
-#, fuzzy
 msgid ""
 "This value will set the virtual size of the window when 'Fit image to "
 "window' is set. Instead of using the actual size of the window, the "
@@ -6456,10 +6426,10 @@ msgid ""
 "(values greater than 100%). It affects fullscreen mode too."
 msgstr ""
 "Táto voľba nastavuje virtuálnu veľkosť okna pri aktívnej voľbe \"Prispôsobiť "
-"obrázok oknu\". Veľkosť okna bude vypočítaná ako percento skutočnej "
-"veľkosti. Týmto môžete pridať rámik okolo obrázkov (hodnoty nižšie ako 100%) "
-"alebo automaticky obrázky približovať (hodnoty vyššie ako 100%). Nastavenie "
-"sa použije aj pri zobrazení na celú obrazovku."
+"obrázok oknu\". Miesto skutočnej veľkosti okna sa použije percentuálna "
+"hodnota jeho veľkosti. To vám umožní pridať okolo obrázkov rámik (hodnoty "
+"nižšie ako 100%) alebo automaticky obrázky približovať (hodnoty vyššie ako "
+"100%). Nastavenie sa použije aj pri zobrazení na celú obrazovku."
 
 # src/preferences.cc:368
 #: src/preferences.cc:2341
@@ -6547,15 +6517,16 @@ msgid "Remember dialog window positions"
 msgstr "Pamätať si pozície dialógových okien"
 
 #: src/preferences.cc:2455
-#, fuzzy
 msgid "Hide window decorations"
-msgstr "Skryť okno pri zobrazení na celú obrazovku"
+msgstr "Skryť dekorácie okien"
 
 #: src/preferences.cc:2457
 msgid ""
 "Remove borders and title bar from windows. A restart of Geeqie is required "
 "for this feature to take effect on the main layout window"
 msgstr ""
+"Odstráni okraje a titulkovú lištu okien. Na to, aby sa táto zmena prejavila "
+"v hlavnom okne Geeqie je potrebné aplikáciu reštartovať"
 
 # src/menu.cc:711
 #: src/preferences.cc:2459
@@ -6688,9 +6659,8 @@ msgstr ""
 
 # src/ui-pathsel.cc:764
 #: src/preferences.cc:2719
-#, fuzzy
 msgid "File Filters"
-msgstr "Zobraziť filter súborov"
+msgstr "Filtre súborov"
 
 #: src/preferences.cc:2723
 msgid "Show hidden files or folders"
@@ -6703,6 +6673,8 @@ msgstr "Zobraziť nadradený priečinok (..)"
 #: src/preferences.cc:2727
 msgid "Case sensitive sort (Search and Collection windows, and tab completion)"
 msgstr ""
+"Triedenie so zohľadením veľkosti písmen (okná hľadania a zbierok a dopĺňanie "
+"tabulátorom)"
 
 # src/preferences.cc:823
 #: src/preferences.cc:2728
@@ -6724,9 +6696,8 @@ msgid "File types"
 msgstr "Typy súborov"
 
 #: src/preferences.cc:2764
-#, fuzzy
 msgid "Enabled"
-msgstr "Vypnutý"
+msgstr "Zapnuté"
 
 #: src/preferences.cc:2814 src/view-file/view-file.cc:1345
 msgid "Class"
@@ -6741,9 +6712,8 @@ msgid "Sidecar is allowed"
 msgstr "Pomocný súbor je povolený"
 
 #: src/preferences.cc:2895
-#, fuzzy
 msgid "Metadata writing sequence"
-msgstr "Proces zápisu metadát"
+msgstr "Postup zápisu metadát"
 
 #: src/preferences.cc:2897
 msgid "Warning: Geeqie is built without Exiv2. Some options are disabled."
@@ -6755,88 +6725,79 @@ msgid ""
 "When writing metadata, Geeqie will follow these steps, if selected. This "
 "process will stop when the first successful write occurs."
 msgstr ""
+"Ak túto možnosť aktivujete bude Geeqie pri zapisovaní metadát postupovať "
+"podľa týchto krokov. Tento proces skončí pri prvom úspešnom zápise."
 
 #: src/preferences.cc:2903
-#, fuzzy
 msgid "A flowchart of the sequence is shown in the Help file"
-msgstr "Podrobnejšie možnosti formátovania nájdete v súbore Pomocníka"
+msgstr "Diagram postupnosti sa nachádza v súbore Pomocníka"
 
 #: src/preferences.cc:2907
 msgid "Step 1"
-msgstr ""
+msgstr "Krok č. 1"
 
 #: src/preferences.cc:2907
-#, fuzzy
 msgid ""
 ") Save metadata in either the image file or the sidecar file, according to "
 "the XMP standard"
 msgstr ""
-"1) Ukladať metadáta do súborov obrázka alebo pomocných súborov, podľa "
+"1) Ukladať metadáta buď do súboru obrázka alebo pomocného súboru, podľa "
 "štandardu XMP"
 
 #: src/preferences.cc:2910
 msgid "The destination is dependent on the settings in the "
-msgstr ""
+msgstr "Cieľ závisí na nastaveniach v "
 
 #: src/preferences.cc:2910
 msgid " and "
-msgstr ""
+msgstr " a "
 
 #: src/preferences.cc:2910
-#, fuzzy
 msgid "Sidecar Is Allowed"
 msgstr "Pomocný súbor je povolený"
 
 #: src/preferences.cc:2910
 msgid " columns of the File Filters tab)"
-msgstr ""
+msgstr " stĺpce na karte Filtre súborov)"
 
 #: src/preferences.cc:2920
 msgid "Step 2"
-msgstr ""
+msgstr "Krok č. 2"
 
 #: src/preferences.cc:2920
-#, fuzzy
 msgid ") Save metadata in the folder "
-msgstr "3) Ukladať metadáta do súkromného adresára Geeqie '%s'"
+msgstr ") Uložiť metadáta do priečinka "
 
 #: src/preferences.cc:2920
-#, fuzzy
 msgid " local to the image folder (non-standard)"
-msgstr ""
-"Náhľady ukladať do podpriečinka v rovnakom priečinku ako obrázky "
-"(neštandardné)"
+msgstr " do priečinka obrázka (nie podľa štandardu)"
 
 #: src/preferences.cc:2925
 msgid "Step 3"
-msgstr ""
+msgstr "Krok č. 3"
 
 #: src/preferences.cc:2925
-#, fuzzy
 msgid ") Save metadata in Geeqie private directory "
-msgstr "3) Ukladať metadáta do súkromného adresára Geeqie '%s'"
+msgstr ") Uložiť metadáta do súkromného adresára Geeqie "
 
 #: src/preferences.cc:2934
 msgid "Step 1 Options:"
-msgstr ""
+msgstr "Možnosti pre krok č. 1:"
 
 #: src/preferences.cc:2942
-#, fuzzy
 msgid ""
 "Store metadata also in IPTC tags (converted according to the IPTC4XMP "
 "standard)"
 msgstr ""
-"Ukladať metadáta tiež v starom formáte IPTC (konvertované podľa štandardu "
-"IPTC4XMP)"
+"Uložiť metadáta aj do IPTC značiek (konvertované podľa štandardu IPTC4XMP)"
 
 #: src/preferences.cc:2943
 msgid "A simplified conversion list is in the Help file"
-msgstr ""
+msgstr "Zjednodušený zoznam konverzií nájdete v súbore Pomocníka"
 
 #: src/preferences.cc:2945
-#, fuzzy
 msgid "Warn if the image or sidecar file is not writable"
-msgstr "Upozorniť, ak nie je možné zapísať do súborov s obrázkami"
+msgstr "Upozorniť, ak nie je možné zapísať do obrázka alebo pomocného súboru"
 
 #: src/preferences.cc:2947
 msgid "Ask before writing to image files"
@@ -6844,24 +6805,22 @@ msgstr "Spýtať sa pred zápisom do súborov s obrázkami"
 
 #: src/preferences.cc:2950
 msgid "This file naming convention is used by Darktable"
-msgstr ""
+msgstr "Tento spôsob pomenovania súborov používa program Darktable"
 
 # src/utilops.cc:1151
 #: src/preferences.cc:2952
-#, fuzzy
 msgid "Create sidecar files named "
-msgstr "Vytvoriť súbory .sim"
+msgstr "Vytvoriť pomocné súbory s menom "
 
 #: src/preferences.cc:2952
 msgid " (as opposed to the normal "
-msgstr ""
+msgstr " (na rozdiel od bežného "
 
 #: src/preferences.cc:2958
 msgid "Steps 2 and 3 Option:"
-msgstr ""
+msgstr "Možnosti pre krok č. 2 a 3:"
 
 #: src/preferences.cc:2963
-#, fuzzy
 msgid ""
 "Use GQview legacy metadata format instead of XMP (supports only Keywords and "
 "Comments)"
@@ -6874,23 +6833,22 @@ msgid "Miscellaneous"
 msgstr "Rôzne"
 
 #: src/preferences.cc:2968
-#, fuzzy
 msgid "Write the same description tags to all grouped sidecars"
 msgstr ""
-"Zapisovať rovnaké kľúčové slová a komentáre do všetkých združených pomocných "
-"súborov"
+"Zapisovať rovnaké popisné značky do všetkých združených pomocných súborov"
 
 #: src/preferences.cc:2969
 msgid "See the Help file for a list of the tags used"
-msgstr ""
+msgstr "Zoznam použitých značiek nájdete v súbore Pomocníka"
 
 #: src/preferences.cc:2971
 msgid "Permit Keywords to be case-sensitive"
-msgstr ""
+msgstr "Povoliť rozlišovanie veľkosti písmen v kľúčových slovách"
 
 #: src/preferences.cc:2972
 msgid "When selected, 'Place' and 'place' are two different keywords"
 msgstr ""
+"Ak je zapnuté, 'Miesto' a 'miesto' budú považované za rozdielne kľúčové slová"
 
 #: src/preferences.cc:2974
 msgid "Write altered image orientation to the metadata"
@@ -6903,6 +6861,10 @@ msgid ""
 "Note: If this option is not checked, the results of orientation commands "
 "will be lost when Geeqie closes"
 msgstr ""
+"Ak je povolené, výsledky príkazov na zmenu orientácie (Otočiť, Zrkadliť a "
+"Preklopiť) aplikované na obrázok sa zapíšu do metadát\n"
+"Poznámka: ak táto možnosť nie je povolená, výsledky príkazov na zmenu "
+"orientácie sa stratia, keď Geeqie zatvoríte"
 
 #: src/preferences.cc:2983
 msgid "Auto-save options"
@@ -6927,20 +6889,20 @@ msgstr "Zapísať metadáta pri zmene adresára"
 
 # src/dupe.cc:775
 #: src/preferences.cc:2999
-#, fuzzy
 msgid "Spelling checks"
-msgstr "Načítavam kontrolné súčty..."
+msgstr "Kontroly pravopisu"
 
 #: src/preferences.cc:3001
-#, fuzzy
 msgid "Check spelling - Requires restart"
-msgstr "(Vyžaduje reštart)"
+msgstr "Kontroly pravopisu - vyžaduje reštart"
 
 #: src/preferences.cc:3002
 msgid ""
 "Spelling checks are performed on info sidebar panes Comment, Headline and "
 "Title"
 msgstr ""
+"Kontrola pravopisu sa vykonáva v informačných podoknách bočného panela "
+"Poznámka, Nadpis a Názov"
 
 #: src/preferences.cc:3007
 msgid "Pre-load metadata"
@@ -6957,6 +6919,10 @@ msgid ""
 "If this is not selected, initial loading of the folder will be faster but "
 "sorting on these items will be slower"
 msgstr ""
+"Pri zmene priečinka načítavať DateTimeOriginal, DateTimeDigitized a Star "
+"Rating v nečinnej slučke.\n"
+"Ak táto možnosť nie je aktivovaná, počiatočné načítanie priečinka bude "
+"rýchlejšie, ale triedenie jeho položiek bude pomalšie"
 
 #: src/preferences.cc:3195 src/preferences.cc:3209
 msgid "Search for keywords"
@@ -6972,9 +6938,8 @@ msgid "Search"
 msgstr "Hľadanie"
 
 #: src/preferences.cc:3304
-#, fuzzy
 msgid "Search for existing keywords"
-msgstr "Hľadať kľúčové slová"
+msgstr "Hľadať existujúce kľúčové slová"
 
 #: src/preferences.cc:3389
 msgid "Perceptual"
@@ -6993,6 +6958,8 @@ msgid ""
 "Refer to the lcms documentation for the defaults used when the selected "
 "Intent is not available"
 msgstr ""
+"Predvolené nastavenia, ktoré sa použijú, ak nie je vybraný Intent dostupný "
+"nájdete v dokumentácií lcms."
 
 # src/menu.cc:526
 #: src/preferences.cc:3419
@@ -7121,28 +7088,25 @@ msgid ""
 "Note that marks linked to a keyword will be saved irrespective of this "
 "setting"
 msgstr ""
+"Upozorňujeme, že značky spojené s kľúčovým slovom budú uložené bez ohľadu na "
+"toto nastavenie"
 
 #: src/preferences.cc:3606
-#, fuzzy
 msgid "Use 'With Rename' as default for Copy/Move dialogs"
 msgstr ""
-"Použiť \"S premenovaním\" ako predvolené pre dialógové okná Kopírovať/"
-"Presunúť"
+"Použiť „S premenovaním“ ako predvolené pre dialógové okná Kopírovať/Presunúť"
 
 #: src/preferences.cc:3608
-#, fuzzy
 msgid "Change the default button for Copy/Move dialogs"
-msgstr ""
-"Použiť \"S premenovaním\" ako predvolené pre dialógové okná Kopírovať/"
-"Presunúť"
+msgstr "Zmeniť predvolené tlačidlo pre dialógové okná Kopírovať/Presunúť"
 
 #: src/preferences.cc:3610
 msgid "Permit duplicates in Collections"
-msgstr ""
+msgstr "Povoliť duplicity v zbierkach"
 
 #: src/preferences.cc:3612
 msgid "Allow the same image to be in a Collection more than once"
-msgstr ""
+msgstr "Povoliť uloženie toho istého obrázka v zbierke viac ako raz"
 
 # src/collect-dlg.cc:172
 #: src/preferences.cc:3614
@@ -7151,9 +7115,8 @@ msgstr "Otvoriť zbierku na vrchu"
 
 # src/collect-dlg.cc:172
 #: src/preferences.cc:3616
-#, fuzzy
 msgid "Open collections window on top"
-msgstr "Otvoriť zbierku na vrchu"
+msgstr "Otvoriť okno so zbierkami na vrchu"
 
 #: src/preferences.cc:3618
 msgid "Hide window in fullscreen"
@@ -7161,32 +7124,31 @@ msgstr "Skryť okno pri zobrazení na celú obrazovku"
 
 #: src/preferences.cc:3620
 msgid "When alt-tabbing, prevent Geeqie window showing twice"
-msgstr ""
+msgstr "Zabrániť dvojitému zobrazeniu okna Geeqie pri použití alt-tab"
 
 #: src/preferences.cc:3622
-#, fuzzy
 msgid "Hide OSD in fullscreen"
-msgstr "Skryť okno pri zobrazení na celú obrazovku"
+msgstr "Skryť OSD pri zobrazení na celú obrazovku"
 
 #: src/preferences.cc:3624
-#, fuzzy
 msgid "Hide Overlay Screen Display in fullscreen mode"
-msgstr "Informácie v okne obrázka (OSD)"
+msgstr "Skryť informácie v okne obrázka pri zobrazení na celú obrazovku"
 
 #: src/preferences.cc:3626
 msgid "Recent folder list maximum size"
 msgstr "Maximálna veľkosť zoznamu naposledy otvorených priečinkov"
 
 #: src/preferences.cc:3629
-#, fuzzy
 msgid "Recent folder-image list maximum size"
-msgstr "Maximálna veľkosť zoznamu naposledy otvorených priečinkov"
+msgstr "Maximálna veľkosť zoznamu nedávnych priečinkov s obrázkami"
 
 #: src/preferences.cc:3630
 msgid ""
 "List of the last image viewed in each recent folder.\n"
 "Re-opening a folder will set focus to the last image viewed."
 msgstr ""
+"Zoznam naposledy zobrazených obrázkov v každom nedávnom priečinku.\n"
+"Opätovné otvorenie priečinka nastaví kurzor na naposledy zobrazený obrázok."
 
 #: src/preferences.cc:3632
 msgid "Drag'n drop icon size"
@@ -7254,7 +7216,7 @@ msgstr "Ignorovať vypnutie GPU"
 
 #: src/preferences.cc:3672
 msgid "Contact the developers for usage"
-msgstr ""
+msgstr "Kontaktujte vývojárov pre použitie"
 
 #: src/preferences.cc:3677
 msgid "Debugging"
@@ -7272,9 +7234,8 @@ msgstr "Max. počet riadkov okna so záznamom:"
 
 # src/preferences.cc:773
 #: src/preferences.cc:3689
-#, fuzzy
 msgid "Log Window F1 command: "
-msgstr "Max. počet riadkov okna so záznamom:"
+msgstr "Príkaz F1 okna so záznamom: "
 
 #: src/preferences.cc:3748
 msgid "Keyboard"
@@ -7304,11 +7265,10 @@ msgstr "Vynulovať vybrané"
 
 #: src/preferences.cc:3851
 msgid "Will only reset changes made before the settings are saved"
-msgstr ""
+msgstr "Obnoví len zmeny vykonané pred uložením nastavení"
 
 # src/utilops.cc:707
 #: src/preferences.cc:3855
-#, fuzzy
 msgid "Clear selected"
 msgstr "Vynulovať vybrané"
 
@@ -7367,6 +7327,9 @@ msgid ""
 "when running duplicate checks.\n"
 "The value 0 means all available cores will be used."
 msgstr ""
+"Táto možnosť obmedzí počet vlákien (alebo procesorých jadier), ktoré Geeqie "
+"použije pri vykonávaní kontrol na duplicity.\n"
+"Hodnota 0 znamená, že sa použijú všetky dostupné jadrá."
 
 #: src/preferences.cc:3970
 msgid "Duplicate check:"
@@ -7382,23 +7345,21 @@ msgstr "Nastavte 0 pre neobdmezené"
 
 # src/preferences.cc:163 src/preferences.cc:604
 #: src/preferences.cc:3977
-#, fuzzy
 msgid "Alternate similarity alogorithm"
-msgstr "Vyrovnávacia pamäť podobnostných dát"
+msgstr "Alternatívny algoritmus hľadania podobnosti"
 
 #: src/preferences.cc:3979
 msgid "Enable alternate similarity algorithm"
-msgstr ""
+msgstr "Povoliť alternatívny algoritmus podobnosti"
 
 # src/img-view.cc:813 src/menu.cc:982
 #: src/preferences.cc:3984
-#, fuzzy
 msgid "Use grayscale"
-msgstr "Prepnúť šedotón"
+msgstr "Použiť šedotón"
 
 #: src/preferences.cc:3985
 msgid "Reduce fingerprint to grayscale"
-msgstr ""
+msgstr "Previesť odtlačok na šedotón"
 
 #: src/preferences.cc:3998
 msgid "Stereo"
@@ -7470,6 +7431,10 @@ msgid ""
 "See https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n"
 "\n"
 msgstr ""
+"Tento program sa dodáva bez akejkoľvek záruky.\n"
+"GNU General Public License, verzia 2 alebo novšia.\n"
+"Pozri https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n"
+"\n"
 
 #: src/preferences.cc:4216
 msgid ""
@@ -7477,6 +7442,9 @@ msgid ""
 "\n"
 "Some icons by https://www.flaticon.com"
 msgstr ""
+"\n"
+"\n"
+"Niektoré ikony z https://www.flaticon.com"
 
 #: src/preferences.cc:4242
 msgid ""
@@ -7487,12 +7455,20 @@ msgid ""
 "\n"
 "Development and bug reports:\n"
 msgstr ""
+"Projekt vytvoril John Ellis\n"
+"GQview 1998\n"
+"Geeqie 2007\n"
+"\n"
+"\n"
+"Vývoj a hlásenia chýb:\n"
 
 #: src/preferences.cc:4242
 msgid ""
 "\n"
 "https://github.com/BestImageViewer/geeqie/issues"
 msgstr ""
+"\n"
+"https://github.com/BestImageViewer/geeqie/issues"
 
 # src/img-view.cc:559 src/window.cc:533
 #: src/preferences.cc:4250
@@ -7501,7 +7477,7 @@ msgstr "O Geeqie"
 
 #: src/preferences.cc:4257
 msgid "Website"
-msgstr ""
+msgstr "Webová stránka"
 
 #: src/preferences.cc:4329 src/preferences.cc:4337
 msgid "Warning: Cannot open timezone database file"
@@ -7530,23 +7506,21 @@ msgstr "Zobraziť text obrázka"
 
 # src/preferences.cc:369
 #: src/print.cc:326 src/print.cc:389
-#, fuzzy
 msgid "Header 1"
-msgstr "Nadpis"
+msgstr "Nadpis č. 1"
 
 # src/preferences.cc:369
 #: src/print.cc:329 src/print.cc:392
-#, fuzzy
 msgid "Header 2"
-msgstr "Nadpis"
+msgstr "Nadpis č. 2"
 
 #: src/print.cc:332 src/print.cc:395
 msgid "Footer 1"
-msgstr ""
+msgstr "Päta č. 1"
 
 #: src/print.cc:335 src/print.cc:398
 msgid "Footer 2"
-msgstr ""
+msgstr "Päta č. 2"
 
 #: src/print.cc:377
 msgid "Page text"
@@ -7560,11 +7534,11 @@ msgstr "Zobraziť text strany"
 #: src/print.cc:417
 msgid "Text shown on each page of a single or multi-page print job"
 msgstr ""
+"Text zobrazený na každej strane jedno alebo viacstranovej tlačovej úlohy"
 
 #: src/print.cc:799
-#, fuzzy
 msgid "Options"
-msgstr "akcia"
+msgstr "Možnosti"
 
 # src/main.cc:533
 #: src/rcfile.cc:154
@@ -7595,9 +7569,9 @@ msgid "error saving default layout file: %s\n"
 msgstr "chyba pri ukladaní súboru s predvoleným rozložením: %s\n"
 
 #: src/remote.cc:795
-#, fuzzy, c-format
+#, c-format
 msgid "[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"
-msgstr "[%d,%d]: RGB(%3d,%3d,%3d)"
+msgstr "[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"
 
 #: src/remote.cc:801
 #, c-format
@@ -7639,17 +7613,18 @@ msgid "lua error: no data"
 msgstr "chyba lua: žiadne dáta"
 
 #: src/remote.cc:1708
-#, fuzzy
 msgid "<ACTION>"
-msgstr "<ZBIERKA>"
+msgstr "<AKCIA>"
 
 #: src/remote.cc:1708
 msgid "execute keyboard action (See Help/Reference/Remote Keyboard Actions)"
 msgstr ""
+"vykonať akciu klávesnice (pozrite Pomocník/Referencie/Akcie vzdialenej "
+"klávesnice)"
 
 #: src/remote.cc:1709
 msgid "list available keyboard actions (some are redundant)"
-msgstr ""
+msgstr "zoznam dostupných akcií klávesnice (niektoré sú nadbytočné)"
 
 #: src/remote.cc:1710
 msgid "previous image"
@@ -7665,9 +7640,8 @@ msgid "<FILE>|layout ID"
 msgstr "<SÚBOR>|ID rozloženia"
 
 #: src/remote.cc:1712
-#, fuzzy
 msgid "load configuration from FILE"
-msgstr " načítať konfiguráciu zo SÚBORU"
+msgstr "načítať konfiguráciu zo SÚBORU"
 
 #: src/remote.cc:1713
 msgid "clean the metadata cache"
@@ -7706,18 +7680,15 @@ msgid " render thumbnails recursively (see Help)"
 msgstr " vytvárať náhľady rekurzívne (viď Pomocník)"
 
 #: src/remote.cc:1718 src/remote.cc:1719
-#, fuzzy
 msgid "clean|clear"
 msgstr "vyčistiť|uvoľniť"
 
 #: src/remote.cc:1718
-#, fuzzy
 msgid "clean or clear shared thumbnail cache"
 msgstr "vyčistiť alebo uvoľniť zdieľanú vyrovnávaciu pamäť pre náhľady"
 
 # src/preferences.cc:603
 #: src/remote.cc:1719
-#, fuzzy
 msgid "clean or clear thumbnail cache"
 msgstr "vyčistiť alebo uvoľniť vyrovnávaciu pamäť náhľadov"
 
@@ -7821,18 +7792,16 @@ msgid "get render intent"
 msgstr "zistiť zámer vykresľovania"
 
 #: src/remote.cc:1738
-#, fuzzy
 msgid "get list of selected files"
-msgstr "Pridať text k vybraným súborom"
+msgstr "získať zoznam vybraných súborov"
 
 #: src/remote.cc:1739
 msgid "get list of sidecars of FILE"
 msgstr "načítať zoznam pomocných súborov zo SÚBORU"
 
 #: src/remote.cc:1740
-#, fuzzy
 msgid "get window list"
-msgstr "Odstrániť rozloženie okien"
+msgstr "získať zoznam okien"
 
 #: src/remote.cc:1741
 msgid "<ID>"
@@ -7898,23 +7867,21 @@ msgid "bring the Geeqie window to the top"
 msgstr "preniesť okno Geeqie do popredia"
 
 #: src/remote.cc:1756 src/remote.cc:1758
-#, fuzzy
 msgid "[<FILE>]"
-msgstr "<SÚBOR>"
+msgstr "[<SÚBOR>]"
 
 #: src/remote.cc:1756
 msgid "adds the current file (or the specified file) to the current selection"
-msgstr ""
+msgstr "pridá aktuálny (alebo zadaný) súbor k aktuálnemu výberu"
 
 #: src/remote.cc:1757
-#, fuzzy
 msgid "clears the current selection"
-msgstr "Počkajte, prosím, kým sa načíta aktuálny výber súborov."
+msgstr "zruší aktuálny výber"
 
 #: src/remote.cc:1758
 msgid ""
 "removes the current file (or the specified file) from the current selection"
-msgstr ""
+msgstr "odstráni aktuálny (alebo zadaný) súbor z aktívneho výberu"
 
 # src/img-view.cc:813 src/menu.cc:982
 #: src/remote.cc:1759
@@ -8103,9 +8070,8 @@ msgid "Searching..."
 msgstr "Hľadám..."
 
 #: src/search.cc:1606
-#, fuzzy
 msgid "Image is not geocoded"
-msgstr "nie je geokódované"
+msgstr "Obrázok nie je geokódovaný"
 
 #: src/search.cc:2059
 msgid "Changed"
@@ -8192,9 +8158,8 @@ msgid "Match case"
 msgstr "Citlivé na veľkosť písma"
 
 #: src/search.cc:3507
-#, fuzzy
 msgid "Symbolic link"
-msgstr "Odstrániť symbolický odkaz?"
+msgstr "Symbolický odkaz"
 
 #: src/search.cc:3508
 msgid ""
@@ -8207,6 +8172,14 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
+"Ak je nastavené na 'obsahuje' alebo 'cesta obsahuje', toto pole bude "
+"rozoznávať regulárne výrazy kompatibilné s jazykom Perl.\n"
+"napr. použite \n"
+".*\\.jpg\n"
+" a nie \n"
+"*.jpg\n"
+"\n"
+"Viac nájdete v súbore Pomocníka."
 
 # src/preferences.cc:368
 #: src/search.cc:3512
@@ -8262,6 +8235,13 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
+"Toto pole používa regulárne výrazy kompatibilné s jazykom Perl.\n"
+"Použite napr. \n"
+"abc.*ghk\n"
+" a nie \n"
+"abc*ghk\n"
+"\n"
+"Viac nájdete v súbore Pomocníka."
 
 #: src/search.cc:3632
 msgid ""
@@ -8272,6 +8252,12 @@ msgid ""
 "\n"
 "See https://exiv2.org/tags.html"
 msgstr ""
+"napr. Exif.Image.Model\n"
+"Vždy sa prihliada na veľkosť písmen\n"
+"\n"
+"Z okna Exifu môžete použiť techniku ťahania myšou\n"
+"\n"
+"Viac nájdete na https://exiv2.org/tags.html"
 
 #: src/search.cc:3643
 msgid ""
@@ -8285,6 +8271,15 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
+"napr. Canon EOS\n"
+"\n"
+"Toto pole používa regulárne výrazy kompatibilné s jazykom Perl.\n"
+"Použite napr. \n"
+"abc.*ghk\n"
+" a nie \n"
+"abc*ghk\n"
+"\n"
+"Viac nájdete v súbore Pomocníka."
 
 # src/collect-table.cc:1820 src/dupe.cc:2172
 #: src/search.cc:3649
@@ -8338,7 +8333,7 @@ msgstr "Značky"
 
 #: src/search.cc:3839 src/search.cc:3843
 msgid "Ctrl-Return"
-msgstr ""
+msgstr "Ctrl-Enter"
 
 # src/utilops.cc:1151
 #: src/secure-save.cc:401
@@ -8436,14 +8431,17 @@ msgid ""
 "See the Help file for a possible workaround.\n"
 "\n"
 msgstr ""
+"Alternatívne riešenie nájdete v súbore Pomocníka.\n"
+"\n"
 
 # src/utilops.cc:601
 #: src/trash.cc:206
-#, fuzzy
 msgid ""
 "Move to trash failed\n"
 "\n"
-msgstr "Presunúť do koša"
+msgstr ""
+"Presun do koša zlyhal\n"
+"\n"
 
 #: src/trash.cc:225
 msgid "Deletion by external command"
@@ -8473,7 +8471,7 @@ msgstr "Používa sa systémový kôš"
 
 #: src/ui/appimage-notification.ui:17
 msgid "A new Geeqie AppImage is available"
-msgstr ""
+msgstr "Je dostupný nový AppImage Geeqie"
 
 #: src/ui-bookmark.cc:143 src/ui-bookmark.cc:206
 msgid "New Bookmark"
@@ -8654,21 +8652,23 @@ msgid ""
 "Or, e.g. png;jpg\n"
 "Or, e.g. png; jpg"
 msgstr ""
+"Prípona súboru.\n"
+"Všetky súbory: *\n"
+"Alebo, napr. png;jpg\n"
+"Alebo, napr. png; jpg"
 
 #: src/ui/search-and-run.ui:30
-#, fuzzy
 msgid "Search and Run command - Geeqie"
-msgstr "Nájsť a spustiť príkaz"
+msgstr "Nájsť a spustiť príkaz - Geeqie"
 
 #: src/ui/search-and-run.ui:39 src/ui/search-and-run.ui:41
-#, fuzzy
 msgid "Search for commands and run them"
-msgstr "Nájsť príkazy podľa kľúčových slov a spustiť ich"
+msgstr "Nájdite príkazy a spustite ich"
 
 # src/collect-table.cc:627 src/dupe.cc:1391 src/dupe.cc:1563
 #: src/ui-tabcomp.cc:834
 msgid "Select path"
-msgstr "Vybrať cestu"
+msgstr "Vyberte cestu"
 
 # src/ui-pathsel.cc:697
 #: src/ui-tabcomp.cc:856
@@ -8761,9 +8761,8 @@ msgstr "Vyberte cieľový priečinok."
 # src/ui-pathsel.cc:437 src/ui-pathsel.cc:460 src/utilops.cc:944
 # src/utilops.cc:1095
 #: src/utilops.cc:1667 src/utilops.cc:1671
-#, fuzzy
 msgid "With Rename"
-msgstr "Premenovať"
+msgstr "S premenovaním"
 
 # src/utilops.cc:980
 #: src/utilops.cc:1743
@@ -8776,9 +8775,8 @@ msgid "Source"
 msgstr "Zdroj"
 
 #: src/utilops.cc:1758
-#, fuzzy
 msgid "Destination"
-msgstr "Cieľ:"
+msgstr "Cieľ"
 
 # src/preferences.cc:930
 #: src/utilops.cc:1775
@@ -8876,25 +8874,21 @@ msgid "The following metadata tags will be written to the image file itself."
 msgstr "Nasledujúce položky metadát budú zapísané priamo do súboru s obrázkom."
 
 #: src/utilops.cc:2259
-#, fuzzy
 msgid "⚠ This will move the following    "
-msgstr "Týmto presuniete nasledujúce súbory"
+msgstr "⚠ Týmto presuniete nasledujúce    "
 
 #: src/utilops.cc:2259
-#, fuzzy
 msgid "    files to the Trash bin"
-msgstr "Týmto presuniete nasledujúce súbory do koša"
+msgstr "    súbory do koša"
 
 #: src/utilops.cc:2263
-#, fuzzy
 msgid "⚠ This will permanently delete the following    "
-msgstr "Týmto nenávratne odstránite nasledujúce súbory"
+msgstr "⚠ Týmto nenávratne odstránite nasledujúce    "
 
 # src/dupe.cc:67 src/dupe.cc:1449
 #: src/utilops.cc:2263
-#, fuzzy
 msgid "    files"
-msgstr "%d súborov"
+msgstr "    súbory"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
 #: src/utilops.cc:2265
@@ -8902,14 +8896,12 @@ msgid "Delete files?"
 msgstr "Odstrániť súbory?"
 
 #: src/utilops.cc:2271
-#, fuzzy
 msgid "This will move the following file to the Trash bin"
-msgstr "Týmto presuniete nasledujúce súbory do koša"
+msgstr "Týmto presuniete nasledujúci súbor do koša"
 
 #: src/utilops.cc:2275
-#, fuzzy
 msgid "This will permanently delete the following file"
-msgstr "Týmto nenávratne odstránite nasledujúce súbory"
+msgstr "Týmto nenávratne odstránite nasledujúci súbor"
 
 # src/ui-pathsel.cc:398 src/utilops.cc:760
 #: src/utilops.cc:2277
@@ -9181,7 +9173,7 @@ msgstr "Týmto nastavíte alebo vyčistíte text značky."
 
 #: src/view-file/view-file.cc:1303
 msgid "Use regular expressions"
-msgstr ""
+msgstr "Použiť regulárne výrazy"
 
 #: src/view-file/view-file.cc:1335
 msgid "Case sensitive"
@@ -9247,11 +9239,9 @@ msgstr "Vyhľadávací reťazec:"
 
 # src/ui-help.cc:191
 #: src/window.cc:439
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: Failed to execute command: %s\n"
-msgstr ""
-"Nepodarilo sa spustiť príkaz:\n"
-"%s\n"
+msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
 
 # src/filelist.c:88
 #, c-format
@@ -11122,3 +11112,28 @@ msgstr ""
 #, fuzzy
 #~ msgid "top"
 #~ msgstr "na:"
+
+# src/dupe.cc:1657 src/dupe.cc:1945
+#~ msgid "Path\n"
+#~ msgstr "Cesta\n"
+
+#~ msgid "UFRaw Batch"
+#~ msgstr "Dávka UFRaw"
+
+#~ msgid "Search for new RAW files or modified UFRaw ID files"
+#~ msgstr "Hľadať nové súbory RAW alebo zmenené UFRaw ID súbory"
+
+#~ msgid "Edit UFRaw ID file"
+#~ msgstr "Upraviť ID súbor UFRaw"
+
+#~ msgid "Create UFRaw ID files for RAW files"
+#~ msgstr "Vytvoriť UFRaw ID súbory zo súborov RAW"
+
+#~ msgid "UFRaw Batch recursive"
+#~ msgstr "Rekurzívna dávka UFRaw"
+
+#~ msgid "Search for new RAW files or modified UFRaw ID files recursively"
+#~ msgstr "Hľadať nové súbory RAW alebo zmenené UFRaw ID súbory rekurzívne"
+
+#~ msgid "UFraw"
+#~ msgstr "UFraw"
