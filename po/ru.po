@@ -19,16 +19,16 @@ msgstr ""
 "Project-Id-Version: geeqie-1.6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-09-21 15:50+0100\n"
-"PO-Revision-Date: 2024-06-19 17:08+0300\n"
+"PO-Revision-Date: 2024-12-20 17:03+0300\n"
 "Last-Translator: Alevtina <karashokovaaa@basealt.ru>\n"
 "Language-Team: Basealt Translation Team\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 23.08.4\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Lokalize 23.08.5\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<"
+"=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: org.geeqie.Geeqie.appdata.xml.in:7 org.geeqie.Geeqie.desktop.in:3
 msgid "Geeqie"
@@ -84,9 +84,8 @@ msgstr ""
 "изображениями, и ваши данные будут отображены."
 
 #: org.geeqie.Geeqie.appdata.xml.in:15
-#, fuzzy
 msgid "Geeqie developers"
-msgstr "Geeqie Инструменты"
+msgstr "Разработчики Geeqie"
 
 #: org.geeqie.Geeqie.appdata.xml.in:32
 msgid "image"
@@ -125,13 +124,13 @@ msgid "Import all images from camera"
 msgstr "Импорт всех изображений из камеры"
 
 #: plugins/exif-datetime-to-file/org.geeqie.exif-datetime-to-file.desktop.in:5
-#, fuzzy
 msgid "Exif datetime to file"
-msgstr "Записать в файл"
+msgstr "Дата и время Exif в файл"
 
 #: plugins/exif-datetime-to-file/org.geeqie.exif-datetime-to-file.desktop.in:6
 msgid "Sets file mtime to the Exif.Image.DateTimeOriginal of the file"
 msgstr ""
+"Устанавливает Exif.Image.DateTimeOriginal файла для параметра mtime файла"
 
 #: plugins/export-jpeg/org.geeqie.export-jpeg.desktop.in:5
 msgid "Export jpeg"
@@ -247,7 +246,7 @@ msgstr "Закрыть"
 
 #: src/advanced-exif.cc:540 src/dupe.cc:4730 src/search.cc:3847
 msgid "Ctrl-W"
-msgstr ""
+msgstr "Ctrl-W"
 
 #: src/archives.cc:183
 msgid "Open Archive - Cannot create directory: "
@@ -1089,11 +1088,15 @@ msgid ""
 "Collection: %s\n"
 "File: %s\n"
 msgstr ""
+"Эту коллекцию невозможно открыть, поскольку она содержит ссылку на файл на "
+"диске, который ещё не смонтирован.\n"
+"\n"
+"Коллекция: %s\n"
+"Файл: %s\n"
 
 #: src/collect-io.cc:318
-#, fuzzy
 msgid "Cannot open Collection"
-msgstr "Не удалось открыть файл коллекции"
+msgstr "Не удалось открыть коллекцию"
 
 #: src/collect-io.cc:508
 #, c-format
@@ -1118,9 +1121,8 @@ msgstr "Переименовать"
 #: src/collect-table.cc:115 src/collect-table.cc:1074 src/dupe.cc:176
 #: src/dupe.cc:3479 src/search.cc:396 src/search.cc:1225
 #: src/view-file/view-file.cc:862
-#, fuzzy
 msgid "Move selection to Trash"
-msgstr "Удалить в корзину"
+msgstr "Переместить выделение в корзину"
 
 #: src/collect-table.cc:116 src/dupe.cc:183 src/img-view.cc:105
 #: src/img-view.cc:143 src/layout-util.cc:2669 src/pan-view/pan-view.cc:152
@@ -1292,21 +1294,18 @@ msgstr "_Копировать путь раскавыченным"
 #: src/collect-table.cc:1073 src/dupe.cc:3478 src/layout-util.cc:2694
 #: src/layout-util.cc:2695 src/layout-util.cc:2696 src/search.cc:1224
 #: src/view-file/view-file.cc:861
-#, fuzzy
 msgid "Move selection to Trash..."
-msgstr "Удалить в корзину..."
+msgstr "Переместить выделение в корзину..."
 
 #: src/collect-table.cc:1077 src/dupe.cc:3482 src/search.cc:1228
 #: src/view-file/view-file.cc:865
-#, fuzzy
 msgid "_Delete selection..."
-msgstr "Инвертировать выделение"
+msgstr "_Удалить выделение…"
 
 #: src/collect-table.cc:1078 src/dupe.cc:3483 src/search.cc:1229
 #: src/view-file/view-file.cc:866
-#, fuzzy
 msgid "_Delete selection"
-msgstr "Инвертировать выделение"
+msgstr "_Удалить выделение"
 
 #: src/collect-table.cc:1084
 msgid "Randomize"
@@ -1459,9 +1458,8 @@ msgid "Path"
 msgstr "Путь"
 
 #: src/dupe.cc:177 src/search.cc:397
-#, fuzzy
 msgid "Delete selection"
-msgstr "Инвертировать выделение"
+msgstr "Удалить выделение"
 
 # #-#-#-#-#  catalog.po (geeqie-1.6)  #-#-#-#-#
 # ashed /maybe correct
@@ -1641,7 +1639,7 @@ msgstr "Миниатюры"
 
 #: src/dupe.cc:4660 src/search.cc:3807
 msgid "Ctrl-T"
-msgstr ""
+msgstr "Ctrl-T"
 
 #: src/dupe.cc:4668
 msgid "Compare by:"
@@ -1656,6 +1654,8 @@ msgid ""
 "Custom similarity threshold\n"
 "(Use tab key to set value)"
 msgstr ""
+"Настраиваемый порог степени сходства\n"
+"(Используйте клавишу Tab, чтобы указать значение)"
 
 #: src/dupe.cc:4686 src/menu.cc:224 src/menu.cc:251
 msgid "Sort"
@@ -2718,9 +2718,8 @@ msgid "Couldn't set parameters on decoder for file."
 msgstr "Не удалось установить параметры декодера для файла"
 
 #: src/image-load-j2k.cc:164
-#, fuzzy
 msgid "Couldn't allocate worker threads on decoder for file."
-msgstr "Не удалось установить параметры декодера для файла"
+msgstr "Не удалось выделить рабочие потоки декодера для файла."
 
 #: src/image-load-j2k.cc:171
 msgid "Couldn't read JP2 header from file"
@@ -3099,25 +3098,22 @@ msgstr "Открыть архив"
 #: src/layout-image.cc:846 src/layout-util.cc:2690
 #: src/pan-view/pan-view.cc:2394 src/view-dir.cc:808
 #: src/view-file/view-file.cc:853
-#, fuzzy
 msgid "_Copy to clipboard"
-msgstr "_Скопировать путь в буфер обмена"
+msgstr "_Скопировать в буфер обмена"
 
 #: src/layout-image.cc:847 src/layout-util.cc:2691
 #: src/pan-view/pan-view.cc:2396 src/view-dir.cc:811
 #: src/view-file/view-file.cc:855
-#, fuzzy
 msgid "_Copy to clipboard (unquoted)"
-msgstr "_Копировать путь раскавыченным"
+msgstr "_Cкопировать  в буфер обмена (раскавыченным)"
 
 #: src/layout-image.cc:848
 msgid "Copy _image to clipboard"
 msgstr "Скопировать _изображение в буфер обмена"
 
 #: src/layout-image.cc:849 src/layout-util.cc:2693
-#, fuzzy
 msgid "Cut to clipboard"
-msgstr "Скопировать путь в буфер обмена"
+msgstr "Скопировать в буфер обмена"
 
 #: src/layout-image.cc:900
 msgid "GIF _animation"
@@ -3132,9 +3128,9 @@ msgid "Hide Selectable Bars"
 msgstr "Скрыть доступные для выбора панели"
 
 #: src/layout-image.cc:2043
-#, fuzzy, c-format
+#, c-format
 msgid "[%*d,%*d]: RGBA(%3d,%3d,%3d,%3d)"
-msgstr "[%*d,%*d]: RGB(%3d,%3d,%3d)"
+msgstr "[%*d,%*d]: RGBA(%3d,%3d,%3d,%3d)"
 
 #: src/layout-image.cc:2050
 #, c-format
@@ -3242,7 +3238,7 @@ msgstr "Поворот изображения в исходное состоян
 
 #: src/layout-util.cc:2666
 msgid "Aspect Ratio"
-msgstr ""
+msgstr "Соотношение сторон"
 
 #: src/layout-util.cc:2667
 msgid "_Back"
@@ -3342,34 +3338,28 @@ msgid "Copy..."
 msgstr "Копировать..."
 
 #: src/layout-util.cc:2689
-#, fuzzy
 msgid "_Copy image to clipboard"
-msgstr "Скопировать _изображение в буфер обмена"
+msgstr "_Скопировать изображение в буфер обмена"
 
 #: src/layout-util.cc:2689
-#, fuzzy
 msgid "Copy image to clipboard"
-msgstr "Скопировать _изображение в буфер обмена"
+msgstr "Copy image to clipboard"
 
 #: src/layout-util.cc:2690
-#, fuzzy
 msgid "Copy to clipboard"
-msgstr "Скопировать путь в буфер обмена"
+msgstr "Скопировать в буфер обмена"
 
 #: src/layout-util.cc:2691
-#, fuzzy
 msgid "Copy to clipboard (unquoted)"
-msgstr "_Копировать путь раскавыченным"
+msgstr "Скопировать в буфер обмена (раскавыченным)"
 
 #: src/layout-util.cc:2692
-#, fuzzy
 msgid "Crop Rectangle"
-msgstr "Рисовать прямоугольник"
+msgstr "Прямоугольник для кадрирования"
 
 #: src/layout-util.cc:2693 src/view-dir.cc:814 src/view-file/view-file.cc:857
-#, fuzzy
 msgid "_Cut to clipboard"
-msgstr "_Скопировать путь в буфер обмена"
+msgstr "_Вырезать в буфер обмена"
 
 #: src/layout-util.cc:2698 src/view-file/view-file.cc:872
 msgid "Disable file groupi_ng"
@@ -3496,13 +3486,12 @@ msgid "Readme"
 msgstr "Файл сведений"
 
 #: src/layout-util.cc:2720
-#, fuzzy
 msgid "Help in pdf format"
-msgstr "Формат пикселей"
+msgstr "Справка в формате PDF"
 
 #: src/layout-util.cc:2720
 msgid "Help in pdf formast"
-msgstr ""
+msgstr "Справка в формате PDF"
 
 #: src/layout-util.cc:2721 src/window.cc:384
 msgid "On-line help search"
@@ -3718,9 +3707,8 @@ msgid "Pan view"
 msgstr "Панорамное изображение"
 
 #: src/layout-util.cc:2755
-#, fuzzy
 msgid "Delete selection..."
-msgstr "Инвертировать выделение"
+msgstr "Удалить выделение…"
 
 #: src/layout-util.cc:2756
 msgid "Configure _Plugins..."
@@ -4035,9 +4023,8 @@ msgid "_Zoom"
 msgstr "_Масштаб"
 
 #: src/layout-util.cc:2820
-#, fuzzy
 msgid "Zoom to rectangle"
-msgstr "Выделить всё"
+msgstr "Масштабировать по размеру прямоугольника"
 
 #: src/layout-util.cc:2825
 msgid "_Animation"
@@ -4357,19 +4344,19 @@ msgstr "Нет"
 
 #: src/layout-util.cc:2897
 msgid "1:1"
-msgstr ""
+msgstr "1:1"
 
 #: src/layout-util.cc:2898
 msgid "4:3"
-msgstr ""
+msgstr "4:3"
 
 #: src/layout-util.cc:2899
 msgid "3:2"
-msgstr ""
+msgstr "3:2"
 
 #: src/layout-util.cc:2900
 msgid "16:9"
-msgstr ""
+msgstr "16:9"
 
 #: src/layout-util.cc:2955
 #, c-format
@@ -4538,9 +4525,8 @@ msgid "Filter regexp"
 msgstr "Фильтр регулярных выражений"
 
 #: src/main.cc:335
-#, fuzzy
 msgid "Invalid parameter(s):"
-msgstr "Недопустимые размеры\n"
+msgstr "Недопустимые параметры:"
 
 #: src/main.cc:491
 #, c-format
@@ -4560,11 +4546,10 @@ msgid "      --blank                      start with blank file list\n"
 msgstr "      --blank                      старт с пустым списком файлов\n"
 
 #: src/main.cc:494
-#, fuzzy
 msgid ""
 "      --cache-maintenance=<path>   run cache maintenance in non-GUI mode\n"
 msgstr ""
-"      --cache-maintenance <path>    запустить обслуживание кэша в режиме без "
+"      --cache-maintenance=<path>    запустить обслуживание кэша в режиме без "
 "ГПИ\n"
 
 #: src/main.cc:495
@@ -4599,9 +4584,8 @@ msgid "  -n, --new-instance               open a new instance of Geeqie *\n"
 msgstr "  -n, --new-instance              открыть новый экземпляр Geeqie\n"
 
 #: src/main.cc:501
-#, fuzzy
 msgid "  -o, --log-file=<file>            save log data to file\n"
-msgstr "  -o:, --log-file:<file>     сохранить данные лога в файл\n"
+msgstr "  -o, --log-file=<file>            сохранить данные журнала в файл\n"
 
 #: src/main.cc:502
 msgid ""
@@ -4614,9 +4598,9 @@ msgid "  -s, --slideshow                  start in slideshow mode\n"
 msgstr "  -s, --slideshow            запуск в режиме показа слайдов\n"
 
 #: src/main.cc:504
-#, fuzzy
 msgid "  -T, --with-tools                 force show of tools\n"
-msgstr "  +t, --with-tools           показывать окно инструментов\n"
+msgstr ""
+"  -T, --with-tools                 принудительно показать инструменты\n"
 
 #: src/main.cc:505
 msgid "  -t, --without-tools              force hide of tools\n"
@@ -4627,19 +4611,17 @@ msgid "  -v, --version                    print version info\n"
 msgstr "  -v, --version              показать информацию о версии\n"
 
 #: src/main.cc:507
-#, fuzzy
 msgid "  -w, --show-log-window            show log window\n"
-msgstr "  +w, --show-log-window            показывать окно журнала\n"
+msgstr "  -w, --show-log-window            показать окно журнала\n"
 
 #: src/main.cc:509
-#, fuzzy
 msgid "      --debug=[level]              turn on debug output\n"
-msgstr "  --debug[=level]            выводить отладочную информацию\n"
+msgstr ""
+"      --debug=[level]              включить вывод отладочной информации\n"
 
 #: src/main.cc:510
-#, fuzzy
 msgid "  -g, --grep=<regexp>              filter debug output\n"
-msgstr "  -g:, --grep:<regexp>     фильтр выходных данных отладки\n"
+msgstr "  -g, --grep=<regexp>              фильтр выходных данных отладки\n"
 
 #: src/main.cc:522
 #, c-format
@@ -4648,6 +4630,9 @@ msgid ""
 "\n"
 "This is a --remote command option\n"
 msgstr ""
+"%s\n"
+"\n"
+"Это опция команды --remote\n"
 
 #: src/main.cc:522
 #, c-format
@@ -4656,6 +4641,9 @@ msgid ""
 "\n"
 "This option is unknown\n"
 msgstr ""
+"%s\n"
+"\n"
+"Эта опция неизвестна\n"
 
 #: src/main.cc:713
 msgid "No path parameter given\n"
@@ -5806,14 +5794,14 @@ msgstr "Разрешить увеличение изображения (макс
 
 # c-format
 #: src/preferences.cc:2330
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Enable this to allow Geeqie to increase the image size for images that are "
 "smaller than the current view area when the zoom is set to 'Fit image to "
 "window'. This value sets the maximum expansion permitted in percent i.e. "
 "100% is full-size."
 msgstr ""
-"Включите этот параметр, чтобы Geeqie мог увеличить размер изображений, "
+"Включите этот параметр, чтобы Geeqie могла увеличить размер изображений, "
 "которые меньше текущей области просмотра, когда для масштабирования "
 "установлено значение «Уместить в окне». Это значение устанавливает "
 "максимально допустимое увеличение в процентах, т. е. 100% — полноразмерное "
@@ -5826,7 +5814,6 @@ msgid "Virtual window size (%% of actual window):"
 msgstr "Размер виртуального окна (%% от реального окна):"
 
 #: src/preferences.cc:2339
-#, fuzzy
 msgid ""
 "This value will set the virtual size of the window when 'Fit image to "
 "window' is set. Instead of using the actual size of the window, the "
@@ -5917,15 +5904,16 @@ msgid "Remember dialog window positions"
 msgstr "Запоминать расположение окон"
 
 #: src/preferences.cc:2455
-#, fuzzy
 msgid "Hide window decorations"
-msgstr "Скрывать окно при полноэкранном просмотре"
+msgstr "Скрывать оформление окон"
 
 #: src/preferences.cc:2457
 msgid ""
 "Remove borders and title bar from windows. A restart of Geeqie is required "
 "for this feature to take effect on the main layout window"
 msgstr ""
+"Удалить границы и строку заголовка из окон. Чтобы эту функция вступила в силу "
+"для главного окна макета, требуется перезапуск Geeqie"
 
 #: src/preferences.cc:2459
 msgid "Show window IDs"
@@ -6237,7 +6225,6 @@ msgid "Permit Keywords to be case-sensitive"
 msgstr "Включить чувствительные к регистру ключевые слова"
 
 #: src/preferences.cc:2972
-#, fuzzy
 msgid "When selected, 'Place' and 'place' are two different keywords"
 msgstr "Если выбрано, «Место» и «место» — два разных ключевых слова."
 
@@ -6308,6 +6295,11 @@ msgid ""
 "If this is not selected, initial loading of the folder will be faster but "
 "sorting on these items will be slower"
 msgstr ""
+"При смене папки считывать DateTimeOriginal, DateTimeDigitized и Star Rating "
+"в пустом цикле.\n"
+"Если этот параметр не выбран, начальная загрузка папки будет происходить"
+" быстрее, но "
+"сортировка по этим элементам будет происходить медленнее"
 
 #: src/preferences.cc:3195 src/preferences.cc:3209
 msgid "Search for keywords"
@@ -6463,17 +6455,15 @@ msgstr ""
 "независимо от этой настройки"
 
 #: src/preferences.cc:3606
-#, fuzzy
 msgid "Use 'With Rename' as default for Copy/Move dialogs"
 msgstr ""
 "Использовать «С переименованием» по умолчанию для диалоговых окон "
 "копирования/перемещения"
 
 #: src/preferences.cc:3608
-#, fuzzy
 msgid "Change the default button for Copy/Move dialogs"
 msgstr ""
-"Использовать «С переименованием» по умолчанию для диалоговых окон "
+"Изменить кнопку по умолчанию для диалоговых окон "
 "копирования/перемещения"
 
 #: src/preferences.cc:3610
@@ -6501,16 +6491,15 @@ msgstr "Скрывать окно при полноэкранном просмо
 #: src/preferences.cc:3620
 msgid "When alt-tabbing, prevent Geeqie window showing twice"
 msgstr ""
+"При использовании alt-табуляции избегать двойного отображения окна Geeqie"
 
 #: src/preferences.cc:3622
-#, fuzzy
 msgid "Hide OSD in fullscreen"
-msgstr "Скрывать окно при полноэкранном просмотре"
+msgstr "Скрывать экранный оверлей при полноэкранном просмотре"
 
 #: src/preferences.cc:3624
-#, fuzzy
 msgid "Hide Overlay Screen Display in fullscreen mode"
-msgstr "Экранный оверлей"
+msgstr "Скрывать экранный оверлей в полноэкранном режиме"
 
 #: src/preferences.cc:3626
 msgid "Recent folder list maximum size"
@@ -6921,9 +6910,9 @@ msgid "error saving default layout file: %s\n"
 msgstr "ошибка сохранения файла макета по умолчанию: %s\n"
 
 #: src/remote.cc:795
-#, fuzzy, c-format
+#, c-format
 msgid "[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"
-msgstr "[%d,%d]: RGB(%3d,%3d,%3d)"
+msgstr "[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"
 
 #: src/remote.cc:801
 #, c-format
@@ -7027,17 +7016,14 @@ msgid " render thumbnails recursively (see Help)"
 msgstr " создать миниатюры рекурсивно (см. справку)"
 
 #: src/remote.cc:1718 src/remote.cc:1719
-#, fuzzy
 msgid "clean|clear"
 msgstr "удалить|очистить"
 
 #: src/remote.cc:1718
-#, fuzzy
 msgid "clean or clear shared thumbnail cache"
 msgstr "удалить или очистить общий кэш миниатюр"
 
 #: src/remote.cc:1719
-#, fuzzy
 msgid "clean or clear thumbnail cache"
 msgstr "удалить или очистить кэш миниатюр"
 
@@ -7483,6 +7469,15 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
+"Если установлено значение «содержит» или «путь содержит», это поле использует"
+" совместимые с Perl "
+"регулярные выражения.\n"
+"Например, используется \n"
+".*\\.jpg,\n"
+" а не \n"
+"*.jpg\n"
+"\n"
+"См. файл справки."
 
 #: src/search.cc:3512
 msgid "File size is"
@@ -7531,6 +7526,13 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
+"Это поле использует совместимые с Perl регулярные выражения.\n"
+"Например, используется \n"
+"abc.*ghk,\n"
+" а не \n"
+"abc*ghk\n"
+"\n"
+"См. файл справки."
 
 #: src/search.cc:3632
 msgid ""
@@ -7541,6 +7543,12 @@ msgid ""
 "\n"
 "See https://exiv2.org/tags.html"
 msgstr ""
+"Например, Exif.Image.Model\n"
+"Всегда чувствительно к регистру\n"
+"\n"
+"Вы можете перетаскивать изображения из окна Exif\n"
+"\n"
+"См. https://exiv2.org/tags.html"
 
 #: src/search.cc:3643
 msgid ""
@@ -7554,6 +7562,15 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
+"Например, Canon EOS\n"
+"\n"
+"Это поле использует совместимые с Perl регулярные выражения.\n"
+"Например, используется \n"
+"abc.*ghk,\n"
+" а не \n"
+"abc*ghk\n"
+"\n"
+"См. файл справки."
 
 #: src/search.cc:3649
 msgid "Image rating is"
@@ -7603,7 +7620,7 @@ msgstr "Метки"
 
 #: src/search.cc:3839 src/search.cc:3843
 msgid "Ctrl-Return"
-msgstr ""
+msgstr "Ctrl-Return"
 
 #: src/secure-save.cc:401
 msgid "Cannot read the file"
@@ -7684,11 +7701,12 @@ msgstr ""
 "«%s»"
 
 #: src/trash.cc:205
-#, fuzzy
 msgid ""
 "See the Help file for a possible workaround.\n"
 "\n"
-msgstr "Список используемых тегов смотрите в файле справки"
+msgstr ""
+"Возможные пути решения проблемы смотрите в файле справки.\n"
+"\n"
 
 #: src/trash.cc:206
 msgid ""
@@ -8095,36 +8113,30 @@ msgstr ""
 "Следующие теги метаданных будут записаны непосредственно в файл изображения."
 
 #: src/utilops.cc:2259
-#, fuzzy
 msgid "⚠ This will move the following    "
-msgstr "Будут перемещены следующие файлы"
+msgstr "⚠ Следующие файлы будут перемещены в корзину    "
 
 #: src/utilops.cc:2259
-#, fuzzy
 msgid "    files to the Trash bin"
-msgstr "Следующие файлы будут перемещены в корзину"
+msgstr "    "
 
 #: src/utilops.cc:2263
-#, fuzzy
 msgid "⚠ This will permanently delete the following    "
-msgstr "Следующие файлы будут навсегда удалены"
+msgstr "⚠ Следующие файлы будут навсегда удалены    "
 
 #: src/utilops.cc:2263
-#, fuzzy
 msgid "    files"
-msgstr "Файлов: %d"
+msgstr "    "
 
 #: src/utilops.cc:2265
 msgid "Delete files?"
 msgstr "Удалить файлы?"
 
 #: src/utilops.cc:2271
-#, fuzzy
 msgid "This will move the following file to the Trash bin"
 msgstr "Следующие файлы будут перемещены в корзину"
 
 #: src/utilops.cc:2275
-#, fuzzy
 msgid "This will permanently delete the following file"
 msgstr "Следующие файлы будут навсегда удалены"
 
@@ -8420,11 +8432,9 @@ msgid "Search terms:"
 msgstr "Термины поиска:"
 
 #: src/window.cc:439
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: Failed to execute command: %s\n"
-msgstr ""
-"Невозможно выполнить команду:\n"
-"%s\n"
+msgstr "Предупреждение: не удалось выполнить команду: %s\n"
 
 #, c-format
 #~ msgid "%d files%s"
@@ -8771,8 +8781,8 @@ msgstr ""
 
 #~ msgid ""
 #~ "<i>%name%</i> results in the filename of the picture.\n"
-#~ "Also available: <i>%collection%</i>, <i>%number%</i>, <i>%total%</i>, "
-#~ "<i>%date%</i>,\n"
+#~ "Also available: <i>%collection%</i>, <i>%number%</i>, <i>%total%</i>, <i>"
+#~ "%date%</i>,\n"
 #~ "<i>%size%</i> (filesize), <i>%width%</i>, <i>%height%</i>, <i>%res%</i> "
 #~ "(resolution)\n"
 #~ "To access exif data use the exif name, e. g. <i>%formatted.Camera%</i> is "
@@ -8782,9 +8792,9 @@ msgstr ""
 #~ "20 characters and will add 3 dots at the end to denote the truncation.\n"
 #~ "If two or more variables are connected with the |-sign, it prints "
 #~ "available variables with a separator.\n"
-#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|"
-#~ "<i>%formatted.FocalLength%</i> could show \"1/20s - 400 - 80 mm\" or "
-#~ "\"1/200 - 80 mm\",\n"
+#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|<i>"
+#~ "%formatted.FocalLength%</i> could show \"1/20s - 400 - 80 mm\" or \"1/200 "
+#~ "- 80 mm\",\n"
 #~ "if there's no ISO information in the Exif data.\n"
 #~ "If a line is empty, it is removed. This allows one to add lines that "
 #~ "totally disappear when no data is available.\n"
@@ -8794,15 +8804,15 @@ msgstr ""
 #~ "<i>%total%</i> (всего), <i>%date%</i> (дата),\n"
 #~ "<i>%size%</i> (размер файла), <i>%width%</i> (ширина), <i>%height%</i> "
 #~ "(высота), <i>%res%</i> (разрешение)\n"
-#~ "Для доступа к данным exif, используйте имена exif, например. "
-#~ "<i>%formatted.Camera%</i> соответствует отформатированному имени камеры,\n"
+#~ "Для доступа к данным exif, используйте имена exif, например. <i>"
+#~ "%formatted.Camera%</i> соответствует отформатированному имени камеры,\n"
 #~ "<i>%Exif.Photo.DateTimeOriginal%</i> - дата исходного снимка.\n"
 #~ "Нотация <i>%formatted.Camera:20</i> ограничит отображаемые данные 20 "
 #~ "символами и добавит многоточие в случае обрезки.\n"
 #~ "Если две или более переменные объединены знаком |, то будут напечатаны "
 #~ "доступные переменные (c разделителями).\n"
-#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|"
-#~ "<i>%formatted.FocalLength%</i> может показать \"1/20s - 400 - 80 mm\" or "
+#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|<i>"
+#~ "%formatted.FocalLength%</i> может показать \"1/20s - 400 - 80 mm\" or "
 #~ "\"1/200 - 80 mm\",\n"
 #~ "если в данных Exif отсутствует информация ISO.\n"
 #~ "Пустые строки удаляются. Это позволяет добавлять строки, которые "
@@ -9627,3 +9637,4 @@ msgstr ""
 
 #~ msgid "New folder - Geeqie"
 #~ msgstr "Новый каталог - Geeqie"
+
