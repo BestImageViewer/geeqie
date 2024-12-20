@@ -19,6 +19,7 @@
 
 #include "cellrenderericon.h"
 
+#include <algorithm>
 #include <cstddef>
 
 #include <cairo.h>
@@ -588,14 +589,14 @@ static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
 		pango_layout_get_pixel_extents(layout, nullptr, &rect);
 		g_object_unref(layout);
 
-		calc_width = MAX(calc_width, rect.width);
+		calc_width = std::max(calc_width, rect.width);
 		calc_height += rect.height;
 		}
 
 	if (cellicon->show_marks)
 		{
 		calc_height += TOGGLE_SPACING;
-		calc_width = MAX(calc_width, TOGGLE_SPACING * cellicon->num_marks);
+		calc_width = std::max(calc_width, TOGGLE_SPACING * cellicon->num_marks);
 		}
 
 	calc_width += xpad * 2;
@@ -609,12 +610,12 @@ static void gqv_cell_renderer_icon_get_size(GtkCellRenderer    *cell,
 		if (x_offset)
 			{
 			*x_offset = (xalign * (cell_area->width - calc_width - 2 * xpad));
-			*x_offset = MAX(*x_offset, 0) + xpad;
+			*x_offset = std::max(*x_offset, 0) + xpad;
 			}
 		if (y_offset)
 			{
 			*y_offset = (yalign * (cell_area->height - calc_height - 2 * ypad));
-			*y_offset = MAX(*y_offset, 0) + ypad;
+			*y_offset = std::max(*y_offset, 0) + ypad;
 			}
 		}
 

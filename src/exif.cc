@@ -1315,7 +1315,6 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 	if (!marker) return nullptr;
 
 	data = item->data;
-	ne = item->elements;
 	ne = std::min(item->elements, EXIF_DATA_AS_TEXT_MAX_COUNT);
 	string = g_string_new("");
 	switch (item->format)

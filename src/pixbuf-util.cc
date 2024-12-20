@@ -491,13 +491,13 @@ GdkPixbuf *pixbuf_copy_rotate_90(GdkPixbuf *src, gboolean counter_clockwise)
 
 	for (i = 0; i < sh; i+= ROTATE_BUFFER_WIDTH)
 		{
-		w = MIN(ROTATE_BUFFER_WIDTH, (sh - i));
+		w = std::min(ROTATE_BUFFER_WIDTH, sh - i);
 		for (j = 0; j < sw; j += ROTATE_BUFFER_HEIGHT)
 			{
 			gint x;
 			gint y;
 
-			h = MIN(ROTATE_BUFFER_HEIGHT, (sw - j));
+			h = std::min(ROTATE_BUFFER_HEIGHT, sw - j);
 			pixbuf_copy_block_rotate(s_pix, srs, j, i,
 						 b_pix, brs, h, w,
 						 a, counter_clockwise);
@@ -893,7 +893,7 @@ static void pixbuf_copy_font(GdkPixbuf *src, gint sx, gint sy,
 				asub = a * sp[2] / 255;
 				dp[2] = (b * asub + dp[2] * (256-asub)) >> 8;
 
-				if (d_alpha) dp[3] = MAX(dp[3], a * ((sp[0] + sp[1] + sp[2]) / 3) / 255);
+				if (d_alpha) dp[3] = std::max<guchar>(dp[3], a * ((sp[0] + sp[1] + sp[2]) / 3) / 255);
 				}
 
 			sp += s_step;

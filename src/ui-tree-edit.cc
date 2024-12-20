@@ -147,7 +147,7 @@ static gboolean tree_edit_by_path_idle_cb(gpointer data)
 	if (gtk_tree_view_column_cell_get_position(ted->column, ted->cell, &sx, &sw))
 		{
 		x += sx;
-		w = MAX(w - sx, sw);
+		w = std::max(w - sx, sw);
 		}
 
 	gdk_window_get_origin(gtk_widget_get_window(gtk_widget_get_parent(GTK_WIDGET(ted->tree))), &wx, &wy);
@@ -413,15 +413,15 @@ void shift_color(GdkRGBA *src, gshort val, gint direction)
 	/* up or down ? */
 	if (direction < 0 || (direction == 0 &&(src->red + src->green + src->blue) / 3 > 1.0 / 2))
 		{
-		src->red = MAX(0 , src->red - cs);
-		src->green = MAX(0 , src->green - cs);
-		src->blue = MAX(0 , src->blue - cs);
+		src->red = std::max(0.0, src->red - cs);
+		src->green = std::max(0.0, src->green - cs);
+		src->blue = std::max(0.0, src->blue - cs);
 		}
 	else
 		{
-		src->red = MIN(1.0, src->red + cs);
-		src->green = MIN(1.0, src->green + cs);
-		src->blue = MIN(1.0, src->blue + cs);
+		src->red = std::min(1.0, src->red + cs);
+		src->green = std::min(1.0, src->green + cs);
+		src->blue = std::min(1.0, src->blue + cs);
 		}
 }
 
@@ -467,7 +467,7 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 
 	if (sd->max_step < sd->region_size)
 		{
-		sd->max_step = MIN(sd->region_size, sd->max_step + 2);
+		sd->max_step = std::min(sd->region_size, sd->max_step + 2);
 		}
 
 	GdkWindow *window = gtk_widget_get_window(sd->widget);

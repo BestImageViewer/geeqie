@@ -157,7 +157,7 @@ static void image_sim_channel_norm(guint8 *pix, gint len)
 
 	l = h = pix[0];
 
-	for (i = 0; i < len; i++)
+	for (i = 1; i < len; i++)
 		{
 		l = std::min(pix[i], l);
 		h = std::max(pix[i], h);

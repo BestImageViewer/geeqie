@@ -177,8 +177,8 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 		}
 
 	GdkPoint c1{pi_day->x + pi_day->width - 8, pi_day->y + 8};
-	GdkPoint c2{pbox->x + 1, pbox->y + MIN(42, pbox->height)};
-	GdkPoint c3{pbox->x + 1, MAX(pbox->y, c2.y - 30)};
+	GdkPoint c2{pbox->x + 1, pbox->y + std::min(42, pbox->height)};
+	GdkPoint c3{pbox->x + 1, std::max(pbox->y, c2.y - 30)};
 
 	pi = pan_item_tri_new(pw,
 	                      c1, c2, c3,
@@ -380,7 +380,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 				{
 				PanItem *pi;
 
-				pi_day->color.r = MAX(pi_day->color.r - 61 - (n * 3), 80);
+				pi_day->color.r = std::max(pi_day->color.r - 61 - (n * 3), 80);
 				pi_day->color.g = pi_day->color.r;
 
 				buf = g_strdup_printf("( %d )", n);
@@ -431,7 +431,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 		}
 
 	width += grid;
-	height = MAX(height, grid + (PAN_BOX_BORDER * 2 * 2));
+	height = std::max(height, grid + (PAN_BOX_BORDER * 2 * 2));
 
 	g_list_free(list);
 }

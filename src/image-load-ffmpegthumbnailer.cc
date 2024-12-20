@@ -122,7 +122,7 @@ gboolean ImageLoaderFT::write(const guchar *, gsize &chunk_size, gsize count, GE
 #if HAVE_FFMPEGTHUMBNAILER_WH
 	video_thumbnailer_set_size(vt, requested_width, requested_height);
 #else
-	vt->thumbnail_size = MAX(requested_width, requested_height);
+	vt->thumbnail_size = std::max(requested_width, requested_height);
 #endif
 
 #if HAVE_FFMPEGTHUMBNAILER_METADATA

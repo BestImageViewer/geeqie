@@ -318,8 +318,8 @@ void color_man_correct_region(ColorMan *cm, GdkPixbuf *pixbuf, gint x, gint y, g
 	w = w * scale_factor();
 	h = h * scale_factor();
 
-	w = MIN(w, pixbuf_width - x);
-	h = MIN(h, pixbuf_height - y);
+	w = std::min(w, pixbuf_width - x);
+	h = std::min(h, pixbuf_height - y);
 
 	pix += x * ((cc->has_alpha) ? 4 : 3);
 	for (i = 0; i < h; i++)
@@ -453,7 +453,7 @@ static cmsToneCurve* colorspaces_create_transfer(int32_t size, double (*fct)(dou
 	for(int32_t i = 0; i < size; ++i)
 		{
 		const double x = static_cast<float>(i) / (size - 1);
-		const double y = MIN(fct(x), 1.0F);
+		const double y = std::min(fct(x), 1.0);
 		values.push_back(static_cast<float>(y));
 		}
 
@@ -469,7 +469,7 @@ static double HLG_fct(double x)
 	static const double B     = 0.28466892; // 1.0 - 4.0 * A
 	static const double C     = 0.5599107295; // 0,5 –aln(4a)
 
-	double e = MAX((x * (1.0 - Beta)) + Beta, 0.0);
+	double e = std::max((x * (1.0 - Beta)) + Beta, 0.0);
 
 	if(e == 0.0) return 0.0;
 
@@ -503,7 +503,7 @@ static double PQ_fct(double x)
 	x = fabs(x);
 
 	const double xpo = pow(x, 1.0 / M2);
-	const double num = MAX(xpo - C1, 0.0);
+	const double num = std::max(xpo - C1, 0.0);
 	const double den = C2 - (C3 * xpo);
 	const double res = pow(num / den, 1.0 / M1);
 

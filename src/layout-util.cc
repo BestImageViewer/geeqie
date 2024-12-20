@@ -1307,15 +1307,12 @@ static void layout_menu_slideshow_pause_cb(GtkAction *, gpointer data)
 
 static void layout_menu_slideshow_slower_cb(GtkAction *, gpointer)
 {
-	options->slideshow.delay = options->slideshow.delay + 5;
-	if (options->slideshow.delay > SLIDESHOW_MAX_SECONDS)
-		options->slideshow.delay = SLIDESHOW_MAX_SECONDS;
+	options->slideshow.delay = std::min<gdouble>(options->slideshow.delay + 5, SLIDESHOW_MAX_SECONDS);
 }
 
 static void layout_menu_slideshow_faster_cb(GtkAction *, gpointer)
 {
-	options->slideshow.delay = options->slideshow.delay - 5;
-	options->slideshow.delay = std::max<double>(options->slideshow.delay, SLIDESHOW_MIN_SECONDS * 10);
+	options->slideshow.delay = std::max<gdouble>(options->slideshow.delay - 5, SLIDESHOW_MIN_SECONDS * 10);
 }
 
 

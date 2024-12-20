@@ -1169,8 +1169,7 @@ static void collection_table_move_focus(CollectTable *ct, gint row, gint col, gb
 		new_col = ct->focus_column;
 
 		new_row += row;
-		new_row = std::max(new_row, 0);
-		if (new_row >= ct->rows) new_row = ct->rows - 1;
+		new_row = CLAMP(new_row, 0, ct->rows - 1);
 
 		while (col != 0)
 			{

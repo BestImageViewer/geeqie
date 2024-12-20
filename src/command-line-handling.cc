@@ -215,7 +215,7 @@ void gq_action_list(GtkApplication *, GApplicationCommandLine *app_command_line,
 	for (const ActionItem &action_item : list)
 		{
 		const auto length = g_utf8_strlen(action_item.name, -1);
-		max_length = MAX(length, max_length);
+		max_length = std::max<gint>(length, max_length);
 		}
 
 	/* Pad the action names to the same column for readable output */

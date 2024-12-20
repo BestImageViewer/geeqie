@@ -21,6 +21,7 @@
 
 #include "renderer-tiles.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -356,8 +357,8 @@ void rt_tile_free_space(RendererTiles *rt, guint space, ImageTile *it)
 		gint tiles;
 
 		tiles = (pr->vis_width / rt->tile_width + 1) * (pr->vis_height / rt->tile_height + 1);
-		tile_max = MAX(tiles * rt->tile_width * rt->tile_height * 3,
-			       (gint)((gdouble)rt->tile_cache_max * 1048576.0 * pr->scale));
+		tile_max = std::max<gint>(tiles * rt->tile_width * rt->tile_height * 3,
+		                          rt->tile_cache_max * 1048576.0 * pr->scale);
 		}
 	else
 		{
@@ -392,8 +393,8 @@ void rt_tile_invalidate_all(RendererTiles *rt)
 		it->render_todo = TILE_RENDER_ALL;
 		it->blank = FALSE;
 
-		it->w = MIN(rt->tile_width, pr->width - it->x);
-		it->h = MIN(rt->tile_height, pr->height - it->y);
+		it->w = std::min(rt->tile_width, pr->width - it->x);
+		it->h = std::min(rt->tile_height, pr->height - it->y);
 		}
 }
 
@@ -594,8 +595,8 @@ void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it
 				for (gint sx = r.x; sx < r.x + r.width; sx += rt->tile_width)
 				    for (gint sy = r.y; sy < r.y + r.height; sy += rt->tile_height)
 					{
-					gint sw = MIN(r.x + r.width - sx, rt->tile_width);
-					gint sh = MIN(r.y + r.height - sy, rt->tile_height);
+					gint sw = std::min(r.x + r.width - sx, rt->tile_width);
+					gint sh = std::min(r.y + r.height - sy, rt->tile_height);
 
 					draw({sx, sy, sw, sh}, [](cairo_t *cr){ cairo_set_source_rgb(cr, 0, 0, 0); });
 					}
@@ -2001,13 +2002,13 @@ void renderer_redraw(RendererTiles *rt, gint x, gint y, gint w, gint h,
 
 	rt_border_draw(rt, {x, y, w, h});
 
-	x = MAX(0, x - pr->x_offset + pr->x_scroll);
-	y = MAX(0, y - pr->y_offset + pr->y_scroll);
+	x = std::max(0, x - pr->x_offset + pr->x_scroll);
+	y = std::max(0, y - pr->y_offset + pr->y_scroll);
 
 	rt_queue(rt,
 		 x, y,
-		 MIN(w, pr->width - x),
-		 MIN(h, pr->height - y),
+		 std::min(w, pr->width - x),
+		 std::min(h, pr->height - y),
 		 clamp, render, new_data, only_existing);
 }
 

@@ -868,7 +868,7 @@ static gboolean image_loader_continue(ImageLoader *il)
 			return G_SOURCE_REMOVE;
 			}
 
-		gsize b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
+		gsize b = std::min(il->read_buffer_size, il->bytes_total - il->bytes_read);
 
 		if (!il->backend->write(il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
 			{
@@ -895,7 +895,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 
 	if (il->bytes_total <= il->bytes_read) return FALSE;
 
-	gsize b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
+	gsize b = std::min(il->read_buffer_size, il->bytes_total - il->bytes_read);
 
 	image_loader_setup_loader(il);
 
@@ -919,7 +919,7 @@ static gboolean image_loader_begin(ImageLoader *il)
 			return FALSE;
 			}
 
-		b = MIN(il->read_buffer_size, il->bytes_total - il->bytes_read);
+		b = std::min(il->read_buffer_size, il->bytes_total - il->bytes_read);
 		if (b > 0 && !il->backend->write(il->mapped_file + il->bytes_read, b, il->bytes_total, &il->error))
 			{
 			image_loader_stop_loader(il);

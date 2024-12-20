@@ -134,7 +134,7 @@ static void pan_flower_position(FlowerGroup *group, FlowerGroup *parent,
 	gdouble a;
 
 	radius = parent->circumference / (2*G_PI);
-	radius = MAX(radius, (parent->diameter / 2) + (group->diameter / 2));
+	radius = std::max(radius, (parent->diameter / 2) + (group->diameter / 2));
 
 	a = 2*G_PI * group->diameter / parent->circumference;
 
@@ -372,7 +372,7 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 
 	pan_filter_fd_list(&f, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 
-	x = PAN_BOX_BORDER + (level * MAX(PAN_BOX_BORDER, PAN_THUMB_GAP));
+	x = PAN_BOX_BORDER + (level * std::max(PAN_BOX_BORDER, PAN_THUMB_GAP));
 
 	pi_box = pan_item_text_new(pw, x, y, dir_fd->path, PAN_TEXT_ATTR_NONE,
 	                           PAN_BORDER_3,

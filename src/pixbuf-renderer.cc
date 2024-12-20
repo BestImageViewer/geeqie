@@ -760,15 +760,13 @@ static gboolean pr_scroller_update_cb(gpointer data)
 
 		if (x >= 0)
 			{
-			xinc = std::max(xinc, 0);
-			xinc = std::min(x, xinc);
-			if (x > xinc) xinc = MIN(xinc + (x / PR_SCROLLER_UPDATES_PER_SEC), x);
+			xinc = CLAMP(xinc, 0, x);
+			if (x > xinc) xinc = std::min(xinc + (x / PR_SCROLLER_UPDATES_PER_SEC), x);
 			}
 		else
 			{
-			xinc = std::min(xinc, 0);
-			xinc = std::max(x, xinc);
-			if (x < xinc) xinc = MAX(xinc + (x / PR_SCROLLER_UPDATES_PER_SEC), x);
+			xinc = CLAMP(xinc, x, 0);
+			if (x < xinc) xinc = std::max(xinc + (x / PR_SCROLLER_UPDATES_PER_SEC), x);
 			}
 		}
 
@@ -782,15 +780,13 @@ static gboolean pr_scroller_update_cb(gpointer data)
 
 		if (y >= 0)
 			{
-			yinc = std::max(yinc, 0);
-			yinc = std::min(y, yinc);
-			if (y > yinc) yinc = MIN(yinc + (y / PR_SCROLLER_UPDATES_PER_SEC), y);
+			yinc = CLAMP(yinc, 0, y);
+			if (y > yinc) yinc = std::min(yinc + (y / PR_SCROLLER_UPDATES_PER_SEC), y);
 			}
 		else
 			{
-			yinc = std::min(yinc, 0);
-			yinc = std::max(y, yinc);
-			if (y < yinc) yinc = MAX(yinc + (y / PR_SCROLLER_UPDATES_PER_SEC), y);
+			yinc = CLAMP(yinc, y, 0);
+			if (y < yinc) yinc = std::max(yinc + (y / PR_SCROLLER_UPDATES_PER_SEC), y);
 			}
 		}
 
@@ -1131,10 +1127,8 @@ void pixbuf_renderer_set_tiles(PixbufRenderer *pr, gint width, gint height,
 
 	pr_source_tile_unset(pr);
 
-	cache_size = std::max(cache_size, 4);
-
 	pr->source_tiles_enabled = TRUE;
-	pr->source_tiles_cache_size = cache_size;
+	pr->source_tiles_cache_size = std::max(cache_size, 4);
 	pr->source_tile_width = tile_width;
 	pr->source_tile_height = tile_height;
 
@@ -2353,8 +2347,7 @@ static void pr_create_anaglyph_dubois(GdkPixbuf *pixbuf, GdkPixbuf *right, gint 
 				{
 				const double *m = pr_dubois_matrix[k];
 				res[k] = sp[0] * m[0] + sp[1] * m[1] + sp[2] * m[2] + dp[0] * m[3] + dp[1] * m[4] + dp[2] * m[5];
-				if (res[k] < 0.0) res[k] = 0;
-				res[k] = std::min(res[k], 255.0);
+				res[k] = CLAMP(res[k], 0.0, 255.0);
 				}
 			dp[0] = res[0];
 			dp[1] = res[1];

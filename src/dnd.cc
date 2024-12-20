@@ -87,7 +87,6 @@ static void pixbuf_draw_border(GdkPixbuf *pixbuf, gint w, gint h)
  */
 void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pixbuf, gint items)
 {
-	GdkPixbuf *dest;
 	gint w;
 	gint h;
 	gint sw;
@@ -117,8 +116,11 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 		h = sh * DND_ICON_SIZE / sw;
 		}
 
-	dest = gdk_pixbuf_scale_simple(pixbuf, MAX(1, w), MAX(1, h), GDK_INTERP_BILINEAR);
-	pixbuf_draw_border(dest, MAX(1, w), MAX(1, h));
+	const gint dest_width = std::max(1, w);
+	const gint dest_height = std::max(1, h);
+
+	g_autoptr(GdkPixbuf) dest = gdk_pixbuf_scale_simple(pixbuf, dest_width, dest_height, GDK_INTERP_BILINEAR);
+	pixbuf_draw_border(dest, dest_width, dest_height);
 
 	if (items > 1)
 		{
@@ -133,8 +135,8 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 
 		pango_layout_get_pixel_size(layout, &lw, &lh);
 
-		x = MAX(0, w - lw);
-		y = MAX(0, h - lh);
+		x = std::max(0, w - lw);
+		y = std::max(0, h - lh);
 		lw = CLAMP(lw, 0, w - x - 1);
 		lh = CLAMP(lh, 0, h - y - 1);
 
@@ -150,8 +152,6 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 		}
 
 	gtk_drag_set_icon_pixbuf(context, dest, -8, -6);
-
-	g_object_unref(dest);
 }
 
 static void dnd_set_drag_label_end_cb(GtkWidget *widget, GdkDragContext *, gpointer data)

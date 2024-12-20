@@ -808,8 +808,8 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 	row = std::max(row, 1);
 
 	/* limit minimum size of grid so that a tile will always fit regardless of position */
-	cw = MAX((gint)ceil((gdouble)width / col), PAN_TILE_SIZE * 2);
-	ch = MAX((gint)ceil((gdouble)height / row), PAN_TILE_SIZE * 2);
+	cw = std::max<gint>(ceil(static_cast<gdouble>(width) / col), PAN_TILE_SIZE * 2);
+	ch = std::max<gint>(ceil(static_cast<gdouble>(height) / row), PAN_TILE_SIZE * 2);
 
 	row = row * 2 - 1;
 	col = col * 2 - 1;
@@ -1524,8 +1524,8 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 					break;
 				}
 
-			iw = MAX(1, iw * scale / 100);
-			ih = MAX(1, ih * scale / 100);
+			iw = std::max(1, iw * scale / 100);
+			ih = std::max(1, ih * scale / 100);
 
 			pbox = pan_item_box_new(pw, nullptr, pbox->x, pbox->y + pbox->height + 8, 10, 10,
 						PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
@@ -1714,7 +1714,7 @@ static void pan_window_image_scroll_notify_cb(PixbufRenderer *pr, gpointer data)
 	gtk_adjustment_set_page_increment(adj, gtk_adjustment_get_page_size(adj) / 2.0);
 	gtk_adjustment_set_step_increment(adj, 48.0 / pr->scale);
 	gtk_adjustment_set_lower(adj, 0.0);
-	gtk_adjustment_set_upper(adj, MAX((gdouble)width, 1.0));
+	gtk_adjustment_set_upper(adj, std::max<gdouble>(width, 1.0));
 	gtk_adjustment_set_value(adj, static_cast<gdouble>(rect.x));
 
 	pref_signal_block_data(pw->scrollbar_h, pw);
@@ -1725,7 +1725,7 @@ static void pan_window_image_scroll_notify_cb(PixbufRenderer *pr, gpointer data)
 	gtk_adjustment_set_page_increment(adj, gtk_adjustment_get_page_size(adj) / 2.0);
 	gtk_adjustment_set_step_increment(adj, 48.0 / pr->scale);
 	gtk_adjustment_set_lower(adj, 0.0);
-	gtk_adjustment_set_upper(adj, MAX((gdouble)height, 1.0));
+	gtk_adjustment_set_upper(adj, std::max<gdouble>(height, 1.0));
 	gtk_adjustment_set_value(adj, static_cast<gdouble>(rect.y));
 
 	pref_signal_block_data(pw->scrollbar_v, pw);
