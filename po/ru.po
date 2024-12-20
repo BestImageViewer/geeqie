@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: geeqie-1.6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-09-21 15:50+0100\n"
-"PO-Revision-Date: 2024-12-19 09:55+0300\n"
+"PO-Revision-Date: 2024-12-20 17:03+0300\n"
 "Last-Translator: Alevtina <karashokovaaa@basealt.ru>\n"
 "Language-Team: Basealt Translation Team\n"
 "Language: ru\n"
@@ -129,7 +129,8 @@ msgstr "Дата и время Exif в файл"
 
 #: plugins/exif-datetime-to-file/org.geeqie.exif-datetime-to-file.desktop.in:6
 msgid "Sets file mtime to the Exif.Image.DateTimeOriginal of the file"
-msgstr "Устанавливает mtime в Exif.Image.DateTimeOriginal файла"
+msgstr ""
+"Устанавливает Exif.Image.DateTimeOriginal файла для параметра mtime файла"
 
 #: plugins/export-jpeg/org.geeqie.export-jpeg.desktop.in:5
 msgid "Export jpeg"
@@ -3342,7 +3343,7 @@ msgstr "_Скопировать изображение в буфер обмен�
 
 #: src/layout-util.cc:2689
 msgid "Copy image to clipboard"
-msgstr "Скопировать изображение в буфер обмена"
+msgstr "Copy image to clipboard"
 
 #: src/layout-util.cc:2690
 msgid "Copy to clipboard"
@@ -3354,7 +3355,7 @@ msgstr "Скопировать в буфер обмена (раскавычен�
 
 #: src/layout-util.cc:2692
 msgid "Crop Rectangle"
-msgstr "Обрезать прямоугольник"
+msgstr "Прямоугольник для кадрирования"
 
 #: src/layout-util.cc:2693 src/view-dir.cc:814 src/view-file/view-file.cc:857
 msgid "_Cut to clipboard"
@@ -4584,7 +4585,7 @@ msgstr "  -n, --new-instance              открыть новый экземп
 
 #: src/main.cc:501
 msgid "  -o, --log-file=<file>            save log data to file\n"
-msgstr "  -o, --log-file:<file>     сохранить данные журнала в файл\n"
+msgstr "  -o, --log-file=<file>            сохранить данные журнала в файл\n"
 
 #: src/main.cc:502
 msgid ""
@@ -8780,8 +8781,8 @@ msgstr "Предупреждение: не удалось выполнить к�
 
 #~ msgid ""
 #~ "<i>%name%</i> results in the filename of the picture.\n"
-#~ "Also available: <i>%collection%</i>, <i>%number%</i>, <i>%total%</i>, "
-#~ "<i>%date%</i>,\n"
+#~ "Also available: <i>%collection%</i>, <i>%number%</i>, <i>%total%</i>, <i>"
+#~ "%date%</i>,\n"
 #~ "<i>%size%</i> (filesize), <i>%width%</i>, <i>%height%</i>, <i>%res%</i> "
 #~ "(resolution)\n"
 #~ "To access exif data use the exif name, e. g. <i>%formatted.Camera%</i> is "
@@ -8791,9 +8792,9 @@ msgstr "Предупреждение: не удалось выполнить к�
 #~ "20 characters and will add 3 dots at the end to denote the truncation.\n"
 #~ "If two or more variables are connected with the |-sign, it prints "
 #~ "available variables with a separator.\n"
-#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|"
-#~ "<i>%formatted.FocalLength%</i> could show \"1/20s - 400 - 80 mm\" or "
-#~ "\"1/200 - 80 mm\",\n"
+#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|<i>"
+#~ "%formatted.FocalLength%</i> could show \"1/20s - 400 - 80 mm\" or \"1/200 "
+#~ "- 80 mm\",\n"
 #~ "if there's no ISO information in the Exif data.\n"
 #~ "If a line is empty, it is removed. This allows one to add lines that "
 #~ "totally disappear when no data is available.\n"
@@ -8803,15 +8804,15 @@ msgstr "Предупреждение: не удалось выполнить к�
 #~ "<i>%total%</i> (всего), <i>%date%</i> (дата),\n"
 #~ "<i>%size%</i> (размер файла), <i>%width%</i> (ширина), <i>%height%</i> "
 #~ "(высота), <i>%res%</i> (разрешение)\n"
-#~ "Для доступа к данным exif, используйте имена exif, например. "
-#~ "<i>%formatted.Camera%</i> соответствует отформатированному имени камеры,\n"
+#~ "Для доступа к данным exif, используйте имена exif, например. <i>"
+#~ "%formatted.Camera%</i> соответствует отформатированному имени камеры,\n"
 #~ "<i>%Exif.Photo.DateTimeOriginal%</i> - дата исходного снимка.\n"
 #~ "Нотация <i>%formatted.Camera:20</i> ограничит отображаемые данные 20 "
 #~ "символами и добавит многоточие в случае обрезки.\n"
 #~ "Если две или более переменные объединены знаком |, то будут напечатаны "
 #~ "доступные переменные (c разделителями).\n"
-#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|"
-#~ "<i>%formatted.FocalLength%</i> может показать \"1/20s - 400 - 80 mm\" or "
+#~ "<i>%formatted.ShutterSpeed%</i>|<i>%formatted.ISOSpeedRating%</i>|<i>"
+#~ "%formatted.FocalLength%</i> может показать \"1/20s - 400 - 80 mm\" or "
 #~ "\"1/200 - 80 mm\",\n"
 #~ "если в данных Exif отсутствует информация ISO.\n"
 #~ "Пустые строки удаляются. Это позволяет добавлять строки, которые "
@@ -9636,5 +9637,4 @@ msgstr "Предупреждение: не удалось выполнить к�
 
 #~ msgid "New folder - Geeqie"
 #~ msgstr "Новый каталог - Geeqie"
-
 
