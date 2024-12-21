@@ -507,8 +507,6 @@ static void pan_window_message(PanWindow *pw, const gchar *text)
 	GList *work;
 	gint count = 0;
 	gint64 size = 0;
-	gchar *ss;
-	gchar *buf;
 
 	if (text)
 		{
@@ -553,21 +551,17 @@ static void pan_window_message(PanWindow *pw, const gchar *text)
 			}
 		}
 
-	ss = text_from_size_abrev(size);
-	buf = g_strdup_printf(_("%d images, %s"), count, ss);
-	g_free(ss);
+	g_autofree gchar *ss = text_from_size_abrev(size);
+	g_autofree gchar *buf = g_strdup_printf(_("%d images, %s"), count, ss);
 	gtk_label_set_text(GTK_LABEL(pw->label_message), buf);
-	g_free(buf);
 }
 
 static void pan_warning_folder(const gchar *path, GtkWidget *parent)
 {
-	gchar *message;
+	g_autofree gchar *message = g_strdup_printf(_("The pan view does not support the folder \"%s\"."), path);
 
-	message = g_strdup_printf(_("The pan view does not support the folder \"%s\"."), path);
 	warning_dialog(_("Folder not supported"), message,
-		      GQ_ICON_DIALOG_INFO, parent);
-	g_free(message);
+	               GQ_ICON_DIALOG_INFO, parent);
 }
 
 static void pan_window_zoom_limit(PanWindow *pw)
@@ -1098,12 +1092,9 @@ static gint pan_layout_update_idle_cb(gpointer data)
 				}
 			else if (pw->cache_tick > 9)
 				{
-				gchar *buf;
-
-				buf = g_strdup_printf("%s %d / %d", _("Reading image data..."),
-						      pw->cache_count, pw->cache_total);
+				g_autofree gchar *buf = g_strdup_printf("%s %d / %d", _("Reading image data..."),
+				                                        pw->cache_count, pw->cache_total);
 				pan_window_message(pw, buf);
-				g_free(buf);
 
 				pw->cache_tick = 0;
 				}
@@ -1401,7 +1392,6 @@ static gboolean pan_window_key_press_cb(GtkWidget *widget, GdkEventKey *event, g
 static void pan_info_add_exif(PanTextAlignment &ta, FileData *fd)
 {
 	GList *exif_list;
-	gchar *text;
 	gchar *title;
 	gchar *key;
 
@@ -1415,13 +1405,11 @@ static void pan_info_add_exif(PanTextAlignment &ta, FileData *fd)
 		key = static_cast<gchar *>(exif_list->data);
 		exif_list = exif_list->next;
 
-		text = metadata_read_string(fd, key, METADATA_FORMATTED);
+		g_autofree gchar *text = metadata_read_string(fd, key, METADATA_FORMATTED);
 		if (text && text[0] != '\0')
 			{
 			ta.add(title, text);
 			}
-
-		g_free(text);
 		}
 
 	g_list_free_full(exif_list, g_free);
@@ -1433,15 +1421,13 @@ static void pan_info_calc_text_alignment(PanWindow *pw, PanItem *pbox, FileData 
 
 	ta.add(_("Filename:"), fd->name);
 
-	gchar *buf = remove_level_from_path(fd->path);
-	ta.add(_("Location:"), buf);
-	g_free(buf);
+	g_autofree gchar *location_buf = remove_level_from_path(fd->path);
+	ta.add(_("Location:"), location_buf);
 
 	ta.add(_("Date:"), text_from_time(fd->date));
 
-	buf = text_from_size(fd->size);
-	ta.add(_("Size:"), buf);
-	g_free(buf);
+	g_autofree gchar *size_buf = text_from_size(fd->size);
+	ta.add(_("Size:"), size_buf);
 
 	if (pw->info_includes_exif)
 		{
@@ -1689,11 +1675,9 @@ static void pan_fullscreen_toggle(PanWindow *pw, gboolean force_off)
 static void pan_window_image_zoom_cb(PixbufRenderer *, gdouble, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
-	gchar *text;
 
-	text = image_zoom_get_as_text(pw->imd);
+	g_autofree gchar *text = image_zoom_get_as_text(pw->imd);
 	gtk_label_set_text(GTK_LABEL(pw->label_zoom), text);
-	g_free(text);
 }
 
 static void pan_window_image_scroll_notify_cb(PixbufRenderer *pr, gpointer data)
@@ -1781,27 +1765,23 @@ static void pan_window_layout_size_cb(GtkWidget *combo, gpointer data)
 static void pan_window_entry_activate_cb(const gchar *new_text, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
-	gchar *path;
 
-	path = remove_trailing_slash(new_text);
+	g_autofree gchar *path = remove_trailing_slash(new_text);
 	parse_out_relatives(path);
 
 	if (!isdir(path))
 		{
 		warning_dialog(_("Folder not found"),
-			       _("The entered path is not a folder"),
-			       GQ_ICON_DIALOG_WARNING, pw->path_entry);
-		}
-	else
-		{
-		FileData *dir_fd = file_data_new_dir(path);
-		tab_completion_append_to_history(pw->path_entry, path);
-
-		pan_layout_set_fd(pw, dir_fd);
-		file_data_unref(dir_fd);
+		               _("The entered path is not a folder"),
+		               GQ_ICON_DIALOG_WARNING, pw->path_entry);
+		return;
 		}
 
-	g_free(path);
+	FileData *dir_fd = file_data_new_dir(path);
+	tab_completion_append_to_history(pw->path_entry, path);
+
+	pan_layout_set_fd(pw, dir_fd);
+	file_data_unref(dir_fd);
 }
 
 static void pan_window_close(PanWindow *pw)

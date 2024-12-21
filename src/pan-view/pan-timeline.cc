@@ -94,7 +94,6 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 			{
 			// FD starts a new day group.
 			GList *needle;
-			gchar *buf;
 
 			if (!pan_date_compare(fd->date, group_start_date, PAN_DATE_LENGTH_MONTH))
 				{
@@ -112,12 +111,11 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 
 				y = PAN_BOX_BORDER;
 
-				buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_MONTH);
-				pi = pan_item_text_new(pw, x, y, buf,
+				g_autofree gchar *month_buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_MONTH);
+				pi = pan_item_text_new(pw, x, y, month_buf,
 						       static_cast<PanTextAttrType>(PAN_TEXT_ATTR_BOLD | PAN_TEXT_ATTR_HEADING),
 						       PAN_BORDER_3,
 						       {PAN_TEXT_COLOR, 255});
-				g_free(buf);
 				y += pi->height;
 
 				pi_month = pan_item_box_new(pw, file_data_ref(fd),
@@ -154,11 +152,10 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 					}
 				}
 
-			buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_WEEK);
-			pi = pan_item_text_new(pw, x, y, buf, PAN_TEXT_ATTR_NONE,
+			g_autofree gchar *week_buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_WEEK);
+			pi = pan_item_text_new(pw, x, y, week_buf, PAN_TEXT_ATTR_NONE,
 					       PAN_BORDER_3,
 					       {PAN_TEXT_COLOR, 255});
-			g_free(buf);
 
 			y += pi->height;
 

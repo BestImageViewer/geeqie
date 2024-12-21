@@ -485,16 +485,14 @@ void pop_menu_collections(GList *selection_list, gpointer data)
 	CollectWindow *cw;
 	gchar *collection_name;
 	GList *collection_list = nullptr;
-	gchar *name;
 	const gint index = GPOINTER_TO_INT(data);
 
 	if (index >= 0)
 		{
 		collect_manager_list(&collection_list, nullptr, nullptr);
 		collection_name = static_cast<gchar *>(g_list_nth_data(collection_list, index));
-		name = collection_path(collection_name);
+		g_autofree gchar *name = collection_path(collection_name);
 		cw = collection_window_new(name);
-		g_free(name);
 		g_list_free_full(collection_list, g_free);
 		}
 	else

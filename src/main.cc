@@ -406,45 +406,32 @@ gboolean parse_command_line_for_cache_maintenance_option(gint argc, gchar *argv[
 void setup_env_path()
 {
 	const gchar *old_path = g_getenv("PATH");
-	gchar *path = g_strconcat(gq_bindir, ":", old_path, NULL);
-        g_setenv("PATH", path, TRUE);
-	g_free(path);
+	g_autofree gchar *path = g_strconcat(gq_bindir, ":", old_path, NULL);
+	g_setenv("PATH", path, TRUE);
 }
 
 void keys_load()
 {
-	gchar *path;
-
-	path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
+	g_autofree gchar *path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
 	history_list_load(path);
-	g_free(path);
 }
 
 void keys_save()
 {
-	gchar *path;
-
-	path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
+	g_autofree gchar *path = g_build_filename(get_rc_dir(), RC_HISTORY_NAME, NULL);
 	history_list_save(path);
-	g_free(path);
 }
 
 void marks_load()
 {
-	gchar *path;
-
-	path = g_build_filename(get_rc_dir(), RC_MARKS_NAME, NULL);
+	g_autofree gchar *path = g_build_filename(get_rc_dir(), RC_MARKS_NAME, NULL);
 	marks_list_load(path);
-	g_free(path);
 }
 
 void marks_save(gboolean save)
 {
-	gchar *path;
-
-	path = g_build_filename(get_rc_dir(), RC_MARKS_NAME, NULL);
+	g_autofree gchar *path = g_build_filename(get_rc_dir(), RC_MARKS_NAME, NULL);
 	marks_list_save(path, save);
-	g_free(path);
 }
 
 void mkdir_if_not_exists(const gchar *path)
@@ -472,22 +459,17 @@ void gq_accel_map_print(
 {
 	GString *gstring = g_string_new(changed ? nullptr : "; ");
 	auto ssi = static_cast<SecureSaveInfo *>(data);
-	gchar *tmp;
-	gchar *name;
 
 	g_string_append(gstring, "(gtk_accel_path \"");
 
-	tmp = g_strescape(accel_path, nullptr);
-	g_string_append(gstring, tmp);
-	g_free(tmp);
+	g_autofree gchar *accel_path_escaped = g_strescape(accel_path, nullptr);
+	g_string_append(gstring, accel_path_escaped);
 
 	g_string_append(gstring, "\" \"");
 
-	name = gtk_accelerator_name(accel_key, accel_mods);
-	tmp = g_strescape(name, nullptr);
-	g_free(name);
-	g_string_append(gstring, tmp);
-	g_free(tmp);
+	g_autofree gchar *name = gtk_accelerator_name(accel_key, accel_mods);
+	g_autofree gchar *name_escaped = g_strescape(name, nullptr);
+	g_string_append(gstring, name_escaped);
 
 	g_string_append(gstring, "\")\n");
 
@@ -498,13 +480,11 @@ void gq_accel_map_print(
 
 gboolean gq_accel_map_save(const gchar *path)
 {
-	gchar *pathl;
 	SecureSaveInfo *ssi;
 	GString *gstring;
 
-	pathl = path_from_utf8(path);
+	g_autofree gchar *pathl = path_from_utf8(path);
 	ssi = secure_open(pathl);
-	g_free(pathl);
 	if (!ssi)
 		{
 		log_printf(_("error saving file: %s\n"), path);
@@ -541,38 +521,25 @@ gchar *accep_map_filename()
 
 void accel_map_save()
 {
-	gchar *path;
-
-	path = accep_map_filename();
+	g_autofree gchar *path = accep_map_filename();
 	gq_accel_map_save(path);
-	g_free(path);
 }
 
 void accel_map_load()
 {
-	gchar *path;
-	gchar *pathl;
-
-	path = accep_map_filename();
-	pathl = path_from_utf8(path);
+	g_autofree gchar *path = accep_map_filename();
+	g_autofree gchar *pathl = path_from_utf8(path);
 	gtk_accel_map_load(pathl);
-	g_free(pathl);
-	g_free(path);
 }
 
 void gtkrc_load()
 {
-	gchar *path;
-	gchar *pathl;
-
 	/* If a gtkrc file exists in the rc directory, add it to the
 	 * list of files to be parsed at the end of gtk_init() */
-	path = g_build_filename(get_rc_dir(), "gtkrc", NULL);
-	pathl = path_from_utf8(path);
+	g_autofree gchar *path = g_build_filename(get_rc_dir(), "gtkrc", NULL);
+	g_autofree gchar *pathl = path_from_utf8(path);
 	if (access(pathl, R_OK) == 0)
 		gtk_rc_add_default_file(pathl);
-	g_free(pathl);
-	g_free(path);
 }
 
 void exit_program_final()
@@ -580,7 +547,6 @@ void exit_program_final()
 	LayoutWindow *lw = nullptr;
 	GList *list;
 	LayoutWindow *tmp_lw;
-	gchar *archive_dir;
 	GFile *archive_file;
 
 	 /* make sure that external editors are loaded, we would save incomplete configuration otherwise */
@@ -613,23 +579,21 @@ void exit_program_final()
 		}
 
 	/* Delete any files/folders in /tmp that have been created by the open archive function */
-	archive_dir = g_build_filename(g_get_tmp_dir(), GQ_ARCHIVE_DIR, instance_identifier, NULL);
-	if (isdir(archive_dir))
+	g_autofree gchar *instance_archive_dir = g_build_filename(g_get_tmp_dir(), GQ_ARCHIVE_DIR, instance_identifier, NULL);
+	if (isdir(instance_archive_dir))
 		{
-		archive_file = g_file_new_for_path(archive_dir);
+		archive_file = g_file_new_for_path(instance_archive_dir);
 		rmdir_recursive(archive_file, nullptr, nullptr);
-		g_free(archive_dir);
 		g_object_unref(archive_file);
 		}
 
 	/* If there are still sub-dirs created by another instance, this will fail
 	 * but that does not matter */
-	archive_dir = g_build_filename(g_get_tmp_dir(), GQ_ARCHIVE_DIR, NULL);
+	g_autofree gchar *archive_dir = g_build_filename(g_get_tmp_dir(), GQ_ARCHIVE_DIR, NULL);
 	if (isdir(archive_dir))
 		{
 		archive_file = g_file_new_for_path(archive_dir);
 		g_file_delete(archive_file, nullptr, nullptr);
-		g_free(archive_dir);
 		g_object_unref(archive_file);
 		}
 
@@ -658,7 +622,6 @@ gint exit_confirm_dlg()
 {
 	GtkWidget *parent;
 	LayoutWindow *lw;
-	gchar *msg;
 	GString *message;
 
 	if (exit_dialog)
@@ -676,12 +639,9 @@ gint exit_confirm_dlg()
 		parent = lw->window;
 		}
 
-	msg = g_strdup_printf("%s - %s", GQ_APPNAME, _("exit"));
-	exit_dialog = generic_dialog_new(msg,
-				"exit", parent, FALSE,
-				exit_confirm_cancel_cb, nullptr);
-	g_free(msg);
-	msg = g_strdup_printf(_("Quit %s"), GQ_APPNAME);
+	g_autofree gchar *exit_msg = g_strdup_printf("%s - %s", GQ_APPNAME, _("exit"));
+	exit_dialog = generic_dialog_new(exit_msg, "exit", parent, FALSE,
+	                                 exit_confirm_cancel_cb, nullptr);
 
 	message = g_string_new(nullptr);
 
@@ -697,8 +657,8 @@ gint exit_confirm_dlg()
 
 	message = g_string_append(message, _("Quit anyway?"));
 
-	generic_dialog_add_message(exit_dialog, GQ_ICON_DIALOG_QUESTION, msg, message->str, TRUE);
-	g_free(msg);
+	g_autofree gchar *quit_msg = g_strdup_printf(_("Quit %s"), GQ_APPNAME);
+	generic_dialog_add_message(exit_dialog, GQ_ICON_DIALOG_QUESTION, quit_msg, message->str, TRUE);
 	generic_dialog_add_button(exit_dialog, GQ_ICON_QUIT, _("Quit"), exit_confirm_exit_cb, TRUE);
 
 	gtk_widget_show(exit_dialog->dialog);
@@ -812,17 +772,15 @@ gboolean theme_change_cb(GObject *, GParamSpec *, gpointer)
  */
 void create_application_paths()
 {
-	gchar *dirname;
 	gint length;
-	gchar *path;
 
 	length = wai_getExecutablePath(nullptr, 0, nullptr);
-	path = static_cast<gchar *>(malloc(length + 1));
+	g_autofree auto *path = static_cast<gchar *>(malloc(length + 1));
 	wai_getExecutablePath(path, length, nullptr);
 	path[length] = '\0';
 
 	gq_executable_path = g_strdup(path);
-	dirname = g_path_get_dirname(gq_executable_path);
+	g_autofree gchar *dirname = g_path_get_dirname(gq_executable_path);
 	gq_prefix = g_path_get_dirname(dirname);
 
 	gq_localedir = g_build_filename(gq_prefix, GQ_LOCALEDIR, NULL);
@@ -831,9 +789,6 @@ void create_application_paths()
 	gq_appdir = g_build_filename(gq_prefix, GQ_APPDIR, NULL);
 	gq_bindir = g_build_filename(gq_prefix, GQ_BINDIR, NULL);
 	desktop_file_template = g_build_filename(gq_appdir, "org.geeqie.template.desktop", NULL);
-
-	g_free(dirname);
-	g_free(path);
 }
 
 gint command_line_cb(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer)
@@ -1071,7 +1026,6 @@ void exit_program()
 gint main(gint argc, gchar *argv[])
 {
 	gint status;
-	gchar *version_string;
 	GtkApplication *app;
 	// We handle unit tests here because it takes the place of running the
 	// rest of the app.
@@ -1116,12 +1070,11 @@ gint main(gint argc, gchar *argv[])
 _("\n\nUsage for cache maintenance:\n \
 GQ_CACHE_MAINTENANCE= geeqie OPTION"));
 
-		version_string = g_strconcat( \
+		g_autofree gchar *version_string = g_strconcat(
 _("Geeqie Cache Maintenance. \n \
 Version: Geeqie "), VERSION, nullptr);
 
 		g_application_set_option_context_summary (G_APPLICATION(app), version_string);
-		g_free(version_string);
 		g_application_set_option_context_description (G_APPLICATION(app),option_context_description_cache_maintenance);
 
 		g_signal_connect(app, "startup", G_CALLBACK(startup_cache_maintenance_cb), nullptr);
@@ -1154,13 +1107,11 @@ Version: Geeqie "), VERSION, nullptr);
 
 	g_application_set_option_context_parameter_string (G_APPLICATION(app), "[path...]");
 
-	version_string = g_strconcat( \
+	g_autofree gchar *version_string = g_strconcat(
 _("Geeqie is an image viewer.\n \
 Version: Geeqie "), VERSION, nullptr);
 
 	g_application_set_option_context_summary (G_APPLICATION(app), version_string);
-	g_free(version_string);
-
 	g_application_set_option_context_description (G_APPLICATION(app), option_context_description);
 
 	g_signal_connect(app, "activate", G_CALLBACK(activate_cb), nullptr);

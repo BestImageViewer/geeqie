@@ -189,9 +189,8 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 
 	// Create the button.
 	/** @todo (xsdg): Use MVC so that the button list is an actual representation of the GList */
-	gchar *label = g_strdup_printf("(%s) %s", short_mode, text);
+	g_autofree gchar *label = g_strdup_printf("(%s) %s", short_mode, text);
 	kw_button = gtk_button_new_with_label(label);
-	g_clear_pointer(&label, g_free);
 
 	gq_gtk_box_pack_start(GTK_BOX(ui->filter_kw_hbox), kw_button, FALSE, FALSE, 0);
 	gtk_widget_show(kw_button);

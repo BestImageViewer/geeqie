@@ -256,16 +256,13 @@ ConfOptions *init_options(ConfOptions *options)
 
 void setup_default_options(ConfOptions *options)
 {
-	gchar *path;
 	gint i;
 
-	path = get_current_dir();
-	bookmark_add_default(".", path);
-	g_free(path);
+	g_autofree gchar *current_path = get_current_dir();
+	bookmark_add_default(".", current_path);
 	bookmark_add_default(_("Home"), homedir());
-	path = g_build_filename(homedir(), "Desktop", NULL);
-	bookmark_add_default(_("Desktop"), path);
-	g_free(path);
+	g_autofree gchar *desktop_path = g_build_filename(homedir(), "Desktop", NULL);
+	bookmark_add_default(_("Desktop"), desktop_path);
 	bookmark_add_default(_("Collections"), get_collections_dir());
 
 	g_free(options->file_ops.safe_delete_path);
@@ -374,32 +371,26 @@ static void sync_options_with_current_state(ConfOptions *options)
 
 void save_options(ConfOptions *options)
 {
-	gchar *rc_path;
-
 	sync_options_with_current_state(options);
 
-	rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
+	g_autofree gchar *rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
 	save_config_to_file(rc_path, options, nullptr);
-	g_free(rc_path);
 }
 
 gboolean load_options(ConfOptions *)
 {
 	gboolean success;
-	gchar *rc_path;
 
 	if (isdir(GQ_SYSTEM_WIDE_DIR))
 		{
-		rc_path = g_build_filename(GQ_SYSTEM_WIDE_DIR, RC_FILE_NAME, NULL);
+		g_autofree gchar *rc_path = g_build_filename(GQ_SYSTEM_WIDE_DIR, RC_FILE_NAME, NULL);
 		success = load_config_from_file(rc_path, TRUE);
 		DEBUG_1("Loading options from %s ... %s", rc_path, success ? "done" : "failed");
-		g_free(rc_path);
 		}
 
-	rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
+	g_autofree gchar *rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, NULL);
 	success = load_config_from_file(rc_path, TRUE);
 	DEBUG_1("Loading options from %s ... %s", rc_path, success ? "done" : "failed");
-	g_free(rc_path);
-	return(success);
+	return success;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

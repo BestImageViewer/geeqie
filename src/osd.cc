@@ -257,8 +257,6 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)
 	guint pos;
 	guint prev;
 	gboolean want_separator = FALSE;
-	gchar *name;
-	gchar *data;
 	GString *osd_info;
 	gchar *ret;
 
@@ -273,7 +271,6 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)
 		guint limit = 0;
 		gchar *trunc = nullptr;
 		gchar *limpos = nullptr;
-		gchar *extra = nullptr;
 		gchar *extrapos = nullptr;
 		gchar *p;
 
@@ -308,12 +305,13 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)
 		if (limpos)
 			limit = static_cast<guint>(atoi(limpos));
 
-		if (extrapos)
-			extra = g_strndup(extrapos, end - extrapos);
+		g_autofree gchar *extra = extrapos ? g_strndup(extrapos, end - extrapos) : nullptr;
 
-		name = g_strndup(start+1, (trunc ? trunc : end)-start-1);
+		g_autofree gchar *name = g_strndup(start+1, (trunc ? trunc : end)-start-1);
+
 		pos = start - osd_info->str;
-		data = nullptr;
+
+		g_autofree gchar *data = nullptr;
 
 		if (strcmp(name, "keywords") == 0)
 			{
@@ -356,71 +354,63 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)
 
 		if (data && *data && limit > 0 && strlen(data) > limit + 3)
 			{
-			gchar *new_data = g_strdup_printf("%-*.*s...", limit, limit, data);
-			g_free(data);
-			data = new_data;
+			g_autofree gchar *new_data = g_strdup_printf("%-*.*s...", limit, limit, data);
+			std::swap(data, new_data);
 			}
 
 		if (data)
 			{
 			/* Since we use pango markup to display, we need to escape here */
-			gchar *escaped = g_markup_escape_text(data, -1);
-			g_free(data);
-			data = escaped;
+			g_autofree gchar *escaped = g_markup_escape_text(data, -1);
+			std::swap(data, escaped);
 			}
 
-		if (extra)
+		if (data && *data && extra)
 			{
-			if (data && *data)
-				{
-				/* Display data between left and right parts of extra string
-				 * the data is expressed by a '*' character. A '*' may be escaped
-				 * by a \. You should escape all '*' characters, do not rely on the
-				 * current implementation which only replaces the first unescaped '*'.
-				 * If no "*" is present, the extra string is just appended to data string.
-				 * Pango mark up is accepted in left and right parts.
-				 * Any \n is replaced by a newline
-				 * Examples:
-				 * "<i>*</i>\n" -> data is displayed in italics ended with a newline
-				 * "\n" 	-> ended with newline
-				 * 'ISO *'	-> prefix data with 'ISO ' (ie. 'ISO 100')
-				 * "\**\*"	-> prefix data with a star, and append a star (ie. "*100*")
-				 * "\\*"	-> prefix data with an anti slash (ie "\100")
-				 * 'Collection <b>*</b>\n' -> display data in bold prefixed by 'Collection ' and a newline is appended
-				 */
-				/** @FIXME using background / foreground colors lead to weird results.
-				 */
-				gchar *new_data;
-				gchar *left = nullptr;
-				gchar *right = extra;
-				gchar *p;
-				guint len = strlen(extra);
+			/* Display data between left and right parts of extra string
+			 * the data is expressed by a '*' character. A '*' may be escaped
+			 * by a \. You should escape all '*' characters, do not rely on the
+			 * current implementation which only replaces the first unescaped '*'.
+			 * If no "*" is present, the extra string is just appended to data string.
+			 * Pango mark up is accepted in left and right parts.
+			 * Any \n is replaced by a newline
+			 * Examples:
+			 * "<i>*</i>\n" -> data is displayed in italics ended with a newline
+			 * "\n" 	-> ended with newline
+			 * 'ISO *'	-> prefix data with 'ISO ' (ie. 'ISO 100')
+			 * "\**\*"	-> prefix data with a star, and append a star (ie. "*100*")
+			 * "\\*"	-> prefix data with an anti slash (ie "\100")
+			 * 'Collection <b>*</b>\n' -> display data in bold prefixed by 'Collection ' and a newline is appended
+			 */
+			/** @FIXME using background / foreground colors lead to weird results.
+			 */
+			gchar *left = nullptr;
+			gchar *right = extra;
+			gchar *p;
+			guint len = strlen(extra);
 
-				/* Search for left and right parts and unescape characters */
-				for (p = extra; *p; p++, len--)
-					if (p[0] == '\\')
+			/* Search for left and right parts and unescape characters */
+			for (p = extra; *p; p++, len--)
+				if (p[0] == '\\')
+					{
+					if (p[1] == 'n')
 						{
-						if (p[1] == 'n')
-							{
-							memmove(p+1, p+2, --len);
-							p[0] = '\n';
-							}
-						else if (p[1] != '\0')
-							memmove(p, p+1, len--); // includes \0
+						memmove(p+1, p+2, --len);
+						p[0] = '\n';
 						}
-					else if (p[0] == '*' && !left)
-						{
-						right = p + 1;
-						left = extra;
-						}
+					else if (p[1] != '\0')
+						memmove(p, p+1, len--); // includes \0
+					}
+				else if (p[0] == '*' && !left)
+					{
+					right = p + 1;
+					left = extra;
+					}
 
-				if (left) right[-1] = '\0';
+			if (left) right[-1] = '\0';
 
-				new_data = g_strdup_printf("%s%s%s", left ? left : "", data, right);
-				g_free(data);
-				data = new_data;
-				}
-			g_free(extra);
+			g_autofree gchar *new_data = g_strdup_printf("%s%s%s", left ? left : "", data, right);
+			std::swap(data, new_data);
 			}
 
 		g_string_erase(osd_info, pos, end-start+1);
@@ -449,9 +439,6 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)
 		if (osd_info->str[pos] == '\n') want_separator = FALSE;
 
 		prev = pos - 1;
-
-		g_free(name);
-		g_free(data);
 		}
 
 	/* search and destroy empty lines */

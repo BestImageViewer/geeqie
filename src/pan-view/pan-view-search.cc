@@ -102,7 +102,6 @@ static gint pan_search_by_path(PanWindow *pw, const gchar *path)
 	GList *list;
 	GList *found;
 	PanItemType type;
-	gchar *buf;
 
 	type = (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE) ? PAN_ITEM_IMAGE : PAN_ITEM_THUMB;
 
@@ -123,12 +122,11 @@ static gint pan_search_by_path(PanWindow *pw, const gchar *path)
 	pan_info_update(pw, pi);
 	image_scroll_to_point(pw->imd, pi->x + (pi->width / 2), pi->y + (pi->height / 2), 0.5, 0.5);
 
-	buf = g_strdup_printf("%s ( %d / %u )",
-	                      (path[0] == G_DIR_SEPARATOR) ? _("path found") : _("filename found"),
-	                      g_list_index(list, pi) + 1,
-	                      g_list_length(list));
+	g_autofree gchar *buf = g_strdup_printf("%s ( %d / %u )",
+	                                        (path[0] == G_DIR_SEPARATOR) ? _("path found") : _("filename found"),
+	                                        g_list_index(list, pi) + 1,
+	                                        g_list_length(list));
 	pan_search_status(pw, buf);
-	g_free(buf);
 
 	g_list_free(list);
 
@@ -141,7 +139,6 @@ static gboolean pan_search_by_partial(PanWindow *pw, const gchar *text)
 	GList *list;
 	GList *found;
 	PanItemType type;
-	gchar *buf;
 
 	type = (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE) ? PAN_ITEM_IMAGE : PAN_ITEM_THUMB;
 
@@ -149,11 +146,8 @@ static gboolean pan_search_by_partial(PanWindow *pw, const gchar *text)
 	if (!list) list = pan_item_find_by_path(pw, type, text, FALSE, TRUE);
 	if (!list)
 		{
-		gchar *needle;
-
-		needle = g_utf8_strdown(text, -1);
+		g_autofree gchar *needle = g_utf8_strdown(text, -1);
 		list = pan_item_find_by_path(pw, type, needle, TRUE, TRUE);
-		g_free(needle);
 		}
 	if (!list) return FALSE;
 
@@ -171,12 +165,11 @@ static gboolean pan_search_by_partial(PanWindow *pw, const gchar *text)
 	pan_info_update(pw, pi);
 	image_scroll_to_point(pw->imd, pi->x + (pi->width / 2), pi->y + (pi->height / 2), 0.5, 0.5);
 
-	buf = g_strdup_printf("%s ( %d / %u )",
-	                      _("partial match"),
-	                      g_list_index(list, pi) + 1,
-	                      g_list_length(list));
+	g_autofree gchar *buf = g_strdup_printf("%s ( %d / %u )",
+	                                        _("partial match"),
+	                                        g_list_index(list, pi) + 1,
+	                                        g_list_length(list));
 	pan_search_status(pw, buf);
-	g_free(buf);
 
 	g_list_free(list);
 
@@ -236,9 +229,6 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 	gchar *mptr;
 	struct tm *lt;
 	time_t t;
-	gchar *message;
-	gchar *buf;
-	gchar *buf_count;
 
 	if (!text) return FALSE;
 
@@ -358,15 +348,14 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 				      pi->y, 0.0, 0.5);
 		}
 
+	g_autofree gchar *buf = nullptr;
 	if (month > 0)
 		{
 		buf = pan_date_value_string(t, PAN_DATE_LENGTH_MONTH);
 		if (day > 0)
 			{
-			gchar *tmp;
-			tmp = buf;
-			buf = g_strdup_printf("%d %s", day, tmp);
-			g_free(tmp);
+			g_autofree gchar *tmp = g_strdup_printf("%d %s", day, buf);
+			std::swap(buf, tmp);
 			}
 		}
 	else
@@ -374,6 +363,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 		buf = pan_date_value_string(t, PAN_DATE_LENGTH_YEAR);
 		}
 
+	g_autofree gchar *buf_count = nullptr;
 	if (pi)
 		{
 		buf_count = g_strdup_printf("( %d / %u )",
@@ -385,11 +375,8 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 		buf_count = g_strdup_printf("(%s)", _("no match"));
 		}
 
-	message = g_strdup_printf("%s %s %s", _("Date:"), buf, buf_count);
-	g_free(buf);
-	g_free(buf_count);
+	g_autofree gchar *message = g_strdup_printf("%s %s %s", _("Date:"), buf, buf_count);
 	pan_search_status(pw, message);
-	g_free(message);
 
 	g_list_free(list);
 
@@ -420,11 +407,9 @@ void pan_search_activate_cb(const gchar *text, gpointer data)
 
 void pan_search_activate(PanWindow *pw)
 {
-	gchar *text;
+	const gchar *text = gq_gtk_entry_get_text(GTK_ENTRY(pw->search_ui->search_entry));
 
-	text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(pw->search_ui->search_entry)));
 	pan_search_activate_cb(text, pw);
-	g_free(text);
 }
 
 void pan_search_toggle_cb(GtkWidget *button, gpointer data)

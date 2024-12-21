@@ -75,13 +75,10 @@ void pan_item_free(PanItem *pi)
 
 void pan_item_set_key(PanItem *pi, const gchar *key)
 {
-	gchar *tmp;
-
 	if (!pi) return;
 
-	tmp = pi->key;
+	g_free(pi->key);
 	pi->key = g_strdup(key);
-	g_free(tmp);
 }
 
 void pan_item_added(PanWindow *pw, PanItem *pi)
@@ -667,11 +664,8 @@ static GList *pan_item_find_by_path_l(GList *list, GList *search_list,
 					{
 					if (ignore_case)
 						{
-						gchar *haystack;
-
-						haystack = g_utf8_strdown(pi->fd->name, -1);
+						g_autofree gchar *haystack = g_utf8_strdown(pi->fd->name, -1);
 						match = (strstr(haystack, path) != nullptr);
-						g_free(haystack);
 						}
 					else
 						{
