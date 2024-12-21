@@ -29,6 +29,7 @@
 
 #include "filedata.h"
 #include "main-defines.h"
+#include "misc.h"
 #include "ui-fileops.h"
 
 
@@ -166,53 +167,24 @@ time_t pan_date_to_time(gint year, gint month, gint day)
 
 gboolean pan_is_link_loop(const gchar *s)
 {
-	gchar *sl;
-	struct stat st;
-	gboolean ret = FALSE;
+	g_autofree gchar *buf = get_symbolic_link(s);
+	if (!buf || *buf == '\0') return FALSE;
 
-	sl = path_from_utf8(s);
+	g_autofree gchar *sl = path_from_utf8(s);
+	parse_out_relatives(sl);
 
-	if (lstat(sl, &st) == 0 && S_ISLNK(st.st_mode))
+	parse_out_relatives(buf);
+	const gint l = strlen(buf); // @todo Calculate after correction below?
+
+	if (buf[0] != G_DIR_SEPARATOR)
 		{
-		gchar *buf;
-		gint l;
-
-		buf = static_cast<gchar *>(g_malloc(st.st_size + 1));
-		l = readlink(sl, buf, st.st_size);
-		if (l == st.st_size)
-			{
-			buf[l] = '\0';
-
-			parse_out_relatives(buf);
-			l = strlen(buf);
-
-			parse_out_relatives(sl);
-
-			if (buf[0] == G_DIR_SEPARATOR)
-				{
-				if (strncmp(sl, buf, l) == 0 &&
-				    (sl[l] == '\0' || sl[l] == G_DIR_SEPARATOR || l == 1)) ret = TRUE;
-				}
-			else
-				{
-				gchar *link_path;
-
-				link_path = g_build_filename(sl, buf, NULL);
-				parse_out_relatives(link_path);
-
-				if (strncmp(sl, link_path, l) == 0 &&
-				    (sl[l] == '\0' || sl[l] == G_DIR_SEPARATOR || l == 1)) ret = TRUE;
-
-				g_free(link_path);
-				}
-			}
-
-		g_free(buf);
+		g_autofree gchar *link_path = g_build_filename(sl, buf, NULL);
+		parse_out_relatives(link_path);
+		std::swap(buf, link_path);
 		}
 
-	g_free(sl);
-
-	return ret;
+	return strncmp(sl, buf, l) == 0 &&
+	       (sl[l] == '\0' || sl[l] == G_DIR_SEPARATOR || l == 1);
 }
 
 gboolean pan_is_ignored(const gchar *s, gboolean ignore_symlinks)

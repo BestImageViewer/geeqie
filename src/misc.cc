@@ -435,21 +435,14 @@ gchar *get_symbolic_link(const gchar *path_utf8)
 
 	if (lstat(sl, &st) == 0 && S_ISLNK(st.st_mode))
 		{
-		gchar *buf;
-		gint l;
+		g_autofree auto *buf = static_cast<gchar *>(g_malloc(st.st_size + 1));
 
-		buf = static_cast<gchar *>(g_malloc(st.st_size + 1));
-		l = readlink(sl, buf, st.st_size);
-
+		const gint l = readlink(sl, buf, st.st_size);
 		if (l == st.st_size)
 			{
 			buf[l] = '\0';
 
-			ret = buf;
-			}
-		else
-			{
-			g_free(buf);
+			std::swap(ret, buf);
 			}
 		}
 
