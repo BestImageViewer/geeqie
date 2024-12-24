@@ -532,14 +532,19 @@ void accel_map_load()
 	gtk_accel_map_load(pathl);
 }
 
-void gtkrc_load()
+void gq_gtk_css_load()
 {
-	/* If a gtkrc file exists in the rc directory, add it to the
-	 * list of files to be parsed at the end of gtk_init() */
-	g_autofree gchar *path = g_build_filename(get_rc_dir(), "gtkrc", NULL);
+	/* Load gtk.css file from the rc directory */
+	g_autofree gchar *path = g_build_filename(get_rc_dir(), "gtk.css", nullptr);
 	g_autofree gchar *pathl = path_from_utf8(path);
-	if (access(pathl, R_OK) == 0)
-		gtk_rc_add_default_file(pathl);
+	if (access(pathl, R_OK) != 0) return;
+
+	g_autoptr(GtkCssProvider) css_provider = gtk_css_provider_new();
+	if (!gtk_css_provider_load_from_path(css_provider, pathl, nullptr)) return;
+
+	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+	                                          GTK_STYLE_PROVIDER(css_provider),
+	                                          GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
 }
 
 void exit_program_final()
@@ -860,7 +865,7 @@ void startup_common(GtkApplication *, gpointer)
 	file_data_register_notify_func(collect_manager_notify_cb, nullptr, NOTIFY_PRIORITY_LOW);
 	file_data_register_notify_func(metadata_notify_cb, nullptr, NOTIFY_PRIORITY_LOW);
 
-	gtkrc_load();
+	gq_gtk_css_load();
 
 	if (gtk_major_version < GTK_MAJOR_VERSION ||
 	        (gtk_major_version == GTK_MAJOR_VERSION && gtk_minor_version < GTK_MINOR_VERSION) )
