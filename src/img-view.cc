@@ -643,7 +643,6 @@ static void button_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	GtkWidget *menu;
-	gchar *dest_dir;
 	LayoutWindow *lw_new;
 
 	switch (event->button)
@@ -651,12 +650,11 @@ static void button_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
 		case MOUSE_BUTTON_LEFT:
 			if (options->image_l_click_archive && imd->image_fd->format_class == FORMAT_CLASS_ARCHIVE)
 				{
-				dest_dir = open_archive(imd->image_fd);
+				g_autofree gchar *dest_dir = open_archive(imd->image_fd);
 				if (dest_dir)
 					{
 					lw_new = layout_new_from_default();
 					layout_set_path(lw_new, dest_dir);
-					g_free(dest_dir);
 					}
 				else
 					{

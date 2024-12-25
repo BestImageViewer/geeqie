@@ -222,7 +222,6 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 	gint height;
 	PangoLayout *layout;
 	const gchar *name;
-	gchar *text;
 	gboolean with_hist;
 	const HistMap *histmap = nullptr;
 	ImageWindow *imd = osd->imd;
@@ -231,6 +230,7 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 
 	if (!fd) return nullptr;
 
+	g_autofree gchar *text = nullptr;
 	name = image_get_name(imd);
 	if (name)
 		{
@@ -360,7 +360,6 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 	{
 		gint active_marks = 0;
 		gint mark;
-		gchar *text2;
 
 		for (mark = 0; mark < FILEDATA_MARKS_SIZE; mark++)
 			{
@@ -387,23 +386,21 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 
 		if (with_hist)
 			{
-			gchar *escaped_histogram_label = g_markup_escape_text(histogram_label(osd->histogram), -1);
+			g_autofree gchar *escaped_histogram_label = g_markup_escape_text(histogram_label(osd->histogram), -1);
+			g_autofree gchar *text2 = nullptr;
 			if (*text)
 				text2 = g_strdup_printf("%s\n%s", text, escaped_histogram_label);
 			else
-				text2 = g_strdup(escaped_histogram_label);
-			g_free(escaped_histogram_label);
-			g_free(text);
-			text = text2;
+				text2 = g_steal_pointer(&escaped_histogram_label);
+			std::swap(text, text2);
 			}
 	}
 
 	font_desc = pango_font_description_from_string(options->image_overlay.font);
 	layout = gtk_widget_create_pango_layout(imd->pr, nullptr);
-	pango_layout_set_font_description(layout, font_desc);
 
+	pango_layout_set_font_description(layout, font_desc);
 	pango_layout_set_markup(layout, text, -1);
-	g_free(text);
 
 	pango_layout_get_pixel_size(layout, &width, &height);
 	/* with empty text width is set to 0, but not height) */

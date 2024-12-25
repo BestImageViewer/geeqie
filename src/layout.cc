@@ -281,25 +281,21 @@ GString *layout_get_window_list()
 static void layout_path_entry_changed_cb(GtkWidget *widget, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gchar *buf;
 
 	if (gtk_combo_box_get_active(GTK_COMBO_BOX(widget)) < 0) return;
 
-	buf = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(lw->path_entry)));
+	const gchar *buf = gq_gtk_entry_get_text(GTK_ENTRY(lw->path_entry));
 	if (!lw->dir_fd || strcmp(buf, lw->dir_fd->path) != 0)
 		{
 		layout_set_path(lw, buf);
 		}
-
-	g_free(buf);
 }
 
 static void layout_path_entry_tab_cb(const gchar *path, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gchar *buf;
 
-	buf = g_strdup(path);
+	g_autofree gchar *buf = g_strdup(path);
 	parse_out_relatives(buf);
 
 	if (isdir(buf))
@@ -316,33 +312,25 @@ static void layout_path_entry_tab_cb(const gchar *path, gpointer data)
 		}
 	else if (lw->dir_fd)
 		{
-		gchar *base = remove_level_from_path(buf);
+		g_autofree gchar *base = remove_level_from_path(buf);
 
 		if (strcmp(lw->dir_fd->path, base) == 0)
 			{
 			layout_list_scroll_to_subpart(lw, filename_from_path(buf));
 			}
-		g_free(base);
 		}
-
-	g_free(buf);
 }
 
 static void layout_path_entry_cb(const gchar *path, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gchar *buf;
 
-	buf = g_strdup(path);
+	if (download_web_file(path, FALSE, lw)) return;
 
-	if (!download_web_file(buf, FALSE, lw))
-		{
-		parse_out_relatives(buf);
+	g_autofree gchar *buf = g_strdup(path);
+	parse_out_relatives(buf);
 
-		layout_set_path(lw, buf);
-		}
-
-	g_free(buf);
+	layout_set_path(lw, buf);
 }
 
 static void layout_vd_select_cb(ViewDir *, FileData *fd, gpointer data)
@@ -367,14 +355,12 @@ static gboolean path_entry_tooltip_cb(GtkWidget *widget, gpointer)
 {
 	GList *box_child_list;
 	GtkComboBox *path_entry;
-	gchar *current_path;
 
 	box_child_list = gtk_container_get_children(GTK_CONTAINER(widget));
 	path_entry = static_cast<GtkComboBox *>(box_child_list->data);
-	current_path = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(path_entry));
+	g_autofree gchar *current_path = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(path_entry));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(widget), current_path);
 
-	g_free(current_path);
 	g_list_free(box_child_list);
 
 	return FALSE;
@@ -694,11 +680,10 @@ void layout_status_update_progress(LayoutWindow *lw, gdouble val, const gchar *t
 
 void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 {
-	gchar *buf = nullptr;
+	g_autofree gchar *buf = nullptr;
 	gint hrs;
 	gint min;
 	gdouble sec;
-	GString *delay;
 
 	if (!layout_valid(&lw)) return;
 
@@ -713,10 +698,11 @@ void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 			{
 			guint s;
 			gint64 s_bytes = 0;
-			gchar *ss;
+			g_autofree gchar *ss = nullptr;
 
 			if (layout_image_slideshow_active(lw))
 				{
+				GString *delay;
 
 				if (!layout_image_slideshow_paused(lw))
 					{
@@ -763,8 +749,6 @@ void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 				buf = g_strdup_printf(_("%s, %d files%s"), b, n, ss);
 				}
 
-			g_free(ss);
-
 			text = buf;
 
 			image_osd_update(lw->image);
@@ -776,7 +760,6 @@ void layout_status_update_info(LayoutWindow *lw, const gchar *text)
 		}
 
 	if (lw->info_status) gtk_label_set_text(GTK_LABEL(lw->info_status), text);
-	g_free(buf);
 }
 
 void layout_status_update_image(LayoutWindow *lw)
@@ -795,25 +778,22 @@ void layout_status_update_image(LayoutWindow *lw)
 		}
 	else
 		{
-		gchar *text;
-		gchar *b;
+		g_autofree gchar *zoom_text = image_zoom_get_as_text(lw->image);
+		gtk_button_set_label(GTK_BUTTON(lw->info_zoom), zoom_text);
 
-		text = image_zoom_get_as_text(lw->image);
-		gtk_button_set_label(GTK_BUTTON(lw->info_zoom), text);
-		g_free(text);
+		g_autofree gchar *b = image_get_fd(lw->image) ? text_from_size(image_get_fd(lw->image)->size) : g_strdup("0");
 
-		b = image_get_fd(lw->image) ? text_from_size(image_get_fd(lw->image)->size) : g_strdup("0");
-
+		g_autofree gchar *details_text = nullptr;
 		if (lw->image->unknown)
 			{
 			const gchar *filename = image_get_path(lw->image);
 			if (filename && !access_file(filename, R_OK))
 				{
-				text = g_strdup_printf(_("(no read permission) %s bytes"), b);
+				details_text = g_strdup_printf(_("(no read permission) %s bytes"), b);
 				}
 			else
 				{
-				text = g_strdup_printf(_("( ? x ? ) %s bytes"), b);
+				details_text = g_strdup_printf(_("( ? x ? ) %s bytes"), b);
 				}
 			}
 		else
@@ -827,20 +807,17 @@ void layout_status_update_image(LayoutWindow *lw)
 
 			if (page_total > 1)
 				{
-				text = g_strdup_printf(_("( %d x %d ) %s bytes %s%d%s%d%s"), width, height, b, "[", page_num, "/", page_total, "]");
+				details_text = g_strdup_printf(_("( %d x %d ) %s bytes [%d/%d]"), width, height, b, page_num, page_total);
 				}
 			else
 				{
-				text = g_strdup_printf(_("( %d x %d ) %s bytes"), width, height, b);
+				details_text = g_strdup_printf(_("( %d x %d ) %s bytes"), width, height, b);
 				}
 			}
 
 		g_signal_emit_by_name (lw->image->pr, "update-pixel");
 
-		g_free(b);
-
-		gtk_label_set_text(GTK_LABEL(lw->info_details), text);
-		g_free(text);
+		gtk_label_set_text(GTK_LABEL(lw->info_details), details_text);
 		}
 	layout_util_sync_color(lw); /* update color button */
 }
@@ -1213,7 +1190,6 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 {
 	gboolean have_file = FALSE;
 	gboolean dir_changed = TRUE;
-	gchar *last_image;
 
 	if (!layout_valid(&lw)) return FALSE;
 
@@ -1233,11 +1209,10 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 		lw->dir_fd = file_data_ref(fd);
 		file_data_register_real_time_monitor(fd);
 
-		last_image = get_recent_viewed_folder_image(fd->path);
+		g_autofree gchar *last_image = get_recent_viewed_folder_image(fd->path);
 		if (last_image)
 			{
 			fd = file_data_new_group(last_image);
-			g_free(last_image);
 
 			if (isfile(fd->path)) have_file = TRUE;
 			}
@@ -1245,12 +1220,10 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 		}
 	else
 		{
-		gchar *base;
+		g_autofree gchar *base = remove_level_from_path(fd->path);
 
-		base = remove_level_from_path(fd->path);
 		if (lw->dir_fd && strcmp(lw->dir_fd->path, base) == 0)
 			{
-			g_free(base);
 			dir_changed = FALSE;
 			}
 		else if (isdir(base))
@@ -1262,13 +1235,12 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 				}
 			lw->dir_fd = file_data_new_dir(base);
 			file_data_register_real_time_monitor(lw->dir_fd);
-			g_free(base);
 			}
 		else
 			{
-			g_free(base);
 			return FALSE;
 			}
+
 		if (isfile(fd->path)) have_file = TRUE;
 		}
 
@@ -2494,18 +2466,12 @@ void layout_apply_options(LayoutWindow *lw, LayoutOptions *lop)
 
 void save_layout(LayoutWindow *lw)
 {
-	gchar *path;
-	gchar *xml_name;
+	if (g_str_has_prefix(lw->options.id, "lw")) return;
 
-	if (!g_str_has_prefix(lw->options.id, "lw"))
-		{
-		xml_name = g_strdup_printf("%s.xml", lw->options.id);
-		path = g_build_filename(get_window_layouts_dir(), xml_name, NULL);
-		save_config_to_file(path, options, lw);
+	g_autofree gchar *xml_name = g_strdup_printf("%s.xml", lw->options.id);
+	g_autofree gchar *path = g_build_filename(get_window_layouts_dir(), xml_name, NULL);
 
-		g_free(xml_name);
-		g_free(path);
-		}
+	save_config_to_file(path, options, lw);
 }
 
 void layout_close(LayoutWindow *lw)
@@ -2601,7 +2567,6 @@ LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
 	GdkGeometry hint;
 	GdkWindowHints hint_mask;
 	Histogram *histogram;
-	gchar *default_path;
 
 	DEBUG_1("%s layout_new: start", get_exec_time());
 	lw = g_new0(LayoutWindow, 1);
@@ -2621,7 +2586,7 @@ LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
 	if (lw->options.file_view_type > FILEVIEW_LAST) lw->options.file_view_type = FILEVIEW_LIST;
 	/* divider positions */
 
-	default_path = g_build_filename(get_rc_dir(), DEFAULT_WINDOW_LAYOUT, NULL);
+	g_autofree gchar *default_path = g_build_filename(get_rc_dir(), DEFAULT_WINDOW_LAYOUT, NULL);
 
 	if (!options->save_window_positions)
 		{
@@ -2669,7 +2634,6 @@ LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
 		gtk_window_set_default_size(GTK_WINDOW(lw->window), MAINWINDOW_DEF_WIDTH, MAINWINDOW_DEF_HEIGHT);
 		}
 
-	g_free(default_path);
 	g_signal_connect(G_OBJECT(lw->window), "delete_event",
 			 G_CALLBACK(layout_delete_cb), lw);
 
@@ -2859,7 +2823,7 @@ void layout_write_config(LayoutWindow *lw, GString *outstr, gint indent)
 
 void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *id = nullptr;
+	g_autofree gchar *id = nullptr;
 
 	while (*attribute_names)
 		{
@@ -2951,14 +2915,10 @@ void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names
 
 		log_printf("unknown attribute %s = %s\n", option, value);
 		}
+
 	if (id && strcmp(id, LAYOUT_ID_CURRENT) != 0)
 		{
-		g_free(layout->id);
-		layout->id = id;
-		}
-	else
-		{
-		g_free(id);
+		std::swap(layout->id, id);
 		}
 }
 
@@ -2981,7 +2941,6 @@ static void layout_config_startup_path(LayoutOptions *lop, gchar **path)
 
 static void layout_config_commandline(LayoutOptions *lop, gchar **path)
 {
-	gchar *last_image;
 
 	if (command_line->startup_blank)
 		{
@@ -2999,11 +2958,10 @@ static void layout_config_commandline(LayoutOptions *lop, gchar **path)
 
 	if (isdir(*path))
 		{
-		last_image = get_recent_viewed_folder_image(*path);
+		g_autofree gchar *last_image = get_recent_viewed_folder_image(*path);
 		if (last_image)
 			{
-			g_free(*path);
-			*path = last_image;
+			std::swap(*path, last_image);
 			}
 		}
 
@@ -3024,7 +2982,7 @@ LayoutWindow *layout_new_from_config(const gchar **attribute_names, const gchar 
 {
 	LayoutOptions lop;
 	LayoutWindow *lw;
-	gchar *path = nullptr;
+	g_autofree gchar *path = nullptr;
 
 	init_layout_options(&lop);
 
@@ -3053,7 +3011,6 @@ LayoutWindow *layout_new_from_config(const gchar **attribute_names, const gchar 
 	if (use_commandline && command_line->startup_in_slideshow) layout_image_slideshow_start(lw);
 	if (use_commandline && command_line->log_window_show) log_window_new(lw);
 
-	g_free(path);
 	free_layout_options_content(&lop);
 	return lw;
 }
@@ -3075,14 +3032,9 @@ LayoutWindow *layout_new_from_default()
 {
 	LayoutWindow *lw;
 	GList *work;
-	gboolean success;
-	gchar *default_path;
 
-	default_path = g_build_filename(get_rc_dir(), DEFAULT_WINDOW_LAYOUT, NULL);
-	success = load_config_from_file(default_path, TRUE);
-	g_free(default_path);
-
-	if (success)
+	g_autofree gchar *default_path = g_build_filename(get_rc_dir(), DEFAULT_WINDOW_LAYOUT, NULL);
+	if (load_config_from_file(default_path, TRUE))
 		{
 		work = g_list_last(layout_window_list);
 		lw = static_cast<LayoutWindow *>(work->data);
@@ -3092,9 +3044,8 @@ LayoutWindow *layout_new_from_default()
 		lw = layout_new_from_config(nullptr, nullptr, TRUE);
 		}
 
-	gchar *id_tmp = g_strdup(layout_get_unique_id());
-	g_free(lw->options.id);
-	lw->options.id = id_tmp;
+	g_autofree gchar *id_tmp = layout_get_unique_id();
+	std::swap(lw->options.id, id_tmp);
 
 	return lw;
 }

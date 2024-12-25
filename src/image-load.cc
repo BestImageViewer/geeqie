@@ -545,15 +545,12 @@ static void image_loader_area_prepared_cb(gpointer, gpointer data)
 	   https://bugzilla.gnome.org/show_bug.cgi?id=547669
 	   https://bugzilla.gnome.org/show_bug.cgi?id=589334
 	*/
-	gchar *format = il->backend->get_format_name();
+	g_autofree gchar *format = il->backend->get_format_name();
 	if (strcmp(format, "svg") == 0 ||
 	    strcmp(format, "xpm") == 0)
 		{
-		g_free(format);
 		return;
 		}
-
-	g_free(format);
 
 	pb = il->backend->get_pixbuf();
 
@@ -562,7 +559,6 @@ static void image_loader_area_prepared_cb(gpointer, gpointer data)
 	pix = gdk_pixbuf_get_pixels(pb);
 
 	memset(pix, 0, rs * h); /*this should be faster than pixbuf_fill */
-
 }
 
 static void image_loader_size_cb(gpointer,
@@ -641,16 +637,10 @@ static void image_loader_setup_loader(ImageLoader *il)
 
 	if (options->external_preview.enable)
 		{
-		gchar *cmd_line;
-		gchar *tilde_filename;
-
-		tilde_filename = expand_tilde(options->external_preview.select);
-
-		cmd_line = g_strdup_printf("\"%s\" \"%s\"" , tilde_filename, il->fd->path);
+		g_autofree gchar *tilde_filename = expand_tilde(options->external_preview.select);
+		g_autofree gchar *cmd_line = g_strdup_printf("\"%s\" \"%s\"", tilde_filename, il->fd->path);
 
 		external_preview = runcmd(cmd_line);
-		g_free(cmd_line);
-		g_free(tilde_filename);
 		}
 
 	if (external_preview == 0)

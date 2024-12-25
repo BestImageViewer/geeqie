@@ -86,8 +86,6 @@ static void hide_cb(GtkWidget *, LogWindow *)
 */
 static gboolean key_pressed(GtkWidget *, GdkEventKey *event, LogWindow *logwin)
 {
-	gchar *cmd_line;
-	gchar *sel_text;
 	GtkTextBuffer *buffer;
 	GtkTextIter chr_end;
 	GtkTextIter chr_marker;
@@ -121,14 +119,11 @@ static gboolean key_pressed(GtkWidget *, GdkEventKey *event, LogWindow *logwin)
 
 			if (gtk_text_buffer_get_selection_bounds(gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text)), &chr_start, &chr_end))
 				{
-				sel_text = gtk_text_buffer_get_text( gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text)), &chr_start, &chr_end, FALSE);
+				g_autofree gchar *sel_text = gtk_text_buffer_get_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text)), &chr_start, &chr_end, FALSE);
 
-				cmd_line = g_strconcat(options->log_window.action, " \"", sel_text, "\"", NULL);
+				g_autofree gchar *cmd_line = g_strdup_printf("%s \"%s\"", options->log_window.action, sel_text);
 
 				runcmd(cmd_line);
-
-				g_free(sel_text);
-				g_free(cmd_line);
 				}
 			}
 		}
@@ -165,11 +160,8 @@ static void log_window_timer_data_cb(GtkWidget *, gpointer)
 
 static void log_window_regexp_cb(GtkWidget *text_entry, gpointer)
 {
-	gchar *new_regexp;
-
-	new_regexp = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(text_entry)));
+	const gchar *new_regexp = gq_gtk_entry_get_text(GTK_ENTRY(text_entry));
 	set_regexp(new_regexp);
-	g_free(new_regexp);
 }
 
 static void remove_green_bg(LogWindow *logwin)
@@ -562,7 +554,6 @@ static void log_window_show(LogWindow *logwin)
 	GtkTextView *text = GTK_TEXT_VIEW(logwin->text);
 	GtkTextBuffer *buffer;
 	GtkTextMark *mark;
-	gchar *regexp;
 
 	buffer = gtk_text_view_get_buffer(text);
 	mark = gtk_text_buffer_get_mark(buffer, "end");
@@ -572,11 +563,10 @@ static void log_window_show(LogWindow *logwin)
 
 	log_window_append("", LOG_NORMAL); // to flush memorized lines
 
-	regexp = g_strdup(get_regexp());
+	g_autofree gchar *regexp = get_regexp();
 	if (regexp != nullptr)
 		{
 		gq_gtk_entry_set_text(GTK_ENTRY(logwin->regexp_box), regexp);
-		g_free(regexp);
 		}
 }
 
@@ -607,13 +597,10 @@ struct LogMsg {
 static void log_window_insert_text(GtkTextBuffer *buffer, GtkTextIter *iter,
 				   const gchar *text, GtkTextTag *tag)
 {
-	gchar *str_utf8;
-
 	if (!text || !*text) return;
 
-	str_utf8 = utf8_validate_or_convert(text);
+	g_autofree gchar *str_utf8 = utf8_validate_or_convert(text);
 	gtk_text_buffer_insert_with_tags(buffer, iter, str_utf8, -1, tag, NULL);
-	g_free(str_utf8);
 }
 
 void log_window_append(const gchar *str, LogType type)

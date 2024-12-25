@@ -466,9 +466,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 	ColorManProfileType screen_type;
 	const gchar *input_file = nullptr;
 	const gchar *screen_file = nullptr;
-	guchar *profile = nullptr;
 	guint profile_len;
-	guchar *screen_profile = nullptr;
 	gint screen_profile_len;
 	ExifData *exif;
 
@@ -495,6 +493,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 		return FALSE;
 		}
 
+	g_autofree guchar *screen_profile = nullptr;
 	if (options->color_profile.use_x11_screen_profile &&
 	    image_get_x11_screen_profile(imd, &screen_profile, &screen_profile_len))
 		{
@@ -516,8 +515,9 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 
 	imd->color_profile_from_image = COLOR_PROFILE_NONE;
 
-	exif = exif_read_fd(imd->image_fd);
+	g_autofree guchar *profile = nullptr;
 
+	exif = exif_read_fd(imd->image_fd);
 	if (exif)
 		{
 		if (g_strcmp0(imd->image_fd->format_name, "heif") == 0)
@@ -542,7 +542,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 			}
 		else
 			{
-			gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
+			g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
 
 			if (interop_index)
 				{
@@ -557,7 +557,6 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 					imd->color_profile_from_image = COLOR_PROFILE_ADOBERGB;
 					DEBUG_1("Found EXIF 2.21 ColorSpace of AdobeRGB");
 					}
-				g_free(interop_index);
 				}
 			else
 				{
@@ -579,10 +578,10 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 				}
 
 			if (imd->color_profile_use_image && imd->color_profile_from_image != COLOR_PROFILE_NONE)
-                               {
-                               input_type = static_cast<ColorManProfileType>(imd->color_profile_from_image);
-                               input_file = nullptr;
-                               }
+				{
+				input_type = static_cast<ColorManProfileType>(imd->color_profile_from_image);
+				input_file = nullptr;
+				}
 			}
 
 		exif_free_fd(imd->image_fd, exif);
@@ -594,7 +593,6 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 		cm = color_man_new_embedded(run_in_bg ? imd : nullptr, nullptr,
 					    profile, profile_len,
 					    screen_type, screen_file, screen_profile, screen_profile_len);
-		g_free(profile);
 		}
 	else
 		{
@@ -615,12 +613,6 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 		}
 
 	image_update_util(imd);
-
-	if (screen_profile)
-		{
-		g_free(screen_profile);
-		screen_profile = nullptr;
-		}
 
 	return !!cm;
 }

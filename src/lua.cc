@@ -396,7 +396,7 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 
 	gchar *data = g_strdup(lua_tostring(L, -1));
 	GError *error = nullptr;
-	gchar *tmp = g_locale_to_utf8(data, strlen(data), nullptr, nullptr, &error);
+	g_autofree gchar *tmp = g_locale_to_utf8(data, strlen(data), nullptr, nullptr, &error);
 	if (error)
 		{
 		log_printf("Error converting lua output from locale to UTF-8: %s\n", error->message);
@@ -405,8 +405,7 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 	else
 		{
 		std::swap(data, tmp);
-		} // if (error) { ... } else
-	g_free(tmp);
+		}
 	return data;
 }
 

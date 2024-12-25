@@ -63,19 +63,15 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 	#define LINE_LENGTH 1000
 
 	gboolean ret = FALSE;
-	gchar *randname;
-	gchar *cmd_line;
 	FILE *fp = nullptr;
 	gint line_count = 0;
 	GString *file_names = g_string_new(nullptr);
 	gchar line[LINE_LENGTH];
-	gchar *pathl;
 
 	if (runcmd("which montage >/dev/null 2>&1") == 0)
 		{
-		pathl = path_from_utf8(il->fd->path);
+		g_autofree gchar *pathl = path_from_utf8(il->fd->path);
 		fp = fopen(pathl, "r");
-		g_free(pathl);
 		if (fp)
 			{
 			while(fgets(line, LINE_LENGTH, fp) && line_count < options->thumbnails.collection_preview)
@@ -95,10 +91,11 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 
 			if (file_names->len > 0)
 				{
-				randname = g_strdup("/tmp/geeqie_collection_XXXXXX.png");
+				g_autofree gchar *randname = g_strdup("/tmp/geeqie_collection_XXXXXX.png");
 				g_mkstemp(randname);
 
-				cmd_line = g_strdup_printf("montage %s -geometry %dx%d+1+1 %s >/dev/null 2>&1", file_names->str, options->thumbnails.max_width, options->thumbnails.max_height, randname);
+				g_autofree gchar *cmd_line = g_strdup_printf("montage %s -geometry %dx%d+1+1 %s >/dev/null 2>&1",
+				                                             file_names->str, options->thumbnails.max_width, options->thumbnails.max_height, randname);
 
 				runcmd(cmd_line);
 				pixbuf = gdk_pixbuf_new_from_file(randname, nullptr);
@@ -108,8 +105,6 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 					}
 
 				unlink(randname);
-				g_free(randname);
-				g_free(cmd_line);
 
 				ret = TRUE;
 				}

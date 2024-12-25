@@ -54,16 +54,13 @@ private:
 gboolean ImageLoaderExternal::write(const guchar *, gsize &chunk_size, gsize count, GError **)
 {
 	auto il = static_cast<ImageLoader *>(data);
-	gchar *cmd_line;
-	gchar *randname;
-	gchar *tilde_filename;
 
-	tilde_filename = expand_tilde(options->external_preview.extract);
+	g_autofree gchar *tilde_filename = expand_tilde(options->external_preview.extract);
 
-	randname = g_strdup("/tmp/geeqie_external_preview_XXXXXX");
+	g_autofree gchar *randname = g_strdup("/tmp/geeqie_external_preview_XXXXXX");
 	g_mkstemp(randname);
 
-	cmd_line = g_strdup_printf("\"%s\" \"%s\" \"%s\"" , tilde_filename, il->fd->path, randname);
+	g_autofree gchar *cmd_line = g_strdup_printf("\"%s\" \"%s\" \"%s\"", tilde_filename, il->fd->path, randname);
 
 	runcmd(cmd_line);
 
@@ -71,10 +68,7 @@ gboolean ImageLoaderExternal::write(const guchar *, gsize &chunk_size, gsize cou
 
 	area_updated_cb(nullptr, 0, 0, gdk_pixbuf_get_width(pixbuf), gdk_pixbuf_get_height(pixbuf), data);
 
-	g_free(cmd_line);
 	unlink_file(randname);
-	g_free(randname);
-	g_free(tilde_filename);
 
 	chunk_size = count;
 	return TRUE;
