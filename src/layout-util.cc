@@ -1459,7 +1459,6 @@ static void layout_menu_foreach_func(
 static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 {
 	gint fd = -1;
-	GPtrArray *array;
 	char * tmp_file;
 	GError *error = nullptr;
 	GIOChannel *channel;
@@ -1468,7 +1467,6 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 	const char *key_name;
 	char *converted_line;
 	int keymap_index;
-	guint index;
 
 	fd = g_file_open_tmp("geeqie_keymap_XXXXXX.svg", &tmp_file, &error);
 	if (error)
@@ -1478,7 +1476,7 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 		}
 	else
 		{
-		array = g_ptr_array_new();
+		GPtrArray *array = g_ptr_array_new_with_free_func(g_free);
 
 		gtk_accel_map_foreach(array, layout_menu_foreach_func);
 
@@ -1492,9 +1490,8 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 				pre_key = g_strsplit(keymap_template[keymap_index],">key:",2);
 				post_key = g_strsplit(pre_key[1],"<",2);
 
-				index=0;
 				key_name = " ";
-				for (index=0; index < array->len-2; index=index+2)
+				for (guint index = 0; index < array->len-1; index += 2)
 					{
 					if (!(g_ascii_strcasecmp(static_cast<const gchar *>(g_ptr_array_index(array,index+1)), post_key[0])))
 						{
@@ -1534,12 +1531,6 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 		if (error) {log_printf("Warning: Keyboard Map:%s\n",error->message); g_error_free(error);}
 		g_io_channel_unref(channel);
 
-		index=0;
-		for (index=0; index < array->len-2; index=index+2)
-			{
-			g_free(g_ptr_array_index(array,index));
-			g_free(g_ptr_array_index(array,index+1));
-			}
 		g_ptr_array_unref(array);
 
 		view_window_new(file_data_new_simple(tmp_file));
