@@ -93,6 +93,7 @@ gboolean ImageLoaderHEIF::write(const guchar *buf, gsize &chunk_size, gsize coun
 	if (error_code.code)
 		{
 		log_printf("warning: heif reader error: %s\n", error_code.message);
+		heif_image_handle_release(handle);
 		heif_context_free(ctx);
 		return FALSE;
 		}
@@ -102,6 +103,7 @@ gboolean ImageLoaderHEIF::write(const guchar *buf, gsize &chunk_size, gsize coun
 	if (error_code.code)
 		{
 		log_printf("warning: heif reader error: %s\n", error_code.message);
+		heif_image_handle_release(handle);
 		heif_context_free(ctx);
 		return FALSE;
 		}
