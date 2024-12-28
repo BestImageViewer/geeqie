@@ -1391,7 +1391,11 @@ static void layout_menu_changelog_cb(GtkAction *, gpointer data)
 	help_window_show("changelog");
 }
 
-static constexpr const char *keyboard_map_hardcoded[][2] = {
+static constexpr struct
+{
+	const gchar *menu_name;
+	const gchar *key_name;
+} keyboard_map_hardcoded[] = {
 	{"Scroll","Left"},
 	{"FastScroll", "&lt;Shift&gt;Left"},
 	{"Left Border", "&lt;Primary&gt;Left"},
@@ -1464,8 +1468,6 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 	GIOChannel *channel;
 	char **pre_key;
 	char **post_key;
-	const char *key_name;
-	char *converted_line;
 	int keymap_index;
 
 	fd = g_file_open_tmp("geeqie_keymap_XXXXXX.svg", &tmp_file, &error);
@@ -1490,30 +1492,30 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 				pre_key = g_strsplit(keymap_template[keymap_index],">key:",2);
 				post_key = g_strsplit(pre_key[1],"<",2);
 
-				key_name = " ";
+				const gchar *key_name = post_key[0];
+				const gchar *menu_name = " ";
 				for (guint index = 0; index < array->len-1; index += 2)
 					{
-					if (!(g_ascii_strcasecmp(static_cast<const gchar *>(g_ptr_array_index(array,index+1)), post_key[0])))
+					if (!g_ascii_strcasecmp(static_cast<const gchar *>(g_ptr_array_index(array, index+1)), key_name))
 						{
-						key_name = static_cast<const gchar *>(g_ptr_array_index(array,index+0));
+						menu_name = static_cast<const gchar *>(g_ptr_array_index(array, index+0));
 						break;
 						}
 					}
 
 				for (const auto& m : keyboard_map_hardcoded)
 					{
-					if (!(g_strcmp0(m[1], post_key[0])))
+					if (!g_strcmp0(m.key_name, key_name))
 						{
-						key_name = m[0];
+						menu_name = m.menu_name;
 						break;
 						}
 					}
 
-				converted_line = g_strconcat(pre_key[0], ">", key_name, "<", post_key[1], "\n", NULL);
+				g_autofree gchar *converted_line = g_strconcat(pre_key[0], ">", menu_name, "<", post_key[1], "\n", NULL);
 				g_io_channel_write_chars(channel, converted_line, -1, nullptr, &error);
 				if (error) {log_printf("Warning: Keyboard Map:%s\n",error->message); g_error_free(error);}
 
-				g_free(converted_line);
 				g_strfreev(pre_key);
 				g_strfreev(post_key);
 				}
