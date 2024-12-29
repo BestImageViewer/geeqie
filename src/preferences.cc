@@ -58,7 +58,6 @@
 #include "filedata.h"
 #include "filefilter.h"
 #include "fullscreen.h"
-#include "image-overlay.h"
 #include "image.h"
 #include "img-view.h"
 #include "intl.h"
@@ -416,11 +415,15 @@ static void config_window_apply()
 	options->fullscreen.disable_saver = c_options->fullscreen.disable_saver;
 	options->fullscreen.above = c_options->fullscreen.above;
 	if (c_options->image_overlay.template_string)
-		set_image_overlay_template_string(&options->image_overlay.template_string,
-						  c_options->image_overlay.template_string);
+		{
+		g_free(options->image_overlay.template_string);
+		options->image_overlay.template_string = g_strdup(c_options->image_overlay.template_string);
+		}
 	if (c_options->image_overlay.font)
-		set_image_overlay_font_string(&options->image_overlay.font,
-						  c_options->image_overlay.font);
+		{
+		g_free(options->image_overlay.font);
+		options->image_overlay.font = g_strdup(c_options->image_overlay.font);
+		}
 	options->image_overlay.text_red = c_options->image_overlay.text_red;
 	options->image_overlay.text_green = c_options->image_overlay.text_green;
 	options->image_overlay.text_blue = c_options->image_overlay.text_blue;
@@ -1432,8 +1435,8 @@ static void image_overlay_template_view_changed_cb(GtkWidget *, gpointer data)
 	gtk_text_buffer_get_start_iter(pTextBuffer, &iStart);
 	gtk_text_buffer_get_end_iter(pTextBuffer, &iEnd);
 
-	set_image_overlay_template_string(&c_options->image_overlay.template_string,
-					  gtk_text_buffer_get_text(pTextBuffer, &iStart, &iEnd, TRUE));
+	g_free(c_options->image_overlay.template_string);
+	c_options->image_overlay.template_string = g_strdup(gtk_text_buffer_get_text(pTextBuffer, &iStart, &iEnd, TRUE));
 }
 
 static void image_overlay_default_template_ok_cb(GenericDialog *, gpointer data)
@@ -1441,7 +1444,7 @@ static void image_overlay_default_template_ok_cb(GenericDialog *, gpointer data)
 	auto text_view = static_cast<GtkTextView *>(data);
 	GtkTextBuffer *buffer;
 
-	set_default_image_overlay_template_string(&options->image_overlay.template_string);
+	set_default_image_overlay_template_string(options);
 	if (!configwindow) return;
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));

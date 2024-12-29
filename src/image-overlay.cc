@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <string>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib-object.h>
@@ -107,28 +108,6 @@ constexpr gint IMAGE_OSD_DEFAULT_DURATION = 30;
 } // namespace
 
 static void image_osd_timer_schedule(OverlayStateData *osd);
-
-void set_image_overlay_template_string(gchar **template_string, const gchar *value)
-{
-	g_assert(template_string);
-
-	g_free(*template_string);
-	*template_string = g_strdup(value);
-}
-
-
-void set_default_image_overlay_template_string(gchar **template_string)
-{
-	set_image_overlay_template_string(template_string, DEFAULT_OVERLAY_INFO);
-}
-
-void set_image_overlay_font_string(gchar **font_string, const gchar *value)
-{
-	g_assert(font_string);
-
-	g_free(*font_string);
-	*font_string = g_strdup(value);
-}
 
 static OverlayStateData *image_get_osd_data(ImageWindow *imd)
 {

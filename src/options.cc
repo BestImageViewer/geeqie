@@ -274,7 +274,7 @@ void setup_default_options(ConfOptions *options)
 		options->color_profile.input_name[i] = nullptr;
 		}
 
-	set_default_image_overlay_template_string(&options->image_overlay.template_string);
+	set_default_image_overlay_template_string(options);
 	options->sidecar.ext = g_strdup(".jpg;%raw;.gqv;.xmp;%unknown");
 
 	options->shell.path = g_strdup(GQ_DEFAULT_SHELL_PATH);
@@ -392,5 +392,11 @@ gboolean load_options(ConfOptions *)
 	success = load_config_from_file(rc_path, TRUE);
 	DEBUG_1("Loading options from %s ... %s", rc_path, success ? "done" : "failed");
 	return success;
+}
+
+void set_default_image_overlay_template_string(ConfOptions *options)
+{
+	g_free(options->image_overlay.template_string);
+	options->image_overlay.template_string = g_strdup(DEFAULT_OVERLAY_INFO);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -455,6 +455,7 @@ ConfOptions *init_options(ConfOptions *options);
 void setup_default_options(ConfOptions *options);
 void save_options(ConfOptions *options);
 gboolean load_options(ConfOptions *options);
+void set_default_image_overlay_template_string(ConfOptions *options);
 
 
 enum StartUpPath {
