@@ -66,15 +66,9 @@ gboolean autocomplete_activate_cb(GtkWidget *widget, gpointer data);
 
 GList *keyword_list_pull_selected(GtkWidget *text_widget)
 {
-	GList *list;
-	gchar *text;
+	g_autofree gchar *text = text_widget_text_pull_selected(text_widget);
 
-	text = text_widget_text_pull_selected(text_widget);
-	list = string_to_keywords_list(text);
-
-	g_free(text);
-
-	return list;
+	return string_to_keywords_list(text);
 }
 
 /* the "changed" signal should be blocked before calling this */
@@ -278,8 +272,7 @@ void bar_keyword_tree_get_expanded_cb(GtkTreeView *keyword_treeview, GtkTreePath
 
 	path_string = gtk_tree_model_get_string_from_iter(model, &iter);
 
-	*expanded = g_list_append(*expanded, g_strdup(path_string));
-	g_free(path_string);
+	*expanded = g_list_append(*expanded, path_string);
 }
 
 void bar_pane_keywords_entry_write_config(gchar *entry, GString *outstr, gint indent)
@@ -563,9 +556,8 @@ void bar_pane_keywords_dnd_get(GtkWidget *tree_view, GdkDragContext *,
 		case TARGET_TEXT_PLAIN:
 		default:
 			{
-			gchar *name = keyword_get_name(keyword_tree, &child_iter);
+			g_autofree gchar *name = keyword_get_name(keyword_tree, &child_iter);
 			gtk_selection_data_set_text(selection_data, name, -1);
-			g_free(name);
 			}
 			break;
 		}
@@ -577,20 +569,17 @@ void bar_pane_keywords_dnd_begin(GtkWidget *tree_view, GdkDragContext *context, 
 	GtkTreeModel *model;
 	GtkTreeIter child_iter;
 	GtkTreeModel *keyword_tree;
-	gchar *name;
 
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
 
-        if (!gtk_tree_selection_get_selected(sel, &model, &iter)) return;
+	if (!gtk_tree_selection_get_selected(sel, &model, &iter)) return;
 
 	keyword_tree = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
 	gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &child_iter, &iter);
 
-	name = keyword_get_name(keyword_tree, &child_iter);
+	g_autofree gchar *name = keyword_get_name(keyword_tree, &child_iter);
 
 	dnd_set_drag_label(tree_view, context, name);
-	g_free(name);
-
 }
 
 void bar_pane_keywords_dnd_end(GtkWidget *, GdkDragContext *, gpointer)
@@ -600,7 +589,6 @@ void bar_pane_keywords_dnd_end(GtkWidget *, GdkDragContext *, gpointer)
 
 gboolean bar_pane_keywords_dnd_can_move(GtkTreeModel *keyword_tree, GtkTreeIter *src_kw_iter, GtkTreeIter *dest_kw_iter)
 {
-	gchar *src_name;
 	GtkTreeIter parent;
 
 	if (dest_kw_iter && keyword_same_parent(keyword_tree, src_kw_iter, dest_kw_iter))
@@ -612,14 +600,8 @@ gboolean bar_pane_keywords_dnd_can_move(GtkTreeModel *keyword_tree, GtkTreeIter 
 		return TRUE; /* reordering of top-level siblings is ok */
 		}
 
-	src_name = keyword_get_name(keyword_tree, src_kw_iter);
-	if (keyword_exists(keyword_tree, nullptr, dest_kw_iter, src_name, FALSE, nullptr))
-		{
-		g_free(src_name);
-		return FALSE;
-	}
-	g_free(src_name);
-	return TRUE;
+	g_autofree gchar *src_name = keyword_get_name(keyword_tree, src_kw_iter);
+	return !keyword_exists(keyword_tree, nullptr, dest_kw_iter, src_name, FALSE, nullptr);
 }
 
 gboolean bar_pane_keywords_dnd_skip_existing(GtkTreeModel *keyword_tree, GtkTreeIter *dest_kw_iter, GList **keywords)
@@ -920,9 +902,8 @@ void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_existing
 	GtkWidget *group;
 	GtkWidget *button;
 
-	gchar *name = nullptr;
+	g_autofree gchar *name = nullptr;
 	gboolean is_keyword = TRUE;
-
 
 	if (edit_existing && pkd->click_tpath)
 		{
@@ -932,8 +913,10 @@ void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_existing
 
 		if (gtk_tree_model_get_iter(model, &iter, pkd->click_tpath))
 			{
-			gtk_tree_model_get(model, &iter, FILTER_KEYWORD_COLUMN_NAME, &name,
-							 FILTER_KEYWORD_COLUMN_IS_KEYWORD, &is_keyword, -1);
+			gtk_tree_model_get(model, &iter,
+			                   FILTER_KEYWORD_COLUMN_NAME, &name,
+			                   FILTER_KEYWORD_COLUMN_IS_KEYWORD, &is_keyword,
+			                   -1);
 			}
 		else
 			{
@@ -942,7 +925,6 @@ void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_existing
 		}
 
 	if (edit_existing && !name) return;
-
 
 	cdd = g_new0(ConfDialogData, 1);
 	cdd->pkd =pkd;
@@ -982,8 +964,6 @@ void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_existing
 				      G_CALLBACK(bar_pane_keywords_conf_set_helper), cdd);
 
 	cdd->is_keyword = is_keyword;
-
-	g_free(name);
 
 	gtk_widget_grab_focus(cdd->edit_widget);
 
@@ -1288,10 +1268,10 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 	GtkWidget *menu;
 	GtkWidget *item;
 	GtkWidget *submenu;
-        GtkTreeViewDropPosition pos;
+	GtkTreeViewDropPosition pos;
 
-        if (pkd->click_tpath) gtk_tree_path_free(pkd->click_tpath);
-        pkd->click_tpath = nullptr;
+	if (pkd->click_tpath) gtk_tree_path_free(pkd->click_tpath);
+	pkd->click_tpath = nullptr;
 	gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(pkd->keyword_treeview), x, y, &pkd->click_tpath, &pos);
 
 	menu = popup_menu_short_lived();
@@ -1303,75 +1283,64 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 	if (pkd->click_tpath)
 		{
 		/* for the entry */
-		gchar *text;
-		gchar *mark;
-		gint i;
-		gboolean keyword;
-
 		GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(pkd->keyword_treeview));
 
 		GtkTreeIter iter;
-                gtk_tree_model_get_iter(model, &iter, pkd->click_tpath);
-		gchar *name;
+		gtk_tree_model_get_iter(model, &iter, pkd->click_tpath);
 
-		gtk_tree_model_get(model, &iter, FILTER_KEYWORD_COLUMN_NAME, &name,
-						FILTER_KEYWORD_COLUMN_MARK, &mark,
-						FILTER_KEYWORD_COLUMN_IS_KEYWORD, &keyword, -1);
+		g_autofree gchar *name = nullptr;
+		g_autofree gchar *mark = nullptr;
+		gboolean is_keyword;
+		gtk_tree_model_get(model, &iter,
+		                   FILTER_KEYWORD_COLUMN_NAME, &name,
+		                   FILTER_KEYWORD_COLUMN_MARK, &mark,
+		                   FILTER_KEYWORD_COLUMN_IS_KEYWORD, &is_keyword,
+		                   -1);
 
-		if (keyword)
+		if (is_keyword)
 			{
-			text = g_strdup_printf(_("Add \"%s\" to all selected images"), name);
+			g_autofree gchar *text = g_strdup_printf(_("Add \"%s\" to all selected images"), name);
 			menu_item_add_icon(menu, text, GQ_ICON_ADD, G_CALLBACK(bar_pane_keywords_add_to_selected_cb), pkd);
-			g_free(text);
 			}
 		menu_item_add_divider(menu);
 
-		text = g_strdup_printf(_("Hide \"%s\""), name);
-		menu_item_add(menu, text, G_CALLBACK(bar_pane_keywords_hide_cb), pkd);
-		g_free(text);
+		g_autofree gchar *hide_text = g_strdup_printf(_("Hide \"%s\""), name);
+		menu_item_add(menu, hide_text, G_CALLBACK(bar_pane_keywords_hide_cb), pkd);
 
 		submenu = gtk_menu_new();
-		for (i = 0; i < FILEDATA_MARKS_SIZE; i++)
+		for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
 			{
-			text = g_strdup_printf(_("Mark %d"), 1 + (i < 9 ? i : -1));
+			g_autofree gchar *text = g_strdup_printf(_("Mark %d"), 1 + (i < 9 ? i : -1));
 			item = menu_item_add(submenu, text, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
 			g_object_set_data(G_OBJECT(item), "mark", GINT_TO_POINTER(i + 1));
-			g_free(text);
 			}
 
-		if (keyword)
+		if (is_keyword)
 			{
-			text = g_strdup_printf(_("Connect \"%s\" to mark"), name);
+			g_autofree gchar *text = g_strdup_printf(_("Connect \"%s\" to mark"), name);
 			item = menu_item_add(menu, text, nullptr, nullptr);
 			gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-			g_free(text);
 			}
 		menu_item_add_divider(menu);
 
-		text = g_strdup_printf(_("Edit \"%s\""), name);
-		menu_item_add_icon(menu, text, GQ_ICON_EDIT, G_CALLBACK(bar_pane_keywords_edit_dialog_cb), pkd);
-		g_free(text);
-		text = g_strdup_printf(_("Remove \"%s\""), name);
-		menu_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_delete_cb), pkd);
-		g_free(text);
+		g_autofree gchar *edit_text = g_strdup_printf(_("Edit \"%s\""), name);
+		menu_item_add_icon(menu, edit_text, GQ_ICON_EDIT, G_CALLBACK(bar_pane_keywords_edit_dialog_cb), pkd);
 
+		g_autofree gchar *delete_text = g_strdup_printf(_("Remove \"%s\""), name);
+		menu_item_add_icon(menu, delete_text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_delete_cb), pkd);
 
 		if (mark && mark[0])
 			{
-			text = g_strdup_printf(_("Disconnect \"%s\" from mark %s"), name, mark);
+			g_autofree gchar *text = g_strdup_printf(_("Disconnect \"%s\" from mark %s"), name, mark);
 			menu_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
-			g_free(text);
 			}
 
-		if (keyword)
+		if (is_keyword)
 			{
-			text = g_strdup_printf("%s", _("Disconnect all Mark Keyword connections"));
+			g_autofree gchar *text = g_strdup_printf("%s", _("Disconnect all Mark Keyword connections"));
 			menu_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
-			g_free(text);
 			}
 		menu_item_add_divider(menu);
-		g_free(mark);
-		g_free(name);
 		}
 	/* for the pane */
 
@@ -1620,29 +1589,26 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 gboolean autocomplete_activate_cb(GtkWidget *, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
-	gchar *entry_text;
 	GtkTextBuffer *buffer;
 	GtkTextIter iter;
 	GtkTreeIter iter_t;
-	gchar *kw_cr;
 	gchar *kw_split;
 	gboolean valid;
 	gboolean found = FALSE;
 	gchar *string;
 
-	entry_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(pkd->autocomplete)));
+	g_autofree gchar *entry_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(pkd->autocomplete)));
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pkd->keyword_view));
 
 	kw_split = strtok(entry_text, ",");
 	while (kw_split != nullptr)
 		{
-		kw_cr = g_strconcat(kw_split, "\n", NULL);
+		g_autofree gchar *kw_cr = g_strconcat(kw_split, "\n", NULL);
 		g_strchug(kw_cr);
 		gtk_text_buffer_get_end_iter(buffer, &iter);
 		gtk_text_buffer_insert(buffer, &iter, kw_cr, -1);
 
 		kw_split = strtok(nullptr, ",");
-		g_free(kw_cr);
 		}
 
 	g_free(entry_text);
@@ -1668,7 +1634,6 @@ gboolean autocomplete_activate_cb(GtkWidget *, gpointer data)
 		gtk_list_store_set(keyword_store, &iter_t, 0, entry_text, -1);
 		}
 
-	g_free(entry_text);
 	return FALSE;
 }
 
@@ -1730,15 +1695,12 @@ void autocomplete_keywords_list_load(const gchar *path)
 gboolean autocomplete_keywords_list_save(const gchar *path)
 {
 	SecureSaveInfo *ssi;
-	gchar *pathl;
 	gchar *string;
-	gchar *string_nl;
 	GtkTreeIter  iter;
 	gboolean     valid;
 
-	pathl = path_from_utf8(path);
+	g_autofree gchar *pathl = path_from_utf8(path);
 	ssi = secure_open(pathl);
-	g_free(pathl);
 
 	if (!ssi)
 		{
@@ -1753,12 +1715,10 @@ gboolean autocomplete_keywords_list_save(const gchar *path)
 	while (valid)
 		{
 		gtk_tree_model_get (GTK_TREE_MODEL(keyword_store), &iter, 0, &string, -1);
-		string_nl = g_strconcat(string, "\n", NULL);
+		g_autofree gchar *string_nl = g_strconcat(string, "\n", NULL);
 		secure_fprintf(ssi, "%s", string_nl);
 
 		valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(keyword_store), &iter);
-
-		g_free(string_nl);
 		}
 
 	secure_fprintf(ssi, "#end\n");
@@ -1775,12 +1735,11 @@ gboolean autocomplete_keywords_list_save(const gchar *path)
 
 GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *id = g_strdup("keywords");
-	gchar *title = nullptr;
-	gchar *key = g_strdup(COMMENT_KEY);
+	g_autofree gchar *id = g_strdup("keywords");
+	g_autofree gchar *title = nullptr;
+	g_autofree gchar *key = g_strdup(COMMENT_KEY);
 	gboolean expanded = TRUE;
 	gint height = 200;
-	GtkWidget *ret;
 
 	while (*attribute_names)
 		{
@@ -1798,11 +1757,7 @@ GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, cons
 
 	options->info_keywords.height = height;
 	bar_pane_translate_title(PANE_KEYWORDS, id, &title);
-	ret = bar_pane_keywords_new(id, title, key, expanded, height);
-	g_free(id);
-	g_free(title);
-	g_free(key);
-	return ret;
+	return bar_pane_keywords_new(id, title, key, expanded, height);
 }
 
 void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
@@ -1812,7 +1767,7 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 	pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pkd) return;
 
-	gchar *title = nullptr;
+	g_autofree gchar *title = nullptr;
 
 	while (*attribute_names)
 		{
@@ -1831,7 +1786,6 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 		{
 		bar_pane_translate_title(PANE_KEYWORDS, pkd->pane.id, &title);
 		gtk_label_set_text(GTK_LABEL(pkd->pane.title), title);
-		g_free(title);
 		}
 
 	bar_update_expander(pane);
@@ -1874,22 +1828,15 @@ void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attr
 
 GList *keyword_list_pull(GtkWidget *text_widget)
 {
-	GList *list;
-	gchar *text;
+	g_autofree gchar *text = text_widget_text_pull(text_widget);
 
-	text = text_widget_text_pull(text_widget);
-	list = string_to_keywords_list(text);
-
-	g_free(text);
-
-	return list;
+	return string_to_keywords_list(text);
 }
 
 GList *keyword_list_get()
 {
 	GList *ret_list = nullptr;
 	gchar *string;
-	gchar *string_nl;
 	GtkTreeIter iter;
 	gboolean valid;
 
@@ -1900,11 +1847,8 @@ GList *keyword_list_get()
 		while (valid)
 			{
 			gtk_tree_model_get (GTK_TREE_MODEL(keyword_store), &iter, 0, &string, -1);
-			string_nl = g_strconcat(string, "\n", NULL);
 			ret_list = g_list_append(ret_list, string);
 			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(keyword_store), &iter);
-
-			g_free(string_nl);
 			}
 		}
 

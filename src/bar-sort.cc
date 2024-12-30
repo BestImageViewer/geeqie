@@ -110,7 +110,7 @@ static void bar_sort_collection_list_build(GtkWidget *bookmarks)
 	while (work)
 		{
 		FileData *fd;
-		gchar *name;
+		g_autofree gchar *name = nullptr;
 
 		fd = static_cast<FileData *>(work->data);
 		work = work->next;
@@ -124,7 +124,6 @@ static void bar_sort_collection_list_build(GtkWidget *bookmarks)
 			name = g_strdup(fd->name);
 			}
 		bookmark_list_add(bookmarks, name, fd->path);
-		g_free(name);
 		}
 
 	filelist_free(list);

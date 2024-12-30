@@ -171,27 +171,22 @@ gboolean extract(const char *filename, bool do_extract, int flags)
 gchar *open_archive(const FileData *fd)
 {
 	int flags;
-	gchar *current_dir;
-	gchar *destination_dir;
 	gboolean success;
 	gint error;
 
-	destination_dir = g_build_filename(g_get_tmp_dir(), GQ_ARCHIVE_DIR, instance_identifier, fd->path, NULL);
+	g_autofree gchar *destination_dir = g_build_filename(g_get_tmp_dir(), GQ_ARCHIVE_DIR, instance_identifier, fd->path, NULL);
 
 	if (!recursive_mkdir_if_not_exists(destination_dir, 0755))
 		{
-		log_printf("%s%s%s", _("Open Archive - Cannot create directory: "), destination_dir, "\n");
-		g_free(destination_dir);
+		log_printf("%s%s\n", _("Open Archive - Cannot create directory: "), destination_dir);
 		return nullptr;
 		}
 
-	current_dir = g_get_current_dir();
+	g_autofree gchar *current_dir = g_get_current_dir();
 	error = chdir(destination_dir);
 	if (error)
 		{
-		log_printf("%s%s%s%s%s", _("Open Archive - Cannot change directory to: "), destination_dir, _("\n  Error code: "), strerror(errno), "\n");
-		g_free(destination_dir);
-		g_free(current_dir);
+		log_printf("%s%s%s%s\n", _("Open Archive - Cannot change directory to: "), destination_dir, _("\n  Error code: "), strerror(errno));
 		return nullptr;
 		}
 
@@ -201,20 +196,16 @@ gchar *open_archive(const FileData *fd)
 	error = chdir(current_dir);
 	if (error)
 		{
-		log_printf("%s%s%s%s%s", _("Open Archive - Cannot change directory to: "), current_dir, _("\n  Error code: "), strerror(errno), "\n");
-		g_free(destination_dir);
-		g_free(current_dir);
+		log_printf("%s%s%s%s\n", _("Open Archive - Cannot change directory to: "), current_dir, _("\n  Error code: "), strerror(errno));
 		return nullptr;
 		}
-	g_free(current_dir);
 
 	if (!success)
 		{
-		g_free(destination_dir);
-		destination_dir = nullptr;
+		return nullptr;
 		}
 
-	return destination_dir;
+	return g_steal_pointer(&destination_dir);
 }
 #else
 gchar *open_archive(const FileData *)

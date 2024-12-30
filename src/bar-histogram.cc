@@ -321,13 +321,12 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 
 GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *title = nullptr;
-	gchar *id = g_strdup("histogram");
+	g_autofree gchar *id = g_strdup("histogram");
+	g_autofree gchar *title = nullptr;
 	gboolean expanded = TRUE;
-	gint height = 80;
+	constexpr gint height = 80;
 	gint histogram_channel = HCHAN_RGB;
 	gint histogram_mode = 0;
-	GtkWidget *ret;
 
 	while (*attribute_names)
 		{
@@ -344,10 +343,8 @@ GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, con
 		}
 
 	bar_pane_translate_title(PANE_HISTOGRAM, id, &title);
-	ret = bar_pane_histogram_new(id, title, height, expanded, histogram_channel, histogram_mode);
-	g_free(title);
-	g_free(id);
-	return ret;
+
+	return bar_pane_histogram_new(id, title, height, expanded, histogram_channel, histogram_mode);
 }
 
 void bar_pane_histogram_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)

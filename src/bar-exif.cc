@@ -111,12 +111,10 @@ gboolean bar_pane_exif_copy_cb(GtkWidget *widget, GdkEventButton *bevent, gpoint
 void bar_pane_exif_entry_changed(GtkEntry *, gpointer data)
 {
 	auto ee = static_cast<ExifEntry *>(data);
-	gchar *text;
 	if (!ee->ped->fd) return;
 
-	text = text_widget_text_pull(ee->value_widget);
+	g_autofree gchar *text = text_widget_text_pull(ee->value_widget);
 	metadata_write_string(ee->ped->fd, ee->key, text);
-	g_free(text);
 }
 
 void bar_pane_exif_entry_destroy(gpointer data)
@@ -227,20 +225,19 @@ void bar_pane_exif_reparent_entry(GtkWidget *entry, GtkWidget *pane)
 
 void bar_pane_exif_entry_update_title(ExifEntry *ee)
 {
-	gchar *markup;
+	g_autofree gchar *markup = g_markup_printf_escaped("<span size='small'>%s:</span>", ee->title ? ee->title : _("<empty label, fixme>"));
 
-	markup = g_markup_printf_escaped("<span size='small'>%s:</span>", (ee->title) ? ee->title : _("<empty label, fixme>"));
 	gtk_label_set_markup(GTK_LABEL(ee->title_label), markup);
-	g_free(markup);
 }
 
 void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboolean update_title)
 {
-	gchar *text;
 	auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(entry), "entry_data"));
 	gshort rating;
 
 	if (!ee) return;
+
+	g_autofree gchar *text = nullptr;
 	if (g_strcmp0(ee->key, "Xmp.xmp.Rating") == 0)
 		{
 		rating = metadata_read_int(ee->ped->fd, ee->key, 0);
@@ -273,8 +270,6 @@ void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboolean up
 		gtk_widget_show(entry);
 		ped->all_hidden = FALSE;
 		}
-
-	g_free(text);
 
 	if (update_title) bar_pane_exif_entry_update_title(ee);
 }
@@ -659,17 +654,14 @@ void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped)
 	if (ee)
 		{
 		/* for the entry */
-		gchar *conf = g_strdup_printf(_("Configure \"%s\""), ee->title);
-		gchar *del = g_strdup_printf(_("Remove \"%s\""), ee->title);
-		gchar *copy = g_strdup_printf(_("Copy \"%s\""), ee->title);
+		g_autofree gchar *conf = g_strdup_printf(_("Configure \"%s\""), ee->title);
+		g_autofree gchar *del = g_strdup_printf(_("Remove \"%s\""), ee->title);
+		g_autofree gchar *copy = g_strdup_printf(_("Copy \"%s\""), ee->title);
 
 		menu_item_add_icon(menu, conf, GQ_ICON_EDIT, G_CALLBACK(bar_pane_exif_conf_dialog_cb), widget);
 		menu_item_add_icon(menu, del, GQ_ICON_DELETE, G_CALLBACK(bar_pane_exif_delete_entry_cb), widget);
 		menu_item_add_icon(menu, copy, GQ_ICON_COPY, G_CALLBACK(bar_pane_exif_copy_entry_cb), widget);
 		menu_item_add_divider(menu);
-
-		g_free(conf);
-		g_free(del);
 		}
 
 	/* for the pane */
@@ -856,11 +848,10 @@ GList * bar_pane_exif_list()
 
 GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	gchar *title = nullptr;
-	gchar *id = g_strdup("exif");
+	g_autofree gchar *id = g_strdup("exif");
+	g_autofree gchar *title = nullptr;
 	gboolean expanded = TRUE;
 	gboolean show_all = FALSE;
-	GtkWidget *ret;
 
 	while (*attribute_names)
 		{
@@ -876,16 +867,14 @@ GtkWidget *bar_pane_exif_new_from_config(const gchar **attribute_names, const gc
 		}
 
 	bar_pane_translate_title(PANE_EXIF, id, &title);
-	ret = bar_pane_exif_new(id, title, expanded, show_all);
-	g_free(title);
-	g_free(id);
-	return ret;
+
+	return bar_pane_exif_new(id, title, expanded, show_all);
 }
 
 void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
 	PaneExifData *ped;
-	gchar *title = nullptr;
+	g_autofree gchar *title = nullptr;
 
 	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!ped) return;
@@ -907,7 +896,6 @@ void bar_pane_exif_update_from_config(GtkWidget *pane, const gchar **attribute_n
 		{
 		bar_pane_translate_title(PANE_EXIF, ped->pane.id, &title);
 		gtk_label_set_text(GTK_LABEL(ped->pane.title), title);
-		g_free(title);
 		}
 
 	bar_update_expander(pane);
