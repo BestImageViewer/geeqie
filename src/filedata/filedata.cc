@@ -45,7 +45,6 @@
 #include "intl.h"
 #include "main-defines.h"
 #include "metadata.h"
-#include "misc.h"
 #include "options.h"
 #include "secure-save.h"
 #include "trash.h"
@@ -64,11 +63,7 @@ static void file_data_disconnect_sidecar_file(FileData *target, FileData *sfd);
 
 gchar *FileData::text_from_size(gint64 size)
 {
-	gchar *a;
-	gchar *b;
-	gchar *s;
-	gchar *d;
-	gint i;
+	g_autofree gchar *a = nullptr;
 
 	/* what I would like to use is printf("%'d", size)
 	 * BUT: not supported on every libc :(
@@ -84,13 +79,13 @@ gchar *FileData::text_from_size(gint64 size)
 		}
 	gint len = strlen(a);
 	gint n = (len - ((size < 0) ? 2 : 1)) / 3;
-	if (n < 1) return a;
+	if (n < 1) return g_steal_pointer(&a);
 
-	b = g_new(gchar, len + n + 1);
+	auto *b = g_new(gchar, len + n + 1);
 
-	s = a;
-	d = b;
-	i = len - n * 3;
+	gchar *s = a;
+	gchar *d = b;
+	gint i = len - n * 3;
 	while (*s != '\0')
 		{
 		if (i < 1)
@@ -107,7 +102,6 @@ gchar *FileData::text_from_size(gint64 size)
 		}
 	*d = '\0';
 
-	g_free(a);
 	return b;
 }
 
@@ -279,11 +273,8 @@ gboolean FileData::file_data_check_changed_files(FileData *fd)
 
 static void file_data_set_collate_keys(FileData *fd)
 {
-	gchar *caseless_name;
-	gchar *valid_name;
-
-	valid_name = g_filename_display_name(fd->name);
-	caseless_name = g_utf8_casefold(valid_name, -1);
+	g_autofree gchar *valid_name = g_filename_display_name(fd->name);
+	g_autofree gchar *caseless_name = g_utf8_casefold(valid_name, -1);
 
 	g_free(fd->collate_key_name);
 	g_free(fd->collate_key_name_nocase);
@@ -292,9 +283,6 @@ static void file_data_set_collate_keys(FileData *fd)
  	fd->collate_key_name_nocase_natural = g_utf8_collate_key_for_filename(caseless_name, -1);
 	fd->collate_key_name = g_utf8_collate_key(valid_name, -1);
 	fd->collate_key_name_nocase = g_utf8_collate_key(caseless_name, -1);
-
-	g_free(valid_name);
-	g_free(caseless_name);
 }
 
 void FileData::set_path(const gchar *new_path)
@@ -329,10 +317,9 @@ void FileData::set_path(const gchar *new_path)
 
 	if (strcmp(name, "..") == 0)
 		{
-		gchar *dir = remove_level_from_path(new_path);
+		g_autofree gchar *dir = remove_level_from_path(new_path);
 		g_free(path);
 		path = remove_level_from_path(dir);
-		g_free(dir);
 		name = "..";
 		extension = name + 2;
 		file_data_set_collate_keys(this);
@@ -460,11 +447,9 @@ FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gbool
 
 FileData *FileData::file_data_new_local(const gchar *path, struct stat *st, gboolean disable_sidecars, FileDataContext *context)
 {
-	gchar *path_utf8 = path_to_utf8(path);
-	FileData *ret = file_data_new(path_utf8, st, disable_sidecars, context);
+	g_autofree gchar *path_utf8 = path_to_utf8(path);
 
-	g_free(path_utf8);
-	return ret;
+	return file_data_new(path_utf8, st, disable_sidecars, context);
 }
 
 FileData *FileData::file_data_new_simple(const gchar *path_utf8, FileDataContext *context)
@@ -553,13 +538,11 @@ void FileData::read_exif_time_digitized_data(FileData *file)
 
 void FileData::read_rating_data(FileData *file)
 {
-	gchar *rating_str;
+	g_autofree gchar *rating_str = metadata_read_string(file, RATING_KEY, METADATA_PLAIN);
 
-	rating_str = metadata_read_string(file, RATING_KEY, METADATA_PLAIN);
 	if (rating_str)
 		{
 		file->rating = atoi(rating_str);
-		g_free(rating_str);
 		}
 	else
 		{
@@ -1080,7 +1063,7 @@ GHashTable *FileData::file_data_basename_hash_new()
 GList *FileData::file_data_basename_hash_insert(GHashTable *basename_hash, FileData *fd)
 {
 	GList *list;
-	gchar *basename = g_strndup(fd->path, fd->extension - fd->path);
+	g_autofree gchar *basename = g_strndup(fd->path, fd->extension - fd->path);
 
 	list = static_cast<GList *>(g_hash_table_lookup(basename_hash, basename));
 
@@ -1092,7 +1075,7 @@ GList *FileData::file_data_basename_hash_insert(GHashTable *basename_hash, FileD
 		if (parent_extension)
 			{
 			DEBUG_1("TG: parent extension %s",parent_extension);
-			gchar *parent_basename = g_strndup(basename, parent_extension - basename);
+			g_autofree gchar *parent_basename = g_strndup(basename, parent_extension - basename);
 			DEBUG_1("TG: parent basename %s",parent_basename);
 			auto parent_fd = static_cast<FileData *>(g_hash_table_lookup(fd->context->file_data_pool, basename));
 			if (parent_fd)
@@ -1102,13 +1085,11 @@ GList *FileData::file_data_basename_hash_insert(GHashTable *basename_hash, FileD
 				if (!g_list_find(list, parent_fd))
 					{
 					DEBUG_1("TG: parent fd doesn't fit");
-					g_free(parent_basename);
 					list = nullptr;
 					}
 				else
 					{
-					g_free(basename);
-					basename = parent_basename;
+					std::swap(basename, parent_basename);
 					fd->extended_extension = g_strconcat(parent_extension, fd->extension, NULL);
 					}
 				}
@@ -1118,12 +1099,9 @@ GList *FileData::file_data_basename_hash_insert(GHashTable *basename_hash, FileD
 	if (!g_list_find(list, fd))
 		{
 		list = g_list_insert_sorted(list, ::file_data_ref(fd), file_data_sort_by_ext);
-		g_hash_table_insert(basename_hash, basename, list);
+		g_hash_table_insert(basename_hash, g_steal_pointer(&basename), list);
 		}
-	else
-		{
-		g_free(basename);
-		}
+
 	return list;
 }
 
@@ -1167,9 +1145,9 @@ FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext 
 	if (S_ISDIR(st.st_mode))
 		return file_data_new(path_utf8, &st, TRUE, context);
 
-	gchar *dir = remove_level_from_path(path_utf8);
+	g_autofree gchar *dir = remove_level_from_path(path_utf8);
 
-        GList *files;
+	GList *files;
 	FileList::read_list_real(dir, &files, nullptr, TRUE);
 
 	auto *fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
@@ -1183,7 +1161,6 @@ FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext 
 		}
 
 	filelist_free(files);
-	g_free(dir);
 	return fd;
 }
 
@@ -1226,7 +1203,7 @@ gchar *FileData::file_data_get_sidecar_path(FileData *fd, gboolean existing_only
 	if (!file_data_can_write_sidecar(fd)) return nullptr;
 
 	work = fd->parent ? fd->parent->sidecar_files : fd->sidecar_files;
-	gchar *extended_extension = g_strconcat(fd->parent ? fd->parent->extension : fd->extension, ".xmp", NULL);
+	g_autofree gchar *extended_extension = g_strconcat(fd->parent ? fd->parent->extension : fd->extension, ".xmp", NULL);
 	while (work)
 		{
 		auto sfd = static_cast<FileData *>(work->data);
@@ -1237,7 +1214,6 @@ gchar *FileData::file_data_get_sidecar_path(FileData *fd, gboolean existing_only
 			break;
 			}
 		}
-	g_free(extended_extension);
 
 	if (!existing_only && !sidecar_path)
 		{
@@ -1245,9 +1221,8 @@ gchar *FileData::file_data_get_sidecar_path(FileData *fd, gboolean existing_only
 			sidecar_path = g_strconcat(fd->path, ".xmp", NULL);
 		else
 			{
-			gchar *base = g_strndup(fd->path, fd->extension - fd->path);
+			g_autofree gchar *base = g_strndup(fd->path, fd->extension - fd->path);
 			sidecar_path = g_strconcat(base, ".xmp", NULL);
-			g_free(base);
 			}
 		}
 
@@ -1871,30 +1846,26 @@ void FileData::update_planned_change_hash(const gchar *old_path, gchar *new_path
 
 void FileData::file_data_update_ci_dest(FileData *fd, const gchar *dest_path)
 {
-	gchar *old_path = fd->change->dest;
+	g_autofree gchar *old_path = fd->change->dest;
 
 	fd->change->dest = g_strdup(dest_path);
 	fd->update_planned_change_hash(old_path, fd->change->dest);
-	g_free(old_path);
 }
 
 void FileData::file_data_update_ci_dest_preserve_ext(FileData *fd, const gchar *dest_path)
 {
 	const gchar *extension = registered_extension_from_path(fd->change->source);
-	gchar *base = remove_extension_from_path(dest_path);
-	gchar *old_path = fd->change->dest;
+	g_autofree gchar *base = remove_extension_from_path(dest_path);
+	g_autofree gchar *old_path = fd->change->dest;
 
 	fd->change->dest = g_strconcat(base, fd->extended_extension ? fd->extended_extension : extension, NULL);
 	fd->update_planned_change_hash(old_path, fd->change->dest);
-
-	g_free(old_path);
-	g_free(base);
 }
 
 void FileData::file_data_sc_update_ci(FileData *fd, const gchar *dest_path)
 {
 	GList *work;
-	gchar *dest_path_full = nullptr;
+	g_autofree gchar *dest_path_full = nullptr;
 
 	if (fd->parent) fd = fd->parent;
 
@@ -1904,10 +1875,9 @@ void FileData::file_data_sc_update_ci(FileData *fd, const gchar *dest_path)
 		}
 	else if (!strchr(dest_path, G_DIR_SEPARATOR)) /* we got only filename, not a full path */
 		{
-		gchar *dir = remove_level_from_path(fd->path);
+		g_autofree gchar *dir = remove_level_from_path(fd->path);
 
 		dest_path_full = g_build_filename(dir, dest_path, NULL);
-		g_free(dir);
 		dest_path = dest_path_full;
 		}
 	else if (fd->change->type != FILEDATA_CHANGE_RENAME && isdir(dest_path)) /* rename should not move files between directories */
@@ -1926,8 +1896,6 @@ void FileData::file_data_sc_update_ci(FileData *fd, const gchar *dest_path)
 		file_data_update_ci_dest_preserve_ext(sfd, dest_path);
 		work = work->next;
 		}
-
-	g_free(dest_path_full);
 }
 
 gboolean FileData::file_data_sc_check_update_ci(FileData *fd, const gchar *dest_path, FileDataChangeType type)
@@ -2000,7 +1968,6 @@ gboolean FileData::file_data_sc_update_ci_unspecified_list(GList *fd_list, const
 gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 {
 	gint ret = CHANGE_OK;
-	gchar *dir;
 	GList *work = nullptr;
 	FileData *fd1 = nullptr;
 
@@ -2018,7 +1985,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 		return ret;
 		}
 
-	dir = remove_level_from_path(fd->path);
+	g_autofree gchar *dir = remove_level_from_path(fd->path);
 
 	if (fd->change->type != FILEDATA_CHANGE_DELETE &&
 	    fd->change->type != FILEDATA_CHANGE_MOVE && /* the unsaved metadata should survive move and rename operations */
@@ -2059,7 +2026,6 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 		{
 		/* determine destination file */
 		gboolean have_dest = FALSE;
-		gchar *dest_dir = nullptr;
 
 		if (options->metadata.save_in_image_file)
 			{
@@ -2082,7 +2048,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 			else if (file_data_can_write_sidecar(fd))
 				{
 				/* we can write sidecar */
-				gchar *sidecar = file_data_get_sidecar_path(fd, FALSE);
+				g_autofree gchar *sidecar = file_data_get_sidecar_path(fd, FALSE);
 				if (access_file(sidecar, W_OK) || (!isname(sidecar) && access_file(dir, W_OK)))
 					{
 					file_data_update_ci_dest(fd, sidecar);
@@ -2096,7 +2062,6 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 						DEBUG_1("Change checked: file is not writable: %s", sidecar);
 						}
 					}
-				g_free(sidecar);
 				}
 			}
 
@@ -2107,7 +2072,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 			/* If an existing metadata file exists, we will try writing to
 			 * it's location regardless of the user's preference.
 			 */
-			gchar *metadata_path = nullptr;
+			g_autofree gchar *metadata_path = nullptr;
 #if HAVE_EXIV2
 			/* but ignore XMP if we are not able to write it */
 			metadata_path = cache_find_location(CACHE_TYPE_XMP_METADATA, fd->path);
@@ -2120,15 +2085,15 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 				metadata_path = nullptr;
 				}
 
+			g_autofree gchar *dest_dir = nullptr;
 			if (!metadata_path)
 				{
 				dest_dir = cache_create_location(CACHE_TYPE_METADATA, fd->path);
 				if (dest_dir)
 					{
-					gchar *filename = g_strconcat(fd->name, options->metadata.save_legacy_format ? GQ_CACHE_EXT_METADATA : GQ_CACHE_EXT_XMP_METADATA, NULL);
+					g_autofree gchar *filename = g_strconcat(fd->name, options->metadata.save_legacy_format ? GQ_CACHE_EXT_METADATA : GQ_CACHE_EXT_XMP_METADATA, NULL);
 
 					metadata_path = g_build_filename(dest_dir, filename, NULL);
-					g_free(filename);
 					}
 				}
 			if (access_file(metadata_path, W_OK) || (!isname(metadata_path) && access_file(dest_dir, W_OK)))
@@ -2140,15 +2105,12 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 				ret |= CHANGE_NO_WRITE_PERM_DEST;
 				DEBUG_1("Change checked: file is not writable: %s", metadata_path);
 				}
-			g_free(metadata_path);
 			}
-		g_free(dest_dir);
 		}
 
 	if (fd->change->dest && fd->change->type != FILEDATA_CHANGE_WRITE_METADATA)
 		{
 		gboolean same;
-		gchar *dest_dir;
 
 		same = (strcmp(fd->path, fd->change->dest) == 0);
 
@@ -2174,8 +2136,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 				}
 			}
 
-		dest_dir = remove_level_from_path(fd->change->dest);
-
+		g_autofree gchar *dest_dir = remove_level_from_path(fd->change->dest);
 		if (!isdir(dest_dir))
 			{
 			ret |= CHANGE_NO_DEST_DIR;
@@ -2207,8 +2168,6 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 				DEBUG_1("Change checked: destination exists: %s -> %s", fd->path, fd->change->dest);
 				}
 			}
-
-		g_free(dest_dir);
 		}
 
 	/* During a rename operation, check if another planned destination file has
@@ -2236,7 +2195,6 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 	fd->change->error = ret;
 	if (ret == 0) DEBUG_1("Change checked: OK: %s", fd->path);
 
-	g_free(dir);
 	return ret;
 }
 
@@ -2351,13 +2309,12 @@ gint FileData::file_data_verify_ci_list(GList *list, gchar **desc, gboolean with
 	gint all_errors = 0;
 	gint common_errors = ~0;
 	gint num;
-	gint *errors;
 	gint i;
 
 	if (!list) return 0;
 
 	num = g_list_length(list);
-	errors = g_new(int, num);
+	g_autofree auto *errors = g_new(int, num);
 	work = list;
 	i = 0;
 	while (work)
@@ -2384,10 +2341,8 @@ gint FileData::file_data_verify_ci_list(GList *list, gchar **desc, gboolean with
 
 		if (common_errors)
 			{
-			gchar *str = file_data_get_error_string(common_errors);
-			g_string_append(result, str);
-			g_string_append(result, "\n");
-			g_free(str);
+			g_autofree gchar *str = file_data_get_error_string(common_errors);
+			g_string_append_printf(result, "%s\n", str);
 			}
 
 		work = list;
@@ -2404,16 +2359,14 @@ gint FileData::file_data_verify_ci_list(GList *list, gchar **desc, gboolean with
 
 			if (error)
 				{
-				gchar *str = file_data_get_error_string(error);
+				g_autofree gchar *str = file_data_get_error_string(error);
 				g_string_append_printf(result, "%s: %s\n", fd->name, str);
-				g_free(str);
 				}
 			i++;
 			}
 		*desc = g_string_free(result, FALSE);
 		}
 
-	g_free(errors);
 	return all_errors;
 }
 
@@ -2863,11 +2816,9 @@ gboolean FileData::marks_list_load(const gchar *path)
 gboolean FileData::marks_list_save(gchar *path, gboolean save)
 {
 	SecureSaveInfo *ssi;
-	gchar *pathl;
 
-	pathl = path_from_utf8(path);
+	g_autofree gchar *pathl = path_from_utf8(path);
 	ssi = secure_open(pathl);
-	g_free(pathl);
 	if (!ssi)
 		{
 		log_printf(_("Error: Unable to write marks lists to: %s\n"), path);

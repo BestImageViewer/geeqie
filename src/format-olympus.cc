@@ -312,27 +312,23 @@ gboolean format_olympus_makernote(ExifData *exif, guchar *tiff, guint offset,
 		static ExifMarker marker = { 0x0200, EXIF_FORMAT_STRING, -1,
 					     "Olympus.ShootingMode", "Shooting mode", nullptr };
 		auto array = static_cast<guint32 *>(item->data);
-		gchar *mode;
-		gchar *pdir = nullptr;
-		gchar *text;
+		g_autofree gchar *text = nullptr;
 		gint l;
 
-		mode = exif_text_list_find_value(OlympusShootingMode, array[0]);
+		g_autofree gchar *mode = exif_text_list_find_value(OlympusShootingMode, array[0]);
 		if (array[0] == 3)
 			{
-			pdir = exif_text_list_find_value(OlympusPanoramaDirection, array[2]);
+			g_autofree gchar *pdir = exif_text_list_find_value(OlympusPanoramaDirection, array[2]);
+			text = g_strdup_printf("%s %s, seq %d", mode, pdir, array[1] + 1);
+			}
+		else
+			{
+			text = g_strdup_printf("%s, seq %d", mode, array[1] + 1);
 			}
 
-		text = g_strdup_printf("%s%s%s, seq %d", mode,
-				       (pdir) ? " " : "", (pdir) ? pdir : "",
-				       array[1] + 1);
 		l = strlen(text) + 1;
 		item = exif_item_new(marker.format, marker.tag, l, &marker);
 		memcpy(item->data, text, l);
-
-		g_free(text);
-		g_free(pdir);
-		g_free(mode);
 
 		exif->items = g_list_prepend(exif->items, item);
 		}
@@ -343,26 +339,23 @@ gboolean format_olympus_makernote(ExifData *exif, guchar *tiff, guint offset,
 		static ExifMarker marker = { 0x1015, EXIF_FORMAT_STRING, -1,
 					     "Olympus.WhiteBalance", "White balance", nullptr };
 		auto array = static_cast<guint16 *>(item->data);
-		gchar *mode;
-		gchar *color = nullptr;
-		gchar *text;
+		g_autofree gchar *text = nullptr;
 		gint l;
 
-		mode = exif_text_list_find_value(OlympusWB, array[0]);
+		g_autofree gchar *mode = exif_text_list_find_value(OlympusWB, array[0]);
 		if (array[0] == 2)
 			{
-			color = exif_text_list_find_value(OlympusWBColorTemp, array[1]);
+			g_autofree gchar *color = exif_text_list_find_value(OlympusWBColorTemp, array[1]);
+			text = g_strdup_printf("%s %s", mode, color);
+			}
+		else
+			{
+			text = g_steal_pointer(&mode);
 			}
 
-		text = g_strdup_printf("%s%s%s", mode,
-				       (color) ? " " : "", (color) ? color : "");
 		l = strlen(text) + 1;
 		item = exif_item_new(marker.format, marker.tag, l, &marker);
 		memcpy(item->data, text, l);
-
-		g_free(text);
-		g_free(color);
-		g_free(mode);
 
 		exif->items = g_list_prepend(exif->items, item);
 		}

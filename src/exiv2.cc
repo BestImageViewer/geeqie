@@ -99,9 +99,8 @@ static void _debug_exception(const char* file,
                              const char* func,
                              Exiv2::AnyError& e)
 {
-	gchar *str = g_locale_from_utf8(e.what(), -1, nullptr, nullptr, nullptr);
+	g_autofree gchar *str = g_locale_from_utf8(e.what(), -1, nullptr, nullptr, nullptr);
 	DEBUG_1("%s:%d:%s:Exiv2: %s", file, line, func, str);
-	g_free(str);
 }
 
 #define debug_exception(e) _debug_exception(__FILE__, __LINE__, __func__, e)
@@ -347,11 +346,9 @@ public:
 			}
 		else
 			{
-			gchar *pathl = path_from_utf8(path);;
+			g_autofree gchar *pathl = path_from_utf8(path);;
 
 			auto sidecar = Exiv2::ImageFactory::create(Exiv2::ImageType::xmp, pathl);
-
-			g_free(pathl);
 
 			sidecar->setXmpData(xmpData_);
 			sidecar->writeMetadata();

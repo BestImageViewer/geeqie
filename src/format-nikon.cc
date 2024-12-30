@@ -379,16 +379,13 @@ gboolean format_nikon_makernote(ExifData *exif, guchar *tiff, guint offset,
 		static ExifMarker marker = { 0x0088, EXIF_FORMAT_STRING, -1,
 					     "Nikon.AutoFocusPoint", "Auto focus point", nullptr };
 		auto array = static_cast<guchar*>(item->data);
-		gchar *text;
 		gint l;
 
-		text = exif_text_list_find_value(NikonAFPoint, static_cast<gint>(array[1]));
+		g_autofree gchar *text = exif_text_list_find_value(NikonAFPoint, static_cast<gint>(array[1]));
 		l = strlen(text) + 1;
 
 		item = exif_item_new(marker.format, marker.tag, l, &marker);
 		memcpy(item->data, text, l);
-
-		g_free(text);
 
 		exif->items = g_list_prepend(exif->items, item);
 		}

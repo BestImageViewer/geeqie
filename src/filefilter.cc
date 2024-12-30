@@ -116,10 +116,9 @@ void filter_add(const gchar *key, const gchar *description, const gchar *extensi
 
 void filter_add_unique(const gchar *description, const gchar *extensions, FileFormatClass file_class, gboolean writable, gboolean allow_sidecar, gboolean enabled)
 {
-	gchar *key;
 	guint n;
 
-	key = g_strdup("user0");
+	g_autofree gchar *key = g_strdup("user0");
 	n = 1;
 	while (filter_key_exists(key))
 		{
@@ -130,7 +129,6 @@ void filter_add_unique(const gchar *description, const gchar *extensions, FileFo
 		}
 
 	filter_add(key, description, extensions, file_class, writable, allow_sidecar, enabled);
-	g_free(key);
 }
 
 static void filter_add_if_missing(const gchar *key, const gchar *description, const gchar *extensions, FileFormatClass file_class, gboolean writable, gboolean allow_sidecar, gboolean enabled)
@@ -298,7 +296,6 @@ GList *filter_to_list(const gchar *extensions)
 	while (*p != '\0')
 		{
 		const gchar *b;
-		gchar *ext;
 		gint file_class = -1;
 		guint l = 0;
 
@@ -309,7 +306,7 @@ GList *filter_to_list(const gchar *extensions)
 			l++;
 			}
 
-		ext = g_strndup(b, l);
+		g_autofree gchar *ext = g_strndup(b, l);
 
 		if (g_ascii_strcasecmp(ext, "%image") == 0) file_class = FORMAT_CLASS_IMAGE;
 		else if (g_ascii_strcasecmp(ext, "%raw") == 0) file_class = FORMAT_CLASS_RAWIMAGE;
@@ -318,12 +315,11 @@ GList *filter_to_list(const gchar *extensions)
 
 		if (file_class == -1)
 			{
-			list = g_list_append(list, ext);
+			list = g_list_append(list, g_steal_pointer(&ext));
 			}
 		else
 			{
 			list = g_list_concat(list, string_list_copy(file_class_extension_list[file_class]));
-			g_free(ext);
 			}
 
 		if (*p == ';') p++;

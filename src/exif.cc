@@ -776,9 +776,8 @@ void exif_item_copy_data(ExifItem *item, gpointer src, guint len,
 	if (!dest ||
 	    ExifFormatList[src_format].size * ne > len)
 		{
-		gchar *tag = exif_item_get_tag_name(item);
+		g_autofree gchar *tag = exif_item_get_tag_name(item);
 		log_printf("exif tag %s data size mismatch\n", tag);
-		g_free(tag);
 		return;
 		}
 
@@ -1216,17 +1215,11 @@ ExifData *exif_read(gchar *path, gchar *, GHashTable *)
 	gpointer f;
 	gint res;
 	gint size;
-	gchar *pathl;
 
 	if (!path) return nullptr;
 
-	pathl = path_from_utf8(path);
-	if (map_file(pathl, &f, &size) == -1)
-		{
-		g_free(pathl);
-		return nullptr;
-		}
-	g_free(pathl);
+	g_autofree gchar *pathl = path_from_utf8(path);
+	if (map_file(pathl, &f, &size) == -1) return nullptr;
 
 	exif = g_new0(ExifData, 1);
 	exif->path = g_strdup(path);
@@ -1326,7 +1319,6 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 		case EXIF_FORMAT_UNDEFINED:
 			if (ne == 1 && marker->list && format == METADATA_FORMATTED)
 				{
-				gchar *result;
 				guchar val;
 
 				if (item->format == EXIF_FORMAT_BYTE_UNSIGNED ||
@@ -1339,9 +1331,8 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 					val = static_cast<guchar>((static_cast<gchar *>(data))[0]);
 					}
 
-				result = exif_text_list_find_value(marker->list, static_cast<guint>(val));
+				g_autofree gchar *result = exif_text_list_find_value(marker->list, static_cast<guint>(val));
 				string = g_string_append(string, result);
-				g_free(result);
 				}
 			else
 				{
@@ -1354,11 +1345,8 @@ static gchar *exif_item_get_data_as_text_full(ExifItem *item, MetadataFormat for
 		case EXIF_FORMAT_SHORT_UNSIGNED:
 			if (ne == 1 && marker->list && format == METADATA_FORMATTED)
 				{
-				gchar *result;
-
-				result = exif_text_list_find_value(marker->list, (static_cast<guint16 *>(data))[0]);
+				g_autofree gchar *result = exif_text_list_find_value(marker->list, (static_cast<guint16 *>(data))[0]);
 				string = g_string_append(string, result);
-				g_free(result);
 				}
 			else for (i = 0; i < ne; i++)
 				{
@@ -1512,17 +1500,12 @@ gchar *exif_get_tag_description_by_key(const gchar *key)
 
 static void exif_write_item(FILE *f, ExifItem *item, ExifData *exif)
 {
-	gchar *text;
+	g_autofree gchar *text = exif_item_get_data_as_text(item, exif);
+	if (!text) return;
 
-	text = exif_item_get_data_as_text(item, exif);
-	if (text)
-		{
-		gchar *tag = exif_item_get_tag_name(item);
-		g_fprintf(f, "%4x %9s %30s %s\n", item->tag, ExifFormatList[item->format].short_name,
-			tag, text);
-		g_free(tag);
-		}
-	g_free(text);
+	g_autofree gchar *tag = exif_item_get_tag_name(item);
+	g_fprintf(f, "%4x %9s %30s %s\n",
+	          item->tag, ExifFormatList[item->format].short_name, tag, text);
 }
 
 /**

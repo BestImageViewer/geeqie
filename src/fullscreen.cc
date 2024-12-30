@@ -257,7 +257,7 @@ std::vector<ScreenData> fullscreen_prefs_list()
 	for (gint j = -1; j < monitors; j++)
 		{
 		GdkRectangle rect;
-		gchar *subname;
+		g_autofree gchar *subname = nullptr;
 
 		if (j < 0)
 			{
@@ -285,8 +285,6 @@ std::vector<ScreenData> fullscreen_prefs_list()
 		        sd.number, sd.description.c_str(), sd.geometry.x, sd.geometry.y, sd.geometry.width, sd.geometry.height);
 
 		list.push_back(sd);
-
-		g_free(subname);
 		}
 
 	return list;
