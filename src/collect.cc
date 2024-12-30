@@ -333,7 +333,6 @@ CollectWindow *collection_window_find_by_path(const gchar *path)
 gchar *collection_path(const gchar *param)
 {
 	gchar *path = nullptr;
-	gchar *full_name = nullptr;
 
 	if (file_extension_match(param, GQ_COLLECTION_EXT))
 		{
@@ -341,7 +340,7 @@ gchar *collection_path(const gchar *param)
 		}
 	else if (file_extension_match(param, nullptr))
 		{
-		full_name = g_strconcat(param, GQ_COLLECTION_EXT, NULL);
+		g_autofree gchar *full_name = g_strconcat(param, GQ_COLLECTION_EXT, NULL);
 		path = g_build_filename(get_collections_dir(), full_name, NULL);
 		}
 
@@ -351,7 +350,6 @@ gchar *collection_path(const gchar *param)
 		path = nullptr;
 		}
 
-	g_free(full_name);
 	return path;
 }
 
@@ -364,15 +362,9 @@ gchar *collection_path(const gchar *param)
  */
 gboolean is_collection(const gchar *param)
 {
-	gchar *name = nullptr;
+	g_autofree gchar *name = collection_path(param);
 
-	name = collection_path(param);
-	if (name)
-		{
-		g_free(name);
-		return TRUE;
-		}
-	return FALSE;
+	return name != nullptr;
 }
 
 /**
@@ -384,30 +376,28 @@ gboolean is_collection(const gchar *param)
  */
 void collection_contents(const gchar *name, GString **contents)
 {
-	gchar *path;
 	CollectionData *cd;
 	CollectInfo *ci;
 	GList *work;
 	FileData *fd;
 
-	if (is_collection(name))
-		{
-		path = collection_path(name);
-		cd = collection_new("");
-		collection_load(cd, path, COLLECTION_LOAD_APPEND);
-		work = cd->list;
-		while (work)
-			{
-			ci = static_cast<CollectInfo *>(work->data);
-			fd = ci->fd;
-			*contents = g_string_append(*contents, fd->path);
-			*contents = g_string_append(*contents, "\n");
+	if (!is_collection(name)) return;
 
-			work = work->next;
-			}
-		g_free(path);
-		collection_free(cd);
+	g_autofree gchar *path = collection_path(name);
+	cd = collection_new("");
+	collection_load(cd, path, COLLECTION_LOAD_APPEND);
+	work = cd->list;
+	while (work)
+		{
+		ci = static_cast<CollectInfo *>(work->data);
+		fd = ci->fd;
+		*contents = g_string_append(*contents, fd->path);
+		*contents = g_string_append(*contents, "\n");
+
+		work = work->next;
 		}
+
+	collection_free(cd);
 }
 
 /**
@@ -418,28 +408,26 @@ void collection_contents(const gchar *name, GString **contents)
  */
 GList *collection_contents_fd(const gchar *name)
 {
-	gchar *path;
 	CollectionData *cd;
 	CollectInfo *ci;
 	GList *work;
 	GList *list = nullptr;
 
-	if (is_collection(name))
-		{
-		path = collection_path(name);
-		cd = collection_new("");
-		collection_load(cd, path, COLLECTION_LOAD_APPEND);
-		work = cd->list;
-		while (work)
-			{
-			ci = static_cast<CollectInfo *>(work->data);
-			list = g_list_append(list, ci->fd);
+	if (!is_collection(name)) return nullptr;
 
-			work = work->next;
-			}
-		g_free(path);
-		collection_free(cd);
+	g_autofree gchar *path = collection_path(name);
+	cd = collection_new("");
+	collection_load(cd, path, COLLECTION_LOAD_APPEND);
+	work = cd->list;
+	while (work)
+		{
+		ci = static_cast<CollectInfo *>(work->data);
+		list = g_list_append(list, ci->fd);
+
+		work = work->next;
 		}
+
+	collection_free(cd);
 
 	return list;
 }
@@ -1067,7 +1055,6 @@ static void collection_window_update_title(CollectWindow *cw)
 {
 	gboolean free_name = FALSE;
 	gchar *name;
-	gchar *buf;
 
 	if (!cw) return;
 
@@ -1081,10 +1068,9 @@ static void collection_window_update_title(CollectWindow *cw)
 		name = cw->cd->name;
 		}
 
-	buf = g_strdup_printf(_("%s - Collection - %s"), name, GQ_APPNAME);
+	g_autofree gchar *buf = g_strdup_printf(_("%s - Collection - %s"), name, GQ_APPNAME);
 	if (free_name) g_free(name);
 	gtk_window_set_title(GTK_WINDOW(cw->window), buf);
-	g_free(buf);
 }
 
 static void collection_window_update_info(CollectionData *, CollectInfo *ci, gpointer data)
@@ -1155,10 +1141,8 @@ static void collection_close_save_cb(GenericDialog *gd, gpointer data)
 
 	if (!collection_save(cw->cd, cw->cd->path))
 		{
-		gchar *buf;
-		buf = g_strdup_printf(_("Failed to save the collection:\n%s"), cw->cd->path);
+		g_autofree gchar *buf = g_strdup_printf(_("Failed to save the collection:\n%s"), cw->cd->path);
 		warning_dialog(_("Save Failed"), buf, GQ_ICON_DIALOG_ERROR, cw->window);
-		g_free(buf);
 		return;
 		}
 

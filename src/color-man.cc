@@ -125,11 +125,8 @@ static cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const 
 		case COLOR_PROFILE_FILE:
 			if (file)
 				{
-				gchar *pathl;
-
-				pathl = path_from_utf8(file);
+				g_autofree gchar *pathl = path_from_utf8(file);
 				profile = cmsOpenProfileFromFile(pathl, "r");
-				g_free(pathl);
 				}
 			break;
 		case COLOR_PROFILE_SRGB:

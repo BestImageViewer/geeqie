@@ -216,7 +216,6 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 			      CacheLoader::DoneFunc done_func, gpointer done_data)
 {
 	CacheLoader *cl;
-	gchar *found;
 
 	if (!fd || !isfile(fd->path)) return nullptr;
 
@@ -226,12 +225,11 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 	cl->done_func = done_func;
 	cl->done_data = done_data;
 
-	found = cache_find_location(CACHE_TYPE_SIM, cl->fd->path);
+	g_autofree gchar *found = cache_find_location(CACHE_TYPE_SIM, cl->fd->path);
 	if (found && filetime(found) == filetime(cl->fd->path))
 		{
 		cl->cd = cache_sim_data_load(found);
 		}
-	g_free(found);
 
 	if (!cl->cd) cl->cd = cache_sim_data_new();
 

@@ -66,9 +66,9 @@ static gboolean log_msg_cb(gpointer data)
 static gboolean log_normal_cb(gpointer data)
 {
 	auto buf = static_cast<gchar *>(data);
-	gchar *buf_casefold = g_utf8_casefold(buf, -1);
-	gchar *error_casefold = g_utf8_casefold(_("error"), -1);
-	gchar *warning_casefold = g_utf8_casefold(_("warning"), -1);
+	g_autofree gchar *buf_casefold = g_utf8_casefold(buf, -1);
+	g_autofree gchar *error_casefold = g_utf8_casefold(_("error"), -1);
+	g_autofree gchar *warning_casefold = g_utf8_casefold(_("warning"), -1);
 
 	if (buf_casefold == g_strstr_len(buf_casefold, -1, error_casefold))
 		{
@@ -84,9 +84,6 @@ static gboolean log_normal_cb(gpointer data)
 		}
 
 	g_free(buf);
-	g_free(buf_casefold);
-	g_free(error_casefold);
-	g_free(warning_casefold);
 	return FALSE;
 }
 
@@ -112,13 +109,12 @@ static void log_domain_print_message(const gchar *domain, const gchar *buf)
 void log_domain_print_debug(const gchar *domain, const gchar *file_name, int line_number, const gchar *function_name, const gchar *format, ...)
 {
 	va_list ap;
-	gchar *message;
-	gchar *location;
 
 	va_start(ap, format);
-	message = g_strdup_vprintf(format, ap);
+	g_autofree gchar *message = g_strdup_vprintf(format, ap);
 	va_end(ap);
 
+	g_autofree gchar *location = nullptr;
 	if (options && options->log_window.timer_data)
 		{
 		location = g_strdup_printf("%s:%s:%d:%s:", get_exec_time(), file_name, line_number, function_name);
@@ -130,8 +126,6 @@ void log_domain_print_debug(const gchar *domain, const gchar *file_name, int lin
 
 	g_autofree gchar *buf = g_strconcat(location, message, NULL);
 	log_domain_print_message(domain, buf);
-	g_free(location);
-	g_free(message);
 }
 
 void log_domain_printf(const gchar *domain, const gchar *format, ...)
@@ -264,10 +258,6 @@ void log_print_backtrace(const gchar *file, gint line, const gchar *function)
 	FILE *fp;
 	char **bt_syms;
 	char path[2048];
-	gchar *address_offset;
-	gchar *cmd_line;
-	gchar *exe_path;
-	gchar *function_name = nullptr;
 	gchar *paren_end;
 	gchar *paren_start;
 	gint bt_size;
@@ -276,7 +266,7 @@ void log_print_backtrace(const gchar *file, gint line, const gchar *function)
 
 	if (runcmd(reinterpret_cast<const gchar *>("which addr2line >/dev/null 2>&1")) == 0)
 		{
-		exe_path = g_path_get_dirname(gq_executable_path);
+		g_autofree gchar *exe_path = g_path_get_dirname(gq_executable_path);
 		bt_size = backtrace(bt, 1024);
 		bt_syms = backtrace_symbols(bt, bt_size);
 
@@ -290,9 +280,9 @@ void log_print_backtrace(const gchar *file, gint line, const gchar *function)
 				{
 				paren_start = g_strstr_len(bt_syms[i], -1, "(");
 				paren_end = g_strstr_len(bt_syms[i], -1, ")");
-				address_offset = g_strndup(paren_start + 1, paren_end - paren_start - 1);
+				g_autofree gchar *address_offset = g_strndup(paren_start + 1, paren_end - paren_start - 1);
 
-				cmd_line = g_strconcat("addr2line -p -f -C -e ", gq_executable_path, " ", address_offset, NULL);
+				g_autofree gchar *cmd_line = g_strconcat("addr2line -p -f -C -e ", gq_executable_path, " ", address_offset, NULL);
 
 				fp = popen(cmd_line, "r");
 				if (fp == nullptr)
@@ -310,30 +300,18 @@ void log_print_backtrace(const gchar *file, gint line, const gchar *function)
 						path[path_len] = '\0';
 
 						gchar *paren = g_strstr_len(path, path_len, "(");
-						if (paren != nullptr)
-							{
-							function_name = g_strndup(path, paren - path);
-							}
-						else
-							{
-							function_name = g_strdup("");
-							}
-						log_printf("%s %s", g_strstr_len(path, -1, "at ") + 3, function_name);
+						g_autofree gchar *function_name = paren ? g_strndup(path, paren - path) : g_strdup("");
 
-						g_free(function_name);
+						log_printf("%s %s", g_strstr_len(path, -1, "at ") + 3, function_name);
 						}
 					}
 
 				pclose(fp);
-
-				g_free(address_offset);
-				g_free(cmd_line);
 				}
 			}
 		log_printf("Backtrace end");
 
 		free(bt_syms);
-		g_free(exe_path);
 		}
 }
 #else
@@ -353,9 +331,7 @@ void log_print_backtrace(const gchar *, gint, const gchar *)
  */
 void log_print_file_data_dump(const gchar *file, gint line, const gchar *function)
 {
-	gchar *exe_path;
-
-	exe_path = g_path_get_dirname(gq_executable_path);
+	g_autofree gchar *exe_path = g_path_get_dirname(gq_executable_path);
 
 	log_printf("FileData dump start");
 	log_printf("%s/../%s:%d %s\n", exe_path, file, line, function);
@@ -363,8 +339,6 @@ void log_print_file_data_dump(const gchar *file, gint line, const gchar *functio
 	file_data_dump();
 
 	log_printf("FileData dump end");
-
-	g_free(exe_path);
 }
 
 #endif /* DEBUG */

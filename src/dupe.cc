@@ -270,7 +270,7 @@ static void dupe_comparison_func(gpointer d1, gpointer d2)
  */
 static void dupe_window_update_count(DupeWindow *dw, gboolean count_only)
 {
-	gchar *text;
+	g_autofree gchar *text = nullptr;
 
 	if (!dw->list)
 		{
@@ -287,13 +287,11 @@ static void dupe_window_update_count(DupeWindow *dw, gboolean count_only)
 
 	if (dw->second_set)
 		{
-		gchar *buf = g_strconcat(text, " ", _("[set 1]"), NULL);
-		g_free(text);
-		text = buf;
+		g_autofree gchar *buf = g_strconcat(text, " ", _("[set 1]"), NULL);
+		std::swap(text, buf);
 		}
-	gtk_label_set_text(GTK_LABEL(dw->status_label), text);
 
-	g_free(text);
+	gtk_label_set_text(GTK_LABEL(dw->status_label), text);
 }
 
 /**
@@ -344,7 +342,6 @@ static void dupe_window_update_progress(DupeWindow *dw, const gchar *status, gdo
 		    dw->setup_count > 0 &&
 		    new_time > 2000000)
 			{
-			gchar *buf;
 			gint t;
 			gint d;
 			guint32 rem;
@@ -375,9 +372,8 @@ static void dupe_window_update_progress(DupeWindow *dw, const gchar *status, gdo
 
 			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(dw->extra_label), value);
 
-			buf = g_strdup_printf("%s %d:%02d ", status, rem / 60, rem % 60);
+			g_autofree gchar *buf = g_strdup_printf("%s %d:%02d ", status, rem / 60, rem % 60);
 			gtk_progress_bar_set_text(GTK_PROGRESS_BAR(dw->extra_label), buf);
-			g_free(buf);
 
 			return;
 			}
@@ -485,42 +481,37 @@ static void dupe_item_free(DupeItem *di)
 
 static void dupe_item_read_cache(DupeItem *di)
 {
-	gchar *path;
 	CacheData *cd;
 
 	if (!di) return;
 
-	path = cache_find_location(CACHE_TYPE_SIM, di->fd->path);
+	g_autofree gchar *path = cache_find_location(CACHE_TYPE_SIM, di->fd->path);
 	if (!path) return;
 
-	if (filetime(di->fd->path) != filetime(path))
-		{
-		g_free(path);
-		return;
-		}
+	if (filetime(di->fd->path) != filetime(path)) return;
 
 	cd = cache_sim_data_load(path);
-	g_free(path);
+	if (!cd) return;
 
-	if (cd)
+	if (!di->simd && cd->sim)
 		{
-		if (!di->simd && cd->sim)
-			{
-			di->simd = cd->sim;
-			cd->sim = nullptr;
-			}
-		if (di->width == 0 && di->height == 0 && cd->dimensions)
-			{
-			di->width = cd->width;
-			di->height = cd->height;
-			di->dimensions = (di->width << 16) + di->height;
-			}
-		if (!di->md5sum && cd->have_md5sum)
-			{
-			di->md5sum = md5_digest_to_text(cd->md5sum);
-			}
-		cache_sim_data_free(cd);
+		di->simd = cd->sim;
+		cd->sim = nullptr;
 		}
+
+	if (di->width == 0 && di->height == 0 && cd->dimensions)
+		{
+		di->width = cd->width;
+		di->height = cd->height;
+		di->dimensions = (di->width << 16) + di->height;
+		}
+
+	if (!di->md5sum && cd->have_md5sum)
+		{
+		di->md5sum = md5_digest_to_text(cd->md5sum);
+		}
+
+	cache_sim_data_free(cd);
 }
 
 static void dupe_item_write_cache(DupeItem *di)
@@ -580,7 +571,6 @@ static void dupe_listview_add(DupeWindow *dw, DupeItem *parent, DupeItem *child)
 {
 	DupeItem *di;
 	gint row;
-	gchar *text[DUPE_COLUMN_COUNT];
 	GtkListStore *store;
 	GtkTreeIter iter;
 	gboolean color_set = FALSE;
@@ -628,46 +618,45 @@ static void dupe_listview_add(DupeWindow *dw, DupeItem *parent, DupeItem *child)
 
 	di = (child) ? child : parent;
 
+	g_autofree gchar *rank_text = nullptr;
 	if (!child && dw->second_set)
 		{
-		text[DUPE_COLUMN_RANK] = g_strdup("[1]");
+		rank_text = g_strdup("[1]");
 		}
 	else if (rank == 0)
 		{
-		text[DUPE_COLUMN_RANK] = g_strdup((di->second) ? "(2)" : "");
+		rank_text = g_strdup((di->second) ? "(2)" : "");
 		}
 	else
 		{
-		text[DUPE_COLUMN_RANK] = g_strdup_printf("%d%s", rank, (di->second) ? " (2)" : "");
+		rank_text = g_strdup_printf("%d%s", rank, (di->second) ? " (2)" : "");
 		}
 
-	text[DUPE_COLUMN_SIZE] = text_from_size(di->fd->size);
+	g_autofree gchar *size_text = text_from_size(di->fd->size);
+
+	g_autofree gchar *dimensions_text = nullptr;
 	if (di->width > 0 && di->height > 0)
 		{
-		text[DUPE_COLUMN_DIMENSIONS] = g_strdup_printf("%d x %d", di->width, di->height);
+		dimensions_text = g_strdup_printf("%d x %d", di->width, di->height);
 		}
 	else
 		{
-		text[DUPE_COLUMN_DIMENSIONS] = g_strdup("");
+		dimensions_text = g_strdup("");
 		}
 
 	gtk_list_store_insert(store, &iter, row);
 	gtk_list_store_set(store, &iter,
 	                   DUPE_COLUMN_POINTER, di,
-	                   DUPE_COLUMN_RANK, text[DUPE_COLUMN_RANK],
+	                   DUPE_COLUMN_RANK, rank_text,
 	                   DUPE_COLUMN_THUMB, NULL,
 	                   DUPE_COLUMN_NAME, di->fd->name,
-	                   DUPE_COLUMN_SIZE, text[DUPE_COLUMN_SIZE],
+	                   DUPE_COLUMN_SIZE, size_text,
 	                   DUPE_COLUMN_DATE, text_from_time(di->fd->date),
-	                   DUPE_COLUMN_DIMENSIONS, text[DUPE_COLUMN_DIMENSIONS],
+	                   DUPE_COLUMN_DIMENSIONS, dimensions_text,
 	                   DUPE_COLUMN_PATH, di->fd->path,
 	                   DUPE_COLUMN_COLOR, color_set,
 	                   DUPE_COLUMN_SET, dw->set_count,
 	                   -1);
-
-	g_free(text[DUPE_COLUMN_RANK]);
-	g_free(text[DUPE_COLUMN_SIZE]);
-	g_free(text[DUPE_COLUMN_DIMENSIONS]);
 }
 
 static void dupe_listview_select_dupes(DupeWindow *dw, DupeSelectType parents);
@@ -2346,7 +2335,6 @@ static gboolean dupe_check_cb(gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 	DupeSearchMatch *search_match_list_item;
-	gchar *progress_text;
 
 	if (!dw->idle_id)
 		{
@@ -2442,11 +2430,9 @@ static gboolean dupe_check_cb(gpointer data)
 			{
 			if( dw->thread_count < dw->queue_count)
 				{
-				progress_text = g_strdup_printf("%s %d%s%d", _("Comparing"), dw->thread_count, "/", dw->queue_count);
+				g_autofree gchar *progress_text = g_strdup_printf("%s %d/%d", _("Comparing"), dw->thread_count, dw->queue_count);
 
 				dupe_window_update_progress(dw, progress_text, (gdouble)dw->thread_count / dw->queue_count, TRUE);
-
-				g_free(progress_text);
 
 				return G_SOURCE_CONTINUE;
 				}
@@ -3038,7 +3024,6 @@ static GtkWidget *dupe_display_label(GtkWidget *vbox, const gchar *description, 
 static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 {
 	GenericDialog *gd;
-	gchar *buf;
 
 	if (!di) return;
 
@@ -3048,13 +3033,15 @@ static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), nullptr, TRUE);
 
 	dupe_display_label(gd->vbox, "name:", di->fd->name);
-	buf = text_from_size(di->fd->size);
-	dupe_display_label(gd->vbox, "size:", buf);
-	g_free(buf);
+
+	g_autofree gchar *size_buf = text_from_size(di->fd->size);
+	dupe_display_label(gd->vbox, "size:", size_buf);
+
 	dupe_display_label(gd->vbox, "date:", text_from_time(di->fd->date));
-	buf = g_strdup_printf("%d x %d", di->width, di->height);
-	dupe_display_label(gd->vbox, "dimensions:", buf);
-	g_free(buf);
+
+	g_autofree gchar *dimensions_buf = g_strdup_printf("%d x %d", di->width, di->height);
+	dupe_display_label(gd->vbox, "dimensions:", dimensions_buf);
+
 	dupe_display_label(gd->vbox, "md5sum:", (di->md5sum) ? di->md5sum : "not generated");
 
 	dupe_display_label(gd->vbox, "thumbprint:", (di->simd) ? "" : "not generated");
@@ -3642,11 +3629,8 @@ static gboolean dupe_listview_release_cb(GtkWidget *widget, GdkEventButton *beve
 
 static void dupe_second_update_status(DupeWindow *dw)
 {
-	gchar *buf;
-
-	buf = g_strdup_printf(_("%d files (set 2)"), g_list_length(dw->second_list));
+	g_autofree gchar *buf = g_strdup_printf(_("%d files (set 2)"), g_list_length(dw->second_list));
 	gtk_label_set_text(GTK_LABEL(dw->second_status_label), buf);
-	g_free(buf);
 }
 
 static void dupe_second_add(DupeWindow *dw, DupeItem *di)
@@ -5116,17 +5100,14 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 	DupeItem *di;
 	GFileOutputStream *gfstream;
 	GFile *out_file;
-	gchar* rank;
 	GList *work;
 	GtkTreeSelection *selection;
 	GList *slist;
-	gchar *thumb_cache;
 	gchar **rank_split;
 	GtkTreePath *tpath;
 	gboolean color_old = FALSE;
 	gboolean color_new = FALSE;
 	gint match_count;
-	gchar *name;
 
 	history_list_add_to_key("export_duplicates", fdlg->dest_path, -1);
 
@@ -5182,6 +5163,7 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 			}
 		output_string = g_string_append(output_string, sep);
 
+		g_autofree gchar *rank = nullptr;
 		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, DUPE_COLUMN_RANK, &rank, -1);
 		rank_split = g_strsplit_set(rank, " [(", -1);
 		if (rank_split[0] == nullptr)
@@ -5193,28 +5175,19 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 			output_string = g_string_append(output_string, rank_split[0]);
 			}
 		output_string = g_string_append(output_string, sep);
-		g_free(rank);
 		g_strfreev(rank_split);
 
 		g_string_append_printf(output_string, "%d", di->second + 1);
 		output_string = g_string_append(output_string, sep);
 
-		thumb_cache = cache_find_location(CACHE_TYPE_THUMB, di->fd->path);
-		if (thumb_cache)
-			{
-			output_string = g_string_append(output_string, thumb_cache);
-			g_free(thumb_cache);
-			}
-		else
-			{
-			output_string = g_string_append(output_string, "");
-			}
+		g_autofree gchar *thumb_cache = cache_find_location(CACHE_TYPE_THUMB, di->fd->path);
+		output_string = g_string_append(output_string, thumb_cache ? thumb_cache : "");
 		output_string = g_string_append(output_string, sep);
 
+		g_autofree gchar *name = nullptr;
 		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, DUPE_COLUMN_NAME, &name, -1);
 		output_string = g_string_append(output_string, name);
 		output_string = g_string_append(output_string, sep);
-		g_free(name);
 
 		g_string_append_printf(output_string, "%" PRId64, di->fd->size);
 		output_string = g_string_append(output_string, sep);
@@ -5244,7 +5217,7 @@ static void pop_menu_export(GList *, gpointer dupe_window, gpointer data)
 	auto dw = static_cast<DupeWindow *>(dupe_window);
 	const gchar *title = _("Export duplicates data");
 	const gchar *default_path = "/tmp/";
-	gchar *file_extension;
+	const gchar *file_extension = nullptr;
 	ExportDupesData *edd;
 	const gchar *previous_path;
 
@@ -5255,11 +5228,11 @@ static void pop_menu_export(GList *, gpointer dupe_window, gpointer data)
 		{
 		case EXPORT_CSV:
 			edd->separator = EXPORT_CSV;
-			file_extension = g_strdup(".csv");
+			file_extension = ".csv";
 			break;
 		case EXPORT_TSV:
 			edd->separator = EXPORT_TSV;
-			file_extension = g_strdup(".tsv");
+			file_extension = ".tsv";
 			break;
 		default:
 			return;
@@ -5275,8 +5248,6 @@ static void pop_menu_export(GList *, gpointer dupe_window, gpointer data)
 	edd->dupewindow = dw;
 
 	gtk_widget_show(GENERIC_DIALOG(edd->dialog)->dialog);
-
-	g_free(file_extension);
 }
 
 static void dupe_pop_menu_export_cb(GtkWidget *widget, gpointer data)

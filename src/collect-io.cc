@@ -101,7 +101,6 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 {
 	gchar s_buf[GQ_COLLECTION_READ_BUFSIZE];
 	FILE *f;
-	gchar *pathl;
 	gboolean limit_failures = TRUE;
 	gboolean success = TRUE;
 	gboolean has_official_header = FALSE;
@@ -138,13 +137,12 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 
 	if (!path) path = cd->path;
 
-	pathl = path_from_utf8(path);
+	g_autofree gchar *pathl = path_from_utf8(path);
 
 	DEBUG_1("collection load: append=%d flush=%d only_geometry=%d path=%s", append, flush, only_geometry, pathl);
 
 	/* load it */
 	f = fopen(pathl, "r");
-	g_free(pathl);
 	if (!f)
 		{
 		log_printf("Failed to open collection file: \"%s\"\n", path);
@@ -318,9 +316,9 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 					if (!found)
 						{
 						log_printf("%s is a file on an unmounted filesystem: %s", buffer2, cd->path);
-						gchar *text = g_strdup_printf(_("This Collection cannot be opened because it contains a link to a file on a drive which is not yet mounted.\n\nCollection: %s\nFile: %s\n"), cd->path, buffer2);
+						g_autofree gchar *text = g_strdup_printf(_("This Collection cannot be opened because it contains a link to a file on a drive which is not yet mounted.\n\nCollection: %s\nFile: %s\n"),
+						                                         cd->path, buffer2);
 						warning_dialog(_("Cannot open Collection"), text, GQ_ICON_DIALOG_WARNING, nullptr);
-						g_free(text);
 
 						collection_window_close_by_collection(cd);
 						success = FALSE;
@@ -494,7 +492,6 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 {
 	SecureSaveInfo *ssi;
 	GList *work;
-	gchar *pathl;
 
 	if (!path && !cd->path) return FALSE;
 
@@ -503,10 +500,8 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 		path = cd->path;
 		}
 
-
-	pathl = path_from_utf8(path);
+	g_autofree gchar *pathl = path_from_utf8(path);
 	ssi = secure_open(pathl);
-	g_free(pathl);
 	if (!ssi)
 		{
 		log_printf(_("failed to open collection (write) \"%s\"\n"), path);
@@ -541,10 +536,9 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 
 	if (!cd->path || strcmp(path, cd->path) != 0)
 		{
-		gchar *buf = cd->path;
+		g_autofree gchar *buf = cd->path;
 		cd->path = g_strdup(path);
 		path = cd->path;
-		g_free(buf);
 
 		g_free(cd->name);
 		cd->name = g_strdup(filename_from_path(cd->path));

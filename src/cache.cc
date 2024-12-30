@@ -207,13 +207,10 @@ static gboolean cache_sim_write_date(SecureSaveInfo *ssi, CacheData *cd)
 
 static gboolean cache_sim_write_md5sum(SecureSaveInfo *ssi, CacheData *cd)
 {
-	gchar *text;
-
 	if (!cd || !cd->have_md5sum) return FALSE;
 
-	text = md5_digest_to_text(cd->md5sum);
+	g_autofree gchar *text = md5_digest_to_text(cd->md5sum);
 	secure_fprintf(ssi, "MD5sum=[%s]\n", text);
-	g_free(text);
 
 	return TRUE;
 }
@@ -253,14 +250,11 @@ static gboolean cache_sim_write_similarity(SecureSaveInfo *ssi, CacheData *cd)
 gboolean cache_sim_data_save(CacheData *cd)
 {
 	SecureSaveInfo *ssi;
-	gchar *pathl;
 
 	if (!cd || !cd->path) return FALSE;
 
-	pathl = path_from_utf8(cd->path);
+	g_autofree gchar *pathl = path_from_utf8(cd->path);
 	ssi = secure_open(pathl);
-	g_free(pathl);
-
 	if (!ssi)
 		{
 		log_printf("Unable to save sim cache data: %s\n", cd->path);
@@ -507,14 +501,11 @@ CacheData *cache_sim_data_load(const gchar *path)
 	CacheData *cd = nullptr;
 	gchar buf[32];
 	gint success = CACHE_LOAD_LINE_NOISE;
-	gchar *pathl;
 
 	if (!path) return nullptr;
 
-	pathl = path_from_utf8(path);
+	g_autofree gchar *pathl = path_from_utf8(path);
 	f = fopen(pathl, "r");
-	g_free(pathl);
-
 	if (!f) return nullptr;
 
 	cd = cache_sim_data_new();
@@ -692,14 +683,12 @@ gboolean cache_time_valid(const gchar *cache, const gchar *path)
 {
 	struct stat cache_st;
 	struct stat path_st;
-	gchar *cachel;
-	gchar *pathl;
 	gboolean ret = FALSE;
 
 	if (!cache || !path) return FALSE;
 
-	cachel = path_from_utf8(cache);
-	pathl = path_from_utf8(path);
+	g_autofree gchar *cachel = path_from_utf8(cache);
+	g_autofree gchar *pathl = path_from_utf8(path);
 
 	if (stat(cachel, &cache_st) == 0 &&
 	    stat(pathl, &path_st) == 0)
@@ -721,9 +710,6 @@ gboolean cache_time_valid(const gchar *cache, const gchar *path)
 				}
 			}
 		}
-
-	g_free(pathl);
-	g_free(cachel);
 
 	return ret;
 }

@@ -124,14 +124,13 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 
 	if (items > 1)
 		{
-		gchar *buf;
 		gint lw;
 		gint lh;
 
 		layout = gtk_widget_create_pango_layout(widget, nullptr);
-		buf = g_strdup_printf("<small> %d </small>", items);
+
+		g_autofree gchar *buf = g_strdup_printf("<small> %d </small>", items);
 		pango_layout_set_markup(layout, buf, -1);
-		g_free(buf);
 
 		pango_layout_get_pixel_size(layout, &lw, &lh);
 

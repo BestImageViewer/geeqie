@@ -436,11 +436,8 @@ gqv_cell_renderer_icon_set_property(GObject		*object,
 		break;
 	case PROP_TEXT:
 		{
-		gchar *text;
-
-		text = cellicon->text;
+		g_autofree gchar *text = cellicon->text;
 		cellicon->text = g_strdup(g_value_get_string(value));
-		g_free(text);
 
 		g_object_notify(object, "text");
 		}

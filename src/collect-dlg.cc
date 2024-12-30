@@ -58,7 +58,6 @@ static void collection_confirm_cancel_cb(GenericDialog *gdlg, gpointer)
 
 static void collection_save_confirmed(GenericDialog *gdlg, gboolean overwrite, CollectionData *cd)
 {
-	gchar *buf;
 	GenericDialog *gdlg_overwrite;
 
 	generic_dialog_close(gdlg);
@@ -76,9 +75,8 @@ static void collection_save_confirmed(GenericDialog *gdlg, gboolean overwrite, C
 
 	if (!collection_save(cd, cd->collection_path))
 		{
-		buf = g_strdup_printf(_("Failed to save the collection:\n%s"), cd->collection_path);
+		g_autofree gchar *buf = g_strdup_printf(_("Failed to save the collection:\n%s"), cd->collection_path);
 		file_util_warning_dialog(_("Save Failed"), buf, GQ_ICON_DIALOG_ERROR, GENERIC_DIALOG(gdlg)->dialog);
-		g_free(buf);
 		}
 
 	collection_unref(cd);

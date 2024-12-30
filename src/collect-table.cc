@@ -264,7 +264,6 @@ static guint collection_table_selection_count(CollectTable *ct, gint64 *bytes)
 
 static void collection_table_update_status(CollectTable *ct)
 {
-	gchar *buf;
 	guint n;
 	gint64 n_bytes = 0;
 	guint s;
@@ -275,19 +274,17 @@ static void collection_table_update_status(CollectTable *ct)
 	n = collection_table_list_count(ct, &n_bytes);
 	s = collection_table_selection_count(ct, &s_bytes);
 
+	g_autofree gchar *buf = nullptr;
 	if (s > 0)
 		{
-		gchar *b = text_from_size_abrev(n_bytes);
-		gchar *sb = text_from_size_abrev(s_bytes);
+		g_autofree gchar *b = text_from_size_abrev(n_bytes);
+		g_autofree gchar *sb = text_from_size_abrev(s_bytes);
 		buf = g_strdup_printf(_("%s, %d images (%s, %d)"), b, n, sb, s);
-		g_free(b);
-		g_free(sb);
 		}
 	else if (n > 0)
 		{
-		gchar *b = text_from_size_abrev(n_bytes);
+		g_autofree gchar *b = text_from_size_abrev(n_bytes);
 		buf = g_strdup_printf(_("%s, %d images"), b, n);
-		g_free(b);
 		}
 	else
 		{
@@ -295,7 +292,6 @@ static void collection_table_update_status(CollectTable *ct)
 		}
 
 	gtk_label_set_text(GTK_LABEL(ct->status_label), buf);
-	g_free(buf);
 }
 
 static void collection_table_update_extras(CollectTable *ct, gboolean loading, gdouble value)
@@ -2175,7 +2171,7 @@ static void collection_table_dnd_get(GtkWidget *, GdkDragContext *,
 	auto ct = static_cast<CollectTable *>(data);
 	gboolean selected;
 	GList *list = nullptr;
-	gchar *uri_text = nullptr;
+	g_autofree gchar *uri_text = nullptr;
 	gint total;
 
 	if (!ct->click_info) return;
@@ -2197,7 +2193,6 @@ static void collection_table_dnd_get(GtkWidget *, GdkDragContext *,
 				}
 			gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data),
 						8, reinterpret_cast<guchar *>(uri_text), total);
-			g_free(uri_text);
 			break;
 		case TARGET_URI_LIST:
 		case TARGET_TEXT_PLAIN:
@@ -2382,12 +2377,12 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 	auto cd = static_cast<ColumnData *>(data);
 	CollectInfo *info;
 	CollectTable *ct;
-	gchar *display_text = nullptr;
-	gchar *star_rating = nullptr;
 	GdkRGBA color_bg;
 	GdkRGBA color_fg;
 	GList *list;
 	GtkStyle *style;
+
+	if (!GQV_IS_CELL_RENDERER_ICON(cell)) return;
 
 	ct = cd->ct;
 
@@ -2419,6 +2414,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 		shift_color(&color_bg, -1, 0);
 		}
 
+	g_autofree gchar *star_rating = nullptr;
 	if (ct->show_stars && info && info->fd)
 		{
 		star_rating = metadata_read_rating_stars(info->fd);
@@ -2428,6 +2424,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 		star_rating = g_strdup("");
 		}
 
+	g_autofree gchar *display_text = nullptr;
 	if (info && info->fd)
 		{
 		if (ct->show_text && ct->show_stars)
@@ -2440,7 +2437,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 			}
 		else if (ct->show_stars)
 			{
-			display_text = g_strdup(star_rating);
+			display_text = g_steal_pointer(&star_rating);
 			}
 		else
 			{
@@ -2452,30 +2449,29 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 		display_text = g_strdup("");
 		}
 
-	if (GQV_IS_CELL_RENDERER_ICON(cell))
-		{
-		if (info)
-			{
-			g_object_set(cell,	"pixbuf", info->pixbuf,
-						"text",  display_text,
-						"cell-background-rgba", &color_bg,
-						"cell-background-set", TRUE,
-						"foreground-rgba", &color_fg,
-						"foreground-set", TRUE,
-						"has-focus", (ct->focus_info == info), NULL);
-			}
-		else
-			{
-			g_object_set(cell,	"pixbuf", NULL,
-						"text", NULL,
-						"cell-background-set", FALSE,
-						"foreground-set", FALSE,
-						"has-focus", FALSE,  NULL);
-			}
-		}
 
-	g_free(display_text);
-	g_free(star_rating);
+	if (info)
+		{
+		g_object_set(cell,
+		             "pixbuf", info->pixbuf,
+		             "text", display_text,
+		             "cell-background-rgba", &color_bg,
+		             "cell-background-set", TRUE,
+		             "foreground-rgba", &color_fg,
+		             "foreground-set", TRUE,
+		             "has-focus", (ct->focus_info == info),
+		             NULL);
+		}
+	else
+		{
+		g_object_set(cell,
+		             "pixbuf", NULL,
+		             "text", NULL,
+		             "cell-background-set", FALSE,
+		             "foreground-set", FALSE,
+		             "has-focus", FALSE,
+		             NULL);
+		}
 }
 
 static void collection_table_append_column(CollectTable *ct, gint n)

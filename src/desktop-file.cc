@@ -81,9 +81,6 @@ EditorListWindow *editor_list_window = nullptr;
 
 gboolean editor_window_save(EditorWindow *ew)
 {
-	gchar *dir;
-	gchar *path;
-	gchar *text;
 	GtkTextIter start;
 	GtkTextIter end;
 	GError *error = nullptr;
@@ -97,10 +94,10 @@ gboolean editor_window_save(EditorWindow *ew)
 		}
 
 	gtk_text_buffer_get_bounds(ew->buffer, &start, &end);
-	text = gtk_text_buffer_get_text(ew->buffer, &start, &end, FALSE);
+	g_autofree gchar *text = gtk_text_buffer_get_text(ew->buffer, &start, &end, FALSE);
 
-	dir = g_build_filename(get_rc_dir(), "applications", NULL);
-	path = g_build_filename(dir, name, NULL);
+	g_autofree gchar *dir = g_build_filename(get_rc_dir(), "applications", NULL);
+	g_autofree gchar *path = g_build_filename(dir, name, NULL);
 
 	if (!recursive_mkdir_if_not_exists(dir, 0755))
 		{
@@ -115,9 +112,6 @@ gboolean editor_window_save(EditorWindow *ew)
 		ret = FALSE;
 		}
 
-	g_free(path);
-	g_free(dir);
-	g_free(text);
 	layout_editors_reload_start();
 	/* idle function is not needed, everything should be cached */
 	layout_editors_reload_finish();
@@ -308,9 +302,8 @@ void editor_list_window_delete_dlg_ok_cb(GenericDialog *gd, gpointer data)
 
 	if (!unlink_file(ewdl->path))
 		{
-		gchar *text = g_strdup_printf(_("Unable to delete file:\n%s"), ewdl->path);
+		g_autofree gchar *text = g_strdup_printf(_("Unable to delete file:\n%s"), ewdl->path);
 		warning_dialog(_("File deletion failed"), text, GQ_ICON_DIALOG_WARNING, nullptr);
-		g_free(text);
 		}
 	else
 		{
@@ -333,12 +326,10 @@ void editor_list_window_delete_cb(GtkWidget *, gpointer data)
 		{
 		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(ewl->view));
 		gchar *path;
-		gchar *key;
-		gchar *text;
 
 		gtk_tree_model_get(store, &iter,
-				   DESKTOP_FILE_COLUMN_PATH, &path,
-				   DESKTOP_FILE_COLUMN_KEY, &key, -1);
+		                   DESKTOP_FILE_COLUMN_PATH, &path,
+		                   -1);
 
 		auto *ewdl = g_new(EditorWindowDelData, 1);
 		ewdl->ewl = ewl;
@@ -357,10 +348,9 @@ void editor_list_window_delete_cb(GtkWidget *, gpointer data)
 
 		generic_dialog_add_button(ewl->gd, GQ_ICON_DELETE, _("Delete"), editor_list_window_delete_dlg_ok_cb, TRUE);
 
-		text = g_strdup_printf(_("About to delete the file:\n %s"), path);
+		g_autofree gchar *text = g_strdup_printf(_("About to delete the file:\n %s"), path);
 		generic_dialog_add_message(ewl->gd, GQ_ICON_DIALOG_QUESTION,
 					   _("Delete file"), text, TRUE);
-		g_free(text);
 
 		gtk_widget_show(ewl->gd->dialog);
 		}
@@ -372,19 +362,17 @@ void editor_list_window_edit_cb(GtkWidget *, gpointer data)
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));
 	GtkTreeIter iter;
 
-	if (gtk_tree_selection_get_selected(sel, nullptr, &iter))
-		{
-		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(ewl->view));
-		gchar *path;
-		gchar *key;
+	if (!gtk_tree_selection_get_selected(sel, nullptr, &iter)) return;
 
-		gtk_tree_model_get(store, &iter,
-				   DESKTOP_FILE_COLUMN_PATH, &path,
-				   DESKTOP_FILE_COLUMN_KEY, &key, -1);
-		editor_window_new(path, key);
-		g_free(key);
-		g_free(path);
-		}
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(ewl->view));
+	g_autofree gchar *path = nullptr;
+	g_autofree gchar *key = nullptr;
+
+	gtk_tree_model_get(store, &iter,
+	                   DESKTOP_FILE_COLUMN_PATH, &path,
+	                   DESKTOP_FILE_COLUMN_KEY, &key,
+	                   -1);
+	editor_window_new(path, key);
 }
 
 void editor_list_window_new_cb(GtkWidget *, gpointer)
@@ -403,20 +391,17 @@ void editor_list_window_selection_changed_cb(GtkWidget *, gpointer data)
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));
 	GtkTreeIter iter;
 
-	if (gtk_tree_selection_get_selected(sel, nullptr, &iter))
-		{
-		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(ewl->view));
-		gchar *path;
+	if (!gtk_tree_selection_get_selected(sel, nullptr, &iter)) return;
 
-		gtk_tree_model_get(store, &iter,
-						   DESKTOP_FILE_COLUMN_PATH, &path,
-						   -1);
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(ewl->view));
+	g_autofree gchar *path = nullptr;
 
-		gtk_widget_set_sensitive(ewl->delete_button, access_file(path, W_OK));
-		gtk_widget_set_sensitive(ewl->edit_button, TRUE);
-		g_free(path);
-		}
+	gtk_tree_model_get(store, &iter,
+	                   DESKTOP_FILE_COLUMN_PATH, &path,
+	                   -1);
 
+	gtk_widget_set_sensitive(ewl->delete_button, access_file(path, W_OK));
+	gtk_widget_set_sensitive(ewl->edit_button, TRUE);
 }
 
 gint editor_list_window_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)

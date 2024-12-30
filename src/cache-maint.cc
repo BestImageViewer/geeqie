@@ -212,11 +212,9 @@ static gboolean isempty(const gchar *path)
 {
 	DIR *dp;
 	struct dirent *dir;
-	gchar *pathl;
 
-	pathl = path_from_utf8(path);
+	g_autofree gchar *pathl = path_from_utf8(path);
 	dp = opendir(pathl);
-	g_free(pathl);
 	if (!dp) return FALSE;
 
 	while ((dir = readdir(dp)) != nullptr)
@@ -309,7 +307,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 			while (work)
 				{
 				auto fd_list = static_cast<FileData *>(work->data);
-				gchar *path_buf = g_strdup(fd_list->path);
+				g_autofree gchar *path_buf = g_strdup(fd_list->path);
 
 				gchar *dot = strrchr(path_buf, '.');
 
@@ -324,7 +322,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 					{
 					still_have_a_file = TRUE;
 					}
-				g_free(path_buf);
+
 				work = work->next;
 				}
 			}
@@ -720,7 +718,6 @@ static gboolean cache_manager_render_file(CacheOpsData *cd)
 static void cache_manager_render_start_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
-	gchar *path;
 	GList *list_total = nullptr;
 
 	if(!cd->remote)
@@ -728,7 +725,7 @@ static void cache_manager_render_start_cb(GenericDialog *, gpointer data)
 		if (cd->list || !gtk_widget_get_sensitive(cd->button_start)) return;
 		}
 
-	path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(cd->entry))));
+	g_autofree gchar *path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(cd->entry))));
 	parse_out_relatives(path);
 
 	if (!isdir(path))
@@ -766,15 +763,11 @@ static void cache_manager_render_start_cb(GenericDialog *, gpointer data)
 
 		while (cache_manager_render_file(cd));
 		}
-
-	g_free(path);
 }
 
 static void cache_manager_render_start_render_remote(CacheOpsData *cd, const gchar *user_path)
 {
-	gchar *path;
-
-	path = remove_trailing_slash(user_path);
+	g_autofree gchar *path = remove_trailing_slash(user_path);
 	parse_out_relatives(path);
 
 	if (!isdir(path))
@@ -788,10 +781,9 @@ static void cache_manager_render_start_render_remote(CacheOpsData *cd, const gch
 		dir_fd = file_data_new_dir(path);
 		cache_manager_render_folder(cd, dir_fd);
 		file_data_unref(dir_fd);
-		while (cache_manager_render_file(cd));
+		while (cache_manager_render_file(cd))
+			;
 		}
-
-	g_free(path);
 }
 
 static void cache_manager_render_dialog(GtkWidget *widget, const gchar *path)
@@ -1191,11 +1183,9 @@ static void cache_manager_help_cb(GenericDialog *, gpointer)
 static GtkWidget *cache_manager_location_label(GtkWidget *group, const gchar *subdir)
 {
 	GtkWidget *label;
-	gchar *buf;
 
-	buf = g_strdup_printf(_("Location: %s"), subdir);
+	g_autofree gchar *buf = g_strdup_printf(_("Location: %s"), subdir);
 	label = pref_label_new(group, buf);
-	g_free(buf);
 	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
 	gtk_label_set_yalign(GTK_LABEL(label), 0.5);
 
@@ -1282,9 +1272,7 @@ static void cache_manager_sim_file_done_cb(CacheLoader *, gint, gpointer data)
 
 static void cache_manager_sim_start_sim_remote(GtkApplication *, CacheOpsData *cd, const gchar *user_path)
 {
-	gchar *path;
-
-	path = remove_trailing_slash(user_path);
+	g_autofree gchar *path = remove_trailing_slash(user_path);
 	parse_out_relatives(path);
 
 	if (!isdir(path))
@@ -1298,10 +1286,9 @@ static void cache_manager_sim_start_sim_remote(GtkApplication *, CacheOpsData *c
 		dir_fd = file_data_new_dir(path);
 		cache_manager_sim_folder(cd, dir_fd);
 		file_data_unref(dir_fd);
-		while (cache_manager_sim_file(cd));
+		while (cache_manager_sim_file(cd))
+			;
 		}
-
-	g_free(path);
 }
 
 /**
@@ -1383,7 +1370,6 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd)
 static void cache_manager_sim_start_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
-	gchar *path;
 	GList *list_total = nullptr;
 
 	if (!cd->remote)
@@ -1391,7 +1377,7 @@ static void cache_manager_sim_start_cb(GenericDialog *, gpointer data)
 		if (cd->list || !gtk_widget_get_sensitive(cd->button_start)) return;
 		}
 
-	path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(cd->entry))));
+	g_autofree gchar *path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(cd->entry))));
 	parse_out_relatives(path);
 
 	if (!isdir(path))
@@ -1427,10 +1413,9 @@ static void cache_manager_sim_start_cb(GenericDialog *, gpointer data)
 		g_list_free(list_total);
 		cd->count_done = 0;
 
-		while (cache_manager_sim_file(cd));
+		while (cache_manager_sim_file(cd))
+			;
 		}
-
-	g_free(path);
 }
 
 static void cache_manager_sim_load_dialog(GtkWidget *widget, const gchar *path)
@@ -1513,15 +1498,13 @@ static void cache_manager_cache_maintenance_close_cb(GenericDialog *, gpointer d
 static void cache_manager_cache_maintenance_start_cb(GenericDialog *, gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
-	gchar *path;
-	gchar *cmd_line;
 
 	if (!cd->remote)
 		{
 		if (cd->list || !gtk_widget_get_sensitive(cd->button_start)) return;
 		}
 
-	path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(cd->entry))));
+	g_autofree gchar *path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(cd->entry))));
 	parse_out_relatives(path);
 
 	if (!isdir(path))
@@ -1539,17 +1522,14 @@ static void cache_manager_cache_maintenance_start_cb(GenericDialog *, gpointer d
 		}
 	else
 		{
-		cmd_line = g_strdup_printf("%s --cache-maintenance=\"%s\"", gq_executable_path, path);
+		g_autofree gchar *cmd_line = g_strdup_printf("%s --cache-maintenance=\"%s\"", gq_executable_path, path);
 
 		g_spawn_command_line_async(cmd_line, nullptr);
 
-		g_free(cmd_line);
 		generic_dialog_close(cd->gd);
 		cache_manager_sim_reset(cd);
 		g_free(cd);
 		}
-
-	g_free(path);
 }
 
 static void cache_manager_cache_maintenance_load_dialog(GtkWidget *widget, const gchar *path)
@@ -1604,7 +1584,6 @@ void cache_manager_show()
 	GtkWidget *button;
 	GtkWidget *table;
 	GtkSizeGroup *sizegroup;
-	gchar *path;
 
 	if (cache_manager)
 		{
@@ -1649,9 +1628,8 @@ void cache_manager_show()
 
 	group = pref_group_new(gd->vbox, FALSE, _("Shared thumbnail cache"), GTK_ORIENTATION_VERTICAL);
 
-	path = g_build_filename(get_thumbnails_standard_cache_dir(), NULL);
+	g_autofree gchar *path = g_build_filename(get_thumbnails_standard_cache_dir(), NULL);
 	cache_manager_location_label(group, path);
-	g_free(path);
 
 	table = pref_table_new(group, 2, 2, FALSE, FALSE);
 

@@ -123,7 +123,6 @@ gboolean close_window_cb(gpointer)
 gchar *config_file_path(const gchar *param)
 {
 	gchar *path = nullptr;
-	gchar *full_name = nullptr;
 
 	if (file_extension_match(param, ".xml"))
 		{
@@ -131,7 +130,7 @@ gchar *config_file_path(const gchar *param)
 		}
 	else if (file_extension_match(param, nullptr))
 		{
-		full_name = g_strconcat(param, ".xml", NULL);
+		g_autofree gchar *full_name = g_strconcat(param, ".xml", NULL);
 		path = g_build_filename(get_window_layouts_dir(), full_name, NULL);
 		}
 
@@ -141,21 +140,14 @@ gchar *config_file_path(const gchar *param)
 		path = nullptr;
 		}
 
-	g_free(full_name);
 	return path;
 }
 
 gboolean is_config_file(const gchar *param)
 {
-	gchar *name = nullptr;
+	g_autofree gchar *name = config_file_path(param);
 
-	name = config_file_path(param);
-	if (name)
-		{
-		g_free(name);
-		return TRUE;
-		}
-	return FALSE;
+	return name != nullptr;
 }
 
 gboolean wait_cb(gpointer data)
@@ -171,11 +163,11 @@ gboolean wait_cb(gpointer data)
 
 void gq_action(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *text;
 	gboolean remote_instance;
 
 	remote_instance = g_application_command_line_get_is_remote(app_command_line);
 
+	g_autofree gchar *text = nullptr;
 	g_variant_dict_lookup(command_line_options_dict, "action", "s", &text);
 
 	layout_valid(&lw_id);
@@ -202,7 +194,6 @@ void gq_action(GtkApplication *, GApplicationCommandLine *app_command_line, GVar
 				}
 			}
 		}
-	g_free(text);
 }
 
 void gq_action_list(GtkApplication *, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
@@ -321,17 +312,16 @@ void gq_close_window(GtkApplication *, GApplicationCommandLine *, GVariantDict *
 
 void gq_config_load(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *text;
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "config-load", "&s", &text);
-	gchar *filename = expand_tilde(text);
+	g_autofree gchar *filename = expand_tilde(text);
 
 	if (!g_strstr_len(filename, -1, G_DIR_SEPARATOR_S))
 		{
 		if (is_config_file(filename))
 			{
-			gchar *tmp = config_file_path(filename);
-			g_free(filename);
-			filename = tmp;
+			g_autofree gchar *tmp = config_file_path(filename);
+			std::swap(filename, tmp);
 			}
 		}
 
@@ -344,8 +334,6 @@ void gq_config_load(GtkApplication *, GApplicationCommandLine *app_command_line,
 		g_application_command_line_print(app_command_line, "remote sent filename that does not exist:\"%s\"\n", filename ? filename : "(null)");
 		layout_set_path(nullptr, homedir());
 		}
-
-	g_free(filename);
 }
 
 void gq_debug(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
@@ -409,22 +397,19 @@ void gq_delay(GtkApplication *, GApplicationCommandLine *app_command_line, GVari
 
 void file_load_no_raise(const gchar *text, GApplicationCommandLine *app_command_line)
 {
-	gchar *filename;
-	gchar *tilde_filename;
-	g_autofree gchar *tmp_file = nullptr;
+	g_autofree gchar *tilde_filename = nullptr;
 
-	tmp_file = download_web_file(text, TRUE, nullptr);
-
+	g_autofree gchar *tmp_file = download_web_file(text, TRUE, nullptr);
 	if (!tmp_file)
 		{
 		tilde_filename = expand_tilde(text);
 		}
 	else
 		{
-		tilde_filename = g_strdup(tmp_file);
+		tilde_filename = g_steal_pointer(&tmp_file);
 		}
 
-	filename = set_cwd(tilde_filename, app_command_line);
+	g_autofree gchar *filename = set_cwd(tilde_filename, app_command_line);
 
 	if (isfile(filename))
 		{
@@ -446,9 +431,6 @@ void file_load_no_raise(const gchar *text, GApplicationCommandLine *app_command_
 		/* shoould not happen */
 		g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " does not exist\n",  filename);
 		}
-
-	g_free(filename);
-	g_free(tilde_filename);
 }
 
 void gq_file(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
@@ -598,18 +580,16 @@ void gq_get_collection_list(GtkApplication *, GApplicationCommandLine *app_comma
 
 void gq_get_destination(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *text;
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "get-destination", "&s", &text);
 
-	gchar *filename = expand_tilde(text);
+	g_autofree gchar *filename = expand_tilde(text);
 	FileData *fd = file_data_new_group(filename);
 
 	if (fd->change && fd->change->dest)
 		{
 		g_application_command_line_print(app_command_line, "%s",  fd->change->dest);
 		}
-
-	g_free(filename);
 }
 
 void gq_get_file_info(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
@@ -682,32 +662,19 @@ void get_filelist(GApplicationCommandLine *app_command_line, const gchar *text, 
 	FileData *dir_fd;
 	FileData *fd;
 	GList *work;
-	gchar *tilde_filename;
 
 	if (strcmp(text, "") == 0)
 		{
-		if (layout_valid(&lw_id))
-			{
-			dir_fd = file_data_new_dir(lw_id->dir_fd->path);
-			}
-		else
-			{
-			return;
-			}
+		if (!layout_valid(&lw_id)) return;
+
+		dir_fd = file_data_new_dir(lw_id->dir_fd->path);
 		}
 	else
 		{
-		tilde_filename = expand_tilde(text);
-		if (isdir(tilde_filename))
-			{
-			dir_fd = file_data_new_dir(tilde_filename);
-			}
-		else
-			{
-			g_free(tilde_filename);
-			return;
-			}
-		g_free(tilde_filename);
+		g_autofree gchar *tilde_filename = expand_tilde(text);
+		if (!isdir(tilde_filename)) return;
+
+		dir_fd = file_data_new_dir(tilde_filename);
 		}
 
 	if (recurse)
@@ -800,20 +767,18 @@ void gq_get_rectangle(GtkApplication *, GApplicationCommandLine *app_command_lin
 
 	image_get_rectangle(x1, y1, x2, y2);
 
-	gchar *rectangle_info = g_strdup_printf(_("%dx%d+%d+%d"),
-	                                        std::abs(x1 - x2),
-	                                        std::abs(y1 - y2),
-	                                        std::min(x1, x2),
-	                                        std::min(y1, y2));
+	g_autofree gchar *rectangle_info = g_strdup_printf(_("%dx%d+%d+%d"),
+	                                                   std::abs(x1 - x2),
+	                                                   std::abs(y1 - y2),
+	                                                   std::min(x1, x2),
+	                                                   std::min(y1, y2));
 
 	g_application_command_line_print(app_command_line, "%s\n", rectangle_info);
-
-	g_free(rectangle_info);
 }
 
 void gq_get_render_intent(GtkApplication *, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
 {
-	gchar *render_intent;
+	g_autofree gchar *render_intent = nullptr;
 
 	switch (options->color_profile.render_intent)
 		{
@@ -835,8 +800,6 @@ void gq_get_render_intent(GtkApplication *, GApplicationCommandLine *app_command
 		}
 
 	g_application_command_line_print(app_command_line, "%s\n",  render_intent);
-
-	g_free(render_intent);
 }
 
 void gq_get_selection(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
@@ -868,9 +831,9 @@ void gq_get_selection(GtkApplication *, GApplicationCommandLine *app_command_lin
 
 void gq_get_sidecars(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *text;
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "file", "&s", &text);
-	gchar *filename = expand_tilde(text);
+	g_autofree gchar *filename = expand_tilde(text);
 	FileData *fd = file_data_new_group(filename);
 
 	GList *work;
@@ -889,7 +852,6 @@ void gq_get_sidecars(GtkApplication *, GApplicationCommandLine *app_command_line
 		work = work->next;
 		g_application_command_line_print(app_command_line, "%s\n", fd->path);
 		}
-	g_free(filename);
 }
 
 void gq_grep(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
@@ -932,10 +894,9 @@ void gq_log_file(GtkApplication *, GApplicationCommandLine *, GVariantDict *comm
 void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
 #if HAVE_LUA
-	gchar *result = nullptr;
 	gchar **lua_command;
-	gchar *text;
 
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "lua", "&s", &text);
 
 	lua_command = g_strsplit(text, ",", 2);
@@ -943,7 +904,7 @@ void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVarian
 	if (lua_command[0] && lua_command[1])
 		{
 		FileData *fd = file_data_new_group(lua_command[0]);
-		result = g_strdup(lua_callvalue(fd, lua_command[1], nullptr));
+		g_autofree gchar *result = g_strdup(lua_callvalue(fd, lua_command[1], nullptr));
 		if (result)
 			{
 			g_application_command_line_print(app_command_line, "%s\n", result);
@@ -959,7 +920,6 @@ void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVarian
 		}
 
 	g_strfreev(lua_command);
-	g_free(result);
 #else
 	g_application_command_line_print(app_command_line, _("Lua is not available\n"));
 #endif
@@ -983,58 +943,42 @@ void gq_next(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList 
 
 void gq_pixel_info(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
 {
-	gchar *pixel_info;
-	gint x_pixel;
-	gint y_pixel;
+	if (!layout_valid(&lw_id)) return;
+
+	auto *pr = PIXBUF_RENDERER(lw_id->image->pr);
+	if (!pr) return;
+
 	gint width;
 	gint height;
+	pixbuf_renderer_get_image_size(pr, &width, &height);
+	if (width < 1 || height < 1) return;
+
+	gint x_pixel;
+	gint y_pixel;
+	pixbuf_renderer_get_mouse_position(pr, &x_pixel, &y_pixel);
+	if (x_pixel < 0 || y_pixel < 0) return;
+
 	gint r_mouse;
 	gint g_mouse;
 	gint b_mouse;
 	gint a_mouse;
-	PixbufRenderer *pr;
+	pixbuf_renderer_get_pixel_colors(pr, x_pixel, y_pixel, &r_mouse, &g_mouse, &b_mouse, &a_mouse);
 
-	if (!layout_valid(&lw_id)) return;
-
-	pr = PIXBUF_RENDERER(lw_id->image->pr);
-
-	if (pr)
+	g_autofree gchar *pixel_info = nullptr;
+	if (gdk_pixbuf_get_has_alpha(pr->pixbuf))
 		{
-		pixbuf_renderer_get_image_size(pr, &width, &height);
-		if (width < 1 || height < 1) return;
-
-		pixbuf_renderer_get_mouse_position(pr, &x_pixel, &y_pixel);
-
-		if (x_pixel >= 0 && y_pixel >= 0)
-			{
-			pixbuf_renderer_get_pixel_colors(pr, x_pixel, y_pixel, &r_mouse, &g_mouse, &b_mouse, &a_mouse);
-
-			if (gdk_pixbuf_get_has_alpha(pr->pixbuf))
-				{
-				pixel_info = g_strdup_printf(_("[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"),
-				                             x_pixel, y_pixel,
-				                             r_mouse, g_mouse, b_mouse, a_mouse);
-				}
-			else
-				{
-				pixel_info = g_strdup_printf(_("[%d,%d]: RGB(%3d,%3d,%3d)"),
-				                             x_pixel, y_pixel,
-				                             r_mouse, g_mouse, b_mouse);
-				}
-
-			g_application_command_line_print(app_command_line, "%s\n", pixel_info);
-
-			g_free(pixel_info);
-			}
-		else
-			{
-			return;
-			}
+		pixel_info = g_strdup_printf(_("[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"),
+		                             x_pixel, y_pixel,
+		                             r_mouse, g_mouse, b_mouse, a_mouse);
 		}
 	else
 		{
-		return;
+		pixel_info = g_strdup_printf(_("[%d,%d]: RGB(%3d,%3d,%3d)"),
+		                             x_pixel, y_pixel,
+		                             r_mouse, g_mouse, b_mouse);
 		}
+
+	g_application_command_line_print(app_command_line, "%s\n", pixel_info);
 }
 
 void gq_print0(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
@@ -1066,7 +1010,7 @@ void gq_raise(GtkApplication *, GApplicationCommandLine *,GVariantDict *, GList 
 
 void gq_selection_add(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *text;
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "selection-add", "&s", &text);
 
 	FileData *fd_to_select = nullptr;
@@ -1079,9 +1023,9 @@ void gq_selection_add(GtkApplication *, GApplicationCommandLine *app_command_lin
 		{
 		// Search through the current file list for a file matching the specified path.
 		// "Match" is either a basename match or a file path match.
-		gchar *path = expand_tilde(text);
-		gchar *filename = g_path_get_basename(path);
-		gchar *slash_plus_filename = g_strdup_printf("%s%s", G_DIR_SEPARATOR_S, filename);
+		g_autofree gchar *path = expand_tilde(text);
+		g_autofree gchar *filename = g_path_get_basename(path);
+		g_autofree gchar *slash_plus_filename = g_strdup_printf("%s%s", G_DIR_SEPARATOR_S, filename);
 
 		GList *file_list = layout_list(lw_id);
 		for (GList *work = file_list; work && !fd_to_select; work = work->next)
@@ -1107,13 +1051,11 @@ void gq_selection_add(GtkApplication *, GApplicationCommandLine *app_command_lin
 
 		if (!fd_to_select)
 			{
-			g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " is not in the current folder " BOLD_ON "%s" BOLD_OFF "%c", filename, g_application_command_line_get_cwd(app_command_line), print0 ? 0 : '\n');
+			g_application_command_line_print(app_command_line, "File " BOLD_ON "%s" BOLD_OFF " is not in the current folder " BOLD_ON "%s" BOLD_OFF "%c",
+			                                 filename, g_application_command_line_get_cwd(app_command_line), print0 ? 0 : '\n');
 			}
 
 		filelist_free(file_list);
-		g_free(slash_plus_filename);
-		g_free(filename);
-		g_free(path);
 		}
 
 	if (fd_to_select)
@@ -1144,9 +1086,9 @@ void gq_selection_remove(GtkApplication *, GApplicationCommandLine *app_command_
 		}
 
 	FileData *fd_to_deselect = nullptr;
-	gchar *path = nullptr;
-	gchar *filename = nullptr;
-	gchar *slash_plus_filename = nullptr;
+	g_autofree gchar *path = nullptr;
+	g_autofree gchar *filename = nullptr;
+	g_autofree gchar *slash_plus_filename = nullptr;
 
 	if (!text || strcmp(text, "") == 0)
 		{
@@ -1228,9 +1170,6 @@ void gq_selection_remove(GtkApplication *, GApplicationCommandLine *app_command_
 
 	filelist_free(selected);
 	file_data_unref(fd_to_deselect);
-	g_free(slash_plus_filename);
-	g_free(filename);
-	g_free(path);
 }
 
 void gq_show_log_window(GtkApplication *, GApplicationCommandLine *,GVariantDict *, GList *)
@@ -1246,14 +1185,11 @@ void gq_slideshow(GtkApplication *, GApplicationCommandLine *,GVariantDict *, GL
 void gq_slideshow_recurse(GtkApplication *, GApplicationCommandLine *,GVariantDict *command_line_options_dict, GList *)
 {
 	GList *list;
-	gchar *tilde_filename;
-	gchar *text;
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "slideshow-recurse", "&s", &text);
 
-	tilde_filename = expand_tilde(text);
-
+	g_autofree gchar *tilde_filename = expand_tilde(text);
 	FileData *dir_fd = file_data_new_dir(tilde_filename);
-	g_free(tilde_filename);
 
 	layout_valid(&lw_id);
 	list = filelist_recursive_full(dir_fd, lw_id->options.file_view_list_sort.method, lw_id->options.file_view_list_sort.ascend, lw_id->options.file_view_list_sort.case_sensitive);
@@ -1266,7 +1202,7 @@ void gq_slideshow_recurse(GtkApplication *, GApplicationCommandLine *,GVariantDi
 
 void gq_tell(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
 {
-	gchar *out_string;
+	g_autofree gchar *out_string = nullptr;
 
 	layout_valid(&lw_id);
 
@@ -1289,7 +1225,6 @@ void gq_tell(GtkApplication *, GApplicationCommandLine *app_command_line, GVaria
 		}
 
 	g_application_command_line_print(app_command_line, "%s%c", out_string, print0 ? 0 : '\n');
-	g_free(out_string);
 }
 
 void gq_tools(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
@@ -1319,18 +1254,14 @@ void gq_get_window_list(GtkApplication *, GApplicationCommandLine *app_command_l
 
 void gq_view(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *filename;
-	gchar *tilde_filename;
-	gchar *text;
-
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "view", "&s", &text);
-	tilde_filename = expand_tilde(text);
 
-	filename = set_cwd(tilde_filename, app_command_line);
+	g_autofree gchar *tilde_filename = expand_tilde(text);
+
+	g_autofree gchar *filename = set_cwd(tilde_filename, app_command_line);
 
 	view_window_new(file_data_new_group(filename));
-	g_free(filename);
-	g_free(tilde_filename);
 }
 
 /**
@@ -1407,22 +1338,19 @@ void process_files(GList *file_list)
 		gboolean multiple_dirs = FALSE;
 		work = file_list;
 
-		gchar *basepath;
-		basepath = g_path_get_dirname(static_cast<const gchar *>(work->data));
+		g_autofree gchar *basepath = g_path_get_dirname(static_cast<const gchar *>(work->data));
 
 		/* If command line arguments contain multiple dirs, a new
 		 * collection will be created to hold them
 		 */
 		while (work)
 			{
-			gchar *newpath;
-			newpath = g_path_get_dirname(static_cast<const gchar *>(work->data));
+			g_autofree gchar *newpath = g_path_get_dirname(static_cast<const gchar *>(work->data));
 			if (g_strcmp0(newpath, basepath) != 0)
 				{
 				multiple_dirs = TRUE;
 				break;
 				}
-			g_free(newpath);
 			work = work->next;
 			}
 
@@ -1542,10 +1470,6 @@ void gq_cm_quit(GtkApplication *app, GApplicationCommandLine *, GVariantDict *, 
 void gq_cm_dir(GtkApplication *app, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
 	gboolean remote_instance;
-	gchar *buf_config_file;
-	gchar *folder_path = nullptr;
-	gchar *path;
-	gchar *rc_path;
 	gint diff_count;
 	gsize i = 0;
 	gsize size;
@@ -1555,77 +1479,64 @@ void gq_cm_dir(GtkApplication *app, GApplicationCommandLine *app_command_line, G
 	if (remote_instance)
 		{
 		g_application_command_line_print(app_command_line, _("Cache Maintenance is already running\n"));
-
 		return;
 		}
 
+	const gchar *path;
 	g_variant_dict_lookup(command_line_options_dict, "cache-maintenance", "&s", &path);
 
-	folder_path = expand_tilde(path);
-
-	if (isdir(folder_path))
+	g_autofree gchar *folder_path = expand_tilde(path);
+	if (!isdir(folder_path))
 		{
-		rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, nullptr);
-
-		if (isfile(rc_path))
-			{
-			if (g_file_get_contents(rc_path, &buf_config_file, &size, nullptr))
-				{
-				while (i < size)
-					{
-					diff_count = strncmp("</global>", &buf_config_file[i], 9);
-					if (diff_count == 0)
-						{
-						break;
-						}
-					i++;
-					}
-				/* Load only the <global> section */
-				load_config_from_buf(buf_config_file, i + 9, FALSE);
-
-				if (options->thumbnails.enable_caching)
-					{
-					cache_maintenance(app, folder_path);
-					}
-				else
-					{
-					g_autofree gchar *notification_message = g_strdup(_("Caching not enabled"));
-					cache_maintenance_notification(app, notification_message, FALSE);
-					g_application_command_line_print(app_command_line, _("Caching not enabled\n"));
-
-					exit(EXIT_FAILURE);
-					}
-				g_free(buf_config_file);
-				}
-			else
-				{
-				g_autofree gchar *notification_message = g_strconcat(_("Cannot load "), rc_path, nullptr);
-				cache_maintenance_notification(app, notification_message, FALSE);
-				g_application_command_line_print(app_command_line, "%s%s\n", _("Cannot load "), rc_path);
-
-				exit(EXIT_FAILURE);
-				}
-			}
-		else
-			{
-			g_autofree gchar *notification_message = g_strconcat(_("Configuration file path "), rc_path, _(" is not a file"), NULL, nullptr);
-			cache_maintenance_notification(app, notification_message, FALSE);
-			g_application_command_line_print(app_command_line, "%s%s%s\n", _("Configuration file path "), rc_path, _(" is not a file"));
-
-			exit(EXIT_FAILURE);
-			}
-		g_free(rc_path);
-		}
-	else
-		{
-		g_autofree gchar *notification_message = g_strconcat("\"", folder_path, "\"", _(" is not a folder"), nullptr);
+		g_autofree gchar *notification_message = g_strdup_printf("\"%s\"%s", folder_path, _(" is not a folder"));
 		cache_maintenance_notification(app, notification_message, FALSE);
-		g_application_command_line_print(app_command_line, "%s%s%s%s\n", "\"", folder_path, "\"", _(" is not a folder"));
+		g_application_command_line_print(app_command_line, "%s\n", notification_message);
 
 		exit(EXIT_FAILURE);
 		}
 
-	g_free(folder_path);
+	g_autofree gchar *rc_path = g_build_filename(get_rc_dir(), RC_FILE_NAME, nullptr);
+	if (!isfile(rc_path))
+		{
+		g_autofree gchar *notification_message = g_strconcat(_("Configuration file path "), rc_path, _(" is not a file"), nullptr);
+		cache_maintenance_notification(app, notification_message, FALSE);
+		g_application_command_line_print(app_command_line, "%s\n", notification_message);
+
+		exit(EXIT_FAILURE);
+		}
+
+	g_autofree gchar *buf_config_file = nullptr;
+	if (!g_file_get_contents(rc_path, &buf_config_file, &size, nullptr))
+		{
+		g_autofree gchar *notification_message = g_strconcat(_("Cannot load "), rc_path, nullptr);
+		cache_maintenance_notification(app, notification_message, FALSE);
+		g_application_command_line_print(app_command_line, "%s\n", notification_message);
+
+		exit(EXIT_FAILURE);
+		}
+
+	/* Load only the <global> section */
+	while (i < size)
+		{
+		diff_count = strncmp("</global>", &buf_config_file[i], 9);
+		if (diff_count == 0)
+			{
+			break;
+			}
+		i++;
+		}
+	load_config_from_buf(buf_config_file, i + 9, FALSE);
+
+	if (!options->thumbnails.enable_caching)
+		{
+		const gchar *notification_message = _("Caching not enabled");
+		cache_maintenance_notification(app, notification_message, FALSE);
+		g_application_command_line_print(app_command_line, "%s\n", notification_message);
+
+		exit(EXIT_FAILURE);
+		}
+
+	cache_maintenance(app, folder_path);
 }
 
 CommandLineOptionEntry command_line_options_cache_maintenance[] =
