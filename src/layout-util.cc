@@ -1454,8 +1454,6 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 	g_autofree gchar *tmp_file = nullptr;
 	GError *error = nullptr;
 	GIOChannel *channel;
-	char **pre_key;
-	char **post_key;
 	int keymap_index;
 
 	fd = g_file_open_tmp("geeqie_keymap_XXXXXX.svg", &tmp_file, &error);
@@ -1477,8 +1475,8 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 			{
 			if (g_strrstr(keymap_template[keymap_index], ">key:"))
 				{
-				pre_key = g_strsplit(keymap_template[keymap_index],">key:",2);
-				post_key = g_strsplit(pre_key[1],"<",2);
+				g_auto(GStrv) pre_key = g_strsplit(keymap_template[keymap_index], ">key:", 2);
+				g_auto(GStrv) post_key = g_strsplit(pre_key[1], "<", 2);
 
 				const gchar *key_name = post_key[0];
 				const gchar *menu_name = " ";
@@ -1503,9 +1501,6 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 				g_autofree gchar *converted_line = g_strconcat(pre_key[0], ">", menu_name, "<", post_key[1], "\n", NULL);
 				g_io_channel_write_chars(channel, converted_line, -1, nullptr, &error);
 				if (error) {log_printf("Warning: Keyboard Map:%s\n",error->message); g_error_free(error);}
-
-				g_strfreev(pre_key);
-				g_strfreev(post_key);
 				}
 			else
 				{
@@ -2934,23 +2929,16 @@ static void layout_actions_setup_marks(LayoutWindow *lw)
 
 static GList *layout_actions_editor_menu_path(EditorDescription *editor)
 {
-	gchar **split = g_strsplit(editor->menu_path, "/", 0);
-	gint i = 0;
+	g_auto(GStrv) split = g_strsplit(editor->menu_path, "/", 0);
+
+	const guint split_count = g_strv_length(split);
+	if (split_count == 0) return nullptr;
+
 	GList *ret = nullptr;
-
-	if (split[0] == nullptr)
-		{
-		g_strfreev(split);
-		return nullptr;
-		}
-
-	while (split[i])
+	for (guint i = 0; i < split_count; i++)
 		{
 		ret = g_list_prepend(ret, g_strdup(split[i]));
-		i++;
 		}
-
-	g_strfreev(split);
 
 	ret = g_list_prepend(ret, g_strdup(editor->key));
 

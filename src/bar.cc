@@ -700,14 +700,12 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 
 void bar_populate_default(GtkWidget *)
 {
-	const gchar *populate_id[] = {"histogram", "title", "keywords", "comment", "rating", "exif", nullptr};
-	const gchar **id = populate_id;
+	const gchar *populate_id[] = {"histogram", "title", "keywords", "comment", "rating", "exif"};
 
-	while (*id)
+	for (const gchar *id : populate_id)
 		{
-		const gchar *config = bar_pane_get_default_config(*id);
+		const gchar *config = bar_pane_get_default_config(id);
 		if (config) load_config_from_buf(config, strlen(config), FALSE);
-		id++;
 		}
 }
 

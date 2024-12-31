@@ -565,9 +565,7 @@ static void image_loader_size_cb(gpointer,
 				 gint width, gint height, gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
-	gchar **mime_types;
 	gboolean scale = FALSE;
-	gint n;
 
 	g_mutex_lock(il->data_mutex);
 	il->actual_width = width;
@@ -584,14 +582,17 @@ static void image_loader_size_cb(gpointer,
 	if (il->fd->format_class == FORMAT_CLASS_VIDEO)
 		scale = TRUE;
 #endif
-	mime_types = il->backend->get_format_mime_types();
-	n = 0;
-	while (mime_types[n] && !scale)
+
+	if (!scale)
 		{
-		if (strstr(mime_types[n], "jpeg")) scale = TRUE;
-		n++;
+		g_auto(GStrv) mime_types = il->backend->get_format_mime_types();
+		gint n = 0;
+		while (mime_types[n] && !scale)
+			{
+			if (strstr(mime_types[n], "jpeg")) scale = TRUE;
+			n++;
+			}
 		}
-	g_strfreev(mime_types);
 
 	if (!scale)
 		{

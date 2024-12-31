@@ -46,7 +46,6 @@
  */
 static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_group, hard_coded_window_keys *window_keys)
 {
-	gchar **label_stripped;
 	gint i = 0;
 
 	const gchar *label = gtk_menu_item_get_label(GTK_MENU_ITEM(menu));
@@ -54,7 +53,7 @@ static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_grou
 	g_autofree gchar *label_text = nullptr;
 	pango_parse_markup(label, -1, '_', nullptr, &label_text, nullptr, nullptr);
 
-	label_stripped = g_strsplit(label_text, "...", 2);
+	g_auto(GStrv) label_stripped = g_strsplit(label_text, "...", 2);
 
 	while (window_keys[i].text != nullptr)
 		{
@@ -66,8 +65,6 @@ static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_grou
 			}
 		i++;
 		}
-
-	g_strfreev(label_stripped);
 }
 
 /**

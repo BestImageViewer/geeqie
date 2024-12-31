@@ -556,7 +556,7 @@ CollectionData *collection_from_number(gint n)
 
 	if (!list && !info_list) return cd;
 
-	GStrv numbers = g_strsplit(data, "\n", -1);
+	g_auto(GStrv) numbers = g_strsplit(data, "\n", -1);
 	for (gint i = 1; numbers[i] != nullptr; i++)
 		{
 		if (!numbers[i + 1]) break; // numbers[i] is data after last \n, skip it
@@ -569,7 +569,6 @@ CollectionData *collection_from_number(gint n)
 		if (info_list) *info_list = g_list_append(*info_list, info);
 		}
 
-	g_strfreev(numbers);
 	return cd;
 }
 

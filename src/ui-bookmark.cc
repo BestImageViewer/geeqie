@@ -472,16 +472,7 @@ static void bookmark_drag_set_data(GtkWidget *button,
 	if (!b) return;
 
 	list = g_list_append(list, b->path);
-
-	gchar **uris = uris_from_pathlist(list);
-	gboolean ret = gtk_selection_data_set_uris(selection_data, uris);
-	if (!ret)
-		{
-		g_autofree char *str = g_strjoinv("\r\n", uris);
-		ret = gtk_selection_data_set_text(selection_data, str, -1);
-		}
-
-	g_strfreev(uris);
+	uri_selection_data_set_uris_from_pathlist(selection_data, list);
 	g_list_free(list);
 }
 
@@ -714,37 +705,24 @@ static void bookmark_dnd_get_data(GtkWidget *, GdkDragContext *,
 				  guint, gpointer data)
 {
 	auto bm = static_cast<BookMarkData *>(data);
-	GList *list = nullptr;
-	GList *errors = nullptr;
-	gchar **uris;
 
 	if (!bm->editable) return;
 
- 	uris = gtk_selection_data_get_uris(selection_data);
- 	if (uris)
+	GList *list = uri_pathlist_from_gtk_selection_data(selection_data);
+
+	for (GList *work = list; work; work = work->next)
 		{
-		list = uri_pathlist_from_uris(uris, &errors);
-		if(errors)
-			{
-			warning_dialog_dnd_uri_error(errors);
-			g_list_free_full(errors, g_free);
-			}
-		g_strfreev(uris);
+		auto path = static_cast<gchar *>(work->data);
 
-		for (GList *work = list; work; work = work->next)
-			{
-			auto path = static_cast<gchar *>(work->data);
+		if (bm->only_directories && !isdir(path)) continue;
 
-			if (bm->only_directories && !isdir(path)) continue;
-
-			g_autofree gchar *buf = bookmark_string(filename_from_path(path), path, bookmark_icon(path));
-			history_list_add_to_key(bm->key, buf, 0);
-			}
-
-		g_list_free_full(list, g_free);
-
-		bookmark_populate_all(bm->key);
+		g_autofree gchar *buf = bookmark_string(filename_from_path(path), path, bookmark_icon(path));
+		history_list_add_to_key(bm->key, buf, 0);
 		}
+
+	g_list_free_full(list, g_free);
+
+	bookmark_populate_all(bm->key);
 }
 
 static void bookmark_list_destroy(gpointer data)

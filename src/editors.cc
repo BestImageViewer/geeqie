@@ -195,9 +195,6 @@ gboolean editor_read_desktop_file(const gchar *path)
 	EditorDescription *editor;
 	gchar *extensions;
 	const gchar *key = filename_from_path(path);
-	gchar **categories;
-	gchar **only_show_in;
-	gchar **not_show_in;
 	GtkTreeIter iter;
 	gboolean category_geeqie = FALSE;
 
@@ -227,11 +224,11 @@ gboolean editor_read_desktop_file(const gchar *path)
 
 	if (g_key_file_get_boolean(key_file, DESKTOP_GROUP, "Hidden", nullptr)
 	    || g_key_file_get_boolean(key_file, DESKTOP_GROUP, "NoDisplay", nullptr))
-	    	{
-	    	editor->hidden = TRUE;
+		{
+		editor->hidden = TRUE;
 		}
 
-	categories = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "Categories", nullptr, nullptr);
+	g_auto(GStrv) categories = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "Categories", nullptr, nullptr);
 	if (categories)
 		{
 		gboolean found = FALSE;
@@ -251,41 +248,22 @@ gboolean editor_read_desktop_file(const gchar *path)
 				}
 			}
 		if (!found) editor->ignored = TRUE;
-		g_strfreev(categories);
 		}
 	else
 		{
 		editor->ignored = TRUE;
 		}
 
-	only_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "OnlyShowIn", nullptr, nullptr);
-	if (only_show_in)
+	g_auto(GStrv) only_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "OnlyShowIn", nullptr, nullptr);
+	if (only_show_in && !g_strv_contains(only_show_in, "X-Geeqie"))
 		{
-		gboolean found = FALSE;
-		gint i;
-		for (i = 0; only_show_in[i]; i++)
-			if (strcmp(only_show_in[i], "X-Geeqie") == 0)
-				{
-				found = TRUE;
-				break;
-				}
-		if (!found) editor->ignored = TRUE;
-		g_strfreev(only_show_in);
+		editor->ignored = TRUE;
 		}
 
-	not_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "NotShowIn", nullptr, nullptr);
-	if (not_show_in)
+	g_auto(GStrv) not_show_in = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "NotShowIn", nullptr, nullptr);
+	if (not_show_in && g_strv_contains(not_show_in, "X-Geeqie"))
 		{
-		gboolean found = FALSE;
-		gint i;
-		for (i = 0; not_show_in[i]; i++)
-			if (strcmp(not_show_in[i], "X-Geeqie") == 0)
-				{
-				found = TRUE;
-				break;
-				}
-		if (found) editor->ignored = TRUE;
-		g_strfreev(not_show_in);
+		editor->ignored = TRUE;
 		}
 
 
@@ -341,11 +319,10 @@ gboolean editor_read_desktop_file(const gchar *path)
 		editor->ext_list = filter_to_list(extensions);
 	else
 		{
-		gchar **mime_types = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "MimeType", nullptr, nullptr);
+		g_auto(GStrv) mime_types = g_key_file_get_string_list(key_file, DESKTOP_GROUP, "MimeType", nullptr, nullptr);
 		if (mime_types)
 			{
 			editor->ext_list = editor_mime_types_to_extensions(mime_types);
-			g_strfreev(mime_types);
 			if (!editor->ext_list) editor->hidden = TRUE;
 			}
 		}
@@ -435,8 +412,6 @@ static GList *editor_add_desktop_dir(GList *list, const gchar *path)
 
 GList *editor_get_desktop_files()
 {
-	gchar **split_dirs;
-	gint i;
 	GList *list = nullptr;
 
 	const gchar *xdg_data_dirs_env = getenv("XDG_DATA_DIRS");
@@ -444,18 +419,14 @@ GList *editor_get_desktop_files()
 
 	g_autofree gchar *all_dirs = g_strconcat(get_rc_dir(), ":", gq_appdir, ":", xdg_data_home_get(), ":", xdg_data_dirs, NULL);
 
-	split_dirs = g_strsplit(all_dirs, ":", 0);
+	g_auto(GStrv) split_dirs = g_strsplit(all_dirs, ":", 0);
 
-	for (i = 0; split_dirs[i]; i++)
-		;
-
-	for (--i; i >= 0; i--)
+	for (gint i = g_strv_length(split_dirs) - 1; i >= 0; i--)
 		{
 		g_autofree gchar *path = g_build_filename(split_dirs[i], "applications", NULL);
 		list = editor_add_desktop_dir(list, path);
 		}
 
-	g_strfreev(split_dirs);
 	return list;
 }
 

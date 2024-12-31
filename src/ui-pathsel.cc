@@ -334,15 +334,7 @@ static void dest_dnd_set_data(GtkWidget *view, GdkDragContext *,
 	if (!path) return;
 
 	list = g_list_append(list, path);
-
-	gchar **uris = uris_from_pathlist(list);
-	gboolean ret = gtk_selection_data_set_uris(selection_data, uris);
-	if (!ret)
-		{
-		g_autofree char *str = g_strjoinv("\r\n", uris);
-		ret = gtk_selection_data_set_text(selection_data, str, -1);
-		}
-
+	uri_selection_data_set_uris_from_pathlist(selection_data, list);
 	g_list_free_full(list, g_free);
 }
 

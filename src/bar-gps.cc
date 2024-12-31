@@ -152,7 +152,6 @@ void bar_pane_gps_dnd_receive(GtkWidget *pane, GdkDragContext *,
 	gdouble latitude;
 	gdouble longitude;
 	GString *message;
-	gchar **latlong;
 
 	pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pgd) return;
@@ -242,11 +241,10 @@ void bar_pane_gps_dnd_receive(GtkWidget *pane, GdkDragContext *,
 		g_autofree gchar *location = decode_geo_parameters(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)));
 		if (!(g_strstr_len(location,-1,"Error")))
 			{
-			latlong = g_strsplit(location, " ", 2);
+			g_auto(GStrv) latlong = g_strsplit(location, " ", 2);
 			champlain_view_center_on(CHAMPLAIN_VIEW(pgd->gps_view),
-							g_ascii_strtod(latlong[0],nullptr),
-							g_ascii_strtod(latlong[1],nullptr));
-			g_strfreev(latlong);
+			                         g_ascii_strtod(latlong[0], nullptr),
+			                         g_ascii_strtod(latlong[1], nullptr));
 			}
 		}
 }
@@ -917,7 +915,6 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	ChamplainMarkerLayer *layer;
 	ChamplainView *view;
 	const gchar *slider_list[] = {GQ_ICON_ZOOM_IN, GQ_ICON_ZOOM_OUT, nullptr};
-	const gchar **slider_icons = slider_list;
 
 	pgd = g_new0(PaneGPSData, 1);
 
@@ -943,9 +940,10 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	status = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
 #if HAVE_GTK4
+	const gchar **slider_icons = slider_list;
 	slider = gtk_scale_button_new(1, 17, 1, slider_icons);
 #else
-	slider = gtk_scale_button_new(GTK_ICON_SIZE_SMALL_TOOLBAR, 1, 17, 1, slider_icons);
+	slider = gtk_scale_button_new(GTK_ICON_SIZE_SMALL_TOOLBAR, 1, 17, 1, slider_list);
 #endif
 	gtk_widget_set_tooltip_text(slider, _("Zoom"));
 	gtk_scale_button_set_value(GTK_SCALE_BUTTON(slider), static_cast<gdouble>(zoom));

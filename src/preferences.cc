@@ -1889,7 +1889,6 @@ static guint star_rating_symbol_test(GtkWidget *, gpointer data)
 	auto hbox = static_cast<GtkContainer *>(data);
 	GString *str = g_string_new(nullptr);
 	GtkEntry *hex_code_entry;
-	gchar **hex_code;
 	GList *list;
 	guint64 hex_value = 0;
 
@@ -1898,11 +1897,12 @@ static guint star_rating_symbol_test(GtkWidget *, gpointer data)
 	hex_code_entry = static_cast<GtkEntry *>(g_list_nth_data(list, 2));
 	const gchar *hex_code_full = gq_gtk_entry_get_text(hex_code_entry);
 
-	hex_code = g_strsplit(hex_code_full, "+", 2);
+	g_auto(GStrv) hex_code = g_strsplit(hex_code_full, "+", 2);
 	if (hex_code[0] && hex_code[1])
 		{
 		hex_value = strtoull(hex_code[1], nullptr, 16);
 		}
+
 	if (!hex_value || hex_value > 0x10FFFF)
 		{
 		hex_value = 0x003F; // Unicode 'Question Mark'
@@ -1910,7 +1910,6 @@ static guint star_rating_symbol_test(GtkWidget *, gpointer data)
 	str = g_string_append_unichar(str, static_cast<gunichar>(hex_value));
 	gtk_label_set_text(static_cast<GtkLabel *>(g_list_nth_data(list, 1)), str->str);
 
-	g_strfreev(hex_code);
 	g_string_free(str, TRUE);
 
 	return hex_value;
