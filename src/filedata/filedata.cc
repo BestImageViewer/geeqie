@@ -131,7 +131,6 @@ const gchar *FileData::text_from_time(time_t t)
 	gchar buf[128];
 	gint buflen;
 	struct tm *btime;
-	GError *error = nullptr;
 
 	btime = localtime(&t);
 
@@ -140,11 +139,11 @@ const gchar *FileData::text_from_time(time_t t)
 	if (buflen < 1) return "";
 
 	g_free(ret);
+	g_autoptr(GError) error = nullptr;
 	ret = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 	if (error)
 		{
 		log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
-		g_error_free(error);
 		return "";
 		}
 

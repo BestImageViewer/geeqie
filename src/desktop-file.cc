@@ -82,7 +82,6 @@ gboolean editor_window_save(EditorWindow *ew)
 {
 	GtkTextIter start;
 	GtkTextIter end;
-	GError *error = nullptr;
 	gboolean ret = TRUE;
 	const gchar *name = gq_gtk_entry_get_text(GTK_ENTRY(ew->entry));
 
@@ -104,10 +103,10 @@ gboolean editor_window_save(EditorWindow *ew)
 		ret = FALSE;
 		}
 
+	g_autoptr(GError) error = nullptr;
 	if (ret && !g_file_set_contents(path, text, -1, &error))
 		{
 		file_util_warning_dialog(_("Can't save"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
-		g_error_free(error);
 		ret = FALSE;
 		}
 

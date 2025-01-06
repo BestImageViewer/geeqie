@@ -2570,10 +2570,21 @@ static void search_similarity_load_done_cb(ImageLoader *, gpointer data)
 	search_file_load_process(sd, sd->search_similarity_cd);
 }
 
+static GRegex *create_search_regex(const gchar *pattern)
+{
+	g_autoptr(GError) error = nullptr;
+	GRegex *regex = g_regex_new(pattern, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), &error);
+	if (error)
+		{
+		log_printf("Error: could not compile regular expression %s\n%s\n", pattern, error->message);
+		regex = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
+		}
+
+	return regex;
+}
+
 static void search_start(SearchData *sd)
 {
-	GError *error = nullptr;
-
 	search_stop(sd);
 	search_result_clear(sd);
 
@@ -2602,15 +2613,7 @@ static void search_start(SearchData *sd)
 		{
 		g_regex_unref(sd->search_name_regex);
 		}
-
-	sd->search_name_regex = g_regex_new(sd->search_name, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), &error);
-	if (error)
-		{
-		log_printf("Error: could not compile regular expression %s\n%s\n", sd->search_name, error->message);
-		g_error_free(error);
-		error = nullptr;
-		sd->search_name_regex = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
-		}
+	sd->search_name_regex = create_search_regex(sd->search_name);
 
 	if (!sd->search_comment_match_case)
 		{
@@ -2624,29 +2627,13 @@ static void search_start(SearchData *sd)
 		{
 		g_regex_unref(sd->search_comment_regex);
 		}
-
-	sd->search_comment_regex = g_regex_new(sd->search_comment, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), &error);
-	if (error)
-		{
-		log_printf("Error: could not compile regular expression %s\n%s\n", sd->search_comment, error->message);
-		g_error_free(error);
-		error = nullptr;
-		sd->search_comment_regex = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
-		}
+	sd->search_comment_regex = create_search_regex(sd->search_comment);
 
 	if(sd->search_exif_regex)
 		{
 		g_regex_unref(sd->search_exif_regex);
 		}
-
-	sd->search_exif_regex = g_regex_new(sd->search_exif_value, static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), &error);
-	if (error)
-		{
-		log_printf("Error: could not compile regular expression %s\n%s\n", sd->search_exif_value, error->message);
-		g_error_free(error);
-		error = nullptr;
-		sd->search_exif_regex = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
-		}
+	sd->search_exif_regex = create_search_regex(sd->search_exif_value);
 
 	sd->search_count = 0;
 	sd->search_total = 0;

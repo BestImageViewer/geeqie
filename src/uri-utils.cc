@@ -89,10 +89,10 @@ static GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
 {
 	GList *list = nullptr;
 	guint i = 0;
-	GError *error = nullptr;
 
 	while (uris[i])
 		{
+		g_autoptr(GError) error = nullptr;
 		g_autofree gchar *local_path = g_filename_from_uri(uris[i], nullptr, &error);
 		if (error)
 			{
@@ -100,18 +100,16 @@ static GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
 			DEBUG_1("   error %d: %s", error->code, error->message);
 			if (error->code == G_CONVERT_ERROR_BAD_URI)
 				{
-				GError *retry_error = nullptr;
 				g_autofree gchar *escaped = g_uri_escape_string(uris[i], ":/", TRUE);
+				g_autoptr(GError) retry_error = nullptr;
 				local_path = g_filename_from_uri(escaped, nullptr, &retry_error);
 				if(retry_error)
 					{
 					DEBUG_1("manually escaped uri \"%s\" also failed g_filename_from_uri", escaped);
 					DEBUG_1("   error %d: %s", retry_error->code, retry_error->message);
-					g_error_free(retry_error);
 					}
 				}
-			g_error_free(error);
-			error = nullptr;
+
 			if (!local_path)
 				{
 				*uri_error_list = g_list_prepend(*uri_error_list, g_strdup(uris[i]));
@@ -119,6 +117,7 @@ static GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
 				continue;
 				}
 			}
+
 		gchar *path = path_to_utf8(local_path);
 		list = g_list_prepend(list, path);
 		i++;

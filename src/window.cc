@@ -414,12 +414,11 @@ void help_pdf()
 		}
 
 	g_autofree gchar *command = g_strdup_printf("xdg-open %s", path);
-	GError *error = nullptr;
 
+	g_autoptr(GError) error = nullptr;
 	if (!g_spawn_command_line_async(command, &error))
 		{
 		log_printf(_("Warning: Failed to execute command: %s\n"), error->message);
-		g_error_free(error);
 		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

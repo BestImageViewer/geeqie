@@ -153,18 +153,17 @@ void pixbuf_draw_rect_fill(guchar *p_pix, gint prs, gboolean has_alpha,
 
 gboolean pixbuf_to_file_as_png(GdkPixbuf *pixbuf, const gchar *filename)
 {
-	GError *error = nullptr;
 	gboolean ret;
 
 	if (!pixbuf || !filename) return FALSE;
 
+	g_autoptr(GError) error = nullptr;
 	ret = gdk_pixbuf_save(pixbuf, filename, "png", &error,
 			      "tEXt::Software", GQ_APPNAME " " VERSION, NULL);
 
 	if (error)
 		{
 		log_printf("Error saving png file: %s\n", error->message);
-		g_error_free(error);
 		}
 
 	return ret;
@@ -178,7 +177,6 @@ gboolean pixbuf_to_file_as_png(GdkPixbuf *pixbuf, const gchar *filename)
 
 GdkPixbuf *pixbuf_inline(const gchar *key)
 {
-	GError *error = nullptr;
 	GInputStream *in_stream;
 
 	if (!key) return nullptr;
@@ -203,6 +201,7 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 		return g_resources_open_stream(path, G_RESOURCE_LOOKUP_FLAGS_NONE, error);
 	};
 
+	g_autoptr(GError) error = nullptr;
 	in_stream = get_input_stream(it->data, dark, &error);
 	if (error && dark)
 		{
@@ -214,7 +213,6 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 	if (error)
 		{
 		log_printf("warning: inline pixbuf error: %s", error->message);
-		g_error_free(error);
 		g_object_unref(in_stream);
 		return nullptr;
 		}
@@ -225,7 +223,6 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 	if (error)
 		{
 		log_printf("warning: inline pixbuf error: %s", error->message);
-		g_error_free(error);
 		return nullptr;
 		}
 

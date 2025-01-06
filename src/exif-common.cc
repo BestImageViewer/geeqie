@@ -209,7 +209,6 @@ static gchar *exif_build_formatted_DateTime(ExifData *exif)
 	gchar buf[128];
 	gint buflen;
 	struct tm tm;
-	GError *error = nullptr;
 
 	gchar *text = exif_get_data_as_text(exif, "Exif.Photo.DateTimeOriginal");
 	if (text)
@@ -229,11 +228,11 @@ static gchar *exif_build_formatted_DateTime(ExifData *exif)
 		buflen = strftime(buf, sizeof(buf), "%x %X", &tm);
 		if (buflen > 0)
 			{
+			g_autoptr(GError) error = nullptr;
 			g_autofree gchar *tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 			if (error)
 				{
 				log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
-				g_error_free(error);
 				}
 			else
 				{
@@ -257,7 +256,6 @@ static gchar *exif_build_formatted_DateTimeDigitized(ExifData *exif)
 	gchar buf[128];
 	gint buflen;
 	struct tm tm;
-	GError *error = nullptr;
 
 	gchar *text = exif_get_data_as_text(exif, "Exif.Photo.DateTimeDigitized");
 	if (text)
@@ -277,11 +275,11 @@ static gchar *exif_build_formatted_DateTimeDigitized(ExifData *exif)
 		buflen = strftime(buf, sizeof(buf), "%x %X", &tm);
 		if (buflen > 0)
 			{
+			g_autoptr(GError) error = nullptr;
 			g_autofree gchar *tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 			if (error)
 				{
 				log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
-				g_error_free(error);
 				}
 			else
 				{
@@ -759,7 +757,6 @@ static gchar *exif_build_formatted_localtime(ExifData *exif)
 {
 	gchar buf[128];
 	gint buflen;
-	GError *error = nullptr;
 	struct tm *tm_local;
 	struct tm tm_utc;
 	time_t stamp;
@@ -786,11 +783,11 @@ static gchar *exif_build_formatted_localtime(ExifData *exif)
 			buflen = strftime(buf, sizeof(buf), "%x %X", tm_local);
 			if (buflen > 0)
 				{
+				g_autoptr(GError) error = nullptr;
 				g_autofree gchar *tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
 				if (error)
 					{
 					log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
-					g_error_free(error);
 					}
 				else
 					{

@@ -56,7 +56,7 @@ private:
 
 gboolean ImageLoaderPDF::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	GError *poppler_error = nullptr;
+	g_autoptr(GError) poppler_error = nullptr;
 	PopplerPage *page;
 	PopplerDocument *document;
 	gdouble width;
@@ -76,7 +76,6 @@ gboolean ImageLoaderPDF::write(const guchar *buf, gsize &chunk_size, gsize count
 	if (poppler_error)
 		{
 		log_printf("warning: pdf reader error: %s\n", poppler_error->message);
-		g_error_free(poppler_error);
 		}
 	else
 		{

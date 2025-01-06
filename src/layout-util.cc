@@ -986,13 +986,12 @@ static void open_with_response_cb(GtkDialog *, gint response_id, gpointer data)
 
 	if (response_id == GTK_RESPONSE_OK)
 		{
-		GError *error = nullptr;
+		g_autoptr(GError) error = nullptr;
 		g_app_info_launch(open_with_data->application, open_with_data->g_file_list, nullptr, &error);
 
 		if (error)
 			{
 			log_printf("Error launching app: %s\n", error->message);
-			g_error_free(error);
 			}
 		}
 
@@ -1010,15 +1009,14 @@ static void open_with_application_selected_cb(GtkAppChooserWidget *, GAppInfo *a
 
 static void open_with_application_activated_cb(GtkAppChooserWidget *, GAppInfo *application, gpointer data)
 {
-	GError *error = nullptr;
 	auto open_with_data = static_cast<OpenWithData *>(data);
 
+	g_autoptr(GError) error = nullptr;
 	g_app_info_launch(application, open_with_data->g_file_list, nullptr, &error);
 
 	if (error)
 		{
 		log_printf("Error launching app.: %s\n", error->message);
-		g_error_free(error);
 		}
 
 	open_with_data_free(open_with_data);
@@ -2854,7 +2852,6 @@ static void layout_actions_setup_mark(LayoutWindow *lw, gint mark, const gchar *
 static void layout_actions_setup_marks(LayoutWindow *lw)
 {
 	gint mark;
-	GError *error;
 	GString *desc = g_string_new(
 				"<ui>"
 				"  <menubar name='MainMenu'>");
@@ -2916,11 +2913,10 @@ static void layout_actions_setup_marks(LayoutWindow *lw)
 		}
 	g_string_append(desc,   "</ui>" );
 
-	error = nullptr;
+	g_autoptr(GError) error = nullptr;
 	if (!gq_gtk_ui_manager_add_ui_from_string(lw->ui_manager, desc->str, -1, &error))
 		{
 		g_message("building menus failed: %s", error->message);
-		g_error_free(error);
 		exit(EXIT_FAILURE);
 		}
 	g_string_free(desc, TRUE);
@@ -3005,7 +3001,6 @@ static void layout_actions_editor_add(GString *desc, GList *path, GList *old_pat
 
 static void layout_actions_setup_editors(LayoutWindow *lw)
 {
-	GError *error;
 	GList *editors_list;
 	GList *work;
 	GList *old_path;
@@ -3101,13 +3096,12 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 	g_string_append(desc,"  </menubar>"
 				"</ui>" );
 
-	error = nullptr;
+	g_autoptr(GError) error = nullptr;
 
 	lw->ui_editors_id = gq_gtk_ui_manager_add_ui_from_string(lw->ui_manager, desc->str, -1, &error);
 	if (!lw->ui_editors_id)
 		{
 		g_message("building menus failed: %s", error->message);
-		g_error_free(error);
 		exit(EXIT_FAILURE);
 		}
 	g_string_free(desc, TRUE);
@@ -3128,8 +3122,6 @@ void create_toolbars(LayoutWindow *lw)
 
 void layout_actions_setup(LayoutWindow *lw)
 {
-	GError *error;
-
 	DEBUG_1("%s layout_actions_setup: start", get_exec_time());
 	if (lw->ui_manager) return;
 
@@ -3171,12 +3163,11 @@ void layout_actions_setup(LayoutWindow *lw)
 	gq_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group, 0);
 
 	DEBUG_1("%s layout_actions_setup: add menu", get_exec_time());
-	error = nullptr;
+	g_autoptr(GError) error = nullptr;
 
 	if (!gq_gtk_ui_manager_add_ui_from_resource(lw->ui_manager, options->hamburger_menu ? GQ_RESOURCE_PATH_UI "/menu-hamburger.ui" : GQ_RESOURCE_PATH_UI "/menu-classic.ui" , &error))
 		{
 		g_message("building menus failed: %s", error->message);
-		g_error_free(error);
 		exit(EXIT_FAILURE);
 		}
 

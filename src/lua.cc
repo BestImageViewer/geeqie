@@ -394,12 +394,11 @@ gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function)
 		}
 
 	gchar *data = g_strdup(lua_tostring(L, -1));
-	GError *error = nullptr;
+	g_autoptr(GError) error = nullptr;
 	g_autofree gchar *tmp = g_locale_to_utf8(data, strlen(data), nullptr, nullptr, &error);
 	if (error)
 		{
 		log_printf("Error converting lua output from locale to UTF-8: %s\n", error->message);
-		g_error_free(error);
 		}
 	else
 		{

@@ -59,12 +59,11 @@ gchar **ImageLoaderSvgz::get_format_mime_types()
 
 void ImageLoaderSvgz::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data)
 {
-	GError *error = nullptr;
+	g_autoptr(GError) error = nullptr;
 
 	loader = gdk_pixbuf_loader_new_with_mime_type("image/svg", &error);
 	if (error)
 		{
-		g_error_free(error);
 		return;
 		}
 

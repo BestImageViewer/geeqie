@@ -5093,7 +5093,6 @@ static void export_duplicates_data_cancel_cb(FileDialog *, gpointer data)
 static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 {
 	auto edd = static_cast<ExportDupesData *>(data);
-	GError *error = nullptr;
 	GtkTreeModel *store;
 	GtkTreeIter iter;
 	DupeItem *di;
@@ -5111,11 +5110,11 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 
 	out_file = g_file_new_for_path(fdlg->dest_path);
 
+	g_autoptr(GError) error = nullptr;
 	gfstream = g_file_replace(out_file, nullptr, TRUE, G_FILE_CREATE_NONE, nullptr, &error);
 	if (error)
 		{
 		log_printf(_("Error creating Export duplicates data file: Error: %s\n"), error->message);
-		g_error_free(error);
 		return;
 		}
 

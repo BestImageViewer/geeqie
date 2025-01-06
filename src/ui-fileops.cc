@@ -131,10 +131,10 @@ gchar *path_to_utf8(const gchar *path)
 #endif
 {
 	gchar *utf8;
-	GError *error = nullptr;
 
 	if (!path) return nullptr;
 
+	g_autoptr(GError) error = nullptr;
 	utf8 = g_filename_to_utf8(path, -1, nullptr, nullptr, &error);
 	if (error)
 		{
@@ -143,9 +143,9 @@ gchar *path_to_utf8(const gchar *path)
 #else
 		log_printf("Unable to convert filename to UTF-8:\n%s\n%s\n", path, error->message);
 #endif
-		g_error_free(error);
 		encoding_dialog(path);
 		}
+
 	if (!utf8)
 		{
 		/* just let it through, but bad things may happen */
@@ -162,10 +162,10 @@ gchar *path_from_utf8(const gchar *utf8)
 #endif
 {
 	gchar *path;
-	GError *error = nullptr;
 
 	if (!utf8) return nullptr;
 
+	g_autoptr(GError) error = nullptr;
 	path = g_filename_from_utf8(utf8, -1, nullptr, nullptr, &error);
 	if (error)
 		{
@@ -174,8 +174,8 @@ gchar *path_from_utf8(const gchar *utf8)
 #else
 		log_printf("Unable to convert filename to locale from UTF-8:\n%s\n%s\n", utf8, error->message);
 #endif
-		g_error_free(error);
 		}
+
 	if (!path)
 		{
 		/* if invalid UTF-8, text probably still in original form, so just copy it */
@@ -832,7 +832,6 @@ struct WebData
 
 static void web_file_async_ready_cb(GObject *source_object, GAsyncResult *res, gpointer data)
 {
-	GError *error = nullptr;
 	auto web = static_cast<WebData *>(data);
 
 	if (!g_cancellable_is_cancelled(web->cancellable))
@@ -840,6 +839,7 @@ static void web_file_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 		generic_dialog_close(web->gd);
 		}
 
+	g_autoptr(GError) error = nullptr;
 	if (g_file_copy_finish(G_FILE(source_object), res, &error))
 		{
 		g_autofree gchar *tmp_filename = g_file_get_parse_name(web->tmp_g_file); // @todo Is it required?

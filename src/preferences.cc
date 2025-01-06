@@ -4211,7 +4211,6 @@ static void image_overlay_set_text_colors()
 
 static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, gpointer data)
 {
-	GError *error = nullptr;
 	auto tz = static_cast<TZData *>(data);
 	FileData *fd;
 
@@ -4220,6 +4219,7 @@ static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 		generic_dialog_close(tz->gd);
 		}
 
+	g_autoptr(GError) error = nullptr;
 	if (g_file_copy_finish(G_FILE(source_object), res, &error))
 		{
 		g_autofree gchar *tmp_filename = g_file_get_path(tz->tmp_g_file);
@@ -4251,7 +4251,7 @@ static void timezone_async_ready_cb(GObject *source_object, GAsyncResult *res, g
 		file_util_warning_dialog(_("Error: Timezone database download failed"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
 		}
 
-	g_file_delete(tz->tmp_g_file, nullptr, &error);
+	g_file_delete(tz->tmp_g_file, nullptr, nullptr);
 	g_object_unref(tz->tmp_g_file);
 	tz->tmp_g_file = nullptr;
 	g_object_unref(tz->cancellable);
@@ -4278,7 +4278,6 @@ static void timezone_cancel_button_cb(GenericDialog *, gpointer data)
 static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 {
 	auto tz = static_cast<TZData *>(data);
-	GError *error = nullptr;
 	GFileIOStream *io_stream;
 
 	if (tz->tmp_g_file)
@@ -4286,13 +4285,13 @@ static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 		return;
 		}
 
+	g_autoptr(GError) error = nullptr;
 	tz->tmp_g_file = g_file_new_tmp("geeqie_timezone_XXXXXX", &io_stream, &error);
 
 	if (error)
 		{
 		file_util_warning_dialog(_("Timezone database download failed"), error->message, GQ_ICON_DIALOG_ERROR, nullptr);
 		log_printf("Error: Download timezone database failed:\n%s", error->message);
-		g_error_free(error);
 		g_object_unref(tz->tmp_g_file);
 		}
 	else

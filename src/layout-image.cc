@@ -400,52 +400,50 @@ static void layout_image_animate_update_image(LayoutWindow *lw)
 
 static void animation_async_ready_cb(GObject *, GAsyncResult *res, gpointer data)
 {
-	GError *error = nullptr;
 	auto animation = static_cast<AnimationData *>(data);
 
-	if (animation)
+	if (!animation) return;
+
+	if (g_cancellable_is_cancelled(animation->cancellable))
 		{
-		if (g_cancellable_is_cancelled(animation->cancellable))
-			{
-			gdk_pixbuf_animation_new_from_stream_finish(res, nullptr);
-			g_object_unref(animation->in_file);
-			g_object_unref(animation->gfstream);
-			image_animation_data_free(animation);
-			return;
-			}
-
-		animation->gpa = gdk_pixbuf_animation_new_from_stream_finish(res, &error);
-		if (animation->gpa)
-			{
-			if (!gdk_pixbuf_animation_is_static_image(animation->gpa))
-				{
-				animation->iter = gdk_pixbuf_animation_get_iter(animation->gpa, nullptr);
-				if (animation->iter)
-					{
-					animation->data_adr = animation->lw->image->image_fd;
-					animation->delay = gdk_pixbuf_animation_iter_get_delay_time(animation->iter);
-					animation->valid = TRUE;
-
-					layout_image_animate_update_image(animation->lw);
-
-					g_timeout_add(animation->delay, show_next_frame, animation);
-					}
-				}
-			}
-		else
-			{
-			log_printf("Error reading GIF file: %s\n", error->message);
-			}
-
+		gdk_pixbuf_animation_new_from_stream_finish(res, nullptr);
 		g_object_unref(animation->in_file);
 		g_object_unref(animation->gfstream);
+		image_animation_data_free(animation);
+		return;
 		}
+
+	g_autoptr(GError) error = nullptr;
+	animation->gpa = gdk_pixbuf_animation_new_from_stream_finish(res, &error);
+	if (animation->gpa)
+		{
+		if (!gdk_pixbuf_animation_is_static_image(animation->gpa))
+			{
+			animation->iter = gdk_pixbuf_animation_get_iter(animation->gpa, nullptr);
+			if (animation->iter)
+				{
+				animation->data_adr = animation->lw->image->image_fd;
+				animation->delay = gdk_pixbuf_animation_iter_get_delay_time(animation->iter);
+				animation->valid = TRUE;
+
+				layout_image_animate_update_image(animation->lw);
+
+				g_timeout_add(animation->delay, show_next_frame, animation);
+				}
+			}
+		}
+	else
+		{
+		log_printf("Error reading GIF file: %s\n", error->message);
+		}
+
+	g_object_unref(animation->in_file);
+	g_object_unref(animation->gfstream);
 }
 
 static gboolean layout_image_animate_new_file(LayoutWindow *lw)
 {
 	GFileInputStream *gfstream;
-	GError *error = nullptr;
 	AnimationData *animation;
 	GFile *in_file;
 
@@ -465,6 +463,7 @@ static gboolean layout_image_animate_new_file(LayoutWindow *lw)
 
 	in_file = g_file_new_for_path(lw->image->image_fd->path);
 	animation->in_file = in_file;
+	g_autoptr(GError) error = nullptr;
 	gfstream = g_file_read(in_file, nullptr, &error);
 	if (gfstream)
 		{

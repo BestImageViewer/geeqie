@@ -1722,30 +1722,23 @@ guint vf_marks_get_filter(ViewFile *vf)
 
 GRegex *vf_file_filter_get_filter(ViewFile *vf)
 {
-	GRegex *ret = nullptr;
-	GError *error = nullptr;
-
 	if (!gtk_widget_get_visible(vf->file_filter.combo))
 		{
 		return g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
 	g_autofree gchar *file_filter_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
-
-	if (file_filter_text[0] != '\0')
+	if (file_filter_text[0] == '\0')
 		{
-		ret = g_regex_new(file_filter_text, vf->file_filter.case_sensitive ? static_cast<GRegexCompileFlags>(0) : G_REGEX_CASELESS, static_cast<GRegexMatchFlags>(0), &error);
-		if (error)
-			{
-			log_printf("Error: could not compile regular expression %s\n%s\n", file_filter_text, error->message);
-			g_error_free(error);
-			error = nullptr;
-			ret = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
-			}
+		return g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
-	else
+
+	g_autoptr(GError) error = nullptr;
+	GRegex *ret = g_regex_new(file_filter_text, vf->file_filter.case_sensitive ? static_cast<GRegexCompileFlags>(0) : G_REGEX_CASELESS, static_cast<GRegexMatchFlags>(0), &error);
+	if (error)
 		{
-		ret = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
+		log_printf("Error: could not compile regular expression %s\n%s\n", file_filter_text, error->message);
+		return g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
 	return ret;
