@@ -22,7 +22,7 @@
  *
  */
 
-#include "pic_equiv.h"
+#include "pic-equiv.h"
 
 /**
  * @param cname path to picture file to represent

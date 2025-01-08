@@ -20,9 +20,10 @@
 
 #include "command-line-handling.h"
 
+#include <sys/wait.h>
+
 #include <cstring>
 #include <map>
-#include <sys/wait.h>
 #include <vector>
 
 #include "cache-maint.h"
@@ -43,7 +44,7 @@
 #include "main-defines.h"
 #include "main.h"
 #include "misc.h"
-#include "pic_equiv.h"
+#include "pic-equiv.h"
 #include "pixbuf-renderer.h"
 #include "rcfile.h"
 #include "secure-save.h"
@@ -425,9 +426,7 @@ void gq_duplicates_process(GtkApplication *, GApplicationCommandLine *, GVariant
 	// Compute similarity score for every pair, build equivalence sets.
 	for (auto outer_iter = pics.begin(); outer_iter != pics.end(); ++outer_iter)
 		{
-		auto inner_iter = outer_iter;
-		inner_iter++;
-		for (; inner_iter != pics.end(); ++inner_iter)
+		for (auto inner_iter = std::next(outer_iter); inner_iter != pics.end(); ++inner_iter)
 			{
 			double similarity = outer_iter->second->compare(*inner_iter->second);
 			DEBUG_1("%s vs %s: %f", outer_iter->second->name.c_str(), inner_iter->second->name.c_str(), similarity);
@@ -485,7 +484,7 @@ void gq_duplicates_process(GtkApplication *, GApplicationCommandLine *, GVariant
 
 void gq_duplicates_program(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *text = nullptr;
+	const gchar *text = nullptr;
 
 	g_variant_dict_lookup(command_line_options_dict, "duplicates-program", "&s", &text);
 
