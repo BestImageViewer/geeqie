@@ -1447,78 +1447,78 @@ static void layout_menu_foreach_func(
 	g_ptr_array_add(array, key_name);
 }
 
+static gchar *convert_template_line(const gchar *template_line, const GPtrArray *keyboard_map_array)
+{
+	if (!g_strrstr(template_line, ">key:"))
+		{
+		return g_strdup_printf("%s\n", template_line);
+		}
+
+	g_auto(GStrv) pre_key = g_strsplit(template_line, ">key:", 2);
+	g_auto(GStrv) post_key = g_strsplit(pre_key[1], "<", 2);
+
+	const gchar *key_name = post_key[0];
+	const gchar *menu_name = " ";
+	for (guint index = 0; index < keyboard_map_array->len-1; index += 2)
+		{
+		if (!g_ascii_strcasecmp(static_cast<const gchar *>(g_ptr_array_index(keyboard_map_array, index+1)), key_name))
+			{
+			menu_name = static_cast<const gchar *>(g_ptr_array_index(keyboard_map_array, index+0));
+			break;
+			}
+		}
+
+	for (const auto &m : keyboard_map_hardcoded)
+		{
+		if (!g_strcmp0(m.key_name, key_name))
+			{
+			menu_name = m.menu_name;
+			break;
+			}
+		}
+
+	return g_strconcat(pre_key[0], ">", menu_name, "<", post_key[1], "\n", NULL);
+}
+
+static void convert_keymap_template_to_file(const gint fd, const GPtrArray *keyboard_map_array)
+{
+	g_autoptr(GIOChannel) channel = g_io_channel_unix_new(fd);
+
+	int keymap_index = 0;
+	while (keymap_template[keymap_index])
+		{
+		g_autofree gchar *converted_line = convert_template_line(keymap_template[keymap_index], keyboard_map_array);
+
+		g_autoptr(GError) error = nullptr;
+		g_io_channel_write_chars(channel, converted_line, -1, nullptr, &error);
+		if (error) log_printf("Warning: Keyboard Map:%s\n", error->message);
+
+		keymap_index++;
+		}
+
+	g_autoptr(GError) error = nullptr;
+	g_io_channel_flush(channel, &error);
+	if (error) log_printf("Warning: Keyboard Map:%s\n", error->message);
+}
+
 static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 {
-	gint fd = -1;
 	g_autofree gchar *tmp_file = nullptr;
-	GError *error = nullptr;
-	GIOChannel *channel;
-	int keymap_index;
+	g_autoptr(GError) error = nullptr;
 
-	fd = g_file_open_tmp("geeqie_keymap_XXXXXX.svg", &tmp_file, &error);
+	const gint fd = g_file_open_tmp("geeqie_keymap_XXXXXX.svg", &tmp_file, &error);
 	if (error)
 		{
-		log_printf("Error: Keyboard Map - cannot create file:%s\n",error->message);
-		g_error_free(error);
+		log_printf("Error: Keyboard Map - cannot create file:%s\n", error->message);
+		return;
 		}
-	else
-		{
-		GPtrArray *array = g_ptr_array_new_with_free_func(g_free);
 
-		gtk_accel_map_foreach(array, layout_menu_foreach_func);
+	g_autoptr(GPtrArray) array = g_ptr_array_new_with_free_func(g_free);
+	gtk_accel_map_foreach(array, layout_menu_foreach_func);
 
-		channel = g_io_channel_unix_new(fd);
+	convert_keymap_template_to_file(fd, array);
 
-		keymap_index = 0;
-		while (keymap_template[keymap_index])
-			{
-			if (g_strrstr(keymap_template[keymap_index], ">key:"))
-				{
-				g_auto(GStrv) pre_key = g_strsplit(keymap_template[keymap_index], ">key:", 2);
-				g_auto(GStrv) post_key = g_strsplit(pre_key[1], "<", 2);
-
-				const gchar *key_name = post_key[0];
-				const gchar *menu_name = " ";
-				for (guint index = 0; index < array->len-1; index += 2)
-					{
-					if (!g_ascii_strcasecmp(static_cast<const gchar *>(g_ptr_array_index(array, index+1)), key_name))
-						{
-						menu_name = static_cast<const gchar *>(g_ptr_array_index(array, index+0));
-						break;
-						}
-					}
-
-				for (const auto& m : keyboard_map_hardcoded)
-					{
-					if (!g_strcmp0(m.key_name, key_name))
-						{
-						menu_name = m.menu_name;
-						break;
-						}
-					}
-
-				g_autofree gchar *converted_line = g_strconcat(pre_key[0], ">", menu_name, "<", post_key[1], "\n", NULL);
-				g_io_channel_write_chars(channel, converted_line, -1, nullptr, &error);
-				if (error) {log_printf("Warning: Keyboard Map:%s\n",error->message); g_error_free(error);}
-				}
-			else
-				{
-				g_io_channel_write_chars(channel, keymap_template[keymap_index], -1, nullptr, &error);
-				if (error) {log_printf("Warning: Keyboard Map:%s\n",error->message); g_error_free(error);}
-				g_io_channel_write_chars(channel, "\n", -1, nullptr, &error);
-				if (error) {log_printf("Warning: Keyboard Map:%s\n",error->message); g_error_free(error);}
-				}
-			keymap_index++;
-			}
-
-		g_io_channel_flush(channel, &error);
-		if (error) {log_printf("Warning: Keyboard Map:%s\n",error->message); g_error_free(error);}
-		g_io_channel_unref(channel);
-
-		g_ptr_array_unref(array);
-
-		view_window_new(file_data_new_simple(tmp_file));
-		}
+	view_window_new(file_data_new_simple(tmp_file));
 }
 
 static void layout_menu_about_cb(GtkAction *, gpointer data)
