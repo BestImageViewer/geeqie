@@ -152,7 +152,7 @@ static void collection_save_or_append_dialog(gint type, CollectionData *cd)
 
 		collect_manager_list(&collection_list, nullptr, nullptr);
 
-		GString *out_string = g_string_new(nullptr);
+		g_autoptr(GString) out_string = g_string_new(nullptr);
 
 		for (GList *work = collection_list; work != nullptr; work = work->next)
 			{
@@ -163,7 +163,6 @@ static void collection_save_or_append_dialog(gint type, CollectionData *cd)
 		g_list_free_full(collection_list, g_free);
 
 		existing_collections = gtk_label_new(out_string->str);
-		g_string_free(out_string, TRUE);
 
 		scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);

@@ -79,14 +79,6 @@ static gdouble exif_get_rational_as_double(ExifData *exif, const gchar *key)
 	return exif_rational_to_double(r, sign);
 }
 
-static GString *append_comma_text(GString *string, const gchar *text)
-{
-	string = g_string_append(string, ", ");
-	string = g_string_append(string, text);
-
-	return string;
-}
-
 static gchar *remove_common_prefix(gchar *s, gchar *t)
 {
 	gint i;
@@ -424,7 +416,7 @@ static gchar *exif_build_formatted_Flash(ExifData *exif)
 
 	/* flash mode (bits 3, 4) */
 	v = (n >> 3) & 0x03;
-	if (v) string = append_comma_text(string, _("mode:"));
+	if (v) g_string_append_printf(string, ", %s", _("mode:"));
 	switch (v)
 		{
 		case 1:
@@ -442,13 +434,13 @@ static gchar *exif_build_formatted_Flash(ExifData *exif)
 
 	/* return light (bits 1, 2) */
 	v = (n >> 1) & 0x03;
-	if (v == 2) string = append_comma_text(string, _("not detected by strobe"));
-	if (v == 3) string = append_comma_text(string, _("detected by strobe"));
+	if (v == 2) g_string_append_printf(string, ", %s", _("not detected by strobe"));
+	if (v == 3) g_string_append_printf(string, ", %s", _("detected by strobe"));
 
 	/* we ignore flash function (bit 5) */
 
 	/* red-eye (bit 6) */
-	if ((n >> 5) & 0x01) string = append_comma_text(string, _("red-eye reduction"));
+	if ((n >> 5) & 0x01) g_string_append_printf(string, ", %s", _("red-eye reduction"));
 
 	return g_string_free(string, FALSE);
 }
@@ -529,56 +521,39 @@ static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 
 static gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 {
-	GString *string;
-	gchar *ref;
-	ExifRational *value;
-	ExifItem *item;
-	guint i;
-	gdouble p;
-	gdouble p3;
-	gulong p1;
-	gulong p2;
+	GString *string = g_string_new("");
 
-	string = g_string_new("");
+	const auto build = [exif, string](const gchar *item_key, const gchar *ref_key)
+	{
+		ExifItem *item = exif_get_item(exif, item_key);
+		if (!item) return;
 
-	item = exif_get_item(exif, "Exif.GPSInfo.GPSLatitude");
-	ref = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSLatitudeRef");
-	if (item && ref)
-		{
-		p = 0;
-		for (i = 0; i < exif_item_get_elements(item); i++)
+		g_autofree gchar *ref = exif_get_data_as_text(exif, ref_key);
+		if (!ref) return;
+
+		gdouble p = 0;
+		for (guint i = 0, elements = exif_item_get_elements(item); i < elements; i++)
 			{
-			value = exif_item_get_rational(item, nullptr, i);
+			ExifRational *value = exif_item_get_rational(item, nullptr, i);
 			if (value && value->num && value->den)
 				p += static_cast<gdouble>(value->num) / static_cast<gdouble>(value->den) / pow(60.0, static_cast<gdouble>(i));
 			}
-		p1 = static_cast<gint>(p);
-		p2 = static_cast<gint>((p - p1)*60);
-		p3 = ((p - p1)*60 - p2)*60;
+
+		const gulong p1 = static_cast<gint>(p);
+		const gulong p2 = static_cast<gint>((p - p1)*60);
+		const gdouble p3 = ((p - p1)*60 - p2)*60;
+
+		if (string->len > 0)
+			g_string_append(string, ", ");
 
 		g_string_append_printf(string, "%0lu° %0lu' %0.2f\" %.1s", p1, p2, p3, ref);
-		} // if (item && ref)
+	};
 
-	item = exif_get_item(exif, "Exif.GPSInfo.GPSLongitude");
-	ref = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSLongitudeRef");
-	if (item && ref)
-		{
-		p = 0;
-		for (i = 0; i < exif_item_get_elements(item); i++)
-			{
-			value = exif_item_get_rational(item, nullptr, i);
-			if (value && value->num && value->den)
-			p += static_cast<gdouble>(value->num) / static_cast<gdouble>(value->den) / pow(60.0, static_cast<gdouble>(i));
-			}
-		p1 = static_cast<gint>(p);
-		p2 = static_cast<gint>((p - p1)*60);
-		p3 = ((p - p1)*60 - p2)*60;
-
-		g_string_append_printf(string, ", %0lu° %0lu' %0.2f\" %.1s", p1, p2, p3, ref);
-		} // if (item && ref)
+	build("Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef");
+	build("Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef");
 
 	return g_string_free(string, FALSE);
-} // static gchar *exif_build_forma...
+}
 
 static gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
 {

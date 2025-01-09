@@ -148,7 +148,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		return FALSE;
 		}
 
-	GString *extended_filename_buffer = g_string_new(nullptr);
+	g_autoptr(GString) extended_filename_buffer = g_string_new(nullptr);
 	while (fgets(s_buf, sizeof(s_buf), f))
 		{
 		gchar *buf;
@@ -340,8 +340,6 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			}
 		g_free(buffer2);
 		}
-
-	g_string_free(extended_filename_buffer, TRUE);
 
 	DEBUG_1("collection files: total = %u fail = %u official=%d gqview=%d geometry=%d", total, fail, has_official_header, has_gqview_header, has_geometry_header);
 

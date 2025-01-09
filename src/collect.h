@@ -135,7 +135,7 @@ gboolean collection_window_modified_exists();
 
 gboolean is_collection(const gchar *param);
 gchar *collection_path(const gchar *param);
-void collection_contents(const gchar *name, GString **contents);
+GString *collection_contents(const gchar *name, GString *contents) G_GNUC_WARN_UNUSED_RESULT;
 GList *collection_contents_fd(const gchar *name);
 
 #endif

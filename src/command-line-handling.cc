@@ -528,22 +528,18 @@ void gq_geometry(GtkApplication *, GApplicationCommandLine *, GVariantDict *comm
 
 void gq_get_collection(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *text;
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "get-collection", "&s", &text);
-
-	GString *contents = g_string_new(nullptr);
 
 	if (is_collection(text))
 		{
-		collection_contents(text, &contents);
+		g_autoptr(GString) contents = collection_contents(text, g_string_new(nullptr));
 		g_application_command_line_print(app_command_line, "%s%c",  contents->str, print0 ? 0 : '\n');
 		}
 	else
 		{
-		g_application_command_line_print(app_command_line, "%s%s%s%s%s", "Collection ", BOLD_ON, text, BOLD_OFF, " does not exist\n");
+		g_application_command_line_print(app_command_line, "Collection " BOLD_ON "%s" BOLD_OFF " does not exist\n", text);
 		}
-
-	g_string_free(contents, TRUE);
 }
 
 void gq_get_collection_list(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
@@ -553,7 +549,7 @@ void gq_get_collection_list(GtkApplication *, GApplicationCommandLine *app_comma
 
 	GList *collection_list = nullptr;
 	GList *work;
-	GString *out_string = g_string_new(nullptr);
+	g_autoptr(GString) out_string = g_string_new(nullptr);
 
 	collect_manager_list(&collection_list, nullptr, nullptr);
 
@@ -570,7 +566,6 @@ void gq_get_collection_list(GtkApplication *, GApplicationCommandLine *app_comma
 	g_application_command_line_print(app_command_line, "%s%c", out_string->str, print0 ? 0 : '\n');
 
 	g_list_free_full(collection_list, g_free);
-	g_string_free(out_string, TRUE);
 }
 
 void gq_get_destination(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
@@ -589,65 +584,53 @@ void gq_get_destination(GtkApplication *, GApplicationCommandLine *app_command_l
 
 void gq_get_file_info(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
 {
-	FileData *fd;
-	GString *out_string;
-	FileFormatClass format_class;
-
 	if (!layout_valid(&lw_id)) return;
 
 	const gchar *filename = image_get_path(lw_id->image);
-	if (filename)
+	if (!filename) return;
+
+	FileData *fd = file_data_new_group(filename);
+
+	g_autoptr(GString) out_string = g_string_new(nullptr);
+
+	FileFormatClass format_class = fd->pixbuf ? filter_file_get_class(filename) : FORMAT_CLASS_UNKNOWN;
+	g_string_append_printf(out_string, _("Class: %s\n"), format_class_list[format_class]);
+
+	if (fd->page_total > 1)
 		{
-		fd = file_data_new_group(filename);
-		out_string = g_string_new(nullptr);
-
-		if (fd->pixbuf)
-			{
-			format_class = filter_file_get_class(filename);
-			}
-		else
-			{
-			format_class = FORMAT_CLASS_UNKNOWN;
-			}
-
-		g_string_append_printf(out_string, _("Class: %s\n"), format_class_list[format_class]);
-
-		if (fd->page_total > 1)
-			{
-			g_string_append_printf(out_string, _("Page no: %d/%d\n"), fd->page_num + 1, fd->page_total);
-			}
-
-		if (fd->exif)
-			{
-			g_autofree gchar *country_name = exif_get_data_as_text(fd->exif, "formatted.countryname");
-			if (country_name)
-				{
-				g_string_append_printf(out_string, _("Country name: %s\n"), country_name);
-				}
-
-			g_autofree gchar *country_code = exif_get_data_as_text(fd->exif, "formatted.countrycode");
-			if (country_code)
-				{
-				g_string_append_printf(out_string, _("Country code: %s\n"), country_code);
-				}
-
-			g_autofree gchar *timezone = exif_get_data_as_text(fd->exif, "formatted.timezone");
-			if (timezone)
-				{
-				g_string_append_printf(out_string, _("Timezone: %s\n"), timezone);
-				}
-
-			g_autofree gchar *local_time = exif_get_data_as_text(fd->exif, "formatted.localtime");
-			if (local_time)
-				{
-				g_string_append_printf(out_string, ("Local time: %s\n"), local_time);
-				}
-			}
-
-		g_application_command_line_print(app_command_line, "%s%c", out_string->str, print0 ? 0 : '\n');
-		g_string_free(out_string, TRUE);
-		file_data_unref(fd);
+		g_string_append_printf(out_string, _("Page no: %d/%d\n"), fd->page_num + 1, fd->page_total);
 		}
+
+	if (fd->exif)
+		{
+		g_autofree gchar *country_name = exif_get_data_as_text(fd->exif, "formatted.countryname");
+		if (country_name)
+			{
+			g_string_append_printf(out_string, _("Country name: %s\n"), country_name);
+			}
+
+		g_autofree gchar *country_code = exif_get_data_as_text(fd->exif, "formatted.countrycode");
+		if (country_code)
+			{
+			g_string_append_printf(out_string, _("Country code: %s\n"), country_code);
+			}
+
+		g_autofree gchar *timezone = exif_get_data_as_text(fd->exif, "formatted.timezone");
+		if (timezone)
+			{
+			g_string_append_printf(out_string, _("Timezone: %s\n"), timezone);
+			}
+
+		g_autofree gchar *local_time = exif_get_data_as_text(fd->exif, "formatted.localtime");
+		if (local_time)
+			{
+			g_string_append_printf(out_string, ("Local time: %s\n"), local_time);
+			}
+		}
+
+	g_application_command_line_print(app_command_line, "%s%c", out_string->str, print0 ? 0 : '\n');
+
+	file_data_unref(fd);
 }
 
 void get_filelist(GApplicationCommandLine *app_command_line, const gchar *text, gboolean recurse)
@@ -681,7 +664,7 @@ void get_filelist(GApplicationCommandLine *app_command_line, const gchar *text, 
 		filelist_read(dir_fd, &list, nullptr);
 		}
 
-	GString *out_string = g_string_new(nullptr);
+	g_autoptr(GString) out_string = g_string_new(nullptr);
 	work = list;
 	while (work)
 		{
@@ -725,7 +708,6 @@ void get_filelist(GApplicationCommandLine *app_command_line, const gchar *text, 
 
 	g_application_command_line_print(app_command_line, "%s\n",  out_string->str);
 
-	g_string_free(out_string, TRUE);
 	filelist_free(list);
 	file_data_unref(dir_fd);
 }
@@ -802,7 +784,7 @@ void gq_get_selection(GtkApplication *, GApplicationCommandLine *app_command_lin
 	if (!layout_valid(&lw_id)) return;
 
 	GList *selected = layout_selection_list(lw_id);  // Keep copy to free.
-	GString *out_string = g_string_new(nullptr);
+	g_autoptr(GString) out_string = g_string_new(nullptr);
 
 	GList *work = selected;
 	while (work)
@@ -820,7 +802,6 @@ void gq_get_selection(GtkApplication *, GApplicationCommandLine *app_command_lin
 	g_application_command_line_print(app_command_line, "%s\n",  out_string->str);
 
 	filelist_free(selected);
-	g_string_free(out_string, TRUE);
 }
 
 
@@ -1233,13 +1214,9 @@ void gq_version(GtkApplication *, GApplicationCommandLine *app_command_line,GVar
 
 void gq_get_window_list(GtkApplication *, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
 {
-	GString *window_list;
+	g_autofree gchar *window_list = layout_get_window_list();
 
-	window_list = layout_get_window_list();
-
-	g_application_command_line_print(app_command_line, "%s\n", window_list->str);
-
-	g_string_free(window_list, TRUE);
+	g_application_command_line_print(app_command_line, "%s\n", window_list);
 }
 
 void gq_view(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)

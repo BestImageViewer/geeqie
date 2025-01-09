@@ -79,7 +79,6 @@ static void encoding_dialog(const gchar *path)
 {
 	static gboolean warned_user = FALSE;
 	GenericDialog *gd;
-	GString *string;
 	const gchar *lc;
 	const gchar *bf;
 
@@ -89,7 +88,7 @@ static void encoding_dialog(const gchar *path)
 	lc = getenv("LANG");
 	bf = getenv("G_BROKEN_FILENAMES");
 
-	string = g_string_new(_("One or more filenames are not encoded with the preferred locale character set.\n"));
+	g_autoptr(GString) string = g_string_new(_("One or more filenames are not encoded with the preferred locale character set.\n"));
 	g_string_append_printf(string, _("Operations on, and display of these files with %s may not succeed.\n"), PACKAGE);
 	g_string_append(string, "\n");
 	g_string_append(string, _("If your filenames are not encoded in utf-8, try setting the environment variable G_BROKEN_FILENAMES=1\n"));
@@ -120,8 +119,6 @@ static void encoding_dialog(const gchar *path)
 				   _("Filename encoding locale mismatch"), string->str, TRUE);
 
 	gtk_widget_show(gd->dialog);
-
-	g_string_free(string, TRUE);
 }
 
 #if GQ_DEBUG_PATH_UTF8

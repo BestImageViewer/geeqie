@@ -475,7 +475,7 @@ void gq_accel_map_print(
 		    GdkModifierType accel_mods,
 		    gboolean	changed)
 {
-	GString *gstring = g_string_new(changed ? nullptr : "; ");
+	g_autoptr(GString) gstring = g_string_new(changed ? nullptr : "; ");
 	auto ssi = static_cast<SecureSaveInfo *>(data);
 
 	g_string_append(gstring, "(gtk_accel_path \"");
@@ -492,14 +492,11 @@ void gq_accel_map_print(
 	g_string_append(gstring, "\")\n");
 
 	secure_fwrite(gstring->str, sizeof(*gstring->str), gstring->len, ssi);
-
-	g_string_free(gstring, TRUE);
 }
 
 gboolean gq_accel_map_save(const gchar *path)
 {
 	SecureSaveInfo *ssi;
-	GString *gstring;
 
 	g_autofree gchar *pathl = path_from_utf8(path);
 	ssi = secure_open(pathl);
@@ -509,7 +506,7 @@ gboolean gq_accel_map_save(const gchar *path)
 		return FALSE;
 		}
 
-	gstring = g_string_new("; ");
+	g_autoptr(GString) gstring = g_string_new("; ");
 	if (g_get_prgname())
 		g_string_append(gstring, g_get_prgname());
 	g_string_append(gstring, " GtkAccelMap rc-file         -*- scheme -*-\n");
@@ -517,8 +514,6 @@ gboolean gq_accel_map_save(const gchar *path)
 	g_string_append(gstring, ";\n");
 
 	secure_fwrite(gstring->str, sizeof(*gstring->str), gstring->len, ssi);
-
-	g_string_free(gstring, TRUE);
 
 	gtk_accel_map_foreach(ssi, gq_accel_map_print);
 
@@ -645,7 +640,6 @@ gint exit_confirm_dlg()
 {
 	GtkWidget *parent;
 	LayoutWindow *lw;
-	GString *message;
 
 	if (exit_dialog)
 		{
@@ -666,7 +660,7 @@ gint exit_confirm_dlg()
 	exit_dialog = generic_dialog_new(exit_msg, "exit", parent, FALSE,
 	                                 exit_confirm_cancel_cb, nullptr);
 
-	message = g_string_new(nullptr);
+	g_autoptr(GString) message = g_string_new(nullptr);
 
 	if (collection_window_modified_exists())
 		{
@@ -685,8 +679,6 @@ gint exit_confirm_dlg()
 	generic_dialog_add_button(exit_dialog, GQ_ICON_QUIT, _("Quit"), exit_confirm_exit_cb, TRUE);
 
 	gtk_widget_show(exit_dialog->dialog);
-
-	g_string_free(message, TRUE);
 
 	return TRUE;
 }

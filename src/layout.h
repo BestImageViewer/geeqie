@@ -192,7 +192,7 @@ guint layout_list_count(LayoutWindow *lw, gint64 *bytes);
 FileData *layout_list_get_fd(LayoutWindow *lw, gint index);
 gint layout_list_get_index(LayoutWindow *lw, FileData *fd);
 void layout_list_sync_fd(LayoutWindow *lw, FileData *fd);
-GString *layout_get_window_list();
+gchar *layout_get_window_list();
 
 GList *layout_selection_list(LayoutWindow *lw);
 /* return list of pointers to int for selection */

@@ -1925,7 +1925,7 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 
 		g_assert(fd->magick == FD_MAGICK);
 
-		GString *name_sidecars = g_string_new(nullptr);
+		g_autoptr(GString) name_sidecars = g_string_new(nullptr);
 
 		if (VFICON(vf)->show_text)
 			{
@@ -1982,7 +1982,6 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 		             "foreground-set", TRUE,
 		             "has-focus", VFICON(vf)->focus_fd == fd,
 		             NULL);
-		g_string_free(name_sidecars, TRUE);
 		}
 	else
 		{

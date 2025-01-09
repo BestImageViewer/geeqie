@@ -373,30 +373,25 @@ gboolean is_collection(const gchar *param)
  *
  *
  */
-void collection_contents(const gchar *name, GString **contents)
+GString *collection_contents(const gchar *name, GString *contents)
 {
-	CollectionData *cd;
-	CollectInfo *ci;
-	GList *work;
-	FileData *fd;
+	if (!is_collection(name)) return contents;
 
-	if (!is_collection(name)) return;
-
+	CollectionData *cd = collection_new("");
 	g_autofree gchar *path = collection_path(name);
-	cd = collection_new("");
 	collection_load(cd, path, COLLECTION_LOAD_APPEND);
-	work = cd->list;
-	while (work)
-		{
-		ci = static_cast<CollectInfo *>(work->data);
-		fd = ci->fd;
-		*contents = g_string_append(*contents, fd->path);
-		*contents = g_string_append(*contents, "\n");
 
-		work = work->next;
+	for (GList *work = cd->list; work; work = work->next)
+		{
+		auto *ci = static_cast<CollectInfo *>(work->data);
+
+		contents = g_string_append(contents, ci->fd->path);
+		contents = g_string_append(contents, "\n");
 		}
 
 	collection_free(cd);
+
+	return contents;
 }
 
 /**

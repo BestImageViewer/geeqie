@@ -753,7 +753,6 @@ static void write_disabled_plugins(GString *outstr, gint indent)
 gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, LayoutWindow *lw)
 {
 	SecureSaveInfo *ssi;
-	GString *outstr;
 	gint indent = 0;
 	GList *work;
 
@@ -765,7 +764,7 @@ gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, Layou
 		return FALSE;
 		}
 
-	outstr = g_string_new("<!--\n");
+	g_autoptr(GString) outstr = g_string_new("<!--\n");
 	g_string_append(outstr, "######################################################################\n");
 	g_string_append_printf(outstr, "# %30s config file	  version %-10s #\n", GQ_APPNAME, VERSION);
 	g_string_append(outstr, "######################################################################\n");
@@ -836,7 +835,6 @@ gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, Layou
 	WRITE_SEPARATOR();
 
 	secure_fputs(ssi, outstr->str);
-	g_string_free(outstr, TRUE);
 
 	if (secure_close(ssi))
 		{
@@ -850,7 +848,6 @@ gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, Layou
 gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions *, LayoutWindow *lw)
 {
 	SecureSaveInfo *ssi;
-	GString *outstr;
 	gint indent = 0;
 
 	g_autofree gchar *rc_pathl = path_from_utf8(utf8_path);
@@ -861,7 +858,7 @@ gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions
 		return FALSE;
 		}
 
-	outstr = g_string_new("<!--\n");
+	g_autoptr(GString) outstr = g_string_new("<!--\n");
 	g_string_append(outstr, "######################################################################\n");
 	g_string_append_printf(outstr, "# %8s default layout file	  version %-10s #\n", GQ_APPNAME, VERSION);
 	g_string_append(outstr, "######################################################################\n");
@@ -883,7 +880,6 @@ gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions
 	WRITE_SEPARATOR();
 
 	secure_fputs(ssi, outstr->str);
-	g_string_free(outstr, TRUE);
 
 	if (secure_close(ssi))
 		{

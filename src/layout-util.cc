@@ -637,7 +637,7 @@ static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean 
 			}
 		else
 			{
-			GString *message = g_string_new(_("Operation failed:\n"));
+			g_autoptr(GString) message = g_string_new(_("Operation failed:\n"));
 
 			if (run_result == 1)
 				message = g_string_append(message, _("No file extension\n"));
@@ -659,8 +659,6 @@ static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean 
 			generic_dialog_add_button(gd, GQ_ICON_OK, "OK", nullptr, TRUE);
 
 			gtk_widget_show(gd->dialog);
-
-			g_string_free(message, TRUE);
 			}
 	});
 }
@@ -2852,7 +2850,7 @@ static void layout_actions_setup_mark(LayoutWindow *lw, gint mark, const gchar *
 static void layout_actions_setup_marks(LayoutWindow *lw)
 {
 	gint mark;
-	GString *desc = g_string_new(
+	g_autoptr(GString) desc = g_string_new(
 				"<ui>"
 				"  <menubar name='MainMenu'>");
 
@@ -2919,7 +2917,6 @@ static void layout_actions_setup_marks(LayoutWindow *lw)
 		g_message("building menus failed: %s", error->message);
 		exit(EXIT_FAILURE);
 		}
-	g_string_free(desc, TRUE);
 }
 
 static GList *layout_actions_editor_menu_path(EditorDescription *editor)
@@ -3004,7 +3001,6 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 	GList *editors_list;
 	GList *work;
 	GList *old_path;
-	GString *desc;
 
 	if (lw->ui_editors_id)
 		{
@@ -3020,7 +3016,7 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 	gq_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group_editors, 1);
 
 	/* lw->action_group_editors contains translated entries, no translate func is required */
-	desc = g_string_new(
+	g_autoptr(GString) desc = g_string_new(
 				"<ui>"
 				"  <menubar name='MainMenu'>");
 
@@ -3093,8 +3089,9 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 		g_string_append(desc, "</menu>");
 		}
 
-	g_string_append(desc,"  </menubar>"
-				"</ui>" );
+	g_string_append(desc,
+	                "  </menubar>"
+	                "</ui>" );
 
 	g_autoptr(GError) error = nullptr;
 
@@ -3104,7 +3101,7 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 		g_message("building menus failed: %s", error->message);
 		exit(EXIT_FAILURE);
 		}
-	g_string_free(desc, TRUE);
+
 	g_list_free(editors_list);
 }
 

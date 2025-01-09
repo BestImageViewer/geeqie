@@ -2838,14 +2838,13 @@ gboolean FileData::marks_list_save(gchar *path, gboolean save)
 
 	secure_fprintf(ssi, "#Marks lists\n");
 
-	GString *marks = g_string_new("");
+	g_autoptr(GString) marks = g_string_new("");
 	if (save)
 		{
 		FileDataContext *context = FileData::DefaultFileDataContext();
 		g_hash_table_foreach(context->file_data_pool, marks_get_files, marks);
 		}
 	secure_fprintf(ssi, "%s", marks->str);
-	g_string_free(marks, TRUE);
 
 	secure_fprintf(ssi, "#end\n");
 	return (secure_close(ssi) == 0);

@@ -236,34 +236,21 @@ static void layout_box_folders_changed_cb(GtkWidget *widget, gpointer)
 		}
 }
 
-GString *layout_get_window_list()
+gchar *layout_get_window_list()
 {
-	LayoutWindow *lw;
-	GList *work;
-	GList *window_list = nullptr;
 	GString *ret = g_string_new(nullptr);
 
-	work = layout_window_list;
-	while (work)
+	for (GList *work = layout_window_list; work; work = work->next)
 		{
-		lw = static_cast<LayoutWindow *>(work->data);
-		window_list = g_list_append(window_list, g_strdup(lw->options.id));
-		work = work->next;
+		auto *lw = static_cast<LayoutWindow *>(work->data);
+
+		if (ret->len > 0)
+			g_string_append_c(ret, '\n');
+
+		g_string_append(ret, lw->options.id);
 		}
 
-	work = g_list_first(window_list);
-	g_string_append_printf(ret, "%s", (gchar *)work->data);
-	work = work->next;
-
-	while (work)
-		{
-		g_string_append_printf(ret, "\n%s", (gchar *)work->data);
-		work = work->next;
-		}
-
-	g_list_free(window_list);
-
-	return ret;
+	return g_string_free(ret, FALSE);
 }
 
 /*

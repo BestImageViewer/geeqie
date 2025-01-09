@@ -702,11 +702,10 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 
 	g_assert(p);
 
-	GString *string = g_string_new(p);
+	g_autoptr(GString) string = g_string_new(p);
 	if (type == PATH_FILE_URL) g_string_prepend(string, "file://");
-	pathl = path_from_utf8(string->str);
-	g_string_free(string, TRUE);
 
+	pathl = path_from_utf8(string->str);
 	if (pathl && !pathl[0]) /* empty string case */
 		{
 		g_free(pathl);

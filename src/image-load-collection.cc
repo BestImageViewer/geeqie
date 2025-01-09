@@ -65,7 +65,7 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 	gboolean ret = FALSE;
 	FILE *fp = nullptr;
 	gint line_count = 0;
-	GString *file_names = g_string_new(nullptr);
+	g_autoptr(GString) file_names = g_string_new(nullptr);
 	gchar line[LINE_LENGTH];
 
 	if (runcmd("which montage >/dev/null 2>&1") == 0)
@@ -108,10 +108,9 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 
 				ret = TRUE;
 				}
-
-			g_string_free(file_names, TRUE);
 			}
 		}
+
 	chunk_size = count;
 	return ret;
 }

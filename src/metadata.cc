@@ -497,10 +497,11 @@ static gboolean metadata_file_read(gchar *path, GList **keywords, gchar **commen
 	gchar s_buf[1024];
 	MetadataKey key = MK_NONE;
 	GList *list = nullptr;
-	GString *comment_build = nullptr;
 
 	f = fopen(path, "r");
 	if (!f) return FALSE;
+
+	g_autoptr(GString) comment_build = g_string_new(nullptr);
 
 	while (fgets(s_buf, sizeof(s_buf), f))
 		{
@@ -542,7 +543,6 @@ static gboolean metadata_file_read(gchar *path, GList **keywords, gchar **commen
 				}
 				break;
 			case MK_COMMENT:
-				if (!comment_build) comment_build = g_string_new("");
 				g_string_append(comment_build, s_buf);
 				break;
 			}
@@ -559,26 +559,22 @@ static gboolean metadata_file_read(gchar *path, GList **keywords, gchar **commen
 		g_list_free_full(list, g_free);
 		}
 
-	if (comment_build)
+	if (comment && comment_build->len > 0)
 		{
-		if (comment)
+		gint len;
+		gchar *ptr = comment_build->str;
+
+		/* strip leading and trailing newlines */
+		while (*ptr == '\n') ptr++;
+		len = strlen(ptr);
+		while (len > 0 && ptr[len - 1] == '\n') len--;
+		if (ptr[len] == '\n') len++; /* keep the last one */
+		if (len > 0)
 			{
-			gint len;
-			gchar *ptr = comment_build->str;
+			g_autofree gchar *text = g_strndup(ptr, len);
 
-			/* strip leading and trailing newlines */
-			while (*ptr == '\n') ptr++;
-			len = strlen(ptr);
-			while (len > 0 && ptr[len - 1] == '\n') len--;
-			if (ptr[len] == '\n') len++; /* keep the last one */
-			if (len > 0)
-				{
-				g_autofree gchar *text = g_strndup(ptr, len);
-
-				*comment = utf8_validate_or_convert(text);
-				}
+			*comment = utf8_validate_or_convert(text);
 			}
-		g_string_free(comment_build, TRUE);
 		}
 
 	return TRUE;

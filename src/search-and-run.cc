@@ -63,7 +63,6 @@ static void command_store_populate(SarData* sar)
 	GtkAccelKey key;
 	GtkTreeIter iter;
 	GtkTreeSortable *sortable;
-	GString *new_command;
 	gboolean iter_found;
 	gboolean duplicate_command;
 
@@ -106,7 +105,7 @@ static void command_store_populate(SarData* sar)
 
 					g_autofree gchar *accel = gtk_accelerator_get_label(key.accel_key, key.accel_mods);
 
-					new_command = g_string_new(nullptr);
+					g_autoptr(GString) new_command = g_string_new(nullptr);
 					if (!tooltip || g_strcmp0(label, tooltip) == 0)
 						{
 						g_string_append_printf(new_command, "%s : <b>%s</b>",label, accel);
@@ -139,7 +138,6 @@ static void command_store_populate(SarData* sar)
 								SAR_ACTION, action,
 								-1);
 						}
-					g_string_free(new_command, TRUE);
 					}
 				}
 			actions = actions->next;
@@ -220,7 +218,6 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 	GtkTreeModel *model;
 	GtkAction *action;
 	gchar *label;
-	GString *reg_exp_str;
 	GRegex *reg_exp;
 
 	model = gtk_entry_completion_get_model(completion);
@@ -229,7 +226,7 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 
 	g_autofree gchar *normalized = g_utf8_normalize(label, -1, G_NORMALIZE_DEFAULT);
 
-	reg_exp_str = g_string_new("\\b(\?=.*:)");
+	g_autoptr(GString) reg_exp_str = g_string_new("\\b(\?=.*:)");
 	reg_exp_str = g_string_append(reg_exp_str, key);
 
 	g_autoptr(GError) error = nullptr;
@@ -249,7 +246,6 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 		}
 
 	g_regex_unref(reg_exp);
-	g_string_free(reg_exp_str, TRUE);
 
 	return ret;
 }

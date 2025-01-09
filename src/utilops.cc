@@ -685,11 +685,11 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 
 	if (editor_errors_but_skipped(flags))
 		{
-		GString *msg = g_string_new(editor_get_error_str(flags));
-		GenericDialog *d;
+		g_autoptr(GString) msg = g_string_new(editor_get_error_str(flags));
 		g_string_append(msg, "\n");
 		g_string_append(msg, ud->messages.fail);
 		g_string_append(msg, "\n");
+
 		while (list)
 			{
 			auto fd = static_cast<FileData *>(list->data);
@@ -698,12 +698,13 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 			g_string_append(msg, "\n");
 			list = list->next;
 			}
+
 		if (resume_data)
 			{
 			g_string_append(msg, _("\n Continue multiple file operation?"));
-			d = file_util_gen_dlg(ud->messages.fail, "dlg_confirm",
-					      nullptr, TRUE,
-					      file_util_abort_cb, ud);
+			GenericDialog *d = file_util_gen_dlg(ud->messages.fail, "dlg_confirm",
+			                                     nullptr, TRUE,
+			                                     file_util_abort_cb, ud);
 
 			generic_dialog_add_message(d, GQ_ICON_DIALOG_WARNING, nullptr, msg->str, TRUE);
 
@@ -716,7 +717,6 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 			{
 			file_util_warning_dialog(ud->messages.fail, msg->str, GQ_ICON_DIALOG_ERROR, nullptr);
 			}
-		g_string_free(msg, TRUE);
 		}
 
 
@@ -3123,10 +3123,9 @@ static void clipboard_get_func(GtkClipboard *clipboard, GtkSelectionData *select
 {
 	auto cbd = static_cast<ClipboardData *>(data);
 	gchar *file_path;
-	GString *path_list_str;
 	GList *work;
 
-	path_list_str = g_string_new("");
+	g_autoptr(GString) path_list_str = g_string_new("");
 	work = cbd->path_list;
 
 	if (clipboard == gtk_clipboard_get(GDK_SELECTION_CLIPBOARD) && info == CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES)
@@ -3176,8 +3175,6 @@ static void clipboard_get_func(GtkClipboard *clipboard, GtkSelectionData *select
 		}
 
 	gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data), 8, reinterpret_cast<guchar *>(path_list_str->str), path_list_str->len);
-
-	g_string_free(path_list_str, TRUE);
 }
 #endif
 
