@@ -34,14 +34,15 @@ struct CollectionData;
 class FileData;
 struct ImageLoader;
 
-enum RectangleDrawAspectRatio
-{
+enum RectangleDrawAspectRatio {
 	RECTANGLE_DRAW_ASPECT_RATIO_NONE = 0,
 	RECTANGLE_DRAW_ASPECT_RATIO_ONE_ONE,
 	RECTANGLE_DRAW_ASPECT_RATIO_FOUR_THREE,
 	RECTANGLE_DRAW_ASPECT_RATIO_THREE_TWO,
 	RECTANGLE_DRAW_ASPECT_RATIO_SIXTEEN_NINE
 };
+
+const gdouble AspectRatios[5] {0.0, gdouble(1.0), gdouble(4.0) / 3, gdouble(3) / 2, gdouble(16) / 9};
 
 enum ImageState {
 	IMAGE_STATE_NONE	= 0,
@@ -52,6 +53,24 @@ enum ImageState {
 	IMAGE_STATE_ROTATE_AUTO	= 1 << 4,
 	IMAGE_STATE_ROTATE_USER	= 1 << 5,
 	IMAGE_STATE_DELAY_FLIP	= 1 << 6
+};
+
+struct SelectionRectangle {
+	gint origin_x;
+	gint origin_y;
+	gint cursor_x;
+	gint cursor_y;
+	gint height = 0;
+	gint width = 0;
+	gint x = 0;
+	gint y = 0;
+	gdouble aspect_ratio = 0.0;
+
+	SelectionRectangle(gint origin_x = 0, gint origin_y = 0, int rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE) : origin_x(origin_x), origin_y(origin_y)
+	{
+		this->aspect_ratio = AspectRatios[rectangle_draw_aspect_ratio];
+	}
+	void setCursor(gint x, gint y);
 };
 
 struct ImageWindow
