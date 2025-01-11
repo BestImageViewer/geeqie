@@ -60,7 +60,7 @@
 #include <glib-object.h>
 #include <glib.h>
 #include <jxl/codestream_header.h>
-#include <jxl/decode.h> //TODO Use decode_cxx.h?
+#include <jxl/decode_cxx.h>
 #include <jxl/types.h>
 
 #include "image-load.h"
@@ -93,7 +93,7 @@ void free_buffer(guchar *pixels, gpointer)
 
 uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, size_t &ysize, size_t &stride)
 {
-	std::unique_ptr<JxlDecoder, decltype(&JxlDecoderDestroy)> dec{JxlDecoderCreate(nullptr), JxlDecoderDestroy};
+	JxlDecoderPtr dec = JxlDecoderMake(nullptr);
 	if (!dec)
 		{
 		log_printf("JxlDecoderCreate failed\n");
