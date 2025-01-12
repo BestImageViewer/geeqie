@@ -669,7 +669,7 @@ guint exif_item_get_format_id(ExifItem *item)
 	try {
 		if (!item) return EXIF_FORMAT_UNKNOWN;
 		guint id = (reinterpret_cast<Exiv2::Metadatum *>(item))->typeId();
-		if (id >= (sizeof(format_id_trans_tbl) / sizeof(format_id_trans_tbl[0])) ) return EXIF_FORMAT_UNKNOWN;
+		if (id >= G_N_ELEMENTS(format_id_trans_tbl)) return EXIF_FORMAT_UNKNOWN;
 		return format_id_trans_tbl[id];
 	}
 	catch (Exiv2::AnyError& e) {

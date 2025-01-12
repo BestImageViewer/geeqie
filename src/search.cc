@@ -3399,8 +3399,8 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	pref_label_new(hbox, _("Search:"));
 
-	sd->menu_path = menu_choice_menu(text_search_menu_path, sizeof(text_search_menu_path) / sizeof(MatchList),
-					 G_CALLBACK(menu_choice_path_cb), sd);
+	sd->menu_path = menu_choice_menu(text_search_menu_path, G_N_ELEMENTS(text_search_menu_path),
+	                                 G_CALLBACK(menu_choice_path_cb), sd);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->menu_path, FALSE, FALSE, 0);
 	gtk_widget_show(sd->menu_path);
 
@@ -3429,9 +3429,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for file name */
 	hbox = menu_choice(sd->box_search, &sd->check_name, &sd->menu_name,
-			   _("File"), &sd->match_name_enable,
-			   text_search_menu_name, sizeof(text_search_menu_name) / sizeof(MatchList),
-			   G_CALLBACK(menu_choice_name_cb), sd);
+	                   _("File"), &sd->match_name_enable,
+	                   text_search_menu_name, G_N_ELEMENTS(text_search_menu_name),
+	                   G_CALLBACK(menu_choice_name_cb), sd);
 	combo = history_combo_new(&sd->entry_name, "", "search_name", -1);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);
@@ -3442,9 +3442,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for file size */
 	hbox = menu_choice(sd->box_search, &sd->check_size, &sd->menu_size,
-			   _("File size is"), &sd->match_size_enable,
-			   text_search_menu_size, sizeof(text_search_menu_size) / sizeof(MatchList),
-			   G_CALLBACK(menu_choice_size_cb), sd);
+	                   _("File size is"), &sd->match_size_enable,
+	                   text_search_menu_size, G_N_ELEMENTS(text_search_menu_size),
+	                   G_CALLBACK(menu_choice_size_cb), sd);
 	sd->spin_size = menu_spin(hbox, 0, 1024*1024*1024, sd->search_size,
 				  G_CALLBACK(menu_choice_spin_cb), &sd->search_size);
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
@@ -3455,9 +3455,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for file date */
 	hbox = menu_choice(sd->box_search, &sd->check_date, &sd->menu_date,
-			   _("File date is"), &sd->match_date_enable,
-			   text_search_menu_date, sizeof(text_search_menu_date) / sizeof(MatchList),
-			   G_CALLBACK(menu_choice_date_cb), sd);
+	                   _("File date is"), &sd->match_date_enable,
+	                   text_search_menu_date, G_N_ELEMENTS(text_search_menu_date),
+	                   G_CALLBACK(menu_choice_date_cb), sd);
 
 	sd->date_sel = date_selection_new();
 	date_selection_time_set(sd->date_sel, time(nullptr));
@@ -3484,9 +3484,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for image dimensions */
 	hbox = menu_choice(sd->box_search, &sd->check_dimensions, &sd->menu_dimensions,
-			   _("Image dimensions are"), &sd->match_dimensions_enable,
-			   text_search_menu_size, sizeof(text_search_menu_size) / sizeof(MatchList),
-			   G_CALLBACK(menu_choice_dimensions_cb), sd);
+	                   _("Image dimensions are"), &sd->match_dimensions_enable,
+	                   text_search_menu_size, G_N_ELEMENTS(text_search_menu_size),
+	                   G_CALLBACK(menu_choice_dimensions_cb), sd);
 	pad_box = pref_box_new(hbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 2);
 	sd->spin_width = menu_spin(pad_box, 0, 1000000, sd->search_width,
 				   G_CALLBACK(menu_choice_spin_cb), &sd->search_width);
@@ -3524,9 +3524,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for image keywords */
 	hbox = menu_choice(sd->box_search, &sd->check_keywords, &sd->menu_keywords,
-			   _("Keywords"), &sd->match_keywords_enable,
-			   text_search_menu_keyword, sizeof(text_search_menu_keyword) / sizeof(MatchList),
-			   G_CALLBACK(menu_choice_keyword_cb), sd);
+	                   _("Keywords"), &sd->match_keywords_enable,
+	                   text_search_menu_keyword, G_N_ELEMENTS(text_search_menu_keyword),
+	                   G_CALLBACK(menu_choice_keyword_cb), sd);
 	sd->entry_keywords = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->entry_keywords, TRUE, TRUE, 0);
 	gtk_widget_set_sensitive(sd->entry_keywords, sd->match_keywords_enable);
@@ -3536,9 +3536,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for image comment */
 	hbox = menu_choice(sd->box_search, &sd->check_comment, &sd->menu_comment,
-			_("Comment"), &sd->match_comment_enable,
-			text_search_menu_comment, sizeof(text_search_menu_comment) / sizeof(MatchList),
-			G_CALLBACK(menu_choice_comment_cb), sd);
+	                   _("Comment"), &sd->match_comment_enable,
+	                   text_search_menu_comment, G_N_ELEMENTS(text_search_menu_comment),
+	                   G_CALLBACK(menu_choice_comment_cb), sd);
 	sd->entry_comment = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->entry_comment, TRUE, TRUE, 0);
 	gtk_widget_set_sensitive(sd->entry_comment, sd->match_comment_enable);
@@ -3551,9 +3551,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for Exif tag */
 	hbox = menu_choice(sd->box_search, &sd->check_exif, &sd->menu_exif,
-			_("Exif"), &sd->match_exif_enable,
-			text_search_menu_exif, sizeof(text_search_menu_exif) / sizeof(MatchList),
-			G_CALLBACK(menu_choice_exif_cb), sd);
+	                   _("Exif"), &sd->match_exif_enable,
+	                   text_search_menu_exif, G_N_ELEMENTS(text_search_menu_exif),
+	                   G_CALLBACK(menu_choice_exif_cb), sd);
 
 	pref_label_new(hbox, _("Tag"));
 
@@ -3579,9 +3579,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for image rating */
 	hbox = menu_choice(sd->box_search, &sd->check_rating, &sd->menu_rating,
-			   _("Image rating is"), &sd->match_rating_enable,
-			   text_search_menu_rating, sizeof(text_search_menu_rating) / sizeof(MatchList),
-			   G_CALLBACK(menu_choice_rating_cb), sd);
+	                   _("Image rating is"), &sd->match_rating_enable,
+	                   text_search_menu_rating, G_N_ELEMENTS(text_search_menu_rating),
+	                   G_CALLBACK(menu_choice_rating_cb), sd);
 	sd->spin_size = menu_spin(hbox, -1, 5, sd->search_rating,
 				  G_CALLBACK(menu_choice_spin_cb), &sd->search_rating);
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
@@ -3593,9 +3593,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	/* Search for images within a specified range of a lat/long coordinate
 	*/
 	hbox = menu_choice(sd->box_search, &sd->check_gps, &sd->menu_gps,
-			   _("Image is"), &sd->match_gps_enable,
-			   text_search_menu_gps, sizeof(text_search_menu_gps) / sizeof(MatchList),
-			   G_CALLBACK(menu_choice_gps_cb), sd);
+	                   _("Image is"), &sd->match_gps_enable,
+	                   text_search_menu_gps, G_N_ELEMENTS(text_search_menu_gps),
+	                   G_CALLBACK(menu_choice_gps_cb), sd);
 
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
@@ -3624,9 +3624,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for image class */
 	hbox = menu_choice(sd->box_search, &sd->check_class, &sd->menu_class,
-			   _("Image class"), &sd->match_class_enable,
-			   text_search_menu_class, sizeof(text_search_menu_class) / sizeof(MatchList),
-			   G_CALLBACK(menu_choice_class_cb), sd);
+	                   _("Image class"), &sd->match_class_enable,
+	                   text_search_menu_class, G_N_ELEMENTS(text_search_menu_class),
+	                   G_CALLBACK(menu_choice_class_cb), sd);
 
 	sd->class_type = gtk_combo_box_text_new();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->class_type), _("Image"));
@@ -3643,9 +3643,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Search for image marks */
 	hbox = menu_choice(sd->box_search, &sd->check_class, &sd->menu_marks,
-			   _("Marks"), &sd->match_marks_enable,
-			   text_search_menu_marks, sizeof(text_search_menu_marks) / sizeof(MatchList),
-			   G_CALLBACK(menu_choice_marks_cb), sd);
+	                   _("Marks"), &sd->match_marks_enable,
+	                   text_search_menu_marks, G_N_ELEMENTS(text_search_menu_marks),
+	                   G_CALLBACK(menu_choice_marks_cb), sd);
 
 	sd->marks_type = gtk_combo_box_text_new();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->marks_type), _("Any mark"));

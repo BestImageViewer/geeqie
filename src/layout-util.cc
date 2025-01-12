@@ -105,14 +105,9 @@ static guint tree_key_overrides[] = {
 
 static gboolean layout_key_match(guint keyval)
 {
-	guint i;
+	const auto it = std::find(std::cbegin(tree_key_overrides), std::cend(tree_key_overrides), keyval);
 
-	for (i = 0; i < sizeof(tree_key_overrides) / sizeof(guint); i++)
-		{
-		if (keyval == tree_key_overrides[i]) return TRUE;
-		}
-
-	return FALSE;
+	return it != std::cend(tree_key_overrides);
 }
 
 void keyboard_scroll_calc(gint &x, gint &y, const GdkEventKey *event)

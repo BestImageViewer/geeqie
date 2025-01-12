@@ -52,7 +52,11 @@ struct TagData
 	gchar *title;
 };
 
-const gchar *predefined_tags[][2] = {
+constexpr struct
+{
+	const gchar *key;
+	const gchar *title;
+} predefined_tags[] = {
 	{"%name%",							N_("Name")},
 	{"%path:60%",						N_("Path")},
 	{"%date%",							N_("Date")},
@@ -96,7 +100,7 @@ const gchar *predefined_tags[][2] = {
 	{"%Xmp.dc.creator%",				N_("© Creator")},
 	{"%Xmp.dc.contributor%",			N_("© Contributor")},
 	{"%Xmp.dc.rights%",					N_("© Rights")},
-	{nullptr, nullptr}};
+};
 
 constexpr std::array<GtkTargetEntry, 1> osd_drag_types{{
 	{ const_cast<gchar *>("text/plain"), GTK_TARGET_SAME_APP, TARGET_TEXT_PLAIN }
@@ -164,11 +168,6 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 {
 	GtkWidget *vbox;
 	GtkWidget *scrolled;
-	gint i = 0;
-	gint rows = 0;
-	gint max_rows = 0;
-	gint cols = 0;
-	gdouble entries;
 	GtkWidget *viewport;
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -188,27 +187,25 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 	gq_gtk_container_add(GTK_WIDGET(scrolled), viewport);
 	gtk_widget_show(viewport);
 
-	entries = ((gdouble)sizeof(predefined_tags) / sizeof(predefined_tags[0])) - 1;
-	max_rows = ceil(entries / max_cols);
+	const gint entries = G_N_ELEMENTS(predefined_tags);
+	const gint max_rows = ceil(static_cast<gdouble>(entries) / max_cols);
 
 	GtkGrid *grid;
 	grid = GTK_GRID(gtk_grid_new());
 	gq_gtk_container_add(GTK_WIDGET(viewport), GTK_WIDGET(grid));
 	gtk_widget_show(GTK_WIDGET(grid));
 
-	for (rows = 0; rows < max_rows; rows++)
+	gint i = 0;
+	for (gint rows = 0; rows < max_rows; rows++)
 		{
-		cols = 0;
-
-		while (cols < max_cols && predefined_tags[i][0])
+		for (gint cols = 0; cols < max_cols && i < entries; cols++, i++)
 			{
-			set_osd_button(grid, rows, cols, predefined_tags[i][0], predefined_tags[i][1], template_view);
-			i = i + 1;
-			cols++;
+			set_osd_button(grid, rows, cols, predefined_tags[i].key, predefined_tags[i].title, template_view);
 			}
 		}
 	return vbox;
 }
+
 static gchar *keywords_to_string(FileData *fd)
 {
 	GList *keywords;
