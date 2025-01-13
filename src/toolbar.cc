@@ -298,14 +298,11 @@ static gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
  */
 void toolbar_apply(ToolbarType bar)
 {
-	const auto layout_toolbar_apply = [](gpointer data, gpointer user_data)
+	const auto layout_toolbar_apply = [bar](LayoutWindow *lw)
 	{
-		auto *lw = static_cast<LayoutWindow *>(data);
-		auto bar = static_cast<ToolbarType>(GPOINTER_TO_INT(user_data));
-
 		layout_toolbar_clear(lw, bar);
 
-		GList *work_toolbar = gtk_container_get_children(GTK_CONTAINER(toolbarlist[bar]->vbox));
+		g_autoptr(GList) work_toolbar = gtk_container_get_children(GTK_CONTAINER(toolbarlist[bar]->vbox));
 		for (GList *work = work_toolbar; work; work = work->next)
 			{
 			auto button = static_cast<GtkButton *>(work->data);
@@ -313,10 +310,9 @@ void toolbar_apply(ToolbarType bar)
 
 			layout_toolbar_add(lw, bar, action_name);
 			}
-		g_list_free(work_toolbar);
 	};
 
-	g_list_foreach(layout_window_list, layout_toolbar_apply, GINT_TO_POINTER(bar));
+	layout_window_foreach(layout_toolbar_apply);
 }
 
 /**

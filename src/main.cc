@@ -547,9 +547,6 @@ void gq_gtk_css_load()
 
 void exit_program_final()
 {
-	LayoutWindow *lw = nullptr;
-	GList *list;
-	LayoutWindow *tmp_lw;
 	GFile *archive_file;
 
 	 /* make sure that external editors are loaded, we would save incomplete configuration otherwise */
@@ -558,24 +555,22 @@ void exit_program_final()
 	collect_manager_flush();
 
 	/* Save the named windows */
-	if (layout_window_list && layout_window_list->next)
+	if (layout_window_count() > 1)
 		{
-		list = layout_window_list;
-		while (list)
-			{
-			tmp_lw = static_cast<LayoutWindow *>(list->data);
-			if (!g_str_has_prefix(tmp_lw->options.id, "lw"))
+		layout_window_foreach([](LayoutWindow *lw)
+		{
+			if (!g_str_has_prefix(lw->options.id, "lw"))
 				{
-				save_layout(static_cast<LayoutWindow *>(list->data));
+				save_layout(lw);
 				}
-			list = list->next;
-			}
+		});
 		}
 
 	save_options(options);
 	keys_save();
 	accel_map_save();
 
+	LayoutWindow *lw = nullptr;
 	if (layout_valid(&lw))
 		{
 		layout_free(lw);
@@ -728,13 +723,10 @@ void set_theme_bg_color()
 	GdkRGBA bg_color;
 	GdkRGBA theme_color;
 	GtkStyleContext *style_context;
-	GList *work;
-	LayoutWindow *lw;
 
 	if (!options->image.use_custom_border_color)
 		{
-		work = layout_window_list;
-		lw = static_cast<LayoutWindow *>(work->data);
+		LayoutWindow *lw = layout_window_first();
 
 		style_context = gtk_widget_get_style_context(lw->window);
 		gq_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &bg_color);
@@ -743,12 +735,10 @@ void set_theme_bg_color()
 		theme_color.green = bg_color.green  ;
 		theme_color.blue = bg_color.blue ;
 
-		while (work)
-			{
-			lw = static_cast<LayoutWindow *>(work->data);
+		layout_window_foreach([&theme_color](LayoutWindow *lw)
+		{
 			image_background_set_color(lw->image, &theme_color);
-			work = work->next;
-			}
+		});
 		}
 
 	view_window_colors_update();
@@ -966,7 +956,7 @@ void startup_cb(GtkApplication *app, gpointer)
 #endif
 
 	/* handle missing config file and commandline additions*/
-	if (!layout_window_list)
+	if (!layout_window_first())
 		{
 		/* broken or no config file or no <layout> section */
 		layout_new_from_default();

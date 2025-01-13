@@ -813,16 +813,13 @@ GList * bar_pane_exif_list()
 {
 	PaneExifData *ped;
 	GList *list;
-	GList *work_windows;
 	GList *exif_list = nullptr;
-	LayoutWindow *lw;
 	GtkWidget *bar;
 	GtkWidget *pane;
 	GtkWidget *entry;
 	ExifEntry *ee;
 
-	work_windows = layout_window_list;
-	lw = static_cast<LayoutWindow *>(work_windows->data);
+	const LayoutWindow *lw = layout_window_first();
 	bar = lw->bar;
 	pane = bar_find_pane_by_id(bar, PANE_EXIF, "exif");
 	if (pane)

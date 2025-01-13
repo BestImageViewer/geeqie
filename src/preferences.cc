@@ -608,11 +608,10 @@ static gboolean config_window_delete(GtkWidget *, GdkEventAny *, gpointer)
 
 static void config_window_ok_cb(GtkWidget *widget, gpointer data)
 {
-	LayoutWindow *lw;
 	auto notebook = static_cast<GtkNotebook *>(data);
 	GdkWindow *window;
 
-	lw = static_cast<LayoutWindow *>(layout_window_list->data);
+	LayoutWindow *lw = layout_window_first();
 
 	window = gtk_widget_get_window(widget);
 
@@ -1608,7 +1607,6 @@ static void image_overlay_set_background_color_cb(GtkWidget *widget, gpointer)
 
 static void accel_store_populate()
 {
-	LayoutWindow *lw;
 	GList *groups;
 	GList *actions;
 	GtkAction *action;
@@ -1616,10 +1614,10 @@ static void accel_store_populate()
 	GtkAccelKey key;
 	GtkTreeIter iter;
 
-	if (!accel_store || !layout_window_list || !layout_window_list->data) return;
+	if (!accel_store || !layout_window_first()) return;
 
 	gtk_tree_store_clear(accel_store);
-	lw = static_cast<LayoutWindow *>(layout_window_list->data); /* get the actions from the first window, it should not matter, they should be the same in all windows */
+	LayoutWindow *lw = layout_window_first(); /* get the actions from the first window, it should not matter, they should be the same in all windows */
 
 	g_assert(lw && lw->ui_manager);
 	groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager);
@@ -3787,9 +3785,8 @@ static void config_tab_toolbar_main(GtkWidget *notebook)
 {
 	GtkWidget *vbox;
 	GtkWidget *toolbardata;
-	LayoutWindow *lw;
 
-	lw = static_cast<LayoutWindow *>(layout_window_list->data);
+	LayoutWindow *lw = layout_window_first();
 
 	vbox = scrolled_notebook_page(notebook, _("Toolbar Main"));
 
@@ -3803,9 +3800,8 @@ static void config_tab_toolbar_status(GtkWidget *notebook)
 {
 	GtkWidget *vbox;
 	GtkWidget *toolbardata;
-	LayoutWindow *lw;
 
-	lw = static_cast<LayoutWindow *>(layout_window_list->data);
+	LayoutWindow *lw = layout_window_first();
 
 	vbox = scrolled_notebook_page(notebook, _("Toolbar Status"));
 

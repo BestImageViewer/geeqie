@@ -2118,17 +2118,11 @@ static void layout_menu_collection_open_update(LayoutWindow *lw)
 
 void layout_recent_update_all()
 {
-	GList *work;
-
-	work = layout_window_list;
-	while (work)
-		{
-		auto lw = static_cast<LayoutWindow *>(work->data);
-		work = work->next;
-
+	layout_window_foreach([](LayoutWindow *lw)
+	{
 		layout_menu_collection_recent_update(lw);
 		layout_menu_collection_open_update(lw);
-		}
+	});
 }
 
 void layout_recent_add_path(const gchar *path)
@@ -2202,7 +2196,7 @@ static GList *layout_window_menu_list(GList *listin)
 			gchar *name_base = g_strndup(name_utf8, strlen(name_utf8) - 4);
 
 			wn  = g_new0(WindowNames, 1);
-			wn->displayed = g_list_find_custom(layout_window_list, name_base, reinterpret_cast<GCompareFunc>(layout_compare_options_id)) ? TRUE : FALSE;
+			wn->displayed = layout_window_is_displayed(name_base);
 			wn->name = name_base;
 			wn->path = g_build_filename(pathl, name_utf8, NULL);
 			listin = g_list_append(listin, wn);
@@ -3197,21 +3191,17 @@ static gboolean layout_editors_reload_idle_cb(gpointer)
 
 	if (!layout_editors_desktop_files)
 		{
-		GList *work;
 		DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors", get_exec_time());
 		editor_table_finish();
 
-		work = layout_window_list;
-		while (work)
-			{
-			auto lw = static_cast<LayoutWindow *>(work->data);
-			work = work->next;
+		layout_window_foreach([](LayoutWindow *lw)
+		{
 			layout_actions_setup_editors(lw);
 			if (lw->bar_sort_enabled)
 				{
 				layout_bar_sort_toggle(lw);
 				}
-			}
+		});
 
 		DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors done", get_exec_time());
 
@@ -3499,7 +3489,7 @@ void layout_toolbar_add_default(LayoutWindow *lw, ToolbarType type)
 {
 	if (type >= TOOLBAR_COUNT) return;
 
-	LayoutWindow *lw_first = layout_window_list ? static_cast<LayoutWindow *>(layout_window_list->data) : nullptr;
+	LayoutWindow *lw_first = layout_window_first();
 	if (lw_first && lw_first->toolbar_actions[type])
 		{
 		GList *work_action = lw_first->toolbar_actions[type];
@@ -3616,16 +3606,7 @@ void layout_util_status_update_write(LayoutWindow *lw)
 
 void layout_util_status_update_write_all()
 {
-	GList *work;
-
-	work = layout_window_list;
-	while (work)
-		{
-		auto lw = static_cast<LayoutWindow *>(work->data);
-		work = work->next;
-
-		layout_util_status_update_write(lw);
-		}
+	layout_window_foreach(layout_util_status_update_write);
 }
 
 static gchar *layout_color_name_parse(const gchar *name)

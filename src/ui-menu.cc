@@ -107,7 +107,6 @@ static gint actions_sort_cb(gconstpointer a, gconstpointer b)
  */
 static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup *accel_group)
 {
-	LayoutWindow *lw;
 	GList *groups;
 	GList *actions;
 	GtkAction *action;
@@ -119,7 +118,7 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 	g_autofree gchar *menu_label_text = nullptr;
 	pango_parse_markup(menu_label, -1, '_', nullptr, &menu_label_text, nullptr, nullptr);
 
-	lw = static_cast<LayoutWindow *>(layout_window_list->data); /* get the actions from the first window, it should not matter, they should be the same in all windows */
+	LayoutWindow *lw = layout_window_first(); /* get the actions from the first window, it should not matter, they should be the same in all windows */
 
 	g_assert(lw && lw->ui_manager);
 	groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager);

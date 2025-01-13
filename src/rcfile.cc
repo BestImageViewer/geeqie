@@ -754,7 +754,6 @@ gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, Layou
 {
 	SecureSaveInfo *ssi;
 	gint indent = 0;
-	GList *work;
 
 	g_autofree gchar *rc_pathl = path_from_utf8(utf8_path);
 	ssi = secure_open(rc_pathl);
@@ -816,13 +815,7 @@ gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, Layou
 		/* If not save_window_positions, do not include a <layout> section */
 		if (options->save_window_positions)
 			{
-			work = layout_window_list;
-			while (work)
-				{
-				auto lw = static_cast<LayoutWindow *>(work->data);
-				layout_write_config(lw, outstr, indent);
-				work = work->next;
-				}
+			layout_window_foreach([outstr, indent](LayoutWindow *lw){ layout_write_config(lw, outstr, indent); });
 			}
 		}
 	else
@@ -1681,7 +1674,7 @@ static void options_parse_layout(GQParserData *parser_data, const gchar *element
 		}
 	else if (g_ascii_strcasecmp(element_name, "bar_sort") == 0)
 		{
-		if (g_list_length(layout_window_list) == 1)
+		if (layout_window_count() == 1)
 			{
 			bar_sort_cold_start(lw, attribute_names, attribute_values);
 			}

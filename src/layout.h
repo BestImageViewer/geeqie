@@ -22,6 +22,8 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
+#include <functional>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -36,11 +38,7 @@ struct SlideShowData;
 struct ViewDir;
 struct ViewFile;
 
-#define LAYOUT_ID_CURRENT "_current_"
 #define MAX_SPLIT_IMAGES 4
-
-extern GList *layout_window_list;
-
 
 enum LayoutLocation {
 	LAYOUT_HIDE   = 0,
@@ -173,7 +171,6 @@ void layout_write_config(LayoutWindow *lw, GString *outstr, gint indent);
 LayoutWindow *layout_find_by_image(ImageWindow *imd);
 LayoutWindow *layout_find_by_image_fd(ImageWindow *imd);
 LayoutWindow *layout_find_by_layout_id(const gchar *id);
-gint layout_compare_options_id(const LayoutWindow *lw, const gchar *id);
 
 const gchar *layout_get_path(LayoutWindow *lw);
 gboolean layout_set_path(LayoutWindow *lw, const gchar *path);
@@ -245,7 +242,15 @@ void layout_split_change(LayoutWindow *lw, ImageSplitMode mode);
 
 void save_layout(LayoutWindow *lw);
 gchar *layout_get_unique_id();
+
+
 guint layout_window_count();
+LayoutWindow *layout_window_first();
+
+using LayoutWindowCallback = std::function<void(LayoutWindow *)>;
+void layout_window_foreach(const LayoutWindowCallback &lw_cb);
+
+gboolean layout_window_is_displayed(const gchar *id);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

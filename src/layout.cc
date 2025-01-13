@@ -96,10 +96,22 @@ struct LayoutConfig
 	LayoutOptions options;
 };
 
-} // namespace
+#define LAYOUT_ID_CURRENT "_current_"
 
 GList *layout_window_list = nullptr;
-static LayoutWindow *current_lw = nullptr;
+LayoutWindow *current_lw = nullptr;
+
+inline gboolean is_current_layout_id(const gchar *id)
+{
+	return strcmp(id, LAYOUT_ID_CURRENT) == 0;
+}
+
+gint layout_compare_options_id(const LayoutWindow *lw, const gchar *id)
+{
+	return g_strcmp0(lw->options.id, id);
+}
+
+} // namespace
 
 static void layout_list_scroll_to_subpart(LayoutWindow *lw, const gchar *needle);
 
@@ -160,7 +172,7 @@ LayoutWindow *layout_find_by_layout_id(const gchar *id)
 
 	if (!id || !id[0]) return nullptr;
 
-	if (strcmp(id, LAYOUT_ID_CURRENT) == 0)
+	if (is_current_layout_id(id))
 		{
 		if (current_lw) return current_lw;
 		if (layout_window_list) return static_cast<LayoutWindow *>(layout_window_list->data);
@@ -169,11 +181,6 @@ LayoutWindow *layout_find_by_layout_id(const gchar *id)
 
 	work = g_list_find_custom(layout_window_list, id, reinterpret_cast<GCompareFunc>(layout_compare_options_id));
 	return work ? static_cast<LayoutWindow *>(work->data) : nullptr;
-}
-
-gint layout_compare_options_id(const LayoutWindow *lw, const gchar *id)
-{
-	return g_strcmp0(lw->options.id, id);
 }
 
 gchar *layout_get_unique_id()
@@ -1138,6 +1145,26 @@ void layout_mark_filter_toggle(LayoutWindow *lw, gint mark)
 guint layout_window_count()
 {
 	return g_list_length(layout_window_list);
+}
+
+LayoutWindow *layout_window_first()
+{
+	if (!layout_window_list) return nullptr;
+
+	return static_cast<LayoutWindow *>(layout_window_list->data);
+}
+
+void layout_window_foreach(const LayoutWindowCallback &lw_cb)
+{
+	for (GList *work = layout_window_list; work; work = work->next)
+		{
+		lw_cb(static_cast<LayoutWindow *>(work->data));
+		}
+}
+
+gboolean layout_window_is_displayed(const gchar *id)
+{
+	return g_list_find_custom(layout_window_list, id, reinterpret_cast<GCompareFunc>(layout_compare_options_id)) != nullptr;
 }
 
 /*
@@ -2887,7 +2914,7 @@ void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	if (id && strcmp(id, LAYOUT_ID_CURRENT) != 0)
+	if (id && !is_current_layout_id(id))
 		{
 		std::swap(layout->id, id);
 		}
