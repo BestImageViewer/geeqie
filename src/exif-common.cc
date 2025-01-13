@@ -20,7 +20,9 @@
 #include <config.h>
 
 #ifdef __linux__
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
 #endif
 
 #include <sys/stat.h>
@@ -195,29 +197,29 @@ static gchar *exif_build_formatted_Camera(ExifData *exif)
 	                       (software2 && (make || model2)) ? ")" : "");
 }
 
-static gchar *exif_build_formatted_DateTime(ExifData *exif)
+static gchar *exif_build_formatted_DateTime(ExifData *exif, const gchar *text_key, const gchar *subsec_key)
 {
 	g_autofree gchar *subsec = nullptr;
-	gchar buf[128];
-	gint buflen;
-	struct tm tm;
 
-	gchar *text = exif_get_data_as_text(exif, "Exif.Photo.DateTimeOriginal");
+	gchar *text = exif_get_data_as_text(exif, text_key);
 	if (text)
 		{
-		subsec = exif_get_data_as_text(exif, "Exif.Photo.SubSecTimeOriginal");
+		subsec = exif_get_data_as_text(exif, subsec_key);
 		}
 	else
 		{
 		text = exif_get_data_as_text(exif, "Exif.Image.DateTime");
-		if (text) subsec = exif_get_data_as_text(exif, "Exif.Photo.SubSecTime");
+		if (!text) return nullptr;
+
+		subsec = exif_get_data_as_text(exif, "Exif.Photo.SubSecTime");
 		}
 
 	/* Convert the stuff into a tm struct */
-	memset(&tm, 0, sizeof(tm)); /* Uh, strptime could let garbage in tm! */
-	if (text && strptime(text, "%Y:%m:%d %H:%M:%S", &tm))
+	std::tm tm{}; /* Uh, strptime could let garbage in tm! */
+	if (strptime(text, "%Y:%m:%d %H:%M:%S", &tm))
 		{
-		buflen = strftime(buf, sizeof(buf), "%x %X", &tm);
+		gchar buf[128];
+		const gint buflen = strftime(buf, sizeof(buf), "%x %X", &tm);
 		if (buflen > 0)
 			{
 			g_autoptr(GError) error = nullptr;
@@ -242,51 +244,14 @@ static gchar *exif_build_formatted_DateTime(ExifData *exif)
 	return text;
 }
 
+static gchar *exif_build_formatted_DateTime(ExifData *exif)
+{
+	return exif_build_formatted_DateTime(exif, "Exif.Photo.DateTimeOriginal", "Exif.Photo.SubSecTimeOriginal");
+}
+
 static gchar *exif_build_formatted_DateTimeDigitized(ExifData *exif)
 {
-	g_autofree gchar *subsec = nullptr;
-	gchar buf[128];
-	gint buflen;
-	struct tm tm;
-
-	gchar *text = exif_get_data_as_text(exif, "Exif.Photo.DateTimeDigitized");
-	if (text)
-		{
-		subsec = exif_get_data_as_text(exif, "Exif.Photo.SubSecTimeDigitized");
-		}
-	else
-		{
-		text = exif_get_data_as_text(exif, "Exif.Image.DateTime");
-		if (text) subsec = exif_get_data_as_text(exif, "Exif.Photo.SubSecTime");
-		}
-
-	/* Convert the stuff into a tm struct */
-	memset(&tm, 0, sizeof(tm)); /* Uh, strptime could let garbage in tm! */
-	if (text && strptime(text, "%Y:%m:%d %H:%M:%S", &tm))
-		{
-		buflen = strftime(buf, sizeof(buf), "%x %X", &tm);
-		if (buflen > 0)
-			{
-			g_autoptr(GError) error = nullptr;
-			g_autofree gchar *tmp = g_locale_to_utf8(buf, buflen, nullptr, nullptr, &error);
-			if (error)
-				{
-				log_printf("Error converting locale strftime to UTF-8: %s\n", error->message);
-				}
-			else
-				{
-				std::swap(text, tmp);
-				}
-			}
-		}
-
-	if (subsec)
-		{
-		g_autofree gchar *tmp = text;
-		text = g_strconcat(tmp, ".", subsec, NULL);
-		}
-
-	return text;
+	return exif_build_formatted_DateTime(exif, "Exif.Photo.DateTimeDigitized", "Exif.Photo.SubSecTimeDigitized");
 }
 
 static gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)

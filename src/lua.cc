@@ -18,7 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
 
 #include "glua.h"
 
@@ -232,10 +234,7 @@ static ExifData *lua_check_exif(lua_State *L, int index)
 static int lua_exif_get_datum(lua_State *L)
 {
 	const gchar *key;
-	gchar *value = nullptr;
 	ExifData *exif;
-	struct tm tm;
-	time_t datetime;
 
 	exif = lua_check_exif(L, 1);
 	key = luaL_checkstring(L, 2);
@@ -249,27 +248,16 @@ static int lua_exif_get_datum(lua_State *L)
 		lua_pushnil(L);
 		return 1;
 		}
-	value = exif_get_data_as_text(exif, key);
-	if (strcmp(key, "Exif.Photo.DateTimeOriginal") == 0)
+
+	g_autofree gchar *value = exif_get_data_as_text(exif, key);
+
+	if (strcmp(key, "Exif.Photo.DateTimeDigitized") == 0 ||
+	    strcmp(key, "Exif.Photo.DateTimeOriginal") == 0)
 		{
-		memset(&tm, 0, sizeof(tm));
+		std::tm tm{};
 		if (value && strptime(value, "%Y:%m:%d %H:%M:%S", &tm))
 			{
-			datetime = mktime(&tm);
-			lua_pushnumber(L, datetime);
-			return 1;
-			}
-
-		lua_pushnil(L);
-		return 1;
-		}
-
-	if (strcmp(key, "Exif.Photo.DateTimeDigitized") == 0)
-		{
-		memset(&tm, 0, sizeof(tm));
-		if (value && strptime(value, "%Y:%m:%d %H:%M:%S", &tm))
-			{
-			datetime = mktime(&tm);
+			const time_t datetime = mktime(&tm);
 			lua_pushnumber(L, datetime);
 			return 1;
 			}
