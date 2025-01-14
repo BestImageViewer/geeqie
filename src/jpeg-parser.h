@@ -62,18 +62,18 @@ struct MPOEntry {
 	guint MPFVersion;
 	guint MPIndividualNum;
 	guint PanOrientation;
-	double PanOverlap_H;
-	double PanOverlap_V;
-	guint BaseViewpointNum;
-	double ConvergenceAngle;
-	double BaselineLength;
-	double VerticalDivergence;
-	double AxisDistance_X;
-	double AxisDistance_Y;
-	double AxisDistance_Z;
-	double YawAngle;
-	double PitchAngle;
-	double RollAngle;
+	// double PanOverlap_H;
+	// double PanOverlap_V;
+	// guint BaseViewpointNum;
+	// double ConvergenceAngle;
+	// double BaselineLength;
+	// double VerticalDivergence;
+	// double AxisDistance_X;
+	// double AxisDistance_Y;
+	// double AxisDistance_Z;
+	// double YawAngle;
+	// double PitchAngle;
+	// double RollAngle;
 };
 
 
