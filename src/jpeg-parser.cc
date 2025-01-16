@@ -24,6 +24,218 @@
 #include <cstring>
 #include <functional>
 
+namespace
+{
+
+enum TiffByteOrder {
+	TIFF_BYTE_ORDER_INTEL,
+	TIFF_BYTE_ORDER_MOTOROLA
+};
+
+constexpr guint TIFF_TIFD_OFFSET_TAG = 0;
+constexpr guint TIFF_TIFD_OFFSET_FORMAT = 2;
+constexpr guint TIFF_TIFD_OFFSET_COUNT = 4;
+constexpr guint TIFF_TIFD_OFFSET_DATA = 8;
+constexpr guint TIFF_TIFD_SIZE = 12;
+
+guint16 tiff_byte_get_int16(const guchar *tiff, TiffByteOrder bo)
+{
+	guint16 align_buf;
+
+	memcpy(&align_buf, tiff, sizeof(guint16));
+
+	if (bo == TIFF_BYTE_ORDER_INTEL)
+		return GUINT16_FROM_LE(align_buf);
+
+	return GUINT16_FROM_BE(align_buf);
+}
+
+guint32 tiff_byte_get_int32(const guchar *tiff, TiffByteOrder bo)
+{
+	guint32 align_buf;
+
+	memcpy(&align_buf, tiff, sizeof(guint32));
+
+	if (bo == TIFF_BYTE_ORDER_INTEL)
+		return GUINT32_FROM_LE(align_buf);
+
+	return GUINT32_FROM_BE(align_buf); // NOLINT
+}
+
+struct TiffTag
+{
+	TiffTag(const guchar *tiff, TiffByteOrder bo)
+	    : tag(tiff_byte_get_int16(tiff + TIFF_TIFD_OFFSET_TAG, bo))
+	    , format(tiff_byte_get_int16(tiff + TIFF_TIFD_OFFSET_FORMAT, bo))
+	    , count(tiff_byte_get_int32(tiff + TIFF_TIFD_OFFSET_COUNT, bo))
+	    , data_val(tiff_byte_get_int32(tiff + TIFF_TIFD_OFFSET_DATA, bo))
+	{}
+
+	guint tag;
+	guint format;
+	guint count;
+	guint data_val;
+};
+
+gboolean tiff_directory_offset(const guchar *data, const guint len,
+                               guint &offset, TiffByteOrder &bo)
+{
+	if (len < 8) return FALSE;
+
+	if (memcmp(data, "II", 2) == 0)
+		{
+		bo = TIFF_BYTE_ORDER_INTEL;
+		}
+	else if (memcmp(data, "MM", 2) == 0)
+		{
+		bo = TIFF_BYTE_ORDER_MOTOROLA;
+		}
+	else
+		{
+		return FALSE;
+		}
+
+	if (tiff_byte_get_int16(data + 2, bo) != 0x002A)
+		{
+		return FALSE;
+		}
+
+	offset = tiff_byte_get_int32(data + 4, bo);
+
+	return offset < len;
+}
+
+using ParseIFDEntryFunc = std::function<gint(const guchar *, guint, TiffByteOrder)>;
+
+gint tiff_parse_IFD_table(const guchar *tiff, guint offset, guint size, TiffByteOrder bo,
+                          const ParseIFDEntryFunc &parse_entry,
+                          guint *next_offset = nullptr)
+{
+	/* We should be able to read number of entries in IFD0) */
+	if (size < offset + 2) return -1;
+
+	guint count = tiff_byte_get_int16(tiff + offset, bo);
+	offset += 2;
+	/* Entries and next IFD offset must be readable */
+	if (size < offset + count * TIFF_TIFD_SIZE + 4) return -1;
+
+	for (guint i = 0; i < count; i++)
+		{
+		parse_entry(tiff, offset + (i * TIFF_TIFD_SIZE), bo);
+		}
+
+	if (next_offset)
+		{
+		*next_offset = tiff_byte_get_int32(tiff + offset + (count * TIFF_TIFD_SIZE), bo);
+		}
+
+	return 0;
+}
+
+gint mpo_parse_Index_IFD_entry(const guchar *tiff, guint offset, guint size, TiffByteOrder bo,
+                               MPOData &mpo)
+{
+	const TiffTag tt{tiff + offset, bo};
+	DEBUG_1("   tag %x format %x count %x data_val %x", tt.tag, tt.format, tt.count, tt.data_val);
+
+	if (tt.tag == 0xb000)
+		{
+		mpo.version = tt.data_val;
+		DEBUG_1("    mpo version %x", mpo.version);
+		}
+	else if (tt.tag == 0xb001)
+		{
+		mpo.num_images = tt.data_val;
+		DEBUG_1("    num images %x", mpo.num_images);
+		}
+	else if (tt.tag == 0xb002)
+		{
+		guint data_offset = tt.data_val;
+		guint data_length = tt.count;
+		if (size < data_offset || size < data_offset + data_length)
+			{
+			return -1;
+			}
+		if (tt.count != mpo.num_images * 16)
+			{
+			return -1;
+			}
+
+		mpo.images = g_new0(MPOEntry, mpo.num_images);
+
+		for (guint i = 0; i < mpo.num_images; i++)
+			{
+			guint image_attr = tiff_byte_get_int32(tiff + data_offset + (i * 16), bo);
+			mpo.images[i].type_code = image_attr & 0xffffff;
+			mpo.images[i].representative = !!(image_attr & 0x20000000);
+			mpo.images[i].dependent_child = !!(image_attr & 0x40000000);
+			mpo.images[i].dependent_parent = !!(image_attr & 0x80000000);
+			mpo.images[i].length = tiff_byte_get_int32(tiff + data_offset + (i * 16) + 4, bo);
+			mpo.images[i].offset = tiff_byte_get_int32(tiff + data_offset + (i * 16) + 8, bo);
+			mpo.images[i].dep1 = tiff_byte_get_int16(tiff + data_offset + (i * 16) + 12, bo);
+			mpo.images[i].dep2 = tiff_byte_get_int16(tiff + data_offset + (i * 16) + 14, bo);
+
+			if (i == 0)
+				{
+				mpo.images[i].offset = 0;
+				}
+			else
+				{
+				mpo.images[i].offset += mpo.mpo_offset;
+				}
+
+			DEBUG_1("   image %x %x %x", image_attr, mpo.images[i].length, mpo.images[i].offset);
+			}
+		}
+
+	return 0;
+}
+
+gint mpo_parse_Attributes_IFD_entry(const guchar *tiff, guint offset, TiffByteOrder bo,
+                                    MPOEntry &mpe)
+{
+	const TiffTag tt{tiff + offset, bo};
+	DEBUG_1("   tag %x format %x count %x data_val %x", tt.tag, tt.format, tt.count, tt.data_val);
+
+	switch (tt.tag)
+		{
+		case 0xb000:
+			mpe.MPFVersion = tt.data_val;
+			DEBUG_1("    mpf version %x", mpe.MPFVersion);
+			break;
+		case 0xb101:
+			mpe.MPIndividualNum = tt.data_val;
+			DEBUG_1("    Individual Image Number %x", mpe.MPIndividualNum);
+			break;
+		case 0xb201:
+			mpe.PanOrientation = tt.data_val;
+			break;
+		/**
+		@FIXME See section 5.2.4. MP Attribute IFD of
+		CIPA DC-007-Translation-2021 Multi-Picture Format
+		https://www.cipa.jp/std/documents/download_e.html?CIPA_DC-007-2021_E
+		Tag Name                    Field Name         Tag ID (Dec/Hex) Type      Count
+		Panorama Horizontal Overlap PanOverlap_H       45570 B202       RATIONAL  1
+		Panorama Vertical Overlap   PanOverlap_V       45571 B203       RATIONAL  1
+		Base Viewpoint Number       BaseViewpointNum   45572 B204       LONG      1
+		Convergence Angle           ConvergenceAngle   45573 B205       SRATIONAL 1
+		Baseline Length             BaselineLength     45574 B206       RATIONAL  1
+		Divergence Angle            VerticalDivergence 45575 B207       SRATIONAL 1
+		Horizontal Axis Distance    AxisDistance_X     45576 B208       SRATIONAL 1
+		Vertical Axis Distance      AxisDistance_Y     45577 B209       SRATIONAL 1
+		Collimation Axis Distance   AxisDistance_Z     45578 B20A       SRATIONAL 1
+		Yaw Angle                   YawAngle           45579 B20B       SRATIONAL 1
+		Pitch Angle                 PitchAngle         45580 B20C       SRATIONAL 1
+		Roll Angle                  RollAngle          45581 B20D       SRATIONAL 1
+		*/
+		default:
+			break;
+		}
+
+	return 0;
+}
+
+} // namespace
 
 gboolean is_jpeg_container(const guchar *data, guint size)
 {
@@ -67,225 +279,6 @@ gboolean jpeg_segment_find(const guchar *data, guint size,
 			}
 		}
 	return FALSE;
-}
-
-
-enum TiffByteOrder {
-	TIFF_BYTE_ORDER_INTEL,
-	TIFF_BYTE_ORDER_MOTOROLA
-};
-
-enum {
-	TIFF_TIFD_OFFSET_TAG = 0,
-	TIFF_TIFD_OFFSET_FORMAT = 2,
-	TIFF_TIFD_OFFSET_COUNT = 4,
-	TIFF_TIFD_OFFSET_DATA = 8,
-	TIFF_TIFD_SIZE = 12
-};
-
-
-
-static guint16 tiff_byte_get_int16(const guchar *f, TiffByteOrder bo)
-{
-	guint16 align_buf;
-
-	memcpy(&align_buf, f, sizeof(guint16));
-
-	if (bo == TIFF_BYTE_ORDER_INTEL)
-		return GUINT16_FROM_LE(align_buf);
-
-	return GUINT16_FROM_BE(align_buf);
-}
-
-static guint32 tiff_byte_get_int32(const guchar *f, TiffByteOrder bo)
-{
-	guint32 align_buf;
-
-	memcpy(&align_buf, f, sizeof(guint32));
-
-	if (bo == TIFF_BYTE_ORDER_INTEL)
-		return GUINT32_FROM_LE(align_buf);
-
-	return GUINT32_FROM_BE(align_buf); // NOLINT
-}
-
-static gboolean tiff_directory_offset(const guchar *data, const guint len,
-                                      guint &offset, TiffByteOrder &bo)
-{
-	if (len < 8) return FALSE;
-
-	if (memcmp(data, "II", 2) == 0)
-		{
-		bo = TIFF_BYTE_ORDER_INTEL;
-		}
-	else if (memcmp(data, "MM", 2) == 0)
-		{
-		bo = TIFF_BYTE_ORDER_MOTOROLA;
-		}
-	else
-		{
-		return FALSE;
-		}
-
-	if (tiff_byte_get_int16(data + 2, bo) != 0x002A)
-		{
-		return FALSE;
-		}
-
-	offset = tiff_byte_get_int32(data + 4, bo);
-
-	return offset < len;
-}
-
-using FuncParseIFDEntry = std::function<gint(const guchar *, guint, TiffByteOrder)>;
-
-static gint tiff_parse_IFD_table(const guchar *tiff, guint offset,
-                                 guint size, TiffByteOrder bo,
-                                 const FuncParseIFDEntry &parse_entry,
-                                 guint *next_offset = nullptr)
-{
-	/* We should be able to read number of entries in IFD0) */
-	if (size < offset + 2) return -1;
-
-	guint count = tiff_byte_get_int16(tiff + offset, bo);
-	offset += 2;
-	/* Entries and next IFD offset must be readable */
-	if (size < offset + count * TIFF_TIFD_SIZE + 4) return -1;
-
-	for (guint i = 0; i < count; i++)
-		{
-		parse_entry(tiff, offset + (i * TIFF_TIFD_SIZE), bo);
-		}
-
-	if (next_offset)
-		{
-		*next_offset = tiff_byte_get_int32(tiff + offset + (count * TIFF_TIFD_SIZE), bo);
-		}
-
-	return 0;
-}
-
-static gint mpo_parse_Index_IFD_entry(const guchar *tiff, guint offset,
-                                      guint size, TiffByteOrder bo,
-                                      MPOData &mpo)
-{
-	guint tag;
-	guint format;
-	guint count;
-	guint data_val;
-	guint data_offset;
-	guint data_length;
-
-	tag = tiff_byte_get_int16(tiff + offset + TIFF_TIFD_OFFSET_TAG, bo);
-	format = tiff_byte_get_int16(tiff + offset + TIFF_TIFD_OFFSET_FORMAT, bo);
-	count = tiff_byte_get_int32(tiff + offset + TIFF_TIFD_OFFSET_COUNT, bo);
-	data_val = tiff_byte_get_int32(tiff + offset + TIFF_TIFD_OFFSET_DATA, bo);
-	DEBUG_1("   tag %x format %x count %x data_val %x", tag, format, count, data_val);
-
-	if (tag == 0xb000)
-		{
-		mpo.version = data_val;
-		DEBUG_1("    mpo version %x", mpo.version);
-		}
-	else if (tag == 0xb001)
-		{
-		mpo.num_images = data_val;
-		DEBUG_1("    num images %x", mpo.num_images);
-		}
-	else if (tag == 0xb002)
-		{
-		data_offset = data_val;
-		data_length = count;
-		if (size < data_offset || size < data_offset + data_length)
-			{
-			return -1;
-			}
-		if (count != mpo.num_images * 16)
-			{
-			return -1;
-			}
-
-		mpo.images = g_new0(MPOEntry, mpo.num_images);
-
-		for (guint i = 0; i < mpo.num_images; i++)
-			{
-			guint image_attr = tiff_byte_get_int32(tiff + data_offset + (i * 16), bo);
-			mpo.images[i].type_code = image_attr & 0xffffff;
-			mpo.images[i].representative = !!(image_attr & 0x20000000);
-			mpo.images[i].dependent_child = !!(image_attr & 0x40000000);
-			mpo.images[i].dependent_parent = !!(image_attr & 0x80000000);
-			mpo.images[i].length = tiff_byte_get_int32(tiff + data_offset + (i * 16) + 4, bo);
-			mpo.images[i].offset = tiff_byte_get_int32(tiff + data_offset + (i * 16) + 8, bo);
-			mpo.images[i].dep1 = tiff_byte_get_int16(tiff + data_offset + (i * 16) + 12, bo);
-			mpo.images[i].dep2 = tiff_byte_get_int16(tiff + data_offset + (i * 16) + 14, bo);
-
-			if (i == 0)
-				{
-				mpo.images[i].offset = 0;
-				}
-			else
-				{
-				mpo.images[i].offset += mpo.mpo_offset;
-				}
-
-			DEBUG_1("   image %x %x %x", image_attr, mpo.images[i].length, mpo.images[i].offset);
-			}
-		}
-
-	return 0;
-}
-
-static gint mpo_parse_Attributes_IFD_entry(const guchar *tiff, guint offset,
-                                           TiffByteOrder bo,
-                                           MPOEntry &mpe)
-{
-	guint tag;
-	guint format;
-	guint count;
-	guint data_val;
-
-	tag = tiff_byte_get_int16(tiff + offset + TIFF_TIFD_OFFSET_TAG, bo);
-	format = tiff_byte_get_int16(tiff + offset + TIFF_TIFD_OFFSET_FORMAT, bo);
-	count = tiff_byte_get_int32(tiff + offset + TIFF_TIFD_OFFSET_COUNT, bo);
-	data_val = tiff_byte_get_int32(tiff + offset + TIFF_TIFD_OFFSET_DATA, bo);
-	DEBUG_1("   tag %x format %x count %x data_val %x", tag, format, count, data_val);
-
-	switch (tag)
-		{
-		case 0xb000:
-			mpe.MPFVersion = data_val;
-			DEBUG_1("    mpo version %x", data_val);
-			break;
-		case 0xb101:
-			mpe.MPIndividualNum = data_val;
-			DEBUG_1("    Individual Image Number %x", mpe.MPIndividualNum);
-			break;
-		case 0xb201:
-			mpe.PanOrientation = data_val;
-			break;
-		/**
-		@FIXME See section 5.2.4. MP Attribute IFD of
-		CIPA DC-007-Translation-2021 Multi-Picture Format
-		https://www.cipa.jp/std/documents/download_e.html?CIPA_DC-007-2021_E
-		Tag Name                    Field Name         Tag ID (Dec/Hex) Type      Count
-		Panorama Horizontal Overlap PanOverlap_H       45570 B202       RATIONAL  1
-		Panorama Vertical Overlap   PanOverlap_V       45571 B203       RATIONAL  1
-		Base Viewpoint Number       BaseViewpointNum   45572 B204       LONG      1
-		Convergence Angle           ConvergenceAngle   45573 B205       SRATIONAL 1
-		Baseline Length             BaselineLength     45574 B206       RATIONAL  1
-		Divergence Angle            VerticalDivergence 45575 B207       SRATIONAL 1
-		Horizontal Axis Distance    AxisDistance_X     45576 B208       SRATIONAL 1
-		Vertical Axis Distance      AxisDistance_Y     45577 B209       SRATIONAL 1
-		Collimation Axis Distance   AxisDistance_Z     45578 B20A       SRATIONAL 1
-		Yaw Angle                   YawAngle           45579 B20B       SRATIONAL 1
-		Pitch Angle                 PitchAngle         45580 B20C       SRATIONAL 1
-		Roll Angle                  RollAngle          45581 B20D       SRATIONAL 1
-		*/
-		default:
-			break;
-		}
-
-	return 0;
 }
 
 MPOData *jpeg_get_mpo_data(const guchar *data, guint size)
