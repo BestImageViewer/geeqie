@@ -60,10 +60,7 @@ namespace
 
 struct ExifWin
 {
-	GtkWidget *button_close;
-	GtkWidget *button_help;
 	GtkWidget *window;
-	GtkWidget *vbox;
 	GtkWidget *scrolled;
 	GtkWidget *listview;
 	GtkWidget *label_file_name;
@@ -420,9 +417,9 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	g_object_set_data(G_OBJECT(ew->window), "advanced_exif_data", ew);
 	g_signal_connect(G_OBJECT(ew->window), "delete_event", G_CALLBACK(advanced_exif_delete_cb), ew);
 
-	ew->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	gq_gtk_container_add(GTK_WIDGET(ew->window), ew->vbox);
-	gtk_widget_show(ew->vbox);
+	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	gq_gtk_container_add(ew->window, vbox);
+	gtk_widget_show(vbox);
 
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
@@ -435,7 +432,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gq_gtk_box_pack_start(GTK_BOX(box), ew->label_file_name, TRUE, TRUE, 0);
 	gtk_widget_show(ew->label_file_name);
 
-	gq_gtk_box_pack_start(GTK_BOX(ew->vbox), box, FALSE, FALSE, 0);
+	gq_gtk_box_pack_start(GTK_BOX(vbox), box, FALSE, FALSE, 0);
 	gtk_widget_show(box);
 
 
@@ -489,25 +486,25 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(ew->scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ew->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-	gq_gtk_box_pack_start(GTK_BOX(ew->vbox), ew->scrolled, TRUE, TRUE, 0);
+	gq_gtk_box_pack_start(GTK_BOX(vbox), ew->scrolled, TRUE, TRUE, 0);
 	gq_gtk_container_add(GTK_WIDGET(ew->scrolled), ew->listview);
 	gtk_widget_show(ew->listview);
 	gtk_widget_show(ew->scrolled);
 
 	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_end(GTK_BOX(ew->vbox), button_box, FALSE, FALSE, 0);
+	gq_gtk_box_pack_end(GTK_BOX(vbox), button_box, FALSE, FALSE, 0);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_spacing(GTK_BOX(hbox), PREF_PAD_SPACE);
 	gq_gtk_box_pack_end(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
 
-	ew->button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(exif_window_help_cb), ew);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(ew->button_help), "F1");
-	gtk_widget_set_sensitive(ew->button_help, TRUE);
+	GtkWidget *button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(exif_window_help_cb), ew);
+	gtk_widget_set_tooltip_text(button_help, "F1");
+	gtk_widget_set_sensitive(button_help, TRUE);
 
-	ew->button_close = pref_button_new(hbox, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(exif_window_close_cb), ew);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(ew->button_close), _("Ctrl-W"));
-	gtk_widget_set_sensitive(ew->button_close, TRUE);
+	GtkWidget *button_close = pref_button_new(hbox, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(exif_window_close_cb), ew);
+	gtk_widget_set_tooltip_text(button_close, _("Ctrl-W"));
+	gtk_widget_set_sensitive(button_close, TRUE);
 
 	gq_gtk_widget_show_all(button_box);
 
