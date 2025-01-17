@@ -260,26 +260,25 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 
 	stereo = FALSE;
 
-	MPOData *mpo = jpeg_get_mpo_data(buf, count);
-	if (mpo && mpo->num_images > 1)
+	MPOData mpo = jpeg_get_mpo_data(buf, count);
+	if (mpo.num_images > 1)
 		{
-		guint i;
 		gint idx1 = -1;
 		gint idx2 = -1;
 		guint num2 = 1;
 
-		for (i = 0; i < mpo->num_images; i++)
+		for (guint i = 0; i < mpo.num_images; ++i)
 			{
-			if (mpo->images[i].type_code == 0x20002)
+			if (mpo.images[i].type_code == 0x20002)
 				{
-				if (mpo->images[i].MPIndividualNum == 1)
+				if (mpo.images[i].MPIndividualNum == 1)
 					{
 					idx1 = i;
 					}
-				else if (mpo->images[i].MPIndividualNum > num2)
+				else if (mpo.images[i].MPIndividualNum > num2)
 					{
 					idx2 = i;
-					num2 = mpo->images[i].MPIndividualNum;
+					num2 = mpo.images[i].MPIndividualNum;
 					}
 				}
 			}
@@ -287,13 +286,12 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 		if (idx1 >= 0 && idx2 >= 0)
 			{
 			stereo = TRUE;
-			stereo_buf2 = const_cast<unsigned char *>(buf) + mpo->images[idx2].offset;
-			stereo_length = mpo->images[idx2].length;
-			buf = const_cast<unsigned char *>(buf) + mpo->images[idx1].offset;
-			count = mpo->images[idx1].length;
+			stereo_buf2 = const_cast<unsigned char *>(buf) + mpo.images[idx2].offset;
+			stereo_length = mpo.images[idx2].length;
+			buf = const_cast<unsigned char *>(buf) + mpo.images[idx1].offset;
+			count = mpo.images[idx1].length;
 			}
 		}
-	jpeg_mpo_data_free(mpo);
 
 	/* setup error handler */
 	cinfo.err = jpeg_std_error (&jerr.pub);

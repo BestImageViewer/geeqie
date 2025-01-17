@@ -22,6 +22,8 @@
 #ifndef JPEG_PARSER_H
 #define JPEG_PARSER_H
 
+#include <vector>
+
 #include <glib.h>
 
 #define JPEG_MARKER		0xFF
@@ -82,11 +84,10 @@ struct MPOData {
 
 	guint version;
 	guint num_images;
-	MPOEntry *images;
+	std::vector<MPOEntry> images;
 };
 
-MPOData* jpeg_get_mpo_data(const guchar *data, guint size);
-void jpeg_mpo_data_free(MPOData *mpo);
+MPOData jpeg_get_mpo_data(const guchar *data, guint size);
 
 #endif
 
