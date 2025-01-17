@@ -1069,8 +1069,6 @@ static gint exif_jpeg_parse(ExifData *exif,
 			    guchar *data, guint size,
 			    ExifMarker *list)
 {
-	guint seg_offset = 0;
-	guint seg_length = 0;
 	gint res = -1;
 
 	if (size < 4 ||
@@ -1079,9 +1077,11 @@ static gint exif_jpeg_parse(ExifData *exif,
 		return -2;
 		}
 
+	guint seg_offset = 0;
+	guint seg_length = 0;
 	if (jpeg_segment_find(data, size, JPEG_MARKER_APP1,
-				   "Exif\x00\x00", 6,
-				   &seg_offset, &seg_length))
+	                      "Exif\x00\x00", 6,
+	                      seg_offset, seg_length))
 		{
 		res = exif_tiff_parse(exif, data + seg_offset + 6, seg_length - 6, list);
 		}

@@ -240,8 +240,8 @@ gboolean is_jpeg_container(const guchar *data, guint size)
 }
 
 gboolean jpeg_segment_find(const guchar *data, guint size,
-			    guchar app_marker, const gchar *magic, guint magic_len,
-			    guint *seg_offset, guint *seg_length)
+                           guchar app_marker, const gchar *magic, guint magic_len,
+                           guint &seg_offset, guint &seg_length)
 {
 	guchar marker = 0;
 	guint offset = 0;
@@ -267,8 +267,8 @@ gboolean jpeg_segment_find(const guchar *data, guint size,
 			    length >= 4 + magic_len &&
 			    memcmp(data + offset + 4, magic, magic_len) == 0)
 				{
-				*seg_offset = offset + 4;
-				*seg_length = length - 4;
+				seg_offset = offset + 4;
+				seg_length = length - 4;
 				return TRUE;
 				}
 			}
@@ -280,7 +280,7 @@ MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 {
 	guint seg_offset;
 	guint seg_size;
-	if (!jpeg_segment_find(data, size, JPEG_MARKER_APP2, "MPF\x00", 4, &seg_offset, &seg_size) || seg_size <= 16) return {};
+	if (!jpeg_segment_find(data, size, JPEG_MARKER_APP2, "MPF\x00", 4, seg_offset, seg_size) || seg_size <= 16) return {};
 
 	DEBUG_1("mpo signature found at %x", seg_offset);
 	seg_offset += 4;
@@ -319,7 +319,7 @@ MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 			}
 		else
 			{
-			if (!jpeg_segment_find(data + mpo.images[i].offset, mpo.images[i].length, JPEG_MARKER_APP2, "MPF\x00", 4, &seg_offset, &seg_size) || seg_size <=16)
+			if (!jpeg_segment_find(data + mpo.images[i].offset, mpo.images[i].length, JPEG_MARKER_APP2, "MPF\x00", 4, seg_offset, seg_size) || seg_size <= 16)
 				{
 				DEBUG_1("MPO image %u: MPO signature not found", i);
 				continue;

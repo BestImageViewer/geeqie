@@ -977,10 +977,10 @@ gboolean exif_jpeg_parse_color(ExifData *exif, guchar *data, guint size)
 	 */
 
 	while (jpeg_segment_find(data + seg_offset + seg_length,
-				      size - seg_offset - seg_length,
-				      JPEG_MARKER_APP2,
-				      "ICC_PROFILE\x00", 12,
-				      &seg_offset, &seg_length))
+	                         size - seg_offset - seg_length,
+	                         JPEG_MARKER_APP2,
+	                         "ICC_PROFILE\x00", 12,
+	                         seg_offset, seg_length))
 		{
 		guchar chunk_num;
 		guchar chunk_tot;

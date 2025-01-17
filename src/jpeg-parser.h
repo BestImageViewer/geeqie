@@ -47,8 +47,8 @@
 gboolean is_jpeg_container(const guchar *data, guint size);
 
 gboolean jpeg_segment_find(const guchar *data, guint size,
-			    guchar app_marker, const gchar *magic, guint magic_len,
-			    guint *seg_offset, guint *seg_length);
+                           guchar app_marker, const gchar *magic, guint magic_len,
+                           guint &seg_offset, guint &seg_length);
 
 
 struct MPOEntry {
