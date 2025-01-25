@@ -3496,86 +3496,43 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 
 void layout_toolbar_add_default(LayoutWindow *lw, ToolbarType type)
 {
-	LayoutWindow *lw_first;
-	GList *work_action;
+	if (type >= TOOLBAR_COUNT) return;
+
+	LayoutWindow *lw_first = layout_window_list ? static_cast<LayoutWindow *>(layout_window_list->data) : nullptr;
+	if (lw_first && lw_first->toolbar_actions[type])
+		{
+		GList *work_action = lw_first->toolbar_actions[type];
+		while (work_action)
+			{
+			auto action = static_cast<gchar *>(work_action->data);
+			work_action = work_action->next;
+			layout_toolbar_add(lw, type, action); // TODO May change lw_first->toolbar_actions[type]?
+			}
+
+		return;
+		}
 
 	switch (type)
 		{
 		case TOOLBAR_MAIN:
-			if (layout_window_list)
-				{
-				lw_first = static_cast<LayoutWindow *>(layout_window_list->data);
-				if (lw_first->toolbar_actions[TOOLBAR_MAIN])
-					{
-					work_action = lw_first->toolbar_actions[type];
-					while (work_action)
-						{
-						auto action = static_cast<gchar *>(work_action->data);
-						work_action = work_action->next;
-						layout_toolbar_add(lw, type, action);
-						}
-					}
-				else
-					{
-					layout_toolbar_add(lw, type, "Thumbnails");
-					layout_toolbar_add(lw, type, "Back");
-					layout_toolbar_add(lw, type, "Forward");
-					layout_toolbar_add(lw, type, "Up");
-					layout_toolbar_add(lw, type, "Home");
-					layout_toolbar_add(lw, type, "Refresh");
-					layout_toolbar_add(lw, type, "ZoomIn");
-					layout_toolbar_add(lw, type, "ZoomOut");
-					layout_toolbar_add(lw, type, "ZoomFit");
-					layout_toolbar_add(lw, type, "Zoom100");
-					layout_toolbar_add(lw, type, "Preferences");
-					layout_toolbar_add(lw, type, "FloatTools");
-					}
-				}
-			else
-				{
-				layout_toolbar_add(lw, type, "Thumbnails");
-				layout_toolbar_add(lw, type, "Back");
-				layout_toolbar_add(lw, type, "Forward");
-				layout_toolbar_add(lw, type, "Up");
-				layout_toolbar_add(lw, type, "Home");
-				layout_toolbar_add(lw, type, "Refresh");
-				layout_toolbar_add(lw, type, "ZoomIn");
-				layout_toolbar_add(lw, type, "ZoomOut");
-				layout_toolbar_add(lw, type, "ZoomFit");
-				layout_toolbar_add(lw, type, "Zoom100");
-				layout_toolbar_add(lw, type, "Preferences");
-				layout_toolbar_add(lw, type, "FloatTools");
-				}
+			layout_toolbar_add(lw, type, "Thumbnails");
+			layout_toolbar_add(lw, type, "Back");
+			layout_toolbar_add(lw, type, "Forward");
+			layout_toolbar_add(lw, type, "Up");
+			layout_toolbar_add(lw, type, "Home");
+			layout_toolbar_add(lw, type, "Refresh");
+			layout_toolbar_add(lw, type, "ZoomIn");
+			layout_toolbar_add(lw, type, "ZoomOut");
+			layout_toolbar_add(lw, type, "ZoomFit");
+			layout_toolbar_add(lw, type, "Zoom100");
+			layout_toolbar_add(lw, type, "Preferences");
+			layout_toolbar_add(lw, type, "FloatTools");
 			break;
 		case TOOLBAR_STATUS:
-			if (layout_window_list)
-				{
-				lw_first = static_cast<LayoutWindow *>(layout_window_list->data);
-				if (lw_first->toolbar_actions[TOOLBAR_STATUS])
-					{
-					work_action = lw_first->toolbar_actions[type];
-					while (work_action)
-						{
-						auto action = static_cast<gchar *>(work_action->data);
-						work_action = work_action->next;
-						layout_toolbar_add(lw, type, action);
-						}
-					}
-				else
-					{
-					layout_toolbar_add(lw, type, "ExifRotate");
-					layout_toolbar_add(lw, type, "ShowInfoPixel");
-					layout_toolbar_add(lw, type, "UseColorProfiles");
-					layout_toolbar_add(lw, type, "SaveMetadata");
-					}
-				}
-			else
-				{
-				layout_toolbar_add(lw, type, "ExifRotate");
-				layout_toolbar_add(lw, type, "ShowInfoPixel");
-				layout_toolbar_add(lw, type, "UseColorProfiles");
-				layout_toolbar_add(lw, type, "SaveMetadata");
-				}
+			layout_toolbar_add(lw, type, "ExifRotate");
+			layout_toolbar_add(lw, type, "ShowInfoPixel");
+			layout_toolbar_add(lw, type, "UseColorProfiles");
+			layout_toolbar_add(lw, type, "SaveMetadata");
 			break;
 		default:
 			break;
