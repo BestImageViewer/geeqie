@@ -29,6 +29,7 @@
 
 #include "image-load-jpeg.h"
 
+#include <algorithm>
 #include <csetjmp>
 #include <cstdio> // for FILE and size_t in jpeglib.h
 
@@ -224,10 +225,8 @@ static void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 		}
 }
 static void term_source (j_decompress_ptr) {}
-static void set_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
+static void set_mem_src (j_decompress_ptr cinfo, const guchar *buffer, guint nbytes)
 {
-	struct jpeg_source_mgr* src;
-
 	if (cinfo->src == nullptr)
 		{   /* first time for this JPEG object? */
 		cinfo->src = static_cast<struct jpeg_source_mgr *>((*cinfo->mem->alloc_small) (
@@ -235,14 +234,14 @@ static void set_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
 					sizeof(struct jpeg_source_mgr)));
 		}
 
-	src = static_cast<struct jpeg_source_mgr*>(cinfo->src);
+	struct jpeg_source_mgr *src = cinfo->src;
 	src->init_source = init_source;
 	src->fill_input_buffer = fill_input_buffer;
 	src->skip_input_data = skip_input_data;
 	src->resync_to_restart = jpeg_resync_to_restart; /* use default method */
 	src->term_source = term_source;
 	src->bytes_in_buffer = nbytes;
-	src->next_input_byte = static_cast<JOCTET*>(buffer);
+	src->next_input_byte = static_cast<const JOCTET *>(buffer);
 }
 
 
@@ -253,7 +252,7 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 	guchar *dptr;
 	guchar *dptr2;
 	guint rowstride;
-	guchar *stereo_buf2 = nullptr;
+	const guchar *stereo_buf2 = nullptr;
 	guint stereo_length = 0;
 
 	struct error_handler_data jerr;
@@ -261,35 +260,36 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 	stereo = FALSE;
 
 	MPOData mpo = jpeg_get_mpo_data(buf, count);
-	if (mpo.num_images > 1)
+	mpo.images.erase(std::remove_if(mpo.images.begin(), mpo.images.end(),
+	                                [](const MPOEntry &mpe){ return mpe.type_code != 0x20002; }),
+	                 mpo.images.end());
+	if (mpo.images.size() > 1)
 		{
-		gint idx1 = -1;
-		gint idx2 = -1;
+		auto it1 = mpo.images.cend();
+		auto it2 = mpo.images.cend();
 		guint num2 = 1;
 
-		for (guint i = 0; i < mpo.num_images; ++i)
+		for (auto it = mpo.images.cbegin(); it != mpo.images.cend(); ++it)
 			{
-			if (mpo.images[i].type_code == 0x20002)
+			if (it->MPIndividualNum == 1)
 				{
-				if (mpo.images[i].MPIndividualNum == 1)
-					{
-					idx1 = i;
-					}
-				else if (mpo.images[i].MPIndividualNum > num2)
-					{
-					idx2 = i;
-					num2 = mpo.images[i].MPIndividualNum;
-					}
+				it1 = it;
+				}
+			else if (it->MPIndividualNum > num2)
+				{
+				it2 = it;
+				num2 = it->MPIndividualNum;
 				}
 			}
 
-		if (idx1 >= 0 && idx2 >= 0)
+		if (it1 != mpo.images.cend() && it2 != mpo.images.cend())
 			{
 			stereo = TRUE;
-			stereo_buf2 = const_cast<unsigned char *>(buf) + mpo.images[idx2].offset;
-			stereo_length = mpo.images[idx2].length;
-			buf = const_cast<unsigned char *>(buf) + mpo.images[idx1].offset;
-			count = mpo.images[idx1].length;
+			stereo_buf2 = buf + it2->offset;
+			stereo_length = it2->length;
+
+			buf = buf + it1->offset;
+			count = it1->length;
 			}
 		}
 
@@ -314,7 +314,7 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 
 	jpeg_create_decompress(&cinfo);
 
-	set_mem_src(&cinfo, const_cast<unsigned char *>(buf), count);
+	set_mem_src(&cinfo, buf, count);
 
 
 	jpeg_read_header(&cinfo, TRUE);
