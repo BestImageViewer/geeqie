@@ -489,7 +489,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 		{
 		if (g_strcmp0(imd->image_fd->format_name, "heif") == 0)
 			{
-			profile = heif_color_profile(imd->image_fd, &profile_len);
+			profile = heif_color_profile(imd->image_fd->path, profile_len);
 			}
 
 		if (!profile)

@@ -25,7 +25,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib-object.h>
 #include <glib.h>
-#include <libheif/heif.h>
+#include <libheif/heif_cxx.h>
 
 #include "image-load.h"
 
@@ -61,64 +61,39 @@ void free_buffer(guchar *, gpointer data)
 
 gboolean ImageLoaderHEIF::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	struct heif_context* ctx;
-	struct heif_image* img;
-	struct heif_error error_code;
-	struct heif_image_handle* handle;
-	guint8* pixels;
-	gint width;
-	gint height;
-	gint stride;
-	gboolean alpha;
+	heif::Context ctx{};
 
-	ctx = heif_context_alloc();
-
-	error_code = heif_context_read_from_memory_without_copy(ctx, buf, count, nullptr);
-	if (error_code.code)
+	try
 		{
-		log_printf("warning: heif reader error: %s\n", error_code.message);
-		heif_context_free(ctx);
+		ctx.read_from_memory_without_copy(buf, count);
+
+		page_total = ctx.get_number_of_top_level_images();
+
+		/* get list of all (top level) image IDs */
+		std::vector<heif_item_id> IDs = ctx.get_list_of_top_level_image_IDs();
+
+		heif::ImageHandle handle = ctx.get_image_handle(IDs[page_num]);
+
+		// decode the image and convert colorspace to RGB, saved as 24bit interleaved
+		heif_image *img;
+		heif_error error = heif_decode_image(handle.get_raw_image_handle(), &img, heif_colorspace_RGB, heif_chroma_interleaved_24bit, nullptr);
+		if (error.code) throw heif::Error(error);
+
+		gint stride;
+		guint8* pixels = heif_image_get_plane(img, heif_channel_interleaved, &stride);
+		gint width = heif_image_get_width(img,heif_channel_interleaved);
+		gint height = heif_image_get_height(img,heif_channel_interleaved);
+		gboolean alpha = handle.has_alpha_channel();
+
+		pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, img);
+
+		area_updated_cb(nullptr, 0, 0, width, height, data);
+		}
+	catch (const heif::Error &error)
+		{
+		log_printf("warning: heif reader error: %s\n", error.get_message().c_str());
 		return FALSE;
 		}
-
-	page_total = heif_context_get_number_of_top_level_images(ctx);
-
-	std::vector<heif_item_id> IDs(page_total);
-
-	/* get list of all (top level) image IDs */
-	heif_context_get_list_of_top_level_image_IDs(ctx, IDs.data(), page_total);
-
-	error_code = heif_context_get_image_handle(ctx, IDs[page_num], &handle);
-	if (error_code.code)
-		{
-		log_printf("warning: heif reader error: %s\n", error_code.message);
-		heif_image_handle_release(handle);
-		heif_context_free(ctx);
-		return FALSE;
-		}
-
-	// decode the image and convert colorspace to RGB, saved as 24bit interleaved
-	error_code = heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_24bit, nullptr);
-	if (error_code.code)
-		{
-		log_printf("warning: heif reader error: %s\n", error_code.message);
-		heif_image_handle_release(handle);
-		heif_context_free(ctx);
-		return FALSE;
-		}
-
-	pixels = heif_image_get_plane(img, heif_channel_interleaved, &stride);
-
-	height = heif_image_get_height(img,heif_channel_interleaved);
-	width = heif_image_get_width(img,heif_channel_interleaved);
-	alpha = heif_image_handle_has_alpha_channel(handle);
-	heif_image_handle_release(handle);
-
-	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, img);
-
-	area_updated_cb(nullptr, 0, 0, width, height, data);
-
-	heif_context_free(ctx);
 
 	chunk_size = count;
 	return TRUE;

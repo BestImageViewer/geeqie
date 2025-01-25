@@ -381,7 +381,7 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf) {
 
 	if (g_strcmp0(fd->format_name, "heif") == 0)
 		{
-		profile = heif_color_profile(fd, &profile_len);
+		profile = heif_color_profile(fd->path, profile_len);
 		}
 
 	if (!profile)

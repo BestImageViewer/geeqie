@@ -38,7 +38,6 @@
 #  include <lcms.h>
 #endif
 
-#include "filedata.h"
 #include "image.h"
 #include "intl.h"
 #include "options.h"
@@ -440,7 +439,9 @@ void color_man_update()
 
 #if HAVE_HEIF
 #include <cmath>
-#include <libheif/heif.h>
+#include <libheif/heif_cxx.h>
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(heif_color_profile_nclx, heif_nclx_color_profile_free)
 
 static cmsToneCurve* colorspaces_create_transfer(int32_t size, double (*fct)(double))
 {
@@ -514,7 +515,7 @@ static double PQ_fct(double x)
  *
  * Copied from: gimp/libgimpcolor/gimpcolorprofile.c
  */
-static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, guint *profile_len)
+static guchar *nclx_to_lcms_profile(const heif_color_profile_nclx *nclx, guint &profile_len)
 {
 	const gchar *primaries_name = "";
 	const gchar *trc_name = "";
@@ -657,98 +658,62 @@ static guchar *nclx_to_lcms_profile(const struct heif_color_profile_nclx *nclx, 
 			data = static_cast<guint8 *>(g_malloc(size));
 			if (cmsSaveProfileToMem(profile, data, &size))
 				{
-				*profile_len = size;
+				profile_len = size;
 				}
 			cmsCloseProfile(profile);
 			return static_cast<guchar *>(data);
 			}
 
 		cmsCloseProfile(profile);
-		return nullptr;
 		}
 
 	return nullptr;
 }
 
-guchar *heif_color_profile(FileData *fd, guint *profile_len)
+guchar *heif_color_profile(const gchar *path, guint &profile_len)
 {
-	struct heif_context* ctx;
-	struct heif_error error_code;
-	struct heif_image_handle* handle;
-	struct heif_color_profile_nclx *nclxcp;
-	gint profile_type;
-	guchar *profile;
-	cmsUInt32Number size;
-	guint8 *data = nullptr;
+	heif::Context ctx{};
 
-	ctx = heif_context_alloc();
-	error_code = heif_context_read_from_file(ctx, fd->path, nullptr);
-
-	if (error_code.code)
+	try
 		{
-		log_printf("warning: heif reader error: %s\n", error_code.message);
-		heif_context_free(ctx);
-		return nullptr;
-		}
+		ctx.read_from_file(path);
 
-	error_code = heif_context_get_primary_image_handle(ctx, &handle);
-	if (error_code.code)
-		{
-		log_printf("warning: heif reader error: %s\n", error_code.message);
-		heif_image_handle_release(handle);
-		heif_context_free(ctx);
-		return nullptr;
-		}
+		heif::ImageHandle image_handle = ctx.get_primary_image_handle();
+		heif_image_handle *handle = image_handle.get_raw_image_handle();
 
-	nclxcp = heif_nclx_color_profile_alloc();
-	profile_type = heif_image_handle_get_color_profile_type(handle);
-
-	if (profile_type == heif_color_profile_type_prof)
-		{
-		size = heif_image_handle_get_raw_color_profile_size(handle);
-		*profile_len = size;
-		data = static_cast<guint8 *>(g_malloc0(size));
-		error_code = heif_image_handle_get_raw_color_profile(handle, data);
-		if (error_code.code)
+		if (heif_image_handle_get_color_profile_type(handle) == heif_color_profile_type_prof)
 			{
-			log_printf("warning: heif reader error: %s\n", error_code.message);
-			heif_image_handle_release(handle);
-			heif_context_free(ctx);
-			heif_nclx_color_profile_free(nclxcp);
-			return nullptr;
+			profile_len = heif_image_handle_get_raw_color_profile_size(handle);
+			auto *data = static_cast<guint8 *>(g_malloc0(profile_len));
+
+			heif_error error = heif_image_handle_get_raw_color_profile(handle, data);
+			if (error.code) throw heif::Error(error);
+
+			DEBUG_1("heif color profile type: prof");
+
+			return static_cast<guchar *>(data);
 			}
 
-		DEBUG_1("heif color profile type: prof");
-		heif_image_handle_release(handle);
-		heif_context_free(ctx);
-		heif_nclx_color_profile_free(nclxcp);
+		g_autoptr(heif_color_profile_nclx) nclx_cp = heif_nclx_color_profile_alloc();
 
-		return static_cast<guchar *>(data);
+		heif_error error = heif_image_handle_get_nclx_color_profile(handle, &nclx_cp);
+		if (error.code) throw heif::Error(error);
+
+		return nclx_to_lcms_profile(nclx_cp, profile_len);
 		}
-
-	error_code = heif_image_handle_get_nclx_color_profile(handle, &nclxcp);
-	if (error_code.code)
+	catch (const heif::Error &error)
 		{
-		if (error_code.code != heif_error_Color_profile_does_not_exist)
+		if (error.get_code() != heif_error_Color_profile_does_not_exist)
 			{
-			log_printf("warning: heif reader error: %d (%s)\n", error_code.code, error_code.message);
+			log_printf("warning: heif reader error: %d (%s)\n",
+			           error.get_code(), error.get_message().c_str());
 			}
-		heif_image_handle_release(handle);
-		heif_context_free(ctx);
-		heif_nclx_color_profile_free(nclxcp);
-		return nullptr;
 		}
 
-	profile = nclx_to_lcms_profile(nclxcp, profile_len);
-
-	heif_image_handle_release(handle);
-	heif_context_free(ctx);
-	heif_nclx_color_profile_free(nclxcp);
-
-	return profile;
+	return nullptr;
 }
 #else
-guchar *heif_color_profile(FileData *, guint *)
+guchar *heif_color_profile(const gchar *, guint &)
 {
 	return NULL;
 }
@@ -796,7 +761,7 @@ gboolean color_man_get_status(ColorMan *, gchar **, gchar **)
 	return FALSE;
 }
 
-guchar *heif_color_profile(FileData *, guint *)
+guchar *heif_color_profile(const gchar *, guint &)
 {
 	return nullptr;
 }
