@@ -74,6 +74,5 @@ void color_man_correct_region(ColorMan *cm, GdkPixbuf *pixbuf, gint x, gint y, g
 
 gboolean color_man_get_status(ColorMan *cm, gchar **image_profile, gchar **screen_profile);
 
-guchar *heif_color_profile(const gchar *path, guint &profile_len);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

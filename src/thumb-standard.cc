@@ -33,6 +33,7 @@
 #include <config.h>
 
 #include "cache.h"
+#include "color-man-heif.h"
 #include "color-man.h"
 #include "exif.h"
 #include "filedata.h"
