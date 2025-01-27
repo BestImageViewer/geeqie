@@ -33,7 +33,6 @@
 #include <config.h>
 
 #include "cache.h"
-#include "color-man-heif.h"
 #include "color-man.h"
 #include "exif.h"
 #include "filedata.h"
@@ -358,107 +357,43 @@ static void thumb_loader_std_set_fallback(ThumbLoaderStd *tl)
 }
 
 
-void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf) {
-	ExifData *exif = nullptr;
-	gint color_profile_from_image = COLOR_PROFILE_NONE;
-	ColorManProfileType input_type = COLOR_PROFILE_MEM;
-	ColorManProfileType screen_type;
-	const gchar *input_file = nullptr;
-	g_autofree guchar *profile = nullptr;
+void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf)
+{
+	if (!options->thumbnails.use_color_management) return;
+
+	ColorManProfileType color_profile_from_image = COLOR_PROFILE_NONE;
 	guint profile_len;
-	gint sw;
-	gint sh;
+	g_autofree guchar *profile = exif_get_color_profile(fd, profile_len, color_profile_from_image);
 
-	if (!options->thumbnails.use_color_management)
-		{
-		return;
-		}
+	if (color_profile_from_image == COLOR_PROFILE_NONE) return;
 
-	sw = gdk_pixbuf_get_width(pixbuf);
-	sh = gdk_pixbuf_get_height(pixbuf);
+	// transform image, we always use sRGB as target for thumbnails
+	constexpr ColorManProfileType screen_type = COLOR_PROFILE_SRGB;
 
-	exif = exif_read_fd(fd);
-	if (!exif) return;
+	const gint sw = gdk_pixbuf_get_width(pixbuf);
+	const gint sh = gdk_pixbuf_get_height(pixbuf);
 
-	if (g_strcmp0(fd->format_name, "heif") == 0)
-		{
-		profile = heif_color_profile(fd->path, profile_len);
-		}
-
-	if (!profile)
-		{
-		profile = exif_get_color_profile(exif, &profile_len);
-		}
-
+	g_autofree ColorMan *cm = nullptr;
 	if (profile)
 		{
-		DEBUG_1("Found embedded color profile");
-		color_profile_from_image = COLOR_PROFILE_MEM;
+		cm = color_man_new_embedded(nullptr, pixbuf,
+		                            profile, profile_len,
+		                            screen_type, nullptr, nullptr, 0);
 		}
 	else
 		{
-		g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
+		constexpr ColorManProfileType input_type = COLOR_PROFILE_MEM;
+		const gchar *input_file = nullptr;
 
-		if (interop_index)
-			{
-			/* Exif 2.21 specification */
-			if (!strcmp(interop_index, "R98"))
-				{
-				color_profile_from_image = COLOR_PROFILE_SRGB;
-				DEBUG_1("Found EXIF 2.21 ColorSpace of sRGB");
-				}
-			else if (!strcmp(interop_index, "R03"))
-				{
-				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-				DEBUG_1("Found EXIF 2.21 ColorSpace of AdobeRGB");
-				}
-			}
-		else
-			{
-			gint cs;
-
-			/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
-			if (!exif_get_integer(exif, "Exif.Photo.ColorSpace", &cs)) cs = 0;
-			if (cs == 1)
-				{
-				color_profile_from_image = COLOR_PROFILE_SRGB;
-				DEBUG_1("Found EXIF 2.2 ColorSpace of sRGB");
-				}
-			else if (cs == 2)
-				{
-				/* non-standard way of specifying AdobeRGB (used by some software) */
-				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-				DEBUG_1("Found EXIF 2.2 ColorSpace of AdobeRGB");
-				}
-			}
+		cm = color_man_new(nullptr, pixbuf,
+		                   input_type, input_file,
+		                   screen_type, nullptr, nullptr, 0);
 		}
 
-	if(color_profile_from_image != COLOR_PROFILE_NONE)
+	if(cm)
 		{
-		// transform image, we always use sRGB as target for thumbnails
-		screen_type = COLOR_PROFILE_SRGB;
-
-		g_autofree ColorMan *cm = nullptr;
-		if (profile)
-			{
-			cm = color_man_new_embedded(nullptr, pixbuf,
-			                            profile, profile_len,
-			                            screen_type, nullptr, nullptr, 0);
-			}
-		else
-			{
-			cm = color_man_new(nullptr, pixbuf,
-			                   input_type, input_file,
-			                   screen_type, nullptr, nullptr, 0);
-			}
-
-		if(cm)
-			{
-			color_man_correct_region(cm, cm->pixbuf, 0, 0, sw, sh);
-			}
+		color_man_correct_region(cm, cm->pixbuf, 0, 0, sw, sh);
 		}
-
-	exif_free_fd(fd, exif);
 }
 
 static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf, gboolean shrunk)

@@ -36,10 +36,9 @@
 #include <glib.h>
 
 #include "cache.h"
-#include "color-man.h"
+#include "color-man-heif.h"
+#include "exif-int.h" /* Required to prevent clang-tidy warnings */
 #include "exif.h"
-/* Required to prevent clang-tidy warnings */
-#include "exif-int.h"
 #include "filecache.h"
 #include "filedata.h"
 #include "glua.h"
@@ -933,6 +932,73 @@ void exif_free_fd(FileData *fd, ExifData *exif)
 {
 	if (!fd) return;
 	g_assert(fd->exif == exif);
+}
+
+guchar *exif_get_color_profile(FileData *fd, guint &profile_len, ColorManProfileType &color_profile_from_image)
+{
+	color_profile_from_image = COLOR_PROFILE_NONE;
+
+	ExifData *exif = exif_read_fd(fd);
+	if (!exif) return nullptr;
+
+	guchar *profile = nullptr;
+
+	if (g_strcmp0(fd->format_name, "heif") == 0)
+		{
+		profile = heif_color_profile(fd->path, profile_len);
+		}
+
+	if (!profile)
+		{
+		profile = exif_get_color_profile(exif, &profile_len);
+		}
+
+	if (profile)
+		{
+		DEBUG_1("Found embedded color profile");
+		color_profile_from_image = COLOR_PROFILE_MEM;
+		}
+	else
+		{
+		g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
+
+		if (interop_index)
+			{
+			/* Exif 2.21 specification */
+			if (!strcmp(interop_index, "R98"))
+				{
+				color_profile_from_image = COLOR_PROFILE_SRGB;
+				DEBUG_1("Found EXIF 2.21 ColorSpace of sRGB");
+				}
+			else if (!strcmp(interop_index, "R03"))
+				{
+				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
+				DEBUG_1("Found EXIF 2.21 ColorSpace of AdobeRGB");
+				}
+			}
+		else
+			{
+			gint cs;
+
+			/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
+			if (!exif_get_integer(exif, "Exif.Photo.ColorSpace", &cs)) cs = 0;
+			if (cs == 1)
+				{
+				color_profile_from_image = COLOR_PROFILE_SRGB;
+				DEBUG_1("Found EXIF 2.2 ColorSpace of sRGB");
+				}
+			else if (cs == 2)
+				{
+				/* non-standard way of specifying AdobeRGB (used by some software) */
+				color_profile_from_image = COLOR_PROFILE_ADOBERGB;
+				DEBUG_1("Found EXIF 2.2 ColorSpace of AdobeRGB");
+				}
+			}
+		}
+
+	exif_free_fd(fd, exif);
+
+	return profile;
 }
 
 /* embedded icc in jpeg */

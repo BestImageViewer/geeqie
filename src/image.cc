@@ -29,7 +29,6 @@
 
 #include "collect-table.h"
 #include "collect.h"
-#include "color-man-heif.h"
 #include "color-man.h"
 #include "compat-deprecated.h"
 #include "compat.h"
@@ -435,9 +434,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 	ColorManProfileType screen_type;
 	const gchar *input_file = nullptr;
 	const gchar *screen_file = nullptr;
-	guint profile_len;
 	gint screen_profile_len;
-	ExifData *exif;
 
 	if (imd->cm) return FALSE;
 
@@ -484,78 +481,22 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 
 	imd->color_profile_from_image = COLOR_PROFILE_NONE;
 
-	g_autofree guchar *profile = nullptr;
+	guint profile_len;
+	g_autofree guchar *profile = exif_get_color_profile(imd->image_fd, profile_len, imd->color_profile_from_image);
 
-	exif = exif_read_fd(imd->image_fd);
-	if (exif)
+	if (profile)
 		{
-		if (g_strcmp0(imd->image_fd->format_name, "heif") == 0)
+		if (!imd->color_profile_use_image)
 			{
-			profile = heif_color_profile(imd->image_fd->path, profile_len);
+			g_free(profile);
+			profile = nullptr;
 			}
-
-		if (!profile)
-			{
-			profile = exif_get_color_profile(exif, &profile_len);
-			}
-
-		if (profile)
-			{
-			if (!imd->color_profile_use_image)
-				{
-				g_free(profile);
-				profile = nullptr;
-				}
-			DEBUG_1("Found embedded color profile");
-			imd->color_profile_from_image = COLOR_PROFILE_MEM;
-			}
-		else
-			{
-			g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
-
-			if (interop_index)
-				{
-				/* Exif 2.21 specification */
-				if (!strcmp(interop_index, "R98"))
-					{
-					imd->color_profile_from_image = COLOR_PROFILE_SRGB;
-					DEBUG_1("Found EXIF 2.21 ColorSpace of sRGB");
-					}
-				else if (!strcmp(interop_index, "R03"))
-					{
-					imd->color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-					DEBUG_1("Found EXIF 2.21 ColorSpace of AdobeRGB");
-					}
-				}
-			else
-				{
-				gint cs;
-
-				/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
-				if (!exif_get_integer(exif, "Exif.Photo.ColorSpace", &cs)) cs = 0;
-				if (cs == 1)
-					{
-					imd->color_profile_from_image = COLOR_PROFILE_SRGB;
-					DEBUG_1("Found EXIF 2.2 ColorSpace of sRGB");
-					}
-				else if (cs == 2)
-					{
-					/* non-standard way of specifying AdobeRGB (used by some software) */
-					imd->color_profile_from_image = COLOR_PROFILE_ADOBERGB;
-					DEBUG_1("Found EXIF 2.2 ColorSpace of AdobeRGB");
-					}
-				}
-
-			if (imd->color_profile_use_image && imd->color_profile_from_image != COLOR_PROFILE_NONE)
-				{
-				input_type = static_cast<ColorManProfileType>(imd->color_profile_from_image);
-				input_file = nullptr;
-				}
-			}
-
-		exif_free_fd(imd->image_fd, exif);
 		}
-
+	else if (imd->color_profile_use_image && imd->color_profile_from_image != COLOR_PROFILE_NONE)
+		{
+		input_type = imd->color_profile_from_image;
+		input_file = nullptr;
+		}
 
 	if (profile)
 		{

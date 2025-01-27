@@ -27,6 +27,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "color-man.h"
 #include "typedefs.h"
 
 struct CollectInfo;
@@ -140,7 +141,7 @@ struct ImageWindow
 	gboolean color_profile_enable;
 	gint color_profile_input;
 	gboolean color_profile_use_image;
-	gint color_profile_from_image;
+	ColorManProfileType color_profile_from_image;
 	gpointer cm;
 
 	AlterType delay_alter_type;

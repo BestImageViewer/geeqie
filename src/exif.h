@@ -24,6 +24,7 @@
 
 #include <glib.h>
 
+#include "color-man.h"
 #include "typedefs.h"
 
 struct ExifData;
@@ -151,6 +152,7 @@ gint exif_update_metadata(ExifData *exif, const gchar *key, const GList *values)
 GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format);
 
 guchar *exif_get_color_profile(ExifData *exif, guint *data_len);
+guchar *exif_get_color_profile(FileData *fd, guint &profile_len, ColorManProfileType &color_profile_from_image);
 
 /* jpeg embedded icc support */
 
