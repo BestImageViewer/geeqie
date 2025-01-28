@@ -436,6 +436,26 @@ void color_man_update()
 	color_man_cache_reset();
 }
 
+const gchar *get_profile_name(const guchar *profile_data, guint profile_len)
+{
+	cmsHPROFILE profile = cmsOpenProfileFromMem(profile_data, profile_len);
+	if (!profile) return nullptr;
+
+#if HAVE_LCMS2
+	cmsUInt8Number profileID[17];
+	profileID[16] = '\0';
+
+	cmsGetHeaderProfileID(profile, profileID);
+	auto *name = reinterpret_cast<gchar *>(profileID);
+#else
+	auto *name = (gchar *) cmsTakeProductName(profile);
+#endif
+
+	cmsCloseProfile(profile);
+
+	return name;
+}
+
 #else /* define HAVE_LCMS */
 /*** color support not enabled ***/
 
@@ -476,6 +496,12 @@ void color_man_correct_region(ColorMan *, GdkPixbuf *, gint, gint, gint, gint)
 gboolean color_man_get_status(ColorMan *, gchar **, gchar **)
 {
 	return FALSE;
+}
+
+const gchar *get_profile_name(const guchar *, guint)
+{
+	/* no op */
+	return nullptr;
 }
 
 #endif /* define HAVE_LCMS */

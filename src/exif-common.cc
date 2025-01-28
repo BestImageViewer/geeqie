@@ -35,16 +35,8 @@
 
 #include <glib.h>
 
-#if HAVE_LCMS
-/*** color support enabled ***/
-#  if HAVE_LCMS2
-#    include <lcms2.h>
-#  else
-#    include <lcms.h>
-#  endif
-#endif
-
 #include "cache.h"
+#include "color-man.h"
 #include "exif.h"
 /* Required to prevent clang-tidy warnings */
 #include "exif-int.h"
@@ -58,6 +50,7 @@
 #include "third-party/zonedetect.h"
 #include "typedefs.h"
 #include "ui-fileops.h"
+
 struct ExifData;
 struct ExifItem;
 struct FileCacheData;
@@ -429,9 +422,6 @@ static gchar *exif_build_formatted_Resolution(ExifData *exif)
 
 static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 {
-#if HAVE_LCMS2
-	cmsUInt8Number profileID[17];
-#endif
 	const gchar *name = "";
 	const gchar *source = "";
 	guint profile_len;
@@ -459,27 +449,12 @@ static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 		}
 	else
 		{
+		const gchar *profile_name = get_profile_name(profile_data, profile_len);
+		if (profile_name) name = profile_name;
+
 		source = _("embedded");
-#if HAVE_LCMS
-
-			{
-			cmsHPROFILE profile;
-
-			profile = cmsOpenProfileFromMem(profile_data, profile_len);
-			if (profile)
-				{
-#if HAVE_LCMS2
-				profileID[16] = '\0';
-				cmsGetHeaderProfileID(profile, profileID);
-				name = reinterpret_cast<gchar *>(profileID);
-#else
-				name = (gchar *) cmsTakeProductName(profile);
-#endif
-				cmsCloseProfile(profile);
-				}
-			}
-#endif
 		}
+
 	if (name[0] == 0 && source[0] == 0) return nullptr;
 	return g_strdup_printf("%s (%s)", name, source);
 }
