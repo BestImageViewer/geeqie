@@ -206,23 +206,9 @@ static ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gch
 	return cc;
 }
 
-static void color_man_cache_free(ColorManCache *cc)
-{
-	if (!cc) return;
-
-	cm_cache_list = g_list_remove(cm_cache_list, cc);
-	color_man_cache_unref(cc);
-}
-
 static void color_man_cache_reset()
 {
-	while (cm_cache_list)
-		{
-		ColorManCache *cc;
-
-		cc = static_cast<ColorManCache *>(cm_cache_list->data);
-		color_man_cache_free(cc);
-		}
+	g_list_free_full(cm_cache_list, reinterpret_cast<GDestroyNotify>(color_man_cache_unref));
 }
 
 static ColorManCache *color_man_cache_find(ColorManProfileType in_type, const gchar *in_file,
@@ -442,8 +428,8 @@ const gchar *get_profile_name(const guchar *profile_data, guint profile_len)
 	if (!profile) return nullptr;
 
 #if HAVE_LCMS2
-	cmsUInt8Number profileID[17];
-	profileID[16] = '\0';
+	static cmsUInt8Number profileID[17];
+	memset(profileID, 0, sizeof(profileID));
 
 	cmsGetHeaderProfileID(profile, profileID);
 	auto *name = reinterpret_cast<gchar *>(profileID);
