@@ -31,6 +31,7 @@
 
 #include <config.h>
 
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "dnd.h"
 #include "dupe.h"
@@ -1135,7 +1136,7 @@ static GdkRGBA *vd_color_shifted(GtkWidget *widget)
 		GtkStyleContext *style_context;
 
 		style_context = gtk_widget_get_style_context(widget);
-		gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &color);
+		gq_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &color);
 
 		shift_color(&color, -1, 0);
 		done = widget;

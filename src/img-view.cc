@@ -31,6 +31,7 @@
 #include "archives.h"
 #include "collect-io.h"
 #include "collect.h"
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "dnd.h"
 #include "editors.h"
@@ -962,8 +963,8 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 
 	if (options->image.limit_window_size)
 		{
-		gint mw = gdk_screen_width() * options->image.max_window_size / 100;
-		gint mh = gdk_screen_height() * options->image.max_window_size / 100;
+		gint mw = gq_gdk_screen_width() * options->image.max_window_size / 100;
+		gint mh = gq_gdk_screen_height() * options->image.max_window_size / 100;
 
 		w = std::min(w, mw);
 		h = std::min(h, mh);

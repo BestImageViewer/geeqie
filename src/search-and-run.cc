@@ -28,6 +28,7 @@
 #include <glib.h>
 #include <pango/pango.h>
 
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "layout.h"
 #include "main-defines.h"
@@ -75,10 +76,10 @@ static void command_store_populate(SarData* sar)
 	groups = gq_gtk_ui_manager_get_action_groups(sar->lw->ui_manager);
 	while (groups)
 		{
-		actions = gq_gtk_action_group_list_actions(GTK_ACTION_GROUP(groups->data));
+		actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
 		while (actions)
 			{
-			action = GTK_ACTION(actions->data);
+			action = GQ_GTK_ACTION(actions->data);
 			accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{

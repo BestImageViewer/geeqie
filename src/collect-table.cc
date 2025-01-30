@@ -32,6 +32,7 @@
 #include "collect-dlg.h"
 #include "collect-io.h"
 #include "collect.h"
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "dnd.h"
 #include "dupe.h"
@@ -2396,7 +2397,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 
 	info = static_cast<CollectInfo *>(g_list_nth_data(list, cd->number));
 
-	style = gtk_widget_get_style(ct->listview);
+	style = gq_gtk_widget_get_style(ct->listview);
 	if (info && (info->flag_mask & SELECTION_SELECTED) )
 		{
 		convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_SELECTED], &color_fg);

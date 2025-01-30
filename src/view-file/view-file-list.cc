@@ -28,6 +28,7 @@
 #include <glib-object.h>
 
 #include "collect.h"
+#include "compat-deprecated.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "intl.h"
@@ -1782,7 +1783,7 @@ static GdkRGBA *vflist_listview_color_shifted(GtkWidget *widget)
 		{
 		GtkStyle *style;
 
-		style = gtk_widget_get_style(widget);
+		style = gq_gtk_widget_get_style(widget);
 		convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL], &color);
 
 		shift_color(&color, -1, 0);

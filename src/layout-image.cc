@@ -34,7 +34,7 @@
 
 #include "archives.h"
 #include "collect.h"
-#include "compat.h"
+#include "compat-deprecated.h"
 #include "dnd.h"
 #include "editors.h"
 #include "exif.h"
@@ -487,7 +487,7 @@ void layout_image_animate_toggle(LayoutWindow *lw)
 	lw->options.animate = !lw->options.animate;
 
 	action = gq_gtk_action_group_get_action(lw->action_group, "Animate");
-	gq_gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(action), lw->options.animate);
+	gq_gtk_toggle_action_set_active(GQ_GTK_TOGGLE_ACTION(action), lw->options.animate);
 
 	layout_image_animate_new_file(lw);
 }

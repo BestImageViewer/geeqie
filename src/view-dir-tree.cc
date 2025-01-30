@@ -29,6 +29,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib-object.h>
 
+#include "compat-deprecated.h"
 #include "filedata.h"
 #include "layout.h"
 #include "misc.h"
@@ -68,7 +69,7 @@ static void set_cursor(GtkWidget *widget, gint cursor_type)
 	if (!widget) return;
 
 	widget_set_cursor(widget, cursor_type);
-	gdk_flush();
+	gq_gdk_flush();
 }
 
 static void vdtree_busy_push(ViewDir *vd)

@@ -25,6 +25,7 @@
 
 #include <glib-object.h>
 
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "misc.h"
 #include "ui-misc.h"
@@ -38,8 +39,8 @@
 static void tree_edit_close(TreeEditData *ted)
 {
 	gtk_grab_remove(ted->window);
-	gdk_keyboard_ungrab(GDK_CURRENT_TIME);
-	gdk_pointer_ungrab(GDK_CURRENT_TIME);
+	gq_gdk_keyboard_ungrab(GDK_CURRENT_TIME);
+	gq_gdk_pointer_ungrab(GDK_CURRENT_TIME);
 
 	gq_gtk_widget_destroy(ted->window);
 
@@ -169,10 +170,10 @@ static gboolean tree_edit_by_path_idle_cb(gpointer data)
 	 */
 	gtk_widget_grab_focus(ted->entry);
 	gtk_grab_add(ted->window);
-	gdk_pointer_grab(gtk_widget_get_window(ted->window), TRUE,
-			 static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK),
-			 nullptr, nullptr, GDK_CURRENT_TIME);
-	gdk_keyboard_grab(gtk_widget_get_window(ted->window), TRUE, GDK_CURRENT_TIME);
+	gq_gdk_pointer_grab(gtk_widget_get_window(ted->window), TRUE,
+	                    static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK),
+	                    nullptr, nullptr, GDK_CURRENT_TIME);
+	gq_gdk_keyboard_grab(gtk_widget_get_window(ted->window), TRUE, GDK_CURRENT_TIME);
 
 	return G_SOURCE_REMOVE;
 }

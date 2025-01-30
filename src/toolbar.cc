@@ -31,6 +31,7 @@
 
 #include <config.h>
 
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "editors.h"
 #include "intl.h"
@@ -214,7 +215,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 			}
 		else
 			{
-			image = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
+			image = gq_gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_BUTTON);
 			}
 		}
 	else

@@ -35,6 +35,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "compat-deprecated.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "typedefs.h"
@@ -573,7 +574,7 @@ void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it
 				cairo_fill(cr);
 				cairo_destroy (cr);
 
-				cr = gdk_cairo_create(od->window);
+				cr = gq_gdk_cairo_create(od->window);
 				cairo_set_source_surface(cr, rt->overlay_buffer, r.x - od_rect.x, r.y - od_rect.y);
 				cairo_rectangle (cr, r.x - od_rect.x, r.y - od_rect.y, r.width, r.height);
 				cairo_fill (cr);

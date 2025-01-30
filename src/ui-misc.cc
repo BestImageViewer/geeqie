@@ -33,6 +33,7 @@
 
 #include <config.h>
 
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "history-list.h"
 #include "layout.h"
@@ -695,8 +696,8 @@ static void date_selection_popup_hide(DateSelection *ds)
 	if (gtk_widget_has_grab(ds->window))
 		{
 		gtk_grab_remove(ds->window);
-		gdk_keyboard_ungrab(GDK_CURRENT_TIME);
-		gdk_pointer_ungrab(GDK_CURRENT_TIME);
+		gq_gdk_keyboard_ungrab(GDK_CURRENT_TIME);
+		gq_gdk_pointer_ungrab(GDK_CURRENT_TIME);
 		}
 
 	gtk_widget_hide(ds->window);
@@ -839,7 +840,7 @@ static void date_selection_popup(DateSelection *ds)
 	x = wx + button_allocation.x + button_allocation.width - window_allocation.width;
 	y = wy + button_allocation.y + button_allocation.height;
 
-	if (y + window_allocation.height > gdk_screen_height())
+	if (y + window_allocation.height > gq_gdk_screen_height())
 		{
 		y = wy + button_allocation.y - window_allocation.height;
 		}
@@ -850,10 +851,10 @@ static void date_selection_popup(DateSelection *ds)
 	gtk_widget_show(ds->window);
 
 	gtk_widget_grab_focus(ds->calendar);
-	gdk_pointer_grab(gtk_widget_get_window(ds->window), TRUE,
-			 static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK),
-			 nullptr, nullptr, GDK_CURRENT_TIME);
-	gdk_keyboard_grab(gtk_widget_get_window(ds->window), TRUE, GDK_CURRENT_TIME);
+	gq_gdk_pointer_grab(gtk_widget_get_window(ds->window), TRUE,
+	                    static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK),
+	                    nullptr, nullptr, GDK_CURRENT_TIME);
+	gq_gdk_keyboard_grab(gtk_widget_get_window(ds->window), TRUE, GDK_CURRENT_TIME);
 	gtk_grab_add(ds->window);
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), TRUE);
@@ -873,7 +874,7 @@ static void button_size_allocate_cb(GtkWidget *button, GtkAllocation *allocation
 {
 	auto spin = static_cast<GtkWidget *>(data);
 	GtkRequisition spin_requisition;
-	gtk_widget_get_requisition(spin, &spin_requisition);
+	gq_gtk_widget_get_requisition(spin, &spin_requisition);
 
 	if (allocation->height > spin_requisition.height)
 		{
@@ -893,7 +894,7 @@ static void spin_increase(GtkWidget *spin, gint value)
 {
 	GtkRequisition req;
 
-	gtk_widget_size_request(spin, &req);
+	gq_gtk_widget_size_request(spin, &req);
 	gtk_widget_set_size_request(spin, req.width + value, -1);
 }
 
@@ -1336,10 +1337,10 @@ std::vector<ActionItem> get_action_items()
 
 	for (GList *groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager); groups; groups = groups->next)
 		{
-		GtkActionGroup *action_group = GTK_ACTION_GROUP(groups->data);
+		GtkActionGroup *action_group = GQ_GTK_ACTION_GROUP(groups->data);
 		for (GList *actions = gq_gtk_action_group_list_actions(action_group); actions; actions = actions->next)
 			{
-			GtkAction *action = GTK_ACTION(actions->data);
+			GtkAction *action = GQ_GTK_ACTION(actions->data);
 
 			const gchar *accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, nullptr))

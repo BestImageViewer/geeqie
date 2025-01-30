@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "compat-deprecated.h"
 #include "main-defines.h"
 #include "misc.h"
 #include "options.h"
@@ -446,7 +447,7 @@ static void pixbuf_renderer_init(PixbufRenderer *pr)
 
 	pr->renderer2 = nullptr;
 
-	gtk_widget_set_double_buffered(box, FALSE);
+	gq_gtk_widget_set_double_buffered(box, FALSE);
 	gtk_widget_set_app_paintable(box, TRUE);
 	g_signal_connect_after(G_OBJECT(box), "size_allocate",
 			       G_CALLBACK(pr_size_cb), pr);
@@ -641,8 +642,8 @@ static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 
 	if (pr->window_limit)
 		{
-		gint sw = gdk_screen_width() * pr->window_limit_size / 100;
-		gint sh = gdk_screen_height() * pr->window_limit_size / 100;
+		gint sw = gq_gdk_screen_width() * pr->window_limit_size / 100;
+		gint sh = gq_gdk_screen_height() * pr->window_limit_size / 100;
 
 		w = std::min(w, sw);
 		h = std::min(h, sh);
@@ -1615,8 +1616,8 @@ static gboolean pr_zoom_clamp(PixbufRenderer *pr, gdouble zoom,
 
 		if (sizeable)
 			{
-			max_w = gdk_screen_width();
-			max_h = gdk_screen_height();
+			max_w = gq_gdk_screen_width();
+			max_h = gq_gdk_screen_height();
 
 			if (pr->window_limit)
 				{
@@ -1997,7 +1998,7 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 	pr->y_mouse = event->y;
 	pr_update_pixel_signal(pr);
 
-	if (!pr->in_drag || !gdk_pointer_is_grabbed()) return FALSE;
+	if (!pr->in_drag || !gq_gdk_pointer_is_grabbed()) return FALSE;
 
 	if (pr->drag_moved < PR_DRAG_SCROLL_THRESHHOLD)
 		{
@@ -2064,9 +2065,9 @@ static gboolean pr_mouse_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpo
 			pr->drag_last_x = bevent->x;
 			pr->drag_last_y = bevent->y;
 			pr->drag_moved = 0;
-			gdk_pointer_grab(gtk_widget_get_window(widget), FALSE,
-					 static_cast<GdkEventMask>(GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_RELEASE_MASK),
-					 nullptr, nullptr, bevent->time);
+			gq_gdk_pointer_grab(gtk_widget_get_window(widget), FALSE,
+			                    static_cast<GdkEventMask>(GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_RELEASE_MASK),
+			                    nullptr, nullptr, bevent->time);
 			gtk_grab_add(widget);
 			break;
 		case MOUSE_BUTTON_MIDDLE:
@@ -2100,10 +2101,10 @@ static gboolean pr_mouse_release_cb(GtkWidget *widget, GdkEventButton *bevent, g
 		return TRUE;
 		}
 
-	if (gdk_pointer_is_grabbed() && gtk_widget_has_grab(GTK_WIDGET(pr)))
+	if (gq_gdk_pointer_is_grabbed() && gtk_widget_has_grab(GTK_WIDGET(pr)))
 		{
 		gtk_grab_remove(widget);
-		gdk_pointer_ungrab(bevent->time);
+		gq_gdk_pointer_ungrab(bevent->time);
 		widget_set_cursor(widget, -1);
 		}
 

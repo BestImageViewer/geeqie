@@ -39,6 +39,7 @@
 
 #include <config.h>
 
+#include "compat-deprecated.h"
 #include "exif.h"
 #include "filedata.h"
 #include "main-defines.h"
@@ -233,13 +234,13 @@ static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
 {
 	static GtkIconFactory *icon_factory = []()
 	{
-		GtkIconFactory *icon_factory = gtk_icon_factory_new();
-		gtk_icon_factory_add_default(icon_factory);
+		GtkIconFactory *icon_factory = gq_gtk_icon_factory_new();
+		gq_gtk_icon_factory_add_default(icon_factory);
 		return icon_factory;
 	}();
 
-	GtkIconSet *icon_set = gtk_icon_set_new_from_pixbuf(pixbuf);
-	gtk_icon_factory_add(icon_factory, key, icon_set);
+	GtkIconSet *icon_set = gq_gtk_icon_set_new_from_pixbuf(pixbuf);
+	gq_gtk_icon_factory_add(icon_factory, key, icon_set);
 }
 
 

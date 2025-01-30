@@ -52,6 +52,7 @@
 #include "bar-keywords.h"
 #include "cache.h"
 #include "color-man.h"
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "editors.h"
 #include "filedata.h"
@@ -1624,10 +1625,10 @@ static void accel_store_populate()
 	groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager);
 	while (groups)
 		{
-		actions = gq_gtk_action_group_list_actions(GTK_ACTION_GROUP(groups->data));
+		actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
 		while (actions)
 			{
-			action = GTK_ACTION(actions->data);
+			action = GQ_GTK_ACTION(actions->data);
 			accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{

@@ -25,6 +25,7 @@
 #include "cache-maint.h"
 #include "collect-io.h"
 #include "collect.h"
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "exif.h"
 #include "filedata.h"
@@ -867,9 +868,9 @@ void gq_log_file(GtkApplication *, GApplicationCommandLine *, GVariantDict *comm
 	command_line->ssi = secure_open(pathl);
 }
 
+#if HAVE_LUA // @todo Use [[maybe_unused]] for command_line_options_dict since C++17 and merge declarations
 void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
-#if HAVE_LUA
 	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "lua", "&s", &text);
 
@@ -891,10 +892,13 @@ void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVarian
 		{
 		g_application_command_line_print(app_command_line, _("lua error: no data\n"));
 		}
-#else
-	g_application_command_line_print(app_command_line, _("Lua is not available\n"));
-#endif
 }
+#else
+void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
+{
+	g_application_command_line_print(app_command_line, _("Lua is not available\n"));
+}
+#endif
 
 void gq_new_window(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
 {

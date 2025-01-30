@@ -397,7 +397,8 @@ gboolean copy_file_attributes(const gchar *s, const gchar *t, gint perms, gint m
 		{
 		/* Ignores chown errors, while still doing chown
 		   (so root still can copy files preserving ownership) */
-		chown(tl, st.st_uid, st.st_gid);
+		int err = chown(tl, st.st_uid, st.st_gid);
+		(void)err; // @todo Use [[maybe_unused]] since C++17
 
 		if (chmod(tl, st.st_mode) < 0)
 			{

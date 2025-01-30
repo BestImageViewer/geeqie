@@ -36,6 +36,7 @@
 
 #include "bar-sort.h"
 #include "bar.h"
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "filedata.h"
 #include "histogram.h"
@@ -2660,7 +2661,7 @@ LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
 
 	if (geometry)
 		{
-		if (!gtk_window_parse_geometry(GTK_WINDOW(lw->window), geometry))
+		if (!gq_gtk_window_parse_geometry(GTK_WINDOW(lw->window), geometry))
 			{
 			log_printf("%s", _("Invalid geometry\n"));
 			}

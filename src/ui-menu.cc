@@ -25,7 +25,7 @@
 
 #include <pango/pango.h>
 
-#include "compat.h"
+#include "compat-deprecated.h"
 #include "layout.h"
 
 /*
@@ -84,8 +84,8 @@ static gint actions_sort_cb(gconstpointer a, gconstpointer b)
 	const gchar *accel_path_b;
 	GtkAccelKey key_b;
 
-	accel_path_a = gq_gtk_action_get_accel_path(GTK_ACTION(a));
-	accel_path_b = gq_gtk_action_get_accel_path(GTK_ACTION(b));
+	accel_path_a = gq_gtk_action_get_accel_path(GQ_GTK_ACTION(a));
+	accel_path_b = gq_gtk_action_get_accel_path(GQ_GTK_ACTION(b));
 
 	if (accel_path_a && gtk_accel_map_lookup_entry(accel_path_a, &key_a) && accel_path_b && gtk_accel_map_lookup_entry(accel_path_b, &key_b))
 		{
@@ -126,12 +126,12 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 
 	while (groups)
 		{
-		actions = gq_gtk_action_group_list_actions(GTK_ACTION_GROUP(groups->data));
+		actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
 		actions = g_list_sort(actions, actions_sort_cb);
 
 		while (actions)
 			{
-			action = GTK_ACTION(actions->data);
+			action = GQ_GTK_ACTION(actions->data);
 			accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{
@@ -197,12 +197,12 @@ GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar 
 	GtkAccelGroup *accel_group;
 	hard_coded_window_keys *window_keys;
 
-	item = gtk_image_menu_item_new_with_mnemonic(label);
+	item = gq_gtk_image_menu_item_new_with_mnemonic(label);
 	window_keys = static_cast<hard_coded_window_keys *>(g_object_get_data(G_OBJECT(menu), "window_keys"));
 	accel_group = static_cast<GtkAccelGroup *>(g_object_get_data(G_OBJECT(menu), "accel_group"));
 
-	image = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), image);
+	image = gq_gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_MENU);
+	gq_gtk_image_menu_item_set_image(GQ_GTK_IMAGE_MENU_ITEM(item), image);
 
 	if (accel_group && window_keys)
 		{
@@ -227,12 +227,12 @@ GtkWidget *menu_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *
 	GtkAccelGroup *accel_group;
 	hard_coded_window_keys *window_keys;
 
-	item = gtk_image_menu_item_new_with_mnemonic(label);
+	item = gq_gtk_image_menu_item_new_with_mnemonic(label);
 	window_keys = static_cast<hard_coded_window_keys *>(g_object_get_data(G_OBJECT(menu), "window_keys"));
 	accel_group = static_cast<GtkAccelGroup *>(g_object_get_data(G_OBJECT(menu), "accel_group"));
 
 	image = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), image);
+	gq_gtk_image_menu_item_set_image(GQ_GTK_IMAGE_MENU_ITEM(item), image);
 
 	if (accel_group && window_keys)
 		{

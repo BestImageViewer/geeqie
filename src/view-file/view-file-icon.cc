@@ -29,6 +29,7 @@
 
 #include "cellrenderericon.h"
 #include "collect.h"
+#include "compat-deprecated.h"
 #include "compat.h"
 #include "dnd.h"
 #include "filedata.h"
@@ -1958,7 +1959,7 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 			name_sidecars = g_string_append(name_sidecars, star_rating);
 			}
 
-		GtkStyle *style = gtk_widget_get_style(vf->listview);
+		GtkStyle *style = gq_gtk_widget_get_style(vf->listview);
 		GtkStateType state = (fd->selected & SELECTION_SELECTED) ? GTK_STATE_SELECTED : GTK_STATE_NORMAL;
 
 		GdkRGBA color_fg;

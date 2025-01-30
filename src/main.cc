@@ -61,6 +61,7 @@
 #include "collect-io.h"
 #include "collect.h"
 #include "command-line-handling.h"
+#include "compat-deprecated.h"
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -197,6 +198,7 @@ GOptionEntry command_line_options_cache_maintenance[] =
 	{ nullptr            ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, nullptr                                             , nullptr },
 };
 
+#if !HAVE_DEVELOPER
 #if defined(SA_SIGINFO)
 void sig_handler_cb(int signo, siginfo_t *info, void *)
 {
@@ -297,8 +299,7 @@ void sig_handler_cb(int signo, siginfo_t *info, void *)
 	backtrace_symbols_fd(bt, bt_size, STDERR_FILENO);
 #endif
 
-	/* Avoid "not used" warning */
-	len++;
+	(void)len; // @todo Use [[maybe_unused]] since C++17
 
 	exit(EXIT_FAILURE);
 }
@@ -321,6 +322,7 @@ void sig_handler_cb(int)
 	exit(EXIT_FAILURE);
 }
 #endif /* defined(SA_SIGINFO) */
+#endif /* !HAVE_DEVELOPER */
 
 gboolean search_command_line_for_option(const gint argc, const gchar* const argv[], const gchar* option_name)
 {
@@ -393,23 +395,6 @@ void null_activated_cb(GSimpleAction *, GVariant *, gpointer)
 void quit_activated_cb(GSimpleAction *, GVariant *, gpointer app)
 {
 	g_application_quit(G_APPLICATION(app));
-}
-
-gboolean parse_command_line_for_cache_maintenance_option(gint argc, gchar *argv[])
-{
-	const gchar *cache_maintenance_option = "--cache-maintenance=";
-	const gint len = strlen(cache_maintenance_option);
-
-	if (argc >= 2)
-		{
-		const gchar *cmd_line = argv[1];
-		if (strncmp(cmd_line, cache_maintenance_option, len) == 0)
-			{
-			return TRUE;
-			}
-		}
-
-	return FALSE;
 }
 
 /*
@@ -752,7 +737,7 @@ void set_theme_bg_color()
 		lw = static_cast<LayoutWindow *>(work->data);
 
 		style_context = gtk_widget_get_style_context(lw->window);
-		gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &bg_color);
+		gq_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &bg_color);
 
 		theme_color.red = bg_color.red  ;
 		theme_color.green = bg_color.green  ;
