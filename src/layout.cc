@@ -2521,11 +2521,6 @@ static gboolean layout_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
 	return TRUE;
 }
 
-LayoutWindow *layout_new(FileData *dir_fd, LayoutOptions *lop)
-{
-	return layout_new_with_geometry(dir_fd, lop, nullptr);
-}
-
 static gboolean move_window_to_workspace_cb(gpointer data)
 {
 #ifdef GDK_WINDOWING_X11
@@ -2550,8 +2545,7 @@ static gboolean move_window_to_workspace_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
-				       const gchar *geometry)
+static LayoutWindow *layout_new(const LayoutOptions &lop, const gchar *geometry)
 {
 	LayoutWindow *lw;
 	GdkGeometry hint;
@@ -2561,10 +2555,7 @@ LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
 	DEBUG_1("%s layout_new: start", get_exec_time());
 	lw = g_new0(LayoutWindow, 1);
 
-	if (lop)
-		copy_layout_options(&lw->options, lop);
-	else
-		init_layout_options(&lw->options);
+	copy_layout_options(&lw->options, &lop);
 
 	layout_set_unique_id(lw);
 
@@ -2643,21 +2634,11 @@ LayoutWindow *layout_new_with_geometry(FileData *dir_fd, LayoutOptions *lop,
 	layout_util_sync(lw);
 	layout_status_update_all(lw);
 
-	if (dir_fd)
-		{
-		layout_set_fd(lw, dir_fd);
-		}
-	else
-		{
-		GdkPixbuf *pixbuf;
+	g_autoptr(GdkPixbuf) pixbuf = pixbuf_inline(PIXBUF_INLINE_LOGO);
 
-		pixbuf = pixbuf_inline(PIXBUF_INLINE_LOGO);
-
-		/** @FIXME the zoom value set here is the value, which is then copied again and again
-		   in 'Leave Zoom at previous setting' mode. This is not ideal.  */
-		image_change_pixbuf(lw->image, pixbuf, 0.0, FALSE);
-		g_object_unref(pixbuf);
-		}
+	/** @FIXME the zoom value set here is the value, which is then copied again and again
+	   in 'Leave Zoom at previous setting' mode. This is not ideal.  */
+	image_change_pixbuf(lw->image, pixbuf, 0.0, FALSE);
 
 	if (geometry)
 		{
@@ -2971,7 +2952,6 @@ static gboolean first_found = FALSE;
 LayoutWindow *layout_new_from_config(const gchar **attribute_names, const gchar **attribute_values, gboolean use_commandline)
 {
 	LayoutOptions lop;
-	LayoutWindow *lw;
 	g_autofree gchar *path = nullptr;
 
 	init_layout_options(&lop);
@@ -2991,7 +2971,7 @@ LayoutWindow *layout_new_from_config(const gchar **attribute_names, const gchar 
 		layout_config_startup_path(&lop, &path);
 		}
 
-	lw = layout_new_with_geometry(nullptr, &lop, use_commandline ? command_line->geometry : nullptr);
+	LayoutWindow *lw = layout_new(lop, use_commandline ? command_line->geometry : nullptr);
 	layout_sort_set_files(lw, lw->options.file_view_list_sort.method, lw->options.file_view_list_sort.ascend, lw->options.file_view_list_sort.case_sensitive);
 
 

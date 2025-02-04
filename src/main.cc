@@ -910,7 +910,7 @@ void activate_cb(GtkApplication *, gpointer)
 	 * The startup signal is issued before the command_line signal, therefore
 	 * the window layout processing is done before the command line processing.
 	 *
-	 * Function layout_new_with_geometry() does not execute a gtk_window_show()
+	 * Function layout_new() does not execute a gtk_window_show()
 	 * if this is the first window - i.e. Geeqie is not yet fully running.
 	 *
 	 * The activate signal is issued in command_line_cb() after the
