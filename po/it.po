@@ -2542,7 +2542,7 @@ msgstr "infinito"
 
 #: src/exif-common.cc:376
 msgid "mode:"
-msgstr "modalità:"
+msgstr "modalità: "
 
 #: src/exif-common.cc:380
 msgid "on"
@@ -3735,7 +3735,6 @@ msgid "_Mirror"
 msgstr "_Rifletti"
 
 #: src/layout-util.cc:2645
-#, fuzzy
 msgid "Image Mirror"
 msgstr "Rifletti immagine"
 
@@ -7784,7 +7783,7 @@ msgstr ""
 "locale preferito.\n"
 
 #: src/ui-fileops.cc:92
-#, fuzzy, c-format
+#, c-format
 msgid "Operations on, and display of these files with %s may not succeed.\n"
 msgstr ""
 "Le operazioni su questi file e la loro visualizzazione con «%s» potrebbero "
