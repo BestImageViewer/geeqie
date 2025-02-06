@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geeqie-2.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-05 11:05+0100\n"
-"PO-Revision-Date: 2025-02-05 13:00+0100\n"
+"POT-Creation-Date: 2025-02-05 20:25+0100\n"
+"PO-Revision-Date: 2025-02-06 09:00+0100\n"
 "Last-Translator: pezcurrel <pezcurrel@insicuri.net>\n"
 "Language-Team: italiano <it@li.org>\n"
 "Language: it\n"
@@ -130,11 +130,11 @@ msgstr ""
 
 #: plugins/export-jpeg/org.geeqie.export-jpeg.desktop.in:4
 msgid "Export jpeg"
-msgstr "Esporta jpeg"
+msgstr "Estrai jpeg"
 
 #: plugins/export-jpeg/org.geeqie.export-jpeg.desktop.in:5
 msgid "Extract embedded jpegs from a raw file"
-msgstr "Estrae le jpeg incorporate in un file raw"
+msgstr "Estrae le immagini jpeg incorporate in un file raw"
 
 #: plugins/image-crop/org.geeqie.image-crop.desktop.in:4
 msgid "Image crop"
@@ -364,7 +364,7 @@ msgstr "Aggiungi elemento"
 
 #: src/bar-exif.cc:581
 msgid "Key:"
-msgstr "Tasto:"
+msgstr "Chiave:"
 
 #: src/bar-exif.cc:590
 msgid "Title:"
@@ -489,17 +489,13 @@ msgstr "Centra la mappa sul marcatore"
 msgid ""
 "Move map centre to marker\n"
 " is disabled"
-msgstr ""
-"Lo spostamento del centro della mappa al marcatore\n"
-" è disattivato"
+msgstr "Lo spostamento del centro della mappa al marcatore è disattivato"
 
 #: src/bar-gps.cc:810
 msgid ""
 "Move map centre to marker\n"
 " is enabled"
-msgstr ""
-"Lo spostamento del centro della mappa al marcatore\n"
-" è attivato"
+msgstr "Lo spostamento del centro della mappa al marcatore è attivato"
 
 #: src/bar-gps.cc:815
 msgid "Map centering"
@@ -693,12 +689,8 @@ msgid ""
 "\n"
 "in the plugin file."
 msgstr ""
-"Operazioni aggiuntive che utilizzano i plugin\n"
-"possono essere incluse impostando:\n"
-"\n"
-"X-Geeqie-Filter=true\n"
-"\n"
-"nel file del plugin."
+"Operazioni aggiuntive che utilizzano i plugin possono essere incluse "
+"impostando «X-Geeqie-Filter=true» nel file del plugin."
 
 #: src/bar-sort.cc:508
 #, c-format
@@ -706,10 +698,7 @@ msgid ""
 "The collection:\n"
 "%s\n"
 "already exists."
-msgstr ""
-"La Collezione:\n"
-"%s\n"
-"esiste già."
+msgstr "La Collezione «%s» esiste già."
 
 #: src/bar-sort.cc:509
 msgid "Collection exists"
@@ -720,9 +709,7 @@ msgstr "La Collezione esiste già"
 msgid ""
 "Failed to save the collection:\n"
 "%s"
-msgstr ""
-"Impossibile salvare la Collezione:\n"
-"%s"
+msgstr "Impossibile salvare la Collezione «%s»."
 
 #: src/bar-sort.cc:523 src/collect.cc:1138 src/collect-dlg.cc:79
 msgid "Save Failed"
@@ -754,7 +741,7 @@ msgstr "Collezioni"
 
 #: src/bar-sort.cc:666
 msgid "See the Help file for additional functions"
-msgstr "Consulta il file di Aiuto per funzioni aggiuntive"
+msgstr "Vedi il file di Aiuto per funzioni aggiuntive"
 
 #: src/bar-sort.cc:669 src/collect-table.cc:113 src/dupe.cc:173
 #: src/img-view.cc:100 src/pan-view/pan-view.cc:147 src/preferences.cc:732
@@ -901,9 +888,8 @@ msgid ""
 "This will remove all thumbnails and sim. files\n"
 "that have been saved to disk, continue?"
 msgstr ""
-"Questo determinerà l’eliminazione di tutte le\n"
-"miniature e dei file di somiglianza salvati su\n"
-"disco, continuare?"
+"Questo determinerà l’eliminazione di tutte le miniature e dei file "
+"di somiglianza salvati, continuare?"
 
 #: src/cache-maint.cc:1186
 #, c-format
@@ -928,9 +914,8 @@ msgid ""
 "and .sim files, and create new\n"
 "thumbnails and .sim files"
 msgstr ""
-"Elimina le miniature e i file\n"
-"di somiglianza orfani e crea nuove\n"
-"miniature e file di somiglianza"
+"Elimina le miniature e i file di somiglianza orfani e crea nuove miniature "
+"e file di somiglianza"
 
 #: src/cache-maint.cc:1595 src/cache-maint.cc:1703
 msgid "Cache Maintenance"
@@ -1512,7 +1497,7 @@ msgstr "Per favore, specifica il nome del file."
 
 #: src/desktop-file.cc:102
 msgid "Could not create directory"
-msgstr "Imposssibile creare la directory"
+msgstr "Imposssibile creare la cartella"
 
 #: src/desktop-file.cc:195 src/desktop-file.cc:614
 msgid "Desktop file"
@@ -1689,7 +1674,7 @@ msgstr "%d file (gruppo 2)"
 
 #: src/dupe.cc:3864
 msgid "Name case-insensitive"
-msgstr "Nome (senza distinzione maiu./minu.)"
+msgstr "Nome (senza distinzione maiusc./minusc.)"
 
 #: src/dupe.cc:3865 src/dupe.cc:4560 src/dupe.cc:5123 src/osd.cc:63
 #: src/preferences.cc:2422 src/search.cc:3718
@@ -1733,7 +1718,7 @@ msgstr "Nome ≠ contenuto"
 
 #: src/dupe.cc:3875
 msgid "Name case-insensitive ≠ content"
-msgstr "Nome (senza distinzione maiu./minu.) ≠ contenuto"
+msgstr "Nome (senza distinzione maiusc./minusc.) ≠ contenuto"
 
 #: src/dupe.cc:4493 src/dupe.cc:4872 src/search.cc:407
 msgid "Find duplicates"
@@ -1777,8 +1762,7 @@ msgid ""
 "Custom similarity threshold\n"
 "(Use tab key to set value)"
 msgstr ""
-"Soglia di somiglianza personalizzata\n"
-"(premi Tab per impostare il valore)"
+"Soglia di somiglianza personalizzata (premi Tab per impostare il valore)"
 
 #: src/dupe.cc:4665 src/menu.cc:224 src/menu.cc:251
 msgid "Sort"
@@ -2694,7 +2678,7 @@ msgstr "%.1f GiB"
 
 #: src/filedata/filedata.cc:2239
 msgid "file or directory does not exist"
-msgstr "il file o la directory non esistono"
+msgstr "il file o la cartella non esistono"
 
 #: src/filedata/filedata.cc:2245
 msgid "destination already exists"
@@ -2706,15 +2690,15 @@ msgstr "la destinazione non può essere sovrascritta"
 
 #: src/filedata/filedata.cc:2257
 msgid "destination directory is not writable"
-msgstr "la directory di destinazione non è scrivibile"
+msgstr "la cartella di destinazione non è scrivibile"
 
 #: src/filedata/filedata.cc:2263
 msgid "destination directory does not exist"
-msgstr "la directory di destinazione non esiste"
+msgstr "la cartella di destinazione non esiste"
 
 #: src/filedata/filedata.cc:2269
 msgid "source directory is not writable"
-msgstr "la directory sorgente non è scrivibile"
+msgstr "la cartella sorgente non è scrivibile"
 
 #: src/filedata/filedata.cc:2275
 msgid "no read permission"
@@ -2998,7 +2982,7 @@ msgstr "Impossibile aprire il file Archivio"
 #: src/layout-util.cc:1062 src/preferences.cc:4229 src/preferences.cc:4236
 #: src/view-file/view-file.cc:503
 msgid "See the Log Window"
-msgstr "Consulta la finestra di Registro"
+msgstr "Vedi la finestra di Registro"
 
 #: src/img-view.cc:1390 src/layout-image.cc:798 src/layout-util.cc:2592
 #: src/layout-util.cc:2593 src/layout-util.cc:2725 src/layout-util.cc:2726
@@ -3073,7 +3057,7 @@ msgstr "Ascendente"
 #: src/layout.cc:507 src/view-dir.cc:824 src/view-file/view-file.cc:878
 #: src/view-file/view-file.cc:1316
 msgid "Case"
-msgstr "Maiu./Minu."
+msgstr "Maiusc. ≠ minusc."
 
 #: src/layout.cc:583
 msgid "Scroll to top left corner"
@@ -3197,7 +3181,7 @@ msgstr "Percorso home"
 msgid "Layout"
 msgstr "Struttura"
 
-#: src/layout.cc:2666
+#: src/layout.cc:2647
 msgid "Invalid geometry\n"
 msgstr "Geometria non valida\n"
 
@@ -3279,8 +3263,8 @@ msgid ""
 "This will clear all marks for all images,\n"
 "including those linked to keywords"
 msgstr ""
-"Questo rimuoverà tutti i Contrassegni da tutte\n"
-"le immagini, compresi quelli collegati a Parole Chiave"
+"Questo rimuoverà tutti i Contrassegni da tutte le immagini, compresi quelli "
+"collegati a Parole Chiave"
 
 #: src/layout-util.cc:636
 msgid "Operation failed:\n"
@@ -4743,10 +4727,10 @@ msgid ""
 " User manual: https://www.geeqie.org/help/GuideIndex.html\n"
 "            : https://www.geeqie.org/help-pdf/help.pdf"
 msgstr ""
-" Questo è un programma da linea di comando che rimuoverà ricorsivamente le "
-"miniature e i file di somiglianza orfani, e creerà le miniature e i dati di "
-"somiglianza per tutte le immagini presenti nella CARTELLA.\n"
-" Può anche essere invocato da cron o anacron per aggiornare periodicamente e "
+" Questo è un programma da linea di comando che rimuoverà ricorsivamente le\n"
+"miniature e i file di somiglianza orfani, e creerà le miniature e i dati\n"
+"di somiglianza per tutte le immagini presenti nella CARTELLA specificata.\n"
+" Può anche essere invocato da cron o anacron per aggiornare periodicamente\n"
 "automaticamente i dati in cache di tutte le tue immagini.\n"
 "\n"
 " Manuali utente: https://www.geeqie.org/help/GuideIndex.html\n"
@@ -4757,8 +4741,8 @@ msgid ""
 "execute keyboard action (https://www.geeqie.org/help/"
 "GuideReferenceRemoteKeyboardActions.html)"
 msgstr ""
-"esegui azione da tastiera\n"
-"(https://www.geeqie.org/help/GuideReferenceRemoteKeyboardActions.html)"
+"esegui azione da tastiera (vedi "
+"https://www.geeqie.org/help/GuideReferenceRemoteKeyboardActions.html)"
 
 #: src/main.cc:136
 msgid "list available keyboard actions (some are redundant)"
@@ -4987,12 +4971,12 @@ msgstr "ferma manutenzione cache"
 #: src/main.cc:444
 #, c-format
 msgid "Creating %s dir:%s\n"
-msgstr "Creazione %s directory:%s\n"
+msgstr "Creazione cartella «%s»: %s\n"
 
 #: src/main.cc:448
 #, c-format
 msgid "Could not create dir:%s\n"
-msgstr "Impossibile creare la directory:%s\n"
+msgstr "Impossibile creare la cartella: %s\n"
 
 #: src/main.cc:490
 #, c-format
@@ -5043,8 +5027,8 @@ msgid ""
 "\n"
 msgstr ""
 "Impossibile inizializzare clutter-gtk.\n"
-"\t\t\t\tPer avviare Geeqie usa:\n"
-"\t\t\t\tGQ_DISABLE_CLUTTER=y geeqie\n"
+" \t\t\t\tPer avviare Geeqie usa:\n"
+" \t\t\t\tGQ_DISABLE_CLUTTER=y geeqie\n"
 "\n"
 
 #: src/main.cc:1066
@@ -5441,7 +5425,7 @@ msgid ""
 "To include predefined tags in the template, click a button or drag-and-drop"
 msgstr ""
 "Per includere etichette predefinite nel modello, clicca su un pulsante, "
-"trascinalo e rilascialo"
+"oppure trascinalo e rilascialo"
 
 #: src/pan-view/pan-view.cc:152 src/pan-view/pan-view.cc:171
 msgid "Display Find search bar"
@@ -5626,13 +5610,11 @@ msgid ""
 "Note that both options must be enabled to\n"
 "notice a change in performance."
 msgstr ""
-"Le opzioni seguenti possono essere attivate\n"
-"per migliorare le prestazioni delle miniature\n"
-"nella vista panoramica.\n"
+"Le opzioni seguenti possono essere attivate per migliorare le prestazioni "
+"delle miniature nella vista panoramica.\n"
 "\n"
-"Nota che entrambe le opzioni devono essere\n"
-"attivate perché sia rilevabile un cambiamento\n"
-"nelle prestazioni."
+"Nota che entrambe le opzioni devono essere attivate perché sia rilevabile "
+"un cambiamento nelle prestazioni."
 
 #: src/pan-view/pan-view.cc:2061
 msgid "Cache thumbnails"
@@ -6116,16 +6098,15 @@ msgid ""
 msgstr ""
 "Nessuna connessione a Internet!\n"
 "Il database dei fusi orari è utilizzato per mostrare le date contenute nelle "
-"etichette Exif tenendo conto dello scarto rispetto a UTC e dell’ora legale"
+"etichette Exif tenendo conto dello scarto rispetto a UTC e dell’ora legale."
 
 #: src/preferences.cc:2214
 msgid ""
 "The timezone database is used to display exif time and date\n"
 "corrected for UTC offset and Daylight Saving Time"
 msgstr ""
-"Il database dei fusi orari è utilizzato per mostrare le date\n"
-"contenute nelle etichette Exif tenendo conto dello scarto\n"
-"rispetto a UTC e dell’ora legale"
+"Il database dei fusi orari è utilizzato per mostrare le date contenute nelle "
+"etichette Exif tenendo conto dello scarto rispetto a UTC e dell’ora legale"
 
 #: src/preferences.cc:2220
 msgid "On-line help search engine"
@@ -6297,8 +6278,7 @@ msgid ""
 "Current window layout\n"
 "has been set as default"
 msgstr ""
-"L’attuale layout della finestra\n"
-"è stato impostato come predefinito"
+"L’attuale layout della finestra è stato impostato come predefinito"
 
 #: src/preferences.cc:2424
 msgid "Fit window to image when tools are hidden/floating"
@@ -6590,11 +6570,11 @@ msgstr ""
 
 #: src/preferences.cc:2920
 msgid "See the Help file for a list of the tags used"
-msgstr "Consulta il file di Aiuto per un elenco delle etichette usate"
+msgstr "Vedi il file di Aiuto per un elenco delle etichette usate"
 
 #: src/preferences.cc:2922
 msgid "Permit Keywords to be case-sensitive"
-msgstr "Usa Parole Chiave con distinzione maiuscole/minuscole"
+msgstr "Usa Parole Chiave con distinzione maiusc./minusc."
 
 #: src/preferences.cc:2923
 msgid "When selected, 'Place' and 'place' are two different keywords"
@@ -6617,7 +6597,7 @@ msgstr ""
 "(Ruota, Rifletti e Ribalta) eseguiti su un’immagine verrano scritti nei suoi "
 "metadati.\n"
 "Nota: se questa opzione non è attivata, i risultati dei comandi di "
-"Orientamento saranno persi alla chiusura di Geeqie"
+"Orientamento saranno persi alla chiusura di Geeqie."
 
 #: src/preferences.cc:2934
 msgid "Auto-save options"
@@ -6673,7 +6653,7 @@ msgstr ""
 "Leggi le etichette «DateTimeOriginal», «DateTimeDigitized» e «StarRating» al "
 "cambio di cartella nell’ambito del ciclo di inattività.\n"
 "Se questa opzione non è attivata, il caricamento iniziale dei file nella "
-"cartella sarà più veloce, ma il loro ordinamento sarà più lento"
+"cartella sarà più veloce, ma il loro ordinamento sarà più lento."
 
 #: src/preferences.cc:3141 src/preferences.cc:3155
 msgid "Search for keywords"
@@ -6709,7 +6689,7 @@ msgid ""
 "Intent is not available"
 msgstr ""
 "Consulta la documentazione di Lcms per conoscere le impostazioni predefinite "
-"che vengono impiegate quando l’Intento selezionato non è disponibile"
+"che vengono impiegate quando l’Intento selezionato non è disponibile."
 
 #: src/preferences.cc:3357
 msgid "Color management"
@@ -6891,7 +6871,7 @@ msgstr ""
 "Elenco dell’ultima immagine visualizzata in ciascuna cartella aperta di "
 "recente.\n"
 "Alla riapertura di una cartella aperta di recente Geeqie selezionerà "
-"automaticamente l’ultima immagine visualizzata"
+"automaticamente l’ultima immagine visualizzata."
 
 #: src/preferences.cc:3568
 msgid "Drag'n drop icon size"
@@ -7298,7 +7278,7 @@ msgstr "il nome contiene"
 
 #: src/search.cc:291
 msgid "name is"
-msgstr "il nome è"
+msgstr "il nome è uguale a"
 
 #: src/search.cc:292
 msgid "path contains"
@@ -7310,11 +7290,11 @@ msgstr "uguale a"
 
 #: src/search.cc:297 src/search.cc:327 src/search.cc:334
 msgid "less than"
-msgstr "minore di"
+msgstr "meno di"
 
 #: src/search.cc:298 src/search.cc:328 src/search.cc:335
 msgid "greater than"
-msgstr "maggiore di"
+msgstr "più di"
 
 #: src/search.cc:299 src/search.cc:306 src/search.cc:329
 msgid "between"
@@ -7322,11 +7302,11 @@ msgstr "tra"
 
 #: src/search.cc:304
 msgid "before"
-msgstr "prima"
+msgstr "prima del"
 
 #: src/search.cc:305
 msgid "after"
-msgstr "dopo"
+msgstr "dopo il"
 
 #: src/search.cc:310
 msgid "match all"
@@ -7350,7 +7330,7 @@ msgstr "non contiene"
 
 #: src/search.cc:333
 msgid "not geocoded"
-msgstr "senza geocode"
+msgstr "sconosciuta"
 
 #: src/search.cc:339 src/search.cc:344
 msgid "is"
@@ -7400,7 +7380,7 @@ msgstr "Immagine Raw"
 
 #: src/search.cc:2323 src/search.cc:3651
 msgid "Any mark"
-msgstr "Qualsiasi Contrassegno"
+msgstr "Qualsiasi"
 
 #: src/search.cc:2380 src/search.cc:3606
 msgid "km"
@@ -7444,7 +7424,7 @@ msgstr "File di Collezione"
 
 #: src/search.cc:3361
 msgid "Image search"
-msgstr "Ricerca immagine"
+msgstr "Ricerca immagini"
 
 #: src/search.cc:3400
 msgid "Search:"
@@ -7456,7 +7436,7 @@ msgstr "Ricorsivamente"
 
 #: src/search.cc:3438 src/search.cc:3548 src/search.cc:3578
 msgid "Match case"
-msgstr "Distingui maiuscole/minuscole"
+msgstr "Distingui maiusc./minusc."
 
 #: src/search.cc:3440
 msgid "Symbolic link"
@@ -7473,13 +7453,9 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
-"Quando impostato a «contiene» o «il percorso contiene», questo campo usa "
+"Quando è impostato a «contiene» o «il percorso contiene», questo campo usa "
 "espressioni regolari compatibili con Perl (PCRE).\n"
-"Per esempio, usa\n"
-".*\\.jpg\n"
-"invece di\n"
-"*.jpg\n"
-"\n"
+"Per esempio, usa «.*\\.jpg» invece di «*.jpg».\n"
 "Vedi il file di Aiuto."
 
 #: src/search.cc:3445
@@ -7504,16 +7480,16 @@ msgstr "Stato modificato"
 
 #: src/search.cc:3487
 msgid "Image dimensions are"
-msgstr "La risoluzione dell’immagine è"
+msgstr "La risoluzione è"
 
 #: src/search.cc:3508
 msgid "Image content is"
-msgstr "Il contenuto dell’immagine è al"
+msgstr "Il contenuto è al"
 
 #: src/search.cc:3514
 #, no-c-format
 msgid "% similar to"
-msgstr "% simile a"
+msgstr "% simile a quello del file"
 
 #: src/search.cc:3522
 msgid "Ignore rotation"
@@ -7530,11 +7506,7 @@ msgid ""
 "See the Help file."
 msgstr ""
 "Questo campo usa le espressioni regolari compatibili con Perl (PCRE).\n"
-"Per esempio, usa\n"
-"abc.*ghk\n"
-"invece di\n"
-"abc*ghk\n"
-"\n"
+"Per esempio, usa «abc.*ghk» invece di «abc*ghk».\n"
 "Vedi il file di Aiuto."
 
 #: src/search.cc:3565
@@ -7546,13 +7518,10 @@ msgid ""
 "\n"
 "See https://exiv2.org/tags.html"
 msgstr ""
-"Per esempio, «Exif.Image.Model»\n"
-"\n"
-"Maiuscole e minuscole sono sempre considerate diverse\n"
-"\n"
-"Puoi trascinare e rilasciare dalla finestra Exif\n"
-"\n"
-"Vedi https://exiv2.org/tags.html"
+"Per esempio, «Exif.Image.Model».\n"
+"Maiuscole e minuscole sono sempre considerate diverse.\n"
+"Puoi trascinare e rilasciare dalla finestra Exif."
+"Vedi «https://exiv2.org/tags.html»."
 
 #: src/search.cc:3576
 msgid ""
@@ -7566,23 +7535,18 @@ msgid ""
 "\n"
 "See the Help file."
 msgstr ""
-"Per esempio, «Canon EOS»\n"
-"\n"
+"Per esempio, «Canon EOS».\n"
 "Questo campo usa le espressioni regolari compatibili con Perl (PCRE).\n"
-"Per esempio, usa\n"
-"abc.*ghk\n"
-"invece di\n"
-"abc*ghk\n"
-"\n"
+"Per esempio, usa «abc.*ghk» invece di «abc*ghk».\n"
 "Vedi il file di Aiuto."
 
 #: src/search.cc:3582
 msgid "Image rating is"
-msgstr "La Valutazione dell’immagine è"
+msgstr "La Valutazione è"
 
 #: src/search.cc:3596
 msgid "Image is"
-msgstr "L’immagine è"
+msgstr "La posizione geografica è"
 
 #: src/search.cc:3608
 msgid "n.m."
@@ -7602,25 +7566,23 @@ msgid ""
 "an internet search URL\n"
 "See the Help file"
 msgstr ""
-"Immetti le coordinate nel formato:\n"
-"89.123 179.456\n"
-"oppure trascina e rilascia un’immagine con geocode\n"
-"oppure fai clic sinistro sulla mappa e incolla\n"
-"oppure taglia e incolla o trascina e rilascia\n"
-"la URL di una ricerca Internet\n"
-"Vedi il file di Aiuto"
+"Immetti le coordinate in formato «latitudine longitudine» (per esempio: "
+"«89.123 179.456»); oppure trascina e rilascia un’immagine con geocode; "
+"oppure fai clic sinistro sulla mappa e incolla; oppure taglia e incolla "
+"o trascina e rilascia la URL di una ricerca Internet.\n"
+"Vedi il file di Aiuto."
 
 #: src/search.cc:3627
 msgid "Image class"
-msgstr "Classe dell’immagine"
+msgstr "La classe del file"
 
 #: src/search.cc:3639
 msgid "Broken"
-msgstr "Rotto"
+msgstr "Sbagliata"
 
 #: src/search.cc:3646
 msgid "Marks"
-msgstr "Contrassegno"
+msgstr "Il Contrassegno"
 
 #: src/search.cc:3768 src/search.cc:3772
 msgid "Ctrl-Return"
@@ -8249,7 +8211,7 @@ msgid ""
 "Unable to remove folder %s\n"
 "Permissions do not allow writing to the folder."
 msgstr ""
-"Impossibile eliminare la cartella «%s»\n"
+"Impossibile eliminare la cartella «%s».\n"
 "I permessi non ne consentono la scrittura."
 
 # c-format
@@ -8392,7 +8354,7 @@ msgstr "Usa espressioni regolari"
 
 #: src/view-file/view-file.cc:1318
 msgid "Case sensitive"
-msgstr "Distingui maiu./minu."
+msgstr "Maiusc. ≠ minusc."
 
 #: src/view-file/view-file.cc:1335
 msgid "Select Class filter"
