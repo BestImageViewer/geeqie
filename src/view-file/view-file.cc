@@ -1179,43 +1179,36 @@ static gboolean vf_file_filter_class_cb(GtkWidget *widget, gpointer data)
 	return TRUE;
 }
 
-static gboolean vf_file_filter_class_set_all_cb(GtkWidget *widget, gpointer data)
+static gboolean vf_file_filter_class_set_all(GtkWidget *widget, gpointer data, gboolean state)
 {
-	auto vf = static_cast<ViewFile *>(data);
-	GtkWidget *parent;
-	GList *children;
-	gint i;
-	gboolean state;
+	GtkWidget *parent = gtk_widget_get_parent(widget);
+	g_autoptr(GList) children = gtk_container_get_children(GTK_CONTAINER(parent));
 
-	if (g_strcmp0(_("Select all"), gtk_menu_item_get_label(GTK_MENU_ITEM(widget))) == 0)
-		{
-		state = TRUE;
-		}
-	else
-		{
-		state = FALSE;
-		}
-
-	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
+	GList *work = children;
+	for (gint i = 0; i < FILE_FORMAT_CLASSES; i++)
 		{
 		options->class_filter[i] = state;
-		}
 
-	i = 0;
-	parent = gtk_widget_get_parent(widget);
-	children = gtk_container_get_children(GTK_CONTAINER(parent));
-	for (GList *work = children; work; work = work->next)
-		{
-		if (i < FILE_FORMAT_CLASSES)
+		if (work)
 			{
 			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(work->data), state);
+			work = work->next;
 			}
-		i++;
 		}
-	g_list_free(children);
-	vf_refresh(vf);
+
+	vf_refresh(static_cast<ViewFile *>(data));
 
 	return TRUE;
+}
+
+static gboolean vf_file_filter_class_select_all_cb(GtkWidget *widget, gpointer data)
+{
+	return vf_file_filter_class_set_all(widget, data, TRUE);
+}
+
+static gboolean vf_file_filter_class_select_none_cb(GtkWidget *widget, gpointer data)
+{
+	return vf_file_filter_class_set_all(widget, data, FALSE);
 }
 
 static GtkWidget *class_filter_menu (ViewFile *vf)
@@ -1231,8 +1224,8 @@ static GtkWidget *class_filter_menu (ViewFile *vf)
 		gtk_widget_show(menu_item);
 		}
 
-	menu_item_add_simple(menu, _("Select all"), G_CALLBACK(vf_file_filter_class_set_all_cb), vf);
-	menu_item_add_simple(menu, _("Select none"), G_CALLBACK(vf_file_filter_class_set_all_cb), vf);
+	menu_item_add_simple(menu, _("Select all"), G_CALLBACK(vf_file_filter_class_select_all_cb), vf);
+	menu_item_add_simple(menu, _("Select none"), G_CALLBACK(vf_file_filter_class_select_none_cb), vf);
 
 	return menu;
 }
