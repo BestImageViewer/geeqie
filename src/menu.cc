@@ -40,20 +40,6 @@ static GtkWidget *real_submenu_add_alter(GtkWidget *menu, GCallback func, gpoint
  *-----------------------------------------------------------------------------
  */
 
-static GtkWidget *add_menu_item(GtkWidget *menu, gchar *label, GtkAccelGroup *accel_group,
-				guint accel_key, guint accel_mods, GCallback func, gpointer data)
-{
-	GtkWidget *item;
-
-	item = gtk_menu_item_new_with_label(label);
-	gtk_widget_add_accelerator(item, "activate", accel_group, accel_key, static_cast<GdkModifierType>(accel_mods), GTK_ACCEL_VISIBLE);
-	g_signal_connect(G_OBJECT(item), "activate", func, data);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
-	gtk_widget_show(item);
-
-	return item;
-}
-
 gpointer submenu_item_get_data(GtkWidget *menu)
 {
 	if (!gtk_widget_get_parent(menu) || !GTK_IS_MENU(gtk_widget_get_parent(menu))) return nullptr;
@@ -369,9 +355,8 @@ static void submenu_add_alter_item(GtkWidget *menu, GCallback func, AlterType ty
 {
 	if (accel_group)
 		{
-		add_menu_item(menu, alter_type_get_text(type), accel_group,
-			      accel_key, accel_mods, func, GINT_TO_POINTER((gint)type));
-
+		GtkWidget *item = menu_item_add_simple(menu, alter_type_get_text(type), func, GINT_TO_POINTER((gint)type));
+		gtk_widget_add_accelerator(item, "activate", accel_group, accel_key, static_cast<GdkModifierType>(accel_mods), GTK_ACCEL_VISIBLE);
 		}
 	else
 		{

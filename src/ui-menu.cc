@@ -287,8 +287,7 @@ void menu_item_add_divider(GtkWidget *menu)
 {
 	GtkWidget *item = gtk_separator_menu_item_new();
 	gtk_widget_set_sensitive(item, FALSE);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu),item);
-	gtk_widget_show(item);
+	menu_item_finish(menu, item, nullptr, nullptr);
 }
 
 /**

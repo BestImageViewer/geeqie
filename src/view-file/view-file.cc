@@ -1220,30 +1220,19 @@ static gboolean vf_file_filter_class_set_all_cb(GtkWidget *widget, gpointer data
 
 static GtkWidget *class_filter_menu (ViewFile *vf)
 {
-	GtkWidget *menu;
-	GtkWidget *menu_item;
-	int i;
+	GtkWidget *menu = gtk_menu_new();
 
-	menu = gtk_menu_new();
-
-	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
-	    {
-		menu_item = gtk_check_menu_item_new_with_label(format_class_list[i]);
+	for (int i = 0; i < FILE_FORMAT_CLASSES; i++)
+		{
+		GtkWidget *menu_item = gtk_check_menu_item_new_with_label(format_class_list[i]);
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), options->class_filter[i]);
 		g_signal_connect(G_OBJECT(menu_item), "toggled", G_CALLBACK(vf_file_filter_class_cb), vf);
 		gtk_menu_shell_append(GTK_MENU_SHELL (menu), menu_item);
 		gtk_widget_show(menu_item);
 		}
 
-	menu_item = gtk_menu_item_new_with_label(_("Select all"));
-	gtk_menu_shell_append(GTK_MENU_SHELL (menu), menu_item);
-	gtk_widget_show(menu_item);
-	g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(vf_file_filter_class_set_all_cb), vf);
-
-	menu_item = gtk_menu_item_new_with_label(_("Select none"));
-	gtk_menu_shell_append(GTK_MENU_SHELL (menu), menu_item);
-	gtk_widget_show(menu_item);
-	g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(vf_file_filter_class_set_all_cb), vf);
+	menu_item_add_simple(menu, _("Select all"), G_CALLBACK(vf_file_filter_class_set_all_cb), vf);
+	menu_item_add_simple(menu, _("Select none"), G_CALLBACK(vf_file_filter_class_set_all_cb), vf);
 
 	return menu;
 }
