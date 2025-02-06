@@ -35,7 +35,7 @@ void view_window_new_from_collection(CollectionData *cd, CollectInfo *info);
 
 void view_window_colors_update();
 
-gboolean view_window_find_image(ImageWindow *imd, gint *index, gint *total);
+gboolean view_window_find_image(const ImageWindow *imd, gint &index, gint &total);
 
 
 #endif

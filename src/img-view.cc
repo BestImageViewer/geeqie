@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <array>
+#include <vector>
 
 #include <gdk/gdk.h>
 #include <glib-object.h>
@@ -58,6 +59,9 @@
 #include "utilops.h"
 #include "window.h"
 
+namespace
+{
+
 struct ViewWindow
 {
 	GtkWidget *window;
@@ -70,8 +74,9 @@ struct ViewWindow
 };
 
 
-static GList *view_window_list = nullptr;
+std::vector<ViewWindow *> view_window_list;
 
+} // namespace
 
 static GtkWidget *view_popup_menu(ViewWindow *vw);
 static void view_fullscreen_toggle(ViewWindow *vw, gboolean force_off);
@@ -848,7 +853,8 @@ static void view_window_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
-	view_window_list = g_list_remove(view_window_list, vw);
+	view_window_list.erase(std::remove(view_window_list.begin(), view_window_list.end(), vw),
+	                       view_window_list.end());
 
 	view_slideshow_stop(vw);
 	fullscreen_stop(vw->fs);
@@ -979,7 +985,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	gtk_window_set_focus_on_map(GTK_WINDOW(vw->window), FALSE);
 	gtk_widget_show(vw->window);
 
-	view_window_list = g_list_append(view_window_list, vw);
+	view_window_list.push_back(vw);
 
 	file_data_register_notify_func(view_window_notify_cb, vw, NOTIFY_PRIORITY_LOW);
 
@@ -1064,52 +1070,37 @@ void view_window_new_from_collection(CollectionData *cd, CollectInfo *info)
 
 void view_window_colors_update()
 {
-	GList *work;
-
-	work = view_window_list;
-	while (work)
+	for (ViewWindow *vw : view_window_list)
 		{
-		auto vw = static_cast<ViewWindow *>(work->data);
-		work = work->next;
-
 		image_background_set_color_from_options(vw->imd, !!vw->fs);
 		}
 }
 
-gboolean view_window_find_image(ImageWindow *imd, gint *index, gint *total)
+gboolean view_window_find_image(const ImageWindow *imd, gint &index, gint &total)
 {
-	GList *work;
+	const auto it = std::find_if(view_window_list.cbegin(), view_window_list.cend(),
+	                             [imd](const ViewWindow *vw) { return vw->imd == imd || (vw->fs && vw->fs->imd == imd); });
+	if (it == view_window_list.cend()) return FALSE;
 
-	work = view_window_list;
-	while (work)
+	const ViewWindow *vw = *it;
+
+	if (vw->ss)
 		{
-		auto vw = static_cast<ViewWindow *>(work->data);
-		work = work->next;
+		gint n = g_list_length(vw->ss->list_done);
+		gint t = n + g_list_length(vw->ss->list);
 
-		if (vw->imd == imd ||
-		    (vw->fs && vw->fs->imd == imd))
-			{
-			if (vw->ss)
-				{
-				gint n;
-				gint t;
+		if (n == 0) n = t;
 
-				n = g_list_length(vw->ss->list_done);
-				t = n + g_list_length(vw->ss->list);
-				if (n == 0) n = t;
-				if (index) *index = n - 1;
-				if (total) *total = t;
-				}
-			else
-				{
-				if (index) *index = g_list_position(vw->list, vw->list_pointer);
-				if (total) *total = g_list_length(vw->list);
-				}
-			return TRUE;
-			}
+		index = n - 1;
+		total = t;
+		}
+	else
+		{
+		index = g_list_position(vw->list, vw->list_pointer);
+		total = g_list_length(vw->list);
 		}
 
-	return FALSE;
+	return TRUE;
 }
 
 /*
