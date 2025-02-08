@@ -24,6 +24,7 @@
 <gresources>
   <gresource prefix="/org/geeqie/ui">
     <file>custom.css</file>
+    <file>keymap-template.svg</file>
     <file>menu-classic.ui</file>
     <file>menu-hamburger.ui</file>
     <file>search-and-run.ui</file>

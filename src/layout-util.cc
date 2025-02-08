@@ -57,7 +57,6 @@
 #include "image.h"
 #include "img-view.h"
 #include "intl.h"
-#include "keymap-template.h"
 #include "layout-image.h"
 #include "layout.h"
 #include "logwindow.h"
@@ -1476,16 +1475,17 @@ static void convert_keymap_template_to_file(const gint fd, const GPtrArray *keyb
 {
 	g_autoptr(GIOChannel) channel = g_io_channel_unix_new(fd);
 
-	int keymap_index = 0;
-	while (keymap_template[keymap_index])
+	g_autoptr(GInputStream) in_stream = g_resources_open_stream(GQ_RESOURCE_PATH_UI "/keymap-template.svg", G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
+	g_autoptr(GDataInputStream) data_stream = g_data_input_stream_new(in_stream);
+
+	gchar *template_line;
+	while ((template_line = g_data_input_stream_read_line(G_DATA_INPUT_STREAM(data_stream), nullptr, nullptr, nullptr)))
 		{
-		g_autofree gchar *converted_line = convert_template_line(keymap_template[keymap_index], keyboard_map_array);
+		g_autofree gchar *converted_line = convert_template_line(template_line, keyboard_map_array);
 
 		g_autoptr(GError) error = nullptr;
 		g_io_channel_write_chars(channel, converted_line, -1, nullptr, &error);
 		if (error) log_printf("Warning: Keyboard Map:%s\n", error->message);
-
-		keymap_index++;
 		}
 
 	g_autoptr(GError) error = nullptr;
