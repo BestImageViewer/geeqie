@@ -23,6 +23,7 @@
 
 #include <unistd.h>
 
+#include <algorithm>
 #include <string>
 #include <utility>
 
@@ -98,7 +99,7 @@ struct LayoutConfig
 
 #define LAYOUT_ID_CURRENT "_current_"
 
-GList *layout_window_list = nullptr;
+std::vector<LayoutWindow *> layout_window_list;
 LayoutWindow *current_lw = nullptr;
 
 inline gboolean is_current_layout_id(const gchar *id)
@@ -106,9 +107,13 @@ inline gboolean is_current_layout_id(const gchar *id)
 	return strcmp(id, LAYOUT_ID_CURRENT) == 0;
 }
 
-gint layout_compare_options_id(const LayoutWindow *lw, const gchar *id)
+LayoutWindow *layout_window_find_by_options_id(const gchar *id)
 {
-	return g_strcmp0(lw->options.id, id);
+	auto it = std::find_if(layout_window_list.begin(), layout_window_list.end(),
+	                       [id](LayoutWindow *lw){ return g_strcmp0(lw->options.id, id) == 0; });
+	if (it == layout_window_list.end()) return nullptr;
+
+	return *it;
 }
 
 } // namespace
@@ -126,7 +131,7 @@ LayoutWindow *get_current_layout()
 {
 	if (current_lw) return current_lw;
 
-	if (layout_window_list) return static_cast<LayoutWindow *>(layout_window_list->data);
+	if (!layout_window_list.empty()) return layout_window_list.front();
 
 	return nullptr;
 }
@@ -139,57 +144,37 @@ gboolean layout_valid(LayoutWindow **lw)
 		return *lw != nullptr;
 		}
 
-	return g_list_find(layout_window_list, *lw) != nullptr;
+	return std::find(layout_window_list.cbegin(), layout_window_list.cend(), *lw) != layout_window_list.cend();
 }
 
 LayoutWindow *layout_find_by_image(ImageWindow *imd)
 {
-	GList *work;
+	auto it = std::find_if(layout_window_list.begin(), layout_window_list.end(),
+	                       [imd](LayoutWindow *lw){ return lw->image == imd; });
+	if (it == layout_window_list.end()) return nullptr;
 
-	work = layout_window_list;
-	while (work)
-		{
-		auto lw = static_cast<LayoutWindow *>(work->data);
-		work = work->next;
-
-		if (lw->image == imd) return lw;
-		}
-
-	return nullptr;
+	return *it;
 }
 
 LayoutWindow *layout_find_by_image_fd(ImageWindow *imd)
 {
-	GList *work;
+	auto it = std::find_if(layout_window_list.begin(), layout_window_list.end(),
+	                       [imd](LayoutWindow *lw){ return lw->image->image_fd == imd->image_fd; });
+	if (it == layout_window_list.end()) return nullptr;
 
-	work = layout_window_list;
-	while (work)
-		{
-		auto lw = static_cast<LayoutWindow *>(work->data);
-		work = work->next;
-
-		if (lw->image->image_fd == imd->image_fd)
-			return lw;
-		}
-
-	return nullptr;
+	return *it;
 }
 
 LayoutWindow *layout_find_by_layout_id(const gchar *id)
 {
-	GList *work;
-
 	if (!id || !id[0]) return nullptr;
 
 	if (is_current_layout_id(id))
 		{
-		if (current_lw) return current_lw;
-		if (layout_window_list) return static_cast<LayoutWindow *>(layout_window_list->data);
-		return nullptr;
+		return get_current_layout();
 		}
 
-	work = g_list_find_custom(layout_window_list, id, reinterpret_cast<GCompareFunc>(layout_compare_options_id));
-	return work ? static_cast<LayoutWindow *>(work->data) : nullptr;
+	return layout_window_find_by_options_id(id);
 }
 
 gchar *layout_get_unique_id()
@@ -240,16 +225,10 @@ static gboolean layout_set_current_cb(GtkWidget *, GdkEventFocus *, gpointer dat
 
 static void layout_box_folders_changed_cb(GtkWidget *widget, gpointer)
 {
-	LayoutWindow *lw;
-	GList *work;
-
-/** @FIXME this is probably not the correct way to implement this */
-	work = layout_window_list;
-	while (work)
+	/** @FIXME this is probably not the correct way to implement this */
+	for (LayoutWindow *lw : layout_window_list)
 		{
-		lw = static_cast<LayoutWindow *>(work->data);
 		lw->options.folder_window.vdivider_pos = gtk_paned_get_position(GTK_PANED(widget));
-		work = work->next;
 		}
 }
 
@@ -257,10 +236,8 @@ gchar *layout_get_window_list()
 {
 	GString *ret = g_string_new(nullptr);
 
-	for (GList *work = layout_window_list; work; work = work->next)
+	for (const LayoutWindow *lw : layout_window_list)
 		{
-		auto *lw = static_cast<LayoutWindow *>(work->data);
-
 		if (ret->len > 0)
 			g_string_append_c(ret, '\n');
 
@@ -1153,27 +1130,27 @@ void layout_mark_filter_toggle(LayoutWindow *lw, gint mark)
 
 guint layout_window_count()
 {
-	return g_list_length(layout_window_list);
+	return layout_window_list.size();
 }
 
 LayoutWindow *layout_window_first()
 {
-	if (!layout_window_list) return nullptr;
+	if (layout_window_list.empty()) return nullptr;
 
-	return static_cast<LayoutWindow *>(layout_window_list->data);
+	return layout_window_list.front();
 }
 
 void layout_window_foreach(const LayoutWindowCallback &lw_cb)
 {
-	for (GList *work = layout_window_list; work; work = work->next)
+	for (LayoutWindow *lw : layout_window_list)
 		{
-		lw_cb(static_cast<LayoutWindow *>(work->data));
+		lw_cb(lw);
 		}
 }
 
 gboolean layout_window_is_displayed(const gchar *id)
 {
-	return g_list_find_custom(layout_window_list, id, reinterpret_cast<GCompareFunc>(layout_compare_options_id)) != nullptr;
+	return layout_window_find_by_options_id(id) != nullptr;
 }
 
 /*
@@ -2030,21 +2007,15 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 
 void layout_colors_update()
 {
-	GList *work;
-
-	work = layout_window_list;
-	while (work)
+	for (LayoutWindow *lw : layout_window_list)
 		{
-		gint i;
-		auto lw = static_cast<LayoutWindow *>(work->data);
-		work = work->next;
-
 		if (!lw->image) continue;
 
-		for (i = 0; i < MAX_SPLIT_IMAGES; i++)
+		for (ImageWindow *split_image : lw->split_images)
 			{
-			if (!lw->split_images[i]) continue;
-			image_background_set_color_from_options(lw->split_images[i], !!lw->full_screen);
+			if (!split_image) continue;
+
+			image_background_set_color_from_options(split_image, !!lw->full_screen);
 			}
 
 		image_background_set_color_from_options(lw->image, !!lw->full_screen);
@@ -2502,7 +2473,7 @@ void save_layout(LayoutWindow *lw)
 
 void layout_close(LayoutWindow *lw)
 {
-	if (layout_window_list && layout_window_list->next)
+	if (layout_window_count() > 1)
 		{
 		save_layout(lw);
 		layout_free(lw);
@@ -2518,7 +2489,8 @@ void layout_free(LayoutWindow *lw)
 	gint i;
 	if (!lw) return;
 
-	layout_window_list = g_list_remove(layout_window_list, lw);
+	layout_window_list.erase(std::remove(layout_window_list.begin(), layout_window_list.end(), lw),
+	                         layout_window_list.end());
 	if (current_lw == lw) current_lw = nullptr;
 
 	if (lw->exif_window) g_signal_handlers_disconnect_matched(G_OBJECT(lw->exif_window), G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, lw);
@@ -2692,16 +2664,16 @@ static LayoutWindow *layout_new(const LayoutOptions &lop, const gchar *geometry)
 	histogram->histogram_channel = lw->options.image_overlay.histogram_channel;
 	histogram->histogram_mode = lw->options.image_overlay.histogram_mode;
 
-	layout_window_list = g_list_append(layout_window_list, lw);
+	layout_window_list.push_back(lw);
 
 	/* Refer to the activate signal in main */
 #if HAVE_GTK4
-	if (g_list_length(layout_window_list) == 1)
+	if (layout_window_count() == 1)
 		{
 		gtk_widget_hide(lw->window);
 		}
 #else
-	if (g_list_length(layout_window_list) > 1)
+	if (layout_window_count() > 1)
 		{
 		gtk_widget_show(lw->window);
 		}
@@ -3037,13 +3009,11 @@ void layout_update_from_config(LayoutWindow *lw, const gchar **attribute_names, 
 LayoutWindow *layout_new_from_default()
 {
 	LayoutWindow *lw;
-	GList *work;
 
 	g_autofree gchar *default_path = g_build_filename(get_rc_dir(), DEFAULT_WINDOW_LAYOUT, NULL);
 	if (load_config_from_file(default_path, TRUE))
 		{
-		work = g_list_last(layout_window_list);
-		lw = static_cast<LayoutWindow *>(work->data);
+		lw = layout_window_list.back();
 		}
 	else
 		{
