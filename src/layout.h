@@ -156,6 +156,7 @@ LayoutWindow *layout_new_from_default();
 void layout_close(LayoutWindow *lw);
 void layout_free(LayoutWindow *lw);
 
+LayoutWindow *get_current_layout();
 gboolean layout_valid(LayoutWindow **lw);
 
 void layout_show_config_window(LayoutWindow *lw);

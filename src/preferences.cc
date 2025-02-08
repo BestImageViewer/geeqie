@@ -2323,11 +2323,10 @@ static void config_tab_image(GtkWidget *notebook)
 
 static void save_default_window_layout_cb(GtkWidget *, gpointer)
 {
-	LayoutWindow *lw = nullptr;
 	gchar *tmp_id;
 
 	/* Get current lw */
-	layout_valid(&lw);
+	LayoutWindow *lw = get_current_layout();
 
 	tmp_id = lw->options.id;
 	lw->options.id = g_strdup("");

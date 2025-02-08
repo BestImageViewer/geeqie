@@ -362,9 +362,7 @@ gboolean search_command_line_for_unit_test_option(gint argc, gchar *argv[])
  */
 void config_file_error_notification_clicked_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	LayoutWindow *lw;
-
-	layout_valid(&lw);
+	LayoutWindow *lw = get_current_layout();
 
 	log_window_new(lw);
 }
@@ -570,8 +568,8 @@ void exit_program_final()
 	keys_save();
 	accel_map_save();
 
-	LayoutWindow *lw = nullptr;
-	if (layout_valid(&lw))
+	LayoutWindow *lw = get_current_layout();
+	if (lw)
 		{
 		layout_free(lw);
 		}
@@ -619,7 +617,6 @@ void exit_confirm_exit_cb(GenericDialog *gd, gpointer)
 gint exit_confirm_dlg()
 {
 	GtkWidget *parent;
-	LayoutWindow *lw;
 
 	if (exit_dialog)
 		{
@@ -630,8 +627,8 @@ gint exit_confirm_dlg()
 	if (!collection_window_modified_exists() && (layout_window_count() == 1)) return FALSE;
 
 	parent = nullptr;
-	lw = nullptr;
-	if (layout_valid(&lw))
+	LayoutWindow *lw = get_current_layout();
+	if (lw)
 		{
 		parent = lw->window;
 		}
@@ -890,9 +887,7 @@ void startup_common(GtkApplication *, gpointer)
 
 void activate_cb(GtkApplication *, gpointer)
 {
-	LayoutWindow *lw = nullptr;
-
-	layout_valid(&lw);
+	LayoutWindow *lw = get_current_layout();
 
 	/* If Geeqie is not running and a command line option like --version
 	 * is executed, display of the Geeqie window has to be inhibited.

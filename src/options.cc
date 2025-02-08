@@ -354,9 +354,9 @@ LayoutOptions *init_layout_options(LayoutOptions *options)
 
 static void sync_options_with_current_state(ConfOptions *options)
 {
-	LayoutWindow *lw = nullptr;
+	LayoutWindow *lw = get_current_layout();
 
-	if (layout_valid(&lw))
+	if (lw)
 		{
 		layout_sync_options_with_current_state(lw);
 

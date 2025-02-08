@@ -1326,9 +1326,8 @@ static gchar *get_action_label(GtkAction *action, const gchar *action_name)
  */
 std::vector<ActionItem> get_action_items()
 {
-	LayoutWindow *lw = nullptr;
-
-	if (!layout_valid(&lw))
+	LayoutWindow *lw = get_current_layout();
+	if (!lw)
 		{
 		return {};
 		}

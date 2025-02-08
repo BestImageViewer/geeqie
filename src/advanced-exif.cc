@@ -246,10 +246,8 @@ static void advanced_exif_add_column(GtkWidget *listview, const gchar *title, gi
 static void advanced_exif_window_get_geometry(ExifWin *ew)
 {
 	GdkWindow *window;
-	LayoutWindow *lw = nullptr;
 
-	layout_valid(&lw);
-
+	LayoutWindow *lw = get_current_layout();
 	if (!ew || !lw) return;
 
 	window = gtk_widget_get_window(ew->window);

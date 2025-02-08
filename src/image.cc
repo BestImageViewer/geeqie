@@ -197,7 +197,7 @@ static void image_press_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer d
 	lw = layout_find_by_image(imd);
 	if (!lw)
 		{
-		layout_valid(&lw);
+		lw = get_current_layout();
 		}
 
 	if (lw && event->button == MOUSE_BUTTON_LEFT && event->type == GDK_2BUTTON_PRESS
@@ -215,7 +215,7 @@ static void image_release_cb(PixbufRenderer *, GdkEventButton *event, gpointer d
 	lw = layout_find_by_image(imd);
 	if (!lw)
 		{
-		layout_valid(&lw);
+		lw = get_current_layout();
 		}
 
 	defined_mouse_buttons(nullptr, event, lw);
@@ -1126,11 +1126,11 @@ static gboolean image_scroll_cb(GtkWidget *, GdkEventScroll *event, gpointer dat
 	auto imd = static_cast<ImageWindow *>(data);
 	gboolean in_lw = FALSE;
 	gint i = 0;
-	LayoutWindow *lw = nullptr;
 
 	if (imd->func_scroll && event && event->type == GDK_SCROLL)
 		{
-		layout_valid(&lw);
+		LayoutWindow *lw = get_current_layout();
+
 		/* check if the image is in a layout window */
 		for (i = 0; i < MAX_SPLIT_IMAGES; i++)
 			{
@@ -1814,7 +1814,6 @@ void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscre
 	GdkRGBA theme_color;
 	GdkRGBA bg_color;
 	GtkStyleContext *style_context;
-	LayoutWindow *lw = nullptr;
 
 	if ((options->image.use_custom_border_color && !fullscreen) ||
 	    (options->image.use_custom_border_color_in_fullscreen && fullscreen))
@@ -1824,7 +1823,8 @@ void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscre
 
 	else
 		{
-		if (!layout_valid(&lw)) return;
+		LayoutWindow *lw = get_current_layout();
+		if (!lw) return;
 
 		style_context = gtk_widget_get_style_context(lw->window);
 		gq_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &bg_color);

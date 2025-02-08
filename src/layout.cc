@@ -122,15 +122,24 @@ static void layout_list_scroll_to_subpart(LayoutWindow *lw, const gchar *needle)
  *-----------------------------------------------------------------------------
  */
 
+LayoutWindow *get_current_layout()
+{
+	if (current_lw) return current_lw;
+
+	if (layout_window_list) return static_cast<LayoutWindow *>(layout_window_list->data);
+
+	return nullptr;
+}
+
 gboolean layout_valid(LayoutWindow **lw)
 {
 	if (*lw == nullptr)
 		{
-		if (current_lw) *lw = current_lw;
-		else if (layout_window_list) *lw = static_cast<LayoutWindow *>(layout_window_list->data);
-		return (*lw != nullptr);
+		*lw = get_current_layout();
+		return *lw != nullptr;
 		}
-	return (g_list_find(layout_window_list, *lw) != nullptr);
+
+	return g_list_find(layout_window_list, *lw) != nullptr;
 }
 
 LayoutWindow *layout_find_by_image(ImageWindow *imd)

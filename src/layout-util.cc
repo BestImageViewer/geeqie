@@ -3206,8 +3206,7 @@ static gboolean layout_editors_reload_idle_cb(gpointer)
 		DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors done", get_exec_time());
 
 		/* The toolbars need to be regenerated in case they contain a plugin */
-		LayoutWindow *lw = nullptr;
-		layout_valid(&lw);
+		LayoutWindow *lw = get_current_layout();
 
 		toolbar_select_new(lw, TOOLBAR_MAIN);
 		toolbar_apply(TOOLBAR_MAIN);

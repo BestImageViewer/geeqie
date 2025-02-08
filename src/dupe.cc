@@ -4292,10 +4292,8 @@ void dupe_window_clear(DupeWindow *dw)
 static void dupe_window_get_geometry(DupeWindow *dw)
 {
 	GdkWindow *window;
-	LayoutWindow *lw = nullptr;
 
-	layout_valid(&lw);
-
+	LayoutWindow *lw = get_current_layout();
 	if (!dw || !lw) return;
 
 	window = gtk_widget_get_window(dw->window);
@@ -4466,9 +4464,6 @@ DupeWindow *dupe_window_new()
 	GtkListStore *store;
 	GtkTreeSelection *selection;
 	GdkGeometry geometry;
-	LayoutWindow *lw = nullptr;
-
-	layout_valid(&lw);
 
 	dw = g_new0(DupeWindow, 1);
 	dw->add_files_queue = nullptr;
@@ -4500,6 +4495,7 @@ DupeWindow *dupe_window_new()
 	gtk_window_set_geometry_hints(GTK_WINDOW(dw->window), nullptr, &geometry,
 				      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE));
 
+	LayoutWindow *lw = get_current_layout();
 	if (lw && options->save_window_positions)
 		{
 		gtk_window_set_default_size(GTK_WINDOW(dw->window), lw->options.dupe_window.width, lw->options.dupe_window.height);

@@ -902,9 +902,8 @@ void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVarian
 
 void gq_new_window(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
 {
-	LayoutWindow *lw = nullptr;
-
-	if (!layout_valid(&lw)) return;
+	LayoutWindow *lw = get_current_layout();
+	if (!lw) return;
 
 	lw_id = layout_new_from_default();
 

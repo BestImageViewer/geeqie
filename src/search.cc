@@ -3190,10 +3190,8 @@ static GtkWidget *menu_choice(GtkWidget *box, GtkWidget **check, GtkWidget **men
 static void search_window_get_geometry(SearchData *sd)
 {
 	GdkWindow *window;
-	LayoutWindow *lw = nullptr;
 
-	layout_valid(&lw);
-
+	LayoutWindow *lw = get_current_layout();
 	if (!sd || !lw) return;
 
 	window = gtk_widget_get_window(sd->window);
@@ -3319,9 +3317,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	GtkTreeViewColumn *column;
 	GtkWidget *combo;
 	GdkGeometry geometry;
-	LayoutWindow *lw = nullptr;
-
-	layout_valid(&lw);
 
 	auto sd = g_new0(SearchData, 1);
 
@@ -3370,6 +3365,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_window_set_geometry_hints(GTK_WINDOW(sd->window), nullptr, &geometry,
 				      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE));
 
+	LayoutWindow *lw = get_current_layout();
 	if (lw && options->save_window_positions)
 		{
 		gtk_window_set_default_size(GTK_WINDOW(sd->window), lw->options.search_window.width, lw->options.search_window.height);

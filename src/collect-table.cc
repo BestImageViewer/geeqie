@@ -911,9 +911,9 @@ static void collection_table_popup_add_file_selection_cb(GtkWidget *, gpointer d
 {
 	auto ct = static_cast<CollectTable *>(data);
 	GList *list;
-	LayoutWindow *lw = nullptr;
 
-	if (!layout_valid(&lw)) return;
+	LayoutWindow *lw = get_current_layout();
+	if (!lw) return;
 
 	list = vf_selection_get_list(lw->vf);
 
@@ -935,10 +935,11 @@ static void collection_table_popup_goto_original_cb(GtkWidget *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 	GList *list;
-	LayoutWindow *lw = nullptr;
 	FileData *fd;
 
-	if (!layout_valid(&lw)) return;
+	LayoutWindow *lw = get_current_layout();
+	if (!lw) return;
+
 	list = collection_table_selection_get_list(ct);
 	if (list)
 		{

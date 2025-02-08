@@ -963,9 +963,8 @@ gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error)
  */
 gint scale_factor()
 {
-	LayoutWindow *lw = nullptr;
+	LayoutWindow *lw = get_current_layout();
 
-	layout_valid(&lw);
 	return gtk_widget_get_scale_factor(lw->window);
 }
 

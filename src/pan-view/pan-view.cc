@@ -2113,11 +2113,11 @@ static void pan_new_window_cb(GtkWidget *, gpointer data)
 
 static void pan_go_to_original_cb(GtkWidget *, gpointer data)
 {
-	LayoutWindow *lw = nullptr;
 	auto pw = static_cast<PanWindow *>(data);
 	FileData *fd;
 
-	if (!layout_valid(&lw)) return;
+	LayoutWindow *lw = get_current_layout();
+	if (!lw) return;
 
 	fd = pan_menu_click_fd(pw);
 	if (fd)
