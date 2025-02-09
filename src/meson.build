@@ -353,14 +353,20 @@ gq_marshal_pragma = custom_target('gq-marshal-pragma',
 project_sources += gq_marshal_pragma
 
 if conf_data.get('HAVE_LCMS', 0) == 1
-    xxd_sh = find_program('generate-ClayRGB1998-icc-h.sh', dirs : join_paths(meson.project_source_root(), 'scripts'))
+    target_string = '--target=' + meson.current_build_dir() + '/icc.h'
+    icc_resources_h = custom_target('icc_resources_h',
+                    input : 'icc.gresource.xml',
+                    output : 'icc.h',
+                    command : [glib_compile_resources, '--generate-header', target_string, '--sourcedir=@CURRENT_SOURCE_DIR@', '@INPUT@'])
 
-    ClayRGB1998_icc_h = custom_target('ClayRGB1998',
-                        input: 'ClayRGB1998.icc',
-                        output : 'ClayRGB1998_icc.h',
-                        command : [xxd_sh, '@INPUT@', '@OUTPUT@'])
+    target_string = '--target=' + meson.current_build_dir() + '/icc.c'
+    icc_resources_c = custom_target('icc_resources_c',
+                    input : 'icc.gresource.xml',
+                    output : 'icc.c',
+                    command : [glib_compile_resources, '--generate-source', target_string, '--sourcedir=@CURRENT_SOURCE_DIR@', '@INPUT@'])
 
-    project_sources += ClayRGB1998_icc_h
+    project_sources += icc_resources_h
+    project_sources += icc_resources_c
 endif
 
 geeqie_exe = executable('geeqie', project_sources,

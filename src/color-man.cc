@@ -42,6 +42,8 @@
 #include "options.h"
 #include "ui-fileops.h"
 
+#define GQ_RESOURCE_PATH_ICC "/org/geeqie/icc"
+
 struct ColorManCache {
 	cmsHPROFILE   profile_in;
 	cmsHPROFILE   profile_out;
@@ -74,7 +76,12 @@ static void color_man_lib_init()
 static cmsHPROFILE color_man_create_adobe_comp()
 {
 	/* ClayRGB1998 is AdobeRGB compatible */
-#include "ClayRGB1998_icc.h" // IWYU pragma: keep
+	g_autoptr(GBytes) ClayRGB1998_icc_bytes = g_resources_lookup_data(GQ_RESOURCE_PATH_ICC "/ClayRGB1998.icc",
+	                                                                  G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
+
+	gsize ClayRGB1998_icc_len;
+	gconstpointer ClayRGB1998_icc = g_bytes_get_data(ClayRGB1998_icc_bytes, &ClayRGB1998_icc_len);
+
 	return cmsOpenProfileFromMem(ClayRGB1998_icc, ClayRGB1998_icc_len);
 }
 
