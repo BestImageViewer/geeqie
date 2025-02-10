@@ -39,11 +39,7 @@
 #endif
 
 #if HAVE_LCMS
-#if HAVE_LCMS2
-#include <lcms2.h>
-#else
-#include <lcms.h>
-#endif
+#  include <lcms2.h>
 #endif
 
 #include <pango/pango.h>
@@ -302,9 +298,6 @@ static gboolean accel_apply_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *
 static void config_window_apply()
 {
 	gboolean refresh = FALSE;
-#if HAVE_LCMS2
-	int i = 0;
-#endif
 
 	config_entry_to_option(safe_delete_path_entry, &options->file_ops.safe_delete_path, remove_trailing_slash);
 
@@ -525,7 +518,7 @@ static void config_window_apply()
 #endif
 
 #if HAVE_LCMS
-	for (i = 0; i < COLOR_PROFILE_INPUTS; i++)
+	for (int i = 0; i < COLOR_PROFILE_INPUTS; i++)
 		{
 		config_entry_to_option(color_profile_input_name_entry[i], &options->color_profile.input_name[i], nullptr);
 		config_entry_to_option(color_profile_input_file_entry[i], &options->color_profile.input_file[i], nullptr);

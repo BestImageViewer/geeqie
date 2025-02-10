@@ -225,7 +225,6 @@ else
 endif
 
 conf_data.set('HAVE_LCMS', 0)
-conf_data.set('HAVE_LCMS2', 0)
 lcms_dep = []
 req_version = '>=2.0'
 option = get_option('cms')
@@ -233,7 +232,6 @@ if not option.disabled()
     lcms_dep = dependency('lcms2', version : req_version, required : get_option('cms'))
     if lcms_dep.found()
         conf_data.set('HAVE_LCMS', 1)
-        conf_data.set('HAVE_LCMS2', 1)
         summary({'cms' : ['color management supported:', true]}, section : 'Configuration', bool_yn : true)
     else
         summary({'cms' : ['lcms2' + req_version + ' not found - color management supported:', false]}, section : 'Configuration', bool_yn : true)

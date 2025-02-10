@@ -32,13 +32,7 @@
 #include <vector>
 
 #include <glib-object.h>
-
-#if HAVE_LCMS2
-#  include <lcms2.h>
-#else
-#  include <lcms.h>
-#endif
-
+#include <lcms2.h>
 #include <libheif/heif_cxx.h>
 
 namespace

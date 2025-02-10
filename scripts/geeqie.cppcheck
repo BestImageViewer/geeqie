@@ -30,7 +30,6 @@
         <define name="HAVE_JPEG"/>
         <define name="HAVE_JPEGXL"/>
         <define name="HAVE_LCMS"/>
-        <define name="HAVE_LCMS2"/>
         <define name="HAVE_LIBCHAMPLAIN"/>
         <define name="HAVE_LIBCHAMPLAIN_GTK"/>
         <define name="HAVE_LUA"/>

@@ -30,12 +30,7 @@
 #include <cstring>
 
 #include <glib-object.h>
-
-#if HAVE_LCMS2
-#  include <lcms2.h>
-#else
-#  include <lcms.h>
-#endif
+#include <lcms2.h>
 
 #include "image.h"
 #include "intl.h"
@@ -60,18 +55,6 @@ struct ColorManCache {
 	gint refcount;
 };
 
-
-static void color_man_lib_init()
-{
-	static gboolean init_done = FALSE;
-
-	if (init_done) return;
-	init_done = TRUE;
-
-#if !HAVE_LCMS2
-	cmsErrorAction(LCMS_ERROR_IGNORE);
-#endif
-}
 
 static cmsHPROFILE color_man_create_adobe_comp()
 {
@@ -160,8 +143,6 @@ static ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gch
 					  gboolean has_alpha)
 {
 	ColorManCache *cc;
-
-	color_man_lib_init();
 
 	cc = g_new0(ColorManCache, 1);
 	cc->refcount = 1;
@@ -382,15 +363,11 @@ static gchar *color_man_get_profile_name(ColorManProfileType type, cmsHPROFILE p
 		case COLOR_PROFILE_FILE:
 			if (profile)
 				{
-#if HAVE_LCMS2
 				char buffer[20];
 				buffer[0] = '\0';
 				cmsGetProfileInfoASCII(profile, cmsInfoDescription, "en", "US", buffer, 20);
 				buffer[19] = '\0'; /* Just to be sure */
 				return g_strdup(buffer);
-#else
-				return g_strdup(cmsTakeProductName(profile));
-#endif
 				}
 			return g_strdup(_("Custom profile"));
 			break;
@@ -434,19 +411,13 @@ const gchar *get_profile_name(const guchar *profile_data, guint profile_len)
 	cmsHPROFILE profile = cmsOpenProfileFromMem(profile_data, profile_len);
 	if (!profile) return nullptr;
 
-#if HAVE_LCMS2
 	static cmsUInt8Number profileID[17];
 	memset(profileID, 0, sizeof(profileID));
 
 	cmsGetHeaderProfileID(profile, profileID);
-	auto *name = reinterpret_cast<gchar *>(profileID);
-#else
-	auto *name = (gchar *) cmsTakeProductName(profile);
-#endif
-
 	cmsCloseProfile(profile);
 
-	return name;
+	return reinterpret_cast<gchar *>(profileID);
 }
 
 #else /* define HAVE_LCMS */
