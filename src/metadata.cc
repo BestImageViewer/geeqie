@@ -892,70 +892,31 @@ gboolean metadata_append_list(FileData *fd, const gchar *key, const GList *value
 }
 
 /**
- * @see find_string_in_list
- */
-static gchar *find_string_in_list_utf8nocase(GList *list, const gchar *string)
-{
-	g_autofree gchar *string_casefold = g_utf8_casefold(string, -1);
-
-	while (list)
-		{
-		auto haystack = static_cast<gchar *>(list->data);
-
-		if (haystack)
-			{
-			g_autofree gchar *haystack_casefold = g_utf8_casefold(haystack, -1);
-
-			if (strcmp(haystack_casefold, string_casefold) == 0)
-				{
-				return haystack;
-				}
-			}
-
-		list = list->next;
-		}
-
-	return nullptr;
-}
-
-/**
- * @see find_string_in_list
- */
-static gchar *find_string_in_list_utf8case(GList *list, const gchar *string)
-{
-	while (list)
-		{
-		auto haystack = static_cast<gchar *>(list->data);
-
-		if (haystack && strcmp(haystack, string) == 0)
-			return haystack;
-
-		list = list->next;
-		} // while (list)
-
-	return nullptr;
-} // gchar *find_string_in_list_utf...
-
-/**
  * @brief Find a existent string in a list.
  *
- * This is a switch between find_string_in_list_utf8case and
- * find_string_in_list_utf8nocase to search with or without case for the
- * existence of a string.
+ * Search with or without case for the existence of a string.
  *
  * @param list The list to search in
  * @param string The string to search for
- * @return The string or NULL
- *
- * @see find_string_in_list_utf8case
- * @see find_string_in_list_utf8nocase
+ * @return The GList or NULL
  */
-static gchar *find_string_in_list(GList *list, const gchar *string)
+static GList *find_string_in_list(GList *list, const gchar *string)
 {
-	if (options->metadata.keywords_case_sensitive)
-		return find_string_in_list_utf8case(list, string);
+	if (!string) return nullptr;
 
-	return find_string_in_list_utf8nocase(list, string);
+	if (options->metadata.keywords_case_sensitive)
+		return g_list_find_custom(list, string, reinterpret_cast<GCompareFunc>(g_strcmp0));
+
+	g_autofree gchar *string_casefold = g_utf8_casefold(string, -1);
+	static const auto string_compare_utf8nocase = [](gconstpointer data, gconstpointer user_data)
+	{
+		if (!data) return 1;
+
+		g_autofree gchar *haystack = g_utf8_casefold(static_cast<const gchar *>(data), -1);
+		return strcmp(haystack, static_cast<const gchar *>(user_data));
+	};
+
+	return g_list_find_custom(list, string_casefold, string_compare_utf8nocase);
 }
 
 GList *string_to_keywords_list(const gchar *text)
@@ -982,13 +943,13 @@ GList *string_to_keywords_list(const gchar *text)
 
 		if (l > 0)
 			{
-			gchar *keyword = g_strndup(begin, l);
+			g_autofree gchar *keyword = g_strndup(begin, l);
 
 			/* only add if not already in the list */
 			if (!find_string_in_list(list, keyword))
-				list = g_list_append(list, keyword);
-			else
-				g_free(keyword);
+				{
+				list = g_list_append(list, g_steal_pointer(&keyword));
+				}
 			}
 		}
 
@@ -1405,14 +1366,10 @@ void keyword_tree_set(GtkTreeModel *keyword_tree, GtkTreeIter *iter_ptr, GList *
 
 		if (keyword_get_is_keyword(keyword_tree, &iter))
 			{
-			gchar *name = keyword_get_name(keyword_tree, &iter);
+			g_autofree gchar *name = keyword_get_name(keyword_tree, &iter);
 			if (!find_string_in_list(*kw_list, name))
 				{
-				*kw_list = g_list_append(*kw_list, name);
-				}
-			else
-				{
-				g_free(name);
+				*kw_list = g_list_append(*kw_list, g_steal_pointer(&name));
 				}
 			}
 
@@ -1446,11 +1403,12 @@ static void keyword_tree_reset1(GtkTreeModel *keyword_tree, GtkTreeIter *iter, G
 	if (!keyword_get_is_keyword(keyword_tree, iter)) return;
 
 	g_autofree gchar *name = keyword_get_name(keyword_tree, iter);
-	g_autofree gchar *found = find_string_in_list(*kw_list, name);
 
+	GList *found = find_string_in_list(*kw_list, name);
 	if (found)
 		{
-		*kw_list = g_list_remove(*kw_list, found);
+		g_free(found->data);
+		*kw_list = g_list_delete_link(*kw_list, found);
 		}
 }
 
