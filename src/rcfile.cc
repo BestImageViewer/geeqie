@@ -1392,8 +1392,8 @@ static void options_parse_keyword(GQParserData *parser_data, const gchar *elemen
 {
 	if (g_ascii_strcasecmp(element_name, "keyword") == 0)
 		{
-		auto iter_ptr = static_cast<GtkTreeIter *>(data);
-		GtkTreeIter *child = keyword_add_from_config(keyword_tree, iter_ptr, attribute_names, attribute_values);
+		GtkTreeStore *keyword_tree = keyword_tree_get_or_new();
+		GtkTreeIter *child = keyword_add_from_config(keyword_tree, static_cast<GtkTreeIter *>(data), attribute_names, attribute_values);
 		parser_data->func_push(options_parse_keyword, options_parse_keyword_end, child);
 		}
 	else
@@ -1405,11 +1405,11 @@ static void options_parse_keyword(GQParserData *parser_data, const gchar *elemen
 
 
 
-static void options_parse_keyword_tree(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer)
+static void options_parse_keyword_tree(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)
 {
 	if (g_ascii_strcasecmp(element_name, "keyword") == 0)
 		{
-		GtkTreeIter *iter_ptr = keyword_add_from_config(keyword_tree, nullptr, attribute_names, attribute_values);
+		GtkTreeIter *iter_ptr = keyword_add_from_config(GTK_TREE_STORE(data), nullptr, attribute_names, attribute_values);
 		parser_data->func_push(options_parse_keyword, options_parse_keyword_end, iter_ptr);
 		}
 	else
@@ -1442,8 +1442,8 @@ static void options_parse_global(GQParserData *parser_data, const gchar *element
 		}
 	else if (g_ascii_strcasecmp(element_name, "keyword_tree") == 0)
 		{
-		if (!keyword_tree) keyword_tree_new();
-		parser_data->func_push(options_parse_keyword_tree, nullptr, nullptr);
+		GtkTreeStore *keyword_tree = keyword_tree_get_or_new();
+		parser_data->func_push(options_parse_keyword_tree, nullptr, keyword_tree);
 		}
 	else if (g_ascii_strcasecmp(element_name, "disabled_plugins") == 0)
 		{

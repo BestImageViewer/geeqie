@@ -1489,10 +1489,11 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	g_signal_connect(G_OBJECT(pkd->autocomplete), "activate",
 			 G_CALLBACK(autocomplete_activate_cb), pkd);
 
-	if (!keyword_tree || !gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_tree), &iter))
+	GtkTreeStore *keyword_tree = keyword_tree_get_or_new();
+	if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_tree), &iter))
 		{
-		/* keyword tree does not exist or is empty - fill with defaults */
-		keyword_tree_new_default();
+		/* keyword tree is empty - fill with defaults */
+		keyword_tree_set_default(keyword_tree);
 		}
 
 	store = gtk_tree_model_filter_new(GTK_TREE_MODEL(keyword_tree), nullptr);

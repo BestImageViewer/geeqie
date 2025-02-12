@@ -93,6 +93,8 @@ constexpr std::array<const gchar *, 22> group_keys{
 	"Xmp.xmp.Rating",
 };
 
+GtkTreeStore *keyword_tree;
+
 gint metadata_cache_entry_compare_key(const MetadataCacheEntry *entry, const gchar *key)
 {
 	return strcmp(entry->key, key);
@@ -1055,10 +1057,6 @@ void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter
  *-------------------------------------------------------------------
  */
 
-
-
-GtkTreeStore *keyword_tree;
-
 gchar *keyword_get_name(GtkTreeModel *keyword_tree, GtkTreeIter *iter)
 {
 	gchar *name;
@@ -1584,11 +1582,12 @@ void keyword_show_set_in(GtkTreeStore *keyword_tree, gpointer id, GList *keyword
 }
 
 
-void keyword_tree_new()
+GtkTreeStore *keyword_tree_get_or_new()
 {
-	if (keyword_tree) return;
+	if (!keyword_tree)
+		keyword_tree = gtk_tree_store_new(KEYWORD_COLUMN_COUNT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_POINTER);
 
-	keyword_tree = gtk_tree_store_new(KEYWORD_COLUMN_COUNT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_POINTER);
+	return keyword_tree;
 }
 
 static GtkTreeIter keyword_tree_default_append(GtkTreeStore *keyword_tree, GtkTreeIter *parent, const gchar *name, gboolean is_keyword)
@@ -1599,12 +1598,12 @@ static GtkTreeIter keyword_tree_default_append(GtkTreeStore *keyword_tree, GtkTr
 	return iter;
 }
 
-void keyword_tree_new_default()
+void keyword_tree_set_default(GtkTreeStore *keyword_tree)
 {
+	if (!keyword_tree) return;
+
 	GtkTreeIter i1;
 	GtkTreeIter i2;
-
-	if (!keyword_tree) keyword_tree_new();
 
 	i1 = keyword_tree_default_append(keyword_tree, nullptr, _("People"), TRUE);
 		i2 = keyword_tree_default_append(keyword_tree, &i1, _("Family"), TRUE);

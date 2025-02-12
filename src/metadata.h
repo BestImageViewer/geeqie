@@ -73,8 +73,6 @@ enum {
 	KEYWORD_COLUMN_COUNT
 };
 
-extern GtkTreeStore *keyword_tree;
-
 void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter *kw_iter, gint mark);
 
 
@@ -111,8 +109,8 @@ void keyword_revert_hidden_in(GtkTreeStore *keyword_tree, gpointer id);
 void keyword_hide_unset_in(GtkTreeStore *keyword_tree, gpointer id, GList *keywords);
 void keyword_show_set_in(GtkTreeStore *keyword_tree, gpointer id, GList *keywords);
 
-void keyword_tree_new_default();
-void keyword_tree_new();
+void keyword_tree_set_default(GtkTreeStore *keyword_tree);
+GtkTreeStore *keyword_tree_get_or_new();
 
 void keyword_tree_write_config(GString *outstr, gint indent);
 GtkTreeIter *keyword_add_from_config(GtkTreeStore *keyword_tree, GtkTreeIter *parent, const gchar **attribute_names, const gchar **attribute_values);
