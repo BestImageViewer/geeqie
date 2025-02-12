@@ -148,6 +148,9 @@ GOptionEntry command_line_options[] =
 	{ "debug"                     ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_INT   , nullptr, _("turn on debug output")                                                        , "[level]" },
 #endif
 	{ "delay"                     , 'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("set slide show delay to Hrs Mins N.M seconds,")                               , "<[H:][M:][N][.M]>" },
+	{ "duplicates-process"        , 'p', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("group duplicate pictures in current collection and process them")             , nullptr },
+	{ "duplicates-program"        ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("run program with each identified set of duplicate images, by default 'echo'") , "<PROGRAM>" },
+	{ "duplicates-threshold"      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,    nullptr, _("set similarity threshold (0-100) for what is considered a duplicate")         , "<N>" },
 	{ "file"                      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL bring Geeqie window to the top")                             , "<FILE>|<URL>" },
 	{ "File"                      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL do not bring Geeqie window to the top")                      , "<FILE>|<URL>" },
 	{ "file-extensions"           ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("list known file extensions")                                                  , nullptr },
