@@ -94,6 +94,47 @@ gboolean scan_geometry(gchar *buffer, GdkRectangle &window)
 	return TRUE;
 }
 
+bool is_file_on_mounted_drive(const gchar *filename)
+{
+	bool found = false;
+
+#if defined(__GLIBC__)
+	FILE *mount_entries = setmntent("/proc/mounts", "r");
+	if (mount_entries == nullptr)
+		{
+		/* It is assumed this will never fail */
+		perror("setmntent");
+		exit(EXIT_FAILURE);
+		}
+
+	struct mntent *mount_entry;
+	while (!found && nullptr != (mount_entry = getmntent(mount_entries)))
+		{
+		found = (g_strcmp0(mount_entry->mnt_dir, G_DIR_SEPARATOR_S) != 0) &&
+		        g_str_has_prefix(filename, mount_entry->mnt_dir);
+		}
+
+	endmntent(mount_entries);
+#else
+	struct statfs* mounts;
+	int num_mounts = getmntinfo(&mounts, MNT_NOWAIT);
+
+	if (num_mounts < 0)
+		{
+		/* It is assumed this will never fail */
+		perror("getmntinfo");
+		exit(EXIT_FAILURE);
+		}
+
+	for (int i = 0; !found && i < num_mounts; i++)
+		{
+		found = (g_strcmp0(mounts[i].f_mntonname, G_DIR_SEPARATOR_S) != 0) &&
+		        g_str_has_prefix(filename, mounts[i].f_mntonname);
+		}
+#endif
+	return found;
+}
+
 } // namespace
 
 static gboolean collection_load_private(CollectionData *cd, const gchar *path, CollectionLoadFlags flags)
@@ -113,8 +154,6 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	guint flush = !!(flags & COLLECTION_LOAD_FLUSH);
 	guint append = !!(flags & COLLECTION_LOAD_APPEND);
 	guint only_geometry = !!(flags & COLLECTION_LOAD_GEOMETRY);
-	gboolean reading_extended_filename = FALSE;
-	gchar *buffer2;
 
 	if (!only_geometry)
 		{
@@ -148,13 +187,13 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		return FALSE;
 		}
 
-	g_autoptr(GString) extended_filename_buffer = g_string_new(nullptr);
+	g_autoptr(GString) extended_filename_buffer = nullptr;
 	while (fgets(s_buf, sizeof(s_buf), f))
 		{
 		gchar *buf;
 		gchar *p = s_buf;
 
-		if (!reading_extended_filename)
+		if (!extended_filename_buffer)
 			{
 			/* Skip whitespaces and empty lines */
 			while (*p && g_ascii_isspace(*p)) p++;
@@ -197,7 +236,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		/* Read filenames */
 		/** @todo This is not safe! */
 		/* Updated: anything within double quotes is considered a filename */
-		if (!reading_extended_filename)
+		if (!extended_filename_buffer)
 			{
 			/* not yet reading filename */
 			while (*p && *p != '"') p++;
@@ -208,8 +247,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			if (p[0] != '"')
 				{
 				/* first part of extended filename */
-				g_string_append(extended_filename_buffer, buf);
-				reading_extended_filename = TRUE;
+				extended_filename_buffer = g_string_new(buf);
 				continue;
 				}
 			}
@@ -226,119 +264,62 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 
 			/* end of extended filename found */
 			g_string_append_len(extended_filename_buffer, buf, p - buf);
-			reading_extended_filename = FALSE;
 			}
 
-		if (extended_filename_buffer->len > 0)
+		g_autofree gchar *filename = nullptr;
+		if (extended_filename_buffer)
 			{
-			buffer2 = g_strdup(extended_filename_buffer->str);
-			g_string_erase(extended_filename_buffer, 0, -1);
+			filename = g_string_free(extended_filename_buffer, FALSE);
+			extended_filename_buffer = nullptr;
 			}
 		else
 			{
 			*p = 0;
-			buffer2 = g_strdup(buf);
+			filename = g_strdup(buf);
 			}
 
-		if (*buffer2)
+		if (!*filename) continue;
+
+		total++;
+
+		if (!flush)
+			changed |= collect_manager_process_action(entry, &filename);
+
+		if (filename[0] == G_DIR_SEPARATOR && collection_add_check(cd, file_data_new_simple(filename), FALSE, TRUE)) continue;
+
+		log_printf("Warning: Collection: %s Invalid file: %s", cd->name, filename);
+		DEBUG_1("collection invalid file: %s", filename);
+
+		/* If the file path has the prefix home, tmp or usr it was on the local file system and has been deleted. Ignore it. */
+		if (!g_str_has_prefix(filename, "/home") && !g_str_has_prefix(filename, "/tmp") && !g_str_has_prefix(filename, "/usr"))
 			{
-			gboolean valid;
-			gboolean found = FALSE;
-
-			if (!flush)
-				changed |= collect_manager_process_action(entry, &buffer2);
-
-			valid = (buffer2[0] == G_DIR_SEPARATOR && collection_add_check(cd, file_data_new_simple(buffer2), FALSE, TRUE));
-			if (!valid)
+			/* The file was on a mounted drive and either has been deleted or the drive is not mounted */
+			if (!is_file_on_mounted_drive(filename))
 				{
-				log_printf("Warning: Collection: %s Invalid file: %s", cd->name, buffer2);
-				DEBUG_1("collection invalid file: %s", buffer2);
+				log_printf("%s is a file on an unmounted filesystem: %s", filename, cd->path);
+				g_autofree gchar *text = g_strdup_printf(_("This Collection cannot be opened because it contains a link to a file on a drive which is not yet mounted.\n\nCollection: %s\nFile: %s\n"),
+				                                         cd->path, filename);
+				warning_dialog(_("Cannot open Collection"), text, GQ_ICON_DIALOG_WARNING, nullptr);
+
+				collection_window_close_by_collection(cd);
+				success = FALSE;
+				break;
 				}
 
-			total++;
-			if (!valid)
-				{
-				/* If the file path has the prefix home, tmp or usr it was on the local file system and has been deleted. Ignore it. */
-				if (!g_str_has_prefix(buffer2, "/home") && !g_str_has_prefix(buffer2, "/tmp") && !g_str_has_prefix(buffer2, "/usr"))
-					{
-					/* The file was on a mounted drive and either has been deleted or the drive is not mounted */
-#if defined(__GLIBC__)
-					struct mntent *mount_entry;
-					FILE *mount_entries;
-
-					mount_entries = setmntent("/proc/mounts", "r");
-					if (mount_entries == nullptr)
-						{
-						/* It is assumed this will never fail */
-						perror("setmntent");
-						exit(EXIT_FAILURE);
-						}
-
-					while (nullptr != (mount_entry = getmntent(mount_entries)))
-						{
-						if (g_strcmp0(mount_entry->mnt_dir, G_DIR_SEPARATOR_S) != 0)
-							{
-							if (g_str_has_prefix(buffer2, mount_entry->mnt_dir))
-								{
-								log_printf("%s was a file on a mounted filesystem but has been deleted: %s", buffer2, cd->name);
-								found = TRUE;
-								break;
-								}
-							}
-						}
-					endmntent(mount_entries);
-#else
-					struct statfs* mounts;
-					int num_mounts = getmntinfo(&mounts, MNT_NOWAIT);
-
-					if (num_mounts < 0)
-						{
-						/* It is assumed this will never fail */
-						perror("setmntent");
-						exit(EXIT_FAILURE);
-						}
-
-					for (int i = 0; i < num_mounts; i++)
-						{
-						if (g_strcmp0(mounts[i].f_mntonname, G_DIR_SEPARATOR_S) != 0)
-							{
-							if (g_str_has_prefix(buffer2, mounts[i].f_mntonname))
-								{
-								log_printf("%s was a file on a mounted filesystem but has been deleted: %s", buffer2, cd->name);
-								found = TRUE;
-								break;
-								}
-							}
-						}
-#endif
-
-					if (!found)
-						{
-						log_printf("%s is a file on an unmounted filesystem: %s", buffer2, cd->path);
-						g_autofree gchar *text = g_strdup_printf(_("This Collection cannot be opened because it contains a link to a file on a drive which is not yet mounted.\n\nCollection: %s\nFile: %s\n"),
-						                                         cd->path, buffer2);
-						warning_dialog(_("Cannot open Collection"), text, GQ_ICON_DIALOG_WARNING, nullptr);
-
-						collection_window_close_by_collection(cd);
-						success = FALSE;
-						break;
-						}
-					}
-				else
-					{
-					log_printf("%s was a file on local filesystem but has been deleted: %s", buffer2, cd->name);
-					}
-
-				fail++;
-				if (limit_failures && fail > GQ_COLLECTION_FAIL_MIN && fail * 100 / total > GQ_COLLECTION_FAIL_PERCENT)
-					{
-					log_printf("%u invalid filenames in unofficial collection file, closing: %s\n", fail, path);
-					success = FALSE;
-					break;
-					}
-				}
+			log_printf("%s was a file on a mounted filesystem but has been deleted: %s", filename, cd->name);
 			}
-		g_free(buffer2);
+		else
+			{
+			log_printf("%s was a file on local filesystem but has been deleted: %s", filename, cd->name);
+			}
+
+		fail++;
+		if (limit_failures && fail > GQ_COLLECTION_FAIL_MIN && fail * 100 / total > GQ_COLLECTION_FAIL_PERCENT)
+			{
+			log_printf("%u invalid filenames in unofficial collection file, closing: %s\n", fail, path);
+			success = FALSE;
+			break;
+			}
 		}
 
 	DEBUG_1("collection files: total = %u fail = %u official=%d gqview=%d geometry=%d", total, fail, has_official_header, has_gqview_header, has_geometry_header);
