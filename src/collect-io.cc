@@ -48,34 +48,73 @@
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
 
-#define GQ_COLLECTION_MARKER "#" GQ_APPNAME
-
 #ifdef __NetBSD__
 #define statfs statvfs
 #endif
 
-enum {
-	GQ_COLLECTION_FAIL_MIN =     300,
-	GQ_COLLECTION_FAIL_PERCENT = 98,
-	GQ_COLLECTION_READ_BUFSIZE = 4096
-};
-
-struct CollectManagerEntry;
-
-static void collection_load_thumb_step(CollectionData *cd);
-static gboolean collection_save_private(CollectionData *cd, const gchar *path);
-
-static CollectManagerEntry *collect_manager_get_entry(const gchar *path);
-static void collect_manager_entry_reset(CollectManagerEntry *entry);
-static gint collect_manager_process_action(CollectManagerEntry *entry, gchar **path_ptr);
-
 namespace
 {
 
+#if defined(__GLIBC__)
+using MFILE = FILE;
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(MFILE, endmntent)
+#endif
+
+constexpr guint GQ_COLLECTION_FAIL_MIN = 300;
+constexpr guint GQ_COLLECTION_FAIL_PERCENT = 98;
+constexpr size_t GQ_COLLECTION_READ_BUFSIZE = 4096;
+
+#define GQ_COLLECTION_MARKER "#" GQ_APPNAME
 const size_t GQ_COLLECTION_MARKER_LEN = strlen(GQ_COLLECTION_MARKER);
 
 constexpr gchar gqview_collection_marker[] = "#GQview collection";
 const size_t gqview_collection_marker_len = strlen(gqview_collection_marker);
+
+constexpr gint COLLECT_MANAGER_ACTIONS_PER_IDLE = 1000;
+constexpr guint COLLECT_MANAGER_FLUSH_DELAY = 10000;
+
+struct CollectManagerEntry
+{
+	gchar *path;
+	GList *add_list;
+	GHashTable *oldpath_hash;
+	GHashTable *newpath_hash;
+	gboolean empty;
+};
+
+enum CollectManagerType {
+	COLLECTION_MANAGER_UPDATE,
+	COLLECTION_MANAGER_ADD,
+	COLLECTION_MANAGER_REMOVE
+};
+
+struct CollectManagerAction
+{
+	gchar *oldpath;
+	gchar *newpath;
+
+	CollectManagerType type;
+
+	gint ref;
+};
+
+
+GList *collection_manager_entry_list = nullptr;
+GList *collection_manager_action_list = nullptr;
+GList *collection_manager_action_tail = nullptr;
+guint collection_manager_timer_id = 0; /* event source id */
+
+CollectManagerEntry *collect_manager_get_entry(const gchar *path)
+{
+	const auto collect_manager_entry_compare_path = [](gconstpointer data, gconstpointer user_data)
+	{
+		return strcmp(static_cast<const CollectManagerEntry *>(data)->path, static_cast<const gchar *>(user_data));
+	};
+
+	GList *work = g_list_find_custom(collection_manager_entry_list, path, collect_manager_entry_compare_path);
+
+	return work ? static_cast<CollectManagerEntry *>(work->data) : nullptr;
+}
 
 gboolean scan_geometry(gchar *buffer, GdkRectangle &window)
 {
@@ -96,10 +135,14 @@ gboolean scan_geometry(gchar *buffer, GdkRectangle &window)
 
 bool is_file_on_mounted_drive(const gchar *filename)
 {
-	bool found = false;
+	const auto is_file_in_dir = [filename](const gchar *dirname)
+	{
+		return (g_strcmp0(dirname, G_DIR_SEPARATOR_S) != 0) &&
+		       g_str_has_prefix(filename, dirname);
+	};
 
 #if defined(__GLIBC__)
-	FILE *mount_entries = setmntent("/proc/mounts", "r");
+	g_autoptr(MFILE) mount_entries = setmntent("/proc/mounts", "r");
 	if (mount_entries == nullptr)
 		{
 		/* It is assumed this will never fail */
@@ -108,13 +151,11 @@ bool is_file_on_mounted_drive(const gchar *filename)
 		}
 
 	struct mntent *mount_entry;
-	while (!found && nullptr != (mount_entry = getmntent(mount_entries)))
+	while (nullptr != (mount_entry = getmntent(mount_entries)))
 		{
-		found = (g_strcmp0(mount_entry->mnt_dir, G_DIR_SEPARATOR_S) != 0) &&
-		        g_str_has_prefix(filename, mount_entry->mnt_dir);
+		if (is_file_in_dir(mount_entry->mnt_dir))
+			return true;
 		}
-
-	endmntent(mount_entries);
 #else
 	struct statfs* mounts;
 	int num_mounts = getmntinfo(&mounts, MNT_NOWAIT);
@@ -126,16 +167,22 @@ bool is_file_on_mounted_drive(const gchar *filename)
 		exit(EXIT_FAILURE);
 		}
 
-	for (int i = 0; !found && i < num_mounts; i++)
+	for (int i = 0; i < num_mounts; i++)
 		{
-		found = (g_strcmp0(mounts[i].f_mntonname, G_DIR_SEPARATOR_S) != 0) &&
-		        g_str_has_prefix(filename, mounts[i].f_mntonname);
+		if (is_file_in_dir(mounts[i].f_mntonname))
+			return true;
 		}
 #endif
-	return found;
+	return false;
 }
 
 } // namespace
+
+static void collection_load_thumb_step(CollectionData *cd);
+static gboolean collection_save_private(CollectionData *cd, const gchar *path);
+
+static void collect_manager_entry_reset(CollectManagerEntry *entry);
+static gint collect_manager_process_action(CollectManagerEntry *entry, gchar **path_ptr);
 
 static gboolean collection_load_private(CollectionData *cd, const gchar *path, CollectionLoadFlags flags)
 {
@@ -552,43 +599,6 @@ gboolean collection_load_only_geometry(CollectionData *cd, const gchar *path)
  *-------------------------------------------------------------------
  */
 
-enum {
-	COLLECT_MANAGER_ACTIONS_PER_IDLE = 1000,
-	COLLECT_MANAGER_FLUSH_DELAY =      10000
-};
-
-struct CollectManagerEntry
-{
-	gchar *path;
-	GList *add_list;
-	GHashTable *oldpath_hash;
-	GHashTable *newpath_hash;
-	gboolean empty;
-};
-
-enum CollectManagerType {
-	COLLECTION_MANAGER_UPDATE,
-	COLLECTION_MANAGER_ADD,
-	COLLECTION_MANAGER_REMOVE
-};
-
-struct CollectManagerAction
-{
-	gchar *oldpath;
-	gchar *newpath;
-
-	CollectManagerType type;
-
-	gint ref;
-};
-
-
-static GList *collection_manager_entry_list = nullptr;
-static GList *collection_manager_action_list = nullptr;
-static GList *collection_manager_action_tail = nullptr;
-static guint collection_manager_timer_id = 0; /* event source id */
-
-
 static CollectManagerAction *collect_manager_action_new(const gchar *oldpath, const gchar *newpath,
 							CollectManagerType type)
 {
@@ -671,18 +681,6 @@ static void collect_manager_entry_reset(CollectManagerEntry *entry)
 {
 	collect_manager_entry_free_data(entry);
 	collect_manager_entry_init_data(entry);
-}
-
-static CollectManagerEntry *collect_manager_get_entry(const gchar *path)
-{
-	const auto collect_manager_entry_compare_path = [](gconstpointer data, gconstpointer user_data)
-	{
-		return strcmp(static_cast<const CollectManagerEntry *>(data)->path, static_cast<const gchar *>(user_data));
-	};
-
-	GList *work = g_list_find_custom(collection_manager_entry_list, path, collect_manager_entry_compare_path);
-
-	return work ? static_cast<CollectManagerEntry *>(work->data) : nullptr;
 }
 
 static void collect_manager_entry_add_action(CollectManagerEntry *entry, CollectManagerAction *action)
