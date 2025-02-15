@@ -102,7 +102,6 @@ struct CollectManagerAction
 GList *collection_manager_entry_list = nullptr;
 GList *collection_manager_action_list = nullptr;
 GList *collection_manager_action_tail = nullptr;
-guint collection_manager_timer_id = 0; /* event source id */
 
 CollectManagerEntry *collect_manager_get_entry(const gchar *path)
 {
@@ -949,18 +948,22 @@ static gboolean collect_manager_process_cb(gpointer)
 	return G_SOURCE_REMOVE;
 }
 
-static gboolean collect_manager_timer_cb(gpointer)
+static gboolean collect_manager_timer_cb(gpointer user_data)
 {
 	DEBUG_1("collection manager timer expired");
 
 	g_idle_add_full(G_PRIORITY_LOW, collect_manager_process_cb, nullptr, nullptr);
 
-	collection_manager_timer_id = 0;
-	return FALSE;
+	auto *collection_manager_timer_id = static_cast<guint *>(user_data);
+	*collection_manager_timer_id = 0;
+
+	return G_SOURCE_REMOVE;
 }
 
 static void collect_manager_timer_push(gint stop)
 {
+	static guint collection_manager_timer_id = 0; /* event source id */
+
 	if (collection_manager_timer_id)
 		{
 		if (!stop) return;
@@ -972,7 +975,7 @@ static void collect_manager_timer_push(gint stop)
 	if (!stop)
 		{
 		collection_manager_timer_id = g_timeout_add(COLLECT_MANAGER_FLUSH_DELAY,
-							    collect_manager_timer_cb, nullptr);
+		                                            collect_manager_timer_cb, &collection_manager_timer_id);
 		DEBUG_1("collection manager timer started");
 		}
 }
