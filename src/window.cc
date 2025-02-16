@@ -325,49 +325,39 @@ void help_window_show(const gchar *key)
  *-----------------------------------------------------------------------------
  */
 
-struct HelpSearchData {
-	GenericDialog *gd;
-	GtkWidget *edit_widget;
-	gchar *text_entry;
-};
-
-static void help_search_window_show_icon_press(GtkEntry *, GtkEntryIconPosition, GdkEvent *, gpointer userdata)
+static void help_search_window_show_icon_press(GtkEntry *edit_widget, GtkEntryIconPosition, GdkEvent *, gpointer)
 {
-	auto hsd = static_cast<HelpSearchData *>(userdata);
-
-	g_free(hsd->text_entry);
-	hsd->text_entry = g_strdup("");
-	gq_gtk_entry_set_text(GTK_ENTRY(hsd->edit_widget), hsd->text_entry);
+	gq_gtk_entry_set_text(edit_widget, "");
 }
 
 static void help_search_window_ok_cb(GenericDialog *, gpointer data)
 {
-	auto hsd = static_cast<HelpSearchData *>(data);
+	auto *edit_widget = GTK_ENTRY(data);
 
 	g_autofree gchar *search_command = g_strconcat(options->help_search_engine,
-	                                               gq_gtk_entry_get_text(GTK_ENTRY(hsd->edit_widget)),
+	                                               gq_gtk_entry_get_text(edit_widget),
 	                                               NULL);
 	help_browser_run(search_command);
-
-	g_free(hsd);
-}
-
-static void help_search_window_cancel_cb(GenericDialog *, gpointer data)
-{
-	g_free(data);
 }
 
 void help_search_window_show()
 {
-	GenericDialog *gd;
 	GtkWidget *table;
 	GtkWidget *label1;
 	GtkWidget *label2;
 
-	auto hsd = g_new0(HelpSearchData, 1);
-	hsd->gd = gd = generic_dialog_new(_("On-line help search"), "help_search",
-				nullptr, TRUE,
-				help_search_window_cancel_cb, hsd);
+	GtkWidget *edit_widget = gtk_entry_new();
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(edit_widget),
+	                                  GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
+	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(edit_widget),
+	                                GTK_ENTRY_ICON_SECONDARY, _("Clear"));
+	gtk_widget_set_size_request(edit_widget, 300, -1);
+	g_signal_connect(GTK_ENTRY(edit_widget), "icon-press",
+	                 G_CALLBACK(help_search_window_show_icon_press), nullptr);
+
+	GenericDialog *gd = generic_dialog_new(_("On-line help search"), "help_search",
+	                                       nullptr, TRUE,
+	                                       nullptr, edit_widget);
 	generic_dialog_add_message(gd, nullptr, _("Search the on-line help files.\n"), nullptr, FALSE);
 
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK",
@@ -385,20 +375,11 @@ void help_search_window_show()
 
 	table = pref_table_new(gd->vbox, 3, 1, FALSE, TRUE);
 	pref_table_label(table, 0, 0, _("Search terms:"), GTK_ALIGN_END);
-	hsd->edit_widget = gtk_entry_new();
-	gtk_widget_set_size_request(hsd->edit_widget, 300, -1);
-	gq_gtk_grid_attach_default(GTK_GRID(table), hsd->edit_widget, 1, 2, 0, 1);
-	generic_dialog_attach_default(gd, hsd->edit_widget);
-	gtk_widget_show(hsd->edit_widget);
+	gq_gtk_grid_attach_default(GTK_GRID(table), edit_widget, 1, 2, 0, 1);
+	generic_dialog_attach_default(gd, edit_widget);
+	gtk_widget_show(edit_widget);
 
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(hsd->edit_widget),
-						GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
-	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(hsd->edit_widget),
-						GTK_ENTRY_ICON_SECONDARY, _("Clear"));
-	g_signal_connect(GTK_ENTRY(hsd->edit_widget), "icon-press",
-						G_CALLBACK(help_search_window_show_icon_press), hsd);
-
-	gtk_widget_grab_focus(hsd->edit_widget);
+	gtk_widget_grab_focus(edit_widget);
 
 	gtk_widget_show(gd->dialog);
 }
