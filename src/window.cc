@@ -279,43 +279,31 @@ void help_window_show(const gchar *key)
 		return;
 		}
 
-	if (!strcmp(key, "release_notes"))
-		{
-		g_autofree gchar *path = g_build_filename(gq_helpdir, "README.html", NULL);
-		if (isfile(path))
+	const auto open_help_file = [key](const gchar *html_file, const gchar *text_file)
+	{
+		g_autofree gchar *html_path = g_build_filename(gq_helpdir, html_file, NULL);
+		if (isfile(html_path))
 			{
-			g_free(path);
-			path = g_build_filename("file://", gq_helpdir, "README.html", NULL);
-			help_browser_run(path);
+			g_autofree gchar *url = g_strdup_printf("file://%s", html_path);
+			help_browser_run(url);
 			}
 		else
 			{
-			g_free(path);
-			path = g_build_filename(gq_helpdir, "README.md", NULL);
-			help_window = help_window_new(_("Help"), "help", path, key);
+			g_autofree gchar *text_path = g_build_filename(gq_helpdir, text_file, NULL);
+			help_window = help_window_new(_("Help"), "help", text_path, key);
 
 			g_signal_connect(G_OBJECT(help_window), "destroy",
-					 G_CALLBACK(help_window_destroy_cb), NULL);
+			                 G_CALLBACK(help_window_destroy_cb), NULL);
 			}
+	};
+
+	if (!strcmp(key, "release_notes"))
+		{
+		open_help_file("README.html", "README.md");
 		}
 	else
 		{
-		g_autofree gchar *path = g_build_filename(gq_helpdir, "ChangeLog.html", NULL);
-		if (isfile(path))
-			{
-			g_free(path);
-			path = g_build_filename("file://", gq_helpdir, "ChangeLog.html", NULL);
-			help_browser_run(path);
-			}
-		else
-			{
-			g_free(path);
-			path = g_build_filename(gq_helpdir, "ChangeLog", NULL);
-			help_window = help_window_new(_("Help"), "help", path, key);
-
-			g_signal_connect(G_OBJECT(help_window), "destroy",
-					 G_CALLBACK(help_window_destroy_cb), NULL);
-			}
+		open_help_file("ChangeLog.html", "ChangeLog");
 		}
 }
 
