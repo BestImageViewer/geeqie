@@ -1163,7 +1163,7 @@ gboolean vd_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 	GtkTreePath *tpath;
 	FileData *fd = nullptr;
 
-	if (defined_mouse_buttons(widget, bevent, vd->layout))
+	if (defined_mouse_buttons(bevent, vd->layout))
 		{
 		return TRUE;
 		}

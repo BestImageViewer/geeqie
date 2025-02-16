@@ -537,7 +537,7 @@ gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *beve
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
 
-	if (defined_mouse_buttons(widget, bevent, vf->layout))
+	if (defined_mouse_buttons(bevent, vf->layout))
 		{
 		return TRUE;
 		}
