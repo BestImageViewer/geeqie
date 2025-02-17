@@ -3176,16 +3176,10 @@ static void keywords_find_cb(GtkWidget *widget, gpointer)
 
 static void config_tab_keywords_save()
 {
-	GtkTextIter start;
-	GtkTextIter end;
-	GtkTextBuffer *buffer;
 	GList *kw_list = nullptr;
 	gchar *kw_split;
 
-	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(keyword_text));
-	gtk_text_buffer_get_bounds(buffer, &start, &end);
-
-	g_autofree gchar *buffer_text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+	g_autofree gchar *buffer_text = text_widget_text_pull(keyword_text);
 
 	kw_split = strtok(buffer_text, "\n");
 	while (kw_split != nullptr)
