@@ -203,7 +203,7 @@ GtkWidget *pref_color_button_new(GtkWidget *parent_box,
 				 const gchar *title, GdkRGBA *color,
 				 GCallback func, gpointer data);
 
-gchar *text_widget_text_pull(GtkWidget *text_widget);
+gchar *text_widget_text_pull(GtkWidget *text_widget, gboolean include_hidden_chars = FALSE);
 gchar *text_widget_text_pull_selected(GtkWidget *text_widget);
 
 struct ActionItem

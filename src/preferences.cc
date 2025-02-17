@@ -1416,19 +1416,8 @@ static void safe_delete_clear_cb(GtkWidget *widget, gpointer)
 
 static void image_overlay_template_view_changed_cb(GtkWidget *, gpointer data)
 {
-	GtkWidget *pTextView;
-	GtkTextBuffer *pTextBuffer;
-	GtkTextIter iStart;
-	GtkTextIter iEnd;
-
-	pTextView = GTK_WIDGET(data);
-
-	pTextBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pTextView));
-	gtk_text_buffer_get_start_iter(pTextBuffer, &iStart);
-	gtk_text_buffer_get_end_iter(pTextBuffer, &iEnd);
-
 	g_free(c_options->image_overlay.template_string);
-	c_options->image_overlay.template_string = g_strdup(gtk_text_buffer_get_text(pTextBuffer, &iStart, &iEnd, TRUE));
+	c_options->image_overlay.template_string = text_widget_text_pull(GTK_WIDGET(data), TRUE);
 }
 
 static void image_overlay_default_template_ok_cb(GenericDialog *, gpointer data)

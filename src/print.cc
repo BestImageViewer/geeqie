@@ -262,29 +262,10 @@ void page_text_position_f2_cb(GtkWidget *widget, gpointer data)
 	page_text_position_cb(widget, data, FOOTER_2);
 }
 
-void set_print_image_text_string(gchar **template_string, const gchar *value)
-{
-	g_assert(template_string);
-
-	g_free(*template_string);
-	*template_string = g_strdup(value);
-}
-
 void image_text_template_view_changed_cb(GtkWidget *, gpointer data)
 {
-	GtkWidget *pTextView;
-	GtkTextBuffer *pTextBuffer;
-	GtkTextIter iStart;
-	GtkTextIter iEnd;
-
-	pTextView = GTK_WIDGET(data);
-
-	pTextBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pTextView));
-	gtk_text_buffer_get_start_iter(pTextBuffer, &iStart);
-	gtk_text_buffer_get_end_iter(pTextBuffer, &iEnd);
-
-	set_print_image_text_string(&options->printer.template_string,
-					  gtk_text_buffer_get_text(pTextBuffer, &iStart, &iEnd, TRUE));
+	g_free(options->printer.template_string);
+	options->printer.template_string = text_widget_text_pull(GTK_WIDGET(data), TRUE);
 }
 
 void print_text_menu(GtkWidget *box, PrintWindow *pw)

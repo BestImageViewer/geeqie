@@ -1182,18 +1182,17 @@ GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title, GdkR
  *-----------------------------------------------------------------------------
  */
 
-gchar *text_widget_text_pull(GtkWidget *text_widget)
+gchar *text_widget_text_pull(GtkWidget *text_widget, gboolean include_hidden_chars)
 {
 	if (GTK_IS_TEXT_VIEW(text_widget))
 		{
-		GtkTextBuffer *buffer;
+		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_widget));
+
 		GtkTextIter start;
 		GtkTextIter end;
-
-		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_widget));
 		gtk_text_buffer_get_bounds(buffer, &start, &end);
 
-		return gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+		return gtk_text_buffer_get_text(buffer, &start, &end, include_hidden_chars);
 		}
 
 	if (GTK_IS_ENTRY(text_widget))
@@ -1202,8 +1201,6 @@ gchar *text_widget_text_pull(GtkWidget *text_widget)
 		}
 
 	return nullptr;
-	
-
 }
 
 gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
