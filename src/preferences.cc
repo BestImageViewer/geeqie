@@ -3235,8 +3235,6 @@ static void config_tab_keywords(GtkWidget *notebook)
 	gtk_text_buffer_get_start_iter(buffer, &iter);
 	gtk_text_buffer_create_mark(buffer, "end", &iter, FALSE);
 
-	g_autofree gchar *path = g_build_filename(get_rc_dir(), "keywords", NULL);
-
 	GList *kwl = keyword_list_get();
 	for (GList *work = kwl; work; work = work->next)
 	{
