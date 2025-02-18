@@ -3198,38 +3198,27 @@ static void config_tab_keywords_save()
 
 static void config_tab_keywords(GtkWidget *notebook)
 {
-	GtkWidget *hbox;
-	GtkWidget *vbox;
-	GtkWidget *group;
-	GtkWidget *button;
-	GtkWidget *scrolled;
-	GtkTextIter iter;
-	GtkTextBuffer *buffer;
-#if HAVE_SPELL
-	GspellTextView *gspell_view;
-#endif
+	GtkWidget *vbox = scrolled_notebook_page(notebook, _("Keywords"));
+	GtkWidget *group = pref_group_new(vbox, TRUE, _("Edit keywords autocompletion list"), GTK_ORIENTATION_VERTICAL);
+	GtkWidget *hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	vbox = scrolled_notebook_page(notebook, _("Keywords"));
-
-	group = pref_group_new(vbox, TRUE, _("Edit keywords autocompletion list"), GTK_ORIENTATION_VERTICAL);
-
-	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-
-	button = pref_button_new(hbox, GQ_ICON_RUN, _("Search"),
-				   G_CALLBACK(keywords_find_cb), keyword_text);
+	GtkWidget *button = pref_button_new(hbox, GQ_ICON_RUN, _("Search"),
+	                                    G_CALLBACK(keywords_find_cb), nullptr);
 	gtk_widget_set_tooltip_text(button, _("Search for existing keywords"));
-
 
 	keyword_text = gtk_text_view_new();
 	gtk_widget_set_size_request(keyword_text, 20, 20);
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(keyword_text), TRUE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(keyword_text), GTK_WRAP_WORD);
+
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
 	gtk_widget_show(scrolled);
 
 #if HAVE_SPELL
 	if (options->metadata.check_spelling)
 		{
-		gspell_view = gspell_text_view_get_from_gtk_text_view(GTK_TEXT_VIEW(keyword_text));
+		GspellTextView *gspell_view = gspell_text_view_get_from_gtk_text_view(GTK_TEXT_VIEW(keyword_text));
 		gspell_text_view_basic_setup(gspell_view);
 		}
 #endif
@@ -3237,27 +3226,25 @@ static void config_tab_keywords(GtkWidget *notebook)
 	gq_gtk_container_add(GTK_WIDGET(scrolled), keyword_text);
 	gtk_widget_show(keyword_text);
 
-	gtk_text_view_set_editable(GTK_TEXT_VIEW(keyword_text), TRUE);
-
-	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(keyword_text));
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(keyword_text));
 	gtk_text_buffer_create_tag(buffer, "monospace",
-				"family", "monospace", NULL);
+	                           "family", "monospace",
+	                           NULL);
 
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(keyword_text), GTK_WRAP_WORD);
+	GtkTextIter iter;
 	gtk_text_buffer_get_start_iter(buffer, &iter);
 	gtk_text_buffer_create_mark(buffer, "end", &iter, FALSE);
 
 	g_autofree gchar *path = g_build_filename(get_rc_dir(), "keywords", NULL);
 
 	GList *kwl = keyword_list_get();
-	kwl = g_list_first(kwl);
-	while (kwl)
+	for (GList *work = kwl; work; work = work->next)
 	{
+		g_autofree gchar *tmp = g_strdup_printf("%s\n", static_cast<gchar *>(work->data));
 		gtk_text_buffer_get_end_iter (buffer, &iter);
-		g_autofree gchar *tmp = g_strconcat(static_cast<const gchar *>(kwl->data), "\n", NULL);
 		gtk_text_buffer_insert(buffer, &iter, tmp, -1);
-		kwl = kwl->next;
 	}
+	g_list_free_full(kwl, g_free);
 
 	gtk_text_buffer_set_modified(buffer, FALSE);
 }
