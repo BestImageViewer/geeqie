@@ -21,9 +21,11 @@
 
 #include "ui-utildlg.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <ctime>
 #include <string>
+#include <vector>
 
 #include <gdk/gdk.h>
 #include <gio/gio.h>
@@ -47,7 +49,29 @@
 namespace
 {
 
-constexpr gint max_buffer_size = 16384;
+struct DialogWindow
+{
+	GdkRectangle rect;
+	gchar *title;
+	gchar *role;
+};
+
+DialogWindow *dialog_window_find_by_title_and_role(const std::vector<DialogWindow *> &dialog_windows,
+                                                   const gchar *title, const gchar *role)
+{
+	const auto dialog_window_has_title_and_role = [title, role](const DialogWindow *dw)
+	{
+		return g_strcmp0(dw->title, title) == 0 && g_strcmp0(dw->role, role) == 0;
+	};
+
+	auto it = std::find_if(dialog_windows.begin(), dialog_windows.end(),
+	                       dialog_window_has_title_and_role);
+
+	return (it != dialog_windows.end()) ? *it : nullptr;
+}
+
+std::vector<DialogWindow *> dialog_windows;
+
 } // namespace
 
 /*
@@ -56,56 +80,30 @@ constexpr gint max_buffer_size = 16384;
  *-----------------------------------------------------------------------------
  */
 
-struct DialogWindow
-{
-	GdkRectangle rect;
-	gchar *title;
-	gchar *role;
-};
-
-static GList *dialog_windows = nullptr;
-
 static void generic_dialog_save_window(const gchar *title, const gchar *role, GdkRectangle rect)
 {
-	GList *work;
-
-	work = g_list_first(dialog_windows);
-	while (work)
+	DialogWindow *dw = dialog_window_find_by_title_and_role(dialog_windows, title, role);
+	if (dw)
 		{
-		auto dw = static_cast<DialogWindow *>(work->data);
-		if (g_strcmp0(dw->title ,title) == 0 && g_strcmp0(dw->role, role) == 0)
-			{
-			dw->rect = rect;
-			return;
-			}
-		work = work->next;
+		dw->rect = rect;
+		return;
 		}
 
-	auto dw = g_new0(DialogWindow, 1);
+	dw = g_new0(DialogWindow, 1);
 	dw->rect = rect;
 	dw->title = g_strdup(title);
 	dw->role = g_strdup(role);
 
-	dialog_windows = g_list_append(dialog_windows, dw);
+	dialog_windows.push_back(dw);
 }
 
 gboolean generic_dialog_find_window(const gchar *title, const gchar *role, GdkRectangle &rect)
 {
-	GList *work;
+	DialogWindow *dw = dialog_window_find_by_title_and_role(dialog_windows, title, role);
+	if (!dw) return FALSE;
 
-	work = g_list_first(dialog_windows);
-	while (work)
-		{
-		auto dw = static_cast<DialogWindow *>(work->data);
-
-		if (g_strcmp0(dw->title,title) == 0 && g_strcmp0(dw->role, role) == 0)
-			{
-			rect = dw->rect;
-			return TRUE;
-			}
-		work = work->next;
-		}
-	return FALSE;
+	rect = dw->rect;
+	return TRUE;
 }
 
 void generic_dialog_close(GenericDialog *gd)
@@ -327,7 +325,7 @@ void generic_dialog_windows_load_config(const gchar **attribute_names, const gch
 
 	if (dw->title && dw->title[0] != 0)
 		{
-		dialog_windows = g_list_append(dialog_windows, dw);
+		dialog_windows.push_back(dw);
 		}
 	else
 		{
@@ -339,30 +337,25 @@ void generic_dialog_windows_load_config(const gchar **attribute_names, const gch
 
 void generic_dialog_windows_write_config(GString *outstr, gint indent)
 {
-	GList *work;
+	if (!options->save_dialog_window_positions || dialog_windows.empty()) return;
 
-	if (options->save_dialog_window_positions && dialog_windows)
+	WRITE_NL(); WRITE_STRING("<%s>", "dialogs");
+	indent++;
+
+	for (const DialogWindow *dw : dialog_windows)
 		{
-		WRITE_NL(); WRITE_STRING("<%s>", "dialogs");
-		indent++;
-
-		work = g_list_first(dialog_windows);
-		while (work)
-			{
-			auto dw = static_cast<DialogWindow *>(work->data);
-			WRITE_NL(); WRITE_STRING("<window ");
-			write_char_option(outstr, indent + 1, "title", dw->title);
-			write_char_option(outstr, indent + 1, "role", dw->role);
-			WRITE_INT(dw->rect, x);
-			WRITE_INT(dw->rect, y);
-			write_int_option(outstr, indent, "w", dw->rect.width);
-			write_int_option(outstr, indent, "h", dw->rect.height);
-			WRITE_STRING("/>");
-			work = work->next;
-			}
-		indent--;
-		WRITE_NL(); WRITE_STRING("</%s>", "dialogs");
+		WRITE_NL(); WRITE_STRING("<window ");
+		write_char_option(outstr, indent + 1, "title", dw->title);
+		write_char_option(outstr, indent + 1, "role", dw->role);
+		WRITE_INT(dw->rect, x);
+		WRITE_INT(dw->rect, y);
+		write_int_option(outstr, indent, "w", dw->rect.width);
+		write_int_option(outstr, indent, "h", dw->rect.height);
+		WRITE_STRING("/>");
 		}
+
+	indent--;
+	WRITE_NL(); WRITE_STRING("</%s>", "dialogs");
 }
 
 static void generic_dialog_setup(GenericDialog *gd,
@@ -532,6 +525,7 @@ static void new_appimage_notification_func(gpointer, gpointer user_data)
 	GNetworkMonitor *net_mon;
 	GSocketConnectable *geeqie_github;
 	auto app = static_cast<GtkApplication *>(user_data);
+	constexpr gint max_buffer_size = 16384;
 	char buffer[max_buffer_size];
 	char result[max_buffer_size];
 	gboolean internet_available = FALSE;
