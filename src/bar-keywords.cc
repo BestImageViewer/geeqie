@@ -1694,14 +1694,9 @@ void autocomplete_keywords_list_load(const gchar *path)
 
 gboolean autocomplete_keywords_list_save(const gchar *path)
 {
-	SecureSaveInfo *ssi;
-	gchar *string;
-	GtkTreeIter  iter;
-	gboolean     valid;
-
 	g_autofree gchar *pathl = path_from_utf8(path);
-	ssi = secure_open(pathl);
 
+	SecureSaveInfo *ssi = secure_open(pathl);
 	if (!ssi)
 		{
 		log_printf(_("Error: Unable to write keywords list to: %s\n"), path);
@@ -1710,16 +1705,14 @@ gboolean autocomplete_keywords_list_save(const gchar *path)
 
 	secure_fprintf(ssi, "#Keywords list\n");
 
-	valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_store), &iter);
-
-	while (valid)
-		{
-		gtk_tree_model_get (GTK_TREE_MODEL(keyword_store), &iter, 0, &string, -1);
-		g_autofree gchar *string_nl = g_strconcat(string, "\n", NULL);
-		secure_fprintf(ssi, "%s", string_nl);
-
-		valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(keyword_store), &iter);
-		}
+	const auto keyword_save = [](GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
+	{
+		g_autofree gchar *string = nullptr;
+		gtk_tree_model_get(model, iter, 0, &string, -1);
+		secure_fprintf(static_cast<SecureSaveInfo *>(data), "%s\n", string);
+		return FALSE;
+	};
+	gtk_tree_model_foreach(GTK_TREE_MODEL(keyword_store), keyword_save, ssi);
 
 	secure_fprintf(ssi, "#end\n");
 	return (secure_close(ssi) == 0);

@@ -63,7 +63,7 @@ gint secure_close(SecureSaveInfo *);
 gint secure_fputs(SecureSaveInfo *, const gchar *);
 gint secure_fputc(SecureSaveInfo *, gint);
 
-gint secure_fprintf(SecureSaveInfo *, const gchar *, ...);
+gint secure_fprintf(SecureSaveInfo *, const gchar *, ...) G_GNUC_PRINTF(2, 3);
 size_t secure_fwrite(gconstpointer ptr, size_t size, size_t nmemb, SecureSaveInfo *ssi);
 
 gchar *secsave_strerror(SecureSaveErrno);

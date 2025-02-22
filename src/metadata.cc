@@ -452,7 +452,7 @@ static gboolean metadata_file_write(gchar *path, const GList *keywords, const gc
 	secure_fputc(ssi, '\n');
 
 	secure_fprintf(ssi, "[comment]\n");
-	secure_fprintf(ssi, "%s\n", (comment) ? comment : "");
+	secure_fprintf(ssi, "%s\n", comment ? comment : "");
 
 	secure_fprintf(ssi, "#end\n");
 
