@@ -351,21 +351,15 @@ static void config_window_apply()
 	options->thumbnails.collection_preview = c_options->thumbnails.collection_preview;
 	options->thumbnails.use_ft_metadata = c_options->thumbnails.use_ft_metadata;
 	options->thumbnails.spec_standard = c_options->thumbnails.spec_standard;
-	options->metadata.enable_metadata_dirs = c_options->metadata.enable_metadata_dirs;
-	options->file_filter.show_hidden_files = c_options->file_filter.show_hidden_files;
-	options->file_filter.show_parent_directory = c_options->file_filter.show_parent_directory;
-	options->file_filter.show_dot_directory = c_options->file_filter.show_dot_directory;
-	options->file_filter.disable_file_extension_checks = c_options->file_filter.disable_file_extension_checks;
 
-	options->file_sort.case_sensitive = c_options->file_sort.case_sensitive;
-	options->file_filter.disable = c_options->file_filter.disable;
+	options->file_filter = c_options->file_filter;
+
+	options->file_sort = c_options->file_sort;
 
 	config_entry_to_option(sidecar_ext_entry, &options->sidecar.ext, nullptr);
 	sidecar_ext_parse(options->sidecar.ext);
 
-	options->slideshow.random = c_options->slideshow.random;
-	options->slideshow.repeat = c_options->slideshow.repeat;
-	options->slideshow.delay = c_options->slideshow.delay;
+	options->slideshow = c_options->slideshow;
 
 	options->mousewheel_scrolls = c_options->mousewheel_scrolls;
 	options->image_lm_click_nav = c_options->image_lm_click_nav;
@@ -403,10 +397,8 @@ static void config_window_apply()
 	options->image.alpha_color_1 = c_options->image.alpha_color_1;
 	options->image.alpha_color_2 = c_options->image.alpha_color_2;
 
-	options->fullscreen.screen = c_options->fullscreen.screen;
-	options->fullscreen.clean_flip = c_options->fullscreen.clean_flip;
-	options->fullscreen.disable_saver = c_options->fullscreen.disable_saver;
-	options->fullscreen.above = c_options->fullscreen.above;
+	options->fullscreen = c_options->fullscreen;
+
 	if (c_options->image_overlay.template_string)
 		{
 		g_free(options->image_overlay.template_string);
@@ -441,20 +433,8 @@ static void config_window_apply()
 	options->clipboard_selection = c_options->clipboard_selection;
 	options->dnd_default_action = c_options->dnd_default_action;
 
-	options->metadata.save_in_image_file = c_options->metadata.save_in_image_file;
-	options->metadata.save_legacy_IPTC = c_options->metadata.save_legacy_IPTC;
-	options->metadata.warn_on_write_problems = c_options->metadata.warn_on_write_problems;
-	options->metadata.save_legacy_format = c_options->metadata.save_legacy_format;
-	options->metadata.sync_grouped_files = c_options->metadata.sync_grouped_files;
-	options->metadata.confirm_write = c_options->metadata.confirm_write;
-	options->metadata.sidecar_extended_name = c_options->metadata.sidecar_extended_name;
-	options->metadata.confirm_timeout = c_options->metadata.confirm_timeout;
-	options->metadata.confirm_after_timeout = c_options->metadata.confirm_after_timeout;
-	options->metadata.confirm_on_image_change = c_options->metadata.confirm_on_image_change;
-	options->metadata.confirm_on_dir_change = c_options->metadata.confirm_on_dir_change;
-	options->metadata.keywords_case_sensitive = c_options->metadata.keywords_case_sensitive;
-	options->metadata.write_orientation = c_options->metadata.write_orientation;
-	options->metadata.check_spelling = c_options->metadata.check_spelling;
+	options->metadata = c_options->metadata;
+
 	options->stereo.mode = (c_options->stereo.mode & (PR_STEREO_HORIZ | PR_STEREO_VERT | PR_STEREO_FIXED | PR_STEREO_ANAGLYPH | PR_STEREO_HALF)) |
 	                       (c_options->stereo.tmp.mirror_right ? PR_STEREO_MIRROR_RIGHT : 0) |
 	                       (c_options->stereo.tmp.flip_right   ? PR_STEREO_FLIP_RIGHT : 0) |
@@ -486,9 +466,7 @@ static void config_window_apply()
 	options->expand_menu_toolbar = c_options->expand_menu_toolbar;
 	options->hamburger_menu = c_options->hamburger_menu;
 
-	options->selectable_bars.menu_bar = c_options->selectable_bars.menu_bar;
-	options->selectable_bars.tool_bar = c_options->selectable_bars.tool_bar;
-	options->selectable_bars.status_bar = c_options->selectable_bars.status_bar;
+	options->selectable_bars = c_options->selectable_bars;
 
 	options->marks_save = c_options->marks_save;
 	options->with_rename = c_options->with_rename;
@@ -504,13 +482,11 @@ static void config_window_apply()
 
 	options->read_metadata_in_idle = c_options->read_metadata_in_idle;
 
-	options->star_rating.star = c_options->star_rating.star;
-	options->star_rating.rejected = c_options->star_rating.rejected;
+	options->star_rating = c_options->star_rating;
 
 	options->threads.duplicates = c_options->threads.duplicates > 0 ? c_options->threads.duplicates : -1;
 
-	options->alternate_similarity_algorithm.enabled = c_options->alternate_similarity_algorithm.enabled;
-	options->alternate_similarity_algorithm.grayscale = c_options->alternate_similarity_algorithm.grayscale;
+	options->alternate_similarity_algorithm = c_options->alternate_similarity_algorithm;
 
 #ifdef DEBUG
 	set_debug_level(debug_c);
