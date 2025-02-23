@@ -324,7 +324,7 @@ struct ConfOptions
 	} metadata;
 
 	/* Stereo */
-	struct {
+	struct Stereo {
 		gint mode;
 		gint fsmode;
 		gboolean enable_fsmode;
@@ -332,23 +332,19 @@ struct ConfOptions
 		gint fixed_x1, fixed_y1;
 		gint fixed_x2, fixed_y2;
 		/**
-		 * @struct tmp
+		 * @struct ModeOptions
 		 * options in this struct are packed to mode and fsmode entries
 		 */
-		struct {
+		struct ModeOptions {
 			gboolean mirror_right;
 			gboolean mirror_left;
 			gboolean flip_right;
 			gboolean flip_left;
 			gboolean swap;
 			gboolean temp_disable;
-			gboolean fs_mirror_right;
-			gboolean fs_mirror_left;
-			gboolean fs_flip_right;
-			gboolean fs_flip_left;
-			gboolean fs_swap;
-			gboolean fs_temp_disable;
-		} tmp;
+		};
+		ModeOptions tmp;
+		ModeOptions fstmp;
 	} stereo;
 
 	/* External preview extraction */

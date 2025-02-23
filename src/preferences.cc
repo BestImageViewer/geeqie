@@ -435,20 +435,18 @@ static void config_window_apply()
 
 	options->metadata = c_options->metadata;
 
-	options->stereo.mode = (c_options->stereo.mode & (PR_STEREO_HORIZ | PR_STEREO_VERT | PR_STEREO_FIXED | PR_STEREO_ANAGLYPH | PR_STEREO_HALF)) |
-	                       (c_options->stereo.tmp.mirror_right ? PR_STEREO_MIRROR_RIGHT : 0) |
-	                       (c_options->stereo.tmp.flip_right   ? PR_STEREO_FLIP_RIGHT : 0) |
-	                       (c_options->stereo.tmp.mirror_left  ? PR_STEREO_MIRROR_LEFT : 0) |
-	                       (c_options->stereo.tmp.flip_left    ? PR_STEREO_FLIP_LEFT : 0) |
-	                       (c_options->stereo.tmp.swap         ? PR_STEREO_SWAP : 0) |
-	                       (c_options->stereo.tmp.temp_disable ? PR_STEREO_TEMP_DISABLE : 0);
-	options->stereo.fsmode = (c_options->stereo.fsmode & (PR_STEREO_HORIZ | PR_STEREO_VERT | PR_STEREO_FIXED | PR_STEREO_ANAGLYPH | PR_STEREO_HALF)) |
-	                       (c_options->stereo.tmp.fs_mirror_right ? PR_STEREO_MIRROR_RIGHT : 0) |
-	                       (c_options->stereo.tmp.fs_flip_right   ? PR_STEREO_FLIP_RIGHT : 0) |
-	                       (c_options->stereo.tmp.fs_mirror_left  ? PR_STEREO_MIRROR_LEFT : 0) |
-	                       (c_options->stereo.tmp.fs_flip_left    ? PR_STEREO_FLIP_LEFT : 0) |
-	                       (c_options->stereo.tmp.fs_swap         ? PR_STEREO_SWAP : 0) |
-	                       (c_options->stereo.tmp.fs_temp_disable ? PR_STEREO_TEMP_DISABLE : 0);
+	static const auto get_stereo_mode = [](gint mode, const ConfOptions::Stereo::ModeOptions &mode_options)
+	{
+		return (mode & (PR_STEREO_HORIZ | PR_STEREO_VERT | PR_STEREO_FIXED | PR_STEREO_ANAGLYPH | PR_STEREO_HALF)) |
+		       (mode_options.mirror_right ? PR_STEREO_MIRROR_RIGHT : 0) |
+		       (mode_options.flip_right   ? PR_STEREO_FLIP_RIGHT : 0) |
+		       (mode_options.mirror_left  ? PR_STEREO_MIRROR_LEFT : 0) |
+		       (mode_options.flip_left    ? PR_STEREO_FLIP_LEFT : 0) |
+		       (mode_options.swap         ? PR_STEREO_SWAP : 0) |
+		       (mode_options.temp_disable ? PR_STEREO_TEMP_DISABLE : 0);
+	};
+	options->stereo.mode = get_stereo_mode(c_options->stereo.mode, c_options->stereo.tmp);
+	options->stereo.fsmode = get_stereo_mode(c_options->stereo.fsmode, c_options->stereo.fstmp);
 	options->stereo.enable_fsmode = c_options->stereo.enable_fsmode;
 	options->stereo.fixed_w = c_options->stereo.fixed_w;
 	options->stereo.fixed_h = c_options->stereo.fixed_h;
@@ -3875,20 +3873,20 @@ static void config_tab_stereo(GtkWidget *notebook)
 	table = pref_table_new(box2, 2, 2, TRUE, FALSE);
 	box = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Mirror left image"),
-			      options->stereo.fsmode & PR_STEREO_MIRROR_LEFT, &c_options->stereo.tmp.fs_mirror_left);
+	                      options->stereo.fsmode & PR_STEREO_MIRROR_LEFT, &c_options->stereo.fstmp.mirror_left);
 	box = pref_table_box(table, 1, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Flip left image"),
-			      options->stereo.fsmode & PR_STEREO_FLIP_LEFT, &c_options->stereo.tmp.fs_flip_left);
+	                      options->stereo.fsmode & PR_STEREO_FLIP_LEFT, &c_options->stereo.fstmp.flip_left);
 	box = pref_table_box(table, 0, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Mirror right image"),
-			      options->stereo.fsmode & PR_STEREO_MIRROR_RIGHT, &c_options->stereo.tmp.fs_mirror_right);
+	                      options->stereo.fsmode & PR_STEREO_MIRROR_RIGHT, &c_options->stereo.fstmp.mirror_right);
 	box = pref_table_box(table, 1, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
 	pref_checkbox_new_int(box, _("Flip right image"),
-			      options->stereo.fsmode & PR_STEREO_FLIP_RIGHT, &c_options->stereo.tmp.fs_flip_right);
+	                      options->stereo.fsmode & PR_STEREO_FLIP_RIGHT, &c_options->stereo.fstmp.flip_right);
 	pref_checkbox_new_int(box2, _("Swap left and right images"),
-			      options->stereo.fsmode & PR_STEREO_SWAP, &c_options->stereo.tmp.fs_swap);
+	                      options->stereo.fsmode & PR_STEREO_SWAP, &c_options->stereo.fstmp.swap);
 	pref_checkbox_new_int(box2, _("Disable stereo mode on single image source"),
-			      options->stereo.fsmode & PR_STEREO_TEMP_DISABLE, &c_options->stereo.tmp.fs_temp_disable);
+	                      options->stereo.fsmode & PR_STEREO_TEMP_DISABLE, &c_options->stereo.fstmp.temp_disable);
 
 	group2 = pref_group_new(box2, FALSE, _("Fixed position"), GTK_ORIENTATION_VERTICAL);
 	table = pref_table_new(group2, 5, 3, FALSE, FALSE);
