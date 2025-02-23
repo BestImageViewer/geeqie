@@ -502,8 +502,8 @@ gboolean gq_accel_map_save(const gchar *path)
 
 	if (secure_close(ssi))
 		{
-		log_printf(_("error saving file: %s\nerror: %s\n"), path,
-			   secsave_strerror(secsave_errno));
+		log_printf(_("error saving file: %s\nerror: %s\n"),
+		           path, secsave_strerror());
 		return FALSE;
 		}
 

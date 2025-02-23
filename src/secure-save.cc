@@ -82,12 +82,15 @@
  * @FIXME Low risk race conditions about ssi->file_name.
  */
 
-SecureSaveErrno secsave_errno = SS_ERR_NONE;
+namespace
+{
+
+SecureSaveErrno secsave_errno = SS_ERR_NONE; /**< internal secsave error number */
 
 
-/** Open a file for writing in a secure way. @returns a pointer to a
- * structure secure_save_info on success, or NULL on failure. */
-static SecureSaveInfo *
+/** Open a file for writing in a secure way.
+ * @returns a pointer to a structure secure_save_info on success, or NULL on failure. */
+SecureSaveInfo *
 secure_open_umask(const gchar *file_name)
 {
 	struct stat st;
@@ -195,6 +198,8 @@ secure_open_umask(const gchar *file_name)
 	file_name_watcher = nullptr;
 	return g_steal_pointer(&ssi);
 }
+
+} // namespace
 
 SecureSaveInfo *
 secure_open(const gchar *file_name)
@@ -392,10 +397,16 @@ secure_fwrite(gconstpointer ptr, size_t size, size_t nmemb, SecureSaveInfo *ssi)
 	return ret;
 }
 
-gchar *
-secsave_strerror(SecureSaveErrno secsave_error)
+bool
+secsave_succeed()
 {
-	switch (secsave_error) {
+	return secsave_errno == SS_ERR_NONE;
+}
+
+const gchar *
+secsave_strerror()
+{
+	switch (secsave_errno) {
 	case SS_ERR_OPEN_READ:
 		return _("Cannot read the file");
 	case SS_ERR_STAT:

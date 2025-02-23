@@ -515,7 +515,6 @@ void collection_load_stop(CollectionData *cd)
 static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 {
 	SecureSaveInfo *ssi;
-	GList *work;
 
 	if (!path && !cd->path) return FALSE;
 
@@ -541,20 +540,18 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 		secure_fprintf(ssi, "#geometry: %d %d %d %d\n", cd->window.x, cd->window.y, cd->window.width, cd->window.height);
 		}
 
-	work = cd->list;
-	while (work && secsave_errno == SS_ERR_NONE)
+	for (GList *work = cd->list; work && secsave_succeed(); work = work->next)
 		{
 		auto ci = static_cast<CollectInfo *>(work->data);
 		secure_fprintf(ssi, "\"%s\"\n", ci->fd->path);
-		work = work->next;
 		}
 
 	secure_fprintf(ssi, "#end\n");
 
 	if (secure_close(ssi))
 		{
-		log_printf(_("error saving collection file: %s\nerror: %s\n"), path,
-			    secsave_strerror(secsave_errno));
+		log_printf(_("error saving collection file: %s\nerror: %s\n"),
+		           path, secsave_strerror());
 		return FALSE;
 		}
 

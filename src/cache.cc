@@ -268,8 +268,8 @@ gboolean cache_sim_data_save(CacheData *cd)
 
 	if (secure_close(ssi))
 		{
-		log_printf(_("error saving sim cache data: %s\nerror: %s\n"), cd->path,
-			    secsave_strerror(secsave_errno));
+		log_printf(_("error saving sim cache data: %s\nerror: %s\n"),
+		           cd->path, secsave_strerror());
 		return FALSE;
 		}
 

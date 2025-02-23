@@ -282,8 +282,6 @@ gboolean history_list_load(const gchar *path)
 gboolean history_list_save(const gchar *path)
 {
 	SecureSaveInfo *ssi;
-	GList *list;
-	gint list_count;
 
 	g_autofree gchar *pathl = path_from_utf8(path);
 	ssi = secure_open(pathl);
@@ -295,33 +293,28 @@ gboolean history_list_save(const gchar *path)
 
 	secure_fprintf(ssi, "#History lists\n\n");
 
-	list = g_list_last(history_list);
-	while (list && secsave_errno == SS_ERR_NONE)
+	for (GList *list = g_list_last(history_list); list && secsave_succeed(); list = list->prev)
 		{
-		HistoryData *hd;
-		GList *work;
-
-		hd = static_cast<HistoryData *>(list->data);
-		list = list->prev;
+		const auto *hd = static_cast<HistoryData *>(list->data);
 
 		secure_fprintf(ssi, "[%s]\n", hd->key);
 
 		/* save them inverted (oldest to newest)
 		 * so that when reading they are added correctly
 		 */
-		work = g_list_last(hd->list);
-		list_count = g_list_position(hd->list, g_list_last(hd->list)) + 1;
-		while (work && secsave_errno == SS_ERR_NONE)
+		gint list_count = g_list_length(hd->list);
+		for (GList *work = g_list_last(hd->list); work && secsave_succeed(); work = work->prev)
 			{
+			const auto *item = static_cast<gchar *>(work->data);
 			if ((strcmp(hd->key, "path_list") != 0 || list_count <= options->open_recent_list_maxsize)
-					&&
-					(strcmp(hd->key, "recent") != 0 || !(!isfile(static_cast<const gchar *>(work->data))))
-					&&
-					(strcmp(hd->key, "image_list") != 0 || list_count <= options->recent_folder_image_list_maxsize))
+			    &&
+			    (strcmp(hd->key, "recent") != 0 || isfile(item))
+			    &&
+			    (strcmp(hd->key, "image_list") != 0 || list_count <= options->recent_folder_image_list_maxsize))
 				{
-				secure_fprintf(ssi, "\"%s\"\n", static_cast<gchar *>(work->data));
+				secure_fprintf(ssi, "\"%s\"\n", item);
 				}
-			work = work->prev;
+
 			list_count--;
 			}
 		secure_fputc(ssi, '\n');

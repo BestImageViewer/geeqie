@@ -442,10 +442,9 @@ static gboolean metadata_file_write(gchar *path, const GList *keywords, const gc
 	secure_fprintf(ssi, "#%s comment (%s)\n\n", GQ_APPNAME, VERSION);
 
 	secure_fprintf(ssi, "[keywords]\n");
-	while (keywords && secsave_errno == SS_ERR_NONE)
+	for (; keywords && secsave_succeed(); keywords = keywords->next)
 		{
 		auto word = static_cast<const gchar *>(keywords->data);
-		keywords = keywords->next;
 
 		secure_fprintf(ssi, "%s\n", word);
 		}

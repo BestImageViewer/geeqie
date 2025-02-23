@@ -43,8 +43,6 @@ enum SecureSaveErrno {
 	SS_ERR_OTHER,
 };
 
-extern SecureSaveErrno secsave_errno; /**< internal secsave error number */
-
 struct SecureSaveInfo {
 	FILE *fp; /**< file stream pointer */
 	gchar *file_name; /**< final file name */
@@ -66,7 +64,8 @@ gint secure_fputc(SecureSaveInfo *, gint);
 gint secure_fprintf(SecureSaveInfo *, const gchar *, ...) G_GNUC_PRINTF(2, 3);
 size_t secure_fwrite(gconstpointer ptr, size_t size, size_t nmemb, SecureSaveInfo *ssi);
 
-gchar *secsave_strerror(SecureSaveErrno);
+bool secsave_succeed();
+const gchar *secsave_strerror();
 
 #endif /* SECURE_SAVE_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

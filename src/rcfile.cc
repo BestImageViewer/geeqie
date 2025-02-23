@@ -831,7 +831,7 @@ gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, Layou
 
 	if (secure_close(ssi))
 		{
-		config_file_error((std::string("- Error saving config file: ") + utf8_path + " error: " + secsave_strerror(secsave_errno)).c_str());
+		config_file_error((std::string("- Error saving config file: ") + utf8_path + " error: " + secsave_strerror()).c_str());
 		return FALSE;
 		}
 
@@ -876,7 +876,7 @@ gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions
 
 	if (secure_close(ssi))
 		{
-		config_file_error((std::string("- Error saving config file: ") + utf8_path + " error: " + secsave_strerror(secsave_errno)).c_str());
+		config_file_error((std::string("- Error saving config file: ") + utf8_path + " error: " + secsave_strerror()).c_str());
 
 		return FALSE;
 		}
