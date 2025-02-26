@@ -60,8 +60,8 @@ po_sources = files([
 translators_sh = join_paths(scriptsdir, 'translators.sh')
 
 translator_resources = custom_target('translator_resources',
-                input : ['locales.txt', 'translators.gresource.xml'],
-                output : ['translators.h', 'translators.c'],
-                command : [translators_sh, '@PRIVATE_DIR@', meson.current_source_dir(), meson.current_build_dir() , '@INPUT0@', '@INPUT1@', po_sources])
+                input : 'locales.txt',
+                output : 'translators',
+                command : [translators_sh, meson.current_build_dir(), meson.current_source_dir(), '@INPUT@', po_sources])
 
-project_sources += translator_resources
+project_sources += gnome.compile_resources('translators', 'translators.gresource.xml', dependencies : translator_resources)

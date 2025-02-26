@@ -68,10 +68,6 @@ i18n = import('i18n')
 fs = import('fs')
 configuration_inc = include_directories('.')
 
-# External programs
-glib_compile_resources = find_program('glib-compile-resources', required : true)
-glib_genmarshal = find_program('glib-genmarshal', required : true)
-
 option = get_option('git')
 if not option.disabled()
     running_from_git = find_program('git', required: false).found() and fs.is_dir('.git')

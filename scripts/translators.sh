@@ -24,12 +24,10 @@
 ##
 ## The lists will be displayed in the About - Credits dialog.
 ##
-## $1 Meson PRIVATE_DIR \n
+## $1 Meson current_build_dir \n
 ## $2 Meson current_source_dir \n
-## $3 Meson current_build_dir \n
-## $4 locales.txt \n
-## $5 gresource.xml \n
-## $6...$n po source list - space separated list \n
+## $3 locales.txt \n
+## $4...$n po source list - space separated list \n
 ##
 ## It is expected that the .po files have a list of translators in the form: \n
 ## \# Translators: \n
@@ -37,16 +35,11 @@
 ## \# translator2_name <translator2 email> \n
 ## \#
 
-mkdir -p "$1"
-private_dir="$1"
+build_dir="$1"
 shift
 source_dir="$1"
 shift
-build_dir="$1"
-shift
 locales="$1"
-shift
-resource_xml="$1"
 shift
 
 while [ -n "$1" ]
@@ -72,8 +65,5 @@ do
 	}' "$full_file_path"
 
 shift
-done > "$private_dir"/translators
-printf "\n\0" >> "$private_dir"/translators
-
-glib-compile-resources --generate-header --sourcedir="$private_dir" --target="$build_dir"/translators.h "$resource_xml"
-glib-compile-resources --generate-source --sourcedir="$private_dir" --target="$build_dir"/translators.c "$resource_xml"
+done > "$build_dir"/translators
+printf "\n\0" >> "$build_dir"/translators

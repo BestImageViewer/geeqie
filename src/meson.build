@@ -353,20 +353,7 @@ gq_marshal_pragma = custom_target('gq-marshal-pragma',
 project_sources += gq_marshal_pragma
 
 if conf_data.get('HAVE_LCMS', 0) == 1
-    target_string = '--target=' + meson.current_build_dir() + '/icc.h'
-    icc_resources_h = custom_target('icc_resources_h',
-                    input : 'icc.gresource.xml',
-                    output : 'icc.h',
-                    command : [glib_compile_resources, '--generate-header', target_string, '--sourcedir=@CURRENT_SOURCE_DIR@', '@INPUT@'])
-
-    target_string = '--target=' + meson.current_build_dir() + '/icc.c'
-    icc_resources_c = custom_target('icc_resources_c',
-                    input : 'icc.gresource.xml',
-                    output : 'icc.c',
-                    command : [glib_compile_resources, '--generate-source', target_string, '--sourcedir=@CURRENT_SOURCE_DIR@', '@INPUT@'])
-
-    project_sources += icc_resources_h
-    project_sources += icc_resources_c
+    project_sources += gnome.compile_resources('icc', 'icc.gresource.xml')
 endif
 
 geeqie_exe = executable('geeqie', project_sources,
