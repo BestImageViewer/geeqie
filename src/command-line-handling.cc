@@ -861,14 +861,11 @@ void gq_last(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList 
 
 void gq_log_file(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *text;
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "log-file", "&s", &text);
 
-	gchar *pathl;
-	gchar *path = g_strdup(text);
-
-	pathl = path_from_utf8(path);
-	command_line->ssi = secure_open(pathl);
+	g_autofree gchar *pathl = path_from_utf8(text);
+	command_line->log_file_ssi = secure_open(pathl);
 }
 
 #if HAVE_LUA // @todo Use [[maybe_unused]] for command_line_options_dict since C++17 and merge declarations

@@ -37,7 +37,6 @@
 
 #include "bar-sort.h"
 #include "bar.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "filedata.h"
 #include "histogram.h"
@@ -2553,7 +2552,7 @@ static gboolean move_window_to_workspace_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static LayoutWindow *layout_new(const LayoutOptions &lop, const gchar *geometry)
+static LayoutWindow *layout_new(const LayoutOptions &lop)
 {
 	LayoutWindow *lw;
 	GdkGeometry hint;
@@ -2647,14 +2646,6 @@ static LayoutWindow *layout_new(const LayoutOptions &lop, const gchar *geometry)
 	/** @FIXME the zoom value set here is the value, which is then copied again and again
 	   in 'Leave Zoom at previous setting' mode. This is not ideal.  */
 	image_change_pixbuf(lw->image, pixbuf, 0.0, FALSE);
-
-	if (geometry)
-		{
-		if (!gq_gtk_window_parse_geometry(GTK_WINDOW(lw->window), geometry))
-			{
-			log_printf("%s", _("Invalid geometry\n"));
-			}
-		}
 
 	layout_tools_hide(lw, lw->options.tools_hidden);
 
@@ -2920,20 +2911,7 @@ static void layout_config_startup_path(LayoutOptions *lop, gchar **path)
 
 static void layout_config_commandline(LayoutOptions *lop, gchar **path)
 {
-
-	if (command_line->startup_blank)
-		{
-		*path = nullptr;
-		}
-	else if (command_line->file)
-		{
-		*path = g_strdup(command_line->file);
-		}
-	else if (command_line->path)
-		{
-		*path = g_strdup(command_line->path);
-		}
-	else layout_config_startup_path(lop, path);
+	layout_config_startup_path(lop, path);
 
 	if (isdir(*path))
 		{
@@ -2942,16 +2920,6 @@ static void layout_config_commandline(LayoutOptions *lop, gchar **path)
 			{
 			std::swap(*path, last_image);
 			}
-		}
-
-	if (command_line->tools_show)
-		{
-		lop->tools_float = FALSE;
-		lop->tools_hidden = FALSE;
-		}
-	else if (command_line->tools_hide)
-		{
-		lop->tools_hidden = TRUE;
 		}
 }
 
@@ -2979,15 +2947,11 @@ LayoutWindow *layout_new_from_config(const gchar **attribute_names, const gchar 
 		layout_config_startup_path(&lop, &path);
 		}
 
-	LayoutWindow *lw = layout_new(lop, use_commandline ? command_line->geometry : nullptr);
+	LayoutWindow *lw = layout_new(lop);
 	layout_sort_set_files(lw, lw->options.file_view_list_sort.method, lw->options.file_view_list_sort.ascend, lw->options.file_view_list_sort.case_sensitive);
 
 
 	layout_set_path(lw, path);
-
-	if (use_commandline && command_line->startup_full_screen) layout_image_full_screen_start(lw);
-	if (use_commandline && command_line->startup_in_slideshow) layout_image_slideshow_start(lw);
-	if (use_commandline && command_line->log_window_show) log_window_new(lw);
 
 	free_layout_options_content(&lop);
 	return lw;

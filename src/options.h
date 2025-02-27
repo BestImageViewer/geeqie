@@ -424,24 +424,7 @@ struct ConfOptions
 
 struct CommandLine
 {
-	int argc;
-	gchar **argv;
-	gboolean startup_blank;
-	gboolean startup_full_screen;
-	gboolean startup_in_slideshow;
-	gboolean startup_command_line_collection;
-	gboolean tools_hide;
-	gboolean tools_show;
-	gboolean log_window_show;
-	gchar *path;
-	gchar *file;
-	GList *cmd_list;
-	GList *collection_list;
-	gchar *geometry;
-	gchar *regexp;
-	gchar *log_file;
-	SecureSaveInfo *ssi;
-	gboolean new_instance;
+	SecureSaveInfo *log_file_ssi;
 };
 
 extern ConfOptions *options;

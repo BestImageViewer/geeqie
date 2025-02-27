@@ -593,7 +593,7 @@ void exit_program_final()
 		g_object_unref(archive_file);
 		}
 
-	secure_close(command_line->ssi);
+	secure_close(command_line->log_file_ssi);
 
 	exit(EXIT_SUCCESS);
 }

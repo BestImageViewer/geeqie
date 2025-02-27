@@ -69,9 +69,9 @@ void print_term(gboolean err, const gchar *text_utf8)
 
 	fputs(text, err ? stderr : stdout);
 
-	if(command_line && command_line->ssi)
+	if(command_line && command_line->log_file_ssi)
 		{
-		secure_fputs(command_line->ssi, text);
+		secure_fputs(command_line->log_file_ssi, text);
 		}
 }
 
