@@ -336,12 +336,14 @@ void gq_config_load(GtkApplication *, GApplicationCommandLine *app_command_line,
 		}
 }
 
+#ifdef DEBUG
 void gq_debug(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
 {
 	gint debug_level;
 	g_variant_dict_lookup(command_line_options_dict, "debug", "i", &debug_level);
 	set_debug_level(debug_level);
 }
+#endif
 
 void gq_delay(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
@@ -835,12 +837,14 @@ void gq_get_sidecars(GtkApplication *, GApplicationCommandLine *app_command_line
 		}
 }
 
+#ifdef DEBUG
 void gq_grep(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar *text;
+	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "grep", "&s", &text);
-	set_regexp(g_strdup(text));
+	set_regexp(text);
 }
+#endif
 
 void gq_id(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {

@@ -229,6 +229,7 @@ void init_exec_time()
 
 void set_regexp(const gchar *cmd_regexp)
 {
+	g_free(regexp);
 	regexp = g_strdup(cmd_regexp);
 }
 
