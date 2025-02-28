@@ -195,24 +195,10 @@ gchar *layout_get_unique_id()
 
 static void layout_set_unique_id(LayoutWindow *lw)
 {
-	char id[10];
-	gint i;
 	if (lw->options.id && lw->options.id[0]) return; /* id is already set */
 
 	g_free(lw->options.id);
-	lw->options.id = nullptr;
-
-	i = 1;
-	while (TRUE)
-		{
-		g_snprintf(id, sizeof(id), "lw%d", i);
-		if (!layout_find_by_layout_id(id))
-			{
-			lw->options.id = g_strdup(id);
-			return;
-			}
-		i++;
-		}
+	lw->options.id = layout_get_unique_id();
 }
 
 static gboolean layout_set_current_cb(GtkWidget *, GdkEventFocus *, gpointer data)
