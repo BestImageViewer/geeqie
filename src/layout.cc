@@ -47,7 +47,6 @@
 #include "layout-config.h"
 #include "layout-image.h"
 #include "layout-util.h"
-#include "logwindow.h"
 #include "main-defines.h"
 #include "main.h"
 #include "menu.h"
@@ -2892,64 +2891,51 @@ void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names
 		}
 }
 
-static void layout_config_startup_path(LayoutOptions *lop, gchar **path)
+static gchar *layout_config_startup_path(const LayoutOptions &lop)
 {
-	switch (lop->startup_path)
+	switch (lop.startup_path)
 		{
 		case STARTUP_PATH_LAST:
-			*path = (history_list_find_last_path_by_key("path_list") && isdir(history_list_find_last_path_by_key("path_list"))) ? g_strdup(history_list_find_last_path_by_key("path_list")) : get_current_dir();
-			break;
-		case STARTUP_PATH_HOME:
-			*path = (lop->home_path && isdir(lop->home_path)) ? g_strdup(lop->home_path) : g_strdup(homedir());
-			break;
-		default:
-			*path = get_current_dir();
-			break;
-		}
-}
-
-
-static void layout_config_commandline(LayoutOptions *lop, gchar **path)
-{
-	layout_config_startup_path(lop, path);
-
-	if (isdir(*path))
-		{
-		g_autofree gchar *last_image = get_recent_viewed_folder_image(*path);
-		if (last_image)
 			{
-			std::swap(*path, last_image);
+			const gchar *path = history_list_find_last_path_by_key("path_list");
+			return (path && isdir(path)) ? g_strdup(path) : get_current_dir();
 			}
+		case STARTUP_PATH_HOME:
+			return (lop.home_path && isdir(lop.home_path)) ? g_strdup(lop.home_path) : g_strdup(homedir());
+		default:
+			return get_current_dir();
 		}
 }
-
-static gboolean first_found = FALSE;
 
 LayoutWindow *layout_new_from_config(const gchar **attribute_names, const gchar **attribute_values, gboolean use_commandline)
 {
 	LayoutOptions lop;
-	g_autofree gchar *path = nullptr;
-
 	init_layout_options(&lop);
 
 	if (attribute_names) layout_load_attributes(&lop, attribute_names, attribute_values);
 
+	g_autofree gchar *path = layout_config_startup_path(lop);
+
 	/* If multiple windows are specified in the config. file,
 	 * use the command line options only in the main window.
 	 */
+	static bool first_found = false;
 	if (use_commandline && !first_found)
 		{
-		first_found = TRUE;
-		layout_config_commandline(&lop, &path);
-		}
-	else
-		{
-		layout_config_startup_path(&lop, &path);
+		first_found = true;
+
+		if (isdir(path))
+			{
+			g_autofree gchar *last_image = get_recent_viewed_folder_image(path);
+			if (last_image)
+				{
+				std::swap(path, last_image);
+				}
+			}
 		}
 
 	LayoutWindow *lw = layout_new(lop);
 	layout_sort_set_files(lw, lw->options.file_view_list_sort.method, lw->options.file_view_list_sort.ascend, lw->options.file_view_list_sort.case_sensitive);
-
 
 	layout_set_path(lw, path);
 
