@@ -52,6 +52,7 @@
 #include "menu.h"
 #include "metadata.h"
 #include "misc.h"
+#include "options.h"
 #include "pixbuf-util.h"
 #include "preferences.h"
 #include "rcfile.h"
@@ -112,6 +113,199 @@ LayoutWindow *layout_window_find_by_options_id(const gchar *id)
 	if (it == layout_window_list.end()) return nullptr;
 
 	return *it;
+}
+
+void layout_load_attributes(LayoutOptions &lop, const gchar **attribute_names, const gchar **attribute_values)
+{
+	g_autofree gchar *id = nullptr;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		/* layout options */
+		if (READ_CHAR_FULL("id", id)) continue;
+
+		if (READ_INT(lop, style)) continue;
+		if (READ_CHAR(lop, order)) continue;
+
+		if (READ_UINT_ENUM(lop, dir_view_type)) continue;
+		if (READ_UINT_ENUM(lop, file_view_type)) continue;
+		if (READ_UINT_ENUM(lop, file_view_list_sort.method)) continue;
+		if (READ_BOOL(lop, file_view_list_sort.ascend)) continue;
+		if (READ_BOOL(lop, file_view_list_sort.case_sensitive)) continue;
+		if (READ_UINT_ENUM(lop, dir_view_list_sort.method)) continue;
+		if (READ_BOOL(lop, dir_view_list_sort.ascend)) continue;
+		if (READ_BOOL(lop, dir_view_list_sort.case_sensitive)) continue;
+		if (READ_BOOL(lop, show_marks)) continue;
+		if (READ_BOOL(lop, show_file_filter)) continue;
+		if (READ_BOOL(lop, show_thumbnails)) continue;
+		if (READ_BOOL(lop, show_directory_date)) continue;
+		if (READ_CHAR(lop, home_path)) continue;
+		if (READ_UINT_ENUM_CLAMP(lop, startup_path, 0, STARTUP_PATH_HOME)) continue;
+
+		/* window positions */
+
+		if (READ_INT_FULL("main_window.x", lop.main_window.rect.x)) continue;
+		if (READ_INT_FULL("main_window.y", lop.main_window.rect.y)) continue;
+		if (READ_INT_FULL("main_window.w", lop.main_window.rect.width)) continue;
+		if (READ_INT_FULL("main_window.h", lop.main_window.rect.height)) continue;
+		if (READ_BOOL(lop, main_window.maximized)) continue;
+		if (READ_INT(lop, main_window.hdivider_pos)) continue;
+		if (READ_INT(lop, main_window.vdivider_pos)) continue;
+
+		if (READ_INT_CLAMP(lop, folder_window.vdivider_pos, 1, 1000)) continue;
+
+		if (READ_INT_FULL("float_window.x", lop.float_window.rect.x)) continue;
+		if (READ_INT_FULL("float_window.y", lop.float_window.rect.y)) continue;
+		if (READ_INT_FULL("float_window.w", lop.float_window.rect.width)) continue;
+		if (READ_INT_FULL("float_window.h", lop.float_window.rect.height)) continue;
+		if (READ_INT(lop, float_window.vdivider_pos)) continue;
+
+		if (READ_BOOL(lop, tools_float)) continue;
+		if (READ_BOOL(lop, tools_hidden)) continue;
+		if (READ_BOOL(lop, show_info_pixel)) continue;
+		if (READ_BOOL(lop, ignore_alpha)) continue;
+
+		if (READ_BOOL(lop, bars_state.info)) continue;
+		if (READ_BOOL(lop, bars_state.sort)) continue;
+		if (READ_BOOL(lop, bars_state.tools_float)) continue;
+		if (READ_BOOL(lop, bars_state.tools_hidden)) continue;
+		if (READ_BOOL(lop, bars_state.hidden)) continue;
+
+		if (READ_UINT(lop, image_overlay.state)) continue;
+		if (READ_INT(lop, image_overlay.histogram_channel)) continue;
+		if (READ_INT(lop, image_overlay.histogram_mode)) continue;
+
+		if (READ_INT(lop, log_window.x)) continue;
+		if (READ_INT(lop, log_window.y)) continue;
+		if (READ_INT(lop, log_window.width)) continue;
+		if (READ_INT(lop, log_window.height)) continue;
+
+		if (READ_INT_FULL("preferences_window.x", lop.preferences_window.rect.x)) continue;
+		if (READ_INT_FULL("preferences_window.y", lop.preferences_window.rect.y)) continue;
+		if (READ_INT_FULL("preferences_window.w", lop.preferences_window.rect.width)) continue;
+		if (READ_INT_FULL("preferences_window.h", lop.preferences_window.rect.height)) continue;
+		if (READ_INT(lop, preferences_window.page_number)) continue;
+
+		if (READ_INT(lop, search_window.x)) continue;
+		if (READ_INT(lop, search_window.y)) continue;
+		if (READ_INT_FULL("search_window.w", lop.search_window.width)) continue;
+		if (READ_INT_FULL("search_window.h", lop.search_window.height)) continue;
+
+		if (READ_INT(lop, dupe_window.x)) continue;
+		if (READ_INT(lop, dupe_window.y)) continue;
+		if (READ_INT_FULL("dupe_window.w", lop.dupe_window.width)) continue;
+		if (READ_INT_FULL("dupe_window.h", lop.dupe_window.height)) continue;
+
+		if (READ_INT(lop, advanced_exif_window.x)) continue;
+		if (READ_INT(lop, advanced_exif_window.y)) continue;
+		if (READ_INT_FULL("advanced_exif_window.w", lop.advanced_exif_window.width)) continue;
+		if (READ_INT_FULL("advanced_exif_window.h", lop.advanced_exif_window.height)) continue;
+
+		if (READ_BOOL(lop, animate)) continue;
+		if (READ_INT(lop, workspace)) continue;
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+
+	if (id && !is_current_layout_id(id))
+		{
+		std::swap(lop.id, id);
+		}
+}
+
+LayoutOptions init_layout_options(const gchar **attribute_names, const gchar **attribute_values)
+{
+	LayoutOptions lop;
+	memset(&lop, 0, sizeof(LayoutOptions));
+
+	lop.dir_view_type = DIRVIEW_LIST;
+	lop.dir_view_list_sort.ascend = TRUE;
+	lop.dir_view_list_sort.case_sensitive = TRUE;
+	lop.dir_view_list_sort.method = SORT_NAME;
+	lop.file_view_list_sort.ascend = TRUE;
+	lop.file_view_list_sort.case_sensitive = TRUE;
+	lop.file_view_list_sort.method = SORT_NAME;
+	lop.file_view_type = FILEVIEW_LIST;
+	lop.float_window.rect = {0, 0, 260, 450};
+	lop.float_window.vdivider_pos = -1;
+	lop.home_path = nullptr;
+	lop.id = g_strdup("null");
+	lop.main_window.hdivider_pos = -1;
+	lop.main_window.maximized = FALSE;
+	lop.main_window.rect = {0, 0, 720, 540};
+	lop.main_window.vdivider_pos = 200;
+	lop.search_window = {100, 100, 700, 650};
+	lop.dupe_window = {100, 100, 800, 400};
+	lop.advanced_exif_window = {0, 0, 900, 600};
+	lop.folder_window.vdivider_pos = 100;
+	lop.order = g_strdup("123");
+	lop.show_directory_date = FALSE;
+	lop.show_marks = FALSE;
+	lop.show_file_filter = FALSE;
+	lop.show_thumbnails = FALSE;
+	lop.style = 0;
+	lop.show_info_pixel = FALSE;
+	lop.selectable_toolbars_hidden = FALSE;
+	lop.tools_float = FALSE;
+	lop.tools_hidden = FALSE;
+	lop.image_overlay.histogram_channel = HCHAN_RGB;
+	lop.image_overlay.histogram_mode = 1;
+	lop.image_overlay.state = OSD_SHOW_NOTHING;
+	lop.animate = TRUE;
+	lop.bars_state.hidden = FALSE;
+	lop.log_window = {0, 0, 520, 400};
+	lop.preferences_window.rect = {0, 0, 700, 600};
+	lop.split_pane_sync = FALSE;
+	lop.workspace = -1;
+
+	if (attribute_names) layout_load_attributes(lop, attribute_names, attribute_values);
+
+	return lop;
+}
+
+void free_layout_options_content(LayoutOptions &dest)
+{
+	g_free(dest.id);
+	g_free(dest.order);
+	g_free(dest.home_path);
+	g_free(dest.last_path);
+}
+
+void copy_layout_options(LayoutOptions &dest, const LayoutOptions &src)
+{
+	free_layout_options_content(dest);
+
+	dest = src;
+	dest.id = g_strdup(src.id);
+	dest.order = g_strdup(src.order);
+	dest.home_path = g_strdup(src.home_path);
+	dest.last_path = g_strdup(src.last_path);
+}
+
+void layout_options_set_unique_id(LayoutOptions &options)
+{
+	if (options.id && options.id[0]) return; /* id is already set */
+
+	g_free(options.id);
+	options.id = layout_get_unique_id();
+}
+
+void layout_apply_options(LayoutWindow *lw, const LayoutOptions &lop)
+{
+	if (!layout_valid(&lw)) return;
+
+	/** @FIXME add other options too */
+
+	gboolean refresh_style = (lop.style != lw->options.style || strcmp(lop.order, lw->options.order) != 0);
+	gboolean refresh_lists = (lop.show_directory_date != lw->options.show_directory_date);
+
+	copy_layout_options(lw->options, lop);
+
+	if (refresh_style) layout_style_set(lw, lw->options.style, lw->options.order);
+	if (refresh_lists) layout_refresh(lw);
 }
 
 } // namespace
@@ -190,14 +384,6 @@ gchar *layout_get_unique_id()
 			}
 		i++;
 		}
-}
-
-static void layout_set_unique_id(LayoutWindow *lw)
-{
-	if (lw->options.id && lw->options.id[0]) return; /* id is already set */
-
-	g_free(lw->options.id);
-	lw->options.id = layout_get_unique_id();
 }
 
 static gboolean layout_set_current_cb(GtkWidget *, GdkEventFocus *, gpointer data)
@@ -2187,7 +2373,7 @@ static void layout_config_close_cb(GtkWidget *, gpointer data)
 	auto lc = static_cast<LayoutConfig *>(data);
 
 	gq_gtk_widget_destroy(lc->configwindow);
-	free_layout_options_content(&lc->options);
+	free_layout_options_content(lc->options);
 	g_free(lc);
 }
 
@@ -2206,7 +2392,7 @@ static void layout_config_apply_cb(GtkWidget *, gpointer data)
 
 	config_entry_to_option(lc->home_path_entry, &lc->options.home_path, remove_trailing_slash);
 
-	layout_apply_options(lc->lw, &lc->options);
+	layout_apply_options(lc->lw, lc->options);
 }
 
 static void layout_config_help_cb(GtkWidget *, gpointer)
@@ -2272,7 +2458,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	lc = g_new0(LayoutConfig, 1);
 	lc->lw = lw;
 	layout_sync_options_with_current_state(lw);
-	copy_layout_options(&lc->options, &lw->options);
+	copy_layout_options(lc->options, lw->options);
 
 	lc->configwindow = window_new("Layout", PIXBUF_INLINE_ICON_CONFIG, nullptr, _("Window options and layout"));
 	DEBUG_NAME(lc->configwindow);
@@ -2428,23 +2614,6 @@ void layout_sync_options_with_current_state(LayoutWindow *lw)
 #endif
 }
 
-void layout_apply_options(LayoutWindow *lw, LayoutOptions *lop)
-{
-	gboolean refresh_style;
-	gboolean refresh_lists;
-
-	if (!layout_valid(&lw)) return;
-/** @FIXME add other options too */
-
-	refresh_style = (lop->style != lw->options.style || strcmp(lop->order, lw->options.order) != 0);
-	refresh_lists = (lop->show_directory_date != lw->options.show_directory_date);
-
-	copy_layout_options(&lw->options, lop);
-
-	if (refresh_style) layout_style_set(lw, lw->options.style, lw->options.order);
-	if (refresh_lists) layout_refresh(lw);
-}
-
 void save_layout(LayoutWindow *lw)
 {
 	if (g_str_has_prefix(lw->options.id, "lw")) return;
@@ -2501,7 +2670,7 @@ void layout_free(LayoutWindow *lw)
 		file_data_unref(lw->dir_fd);
 		}
 
-	free_layout_options_content(&lw->options);
+	free_layout_options_content(lw->options);
 	g_free(lw);
 }
 
@@ -2547,9 +2716,9 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	DEBUG_1("%s layout_new: start", get_exec_time());
 	lw = g_new0(LayoutWindow, 1);
 
-	copy_layout_options(&lw->options, &lop);
+	copy_layout_options(lw->options, lop);
 
-	layout_set_unique_id(lw);
+	layout_options_set_unique_id(lw->options);
 
 	/* default layout */
 
@@ -2662,97 +2831,97 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	return lw;
 }
 
-void layout_write_attributes(LayoutOptions *layout, GString *outstr, gint indent)
+static void layout_write_attributes(const LayoutOptions &lop, GString *outstr, gint indent)
 {
-	WRITE_NL(); WRITE_CHAR(*layout, id);
+	WRITE_NL(); WRITE_CHAR(lop, id);
 
-	WRITE_NL(); WRITE_INT(*layout, style);
-	WRITE_NL(); WRITE_CHAR(*layout, order);
-	WRITE_NL(); WRITE_UINT(*layout, dir_view_type);
-	WRITE_NL(); WRITE_UINT(*layout, file_view_type);
+	WRITE_NL(); WRITE_INT(lop, style);
+	WRITE_NL(); WRITE_CHAR(lop, order);
+	WRITE_NL(); WRITE_UINT(lop, dir_view_type);
+	WRITE_NL(); WRITE_UINT(lop, file_view_type);
 
-	WRITE_NL(); WRITE_UINT(*layout, file_view_list_sort.method);
-	WRITE_NL(); WRITE_BOOL(*layout, file_view_list_sort.ascend);
-	WRITE_NL(); WRITE_BOOL(*layout, file_view_list_sort.case_sensitive);
+	WRITE_NL(); WRITE_UINT(lop, file_view_list_sort.method);
+	WRITE_NL(); WRITE_BOOL(lop, file_view_list_sort.ascend);
+	WRITE_NL(); WRITE_BOOL(lop, file_view_list_sort.case_sensitive);
 
-	WRITE_NL(); WRITE_UINT(*layout, dir_view_list_sort.method);
-	WRITE_NL(); WRITE_BOOL(*layout, dir_view_list_sort.ascend);
-	WRITE_NL(); WRITE_BOOL(*layout, dir_view_list_sort.case_sensitive);
-	WRITE_NL(); WRITE_BOOL(*layout, show_marks);
-	WRITE_NL(); WRITE_BOOL(*layout, show_file_filter);
-	WRITE_NL(); WRITE_BOOL(*layout, show_thumbnails);
-	WRITE_NL(); WRITE_BOOL(*layout, show_directory_date);
-	WRITE_NL(); WRITE_CHAR(*layout, home_path);
-	WRITE_NL(); WRITE_UINT(*layout, startup_path);
+	WRITE_NL(); WRITE_UINT(lop, dir_view_list_sort.method);
+	WRITE_NL(); WRITE_BOOL(lop, dir_view_list_sort.ascend);
+	WRITE_NL(); WRITE_BOOL(lop, dir_view_list_sort.case_sensitive);
+	WRITE_NL(); WRITE_BOOL(lop, show_marks);
+	WRITE_NL(); WRITE_BOOL(lop, show_file_filter);
+	WRITE_NL(); WRITE_BOOL(lop, show_thumbnails);
+	WRITE_NL(); WRITE_BOOL(lop, show_directory_date);
+	WRITE_NL(); WRITE_CHAR(lop, home_path);
+	WRITE_NL(); WRITE_UINT(lop, startup_path);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_INT_FULL("main_window.x", layout->main_window.rect.x);
-	WRITE_NL(); WRITE_INT_FULL("main_window.y", layout->main_window.rect.y);
-	WRITE_NL(); WRITE_INT_FULL("main_window.w", layout->main_window.rect.width);
-	WRITE_NL(); WRITE_INT_FULL("main_window.h", layout->main_window.rect.height);
-	WRITE_NL(); WRITE_BOOL(*layout, main_window.maximized);
-	WRITE_NL(); WRITE_INT(*layout, main_window.hdivider_pos);
-	WRITE_NL(); WRITE_INT(*layout, main_window.vdivider_pos);
-	WRITE_NL(); WRITE_INT(*layout, workspace);
+	WRITE_NL(); WRITE_INT_FULL("main_window.x", lop.main_window.rect.x);
+	WRITE_NL(); WRITE_INT_FULL("main_window.y", lop.main_window.rect.y);
+	WRITE_NL(); WRITE_INT_FULL("main_window.w", lop.main_window.rect.width);
+	WRITE_NL(); WRITE_INT_FULL("main_window.h", lop.main_window.rect.height);
+	WRITE_NL(); WRITE_BOOL(lop, main_window.maximized);
+	WRITE_NL(); WRITE_INT(lop, main_window.hdivider_pos);
+	WRITE_NL(); WRITE_INT(lop, main_window.vdivider_pos);
+	WRITE_NL(); WRITE_INT(lop, workspace);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_INT(*layout, folder_window.vdivider_pos);
+	WRITE_NL(); WRITE_INT(lop, folder_window.vdivider_pos);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_INT_FULL("float_window.x", layout->float_window.rect.x);
-	WRITE_NL(); WRITE_INT_FULL("float_window.y", layout->float_window.rect.y);
-	WRITE_NL(); WRITE_INT_FULL("float_window.w", layout->float_window.rect.width);
-	WRITE_NL(); WRITE_INT_FULL("float_window.h", layout->float_window.rect.height);
-	WRITE_NL(); WRITE_INT(*layout, float_window.vdivider_pos);
+	WRITE_NL(); WRITE_INT_FULL("float_window.x", lop.float_window.rect.x);
+	WRITE_NL(); WRITE_INT_FULL("float_window.y", lop.float_window.rect.y);
+	WRITE_NL(); WRITE_INT_FULL("float_window.w", lop.float_window.rect.width);
+	WRITE_NL(); WRITE_INT_FULL("float_window.h", lop.float_window.rect.height);
+	WRITE_NL(); WRITE_INT(lop, float_window.vdivider_pos);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_BOOL(*layout, tools_float);
-	WRITE_NL(); WRITE_BOOL(*layout, tools_hidden);
+	WRITE_NL(); WRITE_BOOL(lop, tools_float);
+	WRITE_NL(); WRITE_BOOL(lop, tools_hidden);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_BOOL(*layout, show_info_pixel);
-	WRITE_NL(); WRITE_BOOL(*layout, ignore_alpha);
+	WRITE_NL(); WRITE_BOOL(lop, show_info_pixel);
+	WRITE_NL(); WRITE_BOOL(lop, ignore_alpha);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_BOOL(*layout, bars_state.info);
-	WRITE_NL(); WRITE_BOOL(*layout, bars_state.sort);
-	WRITE_NL(); WRITE_BOOL(*layout, bars_state.tools_float);
-	WRITE_NL(); WRITE_BOOL(*layout, bars_state.tools_hidden);
-	WRITE_NL(); WRITE_BOOL(*layout, bars_state.hidden);
+	WRITE_NL(); WRITE_BOOL(lop, bars_state.info);
+	WRITE_NL(); WRITE_BOOL(lop, bars_state.sort);
+	WRITE_NL(); WRITE_BOOL(lop, bars_state.tools_float);
+	WRITE_NL(); WRITE_BOOL(lop, bars_state.tools_hidden);
+	WRITE_NL(); WRITE_BOOL(lop, bars_state.hidden);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_UINT(*layout, image_overlay.state);
-	WRITE_NL(); WRITE_INT(*layout, image_overlay.histogram_channel);
-	WRITE_NL(); WRITE_INT(*layout, image_overlay.histogram_mode);
+	WRITE_NL(); WRITE_UINT(lop, image_overlay.state);
+	WRITE_NL(); WRITE_INT(lop, image_overlay.histogram_channel);
+	WRITE_NL(); WRITE_INT(lop, image_overlay.histogram_mode);
 
-	WRITE_NL(); WRITE_INT(*layout, log_window.x);
-	WRITE_NL(); WRITE_INT(*layout, log_window.y);
-	WRITE_NL(); WRITE_INT(*layout, log_window.width);
-	WRITE_NL(); WRITE_INT(*layout, log_window.height);
+	WRITE_NL(); WRITE_INT(lop, log_window.x);
+	WRITE_NL(); WRITE_INT(lop, log_window.y);
+	WRITE_NL(); WRITE_INT(lop, log_window.width);
+	WRITE_NL(); WRITE_INT(lop, log_window.height);
 
-	WRITE_NL(); WRITE_INT_FULL("preferences_window.x", layout->preferences_window.rect.x);
-	WRITE_NL(); WRITE_INT_FULL("preferences_window.y", layout->preferences_window.rect.y);
-	WRITE_NL(); WRITE_INT_FULL("preferences_window.w", layout->preferences_window.rect.width);
-	WRITE_NL(); WRITE_INT_FULL("preferences_window.h", layout->preferences_window.rect.height);
-	WRITE_NL(); WRITE_INT(*layout, preferences_window.page_number);
+	WRITE_NL(); WRITE_INT_FULL("preferences_window.x", lop.preferences_window.rect.x);
+	WRITE_NL(); WRITE_INT_FULL("preferences_window.y", lop.preferences_window.rect.y);
+	WRITE_NL(); WRITE_INT_FULL("preferences_window.w", lop.preferences_window.rect.width);
+	WRITE_NL(); WRITE_INT_FULL("preferences_window.h", lop.preferences_window.rect.height);
+	WRITE_NL(); WRITE_INT(lop, preferences_window.page_number);
 
-	WRITE_NL(); WRITE_INT(*layout, search_window.x);
-	WRITE_NL(); WRITE_INT(*layout, search_window.y);
-	WRITE_NL(); WRITE_INT_FULL("search_window.w", layout->search_window.width);
-	WRITE_NL(); WRITE_INT_FULL("search_window.h", layout->search_window.height);
+	WRITE_NL(); WRITE_INT(lop, search_window.x);
+	WRITE_NL(); WRITE_INT(lop, search_window.y);
+	WRITE_NL(); WRITE_INT_FULL("search_window.w", lop.search_window.width);
+	WRITE_NL(); WRITE_INT_FULL("search_window.h", lop.search_window.height);
 
-	WRITE_NL(); WRITE_INT(*layout, dupe_window.x);
-	WRITE_NL(); WRITE_INT(*layout, dupe_window.y);
-	WRITE_NL(); WRITE_INT_FULL("dupe_window.w", layout->dupe_window.width);
-	WRITE_NL(); WRITE_INT_FULL("dupe_window.h", layout->dupe_window.height);
+	WRITE_NL(); WRITE_INT(lop, dupe_window.x);
+	WRITE_NL(); WRITE_INT(lop, dupe_window.y);
+	WRITE_NL(); WRITE_INT_FULL("dupe_window.w", lop.dupe_window.width);
+	WRITE_NL(); WRITE_INT_FULL("dupe_window.h", lop.dupe_window.height);
 
-	WRITE_NL(); WRITE_INT(*layout, advanced_exif_window.x);
-	WRITE_NL(); WRITE_INT(*layout, advanced_exif_window.y);
-	WRITE_NL(); WRITE_INT_FULL("advanced_exif_window.w", layout->advanced_exif_window.width);
-	WRITE_NL(); WRITE_INT_FULL("advanced_exif_window.h", layout->advanced_exif_window.height);
+	WRITE_NL(); WRITE_INT(lop, advanced_exif_window.x);
+	WRITE_NL(); WRITE_INT(lop, advanced_exif_window.y);
+	WRITE_NL(); WRITE_INT_FULL("advanced_exif_window.w", lop.advanced_exif_window.width);
+	WRITE_NL(); WRITE_INT_FULL("advanced_exif_window.h", lop.advanced_exif_window.height);
 	WRITE_SEPARATOR();
 
-	WRITE_NL(); WRITE_BOOL(*layout, animate);
+	WRITE_NL(); WRITE_BOOL(lop, animate);
 }
 
 
@@ -2760,7 +2929,7 @@ void layout_write_config(LayoutWindow *lw, GString *outstr, gint indent)
 {
 	layout_sync_options_with_current_state(lw);
 	WRITE_NL(); WRITE_STRING("<layout");
-	layout_write_attributes(&lw->options, outstr, indent + 1);
+	layout_write_attributes(lw->options, outstr, indent + 1);
 	WRITE_STRING(">");
 
 	bar_sort_write_config(lw->bar_sort, outstr, indent + 1);
@@ -2774,107 +2943,6 @@ void layout_write_config(LayoutWindow *lw, GString *outstr, gint indent)
 	layout_toolbar_write_config(lw, TOOLBAR_STATUS, outstr, indent + 1);
 
 	WRITE_NL(); WRITE_STRING("</layout>");
-}
-
-void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names, const gchar **attribute_values)
-{
-	g_autofree gchar *id = nullptr;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		/* layout options */
-		if (READ_CHAR_FULL("id", id)) continue;
-
-		if (READ_INT(*layout, style)) continue;
-		if (READ_CHAR(*layout, order)) continue;
-
-		if (READ_UINT_ENUM(*layout, dir_view_type)) continue;
-		if (READ_UINT_ENUM(*layout, file_view_type)) continue;
-		if (READ_UINT_ENUM(*layout, file_view_list_sort.method)) continue;
-		if (READ_BOOL(*layout, file_view_list_sort.ascend)) continue;
-		if (READ_BOOL(*layout, file_view_list_sort.case_sensitive)) continue;
-		if (READ_UINT_ENUM(*layout, dir_view_list_sort.method)) continue;
-		if (READ_BOOL(*layout, dir_view_list_sort.ascend)) continue;
-		if (READ_BOOL(*layout, dir_view_list_sort.case_sensitive)) continue;
-		if (READ_BOOL(*layout, show_marks)) continue;
-		if (READ_BOOL(*layout, show_file_filter)) continue;
-		if (READ_BOOL(*layout, show_thumbnails)) continue;
-		if (READ_BOOL(*layout, show_directory_date)) continue;
-		if (READ_CHAR(*layout, home_path)) continue;
-		if (READ_UINT_ENUM_CLAMP(*layout, startup_path, 0, STARTUP_PATH_HOME)) continue;
-
-		/* window positions */
-
-		if (READ_INT_FULL("main_window.x", layout->main_window.rect.x)) continue;
-		if (READ_INT_FULL("main_window.y", layout->main_window.rect.y)) continue;
-		if (READ_INT_FULL("main_window.w", layout->main_window.rect.width)) continue;
-		if (READ_INT_FULL("main_window.h", layout->main_window.rect.height)) continue;
-		if (READ_BOOL(*layout, main_window.maximized)) continue;
-		if (READ_INT(*layout, main_window.hdivider_pos)) continue;
-		if (READ_INT(*layout, main_window.vdivider_pos)) continue;
-
-		if (READ_INT_CLAMP(*layout, folder_window.vdivider_pos, 1, 1000)) continue;
-
-		if (READ_INT_FULL("float_window.x", layout->float_window.rect.x)) continue;
-		if (READ_INT_FULL("float_window.y", layout->float_window.rect.y)) continue;
-		if (READ_INT_FULL("float_window.w", layout->float_window.rect.width)) continue;
-		if (READ_INT_FULL("float_window.h", layout->float_window.rect.height)) continue;
-		if (READ_INT(*layout, float_window.vdivider_pos)) continue;
-
-		if (READ_BOOL(*layout, tools_float)) continue;
-		if (READ_BOOL(*layout, tools_hidden)) continue;
-		if (READ_BOOL(*layout, show_info_pixel)) continue;
-		if (READ_BOOL(*layout, ignore_alpha)) continue;
-
-		if (READ_BOOL(*layout, bars_state.info)) continue;
-		if (READ_BOOL(*layout, bars_state.sort)) continue;
-		if (READ_BOOL(*layout, bars_state.tools_float)) continue;
-		if (READ_BOOL(*layout, bars_state.tools_hidden)) continue;
-		if (READ_BOOL(*layout, bars_state.hidden)) continue;
-
-		if (READ_UINT(*layout, image_overlay.state)) continue;
-		if (READ_INT(*layout, image_overlay.histogram_channel)) continue;
-		if (READ_INT(*layout, image_overlay.histogram_mode)) continue;
-
-		if (READ_INT(*layout, log_window.x)) continue;
-		if (READ_INT(*layout, log_window.y)) continue;
-		if (READ_INT(*layout, log_window.width)) continue;
-		if (READ_INT(*layout, log_window.height)) continue;
-
-		if (READ_INT_FULL("preferences_window.x", layout->preferences_window.rect.x)) continue;
-		if (READ_INT_FULL("preferences_window.y", layout->preferences_window.rect.y)) continue;
-		if (READ_INT_FULL("preferences_window.w", layout->preferences_window.rect.width)) continue;
-		if (READ_INT_FULL("preferences_window.h", layout->preferences_window.rect.height)) continue;
-		if (READ_INT(*layout, preferences_window.page_number)) continue;
-
-		if (READ_INT(*layout, search_window.x)) continue;
-		if (READ_INT(*layout, search_window.y)) continue;
-		if (READ_INT_FULL("search_window.w", layout->search_window.width)) continue;
-		if (READ_INT_FULL("search_window.h", layout->search_window.height)) continue;
-
-		if (READ_INT(*layout, dupe_window.x)) continue;
-		if (READ_INT(*layout, dupe_window.y)) continue;
-		if (READ_INT_FULL("dupe_window.w", layout->dupe_window.width)) continue;
-		if (READ_INT_FULL("dupe_window.h", layout->dupe_window.height)) continue;
-
-		if (READ_INT(*layout, advanced_exif_window.x)) continue;
-		if (READ_INT(*layout, advanced_exif_window.y)) continue;
-		if (READ_INT_FULL("advanced_exif_window.w", layout->advanced_exif_window.width)) continue;
-		if (READ_INT_FULL("advanced_exif_window.h", layout->advanced_exif_window.height)) continue;
-
-		if (READ_BOOL(*layout, animate)) continue;
-		if (READ_INT(*layout, workspace)) continue;
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-
-	if (id && !is_current_layout_id(id))
-		{
-		std::swap(layout->id, id);
-		}
 }
 
 static gchar *layout_config_startup_path(const LayoutOptions &lop)
@@ -2895,10 +2963,7 @@ static gchar *layout_config_startup_path(const LayoutOptions &lop)
 
 LayoutWindow *layout_new_from_config(const gchar **attribute_names, const gchar **attribute_values, gboolean use_commandline)
 {
-	LayoutOptions lop;
-	init_layout_options(&lop);
-
-	if (attribute_names) layout_load_attributes(&lop, attribute_names, attribute_values);
+	LayoutOptions lop = init_layout_options(attribute_names, attribute_values);
 
 	g_autofree gchar *path = layout_config_startup_path(lop);
 
@@ -2925,21 +2990,17 @@ LayoutWindow *layout_new_from_config(const gchar **attribute_names, const gchar 
 
 	layout_set_path(lw, path);
 
-	free_layout_options_content(&lop);
+	free_layout_options_content(lop);
 	return lw;
 }
 
 void layout_update_from_config(LayoutWindow *lw, const gchar **attribute_names, const gchar **attribute_values)
 {
-	LayoutOptions lop;
+	LayoutOptions lop = init_layout_options(attribute_names, attribute_values);
 
-	init_layout_options(&lop);
+	layout_apply_options(lw, lop);
 
-	if (attribute_names) layout_load_attributes(&lop, attribute_names, attribute_values);
-
-	layout_apply_options(lw, &lop);
-
-	free_layout_options_content(&lop);
+	free_layout_options_content(lop);
 }
 
 LayoutWindow *layout_new_from_default()

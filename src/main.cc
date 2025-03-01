@@ -77,6 +77,7 @@
 #include "logwindow.h"
 #include "main-defines.h"
 #include "metadata.h"
+#include "options.h"
 #include "pixbuf-util.h"
 #include "secure-save.h"
 #include "third-party/whereami.h"

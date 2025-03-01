@@ -27,7 +27,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "options.h"
 #include "typedefs.h"
 
 struct AnimationData;
@@ -46,6 +45,119 @@ enum LayoutLocation {
 	LAYOUT_RIGHT  = 1 << 1,
 	LAYOUT_TOP    = 1 << 2,
 	LAYOUT_BOTTOM = 1 << 3
+};
+
+enum StartUpPath {
+	STARTUP_PATH_CURRENT	= 0,
+	STARTUP_PATH_LAST,
+	STARTUP_PATH_HOME,
+};
+
+enum SortActionType {
+	BAR_SORT_COPY = 0,
+	BAR_SORT_MOVE,
+	BAR_SORT_FILTER,
+	BAR_SORT_ACTION_COUNT
+};
+
+enum SortModeType {
+	BAR_SORT_MODE_FOLDER = 0,
+	BAR_SORT_MODE_COLLECTION,
+	BAR_SORT_MODE_COUNT
+};
+
+enum SortSelectionType {
+	BAR_SORT_SELECTION_IMAGE = 0,
+	BAR_SORT_SELECTION_SELECTED,
+	BAR_SORT_SELECTION_COUNT
+};
+
+struct LayoutOptions
+{
+	gchar *id;
+
+	gchar *order;
+	gint style;
+
+	DirViewType dir_view_type;
+	FileViewType file_view_type;
+
+	struct SortParams
+	{
+		SortType method;
+		gboolean ascend;
+		gboolean case_sensitive;
+	};
+	SortParams dir_view_list_sort;
+	SortParams file_view_list_sort;
+
+	gboolean show_thumbnails;
+	gboolean show_marks;
+	gboolean show_file_filter;
+	gboolean show_directory_date;
+	gboolean show_info_pixel;
+	gboolean split_pane_sync;
+	gboolean ignore_alpha;
+
+	struct {
+		GdkRectangle rect;
+		gboolean maximized;
+		gint hdivider_pos;
+		gint vdivider_pos;
+	} main_window;
+
+	struct {
+		GdkRectangle rect;
+		gint vdivider_pos;
+	} float_window;
+
+	struct {
+		gint vdivider_pos;
+	} folder_window;
+
+	struct {
+		guint state;
+		gint histogram_channel;
+		gint histogram_mode;
+	} image_overlay;
+
+	GdkRectangle log_window;
+
+	struct {
+		GdkRectangle rect;
+		gint page_number;
+	} preferences_window;
+
+	GdkRectangle search_window;
+
+	GdkRectangle dupe_window;
+
+	GdkRectangle advanced_exif_window;
+
+	gboolean tools_float;
+	gboolean tools_hidden;
+	gboolean selectable_toolbars_hidden;
+
+	struct {
+		gboolean info;
+		gboolean sort;
+		gboolean tools_float;
+		gboolean tools_hidden;
+		gboolean hidden;
+	} bars_state;
+
+	gchar *home_path;
+	gchar *last_path;
+
+	StartUpPath startup_path;
+
+	gboolean animate;
+	gint workspace;
+
+	SortActionType action;
+	SortModeType mode;
+	SortSelectionType selection;
+	gchar *filter_key;
 };
 
 struct LayoutWindow
@@ -161,11 +273,7 @@ gboolean layout_valid(LayoutWindow **lw);
 
 void layout_show_config_window(LayoutWindow *lw);
 
-void layout_apply_options(LayoutWindow *lw, LayoutOptions *lop);
-
 void layout_sync_options_with_current_state(LayoutWindow *lw);
-void layout_load_attributes(LayoutOptions *layout, const gchar **attribute_names, const gchar **attribute_values);
-void layout_write_attributes(LayoutOptions *layout, GString *outstr, gint indent);
 void layout_write_config(LayoutWindow *lw, GString *outstr, gint indent);
 
 

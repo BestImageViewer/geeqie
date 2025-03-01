@@ -23,9 +23,6 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "histogram.h" /* HCHAN_RGB */
-#include "image-overlay.h" /* OSD_SHOW_NOTHING */
-#include "image.h" /* RECTANGLE_DRAW_ASPECT_RATIO_NONE */
 #include "intl.h"
 #include "layout-image.h"
 #include "layout.h"
@@ -285,71 +282,6 @@ void setup_default_options(ConfOptions *options)
 		}
 
 	options->help_search_engine = g_strdup(HELP_SEARCH_ENGINE);
-}
-
-void copy_layout_options(LayoutOptions *dest, const LayoutOptions *src)
-{
-	free_layout_options_content(dest);
-
-	*dest = *src;
-	dest->id = g_strdup(src->id);
-	dest->order = g_strdup(src->order);
-	dest->home_path = g_strdup(src->home_path);
-	dest->last_path = g_strdup(src->last_path);
-}
-
-void free_layout_options_content(LayoutOptions *dest)
-{
-	g_free(dest->id);
-	g_free(dest->order);
-	g_free(dest->home_path);
-	g_free(dest->last_path);
-}
-
-LayoutOptions *init_layout_options(LayoutOptions *options)
-{
-	memset(options, 0, sizeof(LayoutOptions));
-
-	options->dir_view_type = DIRVIEW_LIST;
-	options->dir_view_list_sort.ascend = TRUE;
-	options->dir_view_list_sort.case_sensitive = TRUE;
-	options->dir_view_list_sort.method = SORT_NAME;
-	options->file_view_list_sort.ascend = TRUE;
-	options->file_view_list_sort.case_sensitive = TRUE;
-	options->file_view_list_sort.method = SORT_NAME;
-	options->file_view_type = FILEVIEW_LIST;
-	options->float_window.rect = {0, 0, 260, 450};
-	options->float_window.vdivider_pos = -1;
-	options->home_path = nullptr;
-	options->id = g_strdup("null");
-	options->main_window.hdivider_pos = -1;
-	options->main_window.maximized = FALSE;
-	options->main_window.rect = {0, 0, 720, 540};
-	options->main_window.vdivider_pos = 200;
-	options->search_window = {100, 100, 700, 650};
-	options->dupe_window = {100, 100, 800, 400};
-	options->advanced_exif_window = {0, 0, 900, 600};
-	options->folder_window.vdivider_pos = 100;
-	options->order = g_strdup("123");
-	options->show_directory_date = FALSE;
-	options->show_marks = FALSE;
-	options->show_file_filter = FALSE;
-	options->show_thumbnails = FALSE;
-	options->style = 0;
-	options->show_info_pixel = FALSE;
-	options->selectable_toolbars_hidden = FALSE;
-	options->tools_float = FALSE;
-	options->tools_hidden = FALSE;
-	options->image_overlay.histogram_channel = HCHAN_RGB;
-	options->image_overlay.histogram_mode = 1;
-	options->image_overlay.state = OSD_SHOW_NOTHING;
-	options->animate = TRUE;
-	options->bars_state.hidden = FALSE;
-	options->log_window = {0, 0, 520, 400};
-	options->preferences_window.rect = {0, 0, 700, 600};
-	options->split_pane_sync = FALSE;
-	options->workspace = -1;
-	return options;
 }
 
 static void sync_options_with_current_state(ConfOptions *options)

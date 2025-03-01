@@ -41,6 +41,7 @@
 #include "main-defines.h"
 #include "main.h"
 #include "misc.h"
+#include "options.h"
 #include "pixbuf-renderer.h"
 #include "rcfile.h"
 #include "secure-save.h"
