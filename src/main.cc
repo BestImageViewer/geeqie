@@ -68,6 +68,7 @@
 #include "glua.h"
 #include "histogram.h"
 #include "history-list.h"
+#include "image.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"

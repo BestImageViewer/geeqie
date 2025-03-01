@@ -25,7 +25,6 @@
 #include <gdk/gdk.h>
 #include <glib.h>
 
-#include "image.h"
 #include "typedefs.h"
 
 enum TextPosition : gint;
@@ -42,6 +41,14 @@ enum DnDAction {
 	DND_ACTION_ASK,
 	DND_ACTION_COPY,
 	DND_ACTION_MOVE
+};
+
+enum RectangleDrawAspectRatio {
+	RECTANGLE_DRAW_ASPECT_RATIO_NONE = 0,
+	RECTANGLE_DRAW_ASPECT_RATIO_ONE_ONE,
+	RECTANGLE_DRAW_ASPECT_RATIO_FOUR_THREE,
+	RECTANGLE_DRAW_ASPECT_RATIO_THREE_TWO,
+	RECTANGLE_DRAW_ASPECT_RATIO_SIXTEEN_NINE
 };
 
 enum ZoomStyle {

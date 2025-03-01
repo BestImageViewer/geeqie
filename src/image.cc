@@ -50,23 +50,40 @@
 struct ExifData;
 struct FileCacheData;
 
-static GList *image_list = nullptr;
+namespace
+{
 
-static void image_read_ahead_start(ImageWindow *imd);
-static void image_cache_set(ImageWindow *imd, FileData *fd);
-
-// For draw rectangle function
-static gint image_start_x;
-static gint image_start_y;
-static gint rect_x1, rect_x2, rect_y1, rect_y2;
-static gint rect_id = 0;
-static SelectionRectangle selection_rectangle;
+constexpr gdouble aspect_ratios[5] {0.0, gdouble(1.0), gdouble(4.0) / 3, gdouble(3) / 2, gdouble(16) / 9};
 
 /*
  * SelectionRectangle
  */
 
-void SelectionRectangle::setCursor(gint x, gint y) {
+struct SelectionRectangle
+{
+	gint origin_x;
+	gint origin_y;
+	gint cursor_x;
+	gint cursor_y;
+	gint height = 0;
+	gint width = 0;
+	gint x = 0;
+	gint y = 0;
+	gdouble aspect_ratio = 0.0;
+
+	SelectionRectangle(gint origin_x = 0, gint origin_y = 0, int rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE);
+	void set_cursor(gint x, gint y);
+};
+
+SelectionRectangle::SelectionRectangle(gint origin_x, gint origin_y, int rectangle_draw_aspect_ratio)
+    : origin_x(origin_x)
+    , origin_y(origin_y)
+{
+	this->aspect_ratio = aspect_ratios[rectangle_draw_aspect_ratio];
+}
+
+void SelectionRectangle::set_cursor(gint x, gint y)
+{
 	this->cursor_x = x;
 	this->cursor_y = y;
 	this->x = std::min(origin_x, cursor_x);
@@ -87,7 +104,21 @@ void SelectionRectangle::setCursor(gint x, gint y) {
 		if (cursor_y < origin_y)
 			this->y = origin_y - height;
 		}
-	}
+}
+
+// For draw rectangle function
+gint image_start_x;
+gint image_start_y;
+gint rect_x1, rect_x2, rect_y1, rect_y2;
+gint rect_id = 0;
+SelectionRectangle selection_rectangle;
+
+} // namespace
+
+static GList *image_list = nullptr;
+
+static void image_read_ahead_start(ImageWindow *imd);
+static void image_cache_set(ImageWindow *imd, FileData *fd);
 
 /*
  *-------------------------------------------------------------------
@@ -232,7 +263,7 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 	gint image_x_pixel;
 	gint image_y_pixel;
 
-	selection_rectangle.setCursor(event->x, event->y);
+	selection_rectangle.set_cursor(event->x, event->y);
 
 	if (options->draw_rectangle)
 		{

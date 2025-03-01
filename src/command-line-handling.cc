@@ -31,6 +31,7 @@
 #include "filedata.h"
 #include "filefilter.h"
 #include "glua.h"
+#include "image.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"
