@@ -61,49 +61,54 @@ constexpr gdouble aspect_ratios[5] {0.0, gdouble(1.0), gdouble(4.0) / 3, gdouble
 
 struct SelectionRectangle
 {
+	gint x = 0;
+	gint y = 0;
+	gint width = 0;
+	gint height = 0;
+	gdouble aspect_ratio = 0.0;
+
+	SelectionRectangle(gint origin_x = 0, gint origin_y = 0,
+	                   RectangleDrawAspectRatio rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE);
+	void set_cursor(gint x, gint y);
+
+private:
 	gint origin_x;
 	gint origin_y;
 	gint cursor_x;
 	gint cursor_y;
-	gint height = 0;
-	gint width = 0;
-	gint x = 0;
-	gint y = 0;
-	gdouble aspect_ratio = 0.0;
-
-	SelectionRectangle(gint origin_x = 0, gint origin_y = 0, int rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE);
-	void set_cursor(gint x, gint y);
+	RectangleDrawAspectRatio rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE;
 };
 
-SelectionRectangle::SelectionRectangle(gint origin_x, gint origin_y, int rectangle_draw_aspect_ratio)
-    : origin_x(origin_x)
+SelectionRectangle::SelectionRectangle(gint origin_x, gint origin_y, RectangleDrawAspectRatio rectangle_draw_aspect_ratio)
+    : aspect_ratio(aspect_ratios[static_cast<gint>(rectangle_draw_aspect_ratio)])
+    , origin_x(origin_x)
     , origin_y(origin_y)
-{
-	this->aspect_ratio = aspect_ratios[rectangle_draw_aspect_ratio];
-}
+    , rectangle_draw_aspect_ratio(rectangle_draw_aspect_ratio)
+{}
 
 void SelectionRectangle::set_cursor(gint x, gint y)
 {
-	this->cursor_x = x;
-	this->cursor_y = y;
+	cursor_x = x;
+	cursor_y = y;
 	this->x = std::min(origin_x, cursor_x);
 	this->y = std::min(origin_y, cursor_y);
-	this->width = std::abs(x - origin_x);
-	this->height = std::abs(y - origin_y);
+	width = std::abs(x - origin_x);
+	height = std::abs(y - origin_y);
 
-	if (aspect_ratio != 0.0)
-		{
-		if (width < height)
-			this->width = height / aspect_ratio;
-		else
-			this->height = width / aspect_ratio;
-		// left side of the origin: move x to respect that origin
-		if (cursor_x < origin_x)
-			this->x = origin_x - width;
-		// above the origin: move y
-		if (cursor_y < origin_y)
-			this->y = origin_y - height;
-		}
+	if (rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_NONE) return;
+
+	if (width < height)
+		width = height / aspect_ratio;
+	else
+		height = width / aspect_ratio;
+
+	// left side of the origin: move x to respect that origin
+	if (cursor_x < origin_x)
+		this->x = origin_x - width;
+
+	// above the origin: move y
+	if (cursor_y < origin_y)
+		this->y = origin_y - height;
 }
 
 // For draw rectangle function
