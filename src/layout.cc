@@ -1917,7 +1917,7 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 		LayoutLocation f;
 		LayoutLocation i;
 
-		layout_config_parse(style, order, &d,  &f, &i);
+		layout_config_parse(style, order, d, f, i);
 
 		if (lw->dir_location == d &&
 		    lw->file_location == f &&
@@ -2569,7 +2569,7 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	/* default layout */
 
 	layout_config_parse(lw->options.style, lw->options.order,
-			    &lw->dir_location,  &lw->file_location, &lw->image_location);
+	                    lw->dir_location, lw->file_location, lw->image_location);
 	if (lw->options.dir_view_type > DIRVIEW_LAST) lw->options.dir_view_type = DIRVIEW_LIST;
 	if (lw->options.file_view_type > FILEVIEW_LAST) lw->options.file_view_type = FILEVIEW_LIST;
 	/* divider positions */

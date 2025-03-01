@@ -34,7 +34,7 @@ void layout_config_set(GtkWidget *widget, gint style, const gchar *order);
 gchar *layout_config_get(GtkWidget *widget, gint *style);
 
 void layout_config_parse(gint style, const gchar *order,
-			 LayoutLocation *a, LayoutLocation *b, LayoutLocation *c);
+                         LayoutLocation &a, LayoutLocation &b, LayoutLocation &c);
 
 #endif /* LAYOUT_CONFIG_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

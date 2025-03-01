@@ -82,24 +82,25 @@ void layout_config_destroy(gpointer data)
 }
 
 void layout_config_set_order(LayoutLocation l, gint n,
-				    LayoutLocation *a, LayoutLocation *b, LayoutLocation *c)
+                             LayoutLocation &a, LayoutLocation &b, LayoutLocation &c)
 {
 	switch (n)
 		{
 		case 0:
-			*a = l;
+			a = l;
 			break;
 		case 1:
-			*b = l;
+			b = l;
 			break;
-		case 2: default:
-			*c = l;
+		case 2:
+		default:
+			c = l;
 			break;
 		}
 }
 
 void layout_config_from_data(gint style, gint oa, gint ob, gint oc,
-				    LayoutLocation *la, LayoutLocation *lb, LayoutLocation *lc)
+                             LayoutLocation &la, LayoutLocation &lb, LayoutLocation &lc)
 {
 	LayoutStyle ls;
 
@@ -288,32 +289,32 @@ gint text_char_to_num(const gchar *text, gint n)
 	return 0;
 }
 
-void layout_config_order_from_text(const gchar *text, gint *a, gint *b, gint *c)
+void layout_config_order_from_text(const gchar *text, gint &a, gint &b, gint &c)
 {
 	if (!text || strlen(text) < 3)
 		{
-		*a = 0;
-		*b = 1;
-		*c = 2;
+		a = 0;
+		b = 1;
+		c = 2;
 		}
 	else
 		{
-		*a = text_char_to_num(text, 0);
-		*b = text_char_to_num(text, 1);
-		*c = text_char_to_num(text, 2);
+		a = text_char_to_num(text, 0);
+		b = text_char_to_num(text, 1);
+		c = text_char_to_num(text, 2);
 		}
 }
 
 } // namespace
 
 void layout_config_parse(gint style, const gchar *order,
-			 LayoutLocation *a, LayoutLocation *b, LayoutLocation *c)
+                         LayoutLocation &a, LayoutLocation &b, LayoutLocation &c)
 {
 	gint na;
 	gint nb;
 	gint nc;
 
-	layout_config_order_from_text(order, &na, &nb, &nc);
+	layout_config_order_from_text(order, na, nb, nc);
 	layout_config_from_data(style, na, nb, nc, a, b, c);
 }
 
@@ -321,9 +322,6 @@ void layout_config_set(GtkWidget *widget, gint style, const gchar *order)
 {
 	LayoutConfig *lc;
 	GtkWidget *button;
-	gint a;
-	gint b;
-	gint c;
 
 	lc = static_cast<LayoutConfig *>(g_object_get_data(G_OBJECT(widget), "layout_config"));
 
@@ -335,7 +333,10 @@ void layout_config_set(GtkWidget *widget, gint style, const gchar *order)
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
 
-	layout_config_order_from_text(order, &a, &b, &c);
+	gint a;
+	gint b;
+	gint c;
+	layout_config_order_from_text(order, a, b, c);
 
 	layout_config_list_order_set(lc, a, 0);
 	layout_config_list_order_set(lc, b, 1);
