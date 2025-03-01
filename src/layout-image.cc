@@ -2101,7 +2101,7 @@ static void layout_image_deactivate(LayoutWindow *lw, gint i)
 	image_set_drag_func(lw->split_images[i], layout_image_drag_inactive_cb, lw);
 
 	image_attach_window(lw->split_images[i], nullptr, nullptr, nullptr, FALSE);
-	image_select(lw->split_images[i], FALSE);
+	image_select(lw->split_images[i], false);
 }
 
 /* force should be set after change of lw->split_mode */
@@ -2128,10 +2128,7 @@ void layout_image_activate(LayoutWindow *lw, gint i, gboolean force)
 	/* do not highlight selected image in SPLIT_NONE */
 	/* maybe the image should be selected always and highlight should be controlled by
 	   another image option */
-	if (lw->split_mode != SPLIT_NONE)
-		image_select(lw->split_images[i], TRUE);
-	else
-		image_select(lw->split_images[i], FALSE);
+	image_select(lw->split_images[i], lw->split_mode != SPLIT_NONE);
 
 	fd = image_get_fd(lw->image);
 

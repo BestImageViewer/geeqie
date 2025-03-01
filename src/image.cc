@@ -1951,7 +1951,7 @@ void image_to_root_window(ImageWindow *, gboolean)
 {
 }
 
-void image_select(ImageWindow *imd, gboolean select)
+void image_select(ImageWindow *imd, bool select)
 {
 	if (!imd->has_frame) return;
 

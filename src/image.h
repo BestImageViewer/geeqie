@@ -162,7 +162,7 @@ void image_set_state_func(ImageWindow *imd,
 			  void (*func)(ImageWindow *imd, ImageState state, gpointer data),
 			  gpointer data);
 
-void image_select(ImageWindow *imd, gboolean select);
+void image_select(ImageWindow *imd, bool select);
 void image_set_selectable(ImageWindow *imd, gboolean selectable);
 
 void image_grab_focus(ImageWindow *imd);
