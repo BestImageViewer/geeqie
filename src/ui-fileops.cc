@@ -42,8 +42,6 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "md5-util.h"
-#include "options.h"
-#include "secure-save.h"
 #include "typedefs.h"
 #include "ui-utildlg.h"
 #include "utilops.h"
@@ -60,22 +58,7 @@ namespace
 using FileDescriptor = int;
 G_DEFINE_AUTO_CLEANUP_FREE_FUNC(FileDescriptor, close, -1) // NOLINT(readability-non-const-parameter)
 
-} // namespace
-
-void print_term(gboolean err, const gchar *text_utf8)
-{
-	g_autofree gchar *text_l = g_locale_from_utf8(text_utf8, -1, nullptr, nullptr, nullptr);
-	const gchar *text = text_l ? text_l : text_utf8;
-
-	fputs(text, err ? stderr : stdout);
-
-	if(command_line && command_line->log_file_ssi)
-		{
-		secure_fputs(command_line->log_file_ssi, text);
-		}
-}
-
-static void encoding_dialog(const gchar *path)
+void encoding_dialog(const gchar *path)
 {
 	static gboolean warned_user = FALSE;
 	GenericDialog *gd;
@@ -120,6 +103,8 @@ static void encoding_dialog(const gchar *path)
 
 	gtk_widget_show(gd->dialog);
 }
+
+} // namespace
 
 #if GQ_DEBUG_PATH_UTF8
 gchar *path_to_utf8_debug(const gchar *path, const gchar *file, gint line)

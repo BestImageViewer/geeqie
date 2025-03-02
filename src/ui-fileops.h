@@ -35,16 +35,6 @@
 #define GQ_DEBUG_PATH_UTF8 1
 #endif
 
-void print_term(gboolean err, const gchar *text_utf8);
-
-#define printf_term(err, ...) \
-	G_STMT_START \
-		{ \
-		g_autofree gchar *msg = g_strdup_printf(__VA_ARGS__); \
-		print_term(err, msg); \
-		} \
-	G_STMT_END
-
 #if GQ_DEBUG_PATH_UTF8
 #define path_to_utf8(path) path_to_utf8_debug(path, __FILE__, __LINE__)
 #define path_from_utf8(utf8) path_from_utf8_debug(utf8, __FILE__, __LINE__)

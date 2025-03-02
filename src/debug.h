@@ -28,26 +28,35 @@
 #define DOMAIN_DEBUG "debug"
 #define DOMAIN_INFO  "info"
 
-void log_domain_printf(const gchar *domain, const gchar *format, ...) G_GNUC_PRINTF(2, 3);
 void log_domain_print_debug(const gchar *domain, const gchar *file_name, int line_number, const gchar *function_name, const gchar *format, ...) G_GNUC_PRINTF(5, 6);
-void log_print_file_data_dump(const gchar *file, gint line_number, const gchar *function_name);
-void log_print_backtrace(const gchar *file, gint line_number, const gchar *function_name);
+void log_domain_printf(const gchar *domain, const gchar *format, ...) G_GNUC_PRINTF(2, 3);
+void print_term(bool err, const gchar *text_utf8);
 
 #define log_printf(...) log_domain_printf(DOMAIN_INFO, __VA_ARGS__)
+
+#define printf_term(err, ...) \
+	G_STMT_START \
+		{ \
+		g_autofree gchar *msg = g_strdup_printf(__VA_ARGS__); \
+		print_term(err, msg); \
+		} \
+	G_STMT_END
 
 #ifdef DEBUG
 
 #define DEBUG_LEVEL_MIN 0
 #define DEBUG_LEVEL_MAX 4
 
-void set_regexp(const gchar *regexp);
-gchar *get_regexp();
 gint get_debug_level();
 void set_debug_level(gint new_level);
 void debug_level_add(gint delta);
 gint required_debug_level(gint level);
 const gchar *get_exec_time();
 void init_exec_time();
+void set_regexp(const gchar *regexp);
+gchar *get_regexp();
+void log_print_backtrace(const gchar *file, gint line_number, const gchar *function_name);
+void log_print_file_data_dump(const gchar *file, gint line_number, const gchar *function_name);
 
 #define DEBUG_N(n, ...) \
 	G_STMT_START \
@@ -99,14 +108,14 @@ void init_exec_time();
 	G_STMT_END
 #else /* DEBUG */
 
-#define get_regexp() (0)
-#define set_regexp(regexp) G_STMT_START { } G_STMT_END
 #define get_debug_level() (0)
 #define set_debug_level(new_level) G_STMT_START { } G_STMT_END
 #define debug_level_add(delta) G_STMT_START { } G_STMT_END
 #define required_debug_level(level) (0)
 #define get_exec_time() ""
 #define init_exec_time() G_STMT_START { } G_STMT_END
+#define set_regexp(regexp) G_STMT_START { } G_STMT_END
+#define get_regexp() (0)
 
 #define DEBUG_N(n, ...) G_STMT_START { } G_STMT_END
 
@@ -121,7 +130,6 @@ void init_exec_time();
 #define DEBUG_2(...) DEBUG_N(2, __VA_ARGS__)
 #define DEBUG_3(...) DEBUG_N(3, __VA_ARGS__)
 #define DEBUG_4(...) DEBUG_N(4, __VA_ARGS__)
-
 
 #endif /* _DEBUG_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

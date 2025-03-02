@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "debug.h"
 
 #include <sys/time.h>
 
@@ -39,7 +40,7 @@
 #include "main.h"
 #include "misc.h"
 #include "options.h"
-#include "ui-fileops.h"
+#include "secure-save.h"
 
 /*
  * Logging functions
@@ -97,7 +98,7 @@ static void log_domain_print_message(const gchar *domain, const gchar *buf)
 		return;
 		}
 
-	print_term(FALSE, buf_nl);
+	print_term(false, buf_nl);
 
 	if (strcmp(domain, DOMAIN_INFO) == 0)
 		g_idle_add(log_normal_cb, buf_nl);
@@ -136,6 +137,19 @@ void log_domain_printf(const gchar *domain, const gchar *format, ...)
 	va_end(ap);
 
 	log_domain_print_message(domain, buf);
+}
+
+void print_term(bool err, const gchar *text_utf8)
+{
+	g_autofree gchar *text_l = g_locale_from_utf8(text_utf8, -1, nullptr, nullptr, nullptr);
+	const gchar *text = text_l ? text_l : text_utf8;
+
+	fputs(text, err ? stderr : stdout);
+
+	if(command_line && command_line->log_file_ssi)
+		{
+		secure_fputs(command_line->log_file_ssi, text);
+		}
 }
 
 /*
