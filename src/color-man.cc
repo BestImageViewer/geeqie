@@ -34,8 +34,12 @@
 
 #include "image.h"
 #include "intl.h"
+#include "layout.h"
 #include "options.h"
 #include "ui-fileops.h"
+
+namespace
+{
 
 #define GQ_RESOURCE_PATH_ICC "/org/geeqie/icc"
 
@@ -56,7 +60,7 @@ struct ColorManCache {
 };
 
 
-static cmsHPROFILE color_man_create_adobe_comp()
+cmsHPROFILE color_man_create_adobe_comp()
 {
 	/* ClayRGB1998 is AdobeRGB compatible */
 	g_autoptr(GBytes) ClayRGB1998_icc_bytes = g_resources_lookup_data(GQ_RESOURCE_PATH_ICC "/ClayRGB1998.icc",
@@ -68,23 +72,35 @@ static cmsHPROFILE color_man_create_adobe_comp()
 	return cmsOpenProfileFromMem(ClayRGB1998_icc, ClayRGB1998_icc_len);
 }
 
+/**
+ * @brief Retrieves the internal scale factor that maps from window coordinates to the actual device pixels
+ * @param  -
+ * @returns scale factor
+ */
+gint scale_factor()
+{
+	LayoutWindow *lw = get_current_layout();
+
+	return gtk_widget_get_scale_factor(lw->window);
+}
+
 /*
  *-------------------------------------------------------------------
  * color transform cache
  *-------------------------------------------------------------------
  */
 
-static GList *cm_cache_list = nullptr;
+GList *cm_cache_list = nullptr;
 
 
-static void color_man_cache_ref(ColorManCache *cc)
+void color_man_cache_ref(ColorManCache *cc)
 {
 	if (!cc) return;
 
 	cc->refcount++;
 }
 
-static void color_man_cache_unref(ColorManCache *cc)
+void color_man_cache_unref(ColorManCache *cc)
 {
 	if (!cc) return;
 
@@ -102,8 +118,8 @@ static void color_man_cache_unref(ColorManCache *cc)
 		}
 }
 
-static cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const gchar *file,
-						guchar *data, guint data_len)
+cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const gchar *file,
+                                         guchar *data, guint data_len)
 {
 	cmsHPROFILE profile = nullptr;
 
@@ -136,11 +152,11 @@ static cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const 
 	return profile;
 }
 
-static ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gchar *in_file,
-					  guchar *in_data, guint in_data_len,
-					  ColorManProfileType out_type, const gchar *out_file,
-					  guchar *out_data, guint out_data_len,
-					  gboolean has_alpha)
+ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gchar *in_file,
+                                   guchar *in_data, guint in_data_len,
+                                   ColorManProfileType out_type, const gchar *out_file,
+                                   guchar *out_data, guint out_data_len,
+                                   gboolean has_alpha)
 {
 	ColorManCache *cc;
 
@@ -194,14 +210,14 @@ static ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gch
 	return cc;
 }
 
-static void color_man_cache_reset()
+void color_man_cache_reset()
 {
 	g_list_free_full(cm_cache_list, reinterpret_cast<GDestroyNotify>(color_man_cache_unref));
 }
 
-static ColorManCache *color_man_cache_find(ColorManProfileType in_type, const gchar *in_file,
-					   ColorManProfileType out_type, const gchar *out_file,
-					   gboolean has_alpha)
+ColorManCache *color_man_cache_find(ColorManProfileType in_type, const gchar *in_file,
+                                    ColorManProfileType out_type, const gchar *out_file,
+                                    gboolean has_alpha)
 {
 	GList *work;
 
@@ -238,11 +254,11 @@ static ColorManCache *color_man_cache_find(ColorManProfileType in_type, const gc
 	return nullptr;
 }
 
-static ColorManCache *color_man_cache_get(ColorManProfileType in_type, const gchar *in_file,
-					  guchar *in_data, guint in_data_len,
-					  ColorManProfileType out_type, const gchar *out_file,
-					  guchar *out_data, guint out_data_len,
-					  gboolean has_alpha)
+ColorManCache *color_man_cache_get(ColorManProfileType in_type, const gchar *in_file,
+                                   guchar *in_data, guint in_data_len,
+                                   ColorManProfileType out_type, const gchar *out_file,
+                                   guchar *out_data, guint out_data_len,
+                                   gboolean has_alpha)
 {
 	ColorManCache *cc;
 
@@ -256,6 +272,8 @@ static ColorManCache *color_man_cache_get(ColorManProfileType in_type, const gch
 	return color_man_cache_new(in_type, in_file, in_data, in_data_len,
 				   out_type, out_file, out_data, out_data_len, has_alpha);
 }
+
+} // namespace
 
 
 /*

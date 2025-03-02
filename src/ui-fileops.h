@@ -107,7 +107,6 @@ gboolean md5_get_digest_from_file_utf8(const gchar *path, guchar digest[16]);
 
 gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data);
 gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error);
-gint scale_factor();
 
 guchar *map_file(const gchar *path, gsize &map_len);
 

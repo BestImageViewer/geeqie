@@ -954,20 +954,6 @@ gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error)
 	return g_file_delete(file, cancellable, error);
 }
 
-/**
- * @brief Retrieves the internal scale factor that maps from window coordinates to the actual device pixels
- * @param  -
- * @returns scale factor
- *
- *
- */
-gint scale_factor()
-{
-	LayoutWindow *lw = get_current_layout();
-
-	return gtk_widget_get_scale_factor(lw->window);
-}
-
 guchar *map_file(const gchar *path, gsize &map_len)
 {
 	g_auto(FileDescriptor) fd = open(path, O_RDONLY | O_NONBLOCK);
