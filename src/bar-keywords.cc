@@ -1413,7 +1413,6 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	GtkCellRenderer *renderer;
 	GtkTreeIter iter;
 	GtkEntryCompletion *completion;
-	gchar *path;
 
 	pkd = g_new0(PaneKeywordsData, 1);
 
@@ -1474,7 +1473,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_widget_show(vbox);
 	gtk_widget_set_tooltip_text(pkd->autocomplete, _("Keyword autocomplete"));
 
-	path = g_build_filename(get_rc_dir(), "keywords", NULL);
+	g_autofree gchar *path = g_build_filename(get_rc_dir(), "keywords", NULL);
 	autocomplete_keywords_list_load(path);
 
 	completion = gtk_entry_completion_new();
