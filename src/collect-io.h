@@ -24,7 +24,7 @@
 
 #include <glib.h>
 
-#include "typedefs.h"
+enum NotifyType : gint;
 
 struct CollectionData;
 class FileData;

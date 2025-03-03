@@ -29,6 +29,8 @@
 
 #include "typedefs.h"
 
+enum NotifyType : gint;
+
 class FileData;
 struct LayoutWindow;
 struct ThumbLoader;
