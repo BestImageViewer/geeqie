@@ -27,6 +27,8 @@
 
 #include "typedefs.h"
 
+enum NotifyType : gint;
+
 class FileData;
 
 #define COMMENT_KEY "Xmp.dc.description"

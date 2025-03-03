@@ -25,7 +25,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
 
-#include "typedefs.h"
+enum NotifyType : gint;
 
 class FileData;
 struct ImageLoader;
