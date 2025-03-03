@@ -41,6 +41,36 @@ namespace
 
 constexpr gint HISTMAP_SIZE = 256;
 
+void histogram_vgrid(const Histogram::Grid &grid, GdkPixbuf *pixbuf, GdkRectangle rect)
+{
+	if (grid.v == 0) return;
+
+	float add = rect.width / static_cast<float>(grid.v);
+
+	for (guint i = 1; i < grid.v; i++)
+		{
+		gint xpos = rect.x + static_cast<int>((i * add) + 0.5);
+
+		pixbuf_draw_line(pixbuf, rect, xpos, rect.y, xpos, rect.y + rect.height,
+		                 grid.color.R, grid.color.G, grid.color.B, grid.color.A);
+		}
+}
+
+void histogram_hgrid(const Histogram::Grid &grid, GdkPixbuf *pixbuf, GdkRectangle rect)
+{
+	if (grid.h == 0) return;
+
+	float add = rect.height / static_cast<float>(grid.h);
+
+	for (guint i = 1; i < grid.h; i++)
+		{
+		gint ypos = rect.y + static_cast<int>((i * add) + 0.5);
+
+		pixbuf_draw_line(pixbuf, rect, rect.x, ypos, rect.x + rect.width, ypos,
+		                 grid.color.R, grid.color.G, grid.color.B, grid.color.A);
+		}
+}
+
 } // namespace
 
 struct HistMap {
@@ -63,14 +93,6 @@ Histogram *histogram_new()
 	histogram->histogram_channel = HCHAN_DEFAULT;
 	histogram->histogram_mode = 0;
 
-	/* grid */
-	histogram->vgrid = 5;
-	histogram->hgrid = 3;
-	histogram->grid_color.R	= 160;
-	histogram->grid_color.G	= 160;
-	histogram->grid_color.B	= 160;
-	histogram->grid_color.A	= 250;
-
 	return histogram;
 }
 
@@ -80,45 +102,43 @@ void histogram_free(Histogram *histogram)
 }
 
 
-gint histogram_set_channel(Histogram *histogram, gint chan)
+void histogram_set_channel(Histogram *histogram, gint chan)
 {
-	if (!histogram) return 0;
+	if (!histogram) return;
 	histogram->histogram_channel = chan;
-	return chan;
 }
 
-gint histogram_get_channel(Histogram *histogram)
+gint histogram_get_channel(const Histogram *histogram)
 {
 	if (!histogram) return 0;
 	return histogram->histogram_channel;
 }
 
-gint histogram_set_mode(Histogram *histogram, gint mode)
+void histogram_set_mode(Histogram *histogram, gint mode)
 {
-	if (!histogram) return 0;
+	if (!histogram) return;
 	histogram->histogram_mode = mode;
-	return mode;
 }
 
-gint histogram_get_mode(Histogram *histogram)
+gint histogram_get_mode(const Histogram *histogram)
 {
 	if (!histogram) return 0;
 	return histogram->histogram_mode;
 }
 
-gint histogram_toggle_channel(Histogram *histogram)
+void histogram_toggle_channel(Histogram *histogram)
 {
-	if (!histogram) return 0;
-	return histogram_set_channel(histogram, (histogram_get_channel(histogram)+1)%HCHAN_COUNT);
+	if (!histogram) return;
+	histogram_set_channel(histogram, (histogram_get_channel(histogram)+1)%HCHAN_COUNT);
 }
 
-gint histogram_toggle_mode(Histogram *histogram)
+void histogram_toggle_mode(Histogram *histogram)
 {
-	if (!histogram) return 0;
-	return histogram_set_mode(histogram, !histogram_get_mode(histogram));
+	if (!histogram) return;
+	histogram_set_mode(histogram, !histogram_get_mode(histogram));
 }
 
-const gchar *histogram_label(Histogram *histogram)
+const gchar *histogram_label(const Histogram *histogram)
 {
 	const gchar *t1 = "";
 
@@ -248,43 +268,7 @@ gboolean histmap_start_idle(FileData *fd)
 }
 
 
-static void histogram_vgrid(Histogram *histogram, GdkPixbuf *pixbuf, GdkRectangle rect)
-{
-	if (histogram->vgrid == 0) return;
-
-	float add = rect.width / static_cast<float>(histogram->vgrid);
-
-	for (guint i = 1; i < histogram->vgrid; i++)
-		{
-		gint xpos = rect.x + static_cast<int>((i * add) + 0.5);
-
-		pixbuf_draw_line(pixbuf, rect, xpos, rect.y, xpos, rect.y + rect.height,
-				 histogram->grid_color.R,
-				 histogram->grid_color.G,
-				 histogram->grid_color.B,
-				 histogram->grid_color.A);
-		}
-}
-
-static void histogram_hgrid(Histogram *histogram, GdkPixbuf *pixbuf, GdkRectangle rect)
-{
-	if (histogram->hgrid == 0) return;
-
-	float add = rect.height / static_cast<float>(histogram->hgrid);
-
-	for (guint i = 1; i < histogram->hgrid; i++)
-		{
-		gint ypos = rect.y + static_cast<int>((i * add) + 0.5);
-
-		pixbuf_draw_line(pixbuf, rect, rect.x, ypos, rect.x + rect.width, ypos,
-				 histogram->grid_color.R,
-				 histogram->grid_color.G,
-				 histogram->grid_color.B,
-				 histogram->grid_color.A);
-		}
-}
-
-gboolean histogram_draw(Histogram *histogram, const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height)
+gboolean histogram_draw(const Histogram *histogram, const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height)
 {
 	/** @FIXME use the coordinates correctly */
 	gint i;
@@ -296,9 +280,10 @@ gboolean histogram_draw(Histogram *histogram, const HistMap *histmap, GdkPixbuf 
 	if (!histogram || !histmap) return FALSE;
 
 	/* Draw the grid */
+	constexpr Histogram::Grid grid{5, 3, {160, 160, 160, 250}};
 	const GdkRectangle rect{x, y, width, height};
-	histogram_vgrid(histogram, pixbuf, rect);
-	histogram_hgrid(histogram, pixbuf, rect);
+	histogram_vgrid(grid, pixbuf, rect);
+	histogram_hgrid(grid, pixbuf, rect);
 
 	/* exclude overexposed and underexposed */
 	for (i = 1; i < HISTMAP_SIZE - 1; i++)
