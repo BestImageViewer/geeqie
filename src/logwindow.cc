@@ -35,7 +35,9 @@
 #include "compat.h"
 #include "intl.h"
 #include "layout.h"
-#include "main-defines.h"
+#ifdef DEBUG
+#  include "main-defines.h"
+#endif
 #include "misc.h"
 #include "options.h"
 #include "ui-misc.h"
@@ -130,7 +132,7 @@ static gboolean key_pressed(GtkWidget *, GdkEventKey *event, LogWindow *logwin)
 	return FALSE;
 }
 
-
+#ifdef DEBUG
 static void log_window_pause_cb(GtkWidget *, gpointer)
 {
 	options->log_window.paused = !options->log_window.paused;
@@ -342,6 +344,7 @@ static void filter_entry_icon_cb(GtkEntry *entry, GtkEntryIconPosition, GdkEvent
 	gq_gtk_entry_set_text(entry, blank);
 	set_regexp(blank);
 }
+#endif
 
 static LogWindow *log_window_create(LayoutWindow *lw)
 {
@@ -352,16 +355,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	GtkTextBuffer *buffer;
 	GtkTextIter iter;
 	GtkWidget *win_vbox;
-	GtkWidget *textbox;
-	GtkWidget *hbox;
-	GtkWidget *label = nullptr;
-	GtkWidget *search_box;
-	GtkWidget *backwards_button;
-	GtkWidget *forwards_button;
-	GtkWidget *all_button;
-	GtkIconTheme *theme;
-	GdkPixbuf *pixbuf;
-	GtkWidget *image = nullptr;
+	GtkWidget *textbox = nullptr;
 
 	logwin = g_new0(LogWindow, 1);
 
@@ -411,15 +405,15 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	gtk_text_buffer_create_tag(buffer, "gray_bg", "background", "gray", NULL);
 	gtk_text_buffer_create_tag(buffer, "green_bg", "background", "#00FF00", NULL);
 
-	hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	GtkWidget *hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
 	gtk_widget_show(hbox);
 	logwin->debug_level = pref_spin_new_int(hbox, _("Debug level:"), nullptr, 0, 4, 1, get_debug_level(), &logwin->debug_value);
 	g_signal_connect(logwin->debug_level, "value-changed", G_CALLBACK(debug_changed_cb), logwin);
 
 	logwin->pause = gtk_toggle_button_new();
-	label = gtk_label_new("Pause");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(logwin->pause), _("Pause scrolling"));
+	GtkWidget *label = gtk_label_new("Pause");
 	gq_gtk_container_add(GTK_WIDGET(logwin->pause), label) ;
 	gq_gtk_box_pack_start(GTK_BOX(hbox),logwin->pause, FALSE, FALSE, 0) ;
 	g_signal_connect(logwin->pause, "toggled", G_CALLBACK(log_window_pause_cb), logwin);
@@ -445,7 +439,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	g_signal_connect(logwin->timer_data, "toggled", G_CALLBACK(log_window_timer_data_cb), logwin);
 	gq_gtk_widget_show_all(logwin->timer_data);
 
-	search_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	GtkWidget *search_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_container_add(GTK_WIDGET(hbox), search_box);
 	gtk_widget_show(search_box);
 
@@ -459,10 +453,11 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	g_signal_connect(logwin->search_entry_box, "icon-press", G_CALLBACK(search_entry_icon_cb), logwin);
 	g_signal_connect(logwin->search_entry_box, "activate", G_CALLBACK(search_activate_event), logwin);
 
-	theme = gtk_icon_theme_get_default();
-	pixbuf = gtk_icon_theme_load_icon(theme, GQ_ICON_PAN_UP, 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
-	image = gtk_image_new_from_pixbuf(pixbuf);
-	backwards_button = gtk_button_new();
+	GtkIconTheme *theme = gtk_icon_theme_get_default();
+
+	GdkPixbuf *pixbuf = gtk_icon_theme_load_icon(theme, GQ_ICON_PAN_UP, 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
+	GtkWidget *image = gtk_image_new_from_pixbuf(pixbuf);
+	GtkWidget *backwards_button = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(backwards_button), GTK_WIDGET(image));
 	gtk_widget_set_tooltip_text(backwards_button, _("Search backwards"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), backwards_button, FALSE, FALSE, 0);
@@ -472,7 +467,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 
 	pixbuf = gtk_icon_theme_load_icon(theme, GQ_ICON_PAN_DOWN, 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
 	image = gtk_image_new_from_pixbuf(pixbuf);
-	forwards_button = gtk_button_new();
+	GtkWidget *forwards_button = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(forwards_button), GTK_WIDGET(image));
 	gtk_widget_set_tooltip_text(forwards_button, _("Search forwards"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), forwards_button, FALSE, FALSE, 0);
@@ -482,7 +477,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 
 	pixbuf = gtk_icon_theme_load_icon(theme, "edit-select-all-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
 	image = gtk_image_new_from_pixbuf(pixbuf);
-	all_button = gtk_toggle_button_new();
+	GtkWidget *all_button = gtk_toggle_button_new();
 	gtk_button_set_image(GTK_BUTTON(all_button), GTK_WIDGET(image));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(all_button), _("Highlight all"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), all_button, FALSE, FALSE, 0) ;
