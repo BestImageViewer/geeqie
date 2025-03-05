@@ -29,6 +29,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <functional>
 #include <vector>
 
 #include <glib-object.h>
@@ -37,6 +38,9 @@
 
 namespace
 {
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(cmsToneCurve, cmsFreeToneCurve)
+G_DEFINE_AUTO_CLEANUP_FREE_FUNC(cmsHPROFILE, cmsCloseProfile, nullptr) // NOLINT(readability-non-const-parameter)
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(heif_color_profile_nclx, heif_nclx_color_profile_free)
 
@@ -114,53 +118,15 @@ double PQ_fct(double x)
  */
 guchar *nclx_to_lcms_profile(const heif_color_profile_nclx *nclx, guint &profile_len)
 {
+	if (!nclx || nclx->color_primaries == heif_color_primaries_unspecified) return nullptr;
+
 	const gchar *primaries_name = "";
-	const gchar *trc_name = "";
-	cmsHPROFILE *profile = nullptr;
-	cmsCIExyY whitepoint;
-	cmsCIExyYTRIPLE primaries;
-	cmsToneCurve *curve[3];
-	cmsUInt32Number size;
-	guint8 *data = nullptr;
-
-	cmsFloat64Number srgb_parameters[5] =
-	{ 2.4, 1.0 / 1.055,  0.055 / 1.055, 1.0 / 12.92, 0.04045 };
-
-	cmsFloat64Number rec709_parameters[5] =
-	{ 2.2, 1.0 / 1.099,  0.099 / 1.099, 1.0 / 4.5, 0.081 };
-
-	if (nclx == nullptr)
-		{
-		return nullptr;
-		}
-
-	if (nclx->color_primaries == heif_color_primaries_unspecified)
-		{
-		return nullptr;
-		}
-
-	whitepoint.x = nclx->color_primary_white_x;
-	whitepoint.y = nclx->color_primary_white_y;
-	whitepoint.Y = 1.0F;
-
-	primaries.Red.x = nclx->color_primary_red_x;
-	primaries.Red.y = nclx->color_primary_red_y;
-	primaries.Red.Y = 1.0F;
-
-	primaries.Green.x = nclx->color_primary_green_x;
-	primaries.Green.y = nclx->color_primary_green_y;
-	primaries.Green.Y = 1.0F;
-
-	primaries.Blue.x = nclx->color_primary_blue_x;
-	primaries.Blue.y = nclx->color_primary_blue_y;
-	primaries.Blue.Y = 1.0F;
-
 	switch (nclx->color_primaries)
 		{
 		case heif_color_primaries_ITU_R_BT_709_5:
 			primaries_name = "BT.709";
 			break;
-		case   heif_color_primaries_ITU_R_BT_470_6_System_M:
+		case heif_color_primaries_ITU_R_BT_470_6_System_M:
 			primaries_name = "BT.470-6 System M";
 			break;
 		case heif_color_primaries_ITU_R_BT_470_6_System_B_G:
@@ -193,78 +159,98 @@ guchar *nclx_to_lcms_profile(const heif_color_profile_nclx *nclx, guint &profile
 		default:
 			log_printf("nclx unsupported color_primaries value: %d\n", nclx->color_primaries);
 			return nullptr;
-			break;
 		}
 
 	DEBUG_1("nclx primaries: %s: ", primaries_name);
 
+	using GetCurve = std::function<cmsToneCurve *()>;
+	const auto get_profile = [nclx](const GetCurve &get_curve)
+	{
+		cmsCIExyY whitepoint;
+		whitepoint.x = nclx->color_primary_white_x;
+		whitepoint.y = nclx->color_primary_white_y;
+		whitepoint.Y = 1.0F;
+
+		cmsCIExyYTRIPLE primaries;
+		primaries.Red.x = nclx->color_primary_red_x;
+		primaries.Red.y = nclx->color_primary_red_y;
+		primaries.Red.Y = 1.0F;
+
+		primaries.Green.x = nclx->color_primary_green_x;
+		primaries.Green.y = nclx->color_primary_green_y;
+		primaries.Green.Y = 1.0F;
+
+		primaries.Blue.x = nclx->color_primary_blue_x;
+		primaries.Blue.y = nclx->color_primary_blue_y;
+		primaries.Blue.Y = 1.0F;
+
+		g_autoptr(cmsToneCurve) curve = get_curve();
+		cmsToneCurve *transfer_function[3] = {curve, curve, curve};
+
+		return cmsCreateRGBProfile(&whitepoint, &primaries, transfer_function);
+	};
+
+	g_auto(cmsHPROFILE) profile = nullptr;
+	const gchar *trc_name = "";
 	switch (nclx->transfer_characteristics)
 		{
 		case heif_transfer_characteristic_ITU_R_BT_709_5:
-			curve[0] = curve[1] = curve[2] = cmsBuildParametricToneCurve(nullptr, 4, rec709_parameters);
-			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
-			cmsFreeToneCurve(curve[0]);
+			profile = get_profile([]()
+			{
+				cmsFloat64Number rec709_parameters[5] =
+				{ 2.2, 1.0 / 1.099,  0.099 / 1.099, 1.0 / 4.5, 0.081 };
+
+				return cmsBuildParametricToneCurve(nullptr, 4, rec709_parameters);
+			});
 			trc_name = "Rec709 RGB";
 			break;
 		case heif_transfer_characteristic_ITU_R_BT_470_6_System_M:
-			curve[0] = curve[1] = curve[2] = cmsBuildGamma (nullptr, 2.2F);
-			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
-			cmsFreeToneCurve(curve[0]);
+			profile = get_profile([](){ return cmsBuildGamma(nullptr, 2.2F); });
 			trc_name = "Gamma2.2 RGB";
 			break;
 		case heif_transfer_characteristic_ITU_R_BT_470_6_System_B_G:
-			curve[0] = curve[1] = curve[2] = cmsBuildGamma (nullptr, 2.8F);
-			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
-			cmsFreeToneCurve(curve[0]);
+			profile = get_profile([](){ return cmsBuildGamma(nullptr, 2.8F); });
 			trc_name = "Gamma2.8 RGB";
 			break;
 		case heif_transfer_characteristic_linear:
-			curve[0] = curve[1] = curve[2] = cmsBuildGamma (nullptr, 1.0F);
-			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
-			cmsFreeToneCurve(curve[0]);
+			profile = get_profile([](){ return cmsBuildGamma(nullptr, 1.0F); });
 			trc_name = "linear RGB";
 			break;
 		case heif_transfer_characteristic_ITU_R_BT_2100_0_HLG:
-			curve[0] = curve[1] = curve[2] = colorspaces_create_transfer(4096, HLG_fct);
-			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
-			cmsFreeToneCurve(curve[0]);
+			profile = get_profile([](){ return colorspaces_create_transfer(4096, HLG_fct); });
 			trc_name = "HLG Rec2020 RGB";
 			break;
 		case heif_transfer_characteristic_ITU_R_BT_2100_0_PQ:
-			curve[0] = curve[1] = curve[2] = colorspaces_create_transfer(4096, PQ_fct);
-			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
-			cmsFreeToneCurve(curve[0]);
+			profile = get_profile([](){ return colorspaces_create_transfer(4096, PQ_fct); });
 			trc_name = "PQ Rec2020 RGB";
 			break;
-		case heif_transfer_characteristic_IEC_61966_2_1:
-		/* same as default */
+		case heif_transfer_characteristic_IEC_61966_2_1: /* same as default */
 		default:
-			curve[0] = curve[1] = curve[2] = cmsBuildParametricToneCurve(nullptr, 4, srgb_parameters);
-			profile = static_cast<cmsHPROFILE *>(cmsCreateRGBProfile(&whitepoint, &primaries, curve));
-			cmsFreeToneCurve(curve[0]);
+			profile = get_profile([]()
+			{
+				cmsFloat64Number srgb_parameters[5] =
+				{ 2.4, 1.0 / 1.055,  0.055 / 1.055, 1.0 / 12.92, 0.04045 };
+
+				return cmsBuildParametricToneCurve(nullptr, 4, srgb_parameters);
+			});
 			trc_name = "sRGB-TRC RGB";
 			break;
 		}
 
 	DEBUG_1("nclx transfer characteristic: %s", trc_name);
 
-	if (profile)
-		{
-		if (cmsSaveProfileToMem(profile, nullptr, &size))
-			{
-			data = static_cast<guint8 *>(g_malloc(size));
-			if (cmsSaveProfileToMem(profile, data, &size))
-				{
-				profile_len = size;
-				}
-			cmsCloseProfile(profile);
-			return static_cast<guchar *>(data);
-			}
+	if (!profile) return nullptr;
 
-		cmsCloseProfile(profile);
+	cmsUInt32Number size;
+	if (!cmsSaveProfileToMem(profile, nullptr, &size)) return nullptr;
+
+	auto *data = static_cast<guchar *>(g_malloc(size));
+	if (cmsSaveProfileToMem(profile, data, &size))
+		{
+		profile_len = size;
 		}
 
-	return nullptr;
+	return data;
 }
 
 } // namespace
