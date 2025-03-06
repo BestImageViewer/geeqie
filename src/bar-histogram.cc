@@ -202,13 +202,11 @@ static void bar_pane_histogram_destroy(gpointer data)
 static void bar_pane_histogram_popup_channels_cb(GtkWidget *widget, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
-	gint channel;
+	if (!phd) return;
 
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	if (!phd) return;
-
-	channel = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data"));
+	gint channel = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data"));
 	if (channel == histogram_get_channel(phd->histogram)) return;
 
 	histogram_set_channel(phd->histogram, channel);
@@ -218,16 +216,14 @@ static void bar_pane_histogram_popup_channels_cb(GtkWidget *widget, gpointer dat
 static void bar_pane_histogram_popup_mode_cb(GtkWidget *widget, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
-	gint logmode;
+	if (!phd) return;
 
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	if (!phd) return;
+	gint mode = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data"));
+	if (mode == histogram_get_mode(phd->histogram)) return;
 
-	logmode = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data"));
-	if (logmode == histogram_get_mode(phd->histogram)) return;
-
-	histogram_set_mode(phd->histogram, logmode);
+	histogram_set_mode(phd->histogram, mode);
 	bar_pane_histogram_update(phd);
 }
 
@@ -240,16 +236,16 @@ static GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd)
 	menu = popup_menu_short_lived();
 
 	/* use the same strings as in layout-util.cc */
-	menu_item_add_radio(menu, _("Histogram on _Red"),   GINT_TO_POINTER(HCHAN_R), (channel == HCHAN_R), G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
-	menu_item_add_radio(menu, _("Histogram on _Green"), GINT_TO_POINTER(HCHAN_G), (channel == HCHAN_G), G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
-	menu_item_add_radio(menu, _("Histogram on _Blue"),  GINT_TO_POINTER(HCHAN_B), (channel == HCHAN_B), G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
-	menu_item_add_radio(menu, _("_Histogram on RGB"),   GINT_TO_POINTER(HCHAN_RGB), (channel == HCHAN_RGB), G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
-	menu_item_add_radio(menu, _("Histogram on _Value"), GINT_TO_POINTER(HCHAN_MAX), (channel == HCHAN_MAX), G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
+	menu_item_add_radio(menu, _("Histogram on _Red"),   GINT_TO_POINTER(HCHAN_R), channel == HCHAN_R, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
+	menu_item_add_radio(menu, _("Histogram on _Green"), GINT_TO_POINTER(HCHAN_G), channel == HCHAN_G, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
+	menu_item_add_radio(menu, _("Histogram on _Blue"),  GINT_TO_POINTER(HCHAN_B), channel == HCHAN_B, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
+	menu_item_add_radio(menu, _("_Histogram on RGB"),   GINT_TO_POINTER(HCHAN_RGB), channel == HCHAN_RGB, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
+	menu_item_add_radio(menu, _("Histogram on _Value"), GINT_TO_POINTER(HCHAN_MAX), channel == HCHAN_MAX, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
 
 	menu_item_add_divider(menu);
 
-	menu_item_add_radio(menu, _("Li_near Histogram"), GINT_TO_POINTER(0), (mode == 0), G_CALLBACK(bar_pane_histogram_popup_mode_cb), phd);
-	menu_item_add_radio(menu, _("L_og Histogram"),    GINT_TO_POINTER(1), (mode == 1), G_CALLBACK(bar_pane_histogram_popup_mode_cb), phd);
+	menu_item_add_radio(menu, _("Li_near Histogram"), GINT_TO_POINTER(HMODE_LINEAR), mode == HMODE_LINEAR, G_CALLBACK(bar_pane_histogram_popup_mode_cb), phd);
+	menu_item_add_radio(menu, _("L_og Histogram"),    GINT_TO_POINTER(HMODE_LOG), mode == HMODE_LOG, G_CALLBACK(bar_pane_histogram_popup_mode_cb), phd);
 
 	return menu;
 }
@@ -325,7 +321,7 @@ GtkWidget *bar_pane_histogram_new_from_config(const gchar **attribute_names, con
 	gboolean expanded = TRUE;
 	constexpr gint height = 80;
 	gint histogram_channel = HCHAN_RGB;
-	gint histogram_mode = 0;
+	gint histogram_mode = HMODE_LINEAR;
 
 	while (*attribute_names)
 		{

@@ -91,7 +91,7 @@ Histogram *histogram_new()
 
 	histogram = g_new0(Histogram, 1);
 	histogram->histogram_channel = HCHAN_DEFAULT;
-	histogram->histogram_mode = 0;
+	histogram->histogram_mode = HMODE_LINEAR;
 
 	return histogram;
 }
@@ -129,13 +129,13 @@ gint histogram_get_mode(const Histogram *histogram)
 void histogram_toggle_channel(Histogram *histogram)
 {
 	if (!histogram) return;
-	histogram_set_channel(histogram, (histogram_get_channel(histogram)+1)%HCHAN_COUNT);
+	histogram_set_channel(histogram, (histogram_get_channel(histogram) + 1) % HCHAN_COUNT);
 }
 
 void histogram_toggle_mode(Histogram *histogram)
 {
 	if (!histogram) return;
-	histogram_set_mode(histogram, !histogram_get_mode(histogram));
+	histogram_set_mode(histogram, (histogram_get_mode(histogram) + 1) % HMODE_COUNT);
 }
 
 const gchar *histogram_label(const Histogram *histogram)
@@ -144,7 +144,7 @@ const gchar *histogram_label(const Histogram *histogram)
 
 	if (!histogram) return nullptr;
 
-	if (histogram->histogram_mode)
+	if (histogram->histogram_mode == HMODE_LOG)
 		switch (histogram->histogram_channel)
 			{
 			case HCHAN_R:   t1 = _("Log Histogram on Red"); break;
@@ -367,7 +367,7 @@ gboolean histogram_draw(const Histogram *histogram, const HistMap *histmap, GdkP
 
 				if (v[chanmax] == 0)
 					pt = 0;
-				else if (histogram->histogram_mode)
+				else if (histogram->histogram_mode == HMODE_LOG)
 					pt = (static_cast<gdouble>(log(v[chanmax]))) / logmax * (height - 1);
 				else
 					pt = (static_cast<gdouble>(v[chanmax])) / max * (height - 1);

@@ -252,7 +252,7 @@ LayoutOptions init_layout_options(const gchar **attribute_names, const gchar **a
 	lop.tools_float = FALSE;
 	lop.tools_hidden = FALSE;
 	lop.image_overlay.histogram_channel = HCHAN_RGB;
-	lop.image_overlay.histogram_mode = 1;
+	lop.image_overlay.histogram_mode = HMODE_LOG;
 	lop.image_overlay.state = OSD_SHOW_NOTHING;
 	lop.animate = TRUE;
 	lop.bars_state.hidden = FALSE;

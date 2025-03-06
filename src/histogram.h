@@ -30,13 +30,21 @@ class FileData;
 struct HistMap;
 
 /* Note: The order is important */
-#define HCHAN_R 0
-#define HCHAN_G 1
-#define HCHAN_B 2
-#define HCHAN_MAX 3
-#define HCHAN_RGB 4
-#define HCHAN_COUNT 5
-#define HCHAN_DEFAULT HCHAN_RGB
+enum HistogramChannel {
+	HCHAN_R = 0,
+	HCHAN_G = 1,
+	HCHAN_B = 2,
+	HCHAN_MAX = 3,
+	HCHAN_RGB = 4,
+	HCHAN_DEFAULT = HCHAN_RGB,
+	HCHAN_COUNT
+};
+
+enum HistogramMode {
+	HMODE_LINEAR = 0,
+	HMODE_LOG = 1,
+	HMODE_COUNT
+};
 
 struct Histogram {
 	struct Grid {
@@ -51,7 +59,7 @@ struct Histogram {
 	};
 
 	gint histogram_channel; /**< drawing mode for histogram */
-	gint histogram_mode;     /**< logarithmical or not */
+	gint histogram_mode;    /**< linear or logarithmical */
 };
 
 

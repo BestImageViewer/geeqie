@@ -1438,25 +1438,25 @@ static void layout_menu_histogram_toggle_mode_cb(GtkAction *, gpointer data)
 
 static void layout_menu_histogram_channel_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
 	gint channel = gq_gtk_radio_action_get_current_value(action);
-	GtkToggleAction *histogram_action = GQ_GTK_TOGGLE_ACTION(gq_gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
-
 	if (channel < 0 || channel >= HCHAN_COUNT) return;
 
+	auto *lw = static_cast<LayoutWindow *>(data);
+	GtkToggleAction *histogram_action = GQ_GTK_TOGGLE_ACTION(gq_gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
 	gq_gtk_toggle_action_set_active(histogram_action, TRUE); /* this calls layout_menu_histogram_cb */
+
 	image_osd_histogram_set_channel(lw->image, channel);
 }
 
 static void layout_menu_histogram_mode_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
 	gint mode = gq_gtk_radio_action_get_current_value(action);
+	if (mode < 0 || mode >= HMODE_COUNT) return;
+
+	auto *lw = static_cast<LayoutWindow *>(data);
 	GtkToggleAction *histogram_action = GQ_GTK_TOGGLE_ACTION(gq_gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
-
-	if (mode < 0 || mode > 1) return;
-
 	gq_gtk_toggle_action_set_active(histogram_action, TRUE); /* this calls layout_menu_histogram_cb */
+
 	image_osd_histogram_set_mode(lw->image, mode);
 }
 
