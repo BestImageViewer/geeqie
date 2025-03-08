@@ -105,7 +105,7 @@ secure_open_umask(const gchar *file_name)
 
 	ssi->secure_save = TRUE;
 	ssi->preserve_perms = TRUE;
-	ssi->unlink_on_error = TRUE;
+	ssi->remove_on_error = TRUE;
 
 	ssi->file_name = g_strdup(file_name);
 	if (!ssi->file_name) {
@@ -232,7 +232,7 @@ secure_close(SecureSaveInfo *ssi)
 	{
 		if (ssi->tmp_file_name)
 			{
-			if (ret && ssi->unlink_on_error) unlink(ssi->tmp_file_name);
+			if (ret && ssi->remove_on_error) std::remove(ssi->tmp_file_name);
 			g_free(ssi->tmp_file_name);
 			}
 		g_free(ssi->file_name);

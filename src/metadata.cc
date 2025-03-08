@@ -21,8 +21,6 @@
 
 #include "metadata.h"
 
-#include <unistd.h>
-
 #include <algorithm>
 #include <array>
 #include <clocale>
@@ -588,8 +586,7 @@ static void metadata_legacy_delete(FileData *fd, const gchar *except)
 	g_autofree gchar *metadata_path = cache_find_location(CACHE_TYPE_METADATA, fd->path);
 	if (metadata_path && (!except || strcmp(metadata_path, except) != 0))
 		{
-		g_autofree gchar *metadata_pathl = path_from_utf8(metadata_path);
-		unlink(metadata_pathl);
+		unlink_file(metadata_path);
 		}
 
 #if HAVE_EXIV2
@@ -598,8 +595,7 @@ static void metadata_legacy_delete(FileData *fd, const gchar *except)
 	g_autofree gchar *xmp_metadata_path = cache_find_location(CACHE_TYPE_XMP_METADATA, fd->path);
 	if (xmp_metadata_path && (!except || strcmp(xmp_metadata_path, except) != 0))
 		{
-		g_autofree gchar *xmp_metadata_pathl = path_from_utf8(xmp_metadata_path);
-		unlink(xmp_metadata_pathl);
+		unlink_file(xmp_metadata_path);
 		}
 #endif
 }

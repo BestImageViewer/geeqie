@@ -51,7 +51,7 @@ struct SecureSaveInfo {
 	gboolean secure_save; /**< use secure save for this file, internal use only */
 	gboolean preserve_perms; /**< whether to preserve perms, TRUE by default */
 	gboolean preserve_mtime; /**< whether to preserve mtime, FALSE by default */
-	gboolean unlink_on_error; /**< whether to remove temporary file on save failure, TRUE by default */
+	gboolean remove_on_error; /**< whether to remove temporary file on save failure, TRUE by default */
 };
 
 SecureSaveInfo *secure_open(const gchar *);

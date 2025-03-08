@@ -20,8 +20,6 @@
 
 #include "image-load-collection.h"
 
-#include <unistd.h>
-
 #include <cstdio>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -104,7 +102,7 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 					area_updated_cb(nullptr, 0, 0, gdk_pixbuf_get_width(pixbuf), gdk_pixbuf_get_height(pixbuf), data);
 					}
 
-				unlink(randname);
+				std::remove(randname);
 
 				ret = TRUE;
 				}
