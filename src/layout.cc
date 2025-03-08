@@ -2570,11 +2570,6 @@ void layout_show_config_window(LayoutWindow *lw)
 
 void layout_sync_options_with_current_state(LayoutWindow *lw)
 {
-	Histogram *histogram;
-#ifdef GDK_WINDOWING_X11
-	GdkWindow *window;
-#endif
-
 	if (!layout_valid(&lw)) return;
 
 	lw->options.main_window.maximized =  window_maximized(lw->window);
@@ -2588,10 +2583,13 @@ void layout_sync_options_with_current_state(LayoutWindow *lw)
 	layout_geometry_get_tools(lw, lw->options.float_window.rect, lw->options.float_window.vdivider_pos);
 
 	lw->options.image_overlay.state = image_osd_get(lw->image);
-	histogram = image_osd_get_histogram(lw->image);
 
-	lw->options.image_overlay.histogram_channel = histogram->histogram_channel;
-	lw->options.image_overlay.histogram_mode = histogram->histogram_mode;
+	Histogram *histogram = image_osd_get_histogram(lw->image);
+	if (histogram)
+		{
+		lw->options.image_overlay.histogram_channel = histogram->get_channel();
+		lw->options.image_overlay.histogram_mode = histogram->get_mode();
+		}
 
 	g_free(lw->options.last_path);
 	lw->options.last_path = g_strdup(layout_get_path(lw));
@@ -2599,15 +2597,13 @@ void layout_sync_options_with_current_state(LayoutWindow *lw)
 	layout_geometry_get_log_window(lw, lw->options.log_window);
 
 #ifdef GDK_WINDOWING_X11
-	GdkDisplay *display;
-
 	if (options->save_window_workspace)
 		{
-		display = gdk_display_get_default();
+		GdkDisplay *display = gdk_display_get_default();
 
 		if (GDK_IS_X11_DISPLAY(display))
 			{
-			window = gtk_widget_get_window(GTK_WIDGET(lw->window));
+			GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(lw->window));
 			lw->options.workspace = gdk_x11_window_get_desktop(window);
 			}
 		}
@@ -2711,7 +2707,6 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	LayoutWindow *lw;
 	GdkGeometry hint;
 	GdkWindowHints hint_mask;
-	Histogram *histogram;
 
 	DEBUG_1("%s layout_new: start", get_exec_time());
 	lw = g_new0(LayoutWindow, 1);
@@ -2804,10 +2799,13 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	layout_tools_hide(lw, lw->options.tools_hidden);
 
 	image_osd_set(lw->image, static_cast<OsdShowFlags>(lw->options.image_overlay.state));
-	histogram = image_osd_get_histogram(lw->image);
 
-	histogram->histogram_channel = lw->options.image_overlay.histogram_channel;
-	histogram->histogram_mode = lw->options.image_overlay.histogram_mode;
+	Histogram *histogram = image_osd_get_histogram(lw->image);
+	if (histogram)
+		{
+		histogram->set_channel(lw->options.image_overlay.histogram_channel);
+		histogram->set_mode(lw->options.image_overlay.histogram_mode);
+		}
 
 	layout_window_list.push_back(lw);
 

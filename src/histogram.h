@@ -58,27 +58,23 @@ struct Histogram {
 		} color;  /**< grid color */
 	};
 
-	gint histogram_channel; /**< drawing mode for histogram */
-	gint histogram_mode;    /**< linear or logarithmical */
+	void set_channel(gint channel);
+	gint get_channel() const;
+	void set_mode(gint mode);
+	gint get_mode() const;
+	void toggle_channel();
+	void toggle_mode();
+	const gchar *label() const;
+	void draw(const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height) const;
+
+	gint histogram_channel = HCHAN_DEFAULT; /**< drawing mode for histogram */
+	gint histogram_mode = HMODE_LINEAR;     /**< linear or logarithmical */
 };
 
 
-Histogram *histogram_new();
-void histogram_free(Histogram *histogram);
-void histogram_set_channel(Histogram *histogram, gint chan);
-gint histogram_get_channel(const Histogram *histogram);
-void histogram_set_mode(Histogram *histogram, gint mode);
-gint histogram_get_mode(const Histogram *histogram);
-void histogram_toggle_channel(Histogram *histogram);
-void histogram_toggle_mode(Histogram *histogram);
-const gchar *histogram_label(const Histogram *histogram);
-
 void histmap_free(HistMap *histmap);
-
 const HistMap *histmap_get(FileData *fd);
 gboolean histmap_start_idle(FileData *fd);
-
-gboolean histogram_draw(const Histogram *histogram, const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height);
 
 void histogram_notify_cb(FileData *fd, NotifyType type, gpointer data);
 

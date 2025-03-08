@@ -85,67 +85,42 @@ struct HistMap {
 };
 
 
-Histogram *histogram_new()
+void Histogram::set_channel(gint channel)
 {
-	Histogram *histogram;
-
-	histogram = g_new0(Histogram, 1);
-	histogram->histogram_channel = HCHAN_DEFAULT;
-	histogram->histogram_mode = HMODE_LINEAR;
-
-	return histogram;
+	histogram_channel = channel;
 }
 
-void histogram_free(Histogram *histogram)
+gint Histogram::get_channel() const
 {
-	g_free(histogram);
+	return histogram_channel;
 }
 
-
-void histogram_set_channel(Histogram *histogram, gint chan)
+void Histogram::set_mode(gint mode)
 {
-	if (!histogram) return;
-	histogram->histogram_channel = chan;
+	histogram_mode = mode;
 }
 
-gint histogram_get_channel(const Histogram *histogram)
+gint Histogram::get_mode() const
 {
-	if (!histogram) return 0;
-	return histogram->histogram_channel;
+	return histogram_mode;
 }
 
-void histogram_set_mode(Histogram *histogram, gint mode)
+void Histogram::toggle_channel()
 {
-	if (!histogram) return;
-	histogram->histogram_mode = mode;
+	histogram_channel = (histogram_channel + 1) % HCHAN_COUNT;
 }
 
-gint histogram_get_mode(const Histogram *histogram)
+void Histogram::toggle_mode()
 {
-	if (!histogram) return 0;
-	return histogram->histogram_mode;
+	histogram_mode = (histogram_mode + 1) % HMODE_COUNT;
 }
 
-void histogram_toggle_channel(Histogram *histogram)
-{
-	if (!histogram) return;
-	histogram_set_channel(histogram, (histogram_get_channel(histogram) + 1) % HCHAN_COUNT);
-}
-
-void histogram_toggle_mode(Histogram *histogram)
-{
-	if (!histogram) return;
-	histogram_set_mode(histogram, (histogram_get_mode(histogram) + 1) % HMODE_COUNT);
-}
-
-const gchar *histogram_label(const Histogram *histogram)
+const gchar *Histogram::label() const
 {
 	const gchar *t1 = "";
 
-	if (!histogram) return nullptr;
-
-	if (histogram->histogram_mode == HMODE_LOG)
-		switch (histogram->histogram_channel)
+	if (histogram_mode == HMODE_LOG)
+		switch (histogram_channel)
 			{
 			case HCHAN_R:   t1 = _("Log Histogram on Red"); break;
 			case HCHAN_G:   t1 = _("Log Histogram on Green"); break;
@@ -156,7 +131,7 @@ const gchar *histogram_label(const Histogram *histogram)
 				break;
 			}
 	else
-		switch (histogram->histogram_channel)
+		switch (histogram_channel)
 			{
 			case HCHAN_R:   t1 = _("Linear Histogram on Red"); break;
 			case HCHAN_G:   t1 = _("Linear Histogram on Green"); break;
@@ -166,6 +141,7 @@ const gchar *histogram_label(const Histogram *histogram)
 			default:
 				break;
 			}
+
 	return t1;
 }
 
@@ -268,16 +244,16 @@ gboolean histmap_start_idle(FileData *fd)
 }
 
 
-gboolean histogram_draw(const Histogram *histogram, const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height)
+void Histogram::draw(const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, gint width, gint height) const
 {
+	if (!histmap) return;
+
 	/** @FIXME use the coordinates correctly */
 	gint i;
 	gulong max = 0;
 	gdouble logmax;
 	gint combine = ((HISTMAP_SIZE - 1) / width) + 1;
 	gint ypos = y + height;
-
-	if (!histogram || !histmap) return FALSE;
 
 	/* Draw the grid */
 	constexpr Histogram::Grid grid{5, 3, {160, 160, 160, 250}};
@@ -319,11 +295,11 @@ gboolean histogram_draw(const Histogram *histogram, const HistMap *histmap, GdkP
 		for (j = 0; combine > 1 && j < 4; j++)
 			v[j] /= combine;
 
-		num_chan = (histogram->histogram_channel == HCHAN_RGB) ? 3 : 1;
+		num_chan = (histogram_channel == HCHAN_RGB) ? 3 : 1;
 		for (j = 0; j < num_chan; j++)
 			{
 			gint chanmax;
-			if (histogram->histogram_channel == HCHAN_RGB)
+			if (histogram_channel == HCHAN_RGB)
 				{
 				chanmax = HCHAN_R;
 				if (v[HCHAN_G] > v[HCHAN_R]) chanmax = HCHAN_G;
@@ -331,7 +307,7 @@ gboolean histogram_draw(const Histogram *histogram, const HistMap *histmap, GdkP
 				}
 			else
 				{
-				chanmax = histogram->histogram_channel;
+				chanmax = histogram_channel;
 				}
 
 			    	{
@@ -349,7 +325,7 @@ gboolean histogram_draw(const Histogram *histogram, const HistMap *histmap, GdkP
 						break;
 					}
 
-				switch (histogram->histogram_channel)
+				switch (histogram_channel)
 					{
 					case HCHAN_RGB:
 						if (r == 255 && g == 255 && b == 255)
@@ -367,7 +343,7 @@ gboolean histogram_draw(const Histogram *histogram, const HistMap *histmap, GdkP
 
 				if (v[chanmax] == 0)
 					pt = 0;
-				else if (histogram->histogram_mode == HMODE_LOG)
+				else if (histogram_mode == HMODE_LOG)
 					pt = (static_cast<gdouble>(log(v[chanmax]))) / logmax * (height - 1);
 				else
 					pt = (static_cast<gdouble>(v[chanmax])) / max * (height - 1);
@@ -380,8 +356,6 @@ gboolean histogram_draw(const Histogram *histogram, const HistMap *histmap, GdkP
 			v[chanmax] = -1;
 			}
 		}
-
-	return TRUE;
 }
 
 void histogram_notify_cb(FileData *fd, NotifyType type, gpointer)
