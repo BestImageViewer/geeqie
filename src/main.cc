@@ -693,6 +693,7 @@ void sigbus_handler_cb_unused(int, siginfo_t *info, void *)
 	 * See https://github.com/BestImageViewer/geeqie/issues/1052 for discussion
 	 */
 
+	(void)info; // @todo Use [[maybe_unused]] since C++17
 	DEBUG_1("SIGBUS %p NOT HANDLED", info->si_addr);
 	exit(EXIT_FAILURE);
 }

@@ -21,10 +21,6 @@
 #include "filecache.h"
 
 #include "filedata.h"
-#include "typedefs.h"
-
-/* Set to TRUE to add file cache dumps to the debug output */
-const gboolean debug_file_cache = FALSE;
 
 /* this implements a simple LRU algorithm */
 
@@ -35,10 +31,35 @@ struct FileCacheData {
 	gulong size;
 };
 
+namespace
+{
+
 struct FileCacheEntry {
 	FileData *fd;
 	gulong size;
 };
+
+#ifdef DEBUG
+constexpr bool debug_file_cache = false; /* Set to true to add file cache dumps to the debug output */
+
+void file_cache_dump(FileCacheData *fc)
+{
+	if (!debug_file_cache) return;
+
+	DEBUG_1("cache dump: fc=%p max size:%lu size:%lu", (void *)fc, fc->max_size, fc->size);
+
+	gulong n = 0;
+	for (GList *work = fc->list; work; work = work->next)
+		{
+		auto fe = static_cast<FileCacheEntry *>(work->data);
+		DEBUG_1("cache entry: fc=%p [%lu] %s %lu", (void *)fc, ++n, fe->fd->path, fe->size);
+		}
+}
+#else
+#  define file_cache_dump(fc)
+#endif
+
+} // namespace
 
 static void file_cache_notify_cb(FileData *fd, NotifyType type, gpointer data);
 static void file_cache_remove_fd(FileCacheData *fc, FileData *fd);
@@ -82,7 +103,8 @@ gboolean file_cache_get(FileCacheData *fc, FileData *fd)
 				file_cache_remove_fd(fc, fd);
 				return FALSE;
 			}
-			if (debug_file_cache) file_cache_dump(fc);
+
+			file_cache_dump(fc);
 			return TRUE;
 			}
 		work = work->next;
@@ -96,7 +118,7 @@ void file_cache_set_size(FileCacheData *fc, gulong size)
 	GList *work;
 	FileCacheEntry *last_fe;
 
-	if (debug_file_cache) file_cache_dump(fc);
+	file_cache_dump(fc);
 
 	work = g_list_last(fc->list);
 	while (fc->size > size && work)
@@ -142,7 +164,7 @@ static void file_cache_remove_fd(FileCacheData *fc, FileData *fd)
 	GList *work;
 	FileCacheEntry *fe;
 
-	if (debug_file_cache) file_cache_dump(fc);
+	file_cache_dump(fc);
 
 	work = fc->list;
 	while (work)
@@ -161,21 +183,6 @@ static void file_cache_remove_fd(FileCacheData *fc, FileData *fd)
 			file_data_unref(fe->fd);
 			g_free(fe);
 			}
-		}
-}
-
-void file_cache_dump(FileCacheData *fc)
-{
-	GList *work = fc->list;
-	gulong n = 0;
-
-	DEBUG_1("cache dump: fc=%p max size:%lu size:%lu", (void *)fc, fc->max_size, fc->size);
-
-	while (work)
-		{
-		auto fe = static_cast<FileCacheEntry *>(work->data);
-		work = work->next;
-		DEBUG_1("cache entry: fc=%p [%lu] %s %lu", (void *)fc, ++n, fe->fd->path, fe->size);
 		}
 }
 

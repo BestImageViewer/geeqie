@@ -161,6 +161,7 @@ guchar *nclx_to_lcms_profile(const heif_color_profile_nclx *nclx, guint &profile
 			return nullptr;
 		}
 
+	(void)primaries_name; // @todo Use [[maybe_unused]] since C++17
 	DEBUG_1("nclx primaries: %s: ", primaries_name);
 
 	using GetCurve = std::function<cmsToneCurve *()>;
@@ -237,6 +238,7 @@ guchar *nclx_to_lcms_profile(const heif_color_profile_nclx *nclx, guint &profile
 			break;
 		}
 
+	(void)trc_name; // @todo Use [[maybe_unused]] since C++17
 	DEBUG_1("nclx transfer characteristic: %s", trc_name);
 
 	if (!profile) return nullptr;

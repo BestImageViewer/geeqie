@@ -184,8 +184,9 @@ static GtkWidget *external_preview_extract_entry;
 static GtkWidget *sidecar_ext_entry;
 static GtkWidget *help_search_engine_entry;
 
+#ifdef DEBUG
 static GtkWidget *log_window_f1_entry;
-
+#endif
 
 enum {
 	CONFIG_WINDOW_DEF_WIDTH =		700,

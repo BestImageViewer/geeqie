@@ -24,7 +24,6 @@
 #include <cstdint>
 #include <cstring>
 #include <exception>
-#include <list>
 #include <memory>
 #include <string>
 #include <utility>
@@ -93,6 +92,7 @@ static constexpr AltKey alt_keys[] = {
 	{"Xmp.photoshop.CaptionWriter",		nullptr,				"Iptc.Application2.Writer"		},
 	};
 
+#ifdef DEBUG
 static void _debug_exception(const char* file,
                              int line,
                              const char* func,
@@ -102,7 +102,10 @@ static void _debug_exception(const char* file,
 	DEBUG_1("%s:%d:%s:Exiv2: %s", file, line, func, str);
 }
 
-#define debug_exception(e) _debug_exception(__FILE__, __LINE__, __func__, e)
+#  define debug_exception(e) _debug_exception(__FILE__, __LINE__, __func__, e)
+#else
+#  define debug_exception(e)
+#endif
 
 struct ExifData
 {

@@ -594,7 +594,7 @@ FileData *FileData::file_data_ref()
 #ifdef DEBUG_FILEDATA
 		log_printf("Error: fd magick mismatch @ %s:%d  fd=%p", file, line, (void *)fd);
 #else
-		log_printf("Error: fd magick mismatch fd=%p", fd);
+		log_printf("Error: fd magick mismatch fd=%p", (void *)fd);
 #endif
 	g_assert(fd->magick == FD_MAGICK);
 	fd->ref++;
@@ -724,7 +724,7 @@ void FileData::file_data_unref()
 #ifdef DEBUG_FILEDATA
 		log_printf("Error: fd magick mismatch @ %s:%d  fd=%p", file, line, (void *)fd);
 #else
-		log_printf("Error: fd magick mismatch fd=%p", fd);
+		log_printf("Error: fd magick mismatch fd=%p", (void *)fd);
 #endif
 	g_assert(fd->magick == FD_MAGICK);
 
