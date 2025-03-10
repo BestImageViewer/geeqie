@@ -79,6 +79,68 @@ jobs:
         path: ${{ github.workspace }}/build/meson-logs/*.txt
         retention-days: 5
 
+  Check-Build-No-Options-No-Debug:
+    runs-on: ubuntu-24.04
+    steps:
+    - run: sudo apt-get update
+    - run: sudo apt-get install appstream
+    - run: sudo apt-get install build-essential libgtk-3-dev libgtk-3-bin
+    - run: sudo apt-get install at-spi2-core
+    - run: sudo apt-get install desktop-file-utils
+    - run: sudo apt-get install gettext
+    - run: sudo apt-get install libgtk-3-bin
+    - run: sudo apt-get install libxml2-utils
+    - run: sudo apt-get install shellcheck
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - run: sudo apt-get install xvfb
+    - uses: BSFishy/meson-build@v1.0.3
+      with:
+        action: test
+        directory: build
+        setup-options: >
+          -Ddebug=false
+          -Darchive=disabled
+          -Dcms=disabled
+          -Ddjvu=disabled
+          -Ddoxygen=disabled
+          -Devince=disabled
+          -Dexecinfo=disabled
+          -Dexiv2=disabled
+          -Dexr=disabled
+          -Dextended_stacktrace=disabled
+          -Dfits=disabled
+          -Dgit=disabled
+          -Dgps-map=disabled
+          -Dgtk4=disabled
+          -Dheif=disabled
+          -Dhelp_pdf=disabled
+          -Dj2k=disabled
+          -Djpeg=disabled
+          -Djpegxl=disabled
+          -Dlibraw=disabled
+          -Dlua=disabled
+          -Dnpy=disabled
+          -Dpandoc=disabled
+          -Dpdf=disabled
+          -Dspell=disabled
+          -Dtiff=disabled
+          -Dunit_tests=disabled
+          -Dvideothumbnailer=disabled
+          -Dwebp=disabled
+          -Dyelp-build=disabled
+        options: --verbose
+        meson-version: 1.0.0
+    - name: Upload logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: logs-all-no-options-no-debug
+        path: ${{ github.workspace }}/build/meson-logs/*.txt
+        retention-days: 5
+
   Check-Build-Most-Options:
     runs-on: ubuntu-24.04
     steps:
@@ -139,5 +201,69 @@ jobs:
       if: always()
       with:
         name: logs-all-most-options
+        path: ${{ github.workspace }}/build/meson-logs/*.txt
+        retention-days: 5
+
+  Check-Build-Most-Options-No-Debug:
+    runs-on: ubuntu-24.04
+    steps:
+    - run: sudo apt-get update
+    - run: sudo apt-get install appstream
+    - run: sudo apt-get install at-spi2-core
+    - run: sudo apt-get install build-essential libgtk-3-dev libgtk-3-bin
+    - run: sudo apt-get install clang-tidy
+    - run: sudo apt-get install desktop-file-utils
+    - run: sudo apt-get install docbook-xsl
+    - run: sudo apt-get install evince
+    - run: sudo apt-get install fop
+    - run: sudo apt-get install gettext
+    - run: sudo apt-get install libarchive-dev
+    - run: sudo apt-get install libcfitsio-dev
+    - run: sudo apt-get install libchamplain-0.12-dev libchamplain-gtk-0.12-dev
+    - run: sudo apt-get install libdw-dev
+    - run: sudo apt-get install libdwarf-dev
+    - run: sudo apt-get install libgexiv2-dev
+    - run: sudo apt-get install libgspell-1-dev
+    - run: sudo apt-get install libgtk-3-bin
+    - run: sudo apt-get install libheif-dev
+    - run: sudo apt-get install libimath-dev
+    - run: sudo apt-get install libdjvulibre-dev
+    - run: sudo apt-get install libjxl-dev
+    - run: sudo apt-get install liblua5.3-dev
+    - run: sudo apt-get install libopenexr-dev
+    - run: sudo apt-get install libopenjp2-7-dev
+    - run: sudo apt-get install libpoppler-glib-dev
+    - run: sudo apt-get install libraw-dev libomp-dev
+    - run: sudo apt-get install librsvg2-dev
+    - run: sudo apt-get install libunwind-dev
+    - run: sudo apt-get install libwebp-dev
+    - run: sudo apt-get install libwebp7
+    - run: sudo apt-get install libxml2-utils
+    - run: sudo apt-get install pandoc
+    - run: sudo apt-get install shellcheck
+    - run: sudo apt-get install xsltproc
+    #~ - run: sudo apt-get install libffmpegthumbnailer-dev
+    #~ - run: sudo apt-get install yelp-tools
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: '0'
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - run: sudo apt-get install xvfb
+    - uses: BSFishy/meson-build@v1.0.3
+      with:
+        action: test
+        directory: build
+        setup-options: >
+          -Ddebug=false
+          -Dunit_tests=enabled
+        options: --verbose
+        meson-version: 1.0.0
+    - name: Upload logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: logs-all-most-options-no-debug
         path: ${{ github.workspace }}/build/meson-logs/*.txt
         retention-days: 5
