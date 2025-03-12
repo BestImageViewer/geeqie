@@ -22,6 +22,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <vector>
 
 #include "intl.h"
 #include "options.h"
@@ -30,6 +31,67 @@
 
 namespace
 {
+
+struct HistoryChain
+{
+	const gchar *prev();
+	const gchar *next();
+	bool push_back(const gchar *path);
+
+private:
+	std::vector<gchar *> chain;
+	guint index = 0;
+	bool is_nav_button = false; /** Used to prevent the nav buttons making entries to the chain **/
+};
+
+const gchar *HistoryChain::prev()
+{
+	is_nav_button = true;
+
+	index = index > 0 ? index - 1 : 0;
+
+	return chain[index];
+}
+
+const gchar *HistoryChain::next()
+{
+	is_nav_button = true;
+
+	guint last = chain.size() - 1;
+	index = index < last ? index + 1 : last;
+
+	return chain[index];
+}
+
+bool HistoryChain::push_back(const gchar *path)
+{
+	if (is_nav_button)
+		{
+		is_nav_button = false;
+		return false;
+		}
+
+	if (chain.empty())
+		{
+		chain.push_back(g_strdup(path));
+		index = 0;
+		}
+	else
+		{
+		if (g_strcmp0(chain.back(), path) != 0)
+			{
+			chain.push_back(g_strdup(path));
+			DEBUG_3("%d %s", chain.size() - 1, path);
+			}
+
+		index = chain.size() - 1;
+		}
+
+	return true;
+}
+
+HistoryChain history_chain{};
+HistoryChain image_chain{};
 
 gint dirname_compare(gconstpointer data, gconstpointer user_data)
 {
@@ -53,27 +115,14 @@ static void update_recent_viewed_folder_image_list(const gchar *path);
  *-----------------------------------------------------------------------------
  */
 
-static GList *history_chain = nullptr;
-static guint chain_index = G_MAXUINT;
-static gboolean nav_button = FALSE; /** Used to prevent the nav buttons making entries to the chain **/
-
 const gchar *history_chain_back()
 {
-	nav_button = TRUE;
-
-	chain_index = chain_index > 0 ? chain_index - 1 : 0;
-
-	return static_cast<const gchar *>(g_list_nth_data(history_chain, chain_index));
+	return history_chain.prev();
 }
 
 const gchar *history_chain_forward()
 {
-	nav_button= TRUE;
-	guint last = g_list_length(history_chain) - 1;
-
-	chain_index = chain_index < last ? chain_index + 1 : last;
-
-	return static_cast<const gchar *>(g_list_nth_data(history_chain, chain_index));
+	return history_chain.next();
 }
 
 /**
@@ -86,34 +135,7 @@ const gchar *history_chain_forward()
  */
 void history_chain_append_end(const gchar *path)
 {
-	GList *work;
-
-	if (!nav_button)
-		{
-		if(chain_index == G_MAXUINT)
-			{
-			history_chain = g_list_append (history_chain, g_strdup(path));
-			chain_index = 0;
-			}
-		else
-			{
-			work = g_list_last(history_chain);
-			if (g_strcmp0(static_cast<const gchar *>(work->data), path) != 0)
-				{
-				history_chain = g_list_append (history_chain, g_strdup(path));
-				chain_index = g_list_length(history_chain) - 1;
-				DEBUG_3("%d %s", chain_index, path);
-				}
-			else
-				{
-				chain_index = g_list_length(history_chain) - 1;
-				}
-			}
-		}
-	else
-		{
-		nav_button = FALSE;
-		}
+	history_chain.push_back(path);
 }
 
 /**
@@ -127,26 +149,15 @@ void history_chain_append_end(const gchar *path)
  *
  *-----------------------------------------------------------------------------
  */
-static GList *image_chain = nullptr;
-static guint image_chain_index = G_MAXUINT;
-static gboolean image_nav_button = FALSE; /** Used to prevent the nav buttons making entries to the chain **/
+
 const gchar *image_chain_back()
 {
-	image_nav_button = TRUE;
-
-	image_chain_index = image_chain_index > 0 ? image_chain_index - 1 : 0;
-
-	return static_cast<const gchar *>(g_list_nth_data(image_chain, image_chain_index));
+	return image_chain.prev();
 }
 
 const gchar *image_chain_forward()
 {
-	image_nav_button= TRUE;
-	guint last = g_list_length(image_chain) - 1;
-
-	image_chain_index = image_chain_index < last ? image_chain_index + 1 : last;
-
-	return static_cast<const gchar *>(g_list_nth_data(image_chain, image_chain_index));
+	return image_chain.next();
 }
 
 /**
@@ -161,36 +172,9 @@ const gchar *image_chain_forward()
  */
 void image_chain_append_end(const gchar *path)
 {
-	GList *work;
+	if (!image_chain.push_back(path)) return;
 
-	if (!image_nav_button)
-		{
-		if(image_chain_index == G_MAXUINT)
-			{
-			image_chain = g_list_append(image_chain, g_strdup(path));
-			image_chain_index = 0;
-			}
-		else
-			{
-			work = g_list_last(image_chain);
-			if (g_strcmp0(static_cast<const gchar *>(work->data) , path) != 0)
-				{
-				image_chain = g_list_append(image_chain, g_strdup(path));
-				image_chain_index = g_list_length(image_chain) - 1;
-				DEBUG_3("%d %s", image_chain_index, path);
-				}
-			else
-				{
-				image_chain_index = g_list_length(image_chain) - 1;
-				}
-			}
-
-		update_recent_viewed_folder_image_list(path);
-		}
-	else
-		{
-		image_nav_button = FALSE;
-		}
+	update_recent_viewed_folder_image_list(path);
 }
 
 /*
