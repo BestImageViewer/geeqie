@@ -1279,40 +1279,30 @@ gboolean vflist_is_selected(ViewFile *vf, FileData *fd)
 
 guint vflist_selection_count(ViewFile *vf, gint64 *bytes)
 {
-	GtkTreeModel *store;
-	GtkTreeSelection *selection;
-	GList *slist;
-	guint count;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 
 	if (bytes)
 		{
 		gint64 b = 0;
-		GList *work;
 
-		work = slist;
-		while (work)
+		GtkTreeModel *store;
+		GList *slist = gtk_tree_selection_get_selected_rows(selection, &store);
+		for (GList *work = slist; work; work = work->next)
 			{
 			auto tpath = static_cast<GtkTreePath *>(work->data);
 			GtkTreeIter iter;
-			FileData *fd;
-
 			gtk_tree_model_get_iter(store, &iter, tpath);
+
+			FileData *fd;
 			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
 			b += fd->size;
-
-			work = work->next;
 			}
+		g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 		*bytes = b;
 		}
 
-	count = g_list_length(slist);
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
-
-	return count;
+	return gtk_tree_selection_count_selected_rows(selection);
 }
 
 GList *vflist_selection_get_list(ViewFile *vf)
