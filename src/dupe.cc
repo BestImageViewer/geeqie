@@ -5195,6 +5195,7 @@ static void export_duplicates_data_save_cb(FileDialog *fdlg, gpointer data)
 
 		work = work->next;
 		}
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	g_output_stream_write(G_OUTPUT_STREAM(gfstream), output_string->str, output_string->len, nullptr, &error);
 

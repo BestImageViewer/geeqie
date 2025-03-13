@@ -1382,7 +1382,8 @@ void vflist_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &f
 	GtkTreeIter iter;
 	FileData *fd_n;
 
-	for (GList *work = gtk_tree_selection_get_selected_rows(selection, &store); work; work = work->next)
+	GList *slist = gtk_tree_selection_get_selected_rows(selection, &store);
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto *tpath = static_cast<GtkTreePath *>(work->data);
 
@@ -1391,6 +1392,7 @@ void vflist_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &f
 
 		func(fd_n);
 		}
+	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 }
 
 void vflist_select_all(ViewFile *vf)
