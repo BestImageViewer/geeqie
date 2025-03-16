@@ -307,12 +307,6 @@ GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
  *-----------------------------------------------------------------------------
  */
 
-static void popup_menu_short_lived_cb(GtkWidget *, gpointer data)
-{
-	/* destroy the menu */
-	g_object_unref(G_OBJECT(data));
-}
-
 GtkWidget *popup_menu_short_lived()
 {
 	GtkWidget *menu;
@@ -323,7 +317,7 @@ GtkWidget *popup_menu_short_lived()
 	g_object_ref_sink(G_OBJECT(menu));
 
 	g_signal_connect(G_OBJECT(menu), "selection_done",
-			 G_CALLBACK(popup_menu_short_lived_cb), menu);
+	                 G_CALLBACK(g_object_unref), NULL); // destroy the menu
 	return menu;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
