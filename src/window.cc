@@ -244,11 +244,10 @@ static void help_browser_run(const gchar *path)
  *-----------------------------------------------------------------------------
  */
 
-static GtkWidget *help_window = nullptr;
-
-static void help_window_destroy_cb(GtkWidget *, gpointer)
+static void help_window_destroy_cb(GtkWidget *, gpointer data)
 {
-	help_window = nullptr;
+	auto **help_window = static_cast<GtkWidget **>(data);
+	*help_window = nullptr;
 }
 
 void help_window_show(const gchar *key)
@@ -272,6 +271,7 @@ void help_window_show(const gchar *key)
 		return;
 		}
 
+	static GtkWidget *help_window = nullptr;
 	if (help_window)
 		{
 		gtk_window_present(GTK_WINDOW(help_window));
@@ -293,7 +293,7 @@ void help_window_show(const gchar *key)
 			help_window = help_window_new(_("Help"), "help", text_path, key);
 
 			g_signal_connect(G_OBJECT(help_window), "destroy",
-			                 G_CALLBACK(help_window_destroy_cb), NULL);
+			                 G_CALLBACK(help_window_destroy_cb), &help_window);
 			}
 	};
 
