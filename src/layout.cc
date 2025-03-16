@@ -595,7 +595,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 	gtk_paned_add2(GTK_PANED(box_folders), lw->dir_view);
 	gtk_widget_show(lw->dir_view);
 
-	scd = shortcuts_new_default(lw);
+	scd = shortcuts_new(lw);
 	DEBUG_NAME(scd);
 	gtk_paned_add1(GTK_PANED(box_folders), scd);
 	gtk_paned_set_position(GTK_PANED(box_folders), lw->options.folder_window.vdivider_pos);

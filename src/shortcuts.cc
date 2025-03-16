@@ -137,6 +137,8 @@ void shortcuts_destroy(gpointer data)
 	g_free(scd);
 }
 
+} // namespace
+
 GtkWidget *shortcuts_new(LayoutWindow *lw)
 {
 	ShortcutsData *scd;
@@ -161,24 +163,8 @@ GtkWidget *shortcuts_new(LayoutWindow *lw)
 					_("Add Shortcut"),
 					G_CALLBACK(shortcuts_add_cb), scd);
 
+	gtk_widget_show(scd->vbox);
 	return scd->vbox;
-}
-
-GtkWidget *shortcuts_new_from_config(LayoutWindow *lw, const gchar **, const gchar **)
-{
-	GtkWidget *shortcuts_bar;
-
-	shortcuts_bar = shortcuts_new(lw);
-	gtk_widget_show(shortcuts_bar);
-
-	return shortcuts_bar;
-}
-
-} // namespace
-
-GtkWidget *shortcuts_new_default(LayoutWindow *lw)
-{
-	return shortcuts_new_from_config(lw, nullptr, nullptr);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

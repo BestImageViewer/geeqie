@@ -26,7 +26,7 @@
 
 struct LayoutWindow;
 
-GtkWidget *shortcuts_new_default(LayoutWindow *lw);
+GtkWidget *shortcuts_new(LayoutWindow *lw);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
