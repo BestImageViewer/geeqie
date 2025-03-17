@@ -159,15 +159,7 @@ protected:
 	Exiv2::XmpData emptyXmpData_;
 
 public:
-	ExifDataOriginal(Exiv2::Image::AutoPtr image)
-	{
-		cp_data_ = nullptr;
-		cp_length_ = 0;
-        	image_ = std::move(image);
-		valid_ = TRUE;
-	}
-
-	ExifDataOriginal(gchar *path)
+	ExifDataOriginal(const gchar *path)
 	{
 		cp_data_ = nullptr;
 		cp_length_ = 0;
