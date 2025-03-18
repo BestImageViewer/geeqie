@@ -152,7 +152,6 @@ protected:
 	unsigned char *cp_data_;
 	guint cp_length_;
 	gboolean valid_;
-	gchar *pathl_;
 
 	Exiv2::ExifData emptyExifData_;
 	Exiv2::IptcData emptyIptcData_;
@@ -165,10 +164,11 @@ public:
 		cp_length_ = 0;
 		valid_ = TRUE;
 
-		pathl_ = path_from_utf8(path);
 		try
 			{
-			image_ = Exiv2::ImageFactory::open(pathl_);
+			g_autofree gchar *pathl = path_from_utf8(path);
+
+			image_ = Exiv2::ImageFactory::open(pathl);
 			image_->readMetadata();
 
 			if (image_->mimeType() == "application/rdf+xml")
@@ -202,7 +202,6 @@ public:
 	~ExifDataOriginal() override
 	{
 		g_free(cp_data_);
-		g_free(pathl_);
 	}
 
 	Exiv2::Image *image() override
