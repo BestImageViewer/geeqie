@@ -69,13 +69,11 @@ struct SelectionRectangle
 
 	SelectionRectangle(gint origin_x = 0, gint origin_y = 0,
 	                   RectangleDrawAspectRatio rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE);
-	void set_cursor(gint x, gint y);
+	void set_cursor(gint cursor_x, gint cursor_y);
 
 private:
 	gint origin_x;
 	gint origin_y;
-	gint cursor_x;
-	gint cursor_y;
 	RectangleDrawAspectRatio rectangle_draw_aspect_ratio = RECTANGLE_DRAW_ASPECT_RATIO_NONE;
 };
 
@@ -86,14 +84,12 @@ SelectionRectangle::SelectionRectangle(gint origin_x, gint origin_y, RectangleDr
     , rectangle_draw_aspect_ratio(rectangle_draw_aspect_ratio)
 {}
 
-void SelectionRectangle::set_cursor(gint x, gint y)
+void SelectionRectangle::set_cursor(gint cursor_x, gint cursor_y)
 {
-	cursor_x = x;
-	cursor_y = y;
-	this->x = std::min(origin_x, cursor_x);
-	this->y = std::min(origin_y, cursor_y);
-	width = std::abs(x - origin_x);
-	height = std::abs(y - origin_y);
+	x = std::min(origin_x, cursor_x);
+	y = std::min(origin_y, cursor_y);
+	width = std::abs(cursor_x - origin_x);
+	height = std::abs(cursor_y - origin_y);
 
 	if (rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_NONE) return;
 
@@ -104,11 +100,11 @@ void SelectionRectangle::set_cursor(gint x, gint y)
 
 	// left side of the origin: move x to respect that origin
 	if (cursor_x < origin_x)
-		this->x = origin_x - width;
+		x = origin_x - width;
 
 	// above the origin: move y
 	if (cursor_y < origin_y)
-		this->y = origin_y - height;
+		y = origin_y - height;
 }
 
 // For draw rectangle function
