@@ -339,7 +339,7 @@ void generic_dialog_windows_write_config(GString *outstr, gint indent)
 {
 	if (!options->save_dialog_window_positions || dialog_windows.empty()) return;
 
-	WRITE_NL(); WRITE_STRING("<%s>", "dialogs");
+	WRITE_NL(); WRITE_STRING("<dialogs>");
 	indent++;
 
 	for (const DialogWindow *dw : dialog_windows)
@@ -355,7 +355,7 @@ void generic_dialog_windows_write_config(GString *outstr, gint indent)
 		}
 
 	indent--;
-	WRITE_NL(); WRITE_STRING("</%s>", "dialogs");
+	WRITE_NL(); WRITE_STRING("</dialogs>");
 }
 
 static void generic_dialog_setup(GenericDialog *gd,

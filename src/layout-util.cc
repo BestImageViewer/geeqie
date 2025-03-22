@@ -3591,7 +3591,7 @@ void layout_toolbar_write_config(LayoutWindow *lw, ToolbarType type, GString *ou
 			break;
 		}
 
-	WRITE_NL(); WRITE_STRING("<%s>", name);
+	WRITE_NL(); WRITE_FORMAT_STRING("<%s>", name);
 	indent++;
 	WRITE_NL(); WRITE_STRING("<clear/>");
 	while (work)
@@ -3603,7 +3603,7 @@ void layout_toolbar_write_config(LayoutWindow *lw, ToolbarType type, GString *ou
 		WRITE_STRING("/>");
 		}
 	indent--;
-	WRITE_NL(); WRITE_STRING("</%s>", name);
+	WRITE_NL(); WRITE_FORMAT_STRING("</%s>", name);
 }
 
 void layout_toolbar_add_from_config(LayoutWindow *lw, ToolbarType type, const char **attribute_names, const gchar **attribute_values)
