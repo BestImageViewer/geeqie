@@ -672,8 +672,6 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 	GtkWidget *label;
 	GtkWidget *tbar;
 	GtkWidget *combo;
-	GList *editors_list;
-	GList *work;
 	gboolean have_filter;
 	GtkWidget *button;
 
@@ -729,35 +727,27 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, SortActionType action,
 
 
 	have_filter = FALSE;
-	editors_list = editor_list_get();
-	work = editors_list;
-	while (work)
+	EditorsList editors_list = editor_list_get();
+	for (const EditorDescription *editor : editors_list)
 		{
-		GtkWidget *button;
-		auto editor = static_cast<EditorDescription *>(work->data);
-		gchar *key;
-		gboolean select = FALSE;
-
-		work = work->next;
-
 		if (!editor_is_filter(editor->key)) continue;
 
-		key = g_strdup(editor->key);
-		if (sd->action == BAR_SORT_FILTER && strcmp(key, filter_key) == 0)
+		gchar *key = g_strdup(editor->key);
+
+		gboolean select = (sd->action == BAR_SORT_FILTER && strcmp(key, filter_key) == 0);
+		if (select)
 			{
 			bar_sort_set_action(sd, sd->action, key);
-			select = TRUE;
 			have_filter = TRUE;
 			}
 
-		button = pref_radiobutton_new(sd->folder_group, buttongrp,
-					      editor->name, select,
-					      G_CALLBACK(bar_sort_set_filter_cb), sd);
+		GtkWidget *button = pref_radiobutton_new(sd->folder_group, buttongrp,
+		                                         editor->name, select,
+		                                         G_CALLBACK(bar_sort_set_filter_cb), sd);
 		g_signal_connect(G_OBJECT(button), "button_press_event", G_CALLBACK(bar_filter_message_cb), NULL);
 
 		g_object_set_data_full(G_OBJECT(button), "filter_key", key, g_free);
 		}
-	g_list_free(editors_list);
 
 	if (sd->action == BAR_SORT_FILTER && !have_filter) sd->action = BAR_SORT_COPY;
 

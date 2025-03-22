@@ -242,25 +242,21 @@ static void toolbarlist_add_cb(GtkWidget *widget, gpointer data)
 
 static void get_desktop_data(const gchar *name, gchar **label, gchar **stock_id)
 {
-	GList *editors_list;
-	GList *work;
-	*label = nullptr;
-	*stock_id = nullptr;
-
-	editors_list = editor_list_get();
-	const auto editor_compare_key = [](gconstpointer data, gconstpointer user_data)
-	{
-		return g_strcmp0(static_cast<const EditorDescription *>(data)->key, static_cast<const gchar *>(user_data));
-	};
-	work = g_list_find_custom(editors_list, name, editor_compare_key);
-	if (work)
+	EditorsList editors_list = editor_list_get();
+	auto it = std::find_if(editors_list.cbegin(), editors_list.cend(),
+	                       [name](const EditorDescription *editor) { return g_strcmp0(editor->key, name) == 0; });
+	if (it != editors_list.cend())
 		{
-		auto editor = static_cast<const EditorDescription *>(work->data);
+		auto *editor = *it;
 
 		*label = g_strdup(editor->name);
 		*stock_id = g_strconcat(editor->icon, ".desktop", NULL);
 		}
-	g_list_free(editors_list);
+	else
+		{
+		*label = nullptr;
+		*stock_id = nullptr;
+		}
 }
 
 // toolbar_menu_add_popup

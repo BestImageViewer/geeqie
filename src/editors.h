@@ -22,6 +22,8 @@
 #ifndef EDITORS_H
 #define EDITORS_H
 
+#include <vector>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -98,7 +100,8 @@ void editor_table_clear();
 GList *editor_get_desktop_files();
 gboolean editor_read_desktop_file(const gchar *path);
 
-GList *editor_list_get();
+using EditorsList = std::vector<EditorDescription *>;
+EditorsList editor_list_get();
 
 
 /**

@@ -1016,34 +1016,37 @@ static void video_menu_cb(GtkWidget *combo, gpointer data)
 {
 	auto option = static_cast<gchar **>(data);
 
-	auto ed = static_cast<EditorDescription *>(g_list_nth_data(editor_list_get(), gtk_combo_box_get_active(GTK_COMBO_BOX(combo))));
-	*option = ed->key;
-}
-
-static void video_menu_populate(gpointer data, gpointer user_data)
-{
-	auto combo = static_cast<GtkWidget *>(user_data);
-	auto ed = static_cast<EditorDescription *>(data);
-
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), ed->name);
+	EditorsList eds = editor_list_get();
+	gint index = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
+	*option = eds[index]->key;
 }
 
 static void add_video_menu(GtkWidget *table, gint column, gint row, const gchar *text,
 			     gchar *option, gchar **option_c)
 {
 	GtkWidget *combo;
-	gint current;
-/* use lists since they are sorted */
-	GList *eds = editor_list_get();
+	/* use lists since they are sorted */
+	EditorsList eds = editor_list_get();
 
 	*option_c = option;
 
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	combo = gtk_combo_box_text_new();
-	g_list_foreach(eds,video_menu_populate,combo);
-	current = option ? g_list_index(eds, get_editor_by_command(option)) : -1;
+	for (const EditorDescription *ed : eds)
+		{
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), ed->name);
+		}
 
+	gint current = -1;
+	if (option)
+		{
+		auto it = std::find(eds.cbegin(), eds.cend(), get_editor_by_command(option));
+		if (it != eds.cend())
+			{
+			current = std::distance(eds.cbegin(), it);
+			}
+		}
 	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
 
 	g_signal_connect(G_OBJECT(combo), "changed",

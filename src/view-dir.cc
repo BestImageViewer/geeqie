@@ -448,8 +448,6 @@ static void vd_drop_menu_filter_cb(GtkWidget *widget, gpointer data)
 GtkWidget *vd_drop_menu(ViewDir *vd, gint active)
 {
 	GtkWidget *menu;
-	GList *editors_list = editor_list_get();
-	GList *work = editors_list;
 
 	menu = popup_menu_short_lived();
 	g_signal_connect(G_OBJECT(menu), "destroy",
@@ -459,18 +457,15 @@ GtkWidget *vd_drop_menu(ViewDir *vd, gint active)
 				      G_CALLBACK(vd_drop_menu_copy_cb), vd);
 	menu_item_add_sensitive(menu, _("_Move"), active, G_CALLBACK(vd_drop_menu_move_cb), vd);
 
-	while (work)
+	EditorsList editors_list = editor_list_get();
+	for (const EditorDescription *editor : editors_list)
 		{
-		GtkWidget *item;
-		auto editor = static_cast<const EditorDescription *>(work->data);
-		work = work->next;
-
 		if (!editor_is_filter(editor->key)) continue;
-		item = menu_item_add_sensitive(menu, editor->name, active, G_CALLBACK(vd_drop_menu_filter_cb), vd);
+
+		GtkWidget *item = menu_item_add_sensitive(menu, editor->name, active,
+		                                          G_CALLBACK(vd_drop_menu_filter_cb), vd);
 		g_object_set_data_full(G_OBJECT(item), "filter_key", g_strdup(editor->key), g_free);
 		}
-
-	g_list_free(editors_list);
 
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, nullptr, vd);

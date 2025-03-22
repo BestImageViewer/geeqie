@@ -59,33 +59,23 @@ static void edit_item_destroy_cb(GtkWidget *, gpointer data)
 
 static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
 {
-	GList *editors_list = editor_list_get();
-	GList *work = editors_list;
+	EditorsList editors_list = editor_list_get();
 
-	while (work)
+	for (const EditorDescription *editor : editors_list)
 		{
-		auto editor = static_cast<const EditorDescription *>(work->data);
-		work = work->next;
-		gboolean active = TRUE;
+		if (fd_list && editor_errors(editor_command_parse(editor, fd_list, FALSE, nullptr))) continue;
 
-		if (fd_list && editor_errors(editor_command_parse(editor, fd_list, FALSE, nullptr)))
-			active = FALSE;
+		const gchar *stock_id = nullptr;
+		gchar *key = g_strdup(editor->key);
 
-		if (active)
+		if (editor->icon && register_theme_icon_as_stock(key, editor->icon))
 			{
-			GtkWidget *item;
-			const gchar *stock_id = nullptr;
-			gchar *key = g_strdup(editor->key);
-
-			if (editor->icon && register_theme_icon_as_stock(key, editor->icon))
-				stock_id = key;
-
-			item = menu_item_add_stock(menu, editor->name, stock_id, func, key);
-			g_signal_connect(G_OBJECT(item), "destroy", G_CALLBACK(edit_item_destroy_cb), key);
+			stock_id = key;
 			}
-		}
 
-	g_list_free(editors_list);
+		GtkWidget *item = menu_item_add_stock(menu, editor->name, stock_id, func, key);
+		g_signal_connect(G_OBJECT(item), "destroy", G_CALLBACK(edit_item_destroy_cb), key);
+		}
 }
 
 

@@ -2970,7 +2970,7 @@ static void layout_actions_setup_marks(LayoutWindow *lw)
 		}
 }
 
-static GList *layout_actions_editor_menu_path(EditorDescription *editor)
+static GList *layout_actions_editor_menu_path(const EditorDescription *editor)
 {
 	g_auto(GStrv) split = g_strsplit(editor->menu_path, "/", 0);
 
@@ -3049,10 +3049,6 @@ static void layout_actions_editor_add(GString *desc, GList *path, GList *old_pat
 
 static void layout_actions_setup_editors(LayoutWindow *lw)
 {
-	GList *editors_list;
-	GList *work;
-	GList *old_path;
-
 	if (lw->ui_editors_id)
 		{
 		gq_gtk_ui_manager_remove_ui(lw->ui_manager, lw->ui_editors_id);
@@ -3076,14 +3072,12 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 		g_string_append(desc, "    <menu action='OpenMenu'>");
 		}
 
-	editors_list = editor_list_get();
+	GList *old_path = nullptr;
 
-	old_path = nullptr;
-	work = editors_list;
-	while (work)
+	EditorsList editors_list = editor_list_get();
+	for (const EditorDescription *editor : editors_list)
 		{
 		GList *path;
-		auto editor = static_cast<EditorDescription *>(work->data);
 		GtkActionEntry entry = { editor->key,
 		                         nullptr,
 		                         editor->name,
@@ -3129,7 +3123,6 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 
 		g_list_free_full(old_path, g_free);
 		old_path = path;
-		work = work->next;
 		}
 
 	layout_actions_editor_add(desc, nullptr, old_path);
@@ -3152,8 +3145,6 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 		g_message("building menus failed: %s", error->message);
 		exit(EXIT_FAILURE);
 		}
-
-	g_list_free(editors_list);
 }
 
 void create_toolbars(LayoutWindow *lw)
