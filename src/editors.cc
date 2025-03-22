@@ -71,6 +71,8 @@ struct EditorData {
 constexpr gint EDITOR_WINDOW_WIDTH = 500;
 constexpr gint EDITOR_WINDOW_HEIGHT = 300;
 
+GHashTable *editors = nullptr;
+
 } // namespace
 
 static void editor_verbose_window_progress(EditorData *ed, const gchar *text);
@@ -84,7 +86,6 @@ static EditorFlags editor_command_done(EditorData *ed);
  *-----------------------------------------------------------------------------
  */
 
-GHashTable *editors = nullptr;
 GtkListStore *desktop_file_list;
 static gboolean editors_finished = FALSE;
 
@@ -1252,10 +1253,15 @@ static EditorFlags editor_command_start(const EditorDescription *editor, const g
 	return static_cast<EditorFlags>(editor_errors(flags));
 }
 
-gboolean is_valid_editor_command(const gchar *key)
+EditorDescription *get_editor_by_command(const gchar *key)
 {
-	if (!key) return FALSE;
-	return g_hash_table_lookup(editors, key) != nullptr;
+	if (!key) return nullptr;
+	return static_cast<EditorDescription *>(g_hash_table_lookup(editors, key));
+}
+
+bool is_valid_editor_command(const gchar *key)
+{
+	return get_editor_by_command(key) != nullptr;
 }
 
 EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const gchar *working_directory, EditorCallback cb, gpointer data)
