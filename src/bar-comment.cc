@@ -206,8 +206,8 @@ static void bar_pane_comment_write_config(GtkWidget *pane, GString *outstr, gint
 		}
 
 	WRITE_NL(); WRITE_STRING("<pane_comment ");
-	write_char_option(outstr, indent, "id", pcd->pane.id);
-	write_char_option(outstr, indent, "title", gtk_label_get_text(GTK_LABEL(pcd->pane.title)));
+	write_char_option(outstr, "id", pcd->pane.id);
+	write_char_option(outstr, "title", gtk_label_get_text(GTK_LABEL(pcd->pane.title)));
 	WRITE_BOOL(pcd->pane, expanded);
 	WRITE_CHAR(*pcd, key);
 	WRITE_INT(*pcd, height);

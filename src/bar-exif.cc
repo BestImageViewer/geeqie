@@ -731,8 +731,8 @@ void bar_pane_exif_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	if (!ped) return;
 
 	WRITE_NL(); WRITE_STRING("<pane_exif ");
-	write_char_option(outstr, indent, "id", ped->pane.id);
-	write_char_option(outstr, indent, "title", gtk_label_get_text(GTK_LABEL(ped->pane.title)));
+	write_char_option(outstr, "id", ped->pane.id);
+	write_char_option(outstr, "title", gtk_label_get_text(GTK_LABEL(ped->pane.title)));
 	WRITE_BOOL(ped->pane, expanded);
 	WRITE_BOOL(*ped, show_all);
 	WRITE_STRING(">");

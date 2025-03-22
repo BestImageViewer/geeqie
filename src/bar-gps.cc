@@ -672,8 +672,8 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 
 	WRITE_NL();
 	WRITE_STRING("<pane_gps ");
-	write_char_option(outstr, indent, "id", pgd->pane.id);
-	write_char_option(outstr, indent, "title", gtk_label_get_text(GTK_LABEL(pgd->pane.title)));
+	write_char_option(outstr, "id", pgd->pane.id);
+	write_char_option(outstr, "title", gtk_label_get_text(GTK_LABEL(pgd->pane.title)));
 	WRITE_BOOL(pgd->pane, expanded);
 
 	gint w;
@@ -683,12 +683,12 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 
 	const gchar *map_id = bar_pane_gps_get_map_id(pgd);
 	WRITE_NL();
-	write_char_option(outstr, indent, "map-id", map_id);
+	write_char_option(outstr, "map-id", map_id);
 
 	gint zoom;
 	g_object_get(G_OBJECT(pgd->gps_view), "zoom-level", &zoom, NULL);
 	WRITE_NL();
-	write_int_option(outstr, indent, "zoom-level", zoom);
+	write_int_option(outstr, "zoom-level", zoom);
 
 	const auto write_lat_long_option = [pgd, outstr, indent](const gchar *option)
 	{
@@ -696,7 +696,7 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 		g_object_get(G_OBJECT(pgd->gps_view), option, &position, NULL);
 		const gint int_position = position * 1000000;
 		WRITE_NL();
-		write_int_option(outstr, indent, option, int_position);
+		write_int_option(outstr, option, int_position);
 	};
 	write_lat_long_option("latitude");
 	write_lat_long_option("longitude");
