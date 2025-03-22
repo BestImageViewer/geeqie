@@ -623,8 +623,8 @@ void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
 	if (!bd) return;
 
 	WRITE_NL(); WRITE_STRING("<bar ");
-	write_bool_option(outstr, indent, "enabled", gtk_widget_get_visible(bar));
-	write_uint_option(outstr, indent, "width", bd->width);
+	write_bool_option(outstr, "enabled", gtk_widget_get_visible(bar));
+	write_uint_option(outstr, "width", bd->width);
 	WRITE_STRING(">");
 
 	indent++;

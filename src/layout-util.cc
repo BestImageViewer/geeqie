@@ -3608,7 +3608,7 @@ void layout_toolbar_write_config(LayoutWindow *lw, ToolbarType type, GString *ou
 		auto action = static_cast<gchar *>(work->data);
 		work = work->next;
 		WRITE_NL(); WRITE_STRING("<toolitem ");
-		write_char_option(outstr, indent + 1, "action", action);
+		write_char_option(outstr, "action", action);
 		WRITE_STRING("/>");
 		}
 	indent--;

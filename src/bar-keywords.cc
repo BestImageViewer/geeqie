@@ -301,8 +301,8 @@ void bar_pane_keywords_write_config(GtkWidget *pane, GString *outstr, gint inden
 	pkd->height = h;
 
 	WRITE_NL(); WRITE_STRING("<pane_keywords ");
-	write_char_option(outstr, indent, "id", pkd->pane.id);
-	write_char_option(outstr, indent, "title", gtk_label_get_text(GTK_LABEL(pkd->pane.title)));
+	write_char_option(outstr, "id", pkd->pane.id);
+	write_char_option(outstr, "title", gtk_label_get_text(GTK_LABEL(pkd->pane.title)));
 	WRITE_BOOL(pkd->pane, expanded);
 	WRITE_CHAR(*pkd, key);
 	WRITE_INT(*pkd, height);

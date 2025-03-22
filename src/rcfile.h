@@ -29,31 +29,31 @@ struct ConfOptions;
 struct LayoutWindow;
 
 void write_indent(GString *str, gint indent);
-void write_char_option(GString *str, gint indent, const gchar *label, const gchar *text);
+void write_char_option(GString *str, const gchar *label, const gchar *text);
 gboolean read_dummy_option(const gchar *option, const gchar *label, const gchar *message);
 gboolean read_char_option(const gchar *option, const gchar *label, const gchar *value, gchar **text);
-void write_color_option(GString *str, gint indent, const gchar *label, GdkRGBA *color);
+void write_color_option(GString *str, const gchar *label, const GdkRGBA *color);
 gboolean read_color_option(const gchar *option, const gchar *label, const gchar *value, GdkRGBA *color);
-void write_int_option(GString *str, gint indent, const gchar *label, gint n);
+void write_int_option(GString *str, const gchar *label, gint n);
 gboolean read_int_option(const gchar *option, const gchar *label, const gchar *value, gint *n);
 gboolean read_ushort_option(const gchar *option, const gchar *label, const gchar *value, guint16 *n);
-void write_uint_option(GString *str, gint indent, const gchar *label, guint n);
+void write_uint_option(GString *str, const gchar *label, guint n);
 gboolean read_uint_option(const gchar *option, const gchar *label, const gchar *value, guint *n);
 gboolean read_uint_option_clamp(const gchar *option, const gchar *label, const gchar *value, guint *n, guint min, guint max);
 gboolean read_int_option_clamp(const gchar *option, const gchar *label, const gchar *value, gint *n, gint min, gint max);
-void write_int_unit_option(GString *str, gint indent, const gchar *label, gint n, gint subunits);
+void write_int_unit_option(GString *str, const gchar *label, gint n, gint subunits);
 gboolean read_int_unit_option(const gchar *option, const gchar *label, const gchar *value, gint *n, gint subunits);
-void write_bool_option(GString *str, gint indent, const gchar *label, gint n);
+void write_bool_option(GString *str, const gchar *label, gboolean value);
 gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *value, gint *n);
 
-#define WRITE_BOOL(_source_, _name_) write_bool_option(outstr, indent, #_name_, (_source_)._name_)
-#define WRITE_INT(_source_, _name_) write_int_option(outstr, indent, #_name_, (_source_)._name_)
-#define WRITE_UINT(_source_, _name_) write_uint_option(outstr, indent, #_name_, (_source_)._name_)
-#define WRITE_INT_UNIT(_source_, _name_, _unit_) write_int_unit_option(outstr, indent, #_name_, (_source_)._name_, _unit_)
-#define WRITE_CHAR(_source_, _name_) write_char_option(outstr, indent, #_name_, (_source_)._name_)
-#define WRITE_COLOR(_source_, _name_) write_color_option(outstr, indent, #_name_, &(_source_)._name_)
+#define WRITE_BOOL(_source_, _name_) write_bool_option(outstr, #_name_, (_source_)._name_)
+#define WRITE_INT(_source_, _name_) write_int_option(outstr, #_name_, (_source_)._name_)
+#define WRITE_UINT(_source_, _name_) write_uint_option(outstr, #_name_, (_source_)._name_)
+#define WRITE_INT_UNIT(_source_, _name_, _unit_) write_int_unit_option(outstr, #_name_, (_source_)._name_, _unit_)
+#define WRITE_CHAR(_source_, _name_) write_char_option(outstr, #_name_, (_source_)._name_)
+#define WRITE_COLOR(_source_, _name_) write_color_option(outstr, #_name_, &(_source_)._name_)
 
-#define WRITE_INT_FULL(_name_, _source_) write_int_option(outstr, indent, _name_, _source_)
+#define WRITE_INT_FULL(_name_, _source_) write_int_option(outstr, _name_, _source_)
 
 #define WRITE_NL() write_indent(outstr, indent)
 #define WRITE_SEPARATOR() g_string_append(outstr, "\n")

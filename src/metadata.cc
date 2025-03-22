@@ -1672,12 +1672,12 @@ static void keyword_tree_node_write_config(GtkTreeModel *keyword_tree, GtkTreeIt
 
 		WRITE_NL(); WRITE_STRING("<keyword ");
 		g_autofree gchar *name = keyword_get_name(keyword_tree, &iter);
-		write_char_option(outstr, indent, "name", name);
-		write_bool_option(outstr, indent, "kw", keyword_get_is_keyword(keyword_tree, &iter));
+		write_char_option(outstr, "name", name);
+		write_bool_option(outstr, "kw", keyword_get_is_keyword(keyword_tree, &iter));
 		g_autofree gchar *mark_str = keyword_get_mark(keyword_tree, &iter);
 		if (mark_str && mark_str[0])
 			{
-			write_char_option(outstr, indent, "mark", mark_str);
+			write_char_option(outstr, "mark", mark_str);
 			}
 
 		if (gtk_tree_model_iter_children(keyword_tree, &children, &iter))

@@ -137,8 +137,8 @@ static void bar_pane_histogram_write_config(GtkWidget *pane, GString *outstr, gi
 	if (!phd) return;
 
 	WRITE_NL(); WRITE_STRING("<pane_histogram ");
-	write_char_option(outstr, indent, "id", phd->pane.id);
-	write_char_option(outstr, indent, "title", gtk_label_get_text(GTK_LABEL(phd->pane.title)));
+	write_char_option(outstr, "id", phd->pane.id);
+	write_char_option(outstr, "title", gtk_label_get_text(GTK_LABEL(phd->pane.title)));
 	WRITE_BOOL(phd->pane, expanded);
 	WRITE_INT(phd->histogram, histogram_channel);
 	WRITE_INT(phd->histogram, histogram_mode);
