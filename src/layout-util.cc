@@ -3072,48 +3072,53 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 		g_string_append(desc, "    <menu action='OpenMenu'>");
 		}
 
-	g_autoptr(GList) button_list = gtk_container_get_children(GTK_CONTAINER(lw->toolbar[TOOLBAR_MAIN]));
 	GList *old_path = nullptr;
 
-	EditorsList editors_list = editor_list_get();
-	for (const EditorDescription *editor : editors_list)
+	GtkWidget *main_toolbar = lw->toolbar[TOOLBAR_MAIN];
+	if (GTK_IS_CONTAINER(main_toolbar))
 		{
-		GtkActionEntry entry = { editor->key,
-		                         editor->icon ? editor->key : nullptr,
-		                         editor->name,
-		                         editor->hotkey,
-		                         editor->comment ? editor->comment : editor->name,
-		                         G_CALLBACK(layout_menu_edit_cb) };
+		g_autoptr(GList) button_list = gtk_container_get_children(GTK_CONTAINER(main_toolbar));
 
-		gq_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
-
-		for (GList *work = button_list; work; work = work->next)
+		EditorsList editors_list = editor_list_get();
+		for (const EditorDescription *editor : editors_list)
 			{
+			GtkActionEntry entry = { editor->key,
+			                         editor->icon ? editor->key : nullptr,
+			                         editor->name,
+			                         editor->hotkey,
+			                         editor->comment ? editor->comment : editor->name,
+			                         G_CALLBACK(layout_menu_edit_cb) };
+
+			gq_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
+
+			for (GList *work = button_list; work; work = work->next)
+				{
 #if HAVE_GTK4
-			const gchar *tooltip = gtk_widget_get_tooltip_text(GTK_WIDGET(work->data));
+				const gchar *tooltip = gtk_widget_get_tooltip_text(GTK_WIDGET(work->data));
 #else
-			g_autofree gchar *tooltip = gtk_widget_get_tooltip_text(GTK_WIDGET(work->data));
+				g_autofree gchar *tooltip = gtk_widget_get_tooltip_text(GTK_WIDGET(work->data));
 #endif
-			if (g_strcmp0(tooltip, editor->key) != 0) continue; // @todo Use g_list_find_custom() if tooltip is unique
+				if (g_strcmp0(tooltip, editor->key) != 0) continue; // @todo Use g_list_find_custom() if tooltip is unique
 
-			GtkWidget *image = nullptr;
-			if (editor->icon)
-				{
-				image = gq_gtk_image_new_from_stock(editor->key, GTK_ICON_SIZE_BUTTON);
+				GtkWidget *image = nullptr;
+				if (editor->icon)
+					{
+					image = gq_gtk_image_new_from_stock(editor->key, GTK_ICON_SIZE_BUTTON);
+					}
+				else
+					{
+					image = gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
+					}
+				gtk_button_set_image(GTK_BUTTON(work->data), GTK_WIDGET(image));
+				gtk_widget_set_tooltip_text(GTK_WIDGET(work->data), editor->name);
 				}
-			else
-				{
-				image = gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
-				}
-			gtk_button_set_image(GTK_BUTTON(work->data), GTK_WIDGET(image));
-			gtk_widget_set_tooltip_text(GTK_WIDGET(work->data), editor->name);
+
+			GList *path = layout_actions_editor_menu_path(editor);
+			layout_actions_editor_add(desc, path, old_path);
+
+			g_list_free_full(old_path, g_free);
+			old_path = path;
 			}
-
-		GList *path = layout_actions_editor_menu_path(editor);
-		layout_actions_editor_add(desc, path, old_path);
-
-		g_list_free_full(old_path, g_free);
-		old_path = path;
 		}
 
 	layout_actions_editor_add(desc, nullptr, old_path);
