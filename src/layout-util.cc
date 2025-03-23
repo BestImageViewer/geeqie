@@ -3072,53 +3072,44 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 		g_string_append(desc, "    <menu action='OpenMenu'>");
 		}
 
+	g_autoptr(GList) button_list = gtk_container_get_children(GTK_CONTAINER(lw->toolbar[TOOLBAR_MAIN]));
 	GList *old_path = nullptr;
 
 	EditorsList editors_list = editor_list_get();
 	for (const EditorDescription *editor : editors_list)
 		{
-		GList *path;
 		GtkActionEntry entry = { editor->key,
-		                         nullptr,
+		                         editor->icon ? editor->key : nullptr,
 		                         editor->name,
 		                         editor->hotkey,
 		                         editor->comment ? editor->comment : editor->name,
 		                         G_CALLBACK(layout_menu_edit_cb) };
 
-		if (editor->icon)
-			{
-			entry.stock_id = editor->key;
-			}
 		gq_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
 
-		GList *button_list;
-		GList *work_button_list;
-
-		button_list = gtk_container_get_children(GTK_CONTAINER(lw->toolbar[TOOLBAR_MAIN]));
-		work_button_list = button_list;
-
-		while (work_button_list)
+		for (GList *work = button_list; work; work = work->next)
 			{
-			if (g_strcmp0(gtk_widget_get_tooltip_text(GTK_WIDGET(work_button_list->data)), editor->key) == 0)
+#if HAVE_GTK4
+			const gchar *tooltip = gtk_widget_get_tooltip_text(GTK_WIDGET(work->data));
+#else
+			g_autofree gchar *tooltip = gtk_widget_get_tooltip_text(GTK_WIDGET(work->data));
+#endif
+			if (g_strcmp0(tooltip, editor->key) != 0) continue; // @todo Use g_list_find_custom() if tooltip is unique
+
+			GtkWidget *image = nullptr;
+			if (editor->icon)
 				{
-				GtkWidget *image = nullptr;
-				if (editor->icon)
-					{
-					image = gq_gtk_image_new_from_stock(editor->key, GTK_ICON_SIZE_BUTTON);
-					}
-				else
-					{
-					image = gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
-					}
-				gtk_button_set_image(GTK_BUTTON(work_button_list->data), GTK_WIDGET(image));
-				gtk_widget_set_tooltip_text(GTK_WIDGET(work_button_list->data), editor->name);
+				image = gq_gtk_image_new_from_stock(editor->key, GTK_ICON_SIZE_BUTTON);
 				}
-			work_button_list = work_button_list->next;
+			else
+				{
+				image = gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
+				}
+			gtk_button_set_image(GTK_BUTTON(work->data), GTK_WIDGET(image));
+			gtk_widget_set_tooltip_text(GTK_WIDGET(work->data), editor->name);
 			}
 
-		g_list_free(button_list);
-
-		path = layout_actions_editor_menu_path(editor);
+		GList *path = layout_actions_editor_menu_path(editor);
 		layout_actions_editor_add(desc, path, old_path);
 
 		g_list_free_full(old_path, g_free);
