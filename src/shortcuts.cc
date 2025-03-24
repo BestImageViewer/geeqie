@@ -32,8 +32,6 @@
 #include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
-#include "ui-utildlg.h"
-#include "utilops.h"
 
 namespace
 {
@@ -65,11 +63,6 @@ void shortcuts_bookmark_select(const gchar *path, gpointer data)
 		layout_set_path(scd->lw, path);
 		}
 
-}
-
-void shortcuts_add_close(ShortcutsData *scd)
-{
-	g_free(scd->name);
 }
 
 void name_entry_activate_cb(GtkEntry *entry, gpointer data)
@@ -145,8 +138,7 @@ void shortcuts_destroy(gpointer data)
 {
 	auto scd = static_cast<ShortcutsData *>(data);
 
-	shortcuts_add_close(scd);
-
+	g_free(scd->name);
 	g_free(scd);
 }
 
