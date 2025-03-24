@@ -838,7 +838,7 @@ gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, Layou
 	return TRUE;
 }
 
-gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions *, LayoutWindow *lw)
+gboolean save_default_layout_options_to_file(const gchar *utf8_path, LayoutWindow *lw)
 {
 	SecureSaveInfo *ssi;
 	gint indent = 0;

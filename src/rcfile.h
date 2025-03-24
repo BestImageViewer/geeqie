@@ -85,7 +85,7 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 
 
 gboolean save_config_to_file(const gchar *utf8_path, ConfOptions *options, LayoutWindow *lw);
-gboolean save_default_layout_options_to_file(const gchar *utf8_path, ConfOptions *options, LayoutWindow *lw);
+gboolean save_default_layout_options_to_file(const gchar *utf8_path, LayoutWindow *lw);
 
 gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup);
 gboolean load_config_from_file(const gchar *utf8_path, gboolean startup);

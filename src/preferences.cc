@@ -2292,7 +2292,7 @@ static void save_default_window_layout_cb(GtkWidget *, gpointer)
 	lw->options.id = g_strdup("");
 
 	g_autofree gchar *default_path = g_build_filename(get_rc_dir(), DEFAULT_WINDOW_LAYOUT, NULL);
-	save_default_layout_options_to_file(default_path, options, lw);
+	save_default_layout_options_to_file(default_path, lw);
 	g_free(lw->options.id);
 	lw->options.id = tmp_id;
 }
