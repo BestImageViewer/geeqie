@@ -111,13 +111,13 @@ secs_start=$(cut --delimiter='.' --fields=1 < /proc/uptime)
 
 if [ "$process_all" -eq 1 ]
 then
-	total_files=$(find src -name "*.cc" | wc --lines)
+	total_files=$(find src -name "*.cc" -not -path "src/third-party/*" | wc --lines)
 
 	while read -r file
 	do
 		process_file
 	done << EOF
-$(find src -name "*.cc" | sort)
+$(find src -name "*.cc" -not -path "src/third-party/*" | sort)
 EOF
 else
 	total_files=$(git diff --name-only ./src/*.cc ./src/filedata/*.cc ./src/pan-view/*.cc ./src/view-file/*.cc | wc --lines)
