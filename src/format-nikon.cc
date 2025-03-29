@@ -35,8 +35,8 @@
  */
 
 static guint nikon_tiff_table(guchar *data, guint len, guint offset, ExifByteOrder bo,
-			      gint level,
-			      guint *image_offset, guint *jpeg_len);
+                              gint level,
+                              guint *image_offset, guint *image_length);
 
 
 static void nikon_tiff_entry(guchar *data, const guint len, guint offset, ExifByteOrder bo,

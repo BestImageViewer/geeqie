@@ -100,12 +100,6 @@ struct ExifItem
  *-----------------------------------------------------------------------------
  */
 
-
-
-extern ExifMarker ExifKnownMarkersList[]; /**< the known exif tags list */
-
-extern ExifMarker ExifUnknownMarkersList[]; /**< the unknown tags utilize this generic list */
-
 extern ExifFormattedText ExifFormattedList[]; /**< the list of specially formatted keys, for human readable output */
 
 

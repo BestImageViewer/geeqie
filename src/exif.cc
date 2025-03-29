@@ -317,7 +317,8 @@ Tag names should match to exiv2 keys, https://www.exiv2.org/metadata.html
 Tags that don't match are not supported by exiv2 and should not be used anywhere in the code
 */
 
-ExifMarker ExifKnownMarkersList[] = {
+/**< the known exif tags list */
+static ExifMarker ExifKnownMarkersList[] = {
 { 0x0100, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageWidth",	N_("Image Width"), nullptr },
 { 0x0101, EXIF_FORMAT_LONG_UNSIGNED, 1,		"Exif.Image.ImageLength",	N_("Image Height"), nullptr },
 { 0x0102, EXIF_FORMAT_SHORT_UNSIGNED, 1,	"Exif.Image.BitsPerSample",	N_("Bits per Sample/Pixel"), nullptr },
@@ -431,7 +432,7 @@ ExifMarker ExifKnownMarkersList[] = {
 EXIF_MARKER_LIST_END
 };
 
-ExifMarker ExifKnownGPSInfoMarkersList[] = {
+static ExifMarker ExifKnownGPSInfoMarkersList[] = {
         /* The following do not work at the moment as the tag value 0x0000 has a
          * special meaning. */
         /* { 0x0000, EXIF_FORMAT_BYTE, -1, "Exif.GPSInfo.GPSVersionID", NULL, NULL }, */
@@ -469,7 +470,8 @@ ExifMarker ExifKnownGPSInfoMarkersList[] = {
         EXIF_MARKER_LIST_END
 };
 
-ExifMarker ExifUnknownMarkersList[] = {
+/**< the unknown tags utilize this generic list */
+static ExifMarker ExifUnknownMarkersList[] = {
 { 0x0000, EXIF_FORMAT_UNKNOWN, 0,		"unknown",	nullptr, nullptr },
 { 0x0000, EXIF_FORMAT_BYTE_UNSIGNED, -1,	"unknown",	nullptr, nullptr },
 { 0x0000, EXIF_FORMAT_STRING, -1,		"unknown",	nullptr, nullptr },
@@ -695,7 +697,7 @@ guint32 exif_byte_get_int32(guchar *f, ExifByteOrder bo)
 		return GUINT32_FROM_LE(align_buf);
 		}
 
-	return GUINT32_FROM_BE(align_buf);
+	return GUINT32_FROM_BE(align_buf); // NOLINT(readability-isolate-declaration)
 }
 
 void exif_byte_put_int16(guchar *f, guint16 n, ExifByteOrder bo)
@@ -724,7 +726,7 @@ void exif_byte_put_int32(guchar *f, guint32 n, ExifByteOrder bo)
 		}
 	else
 		{
-		align_buf = GUINT32_TO_BE(n);
+		align_buf = GUINT32_TO_BE(n); // NOLINT(readability-isolate-declaration)
 		}
 
 	memcpy(f, &align_buf, sizeof(guint32));
@@ -953,6 +955,8 @@ static gint exif_parse_IFD_entry(ExifData *exif, guchar *tiff, guint offset,
 				break;
 			case TAG_EXIFMAKERNOTE:
 				format_exif_makernote_parse(exif, tiff, data_val, size, bo);
+				break;
+			default:
 				break;
 			}
 		}
@@ -1194,9 +1198,9 @@ static gint unmap_file(gpointer mapping, gint size)
  * this function gives access to the original data from the image.
  * original data are part of the processed data and should not be freed separately
  */
-ExifData *exif_get_original(ExifData *processed)
+ExifData *exif_get_original(ExifData *exif)
 {
-	return processed;
+	return exif;
 }
 
 void exif_free(ExifData *exif)
