@@ -1590,11 +1590,13 @@ void vf_star_cleanup(ViewFile *vf)
 
 void vf_star_stop(ViewFile *vf)
 {
-	 vf_star_cleanup(vf);
+	vf_star_cleanup(vf);
 }
 
 static void vf_set_star_fd(ViewFile *vf, FileData *fd)
 {
+	if (!fd) return;
+
 	switch (vf->type)
 		{
 		case FILEVIEW_LIST: vflist_set_star_fd(vf, fd); break;
@@ -1603,12 +1605,7 @@ static void vf_set_star_fd(ViewFile *vf, FileData *fd)
 		}
 }
 
-static void vf_star_do(ViewFile *vf, FileData *fd)
-{
-	if (!fd) return;
-
-	vf_set_star_fd(vf, fd);
-}
+static gboolean vf_stars_cb(gpointer data);
 
 static gboolean vf_star_next(ViewFile *vf)
 {
@@ -1628,31 +1625,35 @@ static gboolean vf_star_next(ViewFile *vf)
 		return FALSE;
 		}
 
+	vf->stars_filedata = fd;
+
+	if (vf->stars_id == 0)
+		{
+		vf->stars_id = g_idle_add_full(G_PRIORITY_LOW, vf_stars_cb, vf, nullptr);
+		}
+
 	return TRUE;
 }
 
-gboolean vf_stars_cb(gpointer data)
+static gboolean vf_stars_cb(gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	FileData *fd = vf->stars_filedata;
 
-	if (fd)
+	if (!fd) return G_SOURCE_REMOVE;
+
+	read_rating_data(fd);
+
+	vf_set_star_fd(vf, fd);
+
+	if (!vf_star_next(vf))
 		{
-		read_rating_data(fd);
-
-		vf_star_do(vf, fd);
-
-		if (vf_star_next(vf))
-			{
-			return G_SOURCE_CONTINUE;
-			}
-
 		vf->stars_filedata = nullptr;
 		vf->stars_id = 0;
 		return G_SOURCE_REMOVE;
 		}
 
-	return G_SOURCE_REMOVE;
+	return G_SOURCE_CONTINUE;
 }
 
 void vf_star_update(ViewFile *vf)

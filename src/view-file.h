@@ -156,7 +156,6 @@ void vf_file_filter_set(ViewFile *vf, gboolean enable);
 GRegex *vf_file_filter_get_filter(ViewFile *vf);
 
 void vf_star_update(ViewFile *vf);
-gboolean vf_stars_cb(gpointer data);
 void vf_star_stop(ViewFile *vf);
 void vf_star_cleanup(ViewFile *vf);
 

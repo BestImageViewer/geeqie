@@ -1676,18 +1676,11 @@ FileData *vficon_star_next_fd(ViewFile *vf)
 			GList *list;
 			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &list, -1);
 
-			for (; list; list = list->next)
+			for (GList *work = list; work; work = work->next)
 				{
-				auto fd = static_cast<FileData *>(list->data);
+				auto *fd = static_cast<FileData *>(work->data);
 				if (fd && fd->rating == STAR_RATING_NOT_READ)
 					{
-					vf->stars_filedata = fd;
-
-					if (vf->stars_id == 0)
-						{
-						vf->stars_id = g_idle_add_full(G_PRIORITY_LOW, vf_stars_cb, vf, nullptr);
-						}
-
 					return fd;
 					}
 				}
@@ -1698,20 +1691,12 @@ FileData *vficon_star_next_fd(ViewFile *vf)
 
 	/* Then iterate through the entire list to load all of them. */
 
-	GList *work;
-	for (work = vf->list; work; work = work->next)
+	for (GList *work = vf->list; work; work = work->next)
 		{
-		auto fd = static_cast<FileData *>(work->data);
+		auto *fd = static_cast<FileData *>(work->data);
 
 		if (fd && fd->rating == STAR_RATING_NOT_READ)
 			{
-			vf->stars_filedata = fd;
-
-			if (vf->stars_id == 0)
-				{
-				vf->stars_id = g_idle_add_full(G_PRIORITY_LOW, vf_stars_cb, vf, nullptr);
-				}
-
 			return fd;
 			}
 		}
