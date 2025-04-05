@@ -639,12 +639,14 @@ static gboolean tip_schedule_cb(gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	if (!ct->tip_delay_id) return FALSE;
+	if (ct->tip_delay_id)
+		{
+		tip_show(ct);
 
-	tip_show(ct);
+		ct->tip_delay_id = 0;
+		}
 
-	ct->tip_delay_id = 0;
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static void tip_schedule(CollectTable *ct)
@@ -1539,17 +1541,19 @@ static gboolean collection_table_auto_scroll_idle_cb(gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	if (!ct->drop_idle_id) return G_SOURCE_REMOVE;
-
-	GdkWindow *window = gtk_widget_get_window(ct->listview);
-
-	GdkPoint pos;
-	if (window_get_pointer_position(window, pos))
+	if (ct->drop_idle_id)
 		{
-		collection_table_motion_update(ct, pos.x, pos.y, TRUE);
+		GdkWindow *window = gtk_widget_get_window(ct->listview);
+
+		GdkPoint pos;
+		if (window_get_pointer_position(window, pos))
+			{
+			collection_table_motion_update(ct, pos.x, pos.y, TRUE);
+			}
+
+		ct->drop_idle_id = 0;
 		}
 
-	ct->drop_idle_id = 0;
 	return G_SOURCE_REMOVE;
 }
 
@@ -1893,11 +1897,14 @@ static gboolean collection_table_sync_idle_cb(gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	if (!ct->sync_idle_id) return G_SOURCE_REMOVE;
-	g_source_remove(ct->sync_idle_id);
-	ct->sync_idle_id = 0;
+	if (ct->sync_idle_id)
+		{
+		g_source_remove(ct->sync_idle_id);
+		ct->sync_idle_id = 0;
 
-	collection_table_sync(ct);
+		collection_table_sync(ct);
+		}
+
 	return G_SOURCE_REMOVE;
 }
 

@@ -302,19 +302,19 @@ static gboolean slideshow_loop_cb(gpointer data)
 {
 	auto ss = static_cast<SlideShowData *>(data);
 
-	if (ss->paused) return TRUE;
+	if (ss->paused) return G_SOURCE_CONTINUE;
 
-	if (!slideshow_step(ss, TRUE))
+	if (slideshow_step(ss, TRUE))
 		{
-		ss->timeout_id = 0;
-		slideshow_free(ss);
-		return FALSE;
+		/* Check if the user has changed the timer interval */
+		slideshow_timer_reset(ss);
+
+		return G_SOURCE_CONTINUE;
 		}
 
-	/* Check if the user has changed the timer interval */
-	slideshow_timer_reset(ss);
-
-	return TRUE;
+	ss->timeout_id = 0;
+	slideshow_free(ss);
+	return G_SOURCE_REMOVE;
 }
 
 static void slideshow_timer_stop(SlideShowData *ss)

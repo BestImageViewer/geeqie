@@ -1279,7 +1279,7 @@ static gboolean filter_add_scroll(gpointer data)
 	gtk_tree_path_free(path);
 	g_list_free(list_cells);
 
-	return(G_SOURCE_REMOVE);
+	return G_SOURCE_REMOVE;
 }
 
 static void filter_add_cb(GtkWidget *, gpointer data)
@@ -1287,7 +1287,7 @@ static void filter_add_cb(GtkWidget *, gpointer data)
 	filter_add_unique("description", ".new", FORMAT_CLASS_IMAGE, TRUE, FALSE, TRUE);
 	filter_store_populate();
 
-	g_idle_add(static_cast<GSourceFunc>(filter_add_scroll), data);
+	g_idle_add(filter_add_scroll, data);
 }
 
 static void filter_remove_cb(GtkWidget *, gpointer data)
@@ -2299,11 +2299,9 @@ static void save_default_window_layout_cb(GtkWidget *, gpointer)
 
 static gboolean popover_cb(gpointer data)
 {
-	auto popover = static_cast<GtkPopover *>(data);
+	gtk_popover_popdown(GTK_POPOVER(data));
 
-	gtk_popover_popdown(popover);
-
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static void default_layout_changed_cb(GtkWidget *, GtkPopover *popover)
@@ -3033,7 +3031,7 @@ static gboolean keywords_find_file(gpointer data)
 		file_data_unref(fd);
 		g_list_free_full(keywords, g_free);
 
-		return (G_SOURCE_CONTINUE);
+		return G_SOURCE_CONTINUE;
 		}
 
 	if (kfd->list_dir)

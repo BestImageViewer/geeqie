@@ -483,7 +483,7 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 		{
 		sd->timer_id = 0;
 		widget_auto_scroll_stop(sd->widget);
-		return FALSE;
+		return G_SOURCE_REMOVE;
 		}
 
 	gint h = gdk_window_get_height(window);
@@ -516,7 +516,7 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 				{
 				sd->timer_id = 0;
 				widget_auto_scroll_stop(sd->widget);
-				return FALSE;
+				return G_SOURCE_REMOVE;
 				}
 
 			gtk_adjustment_set_value(sd->adj,
@@ -524,7 +524,7 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 			}
 		}
 
-	return TRUE;
+	return G_SOURCE_CONTINUE;
 }
 
 /**

@@ -207,7 +207,7 @@ static gboolean match_selected_cb(GtkEntryCompletion *, GtkTreeModel *model, Gtk
 		gq_gtk_action_activate(sar->action);
 		}
 
-	g_idle_add(static_cast<GSourceFunc>(search_and_run_destroy), sar);
+	g_idle_add(search_and_run_destroy, sar);
 
 	return TRUE;
 }

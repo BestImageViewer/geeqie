@@ -213,7 +213,6 @@ void metadata_cache_free(FileData *fd)
  */
 
 static GList *metadata_write_queue = nullptr;
-static guint metadata_write_idle_id = 0; /* event source id */
 
 static void metadata_write_queue_add(FileData *fd)
 {
@@ -225,6 +224,8 @@ static void metadata_write_queue_add(FileData *fd)
 		layout_util_status_update_write_all();
 		}
 
+	static guint metadata_write_idle_id = 0; /* event source id */
+
 	if (metadata_write_idle_id)
 		{
 		g_source_remove(metadata_write_idle_id);
@@ -233,7 +234,7 @@ static void metadata_write_queue_add(FileData *fd)
 
 	if (options->metadata.confirm_after_timeout)
 		{
-		metadata_write_idle_id = g_timeout_add(options->metadata.confirm_timeout * 1000, metadata_write_queue_idle_cb, nullptr);
+		metadata_write_idle_id = g_timeout_add(options->metadata.confirm_timeout * 1000, metadata_write_queue_idle_cb, &metadata_write_idle_id);
 		}
 }
 
@@ -300,11 +301,14 @@ gboolean metadata_write_queue_confirm(gboolean force_dialog, FileUtilDoneFunc do
 	return (metadata_write_queue != nullptr);
 }
 
-static gboolean metadata_write_queue_idle_cb(gpointer)
+static gboolean metadata_write_queue_idle_cb(gpointer data)
 {
 	metadata_write_queue_confirm(FALSE, nullptr, nullptr);
-	metadata_write_idle_id = 0;
-	return FALSE;
+
+	auto *metadata_write_idle_id = static_cast<guint *>(data);
+	*metadata_write_idle_id = 0;
+
+	return G_SOURCE_REMOVE;
 }
 
 gboolean metadata_write_perform(FileData *fd)

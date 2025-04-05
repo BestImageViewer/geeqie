@@ -328,7 +328,7 @@ static gboolean show_next_frame(gpointer data)
 	if(animation_should_continue(fd)==FALSE)
 		{
 		image_animation_data_free(fd);
-		return FALSE;
+		return G_SOURCE_REMOVE;
 		}
 
 	PixbufRenderer *pr = PIXBUF_RENDERER(fd->iw->pr);
@@ -351,16 +351,16 @@ static gboolean show_next_frame(gpointer data)
 		if (delay>0) /* Current frame not static. */
 			{
 			fd->delay=delay;
-			g_timeout_add(delay,show_next_frame,fd);
+			g_timeout_add(delay, show_next_frame, fd);
 			}
 		else
 			{
 			image_animation_data_free(fd);
 			}
-		return FALSE;
+		return G_SOURCE_REMOVE;
 		}
 
-	return TRUE;
+	return G_SOURCE_CONTINUE;
 }
 
 static gboolean layout_image_animate_check(LayoutWindow *lw)

@@ -739,10 +739,10 @@ static gboolean image_osd_timer_cb(gpointer data)
 	if (done)
 		{
 		osd->timer_id = 0;
-		return FALSE;
+		return G_SOURCE_REMOVE;
 		}
 
-	return TRUE;
+	return G_SOURCE_CONTINUE;
 }
 
 static void image_osd_timer_schedule(OverlayStateData *osd)

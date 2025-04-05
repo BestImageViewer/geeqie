@@ -633,18 +633,15 @@ static gboolean vflist_select_idle_cb(gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	if (!vf->layout)
+	if (vf->layout)
 		{
-		VFLIST(vf)->select_idle_id = 0;
-		return G_SOURCE_REMOVE;
-		}
+		vf_send_update(vf);
 
-	vf_send_update(vf);
-
-	if (VFLIST(vf)->select_fd)
-		{
-		vflist_select_image(vf, VFLIST(vf)->select_fd);
-		VFLIST(vf)->select_fd = nullptr;
+		if (VFLIST(vf)->select_fd)
+			{
+			vflist_select_image(vf, VFLIST(vf)->select_fd);
+			VFLIST(vf)->select_fd = nullptr;
+			}
 		}
 
 	VFLIST(vf)->select_idle_id = 0;

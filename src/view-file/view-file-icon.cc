@@ -356,21 +356,22 @@ static void tip_hide(ViewFile *vf)
 
 static gboolean tip_schedule_cb(gpointer data)
 {
-	auto vf = static_cast<ViewFile *>(data);
-	GtkWidget *window;
+	auto *vf = static_cast<ViewFile *>(data);
 
-	if (!VFICON(vf)->tip_delay_id) return FALSE;
-
-	window = gtk_widget_get_toplevel(vf->listview);
-
-	if (gtk_widget_get_sensitive(window) &&
-	    gtk_window_has_toplevel_focus(GTK_WINDOW(window)))
+	if (VFICON(vf)->tip_delay_id)
 		{
-		tip_show(vf);
+		GtkWidget *window = gtk_widget_get_toplevel(vf->listview);
+
+		if (gtk_widget_get_sensitive(window) &&
+		    gtk_window_has_toplevel_focus(GTK_WINDOW(window)))
+			{
+			tip_show(vf);
+			}
+
+		VFICON(vf)->tip_delay_id = 0;
 		}
 
-	VFICON(vf)->tip_delay_id = 0;
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static void tip_schedule(ViewFile *vf)
