@@ -2670,18 +2670,15 @@ static gboolean move_window_to_workspace_cb(gpointer data)
 {
 #ifdef GDK_WINDOWING_X11
 	auto lw = static_cast<LayoutWindow *>(data);
-	GdkWindow *window;
-	GdkDisplay *display;
 
 	if (options->save_window_workspace)
 		{
-		display = gdk_display_get_default();
-
+		GdkDisplay *display = gdk_display_get_default();
 		if (GDK_IS_X11_DISPLAY(display))
 			{
 			if (lw->options.workspace != -1)
 				{
-				window = gtk_widget_get_window(GTK_WIDGET(lw->window));
+				GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(lw->window));
 				gdk_x11_window_move_to_desktop(window, lw->options.workspace);
 				}
 			}

@@ -1590,7 +1590,6 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 	QueueData *qd;
 	gboolean fast;
 
-
 	if ((!pr->pixbuf && !pr->source_tiles_enabled) ||
 	    (!rt->draw_queue && !rt->draw_queue_2pass) ||
 	    !rt->draw_idle_id)
@@ -1673,7 +1672,7 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 		return G_SOURCE_REMOVE;
 		}
 
-		return rt_queue_schedule_next_draw(rt, FALSE);
+	return rt_queue_schedule_next_draw(rt, FALSE);
 }
 
 void rt_queue_data_free(gpointer data)

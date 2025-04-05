@@ -3238,36 +3238,33 @@ static gboolean layout_editors_reload_idle_cb(gpointer)
 	g_free(layout_editors_desktop_files->data);
 	layout_editors_desktop_files = g_list_delete_link(layout_editors_desktop_files, layout_editors_desktop_files);
 
+	if (layout_editors_desktop_files) return G_SOURCE_CONTINUE;
 
-	if (!layout_editors_desktop_files)
-		{
-		DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors", get_exec_time());
-		editor_table_finish();
+	DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors", get_exec_time());
+	editor_table_finish();
 
-		layout_window_foreach([](LayoutWindow *lw)
-		{
-			layout_actions_setup_editors(lw);
-			if (lw->bar_sort_enabled)
-				{
-				layout_bar_sort_toggle(lw);
-				}
-		});
+	layout_window_foreach([](LayoutWindow *lw)
+	{
+		layout_actions_setup_editors(lw);
+		if (lw->bar_sort_enabled)
+			{
+			layout_bar_sort_toggle(lw);
+			}
+	});
 
-		DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors done", get_exec_time());
+	DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors done", get_exec_time());
 
-		/* The toolbars need to be regenerated in case they contain a plugin */
-		LayoutWindow *lw = get_current_layout();
+	/* The toolbars need to be regenerated in case they contain a plugin */
+	LayoutWindow *lw = get_current_layout();
 
-		toolbar_select_new(lw, TOOLBAR_MAIN);
-		toolbar_apply(TOOLBAR_MAIN);
+	toolbar_select_new(lw, TOOLBAR_MAIN);
+	toolbar_apply(TOOLBAR_MAIN);
 
-		toolbar_select_new(lw, TOOLBAR_STATUS);
-		toolbar_apply(TOOLBAR_STATUS);
+	toolbar_select_new(lw, TOOLBAR_STATUS);
+	toolbar_apply(TOOLBAR_STATUS);
 
-		layout_editors_reload_idle_id = -1;
-		return G_SOURCE_REMOVE;
-		}
-	return G_SOURCE_CONTINUE;
+	layout_editors_reload_idle_id = -1;
+	return G_SOURCE_REMOVE;
 }
 
 void layout_editors_reload_start()

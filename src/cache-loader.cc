@@ -36,13 +36,13 @@
 #include "ui-fileops.h"
 
 
-static gboolean cache_loader_phase2_idle_cb(gpointer data);
+static gboolean cache_loader_phase2_process(gpointer data);
 
 static void cache_loader_phase1_done_cb(ImageLoader *, gpointer data)
 {
 	auto cl = static_cast<CacheLoader *>(data);
 
-	cl->idle_id = g_idle_add(cache_loader_phase2_idle_cb, cl);
+	cl->idle_id = g_idle_add(cache_loader_phase2_process, cl);
 }
 
 static void cache_loader_phase1_error_cb(ImageLoader *, gpointer data)
@@ -50,14 +50,15 @@ static void cache_loader_phase1_error_cb(ImageLoader *, gpointer data)
 	auto cl = static_cast<CacheLoader *>(data);
 
 	cl->error = TRUE;
-	cl->idle_id = g_idle_add(cache_loader_phase2_idle_cb, cl);
+	cl->idle_id = g_idle_add(cache_loader_phase2_process, cl);
 }
 
-static gboolean cache_loader_phase1_process(CacheLoader *cl)
+static gboolean cache_loader_phase1_process(gpointer data)
 {
+	auto *cl = static_cast<CacheLoader *>(data);
+
 	if (cl->todo_mask & CACHE_LOADER_SIMILARITY && !cl->cd->similarity)
 		{
-
 		if (!cl->il && !cl->error)
 			{
 			cl->il = image_loader_new(cl->fd);
@@ -72,13 +73,15 @@ static gboolean cache_loader_phase1_process(CacheLoader *cl)
 			}
 		}
 
-	cl->idle_id = g_idle_add(cache_loader_phase2_idle_cb, cl);
+	cl->idle_id = g_idle_add(cache_loader_phase2_process, cl);
 
 	return G_SOURCE_REMOVE;
 }
 
-static gboolean cache_loader_phase2_process(CacheLoader *cl)
+static gboolean cache_loader_phase2_process(gpointer data)
 {
+	auto *cl = static_cast<CacheLoader *>(data);
+
 	if (cl->todo_mask & CACHE_LOADER_SIMILARITY && !cl->cd->similarity && cl->il)
 		{
 		GdkPixbuf *pixbuf;
@@ -198,20 +201,6 @@ static gboolean cache_loader_phase2_process(CacheLoader *cl)
 	return G_SOURCE_CONTINUE;
 }
 
-static gboolean cache_loader_phase1_idle_cb(gpointer data)
-{
-	auto cl = static_cast<CacheLoader *>(data);
-
-	return cache_loader_phase1_process(cl);
-}
-
-static gboolean cache_loader_phase2_idle_cb(gpointer data)
-{
-	auto cl = static_cast<CacheLoader *>(data);
-
-	return cache_loader_phase2_process(cl);
-}
-
 CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 			      CacheLoader::DoneFunc done_func, gpointer done_data)
 {
@@ -237,7 +226,7 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 	cl->done_mask = CACHE_LOADER_NONE;
 
 	cl->il = nullptr;
-	cl->idle_id = g_idle_add(cache_loader_phase1_idle_cb, cl);
+	cl->idle_id = g_idle_add(cache_loader_phase1_process, cl);
 
 	cl->error = FALSE;
 

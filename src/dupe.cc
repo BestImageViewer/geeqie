@@ -2546,11 +2546,9 @@ static void dupe_check_start(DupeWindow *dw)
 
 static gboolean dupe_check_start_cb(gpointer data)
 {
-	auto dw = static_cast<DupeWindow *>(data);
+	dupe_check_start(static_cast<DupeWindow *>(data));
 
-	dupe_check_start(dw);
-
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 /*
@@ -2647,87 +2645,80 @@ static void dupe_item_remove(DupeWindow *dw, DupeItem *di)
 
 static gboolean dupe_files_add_queue_cb(gpointer data)
 {
-	DupeItem *di = nullptr;
-	auto dw = static_cast<DupeWindow *>(data);
-	FileData *fd;
-	GList *queue = dw->add_files_queue;
+	auto *dw = static_cast<DupeWindow *>(data);
 
 	gtk_progress_bar_pulse(GTK_PROGRESS_BAR(dw->extra_label));
 
-	if (queue == nullptr)
+	if (dw->add_files_queue != nullptr)
 		{
-		dw->add_files_queue_id = 0;
-		dupe_destroy_list_cache(dw);
-		g_idle_add(dupe_check_start_cb, dw);
-		gtk_widget_set_sensitive(dw->controls_box, TRUE);
-		return FALSE;
-		}
+		DupeItem *di = nullptr;
 
-	fd = static_cast<FileData *>(queue->data);
-	if (fd)
-		{
-		if (isfile(fd->path))
+		auto *fd = static_cast<FileData *>(dw->add_files_queue->data);
+		if (fd)
 			{
-			di = dupe_item_new(fd);
-			}
-		else if (isdir(fd->path))
-			{
-			GList *f;
-			GList *d;
-			dw->add_files_queue = g_list_remove(dw->add_files_queue, g_list_first(dw->add_files_queue)->data);
-
-			if (filelist_read(fd, &f, &d))
+			if (isfile(fd->path))
 				{
-				f = filelist_filter(f, FALSE);
-				d = filelist_filter(d, TRUE);
-
-				dw->add_files_queue = g_list_concat(f, dw->add_files_queue);
-				dw->add_files_queue = g_list_concat(d, dw->add_files_queue);
+				di = dupe_item_new(fd);
 				}
+			else if (isdir(fd->path))
+				{
+				GList *f;
+				GList *d;
+				dw->add_files_queue = g_list_remove(dw->add_files_queue, g_list_first(dw->add_files_queue)->data);
+
+				if (filelist_read(fd, &f, &d))
+					{
+					f = filelist_filter(f, FALSE);
+					d = filelist_filter(d, TRUE);
+
+					dw->add_files_queue = g_list_concat(f, dw->add_files_queue);
+					dw->add_files_queue = g_list_concat(d, dw->add_files_queue);
+					}
+				}
+			else
+				{
+				/* Not a file and not a dir */
+				dw->add_files_queue = g_list_remove(dw->add_files_queue, g_list_first(dw->add_files_queue)->data);
+				}
+			}
+
+		if (!di)
+			{
+			/* A dir was found. Process the contents on next entry */
+			return G_SOURCE_CONTINUE;
+			}
+
+		dw->add_files_queue = g_list_remove(dw->add_files_queue, g_list_first(dw->add_files_queue)->data);
+
+		dupe_item_read_cache(di);
+
+		/* Ensure images in the lists have unique FileDatas */
+		if (!dupe_insert_in_list_cache(dw, di->fd))
+			{
+			dupe_item_free(di);
+			return G_SOURCE_CONTINUE;
+			}
+
+		if (dw->second_drop)
+			{
+			dupe_second_add(dw, di);
 			}
 		else
 			{
-			/* Not a file and not a dir */
-			dw->add_files_queue = g_list_remove(dw->add_files_queue, g_list_first(dw->add_files_queue)->data);
+			dw->list = g_list_prepend(dw->list, di);
 			}
-		}
 
-	if (!di)
-		{
-		/* A dir was found. Process the contents on next entry */
-		return TRUE;
-		}
-
-	dw->add_files_queue = g_list_remove(dw->add_files_queue, g_list_first(dw->add_files_queue)->data);
-
-	dupe_item_read_cache(di);
-
-	/* Ensure images in the lists have unique FileDatas */
-	if (!dupe_insert_in_list_cache(dw, di->fd))
-		{
-		dupe_item_free(di);
-		return TRUE;
-		}
-
-	if (dw->second_drop)
-		{
-		dupe_second_add(dw, di);
-		}
-	else
-		{
-		dw->list = g_list_prepend(dw->list, di);
-		}
-
-	if (dw->add_files_queue != nullptr)
-		{
-		return TRUE;
+		if (dw->add_files_queue != nullptr)
+			{
+			return G_SOURCE_CONTINUE;
+			}
 		}
 
 	dw->add_files_queue_id = 0;
 	dupe_destroy_list_cache(dw);
 	g_idle_add(dupe_check_start_cb, dw);
 	gtk_widget_set_sensitive(dw->controls_box, TRUE);
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static void dupe_files_add(DupeWindow *dw, CollectionData *, CollectInfo *info,

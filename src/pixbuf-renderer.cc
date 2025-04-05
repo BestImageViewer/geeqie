@@ -798,7 +798,7 @@ static gboolean pr_scroller_update_cb(gpointer data)
 
 	pixbuf_renderer_scroll(pr, xinc, yinc);
 
-	return TRUE;
+	return G_SOURCE_CONTINUE;
 }
 
 static void pr_scroller_timer_set(PixbufRenderer *pr, gboolean start)

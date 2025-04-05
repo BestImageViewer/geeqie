@@ -205,7 +205,7 @@ static gboolean vdtree_dnd_drop_expand_cb(gpointer data)
 		}
 
 	VDTREE(vd)->drop_expand_id = 0;
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static void vdtree_dnd_drop_expand_cancel(ViewDir *vd)

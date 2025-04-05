@@ -2699,9 +2699,9 @@ static void realtime_monitor_check_cb(gpointer key, gpointer, gpointer)
 
 static gboolean realtime_monitor_cb(gpointer)
 {
-	if (!options->update_on_time_change) return TRUE;
-	g_hash_table_foreach(file_data_monitor_pool, realtime_monitor_check_cb, nullptr);
-	return TRUE;
+	if (options->update_on_time_change)
+		g_hash_table_foreach(file_data_monitor_pool, realtime_monitor_check_cb, nullptr);
+	return G_SOURCE_CONTINUE;
 }
 
 gboolean FileData::file_data_register_real_time_monitor(FileData *fd)

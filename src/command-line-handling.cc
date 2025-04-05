@@ -116,9 +116,7 @@ gchar *set_cwd(gchar *filename, GApplicationCommandLine *app_command_line)
 
 gboolean close_window_cb(gpointer)
 {
-	if (!layout_valid(&lw_id)) return FALSE;
-
-	layout_menu_close_cb(nullptr, lw_id);
+	if (layout_valid(&lw_id)) layout_menu_close_cb(nullptr, lw_id);
 
 	return G_SOURCE_REMOVE;
 }
@@ -310,7 +308,7 @@ void gq_cache_thumbs(GtkApplication *app, GApplicationCommandLine *, GVariantDic
 
 void gq_close_window(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)
 {
-	g_idle_add((close_window_cb), nullptr);
+	g_idle_add(close_window_cb, nullptr);
 }
 
 void gq_config_load(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)

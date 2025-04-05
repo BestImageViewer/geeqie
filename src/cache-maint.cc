@@ -916,7 +916,7 @@ static void cache_manager_standard_clean_stop_cb(GenericDialog *, gpointer data)
 	cache_manager_standard_clean_done(cd);
 }
 
-static gint cache_manager_standard_clean_clear_cb(gpointer data)
+static gboolean cache_manager_standard_clean_clear_cb(gpointer data)
 {
 	auto cd = static_cast<CacheOpsData *>(data);
 

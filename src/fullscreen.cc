@@ -77,14 +77,16 @@ gboolean fullscreen_hide_mouse_cb(gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
-	if (!fs->hide_mouse_id) return FALSE;
+	if (fs->hide_mouse_id)
+		{
+		fs->cursor_state &= ~FULLSCREEN_CURSOR_NORMAL;
+		if (!(fs->cursor_state & FULLSCREEN_CURSOR_BUSY)) clear_mouse_cursor(fs->window, fs->cursor_state);
 
-	fs->cursor_state &= ~FULLSCREEN_CURSOR_NORMAL;
-	if (!(fs->cursor_state & FULLSCREEN_CURSOR_BUSY)) clear_mouse_cursor(fs->window, fs->cursor_state);
+		g_source_remove(fs->hide_mouse_id);
+		fs->hide_mouse_id = 0;
+		}
 
-	g_source_remove(fs->hide_mouse_id);
-	fs->hide_mouse_id = 0;
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 void fullscreen_hide_mouse_disable(FullScreenData *fs)
@@ -149,7 +151,7 @@ gboolean fullscreen_mouse_set_busy_cb(gpointer data)
 
 	fs->busy_mouse_id = 0;
 	fullscreen_mouse_set_busy(fs, TRUE);
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 void fullscreen_mouse_set_busy_idle(FullScreenData *fs)
@@ -199,7 +201,7 @@ gboolean fullscreen_saver_block_cb(gpointer)
 		fullscreen_saver_deactivate();
 		}
 
-	return TRUE;
+	return G_SOURCE_CONTINUE;
 }
 
 gboolean fullscreen_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
@@ -549,7 +551,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	clear_mouse_cursor(fs->window, fs->cursor_state);
 
 	/* set timer to block screen saver */
-	fs->saver_block_id = g_timeout_add(60 * 1000, fullscreen_saver_block_cb, fs);
+	fs->saver_block_id = g_timeout_add(60 * 1000, fullscreen_saver_block_cb, nullptr);
 
 	/* hide normal window */
 	 /** @FIXME properly restore this window on show

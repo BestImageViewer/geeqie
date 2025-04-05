@@ -52,7 +52,7 @@ static gboolean log_msg_cb(gpointer data)
 	auto buf = static_cast<gchar *>(data);
 	log_window_append(buf, LOG_MSG);
 	g_free(buf);
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 /**
@@ -84,7 +84,7 @@ static gboolean log_normal_cb(gpointer data)
 		}
 
 	g_free(buf);
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static void log_domain_print_message(const gchar *domain, const gchar *buf)

@@ -1060,21 +1060,20 @@ static void thumb_std_maint_move_step(TMaintMove *tm)
 
 static gboolean thumb_std_maint_move_idle(gpointer)
 {
-	TMaintMove *tm;
+	if (thumb_std_maint_move_list)
+		{
+		auto *tm = static_cast<TMaintMove *>(thumb_std_maint_move_list->data);
 
-	if (!thumb_std_maint_move_list) return G_SOURCE_REMOVE;
+		thumb_std_maint_move_list = g_list_remove(thumb_std_maint_move_list, tm);
+		if (!thumb_std_maint_move_list) thumb_std_maint_move_tail = nullptr;
 
-	tm = static_cast<TMaintMove *>(thumb_std_maint_move_list->data);
+		g_autofree gchar *pathl = path_from_utf8(tm->source);
+		tm->source_uri = g_filename_to_uri(pathl, nullptr, nullptr);
 
-	thumb_std_maint_move_list = g_list_remove(thumb_std_maint_move_list, tm);
-	if (!thumb_std_maint_move_list) thumb_std_maint_move_tail = nullptr;
+		tm->pass = 0;
 
-	g_autofree gchar *pathl = path_from_utf8(tm->source);
-	tm->source_uri = g_filename_to_uri(pathl, nullptr, nullptr);
-
-	tm->pass = 0;
-
-	thumb_std_maint_move_step(tm);
+		thumb_std_maint_move_step(tm);
+		}
 
 	return G_SOURCE_REMOVE;
 }

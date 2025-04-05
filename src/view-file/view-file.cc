@@ -1638,8 +1638,8 @@ static gboolean vf_star_next(ViewFile *vf)
 static gboolean vf_stars_cb(gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	FileData *fd = vf->stars_filedata;
 
+	FileData *fd = vf->stars_filedata;
 	if (!fd) return G_SOURCE_REMOVE;
 
 	read_rating_data(fd);

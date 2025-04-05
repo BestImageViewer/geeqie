@@ -1101,15 +1101,15 @@ void image_loader_delay_area_ready(ImageLoader *il, gboolean enable)
 
 static gboolean image_loader_idle_cb(gpointer data)
 {
-	gboolean ret = G_SOURCE_REMOVE;
 	auto il = static_cast<ImageLoader *>(data);
 
+	gboolean ret = G_SOURCE_REMOVE;
 	if (il->idle_id)
 		{
 		ret = image_loader_continue(il);
 		}
 
-	if (!ret)
+	if (ret == G_SOURCE_REMOVE)
 		{
 		image_loader_stop_source(il);
 		}
