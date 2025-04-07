@@ -357,7 +357,6 @@ enum UtilityType {
 	UTILITY_TYPE_DELETE,
 	UTILITY_TYPE_DELETE_LINK,
 	UTILITY_TYPE_DELETE_FOLDER,
-	UTILITY_TYPE_CREATE_FOLDER,
 	UTILITY_TYPE_WRITE_METADATA
 };
 
@@ -429,7 +428,6 @@ struct UtilityData {
 
 	gchar *external_command;
 	gpointer resume_data;
-	gboolean show_rename_button;
 
 	FileUtilDoneFunc done_func;
 	void (*details_func)(UtilityData *ud, FileData *fd);
@@ -515,15 +513,6 @@ static UtilityData *file_util_data_new(UtilityType type)
 
 	ud->type = type;
 	ud->phase = UTILITY_PHASE_START;
-
-	if (type == UTILITY_TYPE_CREATE_FOLDER)
-		{
-		ud->show_rename_button = FALSE;
-		}
-	else
-		{
-		ud->show_rename_button = TRUE;
-		}
 
 	return ud;
 }
@@ -930,21 +919,6 @@ static void file_util_perform_ci_dir(UtilityData *ud, gboolean internal, gboolea
 				}
 			break;
 			}
-		case UTILITY_TYPE_CREATE_FOLDER:
-			{
-			if ((internal && mkdir_utf8(ud->dir_fd->path, 0755)) ||
-			    (!internal && ext_result))
-				{
-				file_data_check_changed_files(ud->dir_fd); /* this will update the FileData and send notification */
-				}
-			else
-				{
-				g_autofree gchar *text = g_strdup_printf("%s:\n\n%s", ud->messages.fail, ud->dir_fd->path);
-				file_util_warning_dialog(ud->messages.fail, text, GQ_ICON_DIALOG_ERROR, nullptr);
-				}
-
-			break;
-			}
 		default:
 			g_warning("unhandled operation");
 		}
@@ -977,9 +951,6 @@ static void file_util_perform_ci(UtilityData *ud)
 		case UTILITY_TYPE_DELETE_LINK:
 		case UTILITY_TYPE_DELETE_FOLDER:
 			ud->external_command = g_strdup(CMD_DELETE);
-			break;
-		case UTILITY_TYPE_CREATE_FOLDER:
-			ud->external_command = g_strdup(CMD_FOLDER);
 			break;
 		case UTILITY_TYPE_FILTER:
 		case UTILITY_TYPE_EDITOR:
@@ -1058,8 +1029,7 @@ static void file_util_check_ci(UtilityData *ud)
 	gint error = CHANGE_OK;
 	g_autofree gchar *desc = nullptr;
 
-	if (ud->type != UTILITY_TYPE_CREATE_FOLDER &&
-	    ud->type != UTILITY_TYPE_RENAME_FOLDER)
+	if (ud->type != UTILITY_TYPE_RENAME_FOLDER)
 		{
 		if (ud->dest_path && !isdir(ud->dest_path))
 			{
@@ -1179,10 +1149,6 @@ static void file_util_dest_folder_update_path(UtilityData *ud)
 		case UTILITY_TYPE_FILTER:
 		case UTILITY_TYPE_EDITOR:
 			file_data_sc_update_ci_unspecified_list(ud->flist, ud->dest_path);
-			break;
-		case UTILITY_TYPE_CREATE_FOLDER:
-			file_data_unref(ud->dir_fd);
-			ud->dir_fd = file_data_new_dir(ud->dest_path);
 			break;
 		case UTILITY_TYPE_DELETE:
 		case UTILITY_TYPE_DELETE_LINK:
@@ -1638,21 +1604,14 @@ static void file_util_dialog_init_dest_folder(UtilityData *ud)
 
 	pref_spacer(GENERIC_DIALOG(fdlg)->vbox, 0);
 
-	if (ud->show_rename_button == TRUE)
+	if (options->with_rename)
 		{
-		if (options->with_rename)
-			{
-			file_dialog_add_button(fdlg, icon_name, ud->messages.title, file_util_fdlg_ok_cb, TRUE);
-			file_dialog_add_button(fdlg, GQ_ICON_EDIT, _("With Rename"), file_util_fdlg_rename_cb, TRUE);
-			}
-		else
-			{
-			file_dialog_add_button(fdlg, GQ_ICON_EDIT, _("With Rename"), file_util_fdlg_rename_cb, TRUE);
-			file_dialog_add_button(fdlg, icon_name, ud->messages.title, file_util_fdlg_ok_cb, TRUE);
-			}
+		file_dialog_add_button(fdlg, icon_name, ud->messages.title, file_util_fdlg_ok_cb, TRUE);
+		file_dialog_add_button(fdlg, GQ_ICON_EDIT, _("With Rename"), file_util_fdlg_rename_cb, TRUE);
 		}
 	else
 		{
+		file_dialog_add_button(fdlg, GQ_ICON_EDIT, _("With Rename"), file_util_fdlg_rename_cb, TRUE);
 		file_dialog_add_button(fdlg, icon_name, ud->messages.title, file_util_fdlg_ok_cb, TRUE);
 		}
 
@@ -1909,7 +1868,6 @@ void file_util_dialog_run(UtilityData *ud)
 					ud->phase = UTILITY_PHASE_INTERMEDIATE;
 					break;
 				case UTILITY_TYPE_FILTER:
-				case UTILITY_TYPE_CREATE_FOLDER:
 					file_util_dialog_init_dest_folder(ud);
 					ud->phase = UTILITY_PHASE_ENTERING;
 					break;
