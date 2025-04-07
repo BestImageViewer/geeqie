@@ -5027,7 +5027,7 @@ static void dupe_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 /**
  * @brief Refresh window after a file delete operation
- * @param success (ud->phase != UTILITY_PHASE_CANCEL) #file_util_dialog_run
+ * @param success (ud->phase != UtilityPhase::CANCEL) #file_util_dialog_run
  * @param dest_path Not used
  * @param data #DupeWindow
  *
