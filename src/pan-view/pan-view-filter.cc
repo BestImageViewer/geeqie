@@ -59,16 +59,33 @@ struct PanFilterCallbackState
 	GList *filter_element;
 };
 
+void pan_filter_callback_state_free(PanFilterCallbackState *cb_state)
+{
+	if (!cb_state) return;
+
+	static const auto pan_view_filter_element_free = [](gpointer data)
+	{
+		if (!data) return;
+
+		auto *pvfe = static_cast<PanViewFilterElement *>(data);
+		g_free(pvfe->keyword);
+		if (pvfe->kw_regex) g_regex_unref(pvfe->kw_regex);
+		g_free(pvfe);
+	};
+
+	g_list_free_full(cb_state->filter_element, pan_view_filter_element_free);
+	g_free(cb_state);
+}
+
 void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 {
 	auto cb_state = static_cast<PanFilterCallbackState *>(data);
 	PanWindow *pw = cb_state->pw;
 	PanViewFilterUi *ui = pw->filter_ui;
 
-	/** @todo (xsdg): Fix filter element pointed object memory leak. */
-	ui->filter_elements = g_list_delete_link(ui->filter_elements, cb_state->filter_element);
+	ui->filter_elements = g_list_remove_link(ui->filter_elements, cb_state->filter_element);
 	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(GTK_WIDGET(widget))), GTK_WIDGET(widget));
-	g_free(cb_state);
+	pan_filter_callback_state_free(cb_state);
 
 	gtk_label_set_text(GTK_LABEL(pw->filter_ui->filter_label), _("Removed keyword…"));
 	pan_layout_update(pw);
