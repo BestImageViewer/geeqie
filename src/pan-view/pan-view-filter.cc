@@ -263,29 +263,28 @@ void pan_filter_toggle_button_cb(GtkWidget *, gpointer data)
 		pan_layout_update(pw);
 }
 
-static gboolean pan_view_list_contains_kw_pattern(GList *haystack, PanViewFilterElement *filter, gchar **found_kw)
+static gchar *pan_view_list_find_kw_pattern(GList *haystack, const PanViewFilterElement *filter)
 {
+	GList *found_elem;
+
 	if (filter->kw_regex)
 		{
 		// regex compile succeeded; attempt regex match.
-		GList *work = g_list_first(haystack);
-		while (work)
-			{
-			auto keyword = static_cast<gchar *>(work->data);
-			work = work->next;
-			if (g_regex_match(filter->kw_regex, keyword, static_cast<GRegexMatchFlags>(0), nullptr))
-				{
-				if (found_kw) *found_kw = keyword;
-				return TRUE;
-				}
-			}
-		return FALSE;
+		static const auto regex_cmp = [](gconstpointer data, gconstpointer user_data)
+		{
+			const auto *keyword = static_cast<const gchar *>(data);
+			const auto *kw_regex = static_cast<const GRegex *>(user_data);
+			return g_regex_match(kw_regex, keyword, static_cast<GRegexMatchFlags>(0), nullptr) ? 0 : 1;
+		};
+		found_elem = g_list_find_custom(haystack, filter->kw_regex, regex_cmp);
+		}
+	else
+		{
+		// regex compile failed; fall back to exact string match.
+		found_elem = g_list_find_custom(haystack, filter->keyword, reinterpret_cast<GCompareFunc>(g_strcmp0));
 		}
 
-	// regex compile failed; fall back to exact string match.
-	GList *found_elem = g_list_find_custom(haystack, filter->keyword, reinterpret_cast<GCompareFunc>(g_strcmp0));
-	if (found_elem && found_kw) *found_kw = static_cast<gchar *>(found_elem->data);
-	return !!found_elem;
+	return found_elem ? static_cast<gchar *>(found_elem->data) : nullptr;
 }
 
 gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter_classes)
@@ -308,7 +307,6 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 		work = work->next;
 
 		gboolean should_reject = FALSE;
-		gchar *group_kw = nullptr;
 
 		if (!((1 << fd -> format_class) & filter_classes))
 			{
@@ -318,6 +316,7 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 			{
 			/** @todo (xsdg): OPTIMIZATION Do the search inside of metadata.cc to avoid a bunch of string list copies. */
 			GList *img_keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
+			gchar *group_kw = nullptr; // group_kw references an item from img_keywords.
 
 			/** @todo (xsdg): OPTIMIZATION Determine a heuristic for when to linear-search the keywords list, and when to build a hash table for the image's keywords. */
 			GList *filter_element = filter_elements;
@@ -326,8 +325,8 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 				{
 				auto filter = static_cast<PanViewFilterElement *>(filter_element->data);
 				filter_element = filter_element->next;
-				gchar *found_kw = nullptr;
-				gboolean has_kw = pan_view_list_contains_kw_pattern(img_keywords, filter, &found_kw);
+				gchar *found_kw = pan_view_list_find_kw_pattern(img_keywords, filter);
+				gboolean has_kw = !!found_kw;
 
 				switch (filter->mode)
 					{
@@ -356,8 +355,9 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 					}
 				}
 			g_list_free_full(img_keywords, g_free);
-			if (!should_reject && group_kw != nullptr) g_hash_table_add(seen_kw_table, group_kw);
-			group_kw = nullptr;  // group_kw references an item from img_keywords.
+
+			if (!should_reject && group_kw != nullptr)
+				g_hash_table_add(seen_kw_table, group_kw); // @FIXME group_kw points to freed memory
 			}
 
 		if (should_reject)
