@@ -1721,7 +1721,7 @@ GRegex *vf_file_filter_get_filter(ViewFile *vf)
 	if (error)
 		{
 		log_printf("Error: could not compile regular expression %s\n%s\n", file_filter_text, error->message);
-		return g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
+		ret = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
 	return ret;

@@ -1706,8 +1706,10 @@ gboolean vflist_refresh(ViewFile *vf)
 			}
 
 		vf->list = file_data_filter_marks_list(vf->list, vf_marks_get_filter(vf));
+
+		g_autoptr(GRegex) filter = vf_file_filter_get_filter(vf);
 		vf->list = g_list_first(vf->list);
-		vf->list = file_data_filter_file_filter_list(vf->list, vf_file_filter_get_filter(vf));
+		vf->list = file_data_filter_file_filter_list(vf->list, filter);
 
 		vf->list = g_list_first(vf->list);
 		vf->list = file_data_filter_class_list(vf->list, vf_class_get_filter(vf));

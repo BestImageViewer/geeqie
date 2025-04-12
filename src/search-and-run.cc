@@ -219,7 +219,6 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 	GtkTreeModel *model;
 	GtkAction *action;
 	gchar *label;
-	GRegex *reg_exp;
 
 	model = gtk_entry_completion_get_model(completion);
 	gtk_tree_model_get(GTK_TREE_MODEL(model), iter, SAR_LABEL, &label, -1);
@@ -231,7 +230,7 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 	reg_exp_str = g_string_append(reg_exp_str, key);
 
 	g_autoptr(GError) error = nullptr;
-	reg_exp = g_regex_new(reg_exp_str->str, G_REGEX_CASELESS, static_cast<GRegexMatchFlags>(0), &error);
+	g_autoptr(GRegex) reg_exp = g_regex_new(reg_exp_str->str, G_REGEX_CASELESS, static_cast<GRegexMatchFlags>(0), &error);
 	if (error)
 		{
 		log_printf("Error: could not compile regular expression %s\n%s\n", reg_exp_str->str, error->message);
@@ -245,8 +244,6 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 		sar->action = action;
 		sar->match_found = TRUE;
 		}
-
-	g_regex_unref(reg_exp);
 
 	return ret;
 }

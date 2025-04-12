@@ -1744,8 +1744,10 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 		{
 		ret = filelist_read(vf->dir_fd, &new_filelist, nullptr);
 		new_filelist = file_data_filter_marks_list(new_filelist, vf_marks_get_filter(vf));
+
+		g_autoptr(GRegex) filter = vf_file_filter_get_filter(vf);
 		new_filelist = g_list_first(new_filelist);
-		new_filelist = file_data_filter_file_filter_list(new_filelist, vf_file_filter_get_filter(vf));
+		new_filelist = file_data_filter_file_filter_list(new_filelist, filter);
 
 		new_filelist = g_list_first(new_filelist);
 		new_filelist = file_data_filter_class_list(new_filelist, vf_class_get_filter(vf));
