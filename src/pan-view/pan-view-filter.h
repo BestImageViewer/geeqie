@@ -29,26 +29,6 @@
 
 struct PanWindow;
 
-enum PanViewFilterMode {
-	PAN_VIEW_FILTER_REQUIRE,
-	PAN_VIEW_FILTER_EXCLUDE,
-	PAN_VIEW_FILTER_INCLUDE,
-	PAN_VIEW_FILTER_GROUP
-};
-
-struct PanViewFilterElement
-{
-	PanViewFilterMode mode;
-	gchar *keyword;
-	GRegex *kw_regex;
-};
-
-struct PanFilterCallbackState
-{
-	PanWindow *pw;
-	GList *filter_element;
-};
-
 struct PanViewFilterUi
 {
 	GtkWidget *filter_box;
@@ -63,10 +43,6 @@ struct PanViewFilterUi
 	GList *filter_elements;  /**< List of #PanViewFilterElement. */
 	gint filter_classes;
 };
-
-void pan_filter_activate_cb(const gchar *text, gpointer data);
-void pan_filter_toggle_cb(GtkWidget *button, gpointer data);
-void pan_filter_toggle_button_cb(GtkWidget *button, gpointer data);
 
 /**
  * @headerfile pan_filter_ui_new
