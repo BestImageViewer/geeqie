@@ -156,11 +156,6 @@ void pan_filter_ui_destroy(PanViewFilterUi **ui_ptr)
 	*ui_ptr = nullptr;
 }
 
-static void pan_filter_status(PanWindow *pw, const gchar *text)
-{
-	gtk_label_set_text(GTK_LABEL(pw->filter_ui->filter_label), (text) ? text : "");
-}
-
 static void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 {
 	auto cb_state = static_cast<PanFilterCallbackState *>(data);
@@ -172,7 +167,7 @@ static void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(GTK_WIDGET(widget))), GTK_WIDGET(widget));
 	g_free(cb_state);
 
-	pan_filter_status(pw, _("Removed keyword…"));
+	gtk_label_set_text(GTK_LABEL(pw->filter_ui->filter_label), _("Removed keyword…"));
 	pan_layout_update(pw);
 }
 
