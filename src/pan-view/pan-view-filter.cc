@@ -36,6 +36,24 @@
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
 
+namespace
+{
+
+void pan_filter_ui_replace_filter_button_arrow(PanViewFilterUi *ui, const gchar *new_icon_name)
+{
+	GtkWidget *parent = gtk_widget_get_parent(ui->filter_button_arrow);
+
+	gtk_container_remove(GTK_CONTAINER(parent), ui->filter_button_arrow);
+	ui->filter_button_arrow = gtk_image_new_from_icon_name(new_icon_name, GTK_ICON_SIZE_BUTTON);
+
+	gq_gtk_box_pack_start(GTK_BOX(parent), ui->filter_button_arrow, FALSE, FALSE, 0);
+	gtk_box_reorder_child(GTK_BOX(parent), ui->filter_button_arrow, 0);
+
+	gtk_widget_show(ui->filter_button_arrow);
+};
+
+} // namespace
+
 PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 {
 	auto ui = g_new0(PanViewFilterUi, 1);
@@ -207,41 +225,24 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 
 void pan_filter_toggle_cb(GtkWidget *button, gpointer data)
 {
-	auto pw = static_cast<PanWindow *>(data);
+	auto *pw = static_cast<PanWindow *>(data);
 	PanViewFilterUi *ui = pw->filter_ui;
-	gboolean visible;
-	GtkWidget *parent;
 
-	visible = gtk_widget_get_visible(ui->filter_box);
+	gboolean visible = gtk_widget_get_visible(ui->filter_box);
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) == visible) return;
 
 	if (visible)
 		{
 		gtk_widget_hide(ui->filter_box);
 
-		parent = gtk_widget_get_parent(ui->filter_button_arrow);
-
-		gtk_container_remove(GTK_CONTAINER(parent), ui->filter_button_arrow);
-		ui->filter_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP, GTK_ICON_SIZE_BUTTON);
-
-		gq_gtk_box_pack_start(GTK_BOX(parent), ui->filter_button_arrow, FALSE, FALSE, 0);
-		gtk_box_reorder_child(GTK_BOX(parent), ui->filter_button_arrow, 0);
-
-		gtk_widget_show(ui->filter_button_arrow);
+		pan_filter_ui_replace_filter_button_arrow(ui, GQ_ICON_PAN_UP);
 		}
 	else
 		{
 		gtk_widget_show(ui->filter_box);
 
-		parent = gtk_widget_get_parent(ui->filter_button_arrow);
+		pan_filter_ui_replace_filter_button_arrow(ui, GQ_ICON_PAN_DOWN);
 
-		gtk_container_remove(GTK_CONTAINER(parent), ui->filter_button_arrow);
-		ui->filter_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_BUTTON);
-
-		gq_gtk_box_pack_start(GTK_BOX(parent), ui->filter_button_arrow, FALSE, FALSE, 0);
-		gtk_box_reorder_child(GTK_BOX(parent), ui->filter_button_arrow, 0);
-
-		gtk_widget_show(ui->filter_button_arrow);
 		gtk_widget_grab_focus(ui->filter_entry);
 		}
 }
