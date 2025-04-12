@@ -1368,12 +1368,12 @@ void FileData::file_data_selection_to_mark(FileData *fd, gint mark, SelectionToM
 		}
 }
 
-gboolean FileData::file_data_filter_file_filter(FileData *fd, GRegex *filter)
+gboolean FileData::file_data_filter_file_filter(FileData *fd, const GRegex *filter)
 {
 	return g_regex_match(filter, fd->name, static_cast<GRegexMatchFlags>(0), nullptr);
 }
 
-GList *FileData::file_data_filter_file_filter_list(GList *list, GRegex *filter)
+GList *FileData::file_data_filter_file_filter_list(GList *list, const GRegex *filter)
 {
 	GList *work;
 
