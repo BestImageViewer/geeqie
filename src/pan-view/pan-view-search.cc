@@ -83,12 +83,9 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 	return ui;
 }
 
-void pan_search_ui_destroy(PanViewSearchUi **ui_ptr)
+void pan_search_ui_destroy(PanViewSearchUi *ui)
 {
-	if (ui_ptr == nullptr || *ui_ptr == nullptr) return;
-
-	g_free(*ui_ptr);
-	*ui_ptr = nullptr;
+	g_free(ui);
 }
 
 static void pan_search_status(PanWindow *pw, const gchar *text)

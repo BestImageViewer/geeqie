@@ -312,12 +312,9 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	return ui;
 }
 
-void pan_filter_ui_destroy(PanViewFilterUi **ui_ptr)
+void pan_filter_ui_destroy(PanViewFilterUi *ui)
 {
-	if (ui_ptr == nullptr || *ui_ptr == nullptr) return;
-
-	g_free(*ui_ptr);
-	*ui_ptr = nullptr;
+	g_free(ui);
 }
 
 gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter_classes)

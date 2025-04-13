@@ -52,9 +52,9 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw);
 
 /**
  * @headerfile pan_filter_ui_destroy
- * Destroys the specified #PanViewFilterUi and sets the pointer to NULL.
+ * Destroys the specified #PanViewFilterUi.
  */
-void pan_filter_ui_destroy(PanViewFilterUi **ui);
+void pan_filter_ui_destroy(PanViewFilterUi *ui);
 
 gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter_classes);
 

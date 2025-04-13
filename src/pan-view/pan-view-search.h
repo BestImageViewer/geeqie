@@ -49,9 +49,9 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw);
 
 /**
  * @headerfile pan_search_ui_destroy
- * Destroys the specified #PanViewSearchUi and sets the pointer to NULL.
+ * Destroys the specified #PanViewSearchUi.
  */
-void pan_search_ui_destroy(PanViewSearchUi **ui);
+void pan_search_ui_destroy(PanViewSearchUi *ui);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
