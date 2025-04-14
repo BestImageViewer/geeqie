@@ -59,21 +59,20 @@ struct PanFilterCallbackState
 	GList *filter_element;
 };
 
+void pan_view_filter_element_free(PanViewFilterElement *filter_element)
+{
+	if (!filter_element) return;
+
+	g_free(filter_element->keyword);
+	if (filter_element->kw_regex) g_regex_unref(filter_element->kw_regex);
+	g_free(filter_element);
+}
+
 void pan_filter_callback_state_free(PanFilterCallbackState *cb_state)
 {
 	if (!cb_state) return;
 
-	static const auto pan_view_filter_element_free = [](gpointer data)
-	{
-		if (!data) return;
-
-		auto *pvfe = static_cast<PanViewFilterElement *>(data);
-		g_free(pvfe->keyword);
-		if (pvfe->kw_regex) g_regex_unref(pvfe->kw_regex);
-		g_free(pvfe);
-	};
-
-	g_list_free_full(cb_state->filter_element, pan_view_filter_element_free);
+	g_list_free_full(cb_state->filter_element, reinterpret_cast<GDestroyNotify>(pan_view_filter_element_free));
 	g_free(cb_state);
 }
 
@@ -101,13 +100,14 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 	if (!text) return;
 
 	// Get all relevant state and reset UI.
+	GtkTreeModel *filter_mode_model = gtk_combo_box_get_model(GTK_COMBO_BOX(ui->filter_mode_combo));
 	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(ui->filter_mode_combo), &iter);
 	gq_gtk_entry_set_text(GTK_ENTRY(ui->filter_entry), "");
 	tab_completion_append_to_history(ui->filter_entry, text);
 
 	// Add new filter element.
 	auto element = g_new0(PanViewFilterElement, 1);
-	gtk_tree_model_get(GTK_TREE_MODEL(ui->filter_mode_model), &iter, 0, &element->mode, -1);
+	gtk_tree_model_get(filter_mode_model, &iter, 0, &element->mode, -1);
 	element->keyword = g_strdup(text);
 	if (g_strcmp0(text, g_regex_escape_string(text, -1)))
 		{
@@ -117,8 +117,8 @@ void pan_filter_activate_cb(const gchar *text, gpointer data)
 	ui->filter_elements = g_list_append(ui->filter_elements, element);
 
 	// Get the short version of the mode value.
-	gchar *short_mode;
-	gtk_tree_model_get(GTK_TREE_MODEL(ui->filter_mode_model), &iter, 2, &short_mode, -1);
+	g_autofree gchar *short_mode = nullptr;
+	gtk_tree_model_get(filter_mode_model, &iter, 2, &short_mode, -1);
 
 	// Create the button.
 	/** @todo (xsdg): Use MVC so that the button list is an actual representation of the GList */
@@ -223,7 +223,6 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	auto ui = g_new0(PanViewFilterUi, 1);
 	GtkWidget *combo;
 	GtkWidget *hbox;
-	gint i;
 
 	/* Since we're using the GHashTable as a HashSet (in which key and value pointers
 	 * are always identical), specifying key _and_ value destructor callbacks will
@@ -231,21 +230,21 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	 */
 	{
 		GtkTreeIter iter;
-		ui->filter_mode_model = gtk_list_store_new(3, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);
-		gtk_list_store_append(ui->filter_mode_model, &iter);
-		gtk_list_store_set(ui->filter_mode_model, &iter,
+		g_autoptr(GtkListStore) filter_mode_model = gtk_list_store_new(3, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);
+		gtk_list_store_append(filter_mode_model, &iter);
+		gtk_list_store_set(filter_mode_model, &iter,
 				   0, PAN_VIEW_FILTER_REQUIRE, 1, _("Require"), 2, _("R"), -1);
-		gtk_list_store_append(ui->filter_mode_model, &iter);
-		gtk_list_store_set(ui->filter_mode_model, &iter,
+		gtk_list_store_append(filter_mode_model, &iter);
+		gtk_list_store_set(filter_mode_model, &iter,
 				   0, PAN_VIEW_FILTER_EXCLUDE, 1, _("Exclude"), 2, _("E"), -1);
-		gtk_list_store_append(ui->filter_mode_model, &iter);
-		gtk_list_store_set(ui->filter_mode_model, &iter,
+		gtk_list_store_append(filter_mode_model, &iter);
+		gtk_list_store_set(filter_mode_model, &iter,
 				   0, PAN_VIEW_FILTER_INCLUDE, 1, _("Include"), 2, _("I"), -1);
-		gtk_list_store_append(ui->filter_mode_model, &iter);
-		gtk_list_store_set(ui->filter_mode_model, &iter,
+		gtk_list_store_append(filter_mode_model, &iter);
+		gtk_list_store_set(filter_mode_model, &iter,
 				   0, PAN_VIEW_FILTER_GROUP, 1, _("Group"), 2, _("G"), -1);
 
-		ui->filter_mode_combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(ui->filter_mode_model));
+		ui->filter_mode_combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(filter_mode_model));
 		gtk_widget_set_focus_on_click(ui->filter_mode_combo, FALSE);
 		gtk_combo_box_set_active(GTK_COMBO_BOX(ui->filter_mode_combo), 0);
 
@@ -293,12 +292,12 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 			 G_CALLBACK(pan_filter_toggle_cb), pw);
 
 	// Add check buttons for filtering by image class
-	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
-	{
+	for (gint i = 0; i < FILE_FORMAT_CLASSES; i++)
+		{
 		ui->filter_check_buttons[i] = gtk_check_button_new_with_label(_(format_class_list[i]));
 		gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), ui->filter_check_buttons[i], FALSE, FALSE, 0);
 		gtk_widget_show(ui->filter_check_buttons[i]);
-	}
+		}
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ui->filter_check_buttons[FORMAT_CLASS_IMAGE]), TRUE);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ui->filter_check_buttons[FORMAT_CLASS_RAWIMAGE]), TRUE);
@@ -306,14 +305,17 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	ui->filter_classes = (1 << FORMAT_CLASS_IMAGE) | (1 << FORMAT_CLASS_RAWIMAGE) | (1 << FORMAT_CLASS_VIDEO);
 
 	// Connecting the signal before setting the state causes segfault as pw is not yet prepared
-	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
-		g_signal_connect((GtkToggleButton *)(ui->filter_check_buttons[i]), "toggled", G_CALLBACK(pan_filter_toggle_button_cb), pw);
+	for (GtkWidget *filter_check_button : ui->filter_check_buttons)
+		g_signal_connect(GTK_TOGGLE_BUTTON(filter_check_button), "toggled", G_CALLBACK(pan_filter_toggle_button_cb), pw);
 
 	return ui;
 }
 
 void pan_filter_ui_destroy(PanViewFilterUi *ui)
 {
+	if (!ui) return;
+
+	g_list_free_full(ui->filter_elements, reinterpret_cast<GDestroyNotify>(pan_view_filter_element_free));
 	g_free(ui);
 }
 
