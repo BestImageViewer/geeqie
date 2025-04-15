@@ -5344,7 +5344,7 @@ static void pop_menu_export(GList *, gpointer dupe_window, gpointer data)
 	GList *list = history_list_get_by_key("export_duplicates");
 
 	g_autoptr(GList) reversed = g_list_reverse(g_list_copy(list));
-	g_autoptr(GList) unique_dirs = nullptr;
+	GList *unique_dirs = nullptr; // @TODO Use STL container of std::string. E.g. unsorted_set if order is not important.
 
 	for (GList *work = reversed; work != nullptr && g_list_length(unique_dirs) < 3; work = work->next)
 		{
@@ -5365,6 +5365,8 @@ static void pop_menu_export(GList *, gpointer dupe_window, gpointer data)
 		gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), static_cast<const gchar *>(work->data), nullptr);
 #endif
 		}
+
+	g_list_free_full(unique_dirs, g_free);
 
 	if (previous_path)
 		{
