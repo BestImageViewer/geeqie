@@ -579,11 +579,6 @@ GList *collection_table_selection_get_list(CollectTable *ct)
 	return collection_list_to_filelist(ct->selection);
 }
 
-static GList *collection_table_get_list(CollectTable *ct)
-{
-	return collection_list_to_filelist(ct->cd->list);
-}
-
 /*
  *-------------------------------------------------------------------
  * tooltip type window
@@ -966,11 +961,8 @@ static void collection_table_popup_find_dupes_cb(GtkWidget *, gpointer data)
 static void collection_table_popup_print_cb(GtkWidget *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
-	FileData *fd;
 
-	fd = (ct->click_info) ? ct->click_info->fd : nullptr;
-
-	print_window_new(fd, collection_table_selection_get_list(ct), collection_table_get_list(ct), gtk_widget_get_toplevel(ct->listview));
+	print_window_new(collection_table_selection_get_list(ct), gtk_widget_get_toplevel(ct->listview));
 }
 
 static void collection_table_popup_show_names_cb(GtkWidget *, gpointer data)

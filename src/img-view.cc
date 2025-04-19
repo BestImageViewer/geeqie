@@ -499,9 +499,8 @@ static gboolean view_window_key_press_cb(GtkWidget * (widget), GdkEventKey *even
 				view_fullscreen_toggle(vw, TRUE);
 				imd = view_window_active_image(vw);
 				fd = image_get_fd(imd);
-				print_window_new(fd,
-						 fd ? g_list_append(nullptr, file_data_ref(fd)) : nullptr,
-						 filelist_copy(vw->list), vw->window);
+				print_window_new(fd ? g_list_append(nullptr, file_data_ref(fd)) : nullptr,
+				                 vw->window);
 				}
 				break;
 			case GDK_KEY_Delete: case GDK_KEY_KP_Delete:

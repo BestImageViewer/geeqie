@@ -713,9 +713,9 @@ void print_response_cb(GtkDialog *dialog, gint, gpointer)
 } // namespace
 
 /**
- * @brief Do not free selection or list, the print window takes control of them
+ * @brief Do not free selection, the print window takes control of it
  */
-void print_window_new(FileData *, GList *selection, GList *, GtkWidget *parent)
+void print_window_new(GList *selection, GtkWidget *parent)
 {
 	GtkWidget *vbox;
 	GtkPrintOperation *operation;

@@ -25,8 +25,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-class FileData;
-
 /* reverse order is important */
 enum TextPosition : gint {
 	FOOTER_2,
@@ -35,7 +33,7 @@ enum TextPosition : gint {
 	HEADER_1,
 };
 
-void print_window_new(FileData *fd, GList *selection, GList *list, GtkWidget *parent);
+void print_window_new(GList *selection, GtkWidget *parent);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

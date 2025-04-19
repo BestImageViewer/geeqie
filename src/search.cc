@@ -588,14 +588,13 @@ static gint search_result_selection_count(SearchData *sd, gint64 *bytes)
 	return search_result_selection_util(sd, bytes, nullptr);
 }
 
-static gint search_result_util(SearchData *sd, gint64 *bytes, GList **list)
+static gint search_result_count(SearchData *sd, gint64 *bytes)
 {
 	GtkTreeModel *store;
 	GtkTreeIter iter;
 	gboolean valid;
 	gint n = 0;
 	gint64 total = 0;
-	GList *plist = nullptr;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(sd->result_view));
 
@@ -603,35 +602,19 @@ static gint search_result_util(SearchData *sd, gint64 *bytes, GList **list)
 	while (valid)
 		{
 		n++;
-		if (bytes || list)
+		if (bytes)
 			{
 			MatchFileData *mfd;
 
 			gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd, -1);
 			total += mfd->fd->size;
-
-			if (list) plist = g_list_prepend(plist, file_data_ref(mfd->fd));
 			}
 		valid = gtk_tree_model_iter_next(store, &iter);
 		}
 
 	if (bytes) *bytes = total;
-	if (list) *list = g_list_reverse(plist);
 
 	return n;
-}
-
-static GList *search_result_get_filelist(SearchData *sd)
-{
-	GList *list = nullptr;
-
-	search_result_util(sd, nullptr, &list);
-	return list;
-}
-
-static gint search_result_count(SearchData *sd, gint64 *bytes)
-{
-	return search_result_util(sd, bytes, nullptr);
 }
 
 static void search_result_append(SearchData *sd, MatchFileData *mfd)
@@ -1063,8 +1046,7 @@ static void sr_menu_print_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	print_window_new(sd->click_fd, search_result_selection_list(sd),
-			 search_result_get_filelist(sd), sd->window);
+	print_window_new(search_result_selection_list(sd), sd->window);
 }
 
 static void sr_menu_copy_cb(GtkWidget *, gpointer data)

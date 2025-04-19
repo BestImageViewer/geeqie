@@ -974,12 +974,7 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 			case 'P': case 'p':
 				if (event->state & GDK_SHIFT_MASK)
 					{
-					CollectInfo *info;
-
-					info = collection_table_get_focus_info(cw->table);
-
-					print_window_new(info->fd, collection_table_selection_get_list(cw->table),
-							 collection_list_to_filelist(cw->cd->list), cw->window);
+					print_window_new(collection_table_selection_get_list(cw->table), cw->window);
 					}
 				else
 					{
