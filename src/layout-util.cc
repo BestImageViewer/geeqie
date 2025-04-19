@@ -340,7 +340,7 @@ static void layout_menu_print_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	print_window_new(layout_image_get_fd(lw), layout_selection_list(lw), layout_list(lw), layout_window(lw));
+	print_window_new(layout_selection_list(lw), layout_window(lw));
 }
 
 static void layout_menu_dir_cb(GtkAction *, gpointer data)

@@ -728,28 +728,6 @@ static void dupe_listview_remove(DupeWindow *dw, DupeItem *di)
 }
 
 
-static GList *dupe_listview_get_filelist(GtkWidget *listview)
-{
-	GtkTreeModel *store;
-	GtkTreeIter iter;
-	gboolean valid;
-	GList *list = nullptr;
-
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(listview));
-	valid = gtk_tree_model_get_iter_first(store, &iter);
-	while (valid)
-		{
-		DupeItem *di;
-		gtk_tree_model_get(store, &iter, DUPE_COLUMN_POINTER, &di, -1);
-		list = g_list_prepend(list, file_data_ref(di->fd));
-
-		valid = gtk_tree_model_iter_next(store, &iter);
-		}
-
-	return g_list_reverse(list);
-}
-
-
 static GList *dupe_listview_get_selection(GtkWidget *listview)
 {
 	GtkTreeModel *store;
@@ -3285,13 +3263,8 @@ static void dupe_menu_edit_cb(GtkWidget *widget, gpointer data)
 static void dupe_menu_print_cb(GtkWidget *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
-	FileData *fd;
 
-	fd = (dw->click_item) ? dw->click_item->fd : nullptr;
-
-	print_window_new(fd,
-	                 dupe_listview_get_selection(dw->listview),
-	                 dupe_listview_get_filelist(dw->listview), dw->window);
+	print_window_new(dupe_listview_get_selection(dw->listview), dw->window);
 }
 
 static void dupe_menu_copy_cb(GtkWidget *, gpointer data)
