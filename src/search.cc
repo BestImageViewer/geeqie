@@ -2347,52 +2347,41 @@ static gboolean search_file_next(SearchData *sd)
 		/* Calculate the distance the image is from the specified origin.
 		* This is a standard algorithm. A simplified one may be faster.
 		*/
-		#define RADIANS  0.0174532925
-		#define KM_EARTH_RADIUS 6371
-		#define MILES_EARTH_RADIUS 3959
-		#define NAUTICAL_MILES_EARTH_RADIUS 3440
-
-		gdouble latitude;
-		gdouble longitude;
-		gdouble range;
 		gdouble conversion;
 
 		if (g_strcmp0(gtk_combo_box_text_get_active_text(
 						GTK_COMBO_BOX_TEXT(sd->units_gps)), _("km")) == 0)
 			{
+			constexpr gdouble KM_EARTH_RADIUS = 6371;
 			conversion = KM_EARTH_RADIUS;
 			}
 		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
 						GTK_COMBO_BOX_TEXT(sd->units_gps)), _("miles")) == 0)
 			{
+			constexpr gdouble MILES_EARTH_RADIUS = 3959;
 			conversion = MILES_EARTH_RADIUS;
 			}
 		else
 			{
+			constexpr gdouble NAUTICAL_MILES_EARTH_RADIUS = 3440;
 			conversion = NAUTICAL_MILES_EARTH_RADIUS;
 			}
 
 		tested = TRUE;
 		match = FALSE;
 
-		latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
-		longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
+		gdouble latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
+		gdouble longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
 		if (latitude != 1000 && longitude != 1000)
 			{
-			range = conversion * acos((sin(latitude * RADIANS) *
-						sin(sd->search_lat * RADIANS)) + (cos(latitude * RADIANS) *
-						cos(sd->search_lat * RADIANS) * cos((sd->search_lon -
-						longitude) * RADIANS)));
-			if (sd->match_gps == SEARCH_MATCH_UNDER)
-				{
-				if (sd->search_gps >= range)
-					match = TRUE;
-				}
-			else if (sd->match_gps == SEARCH_MATCH_OVER)
-				{
-				if (sd->search_gps < range)
-					match = TRUE;
-				}
+			constexpr gdouble RADIANS = 0.0174532925; // 1 degree in radians
+			const gdouble lat_rad = latitude * RADIANS;
+			const gdouble search_lat_rad = sd->search_lat * RADIANS;
+			const gdouble lon_diff_rad = (sd->search_lon - longitude) * RADIANS;
+			const gdouble range = conversion * acos((sin(lat_rad) * sin(search_lat_rad)) +
+			                                        (cos(lat_rad) * cos(search_lat_rad) * cos(lon_diff_rad)));
+			match = (sd->match_gps == SEARCH_MATCH_UNDER && sd->search_gps >= range) ||
+			        (sd->match_gps == SEARCH_MATCH_OVER && sd->search_gps < range);
 			}
 		else if (sd->match_gps == SEARCH_MATCH_NONE)
 			{
