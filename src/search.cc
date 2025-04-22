@@ -2019,19 +2019,18 @@ static gboolean search_file_next(SearchData *sd)
 		tested = TRUE;
 		match = FALSE;
 
-		if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->date_type)), _("Changed")) == 0)
+		g_autofree gchar *date_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->date_type));
+
+		if (g_strcmp0(date_type, _("Changed")) == 0)
 			{
 			file_date = fd->cdate;
 			}
-		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->date_type)), _("Original")) == 0)
+		else if (g_strcmp0(date_type, _("Original")) == 0)
 			{
 			read_exif_time_data(fd);
 			file_date = fd->exifdate;
 			}
-		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->date_type)), _("Digitized")) == 0)
+		else if (g_strcmp0(date_type, _("Digitized")) == 0)
 			{
 			read_exif_time_digitized_data(fd);
 			file_date = fd->exifdate_digitized;
@@ -2228,38 +2227,33 @@ static gboolean search_file_next(SearchData *sd)
 		FileFormatClass format_class;
 		FileFormatClass search_class;
 
-		if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->class_type)), _("Image")) == 0)
+		g_autofree gchar *class_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->class_type));
+
+		if (g_strcmp0(class_type, _("Image")) == 0)
 			{
 			search_class = FORMAT_CLASS_IMAGE;
 			}
-		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->class_type)), _("Raw Image")) == 0)
+		else if (g_strcmp0(class_type, _("Raw Image")) == 0)
 			{
 			search_class = FORMAT_CLASS_RAWIMAGE;
 			}
-		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->class_type)), _("Video")) == 0)
+		else if (g_strcmp0(class_type, _("Video")) == 0)
 			{
 			search_class = FORMAT_CLASS_VIDEO;
 			}
-		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->class_type)), _("Document")) == 0)
+		else if (g_strcmp0(class_type, _("Document")) == 0)
 			{
 			search_class = FORMAT_CLASS_DOCUMENT;
 			}
-		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->class_type)), _("Metadata")) == 0)
+		else if (g_strcmp0(class_type, _("Metadata")) == 0)
 			{
 			search_class = FORMAT_CLASS_META;
 			}
-		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->class_type)), _("Archive")) == 0)
+		else if (g_strcmp0(class_type, _("Archive")) == 0)
 			{
 			search_class = FORMAT_CLASS_ARCHIVE;
 			}
-		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->class_type)), _("Unknown")) == 0)
+		else if (g_strcmp0(class_type, _("Unknown")) == 0)
 			{
 			search_class = FORMAT_CLASS_UNKNOWN;
 			}
@@ -2300,8 +2294,9 @@ static gboolean search_file_next(SearchData *sd)
 		match = FALSE;
 		gint search_marks = -1;
 
-		if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->marks_type)), _("Any mark")) == 0)
+		g_autofree gchar *marks_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->marks_type));
+
+		if (g_strcmp0(marks_type, _("Any mark")) == 0)
 			{
 			search_marks = -1;
 			}
@@ -2317,8 +2312,7 @@ static gboolean search_file_next(SearchData *sd)
 					g_string_append_printf(marks_string, " %s", options->marks_tooltips[i]);
 					}
 
-				if (g_strcmp0(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->marks_type)),
-				              marks_string->str) == 0)
+				if (g_strcmp0(marks_type, marks_string->str) == 0)
 					{
 					search_marks = 1 << i;
 					}
@@ -2347,33 +2341,32 @@ static gboolean search_file_next(SearchData *sd)
 		/* Calculate the distance the image is from the specified origin.
 		* This is a standard algorithm. A simplified one may be faster.
 		*/
-		gdouble conversion;
-
-		if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->units_gps)), _("km")) == 0)
-			{
-			constexpr gdouble KM_EARTH_RADIUS = 6371;
-			conversion = KM_EARTH_RADIUS;
-			}
-		else if (g_strcmp0(gtk_combo_box_text_get_active_text(
-						GTK_COMBO_BOX_TEXT(sd->units_gps)), _("miles")) == 0)
-			{
-			constexpr gdouble MILES_EARTH_RADIUS = 3959;
-			conversion = MILES_EARTH_RADIUS;
-			}
-		else
-			{
-			constexpr gdouble NAUTICAL_MILES_EARTH_RADIUS = 3440;
-			conversion = NAUTICAL_MILES_EARTH_RADIUS;
-			}
-
 		tested = TRUE;
 		match = FALSE;
 
-		gdouble latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
-		gdouble longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
+		const gdouble latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
+		const gdouble longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
 		if (latitude != 1000 && longitude != 1000)
 			{
+			g_autofree gchar *units_gps = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->units_gps));
+			gdouble conversion;
+
+			if (g_strcmp0(units_gps, _("km")) == 0)
+				{
+				constexpr gdouble KM_EARTH_RADIUS = 6371;
+				conversion = KM_EARTH_RADIUS;
+				}
+			else if (g_strcmp0(units_gps, _("miles")) == 0)
+				{
+				constexpr gdouble MILES_EARTH_RADIUS = 3959;
+				conversion = MILES_EARTH_RADIUS;
+				}
+			else
+				{
+				constexpr gdouble NAUTICAL_MILES_EARTH_RADIUS = 3440;
+				conversion = NAUTICAL_MILES_EARTH_RADIUS;
+				}
+
 			constexpr gdouble RADIANS = 0.0174532925; // 1 degree in radians
 			const gdouble lat_rad = latitude * RADIANS;
 			const gdouble search_lat_rad = sd->search_lat * RADIANS;
