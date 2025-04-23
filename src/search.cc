@@ -367,6 +367,12 @@ constexpr std::array<GtkTargetEntry, 2> result_drop_types{{
 
 GList *search_window_list = nullptr;
 
+template<typename T>
+bool match_is_between(T val, T a, T b)
+{
+	return (b > a) ? (a <= val && val <= b) : (b <= val && val <= a);
+}
+
 } // namespace
 
 static gint search_result_selection_count(SearchData *sd, gint64 *bytes);
@@ -1681,8 +1687,6 @@ static void search_dnd_init(SearchData *sd)
  *-------------------------------------------------------------------
  */
 
-#define MATCH_IS_BETWEEN(val, a, b)  ((b) > (a) ? ((val) >= (a) && (val) <= (b)) : ((val) >= (b) && (val) <= (a)))
-
 static gboolean search_step_cb(gpointer data);
 
 
@@ -1878,8 +1882,8 @@ static gboolean search_file_do_extra(SearchData *sd, FileData *fd, gint *match,
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_BETWEEN)
 			{
-			tmatch = (MATCH_IS_BETWEEN(cd->width, sd->search_width, sd->search_width_end) &&
-				  MATCH_IS_BETWEEN(cd->height, sd->search_height, sd->search_height_end));
+			tmatch = match_is_between(cd->width, sd->search_width, sd->search_width_end) &&
+			         match_is_between(cd->height, sd->search_height, sd->search_height_end);
 			}
 		}
 
@@ -2010,7 +2014,7 @@ static gboolean search_file_next(SearchData *sd)
 			}
 		else if (sd->match_size == SEARCH_MATCH_BETWEEN)
 			{
-			match = MATCH_IS_BETWEEN(fd->size, sd->search_size, sd->search_size_end);
+			match = match_is_between(fd->size, sd->search_size, sd->search_size_end);
 			}
 		}
 
@@ -2071,7 +2075,7 @@ static gboolean search_file_next(SearchData *sd)
 				{
 				a += 60 * 60 * 24 - 1;
 				}
-			match = MATCH_IS_BETWEEN(file_date, a, b);
+			match = match_is_between(file_date, a, b);
 			}
 		}
 
@@ -2216,7 +2220,7 @@ static gboolean search_file_next(SearchData *sd)
 			}
 		else if (sd->match_rating == SEARCH_MATCH_BETWEEN)
 			{
-			match = MATCH_IS_BETWEEN(rating, sd->search_rating, sd->search_rating_end);
+			match = match_is_between(rating, sd->search_rating, sd->search_rating_end);
 			}
 		}
 
