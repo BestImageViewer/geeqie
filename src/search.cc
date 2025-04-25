@@ -105,7 +105,6 @@ struct SearchData
 	GtkWidget *button_start;
 	GtkWidget *button_stop;
 	GtkWidget *button_close;
-	GtkWidget *button_help;
 	GtkWidget *spinner;
 
 	GtkWidget *collection;
@@ -3726,9 +3725,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->spinner, FALSE, FALSE, 0);
 	gtk_widget_show(sd->spinner);
 
-	sd->button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(search_window_help_cb), sd);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(sd->button_help), "F1");
-	gtk_widget_set_sensitive(sd->button_help, TRUE);
+	GtkWidget *button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(search_window_help_cb), sd);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(button_help), "F1");
+	gtk_widget_set_sensitive(button_help, TRUE);
 	pref_spacer(hbox, PREF_PAD_BUTTON_GAP);
 	sd->button_start = pref_button_new(hbox, GQ_ICON_FIND, _("Find"),
 					   G_CALLBACK(search_start_cb), sd);
