@@ -89,7 +89,8 @@ void log_print_file_data_dump(const gchar *file, gint line_number, const gchar *
 #define DEBUG_NAME(widget) \
 	G_STMT_START \
 		{ \
-		gtk_widget_set_name(GTK_WIDGET(widget), g_strdup_printf("%s:%d", __FILE__, __LINE__)); \
+		g_autofree gchar *name = g_strdup_printf("%s:%d", __FILE__, __LINE__); \
+		gtk_widget_set_name(GTK_WIDGET(widget), name); \
 		} \
 	G_STMT_END
 

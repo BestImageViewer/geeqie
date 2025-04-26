@@ -626,14 +626,14 @@ static void search_result_append(SearchData *sd, MatchFileData *mfd)
 	FileData *fd;
 	GtkListStore *store;
 	GtkTreeIter iter;
-	g_autofree gchar *text_dim = nullptr;
 
 	fd = mfd->fd;
 
 	if (!fd) return;
 
 	g_autofree gchar *text_size = text_from_size(fd->size);
-	if (mfd->width > 0 && mfd->height > 0) text_dim = g_strdup_printf("%d x %d", mfd->width, mfd->height);
+	g_autofree gchar *text_dim = (mfd->width > 0 && mfd->height > 0) ?
+	            g_strdup_printf("%d x %d", mfd->width, mfd->height) : nullptr;
 
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(sd->result_view)));
 	gtk_list_store_append(store, &iter);
@@ -1593,24 +1593,21 @@ static void search_path_entry_dnd_received_cb(GtkWidget *, GdkDragContext *,
 										guint, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
-	GList *list;
-	FileData *fd;
 
 	if (info == TARGET_URI_LIST)
 		{
-		list = uri_filelist_from_gtk_selection_data(selection_data);
+		GList *list = uri_filelist_from_gtk_selection_data(selection_data);
 		/* If more than one file, use only the first file in a list.
 		*/
 		if (list != nullptr)
 			{
-			fd = static_cast<FileData *>(list->data);
-			gq_gtk_entry_set_text(GTK_ENTRY(sd->path_entry),
-						g_strdup_printf("%s", fd->path));
-			gtk_widget_set_tooltip_text(GTK_WIDGET(sd->path_entry),g_strdup_printf("%s", fd->path));
+			auto *fd = static_cast<FileData *>(list->data);
+			g_autofree gchar *text = g_strdup_printf("%s", fd->path);
+			gq_gtk_entry_set_text(GTK_ENTRY(sd->path_entry), text);
+			gtk_widget_set_tooltip_text(GTK_WIDGET(sd->path_entry), text);
 			}
 		}
-
-	if (info == TARGET_TEXT_PLAIN)
+	else if (info == TARGET_TEXT_PLAIN)
 		{
 		gq_gtk_entry_set_text(GTK_ENTRY(sd->path_entry),"");
 		}
@@ -1622,24 +1619,21 @@ static void search_image_content_dnd_received_cb(GtkWidget *, GdkDragContext *,
 										guint, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
-	GList *list;
-	FileData *fd;
 
 	if (info == TARGET_URI_LIST)
 		{
-		list = uri_filelist_from_gtk_selection_data(selection_data);
+		GList *list = uri_filelist_from_gtk_selection_data(selection_data);
 		/* If more than one file, use only the first file in a list.
 		*/
 		if (list != nullptr)
 			{
-			fd = static_cast<FileData *>(list->data);
-			gq_gtk_entry_set_text(GTK_ENTRY(sd->entry_similarity),
-						g_strdup_printf("%s", fd->path));
-			gtk_widget_set_tooltip_text(GTK_WIDGET(sd->entry_similarity),g_strdup_printf("%s", fd->path));
+			auto *fd = static_cast<FileData *>(list->data);
+			g_autofree gchar *text = g_strdup_printf("%s", fd->path);
+			gq_gtk_entry_set_text(GTK_ENTRY(sd->entry_similarity), text);
+			gtk_widget_set_tooltip_text(GTK_WIDGET(sd->entry_similarity), text);
 			}
 		}
-
-	if (info == TARGET_TEXT_PLAIN)
+	else if (info == TARGET_TEXT_PLAIN)
 		{
 		gq_gtk_entry_set_text(GTK_ENTRY(sd->entry_similarity),"");
 		}
