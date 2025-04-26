@@ -504,7 +504,7 @@ if not option.disabled()
 else
     summary({'pandoc' : ['disabled - README.html created:', false]}, section : 'Documentation', bool_yn : true)
 endif
-install_data('README.md', 'COPYING', 'TODO', install_dir : helpdir)
+install_data('README.md', 'COPYING', install_dir : helpdir)
 
 conf_data.set('HAVE_PDF', 0)
 poppler_glib_dep = []
