@@ -21,6 +21,7 @@
 
 #include "search.h"
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdio>
@@ -2075,15 +2076,8 @@ static gboolean search_file_next(SearchData *sd)
 			time_t a = sd->search_date.to_time();
 			time_t b = sd->search_date_end.to_time();
 
-			if (b >= a)
-				{
-				b += 60 * 60 * 24 - 1;
-				}
-			else
-				{
-				a += 60 * 60 * 24 - 1;
-				}
-			match = match_is_between(file_date, a, b);
+			std::tie(a, b) = std::minmax(a, b); // @TODO Use structured binding in C++17
+			match = match_is_between(file_date, a, b + 60 * 60 * 24 - 1);
 			}
 		}
 
