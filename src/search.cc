@@ -190,6 +190,49 @@ struct SearchUi
 	GtkWidget *spinner;
 };
 
+struct SearchDate
+{
+	void set_date(GtkWidget *date_sel);
+	time_t to_time() const;
+	bool is_equal(const std::tm *lt) const;
+
+private:
+	gint year;
+	gint month;
+	gint mday;
+};
+
+void SearchDate::set_date(GtkWidget *date_sel)
+{
+	g_autoptr(GDateTime) date = date_selection_get(date_sel);
+
+	mday = g_date_time_get_day_of_month(date);
+	month = g_date_time_get_month(date);
+	year = g_date_time_get_year(date);
+}
+
+time_t SearchDate::to_time() const
+{
+	std::tm lt;
+
+	lt.tm_sec = 0;
+	lt.tm_min = 0;
+	lt.tm_hour = 0;
+	lt.tm_mday = mday;
+	lt.tm_mon = month - 1;
+	lt.tm_year = year - 1900;
+	lt.tm_isdst = 0;
+
+	return mktime(&lt);
+}
+
+bool SearchDate::is_equal(const std::tm *lt) const
+{
+	return (year - 1900) == lt->tm_year &&
+	       (month - 1) == lt->tm_mon &&
+	       mday == lt->tm_mday;
+}
+
 struct SearchData
 {
 	SearchUi ui;
@@ -202,12 +245,8 @@ struct SearchData
 	gboolean   search_name_symbolic_link;
 	gint64 search_size;
 	gint64 search_size_end;
-	gint   search_date_y;
-	gint   search_date_m;
-	gint   search_date_d;
-	gint   search_date_end_y;
-	gint   search_date_end_m;
-	gint   search_date_end_d;
+	SearchDate search_date;
+	SearchDate search_date_end;
 	gint   search_width;
 	gint   search_height;
 	gint   search_width_end;
@@ -434,21 +473,6 @@ static hard_coded_window_keys search_window_keys[] = {
  * utils
  *-------------------------------------------------------------------
  */
-
-static time_t convert_dmy_to_time(gint day, gint month, gint year)
-{
-	struct tm lt;
-
-	lt.tm_sec = 0;
-	lt.tm_min = 0;
-	lt.tm_hour = 0;
-	lt.tm_mday = day;
-	lt.tm_mon = month - 1;
-	lt.tm_year = year - 1900;
-	lt.tm_isdst = 0;
-
-	return mktime(&lt);
-}
 
 static void search_status_update(SearchData *sd)
 {
@@ -2036,23 +2060,20 @@ static gboolean search_file_next(SearchData *sd)
 			struct tm *lt;
 
 			lt = localtime(&file_date);
-			match = (lt &&
-				 lt->tm_year == sd->search_date_y - 1900 &&
-				 lt->tm_mon == sd->search_date_m - 1 &&
-				 lt->tm_mday == sd->search_date_d);
+			match = (lt && sd->search_date.is_equal(lt));
 			}
 		else if (sd->match_date == SEARCH_MATCH_UNDER)
 			{
-			match = (file_date < convert_dmy_to_time(sd->search_date_d, sd->search_date_m, sd->search_date_y));
+			match = (file_date < sd->search_date.to_time());
 			}
 		else if (sd->match_date == SEARCH_MATCH_OVER)
 			{
-			match = (file_date > convert_dmy_to_time(sd->search_date_d, sd->search_date_m, sd->search_date_y) + 60 * 60 * 24 - 1);
+			match = (file_date > sd->search_date.to_time() + 60 * 60 * 24 - 1);
 			}
 		else if (sd->match_date == SEARCH_MATCH_BETWEEN)
 			{
-			time_t a = convert_dmy_to_time(sd->search_date_d, sd->search_date_m, sd->search_date_y);
-			time_t b = convert_dmy_to_time(sd->search_date_end_d, sd->search_date_end_m, sd->search_date_end_y);
+			time_t a = sd->search_date.to_time();
+			time_t b = sd->search_date_end.to_time();
 
 			if (b >= a)
 				{
@@ -2694,17 +2715,11 @@ static void search_start_cb(GtkWidget *, gpointer data)
 	g_list_free_full(sd->search_keyword_list, g_free);
 	sd->search_keyword_list = keyword_list_pull(sd->ui.entry_keywords);
 
-	GDateTime *date = date_selection_get(sd->ui.date_sel);
-	sd->search_date_d = g_date_time_get_day_of_month(date);
-	sd->search_date_m = g_date_time_get_month(date);
-	sd->search_date_y = g_date_time_get_year(date);
-	g_date_time_unref(date);
-
-	date = date_selection_get(sd->ui.date_sel_end);
-	sd->search_date_end_d = g_date_time_get_day_of_month(date);
-	sd->search_date_end_m = g_date_time_get_month(date);
-	sd->search_date_end_y = g_date_time_get_year(date);
-	g_date_time_unref(date);
+	if (sd->match_date_enable)
+		{
+		sd->search_date.set_date(sd->ui.date_sel);
+		sd->search_date_end.set_date(sd->ui.date_sel_end);
+		}
 
 	GtkTreeViewColumn *column = gtk_tree_view_get_column(GTK_TREE_VIEW(sd->ui.result_view), SEARCH_COLUMN_DIMENSIONS - 1);
 	gtk_tree_view_column_set_visible(column, sd->match_dimensions_enable);
