@@ -191,6 +191,21 @@ struct SearchUi
 	GtkWidget *spinner;
 };
 
+using GetFileDate = std::function<time_t(FileData *)>;
+
+struct SearchDateType
+{
+	const gchar *name;
+	GetFileDate get_file_date;
+};
+
+const SearchDateType search_date_types[] = {
+    { _("Modified"), [](FileData *fd){ return fd->date; } },
+    { _("Status Changed"), [](FileData *fd){ return fd->cdate; } },
+    { _("Original"), [](FileData *fd){ read_exif_time_data(fd); return fd->exifdate; } },
+    { _("Digitized"), [](FileData *fd){ read_exif_time_digitized_data(fd); return fd->exifdate_digitized; } },
+};
+
 struct SearchDate
 {
 	void set_date(GtkWidget *date_sel);
@@ -246,6 +261,7 @@ struct SearchData
 	gboolean   search_name_symbolic_link;
 	gint64 search_size;
 	gint64 search_size_end;
+	GetFileDate get_file_date;
 	SearchDate search_date;
 	SearchDate search_date_end;
 	gint   search_width;
@@ -1947,7 +1963,6 @@ static gboolean search_file_next(SearchData *sd)
 	gint width = 0;
 	gint height = 0;
 	gint sim = 0;
-	time_t file_date;
 
 	if (!sd->search_file_list) return FALSE;
 
@@ -2035,26 +2050,7 @@ static gboolean search_file_next(SearchData *sd)
 		tested = TRUE;
 		match = FALSE;
 
-		g_autofree gchar *date_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.date_type));
-
-		if (g_strcmp0(date_type, _("Changed")) == 0)
-			{
-			file_date = fd->cdate;
-			}
-		else if (g_strcmp0(date_type, _("Original")) == 0)
-			{
-			read_exif_time_data(fd);
-			file_date = fd->exifdate;
-			}
-		else if (g_strcmp0(date_type, _("Digitized")) == 0)
-			{
-			read_exif_time_digitized_data(fd);
-			file_date = fd->exifdate_digitized;
-			}
-		else
-			{
-			file_date = fd->date;
-			}
+		const time_t file_date = sd->get_file_date(fd);
 
 		if (sd->match_date == SEARCH_MATCH_EQUAL)
 			{
@@ -2711,6 +2707,14 @@ static void search_start_cb(GtkWidget *, gpointer data)
 
 	if (sd->match_date_enable)
 		{
+		g_autofree gchar *date_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.date_type));
+		const auto it = std::find_if(std::cbegin(search_date_types), std::cend(search_date_types),
+		                             [date_type](const SearchDateType &sdt){ return g_strcmp0(date_type, sdt.name) == 0; });
+		if (it != std::cend(search_date_types))
+			sd->get_file_date = it->get_file_date;
+		else
+			sd->get_file_date = [](FileData *fd){ return fd->date; };
+
 		sd->search_date.set_date(sd->ui.date_sel);
 		sd->search_date_end.set_date(sd->ui.date_sel_end);
 		}
@@ -3426,10 +3430,10 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_widget_show(sd->ui.date_sel_end);
 
 	sd->ui.date_type = gtk_combo_box_text_new();
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.date_type), _("Modified"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.date_type), _("Status Changed"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.date_type), _("Original"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.date_type), _("Digitized"));
+	for (const SearchDateType &sdt : search_date_types)
+		{
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.date_type), sdt.name);
+		}
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.date_type, FALSE, FALSE, 0);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(sd->ui.date_type), 0);
 	gtk_widget_set_tooltip_text(sd->ui.date_type, "Modified (mtime)\nStatus Changed (ctime)\nOriginal (Exif.Photo.DateTimeOriginal)\nDigitized (Exif.Photo.DateTimeDigitized)");
