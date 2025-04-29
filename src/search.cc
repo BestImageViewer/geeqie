@@ -438,8 +438,6 @@ constexpr std::array<GtkTargetEntry, 2> result_drop_types{{
 	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
 }};
 
-GList *search_window_list = nullptr;
-
 template<typename T>
 bool match_is_between(T val, T a, T b)
 {
@@ -3191,8 +3189,6 @@ static void search_window_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	search_window_list = g_list_remove(search_window_list, sd);
-
 	search_result_update_idle_cancel(sd);
 
 	static const auto mfd_fd_unref = [](gpointer data)
@@ -3744,8 +3740,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	search_status_update(sd);
 	search_progress_update(sd, FALSE, -1.0);
-
-	search_window_list = g_list_append(search_window_list, sd);
 
 	file_data_register_notify_func(search_notify_cb, sd, NOTIFY_PRIORITY_MEDIUM);
 
