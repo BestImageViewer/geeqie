@@ -282,6 +282,7 @@ struct SearchData
 	gint   search_rating;
 	gint   search_rating_end;
 	gboolean   search_comment_match_case;
+	FileFormatClass search_class;
 
 	MatchType search_type;
 
@@ -2224,67 +2225,16 @@ static gboolean search_file_next(SearchData *sd)
 		{
 		tested = TRUE;
 		match = FALSE;
-		FileFormatClass format_class;
-		FileFormatClass search_class;
 
-		g_autofree gchar *class_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type));
-
-		if (g_strcmp0(class_type, _("Image")) == 0)
+		if (sd->search_class != FORMAT_CLASS_BROKEN)
 			{
-			search_class = FORMAT_CLASS_IMAGE;
-			}
-		else if (g_strcmp0(class_type, _("Raw Image")) == 0)
-			{
-			search_class = FORMAT_CLASS_RAWIMAGE;
-			}
-		else if (g_strcmp0(class_type, _("Video")) == 0)
-			{
-			search_class = FORMAT_CLASS_VIDEO;
-			}
-		else if (g_strcmp0(class_type, _("Document")) == 0)
-			{
-			search_class = FORMAT_CLASS_DOCUMENT;
-			}
-		else if (g_strcmp0(class_type, _("Metadata")) == 0)
-			{
-			search_class = FORMAT_CLASS_META;
-			}
-		else if (g_strcmp0(class_type, _("Archive")) == 0)
-			{
-			search_class = FORMAT_CLASS_ARCHIVE;
-			}
-		else if (g_strcmp0(class_type, _("Unknown")) == 0)
-			{
-			search_class = FORMAT_CLASS_UNKNOWN;
+			match = (sd->match_class == SEARCH_MATCH_EQUAL && fd->format_class == sd->search_class) ||
+			        (sd->match_class == SEARCH_MATCH_NONE && fd->format_class != sd->search_class);
 			}
 		else
 			{
-			search_class = FORMAT_CLASS_BROKEN;
-			}
-
-		if (search_class != FORMAT_CLASS_BROKEN)
-			{
-			format_class = fd->format_class;
-			if (sd->match_class == SEARCH_MATCH_EQUAL)
-				{
-				match = (format_class == search_class);
-				}
-			else if (sd->match_class == SEARCH_MATCH_NONE)
-				{
-				match = (format_class != search_class);
-				}
-			}
-		else
-			{
-			if (fd->format_class == FORMAT_CLASS_IMAGE || fd->format_class == FORMAT_CLASS_RAWIMAGE || fd->format_class == FORMAT_CLASS_VIDEO || fd->format_class == FORMAT_CLASS_DOCUMENT)
-				{
-				sd->match_broken_enable = TRUE;
-				match = TRUE;
-				}
-			else
-				{
-				sd->match_broken_enable = FALSE;
-				}
+			match = sd->match_broken_enable = fd->format_class == FORMAT_CLASS_IMAGE || fd->format_class == FORMAT_CLASS_RAWIMAGE ||
+			                                  fd->format_class == FORMAT_CLASS_VIDEO || fd->format_class == FORMAT_CLASS_DOCUMENT;
 			}
 		}
 
@@ -2715,6 +2665,44 @@ static void search_start_cb(GtkWidget *, gpointer data)
 
 		sd->search_date.set_date(sd->ui.date_sel);
 		sd->search_date_end.set_date(sd->ui.date_sel_end);
+		}
+
+	if (sd->match_class_enable)
+		{
+		g_autofree gchar *class_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type));
+
+		if (g_strcmp0(class_type, _("Image")) == 0)
+			{
+			sd->search_class = FORMAT_CLASS_IMAGE;
+			}
+		else if (g_strcmp0(class_type, _("Raw Image")) == 0)
+			{
+			sd->search_class = FORMAT_CLASS_RAWIMAGE;
+			}
+		else if (g_strcmp0(class_type, _("Video")) == 0)
+			{
+			sd->search_class = FORMAT_CLASS_VIDEO;
+			}
+		else if (g_strcmp0(class_type, _("Document")) == 0)
+			{
+			sd->search_class = FORMAT_CLASS_DOCUMENT;
+			}
+		else if (g_strcmp0(class_type, _("Metadata")) == 0)
+			{
+			sd->search_class = FORMAT_CLASS_META;
+			}
+		else if (g_strcmp0(class_type, _("Archive")) == 0)
+			{
+			sd->search_class = FORMAT_CLASS_ARCHIVE;
+			}
+		else if (g_strcmp0(class_type, _("Unknown")) == 0)
+			{
+			sd->search_class = FORMAT_CLASS_UNKNOWN;
+			}
+		else
+			{
+			sd->search_class = FORMAT_CLASS_BROKEN;
+			}
 		}
 
 	GtkTreeViewColumn *column = gtk_tree_view_get_column(GTK_TREE_VIEW(sd->ui.result_view), SEARCH_COLUMN_DIMENSIONS - 1);
