@@ -283,6 +283,7 @@ struct SearchData
 	gint   search_rating_end;
 	gboolean   search_comment_match_case;
 	FileFormatClass search_class;
+	gint search_marks;
 
 	MatchType search_type;
 
@@ -2242,46 +2243,20 @@ static gboolean search_file_next(SearchData *sd)
 		{
 		tested = TRUE;
 		match = FALSE;
-		gint search_marks = -1;
-
-		g_autofree gchar *marks_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.marks_type));
-
-		if (g_strcmp0(marks_type, _("Any mark")) == 0)
-			{
-			search_marks = -1;
-			}
-		else
-			{
-			for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
-				{
-				g_autoptr(GString) marks_string = g_string_new(_("Mark "));
-				g_string_append_printf(marks_string, "%d", i + 1);
-
-				if (g_strcmp0(marks_string->str, options->marks_tooltips[i]) != 0)
-					{
-					g_string_append_printf(marks_string, " %s", options->marks_tooltips[i]);
-					}
-
-				if (g_strcmp0(marks_type, marks_string->str) == 0)
-					{
-					search_marks = 1 << i;
-					}
-				}
-			}
 
 		if (sd->match_marks == SEARCH_MATCH_EQUAL)
 			{
-			match = (fd->marks & search_marks);
+			match = (fd->marks & sd->search_marks);
 			}
 		else
 			{
-			if (search_marks == -1)
+			if (sd->search_marks == -1)
 				{
 				match = fd->marks ? FALSE : TRUE;
 				}
 			else
 				{
-				match = (fd->marks & search_marks) ? FALSE : TRUE;
+				match = (fd->marks & sd->search_marks) ? FALSE : TRUE;
 				}
 			}
 		}
@@ -2702,6 +2677,32 @@ static void search_start_cb(GtkWidget *, gpointer data)
 		else
 			{
 			sd->search_class = FORMAT_CLASS_BROKEN;
+			}
+		}
+
+	if (sd->match_marks_enable)
+		{
+		sd->search_marks = -1;
+
+		g_autofree gchar *marks_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.marks_type));
+
+		if (g_strcmp0(marks_type, _("Any mark")) != 0)
+			{
+			for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
+				{
+				g_autoptr(GString) marks_string = g_string_new(_("Mark "));
+				g_string_append_printf(marks_string, "%d", i + 1);
+
+				if (g_strcmp0(marks_string->str, options->marks_tooltips[i]) != 0)
+					{
+					g_string_append_printf(marks_string, " %s", options->marks_tooltips[i]);
+					}
+
+				if (g_strcmp0(marks_type, marks_string->str) == 0)
+					{
+					sd->search_marks = 1 << i;
+					}
+				}
 			}
 		}
 
