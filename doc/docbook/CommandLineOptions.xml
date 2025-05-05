@@ -7,8 +7,8 @@
 <refmeta>
 <refentrytitle>GEEQIE</refentrytitle>
 <manvolnum>1</manvolnum>
-<refmiscinfo class='source'>April 2025</refmiscinfo>
-<refmiscinfo class='manual'>Geeqie 2.5+git20250407-604c9658 GTK3</refmiscinfo>
+<refmiscinfo class='source'>May 2025</refmiscinfo>
+<refmiscinfo class='manual'>Geeqie 2.6 GTK3</refmiscinfo>
 </refmeta>
 <refnamediv>
 <refname>Geeqie</refname>
@@ -28,7 +28,7 @@ zooming, panning, thumbnails and sorting images into collections.</para>
 
 <para>Geeqie is an image viewer.</para>
 
-<para>Version: Geeqie 2.5+git20250407-604c9658</para>
+<para>Version: Geeqie 2.6</para>
 </refsect2>
 
 <refsect2 id='help_options'><title>Help Options:</title>
@@ -150,6 +150,12 @@ zooming, panning, thumbnails and sorting images into collections.</para>
   <term><emphasis role='strong' remap='B'>--dupes=</emphasis>&lt;FOLDER&gt;</term>
   <listitem>
 <para>find duplicates in folder</para>
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term><emphasis role='strong' remap='B'>--dupes-export</emphasis></term>
+  <listitem>
+<para>export duplicates search result</para>
   </listitem>
   </varlistentry>
   <varlistentry>

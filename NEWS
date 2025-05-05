@@ -1,3 +1,29 @@
+Geeqie 2.6
+============
+
+- Four OSD profiles
+- Move some file dialogs to gtk_file_chooser()
+- Additional command line option: --dupes-export
+- Additional command line option: --dupes<FOLDER>
+- Additional command line option: --dupes-recurse=<FOLDER>
+- Modify Open Collection menu
+- Additional --get-file-info data: Marks, Path to thumbnail
+- Additional menu item - system Open Recent File
+- Additional menu item - system Open File
+- Updated Italian translation
+- Updated Help files
+- Allow rectangle drawing up and to left
+- Updated Spanish translation
+- Improve user info. after crash
+- Improve user info. when a config. file error is detected
+- Updated Russian translation
+- Updated Slovak translation
+- Additional command line option: --file-extensions
+- Additional file type: FITS
+- Additional file type: numpy
+- Additional file type: EXR
+- Convert Geeqie to be a GtkApplication
+
 Geeqie 2.5
 ============
 
