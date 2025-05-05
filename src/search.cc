@@ -2050,6 +2050,7 @@ static gboolean search_file_next(SearchData *sd)
 		tested = TRUE;
 		match = FALSE;
 
+		constexpr time_t seconds_per_day = 60 * 60 * 24;
 		const time_t file_date = sd->get_file_date(fd);
 
 		if (sd->match_date == SEARCH_MATCH_EQUAL)
@@ -2065,7 +2066,7 @@ static gboolean search_file_next(SearchData *sd)
 			}
 		else if (sd->match_date == SEARCH_MATCH_OVER)
 			{
-			match = (file_date > sd->search_date.to_time() + 60 * 60 * 24 - 1);
+			match = (file_date > sd->search_date.to_time() + seconds_per_day - 1);
 			}
 		else if (sd->match_date == SEARCH_MATCH_BETWEEN)
 			{
@@ -2073,7 +2074,7 @@ static gboolean search_file_next(SearchData *sd)
 			time_t b = sd->search_date_end.to_time();
 
 			std::tie(a, b) = std::minmax(a, b); // @TODO Use structured binding in C++17
-			match = match_is_between(file_date, a, b + 60 * 60 * 24 - 1);
+			match = match_is_between(file_date, a, b + seconds_per_day - 1);
 			}
 		}
 
