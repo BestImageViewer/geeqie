@@ -1531,9 +1531,13 @@ static gboolean layout_geometry_get(LayoutWindow *lw, GdkRectangle &rect)
 	if (!layout_valid(&lw)) return FALSE;
 
 	window = gtk_widget_get_window(lw->window);
-	rect = window_get_root_origin_geometry(window);
+	if (window)
+		{
+		rect = window_get_root_origin_geometry(window);
+		return TRUE;
+		}
 
-	return TRUE;
+	return FALSE;
 }
 
 gboolean layout_geometry_get_dividers(LayoutWindow *lw, gint *h, gint *v)
