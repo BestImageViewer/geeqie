@@ -282,6 +282,10 @@ struct SearchData
 	gint   search_rating;
 	gint   search_rating_end;
 	gboolean   search_comment_match_case;
+	gint search_gps;
+	gdouble search_lat;
+	gdouble search_lon;
+	gdouble search_earth_radius;
 	FileFormatClass search_class;
 	gint search_marks;
 
@@ -308,6 +312,7 @@ struct SearchData
 	gboolean match_comment_enable;
 	gboolean match_exif_enable;
 	gboolean match_rating_enable;
+	gboolean match_gps_enable;
 	gboolean match_class_enable;
 	gboolean match_marks_enable;
 	gboolean match_broken_enable;
@@ -332,12 +337,6 @@ struct SearchData
 	ThumbLoader *thumb_loader;
 	gboolean thumb_enable;
 	FileData *thumb_fd;
-
-	/* Used for lat/long coordinate search
-	*/
-	gint search_gps;
-	gdouble search_lat, search_lon;
-	gboolean match_gps_enable;
 };
 
 struct MatchFileData
@@ -444,6 +443,17 @@ template<typename T>
 bool match_is_between(T val, T a, T b)
 {
 	return (b > a) ? (a <= val && val <= b) : (b <= val && val <= a);
+}
+
+gdouble get_gps_range(const SearchData *sd, gdouble latitude, gdouble longitude)
+{
+	constexpr gdouble RADIANS = 0.0174532925; // 1 degree in radians
+	const gdouble lat_rad = latitude * RADIANS;
+	const gdouble search_lat_rad = sd->search_lat * RADIANS;
+	const gdouble lon_diff_rad = (sd->search_lon - longitude) * RADIANS;
+
+	return sd->search_earth_radius * acos((sin(lat_rad) * sin(search_lat_rad)) +
+	                                      (cos(lat_rad) * cos(search_lat_rad) * cos(lon_diff_rad)));
 }
 
 } // namespace
@@ -2272,39 +2282,17 @@ static gboolean search_file_next(SearchData *sd)
 
 		const gdouble latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
 		const gdouble longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
-		if (latitude != 1000 && longitude != 1000)
+		const bool image_has_gps = (latitude != 1000 && longitude != 1000);
+
+		if (sd->match_gps == SEARCH_MATCH_NONE)
 			{
-			g_autofree gchar *units_gps = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.units_gps));
-			gdouble conversion;
-
-			if (g_strcmp0(units_gps, _("km")) == 0)
-				{
-				constexpr gdouble KM_EARTH_RADIUS = 6371;
-				conversion = KM_EARTH_RADIUS;
-				}
-			else if (g_strcmp0(units_gps, _("miles")) == 0)
-				{
-				constexpr gdouble MILES_EARTH_RADIUS = 3959;
-				conversion = MILES_EARTH_RADIUS;
-				}
-			else
-				{
-				constexpr gdouble NAUTICAL_MILES_EARTH_RADIUS = 3440;
-				conversion = NAUTICAL_MILES_EARTH_RADIUS;
-				}
-
-			constexpr gdouble RADIANS = 0.0174532925; // 1 degree in radians
-			const gdouble lat_rad = latitude * RADIANS;
-			const gdouble search_lat_rad = sd->search_lat * RADIANS;
-			const gdouble lon_diff_rad = (sd->search_lon - longitude) * RADIANS;
-			const gdouble range = conversion * acos((sin(lat_rad) * sin(search_lat_rad)) +
-			                                        (cos(lat_rad) * cos(search_lat_rad) * cos(lon_diff_rad)));
-			match = (sd->match_gps == SEARCH_MATCH_UNDER && sd->search_gps >= range) ||
-			        (sd->match_gps == SEARCH_MATCH_OVER && sd->search_gps < range);
+			match = !image_has_gps;
 			}
-		else if (sd->match_gps == SEARCH_MATCH_NONE)
+		else if (image_has_gps)
 			{
-			match = TRUE;
+			const gdouble range = get_gps_range(sd, latitude, longitude);
+			match = (sd->match_gps == SEARCH_MATCH_UNDER && range <= sd->search_gps) ||
+			        (sd->match_gps == SEARCH_MATCH_OVER && range > sd->search_gps);
 			}
 		}
 
@@ -2607,22 +2595,37 @@ static void search_start_cb(GtkWidget *, gpointer data)
 	/* Check the coordinate entry.
 	* If the result is not sensible, it should get blocked.
 	*/
-	if (sd->match_gps_enable)
+	if (sd->match_gps_enable && sd->match_gps != SEARCH_MATCH_NONE)
 		{
-		if (sd->match_gps != SEARCH_MATCH_NONE)
-			{
-			g_autofree gchar *entry_text = decode_geo_parameters(gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.entry_gps_coord)));
+		g_autofree gchar *entry_text = decode_geo_parameters(gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.entry_gps_coord)));
 
-			sd->search_lat = 1000;
-			sd->search_lon = 1000;
-			sscanf(entry_text," %lf  %lf ", &sd->search_lat, &sd->search_lon );
-			if (entry_text == nullptr || g_strstr_len(entry_text, -1, "Error") ||
-						sd->search_lat < -90 || sd->search_lat > 90 ||
-						sd->search_lon < -180 || sd->search_lon > 180)
-				{
-				file_util_warning_dialog(_("Entry does not contain a valid lat/long value"), entry_text, GQ_ICON_DIALOG_WARNING, sd->ui.window);
-				return;
-				}
+		sd->search_lat = 1000;
+		sd->search_lon = 1000;
+		sscanf(entry_text, " %lf  %lf ", &sd->search_lat, &sd->search_lon);
+		if (entry_text == nullptr || g_strstr_len(entry_text, -1, "Error") ||
+		    sd->search_lat < -90 || sd->search_lat > 90 ||
+		    sd->search_lon < -180 || sd->search_lon > 180)
+			{
+			file_util_warning_dialog(_("Entry does not contain a valid lat/long value"), entry_text, GQ_ICON_DIALOG_WARNING, sd->ui.window);
+			return;
+			}
+
+		g_autofree gchar *units_gps = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.units_gps));
+
+		if (g_strcmp0(units_gps, _("km")) == 0)
+			{
+			constexpr gdouble KM_EARTH_RADIUS = 6371;
+			sd->search_earth_radius = KM_EARTH_RADIUS;
+			}
+		else if (g_strcmp0(units_gps, _("miles")) == 0)
+			{
+			constexpr gdouble MILES_EARTH_RADIUS = 3959;
+			sd->search_earth_radius = MILES_EARTH_RADIUS;
+			}
+		else
+			{
+			constexpr gdouble NAUTICAL_MILES_EARTH_RADIUS = 3440;
+			sd->search_earth_radius = NAUTICAL_MILES_EARTH_RADIUS;
 			}
 		}
 
