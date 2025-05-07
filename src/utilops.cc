@@ -3070,6 +3070,7 @@ void file_util_create_dir(const gchar *path, GtkWidget *parent, FileUtilDoneFunc
 
 	GtkWidget *dialog = gtk_file_chooser_dialog_new(_("Create Folder"), GTK_WINDOW(parent), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("Cancel"), GTK_RESPONSE_CANCEL, _("Close"), GTK_RESPONSE_ACCEPT, nullptr);
 
+	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
 
 	g_signal_connect(dialog, "response", G_CALLBACK(create_folder_cb), cfd);
