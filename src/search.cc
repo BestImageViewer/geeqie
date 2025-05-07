@@ -456,6 +456,19 @@ gdouble get_gps_range(const SearchData *sd, gdouble latitude, gdouble longitude)
 	                                      (cos(lat_rad) * cos(search_lat_rad) * cos(lon_diff_rad)));
 }
 
+GString *get_marks_string(gint mark_num)
+{
+	GString *marks_string = g_string_new(_("Mark "));
+	g_string_append_printf(marks_string, "%d", mark_num + 1);
+
+	if (g_strcmp0(marks_string->str, options->marks_tooltips[mark_num]) != 0)
+		{
+		g_string_append_printf(marks_string, " %s", options->marks_tooltips[mark_num]);
+		}
+
+	return marks_string;
+}
+
 } // namespace
 
 static gint search_result_selection_count(SearchData *sd, gint64 *bytes);
@@ -2694,13 +2707,7 @@ static void search_start_cb(GtkWidget *, gpointer data)
 			{
 			for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
 				{
-				g_autoptr(GString) marks_string = g_string_new(_("Mark "));
-				g_string_append_printf(marks_string, "%d", i + 1);
-
-				if (g_strcmp0(marks_string->str, options->marks_tooltips[i]) != 0)
-					{
-					g_string_append_printf(marks_string, " %s", options->marks_tooltips[i]);
-					}
+				g_autoptr(GString) marks_string = get_marks_string(i);
 
 				if (g_strcmp0(marks_type, marks_string->str) == 0)
 					{
@@ -3601,13 +3608,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.marks_type), _("Any mark"));
 	for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
 		{
-		g_autoptr(GString) marks_string = g_string_new(_("Mark "));
-		g_string_append_printf(marks_string, "%d", i + 1);
-
-		if (g_strcmp0(marks_string->str, options->marks_tooltips[i]) != 0)
-			{
-			g_string_append_printf(marks_string, " %s", options->marks_tooltips[i]);
-			}
+		g_autoptr(GString) marks_string = get_marks_string(i);
 
 		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.marks_type), marks_string->str);
 		}
