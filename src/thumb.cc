@@ -21,8 +21,6 @@
 
 #include "thumb.h"
 
-#include <utime.h>
-
 #include <cstdio>
 #include <cstring>
 
@@ -86,14 +84,8 @@ static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failu
 
 	if (success)
 		{
-		struct utimbuf ut;
 		/* set thumb time to that of source file */
-
-		ut.actime = ut.modtime = filetime(tl->fd->path);
-		if (ut.modtime > 0)
-			{
-			utime(pathl, &ut);
-			}
+		filetime_set(cache_path, filetime(tl->fd->path));
 		}
 	else
 		{
