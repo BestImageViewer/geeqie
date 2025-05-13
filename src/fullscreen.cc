@@ -604,6 +604,7 @@ void fullscreen_stop(FullScreenData *fs)
 			}
 		}
 
+	gtk_window_unfullscreen(GTK_WINDOW(fs->window));
 
 	if (fs->stop_func) fs->stop_func(fs, fs->stop_data);
 
