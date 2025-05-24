@@ -1425,7 +1425,7 @@ static void layout_menu_selectable_toolbars_cb(GtkToggleAction *action, gpointer
 	if (lw->options.selectable_toolbars_hidden == gq_gtk_toggle_action_get_active(action)) return;
 
 	layout_exit_fullscreen(lw);
-	layout_selectable_toolbars_toggle(lw);
+	current_layout_selectable_toolbars_toggle();
 }
 
 static void layout_menu_info_pixel_cb(GtkToggleAction *action, gpointer data)

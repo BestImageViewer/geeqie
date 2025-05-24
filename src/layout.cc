@@ -2254,7 +2254,7 @@ gboolean layout_tools_float_get(LayoutWindow *lw, gboolean *popped, gboolean *hi
 	return TRUE;
 }
 
-void layout_selectable_toolbars_toggle(LayoutWindow *)
+void current_layout_selectable_toolbars_toggle()
 {
 	if (!layout_valid(&current_lw)) return;
 	if (!current_lw->toolbar[TOOLBAR_MAIN]) return;

@@ -774,6 +774,11 @@ static void layout_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	filelist_free(selection_list);
 }
 
+static void li_pop_menu_selectable_toolbars_toggle_cb(GtkWidget *, gpointer)
+{
+	current_layout_selectable_toolbars_toggle();
+}
+
 static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 {
 	GtkWidget *menu;
@@ -890,7 +895,8 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 	item = menu_item_add_check(menu, _("Hide file _list"), lw->options.tools_hidden,
 				   G_CALLBACK(li_pop_menu_hide_cb), lw);
 
-	item = menu_item_add_check(menu, _("Hide Selectable Bars"), lw->options.selectable_toolbars_hidden, G_CALLBACK(layout_selectable_toolbars_toggle), lw);
+	item = menu_item_add_check(menu, _("Hide Selectable Bars"), lw->options.selectable_toolbars_hidden,
+	                           G_CALLBACK(li_pop_menu_selectable_toolbars_toggle_cb), nullptr);
 	if (fullscreen) gtk_widget_set_sensitive(item, FALSE);
 
 	return menu;
