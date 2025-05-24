@@ -923,6 +923,13 @@ void startup_cb(GtkApplication *app, gpointer)
 
 	startup_common(app, nullptr);
 
+	const gchar *gq_disable_clutter = g_getenv("GQ_DISABLE_CLUTTER");
+
+	if (gq_disable_clutter && (gq_disable_clutter[0] == 'y' || gq_disable_clutter[0] == 'Y'))
+		{
+		options->disable_gpu = TRUE;
+		}
+
 	/* restore session from the config file */
 
 	if (!load_options(options))
@@ -947,13 +954,6 @@ void startup_cb(GtkApplication *app, gpointer)
 		options->image_overlay_n.background_green[0] = options->image_overlay.background_green;
 		options->image_overlay_n.background_blue[0] = options->image_overlay.background_blue;
 		options->image_overlay_n.background_alpha[0] = options->image_overlay.background_alpha;
-		}
-
-	const gchar *gq_disable_clutter = g_getenv("GQ_DISABLE_CLUTTER");
-
-	if (gq_disable_clutter && (gq_disable_clutter[0] == 'y' || gq_disable_clutter[0] == 'Y'))
-		{
-		options->disable_gpu = TRUE;
 		}
 
 #if HAVE_CLUTTER
