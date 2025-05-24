@@ -1146,16 +1146,8 @@ static GtkWidget *vf_marks_filter_init(ViewFile *vf)
 
 void vf_file_filter_set(ViewFile *vf, gboolean enable)
 {
-	if (enable)
-		{
-		gtk_widget_show(vf->file_filter.combo);
-		gtk_widget_show(vf->file_filter.frame);
-		}
-	else
-		{
-		gtk_widget_hide(vf->file_filter.combo);
-		gtk_widget_hide(vf->file_filter.frame);
-		}
+	gtk_widget_set_visible(vf->file_filter.combo, enable);
+	gtk_widget_set_visible(vf->file_filter.frame, enable);
 
 	vf_refresh(vf);
 }
@@ -1679,10 +1671,8 @@ void vf_marks_set(ViewFile *vf, gboolean enable)
 	case FILEVIEW_LIST: vflist_marks_set(vf, enable); break;
 	case FILEVIEW_ICON: vficon_marks_set(vf, enable); break;
 	}
-	if (enable)
-		gtk_widget_show(vf->filter);
-	else
-		gtk_widget_hide(vf->filter);
+
+	gtk_widget_set_visible(vf->filter, enable);
 
 	vf_refresh_idle(vf);
 }

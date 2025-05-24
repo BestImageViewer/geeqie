@@ -2900,18 +2900,6 @@ static void search_result_add_column(SearchData * sd, gint n, const gchar *title
 	gtk_tree_view_append_column(GTK_TREE_VIEW(sd->ui.result_view), column);
 }
 
-static void menu_choice_set_visible(GtkWidget *widget, gboolean visible)
-{
-	if (visible)
-		{
-		if (!gtk_widget_get_visible(widget)) gtk_widget_show(widget);
-		}
-	else
-		{
-		if (gtk_widget_get_visible(widget)) gtk_widget_hide(widget);
-		}
-}
-
 static gboolean menu_choice_get_match_type(GtkWidget *combo, MatchType *type)
 {
 	GtkTreeModel *store;
@@ -2929,9 +2917,9 @@ static void menu_choice_path_cb(GtkWidget *combo, gpointer data)
 
 	if (!menu_choice_get_match_type(combo, &sd->search_type)) return;
 
-	menu_choice_set_visible(gtk_widget_get_parent(sd->ui.check_recurse),
-	                        (sd->search_type == SEARCH_MATCH_NONE));
-	menu_choice_set_visible(sd->ui.box_collection, (sd->search_type == SEARCH_MATCH_COLLECTION));
+	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.check_recurse),
+	                       sd->search_type == SEARCH_MATCH_NONE);
+	gtk_widget_set_visible(sd->ui.box_collection, sd->search_type == SEARCH_MATCH_COLLECTION);
 }
 
 static void menu_choice_name_cb(GtkWidget *combo, gpointer data)
@@ -2947,8 +2935,8 @@ static void menu_choice_size_cb(GtkWidget *combo, gpointer data)
 
 	if (!menu_choice_get_match_type(combo, &sd->match_size)) return;
 
-	menu_choice_set_visible(gtk_widget_get_parent(sd->ui.spin_size_end),
-	                        (sd->match_size == SEARCH_MATCH_BETWEEN));
+	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.spin_size_end),
+	                       sd->match_size == SEARCH_MATCH_BETWEEN);
 }
 
 static void menu_choice_rating_cb(GtkWidget *combo, gpointer data)
@@ -2957,8 +2945,8 @@ static void menu_choice_rating_cb(GtkWidget *combo, gpointer data)
 
 	if (!menu_choice_get_match_type(combo, &sd->match_rating)) return;
 
-	menu_choice_set_visible(gtk_widget_get_parent(sd->ui.spin_rating_end),
-	                        (sd->match_rating == SEARCH_MATCH_BETWEEN));
+	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.spin_rating_end),
+	                       sd->match_rating == SEARCH_MATCH_BETWEEN);
 }
 
 static void menu_choice_class_cb(GtkWidget *combo, gpointer data)
@@ -2981,8 +2969,8 @@ static void menu_choice_date_cb(GtkWidget *combo, gpointer data)
 
 	if (!menu_choice_get_match_type(combo, &sd->match_date)) return;
 
-	menu_choice_set_visible(gtk_widget_get_parent(sd->ui.date_sel_end),
-	                        (sd->match_date == SEARCH_MATCH_BETWEEN));
+	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.date_sel_end),
+	                       sd->match_date == SEARCH_MATCH_BETWEEN);
 }
 
 static void menu_choice_dimensions_cb(GtkWidget *combo, gpointer data)
@@ -2991,8 +2979,8 @@ static void menu_choice_dimensions_cb(GtkWidget *combo, gpointer data)
 
 	if (!menu_choice_get_match_type(combo, &sd->match_dimensions)) return;
 
-	menu_choice_set_visible(gtk_widget_get_parent(sd->ui.spin_width_end),
-	                        (sd->match_dimensions == SEARCH_MATCH_BETWEEN));
+	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.spin_width_end),
+	                       sd->match_dimensions == SEARCH_MATCH_BETWEEN);
 }
 
 static void menu_choice_keyword_cb(GtkWidget *combo, gpointer data)
@@ -3029,8 +3017,8 @@ static void menu_choice_gps_cb(GtkWidget *combo, gpointer data)
 
 	if (!menu_choice_get_match_type(combo, &sd->match_gps)) return;
 
-	menu_choice_set_visible(gtk_widget_get_parent(sd->ui.spin_gps),
-	                        (sd->match_gps != SEARCH_MATCH_NONE));
+	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.spin_gps),
+	                       sd->match_gps != SEARCH_MATCH_NONE);
 }
 
 static GtkWidget *menu_spin(GtkWidget *box, gdouble min, gdouble max, gint value,

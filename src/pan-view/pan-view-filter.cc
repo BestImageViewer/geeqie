@@ -159,16 +159,14 @@ void pan_filter_toggle_cb(GtkWidget *button, gpointer data)
 	gboolean visible = gtk_widget_get_visible(ui->filter_box);
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) == visible) return;
 
+	gtk_widget_set_visible(ui->filter_box, !visible);
+
 	if (visible)
 		{
-		gtk_widget_hide(ui->filter_box);
-
 		pan_filter_ui_replace_filter_button_arrow(ui, GQ_ICON_PAN_UP);
 		}
 	else
 		{
-		gtk_widget_show(ui->filter_box);
-
 		pan_filter_ui_replace_filter_button_arrow(ui, GQ_ICON_PAN_DOWN);
 
 		gtk_widget_grab_focus(ui->filter_entry);

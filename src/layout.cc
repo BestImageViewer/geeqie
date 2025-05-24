@@ -2263,71 +2263,14 @@ void layout_selectable_toolbars_toggle(LayoutWindow *)
 
 	current_lw->options.selectable_toolbars_hidden = !current_lw->options.selectable_toolbars_hidden;
 
-	if (options->selectable_bars.tool_bar)
-		{
-		if (current_lw->options.selectable_toolbars_hidden)
-			{
-			if (gtk_widget_get_visible(current_lw->toolbar[TOOLBAR_MAIN]))
-				{
-				gtk_widget_hide(current_lw->toolbar[TOOLBAR_MAIN]);
-				}
-			}
-		else
-			{
-			if (!gtk_widget_get_visible(current_lw->toolbar[TOOLBAR_MAIN]))
-				{
-				gtk_widget_show(current_lw->toolbar[TOOLBAR_MAIN]);
-				}
-			}
-		}
-	else
-		{
-		gtk_widget_show(current_lw->toolbar[TOOLBAR_MAIN]);
-		}
+	gtk_widget_set_visible(current_lw->toolbar[TOOLBAR_MAIN],
+	                       !options->selectable_bars.tool_bar || !current_lw->options.selectable_toolbars_hidden);
 
-	if (options->selectable_bars.menu_bar)
-		{
-		if (current_lw->options.selectable_toolbars_hidden)
-			{
-			if (gtk_widget_get_visible(current_lw->menu_bar))
-				{
-				gtk_widget_hide(current_lw->menu_bar);
-				}
-			}
-		else
-			{
-			if (!gtk_widget_get_visible(current_lw->menu_bar))
-				{
-				gtk_widget_show(current_lw->menu_bar);
-				}
-			}
-		}
-	else
-		{
-		gtk_widget_show(current_lw->menu_bar);
-		}
+	gtk_widget_set_visible(current_lw->menu_bar,
+	                       !options->selectable_bars.menu_bar || !current_lw->options.selectable_toolbars_hidden);
 
-	if (options->selectable_bars.status_bar)
-		{
-		if (current_lw->options.selectable_toolbars_hidden)
-			{
-			if (gtk_widget_get_visible(current_lw->info_box))
-				{
-				gtk_widget_hide(current_lw->info_box);
-				}
-			}
-		else
-			{
-			if (!gtk_widget_get_visible(current_lw->info_box))
-				{
-				gtk_widget_show(current_lw->info_box);
-				}
-			}
-		}
-	else
-		{
-		gtk_widget_show(current_lw->info_box);
-		}
+	gtk_widget_set_visible(current_lw->info_box,
+	                       !options->selectable_bars.status_bar || !current_lw->options.selectable_toolbars_hidden);
 }
 
 void layout_info_pixel_set(LayoutWindow *lw, gboolean show)
@@ -2340,14 +2283,7 @@ void layout_info_pixel_set(LayoutWindow *lw, gboolean show)
 	lw->options.show_info_pixel = show;
 
 	frame = gtk_widget_get_parent(lw->info_pixel);
-	if (!lw->options.show_info_pixel)
-		{
-		gtk_widget_hide(frame);
-		}
-	else
-		{
-		gtk_widget_show(frame);
-		}
+	gtk_widget_set_visible(frame, lw->options.show_info_pixel);
 
 	g_signal_emit_by_name (lw->image->pr, "update-pixel");
 }
