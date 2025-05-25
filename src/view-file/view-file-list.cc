@@ -292,7 +292,7 @@ void vflist_pop_menu_rename_cb(ViewFile *vf)
 		GtkTreeModel *store;
 		GtkTreeIter iter;
 
-		filelist_free(list);
+		file_data_list_free(list);
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 		if (vflist_find_row(vf, vf->click_fd, &iter) >= 0)
@@ -1670,7 +1670,7 @@ static void vflist_populate_view(ViewFile *vf, gboolean force)
 		vflist_select_closest(vf, static_cast<FileData *>(selected->data));
 		}
 
-	filelist_free(selected);
+	file_data_list_free(selected);
 
 	vf_send_update(vf);
 	vf_thumb_update(vf);
@@ -1726,7 +1726,7 @@ gboolean vflist_refresh(ViewFile *vf)
 
 	DEBUG_1("%s vflist_refresh: free filelist", get_exec_time());
 
-	filelist_free(old_list);
+	file_data_list_free(old_list);
 	DEBUG_1("%s vflist_refresh: done", get_exec_time());
 
 	return ret;
@@ -1881,7 +1881,7 @@ gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd)
 	/* force complete reload */
 	vflist_store_clear(vf, TRUE);
 
-	filelist_free(vf->list);
+	file_data_list_free(vf->list);
 	vf->list = nullptr;
 
 	ret = vflist_refresh(vf);
@@ -1898,7 +1898,7 @@ void vflist_destroy_cb(ViewFile *vf)
 	vf_thumb_stop(vf);
 	vf_star_stop(vf);
 
-	filelist_free(vf->list);
+	file_data_list_free(vf->list);
 }
 
 ViewFile *vflist_new(ViewFile *vf)

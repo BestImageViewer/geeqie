@@ -179,7 +179,7 @@ gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs)
 	return FileData::FileList::read_list_lstat(dir_fd, files, dirs);
 }
 
-void filelist_free(GList *list)
+void file_data_list_free(FileDataList *list)
 {
 	FileData::FileList::free_list(list);
 }

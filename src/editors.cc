@@ -1142,7 +1142,7 @@ static EditorFlags editor_command_next_finish(EditorData *ed, gint status)
 	if (ed->flags & EDITOR_FOR_EACH)
 		{
 		/* handle the first element from the list */
-		GList *fd_element = ed->list;
+		g_autoptr(FileDataList) fd_element = ed->list;
 
 		ed->list = g_list_remove_link(ed->list, fd_element);
 		if (ed->callback)
@@ -1150,14 +1150,13 @@ static EditorFlags editor_command_next_finish(EditorData *ed, gint status)
 			cont = ed->callback(ed->list ? ed : nullptr, ed->flags, fd_element, ed->data);
 			if (ed->stopping && cont == EDITOR_CB_CONTINUE) cont = EDITOR_CB_SKIP;
 			}
-		filelist_free(fd_element);
 		}
 	else
 		{
 		/* handle whole list */
 		if (ed->callback)
 			cont = ed->callback(nullptr, ed->flags, ed->list, ed->data);
-		filelist_free(ed->list);
+		file_data_list_free(ed->list);
 		ed->list = nullptr;
 		}
 
@@ -1196,7 +1195,7 @@ static EditorFlags editor_command_done(EditorData *ed)
 		{
 		ed->flags = static_cast<EditorFlags>(ed->flags | EDITOR_ERROR_SKIPPED);
 		if (ed->callback) ed->callback(nullptr, ed->flags, ed->list, ed->data);
-		filelist_free(ed->list);
+		file_data_list_free(ed->list);
 		ed->list = nullptr;
 		}
 

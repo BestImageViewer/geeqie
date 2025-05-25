@@ -785,11 +785,11 @@ static gboolean collect_manager_process_action(CollectManagerEntry *entry, gchar
 
 static void collect_manager_refresh()
 {
-	GList *list;
 	GList *work;
 	FileData *dir_fd;
 
 	dir_fd = file_data_new_dir(get_collections_dir());
+	g_autoptr(FileDataList) list = nullptr;
 	filelist_read(dir_fd, &list, nullptr);
 	file_data_unref(dir_fd);
 
@@ -836,8 +836,6 @@ static void collect_manager_refresh()
 
 		collect_manager_entry_new(fd->path);
 		}
-
-	filelist_free(list);
 }
 
 static void collect_manager_process_actions(gint max)
@@ -1103,7 +1101,6 @@ void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer)
 void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 {
 	FileData *dir_fd;
-	GList *list = nullptr;
 
 	if (names_exc == nullptr && names_inc == nullptr && paths == nullptr)
 		{
@@ -1112,6 +1109,7 @@ void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 
 	dir_fd = file_data_new_dir((get_collections_dir()));
 
+	g_autoptr(FileDataList) list = nullptr;
 	filelist_read(dir_fd, &list, nullptr);
 
 	for (GList *work = list; work; work = work->next)
@@ -1138,7 +1136,5 @@ void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths)
 				}
 			}
 		}
-
-	filelist_free(list);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

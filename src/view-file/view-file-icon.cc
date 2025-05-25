@@ -833,18 +833,15 @@ void vficon_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 
 void vficon_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 {
-	GList *slist;
-
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
-	slist = vficon_selection_get_list(vf);
+	g_autoptr(FileDataList) slist = vficon_selection_get_list(vf);
 	for (GList *work = slist; work; work = work->next)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 
 		file_data_selection_to_mark(fd, mark, mode);
 		}
-	filelist_free(slist);
 }
 
 static void vficon_select_closest(ViewFile *vf, FileData *sel_fd)
@@ -1863,7 +1860,7 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 		g_list_free(reversed_old_selected);
 		}
 
-	filelist_free(new_filelist);
+	file_data_list_free(new_filelist);
 
 	vficon_populate(vf, TRUE, keep_position);
 

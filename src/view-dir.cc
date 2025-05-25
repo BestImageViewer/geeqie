@@ -174,7 +174,7 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 	}
 
 	folder_icons_free(vd->pf);
-	filelist_free(vd->drop_list);
+	file_data_list_free(vd->drop_list);
 
 	file_data_unref(vd->dir_fd);
 	g_free(vd->info);
@@ -384,7 +384,7 @@ void vd_popup_destroy_cb(GtkWidget *, gpointer data)
 	vd->popup = nullptr;
 
 	vd_color_set(vd, vd->drop_fd, FALSE);
-	filelist_free(vd->drop_list);
+	file_data_list_free(vd->drop_list);
 	vd->drop_list = nullptr;
 	vd->drop_fd = nullptr;
 }
@@ -524,9 +524,10 @@ static void vd_pop_menu_slide_rec_cb(GtkWidget *, gpointer data)
 static void vd_pop_menu_dupe(ViewDir *vd, gint recursive)
 {
 	DupeWindow *dw;
-	GList *list = nullptr;
 
 	if (!vd->click_fd) return;
+
+	g_autoptr(FileDataList) list = nullptr;
 
 	if (recursive)
 		{
@@ -540,8 +541,6 @@ static void vd_pop_menu_dupe(ViewDir *vd, gint recursive)
 
 	dw = dupe_window_new();
 	dupe_window_add_files(dw, list, recursive);
-
-	filelist_free(list);
 }
 
 static void vd_pop_menu_dupe_cb(GtkWidget *, gpointer data)

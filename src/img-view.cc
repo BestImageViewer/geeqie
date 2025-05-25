@@ -169,7 +169,7 @@ static ImageWindow *view_window_active_image(ViewWindow *vw)
 static void view_window_set_list(ViewWindow *vw, GList *list)
 {
 
-	filelist_free(vw->list);
+	file_data_list_free(vw->list);
 	vw->list = nullptr;
 	vw->list_pointer = nullptr;
 
@@ -857,7 +857,7 @@ static void view_window_destroy_cb(GtkWidget *, gpointer data)
 	view_slideshow_stop(vw);
 	fullscreen_stop(vw->fs);
 
-	filelist_free(vw->list);
+	file_data_list_free(vw->list);
 
 	file_data_unregister_notify_func(view_window_notify_cb, vw);
 
@@ -1041,7 +1041,7 @@ void view_window_new(FileData *fd)
 			list = filelist_sort_path(list);
 			list = filelist_filter(list, FALSE);
 			real_view_window_new(nullptr, list, nullptr, nullptr);
-			filelist_free(list);
+			file_data_list_free(list);
 			}
 		else
 			{
@@ -1321,7 +1321,7 @@ static void view_popup_menu_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto editmenu_fd_list = static_cast<GList *>(data);
 
-	filelist_free(editmenu_fd_list);
+	file_data_list_free(editmenu_fd_list);
 }
 
 static GList *view_window_get_fd_list(ViewWindow *vw)
@@ -1350,15 +1350,13 @@ static void image_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	ViewWindow *vw;
 	ImageWindow *imd;
 	FileData *fd;
-	GList *selection_list = nullptr;
 
 	vw = static_cast<ViewWindow *>(submenu_item_get_data(widget));
 	imd = view_window_active_image(vw);
 	fd = image_get_fd(imd);
-	selection_list = g_list_append(selection_list, fd);
-	pop_menu_collections(selection_list, data);
 
-	filelist_free(selection_list);
+	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, fd);
+	pop_menu_collections(selection_list, data);
 }
 
 static GtkWidget *view_popup_menu(ViewWindow *vw)
@@ -1550,7 +1548,7 @@ static void view_dir_list_skip(GtkWidget *, gpointer data)
 static void view_dir_list_destroy(GtkWidget *, gpointer data)
 {
 	auto d = static_cast<CViewConfirmD *>(data);
-	filelist_free(d->list);
+	file_data_list_free(d->list);
 	g_free(d);
 }
 
@@ -1599,7 +1597,7 @@ static void view_window_get_dnd_data(GtkWidget *, GdkDragContext *context,
 	if (info == TARGET_URI_LIST || info == TARGET_APP_COLLECTION_MEMBER)
 		{
 		CollectionData *source;
-		GList *list;
+		g_autoptr(FileDataList) list = nullptr;
 		GList *info_list;
 
 		if (info == TARGET_URI_LIST)
@@ -1659,7 +1657,7 @@ static void view_window_get_dnd_data(GtkWidget *, GdkDragContext *context,
 					}
 				}
 			}
-		filelist_free(list);
+
 		g_list_free(info_list);
 		}
 }

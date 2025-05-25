@@ -2117,7 +2117,7 @@ static void dupe_check_stop(DupeWindow *dw)
 		gtk_widget_set_sensitive(dw->controls_box, TRUE);
 		if (g_list_length(dw->add_files_queue) > 0)
 			{
-			filelist_free(dw->add_files_queue);
+			file_data_list_free(dw->add_files_queue);
 			}
 		dw->add_files_queue = nullptr;
 		dupe_window_update_progress(dw, nullptr, 0.0, FALSE);
@@ -2731,14 +2731,14 @@ static void dupe_files_add(DupeWindow *dw, CollectInfo *info,
 					dupe_files_add(dw, nullptr, static_cast<FileData *>(work->data), TRUE);
 					work = work->next;
 					}
-				filelist_free(f);
+				file_data_list_free(f);
 				work = d;
 				while (work)
 					{
 					dupe_files_add(dw, nullptr, static_cast<FileData *>(work->data), TRUE);
 					work = work->next;
 					}
-				filelist_free(d);
+				file_data_list_free(d);
 				}
 			}
 		}
@@ -3117,9 +3117,8 @@ static void dupe_menu_view(DupeItem *di, GtkWidget *listview, gint new_window)
 		{
 		if (new_window)
 			{
-			GList *list = dupe_listview_get_selection(listview);
+			g_autoptr(FileDataList) list = dupe_listview_get_selection(listview);
 			view_window_new_from_list(list);
-			filelist_free(list);
 			}
 		else
 			{
@@ -3177,20 +3176,16 @@ static void dupe_window_edit_selected(DupeWindow *dw, const gchar *key)
 static void dupe_window_collection_from_selection(DupeWindow *dw)
 {
 	CollectWindow *w = collection_window_new(nullptr);
-	GList *list = dupe_listview_get_selection(dw->listview);
+	g_autoptr(FileDataList) list = dupe_listview_get_selection(dw->listview);
 	collection_table_add_filelist(w->table, list);
-	filelist_free(list);
 }
 
 static void dupe_window_append_file_list(DupeWindow *dw, gint on_second)
 {
-	GList *list;
-
 	dw->second_drop = (dw->second_set && on_second);
 
-	list = layout_list(nullptr);
+	g_autoptr(FileDataList) list = layout_list(nullptr);
 	dupe_window_add_files(dw, list, FALSE);
-	filelist_free(list);
 }
 
 /*
@@ -3343,7 +3338,7 @@ static void dupe_menu_popup_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto editmenu_fd_list = static_cast<GList *>(data);
 
-	filelist_free(editmenu_fd_list);
+	file_data_list_free(editmenu_fd_list);
 }
 
 static GList *dupe_window_get_fd_list(DupeWindow *dw)
@@ -3373,10 +3368,8 @@ static void dupe_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 {
 	auto *dw = static_cast<DupeWindow *>(submenu_item_get_data(widget));
 	
-	GList *selection_list = dupe_listview_get_selection(dw->listview);
+	g_autoptr(FileDataList) selection_list = dupe_listview_get_selection(dw->listview);
 	pop_menu_collections(selection_list, data);
-
-	filelist_free(selection_list);
 }
 
 static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
@@ -4755,14 +4748,13 @@ static void confirm_dir_list_add(GtkWidget *, gpointer data)
 		work = work->next;
 		if (isdir(fd->path))
 			{
-			GList *list;
+			g_autoptr(FileDataList) list = nullptr;
 
 			filelist_read(fd, &list, nullptr);
 			list = filelist_filter(list, FALSE);
 			if (list)
 				{
 				dupe_window_add_files(d->dw, list, FALSE);
-				filelist_free(list);
 				}
 			}
 		}
@@ -4783,7 +4775,7 @@ static void confirm_dir_list_skip(GtkWidget *, gpointer data)
 static void confirm_dir_list_destroy(GtkWidget *, gpointer data)
 {
 	auto d = static_cast<CDupeConfirmD *>(data);
-	filelist_free(d->list);
+	file_data_list_free(d->list);
 	g_free(d);
 }
 
@@ -4821,16 +4813,16 @@ static void dupe_dnd_data_set(GtkWidget *widget, GdkDragContext *,
                               GtkSelectionData *selection_data, guint info,
                               guint, gpointer)
 {
-	GList *list;
-
 	switch (info)
 		{
 		case TARGET_URI_LIST:
 		case TARGET_TEXT_PLAIN:
-			list = dupe_listview_get_selection(widget);
+			{
+			g_autoptr(FileDataList) list = dupe_listview_get_selection(widget);
 			if (!list) return;
+
 			uri_selection_data_set_uris_from_filelist(selection_data, list);
-			filelist_free(list);
+			}
 			break;
 		default:
 			break;
@@ -4844,7 +4836,6 @@ static void dupe_dnd_data_get(GtkWidget *widget, GdkDragContext *context,
 {
 	auto dw = static_cast<DupeWindow *>(data);
 	GtkWidget *source;
-	GList *list = nullptr;
 	GList *work;
 
 	if (dw->add_files_queue_id > 0)
@@ -4859,6 +4850,7 @@ static void dupe_dnd_data_get(GtkWidget *widget, GdkDragContext *context,
 
 	dw->second_drop = (dw->second_set && widget == dw->second_listview);
 
+	g_autoptr(FileDataList) list = nullptr;
 	switch (info)
 		{
 		case TARGET_APP_COLLECTION_MEMBER:
@@ -4888,7 +4880,6 @@ static void dupe_dnd_data_get(GtkWidget *widget, GdkDragContext *context,
 	if (list)
 		{
 		dupe_window_add_files(dw, list, FALSE);
-		filelist_free(list);
 		}
 }
 

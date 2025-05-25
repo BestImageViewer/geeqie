@@ -145,7 +145,7 @@ void cache_maintain_home_close(CMData *cm)
 {
 	if (cm->idle_id) g_source_remove(cm->idle_id);
 	if (cm->gd) generic_dialog_close(cm->gd);
-	filelist_free(cm->list);
+	file_data_list_free(cm->list);
 	g_list_free(cm->done_list);
 	g_free(cm);
 }
@@ -328,7 +328,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 		}
 	options->file_filter.disable = filter_disable;
 
-	filelist_free(list);
+	file_data_list_free(list);
 
 	cm->list = g_list_concat(dlist, cm->list);
 
@@ -568,10 +568,10 @@ void cache_notify_cb(FileData *fd, NotifyType type, gpointer)
 
 static void cache_manager_render_reset(CacheOpsData *cd)
 {
-	filelist_free(cd->list);
+	file_data_list_free(cd->list);
 	cd->list = nullptr;
 
-	filelist_free(cd->list_dir);
+	file_data_list_free(cd->list_dir);
 	cd->list_dir = nullptr;
 
 	thumb_loader_free(reinterpret_cast<ThumbLoader *>(cd->tl));
@@ -882,7 +882,7 @@ static void cache_manager_standard_clean_close_cb(GenericDialog *, gpointer data
 	generic_dialog_close(cd->gd);
 
 	thumb_loader_std_thumb_file_validate_cancel(cd->tl);
-	filelist_free(cd->list);
+	file_data_list_free(cd->list);
 	g_free(cd);
 }
 
@@ -905,7 +905,7 @@ static void cache_manager_standard_clean_done(CacheOpsData *cd)
 	thumb_loader_std_thumb_file_validate_cancel(cd->tl);
 	cd->tl = nullptr;
 
-	filelist_free(cd->list);
+	file_data_list_free(cd->list);
 	cd->list = nullptr;
 }
 
@@ -1195,10 +1195,10 @@ static gboolean cache_manager_sim_file(CacheOpsData *cd);
 
 static void cache_manager_sim_reset(CacheOpsData *cd)
 {
-	filelist_free(cd->list);
+	file_data_list_free(cd->list);
 	cd->list = nullptr;
 
-	filelist_free(cd->list_dir);
+	file_data_list_free(cd->list_dir);
 	cd->list_dir = nullptr;
 
 	cache_loader_free(cd->cl);

@@ -109,12 +109,11 @@ static void bar_pane_comment_update(PaneCommentData *pcd)
 
 static void bar_pane_comment_set_selection(PaneCommentData *pcd, gboolean append)
 {
-	GList *list = nullptr;
 	GList *work;
 
 	g_autofree gchar *comment = text_widget_text_pull(pcd->comment_view);
 
-	list = layout_selection_list(pcd->pane.lw);
+	g_autoptr(FileDataList) list = layout_selection_list(pcd->pane.lw);
 	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
 
 	work = list;
@@ -133,8 +132,6 @@ static void bar_pane_comment_set_selection(PaneCommentData *pcd, gboolean append
 			metadata_write_string(fd, pcd->key, comment);
 			}
 		}
-
-	filelist_free(list);
 }
 
 static void bar_pane_comment_sel_add_cb(GtkWidget *, gpointer data)

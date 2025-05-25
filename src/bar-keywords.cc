@@ -428,12 +428,11 @@ gboolean bar_pane_keywords_filter_visible(GtkTreeModel *keyword_tree, GtkTreeIte
 void bar_pane_keywords_set_selection(PaneKeywordsData *pkd, gboolean append)
 {
 	GList *keywords = nullptr;
-	GList *list = nullptr;
 	GList *work;
 
 	keywords = keyword_list_pull_selected(pkd->keyword_view);
 
-	list = layout_selection_list(pkd->pane.lw);
+	g_autoptr(FileDataList) list = layout_selection_list(pkd->pane.lw);
 	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
 
 	work = list;
@@ -452,7 +451,6 @@ void bar_pane_keywords_set_selection(PaneKeywordsData *pkd, gboolean append)
 			}
 		}
 
-	filelist_free(list);
 	g_list_free_full(keywords, g_free);
 }
 
@@ -1258,7 +1256,7 @@ void bar_pane_keywords_add_to_selected_cb(GtkWidget *, gpointer data)
 		work = work->next;
 		metadata_append_list(fd, KEYWORD_KEY, keywords);
 		}
-	filelist_free(list);
+	file_data_list_free(list);
 	g_list_free_full(keywords, g_free);
 }
 

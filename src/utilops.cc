@@ -525,8 +525,8 @@ static void file_util_data_free(UtilityData *ud)
 	if (ud->perform_idle_id) g_source_remove(ud->perform_idle_id);
 
 	file_data_unref(ud->dir_fd);
-	filelist_free(ud->content_list);
-	filelist_free(ud->flist);
+	file_data_list_free(ud->content_list);
+	file_data_list_free(ud->flist);
 
 	if (ud->gd) generic_dialog_close(ud->gd);
 
@@ -2145,7 +2145,6 @@ static void file_util_mark_ungrouped_files(GList *work)
 static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *parent, UtilityPhase phase, FileUtilDoneFunc done_func, gpointer done_data)
 {
 	UtilityData *ud;
-	GList *ungrouped = nullptr;
 	gchar *message;
 
 	if (source_fd)
@@ -2153,19 +2152,18 @@ static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *
 
 	if (!flist) return;
 
+	g_autoptr(FileDataList) ungrouped = nullptr;
 	flist = file_data_process_groups_in_selection(flist, TRUE, &ungrouped);
 
 	if (!file_data_sc_add_ci_delete_list(flist))
 		{
 		file_util_warn_op_in_progress(_("File deletion failed"));
 		file_data_disable_grouping_list(ungrouped, FALSE);
-		filelist_free(flist);
-		filelist_free(ungrouped);
+		file_data_list_free(flist);
 		return;
 		}
 
 	file_util_mark_ungrouped_files(ungrouped);
-	filelist_free(ungrouped);
 
 	ud = file_util_data_new(UtilityType::DELETE);
 
@@ -2228,7 +2226,7 @@ static void file_util_write_metadata_full(FileData *source_fd, GList *flist, Gtk
 	if (!file_data_add_ci_write_metadata_list(flist))
 		{
 		file_util_warn_op_in_progress(_("Can't write metadata"));
-		filelist_free(flist);
+		file_data_list_free(flist);
 		return;
 		}
 
@@ -2262,26 +2260,24 @@ static void file_util_write_metadata_full(FileData *source_fd, GList *flist, Gtk
 static void file_util_move_full(FileData *source_fd, GList *flist, const gchar *dest_path, GtkWidget *parent, UtilityPhase phase)
 {
 	UtilityData *ud;
-	GList *ungrouped = nullptr;
 
 	if (source_fd)
 		flist = g_list_append(flist, file_data_ref(source_fd));
 
 	if (!flist) return;
 
+	g_autoptr(FileDataList) ungrouped = nullptr;
 	flist = file_data_process_groups_in_selection(flist, TRUE, &ungrouped);
 
 	if (!file_data_sc_add_ci_move_list(flist, dest_path))
 		{
 		file_util_warn_op_in_progress(_("Move failed"));
 		file_data_disable_grouping_list(ungrouped, FALSE);
-		filelist_free(flist);
-		filelist_free(ungrouped);
+		file_data_list_free(flist);
 		return;
 		}
 
 	file_util_mark_ungrouped_files(ungrouped);
-	filelist_free(ungrouped);
 
 	ud = file_util_data_new(UtilityType::MOVE);
 
@@ -2309,7 +2305,6 @@ static void file_util_move_full(FileData *source_fd, GList *flist, const gchar *
 static void file_util_copy_full(FileData *source_fd, GList *flist, const gchar *dest_path, GtkWidget *parent, UtilityPhase phase)
 {
 	UtilityData *ud;
-	GList *ungrouped = nullptr;
 
 	if (source_fd)
 		flist = g_list_append(flist, file_data_ref(source_fd));
@@ -2319,19 +2314,18 @@ static void file_util_copy_full(FileData *source_fd, GList *flist, const gchar *
 	if (file_util_write_metadata_first(UtilityType::COPY, phase, flist, dest_path, nullptr, parent))
 		return;
 
+	g_autoptr(FileDataList) ungrouped = nullptr;
 	flist = file_data_process_groups_in_selection(flist, TRUE, &ungrouped);
 
 	if (!file_data_sc_add_ci_copy_list(flist, dest_path))
 		{
 		file_util_warn_op_in_progress(_("Copy failed"));
 		file_data_disable_grouping_list(ungrouped, FALSE);
-		filelist_free(flist);
-		filelist_free(ungrouped);
+		file_data_list_free(flist);
 		return;
 		}
 
 	file_util_mark_ungrouped_files(ungrouped);
-	filelist_free(ungrouped);
 
 	ud = file_util_data_new(UtilityType::COPY);
 
@@ -2359,26 +2353,24 @@ static void file_util_copy_full(FileData *source_fd, GList *flist, const gchar *
 static void file_util_rename_full(FileData *source_fd, GList *flist, const gchar *dest_path, GtkWidget *parent, UtilityPhase phase)
 {
 	UtilityData *ud;
-	GList *ungrouped = nullptr;
 
 	if (source_fd)
 		flist = g_list_append(flist, file_data_ref(source_fd));
 
 	if (!flist) return;
 
+	g_autoptr(FileDataList) ungrouped = nullptr;
 	flist = file_data_process_groups_in_selection(flist, TRUE, &ungrouped);
 
 	if (!file_data_sc_add_ci_rename_list(flist, dest_path))
 		{
 		file_util_warn_op_in_progress(_("Rename failed"));
 		file_data_disable_grouping_list(ungrouped, FALSE);
-		filelist_free(flist);
-		filelist_free(ungrouped);
+		file_data_list_free(flist);
 		return;
 		}
 
 	file_util_mark_ungrouped_files(ungrouped);
-	filelist_free(ungrouped);
 
 	ud = file_util_data_new(UtilityType::RENAME);
 
@@ -2405,7 +2397,6 @@ static void file_util_rename_full(FileData *source_fd, GList *flist, const gchar
 static void file_util_start_editor_full(const gchar *key, FileData *source_fd, GList *flist, const gchar *dest_path, const gchar *working_directory, GtkWidget *parent, UtilityPhase phase)
 {
 	UtilityData *ud;
-	GList *ungrouped = nullptr;
 
 	if (editor_no_param(key))
 		{
@@ -2423,7 +2414,7 @@ static void file_util_start_editor_full(const gchar *key, FileData *source_fd, G
 
 		/* just start the editor, don't care about files */
 		start_editor(key, working_directory);
-		filelist_free(flist);
+		file_data_list_free(flist);
 		return;
 		}
 
@@ -2442,19 +2433,18 @@ static void file_util_start_editor_full(const gchar *key, FileData *source_fd, G
 	if (file_util_write_metadata_first(UtilityType::FILTER, phase, flist, dest_path, key, parent))
 		return;
 
+	g_autoptr(FileDataList) ungrouped = nullptr;
 	flist = file_data_process_groups_in_selection(flist, TRUE, &ungrouped);
 
 	if (!file_data_sc_add_ci_unspecified_list(flist, dest_path))
 		{
 		file_util_warn_op_in_progress(_("Can't run external editor"));
 		file_data_disable_grouping_list(ungrouped, FALSE);
-		filelist_free(flist);
-		filelist_free(ungrouped);
+		file_data_list_free(flist);
 		return;
 		}
 
 	file_util_mark_ungrouped_files(ungrouped);
-	filelist_free(ungrouped);
 
 	if (editor_is_filter(key))
 		ud = file_util_data_new(UtilityType::FILTER);
@@ -2514,8 +2504,6 @@ static GList *file_util_delete_dir_remaining_folders(GList *dlist)
 
 static gboolean file_util_delete_dir_empty_path(UtilityData *ud, FileData *fd, gint level)
 {
-	GList *dlist;
-	GList *flist;
 	GList *work;
 
 	DEBUG_1("deltree into: %s", fd->path);
@@ -2525,13 +2513,15 @@ static gboolean file_util_delete_dir_empty_path(UtilityData *ud, FileData *fd, g
 		{
 		log_printf("folder recursion depth past %d, giving up\n", UTILITY_DELETE_MAX_DEPTH);
 		// ud->fail_fd = fd
-		return 0;
+		return FALSE;
 		}
 
+	g_autoptr(FileDataList) dlist = nullptr;
+	g_autoptr(FileDataList) flist = nullptr;
 	if (!filelist_read_lstat(fd, &flist, &dlist))
 		{
 		// ud->fail_fd = fd
-		return 0;
+		return FALSE;
 		}
 
 	gboolean ok = file_data_sc_add_ci_delete(fd);
@@ -2569,9 +2559,6 @@ static gboolean file_util_delete_dir_empty_path(UtilityData *ud, FileData *fd, g
 			}
 		// ud->fail_fd = fd
 		}
-
-	filelist_free(dlist);
-	filelist_free(flist);
 
 	DEBUG_1("deltree done: %s", fd->path);
 
@@ -2724,20 +2711,20 @@ static void file_util_delete_dir_full(FileData *fd, GtkWidget *parent, UtilityPh
 			}
 		else
 			{
-			filelist_free(dlist);
+			file_data_list_free(dlist);
 			file_util_dialog_run(ud);
 			return;
 			}
 		}
 
 	g_list_free(rlist);
-	filelist_free(dlist);
-	filelist_free(flist);
+	file_data_list_free(dlist);
+	file_data_list_free(flist);
 }
 
 static gboolean file_util_rename_dir_scan(UtilityData *ud, FileData *fd)
 {
-	GList *dlist;
+	g_autoptr(FileDataList) dlist = nullptr;
 	GList *flist;
 	GList *work;
 
@@ -2746,7 +2733,7 @@ static gboolean file_util_rename_dir_scan(UtilityData *ud, FileData *fd)
 	if (!filelist_read_lstat(fd, &flist, &dlist))
 		{
 		// ud->fail_fd = fd
-		return 0;
+		return FALSE;
 		}
 
 	ud->content_list = g_list_concat(flist, ud->content_list);
@@ -2762,8 +2749,6 @@ static gboolean file_util_rename_dir_scan(UtilityData *ud, FileData *fd)
 		ud->content_list = g_list_prepend(ud->content_list, file_data_ref(lfd));
 		ok = file_util_rename_dir_scan(ud, lfd);
 		}
-
-	filelist_free(dlist);
 
 	return ok;
 }
@@ -2885,7 +2870,7 @@ static void file_util_write_metadata_first_done(gboolean success, const gchar *,
 		}
 
 	/* the operation was cancelled */
-	filelist_free(dd->flist);
+	file_data_list_free(dd->flist);
 	g_free(dd->dest_path);
 	g_free(dd->editor_key);
 	g_free(dd);
@@ -2906,7 +2891,7 @@ static gboolean file_util_write_metadata_first(UtilityType type, UtilityPhase ph
 
 		if (fd->change)
 			{
-			filelist_free(unsaved);
+			file_data_list_free(unsaved);
 			return FALSE; /* another op. in progress, let the caller handle it */
 			}
 
@@ -3242,7 +3227,7 @@ void file_util_path_list_to_clipboard(GList *fd_list, gboolean quoted, Clipboard
 		path_list_to_clipboard(get_path_list(fd_list), quoted, action, GDK_SELECTION_CLIPBOARD);
 		}
 
-	filelist_free(fd_list);
+	file_data_list_free(fd_list);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

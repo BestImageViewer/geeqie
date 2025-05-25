@@ -43,7 +43,7 @@ void slideshow_free(SlideShowData *ss)
 
 	if (ss->stop_func) ss->stop_func(ss, ss->stop_data);
 
-	if (ss->filelist) filelist_free(ss->filelist);
+	if (ss->filelist) file_data_list_free(ss->filelist);
 	if (ss->cd) collection_unref(ss->cd);
 	file_data_unref(ss->dir_fd);
 

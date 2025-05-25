@@ -334,7 +334,7 @@ static void vf_dnd_get(GtkWidget *, GdkDragContext *,
 
 	if (!vf->click_fd) return;
 
-	GList *list = nullptr;
+	g_autoptr(FileDataList) list = nullptr;
 
 	if (vf_is_selected(vf, vf->click_fd))
 		{
@@ -348,7 +348,6 @@ static void vf_dnd_get(GtkWidget *, GdkDragContext *,
 	if (!list) return;
 
 	uri_selection_data_set_uris_from_filelist(selection_data, list);
-	filelist_free(list);
 }
 
 static void vf_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
@@ -475,11 +474,8 @@ static void vf_pop_menu_view_cb(GtkWidget *, gpointer data)
 
 	if (vf_is_selected(vf, vf->click_fd))
 		{
-		GList *list;
-
-		list = vf_selection_get_list(vf);
+		g_autoptr(FileDataList) list = vf_selection_get_list(vf);
 		view_window_new_from_list(list);
-		filelist_free(list);
 		}
 	else
 		{
@@ -719,7 +715,7 @@ static void vf_popup_destroy_cb(GtkWidget *, gpointer data)
 	vf->click_fd = nullptr;
 	vf->popup = nullptr;
 
-	filelist_free(vf->editmenu_fd_list);
+	file_data_list_free(vf->editmenu_fd_list);
 	vf->editmenu_fd_list = nullptr;
 }
 
@@ -728,18 +724,13 @@ static void vf_popup_destroy_cb(GtkWidget *, gpointer data)
  * @param[in] widget
  * @param[in] data Index to the collection list menu item selected, or -1 for new collection
  *
- *
  */
 static void vf_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 {
-	ViewFile *vf;
-	GList *selection_list;
+	auto *vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
 
-	vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
-	selection_list = vf_selection_get_list(vf);
+	g_autoptr(FileDataList) selection_list = vf_selection_get_list(vf);
 	pop_menu_collections(selection_list, data);
-
-	filelist_free(selection_list);
 }
 
 static void vf_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)

@@ -3002,10 +3002,10 @@ static void keywords_find_folder(KeywordFindData *kfd, FileData *dir_fd)
 
 static void keywords_find_reset(KeywordFindData *kfd)
 {
-	filelist_free(kfd->list);
+	file_data_list_free(kfd->list);
 	kfd->list = nullptr;
 
-	filelist_free(kfd->list_dir);
+	file_data_list_free(kfd->list_dir);
 	kfd->list_dir = nullptr;
 }
 

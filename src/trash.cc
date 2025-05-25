@@ -48,13 +48,13 @@ static gint file_util_safe_number(gint64 free_space)
 {
 	gint n = 0;
 	gint64 total = 0;
-	GList *list;
 	GList *work;
 	gboolean sorted = FALSE;
 	gboolean warned = FALSE;
 	FileData *dir_fd;
 
 	dir_fd = file_data_new_dir(options->file_ops.safe_delete_path);
+	g_autoptr(FileDataList) list = nullptr;
 	if (!filelist_read(dir_fd, &list, nullptr))
 		{
 		file_data_unref(dir_fd);
@@ -102,8 +102,6 @@ static gint file_util_safe_number(gint64 free_space)
 		total -= fd->size;
 		file_data_unref(fd);
 		}
-
-	filelist_free(list);
 
 	return n;
 }

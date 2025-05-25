@@ -437,6 +437,8 @@ FileData *file_data_ref(FileData *fd);
 void file_data_unref(FileData *fd);
 #endif
 
+using FileDataList = GList; // element is FileData
+
 void file_data_lock(FileData *fd);
 void file_data_unlock(FileData *fd);
 void file_data_lock_list(GList *list);
@@ -458,7 +460,10 @@ GList *filelist_sort_full(GList *list, SortType method, gboolean ascending, gboo
 
 gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs);
 gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs);
-void filelist_free(GList *list);
+
+void file_data_list_free(FileDataList *list);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(FileDataList, file_data_list_free)
+
 GList *filelist_copy(GList *list);
 GList *filelist_from_path_list(GList *list);
 GList *filelist_to_path_list(GList *list);

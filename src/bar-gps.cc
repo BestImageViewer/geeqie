@@ -547,7 +547,7 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 	 * a single, small text character the same colour as the marker background.
 	 * Use a background process in case the user selects a large number of files.
 	 */
-	filelist_free(pgd->selection_list);
+	file_data_list_free(pgd->selection_list);
 	if (pgd->bbox) champlain_bounding_box_free(pgd->bbox);
 
 	list = layout_selection_list(pgd->pane.lw);
@@ -869,7 +869,7 @@ void bar_pane_gps_destroy(gpointer data)
 
 	g_idle_remove_by_data(pgd);
 
-	filelist_free(pgd->selection_list);
+	file_data_list_free(pgd->selection_list);
 	if (pgd->bbox) champlain_bounding_box_free(pgd->bbox);
 
 	file_data_unref(pgd->fd);

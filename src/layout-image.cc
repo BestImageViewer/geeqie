@@ -211,7 +211,7 @@ void layout_image_slideshow_start_from_list(LayoutWindow *lw, GList *list)
 
 	if (lw->slideshow || !list)
 		{
-		filelist_free(list);
+		file_data_list_free(list);
 		return;
 		}
 
@@ -735,7 +735,7 @@ static void layout_image_popup_menu_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto editmenu_fd_list = static_cast<GList *>(data);
 
-	filelist_free(editmenu_fd_list);
+	file_data_list_free(editmenu_fd_list);
 }
 
 static GList *layout_image_get_fd_list(LayoutWindow *lw)
@@ -764,14 +764,10 @@ static GList *layout_image_get_fd_list(LayoutWindow *lw)
  */
 static void layout_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 {
-	LayoutWindow *lw;
-	GList *selection_list = nullptr;
+	auto *lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
 
-	lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
-	selection_list = g_list_append(selection_list, layout_image_get_fd(lw));
+	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, layout_image_get_fd(lw));
 	pop_menu_collections(selection_list, data);
-
-	filelist_free(selection_list);
 }
 
 static void li_pop_menu_selectable_toolbars_toggle_cb(GtkWidget *, gpointer)
@@ -944,7 +940,7 @@ static void layout_image_dnd_receive(GtkWidget *widget, GdkDragContext *,
 	else if (info == TARGET_URI_LIST || info == TARGET_APP_COLLECTION_MEMBER)
 		{
 		CollectionData *source;
-		GList *list;
+		g_autoptr(FileDataList) list = nullptr;
 		GList *info_list;
 
 		if (info == TARGET_URI_LIST)
@@ -996,7 +992,6 @@ static void layout_image_dnd_receive(GtkWidget *widget, GdkDragContext *,
 				}
 			}
 
-		filelist_free(list);
 		g_list_free(info_list);
 		}
 }

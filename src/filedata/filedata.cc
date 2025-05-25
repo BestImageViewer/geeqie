@@ -250,7 +250,7 @@ gboolean FileData::file_data_check_changed_files(FileData *fd)
 			}
 		file_data_check_sidecars(sidecars); /* this will group the sidecars back together */
 		/* now we can release the sidecars */
-		filelist_free(sidecars);
+		file_data_list_free(sidecars);
 		file_data_increment_version(fd);
 		file_data_send_notification(fd, NOTIFY_REREAD);
 		::file_data_unref(fd);
@@ -1006,7 +1006,7 @@ void FileData::file_data_disable_grouping(FileData *fd, gboolean disable)
 			}
 		else if (fd->sidecar_files)
 			{
-			GList *sidecar_files = filelist_copy(fd->sidecar_files);
+			g_autoptr(FileDataList) sidecar_files = filelist_copy(fd->sidecar_files);
 			GList *work = sidecar_files;
 			while (work)
 				{
@@ -1016,7 +1016,6 @@ void FileData::file_data_disable_grouping(FileData *fd, gboolean disable)
 				file_data_send_notification(sfd, NOTIFY_GROUPING);
 				}
 			file_data_check_sidecars(sidecar_files); /* this will group the sidecars back together */
-			filelist_free(sidecar_files);
 			}
 		else
 			{
@@ -1110,7 +1109,7 @@ void FileData::file_data_basename_hash_insert_cb(gpointer fd, gpointer basename_
 
 void FileData::file_data_basename_hash_remove_list(gpointer, gpointer value, gpointer)
 {
-	filelist_free(static_cast<GList *>(value));
+	file_data_list_free(static_cast<GList *>(value));
 }
 
 void FileData::file_data_basename_hash_free(GHashTable *basename_hash)
@@ -1145,7 +1144,7 @@ FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext 
 
 	g_autofree gchar *dir = remove_level_from_path(path_utf8);
 
-	GList *files;
+	g_autoptr(FileDataList) files = nullptr;
 	FileList::read_list_real(dir, &files, nullptr, TRUE);
 
 	auto *fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
@@ -1158,7 +1157,6 @@ FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext 
 		::file_data_ref(fd);
 		}
 
-	filelist_free(files);
 	return fd;
 }
 
@@ -2579,7 +2577,7 @@ GList *FileData::file_data_process_groups_in_selection(GList *list, gboolean ung
 			}
 		}
 
-	filelist_free(list);
+	file_data_list_free(list);
 	out = g_list_reverse(out);
 
 	return out;

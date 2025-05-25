@@ -326,7 +326,7 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 		}
 
 	g_list_free(f);
-	filelist_free(d);
+	file_data_list_free(d);
 
 	return group;
 }
@@ -433,7 +433,7 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 			}
 		}
 
-	filelist_free(d);
+	file_data_list_free(d);
 
 	pan_item_size_by_item(parent, pi_box, PAN_BOX_BORDER);
 

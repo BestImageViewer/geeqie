@@ -607,7 +607,7 @@ void file_dialog_close(FileDialog *fdlg)
 {
 	file_data_unref(fdlg->source_fd);
 	g_free(fdlg->dest_path);
-	if (fdlg->source_list) filelist_free(fdlg->source_list);
+	if (fdlg->source_list) file_data_list_free(fdlg->source_list);
 
 	generic_dialog_close(GENERIC_DIALOG(fdlg));
 }

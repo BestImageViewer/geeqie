@@ -93,13 +93,13 @@ static void bar_sort_undo_set(SortData *sd, GList *src_list, const gchar *dest);
 static void bar_sort_collection_list_build(GtkWidget *bookmarks)
 {
 	FileData *dir_fd;
-	GList *list;
 	GList *work;
 
 	history_list_free_key(SORT_KEY_COLLECTIONS);
 	bookmark_list_set_key(bookmarks, SORT_KEY_COLLECTIONS);
 
 	dir_fd = file_data_new_dir(get_collections_dir());
+	g_autoptr(FileDataList) list = nullptr;
 	filelist_read(dir_fd, &list, nullptr);
 	file_data_unref(dir_fd);
 
@@ -124,8 +124,6 @@ static void bar_sort_collection_list_build(GtkWidget *bookmarks)
 			}
 		bookmark_list_add(bookmarks, name, fd->path);
 		}
-
-	filelist_free(list);
 }
 
 static void bar_sort_mode_sync(SortData *sd, SortModeType mode)

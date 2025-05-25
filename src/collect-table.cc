@@ -907,18 +907,14 @@ static void collection_table_popup_remove_cb(GtkWidget *, gpointer data)
 static void collection_table_popup_add_file_selection_cb(GtkWidget *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
-	GList *list;
 
 	LayoutWindow *lw = get_current_layout();
 	if (!lw) return;
 
-	list = vf_selection_get_list(lw->vf);
+	g_autoptr(FileDataList) list = vf_selection_get_list(lw->vf);
+	if (!list) return;
 
-	if (list)
-		{
-		collection_table_add_filelist(ct, list);
-		filelist_free(list);
-		}
+	collection_table_add_filelist(ct, list);
 }
 
 static void collection_table_popup_add_collection_cb(GtkWidget *, gpointer data)
@@ -987,11 +983,11 @@ static void collection_table_popup_destroy_cb(GtkWidget *, gpointer data)
 	ct->click_info = nullptr;
 	ct->popup = nullptr;
 
-	filelist_free(ct->drop_list);
+	file_data_list_free(ct->drop_list);
 	ct->drop_list = nullptr;
 	ct->drop_info = nullptr;
 
-	filelist_free(ct->editmenu_fd_list);
+	file_data_list_free(ct->editmenu_fd_list);
 	ct->editmenu_fd_list = nullptr;
 }
 
@@ -2098,8 +2094,8 @@ static void collection_table_add_dir_recursive(CollectTable *ct, FileData *dir_f
 		work = work->prev;
 		}
 
-	filelist_free(f);
-	filelist_free(d);
+	file_data_list_free(f);
+	file_data_list_free(d);
 }
 
 static void confirm_dir_list_do(CollectTable *ct, GList *list, gboolean recursive)
@@ -2208,7 +2204,7 @@ static void collection_table_dnd_get(GtkWidget *, GdkDragContext *,
 			if (!list) return;
 
 			uri_selection_data_set_uris_from_filelist(selection_data, list);
-			filelist_free(list);
+			file_data_list_free(list);
 			break;
 		}
 }
@@ -2244,7 +2240,7 @@ static void collection_table_dnd_receive(GtkWidget *, GdkDragContext *context,
 					gint col = -1;
 
 					/* it is a move within a collection */
-					filelist_free(list);
+					file_data_list_free(list);
 					list = nullptr;
 
 					if (!drop_info)
@@ -2294,7 +2290,7 @@ static void collection_table_dnd_receive(GtkWidget *, GdkDragContext *context,
 	if (list)
 		{
 		collection_table_insert_filelist(ct, list, drop_info);
-		filelist_free(list);
+		file_data_list_free(list);
 		}
 }
 

@@ -306,7 +306,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	vd->click_fd = nullptr;
 	vd->drop_fd = nullptr;
 
-	filelist_free(old_list);
+	file_data_list_free(old_list);
 	return ret;
 }
 
@@ -428,7 +428,7 @@ void vdlist_destroy_cb(GtkWidget *, gpointer data)
 	vd_dnd_drop_scroll_cancel(vd);
 	widget_auto_scroll_stop(vd->view);
 
-	filelist_free(VDLIST(vd)->list);
+	file_data_list_free(VDLIST(vd)->list);
 }
 
 ViewDir *vdlist_new(ViewDir *vd, FileData *)
