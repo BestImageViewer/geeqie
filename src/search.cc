@@ -1403,7 +1403,6 @@ static gboolean search_result_release_cb(GtkWidget *widget, GdkEventButton *beve
 static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
-	gboolean stop_signal = FALSE;
 	GtkTreeModel *store;
 	GList *slist;
 	MatchFileData *mfd = nullptr;
@@ -1425,9 +1424,9 @@ static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event,
 		}
 	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
+	gboolean stop_signal = TRUE;
 	if (event->state & GDK_CONTROL_MASK)
 		{
-		stop_signal = TRUE;
 		switch (event->keyval)
 			{
 			case '1':
@@ -1474,7 +1473,6 @@ static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event,
 		}
 	else
 		{
-		stop_signal = TRUE;
 		switch (event->keyval)
 			{
 			case GDK_KEY_Return: case GDK_KEY_KP_Enter:

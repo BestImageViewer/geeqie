@@ -1247,9 +1247,9 @@ static gboolean pan_window_key_press_cb(GtkWidget *widget, GdkEventKey *event, g
 
 	if (stop_signal) return stop_signal;
 
+	stop_signal = TRUE;
 	if (event->state & GDK_CONTROL_MASK)
 		{
-		stop_signal = TRUE;
 		switch (event->keyval)
 			{
 			case '1':
@@ -1295,7 +1295,6 @@ static gboolean pan_window_key_press_cb(GtkWidget *widget, GdkEventKey *event, g
 		}
 	else
 		{
-		stop_signal = TRUE;
 		switch (event->keyval)
 			{
 			case GDK_KEY_Escape:

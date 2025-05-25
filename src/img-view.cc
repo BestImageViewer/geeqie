@@ -438,9 +438,9 @@ static gboolean view_window_key_press_cb(GtkWidget * (widget), GdkEventKey *even
 
 	if (stop_signal) return stop_signal;
 
+	stop_signal = TRUE;
 	if (event->state & GDK_CONTROL_MASK)
 		{
-		stop_signal = TRUE;
 		switch (event->keyval)
 			{
 			case '1':
@@ -477,7 +477,6 @@ static gboolean view_window_key_press_cb(GtkWidget * (widget), GdkEventKey *even
 		}
 	else if (event->state & GDK_SHIFT_MASK)
 		{
-		stop_signal = TRUE;
 		switch (event->keyval)
 			{
 			case 'R': case 'r':
@@ -517,7 +516,6 @@ static gboolean view_window_key_press_cb(GtkWidget * (widget), GdkEventKey *even
 		}
 	else
 		{
-		stop_signal = TRUE;
 		switch (event->keyval)
 			{
 			case GDK_KEY_Page_Up: case GDK_KEY_KP_Page_Up:
@@ -629,6 +627,7 @@ static gboolean view_window_key_press_cb(GtkWidget * (widget), GdkEventKey *even
 				break;
 			}
 		}
+
 	if (!stop_signal && is_help_key(event))
 		{
 		help_window_show("GuideOtherWindowsImageWindow.html");

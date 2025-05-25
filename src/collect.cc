@@ -875,12 +875,11 @@ static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data)
 static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpointer data)
 {
 	auto cw = static_cast<CollectWindow *>(data);
-	gboolean stop_signal = FALSE;
+	gboolean stop_signal = TRUE;
 	GList *list;
 
 	if (event->state & GDK_CONTROL_MASK)
 		{
-		stop_signal = TRUE;
 		switch (event->keyval)
 			{
 			case '1':
@@ -938,7 +937,6 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 		}
 	else
 		{
-		stop_signal = TRUE;
 		switch (event->keyval)
 			{
 			case GDK_KEY_Return: case GDK_KEY_KP_Enter:
@@ -1005,6 +1003,7 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 				break;
 			}
 		}
+
 	if (!stop_signal && is_help_key(event))
 		{
 		help_window_show("GuideCollections.html");
