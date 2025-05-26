@@ -186,41 +186,36 @@ void cache_sim_data_free(CacheData *cd)
  *-------------------------------------------------------------------
  */
 
-static gboolean cache_sim_write_dimensions(GString *gstring, CacheData *cd)
+static gboolean cache_sim_write_dimensions(GString *gstring, const CacheData *cd)
 {
 	if (!cd || !cd->dimensions) return FALSE;
 
-	g_autofree gchar *parameter_text = g_strdup_printf("Dimensions=[%d x %d]\n", cd->width, cd->height);
-
-	g_string_append(gstring, parameter_text);
+	g_string_append_printf(gstring, "Dimensions=[%d x %d]\n", cd->width, cd->height);
 
 	return TRUE;
 }
 
-static gboolean cache_sim_write_date(GString *gstring, CacheData *cd)
+static gboolean cache_sim_write_date(GString *gstring, const CacheData *cd)
 {
 	if (!cd || !cd->have_date) return FALSE;
 
-	g_autofree gchar *parameter_text = g_strdup_printf("Date=[%ld]\n", cd->date);
-
-	g_string_append(gstring, parameter_text);
+	g_string_append_printf(gstring, "Date=[%ld]\n", cd->date);
 
 	return TRUE;
 }
 
-static gboolean cache_sim_write_md5sum(GString *gstring, CacheData *cd)
+static gboolean cache_sim_write_md5sum(GString *gstring, const CacheData *cd)
 {
 	if (!cd || !cd->have_md5sum) return FALSE;
 
 	g_autofree gchar *text = md5_digest_to_text(cd->md5sum);
-	g_autofree gchar *parameter_text = g_strdup_printf("MD5sum=[%s]\n", text);
 
-	g_string_append(gstring, parameter_text);
+	g_string_append_printf(gstring, "MD5sum=[%s]\n", text);
 
 	return TRUE;
 }
 
-static gboolean cache_sim_write_similarity(GString *gstring, CacheData *cd)
+static gboolean cache_sim_write_similarity(GString *gstring, const CacheData *cd)
 {
 	guint x;
 	guint y;
@@ -260,10 +255,7 @@ gboolean cache_sim_data_save(CacheData *cd)
 
 	g_autofree gchar *pathl = path_from_utf8(cd->path);
 
-	g_autoptr(GString) gstring = g_string_new(nullptr);
-
-	g_autofree gchar *open_text = g_strdup_printf("SIMcache\n#%s %s\n", PACKAGE, VERSION);
-	g_string_append(gstring, open_text);
+	g_autoptr(GString) gstring = g_string_new("SIMcache\n#" PACKAGE " " VERSION "\n");
 
 	cache_sim_write_dimensions(gstring, cd);
 	cache_sim_write_date(gstring, cd);

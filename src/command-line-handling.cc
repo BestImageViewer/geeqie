@@ -46,7 +46,6 @@
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "rcfile.h"
-#include "secure-save.h"
 #include "slideshow.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
@@ -932,8 +931,7 @@ void gq_log_file(GtkApplication *, GApplicationCommandLine *, GVariantDict *comm
 	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "log-file", "&s", &text);
 
-	g_autofree gchar *pathl = path_from_utf8(text);
-	command_line->log_file = g_strdup(pathl);
+	command_line->log_file = path_from_utf8(text);
 }
 
 #if HAVE_LUA // @todo Use [[maybe_unused]] for command_line_options_dict since C++17 and merge declarations

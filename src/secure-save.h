@@ -21,6 +21,8 @@
 #ifndef SECURE_SAVE_H
 #define SECURE_SAVE_H
 
+#include <glib.h>
+
 gboolean secure_save(const gchar *file_name, const gchar *contents, gsize length);
 
 #endif /* SECURE_SAVE_H */

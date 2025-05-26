@@ -273,8 +273,7 @@ gboolean history_list_save(const gchar *path)
 		{
 		const auto *hd = static_cast<HistoryData *>(list->data);
 
-		g_autofree gchar *key_text = g_strdup_printf("[%s]\n", hd->key);
-		g_string_append(gstring, key_text);
+		g_string_append_printf(gstring, "[%s]\n", hd->key);
 
 		/* save them inverted (oldest to newest)
 		 * so that when reading they are added correctly
@@ -289,8 +288,7 @@ gboolean history_list_save(const gchar *path)
 			    &&
 			    (strcmp(hd->key, "image_list") != 0 || list_count <= options->recent_folder_image_list_maxsize))
 				{
-				g_autofree gchar *item_text = g_strdup_printf("\"%s\"\n", item);
-				g_string_append(gstring, item_text);
+				g_string_append_printf(gstring, "\"%s\"\n", item);
 				}
 
 			list_count--;

@@ -461,7 +461,9 @@ void gq_accel_map_print(
 {
 	auto gstring = static_cast<GString *>(data);
 
-	g_string_append(gstring, changed ? nullptr : "; ");
+	if (!changed)
+		g_string_append(gstring, "; ");
+
 	g_string_append(gstring, "(gtk_accel_path \"");
 
 	g_autofree gchar *accel_path_escaped = g_strescape(accel_path, nullptr);

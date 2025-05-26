@@ -2825,9 +2825,7 @@ gboolean FileData::marks_list_load(const gchar *path)
 gboolean FileData::marks_list_save(gchar *path, gboolean save)
 {
 	g_autofree gchar *pathl = path_from_utf8(path);
-	g_autoptr(GString) marks = g_string_new("");
-
-	g_string_append(marks, "#Marks lists\n");
+	g_autoptr(GString) marks = g_string_new("#Marks lists\n");
 
 	if (save)
 		{
@@ -2835,7 +2833,7 @@ gboolean FileData::marks_list_save(gchar *path, gboolean save)
 		g_hash_table_foreach(context->file_data_pool, marks_get_files, marks);
 		}
 
-	g_string_append(marks,  "#end\n");
+	g_string_append(marks, "#end\n");
 
 	return secure_save(pathl, marks->str, -1);
 }

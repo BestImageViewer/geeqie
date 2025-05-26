@@ -1700,8 +1700,7 @@ gboolean autocomplete_keywords_list_save(const gchar *path)
 		g_autofree gchar *string = nullptr;
 		gtk_tree_model_get(model, iter, 0, &string, -1);
 
-		g_autofree gchar *keyword_text = g_strdup_printf("%s\n", string);
-		g_string_append(static_cast<GString *>(data), keyword_text);
+		g_string_append_printf(static_cast<GString *>(data), "%s\n", string);
 
 		return FALSE;
 	};

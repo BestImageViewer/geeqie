@@ -521,24 +521,19 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 		}
 
 	g_autofree gchar *pathl = path_from_utf8(path);
-	g_autoptr(GString) gstring = g_string_new(nullptr);
-	g_autofree gchar *open_text = g_strdup_printf("%s collection\n#created with %s version %s\n", GQ_COLLECTION_MARKER, GQ_APPNAME, VERSION);
-
-	g_string_append(gstring, open_text);
+	g_autoptr(GString) gstring = g_string_new(GQ_COLLECTION_MARKER " collection\n#created with " GQ_APPNAME " version " VERSION "\n");
 
 	collection_update_geometry(cd);
 	if (cd->window_read)
 		{
-		g_autofree gchar *window_text = g_strdup_printf("#geometry: %d %d %d %d\n", cd->window.x, cd->window.y, cd->window.width, cd->window.height);
-		g_string_append(gstring, window_text);
+		g_string_append_printf(gstring, "#geometry: %d %d %d %d\n", cd->window.x, cd->window.y, cd->window.width, cd->window.height);
 		}
 
 	for (GList *work = cd->list; work; work = work->next)
 		{
 		auto ci = static_cast<CollectInfo *>(work->data);
 
-		g_autofree gchar *sec_text = g_strdup_printf("\"%s\"\n", ci->fd->path);
-		g_string_append(gstring, sec_text);
+		g_string_append_printf(gstring, "\"%s\"\n", ci->fd->path);
 		}
 
 	g_string_append(gstring, "#end\n");

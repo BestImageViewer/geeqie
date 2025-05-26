@@ -436,10 +436,7 @@ gboolean metadata_write_int(FileData *fd, const gchar *key, guint64 value)
 
 static gboolean metadata_file_write(gchar *path, const GList *keywords, const gchar *comment)
 {
-	g_autoptr(GString) gstring = g_string_new(nullptr);
-
-	g_autofree gchar *start_text = g_strdup_printf("#%s comment (%s)\n\n[keywords]\n", GQ_APPNAME, VERSION);
-	g_string_append(gstring, start_text);
+	g_autoptr(GString) gstring = g_string_new("#" GQ_APPNAME " comment (" VERSION ")\n\n[keywords]\n");
 
 	for (; keywords; keywords = keywords->next)
 		{
@@ -447,8 +444,7 @@ static gboolean metadata_file_write(gchar *path, const GList *keywords, const gc
 		g_string_append(gstring, word);
 		}
 
-	g_autofree gchar *end_text = g_strdup_printf("\n[comment]\n%s\n#end\n", comment ? comment : "");
-	g_string_append(gstring, end_text);
+	g_string_append_printf(gstring, "\n[comment]\n%s\n#end\n", comment ? comment : "");
 
 	return secure_save(path, gstring->str, -1);
 }

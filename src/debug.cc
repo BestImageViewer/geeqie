@@ -20,13 +20,13 @@
 
 #include "debug.h"
 
-#include <fstream>
 #include <sys/time.h>
 
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 
 #include <config.h>
 
@@ -41,7 +41,6 @@
 #include "main.h"
 #include "misc.h"
 #include "options.h"
-#include "secure-save.h"
 
 /*
  * Logging functions
