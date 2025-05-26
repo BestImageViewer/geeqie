@@ -731,13 +731,6 @@ static gboolean li_check_if_current_path(LayoutWindow *lw, const gchar *path)
 	return strcmp(lw->dir_fd->path, dirname) == 0;
 }
 
-static void layout_image_popup_menu_destroy_cb(GtkWidget *, gpointer data)
-{
-	auto editmenu_fd_list = static_cast<GList *>(data);
-
-	file_data_list_free(editmenu_fd_list);
-}
-
 static GList *layout_image_get_fd_list(LayoutWindow *lw)
 {
 	GList *list = nullptr;
@@ -803,8 +796,8 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 	menu_item_add_divider(menu);
 
 	editmenu_fd_list = layout_image_get_fd_list(lw);
-	g_signal_connect(G_OBJECT(menu), "destroy",
-			 G_CALLBACK(layout_image_popup_menu_destroy_cb), editmenu_fd_list);
+	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
+	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
 	submenu = submenu_add_edit(menu, &item, G_CALLBACK(li_pop_menu_edit_cb), lw, editmenu_fd_list);
 	if (!path) gtk_widget_set_sensitive(item, FALSE);
 	menu_item_add_divider(submenu);

@@ -1166,13 +1166,6 @@ static void sr_menu_play_cb(GtkWidget *, gpointer data)
 	start_editor_from_file(options->image_l_click_video_editor, sd->click_fd);
 }
 
-static void search_result_menu_destroy_cb(GtkWidget *, gpointer data)
-{
-	auto editmenu_fd_list = static_cast<GList *>(data);
-
-	file_data_list_free(editmenu_fd_list);
-}
-
 /**
  * @brief Add file selection list to a collection
  * @param[in] widget
@@ -1219,8 +1212,8 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 	menu_item_add_divider(menu);
 
 	editmenu_fd_list = search_result_selection_list(sd);
-	g_signal_connect(G_OBJECT(menu), "destroy",
-			 G_CALLBACK(search_result_menu_destroy_cb), editmenu_fd_list);
+	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
+	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
 	submenu_add_edit(menu, &item, G_CALLBACK(sr_menu_edit_cb), sd, editmenu_fd_list);
 	if (!on_row) gtk_widget_set_sensitive(item, FALSE);
 

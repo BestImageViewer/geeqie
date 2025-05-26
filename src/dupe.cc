@@ -3334,13 +3334,6 @@ static void dupe_menu_close_cb(GtkWidget *, gpointer data)
 	dupe_window_close(dw);
 }
 
-static void dupe_menu_popup_destroy_cb(GtkWidget *, gpointer data)
-{
-	auto editmenu_fd_list = static_cast<GList *>(data);
-
-	file_data_list_free(editmenu_fd_list);
-}
-
 static GList *dupe_window_get_fd_list(DupeWindow *dw)
 {
 	GList *list;
@@ -3410,8 +3403,8 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	menu_item_add_divider(menu);
 
 	editmenu_fd_list = dupe_window_get_fd_list(dw);
-	g_signal_connect(G_OBJECT(menu), "destroy",
-			 G_CALLBACK(dupe_menu_popup_destroy_cb), editmenu_fd_list);
+	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
+	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
 	submenu_add_edit(menu, &item, G_CALLBACK(dupe_menu_edit_cb), dw, editmenu_fd_list);
 	if (!on_row) gtk_widget_set_sensitive(item, FALSE);
 

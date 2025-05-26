@@ -2275,13 +2275,6 @@ static void pan_close_cb(GtkWidget *, gpointer data)
 	pan_window_close(pw);
 }
 
-static void pan_popup_menu_destroy_cb(GtkWidget *, gpointer data)
-{
-	auto editmenu_fd_list = static_cast<GList *>(data);
-
-	file_data_list_free(editmenu_fd_list);
-}
-
 static void pan_play_cb(GtkWidget *, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
@@ -2347,8 +2340,8 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 	menu_item_add_divider(menu);
 
 	editmenu_fd_list = pan_view_get_fd_list(pw);
-	g_signal_connect(G_OBJECT(menu), "destroy",
-			 G_CALLBACK(pan_popup_menu_destroy_cb), editmenu_fd_list);
+	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
+	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
 
 	submenu_add_edit(menu, &item, G_CALLBACK(pan_edit_cb), pw, editmenu_fd_list);
 	gtk_widget_set_sensitive(item, active);

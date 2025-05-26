@@ -1317,13 +1317,6 @@ static void view_set_layout_path_cb(GtkWidget *, gpointer data)
 	view_window_close(vw);
 }
 
-static void view_popup_menu_destroy_cb(GtkWidget *, gpointer data)
-{
-	auto editmenu_fd_list = static_cast<GList *>(data);
-
-	file_data_list_free(editmenu_fd_list);
-}
-
 static GList *view_window_get_fd_list(ViewWindow *vw)
 {
 	GList *list = nullptr;
@@ -1381,8 +1374,8 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 	menu_item_add_divider(menu);
 
  	editmenu_fd_list = view_window_get_fd_list(vw);
-	g_signal_connect(G_OBJECT(menu), "destroy",
-			 G_CALLBACK(view_popup_menu_destroy_cb), editmenu_fd_list);
+	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
+	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
 	item = submenu_add_edit(menu, nullptr, G_CALLBACK(view_edit_cb), vw, editmenu_fd_list);
 	menu_item_add_divider(item);
 
