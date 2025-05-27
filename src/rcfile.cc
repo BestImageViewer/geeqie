@@ -47,7 +47,6 @@
 #include "main-defines.h"
 #include "metadata.h"
 #include "options.h"
-#include "secure-save.h"
 #include "slideshow.h"
 #include "typedefs.h"
 #include "ui-fileops.h"

@@ -978,4 +978,82 @@ void pixbuf_gdk_known_extensions(GList **extensions_list)
 
 	g_slist_free(formats_list);
 }
+
+/**
+ * @brief Save file in a safe manner
+ * @param file_name
+ * @param contents
+ * @param length Length of contents or -1 if null-terminated string
+ * @returns
+ *
+ * The operation is atomic in the sense that it is first written to a
+ * temporary file which is then renamed to the final name.
+ * After a failure, either the old version of the file or the
+ * new version of the file will be available, but not a mixture.
+ *
+ * If the file already exists, mode and group are preserved.
+ */
+gboolean secure_save(const gchar *file_name, const gchar *contents, gsize length)
+{
+	constexpr mode_t mask = S_IXUSR | S_IRWXG | S_IRWXO;
+	const mode_t saved_mask = umask(mask);
+
+	guint permissions = 0;
+	guint32 gid = 0;
+	guint32 uid = 0;
+	struct stat st;
+	if (stat(file_name, &st) == 0)
+		{
+		permissions = st.st_mode & 0777;
+		gid = st.st_gid;
+		uid = st.st_uid;
+		}
+	else
+		{
+		permissions = 0600;
+		gid = getgid();
+		uid = getuid();
+		}
+
+	constexpr auto flags = static_cast<GFileSetContentsFlags>(G_FILE_SET_CONTENTS_CONSISTENT | G_FILE_SET_CONTENTS_DURABLE);
+	g_autoptr(GError) error = nullptr;
+	gboolean success = g_file_set_contents_full(file_name, contents, length, flags, 0600, &error);
+	if (!success)
+		{
+		g_autoptr(GNotification) notification = g_notification_new("Geeqie");
+		g_notification_set_priority(notification, G_NOTIFICATION_PRIORITY_URGENT);
+		g_notification_set_default_action(notification, "app.null");
+		g_notification_set_title(notification, _("File was not saved"));
+
+		if (error)
+			{
+			g_notification_set_body(notification, error->message);
+			log_printf("Error: Failed to save file: %s\n%s", file_name, error->message);
+			}
+		else
+			{
+			g_notification_set_body(notification, file_name);
+			log_printf("Error: Failed to save file: %s", file_name);
+			}
+
+		GApplication *app = g_application_get_default();
+		g_application_send_notification(G_APPLICATION(app), "save-file-notification", notification);
+		}
+	else
+		{
+		if (chown(file_name, uid, gid) == -1)
+			{
+			log_printf("secure_save: chown failed");
+			}
+
+		if (chmod(file_name, permissions) == -1)
+			{
+			log_printf("secure_save: chmod failed");
+			}
+		}
+
+	umask(saved_mask);
+
+	return success;
+}
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

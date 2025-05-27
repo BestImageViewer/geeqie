@@ -24,9 +24,7 @@
 #include <cstring>
 #include <vector>
 
-#include "intl.h"
 #include "options.h"
-#include "secure-save.h"
 #include "ui-fileops.h"
 
 namespace

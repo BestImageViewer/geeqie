@@ -39,7 +39,6 @@
 #include "misc.h"
 #include "options.h"
 #include "rcfile.h"
-#include "secure-save.h"
 #include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"

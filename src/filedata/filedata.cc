@@ -45,7 +45,6 @@
 #include "main-defines.h"
 #include "metadata.h"
 #include "options.h"
-#include "secure-save.h"
 #include "trash.h"
 #include "ui-fileops.h"
 

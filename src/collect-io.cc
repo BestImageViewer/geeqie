@@ -43,7 +43,6 @@
 #include "layout-util.h"
 #include "main-defines.h"
 #include "options.h"
-#include "secure-save.h"
 #include "thumb.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"

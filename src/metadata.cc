@@ -42,7 +42,6 @@
 #include "misc.h"
 #include "options.h"
 #include "rcfile.h"
-#include "secure-save.h"
 #include "ui-fileops.h"
 #include "utilops.h"
 
