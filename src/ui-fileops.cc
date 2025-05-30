@@ -956,14 +956,15 @@ guchar *map_file(const gchar *path, gsize &map_len)
 
 /**
  * @brief Get list of file extensions supported by gdk_pixbuf_loader
- * @param  extensions_list
+ * @returns List of gchar
  *
- * extensions_list must be supplied by and freed by caller
+ * Returned list must be freed with data by caller
  */
-void pixbuf_gdk_known_extensions(GList **extensions_list)
+GList *pixbuf_gdk_known_extensions()
 {
-	GSList *formats_list = gdk_pixbuf_get_formats();
+	GList *extensions_list = nullptr;
 
+	g_autoptr(GSList) formats_list = gdk_pixbuf_get_formats();
 	for (GSList *work = formats_list; work; work = work->next)
 		{
 		auto *fm = static_cast<GdkPixbufFormat *>(work->data);
@@ -972,11 +973,11 @@ void pixbuf_gdk_known_extensions(GList **extensions_list)
 
 		for (guint i = 0; i < extensions_count; i++)
 			{
-			*extensions_list = g_list_insert_sorted(*extensions_list, g_strdup(extensions[i]), reinterpret_cast<GCompareFunc>(g_strcmp0));
+			extensions_list = g_list_prepend(extensions_list, g_strdup(extensions[i]));
 			}
 		}
 
-	g_slist_free(formats_list);
+	return g_list_sort(extensions_list, reinterpret_cast<GCompareFunc>(g_strcmp0));
 }
 
 /**

@@ -504,18 +504,12 @@ void gq_File(GtkApplication *, GApplicationCommandLine *app_command_line, GVaria
 
 void gq_file_extensions(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
 {
-	GList *extensions_list = nullptr;
-	GList *work;
+	GList *extensions_list = pixbuf_gdk_known_extensions();
 
-	pixbuf_gdk_known_extensions(&extensions_list);
-
-	work = filter_get_list();
-	while (work)
+	for (GList *work = filter_get_list(); work; work = work->next)
 		{
-		FilterEntry *fe;
+		auto *fe = static_cast<FilterEntry *>(work->data);
 
-		fe = static_cast<FilterEntry *>(work->data);
-		work = work->next;
 		if (!g_list_find_custom(extensions_list, fe->key, reinterpret_cast<GCompareFunc>(g_strcmp0)))
 			{
 			extensions_list = g_list_insert_sorted(extensions_list, g_strdup(fe->key), reinterpret_cast<GCompareFunc>(g_strcmp0));

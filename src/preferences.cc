@@ -3795,7 +3795,6 @@ static void config_tab_toolbar_status(GtkWidget *notebook)
 /* advanced tab */
 static void config_tab_advanced(GtkWidget *notebook)
 {
-	GList *extensions_list = nullptr;
 	GtkWidget *alternate_checkbox;
 	GtkWidget *dupes_threads_spin;
 	GtkWidget *group;
@@ -3812,9 +3811,9 @@ static void config_tab_advanced(GtkWidget *notebook)
 
 	pref_spacer(group, PREF_PAD_GROUP);
 
-	pixbuf_gdk_known_extensions(&extensions_list);
+	GList *extensions_list = pixbuf_gdk_known_extensions();
 
-	 g_autoptr(GString) types_string = g_string_new(nullptr);
+	g_autoptr(GString) types_string = g_string_new(nullptr);
 
 	for (GList *work = extensions_list; work; work = work->next)
 		{
