@@ -1,3 +1,14 @@
+Geeqie 2.6.1
+============
+
+- Bug fix release
+- --action=<illegal value> results in crash
+- gtk_file_chooser dialog cannot create folders
+- Icon view, filename text not displayed, filename tooltip
+- MacOS: Crash when exiting fullscreen mode
+- Crash using GQ_DISABLE_CLUTTER=y when config file already has gps map enabled
+- Slow since 2.6
+
 Geeqie 2.6
 ============
 
