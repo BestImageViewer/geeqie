@@ -92,17 +92,6 @@ struct ExifItem
 #define EXIF_TEXT_LIST_END { -1, NULL }
 
 
-
-
-/*
- *-----------------------------------------------------------------------------
- * Data
- *-----------------------------------------------------------------------------
- */
-
-extern ExifFormattedText ExifFormattedList[]; /**< the list of specially formatted keys, for human readable output */
-
-
 /*
  *-----------------------------------------------------------------------------
  * functions

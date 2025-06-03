@@ -37,7 +37,6 @@
 
 #include "cache.h"
 #include "color-man-heif.h"
-#include "exif-int.h" /* Required to prevent clang-tidy warnings */
 #include "exif.h"
 #include "filecache.h"
 #include "filedata.h"
