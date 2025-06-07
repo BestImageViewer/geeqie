@@ -308,8 +308,6 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	auto expander = static_cast<GtkWidget *>(data);
 	GtkWidget *spin;
 	GtkWidget *window;
-	GtkWidget *data_box;
-	GList *list;
 	gint x;
 	gint y;
 	gint w;
@@ -324,8 +322,8 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	device = gdk_seat_get_pointer(seat);
 	gdk_device_get_position(device, nullptr, &x, &y);
 
-	list = gtk_container_get_children(GTK_CONTAINER(expander));
-	data_box = static_cast<GtkWidget *>(list->data);
+	g_autoptr(GList) list = gtk_container_get_children(GTK_CONTAINER(expander));
+	auto *data_box = static_cast<GtkWidget *>(list->data);
 
 #if HAVE_GTK4
 	window = gtk_window_new();
@@ -342,7 +340,7 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	gq_gtk_window_move(GTK_WINDOW(window), x, y);
 	gtk_widget_show(window);
 
-	gtk_widget_get_size_request(GTK_WIDGET(data_box), &w, &h);
+	gtk_widget_get_size_request(data_box, &w, &h);
 
 	spin = gtk_spin_button_new_with_range(1, 1000, 1);
 	g_signal_connect(G_OBJECT(spin), "value-changed", G_CALLBACK(height_spin_changed_cb), data_box);
@@ -353,8 +351,6 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	gq_gtk_container_add(GTK_WIDGET(window), spin);
 	gtk_widget_show(spin);
 	gtk_widget_grab_focus(GTK_WIDGET(spin));
-
-	g_list_free(list);
 }
 
 static void bar_expander_delete_cb(GtkWidget *, gpointer data)
@@ -538,41 +534,27 @@ void bar_notify_selection(GtkWidget *bar, gint count)
 
 gboolean bar_event(GtkWidget *bar, GdkEvent *event)
 {
-	BarData *bd;
-	GList *list;
-	GList *work;
-	gboolean ret = FALSE;
-
-	bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
+	auto *bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
 	if (!bd) return FALSE;
 
-	list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
+	g_autoptr(GList) list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
 
-	work = list;
-	while (work)
+	for (GList *work = list; work; work = work->next)
 		{
 		GtkWidget *widget = gtk_bin_get_child(GTK_BIN(work->data));
-		auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
-		if (!pd) continue;
 
-		if (pd->pane_event && pd->pane_event(widget, event))
+		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
+		if (pd && pd->pane_event && pd->pane_event(widget, event))
 			{
-			ret = TRUE;
-			break;
+			return TRUE;
 			}
-		work = work->next;
 		}
-	g_list_free(list);
-	return ret;
+
+	return FALSE;
 }
 
 GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id)
 {
-	BarData *bd;
-	GList *list;
-	GList *work;
-	GtkWidget *ret = nullptr;
-
 	if (!id || !id[0]) return nullptr;
 
 	if (!bar)
@@ -580,27 +562,22 @@ GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id)
 		return nullptr;
 		}
 
-	bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
+	auto *bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
 	if (!bd) return nullptr;
 
-	list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
-
-	work = list;
-	while (work)
+	g_autoptr(GList) list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
+	for (GList *work = list; work; work = work->next)
 		{
 		GtkWidget *widget = gtk_bin_get_child(GTK_BIN(work->data));
-		auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
-		if (!pd) continue;
 
-		if (type == pd->type && strcmp(id, pd->id) == 0)
+		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
+		if (pd && type == pd->type && strcmp(id, pd->id) == 0)
 			{
-			ret = widget;
-			break;
+			return widget;
 			}
-		work = work->next;
 		}
-	g_list_free(list);
-	return ret;
+
+	return nullptr;
 }
 
 void bar_clear(GtkWidget *bar)
@@ -618,13 +595,9 @@ void bar_clear(GtkWidget *bar)
 
 void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
 {
-	BarData *bd;
-	GList *list;
-	GList *work;
-
 	if (!bar) return;
 
-	bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
+	auto *bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
 	if (!bd) return;
 
 	WRITE_NL(); WRITE_STRING("<bar ");
@@ -635,23 +608,21 @@ void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
 	indent++;
 	WRITE_NL(); WRITE_STRING("<clear/>");
 
-	list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
-	work = list;
-	while (work)
+	g_autoptr(GList) list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
+	for (GList *work = list; work; work = work->next)
 		{
-		auto expander = static_cast<GtkWidget *>(work->data);
+		auto *expander = static_cast<GtkWidget *>(work->data);
 		GtkWidget *widget = gtk_bin_get_child(GTK_BIN(expander));
-		auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
+
+		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (!pd) continue;
 
 		pd->expanded = gtk_expander_get_expanded(GTK_EXPANDER(expander));
 
 		if (pd->pane_write_config)
 			pd->pane_write_config(widget, outstr, indent);
-
-		work = work->next;
 		}
-	g_list_free(list);
+
 	indent--;
 	WRITE_NL(); WRITE_STRING("</bar>");
 }

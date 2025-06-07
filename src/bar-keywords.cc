@@ -1866,32 +1866,8 @@ void keyword_list_set(GList *keyword_list)
 
 gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)
 {
-	GtkWidget *pane;
-	GtkWidget *current_focus;
-	GList *children;
-	gboolean ret = FALSE;
-
-	current_focus = gtk_window_get_focus(GTK_WINDOW(lw->window));
-	pane = bar_find_pane_by_id(lw->bar, PANE_KEYWORDS, "keywords");
-
-	if (pane)
-		{
-		children = gtk_container_get_children(GTK_CONTAINER(pane));
-
-		const GList *last_child = g_list_last(children);
-		if (current_focus == last_child->data)
-			{
-			ret = TRUE;
-			}
-		else
-			{
-			gtk_widget_grab_focus(GTK_WIDGET(last_child->data));
-			ret = FALSE;
-			}
-
-		g_list_free(children);
-		}
-	else
+	GtkWidget *pane = bar_find_pane_by_id(lw->bar, PANE_KEYWORDS, "keywords");
+	if (!pane)
 		{
 		GApplication *app = g_application_get_default();
 
@@ -1903,8 +1879,18 @@ gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)
 		g_notification_set_default_action(notification, "app.null");
 
 		g_application_send_notification(G_APPLICATION(app), "keyword-autocomplete-notification", notification);
+		return FALSE;
 		}
 
-	return ret;
+	g_autoptr(GList) children = gtk_container_get_children(GTK_CONTAINER(pane));
+	const GList *last_child = g_list_last(children);
+
+	gboolean is_focused = (gtk_window_get_focus(GTK_WINDOW(lw->window)) == last_child->data);
+	if (!is_focused)
+		{
+		gtk_widget_grab_focus(GTK_WIDGET(last_child->data));
+		}
+
+	return is_focused;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

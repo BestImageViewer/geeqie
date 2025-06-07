@@ -330,10 +330,9 @@ static void bookmark_move(BookMarkData *bm, GtkWidget *button, gint direction)
 	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
 	if (!b) return;
 
-	GList *list = gtk_container_get_children(GTK_CONTAINER(bm->box));
-	gint p = g_list_index(list, button);
-	g_list_free(list);
+	g_autoptr(GList) list = gtk_container_get_children(GTK_CONTAINER(bm->box));
 
+	gint p = g_list_index(list, button);
 	if (p < 0 || p + direction < 0) return;
 
 	gchar *key_holder = bm->key;
@@ -511,19 +510,11 @@ static gboolean bookmark_path_tooltip_cb(GtkWidget *button, gpointer)
 
 static void bookmark_populate(BookMarkData *bm)
 {
-	GtkBox *box;
-	GList *work;
-	GList *children;
-
-	box = GTK_BOX(bm->box);
-	children = gtk_container_get_children(GTK_CONTAINER(box));
-	work = children;
-	while (work)
-		{
-		GtkWidget *widget = GTK_WIDGET(work->data);
-		work = work->next;
+	static const auto destroy_widget = [](GtkWidget *widget, gpointer)
+	{
 		gq_gtk_widget_destroy(widget);
-		}
+	};
+	gtk_container_foreach(GTK_CONTAINER(bm->box), destroy_widget, nullptr);
 
 	if (!bm->no_defaults && !history_list_get_by_key(bm->key))
 		{
@@ -546,7 +537,7 @@ static void bookmark_populate(BookMarkData *bm)
 				}
 			}
 
-		work = bookmark_default_list;
+		GList *work = bookmark_default_list;
 		while (work && work->next)
 			{
 			auto *name = static_cast<gchar *>(work->data);
@@ -569,7 +560,7 @@ static void bookmark_populate(BookMarkData *bm)
 			}
 		}
 
-	work = history_list_get_by_key(bm->key);
+	GList *work = history_list_get_by_key(bm->key);
 	work = g_list_last(work);
 	while (work)
 		{
