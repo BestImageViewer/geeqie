@@ -275,21 +275,14 @@ void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboolean up
 
 void bar_pane_exif_update(PaneExifData *ped)
 {
-	GList *list;
-	GList *work;
-
 	ped->all_hidden = TRUE;
 
-	list = gtk_container_get_children(GTK_CONTAINER(ped->vbox));
-	work = list;
-	while (work)
-		{
-		auto entry = static_cast<GtkWidget *>(work->data);
-		work = work->next;
-
+	static const auto update_entry = [](GtkWidget *entry, gpointer data)
+	{
+		auto *ped = static_cast<PaneExifData *>(data);
 		bar_pane_exif_update_entry(ped, entry, FALSE);
-		}
-	g_list_free(list);
+	};
+	gtk_container_foreach(GTK_CONTAINER(ped->vbox), update_entry, ped);
 
 	gtk_widget_set_sensitive(ped->pane.title, !ped->all_hidden);
 }
@@ -309,25 +302,19 @@ void bar_pane_exif_set_fd(GtkWidget *widget, FileData *fd)
 
 gint bar_pane_exif_event(GtkWidget *bar, GdkEvent *event)
 {
-	PaneExifData *ped;
-	gboolean ret = FALSE;
-	GList *list;
-	GList *work;
-
-	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
+	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
 	if (!ped) return FALSE;
 
-	list = gtk_container_get_children(GTK_CONTAINER(ped->vbox));
-	work = list;
-	while (!ret && work)
+	g_autoptr(GList) list = gtk_container_get_children(GTK_CONTAINER(ped->vbox));
+	gboolean ret = FALSE;
+	for (GList *work = list; !ret && work; work = work->next)
 		{
-		auto entry = static_cast<GtkWidget *>(work->data);
-		auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(entry), "entry_data"));
-		work = work->next;
+		auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(work->data), "entry_data"));
 
-		if (ee->editable && gtk_widget_has_focus(ee->value_widget)) ret = gtk_widget_event(ee->value_widget, event);
+		if (ee->editable && gtk_widget_has_focus(ee->value_widget))
+			ret = gtk_widget_event(ee->value_widget, event);
 		}
-	g_list_free(list);
+
 	return ret;
 }
 
@@ -385,21 +372,17 @@ void bar_pane_exif_dnd_receive(GtkWidget *pane, GdkDragContext *,
 					  GtkSelectionData *selection_data, guint info,
 					  guint, gpointer)
 {
-	PaneExifData *ped;
-	GList *work;
-	GList *list;
-	gint pos;
-	GtkWidget *new_entry = nullptr;
-
-	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!ped) return;
 
+	GtkWidget *new_entry = nullptr;
 	switch (info)
 		{
 		case TARGET_APP_EXIF_ENTRY:
 			new_entry = GTK_WIDGET(*(gpointer *)gtk_selection_data_get_data(selection_data));
 
-			if (gtk_widget_get_parent(new_entry) && gtk_widget_get_parent(new_entry) != ped->vbox) bar_pane_exif_reparent_entry(new_entry, pane);
+			if (gtk_widget_get_parent(new_entry) && gtk_widget_get_parent(new_entry) != ped->vbox)
+				bar_pane_exif_reparent_entry(new_entry, pane);
 
 			break;
 		default:
@@ -408,27 +391,27 @@ void bar_pane_exif_dnd_receive(GtkWidget *pane, GdkDragContext *,
 			break;
 		}
 
-	list = gtk_container_get_children(GTK_CONTAINER(ped->vbox));
-	work = list;
-	pos = 0;
-	while (work)
+	g_autoptr(GList) list = gtk_container_get_children(GTK_CONTAINER(ped->vbox));
+	gint pos = 0;
+	for (GList *work = list; work; work = work->next)
 		{
-		gint nx;
-		gint ny;
 		auto entry = static_cast<GtkWidget *>(work->data);
-		GtkAllocation allocation;
-		work = work->next;
-
 		if (entry == new_entry) continue;
 
+		GtkAllocation allocation;
 		gtk_widget_get_allocation(entry, &allocation);
 
+		gint nx;
+		gint ny;
 		if (gtk_widget_is_drawable(entry) &&
 		    gtk_widget_translate_coordinates(pane, entry, x, y, &nx, &ny) &&
-		    ny < allocation.height / 2) break;
+		    ny < allocation.height / 2)
+			{
+			break;
+			}
+
 		pos++;
 		}
-	g_list_free(list);
 
 	gtk_box_reorder_child(GTK_BOX(ped->vbox), new_entry, pos);
 }
@@ -723,11 +706,7 @@ void bar_pane_exif_entry_write_config(GtkWidget *entry, GString *outstr, gint in
 
 void bar_pane_exif_write_config(GtkWidget *pane, GString *outstr, gint indent)
 {
-	PaneExifData *ped;
-	GList *work;
-	GList *list;
-
-	ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!ped) return;
 
 	WRITE_NL(); WRITE_STRING("<pane_exif ");
@@ -738,16 +717,14 @@ void bar_pane_exif_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	WRITE_STRING(">");
 	indent++;
 
-	list = gtk_container_get_children(GTK_CONTAINER(ped->vbox));
-	work = list;
-	while (work)
+	g_autoptr(GList) list = gtk_container_get_children(GTK_CONTAINER(ped->vbox));
+	for (GList *work = list; work; work = work->next)
 		{
 		auto entry = static_cast<GtkWidget *>(work->data);
-		work = work->next;
 
 		bar_pane_exif_entry_write_config(entry, outstr, indent);
 		}
-	g_list_free(list);
+
 	indent--;
 	WRITE_NL(); WRITE_STRING("</pane_exif>");
 }
@@ -809,36 +786,26 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 
 } // namespace
 
-GList * bar_pane_exif_list()
+GList *bar_pane_exif_list()
 {
-	PaneExifData *ped;
-	GList *list;
-	GList *exif_list = nullptr;
-	GtkWidget *bar;
-	GtkWidget *pane;
-	GtkWidget *entry;
-	ExifEntry *ee;
-
 	const LayoutWindow *lw = layout_window_first();
-	bar = lw->bar;
-	pane = bar_find_pane_by_id(bar, PANE_EXIF, "exif");
-	if (pane)
-		{
-		ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 
-		list = gtk_container_get_children(GTK_CONTAINER(ped->vbox));
-		GList *work = list;
-		while (work)
-			{
-			entry = static_cast<GtkWidget *>(work->data);
-			work = work->next;
-			ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(entry), "entry_data"));
-			exif_list = g_list_append(exif_list, g_strdup(ee->title));
-			exif_list = g_list_append(exif_list, g_strdup(ee->key));
-			}
+	GtkWidget *pane = bar_find_pane_by_id(lw->bar, PANE_EXIF, "exif");
+	if (!pane) return nullptr;
 
-		g_list_free(list);
-		}
+	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+
+	static const auto exif_entry_to_list = [](GtkWidget *widget, gpointer data)
+	{
+		auto *ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
+
+		auto *exif_list = static_cast<GList **>(data);
+		*exif_list = g_list_append(*exif_list, g_strdup(ee->title));
+		*exif_list = g_list_append(*exif_list, g_strdup(ee->key));
+	};
+	GList *exif_list = nullptr;
+	gtk_container_foreach(GTK_CONTAINER(ped->vbox), exif_entry_to_list, &exif_list);
+
 	return exif_list;
 }
 

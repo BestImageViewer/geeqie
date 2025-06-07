@@ -1863,14 +1863,11 @@ static void star_rating_rejected_icon_cb(GtkEntry *, GtkEntryIconPosition pos, G
 static guint star_rating_symbol_test(GtkWidget *, gpointer data)
 {
 	auto hbox = static_cast<GtkContainer *>(data);
-	g_autoptr(GString) str = g_string_new(nullptr);
-	GtkEntry *hex_code_entry;
-	GList *list;
 	guint64 hex_value = 0;
 
-	list = gtk_container_get_children(hbox);
+	g_autoptr(GList) list = gtk_container_get_children(hbox);
 
-	hex_code_entry = static_cast<GtkEntry *>(g_list_nth_data(list, 2));
+	auto *hex_code_entry = static_cast<GtkEntry *>(g_list_nth_data(list, 2));
 	const gchar *hex_code_full = gq_gtk_entry_get_text(hex_code_entry);
 
 	g_auto(GStrv) hex_code = g_strsplit(hex_code_full, "+", 2);
@@ -1883,6 +1880,8 @@ static guint star_rating_symbol_test(GtkWidget *, gpointer data)
 		{
 		hex_value = 0x003F; // Unicode 'Question Mark'
 		}
+
+	g_autoptr(GString) str = g_string_new(nullptr);
 	str = g_string_append_unichar(str, static_cast<gunichar>(hex_value));
 	gtk_label_set_text(static_cast<GtkLabel *>(g_list_nth_data(list, 1)), str->str);
 

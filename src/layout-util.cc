@@ -2331,46 +2331,33 @@ static void layout_menu_new_window_cb(GtkWidget *, gpointer data)
 
 static void layout_menu_new_window_update(LayoutWindow *lw)
 {
-	GtkWidget *menu;
-	GtkWidget *sub_menu;
-	GtkWidget *item;
-	GList *children;
-	GList *iter;
-	gint n;
-	GList *list = nullptr;
-	gint i = 0;
-	WindowNames *wn;
-
 	if (!lw->ui_manager) return;
 
-	list = layout_window_menu_list(list);
+	g_autoptr(GList) list = layout_window_menu_list(nullptr);
 
-	menu = gq_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/NewWindow" : "/MainMenu/WindowsMenu/NewWindow");
-	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(menu));
+	GtkWidget *menu = gq_gtk_ui_manager_get_widget(lw->ui_manager,
+	                                               options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/NewWindow" : "/MainMenu/WindowsMenu/NewWindow");
+	GtkWidget *sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(menu));
 
-	children = gtk_container_get_children(GTK_CONTAINER(sub_menu));
-	for (iter = children; iter != nullptr; iter = g_list_next(iter), i++)
+	g_autoptr(GList) children = gtk_container_get_children(GTK_CONTAINER(sub_menu));
+	for (GList *iter = g_list_nth(children, 4); // separator, default, from current, separator
+	     iter != nullptr; iter = g_list_next(iter))
 		{
-		if (i >= 4) // separator, default, from current, separator
-			{
-			gq_gtk_widget_destroy(GTK_WIDGET(iter->data));
-			}
+		gq_gtk_widget_destroy(GTK_WIDGET(iter->data));
 		}
-	g_list_free(children);
 
 	menu_item_add_divider(sub_menu);
 
-	n = 0;
-	while (list)
+	gint n = 0;
+	for (GList *work = list; work; work = work->next, n++)
 		{
-		wn = static_cast<WindowNames *>(list->data);
-		item = menu_item_add_simple(sub_menu, wn->name, G_CALLBACK(layout_menu_new_window_cb), GINT_TO_POINTER(n));
+		auto *wn = static_cast<WindowNames *>(work->data);
+		GtkWidget *item = menu_item_add_simple(sub_menu, wn->name,
+		                                       G_CALLBACK(layout_menu_new_window_cb), GINT_TO_POINTER(n));
 		if (wn->displayed)
 			{
 			gtk_widget_set_sensitive(item, FALSE);
 			}
-		list = list->next;
-		n++;
 		}
 }
 
@@ -2468,8 +2455,6 @@ static void layout_menu_windows_menu_cb(GtkWidget *, gpointer data)
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *menu;
 	GtkWidget *sub_menu;
-	GList *children;
-	GList *iter;
 
 	menu = gq_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/" : "/MainMenu/WindowsMenu/");
 
@@ -2478,16 +2463,15 @@ static void layout_menu_windows_menu_cb(GtkWidget *, gpointer data)
 	/* disable Delete for temporary windows */
 	if (!g_str_has_prefix(lw->options.id, "lw")) return;
 
-	children = gtk_container_get_children(GTK_CONTAINER(sub_menu));
-	for (iter = children; iter != nullptr; iter = g_list_next(iter))
-		{
-		const gchar *menu_label = gtk_menu_item_get_label(GTK_MENU_ITEM(iter->data));
+	static const auto set_sensitive = [](GtkWidget *widget, gpointer)
+	{
+		const gchar *menu_label = gtk_menu_item_get_label(GTK_MENU_ITEM(widget));
 		if (g_strcmp0(menu_label, _("Delete window")) == 0)
 			{
-			gtk_widget_set_sensitive(GTK_WIDGET(iter->data), FALSE);
+			gtk_widget_set_sensitive(widget, FALSE);
 			}
-		}
-	g_list_free(children);
+	};
+	gtk_container_foreach(GTK_CONTAINER(sub_menu), set_sensitive, nullptr);
 }
 
 static void layout_menu_view_menu_cb(GtkWidget *, gpointer data)
@@ -2495,8 +2479,6 @@ static void layout_menu_view_menu_cb(GtkWidget *, gpointer data)
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *menu;
 	GtkWidget *sub_menu;
-	GList *children;
-	GList *iter;
 	FileData *fd;
 
 	menu = gq_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/ViewMenu/" : "/MainMenu/ViewMenu/");
@@ -2505,16 +2487,15 @@ static void layout_menu_view_menu_cb(GtkWidget *, gpointer data)
 	fd = layout_image_get_fd(lw);
 	const gboolean sensitive = (fd && fd->format_class == FORMAT_CLASS_ARCHIVE);
 
-	children = gtk_container_get_children(GTK_CONTAINER(sub_menu));
-	for (iter = children; iter != nullptr; iter = g_list_next(iter))
-		{
-		const gchar *menu_label = gtk_menu_item_get_label(GTK_MENU_ITEM(iter->data));
+	static const auto set_sensitive = [](GtkWidget *widget, gpointer data)
+	{
+		const gchar *menu_label = gtk_menu_item_get_label(GTK_MENU_ITEM(widget));
 		if (g_strcmp0(menu_label, _("Open archive")) == 0)
 			{
-			gtk_widget_set_sensitive(GTK_WIDGET(iter->data), sensitive);
+			gtk_widget_set_sensitive(widget, GPOINTER_TO_INT(data));
 			}
-		}
-	g_list_free(children);
+	};
+	gtk_container_foreach(GTK_CONTAINER(sub_menu), set_sensitive, GINT_TO_POINTER(sensitive));
 }
 
 static gchar *create_tmp_config_file()
@@ -3128,10 +3109,31 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 	GtkWidget *main_toolbar = lw->toolbar[TOOLBAR_MAIN];
 	if (GTK_IS_CONTAINER(main_toolbar))
 		{
-		g_autoptr(GList) button_list = gtk_container_get_children(GTK_CONTAINER(main_toolbar));
+		static const auto set_image_and_tooltip_from_editor = [](GtkWidget *widget, gpointer data)
+		{
+#if HAVE_GTK4
+			const gchar *tooltip = gtk_widget_get_tooltip_text(widget);
+#else
+			g_autofree gchar *tooltip = gtk_widget_get_tooltip_text(widget);
+#endif
+			auto *editor = static_cast<EditorDescription *>(data);
+			if (g_strcmp0(tooltip, editor->key) != 0) return; // @todo Use g_list_find_custom() if tooltip is unique
+
+			GtkWidget *image = nullptr;
+			if (editor->icon)
+				{
+				image = gq_gtk_image_new_from_stock(editor->key, GTK_ICON_SIZE_BUTTON);
+				}
+			else
+				{
+				image = gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
+				}
+			gtk_button_set_image(GTK_BUTTON(widget), GTK_WIDGET(image));
+			gtk_widget_set_tooltip_text(widget, editor->name);
+		};
 
 		EditorsList editors_list = editor_list_get();
-		for (const EditorDescription *editor : editors_list)
+		for (EditorDescription *editor : editors_list)
 			{
 			GtkActionEntry entry = { editor->key,
 			                         editor->icon ? editor->key : nullptr,
@@ -3142,27 +3144,8 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 
 			gq_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
 
-			for (GList *work = button_list; work; work = work->next)
-				{
-#if HAVE_GTK4
-				const gchar *tooltip = gtk_widget_get_tooltip_text(GTK_WIDGET(work->data));
-#else
-				g_autofree gchar *tooltip = gtk_widget_get_tooltip_text(GTK_WIDGET(work->data));
-#endif
-				if (g_strcmp0(tooltip, editor->key) != 0) continue; // @todo Use g_list_find_custom() if tooltip is unique
-
-				GtkWidget *image = nullptr;
-				if (editor->icon)
-					{
-					image = gq_gtk_image_new_from_stock(editor->key, GTK_ICON_SIZE_BUTTON);
-					}
-				else
-					{
-					image = gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
-					}
-				gtk_button_set_image(GTK_BUTTON(work->data), GTK_WIDGET(image));
-				gtk_widget_set_tooltip_text(GTK_WIDGET(work->data), editor->name);
-				}
+			// @todo Use g_list_find_custom() if tooltip is unique
+			gtk_container_foreach(GTK_CONTAINER(main_toolbar), set_image_and_tooltip_from_editor, editor);
 
 			GList *path = layout_actions_editor_menu_path(editor);
 			layout_actions_editor_add(desc, path, old_path);
@@ -3427,7 +3410,7 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 
 	if (lw->toolbar[type])
 		{
-		gtk_container_foreach(GTK_CONTAINER(lw->toolbar[type]), (GtkCallback)G_CALLBACK(toolbar_clear_cb), nullptr);
+		gtk_container_foreach(GTK_CONTAINER(lw->toolbar[type]), toolbar_clear_cb, nullptr);
 		}
 }
 

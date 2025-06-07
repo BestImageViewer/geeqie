@@ -74,12 +74,11 @@ GtkWidget *pref_group_new(GtkWidget *parent_box, gboolean fill,
 	if (GTK_IS_ORIENTABLE(parent_box) &&
 	    gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box)) == GTK_ORIENTATION_VERTICAL)
 		{
-		GList *list = gtk_container_get_children(GTK_CONTAINER(parent_box));
+		g_autoptr(GList) list = gtk_container_get_children(GTK_CONTAINER(parent_box));
 		if (list)
 			{
 			pref_spacer(vbox, PREF_PAD_GROUP - PREF_PAD_GAP);
 			}
-		g_list_free(list);
 		}
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), vbox, fill, fill, 0);

@@ -498,15 +498,10 @@ static void layout_path_entry_tab_append_cb(const gchar *, gpointer data, gint n
 
 static gboolean path_entry_tooltip_cb(GtkWidget *widget, gpointer)
 {
-	GList *box_child_list;
-	GtkComboBox *path_entry;
+	g_autoptr(GList) box_child_list = gtk_container_get_children(GTK_CONTAINER(widget));
+	g_autofree gchar *current_path = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box_child_list->data));
 
-	box_child_list = gtk_container_get_children(GTK_CONTAINER(widget));
-	path_entry = static_cast<GtkComboBox *>(box_child_list->data);
-	g_autofree gchar *current_path = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(path_entry));
 	gtk_widget_set_tooltip_text(GTK_WIDGET(widget), current_path);
-
-	g_list_free(box_child_list);
 
 	return FALSE;
 }
