@@ -429,7 +429,7 @@ gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)
 			{
 			/* pipe character is replaced by a separator, delete it
 			 * and raise a flag if needed */
-			g_string_erase(osd_info, pos--, 1);
+			g_string_erase(osd_info, pos, 1);
 			want_separator |= (data && *data);
 			}
 
