@@ -76,6 +76,7 @@ gboolean rename_file(const gchar *s, const gchar *t);
 gchar *get_current_dir();
 
 GList *string_list_copy(const GList *list);
+GString *string_list_join(const GList *list, const gchar *sep) G_GNUC_WARN_UNUSED_RESULT;
 
 gchar *unique_filename(const gchar *path, const gchar *ext, const gchar *divider, gboolean pad);
 

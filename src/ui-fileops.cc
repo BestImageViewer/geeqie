@@ -592,6 +592,26 @@ GList *string_list_copy(const GList *list)
 	return g_list_reverse(new_list);
 }
 
+GString *string_list_join(const GList *list, const gchar *sep)
+{
+	GString *result = g_string_new(nullptr);
+
+	for (const GList *work = list; work; work = work->next)
+		{
+		auto *str = static_cast<gchar *>(work->data);
+		if (!str) continue;
+
+		if (result->len > 0)
+			{
+			result = g_string_append(result, sep);
+			}
+
+		result = g_string_append(result, str);
+		}
+
+	return result;
+}
+
 gchar *unique_filename(const gchar *path, const gchar *ext, const gchar *divider, gboolean pad)
 {
 	gint n = 1;

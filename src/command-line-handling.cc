@@ -516,15 +516,7 @@ void gq_file_extensions(GtkApplication *, GApplicationCommandLine *app_command_l
 			}
 		}
 
-	g_autoptr(GString) types_string = g_string_new(nullptr);
-	for (GList *work = extensions_list; work; work = work->next)
-		{
-		if (types_string->len > 0)
-			{
-			types_string = g_string_append(types_string, " ");
-			}
-		types_string = g_string_append(types_string, static_cast<gchar *>(work->data));
-		}
+	g_autoptr(GString) types_string = string_list_join(extensions_list, " ");
 
 	g_list_free_full(extensions_list, g_free);
 

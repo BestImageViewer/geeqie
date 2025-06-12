@@ -42,6 +42,7 @@
 #include "intl.h"
 #include "metadata.h"
 #include "typedefs.h"
+#include "ui-fileops.h"
 #include "ui-misc.h"
 
 namespace {
@@ -208,39 +209,15 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 
 static gchar *keywords_to_string(FileData *fd)
 {
-	GList *keywords;
-	GString *kwstr = nullptr;
-
 	g_assert(fd);
 
-	keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
+	GList *keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
 
-	if (keywords)
-		{
-		GList *work = keywords;
+	GString *kwstr = string_list_join(keywords, ", ");
 
-		while (work)
-			{
-			auto kw = static_cast<gchar *>(work->data);
-			work = work->next;
+	g_list_free_full(keywords, g_free);
 
-			if (!kw) continue;
-			if (!kwstr)
-				kwstr = g_string_new("");
-			else
-				g_string_append(kwstr, ", ");
-
-			g_string_append(kwstr, kw);
-			}
-		g_list_free_full(keywords, g_free);
-		}
-
-	if (kwstr)
-		{
-		return g_string_free(kwstr, FALSE);
-		}
-
-	return nullptr;
+	return g_string_free(kwstr, FALSE);
 }
 
 gchar *image_osd_mkinfo(const gchar *str, FileData *fd, const OsdTemplate &vars)

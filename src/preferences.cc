@@ -3812,16 +3812,8 @@ static void config_tab_advanced(GtkWidget *notebook)
 
 	GList *extensions_list = pixbuf_gdk_known_extensions();
 
-	g_autoptr(GString) types_string = g_string_new(nullptr);
+	g_autoptr(GString) types_string = string_list_join(extensions_list, ", ");
 
-	for (GList *work = extensions_list; work; work = work->next)
-		{
-		if (types_string->len > 0)
-			{
-			types_string = g_string_append(types_string, ", ");
-			}
-		types_string = g_string_append(types_string, static_cast<gchar *>(work->data));
-		}
 	g_list_free_full(extensions_list, g_free);
 
 	types_string = g_string_prepend(types_string, _("Usable file types:\n"));
