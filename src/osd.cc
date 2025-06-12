@@ -53,7 +53,7 @@ struct TagData
 	GtkWidget *image_overlay_template_view;
 };
 
-constexpr struct
+constexpr struct OsdTag
 {
 	const gchar *key;
 	const gchar *title;
@@ -127,21 +127,21 @@ void tag_data_free(TagData *td)
 	g_free(td);
 }
 
-void set_osd_button(GtkGrid *grid, const gint rows, const gint cols, const gchar *key, const gchar *title, GtkWidget *template_view)
+GtkWidget *osd_tag_button_new(const OsdTag &tag, GtkWidget *template_view)
 {
 	auto *td = g_new0(TagData, 1);
-	td->key = g_strdup(key);
+	td->key = g_strdup(tag.key);
 	td->image_overlay_template_view = template_view;
 
-	GtkWidget *new_button = gtk_button_new_with_label(title);
-	g_signal_connect_swapped(G_OBJECT(new_button), "clicked", G_CALLBACK(tag_data_add_key_to_template), td);
-	g_signal_connect_swapped(G_OBJECT(new_button), "destroy", G_CALLBACK(tag_data_free), td);
-	gtk_widget_show(new_button);
+	GtkWidget *tag_button = gtk_button_new_with_label(tag.title);
+	g_signal_connect_swapped(G_OBJECT(tag_button), "clicked", G_CALLBACK(tag_data_add_key_to_template), td);
+	g_signal_connect_swapped(G_OBJECT(tag_button), "destroy", G_CALLBACK(tag_data_free), td);
+	gtk_widget_show(tag_button);
 
-	gtk_drag_source_set(new_button, GDK_BUTTON1_MASK, osd_drag_types.data(), osd_drag_types.size(), GDK_ACTION_COPY);
-	g_signal_connect_swapped(G_OBJECT(new_button), "drag_data_get", G_CALLBACK(tag_data_add_key_to_selection), td);
+	gtk_drag_source_set(tag_button, GDK_BUTTON1_MASK, osd_drag_types.data(), osd_drag_types.size(), GDK_ACTION_COPY);
+	g_signal_connect_swapped(G_OBJECT(tag_button), "drag_data_get", G_CALLBACK(tag_data_add_key_to_selection), td);
 
-	gtk_grid_attach(grid, new_button, cols, rows, 1, 1);
+	return tag_button;
 }
 
 } // namespace
@@ -182,7 +182,8 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 		{
 		for (gint cols = 0; cols < max_cols && i < entries; cols++, i++)
 			{
-			set_osd_button(grid, rows, cols, predefined_tags[i].key, predefined_tags[i].title, template_view);
+			GtkWidget *button = osd_tag_button_new(predefined_tags[i], template_view);
+			gtk_grid_attach(grid, button, cols, rows, 1, 1);
 			}
 		}
 	return vbox;
