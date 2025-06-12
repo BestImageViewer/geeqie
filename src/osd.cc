@@ -49,7 +49,7 @@ namespace {
 struct TagData
 {
 	gchar *key;
-	gchar *title;
+	GtkWidget *image_overlay_template_view;
 };
 
 constexpr struct
@@ -106,63 +106,44 @@ constexpr std::array<GtkTargetEntry, 1> osd_drag_types{{
 	{ const_cast<gchar *>("text/plain"), GTK_TARGET_SAME_APP, TARGET_TEXT_PLAIN }
 }};
 
-} // namespace
-
-static void tag_button_cb(GtkWidget *widget, gpointer data)
+void tag_data_add_key_to_template(TagData *td)
 {
-	auto image_overlay_template_view = static_cast<GtkTextView *>(data);
-	GtkTextBuffer *buffer;
-	TagData *td;
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(td->image_overlay_template_view));
+	gtk_text_buffer_insert_at_cursor(buffer, td->key, -1);
 
-	buffer = gtk_text_view_get_buffer(image_overlay_template_view);
-	td = static_cast<TagData *>(g_object_get_data(G_OBJECT(widget), "tag_data"));
-	gtk_text_buffer_insert_at_cursor(GTK_TEXT_BUFFER(buffer), td->key, -1);
-
-	gtk_widget_grab_focus(GTK_WIDGET(image_overlay_template_view));
+	gtk_widget_grab_focus(td->image_overlay_template_view);
 }
 
-static void osd_dnd_get_cb(GtkWidget *btn, GdkDragContext *, GtkSelectionData *selection_data, guint, guint, gpointer data)
+void tag_data_add_key_to_selection(TagData *td, GdkDragContext *, GtkSelectionData *selection_data, guint, guint, gpointer)
 {
-	TagData *td;
-	auto image_overlay_template_view = static_cast<GtkTextView *>(data);
-
-	td = static_cast<TagData *>(g_object_get_data(G_OBJECT(btn), "tag_data"));
 	gtk_selection_data_set_text(selection_data, td->key, -1);
-
-	gtk_widget_grab_focus(GTK_WIDGET(image_overlay_template_view));
+	gtk_widget_grab_focus(td->image_overlay_template_view);
 }
 
-static void tag_data_free(gpointer data)
+void tag_data_free(TagData *td)
 {
-	auto *td = static_cast<TagData *>(data);
-
 	g_free(td->key);
-	g_free(td->title);
 	g_free(td);
 }
 
-static void set_osd_button(GtkGrid *grid, const gint rows, const gint cols, const gchar *key, const gchar *title, GtkWidget *template_view)
+void set_osd_button(GtkGrid *grid, const gint rows, const gint cols, const gchar *key, const gchar *title, GtkWidget *template_view)
 {
-	GtkWidget *new_button;
-	TagData *td;
+	auto *td = g_new0(TagData, 1);
+	td->key = g_strdup(key);
+	td->image_overlay_template_view = template_view;
 
-	new_button = gtk_button_new_with_label(title);
-	g_signal_connect(G_OBJECT(new_button), "clicked", G_CALLBACK(tag_button_cb), template_view);
+	GtkWidget *new_button = gtk_button_new_with_label(title);
+	g_signal_connect_swapped(G_OBJECT(new_button), "clicked", G_CALLBACK(tag_data_add_key_to_template), td);
+	g_signal_connect_swapped(G_OBJECT(new_button), "destroy", G_CALLBACK(tag_data_free), td);
 	gtk_widget_show(new_button);
 
-	td = g_new0(TagData, 1);
-	td->key = g_strdup(key);
-	td->title = g_strdup(title);
-
-	g_object_set_data_full(G_OBJECT(new_button), "tag_data", td, tag_data_free);
-
 	gtk_drag_source_set(new_button, GDK_BUTTON1_MASK, osd_drag_types.data(), osd_drag_types.size(), GDK_ACTION_COPY);
-	g_signal_connect(G_OBJECT(new_button), "drag_data_get",
-							G_CALLBACK(osd_dnd_get_cb), template_view);
+	g_signal_connect_swapped(G_OBJECT(new_button), "drag_data_get", G_CALLBACK(tag_data_add_key_to_selection), td);
 
 	gtk_grid_attach(grid, new_button, cols, rows, 1, 1);
-
 }
+
+} // namespace
 
 GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 {
