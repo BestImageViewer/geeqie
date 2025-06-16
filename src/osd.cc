@@ -177,24 +177,19 @@ gchar *get_osd_name(const gchar *start, const gchar *end, guint &limit, gchar **
 	return g_strndup(start + 1, (trunc ? trunc : end) - start - 1);
 }
 
-gchar *keywords_to_string(FileData *fd)
-{
-	g_assert(fd);
-
-	GList *keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
-
-	GString *kwstr = string_list_join(keywords, ", ");
-
-	g_list_free_full(keywords, g_free);
-
-	return g_string_free(kwstr, FALSE);
-}
-
 gchar *get_osd_data(gchar *name, FileData *fd, const OsdTemplate &vars)
 {
 	if (strcmp(name, "keywords") == 0)
 		{
-		return keywords_to_string(fd);
+		g_assert(fd);
+
+		GList *keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
+
+		GString *kwstr = string_list_join(keywords, ", ");
+
+		g_list_free_full(keywords, g_free);
+
+		return g_string_free(kwstr, FALSE);
 		}
 
 	if (strcmp(name, "comment") == 0)

@@ -953,30 +953,26 @@ GList *string_to_keywords_list(const gchar *text)
 gboolean meta_data_get_keyword_mark(FileData *fd, gint, gpointer data)
 {
 	/** @FIXME do not use global keyword_tree */
-	auto path = static_cast<GList *>(data);
-	GList *keywords;
-	gboolean found = FALSE;
-	keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
-	if (keywords)
-		{
-		GtkTreeIter iter;
-		if (keyword_tree_get_iter(GTK_TREE_MODEL(keyword_tree), &iter, path) &&
-		    keyword_tree_is_set(GTK_TREE_MODEL(keyword_tree), &iter, keywords))
-			found = TRUE;
+	GList *keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
+	if (!keywords) return FALSE;
 
-		}
+	auto path = static_cast<GList *>(data);
+	GtkTreeIter iter;
+	gboolean found = (keyword_tree_get_iter(GTK_TREE_MODEL(keyword_tree), &iter, path) &&
+	                  keyword_tree_is_set(GTK_TREE_MODEL(keyword_tree), &iter, keywords));
+
+	g_list_free_full(keywords, g_free);
 	return found;
 }
 
 gboolean meta_data_set_keyword_mark(FileData *fd, gint, gboolean value, gpointer data)
 {
 	auto path = static_cast<GList *>(data);
-	GList *keywords = nullptr;
 	GtkTreeIter iter;
 
 	if (!keyword_tree_get_iter(GTK_TREE_MODEL(keyword_tree), &iter, path)) return FALSE;
 
-	keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
+	GList *keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
 
 	if (!!keyword_tree_is_set(GTK_TREE_MODEL(keyword_tree), &iter, keywords) != !!value)
 		{
