@@ -3598,7 +3598,7 @@ msgid "Help in pdf format"
 msgstr "Aiuto in formato PDF"
 
 #: src/layout-util.cc:2629
-msgid "Help in pdf formast"
+msgid "Help in pdf formats"
 msgstr "Aiuto in formato PDF"
 
 #: src/layout-util.cc:2630 src/window.cc:368
