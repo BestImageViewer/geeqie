@@ -7936,7 +7936,7 @@ msgstr ""
 # src/preferences.cc:163 src/preferences.cc:604
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Gyorstár ürítése"
 
 #: src/preferences.cc:3979

@@ -6698,7 +6698,7 @@ msgid "Set to 0 for unlimited"
 msgstr "Установите значение 0 для неограниченного количества"
 
 #: src/preferences.cc:3977
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Альтернативный алгоритм сходства"
 
 #: src/preferences.cc:3979

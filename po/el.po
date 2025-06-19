@@ -6920,7 +6920,7 @@ msgstr "Όρισέ το στο 0, για απεριόριστο μέγεθος"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Εκκαθάριση της μικροαποθήκευσης"
 
 #: src/preferences.cc:3979

@@ -6629,7 +6629,7 @@ msgid "Set to 0 for unlimited"
 msgstr "Establecer en 0 para tamaño ilimitado"
 
 #: src/preferences.cc:3977
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Algoritmo de similitud alternativo"
 
 #: src/preferences.cc:3979

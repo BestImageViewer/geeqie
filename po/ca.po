@@ -6734,7 +6734,7 @@ msgstr "Poseu-ho a 0 per indicar il·limitat"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Memòria cau de semblances"
 
 #: src/preferences.cc:3979

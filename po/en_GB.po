@@ -6735,7 +6735,7 @@ msgstr "Set to 0 for unlimited"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "File similarity cache"
 
 #: src/preferences.cc:3979

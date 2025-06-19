@@ -6877,7 +6877,7 @@ msgstr "Ustaw na 0 dla nieograniczonego rozmiaru"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Wyczyść cache"
 
 #: src/preferences.cc:3979

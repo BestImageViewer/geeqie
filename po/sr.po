@@ -6911,7 +6911,7 @@ msgstr "Поставите на 0 за неограничену величину
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Очисти оставу"
 
 #: src/preferences.cc:3979
