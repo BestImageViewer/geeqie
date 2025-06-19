@@ -6962,7 +6962,7 @@ msgstr "设置为 0 取消容量限制"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "清除缓存"
 
 #: src/preferences.cc:3979

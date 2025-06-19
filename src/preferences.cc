@@ -3852,7 +3852,7 @@ static void config_tab_advanced(GtkWidget *notebook)
 
 	pref_line(vbox, PREF_PAD_SPACE);
 
-	group = pref_group_new(vbox, FALSE, _("Alternate similarity alogorithm"), GTK_ORIENTATION_VERTICAL);
+	group = pref_group_new(vbox, FALSE, _("Alternate similarity algorithm"), GTK_ORIENTATION_VERTICAL);
 
 	alternate_checkbox = pref_checkbox_new_int(group, _("Enable alternate similarity algorithm"), options->alternate_similarity_algorithm.enabled, &c_options->alternate_similarity_algorithm.enabled);
 

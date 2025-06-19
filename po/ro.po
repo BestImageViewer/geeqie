@@ -6929,7 +6929,7 @@ msgstr "0 pentru nelimitat"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Şterge memoria tampon"
 
 #: src/preferences.cc:3979

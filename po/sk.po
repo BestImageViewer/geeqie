@@ -7345,7 +7345,7 @@ msgstr "Nastavte 0 pre neobdmezené"
 
 # src/preferences.cc:163 src/preferences.cc:604
 #: src/preferences.cc:3977
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Alternatívny algoritmus hľadania podobnosti"
 
 #: src/preferences.cc:3979

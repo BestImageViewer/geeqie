@@ -6789,7 +6789,7 @@ msgstr "Auf 0 setzen für unbeschränkte Größe"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Dateiähnlichkeits-Cache"
 
 #: src/preferences.cc:3979

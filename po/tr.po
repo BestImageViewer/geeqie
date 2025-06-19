@@ -6876,7 +6876,7 @@ msgstr "Sınırsız boyut için 0'a ayarlayın"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Önbelleği temizle"
 
 #: src/preferences.cc:3979

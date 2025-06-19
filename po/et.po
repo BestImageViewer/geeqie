@@ -7194,7 +7194,7 @@ msgstr ""
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Puhasta puhver"
 
 #: src/preferences.cc:3979

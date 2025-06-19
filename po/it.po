@@ -7056,7 +7056,7 @@ msgid "Set to 0 for unlimited"
 msgstr "Imposta a 0 per non porre alcun limite"
 
 #: src/preferences.cc:3890
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Algoritmo di rilevamento della somiglianza alternativo"
 
 #: src/preferences.cc:3892

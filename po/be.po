@@ -7105,7 +7105,7 @@ msgstr "Устанавіце 0 для неабмежаванага памеру"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Ачысціць кэш"
 
 #: src/preferences.cc:3979

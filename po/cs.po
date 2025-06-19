@@ -6690,7 +6690,7 @@ msgstr "Nastav 0 pro neomezený počet"
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Cache podobnosti souborů"
 
 #: src/preferences.cc:3979

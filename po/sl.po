@@ -7185,7 +7185,7 @@ msgstr ""
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Počisti predpomnilnik"
 
 #: src/preferences.cc:3979

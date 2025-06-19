@@ -6995,7 +6995,7 @@ msgid "Set to 0 for unlimited"
 msgstr "Geef 0 op voor onbeperkt"
 
 #: ../src/preferences.cc:3862
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "Alternatieve algoritme voor gelijkheid"
 
 #: ../src/preferences.cc:3864

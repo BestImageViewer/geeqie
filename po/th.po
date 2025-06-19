@@ -7192,7 +7192,7 @@ msgstr ""
 
 #: src/preferences.cc:3977
 #, fuzzy
-msgid "Alternate similarity alogorithm"
+msgid "Alternate similarity algorithm"
 msgstr "ล้างแคช"
 
 #: src/preferences.cc:3979
