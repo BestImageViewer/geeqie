@@ -115,7 +115,7 @@ void shortcuts_add_cb(GtkWidget *, gpointer data)
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), layout_get_path(get_current_layout()));
 	gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), layout_get_path(get_current_layout()), nullptr);
 
-	gtk_widget_set_tooltip_text(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GQ_RESPONSE_NAME_CLICKED), _("Optional alias name for the shortcut.\nThis may be amended or added from the Shortcuts pane.\nIf none given, the basename of the folder is usedddd"));
+	gtk_widget_set_tooltip_text(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GQ_RESPONSE_NAME_CLICKED), _("Optional alias name for the shortcut.\nThis may be amended or added from the Shortcuts pane.\nIf none given, the basename of the folder is used"));
 
 	GtkWidget *entry = gtk_entry_new();
 	GtkWidget *name_popover = gtk_popover_new(GTK_WIDGET(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GQ_RESPONSE_NAME_CLICKED)));
