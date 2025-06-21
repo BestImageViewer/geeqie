@@ -3597,10 +3597,6 @@ msgstr "Leggimi"
 msgid "Help in pdf format"
 msgstr "Aiuto in formato PDF"
 
-#: src/layout-util.cc:2629
-msgid "Help in pdf formats"
-msgstr "Aiuto in formato PDF"
-
 #: src/layout-util.cc:2630 src/window.cc:368
 msgid "On-line help search"
 msgstr "Ricerca nell’Aiuto online"

@@ -3483,10 +3483,6 @@ msgstr "Č_timne"
 msgid "Help in pdf format"
 msgstr "Formát pixelu"
 
-#: src/layout-util.cc:2720
-msgid "Help in pdf formats"
-msgstr ""
-
 #: src/layout-util.cc:2721 src/window.cc:384
 msgid "On-line help search"
 msgstr "Vyhledávání nápovědy on-line"

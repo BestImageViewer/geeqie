@@ -3469,10 +3469,6 @@ msgstr "Readme"
 msgid "Help in pdf format"
 msgstr "Help in pdf-formaat"
 
-#: ../src/layout-util.cc:2711
-msgid "Help in pdf formats"
-msgstr "Help in pdf-formaat"
-
 #: ../src/layout-util.cc:2712 ../src/window.cc:344
 msgid "On-line help search"
 msgstr "Zoeken in online help"

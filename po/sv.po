@@ -3487,10 +3487,6 @@ msgstr "Läs mig"
 msgid "Help in pdf format"
 msgstr "Pixeluppbyggnad"
 
-#: src/layout-util.cc:2720
-msgid "Help in pdf formats"
-msgstr ""
-
 #: src/layout-util.cc:2721 src/window.cc:384
 msgid "On-line help search"
 msgstr "Online hjälpsök"
