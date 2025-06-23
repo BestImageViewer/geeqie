@@ -3044,9 +3044,6 @@ static void keywords_find_stop_cb(GenericDialog *, gpointer data)
 static gboolean keywords_find_file(gpointer data)
 {
 	auto kfd = static_cast<KeywordFindData *>(data);
-	GtkTextIter iter;
-	GtkTextBuffer *buffer;
-	GList *keywords;
 
 	if (kfd->list)
 		{
@@ -3055,15 +3052,15 @@ static gboolean keywords_find_file(gpointer data)
 		fd = static_cast<FileData *>(kfd->list->data);
 		kfd->list = g_list_remove(kfd->list, fd);
 
-		keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
-		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(keyword_text));
+		GList *keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
+		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(keyword_text));
+		GtkTextIter iter;
 
-		while (keywords)
+		for (GList *work = keywords; work; work = work->next)
 			{
 			gtk_text_buffer_get_end_iter(buffer, &iter);
-			g_autofree gchar *tmp = g_strconcat(static_cast<const gchar *>(keywords->data), "\n", NULL);
+			g_autofree gchar *tmp = g_strconcat(static_cast<gchar *>(work->data), "\n", NULL);
 			gtk_text_buffer_insert(buffer, &iter, tmp, -1);
-			keywords = keywords->next;
 			}
 
 		gq_gtk_entry_set_text(GTK_ENTRY(kfd->progress), fd->path);
