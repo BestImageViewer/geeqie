@@ -150,7 +150,7 @@ if option.enabled()
 else
     gtk_dep = dependency('gtk+-3.0', version : '>=3.24', required: true)
 endif
-glib_dep = dependency('glib-2.0', version : '>=2.52', required: true)
+glib_dep = dependency('glib-2.0', version : '>=2.66', required: true)
 
 # Required only when backward-cpp is used
 conf_data.set('HAVE_DEVELOPER', 0)
