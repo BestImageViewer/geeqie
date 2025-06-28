@@ -677,7 +677,7 @@ void bar_pane_keywords_dnd_receive(GtkWidget *tree_view, GdkDragContext *,
 			return;
 			}
 
-		if (src_valid && keyword_compare(keyword_tree, &src_kw_iter, &dest_kw_iter) == 0)
+		if (src_valid && keyword_equal(keyword_tree, &src_kw_iter, &dest_kw_iter))
 			{
 			/* can't move to itself */
 			return;

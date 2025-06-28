@@ -1012,7 +1012,7 @@ void meta_data_connect_mark_with_keyword(GtkTreeModel *keyword_tree, GtkTreeIter
 
 			if (keyword_tree_get_iter(keyword_tree, &old_kw_iter, old_path) &&
 			    (i == mark || /* release any previous connection of given mark */
-			     keyword_compare(keyword_tree, &old_kw_iter, kw_iter) == 0)) /* or given keyword */
+			     keyword_equal(keyword_tree, &old_kw_iter, kw_iter))) /* or given keyword */
 				{
 				file_data_register_mark_func(i, nullptr, nullptr, nullptr, nullptr);
 				gtk_tree_store_set(GTK_TREE_STORE(keyword_tree), &old_kw_iter, KEYWORD_COLUMN_MARK, "", -1);
@@ -1078,14 +1078,12 @@ void keyword_set(GtkTreeStore *keyword_tree, GtkTreeIter *iter, const gchar *nam
 						KEYWORD_COLUMN_IS_KEYWORD, is_keyword, -1);
 }
 
-gboolean keyword_compare(GtkTreeModel *keyword_tree, GtkTreeIter *a, GtkTreeIter *b)
+gboolean keyword_equal(GtkTreeModel *keyword_tree, GtkTreeIter *a, GtkTreeIter *b)
 {
-	GtkTreePath *pa = gtk_tree_model_get_path(keyword_tree, a);
-	GtkTreePath *pb = gtk_tree_model_get_path(keyword_tree, b);
-	gint ret = gtk_tree_path_compare(pa, pb);
-	gtk_tree_path_free(pa);
-	gtk_tree_path_free(pb);
-	return ret;
+	g_autoptr(GtkTreePath) pa = gtk_tree_model_get_path(keyword_tree, a);
+	g_autoptr(GtkTreePath) pb = gtk_tree_model_get_path(keyword_tree, b);
+
+	return gtk_tree_path_compare(pa, pb) == 0;
 }
 
 gboolean keyword_same_parent(GtkTreeModel *keyword_tree, GtkTreeIter *a, GtkTreeIter *b)
@@ -1098,7 +1096,7 @@ gboolean keyword_same_parent(GtkTreeModel *keyword_tree, GtkTreeIter *a, GtkTree
 
 	if (valid_pa && valid_pb)
 		{
-		return keyword_compare(keyword_tree, &parent_a, &parent_b) == 0;
+		return keyword_equal(keyword_tree, &parent_a, &parent_b);
 		}
 
 	return (!valid_pa && !valid_pb); /* both are toplevel */
@@ -1109,7 +1107,6 @@ gboolean keyword_exists(GtkTreeModel *keyword_tree, GtkTreeIter *parent_ptr, Gtk
 	GtkTreeIter parent;
 	GtkTreeIter iter;
 	gboolean toplevel = FALSE;
-	gboolean ret;
 
 	if (parent_ptr)
 		{
@@ -1127,30 +1124,28 @@ gboolean keyword_exists(GtkTreeModel *keyword_tree, GtkTreeIter *parent_ptr, Gtk
 	if (!gtk_tree_model_iter_children(GTK_TREE_MODEL(keyword_tree), &iter, toplevel ? nullptr : &parent)) return FALSE;
 
 	g_autofree gchar *casefold = g_utf8_casefold(name, -1);
-	ret = FALSE;
+	gboolean ret = FALSE;
 
-	while (TRUE)
+	do
 		{
-		if (!exclude_sibling || !sibling || keyword_compare(keyword_tree, &iter, sibling) != 0)
+		if (exclude_sibling && sibling && keyword_equal(keyword_tree, &iter, sibling)) continue;
+
+		if (options->metadata.keywords_case_sensitive)
 			{
-			if (options->metadata.keywords_case_sensitive)
-				{
-				g_autofree gchar *iter_name = keyword_get_name(keyword_tree, &iter);
-				ret = strcmp(name, iter_name) == 0;
-				}
-			else
-				{
-				g_autofree gchar *iter_casefold = keyword_get_casefold(keyword_tree, &iter);
-				ret = strcmp(casefold, iter_casefold) == 0;
-				} // if (options->metadata.tags_cas...
+			g_autofree gchar *iter_name = keyword_get_name(keyword_tree, &iter);
+			ret = strcmp(name, iter_name) == 0;
 			}
-		if (ret)
+		else
 			{
-			if (result) *result = iter;
-			break;
+			g_autofree gchar *iter_casefold = keyword_get_casefold(keyword_tree, &iter);
+			ret = strcmp(casefold, iter_casefold) == 0;
 			}
-		if (!gtk_tree_model_iter_next(keyword_tree, &iter)) break;
+
+		if (ret) break;
 		}
+	while (gtk_tree_model_iter_next(keyword_tree, &iter));
+
+	if (ret && result) *result = iter;
 
 	return ret;
 }
