@@ -730,16 +730,13 @@ static void dupe_listview_remove(DupeWindow *dw, DupeItem *di)
 
 static GList *dupe_listview_get_selection(GtkWidget *listview)
 {
-	GtkTreeModel *store;
-	GtkTreeSelection *selection;
-	GList *slist;
 	GList *list = nullptr;
-	GList *work;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
-	while (work)
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
+	GtkTreeModel *store;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
 		DupeItem *di = nullptr;
@@ -751,25 +748,18 @@ static GList *dupe_listview_get_selection(GtkWidget *listview)
 			{
 			list = g_list_prepend(list, file_data_ref(di->fd));
 			}
-		work = work->next;
 		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return g_list_reverse(list);
 }
 
 static gboolean dupe_listview_item_is_selected(DupeItem *di, GtkWidget *listview)
 {
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
 	GtkTreeModel *store;
-	GtkTreeSelection *selection;
-	GList *slist;
-	GList *work;
-	gboolean found = FALSE;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
-	while (!found && work)
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
 		DupeItem *di_n;
@@ -777,12 +767,11 @@ static gboolean dupe_listview_item_is_selected(DupeItem *di, GtkWidget *listview
 
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DUPE_COLUMN_POINTER, &di_n, -1);
-		if (di_n == di) found = TRUE;
-		work = work->next;
-		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
-	return found;
+		if (di_n == di) return TRUE;
+		}
+
+	return FALSE;
 }
 
 static void dupe_listview_select_dupes(DupeWindow *dw, DupeSelectType parents)
@@ -3129,30 +3118,25 @@ static void dupe_menu_view(DupeItem *di, GtkWidget *listview, gint new_window)
 
 static void dupe_window_remove_selection(DupeWindow *dw, GtkWidget *listview)
 {
-	GtkTreeSelection *selection;
-	GtkTreeModel *store;
-	GtkTreeIter iter;
-	GList *slist;
 	GList *list = nullptr;
-	GList *work;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
-	while (work)
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
+	GtkTreeModel *store;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
 		DupeItem *di = nullptr;
 
+		GtkTreeIter iter;
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DUPE_COLUMN_POINTER, &di, -1);
 		if (di) list = g_list_prepend(list, di);
-		work = work->next;
 		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	dw->color_frozen = TRUE;
-	work = list;
+	GList *work = list;
 	while (work)
 		{
 		DupeItem *di;
@@ -4044,10 +4028,6 @@ static gboolean dupe_window_keypress_cb(GtkWidget *widget, GdkEventKey *event, g
 	gboolean stop_signal = FALSE;
 	gboolean on_second;
 	GtkWidget *listview;
-	GtkTreeModel *store;
-	GtkTreeSelection *selection;
-	GList *slist;
-	DupeItem *di = nullptr;
 
 	on_second = gtk_widget_has_focus(dw->second_listview);
 
@@ -4060,22 +4040,7 @@ static gboolean dupe_window_keypress_cb(GtkWidget *widget, GdkEventKey *event, g
 		listview = dw->listview;
 		}
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	if (slist)
-		{
-		GtkTreePath *tpath;
-		GtkTreeIter iter;
-		GList *last;
-
-		last = g_list_last(slist);
-		tpath = static_cast<GtkTreePath *>(last->data);
-
-		/* last is newest selected file */
-		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_model_get(store, &iter, DUPE_COLUMN_POINTER, &di, -1);
-		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(listview));
 
 	if (event->state & GDK_CONTROL_MASK)
 		{
@@ -4175,6 +4140,21 @@ static gboolean dupe_window_keypress_cb(GtkWidget *widget, GdkEventKey *event, g
 		}
 	else
 		{
+		DupeItem *di = nullptr;
+
+		GtkTreeModel *store;
+		g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+		if (slist)
+			{
+			GList *last = g_list_last(slist);
+			auto *tpath = static_cast<GtkTreePath *>(last->data);
+
+			/* last is newest selected file */
+			GtkTreeIter iter;
+			gtk_tree_model_get_iter(store, &iter, tpath);
+			gtk_tree_model_get(store, &iter, DUPE_COLUMN_POINTER, &di, -1);
+			}
+
 		stop_signal = TRUE;
 		switch (event->keyval)
 			{
@@ -5044,13 +5024,6 @@ struct ExportDupesData
 
 static void export_duplicates_data(DupeWindow *dw, const gchar *sep, GString *output_string)
 {
-	GtkTreeModel *store;
-	GtkTreeIter iter;
-	DupeItem *di;
-	GList *work;
-	GtkTreeSelection *selection;
-	GList *slist;
-	GtkTreePath *tpath;
 	gboolean color_old = FALSE;
 	gboolean color_new = FALSE;
 	gint match_count;
@@ -5060,21 +5033,23 @@ static void export_duplicates_data(DupeWindow *dw, const gchar *sep, GString *ou
 	output_string = g_string_append(output_string, header);
 	output_string = g_string_append_c(output_string, '\n');
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
+	GtkTreeModel *store;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
 
-	tpath = static_cast<GtkTreePath *>(work->data);
+	auto *tpath = static_cast<GtkTreePath *>(slist->data);
+	GtkTreeIter iter;
 	gtk_tree_model_get_iter(store, &iter, tpath);
 	gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, DUPE_COLUMN_COLOR, &color_new, -1);
 	color_old = !color_new;
 	match_count = 0;
 
-	while (work)
+	for (GList *work = slist; work; work = work->next)
 		{
 		tpath = static_cast<GtkTreePath *>(work->data);
 		gtk_tree_model_get_iter(store, &iter, tpath);
 
+		DupeItem *di;
 		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, DUPE_COLUMN_POINTER, &di, -1);
 
 		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, DUPE_COLUMN_COLOR, &color_new, -1);
@@ -5131,10 +5106,7 @@ static void export_duplicates_data(DupeWindow *dw, const gchar *sep, GString *ou
 		output_string = g_string_append(output_string, sep);
 		output_string = g_string_append(output_string, di->fd->path);
 		output_string = g_string_append_c(output_string, '\n');
-
-		work = work->next;
 		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 }
 
 void export_duplicates_data_command_line(GString *output_string)

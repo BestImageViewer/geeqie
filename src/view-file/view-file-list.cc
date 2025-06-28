@@ -1212,16 +1212,11 @@ gint vflist_index_by_fd(const ViewFile *vf, const FileData *fd)
 
 static gboolean vflist_row_is_selected(ViewFile *vf, FileData *fd)
 {
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 	GtkTreeModel *store;
-	GtkTreeSelection *selection;
-	GList *slist;
-	GList *work;
-	gboolean found = FALSE;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
-	while (!found && work)
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
 		FileData *fd_n;
@@ -1229,12 +1224,11 @@ static gboolean vflist_row_is_selected(ViewFile *vf, FileData *fd)
 
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd_n, -1);
-		if (fd_n == fd) found = TRUE;
-		work = work->next;
-		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
-	return found;
+		if (fd_n == fd) return TRUE;
+		}
+
+	return FALSE;
 }
 
 gboolean vflist_is_selected(ViewFile *vf, FileData *fd)
@@ -1251,7 +1245,8 @@ guint vflist_selection_count(ViewFile *vf, gint64 *bytes)
 		gint64 b = 0;
 
 		GtkTreeModel *store;
-		GList *slist = gtk_tree_selection_get_selected_rows(selection, &store);
+		g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+
 		for (GList *work = slist; work; work = work->next)
 			{
 			auto tpath = static_cast<GtkTreePath *>(work->data);
@@ -1262,7 +1257,6 @@ guint vflist_selection_count(ViewFile *vf, gint64 *bytes)
 			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
 			b += fd->size;
 			}
-		g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 		*bytes = b;
 		}
@@ -1272,13 +1266,12 @@ guint vflist_selection_count(ViewFile *vf, gint64 *bytes)
 
 GList *vflist_selection_get_list(ViewFile *vf)
 {
-	GtkTreeModel *store;
-	GtkTreeSelection *selection;
-	GList *slist;
 	GList *list = nullptr;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+	GtkTreeModel *store;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+
 	for (GList *work = g_list_last(slist); work; work = work->prev)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
@@ -1296,23 +1289,19 @@ GList *vflist_selection_get_list(ViewFile *vf)
 
 		list = g_list_prepend(list, file_data_ref(fd));
 		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return list;
 }
 
 GList *vflist_selection_get_list_by_index(ViewFile *vf)
 {
-	GtkTreeModel *store;
-	GtkTreeSelection *selection;
-	GList *slist;
 	GList *list = nullptr;
-	GList *work;
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
-	while (work)
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+	GtkTreeModel *store;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
 		FileData *fd;
@@ -1322,10 +1311,7 @@ GList *vflist_selection_get_list_by_index(ViewFile *vf)
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
 
 		list = g_list_prepend(list, GINT_TO_POINTER(g_list_index(vf->list, fd)));
-
-		work = work->next;
 		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	return g_list_reverse(list);
 }
@@ -1334,20 +1320,20 @@ void vflist_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &f
 {
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 	GtkTreeModel *store;
-	GtkTreeIter iter;
-	FileData *fd_n;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
 
-	GList *slist = gtk_tree_selection_get_selected_rows(selection, &store);
 	for (GList *work = slist; work; work = work->next)
 		{
 		auto *tpath = static_cast<GtkTreePath *>(work->data);
 
+		GtkTreeIter iter;
 		gtk_tree_model_get_iter(store, &iter, tpath);
+
+		FileData *fd_n;
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd_n, -1);
 
 		func(fd_n);
 		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 }
 
 void vflist_select_all(ViewFile *vf)
@@ -1534,14 +1520,12 @@ void vflist_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode)
 
 void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 {
-	GtkTreeModel *store;
-	GtkTreeSelection *selection;
-	GList *slist;
-
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+	GtkTreeModel *store;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+
 	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
@@ -1571,7 +1555,6 @@ void vflist_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
 
 		file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
 		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 }
 
 /*

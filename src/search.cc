@@ -610,15 +610,11 @@ static gint search_result_find_row(SearchData *sd, FileData *fd, GtkTreeIter *it
 
 static gboolean search_result_row_selected(SearchData *sd, FileData *fd)
 {
-	GtkTreeModel *store;
-	GList *slist;
-	GList *work;
-	gboolean found = FALSE;
-
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(sd->ui.result_view));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
-	while (!found && work)
+	GtkTreeModel *store;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
 		MatchFileData *mfd_n;
@@ -626,27 +622,24 @@ static gboolean search_result_row_selected(SearchData *sd, FileData *fd)
 
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd_n, -1);
-		if (mfd_n->fd == fd) found = TRUE;
-		work = work->next;
-		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
-	return found;
+		if (mfd_n->fd == fd) return TRUE;
+		}
+
+	return FALSE;
 }
 
 static gint search_result_selection_util(SearchData *sd, gint64 *bytes, GList **list)
 {
-	GList *slist;
-	GList *work;
 	gint n = 0;
 	gint64 total = 0;
 	GList *plist = nullptr;
 
 	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(sd->ui.result_view));
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(sd->ui.result_view));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
-	while (work)
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+
+	for (GList *work = slist; work; work = work->next)
 		{
 		n++;
 
@@ -662,10 +655,7 @@ static gint search_result_selection_util(SearchData *sd, gint64 *bytes, GList **
 
 			if (list) plist = g_list_prepend(plist, file_data_ref(mfd->fd));
 			}
-
-		work = work->next;
 		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	if (bytes) *bytes = total;
 	if (list) *list = g_list_reverse(plist);
@@ -832,15 +822,13 @@ static void search_result_remove(SearchData *sd, FileData *fd)
 
 static void search_result_remove_selection(SearchData *sd)
 {
-	GtkTreeModel *store;
-	GList *slist;
 	GList *flist = nullptr;
-	GList *work;
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(sd->ui.result_view));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	work = slist;
-	while (work)
+	GtkTreeModel *store;
+	g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+
+	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
 		GtkTreeIter iter;
@@ -849,11 +837,9 @@ static void search_result_remove_selection(SearchData *sd)
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd, -1);
 		flist = g_list_prepend(flist, mfd->fd);
-		work = work->next;
 		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
-	work = flist;
+	GList *work = flist;
 	while (work)
 		{
 		auto fd = static_cast<FileData *>(work->data);
@@ -1403,26 +1389,7 @@ static gboolean search_result_release_cb(GtkWidget *widget, GdkEventButton *beve
 static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
-	GtkTreeModel *store;
-	GList *slist;
-	MatchFileData *mfd = nullptr;
-
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(sd->ui.result_view));
-	slist = gtk_tree_selection_get_selected_rows(selection, &store);
-	if (slist)
-		{
-		GtkTreePath *tpath;
-		GtkTreeIter iter;
-		GList *last;
-
-		last = g_list_last(slist);
-		tpath = static_cast<GtkTreePath *>(last->data);
-
-		/* last is newest selected file */
-		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd, -1);
-		}
-	g_list_free_full(slist, reinterpret_cast<GDestroyNotify>(gtk_tree_path_free));
 
 	gboolean stop_signal = TRUE;
 	if (event->state & GDK_CONTROL_MASK)
@@ -1473,6 +1440,21 @@ static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event,
 		}
 	else
 		{
+		MatchFileData *mfd = nullptr;
+
+		GtkTreeModel *store;
+		g_autolist(GtkTreePath) slist = gtk_tree_selection_get_selected_rows(selection, &store);
+		if (slist)
+			{
+			GList *last = g_list_last(slist);
+			auto *tpath = static_cast<GtkTreePath *>(last->data);
+
+			/* last is newest selected file */
+			GtkTreeIter iter;
+			gtk_tree_model_get_iter(store, &iter, tpath);
+			gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd, -1);
+			}
+
 		switch (event->keyval)
 			{
 			case GDK_KEY_Return: case GDK_KEY_KP_Enter:
@@ -1493,15 +1475,9 @@ static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event,
 			case GDK_KEY_Menu:
 			case GDK_KEY_F10:
 				{
-				GtkWidget *menu;
+				sd->click_fd = mfd ? mfd->fd : nullptr;
 
-				if (mfd)
-					sd->click_fd = mfd->fd;
-				else
-					sd->click_fd = nullptr;
-
-				menu = search_result_menu(sd, (mfd != nullptr), (search_result_count(sd, nullptr) > 0));
-
+				GtkWidget *menu = search_result_menu(sd, (mfd != nullptr), (search_result_count(sd, nullptr) > 0));
 				gtk_menu_popup_at_widget(GTK_MENU(menu), widget, GDK_GRAVITY_EAST, GDK_GRAVITY_CENTER, nullptr);
 				}
 				break;
