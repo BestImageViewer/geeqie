@@ -86,6 +86,29 @@
 #include "view-file.h"
 #include "window.h"
 
+namespace
+{
+
+struct WindowNames
+{
+	gboolean displayed;
+	gchar *name;
+	gchar *path;
+};
+
+void window_names_free(WindowNames *wn)
+{
+	if (!wn) return;
+
+	g_free(wn->name);
+	g_free(wn->path);
+	g_free(wn);
+}
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(WindowNames, window_names_free)
+
+} // namespace
+
 static gboolean layout_bar_enabled(LayoutWindow *lw);
 static gboolean layout_bar_sort_enabled(LayoutWindow *lw);
 static void layout_bars_hide_toggle(LayoutWindow *lw);
@@ -2241,13 +2264,6 @@ void layout_recent_add_path(const gchar *path)
  * window layout menu
  *-----------------------------------------------------------------------------
  */
-struct WindowNames
-{
-	gboolean displayed;
-	gchar *name;
-	gchar *path;
-};
-
 struct RenameWindow
 {
 	GenericDialog *gd;
@@ -2265,15 +2281,6 @@ struct DeleteWindow
 	GtkWidget *button_ok;
 	GtkWidget *group;
 };
-
-static void window_names_free(WindowNames *wn)
-{
-	if (!wn) return;
-
-	g_free(wn->name);
-	g_free(wn->path);
-	g_free(wn);
-}
 
 static gint layout_window_menu_list_sort_cb(gconstpointer a, gconstpointer b)
 {
@@ -2326,7 +2333,7 @@ static void layout_menu_new_window_cb(GtkWidget *, gpointer data)
 
 	n = GPOINTER_TO_INT(data);
 
-	GList *menulist = layout_window_menu_list();
+	g_autolist(WindowNames) menulist = layout_window_menu_list();
 	auto wn = static_cast<WindowNames *>(g_list_nth(menulist, n )->data);
 
 	if (wn->path) // @FIXME path can not be nullptr. Check for path existence?
@@ -2337,15 +2344,13 @@ static void layout_menu_new_window_cb(GtkWidget *, gpointer data)
 		{
 		log_printf(_("Error: window layout name: %s does not exist\n"), wn->path);
 		}
-
-	g_list_free_full(menulist, reinterpret_cast<GDestroyNotify>(window_names_free));
 }
 
 static void layout_menu_new_window_update(LayoutWindow *lw)
 {
 	if (!lw->ui_manager) return;
 
-	GList *list = layout_window_menu_list();
+	g_autolist(WindowNames) list = layout_window_menu_list();
 
 	GtkWidget *menu = gq_gtk_ui_manager_get_widget(lw->ui_manager,
 	                                               options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/NewWindow" : "/MainMenu/WindowsMenu/NewWindow");
@@ -2371,8 +2376,6 @@ static void layout_menu_new_window_update(LayoutWindow *lw)
 			gtk_widget_set_sensitive(item, FALSE);
 			}
 		}
-
-	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(window_names_free));
 }
 
 static void window_rename_cancel_cb(GenericDialog *, gpointer data)
@@ -2387,7 +2390,7 @@ static void window_rename_ok(GenericDialog *, gpointer data)
 {
 	auto rw = static_cast<RenameWindow *>(data);
 
-	GList *list = layout_window_menu_list();
+	g_autolist(WindowNames) list = layout_window_menu_list();
 	const gchar *new_id = gq_gtk_entry_get_text(GTK_ENTRY(rw->window_name_entry));
 
 	const auto window_names_compare_name = [](gconstpointer data, gconstpointer user_data)
@@ -2416,7 +2419,6 @@ static void window_rename_ok(GenericDialog *, gpointer data)
 		layout_refresh(rw->lw);
 		image_update_title(rw->lw->image);
 		}
-	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(window_names_free));
 
 	save_layout(rw->lw);
 
