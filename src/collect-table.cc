@@ -128,6 +128,7 @@ static hard_coded_window_keys collection_window_keys[] = {
 	{static_cast<GdkModifierType>(0), 'S', N_("Save collection")},
 	{GDK_CONTROL_MASK, 'S', N_("Save collection as")},
 	{GDK_CONTROL_MASK, 'T', N_("Show filename text")},
+	{GDK_CONTROL_MASK, 'I', N_("Show info text")},
 	{static_cast<GdkModifierType>(0), 'N', N_("Sort by name")},
 	{static_cast<GdkModifierType>(0), 'D', N_("Sort by date")},
 	{static_cast<GdkModifierType>(0), 'B', N_("Sort by size")},
@@ -329,11 +330,21 @@ static void collection_table_toggle_stars(CollectTable *ct)
 	collection_table_populate_at_new_size(ct, allocation.width, allocation.height, TRUE);
 }
 
+static void collection_table_toggle_info(CollectTable *ct)
+{
+	GtkAllocation allocation;
+	ct->show_infotext = !ct->show_infotext;
+	options->show_collection_infotext = ct->show_infotext;
+
+	gtk_widget_get_allocation(ct->listview, &allocation);
+	collection_table_populate_at_new_size(ct, allocation.width, allocation.height, TRUE);
+}
+
 static gint collection_table_get_icon_width(CollectTable *ct)
 {
 	gint width;
 
-	if (!ct->show_text) return options->thumbnails.max_width;
+	if (!ct->show_text && !ct->show_infotext) return options->thumbnails.max_width;
 
 	width = options->thumbnails.max_width + options->thumbnails.max_width / 2;
 	width = std::max(width, THUMB_MIN_ICON_WIDTH);
@@ -975,6 +986,13 @@ static void collection_table_popup_show_stars_cb(GtkWidget *, gpointer data)
 	collection_table_toggle_stars(ct);
 }
 
+static void collection_table_popup_show_infotext_cb(GtkWidget *, gpointer data)
+{
+	auto ct = static_cast<CollectTable *>(data);
+
+	collection_table_toggle_info(ct);
+}
+
 static void collection_table_popup_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
@@ -1078,6 +1096,8 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 			G_CALLBACK(collection_table_popup_show_names_cb), ct);
 	menu_item_add_check(menu, _("Show star rating"), ct->show_stars,
 				G_CALLBACK(collection_table_popup_show_stars_cb), ct);
+	menu_item_add_check(menu, _("Show info _text"), ct->show_infotext,
+			G_CALLBACK(collection_table_popup_show_infotext_cb), ct);
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("_Save collection"), GQ_ICON_SAVE,
 			G_CALLBACK(collection_table_popup_save_cb), ct);
@@ -1265,6 +1285,7 @@ static gint page_height(CollectTable *ct)
 
 	row_height = options->thumbnails.max_height + THUMB_BORDER_PADDING * 2;
 	if (ct->show_text) row_height += options->thumbnails.max_height / 3;
+	if (ct->show_infotext) row_height += options->thumbnails.max_height / 3;
 
 	ret = page_size / row_height;
 	ret = std::max(ret, 1);
@@ -1326,6 +1347,9 @@ static gboolean collection_table_press_key_cb(GtkWidget *widget, GdkEventKey *ev
 			break;
 		case 'T': case 't':
 			if (event->state & GDK_CONTROL_MASK) collection_table_toggle_filenames(ct);
+			break;
+		case 'I': case 'i':
+			if (event->state & GDK_CONTROL_MASK) collection_table_toggle_info(ct);
 			break;
 		case GDK_KEY_Menu:
 		case GDK_KEY_F10:
@@ -1773,7 +1797,7 @@ static void collection_table_populate(CollectTable *ct, gboolean resize)
 				{
 				g_object_set(G_OBJECT(cell), "fixed_width", thumb_width,
 							     "fixed_height", options->thumbnails.max_height,
-							     "show_text", ct->show_text || ct->show_stars, NULL);
+							     "show_text", ct->show_text || ct->show_stars || ct->show_infotext, NULL);
 				}
 			}
 		if (gtk_widget_get_realized(ct->listview)) gtk_tree_view_columns_autosize(GTK_TREE_VIEW(ct->listview));
@@ -2420,29 +2444,25 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 		star_rating = g_strdup("");
 		}
 
-	g_autofree gchar *display_text = nullptr;
+	g_autoptr(GString) display_text = g_string_new("");
 	if (info && info->fd)
 		{
-		if (ct->show_text && ct->show_stars)
+		if (ct->show_text)
 			{
-			display_text = g_strconcat(info->fd->name, "\n", star_rating, NULL);
+			g_string_append(display_text, info->fd->name);
 			}
-		else if (ct->show_text)
+
+		if (ct->show_stars)
 			{
-			display_text = g_strdup(info->fd->name);
+			if (display_text->len) g_string_append(display_text, "\n");
+			g_string_append(display_text, star_rating);
 			}
-		else if (ct->show_stars)
+
+		if (ct->show_infotext && info->infotext)
 			{
-			display_text = g_steal_pointer(&star_rating);
+			if (display_text->len) g_string_append(display_text, "\n");
+			g_string_append(display_text, info->infotext);
 			}
-		else
-			{
-			display_text = g_strdup("");
-			}
-		}
-	else
-		{
-		display_text = g_strdup("");
 		}
 
 
@@ -2450,7 +2470,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 		{
 		g_object_set(cell,
 		             "pixbuf", info->pixbuf,
-		             "text", display_text,
+		             "text", display_text->str,
 		             "cell-background-rgba", &color_bg,
 		             "cell-background-set", TRUE,
 		             "foreground-rgba", &color_fg,
@@ -2555,6 +2575,7 @@ CollectTable *collection_table_new(CollectionData *cd)
 	ct->cd = cd;
 	ct->show_text = options->show_icon_names;
 	ct->show_stars = options->show_star_rating;
+	ct->show_infotext = options->show_collection_infotext;
 
 	ct->scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(ct->scrolled), GTK_SHADOW_IN);
