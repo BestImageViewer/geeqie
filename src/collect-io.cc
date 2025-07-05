@@ -199,6 +199,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 	guint flush = !!(flags & COLLECTION_LOAD_FLUSH);
 	guint append = !!(flags & COLLECTION_LOAD_APPEND);
 	guint only_geometry = !!(flags & COLLECTION_LOAD_GEOMETRY);
+	g_autofree gchar *infotext = nullptr;
 
 	if (!only_geometry)
 		{
@@ -247,7 +248,15 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 			/* Parse comments */
 			if (*p == '#')
 				{
+				if (strncmp(p, "#i ", 3 ) == 0)
+					{
+					g_free(infotext);
+					infotext = g_strdup(p+3);
+					gchar *q = strpbrk(infotext, "\r\n");
+					if (q) *q = 0;
+					}
 				if (!need_header) continue;
+
 				if (g_ascii_strncasecmp(p, GQ_COLLECTION_MARKER, GQ_COLLECTION_MARKER_LEN) == 0)
 					{
 					/* Looks like an official collection, allow unchecked input.
@@ -330,7 +339,11 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		if (!flush)
 			changed |= collect_manager_process_action(entry, &filename);
 
-		if (filename[0] == G_DIR_SEPARATOR && collection_add_check(cd, file_data_new_simple(filename), FALSE, TRUE)) continue;
+		if (filename[0] == G_DIR_SEPARATOR && collection_add_check(cd, file_data_new_simple(filename), FALSE, TRUE, infotext)) 
+			{
+			g_clear_pointer(&infotext, g_free);
+			continue;
+			}
 
 		log_printf("Warning: Collection: %s Invalid file: %s", cd->name, filename);
 		DEBUG_1("collection invalid file: %s", filename);
@@ -376,7 +389,7 @@ static gboolean collection_load_private(CollectionData *cd, const gchar *path, C
 		gchar *buf = nullptr;
 		while (collect_manager_process_action(entry, &buf))
 			{
-			collection_add_check(cd, file_data_new_group(buf), FALSE, TRUE);
+			collection_add_check(cd, file_data_new_group(buf), FALSE, TRUE, nullptr);
 			changed = TRUE;
 			g_free(buf);
 			buf = nullptr;
@@ -531,6 +544,8 @@ static gboolean collection_save_private(CollectionData *cd, const gchar *path)
 	for (GList *work = cd->list; work; work = work->next)
 		{
 		auto ci = static_cast<CollectInfo *>(work->data);
+		if (ci->infotext && *ci->infotext)
+			g_string_append_printf(gstring, "#i %s\n", ci->infotext);
 
 		g_string_append_printf(gstring, "\"%s\"\n", ci->fd->path);
 		}

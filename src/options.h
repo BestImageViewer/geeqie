@@ -75,6 +75,7 @@ struct ConfOptions
 	gchar *image_l_click_video_editor;
 	gboolean show_icon_names;
 	gboolean show_star_rating;
+	gboolean show_collection_infotext;
 	gboolean draw_rectangle;
 	gboolean show_predefined_keyword_tree;
 	gboolean overunderexposed;

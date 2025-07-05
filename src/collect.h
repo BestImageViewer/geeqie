@@ -38,6 +38,7 @@ struct CollectInfo
 	FileData *fd;
 	GdkPixbuf *pixbuf;
 	guint flag_mask;
+	gchar *infotext;
 };
 
 CollectInfo *collection_info_new(FileData *fd, struct stat *st, GdkPixbuf *pixbuf);
@@ -108,7 +109,7 @@ void collection_set_update_info_func(CollectionData *cd,
 				     void (*func)(CollectionData *, CollectInfo *, gpointer), gpointer data);
 
 gboolean collection_add(CollectionData *cd, FileData *fd, gboolean sorted);
-gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean sorted, gboolean must_exist);
+gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean sorted, gboolean must_exist, const gchar *infotext);
 gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert_ci, gboolean sorted);
 gboolean collection_remove(CollectionData *cd, FileData *fd);
 void collection_remove_by_info_list(CollectionData *cd, GList *list);
