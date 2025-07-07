@@ -687,7 +687,8 @@ static CollectInfo *collection_info_new_if_not_exists(CollectionData *cd, struct
 	return ci;
 }
 
-gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean sorted, gboolean must_exist, const gchar *infotext)
+// @TODO Drop must_exist and merge with collection_add()?
+static gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean sorted, gboolean must_exist, const gchar *infotext)
 {
 	struct stat st;
 	gboolean valid;
@@ -731,9 +732,9 @@ gboolean collection_add_check(CollectionData *cd, FileData *fd, gboolean sorted,
 	return valid;
 }
 
-gboolean collection_add(CollectionData *cd, FileData *fd, gboolean sorted)
+gboolean collection_add(CollectionData *cd, FileData *fd, gboolean sorted, const gchar *infotext)
 {
-	return collection_add_check(cd, fd, sorted, TRUE, nullptr);
+	return collection_add_check(cd, fd, sorted, TRUE, infotext);
 }
 
 gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert_ci, gboolean sorted)
