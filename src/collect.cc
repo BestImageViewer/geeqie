@@ -111,18 +111,12 @@ static CollectInfo *collection_info_new(FileData *fd, struct stat *, GdkPixbuf *
 	return ci;
 }
 
-static void collection_info_free_thumb(CollectInfo *ci)
-{
-	if (ci->pixbuf) g_object_unref(ci->pixbuf);
-	ci->pixbuf = nullptr;
-}
-
 void collection_info_free(CollectInfo *ci)
 {
 	if (!ci) return;
 
 	file_data_unref(ci->fd);
-	collection_info_free_thumb(ci);
+	if (ci->pixbuf) g_object_unref(ci->pixbuf);
 	g_free(ci->infotext);
 	g_free(ci);
 }
@@ -130,7 +124,7 @@ void collection_info_free(CollectInfo *ci)
 void collection_info_set_thumb(CollectInfo *ci, GdkPixbuf *pixbuf)
 {
 	if (pixbuf) g_object_ref(pixbuf);
-	collection_info_free_thumb(ci);
+	if (ci->pixbuf) g_object_unref(ci->pixbuf);
 	ci->pixbuf = pixbuf;
 }
 
