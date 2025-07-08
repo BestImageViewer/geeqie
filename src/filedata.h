@@ -384,6 +384,7 @@ class FileData::FileList
 	static GList *from_path_list(GList *list);
 	static GList *to_path_list(GList *list);
 
+	static bool has_dir(GList *list);
 	static GList *filter(GList *list, gboolean is_dir_list);
 
 	static GList *sort_path(GList *list);
@@ -468,6 +469,7 @@ GList *filelist_copy(GList *list);
 GList *filelist_from_path_list(GList *list);
 GList *filelist_to_path_list(GList *list);
 
+bool file_data_list_has_dir(FileDataList *list);
 GList *filelist_filter(GList *list, gboolean is_dir_list);
 
 GList *filelist_sort_path(GList *list);

@@ -1595,22 +1595,13 @@ static void view_window_get_dnd_data(GtkWidget *, GdkDragContext *context,
 
 		if (info == TARGET_URI_LIST)
 			{
-			GList *work;
-
 			list = uri_filelist_from_gtk_selection_data(selection_data);
 
-			work = list;
-			while (work)
+			if (file_data_list_has_dir(list))
 				{
-				auto fd = static_cast<FileData *>(work->data);
-				if (isdir(fd->path))
-					{
-					GtkWidget *menu;
-					menu = view_confirm_dir_list(vw, list);
-					gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-					return;
-					}
-				work = work->next;
+				GtkWidget *menu = view_confirm_dir_list(vw, g_steal_pointer(&list));
+				gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+				return;
 				}
 
 			list = filelist_filter(list, FALSE);

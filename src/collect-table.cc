@@ -2240,11 +2240,9 @@ static void collection_table_dnd_receive(GtkWidget *, GdkDragContext *context,
 					  guint, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
-	GList *list = nullptr;
 	GList *info_list = nullptr;
 	CollectionData *source;
 	CollectInfo *drop_info;
-	GList *work;
 
 	DEBUG_1("%s", gtk_selection_data_get_data(selection_data));
 
@@ -2252,6 +2250,7 @@ static void collection_table_dnd_receive(GtkWidget *, GdkDragContext *context,
 
 	drop_info = collection_table_insert_point(ct, x, y);
 
+	g_autoptr(FileDataList) list = nullptr;
 	switch (info)
 		{
 		case TARGET_APP_COLLECTION_MEMBER:
@@ -2264,8 +2263,7 @@ static void collection_table_dnd_receive(GtkWidget *, GdkDragContext *context,
 					gint col = -1;
 
 					/* it is a move within a collection */
-					file_data_list_free(list);
-					list = nullptr;
+					g_clear_pointer(&list, file_data_list_free);
 
 					if (!drop_info)
 						{
@@ -2289,32 +2287,23 @@ static void collection_table_dnd_receive(GtkWidget *, GdkDragContext *context,
 			break;
 		case TARGET_URI_LIST:
 			list = uri_filelist_from_gtk_selection_data(selection_data);
-			work = list;
-			while (work)
+			if (file_data_list_has_dir(list))
 				{
-				auto fd = static_cast<FileData *>(work->data);
-				if (isdir(fd->path))
-					{
-					GtkWidget *menu;
+				ct->drop_list = g_steal_pointer(&list);
+				ct->drop_info = drop_info;
 
-					ct->drop_list = list;
-					ct->drop_info = drop_info;
-					menu = collection_table_drop_menu(ct);
-					gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-					return;
-					}
-				work = work->next;
+				GtkWidget *menu = collection_table_drop_menu(ct);
+				gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+				return;
 				}
 			break;
 		default:
-			list = nullptr;
 			break;
 		}
 
 	if (list)
 		{
 		collection_table_insert_filelist(ct, list, drop_info);
-		file_data_list_free(list);
 		}
 }
 

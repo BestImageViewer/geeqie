@@ -394,6 +394,17 @@ GList *FileData::FileList::to_path_list(GList *list)
 	return g_list_reverse(new_list);
 }
 
+bool FileData::FileList::has_dir(GList *list)
+{
+	static const auto fd_path_is_dir = [](gconstpointer data, gconstpointer)
+	{
+		const auto *fd = static_cast<const FileData *>(data);
+		return isdir(fd->path) ? 0 : 1;
+	};
+
+	return g_list_find_custom(list, nullptr, fd_path_is_dir) != nullptr;
+}
+
 GList *FileData::FileList::filter(GList *list, gboolean is_dir_list)
 {
 	GList *work;

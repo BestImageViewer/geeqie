@@ -4808,17 +4808,14 @@ static void dupe_dnd_data_get(GtkWidget *widget, GdkDragContext *context,
 			      guint, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
-	GtkWidget *source;
-	GList *work;
 
 	if (dw->add_files_queue_id > 0)
 		{
 		warning_dialog(_("Find duplicates"), _("Please wait for the current file selection to be loaded."), GQ_ICON_DIALOG_INFO, dw->window);
-
 		return;
 		}
 
-	source = gtk_drag_get_source_widget(context);
+	GtkWidget *source = gtk_drag_get_source_widget(context);
 	if (source == dw->listview || source == dw->second_listview) return;
 
 	dw->second_drop = (dw->second_set && widget == dw->second_listview);
@@ -4831,22 +4828,14 @@ static void dupe_dnd_data_get(GtkWidget *widget, GdkDragContext *context,
 			break;
 		case TARGET_URI_LIST:
 			list = uri_filelist_from_gtk_selection_data(selection_data);
-			work = list;
-			while (work)
+			if (file_data_list_has_dir(list))
 				{
-				auto fd = static_cast<FileData *>(work->data);
-				if (isdir(fd->path))
-					{
-					GtkWidget *menu;
-					menu = dupe_confirm_dir_list(dw, list);
-					gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-					return;
-					}
-				work = work->next;
+				GtkWidget *menu = dupe_confirm_dir_list(dw, g_steal_pointer(&list));
+				gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+				return;
 				}
 			break;
 		default:
-			list = nullptr;
 			break;
 		}
 

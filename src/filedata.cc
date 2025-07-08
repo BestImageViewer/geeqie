@@ -200,6 +200,11 @@ GList *filelist_to_path_list(GList *list)
 }
 
 
+bool file_data_list_has_dir(FileDataList *list)
+{
+	return FileData::FileList::has_dir(list);
+}
+
 GList *filelist_filter(GList *list, gboolean is_dir_list)
 {
 	return FileData::FileList::filter(list, is_dir_list);
