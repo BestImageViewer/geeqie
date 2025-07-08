@@ -134,18 +134,14 @@ void collection_info_set_thumb(CollectInfo *ci, GdkPixbuf *pixbuf)
 	ci->pixbuf = pixbuf;
 }
 
-/* an ugly static var, well what ya gonna do ? */
-static SortType collection_list_sort_method = SORT_NAME;
-
-static gint collection_list_sort_cb(gconstpointer a, gconstpointer b)
+static gint collection_list_sort_cb(gconstpointer a, gconstpointer b,
+                                    gpointer user_data)
 {
 	auto cia = static_cast<const CollectInfo *>(a);
 	auto cib = static_cast<const CollectInfo *>(b);
 
-	switch (collection_list_sort_method)
+	switch (GPOINTER_TO_INT(user_data))
 		{
-		case SORT_NAME:
-			break;
 		case SORT_NONE:
 			return 0;
 			break;
@@ -197,9 +193,7 @@ GList *collection_list_sort(GList *list, SortType method)
 {
 	if (method == SORT_NONE) return list;
 
-	collection_list_sort_method = method;
-
-	return g_list_sort(list, collection_list_sort_cb);
+	return g_list_sort_with_data(list, collection_list_sort_cb, GINT_TO_POINTER(method));
 }
 
 static GList *collection_list_randomize(GList *list)
@@ -230,8 +224,7 @@ GList *collection_list_add(GList *list, CollectInfo *ci, SortType method)
 {
 	if (method != SORT_NONE)
 		{
-		collection_list_sort_method = method;
-		list = g_list_insert_sorted(list, ci, collection_list_sort_cb);
+		list = g_list_insert_sorted_with_data(list, ci, collection_list_sort_cb, GINT_TO_POINTER(method));
 		}
 	else
 		{
@@ -245,8 +238,7 @@ GList *collection_list_insert(GList *list, CollectInfo *ci, CollectInfo *insert_
 {
 	if (method != SORT_NONE)
 		{
-		collection_list_sort_method = method;
-		list = g_list_insert_sorted(list, ci, collection_list_sort_cb);
+		list = g_list_insert_sorted_with_data(list, ci, collection_list_sort_cb, GINT_TO_POINTER(method));
 		}
 	else
 		{
