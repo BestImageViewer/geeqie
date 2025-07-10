@@ -2951,17 +2951,16 @@ static void menu_choice_gps_cb(GtkWidget *combo, gpointer data)
 	                       sd->match_gps != SEARCH_MATCH_NONE);
 }
 
-static GtkWidget *menu_spin(GtkWidget *box, gdouble min, gdouble max, gint value,
-			    GCallback func, gpointer data)
+static GtkWidget *menu_spin(GtkWidget *box, gdouble min, gdouble max, gpointer data)
 {
-	GtkWidget *spin;
-	GtkAdjustment *adj;
+	GtkWidget *spin = gtk_spin_button_new_with_range(min, max, 1);
+	const auto *value = static_cast<const gint *>(data);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), static_cast<gdouble>(*value));
 
-	spin = gtk_spin_button_new_with_range(min, max, 1);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), static_cast<gdouble>(value));
-	adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
-	if (func) g_signal_connect(G_OBJECT(adj), "value_changed",
-				   G_CALLBACK(func), data);
+	GtkAdjustment *adj = gtk_spin_button_get_adjustment(GTK_SPIN_BUTTON(spin));
+	g_signal_connect(G_OBJECT(adj), "value_changed",
+	                 G_CALLBACK(menu_choice_spin_cb), data);
+
 	gq_gtk_box_pack_start(GTK_BOX(box), spin, FALSE, FALSE, 0);
 	gtk_widget_show(spin);
 
@@ -3289,13 +3288,12 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	hbox = menu_choice(sd->ui.box_search, _("File size is"), &sd->match_size_enable);
 	sd->ui.menu_size = menu_choice_menu(hbox, text_search_menu_size,
 	                                    G_CALLBACK(menu_choice_size_cb), sd);
-	sd->ui.spin_size = menu_spin(hbox, 0, 1024*1024*1024, sd->search_size,
-	                             G_CALLBACK(menu_choice_spin_cb), &sd->search_size);
+	constexpr std::size_t file_size_max = 1024*1024*1024;
+	sd->ui.spin_size = menu_spin(hbox, 0, file_size_max, &sd->search_size);
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
 	pref_label_new(hbox2, _("and"));
-	sd->ui.spin_size_end = menu_spin(hbox2, 0, 1024*1024*1024, sd->search_size_end,
-	                                 G_CALLBACK(menu_choice_spin_cb), &sd->search_size_end);
+	sd->ui.spin_size_end = menu_spin(hbox2, 0, file_size_max, &sd->search_size_end);
 
 	/* Search for file date */
 	hbox = menu_choice(sd->ui.box_search, _("File date is"), &sd->match_date_enable);
@@ -3330,25 +3328,21 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.menu_dimensions = menu_choice_menu(hbox, text_search_menu_dimensions,
 	                                          G_CALLBACK(menu_choice_dimensions_cb), sd);
 	pad_box = pref_box_new(hbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 2);
-	sd->ui.spin_width = menu_spin(pad_box, 0, 1000000, sd->search_width,
-	                              G_CALLBACK(menu_choice_spin_cb), &sd->search_width);
+	constexpr std::size_t dimension_max = 1000000;
+	sd->ui.spin_width = menu_spin(pad_box, 0, dimension_max, &sd->search_width);
 	pref_label_new(pad_box, "x");
-	sd->ui.spin_height = menu_spin(pad_box, 0, 1000000, sd->search_height,
-	                               G_CALLBACK(menu_choice_spin_cb), &sd->search_height);
+	sd->ui.spin_height = menu_spin(pad_box, 0, dimension_max, &sd->search_height);
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
 	pref_label_new(hbox2, _("and"));
 	pref_spacer(hbox2, PREF_PAD_SPACE - (2*2));
-	sd->ui.spin_width_end = menu_spin(hbox2, 0, 1000000, sd->search_width_end,
-	                                  G_CALLBACK(menu_choice_spin_cb), &sd->search_width_end);
+	sd->ui.spin_width_end = menu_spin(hbox2, 0, dimension_max, &sd->search_width_end);
 	pref_label_new(hbox2, "x");
-	sd->ui.spin_height_end = menu_spin(hbox2, 0, 1000000, sd->search_height_end,
-	                                   G_CALLBACK(menu_choice_spin_cb), &sd->search_height_end);
+	sd->ui.spin_height_end = menu_spin(hbox2, 0, dimension_max, &sd->search_height_end);
 
 	/* Search for image similarity */
 	hbox = menu_choice(sd->ui.box_search, _("Image content is"), &sd->match_similarity_enable);
-	sd->ui.spin_similarity = menu_spin(hbox, 80, 100, sd->search_similarity,
-	                                   G_CALLBACK(menu_choice_spin_cb), &sd->search_similarity);
+	sd->ui.spin_similarity = menu_spin(hbox, 80, 100, &sd->search_similarity);
 
 	/* xgettext:no-c-format */
 	pref_label_new(hbox, _("% similar to"));
@@ -3428,13 +3422,13 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	hbox = menu_choice(sd->ui.box_search, _("Image rating is"), &sd->match_rating_enable);
 	sd->ui.menu_rating = menu_choice_menu(hbox, text_search_menu_rating,
 	                                      G_CALLBACK(menu_choice_rating_cb), sd);
-	sd->ui.spin_size = menu_spin(hbox, -1, 5, sd->search_rating,
-	                             G_CALLBACK(menu_choice_spin_cb), &sd->search_rating);
+	constexpr gint rating_min = -1;
+	constexpr gint rating_max = 5;
+	sd->ui.spin_size = menu_spin(hbox, rating_min, rating_max, &sd->search_rating);
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
 	pref_label_new(hbox2, _("and"));
-	sd->ui.spin_rating_end = menu_spin(hbox2, -1, 5, sd->search_rating_end,
-	                                   G_CALLBACK(menu_choice_spin_cb), &sd->search_rating_end);
+	sd->ui.spin_rating_end = menu_spin(hbox2, rating_min, rating_max, &sd->search_rating_end);
 
 	/* Search for images within a specified range of a lat/long coordinate
 	*/
@@ -3444,8 +3438,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
-	sd->ui.spin_gps = menu_spin(hbox2, 1, 9999, sd->search_gps,
-	                            G_CALLBACK(menu_choice_spin_cb), &sd->search_gps);
+	sd->ui.spin_gps = menu_spin(hbox2, 1, 9999, &sd->search_gps);
 
 	sd->ui.units_gps = gtk_combo_box_text_new();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.units_gps), _("km"));
