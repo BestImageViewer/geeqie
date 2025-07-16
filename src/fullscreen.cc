@@ -22,6 +22,7 @@
 #include "fullscreen.h"
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -382,15 +383,6 @@ void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer data)
 		}
 }
 
-void fullscreen_prefs_selection_add(GtkListStore *store, const gchar *text, gint value)
-{
-	GtkTreeIter iter;
-
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, FS_MENU_COLUMN_NAME, text,
-					 FS_MENU_COLUMN_VALUE, value, -1);
-}
-
 gint get_monitor_index(GdkDisplay *display, GdkMonitor *target_monitor)
 {
 	gint num_monitors = gdk_display_get_n_monitors(display);
@@ -624,46 +616,45 @@ void fullscreen_stop(FullScreenData *fs)
 
 GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value, gboolean *)
 {
-	GtkWidget *vbox;
-	GtkWidget *hbox;
-	GtkWidget *combo;
-	GtkListStore *store;
-	GtkCellRenderer *renderer;
-	gint current = 0;
-	gint n;
-
 	if (!screen_value) return nullptr;
 
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	DEBUG_NAME(vbox);
-	hbox = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+
+	GtkWidget *hbox = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+
 	if (text) pref_label_new(hbox, text);
 
-	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	g_object_unref(store);
+	g_autoptr(GtkListStore) store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+	GtkWidget *combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 
-	renderer = gtk_cell_renderer_text_new();
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
 	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), renderer, TRUE);
 	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), renderer,
 				       "text", FS_MENU_COLUMN_NAME, NULL);
 
-	fullscreen_prefs_selection_add(store, _("Determined by Window Manager"), -1);
-	fullscreen_prefs_selection_add(store, _("Active screen"), 0);
-	if (*screen_value == 0) current = 1;
-	fullscreen_prefs_selection_add(store, _("Active monitor"), 1);
-	if (*screen_value == 1) current = 2;
+	const std::array<ScreenData, 3> default_list = {{
+	    {-1, _("Determined by Window Manager"), {}},
+	    { 0, _("Active screen"), {},},
+	    { 1, _("Active monitor"), {} },
+	}};
 
-	n = 3;
 	std::vector<ScreenData> list = fullscreen_prefs_list();
+	list.insert(list.begin(), default_list.cbegin(), default_list.cend());
 	for (const ScreenData &sd : list)
 		{
-		fullscreen_prefs_selection_add(store, sd.description.c_str(), sd.number);
-		if (*screen_value == sd.number) current = n;
+		GtkTreeIter iter;
 
-		n++;
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter,
+		                   FS_MENU_COLUMN_NAME, sd.description.c_str(),
+		                   FS_MENU_COLUMN_VALUE, sd.number,
+		                   -1);
 		}
 
+	const auto it = std::find_if(list.cbegin(), list.cend(),
+	                             [screen_num = *screen_value](const ScreenData &sd){ return sd.number == screen_num; });
+	const gint current = (it != list.cend()) ? std::distance(list.cbegin(), it) : 0;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, FALSE, FALSE, 0);
