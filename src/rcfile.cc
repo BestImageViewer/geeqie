@@ -534,7 +534,6 @@ static void write_global_attributes(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_INT(*options, fullscreen.screen);
 	WRITE_NL(); WRITE_BOOL(*options, fullscreen.clean_flip);
 	WRITE_NL(); WRITE_BOOL(*options, fullscreen.disable_saver);
-	WRITE_NL(); WRITE_BOOL(*options, fullscreen.above);
 
 	WRITE_SEPARATOR();
 
@@ -1036,7 +1035,6 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_INT(*options, fullscreen.screen)) continue;
 		if (READ_BOOL(*options, fullscreen.clean_flip)) continue;
 		if (READ_BOOL(*options, fullscreen.disable_saver)) continue;
-		if (READ_BOOL(*options, fullscreen.above)) continue;
 
 		/* Image overlay */
 		if (READ_CHAR(*options, image_overlay.template_string)) continue;

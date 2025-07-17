@@ -361,26 +361,15 @@ enum {
 	FS_MENU_COLUMN_VALUE
 };
 
-#define BUTTON_ABOVE_KEY  "button_above"
-
-void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer data)
+void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer value)
 {
-	auto value = static_cast<gint *>(data);
-	GtkTreeModel *store;
-	GtkTreeIter iter;
-	GtkWidget *button;
-
 	if (!value) return;
 
-	store = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+	GtkTreeModel *store = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+	GtkTreeIter iter;
 	if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(combo), &iter)) return;
-	gtk_tree_model_get(store, &iter, FS_MENU_COLUMN_VALUE, value, -1);
 
-	button = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(combo), BUTTON_ABOVE_KEY));
-	if (button)
-		{
-		gtk_widget_set_sensitive(button, *value != -1);
-		}
+	gtk_tree_model_get(store, &iter, FS_MENU_COLUMN_VALUE, value, -1);
 }
 
 gint get_monitor_index(GdkDisplay *display, GdkMonitor *target_monitor)
@@ -447,12 +436,6 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	/* few cosmetic details */
 	gtk_window_set_decorated(GTK_WINDOW(fs->window), FALSE);
 	gtk_container_set_border_width(GTK_CONTAINER(fs->window), 0);
-
-	/* keep window above others, if requested */
-	if (options->fullscreen.above)
-		{
-		gq_gtk_window_set_keep_above(GTK_WINDOW(fs->window), TRUE);
-		}
 
 	/* set default size and position, so the window appears where it was before */
 	gtk_window_set_default_size(GTK_WINDOW(fs->window), rect.width, rect.height);
@@ -614,14 +597,12 @@ void fullscreen_stop(FullScreenData *fs)
  *----------------------------------------------------------------------------
  */
 
-GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value, gboolean *)
+GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value)
 {
 	if (!screen_value) return nullptr;
 
-	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	DEBUG_NAME(vbox);
-
-	GtkWidget *hbox = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	DEBUG_NAME(hbox);
 
 	if (text) pref_label_new(hbox, text);
 
@@ -663,6 +644,6 @@ GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value,
 	g_signal_connect(G_OBJECT(combo), "changed",
 			 G_CALLBACK(fullscreen_prefs_selection_cb), screen_value);
 
-	return vbox;
+	return hbox;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -92,7 +92,6 @@ ConfOptions *init_options(ConfOptions *options)
 
 	options->file_sort.case_sensitive = FALSE;
 
-	options->fullscreen.above = FALSE;
 	options->fullscreen.clean_flip = FALSE;
 	options->fullscreen.disable_saver = TRUE;
 	options->fullscreen.screen = -1;
