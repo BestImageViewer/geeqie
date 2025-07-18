@@ -269,7 +269,6 @@ struct ConfOptions
 		gint screen;
 		gboolean clean_flip;
 		gboolean disable_saver;
-		gboolean above;
 	} fullscreen;
 
 	/* image overlay */

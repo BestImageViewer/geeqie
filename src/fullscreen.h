@@ -56,9 +56,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 				 FullScreenData::StopFunc stop_func, gpointer stop_data);
 void fullscreen_stop(FullScreenData *fs);
 
-
-GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value, gboolean *above_value);
-
+GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

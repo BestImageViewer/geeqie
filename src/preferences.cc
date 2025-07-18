@@ -2407,8 +2407,7 @@ static void config_tab_windows(GtkWidget *notebook)
 	group = pref_group_new(vbox, FALSE, _("Full screen"), GTK_ORIENTATION_VERTICAL);
 
 	c_options->fullscreen.screen = options->fullscreen.screen;
-	c_options->fullscreen.above = options->fullscreen.above;
-	hbox = fullscreen_prefs_selection_new(_("Location:"), &c_options->fullscreen.screen, &c_options->fullscreen.above);
+	hbox = fullscreen_prefs_selection_new(_("Location:"), &c_options->fullscreen.screen);
 	gq_gtk_box_pack_start(GTK_BOX(group), hbox, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
 
