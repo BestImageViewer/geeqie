@@ -745,15 +745,6 @@ static void view_image_set_buttons(ViewWindow *vw, ImageWindow *imd)
 	image_set_scroll_func(imd, scroll_cb, vw);
 }
 
-static void view_fullscreen_stop_func(FullScreenData *, gpointer data)
-{
-	auto vw = static_cast<ViewWindow *>(data);
-
-	vw->fs = nullptr;
-
-	if (vw->ss) vw->ss->imd = vw->imd;
-}
-
 static void view_fullscreen_toggle(ViewWindow *vw, gboolean force_off)
 {
 	if (force_off && !vw->fs) return;
@@ -767,7 +758,13 @@ static void view_fullscreen_toggle(ViewWindow *vw, gboolean force_off)
 		}
 	else
 		{
-		vw->fs = fullscreen_start(vw->window, vw->imd, view_fullscreen_stop_func, vw);
+		const auto view_fullscreen_stop_func = [vw](FullScreenData *)
+		{
+			vw->fs = nullptr;
+
+			if (vw->ss) vw->ss->imd = vw->imd;
+		};
+		vw->fs = fullscreen_start(vw->window, vw->imd, view_fullscreen_stop_func);
 
 		view_image_set_buttons(vw, vw->fs->imd);
 		g_signal_connect(G_OBJECT(vw->fs->window), "key_press_event",

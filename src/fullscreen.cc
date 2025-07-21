@@ -398,7 +398,7 @@ gint get_monitor_index(GdkDisplay *display, GdkMonitor *target_monitor)
  */
 
 FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
-				 FullScreenData::StopFunc stop_func, gpointer stop_data)
+                                 const FullScreenData::StopFunc &stop_func)
 {
 	FullScreenData *fs;
 	GdkDisplay *display;
@@ -422,7 +422,6 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	fs->normal_imd = imd;
 
 	fs->stop_func = stop_func;
-	fs->stop_data = stop_data;
 
 	DEBUG_1("full screen requests screen %d", options->fullscreen.screen);
 	GdkRectangle rect = fullscreen_prefs_get_geometry(options->fullscreen.screen, window, screen, fs->same_region);
@@ -581,7 +580,7 @@ void fullscreen_stop(FullScreenData *fs)
 
 	gtk_window_unfullscreen(GTK_WINDOW(fs->window));
 
-	if (fs->stop_func) fs->stop_func(fs, fs->stop_data);
+	if (fs->stop_func) fs->stop_func(fs);
 
 	gq_gtk_widget_destroy(fs->window);
 

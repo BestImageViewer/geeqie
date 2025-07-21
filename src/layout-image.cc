@@ -79,17 +79,6 @@ static void layout_image_animate_update_image(LayoutWindow *lw);
  *----------------------------------------------------------------------------
  */
 
-static void layout_image_full_screen_stop_func(FullScreenData *fs, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	/* restore image window */
-	if (lw->image == fs->imd)
-		lw->image = fs->normal_imd;
-
-	lw->full_screen = nullptr;
-}
-
 static void touchpad_zoom_cb(GtkGestureZoom *controller, double, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
@@ -103,8 +92,16 @@ void layout_image_full_screen_start(LayoutWindow *lw)
 
 	if (lw->full_screen) return;
 
+	const auto layout_image_fullscreen_stop_func = [lw](FullScreenData *fs)
+	{
+		/* restore image window */
+		if (lw->image == fs->imd)
+			lw->image = fs->normal_imd;
+
+		lw->full_screen = nullptr;
+	};
 	lw->full_screen = fullscreen_start(lw->window, lw->image,
-					   layout_image_full_screen_stop_func, lw);
+	                                   layout_image_fullscreen_stop_func);
 
 	/* set to new image window */
 	if (lw->full_screen->same_region)

@@ -22,6 +22,8 @@
 #ifndef FULLSCREEN_H
 #define FULLSCREEN_H
 
+#include <functional>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -41,19 +43,18 @@ struct FullScreenData
 	guint busy_mouse_id; /**< event source id */
 
 	gint cursor_state;
-OsdShowFlags osd_flags;
+	OsdShowFlags osd_flags;
 
 	guint saver_block_id; /**< event source id */
 
-	using StopFunc = void (*)(FullScreenData *, gpointer);
+	using StopFunc = std::function<void(FullScreenData *)>;
 	StopFunc stop_func;
-	gpointer stop_data;
 
 	gboolean same_region; /**< the returned region will overlap the current location of widget. */
 };
 
 FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
-				 FullScreenData::StopFunc stop_func, gpointer stop_data);
+                                 const FullScreenData::StopFunc &stop_func);
 void fullscreen_stop(FullScreenData *fs);
 
 GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value);

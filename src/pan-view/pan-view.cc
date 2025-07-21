@@ -1643,14 +1643,6 @@ static void pan_image_set_buttons(PanWindow *pw, ImageWindow *imd)
 			 G_CALLBACK(scroll_cb), pw);
 }
 
-static void pan_fullscreen_stop_func(FullScreenData *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	pw->fs = nullptr;
-	pw->imd = pw->imd_normal;
-}
-
 static void pan_fullscreen_toggle(PanWindow *pw, gboolean force_off)
 {
 	if (force_off && !pw->fs) return;
@@ -1661,7 +1653,12 @@ static void pan_fullscreen_toggle(PanWindow *pw, gboolean force_off)
 		}
 	else
 		{
-		pw->fs = fullscreen_start(pw->window, pw->imd, pan_fullscreen_stop_func, pw);
+		const auto pan_fullscreen_stop_func = [pw](FullScreenData *)
+		{
+			pw->fs = nullptr;
+			pw->imd = pw->imd_normal;
+		};
+		pw->fs = fullscreen_start(pw->window, pw->imd, pan_fullscreen_stop_func);
 		pan_image_set_buttons(pw, pw->fs->imd);
 		g_signal_connect(G_OBJECT(pw->fs->window), "key_press_event",
 				 G_CALLBACK(pan_window_key_press_cb), pw);
