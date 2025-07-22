@@ -27,6 +27,33 @@
 
 struct LayoutWindow;
 
+struct BarSort
+{
+	enum Action {
+		COPY = 0,
+		MOVE,
+		FILTER,
+		ACTION_COUNT
+	};
+
+	enum Mode {
+		MODE_FOLDER = 0,
+		MODE_COLLECTION,
+		MODE_COUNT
+	};
+
+	enum Selection {
+		SELECTION_IMAGE = 0,
+		SELECTION_SELECTED,
+		SELECTION_COUNT
+	};
+
+	BarSort::Action action;
+	BarSort::Mode mode;
+	BarSort::Selection selection;
+	gchar *filter_key;
+};
+
 GtkWidget *bar_sort_new_default(LayoutWindow *lw);
 GtkWidget *bar_sort_new_from_config(LayoutWindow *lw, const gchar **attribute_names, const gchar **attribute_values);
 void bar_sort_close(GtkWidget *bar);

@@ -27,6 +27,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "bar-sort.h"
 #include "typedefs.h"
 
 struct AnimationData;
@@ -51,25 +52,6 @@ enum StartUpPath {
 	STARTUP_PATH_CURRENT	= 0,
 	STARTUP_PATH_LAST,
 	STARTUP_PATH_HOME,
-};
-
-enum SortActionType {
-	BAR_SORT_COPY = 0,
-	BAR_SORT_MOVE,
-	BAR_SORT_FILTER,
-	BAR_SORT_ACTION_COUNT
-};
-
-enum SortModeType {
-	BAR_SORT_MODE_FOLDER = 0,
-	BAR_SORT_MODE_COLLECTION,
-	BAR_SORT_MODE_COUNT
-};
-
-enum SortSelectionType {
-	BAR_SORT_SELECTION_IMAGE = 0,
-	BAR_SORT_SELECTION_SELECTED,
-	BAR_SORT_SELECTION_COUNT
 };
 
 struct LayoutOptions
@@ -154,10 +136,7 @@ struct LayoutOptions
 	gboolean animate;
 	gint workspace;
 
-	SortActionType action;
-	SortModeType mode;
-	SortSelectionType selection;
-	gchar *filter_key;
+	BarSort bar_sort;
 };
 
 struct LayoutWindow
