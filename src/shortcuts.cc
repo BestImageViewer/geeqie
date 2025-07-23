@@ -38,20 +38,6 @@ namespace
 
 #define SHORTCUTS     "shortcuts"
 
-void shortcuts_bookmark_select(const gchar *path, gpointer data)
-{
-	auto *lw = static_cast<LayoutWindow *>(data);
-
-	if (file_extension_match(path, GQ_COLLECTION_EXT))
-		{
-		collection_window_new(path);
-		}
-	else
-		{
-		layout_set_path(lw, path);
-		}
-}
-
 void shortcuts_add_cb(GtkWidget *, gpointer data)
 {
 	auto *bookmarks = static_cast<GtkWidget *>(data);
@@ -67,7 +53,18 @@ GtkWidget *shortcuts_new(LayoutWindow *lw)
 
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
-	GtkWidget *bookmarks = bookmark_list_new(SHORTCUTS, shortcuts_bookmark_select, lw);
+	const auto shortcuts_bookmark_select = [lw](const gchar *path)
+	{
+		if (file_extension_match(path, GQ_COLLECTION_EXT))
+			{
+			collection_window_new(path);
+			}
+		else
+			{
+			layout_set_path(lw, path);
+			}
+	};
+	GtkWidget *bookmarks = bookmark_list_new(SHORTCUTS, shortcuts_bookmark_select);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), bookmarks, TRUE, TRUE, 0);
 	gtk_widget_show(bookmarks);
 

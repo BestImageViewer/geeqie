@@ -77,8 +77,7 @@ struct BookMarkData
 	GtkWidget *box;
 	gchar *key;
 
-	void (*select_func)(const gchar *path, gpointer data);
-	gpointer select_data;
+	BookmarkSelectFunc select_func;
 
 	gboolean no_defaults;
 	gboolean editable;
@@ -221,7 +220,7 @@ static void bookmark_select_cb(GtkWidget *button, gpointer data)
 	b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
 	if (!b) return;
 
-	if (bm->select_func) bm->select_func(b->path, bm->select_data);
+	if (bm->select_func) bm->select_func(b->path);
 }
 
 static void bookmark_edit_destroy_cb(GtkWidget *, gpointer data)
@@ -719,8 +718,7 @@ static void bookmark_list_destroy(gpointer data)
 	g_free(bm);
 }
 
-GtkWidget *bookmark_list_new(const gchar *key,
-			     void (*select_func)(const gchar *path, gpointer data), gpointer select_data)
+GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_func)
 {
 	GtkWidget *scrolled;
 	BookMarkData *bm;
@@ -731,7 +729,6 @@ GtkWidget *bookmark_list_new(const gchar *key,
 	bm->key = g_strdup(key);
 
 	bm->select_func = select_func;
-	bm->select_data = select_data;
 
 	bm->no_defaults = FALSE;
 	bm->editable = TRUE;

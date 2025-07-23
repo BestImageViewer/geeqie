@@ -328,22 +328,6 @@ static void bar_sort_bookmark_select_collection(SortData *sd, const gchar *path)
 	g_list_foreach(list, reinterpret_cast<GFunc>(collect_manager_add), const_cast<gchar *>(path));
 }
 
-static void bar_sort_bookmark_select(const gchar *path, gpointer data)
-{
-	if (!path) return;
-
-	auto sd = static_cast<SortData *>(data);
-
-	if (sd->mode == BarSort::MODE_FOLDER)
-		{
-		bar_sort_bookmark_select_folder(sd, path);
-		}
-	else
-		{
-		bar_sort_bookmark_select_collection(sd, path);
-		}
-}
-
 static void bar_sort_set_action(SortData *sd, BarSort::Action action, const gchar *filter_key)
 {
 	sd->action = action;
@@ -636,7 +620,20 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	                     sd->selection == BarSort::SELECTION_SELECTED,
 	                     G_CALLBACK(bar_sort_set_selection_cb<BarSort::SELECTION_SELECTED>), sd);
 
-	sd->bookmarks = bookmark_list_new(SORT_KEY_FOLDERS, bar_sort_bookmark_select, sd);
+	const auto bar_sort_bookmark_select = [sd](const gchar *path)
+	{
+		if (!path) return;
+
+		if (sd->mode == BarSort::MODE_FOLDER)
+			{
+			bar_sort_bookmark_select_folder(sd, path);
+			}
+		else
+			{
+			bar_sort_bookmark_select_collection(sd, path);
+			}
+	};
+	sd->bookmarks = bookmark_list_new(SORT_KEY_FOLDERS, bar_sort_bookmark_select);
 	DEBUG_NAME(sd->bookmarks);
 	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), sd->bookmarks, TRUE, TRUE, 0);
 	gtk_widget_show(sd->bookmarks);

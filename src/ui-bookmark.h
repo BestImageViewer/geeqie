@@ -22,13 +22,15 @@
 #ifndef UI_BOOKMARK_H
 #define UI_BOOKMARK_H
 
+#include <functional>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
 /* bookmarks */
 
-GtkWidget *bookmark_list_new(const gchar *key,
-			     void (*select_func)(const gchar *path, gpointer data), gpointer select_data);
+using BookmarkSelectFunc = std::function<void(const gchar *path)>;
+GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_func);
 void bookmark_list_set_key(GtkWidget *list, const gchar *key);
 void bookmark_list_set_no_defaults(GtkWidget *list, gint no_defaults);
 void bookmark_list_set_editable(GtkWidget *list, gint editable);

@@ -912,20 +912,6 @@ static void dest_filter_changed_cb(GtkEditable *, gpointer data)
 	dest_populate(dd, path);
 }
 
-static void dest_bookmark_select_cb(const gchar *path, gpointer data)
-{
-	auto dd = static_cast<Dest_Data *>(data);
-
-	if (isdir(path))
-		{
-		dest_change_dir(dd, path, (dd->f_view != nullptr));
-		}
-	else if (isfile(path) && dd->f_view)
-		{
-		gq_gtk_entry_set_text(GTK_ENTRY(dd->entry), path);
-		}
-}
-
 /*
  *-----------------------------------------------------------------------------
  * destination widget setup routines (public)
@@ -987,7 +973,18 @@ GtkWidget *path_selection_new_with_files(GtkWidget *entry, const gchar *path,
 	gtk_widget_show(hbox2);
 
 	/* bookmarks */
-	scrolled = bookmark_list_new(nullptr, dest_bookmark_select_cb, dd);
+	const auto dest_bookmark_select_cb = [dd](const gchar *path)
+	{
+		if (isdir(path))
+			{
+			dest_change_dir(dd, path, dd->f_view != nullptr);
+			}
+		else if (isfile(path) && dd->f_view)
+			{
+			gq_gtk_entry_set_text(GTK_ENTRY(dd->entry), path);
+			}
+	};
+	scrolled = bookmark_list_new(nullptr, dest_bookmark_select_cb);
 	gq_gtk_box_pack_start(GTK_BOX(hbox2), scrolled, FALSE, FALSE, 0);
 	gtk_widget_show(scrolled);
 
