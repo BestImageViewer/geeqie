@@ -274,36 +274,27 @@ static void bar_sort_undo_cb(GtkWidget *button, gpointer data)
 		}
 }
 
-static void bar_sort_bookmark_select_folder(SortData *sd, FileData *, const gchar *path)
+static void bar_sort_bookmark_select_folder(SortData *sd, const gchar *path)
 {
-	GList *orig_list;
-	GList *action_list;
-	GList *undo_src_list;
-
 	if (!isdir(path)) return;
 
-	orig_list = layout_selection_list(sd->lw);
-	action_list = orig_list;
-	undo_src_list = orig_list;
-	orig_list = nullptr;
+	g_autoptr(FileDataList) list = layout_selection_list(sd->lw);
 
-	bar_sort_undo_set(sd, undo_src_list, path);
+	bar_sort_undo_set(sd, list, path);
 
 	switch (sd->action)
 		{
 		case BarSort::COPY:
-			file_util_copy_simple(action_list, path, sd->lw->window);
-			action_list = nullptr;
+			file_util_copy_simple(g_steal_pointer(&list), path, sd->lw->window);
 			layout_image_next(sd->lw);
 			break;
 
 		case BarSort::MOVE:
-			file_util_move_simple(action_list, path, sd->lw->window);
-			action_list = nullptr;
+			file_util_move_simple(g_steal_pointer(&list), path, sd->lw->window);
 			break;
 
 		case BarSort::FILTER:
-			file_util_start_filter_from_filelist(sd->filter_key, action_list, path, sd->lw->window);
+			file_util_start_filter_from_filelist(sd->filter_key, g_steal_pointer(&list), path, sd->lw->window);
 			layout_image_next(sd->lw);
 			break;
 
@@ -312,14 +303,19 @@ static void bar_sort_bookmark_select_folder(SortData *sd, FileData *, const gcha
 		}
 }
 
-static void bar_sort_bookmark_select_collection(SortData *sd, FileData *source, const gchar *path)
+static void bar_sort_bookmark_select_collection(SortData *sd, const gchar *path)
 {
-	GList *list = nullptr;
+	g_autoptr(FileDataList) list = nullptr;
 
 	switch (sd->selection)
 		{
 		case BarSort::SELECTION_IMAGE:
+			{
+			FileData *source = layout_image_get_fd(sd->lw);
+			if (!source) return;
+
 			list = g_list_append(nullptr, file_data_ref(source));
+			}
 			break;
 		case BarSort::SELECTION_SELECTED:
 			list = layout_selection_list(sd->lw);
@@ -337,31 +333,22 @@ static void bar_sort_bookmark_select_collection(SortData *sd, FileData *source, 
 	bar_sort_undo_set(sd, list, path);
 	sd->undo_collection = g_strdup(path);
 
-	while (list)
-		{
-		FileData *image_fd;
-
-		image_fd = static_cast<FileData *>(list->data);
-		list = list->next;
-		collect_manager_add(image_fd, path);
-		}
+	g_list_foreach(list, reinterpret_cast<GFunc>(collect_manager_add), const_cast<gchar *>(path));
 }
 
 static void bar_sort_bookmark_select(const gchar *path, gpointer data)
 {
-	auto sd = static_cast<SortData *>(data);
-	FileData *source;
+	if (!path) return;
 
-	source = layout_image_get_fd(sd->lw);
-	if (!path || !source) return;
+	auto sd = static_cast<SortData *>(data);
 
 	if (sd->mode == BarSort::MODE_FOLDER)
 		{
-		bar_sort_bookmark_select_folder(sd, source, path);
+		bar_sort_bookmark_select_folder(sd, path);
 		}
 	else
 		{
-		bar_sort_bookmark_select_collection(sd, source, path);
+		bar_sort_bookmark_select_collection(sd, path);
 		}
 }
 
