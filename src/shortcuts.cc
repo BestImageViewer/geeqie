@@ -38,21 +38,17 @@ namespace
 
 struct ShortcutsData
 {
-	GtkWidget *vbox;
 	GtkWidget *bookmarks;
-	LayoutWindow *lw;
 
 	gchar *name;
 	GtkPopover *name_popover;
-
-	GtkWidget *add_button;
 };
 
 #define SHORTCUTS     "shortcuts"
 
 void shortcuts_bookmark_select(const gchar *path, gpointer data)
 {
-	auto scd = static_cast<ShortcutsData *>(data);
+	auto *lw = static_cast<LayoutWindow *>(data);
 
 	if (file_extension_match(path, GQ_COLLECTION_EXT))
 		{
@@ -60,9 +56,8 @@ void shortcuts_bookmark_select(const gchar *path, gpointer data)
 		}
 	else
 		{
-		layout_set_path(scd->lw, path);
+		layout_set_path(lw, path);
 		}
-
 }
 
 void name_entry_activate_cb(GtkEntry *entry, gpointer data)
@@ -146,30 +141,25 @@ void shortcuts_destroy(gpointer data)
 
 GtkWidget *shortcuts_new(LayoutWindow *lw)
 {
-	ShortcutsData *scd;
-	GtkWidget *tbar;
-
 	if (!lw) return nullptr;
 
-	scd = g_new0(ShortcutsData, 1);
+	auto *scd = g_new0(ShortcutsData, 1);
 
-	scd->lw = lw;
+	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	g_object_set_data_full(G_OBJECT(vbox), "shortcuts_data", scd, shortcuts_destroy);
 
-	scd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	g_object_set_data_full(G_OBJECT(scd->vbox), "shortcuts_data", scd, shortcuts_destroy);
-
-	scd->bookmarks = bookmark_list_new(SHORTCUTS, shortcuts_bookmark_select, scd);
-	gq_gtk_box_pack_start(GTK_BOX(scd->vbox), scd->bookmarks, TRUE, TRUE, 0);
+	scd->bookmarks = bookmark_list_new(SHORTCUTS, shortcuts_bookmark_select, lw);
+	gq_gtk_box_pack_start(GTK_BOX(vbox), scd->bookmarks, TRUE, TRUE, 0);
 	gtk_widget_show(scd->bookmarks);
 
-	tbar = pref_toolbar_new(scd->vbox);
+	GtkWidget *tbar = pref_toolbar_new(vbox);
 
-	scd->add_button = pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
-					_("Add Shortcut"),
-					G_CALLBACK(shortcuts_add_cb), scd);
+	pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
+	                    _("Add Shortcut"),
+	                    G_CALLBACK(shortcuts_add_cb), scd);
 
-	gtk_widget_show(scd->vbox);
-	return scd->vbox;
+	gtk_widget_show(vbox);
+	return vbox;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
