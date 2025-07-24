@@ -2035,7 +2035,7 @@ static void layout_menu_edit_cb(GtkAction *action, gpointer data)
 
 static void layout_menu_metadata_write_cb(GtkAction *, gpointer)
 {
-	metadata_write_queue_confirm(TRUE, nullptr, nullptr);
+	metadata_write_queue_confirm(TRUE, nullptr);
 }
 
 static GtkWidget *last_focussed = nullptr;
@@ -4088,7 +4088,7 @@ void layout_bars_new_image(LayoutWindow *lw)
 
 	/* this should be called here to handle the metadata edited in bars */
 	if (options->metadata.confirm_on_image_change)
-		metadata_write_queue_confirm(FALSE, nullptr, nullptr);
+		metadata_write_queue_confirm(FALSE, nullptr);
 }
 
 void layout_bars_new_selection(LayoutWindow *lw, gint count)

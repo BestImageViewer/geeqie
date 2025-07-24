@@ -648,7 +648,7 @@ gint exit_confirm_dlg()
 	return TRUE;
 }
 
-void exit_program_write_metadata_cb(gint success, const gchar *, gpointer)
+void exit_program_write_metadata_cb(gint success, const gchar *)
 {
 	if (success) exit_program();
 }
@@ -1009,7 +1009,7 @@ void exit_program()
 {
 	layout_image_full_screen_stop(nullptr);
 
-	if (metadata_write_queue_confirm(FALSE, exit_program_write_metadata_cb, nullptr)) return;
+	if (metadata_write_queue_confirm(FALSE, exit_program_write_metadata_cb)) return;
 
 	marks_save(options->marks_save);
 

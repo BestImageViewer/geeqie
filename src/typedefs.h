@@ -205,8 +205,6 @@ enum ScrollReset : guint {
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, fclose)
 
-using FileUtilDoneFunc = void (*)(gboolean, const gchar *, gpointer);
-
 #define FILEDATA_MARKS_SIZE 10
 
 #endif

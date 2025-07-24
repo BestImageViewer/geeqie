@@ -22,10 +22,10 @@
 #ifndef UTILOPS_H
 #define UTILOPS_H
 
+#include <functional>
+
 #include <glib.h>
 #include <gtk/gtk.h>
-
-#include "typedefs.h"
 
 class FileData;
 struct FileDialog;
@@ -53,16 +53,18 @@ GenericDialog *file_util_warning_dialog(const gchar *heading, const gchar *messa
 
 /* all functions takes over the filelist and frees it when done */
 
+using FileUtilDoneFunc = std::function<void(gboolean, const gchar *)>;
+
 void file_util_delete(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete);
-void file_util_delete_notify_done(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete, FileUtilDoneFunc done_func, gpointer done_data);
+void file_util_delete_notify_done(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete, const FileUtilDoneFunc &done_func);
 void file_util_move(FileData *source_fd, GList *source_list, const gchar *dest_path, GtkWidget *parent);
 void file_util_copy(FileData *source_fd, GList *source_list, const gchar *dest_path, GtkWidget *parent);
 void file_util_rename(FileData *source_fd, GList *source_list, GtkWidget *parent);
-void file_util_write_metadata(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean force_dialog, FileUtilDoneFunc done_func, gpointer done_data);
+void file_util_write_metadata(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean force_dialog, const FileUtilDoneFunc &done_func);
 
-void file_util_create_dir(const gchar *path, GtkWidget *parent, FileUtilDoneFunc done_func, gpointer done_data);
+void file_util_create_dir(const gchar *path, GtkWidget *parent, const FileUtilDoneFunc &done_func);
 
-void file_util_rename_dir(FileData *source_fd, const gchar *new_path, GtkWidget *parent, FileUtilDoneFunc done_func, gpointer done_data);
+void file_util_rename_dir(FileData *source_fd, const gchar *new_path, GtkWidget *parent, const FileUtilDoneFunc &done_func);
 
 /* these avoid the location entry dialog, list must be files only and
  * dest_path must be a valid directory path

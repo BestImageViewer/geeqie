@@ -272,7 +272,7 @@ void metadata_notify_cb(FileData *fd, NotifyType type, gpointer)
 		}
 }
 
-gboolean metadata_write_queue_confirm(gboolean force_dialog, FileUtilDoneFunc done_func, gpointer done_data)
+gboolean metadata_write_queue_confirm(gboolean force_dialog, const FileUtilDoneFunc &done_func)
 {
 	GList *work;
 	GList *to_approve = nullptr;
@@ -295,14 +295,14 @@ gboolean metadata_write_queue_confirm(gboolean force_dialog, FileUtilDoneFunc do
 		to_approve = g_list_prepend(to_approve, file_data_ref(fd));
 		}
 
-	file_util_write_metadata(nullptr, to_approve, nullptr, force_dialog, done_func, done_data);
+	file_util_write_metadata(nullptr, to_approve, nullptr, force_dialog, done_func);
 
 	return (metadata_write_queue != nullptr);
 }
 
 static gboolean metadata_write_queue_idle_cb(gpointer data)
 {
-	metadata_write_queue_confirm(FALSE, nullptr, nullptr);
+	metadata_write_queue_confirm(FALSE, nullptr);
 
 	auto *metadata_write_idle_id = static_cast<guint *>(data);
 	*metadata_write_idle_id = 0;

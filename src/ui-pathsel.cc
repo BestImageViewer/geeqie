@@ -677,51 +677,38 @@ static gboolean dest_keypress_cb(GtkWidget *view, GdkEventKey *event, gpointer d
 	return FALSE;
 }
 
-static void file_util_create_dir_cb(gboolean success, const gchar *new_path, gpointer data)
-{
-	auto dd = static_cast<Dest_Data *>(data);
-	const gchar *text;
-	GtkListStore *store;
-	GtkTreeIter iter;
-
-	if (!success)
-		{
-		return;
-		}
-
-	if (new_path == nullptr)
-		{
-		return;
-		}
-
-	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dd->d_view)));
-
-	text = filename_from_path(new_path);
-
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, text, 1, new_path, -1);
-
-	if (dd->right_click_path)
-		{
-		gtk_tree_path_free(dd->right_click_path);
-		}
-	dd->right_click_path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
-
-	gq_gtk_entry_set_text(GTK_ENTRY(dd->entry), new_path);
-
-	gtk_widget_grab_focus(GTK_WIDGET(dd->entry));
-}
-
 static void dest_new_dir_cb(GtkWidget *widget, gpointer data)
 {
 	auto dd = static_cast<Dest_Data *>(data);
 
-/**
- * @FIXME on exit from the "new folder" modal dialog, focus returns to the main Geeqie
- * window rather than the file dialog window. gtk_window_present() does not seem to
- * function unless the window was previously minimized.
- */
-	file_util_create_dir(gq_gtk_entry_get_text(GTK_ENTRY(dd->entry)), widget, file_util_create_dir_cb, data);
+	/**
+	 * @FIXME on exit from the "new folder" modal dialog, focus returns to the main Geeqie
+	 * window rather than the file dialog window. gtk_window_present() does not seem to
+	 * function unless the window was previously minimized.
+	 */
+	const auto file_util_create_dir_cb = [dd](gboolean success, const gchar *new_path)
+	{
+		if (!success || !new_path) return;
+
+		auto *store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dd->d_view)));
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter,
+		                   0, filename_from_path(new_path),
+		                   1, new_path,
+		                   -1);
+
+		if (dd->right_click_path)
+			{
+			gtk_tree_path_free(dd->right_click_path);
+			}
+		dd->right_click_path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
+
+		gq_gtk_entry_set_text(GTK_ENTRY(dd->entry), new_path);
+
+		gtk_widget_grab_focus(GTK_WIDGET(dd->entry));
+	};
+	file_util_create_dir(gq_gtk_entry_get_text(GTK_ENTRY(dd->entry)), widget, file_util_create_dir_cb);
 }
 
 /*

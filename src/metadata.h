@@ -26,6 +26,7 @@
 #include <gtk/gtk.h>
 
 #include "typedefs.h"
+#include "utilops.h"
 
 enum NotifyType : gint;
 
@@ -40,7 +41,7 @@ void metadata_cache_free(FileData *fd);
 
 gboolean metadata_write_queue_remove(FileData *fd);
 gboolean metadata_write_perform(FileData *fd);
-gboolean metadata_write_queue_confirm(gboolean force_dialog, FileUtilDoneFunc done_func, gpointer done_data);
+gboolean metadata_write_queue_confirm(gboolean force_dialog, const FileUtilDoneFunc &done_func);
 void metadata_notify_cb(FileData *fd, NotifyType type, gpointer data);
 
 gint metadata_queue_length();

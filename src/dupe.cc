@@ -150,7 +150,6 @@ static GtkWidget *dupe_menu_popup_second(DupeWindow *dw, DupeItem *di);
 static void dupe_dnd_init(DupeWindow *dw);
 
 static void dupe_notify_cb(FileData *fd, NotifyType type, gpointer data);
-static void delete_finished_cb(gboolean success, const gchar *dest_path, gpointer data);
 
 static GtkWidget *submenu_add_export(GtkWidget *menu, GtkWidget **menu_item, GCallback func, gpointer data);
 static void dupe_pop_menu_export_cb(GtkWidget *widget, gpointer data);
@@ -3154,7 +3153,18 @@ static void dupe_window_remove_selection(DupeWindow *dw, GtkWidget *listview)
 
 static void dupe_window_delete_selected(DupeWindow *dw, gboolean safe_delete)
 {
-	file_util_delete_notify_done(nullptr, dupe_listview_get_selection(dw->listview), dw->window, safe_delete, delete_finished_cb, dw);
+	const auto delete_finished_cb = [dw](gboolean success, const gchar *)
+	{
+		if (!success) return;
+
+		/**
+		 * If the window is refreshed after each file of a large set is deleted,
+		 * the UI slows to an unacceptable level. The #FileUtilDoneFunc is used
+		 * to call this function once, when the entire delete operation is completed.
+		 */
+		dupe_window_remove_selection(dw, dw->listview);
+	};
+	file_util_delete_notify_done(nullptr, dupe_listview_get_selection(dw->listview), dw->window, safe_delete, delete_finished_cb);
 }
 
 static void dupe_window_edit_selected(DupeWindow *dw, const gchar *key)
@@ -4937,28 +4947,6 @@ static void dupe_notify_cb(FileData *fd, NotifyType type, gpointer data)
 			break;
 		}
 
-}
-
-/**
- * @brief Refresh window after a file delete operation
- * @param success (ud->phase != UtilityPhase::CANCEL) #file_util_dialog_run
- * @param dest_path Not used
- * @param data #DupeWindow
- *
- * If the window is refreshed after each file of a large set is deleted,
- * the UI slows to an unacceptable level. The #FileUtilDoneFunc is used
- * to call this function once, when the entire delete operation is completed.
- */
-static void delete_finished_cb(gboolean success, const gchar *, gpointer data)
-{
-	auto dw = static_cast<DupeWindow *>(data);
-
-	if (!success)
-		{
-		return;
-		}
-
-	dupe_window_remove_selection(dw, dw->listview);
 }
 
 /*
