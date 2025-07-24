@@ -2142,15 +2142,14 @@ static void file_util_mark_ungrouped_files(GList *work)
 		}
 }
 
-static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *parent, UtilityPhase phase, FileUtilDoneFunc done_func, gpointer done_data)
+static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *parent, gboolean safe_delete, UtilityPhase phase, FileUtilDoneFunc done_func, gpointer done_data)
 {
-	UtilityData *ud;
-	gchar *message;
-
 	if (source_fd)
 		flist = g_list_append(flist, file_data_ref(source_fd));
 
 	if (!flist) return;
+
+	options->file_ops.safe_delete_enable = safe_delete;
 
 	g_autoptr(FileDataList) ungrouped = nullptr;
 	flist = file_data_process_groups_in_selection(flist, TRUE, &ungrouped);
@@ -2165,7 +2164,7 @@ static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *
 
 	file_util_mark_ungrouped_files(ungrouped);
 
-	ud = file_util_data_new(UtilityType::DELETE);
+	UtilityData *ud = file_util_data_new(UtilityType::DELETE);
 
 	ud->phase = phase;
 
@@ -2180,6 +2179,7 @@ static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *
 
 	ud->details_func = file_util_details_dialog;
 
+	gchar *message;
 	if (g_list_length(flist) > 1)
 		{
 		if(options->file_ops.safe_delete_enable)
@@ -2922,21 +2922,16 @@ static gboolean file_util_write_metadata_first(UtilityType type, UtilityPhase ph
 /* full-featured entry points
 */
 
-void file_util_delete(FileData *source_fd, GList *source_list, GtkWidget *parent)
+void file_util_delete(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete)
 {
-	if (options->file_ops.safe_delete_enable == FALSE)
-		{
-		file_util_delete_full(source_fd, source_list, parent, options->file_ops.confirm_delete ? UtilityPhase::START : UtilityPhase::ENTERING, nullptr, nullptr);
-		}
-	else
-		{
-		file_util_delete_full(source_fd, source_list, parent, options->file_ops.confirm_move_to_trash ? UtilityPhase::START : UtilityPhase::ENTERING, nullptr, nullptr);
-		}
+	const gboolean confirm = safe_delete ? options->file_ops.confirm_move_to_trash : options->file_ops.confirm_delete;
+
+	file_util_delete_full(source_fd, source_list, parent, safe_delete, confirm ? UtilityPhase::START : UtilityPhase::ENTERING, nullptr, nullptr);
 }
 
-void file_util_delete_notify_done(FileData *source_fd, GList *source_list, GtkWidget *parent, FileUtilDoneFunc done_func, gpointer done_data)
+void file_util_delete_notify_done(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete, FileUtilDoneFunc done_func, gpointer done_data)
 {
-	file_util_delete_full(source_fd, source_list, parent, options->file_ops.confirm_delete ? UtilityPhase::START : UtilityPhase::ENTERING, done_func, done_data);
+	file_util_delete_full(source_fd, source_list, parent, safe_delete, options->file_ops.confirm_delete ? UtilityPhase::START : UtilityPhase::ENTERING, done_func, done_data);
 }
 
 void file_util_write_metadata(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean force_dialog, FileUtilDoneFunc done_func, gpointer done_data)

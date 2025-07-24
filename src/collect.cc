@@ -910,8 +910,7 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 				file_util_rename(nullptr, collection_table_selection_get_list(cw->table), cw->window);
 				break;
 			case 'D': case 'd':
-				options->file_ops.safe_delete_enable = TRUE;
-				file_util_delete(nullptr, collection_table_selection_get_list(cw->table), cw->window);
+				file_util_delete(nullptr, collection_table_selection_get_list(cw->table), cw->window, TRUE);
 				break;
 			case 'S': case 's':
 				collection_dialog_save_as(cw->cd);

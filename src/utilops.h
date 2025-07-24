@@ -53,8 +53,8 @@ GenericDialog *file_util_warning_dialog(const gchar *heading, const gchar *messa
 
 /* all functions takes over the filelist and frees it when done */
 
-void file_util_delete(FileData *source_fd, GList *source_list, GtkWidget *parent);
-void file_util_delete_notify_done(FileData *source_fd, GList *source_list, GtkWidget *parent, FileUtilDoneFunc done_func, gpointer done_data);
+void file_util_delete(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete);
+void file_util_delete_notify_done(FileData *source_fd, GList *source_list, GtkWidget *parent, gboolean safe_delete, FileUtilDoneFunc done_func, gpointer done_data);
 void file_util_move(FileData *source_fd, GList *source_list, const gchar *dest_path, GtkWidget *parent);
 void file_util_copy(FileData *source_fd, GList *source_list, const gchar *dest_path, GtkWidget *parent);
 void file_util_rename(FileData *source_fd, GList *source_list, GtkWidget *parent);

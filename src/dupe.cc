@@ -3152,10 +3152,9 @@ static void dupe_window_remove_selection(DupeWindow *dw, GtkWidget *listview)
 	dupe_listview_realign_colors(dw);
 }
 
-static void dupe_window_delete_selected(DupeWindow *dw, gboolean safe_delete_enable)
+static void dupe_window_delete_selected(DupeWindow *dw, gboolean safe_delete)
 {
-	options->file_ops.safe_delete_enable = safe_delete_enable;
-	file_util_delete_notify_done(nullptr, dupe_listview_get_selection(dw->listview), dw->window, delete_finished_cb, dw);
+	file_util_delete_notify_done(nullptr, dupe_listview_get_selection(dw->listview), dw->window, safe_delete, delete_finished_cb, dw);
 }
 
 static void dupe_window_edit_selected(DupeWindow *dw, const gchar *key)
@@ -4072,8 +4071,7 @@ static gboolean dupe_window_keypress_cb(GtkWidget *widget, GdkEventKey *event, g
 					file_util_rename(nullptr, dupe_listview_get_selection(listview), dw->window);
 					break;
 				case 'D': case 'd':
-					options->file_ops.safe_delete_enable = TRUE;
-					file_util_delete(nullptr, dupe_listview_get_selection(listview), dw->window);
+					file_util_delete(nullptr, dupe_listview_get_selection(listview), dw->window, TRUE);
 					break;
 				default:
 					stop_signal = FALSE;

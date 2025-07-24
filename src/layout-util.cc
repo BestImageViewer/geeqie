@@ -430,16 +430,14 @@ static void layout_menu_delete_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	options->file_ops.safe_delete_enable = FALSE;
-	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw));
+	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), FALSE);
 }
 
 static void layout_menu_move_to_trash_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	options->file_ops.safe_delete_enable = TRUE;
-	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw));
+	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), TRUE);
 }
 
 static void layout_menu_move_to_trash_key_cb(GtkAction *, gpointer data)
@@ -448,8 +446,7 @@ static void layout_menu_move_to_trash_key_cb(GtkAction *, gpointer data)
 
 	if (options->file_ops.enable_delete_key)
 		{
-		options->file_ops.safe_delete_enable = TRUE;
-		file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw));
+		file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), TRUE);
 		}
 }
 

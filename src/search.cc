@@ -1129,16 +1129,14 @@ static void sr_menu_delete_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	options->file_ops.safe_delete_enable = FALSE;
-	file_util_delete(nullptr, search_result_selection_list(sd), sd->ui.window);
+	file_util_delete(nullptr, search_result_selection_list(sd), sd->ui.window, FALSE);
 }
 
 static void sr_menu_move_to_trash_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	options->file_ops.safe_delete_enable = TRUE;
-	file_util_delete(nullptr, search_result_selection_list(sd), sd->ui.window);
+	file_util_delete(nullptr, search_result_selection_list(sd), sd->ui.window, TRUE);
 }
 
 static void sr_menu_copy_path_cb(GtkWidget *, gpointer data)
@@ -1411,8 +1409,7 @@ static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event,
 				file_util_rename(nullptr, search_result_selection_list(sd), widget);
 				break;
 			case 'D': case 'd':
-				options->file_ops.safe_delete_enable = TRUE;
-				file_util_delete(nullptr, search_result_selection_list(sd), widget);
+				file_util_delete(nullptr, search_result_selection_list(sd), widget, TRUE);
 				break;
 			case 'A': case 'a':
 				if (event->state & GDK_SHIFT_MASK)

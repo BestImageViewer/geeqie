@@ -1275,8 +1275,7 @@ static gboolean pan_window_key_press_cb(GtkWidget *widget, GdkEventKey *event, g
 			case 'D': case 'd':
 				if (fd)
 					{
-					options->file_ops.safe_delete_enable = TRUE;
-					file_util_delete(fd, nullptr, GTK_WIDGET(pr));
+					file_util_delete(fd, nullptr, GTK_WIDGET(pr), TRUE);
 					}
 				break;
 			case 'F': case 'f':
@@ -2198,8 +2197,7 @@ static void pan_delete_cb(GtkWidget *, gpointer data)
 	fd = pan_menu_click_fd(pw);
 	if (fd)
 		{
-		options->file_ops.safe_delete_enable = FALSE;
-		file_util_delete(fd, nullptr, pw->imd->widget);
+		file_util_delete(fd, nullptr, pw->imd->widget, FALSE);
 		}
 }
 
@@ -2211,8 +2209,7 @@ static void pan_move_to_trash_cb(GtkWidget *, gpointer data)
 	fd = pan_menu_click_fd(pw);
 	if (fd)
 		{
-		options->file_ops.safe_delete_enable = TRUE;
-		file_util_delete(fd, nullptr, pw->imd->widget);
+		file_util_delete(fd, nullptr, pw->imd->widget, TRUE);
 		}
 }
 

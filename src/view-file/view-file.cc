@@ -529,16 +529,14 @@ static void vf_pop_menu_delete_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	options->file_ops.safe_delete_enable = FALSE;
-	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview);
+	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview, FALSE);
 }
 
 static void vf_pop_menu_move_to_trash_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	options->file_ops.safe_delete_enable = TRUE;
-	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview);
+	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview, TRUE);
 }
 
 static void vf_pop_menu_copy_path_cb(GtkWidget *, gpointer data)

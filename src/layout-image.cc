@@ -648,18 +648,16 @@ static void li_pop_menu_delete_cb(GtkWidget *widget, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	options->file_ops.safe_delete_enable = FALSE;
 	file_util_delete(layout_image_get_fd(lw), nullptr,
-			 li_pop_menu_click_parent(widget, lw));
+	                 li_pop_menu_click_parent(widget, lw), FALSE);
 }
 
 static void li_pop_menu_move_to_trash_cb(GtkWidget *widget, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	options->file_ops.safe_delete_enable = TRUE;
 	file_util_delete(layout_image_get_fd(lw), nullptr,
-			 li_pop_menu_click_parent(widget, lw));
+	                 li_pop_menu_click_parent(widget, lw), TRUE);
 }
 
 static void li_pop_menu_slide_start_cb(GtkWidget *, gpointer data)
