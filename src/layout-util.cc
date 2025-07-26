@@ -478,53 +478,12 @@ static void layout_menu_alter_90_cb(GtkAction *, gpointer data)
 	layout_image_alter_orientation(lw, ALTER_ROTATE_90);
 }
 
-static void layout_menu_rating_0_cb(GtkAction *, gpointer data)
+template<gint rating>
+static void layout_menu_rating_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	layout_image_rating(lw, "0");
-}
-
-static void layout_menu_rating_1_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_rating(lw, "1");
-}
-
-static void layout_menu_rating_2_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_rating(lw, "2");
-}
-
-static void layout_menu_rating_3_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_rating(lw, "3");
-}
-
-static void layout_menu_rating_4_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_rating(lw, "4");
-}
-
-static void layout_menu_rating_5_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_rating(lw, "5");
-}
-
-static void layout_menu_rating_m1_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_rating(lw, "-1");
+	layout_image_rating(lw, std::to_string(rating).c_str());
 }
 
 static void layout_menu_alter_90cc_cb(GtkAction *, gpointer data)
@@ -2760,13 +2719,13 @@ static GtkActionEntry menu_entries[] = {
   { "PrevPage",              GQ_ICON_BACK_PAGE,                 N_("_Previous Page"),                                   "<control>Page_Up",    N_("Previous Page of multi-page image"),               CB(layout_menu_page_previous_cb) },
   { "Print",                 GQ_ICON_PRINT,                     N_("_Print..."),                                        "<shift>P",            N_("Print..."),                                        CB(layout_menu_print_cb) },
   { "Quit",                  GQ_ICON_QUIT,                      N_("_Quit"),                                            "<control>Q",          N_("Quit"),                                            CB(layout_menu_exit_cb) },
-  { "Rating0",               nullptr,                           N_("_Rating 0"),                                        "<alt>KP_0",           N_("Rating 0"),                                        CB(layout_menu_rating_0_cb) },
-  { "Rating1",               nullptr,                           N_("_Rating 1"),                                        "<alt>KP_1",           N_("Rating 1"),                                        CB(layout_menu_rating_1_cb) },
-  { "Rating2",               nullptr,                           N_("_Rating 2"),                                        "<alt>KP_2",           N_("Rating 2"),                                        CB(layout_menu_rating_2_cb) },
-  { "Rating3",               nullptr,                           N_("_Rating 3"),                                        "<alt>KP_3",           N_("Rating 3"),                                        CB(layout_menu_rating_3_cb) },
-  { "Rating4",               nullptr,                           N_("_Rating 4"),                                        "<alt>KP_4",           N_("Rating 4"),                                        CB(layout_menu_rating_4_cb) },
-  { "Rating5",               nullptr,                           N_("_Rating 5"),                                        "<alt>KP_5",           N_("Rating 5"),                                        CB(layout_menu_rating_5_cb) },
-  { "RatingM1",              nullptr,                           N_("_Rating -1"),                                       "<alt>KP_Subtract",    N_("Rating -1"),                                       CB(layout_menu_rating_m1_cb) },
+  { "Rating0",               nullptr,                           N_("_Rating 0"),                                        "<alt>KP_0",           N_("Rating 0"),                                        CB(layout_menu_rating_cb<0>) },
+  { "Rating1",               nullptr,                           N_("_Rating 1"),                                        "<alt>KP_1",           N_("Rating 1"),                                        CB(layout_menu_rating_cb<1>) },
+  { "Rating2",               nullptr,                           N_("_Rating 2"),                                        "<alt>KP_2",           N_("Rating 2"),                                        CB(layout_menu_rating_cb<2>) },
+  { "Rating3",               nullptr,                           N_("_Rating 3"),                                        "<alt>KP_3",           N_("Rating 3"),                                        CB(layout_menu_rating_cb<3>) },
+  { "Rating4",               nullptr,                           N_("_Rating 4"),                                        "<alt>KP_4",           N_("Rating 4"),                                        CB(layout_menu_rating_cb<4>) },
+  { "Rating5",               nullptr,                           N_("_Rating 5"),                                        "<alt>KP_5",           N_("Rating 5"),                                        CB(layout_menu_rating_cb<5>) },
+  { "RatingM1",              nullptr,                           N_("_Rating -1"),                                       "<alt>KP_Subtract",    N_("Rating -1"),                                       CB(layout_menu_rating_cb<-1>) },
   { "RatingMenu",            nullptr,                           N_("_Rating"),                                          nullptr,               nullptr,                                               nullptr },
   { "Refresh",               GQ_ICON_REFRESH,                   N_("_Refresh"),                                         "R",                   N_("Refresh"),                                         CB(layout_menu_refresh_cb) },
   { "Rename",                PIXBUF_INLINE_ICON_RENAME,         N_("_Rename..."),                                       "<control>R",          N_("Rename..."),                                       CB(layout_menu_rename_cb) },
