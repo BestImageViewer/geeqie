@@ -525,18 +525,12 @@ static void vf_pop_menu_rename_cb(GtkWidget *, gpointer data)
 	}
 }
 
+template<gboolean safe_delete>
 static void vf_pop_menu_delete_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview, FALSE);
-}
-
-static void vf_pop_menu_move_to_trash_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
-	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview, TRUE);
+	file_util_delete(nullptr, vf_pop_menu_file_list(vf), vf->listview, safe_delete);
 }
 
 static void vf_pop_menu_copy_path_cb(GtkWidget *, gpointer data)
@@ -834,14 +828,14 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	menu_item_add_sensitive(menu, _("_Cut to clipboard"), active,
 				G_CALLBACK(vf_pop_menu_cut_path_cb), vf);
 	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu,
-				options->file_ops.confirm_move_to_trash ? _("Move selection to Trash...") :
-					_("Move selection to Trash"), GQ_ICON_DELETE, active,
-				G_CALLBACK(vf_pop_menu_move_to_trash_cb), vf);
-	menu_item_add_icon_sensitive(menu,
-				options->file_ops.confirm_delete ? _("_Delete selection...") :
-					_("_Delete selection"), GQ_ICON_DELETE_SHRED, active,
-				G_CALLBACK(vf_pop_menu_delete_cb), vf);
+	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_move_to_trash ?
+	                                 _("Move selection to Trash...") : _("Move selection to Trash"),
+	                             GQ_ICON_DELETE, active,
+	                             G_CALLBACK(vf_pop_menu_delete_cb<TRUE>), vf);
+	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_delete ?
+	                                 _("_Delete selection...") : _("_Delete selection"),
+	                             GQ_ICON_DELETE_SHRED, active,
+	                             G_CALLBACK(vf_pop_menu_delete_cb<FALSE>), vf);
 	menu_item_add_divider(menu);
 
 	menu_item_add_sensitive(menu, _("Enable file _grouping"), active,

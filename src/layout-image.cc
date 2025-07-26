@@ -644,20 +644,13 @@ static void li_pop_menu_rename_cb(GtkWidget *widget, gpointer data)
 			 li_pop_menu_click_parent(widget, lw));
 }
 
+template<gboolean safe_delete>
 static void li_pop_menu_delete_cb(GtkWidget *widget, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	file_util_delete(layout_image_get_fd(lw), nullptr,
-	                 li_pop_menu_click_parent(widget, lw), FALSE);
-}
-
-static void li_pop_menu_move_to_trash_cb(GtkWidget *widget, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	file_util_delete(layout_image_get_fd(lw), nullptr,
-	                 li_pop_menu_click_parent(widget, lw), TRUE);
+	                 li_pop_menu_click_parent(widget, lw), safe_delete);
 }
 
 static void li_pop_menu_slide_start_cb(GtkWidget *, gpointer data)
@@ -837,15 +830,15 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 	if (!path) gtk_widget_set_sensitive(item, FALSE);
 	menu_item_add_divider(menu);
 
-	item = menu_item_add_icon(menu,
-				options->file_ops.confirm_move_to_trash ? _("Move to Trash...") :
-					_("Move to Trash"), GQ_ICON_DELETE,
-								G_CALLBACK(li_pop_menu_move_to_trash_cb), lw);
+	item = menu_item_add_icon(menu, options->file_ops.confirm_move_to_trash ?
+	                              _("Move to Trash...") : _("Move to Trash"),
+	                          GQ_ICON_DELETE,
+	                          G_CALLBACK(li_pop_menu_delete_cb<TRUE>), lw);
 	if (!path) gtk_widget_set_sensitive(item, FALSE);
-	item = menu_item_add_icon(menu,
-				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), GQ_ICON_DELETE_SHRED,
-								G_CALLBACK(li_pop_menu_delete_cb), lw);
+	item = menu_item_add_icon(menu, options->file_ops.confirm_delete ?
+	                              _("_Delete...") : _("_Delete"),
+	                          GQ_ICON_DELETE_SHRED,
+	                          G_CALLBACK(li_pop_menu_delete_cb<FALSE>), lw);
 	if (!path) gtk_widget_set_sensitive(item, FALSE);
 	menu_item_add_divider(menu);
 

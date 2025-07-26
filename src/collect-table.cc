@@ -786,20 +786,12 @@ static void collection_table_popup_rename_cb(GtkWidget *, gpointer data)
 	file_util_rename(nullptr, collection_table_popup_file_list(ct), ct->listview);
 }
 
+template<gboolean safe_delete>
 static void collection_table_popup_delete_cb(GtkWidget *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	file_util_delete(nullptr, collection_table_popup_file_list(ct), ct->listview, FALSE);
-
-	collection_table_refresh(ct);
-}
-
-static void collection_table_popup_move_to_trash_cb(GtkWidget *, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
-
-	file_util_delete(nullptr, collection_table_popup_file_list(ct), ct->listview, TRUE);
+	file_util_delete(nullptr, collection_table_popup_file_list(ct), ct->listview, safe_delete);
 
 	collection_table_refresh(ct);
 }
@@ -1073,14 +1065,14 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 				G_CALLBACK(collection_table_popup_copy_path_unquoted_cb), ct);
 
 	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu,
-				options->file_ops.confirm_move_to_trash ? _("Move selection to Trash...") :
-					_("Move selection to Trash"), GQ_ICON_DELETE, over_icon,
-				G_CALLBACK(collection_table_popup_move_to_trash_cb), ct);
-	menu_item_add_icon_sensitive(menu,
-				options->file_ops.confirm_delete ? _("_Delete selection...") :
-					_("_Delete selection"), GQ_ICON_DELETE_SHRED, over_icon,
-				G_CALLBACK(collection_table_popup_delete_cb), ct);
+	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_move_to_trash ?
+	                                 _("Move selection to Trash...") : _("Move selection to Trash"),
+	                             GQ_ICON_DELETE, over_icon,
+	                             G_CALLBACK(collection_table_popup_delete_cb<TRUE>), ct);
+	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_delete ?
+	                                 _("_Delete selection...") : _("_Delete selection"),
+	                             GQ_ICON_DELETE_SHRED, over_icon,
+	                             G_CALLBACK(collection_table_popup_delete_cb<FALSE>), ct);
 
 	menu_item_add_divider(menu);
 	submenu = submenu_add_sort(nullptr, G_CALLBACK(collection_table_popup_sort_cb), ct, FALSE, TRUE, FALSE, SORT_NONE);

@@ -426,18 +426,12 @@ static void layout_menu_rename_cb(GtkAction *, gpointer data)
 	file_util_rename(nullptr, layout_selection_list(lw), layout_window(lw));
 }
 
+template<gboolean safe_delete>
 static void layout_menu_delete_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), FALSE);
-}
-
-static void layout_menu_move_to_trash_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), TRUE);
+	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), safe_delete);
 }
 
 static void layout_menu_move_to_trash_key_cb(GtkAction *, gpointer data)
@@ -2694,7 +2688,7 @@ static GtkActionEntry menu_entries[] = {
   { "CutPath",               nullptr,                           N_("_Cut to clipboard"),                                "<control>X",          N_("Cut to clipboard"),                                CB(layout_menu_cut_path_cb) },
   { "DeleteAlt1",            GQ_ICON_USER_TRASH,                N_("Move selection to Trash..."),                       "Delete",              N_("Move selection to Trash..."),                      CB(layout_menu_move_to_trash_key_cb) },
   { "DeleteAlt2",            GQ_ICON_USER_TRASH,                N_("Move selection to Trash..."),                       "KP_Delete",           N_("Move selection to Trash..."),                      CB(layout_menu_move_to_trash_key_cb) },
-  { "Delete",                GQ_ICON_USER_TRASH,                N_("Move selection to Trash..."),                       "<control>D",          N_("Move selection to Trash..."),                      CB(layout_menu_move_to_trash_cb) },
+  { "Delete",                GQ_ICON_USER_TRASH,                N_("Move selection to Trash..."),                       "<control>D",          N_("Move selection to Trash..."),                      CB(layout_menu_delete_cb<TRUE>) },
   { "DeleteWindow",          GQ_ICON_DELETE,                    N_("Delete window"),                                    nullptr,               N_("Delete window"),                                   CB(layout_menu_window_delete_cb) },
   { "DisableGrouping",       nullptr,                           N_("Disable file groupi_ng"),                           nullptr,               N_("Disable file grouping"),                           CB(layout_menu_disable_grouping_cb) },
   { "EditMenu",              nullptr,                           N_("_Edit"),                                            nullptr,               nullptr,                                               nullptr },
@@ -2755,7 +2749,7 @@ static GtkActionEntry menu_entries[] = {
   { "OrientationMenu",       nullptr,                           N_("_Orientation"),                                     nullptr,               nullptr,                                               nullptr },
   { "OverlayMenu",           nullptr,                           N_("Image _Overlay"),                                   nullptr,               nullptr,                                               nullptr },
   { "PanView",               PIXBUF_INLINE_ICON_PANORAMA,       N_("Pa_n view"),                                        "<control>J",          N_("Pan view"),                                        CB(layout_menu_pan_cb) },
-  { "PermanentDelete",       GQ_ICON_DELETE,                    N_("Delete selection..."),                              "<shift>Delete",       N_("Delete selection..."),                             CB(layout_menu_delete_cb) },
+  { "PermanentDelete",       GQ_ICON_DELETE,                    N_("Delete selection..."),                              "<shift>Delete",       N_("Delete selection..."),                             CB(layout_menu_delete_cb<FALSE>) },
   { "Plugins",               GQ_ICON_PREFERENCES,               N_("Configure _Plugins..."),                            nullptr,               N_("Configure Plugins..."),                            CB(layout_menu_editors_cb) },
   { "PluginsMenu",           nullptr,                           N_("_Plugins"),                                         nullptr,               nullptr,                                               nullptr },
   { "Preferences",           GQ_ICON_PREFERENCES,               N_("P_references..."),                                  "<control>O",          N_("Preferences..."),                                  CB(layout_menu_config_cb) },

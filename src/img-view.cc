@@ -1204,22 +1204,13 @@ static void view_rename_cb(GtkWidget *, gpointer data)
 	file_util_rename(image_get_fd(imd), nullptr, imd->widget);
 }
 
+template<gboolean safe_delete>
 static void view_delete_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
-	ImageWindow *imd;
+	ImageWindow *imd = view_window_active_image(vw);
 
-	imd = view_window_active_image(vw);
-	file_util_delete(image_get_fd(imd), nullptr, imd->widget, FALSE);
-}
-
-static void view_move_to_trash_cb(GtkWidget *, gpointer data)
-{
-	auto vw = static_cast<ViewWindow *>(data);
-	ImageWindow *imd;
-
-	imd = view_window_active_image(vw);
-	file_util_delete(image_get_fd(imd), nullptr, imd->widget, TRUE);
+	file_util_delete(image_get_fd(imd), nullptr, imd->widget, safe_delete);
 }
 
 static void view_copy_path_cb(GtkWidget *, gpointer data)
@@ -1384,14 +1375,14 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 	menu_item_add(menu, _("_Copy path unquoted"), G_CALLBACK(view_copy_path_unquoted_cb), vw);
 
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu,
-				options->file_ops.confirm_move_to_trash ? _("Move to Trash...") :
-					_("Move to Trash"), GQ_ICON_DELETE,
-				G_CALLBACK(view_move_to_trash_cb), vw);
-	menu_item_add_icon(menu,
-				options->file_ops.confirm_delete ? _("_Delete...") :
-					_("_Delete"), GQ_ICON_DELETE_SHRED,
-				G_CALLBACK(view_delete_cb), vw);
+	menu_item_add_icon(menu, options->file_ops.confirm_move_to_trash ?
+	                       _("Move to Trash...") : _("Move to Trash"),
+	                   GQ_ICON_DELETE,
+	                   G_CALLBACK(view_delete_cb<TRUE>), vw);
+	menu_item_add_icon(menu, options->file_ops.confirm_delete ?
+	                       _("_Delete...") : _("_Delete"),
+	                   GQ_ICON_DELETE_SHRED,
+	                   G_CALLBACK(view_delete_cb<FALSE>), vw);
 
 	menu_item_add_divider(menu);
 
