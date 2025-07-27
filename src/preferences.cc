@@ -643,7 +643,7 @@ static void dnd_default_action_selection_menu_cb(GtkWidget *combo, gpointer data
 }
 static void clipboard_selection_menu_cb(GtkWidget *combo, gpointer data)
 {
-	auto option = static_cast<gint *>(data);
+	auto *option = static_cast<ClipboardSelection *>(data);
 
 	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
 		{
@@ -717,7 +717,7 @@ static void add_dnd_default_action_selection_menu(GtkWidget *table, gint column,
 }
 
 static void add_clipboard_selection_menu(GtkWidget *table, gint column, gint row, const gchar *text,
-			     gint option, gint *option_c)
+                                         ClipboardSelection option, ClipboardSelection *option_c)
 {
 	GtkWidget *combo;
 	gint current = 0;

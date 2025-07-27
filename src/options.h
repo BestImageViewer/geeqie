@@ -42,6 +42,12 @@ enum DnDAction {
 	DND_ACTION_MOVE
 };
 
+enum ClipboardSelection {
+	CLIPBOARD_PRIMARY   = 0,
+	CLIPBOARD_CLIPBOARD = 1,
+	CLIPBOARD_BOTH      = 2
+};
+
 enum RectangleDrawAspectRatio {
 	RECTANGLE_DRAW_ASPECT_RATIO_NONE = 0,
 	RECTANGLE_DRAW_ASPECT_RATIO_ONE_ONE,
@@ -102,7 +108,7 @@ struct ConfOptions
 	gint recent_folder_image_list_maxsize;
 	gint dnd_icon_size;
 	DnDAction dnd_default_action;
-	gint clipboard_selection;
+	ClipboardSelection clipboard_selection;
 	RectangleDrawAspectRatio rectangle_draw_aspect_ratio;
 
 	gboolean save_window_positions;

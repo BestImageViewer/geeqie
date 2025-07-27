@@ -939,7 +939,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_INT(*options, dnd_icon_size)) continue;
 		if (READ_UINT_ENUM(*options, dnd_default_action)) continue;
 		if (READ_BOOL(*options, place_dialogs_under_mouse)) continue;
-		if (READ_INT(*options, clipboard_selection)) continue;
+		if (READ_INT_ENUM(*options, clipboard_selection)) continue;
 		if (READ_UINT_ENUM(*options, rectangle_draw_aspect_ratio)) continue;
 
 		if (READ_BOOL(*options, save_window_positions)) continue;

@@ -32,12 +32,6 @@ enum ZoomMode {
 	ZOOM_RESET_NONE		= 2
 };
 
-enum ClipboardSelection {
-	CLIPBOARD_PRIMARY	= 0,
-	CLIPBOARD_CLIPBOARD = 1,
-	CLIPBOARD_BOTH = 2
-};
-
 enum MouseButton {
 	MOUSE_BUTTON_LEFT	= 1,
 	MOUSE_BUTTON_MIDDLE	= 2,
