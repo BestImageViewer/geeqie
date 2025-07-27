@@ -75,16 +75,9 @@ struct ImageWindow
 	void (*func_complete)(ImageWindow *imd, gint preload, gpointer data);
 	void (*func_state)(ImageWindow *imd, ImageState state, gpointer data);
 
-	using TileRequestFunc = gint (*)(ImageWindow *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
-	TileRequestFunc func_tile_request;
-
-	using TileDisposeFunc = void (*)(ImageWindow *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
-	TileDisposeFunc func_tile_dispose;
-
 	gpointer data_update;
 	gpointer data_complete;
 	gpointer data_state;
-	gpointer data_tile;
 
 	/* button, scroll functions */
 	void (*func_button)(ImageWindow *, GdkEventButton *event, gpointer);
@@ -236,14 +229,6 @@ void image_set_delay_flip(ImageWindow *imd, gint delay);
 
 void image_to_root_window(ImageWindow *imd, gboolean scaled);
 
-
-
-void image_set_image_as_tiles(ImageWindow *imd, gint width, gint height,
-			      gint tile_width, gint tile_height, gint cache_size,
-			      ImageWindow::TileRequestFunc func_tile_request,
-			      ImageWindow::TileDisposeFunc func_tile_dispose,
-			      gpointer data,
-			      gdouble zoom);
 
 void image_options_sync();
 
