@@ -1133,18 +1133,12 @@ static void sr_menu_delete_cb(GtkWidget *, gpointer data)
 	file_util_delete(nullptr, search_result_selection_list(sd), sd->ui.window, safe_delete);
 }
 
+template<gboolean quoted>
 static void sr_menu_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	file_util_path_list_to_clipboard(search_result_selection_list(sd), TRUE, ClipboardAction::COPY);
-}
-
-static void sr_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
-{
-	auto sd = static_cast<SearchData *>(data);
-
-	file_util_path_list_to_clipboard(search_result_selection_list(sd), FALSE, ClipboardAction::COPY);
+	file_util_path_list_to_clipboard(search_result_selection_list(sd), quoted, ClipboardAction::COPY);
 }
 
 static void sr_menu_play_cb(GtkWidget *, gpointer data)
@@ -1219,9 +1213,9 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 	menu_item_add_sensitive(menu, _("_Rename..."), on_row,
 				G_CALLBACK(sr_menu_rename_cb), sd);
 	menu_item_add_sensitive(menu, _("_Copy path"), on_row,
-				G_CALLBACK(sr_menu_copy_path_cb), sd);
+	                        G_CALLBACK(sr_menu_copy_path_cb<TRUE>), sd);
 	menu_item_add_sensitive(menu, _("_Copy path unquoted"), on_row,
-				G_CALLBACK(sr_menu_copy_path_unquoted_cb), sd);
+	                        G_CALLBACK(sr_menu_copy_path_cb<FALSE>), sd);
 
 	menu_item_add_divider(menu);
 	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_move_to_trash ?

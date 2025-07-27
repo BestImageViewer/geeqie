@@ -796,18 +796,12 @@ static void collection_table_popup_delete_cb(GtkWidget *, gpointer data)
 	collection_table_refresh(ct);
 }
 
+template<gboolean quoted>
 static void collection_table_popup_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	file_util_path_list_to_clipboard(collection_table_popup_file_list(ct), TRUE, ClipboardAction::COPY);
-}
-
-static void collection_table_popup_copy_path_unquoted_cb(GtkWidget *, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
-
-	file_util_path_list_to_clipboard(collection_table_popup_file_list(ct), FALSE, ClipboardAction::COPY);
+	file_util_path_list_to_clipboard(collection_table_popup_file_list(ct), quoted, ClipboardAction::COPY);
 }
 
 static void collection_table_popup_sort_cb(GtkWidget *widget, gpointer data)
@@ -1060,9 +1054,9 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 	menu_item_add_sensitive(menu, _("_Rename..."), over_icon,
 			G_CALLBACK(collection_table_popup_rename_cb), ct);
 	menu_item_add_sensitive(menu, _("_Copy path"), over_icon,
-				G_CALLBACK(collection_table_popup_copy_path_cb), ct);
+	                        G_CALLBACK(collection_table_popup_copy_path_cb<TRUE>), ct);
 	menu_item_add_sensitive(menu, _("_Copy path unquoted"), over_icon,
-				G_CALLBACK(collection_table_popup_copy_path_unquoted_cb), ct);
+	                        G_CALLBACK(collection_table_popup_copy_path_cb<FALSE>), ct);
 
 	menu_item_add_divider(menu);
 	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_move_to_trash ?

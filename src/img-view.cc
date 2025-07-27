@@ -1213,22 +1213,13 @@ static void view_delete_cb(GtkWidget *, gpointer data)
 	file_util_delete(image_get_fd(imd), nullptr, imd->widget, safe_delete);
 }
 
+template<gboolean quoted>
 static void view_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
-	ImageWindow *imd;
+	ImageWindow *imd = view_window_active_image(vw);
 
-	imd = view_window_active_image(vw);
-	file_util_copy_path_to_clipboard(image_get_fd(imd), TRUE, ClipboardAction::COPY);
-}
-
-static void view_copy_path_unquoted_cb(GtkWidget *, gpointer data)
-{
-	auto vw = static_cast<ViewWindow *>(data);
-	ImageWindow *imd;
-
-	imd = view_window_active_image(vw);
-	file_util_copy_path_to_clipboard(image_get_fd(imd), FALSE, ClipboardAction::COPY);
+	file_util_copy_path_to_clipboard(image_get_fd(imd), quoted, ClipboardAction::COPY);
 }
 
 static void view_fullscreen_cb(GtkWidget *, gpointer data)
@@ -1371,8 +1362,10 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 	menu_item_add_icon(menu, _("_Copy..."), GQ_ICON_COPY, G_CALLBACK(view_copy_cb), vw);
 	menu_item_add(menu, _("_Move..."), G_CALLBACK(view_move_cb), vw);
 	menu_item_add(menu, _("_Rename..."), G_CALLBACK(view_rename_cb), vw);
-	menu_item_add(menu, _("_Copy path"), G_CALLBACK(view_copy_path_cb), vw);
-	menu_item_add(menu, _("_Copy path unquoted"), G_CALLBACK(view_copy_path_unquoted_cb), vw);
+	menu_item_add(menu, _("_Copy path"),
+	              G_CALLBACK(view_copy_path_cb<TRUE>), vw);
+	menu_item_add(menu, _("_Copy path unquoted"),
+	              G_CALLBACK(view_copy_path_cb<FALSE>), vw);
 
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, options->file_ops.confirm_move_to_trash ?

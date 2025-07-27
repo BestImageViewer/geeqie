@@ -3282,18 +3282,12 @@ static void dupe_menu_move_to_trash_cb(GtkWidget *, gpointer data)
 	dupe_window_delete_selected(static_cast<DupeWindow *>(data), TRUE);
 }
 
+template<gboolean quoted>
 static void dupe_menu_copy_path_cb(GtkWidget *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	file_util_path_list_to_clipboard(dupe_listview_get_selection(dw->listview), TRUE, ClipboardAction::COPY);
-}
-
-static void dupe_menu_copy_path_unquoted_cb(GtkWidget *, gpointer data)
-{
-	auto dw = static_cast<DupeWindow *>(data);
-
-	file_util_path_list_to_clipboard(dupe_listview_get_selection(dw->listview), FALSE, ClipboardAction::COPY);
+	file_util_path_list_to_clipboard(dupe_listview_get_selection(dw->listview), quoted, ClipboardAction::COPY);
 }
 
 static void dupe_menu_remove_cb(GtkWidget *, gpointer data)
@@ -3405,9 +3399,9 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	menu_item_add_sensitive(menu, _("_Rename..."), on_row,
 				G_CALLBACK(dupe_menu_rename_cb), dw);
 	menu_item_add_sensitive(menu, _("_Copy path"), on_row,
-				G_CALLBACK(dupe_menu_copy_path_cb), dw);
+	                        G_CALLBACK(dupe_menu_copy_path_cb<TRUE>), dw);
 	menu_item_add_sensitive(menu, _("_Copy path unquoted"), on_row,
-				G_CALLBACK(dupe_menu_copy_path_unquoted_cb), dw);
+	                        G_CALLBACK(dupe_menu_copy_path_cb<FALSE>), dw);
 
 	menu_item_add_divider(menu);
 	menu_item_add_icon_sensitive(menu,

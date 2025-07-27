@@ -380,18 +380,12 @@ static void layout_menu_copy_cb(GtkAction *, gpointer data)
 	file_util_copy(nullptr, layout_selection_list(lw), nullptr, layout_window(lw));
 }
 
+template<gboolean quoted>
 static void layout_menu_copy_path_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	file_util_path_list_to_clipboard(layout_selection_list(lw), TRUE, ClipboardAction::COPY);
-}
-
-static void layout_menu_copy_path_unquoted_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	file_util_path_list_to_clipboard(layout_selection_list(lw), FALSE, ClipboardAction::COPY);
+	file_util_path_list_to_clipboard(layout_selection_list(lw), quoted, ClipboardAction::COPY);
 }
 
 static void layout_menu_copy_image_cb(GtkAction *, gpointer data)
@@ -2563,8 +2557,8 @@ static GtkActionEntry menu_entries[] = {
   { "ConnectZoomOut",        GQ_ICON_ZOOM_OUT,                  N_("Zoom _out"),                                        "underscore",          N_("Connected Zoom out"),                              CB(layout_menu_connect_zoom_out_cb) },
   { "Copy",                  GQ_ICON_COPY,                      N_("_Copy..."),                                         "<control>C",          N_("Copy..."),                                         CB(layout_menu_copy_cb) },
   { "CopyImage",             nullptr,                           N_("_Copy image to clipboard"),                         nullptr,               N_("Copy image to clipboard"),                         CB(layout_menu_copy_image_cb) },
-  { "CopyPath",              nullptr,                           N_("_Copy to clipboard"),                               nullptr,               N_("Copy to clipboard"),                               CB(layout_menu_copy_path_cb) },
-  { "CopyPathUnquoted",      nullptr,                           N_("_Copy to clipboard (unquoted)"),                    nullptr,               N_("Copy to clipboard (unquoted)"),                    CB(layout_menu_copy_path_unquoted_cb) },
+  { "CopyPath",              nullptr,                           N_("_Copy to clipboard"),                               nullptr,               N_("Copy to clipboard"),                               CB(layout_menu_copy_path_cb<TRUE>) },
+  { "CopyPathUnquoted",      nullptr,                           N_("_Copy to clipboard (unquoted)"),                    nullptr,               N_("Copy to clipboard (unquoted)"),                    CB(layout_menu_copy_path_cb<FALSE>) },
   { "CropRectangle",         nullptr,                           N_("Crop Rectangle"),                                   nullptr,               N_("Crop Rectangle"),                                  CB(layout_menu_crop_selection_cb) },
   { "CutPath",               nullptr,                           N_("_Cut to clipboard"),                                "<control>X",          N_("Cut to clipboard"),                                CB(layout_menu_cut_path_cb) },
   { "DeleteAlt1",            GQ_ICON_USER_TRASH,                N_("Move selection to Trash..."),                       "Delete",              N_("Move selection to Trash..."),                      CB(layout_menu_move_to_trash_key_cb) },
