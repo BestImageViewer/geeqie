@@ -3087,7 +3087,7 @@ static void dupe_window_recompare(DupeWindow *dw)
 	dupe_check_start(dw);
 }
 
-static void dupe_menu_view(DupeItem *di, GtkWidget *listview, gint new_window)
+static void dupe_menu_view(DupeItem *di, GtkWidget *listview, gboolean new_window)
 {
 	if (!di) return;
 
@@ -3183,18 +3183,12 @@ static void dupe_window_append_file_list(DupeWindow *dw, gint on_second)
  *-------------------------------------------------------------------
  */
 
+template<gboolean new_window>
 static void dupe_menu_view_cb(GtkWidget *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	if (dw->click_item) dupe_menu_view(dw->click_item, dw->listview, FALSE);
-}
-
-static void dupe_menu_viewnew_cb(GtkWidget *, gpointer data)
-{
-	auto dw = static_cast<DupeWindow *>(data);
-
-	if (dw->click_item) dupe_menu_view(dw->click_item, dw->listview, TRUE);
+	if (dw->click_item) dupe_menu_view(dw->click_item, dw->listview, new_window);
 }
 
 static void dupe_menu_select_all_cb(GtkWidget *, gpointer data)
@@ -3217,20 +3211,13 @@ static void dupe_menu_select_none_cb(GtkWidget *, gpointer data)
 	gtk_tree_selection_unselect_all(selection);
 }
 
-static void dupe_menu_select_dupes_set1_cb(GtkWidget *, gpointer data)
+template<DupeSelectType parents>
+static void dupe_menu_select_dupes_cb(GtkWidget *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	options->duplicates_select_type = DUPE_SELECT_GROUP1;
-	dupe_listview_select_dupes(dw, DUPE_SELECT_GROUP1);
-}
-
-static void dupe_menu_select_dupes_set2_cb(GtkWidget *, gpointer data)
-{
-	auto dw = static_cast<DupeWindow *>(data);
-
-	options->duplicates_select_type = DUPE_SELECT_GROUP2;
-	dupe_listview_select_dupes(dw, DUPE_SELECT_GROUP2);
+	options->duplicates_select_type = parents;
+	dupe_listview_select_dupes(dw, parents);
 }
 
 static void dupe_menu_edit_cb(GtkWidget *widget, gpointer data)
@@ -3272,14 +3259,10 @@ static void dupe_menu_rename_cb(GtkWidget *, gpointer data)
 	file_util_rename(nullptr, dupe_listview_get_selection(dw->listview), dw->window);
 }
 
+template<gboolean safe_delete>
 static void dupe_menu_delete_cb(GtkWidget *, gpointer data)
 {
-	dupe_window_delete_selected(static_cast<DupeWindow *>(data), FALSE);
-}
-
-static void dupe_menu_move_to_trash_cb(GtkWidget *, gpointer data)
-{
-	dupe_window_delete_selected(static_cast<DupeWindow *>(data), TRUE);
+	dupe_window_delete_selected(static_cast<DupeWindow *>(data), safe_delete);
 }
 
 template<gboolean quoted>
@@ -3361,18 +3344,18 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	menu_item_add_sensitive(menu, _("_View"), on_row,
-				G_CALLBACK(dupe_menu_view_cb), dw);
+	                        G_CALLBACK(dupe_menu_view_cb<FALSE>), dw);
 	menu_item_add_icon_sensitive(menu, _("View in _new window"), GQ_ICON_NEW, on_row,
-				G_CALLBACK(dupe_menu_viewnew_cb), dw);
+	                             G_CALLBACK(dupe_menu_view_cb<TRUE>), dw);
 	menu_item_add_divider(menu);
 	menu_item_add_sensitive(menu, _("Select all"), (dw->dupes != nullptr),
 				G_CALLBACK(dupe_menu_select_all_cb), dw);
 	menu_item_add_sensitive(menu, _("Select none"), (dw->dupes != nullptr),
 				G_CALLBACK(dupe_menu_select_none_cb), dw);
 	menu_item_add_sensitive(menu, _("Select group _1 duplicates"), (dw->dupes != nullptr),
-				G_CALLBACK(dupe_menu_select_dupes_set1_cb), dw);
+	                        G_CALLBACK(dupe_menu_select_dupes_cb<DUPE_SELECT_GROUP1>), dw);
 	menu_item_add_sensitive(menu, _("Select group _2 duplicates"), (dw->dupes != nullptr),
-				G_CALLBACK(dupe_menu_select_dupes_set2_cb), dw);
+	                        G_CALLBACK(dupe_menu_select_dupes_cb<DUPE_SELECT_GROUP2>), dw);
 	menu_item_add_divider(menu);
 
 	submenu_add_export(menu, &item, G_CALLBACK(dupe_pop_menu_export_cb), dw);
@@ -3404,14 +3387,14 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	                        G_CALLBACK(dupe_menu_copy_path_cb<FALSE>), dw);
 
 	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu,
-				options->file_ops.confirm_move_to_trash ? _("Move selection to Trash...") :
-					_("Move selection to Trash"), GQ_ICON_DELETE, on_row,
-				G_CALLBACK(dupe_menu_move_to_trash_cb), dw);
-	menu_item_add_icon_sensitive(menu,
-				options->file_ops.confirm_delete ? _("_Delete selection...") :
-					_("_Delete selection"), GQ_ICON_DELETE_SHRED, on_row,
-				G_CALLBACK(dupe_menu_delete_cb), dw);
+	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_move_to_trash ?
+	                                 _("Move selection to Trash...") : _("Move selection to Trash"),
+	                             GQ_ICON_DELETE, on_row,
+	                             G_CALLBACK(dupe_menu_delete_cb<TRUE>), dw);
+	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_delete ?
+	                                 _("_Delete selection...") : _("_Delete selection"),
+	                             GQ_ICON_DELETE_SHRED, on_row,
+	                             G_CALLBACK(dupe_menu_delete_cb<FALSE>), dw);
 
 	menu_item_add_divider(menu);
 	menu_item_add_icon_sensitive(menu, _("Rem_ove"), GQ_ICON_REMOVE, on_row,
@@ -3634,18 +3617,12 @@ static void dupe_second_clear(DupeWindow *dw)
 	dupe_second_update_status(dw);
 }
 
+template<gboolean new_window>
 static void dupe_second_menu_view_cb(GtkWidget *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	if (dw->click_item) dupe_menu_view(dw->click_item, dw->second_listview, FALSE);
-}
-
-static void dupe_second_menu_viewnew_cb(GtkWidget *, gpointer data)
-{
-	auto dw = static_cast<DupeWindow *>(data);
-
-	if (dw->click_item) dupe_menu_view(dw->click_item, dw->second_listview, TRUE);
+	if (dw->click_item) dupe_menu_view(dw->click_item, dw->second_listview, new_window);
 }
 
 static void dupe_second_menu_select_all_cb(GtkWidget *, gpointer data)
@@ -3696,9 +3673,9 @@ static GtkWidget *dupe_menu_popup_second(DupeWindow *dw, DupeItem *di)
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	menu_item_add_sensitive(menu, _("_View"), on_row,
-				G_CALLBACK(dupe_second_menu_view_cb), dw);
+	                        G_CALLBACK(dupe_second_menu_view_cb<FALSE>), dw);
 	menu_item_add_icon_sensitive(menu, _("View in _new window"), GQ_ICON_NEW, on_row,
-				G_CALLBACK(dupe_second_menu_viewnew_cb), dw);
+	                             G_CALLBACK(dupe_second_menu_view_cb<TRUE>), dw);
 	menu_item_add_divider(menu);
 	menu_item_add_sensitive(menu, _("Select all"), notempty,
 				G_CALLBACK(dupe_second_menu_select_all_cb), dw);
