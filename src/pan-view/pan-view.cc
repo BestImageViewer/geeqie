@@ -375,10 +375,10 @@ static void pan_queue_add(PanWindow *pw, PanItem *pi)
  *-----------------------------------------------------------------------------
  */
 
-static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
-				       	   gint width, gint height, GdkPixbuf *pixbuf, gpointer data)
+static gboolean pan_window_request_tile_cb(PanWindow *pw, PixbufRenderer *pr,
+                                           gint x, gint y, gint width, gint height,
+                                           GdkPixbuf *pixbuf)
 {
-	auto pw = static_cast<PanWindow *>(data);
 	GList *list;
 	GList *work;
 	const GdkRectangle request_rect{x, y, width, height};
@@ -454,10 +454,8 @@ static gboolean pan_window_request_tile_cb(PixbufRenderer *pr, gint x, gint y,
 	return TRUE;
 }
 
-static void pan_window_dispose_tile_cb(PixbufRenderer *, gint x, gint y,
-				       gint width, gint height, GdkPixbuf *, gpointer data)
+static void pan_window_dispose_tile_cb(PanWindow *pw, gint x, gint y, gint width, gint height)
 {
-	auto pw = static_cast<PanWindow *>(data);
 	GList *list;
 	GList *work;
 
@@ -1117,10 +1115,18 @@ static gint pan_layout_update_idle_cb(gpointer data)
 
 		pan_grid_build(pw, width, height, 1000);
 
+		const auto tile_request_func = [pw](PixbufRenderer *pr, gint x, gint y, gint width, gint height, GdkPixbuf *pixbuf)
+		{
+			return pan_window_request_tile_cb(pw, pr, x, y, width, height, pixbuf);
+		};
+		const auto tile_dispose_func = [pw](PixbufRenderer *, gint x, gint y, gint width, gint height, GdkPixbuf *)
+		{
+			pan_window_dispose_tile_cb(pw, x, y, width, height);
+		};
 		pixbuf_renderer_set_tiles(PIXBUF_RENDERER(pw->imd->pr), width, height,
-					  PAN_TILE_SIZE, PAN_TILE_SIZE, 10,
-					  pan_window_request_tile_cb,
-					  pan_window_dispose_tile_cb, pw, 1.0);
+		                          PAN_TILE_SIZE, PAN_TILE_SIZE, 10,
+		                          tile_request_func, tile_dispose_func,
+		                          1.0);
 
 		if (scroll_x == 0 && scroll_y == 0)
 			{

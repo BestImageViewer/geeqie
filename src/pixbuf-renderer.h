@@ -22,6 +22,8 @@
 #ifndef PIXBUF_RENDERER_H
 #define PIXBUF_RENDERER_H
 
+#include <functional>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #include <glib-object.h>
@@ -70,11 +72,6 @@ struct PixbufRenderer;
  */
 #define ROUND_DOWN(A,B) ((gint)(((A))/(B))*(B))
 
-
-using PixbufRendererTileRequestFunc = gint (*)(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
-using PixbufRendererTileDisposeFunc = void (*)(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *, gpointer);
-
-using PixbufRendererPostProcessFunc = void (*)(PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint, gpointer);
 
 enum ImageRenderType {
 	TILE_RENDER_NONE = 0, /**< do nothing */
@@ -184,13 +181,13 @@ struct PixbufRenderer
 	gint source_tile_width;
 	gint source_tile_height;
 
-	PixbufRendererTileRequestFunc func_tile_request;
-	PixbufRendererTileDisposeFunc func_tile_dispose;
+	using TileRequestFunc = std::function<gboolean(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *)>;
+	TileRequestFunc func_tile_request;
+	using TileDisposeFunc = std::function<void(PixbufRenderer *, gint, gint, gint, gint, GdkPixbuf *)>;
+	TileDisposeFunc func_tile_dispose;
 
-	gpointer func_tile_data;
-
-	PixbufRendererPostProcessFunc func_post_process;
-	gpointer post_process_user_data;
+	using PostProcessFunc = std::function<void(PixbufRenderer *, GdkPixbuf **, gint, gint, gint, gint)>;
+	PostProcessFunc func_post_process;
 	gint post_process_slow;
 
 	gboolean delay_flip;
@@ -259,14 +256,13 @@ void pixbuf_renderer_set_orientation(PixbufRenderer *pr, gint orientation);
 
 void pixbuf_renderer_set_stereo_data(PixbufRenderer *pr, StereoPixbufData stereo_data);
 
-void pixbuf_renderer_set_post_process_func(PixbufRenderer *pr, PixbufRendererPostProcessFunc func, gpointer user_data, gboolean slow);
+void pixbuf_renderer_set_post_process_func(PixbufRenderer *pr, const PixbufRenderer::PostProcessFunc &func, gboolean slow);
 
 void pixbuf_renderer_set_tiles(PixbufRenderer *pr, gint width, gint height,
-			       gint tile_width, gint tile_height, gint cache_size,
-			       PixbufRendererTileRequestFunc func_request,
-			       PixbufRendererTileDisposeFunc func_dispose,
-			       gpointer user_data,
-			       gdouble zoom);
+                               gint tile_width, gint tile_height, gint cache_size,
+                               const PixbufRenderer::TileRequestFunc &func_request,
+                               const PixbufRenderer::TileDisposeFunc &func_dispose,
+                               gdouble zoom);
 void pixbuf_renderer_set_tiles_size(PixbufRenderer *pr, gint width, gint height);
 gint pixbuf_renderer_get_tiles(PixbufRenderer *pr);
 

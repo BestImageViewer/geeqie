@@ -960,8 +960,8 @@ static SourceTile *pr_source_tile_new(PixbufRenderer *pr, gint x, gint y)
 				if (pr->func_tile_dispose)
 					{
 					pr->func_tile_dispose(pr, needle->x, needle->y,
-							      pr->source_tile_width, pr->source_tile_height,
-							      needle->pixbuf, pr->func_tile_data);
+					                      pr->source_tile_width, pr->source_tile_height,
+					                      needle->pixbuf);
 					}
 
 				if (!st)
@@ -1003,7 +1003,7 @@ static SourceTile *pr_source_tile_request(PixbufRenderer *pr, gint x, gint y)
 
 	if (pr->func_tile_request &&
 	    pr->func_tile_request(pr, st->x, st->y,
-				   pr->source_tile_width, pr->source_tile_height, st->pixbuf, pr->func_tile_data))
+	                          pr->source_tile_width, pr->source_tile_height, st->pixbuf))
 		{
 		st->blank = FALSE;
 		}
@@ -1095,7 +1095,7 @@ static void pr_source_tile_changed(PixbufRenderer *pr, gint x, gint y, gint widt
 
 			pixbuf = gdk_pixbuf_new_subpixbuf(st->pixbuf, r.x - st->x, r.y - st->y, r.width, r.height);
 			if (pr->func_tile_request &&
-			    pr->func_tile_request(pr, r.x, r.y, r.width, r.height, pixbuf, pr->func_tile_data))
+			    pr->func_tile_request(pr, r.x, r.y, r.width, r.height, pixbuf))
 				{
 				pr_scale_region(r, pr->scale);
 
@@ -1111,11 +1111,10 @@ static void pr_source_tile_changed(PixbufRenderer *pr, gint x, gint y, gint widt
  * @brief Display an on-request array of pixbuf tiles
  */
 void pixbuf_renderer_set_tiles(PixbufRenderer *pr, gint width, gint height,
-			       gint tile_width, gint tile_height, gint cache_size,
-			       PixbufRendererTileRequestFunc func_request,
-			       PixbufRendererTileDisposeFunc func_dispose,
-			       gpointer user_data,
-			       gdouble zoom)
+                               gint tile_width, gint tile_height, gint cache_size,
+                               const PixbufRenderer::TileRequestFunc &func_request,
+                               const PixbufRenderer::TileDisposeFunc &func_dispose,
+                               gdouble zoom)
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 	g_return_if_fail(tile_width >= 32 && tile_height >= 32);
@@ -1137,7 +1136,6 @@ void pixbuf_renderer_set_tiles(PixbufRenderer *pr, gint width, gint height,
 
 	pr->func_tile_request = func_request;
 	pr->func_tile_dispose = func_dispose;
-	pr->func_tile_data = user_data;
 
 	pr_stereo_temp_disable(pr, TRUE);
 	pr_zoom_sync(pr, zoom, static_cast<PrZoomFlags>(PR_ZOOM_FORCE | PR_ZOOM_NEW), 0, 0);
@@ -2534,14 +2532,12 @@ void pixbuf_renderer_set_stereo_data(PixbufRenderer *pr, StereoPixbufData stereo
 	pr_zoom_sync(pr, pr->zoom, PR_ZOOM_FORCE, 0, 0);
 }
 
-void pixbuf_renderer_set_post_process_func(PixbufRenderer *pr, PixbufRendererPostProcessFunc func, gpointer user_data, gboolean slow)
+void pixbuf_renderer_set_post_process_func(PixbufRenderer *pr, const PixbufRenderer::PostProcessFunc &func, gboolean slow)
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 
 	pr->func_post_process = func;
-	pr->post_process_user_data = user_data;
 	pr->post_process_slow = func && slow;
-
 }
 
 /**
@@ -2574,7 +2570,6 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 	pr->scroll_reset = ScrollReset::NOCHANGE;
 
 	pr->func_post_process = source->func_post_process;
-	pr->post_process_user_data = source->post_process_user_data;
 	pr->post_process_slow = source->post_process_slow;
 	pr->orientation = source->orientation;
 	pr->stereo_data = source->stereo_data;
@@ -2592,7 +2587,6 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 
 		pr->func_tile_request = source->func_tile_request;
 		pr->func_tile_dispose = source->func_tile_dispose;
-		pr->func_tile_data = source->func_tile_data;
 
 		pr->source_tiles = source->source_tiles;
 		source->source_tiles = nullptr;
@@ -2649,7 +2643,6 @@ void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 
 		pr->func_tile_request = source->func_tile_request;
 		pr->func_tile_dispose = source->func_tile_dispose;
-		pr->func_tile_data = source->func_tile_data;
 
 		pr->source_tiles = source->source_tiles;
 		source->source_tiles = nullptr;

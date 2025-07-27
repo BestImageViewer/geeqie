@@ -560,14 +560,6 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 }
 
 
-static void image_post_process_tile_color_cb(PixbufRenderer *, GdkPixbuf **pixbuf, gint x, gint y, gint w, gint h, gpointer data)
-{
-	auto imd = static_cast<ImageWindow *>(data);
-	if (imd->cm) color_man_correct_region(static_cast<ColorMan *>(imd->cm), *pixbuf, x, y, w, h);
-	if (imd->desaturate) pixbuf_desaturate_rect(*pixbuf, x, y, w, h);
-	if (imd->overunderexposed) pixbuf_highlight_overunderexposed(*pixbuf, x, y, w, h);
-}
-
 void image_alter_orientation(ImageWindow *imd, FileData *fd_n, AlterType type)
 {
 	static const gint rotate_90[]    = {1,   6, 7, 8, 5, 2, 3, 4, 1};
@@ -677,9 +669,19 @@ void image_alter_orientation(ImageWindow *imd, FileData *fd_n, AlterType type)
 static void image_set_pixbuf_renderer_post_process_func(ImageWindow *imd)
 {
 	if (imd->cm || imd->desaturate || imd->overunderexposed)
-		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), image_post_process_tile_color_cb, imd, (imd->cm != nullptr) );
+		{
+		const auto image_post_process_tile_color_cb = [imd](PixbufRenderer *, GdkPixbuf **pixbuf, gint x, gint y, gint w, gint h)
+		{
+			if (imd->cm) color_man_correct_region(static_cast<ColorMan *>(imd->cm), *pixbuf, x, y, w, h);
+			if (imd->desaturate) pixbuf_desaturate_rect(*pixbuf, x, y, w, h);
+			if (imd->overunderexposed) pixbuf_highlight_overunderexposed(*pixbuf, x, y, w, h);
+		};
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), image_post_process_tile_color_cb, (imd->cm != nullptr) );
+		}
 	else
-		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, nullptr, TRUE);
+		{
+		pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, TRUE);
+		}
 }
 
 void image_set_desaturate(ImageWindow *imd, gboolean desaturate)
@@ -1382,7 +1384,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 			}
 		}
 
-	pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, nullptr, FALSE);
+	pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, FALSE);
 	if (imd->cm)
 		{
 		color_man_free(static_cast<ColorMan *>(imd->cm));
