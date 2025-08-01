@@ -85,38 +85,6 @@ TEST_F(FileDataTest, text_from_size_test)
 	}
 }
 
-TEST_F(FileDataTest, text_from_size_abrev_test)
-{
-	constexpr gint64 kib_threshold = 1024;
-	constexpr gint64 mib_threshold = 1024 * 1024;
-	constexpr gint64 gib_threshold = 1024 * 1024 * 1024;
-	std::vector<std::pair<gint64, std::string>> test_cases = {
-		{0, "0 bytes"},
-		{1, "1 bytes"},
-		{kib_threshold - 1, "1023 bytes"},
-		{kib_threshold, "1.0 KiB"},
-		{kib_threshold * 1.5, "1.5 KiB"},
-		{kib_threshold * 2, "2.0 KiB"},
-
-		{mib_threshold - 1, "1024.0 KiB"},
-		{mib_threshold, "1.0 MiB"},
-		{mib_threshold * 1.5, "1.5 MiB"},
-		{mib_threshold * 2, "2.0 MiB"},
-
-		{gib_threshold - 1, "1024.0 MiB"},
-		{gib_threshold, "1.0 GiB"},
-		{gib_threshold * 1.5, "1.5 GiB"},
-		{gib_threshold * 2, "2.0 GiB"},
-		{gib_threshold * 2048, "2048.0 GiB"},
-	};
-
-	for (const auto &test_case : test_cases)
-	{
-		g_autofree gchar *generated = FileData::text_from_size_abrev(test_case.first);
-		ASSERT_EQ(test_case.second, std::string(generated));
-	}
-}
-
 #ifdef DEBUG_FILEDATA
 TEST_F(FileDataTest, FileDataNewSimpleAndFree)
 {

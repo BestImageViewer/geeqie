@@ -106,22 +106,7 @@ gchar *FileData::text_from_size(gint64 size)
 
 gchar *FileData::text_from_size_abrev(gint64 size)
 {
-	if (size < static_cast<gint64>(1024))
-		{
-		return g_strdup_printf(_("%d bytes"), static_cast<gint>(size));
-		}
-	if (size < static_cast<gint64>(1048576))
-		{
-		return g_strdup_printf(_("%.1f KiB"), static_cast<gdouble>(size) / 1024.0);
-		}
-	if (size < static_cast<gint64>(1073741824))
-		{
-		return g_strdup_printf(_("%.1f MiB"), static_cast<gdouble>(size) / 1048576.0);
-		}
-
-	/* to avoid overflowing the gdouble, do division in two steps */
-	size /= 1048576;
-	return g_strdup_printf(_("%.1f GiB"), static_cast<gdouble>(size) / 1024.0);
+	return g_format_size_full(size, G_FORMAT_SIZE_IEC_UNITS);
 }
 
 /* note: returned string is valid until next call to text_from_time() */
