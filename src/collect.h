@@ -22,6 +22,8 @@
 #ifndef COLLECT_H
 #define COLLECT_H
 
+#include <functional>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #include <glib.h>
@@ -62,8 +64,8 @@ struct CollectionData
 	ThumbLoader *thumb_loader;
 	CollectInfo *thumb_info;
 
-	void (*info_updated_func)(CollectionData *, CollectInfo *, gpointer);
-	gpointer info_updated_data;
+	using InfoUpdatedFunc = std::function<void(CollectionData *, CollectInfo *)>;
+	InfoUpdatedFunc info_updated_func;
 
 	gint ref;
 
@@ -103,8 +105,6 @@ CollectInfo *collection_get_last(CollectionData *cd);
 
 void collection_set_sort_method(CollectionData *cd, SortType method);
 void collection_randomize(CollectionData *cd);
-void collection_set_update_info_func(CollectionData *cd,
-				     void (*func)(CollectionData *, CollectInfo *, gpointer), gpointer data);
 
 gboolean collection_add(CollectionData *cd, FileData *fd, gboolean sorted, const gchar *infotext = nullptr);
 gboolean collection_insert(CollectionData *cd, FileData *fd, CollectInfo *insert_ci, gboolean sorted);

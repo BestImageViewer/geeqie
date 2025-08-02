@@ -652,11 +652,9 @@ void collection_randomize(CollectionData *cd)
 	collection_window_refresh(collection_window_find(cd));
 }
 
-void collection_set_update_info_func(CollectionData *cd,
-				     void (*func)(CollectionData *, CollectInfo *, gpointer), gpointer data)
+static void collection_set_update_info_func(CollectionData *cd, const CollectionData::InfoUpdatedFunc &func)
 {
 	cd->info_updated_func = func;
-	cd->info_updated_data = data;
 }
 
 static CollectInfo *collection_info_new_if_not_exists(CollectionData *cd, struct stat *st, FileData *fd, const gchar *infotext)
@@ -1049,13 +1047,6 @@ static void collection_window_update_title(CollectWindow *cw)
 	gtk_window_set_title(GTK_WINDOW(cw->window), buf);
 }
 
-static void collection_window_update_info(CollectionData *, CollectInfo *ci, gpointer data)
-{
-	auto cw = static_cast<CollectWindow *>(data);
-
-	collection_table_file_update(cw->table, ci);
-}
-
 static void collection_window_add(CollectWindow *cw, CollectInfo *ci)
 {
 	if (!cw) return;
@@ -1096,7 +1087,7 @@ static void collection_window_close_final(CollectWindow *cw)
 
 	gq_gtk_widget_destroy(cw->window);
 
-	collection_set_update_info_func(cw->cd, nullptr, nullptr);
+	collection_set_update_info_func(cw->cd, nullptr);
 	collection_unref(cw->cd);
 
 	g_free(cw);
@@ -1322,7 +1313,11 @@ CollectWindow *collection_window_new(const gchar *path)
 	gtk_widget_show(cw->window);
 	gtk_widget_grab_focus(cw->table->listview);
 
-	collection_set_update_info_func(cw->cd, collection_window_update_info, cw);
+	const auto collection_window_update_info = [cw](CollectionData *, CollectInfo *ci)
+	{
+		collection_table_file_update(cw->table, ci);
+	};
+	collection_set_update_info_func(cw->cd, collection_window_update_info);
 
 	if (path && *path == G_DIR_SEPARATOR)
 		{

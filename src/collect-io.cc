@@ -449,7 +449,7 @@ static void collection_load_thumb_do(CollectionData *cd)
 	collection_info_set_thumb(cd->thumb_info, pixbuf);
 	g_object_unref(pixbuf);
 
-	if (cd->info_updated_func) cd->info_updated_func(cd, cd->thumb_info, cd->info_updated_data);
+	if (cd->info_updated_func) cd->info_updated_func(cd, cd->thumb_info);
 }
 
 static void collection_load_thumb_error_cb(ThumbLoader *, gpointer data)
@@ -495,7 +495,7 @@ static void collection_load_thumb_step(CollectionData *cd)
 		collection_load_stop(cd);
 
 		/* send a NULL CollectInfo to notify end */
-		if (cd->info_updated_func) cd->info_updated_func(cd, nullptr, cd->info_updated_data);
+		if (cd->info_updated_func) cd->info_updated_func(cd, nullptr);
 
 		return;
 		}
