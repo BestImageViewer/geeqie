@@ -506,13 +506,10 @@ static void vd_pop_menu_slide_cb(GtkWidget *, gpointer data)
 
 static void vd_pop_menu_slide_rec_cb(GtkWidget *, gpointer data)
 {
-	auto vd = static_cast<ViewDir *>(data);
-	GList *list;
+	auto *vd = static_cast<ViewDir *>(data);
+	if (!vd->layout || !vd->click_fd) return;
 
-	if (!vd->layout) return;
-	if (!vd->click_fd) return;
-
-	list = filelist_recursive_full(vd->click_fd, {vd->layout->options.file_view_list_sort.method, vd->layout->options.file_view_list_sort.ascend, vd->layout->options.file_view_list_sort.case_sensitive});
+	GList *list = filelist_recursive_full(vd->click_fd, vd->layout->options.file_view_list_sort);
 
 	layout_image_slideshow_stop(vd->layout);
 	layout_image_slideshow_start_from_list(vd->layout, list);
@@ -635,47 +632,39 @@ static void vd_pop_menu_rename_cb(GtkWidget *, gpointer data)
 
 static void vd_pop_menu_sort_ascend_cb(GtkWidget *widget, gpointer data)
 {
-	auto vd = static_cast<ViewDir *>(data);
-	gboolean ascend;
+	auto *vd = static_cast<ViewDir *>(data);
+	if (!vd || !vd->layout) return;
 
-	if (!vd) return;
+	auto sort = vd->layout->options.dir_view_list_sort;
+	sort.ascending = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 
-	if (!vd->layout) return;
-
-	ascend = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
-	layout_views_set_sort_dir(vd->layout, vd->layout->options.dir_view_list_sort.method, ascend, vd->layout->options.dir_view_list_sort.case_sensitive);
+	layout_views_set_sort_dir(vd->layout, sort);
 	layout_refresh(vd->layout);
 }
 
 static void vd_pop_menu_sort_case_cb(GtkWidget *widget, gpointer data)
 {
-	auto vd = static_cast<ViewDir *>(data);
-	gboolean case_sensitive;
+	auto *vd = static_cast<ViewDir *>(data);
+	if (!vd || !vd->layout) return;
 
-	if (!vd) return;
+	auto sort = vd->layout->options.dir_view_list_sort;
+	sort.case_sensitive = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
 
-	if (!vd->layout) return;
-
-	case_sensitive = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
-	layout_views_set_sort_dir(vd->layout, vd->layout->options.dir_view_list_sort.method, vd->layout->options.dir_view_list_sort.ascend, case_sensitive);
+	layout_views_set_sort_dir(vd->layout, sort);
 	layout_refresh(vd->layout);
 }
 
 static void vd_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 {
-	ViewDir *vd;
-	SortType type;
+	auto *vd = static_cast<ViewDir *>(submenu_item_get_data(widget));
+	if (!vd || !vd->layout) return;
 
-	vd = static_cast<ViewDir *>(submenu_item_get_data(widget));
+	auto sort = vd->layout->options.dir_view_list_sort;
+	sort.method = static_cast<SortType>(GPOINTER_TO_INT(data));
 
-	if (!vd) return;
-	if (!vd->layout) return;
-
-	type = static_cast<SortType>GPOINTER_TO_INT(data);
-
-	if (type == SORT_NAME || type == SORT_NUMBER || type == SORT_TIME)
+	if (sort.method == SORT_NAME || sort.method == SORT_NUMBER || sort.method == SORT_TIME)
 		{
-		layout_views_set_sort_dir(vd->layout, type, vd->layout->options.dir_view_list_sort.ascend, vd->layout->options.dir_view_list_sort.case_sensitive);
+		layout_views_set_sort_dir(vd->layout, sort);
 		layout_refresh(vd->layout);
 		}
 }
@@ -765,21 +754,14 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 	menu_item_add_radio(menu, _("View as _Tree"), GINT_TO_POINTER(DIRVIEW_TREE), vd->type == DIRVIEW_TREE,
                         G_CALLBACK(vd_pop_submenu_dir_view_as_cb), vd);
 
+	submenu = submenu_add_dir_sort(nullptr, G_CALLBACK(vd_pop_menu_sort_cb), vd, FALSE, FALSE, TRUE, vd->layout->options.dir_view_list_sort.method);
 	if (vd->type == DIRVIEW_LIST)
 		{
-		submenu = submenu_add_dir_sort(nullptr, G_CALLBACK(vd_pop_menu_sort_cb), vd, FALSE, FALSE, TRUE, vd->layout->options.dir_view_list_sort.method);
-		menu_item_add_check(submenu, _("Ascending"), vd->layout->options.dir_view_list_sort.ascend, G_CALLBACK(vd_pop_menu_sort_ascend_cb), (vd));
+		menu_item_add_check(submenu, _("Ascending"), vd->layout->options.dir_view_list_sort.ascending, G_CALLBACK(vd_pop_menu_sort_ascend_cb), (vd));
 		menu_item_add_check(submenu, _("Case"), vd->layout->options.dir_view_list_sort.case_sensitive, G_CALLBACK(vd_pop_menu_sort_case_cb), (vd));
-		item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
-		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 		}
-
-	if (vd->type == DIRVIEW_TREE)
-		{
-		submenu = submenu_add_dir_sort(nullptr, G_CALLBACK(vd_pop_menu_sort_cb), vd, FALSE, FALSE, TRUE, vd->layout->options.dir_view_list_sort.method);
-		item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
-		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-		}
+	item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 
 	menu_item_add_divider(menu);
 

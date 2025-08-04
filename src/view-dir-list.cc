@@ -140,14 +140,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	GList *old_list;
 	gboolean ret;
 	FileData *fd;
-	FileData::FileList::SortSettings settings{ SORT_NAME, TRUE, TRUE };
-
-	if (vd->layout)
-		{
-		settings.method = vd->layout->options.dir_view_list_sort.method;
-		settings.ascending = vd->layout->options.dir_view_list_sort.ascend;
-		settings.case_sensitive = vd->layout->options.dir_view_list_sort.case_sensitive;
-		}
+	const auto settings = vd->layout ? vd->layout->options.dir_view_list_sort : FileData::FileList::SortSettings{ SORT_NAME, TRUE, TRUE };
 
 	old_list = VDLIST(vd)->list;
 

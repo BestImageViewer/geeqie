@@ -28,10 +28,10 @@
 #include <gtk/gtk.h>
 
 #include "bar-sort.h"
+#include "filedata.h"
 #include "typedefs.h"
 
 struct AnimationData;
-class FileData;
 struct FullScreenData;
 struct ImageWindow;
 struct SlideShowData;
@@ -64,14 +64,8 @@ struct LayoutOptions
 	DirViewType dir_view_type;
 	FileViewType file_view_type;
 
-	struct SortParams
-	{
-		SortType method;
-		gboolean ascend;
-		gboolean case_sensitive;
-	};
-	SortParams dir_view_list_sort;
-	SortParams file_view_list_sort;
+	FileData::FileList::SortSettings dir_view_list_sort;
+	FileData::FileList::SortSettings file_view_list_sort;
 
 	gboolean show_thumbnails;
 	gboolean show_marks;
@@ -300,14 +294,14 @@ void layout_marks_set(LayoutWindow *lw, gboolean enable);
 
 void layout_file_filter_set(LayoutWindow *lw, gboolean enable);
 
-void layout_sort_set_files(LayoutWindow *lw, SortType type, gboolean ascend, gboolean case_sensitive);
-gboolean layout_sort_get(LayoutWindow *lw, SortType *type, gboolean *ascend, gboolean *case_sensitive);
+void layout_sort_set_files(LayoutWindow *lw, FileData::FileList::SortSettings settings);
+gboolean layout_sort_get(LayoutWindow *lw, FileData::FileList::SortSettings &settings);
 
 gboolean layout_geometry_get_dividers(LayoutWindow *lw, gint *h, gint *v);
 
 void layout_views_set(LayoutWindow *lw, DirViewType dir_view_type, FileViewType file_view_type);
 
-void layout_views_set_sort_dir(LayoutWindow *lw, SortType method, gboolean ascend, gboolean case_sensitive);
+void layout_views_set_sort_dir(LayoutWindow *lw, FileData::FileList::SortSettings settings);
 
 void layout_status_update(LayoutWindow *lw, const gchar *text);
 

@@ -573,28 +573,26 @@ static void vf_pop_menu_disable_grouping_cb(GtkWidget *, gpointer data)
 
 static void vf_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 {
-	ViewFile *vf;
-	SortType type;
-
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
+	auto *vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
 	if (!vf) return;
 
-	type = static_cast<SortType>GPOINTER_TO_INT(data);
+	auto sort = vf->sort;
+	sort.method = static_cast<SortType>(GPOINTER_TO_INT(data));
 
-	if (type == SORT_EXIFTIME || type == SORT_EXIFTIMEDIGITIZED || type == SORT_RATING)
+	if (sort.method == SORT_EXIFTIME || sort.method == SORT_EXIFTIMEDIGITIZED || sort.method == SORT_RATING)
 		{
 		vf_read_metadata_in_idle(vf);
 		}
 
 	if (vf->layout)
 		{
-		layout_sort_set_files(vf->layout, type, vf->sort.ascending, vf->sort.case_sensitive);
+		layout_sort_set_files(vf->layout, sort);
 		}
 	else
 		{
-		vf_sort_set(vf, {type, vf->sort.ascending, vf->sort.case_sensitive});
+		vf_sort_set(vf, sort);
 		}
 }
 
@@ -602,13 +600,16 @@ static void vf_pop_menu_sort_ascend_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
+	auto sort = vf->sort;
+	sort.ascending = !sort.ascending;
+
 	if (vf->layout)
 		{
-		layout_sort_set_files(vf->layout, vf->sort.method, !vf->sort.ascending, vf->sort.case_sensitive);
+		layout_sort_set_files(vf->layout, sort);
 		}
 	else
 		{
-		vf_sort_set(vf, {vf->sort.method, !vf->sort.ascending, vf->sort.case_sensitive});
+		vf_sort_set(vf, sort);
 		}
 }
 
@@ -616,13 +617,16 @@ static void vf_pop_menu_sort_case_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
+	auto sort = vf->sort;
+	sort.case_sensitive = !sort.case_sensitive;
+
 	if (vf->layout)
 		{
-		layout_sort_set_files(vf->layout, vf->sort.method, vf->sort.ascending, !vf->sort.case_sensitive);
+		layout_sort_set_files(vf->layout, sort);
 		}
 	else
 		{
-		vf_sort_set(vf, {vf->sort.method, vf->sort.ascending, !vf->sort.case_sensitive});
+		vf_sort_set(vf, sort);
 		}
 }
 
