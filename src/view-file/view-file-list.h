@@ -59,7 +59,7 @@ gboolean vflist_refresh(ViewFile *vf);
 
 void vflist_thumb_set(ViewFile *vf, gboolean enable);
 void vflist_marks_set(ViewFile *vf, gboolean enable);
-void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive);
+void vflist_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings);
 
 GList *vflist_selection_get_one(ViewFile *vf, FileData *fd);
 void vflist_pop_menu_rename_cb(ViewFile *vf);

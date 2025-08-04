@@ -1188,7 +1188,7 @@ static void layout_list_sync_sort(LayoutWindow *lw)
 {
 	if (!layout_valid(&lw)) return;
 
-	if (lw->vf) vf_sort_set(lw->vf, lw->options.file_view_list_sort.method, lw->options.file_view_list_sort.ascend, lw->options.file_view_list_sort.case_sensitive);
+	if (lw->vf) vf_sort_set(lw->vf, {lw->options.file_view_list_sort.method, lw->options.file_view_list_sort.ascend, lw->options.file_view_list_sort.case_sensitive});
 }
 
 GList *layout_selection_list(LayoutWindow *lw)

@@ -859,7 +859,7 @@ static void vficon_select_closest(ViewFile *vf, FileData *sel_fd)
 		fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
-		match = filelist_sort_compare_filedata_full(fd, sel_fd, vf->sort_method, vf->sort_ascend);
+		match = filelist_sort_compare_filedata_full(fd, sel_fd, vf->sort.method, vf->sort.ascending);
 
 		if (match >= 0) break;
 		}
@@ -1535,13 +1535,11 @@ static void vficon_sized_cb(GtkWidget *, GtkAllocation *allocation, gpointer dat
  *-----------------------------------------------------------------------------
  */
 
-void vficon_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive)
+void vficon_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings)
 {
-	if (vf->sort_method == type && vf->sort_ascend == ascend && vf->sort_case == case_sensitive) return;
+	if (vf->sort == settings) return;
 
-	vf->sort_method = type;
-	vf->sort_ascend = ascend;
-	vf->sort_case = case_sensitive;
+	vf->sort = settings;
 
 	if (!vf->list) return;
 
@@ -1752,8 +1750,8 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 
 		}
 
-	vf->list = filelist_sort(vf->list, {vf->sort_method, vf->sort_ascend, vf->sort_case}); /* the list might not be sorted if there were renames */
-	new_filelist = filelist_sort(new_filelist, {vf->sort_method, vf->sort_ascend, vf->sort_case});
+	vf->list = filelist_sort(vf->list, vf->sort); /* the list might not be sorted if there were renames */
+	new_filelist = filelist_sort(new_filelist, vf->sort);
 
 	if (VFICON(vf)->selection)
 		{
@@ -1790,7 +1788,7 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 				continue;
 				}
 
-			match = filelist_sort_compare_filedata_full(fd, new_fd, vf->sort_method, vf->sort_ascend);
+			match = filelist_sort_compare_filedata_full(fd, new_fd, vf->sort.method, vf->sort.ascending);
 			if (match == 0) g_warning("multiple fd for the same path");
 			}
 		else if (work)

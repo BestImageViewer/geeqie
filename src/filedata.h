@@ -367,6 +367,13 @@ class FileData::FileList
 	// Note that this struct will be moved to a new Util class in a subsequent commit.
 	struct SortSettings
 	{
+		bool operator==(const SortSettings &other)
+		{
+			return method == other.method
+			    && ascending == other.ascending
+			    && case_sensitive == other.case_sensitive;
+		}
+
 		SortType method = SORT_NONE;
 		gboolean ascending = TRUE;
 		gboolean case_sensitive = TRUE;

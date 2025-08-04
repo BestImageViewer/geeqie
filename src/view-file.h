@@ -27,11 +27,9 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "filedata.h"
 #include "typedefs.h"
 
-enum NotifyType : gint;
-
-class FileData;
 struct LayoutWindow;
 struct ThumbLoader;
 
@@ -60,9 +58,7 @@ struct ViewFile
 
 	FileData *click_fd;
 
-	SortType sort_method;
-	gboolean sort_ascend;
-	gboolean sort_case;
+	FileData::FileList::SortSettings sort;
 
 	/* func list */
 	void (*func_thumb_status)(ViewFile *vf, gdouble val, const gchar *text, gpointer data);
@@ -115,7 +111,7 @@ void vf_refresh_idle(ViewFile *vf);
 
 void vf_thumb_set(ViewFile *vf, gboolean enable);
 void vf_marks_set(ViewFile *vf, gboolean enable);
-void vf_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive);
+void vf_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings);
 
 guint vf_marks_get_filter(ViewFile *vf);
 void vf_mark_filter_toggle(ViewFile *vf, gint mark);

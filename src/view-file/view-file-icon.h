@@ -70,7 +70,7 @@ gboolean vficon_refresh(ViewFile *vf);
 
 
 void vficon_marks_set(ViewFile *vf, gboolean enable);
-void vficon_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive);
+void vficon_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings);
 
 GList *vficon_selection_get_one(ViewFile *vf, FileData *fd);
 void vficon_pop_menu_rename_cb(ViewFile *vf);

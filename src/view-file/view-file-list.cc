@@ -855,7 +855,7 @@ static void vflist_setup_iter_recursive(ViewFile *vf, GtkTreeStore *store, GtkTr
 					if (parent_iter)
 						match = filelist_sort_compare_filedata_full(fd, old_fd, SORT_NAME, TRUE); /* always sort sidecars by name */
 					else
-						match = filelist_sort_compare_filedata_full(fd, old_fd, vf->sort_method, vf->sort_ascend);
+						match = filelist_sort_compare_filedata_full(fd, old_fd, vf->sort.method, vf->sort.ascending);
 
 					if (match == 0) g_warning("multiple fd for the same path");
 					}
@@ -948,15 +948,14 @@ static void vflist_setup_iter_recursive(ViewFile *vf, GtkTreeStore *store, GtkTr
 		}
 }
 
-void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case_sensitive)
+void vflist_sort_set(ViewFile *vf, FileData::FileList::SortSettings settings)
 {
 	gint i;
 	GHashTable *fd_idx_hash = g_hash_table_new(nullptr, nullptr);
 	GtkTreeStore *store;
 	GList *work;
 
-	if (vf->sort_method == type && vf->sort_ascend == ascend && vf->sort_case == case_sensitive) return;
-	if (!vf->list) return;
+	if (!vf->list || vf->sort == settings) return;
 
 	work = vf->list;
 	i = 0;
@@ -968,11 +967,8 @@ void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case
 		work = work->next;
 		}
 
-	vf->sort_method = type;
-	vf->sort_ascend = ascend;
-	vf->sort_case = case_sensitive;
-
-	vf->list = filelist_sort(vf->list, {vf->sort_method, vf->sort_ascend, vf->sort_case});
+	vf->sort = settings;
+	vf->list = filelist_sort(vf->list, vf->sort);
 
 	std::vector<gint> new_order;
 	new_order.reserve(i);
@@ -1479,7 +1475,7 @@ static void vflist_select_closest(ViewFile *vf, FileData *sel_fd)
 		fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
-		match = filelist_sort_compare_filedata_full(fd, sel_fd, vf->sort_method, vf->sort_ascend);
+		match = filelist_sort_compare_filedata_full(fd, sel_fd, vf->sort.method, vf->sort.ascending);
 
 		if (match >= 0) break;
 		}
@@ -1700,7 +1696,7 @@ gboolean vflist_refresh(ViewFile *vf)
 		file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
 
 		DEBUG_1("%s vflist_refresh: sort", get_exec_time());
-		vf->list = filelist_sort(vf->list, {vf->sort_method, vf->sort_ascend, vf->sort_case});
+		vf->list = filelist_sort(vf->list, vf->sort);
 		}
 
 	DEBUG_1("%s vflist_refresh: populate view", get_exec_time());
