@@ -972,7 +972,7 @@ void vflist_sort_set(ViewFile *vf, SortType type, gboolean ascend, gboolean case
 	vf->sort_ascend = ascend;
 	vf->sort_case = case_sensitive;
 
-	vf->list = filelist_sort(vf->list, vf->sort_method, vf->sort_ascend, vf->sort_case);
+	vf->list = filelist_sort(vf->list, {vf->sort_method, vf->sort_ascend, vf->sort_case});
 
 	std::vector<gint> new_order;
 	new_order.reserve(i);
@@ -1700,7 +1700,7 @@ gboolean vflist_refresh(ViewFile *vf)
 		file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
 
 		DEBUG_1("%s vflist_refresh: sort", get_exec_time());
-		vf->list = filelist_sort(vf->list, vf->sort_method, vf->sort_ascend, vf->sort_case);
+		vf->list = filelist_sort(vf->list, {vf->sort_method, vf->sort_ascend, vf->sort_case});
 		}
 
 	DEBUG_1("%s vflist_refresh: populate view", get_exec_time());

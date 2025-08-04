@@ -26,9 +26,7 @@
 
 #include <glib.h>
 
-#include "typedefs.h"
-
-class FileData;
+#include "filedata.h"
 
 enum PanDateLengthType {
 	PAN_DATE_LENGTH_EXACT,
@@ -46,7 +44,6 @@ time_t pan_date_to_time(gint year, gint month, gint day);
 
 gboolean pan_is_link_loop(const gchar *s);
 gboolean pan_is_ignored(const gchar *s, gboolean ignore_symlinks);
-GList *pan_list_tree(FileData *dir_fd, SortType sort, gboolean ascend, gboolean case_sensitive,
-		     gboolean ignore_symlinks);
+GList *pan_list_tree(FileData *dir_fd, FileData::FileList::SortSettings settings, gboolean ignore_symlinks);
 
 #endif

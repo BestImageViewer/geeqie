@@ -512,7 +512,7 @@ static void vd_pop_menu_slide_rec_cb(GtkWidget *, gpointer data)
 	if (!vd->layout) return;
 	if (!vd->click_fd) return;
 
-	list = filelist_recursive_full(vd->click_fd, vd->layout->options.file_view_list_sort.method, vd->layout->options.file_view_list_sort.ascend, vd->layout->options.file_view_list_sort.case_sensitive);
+	list = filelist_recursive_full(vd->click_fd, {vd->layout->options.file_view_list_sort.method, vd->layout->options.file_view_list_sort.ascend, vd->layout->options.file_view_list_sort.case_sensitive});
 
 	layout_image_slideshow_stop(vd->layout);
 	layout_image_slideshow_start_from_list(vd->layout, list);

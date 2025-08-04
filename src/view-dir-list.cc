@@ -140,21 +140,19 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	GList *old_list;
 	gboolean ret;
 	FileData *fd;
-	SortType sort_type = SORT_NAME;
-	gboolean sort_ascend = TRUE;
-	gboolean sort_case = TRUE;
+	FileData::FileList::SortSettings settings{ SORT_NAME, TRUE, TRUE };
 
 	if (vd->layout)
 		{
-		sort_type = vd->layout->options.dir_view_list_sort.method;
-		sort_ascend = vd->layout->options.dir_view_list_sort.ascend;
-		sort_case = vd->layout->options.dir_view_list_sort.case_sensitive;
+		settings.method = vd->layout->options.dir_view_list_sort.method;
+		settings.ascending = vd->layout->options.dir_view_list_sort.ascend;
+		settings.case_sensitive = vd->layout->options.dir_view_list_sort.case_sensitive;
 		}
 
 	old_list = VDLIST(vd)->list;
 
 	ret = filelist_read(vd->dir_fd, nullptr, &VDLIST(vd)->list);
-	VDLIST(vd)->list = filelist_sort(VDLIST(vd)->list, sort_type, sort_ascend, sort_case);
+	VDLIST(vd)->list = filelist_sort(VDLIST(vd)->list, settings);
 
 	/* add . and .. */
 
@@ -233,7 +231,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 					}
 				else
 					{
-					match = filelist_sort_compare_filedata_full(fd, old_fd, sort_type, sort_ascend);
+					match = filelist_sort_compare_filedata_full(fd, old_fd, settings.method, settings.ascending);
 
 					if (match == 0) g_warning("multiple fd for the same path");
 					}

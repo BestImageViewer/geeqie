@@ -24,9 +24,8 @@
 
 #include <glib.h>
 
-#include "typedefs.h"
+#include "filedata.h"
 
-class FileData;
 struct PanItem;
 struct PanWindow;
 
@@ -34,7 +33,7 @@ void pan_layout_update(PanWindow *pw);
 GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height);
 void pan_layout_resize(PanWindow *pw);
 
-GList *pan_cache_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive);
+GList *pan_cache_sort(GList *list, FileData::FileList::SortSettings settings);
 void pan_cache_sync_date(PanWindow *pw, GList *list);
 void pan_cache_get_image_size(PanWindow *pw, const FileData *fd, gint &w, gint &h);
 

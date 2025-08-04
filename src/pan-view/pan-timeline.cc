@@ -55,18 +55,18 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 	gint x_width;
 	gint y_height;
 
-	list = pan_list_tree(dir_fd, SORT_NONE, TRUE, TRUE, pw->ignore_symlinks);
+	list = pan_list_tree(dir_fd, {SORT_NONE, TRUE, TRUE}, pw->ignore_symlinks);
 	pan_filter_fd_list(&list, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 
 	if (pw->cache_list && pw->exif_date_enable)
 		{
-		pw->cache_list = pan_cache_sort(pw->cache_list, SORT_NAME, TRUE, TRUE);
-		list = filelist_sort(list, SORT_NAME, TRUE, TRUE);
+		pw->cache_list = pan_cache_sort(pw->cache_list, {SORT_NAME, TRUE, TRUE});
+		list = filelist_sort(list, {SORT_NAME, TRUE, TRUE});
 		pan_cache_sync_date(pw, list);
 		}
 
-	pw->cache_list = pan_cache_sort(pw->cache_list, SORT_TIME, TRUE, TRUE);
-	list = filelist_sort(list, SORT_TIME, TRUE, TRUE);
+	pw->cache_list = pan_cache_sort(pw->cache_list, {SORT_TIME, TRUE, TRUE});
+	list = filelist_sort(list, {SORT_TIME, TRUE, TRUE});
 
 	width = PAN_BOX_BORDER * 2;
 	height = PAN_BOX_BORDER * 2;

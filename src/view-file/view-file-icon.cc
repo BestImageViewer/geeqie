@@ -1752,8 +1752,8 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 
 		}
 
-	vf->list = filelist_sort(vf->list, vf->sort_method, vf->sort_ascend, vf->sort_case); /* the list might not be sorted if there were renames */
-	new_filelist = filelist_sort(new_filelist, vf->sort_method, vf->sort_ascend, vf->sort_case);
+	vf->list = filelist_sort(vf->list, {vf->sort_method, vf->sort_ascend, vf->sort_case}); /* the list might not be sorted if there were renames */
+	new_filelist = filelist_sort(new_filelist, {vf->sort_method, vf->sort_ascend, vf->sort_case});
 
 	if (VFICON(vf)->selection)
 		{

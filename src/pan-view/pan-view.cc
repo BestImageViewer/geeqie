@@ -609,9 +609,9 @@ static gint pan_cache_sort_file_cb(gconstpointer a, gconstpointer b, gpointer da
 	return filelist_sort_compare_filedata(pca->fd, pcb->fd, settings);
 }
 
-GList *pan_cache_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
+GList *pan_cache_sort(GList *list, FileData::FileList::SortSettings settings)
 {
-	return filelist_sort_full(list, method, ascend, case_sensitive, pan_cache_sort_file_cb);
+	return filelist_sort_full(list, settings, pan_cache_sort_file_cb);
 }
 
 static void pan_cache_free(PanWindow *pw)
@@ -636,7 +636,7 @@ static void pan_cache_fill(PanWindow *pw, FileData *dir_fd)
 
 	pan_cache_free(pw);
 
-	list = pan_list_tree(dir_fd, SORT_NAME, TRUE, TRUE, pw->ignore_symlinks);
+	list = pan_list_tree(dir_fd, {SORT_NAME, TRUE, TRUE}, pw->ignore_symlinks);
 	pw->cache_todo = g_list_reverse(list);
 
 	pw->cache_total = g_list_length(pw->cache_todo);

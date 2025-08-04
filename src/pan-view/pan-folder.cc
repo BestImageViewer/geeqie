@@ -232,8 +232,8 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 	if (!filelist_read(dir_fd, &f, &d)) return nullptr;
 	if (!f && !d) return nullptr;
 
-	f = filelist_sort(f, SORT_NAME, TRUE, TRUE);
-	d = filelist_sort(d, SORT_NAME, TRUE, TRUE);
+	f = filelist_sort(f, {SORT_NAME, TRUE, TRUE});
+	d = filelist_sort(d, {SORT_NAME, TRUE, TRUE});
 
 	pan_filter_fd_list(&f, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 
@@ -367,8 +367,8 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 	if (!filelist_read(dir_fd, &f, &d)) return;
 	if (!f && !d) return;
 
-	f = filelist_sort(f, SORT_NAME, TRUE, TRUE);
-	d = filelist_sort(d, SORT_NAME, TRUE, TRUE);
+	f = filelist_sort(f, {SORT_NAME, TRUE, TRUE});
+	d = filelist_sort(d, {SORT_NAME, TRUE, TRUE});
 
 	pan_filter_fd_list(&f, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 

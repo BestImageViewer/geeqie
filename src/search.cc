@@ -2367,12 +2367,12 @@ static gboolean search_step_cb(gpointer data)
 
 		if (success)
 			{
-			list = filelist_sort(list, SORT_NAME, TRUE, TRUE);
+			list = filelist_sort(list, {SORT_NAME, TRUE, TRUE});
 			sd->search_file_list = list;
 
 			if (sd->search_path_recurse)
 				{
-				dlist = filelist_sort(dlist, SORT_NAME, TRUE, TRUE);
+				dlist = filelist_sort(dlist, {SORT_NAME, TRUE, TRUE});
 				sd->search_folder_list = g_list_concat(dlist, sd->search_folder_list);
 				}
 			else

@@ -374,8 +374,8 @@ class FileData::FileList
 
 	static gint sort_compare_filedata(const FileData *fa, const FileData *fb, SortSettings *settings);
 	static gint sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend);
-	static GList *sort(GList *list, SortType method, gboolean ascending, gboolean case_sensitive);
-	static GList *sort_full(GList *list, SortType method, gboolean ascending, gboolean case_sensitive, GCompareDataFunc cb);
+	static GList *sort(GList *list, SortSettings settings);
+	static GList *sort_full(GList *list, SortSettings settings, GCompareDataFunc cb);
 
 	static gboolean read_list(FileData *dir_fd, GList **files, GList **dirs);
 	static gboolean read_list_lstat(FileData *dir_fd, GList **files, GList **dirs);
@@ -389,7 +389,7 @@ class FileData::FileList
 
 	static GList *sort_path(GList *list);
 	static GList *recursive(FileData *dir_fd);
-	static GList *recursive_full(FileData *dir_fd, SortType method, gboolean ascend, gboolean case_sensitive);
+	static GList *recursive_full(FileData *dir_fd, SortSettings settings);
 
     protected:
 	static GList *filter_out_sidecars(GList *flist);
@@ -398,7 +398,7 @@ class FileData::FileList
 	static gint sort_file_cb(gconstpointer a, gconstpointer b, gpointer data);
 	static gint sort_path_cb(gconstpointer a, gconstpointer b);
 	static void recursive_append(GList **list, GList *dirs);
-	static void recursive_append_full(GList **list, GList *dirs, SortType method, gboolean ascend, gboolean case_sensitive);
+	static void recursive_append_full(GList **list, GList *dirs, SortSettings settings);
 };
 
 /**
@@ -456,8 +456,8 @@ void file_data_disable_grouping_list(GList *fd_list, gboolean disable);
 
 gint filelist_sort_compare_filedata(const FileData *fa, const FileData *fb, FileData::FileList::SortSettings *settings);
 gint filelist_sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend);
-GList *filelist_sort(GList *list, SortType method, gboolean ascending, gboolean case_sensitive);
-GList *filelist_sort_full(GList *list, SortType method, gboolean ascending, gboolean case_sensitive, GCompareDataFunc cb);
+GList *filelist_sort(GList *list, FileData::FileList::SortSettings settings);
+GList *filelist_sort_full(GList *list, FileData::FileList::SortSettings settings, GCompareDataFunc cb);
 
 gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs);
 gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs);
@@ -474,7 +474,7 @@ GList *filelist_filter(GList *list, gboolean is_dir_list);
 
 GList *filelist_sort_path(GList *list);
 GList *filelist_recursive(FileData *dir_fd);
-GList *filelist_recursive_full(FileData *dir_fd, SortType method, gboolean ascend, gboolean case_sensitive);
+GList *filelist_recursive_full(FileData *dir_fd, FileData::FileList::SortSettings settings);
 
 gboolean file_data_register_mark_func(gint n, FileData::GetMarkFunc get_mark_func, FileData::SetMarkFunc set_mark_func, gpointer data, GDestroyNotify notify);
 void file_data_get_registered_mark_func(gint n, FileData::GetMarkFunc *get_mark_func, FileData::SetMarkFunc *set_mark_func, gpointer *data);

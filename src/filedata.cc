@@ -158,14 +158,14 @@ gint filelist_sort_compare_filedata_full(const FileData *fa, const FileData *fb,
 	return FileData::FileList::sort_compare_filedata_full(fa, fb, method, ascend);
 }
 
-GList *filelist_sort(GList *list, SortType method, gboolean ascend, gboolean case_sensitive)
+GList *filelist_sort(GList *list, FileData::FileList::SortSettings settings)
 {
-	return FileData::FileList::sort(list, method, ascend, case_sensitive);
+	return FileData::FileList::sort(list, settings);
 }
 
-GList *filelist_sort_full(GList *list, SortType method, gboolean ascend, gboolean case_sensitive, GCompareDataFunc cb)
+GList *filelist_sort_full(GList *list, FileData::FileList::SortSettings settings, GCompareDataFunc cb)
 {
-	return FileData::FileList::sort_full(list, method, ascend, case_sensitive, cb);
+	return FileData::FileList::sort_full(list, settings, cb);
 }
 
 
@@ -221,9 +221,9 @@ GList *filelist_recursive(FileData *dir_fd)
 	return FileData::FileList::recursive(dir_fd);
 }
 
-GList *filelist_recursive_full(FileData *dir_fd, SortType method, gboolean ascend, gboolean case_sensitive)
+GList *filelist_recursive_full(FileData *dir_fd, FileData::FileList::SortSettings settings)
 {
-	return FileData::FileList::recursive_full(dir_fd, method, ascend, case_sensitive);
+	return FileData::FileList::recursive_full(dir_fd, settings);
 }
 
 

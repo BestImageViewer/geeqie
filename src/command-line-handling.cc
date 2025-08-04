@@ -1224,7 +1224,7 @@ void gq_slideshow_recurse(GtkApplication *, GApplicationCommandLine *,GVariantDi
 	FileData *dir_fd = file_data_new_dir(tilde_filename);
 
 	layout_valid(&lw_id);
-	list = filelist_recursive_full(dir_fd, lw_id->options.file_view_list_sort.method, lw_id->options.file_view_list_sort.ascend, lw_id->options.file_view_list_sort.case_sensitive);
+	list = filelist_recursive_full(dir_fd, {lw_id->options.file_view_list_sort.method, lw_id->options.file_view_list_sort.ascend, lw_id->options.file_view_list_sort.case_sensitive});
 	file_data_unref(dir_fd);
 	if (!list) return;
 

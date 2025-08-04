@@ -306,15 +306,14 @@ gint FileData::FileList::sort_file_cb(gconstpointer a, gconstpointer b, gpointer
                 static_cast<SortSettings *>(data));
 }
 
-GList *FileData::FileList::sort_full(GList *list, SortType method, gboolean ascending, gboolean case_sensitive, GCompareDataFunc cb)
+GList *FileData::FileList::sort_full(GList *list, SortSettings settings, GCompareDataFunc cb)
 {
-	SortSettings settings = {method, ascending, case_sensitive};
 	return g_list_sort_with_data(list, cb, &settings);
 }
 
-GList *FileData::FileList::sort(GList *list, SortType method, gboolean ascending, gboolean case_sensitive)
+GList *FileData::FileList::sort(GList *list, SortSettings settings)
 {
-	return sort_full(list, method, ascending, case_sensitive, sort_file_cb);
+	return sort_full(list, settings, sort_file_cb);
 }
 
 gboolean FileData::FileList::read_list(FileData *dir_fd, GList **files, GList **dirs)
@@ -477,7 +476,7 @@ void FileData::FileList::recursive_append(GList **list, GList *dirs)
 		}
 }
 
-void FileData::FileList::recursive_append_full(GList **list, GList *dirs, SortType method, gboolean ascend, gboolean case_sensitive)
+void FileData::FileList::recursive_append_full(GList **list, GList *dirs, SortSettings settings)
 {
 	GList *work;
 
@@ -491,12 +490,12 @@ void FileData::FileList::recursive_append_full(GList **list, GList *dirs, SortTy
 		if (read_list(fd, &f, &d))
 			{
 			f = filter(f, FALSE);
-			f = sort_full(f, method, ascend, case_sensitive, sort_file_cb);
+			f = sort_full(f, settings, sort_file_cb);
 			*list = g_list_concat(*list, f);
 
 			d = filter(d, TRUE);
 			d = sort_path(d);
-			recursive_append_full(list, d, method, ascend, case_sensitive);
+			recursive_append_full(list, d, settings);
 			free_list(d);
 			}
 
@@ -521,18 +520,18 @@ GList *FileData::FileList::recursive(FileData *dir_fd)
 	return list;
 }
 
-GList *FileData::FileList::recursive_full(FileData *dir_fd, SortType method, gboolean ascend, gboolean case_sensitive)
+GList *FileData::FileList::recursive_full(FileData *dir_fd, SortSettings settings)
 {
 	GList *list;
 	GList *d;
 
 	if (!read_list(dir_fd, &list, &d)) return nullptr;
 	list = filter(list, FALSE);
-	list = sort_full(list, method, ascend, case_sensitive, sort_file_cb);
+	list = sort_full(list, settings, sort_file_cb);
 
 	d = filter(d, TRUE);
 	d = sort_path(d);
-	recursive_append_full(&list, d, method, ascend, case_sensitive);
+	recursive_append_full(&list, d, settings);
 	free_list(d);
 
 	return list;

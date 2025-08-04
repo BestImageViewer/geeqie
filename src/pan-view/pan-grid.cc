@@ -38,7 +38,7 @@ void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height
 	gint grid_size;
 	gint next_y;
 
-	list = pan_list_tree(dir_fd, SORT_NAME, TRUE, TRUE, pw->ignore_symlinks);
+	list = pan_list_tree(dir_fd, {SORT_NAME, TRUE, TRUE}, pw->ignore_symlinks);
 	pan_filter_fd_list(&list, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 
 	grid_size = static_cast<gint>(sqrt(static_cast<gdouble>(g_list_length(list))));
