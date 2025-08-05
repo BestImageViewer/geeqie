@@ -151,6 +151,13 @@ gchar *sort_type_get_text(SortType method)
 	return nullptr;
 }
 
+bool sort_type_requires_metadata(SortType method)
+{
+	return method == SORT_EXIFTIME
+	    || method == SORT_EXIFTIMEDIGITIZED
+	    || method == SORT_RATING;
+}
+
 static GtkWidget *submenu_add_sort_item(GtkWidget *menu,
 					GCallback func, SortType type,
 					gboolean show_current, SortType show_type)

@@ -581,7 +581,7 @@ static void vf_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 	auto sort = vf->sort;
 	sort.method = static_cast<SortType>(GPOINTER_TO_INT(data));
 
-	if (sort.method == SORT_EXIFTIME || sort.method == SORT_EXIFTIMEDIGITIZED || sort.method == SORT_RATING)
+	if (sort_type_requires_metadata(sort.method))
 		{
 		vf_read_metadata_in_idle(vf);
 		}

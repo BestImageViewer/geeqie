@@ -615,7 +615,7 @@ static void layout_sort_menu_cb(GtkWidget *widget, gpointer data)
 	auto sort = lw->options.file_view_list_sort;
 	sort.method = static_cast<SortType>(GPOINTER_TO_INT(data));
 
-	if (sort.method == SORT_EXIFTIME || sort.method == SORT_EXIFTIMEDIGITIZED || sort.method == SORT_RATING)
+	if (sort_type_requires_metadata(sort.method))
 		{
 		vf_read_metadata_in_idle(lw->vf);
 		}
@@ -1429,8 +1429,7 @@ gboolean layout_set_fd(LayoutWindow *lw, FileData *fd)
 	if (options->metadata.confirm_on_dir_change && dir_changed)
 		metadata_write_queue_confirm(FALSE, nullptr);
 
-	if (lw->vf && (options->read_metadata_in_idle ||
-	               (lw->options.file_view_list_sort.method == SORT_EXIFTIME || lw->options.file_view_list_sort.method == SORT_EXIFTIMEDIGITIZED || lw->options.file_view_list_sort.method == SORT_RATING)))
+	if (lw->vf && (options->read_metadata_in_idle || sort_type_requires_metadata(lw->options.file_view_list_sort.method)))
 		{
 		vf_read_metadata_in_idle(lw->vf);
 		}
