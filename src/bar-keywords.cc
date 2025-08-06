@@ -876,18 +876,12 @@ void bar_pane_keywords_edit_ok_cb(GenericDialog *, gpointer data)
 	g_list_free_full(keywords, g_free);
 }
 
-void bar_pane_keywords_conf_set_helper(GtkWidget *, gpointer data)
+template<gboolean is_keyword>
+void bar_pane_keywords_conf_set_is_keyword_cb(GtkWidget *, gpointer data)
 {
 	auto cdd = static_cast<ConfDialogData *>(data);
-	cdd->is_keyword = FALSE;
+	cdd->is_keyword = is_keyword;
 }
-
-void bar_pane_keywords_conf_set_kw(GtkWidget *, gpointer data)
-{
-	auto cdd = static_cast<ConfDialogData *>(data);
-	cdd->is_keyword = TRUE;
-}
-
 
 
 void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_existing)
@@ -952,12 +946,10 @@ void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_existing
 
 	group = pref_group_new(gd->vbox, FALSE, _("Keyword type:"), GTK_ORIENTATION_VERTICAL);
 
-	button = pref_radiobutton_new(group, nullptr, _("Active keyword"),
-				      (is_keyword),
-				      G_CALLBACK(bar_pane_keywords_conf_set_kw), cdd);
-	button = pref_radiobutton_new(group, button, _("Helper"),
-				      (!is_keyword),
-				      G_CALLBACK(bar_pane_keywords_conf_set_helper), cdd);
+	button = pref_radiobutton_new(group, nullptr, _("Active keyword"), is_keyword,
+	                              G_CALLBACK(bar_pane_keywords_conf_set_is_keyword_cb<TRUE>), cdd);
+	button = pref_radiobutton_new(group, button, _("Helper"), !is_keyword,
+	                              G_CALLBACK(bar_pane_keywords_conf_set_is_keyword_cb<FALSE>), cdd);
 
 	cdd->is_keyword = is_keyword;
 

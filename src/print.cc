@@ -194,7 +194,8 @@ gint set_toggle(GSList *list, TextPosition pos)
 	return new_pos;
 }
 
-void image_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
+template<TextPosition pos>
+void image_text_position_cb(GtkWidget *widget, gpointer data)
 {
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
 
@@ -208,27 +209,8 @@ void image_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
 	options->printer.image_text_position = pos;
 }
 
-void image_text_position_h1_cb(GtkWidget *widget, gpointer data)
-{
-	image_text_position_cb(widget, data, HEADER_1);
-}
-
-void image_text_position_h2_cb(GtkWidget *widget, gpointer data)
-{
-	image_text_position_cb(widget, data, HEADER_2);
-}
-
-void image_text_position_f1_cb(GtkWidget *widget, gpointer data)
-{
-	image_text_position_cb(widget, data, FOOTER_1);
-}
-
-void image_text_position_f2_cb(GtkWidget *widget, gpointer data)
-{
-	image_text_position_cb(widget, data, FOOTER_2);
-}
-
-void page_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
+template<TextPosition pos>
+void page_text_position_cb(GtkWidget *widget, gpointer data)
 {
 	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
 
@@ -240,26 +222,6 @@ void page_text_position_cb(GtkWidget *widget, gpointer data, TextPosition pos)
 		}
 
 	options->printer.page_text_position = pos;
-}
-
-void page_text_position_h1_cb(GtkWidget *widget, gpointer data)
-{
-	page_text_position_cb(widget, data, HEADER_1);
-}
-
-void page_text_position_h2_cb(GtkWidget *widget, gpointer data)
-{
-	page_text_position_cb(widget, data, HEADER_2);
-}
-
-void page_text_position_f1_cb(GtkWidget *widget, gpointer data)
-{
-	page_text_position_cb(widget, data, FOOTER_1);
-}
-
-void page_text_position_f2_cb(GtkWidget *widget, gpointer data)
-{
-	page_text_position_cb(widget, data, FOOTER_2);
 }
 
 void image_text_template_view_changed_cb(GtkWidget *, gpointer data)
@@ -298,17 +260,17 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	/* order is important */
 	button1 = pref_radiobutton_new(hbox, nullptr,  _("Header 1"),
-							options->printer.image_text_position == HEADER_1,
-							G_CALLBACK(image_text_position_h1_cb), pw);
+	                               options->printer.image_text_position == HEADER_1,
+	                               G_CALLBACK(image_text_position_cb<HEADER_1>), pw);
 	button1 = pref_radiobutton_new(hbox, button1,  _("Header 2"),
-							options->printer.image_text_position == HEADER_2,
-							G_CALLBACK(image_text_position_h2_cb), pw);
+	                               options->printer.image_text_position == HEADER_2,
+	                               G_CALLBACK(image_text_position_cb<HEADER_2>), pw);
 	button1 = pref_radiobutton_new(hbox, button1, _("Footer 1"),
-							options->printer.image_text_position == FOOTER_1,
-							G_CALLBACK(image_text_position_f1_cb), pw);
+	                               options->printer.image_text_position == FOOTER_1,
+	                               G_CALLBACK(image_text_position_cb<FOOTER_1>), pw);
 	button1 = pref_radiobutton_new(hbox, button1, _("Footer 2"),
-							options->printer.image_text_position == FOOTER_2,
-							G_CALLBACK(image_text_position_f2_cb), pw);
+	                               options->printer.image_text_position == FOOTER_2,
+	                               G_CALLBACK(image_text_position_cb<FOOTER_2>), pw);
 	gtk_widget_show(hbox);
 	pw->image_group = (gtk_radio_button_get_group(GTK_RADIO_BUTTON(button1)));
 
@@ -361,17 +323,17 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	/* order is important */
 	button2 = pref_radiobutton_new(hbox, nullptr, _("Header 1"),
-							options->printer.page_text_position == HEADER_1,
-							G_CALLBACK(page_text_position_h1_cb), pw);
+	                               options->printer.page_text_position == HEADER_1,
+	                               G_CALLBACK(page_text_position_cb<HEADER_1>), pw);
 	button2 = pref_radiobutton_new(hbox, button2,  _("Header 2"),
-							options->printer.page_text_position == HEADER_2,
-							G_CALLBACK(page_text_position_h2_cb), pw);
+	                               options->printer.page_text_position == HEADER_2,
+	                               G_CALLBACK(page_text_position_cb<HEADER_2>), pw);
 	button2 = pref_radiobutton_new(hbox, button2, _("Footer 1"),
-							options->printer.page_text_position == FOOTER_1,
-							G_CALLBACK(page_text_position_f1_cb), pw);
+	                               options->printer.page_text_position == FOOTER_1,
+	                               G_CALLBACK(page_text_position_cb<FOOTER_1>), pw);
 	button2 = pref_radiobutton_new(hbox, button2, _("Footer 2"),
-							options->printer.page_text_position == FOOTER_2,
-							G_CALLBACK(page_text_position_f2_cb), pw);
+	                               options->printer.page_text_position == FOOTER_2,
+	                               G_CALLBACK(page_text_position_cb<FOOTER_2>), pw);
 	gtk_widget_show(hbox);
 	pw->page_group = (gtk_radio_button_get_group(GTK_RADIO_BUTTON(button2)));
 

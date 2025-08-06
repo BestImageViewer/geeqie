@@ -2331,34 +2331,13 @@ static void home_path_set_current_cb(GtkWidget *, gpointer data)
 	gq_gtk_entry_set_text(GTK_ENTRY(lc->home_path_entry), layout_get_path(lc->lw));
 }
 
-static void startup_path_set_current_cb(GtkWidget *widget, gpointer data)
+template<StartUpPath startup_path>
+static void startup_path_set_cb(GtkWidget *widget, gpointer data)
 {
-	auto lc = static_cast<LayoutConfig *>(data);
-	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		return;
-		}
-	lc->options.startup_path = STARTUP_PATH_CURRENT;
-}
+	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
 
-static void startup_path_set_last_cb(GtkWidget *widget, gpointer data)
-{
-	auto lc = static_cast<LayoutConfig *>(data);
-	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		return;
-		}
-	lc->options.startup_path = STARTUP_PATH_LAST;
-}
-
-static void startup_path_set_home_cb(GtkWidget *widget, gpointer data)
-{
-	auto lc = static_cast<LayoutConfig *>(data);
-	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-		{
-		return;
-		}
-	lc->options.startup_path = STARTUP_PATH_HOME;
+	auto *lc = static_cast<LayoutConfig *>(data);
+	lc->options.startup_path = startup_path;
 }
 
 void layout_show_config_window(LayoutWindow *lw)
@@ -2460,14 +2439,14 @@ void layout_show_config_window(LayoutWindow *lw)
 	group = pref_group_new(vbox, FALSE, _("Start-up directory:"), GTK_ORIENTATION_VERTICAL);
 
 	button = pref_radiobutton_new(group, nullptr, _("No change"),
-				      (lc->options.startup_path == STARTUP_PATH_CURRENT),
-				      G_CALLBACK(startup_path_set_current_cb), lc);
+	                              lc->options.startup_path == STARTUP_PATH_CURRENT,
+	                              G_CALLBACK(startup_path_set_cb<STARTUP_PATH_CURRENT>), lc);
 	button = pref_radiobutton_new(group, button, _("Restore last path"),
-				      (lc->options.startup_path == STARTUP_PATH_LAST),
-				      G_CALLBACK(startup_path_set_last_cb), lc);
+	                              lc->options.startup_path == STARTUP_PATH_LAST,
+	                              G_CALLBACK(startup_path_set_cb<STARTUP_PATH_LAST>), lc);
 	button = pref_radiobutton_new(group, button, _("Home path"),
-				      (lc->options.startup_path == STARTUP_PATH_HOME),
-				      G_CALLBACK(startup_path_set_home_cb), lc);
+	                              lc->options.startup_path == STARTUP_PATH_HOME,
+	                              G_CALLBACK(startup_path_set_cb<STARTUP_PATH_HOME>), lc);
 
 	group = pref_group_new(vbox, FALSE, _("Layout"), GTK_ORIENTATION_VERTICAL);
 
