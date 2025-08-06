@@ -2106,31 +2106,19 @@ static void collection_table_add_dir_recursive(CollectTable *ct, FileData *dir_f
 	file_data_list_free(d);
 }
 
-static void confirm_dir_list_do(CollectTable *ct, GList *list, gboolean recursive)
-{
-	GList *work = list;
-	while (work)
-		{
-		auto fd = static_cast<FileData *>(work->data);
-		work = work->next;
-		if (isdir(fd->path)) collection_table_add_dir_recursive(ct, fd, recursive);
-		}
-	collection_table_insert_filelist(ct, list, ct->marker_info);
-}
-
-
+template<gboolean recursive>
 static void confirm_dir_list_add(GtkWidget *, gpointer data)
 {
-	auto ct = static_cast<CollectTable *>(data);
+	auto *ct = static_cast<CollectTable *>(data);
 
-	confirm_dir_list_do(ct, ct->drop_list, FALSE);
-}
+	for (GList *work = ct->drop_list; work; work = work->next)
+		{
+		auto fd = static_cast<FileData *>(work->data);
 
-static void confirm_dir_list_recurse(GtkWidget *, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
+		if (isdir(fd->path)) collection_table_add_dir_recursive(ct, fd, recursive);
+		}
 
-	confirm_dir_list_do(ct, ct->drop_list, TRUE);
+	collection_table_insert_filelist(ct, ct->drop_list, ct->marker_info);
 }
 
 static void confirm_dir_list_skip(GtkWidget *, gpointer data)
@@ -2151,11 +2139,11 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
 	menu_item_add_icon(menu, _("Dropped list includes folders."), GQ_ICON_DIRECTORY, nullptr, nullptr);
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK,
-			    G_CALLBACK(confirm_dir_list_add), ct);
+	                   G_CALLBACK(confirm_dir_list_add<FALSE>), ct);
 	menu_item_add_icon(menu, _("Add contents _recursive"), GQ_ICON_ADD,
-			    G_CALLBACK(confirm_dir_list_recurse), ct);
+	                   G_CALLBACK(confirm_dir_list_add<TRUE>), ct);
 	menu_item_add_icon(menu, _("_Skip folders"), GQ_ICON_REMOVE,
-			    G_CALLBACK(confirm_dir_list_skip), ct);
+	                   G_CALLBACK(confirm_dir_list_skip), ct);
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, nullptr, ct);
 

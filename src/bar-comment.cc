@@ -107,14 +107,18 @@ static void bar_pane_comment_update(PaneCommentData *pcd)
 	gtk_widget_set_sensitive(pcd->comment_view, (pcd->fd != nullptr));
 }
 
-static void bar_pane_comment_set_selection(PaneCommentData *pcd, gboolean append)
+template<gboolean append>
+static void bar_pane_comment_set_selection_cb(GtkWidget *, gpointer data)
 {
+	auto *pcd = static_cast<PaneCommentData *>(data);
 	GList *work;
 
 	g_autofree gchar *comment = text_widget_text_pull(pcd->comment_view);
 
 	g_autoptr(FileDataList) list = layout_selection_list(pcd->pane.lw);
 	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
+
+	const auto func = append ? metadata_append_string : metadata_write_string;
 
 	work = list;
 	while (work)
@@ -123,29 +127,8 @@ static void bar_pane_comment_set_selection(PaneCommentData *pcd, gboolean append
 		work = work->next;
 		if (fd == pcd->fd) continue;
 
-		if (append)
-			{
-			metadata_append_string(fd, pcd->key, comment);
-			}
-		else
-			{
-			metadata_write_string(fd, pcd->key, comment);
-			}
+		func(fd, pcd->key, comment);
 		}
-}
-
-static void bar_pane_comment_sel_add_cb(GtkWidget *, gpointer data)
-{
-	auto pcd = static_cast<PaneCommentData *>(data);
-
-	bar_pane_comment_set_selection(pcd, TRUE);
-}
-
-static void bar_pane_comment_sel_replace_cb(GtkWidget *, gpointer data)
-{
-	auto pcd = static_cast<PaneCommentData *>(data);
-
-	bar_pane_comment_set_selection(pcd, FALSE);
 }
 
 
@@ -235,8 +218,10 @@ static void bar_pane_comment_populate_popup(GtkTextView *, GtkMenu *menu, gpoint
 	auto pcd = static_cast<PaneCommentData *>(data);
 
 	menu_item_add_divider(GTK_WIDGET(menu));
-	menu_item_add_icon(GTK_WIDGET(menu), _("Add text to selected files"), GQ_ICON_ADD, G_CALLBACK(bar_pane_comment_sel_add_cb), pcd);
-	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing text in selected files"), GQ_ICON_REPLACE, G_CALLBACK(bar_pane_comment_sel_replace_cb), data);
+	menu_item_add_icon(GTK_WIDGET(menu), _("Add text to selected files"), GQ_ICON_ADD,
+	                   G_CALLBACK(bar_pane_comment_set_selection_cb<TRUE>), pcd);
+	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing text in selected files"), GQ_ICON_REPLACE,
+	                   G_CALLBACK(bar_pane_comment_set_selection_cb<FALSE>), data);
 }
 
 static void bar_pane_comment_destroy(gpointer data)

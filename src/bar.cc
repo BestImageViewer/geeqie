@@ -238,7 +238,8 @@ struct BarData
 
 static const gchar *bar_pane_get_default_config(const gchar *id);
 
-static void bar_expander_move(GtkWidget *, gpointer data, gboolean up, gboolean single_step)
+template<gboolean up, gboolean single_step>
+static void bar_expander_move_cb(GtkWidget *, gpointer data)
 {
 	auto expander = static_cast<GtkWidget *>(data);
 	GtkWidget *box;
@@ -261,27 +262,6 @@ static void bar_expander_move(GtkWidget *, gpointer data, gboolean up, gboolean 
 		}
 
 	gtk_box_reorder_child(GTK_BOX(box), expander, pos);
-}
-
-
-static void bar_expander_move_up_cb(GtkWidget *widget, gpointer data)
-{
-	bar_expander_move(widget, data, TRUE, TRUE);
-}
-
-static void bar_expander_move_down_cb(GtkWidget *widget, gpointer data)
-{
-	bar_expander_move(widget, data, FALSE, TRUE);
-}
-
-static void bar_expander_move_top_cb(GtkWidget *widget, gpointer data)
-{
-	bar_expander_move(widget, data, TRUE, FALSE);
-}
-
-static void bar_expander_move_bottom_cb(GtkWidget *widget, gpointer data)
-{
-	bar_expander_move(widget, data, FALSE, FALSE);
 }
 
 static void height_spin_changed_cb(GtkSpinButton *spin, gpointer data)
@@ -416,10 +396,14 @@ static void bar_menu_popup(GtkWidget *widget)
 
 	if (expander)
 		{
-		menu_item_add_icon(menu, _("Move to _top"), GQ_ICON_GO_TOP, G_CALLBACK(bar_expander_move_top_cb), expander);
-		menu_item_add_icon(menu, _("Move _up"), GQ_ICON_GO_UP, G_CALLBACK(bar_expander_move_up_cb), expander);
-		menu_item_add_icon(menu, _("Move _down"), GQ_ICON_GO_DOWN, G_CALLBACK(bar_expander_move_down_cb), expander);
-		menu_item_add_icon(menu, _("Move to _bottom"), GQ_ICON_GO_BOTTOM, G_CALLBACK(bar_expander_move_bottom_cb), expander);
+		menu_item_add_icon(menu, _("Move to _top"), GQ_ICON_GO_TOP,
+		                   (GCallback)bar_expander_move_cb<TRUE, FALSE>, expander);
+		menu_item_add_icon(menu, _("Move _up"), GQ_ICON_GO_UP,
+		                   (GCallback)bar_expander_move_cb<TRUE, TRUE>, expander);
+		menu_item_add_icon(menu, _("Move _down"), GQ_ICON_GO_DOWN,
+		                   (GCallback)bar_expander_move_cb<FALSE, TRUE>, expander);
+		menu_item_add_icon(menu, _("Move to _bottom"), GQ_ICON_GO_BOTTOM,
+		                   (GCallback)bar_expander_move_cb<FALSE, FALSE>, expander);
 		menu_item_add_divider(menu);
 
 		if (gtk_expander_get_expanded(GTK_EXPANDER(expander)) && display_height_option)

@@ -515,10 +515,10 @@ static void vd_pop_menu_slide_rec_cb(GtkWidget *, gpointer data)
 	layout_image_slideshow_start_from_list(vd->layout, list);
 }
 
-static void vd_pop_menu_dupe(ViewDir *vd, gint recursive)
+template<gboolean recursive>
+static void vd_pop_menu_dupe_cb(GtkWidget *, gpointer data)
 {
-	DupeWindow *dw;
-
+	auto *vd = static_cast<ViewDir *>(data);
 	if (!vd->click_fd) return;
 
 	g_autoptr(FileDataList) list = nullptr;
@@ -533,20 +533,8 @@ static void vd_pop_menu_dupe(ViewDir *vd, gint recursive)
 		list = filelist_filter(list, FALSE);
 		}
 
-	dw = dupe_window_new();
+	DupeWindow *dw = dupe_window_new();
 	dupe_window_add_files(dw, list, recursive);
-}
-
-static void vd_pop_menu_dupe_cb(GtkWidget *, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
-	vd_pop_menu_dupe(vd, FALSE);
-}
-
-static void vd_pop_menu_dupe_rec_cb(GtkWidget *, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
-	vd_pop_menu_dupe(vd, TRUE);
 }
 
 static void vd_pop_menu_delete_cb(GtkWidget *, gpointer data)
@@ -722,9 +710,9 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 
 	menu_item_add_divider(menu);
 	menu_item_add_icon_sensitive(menu, _("Find _duplicates..."), GQ_ICON_FIND, active,
-				      G_CALLBACK(vd_pop_menu_dupe_cb), vd);
+	                             G_CALLBACK(vd_pop_menu_dupe_cb<FALSE>), vd);
 	menu_item_add_icon_sensitive(menu, _("Find duplicates recursive..."), GQ_ICON_FIND, active,
-				      G_CALLBACK(vd_pop_menu_dupe_rec_cb), vd);
+	                             G_CALLBACK(vd_pop_menu_dupe_cb<TRUE>), vd);
 
 	menu_item_add_divider(menu);
 

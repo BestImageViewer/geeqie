@@ -424,8 +424,10 @@ gboolean bar_pane_keywords_filter_visible(GtkTreeModel *keyword_tree, GtkTreeIte
 	return !keyword_is_hidden_in(keyword_tree, iter, filter);
 }
 
-void bar_pane_keywords_set_selection(PaneKeywordsData *pkd, gboolean append)
+template<gboolean append>
+void bar_pane_keywords_set_selection_cb(GtkWidget *, gpointer data)
 {
+	auto *pkd = static_cast<PaneKeywordsData *>(data);
 	GList *keywords = nullptr;
 	GList *work;
 
@@ -434,37 +436,18 @@ void bar_pane_keywords_set_selection(PaneKeywordsData *pkd, gboolean append)
 	g_autoptr(FileDataList) list = layout_selection_list(pkd->pane.lw);
 	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
 
+	const auto func = append ? metadata_append_list : metadata_write_list;
+
 	work = list;
 	while (work)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
-		if (append)
-			{
-			metadata_append_list(fd, KEYWORD_KEY, keywords);
-			}
-		else
-			{
-			metadata_write_list(fd, KEYWORD_KEY, keywords);
-			}
+		func(fd, KEYWORD_KEY, keywords);
 		}
 
 	g_list_free_full(keywords, g_free);
-}
-
-void bar_pane_keywords_sel_add_cb(GtkWidget *, gpointer data)
-{
-	auto pkd = static_cast<PaneKeywordsData *>(data);
-
-	bar_pane_keywords_set_selection(pkd, TRUE);
-}
-
-void bar_pane_keywords_sel_replace_cb(GtkWidget *, gpointer data)
-{
-	auto pkd = static_cast<PaneKeywordsData *>(data);
-
-	bar_pane_keywords_set_selection(pkd, FALSE);
 }
 
 void bar_pane_keywords_populate_popup_cb(GtkTextView *, GtkMenu *menu, gpointer data)
@@ -472,8 +455,10 @@ void bar_pane_keywords_populate_popup_cb(GtkTextView *, GtkMenu *menu, gpointer 
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 
 	menu_item_add_divider(GTK_WIDGET(menu));
-	menu_item_add_icon(GTK_WIDGET(menu), _("Add selected keywords to selected files"), GQ_ICON_ADD, G_CALLBACK(bar_pane_keywords_sel_add_cb), pkd);
-	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing keywords in selected files with selected keywords"), GQ_ICON_REPLACE, G_CALLBACK(bar_pane_keywords_sel_replace_cb), pkd);
+	menu_item_add_icon(GTK_WIDGET(menu), _("Add selected keywords to selected files"), GQ_ICON_ADD,
+	                   G_CALLBACK(bar_pane_keywords_set_selection_cb<TRUE>), pkd);
+	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing keywords in selected files with selected keywords"), GQ_ICON_REPLACE,
+	                   G_CALLBACK(bar_pane_keywords_set_selection_cb<FALSE>), pkd);
 }
 
 
@@ -884,8 +869,16 @@ void bar_pane_keywords_conf_set_is_keyword_cb(GtkWidget *, gpointer data)
 }
 
 
-void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_existing)
+/*
+ *-------------------------------------------------------------------
+ * popup menu
+ *-------------------------------------------------------------------
+ */
+
+template<gboolean edit_existing>
+void bar_pane_keywords_edit_dialog_cb(GtkWidget *, gpointer data)
 {
+	auto *pkd = static_cast<PaneKeywordsData *>(data);
 	ConfDialogData *cdd;
 	GenericDialog *gd;
 	GtkWidget *table;
@@ -956,25 +949,6 @@ void bar_pane_keywords_edit_dialog(PaneKeywordsData *pkd, gboolean edit_existing
 	gtk_widget_grab_focus(cdd->edit_widget);
 
 	gtk_widget_show(gd->dialog);
-}
-
-
-/*
- *-------------------------------------------------------------------
- * popup menu
- *-------------------------------------------------------------------
- */
-
-void bar_pane_keywords_edit_dialog_cb(GtkWidget *, gpointer data)
-{
-	auto pkd = static_cast<PaneKeywordsData *>(data);
-	bar_pane_keywords_edit_dialog(pkd, TRUE);
-}
-
-void bar_pane_keywords_add_dialog_cb(GtkWidget *, gpointer data)
-{
-	auto pkd = static_cast<PaneKeywordsData *>(data);
-	bar_pane_keywords_edit_dialog(pkd, FALSE);
 }
 
 void bar_pane_keywords_connect_mark_cb(GtkWidget *menu_widget, gpointer data)
@@ -1264,7 +1238,8 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 
 	menu = popup_menu_short_lived();
 
-	menu_item_add_icon(menu, _("New keyword"), GQ_ICON_NEW, G_CALLBACK(bar_pane_keywords_add_dialog_cb), pkd);
+	menu_item_add_icon(menu, _("New keyword"), GQ_ICON_NEW,
+	                   G_CALLBACK(bar_pane_keywords_edit_dialog_cb<FALSE>), pkd);
 
 	menu_item_add_divider(menu);
 
@@ -1312,7 +1287,8 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 		menu_item_add_divider(menu);
 
 		g_autofree gchar *edit_text = g_strdup_printf(_("Edit \"%s\""), name);
-		menu_item_add_icon(menu, edit_text, GQ_ICON_EDIT, G_CALLBACK(bar_pane_keywords_edit_dialog_cb), pkd);
+		menu_item_add_icon(menu, edit_text, GQ_ICON_EDIT,
+		                   G_CALLBACK(bar_pane_keywords_edit_dialog_cb<TRUE>), pkd);
 
 		g_autofree gchar *delete_text = g_strdup_printf(_("Remove \"%s\""), name);
 		menu_item_add_icon(menu, delete_text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_delete_cb), pkd);

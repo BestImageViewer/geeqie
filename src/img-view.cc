@@ -1496,16 +1496,11 @@ static void view_dir_list_do(ViewWindow *vw, GList *list, gboolean skip, gboolea
 		}
 }
 
+template<gboolean recurse>
 static void view_dir_list_add(GtkWidget *, gpointer data)
 {
 	auto d = static_cast<CViewConfirmD *>(data);
-	view_dir_list_do(d->vw, d->list, FALSE, FALSE);
-}
-
-static void view_dir_list_recurse(GtkWidget *, gpointer data)
-{
-	auto d = static_cast<CViewConfirmD *>(data);
-	view_dir_list_do(d->vw, d->list, FALSE, TRUE);
+	view_dir_list_do(d->vw, d->list, FALSE, recurse);
 }
 
 static void view_dir_list_skip(GtkWidget *, gpointer data)
@@ -1536,8 +1531,10 @@ static GtkWidget *view_confirm_dir_list(ViewWindow *vw, GList *list)
 
 	menu_item_add_icon(menu, _("Dropped list includes folders."), GQ_ICON_DIRECTORY, nullptr, nullptr);
 	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK, G_CALLBACK(view_dir_list_add), d);
-	menu_item_add_icon(menu, _("Add contents _recursive"), GQ_ICON_ADD, G_CALLBACK(view_dir_list_recurse), d);
+	menu_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK,
+	                   G_CALLBACK(view_dir_list_add<FALSE>), d);
+	menu_item_add_icon(menu, _("Add contents _recursive"), GQ_ICON_ADD,
+	                   G_CALLBACK(view_dir_list_add<TRUE>), d);
 	menu_item_add_icon(menu, _("_Skip folders"), GQ_ICON_REMOVE, G_CALLBACK(view_dir_list_skip), d);
 	menu_item_add_divider(menu);
 	menu_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, G_CALLBACK(view_dir_list_cancel), d);

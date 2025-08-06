@@ -582,28 +582,14 @@ void bar_pane_gps_enable_markers_checked_toggle_cb(GtkWidget *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 
-	if (pgd->enable_markers_checked)
-		{
-		pgd->enable_markers_checked = FALSE;
-		}
-	else
-		{
-		pgd->enable_markers_checked = TRUE;
-		}
+	pgd->enable_markers_checked = !pgd->enable_markers_checked;
 }
 
 void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 
-	if (pgd->centre_map_checked)
-		{
-		pgd->centre_map_checked = FALSE;
-		}
-	else
-		{
-		pgd->centre_map_checked = TRUE;
-		}
+	pgd->centre_map_checked = !pgd->centre_map_checked;
 }
 
 void bar_pane_gps_change_map_cb(GtkWidget *widget, gpointer data)

@@ -68,7 +68,8 @@ ToolbarData *toolbarlist[2];
  * @param single_step Move up/down one step, or to top/bottom
  *
  */
-static void toolbar_item_move(GtkWidget *, gpointer data, gboolean up, gboolean single_step)
+template<gboolean up, gboolean single_step>
+static void toolbar_item_move_cb(GtkWidget *, gpointer data)
 {
 	auto list_item = static_cast<GtkWidget *>(data);
 	GtkWidget *box;
@@ -93,26 +94,6 @@ static void toolbar_item_move(GtkWidget *, gpointer data, gboolean up, gboolean 
 	gtk_box_reorder_child(GTK_BOX(box), list_item, pos);
 }
 
-static void toolbar_item_move_up_cb(GtkWidget *widget, gpointer data)
-{
-	toolbar_item_move(widget, data, TRUE, TRUE);
-}
-
-static void toolbar_item_move_down_cb(GtkWidget *widget, gpointer data)
-{
-	toolbar_item_move(widget, data, FALSE, TRUE);
-}
-
-static void toolbar_item_move_top_cb(GtkWidget *widget, gpointer data)
-{
-	toolbar_item_move(widget, data, TRUE, FALSE);
-}
-
-static void toolbar_item_move_bottom_cb(GtkWidget *widget, gpointer data)
-{
-	toolbar_item_move(widget, data, FALSE, FALSE);
-}
-
 static void toolbar_item_delete_cb(GtkWidget *, gpointer data)
 {
 	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(GTK_WIDGET(data))), GTK_WIDGET(data));
@@ -126,10 +107,14 @@ static void toolbar_menu_popup(GtkWidget *widget)
 
 	if (widget)
 		{
-		menu_item_add_icon(menu, _("Move to _top"), GQ_ICON_GO_TOP, G_CALLBACK(toolbar_item_move_top_cb), widget);
-		menu_item_add_icon(menu, _("Move _up"), GQ_ICON_GO_UP, G_CALLBACK(toolbar_item_move_up_cb), widget);
-		menu_item_add_icon(menu, _("Move _down"), GQ_ICON_GO_DOWN, G_CALLBACK(toolbar_item_move_down_cb), widget);
-		menu_item_add_icon(menu, _("Move to _bottom"), GQ_ICON_GO_BOTTOM, G_CALLBACK(toolbar_item_move_bottom_cb), widget);
+		menu_item_add_icon(menu, _("Move to _top"), GQ_ICON_GO_TOP,
+		                   (GCallback)toolbar_item_move_cb<TRUE, FALSE>, widget);
+		menu_item_add_icon(menu, _("Move _up"), GQ_ICON_GO_UP,
+		                   (GCallback)toolbar_item_move_cb<TRUE, TRUE>, widget);
+		menu_item_add_icon(menu, _("Move _down"), GQ_ICON_GO_DOWN,
+		                   (GCallback)toolbar_item_move_cb<FALSE, TRUE>, widget);
+		menu_item_add_icon(menu, _("Move to _bottom"), GQ_ICON_GO_BOTTOM,
+		                   (GCallback)toolbar_item_move_cb<FALSE, FALSE>, widget);
 		menu_item_add_divider(menu);
 		menu_item_add_icon(menu, _("Remove"), GQ_ICON_DELETE, G_CALLBACK(toolbar_item_delete_cb), widget);
 		menu_item_add_divider(menu);

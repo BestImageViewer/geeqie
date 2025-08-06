@@ -548,11 +548,12 @@ static void vf_pop_menu_cut_path_cb(GtkWidget *, gpointer data)
 	file_util_path_list_to_clipboard(vf_pop_menu_file_list(vf), FALSE, ClipboardAction::CUT);
 }
 
-static void vf_pop_menu_enable_grouping_cb(GtkWidget *, gpointer data)
+template<gboolean disable>
+static void vf_pop_menu_disable_grouping_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	file_data_disable_grouping_list(vf_pop_menu_file_list(vf), FALSE);
+	file_data_disable_grouping_list(vf_pop_menu_file_list(vf), disable);
 }
 
 static void vf_pop_menu_duplicates_cb(GtkWidget *, gpointer data)
@@ -562,13 +563,6 @@ static void vf_pop_menu_duplicates_cb(GtkWidget *, gpointer data)
 
 	dw = dupe_window_new();
 	dupe_window_add_files(dw, vf_pop_menu_file_list(vf), FALSE);
-}
-
-static void vf_pop_menu_disable_grouping_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
-	file_data_disable_grouping_list(vf_pop_menu_file_list(vf), TRUE);
 }
 
 static void vf_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
@@ -630,46 +624,18 @@ static void vf_pop_menu_sort_case_cb(GtkWidget *, gpointer data)
 		}
 }
 
-static void vf_pop_menu_sel_mark_cb(GtkWidget *, gpointer data)
+template<MarkToSelectionMode mode>
+static void vf_pop_menu_mark_to_selection_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_SET);
+	vf_mark_to_selection(vf, vf->active_mark, mode);
 }
 
-static void vf_pop_menu_sel_mark_and_cb(GtkWidget *, gpointer data)
+template<SelectionToMarkMode mode>
+static void vf_pop_menu_selection_to_mark_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_AND);
-}
-
-static void vf_pop_menu_sel_mark_or_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_OR);
-}
-
-static void vf_pop_menu_sel_mark_minus_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_MINUS);
-}
-
-static void vf_pop_menu_set_mark_sel_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	vf_selection_to_mark(vf, vf->active_mark, STM_MODE_SET);
-}
-
-static void vf_pop_menu_res_mark_sel_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	vf_selection_to_mark(vf, vf->active_mark, STM_MODE_RESET);
-}
-
-static void vf_pop_menu_toggle_mark_sel_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	vf_selection_to_mark(vf, vf->active_mark, STM_MODE_TOGGLE);
+	vf_selection_to_mark(vf, vf->active_mark, mode);
 }
 
 static void vf_pop_menu_toggle_view_type_cb(GtkWidget *widget, gpointer data)
@@ -781,24 +747,24 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 		vf->clicked_mark = 0;
 
 		menu_item_add_sensitive(menu, str_set_mark, active,
-					G_CALLBACK(vf_pop_menu_set_mark_sel_cb), vf);
+		                        G_CALLBACK(vf_pop_menu_selection_to_mark_cb<STM_MODE_SET>), vf);
 
 		menu_item_add_sensitive(menu, str_res_mark, active,
-					G_CALLBACK(vf_pop_menu_res_mark_sel_cb), vf);
+		                        G_CALLBACK(vf_pop_menu_selection_to_mark_cb<STM_MODE_RESET>), vf);
 
 		menu_item_add_sensitive(menu, str_toggle_mark, active,
-					G_CALLBACK(vf_pop_menu_toggle_mark_sel_cb), vf);
+		                        G_CALLBACK(vf_pop_menu_selection_to_mark_cb<STM_MODE_TOGGLE>), vf);
 
 		menu_item_add_divider(menu);
 
 		menu_item_add_sensitive(menu, str_sel_mark, active,
-					G_CALLBACK(vf_pop_menu_sel_mark_cb), vf);
+		                        G_CALLBACK(vf_pop_menu_mark_to_selection_cb<MTS_MODE_SET>), vf);
 		menu_item_add_sensitive(menu, str_sel_mark_or, active,
-					G_CALLBACK(vf_pop_menu_sel_mark_or_cb), vf);
+		                        G_CALLBACK(vf_pop_menu_mark_to_selection_cb<MTS_MODE_OR>), vf);
 		menu_item_add_sensitive(menu, str_sel_mark_and, active,
-					G_CALLBACK(vf_pop_menu_sel_mark_and_cb), vf);
+		                        G_CALLBACK(vf_pop_menu_mark_to_selection_cb<MTS_MODE_AND>), vf);
 		menu_item_add_sensitive(menu, str_sel_mark_minus, active,
-					G_CALLBACK(vf_pop_menu_sel_mark_minus_cb), vf);
+		                        G_CALLBACK(vf_pop_menu_mark_to_selection_cb<MTS_MODE_MINUS>), vf);
 
 		menu_item_add_divider(menu);
 		}
@@ -837,9 +803,9 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	menu_item_add_divider(menu);
 
 	menu_item_add_sensitive(menu, _("Enable file _grouping"), active,
-				G_CALLBACK(vf_pop_menu_enable_grouping_cb), vf);
+	                        G_CALLBACK(vf_pop_menu_disable_grouping_cb<FALSE>), vf);
 	menu_item_add_sensitive(menu, _("Disable file groupi_ng"), active,
-				G_CALLBACK(vf_pop_menu_disable_grouping_cb), vf);
+	                        G_CALLBACK(vf_pop_menu_disable_grouping_cb<TRUE>), vf);
 
 	menu_item_add_divider(menu);
 	menu_item_add_icon_sensitive(menu, _("_Find duplicates..."), GQ_ICON_FIND, active,
