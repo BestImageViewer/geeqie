@@ -123,7 +123,6 @@ struct LayoutOptions
 	} bars_state;
 
 	gchar *home_path;
-	gchar *last_path;
 
 	StartUpPath startup_path;
 

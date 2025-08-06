@@ -266,7 +266,6 @@ void free_layout_options_content(LayoutOptions &dest)
 	g_free(dest.id);
 	g_free(dest.order);
 	g_free(dest.home_path);
-	g_free(dest.last_path);
 }
 
 void copy_layout_options(LayoutOptions &dest, const LayoutOptions &src)
@@ -277,7 +276,6 @@ void copy_layout_options(LayoutOptions &dest, const LayoutOptions &src)
 	dest.id = g_strdup(src.id);
 	dest.order = g_strdup(src.order);
 	dest.home_path = g_strdup(src.home_path);
-	dest.last_path = g_strdup(src.last_path);
 }
 
 void layout_options_set_unique_id(LayoutOptions &options)
@@ -2508,9 +2506,6 @@ void layout_sync_options_with_current_state(LayoutWindow *lw)
 		lw->options.image_overlay.histogram_channel = histogram->get_channel();
 		lw->options.image_overlay.histogram_mode = histogram->get_mode();
 		}
-
-	g_free(lw->options.last_path);
-	lw->options.last_path = g_strdup(layout_get_path(lw));
 
 	layout_geometry_get_log_window(lw, lw->options.log_window);
 
