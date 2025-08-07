@@ -33,6 +33,13 @@
 struct LayoutWindow;
 struct ThumbLoader;
 
+enum FileViewType : guint {
+	FILEVIEW_LIST,
+	FILEVIEW_ICON,
+
+	FILEVIEW_LAST = FILEVIEW_ICON /**< Keep this up to date! */
+};
+
 struct ViewFile
 {
 	FileViewType type; 	/**< @todo (xsdg): Turn this into a union (see VFLIST and VFICON). */

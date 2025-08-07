@@ -26,10 +26,15 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
-
 class FileData;
 struct LayoutWindow;
+
+enum DirViewType : guint {
+	DIRVIEW_LIST,
+	DIRVIEW_TREE,
+
+	DIRVIEW_LAST = DIRVIEW_TREE /**< Keep this up to date! */
+};
 
 enum {
 	DIR_COLUMN_POINTER = 0,

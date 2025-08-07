@@ -31,6 +31,9 @@
 #include "filedata.h"
 #include "typedefs.h"
 
+enum DirViewType : guint;
+enum FileViewType : guint;
+
 struct AnimationData;
 struct FullScreenData;
 struct ImageWindow;

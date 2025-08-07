@@ -42,20 +42,6 @@ enum MouseButton {
 	MOUSE_BUTTON_9	= 9
 };
 
-enum DirViewType {
-	DIRVIEW_LIST,
-	DIRVIEW_TREE,
-
-	DIRVIEW_LAST = DIRVIEW_TREE /**< Keep this up to date! */
-};
-
-enum FileViewType {
-	FILEVIEW_LIST,
-	FILEVIEW_ICON,
-
-	FILEVIEW_LAST = FILEVIEW_ICON /**< Keep this up to date! */
-};
-
 #define	CMD_COPY     "geeqie-copy-command.desktop"
 #define	CMD_MOVE     "geeqie-move-command.desktop"
 #define	CMD_RENAME   "geeqie-rename-command.desktop"
