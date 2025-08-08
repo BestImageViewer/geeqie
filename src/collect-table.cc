@@ -107,9 +107,9 @@ static void collection_table_populate_at_new_size(CollectTable *ct, gint w, gint
  * @link collection_window_keypress @endlink \n
  * @link collection_table_popup_menu @endlink
  *
- * See also @link hard_coded_window_keys @endlink
+ * See also @link HardcodedWindowKey @endlink
  **/
-static hard_coded_window_keys collection_window_keys[] = {
+static HardcodedWindowKeyList collection_window_keys{
 	{GDK_CONTROL_MASK, 'C', N_("Copy")},
 	{GDK_CONTROL_MASK, 'M', N_("Move")},
 	{GDK_CONTROL_MASK, 'R', N_("Rename")},
@@ -136,7 +136,6 @@ static hard_coded_window_keys collection_window_keys[] = {
 	{GDK_SHIFT_MASK, 'P', N_("Print")},
 	{GDK_MOD1_MASK, 'A', N_("Append (Append collection dialog)")},
 	{GDK_MOD1_MASK, 'D', N_("Discard (Close modified collection dialog)")},
-	{static_cast<GdkModifierType>(0), 0, nullptr}
 };
 
 /*
@@ -1005,7 +1004,7 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 	accel_group = gtk_accel_group_new();
 	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
 
-	g_object_set_data(G_OBJECT(menu), "window_keys", collection_window_keys);
+	g_object_set_data(G_OBJECT(menu), "window_keys", &collection_window_keys);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	g_signal_connect(G_OBJECT(menu), "destroy",

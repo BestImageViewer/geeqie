@@ -25,13 +25,13 @@
 ##
 ## The .xml files are included within ./doc/docbook/GuideReferenceKeyboardShortcuts.xml
 ##
-## For separate windows, source code files are searched for the string "hard_coded_window_keys"  
+## For separate windows, source code files are searched for the string "HardcodedWindowKeyList"
 ## which is an array containing the shortcut key and the menu label.
 ##
 ## For the main window the source file ./src/layout-util.cc is searched for
 ## lines which contain shortcut definitions.
 ##
-## This needs to be run only when the sortcut keys have been changed
+## This needs to be run only when the shortcut keys have been changed
 ##
 
 duplicates_xml="<emphasis role=\"underline\"><link linkend=\"GuideImageSearchFindingDuplicates\">Duplicates window</link></emphasis>"
@@ -83,10 +83,10 @@ awk_window='BEGIN {
 	LINT = "fatal"
 	FS = ","
 	getline
-	while ($0 !~ /^static hard_coded_window_keys/) {getline}
+	while ($0 !~ /^static HardcodedWindowKeyList/) {getline}
 	}
 
-$0~/\{static_cast<GdkModifierType>\(0\), 0/ {exit}
+$0~/\};/ {exit}
 {
 gsub(/\{static_cast<GdkModifierType>\(0\)/, "", $1);
 gsub(/\{static_cast<GdkModifierType>\(GDK_CONTROL_MASK \+ GDK_SHIFT_MASK\)/, "Ctrl + Shift +", $1);

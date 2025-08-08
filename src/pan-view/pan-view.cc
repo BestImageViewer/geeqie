@@ -141,9 +141,9 @@ static void pan_window_dnd_init(PanWindow *pw);
  * @link pan_window_key_press_cb @endlink \n
  * @link pan_popup_menu @endlink
  *
- * See also @link hard_coded_window_keys @endlink
+ * See also @link HardcodedWindowKey @endlink
  **/
-static hard_coded_window_keys pan_view_window_keys[] = {
+static HardcodedWindowKeyList pan_view_window_keys{
 	{GDK_CONTROL_MASK, 'C', N_("Copy")},
 	{GDK_CONTROL_MASK, 'M', N_("Move")},
 	{GDK_CONTROL_MASK, 'R', N_("Rename")},
@@ -181,7 +181,6 @@ static hard_coded_window_keys pan_view_window_keys[] = {
 	{static_cast<GdkModifierType>(0), GDK_KEY_Page_Down, N_("Scroll display half screen down")},
 	{static_cast<GdkModifierType>(0), GDK_KEY_Home, N_("Scroll display half screen left")},
 	{static_cast<GdkModifierType>(0), GDK_KEY_End, N_("Scroll display half screen right")},
-	{static_cast<GdkModifierType>(0), 0, nullptr}
 };
 
 /*
@@ -2302,7 +2301,7 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 	accel_group = gtk_accel_group_new();
 	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
 
-	g_object_set_data(G_OBJECT(menu), "window_keys", pan_view_window_keys);
+	g_object_set_data(G_OBJECT(menu), "window_keys", &pan_view_window_keys);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	menu_item_add_icon_sensitive(menu, _("_Play"), GQ_ICON_PLAY, video,

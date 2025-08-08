@@ -99,9 +99,9 @@ static void view_window_notify_cb(FileData *fd, NotifyType type, gpointer data);
  *  @link view_popup_menu() @endlink \n
  *  @link view_window_key_press_cb() @endlink
  *
- * See also @link hard_coded_window_keys @endlink
+ * See also @link HardcodedWindowKey @endlink
  **/
-static hard_coded_window_keys image_window_keys[] = {
+static HardcodedWindowKeyList image_window_keys{
 	{GDK_CONTROL_MASK, 'C', N_("Copy")},
 	{GDK_CONTROL_MASK, 'M', N_("Move")},
 	{GDK_CONTROL_MASK, 'R', N_("Rename")},
@@ -149,7 +149,6 @@ static hard_coded_window_keys image_window_keys[] = {
 	{static_cast<GdkModifierType>(0), GDK_KEY_Escape, N_("Close window")},
 	{GDK_SHIFT_MASK, 'G', N_("Desaturate")},
 	{GDK_SHIFT_MASK, 'P', N_("Print")},
-	{static_cast<GdkModifierType>(0), 0, nullptr}
 };
 
 
@@ -1338,7 +1337,7 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 	accel_group = gtk_accel_group_new();
 	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
 
-	g_object_set_data(G_OBJECT(menu), "window_keys", image_window_keys);
+	g_object_set_data(G_OBJECT(menu), "window_keys", &image_window_keys);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	menu_item_add_icon(menu, _("Zoom _in"), GQ_ICON_ZOOM_IN, G_CALLBACK(view_zoom_in_cb), vw);

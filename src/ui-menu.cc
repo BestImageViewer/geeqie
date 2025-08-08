@@ -21,6 +21,7 @@
 
 #include "ui-menu.h"
 
+#include <algorithm>
 #include <cstddef>
 
 #include <pango/pango.h>
@@ -44,10 +45,8 @@
  * shortcut key displayed in the menu. The actual handling of
  * the keystroke is done elsewhere in the code.
  */
-static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_group, const hard_coded_window_keys *window_keys)
+static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_group, const HardcodedWindowKeyList &window_keys)
 {
-	gint i = 0;
-
 	const gchar *label = gtk_menu_item_get_label(GTK_MENU_ITEM(menu));
 
 	g_autofree gchar *label_text = nullptr;
@@ -55,16 +54,15 @@ static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_grou
 
 	g_auto(GStrv) label_stripped = g_strsplit(label_text, "...", 2);
 
-	while (window_keys[i].text != nullptr)
-		{
-		if (g_strcmp0(window_keys[i].text, label_stripped[0]) == 0)
-			{
-			gtk_widget_add_accelerator(menu, "activate", accel_group, window_keys[i].key_value, window_keys[i].mask, GTK_ACCEL_VISIBLE);
+	const auto has_text = [text = label_stripped[0]](const HardcodedWindowKey &window_key)
+	{
+		return g_strcmp0(window_key.text, text) == 0;
+	};
 
-			break;
-			}
-		i++;
-		}
+	const auto it = std::find_if(window_keys.cbegin(), window_keys.cend(), has_text);
+	if (it == window_keys.cend()) return;
+
+	gtk_widget_add_accelerator(menu, "activate", accel_group, it->key_value, it->mask, GTK_ACCEL_VISIBLE);
 }
 
 /**
@@ -161,10 +159,10 @@ static void menu_item_add_accelerator(GtkWidget *menu, GtkWidget *item)
 	auto *accel_group = static_cast<GtkAccelGroup *>(g_object_get_data(G_OBJECT(menu), "accel_group"));
 	if (!accel_group) return;
 
-	auto *window_keys = static_cast<hard_coded_window_keys *>(g_object_get_data(G_OBJECT(menu), "window_keys"));
+	auto *window_keys = static_cast<HardcodedWindowKeyList *>(g_object_get_data(G_OBJECT(menu), "window_keys"));
 	if (window_keys)
 		{
-		menu_item_add_accelerator(item, accel_group, window_keys);
+		menu_item_add_accelerator(item, accel_group, *window_keys);
 		}
 	else
 		{
@@ -203,10 +201,10 @@ GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar 
 
 	image = gq_gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_MENU);
 	gq_gtk_image_menu_item_set_image(GQ_GTK_IMAGE_MENU_ITEM(item), image);
+	gtk_widget_show(image);
 
 	menu_item_add_accelerator(menu, item);
 
-	gtk_widget_show(image);
 	menu_item_finish(menu, item, func, data);
 
 	return item;
@@ -222,10 +220,10 @@ GtkWidget *menu_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *
 
 	image = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_MENU);
 	gq_gtk_image_menu_item_set_image(GQ_GTK_IMAGE_MENU_ITEM(item), image);
+	gtk_widget_show(image);
 
 	menu_item_add_accelerator(menu, item);
 
-	gtk_widget_show(image);
 	menu_item_finish(menu, item, func, data);
 
 	return item;
@@ -238,7 +236,6 @@ GtkWidget *menu_item_add_sensitive(GtkWidget *menu, const gchar *label, gboolean
 
 	item = menu_item_add(menu, label, func, data);
 	gtk_widget_set_sensitive(item, sensitive);
-	menu_item_add_accelerator(menu, item);
 
 	return item;
 }
@@ -250,7 +247,6 @@ GtkWidget *menu_item_add_icon_sensitive(GtkWidget *menu, const gchar *label, con
 
 	item = menu_item_add_icon(menu, label, icon_name, func, data);
 	gtk_widget_set_sensitive(item, sensitive);
-	menu_item_add_accelerator(menu, item);
 
 	return item;
 }
@@ -261,10 +257,10 @@ GtkWidget *menu_item_add_check(GtkWidget *menu, const gchar *label, gboolean act
 	GtkWidget *item;
 
 	item = gtk_check_menu_item_new_with_mnemonic(label);
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), active);
 
 	menu_item_add_accelerator(menu, item);
 
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), active);
 	menu_item_finish(menu, item, func, data);
 
 	return item;
@@ -276,8 +272,6 @@ GtkWidget *menu_item_add_radio(GtkWidget *menu, const gchar *label, gpointer ite
 	GtkWidget *item = menu_item_add_check(menu, label, active, func, data);
 	g_object_set_data(G_OBJECT(item), "menu_item_radio_data", item_data);
 	g_object_set(G_OBJECT(item), "draw-as-radio", TRUE, NULL);
-
-	menu_item_add_accelerator(menu, item);
 
 	return item;
 }

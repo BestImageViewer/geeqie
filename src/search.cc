@@ -496,10 +496,10 @@ static void search_start_cb(GtkWidget *widget, gpointer data);
  * @link search_window_keypress_cb @endlink \n
  * @link search_result_menu @endlink
  *
- * See also @link hard_coded_window_keys @endlink
+ * See also @link HardcodedWindowKey @endlink
  **/
 
-static hard_coded_window_keys search_window_keys[] = {
+static HardcodedWindowKeyList search_window_keys{
 	{GDK_CONTROL_MASK, 'C', N_("Copy")},
 	{GDK_CONTROL_MASK, 'M', N_("Move")},
 	{GDK_CONTROL_MASK, 'R', N_("Rename")},
@@ -516,7 +516,6 @@ static hard_coded_window_keys search_window_keys[] = {
 	{static_cast<GdkModifierType>(0), 'C', N_("Collection from selection")},
 	{GDK_CONTROL_MASK, GDK_KEY_Return, N_("Start/stop search")},
 	{static_cast<GdkModifierType>(0), GDK_KEY_F3, N_("Find duplicates")},
-	{static_cast<GdkModifierType>(0), 0, nullptr}
 };
 /*
  *-------------------------------------------------------------------
@@ -1174,7 +1173,7 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 	accel_group = gtk_accel_group_new();
 	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
 
-	g_object_set_data(G_OBJECT(menu), "window_keys", search_window_keys);
+	g_object_set_data(G_OBJECT(menu), "window_keys", &search_window_keys);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	video = (on_row && sd->click_fd && sd->click_fd->format_class == FORMAT_CLASS_VIDEO);

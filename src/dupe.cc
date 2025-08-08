@@ -166,9 +166,9 @@ static gint dupe_match_link_exists(DupeItem *child, DupeItem *parent);
  *  @link dupe_window_keypress_cb() @endlink \n
  *  @link dupe_menu_popup_main() @endlink
  *
- * See also @link hard_coded_window_keys @endlink
+ * See also @link HardcodedWindowKey @endlink
  **/
-static hard_coded_window_keys dupe_window_keys[] = {
+static HardcodedWindowKeyList dupe_window_keys{
 	{GDK_CONTROL_MASK, 'C', N_("Copy")},
 	{GDK_CONTROL_MASK, 'M', N_("Move")},
 	{GDK_CONTROL_MASK, 'R', N_("Rename")},
@@ -187,7 +187,6 @@ static hard_coded_window_keys dupe_window_keys[] = {
 	{static_cast<GdkModifierType>(0), '0', N_("Select none")},
 	{static_cast<GdkModifierType>(0), '1', N_("Select group 1 duplicates")},
 	{static_cast<GdkModifierType>(0), '2', N_("Select group 2 duplicates")},
-	{static_cast<GdkModifierType>(0), 0, nullptr}
 };
 
 /**
@@ -3350,7 +3349,7 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	accel_group = gtk_accel_group_new();
 	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
 
-	g_object_set_data(G_OBJECT(menu), "window_keys", dupe_window_keys);
+	g_object_set_data(G_OBJECT(menu), "window_keys", &dupe_window_keys);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	menu_item_add_sensitive(menu, _("_View"), on_row,
@@ -3679,7 +3678,7 @@ static GtkWidget *dupe_menu_popup_second(DupeWindow *dw, DupeItem *di)
 	accel_group = gtk_accel_group_new();
 	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
 
-	g_object_set_data(G_OBJECT(menu), "window_keys", dupe_window_keys);
+	g_object_set_data(G_OBJECT(menu), "window_keys", &dupe_window_keys);
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
 
 	menu_item_add_sensitive(menu, _("_View"), on_row,
