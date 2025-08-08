@@ -1332,10 +1332,10 @@ std::vector<ActionItem> get_action_items()
 
 	for (GList *groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager); groups; groups = groups->next)
 		{
-		GtkActionGroup *action_group = GQ_GTK_ACTION_GROUP(groups->data);
-		for (GList *actions = gq_gtk_action_group_list_actions(action_group); actions; actions = actions->next)
+		g_autoptr(GList) actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
+		for (GList *work = actions; work; work = work->next)
 			{
-			GtkAction *action = GQ_GTK_ACTION(actions->data);
+			GtkAction *action = GQ_GTK_ACTION(work->data);
 
 			const gchar *accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, nullptr))

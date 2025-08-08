@@ -58,8 +58,6 @@ static gint sort_iter_compare_func (GtkTreeModel *model, GtkTreeIter *a, GtkTree
 static void command_store_populate(SarData* sar)
 {
 	GList *groups;
-	GList *actions;
-	GtkAction *action;
 	const gchar *accel_path;
 	GtkAccelKey key;
 	GtkTreeIter iter;
@@ -76,10 +74,10 @@ static void command_store_populate(SarData* sar)
 	groups = gq_gtk_ui_manager_get_action_groups(sar->lw->ui_manager);
 	while (groups)
 		{
-		actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
-		while (actions)
+		g_autoptr(GList) actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
+		for (GList *work = actions; work; work = work->next)
 			{
-			action = GQ_GTK_ACTION(actions->data);
+			GtkAction *action = GQ_GTK_ACTION(work->data);
 			accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{
@@ -141,8 +139,8 @@ static void command_store_populate(SarData* sar)
 						}
 					}
 				}
-			actions = actions->next;
 			}
+
 		groups = groups->next;
 		}
 }

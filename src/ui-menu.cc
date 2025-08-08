@@ -108,10 +108,7 @@ static gint actions_sort_cb(gconstpointer a, gconstpointer b)
 static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup *accel_group)
 {
 	GList *groups;
-	GList *actions;
-	GtkAction *action;
 	const gchar *accel_path;
-	GtkAccelKey key;
 
 	const gchar *menu_label = gtk_menu_item_get_label(GTK_MENU_ITEM(menu));
 
@@ -125,14 +122,15 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 
 	while (groups)
 		{
-		actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
+		g_autoptr(GList) actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
 		actions = g_list_sort(actions, actions_sort_cb);
 
-		while (actions)
+		for (GList *work = actions; work; work = work->next)
 			{
-			action = GQ_GTK_ACTION(actions->data);
+			GtkAction *action = GQ_GTK_ACTION(work->data);
 			accel_path = gq_gtk_action_get_accel_path(action);
-			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
+			GtkAccelKey key;
+			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key) && key.accel_key != 0)
 				{
 				g_autofree gchar *action_label = nullptr;
 				g_object_get(action, "label", &action_label, NULL);
@@ -142,16 +140,12 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 
 				if (g_strcmp0(action_label_text, menu_label_text) == 0)
 					{
-					if (key.accel_key != 0)
-						{
-						gtk_widget_add_accelerator(menu, "activate", accel_group, key.accel_key, key.accel_mods, GTK_ACCEL_VISIBLE);
-
-						break;
-						}
+					gtk_widget_add_accelerator(menu, "activate", accel_group, key.accel_key, key.accel_mods, GTK_ACCEL_VISIBLE);
+					break;
 					}
 				}
-			actions = actions->next;
 			}
+
 		groups = groups->next;
 		}
 }

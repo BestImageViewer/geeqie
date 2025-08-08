@@ -1588,8 +1588,6 @@ static void image_overlay_set_background_color_cb(GtkWidget *widget, gpointer da
 static void accel_store_populate()
 {
 	GList *groups;
-	GList *actions;
-	GtkAction *action;
 	const gchar *accel_path;
 	GtkAccelKey key;
 	GtkTreeIter iter;
@@ -1603,10 +1601,10 @@ static void accel_store_populate()
 	groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager);
 	while (groups)
 		{
-		actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
-		while (actions)
+		g_autoptr(GList) actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
+		for (GList *work = actions; work; work = work->next)
 			{
-			action = GQ_GTK_ACTION(actions->data);
+			GtkAction *action = GQ_GTK_ACTION(work->data);
 			accel_path = gq_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{
@@ -1638,7 +1636,6 @@ static void accel_store_populate()
 					                   -1);
 					}
 				}
-			actions = actions->next;
 			}
 
 		groups = groups->next;
