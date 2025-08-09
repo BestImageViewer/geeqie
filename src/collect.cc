@@ -414,6 +414,20 @@ GList *collection_contents_fd(const gchar *name)
 	return list;
 }
 
+/**
+ * @brief Add file selection list to a collection
+ * @param[in] index Index to the collection list, or -1 for new collection
+ * @param[in] list List of ::_FileData
+ *
+ */
+void collection_by_index_add_filelist(gint index, GList *list)
+{
+	g_autofree gchar *path = collection_manager_path_by_index(index);
+	CollectWindow *cw = collection_window_new(path);
+
+	collection_table_add_filelist(cw->table, list);
+}
+
 /*
  *-------------------------------------------------------------------
  * please use these to actually add/remove stuff

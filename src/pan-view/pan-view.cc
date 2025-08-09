@@ -35,6 +35,7 @@
 #include "bar-exif.h"
 #include "cache-loader.h"
 #include "cache.h"
+#include "collect.h"
 #include "compat.h"
 #include "dnd.h"
 #include "editors.h"
@@ -2281,7 +2282,7 @@ static void pan_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	auto *pw = static_cast<PanWindow *>(submenu_item_get_data(widget));
 
 	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, pan_menu_click_fd(pw));
-	pop_menu_collections(selection_list, data);
+	collection_by_index_add_filelist(GPOINTER_TO_INT(data), selection_list);
 }
 
 static GtkWidget *pan_popup_menu(PanWindow *pw)

@@ -754,7 +754,7 @@ static void layout_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	auto *lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
 
 	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, layout_image_get_fd(lw));
-	pop_menu_collections(selection_list, data);
+	collection_by_index_add_filelist(GPOINTER_TO_INT(data), selection_list);
 }
 
 static void li_pop_menu_selectable_toolbars_toggle_cb(GtkWidget *, gpointer)

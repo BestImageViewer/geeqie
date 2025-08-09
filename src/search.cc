@@ -36,7 +36,6 @@
 
 #include "bar-keywords.h"
 #include "cache.h"
-#include "collect-table.h"
 #include "collect.h"
 #include "compat.h"
 #include "dnd.h"
@@ -852,11 +851,8 @@ static void search_result_edit_selected(SearchData *sd, const gchar *key)
 
 static void search_result_collection_from_selection(SearchData *sd)
 {
-	CollectWindow *w;
-
 	g_autoptr(FileDataList) list = search_result_selection_list(sd);
-	w = collection_window_new(nullptr);
-	collection_table_add_filelist(w->table, list);
+	collection_by_index_add_filelist(-1, list);
 }
 
 static gboolean search_result_update_idle_cb(gpointer data)
@@ -1158,7 +1154,7 @@ static void search_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	auto *sd = static_cast<SearchData *>(submenu_item_get_data(widget));
 
 	g_autoptr(FileDataList) selection_list = search_result_selection_list(sd);
-	pop_menu_collections(selection_list, data);
+	collection_by_index_add_filelist(GPOINTER_TO_INT(data), selection_list);
 }
 
 static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean empty)

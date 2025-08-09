@@ -1322,7 +1322,7 @@ static void image_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	fd = image_get_fd(imd);
 
 	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, fd);
-	pop_menu_collections(selection_list, data);
+	collection_by_index_add_filelist(GPOINTER_TO_INT(data), selection_list);
 }
 
 static GtkWidget *view_popup_menu(ViewWindow *vw)

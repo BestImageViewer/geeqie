@@ -34,7 +34,6 @@
 #include <glib-object.h>
 
 #include "cache.h"
-#include "collect-table.h"
 #include "collect.h"
 #include "compat-deprecated.h"
 #include "compat.h"
@@ -3172,9 +3171,8 @@ static void dupe_window_edit_selected(DupeWindow *dw, const gchar *key)
 
 static void dupe_window_collection_from_selection(DupeWindow *dw)
 {
-	CollectWindow *w = collection_window_new(nullptr);
 	g_autoptr(FileDataList) list = dupe_listview_get_selection(dw->listview);
-	collection_table_add_filelist(w->table, list);
+	collection_by_index_add_filelist(-1, list);
 }
 
 static void dupe_window_append_file_list(DupeWindow *dw, gint on_second)
@@ -3330,7 +3328,7 @@ static void dupe_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	auto *dw = static_cast<DupeWindow *>(submenu_item_get_data(widget));
 	
 	g_autoptr(FileDataList) selection_list = dupe_listview_get_selection(dw->listview);
-	pop_menu_collections(selection_list, data);
+	collection_by_index_add_filelist(GPOINTER_TO_INT(data), selection_list);
 }
 
 static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)

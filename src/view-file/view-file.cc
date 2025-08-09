@@ -26,6 +26,7 @@
 #include <glib-object.h>
 
 #include "archives.h"
+#include "collect.h"
 #include "compat.h"
 #include "dnd.h"
 #include "dupe.h"
@@ -686,7 +687,7 @@ static void vf_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 	auto *vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
 
 	g_autoptr(FileDataList) selection_list = vf_selection_get_list(vf);
-	pop_menu_collections(selection_list, data);
+	collection_by_index_add_filelist(GPOINTER_TO_INT(data), selection_list);
 }
 
 static void vf_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)

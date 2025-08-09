@@ -57,6 +57,7 @@ void collect_manager_flush();
 
 void collect_manager_notify_cb(FileData *fd, NotifyType type, gpointer data);
 void collect_manager_list(GList **names_exc, GList **names_inc, GList **paths);
+gchar *collection_manager_path_by_index(gint index);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
