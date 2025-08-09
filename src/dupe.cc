@@ -151,8 +151,7 @@ static void dupe_dnd_init(DupeWindow *dw);
 
 static void dupe_notify_cb(FileData *fd, NotifyType type, gpointer data);
 
-static GtkWidget *submenu_add_export(GtkWidget *menu, GtkWidget **menu_item, GCallback func, gpointer data);
-static void dupe_pop_menu_export_cb(GtkWidget *widget, gpointer data);
+static void submenu_add_export(GtkWidget *menu, gboolean sensitive, gpointer data);
 
 static void dupe_init_list_cache(DupeWindow *dw);
 static void dupe_destroy_list_cache(DupeWindow *dw);
@@ -3338,11 +3337,9 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 {
 	GtkWidget *menu;
 	GtkWidget *item;
-	gint on_row;
 	GList *editmenu_fd_list;
 	GtkAccelGroup *accel_group;
-
-	on_row = (di != nullptr);
+	gboolean on_row = (di != nullptr);
 
 	menu = popup_menu_short_lived();
 
@@ -3367,8 +3364,7 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	                        G_CALLBACK(dupe_menu_select_dupes_cb<DUPE_SELECT_GROUP2>), dw);
 	menu_item_add_divider(menu);
 
-	submenu_add_export(menu, &item, G_CALLBACK(dupe_pop_menu_export_cb), dw);
-	gtk_widget_set_sensitive(item, on_row);
+	submenu_add_export(menu, on_row, dw);
 	menu_item_add_divider(menu);
 
 	editmenu_fd_list = dupe_window_get_fd_list(dw);
@@ -5147,17 +5143,18 @@ static void export_response_cb(GtkFileChooser *chooser, gint response_id, gpoint
 		}
 }
 
-static void dupe_pop_menu_export_cb(GtkWidget *widget, gpointer data)
+template<SeparatorType separator>
+static void dupe_pop_menu_export_cb(GtkWidget *, gpointer data)
 {
-	auto *dw = static_cast<DupeWindow *>(submenu_item_get_data(widget));
-	const gint index = GPOINTER_TO_INT(data);
+	auto *dw = static_cast<DupeWindow *>(data);
 
-	auto edd = g_new0(ExportDupesData, 1);
+	GtkWidget *dialog = gtk_file_chooser_dialog_new(_("Export duplicates data"), GTK_WINDOW(dw->window), GTK_FILE_CHOOSER_ACTION_SAVE,
+	                                                _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Save"), GTK_RESPONSE_ACCEPT, nullptr);
 
-	GtkWidget *dialog = gtk_file_chooser_dialog_new(_("Export duplicates data"), GTK_WINDOW(dw->window), GTK_FILE_CHOOSER_ACTION_SAVE,  _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Save"), GTK_RESPONSE_ACCEPT, nullptr);
-
+	auto *edd = g_new0(ExportDupesData, 1);
 	edd->dupewindow = dw;
 	edd->chooser = dialog;
+	edd->separator = separator;
 
 	GtkFileFilter *all_filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(all_filter, _("All files"));
@@ -5168,10 +5165,9 @@ static void dupe_pop_menu_export_cb(GtkWidget *widget, gpointer data)
 	g_autofree gchar *previous_path = g_strdup(history_list_find_last_path_by_key("export_duplicates"));
 	g_autofree gchar *base_name = g_path_get_basename(previous_path);
 
-	switch (index)
+	switch (separator)
 		{
 		case EXPORT_CSV:
-			edd->separator = EXPORT_CSV;
 			gtk_file_filter_set_name(type_filter, _("csv files"));
 			gtk_file_filter_add_pattern(type_filter, "*.csv");
 			if (base_name && g_str_has_suffix(base_name, ".csv"))
@@ -5184,7 +5180,6 @@ static void dupe_pop_menu_export_cb(GtkWidget *widget, gpointer data)
 				}
 			break;
 		case EXPORT_TSV:
-			edd->separator = EXPORT_TSV;
 			gtk_file_filter_set_name(type_filter, _("tsv files"));
 			gtk_file_filter_add_pattern(type_filter, "*.tsv");
 			if (base_name && g_str_has_suffix(base_name, ".tsv"))
@@ -5254,25 +5249,22 @@ static void dupe_pop_menu_export_cb(GtkWidget *widget, gpointer data)
 	gtk_window_present(GTK_WINDOW(dialog));
 }
 
-static GtkWidget *submenu_add_export(GtkWidget *menu, GtkWidget **menu_item, GCallback func, gpointer data)
+static void submenu_add_export(GtkWidget *menu, gboolean sensitive, gpointer data)
 {
 	GtkWidget *item;
 	GtkWidget *submenu;
 
 	item = menu_item_add(menu, _("_Export"), nullptr, nullptr);
+	gtk_widget_set_sensitive(item, sensitive);
 
 	submenu = gtk_menu_new();
-	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
-	menu_item_add_icon_sensitive(submenu, _("Export to csv"),
-					GQ_ICON_EXPORT, TRUE, G_CALLBACK(func), GINT_TO_POINTER(0));
-	menu_item_add_icon_sensitive(submenu, _("Export to tab-delimited"),
-					GQ_ICON_EXPORT, TRUE, G_CALLBACK(func), GINT_TO_POINTER(1));
+	menu_item_add_icon_sensitive(submenu, _("Export to csv"), GQ_ICON_EXPORT, TRUE,
+	                             G_CALLBACK(dupe_pop_menu_export_cb<EXPORT_CSV>), data);
+	menu_item_add_icon_sensitive(submenu, _("Export to tab-delimited"), GQ_ICON_EXPORT, TRUE,
+	                             G_CALLBACK(dupe_pop_menu_export_cb<EXPORT_TSV>), data);
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-	if (menu_item) *menu_item = item;
-
-	return submenu;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
