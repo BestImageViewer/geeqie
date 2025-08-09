@@ -63,6 +63,12 @@ enum OverlayScreenDisplaySelectedTab {
 	OVERLAY_SCREEN_DISPLAY_4
 };
 
+enum ZoomMode {
+	ZOOM_RESET_ORIGINAL	= 0,
+	ZOOM_RESET_FIT_WINDOW	= 1,
+	ZOOM_RESET_NONE		= 2
+};
+
 enum ZoomStyle {
 	ZOOM_GEOMETRIC	= 0,
 	ZOOM_ARITHMETIC	= 1

@@ -710,16 +710,25 @@ static void layout_scroll_menu_cb(GtkWidget *widget, gpointer data)
 	image_options_sync();
 }
 
-static void layout_zoom_button_press_cb(GtkWidget *, gpointer data)
+static void layout_zoom_button_press_cb(GtkWidget *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-	GtkWidget *menu;
+	GtkWidget *menu = popup_menu_short_lived();
 
-	menu = submenu_add_zoom(nullptr, G_CALLBACK(layout_zoom_menu_cb),
-			lw, FALSE, FALSE, TRUE, options->image.zoom_mode);
-
-	/* take ownership of menu */
-	g_object_ref_sink(G_OBJECT(menu));
+	menu_item_add_radio(menu, _("Zoom to original size"),
+	                    GINT_TO_POINTER(ZOOM_RESET_ORIGINAL),
+	                    options->image.zoom_mode == ZOOM_RESET_ORIGINAL,
+	                    G_CALLBACK(layout_zoom_menu_cb),
+	                    GINT_TO_POINTER(ZOOM_RESET_ORIGINAL));
+	menu_item_add_radio(menu, _("Fit image to window"),
+	                    GINT_TO_POINTER(ZOOM_RESET_FIT_WINDOW),
+	                    options->image.zoom_mode == ZOOM_RESET_FIT_WINDOW,
+	                    G_CALLBACK(layout_zoom_menu_cb),
+	                    GINT_TO_POINTER(ZOOM_RESET_FIT_WINDOW));
+	menu_item_add_radio(menu, _("Leave Zoom at previous setting"),
+	                    GINT_TO_POINTER(ZOOM_RESET_NONE),
+	                    options->image.zoom_mode == ZOOM_RESET_NONE,
+	                    G_CALLBACK(layout_zoom_menu_cb),
+	                    GINT_TO_POINTER(ZOOM_RESET_NONE));
 
 	menu_item_add_divider(menu);
 
@@ -738,9 +747,6 @@ static void layout_zoom_button_press_cb(GtkWidget *, gpointer data)
 	                    options->image.scroll_reset_method == ScrollReset::NOCHANGE,
 	                    G_CALLBACK(layout_scroll_menu_cb),
 	                    GUINT_TO_POINTER(ScrollReset::NOCHANGE));
-
-	g_signal_connect(G_OBJECT(menu), "selection_done",
-	                 G_CALLBACK(g_object_unref), NULL); // destroy the menu
 
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }

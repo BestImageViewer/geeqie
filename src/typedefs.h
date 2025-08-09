@@ -26,12 +26,6 @@
 
 #include <glib.h>
 
-enum ZoomMode {
-	ZOOM_RESET_ORIGINAL	= 0,
-	ZOOM_RESET_FIT_WINDOW	= 1,
-	ZOOM_RESET_NONE		= 2
-};
-
 enum MouseButton {
 	MOUSE_BUTTON_LEFT	= 1,
 	MOUSE_BUTTON_MIDDLE	= 2,
