@@ -264,8 +264,9 @@ GtkWidget *menu_item_add_radio(GtkWidget *menu, const gchar *label, gpointer ite
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item = menu_item_add_check(menu, label, active, func, data);
+	gtk_check_menu_item_set_draw_as_radio(GTK_CHECK_MENU_ITEM(item), TRUE);
+
 	g_object_set_data(G_OBJECT(item), "menu_item_radio_data", item_data);
-	g_object_set(G_OBJECT(item), "draw-as-radio", TRUE, NULL);
 
 	return item;
 }

@@ -1054,7 +1054,7 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 			continue;
 		if (READ_INT_CLAMP_FULL("zoom-level", zoom, 1, 8))
 			{
-			g_object_set(G_OBJECT(CHAMPLAIN_VIEW(pgd->gps_view)), "zoom-level", zoom, NULL);
+			champlain_view_set_zoom_level(CHAMPLAIN_VIEW(pgd->gps_view), zoom);
 			continue;
 			}
 		if (READ_INT_CLAMP_FULL("longitude", int_longitude, -90000000, +90000000))

@@ -3643,16 +3643,16 @@ void layout_util_sync_color(LayoutWindow *lw)
 	if (layout_image_color_profile_get_status(lw, &image_profile, &screen_profile))
 		{
 		g_autofree gchar *buf = g_strdup_printf(_("Image profile: %s\nScreen profile: %s"), image_profile, screen_profile);
-		g_object_set(G_OBJECT(action), "tooltip", buf, NULL);
+		gq_gtk_action_set_tooltip(action, buf);
 		}
 	else
 		{
-		g_object_set(G_OBJECT(action), "tooltip", _("Click to enable color management"), NULL);
+		gq_gtk_action_set_tooltip(action, _("Click to enable color management"));
 		}
 #else
 	gq_gtk_toggle_action_set_active(GQ_GTK_TOGGLE_ACTION(action), FALSE);
 	gq_gtk_action_set_sensitive(action, FALSE);
-	g_object_set(G_OBJECT(action), "tooltip", _("Color profiles not supported"), NULL);
+	gq_gtk_action_set_tooltip(action, _("Color profiles not supported"));
 #endif
 
 	action = gq_gtk_action_group_get_action(lw->action_group, "UseImageProfile");
@@ -3674,8 +3674,7 @@ void layout_util_sync_color(LayoutWindow *lw)
 			g_autofree gchar *end = layout_color_name_parse(name);
 			g_autofree gchar *buf = g_strdup_printf(_("Input _%d: %s"), i, end);
 
-			g_object_set(G_OBJECT(action), "label", buf, NULL);
-
+			gq_gtk_action_set_label(action, buf);
 			gq_gtk_action_set_visible(action, file && file[0]);
 			}
 
@@ -3828,7 +3827,7 @@ void layout_util_sync_thumb(LayoutWindow *lw)
 
 	action = gq_gtk_action_group_get_action(lw->action_group, "Thumbnails");
 	gq_gtk_toggle_action_set_active(GQ_GTK_TOGGLE_ACTION(action), lw->options.show_thumbnails);
-	g_object_set(action, "sensitive", (lw->options.file_view_type == FILEVIEW_LIST), NULL);
+	gq_gtk_action_set_sensitive(action, lw->options.file_view_type == FILEVIEW_LIST);
 }
 
 void layout_util_sync(LayoutWindow *lw)
