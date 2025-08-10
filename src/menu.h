@@ -42,7 +42,6 @@ GtkWidget *submenu_add_dir_sort(GtkWidget *menu, GCallback func, gpointer data,
 			    gboolean include_none, gboolean include_path,
 			    gboolean show_current, SortType type);
 
-gchar *alter_type_get_text(AlterType type);
 GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data);
 
 GtkWidget *submenu_add_collections(GtkWidget *menu, GtkWidget **menu_item,

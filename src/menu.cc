@@ -29,9 +29,6 @@
 #include "pixbuf-util.h"
 #include "ui-menu.h"
 
-static GtkWidget *real_submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data,
-					 GtkAccelGroup *accel_group);
-
 /*
  *-----------------------------------------------------------------------------
  * menu utils
@@ -75,7 +72,6 @@ static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
 		g_signal_connect(G_OBJECT(item), "destroy", G_CALLBACK(edit_item_destroy_cb), key);
 		}
 }
-
 
 GtkWidget *submenu_add_edit(GtkWidget *menu, GtkWidget **menu_item, GCallback func, gpointer data, GList *fd_list)
 {
@@ -243,7 +239,7 @@ GtkWidget *submenu_add_dir_sort(GtkWidget *menu, GCallback func, gpointer data,
  *-----------------------------------------------------------------------------
  */
 
-gchar *alter_type_get_text(AlterType type)
+static gchar *alter_type_get_text(AlterType type)
 {
 	switch (type)
 		{
@@ -273,26 +269,20 @@ gchar *alter_type_get_text(AlterType type)
 }
 
 static void submenu_add_alter_item(GtkWidget *menu, GCallback func, AlterType type,
-				   GtkAccelGroup *accel_group, guint accel_key, guint accel_mods)
+                                   GtkAccelGroup *accel_group, guint accel_key, guint accel_mods)
 {
-	if (accel_group)
-		{
-		GtkWidget *item = menu_item_add_simple(menu, alter_type_get_text(type), func, GINT_TO_POINTER((gint)type));
-		gtk_widget_add_accelerator(item, "activate", accel_group, accel_key, static_cast<GdkModifierType>(accel_mods), GTK_ACCEL_VISIBLE);
-		}
-	else
-		{
-		menu_item_add(menu, alter_type_get_text(type), func, GINT_TO_POINTER((gint)type));
-		}
+	GtkWidget *item = menu_item_add_simple(menu, alter_type_get_text(type), func, GINT_TO_POINTER(type));
+	gtk_widget_add_accelerator(item, "activate", accel_group, accel_key, static_cast<GdkModifierType>(accel_mods), GTK_ACCEL_VISIBLE);
 }
 
-static GtkWidget *real_submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data,
-					 GtkAccelGroup *accel_group)
+GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data)
 {
 	GtkWidget *submenu;
 
 	submenu = gtk_menu_new();
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
+
+	GtkAccelGroup *accel_group = gtk_accel_group_new();
 
 	submenu_add_alter_item(submenu, func, ALTER_ROTATE_90, accel_group, ']', 0);
 	submenu_add_alter_item(submenu, func, ALTER_ROTATE_90_CC, accel_group, '[', 0);
@@ -311,14 +301,6 @@ static GtkWidget *real_submenu_add_alter(GtkWidget *menu, GCallback func, gpoint
 		}
 
 	return submenu;
-}
-
-GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data)
-{
-	GtkAccelGroup *accel;
-
-	accel = gtk_accel_group_new();
-	return real_submenu_add_alter(menu, func, data, accel); //last accel gr
 }
 
 /*
