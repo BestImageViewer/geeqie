@@ -35,11 +35,12 @@
  *-----------------------------------------------------------------------------
  */
 
-gpointer submenu_item_get_data(GtkWidget *menu)
+gpointer submenu_item_get_data(GtkWidget *submenu_item)
 {
-	if (!gtk_widget_get_parent(menu) || !GTK_IS_MENU(gtk_widget_get_parent(menu))) return nullptr;
+	GtkWidget *submenu = gtk_widget_get_parent(submenu_item);
+	if (!submenu || !GTK_IS_MENU(submenu)) return nullptr;
 
-	return g_object_get_data(G_OBJECT(gtk_widget_get_parent(menu)), "submenu_data");
+	return g_object_get_data(G_OBJECT(submenu), "submenu_data");
 }
 
 /*

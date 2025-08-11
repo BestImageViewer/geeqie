@@ -28,7 +28,7 @@
 
 #include "typedefs.h"
 
-gpointer submenu_item_get_data(GtkWidget *menu);
+gpointer submenu_item_get_data(GtkWidget *submenu_item);
 
 GtkWidget *submenu_add_edit(GtkWidget *menu, GtkWidget **menu_item, GCallback func, gpointer data, GList *fd_list);
 
