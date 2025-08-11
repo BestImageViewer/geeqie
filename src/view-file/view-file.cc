@@ -570,11 +570,11 @@ static void vf_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 {
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	auto *vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
+	auto *vf = static_cast<ViewFile *>(data);
 	if (!vf) return;
 
 	auto sort = vf->sort;
-	sort.method = static_cast<SortType>(GPOINTER_TO_INT(data));
+	sort.method = static_cast<SortType>(GPOINTER_TO_INT(menu_item_radio_get_data(widget)));
 
 	if (sort_type_requires_metadata(sort.method))
 		{

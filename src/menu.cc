@@ -170,7 +170,7 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
 		submenu = popup_menu_short_lived();
 		}
 
-	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
+	if (!show_current) g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
 	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
 	                                  SORT_EXIFTIMEDIGITIZED, SORT_SIZE, SORT_RATING, SORT_CLASS })
@@ -179,7 +179,7 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
 			{
 			menu_item_add_radio(submenu, sort_type_get_text(sort_type),
 			                    GINT_TO_POINTER(sort_type), sort_type == type,
-			                    func, GINT_TO_POINTER(sort_type));
+			                    func, data);
 			}
 		else
 			{

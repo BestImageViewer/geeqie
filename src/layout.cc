@@ -607,11 +607,11 @@ static void layout_sort_menu_cb(GtkWidget *widget, gpointer data)
 {
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	auto *lw = static_cast<LayoutWindow *>(submenu_item_get_data(widget));
+	auto *lw = static_cast<LayoutWindow *>(data);
 	if (!lw) return;
 
 	auto sort = lw->options.file_view_list_sort;
-	sort.method = static_cast<SortType>(GPOINTER_TO_INT(data));
+	sort.method = static_cast<SortType>(GPOINTER_TO_INT(menu_item_radio_get_data(widget)));
 
 	if (sort_type_requires_metadata(sort.method))
 		{

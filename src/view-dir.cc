@@ -738,15 +738,12 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
                         G_CALLBACK(vd_pop_submenu_dir_view_as_cb), vd);
 
 	GtkWidget *submenu = gtk_menu_new();
-	menu_item_add_radio(submenu, sort_type_get_text(SORT_NAME), GINT_TO_POINTER(SORT_NAME),
-	                    vd->layout->options.dir_view_list_sort.method == SORT_NAME,
-	                    G_CALLBACK(vd_pop_menu_sort_cb), vd);
-	menu_item_add_radio(submenu, sort_type_get_text(SORT_NUMBER), GINT_TO_POINTER(SORT_NUMBER),
-	                    vd->layout->options.dir_view_list_sort.method == SORT_NUMBER,
-	                    G_CALLBACK(vd_pop_menu_sort_cb), vd);
-	menu_item_add_radio(submenu, sort_type_get_text(SORT_TIME), GINT_TO_POINTER(SORT_TIME),
-	                    vd->layout->options.dir_view_list_sort.method == SORT_TIME,
-	                    G_CALLBACK(vd_pop_menu_sort_cb), vd);
+	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME })
+		{
+		menu_item_add_radio(submenu, sort_type_get_text(sort_type), GINT_TO_POINTER(sort_type),
+		                    vd->layout->options.dir_view_list_sort.method == sort_type,
+		                    G_CALLBACK(vd_pop_menu_sort_cb), vd);
+		}
 	if (vd->type == DIRVIEW_LIST)
 		{
 		menu_item_add_check(submenu, _("Ascending"), vd->layout->options.dir_view_list_sort.ascending, G_CALLBACK(vd_pop_menu_sort_ascend_cb), (vd));
