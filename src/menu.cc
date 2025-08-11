@@ -175,8 +175,7 @@ static GtkWidget *submenu_add_sort_item(GtkWidget *menu,
 }
 
 GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
-			    gboolean include_none, gboolean include_path,
-			    gboolean show_current, SortType type)
+                            gboolean show_current, SortType type)
 {
 	GtkWidget *submenu;
 
@@ -203,32 +202,6 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
 	submenu_add_sort_item(submenu, func, SORT_SIZE, show_current, type);
 	submenu_add_sort_item(submenu, func, SORT_RATING, show_current, type);
 	submenu_add_sort_item(submenu, func, SORT_CLASS, show_current, type);
-	if (include_path) submenu_add_sort_item(submenu, func, SORT_PATH, show_current, type);
-	if (include_none) submenu_add_sort_item(submenu, func, SORT_NONE, show_current, type);
-
-	return submenu;
-}
-
-GtkWidget *submenu_add_dir_sort(GtkWidget *menu, GCallback func, gpointer data,
-			    gboolean include_none, gboolean include_path,
-			    gboolean show_current, SortType type)
-{
-	GtkWidget *submenu;
-
-	submenu = gtk_menu_new();
-	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
-
-	submenu_add_sort_item(submenu, func, SORT_NAME, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_NUMBER, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_TIME, show_current, type);
-	if (include_path) submenu_add_sort_item(submenu, func, SORT_PATH, show_current, type);
-	if (include_none) submenu_add_sort_item(submenu, func, SORT_NONE, show_current, type);
-
-	if (menu)
-		{
-		GtkWidget *item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
-		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-		}
 
 	return submenu;
 }

@@ -818,7 +818,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	menu_item_add_divider(menu);
 
 	submenu = submenu_add_sort(menu, G_CALLBACK(vf_pop_menu_sort_cb), vf,
-	                           FALSE, FALSE, TRUE, vf->sort.method);
+	                           TRUE, vf->sort.method);
 	menu_item_add_divider(submenu);
 	menu_item_add_check(submenu, _("Ascending"), vf->sort.ascending,
 	                    G_CALLBACK(vf_pop_menu_sort_ascend_cb), vf);

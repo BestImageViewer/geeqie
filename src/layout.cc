@@ -643,9 +643,8 @@ static void layout_sort_menu_case_cb(GtkWidget *, gpointer data)
 static void layout_sort_button_press_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	GtkWidget *menu;
 
-	menu = submenu_add_sort(nullptr, G_CALLBACK(layout_sort_menu_cb), lw, FALSE, FALSE, TRUE, lw->options.file_view_list_sort.method);
+	GtkWidget *menu = submenu_add_sort(nullptr, G_CALLBACK(layout_sort_menu_cb), lw, TRUE, lw->options.file_view_list_sort.method);
 
 	/* ascending option */
 	menu_item_add_divider(menu);

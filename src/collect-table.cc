@@ -1068,7 +1068,9 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 	                             G_CALLBACK(collection_table_popup_delete_cb<FALSE>), ct);
 
 	menu_item_add_divider(menu);
-	submenu = submenu_add_sort(menu, G_CALLBACK(collection_table_popup_sort_cb), ct, FALSE, TRUE, FALSE, SORT_NONE);
+	submenu = submenu_add_sort(menu, G_CALLBACK(collection_table_popup_sort_cb), ct, FALSE, SORT_NONE);
+	menu_item_add(submenu, sort_type_get_text(SORT_PATH),
+	              G_CALLBACK(collection_table_popup_sort_cb), GINT_TO_POINTER(SORT_PATH));
 	menu_item_add_divider(submenu);
 	menu_item_add(submenu, _("Randomize"),
 			G_CALLBACK(collection_table_popup_randomize_cb), ct);
