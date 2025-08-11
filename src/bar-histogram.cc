@@ -205,7 +205,7 @@ static void bar_pane_histogram_popup_channels_cb(GtkWidget *widget, gpointer dat
 
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	gint channel = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data"));
+	gint channel = GPOINTER_TO_INT(menu_item_radio_get_data(widget));
 	if (channel == phd->histogram.get_channel()) return;
 
 	phd->histogram.set_channel(channel);
@@ -219,7 +219,7 @@ static void bar_pane_histogram_popup_mode_cb(GtkWidget *widget, gpointer data)
 
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	gint mode = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data"));
+	gint mode = GPOINTER_TO_INT(menu_item_radio_get_data(widget));
 	if (mode == phd->histogram.get_mode()) return;
 
 	phd->histogram.set_mode(mode);

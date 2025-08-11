@@ -594,15 +594,13 @@ void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *, gpointer data)
 
 void bar_pane_gps_change_map_cb(GtkWidget *widget, gpointer data)
 {
-	auto pgd = static_cast<PaneGPSData *>(data);
-	gchar *mapsource;
-
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)))
 		return;
 
+	auto *pgd = static_cast<PaneGPSData *>(data);
 	if (!pgd) return;
 
-	mapsource = static_cast<gchar *>(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data"));
+	auto *mapsource = static_cast<gchar *>(menu_item_radio_get_data(widget));
 	bar_pane_gps_set_map_source(pgd, mapsource);
 }
 

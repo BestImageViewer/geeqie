@@ -642,9 +642,9 @@ static void vf_pop_menu_selection_to_mark_cb(GtkWidget *, gpointer data)
 static void vf_pop_menu_toggle_view_type_cb(GtkWidget *widget, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	auto new_type = static_cast<FileViewType>(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "menu_item_radio_data")));
 	if (!vf->layout) return;
 
+	auto new_type = static_cast<FileViewType>(GPOINTER_TO_INT(menu_item_radio_get_data(widget)));
 	layout_views_set(vf->layout, vf->layout->options.dir_view_type, new_type);
 }
 

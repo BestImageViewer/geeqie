@@ -61,6 +61,8 @@ GtkWidget *menu_item_add_check(GtkWidget *menu, const gchar *label, gboolean act
 			       GCallback func, gpointer data);
 GtkWidget *menu_item_add_radio(GtkWidget *menu, const gchar *label, gpointer item_data, gboolean active,
 			       GCallback func, gpointer data);
+gpointer menu_item_radio_get_data(GtkWidget *menu_item);
+
 void menu_item_add_divider(GtkWidget *menu);
 
 GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,

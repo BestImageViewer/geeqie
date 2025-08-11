@@ -271,6 +271,11 @@ GtkWidget *menu_item_add_radio(GtkWidget *menu, const gchar *label, gpointer ite
 	return item;
 }
 
+gpointer menu_item_radio_get_data(GtkWidget *menu_item)
+{
+	return g_object_get_data(G_OBJECT(menu_item), "menu_item_radio_data");
+}
+
 void menu_item_add_divider(GtkWidget *menu)
 {
 	GtkWidget *item = gtk_separator_menu_item_new();
