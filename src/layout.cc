@@ -647,16 +647,10 @@ static void layout_sort_button_press_cb(GtkWidget *, gpointer data)
 
 	menu = submenu_add_sort(nullptr, G_CALLBACK(layout_sort_menu_cb), lw, FALSE, FALSE, TRUE, lw->options.file_view_list_sort.method);
 
-	/* take ownership of menu */
-	g_object_ref_sink(G_OBJECT(menu));
-
 	/* ascending option */
 	menu_item_add_divider(menu);
 	menu_item_add_check(menu, _("Ascending"), lw->options.file_view_list_sort.ascending, G_CALLBACK(layout_sort_menu_ascend_cb), lw);
 	menu_item_add_check(menu, _("Case"), lw->options.file_view_list_sort.case_sensitive, G_CALLBACK(layout_sort_menu_case_cb), lw);
-
-	g_signal_connect(G_OBJECT(menu), "selection_done",
-	                 G_CALLBACK(g_object_unref), NULL); // destroy the menu
 
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }

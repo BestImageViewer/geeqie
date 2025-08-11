@@ -817,16 +817,13 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	gtk_widget_set_sensitive(item, active);
 	menu_item_add_divider(menu);
 
-	submenu = submenu_add_sort(nullptr, G_CALLBACK(vf_pop_menu_sort_cb), vf,
+	submenu = submenu_add_sort(menu, G_CALLBACK(vf_pop_menu_sort_cb), vf,
 	                           FALSE, FALSE, TRUE, vf->sort.method);
 	menu_item_add_divider(submenu);
 	menu_item_add_check(submenu, _("Ascending"), vf->sort.ascending,
 	                    G_CALLBACK(vf_pop_menu_sort_ascend_cb), vf);
 	menu_item_add_check(submenu, _("Case"), vf->sort.case_sensitive,
 	                    G_CALLBACK(vf_pop_menu_sort_case_cb), vf);
-
-	item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 
 	item = menu_item_add_radio(menu, _("Images as List"), GINT_TO_POINTER(FILEVIEW_LIST), vf->type == FILEVIEW_LIST,
                                            G_CALLBACK(vf_pop_menu_toggle_view_type_cb), vf);

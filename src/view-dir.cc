@@ -664,7 +664,6 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 	gboolean rename_delete_active = FALSE;
 	gboolean new_folder_active = FALSE;
 	GtkWidget *submenu;
-	GtkWidget *item;
 
 	active = (fd != nullptr);
 	switch (vd->type)
@@ -742,14 +741,12 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 	menu_item_add_radio(menu, _("View as _Tree"), GINT_TO_POINTER(DIRVIEW_TREE), vd->type == DIRVIEW_TREE,
                         G_CALLBACK(vd_pop_submenu_dir_view_as_cb), vd);
 
-	submenu = submenu_add_dir_sort(nullptr, G_CALLBACK(vd_pop_menu_sort_cb), vd, FALSE, FALSE, TRUE, vd->layout->options.dir_view_list_sort.method);
+	submenu = submenu_add_dir_sort(menu, G_CALLBACK(vd_pop_menu_sort_cb), vd, FALSE, FALSE, TRUE, vd->layout->options.dir_view_list_sort.method);
 	if (vd->type == DIRVIEW_LIST)
 		{
 		menu_item_add_check(submenu, _("Ascending"), vd->layout->options.dir_view_list_sort.ascending, G_CALLBACK(vd_pop_menu_sort_ascend_cb), (vd));
 		menu_item_add_check(submenu, _("Case"), vd->layout->options.dir_view_list_sort.case_sensitive, G_CALLBACK(vd_pop_menu_sort_case_cb), (vd));
 		}
-	item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 
 	menu_item_add_divider(menu);
 

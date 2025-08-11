@@ -179,7 +179,18 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
 {
 	GtkWidget *submenu;
 
-	submenu = gtk_menu_new();
+	if (menu)
+		{
+		submenu = gtk_menu_new();
+
+		GtkWidget *item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
+		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
+		}
+	else
+		{
+		submenu = popup_menu_short_lived();
+		}
+
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
 	submenu_add_sort_item(submenu, func, SORT_NAME, show_current, type);
@@ -193,15 +204,6 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
 	submenu_add_sort_item(submenu, func, SORT_CLASS, show_current, type);
 	if (include_path) submenu_add_sort_item(submenu, func, SORT_PATH, show_current, type);
 	if (include_none) submenu_add_sort_item(submenu, func, SORT_NONE, show_current, type);
-
-	if (menu)
-		{
-		GtkWidget *item;
-
-		item = menu_item_add(menu, _("Sort"), nullptr, nullptr);
-		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-		return item;
-		}
 
 	return submenu;
 }
@@ -223,11 +225,8 @@ GtkWidget *submenu_add_dir_sort(GtkWidget *menu, GCallback func, gpointer data,
 
 	if (menu)
 		{
-		GtkWidget *item;
-
-		item = menu_item_add(menu, _("Sort"), nullptr, nullptr);
+		GtkWidget *item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-		return item;
 		}
 
 	return submenu;
