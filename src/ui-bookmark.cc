@@ -113,7 +113,7 @@ constexpr std::array<GtkTargetEntry, 2> bookmark_drag_types{{
 }};
 
 std::vector<BookMarkData *> bookmark_widget_list;
-GList *bookmark_default_list = nullptr;
+std::vector<std::pair<std::string, std::string>> bookmark_default_list;
 
 const gchar *bookmark_icon(const gchar *path)
 {
@@ -588,7 +588,7 @@ static void bookmark_populate(BookMarkData *bm)
 
 	if (!bm->no_defaults && !history_list_get_by_key(bm->key.c_str()))
 		{
-		if (!bookmark_default_list)
+		if (bookmark_default_list.empty())
 			{
 			g_autofree gchar *home_buf = bookmark_string(_("Home"), homedir(), nullptr);
 			history_list_add_to_key(bm->key.c_str(), home_buf, 0);
@@ -607,25 +607,18 @@ static void bookmark_populate(BookMarkData *bm)
 				}
 			}
 
-		GList *work = bookmark_default_list;
-		while (work && work->next)
+		for (const auto &[name, default_path] : bookmark_default_list)
 			{
-			auto *name = static_cast<gchar *>(work->data);
-			work = work->next;
-			auto *path = static_cast<gchar *>(work->data);
-			work = work->next;
+			const gchar *path = default_path.c_str();
 
-			g_autofree gchar *buf = nullptr;
-			if (strcmp(name, ".") == 0)
+			if (name == ".")
 				{
 				if (bm->key == "shortcuts") continue;
 
-				buf = bookmark_string(name, history_list_find_last_path_by_key("path_list"), nullptr);
+				path = history_list_find_last_path_by_key("path_list");
 				}
-			else
-				{
-				buf = bookmark_string(name, path, nullptr);
-				}
+
+			g_autofree gchar *buf = bookmark_string(name.c_str(), path, nullptr);
 			history_list_add_to_key(bm->key.c_str(), buf, 0);
 			}
 		}
@@ -796,8 +789,8 @@ void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 static void bookmark_add_default(const gchar *name, const gchar *path)
 {
 	if (!name || !path) return;
-	bookmark_default_list = g_list_append(bookmark_default_list, g_strdup(name));
-	bookmark_default_list = g_list_append(bookmark_default_list, g_strdup(path));
+
+	bookmark_default_list.emplace_back(name, path);
 }
 
 void bookmark_setup_default()
