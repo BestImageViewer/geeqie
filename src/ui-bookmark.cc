@@ -33,6 +33,7 @@
 #include "compat.h"
 #include "history-list.h"
 #include "intl.h"
+#include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
 #include "pixbuf-util.h"
@@ -839,6 +840,44 @@ void bookmark_add_default(const gchar *name, const gchar *path)
 	if (!name || !path) return;
 	bookmark_default_list = g_list_append(bookmark_default_list, g_strdup(name));
 	bookmark_default_list = g_list_append(bookmark_default_list, g_strdup(path));
+}
+
+static void bookmark_add_response_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
+{
+	if (response_id == GTK_RESPONSE_ACCEPT)
+		{
+		GtkWidget *name_entry = gtk_file_chooser_get_extra_widget(chooser);
+		const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+		gboolean empty_name = (name[0] == '\0');
+
+		g_autoptr(GFile) file = gtk_file_chooser_get_file(chooser);
+		g_autofree gchar *selected_dir = g_file_get_path(file);
+
+		auto *list = static_cast<GtkWidget *>(data);
+		bookmark_list_add(list, empty_name ? filename_from_path(selected_dir) : name, selected_dir);
+		}
+
+	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
+}
+
+void bookmark_add_dialog(const gchar *title, GtkWidget *list)
+{
+	GtkWidget *dialog = gtk_file_chooser_dialog_new(title, nullptr,
+	                                                GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+	                                                _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                                _("Add"), GTK_RESPONSE_ACCEPT,
+	                                                nullptr);
+	gtk_file_chooser_set_create_folders(GTK_FILE_CHOOSER(dialog), TRUE);
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), layout_get_path(get_current_layout()));
+
+	GtkWidget *entry = gtk_entry_new();
+	gtk_entry_set_placeholder_text(GTK_ENTRY(entry), _("Optional name..."));
+	gtk_widget_set_tooltip_text(entry, _("Optional alias name for the shortcut.\nThis may be amended or added from the Sort Manager pane.\nIf none given, the basename of the folder is used"));
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dialog), entry);
+
+	g_signal_connect(dialog, "response", G_CALLBACK(bookmark_add_response_cb), list);
+
+	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
 }
 
 /*

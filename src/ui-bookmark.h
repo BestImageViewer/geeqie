@@ -37,6 +37,7 @@ void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path);
 
 void bookmark_add_default(const gchar *name, const gchar *path);
 
+void bookmark_add_dialog(const gchar *title, GtkWidget *list);
 
 /* history combo entry */
 
