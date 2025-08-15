@@ -153,27 +153,6 @@ bool sort_type_requires_metadata(SortType method)
 	    || method == SORT_RATING;
 }
 
-static GtkWidget *submenu_add_sort_item(GtkWidget *menu,
-					GCallback func, SortType type,
-					gboolean show_current, SortType show_type)
-{
-	GtkWidget *item;
-
-	if (show_current)
-		{
-		item = menu_item_add_radio(menu,
-					   sort_type_get_text(type), GINT_TO_POINTER((gint)type), (type == show_type),
-					   func, GINT_TO_POINTER((gint)type));
-		}
-	else
-		{
-		item = menu_item_add(menu, sort_type_get_text(type),
-				     func, GINT_TO_POINTER((gint)type));
-		}
-
-	return item;
-}
-
 GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
                             gboolean show_current, SortType type)
 {
@@ -193,15 +172,21 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
 
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
-	submenu_add_sort_item(submenu, func, SORT_NAME, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_NUMBER, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_TIME, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_CTIME, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_EXIFTIME, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_EXIFTIMEDIGITIZED, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_SIZE, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_RATING, show_current, type);
-	submenu_add_sort_item(submenu, func, SORT_CLASS, show_current, type);
+	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
+	                                  SORT_EXIFTIMEDIGITIZED, SORT_SIZE, SORT_RATING, SORT_CLASS })
+		{
+		if (show_current)
+			{
+			menu_item_add_radio(submenu, sort_type_get_text(sort_type),
+			                    GINT_TO_POINTER(sort_type), sort_type == type,
+			                    func, GINT_TO_POINTER(sort_type));
+			}
+		else
+			{
+			menu_item_add(submenu, sort_type_get_text(sort_type),
+			              func, GINT_TO_POINTER(sort_type));
+			}
+		}
 
 	return submenu;
 }
