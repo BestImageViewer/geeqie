@@ -457,12 +457,10 @@ GList *vf_selection_get_one(ViewFile *vf, FileData *fd)
 
 static void vf_pop_menu_edit_cb(GtkWidget *widget, gpointer data)
 {
-	ViewFile *vf;
-	auto key = static_cast<const gchar *>(data);
-
-	vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
-
+	auto *vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
 	if (!vf) return;
+
+	auto *key = static_cast<const gchar *>(data);
 
 	file_util_start_editor_from_filelist(key, vf_pop_menu_file_list(vf), vf->dir_fd->path, vf->listview);
 }
@@ -770,8 +768,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 		}
 
 	vf->editmenu_fd_list = vf_pop_menu_file_list(vf);
-	submenu_add_edit(menu, &item, G_CALLBACK(vf_pop_menu_edit_cb), vf, vf->editmenu_fd_list);
-	gtk_widget_set_sensitive(item, active);
+	submenu_add_edit(menu, active, vf->editmenu_fd_list, G_CALLBACK(vf_pop_menu_edit_cb), vf);
 
 	menu_item_add_icon_sensitive(menu, _("View in _new window"), GQ_ICON_NEW, active,
 				      G_CALLBACK(vf_pop_menu_view_cb), vf);

@@ -1083,11 +1083,10 @@ static void sr_menu_select_none_cb(GtkWidget *, gpointer data)
 
 static void sr_menu_edit_cb(GtkWidget *widget, gpointer data)
 {
-	SearchData *sd;
-	auto key = static_cast<const gchar *>(data);
-
-	sd = static_cast<SearchData *>(submenu_item_get_data(widget));
+	auto *sd = static_cast<SearchData *>(submenu_item_get_data(widget));
 	if (!sd) return;
+
+	auto *key = static_cast<const gchar *>(data);
 
 	search_result_edit_selected(sd, key);
 }
@@ -1191,8 +1190,7 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 	editmenu_fd_list = search_result_selection_list(sd);
 	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
 	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
-	submenu_add_edit(menu, &item, G_CALLBACK(sr_menu_edit_cb), sd, editmenu_fd_list);
-	if (!on_row) gtk_widget_set_sensitive(item, FALSE);
+	submenu_add_edit(menu, on_row, editmenu_fd_list, G_CALLBACK(sr_menu_edit_cb), sd);
 
 	submenu_add_collections(menu, &item,
 				G_CALLBACK(search_pop_menu_collections_cb), sd);

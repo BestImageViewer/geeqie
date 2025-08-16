@@ -2129,22 +2129,20 @@ static void pan_go_to_original_cb(GtkWidget *, gpointer data)
 
 static void pan_edit_cb(GtkWidget *widget, gpointer data)
 {
-	PanWindow *pw;
-	FileData *fd;
-	auto key = static_cast<const gchar *>(data);
-
-	pw = static_cast<PanWindow *>(submenu_item_get_data(widget));
+	auto *pw = static_cast<PanWindow *>(submenu_item_get_data(widget));
 	if (!pw) return;
 
-	fd = pan_menu_click_fd(pw);
-	if (fd)
+	FileData *fd = pan_menu_click_fd(pw);
+	if (!fd) return;
+
+	auto *key = static_cast<const gchar *>(data);
+
+	if (!editor_window_flag_set(key))
 		{
-		if (!editor_window_flag_set(key))
-			{
-			pan_fullscreen_toggle(pw, TRUE);
-			}
-		file_util_start_editor_from_file(key, fd, pw->imd->widget);
+		pan_fullscreen_toggle(pw, TRUE);
 		}
+
+	file_util_start_editor_from_file(key, fd, pw->imd->widget);
 }
 
 static void pan_zoom_in_cb(GtkWidget *, gpointer data)
@@ -2321,8 +2319,7 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
 	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
 
-	submenu_add_edit(menu, &item, G_CALLBACK(pan_edit_cb), pw, editmenu_fd_list);
-	gtk_widget_set_sensitive(item, active);
+	submenu_add_edit(menu, active, editmenu_fd_list, G_CALLBACK(pan_edit_cb), pw);
 
 	menu_item_add_icon_sensitive(menu, _("View in _new window"), GQ_ICON_NEW, active,
 				      G_CALLBACK(pan_new_window_cb), pw);

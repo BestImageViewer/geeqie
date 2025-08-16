@@ -3228,11 +3228,10 @@ static void dupe_menu_select_dupes_cb(GtkWidget *, gpointer data)
 
 static void dupe_menu_edit_cb(GtkWidget *widget, gpointer data)
 {
-	DupeWindow *dw;
-	auto key = static_cast<const gchar *>(data);
-
-	dw = static_cast<DupeWindow *>(submenu_item_get_data(widget));
+	auto *dw = static_cast<DupeWindow *>(submenu_item_get_data(widget));
 	if (!dw) return;
+
+	auto *key = static_cast<const gchar *>(data);
 
 	dupe_window_edit_selected(dw, key);
 }
@@ -3368,8 +3367,7 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	editmenu_fd_list = dupe_window_get_fd_list(dw);
 	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
 	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
-	submenu_add_edit(menu, &item, G_CALLBACK(dupe_menu_edit_cb), dw, editmenu_fd_list);
-	if (!on_row) gtk_widget_set_sensitive(item, FALSE);
+	submenu_add_edit(menu, on_row, editmenu_fd_list, G_CALLBACK(dupe_menu_edit_cb), dw);
 
 	submenu_add_collections(menu, &item,
 								G_CALLBACK(dupe_pop_menu_collections_cb), dw);

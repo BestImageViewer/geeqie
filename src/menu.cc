@@ -48,10 +48,6 @@ gpointer submenu_item_get_data(GtkWidget *submenu_item)
  * edit menu
  *-----------------------------------------------------------------------------
  */
-static void edit_item_destroy_cb(GtkWidget *, gpointer data)
-{
-	g_free(data);
-}
 
 static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
 {
@@ -70,18 +66,16 @@ static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
 			}
 
 		GtkWidget *item = menu_item_add_stock(menu, editor->name, stock_id, func, key);
-		g_signal_connect(G_OBJECT(item), "destroy", G_CALLBACK(edit_item_destroy_cb), key);
+		g_signal_connect_swapped(G_OBJECT(item), "destroy", G_CALLBACK(g_free), key);
 		}
 }
 
-GtkWidget *submenu_add_edit(GtkWidget *menu, GtkWidget **menu_item, GCallback func, gpointer data, GList *fd_list)
+GtkWidget *submenu_add_edit(GtkWidget *menu, gboolean sensitive, GList *fd_list, GCallback func, gpointer data)
 {
-	GtkWidget *item;
 	GtkWidget *submenu;
 	GtkAccelGroup *accel_group;
 
 	accel_group = gtk_accel_group_new();
-	item = menu_item_add(menu, _("_Plugins"), nullptr, nullptr);
 
 	submenu = gtk_menu_new();
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
@@ -90,9 +84,9 @@ GtkWidget *submenu_add_edit(GtkWidget *menu, GtkWidget **menu_item, GCallback fu
 
 	add_edit_items(submenu, func, fd_list);
 
+	GtkWidget *item = menu_item_add(menu, _("_Plugins"), nullptr, nullptr);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-
-	if (menu_item) *menu_item = item;
+	gtk_widget_set_sensitive(item, sensitive);
 
 	return submenu;
 }

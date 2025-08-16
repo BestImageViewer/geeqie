@@ -791,8 +791,7 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 	editmenu_fd_list = layout_image_get_fd_list(lw);
 	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
 	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
-	submenu = submenu_add_edit(menu, &item, G_CALLBACK(li_pop_menu_edit_cb), lw, editmenu_fd_list);
-	if (!path) gtk_widget_set_sensitive(item, FALSE);
+	submenu = submenu_add_edit(menu, !!path, editmenu_fd_list, G_CALLBACK(li_pop_menu_edit_cb), lw);
 	menu_item_add_divider(submenu);
 	item = submenu_add_alter(menu, G_CALLBACK(li_pop_menu_alter_cb), lw);
 

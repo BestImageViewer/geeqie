@@ -30,7 +30,7 @@
 
 gpointer submenu_item_get_data(GtkWidget *submenu_item);
 
-GtkWidget *submenu_add_edit(GtkWidget *menu, GtkWidget **menu_item, GCallback func, gpointer data, GList *fd_list);
+GtkWidget *submenu_add_edit(GtkWidget *menu, gboolean sensitive, GList *fd_list, GCallback func, gpointer data);
 
 gchar *sort_type_get_text(SortType method);
 bool sort_type_requires_metadata(SortType method);
