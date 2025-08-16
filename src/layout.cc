@@ -685,21 +685,20 @@ static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 	return button;
 }
 
-static void layout_zoom_menu_cb(GtkWidget *widget, gpointer data)
+template<ZoomMode mode>
+static void layout_zoom_menu_cb(GtkWidget *widget, gpointer)
 {
-	ZoomMode mode;
-
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	mode = static_cast<ZoomMode>GPOINTER_TO_INT(data);
 	options->image.zoom_mode = mode;
 }
 
-static void layout_scroll_menu_cb(GtkWidget *widget, gpointer data)
+template<ScrollReset scroll_reset_method>
+static void layout_scroll_menu_cb(GtkWidget *widget, gpointer)
 {
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	options->image.scroll_reset_method = static_cast<ScrollReset>(GPOINTER_TO_UINT(data));
+	options->image.scroll_reset_method = scroll_reset_method;
 	image_options_sync();
 }
 
@@ -707,39 +706,27 @@ static void layout_zoom_button_press_cb(GtkWidget *, gpointer)
 {
 	GtkWidget *menu = popup_menu_short_lived();
 
-	menu_item_add_radio(menu, _("Zoom to original size"),
-	                    GINT_TO_POINTER(ZOOM_RESET_ORIGINAL),
+	menu_item_add_radio(menu, _("Zoom to original size"), nullptr,
 	                    options->image.zoom_mode == ZOOM_RESET_ORIGINAL,
-	                    G_CALLBACK(layout_zoom_menu_cb),
-	                    GINT_TO_POINTER(ZOOM_RESET_ORIGINAL));
-	menu_item_add_radio(menu, _("Fit image to window"),
-	                    GINT_TO_POINTER(ZOOM_RESET_FIT_WINDOW),
+	                    G_CALLBACK(layout_zoom_menu_cb<ZOOM_RESET_ORIGINAL>), nullptr);
+	menu_item_add_radio(menu, _("Fit image to window"), nullptr,
 	                    options->image.zoom_mode == ZOOM_RESET_FIT_WINDOW,
-	                    G_CALLBACK(layout_zoom_menu_cb),
-	                    GINT_TO_POINTER(ZOOM_RESET_FIT_WINDOW));
-	menu_item_add_radio(menu, _("Leave Zoom at previous setting"),
-	                    GINT_TO_POINTER(ZOOM_RESET_NONE),
+	                    G_CALLBACK(layout_zoom_menu_cb<ZOOM_RESET_FIT_WINDOW>), nullptr);
+	menu_item_add_radio(menu, _("Leave Zoom at previous setting"), nullptr,
 	                    options->image.zoom_mode == ZOOM_RESET_NONE,
-	                    G_CALLBACK(layout_zoom_menu_cb),
-	                    GINT_TO_POINTER(ZOOM_RESET_NONE));
+	                    G_CALLBACK(layout_zoom_menu_cb<ZOOM_RESET_NONE>), nullptr);
 
 	menu_item_add_divider(menu);
 
-	menu_item_add_radio(menu, _("Scroll to top left corner"),
-	                    GUINT_TO_POINTER(ScrollReset::TOPLEFT),
+	menu_item_add_radio(menu, _("Scroll to top left corner"), nullptr,
 	                    options->image.scroll_reset_method == ScrollReset::TOPLEFT,
-	                    G_CALLBACK(layout_scroll_menu_cb),
-	                    GUINT_TO_POINTER(ScrollReset::TOPLEFT));
-	menu_item_add_radio(menu, _("Scroll to image center"),
-	                    GUINT_TO_POINTER(ScrollReset::CENTER),
+	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::TOPLEFT>), nullptr);
+	menu_item_add_radio(menu, _("Scroll to image center"), nullptr,
 	                    options->image.scroll_reset_method == ScrollReset::CENTER,
-	                    G_CALLBACK(layout_scroll_menu_cb),
-	                    GUINT_TO_POINTER(ScrollReset::CENTER));
-	menu_item_add_radio(menu, _("Keep the region from previous image"),
-	                    GUINT_TO_POINTER(ScrollReset::NOCHANGE),
+	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::CENTER>), nullptr);
+	menu_item_add_radio(menu, _("Keep the region from previous image"), nullptr,
 	                    options->image.scroll_reset_method == ScrollReset::NOCHANGE,
-	                    G_CALLBACK(layout_scroll_menu_cb),
-	                    GUINT_TO_POINTER(ScrollReset::NOCHANGE));
+	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::NOCHANGE>), nullptr);
 
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }

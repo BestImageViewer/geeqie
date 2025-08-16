@@ -198,6 +198,7 @@ static void bar_pane_histogram_destroy(gpointer data)
 	g_free(phd);
 }
 
+template<HistogramChannel channel>
 static void bar_pane_histogram_popup_channels_cb(GtkWidget *widget, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
@@ -205,13 +206,13 @@ static void bar_pane_histogram_popup_channels_cb(GtkWidget *widget, gpointer dat
 
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	gint channel = GPOINTER_TO_INT(menu_item_radio_get_data(widget));
 	if (channel == phd->histogram.get_channel()) return;
 
 	phd->histogram.set_channel(channel);
 	bar_pane_histogram_update(phd);
 }
 
+template<HistogramMode mode>
 static void bar_pane_histogram_popup_mode_cb(GtkWidget *widget, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
@@ -219,7 +220,6 @@ static void bar_pane_histogram_popup_mode_cb(GtkWidget *widget, gpointer data)
 
 	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
 
-	gint mode = GPOINTER_TO_INT(menu_item_radio_get_data(widget));
 	if (mode == phd->histogram.get_mode()) return;
 
 	phd->histogram.set_mode(mode);
@@ -235,16 +235,16 @@ static GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd)
 	menu = popup_menu_short_lived();
 
 	/* use the same strings as in layout-util.cc */
-	menu_item_add_radio(menu, _("Histogram on _Red"),   GINT_TO_POINTER(HCHAN_R), channel == HCHAN_R, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
-	menu_item_add_radio(menu, _("Histogram on _Green"), GINT_TO_POINTER(HCHAN_G), channel == HCHAN_G, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
-	menu_item_add_radio(menu, _("Histogram on _Blue"),  GINT_TO_POINTER(HCHAN_B), channel == HCHAN_B, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
-	menu_item_add_radio(menu, _("_Histogram on RGB"),   GINT_TO_POINTER(HCHAN_RGB), channel == HCHAN_RGB, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
-	menu_item_add_radio(menu, _("Histogram on _Value"), GINT_TO_POINTER(HCHAN_MAX), channel == HCHAN_MAX, G_CALLBACK(bar_pane_histogram_popup_channels_cb), phd);
+	menu_item_add_radio(menu, _("Histogram on _Red"),   nullptr, channel == HCHAN_R, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_R>), phd);
+	menu_item_add_radio(menu, _("Histogram on _Green"), nullptr, channel == HCHAN_G, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_G>), phd);
+	menu_item_add_radio(menu, _("Histogram on _Blue"),  nullptr, channel == HCHAN_B, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_B>), phd);
+	menu_item_add_radio(menu, _("_Histogram on RGB"),   nullptr, channel == HCHAN_RGB, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_RGB>), phd);
+	menu_item_add_radio(menu, _("Histogram on _Value"), nullptr, channel == HCHAN_MAX, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_MAX>), phd);
 
 	menu_item_add_divider(menu);
 
-	menu_item_add_radio(menu, _("Li_near Histogram"), GINT_TO_POINTER(HMODE_LINEAR), mode == HMODE_LINEAR, G_CALLBACK(bar_pane_histogram_popup_mode_cb), phd);
-	menu_item_add_radio(menu, _("L_og Histogram"),    GINT_TO_POINTER(HMODE_LOG), mode == HMODE_LOG, G_CALLBACK(bar_pane_histogram_popup_mode_cb), phd);
+	menu_item_add_radio(menu, _("Li_near Histogram"), nullptr, mode == HMODE_LINEAR, G_CALLBACK(bar_pane_histogram_popup_mode_cb<HMODE_LINEAR>), phd);
+	menu_item_add_radio(menu, _("L_og Histogram"),    nullptr, mode == HMODE_LOG, G_CALLBACK(bar_pane_histogram_popup_mode_cb<HMODE_LOG>), phd);
 
 	return menu;
 }

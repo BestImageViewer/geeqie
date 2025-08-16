@@ -564,12 +564,12 @@ static void vd_pop_menu_cut_path_cb(GtkWidget *, gpointer data)
 	file_util_copy_path_to_clipboard(vd->click_fd, FALSE, ClipboardAction::CUT);
 }
 
-static void vd_pop_submenu_dir_view_as_cb(GtkWidget *widget, gpointer data)
+template<DirViewType dir_view_type>
+static void vd_pop_submenu_dir_view_as_cb(GtkWidget *, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
-	auto new_type = static_cast<DirViewType>(GPOINTER_TO_INT(menu_item_radio_get_data(widget)));
-	layout_views_set(vd->layout, new_type, vd->layout->options.file_view_type);
+	layout_views_set(vd->layout, dir_view_type, vd->layout->options.file_view_type);
 }
 
 static void vd_pop_menu_refresh_cb(GtkWidget *, gpointer data)
@@ -731,11 +731,10 @@ GtkWidget *vd_pop_menu(ViewDir *vd, FileData *fd)
 	menu_item_add_divider(menu);
 
 
-	menu_item_add_radio(menu, _("View as _List"), GINT_TO_POINTER(DIRVIEW_LIST), vd->type == DIRVIEW_LIST,
-                        G_CALLBACK(vd_pop_submenu_dir_view_as_cb), vd);
-
-	menu_item_add_radio(menu, _("View as _Tree"), GINT_TO_POINTER(DIRVIEW_TREE), vd->type == DIRVIEW_TREE,
-                        G_CALLBACK(vd_pop_submenu_dir_view_as_cb), vd);
+	menu_item_add_radio(menu, _("View as _List"), nullptr, vd->type == DIRVIEW_LIST,
+	                    G_CALLBACK(vd_pop_submenu_dir_view_as_cb<DIRVIEW_LIST>), vd);
+	menu_item_add_radio(menu, _("View as _Tree"), nullptr, vd->type == DIRVIEW_TREE,
+	                    G_CALLBACK(vd_pop_submenu_dir_view_as_cb<DIRVIEW_TREE>), vd);
 
 	GtkWidget *submenu = gtk_menu_new();
 	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME })
