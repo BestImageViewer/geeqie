@@ -2096,9 +2096,6 @@ void pan_window_new(FileData *dir_fd)
  *-----------------------------------------------------------------------------
  */
 
-#define INFO_IMAGE_SIZE_KEY "image_size_data"
-
-
 static void pan_new_window_cb(GtkWidget *, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
@@ -2229,11 +2226,12 @@ static void pan_info_toggle_exif_cb(GtkWidget *widget, gpointer data)
 	/** @FIXME sync info now */
 }
 
-static void pan_info_toggle_image_cb(GtkWidget *widget, gpointer data)
+template<PanImageSize pan_image_size>
+static void pan_info_toggle_image_cb(GtkWidget *, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
 
-	pw->info_image_size = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), INFO_IMAGE_SIZE_KEY));
+	pw->info_image_size = pan_image_size;
 	/** @FIXME sync info now */
 }
 
@@ -2367,31 +2365,18 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 	submenu = gtk_menu_new();
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 
-	item = menu_item_add_check(submenu, _("_None"), (pw->info_image_size == PAN_IMAGE_SIZE_THUMB_NONE),
-				   G_CALLBACK(pan_info_toggle_image_cb), pw);
-	g_object_set_data(G_OBJECT(item), INFO_IMAGE_SIZE_KEY, GINT_TO_POINTER(PAN_IMAGE_SIZE_THUMB_NONE));
-
-	item = menu_item_add_check(submenu, _("_Full size"), (pw->info_image_size == PAN_IMAGE_SIZE_100),
-				   G_CALLBACK(pan_info_toggle_image_cb), pw);
-	g_object_set_data(G_OBJECT(item), INFO_IMAGE_SIZE_KEY, GINT_TO_POINTER(PAN_IMAGE_SIZE_100));
-
-	item = menu_item_add_check(submenu, _("1:2 (50%)"), (pw->info_image_size == PAN_IMAGE_SIZE_50),
-				   G_CALLBACK(pan_info_toggle_image_cb), pw);
-	g_object_set_data(G_OBJECT(item), INFO_IMAGE_SIZE_KEY, GINT_TO_POINTER(PAN_IMAGE_SIZE_50));
-
-	item = menu_item_add_check(submenu, _("1:3 (33%)"), (pw->info_image_size == PAN_IMAGE_SIZE_33),
-				   G_CALLBACK(pan_info_toggle_image_cb), pw);
-	g_object_set_data(G_OBJECT(item), INFO_IMAGE_SIZE_KEY, GINT_TO_POINTER(PAN_IMAGE_SIZE_33));
-
-	item = menu_item_add_check(submenu, _("1:4 (25%)"), (pw->info_image_size == PAN_IMAGE_SIZE_25),
-				   G_CALLBACK(pan_info_toggle_image_cb), pw);
-	g_object_set_data(G_OBJECT(item), INFO_IMAGE_SIZE_KEY, GINT_TO_POINTER(PAN_IMAGE_SIZE_25));
-
-	item = menu_item_add_check(submenu, _("1:10 (10%)"), (pw->info_image_size == PAN_IMAGE_SIZE_10),
-				   G_CALLBACK(pan_info_toggle_image_cb), pw);
-	g_object_set_data(G_OBJECT(item), INFO_IMAGE_SIZE_KEY, GINT_TO_POINTER(PAN_IMAGE_SIZE_10));
-
-
+	menu_item_add_check(submenu, _("_None"), pw->info_image_size == PAN_IMAGE_SIZE_THUMB_NONE,
+	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_THUMB_NONE>), pw);
+	menu_item_add_check(submenu, _("_Full size"), pw->info_image_size == PAN_IMAGE_SIZE_100,
+	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_100>), pw);
+	menu_item_add_check(submenu, _("1:2 (50%)"), pw->info_image_size == PAN_IMAGE_SIZE_50,
+	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_50>), pw);
+	menu_item_add_check(submenu, _("1:3 (33%)"), pw->info_image_size == PAN_IMAGE_SIZE_33,
+	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_33>), pw);
+	menu_item_add_check(submenu, _("1:4 (25%)"), pw->info_image_size == PAN_IMAGE_SIZE_25,
+	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_25>), pw);
+	menu_item_add_check(submenu, _("1:10 (10%)"), pw->info_image_size == PAN_IMAGE_SIZE_10,
+	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_10>), pw);
 
 	menu_item_add_divider(menu);
 
