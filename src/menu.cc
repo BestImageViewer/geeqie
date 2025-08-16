@@ -264,20 +264,17 @@ GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data)
 /**
  * @brief Add submenu consisting of "New collection", and list of existing collections to a right-click menu.
  * @param[in] menu
- * @param[out] menu_item
+ * @param[in] sensitive
  * @param[in] func
  * @param[in] data
  *
  *  Used by all image windows
  */
-GtkWidget *submenu_add_collections(GtkWidget *menu, GtkWidget **menu_item,
-										GCallback func, gpointer data)
+GtkWidget *submenu_add_collections(GtkWidget *menu, gboolean sensitive,
+                                   GCallback func, gpointer data)
 {
-	GtkWidget *item;
 	GtkWidget *submenu;
 	GList *collection_list = nullptr;
-
-	item = menu_item_add(menu, _("_Add to Collection"), nullptr, nullptr);
 
 	submenu = gtk_menu_new();
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
@@ -295,8 +292,9 @@ GtkWidget *submenu_add_collections(GtkWidget *menu, GtkWidget **menu_item,
 		menu_item_add(submenu, collection_name, func, GINT_TO_POINTER(index));
 		}
 
+	GtkWidget *item = menu_item_add(menu, _("_Add to Collection"), nullptr, nullptr);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
-	if (menu_item) *menu_item = item;
+	gtk_widget_set_sensitive(item, sensitive);
 
 	g_list_free_full(collection_list, g_free);
 

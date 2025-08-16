@@ -2350,9 +2350,8 @@ static GtkWidget *pan_popup_menu(PanWindow *pw)
 
 	menu_item_add_divider(menu);
 
-	submenu = submenu_add_collections(menu, &item,
-				G_CALLBACK(pan_pop_menu_collections_cb), pw);
-	gtk_widget_set_sensitive(item, TRUE);
+	submenu = submenu_add_collections(menu, TRUE,
+	                                  G_CALLBACK(pan_pop_menu_collections_cb), pw);
 	menu_item_add_divider(menu);
 
 

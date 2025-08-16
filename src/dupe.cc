@@ -3333,7 +3333,6 @@ static void dupe_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 {
 	GtkWidget *menu;
-	GtkWidget *item;
 	GList *editmenu_fd_list;
 	GtkAccelGroup *accel_group;
 	gboolean on_row = (di != nullptr);
@@ -3369,9 +3368,8 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
 	submenu_add_edit(menu, on_row, editmenu_fd_list, G_CALLBACK(dupe_menu_edit_cb), dw);
 
-	submenu_add_collections(menu, &item,
-								G_CALLBACK(dupe_pop_menu_collections_cb), dw);
-	gtk_widget_set_sensitive(item, on_row);
+	submenu_add_collections(menu, on_row,
+	                        G_CALLBACK(dupe_pop_menu_collections_cb), dw);
 
 	menu_item_add_icon_sensitive(menu, _("Print..."), GQ_ICON_PRINT, on_row,
 				G_CALLBACK(dupe_menu_print_cb), dw);

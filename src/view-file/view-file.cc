@@ -704,7 +704,6 @@ static void vf_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)
 GtkWidget *vf_pop_menu(ViewFile *vf)
 {
 	GtkWidget *menu;
-	GtkWidget *item;
 	GtkWidget *submenu;
 	gboolean active = FALSE;
 	gboolean class_archive = FALSE;
@@ -809,9 +808,8 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 				G_CALLBACK(vf_pop_menu_duplicates_cb), vf);
 	menu_item_add_divider(menu);
 
-	submenu = submenu_add_collections(menu, &item,
-				G_CALLBACK(vf_pop_menu_collections_cb), vf);
-	gtk_widget_set_sensitive(item, active);
+	submenu = submenu_add_collections(menu, active,
+	                                  G_CALLBACK(vf_pop_menu_collections_cb), vf);
 	menu_item_add_divider(menu);
 
 	submenu = submenu_add_sort(menu, G_CALLBACK(vf_pop_menu_sort_cb), vf,

@@ -1159,7 +1159,6 @@ static void search_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
 static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean empty)
 {
 	GtkWidget *menu;
-	GtkWidget *item;
 	GList *editmenu_fd_list;
 	gboolean video;
 	GtkAccelGroup *accel_group;
@@ -1192,9 +1191,8 @@ static GtkWidget *search_result_menu(SearchData *sd, gboolean on_row, gboolean e
 	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
 	submenu_add_edit(menu, on_row, editmenu_fd_list, G_CALLBACK(sr_menu_edit_cb), sd);
 
-	submenu_add_collections(menu, &item,
-				G_CALLBACK(search_pop_menu_collections_cb), sd);
-	gtk_widget_set_sensitive(item, on_row);
+	submenu_add_collections(menu, on_row,
+	                        G_CALLBACK(search_pop_menu_collections_cb), sd);
 
 	menu_item_add_icon_sensitive(menu, _("Print..."), GQ_ICON_PRINT, on_row,
 				      G_CALLBACK(sr_menu_print_cb), sd);

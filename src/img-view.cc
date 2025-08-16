@@ -1376,9 +1376,8 @@ static GtkWidget *view_popup_menu(ViewWindow *vw)
 
 	menu_item_add_divider(menu);
 
-	submenu_add_collections(menu, &item,
-				G_CALLBACK(image_pop_menu_collections_cb), vw);
-	gtk_widget_set_sensitive(item, TRUE);
+	submenu_add_collections(menu, TRUE,
+	                        G_CALLBACK(image_pop_menu_collections_cb), vw);
 	menu_item_add_divider(menu);
 
 	if (vw->ss)

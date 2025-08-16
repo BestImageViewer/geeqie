@@ -836,9 +836,8 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 	if (!path) gtk_widget_set_sensitive(item, FALSE);
 	menu_item_add_divider(menu);
 
-	submenu = submenu_add_collections(menu, &item,
-				G_CALLBACK(layout_pop_menu_collections_cb), lw);
-	gtk_widget_set_sensitive(item, TRUE);
+	submenu = submenu_add_collections(menu, TRUE,
+	                                  G_CALLBACK(layout_pop_menu_collections_cb), lw);
 	menu_item_add_divider(menu);
 
 	if (layout_image_slideshow_active(lw))
