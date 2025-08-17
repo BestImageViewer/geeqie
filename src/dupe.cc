@@ -4079,8 +4079,10 @@ static gboolean dupe_window_keypress_cb(GtkWidget *widget, GdkEventKey *event, g
 					dupe_window_append_file_list(dw, FALSE);
 					break;
 				case 'T': case 't':
-					gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dw->button_thumbs),
-						!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(dw->button_thumbs)));
+					{
+					auto *button_thumbs = GTK_TOGGLE_BUTTON(dw->button_thumbs);
+					gtk_toggle_button_set_active(button_thumbs, !gtk_toggle_button_get_active(button_thumbs));
+					}
 					break;
 				case 'W': case 'w':
 					dupe_window_close(dw);

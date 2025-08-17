@@ -1471,8 +1471,10 @@ static gboolean search_window_keypress_cb(GtkWidget *, GdkEventKey *event, gpoin
 		switch (event->keyval)
 			{
 			case 'T': case 't':
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(sd->ui.button_thumbs),
-				                             !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(sd->ui.button_thumbs)));
+				{
+				auto *button_thumbs = GTK_TOGGLE_BUTTON(sd->ui.button_thumbs);
+				gtk_toggle_button_set_active(button_thumbs, !gtk_toggle_button_get_active(button_thumbs));
+				}
 				break;
 			case 'W': case 'w':
 				search_window_close(sd);

@@ -3286,25 +3286,17 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 
 static void action_radio_changed_cb(GtkAction *action, GtkAction *current, gpointer data)
 {
-	auto button = static_cast<GtkToggleButton *>(data);
-
-	if (action == current )
-		{
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-		}
-	else
-		{
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
-		}
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data), action == current);
 }
 
 static void action_toggle_activate_cb(GtkAction* self, gpointer data)
 {
 	auto button = static_cast<GtkToggleButton *>(data);
+	const gboolean action_active = gq_gtk_toggle_action_get_active(GQ_GTK_TOGGLE_ACTION(self));
 
-	if (gq_gtk_toggle_action_get_active(GQ_GTK_TOGGLE_ACTION(self)) != gtk_toggle_button_get_active(button))
+	if (gtk_toggle_button_get_active(button) != action_active)
 		{
-		gtk_toggle_button_set_active(button, gq_gtk_toggle_action_get_active(GQ_GTK_TOGGLE_ACTION(self)));
+		gtk_toggle_button_set_active(button, action_active);
 		}
 }
 
