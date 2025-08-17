@@ -148,6 +148,13 @@ static ExifTextList ExifOrientationList[] = {
 	EXIF_TEXT_LIST_END
 };
 
+enum ExifUnitType {
+	EXIF_UNIT_UNKNOWN	= 0,
+	EXIF_UNIT_NOUNIT	= 1,
+	EXIF_UNIT_INCH		= 2,
+	EXIF_UNIT_CENTIMETER	= 3
+};
+
 static ExifTextList ExifUnitList[] = {
 	{ EXIF_UNIT_UNKNOWN,	N_("unknown") },
 	{ EXIF_UNIT_NOUNIT,	"" },

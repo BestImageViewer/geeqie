@@ -86,13 +86,6 @@ enum ExifOrientationType {
 	EXIF_ORIENTATION_LEFT_BOTTOM	= 8
 };
 
-enum ExifUnitType {
-	EXIF_UNIT_UNKNOWN	= 0,
-	EXIF_UNIT_NOUNIT	= 1,
-	EXIF_UNIT_INCH		= 2,
-	EXIF_UNIT_CENTIMETER	= 3
-};
-
 struct ExifFormattedText
 {
 	const gchar *key;
