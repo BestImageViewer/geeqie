@@ -764,20 +764,16 @@ static void li_pop_menu_selectable_toolbars_toggle_cb(GtkWidget *, gpointer)
 
 static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 {
-	GtkWidget *menu;
 	GtkWidget *item;
 	GtkWidget *submenu;
-	const gchar *path;
-	gboolean fullscreen;
-	GList *editmenu_fd_list;
-	GtkAccelGroup *accel_group;
 
-	path = layout_image_get_path(lw);
-	fullscreen = layout_image_full_screen_active(lw);
+	const gchar *path = layout_image_get_path(lw);
+	gboolean has_path = path != nullptr;
+	gboolean fullscreen = layout_image_full_screen_active(lw);
 
-	menu = popup_menu_short_lived();
+	GtkWidget *menu = popup_menu_short_lived();
 
-	accel_group = gtk_accel_group_new();
+	GtkAccelGroup *accel_group = gtk_accel_group_new();
 	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
 
 	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
@@ -788,52 +784,49 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 	menu_item_add_icon(menu, _("Zoom to fit"), GQ_ICON_ZOOM_FIT, G_CALLBACK(li_pop_menu_zoom_fit_cb), lw);
 	menu_item_add_divider(menu);
 
-	editmenu_fd_list = layout_image_get_fd_list(lw);
+	GList *editmenu_fd_list = layout_image_get_fd_list(lw);
 	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
 	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
-	submenu = submenu_add_edit(menu, !!path, editmenu_fd_list, G_CALLBACK(li_pop_menu_edit_cb), lw);
+	submenu = submenu_add_edit(menu, has_path, editmenu_fd_list, G_CALLBACK(li_pop_menu_edit_cb), lw);
 	menu_item_add_divider(submenu);
 	item = submenu_add_alter(menu, G_CALLBACK(li_pop_menu_alter_cb), lw);
 
 	item = menu_item_add_icon(menu, _("View in _new window"), GQ_ICON_NEW, G_CALLBACK(li_pop_menu_new_cb), lw);
-	if (!path || fullscreen) gtk_widget_set_sensitive(item, FALSE);
+	gtk_widget_set_sensitive(item, has_path && !fullscreen);
 
 	item = menu_item_add(menu, _("_Go to directory view"), G_CALLBACK(li_set_layout_path_cb), lw);
-	if (!path || li_check_if_current_path(lw, path)) gtk_widget_set_sensitive(item, FALSE);
+	gtk_widget_set_sensitive(item, has_path && !li_check_if_current_path(lw, path));
 
 	item = menu_item_add_icon(menu, _("Open archive"), GQ_ICON_OPEN, G_CALLBACK(li_open_archive_cb), lw);
-	if (!path || lw->image->image_fd->format_class != FORMAT_CLASS_ARCHIVE)
-		{
-		gtk_widget_set_sensitive(item, FALSE);
-		}
+	gtk_widget_set_sensitive(item, has_path && lw->image->image_fd->format_class == FORMAT_CLASS_ARCHIVE);
 
 	menu_item_add_divider(menu);
 
 	item = menu_item_add_icon(menu, _("_Copy..."), GQ_ICON_COPY, G_CALLBACK(li_pop_menu_copy_cb), lw);
-	if (!path) gtk_widget_set_sensitive(item, FALSE);
+	gtk_widget_set_sensitive(item, has_path);
 	item = menu_item_add(menu, _("_Move..."), G_CALLBACK(li_pop_menu_move_cb), lw);
-	if (!path) gtk_widget_set_sensitive(item, FALSE);
+	gtk_widget_set_sensitive(item, has_path);
 	item = menu_item_add(menu, _("_Rename..."), G_CALLBACK(li_pop_menu_rename_cb), lw);
-	if (!path) gtk_widget_set_sensitive(item, FALSE);
+	gtk_widget_set_sensitive(item, has_path);
 	item = menu_item_add(menu, _("_Copy to clipboard"),
 	                     G_CALLBACK(li_pop_menu_copy_path_cb<TRUE>), lw);
 	item = menu_item_add(menu, _("_Copy to clipboard (unquoted)"),
 	                     G_CALLBACK(li_pop_menu_copy_path_cb<FALSE>), lw);
 	item = menu_item_add(menu, _("Copy _image to clipboard"), G_CALLBACK(li_pop_menu_copy_image_cb), lw);
 	item = menu_item_add(menu, _("Cut to clipboard"), G_CALLBACK(li_pop_menu_cut_path_cb), lw);
-	if (!path) gtk_widget_set_sensitive(item, FALSE);
+	gtk_widget_set_sensitive(item, has_path);
 	menu_item_add_divider(menu);
 
 	item = menu_item_add_icon(menu, options->file_ops.confirm_move_to_trash ?
 	                              _("Move to Trash...") : _("Move to Trash"),
 	                          GQ_ICON_DELETE,
 	                          G_CALLBACK(li_pop_menu_delete_cb<TRUE>), lw);
-	if (!path) gtk_widget_set_sensitive(item, FALSE);
+	gtk_widget_set_sensitive(item, has_path);
 	item = menu_item_add_icon(menu, options->file_ops.confirm_delete ?
 	                              _("_Delete...") : _("_Delete"),
 	                          GQ_ICON_DELETE_SHRED,
 	                          G_CALLBACK(li_pop_menu_delete_cb<FALSE>), lw);
-	if (!path) gtk_widget_set_sensitive(item, FALSE);
+	gtk_widget_set_sensitive(item, has_path);
 	menu_item_add_divider(menu);
 
 	submenu = submenu_add_collections(menu, TRUE,
@@ -879,7 +872,7 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	item = menu_item_add_check(menu, _("Hide Selectable Bars"), lw->options.selectable_toolbars_hidden,
 	                           G_CALLBACK(li_pop_menu_selectable_toolbars_toggle_cb), nullptr);
-	if (fullscreen) gtk_widget_set_sensitive(item, FALSE);
+	gtk_widget_set_sensitive(item, !fullscreen);
 
 	return menu;
 }

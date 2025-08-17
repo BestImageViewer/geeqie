@@ -181,7 +181,7 @@ static void bar_sort_undo_set(SortData *sd, GList *src_list, const gchar *dest)
 	if (sd->undo_button)
 		{
 		gtk_widget_set_sensitive(sd->undo_button,
-					((sd->undo_src_list ) && sd->undo_dest_list));
+		                         sd->undo_src_list && sd->undo_dest_list);
 		}
 }
 

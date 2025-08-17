@@ -768,10 +768,7 @@ GtkWidget *bar_pane_gps_menu(PaneGPSData *pgd)
 	                    G_CALLBACK(bar_pane_gps_enable_markers_checked_toggle_cb), pgd);
 	map_centre = menu_item_add_check(menu, _("Centre map on marker"), pgd->centre_map_checked,
 	                                 G_CALLBACK(bar_pane_gps_centre_map_checked_toggle_cb), pgd);
-	if (!pgd->enable_markers_checked)
-		{
-		gtk_widget_set_sensitive(map_centre, FALSE);
-		}
+	gtk_widget_set_sensitive(map_centre, pgd->enable_markers_checked);
 
 	g_object_unref(map_factory);
 

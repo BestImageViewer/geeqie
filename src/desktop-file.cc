@@ -169,7 +169,7 @@ void editor_window_entry_changed_cb(GtkWidget *, gpointer data)
 
 	if (!modified)
 		{
-		modified = strcmp(ew->desktop_name, content);
+		modified = strcmp(ew->desktop_name, content) != 0;
 		}
 
 	gtk_widget_set_sensitive(ew->save_button, modified);

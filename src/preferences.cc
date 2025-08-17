@@ -2156,12 +2156,9 @@ static void config_tab_general(GtkWidget *notebook)
 		}
 
 	group = pref_group_new(vbox, FALSE, _("Timezone database"), GTK_ORIENTATION_VERTICAL);
-	hbox = pref_box_new(group, TRUE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	gtk_widget_set_sensitive(group, internet_available);
 
-	if (!internet_available)
-		{
-		gtk_widget_set_sensitive(group, FALSE);
-		}
+	hbox = pref_box_new(group, TRUE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
 	tz = g_new0(TZData, 1);
 
