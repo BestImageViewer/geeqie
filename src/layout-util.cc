@@ -438,18 +438,12 @@ static void layout_menu_move_to_trash_key_cb(GtkAction *, gpointer data)
 		}
 }
 
+template<gboolean disable>
 static void layout_menu_disable_grouping_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	file_data_disable_grouping_list(layout_selection_list(lw), TRUE);
-}
-
-static void layout_menu_enable_grouping_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	file_data_disable_grouping_list(layout_selection_list(lw), FALSE);
+	file_data_disable_grouping_list(layout_selection_list(lw), disable);
 }
 
 void layout_menu_close_cb(GtkAction *, gpointer data)
@@ -524,7 +518,8 @@ static void layout_menu_select_overunderexposed_cb(GtkToggleAction *action, gpoi
 	layout_image_set_overunderexposed(lw, gq_gtk_toggle_action_get_active(action));
 }
 
-static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean keep_date)
+template<gboolean keep_date>
+static void layout_menu_write_rotate_cb(GtkToggleAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -569,16 +564,6 @@ static void layout_menu_write_rotate(GtkToggleAction *, gpointer data, gboolean 
 			gtk_widget_show(gd->dialog);
 			}
 	});
-}
-
-static void layout_menu_write_rotate_keep_date_cb(GtkToggleAction *action, gpointer data)
-{
-	layout_menu_write_rotate(action, data, TRUE);
-}
-
-static void layout_menu_write_rotate_cb(GtkToggleAction *action, gpointer data)
-{
-	layout_menu_write_rotate(action, data, FALSE);
 }
 
 static void layout_menu_config_cb(GtkAction *, gpointer data)
@@ -2566,9 +2551,9 @@ static GtkActionEntry menu_entries[] = {
   { "DeleteAlt2",            GQ_ICON_USER_TRASH,                N_("Move selection to Trash..."),                       "KP_Delete",           N_("Move selection to Trash..."),                      CB(layout_menu_move_to_trash_key_cb) },
   { "Delete",                GQ_ICON_USER_TRASH,                N_("Move selection to Trash..."),                       "<control>D",          N_("Move selection to Trash..."),                      CB(layout_menu_delete_cb<TRUE>) },
   { "DeleteWindow",          GQ_ICON_DELETE,                    N_("Delete window"),                                    nullptr,               N_("Delete window"),                                   CB(layout_menu_window_delete_cb) },
-  { "DisableGrouping",       nullptr,                           N_("Disable file groupi_ng"),                           nullptr,               N_("Disable file grouping"),                           CB(layout_menu_disable_grouping_cb) },
+  { "DisableGrouping",       nullptr,                           N_("Disable file groupi_ng"),                           nullptr,               N_("Disable file grouping"),                           CB(layout_menu_disable_grouping_cb<TRUE>) },
   { "EditMenu",              nullptr,                           N_("_Edit"),                                            nullptr,               nullptr,                                               nullptr },
-  { "EnableGrouping",        nullptr,                           N_("Enable file _grouping"),                            nullptr,               N_("Enable file grouping"),                            CB(layout_menu_enable_grouping_cb) },
+  { "EnableGrouping",        nullptr,                           N_("Enable file _grouping"),                            nullptr,               N_("Enable file grouping"),                            CB(layout_menu_disable_grouping_cb<FALSE>) },
   { "EscapeAlt1",            GQ_ICON_LEAVE_FULLSCREEN,          N_("_Leave full screen"),                               "Q",                   N_("Leave full screen"),                               CB(layout_menu_escape_cb) },
   { "Escape",                GQ_ICON_LEAVE_FULLSCREEN,          N_("_Leave full screen"),                              "Escape",               N_("Leave full screen"),                               CB(layout_menu_escape_cb) },
   { "ExifWin",               PIXBUF_INLINE_ICON_EXIF,           N_("_Exif window"),                                     "<control>E",          N_("Exif window"),                                     CB(layout_menu_bar_exif_cb) },
@@ -2673,8 +2658,8 @@ static GtkActionEntry menu_entries[] = {
   { "ViewMenu",              nullptr,                           N_("_View"),                                            nullptr,               nullptr,                                               CB(layout_menu_view_menu_cb)  },
   { "Wallpaper",             nullptr,                           N_("Set as _wallpaper"),                                nullptr,               N_("Set as wallpaper"),                                CB(layout_menu_wallpaper_cb) },
   { "WindowsMenu",           nullptr,                           N_("_Windows"),                                         nullptr,               nullptr,                                               CB(layout_menu_windows_menu_cb)  },
-  { "WriteRotationKeepDate", nullptr,                           N_("_Write orientation to file (preserve timestamp)"),  nullptr,               N_("Write orientation to file (preserve timestamp)"),  CB(layout_menu_write_rotate_keep_date_cb) },
-  { "WriteRotation",         nullptr,                           N_("_Write orientation to file"),                       nullptr,               N_("Write orientation to file"),                       CB(layout_menu_write_rotate_cb) },
+  { "WriteRotationKeepDate", nullptr,                           N_("_Write orientation to file (preserve timestamp)"),  nullptr,               N_("Write orientation to file (preserve timestamp)"),  CB(layout_menu_write_rotate_cb<TRUE>) },
+  { "WriteRotation",         nullptr,                           N_("_Write orientation to file"),                       nullptr,               N_("Write orientation to file"),                       CB(layout_menu_write_rotate_cb<FALSE>) },
   { "Zoom100Alt1",           GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "KP_Divide",           N_("Zoom 1:1"),                                        CB(layout_menu_zoom_1_1_cb<FALSE>) },
   { "Zoom100",               GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "Z",                   N_("Zoom 1:1"),                                        CB(layout_menu_zoom_1_1_cb<FALSE>) },
   { "Zoom200",               GQ_ICON_GENERIC,                   N_("Zoom _2:1"),                                        nullptr,               N_("Zoom 2:1"),                                        CB(layout_menu_zoom_2_1_cb<FALSE>) },
