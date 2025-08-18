@@ -158,11 +158,12 @@ static BookButtonData *bookmark_from_string(const gchar *text)
 
 	if (path_ptr)
 		{
+		static const size_t marker_path_len = strlen(MARKER_PATH);
 		gint l;
 
 		l = path_ptr - text;
 		b->name = g_strndup(text, l);
-		path_ptr += strlen(MARKER_PATH);
+		path_ptr += marker_path_len;
 		if (icon_ptr)
 			{
 			l = icon_ptr - path_ptr;
@@ -181,8 +182,8 @@ static BookButtonData *bookmark_from_string(const gchar *text)
 
 	if (icon_ptr)
 		{
-		icon_ptr += strlen(MARKER_ICON);
-		b->icon = g_strdup(icon_ptr);
+		static const size_t marker_icon_len = strlen(MARKER_ICON);
+		b->icon = g_strdup(icon_ptr + marker_icon_len);
 		}
 
 	return b;

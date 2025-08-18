@@ -276,8 +276,9 @@ void sig_handler_cb(int signo, siginfo_t *info, void *)
 	len = write(STDERR_FILENO, signal_name, strlen(signal_name));
 	len = write(STDERR_FILENO, "\n", 1);
 
+	const gchar *code_descr = (info->si_code == SEGV_MAPERR) ? "Address not mapped" : "Invalid permissions";
 	len = write(STDERR_FILENO, "Code: ", 6);
-	len = write(STDERR_FILENO,  (info->si_code == SEGV_MAPERR) ? "Address not mapped" : "Invalid permissions", strlen((info->si_code == SEGV_MAPERR) ? "Address not mapped" : "Invalid permissions"));
+	len = write(STDERR_FILENO, code_descr, strlen(code_descr));
 	len = write(STDERR_FILENO, "\n", 1);
 
 	len = write(STDERR_FILENO, "Address: ", 9);

@@ -1091,7 +1091,7 @@ static void filter_store_ext_edit_cb(GtkCellRendererText *, gchar *path_str, gch
 	GtkTreePath *tpath;
 	GtkTreeIter iter;
 
-	if (!new_text || strlen(new_text) < 1) return;
+	if (!new_text || *new_text == '\0') return;
 
 	tpath = gtk_tree_path_new_from_string(path_str);
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);

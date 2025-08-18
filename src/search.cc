@@ -2094,7 +2094,7 @@ static gboolean search_file_next(SearchData *sd)
 			}
 		}
 
-	if (match && sd->match_comment_enable && sd->search_comment && strlen(sd->search_comment))
+	if (match && sd->match_comment_enable && sd->search_comment && sd->search_comment[0] != '\0')
 		{
 		tested = TRUE;
 		match = FALSE;
@@ -2124,7 +2124,7 @@ static gboolean search_file_next(SearchData *sd)
 			}
 		}
 
-	if (match && sd->match_exif_enable && sd->search_exif_tag && strlen(sd->search_exif_tag))
+	if (match && sd->match_exif_enable && sd->search_exif_tag && sd->search_exif_tag[0] != '\0')
 		{
 		tested = TRUE;
 		match = FALSE;

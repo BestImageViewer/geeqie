@@ -356,7 +356,6 @@ static void bar_expander_add_cb(GtkWidget *widget, gpointer)
 
 	config = bar_pane_get_default_config(id);
 	if (config) load_config_from_buf(config, strlen(config), FALSE);
-
 }
 
 

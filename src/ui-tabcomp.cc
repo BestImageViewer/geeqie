@@ -267,7 +267,7 @@ static void tab_completion_popup_cb(GtkWidget *widget, gpointer data)
 
 	g_autofree gchar *buf = g_build_filename(td->dir_path, name, NULL);
 	gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
-	gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
+	gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
 	tab_completion_emit_tab_signal(td);
 }
@@ -332,7 +332,7 @@ static gboolean tab_completion_do(TabCompData *td)
 		{
 		g_autofree gchar *entry_dir = g_strdup(G_DIR_SEPARATOR_S); /** @FIXME root directory win32 */
 		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
-		gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(entry_dir));
+		gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 		return FALSE;
 		}
 
@@ -354,7 +354,7 @@ static gboolean tab_completion_do(TabCompData *td)
 		if (home_exp)
 			{
 			gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
-			gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(entry_dir));
+			gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 			}
 		return home_exp;
 		}
@@ -369,7 +369,7 @@ static gboolean tab_completion_do(TabCompData *td)
 			if (home_exp)
 				{
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
-				gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(entry_dir));
+				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 				}
 
 			tab_completion_read_dir(td, entry_dir);
@@ -386,7 +386,7 @@ static gboolean tab_completion_do(TabCompData *td)
 					buf = g_strconcat(buf, G_DIR_SEPARATOR_S, NULL);
 					}
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
-				gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
+				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 				}
 #ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
 			else
@@ -400,7 +400,7 @@ static gboolean tab_completion_do(TabCompData *td)
 
 		g_autofree gchar *buf = g_strconcat(entry_dir, G_DIR_SEPARATOR_S, NULL);
 		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
-		gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
+		gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 		return TRUE;
 		}
 
@@ -418,7 +418,7 @@ static gboolean tab_completion_do(TabCompData *td)
 		{
 		GList *list;
 		GList *poss = nullptr;
-		gint l = strlen(entry_file);
+		size_t l = strlen(entry_file);
 
 		if (!td->dir_path || !td->file_list || strcmp(td->dir_path, entry_dir) != 0)
 			{
@@ -444,12 +444,11 @@ static gboolean tab_completion_do(TabCompData *td)
 
 				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
-				gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
+				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 				g_list_free(poss);
 				return TRUE;
 				}
 
-			gsize c = strlen(entry_file);
 			gboolean done = FALSE;
 			auto test_file = static_cast<gchar *>(poss->data);
 
@@ -459,22 +458,22 @@ static gboolean tab_completion_do(TabCompData *td)
 				while (list && !done)
 					{
 					auto file = static_cast<gchar *>(list->data);
-					if (strlen(file) < c || strncmp(test_file, file, c) != 0)
+					if (strlen(file) < l || strncmp(test_file, file, l) != 0)
 						{
 						done = TRUE;
 						}
 					list = list->next;
 					}
-				c++;
+				l++;
 				}
-			c -= 2;
-			if (c > 0)
+			l -= 2;
+			if (l > 0)
 				{
 				g_autofree gchar *file = g_strdup(test_file);
-				file[c] = '\0';
+				file[l] = '\0';
 				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
-				gtk_editable_set_position(GTK_EDITABLE(td->entry), strlen(buf));
+				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
 #ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
 				poss = g_list_sort(poss, simple_sort);

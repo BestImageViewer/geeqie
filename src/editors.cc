@@ -1060,7 +1060,7 @@ static EditorFlags editor_command_one(const EditorDescription *editor, GList *li
 			{
 			g_autofree gchar *buf = g_strdup_printf(_("Failed to run command:\n%s\n"), editor->file);
 
-			editor_verbose_window_fill(ed->vd, buf, strlen(buf));
+			editor_verbose_window_fill(ed->vd, buf, -1);
 			}
 		else
 			{
@@ -1116,7 +1116,7 @@ static EditorFlags editor_command_next_start(EditorData *ed)
 			gtk_widget_set_sensitive(ed->vd->button_stop, (ed->list != nullptr) );
 			if ((ed->flags & EDITOR_FOR_EACH) && fd)
 				{
-				editor_verbose_window_fill(ed->vd, fd->path, strlen(fd->path));
+				editor_verbose_window_fill(ed->vd, fd->path, -1);
 				editor_verbose_window_fill(ed->vd, "\n", 1);
 				}
 			}

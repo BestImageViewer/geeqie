@@ -314,11 +314,10 @@ gboolean metadata_write_perform(FileData *fd)
 {
 	gboolean success;
 	ExifData *exif;
-	guint lf;
 
 	g_assert(fd->change);
 
-	lf = strlen(GQ_CACHE_EXT_METADATA);
+	static const size_t lf = strlen(GQ_CACHE_EXT_METADATA);
 	if (fd->change->dest &&
 	    g_ascii_strncasecmp(fd->change->dest + strlen(fd->change->dest) - lf, GQ_CACHE_EXT_METADATA, lf) == 0)
 		{

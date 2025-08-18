@@ -703,7 +703,7 @@ void file_dialog_add_path_widgets(FileDialog *fdlg, const gchar *default_path, c
 	if (fdlg->dest_path)
 		{
 		gq_gtk_entry_set_text(GTK_ENTRY(fdlg->entry), fdlg->dest_path);
-		gtk_editable_set_position(GTK_EDITABLE(fdlg->entry), strlen(fdlg->dest_path));
+		gtk_editable_set_position(GTK_EDITABLE(fdlg->entry), -1);
 		}
 
 	g_signal_connect(G_OBJECT(fdlg->entry), "changed",

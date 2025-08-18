@@ -444,8 +444,7 @@ static void layout_path_entry_tab_cb(const gchar *path, gpointer data)
 			gint pos = -1;
 			/* put the G_DIR_SEPARATOR back, if we are in tab completion for a dir and result was path change */
 			gtk_editable_insert_text(GTK_EDITABLE(lw->path_entry), G_DIR_SEPARATOR_S, -1, &pos);
-			gtk_editable_set_position(GTK_EDITABLE(lw->path_entry),
-						  strlen(gq_gtk_entry_get_text(GTK_ENTRY(lw->path_entry))));
+			gtk_editable_set_position(GTK_EDITABLE(lw->path_entry), -1);
 			}
 		}
 	else if (lw->dir_fd)
