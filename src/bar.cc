@@ -236,7 +236,18 @@ struct BarData
 	gint width;
 };
 
-static const gchar *bar_pane_get_default_config(const gchar *id);
+static const gchar *bar_pane_get_default_config(const gchar *id)
+{
+	const KnownPanes *pane = known_panes;
+
+	while (pane->id)
+		{
+		if (strcmp(pane->id, id) == 0) break;
+		pane++;
+		}
+	if (!pane->id) return nullptr;
+	return pane->config;
+}
 
 template<gboolean up, gboolean single_step>
 static void bar_expander_move_cb(GtkWidget *, gpointer data)
@@ -339,22 +350,10 @@ static void bar_expander_delete_cb(GtkWidget *, gpointer data)
 	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(expander)), expander);
 }
 
-static void bar_expander_add_cb(GtkWidget *widget, gpointer)
+static void bar_expander_add_cb(GtkWidget *, gpointer data)
 {
-	const KnownPanes *pane = known_panes;
-	auto id = static_cast<const gchar *>(g_object_get_data(G_OBJECT(widget), "pane_add_id"));
-	const gchar *config;
+	const auto *config = static_cast<const gchar *>(data);
 
-	if (!id) return;
-
-	while (pane->id)
-		{
-		if (strcmp(pane->id, id) == 0) break;
-		pane++;
-		}
-	if (!pane->id) return;
-
-	config = bar_pane_get_default_config(id);
 	if (config) load_config_from_buf(config, strlen(config), FALSE);
 }
 
@@ -418,27 +417,6 @@ static void bar_menu_popup(GtkWidget *widget)
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }
 
-static void bar_menu_add_popup(GtkWidget *widget)
-{
-	GtkWidget *menu;
-	GtkWidget *bar;
-	const KnownPanes *pane = known_panes;
-
-	bar = widget;
-
-	menu = popup_menu_short_lived();
-
-	while (pane->id)
-		{
-		GtkWidget *item;
-		item = menu_item_add_icon(menu, _(pane->title), GQ_ICON_ADD, G_CALLBACK(bar_expander_add_cb), bar);
-		g_object_set_data(G_OBJECT(item), "pane_add_id", const_cast<gchar *>(pane->id));
-		pane++;
-		}
-
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-}
-
 
 static gboolean bar_menu_expander_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer)
 {
@@ -468,9 +446,17 @@ static void bar_expander_cb(GObject *object, GParamSpec *, gpointer)
 		}
 }
 
-static gboolean bar_menu_add_cb(GtkWidget *widget, GdkEventButton *, gpointer)
+static gboolean bar_menu_add_cb(GtkWidget *, GdkEventButton *, gpointer)
 {
-	bar_menu_add_popup(widget);
+	GtkWidget *menu = popup_menu_short_lived();
+
+	for (const KnownPanes *pane = known_panes; pane->id; pane++)
+		{
+		menu_item_add_icon(menu, _(pane->title), GQ_ICON_ADD,
+		                   G_CALLBACK(bar_expander_add_cb), const_cast<gchar *>(pane->config));
+		}
+
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 	return TRUE;
 }
 
@@ -761,7 +747,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	gq_gtk_box_pack_end(GTK_BOX(bd->widget), add_box, FALSE, FALSE, 0);
 	tbar = pref_toolbar_new(add_box);
 	bd->add_button = pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
-					     _("Add Pane"), G_CALLBACK(bar_menu_add_cb), bd);
+	                                     _("Add Pane"), G_CALLBACK(bar_menu_add_cb), nullptr);
 	gtk_widget_show(add_box);
 
 #if HAVE_LIBCHAMPLAIN_GTK
@@ -833,19 +819,6 @@ gboolean bar_pane_translate_title(PaneType type, const gchar *id, gchar **title)
 	g_free(*title);
 	*title = g_strdup(_(pane->title));
 	return TRUE;
-}
-
-static const gchar *bar_pane_get_default_config(const gchar *id)
-{
-	const KnownPanes *pane = known_panes;
-
-	while (pane->id)
-		{
-		if (strcmp(pane->id, id) == 0) break;
-		pane++;
-		}
-	if (!pane->id) return nullptr;
-	return pane->config;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
