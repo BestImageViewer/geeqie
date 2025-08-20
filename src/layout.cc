@@ -1901,7 +1901,7 @@ void layout_split_change(LayoutWindow *lw, ImageSplitMode mode)
 			{
 			gtk_widget_hide(lw->split_images[i]->widget);
 			if (gtk_widget_get_parent(lw->split_images[i]->widget) != lw->utility_paned)
-				gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(lw->split_images[i]->widget)), lw->split_images[i]->widget);
+				widget_remove_from_parent(lw->split_images[i]->widget);
 			}
 		}
 	gtk_container_remove(GTK_CONTAINER(lw->utility_paned), lw->split_image_widget);
@@ -2076,19 +2076,19 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 
 	/* preserve utility_box (image + sidebars), menu_bar and toolbars to be reused later in layout_grid_setup */
 	/* lw->image is preserved together with lw->utility_box */
-	if (lw->utility_box) gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(lw->utility_box)), lw->utility_box);
+	if (lw->utility_box) widget_remove_from_parent(lw->utility_box);
 
 	if (options->expand_menu_toolbar)
 		{
-		if (lw->toolbar[TOOLBAR_STATUS]) gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(lw->toolbar[TOOLBAR_STATUS])), lw->toolbar[TOOLBAR_STATUS]);
+		if (lw->toolbar[TOOLBAR_STATUS]) widget_remove_from_parent(lw->toolbar[TOOLBAR_STATUS]);
 
-		if (lw->menu_tool_bar) gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(lw->menu_tool_bar)), lw->menu_tool_bar);
+		if (lw->menu_tool_bar) widget_remove_from_parent(lw->menu_tool_bar);
 		}
 	else
 		{
-		if (lw->menu_bar) gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(lw->menu_bar)), lw->menu_bar);
-			for (i = 0; i < TOOLBAR_COUNT; i++)
-				if (lw->toolbar[i]) gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(lw->toolbar[i])), lw->toolbar[i]);
+		if (lw->menu_bar) widget_remove_from_parent(lw->menu_bar);
+		for (i = 0; i < TOOLBAR_COUNT; i++)
+			if (lw->toolbar[i]) widget_remove_from_parent(lw->toolbar[i]);
 		}
 
 	/* clear it all */

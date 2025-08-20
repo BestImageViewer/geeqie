@@ -233,5 +233,8 @@ gboolean window_get_pointer_position(GdkWindow *window, GdkPoint &pos);
 GdkRectangle window_get_position_geometry(GdkWindow *window);
 GdkRectangle window_get_root_origin_geometry(GdkWindow *window);
 gboolean window_received_event(GdkWindow *window, GdkPoint event);
+
+void widget_remove_from_parent(GtkWidget *widget);
+void widget_remove_from_parent_cb(GtkWidget *, gpointer data);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

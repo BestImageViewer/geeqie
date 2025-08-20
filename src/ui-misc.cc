@@ -1475,4 +1475,14 @@ gboolean window_received_event(GdkWindow *window, GdkPoint event)
 	       y <= event.y && event.y <= y + height;
 }
 
+void widget_remove_from_parent(GtkWidget *widget)
+{
+	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(widget)), widget);
+}
+
+void widget_remove_from_parent_cb(GtkWidget *, gpointer data)
+{
+	widget_remove_from_parent(GTK_WIDGET(data));
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

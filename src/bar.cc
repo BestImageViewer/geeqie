@@ -46,11 +46,6 @@ namespace
 
 constexpr gint SIDEBAR_DEFAULT_WIDTH = 250;
 
-void remove_child_from_parent(gpointer data)
-{
-	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(GTK_WIDGET(data))), GTK_WIDGET(data));
-}
-
 } // namespace
 
 struct KnownPanes
@@ -343,12 +338,6 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	gtk_widget_grab_focus(GTK_WIDGET(spin));
 }
 
-static void bar_expander_delete_cb(GtkWidget *, gpointer data)
-{
-	auto expander = static_cast<GtkWidget *>(data);
-	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(expander)), expander);
-}
-
 static void bar_expander_add_cb(GtkWidget *, gpointer data)
 {
 	const auto *config = static_cast<const gchar *>(data);
@@ -409,7 +398,7 @@ static void bar_menu_popup(GtkWidget *widget)
 			menu_item_add_divider(menu);
 			}
 
-		menu_item_add_icon(menu, _("Remove"), GQ_ICON_DELETE, G_CALLBACK(bar_expander_delete_cb), expander);
+		menu_item_add_icon(menu, _("Remove"), GQ_ICON_DELETE, G_CALLBACK(widget_remove_from_parent_cb), expander);
 		menu_item_add_divider(menu);
 		}
 
@@ -558,7 +547,7 @@ void bar_clear(GtkWidget *bar)
 
 	list = gtk_container_get_children(GTK_CONTAINER(bd->vbox));
 
-	g_list_free_full(list, remove_child_from_parent);
+	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(widget_remove_from_parent));
 }
 
 void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)

@@ -83,7 +83,7 @@ void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 	PanViewFilterUi *ui = pw->filter_ui;
 
 	ui->filter_elements = g_list_remove_link(ui->filter_elements, cb_state->filter_element);
-	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(GTK_WIDGET(widget))), GTK_WIDGET(widget));
+	widget_remove_from_parent(GTK_WIDGET(widget));
 	pan_filter_callback_state_free(cb_state);
 
 	gtk_label_set_text(GTK_LABEL(pw->filter_ui->filter_label), _("Removed keyword…"));

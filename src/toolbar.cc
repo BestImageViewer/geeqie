@@ -94,11 +94,6 @@ static void toolbar_item_move_cb(GtkWidget *, gpointer data)
 	gtk_box_reorder_child(GTK_BOX(box), list_item, pos);
 }
 
-static void toolbar_item_delete_cb(GtkWidget *, gpointer data)
-{
-	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(GTK_WIDGET(data))), GTK_WIDGET(data));
-}
-
 static void toolbar_menu_popup(GtkWidget *widget)
 {
 	GtkWidget *menu;
@@ -116,7 +111,8 @@ static void toolbar_menu_popup(GtkWidget *widget)
 		menu_item_add_icon(menu, _("Move to _bottom"), GQ_ICON_GO_BOTTOM,
 		                   (GCallback)toolbar_item_move_cb<FALSE, FALSE>, widget);
 		menu_item_add_divider(menu);
-		menu_item_add_icon(menu, _("Remove"), GQ_ICON_DELETE, G_CALLBACK(toolbar_item_delete_cb), widget);
+		menu_item_add_icon(menu, _("Remove"), GQ_ICON_DELETE,
+		                   G_CALLBACK(widget_remove_from_parent_cb), widget);
 		menu_item_add_divider(menu);
 		}
 

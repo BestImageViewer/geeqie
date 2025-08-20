@@ -132,7 +132,7 @@ void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 
 	if (ee->box)
 		{
-		gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(ee->box)), ee->box);
+		widget_remove_from_parent(ee->box);
 		}
 
 	ee->box = gtk_box_new(horizontal ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL, 0);
@@ -591,12 +591,6 @@ void bar_pane_exif_conf_dialog_cb(GtkWidget *, gpointer data)
 	bar_pane_exif_conf_dialog(widget);
 }
 
-void bar_pane_exif_delete_entry_cb(GtkWidget *, gpointer data)
-{
-	auto entry = static_cast<GtkWidget *>(data);
-	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(entry)), entry);
-}
-
 #if HAVE_GTK4
 void bar_pane_exif_copy_entry_cb(GtkWidget *, gpointer data)
 {
@@ -641,7 +635,7 @@ void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped)
 		g_autofree gchar *copy = g_strdup_printf(_("Copy \"%s\""), ee->title);
 
 		menu_item_add_icon(menu, conf, GQ_ICON_EDIT, G_CALLBACK(bar_pane_exif_conf_dialog_cb), widget);
-		menu_item_add_icon(menu, del, GQ_ICON_DELETE, G_CALLBACK(bar_pane_exif_delete_entry_cb), widget);
+		menu_item_add_icon(menu, del, GQ_ICON_DELETE, G_CALLBACK(widget_remove_from_parent_cb), widget);
 		menu_item_add_icon(menu, copy, GQ_ICON_COPY, G_CALLBACK(bar_pane_exif_copy_entry_cb), widget);
 		menu_item_add_divider(menu);
 		}
