@@ -230,7 +230,6 @@ struct BarData
 	GtkWidget *vbox;
 	FileData *fd;
 	GtkWidget *label_file_name;
-	GtkWidget *add_button;
 
 	LayoutWindow *lw;
 	gint width;
@@ -746,8 +745,8 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	DEBUG_NAME(add_box);
 	gq_gtk_box_pack_end(GTK_BOX(bd->widget), add_box, FALSE, FALSE, 0);
 	tbar = pref_toolbar_new(add_box);
-	bd->add_button = pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
-	                                     _("Add Pane"), G_CALLBACK(bar_menu_add_cb), nullptr);
+	pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
+	                    _("Add Pane"), G_CALLBACK(bar_menu_add_cb), nullptr);
 	gtk_widget_show(add_box);
 
 #if HAVE_LIBCHAMPLAIN_GTK
