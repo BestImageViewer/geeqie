@@ -38,6 +38,7 @@
 #include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
+#include "menu.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
@@ -60,70 +61,9 @@ ToolbarData *toolbarlist[2];
 
 } // namespace
 
-/**
- * @brief
- * @param widget Not used
- * @param data Pointer to vbox list item
- * @param up Up/Down movement
- * @param single_step Move up/down one step, or to top/bottom
- *
- */
-template<gboolean up, gboolean single_step>
-static void toolbar_item_move_cb(GtkWidget *, gpointer data)
-{
-	auto list_item = static_cast<GtkWidget *>(data);
-	GtkWidget *box;
-	gint pos = 0;
-
-	if (!list_item) return;
-	box = gtk_widget_get_ancestor(list_item, GTK_TYPE_BOX);
-	if (!box) return;
-
-	gtk_container_child_get(GTK_CONTAINER(box), list_item, "position", &pos, NULL);
-
-	if (single_step)
-		{
-		pos = up ? (pos - 1) : (pos + 1);
-		pos = std::max(pos, 0);
-		}
-	else
-		{
-		pos = up ? 0 : -1;
-		}
-
-	gtk_box_reorder_child(GTK_BOX(box), list_item, pos);
-}
-
-static void toolbar_menu_popup(GtkWidget *widget)
-{
-	GtkWidget *menu;
-
-	menu = popup_menu_short_lived();
-
-	if (widget)
-		{
-		menu_item_add_icon(menu, _("Move to _top"), GQ_ICON_GO_TOP,
-		                   (GCallback)toolbar_item_move_cb<TRUE, FALSE>, widget);
-		menu_item_add_icon(menu, _("Move _up"), GQ_ICON_GO_UP,
-		                   (GCallback)toolbar_item_move_cb<TRUE, TRUE>, widget);
-		menu_item_add_icon(menu, _("Move _down"), GQ_ICON_GO_DOWN,
-		                   (GCallback)toolbar_item_move_cb<FALSE, TRUE>, widget);
-		menu_item_add_icon(menu, _("Move to _bottom"), GQ_ICON_GO_BOTTOM,
-		                   (GCallback)toolbar_item_move_cb<FALSE, FALSE>, widget);
-		menu_item_add_divider(menu);
-		menu_item_add_icon(menu, _("Remove"), GQ_ICON_DELETE,
-		                   G_CALLBACK(widget_remove_from_parent_cb), widget);
-		menu_item_add_divider(menu);
-		}
-
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-}
-
 static gboolean toolbar_press_cb(GtkGesture *, int, double, double, gpointer data)
 {
-	auto *button = static_cast<GtkWidget *>(data);
-
-	toolbar_menu_popup(button);
+	popup_menu_bar(GTK_WIDGET(data), nullptr);
 
 	return TRUE;
 }

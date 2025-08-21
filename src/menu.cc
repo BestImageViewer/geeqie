@@ -26,8 +26,10 @@
 #include "collect-io.h"
 #include "editors.h"
 #include "intl.h"
+#include "main-defines.h"
 #include "pixbuf-util.h"
 #include "ui-menu.h"
+#include "ui-misc.h"
 
 /*
  *-----------------------------------------------------------------------------
@@ -299,6 +301,76 @@ GtkWidget *submenu_add_collections(GtkWidget *menu, gboolean sensitive,
 	g_list_free_full(collection_list, g_free);
 
 	return submenu;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ * bar
+ *-----------------------------------------------------------------------------
+ */
+
+/**
+ * @brief
+ * @param widget Not used
+ * @param data Pointer to vbox item
+ * @param up Up/Down movement
+ * @param single_step Move up/down one step, or to top/bottom
+ *
+ */
+template<gboolean up, gboolean single_step>
+static void widget_move_cb(GtkWidget *, gpointer data)
+{
+	auto *widget = GTK_WIDGET(data);
+	if (!widget) return;
+
+	GtkWidget *box = gtk_widget_get_ancestor(widget, GTK_TYPE_BOX);
+	if (!box) return;
+
+	gint pos = 0;
+	gtk_container_child_get(GTK_CONTAINER(box), widget, "position", &pos, NULL);
+
+	if (single_step)
+		{
+		pos = up ? (pos - 1) : (pos + 1);
+		pos = std::max(pos, 0);
+		}
+	else
+		{
+		pos = up ? 0 : -1;
+		}
+
+	gtk_box_reorder_child(GTK_BOX(box), widget, pos);
+}
+
+void popup_menu_bar(GtkWidget *widget, GCallback expander_height_cb)
+{
+	GtkWidget *menu = popup_menu_short_lived();
+
+	if (widget)
+		{
+		menu_item_add_icon(menu, _("Move to _top"), GQ_ICON_GO_TOP,
+		                   (GCallback)widget_move_cb<TRUE, FALSE>, widget);
+		menu_item_add_icon(menu, _("Move _up"), GQ_ICON_GO_UP,
+		                   (GCallback)widget_move_cb<TRUE, TRUE>, widget);
+		menu_item_add_icon(menu, _("Move _down"), GQ_ICON_GO_DOWN,
+		                   (GCallback)widget_move_cb<FALSE, TRUE>, widget);
+		menu_item_add_icon(menu, _("Move to _bottom"), GQ_ICON_GO_BOTTOM,
+		                   (GCallback)widget_move_cb<FALSE, FALSE>, widget);
+		menu_item_add_divider(menu);
+
+		if (expander_height_cb && gtk_expander_get_expanded(GTK_EXPANDER(widget)))
+			{
+			menu_item_add_icon(menu, _("Height..."), GQ_ICON_PREFERENCES,
+			                   G_CALLBACK(expander_height_cb), widget);
+			menu_item_add_divider(menu);
+			}
+
+		menu_item_add_icon(menu, _("Remove"), GQ_ICON_DELETE,
+		                   G_CALLBACK(widget_remove_from_parent_cb), widget);
+		menu_item_add_divider(menu);
+		}
+
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

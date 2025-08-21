@@ -21,7 +21,6 @@
 
 #include "bar.h"
 
-#include <algorithm>
 #include <string>
 
 #include <glib-object.h>
@@ -34,6 +33,7 @@
 #include "intl.h"
 #include "layout.h"
 #include "main-defines.h"
+#include "menu.h"
 #include "metadata.h"
 #include "rcfile.h"
 #include "typedefs.h"
@@ -243,32 +243,6 @@ static const gchar *bar_pane_get_default_config(const gchar *id)
 	return pane->config;
 }
 
-template<gboolean up, gboolean single_step>
-static void bar_expander_move_cb(GtkWidget *, gpointer data)
-{
-	auto expander = static_cast<GtkWidget *>(data);
-	GtkWidget *box;
-	gint pos;
-
-	if (!expander) return;
-	box = gtk_widget_get_ancestor(expander, GTK_TYPE_BOX);
-	if (!box) return;
-
-	gtk_container_child_get(GTK_CONTAINER(box), expander, "position", &pos, NULL);
-
-	if (single_step)
-		{
-		pos = up ? (pos - 1) : (pos + 1);
-		pos = std::max(pos, 0);
-		}
-	else
-		{
-		pos = up ? 0 : -1;
-		}
-
-	gtk_box_reorder_child(GTK_BOX(box), expander, pos);
-}
-
 static void height_spin_changed_cb(GtkSpinButton *spin, gpointer data)
 {
 
@@ -348,61 +322,34 @@ static void bar_expander_add_cb(GtkWidget *, gpointer data)
 
 static void bar_menu_popup(GtkWidget *widget)
 {
-	GtkWidget *menu;
-	GtkWidget *bar;
-	GtkWidget *expander;
-	BarData *bd;
-	gboolean display_height_option = FALSE;
-	gchar const *label;
+	GtkWidget *expander = nullptr;
 
-	label = gtk_expander_get_label(GTK_EXPANDER(widget));
-	display_height_option =	(g_strcmp0(label, "Comment") == 0) ||
-							(g_strcmp0(label, "Rating") == 0) ||
-							(g_strcmp0(label, "Title") == 0) ||
-							(g_strcmp0(label, "Headline") == 0) ||
-							(g_strcmp0(label, "Keywords") == 0) ||
-							(g_strcmp0(label, "GPS Map") == 0);
-
-	bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(widget), "bar_data"));
-	if (bd)
+	if (!g_object_get_data(G_OBJECT(widget), "bar_data"))
 		{
-		expander = nullptr;
-		bar = widget;
-		}
-	else
-		{
-		expander = widget;
-		bar = gtk_widget_get_parent(widget);
-		while (bar && !g_object_get_data(G_OBJECT(bar), "bar_data"))
+		GtkWidget *bar = widget;
+		do
+			{
 			bar = gtk_widget_get_parent(bar);
+			}
+		while (bar && !g_object_get_data(G_OBJECT(bar), "bar_data"));
 		if (!bar) return;
+
+		expander = widget;
 		}
 
-	menu = popup_menu_short_lived();
-
+	gboolean display_height_option = FALSE;
 	if (expander)
 		{
-		menu_item_add_icon(menu, _("Move to _top"), GQ_ICON_GO_TOP,
-		                   (GCallback)bar_expander_move_cb<TRUE, FALSE>, expander);
-		menu_item_add_icon(menu, _("Move _up"), GQ_ICON_GO_UP,
-		                   (GCallback)bar_expander_move_cb<TRUE, TRUE>, expander);
-		menu_item_add_icon(menu, _("Move _down"), GQ_ICON_GO_DOWN,
-		                   (GCallback)bar_expander_move_cb<FALSE, TRUE>, expander);
-		menu_item_add_icon(menu, _("Move to _bottom"), GQ_ICON_GO_BOTTOM,
-		                   (GCallback)bar_expander_move_cb<FALSE, FALSE>, expander);
-		menu_item_add_divider(menu);
-
-		if (gtk_expander_get_expanded(GTK_EXPANDER(expander)) && display_height_option)
-			{
-			menu_item_add_icon(menu, _("Height..."), GQ_ICON_PREFERENCES, G_CALLBACK(bar_expander_height_cb), expander);
-			menu_item_add_divider(menu);
-			}
-
-		menu_item_add_icon(menu, _("Remove"), GQ_ICON_DELETE, G_CALLBACK(widget_remove_from_parent_cb), expander);
-		menu_item_add_divider(menu);
+		gchar const *label = gtk_expander_get_label(GTK_EXPANDER(expander));
+		display_height_option = (g_strcmp0(label, "Comment") == 0) ||
+		                        (g_strcmp0(label, "Rating") == 0) ||
+		                        (g_strcmp0(label, "Title") == 0) ||
+		                        (g_strcmp0(label, "Headline") == 0) ||
+		                        (g_strcmp0(label, "Keywords") == 0) ||
+		                        (g_strcmp0(label, "GPS Map") == 0);
 		}
 
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+	popup_menu_bar(expander, display_height_option ? G_CALLBACK(bar_expander_height_cb) : nullptr);
 }
 
 
