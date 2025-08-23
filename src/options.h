@@ -27,6 +27,7 @@
 
 #include "typedefs.h"
 
+enum DupeSelectType : guint;
 enum TextPosition : gint;
 
 #define COLOR_PROFILE_INPUTS 4
@@ -106,7 +107,7 @@ struct ConfOptions
 	guint duplicates_similarity_threshold;
 	guint duplicates_match;
 	gboolean duplicates_thumbnails;
-	guint duplicates_select_type;
+	DupeSelectType duplicates_select_type;
 	gboolean rot_invariant_sim;
 	gboolean sort_totals;
 

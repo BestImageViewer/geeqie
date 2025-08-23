@@ -681,7 +681,7 @@ static void dupe_listview_populate(DupeWindow *dw)
 	if (options->duplicates_select_type == DUPE_SELECT_GROUP1 ||
 	    options->duplicates_select_type == DUPE_SELECT_GROUP2)
 		{
-		dupe_listview_select_dupes(dw, static_cast<DupeSelectType>(options->duplicates_select_type));
+		dupe_listview_select_dupes(dw, options->duplicates_select_type);
 		}
 }
 
@@ -4347,7 +4347,6 @@ static void column_clicked_cb(GtkWidget *,  gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	options->duplicates_match = DUPE_SELECT_NONE;
 	dupe_listview_select_dupes(dw, DUPE_SELECT_NONE);
 }
 

@@ -55,7 +55,7 @@ enum DupeMatchType
 	DUPE_MATCH_ALL = 1 << 13 /**< N.B. this is used as a clamp value in rcfile.cc */
 };
 
-enum DupeSelectType
+enum DupeSelectType : guint
 {
 	DUPE_SELECT_NONE,
 	DUPE_SELECT_GROUP1,

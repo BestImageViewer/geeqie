@@ -920,7 +920,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 
 		if (READ_UINT_CLAMP(*options, duplicates_similarity_threshold, 0, 100)) continue;
 		if (READ_UINT_CLAMP(*options, duplicates_match, 0, DUPE_MATCH_ALL)) continue;
-		if (READ_UINT_CLAMP(*options, duplicates_select_type, 0, DUPE_SELECT_GROUP2)) continue;
+		if (READ_UINT_ENUM_CLAMP(*options, duplicates_select_type, DUPE_SELECT_NONE, DUPE_SELECT_GROUP2)) continue;
 		if (READ_BOOL(*options, duplicates_thumbnails)) continue;
 		if (READ_BOOL(*options, rot_invariant_sim)) continue;
 		if (READ_BOOL(*options, sort_totals)) continue;
