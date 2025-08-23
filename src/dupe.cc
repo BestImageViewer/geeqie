@@ -659,47 +659,30 @@ static void dupe_listview_select_dupes(DupeWindow *dw, DupeSelectType parents);
 
 static void dupe_listview_populate(DupeWindow *dw)
 {
-	GtkListStore *store;
-	GList *work;
-
-	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dw->listview)));
+	GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(dw->listview)));
 	gtk_list_store_clear(store);
 
-	work = g_list_last(dw->dupes);
-	while (work)
+	for (GList *work = g_list_last(dw->dupes); work; work = work->prev)
 		{
 		auto parent = static_cast<DupeItem *>(work->data);
-		GList *temp;
 
 		dupe_listview_add(dw, parent, nullptr);
 
-		temp = g_list_last(parent->group);
-		while (temp)
+		for (GList *temp = g_list_last(parent->group); temp; temp = temp->prev)
 			{
 			auto dm = static_cast<DupeMatch *>(temp->data);
-			DupeItem *child;
 
-			child = dm->di;
-
-			dupe_listview_add(dw, parent, child);
-
-			temp = temp->prev;
+			dupe_listview_add(dw, parent, dm->di);
 			}
-
-		work = work->prev;
 		}
 
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(dw->listview));
 
-	if (options->duplicates_select_type == DUPE_SELECT_GROUP1)
+	if (options->duplicates_select_type == DUPE_SELECT_GROUP1 ||
+	    options->duplicates_select_type == DUPE_SELECT_GROUP2)
 		{
-		dupe_listview_select_dupes(dw, DUPE_SELECT_GROUP1);
+		dupe_listview_select_dupes(dw, static_cast<DupeSelectType>(options->duplicates_select_type));
 		}
-	else if (options->duplicates_select_type == DUPE_SELECT_GROUP2)
-		{
-		dupe_listview_select_dupes(dw, DUPE_SELECT_GROUP2);
-		}
-
 }
 
 static void dupe_listview_remove(DupeWindow *dw, DupeItem *di)
