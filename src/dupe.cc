@@ -1438,10 +1438,7 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 		if (b->width == 0) image_load_dimensions(b->fd, &b->width, &b->height);
 		if (a->width != b->width || a->height != b->height) return FALSE;
 		}
-	if (mask & DUPE_MATCH_SIM_HIGH ||
-	    mask & DUPE_MATCH_SIM_MED ||
-	    mask & DUPE_MATCH_SIM_LOW ||
-	    mask & DUPE_MATCH_SIM_CUSTOM)
+	if (mask & DUPE_MATCH_SIM)
 		{
 		gdouble f;
 		gdouble m;
@@ -2303,10 +2300,7 @@ static gboolean dupe_check_cb(gpointer data)
 				return G_SOURCE_CONTINUE;
 				}
 			}
-		if ((dw->match_mask & DUPE_MATCH_SIM_HIGH ||
-		     dw->match_mask & DUPE_MATCH_SIM_MED ||
-		     dw->match_mask & DUPE_MATCH_SIM_LOW ||
-		     dw->match_mask & DUPE_MATCH_SIM_CUSTOM) &&
+		if ((dw->match_mask & DUPE_MATCH_SIM) &&
 		    !(dw->setup_mask & DUPE_MATCH_SIM_MED) )
 			{
 			/* Similarity only */
@@ -2369,10 +2363,7 @@ static gboolean dupe_check_cb(gpointer data)
 	if (!dw->working)
 		{
 		/* Similarity check threads may still be running */
-		if (dw->setup_count > 0 && (dw->match_mask == DUPE_MATCH_SIM_HIGH ||
-			dw->match_mask == DUPE_MATCH_SIM_MED ||
-			dw->match_mask == DUPE_MATCH_SIM_LOW ||
-			dw->match_mask == DUPE_MATCH_SIM_CUSTOM))
+		if (dw->setup_count > 0 && (dw->match_mask & DUPE_MATCH_SIM))
 			{
 			if( dw->thread_count < dw->queue_count)
 				{
@@ -2440,10 +2431,7 @@ static gboolean dupe_check_cb(gpointer data)
 		}
 
 	/* Setup done - working */
-	if (dw->match_mask == DUPE_MATCH_SIM_HIGH ||
-		dw->match_mask == DUPE_MATCH_SIM_MED ||
-		dw->match_mask == DUPE_MATCH_SIM_LOW ||
-		dw->match_mask == DUPE_MATCH_SIM_CUSTOM)
+	if (dw->match_mask & DUPE_MATCH_SIM)
 		{
 		/* This is the similarity comparison */
 		dupe_list_check_match(dw, static_cast<DupeItem *>(dw->working->data), dw->working);
@@ -3731,14 +3719,7 @@ static void dupe_menu_type_cb(GtkWidget *combo, gpointer data)
 
 	options->duplicates_match = dw->match_mask;
 
-	if (dw->match_mask & (DUPE_MATCH_SIM_HIGH | DUPE_MATCH_SIM_MED | DUPE_MATCH_SIM_LOW | DUPE_MATCH_SIM_CUSTOM))
-		{
-		dupe_listview_show_rank(dw->listview, TRUE);
-		}
-	else
-		{
-		dupe_listview_show_rank(dw->listview, FALSE);
-		}
+	dupe_listview_show_rank(dw->listview, dw->match_mask & DUPE_MATCH_SIM);
 	dupe_window_recompare(dw);
 }
 
