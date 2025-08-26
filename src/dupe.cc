@@ -1728,7 +1728,6 @@ static void dupe_array_check(DupeWindow *dw )
 	DUPE_CHECK_RESULT check_result;
 	param_match_mask = dw->match_mask;
 	guint out_match_index;
-	gboolean match_found = FALSE;;
 
 	if (!dw->list) return;
 
@@ -1774,26 +1773,7 @@ static void dupe_array_check(DupeWindow *dw )
 						}
 					}
 
-#if ((GLIB_MAJOR_VERSION == 2) && (GLIB_MINOR_VERSION >= 62))
-				match_found = g_array_binary_search(array_set2, di1, dupe_match_binary_search_cb, &out_match_index);
-#else
-				gint i;
-
-				match_found = FALSE;
-				for(i=0; i < array_set2->len; i++)
-					{
-					di2 = static_cast<DupeItem *>(g_array_index(array_set2,  gpointer, i));
-					check_result = dupe_match_check(di1, di2, dw);
-					if (check_result == DUPE_MATCH)
-						{
-						match_found = TRUE;
-						out_match_index = i;
-						break;
-						}
-					}
-#endif
-
-				if (match_found)
+				if (g_array_binary_search(array_set2, di1, dupe_match_binary_search_cb, &out_match_index))
 					{
 					di2 = static_cast<DupeItem *>(g_array_index(array_set2, gpointer, out_match_index));
 
