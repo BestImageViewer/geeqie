@@ -1719,47 +1719,39 @@ static gint dupe_match_sort_cb(gconstpointer a, gconstpointer b, gpointer data)
  * If two file sets, steps down the first set and for each value
  * does a binary search for matches in the second set.
  */
-static void dupe_array_check(DupeWindow *dw )
+static void dupe_array_check(DupeWindow *dw)
 {
-	GArray *array_set1;
-	GArray *array_set2;
-	GList *work;
-	gint i_set1;
-	gint i_set2;
 	DUPE_CHECK_RESULT check_result;
 	param_match_mask = dw->match_mask;
 	guint out_match_index;
 
 	if (!dw->list) return;
 
-	array_set1 = g_array_new(TRUE, TRUE, sizeof(gpointer));
-	array_set2 = g_array_new(TRUE, TRUE, sizeof(gpointer));
 	dupe_match_reset_list(dw->list);
 
-	work = dw->list;
-	while (work)
-		{
-		auto di = static_cast<DupeItem *>(work->data);
-		g_array_append_val(array_set1, di);
-		work = work->next;
-		}
+	const auto list_to_sorted_array = [dw](GList *list)
+	{
+		GArray *array_set = g_array_new(TRUE, TRUE, sizeof(gpointer));
 
-	g_array_sort_with_data(array_set1, dupe_match_sort_cb, dw);
+		for (GList *work = list; work; work = work->next)
+			{
+			g_array_append_val(array_set, work->data);
+			}
+
+		g_array_sort_with_data(array_set, dupe_match_sort_cb, dw);
+		return array_set;
+	};
+
+	GArray *array_set1 = list_to_sorted_array(dw->list);
 
 	if (dw->second_set)
 		{
 		/* Two sets - nothing can be done until a second set is loaded */
 		if (dw->second_list)
 			{
-			work = dw->second_list;
-			while (work)
-				{
-				g_array_append_val(array_set2, (work->data));
-				work = work->next;
-				}
-			g_array_sort_with_data(array_set2, dupe_match_sort_cb, dw);
+			GArray *array_set2 = list_to_sorted_array(dw->second_list);
 
-			for (i_set1 = 0; i_set1 <= static_cast<gint>(array_set1->len) - 1; i_set1++)
+			for (gint i_set1 = 0; i_set1 <= static_cast<gint>(array_set1->len) - 1; i_set1++)
 				{
 				auto di1 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1));
 				DupeItem *di2 = nullptr;
@@ -1785,8 +1777,8 @@ static void dupe_array_check(DupeWindow *dw )
 							{
 							dupe_match_link(di2, di1, 0.0);
 							}
-						i_set2 = out_match_index + 1;
 
+						gint i_set2 = out_match_index + 1;
 						if (i_set2 > static_cast<gint>(array_set2->len) - 1)
 							{
 							break;
@@ -1811,58 +1803,39 @@ static void dupe_array_check(DupeWindow *dw )
 						}
 					}
 				}
+
+			g_array_free(array_set2, TRUE);
 			}
 		}
 	else
 		{
 		/* File set 1 only */
-		g_list_free(dw->dupes);
-		dw->dupes = nullptr;
+		g_clear_pointer(&dw->dupes, g_list_free);
 
-		if (static_cast<gint>(array_set1->len) > 1)
+		for (gint i_set1 = 0; i_set1 <= static_cast<gint>(array_set1->len) - 2; i_set1++)
 			{
-			for (i_set1 = 0; i_set1 <= static_cast<gint>(array_set1->len) - 2; i_set1++)
+			auto *di1 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1));
+
+			/* Look for multiple matches for item di1 */
+			auto *di2 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1 + 1));
+			check_result = dupe_match_check(di1, di2, dw);
+			while (check_result == DUPE_MATCH || check_result == DUPE_NAME_MATCH)
 				{
-				auto di1 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1));
-				auto di2 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1 + 1));
-
-				check_result = dupe_match_check(di1, di2, dw);
-				if (check_result == DUPE_MATCH || check_result == DUPE_NAME_MATCH)
+				if (check_result == DUPE_MATCH)
 					{
-					if (check_result == DUPE_MATCH)
-						{
-						dupe_match_link(di2, di1, 0.0);
-						}
-					i_set1++;
-
-					if ( i_set1 + 1 > static_cast<gint>(array_set1->len) - 1)
-						{
-						break;
-						}
-					/* Look for multiple matches for item di1 */
-					di2 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1 + 1));
-					check_result = dupe_match_check(di1, di2, dw);
-					while (check_result == DUPE_MATCH || check_result == DUPE_NAME_MATCH)
-						{
-						if (check_result == DUPE_MATCH)
-							{
-							dupe_match_link(di2, di1, 0.0);
-							}
-						i_set1++;
-
-						if (i_set1 + 1 > static_cast<gint>(array_set1->len) - 1)
-							{
-							break;
-							}
-						di2 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1 + 1));
-						check_result = dupe_match_check(di1, di2, dw);
-						}
+					dupe_match_link(di2, di1, 0.0);
 					}
+
+				i_set1++;
+				if (i_set1 + 1 > static_cast<gint>(array_set1->len) - 1) break;
+
+				di2 = static_cast<DupeItem *>(g_array_index(array_set1, gpointer, i_set1 + 1));
+				check_result = dupe_match_check(di1, di2, dw);
 				}
 			}
 		}
+
 	g_array_free(array_set1, TRUE);
-	g_array_free(array_set2, TRUE);
 }
 
 /**
