@@ -4861,7 +4861,7 @@ struct ExportDupesData
 	GtkFileChooser *chooser;
 };
 
-static void export_duplicates_data(DupeWindow *dw, const gchar *sep, GString *output_string)
+static GString *export_duplicates_data(DupeWindow *dw, const gchar *sep)
 {
 	gboolean color_old = FALSE;
 	gboolean color_new = FALSE;
@@ -4869,7 +4869,7 @@ static void export_duplicates_data(DupeWindow *dw, const gchar *sep, GString *ou
 
 	g_autofree gchar *header = g_strjoin(sep, _("Match"), _("Group"), _("Similarity"), _("Set"), _("Thumbnail"), _("Name"), _("Size"), _("Date"), _("Width"), _("Height"), _("Path"), NULL);
 
-	output_string = g_string_append(output_string, header);
+	GString *output_string = g_string_new(header);
 	output_string = g_string_append_c(output_string, '\n');
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
@@ -4946,6 +4946,8 @@ static void export_duplicates_data(DupeWindow *dw, const gchar *sep, GString *ou
 		output_string = g_string_append(output_string, di->fd->path);
 		output_string = g_string_append_c(output_string, '\n');
 		}
+
+	return output_string;
 }
 
 GString *export_duplicates_data_command_line()
@@ -4959,9 +4961,7 @@ GString *export_duplicates_data_command_line()
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
 	gtk_tree_selection_select_all(selection);
 
-	GString *output_string = g_string_new(nullptr);
-	export_duplicates_data(dw, "\t", output_string);
-	return output_string;
+	return export_duplicates_data(dw, "\t");
 }
 
 static void save_export_file(ExportDupesData *edd)
@@ -4983,10 +4983,8 @@ static void save_export_file(ExportDupesData *edd)
 			{
 			const gchar *sep = (edd->separator == EXPORT_CSV) ?  "," : "\t";
 
-			g_autoptr(GString) output_string = g_string_new(nullptr);
-			output_string = g_string_append(output_string, "header");
-
-			export_duplicates_data(edd->dupewindow, sep, output_string);
+			g_autoptr(GString) output_string = export_duplicates_data(edd->dupewindow, sep);
+			output_string = g_string_prepend(output_string, "header");
 
 			g_output_stream_write(G_OUTPUT_STREAM(gfstream), output_string->str, output_string->len, nullptr, &error);
 
