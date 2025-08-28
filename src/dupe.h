@@ -165,8 +165,7 @@ void dupe_window_close(DupeWindow *dw);
 
 void dupe_window_add_collection(DupeWindow *dw, CollectionData *collection);
 void dupe_window_add_files(DupeWindow *dw, GList *list, gboolean recurse);
-void dupe_window_add_folder(const gchar *path);
-void dupe_window_add_folder_recurse(const gchar *path);
+void dupe_window_add_folder(const gchar *path, gboolean recurse);
 void export_duplicates_data_command_line(GString *output_string);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

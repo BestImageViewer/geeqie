@@ -2804,28 +2804,14 @@ void dupe_window_add_files(DupeWindow *dw, GList *list, gboolean recurse)
 		}
 }
 
-void dupe_window_add_folder(const gchar *path)
+void dupe_window_add_folder(const gchar *path, gboolean recurse)
 {
 	DupeWindow *dw = dupe_window_new();
 	FileData *fd = file_data_new_simple(path);
 	g_autoptr(GList) list = nullptr;
 	list = g_list_append(list, fd);
 
-	dupe_window_add_files(dw, list, FALSE);
-
-	dupe_check_start(dw);
-
-	file_data_unref(fd);
-}
-
-void dupe_window_add_folder_recurse(const gchar *path)
-{
-	DupeWindow *dw = dupe_window_new();
-	FileData *fd = file_data_new_simple(path);
-	g_autoptr(GList) list = nullptr;
-	list = g_list_append(list, fd);
-
-	dupe_window_add_files(dw, list, TRUE);
+	dupe_window_add_files(dw, list, recurse);
 
 	dupe_check_start(dw);
 
