@@ -4948,28 +4948,20 @@ static void export_duplicates_data(DupeWindow *dw, const gchar *sep, GString *ou
 		}
 }
 
-void export_duplicates_data_command_line(GString *output_string)
+GString *export_duplicates_data_command_line()
 {
-	if (dupe_window_list != nullptr)
-		{
-		auto dw = static_cast<DupeWindow *>(g_list_last(dupe_window_list)->data);
+	if (!dupe_window_list) return g_string_new(_("No duplicates windows open"));
 
-		if (dw->idle_id != 0)
-			{
-			output_string = g_string_append(output_string, _("Incomplete"));
-			}
-		else
-			{
-			GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
-			gtk_tree_selection_select_all(selection);
+	auto *dw = static_cast<DupeWindow *>(g_list_last(dupe_window_list)->data);
 
-			export_duplicates_data(dw, "\t", output_string);
-			}
-		}
-	else
-		{
-		output_string = g_string_append(output_string, _("No duplicates windows open"));
-		}
+	if (dw->idle_id != 0) return g_string_new(_("Incomplete"));
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
+	gtk_tree_selection_select_all(selection);
+
+	GString *output_string = g_string_new(nullptr);
+	export_duplicates_data(dw, "\t", output_string);
+	return output_string;
 }
 
 static void save_export_file(ExportDupesData *edd)

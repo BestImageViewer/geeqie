@@ -467,9 +467,7 @@ void gq_dupes(GtkApplication *app, GApplicationCommandLine *app_command_line, GV
 
 void gq_dupes_export(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
 {
-	g_autoptr(GString) output_string = g_string_new(nullptr);
-
-	export_duplicates_data_command_line(output_string);
+	g_autoptr(GString) output_string = export_duplicates_data_command_line();
 
 	g_application_command_line_print(app_command_line, "%s\n", output_string->str);
 }
