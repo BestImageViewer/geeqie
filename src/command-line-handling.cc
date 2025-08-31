@@ -232,46 +232,19 @@ void gq_cache_metadata(GtkApplication *app, GApplicationCommandLine *, GVariantD
 	cache_maintain_home_remote(app, TRUE, FALSE, nullptr);
 }
 
+template<gboolean shared, gboolean recurse>
 void gq_cache_render(GtkApplication *app, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
 {
-	gchar* text;
+	if (shared && !options->thumbnails.spec_standard) return;
 
-	g_variant_dict_lookup(command_line_options_dict, "cache-render", "&s", &text);
+	g_autoptr(GString) key = g_string_new("cache-render");
+	if (shared) g_string_append(key, "-shared");
+	if (recurse) g_string_append(key, "-recurse");
 
-	cache_manager_render_remote(app, text, FALSE, FALSE, nullptr);
-}
+	const gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, key->str, "&s", &text);
 
-void gq_cache_render_recurse(GtkApplication *app, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
-{
-	gchar* text;
-
-	g_variant_dict_lookup(command_line_options_dict, "cache-render-recurse", "&s", &text);
-
-	cache_manager_render_remote(app, text, TRUE, FALSE, nullptr);
-}
-
-void gq_cache_render_shared(GtkApplication *app, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
-{
-	gchar* text;
-
-	g_variant_dict_lookup(command_line_options_dict, "cache-render-shared", "&s", &text);
-
-	if(options->thumbnails.spec_standard)
-		{
-		cache_manager_render_remote(app, text, FALSE, TRUE, nullptr);
-		}
-}
-
-void gq_cache_render_shared_recurse(GtkApplication *app, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
-{
-	gchar* text;
-
-	g_variant_dict_lookup(command_line_options_dict, "cache-shared-recurse", "&s", &text);
-
-	if(options->thumbnails.spec_standard)
-		{
-		cache_manager_render_remote(app, text, TRUE, TRUE, nullptr);
-		}
+	cache_manager_render_remote(app, text, recurse, shared, nullptr);
 }
 
 void gq_cache_shared(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
@@ -679,13 +652,16 @@ void gq_get_file_info(GtkApplication *, GApplicationCommandLine *app_command_lin
 	file_data_unref(fd);
 }
 
-void get_filelist(GApplicationCommandLine *app_command_line, const gchar *text, gboolean recurse)
+template<bool recurse>
+void gq_get_filelist(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
-	FileFormatClass format_class;
-	FileData *dir_fd;
-	FileData *fd;
-	GList *work;
+	g_autoptr(GString) key = g_string_new("get-filelist");
+	if (recurse) g_string_append(key, "-recurse");
 
+	const gchar *text;
+	g_variant_dict_lookup(command_line_options_dict, key->str, "&s", &text);
+
+	FileData *dir_fd;
 	if (strcmp(text, "") == 0)
 		{
 		if (!layout_valid(&lw_id)) return;
@@ -711,13 +687,12 @@ void get_filelist(GApplicationCommandLine *app_command_line, const gchar *text, 
 		}
 
 	g_autoptr(GString) out_string = g_string_new(nullptr);
-	work = list;
-	while (work)
+	for (GList *work = list; work; work = work->next)
 		{
-		fd = static_cast<FileData *>(work->data);
+		auto *fd = static_cast<FileData *>(work->data);
 		g_string_append(out_string, fd->path);
-		format_class = filter_file_get_class(fd->path);
 
+		FileFormatClass format_class = filter_file_get_class(fd->path);
 		switch (format_class)
 			{
 			case FORMAT_CLASS_IMAGE:
@@ -748,30 +723,13 @@ void get_filelist(GApplicationCommandLine *app_command_line, const gchar *text, 
 				out_string = g_string_append(out_string, "    Class: Unknown");
 				break;
 			}
+
 		out_string = g_string_append(out_string, "\n");
-		work = work->next;
 		}
 
 	g_application_command_line_print(app_command_line, "%s\n",  out_string->str);
 
 	file_data_unref(dir_fd);
-}
-
-void gq_get_filelist(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
-{
-	gchar *text;
-	g_variant_dict_lookup(command_line_options_dict, "get-filelist", "&s", &text);
-
-	get_filelist(app_command_line, text, FALSE);
-}
-
-
-void gq_get_filelist_recurse(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
-{
-	gchar *text;
-	g_variant_dict_lookup(command_line_options_dict, "get-filelist-recurse", "&s", &text);
-
-	get_filelist(app_command_line, text, TRUE);
 }
 
 void gq_get_rectangle(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
@@ -1411,10 +1369,10 @@ CommandLineOptionEntry command_line_options[] =
 	{ "action-list",                 gq_action_list,                 PRIMARY_REMOTE, TEXT },
 	{ "back",                        gq_back,                        PRIMARY_REMOTE, GUI  },
 	{ "cache-metadata",              gq_cache_metadata,              PRIMARY_REMOTE, GUI  },
-	{ "cache-render",                gq_cache_render,                PRIMARY_REMOTE, GUI  },
-	{ "cache-render-recurse",        gq_cache_render_recurse,        PRIMARY_REMOTE, GUI  },
-	{ "cache-render-shared",         gq_cache_render_shared,         PRIMARY_REMOTE, GUI  },
-	{ "cache-render-shared-recurse", gq_cache_render_shared_recurse, PRIMARY_REMOTE, GUI  },
+	{ "cache-render",                gq_cache_render<FALSE, FALSE>,  PRIMARY_REMOTE, GUI  },
+	{ "cache-render-recurse",        gq_cache_render<FALSE, TRUE>,   PRIMARY_REMOTE, GUI  },
+	{ "cache-render-shared",         gq_cache_render<TRUE, FALSE>,   PRIMARY_REMOTE, GUI  },
+	{ "cache-render-shared-recurse", gq_cache_render<TRUE, TRUE>,    PRIMARY_REMOTE, GUI  },
 	{ "cache-shared",                gq_cache_shared,                PRIMARY_REMOTE, GUI  },
 	{ "cache-thumbs",                gq_cache_thumbs,                PRIMARY_REMOTE, GUI  },
 	{ "close-window",                gq_close_window,                PRIMARY_REMOTE, GUI  },
@@ -1436,8 +1394,8 @@ CommandLineOptionEntry command_line_options[] =
 	{ "get-collection-list",         gq_get_collection_list,         PRIMARY_REMOTE, TEXT },
 	{ "get-destination",             gq_get_destination,             PRIMARY_REMOTE, GUI  },
 	{ "get-file-info",               gq_get_file_info,               REMOTE        , N_A  },
-	{ "get-filelist",                gq_get_filelist,                PRIMARY_REMOTE, GUI  },
-	{ "get-filelist-recurse",        gq_get_filelist_recurse,        PRIMARY_REMOTE, GUI  },
+	{ "get-filelist",                gq_get_filelist<false>,         PRIMARY_REMOTE, GUI  },
+	{ "get-filelist-recurse",        gq_get_filelist<true>,          PRIMARY_REMOTE, GUI  },
 	{ "get-rectangle",               gq_get_rectangle,               REMOTE        , N_A  },
 	{ "get-render-intent",           gq_get_render_intent,           REMOTE        , N_A  },
 	{ "get-selection",               gq_get_selection,               REMOTE        , N_A  },
