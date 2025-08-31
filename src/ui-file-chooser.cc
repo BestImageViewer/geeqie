@@ -21,7 +21,9 @@
 
 #include "ui-file-chooser.h"
 
-#include <iostream>
+#include <string>
+
+#include <config.h>
 
 #if HAVE_ARCHIVE
 #include <archive.h>
@@ -30,6 +32,7 @@
 #if HAVE_PDF
 #include <poppler.h>
 #endif
+
 #include "cache.h"
 #include "compat.h"
 #include "history-list.h"
@@ -642,6 +645,5 @@ void file_chooser_dialog_data_free(FileChooserDialogData *fcdd)
 
 	g_free(fcdd);
 }
-
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
