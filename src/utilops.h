@@ -28,7 +28,6 @@
 #include <gtk/gtk.h>
 
 class FileData;
-struct FileDialog;
 struct GenericDialog;
 
 enum class ClipboardAction {

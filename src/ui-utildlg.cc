@@ -34,16 +34,11 @@
 #include <config.h>
 
 #include "compat.h"
-#include "filedata.h"
 #include "intl.h"
 #include "main-defines.h"
-#include "misc.h"
 #include "options.h"
 #include "rcfile.h"
-#include "ui-fileops.h"
 #include "ui-misc.h"
-#include "ui-pathsel.h"
-#include "ui-tabcomp.h"
 #include "window.h"
 
 namespace
@@ -595,134 +590,5 @@ void new_appimage_notification(GtkApplication *app)
 
 	appimage_data->thread_pool = g_thread_pool_new(new_appimage_notification_func, app, 1, FALSE, nullptr);
 	g_thread_pool_push(appimage_data->thread_pool, appimage_data, nullptr);
-}
-
-/*
- *-----------------------------------------------------------------------------
- * generic file ops dialog routines
- *-----------------------------------------------------------------------------
- */
-
-void file_dialog_close(FileDialog *fdlg)
-{
-	file_data_unref(fdlg->source_fd);
-	g_free(fdlg->dest_path);
-	if (fdlg->source_list) file_data_list_free(fdlg->source_list);
-
-	generic_dialog_close(GENERIC_DIALOG(fdlg));
-}
-
-FileDialog *file_dialog_new(const gchar *title,
-			    const gchar *role,
-			    GtkWidget *parent,
-			    void (*cancel_cb)(FileDialog *, gpointer), gpointer data)
-{
-	FileDialog *fdlg = nullptr;
-
-	fdlg = g_new0(FileDialog, 1);
-
-	generic_dialog_setup(GENERIC_DIALOG(fdlg), title,
-			     role, parent, FALSE,
-			     reinterpret_cast<void(*)(GenericDialog *, gpointer)>(cancel_cb), data);
-
-	return fdlg;
-}
-
-GtkWidget *file_dialog_add_button(FileDialog *fdlg, const gchar *stock_id, const gchar *text,
-				  void (*func_cb)(FileDialog *, gpointer), gboolean is_default)
-{
-	return generic_dialog_add_button(GENERIC_DIALOG(fdlg), stock_id, text,
-					 reinterpret_cast<void(*)(GenericDialog *, gpointer)>(func_cb), is_default);
-}
-
-static void file_dialog_entry_cb(GtkWidget *, gpointer data)
-{
-	auto fdlg = static_cast<FileDialog *>(data);
-	g_free(fdlg->dest_path);
-	fdlg->dest_path = remove_trailing_slash(gq_gtk_entry_get_text(GTK_ENTRY(fdlg->entry)));
-}
-
-static void file_dialog_entry_enter_cb(const gchar *, gpointer data)
-{
-	auto gd = static_cast<GenericDialog *>(data);
-
-	file_dialog_entry_cb(nullptr, data);
-
-	if (gd->default_cb) gd->default_cb(gd, gd->data);
-}
-
-/**
- * @brief Default_path is default base directory, and is only used if no history
- * exists for history_key (HOME is used if default_path is NULL).
- * path can be a full path or only a file name. If name only, appended to
- * the default_path or the last history (see default_path)
- */
-void file_dialog_add_path_widgets(FileDialog *fdlg, const gchar *default_path, const gchar *path,
-				  const gchar *history_key, const gchar *filter, const gchar *filter_desc)
-{
-	GtkWidget *tabcomp;
-	GtkWidget *list;
-
-	if (fdlg->entry) return;
-
-	tabcomp = tab_completion_new_with_history(&fdlg->entry, nullptr,
-		  history_key, -1, file_dialog_entry_enter_cb, fdlg);
-	gq_gtk_box_pack_end(GTK_BOX(GENERIC_DIALOG(fdlg)->vbox), tabcomp, FALSE, FALSE, 0);
-	generic_dialog_attach_default(GENERIC_DIALOG(fdlg), fdlg->entry);
-	gtk_widget_show(tabcomp);
-
-	if (path && path[0] == G_DIR_SEPARATOR)
-		{
-		fdlg->dest_path = g_strdup(path);
-		}
-	else
-		{
-		const gchar *base;
-
-		base = tab_completion_set_to_last_history(fdlg->entry);
-
-		if (!base) base = default_path;
-		if (!base) base = homedir();
-
-		if (path)
-			{
-			fdlg->dest_path = g_build_filename(base, path, NULL);
-			}
-		else
-			{
-			fdlg->dest_path = g_strdup(base);
-			}
-		}
-
-	list = path_selection_new_with_files(fdlg->entry, fdlg->dest_path, filter, filter_desc);
-	path_selection_add_select_func(fdlg->entry, file_dialog_entry_enter_cb, fdlg);
-	gq_gtk_box_pack_end(GTK_BOX(GENERIC_DIALOG(fdlg)->vbox), list, TRUE, TRUE, 0);
-	gtk_widget_show(list);
-
-	gtk_widget_grab_focus(fdlg->entry);
-	if (fdlg->dest_path)
-		{
-		gq_gtk_entry_set_text(GTK_ENTRY(fdlg->entry), fdlg->dest_path);
-		gtk_editable_set_position(GTK_EDITABLE(fdlg->entry), -1);
-		}
-
-	g_signal_connect(G_OBJECT(fdlg->entry), "changed",
-			 G_CALLBACK(file_dialog_entry_cb), fdlg);
-}
-
-void file_dialog_sync_history(FileDialog *fdlg, gboolean dir_only)
-{
-	if (!fdlg->dest_path) return;
-
-	if (!dir_only ||
-	    (dir_only && isdir(fdlg->dest_path)) )
-		{
-		tab_completion_append_to_history(fdlg->entry, fdlg->dest_path);
-		}
-	else
-		{
-		g_autofree gchar *buf = remove_level_from_path(fdlg->dest_path);
-		tab_completion_append_to_history(fdlg->entry, buf);
-		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
