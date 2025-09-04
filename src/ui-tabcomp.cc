@@ -81,15 +81,12 @@ struct TabCompData
 	gchar *history_key;
 	gint history_levels;
 
-	GtkWidget *dialog;
 	gchar *fd_title;
 	gboolean fd_folders_only;
 	GtkWidget *fd_button;
 	gchar *filter;
 	gchar *filter_desc;
 	gchar *shortcuts;
-
-	GCallback response_callback;
 
 	guint choices;
 };
@@ -155,10 +152,6 @@ static void tab_completion_destroy(gpointer data)
 	tab_completion_free_list(td);
 	g_free(td->history_key);
 
-	if (td->dialog)
-		{
-		gq_gtk_widget_destroy(GTK_WIDGET(td->dialog));
-		}
 	g_free(td->fd_title);
 
 	g_free(td->filter);
@@ -786,7 +779,6 @@ static void tab_completion_response_cb(GtkFileChooser *chooser, gint response_id
 		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), filename);
 		}
 
-	td->dialog = nullptr;
 	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 
 	tab_completion_emit_enter_signal(td);
@@ -794,12 +786,6 @@ static void tab_completion_response_cb(GtkFileChooser *chooser, gint response_id
 
 static void tab_completion_select_show(TabCompData *td)
 {
-	if (td->dialog)
-		{
-		gtk_window_present(GTK_WINDOW(GENERIC_DIALOG(td->dialog)));
-		return;
-		}
-
 	FileChooserDialogData fcdd{};
 
 	fcdd.action = td->fd_folders_only ? GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER : GTK_FILE_CHOOSER_ACTION_OPEN;
