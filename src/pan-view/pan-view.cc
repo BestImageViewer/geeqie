@@ -1874,7 +1874,8 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	pref_spacer(box, 0);
 	pref_label_new(box, _("Location:"));
-	combo = tab_completion_new_with_history(&pw->path_entry, dir_fd->path, "pan_view_path", -1, pan_window_entry_activate_cb, pw);
+	combo = tab_completion_new_with_history(&pw->path_entry, dir_fd->path, "pan_view_path", -1);
+	tab_completion_set_enter_func(pw->path_entry, pan_window_entry_activate_cb, pw);
 	gq_gtk_box_pack_start(GTK_BOX(box), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);
 

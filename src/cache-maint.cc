@@ -818,7 +818,7 @@ static void cache_manager_render_dialog(GtkWidget *widget, const gchar *path)
 	hbox = pref_box_new(cd->group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Folder:"));
 
-	label = tab_completion_new(&cd->entry, path, nullptr, nullptr, nullptr, nullptr, nullptr);
+	label = tab_completion_new(&cd->entry, path, nullptr, nullptr, nullptr);
 	tab_completion_add_select_button(cd->entry,_("Select folder") , TRUE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 	gtk_widget_show(label);
@@ -1447,7 +1447,7 @@ static void cache_manager_sim_load_dialog(GtkWidget *widget, const gchar *path)
 	hbox = pref_box_new(cd->group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Folder:"));
 
-	label = tab_completion_new(&cd->entry, path, nullptr, nullptr, nullptr, nullptr, nullptr);
+	label = tab_completion_new(&cd->entry, path, nullptr, nullptr, nullptr);
 	tab_completion_add_select_button(cd->entry,_("Select folder") , TRUE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 	gtk_widget_show(label);
@@ -1558,7 +1558,7 @@ static void cache_manager_cache_maintenance_load_dialog(GtkWidget *widget, const
 	hbox = pref_box_new(cd->group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Folder:"));
 
-	label = tab_completion_new(&cd->entry, path, nullptr, nullptr, nullptr, nullptr, nullptr);
+	label = tab_completion_new(&cd->entry, path, nullptr, nullptr, nullptr);
 	tab_completion_add_select_button(cd->entry,_("Select folder") , TRUE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 	gtk_widget_show(label);

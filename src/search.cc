@@ -3240,8 +3240,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	hbox2 = pref_box_new(hbox, TRUE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	GtkWidget *combo = tab_completion_new_with_history(&sd->ui.path_entry, sd->search_dir_fd->path,
-	                                                   "search_path", -1,
-	                                                   nullptr, nullptr);
+	                                                   "search_path", -1);
 	tab_completion_add_select_button(sd->ui.path_entry, nullptr, TRUE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox2), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);
@@ -3338,8 +3337,8 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	pref_label_new(hbox, _("% similar to"));
 
 	combo = tab_completion_new_with_history(&sd->ui.entry_similarity,
-	                                        (sd->search_similarity_path) ? sd->search_similarity_path : "",
-	                                        "search_similarity_path", -1, nullptr, nullptr);
+	                                        sd->search_similarity_path ? sd->search_similarity_path : "",
+	                                        "search_similarity_path", -1);
 	tab_completion_add_select_button(sd->ui.entry_similarity, nullptr, FALSE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);

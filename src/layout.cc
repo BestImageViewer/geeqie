@@ -477,7 +477,7 @@ static void layout_vd_select_cb(ViewDir *, FileData *fd, gpointer data)
 	layout_set_fd(lw, fd);
 }
 
-static void layout_path_entry_tab_append_cb(const gchar *, gpointer data, gint n)
+static void layout_path_entry_tab_append_cb(const gchar *, gint n, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -542,10 +542,11 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		gq_gtk_box_pack_start(GTK_BOX(lw->main_box), lw->menu_tool_bar, FALSE, FALSE, 0);
 		}
 
-	tabcomp = tab_completion_new_with_history(&lw->path_entry, nullptr, "path_list", -1, layout_path_entry_cb, lw);
+	tabcomp = tab_completion_new_with_history(&lw->path_entry, nullptr, "path_list", -1);
 	DEBUG_NAME(tabcomp);
-	tab_completion_add_tab_func(lw->path_entry, layout_path_entry_tab_cb, lw);
-	tab_completion_add_append_func(lw->path_entry, layout_path_entry_tab_append_cb, lw);
+	tab_completion_set_enter_func(lw->path_entry, layout_path_entry_cb, lw);
+	tab_completion_set_tab_func(lw->path_entry, layout_path_entry_tab_cb, lw);
+	tab_completion_set_tab_append_func(lw->path_entry, layout_path_entry_tab_append_cb, lw);
 
 	if (options->hamburger_menu)
 		{
@@ -2407,7 +2408,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	pref_label_new(group, _("Home path (empty to use your home directory)"));
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
-	tabcomp = tab_completion_new(&lc->home_path_entry, lc->options.home_path, nullptr, nullptr, nullptr, nullptr, nullptr);
+	tabcomp = tab_completion_new(&lc->home_path_entry, lc->options.home_path, nullptr, nullptr, nullptr);
 	tab_completion_add_select_button(lc->home_path_entry, nullptr, TRUE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), tabcomp, TRUE, TRUE, 0);
 	gtk_widget_show(tabcomp);

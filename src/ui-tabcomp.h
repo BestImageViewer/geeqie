@@ -25,20 +25,23 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+using TabCompEnterFunc = void (*)(const gchar *, gpointer);
+using TabCompTabFunc = void (*)(const gchar *, gpointer);
+using TabCompTabAppendFunc = void (*)(const gchar *, gint, gpointer);
+
 GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
-					   const gchar *history_key, gint max_levels,
-					   void (*enter_func)(const gchar *, gpointer), gpointer data);
+                                           const gchar *history_key, gint max_levels);
 const gchar *tab_completion_set_to_last_history(GtkWidget *entry);
 void tab_completion_append_to_history(GtkWidget *entry, const gchar *path);
 
 GtkWidget *tab_completion_new(GtkWidget **entry, const gchar *text,
-			      void (*enter_func)(const gchar *, gpointer), const gchar *filter, const gchar *filter_desc, const gchar *shortcuts, gpointer data);
-void tab_completion_add_to_entry(GtkWidget *entry, void (*enter_func)(const gchar *, gpointer), const gchar *filter, const gchar *filter_desc, const gchar *shortcuts, gpointer data);
-void tab_completion_add_tab_func(GtkWidget *entry, void (*tab_func)(const gchar *, gpointer), gpointer data);
+                              const gchar *filter, const gchar *filter_desc, const gchar *shortcuts);
+void tab_completion_set_enter_func(GtkWidget *entry, TabCompEnterFunc enter_func, gpointer data);
+void tab_completion_set_tab_func(GtkWidget *entry, TabCompTabFunc tab_func, gpointer data);
 gchar *remove_trailing_slash(const gchar *path);
 
 void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboolean folders_only);
-void tab_completion_add_append_func(GtkWidget *entry, void (*tab_append_func)(const gchar *, gpointer, gint), gpointer data);
+void tab_completion_set_tab_append_func(GtkWidget *entry, TabCompTabAppendFunc tab_append_func, gpointer data);
 
 
 #endif

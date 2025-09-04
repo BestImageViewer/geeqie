@@ -59,8 +59,8 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 	gq_gtk_box_pack_start(GTK_BOX(ui->search_box), hbox, TRUE, TRUE, 0);
 	gtk_widget_show(hbox);
 
-	combo = tab_completion_new_with_history(&ui->search_entry, "", "pan_view_search", -1,
-						pan_search_activate_cb, pw);
+	combo = tab_completion_new_with_history(&ui->search_entry, "", "pan_view_search", -1);
+	tab_completion_set_enter_func(ui->search_entry, pan_search_activate_cb, pw);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);
 
