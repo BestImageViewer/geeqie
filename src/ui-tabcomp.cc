@@ -90,7 +90,7 @@ struct TabCompData
 
 static void tab_completion_select_show(TabCompData *td);
 static gint tab_completion_do(TabCompData *td);
-static void tab_completion_add_to_entry(GtkWidget *entry, const gchar *filter, const gchar *filter_desc, const gchar *shortcuts);
+static TabCompData *tab_completion_set_to_entry(GtkWidget *entry);
 
 static void tab_completion_free_list(TabCompData *td)
 {
@@ -590,7 +590,6 @@ GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
 	GtkWidget *combo_entry;
 	GtkWidget *button;
 	GList *work;
-	TabCompData *td;
 	gint n = 0;
 
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -605,11 +604,7 @@ GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
 	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	tab_completion_add_to_entry(combo_entry, nullptr, nullptr, nullptr);
-
-	td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(combo_entry), "tab_completion_data"));
-	if (!td) return nullptr; /* this should never happen! */
-
+	TabCompData *td = tab_completion_set_to_entry(combo_entry);
 	td->combo = combo;
 	td->has_history = TRUE;
 	td->history_key = g_strdup(history_key);
@@ -703,31 +698,31 @@ GtkWidget *tab_completion_new(GtkWidget **entry, const gchar *text,
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	tab_completion_add_to_entry(newentry, filter, filter_desc, shortcuts);
+	TabCompData *td = tab_completion_set_to_entry(newentry);
+	td->filter = g_strdup(filter);
+	td->filter_desc = g_strdup(filter_desc);
+	td->shortcuts = g_strdup(shortcuts);
+
 	if (entry) *entry = newentry;
 	return hbox;
 }
 
-static void tab_completion_add_to_entry(GtkWidget *entry, const gchar *filter, const gchar *filter_desc, const gchar *shortcuts)
+static TabCompData *tab_completion_set_to_entry(GtkWidget *entry)
 {
-	TabCompData *td;
 	if (!entry)
 		{
 		log_printf("Tab completion error: entry != NULL\n");
-		return;
+		return nullptr;
 		}
 
-	td = g_new0(TabCompData, 1);
-
+	auto *td = g_new0(TabCompData, 1);
 	td->entry = entry;
-	td->filter = g_strdup(filter);
-	td->filter_desc = g_strdup(filter_desc);
-	td->shortcuts = g_strdup(shortcuts);
 
 	g_object_set_data_full(G_OBJECT(entry), "tab_completion_data", td, tab_completion_destroy);
 
 	g_signal_connect(G_OBJECT(entry), "key_press_event",
 			 G_CALLBACK(tab_completion_key_pressed), td);
+	return td;
 }
 
 void tab_completion_set_enter_func(GtkWidget *entry, TabCompEnterFunc enter_func, gpointer data)
