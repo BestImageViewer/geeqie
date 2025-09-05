@@ -142,6 +142,13 @@ summary({'gq_appdir': gq_appdir,
 conf_data = configuration_data()
 conf_data.set('DEBUG', debug)
 
+
+# Detect if mntent.h is available
+has_mntent_h = cc.has_header('mntent.h')
+if has_mntent_h
+    add_project_arguments('-DHAVE_MNTENT_H', language: ['c', 'cpp'])
+endif
+
 conf_data.set('HAVE_GTK4', 0)
 option = get_option('gtk4')
 if option.enabled()
