@@ -98,6 +98,9 @@
 /* Define to enable lua support */
 #mesondefine HAVE_LUA
 
+/* Define to enable use of mntent.h */
+#mesondefine HAVE_MNTENT_H
+
 /* Define to enable npy support */
 #mesondefine HAVE_NPY
 

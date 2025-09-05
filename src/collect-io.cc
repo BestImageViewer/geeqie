@@ -29,7 +29,7 @@
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
-#if defined(__GLIBC__)
+#if HAVE_MNTENT_H
 #include <mntent.h>
 #else
 #include <sys/mount.h>
@@ -54,7 +54,7 @@
 namespace
 {
 
-#if defined(__GLIBC__)
+#if HAVE_MNTENT_H
 using MFILE = FILE;
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(MFILE, endmntent)
 #endif
@@ -139,7 +139,7 @@ bool is_file_on_mounted_drive(const gchar *filename)
 		       g_str_has_prefix(filename, dirname);
 	};
 
-#if defined(__GLIBC__) || defined(__UCLIBC__) || defined(__MUSL__)
+#if HAVE_MNTENT_H
 	g_autoptr(MFILE) mount_entries = setmntent("/proc/mounts", "r");
 	if (mount_entries == nullptr)
 		{
