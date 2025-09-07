@@ -82,6 +82,9 @@
 namespace
 {
 
+#define GQ_ICC_LOCAL "/usr/local/share/color/icc/"
+#define GQ_ICC_SYSTEM "/usr/share/color/icc/"
+
 constexpr gint PRE_FORMATTED_COLUMNS = 5;
 constexpr gint KEYWORD_DIALOG_WIDTH = 400;
 
@@ -3338,6 +3341,8 @@ static void config_tab_color(GtkWidget *notebook)
 	label = pref_table_label(table, 2, 0, _("File"), GTK_ALIGN_START);
 	pref_label_bold(label, TRUE, FALSE);
 
+	constexpr auto shortcuts_list = GQ_ICC_LOCAL ";" GQ_ICC_SYSTEM;
+
 	for (gint i = 0; i < COLOR_PROFILE_INPUTS; i++)
 		{
 		GtkWidget *entry;
@@ -3355,7 +3360,6 @@ static void config_tab_color(GtkWidget *notebook)
 		gtk_widget_show(entry);
 		color_profile_input_name_entry[i] = entry;
 
-		g_autofree gchar *shortcuts_list = g_strconcat(GQ_ICC_LOCAL, ";", GQ_ICC_SYSTEM, nullptr);
 		tabcomp = tab_completion_new(&entry, options->color_profile.input_file[i], ".icc", "ICC Files", shortcuts_list);
 		tab_completion_add_select_button(entry, _("Select color profile"), FALSE);
 		gtk_widget_set_size_request(entry, 160, -1);
@@ -3374,7 +3378,6 @@ static void config_tab_color(GtkWidget *notebook)
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 
 	pref_table_label(table, 0, 0, _("Screen:"), GTK_ALIGN_END);
-	g_autofree gchar *shortcuts_list = g_strconcat(GQ_ICC_LOCAL, ";", GQ_ICC_SYSTEM, nullptr);
 	tabcomp = tab_completion_new(&color_profile_screen_file_entry, options->color_profile.screen_file, ".icc", "ICC Files", shortcuts_list);
 	tab_completion_add_select_button(color_profile_screen_file_entry, _("Select color profile"), FALSE);
 	gtk_widget_set_size_request(color_profile_screen_file_entry, 160, -1);

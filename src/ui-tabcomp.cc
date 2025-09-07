@@ -153,6 +153,7 @@ static void tab_completion_destroy(gpointer data)
 
 	g_free(td->filter);
 	g_free(td->filter_desc);
+	g_free(td->shortcuts);
 
 	g_free(td);
 }
