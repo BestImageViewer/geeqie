@@ -21,8 +21,6 @@
 
 #include "ui-tabcomp.h"
 
-#include <dirent.h>
-
 #include <cstring>
 
 #include <gdk/gdk.h>
@@ -103,40 +101,34 @@ static void tab_completion_free_list(TabCompData *td)
 
 static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 {
-	DIR *dp;
-	struct dirent *dir;
-	GList *list = nullptr;
-
 	tab_completion_free_list(td);
 
 	g_autofree gchar *pathl = path_from_utf8(path);
-	dp = opendir(pathl);
-	if (!dp)
+	g_autoptr(GDir) dir = g_dir_open(pathl, 0, nullptr);
+	if (!dir)
 		{
 		/* dir not found */
 		return;
 		}
 
-	while ((dir = readdir(dp)) != nullptr)
+	GList *list = nullptr;
+	const gchar *name;
+	while ((name = g_dir_read_name(dir)) != nullptr)
 		{
-		gchar *name = dir->d_name;
-		if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0 &&
-						(name[0] != '.' || options->file_filter.show_hidden_files))
-			{
-			g_autofree gchar *abspath = g_build_filename(pathl, name, NULL);
+		if (name[0] == '.' && !options->file_filter.show_hidden_files) continue;
 
-			if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
-				{
-				g_autofree gchar *dname = g_strconcat(name, G_DIR_SEPARATOR_S, NULL);
-				list = g_list_prepend(list, path_to_utf8(dname));
-				}
-			else
-				{
-				list = g_list_prepend(list, path_to_utf8(name));
-				}
+		g_autofree gchar *abspath = g_build_filename(pathl, name, NULL);
+
+		if (g_file_test(abspath, G_FILE_TEST_IS_DIR))
+			{
+			g_autofree gchar *dname = g_strconcat(name, G_DIR_SEPARATOR_S, NULL);
+			list = g_list_prepend(list, path_to_utf8(dname));
+			}
+		else
+			{
+			list = g_list_prepend(list, path_to_utf8(name));
 			}
 		}
-	closedir(dp);
 
 	td->dir_path = g_strdup(path);
 	td->file_list = list;
