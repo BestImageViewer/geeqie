@@ -90,18 +90,10 @@ static void tab_completion_select_show(TabCompData *td);
 static gint tab_completion_do(TabCompData *td);
 static TabCompData *tab_completion_set_to_entry(GtkWidget *entry);
 
-static void tab_completion_free_list(TabCompData *td)
-{
-	g_free(td->dir_path);
-	td->dir_path = nullptr;
-
-	g_list_free_full(td->file_list, g_free);
-	td->file_list = nullptr;
-}
-
 static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 {
-	tab_completion_free_list(td);
+	g_clear_pointer(&td->dir_path, g_free);
+	g_clear_list(&td->file_list, g_free);
 
 	g_autofree gchar *pathl = path_from_utf8(path);
 	g_autoptr(GDir) dir = g_dir_open(pathl, 0, nullptr);
@@ -138,7 +130,9 @@ static void tab_completion_destroy(gpointer data)
 {
 	auto td = static_cast<TabCompData *>(data);
 
-	tab_completion_free_list(td);
+	g_free(td->dir_path);
+	g_list_free_full(td->file_list, g_free);
+
 	g_free(td->history_key);
 
 	g_free(td->fd_title);
