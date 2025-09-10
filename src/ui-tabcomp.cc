@@ -81,8 +81,6 @@ struct TabCompData
 	gchar *filter;
 	gchar *filter_desc;
 	gchar *shortcuts;
-
-	guint choices;
 };
 
 
@@ -178,66 +176,69 @@ static void tab_completion_emit_tab_signal(TabCompData *td)
 }
 
 #ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
+struct TabCompPrefix
+{
+	const gchar *prefix;
+	const size_t prefix_len;
+	guint choices;
+};
+
 static void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
 {
-	auto td = static_cast<TabCompData *>(data);
-	GtkWidget *child;
-
 	if (!gtk_widget_get_visible(widget)) return;
 
-	child = gtk_bin_get_child(GTK_BIN(widget));
-	if (GTK_IS_LABEL(child)) {
-		const gchar *text = gtk_label_get_text(GTK_LABEL(child));
-		const gchar *entry_text = gq_gtk_entry_get_text(GTK_ENTRY(td->entry));
-		const gchar *prefix = filename_from_path(entry_text);
-		guint prefix_len = strlen(prefix);
+	GtkWidget *child = gtk_bin_get_child(GTK_BIN(widget));
+	if (!GTK_IS_LABEL(child)) return;
 
-		if (strlen(text) < prefix_len || strncmp(text, prefix, prefix_len) != 0)
-			{
-			/* Hide menu items not matching */
-			gtk_widget_hide(widget);
-			}
-		else
-			{
-			/* Count how many choices are left in the menu */
-			td->choices++;
-			}
-	}
+	auto *tp = static_cast<TabCompPrefix *>(data);
+	const gchar *text = gtk_label_get_text(GTK_LABEL(child));
+
+	if (strlen(text) < tp->prefix_len || strncmp(text, tp->prefix, tp->prefix_len) != 0)
+		{
+		/* Hide menu items not matching */
+		gtk_widget_hide(widget);
+		}
+	else
+		{
+		/* Count how many choices are left in the menu */
+		tp->choices++;
+		}
 }
 
 static gboolean tab_completion_popup_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
-	auto td = static_cast<TabCompData *>(data);
+	const bool is_supported_key = event->keyval >= 0x20 && event->keyval <= 0xFF;
 
-	if (event->keyval == GDK_KEY_Tab ||
-	    event->keyval == GDK_KEY_BackSpace ||
-	    (event->keyval >= 0x20 && event->keyval <= 0xFF) )
+	if (event->keyval != GDK_KEY_Tab &&
+	    event->keyval != GDK_KEY_BackSpace &&
+	    !is_supported_key)
+		return FALSE;
+
+	if (is_supported_key)
 		{
-		if (event->keyval >= 0x20 && event->keyval <= 0xFF)
-			{
-			gchar buf[2];
-			gint p = -1;
+		auto *td = static_cast<TabCompData *>(data);
+		gchar buf[2];
+		gint p = -1;
 
-			buf[0] = event->keyval;
-			buf[1] = '\0';
-			gtk_editable_insert_text(GTK_EDITABLE(td->entry), buf, 1, &p);
-			gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
+		buf[0] = event->keyval;
+		buf[1] = '\0';
+		gtk_editable_insert_text(GTK_EDITABLE(td->entry), buf, 1, &p);
+		gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
-			/* Reduce the number of entries in the menu */
-			td->choices = 0;
-			gtk_container_foreach(GTK_CONTAINER(widget), tab_completion_iter_menu_items, td);
-			if (td->choices > 1) return TRUE; /* multiple choices */
-			if (td->choices > 0) tab_completion_do(td); /* one choice */
-			}
-
-		/* close the menu */
-		gtk_menu_popdown(GTK_MENU(widget));
-		/* doing this does not emit the "selection done" signal, unref it ourselves */
-		g_object_unref(widget);
-		return TRUE;
+		/* Reduce the number of entries in the menu */
+		const gchar *entry_text = gq_gtk_entry_get_text(GTK_ENTRY(td->entry));
+		const gchar *prefix = filename_from_path(entry_text);
+		TabCompPrefix tp{ prefix, strlen(prefix), 0 };
+		gtk_container_foreach(GTK_CONTAINER(widget), tab_completion_iter_menu_items, &tp);
+		if (tp.choices > 1) return TRUE; /* multiple choices */
+		if (tp.choices > 0) tab_completion_do(td); /* one choice */
 		}
 
-	return FALSE;
+	/* close the menu */
+	gtk_menu_popdown(GTK_MENU(widget));
+	/* doing this does not emit the "selection done" signal, unref it ourselves */
+	g_object_unref(widget);
+	return TRUE;
 }
 
 static void tab_completion_popup_cb(GtkWidget *widget, gpointer data)
