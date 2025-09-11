@@ -21,8 +21,6 @@
 
 #include "cache-maint.h"
 
-#include <dirent.h>
-
 #include <cstdlib>
 #include <cstring>
 
@@ -207,28 +205,14 @@ void cache_maintenance(GtkApplication *app, const gchar *path)
  *-------------------------------------------------------------------
  */
 
-static gboolean isempty(const gchar *path)
+static bool is_empty_dir(const gchar *path)
 {
-	DIR *dp;
-	struct dirent *dir;
-
 	g_autofree gchar *pathl = path_from_utf8(path);
-	dp = opendir(pathl);
-	if (!dp) return FALSE;
 
-	while ((dir = readdir(dp)) != nullptr)
-		{
-		gchar *name = dir->d_name;
+	g_autoptr(GDir) dir = g_dir_open(pathl, 0, nullptr);
+	if (!dir) return false;
 
-		if (name[0] != '.' || (name[1] != '\0' && (name[1] != '.' || name[2] != '\0')) )
-			{
-			closedir(dp);
-			return FALSE;
-			}
-		}
-
-	closedir(dp);
-	return TRUE;
+	return g_dir_read_name(dir) == nullptr;
 }
 
 static void cache_maintain_home_stop(CMData *cm)
@@ -346,7 +330,7 @@ static gboolean cache_maintain_home_cb(gpointer data)
 		else
 			{
 			/* must re-check for an empty dir */
-			if (isempty(fd->path) && cm->list->next && !rmdir_utf8(fd->path))
+			if (is_empty_dir(fd->path) && cm->list->next && !rmdir_utf8(fd->path))
 				{
 				log_printf("Unable to delete dir: %s\n", fd->path);
 				}
