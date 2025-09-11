@@ -41,7 +41,6 @@
 #include "bar-sort.h"
 #include "bar.h"
 #include "cache-maint.h"
-#include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "color-man.h"
@@ -107,6 +106,12 @@ void window_names_free(WindowNames *wn)
 }
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(WindowNames, window_names_free)
+
+struct LayoutEditors
+{
+	gint reload_idle_id = -1;
+	GList *desktop_files = nullptr;
+} layout_editors;
 
 } // namespace
 
@@ -2993,23 +2998,22 @@ void layout_actions_setup(LayoutWindow *lw)
 	DEBUG_1("%s layout_actions_setup: end", get_exec_time());
 }
 
-static gint layout_editors_reload_idle_id = -1;
-static GList *layout_editors_desktop_files = nullptr;
-
-static gboolean layout_editors_reload_idle_cb(gpointer)
+static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 {
-	if (!layout_editors_desktop_files)
+	auto *layout_editors = static_cast<LayoutEditors *>(user_data);
+
+	if (!layout_editors->desktop_files)
 		{
 		DEBUG_1("%s layout_editors_reload_idle_cb: get_desktop_files", get_exec_time());
-		layout_editors_desktop_files = editor_get_desktop_files();
+		layout_editors->desktop_files = editor_get_desktop_files();
 		return G_SOURCE_CONTINUE;
 		}
 
-	editor_read_desktop_file(static_cast<const gchar *>(layout_editors_desktop_files->data));
-	g_free(layout_editors_desktop_files->data);
-	layout_editors_desktop_files = g_list_delete_link(layout_editors_desktop_files, layout_editors_desktop_files);
+	editor_read_desktop_file(static_cast<const gchar *>(layout_editors->desktop_files->data));
+	g_free(layout_editors->desktop_files->data);
+	layout_editors->desktop_files = g_list_delete_link(layout_editors->desktop_files, layout_editors->desktop_files);
 
-	if (layout_editors_desktop_files) return G_SOURCE_CONTINUE;
+	if (layout_editors->desktop_files) return G_SOURCE_CONTINUE;
 
 	DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors", get_exec_time());
 	editor_table_finish();
@@ -3034,7 +3038,7 @@ static gboolean layout_editors_reload_idle_cb(gpointer)
 	toolbar_select_new(lw, TOOLBAR_STATUS);
 	toolbar_apply(TOOLBAR_STATUS);
 
-	layout_editors_reload_idle_id = -1;
+	layout_editors->reload_idle_id = -1;
 	return G_SOURCE_REMOVE;
 }
 
@@ -3042,26 +3046,26 @@ void layout_editors_reload_start()
 {
 	DEBUG_1("%s layout_editors_reload_start", get_exec_time());
 
-	if (layout_editors_reload_idle_id != -1)
+	if (layout_editors.reload_idle_id != -1)
 		{
-		g_source_remove(layout_editors_reload_idle_id);
-		g_list_free_full(layout_editors_desktop_files, g_free);
+		g_source_remove(layout_editors.reload_idle_id);
+		g_list_free_full(layout_editors.desktop_files, g_free);
 		}
 
 	editor_table_clear();
-	layout_editors_reload_idle_id = g_idle_add(layout_editors_reload_idle_cb, nullptr);
+	layout_editors.reload_idle_id = g_idle_add(layout_editors_reload_idle_cb, &layout_editors);
 }
 
 void layout_editors_reload_finish()
 {
-	if (layout_editors_reload_idle_id != -1)
+	if (layout_editors.reload_idle_id == -1) return;
+
+	DEBUG_1("%s layout_editors_reload_finish", get_exec_time());
+
+	g_source_remove(layout_editors.reload_idle_id);
+	while (layout_editors.reload_idle_id != -1)
 		{
-		DEBUG_1("%s layout_editors_reload_finish", get_exec_time());
-		g_source_remove(layout_editors_reload_idle_id);
-		while (layout_editors_reload_idle_id != -1)
-			{
-			layout_editors_reload_idle_cb(nullptr);
-			}
+		layout_editors_reload_idle_cb(&layout_editors);
 		}
 }
 
