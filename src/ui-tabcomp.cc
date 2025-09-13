@@ -30,7 +30,8 @@
 #include "history-list.h"
 #include "intl.h"
 #include "main-defines.h"
-#include "misc.h"	/* expand_tilde() */
+#include "main.h"
+#include "misc.h"
 #include "options.h"
 #include "ui-file-chooser.h"
 #include "ui-fileops.h"
@@ -292,16 +293,6 @@ static void tab_completion_popup_list(TabCompData *td, GList *list)
 
 	gtk_menu_popup_at_widget(GTK_MENU(menu), td->entry, GDK_GRAVITY_NORTH_EAST, GDK_GRAVITY_NORTH, nullptr);
 }
-
-#ifndef CASE_SORT
-#define CASE_SORT strcmp
-#endif
-
-static gint simple_sort(gconstpointer a, gconstpointer b)
-{
-	return CASE_SORT((gchar *)a, (gchar *)b);
-}
-
 #endif
 
 static gboolean tab_completion_do(TabCompData *td)
@@ -356,7 +347,7 @@ static gboolean tab_completion_do(TabCompData *td)
 				}
 
 			tab_completion_read_dir(td, entry_dir);
-			td->file_list = g_list_sort(td->file_list, simple_sort);
+			td->file_list = g_list_sort(td->file_list, reinterpret_cast<GCompareFunc>(CASE_SORT));
 			if (td->file_list && !td->file_list->next)
 				{
 				const gchar *file;
@@ -459,7 +450,7 @@ static gboolean tab_completion_do(TabCompData *td)
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
 #ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
-				poss = g_list_sort(poss, simple_sort);
+				poss = g_list_sort(poss, reinterpret_cast<GCompareFunc>(CASE_SORT));
 				tab_completion_popup_list(td, poss);
 #endif
 

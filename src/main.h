@@ -38,7 +38,7 @@ extern gchar *instance_identifier;
 
 void exit_program();
 
-#define CASE_SORT(a, b) ( (options->file_sort.case_sensitive) ? strcmp((a), (b)) : strcasecmp((a), (b)) )
+#define CASE_SORT (options->file_sort.case_sensitive ? strcmp : strcasecmp)
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
