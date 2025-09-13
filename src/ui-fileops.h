@@ -81,6 +81,7 @@ GString *string_list_join(const GList *list, const gchar *sep) G_GNUC_WARN_UNUSE
 gchar *unique_filename(const gchar *path, const gchar *ext, const gchar *divider, gboolean pad);
 
 const gchar *filename_from_path(const gchar *path);
+gchar *remove_trailing_slash(const gchar *path);
 gchar *remove_level_from_path(const gchar *path);
 
 gchar *remove_extension_from_path(const gchar *path);

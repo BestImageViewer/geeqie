@@ -727,18 +727,6 @@ void tab_completion_set_tab_append_func(GtkWidget *entry, TabCompTabAppendFunc t
 	td->tab_append_data = data;
 }
 
-gchar *remove_trailing_slash(const gchar *path)
-{
-	gint l;
-
-	if (!path) return nullptr;
-
-	l = strlen(path);
-	while (l > 1 && path[l - 1] == G_DIR_SEPARATOR) l--;
-
-	return g_strndup(path, l);
-}
-
 static void tab_completion_response_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
 {
 	auto td = static_cast<TabCompData *>(data);

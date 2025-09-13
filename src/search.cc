@@ -63,7 +63,6 @@
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
 #include "ui-tree-edit.h"
-#include "ui-utildlg.h"
 #include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"

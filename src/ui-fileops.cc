@@ -654,6 +654,16 @@ const gchar *filename_from_path(const gchar *path)
 	return path;
 }
 
+gchar *remove_trailing_slash(const gchar *path)
+{
+	if (!path) return nullptr;
+
+	size_t l = strlen(path);
+	while (l > 1 && path[l - 1] == G_DIR_SEPARATOR) l--;
+
+	return g_strndup(path, l);
+}
+
 gchar *remove_level_from_path(const gchar *path)
 {
 	if (!path) return g_strdup("");

@@ -35,12 +35,12 @@ void tab_completion_append_to_history(GtkWidget *entry, const gchar *path);
 
 GtkWidget *tab_completion_new(GtkWidget **entry, const gchar *text,
                               const gchar *filter, const gchar *filter_desc, const gchar *shortcuts);
+
 void tab_completion_set_enter_func(GtkWidget *entry, TabCompEnterFunc enter_func, gpointer data);
 void tab_completion_set_tab_func(GtkWidget *entry, TabCompTabFunc tab_func, gpointer data);
-gchar *remove_trailing_slash(const gchar *path);
+void tab_completion_set_tab_append_func(GtkWidget *entry, TabCompTabAppendFunc tab_append_func, gpointer data);
 
 void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboolean folders_only);
-void tab_completion_set_tab_append_func(GtkWidget *entry, TabCompTabAppendFunc tab_append_func, gpointer data);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
