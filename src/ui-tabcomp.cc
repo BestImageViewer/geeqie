@@ -619,22 +619,6 @@ GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
 	return box;
 }
 
-const gchar *tab_completion_set_to_last_history(GtkWidget *entry)
-{
-	auto td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
-	const gchar *buf;
-
-	if (!td || !td->has_history) return nullptr;
-
-	buf = history_list_find_last_path_by_key(td->history_key);
-	if (buf)
-		{
-		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
-		}
-
-	return buf;
-}
-
 void tab_completion_append_to_history(GtkWidget *entry, const gchar *path)
 {
 	TabCompData *td;
