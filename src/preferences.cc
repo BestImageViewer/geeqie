@@ -3150,8 +3150,8 @@ static void keywords_find_dialog(GtkWidget *widget, const gchar *path)
 	hbox = pref_box_new(kfd->group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Folder:"));
 
-	label = tab_completion_new(&kfd->entry, path, nullptr, nullptr, nullptr);
-	tab_completion_add_select_button(kfd->entry,_("Select folder") , TRUE);
+	label = tab_completion_new(&kfd->entry, path);
+	tab_completion_add_select_button(kfd->entry, _("Select folder"), TRUE, nullptr, nullptr, nullptr);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 	gtk_widget_show(label);
 
@@ -3360,8 +3360,8 @@ static void config_tab_color(GtkWidget *notebook)
 		gtk_widget_show(entry);
 		color_profile_input_name_entry[i] = entry;
 
-		tabcomp = tab_completion_new(&entry, options->color_profile.input_file[i], ".icc", "ICC Files", shortcuts_list);
-		tab_completion_add_select_button(entry, _("Select color profile"), FALSE);
+		tabcomp = tab_completion_new(&entry, options->color_profile.input_file[i]);
+		tab_completion_add_select_button(entry, _("Select color profile"), FALSE, ".icc", "ICC Files", shortcuts_list);
 		gtk_widget_set_size_request(entry, 160, -1);
 		gq_gtk_grid_attach(GTK_GRID(table), tabcomp, 2, 3, i + 1, i + 2, static_cast<GtkAttachOptions>(GTK_FILL | GTK_EXPAND), static_cast<GtkAttachOptions>(0), 0, 0);
 		gtk_widget_show(tabcomp);
@@ -3378,8 +3378,8 @@ static void config_tab_color(GtkWidget *notebook)
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 
 	pref_table_label(table, 0, 0, _("Screen:"), GTK_ALIGN_END);
-	tabcomp = tab_completion_new(&color_profile_screen_file_entry, options->color_profile.screen_file, ".icc", "ICC Files", shortcuts_list);
-	tab_completion_add_select_button(color_profile_screen_file_entry, _("Select color profile"), FALSE);
+	tabcomp = tab_completion_new(&color_profile_screen_file_entry, options->color_profile.screen_file);
+	tab_completion_add_select_button(color_profile_screen_file_entry, _("Select color profile"), FALSE, ".icc", "ICC Files", shortcuts_list);
 	gtk_widget_set_size_request(color_profile_screen_file_entry, 160, -1);
 #if HAVE_LCMS
 	add_intent_menu(table, 0, 1, _("Render Intent:"), options->color_profile.render_intent, &c_options->color_profile.render_intent);
@@ -3452,8 +3452,8 @@ static void config_tab_behavior(GtkWidget *notebook)
 	pref_spacer(hbox, pad_indent - pad_space);
 	pref_label_new(hbox, _("Folder:"));
 
-	tabcomp = tab_completion_new(&safe_delete_path_entry, options->file_ops.safe_delete_path, nullptr, nullptr, nullptr);
-	tab_completion_add_select_button(safe_delete_path_entry, nullptr, TRUE);
+	tabcomp = tab_completion_new(&safe_delete_path_entry, options->file_ops.safe_delete_path);
+	tab_completion_add_select_button(safe_delete_path_entry, nullptr, TRUE, nullptr, nullptr, nullptr);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), tabcomp, TRUE, TRUE, 0);
 	gtk_widget_show(tabcomp);
 
@@ -3813,15 +3813,15 @@ static void config_tab_advanced(GtkWidget *notebook)
 
 	group = pref_group_new(vbox, FALSE, _("File identification tool"), GTK_ORIENTATION_VERTICAL);
 	external_preview_select_entry = gtk_entry_new();
-	tabcomp = tab_completion_new(&external_preview_select_entry, options->external_preview.select, nullptr, nullptr, nullptr);
-	tab_completion_add_select_button(external_preview_select_entry, _("Select file identification tool"), FALSE);
+	tabcomp = tab_completion_new(&external_preview_select_entry, options->external_preview.select);
+	tab_completion_add_select_button(external_preview_select_entry, _("Select file identification tool"), FALSE, nullptr, nullptr, nullptr);
 	gq_gtk_box_pack_start(GTK_BOX(group), tabcomp, TRUE, TRUE, 0);
 	gtk_widget_show(tabcomp);
 
 	group = pref_group_new(vbox, FALSE, _("Preview extraction tool"), GTK_ORIENTATION_VERTICAL);
 	external_preview_extract_entry = gtk_entry_new();
-	tabcomp = tab_completion_new(&external_preview_extract_entry, options->external_preview.extract, nullptr, nullptr, nullptr);
-	tab_completion_add_select_button(external_preview_extract_entry, _("Select preview extraction tool"), FALSE);
+	tabcomp = tab_completion_new(&external_preview_extract_entry, options->external_preview.extract);
+	tab_completion_add_select_button(external_preview_extract_entry, _("Select preview extraction tool"), FALSE, nullptr, nullptr, nullptr);
 	gq_gtk_box_pack_start(GTK_BOX(group), tabcomp, TRUE, TRUE, 0);
 	gtk_widget_show(tabcomp);
 

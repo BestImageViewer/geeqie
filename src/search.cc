@@ -3240,7 +3240,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	hbox2 = pref_box_new(hbox, TRUE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	GtkWidget *combo = tab_completion_new_with_history(&sd->ui.path_entry, sd->search_dir_fd->path,
 	                                                   "search_path", -1);
-	tab_completion_add_select_button(sd->ui.path_entry, nullptr, TRUE);
+	tab_completion_add_select_button(sd->ui.path_entry, nullptr, TRUE, nullptr, nullptr, nullptr);
 	gq_gtk_box_pack_start(GTK_BOX(hbox2), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);
 	sd->ui.check_recurse = pref_checkbox_new_int(hbox2, _("Recurse"),
@@ -3338,7 +3338,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	combo = tab_completion_new_with_history(&sd->ui.entry_similarity,
 	                                        sd->search_similarity_path ? sd->search_similarity_path : "",
 	                                        "search_similarity_path", -1);
-	tab_completion_add_select_button(sd->ui.entry_similarity, nullptr, FALSE);
+	tab_completion_add_select_button(sd->ui.entry_similarity, nullptr, FALSE, nullptr, nullptr, nullptr);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);
 	pref_checkbox_new_int(hbox, _("Ignore rotation"),

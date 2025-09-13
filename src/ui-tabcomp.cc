@@ -75,12 +75,12 @@ struct TabCompData
 	gchar *history_key;
 	gint history_levels;
 
+	GtkWidget *fd_button;
 	gchar *fd_title;
 	gboolean fd_folders_only;
-	GtkWidget *fd_button;
-	gchar *filter;
-	gchar *filter_desc;
-	gchar *shortcuts;
+	gchar *fd_filter;
+	gchar *fd_filter_desc;
+	gchar *fd_shortcuts;
 };
 
 
@@ -134,10 +134,9 @@ static void tab_completion_destroy(gpointer data)
 	g_free(td->history_key);
 
 	g_free(td->fd_title);
-
-	g_free(td->filter);
-	g_free(td->filter_desc);
-	g_free(td->shortcuts);
+	g_free(td->fd_filter);
+	g_free(td->fd_filter_desc);
+	g_free(td->fd_shortcuts);
 
 	g_free(td);
 }
@@ -652,8 +651,7 @@ void tab_completion_append_to_history(GtkWidget *entry, const gchar *path)
 	}
 }
 
-GtkWidget *tab_completion_new(GtkWidget **entry, const gchar *text,
-                              const gchar *filter, const gchar *filter_desc, const gchar *shortcuts)
+GtkWidget *tab_completion_new(GtkWidget **entry, const gchar *text)
 {
 	GtkWidget *hbox;
 	GtkWidget *button;
@@ -670,10 +668,7 @@ GtkWidget *tab_completion_new(GtkWidget **entry, const gchar *text,
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	TabCompData *td = tab_completion_set_to_entry(newentry);
-	td->filter = g_strdup(filter);
-	td->filter_desc = g_strdup(filter_desc);
-	td->shortcuts = g_strdup(shortcuts);
+	tab_completion_set_to_entry(newentry);
 
 	if (entry) *entry = newentry;
 	return hbox;
@@ -750,11 +745,11 @@ static void tab_completion_select_show(TabCompData *td)
 	fcdd.accept_text = _("Open");
 	fcdd.data = td;
 	fcdd.filename = gtk_entry_get_text(GTK_ENTRY(td->entry));
-	fcdd.filter = td->filter;
-	fcdd.filter_description = td->filter_desc;
+	fcdd.filter = td->fd_filter;
+	fcdd.filter_description = td->fd_filter_desc;
 	fcdd.history_key = td->history_key;
 	fcdd.response_callback = G_CALLBACK(tab_completion_response_cb);
-	fcdd.shortcuts = td->shortcuts;
+	fcdd.shortcuts = td->fd_shortcuts;
 	fcdd.title = td->fd_title;
 
 	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
@@ -769,7 +764,8 @@ static void tab_completion_select_pressed(GtkWidget *, gpointer data)
 	tab_completion_select_show(td);
 }
 
-void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboolean folders_only)
+void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboolean folders_only,
+                                      const gchar *filter, const gchar *filter_desc, const gchar *shortcuts)
 {
 	TabCompData *td;
 	GtkWidget *parent;
@@ -777,13 +773,13 @@ void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboo
 
 	td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
 
-	if (!td) return;
+	if (!td || td->fd_button) return;
 
-	g_free(td->fd_title);
 	td->fd_title = g_strdup(title);
 	td->fd_folders_only = folders_only;
-
-	if (td->fd_button) return;
+	td->fd_filter = g_strdup(filter);
+	td->fd_filter_desc = g_strdup(filter_desc);
+	td->fd_shortcuts = g_strdup(shortcuts);
 
 	parent = (td->combo) ? td->combo : td->entry;
 
