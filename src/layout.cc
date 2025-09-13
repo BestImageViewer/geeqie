@@ -2333,7 +2333,6 @@ void layout_show_config_window(LayoutWindow *lw)
 	GtkWidget *ct_button;
 	GtkWidget *group;
 	GtkWidget *frame;
-	GtkWidget *tabcomp;
 
 	lc = g_new0(LayoutConfig, 1);
 	lc->lw = lw;
@@ -2408,10 +2407,8 @@ void layout_show_config_window(LayoutWindow *lw)
 	pref_label_new(group, _("Home path (empty to use your home directory)"));
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
-	tabcomp = tab_completion_new(&lc->home_path_entry, lc->options.home_path);
+	lc->home_path_entry = tab_completion_new(hbox, lc->options.home_path);
 	tab_completion_add_select_button(lc->home_path_entry, nullptr, TRUE, nullptr, nullptr, nullptr);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), tabcomp, TRUE, TRUE, 0);
-	gtk_widget_show(tabcomp);
 
 	button = pref_button_new(hbox, nullptr, _("Use current"),
 				 G_CALLBACK(home_path_set_current_cb), lc);

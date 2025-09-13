@@ -642,27 +642,26 @@ void tab_completion_append_to_history(GtkWidget *entry, const gchar *path)
 	}
 }
 
-GtkWidget *tab_completion_new(GtkWidget **entry, const gchar *text)
+GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text)
 {
-	GtkWidget *hbox;
-	GtkWidget *button;
-	GtkWidget *newentry;
+	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	GtkWidget *entry = gtk_entry_new();
+	if (text) gq_gtk_entry_set_text(GTK_ENTRY(entry), text);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
+	gtk_widget_show(entry);
 
-	newentry = gtk_entry_new();
-	if (text) gq_gtk_entry_set_text(GTK_ENTRY(newentry), text);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), newentry, TRUE, TRUE, 0);
-	gtk_widget_show(newentry);
-
-	button = tab_completion_create_complete_button(newentry, newentry);
+	GtkWidget *button = tab_completion_create_complete_button(entry, entry);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	tab_completion_set_to_entry(newentry);
+	tab_completion_set_to_entry(entry);
 
-	if (entry) *entry = newentry;
-	return hbox;
+	if (parent_box) gq_gtk_box_pack_start(GTK_BOX(parent_box), hbox, TRUE, TRUE, 0);
+
+	gtk_widget_show(hbox);
+
+	return entry;
 }
 
 static TabCompData *tab_completion_set_to_entry(GtkWidget *entry)
