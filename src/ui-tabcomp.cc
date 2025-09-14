@@ -58,6 +58,9 @@
  * ----------------------------------------------------------------
  */
 
+namespace
+{
+
 struct TabCompData
 {
 	GtkWidget *entry;
@@ -84,10 +87,16 @@ struct TabCompData
 	gchar *fd_shortcuts;
 };
 
+inline TabCompData *tab_completion_get_from_entry(GtkWidget *entry)
+{
+	return static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
+}
+
+} // namespace
+
 
 static void tab_completion_select_show(TabCompData *td);
 static gint tab_completion_do(TabCompData *td);
-static TabCompData *tab_completion_set_to_entry(GtkWidget *entry);
 
 static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 {
@@ -243,12 +252,10 @@ static gboolean tab_completion_popup_key_press(GtkWidget *widget, GdkEventKey *e
 
 static void tab_completion_popup_cb(GtkWidget *widget, gpointer data)
 {
-	auto name = static_cast<gchar *>(data);
-	TabCompData *td;
-
-	td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(widget), "tab_completion_data"));
+	TabCompData *td = tab_completion_get_from_entry(widget);
 	if (!td) return;
 
+	auto *name = static_cast<gchar *>(data);
 	g_autofree gchar *buf = g_build_filename(td->dir_path, name, NULL);
 	gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
 	gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
@@ -505,11 +512,9 @@ static gboolean tab_completion_key_pressed(GtkWidget *widget, GdkEventKey *event
 
 static void tab_completion_button_pressed(GtkWidget *, gpointer data)
 {
-	TabCompData *td;
 	auto entry = static_cast<GtkWidget *>(data);
 
-	td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
-
+	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td) return;
 
 	if (!gtk_widget_has_focus(entry))
@@ -552,6 +557,24 @@ static GtkWidget *tab_completion_create_complete_button(GtkWidget *entry, GtkWid
 			 G_CALLBACK(tab_completion_button_pressed), entry);
 
 	return button;
+}
+
+static TabCompData *tab_completion_set_to_entry(GtkWidget *entry)
+{
+	if (!entry)
+		{
+		log_printf("Tab completion error: entry != NULL\n");
+		return nullptr;
+		}
+
+	auto *td = g_new0(TabCompData, 1);
+	td->entry = entry;
+
+	g_object_set_data_full(G_OBJECT(entry), "tab_completion_data", td, tab_completion_destroy);
+
+	g_signal_connect(G_OBJECT(entry), "key_press_event",
+	                 G_CALLBACK(tab_completion_key_pressed), td);
+	return td;
 }
 
 /*
@@ -611,15 +634,13 @@ GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
 
 void tab_completion_append_to_history(GtkWidget *entry, const gchar *path)
 {
-	TabCompData *td;
 	GtkTreeModel *store;
 	GList *work;
 	gint n = 0;
 
-	td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
-
 	if (!path) return;
 
+	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td || !td->has_history) return;
 
 	history_list_add_to_key(td->history_key, path, td->history_levels);
@@ -664,27 +685,9 @@ GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text)
 	return entry;
 }
 
-static TabCompData *tab_completion_set_to_entry(GtkWidget *entry)
-{
-	if (!entry)
-		{
-		log_printf("Tab completion error: entry != NULL\n");
-		return nullptr;
-		}
-
-	auto *td = g_new0(TabCompData, 1);
-	td->entry = entry;
-
-	g_object_set_data_full(G_OBJECT(entry), "tab_completion_data", td, tab_completion_destroy);
-
-	g_signal_connect(G_OBJECT(entry), "key_press_event",
-			 G_CALLBACK(tab_completion_key_pressed), td);
-	return td;
-}
-
 void tab_completion_set_enter_func(GtkWidget *entry, TabCompEnterFunc enter_func, gpointer data)
 {
-	auto *td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
+	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td) return;
 
 	td->enter_func = enter_func;
@@ -693,8 +696,7 @@ void tab_completion_set_enter_func(GtkWidget *entry, TabCompEnterFunc enter_func
 
 void tab_completion_set_tab_func(GtkWidget *entry, TabCompTabFunc tab_func, gpointer data)
 {
-	auto td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
-
+	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td) return;
 
 	td->tab_func = tab_func;
@@ -704,8 +706,7 @@ void tab_completion_set_tab_func(GtkWidget *entry, TabCompTabFunc tab_func, gpoi
 /* Add a callback function called when a new entry is appended to the list */
 void tab_completion_set_tab_append_func(GtkWidget *entry, TabCompTabAppendFunc tab_append_func, gpointer data)
 {
-	auto td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
-
+	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td) return;
 
 	td->tab_append_func = tab_append_func;
@@ -757,12 +758,10 @@ static void tab_completion_select_pressed(GtkWidget *, gpointer data)
 void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboolean folders_only,
                                       const gchar *filter, const gchar *filter_desc, const gchar *shortcuts)
 {
-	TabCompData *td;
 	GtkWidget *parent;
 	GtkWidget *hbox;
 
-	td = static_cast<TabCompData *>(g_object_get_data(G_OBJECT(entry), "tab_completion_data"));
-
+	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td || td->fd_button) return;
 
 	td->fd_title = g_strdup(title);
