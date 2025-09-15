@@ -271,7 +271,6 @@ static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent
 	BookPropData *p;
 	GenericDialog *gd;
 	GtkWidget *table;
-	GtkWidget *label;
 	const gchar *icon;
 
 	if (!key) key = "bookmarks";
@@ -304,21 +303,19 @@ static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent
 
 	pref_table_label(table, 0, 1, _("Path:"), GTK_ALIGN_END);
 
-	label = tab_completion_new_with_history(&p->path_entry, p->bb->path, "bookmark_path", -1);
+	p->path_entry = tab_completion_new_with_history(nullptr, p->bb->path, "bookmark_path", -1);
 	tab_completion_add_select_button(p->path_entry, nullptr, TRUE, nullptr, nullptr, nullptr);
-	gq_gtk_grid_attach_default(GTK_GRID(table), label, 1, 2, 1, 2);
+	gq_gtk_grid_attach_default(GTK_GRID(table), tab_completion_get_box(p->path_entry), 1, 2, 1, 2);
 	generic_dialog_attach_default(gd, p->path_entry);
-	gtk_widget_show(label);
 
 	pref_table_label(table, 0, 2, _("Icon:"), GTK_ALIGN_END);
 
 	icon = p->bb->icon;
 	if (!icon) icon = "";
-	label = tab_completion_new_with_history(&p->icon_entry, icon, "bookmark_icons", -1);
+	p->icon_entry = tab_completion_new_with_history(nullptr, icon, "bookmark_icons", -1);
 	tab_completion_add_select_button(p->icon_entry, _("Select icon"), FALSE, nullptr, nullptr, nullptr);
-	gq_gtk_grid_attach_default(GTK_GRID(table), label, 1, 2, 2, 3);
+	gq_gtk_grid_attach_default(GTK_GRID(table), tab_completion_get_box(p->icon_entry), 1, 2, 2, 3);
 	generic_dialog_attach_default(gd, p->icon_entry);
-	gtk_widget_show(label);
 
 	gtk_widget_show(gd->dialog);
 }

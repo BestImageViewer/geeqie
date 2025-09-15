@@ -29,7 +29,7 @@ using TabCompEnterFunc = void (*)(const gchar *, gpointer);
 using TabCompTabFunc = void (*)(const gchar *, gpointer);
 using TabCompTabAppendFunc = void (*)(const gchar *, gint, gpointer);
 
-GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
+GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *text,
                                            const gchar *history_key, gint max_levels);
 void tab_completion_append_to_history(GtkWidget *entry, const gchar *path);
 
@@ -41,6 +41,8 @@ void tab_completion_set_tab_append_func(GtkWidget *entry, TabCompTabAppendFunc t
 
 void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboolean folders_only,
                                       const gchar *filter, const gchar *filter_desc, const gchar *shortcuts);
+
+GtkWidget *tab_completion_get_box(GtkWidget *entry);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

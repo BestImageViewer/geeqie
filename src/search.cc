@@ -3238,11 +3238,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	                                    G_CALLBACK(menu_choice_path_cb), sd);
 
 	hbox2 = pref_box_new(hbox, TRUE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	GtkWidget *combo = tab_completion_new_with_history(&sd->ui.path_entry, sd->search_dir_fd->path,
-	                                                   "search_path", -1);
+	sd->ui.path_entry = tab_completion_new_with_history(hbox2, sd->search_dir_fd->path,
+	                                                    "search_path", -1);
 	tab_completion_add_select_button(sd->ui.path_entry, nullptr, TRUE, nullptr, nullptr, nullptr);
-	gq_gtk_box_pack_start(GTK_BOX(hbox2), combo, TRUE, TRUE, 0);
-	gtk_widget_show(combo);
 	sd->ui.check_recurse = pref_checkbox_new_int(hbox2, _("Recurse"),
 	                                             sd->search_path_recurse, &sd->search_path_recurse);
 
@@ -3263,7 +3261,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	hbox = menu_choice(sd->ui.box_search, _("File"), &sd->match_name_enable);
 	sd->ui.menu_name = menu_choice_menu(hbox, text_search_menu_name,
 	                                    nullptr, nullptr);
-	combo = history_combo_new(&sd->ui.entry_name, "", "search_name", -1);
+	GtkWidget *combo = history_combo_new(&sd->ui.entry_name, "", "search_name", -1);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);
 	pref_checkbox_new_int(hbox, _("Match case"),
@@ -3335,12 +3333,10 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	/* xgettext:no-c-format */
 	pref_label_new(hbox, _("% similar to"));
 
-	combo = tab_completion_new_with_history(&sd->ui.entry_similarity,
-	                                        sd->search_similarity_path ? sd->search_similarity_path : "",
-	                                        "search_similarity_path", -1);
+	sd->ui.entry_similarity = tab_completion_new_with_history(hbox, sd->search_similarity_path ?
+	                                                              sd->search_similarity_path : "",
+	                                                          "search_similarity_path", -1);
 	tab_completion_add_select_button(sd->ui.entry_similarity, nullptr, FALSE, nullptr, nullptr, nullptr);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
-	gtk_widget_show(combo);
 	pref_checkbox_new_int(hbox, _("Ignore rotation"),
 				options->rot_invariant_sim, &options->rot_invariant_sim);
 

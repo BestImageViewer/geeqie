@@ -502,14 +502,11 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 {
 	GtkWidget *box;
 	GtkWidget *box_folders;
-	GtkWidget *box_menu_tabcomp;
 	GtkWidget *menu_bar;
 	GtkWidget *menu_tool_bar;
 	GtkWidget *menu_toolbar_box;
-	GtkWidget *open_menu;
 	GtkWidget *scd;
 	GtkWidget *scroll_window;
-	GtkWidget *tabcomp;
 	GtkWidget *toolbar;
 
 	box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -542,7 +539,8 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		gq_gtk_box_pack_start(GTK_BOX(lw->main_box), lw->menu_tool_bar, FALSE, FALSE, 0);
 		}
 
-	tabcomp = tab_completion_new_with_history(&lw->path_entry, nullptr, "path_list", -1);
+	lw->path_entry = tab_completion_new_with_history(nullptr, nullptr, "path_list", -1);
+	GtkWidget *tabcomp = tab_completion_get_box(lw->path_entry);
 	DEBUG_NAME(tabcomp);
 	tab_completion_set_enter_func(lw->path_entry, layout_path_entry_cb, lw);
 	tab_completion_set_tab_func(lw->path_entry, layout_path_entry_tab_cb, lw);
@@ -550,13 +548,14 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 
 	if (options->hamburger_menu)
 		{
-		box_menu_tabcomp = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-		gtk_widget_show(box_menu_tabcomp);
-
-		open_menu = layout_actions_menu_bar(lw);
+		GtkWidget *open_menu = layout_actions_menu_bar(lw);
 		gtk_widget_set_tooltip_text(open_menu, _("Open application menu"));
+
+		GtkWidget *box_menu_tabcomp = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 		gq_gtk_box_pack_start(GTK_BOX(box_menu_tabcomp), open_menu, FALSE, FALSE, 0);
 		gq_gtk_box_pack_start(GTK_BOX(box_menu_tabcomp), tabcomp, TRUE, TRUE, 0);
+		gtk_widget_show(box_menu_tabcomp);
+
 		gq_gtk_box_pack_start(GTK_BOX(box), box_menu_tabcomp, FALSE, FALSE, 0);
 		}
 	else
@@ -564,8 +563,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		gq_gtk_box_pack_start(GTK_BOX(box), tabcomp, FALSE, FALSE, 0);
 		}
 
-	gtk_widget_show(tabcomp);
-	gtk_widget_set_has_tooltip(GTK_WIDGET(tabcomp), TRUE);
+	gtk_widget_set_has_tooltip(tabcomp, TRUE);
 	g_signal_connect(G_OBJECT(tabcomp), "query_tooltip", G_CALLBACK(path_entry_tooltip_cb), lw);
 
 	g_signal_connect(G_OBJECT(gtk_widget_get_parent(gtk_widget_get_parent(lw->path_entry))), "changed", G_CALLBACK(layout_path_entry_changed_cb), lw);

@@ -583,7 +583,7 @@ static TabCompData *tab_completion_set_to_entry(GtkWidget *entry)
  *----------------------------------------------------------------------------
  */
 
-GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
+GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *text,
                                            const gchar *history_key, gint max_levels)
 {
 	GtkWidget *box;
@@ -628,8 +628,11 @@ GtkWidget *tab_completion_new_with_history(GtkWidget **entry, const gchar *text,
 		gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
 		}
 
-	if (entry) *entry = combo_entry;
-	return box;
+	if (parent_box) gq_gtk_box_pack_start(GTK_BOX(parent_box), box, TRUE, TRUE, 0);
+
+	gtk_widget_show(box);
+
+	return combo_entry;
 }
 
 void tab_completion_append_to_history(GtkWidget *entry, const gchar *path)
@@ -784,6 +787,14 @@ void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboo
 	gq_gtk_box_pack_start(GTK_BOX(hbox), td->fd_button, FALSE, FALSE, 0);
 
 	gtk_widget_show(td->fd_button);
+}
+
+GtkWidget *tab_completion_get_box(GtkWidget *entry)
+{
+	TabCompData *td = tab_completion_get_from_entry(entry);
+	if (!td) return nullptr;
+
+	return gtk_widget_get_parent(td->combo ? td->combo : td->entry);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

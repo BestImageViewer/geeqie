@@ -47,7 +47,6 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data);
 PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 {
 	auto ui = g_new0(PanViewSearchUi, 1);
-	GtkWidget *combo;
 	GtkWidget *hbox;
 
 	// Build the actual search UI.
@@ -59,10 +58,8 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 	gq_gtk_box_pack_start(GTK_BOX(ui->search_box), hbox, TRUE, TRUE, 0);
 	gtk_widget_show(hbox);
 
-	combo = tab_completion_new_with_history(&ui->search_entry, "", "pan_view_search", -1);
+	ui->search_entry = tab_completion_new_with_history(hbox, "", "pan_view_search", -1);
 	tab_completion_set_enter_func(ui->search_entry, pan_search_activate_cb, pw);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
-	gtk_widget_show(combo);
 
 	ui->search_label = gtk_label_new("");
 	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->search_label, TRUE, TRUE, 0);

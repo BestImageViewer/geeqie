@@ -219,7 +219,6 @@ gchar *pan_view_list_find_kw_pattern(GList *haystack, const PanViewFilterElement
 PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 {
 	auto ui = g_new0(PanViewFilterUi, 1);
-	GtkWidget *combo;
 	GtkWidget *hbox;
 
 	/* Since we're using the GHashTable as a HashSet (in which key and value pointers
@@ -263,10 +262,8 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), hbox, TRUE, TRUE, 0);
 	gtk_widget_show(hbox);
 
-	combo = tab_completion_new_with_history(&ui->filter_entry, "", "pan_view_filter", -1);
+	ui->filter_entry = tab_completion_new_with_history(hbox, "", "pan_view_filter", -1);
 	tab_completion_set_enter_func(ui->filter_entry, pan_filter_activate_cb, pw);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
-	gtk_widget_show(combo);
 
 	ui->filter_label = gtk_label_new("");/** @todo (xsdg): Figure out whether it's useful to keep this label around. */
 
