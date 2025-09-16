@@ -145,7 +145,7 @@ GtkWidget *pref_frame_new(GtkWidget *parent_box, gboolean fill,
 	gtk_widget_show(frame);
 
 	box = gtk_box_new(orientation, padding);
-	gq_gtk_container_add(GTK_WIDGET(frame), box);
+	gq_gtk_container_add(frame, box);
 	gtk_container_set_border_width(GTK_CONTAINER(box), PREF_PAD_BORDER);
 	gtk_widget_show(box);
 
@@ -652,7 +652,7 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(item), TRUE);
 
 	if (func) g_signal_connect(item, "clicked", func, data);
-	gq_gtk_container_add(GTK_WIDGET(toolbar), item);
+	gq_gtk_container_add(toolbar, item);
 	gtk_widget_show(item);
 
 	if (description)
@@ -812,7 +812,7 @@ static void date_selection_popup(DateSelection *ds)
 			 G_CALLBACK(date_selection_popup_keypress_cb), ds);
 
 	ds->calendar = gtk_calendar_new();
-	gq_gtk_container_add(GTK_WIDGET(ds->window), ds->calendar);
+	gq_gtk_container_add(ds->window, ds->calendar);
 	gtk_widget_show(ds->calendar);
 
 	date = date_selection_get(ds->box);
@@ -956,7 +956,7 @@ GtkWidget *date_selection_new()
 			 G_CALLBACK(button_size_allocate_cb), ds->spin_y);
 
 	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_BUTTON);
-	gq_gtk_container_add(GTK_WIDGET(ds->button), icon);
+	gq_gtk_container_add(ds->button, icon);
 	gtk_widget_show(icon);
 
 	gq_gtk_box_pack_start(GTK_BOX(ds->box), ds->button, FALSE, FALSE, 0);
@@ -1482,7 +1482,7 @@ void widget_remove_from_parent(GtkWidget *widget)
 
 void widget_remove_from_parent_cb(GtkWidget *, gpointer data)
 {
-	widget_remove_from_parent(GTK_WIDGET(data));
+	widget_remove_from_parent(static_cast<GtkWidget *>(data));
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -296,7 +296,7 @@ void bar_pane_keywords_write_config(GtkWidget *pane, GString *outstr, gint inden
 	pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pkd) return;
 
-	gtk_widget_get_size_request(GTK_WIDGET(pane), &w, &h);
+	gtk_widget_get_size_request(pane, &w, &h);
 	pkd->height = h;
 
 	WRITE_NL(); WRITE_STRING("<pane_keywords ");
@@ -450,14 +450,14 @@ void bar_pane_keywords_set_selection_cb(GtkWidget *, gpointer data)
 	g_list_free_full(keywords, g_free);
 }
 
-void bar_pane_keywords_populate_popup_cb(GtkTextView *, GtkMenu *menu, gpointer data)
+void bar_pane_keywords_populate_popup_cb(GtkTextView *, GtkWidget *menu, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 
-	menu_item_add_divider(GTK_WIDGET(menu));
-	menu_item_add_icon(GTK_WIDGET(menu), _("Add selected keywords to selected files"), GQ_ICON_ADD,
+	menu_item_add_divider(menu);
+	menu_item_add_icon(menu, _("Add selected keywords to selected files"), GQ_ICON_ADD,
 	                   G_CALLBACK(bar_pane_keywords_set_selection_cb<TRUE>), pkd);
-	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing keywords in selected files with selected keywords"), GQ_ICON_REPLACE,
+	menu_item_add_icon(menu, _("Replace existing keywords in selected files with selected keywords"), GQ_ICON_REPLACE,
 	                   G_CALLBACK(bar_pane_keywords_set_selection_cb<FALSE>), pkd);
 }
 
@@ -1371,7 +1371,6 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	PaneKeywordsData *pkd;
 	GtkWidget *hbox;
 	GtkWidget *vbox;
-	GtkWidget *scrolled;
 	GtkTextBuffer *buffer;
 	GtkTreeModel *store;
 	GtkTreeViewColumn *column;
@@ -1405,7 +1404,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_widget_set_size_request(pkd->widget, -1, height);
 	gtk_widget_show(hbox);
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -1413,7 +1412,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_widget_show(scrolled);
 
 	pkd->keyword_view = gtk_text_view_new();
-	gq_gtk_container_add(GTK_WIDGET(scrolled), pkd->keyword_view);
+	gq_gtk_container_add(scrolled, pkd->keyword_view);
 	g_signal_connect(G_OBJECT(pkd->keyword_view), "populate-popup",
 			 G_CALLBACK(bar_pane_keywords_populate_popup_cb), pkd);
 	gtk_widget_show(pkd->keyword_view);
@@ -1535,7 +1534,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	if (options->show_predefined_keyword_tree)
 		{
-		gq_gtk_container_add(GTK_WIDGET(scrolled), pkd->keyword_treeview);
+		gq_gtk_container_add(scrolled, pkd->keyword_treeview);
 		gtk_widget_show(pkd->keyword_treeview);
 		}
 
@@ -1856,7 +1855,7 @@ gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)
 	gboolean is_focused = (gtk_window_get_focus(GTK_WINDOW(lw->window)) == last_child->data);
 	if (!is_focused)
 		{
-		gtk_widget_grab_focus(GTK_WIDGET(last_child->data));
+		gtk_widget_grab_focus(static_cast<GtkWidget *>(last_child->data));
 		}
 
 	return is_focused;

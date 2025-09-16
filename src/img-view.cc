@@ -907,7 +907,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	image_auto_refresh_enable(vw->imd, TRUE);
 	image_top_window_set_sync(vw->imd, TRUE);
 
-	gq_gtk_container_add(GTK_WIDGET(vw->window), vw->imd->widget);
+	gq_gtk_container_add(vw->window, vw->imd->widget);
 	gtk_widget_show(vw->imd->widget);
 
 	view_window_dnd_init(vw);
@@ -971,7 +971,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	req_size.x = req_size.y = 0;
 	req_size.width = w;
 	req_size.height = h;
-	gtk_widget_size_allocate(GTK_WIDGET(vw->window), &req_size);
+	gtk_widget_size_allocate(vw->window, &req_size);
 
 	gtk_window_set_focus_on_map(GTK_WINDOW(vw->window), FALSE);
 	gtk_widget_show(vw->window);

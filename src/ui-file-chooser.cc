@@ -484,8 +484,8 @@ void preview_file_cb(GtkFileChooser *chooser, gpointer)
 
 	if (new_preview)
 		{
-		gq_gtk_container_add(GTK_WIDGET(preview_box), new_preview);
-		gq_gtk_widget_show_all(GTK_WIDGET(new_preview));
+		gq_gtk_container_add(preview_box, new_preview);
+		gq_gtk_widget_show_all(new_preview);
 		}
 }
 
@@ -614,9 +614,9 @@ GtkFileChooserDialog *file_chooser_dialog_new(const FileChooserDialogData &fcdd)
 
 	GtkWidget *scroller = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gq_gtk_container_add(GTK_WIDGET(scroller), textview);
+	gq_gtk_container_add(scroller, textview);
 	gtk_widget_set_size_request(scroller, 200, -1);
-	gq_gtk_widget_show_all(GTK_WIDGET(scroller));
+	gq_gtk_widget_show_all(scroller);
 
 	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), scroller);
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));

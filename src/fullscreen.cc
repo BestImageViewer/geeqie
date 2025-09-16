@@ -487,7 +487,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 
 	fs->imd = image_new(FALSE);
 
-	gq_gtk_container_add(GTK_WIDGET(fs->window), fs->imd->widget);
+	gq_gtk_container_add(fs->window, fs->imd->widget);
 
 	image_background_set_color_from_options(fs->imd, TRUE);
 	image_set_delay_flip(fs->imd, options->fullscreen.clean_flip);

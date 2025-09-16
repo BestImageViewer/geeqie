@@ -631,10 +631,6 @@ static gboolean pr_parent_window_sizable(PixbufRenderer *pr)
 
 static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 {
-	GtkWidget *widget;
-	GtkWidget *parent;
-	gint ww;
-	gint wh;
 	GtkAllocation widget_allocation;
 	GtkAllocation parent_allocation;
 
@@ -649,20 +645,20 @@ static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 		h = std::min(h, sh);
 		}
 
-	widget = GTK_WIDGET(pr);
-	parent = GTK_WIDGET(pr->parent_window);
+	auto *widget = GTK_WIDGET(pr);
 
 	gtk_widget_get_allocation(widget, &widget_allocation);
-	gtk_widget_get_allocation(parent, &parent_allocation);
+	gtk_widget_get_allocation(pr->parent_window, &parent_allocation);
 
 	w += (parent_allocation.width - widget_allocation.width);
 	h += (parent_allocation.height - widget_allocation.height);
 
-	ww = gdk_window_get_width(gtk_widget_get_window(parent));
-	wh = gdk_window_get_height(gtk_widget_get_window(parent));
-	if (w == ww && h == wh) return FALSE;
+	GdkWindow *window = gtk_widget_get_window(pr->parent_window);
+	if (w == gdk_window_get_width(window) &&
+	    h == gdk_window_get_height(window))
+		return FALSE;
 
-	gdk_window_resize(gtk_widget_get_window(parent), w, h);
+	gdk_window_resize(window, w, h);
 
 	return TRUE;
 }

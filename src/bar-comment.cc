@@ -166,7 +166,7 @@ static void bar_pane_comment_write_config(GtkWidget *pane, GString *outstr, gint
 	pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pcd) return;
 
-	gtk_widget_get_size_request(GTK_WIDGET(pane), &w, &h);
+	gtk_widget_get_size_request(pane, &w, &h);
 
 	if (!g_strcmp0(pcd->pane.id, "title"))
 		{
@@ -213,14 +213,14 @@ static void bar_pane_comment_changed(GtkTextBuffer *, gpointer data)
 }
 
 
-static void bar_pane_comment_populate_popup(GtkTextView *, GtkMenu *menu, gpointer data)
+static void bar_pane_comment_populate_popup(GtkTextView *, GtkWidget *menu, gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 
-	menu_item_add_divider(GTK_WIDGET(menu));
-	menu_item_add_icon(GTK_WIDGET(menu), _("Add text to selected files"), GQ_ICON_ADD,
+	menu_item_add_divider(menu);
+	menu_item_add_icon(menu, _("Add text to selected files"), GQ_ICON_ADD,
 	                   G_CALLBACK(bar_pane_comment_set_selection_cb<TRUE>), pcd);
-	menu_item_add_icon(GTK_WIDGET(menu), _("Replace existing text in selected files"), GQ_ICON_REPLACE,
+	menu_item_add_icon(menu, _("Replace existing text in selected files"), GQ_ICON_REPLACE,
 	                   G_CALLBACK(bar_pane_comment_set_selection_cb<FALSE>), data);
 }
 
@@ -242,7 +242,6 @@ static void bar_pane_comment_destroy(gpointer data)
 static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, const gchar *key, gboolean expanded, gint height)
 {
 	PaneCommentData *pcd;
-	GtkWidget *scrolled;
 	GtkTextBuffer *buffer;
 
 	pcd = g_new0(PaneCommentData, 1);
@@ -261,7 +260,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd->key = g_strdup(key);
 	pcd->height = height;
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 
 	pcd->widget = scrolled;
 	g_object_set_data_full(G_OBJECT(pcd->widget), "pane_data", pcd, bar_pane_comment_destroy);
@@ -275,7 +274,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 
 	pcd->comment_view = gtk_text_view_new();
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(pcd->comment_view), GTK_WRAP_WORD);
-	gq_gtk_container_add(GTK_WIDGET(scrolled), pcd->comment_view);
+	gq_gtk_container_add(scrolled, pcd->comment_view);
 	g_signal_connect(G_OBJECT(pcd->comment_view), "populate-popup",
 			 G_CALLBACK(bar_pane_comment_populate_popup), pcd);
 	gtk_widget_show(pcd->comment_view);

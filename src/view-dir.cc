@@ -200,7 +200,7 @@ ViewDir *vd_new(LayoutWindow *lw)
 		case DIRVIEW_TREE: vd = vdtree_new(vd, lw->dir_fd); break;
 		}
 
-	gq_gtk_container_add(GTK_WIDGET(vd->widget), vd->view);
+	gq_gtk_container_add(vd->widget, vd->view);
 
 	vd_dnd_init(vd);
 

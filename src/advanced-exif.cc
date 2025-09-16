@@ -485,7 +485,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ew->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), ew->scrolled, TRUE, TRUE, 0);
-	gq_gtk_container_add(GTK_WIDGET(ew->scrolled), ew->listview);
+	gq_gtk_container_add(ew->scrolled, ew->listview);
 	gtk_widget_show(ew->listview);
 	gtk_widget_show(ew->scrolled);
 

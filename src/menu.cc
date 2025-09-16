@@ -320,7 +320,7 @@ GtkWidget *submenu_add_collections(GtkWidget *menu, gboolean sensitive,
 template<gboolean up, gboolean single_step>
 static void widget_move_cb(GtkWidget *, gpointer data)
 {
-	auto *widget = GTK_WIDGET(data);
+	auto *widget = static_cast<GtkWidget *>(data);
 	if (!widget) return;
 
 	GtkWidget *box = gtk_widget_get_ancestor(widget, GTK_TYPE_BOX);

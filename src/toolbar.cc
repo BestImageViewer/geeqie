@@ -63,7 +63,7 @@ ToolbarData *toolbarlist[2];
 
 static gboolean toolbar_press_cb(GtkGesture *, int, double, double, gpointer data)
 {
-	popup_menu_bar(GTK_WIDGET(data), nullptr);
+	popup_menu_bar(static_cast<GtkWidget *>(data), nullptr);
 
 	return TRUE;
 }
@@ -101,7 +101,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	g_object_set_data_full(G_OBJECT(button), action_name_key, g_strdup(name), g_free);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-	gq_gtk_container_add(GTK_WIDGET(button), hbox);
+	gq_gtk_container_add(button, hbox);
 	gtk_widget_show(hbox);
 
 #if HAVE_GTK4
@@ -274,7 +274,6 @@ static void toolbarlist_populate(LayoutWindow *lw, GtkBox *box, ToolbarType bar)
 
 GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 {
-	GtkWidget *scrolled;
 	GtkWidget *tbar;
 	GtkWidget *add_box;
 
@@ -288,7 +287,7 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 	GtkWidget *widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gtk_widget_show(widget);
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 							GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_NONE);
@@ -297,7 +296,7 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 
 	toolbarlist[bar]->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_show(toolbarlist[bar]->vbox);
-	gq_gtk_container_add(GTK_WIDGET(scrolled), toolbarlist[bar]->vbox);
+	gq_gtk_container_add(scrolled, toolbarlist[bar]->vbox);
 	gtk_viewport_set_shadow_type(GTK_VIEWPORT(gtk_bin_get_child(GTK_BIN(scrolled))),
 																GTK_SHADOW_NONE);
 

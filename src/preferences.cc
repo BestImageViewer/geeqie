@@ -1407,7 +1407,7 @@ static void image_overlay_template_view_changed_cb(GtkWidget *buffer, gpointer d
 	gint i = GPOINTER_TO_INT(profile_number_pointer);
 
 	g_free(c_options->image_overlay_n.template_string[i]);
-	c_options->image_overlay_n.template_string[i] = text_widget_text_pull(GTK_WIDGET(data), TRUE);
+	c_options->image_overlay_n.template_string[i] = text_widget_text_pull(static_cast<GtkWidget *>(data), TRUE);
 }
 
 static void image_overlay_default_template_ok_cb(GenericDialog *, gpointer data)
@@ -1770,10 +1770,8 @@ static GtkWidget *scrolled_notebook_page(GtkWidget *notebook, const gchar *title
 {
 	GtkWidget *label;
 	GtkWidget *vbox;
-	GtkWidget *scrolled;
-	GtkWidget *viewport;
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_container_set_border_width(GTK_CONTAINER(scrolled), PREF_PAD_BORDER);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -1781,13 +1779,13 @@ static GtkWidget *scrolled_notebook_page(GtkWidget *notebook, const gchar *title
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrolled, label);
 	gtk_widget_show(scrolled);
 
-	viewport = gtk_viewport_new(nullptr, nullptr);
+	GtkWidget *viewport = gtk_viewport_new(nullptr, nullptr);
 	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
-	gq_gtk_container_add(GTK_WIDGET(scrolled), viewport);
+	gq_gtk_container_add(scrolled, viewport);
 	gtk_widget_show(viewport);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(GTK_WIDGET(viewport), vbox);
+	gq_gtk_container_add(viewport, vbox);
 	gtk_widget_show(vbox);
 
 	return vbox;
@@ -1832,33 +1830,19 @@ static void help_search_engine_entry_icon_cb(GtkEntry *, GtkEntryIconPosition po
 		}
 }
 
-static void star_rating_star_icon_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
+template<gunichar star_rating>
+static void star_rating_icon_cb(GtkEntry *entry, GtkEntryIconPosition pos, GdkEvent *, gpointer)
 {
 	if (pos == GTK_ENTRY_ICON_PRIMARY)
 		{
-		g_autofree gchar *rating_symbol = g_strdup_printf("U+%X", STAR_RATING_STAR);
-		gq_gtk_entry_set_text(GTK_ENTRY(userdata), rating_symbol);
+		g_autofree gchar *rating_symbol = g_strdup_printf("U+%X", star_rating);
+		gq_gtk_entry_set_text(entry, rating_symbol);
 		}
 	else
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(userdata), "U+");
-		gtk_widget_grab_focus(GTK_WIDGET(userdata));
-		gtk_editable_select_region(GTK_EDITABLE(userdata), 2, 2);
-		}
-}
-
-static void star_rating_rejected_icon_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
-{
-	if (pos == GTK_ENTRY_ICON_PRIMARY)
-		{
-		g_autofree gchar *rating_symbol = g_strdup_printf("U+%X", STAR_RATING_REJECTED);
-		gq_gtk_entry_set_text(GTK_ENTRY(userdata), rating_symbol);
-		}
-	else
-		{
-		gq_gtk_entry_set_text(GTK_ENTRY(userdata), "U+");
-		gtk_widget_grab_focus(GTK_WIDGET(userdata));
-		gtk_editable_select_region(GTK_EDITABLE(userdata), 2, 2);
+		gq_gtk_entry_set_text(entry, "U+");
+		gtk_widget_grab_focus(GTK_WIDGET(entry));
+		gtk_editable_select_region(GTK_EDITABLE(entry), 2, 2);
 		}
 }
 
@@ -2030,8 +2014,7 @@ static void config_tab_general(GtkWidget *notebook)
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(star_rating_entry),
 						GTK_ENTRY_ICON_PRIMARY, _("Default"));
 	g_signal_connect(GTK_ENTRY(star_rating_entry), "icon-press",
-						G_CALLBACK(star_rating_star_icon_cb),
-						star_rating_entry);
+	                 G_CALLBACK(star_rating_icon_cb<STAR_RATING_STAR>), nullptr);
 
 	g_autoptr(GString) rejected_str = g_string_new(nullptr);
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
@@ -2059,8 +2042,7 @@ static void config_tab_general(GtkWidget *notebook)
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(star_rating_entry),
 						GTK_ENTRY_ICON_PRIMARY, _("Default"));
 	g_signal_connect(GTK_ENTRY(star_rating_entry), "icon-press",
-						G_CALLBACK(star_rating_rejected_icon_cb),
-						star_rating_entry);
+	                 G_CALLBACK(star_rating_icon_cb<STAR_RATING_REJECTED>), nullptr);
 
 	pref_spacer(group, PREF_PAD_GROUP);
 
@@ -2169,15 +2151,15 @@ static void config_tab_general(GtkWidget *notebook)
 
 	if (isfile(tz->timezone_database_user))
 		{
-		button = pref_button_new(GTK_WIDGET(hbox), nullptr, _("Update"), G_CALLBACK(timezone_database_install_cb), tz);
+		button = pref_button_new(hbox, nullptr, _("Update"), G_CALLBACK(timezone_database_install_cb), tz);
 		}
 	else
 		{
-		button = pref_button_new(GTK_WIDGET(hbox), nullptr, _("Install"), G_CALLBACK(timezone_database_install_cb), tz);
+		button = pref_button_new(hbox, nullptr, _("Install"), G_CALLBACK(timezone_database_install_cb), tz);
 		}
 
 	g_autofree gchar *download_locn = g_strconcat(_("Download database from: "), TIMEZONE_DATABASE_WEB, NULL);
-	pref_label_new(GTK_WIDGET(hbox), download_locn);
+	pref_label_new(hbox, download_locn);
 
 	if (!internet_available)
 		{
@@ -2253,7 +2235,8 @@ static void config_tab_image(GtkWidget *notebook)
 				 100, 999, 1,
 				 options->image.max_enlargement_size, &c_options->image.max_enlargement_size);
 	pref_checkbox_link_sensitivity(enlargement_button, spin);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(hbox), _("Enable this to allow Geeqie to increase the image size for images that are smaller than the current view area when the zoom is set to 'Fit image to window'. This value sets the maximum expansion permitted in percent i.e. 100% is full-size."));
+	gtk_widget_set_tooltip_text(hbox,
+	                            _("Enable this to allow Geeqie to increase the image size for images that are smaller than the current view area when the zoom is set to 'Fit image to window'. This value sets the maximum expansion permitted in percent i.e. 100% is full-size."));
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	ct_button = pref_checkbox_new_int(hbox, _("Virtual window size (%% of actual window):"),
@@ -2262,7 +2245,8 @@ static void config_tab_image(GtkWidget *notebook)
 				 10, 150, 1,
 				 options->image.max_autofit_size, &c_options->image.max_autofit_size);
 	pref_checkbox_link_sensitivity(ct_button, spin);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(hbox), _("This value will set the virtual size of the window when 'Fit image to window' is set. Instead of using the actual size of the window, the specified percentage of the window will be used. It allows one to keep a border around the image (values lower than 100%) or to auto zoom the image (values greater than 100%). It affects fullscreen mode too."));
+	gtk_widget_set_tooltip_text(hbox,
+	                            _("This value will set the virtual size of the window when 'Fit image to window' is set. Instead of using the actual size of the window, the specified percentage of the window will be used. It allows one to keep a border around the image (values lower than 100%) or to auto zoom the image (values greater than 100%). It affects fullscreen mode too."));
 
 	group = pref_group_new(vbox, FALSE, _("Tile size"), GTK_ORIENTATION_VERTICAL);
 
@@ -2270,7 +2254,8 @@ static void config_tab_image(GtkWidget *notebook)
 	spin = pref_spin_new_int(hbox, _("Pixels"), _("(Requires restart)"),
 				 128, 4096, 128,
 				 options->image.tile_size, &c_options->image.tile_size);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(hbox), _("This value changes the size of the tiles large images are split into. Increasing the size of the tiles will reduce the tiling effect seen on image changes, but will also slightly increase the delay before the first part of a large image is seen."));
+	gtk_widget_set_tooltip_text(hbox,
+	                            _("This value changes the size of the tiles large images are split into. Increasing the size of the tiles will reduce the tiling effect seen on image changes, but will also slightly increase the delay before the first part of a large image is seen."));
 
 	group = pref_group_new(vbox, FALSE, _("Appearance"), GTK_ORIENTATION_VERTICAL);
 
@@ -2329,11 +2314,10 @@ static void default_layout_changed_cb(GtkWidget *, GtkPopover *popover)
 
 static GtkWidget *create_popover(GtkWidget *parent, GtkWidget *child, GtkPositionType pos)
 {
-	GtkWidget *popover;
+	GtkWidget *popover = gtk_popover_new(parent);
 
-	popover = gtk_popover_new(parent);
 	gtk_popover_set_position(GTK_POPOVER (popover), pos);
-	gq_gtk_container_add(GTK_WIDGET(popover), child);
+	gq_gtk_container_add(popover, child);
 	gtk_container_set_border_width(GTK_CONTAINER (popover), 6);
 	gtk_widget_show (child);
 
@@ -2422,7 +2406,6 @@ static GtkWidget *osd_profiles(gint i)
 	GtkWidget *button;
 	GtkWidget *group;
 	GtkWidget *hbox;
-	GtkWidget *image_overlay_template_view;
 	GtkWidget *page;
 	GtkWidget *scrolled;
 	GtkWidget *scrolled_pre_formatted;
@@ -2430,7 +2413,7 @@ static GtkWidget *osd_profiles(gint i)
 
 	page = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
-	image_overlay_template_view = gtk_text_view_new();
+	GtkWidget *image_overlay_template_view = gtk_text_view_new();
 
 	group = pref_group_new(page, FALSE, nullptr, GTK_ORIENTATION_VERTICAL);
 	subgroup = pref_box_new(group, FALSE, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
@@ -2454,7 +2437,7 @@ static GtkWidget *osd_profiles(gint i)
 
 	gtk_widget_set_tooltip_markup(image_overlay_template_view, _("Extensive formatting options are shown in the Help file"));
 
-	gq_gtk_container_add(GTK_WIDGET(scrolled), image_overlay_template_view);
+	gq_gtk_container_add(scrolled, image_overlay_template_view);
 	gtk_widget_show(image_overlay_template_view);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
@@ -2485,7 +2468,8 @@ static GtkWidget *osd_profiles(gint i)
 	if (options->image_overlay_n.template_string[i]) gtk_text_buffer_set_text(buffer, options->image_overlay_n.template_string[i], -1);
 	g_object_set_data(G_OBJECT(buffer), "osd_profile_number", GINT_TO_POINTER(i));
 
-	g_signal_connect(G_OBJECT(buffer), "changed", G_CALLBACK(image_overlay_template_view_changed_cb), image_overlay_template_view);
+	g_signal_connect(G_OBJECT(buffer), "changed",
+	                 G_CALLBACK(image_overlay_template_view_changed_cb), image_overlay_template_view);
 
 	return page;
 }
@@ -2798,7 +2782,7 @@ static void config_tab_files(GtkWidget *notebook)
 	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_SIDECAR);
 
 	filter_store_populate();
-	gq_gtk_container_add(GTK_WIDGET(scrolled), filter_view);
+	gq_gtk_container_add(scrolled, filter_view);
 	gtk_widget_show(filter_view);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
@@ -3230,7 +3214,7 @@ static void config_tab_keywords(GtkWidget *notebook)
 		}
 #endif
 
-	gq_gtk_container_add(GTK_WIDGET(scrolled), keyword_text);
+	gq_gtk_container_add(scrolled, keyword_text);
 	gtk_widget_show(keyword_text);
 
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(keyword_text));
@@ -3720,7 +3704,7 @@ static void config_tab_accelerators(GtkWidget *notebook)
 	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(accel_view), accel_search_function_cb, nullptr, nullptr);
 
 	accel_store_populate();
-	gq_gtk_container_add(GTK_WIDGET(scrolled), accel_view);
+	gq_gtk_container_add(scrolled, accel_view);
 	gtk_widget_show(accel_view);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
@@ -3921,7 +3905,6 @@ static void config_tab_stereo(GtkWidget *notebook)
 static void config_window_create(LayoutWindow *lw)
 {
 	GtkWidget *win_vbox;
-	GtkWidget *hbox;
 	GtkWidget *notebook;
 	GtkWidget *button;
 	GtkWidget *ct_button;
@@ -3946,7 +3929,7 @@ static void config_window_create(LayoutWindow *lw)
 	gtk_container_set_border_width(GTK_CONTAINER(configwindow), PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
-	gq_gtk_container_add(GTK_WIDGET(configwindow), win_vbox);
+	gq_gtk_container_add(configwindow, win_vbox);
 	gtk_widget_show(win_vbox);
 
 	notebook = gtk_notebook_new();
@@ -3971,7 +3954,7 @@ static void config_window_create(LayoutWindow *lw)
 
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), lw->options.preferences_window.page_number);
 
-	hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+	GtkWidget *hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_END);
 	gtk_box_set_spacing(GTK_BOX(hbox), PREF_PAD_BUTTON_GAP);
 	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
@@ -3979,13 +3962,13 @@ static void config_window_create(LayoutWindow *lw)
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(config_window_help_cb), notebook);
-	gq_gtk_container_add(GTK_WIDGET(hbox), button);
+	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
 	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
 				 G_CALLBACK(config_window_ok_cb), notebook);
-	gq_gtk_container_add(GTK_WIDGET(hbox), button);
+	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_grab_default(button);
 	gtk_widget_show(button);
@@ -3994,7 +3977,7 @@ static void config_window_create(LayoutWindow *lw)
 
 	button = pref_button_new(nullptr, GQ_ICON_CANCEL, _("Cancel"),
 				 G_CALLBACK(config_window_close_cb), nullptr);
-	gq_gtk_container_add(GTK_WIDGET(hbox), button);
+	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 

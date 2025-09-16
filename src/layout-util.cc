@@ -801,7 +801,7 @@ static void open_with_data_free(OpenWithData *open_with_data)
 	g_object_unref(open_with_data->application);
 	g_object_unref(g_list_first(open_with_data->g_file_list)->data);
 	g_list_free(open_with_data->g_file_list);
-	gq_gtk_widget_destroy(GTK_WIDGET(open_with_data->app_chooser_dialog));
+	gq_gtk_widget_destroy(open_with_data->app_chooser_dialog);
 	g_free(open_with_data);
 }
 
@@ -2084,7 +2084,7 @@ static void layout_menu_new_window_update(LayoutWindow *lw)
 	for (GList *iter = g_list_nth(children, 4); // separator, default, from current, separator
 	     iter != nullptr; iter = g_list_next(iter))
 		{
-		gq_gtk_widget_destroy(GTK_WIDGET(iter->data));
+		gq_gtk_widget_destroy(static_cast<GtkWidget *>(iter->data));
 		}
 
 	menu_item_add_divider(sub_menu);
@@ -2344,7 +2344,7 @@ static void layout_menu_window_rename_cb(GtkWidget *, gpointer data)
 	gtk_editable_set_editable(GTK_EDITABLE(rw->window_name_entry), TRUE);
 	gq_gtk_entry_set_text(GTK_ENTRY(rw->window_name_entry), lw->options.id);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), rw->window_name_entry, TRUE, TRUE, 0);
-	gtk_widget_grab_focus(GTK_WIDGET(rw->window_name_entry));
+	gtk_widget_grab_focus(rw->window_name_entry);
 	gtk_widget_show(rw->window_name_entry);
 	g_signal_connect(rw->window_name_entry, "activate", G_CALLBACK(window_rename_entry_activate_cb), rw);
 
@@ -2870,7 +2870,7 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 				{
 				image = gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
 				}
-			gtk_button_set_image(GTK_BUTTON(widget), GTK_WIDGET(image));
+			gtk_button_set_image(GTK_BUTTON(widget), image);
 			gtk_widget_set_tooltip_text(widget, editor->name);
 		};
 
@@ -3296,8 +3296,8 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 		g_object_set_data(G_OBJECT(button), "action", action);
 		}
 
-	gq_gtk_container_add(GTK_WIDGET(lw->toolbar[type]), GTK_WIDGET(button));
-	gtk_widget_show(GTK_WIDGET(button));
+	gq_gtk_container_add(lw->toolbar[type], button);
+	gtk_widget_show(button);
 
 	lw->toolbar_actions[type] = g_list_append(lw->toolbar_actions[type], g_strdup(action_name));
 }

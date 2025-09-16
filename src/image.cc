@@ -2095,7 +2095,7 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		DEBUG_NAME(imd->frame);
         	g_object_ref(imd->pr);
 		if (imd->has_frame != -1) gtk_container_remove(GTK_CONTAINER(imd->widget), imd->pr);
-		gq_gtk_container_add(GTK_WIDGET(imd->frame), imd->pr);
+		gq_gtk_container_add(imd->frame, imd->pr);
 
         	g_object_unref(imd->pr);
 		gtk_widget_set_can_focus(imd->frame, TRUE);

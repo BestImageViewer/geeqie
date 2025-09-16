@@ -636,9 +636,9 @@ gint bar_pane_gps_event(GtkWidget *bar, GdkEvent *event)
 	pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
 	if (!pgd) return FALSE;
 
-	if (gtk_widget_has_focus(pgd->widget)) return gtk_widget_event(GTK_WIDGET(pgd->widget), event);
+	if (!gtk_widget_has_focus(pgd->widget)) return FALSE;
 
-	return FALSE;
+	return gtk_widget_event(pgd->widget, event);
 }
 
 const gchar *bar_pane_gps_get_map_id(const PaneGPSData *pgd)
@@ -661,7 +661,7 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	WRITE_BOOL(pgd->pane, expanded);
 
 	gint w;
-	gtk_widget_get_size_request(GTK_WIDGET(pane), &w, &pgd->height);
+	gtk_widget_get_size_request(pane, &w, &pgd->height);
 	WRITE_INT(*pgd, height);
 	indent++;
 
@@ -721,7 +721,7 @@ void bar_pane_gps_view_state_changed_cb(ChamplainView *view, GParamSpec *, gpoin
 		gtk_label_set_text(GTK_LABEL(pgd->state), message);
 		}
 
-	gtk_widget_set_tooltip_text(GTK_WIDGET(pgd->slider), message);
+	gtk_widget_set_tooltip_text(pgd->slider, message);
 	gtk_scale_button_set_value(GTK_SCALE_BUTTON(pgd->slider), static_cast<gdouble>(zoom));
 }
 
@@ -868,7 +868,6 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 {
 	PaneGPSData *pgd;
 	GtkWidget *vbox;
-	GtkWidget *frame;
 	GtkWidget *gpswidget;
 	GtkWidget *status;
 	GtkWidget *state;
@@ -890,7 +889,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	pgd->pane.expanded = expanded;
 	pgd->height = height;
 
-	frame = gtk_frame_new(nullptr);
+	GtkWidget *frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
@@ -898,7 +897,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	view = gtk_champlain_embed_get_view(GTK_CHAMPLAIN_EMBED(gpswidget));
 
 	gq_gtk_box_pack_start(GTK_BOX(vbox), gpswidget, TRUE, TRUE, 0);
-	gq_gtk_container_add(GTK_WIDGET(frame), vbox);
+	gq_gtk_container_add(frame, vbox);
 
 	status = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,0);
 #if HAVE_GTK4
@@ -919,10 +918,10 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	gtk_label_set_ellipsize(GTK_LABEL(state), PANGO_ELLIPSIZE_START);
 	gtk_widget_set_tooltip_text(state, _("Zoom level"));
 
-	gq_gtk_box_pack_start(GTK_BOX(status), GTK_WIDGET(slider), FALSE, FALSE, 0);
-	gq_gtk_box_pack_start(GTK_BOX(status), GTK_WIDGET(state), FALSE, FALSE, 5);
-	gq_gtk_box_pack_end(GTK_BOX(status), GTK_WIDGET(progress), FALSE, FALSE, 0);
-	gq_gtk_box_pack_end(GTK_BOX(vbox),GTK_WIDGET(status), FALSE, FALSE, 0);
+	gq_gtk_box_pack_start(GTK_BOX(status), slider, FALSE, FALSE, 0);
+	gq_gtk_box_pack_start(GTK_BOX(status), state, FALSE, FALSE, 5);
+	gq_gtk_box_pack_end(GTK_BOX(status), progress, FALSE, FALSE, 0);
+	gq_gtk_box_pack_end(GTK_BOX(vbox), status, FALSE, FALSE, 0);
 
 	layer = champlain_marker_layer_new();
 	champlain_view_add_layer(view, CHAMPLAIN_LAYER(layer));

@@ -1239,7 +1239,6 @@ CollectWindow *collection_window_new(const gchar *path)
 {
 	CollectWindow *cw;
 	GtkWidget *vbox;
-	GtkWidget *frame;
 	GtkWidget *status_label;
 	GtkWidget *extra_label;
 	GdkGeometry geometry;
@@ -1293,7 +1292,7 @@ CollectWindow *collection_window_new(const gchar *path)
 			 G_CALLBACK(collection_window_keypress), cw);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(GTK_WIDGET(cw->window), vbox);
+	gq_gtk_container_add(cw->window, vbox);
 	gtk_widget_show(vbox);
 
 	cw->table = collection_table_new(cw->cd);
@@ -1304,14 +1303,14 @@ CollectWindow *collection_window_new(const gchar *path)
 	gq_gtk_box_pack_start(GTK_BOX(vbox), cw->status_box, FALSE, FALSE, 0);
 	gtk_widget_show(cw->status_box);
 
-	frame = gtk_frame_new(nullptr);
+	GtkWidget *frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
 	gq_gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
 	gq_gtk_box_pack_start(GTK_BOX(cw->status_box), frame, TRUE, TRUE, 0);
 	gtk_widget_show(frame);
 
 	status_label = gtk_label_new("");
-	gq_gtk_container_add(GTK_WIDGET(frame), status_label);
+	gq_gtk_container_add(frame, status_label);
 	gtk_widget_show(status_label);
 
 	extra_label = gtk_progress_bar_new();

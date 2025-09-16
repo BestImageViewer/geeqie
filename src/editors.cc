@@ -546,7 +546,7 @@ static EditorVerboseData *editor_verbose_window(EditorData *ed, const gchar *tex
 	vd->text = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(vd->text), FALSE);
 	gtk_widget_set_size_request(vd->text, EDITOR_WINDOW_WIDTH, EDITOR_WINDOW_HEIGHT);
-	gq_gtk_container_add(GTK_WIDGET(scrolled), vd->text);
+	gq_gtk_container_add(scrolled, vd->text);
 	gtk_widget_show(vd->text);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);

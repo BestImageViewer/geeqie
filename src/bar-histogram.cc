@@ -96,7 +96,7 @@ static gboolean bar_pane_histogram_update_cb(gpointer data)
 	phd->idle_id = 0;
 	phd->need_update = FALSE;
 
-	gq_gtk_widget_queue_draw_area(GTK_WIDGET(phd->drawing_area), 0, 0, phd->histogram_width, phd->histogram_height);
+	gq_gtk_widget_queue_draw_area(phd->drawing_area, 0, 0, phd->histogram_width, phd->histogram_height);
 
 	if (phd->fd != nullptr)
 		{
@@ -282,7 +282,7 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 
 	phd->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	g_object_set_data_full(G_OBJECT(phd->widget), "pane_data", phd, bar_pane_histogram_destroy);
-	gtk_widget_set_size_request(GTK_WIDGET(phd->widget), -1, height);
+	gtk_widget_set_size_request(phd->widget, -1, height);
 
 	phd->drawing_area = gtk_drawing_area_new();
 	g_signal_connect_after(G_OBJECT(phd->drawing_area), "size_allocate",

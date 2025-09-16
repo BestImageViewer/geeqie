@@ -245,27 +245,25 @@ static const gchar *bar_pane_get_default_config(const gchar *id)
 
 static void height_spin_changed_cb(GtkSpinButton *spin, gpointer data)
 {
-
-	gtk_widget_set_size_request(GTK_WIDGET(data), -1, gtk_spin_button_get_value_as_int(spin));
+	gtk_widget_set_size_request(static_cast<GtkWidget *>(data), -1, gtk_spin_button_get_value_as_int(spin));
 }
 
 static void height_spin_key_press_cb(GtkEventControllerKey *, gint keyval, guint, GdkModifierType, gpointer data)
 {
 	if ((keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter || keyval == GDK_KEY_Escape))
 		{
-		gq_gtk_widget_destroy(GTK_WIDGET(data));
+		gq_gtk_widget_destroy(static_cast<GtkWidget *>(data));
 		}
 }
 
-static void expander_height_cb(GtkWindow *widget, GdkEvent *, gpointer)
+static void expander_height_cb(GtkWidget *widget, GdkEvent *, gpointer)
 {
-	gq_gtk_widget_destroy(GTK_WIDGET(widget));
+	gq_gtk_widget_destroy(widget);
 }
 
 static void bar_expander_height_cb(GtkWidget *, gpointer data)
 {
 	auto expander = static_cast<GtkWidget *>(data);
-	GtkWidget *spin;
 	GtkWidget *window;
 	gint x;
 	gint y;
@@ -301,15 +299,15 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 
 	gtk_widget_get_size_request(data_box, &w, &h);
 
-	spin = gtk_spin_button_new_with_range(1, 1000, 1);
+	GtkWidget *spin = gtk_spin_button_new_with_range(1, 1000, 1);
 	g_signal_connect(G_OBJECT(spin), "value-changed", G_CALLBACK(height_spin_changed_cb), data_box);
 	controller = gtk_event_controller_key_new(spin);
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(height_spin_key_press_cb), window);
 
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), h);
-	gq_gtk_container_add(GTK_WIDGET(window), spin);
+	gq_gtk_container_add(window, spin);
 	gtk_widget_show(spin);
-	gtk_widget_grab_focus(GTK_WIDGET(spin));
+	gtk_widget_grab_focus(spin);
 }
 
 static void bar_expander_add_cb(GtkWidget *, gpointer data)
@@ -545,7 +543,6 @@ void bar_update_expander(GtkWidget *pane)
 
 void bar_add(GtkWidget *bar, GtkWidget *pane)
 {
-	GtkWidget *expander;
 	auto bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
 	auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 
@@ -554,7 +551,7 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 	pd->lw = bd->lw;
 	pd->bar = bar;
 
-	expander = gtk_expander_new(nullptr);
+	GtkWidget *expander = gtk_expander_new(nullptr);
 	DEBUG_NAME(expander);
 	if (pd && pd->title)
 		{
@@ -567,14 +564,13 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 	g_signal_connect(expander, "button_release_event", G_CALLBACK(bar_menu_expander_cb), bd);
 	g_signal_connect(expander, "notify::expanded", G_CALLBACK(bar_expander_cb), pd);
 
-	gq_gtk_container_add(GTK_WIDGET(expander), pane);
+	gq_gtk_container_add(expander, pane);
 
 	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd->expanded);
 
 	gtk_widget_show(expander);
 
 	if (bd->fd && pd && pd->pane_set_fd) pd->pane_set_fd(pane, bd->fd);
-
 }
 
 void bar_populate_default(GtkWidget *)
@@ -633,7 +629,6 @@ GtkWidget *bar_new(LayoutWindow *lw)
 {
 	BarData *bd;
 	GtkWidget *box;
-	GtkWidget *scrolled;
 	GtkWidget *tbar;
 	GtkWidget *add_box;
 
@@ -665,7 +660,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	gq_gtk_box_pack_start(GTK_BOX(bd->widget), box, FALSE, FALSE, 0);
 	gtk_widget_show(box);
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	DEBUG_NAME(scrolled);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -674,7 +669,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 
 
 	bd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(GTK_WIDGET(scrolled), bd->vbox);
+	gq_gtk_container_add(scrolled, bd->vbox);
 	gtk_viewport_set_shadow_type(GTK_VIEWPORT(gtk_bin_get_child(GTK_BIN(scrolled))), GTK_SHADOW_NONE);
 
 	add_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);

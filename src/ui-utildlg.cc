@@ -229,7 +229,7 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, 
 	gtk_widget_set_can_default(button, TRUE);
 	g_object_set_data(G_OBJECT(button), "dialog_function", reinterpret_cast<void *>(func_cb));
 
-	gq_gtk_container_add(GTK_WIDGET(gd->hbox), button);
+	gq_gtk_container_add(gd->hbox, button);
 
 	alternative_order = generic_dialog_get_alternative_button_order(gd->hbox);
 
@@ -272,11 +272,9 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 	hbox = pref_box_new(gd->vbox, expand, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	if (icon_name)
 		{
-		GtkWidget *image;
-
-		image = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_DIALOG);
-		gtk_widget_set_halign(GTK_WIDGET(image), GTK_ALIGN_CENTER);
-		gtk_widget_set_valign(GTK_WIDGET(image), GTK_ALIGN_START);
+		GtkWidget *image = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_DIALOG);
+		gtk_widget_set_halign(image, GTK_ALIGN_CENTER);
+		gtk_widget_set_valign(image, GTK_ALIGN_START);
 		gq_gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 		gtk_widget_show(image);
 		}
@@ -360,7 +358,6 @@ static void generic_dialog_setup(GenericDialog *gd,
 				 void (*cancel_cb)(GenericDialog *, gpointer), gpointer data)
 {
 	GtkWidget *vbox;
-	GtkWidget *scrolled;
 
 	gd->auto_close = auto_close;
 	gd->data = data;
@@ -407,12 +404,12 @@ static void generic_dialog_setup(GenericDialog *gd,
 	gtk_window_set_resizable(GTK_WINDOW(gd->dialog), TRUE);
 	gtk_container_set_border_width(GTK_CONTAINER(gd->dialog), PREF_PAD_BORDER);
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
 	gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(scrolled), TRUE);
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_BUTTON_SPACE);
-	gq_gtk_container_add(GTK_WIDGET(scrolled), vbox);
-	gq_gtk_container_add(GTK_WIDGET(gd->dialog), scrolled);
+	gq_gtk_container_add(scrolled, vbox);
+	gq_gtk_container_add(gd->dialog, scrolled);
 	gtk_widget_show(scrolled);
 
 	gtk_widget_show(vbox);

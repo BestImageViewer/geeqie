@@ -183,14 +183,11 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	GtkWidget *hbox;
 	GtkWidget *button;
 	GtkWidget *ct_button;
-	GtkWidget *button_hbox;
-	GtkWidget *scrolled;
 	GtkWidget *text_view;
 	gchar *text;
 	gsize size;
 
 	ew = g_new0(EditorWindow, 1);
-
 
 	ew->window = window_new("Desktop", PIXBUF_INLINE_ICON_CONFIG, nullptr, _("Desktop file"));
 	DEBUG_NAME(ew->window);
@@ -204,7 +201,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_container_set_border_width(GTK_CONTAINER(ew->window), PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
-	gq_gtk_container_add(GTK_WIDGET(ew->window), win_vbox);
+	gq_gtk_container_add(ew->window, win_vbox);
 	gtk_widget_show(win_vbox);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
@@ -222,7 +219,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_widget_show(ew->entry);
 	g_signal_connect(G_OBJECT(ew->entry), "changed", G_CALLBACK(editor_window_entry_changed_cb), ew);
 
-	button_hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+	GtkWidget *button_hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 	gtk_button_box_set_layout(GTK_BUTTON_BOX(button_hbox), GTK_BUTTONBOX_END);
 	gtk_box_set_spacing(GTK_BOX(button_hbox), PREF_PAD_BUTTON_GAP);
 	gq_gtk_box_pack_end(GTK_BOX(hbox), button_hbox, FALSE, FALSE, 0);
@@ -230,7 +227,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 
 	ew->save_button = pref_button_new(nullptr, GQ_ICON_SAVE, _("Save"),
 				 G_CALLBACK(editor_window_save_cb), ew);
-	gq_gtk_container_add(GTK_WIDGET(button_hbox), ew->save_button);
+	gq_gtk_container_add(button_hbox, ew->save_button);
 	gtk_widget_set_can_default(ew->save_button, TRUE);
 	gtk_widget_set_sensitive(ew->save_button, FALSE);
 	gtk_widget_show(ew->save_button);
@@ -238,7 +235,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 
 	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"),
 				 G_CALLBACK(editor_window_close_cb), ew);
-	gq_gtk_container_add(GTK_WIDGET(button_hbox), button);
+	gq_gtk_container_add(button_hbox, button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
@@ -247,8 +244,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 		gtk_box_reorder_child(GTK_BOX(button_hbox), ct_button, -1);
 		}
 
-
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -256,7 +252,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_widget_show(scrolled);
 
 	text_view = gtk_text_view_new();
-	gq_gtk_container_add(GTK_WIDGET(scrolled), text_view);
+	gq_gtk_container_add(scrolled, text_view);
 	gtk_widget_show(text_view);
 
 	ew->buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
@@ -521,7 +517,7 @@ void editor_list_window_create()
 	gtk_container_set_border_width(GTK_CONTAINER(ewl->window), PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
-	gq_gtk_container_add(GTK_WIDGET(ewl->window), win_vbox);
+	gq_gtk_container_add(ewl->window, win_vbox);
 	gtk_widget_show(win_vbox);
 
 	hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
@@ -532,19 +528,19 @@ void editor_list_window_create()
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(editor_list_window_help_cb), ewl);
-	gq_gtk_container_add(GTK_WIDGET(hbox), button);
+	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
 	button = pref_button_new(nullptr, GQ_ICON_NEW, _("New"),
 				 G_CALLBACK(editor_list_window_new_cb), ewl);
-	gq_gtk_container_add(GTK_WIDGET(hbox), button);
+	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
 	button = pref_button_new(nullptr, GQ_ICON_EDIT, _("Edit"),
 				 G_CALLBACK(editor_list_window_edit_cb), ewl);
-	gq_gtk_container_add(GTK_WIDGET(hbox), button);
+	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_set_sensitive(button, FALSE);
 	gtk_widget_show(button);
@@ -552,7 +548,7 @@ void editor_list_window_create()
 
 	button = pref_button_new(nullptr, GQ_ICON_DELETE, _("Delete"),
 				 G_CALLBACK(editor_list_window_delete_cb), ewl);
-	gq_gtk_container_add(GTK_WIDGET(hbox), button);
+	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_set_sensitive(button, FALSE);
 	gtk_widget_show(button);
@@ -560,7 +556,7 @@ void editor_list_window_create()
 
 	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"),
 				 G_CALLBACK(editor_list_window_close_cb), ewl);
-	gq_gtk_container_add(GTK_WIDGET(hbox), button);
+	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
@@ -645,7 +641,7 @@ void editor_list_window_create()
 	/* set initial sort order */
     gtk_tree_sortable_set_sort_column_id(sortable, DESKTOP_FILE_COLUMN_NAME, GTK_SORT_ASCENDING);
 
-	gq_gtk_container_add(GTK_WIDGET(scrolled), ewl->view);
+	gq_gtk_container_add(scrolled, ewl->view);
 	gtk_widget_show(ewl->view);
 
 	gtk_widget_show(ewl->window);

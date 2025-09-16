@@ -231,7 +231,7 @@ GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, La
 	layout_config_table_button(table, ls.c, "3");
 
 	gtk_widget_set_size_request(table, LAYOUT_STYLE_SIZE, LAYOUT_STYLE_SIZE);
-	gq_gtk_container_add(GTK_WIDGET(group), table);
+	gq_gtk_container_add(group, table);
 	gtk_widget_show(table);
 
 	gtk_widget_show(group);
@@ -422,7 +422,7 @@ GtkWidget *layout_config_new()
 		gtk_list_store_set(store, &iter, COLUMN_TEXT, _(layout_titles[i]), COLUMN_KEY, i, -1);
 		}
 
-	gq_gtk_container_add(GTK_WIDGET(scrolled), lc->listview);
+	gq_gtk_container_add(scrolled, lc->listview);
 	gtk_widget_show(lc->listview);
 
 	pref_label_new(lc->box, _("(drag to change order)"));

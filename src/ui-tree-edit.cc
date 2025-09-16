@@ -232,7 +232,7 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 
 	ted->window = gtk_window_new(GTK_WINDOW_POPUP);
 
-LayoutWindow * lw = get_current_layout();
+	LayoutWindow * lw = get_current_layout();
 	gtk_window_set_transient_for(GTK_WINDOW(ted->window), GTK_WINDOW(lw->window));
 
 	gtk_window_set_resizable(GTK_WINDOW(ted->window), FALSE);
@@ -244,7 +244,7 @@ LayoutWindow * lw = get_current_layout();
 	ted->entry = gtk_entry_new();
 	gq_gtk_entry_set_text(GTK_ENTRY(ted->entry), ted->old_name);
 	gtk_editable_select_region(GTK_EDITABLE(ted->entry), 0, strlen(ted->old_name));
-	gq_gtk_container_add(GTK_WIDGET(ted->window), ted->entry);
+	gq_gtk_container_add(ted->window, ted->entry);
 	gtk_widget_show(ted->entry);
 
 	/* due to the fact that gtktreeview scrolls in an idle loop, we cannot

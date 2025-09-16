@@ -987,7 +987,7 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 
 	gtk_widget_show(mte->edit_widget);
 	gtk_widget_grab_focus(mte->edit_widget);
-	gtk_widget_show(GTK_WIDGET(mte->gd->dialog));
+	gtk_widget_show(mte->gd->dialog);
 
 	return TRUE;
 }
@@ -1077,7 +1077,7 @@ static GtkWidget *vf_marks_filter_init(ViewFile *vf)
 		gtk_widget_show(check);
 		vf->filter_check[i] = check;
 		}
-	gq_gtk_container_add(GTK_WIDGET(frame), hbox);
+	gq_gtk_container_add(frame, hbox);
 	gtk_widget_show(hbox);
 	return frame;
 }
@@ -1168,13 +1168,12 @@ static void case_sensitive_cb(GtkWidget *widget, gpointer data)
 	vf_refresh(vf);
 }
 
-static void file_filter_clear_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
+static void file_filter_clear_cb(GtkEntry *entry, GtkEntryIconPosition pos, GdkEvent *, gpointer)
 {
-	if (pos == GTK_ENTRY_ICON_SECONDARY)
-		{
-		gq_gtk_entry_set_text(GTK_ENTRY(userdata), "");
-		gtk_widget_grab_focus(GTK_WIDGET(userdata));
-		}
+	if (pos != GTK_ENTRY_ICON_SECONDARY) return;
+
+	gq_gtk_entry_set_text(entry, "");
+	gtk_widget_grab_focus(GTK_WIDGET(entry));
 }
 
 static GtkWidget *vf_file_filter_init(ViewFile *vf)
@@ -1185,8 +1184,6 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	gint n = 0;
 	GtkWidget *combo_entry;
 	GtkWidget *menubar;
-	GtkWidget *menuitem;
-	GtkWidget *case_sensitive;
 	GtkWidget *box;
 	GtkWidget *icon;
 	GtkWidget *label;
@@ -1194,12 +1191,13 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	vf->file_filter.combo = gtk_combo_box_text_new_with_entry();
 	combo_entry = gtk_bin_get_child(GTK_BIN(vf->file_filter.combo));
 	gtk_widget_show(gtk_bin_get_child(GTK_BIN(vf->file_filter.combo)));
-	gtk_widget_show((GTK_WIDGET(vf->file_filter.combo)));
-	gtk_widget_set_tooltip_text(GTK_WIDGET(vf->file_filter.combo), _("Use regular expressions"));
+	gtk_widget_show(vf->file_filter.combo);
+	gtk_widget_set_tooltip_text(vf->file_filter.combo, _("Use regular expressions"));
 
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(combo_entry), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(combo_entry), GTK_ENTRY_ICON_SECONDARY, _("Clear"));
-	g_signal_connect(GTK_ENTRY(combo_entry), "icon-press", G_CALLBACK(file_filter_clear_cb), combo_entry);
+	g_signal_connect(GTK_ENTRY(combo_entry), "icon-press",
+	                 G_CALLBACK(file_filter_clear_cb), nullptr);
 
 	work = history_list_get_by_key("file_filter");
 	while (work)
@@ -1222,12 +1220,12 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), vf->file_filter.combo, FALSE, FALSE, 0);
 	gtk_widget_show(vf->file_filter.combo);
-	gq_gtk_container_add(GTK_WIDGET(frame), hbox);
+	gq_gtk_container_add(frame, hbox);
 	gtk_widget_show(hbox);
 
-	case_sensitive = gtk_check_button_new_with_label(_("Case"));
+	GtkWidget *case_sensitive = gtk_check_button_new_with_label(_("Case"));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), case_sensitive, FALSE, FALSE, 0);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(case_sensitive), _("Case sensitive"));
+	gtk_widget_set_tooltip_text(case_sensitive, _("Case sensitive"));
 	g_signal_connect(G_OBJECT(case_sensitive), "clicked", G_CALLBACK(case_sensitive_cb), vf);
 	gtk_widget_show(case_sensitive);
 
@@ -1242,12 +1240,12 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	gq_gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
 	gq_gtk_box_pack_end(GTK_BOX(box), icon, FALSE, FALSE, 0);
 
-	menuitem = gtk_menu_item_new();
+	GtkWidget *menuitem = gtk_menu_item_new();
 
-	gtk_widget_set_tooltip_text(GTK_WIDGET(menuitem), _("Select Class filter"));
+	gtk_widget_set_tooltip_text(menuitem, _("Select Class filter"));
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), class_filter_menu(vf));
 	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), menuitem);
-	gq_gtk_container_add(GTK_WIDGET(menuitem), box);
+	gq_gtk_container_add(menuitem, box);
 	gq_gtk_widget_show_all(menuitem);
 
 	return frame;
@@ -1302,7 +1300,7 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	g_signal_connect(G_OBJECT(vf->listview), "button_release_event",
 			 G_CALLBACK(vf_release_cb), vf);
 
-	gq_gtk_container_add(GTK_WIDGET(vf->scrolled), vf->listview);
+	gq_gtk_container_add(vf->scrolled, vf->listview);
 	gtk_widget_show(vf->listview);
 
 	if (dir_fd) vf_set_fd(vf, dir_fd);

@@ -552,11 +552,10 @@ static void file_util_dialog_list_select(GtkWidget *view, gint n)
 
 static GtkWidget *file_util_dialog_add_list(GtkWidget *box, GList *list, gboolean full_paths, gboolean with_sidecars)
 {
-	GtkWidget *scrolled;
 	GtkWidget *view;
 	GtkListStore *store;
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -582,7 +581,7 @@ static GtkWidget *file_util_dialog_add_list(GtkWidget *box, GList *list, gboolea
 		}
 
 	gtk_widget_set_size_request(view, UTILITY_LIST_MIN_WIDTH, UTILITY_LIST_MIN_HEIGHT);
-	gq_gtk_container_add(GTK_WIDGET(scrolled), view);
+	gq_gtk_container_add(scrolled, view);
 	gtk_widget_show(view);
 
 	while (list)
@@ -1902,7 +1901,7 @@ static void file_util_warn_op_in_progress(const gchar *title)
 
 static void file_util_details_dialog_close_cb(GtkWidget *, gpointer data)
 {
-	gq_gtk_widget_destroy(GTK_WIDGET(data));
+	gq_gtk_widget_destroy(static_cast<GtkWidget *>(data));
 }
 
 static void file_util_details_dialog_destroy_cb(GtkWidget *widget, gpointer data)

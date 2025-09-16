@@ -136,7 +136,7 @@ void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 		}
 
 	ee->box = gtk_box_new(horizontal ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(GTK_WIDGET(ee->ebox), ee->box);
+	gq_gtk_container_add(ee->ebox, ee->box);
 	gtk_widget_show(ee->box);
 
 	ee->title_label = gtk_label_new(nullptr);
@@ -759,7 +759,7 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 	ped->size_group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
 	ped->widget = gtk_event_box_new();
 	ped->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	gq_gtk_container_add(GTK_WIDGET(ped->widget), ped->vbox);
+	gq_gtk_container_add(ped->widget, ped->vbox);
 	gtk_widget_show(ped->vbox);
 
 	ped->min_height = MIN_HEIGHT;

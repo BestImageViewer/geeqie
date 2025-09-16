@@ -227,7 +227,7 @@ void page_text_position_cb(GtkWidget *widget, gpointer data)
 void image_text_template_view_changed_cb(GtkWidget *, gpointer data)
 {
 	g_free(options->printer.template_string);
-	options->printer.template_string = text_widget_text_pull(GTK_WIDGET(data), TRUE);
+	options->printer.template_string = text_widget_text_pull(static_cast<GtkWidget *>(data), TRUE);
 }
 
 void print_text_menu(GtkWidget *box, PrintWindow *pw)
@@ -242,7 +242,6 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	GtkWidget *subgroup;
 	GtkWidget *page_text_view;
 	GtkWidget *image_text_template_view;
-	GtkWidget *scrolled;
 	GtkWidget *scrolled_pre_formatted;
 	GtkTextBuffer *buffer;
 
@@ -284,7 +283,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_widget_set_tooltip_markup(image_text_template_view,
 					_("Extensive formatting options are shown in the Help file"));
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_widget_set_size_request(scrolled, 200, 50);
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
@@ -292,7 +291,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gq_gtk_box_pack_start(GTK_BOX(subgroup), scrolled, TRUE, TRUE, 5);
 	gtk_widget_show(scrolled);
 
-	gq_gtk_container_add(GTK_WIDGET(scrolled), image_text_template_view);
+	gq_gtk_container_add(scrolled, image_text_template_view);
 	gtk_widget_show(image_text_template_view);
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(image_text_template_view));
@@ -351,7 +350,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	g_object_ref(pw->page_text);
 
 	gtk_widget_set_tooltip_markup(page_text_view, (_("Text shown on each page of a single or multi-page print job")));
-	gq_gtk_container_add(GTK_WIDGET(scrolled), page_text_view);
+	gq_gtk_container_add(scrolled, page_text_view);
 	gtk_widget_show(page_text_view);
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
