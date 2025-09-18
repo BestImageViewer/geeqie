@@ -35,16 +35,7 @@
 #include "options.h"
 #include "ui-file-chooser.h"
 #include "ui-fileops.h"
-
-/* define this to enable a pop-up menu that shows possible matches
- * #define TAB_COMPLETION_ENABLE_POPUP_MENU
- */
-#define TAB_COMPLETION_ENABLE_POPUP_MENU 1
-#define TAB_COMP_POPUP_MAX 1000
-
-#ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
 #include "ui-menu.h"
-#endif
 
 
 /**
@@ -60,6 +51,8 @@
 
 namespace
 {
+
+constexpr gint TAB_COMP_POPUP_MAX = 1000;
 
 struct TabCompData
 {
@@ -85,6 +78,13 @@ struct TabCompData
 	gchar *fd_filter;
 	gchar *fd_filter_desc;
 	gchar *fd_shortcuts;
+};
+
+struct TabCompPrefix
+{
+	const gchar *prefix;
+	const size_t prefix_len;
+	guint choices;
 };
 
 inline TabCompData *tab_completion_get_from_entry(GtkWidget *entry)
@@ -183,14 +183,6 @@ static void tab_completion_emit_tab_signal(TabCompData *td)
 	g_autofree gchar *text = tab_completion_get_text(td);
 	td->tab_func(text, td->tab_data);
 }
-
-#ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
-struct TabCompPrefix
-{
-	const gchar *prefix;
-	const size_t prefix_len;
-	guint choices;
-};
 
 static void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
 {
@@ -300,7 +292,6 @@ static void tab_completion_popup_list(TabCompData *td, GList *list)
 
 	gtk_menu_popup_at_widget(GTK_MENU(menu), td->entry, GDK_GRAVITY_NORTH_EAST, GDK_GRAVITY_NORTH, nullptr);
 }
-#endif
 
 static gboolean tab_completion_do(TabCompData *td)
 {
@@ -369,12 +360,10 @@ static gboolean tab_completion_do(TabCompData *td)
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 				}
-#ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
 			else
 				{
 				tab_completion_popup_list(td, td->file_list);
 				}
-#endif
 
 			return home_exp;
 			}
@@ -398,7 +387,7 @@ static gboolean tab_completion_do(TabCompData *td)
 	if (isdir(entry_dir))
 		{
 		GList *list;
-		GList *poss = nullptr;
+		g_autoptr(GList) poss = nullptr;
 		size_t l = strlen(entry_file);
 
 		if (!td->dir_path || !td->file_list || strcmp(td->dir_path, entry_dir) != 0)
@@ -426,7 +415,6 @@ static gboolean tab_completion_do(TabCompData *td)
 				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
-				g_list_free(poss);
 				return TRUE;
 				}
 
@@ -447,6 +435,7 @@ static gboolean tab_completion_do(TabCompData *td)
 					}
 				l++;
 				}
+
 			l -= 2;
 			if (l > 0)
 				{
@@ -456,16 +445,11 @@ static gboolean tab_completion_do(TabCompData *td)
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
-#ifdef TAB_COMPLETION_ENABLE_POPUP_MENU
 				poss = g_list_sort(poss, reinterpret_cast<GCompareFunc>(CASE_SORT));
 				tab_completion_popup_list(td, poss);
-#endif
 
-				g_list_free(poss);
 				return TRUE;
 				}
-
-			g_list_free(poss);
 			}
 		}
 
