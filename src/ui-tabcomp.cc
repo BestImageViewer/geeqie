@@ -82,8 +82,13 @@ struct TabCompData
 
 struct TabCompPrefix
 {
+	bool match(const gchar *text) const
+	{
+		return strlen(text) >= prefix_len && strncmp(text, prefix, prefix_len) == 0;
+	}
+
 	const gchar *prefix;
-	const size_t prefix_len;
+	size_t prefix_len;
 	guint choices;
 };
 
@@ -194,7 +199,7 @@ static void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
 	auto *tp = static_cast<TabCompPrefix *>(data);
 	const gchar *text = gtk_label_get_text(GTK_LABEL(child));
 
-	if (strlen(text) < tp->prefix_len || strncmp(text, tp->prefix, tp->prefix_len) != 0)
+	if (!tp->match(text))
 		{
 		/* Hide menu items not matching */
 		gtk_widget_hide(widget);
@@ -418,28 +423,22 @@ static gboolean tab_completion_do(TabCompData *td)
 				return TRUE;
 				}
 
-			gboolean done = FALSE;
-			auto test_file = static_cast<gchar *>(poss->data);
+			static const auto prefix_not_match = [](gconstpointer data, gconstpointer user_data)
+			{
+				const auto *tp = static_cast<const TabCompPrefix *>(user_data);
+				return (!tp->match(static_cast<const gchar *>(data))) ? 0 : 1;
+			};
+			TabCompPrefix tp{ static_cast<gchar *>(poss->data), l, 0 };
 
-			while (!done)
+			while (!g_list_find_custom(poss->next, &tp, prefix_not_match))
 				{
-				list = poss;
-				while (list && !done)
-					{
-					auto file = static_cast<gchar *>(list->data);
-					if (strlen(file) < l || strncmp(test_file, file, l) != 0)
-						{
-						done = TRUE;
-						}
-					list = list->next;
-					}
-				l++;
+				tp.prefix_len++;
 				}
 
-			l -= 2;
+			l = tp.prefix_len - 1;
 			if (l > 0)
 				{
-				g_autofree gchar *file = g_strdup(test_file);
+				g_autofree gchar *file = g_strdup(tp.prefix); // @FIXME: Use g_strndup?
 				file[l] = '\0';
 				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
 				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
