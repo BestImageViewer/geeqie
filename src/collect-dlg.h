@@ -24,11 +24,8 @@
 
 struct CollectionData;
 
-void collection_dialog_save_as(CollectionData *cd);
-void collection_dialog_save_close(CollectionData *cd);
-
+void collection_dialog_save(CollectionData *cd);
 void collection_dialog_append(CollectionData *cd);
-
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

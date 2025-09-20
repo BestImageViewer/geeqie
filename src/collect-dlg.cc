@@ -25,37 +25,14 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "compat.h"
 #include "intl.h"
 #include "main-defines.h"
-#include "misc.h"
-#include "options.h"
 #include "ui-file-chooser.h"
 #include "ui-fileops.h"
-#include "ui-utildlg.h"
 #include "utilops.h"
-
-enum {
-	DIALOG_SAVE,
-	DIALOG_SAVE_CLOSE,
-	DIALOG_LOAD,
-	DIALOG_APPEND
-};
-
-static void collection_save_confirmed(GtkFileChooser *chooser, CollectionData *cd)
-{
-	if (!collection_save(cd, cd->collection_path))
-		{
-		g_autofree gchar *buf = g_strdup_printf(_("Failed to save the collection:\n%s"), cd->collection_path);
-		file_util_warning_dialog(_("Save Failed"), buf, GQ_ICON_DIALOG_ERROR, GTK_WIDGET(chooser));
-		}
-
-	collection_unref(cd);
-	collection_window_close_by_collection(cd);
-}
 
 static void collection_save_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
 {
@@ -67,13 +44,20 @@ static void collection_save_cb(GtkFileChooser *chooser, gint response_id, gpoint
 		g_autofree gchar *filename = g_file_get_path(file);
 
 		cd->collection_path = g_strdup(filename);
-		collection_save_confirmed(chooser, cd);
+		if (!collection_save(cd, cd->collection_path))
+			{
+			g_autofree gchar *buf = g_strdup_printf(_("Failed to save the collection:\n%s"), cd->collection_path);
+			file_util_warning_dialog(_("Save Failed"), buf, GQ_ICON_DIALOG_ERROR, GTK_WIDGET(chooser));
+			}
+
+		collection_unref(cd);
+		collection_window_close_by_collection(cd);
 		}
 
 	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
-static void append_collection_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
+static void collection_append_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
 {
 	auto cd = static_cast<CollectionData *>(data);
 
@@ -93,66 +77,37 @@ static void append_collection_cb(GtkFileChooser *chooser, gint response_id, gpoi
 	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
-static void collection_save_dialog(CollectionData *cd)
+static void collection_dialog_new(CollectionData *cd, const gchar *title, GtkFileChooserAction action, GCallback response_callback)
 {
 	if (!cd) return;
 	collection_ref(cd);
 
 	FileChooserDialogData fcdd{};
 
-	fcdd.action = GTK_FILE_CHOOSER_ACTION_SAVE;
+	fcdd.action = action;
 	fcdd.accept_text = _("Save");
 	fcdd.data = cd;
 	fcdd.filename = get_collections_dir();
 	fcdd.filter = GQ_COLLECTION_EXT;
 	fcdd.filter_description = _("Collection files");
 	fcdd.history_key = "open_collection";;
-	fcdd.response_callback = G_CALLBACK(collection_save_cb);
+	fcdd.response_callback = response_callback;
 	fcdd.shortcuts = get_collections_dir();
 	fcdd.suggested_name = _("Untitled.gqv");
-	fcdd.title =_("Save Collection As - Geeqie");
+	fcdd.title = title;
 
 	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
 
 	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
 }
 
-static void collection_append_dialog(CollectionData *cd)
+void collection_dialog_save(CollectionData *cd)
 {
-	if (!cd) return;
-	collection_ref(cd);
-
-	FileChooserDialogData fcdd{};
-
-	fcdd.action = GTK_FILE_CHOOSER_ACTION_OPEN;
-	fcdd.accept_text = _("Save");
-	fcdd.data = cd;
-	fcdd.filename = get_collections_dir();
-	fcdd.filter = GQ_COLLECTION_EXT;
-	fcdd.filter_description = _("Collection files");
-	fcdd.history_key = "open_collection";
-	fcdd.response_callback = G_CALLBACK(append_collection_cb);
-	fcdd.shortcuts = get_collections_dir();
-	fcdd.suggested_name = _("Untitled.gqv");
-	fcdd.title =_("Append Collection - Geeqie");
-
-	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
-
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
-}
-
-void collection_dialog_save_as(CollectionData *cd)
-{
-	collection_save_dialog(cd);
-}
-
-void collection_dialog_save_close(CollectionData *cd)
-{
-	collection_save_dialog(cd);
+	collection_dialog_new(cd, _("Save Collection As - Geeqie"), GTK_FILE_CHOOSER_ACTION_SAVE, G_CALLBACK(collection_save_cb));
 }
 
 void collection_dialog_append(CollectionData *cd)
 {
-	collection_append_dialog(cd);
+	collection_dialog_new(cd, _("Append Collection - Geeqie"), GTK_FILE_CHOOSER_ACTION_OPEN, G_CALLBACK(collection_append_cb));
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

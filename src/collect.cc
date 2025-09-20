@@ -925,7 +925,7 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 				file_util_delete(nullptr, collection_table_selection_get_list(cw->table), cw->window, TRUE);
 				break;
 			case 'S': case 's':
-				collection_dialog_save_as(cw->cd);
+				collection_dialog_save(cw->cd);
 				break;
 			case 'W': case 'w':
 				collection_window_close(cw);
@@ -950,7 +950,7 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 			case 'S': case 's':
 				if (!cw->cd->path)
 					{
-					collection_dialog_save_as(cw->cd);
+					collection_dialog_save(cw->cd);
 					}
 				else if (!collection_save(cw->cd, cw->cd->path))
 					{
@@ -1116,7 +1116,7 @@ static void collection_close_save_cb(GenericDialog *gd, gpointer data)
 
 	if (!cw->cd->path)
 		{
-		collection_dialog_save_close(cw->cd);
+		collection_dialog_save(cw->cd);
 		return;
 		}
 

@@ -721,7 +721,7 @@ static void collection_table_popup_save_as_cb(GtkWidget *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	collection_dialog_save_as(ct->cd);
+	collection_dialog_save(ct->cd);
 }
 
 static void collection_table_popup_save_cb(GtkWidget *widget, gpointer data)
