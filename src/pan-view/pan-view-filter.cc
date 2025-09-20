@@ -90,10 +90,9 @@ void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 	pan_layout_update(pw);
 }
 
-void pan_filter_activate_cb(const gchar *text, gpointer data)
+void pan_filter_activate_cb(PanWindow *pw, const gchar *text)
 {
 	GtkWidget *kw_button;
-	auto pw = static_cast<PanWindow *>(data);
 	PanViewFilterUi *ui = pw->filter_ui;
 	GtkTreeIter iter;
 
@@ -263,7 +262,8 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	gtk_widget_show(hbox);
 
 	ui->filter_entry = tab_completion_new_with_history(hbox, "", "pan_view_filter", -1);
-	tab_completion_set_enter_func(ui->filter_entry, pan_filter_activate_cb, pw);
+	tab_completion_set_enter_func(ui->filter_entry,
+	                              [pw](const gchar *text){ pan_filter_activate_cb(pw, text); });
 
 	ui->filter_label = gtk_label_new("");/** @todo (xsdg): Figure out whether it's useful to keep this label around. */
 

@@ -1762,10 +1762,8 @@ static void pan_window_layout_size_cb(GtkWidget *combo, gpointer data)
 	pan_layout_update(pw);
 }
 
-static void pan_window_entry_activate_cb(const gchar *new_text, gpointer data)
+static void pan_window_entry_activate_cb(PanWindow *pw, const gchar *new_text)
 {
-	auto pw = static_cast<PanWindow *>(data);
-
 	g_autofree gchar *path = remove_trailing_slash(new_text);
 	parse_out_relatives(path);
 
@@ -1875,7 +1873,8 @@ static void pan_window_new_real(FileData *dir_fd)
 	pref_spacer(box, 0);
 	pref_label_new(box, _("Location:"));
 	pw->path_entry = tab_completion_new_with_history(box, dir_fd->path, "pan_view_path", -1);
-	tab_completion_set_enter_func(pw->path_entry, pan_window_entry_activate_cb, pw);
+	tab_completion_set_enter_func(pw->path_entry,
+	                              [pw](const gchar *text){ pan_window_entry_activate_cb(pw, text); });
 
 	combo = gtk_combo_box_text_new();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Timeline"));

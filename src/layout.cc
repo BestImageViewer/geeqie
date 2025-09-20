@@ -429,10 +429,8 @@ static void layout_path_entry_changed_cb(GtkWidget *widget, gpointer data)
 		}
 }
 
-static void layout_path_entry_tab_cb(const gchar *path, gpointer data)
+static void layout_path_entry_tab_cb(LayoutWindow *lw, const gchar *path)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
 	g_autofree gchar *buf = g_strdup(path);
 	parse_out_relatives(buf);
 
@@ -458,10 +456,8 @@ static void layout_path_entry_tab_cb(const gchar *path, gpointer data)
 		}
 }
 
-static void layout_path_entry_cb(const gchar *path, gpointer data)
+static void layout_path_entry_cb(LayoutWindow *lw, const gchar *path)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
 	if (download_web_file(path, FALSE, lw)) return;
 
 	g_autofree gchar *buf = g_strdup(path);
@@ -477,10 +473,8 @@ static void layout_vd_select_cb(ViewDir *, FileData *fd, gpointer data)
 	layout_set_fd(lw, fd);
 }
 
-static void layout_path_entry_tab_append_cb(const gchar *, gint n, gpointer data)
+static void layout_path_entry_tab_append_cb(LayoutWindow *lw, gint n)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
 	if (!lw || !lw->back_button) return;
 	if (!layout_valid(&lw)) return;
 
@@ -540,9 +534,12 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 	lw->path_entry = tab_completion_new_with_history(nullptr, nullptr, "path_list", -1);
 	GtkWidget *tabcomp = tab_completion_get_box(lw->path_entry);
 	DEBUG_NAME(tabcomp);
-	tab_completion_set_enter_func(lw->path_entry, layout_path_entry_cb, lw);
-	tab_completion_set_tab_func(lw->path_entry, layout_path_entry_tab_cb, lw);
-	tab_completion_set_tab_append_func(lw->path_entry, layout_path_entry_tab_append_cb, lw);
+	tab_completion_set_enter_func(lw->path_entry,
+	                              [lw](const gchar *text){ layout_path_entry_cb(lw, text); });
+	tab_completion_set_tab_func(lw->path_entry,
+	                            [lw](const gchar *text){ layout_path_entry_tab_cb(lw, text); });
+	tab_completion_set_tab_append_func(lw->path_entry,
+	                                   [lw](const gchar *, gint n){ layout_path_entry_tab_append_cb(lw, n); });
 
 	if (options->hamburger_menu)
 		{

@@ -63,10 +63,6 @@ struct TabCompData
 	TabCompTabFunc tab_func;
 	TabCompTabAppendFunc tab_append_func;
 
-	gpointer enter_data;
-	gpointer tab_data;
-	gpointer tab_append_data;
-
 	GtkWidget *combo;
 	gboolean has_history;
 	gchar *history_key;
@@ -176,7 +172,7 @@ static gboolean tab_completion_emit_enter_signal(TabCompData *td)
 	if (!td->enter_func) return FALSE;
 
 	g_autofree gchar *text = tab_completion_get_text(td);
-	td->enter_func(text, td->enter_data);
+	td->enter_func(text);
 
 	return TRUE;
 }
@@ -186,7 +182,7 @@ static void tab_completion_emit_tab_signal(TabCompData *td)
 	if (!td->tab_func) return;
 
 	g_autofree gchar *text = tab_completion_get_text(td);
-	td->tab_func(text, td->tab_data);
+	td->tab_func(text);
 }
 
 static void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
@@ -644,9 +640,7 @@ void tab_completion_append_to_history(GtkWidget *entry, const gchar *path)
 		n++;
 		}
 
-	if (td->tab_append_func) {
-		td->tab_append_func(path, n, td->tab_append_data);
-	}
+	if (td->tab_append_func) td->tab_append_func(path, n);
 }
 
 GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text)
@@ -671,32 +665,29 @@ GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text)
 	return entry;
 }
 
-void tab_completion_set_enter_func(GtkWidget *entry, TabCompEnterFunc enter_func, gpointer data)
+void tab_completion_set_enter_func(GtkWidget *entry, const TabCompEnterFunc &enter_func)
 {
 	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td) return;
 
 	td->enter_func = enter_func;
-	td->enter_data = data;
 }
 
-void tab_completion_set_tab_func(GtkWidget *entry, TabCompTabFunc tab_func, gpointer data)
+void tab_completion_set_tab_func(GtkWidget *entry, const TabCompTabFunc &tab_func)
 {
 	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td) return;
 
 	td->tab_func = tab_func;
-	td->tab_data = data;
 }
 
 /* Add a callback function called when a new entry is appended to the list */
-void tab_completion_set_tab_append_func(GtkWidget *entry, TabCompTabAppendFunc tab_append_func, gpointer data)
+void tab_completion_set_tab_append_func(GtkWidget *entry, const TabCompTabAppendFunc &tab_append_func)
 {
 	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td) return;
 
 	td->tab_append_func = tab_append_func;
-	td->tab_append_data = data;
 }
 
 static void tab_completion_response_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
