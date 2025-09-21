@@ -77,7 +77,7 @@ mkdir -p "$XDG_CONFIG_HOME"
 export G_DEBUG="fatal-critical"
 
 echo "Variables in isolated environment:" >&2
-env -i G_DEBUG="$G_DEBUG" HOME="$HOME" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" dbus-run-session -- env >&2
+env -i G_DEBUG="$G_DEBUG" HOME="$HOME" PATH="$PATH" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" dbus-run-session -- env >&2
 echo >&2
 
-env -i G_DEBUG="$G_DEBUG" HOME="$HOME" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" dbus-run-session -- "$@"
+env -i G_DEBUG="$G_DEBUG" HOME="$HOME" PATH="$PATH" XDG_CONFIG_HOME="$XDG_CONFIG_HOME" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" dbus-run-session -- "$@"
