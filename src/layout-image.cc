@@ -342,19 +342,19 @@ static gboolean show_next_frame(gpointer data)
 
 	PixbufRenderer *pr = PIXBUF_RENDERER(fd->iw->pr);
 
-	if (gdk_pixbuf_animation_iter_advance(fd->iter,nullptr)==FALSE)
+	if (!gq_gdk_pixbuf_animation_iter_advance(fd->iter, nullptr))
 		{
 		/* This indicates the animation is complete.
 		   Return FALSE here to disable looping. */
 		}
 
-	fd->gpb = gdk_pixbuf_animation_iter_get_pixbuf(fd->iter);
+	fd->gpb = gq_gdk_pixbuf_animation_iter_get_pixbuf(fd->iter);
 	image_change_pixbuf(fd->iw,fd->gpb,pr->zoom,FALSE);
 
 	if (fd->iw->func_update)
 		fd->iw->func_update(fd->iw, fd->iw->data_update);
 
-	delay = gdk_pixbuf_animation_iter_get_delay_time(fd->iter);
+	delay = gq_gdk_pixbuf_animation_iter_get_delay_time(fd->iter);
 	if (delay!=fd->delay)
 		{
 		if (delay>0) /* Current frame not static. */
@@ -415,7 +415,7 @@ static void animation_async_ready_cb(GObject *, GAsyncResult *res, gpointer data
 
 	if (g_cancellable_is_cancelled(animation->cancellable))
 		{
-		gdk_pixbuf_animation_new_from_stream_finish(res, nullptr);
+		gq_gdk_pixbuf_animation_new_from_stream_finish(res, nullptr);
 		g_object_unref(animation->in_file);
 		g_object_unref(animation->gfstream);
 		image_animation_data_free(animation);
@@ -423,16 +423,16 @@ static void animation_async_ready_cb(GObject *, GAsyncResult *res, gpointer data
 		}
 
 	g_autoptr(GError) error = nullptr;
-	animation->gpa = gdk_pixbuf_animation_new_from_stream_finish(res, &error);
+	animation->gpa = gq_gdk_pixbuf_animation_new_from_stream_finish(res, &error);
 	if (animation->gpa)
 		{
-		if (!gdk_pixbuf_animation_is_static_image(animation->gpa))
+		if (!gq_gdk_pixbuf_animation_is_static_image(animation->gpa))
 			{
-			animation->iter = gdk_pixbuf_animation_get_iter(animation->gpa, nullptr);
+			animation->iter = gq_gdk_pixbuf_animation_get_iter(animation->gpa, nullptr);
 			if (animation->iter)
 				{
 				animation->data_adr = animation->lw->image->image_fd;
-				animation->delay = gdk_pixbuf_animation_iter_get_delay_time(animation->iter);
+				animation->delay = gq_gdk_pixbuf_animation_iter_get_delay_time(animation->iter);
 				animation->valid = TRUE;
 
 				layout_image_animate_update_image(animation->lw);
@@ -477,7 +477,7 @@ static gboolean layout_image_animate_new_file(LayoutWindow *lw)
 	if (gfstream)
 		{
 		animation->gfstream = gfstream;
-		gdk_pixbuf_animation_new_from_stream_async(G_INPUT_STREAM(gfstream), animation->cancellable, animation_async_ready_cb, animation);
+		gq_gdk_pixbuf_animation_new_from_stream_async(G_INPUT_STREAM(gfstream), animation->cancellable, animation_async_ready_cb, animation);
 		}
 	else
 		{
