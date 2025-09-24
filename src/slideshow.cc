@@ -32,8 +32,23 @@
 #include "layout.h"
 #include "options.h"
 
-static void slideshow_timer_stop(SlideShowData *ss);
+namespace
+{
 
+void slideshow_timer_stop(SlideShowData *ss)
+{
+	if (!ss->timeout_id) return;
+
+	g_source_remove(ss->timeout_id);
+	ss->timeout_id = 0;
+}
+
+inline FileData *slideshow_get_fd(SlideShowData *ss)
+{
+	return ss->lw ? layout_image_get_fd(ss->lw) : image_get_fd(ss->imd);
+}
+
+} // namespace
 
 void slideshow_free(SlideShowData *ss)
 {
@@ -155,15 +170,11 @@ static void slideshow_list_init(SlideShowData *ss, gint start_index)
 
 gboolean slideshow_should_continue(SlideShowData *ss)
 {
-	FileData *imd_fd;
 	FileData *dir_fd;
 
 	if (!ss) return FALSE;
 
-	if (ss->lw)
-		imd_fd = layout_image_get_fd(ss->lw);
-	else
-		imd_fd = image_get_fd(ss->imd);
+	FileData *imd_fd = slideshow_get_fd(ss);
 
 	if ( ((imd_fd == nullptr) != (ss->slide_fd == nullptr)) ||
 	    (imd_fd && ss->slide_fd && imd_fd != ss->slide_fd) ) return FALSE;
@@ -233,10 +244,8 @@ static gboolean slideshow_step(SlideShowData *ss, gboolean forward)
 		info = static_cast<CollectInfo *>(g_list_nth_data(ss->cd->list, row));
 		ss->slide_fd = file_data_ref(info->fd);
 
-		if (ss->lw)
-			image_change_from_collection(ss->lw->image, ss->cd, info, image_zoom_get_default(ss->lw->image));
-		else
-			image_change_from_collection(ss->imd, ss->cd, info, image_zoom_get_default(ss->imd));
+		ImageWindow *imd = ss->lw ? ss->lw->image : ss->imd;
+		image_change_from_collection(imd, ss->cd, info, image_zoom_get_default(imd));
 		}
 	else
 		{
@@ -315,14 +324,6 @@ static gboolean slideshow_loop_cb(gpointer data)
 	ss->timeout_id = 0;
 	slideshow_free(ss);
 	return G_SOURCE_REMOVE;
-}
-
-static void slideshow_timer_stop(SlideShowData *ss)
-{
-	if (!ss->timeout_id) return;
-
-	g_source_remove(ss->timeout_id);
-	ss->timeout_id = 0;
 }
 
 static void slideshow_timer_reset(SlideShowData *ss)
@@ -409,10 +410,7 @@ static SlideShowData *real_slideshow_start(LayoutWindow *target_lw, ImageWindow 
 
 	slideshow_list_init(ss, start_index);
 
-	if (ss->lw)
-		ss->slide_fd = file_data_ref(layout_image_get_fd(ss->lw));
-	else
-		ss->slide_fd = file_data_ref(image_get_fd(ss->imd));
+	ss->slide_fd = file_data_ref(slideshow_get_fd(ss));
 
 	if (slideshow_step(ss, TRUE))
 		{
