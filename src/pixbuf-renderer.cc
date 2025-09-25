@@ -799,11 +799,7 @@ static gboolean pr_scroller_update_cb(gpointer data)
 
 static void pr_scroller_timer_set(PixbufRenderer *pr, gboolean start)
 {
-	if (pr->scroller_id)
-		{
-		g_source_remove(pr->scroller_id);
-		pr->scroller_id = 0;
-		}
+	g_clear_handle_id(&pr->scroller_id, g_source_remove);
 
 	if (start)
 		{

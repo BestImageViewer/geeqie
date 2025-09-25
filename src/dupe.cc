@@ -2000,11 +2000,7 @@ static void dupe_thumb_step(DupeWindow *dw)
 
 static void dupe_check_stop(DupeWindow *dw)
 {
-	if (dw->idle_id > 0)
-		{
-		g_source_remove(dw->idle_id);
-		dw->idle_id = 0;
-		}
+	g_clear_handle_id(&dw->idle_id, g_source_remove);
 
 	dw->abort = TRUE;
 
@@ -2019,19 +2015,14 @@ static void dupe_check_stop(DupeWindow *dw)
 
 	if (dw->idle_id || dw->img_loader || dw->thumb_loader)
 		{
-		if (dw->idle_id > 0)
-			{
-			g_source_remove(dw->idle_id);
-			dw->idle_id = 0;
-			}
+		g_clear_handle_id(&dw->idle_id, g_source_remove);
 		dupe_window_update_progress(dw, nullptr, 0.0, FALSE);
 		widget_set_cursor(dw->listview, -1);
 		}
 
 	if (dw->add_files_queue_id)
 		{
-		g_source_remove(dw->add_files_queue_id);
-		dw->add_files_queue_id = 0;
+		g_clear_handle_id(&dw->add_files_queue_id, g_source_remove);
 		dupe_destroy_list_cache(dw);
 		gtk_widget_set_sensitive(dw->controls_box, TRUE);
 		if (g_list_length(dw->add_files_queue) > 0)

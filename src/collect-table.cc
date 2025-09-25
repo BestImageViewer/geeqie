@@ -654,28 +654,18 @@ static gboolean tip_schedule_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static void tip_schedule(CollectTable *ct)
-{
-	tip_hide(ct);
-
-	if (ct->tip_delay_id)
-		{
-		g_source_remove(ct->tip_delay_id);
-		ct->tip_delay_id = 0;
-		}
-
-	ct->tip_delay_id = g_timeout_add(ct->show_text ? COLLECT_TABLE_TIP_DELAY_PATH : COLLECT_TABLE_TIP_DELAY, tip_schedule_cb, ct);
-}
-
 static void tip_unschedule(CollectTable *ct)
 {
 	tip_hide(ct);
 
-	if (ct->tip_delay_id)
-		{
-		g_source_remove(ct->tip_delay_id);
-		ct->tip_delay_id = 0;
-		}
+	g_clear_handle_id(&ct->tip_delay_id, g_source_remove);
+}
+
+static void tip_schedule(CollectTable *ct)
+{
+	tip_unschedule(ct);
+
+	ct->tip_delay_id = g_timeout_add(ct->show_text ? COLLECT_TABLE_TIP_DELAY_PATH : COLLECT_TABLE_TIP_DELAY, tip_schedule_cb, ct);
 }
 
 static void tip_update(CollectTable *ct, CollectInfo *info)
@@ -1565,11 +1555,7 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
 {
 	if (!scroll)
 		{
-		if (ct->drop_idle_id)
-			{
-			g_source_remove(ct->drop_idle_id);
-			ct->drop_idle_id = 0;
-			}
+		g_clear_handle_id(&ct->drop_idle_id, g_source_remove);
 		widget_auto_scroll_stop(ct->listview);
 		}
 	else
@@ -1891,8 +1877,7 @@ static gboolean collection_table_sync_idle_cb(gpointer data)
 
 	if (ct->sync_idle_id)
 		{
-		g_source_remove(ct->sync_idle_id);
-		ct->sync_idle_id = 0;
+		g_clear_handle_id(&ct->sync_idle_id, g_source_remove);
 
 		collection_table_sync(ct);
 		}

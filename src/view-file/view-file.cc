@@ -1506,12 +1506,7 @@ void vf_thumb_update(ViewFile *vf)
 
 void vf_star_cleanup(ViewFile *vf)
 {
-	if (vf->stars_id != 0)
-		{
-		g_source_remove(vf->stars_id);
-		}
-
-	vf->stars_id = 0;
+	g_clear_handle_id(&vf->stars_id, g_source_remove);
 	vf->stars_filedata = nullptr;
 }
 
@@ -1696,11 +1691,7 @@ static gboolean vf_refresh_idle_cb(gpointer data)
 
 void vf_refresh_idle_cancel(ViewFile *vf)
 {
-	if (vf->refresh_idle_id)
-		{
-		g_source_remove(vf->refresh_idle_id);
-		vf->refresh_idle_id = 0;
-		}
+	g_clear_handle_id(&vf->refresh_idle_id, g_source_remove);
 }
 
 

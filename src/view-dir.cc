@@ -961,11 +961,7 @@ static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y)
 
 void vd_dnd_drop_scroll_cancel(ViewDir *vd)
 {
-	if (vd->drop_scroll_id)
-		{
-		g_source_remove(vd->drop_scroll_id);
-		vd->drop_scroll_id = 0;
-		}
+	g_clear_handle_id(&vd->drop_scroll_id, g_source_remove);
 }
 
 static gboolean vd_auto_scroll_idle_cb(gpointer data)

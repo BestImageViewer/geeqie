@@ -225,11 +225,7 @@ static void metadata_write_queue_add(FileData *fd)
 
 	static guint metadata_write_idle_id = 0; /* event source id */
 
-	if (metadata_write_idle_id)
-		{
-		g_source_remove(metadata_write_idle_id);
-		metadata_write_idle_id = 0;
-		}
+	g_clear_handle_id(&metadata_write_idle_id, g_source_remove);
 
 	if (options->metadata.confirm_after_timeout)
 		{

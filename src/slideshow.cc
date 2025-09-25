@@ -35,14 +35,6 @@
 namespace
 {
 
-void slideshow_timer_stop(SlideShowData *ss)
-{
-	if (!ss->timeout_id) return;
-
-	g_source_remove(ss->timeout_id);
-	ss->timeout_id = 0;
-}
-
 inline FileData *slideshow_get_fd(SlideShowData *ss)
 {
 	return ss->lw ? layout_image_get_fd(ss->lw) : image_get_fd(ss->imd);
@@ -54,7 +46,7 @@ void slideshow_free(SlideShowData *ss)
 {
 	if (!ss) return;
 
-	slideshow_timer_stop(ss);
+	g_clear_handle_id(&ss->timeout_id, g_source_remove);
 
 	if (ss->stop_func) ss->stop_func(ss, ss->stop_data);
 

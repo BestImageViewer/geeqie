@@ -224,11 +224,7 @@ static gboolean vdtree_dnd_drop_expand_cb(gpointer data)
 
 static void vdtree_dnd_drop_expand_cancel(ViewDir *vd)
 {
-	if (VDTREE(vd)->drop_expand_id)
-		{
-		g_source_remove(VDTREE(vd)->drop_expand_id);
-		VDTREE(vd)->drop_expand_id = 0;
-		}
+	g_clear_handle_id(&(VDTREE(vd)->drop_expand_id), g_source_remove);
 }
 
 static void vdtree_dnd_drop_expand(ViewDir *vd)

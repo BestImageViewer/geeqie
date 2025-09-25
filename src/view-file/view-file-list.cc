@@ -648,15 +648,6 @@ static gboolean vflist_select_idle_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static void vflist_select_idle_cancel(ViewFile *vf)
-{
-	if (VFLIST(vf)->select_idle_id)
-		{
-		g_source_remove(VFLIST(vf)->select_idle_id);
-		VFLIST(vf)->select_idle_id = 0;
-		}
-}
-
 static gboolean vflist_select_cb(GtkTreeSelection *, GtkTreeModel *store, GtkTreePath *tpath, gboolean path_currently_selected, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -1872,7 +1863,7 @@ void vflist_destroy_cb(ViewFile *vf)
 {
 	file_data_unregister_notify_func(vf_notify_cb, vf);
 
-	vflist_select_idle_cancel(vf);
+	g_clear_handle_id(&(VFLIST(vf)->select_idle_id), g_source_remove);
 	vf_refresh_idle_cancel(vf);
 	vf_thumb_stop(vf);
 	vf_star_stop(vf);

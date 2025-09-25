@@ -2788,8 +2788,7 @@ gboolean FileData::file_data_unregister_real_time_monitor(FileData *fd)
 
 	if (g_hash_table_size(file_data_monitor_pool) == 0)
 		{
-		g_source_remove(realtime_monitor_id);
-		realtime_monitor_id = 0;
+		g_clear_handle_id(&realtime_monitor_id, g_source_remove);
 		return FALSE;
 		}
 

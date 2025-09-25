@@ -981,8 +981,7 @@ static void collect_manager_timer_push(gint stop)
 		{
 		if (!stop) return;
 
-		g_source_remove(collection_manager_timer_id);
-		collection_manager_timer_id = 0;
+		g_clear_handle_id(&collection_manager_timer_id, g_source_remove);
 		}
 
 	if (!stop)

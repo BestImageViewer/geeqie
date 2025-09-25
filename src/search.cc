@@ -866,15 +866,6 @@ static gboolean search_result_update_idle_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static void search_result_update_idle_cancel(SearchData *sd)
-{
-	if (sd->update_idle_id)
-		{
-		g_source_remove(sd->update_idle_id);
-		sd->update_idle_id = 0;
-		}
-}
-
 static gboolean search_result_select_cb(GtkTreeSelection *, GtkTreeModel *, GtkTreePath *, gboolean, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
@@ -1703,11 +1694,7 @@ static void search_buffer_flush(SearchData *sd)
 
 static void search_stop(SearchData *sd)
 {
-	if (sd->search_idle_id)
-		{
-		g_source_remove(sd->search_idle_id);
-		sd->search_idle_id = 0;
-		}
+	g_clear_handle_id(&sd->search_idle_id, g_source_remove);
 
 	image_loader_free(sd->img_loader);
 	sd->img_loader = nullptr;
@@ -3062,7 +3049,7 @@ static void search_window_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	search_result_update_idle_cancel(sd);
+	g_clear_handle_id(&sd->update_idle_id, g_source_remove);
 
 	static const auto mfd_fd_unref = [](gpointer data)
 	{

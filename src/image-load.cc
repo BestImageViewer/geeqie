@@ -240,11 +240,7 @@ static void image_loader_finalize(GObject *object)
 
 	DEBUG_1("freeing image loader %p bytes_read=%" G_GSIZE_FORMAT, (void *)il, il->bytes_read);
 
-	if (il->idle_done_id)
-		{
-		g_source_remove(il->idle_done_id);
-		il->idle_done_id = 0;
-		}
+	g_clear_handle_id(&il->idle_done_id, g_source_remove);
 
 	while (g_source_remove_by_user_data(il))
 		{
@@ -1041,11 +1037,7 @@ static void image_loader_stop(ImageLoader *il)
 {
 	if (!il) return;
 
-	if (il->idle_id)
-		{
-		g_source_remove(il->idle_id);
-		il->idle_id = 0;
-		}
+	g_clear_handle_id(&il->idle_id, g_source_remove);
 
 	if (il->thread)
 		{

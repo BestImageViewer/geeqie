@@ -1790,10 +1790,7 @@ static void pan_window_close(PanWindow *pw)
 	pref_list_int_set(PAN_PREF_GROUP, PAN_PREF_INFO_IMAGE, pw->info_image_size);
 	pref_list_int_set(PAN_PREF_GROUP, PAN_PREF_INFO_EXIF, pw->info_includes_exif);
 
-	if (pw->idle_id)
-		{
-		g_source_remove(pw->idle_id);
-		}
+	if (pw->idle_id) g_source_remove(pw->idle_id);
 
 	pan_fullscreen_toggle(pw, TRUE);
 	pan_search_ui_destroy(g_steal_pointer(&pw->search_ui));
