@@ -98,37 +98,26 @@ static GPtrArray *generate_ptr_array_from_list(GList *src_list)
 	return arr;
 }
 
-static void ptr_array_random_shuffle(GPtrArray *array)
+static void slideshow_randomize_list(SlideShowData *ss)
 {
-	guint i;
-	for (i = 0; i < array->len; ++i)
+	GPtrArray *array = generate_ptr_array_from_list(ss->list);
+
+	for (guint i = 0; i < array->len; ++i)
 		{
-		guint p = static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) + 1.0) * array->len;
+		guint p = g_random_int_range(0, array->len);
 		std::swap(g_ptr_array_index(array, i), g_ptr_array_index(array, p));
 		}
-}
-
-static GList *generate_random_list(SlideShowData *ss)
-{
-	GList *src_list;
-	GPtrArray *src_array;
-	GList *list = nullptr;
-
-	src_list = generate_list(ss);
-	src_array = generate_ptr_array_from_list(src_list);
-	g_list_free(src_list);
 
 	static const auto list_prepend = [](gpointer data, gpointer user_data)
 	{
-		auto list = static_cast<GList **>(user_data);
-		*list = g_list_prepend(*list, data);
+		auto *ss = static_cast<SlideShowData *>(user_data);
+		ss->list = g_list_prepend(ss->list, data);
 	};
 
-	ptr_array_random_shuffle(src_array);
-	g_ptr_array_foreach(src_array, list_prepend, &list);
-	g_ptr_array_free(src_array, TRUE);
+	g_clear_list(&ss->list, NULL);
+	g_ptr_array_foreach(array, list_prepend, &ss);
 
-	return list;
+	g_ptr_array_free(array, TRUE);
 }
 
 static void slideshow_list_init(SlideShowData *ss, gint start_index)
@@ -137,25 +126,19 @@ static void slideshow_list_init(SlideShowData *ss, gint start_index)
 	ss->list_done = nullptr;
 
 	g_list_free(ss->list);
+	ss->list = generate_list(ss);
 
 	if (options->slideshow.random)
 		{
-		ss->list = generate_random_list(ss);
+		slideshow_randomize_list(ss);
 		}
-	else
+	else if (start_index > 0)
 		{
-		ss->list = generate_list(ss);
-		if (start_index >= 0)
+		/* start with specified image by skipping to it */
+		for (gint i = 0; ss->list && i < start_index; i++)
 			{
-			/* start with specified image by skipping to it */
-			gint i = 0;
-
-			while (ss->list && i < start_index)
-				{
-				ss->list_done = g_list_prepend(ss->list_done, ss->list->data);
-				ss->list = g_list_remove(ss->list, ss->list->data);
-				i++;
-				}
+			ss->list_done = g_list_prepend(ss->list_done, ss->list->data);
+			ss->list = g_list_remove(ss->list, ss->list->data);
 			}
 		}
 }
