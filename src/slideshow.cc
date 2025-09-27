@@ -35,6 +35,13 @@
 namespace
 {
 
+void move_first_list_item(GList **src, GList **dst)
+{
+	gpointer data = (*src)->data;
+	*dst = g_list_prepend(*dst, data);
+	*src = g_list_remove(*src, data);
+}
+
 inline FileData *slideshow_get_fd(SlideShowData *ss)
 {
 	return ss->lw ? layout_image_get_fd(ss->lw) : image_get_fd(ss->imd);
@@ -137,8 +144,7 @@ static void slideshow_list_init(SlideShowData *ss, gint start_index)
 		/* start with specified image by skipping to it */
 		for (gint i = 0; ss->list && i < start_index; i++)
 			{
-			ss->list_done = g_list_prepend(ss->list_done, ss->list->data);
-			ss->list = g_list_remove(ss->list, ss->list->data);
+			move_first_list_item(&ss->list, &ss->list_done);
 			}
 		}
 }
@@ -177,29 +183,22 @@ gboolean slideshow_should_continue(SlideShowData *ss)
 
 static gboolean slideshow_step(SlideShowData *ss, gboolean forward)
 {
-	gint row;
-
-	if (!slideshow_should_continue(ss))
-		{
-		return FALSE;
-		}
+	if (!slideshow_should_continue(ss)) return FALSE;
 
 	if (forward)
 		{
 		if (!ss->list) return TRUE;
 
-		row = GPOINTER_TO_INT(ss->list->data);
-		ss->list_done = g_list_prepend(ss->list_done, ss->list->data);
-		ss->list = g_list_remove(ss->list, ss->list->data);
+		move_first_list_item(&ss->list, &ss->list_done);
 		}
 	else
 		{
 		if (!ss->list_done || !ss->list_done->next) return TRUE;
 
-		ss->list = g_list_prepend(ss->list, ss->list_done->data);
-		ss->list_done = g_list_remove(ss->list_done, ss->list_done->data);
-		row = GPOINTER_TO_INT(ss->list_done->data);
+		move_first_list_item(&ss->list_done, &ss->list);
 		}
+
+	auto row = GPOINTER_TO_INT(ss->list_done->data);
 
 	file_data_unref(ss->slide_fd);
 	ss->slide_fd = nullptr;
