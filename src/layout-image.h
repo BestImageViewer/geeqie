@@ -96,7 +96,7 @@ void layout_image_slideshow_start_from_list(LayoutWindow *lw, GList *list);
 void layout_image_slideshow_stop(LayoutWindow *lw);
 void layout_image_slideshow_toggle(LayoutWindow *lw);
 gboolean layout_image_slideshow_active(LayoutWindow *lw);
-gboolean layout_image_slideshow_pause_toggle(LayoutWindow *lw);
+void layout_image_slideshow_pause_toggle(LayoutWindow *lw);
 gboolean layout_image_slideshow_paused(LayoutWindow *lw);
 
 void layout_image_animate_toggle(LayoutWindow *lw);

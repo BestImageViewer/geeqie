@@ -261,17 +261,13 @@ gboolean layout_image_slideshow_active(LayoutWindow *lw)
 	return (lw->slideshow != nullptr);
 }
 
-gboolean layout_image_slideshow_pause_toggle(LayoutWindow *lw)
+void layout_image_slideshow_pause_toggle(LayoutWindow *lw)
 {
-	gboolean ret;
+	if (!layout_valid(&lw)) return;
 
-	if (!layout_valid(&lw)) return FALSE;
-
-	ret = slideshow_pause_toggle(lw->slideshow);
+	slideshow_pause_toggle(lw->slideshow);
 
 	layout_status_update_info(lw, nullptr);
-
-	return ret;
 }
 
 gboolean layout_image_slideshow_paused(LayoutWindow *lw)
