@@ -22,6 +22,8 @@
 #ifndef SLIDESHOW_H
 #define SLIDESHOW_H
 
+#include <functional>
+
 #include <glib.h>
 
 struct CollectInfo;
@@ -59,8 +61,8 @@ struct SlideShowData
 
 	gboolean from_selection;
 
-	void (*stop_func)(SlideShowData *, gpointer);
-	gpointer stop_data;
+	using StopFunc = std::function<void(SlideShowData *)>;
+	StopFunc stop_func;
 
 	gboolean paused;
 };
@@ -73,12 +75,12 @@ void slideshow_next(SlideShowData *ss);
 void slideshow_prev(SlideShowData *ss);
 
 SlideShowData *slideshow_start_from_filelist(LayoutWindow *target_lw, ImageWindow *imd, GList *list,
-					      void (*stop_func)(SlideShowData *, gpointer), gpointer stop_data);
-SlideShowData *slideshow_start_from_collection(LayoutWindow *target_lw, ImageWindow *imd, CollectionData *cd,
-					       void (*stop_func)(SlideShowData *, gpointer), gpointer stop_data,
-					       CollectInfo *start_info);
+                                             const SlideShowData::StopFunc &stop_func);
+SlideShowData *slideshow_start_from_collection(LayoutWindow *target_lw, ImageWindow *imd,
+                                               CollectionData *cd, CollectInfo *start_info,
+                                               const SlideShowData::StopFunc &stop_func);
 SlideShowData *slideshow_start(LayoutWindow *lw, gint start_point,
-			       void (*stop_func)(SlideShowData *, gpointer), gpointer stop_data);
+                               const SlideShowData::StopFunc &stop_func);
 
 gboolean slideshow_paused(SlideShowData *ss);
 void slideshow_pause_toggle(SlideShowData *ss);

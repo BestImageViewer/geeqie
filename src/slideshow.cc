@@ -55,7 +55,7 @@ void slideshow_free(SlideShowData *ss)
 
 	g_clear_handle_id(&ss->timeout_id, g_source_remove);
 
-	if (ss->stop_func) ss->stop_func(ss, ss->stop_data);
+	if (ss->stop_func) ss->stop_func(ss);
 
 	if (ss->filelist) file_data_list_free(ss->filelist);
 	if (ss->cd) collection_unref(ss->cd);
@@ -333,9 +333,9 @@ void slideshow_prev(SlideShowData *ss)
 }
 
 static SlideShowData *real_slideshow_start(LayoutWindow *target_lw, ImageWindow *imd,
-					   GList *filelist, gint start_point,
-					   CollectionData *cd, CollectInfo *start_info,
-					   void (*stop_func)(SlideShowData *, gpointer), gpointer stop_data)
+                                           GList *filelist, gint start_point,
+                                           CollectionData *cd, CollectInfo *start_info,
+                                           const SlideShowData::StopFunc &stop_func)
 {
 	SlideShowData *ss;
 	gint start_index = -1;
@@ -391,7 +391,6 @@ static SlideShowData *real_slideshow_start(LayoutWindow *target_lw, ImageWindow 
 		slideshow_timer_reset(ss);
 
 		ss->stop_func = stop_func;
-		ss->stop_data = stop_data;
 		}
 	else
 		{
@@ -403,22 +402,22 @@ static SlideShowData *real_slideshow_start(LayoutWindow *target_lw, ImageWindow 
 }
 
 SlideShowData *slideshow_start_from_filelist(LayoutWindow *target_lw, ImageWindow *imd, GList *list,
-					      void (*stop_func)(SlideShowData *, gpointer), gpointer stop_data)
+                                             const SlideShowData::StopFunc &stop_func)
 {
-	return real_slideshow_start(target_lw, imd, list, -1, nullptr, nullptr, stop_func, stop_data);
+	return real_slideshow_start(target_lw, imd, list, -1, nullptr, nullptr, stop_func);
 }
 
-SlideShowData *slideshow_start_from_collection(LayoutWindow *target_lw, ImageWindow *imd, CollectionData *cd,
-					       void (*stop_func)(SlideShowData *, gpointer), gpointer stop_data,
-					       CollectInfo *start_info)
+SlideShowData *slideshow_start_from_collection(LayoutWindow *target_lw, ImageWindow *imd,
+                                               CollectionData *cd, CollectInfo *start_info,
+                                               const SlideShowData::StopFunc &stop_func)
 {
-	return real_slideshow_start(target_lw, imd, nullptr, -1, cd, start_info, stop_func, stop_data);
+	return real_slideshow_start(target_lw, imd, nullptr, -1, cd, start_info, stop_func);
 }
 
 SlideShowData *slideshow_start(LayoutWindow *lw, gint start_point,
-			       void (*stop_func)(SlideShowData *, gpointer), gpointer stop_data)
+                               const SlideShowData::StopFunc &stop_func)
 {
-	return real_slideshow_start(lw, nullptr, nullptr, start_point, nullptr, nullptr, stop_func, stop_data);
+	return real_slideshow_start(lw, nullptr, nullptr, start_point, nullptr, nullptr, stop_func);
 }
 
 gboolean slideshow_paused(SlideShowData *ss)

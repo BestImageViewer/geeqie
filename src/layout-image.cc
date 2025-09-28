@@ -180,34 +180,29 @@ static void layout_image_slideshow_prev(LayoutWindow *lw)
 	if (lw->slideshow) slideshow_prev(lw->slideshow);
 }
 
-static void layout_image_slideshow_stop_func(SlideShowData *, gpointer data)
+static void layout_image_slideshow_stop_func(LayoutWindow *lw)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
 	lw->slideshow = nullptr;
 	layout_status_update_info(lw, nullptr);
 }
 
 void layout_image_slideshow_start(LayoutWindow *lw)
 {
-	CollectionData *cd;
-	CollectInfo *info;
-
 	if (!layout_valid(&lw)) return;
 	if (lw->slideshow) return;
 
-	cd = image_get_collection(lw->image, &info);
+	CollectInfo *info;
+	CollectionData *cd = image_get_collection(lw->image, &info);
 
 	if (cd && info)
 		{
-		lw->slideshow = slideshow_start_from_collection(lw, nullptr, cd,
-				layout_image_slideshow_stop_func, lw, info);
+		lw->slideshow = slideshow_start_from_collection(lw, nullptr, cd, info,
+		                                                [lw](SlideShowData *){ layout_image_slideshow_stop_func(lw); });
 		}
 	else
 		{
-		lw->slideshow = slideshow_start(lw,
-				layout_list_get_index(lw, layout_image_get_fd(lw)),
-				layout_image_slideshow_stop_func, lw);
+		lw->slideshow = slideshow_start(lw, layout_list_get_index(lw, layout_image_get_fd(lw)),
+		                                [lw](SlideShowData *){ layout_image_slideshow_stop_func(lw); });
 		}
 
 	layout_status_update_info(lw, nullptr);
@@ -225,7 +220,7 @@ void layout_image_slideshow_start_from_list(LayoutWindow *lw, GList *list)
 		}
 
 	lw->slideshow = slideshow_start_from_filelist(lw, nullptr, list,
-						       layout_image_slideshow_stop_func, lw);
+	                                              [lw](SlideShowData *){ layout_image_slideshow_stop_func(lw); });
 
 	layout_status_update_info(lw, nullptr);
 }

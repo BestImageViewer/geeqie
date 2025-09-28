@@ -795,10 +795,8 @@ static void view_slideshow_prev(ViewWindow *vw)
 	if (vw->ss) slideshow_prev(vw->ss);
 }
 
-static void view_slideshow_stop_func(SlideShowData *, gpointer data)
+static void view_slideshow_stop_func(ViewWindow *vw)
 {
-	auto vw = static_cast<ViewWindow *>(data);
-
 	vw->ss = nullptr;
 
 	FileData *fd = image_get_fd(view_window_active_image(vw));
@@ -812,26 +810,23 @@ static void view_slideshow_stop_func(SlideShowData *, gpointer data)
 
 static void view_slideshow_start(ViewWindow *vw)
 {
-	if (!vw->ss)
+	if (vw->ss) return;
+
+	if (vw->list)
 		{
-		CollectionData *cd;
-		CollectInfo *info;
+		vw->ss = slideshow_start_from_filelist(nullptr, view_window_active_image(vw), filelist_copy(vw->list),
+		                                       [vw](SlideShowData *){ view_slideshow_stop_func(vw); });
+		vw->list_pointer = nullptr;
+		return;
+		}
 
-		if (vw->list)
-			{
-			vw->ss = slideshow_start_from_filelist(nullptr, view_window_active_image(vw),
-								filelist_copy(vw->list),
-								view_slideshow_stop_func, vw);
-			vw->list_pointer = nullptr;
-			return;
-			}
+	CollectInfo *info;
+	CollectionData *cd = image_get_collection(view_window_active_image(vw), &info);
 
-		cd = image_get_collection(view_window_active_image(vw), &info);
-		if (cd && info)
-			{
-			vw->ss = slideshow_start_from_collection(nullptr, view_window_active_image(vw), cd,
-								 view_slideshow_stop_func, vw, info);
-			}
+	if (cd && info)
+		{
+		vw->ss = slideshow_start_from_collection(nullptr, view_window_active_image(vw), cd, info,
+		                                         [vw](SlideShowData *){ view_slideshow_stop_func(vw); });
 		}
 }
 
