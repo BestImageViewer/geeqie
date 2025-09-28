@@ -268,24 +268,18 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 				{
 				if (lw->slideshow)
 					{
-					n = g_list_length(lw->slideshow->list_done);
-					t = n + g_list_length(lw->slideshow->list);
-					if (n == 0) n = t;
+					slideshow_get_index_and_total(lw->slideshow, n, t);
 					}
 				else
 					{
-					t = layout_list_count(lw, nullptr);
 					n = layout_list_get_index(lw, image_get_fd(lw->image)) + 1;
+					t = layout_list_count(lw, nullptr);
 					}
 				}
-			else if (view_window_find_image(imd, n, t))
+			else if (!view_window_find_image(imd, n, t))
 				{
-				n++;
-				}
-			else
-				{
-				t = 1;
 				n = 1;
+				t = 1;
 				}
 
 			n = std::max(n, 1);

@@ -420,6 +420,14 @@ SlideShowData *slideshow_start(LayoutWindow *lw, gint start_point,
 	return real_slideshow_start(lw, nullptr, nullptr, start_point, nullptr, nullptr, stop_func);
 }
 
+void slideshow_get_index_and_total(SlideShowData *ss, gint &index, gint &total)
+{
+	index = g_list_length(ss->list_done);
+	total = index + g_list_length(ss->list);
+
+	if (index == 0) index = total;
+}
+
 gboolean slideshow_paused(SlideShowData *ss)
 {
 	if (!ss) return FALSE;

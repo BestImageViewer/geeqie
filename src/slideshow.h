@@ -82,6 +82,8 @@ SlideShowData *slideshow_start_from_collection(LayoutWindow *target_lw, ImageWin
 SlideShowData *slideshow_start(LayoutWindow *lw, gint start_point,
                                const SlideShowData::StopFunc &stop_func);
 
+void slideshow_get_index_and_total(SlideShowData *ss, gint &index, gint &total);
+
 gboolean slideshow_paused(SlideShowData *ss);
 void slideshow_pause_toggle(SlideShowData *ss);
 

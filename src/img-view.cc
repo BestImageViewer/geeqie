@@ -1072,17 +1072,11 @@ gboolean view_window_find_image(const ImageWindow *imd, gint &index, gint &total
 
 	if (vw->ss)
 		{
-		gint n = g_list_length(vw->ss->list_done);
-		gint t = n + g_list_length(vw->ss->list);
-
-		if (n == 0) n = t;
-
-		index = n - 1;
-		total = t;
+		slideshow_get_index_and_total(vw->ss, index, total);
 		}
 	else
 		{
-		index = g_list_position(vw->list, vw->list_pointer);
+		index = g_list_position(vw->list, vw->list_pointer) + 1;
 		total = g_list_length(vw->list);
 		}
 
