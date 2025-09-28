@@ -22,6 +22,7 @@
 #ifndef SLIDESHOW_H
 #define SLIDESHOW_H
 
+#include <deque>
 #include <functional>
 
 #include <glib.h>
@@ -51,8 +52,8 @@ struct SlideShowData
 	CollectionData *cd;
 	FileData *dir_fd;
 
-	GList *list;
-	GList *list_done;
+	std::deque<gint> list;
+	std::deque<gint> list_done;
 
 	FileData *slide_fd;
 
