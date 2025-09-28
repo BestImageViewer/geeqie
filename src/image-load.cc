@@ -528,32 +528,8 @@ static void image_loader_area_updated_cb(gpointer,
 	g_mutex_unlock(il->data_mutex);
 }
 
-static void image_loader_area_prepared_cb(gpointer, gpointer data)
+static void image_loader_area_prepared_cb(gpointer, gpointer)
 {
-	auto il = static_cast<ImageLoader *>(data);
-	GdkPixbuf *pb;
-	guchar *pix;
-	size_t h;
-	size_t rs;
-
-	/* a workaround for
-	   https://bugzilla.gnome.org/show_bug.cgi?id=547669
-	   https://bugzilla.gnome.org/show_bug.cgi?id=589334
-	*/
-	g_autofree gchar *format = il->backend->get_format_name();
-	if (strcmp(format, "svg") == 0 ||
-	    strcmp(format, "xpm") == 0)
-		{
-		return;
-		}
-
-	pb = il->backend->get_pixbuf();
-
-	h = gdk_pixbuf_get_height(pb);
-	rs = gdk_pixbuf_get_rowstride(pb);
-	pix = gdk_pixbuf_get_pixels(pb);
-
-	memset(pix, 0, rs * h); /*this should be faster than pixbuf_fill */
 }
 
 static void image_loader_size_cb(gpointer,
