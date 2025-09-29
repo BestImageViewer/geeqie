@@ -34,7 +34,7 @@ struct ImageLoaderZXSCR : public ImageLoaderBackend
 public:
 	~ImageLoaderZXSCR() override;
 
-	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) override;
 	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
 	GdkPixbuf *get_pixbuf() override;
 	gchar *get_format_name() override;
@@ -164,7 +164,7 @@ gboolean ImageLoaderZXSCR::write(const guchar *buf, gsize &chunk_size, gsize cou
 	return TRUE;
 }
 
-void ImageLoaderZXSCR::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
+void ImageLoaderZXSCR::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, gpointer data)
 {
 	this->area_updated_cb = area_updated_cb;
 	this->data = data;

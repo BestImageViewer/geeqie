@@ -126,11 +126,10 @@ convert_cmyk_to_rgb (struct jpeg_decompress_struct *cinfo,
 }
 
 
-void ImageLoaderJpeg::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data)
+void ImageLoaderJpeg::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data)
 {
 	this->area_updated_cb = area_updated_cb;
 	this->size_prepared_cb = size_prepared_cb;
-	this->area_prepared_cb = area_prepared_cb;
 	this->data = data;
 }
 
@@ -384,7 +383,6 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 		return FALSE;
 		}
 	if (stereo) g_object_set_data(G_OBJECT(pixbuf), "stereo_data", GINT_TO_POINTER(STEREO_PIXBUF_CROSS));
-	area_prepared_cb(nullptr, data);
 
 	rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 	dptr = gdk_pixbuf_get_pixels(pixbuf);

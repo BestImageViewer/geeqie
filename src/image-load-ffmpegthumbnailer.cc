@@ -42,7 +42,7 @@ struct ImageLoaderFT : public ImageLoaderBackend
 public:
 	~ImageLoaderFT() override;
 
-	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) override;
 	void set_size(int width, int height) override;
 	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
 	GdkPixbuf *get_pixbuf() override;
@@ -52,7 +52,6 @@ public:
 private:
 	AreaUpdatedCb area_updated_cb;
 	SizePreparedCb size_prepared_cb;
-	AreaPreparedCb area_prepared_cb;
 	gpointer data;
 
 	video_thumbnailer *vt;
@@ -90,11 +89,10 @@ gchar **ImageLoaderFT::get_format_mime_types()
 	return g_strdupv(const_cast<gchar **>(mime));
 }
 
-void ImageLoaderFT::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data)
+void ImageLoaderFT::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data)
 {
 	this->area_updated_cb = area_updated_cb;
 	this->size_prepared_cb = size_prepared_cb;
-	this->area_prepared_cb = area_prepared_cb;
 	this->data = data;
 
 	vt = video_thumbnailer_create();
@@ -163,11 +161,6 @@ gboolean ImageLoaderFT::write(const guchar *, gsize &chunk_size, gsize count, GE
 		return FALSE;
 		}
 
-	/** See comment in image_loader_area_prepared_cb
-	 * Geeqie uses area_prepared signal to fill pixbuf with background color.
-	 * We can't do it here as pixbuf already contains the data
-	 * area_prepared_cb(data);
-	 */
 	area_updated_cb(nullptr, 0, 0, gdk_pixbuf_get_width(pixbuf), gdk_pixbuf_get_height(pixbuf), data);
 
 	chunk_size = count;

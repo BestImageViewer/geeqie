@@ -36,7 +36,7 @@ struct ImageLoaderGdk : public ImageLoaderBackend
 public:
 	~ImageLoaderGdk() override;
 
-	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) override;
 	void set_size(int width, int height) override;
 	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
 	GdkPixbuf *get_pixbuf() override;
@@ -66,7 +66,7 @@ gchar **ImageLoaderGdk::get_format_mime_types()
 	return gdk_pixbuf_format_get_mime_types(gdk_pixbuf_loader_get_format(loader));
 }
 
-void ImageLoaderGdk::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data)
+void ImageLoaderGdk::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
 
@@ -81,9 +81,8 @@ void ImageLoaderGdk::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_pre
 		loader = gdk_pixbuf_loader_new();
 		}
 
-	g_signal_connect(G_OBJECT(loader), "area_updated", G_CALLBACK(area_updated_cb), data);
-	g_signal_connect(G_OBJECT(loader), "size_prepared", G_CALLBACK(size_prepared_cb), data);
-	g_signal_connect(G_OBJECT(loader), "area_prepared", G_CALLBACK(area_prepared_cb), data);
+	g_signal_connect(G_OBJECT(loader), "area-updated", G_CALLBACK(area_updated_cb), data);
+	g_signal_connect(G_OBJECT(loader), "size-prepared", G_CALLBACK(size_prepared_cb), data);
 }
 
 void ImageLoaderGdk::set_size(int width, int height)

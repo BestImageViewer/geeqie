@@ -47,7 +47,7 @@ struct ImageLoaderTiff : public ImageLoaderBackend
 public:
 	~ImageLoaderTiff() override;
 
-	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) override;
 	void set_size(int width, int height) override;
 	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
 	GdkPixbuf *get_pixbuf() override;
@@ -60,7 +60,6 @@ public:
 private:
 	AreaUpdatedCb area_updated_cb;
 	SizePreparedCb size_prepared_cb;
-	AreaPreparedCb area_prepared_cb;
 	gpointer data;
 
 	GdkPixbuf *pixbuf;
@@ -254,8 +253,6 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 		return FALSE;
 		}
 
-	area_prepared_cb(nullptr, data);
-
 	if (TIFFGetField(tiff, TIFFTAG_ROWSPERSTRIP, &rowsperstrip))
 		{
 		/* read by strip */
@@ -343,11 +340,10 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 }
 
 
-void ImageLoaderTiff::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data)
+void ImageLoaderTiff::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data)
 {
 	this->area_updated_cb = area_updated_cb;
 	this->size_prepared_cb = size_prepared_cb;
-	this->area_prepared_cb = area_prepared_cb;
 	this->data = data;
 }
 

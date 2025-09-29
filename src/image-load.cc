@@ -528,10 +528,6 @@ static void image_loader_area_updated_cb(gpointer,
 	g_mutex_unlock(il->data_mutex);
 }
 
-static void image_loader_area_prepared_cb(gpointer, gpointer)
-{
-}
-
 static void image_loader_size_cb(gpointer,
 				 gint width, gint height, gpointer data)
 {
@@ -784,7 +780,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			il->backend = get_image_loader_backend_default();
 		}
 
-	il->backend->init(image_loader_area_updated_cb, image_loader_size_cb, image_loader_area_prepared_cb, il);
+	il->backend->init(image_loader_area_updated_cb, image_loader_size_cb, il);
 	il->backend->set_page_num(il->fd->page_num);
 
 	il->fd->format_name = il->backend->get_format_name();

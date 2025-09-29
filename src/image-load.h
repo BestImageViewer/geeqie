@@ -39,9 +39,8 @@ public:
 
 	using AreaUpdatedCb = void (*)(gpointer, guint, guint, guint, guint, gpointer);
 	using SizePreparedCb = void (*)(gpointer, gint, gint, gpointer);
-	using AreaPreparedCb = void (*)(gpointer, gpointer);
 
-	virtual void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) = 0;
+	virtual void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) = 0;
 	virtual void set_size(int /*width*/, int /*height*/) {};
 	virtual gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) = 0;
 	virtual GdkPixbuf *get_pixbuf() = 0;

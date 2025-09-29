@@ -34,7 +34,7 @@ struct ImageLoaderJpeg : public ImageLoaderBackend
 public:
 	~ImageLoaderJpeg() override;
 
-	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) override;
 	void set_size(int width, int height) override;
 	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
 	GdkPixbuf *get_pixbuf() override;
@@ -45,7 +45,6 @@ public:
 private:
 	AreaUpdatedCb area_updated_cb;
 	SizePreparedCb size_prepared_cb;
-	AreaPreparedCb area_prepared_cb;
 
 	gpointer data;
 

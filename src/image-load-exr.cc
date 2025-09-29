@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "image-load.h"
-#include "ui-fileops.h"
 
 namespace
 {
@@ -35,7 +34,7 @@ struct ImageLoaderEXR : public ImageLoaderBackend
 public:
 	~ImageLoaderEXR() override;
 
-	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, AreaPreparedCb area_prepared_cb, gpointer data) override;
+	void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) override;
 	gboolean write(const guchar *buf, gsize &chunk_size, gsize count, GError **error) override;
 	GdkPixbuf *get_pixbuf() override;
 	gchar *get_format_name() override;
@@ -159,7 +158,7 @@ gboolean ImageLoaderEXR::write(const guchar *buffer, gsize &chunk_size, gsize co
 		}
 }
 
-void ImageLoaderEXR::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, AreaPreparedCb, gpointer data)
+void ImageLoaderEXR::init(AreaUpdatedCb area_updated_cb, SizePreparedCb, gpointer data)
 {
 	this->area_updated_cb = area_updated_cb;
 	this->data = data;
