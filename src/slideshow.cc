@@ -341,8 +341,7 @@ SlideShowData *slideshow_start_from_collection(LayoutWindow *target_lw, ImageWin
 	                            stop_func);
 }
 
-SlideShowData *slideshow_start(LayoutWindow *lw, gint start_point,
-                               const SlideShowData::StopFunc &stop_func)
+SlideShowData *slideshow_start(LayoutWindow *lw, const SlideShowData::StopFunc &stop_func)
 {
 	if (layout_list_count(lw, nullptr) < 1) return nullptr;
 
@@ -354,9 +353,13 @@ SlideShowData *slideshow_start(LayoutWindow *lw, gint start_point,
 	if (ss->slide_count < 2)
 		{
 		ss->slide_count = layout_list_count(ss->lw, nullptr);
-		if (!options->slideshow.random && start_point >= 0 && static_cast<guint>(start_point) < ss->slide_count)
+		if (!options->slideshow.random)
 			{
-			start_index = start_point;
+			const gint start_point = layout_list_get_index(lw, layout_image_get_fd(lw));
+			if (start_point >= 0 && static_cast<guint>(start_point) < ss->slide_count)
+				{
+				start_index = start_point;
+				}
 			}
 		}
 	else

@@ -191,18 +191,18 @@ void layout_image_slideshow_start(LayoutWindow *lw)
 	if (!layout_valid(&lw)) return;
 	if (lw->slideshow) return;
 
+	const auto slideshow_stop_func = [lw](SlideShowData *){ layout_image_slideshow_stop_func(lw); };
+
 	CollectInfo *info;
 	CollectionData *cd = image_get_collection(lw->image, &info);
 
 	if (cd && info)
 		{
-		lw->slideshow = slideshow_start_from_collection(lw, nullptr, cd, info,
-		                                                [lw](SlideShowData *){ layout_image_slideshow_stop_func(lw); });
+		lw->slideshow = slideshow_start_from_collection(lw, nullptr, cd, info, slideshow_stop_func);
 		}
 	else
 		{
-		lw->slideshow = slideshow_start(lw, layout_list_get_index(lw, layout_image_get_fd(lw)),
-		                                [lw](SlideShowData *){ layout_image_slideshow_stop_func(lw); });
+		lw->slideshow = slideshow_start(lw, slideshow_stop_func);
 		}
 
 	layout_status_update_info(lw, nullptr);

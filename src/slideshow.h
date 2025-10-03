@@ -80,8 +80,7 @@ SlideShowData *slideshow_start_from_filelist(LayoutWindow *target_lw, ImageWindo
 SlideShowData *slideshow_start_from_collection(LayoutWindow *target_lw, ImageWindow *imd,
                                                CollectionData *cd, CollectInfo *start_info,
                                                const SlideShowData::StopFunc &stop_func);
-SlideShowData *slideshow_start(LayoutWindow *lw, gint start_point,
-                               const SlideShowData::StopFunc &stop_func);
+SlideShowData *slideshow_start(LayoutWindow *lw, const SlideShowData::StopFunc &stop_func);
 
 void slideshow_get_index_and_total(SlideShowData *ss, gint &index, gint &total);
 
