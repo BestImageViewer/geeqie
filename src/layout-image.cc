@@ -172,12 +172,12 @@ gboolean layout_image_full_screen_active(LayoutWindow *lw)
 
 static void layout_image_slideshow_next(LayoutWindow *lw)
 {
-	if (lw->slideshow) slideshow_next(lw->slideshow);
+	if (lw->slideshow) lw->slideshow->next();
 }
 
 static void layout_image_slideshow_prev(LayoutWindow *lw)
 {
-	if (lw->slideshow) slideshow_prev(lw->slideshow);
+	if (lw->slideshow) lw->slideshow->prev();
 }
 
 static void layout_image_slideshow_stop_func(LayoutWindow *lw)
@@ -229,10 +229,7 @@ void layout_image_slideshow_stop(LayoutWindow *lw)
 {
 	if (!layout_valid(&lw)) return;
 
-	if (!lw->slideshow) return;
-
-	slideshow_free(lw->slideshow);
-	/* the stop_func sets lw->slideshow to NULL for us */
+	delete lw->slideshow; /* the stop_func sets lw->slideshow to nullptr for us */
 }
 
 void layout_image_slideshow_toggle(LayoutWindow *lw)
@@ -260,7 +257,7 @@ void layout_image_slideshow_pause_toggle(LayoutWindow *lw)
 {
 	if (!layout_valid(&lw)) return;
 
-	slideshow_pause_toggle(lw->slideshow);
+	if (lw->slideshow) lw->slideshow->pause_toggle();
 
 	layout_status_update_info(lw, nullptr);
 }
@@ -269,7 +266,7 @@ gboolean layout_image_slideshow_paused(LayoutWindow *lw)
 {
 	if (!layout_valid(&lw)) return FALSE;
 
-	return (slideshow_paused(lw->slideshow));
+	return lw->slideshow->is_paused();
 }
 
 static gboolean layout_image_slideshow_continue_check(LayoutWindow *lw)

@@ -46,7 +46,12 @@ struct SlideShow
 {
 	using StopFunc = std::function<void(SlideShow *)>;
 
+	~SlideShow();
+
 	bool should_continue() const;
+
+	void next();
+	void prev();
 
 	static SlideShow *start_from_filelist(LayoutWindow *target_lw, ImageWindow *imd,
 	                                      GList *list, const StopFunc &stop_func);
@@ -54,6 +59,11 @@ struct SlideShow
 	                                        CollectionData *cd, CollectInfo *start_info,
 	                                        const StopFunc &stop_func);
 	static SlideShow *start(LayoutWindow *lw, const StopFunc &stop_func);
+
+	void get_index_and_total(gint &index, gint &total) const;
+
+	gboolean is_paused() const;
+	void pause_toggle();
 
 	LayoutWindow *lw;        /**< use this window to display the slideshow */
 	ImageWindow *imd;        /**< use this window only if lw is not available,
@@ -77,16 +87,6 @@ struct SlideShow
 
 	gboolean paused;
 };
-
-void slideshow_free(SlideShow *ss);
-
-void slideshow_next(SlideShow *ss);
-void slideshow_prev(SlideShow *ss);
-
-void slideshow_get_index_and_total(SlideShow *ss, gint &index, gint &total);
-
-gboolean slideshow_paused(SlideShow *ss);
-void slideshow_pause_toggle(SlideShow *ss);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

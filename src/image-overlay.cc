@@ -268,7 +268,7 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 				{
 				if (lw->slideshow)
 					{
-					slideshow_get_index_and_total(lw->slideshow, n, t);
+					lw->slideshow->get_index_and_total(n, t);
 					}
 				else
 					{

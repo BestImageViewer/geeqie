@@ -48,21 +48,17 @@ inline FileData *slideshow_get_fd(const SlideShow *ss)
 
 } // namespace
 
-void slideshow_free(SlideShow *ss)
+SlideShow::~SlideShow()
 {
-	if (!ss) return;
+	g_clear_handle_id(&timeout_id, g_source_remove);
 
-	g_clear_handle_id(&ss->timeout_id, g_source_remove);
+	if (stop_func) stop_func(this);
 
-	if (ss->stop_func) ss->stop_func(ss);
+	if (filelist) file_data_list_free(filelist);
+	if (cd) collection_unref(cd);
+	file_data_unref(dir_fd);
 
-	if (ss->filelist) file_data_list_free(ss->filelist);
-	if (ss->cd) collection_unref(ss->cd);
-	file_data_unref(ss->dir_fd);
-
-	file_data_unref(ss->slide_fd);
-
-	delete ss;
+	file_data_unref(slide_fd);
 }
 
 static void slideshow_list_init(SlideShow *ss, gint start_index)
@@ -228,8 +224,7 @@ static gboolean slideshow_loop_cb(gpointer data)
 		return G_SOURCE_CONTINUE;
 		}
 
-	ss->timeout_id = 0;
-	slideshow_free(ss);
+	delete ss;
 	return G_SOURCE_REMOVE;
 }
 
@@ -244,25 +239,23 @@ static void slideshow_timer_reset(SlideShow *ss)
 
 static void slideshow_move(SlideShow *ss, gboolean forward)
 {
-	if (!ss) return;
-
 	if (!slideshow_step(ss, forward))
 		{
-		slideshow_free(ss);
+		delete ss;
 		return;
 		}
 
 	slideshow_timer_reset(ss);
 }
 
-void slideshow_next(SlideShow *ss)
+void SlideShow::next()
 {
-	slideshow_move(ss, TRUE);
+	slideshow_move(this, TRUE);
 }
 
-void slideshow_prev(SlideShow *ss)
+void SlideShow::prev()
 {
-	slideshow_move(ss, FALSE);
+	slideshow_move(this, FALSE);
 }
 
 static SlideShow *slideshow_new(LayoutWindow *target_lw, ImageWindow *imd)
@@ -283,7 +276,7 @@ static SlideShow *slideshow_start_real(SlideShow *ss, gint start_index,
 
 	if (!slideshow_step(ss, TRUE))
 		{
-		slideshow_free(ss);
+		delete ss;
 		return nullptr;
 		}
 
@@ -352,23 +345,19 @@ SlideShow *SlideShow::start(LayoutWindow *lw, const StopFunc &stop_func)
 	return slideshow_start_real(ss, start_index, stop_func);
 }
 
-void slideshow_get_index_and_total(SlideShow *ss, gint &index, gint &total)
+void SlideShow::get_index_and_total(gint &index, gint &total) const
 {
-	index = ss->list_done.empty() ? ss->list.size() : ss->list_done.size();
-	total = ss->list_done.size() + ss->list.size();
+	index = list_done.empty() ? list.size() : list_done.size();
+	total = list_done.size() + list.size();
 }
 
-gboolean slideshow_paused(SlideShow *ss)
+gboolean SlideShow::is_paused() const
 {
-	if (!ss) return FALSE;
-
-	return ss->paused;
+	return paused;
 }
 
-void slideshow_pause_toggle(SlideShow *ss)
+void SlideShow::pause_toggle()
 {
-	if (!ss) return;
-
-	ss->paused = !ss->paused;
+	paused = !paused;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
