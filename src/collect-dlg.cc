@@ -80,13 +80,12 @@ static void collection_append_cb(GtkFileChooser *chooser, gint response_id, gpoi
 static void collection_dialog_new(CollectionData *cd, const gchar *title, GtkFileChooserAction action, GCallback response_callback)
 {
 	if (!cd) return;
-	collection_ref(cd);
 
 	FileChooserDialogData fcdd{};
 
 	fcdd.action = action;
 	fcdd.accept_text = _("Save");
-	fcdd.data = cd;
+	fcdd.data = collection_ref(cd);
 	fcdd.filename = get_collections_dir();
 	fcdd.filter = GQ_COLLECTION_EXT;
 	fcdd.filter_description = _("Collection files");

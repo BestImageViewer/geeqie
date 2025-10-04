@@ -297,10 +297,8 @@ SlideShow *SlideShow::start_from_collection(LayoutWindow *target_lw, ImageWindow
 	if (!cd) return nullptr;
 
 	auto *ss = new SlideShow(target_lw, imd);
-	ss->cd = cd;
+	ss->cd = collection_ref(cd);
 	ss->slide_count = g_list_length(ss->cd->list);
-
-	collection_ref(ss->cd);
 
 	return slideshow_start_real(ss, (!options->slideshow.random && start_info) ?
 	                                g_list_index(ss->cd->list, start_info) : -1,

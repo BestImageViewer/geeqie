@@ -85,7 +85,7 @@ struct CollectionData
 CollectionData *collection_new(const gchar *path);
 void collection_free(CollectionData *cd);
 
-void collection_ref(CollectionData *cd);
+CollectionData *collection_ref(CollectionData *cd);
 void collection_unref(CollectionData *cd);
 
 void collection_path_changed(CollectionData *cd);

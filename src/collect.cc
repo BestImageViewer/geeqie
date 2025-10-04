@@ -497,11 +497,12 @@ void collection_free(CollectionData *cd)
 	g_free(cd);
 }
 
-void collection_ref(CollectionData *cd)
+CollectionData *collection_ref(CollectionData *cd)
 {
 	cd->ref++;
 
 	DEBUG_1("collection \"%s\" ref count = %d", cd->name, cd->ref);
+	return cd;
 }
 
 void collection_unref(CollectionData *cd)
