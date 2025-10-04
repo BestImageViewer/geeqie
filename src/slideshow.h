@@ -46,6 +46,8 @@ struct SlideShow
 {
 	using StopFunc = std::function<void(SlideShow *)>;
 
+	bool should_continue() const;
+
 	static SlideShow *start_from_filelist(LayoutWindow *target_lw, ImageWindow *imd,
 	                                      GList *list, const StopFunc &stop_func);
 	static SlideShow *start_from_collection(LayoutWindow *target_lw, ImageWindow *imd,
@@ -77,8 +79,6 @@ struct SlideShow
 };
 
 void slideshow_free(SlideShow *ss);
-
-gboolean slideshow_should_continue(SlideShow *ss);
 
 void slideshow_next(SlideShow *ss);
 void slideshow_prev(SlideShow *ss);

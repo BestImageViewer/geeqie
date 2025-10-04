@@ -41,7 +41,7 @@ void move_first_list_item(std::deque<gint> &src, std::deque<gint> &dst)
 	src.pop_front();
 }
 
-inline FileData *slideshow_get_fd(SlideShow *ss)
+inline FileData *slideshow_get_fd(const SlideShow *ss)
 {
 	return ss->lw ? layout_image_get_fd(ss->lw) : image_get_fd(ss->imd);
 }
@@ -100,41 +100,23 @@ static void slideshow_list_init(SlideShow *ss, gint start_index)
 		}
 }
 
-gboolean slideshow_should_continue(SlideShow *ss)
+bool SlideShow::should_continue() const
 {
-	FileData *dir_fd;
+	if (slide_fd != slideshow_get_fd(this)) return false;
 
-	if (!ss) return FALSE;
+	if (filelist) return true;
 
-	FileData *imd_fd = slideshow_get_fd(ss);
+	if (cd) return g_list_length(cd->list) == slide_count;
 
-	if ( ((imd_fd == nullptr) != (ss->slide_fd == nullptr)) ||
-	    (imd_fd && ss->slide_fd && imd_fd != ss->slide_fd) ) return FALSE;
+	if (!dir_fd || !lw->dir_fd || dir_fd != lw->dir_fd) return false;
 
-	if (ss->filelist) return TRUE;
-
-	if (ss->cd)
-		{
-		if (g_list_length(ss->cd->list) == ss->slide_count)
-			return TRUE;
-
-		return FALSE;
-		}
-
-	dir_fd = ss->lw->dir_fd;
-
-	if (dir_fd && ss->dir_fd && dir_fd == ss->dir_fd)
-		{
-		if (ss->from_selection && ss->slide_count == layout_selection_count(ss->lw, nullptr)) return TRUE;
-		if (!ss->from_selection && ss->slide_count == layout_list_count(ss->lw, nullptr)) return TRUE;
-		}
-
-	return FALSE;
+	return (from_selection && slide_count == layout_selection_count(lw, nullptr)) ||
+	       (!from_selection && slide_count == layout_list_count(lw, nullptr));
 }
 
 static gboolean slideshow_step(SlideShow *ss, gboolean forward)
 {
-	if (!slideshow_should_continue(ss)) return FALSE;
+	if (!ss->should_continue()) return FALSE;
 
 	if (forward)
 		{
