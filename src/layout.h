@@ -37,7 +37,7 @@ enum FileViewType : guint;
 struct AnimationData;
 struct FullScreenData;
 struct ImageWindow;
-struct SlideShowData;
+struct SlideShow;
 struct ViewDir;
 struct ViewFile;
 
@@ -214,7 +214,7 @@ struct LayoutWindow
 
 	/* slide show */
 
-	SlideShowData *slideshow;
+	SlideShow *slideshow;
 
 	/* full screen */
 

@@ -67,7 +67,7 @@ struct ViewWindow
 	GtkWidget *window;
 	ImageWindow *imd;
 	FullScreenData *fs;
-	SlideShowData *ss;
+	SlideShow *ss;
 
 	GList *list;
 	GList *list_pointer;
@@ -814,8 +814,8 @@ static void view_slideshow_start(ViewWindow *vw)
 
 	if (vw->list)
 		{
-		vw->ss = slideshow_start_from_filelist(nullptr, view_window_active_image(vw), filelist_copy(vw->list),
-		                                       [vw](SlideShowData *){ view_slideshow_stop_func(vw); });
+		vw->ss = SlideShow::start_from_filelist(nullptr, view_window_active_image(vw), filelist_copy(vw->list),
+		                                        [vw](SlideShow *){ view_slideshow_stop_func(vw); });
 		vw->list_pointer = nullptr;
 		return;
 		}
@@ -825,8 +825,8 @@ static void view_slideshow_start(ViewWindow *vw)
 
 	if (cd && info)
 		{
-		vw->ss = slideshow_start_from_collection(nullptr, view_window_active_image(vw), cd, info,
-		                                         [vw](SlideShowData *){ view_slideshow_stop_func(vw); });
+		vw->ss = SlideShow::start_from_collection(nullptr, view_window_active_image(vw), cd, info,
+		                                          [vw](SlideShow *){ view_slideshow_stop_func(vw); });
 		}
 }
 

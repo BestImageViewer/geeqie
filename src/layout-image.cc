@@ -191,18 +191,18 @@ void layout_image_slideshow_start(LayoutWindow *lw)
 	if (!layout_valid(&lw)) return;
 	if (lw->slideshow) return;
 
-	const auto slideshow_stop_func = [lw](SlideShowData *){ layout_image_slideshow_stop_func(lw); };
+	const auto slideshow_stop_func = [lw](SlideShow *){ layout_image_slideshow_stop_func(lw); };
 
 	CollectInfo *info;
 	CollectionData *cd = image_get_collection(lw->image, &info);
 
 	if (cd && info)
 		{
-		lw->slideshow = slideshow_start_from_collection(lw, nullptr, cd, info, slideshow_stop_func);
+		lw->slideshow = SlideShow::start_from_collection(lw, nullptr, cd, info, slideshow_stop_func);
 		}
 	else
 		{
-		lw->slideshow = slideshow_start(lw, slideshow_stop_func);
+		lw->slideshow = SlideShow::start(lw, slideshow_stop_func);
 		}
 
 	layout_status_update_info(lw, nullptr);
@@ -219,8 +219,8 @@ void layout_image_slideshow_start_from_list(LayoutWindow *lw, GList *list)
 		return;
 		}
 
-	lw->slideshow = slideshow_start_from_filelist(lw, nullptr, list,
-	                                              [lw](SlideShowData *){ layout_image_slideshow_stop_func(lw); });
+	lw->slideshow = SlideShow::start_from_filelist(lw, nullptr, list,
+	                                               [lw](SlideShow *){ layout_image_slideshow_stop_func(lw); });
 
 	layout_status_update_info(lw, nullptr);
 }
