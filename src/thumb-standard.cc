@@ -282,7 +282,7 @@ static void thumb_loader_std_save(ThumbLoaderStd *tl, GdkPixbuf *pixbuf)
 		}
 	else
 		{
-		g_object_ref(G_OBJECT(pixbuf));
+		g_object_ref(pixbuf);
 		fail = FALSE;
 		}
 
@@ -459,8 +459,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 					}
 				else
 					{
-					pixbuf_thumb = pixbuf;
-					g_object_ref(G_OBJECT(pixbuf_thumb));
+					pixbuf_thumb = g_object_ref(pixbuf);
 					}
 
 				/* do not save the thumbnail if the source file has changed meanwhile -
@@ -491,8 +490,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 
 	if (sw <= tl->requested_width && sh <= tl->requested_height)
 		{
-		result = pixbuf;
-		g_object_ref(result);
+		result = g_object_ref(pixbuf);
 		}
 	else
 		{
@@ -514,8 +512,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 			}
 		else
 			{
-			result = pixbuf;
-			g_object_ref(result);
+			result = g_object_ref(pixbuf);
 			}
 		}
 
@@ -761,8 +758,7 @@ GdkPixbuf *thumb_loader_std_get_pixbuf(ThumbLoaderStd *tl)
 
 	if (tl && tl->fd && tl->fd->thumb_pixbuf)
 		{
-		pixbuf = tl->fd->thumb_pixbuf;
-		g_object_ref(pixbuf);
+		pixbuf = g_object_ref(tl->fd->thumb_pixbuf);
 		}
 	else
 		{

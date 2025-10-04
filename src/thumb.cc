@@ -200,9 +200,7 @@ static void thumb_loader_done_cb(ImageLoader *il, gpointer data)
 		if (tl->fd)
 			{
 			if (tl->fd->thumb_pixbuf) g_object_unref(tl->fd->thumb_pixbuf);
-			tl->fd->thumb_pixbuf = pixbuf;
-
-			g_object_ref(tl->fd->thumb_pixbuf);
+			tl->fd->thumb_pixbuf = g_object_ref(pixbuf);
 			}
 		save = image_loader_get_shrunk(il);
 		}
@@ -408,8 +406,7 @@ GdkPixbuf *thumb_loader_get_pixbuf(ThumbLoader *tl)
 
 	if (tl && tl->fd && tl->fd->thumb_pixbuf)
 		{
-		pixbuf = tl->fd->thumb_pixbuf;
-		g_object_ref(pixbuf);
+		pixbuf = g_object_ref(tl->fd->thumb_pixbuf);
 		}
 	else
 		{

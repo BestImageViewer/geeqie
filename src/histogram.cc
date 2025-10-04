@@ -236,10 +236,9 @@ gboolean histmap_start_idle(FileData *fd)
 	if (fd->histmap || !fd->pixbuf) return FALSE;
 
 	fd->histmap = histmap_new();
-	fd->histmap->pixbuf = fd->pixbuf;
-	g_object_ref(fd->histmap->pixbuf);
-
+	fd->histmap->pixbuf = g_object_ref(fd->pixbuf);
 	fd->histmap->idle_id = g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, histmap_idle_cb, fd, nullptr);
+
 	return TRUE;
 }
 

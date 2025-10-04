@@ -692,8 +692,7 @@ gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint 
 
 	auto od = g_new0(OverlayData, 1);
 	od->id = id;
-	od->pixbuf = pixbuf;
-	g_object_ref(G_OBJECT(od->pixbuf));
+	od->pixbuf = g_object_ref(pixbuf);
 	od->x = x;
 	od->y = y;
 	od->flags = flags;
@@ -761,9 +760,8 @@ void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint
 
 	if (pixbuf)
 		{
-		g_object_ref(G_OBJECT(pixbuf));
-		g_object_unref(G_OBJECT(od->pixbuf));
-		od->pixbuf = pixbuf;
+		g_object_unref(od->pixbuf);
+		od->pixbuf = g_object_ref(pixbuf);
 		}
 	else
 		{

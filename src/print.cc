@@ -93,8 +93,7 @@ void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
 
 	pixbuf = image_loader_get_pixbuf(il);
 
-	g_object_ref(pixbuf);
-	pw->print_pixbuf_queue = g_list_append(pw->print_pixbuf_queue, pixbuf);
+	pw->print_pixbuf_queue = g_list_append(pw->print_pixbuf_queue, g_object_ref(pixbuf));
 
 	image_loader_free(pw->job_loader);
 	pw->job_loader = nullptr;

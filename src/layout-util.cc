@@ -3083,8 +3083,7 @@ GtkWidget *layout_actions_menu_bar(LayoutWindow *lw)
 {
 	if (lw->menu_bar) return lw->menu_bar;
 	lw->menu_bar = gq_gtk_ui_manager_get_widget(lw->ui_manager, "/MainMenu");
-	g_object_ref(lw->menu_bar);
-	return lw->menu_bar;
+	return g_object_ref(lw->menu_bar);
 }
 
 GtkWidget *layout_actions_toolbar(LayoutWindow *lw, ToolbarType type)
@@ -3094,8 +3093,7 @@ GtkWidget *layout_actions_toolbar(LayoutWindow *lw, ToolbarType type)
 	lw->toolbar[type] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
 	gtk_widget_show(lw->toolbar[type]);
-	g_object_ref(lw->toolbar[type]);
-	return lw->toolbar[type];
+	return g_object_ref(lw->toolbar[type]);
 }
 
 GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
@@ -3118,8 +3116,7 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 
 	gq_gtk_box_pack_start(GTK_BOX(lw->menu_tool_bar), toolbar, FALSE, FALSE, 0);
 
-	g_object_ref(lw->menu_tool_bar);
-	return lw->menu_tool_bar;
+	return g_object_ref(lw->menu_tool_bar);
 }
 
 static void toolbar_clear_cb(GtkWidget *widget, gpointer)
@@ -3961,8 +3958,7 @@ GtkWidget *layout_bars_prepare(LayoutWindow *lw, GtkWidget *image)
 
 	gtk_widget_show(image);
 
-	g_object_ref(lw->utility_box);
-	return lw->utility_box;
+	return g_object_ref(lw->utility_box);
 }
 
 void layout_bars_close(LayoutWindow *lw)

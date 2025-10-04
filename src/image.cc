@@ -869,7 +869,7 @@ static void image_load_done_cb(ImageLoader *, gpointer data)
 
 	if (options->image.enable_read_ahead && imd->image_fd && !imd->image_fd->pixbuf && image_loader_get_pixbuf(imd->il))
 		{
-		imd->image_fd->pixbuf = static_cast<GdkPixbuf*>(g_object_ref(image_loader_get_pixbuf(imd->il)));
+		imd->image_fd->pixbuf = g_object_ref(image_loader_get_pixbuf(imd->il));
 		image_cache_set(imd, imd->image_fd);
 		}
 	/* call the callback triggered by image_state after fd->pixbuf is set */
@@ -2093,11 +2093,11 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		{
 		imd->frame = gtk_frame_new(nullptr);
 		DEBUG_NAME(imd->frame);
-        	g_object_ref(imd->pr);
+		g_object_ref(imd->pr);
 		if (imd->has_frame != -1) gtk_container_remove(GTK_CONTAINER(imd->widget), imd->pr);
 		gq_gtk_container_add(imd->frame, imd->pr);
 
-        	g_object_unref(imd->pr);
+		g_object_unref(imd->pr);
 		gtk_widget_set_can_focus(imd->frame, TRUE);
 		gtk_widget_set_app_paintable(imd->frame, TRUE);
 
@@ -2106,8 +2106,8 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		g_signal_connect(G_OBJECT(imd->frame), "focus_in_event",
 				 G_CALLBACK(image_focus_in_cb), imd);
 
-        	gq_gtk_box_pack_start(GTK_BOX(imd->widget), imd->frame, TRUE, TRUE, 0);
-        	gtk_widget_show(imd->frame);
+		gq_gtk_box_pack_start(GTK_BOX(imd->widget), imd->frame, TRUE, TRUE, 0);
+		gtk_widget_show(imd->frame);
 		}
 	else
 		{
@@ -2118,7 +2118,7 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 			gtk_container_remove(GTK_CONTAINER(imd->widget), imd->frame);
 			imd->frame = nullptr;
 			}
-        	gq_gtk_box_pack_start(GTK_BOX(imd->widget), imd->pr, TRUE, TRUE, 0);
+		gq_gtk_box_pack_start(GTK_BOX(imd->widget), imd->pr, TRUE, TRUE, 0);
 
 		g_object_unref(imd->pr);
 		}
