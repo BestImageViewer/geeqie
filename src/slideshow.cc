@@ -258,15 +258,6 @@ void SlideShow::prev()
 	slideshow_move(this, FALSE);
 }
 
-static SlideShow *slideshow_new(LayoutWindow *target_lw, ImageWindow *imd)
-{
-	auto *ss = new SlideShow();
-	ss->lw = target_lw;
-	ss->imd = imd; /** @FIXME ss->imd is used only for img-view.cc and can be dropped with it */
-
-	return ss;
-}
-
 static SlideShow *slideshow_start_real(SlideShow *ss, gint start_index,
                                        const SlideShow::StopFunc &stop_func)
 {
@@ -292,7 +283,7 @@ SlideShow *SlideShow::start_from_filelist(LayoutWindow *target_lw, ImageWindow *
 {
 	if (!list) return nullptr;
 
-	SlideShow *ss = slideshow_new(target_lw, imd);
+	auto *ss = new SlideShow(target_lw, imd);
 	ss->filelist = list;
 	ss->slide_count = g_list_length(ss->filelist);
 
@@ -305,7 +296,7 @@ SlideShow *SlideShow::start_from_collection(LayoutWindow *target_lw, ImageWindow
 {
 	if (!cd) return nullptr;
 
-	SlideShow *ss = slideshow_new(target_lw, imd);
+	auto *ss = new SlideShow(target_lw, imd);
 	ss->cd = cd;
 	ss->slide_count = g_list_length(ss->cd->list);
 
@@ -320,12 +311,18 @@ SlideShow *SlideShow::start(LayoutWindow *lw, const StopFunc &stop_func)
 {
 	if (layout_list_count(lw, nullptr) < 1) return nullptr;
 
-	SlideShow *ss = slideshow_new(lw, nullptr);
+	auto *ss = new SlideShow(lw, nullptr);
 	ss->dir_fd = file_data_ref(ss->lw->dir_fd);
-	ss->slide_count = layout_selection_count(ss->lw, nullptr);
+
+	const guint selection_count = layout_selection_count(ss->lw, nullptr);
+	ss->from_selection = (selection_count >= 2);
 
 	gint start_index = -1;
-	if (ss->slide_count < 2)
+	if (ss->from_selection)
+		{
+		ss->slide_count = selection_count;
+		}
+	else
 		{
 		ss->slide_count = layout_list_count(ss->lw, nullptr);
 		if (!options->slideshow.random)
@@ -336,10 +333,6 @@ SlideShow *SlideShow::start(LayoutWindow *lw, const StopFunc &stop_func)
 				start_index = start_point;
 				}
 			}
-		}
-	else
-		{
-		ss->from_selection = TRUE;
 		}
 
 	return slideshow_start_real(ss, start_index, stop_func);

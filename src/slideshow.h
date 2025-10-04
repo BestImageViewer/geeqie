@@ -65,27 +65,33 @@ struct SlideShow
 	gboolean is_paused() const;
 	void pause_toggle();
 
-	LayoutWindow *lw;        /**< use this window to display the slideshow */
-	ImageWindow *imd;        /**< use this window only if lw is not available,
-	                            @FIXME it is probably required only by img-view.cc and should be dropped with it */
+	LayoutWindow *lw = nullptr;        /**< use this window to display the slideshow */
+	ImageWindow *imd = nullptr;        /**< use this window only if lw is not available,
+	                                      @FIXME it is probably required only by img-view.cc and should be dropped with it */
 
-	GList *filelist;
-	CollectionData *cd;
-	FileData *dir_fd;
+	GList *filelist = nullptr;
+	CollectionData *cd = nullptr;
+	FileData *dir_fd = nullptr;
 
-	std::deque<gint> list;
-	std::deque<gint> list_done;
+	std::deque<gint> list{};
+	std::deque<gint> list_done{};
 
-	FileData *slide_fd;
+	FileData *slide_fd = nullptr;
 
-	guint slide_count;
-	guint timeout_id; /**< event source id */
+	guint slide_count = 0;
+	guint timeout_id = 0; /**< event source id */
 
-	gboolean from_selection;
+	bool from_selection = false;
 
-	StopFunc stop_func;
+	StopFunc stop_func{};
 
-	gboolean paused;
+	gboolean paused = FALSE;
+
+private:
+	SlideShow(LayoutWindow *target_lw, ImageWindow *imd)
+	    : lw(target_lw)
+	    , imd(imd)
+	{}
 };
 
 #endif
