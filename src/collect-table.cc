@@ -228,7 +228,7 @@ static guint collection_list_count(GList *list, gint64 &bytes)
 		guint count;
 	} ls{0, 0};
 
-	const auto inc_list_size = [](gpointer data, gpointer user_data)
+	static const auto inc_list_size = [](gpointer data, gpointer user_data)
 	{
 		auto *ci = static_cast<CollectInfo *>(data);
 		auto *ls = static_cast<ListSize *>(user_data);
@@ -249,27 +249,27 @@ static void collection_table_update_status(CollectTable *ct)
 
 	gint64 n_bytes = 0;
 	const guint n = collection_list_count(ct->cd->list, n_bytes);
-	gint64 s_bytes = 0;
-	const guint s = collection_list_count(ct->selection, s_bytes);
 
-	g_autofree gchar *buf = nullptr;
-	if (s > 0)
+	g_autoptr(GString) buf = g_string_new(nullptr);
+	if (n > 0)
 		{
 		g_autofree gchar *b = text_from_size_abrev(n_bytes);
-		g_autofree gchar *sb = text_from_size_abrev(s_bytes);
-		buf = g_strdup_printf(_("%s, %d images (%s, %d)"), b, n, sb, s);
-		}
-	else if (n > 0)
-		{
-		g_autofree gchar *b = text_from_size_abrev(n_bytes);
-		buf = g_strdup_printf(_("%s, %d images"), b, n);
+		g_string_append_printf(buf, _("%s, %d images"), b, n);
+
+		gint64 s_bytes = 0;
+		const guint s = collection_list_count(ct->selection, s_bytes);
+		if (s > 0)
+			{
+			g_autofree gchar *sb = text_from_size_abrev(s_bytes);
+			g_string_append_printf(buf, " (%s, %d)", sb, s);
+			}
 		}
 	else
 		{
-		buf = g_strdup(_("Empty"));
+		buf = g_string_append(buf, _("Empty"));
 		}
 
-	gtk_label_set_text(GTK_LABEL(ct->status_label), buf);
+	gtk_label_set_text(GTK_LABEL(ct->status_label), buf->str);
 }
 
 static void collection_table_update_extras(CollectTable *ct, gboolean loading, gdouble value)
