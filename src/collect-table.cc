@@ -220,59 +220,37 @@ static CollectInfo *collection_table_find_data_by_coord(CollectTable *ct, gint x
 	return static_cast<CollectInfo *>(g_list_nth_data(list, n));
 }
 
-static guint collection_table_list_count(CollectTable *ct, gint64 *bytes)
+static guint collection_list_count(GList *list, gint64 &bytes)
 {
-	if (bytes)
-		{
-		gint64 b = 0;
-		GList *work;
+	struct ListSize
+	{
+		gint64 bytes;
+		guint count;
+	} ls{0, 0};
 
-		work = ct->cd->list;
-		while (work)
-			{
-			auto ci = static_cast<CollectInfo *>(work->data);
-			work = work->next;
-			b += ci->fd->size;
-			}
+	const auto inc_list_size = [](gpointer data, gpointer user_data)
+	{
+		auto *ci = static_cast<CollectInfo *>(data);
+		auto *ls = static_cast<ListSize *>(user_data);
 
-		*bytes = b;
-		}
+		ls->bytes += ci->fd->size;
+		ls->count++;
+	};
 
-	return g_list_length(ct->cd->list);
-}
+	g_list_foreach(list, inc_list_size, &ls);
 
-static guint collection_table_selection_count(CollectTable *ct, gint64 *bytes)
-{
-	if (bytes)
-		{
-		gint64 b = 0;
-		GList *work;
-
-		work = ct->selection;
-		while (work)
-			{
-			auto ci = static_cast<CollectInfo *>(work->data);
-			work = work->next;
-			b += ci->fd->size;
-			}
-
-		*bytes = b;
-		}
-
-	return g_list_length(ct->selection);
+	bytes = ls.bytes;
+	return ls.count;
 }
 
 static void collection_table_update_status(CollectTable *ct)
 {
-	guint n;
-	gint64 n_bytes = 0;
-	guint s;
-	gint64 s_bytes = 0;
-
 	if (!ct->status_label) return;
 
-	n = collection_table_list_count(ct, &n_bytes);
-	s = collection_table_selection_count(ct, &s_bytes);
+	gint64 n_bytes = 0;
+	const guint n = collection_list_count(ct->cd->list, n_bytes);
+	gint64 s_bytes = 0;
+	const guint s = collection_list_count(ct->selection, s_bytes);
 
 	g_autofree gchar *buf = nullptr;
 	if (s > 0)
