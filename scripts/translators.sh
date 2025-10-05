@@ -45,7 +45,7 @@ shift
 while [ -n "$1" ]
 do
 	base=$(basename "$1")
-	full_file_path="$source_dir/$1"
+	full_file_path="$source_dir/$base"
 	locale=${base%.po}
 
 	awk -W posix 'BEGIN {LINT = "fatal"} {if ((NF > 0) && ($1 == "'"$locale"'")) {print $0}}' "$locales"
