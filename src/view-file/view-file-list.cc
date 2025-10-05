@@ -229,7 +229,7 @@ void vflist_dnd_begin(ViewFile *vf, GtkWidget *widget, GdkDragContext *context)
 		guint items;
 
 		if (vflist_row_is_selected(vf, vf->click_fd))
-			items = vflist_selection_count(vf, nullptr);
+			items = vflist_selection_count(vf);
 		else
 			items = 1;
 
@@ -616,7 +616,7 @@ static void vflist_select_image(ViewFile *vf, FileData *sel_fd)
 	if (options->image.enable_read_ahead && row >= 0)
 		{
 		if (row > g_list_index(vf->list, cur_fd) &&
-		    static_cast<guint>(row + 1) < vf_count(vf, nullptr))
+		    static_cast<guint>(row + 1) < vf_count(vf))
 			{
 			read_ahead_fd = vf_index_get_data(vf, row + 1);
 			}
@@ -1634,7 +1634,7 @@ static void vflist_populate_view(ViewFile *vf, gboolean force)
 
 	vflist_setup_iter_recursive(vf, store, nullptr, vf->list, selected, force);
 
-	if (selected && vflist_selection_count(vf, nullptr) == 0)
+	if (selected && vflist_selection_count(vf) == 0)
 		{
 		/* all selected files disappeared */
 		vflist_select_closest(vf, static_cast<FileData *>(selected->data));

@@ -106,8 +106,8 @@ bool SlideShow::should_continue() const
 
 	if (!dir_fd || !lw->dir_fd || dir_fd != lw->dir_fd) return false;
 
-	return (from_selection && slide_count == layout_selection_count(lw, nullptr)) ||
-	       (!from_selection && slide_count == layout_list_count(lw, nullptr));
+	return (from_selection && slide_count == layout_selection_count(lw)) ||
+	       (!from_selection && slide_count == layout_list_count(lw));
 }
 
 static gboolean slideshow_step(SlideShow *ss, gboolean forward)
@@ -307,12 +307,13 @@ SlideShow *SlideShow::start_from_collection(LayoutWindow *target_lw, ImageWindow
 
 SlideShow *SlideShow::start(LayoutWindow *lw, const StopFunc &stop_func)
 {
-	if (layout_list_count(lw, nullptr) < 1) return nullptr;
+	const guint list_count = layout_list_count(lw);
+	if (list_count < 1) return nullptr;
 
 	auto *ss = new SlideShow(lw, nullptr);
 	ss->dir_fd = file_data_ref(ss->lw->dir_fd);
 
-	const guint selection_count = layout_selection_count(ss->lw, nullptr);
+	const guint selection_count = layout_selection_count(ss->lw);
 	ss->from_selection = (selection_count >= 2);
 
 	gint start_index = -1;
@@ -322,7 +323,7 @@ SlideShow *SlideShow::start(LayoutWindow *lw, const StopFunc &stop_func)
 		}
 	else
 		{
-		ss->slide_count = layout_list_count(ss->lw, nullptr);
+		ss->slide_count = list_count;
 		if (!options->slideshow.random)
 			{
 			const gint start_point = layout_list_get_index(lw, layout_image_get_fd(lw));

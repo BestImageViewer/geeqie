@@ -268,7 +268,7 @@ void layout_status_update_image(LayoutWindow *lw);
 void layout_status_update_all(LayoutWindow *lw);
 
 GList *layout_list(LayoutWindow *lw);
-guint layout_list_count(LayoutWindow *lw, gint64 *bytes);
+guint layout_list_count(LayoutWindow *lw, gint64 *bytes = nullptr);
 FileData *layout_list_get_fd(LayoutWindow *lw, gint index);
 gint layout_list_get_index(LayoutWindow *lw, FileData *fd);
 void layout_list_sync_fd(LayoutWindow *lw, FileData *fd);
@@ -277,7 +277,7 @@ gchar *layout_get_window_list();
 GList *layout_selection_list(LayoutWindow *lw);
 /* return list of pointers to int for selection */
 GList *layout_selection_list_by_index(LayoutWindow *lw);
-guint layout_selection_count(LayoutWindow *lw, gint64 *bytes);
+guint layout_selection_count(LayoutWindow *lw, gint64 *bytes = nullptr);
 void layout_select_all(LayoutWindow *lw);
 void layout_select_none(LayoutWindow *lw);
 void layout_select_invert(LayoutWindow *lw);

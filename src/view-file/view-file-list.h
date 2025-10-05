@@ -71,7 +71,7 @@ void vflist_popup_destroy_cb(ViewFile *vf);
 gint vflist_index_by_fd(const ViewFile *vf, const FileData *fd);
 
 gboolean vflist_is_selected(ViewFile *vf, FileData *fd);
-guint vflist_selection_count(ViewFile *vf, gint64 *bytes);
+guint vflist_selection_count(ViewFile *vf, gint64 *bytes = nullptr);
 GList *vflist_selection_get_list(ViewFile *vf);
 GList *vflist_selection_get_list_by_index(ViewFile *vf);
 void vflist_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func);

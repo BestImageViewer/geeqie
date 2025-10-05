@@ -131,7 +131,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf);
 
 FileData *vf_index_get_data(ViewFile *vf, gint row);
 gint vf_index_by_fd(ViewFile *vf, FileData *in_fd);
-guint vf_count(ViewFile *vf, gint64 *bytes);
+guint vf_count(ViewFile *vf, gint64 *bytes = nullptr);
 GList *vf_get_list(ViewFile *vf);
 
 guint vf_selection_count(ViewFile *vf, gint64 *bytes);

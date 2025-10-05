@@ -481,8 +481,8 @@ GString *get_marks_string(gint mark_num)
 
 } // namespace
 
-static gint search_result_selection_count(SearchData *sd, gint64 *bytes);
-static gint search_result_count(SearchData *sd, gint64 *bytes);
+static gint search_result_selection_count(SearchData *sd, gint64 *bytes = nullptr);
+static gint search_result_count(SearchData *sd, gint64 *bytes = nullptr);
 
 static void search_window_close(SearchData *sd);
 
@@ -1241,9 +1241,7 @@ static gboolean search_result_press_cb(GtkWidget *widget, GdkEventButton *bevent
 
 	if (bevent->button == MOUSE_BUTTON_RIGHT)
 		{
-		GtkWidget *menu;
-
-		menu = search_result_menu(sd, (mfd != nullptr), (search_result_count(sd, nullptr) == 0));
+		GtkWidget *menu = search_result_menu(sd, mfd != nullptr, search_result_count(sd) == 0);
 		gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 		}
 
@@ -1439,7 +1437,7 @@ static gboolean search_result_keypress_cb(GtkWidget *widget, GdkEventKey *event,
 				{
 				sd->click_fd = mfd ? mfd->fd : nullptr;
 
-				GtkWidget *menu = search_result_menu(sd, (mfd != nullptr), (search_result_count(sd, nullptr) > 0));
+				GtkWidget *menu = search_result_menu(sd, mfd != nullptr, search_result_count(sd) > 0);
 				gtk_menu_popup_at_widget(GTK_MENU(menu), widget, GDK_GRAVITY_EAST, GDK_GRAVITY_CENTER, nullptr);
 				}
 				break;
@@ -1534,7 +1532,7 @@ static void search_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointe
 	if (sd->thumb_enable &&
 	    sd->click_fd && sd->click_fd->thumb_pixbuf)
 		{
-		dnd_set_drag_icon(widget, context, sd->click_fd->thumb_pixbuf, search_result_selection_count(sd, nullptr));
+		dnd_set_drag_icon(widget, context, sd->click_fd->thumb_pixbuf, search_result_selection_count(sd));
 		}
 }
 

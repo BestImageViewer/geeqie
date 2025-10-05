@@ -1014,7 +1014,7 @@ static void layout_image_dnd_end(GtkWidget *, GdkDragContext *context, gpointer 
 
 		if (!isfile(fd->path))
 			{
-			if (static_cast<guint>(row) < layout_list_count(lw, nullptr) - 1)
+			if (static_cast<guint>(row) < layout_list_count(lw) - 1)
 				{
 				layout_image_next(lw);
 				}
@@ -1372,7 +1372,7 @@ void layout_image_set_index(LayoutWindow *lw, gint index)
 		read_ahead_fd = layout_list_get_fd(lw, index + 1);
 		}
 
-	if (layout_selection_count(lw, nullptr) > 1)
+	if (layout_selection_count(lw) > 1)
 		{
 		GList *x = layout_selection_list_by_index(lw);
 		GList *y;
@@ -1506,7 +1506,7 @@ void layout_image_next(LayoutWindow *lw)
 		return;
 		}
 
-	if (layout_selection_count(lw, nullptr) > 1)
+	if (layout_selection_count(lw) > 1)
 		{
 		GList *x = layout_selection_list_by_index(lw);
 		gint old = layout_list_get_index(lw, layout_image_get_fd(lw));
@@ -1552,7 +1552,7 @@ void layout_image_next(LayoutWindow *lw)
 
 	if (current >= 0)
 		{
-		if (static_cast<guint>(current) < layout_list_count(lw, nullptr) - 1)
+		if (static_cast<guint>(current) < layout_list_count(lw) - 1)
 			{
 			layout_image_set_index(lw, current + 1);
 			}
@@ -1581,7 +1581,7 @@ void layout_image_prev(LayoutWindow *lw)
 		return;
 		}
 
-	if (layout_selection_count(lw, nullptr) > 1)
+	if (layout_selection_count(lw) > 1)
 		{
 		GList *x = layout_selection_list_by_index(lw);
 		gint old = layout_list_get_index(lw, layout_image_get_fd(lw));
@@ -1641,7 +1641,7 @@ void layout_image_prev(LayoutWindow *lw)
 		}
 	else
 		{
-		layout_image_set_index(lw, layout_list_count(lw, nullptr) - 1);
+		layout_image_set_index(lw, layout_list_count(lw) - 1);
 		}
 }
 
@@ -1667,7 +1667,7 @@ void layout_image_first(LayoutWindow *lw)
 		}
 
 	current = layout_image_get_index(lw);
-	if (current != 0 && layout_list_count(lw, nullptr) > 0)
+	if (current != 0 && layout_list_count(lw) > 0)
 		{
 		layout_image_set_index(lw, 0);
 		}
@@ -1675,8 +1675,6 @@ void layout_image_first(LayoutWindow *lw)
 
 void layout_image_last(LayoutWindow *lw)
 {
-	gint current;
-	gint count;
 	CollectionData *cd;
 	CollectInfo *info;
 
@@ -1695,9 +1693,8 @@ void layout_image_last(LayoutWindow *lw)
 		return;
 		}
 
-	current = layout_image_get_index(lw);
-	count = layout_list_count(lw, nullptr);
-	if (current != count - 1 && count > 0)
+	const gint count = layout_list_count(lw);
+	if (count > 0 && layout_image_get_index(lw) != count - 1)
 		{
 		layout_image_set_index(lw, count - 1);
 		}
@@ -2142,7 +2139,7 @@ static void layout_image_setup_split_common(LayoutWindow *lw, gint n)
 				image_osd_copy_status(lw->image, lw->split_images[i]);
 				}
 
-			if (layout_selection_count(lw, nullptr) > 1)
+			if (layout_selection_count(lw) > 1)
 				{
 				GList *work = g_list_last(layout_selection_list(lw));
 				gint j = 0;

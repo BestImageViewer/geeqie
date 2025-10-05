@@ -273,7 +273,7 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 				else
 					{
 					n = layout_list_get_index(lw, image_get_fd(lw->image)) + 1;
-					t = layout_list_count(lw, nullptr);
+					t = layout_list_count(lw);
 					}
 				}
 			else if (!view_window_find_image(imd, n, t))
