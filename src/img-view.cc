@@ -987,13 +987,6 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	return vw;
 }
 
-static void view_window_collection_unref_cb(GtkWidget *, gpointer data)
-{
-	auto cd = static_cast<CollectionData *>(data);
-
-	collection_unref(cd);
-}
-
 void view_window_new(FileData *fd)
 {
 	GList *list;
@@ -1013,15 +1006,15 @@ void view_window_new(FileData *fd)
 				}
 			else
 				{
-				collection_unref(cd);
-				cd = nullptr;
+				g_clear_pointer(&cd, collection_unref);
 				info = nullptr;
 				}
+
 			vw = real_view_window_new(nullptr, nullptr, cd, info);
 			if (vw && cd)
 				{
-				g_signal_connect(G_OBJECT(vw->window), "destroy",
-						 G_CALLBACK(view_window_collection_unref_cb), cd);
+				g_signal_connect_swapped(G_OBJECT(vw->window), "destroy",
+				                         G_CALLBACK(collection_unref), cd);
 				}
 			}
 		else if (isdir(fd->path) && filelist_read(fd, &list, nullptr))
