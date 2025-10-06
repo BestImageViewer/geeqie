@@ -1439,21 +1439,16 @@ void image_change_from_collection(ImageWindow *imd, CollectionData *cd, CollectI
 
 CollectionData *image_get_collection(ImageWindow *imd, CollectInfo **info)
 {
-	if (collection_to_number(imd->collection) >= 0)
+	if (info) *info = nullptr;
+
+	if (collection_to_number(imd->collection) < 0) return nullptr;
+
+	if (info && g_list_find(imd->collection->list, imd->collection_info))
 		{
-		if (g_list_find(imd->collection->list, imd->collection_info) != nullptr)
-			{
-			if (info) *info = imd->collection_info;
-			}
-		else
-			{
-			if (info) *info = nullptr;
-			}
-		return imd->collection;
+		*info = imd->collection_info;
 		}
 
-	if (info) *info = nullptr;
-	return nullptr;
+	return imd->collection;
 }
 
 static void image_loader_sync_read_ahead_data(ImageLoader *il, gpointer old_data, gpointer data)
