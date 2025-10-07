@@ -20,6 +20,7 @@
 
 #include "command-line-handling.h"
 
+#include <cmath>
 #include <cstdlib>
 #include <vector>
 
