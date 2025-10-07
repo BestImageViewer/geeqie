@@ -326,7 +326,7 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 
 	if (imd->func_drag)
 		{
-		imd->func_drag(imd, event, static_cast<gfloat>(selection_rectangle.x) / selection_rectangle.width, static_cast<gfloat>(selection_rectangle.y) / selection_rectangle.height, imd->data_button);
+		imd->func_drag(imd, event, static_cast<gfloat>(selection_rectangle.x) / selection_rectangle.width, static_cast<gfloat>(selection_rectangle.y) / selection_rectangle.height, imd->data_drag);
 		}
 }
 
