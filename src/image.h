@@ -22,6 +22,8 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include <functional>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #include <glib.h>
@@ -91,12 +93,11 @@ struct ImageWindow
 	gpointer data_focus_in;
 
 	/**
-	 * @headerfile func_scroll_notify
+	 * @headerfile scroll_notify_func
 	 * scroll notification (for scroll bar implementation)
 	 */
-	void (*func_scroll_notify)(ImageWindow *, gint x, gint y, gint width, gint height, gpointer);
-
-	gpointer data_scroll_notify;
+	using ScrollNotifyFunc = std::function<void(ImageWindow *, gint x, gint y, gint width, gint height)>;
+	ScrollNotifyFunc scroll_notify_func;
 
 	/* collection info */
 	CollectionData *collection;
