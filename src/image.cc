@@ -1376,7 +1376,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 
 	if (pixbuf)
 		{
-		stereo_data = static_cast<StereoPixbufData>(imd->user_stereo);
+		stereo_data = imd->user_stereo;
 		if (stereo_data == STEREO_PIXBUF_DEFAULT)
 			{
 			stereo_data = static_cast<StereoPixbufData>(GPOINTER_TO_INT(g_object_get_data(G_OBJECT(pixbuf), "stereo_data")));
@@ -1748,9 +1748,9 @@ void image_stereo_set(ImageWindow *imd, gint stereo_mode)
 	pixbuf_renderer_stereo_set(PIXBUF_RENDERER(imd->pr), stereo_mode);
 }
 
-StereoPixbufData image_stereo_pixbuf_get(ImageWindow *imd)
+StereoPixbufData image_stereo_pixbuf_get(const ImageWindow *imd)
 {
-	return static_cast<StereoPixbufData>(imd->user_stereo);
+	return imd->user_stereo;
 }
 
 void image_stereo_pixbuf_set(ImageWindow *imd, StereoPixbufData stereo_mode)

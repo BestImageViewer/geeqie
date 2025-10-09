@@ -1311,10 +1311,9 @@ static void layout_menu_slideshow_faster_cb(GtkAction *, gpointer)
 static void layout_menu_stereo_mode_next_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint mode = layout_image_stereo_pixbuf_get(lw);
 
 	/* 0->1, 1->2, 2->3, 3->1 - disable auto, then cycle */
-	mode = mode % 3 + 1;
+	const gint mode = layout_image_stereo_pixbuf_get(lw) % 3 + 1;
 
 	GtkAction *radio = gq_gtk_action_group_get_action(lw->action_group, "StereoAuto");
 	gq_gtk_radio_action_set_current_value(GQ_GTK_RADIO_ACTION(radio), mode);
@@ -1323,14 +1322,12 @@ static void layout_menu_stereo_mode_next_cb(GtkAction *, gpointer data)
 	this is called via fallback in layout_menu_stereo_mode_cb
 	layout_image_stereo_pixbuf_set(lw, mode);
 	*/
-
 }
 
 static void layout_menu_stereo_mode_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint mode = gq_gtk_radio_action_get_current_value(action);
-	layout_image_stereo_pixbuf_set(lw, mode);
+	layout_image_stereo_pixbuf_set(lw, static_cast<StereoPixbufData>(gq_gtk_radio_action_get_current_value(action)));
 }
 
 static void layout_menu_draw_rectangle_aspect_ratio_cb(GtkRadioAction *action, GtkRadioAction *, gpointer)

@@ -123,7 +123,7 @@ struct ImageWindow
 	gint orientation;
 	gboolean desaturate;
 	gboolean overunderexposed;
-	gint user_stereo;
+	StereoPixbufData user_stereo;
 
 	gboolean mouse_wheel_mode;
 };
@@ -206,7 +206,7 @@ gdouble image_zoom_get_default(ImageWindow *imd);
 /* stereo */
 void image_stereo_set(ImageWindow *imd, gint stereo_mode);
 
-StereoPixbufData image_stereo_pixbuf_get(ImageWindow *imd);
+StereoPixbufData image_stereo_pixbuf_get(const ImageWindow *imd);
 void image_stereo_pixbuf_set(ImageWindow *imd, StereoPixbufData stereo_mode);
 
 void image_prebuffer_set(ImageWindow *imd, FileData *fd);
