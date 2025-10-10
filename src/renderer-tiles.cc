@@ -68,6 +68,12 @@ namespace
 
 struct QueueData;
 
+enum ImageRenderType {
+	TILE_RENDER_NONE = 0, /**< do nothing */
+	TILE_RENDER_AREA,     /**< render an area of the tile */
+	TILE_RENDER_ALL       /**< render the whole tile */
+};
+
 struct ImageTile
 {
 	cairo_surface_t *surface;	/* off screen buffer */
@@ -79,14 +85,11 @@ struct ImageTile
 
 	gboolean blank;
 
-/* render_todo: (explanation)
-	NONE	do nothing
-	AREA	render area of tile, usually only used when loading an image
-		note: will jump to an ALL if render_done is not ALL.
-	ALL	render entire tile, if never done before w/ ALL, for expose events *only*
-*/
-
-	ImageRenderType render_todo;	/* what to do (see above) */
+	ImageRenderType render_todo;    /**< what to do
+	                                   NONE  do nothing
+	                                   AREA  render area of tile, usually only used when loading an image
+	                                         note: will jump to an ALL if render_done is not ALL.
+	                                   ALL   render entire tile, if never done before w/ ALL, for expose events *only* */
 	ImageRenderType render_done;	/* highest that has been done before on tile */
 
 	QueueData *qd;

@@ -73,12 +73,6 @@ struct PixbufRenderer;
 #define ROUND_DOWN(A,B) ((gint)(((A))/(B))*(B))
 
 
-enum ImageRenderType {
-	TILE_RENDER_NONE = 0, /**< do nothing */
-	TILE_RENDER_AREA, /**< render an area of the tile */
-	TILE_RENDER_ALL /**< render the whole tile */
-};
-
 enum OverlayRendererFlags {
 	OVL_NORMAL 	= 0,
 	OVL_RELATIVE 	= 1 << 0, /**< x,y coordinates are relative, negative values start bottom right */
