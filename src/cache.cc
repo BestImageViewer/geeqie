@@ -595,12 +595,6 @@ void cache_sim_data_set_similarity(CacheData *cd, ImageSimilarityData *sd)
 	cd->similarity = TRUE;
 }
 
-gboolean cache_sim_data_filled(ImageSimilarityData *sd)
-{
-	if (!sd) return FALSE;
-	return sd->filled;
-}
-
 /*
  *-------------------------------------------------------------------
  * cache path location utils

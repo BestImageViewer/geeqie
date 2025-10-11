@@ -2263,7 +2263,7 @@ static gboolean dupe_check_cb(gpointer data)
 					if (options->thumbnails.enable_caching)
 						{
 						dupe_item_read_cache(di);
-						if (cache_sim_data_filled(di->simd))
+						if (image_sim_filled(di->simd))
 							{
 							image_sim_alternate_processing(di->simd);
 							return G_SOURCE_CONTINUE;

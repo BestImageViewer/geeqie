@@ -374,4 +374,10 @@ gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, g
 
 	return image_sim_data_compare(a, b, [min](gdouble sim){ return (sim / (255.0 * 1024.0 * 3.0)) > min; });
 }
+
+gboolean image_sim_filled(const ImageSimilarityData *sd)
+{
+	if (!sd) return FALSE;
+	return sd->filled;
+}
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

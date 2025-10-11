@@ -44,6 +44,7 @@ ImageSimilarityData *image_sim_new_from_pixbuf(GdkPixbuf *pixbuf);
 gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b);
 gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min);
 
+gboolean image_sim_filled(const ImageSimilarityData *sd);
 
 void image_sim_alternate_set(gboolean enable);
 void image_sim_alternate_processing(ImageSimilarityData *sd);
