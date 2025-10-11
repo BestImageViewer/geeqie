@@ -28,6 +28,7 @@
 #include "typedefs.h"
 
 enum NotifyType : gint;
+enum StereoPixbufData : gint;
 
 struct CollectInfo;
 struct CollectionData;

@@ -79,6 +79,13 @@ enum OverlayRendererFlags {
 	/* OVL_HIDE_ON_SCROLL = 1 << 1*/ /**< hide temporarily when scrolling (not yet implemented) */
 };
 
+enum StereoPixbufData : gint {
+	STEREO_PIXBUF_DEFAULT  = 0,
+	STEREO_PIXBUF_SBS      = 1,
+	STEREO_PIXBUF_CROSS    = 2,
+	STEREO_PIXBUF_NONE     = 3
+};
+
 struct RendererFuncs
 {
 	void (*area_changed)(void *renderer, gint src_x, gint src_y, gint src_w, gint src_h); /**< pixbuf area changed */

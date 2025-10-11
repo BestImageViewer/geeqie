@@ -32,6 +32,8 @@
 #include "color-man.h"
 #include "typedefs.h"
 
+enum StereoPixbufData : gint;
+
 struct CollectInfo;
 struct CollectionData;
 class FileData;

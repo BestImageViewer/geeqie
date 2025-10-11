@@ -42,7 +42,7 @@
 #include "image-load.h"
 #include "intl.h"
 #include "jpeg-parser.h"
-#include "typedefs.h"
+#include "pixbuf-renderer.h"
 
 /* error handler data */
 struct error_handler_data {

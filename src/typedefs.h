@@ -169,13 +169,6 @@ enum PixbufRendererStereoMode {
 	PR_STEREO_HALF             = 1 << 20
 };
 
-enum StereoPixbufData {
-	STEREO_PIXBUF_DEFAULT  = 0,
-	STEREO_PIXBUF_SBS      = 1,
-	STEREO_PIXBUF_CROSS    = 2,
-	STEREO_PIXBUF_NONE     = 3
-};
-
 enum ScrollReset : guint {
 	TOPLEFT  = 0,
 	CENTER   = 1,

@@ -78,6 +78,7 @@
 #include "jpeg-parser.h"
 #include "misc.h"
 #include "options.h"
+#include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "typedefs.h"
 #include "ui-fileops.h"
