@@ -784,15 +784,6 @@ gint shutdown_cache_maintenance_cb(GtkApplication *, gpointer)
 	exit(EXIT_SUCCESS);
 }
 
-gint command_line_cache_maintenance_cb(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer)
-{
-	gint ret;
-
-	ret = process_command_line_cache_maintenance(app, app_command_line, nullptr);
-
-	return ret;
-}
-
 void startup_common(GtkApplication *, gpointer)
 {
 	/* seg. fault handler */
@@ -1073,7 +1064,7 @@ Version: Geeqie "), VERSION, nullptr);
 		g_application_set_option_context_description (G_APPLICATION(app),option_context_description_cache_maintenance);
 
 		g_signal_connect(app, "startup", G_CALLBACK(startup_cache_maintenance_cb), nullptr);
-		g_signal_connect(app, "command-line", G_CALLBACK(command_line_cache_maintenance_cb), nullptr);
+		g_signal_connect(app, "command-line", G_CALLBACK(process_command_line_cache_maintenance), nullptr);
 		g_signal_connect(app, "shutdown", G_CALLBACK(shutdown_cache_maintenance_cb), nullptr);
 
 		/* The quit action is linked to the Quit button on the notifications */
