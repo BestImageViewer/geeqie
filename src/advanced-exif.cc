@@ -397,7 +397,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	ew = g_new0(ExifWin, 1);
 
-	ew->window = window_new("view", nullptr, nullptr, _("Metadata"));
+	ew->window = window_new("view", nullptr, _("Metadata"));
 	DEBUG_NAME(ew->window);
 
 	geometry.min_width = 900;

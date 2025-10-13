@@ -1257,7 +1257,7 @@ CollectWindow *collection_window_new(const gchar *path)
 
 	cw->cd = collection_new(path);
 
-	cw->window = window_new("collection", PIXBUF_INLINE_ICON_BOOK, nullptr, nullptr);
+	cw->window = window_new("collection", PIXBUF_INLINE_ICON_BOOK, nullptr);
 	DEBUG_NAME(cw->window);
 
 	geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;

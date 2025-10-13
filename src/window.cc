@@ -20,7 +20,6 @@
 
 #include "window.h"
 
-#include <array>
 #include <cstdio>
 #include <cstring>
 
@@ -41,16 +40,14 @@
 #include "ui-misc.h"
 #include "ui-utildlg.h"
 
-GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *icon_file, const gchar *subtitle)
+GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *subtitle)
 {
-	g_autofree gchar *title = nullptr;
-	GtkWidget *window;
-
 	GApplication *app = g_application_get_default();
-	window = gtk_application_window_new(GTK_APPLICATION(app));
 
+	GtkWidget *window = gtk_application_window_new(GTK_APPLICATION(app));
 	if (!window) return nullptr;
 
+	g_autofree gchar *title = nullptr;
 	if (subtitle)
 		{
 		title = g_strdup_printf("%s - %s", subtitle, GQ_APPNAME);
@@ -62,7 +59,12 @@ GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *icon_fi
 
 	gtk_window_set_title(GTK_WINDOW(window), title);
 
-	window_set_icon(window, icon, icon_file);
+	g_autoptr(GdkPixbuf) pixbuf = pixbuf_inline(icon ? icon : PIXBUF_INLINE_ICON);
+	if (pixbuf)
+		{
+		gtk_window_set_icon(GTK_WINDOW(window), pixbuf);
+		}
+
 	gtk_window_set_role(GTK_WINDOW(window), role);
 
 	if (options->hide_window_decorations)
@@ -71,27 +73,6 @@ GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *icon_fi
 		}
 
 	return window;
-}
-
-void window_set_icon(GtkWidget *window, const gchar *icon, const gchar *file)
-{
-	if (!icon && !file) icon = PIXBUF_INLINE_ICON;
-
-	if (icon)
-		{
-		GdkPixbuf *pixbuf;
-
-		pixbuf = pixbuf_inline(icon);
-		if (pixbuf)
-			{
-			gtk_window_set_icon(GTK_WINDOW(window), pixbuf);
-			g_object_unref(pixbuf);
-			}
-		}
-	else
-		{
-		gtk_window_set_icon_from_file(GTK_WINDOW(window), file, nullptr);
-		}
 }
 
 gboolean window_maximized(GtkWidget *window)

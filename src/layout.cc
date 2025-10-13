@@ -1733,7 +1733,7 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 		GdkGeometry geometry;
 		GdkWindowHints hints;
 
-		lw->tools = window_new("tools", PIXBUF_INLINE_ICON_TOOLS, nullptr, _("Tools"));
+		lw->tools = window_new("tools", PIXBUF_INLINE_ICON_TOOLS, _("Tools"));
 		DEBUG_NAME(lw->tools);
 		g_signal_connect(G_OBJECT(lw->tools), "delete_event",
 				 G_CALLBACK(layout_tools_delete_cb), lw);
@@ -2328,7 +2328,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	layout_sync_options_with_current_state(lw);
 	copy_layout_options(lc->options, lw->options);
 
-	lc->configwindow = window_new("Layout", PIXBUF_INLINE_ICON_CONFIG, nullptr, _("Window options and layout"));
+	lc->configwindow = window_new("Layout", PIXBUF_INLINE_ICON_CONFIG, _("Window options and layout"));
 	DEBUG_NAME(lc->configwindow);
 	gtk_window_set_type_hint(GTK_WINDOW(lc->configwindow), GDK_WINDOW_TYPE_HINT_DIALOG);
 
@@ -2597,7 +2597,7 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 
 	/* window */
 
-	lw->window = window_new(GQ_APPNAME_LC, nullptr, nullptr, nullptr);
+	lw->window = window_new(GQ_APPNAME_LC, nullptr, nullptr);
 	DEBUG_NAME(lw->window);
 	gtk_window_set_resizable(GTK_WINDOW(lw->window), TRUE);
 	gtk_container_set_border_width(GTK_CONTAINER(lw->window), 0);

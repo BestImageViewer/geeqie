@@ -1850,7 +1850,7 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	pw->idle_id = 0;
 
-	pw->window = window_new("panview", nullptr, nullptr, _("Pan View"));
+	pw->window = window_new("panview", nullptr, _("Pan View"));
 	DEBUG_NAME(pw->window);
 
 	geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;

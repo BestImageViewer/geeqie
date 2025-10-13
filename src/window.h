@@ -24,9 +24,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-GtkWidget *window_new(const gchar *role, const gchar *icon,
-		      const gchar *icon_file, const gchar *subtitle);
-void window_set_icon(GtkWidget *window, const gchar *icon, const gchar *file);
+GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *subtitle);
 gboolean window_maximized(GtkWidget *window);
 
 void help_window_show(const gchar *key);

@@ -407,7 +407,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	DEBUG_1("full screen requests screen %d", options->fullscreen.screen);
 	GdkRectangle rect = fullscreen_prefs_get_geometry(options->fullscreen.screen, window, screen, fs->same_region);
 
-	fs->window = window_new("fullscreen", nullptr, nullptr, _("Full screen"));
+	fs->window = window_new("fullscreen", nullptr, _("Full screen"));
 	DEBUG_NAME(fs->window);
 
 	g_signal_connect(G_OBJECT(fs->window), "delete_event",

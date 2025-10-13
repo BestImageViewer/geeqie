@@ -4299,7 +4299,7 @@ DupeWindow *dupe_window_new()
 	if (options->duplicates_match == DUPE_MATCH_NAME_CI_CONTENT) dw->match_mask = DUPE_MATCH_NAME_CI_CONTENT;
 	if (options->duplicates_match == DUPE_MATCH_ALL) dw->match_mask = DUPE_MATCH_ALL;
 
-	dw->window = window_new("dupe", nullptr, nullptr, _("Find duplicates"));
+	dw->window = window_new("dupe", nullptr, _("Find duplicates"));
 	DEBUG_NAME(dw->window);
 
 	geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;
