@@ -576,10 +576,6 @@ static void write_global_attributes(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_CHAR(*options, shell.path);
 	WRITE_NL(); WRITE_CHAR(*options, shell.options);
 
-	/* Helpers */
-	WRITE_NL(); WRITE_CHAR(*options, helpers.html_browser.command_name);
-	WRITE_NL(); WRITE_CHAR(*options, helpers.html_browser.command_line);
-
 	/* Metadata Options */
 	WRITE_NL(); WRITE_BOOL(*options, metadata.enable_metadata_dirs);
 	WRITE_NL(); WRITE_BOOL(*options, metadata.save_in_image_file);
@@ -1072,10 +1068,6 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		/* Shell command */
 		if (READ_CHAR(*options, shell.path)) continue;
 		if (READ_CHAR(*options, shell.options)) continue;
-
-		/* Helpers */
-		if (READ_CHAR(*options, helpers.html_browser.command_name)) continue;
-		if (READ_CHAR(*options, helpers.html_browser.command_line)) continue;
 
 		/* Metadata */
 		if (READ_BOOL(*options, metadata.enable_metadata_dirs)) continue;

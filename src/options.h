@@ -334,14 +334,6 @@ struct ConfOptions
 		gint render_intent;
 	} color_profile;
 
-	/* Helpers programs */
-	struct {
-		struct {
-			gchar *command_name;
-			gchar *command_line;
-		} html_browser;
-	} helpers;
-
 	/* Metadata */
 	struct {
 		gboolean enable_metadata_dirs;
