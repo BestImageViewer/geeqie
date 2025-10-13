@@ -65,6 +65,7 @@
 #include "misc.h"
 #include "options.h"
 #include "osd.h"
+#include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "rcfile.h"
 #include "slideshow.h"

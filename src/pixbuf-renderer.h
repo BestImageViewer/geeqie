@@ -30,8 +30,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
-
 struct PixbufRenderer;
 
 #define TYPE_PIXBUF_RENDERER		(pixbuf_renderer_get_type())
@@ -77,6 +75,52 @@ enum OverlayRendererFlags {
 	OVL_NORMAL 	= 0,
 	OVL_RELATIVE 	= 1 << 0, /**< x,y coordinates are relative, negative values start bottom right */
 	/* OVL_HIDE_ON_SCROLL = 1 << 1*/ /**< hide temporarily when scrolling (not yet implemented) */
+};
+
+enum PixbufRendererStereoMode {
+	PR_STEREO_NONE             = 0,	  /**< do nothing */
+	PR_STEREO_DUAL             = 1 << 0, /**< independent stereo buffers, for example nvidia opengl */
+	PR_STEREO_FIXED            = 1 << 1,  /**< custom position */
+	PR_STEREO_HORIZ            = 1 << 2,  /**< side by side */
+	PR_STEREO_VERT             = 1 << 3,  /**< above below */
+	PR_STEREO_RIGHT            = 1 << 4,  /**< render right buffer */
+	PR_STEREO_ANAGLYPH_RC      = 1 << 5,  /**< anaglyph red-cyan */
+	PR_STEREO_ANAGLYPH_GM      = 1 << 6,  /**< anaglyph green-magenta */
+	PR_STEREO_ANAGLYPH_YB      = 1 << 7,  /**< anaglyph yellow-blue */
+	PR_STEREO_ANAGLYPH_GRAY_RC = 1 << 8,  /**< anaglyph gray red-cyan*/
+	PR_STEREO_ANAGLYPH_GRAY_GM = 1 << 9,  /**< anaglyph gray green-magenta */
+	PR_STEREO_ANAGLYPH_GRAY_YB = 1 << 10, /**< anaglyph gray yellow-blue */
+	PR_STEREO_ANAGLYPH_DB_RC   = 1 << 11, /**< anaglyph dubois red-cyan */
+	PR_STEREO_ANAGLYPH_DB_GM   = 1 << 12, /**< anaglyph dubois green-magenta */
+	PR_STEREO_ANAGLYPH_DB_YB   = 1 << 13, /**< anaglyph dubois yellow-blue */
+	PR_STEREO_ANAGLYPH         = PR_STEREO_ANAGLYPH_RC |
+	                             PR_STEREO_ANAGLYPH_GM |
+	                             PR_STEREO_ANAGLYPH_YB |
+	                             PR_STEREO_ANAGLYPH_GRAY_RC |
+	                             PR_STEREO_ANAGLYPH_GRAY_GM |
+	                             PR_STEREO_ANAGLYPH_GRAY_YB |
+	                             PR_STEREO_ANAGLYPH_DB_RC |
+	                             PR_STEREO_ANAGLYPH_DB_GM |
+	                             PR_STEREO_ANAGLYPH_DB_YB, /**< anaglyph mask */
+
+	PR_STEREO_MIRROR_LEFT      = 1 << 14, /**< mirror */
+	PR_STEREO_FLIP_LEFT        = 1 << 15, /**< flip */
+
+	PR_STEREO_MIRROR_RIGHT     = 1 << 16, /**< mirror */
+	PR_STEREO_FLIP_RIGHT       = 1 << 17, /**< flip */
+
+	PR_STEREO_MIRROR           = PR_STEREO_MIRROR_LEFT | PR_STEREO_MIRROR_RIGHT, /**< mirror mask*/
+	PR_STEREO_FLIP             = PR_STEREO_FLIP_LEFT | PR_STEREO_FLIP_RIGHT, /**< flip mask*/
+	PR_STEREO_SWAP             = 1 << 18,  /**< swap left and right buffers */
+	PR_STEREO_TEMP_DISABLE     = 1 << 19,  /**< temporarily disable stereo mode if source image is not stereo */
+	PR_STEREO_HALF             = 1 << 20
+};
+
+enum ScrollReset : guint {
+	TOPLEFT  = 0,
+	CENTER   = 1,
+	NOCHANGE = 2,
+	COUNT /**< Keep it last */
 };
 
 enum StereoPixbufData : gint {

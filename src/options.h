@@ -28,6 +28,7 @@
 #include "typedefs.h"
 
 enum DupeSelectType : guint;
+enum ScrollReset : guint;
 enum TextPosition : gint;
 
 #define COLOR_PROFILE_INPUTS 4

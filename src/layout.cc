@@ -53,6 +53,7 @@
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
+#include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "preferences.h"
 #include "rcfile.h"

@@ -28,6 +28,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
+#include "pixbuf-renderer.h"
 #include "print.h"
 #include "rcfile.h"
 #include "ui-bookmark.h"
