@@ -38,7 +38,6 @@
 #include "compat-deprecated.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
-#include "typedefs.h"
 
 /* comment this out if not using this from within Geeqie
  * defining GQ_BUILD does these things:

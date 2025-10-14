@@ -73,19 +73,6 @@ enum ImageSplitMode {
 	SPLIT_QUAD,
 };
 
-enum MarkToSelectionMode {
-	MTS_MODE_MINUS,
-	MTS_MODE_SET,
-	MTS_MODE_OR,
-	MTS_MODE_AND
-};
-
-enum SelectionToMarkMode {
-	STM_MODE_RESET,
-	STM_MODE_SET,
-	STM_MODE_TOGGLE
-};
-
 enum FileFormatClass {
 	FORMAT_CLASS_UNKNOWN,
 	FORMAT_CLASS_IMAGE,

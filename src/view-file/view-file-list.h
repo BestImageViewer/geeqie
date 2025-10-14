@@ -26,7 +26,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
 #include "view-file.h"
 
 class FileData;

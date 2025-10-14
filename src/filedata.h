@@ -68,6 +68,19 @@ enum NotifyType : gint {
 	NOTIFY_CHANGE		= 1 << 8  /**< generic change described by fd->change */
 };
 
+enum MarkToSelectionMode {
+	MTS_MODE_MINUS,
+	MTS_MODE_SET,
+	MTS_MODE_OR,
+	MTS_MODE_AND
+};
+
+enum SelectionToMarkMode {
+	STM_MODE_RESET,
+	STM_MODE_SET,
+	STM_MODE_TOGGLE
+};
+
 enum SelectionType {
 	SELECTION_NONE		= 0,
 	SELECTION_SELECTED	= 1 << 0,

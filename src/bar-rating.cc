@@ -33,7 +33,6 @@
 #include "intl.h"
 #include "metadata.h"
 #include "rcfile.h"
-#include "typedefs.h"
 #include "ui-misc.h"
 
 /**
