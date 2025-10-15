@@ -33,6 +33,7 @@
 
 enum DirViewType : guint;
 enum FileViewType : guint;
+enum ImageSplitMode : gint;
 
 struct AnimationData;
 struct FullScreenData;

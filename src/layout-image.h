@@ -35,10 +35,16 @@ struct CollectionData;
 class FileData;
 struct LayoutWindow;
 
+enum ImageSplitMode : gint {
+	SPLIT_NONE = 0,
+	SPLIT_VERT,
+	SPLIT_HOR,
+	SPLIT_TRIPLE,
+	SPLIT_QUAD,
+};
+
 GtkWidget *layout_image_new(LayoutWindow *lw, gint i);
 void layout_image_activate(LayoutWindow *lw, gint i, gboolean force);
-GtkWidget *layout_image_setup_split_none(LayoutWindow *lw);
-GtkWidget *layout_image_setup_split_hv(LayoutWindow *lw, gboolean horizontal);
 GtkWidget *layout_image_setup_split(LayoutWindow *lw, ImageSplitMode mode);
 
 void layout_image_set_fd(LayoutWindow *lw, FileData *fd);

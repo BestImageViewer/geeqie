@@ -2203,28 +2203,24 @@ static void layout_image_setup_split_common(LayoutWindow *lw, gint n)
 		}
 }
 
-GtkWidget *layout_image_setup_split_none(LayoutWindow *lw)
+static GtkWidget *layout_image_setup_split_none(LayoutWindow *lw)
 {
 	lw->split_mode = SPLIT_NONE;
 
 	layout_image_setup_split_common(lw, 1);
 
-	lw->split_image_widget = lw->split_images[0]->widget;
-
-	return lw->split_image_widget;
+	return lw->split_images[0]->widget;
 }
 
 
-GtkWidget *layout_image_setup_split_hv(LayoutWindow *lw, gboolean horizontal)
+static GtkWidget *layout_image_setup_split_hv(LayoutWindow *lw, ImageSplitMode mode)
 {
-	GtkWidget *paned;
-
-	lw->split_mode = horizontal ? SPLIT_HOR : SPLIT_VERT;
+	lw->split_mode = mode;
 
 	layout_image_setup_split_common(lw, 2);
 
 	/* horizontal split means vpaned and vice versa */
-	paned = gtk_paned_new(horizontal ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
+	GtkWidget *paned = gtk_paned_new((mode == SPLIT_HOR) ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(paned);
 
 	gtk_paned_pack1(GTK_PANED(paned), lw->split_images[0]->widget, TRUE, TRUE);
@@ -2233,25 +2229,19 @@ GtkWidget *layout_image_setup_split_hv(LayoutWindow *lw, gboolean horizontal)
 	gtk_widget_show(lw->split_images[0]->widget);
 	gtk_widget_show(lw->split_images[1]->widget);
 
-	lw->split_image_widget = paned;
-
-	return lw->split_image_widget;
-
+	return paned;
 }
 
 static GtkWidget *layout_image_setup_split_triple(LayoutWindow *lw)
 {
 	GtkWidget *hpaned1;
 	GtkWidget *hpaned2;
-	GtkAllocation allocation;
 	gint i;
 	gint pane_pos;
 
 	lw->split_mode = SPLIT_TRIPLE;
 
 	layout_image_setup_split_common(lw, 3);
-
-	gtk_widget_get_allocation(lw->utility_paned, &allocation);
 
 	hpaned1 = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(hpaned1);
@@ -2264,6 +2254,9 @@ static GtkWidget *layout_image_setup_split_triple(LayoutWindow *lw)
 		}
 	else
 		{
+		GtkAllocation allocation;
+		gtk_widget_get_allocation(lw->utility_paned, &allocation);
+
 		pane_pos = allocation.width / 3;
 		}
 
@@ -2283,9 +2276,7 @@ static GtkWidget *layout_image_setup_split_triple(LayoutWindow *lw)
 	gtk_widget_show(hpaned1);
 	gtk_widget_show(hpaned2);
 
-	lw->split_image_widget = hpaned1;
-
-	return lw->split_image_widget;
+	return hpaned1;
 }
 
 static GtkWidget *layout_image_setup_split_quad(LayoutWindow *lw)
@@ -2321,10 +2312,7 @@ static GtkWidget *layout_image_setup_split_quad(LayoutWindow *lw)
 	gtk_widget_show(vpaned1);
 	gtk_widget_show(vpaned2);
 
-	lw->split_image_widget = hpaned;
-
-	return lw->split_image_widget;
-
+	return hpaned;
 }
 
 GtkWidget *layout_image_setup_split(LayoutWindow *lw, ImageSplitMode mode)
@@ -2332,17 +2320,22 @@ GtkWidget *layout_image_setup_split(LayoutWindow *lw, ImageSplitMode mode)
 	switch (mode)
 		{
 		case SPLIT_HOR:
-			return layout_image_setup_split_hv(lw, TRUE);
 		case SPLIT_VERT:
-			return layout_image_setup_split_hv(lw, FALSE);
+			lw->split_image_widget = layout_image_setup_split_hv(lw, mode);
+			break;
 		case SPLIT_TRIPLE:
-			return layout_image_setup_split_triple(lw);
+			lw->split_image_widget = layout_image_setup_split_triple(lw);
+			break;
 		case SPLIT_QUAD:
-			return layout_image_setup_split_quad(lw);
+			lw->split_image_widget = layout_image_setup_split_quad(lw);
+			break;
 		case SPLIT_NONE:
 		default:
-			return layout_image_setup_split_none(lw);
+			lw->split_image_widget = layout_image_setup_split_none(lw);
+			break;
 		}
+
+	return lw->split_image_widget;
 }
 
 
