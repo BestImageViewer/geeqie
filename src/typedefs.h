@@ -36,12 +36,6 @@ enum MouseButton {
 	MOUSE_BUTTON_9	= 9
 };
 
-#define	CMD_COPY     "geeqie-copy-command.desktop"
-#define	CMD_MOVE     "geeqie-move-command.desktop"
-#define	CMD_RENAME   "geeqie-rename-command.desktop"
-#define	CMD_DELETE   "geeqie-delete-command.desktop"
-#define	CMD_FOLDER   "geeqie-folder-command.desktop"
-
 enum SortType {
 	SORT_NONE,
 	SORT_NAME,

@@ -38,7 +38,6 @@
 #include "main.h"
 #include "options.h"
 #include "pixbuf-util.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
 #include "utilops.h"

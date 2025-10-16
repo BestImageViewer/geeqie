@@ -32,7 +32,6 @@
 #include "intl.h"
 #include "main-defines.h"
 #include "options.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
 #include "utilops.h"

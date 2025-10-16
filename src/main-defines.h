@@ -73,6 +73,12 @@
 #define STAR_RATING_REJECTED 0x274C //Unicode Character 'Cross Mark'
 #define STAR_RATING_STAR 0x2738 //Unicode Character 'Heavy Eight Pointed Rectilinear Black Star'
 
+#define CMD_COPY     "geeqie-copy-command.desktop"
+#define CMD_MOVE     "geeqie-move-command.desktop"
+#define CMD_RENAME   "geeqie-rename-command.desktop"
+#define CMD_DELETE   "geeqie-delete-command.desktop"
+#define CMD_FOLDER   "geeqie-folder-command.desktop"
+
 #define GQ_ICON_ADD "list-add"
 #define GQ_ICON_REMOVE "list-remove"
 #define GQ_ICON_UNDO "edit-undo"
