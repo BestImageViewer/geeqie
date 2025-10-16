@@ -30,7 +30,6 @@
 #include <gtk/gtk.h>
 
 #include "color-man.h"
-#include "typedefs.h"
 
 enum StereoPixbufData : gint;
 
@@ -38,6 +37,15 @@ struct CollectInfo;
 struct CollectionData;
 class FileData;
 struct ImageLoader;
+
+enum AlterType : gint {
+	ALTER_NONE,		/**< do nothing */
+	ALTER_ROTATE_90,
+	ALTER_ROTATE_90_CC,	/**< counterclockwise */
+	ALTER_ROTATE_180,
+	ALTER_MIRROR,
+	ALTER_FLIP,
+};
 
 enum ImageState {
 	IMAGE_STATE_NONE	= 0,
@@ -111,8 +119,6 @@ struct ImageWindow
 	gboolean color_profile_use_image;
 	ColorManProfileType color_profile_from_image;
 	gpointer cm;
-
-	AlterType delay_alter_type;
 
 	FileData *read_ahead_fd;
 	ImageLoader *read_ahead_il;

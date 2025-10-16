@@ -1053,8 +1053,6 @@ static void image_reset(ImageWindow *imd)
 	color_man_free(static_cast<ColorMan *>(imd->cm));
 	imd->cm = nullptr;
 
-	imd->delay_alter_type = ALTER_NONE;
-
 	image_state_set(imd, IMAGE_STATE_NONE);
 }
 
@@ -1495,9 +1493,6 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 		source->il = nullptr;
 
 		image_loader_sync_data(imd->il, source, imd);
-
-		imd->delay_alter_type = source->delay_alter_type;
-		source->delay_alter_type = ALTER_NONE;
 		}
 
 	imd->color_profile_enable = source->color_profile_enable;
@@ -2130,7 +2125,6 @@ ImageWindow *image_new(gboolean frame)
 
 	imd->unknown = TRUE;
 	imd->has_frame = -1; /* not initialized; for image_set_frame */
-	imd->delay_alter_type = ALTER_NONE;
 	imd->state = IMAGE_STATE_NONE;
 	imd->color_profile_from_image = COLOR_PROFILE_NONE;
 	imd->orientation = 1;

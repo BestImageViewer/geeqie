@@ -25,8 +25,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
-
+enum AlterType : gint;
 enum NotifyType : gint;
 enum StereoPixbufData : gint;
 

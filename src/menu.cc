@@ -25,6 +25,7 @@
 
 #include "collect-io.h"
 #include "editors.h"
+#include "image.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "pixbuf-util.h"
