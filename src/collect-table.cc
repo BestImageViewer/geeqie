@@ -1574,7 +1574,7 @@ static gboolean collection_table_press_cb(GtkWidget *, GdkEventButton *bevent, g
 
 	switch (bevent->button)
 		{
-		case MOUSE_BUTTON_LEFT:
+		case GDK_BUTTON_PRIMARY:
 			if (bevent->type == GDK_2BUTTON_PRESS)
 				{
 				if (info)
@@ -1587,7 +1587,7 @@ static gboolean collection_table_press_cb(GtkWidget *, GdkEventButton *bevent, g
 				gtk_widget_grab_focus(ct->listview);
 				}
 			break;
-		case MOUSE_BUTTON_RIGHT:
+		case GDK_BUTTON_SECONDARY:
 			ct->popup = collection_table_popup_menu(ct, (info != nullptr));
 			gtk_menu_popup_at_pointer(GTK_MENU(ct->popup), nullptr);
 			break;
@@ -1616,7 +1616,7 @@ static gboolean collection_table_release_cb(GtkWidget *, GdkEventButton *bevent,
 		collection_table_selection_remove(ct, ct->click_info, SELECTION_PRELIGHT, nullptr);
 		}
 
-	if (bevent->button == MOUSE_BUTTON_LEFT &&
+	if (bevent->button == GDK_BUTTON_PRIMARY &&
 	    info && ct->click_info == info)
 		{
 		collection_table_set_focus(ct, info);
@@ -1649,7 +1649,7 @@ static gboolean collection_table_release_cb(GtkWidget *, GdkEventButton *bevent,
 				}
 			}
 		}
-	else if (bevent->button == MOUSE_BUTTON_MIDDLE &&
+	else if (bevent->button == GDK_BUTTON_MIDDLE &&
 		 info && ct->click_info == info)
 		{
 		collection_table_select_util(ct, info, !info_selected(info));

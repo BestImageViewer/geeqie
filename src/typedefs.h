@@ -26,16 +26,6 @@
 
 #include <glib.h>
 
-enum MouseButton {
-	MOUSE_BUTTON_LEFT	= 1,
-	MOUSE_BUTTON_MIDDLE	= 2,
-	MOUSE_BUTTON_RIGHT	= 3,
-	MOUSE_BUTTON_WHEEL_UP	= 4,
-	MOUSE_BUTTON_WHEEL_DOWN	= 5,
-	MOUSE_BUTTON_8	= 8,
-	MOUSE_BUTTON_9	= 9
-};
-
 enum SortType {
 	SORT_NONE,
 	SORT_NAME,

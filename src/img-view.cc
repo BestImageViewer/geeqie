@@ -387,7 +387,7 @@ static void view_window_press_cb(GtkWidget *, GdkEventButton *bevent, gpointer d
 
 	switch (bevent->button)
 		{
-		case MOUSE_BUTTON_LEFT:
+		case GDK_BUTTON_PRIMARY:
 			if (bevent->type == GDK_2BUTTON_PRESS)
 				{
 				view_fullscreen_toggle(vw, TRUE);
@@ -646,7 +646,7 @@ static void button_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
 
 	switch (event->button)
 		{
-		case MOUSE_BUTTON_LEFT:
+		case GDK_BUTTON_PRIMARY:
 			if (options->image_l_click_archive && imd->image_fd->format_class == FORMAT_CLASS_ARCHIVE)
 				{
 				g_autofree gchar *dest_dir = open_archive(imd->image_fd);
@@ -667,11 +667,11 @@ static void button_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
 			else if (options->image_lm_click_nav)
 				view_step_next(vw);
 			break;
-		case MOUSE_BUTTON_MIDDLE:
+		case GDK_BUTTON_MIDDLE:
 			if (options->image_lm_click_nav)
 				view_step_prev(vw);
 			break;
-		case MOUSE_BUTTON_RIGHT:
+		case GDK_BUTTON_SECONDARY:
 			menu = view_popup_menu(vw);
 			gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 			break;

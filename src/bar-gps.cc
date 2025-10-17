@@ -310,7 +310,7 @@ gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButtonEvent *
 	GdkPixbufRotation rotate;
 	ThumbLoader *tl;
 
-	if (bevent->button == MOUSE_BUTTON_LEFT)
+	if (bevent->button == GDK_BUTTON_PRIMARY)
 		{
 		label_marker = CLUTTER_ACTOR(widget);
 		fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(label_marker), "file_fd"));
@@ -814,20 +814,20 @@ gboolean bar_pane_gps_map_keypress_cb(GtkWidget *, GdkEventButton *bevent, gpoin
 	GtkWidget *menu;
 	GtkClipboard *clipboard;
 
-	if (bevent->button == MOUSE_BUTTON_RIGHT)
+	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
 		menu = bar_pane_gps_menu(pgd);
 		gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
 		return TRUE;
 		}
 
-	if (bevent->button == MOUSE_BUTTON_MIDDLE)
+	if (bevent->button == GDK_BUTTON_MIDDLE)
 		{
 		bar_pane_gps_map_centreing(pgd);
 		return TRUE;
 		}
 
-	if (bevent->button == MOUSE_BUTTON_LEFT)
+	if (bevent->button == GDK_BUTTON_PRIMARY)
 		{
 		clipboard = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 		g_autofree gchar *geo_coords = g_strdup_printf("%f %f",

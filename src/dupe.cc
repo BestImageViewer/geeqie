@@ -54,7 +54,6 @@
 #include "print.h"
 #include "similar.h"
 #include "thumb.h"
-#include "typedefs.h"
 #include "ui-file-chooser.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
@@ -3329,7 +3328,7 @@ static gboolean dupe_listview_press_cb(GtkWidget *widget, GdkEventButton *bevent
 
 	dw->click_item = di;
 
-	if (bevent->button == MOUSE_BUTTON_RIGHT)
+	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
 		/* right click menu */
 		GtkWidget *menu;
@@ -3352,15 +3351,15 @@ static gboolean dupe_listview_press_cb(GtkWidget *widget, GdkEventButton *bevent
 
 	if (!di) return FALSE;
 
-	if (bevent->button == MOUSE_BUTTON_LEFT &&
+	if (bevent->button == GDK_BUTTON_PRIMARY &&
 	    bevent->type == GDK_2BUTTON_PRESS)
 		{
 		dupe_menu_view(di, widget, FALSE);
 		}
 
-	if (bevent->button == MOUSE_BUTTON_MIDDLE) return TRUE;
+	if (bevent->button == GDK_BUTTON_MIDDLE) return TRUE;
 
-	if (bevent->button == MOUSE_BUTTON_RIGHT)
+	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
 		if (!dupe_listview_item_is_selected(di, widget))
 			{
@@ -3378,7 +3377,7 @@ static gboolean dupe_listview_press_cb(GtkWidget *widget, GdkEventButton *bevent
 		return TRUE;
 		}
 
-	if (bevent->button == MOUSE_BUTTON_LEFT &&
+	if (bevent->button == GDK_BUTTON_PRIMARY &&
 	    bevent->type == GDK_BUTTON_PRESS &&
 	    !(bevent->state & GDK_SHIFT_MASK ) &&
 	    !(bevent->state & GDK_CONTROL_MASK ) &&
@@ -3400,7 +3399,7 @@ static gboolean dupe_listview_release_cb(GtkWidget *widget, GdkEventButton *beve
 	GtkTreeIter iter;
 	DupeItem *di = nullptr;
 
-	if (bevent->button != MOUSE_BUTTON_LEFT && bevent->button != MOUSE_BUTTON_MIDDLE) return TRUE;
+	if (bevent->button != GDK_BUTTON_PRIMARY && bevent->button != GDK_BUTTON_MIDDLE) return TRUE;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 
@@ -3413,7 +3412,7 @@ static gboolean dupe_listview_release_cb(GtkWidget *widget, GdkEventButton *beve
 		gtk_tree_path_free(tpath);
 		}
 
-	if (bevent->button == MOUSE_BUTTON_MIDDLE)
+	if (bevent->button == GDK_BUTTON_MIDDLE)
 		{
 		if (di && dw->click_item == di)
 			{

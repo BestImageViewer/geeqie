@@ -949,7 +949,7 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 	GtkWidget *table;
 	gint i = GPOINTER_TO_INT(user_data);
 
-	if (event->button != MOUSE_BUTTON_RIGHT)
+	if (event->button != GDK_BUTTON_SECONDARY)
 		return FALSE;
 
 	auto mte = g_new0(MarksTextEntry, 1);

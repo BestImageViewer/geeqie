@@ -21,11 +21,12 @@
 
 #include "bar-histogram.h"
 
+#include <string>
+
 #include <cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #include <glib-object.h>
-#include <string>
 
 #include <config.h>
 
@@ -35,7 +36,6 @@
 #include "histogram.h"
 #include "intl.h"
 #include "rcfile.h"
-#include "typedefs.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 
@@ -302,7 +302,7 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 #else
 	gesture = gtk_gesture_multi_press_new(phd->drawing_area);
 #endif
-	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), MOUSE_BUTTON_RIGHT);
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(bar_pane_histogram_press_cb), phd);
 
 	gtk_widget_show(phd->widget);

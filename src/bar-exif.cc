@@ -650,7 +650,7 @@ void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped)
 gboolean bar_pane_exif_menu_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
-	if (bevent->button == MOUSE_BUTTON_RIGHT)
+	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
 		bar_pane_exif_menu_popup(widget, ped);
 		return TRUE;
@@ -671,7 +671,7 @@ gboolean bar_pane_exif_copy_cb(GtkWidget *widget, GdkEventButton *bevent, gpoint
 	GtkClipboard *clipboard;
 	ExifEntry *ee;
 
-	if (bevent->button == MOUSE_BUTTON_LEFT)
+	if (bevent->button == GDK_BUTTON_PRIMARY)
 		{
 		ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
 		value = gtk_label_get_text(GTK_LABEL(ee->value_widget));

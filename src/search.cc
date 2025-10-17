@@ -1239,7 +1239,7 @@ static gboolean search_result_press_cb(GtkWidget *widget, GdkEventButton *bevent
 
 	sd->click_fd = mfd ? mfd->fd : nullptr;
 
-	if (bevent->button == MOUSE_BUTTON_RIGHT)
+	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
 		GtkWidget *menu = search_result_menu(sd, mfd != nullptr, search_result_count(sd) == 0);
 		gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
@@ -1247,14 +1247,14 @@ static gboolean search_result_press_cb(GtkWidget *widget, GdkEventButton *bevent
 
 	if (!mfd) return FALSE;
 
-	if (bevent->button == MOUSE_BUTTON_LEFT && bevent->type == GDK_2BUTTON_PRESS)
+	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->type == GDK_2BUTTON_PRESS)
 		{
 		layout_set_fd(nullptr, mfd->fd);
 		}
 
-	if (bevent->button == MOUSE_BUTTON_MIDDLE) return TRUE;
+	if (bevent->button == GDK_BUTTON_MIDDLE) return TRUE;
 
-	if (bevent->button == MOUSE_BUTTON_RIGHT)
+	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
 		if (!search_result_row_selected(sd, mfd->fd))
 			{
@@ -1271,7 +1271,7 @@ static gboolean search_result_press_cb(GtkWidget *widget, GdkEventButton *bevent
 		return TRUE;
 		}
 
-	if (bevent->button == MOUSE_BUTTON_LEFT && bevent->type == GDK_BUTTON_PRESS &&
+	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->type == GDK_BUTTON_PRESS &&
 	    !(bevent->state & GDK_SHIFT_MASK ) &&
 	    !(bevent->state & GDK_CONTROL_MASK ) &&
 	    search_result_row_selected(sd, mfd->fd))
@@ -1293,7 +1293,7 @@ static gboolean search_result_release_cb(GtkWidget *widget, GdkEventButton *beve
 
 	MatchFileData *mfd = nullptr;
 
-	if (bevent->button != MOUSE_BUTTON_LEFT && bevent->button != MOUSE_BUTTON_MIDDLE) return TRUE;
+	if (bevent->button != GDK_BUTTON_PRIMARY && bevent->button != GDK_BUTTON_MIDDLE) return TRUE;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 
@@ -1306,7 +1306,7 @@ static gboolean search_result_release_cb(GtkWidget *widget, GdkEventButton *beve
 		gtk_tree_path_free(tpath);
 		}
 
-	if (bevent->button == MOUSE_BUTTON_MIDDLE)
+	if (bevent->button == GDK_BUTTON_MIDDLE)
 		{
 		if (mfd && sd->click_fd == mfd->fd)
 			{

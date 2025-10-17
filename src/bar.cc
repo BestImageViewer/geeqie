@@ -36,7 +36,6 @@
 #include "menu.h"
 #include "metadata.h"
 #include "rcfile.h"
-#include "typedefs.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 
@@ -353,7 +352,7 @@ static void bar_menu_popup(GtkWidget *widget)
 
 static gboolean bar_menu_expander_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer)
 {
-	if (bevent->button == MOUSE_BUTTON_RIGHT)
+	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
 		bar_menu_popup(widget);
 		return TRUE;

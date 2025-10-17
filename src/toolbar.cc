@@ -110,7 +110,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 #else
 	gesture = gtk_gesture_multi_press_new(button);
 #endif
-	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), MOUSE_BUTTON_RIGHT);
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "released", G_CALLBACK(toolbar_press_cb), button);
 
 	GtkWidget *image;

@@ -130,7 +130,7 @@ static void image_cache_set(ImageWindow *imd, FileData *fd);
 static void image_click_cb(PixbufRenderer *, GdkEventButton *event, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
-	if (!options->image_lm_click_nav && event->button == MOUSE_BUTTON_MIDDLE)
+	if (!options->image_lm_click_nav && event->button == GDK_BUTTON_MIDDLE)
 		{
 		imd->mouse_wheel_mode = !imd->mouse_wheel_mode;
 		}
@@ -232,7 +232,7 @@ static void image_press_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer d
 		lw = get_current_layout();
 		}
 
-	if (lw && event->button == MOUSE_BUTTON_LEFT && event->type == GDK_2BUTTON_PRESS
+	if (lw && event->button == GDK_BUTTON_PRIMARY && event->type == GDK_2BUTTON_PRESS
 												&& !options->image_lm_click_nav)
 		{
 		layout_image_full_screen_toggle(lw);

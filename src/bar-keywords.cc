@@ -1333,7 +1333,7 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 gboolean bar_pane_keywords_menu_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
-	if (bevent->button == MOUSE_BUTTON_RIGHT)
+	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
 		bar_pane_keywords_menu_popup(widget, pkd, bevent->x, bevent->y);
 		return TRUE;

@@ -1744,7 +1744,7 @@ static void layout_image_button_cb(ImageWindow *imd, GdkEventButton *event, gpoi
 
 	switch (event->button)
 		{
-		case MOUSE_BUTTON_LEFT:
+		case GDK_BUTTON_PRIMARY:
 			if (event->type == GDK_2BUTTON_PRESS)
 				{
 				layout_image_full_screen_toggle(lw);
@@ -1770,11 +1770,11 @@ static void layout_image_button_cb(ImageWindow *imd, GdkEventButton *event, gpoi
 			else if (options->image_lm_click_nav && lw->split_mode == SPLIT_NONE)
 				layout_image_next(lw);
 			break;
-		case MOUSE_BUTTON_MIDDLE:
+		case GDK_BUTTON_MIDDLE:
 			if (options->image_lm_click_nav && lw->split_mode == SPLIT_NONE)
 				layout_image_prev(lw);
 			break;
-		case MOUSE_BUTTON_RIGHT:
+		case GDK_BUTTON_SECONDARY:
 			menu = layout_image_pop_menu(lw);
 			if (imd == lw->image)
 				{
@@ -1909,7 +1909,7 @@ static void layout_image_button_inactive_cb(ImageWindow *imd, GdkEventButton *ev
 
 	switch (event->button)
 		{
-		case MOUSE_BUTTON_RIGHT:
+		case GDK_BUTTON_SECONDARY:
 			menu = layout_image_pop_menu(lw);
 			if (imd == lw->image)
 				{

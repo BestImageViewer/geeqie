@@ -37,7 +37,6 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "rcfile.h"
-#include "typedefs.h"
 #include "ui-bookmark.h"
 #include "ui-file-chooser.h"
 #include "ui-fileops.h"
@@ -374,7 +373,7 @@ static void bar_filter_help_dialog()
 
 static gboolean bar_filter_message_cb(GtkWidget *, GdkEventButton *event, gpointer)
 {
-	if (event->button != MOUSE_BUTTON_RIGHT) return FALSE;
+	if (event->button != GDK_BUTTON_SECONDARY) return FALSE;
 
 	bar_filter_help_dialog();
 

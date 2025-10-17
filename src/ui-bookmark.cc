@@ -37,7 +37,6 @@
 #include "main-defines.h"
 #include "misc.h"
 #include "pixbuf-util.h"
-#include "typedefs.h"
 #include "ui-file-chooser.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
@@ -404,7 +403,7 @@ static gboolean bookmark_press_cb(GtkWidget *button, GdkEventButton *event, gpoi
 {
 	auto bm = static_cast<BookMarkData *>(data);
 
-	if (event->button != MOUSE_BUTTON_RIGHT) return FALSE;
+	if (event->button != GDK_BUTTON_SECONDARY) return FALSE;
 
 	bookmark_menu_popup(bm, button, event->button, event->time, FALSE);
 

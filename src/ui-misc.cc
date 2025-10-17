@@ -1379,13 +1379,14 @@ std::vector<ActionItem> get_action_items()
 
 bool defined_mouse_buttons(GdkEventButton *event, gpointer data)
 {
-	bool ret = false;
+	enum MouseButton {
+		MOUSE_BUTTON_8 = 8,
+		MOUSE_BUTTON_9 = 9
+	};
 
-	const auto handle_button = [data](const gchar *action_name)
+	const auto handle_button = [lw = static_cast<LayoutWindow *>(data)](const gchar *action_name)
 	{
 		if (!action_name) return false;
-
-		auto *lw = static_cast<LayoutWindow *>(data);
 
 		if (g_strstr_len(action_name, -1, ".desktop") != nullptr)
 			{
@@ -1406,16 +1407,12 @@ bool defined_mouse_buttons(GdkEventButton *event, gpointer data)
 	switch (event->button)
 		{
 		case MOUSE_BUTTON_8:
-			ret = handle_button(options->mouse_button_8);
-			break;
+			return handle_button(options->mouse_button_8);
 		case MOUSE_BUTTON_9:
-			ret = handle_button(options->mouse_button_9);
-			break;
+			return handle_button(options->mouse_button_9);
 		default:
-			break;
+			return false;
 		}
-
-	return ret;
 }
 
 GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags)
