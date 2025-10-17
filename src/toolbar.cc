@@ -95,7 +95,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 
 	GtkWidget *button = gtk_button_new();
 	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
-	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
+	gq_gtk_box_pack_start(box, button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
 	g_object_set_data_full(G_OBJECT(button), action_name_key, g_strdup(name), g_free);
@@ -234,35 +234,32 @@ void toolbar_apply(ToolbarType bar)
 
 /**
  * @brief Load the current toolbar items into the vbox
- * @param lw
+ * @param toolbar_items
  * @param box The vbox displayed in the preferences Toolbar tab
- * @param bar Main or Status toolbar
  *
  * Get the current contents of the toolbar, both menu items
  * and desktop items, and load them into the vbox
  */
-static void toolbarlist_populate(LayoutWindow *lw, GtkBox *box, ToolbarType bar)
+static void toolbarlist_populate(GList *toolbar_items, GtkBox *box)
 {
-	GList *work = g_list_first(lw->toolbar_actions[bar]);
-
-	while (work)
+	for (GList *work = toolbar_items; work; work = work->next)
 		{
 		auto name = static_cast<gchar *>(work->data);
-		gchar *label;
-		gchar *icon;
-		work = work->next;
-
-		if (file_extension_match(name, ".desktop"))
-			{
-			get_desktop_data(name, &label, &icon);
-			}
-		else
-			{
-			get_toolbar_item(name, &label, &icon);
-			}
 
 		if (g_strcmp0(name, "Separator") != 0)
 			{
+			g_autofree gchar *label = nullptr;
+			g_autofree gchar *icon = nullptr;
+
+			if (file_extension_match(name, ".desktop"))
+				{
+				get_desktop_data(name, &label, &icon);
+				}
+			else
+				{
+				get_toolbar_item(name, &label, &icon);
+				}
+
 			toolbarlist_add_button(name, label, icon, box);
 			}
 		else
@@ -310,7 +307,7 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 	                                            G_CALLBACK(toolbar_menu_add_cb), toolbarlist[bar]);
 	gtk_widget_show(add_button);
 
-	toolbarlist_populate(lw,GTK_BOX(toolbarlist[bar]->vbox), bar);
+	toolbarlist_populate(lw->toolbar_actions[bar], GTK_BOX(toolbarlist[bar]->vbox));
 
 	return widget;
 }
