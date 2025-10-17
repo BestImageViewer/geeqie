@@ -3312,20 +3312,6 @@ void layout_toolbar_add_default(LayoutWindow *lw, ToolbarType type)
 		return;
 		}
 
-	LayoutWindow *lw_first = layout_window_first();
-	if (lw_first && lw_first->toolbar_actions[type])
-		{
-		GList *work_action = lw_first->toolbar_actions[type];
-		while (work_action)
-			{
-			auto action = static_cast<gchar *>(work_action->data);
-			work_action = work_action->next;
-			layout_toolbar_add(lw, type, action); // TODO May change lw_first->toolbar_actions[type]?
-			}
-
-		return;
-		}
-
 	switch (type)
 		{
 		case TOOLBAR_MAIN:
