@@ -312,4 +312,17 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 	return widget;
 }
 
+const gchar *toolbar_type_config_name(ToolbarType type)
+{
+	switch (type)
+		{
+		case TOOLBAR_MAIN:
+			return "toolbar";
+		case TOOLBAR_STATUS:
+			return "statusbar";
+		default:
+			return nullptr;
+		}
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

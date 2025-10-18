@@ -1652,39 +1652,22 @@ static void options_parse_bar(GQParserData *parser_data, const gchar *element_na
 		}
 }
 
+template<ToolbarType type>
 static void options_parse_toolbar(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	if (g_ascii_strcasecmp(element_name, "toolitem") == 0)
 		{
-		layout_toolbar_add_from_config(lw, TOOLBAR_MAIN, attribute_names, attribute_values);
+		layout_toolbar_add_from_config(lw, type, attribute_names, attribute_values);
 		}
 	else if (g_ascii_strcasecmp(element_name, "clear") == 0)
 		{
-		layout_toolbar_clear(lw, TOOLBAR_MAIN);
+		layout_toolbar_clear(lw, type);
 		}
 	else
 		{
-		config_file_error((std::string("Unexpected in <toolbar>: ") + element_name).c_str());
-		}
-
-	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
-}
-
-static void options_parse_statusbar(GQParserData *parser_data, const gchar *element_name, const gchar **attribute_names, const gchar **attribute_values, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-	if (g_ascii_strcasecmp(element_name, "toolitem") == 0)
-		{
-		layout_toolbar_add_from_config(lw, TOOLBAR_STATUS, attribute_names, attribute_values);
-		}
-	else if (g_ascii_strcasecmp(element_name, "clear") == 0)
-		{
-		layout_toolbar_clear(lw, TOOLBAR_STATUS);
-		}
-	else
-		{
-		config_file_error((std::string("Unexpected in <statusbar>: ") + element_name).c_str());
+		g_autofree gchar *message = g_strdup_printf("Unexpected in <%s>: %s", toolbar_type_config_name(type), element_name);
+		config_file_error(message);
 		}
 
 	parser_data->func_push(options_parse_leaf, nullptr, nullptr);
@@ -1737,11 +1720,11 @@ static void options_parse_layout(GQParserData *parser_data, const gchar *element
 		}
 	else if (g_ascii_strcasecmp(element_name, "toolbar") == 0)
 		{
-		parser_data->func_push(options_parse_toolbar, nullptr, lw);
+		parser_data->func_push(options_parse_toolbar<TOOLBAR_MAIN>, nullptr, lw);
 		}
 	else if (g_ascii_strcasecmp(element_name, "statusbar") == 0)
 		{
-		parser_data->func_push(options_parse_statusbar, nullptr, lw);
+		parser_data->func_push(options_parse_toolbar<TOOLBAR_STATUS>, nullptr, lw);
 		}
 	else if (g_ascii_strcasecmp(element_name, "dialogs") == 0)
 		{

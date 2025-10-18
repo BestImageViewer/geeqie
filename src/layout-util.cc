@@ -3036,11 +3036,11 @@ static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 	/* The toolbars need to be regenerated in case they contain a plugin */
 	LayoutWindow *lw = get_current_layout();
 
-	toolbar_select_new(lw, TOOLBAR_MAIN);
-	toolbar_apply(TOOLBAR_MAIN);
-
-	toolbar_select_new(lw, TOOLBAR_STATUS);
-	toolbar_apply(TOOLBAR_STATUS);
+	for (gint i = 0; i < TOOLBAR_COUNT; i++)
+		{
+		toolbar_select_new(lw, static_cast<ToolbarType>(i));
+		toolbar_apply(static_cast<ToolbarType>(i));
+		}
 
 	layout_editors->reload_idle_id = -1;
 	return G_SOURCE_REMOVE;
@@ -3340,31 +3340,16 @@ void layout_toolbar_add_default(LayoutWindow *lw, ToolbarType type)
 }
 
 
-
 void layout_toolbar_write_config(LayoutWindow *lw, ToolbarType type, GString *outstr, gint indent)
 {
-	const gchar *name = nullptr;
-	GList *work = lw->toolbar_actions[type];
-
-	switch (type)
-		{
-		case TOOLBAR_MAIN:
-			name = "toolbar";
-			break;
-		case TOOLBAR_STATUS:
-			name = "statusbar";
-			break;
-		default:
-			break;
-		}
+	const gchar *name = toolbar_type_config_name(type);
 
 	WRITE_NL(); WRITE_FORMAT_STRING("<%s>", name);
 	indent++;
 	WRITE_NL(); WRITE_STRING("<clear/>");
-	while (work)
+	for (GList *work = lw->toolbar_actions[type]; work; work = work->next)
 		{
 		auto action = static_cast<gchar *>(work->data);
-		work = work->next;
 		WRITE_NL(); WRITE_STRING("<toolitem ");
 		write_char_option(outstr, "action", action);
 		WRITE_STRING("/>");

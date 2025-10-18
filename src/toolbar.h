@@ -35,6 +35,8 @@ enum ToolbarType : gint {
 GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar);
 void toolbar_apply(ToolbarType bar);
 
+const gchar *toolbar_type_config_name(ToolbarType type);
+
 #endif
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
