@@ -98,6 +98,9 @@ constexpr gint DIALOG_WIDTH = 750;
 constexpr gint RENAME_WINDOW_WIDTH = 625;
 constexpr gint RENAME_WINDOW_HEIGHT = 635;
 
+constexpr gint PROGRESS_WINDOW_WIDTH = 450;
+constexpr gint PROGRESS_WINDOW_HEIGHT = 150;
+
 /* thumbnail spec has a max depth of 4 (.thumb??/fail/appname/??.png) */
 constexpr gint UTILITY_DELETE_MAX_DEPTH = 5;
 
@@ -406,6 +409,17 @@ struct UtilityData {
 	void (*details_func)(UtilityData *ud, FileData *fd);
 	gboolean (*finalize_func)(FileData *fd);
 	gboolean (*discard_func)(FileData *fd);
+
+	/* progress dialog */
+	GenericDialog *progress_gd;
+	GtkWidget *progress_label;
+	GtkWidget *progress_bar;
+	GtkWidget *progress_spinner;
+	GtkWidget *progress_button_stop;
+	GtkWidget *progress_button_close;
+	gint files_completed;
+	gint files_total;
+	gboolean cancelled;
 };
 
 enum {
@@ -501,6 +515,7 @@ static void file_util_data_free(UtilityData *ud)
 	file_data_list_free(ud->flist);
 
 	if (ud->gd) generic_dialog_close(ud->gd);
+	if (ud->progress_gd) generic_dialog_close(ud->progress_gd);
 
 	g_free(ud->dest_path);
 	g_free(ud->external_command);
@@ -635,6 +650,167 @@ static void file_util_abort_cb(GenericDialog *, gpointer data)
 
 }
 
+/* Progress dialog functions */
+
+static void file_util_progress_close_cb(GenericDialog *gd, gpointer data)
+{
+	auto ud = static_cast<UtilityData *>(data);
+
+	generic_dialog_close(gd);
+	ud->progress_gd = nullptr;
+	ud->progress_label = nullptr;
+	ud->progress_bar = nullptr;
+	ud->progress_spinner = nullptr;
+	ud->progress_button_stop = nullptr;
+	ud->progress_button_close = nullptr;
+}
+
+static void file_util_progress_cancel_cb(GenericDialog *, gpointer data)
+{
+	auto ud = static_cast<UtilityData *>(data);
+	ud->cancelled = TRUE;
+
+	if (ud->progress_button_stop)
+		gtk_widget_set_sensitive(ud->progress_button_stop, FALSE);
+	if (ud->progress_label)
+		gtk_label_set_text(GTK_LABEL(ud->progress_label), _("Cancelling..."));
+}
+
+static void file_util_progress_enable_close(UtilityData *ud)
+{
+	if (!ud->progress_gd) return;
+
+	ud->progress_gd->cancel_cb = file_util_progress_close_cb;
+
+	if (ud->progress_spinner)
+		gtk_spinner_stop(GTK_SPINNER(ud->progress_spinner));
+	if (ud->progress_button_stop)
+		gtk_widget_set_sensitive(ud->progress_button_stop, FALSE);
+	if (ud->progress_button_close)
+		gtk_widget_set_sensitive(ud->progress_button_close, TRUE);
+}
+
+static void file_util_progress_window_new(UtilityData *ud)
+{
+	GtkWidget *hbox;
+	const gchar *title = nullptr;
+
+	/* Don't show progress for very few files */
+	if (ud->files_total < 2) return;
+
+	/* Determine dialog title based on operation type */
+	switch (ud->type)
+		{
+		case UtilityType::COPY:
+			title = _("Copying files");
+			break;
+		case UtilityType::MOVE:
+			title = _("Moving files");
+			break;
+		case UtilityType::DELETE:
+		case UtilityType::DELETE_LINK:
+		case UtilityType::DELETE_FOLDER:
+			title = _("Deleting files");
+			break;
+		case UtilityType::RENAME:
+			title = _("Renaming files");
+			break;
+		default:
+			title = _("Processing files");
+			break;
+		}
+
+	ud->progress_gd = file_util_gen_dlg(title, "file_operation_progress", ud->parent, FALSE, nullptr, ud);
+
+	ud->progress_button_stop = generic_dialog_add_button(ud->progress_gd, GQ_ICON_STOP, _("Stop"),
+	                                                      file_util_progress_cancel_cb, FALSE);
+	gtk_widget_set_sensitive(ud->progress_button_stop, TRUE);
+
+	ud->progress_button_close = generic_dialog_add_button(ud->progress_gd, GQ_ICON_CLOSE, _("Close"),
+	                                                       file_util_progress_close_cb, TRUE);
+	gtk_widget_set_sensitive(ud->progress_button_close, FALSE);
+
+	/* Status label */
+	ud->progress_label = gtk_label_new(_("Starting..."));
+	gtk_label_set_xalign(GTK_LABEL(ud->progress_label), 0.0);
+	gtk_label_set_ellipsize(GTK_LABEL(ud->progress_label), PANGO_ELLIPSIZE_MIDDLE);
+	gq_gtk_box_pack_start(GTK_BOX(ud->progress_gd->vbox), ud->progress_label, FALSE, FALSE, 5);
+	gtk_widget_show(ud->progress_label);
+
+	/* Progress bar and spinner in hbox */
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gq_gtk_box_pack_start(GTK_BOX(ud->progress_gd->vbox), hbox, FALSE, FALSE, 0);
+	gtk_widget_show(hbox);
+
+	ud->progress_bar = gtk_progress_bar_new();
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(ud->progress_bar), 0.0);
+	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(ud->progress_bar), TRUE);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), ud->progress_bar, TRUE, TRUE, 0);
+	gtk_widget_show(ud->progress_bar);
+
+	ud->progress_spinner = gtk_spinner_new();
+	gtk_spinner_start(GTK_SPINNER(ud->progress_spinner));
+	gq_gtk_box_pack_start(GTK_BOX(hbox), ud->progress_spinner, FALSE, FALSE, 5);
+	gtk_widget_show(ud->progress_spinner);
+
+	/* Set default window size */
+	gtk_window_resize(GTK_WINDOW(ud->progress_gd->dialog), PROGRESS_WINDOW_WIDTH, PROGRESS_WINDOW_HEIGHT);
+
+	gtk_widget_show(ud->progress_gd->dialog);
+}
+
+static void file_util_progress_update(UtilityData *ud)
+{
+	if (!ud->progress_gd) return;
+
+	gdouble fraction = (ud->files_total > 0) ? static_cast<gdouble>(ud->files_completed) / ud->files_total : 0.0;
+
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(ud->progress_bar), fraction);
+
+	g_autofree gchar *progress_text = g_strdup_printf(_("%d of %d files"), ud->files_completed, ud->files_total);
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(ud->progress_bar), progress_text);
+
+	/* Update current file label if we have a current file */
+	if (ud->flist && ud->flist->data)
+		{
+		auto fd = static_cast<FileData *>(ud->flist->data);
+		g_autofree gchar *label_text = nullptr;
+
+		/* Show sidecars (e.g., RAW+JPG) if processing with sidecars */
+		if (ud->with_sidecars && fd->sidecar_files)
+			{
+			g_autofree gchar *sidecars = file_data_sc_list_to_string(fd);
+			label_text = g_strdup_printf(_("Processing: %s %s"), fd->name, sidecars);
+			}
+		else
+			{
+			label_text = g_strdup_printf(_("Processing: %s"), fd->name);
+			}
+
+		gtk_label_set_text(GTK_LABEL(ud->progress_label), label_text);
+		}
+}
+
+static void file_util_progress_close(UtilityData *ud)
+{
+	if (!ud->progress_gd) return;
+
+	/* Update to show completion */
+	if (ud->cancelled)
+		{
+		gtk_label_set_text(GTK_LABEL(ud->progress_label), _("Operation cancelled"));
+		}
+	else
+		{
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(ud->progress_bar), 1.0);
+		g_autofree gchar *text = g_strdup_printf(_("%d files completed"), ud->files_total);
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(ud->progress_bar), text);
+		gtk_label_set_text(GTK_LABEL(ud->progress_label), _("Operation completed"));
+		}
+
+	file_util_progress_enable_close(ud);
+}
+
 
 static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GList *list, gpointer data)
 {
@@ -705,11 +881,16 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 		else
 			file_data_free_ci(fd);
 		file_data_unref(fd);
+
+		/* Update progress */
+		ud->files_completed++;
+		file_util_progress_update(ud);
 		}
 
 	if (!resume_data) /* end of the list */
 		{
 		ud->phase = UtilityPhase::DONE;
+		file_util_progress_close(ud);
 		file_util_dialog_run(ud);
 		}
 
@@ -736,6 +917,21 @@ static gboolean file_util_perform_ci_internal(gpointer data)
 		/* this is removed when ud is destroyed */
 		ud->perform_idle_id = g_idle_add(file_util_perform_ci_internal, ud);
 		return G_SOURCE_CONTINUE;
+		}
+
+	/* Initialize progress dialog on first call */
+	if (ud->files_total == 0 && ud->flist)
+		{
+		ud->files_total = g_list_length(ud->flist);
+		ud->files_completed = 0;
+		file_util_progress_window_new(ud);
+		}
+
+	/* Check if operation was cancelled */
+	if (ud->cancelled)
+		{
+		file_util_perform_ci_cb(nullptr, EDITOR_ERROR_SKIPPED, ud->flist, ud);
+		return G_SOURCE_REMOVE;
 		}
 
 	g_assert(ud->flist);
