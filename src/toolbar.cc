@@ -57,7 +57,7 @@ struct ToolbarData
 
 const gchar *action_name_key = "action_name";
 
-ToolbarData *toolbarlist[2];
+ToolbarData *toolbarlist[TOOLBAR_COUNT];
 
 } // namespace
 

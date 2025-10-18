@@ -26,7 +26,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
+enum ToolbarType : gint;
 
 struct LayoutWindow;
 

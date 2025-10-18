@@ -78,12 +78,6 @@ enum MetadataFormat {
 	METADATA_FORMATTED	= 1  /**< for display only */
 };
 
-enum ToolbarType {
-	TOOLBAR_MAIN,
-	TOOLBAR_STATUS,
-	TOOLBAR_COUNT
-};
-
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, fclose)
 
 #define FILEDATA_MARKS_SIZE 10

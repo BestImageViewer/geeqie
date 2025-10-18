@@ -24,9 +24,13 @@
 
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
-
 struct LayoutWindow;
+
+enum ToolbarType : gint {
+	TOOLBAR_MAIN,
+	TOOLBAR_STATUS,
+	TOOLBAR_COUNT
+};
 
 GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar);
 void toolbar_apply(ToolbarType bar);

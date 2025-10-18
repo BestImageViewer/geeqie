@@ -29,7 +29,7 @@
 
 #include "bar-sort.h"
 #include "filedata.h"
-#include "typedefs.h"
+#include "toolbar.h"
 
 enum DirViewType : guint;
 enum FileViewType : guint;
