@@ -91,7 +91,6 @@ namespace
 
 struct WindowNames
 {
-	gboolean displayed;
 	gchar *name;
 	gchar *path;
 };
@@ -2020,7 +2019,6 @@ static gint layout_window_menu_list_sort_cb(gconstpointer a, gconstpointer b)
 
 static GList *layout_window_menu_list()
 {
-	WindowNames *wn;
 	DIR *dp;
 	struct dirent *dir;
 
@@ -2041,12 +2039,11 @@ static GList *layout_window_menu_list()
 		if (g_str_has_suffix(name_file, ".xml"))
 			{
 			g_autofree gchar *name_utf8 = path_to_utf8(name_file);
-			gchar *name_base = g_strndup(name_utf8, strlen(name_utf8) - 4);
 
-			wn  = g_new0(WindowNames, 1);
-			wn->displayed = layout_window_is_displayed(name_base);
-			wn->name = name_base;
+			auto *wn  = g_new0(WindowNames, 1);
+			wn->name = g_strndup(name_utf8, strlen(name_utf8) - 4);
 			wn->path = g_build_filename(pathl, name_utf8, NULL);
+
 			list = g_list_prepend(list, wn);
 			}
 		}
@@ -2099,10 +2096,7 @@ static void layout_menu_new_window_update(LayoutWindow *lw)
 		auto *wn = static_cast<WindowNames *>(work->data);
 		GtkWidget *item = menu_item_add_simple(sub_menu, wn->name,
 		                                       G_CALLBACK(layout_menu_new_window_cb), GINT_TO_POINTER(n));
-		if (wn->displayed)
-			{
-			gtk_widget_set_sensitive(item, FALSE);
-			}
+		gtk_widget_set_sensitive(item, !layout_window_is_displayed(wn->name));
 		}
 }
 
