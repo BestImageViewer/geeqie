@@ -2035,7 +2035,6 @@ struct RenameWindow
 	GenericDialog *gd;
 	LayoutWindow *lw;
 
-	GtkWidget *button_ok;
 	GtkWidget *window_name_entry;
 };
 
@@ -2043,9 +2042,6 @@ struct DeleteWindow
 {
 	GenericDialog *gd;
 	LayoutWindow *lw;
-
-	GtkWidget *button_ok;
-	GtkWidget *group;
 };
 
 static gint layout_window_menu_list_sort_cb(gconstpointer a, gconstpointer b)
@@ -2147,10 +2143,8 @@ static void window_rename_cancel_cb(GenericDialog *, gpointer data)
 	g_free(rw);
 }
 
-static void window_rename_ok(GenericDialog *, gpointer data)
+static void window_rename_ok(RenameWindow *rw)
 {
-	auto rw = static_cast<RenameWindow *>(data);
-
 	g_autolist(WindowNames) list = layout_window_menu_list();
 	const gchar *new_id = gq_gtk_entry_get_text(GTK_ENTRY(rw->window_name_entry));
 
@@ -2187,18 +2181,11 @@ static void window_rename_ok(GenericDialog *, gpointer data)
 	g_free(rw);
 }
 
-static void window_rename_ok_cb(GenericDialog *gd, gpointer data)
+static void window_rename_ok_cb(GenericDialog *, gpointer data)
 {
 	auto rw = static_cast<RenameWindow *>(data);
 
-	window_rename_ok(gd, rw);
-}
-
-static void window_rename_entry_activate_cb(GenericDialog *gd, gpointer data)
-{
-	auto rw = static_cast<RenameWindow *>(data);
-
-	window_rename_ok(gd, rw);
+	window_rename_ok(rw);
 }
 
 static void window_delete_cancel_cb(GenericDialog *, gpointer data)
@@ -2367,8 +2354,8 @@ static void layout_menu_window_rename_cb(GtkWidget *, gpointer data)
 	rw->lw = lw;
 
 	rw->gd = generic_dialog_new(_("Rename window"), "rename_window", nullptr, FALSE, window_rename_cancel_cb, rw);
-	rw->button_ok = generic_dialog_add_button(rw->gd, GQ_ICON_OK, _("OK"), window_rename_ok_cb, TRUE);
 
+	generic_dialog_add_button(rw->gd, GQ_ICON_OK, _("OK"), window_rename_ok_cb, TRUE);
 	generic_dialog_add_message(rw->gd, nullptr, _("rename window"), nullptr, FALSE);
 
 	hbox = pref_box_new(rw->gd->vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
@@ -2383,7 +2370,7 @@ static void layout_menu_window_rename_cb(GtkWidget *, gpointer data)
 	gq_gtk_box_pack_start(GTK_BOX(hbox), rw->window_name_entry, TRUE, TRUE, 0);
 	gtk_widget_grab_focus(rw->window_name_entry);
 	gtk_widget_show(rw->window_name_entry);
-	g_signal_connect(rw->window_name_entry, "activate", G_CALLBACK(window_rename_entry_activate_cb), rw);
+	g_signal_connect_swapped(rw->window_name_entry, "activate", G_CALLBACK(window_rename_ok), rw);
 
 	gtk_widget_show(rw->gd->dialog);
 }
@@ -2398,16 +2385,16 @@ static void layout_menu_window_delete_cb(GtkWidget *, gpointer data)
 	dw->lw = lw;
 
 	dw->gd = generic_dialog_new(_("Delete window"), "delete_window", nullptr, TRUE, window_delete_cancel_cb, dw);
-	dw->button_ok = generic_dialog_add_button(dw->gd, GQ_ICON_OK, _("OK"), window_delete_ok_cb, TRUE);
 
+	generic_dialog_add_button(dw->gd, GQ_ICON_OK, _("OK"), window_delete_ok_cb, TRUE);
 	generic_dialog_add_message(dw->gd, nullptr, _("Delete window layout"), nullptr, FALSE);
 
 	hbox = pref_box_new(dw->gd->vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
 	pref_spacer(hbox, PREF_PAD_INDENT);
-	dw->group = pref_box_new(hbox, TRUE, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
-	hbox = pref_box_new(dw->group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	pref_label_new(hbox, (lw->options.id));
+	GtkWidget *group = pref_box_new(hbox, TRUE, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
+	pref_label_new(hbox, lw->options.id);
 
 	gtk_widget_show(dw->gd->dialog);
 }
