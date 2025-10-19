@@ -185,13 +185,9 @@ void keyboard_scroll_calc(gint &x, gint &y, const GdkEventKey *event)
 	y *= delta * options->keyboard_scroll_step;
 }
 
-gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	GtkWidget *focused;
-	gboolean stop_signal = FALSE;
-	gint x = 0;
-	gint y = 0;
 
 	if (lw->path_entry && gtk_widget_has_focus(lw->path_entry))
 		{
@@ -209,9 +205,10 @@ gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 			}
 		}
 
-	if (lw->vf->file_filter.combo && gtk_widget_has_focus(gtk_bin_get_child(GTK_BIN(lw->vf->file_filter.combo))))
+	if (lw->vf->file_filter.combo)
 		{
-		if (gtk_widget_event(gtk_bin_get_child(GTK_BIN(lw->vf->file_filter.combo)), reinterpret_cast<GdkEvent *>(event)))
+		GtkWidget *combo_entry = gtk_bin_get_child(GTK_BIN(lw->vf->file_filter.combo));
+		if (gtk_widget_has_focus(combo_entry) && gtk_widget_event(combo_entry, reinterpret_cast<GdkEvent *>(event)))
 			{
 			return TRUE;
 			}
@@ -223,13 +220,17 @@ gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 		{
 		return TRUE;
 		}
+
 	if (lw->bar &&
 	    bar_event(lw->bar, reinterpret_cast<GdkEvent *>(event)))
 		{
 		return TRUE;
 		}
 
-	focused = gtk_container_get_focus_child(GTK_CONTAINER(lw->image->widget));
+	GtkWidget *focused = gtk_container_get_focus_child(GTK_CONTAINER(lw->image->widget));
+	gboolean stop_signal = FALSE;
+	gint x = 0;
+	gint y = 0;
 	if (lw->image &&
 	    ((focused && gtk_widget_has_focus(focused)) || (lw->tools && widget == lw->window) || lw->full_screen) )
 		{

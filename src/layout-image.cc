@@ -109,8 +109,7 @@ void layout_image_full_screen_start(LayoutWindow *lw)
 
 	layout_image_set_buttons(lw);
 
-	g_signal_connect(G_OBJECT(lw->full_screen->window), "key_press_event",
-			 G_CALLBACK(layout_key_press_cb), lw);
+	layout_keyboard_init(lw, lw->full_screen->window);
 
 	lw->touchpad_zoom = GTK_EVENT_CONTROLLER(gtk_gesture_zoom_new(lw->full_screen->window));
 	g_signal_connect(lw->touchpad_zoom, "scale-changed", G_CALLBACK(touchpad_zoom_cb), lw);

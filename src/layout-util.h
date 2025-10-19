@@ -32,7 +32,7 @@ struct LayoutWindow;
 
 void keyboard_scroll_calc(gint &x, gint &y, const GdkEventKey *event);
 
-gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
+void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window);
 
 bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, GdkEventButton *event);
 
@@ -63,7 +63,6 @@ void layout_toolbar_write_config(LayoutWindow *lw, ToolbarType type, GString *ou
 void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type);
 void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action);
 void layout_toolbar_add_default(LayoutWindow *lw, ToolbarType type);
-void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window);
 
 void layout_bar_toggle(LayoutWindow *lw);
 void layout_bar_set(LayoutWindow *lw, GtkWidget *bar);
