@@ -285,6 +285,44 @@ void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window)
 			 G_CALLBACK(layout_key_press_cb), lw);
 }
 
+bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, GdkEventButton *event)
+{
+	enum MouseButton {
+		MOUSE_BUTTON_8 = 8,
+		MOUSE_BUTTON_9 = 9
+	};
+
+	const auto handle_button = [lw](const gchar *action_name)
+	{
+		if (!action_name) return false;
+
+		if (g_strstr_len(action_name, -1, ".desktop") != nullptr)
+			{
+			file_util_start_editor_from_filelist(action_name, layout_selection_list(lw), layout_get_path(lw), lw->window);
+			}
+		else
+			{
+			GtkAction *action = gq_gtk_action_group_get_action(lw->action_group, action_name);
+			if (action)
+				{
+				gq_gtk_action_activate(action);
+				}
+			}
+
+		return true;
+	};
+
+	switch (event->button)
+		{
+		case MOUSE_BUTTON_8:
+			return handle_button(options->mouse_button_8);
+		case MOUSE_BUTTON_9:
+			return handle_button(options->mouse_button_9);
+		default:
+			return false;
+		}
+}
+
 /*
  *-----------------------------------------------------------------------------
  * menu callbacks

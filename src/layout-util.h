@@ -34,6 +34,8 @@ void keyboard_scroll_calc(gint &x, gint &y, const GdkEventKey *event);
 
 gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
 
+bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, GdkEventButton *event);
+
 void layout_util_sync_thumb(LayoutWindow *lw);
 void layout_util_sync_marks(LayoutWindow *lw);
 void layout_util_sync_file_filter(LayoutWindow *lw);

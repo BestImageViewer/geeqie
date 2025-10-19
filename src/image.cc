@@ -39,13 +39,13 @@
 #include "image-load.h"
 #include "intl.h"
 #include "layout-image.h"
+#include "layout-util.h"
 #include "layout.h"
 #include "metadata.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
-#include "ui-misc.h"
 
 struct ExifData;
 struct FileCacheData;
@@ -250,7 +250,7 @@ static void image_release_cb(PixbufRenderer *, GdkEventButton *event, gpointer d
 		lw = get_current_layout();
 		}
 
-	defined_mouse_buttons(event, lw);
+	layout_handle_user_defined_mouse_buttons(lw, event);
 }
 
 static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer data)

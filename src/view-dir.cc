@@ -39,6 +39,7 @@
 #include "filedata.h"
 #include "intl.h"
 #include "layout-image.h"
+#include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
 #include "menu.h"
@@ -1106,7 +1107,7 @@ gboolean vd_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 	GtkTreePath *tpath;
 	FileData *fd = nullptr;
 
-	if (defined_mouse_buttons(bevent, vd->layout))
+	if (layout_handle_user_defined_mouse_buttons(vd->layout, bevent))
 		{
 		return TRUE;
 		}

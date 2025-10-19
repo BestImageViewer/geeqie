@@ -224,8 +224,6 @@ struct ActionItem
 
 std::vector<ActionItem> get_action_items();
 
-bool defined_mouse_buttons(GdkEventButton *event, gpointer data);
-
 // Copy pixbuf returned by gtk_icon_theme_load_icon() to avoid GTK+ keeping the old icon theme loaded
 GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags);
 
