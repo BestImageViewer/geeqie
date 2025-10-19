@@ -992,13 +992,32 @@ static gboolean vf_marks_tooltip_cb(GtkWidget *widget,
 	return TRUE;
 }
 
-static void vf_file_filter_save_cb(GtkWidget *, gpointer data)
+static void vf_file_filter_save_cb(GtkEntry *combo_entry, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	g_autofree gchar *entry_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(vf->file_filter.combo)))));
+	const gchar *entry_text = gq_gtk_entry_get_text(combo_entry);
 
-	if (entry_text[0] == '\0' && vf->file_filter.last_selected >= 0)
+	if (entry_text[0] != '\0')
+		{
+		bool text_found = false;
+		for (gint i = 0; !text_found && i < vf->file_filter.count; i++)
+			{
+			gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), i);
+
+			g_autofree gchar *index_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
+			text_found = (g_strcmp0(index_text, entry_text) == 0);
+			}
+
+		if (!text_found)
+			{
+			history_list_add_to_key("file_filter", entry_text, 10);
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), entry_text);
+			vf->file_filter.count++;
+			gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), vf->file_filter.count - 1);
+			}
+		}
+	else if (vf->file_filter.last_selected >= 0)
 		{
 		gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), vf->file_filter.last_selected);
 		g_autofree gchar *remove_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
@@ -1007,36 +1026,10 @@ static void vf_file_filter_save_cb(GtkWidget *, gpointer data)
 
 		gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), -1);
 		vf->file_filter.last_selected = - 1;
-		gq_gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(vf->file_filter.combo))), "");
+		gq_gtk_entry_set_text(combo_entry, "");
 		vf->file_filter.count--;
 		}
-	else
-		{
-		if (entry_text[0] != '\0')
-			{
-			gboolean text_found = FALSE;
 
-			for (gint i = 0; i < vf->file_filter.count; i++)
-				{
-				gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), i);
-
-				g_autofree gchar *index_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
-				if (g_strcmp0(index_text, entry_text) == 0)
-					{
-					text_found = TRUE;
-					break;
-					}
-				}
-
-			if (!text_found)
-				{
-				history_list_add_to_key("file_filter", entry_text, 10);
-				gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), entry_text);
-				vf->file_filter.count++;
-				gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), vf->file_filter.count - 1);
-				}
-			}
-		}
 	vf_refresh(vf);
 }
 
