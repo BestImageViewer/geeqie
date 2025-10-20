@@ -28,6 +28,7 @@
 #include <config.h>
 
 #include "cache.h"
+#include "intl.h"
 #include "main-defines.h"
 #include "options.h"
 #include "rcfile.h"
@@ -39,19 +40,22 @@
  *-----------------------------------------------------------------------------
  */
 
-static GList *filter_list = nullptr;
-static GList *extension_list = nullptr;
-static GList *sidecar_ext_list = nullptr;
+namespace
+{
 
-static GList *file_class_extension_list[FILE_FORMAT_CLASSES];
+GList *filter_list = nullptr;
+GList *extension_list = nullptr;
+GList *sidecar_ext_list = nullptr;
 
-static GList *file_writable_list = nullptr; /* writable files */
-static GList *file_sidecar_list = nullptr; /* files with allowed sidecar */
+GList *file_class_extension_list[FILE_FORMAT_CLASSES];
+
+GList *file_writable_list = nullptr; /* writable files */
+GList *file_sidecar_list = nullptr; /* files with allowed sidecar */
 
 
-static FilterEntry *filter_entry_new(const gchar *key, const gchar *description,
-				     const gchar *extensions, FileFormatClass file_class,
-				     gboolean writable, gboolean allow_sidecar, gboolean enabled)
+FilterEntry *filter_entry_new(const gchar *key, const gchar *description,
+                              const gchar *extensions, FileFormatClass file_class,
+                              gboolean writable, gboolean allow_sidecar, gboolean enabled)
 {
 	FilterEntry *fe;
 
@@ -67,7 +71,7 @@ static FilterEntry *filter_entry_new(const gchar *key, const gchar *description,
 	return fe;
 }
 
-static void filter_entry_free(FilterEntry *fe)
+void filter_entry_free(FilterEntry *fe)
 {
 	if (!fe) return;
 
@@ -76,6 +80,19 @@ static void filter_entry_free(FilterEntry *fe)
 	g_free(fe->extensions);
 	g_free(fe);
 }
+
+} // namespace
+
+const gchar *format_class_list[] = {
+	N_("Unknown"),
+	N_("Image"),
+	N_("RAW Image"),
+	N_("Metadata"),
+	N_("Video"),
+	N_("Collection"),
+	N_("Document"),
+	N_("Archive"),
+};
 
 GList *filter_get_list()
 {

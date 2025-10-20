@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "exif.h"
+
 #include <config.h>
 
 #ifdef __linux__
@@ -37,9 +39,9 @@
 
 #include "cache.h"
 #include "color-man-heif.h"
-#include "exif.h"
 #include "filecache.h"
 #include "filedata.h"
+#include "filefilter.h"
 #include "glua.h"
 #include "intl.h"
 #include "jpeg-parser.h"

@@ -38,7 +38,6 @@
 #include <libraw/libraw.h>
 
 #include "filefilter.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 
 struct UnmapData

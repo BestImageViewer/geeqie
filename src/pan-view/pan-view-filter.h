@@ -25,7 +25,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
+#include "filefilter.h"
 
 struct PanWindow;
 

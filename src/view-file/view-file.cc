@@ -31,6 +31,7 @@
 #include "dnd.h"
 #include "dupe.h"
 #include "filedata.h"
+#include "filefilter.h"
 #include "history-list.h"
 #include "img-view.h"
 #include "intl.h"

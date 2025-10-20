@@ -33,6 +33,8 @@
 
 #include "typedefs.h"
 
+enum FileFormatClass : gint;
+
 struct ExifData;
 struct HistMap;
 

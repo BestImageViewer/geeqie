@@ -51,7 +51,6 @@
 #include "pixbuf-util.h"
 #include "print.h"
 #include "slideshow.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-utildlg.h"

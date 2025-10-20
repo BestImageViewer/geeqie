@@ -25,6 +25,7 @@
 #include <gdk/gdk.h>
 #include <glib.h>
 
+#include "filefilter.h"
 #include "typedefs.h"
 
 enum DupeSelectType : guint;

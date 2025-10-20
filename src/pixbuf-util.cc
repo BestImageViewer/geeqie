@@ -42,8 +42,8 @@
 #include "compat-deprecated.h"
 #include "exif.h"
 #include "filedata.h"
+#include "filefilter.h"
 #include "main-defines.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 
 namespace

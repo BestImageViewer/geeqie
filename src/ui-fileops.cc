@@ -42,7 +42,6 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "md5-util.h"
-#include "typedefs.h"
 #include "ui-utildlg.h"
 #include "utilops.h"
 

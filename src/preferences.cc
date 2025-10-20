@@ -173,17 +173,6 @@ enum {
 	FILETYPES_COLUMN_COUNT
 };
 
-const gchar *format_class_list[] = {
-	N_("Unknown"),
-	N_("Image"),
-	N_("RAW Image"),
-	N_("Metadata"),
-	N_("Video"),
-	N_("Collection"),
-	N_("Document"),
-	N_("Archive")
-	};
-
 /* config memory values */
 static ConfOptions *c_options = nullptr;
 

@@ -26,12 +26,11 @@
 #include "gtest/gtest.h"
 
 #include <string>
-#include <utility>
-#include <vector>
 
 #include <glib.h>
 
 #include "filedata.h"
+#include "filefilter.h"
 
 namespace {
 

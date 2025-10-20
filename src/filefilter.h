@@ -24,7 +24,19 @@
 
 #include <glib.h>
 
-#include "typedefs.h"
+enum FileFormatClass : gint {
+	FORMAT_CLASS_UNKNOWN,
+	FORMAT_CLASS_IMAGE,
+	FORMAT_CLASS_RAWIMAGE,
+	FORMAT_CLASS_META,
+	FORMAT_CLASS_VIDEO,
+	FORMAT_CLASS_COLLECTION,
+	FORMAT_CLASS_DOCUMENT,
+	FORMAT_CLASS_ARCHIVE,
+	FILE_FORMAT_CLASSES
+};
+
+extern const gchar *format_class_list[];
 
 struct FilterEntry {
 	gchar *key;
