@@ -276,22 +276,19 @@ GtkWidget *create_icc_preview(const char *filename)
 #if HAVE_PDF
 GtkWidget *create_pdf_preview(const char *filename)
 {
-	GError* error = nullptr;
-	gint thumb_width = options->thumbnails.max_width;
-	gint thumb_height = options->thumbnails.max_height;
+	g_autofree gchar *uri = g_strconcat("file://", filename, nullptr);
 
-	PopplerDocument* doc = poppler_document_new_from_file(g_strconcat("file://", filename, nullptr), nullptr, &error);
-
+	g_autoptr(GError) error = nullptr;
+	PopplerDocument *doc = poppler_document_new_from_file(uri, nullptr, &error);
 	if (!doc)
 		{
 		log_printf(_("Error loading PDF: %s\n"), error->message);
-		g_error_free(error);
 		return nullptr;
 		}
 
 	/* Get first page
 	 */
-	PopplerPage* page = poppler_document_get_page(doc, 0);
+	PopplerPage *page = poppler_document_get_page(doc, 0);
 	if (!page)
 		{
 		log_printf(_("Failed to get page 0\n"));
@@ -303,15 +300,14 @@ GtkWidget *create_pdf_preview(const char *filename)
 	 */
 	double page_width;
 	double page_height;
-
 	poppler_page_get_size(page, &page_width, &page_height);
 
-	double scale_x = (double)thumb_width / page_width;
-	double scale_y = (double)thumb_height / page_height;
-	double scale = scale_x < scale_y ? scale_x : scale_y;
+	const double scale_x = options->thumbnails.max_width / page_width;
+	const double scale_y = options->thumbnails.max_height / page_height;
+	const double scale = std::min(scale_x, scale_y);
 
-	int target_width = (int)(page_width * scale);
-	int target_height = (int)(page_height * scale);
+	const auto target_width = static_cast<int>(page_width * scale);
+	const auto target_height = static_cast<int>(page_height * scale);
 
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, target_width, target_height);
 	cairo_t* cr = cairo_create(surface);
@@ -321,16 +317,13 @@ GtkWidget *create_pdf_preview(const char *filename)
 
 	cairo_destroy(cr);
 
-	GdkPixbuf* pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, target_width, target_height);
+	g_autoptr(GdkPixbuf) pixbuf = gdk_pixbuf_get_from_surface(surface, 0, 0, target_width, target_height);
 
 	cairo_surface_destroy(surface);
 	g_object_unref(page);
 	g_object_unref(doc);
 
-	GtkWidget* image = gtk_image_new_from_pixbuf(pixbuf);
-	g_object_unref(pixbuf); // GtkImage holds its own ref
-
-	return image;
+	return gtk_image_new_from_pixbuf(pixbuf); // GtkImage holds its own ref of pixbuf
 }
 #endif
 
