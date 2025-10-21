@@ -1827,15 +1827,15 @@ static void cache_local_cb(GtkWidget *widget, gpointer)
 		}
 }
 
-static void help_search_engine_entry_icon_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
+static void help_search_engine_entry_icon_cb(GtkEntry *entry, GtkEntryIconPosition pos, GdkEvent *, gpointer)
 {
 	if (pos == GTK_ENTRY_ICON_PRIMARY)
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(userdata), HELP_SEARCH_ENGINE);
+		gq_gtk_entry_set_text(entry, HELP_SEARCH_ENGINE);
 		}
 	else
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(userdata), "");
+		gq_gtk_entry_set_text(entry, "");
 		}
 }
 
@@ -2158,8 +2158,7 @@ static void config_tab_general(GtkWidget *notebook)
 	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(help_search_engine_entry),
 						GTK_ENTRY_ICON_PRIMARY, _("Default"));
 	g_signal_connect(GTK_ENTRY(help_search_engine_entry), "icon-press",
-						G_CALLBACK(help_search_engine_entry_icon_cb),
-						help_search_engine_entry);
+	                 G_CALLBACK(help_search_engine_entry_icon_cb), nullptr);
 }
 
 /* image tab */

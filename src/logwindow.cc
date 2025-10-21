@@ -319,23 +319,21 @@ static gboolean debug_changed_cb(GtkSpinButton *widget, LogWindow *)
 	return FALSE;
 }
 
-static void search_entry_icon_cb(GtkEntry *, GtkEntryIconPosition pos, GdkEvent *, gpointer userdata)
+static void search_entry_icon_cb(GtkEntry *search_entry_box, GtkEntryIconPosition pos, GdkEvent *, gpointer user_data)
 {
-	auto logwin = static_cast<LogWindow *>(userdata);
+	if (pos != GTK_ENTRY_ICON_SECONDARY) return;
+
+	gq_gtk_entry_set_text(search_entry_box, "");
+
+	auto *logwin = static_cast<LogWindow *>(user_data);
 	GtkTextIter start_find;
 	GtkTextIter end_find;
-	GtkTextBuffer *buffer;
 
-	if (pos == GTK_ENTRY_ICON_SECONDARY)
-		{
-		gq_gtk_entry_set_text(GTK_ENTRY(logwin->search_entry_box), "");
-
-		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text));
-		gtk_text_buffer_get_start_iter(buffer, &start_find);
-		gtk_text_buffer_get_end_iter(buffer, &end_find);
-		gtk_text_buffer_remove_tag_by_name(buffer, "gray_bg", &start_find, &end_find);
-		gtk_text_buffer_remove_tag_by_name(buffer, "green_bg", &start_find, &end_find);
-		}
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text));
+	gtk_text_buffer_get_start_iter(buffer, &start_find);
+	gtk_text_buffer_get_end_iter(buffer, &end_find);
+	gtk_text_buffer_remove_tag_by_name(buffer, "gray_bg", &start_find, &end_find);
+	gtk_text_buffer_remove_tag_by_name(buffer, "green_bg", &start_find, &end_find);
 }
 
 static void filter_entry_icon_cb(GtkEntry *entry, GtkEntryIconPosition, GdkEvent *, gpointer)
@@ -491,7 +489,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	gtk_widget_show(textbox);
 	g_signal_connect(G_OBJECT(textbox), "activate",
 			 G_CALLBACK(log_window_regexp_cb), logwin);
-	g_signal_connect(textbox, "icon-press", G_CALLBACK(filter_entry_icon_cb), logwin);
+	g_signal_connect(textbox, "icon-press", G_CALLBACK(filter_entry_icon_cb), nullptr);
 #endif
 
 	logwin->window = window;
