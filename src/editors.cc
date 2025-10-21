@@ -417,7 +417,7 @@ GList *editor_get_desktop_files()
 	const gchar *xdg_data_dirs_env = getenv("XDG_DATA_DIRS");
 	g_autofree gchar *xdg_data_dirs = (xdg_data_dirs_env && *xdg_data_dirs_env) ? path_to_utf8(xdg_data_dirs_env) : g_strdup("/usr/share");
 
-	g_autofree gchar *all_dirs = g_strconcat(get_rc_dir(), ":", gq_appdir, ":", xdg_data_home_get(), ":", xdg_data_dirs, NULL);
+	g_autofree gchar *all_dirs = g_strjoin(":", get_rc_dir(), gq_appdir, xdg_data_home_get(), xdg_data_dirs, NULL);
 
 	g_auto(GStrv) split_dirs = g_strsplit(all_dirs, ":", 0);
 
