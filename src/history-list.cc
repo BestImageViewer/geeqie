@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "options.h"
+#include "typedefs.h"
 #include "ui-fileops.h"
 
 namespace

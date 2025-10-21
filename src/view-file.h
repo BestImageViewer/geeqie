@@ -28,7 +28,7 @@
 #include <gtk/gtk.h>
 
 #include "filedata.h"
-#include "typedefs.h"
+#include "main-defines.h"
 
 struct LayoutWindow;
 struct ThumbLoader;

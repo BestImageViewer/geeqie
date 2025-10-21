@@ -26,7 +26,7 @@
 #include <glib.h>
 
 #include "filefilter.h"
-#include "typedefs.h"
+#include "main-defines.h"
 
 enum DupeSelectType : guint;
 enum ScrollReset : guint;

@@ -66,7 +66,5 @@ enum MetadataFormat {
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, fclose)
 
-#define FILEDATA_MARKS_SIZE 10
-
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

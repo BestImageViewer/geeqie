@@ -44,7 +44,6 @@
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "slideshow.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 
 struct HistMap;

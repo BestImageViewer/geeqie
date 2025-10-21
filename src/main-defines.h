@@ -79,6 +79,8 @@
 #define CMD_DELETE   "geeqie-delete-command.desktop"
 #define CMD_FOLDER   "geeqie-folder-command.desktop"
 
+#define FILEDATA_MARKS_SIZE 10
+
 #define GQ_ICON_ADD "list-add"
 #define GQ_ICON_REMOVE "list-remove"
 #define GQ_ICON_UNDO "edit-undo"

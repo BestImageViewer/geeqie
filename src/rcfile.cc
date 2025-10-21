@@ -49,7 +49,6 @@
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "slideshow.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
 
