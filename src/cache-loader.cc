@@ -32,7 +32,6 @@
 #include "metadata.h"
 #include "options.h"
 #include "similar.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 
 

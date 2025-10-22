@@ -48,7 +48,6 @@
 #include "main-defines.h"
 #include "misc.h"
 #include "third-party/zonedetect.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 
 struct ExifData;

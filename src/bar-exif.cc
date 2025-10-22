@@ -41,7 +41,6 @@
 #include "metadata.h"
 #include "misc.h"
 #include "rcfile.h"
-#include "typedefs.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-utildlg.h"

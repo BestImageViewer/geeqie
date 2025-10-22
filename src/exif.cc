@@ -63,7 +63,7 @@
 #include "format-raw.h"
 #include "intl.h"
 #include "jpeg-parser.h"
-#include "typedefs.h"
+#include "metadata.h"
 #include "ui-fileops.h"
 
 class FileData;

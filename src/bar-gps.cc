@@ -49,7 +49,6 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 #include "misc.h"
 #include "rcfile.h"
 #include "thumb.h"
-#include "typedefs.h"
 #include "ui-menu.h"
 #include "ui-utildlg.h"
 #include "uri-utils.h"

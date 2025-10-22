@@ -72,7 +72,6 @@
 #include "third-party/zonedetect.h"
 #include "toolbar.h"
 #include "trash.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 #include "ui-tabcomp.h"

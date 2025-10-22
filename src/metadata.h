@@ -25,7 +25,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
 #include "utilops.h"
 
 enum NotifyType : gint;
@@ -36,6 +35,11 @@ class FileData;
 #define KEYWORD_KEY "Xmp.dc.subject"
 #define ORIENTATION_KEY "Xmp.tiff.Orientation"
 #define RATING_KEY "Xmp.xmp.Rating"
+
+enum MetadataFormat : gint {
+	METADATA_PLAIN     = 0, /**< format that can be edited and written back */
+	METADATA_FORMATTED = 1  /**< for display only */
+};
 
 void metadata_cache_free(FileData *fd);
 

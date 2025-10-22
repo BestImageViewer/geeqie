@@ -41,7 +41,6 @@
 #include "glua.h"
 #include "intl.h"
 #include "metadata.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-misc.h"
 

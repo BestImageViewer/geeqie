@@ -59,11 +59,6 @@ enum ChangeError {
 	CHANGE_GENERIC_ERROR           = 1 << 16
 };
 
-enum MetadataFormat {
-	METADATA_PLAIN		= 0, /**< format that can be edited and written back */
-	METADATA_FORMATTED	= 1  /**< for display only */
-};
-
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, fclose)
 
 #endif

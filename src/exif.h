@@ -25,7 +25,8 @@
 #include <glib.h>
 
 #include "color-man.h"
-#include "typedefs.h"
+
+enum MetadataFormat : gint;
 
 struct ExifData;
 struct ExifItem;

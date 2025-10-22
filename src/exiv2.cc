@@ -26,7 +26,6 @@
 #include <exception>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <config.h>
@@ -39,9 +38,9 @@
 
 #include "filedata.h"
 #include "filefilter.h"
+#include "metadata.h"
 #include "misc.h"
 #include "options.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 
 struct ExifItem;
