@@ -467,10 +467,6 @@ void bar_pane_exif_edit_destroy_cb(GtkWidget *, gpointer data)
 	g_free(cdd);
 }
 
-void bar_pane_exif_edit_cancel_cb(GenericDialog *, gpointer)
-{
-}
-
 void bar_pane_exif_edit_ok_cb(GenericDialog *, gpointer data)
 {
 	auto cdd = static_cast<ConfDialogData *>(data);
@@ -546,8 +542,8 @@ void bar_pane_exif_conf_dialog(GtkWidget *widget)
 	cdd->editable = ee ? ee->editable : FALSE;
 
 	cdd->gd = gd = generic_dialog_new(ee ? _("Configure entry") : _("Add entry"), "exif_entry_edit",
-				widget, TRUE,
-				bar_pane_exif_edit_cancel_cb, cdd);
+	                                  widget, TRUE,
+	                                  generic_dialog_dummy_cb, cdd);
 	g_signal_connect(G_OBJECT(gd->dialog), "destroy",
 			 G_CALLBACK(bar_pane_exif_edit_destroy_cb), cdd);
 

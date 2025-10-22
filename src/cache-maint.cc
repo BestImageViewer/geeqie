@@ -965,10 +965,8 @@ static void cache_manager_standard_clean_valid_cb(const gchar *path, gboolean va
 		}
 }
 
-static void cache_manager_standard_clean_start(GenericDialog *, gpointer data)
+static void cache_manager_standard_clean_start(CacheOpsData *cd)
 {
-	auto cd = static_cast<CacheOpsData *>(data);
-
 	if (!cd->remote)
 	{
 		if (cd->list || !gtk_widget_get_sensitive(cd->button_start)) return;
@@ -1010,9 +1008,11 @@ static void cache_manager_standard_clean_start(GenericDialog *, gpointer data)
 		}
 }
 
-static void cache_manager_standard_clean_start_cb(GenericDialog *gd, gpointer data)
+static void cache_manager_standard_clean_start_cb(GenericDialog *, gpointer data)
 {
-	cache_manager_standard_clean_start(gd, data);
+	auto *cd = static_cast<CacheOpsData *>(data);
+
+	cache_manager_standard_clean_start(cd);
 }
 
 static void cache_manager_standard_process(GtkWidget *widget, gboolean clear)
@@ -1075,7 +1075,7 @@ void cache_manager_standard_process_remote(gboolean clear)
 	cd->idle_id = 0;
 	cd->remote = TRUE;
 
-	cache_manager_standard_clean_start(nullptr, cd);
+	cache_manager_standard_clean_start(cd);
 }
 
 static void cache_manager_standard_clean_cb(GtkWidget *widget, gpointer)
@@ -1095,11 +1095,6 @@ static void cache_manager_main_clean_cb(GtkWidget *widget, gpointer)
 }
 
 
-static void dummy_cancel_cb(GenericDialog *, gpointer)
-{
-	/* no op, only so cancel button appears */
-}
-
 static void cache_manager_main_clear_ok_cb(GenericDialog *, gpointer)
 {
 	cache_maintain_home(FALSE, TRUE, nullptr);
@@ -1107,11 +1102,9 @@ static void cache_manager_main_clear_ok_cb(GenericDialog *, gpointer)
 
 static void cache_manager_main_clear_confirm(GtkWidget *parent)
 {
-	GenericDialog *gd;
-
-	gd = generic_dialog_new(_("Clear cache"),
-				"clear_cache", parent, TRUE,
-				dummy_cancel_cb, nullptr);
+	GenericDialog *gd = generic_dialog_new(_("Clear cache"), "clear_cache",
+	                                       parent, TRUE,
+	                                       generic_dialog_dummy_cb, nullptr);
 	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Clear cache"),
 				   _("This will remove all thumbnails and sim. files\nthat have been saved to disk, continue?"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", cache_manager_main_clear_ok_cb, TRUE);

@@ -276,11 +276,6 @@ GenericDialog *file_util_gen_dlg(const gchar *title,
  * because it does not have a mouse center option,
  * and we must center it before show, implement it here.
  */
-static void file_util_warning_dialog_ok_cb(GenericDialog *, gpointer)
-{
-	/* no op */
-}
-
 GenericDialog *file_util_warning_dialog(const gchar *heading, const gchar *message,
 					const gchar *icon_name, GtkWidget *parent)
 {
@@ -288,7 +283,7 @@ GenericDialog *file_util_warning_dialog(const gchar *heading, const gchar *messa
 
 	gd = file_util_gen_dlg(heading, "warning", parent, TRUE, nullptr, nullptr);
 	generic_dialog_add_message(gd, icon_name, heading, message, TRUE);
-	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", file_util_warning_dialog_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", generic_dialog_dummy_cb, TRUE);
 	if (options->place_dialogs_under_mouse)
 		{
 		gq_gtk_window_set_position(GTK_WINDOW(gd->dialog), GTK_WIN_POS_MOUSE);
@@ -1911,11 +1906,6 @@ static void file_util_details_dialog_destroy_cb(GtkWidget *widget, gpointer data
 }
 
 
-static void file_util_details_dialog_ok_cb(GenericDialog *, gpointer)
-{
-	/* no op */
-}
-
 static void file_util_details_dialog_exclude(GenericDialog *gd, gpointer data, gboolean discard)
 {
 	auto ud = static_cast<UtilityData *>(data);
@@ -1992,7 +1982,7 @@ static void file_util_details_dialog(UtilityData *ud, FileData *fd)
 	const gchar *icon_name;
 
 	gd = file_util_gen_dlg(_("File details"), "details", ud->gd->dialog, TRUE, nullptr, ud);
-	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), file_util_details_dialog_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), generic_dialog_dummy_cb, TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_REMOVE, _("Exclude file"), file_util_details_dialog_exclude_cb, FALSE);
 
 	g_object_set_data(G_OBJECT(gd->dialog), "file_data", fd);
@@ -2035,7 +2025,7 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 
 
 	gd = file_util_gen_dlg(_("Overview of changed metadata"), "details", ud->gd->dialog, TRUE, nullptr, ud);
-	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), file_util_details_dialog_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_CLOSE, _("Close"), generic_dialog_dummy_cb, TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_REMOVE, _("Exclude file"), file_util_details_dialog_exclude_cb, FALSE);
 	generic_dialog_add_button(gd, GQ_ICON_REVERT, _("Discard changes"), file_util_details_dialog_discard_cb, FALSE);
 

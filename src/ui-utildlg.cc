@@ -457,16 +457,17 @@ GenericDialog *generic_dialog_new(const gchar *title,
 			     parent, auto_close, cancel_cb, data);
 	return gd;
 }
+
+void generic_dialog_dummy_cb(GenericDialog *, gpointer)
+{
+	/* no op */
+	/* use as argument for generic_dialog_new() to add cancel button */
+}
 /*
  *-----------------------------------------------------------------------------
  * simple warning dialog
  *-----------------------------------------------------------------------------
  */
-
-static void warning_dialog_ok_cb(GenericDialog *, gpointer)
-{
-	/* no op */
-}
 
 GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 			      const gchar *icon_name, GtkWidget *parent)
@@ -474,7 +475,7 @@ GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 	GenericDialog *gd;
 
 	gd = generic_dialog_new(heading, "warning", parent, TRUE, nullptr, nullptr);
-	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", warning_dialog_ok_cb, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", generic_dialog_dummy_cb, TRUE);
 
 	generic_dialog_add_message(gd, icon_name, heading, text, TRUE);
 

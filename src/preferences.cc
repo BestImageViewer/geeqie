@@ -1355,18 +1355,11 @@ static void filter_default_ok_cb(GenericDialog *gd, gpointer)
 	g_idle_add(filter_default_ok_scroll, gd->data);
 }
 
-static void dummy_cancel_cb(GenericDialog *, gpointer)
-{
-	/* no op, only so cancel button appears */
-}
-
 static void filter_default_cb(GtkWidget *widget, gpointer data)
 {
-	GenericDialog *gd;
-
-	gd = generic_dialog_new(_("Reset filters"),
-				"reset_filter", widget, TRUE,
-				dummy_cancel_cb, data);
+	GenericDialog *gd = generic_dialog_new(_("Reset filters"), "reset_filter",
+	                                       widget, TRUE,
+	                                       generic_dialog_dummy_cb, data);
 	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Reset filters"),
 				   _("This will reset the file filters to the defaults.\nContinue?"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", filter_default_ok_cb, TRUE);
@@ -1393,20 +1386,20 @@ static void safe_delete_clear_ok_cb(GenericDialog *, gpointer)
 
 static void safe_delete_clear_cb(GtkWidget *widget, gpointer)
 {
-	GenericDialog *gd;
-	GtkWidget *entry;
-	gd = generic_dialog_new(_("Clear trash"),
-				"clear_trash", widget, TRUE,
-				dummy_cancel_cb, nullptr);
+	GenericDialog *gd = generic_dialog_new(_("Clear trash"), "clear_trash",
+	                                       widget, TRUE,
+	                                       generic_dialog_dummy_cb, nullptr);
 	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Clear trash"),
 				    _("This will remove the trash contents."), FALSE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", safe_delete_clear_ok_cb, TRUE);
-	entry = gtk_entry_new();
+
+	GtkWidget *entry = gtk_entry_new();
 	gtk_widget_set_can_focus(entry, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(entry), FALSE);
 	if (options->file_ops.safe_delete_path) gq_gtk_entry_set_text(GTK_ENTRY(entry), options->file_ops.safe_delete_path);
 	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), entry, FALSE, FALSE, 0);
 	gtk_widget_show(entry);
+
 	gtk_widget_show(gd->dialog);
 }
 
@@ -1433,11 +1426,9 @@ static void image_overlay_default_template_ok_cb(GenericDialog *, gpointer data)
 
 static void image_overlay_default_template_cb(GtkWidget *widget, gpointer data)
 {
-	GenericDialog *gd;
-
-	gd = generic_dialog_new(_("Reset image overlay template string"),
-				"reset_image_overlay_template_string", widget, TRUE,
-				dummy_cancel_cb, data);
+	GenericDialog *gd = generic_dialog_new(_("Reset image overlay template string"),
+	                                       "reset_image_overlay_template_string", widget, TRUE,
+	                                       generic_dialog_dummy_cb, data);
 	generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Reset image overlay template string"),
 				   _("This will reset the image overlay template string to the default.\nContinue?"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", image_overlay_default_template_ok_cb, TRUE);

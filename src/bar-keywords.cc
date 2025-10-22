@@ -784,11 +784,6 @@ void bar_pane_keywords_edit_destroy_cb(GtkWidget *, gpointer data)
 }
 
 
-void bar_pane_keywords_edit_cancel_cb(GenericDialog *, gpointer)
-{
-}
-
-
 void bar_pane_keywords_edit_ok_cb(GenericDialog *, gpointer data)
 {
 	auto cdd = static_cast<ConfDialogData *>(data);
@@ -916,8 +911,8 @@ void bar_pane_keywords_edit_dialog_cb(GtkWidget *, gpointer data)
 	cdd->edit_existing = edit_existing;
 
 	cdd->gd = gd = generic_dialog_new(name ? _("Edit keyword") : _("New keyword"), "keyword_edit",
-				pkd->widget, TRUE,
-				bar_pane_keywords_edit_cancel_cb, cdd);
+	                                  pkd->widget, TRUE,
+	                                  generic_dialog_dummy_cb, cdd);
 	g_signal_connect(G_OBJECT(gd->dialog), "destroy",
 			 G_CALLBACK(bar_pane_keywords_edit_destroy_cb), cdd);
 
@@ -979,19 +974,11 @@ void bar_pane_keywords_disconnect_marks_ok_cb(GenericDialog *, gpointer)
 	keyword_tree_disconnect_marks();
 }
 
-void dummy_cancel_cb(GenericDialog *, gpointer)
-{
-	/* no op, only so cancel button appears */
-}
-
 void bar_pane_keywords_disconnect_marks_cb(GtkWidget *menu_widget, gpointer data)
 {
-	auto pkd = static_cast<PaneKeywordsData *>(data);
-
-	GenericDialog *gd;
-
-	gd = generic_dialog_new(_("Marks Keywords"),
-				"marks_keywords", menu_widget, TRUE, dummy_cancel_cb, pkd);
+	GenericDialog *gd = generic_dialog_new(_("Marks Keywords"), "marks_keywords",
+	                                       menu_widget, TRUE,
+	                                       generic_dialog_dummy_cb, data);
 	generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING,
 				_("Disconnect all Marks Keywords connections?"), _("This will disconnect all Marks Keywords connections"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", bar_pane_keywords_disconnect_marks_ok_cb, TRUE);

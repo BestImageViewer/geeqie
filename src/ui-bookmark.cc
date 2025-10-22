@@ -232,10 +232,6 @@ static void bookmark_edit_destroy_cb(GtkWidget *, gpointer data)
 	g_free(p);
 }
 
-static void bookmark_edit_cancel_cb(GenericDialog *, gpointer)
-{
-}
-
 static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
 {
 	auto p = static_cast<BookPropData *>(data);
@@ -268,7 +264,6 @@ static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
 static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent)
 {
 	BookPropData *p;
-	GenericDialog *gd;
 	GtkWidget *table;
 	const gchar *icon;
 
@@ -279,9 +274,9 @@ static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent
 	p->bb = bookmark_from_string(text);
 	p->bb->parent = g_strdup(key);
 
-	gd = generic_dialog_new(_("Edit Bookmark"), "bookmark_edit",
-				parent, TRUE,
-				bookmark_edit_cancel_cb, p);
+	GenericDialog *gd = generic_dialog_new(_("Edit Bookmark"), "bookmark_edit",
+	                                       parent, TRUE,
+	                                       generic_dialog_dummy_cb, p);
 	g_signal_connect(G_OBJECT(gd->dialog), "destroy",
 			 G_CALLBACK(bookmark_edit_destroy_cb), p);
 
