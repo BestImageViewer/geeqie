@@ -34,7 +34,7 @@
 
 #include <cstdio>
 
-#include "typedefs.h"
+#include "ui-fileops.h"
 
 namespace
 {

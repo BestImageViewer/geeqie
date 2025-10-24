@@ -24,12 +24,15 @@
 
 #include <sys/types.h>
 
+#include <cstdio>
 #include <ctime>
 
 #include <gio/gio.h>
 #include <glib.h>
 
 #include <config.h>
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, fclose)
 
 #ifdef DEBUG
 #define GQ_DEBUG_PATH_UTF8 1

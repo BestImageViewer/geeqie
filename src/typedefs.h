@@ -22,10 +22,6 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
-#include <cstdio>
-
-#include <glib.h>
-
 enum SortType {
 	SORT_NONE,
 	SORT_NAME,
@@ -39,8 +35,6 @@ enum SortType {
 	SORT_RATING,
 	SORT_CLASS
 };
-
-G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, fclose)
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
