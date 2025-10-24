@@ -32,7 +32,6 @@
 #include "filedata.h"
 #include "layout.h"
 #include "options.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
 #include "view-dir.h"

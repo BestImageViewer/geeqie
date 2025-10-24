@@ -55,7 +55,6 @@
 #include "print.h"
 #include "similar.h"
 #include "thumb.h"
-#include "typedefs.h"
 #include "ui-bookmark.h"
 #include "ui-file-chooser.h"
 #include "ui-fileops.h"

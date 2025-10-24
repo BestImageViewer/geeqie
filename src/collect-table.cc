@@ -47,7 +47,6 @@
 #include "misc.h"
 #include "options.h"
 #include "print.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"

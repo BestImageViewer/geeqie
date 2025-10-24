@@ -34,7 +34,6 @@
 #include "layout.h"
 #include "misc.h"
 #include "options.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 #include "ui-tree-edit.h"
 #include "view-dir.h"

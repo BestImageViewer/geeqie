@@ -19,27 +19,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MENU_H
-#define MENU_H
+#include "sort-type.h"
 
-#include <glib-object.h>
-#include <glib.h>
-#include <gtk/gtk.h>
+#include "intl.h"
 
-enum SortType : gint;
+gchar *sort_type_get_text(SortType method)
+{
+	switch (method)
+		{
+		case SORT_SIZE:
+			return _("Sort by size");
+		case SORT_TIME:
+			return _("Sort by date");
+		case SORT_CTIME:
+			return _("Sort by file creation date");
+		case SORT_EXIFTIME:
+			return _("Sort by Exif date original");
+		case SORT_EXIFTIMEDIGITIZED:
+			return _("Sort by Exif date digitized");
+		case SORT_NONE:
+			return _("Unsorted");
+		case SORT_PATH:
+			return _("Sort by path");
+		case SORT_NUMBER:
+			return _("Sort by number");
+		case SORT_RATING:
+			return _("Sort by rating");
+		case SORT_CLASS:
+			return _("Sort by class");
+		case SORT_NAME:
+		default:
+			return _("Sort by name");
+		}
 
-gpointer submenu_item_get_data(GtkWidget *submenu_item);
+	return nullptr;
+}
 
-GtkWidget *submenu_add_edit(GtkWidget *menu, gboolean sensitive, GList *fd_list, GCallback func, gpointer data);
+bool sort_type_requires_metadata(SortType method)
+{
+	return method == SORT_EXIFTIME
+	    || method == SORT_EXIFTIMEDIGITIZED
+	    || method == SORT_RATING;
+}
 
-GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
-                            gboolean show_current, SortType type);
-
-GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data);
-
-GtkWidget *submenu_add_collections(GtkWidget *menu, gboolean sensitive,
-                                   GCallback func, gpointer data);
-
-void popup_menu_bar(GtkWidget *widget, GCallback expander_height_cb);
-#endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

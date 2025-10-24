@@ -30,7 +30,6 @@
 #include "pan-util.h"
 #include "pan-view-filter.h"
 #include "pan-view.h"
-#include "typedefs.h"
 
 namespace
 {

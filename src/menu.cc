@@ -29,6 +29,7 @@
 #include "intl.h"
 #include "main-defines.h"
 #include "pixbuf-util.h"
+#include "sort-type.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 
@@ -99,56 +100,6 @@ GtkWidget *submenu_add_edit(GtkWidget *menu, gboolean sensitive, GList *fd_list,
  * sorting
  *-----------------------------------------------------------------------------
  */
-
-gchar *sort_type_get_text(SortType method)
-{
-	switch (method)
-		{
-		case SORT_SIZE:
-			return _("Sort by size");
-			break;
-		case SORT_TIME:
-			return _("Sort by date");
-			break;
-		case SORT_CTIME:
-			return _("Sort by file creation date");
-			break;
-		case SORT_EXIFTIME:
-			return _("Sort by Exif date original");
-			break;
-		case SORT_EXIFTIMEDIGITIZED:
-			return _("Sort by Exif date digitized");
-			break;
-		case SORT_NONE:
-			return _("Unsorted");
-			break;
-		case SORT_PATH:
-			return _("Sort by path");
-			break;
-		case SORT_NUMBER:
-			return _("Sort by number");
-			break;
-		case SORT_RATING:
-			return _("Sort by rating");
-			break;
-		case SORT_CLASS:
-			return _("Sort by class");
-			break;
-		case SORT_NAME:
-		default:
-			return _("Sort by name");
-			break;
-		}
-
-	return nullptr;
-}
-
-bool sort_type_requires_metadata(SortType method)
-{
-	return method == SORT_EXIFTIME
-	    || method == SORT_EXIFTIMEDIGITIZED
-	    || method == SORT_RATING;
-}
 
 GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
                             gboolean show_current, SortType type)

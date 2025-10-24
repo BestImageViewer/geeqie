@@ -40,7 +40,6 @@
 #include "main.h"
 #include "options.h"
 #include "thumb-standard.h"
-#include "typedefs.h"
 #include "ui-fileops.h"
 
 

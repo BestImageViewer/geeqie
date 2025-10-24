@@ -22,19 +22,5 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
-enum SortType {
-	SORT_NONE,
-	SORT_NAME,
-	SORT_SIZE,
-	SORT_TIME,
-	SORT_CTIME,
-	SORT_PATH,
-	SORT_NUMBER,
-	SORT_EXIFTIME,
-	SORT_EXIFTIMEDIGITIZED,
-	SORT_RATING,
-	SORT_CLASS
-};
-
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

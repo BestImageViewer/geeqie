@@ -29,7 +29,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "typedefs.h"
+enum SortType : gint;
 
 struct CollectTable;
 class FileData;

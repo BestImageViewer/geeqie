@@ -31,7 +31,7 @@
 
 #include <config.h>
 
-#include "typedefs.h"
+#include "sort-type.h"
 
 enum FileFormatClass : gint;
 
