@@ -869,54 +869,36 @@ gboolean vdtree_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 	return (bevent->button != GDK_BUTTON_PRIMARY);
 }
 
-static void vdtree_row_expanded(GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, gpointer data)
+static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GdkPixbuf *pixbuf)
 {
-	auto vd = static_cast<ViewDir *>(data);
-	GtkTreeModel *store;
-	NodeData *nd = nullptr;
-	FileData *fd;
-
-	gtk_tree_view_set_tooltip_column(treeview, DIR_COLUMN_LINK);
-
 	vdtree_populate_path_by_iter(vd, iter, FALSE, nullptr);
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
 
+	GtkTreeModel *store = gtk_tree_view_get_model(treeview);
 	gtk_tree_model_get_iter(store, iter, tpath);
+
+	NodeData *nd = nullptr;
 	gtk_tree_model_get(store, iter, DIR_COLUMN_POINTER, &nd, -1);
 
-	fd = (nd) ? nd->fd : nullptr;
+	FileData *fd = nd ? nd->fd : nullptr;
 	if (fd && islink(fd->path))
 		{
-		vdtree_icon_set_by_iter(vd, iter, vd->pf->link);
+		pixbuf = vd->pf->link;
 		}
-	else
-		{
-		vdtree_icon_set_by_iter(vd, iter, vd->pf->open);
-		}
+	vdtree_icon_set_by_iter(vd, iter, pixbuf);
+}
+
+static void vdtree_row_expanded(GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, gpointer data)
+{
+	gtk_tree_view_set_tooltip_column(treeview, DIR_COLUMN_LINK);
+
+	auto *vd = static_cast<ViewDir *>(data);
+	vdtree_update_row(vd, treeview, iter, tpath, vd->pf->open);
 }
 
 static void vdtree_row_collapsed(GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, gpointer data)
 {
-	auto vd = static_cast<ViewDir *>(data);
-	GtkTreeModel *store;
-	NodeData *nd = nullptr;
-	FileData *fd;
-
-	vdtree_populate_path_by_iter(vd, iter, FALSE, nullptr);
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
-
-	gtk_tree_model_get_iter(store, iter, tpath);
-	gtk_tree_model_get(store, iter, DIR_COLUMN_POINTER, &nd, -1);
-
-	fd = (nd) ? nd->fd : nullptr;
-	if (fd && islink(fd->path))
-		{
-		vdtree_icon_set_by_iter(vd, iter, vd->pf->link);
-		}
-	else
-		{
-		vdtree_icon_set_by_iter(vd, iter, vd->pf->close);
-		}
+	auto *vd = static_cast<ViewDir *>(data);
+	vdtree_update_row(vd, treeview, iter, tpath, vd->pf->close);
 }
 
 static gint vdtree_sort_cb(GtkTreeModel *store, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
@@ -1046,10 +1028,10 @@ ViewDir *vdtree_new(ViewDir *vd, FileData *)
 
 	vdtree_setup_root(vd);
 
-	g_signal_connect(G_OBJECT(vd->view), "row_expanded",
-			 G_CALLBACK(vdtree_row_expanded), vd);
-	g_signal_connect(G_OBJECT(vd->view), "row_collapsed",
-			 G_CALLBACK(vdtree_row_collapsed), vd);
+	g_signal_connect(G_OBJECT(vd->view), "row-expanded",
+	                 G_CALLBACK(vdtree_row_expanded), vd);
+	g_signal_connect(G_OBJECT(vd->view), "row-collapsed",
+	                 G_CALLBACK(vdtree_row_collapsed), vd);
 
 	return vd;
 }
