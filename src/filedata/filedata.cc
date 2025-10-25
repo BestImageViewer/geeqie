@@ -1483,7 +1483,7 @@ gchar *FileData::file_data_sc_list_to_string(FileData *fd)
 
 
 /*
- * add FileDataChangeInfo (see typedefs.h) for the given operation
+ * add FileDataChangeInfo for the given operation
  * uses file_data_add_change_info
  *
  * fails if the fd->change already exists - change operations can't run in parallel

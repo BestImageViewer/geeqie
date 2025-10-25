@@ -23,7 +23,7 @@ Menu processing is in `./src/layout-util.cc menu_entries[]`.
 ## File operation overrides
 
 The standard copy, move, rename, delete and folder create functions can
-be overridden by special plugins. The following defines are in `typedefs.h`:
+be overridden by special plugins. The following defines are in `main-defines.h`:
 
 ```c
 #define CMD_COPY     "geeqie-copy-command.desktop"

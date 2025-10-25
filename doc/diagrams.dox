@@ -165,19 +165,19 @@
  * @startuml
  * 
  * object options.h
- * object typedefs.h
+ * object layout.h
  * 
  * options.h : ConfOptions
  * options.h : \n
  * options.h : Options applicable to **all** Layout Windows
  * options.h : These are in the <global> section of geeqierc.xml
  * options.h : Available to all modules via the global variable **options**
- * typedefs.h : LayoutOptions
- * typedefs.h : \n
- * typedefs.h : Options applicable to **each** Layout Window
- * typedefs.h : These are in the <layout> section of geeqierc.xml
- * typedefs.h : There is one <layout> section for each Layout Window displayed
- * typedefs.h : Available via **<layout_window>->options**
+ * layout.h : LayoutOptions
+ * layout.h : \n
+ * layout.h : Options applicable to **each** Layout Window
+ * layout.h : These are in the <layout> section of geeqierc.xml
+ * layout.h : There is one <layout> section for each Layout Window displayed
+ * layout.h : Available via **<layout_window>->options**
  * 
  * @enduml
  */
