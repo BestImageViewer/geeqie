@@ -1808,7 +1808,6 @@ static GtkWidget *furm_simple_vlabel(GtkWidget *box, const gchar *text, gboolean
 static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_image)
 {
 	GtkTreeModel *store;
-	GtkTreeSelection *selection;
 	GtkWidget *box;
 	GtkWidget *hbox;
 	GtkWidget *box2;
@@ -1843,8 +1842,8 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 
 	file_util_dialog_add_list_column(ud->listview, _("New name"), FALSE, UTILITY_COLUMN_DEST_NAME);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ud->listview));
-	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_SINGLE);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ud->listview));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
 	gtk_tree_selection_set_select_function(selection, file_util_preview_cb, ud, nullptr);
 
 	gtk_tree_view_set_reorderable(GTK_TREE_VIEW(ud->listview), TRUE);

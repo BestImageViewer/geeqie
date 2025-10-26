@@ -2595,7 +2595,6 @@ static void config_tab_files(GtkWidget *notebook)
 	GtkWidget *scrolled;
 	GtkWidget *filter_view;
 	GtkCellRenderer *renderer;
-	GtkTreeSelection *selection;
 	GtkTreeViewColumn *column;
 
 	vbox = scrolled_notebook_page(notebook, _("File Filters"));
@@ -2637,8 +2636,9 @@ static void config_tab_files(GtkWidget *notebook)
 	filter_store = gtk_list_store_new(1, G_TYPE_POINTER);
 	filter_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(filter_store));
 	g_object_unref(filter_store);
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(filter_view));
-	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_SINGLE);
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(filter_view));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
 
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(filter_view), FALSE);
 
@@ -3566,7 +3566,6 @@ static void config_tab_accelerators(GtkWidget *notebook)
 	GtkWidget *scrolled;
 	GtkWidget *accel_view;
 	GtkCellRenderer *renderer;
-	GtkTreeSelection *selection;
 	GtkTreeViewColumn *column;
 
 	vbox = scrolled_notebook_page(notebook, _("Keyboard"));
@@ -3583,8 +3582,9 @@ static void config_tab_accelerators(GtkWidget *notebook)
 
 	accel_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(accel_store));
 	g_object_unref(accel_store);
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(accel_view));
-	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_MULTIPLE);
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(accel_view));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(accel_view), FALSE);
 

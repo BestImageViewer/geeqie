@@ -2486,7 +2486,6 @@ CollectTable *collection_table_new(CollectionData *cd)
 {
 	CollectTable *ct;
 	GtkListStore *store;
-	GtkTreeSelection *selection;
 	gint i;
 
 	ct = g_new0(CollectTable, 1);
@@ -2505,8 +2504,8 @@ CollectTable *collection_table_new(CollectionData *cd)
 	ct->listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ct->listview));
-	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_NONE);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ct->listview));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_NONE);
 
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(ct->listview), FALSE);
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(ct->listview), FALSE);

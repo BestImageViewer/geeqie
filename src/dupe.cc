@@ -4275,7 +4275,6 @@ DupeWindow *dupe_window_new()
 	GtkWidget *label;
 	GtkWidget *button;
 	GtkListStore *store;
-	GtkTreeSelection *selection;
 	GdkGeometry geometry;
 
 	dw = g_new0(DupeWindow, 1);
@@ -4358,8 +4357,8 @@ DupeWindow *dupe_window_new()
 	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_DIMENSIONS, column_sort_cb, dw->sortable, nullptr);
 	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_PATH, column_sort_cb, dw->sortable, nullptr);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
-	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_MULTIPLE);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(dw->listview), TRUE);
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(dw->listview), FALSE);
 
@@ -4404,7 +4403,7 @@ DupeWindow *dupe_window_new()
 	dw->second_listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->second_listview));
-	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_MULTIPLE);
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(dw->second_listview), TRUE);
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(dw->second_listview), FALSE);

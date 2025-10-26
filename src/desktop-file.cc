@@ -379,17 +379,15 @@ void editor_list_window_help_cb(GtkWidget *, gpointer)
 	help_window_show("GuidePluginsConfig.html");
 }
 
-void editor_list_window_selection_changed_cb(GtkWidget *, gpointer data)
+void editor_list_window_selection_changed_cb(GtkTreeSelection *sel, gpointer user_data)
 {
-	auto ewl = static_cast<EditorListWindow *>(data);
-	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));
 	GtkTreeIter iter;
-
 	if (!gtk_tree_selection_get_selected(sel, nullptr, &iter)) return;
 
+	auto *ewl = static_cast<EditorListWindow *>(user_data);
 	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(ewl->view));
-	g_autofree gchar *path = nullptr;
 
+	g_autofree gchar *path = nullptr;
 	gtk_tree_model_get(store, &iter,
 	                   DESKTOP_FILE_COLUMN_PATH, &path,
 	                   -1);
@@ -499,7 +497,6 @@ void editor_list_window_create()
 	GtkWidget *button;
 	GtkWidget *scrolled;
 	GtkCellRenderer *renderer;
-	GtkTreeSelection *selection;
 	GtkTreeViewColumn *column;
 	GtkTreeModel *store;
 	GtkTreeSortable *sortable;
@@ -568,8 +565,8 @@ void editor_list_window_create()
 	gtk_widget_show(scrolled);
 
 	ewl->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(desktop_file_list));
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));
-	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_SINGLE);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
  	g_signal_connect(selection, "changed", G_CALLBACK(editor_list_window_selection_changed_cb), ewl);
 
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(ewl->view), FALSE);

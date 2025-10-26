@@ -1862,7 +1862,6 @@ void vflist_destroy_cb(ViewFile *vf)
 ViewFile *vflist_new(ViewFile *vf)
 {
 	GtkTreeStore *store;
-	GtkTreeSelection *selection;
 	GType flist_types[FILE_COLUMN_COUNT];
 	gint i;
 	gint column;
@@ -1895,8 +1894,8 @@ ViewFile *vflist_new(ViewFile *vf)
 	g_signal_connect(G_OBJECT(vf->listview), "row-collapsed",
 	                 G_CALLBACK(vflist_expand_cb<FALSE>), vf);
 
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
-	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_MULTIPLE);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 	gtk_tree_selection_set_select_function(selection, vflist_select_cb, vf, nullptr);
 
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(vf->listview), FALSE);
