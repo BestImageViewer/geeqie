@@ -61,8 +61,6 @@ namespace
 struct BookButtonData
 {
 	GtkWidget *button;
-	GtkWidget *image;
-	GtkWidget *label;
 
 	gchar *key;
 	gchar *name;
@@ -576,15 +574,14 @@ static void bookmark_populate(BookMarkData *bm)
 			gq_gtk_container_add(b->button, box);
 			gtk_widget_show(box);
 
+			GtkWidget *image;
 			if (b->icon)
 				{
-				GdkPixbuf *pixbuf = nullptr;
-
-				g_autofree gchar *iconl = path_from_utf8(b->icon);
-				pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
+				g_autoptr(GdkPixbuf) pixbuf = nullptr;
 
 				if (isfile(b->icon))
 					{
+					g_autofree gchar *iconl = path_from_utf8(b->icon);
 					pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
 					}
 				else
@@ -600,34 +597,28 @@ static void bookmark_populate(BookMarkData *bm)
 
 				if (pixbuf)
 					{
-					GdkPixbuf *scaled;
 					gint w;
 					gint h;
 
 					w = h = 16;
 					gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON, &w, &h);
 
-					scaled = gdk_pixbuf_scale_simple(pixbuf, w, h,
-									 GDK_INTERP_BILINEAR);
-					b->image = gtk_image_new_from_pixbuf(scaled);
-					g_object_unref(scaled);
-					g_object_unref(pixbuf);
+					g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pixbuf, w, h, GDK_INTERP_BILINEAR);
+					image = gtk_image_new_from_pixbuf(scaled);
 					}
 				else
 					{
-					b->image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
+					image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
 					}
 				}
 			else
 				{
-				b->image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
+				image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
 				}
-			gq_gtk_box_pack_start(GTK_BOX(box), b->image, FALSE, FALSE, 0);
-			gtk_widget_show(b->image);
+			gq_gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 0);
+			gtk_widget_show(image);
 
-			b->label = gtk_label_new(b->name);
-			gq_gtk_box_pack_start(GTK_BOX(box), b->label, FALSE, FALSE, 0);
-			gtk_widget_show(b->label);
+			pref_label_new(box, b->name);
 
 			g_signal_connect(G_OBJECT(b->button), "clicked",
 					 G_CALLBACK(bookmark_select_cb), bm);
