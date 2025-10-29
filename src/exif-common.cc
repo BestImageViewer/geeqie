@@ -887,25 +887,16 @@ gchar *exif_get_data_as_text(ExifData *exif, const gchar *key)
 }
 
 
-static FileCacheData *exif_cache;
-
 static void exif_release_cb(FileData *fd)
 {
-	exif_free(fd->exif);
-	fd->exif = nullptr;
-}
-
-static void exif_init_cache()
-{
-	g_assert(!exif_cache);
-	exif_cache = file_cache_new(exif_release_cb, 4);
+	g_clear_pointer(&fd->exif, exif_free);
 }
 
 ExifData *exif_read_fd(FileData *fd)
 {
-	if (!exif_cache) exif_init_cache();
-
 	if (!fd) return nullptr;
+
+	static FileCacheData *exif_cache = file_cache_new(exif_release_cb, 4);
 
 	if (file_cache_get(exif_cache, fd)) return fd->exif;
 	g_assert(fd->exif == nullptr);
