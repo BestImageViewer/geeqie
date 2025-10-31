@@ -1833,18 +1833,9 @@ static void pan_window_new_real(FileData *dir_fd)
 	pw->thumb_size = PAN_THUMB_SIZE_NORMAL;
 	pw->thumb_gap = PAN_THUMB_GAP_NORMAL;
 
-	if (!pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_EXIF_PAN_DATE, &pw->exif_date_enable))
-		{
-		pw->exif_date_enable = FALSE;
-		}
-	if (!pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_INFO_IMAGE, &pw->info_image_size))
-		{
-		pw->info_image_size = PAN_IMAGE_SIZE_THUMB_NONE;
-		}
-	if (!pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_INFO_EXIF, &pw->info_includes_exif))
-		{
-		pw->info_includes_exif = TRUE;
-		}
+	pw->exif_date_enable = pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_EXIF_PAN_DATE, FALSE);
+	pw->info_image_size = pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_INFO_IMAGE, PAN_IMAGE_SIZE_THUMB_NONE);
+	pw->info_includes_exif = pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_INFO_EXIF, TRUE);
 
 	pw->ignore_symlinks = TRUE;
 
@@ -2026,7 +2017,6 @@ static gboolean pan_warning(FileData *dir_fd)
 	GtkWidget *group;
 	GtkWidget *checkbox;
 	GtkWidget *ct_button;
-	gboolean hide_dlg;
 
 	if (dir_fd && strcmp(dir_fd->path, G_DIR_SEPARATOR_S) == 0)
 		{
@@ -2037,7 +2027,7 @@ static gboolean pan_warning(FileData *dir_fd)
 	if (options->thumbnails.enable_caching &&
 	    options->thumbnails.spec_standard) return FALSE;
 
-	if (!pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_HIDE_WARNING, &hide_dlg)) hide_dlg = FALSE;
+	gboolean hide_dlg = pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_HIDE_WARNING, FALSE);
 	if (hide_dlg) return FALSE;
 
 	gd = generic_dialog_new(_("Pan View Performance"), "pan_view_warning", nullptr, FALSE,

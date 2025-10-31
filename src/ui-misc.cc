@@ -1106,24 +1106,14 @@ void pref_list_int_set(const gchar *group, const gchar *key, gint value)
 	pref_list_set(group, key, PREF_LIST_MARKER_INT, std::to_string(value).c_str());
 }
 
-gboolean pref_list_int_get(const gchar *group, const gchar *key, gint *result)
+gint pref_list_int_get(const gchar *group, const gchar *key, gint fallback)
 {
+	if (!group || !key) return fallback;
+
 	const gchar *text;
+	if (!pref_list_get(group, key, PREF_LIST_MARKER_INT, &text) || !text) return fallback;
 
-	if (!group || !key)
-		{
-		*result = 0;
-		return FALSE;
-		}
-
-	if (pref_list_get(group, key, PREF_LIST_MARKER_INT, &text) && text)
-		{
-		*result = static_cast<gint>(strtol(text, nullptr, 10));
-		return TRUE;
-		}
-
-	*result = 0;
-	return FALSE;
+	return static_cast<gint>(strtol(text, nullptr, 10));
 }
 
 void pref_color_button_set_cb(GtkWidget *widget, gpointer data)

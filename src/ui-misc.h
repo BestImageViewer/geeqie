@@ -195,7 +195,7 @@ void sizer_set_limits(GtkWidget *sizer,
 
 
 void pref_list_int_set(const gchar *group, const gchar *key, gint value);
-gboolean pref_list_int_get(const gchar *group, const gchar *key, gint *result);
+gint pref_list_int_get(const gchar *group, const gchar *key, gint fallback);
 
 
 void pref_color_button_set_cb(GtkWidget *widget, gpointer data);
