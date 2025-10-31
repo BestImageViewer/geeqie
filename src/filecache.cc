@@ -20,6 +20,8 @@
 
 #include "filecache.h"
 
+#include <config.h>
+
 #include "filedata.h"
 
 /* this implements a simple LRU algorithm */
@@ -77,6 +79,22 @@ void file_cache_remove_entry(FileCacheData *fc, GList *link)
 	g_free(fe);
 }
 
+void file_cache_notify_cb(FileData *fd, NotifyType type, gpointer data)
+{
+	/* invalidate the entry on each file change */
+	if (!(type & (NOTIFY_REREAD | NOTIFY_CHANGE))) return;
+
+	DEBUG_1("Notify cache: %s %04x", fd->path, type);
+
+	auto *fc = static_cast<FileCacheData *>(data);
+	file_cache_dump(fc);
+
+	GList *work = g_list_find_custom(fc->list, fd, reinterpret_cast<GCompareFunc>(file_cache_entry_compare_fd));
+	if (!work) return;
+
+	file_cache_remove_entry(fc, work);
+}
+
 void file_cache_shrink_to_max_size(FileCacheData *fc)
 {
 	file_cache_dump(fc);
@@ -91,9 +109,6 @@ void file_cache_shrink_to_max_size(FileCacheData *fc)
 }
 
 } // namespace
-
-static void file_cache_notify_cb(FileData *fd, NotifyType type, gpointer data);
-static void file_cache_remove_fd(FileCacheData *fc, FileData *fd);
 
 FileCacheData *file_cache_new(FileCacheReleaseFunc release, gulong max_size)
 {
@@ -133,7 +148,8 @@ gboolean file_cache_get(FileCacheData *fc, FileData *fd)
 	if (file_data_check_changed_files(fd))
 		{
 		/* file has been changed, cache entry is no longer valid */
-		file_cache_remove_fd(fc, fd);
+		file_cache_dump(fc);
+		file_cache_remove_entry(fc, work);
 		return FALSE;
 		}
 
@@ -161,26 +177,5 @@ void file_cache_set_max_size(FileCacheData *fc, gulong size)
 {
 	fc->max_size = size;
 	file_cache_shrink_to_max_size(fc);
-}
-
-static void file_cache_remove_fd(FileCacheData *fc, FileData *fd)
-{
-	file_cache_dump(fc);
-
-	GList *work = g_list_find_custom(fc->list, fd, reinterpret_cast<GCompareFunc>(file_cache_entry_compare_fd));
-	if (!work) return;
-
-	file_cache_remove_entry(fc, work);
-}
-
-static void file_cache_notify_cb(FileData *fd, NotifyType type, gpointer data)
-{
-	auto fc = static_cast<FileCacheData *>(data);
-
-	if (type & (NOTIFY_REREAD | NOTIFY_CHANGE)) /* invalidate the entry on each file change */
-		{
-		DEBUG_1("Notify cache: %s %04x", fd->path, type);
-		file_cache_remove_fd(fc, fd);
-		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
