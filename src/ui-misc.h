@@ -198,10 +198,8 @@ void pref_list_int_set(const gchar *group, const gchar *key, gint value);
 gint pref_list_int_get(const gchar *group, const gchar *key, gint fallback);
 
 
-void pref_color_button_set_cb(GtkWidget *widget, gpointer data);
-GtkWidget *pref_color_button_new(GtkWidget *parent_box,
-				 const gchar *title, GdkRGBA *color,
-				 GCallback func, gpointer data);
+GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title,
+                                 const GdkRGBA *color, GdkRGBA *result);
 
 gchar *text_widget_text_pull(GtkWidget *text_widget, gboolean include_hidden_chars = FALSE);
 gchar *text_widget_text_pull_selected(GtkWidget *text_widget);
