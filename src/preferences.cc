@@ -2221,18 +2221,13 @@ static void config_tab_image(GtkWidget *notebook)
 	pref_checkbox_new_int(group, _("Use custom border color in fullscreen mode"),
 			      options->image.use_custom_border_color_in_fullscreen, &c_options->image.use_custom_border_color_in_fullscreen);
 
-	pref_color_button_new(group, _("Border color"), &options->image.border_color,
-			      G_CALLBACK(pref_color_button_set_cb), &c_options->image.border_color);
-
+	pref_color_button_new(group, _("Border color"), &options->image.border_color, &c_options->image.border_color);
 	c_options->image.border_color = options->image.border_color;
 
-	pref_color_button_new(group, _("Alpha channel color 1"), &options->image.alpha_color_1,
-			      G_CALLBACK(pref_color_button_set_cb), &c_options->image.alpha_color_1);
-
-	pref_color_button_new(group, _("Alpha channel color 2"), &options->image.alpha_color_2,
-			      G_CALLBACK(pref_color_button_set_cb), &c_options->image.alpha_color_2);
-
+	pref_color_button_new(group, _("Alpha channel color 1"), &options->image.alpha_color_1, &c_options->image.alpha_color_1);
 	c_options->image.alpha_color_1 = options->image.alpha_color_1;
+
+	pref_color_button_new(group, _("Alpha channel color 2"), &options->image.alpha_color_2, &c_options->image.alpha_color_2);
 	c_options->image.alpha_color_2 = options->image.alpha_color_2;
 }
 

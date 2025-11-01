@@ -1116,14 +1116,7 @@ gint pref_list_int_get(const gchar *group, const gchar *key, gint fallback)
 	return static_cast<gint>(strtol(text, nullptr, 10));
 }
 
-void pref_color_button_set_cb(GtkWidget *widget, gpointer data)
-{
-	auto color = static_cast<GdkRGBA *>(data);
-
-	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(widget), color);
-}
-
-GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title, GdkRGBA *color, GCallback func, gpointer data)
+GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title, const GdkRGBA *color, GdkRGBA *result)
 {
 	GtkWidget *button;
 
@@ -1136,7 +1129,7 @@ GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title, GdkR
 		button = gtk_color_button_new();
 		}
 
-	if (func) g_signal_connect(G_OBJECT(button), "color-set", func, data);
+	if (result) g_signal_connect(G_OBJECT(button), "color-set", G_CALLBACK(gtk_color_chooser_get_rgba), result);
 
 	if (title)
 		{
