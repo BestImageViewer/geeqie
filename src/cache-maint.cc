@@ -1015,7 +1015,8 @@ static void cache_manager_standard_clean_start_cb(GenericDialog *, gpointer data
 	cache_manager_standard_clean_start(cd);
 }
 
-static void cache_manager_standard_process(GtkWidget *widget, gboolean clear)
+template<gboolean clear>
+static void cache_manager_standard_process(GtkWidget *widget, gpointer)
 {
 	CacheOpsData *cd;
 	const gchar *icon_name;
@@ -1076,16 +1077,6 @@ void cache_manager_standard_process_remote(gboolean clear)
 	cd->remote = TRUE;
 
 	cache_manager_standard_clean_start(cd);
-}
-
-static void cache_manager_standard_clean_cb(GtkWidget *widget, gpointer)
-{
-	cache_manager_standard_process(widget, FALSE);
-}
-
-static void cache_manager_standard_clear_cb(GtkWidget *widget, gpointer)
-{
-	cache_manager_standard_process(widget, TRUE);
 }
 
 
@@ -1594,12 +1585,12 @@ void cache_manager_show()
 	table = pref_table_new(group, 2, 2, FALSE, FALSE);
 
 	button = pref_table_button(table, 0, 0, GQ_ICON_CLEAR, _("Clean up"),
-				   G_CALLBACK(cache_manager_standard_clean_cb), cache_manager);
+	                           G_CALLBACK(cache_manager_standard_process<FALSE>), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 0, _("Remove orphaned or outdated thumbnails."), GTK_ALIGN_START);
 
 	button = pref_table_button(table, 0, 1, GQ_ICON_DELETE, _("Clear cache"),
-				   G_CALLBACK(cache_manager_standard_clear_cb), cache_manager);
+	                           G_CALLBACK(cache_manager_standard_process<TRUE>), cache_manager);
 	gtk_size_group_add_widget(sizegroup, button);
 	pref_table_label(table, 1, 1, _("Delete all cached thumbnails."), GTK_ALIGN_START);
 
