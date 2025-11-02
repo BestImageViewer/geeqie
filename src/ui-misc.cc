@@ -40,6 +40,24 @@
 #include "main-defines.h"
 #include "misc.h"
 
+namespace
+{
+
+void pref_link_sensitivity_cb(GtkWidget *watch, GtkStateFlags, gpointer data)
+{
+	auto *widget = static_cast<GtkWidget *>(data);
+
+	gtk_widget_set_sensitive(widget, gtk_widget_is_sensitive(watch));
+}
+
+inline void pref_link_sensitivity(GtkWidget *widget, GtkWidget *watch)
+{
+	g_signal_connect(G_OBJECT(watch), "state-flags-changed",
+	                 G_CALLBACK(pref_link_sensitivity_cb), widget);
+}
+
+} // namespace
+
 /*
  *-----------------------------------------------------------------------------
  * widget and layout utilities
@@ -448,19 +466,6 @@ GtkWidget *pref_spin_new_int(GtkWidget *parent_box, const gchar *text, const gch
 			     static_cast<gdouble>(min), static_cast<gdouble>(max), static_cast<gdouble>(step), 0,
 			     value,
 			     G_CALLBACK(pref_spin_int_cb), value_var);
-}
-
-static void pref_link_sensitivity_cb(GtkWidget *watch, GtkStateType, gpointer data)
-{
-	auto widget = static_cast<GtkWidget *>(data);
-
-	gtk_widget_set_sensitive(widget, gtk_widget_is_sensitive(watch));
-}
-
-void pref_link_sensitivity(GtkWidget *widget, GtkWidget *watch)
-{
-	g_signal_connect(G_OBJECT(watch), "state_changed",
-			 G_CALLBACK(pref_link_sensitivity_cb), widget);
 }
 
 void pref_signal_block_data(GtkWidget *widget, gpointer data)

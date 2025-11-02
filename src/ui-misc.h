@@ -137,8 +137,6 @@ GtkWidget *pref_spin_new_int(GtkWidget *parent_box, const gchar *text, const gch
 			     gint min, gint max, gint step,
 			     gint value, gint *value_var);
 
-void pref_link_sensitivity(GtkWidget *widget, GtkWidget *watch);
-
 void pref_signal_block_data(GtkWidget *widget, gpointer data);
 void pref_signal_unblock_data(GtkWidget *widget, gpointer data);
 
