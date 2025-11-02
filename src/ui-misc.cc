@@ -780,20 +780,6 @@ static gboolean date_selection_popup_keypress_cb(GtkWidget *, GdkEventKey *event
 	return FALSE;
 }
 
-static void date_selection_day_cb(GtkWidget *, gpointer data)
-{
-	auto ds = static_cast<DateSelection *>(data);
-
-	date_selection_popup_sync(ds);
-}
-
-static void date_selection_doubleclick_cb(GtkWidget *, gpointer data)
-{
-	auto ds = static_cast<DateSelection *>(data);
-
-	date_selection_popup_hide(ds);
-}
-
 static void date_selection_popup(DateSelection *ds)
 {
 	GDateTime *date;
@@ -826,10 +812,10 @@ static void date_selection_popup(DateSelection *ds)
 #endif
 	g_date_time_unref(date);
 
-	g_signal_connect(G_OBJECT(ds->calendar), "day_selected",
-			 G_CALLBACK(date_selection_day_cb), ds);
-	g_signal_connect(G_OBJECT(ds->calendar), "day_selected_double_click",
-			G_CALLBACK(date_selection_doubleclick_cb), ds);
+	g_signal_connect_swapped(G_OBJECT(ds->calendar), "day-selected",
+	                         G_CALLBACK(date_selection_popup_sync), ds);
+	g_signal_connect_swapped(G_OBJECT(ds->calendar), "day-selected-double-click",
+	                         G_CALLBACK(date_selection_popup_hide), ds);
 
 	gtk_widget_realize(ds->window);
 
