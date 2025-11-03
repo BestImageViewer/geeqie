@@ -180,18 +180,6 @@ GDateTime *date_selection_get(GtkWidget *widget);
 void date_selection_time_set(GtkWidget *widget, time_t t);
 
 
-enum SizerPositionType {
-	SIZER_POS_LEFT   = 1 << 0,
-	SIZER_POS_RIGHT  = 1 << 1,
-	SIZER_POS_TOP    = 1 << 2,
-	SIZER_POS_BOTTOM = 1 << 3
-};
-
-void sizer_set_limits(GtkWidget *sizer,
-		      gint hsize_min, gint hsize_max,
-		      gint vsize_min, gint vsize_max);
-
-
 void pref_list_int_set(const gchar *group, const gchar *key, gint value);
 gint pref_list_int_get(const gchar *group, const gchar *key, gint fallback);
 
