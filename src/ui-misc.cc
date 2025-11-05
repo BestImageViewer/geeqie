@@ -1120,7 +1120,11 @@ GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title, cons
 		button = gtk_color_button_new();
 		}
 
-	if (result) g_signal_connect(G_OBJECT(button), "color-set", G_CALLBACK(gtk_color_chooser_get_rgba), result);
+	if (result)
+		{
+		g_signal_connect(G_OBJECT(button), "color-set", G_CALLBACK(gtk_color_chooser_get_rgba), result);
+		*result = *color;
+		}
 
 	if (title)
 		{
