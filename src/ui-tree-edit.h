@@ -68,7 +68,6 @@ void widget_auto_scroll_stop(GtkWidget *widget);
 /*
  * Various g_list utils, do not really fit anywhere, so they are here.
  */
-GList *uig_list_insert_link(GList *list, GList *link, gpointer data);
 GList *uig_list_insert_list(GList *parent, GList *insert_link, GList *list);
 
 

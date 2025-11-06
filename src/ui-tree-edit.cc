@@ -563,31 +563,6 @@ gint widget_auto_scroll_start(GtkWidget *widget, GtkAdjustment *v_adj, gint scro
  *-------------------------------------------------------------------
  */
 
-GList *uig_list_insert_link(GList *list, GList *link, gpointer data)
-{
-	GList *new_list;
-
-	if (!list || link == list) return g_list_prepend(list, data);
-	if (!link) return g_list_append(list, data);
-
-	new_list = g_list_alloc();
-	new_list->data = data;
-
-	if (link->prev)
-		{
-		link->prev->next = new_list;
-		new_list->prev = link->prev;
-		}
-	else
-		{
-		list = new_list;
-		}
-	link->prev = new_list;
-	new_list->next = link;
-
-	return list;
-}
-
 GList *uig_list_insert_list(GList *parent, GList *insert_link, GList *list)
 {
 	GList *end;
