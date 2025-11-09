@@ -985,17 +985,6 @@ static gboolean vd_auto_scroll_idle_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static gboolean vd_auto_scroll_notify_cb(GtkWidget *, gint, gint, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
-
-	if (!vd->drop_fd || vd->drop_list) return FALSE;
-
-	if (!vd->drop_scroll_id) vd->drop_scroll_id = g_idle_add(vd_auto_scroll_idle_cb, vd);
-
-	return TRUE;
-}
-
 static gboolean vd_dnd_drop_motion(GtkWidget *, GdkDragContext *context, gint x, gint y, guint time, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
@@ -1016,7 +1005,18 @@ static gboolean vd_dnd_drop_motion(GtkWidget *, GdkDragContext *context, gint x,
 	if (vd->drop_fd)
 		{
 		GtkAdjustment *adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(vd->view));
-		widget_auto_scroll_start(vd->view, adj, -1, -1, vd_auto_scroll_notify_cb, vd);
+		const auto vd_auto_scroll_notify_cb = [vd](GtkWidget *, GdkPoint)
+		{
+			if (!vd->drop_fd || vd->drop_list) return false;
+
+			if (!vd->drop_scroll_id)
+				{
+				vd->drop_scroll_id = g_idle_add(vd_auto_scroll_idle_cb, vd);
+				}
+
+			return true;
+		};
+		widget_auto_scroll_start(vd->view, adj, -1, -1, vd_auto_scroll_notify_cb);
 		}
 
 	return FALSE;

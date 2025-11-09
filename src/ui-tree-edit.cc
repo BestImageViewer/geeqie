@@ -409,8 +409,7 @@ struct AutoScrollData
 	GtkAdjustment *adj;
 	gint max_step;
 
-	gint (*notify_func)(GtkWidget *, gint, gint, gpointer);
-	gpointer notify_data;
+	AutoScrollNotifyFunc notify_func;
 };
 
 void widget_auto_scroll_stop(GtkWidget *widget)
@@ -471,7 +470,7 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 		if (gtk_adjustment_get_value(sd->adj) != CLAMP(gtk_adjustment_get_value(sd->adj) + amt, gtk_adjustment_get_lower(sd->adj), gtk_adjustment_get_upper(sd->adj) - gtk_adjustment_get_page_size(sd->adj)))
 			{
 			/* only notify when scrolling is needed */
-			if (sd->notify_func && !sd->notify_func(sd->widget, pos.x, pos.y, sd->notify_data))
+			if (sd->notify_func && !sd->notify_func(sd->widget, pos))
 				{
 				sd->timer_id = 0;
 				widget_auto_scroll_stop(sd->widget);
@@ -488,10 +487,10 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 
 /**
  * @brief Auto scroll, set scroll_speed or region_size to -1 to their respective the defaults
- * notify_func will be called before a scroll, return FALSE to turn off autoscroll
+ * notify_func will be called before a scroll, return false to turn off autoscroll
  */
 gint widget_auto_scroll_start(GtkWidget *widget, GtkAdjustment *v_adj, gint scroll_speed, gint region_size,
-			      gint (*notify_func)(GtkWidget *widget, gint x, gint y, gpointer data), gpointer notify_data)
+                              const AutoScrollNotifyFunc &notify_func)
 {
 	AutoScrollData *sd;
 
@@ -506,9 +505,7 @@ gint widget_auto_scroll_start(GtkWidget *widget, GtkAdjustment *v_adj, gint scro
 	sd->region_size = region_size;
 	sd->max_step = 1;
 	sd->timer_id = g_timeout_add(scroll_speed, widget_auto_scroll_cb, sd);
-
 	sd->notify_func = notify_func;
-	sd->notify_data = notify_data;
 
 	g_object_set_data(G_OBJECT(widget), "autoscroll", sd);
 

@@ -1516,18 +1516,6 @@ static gboolean collection_table_auto_scroll_idle_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static gboolean collection_table_auto_scroll_notify_cb(GtkWidget *, gint, gint, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
-
-	if (!ct->drop_idle_id)
-		{
-		ct->drop_idle_id = g_idle_add(collection_table_auto_scroll_idle_cb, ct);
-		}
-
-	return TRUE;
-}
-
 static void collection_table_scroll(CollectTable *ct, gboolean scroll)
 {
 	if (!scroll)
@@ -1538,8 +1526,17 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
 	else
 		{
 		GtkAdjustment *adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(ct->listview));
+		const auto collection_table_auto_scroll_notify_cb = [ct](GtkWidget *, GdkPoint)
+		{
+			if (!ct->drop_idle_id)
+				{
+				ct->drop_idle_id = g_idle_add(collection_table_auto_scroll_idle_cb, ct);
+				}
+
+			return true;
+		};
 		widget_auto_scroll_start(ct->listview, adj, -1, options->thumbnails.max_height / 2,
-					 collection_table_auto_scroll_notify_cb, ct);
+		                         collection_table_auto_scroll_notify_cb);
 		}
 }
 
