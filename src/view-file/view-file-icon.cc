@@ -1936,11 +1936,9 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 		GtkStyle *style = gq_gtk_widget_get_style(vf->listview);
 		GtkStateType state = (fd->selected & SELECTION_SELECTED) ? GTK_STATE_SELECTED : GTK_STATE_NORMAL;
 
-		GdkRGBA color_fg;
-		convert_gdkcolor_to_gdkrgba(&style->text[state], &color_fg);
+		GdkRGBA color_fg = convert_gdkcolor_to_gdkrgba(&style->text[state]);
 
-		GdkRGBA color_bg;
-		convert_gdkcolor_to_gdkrgba(&style->base[state], &color_bg);
+		GdkRGBA color_bg = convert_gdkcolor_to_gdkrgba(&style->base[state]);
 		if (fd->selected & SELECTION_PRELIGHT)
 			{
 			shift_color(color_bg);

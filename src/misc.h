@@ -47,9 +47,9 @@ void gq_gtk_grid_attach_default(GtkGrid *grid, GtkWidget *child, guint left_atta
 void gq_gtk_grid_attach(GtkGrid *grid, GtkWidget *child, guint left_attach, guint right_attach, guint top_attach, guint bottom_attach, GtkAttachOptions, GtkAttachOptions, guint, guint);
 
 #if HAVE_GTK4
-void convert_gdkcolor_to_gdkrgba(gpointer data, GdkRGBA *gdk_rgba);
+GdkRGBA convert_gdkcolor_to_gdkrgba(/* GdkColor * */ gpointer data);
 #else
-void convert_gdkcolor_to_gdkrgba(gpointer data, GdkRGBA *gdk_rgba);
+GdkRGBA convert_gdkcolor_to_gdkrgba(/* GdkColor * */ gpointer data);
 #endif /* HAVE_GTK4 */
 
 void shift_color(GdkRGBA &src, gshort val = -1, gint direction = 0);

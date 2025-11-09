@@ -2337,15 +2337,15 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 	info = static_cast<CollectInfo *>(g_list_nth_data(list, cd->number));
 
 	style = gq_gtk_widget_get_style(ct->listview);
-	if (info && (info->flag_mask & SELECTION_SELECTED) )
+	if (info && (info->flag_mask & SELECTION_SELECTED))
 		{
-		convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_SELECTED], &color_fg);
-		convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_SELECTED], &color_bg);
+		color_fg = convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_SELECTED]);
+		color_bg = convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_SELECTED]);
 		}
 	else
 		{
-		convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_NORMAL], &color_fg);
-		convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL], &color_bg);
+		color_fg = convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_NORMAL]);
+		color_bg = convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL]);
 		}
 
 	if (info && (info->flag_mask & SELECTION_PRELIGHT))
