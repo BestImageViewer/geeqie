@@ -2350,7 +2350,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 
 	if (info && (info->flag_mask & SELECTION_PRELIGHT))
 		{
-		shift_color(&color_bg, -1, 0);
+		shift_color(color_bg);
 		}
 
 	g_autofree gchar *star_rating = nullptr;

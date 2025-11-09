@@ -52,14 +52,6 @@ gint tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean
 
 gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboolean only_selected);
 
-void shift_color(GdkRGBA *src, gshort val, gint direction);
-
-/**
- * @def STYLE_SHIFT_STANDARD
- * The standard shift percent for alternating list row colors
- */
-#define STYLE_SHIFT_STANDARD 10
-
 gint widget_auto_scroll_start(GtkWidget *widget, GtkAdjustment *v_adj, gint scroll_speed, gint region_size,
 			      gint (*notify_func)(GtkWidget *widget, gint x, gint y, gpointer data), gpointer notify_data);
 void widget_auto_scroll_stop(GtkWidget *widget);

@@ -43,6 +43,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "menu.h"
+#include "misc.h"
 #include "options.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
@@ -1082,7 +1083,7 @@ static GdkRGBA *vd_color_shifted(GtkWidget *widget)
 		style_context = gtk_widget_get_style_context(widget);
 		gq_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &color);
 
-		shift_color(&color, -1, 0);
+		shift_color(color);
 		done = widget;
 		}
 #endif

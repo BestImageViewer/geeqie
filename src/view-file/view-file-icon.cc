@@ -1943,7 +1943,7 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 		convert_gdkcolor_to_gdkrgba(&style->base[state], &color_bg);
 		if (fd->selected & SELECTION_PRELIGHT)
 			{
-			shift_color(&color_bg, -1, 0);
+			shift_color(color_bg);
 			}
 
 		g_object_set(cell,

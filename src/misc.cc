@@ -47,6 +47,12 @@ namespace
 
 constexpr int BUFSIZE = 128;
 
+/**
+ * @def STYLE_SHIFT_STANDARD
+ * The standard shift percent for alternating list row colors
+ */
+constexpr gshort STYLE_SHIFT_STANDARD = 10;
+
 constexpr gint CELL_HEIGHT_OVERRIDE = 512;
 
 } // namespace
@@ -460,6 +466,39 @@ void convert_gdkcolor_to_gdkrgba(gpointer data, GdkRGBA *gdk_rgba)
 	gdk_rgba->alpha = 1.0;
 }
 #endif
+
+/**
+ * @brief Shifts a GdkRGBA values lighter or darker \n
+ * val is percent from 1 to 100, or -1 for default (usually 10%) \n
+ * direction is -1 darker, 0 auto, 1 lighter
+ */
+void shift_color(GdkRGBA &src, gshort val, gint direction)
+{
+	if (val == -1)
+		{
+		val = STYLE_SHIFT_STANDARD;
+		}
+	else
+		{
+		val = CLAMP(val, 1, 100);
+		}
+
+	const gdouble cs = 1.0 / 100 * val;
+
+	/* up or down ? */
+	if (direction < 0 || (direction == 0 && (src.red + src.green + src.blue) / 3 > 0.5))
+		{
+		src.red = std::max(0.0, src.red - cs);
+		src.green = std::max(0.0, src.green - cs);
+		src.blue = std::max(0.0, src.blue - cs);
+		}
+	else
+		{
+		src.red = std::min(1.0, src.red + cs);
+		src.green = std::min(1.0, src.green + cs);
+		src.blue = std::min(1.0, src.blue + cs);
+		}
+}
 
 void gq_gtk_entry_set_text(GtkEntry *entry, const gchar *text)
 {
