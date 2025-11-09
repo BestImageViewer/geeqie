@@ -31,6 +31,25 @@
 #include "misc.h"
 #include "ui-misc.h"
 
+namespace
+{
+
+struct AutoScrollData
+{
+	guint timer_id; /* event source id */
+	gint region_size;
+	GtkWidget *widget;
+	GtkAdjustment *adj;
+	gint max_step;
+
+	AutoScrollNotifyFunc notify_func;
+
+	static constexpr gint DEFAULT_SPEED = 100;
+	static constexpr gint DEFAULT_REGION = 20;
+};
+
+} // namespace
+
 /*
  *-------------------------------------------------------------------
  * cell popup editor
@@ -396,22 +415,6 @@ gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboo
  *-------------------------------------------------------------------
  */
 
-enum {
-	AUTO_SCROLL_DEFAULT_SPEED = 100,
-	AUTO_SCROLL_DEFAULT_REGION = 20
-};
-
-struct AutoScrollData
-{
-	guint timer_id; /* event source id */
-	gint region_size;
-	GtkWidget *widget;
-	GtkAdjustment *adj;
-	gint max_step;
-
-	AutoScrollNotifyFunc notify_func;
-};
-
 void widget_auto_scroll_stop(GtkWidget *widget)
 {
 	AutoScrollData *sd;
@@ -498,12 +501,12 @@ gint widget_auto_scroll_start(GtkWidget *widget, gint scroll_speed, gint region_
 	GtkAdjustment *v_adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(widget));
 	if (!v_adj) return 0;
 
-	if (scroll_speed < 1) scroll_speed = AUTO_SCROLL_DEFAULT_SPEED;
+	if (scroll_speed < 1) scroll_speed = AutoScrollData::DEFAULT_SPEED;
 
 	auto *sd = g_new0(AutoScrollData, 1);
 	sd->widget = widget;
 	sd->adj = v_adj;
-	sd->region_size = (region_size >= 1) ? region_size : AUTO_SCROLL_DEFAULT_REGION;
+	sd->region_size = (region_size >= 1) ? region_size : AutoScrollData::DEFAULT_REGION;
 	sd->max_step = 1;
 	sd->timer_id = g_timeout_add(scroll_speed, widget_auto_scroll_cb, sd);
 	sd->notify_func = notify_func;
