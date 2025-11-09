@@ -1525,7 +1525,6 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
 		}
 	else
 		{
-		GtkAdjustment *adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(ct->listview));
 		const auto collection_table_auto_scroll_notify_cb = [ct](GtkWidget *, GdkPoint)
 		{
 			if (!ct->drop_idle_id)
@@ -1535,7 +1534,7 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
 
 			return true;
 		};
-		widget_auto_scroll_start(ct->listview, adj, -1, options->thumbnails.max_height / 2,
+		widget_auto_scroll_start(ct->listview, -1, options->thumbnails.max_height / 2,
 		                         collection_table_auto_scroll_notify_cb);
 		}
 }

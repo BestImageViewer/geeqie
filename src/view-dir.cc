@@ -1004,7 +1004,6 @@ static gboolean vd_dnd_drop_motion(GtkWidget *, GdkDragContext *context, gint x,
 
 	if (vd->drop_fd)
 		{
-		GtkAdjustment *adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(vd->view));
 		const auto vd_auto_scroll_notify_cb = [vd](GtkWidget *, GdkPoint)
 		{
 			if (!vd->drop_fd || vd->drop_list) return false;
@@ -1016,7 +1015,7 @@ static gboolean vd_dnd_drop_motion(GtkWidget *, GdkDragContext *context, gint x,
 
 			return true;
 		};
-		widget_auto_scroll_start(vd->view, adj, -1, -1, vd_auto_scroll_notify_cb);
+		widget_auto_scroll_start(vd->view, -1, -1, vd_auto_scroll_notify_cb);
 		}
 
 	return FALSE;

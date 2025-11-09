@@ -489,20 +489,21 @@ static gboolean widget_auto_scroll_cb(gpointer data)
  * @brief Auto scroll, set scroll_speed or region_size to -1 to their respective the defaults
  * notify_func will be called before a scroll, return false to turn off autoscroll
  */
-gint widget_auto_scroll_start(GtkWidget *widget, GtkAdjustment *v_adj, gint scroll_speed, gint region_size,
+gint widget_auto_scroll_start(GtkWidget *widget, gint scroll_speed, gint region_size,
                               const AutoScrollNotifyFunc &notify_func)
 {
-	AutoScrollData *sd;
-
-	if (!widget || !v_adj) return 0;
+	if (!widget) return 0;
 	if (g_object_get_data(G_OBJECT(widget), "autoscroll")) return 0;
-	if (scroll_speed < 1) scroll_speed = AUTO_SCROLL_DEFAULT_SPEED;
-	if (region_size < 1) region_size = AUTO_SCROLL_DEFAULT_REGION;
 
-	sd = g_new0(AutoScrollData, 1);
+	GtkAdjustment *v_adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(widget));
+	if (!v_adj) return 0;
+
+	if (scroll_speed < 1) scroll_speed = AUTO_SCROLL_DEFAULT_SPEED;
+
+	auto *sd = g_new0(AutoScrollData, 1);
 	sd->widget = widget;
 	sd->adj = v_adj;
-	sd->region_size = region_size;
+	sd->region_size = (region_size >= 1) ? region_size : AUTO_SCROLL_DEFAULT_REGION;
 	sd->max_step = 1;
 	sd->timer_id = g_timeout_add(scroll_speed, widget_auto_scroll_cb, sd);
 	sd->notify_func = notify_func;
