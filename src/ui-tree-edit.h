@@ -57,7 +57,7 @@ gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboo
 
 using AutoScrollNotifyFunc = std::function<bool(GtkWidget *widget, GdkPoint pos)>;
 
-gint widget_auto_scroll_start(GtkWidget *widget, gint scroll_speed, gint region_size,
+void widget_auto_scroll_start(GtkWidget *widget, gint scroll_speed, gint region_size,
                               const AutoScrollNotifyFunc &notify_func);
 void widget_auto_scroll_stop(GtkWidget *widget);
 
