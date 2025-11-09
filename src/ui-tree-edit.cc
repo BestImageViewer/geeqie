@@ -65,7 +65,6 @@ static void tree_edit_close(TreeEditData *ted)
 	gq_gtk_widget_destroy(ted->window);
 
 	g_free(ted->old_name);
-	g_free(ted->new_name);
 	gtk_tree_path_free(ted->path);
 
 	g_free(ted);
@@ -73,17 +72,14 @@ static void tree_edit_close(TreeEditData *ted)
 
 static void tree_edit_do(TreeEditData *ted)
 {
-	ted->new_name = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(ted->entry)));
+	if (!ted->edit_func) return;
 
-	if (strcmp(ted->new_name, ted->old_name) != 0)
+	const gchar *new_name = gq_gtk_entry_get_text(GTK_ENTRY(ted->entry));
+	if (strcmp(new_name, ted->old_name) == 0) return;
+
+	if (ted->edit_func(ted, ted->old_name, new_name, ted->edit_data))
 		{
-		if (ted->edit_func)
-			{
-			if (ted->edit_func(ted, ted->old_name, ted->new_name, ted->edit_data))
-				{
-				/* hmm, should the caller be required to set text instead ? */
-				}
-			}
+		/* hmm, should the caller be required to set text instead ? */
 		}
 }
 

@@ -34,7 +34,6 @@ struct TreeEditData
 	GtkWidget *entry;
 
 	gchar *old_name;
-	gchar *new_name;
 
 	gint (*edit_func)(TreeEditData *ted, const gchar *oldname, const gchar *newname, gpointer data);
 	gpointer edit_data;
