@@ -47,9 +47,9 @@ struct TreeEditData
 gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, const gchar *text,
 		           gboolean (*edit_func)(TreeEditData *, const gchar *, const gchar *, gpointer), gpointer data);
 
-gint tree_view_row_get_visibility(GtkTreeView *widget, GtkTreeIter *iter, gboolean fully_visible);
+bool tree_view_row_is_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean fully_visible);
 
-gint tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean center);
+void tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean center);
 
 gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboolean only_selected);
 

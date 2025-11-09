@@ -281,61 +281,40 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
  * if fully_visible is TRUE, the behavior changes to return -1/1 if _any_ part of the cell is out of view
  * An implementation that uses gtk_tree_view_get_visible_range
  */
-gint tree_view_row_get_visibility(GtkTreeView *widget, GtkTreeIter *iter, gboolean fully_visible)
+static gint tree_view_row_get_visibility(GtkTreeView *widget, GtkTreeIter *iter, gboolean fully_visible)
 {
-	GtkTreeModel *store;
-	GtkTreePath *tpath;
-	GtkTreePath *start_path;
-	GtkTreePath *end_path;
-	gint ret = 0;
-
+	g_autoptr(GtkTreePath) start_path = nullptr;
+	g_autoptr(GtkTreePath) end_path = nullptr;
 	if (!gtk_tree_view_get_visible_range(widget, &start_path, &end_path)) return -1; /* we will most probably scroll down, needed for tree_view_row_make_visible */
 
-	store = gtk_tree_view_get_model(widget);
-	tpath = gtk_tree_model_get_path(store, iter);
+	GtkTreeModel *store = gtk_tree_view_get_model(widget);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, iter);
 
-	if (fully_visible)
-		{
-		if (gtk_tree_path_compare(tpath, start_path) <= 0)
-			{
-			ret = -1;
-			}
-		else if (gtk_tree_path_compare(tpath, end_path) >= 0)
-			{
-			ret = 1;
-			}
-		}
-	else
-		{
-		if (gtk_tree_path_compare(tpath, start_path) < 0)
-			{
-			ret = -1;
-			}
-		else if (gtk_tree_path_compare(tpath, end_path) > 0)
-			{
-			ret = 1;
-			}
-		}
+	const gint start_res = gtk_tree_path_compare(tpath, start_path);
+	if (start_res < 0 || (fully_visible && start_res == 0)) return -1;
 
-	gtk_tree_path_free(tpath);
-	gtk_tree_path_free(start_path);
-	gtk_tree_path_free(end_path);
-	return ret;
+	const gint end_res = gtk_tree_path_compare(tpath, end_path);
+	if (end_res > 0 || (fully_visible && end_res == 0)) return 1;
+
+	return 0;
+}
+
+bool tree_view_row_is_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean fully_visible)
+{
+	return tree_view_row_get_visibility(widget, iter, fully_visible) == 0;
 }
 
 /**
  * @brief Scrolls to make row visible, if necessary
- * return is same as above (before the scroll)
  */
-gint tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean center)
+void tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean center)
 {
-	GtkTreePath *tpath;
-	gint vis;
+	gint vis = tree_view_row_get_visibility(widget, iter, TRUE);
+	if (vis == 0) return;
 
-	vis = tree_view_row_get_visibility(widget, iter, TRUE);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(gtk_tree_view_get_model(widget), iter);
 
-	tpath = gtk_tree_model_get_path(gtk_tree_view_get_model(widget), iter);
-	if (center && vis != 0)
+	if (center)
 		{
 		gtk_tree_view_scroll_to_cell(widget, tpath, nullptr, TRUE, 0.5, 0.0);
 		}
@@ -347,9 +326,6 @@ gint tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean
 		{
 		gtk_tree_view_scroll_to_cell(widget, tpath, nullptr, TRUE, 1.0, 0.0);
 		}
-	gtk_tree_path_free(tpath);
-
-	return vis;
 }
 
 /**

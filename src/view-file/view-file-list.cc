@@ -1034,7 +1034,7 @@ FileData *vflist_thumb_next_fd(ViewFile *vf)
 		gtk_tree_path_free(tpath);
 		tpath = nullptr;
 
-		while (!fd && valid && tree_view_row_get_visibility(GTK_TREE_VIEW(vf->listview), &iter, FALSE) == 0)
+		while (!fd && valid && tree_view_row_is_visible(GTK_TREE_VIEW(vf->listview), &iter, FALSE))
 			{
 			FileData *nfd;
 
@@ -1123,7 +1123,7 @@ FileData *vflist_star_next_fd(ViewFile *vf)
 		gtk_tree_path_free(tpath);
 		tpath = nullptr;
 
-		while (valid && tree_view_row_get_visibility(GTK_TREE_VIEW(vf->listview), &iter, FALSE) == 0)
+		while (valid && tree_view_row_is_visible(GTK_TREE_VIEW(vf->listview), &iter, FALSE))
 			{
 			FileData *fd = nullptr;
 			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
