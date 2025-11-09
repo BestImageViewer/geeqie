@@ -467,7 +467,8 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 		{
 		amt = CLAMP(amt, 0 - sd->max_step, sd->max_step);
 
-		if (gtk_adjustment_get_value(sd->adj) != CLAMP(gtk_adjustment_get_value(sd->adj) + amt, gtk_adjustment_get_lower(sd->adj), gtk_adjustment_get_upper(sd->adj) - gtk_adjustment_get_page_size(sd->adj)))
+		const gdouble value = CLAMP(gtk_adjustment_get_value(sd->adj) + amt, gtk_adjustment_get_lower(sd->adj), gtk_adjustment_get_upper(sd->adj) - gtk_adjustment_get_page_size(sd->adj));
+		if (gtk_adjustment_get_value(sd->adj) != value)
 			{
 			/* only notify when scrolling is needed */
 			if (sd->notify_func && !sd->notify_func(sd->widget, pos))
@@ -477,8 +478,7 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 				return G_SOURCE_REMOVE;
 				}
 
-			gtk_adjustment_set_value(sd->adj,
-				CLAMP(gtk_adjustment_get_value(sd->adj) + amt, gtk_adjustment_get_lower(sd->adj), gtk_adjustment_get_upper(sd->adj) - gtk_adjustment_get_page_size(sd->adj)));
+			gtk_adjustment_set_value(sd->adj, value);
 			}
 		}
 
