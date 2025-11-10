@@ -212,15 +212,10 @@ static gboolean match_selected_cb(GtkEntryCompletion *, GtkTreeModel *model, Gtk
 
 static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, GtkTreeIter *iter, gpointer data)
 {
-	auto sar = static_cast<SarData *>(data);
-	gboolean ret = FALSE;
-	GtkTreeModel *model;
-	GtkAction *action;
-	gchar *label;
+	GtkTreeModel *model = gtk_entry_completion_get_model(completion);
 
-	model = gtk_entry_completion_get_model(completion);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), iter, SAR_LABEL, &label, -1);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), iter, SAR_ACTION, &action, -1);
+	g_autofree gchar *label;
+	gtk_tree_model_get(model, iter, SAR_LABEL, &label, -1);
 
 	g_autofree gchar *normalized = g_utf8_normalize(label, -1, G_NORMALIZE_DEFAULT);
 
@@ -235,15 +230,17 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 		reg_exp = g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
-	ret = g_regex_match(reg_exp, normalized, static_cast<GRegexMatchFlags>(0), nullptr);
+	if (!g_regex_match(reg_exp, normalized, static_cast<GRegexMatchFlags>(0), nullptr)) return FALSE;
 
-	if (sar->match_found == FALSE && ret == TRUE)
+	auto *sar = static_cast<SarData *>(data);
+
+	if (sar->match_found == FALSE)
 		{
-		sar->action = action;
+		gtk_tree_model_get(model, iter, SAR_ACTION, &sar->action, -1);
 		sar->match_found = TRUE;
 		}
 
-	return ret;
+	return TRUE;
 }
 
 GtkWidget *search_and_run_new(LayoutWindow *lw)
