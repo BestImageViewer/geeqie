@@ -29,7 +29,7 @@
 
 #include "exif.h"
 #include "filedata.h"
-#include "gq-marshal.h"
+#include "gq-size.h"
 #include "image-load-collection.h"
 #include "image-load-dds.h"
 #if HAVE_DJVU
@@ -220,10 +220,9 @@ static void image_loader_class_init(ImageLoaderClass *loader_class)
 	                 G_SIGNAL_RUN_LAST,
 	                 G_STRUCT_OFFSET(ImageLoaderClass, size_prepared),
 	                 nullptr, nullptr,
-	                 gq_marshal_VOID__INT_INT,
-	                 G_TYPE_NONE, 2,
-	                 G_TYPE_INT,
-	                 G_TYPE_INT);
+	                 g_cclosure_marshal_VOID__BOXED,
+	                 G_TYPE_NONE, 1,
+	                 GQ_TYPE_SIZE);
 
 }
 
@@ -337,14 +336,11 @@ static gboolean image_loader_emit_percent_cb(gpointer data)
 
 static gboolean image_loader_emit_size_prepared_cb(gpointer data)
 {
-	gint width;
-	gint height;
 	auto il = static_cast<ImageLoader *>(data);
 	g_mutex_lock(il->data_mutex);
-	width = il->actual_width;
-	height = il->actual_height;
+	GqSize size{ il->actual_width, il->actual_height };
 	g_mutex_unlock(il->data_mutex);
-	g_signal_emit(il, signals[SIGNAL_SIZE_PREPARED], 0, width, height);
+	g_signal_emit(il, signals[SIGNAL_SIZE_PREPARED], 0, &size);
 	return G_SOURCE_REMOVE;
 }
 

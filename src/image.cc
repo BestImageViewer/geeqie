@@ -35,6 +35,7 @@
 #include "exif.h"
 #include "filecache.h"
 #include "filedata.h"
+#include "gq-size.h"
 #include "history-list.h"
 #include "image-load.h"
 #include "intl.h"
@@ -897,12 +898,12 @@ static void image_load_done_cb(ImageLoader *, gpointer data)
 	image_read_ahead_start(imd);
 }
 
-static void image_load_size_prepared_cb(ImageLoader *, gint width, gint height, gpointer data)
+static void image_load_size_prepared_cb(ImageLoader *, const GqSize *size, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
-	DEBUG_1("image_load_size_cb: %ux%u", width, height);
-	pixbuf_renderer_set_size_early(PIXBUF_RENDERER(imd->pr), width, height);
+	DEBUG_1("image_load_size_cb: %dx%d", size->width, size->height);
+	pixbuf_renderer_set_size_early(PIXBUF_RENDERER(imd->pr), size->width, size->height);
 }
 
 static void image_load_error_cb(ImageLoader *il, gpointer data)

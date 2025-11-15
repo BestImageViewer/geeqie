@@ -74,6 +74,8 @@ main_sources = files('advanced-exif.cc',
 'filefilter.h',
 'fullscreen.cc',
 'fullscreen.h',
+'gq-size.cc',
+'gq-size.h',
 'histogram.cc',
 'histogram.h',
 'history-list.cc',
@@ -337,19 +339,6 @@ endif
 
 # We assume that code_sources is only set above.
 project_sources += code_sources
-
-gq_marshal = gnome.genmarshal('gq-marshal', prefix : 'gq_marshal', sources : 'gq-marshal.list')
-
-project_sources += gq_marshal[1]
-
-gq_marshal_pragma_sh = find_program('gq-marshal-pragma.sh', dirs : scriptsdir)
-
-gq_marshal_pragma = custom_target('gq-marshal-pragma',
-                    input : gq_marshal[0],
-                    output : 'gq-marshal-pragma.c',
-                    command : [gq_marshal_pragma_sh, '@INPUT@', '@OUTPUT@'])
-
-project_sources += gq_marshal_pragma
 
 if conf_data.get('HAVE_LCMS', 0) == 1
     project_sources += gnome.compile_resources('icc', 'icc.gresource.xml')

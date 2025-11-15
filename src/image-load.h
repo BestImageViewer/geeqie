@@ -30,6 +30,7 @@
 #include <glib.h>
 
 class FileData;
+struct GqSize;
 
 #define TYPE_IMAGE_LOADER		(image_loader_get_type())
 
@@ -114,7 +115,7 @@ struct ImageLoaderClass {
 	void (*error)(ImageLoader *, gpointer);
 	void (*done)(ImageLoader *, gpointer);
 	void (*percent)(ImageLoader *, gdouble, gpointer);
-	void (*size_prepared)(ImageLoader *, gint width, gint height, gpointer);
+	void (*size_prepared)(ImageLoader *, const GqSize *size, gpointer);
 };
 
 GType image_loader_get_type();
