@@ -113,6 +113,7 @@ struct ImageLoaderClass {
 	void (*error)(ImageLoader *, gpointer);
 	void (*done)(ImageLoader *, gpointer);
 	void (*percent)(ImageLoader *, gdouble, gpointer);
+	void (*size_prepared)(ImageLoader *, gint width, gint height, gpointer);
 };
 
 GType image_loader_get_type();

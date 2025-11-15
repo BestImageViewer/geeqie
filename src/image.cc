@@ -897,7 +897,7 @@ static void image_load_done_cb(ImageLoader *, gpointer data)
 	image_read_ahead_start(imd);
 }
 
-static void image_load_size_cb(ImageLoader *, guint width, guint height, gpointer data)
+static void image_load_size_prepared_cb(ImageLoader *, gint width, gint height, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
@@ -927,7 +927,7 @@ static void image_load_set_signals(ImageWindow *imd, gboolean override_old_signa
 	g_signal_connect(G_OBJECT(imd->il), "area_ready", (GCallback)image_load_area_cb, imd);
 	g_signal_connect(G_OBJECT(imd->il), "error", (GCallback)image_load_error_cb, imd);
 	g_signal_connect(G_OBJECT(imd->il), "done", (GCallback)image_load_done_cb, imd);
-	g_signal_connect(G_OBJECT(imd->il), "size_prepared", (GCallback)image_load_size_cb, imd);
+	g_signal_connect(G_OBJECT(imd->il), "size-prepared", G_CALLBACK(image_load_size_prepared_cb), imd);
 }
 
 /* this read ahead is located here merely for the callbacks, above */

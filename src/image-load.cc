@@ -97,7 +97,7 @@ enum {
 	SIGNAL_ERROR,
 	SIGNAL_DONE,
 	SIGNAL_PERCENT,
-	SIGNAL_SIZE,
+	SIGNAL_SIZE_PREPARED,
 	SIGNAL_COUNT
 };
 
@@ -217,16 +217,16 @@ static void image_loader_class_init(ImageLoaderClass *loader_class)
 			     G_TYPE_NONE, 1,
 			     G_TYPE_DOUBLE);
 
-	signals[SIGNAL_SIZE] =
-		g_signal_new("size_prepared",
-			     G_OBJECT_CLASS_TYPE(gobject_class),
-			     G_SIGNAL_RUN_LAST,
-			     G_STRUCT_OFFSET(ImageLoaderClass, area_ready),
-			     nullptr, nullptr,
-			     gq_marshal_VOID__INT_INT,
-			     G_TYPE_NONE, 2,
-			     G_TYPE_INT,
-			     G_TYPE_INT);
+	signals[SIGNAL_SIZE_PREPARED] =
+	    g_signal_new("size-prepared",
+	                 G_OBJECT_CLASS_TYPE(gobject_class),
+	                 G_SIGNAL_RUN_LAST,
+	                 G_STRUCT_OFFSET(ImageLoaderClass, size_prepared),
+	                 nullptr, nullptr,
+	                 gq_marshal_VOID__INT_INT,
+	                 G_TYPE_NONE, 2,
+	                 G_TYPE_INT,
+	                 G_TYPE_INT);
 
 }
 
@@ -348,7 +348,7 @@ static gboolean image_loader_emit_percent_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static gboolean image_loader_emit_size_cb(gpointer data)
+static gboolean image_loader_emit_size_prepared_cb(gpointer data)
 {
 	gint width;
 	gint height;
@@ -357,7 +357,7 @@ static gboolean image_loader_emit_size_cb(gpointer data)
 	width = il->actual_width;
 	height = il->actual_height;
 	g_mutex_unlock(il->data_mutex);
-	g_signal_emit(il, signals[SIGNAL_SIZE], 0, width, height);
+	g_signal_emit(il, signals[SIGNAL_SIZE_PREPARED], 0, width, height);
 	return G_SOURCE_REMOVE;
 }
 
@@ -381,9 +381,9 @@ static void image_loader_emit_percent(ImageLoader *il)
 	g_idle_add_full(G_PRIORITY_HIGH, image_loader_emit_percent_cb, il, nullptr);
 }
 
-static void image_loader_emit_size(ImageLoader *il)
+static void image_loader_emit_size_prepared(ImageLoader *il)
 {
-	g_idle_add_full(G_PRIORITY_HIGH, image_loader_emit_size_cb, il, nullptr);
+	g_idle_add_full(G_PRIORITY_HIGH, image_loader_emit_size_prepared_cb, il, nullptr);
 }
 
 static ImageLoaderAreaParam *image_loader_queue_area_ready(ImageLoader *il, GList **list, guint x, guint y, guint w, guint h)
@@ -528,8 +528,7 @@ static void image_loader_area_updated_cb(gpointer,
 	g_mutex_unlock(il->data_mutex);
 }
 
-static void image_loader_size_cb(gpointer,
-				 gint width, gint height, gpointer data)
+static void image_loader_size_prepared_cb(gpointer, gint width, gint height, gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
 	gboolean scale = FALSE;
@@ -540,7 +539,7 @@ static void image_loader_size_cb(gpointer,
 	if (il->requested_width < 1 || il->requested_height < 1)
 		{
 		g_mutex_unlock(il->data_mutex);
-		image_loader_emit_size(il);
+		image_loader_emit_size_prepared(il);
 		return;
 		}
 	g_mutex_unlock(il->data_mutex);
@@ -563,7 +562,7 @@ static void image_loader_size_cb(gpointer,
 
 	if (!scale)
 		{
-		image_loader_emit_size(il);
+		image_loader_emit_size_prepared(il);
 		return;
 		}
 
@@ -578,7 +577,7 @@ static void image_loader_size_cb(gpointer,
 		}
 
 	g_mutex_unlock(il->data_mutex);
-	image_loader_emit_size(il);
+	image_loader_emit_size_prepared(il);
 }
 
 static void image_loader_stop_loader(ImageLoader *il)
@@ -780,7 +779,7 @@ static void image_loader_setup_loader(ImageLoader *il)
 			il->backend = get_image_loader_backend_default();
 		}
 
-	il->backend->init(image_loader_area_updated_cb, image_loader_size_cb, il);
+	il->backend->init(image_loader_area_updated_cb, image_loader_size_prepared_cb, il);
 	il->backend->set_page_num(il->fd->page_num);
 
 	il->fd->format_name = il->backend->get_format_name();
