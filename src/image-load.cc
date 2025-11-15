@@ -177,17 +177,17 @@ static void image_loader_class_init(ImageLoaderClass *loader_class)
 
 
 	signals[SIGNAL_AREA_READY] =
-		g_signal_new("area_ready",
-			     G_OBJECT_CLASS_TYPE(gobject_class),
-			     G_SIGNAL_RUN_LAST,
-			     G_STRUCT_OFFSET(ImageLoaderClass, area_ready),
-			     nullptr, nullptr,
-			     gq_marshal_VOID__INT_INT_INT_INT,
-			     G_TYPE_NONE, 4,
-			     G_TYPE_INT,
-			     G_TYPE_INT,
-			     G_TYPE_INT,
-			     G_TYPE_INT);
+	    g_signal_new("area-ready",
+	                 G_OBJECT_CLASS_TYPE(gobject_class),
+	                 G_SIGNAL_RUN_LAST,
+	                 G_STRUCT_OFFSET(ImageLoaderClass, area_ready),
+	                 nullptr, nullptr,
+	                 gq_marshal_VOID__INT_INT_INT_INT,
+	                 G_TYPE_NONE, 4,
+	                 G_TYPE_INT,
+	                 G_TYPE_INT,
+	                 G_TYPE_INT,
+	                 G_TYPE_INT);
 
 	signals[SIGNAL_ERROR] =
 		g_signal_new("error",
@@ -298,10 +298,10 @@ ImageLoader *image_loader_new(FileData *fd)
 
 struct ImageLoaderAreaParam {
 	ImageLoader *il;
-	guint x;
-	guint y;
-	guint w;
-	guint h;
+	gint x;
+	gint y;
+	gint w;
+	gint h;
 };
 
 
@@ -309,16 +309,12 @@ static gboolean image_loader_emit_area_ready_cb(gpointer data)
 {
 	auto par = static_cast<ImageLoaderAreaParam *>(data);
 	ImageLoader *il = par->il;
-	guint x;
-	guint y;
-	guint w;
-	guint h;
 	g_mutex_lock(il->data_mutex);
 	il->area_param_list = g_list_remove(il->area_param_list, par);
-	x = par->x;
-	y = par->y;
-	w = par->w;
-	h = par->h;
+	gint x = par->x;
+	gint y = par->y;
+	gint w = par->w;
+	gint h = par->h;
 	g_free(par);
 	g_mutex_unlock(il->data_mutex);
 
@@ -386,7 +382,7 @@ static void image_loader_emit_size_prepared(ImageLoader *il)
 	g_idle_add_full(G_PRIORITY_HIGH, image_loader_emit_size_prepared_cb, il, nullptr);
 }
 
-static ImageLoaderAreaParam *image_loader_queue_area_ready(ImageLoader *il, GList **list, guint x, guint y, guint w, guint h)
+static ImageLoaderAreaParam *image_loader_queue_area_ready(ImageLoader *il, GList **list, gint x, gint y, gint w, gint h)
 {
 	if (*list)
 		{
@@ -441,7 +437,7 @@ static ImageLoaderAreaParam *image_loader_queue_area_ready(ImageLoader *il, GLis
 }
 
 /* this function expects that il->data_mutex is locked by caller */
-static void image_loader_emit_area_ready(ImageLoader *il, guint x, guint y, guint w, guint h)
+static void image_loader_emit_area_ready(ImageLoader *il, gint x, gint y, gint w, gint h)
 {
 	ImageLoaderAreaParam *par = image_loader_queue_area_ready(il, &il->area_param_list, x, y, w, h);
 
@@ -455,7 +451,7 @@ static void image_loader_emit_area_ready(ImageLoader *il, guint x, guint y, guin
 /* the following functions may be executed in separate thread */
 
 /* this function expects that il->data_mutex is locked by caller */
-static void image_loader_queue_delayed_area_ready(ImageLoader *il, guint x, guint y, guint w, guint h)
+static void image_loader_queue_delayed_area_ready(ImageLoader *il, gint x, gint y, gint w, gint h)
 {
 	image_loader_queue_area_ready(il, &il->area_param_delayed_list, x, y, w, h);
 }
@@ -509,8 +505,8 @@ static void image_loader_sync_pixbuf(ImageLoader *il)
 }
 
 static void image_loader_area_updated_cb(gpointer,
-				 guint x, guint y, guint w, guint h,
-				 gpointer data)
+                                         gint x, gint y, gint w, gint h,
+                                         gpointer data)
 {
 	auto il = static_cast<ImageLoader *>(data);
 

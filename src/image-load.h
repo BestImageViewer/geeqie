@@ -37,7 +37,7 @@ struct ImageLoaderBackend
 public:
 	virtual ~ImageLoaderBackend() = default;
 
-	using AreaUpdatedCb = void (*)(gpointer, guint, guint, guint, guint, gpointer);
+	using AreaUpdatedCb = void (*)(gpointer, gint, gint, gint, gint, gpointer);
 	using SizePreparedCb = void (*)(gpointer, gint, gint, gpointer);
 
 	virtual void init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_prepared_cb, gpointer data) = 0;
@@ -109,7 +109,7 @@ struct ImageLoaderClass {
 	GObjectClass parent;
 
 	/* class members */
-	void (*area_ready)(ImageLoader *, guint x, guint y, guint w, guint h, gpointer);
+	void (*area_ready)(ImageLoader *, gint x, gint y, gint w, gint h, gpointer);
 	void (*error)(ImageLoader *, gpointer);
 	void (*done)(ImageLoader *, gpointer);
 	void (*percent)(ImageLoader *, gdouble, gpointer);

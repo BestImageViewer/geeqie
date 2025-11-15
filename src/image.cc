@@ -844,7 +844,7 @@ static void image_load_pixbuf_ready(ImageWindow *imd)
 	image_change_pixbuf(imd, image_loader_get_pixbuf(imd->il), image_zoom_get(imd), FALSE);
 }
 
-static void image_load_area_cb(ImageLoader *il, guint x, guint y, guint w, guint h, gpointer data)
+static void image_load_area_ready_cb(ImageLoader *il, gint x, gint y, gint w, gint h, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	PixbufRenderer *pr = PIXBUF_RENDERER(imd->pr);
@@ -924,7 +924,7 @@ static void image_load_set_signals(ImageWindow *imd, gboolean override_old_signa
 		g_signal_handlers_disconnect_matched(G_OBJECT(imd->il), G_SIGNAL_MATCH_DATA, 0, 0, nullptr, nullptr, imd);
 		}
 
-	g_signal_connect(G_OBJECT(imd->il), "area_ready", (GCallback)image_load_area_cb, imd);
+	g_signal_connect(G_OBJECT(imd->il), "area-ready", G_CALLBACK(image_load_area_ready_cb), imd);
 	g_signal_connect(G_OBJECT(imd->il), "error", (GCallback)image_load_error_cb, imd);
 	g_signal_connect(G_OBJECT(imd->il), "done", (GCallback)image_load_done_cb, imd);
 	g_signal_connect(G_OBJECT(imd->il), "size-prepared", G_CALLBACK(image_load_size_prepared_cb), imd);
@@ -1463,8 +1463,8 @@ static void image_loader_sync_read_ahead_data(ImageLoader *il, gpointer old_data
 
 static void image_loader_sync_data(ImageLoader *il, gpointer old_data, gpointer data)
 {
-	if (g_signal_handlers_disconnect_by_func(G_OBJECT(il), (gpointer)image_load_area_cb, old_data))
-		g_signal_connect(G_OBJECT(il), "area_ready", G_CALLBACK(image_load_area_cb), data);
+	if (g_signal_handlers_disconnect_by_func(G_OBJECT(il), (gpointer)image_load_area_ready_cb, old_data))
+		g_signal_connect(G_OBJECT(il), "area-ready", G_CALLBACK(image_load_area_ready_cb), data);
 
 	if (g_signal_handlers_disconnect_by_func(G_OBJECT(il), (gpointer)image_load_error_cb, old_data))
 		g_signal_connect(G_OBJECT(il), "error", G_CALLBACK(image_load_error_cb), data);
