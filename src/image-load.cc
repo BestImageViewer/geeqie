@@ -1335,24 +1335,20 @@ gboolean image_loader_get_shrunk(ImageLoader *il)
 /**
  *  @FIXME this can be rather slow and blocks until the size is known
  */
-gboolean image_load_dimensions(FileData *fd, gint *width, gint *height)
+gboolean image_load_dimensions(FileData *fd, GqSize &dimensions)
 {
-	ImageLoader *il;
-	gboolean success;
+	ImageLoader *il = image_loader_new(fd);
 
-	il = image_loader_new(fd);
-
-	success = image_loader_start_idle(il);
+	gboolean success = image_loader_start_idle(il);
 
 	if (success && il->pixbuf)
 		{
-		if (width) *width = gdk_pixbuf_get_width(il->pixbuf);
-		if (height) *height = gdk_pixbuf_get_height(il->pixbuf);;
+		dimensions.width = gdk_pixbuf_get_width(il->pixbuf);
+		dimensions.height = gdk_pixbuf_get_height(il->pixbuf);;
 		}
 	else
 		{
-		if (width) *width = -1;
-		if (height) *height = -1;
+		dimensions = {-1, -1};
 		}
 
 	image_loader_free(il);

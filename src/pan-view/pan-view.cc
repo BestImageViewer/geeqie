@@ -1354,9 +1354,8 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 
 	if (pw->info_image_size > PAN_IMAGE_SIZE_THUMB_NONE)
 		{
-		gint iw;
-		gint ih;
-		if (image_load_dimensions(pi->fd, &iw, &ih))
+		GqSize size;
+		if (image_load_dimensions(pi->fd, size))
 			{
 			gint scale = 25;
 
@@ -1381,15 +1380,15 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 					break;
 				}
 
-			iw = std::max(1, iw * scale / 100);
-			ih = std::max(1, ih * scale / 100);
+			size.width = std::max(1, size.width * scale / 100);
+			size.height = std::max(1, size.height * scale / 100);
 
 			pbox = pan_item_box_new(pw, nullptr, pbox->x, pbox->y + pbox->height + 8, 10, 10,
 			                        PAN_POPUP_COLOR, PAN_POPUP_BORDER, PAN_POPUP_BORDER_COLOR);
 			pbox->set_key(PanKey::Info);
 
 			p = pan_item_image_new(pw, file_data_new_group(pi->fd->path),
-					       pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, iw, ih);
+			                       pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, size.width, size.height);
 			p->set_key(PanKey::Info);
 
 			pbox->set_size_by_item(p, PREF_PAD_BORDER);

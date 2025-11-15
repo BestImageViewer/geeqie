@@ -1390,8 +1390,8 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 		}
 	if (mask & DUPE_MATCH_DIM)
 		{
-		if (a->dimensions.empty()) image_load_dimensions(a->fd, &a->dimensions.width, &a->dimensions.height);
-		if (b->dimensions.empty()) image_load_dimensions(b->fd, &b->dimensions.width, &b->dimensions.height);
+		if (a->dimensions.empty()) image_load_dimensions(a->fd, a->dimensions);
+		if (b->dimensions.empty()) image_load_dimensions(b->fd, b->dimensions);
 		if (a->dimensions != b->dimensions) return FALSE;
 		}
 	if (mask & DUPE_MATCH_SIM)
@@ -2129,7 +2129,7 @@ static gboolean create_checksums_dimensions(DupeWindow *dw, GList *list)
 					if (!di->dimensions.empty()) return TRUE;
 					}
 
-				image_load_dimensions(di->fd, &di->dimensions.width, &di->dimensions.height);
+				image_load_dimensions(di->fd, di->dimensions);
 				di->dimensions_sum = (di->dimensions.width << 16) + di->dimensions.height;
 				if (options->thumbnails.enable_caching)
 					{

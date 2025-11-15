@@ -38,6 +38,7 @@
 #include "editors.h"
 #include "filedata.h"
 #include "fullscreen.h"
+#include "geometry.h"
 #include "image-load.h"
 #include "image-overlay.h"
 #include "image.h"
@@ -855,10 +856,7 @@ static gboolean view_window_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
 static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionData *cd, CollectInfo *info)
 {
 	ViewWindow *vw;
-	GtkAllocation req_size;
 	GdkGeometry geometry;
-	gint w;
-	gint h;
 
 	if (!fd && !list && (!cd || !info)) return nullptr;
 
@@ -936,21 +934,21 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 		}
 
 	/* Wait until image is loaded otherwise size is not defined */
-	image_load_dimensions(fd, &w, &h);
+	GqSize size;
+	image_load_dimensions(fd, size);
 
 	if (options->image.limit_window_size)
 		{
 		gint mw = deprecated_gdk_screen_width() * options->image.max_window_size / 100;
 		gint mh = deprecated_gdk_screen_height() * options->image.max_window_size / 100;
 
-		w = std::min(w, mw);
-		h = std::min(h, mh);
+		size.width = std::min(size.width, mw);
+		size.height = std::min(size.height, mh);
 		}
 
-	gtk_window_set_default_size(GTK_WINDOW(vw->window), w, h);
-	req_size.x = req_size.y = 0;
-	req_size.width = w;
-	req_size.height = h;
+	gtk_window_set_default_size(GTK_WINDOW(vw->window), size.width, size.height);
+
+	GtkAllocation req_size{ 0, 0, size.width, size.height };
 	gtk_widget_size_allocate(vw->window, &req_size);
 
 	gtk_window_set_focus_on_map(GTK_WINDOW(vw->window), FALSE);
