@@ -25,6 +25,7 @@
 #include <memory>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
 #include <glib-object.h>
 #include <glib.h>
 
@@ -109,7 +110,7 @@ struct ImageLoaderClass {
 	GObjectClass parent;
 
 	/* class members */
-	void (*area_ready)(ImageLoader *, gint x, gint y, gint w, gint h, gpointer);
+	void (*area_ready)(ImageLoader *, const GdkRectangle *area, gpointer);
 	void (*error)(ImageLoader *, gpointer);
 	void (*done)(ImageLoader *, gpointer);
 	void (*percent)(ImageLoader *, gdouble, gpointer);

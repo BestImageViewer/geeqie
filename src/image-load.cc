@@ -182,12 +182,9 @@ static void image_loader_class_init(ImageLoaderClass *loader_class)
 	                 G_SIGNAL_RUN_LAST,
 	                 G_STRUCT_OFFSET(ImageLoaderClass, area_ready),
 	                 nullptr, nullptr,
-	                 gq_marshal_VOID__INT_INT_INT_INT,
-	                 G_TYPE_NONE, 4,
-	                 G_TYPE_INT,
-	                 G_TYPE_INT,
-	                 G_TYPE_INT,
-	                 G_TYPE_INT);
+	                 g_cclosure_marshal_VOID__BOXED,
+	                 G_TYPE_NONE, 1,
+	                 GDK_TYPE_RECTANGLE);
 
 	signals[SIGNAL_ERROR] =
 		g_signal_new("error",
@@ -298,10 +295,7 @@ ImageLoader *image_loader_new(FileData *fd)
 
 struct ImageLoaderAreaParam {
 	ImageLoader *il;
-	gint x;
-	gint y;
-	gint w;
-	gint h;
+	GdkRectangle area;
 };
 
 
@@ -311,14 +305,11 @@ static gboolean image_loader_emit_area_ready_cb(gpointer data)
 	ImageLoader *il = par->il;
 	g_mutex_lock(il->data_mutex);
 	il->area_param_list = g_list_remove(il->area_param_list, par);
-	gint x = par->x;
-	gint y = par->y;
-	gint w = par->w;
-	gint h = par->h;
+	GdkRectangle area = par->area;
 	g_free(par);
 	g_mutex_unlock(il->data_mutex);
 
-	g_signal_emit(il, signals[SIGNAL_AREA_READY], 0, x, y, w, h);
+	g_signal_emit(il, signals[SIGNAL_AREA_READY], 0, &area);
 
 	return G_SOURCE_REMOVE;
 }
@@ -382,44 +373,45 @@ static void image_loader_emit_size_prepared(ImageLoader *il)
 	g_idle_add_full(G_PRIORITY_HIGH, image_loader_emit_size_prepared_cb, il, nullptr);
 }
 
-static ImageLoaderAreaParam *image_loader_queue_area_ready(ImageLoader *il, GList **list, gint x, gint y, gint w, gint h)
+static ImageLoaderAreaParam *image_loader_queue_area_ready(ImageLoader *il, GList **list, GdkRectangle area)
 {
 	if (*list)
 		{
 		auto prev_par = static_cast<ImageLoaderAreaParam *>((*list)->data);
+		GdkRectangle &prev_area = prev_par->area;
 
-		if (prev_par->x == x && prev_par->w == w)
+		if (prev_area.x == area.x && prev_area.width == area.width)
 			{
-			if (prev_par->y + prev_par->h == y)
+			if (prev_area.y + prev_area.height == area.y)
 				{
 				/* we can merge the notifications */
-				prev_par->h += h;
+				prev_area.height += area.height;
 				return nullptr;
 				}
 
-			if (prev_par->y == y + h)
+			if (prev_area.y == area.y + area.height)
 				{
 				/* we can merge the notifications */
-				prev_par->y = y;
-				prev_par->h += h;
+				prev_area.y = area.y;
+				prev_area.height += area.height;
 				return nullptr;
 				}
 			}
 
-		if (prev_par->y == y && prev_par->h == h)
+		if (prev_area.y == area.y && prev_area.height == area.height)
 			{
-			if (prev_par->x + prev_par->w == x)
+			if (prev_area.x + prev_area.width == area.x)
 				{
 				/* we can merge the notifications */
-				prev_par->w += w;
+				prev_area.width += area.width;
 				return nullptr;
 				}
 
-			if (prev_par->x == x + w)
+			if (prev_area.x == area.x + area.width)
 				{
 				/* we can merge the notifications */
-				prev_par->x = x;
-				prev_par->w += w;
+				prev_area.x = area.x;
+				prev_area.width += area.width;
 				return nullptr;
 				}
 			}
@@ -427,19 +419,16 @@ static ImageLoaderAreaParam *image_loader_queue_area_ready(ImageLoader *il, GLis
 
 	auto par = g_new0(ImageLoaderAreaParam, 1);
 	par->il = il;
-	par->x = x;
-	par->y = y;
-	par->w = w;
-	par->h = h;
+	par->area = area;
 
 	*list = g_list_prepend(*list, par);
 	return par;
 }
 
 /* this function expects that il->data_mutex is locked by caller */
-static void image_loader_emit_area_ready(ImageLoader *il, gint x, gint y, gint w, gint h)
+static void image_loader_emit_area_ready(ImageLoader *il, GdkRectangle area)
 {
-	ImageLoaderAreaParam *par = image_loader_queue_area_ready(il, &il->area_param_list, x, y, w, h);
+	ImageLoaderAreaParam *par = image_loader_queue_area_ready(il, &il->area_param_list, area);
 
 	if (par)
 		{
@@ -451,9 +440,9 @@ static void image_loader_emit_area_ready(ImageLoader *il, gint x, gint y, gint w
 /* the following functions may be executed in separate thread */
 
 /* this function expects that il->data_mutex is locked by caller */
-static void image_loader_queue_delayed_area_ready(ImageLoader *il, gint x, gint y, gint w, gint h)
+static void image_loader_queue_delayed_area_ready(ImageLoader *il, GdkRectangle area)
 {
-	image_loader_queue_area_ready(il, &il->area_param_delayed_list, x, y, w, h);
+	image_loader_queue_area_ready(il, &il->area_param_delayed_list, area);
 }
 
 
@@ -521,9 +510,9 @@ static void image_loader_area_updated_cb(gpointer,
 
 	g_mutex_lock(il->data_mutex);
 	if (il->delay_area_ready)
-		image_loader_queue_delayed_area_ready(il, x, y, w, h);
+		image_loader_queue_delayed_area_ready(il, {x, y, w, h});
 	else
-		image_loader_emit_area_ready(il, x, y, w, h);
+		image_loader_emit_area_ready(il, {x, y, w, h});
 
 	if (il->stopping) il->backend->abort();
 
@@ -1049,7 +1038,7 @@ void image_loader_delay_area_ready(ImageLoader *il, gboolean enable)
 			auto par = static_cast<ImageLoaderAreaParam *>(work->data);
 			work = work->next;
 
-			g_signal_emit(il, signals[SIGNAL_AREA_READY], 0, par->x, par->y, par->w, par->h);
+			g_signal_emit(il, signals[SIGNAL_AREA_READY], 0, &par->area);
 			}
 		g_list_free_full(list, g_free);
 		}

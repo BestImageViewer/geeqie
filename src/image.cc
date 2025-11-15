@@ -844,7 +844,7 @@ static void image_load_pixbuf_ready(ImageWindow *imd)
 	image_change_pixbuf(imd, image_loader_get_pixbuf(imd->il), image_zoom_get(imd), FALSE);
 }
 
-static void image_load_area_ready_cb(ImageLoader *il, gint x, gint y, gint w, gint h, gpointer data)
+static void image_load_area_ready_cb(ImageLoader *il, const GdkRectangle *area, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	PixbufRenderer *pr = PIXBUF_RENDERER(imd->pr);
@@ -857,7 +857,7 @@ static void image_load_area_ready_cb(ImageLoader *il, gint x, gint y, gint w, gi
 
 	if (!pr->pixbuf) image_change_pixbuf(imd, image_loader_get_pixbuf(imd->il), image_zoom_get(imd), TRUE);
 
-	pixbuf_renderer_area_changed(pr, x, y, w, h);
+	pixbuf_renderer_area_changed(pr, area->x, area->y, area->width, area->height);
 }
 
 static void image_load_done_cb(ImageLoader *, gpointer data)
