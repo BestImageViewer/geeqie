@@ -1954,7 +1954,7 @@ void rt_scroll(void *renderer, gint x_off, gint y_off)
 			}
 }
 
-void renderer_area_changed(void *renderer, gint src_x, gint src_y, gint src_w, gint src_h)
+void renderer_area_changed(void *renderer, GdkRectangle src)
 {
 	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
@@ -1964,9 +1964,8 @@ void renderer_area_changed(void *renderer, gint src_x, gint src_y, gint src_w, g
 	gint y2;
 
 	gint orientation = rt_get_orientation(rt);
-	src_x -= get_right_pixbuf_offset(rt);
-	GdkRectangle rect = pr_coords_map_orientation_reverse(orientation,
-	                                                      {src_x, src_y, src_w, src_h},
+	src.x -= get_right_pixbuf_offset(rt);
+	GdkRectangle rect = pr_coords_map_orientation_reverse(orientation, src,
 	                                                      pr->image_width, pr->image_height);
 
 	if (pr->scale != 1.0 && pr->zoom_quality != GDK_INTERP_NEAREST)

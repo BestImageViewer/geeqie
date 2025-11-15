@@ -132,7 +132,7 @@ enum StereoPixbufData : gint {
 
 struct RendererFuncs
 {
-	void (*area_changed)(void *renderer, gint src_x, gint src_y, gint src_w, gint src_h); /**< pixbuf area changed */
+	void (*area_changed)(void *renderer, GdkRectangle src); /**< pixbuf area changed */
 	void (*invalidate_region)(void *renderer, GdkRectangle region);
 	void (*scroll)(void *renderer, gint x_off, gint y_off); /**< scroll */
 	void (*update_viewport)(void *renderer); /**< window / wiewport / border color has changed */
@@ -314,7 +314,7 @@ gint pixbuf_renderer_get_tiles(PixbufRenderer *pr);
 void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source);
 void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source);
 
-void pixbuf_renderer_area_changed(PixbufRenderer *pr, gint x, gint y, gint width, gint height);
+void pixbuf_renderer_area_changed(PixbufRenderer *pr, GdkRectangle area);
 
 /* scrolling */
 

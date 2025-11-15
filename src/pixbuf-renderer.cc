@@ -1066,11 +1066,10 @@ GList *pr_source_tile_compute_region(PixbufRenderer *pr, gint x, gint y, gint w,
 	return g_list_reverse(list);
 }
 
-static void pr_source_tile_changed(PixbufRenderer *pr, gint x, gint y, gint width, gint height)
+static void pr_source_tile_changed(PixbufRenderer *pr, GdkRectangle request_rect)
 {
-	if (width < 1 || height < 1) return;
+	if (request_rect.width < 1 || request_rect.height < 1) return;
 
-	const GdkRectangle request_rect{x, y, width, height};
 	GdkRectangle st_rect{0, 0, pr->source_tile_width, pr->source_tile_height};
 	GdkRectangle r;
 
@@ -2652,17 +2651,17 @@ void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 /**
  * @brief Update region of existing image
  */
-void pixbuf_renderer_area_changed(PixbufRenderer *pr, gint x, gint y, gint w, gint h)
+void pixbuf_renderer_area_changed(PixbufRenderer *pr, GdkRectangle area)
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 
 	if (pr->source_tiles_enabled)
 		{
-		pr_source_tile_changed(pr, x, y, w, h);
+		pr_source_tile_changed(pr, area);
 		}
 
-	pr->renderer->area_changed(pr->renderer, x, y, w, h);
-	if (pr->renderer2) pr->renderer2->area_changed(pr->renderer2, x, y, w, h);
+	pr->renderer->area_changed(pr->renderer, area);
+	if (pr->renderer2) pr->renderer2->area_changed(pr->renderer2, area);
 }
 
 void pixbuf_renderer_zoom_adjust(PixbufRenderer *pr, gdouble increment)

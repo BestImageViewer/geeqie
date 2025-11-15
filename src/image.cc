@@ -858,7 +858,7 @@ static void image_load_area_ready_cb(ImageLoader *il, const GdkRectangle *area, 
 
 	if (!pr->pixbuf) image_change_pixbuf(imd, image_loader_get_pixbuf(imd->il), image_zoom_get(imd), TRUE);
 
-	pixbuf_renderer_area_changed(pr, area->x, area->y, area->width, area->height);
+	pixbuf_renderer_area_changed(pr, *area);
 }
 
 static void image_load_done_cb(ImageLoader *, gpointer data)
@@ -1593,7 +1593,7 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 
 void image_area_changed(ImageWindow *imd, gint x, gint y, gint width, gint height)
 {
-	pixbuf_renderer_area_changed(PIXBUF_RENDERER(imd->pr), x, y, width, height);
+	pixbuf_renderer_area_changed(PIXBUF_RENDERER(imd->pr), {x, y, width, height});
 }
 
 void image_reload(ImageWindow *imd)
