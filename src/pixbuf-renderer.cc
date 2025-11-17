@@ -2382,40 +2382,33 @@ static void pr_pixbuf_size_sync(PixbufRenderer *pr)
 {
 	pr->stereo_pixbuf_offset_left = 0;
 	pr->stereo_pixbuf_offset_right = 0;
+
 	if (!pr->pixbuf) return;
+
+	pr->image_width = gdk_pixbuf_get_width(pr->pixbuf);
+	pr->image_height = gdk_pixbuf_get_height(pr->pixbuf);
+
+	if (pr->stereo_data == STEREO_PIXBUF_SBS)
+		{
+		pr->image_width /= 2;
+		pr->stereo_pixbuf_offset_right = pr->image_width;
+		}
+	else if (pr->stereo_data == STEREO_PIXBUF_CROSS)
+		{
+		pr->image_width /= 2;
+		pr->stereo_pixbuf_offset_left = pr->image_width;
+		}
+
 	switch (pr->orientation)
 		{
 		case EXIF_ORIENTATION_LEFT_TOP:
 		case EXIF_ORIENTATION_RIGHT_TOP:
 		case EXIF_ORIENTATION_RIGHT_BOTTOM:
 		case EXIF_ORIENTATION_LEFT_BOTTOM:
-			pr->image_width = gdk_pixbuf_get_height(pr->pixbuf);
-			pr->image_height = gdk_pixbuf_get_width(pr->pixbuf);
-			if (pr->stereo_data == STEREO_PIXBUF_SBS)
-				{
-				pr->image_height /= 2;
-				pr->stereo_pixbuf_offset_right = pr->image_height;
-				}
-			else if (pr->stereo_data == STEREO_PIXBUF_CROSS)
-				{
-				pr->image_height /= 2;
-				pr->stereo_pixbuf_offset_left = pr->image_height;
-				}
-
+			std::swap(pr->image_width, pr->image_height);
 			break;
 		default:
-			pr->image_width = gdk_pixbuf_get_width(pr->pixbuf);
-			pr->image_height = gdk_pixbuf_get_height(pr->pixbuf);
-			if (pr->stereo_data == STEREO_PIXBUF_SBS)
-				{
-				pr->image_width /= 2;
-				pr->stereo_pixbuf_offset_right = pr->image_width;
-				}
-			else if (pr->stereo_data == STEREO_PIXBUF_CROSS)
-				{
-				pr->image_width /= 2;
-				pr->stereo_pixbuf_offset_left = pr->image_width;
-				}
+			break;
 		}
 }
 
