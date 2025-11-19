@@ -1213,7 +1213,7 @@ void layout_image_reset_orientation(LayoutWindow *lw)
 		 * This also applies to jxl files.
 		 * Also see commit ac15f03b
 		 */
-		if ((g_strcmp0(imd->image_fd->format_name, "heif") != 0) && (g_strcmp0(imd->image_fd->format_name, "jxl") != 0))
+		if (imd->image_fd->supports_exif_orientation())
 			{
 			imd->orientation = metadata_read_int(imd->image_fd, ORIENTATION_KEY, EXIF_ORIENTATION_TOP_LEFT);
 			}

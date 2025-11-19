@@ -568,29 +568,29 @@ void image_alter_orientation(ImageWindow *imd, FileData *fd_n, AlterType type)
 	static const gint mirror[]       = {1,   2, 1, 4, 3, 6, 5, 8, 7};
 	static const gint flip[]         = {1,   4, 3, 2, 1, 8, 7, 6, 5};
 
-	gint orientation;
-
 	if (!imd || !imd->pr || !imd->image_fd || !fd_n) return;
 
-	orientation = EXIF_ORIENTATION_TOP_LEFT;
-	{
+	gint orientation;
+
 	if (fd_n->user_orientation)
 		{
 		orientation = fd_n->user_orientation;
 		}
-	else
-		if (options->metadata.write_orientation)
+	else if (options->metadata.write_orientation)
+		{
+		if (imd->image_fd->supports_exif_orientation())
 			{
-			if ((g_strcmp0(imd->image_fd->format_name, "heif") == 0) || (g_strcmp0(imd->image_fd->format_name, "jxl") == 0))
-				{
-				orientation = EXIF_ORIENTATION_TOP_LEFT;
-				}
-			else
-				{
-				orientation = metadata_read_int(fd_n, ORIENTATION_KEY, EXIF_ORIENTATION_TOP_LEFT);
-				}
+			orientation = metadata_read_int(fd_n, ORIENTATION_KEY, EXIF_ORIENTATION_TOP_LEFT);
 			}
-	}
+		else
+			{
+			orientation = EXIF_ORIENTATION_TOP_LEFT;
+			}
+		}
+	else
+		{
+		orientation = EXIF_ORIENTATION_TOP_LEFT;
+		}
 
 	switch (type)
 		{
@@ -619,21 +619,13 @@ void image_alter_orientation(ImageWindow *imd, FileData *fd_n, AlterType type)
 
 	if (orientation != (fd_n->exif_orientation ? fd_n->exif_orientation : 1))
 		{
-		if ((g_strcmp0(fd_n->format_name, "heif") != 0) && (g_strcmp0(fd_n->format_name, "jxl") != 0))
+		if (!options->metadata.write_orientation || !fd_n->supports_exif_orientation())
 			{
-			if (!options->metadata.write_orientation)
-				{
-				/* user_orientation does not work together with options->metadata.write_orientation,
-				   use either one or the other.
-				   we must however handle switching metadata.write_orientation on and off, therefore
-				   we just disable referencing new fd's, not unreferencing the old ones
-				*/
-				if (fd_n->user_orientation == 0) file_data_ref(fd_n);
-				fd_n->user_orientation = orientation;
-				}
-			}
-		else
-			{
+			/* user_orientation does not work together with options->metadata.write_orientation,
+			   use either one or the other.
+			   we must however handle switching metadata.write_orientation on and off, therefore
+			   we just disable referencing new fd's, not unreferencing the old ones
+			*/
 			if (fd_n->user_orientation == 0) file_data_ref(fd_n);
 			fd_n->user_orientation = orientation;
 			}
@@ -644,18 +636,15 @@ void image_alter_orientation(ImageWindow *imd, FileData *fd_n, AlterType type)
 		fd_n->user_orientation = 0;
 		}
 
-	if ((g_strcmp0(fd_n->format_name, "heif") != 0) && (g_strcmp0(fd_n->format_name, "jxl") != 0))
+	if (options->metadata.write_orientation && fd_n->supports_exif_orientation())
 		{
-		if (options->metadata.write_orientation)
+		if (type == ALTER_NONE)
 			{
-			if (type == ALTER_NONE)
-				{
-				metadata_write_revert(fd_n, ORIENTATION_KEY);
-				}
-			else
-				{
-				metadata_write_int(fd_n, ORIENTATION_KEY, orientation);
-				}
+			metadata_write_revert(fd_n, ORIENTATION_KEY);
+			}
+		else
+			{
+			metadata_write_int(fd_n, ORIENTATION_KEY, orientation);
 			}
 		}
 
@@ -1364,16 +1353,16 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 			}
 		else if (options->image.exif_rotate_enable)
 			{
-			if ((g_strcmp0(imd->image_fd->format_name, "heif") == 0) || (g_strcmp0(imd->image_fd->format_name, "jxl") == 0))
+			if (imd->image_fd->supports_exif_orientation())
 				{
-				imd->orientation = EXIF_ORIENTATION_TOP_LEFT;
-				imd->image_fd->exif_orientation = imd->orientation;
+				imd->orientation = metadata_read_int(imd->image_fd, ORIENTATION_KEY, EXIF_ORIENTATION_TOP_LEFT);
 				}
 			else
 				{
-				imd->orientation = metadata_read_int(imd->image_fd, ORIENTATION_KEY, EXIF_ORIENTATION_TOP_LEFT);
-				imd->image_fd->exif_orientation = imd->orientation;
+				imd->orientation = EXIF_ORIENTATION_TOP_LEFT;
 				}
+
+			imd->image_fd->exif_orientation = imd->orientation;
 			}
 		}
 

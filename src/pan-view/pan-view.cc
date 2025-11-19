@@ -243,7 +243,7 @@ static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
 			{
 			if (!il->fd->exif_orientation)
 				{
-				if ((g_strcmp0(il->fd->format_name, "heif") != 0) && (g_strcmp0(il->fd->format_name, "jxl") != 0))
+				if (il->fd->supports_exif_orientation())
 					{
 					il->fd->exif_orientation = metadata_read_int(il->fd, ORIENTATION_KEY, EXIF_ORIENTATION_TOP_LEFT);
 					}

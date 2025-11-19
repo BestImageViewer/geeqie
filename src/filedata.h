@@ -156,7 +156,7 @@ class GlobalFileDataContext
 };
 
 class FileData {
-    private:
+private:
 	FileData() = delete;
 
 	// TODO(xsdg): Switch FileData to using new/delete, so that FileDataContext
@@ -167,7 +167,7 @@ class FileData {
 		return &(GlobalFileDataContext::get_instance().context());
 		}
 
-    public:
+public:
 	// Child classes that encapsulate some functionality.
 	class FileList;
 
@@ -365,9 +365,11 @@ class FileData {
 	void file_data_set_page_total(FileData *fd, gint page_total);
 	void file_data_set_page_num(FileData *fd, gint page_num);
 
+	bool supports_exif_orientation() const;
+
 	static void file_data_dump();
 
-    protected:
+protected:
 	static FileData *file_data_new(const gchar *path_utf8, struct stat *st, gboolean disable_sidecars, FileDataContext *context = nullptr);
 	static FileData *file_data_new_local(const gchar *path, struct stat *st, gboolean disable_sidecars, FileDataContext *context = nullptr);
 

@@ -2952,6 +2952,12 @@ void FileData::file_data_set_page_total(FileData *fd, gint page_total)
 	fd->page_total = page_total;
 }
 
+bool FileData::supports_exif_orientation() const
+{
+	return (g_strcmp0(format_name, "heif") != 0)
+	    && (g_strcmp0(format_name, "jxl") != 0);
+}
+
 FileDataRef::FileDataRef(FileData &fd, gboolean skip_ref) : fd_(fd)
 {
         if (!skip_ref) fd_.file_data_ref();

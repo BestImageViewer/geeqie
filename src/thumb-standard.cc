@@ -408,7 +408,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 		{
 		if (!tl->fd->exif_orientation)
 			{
-			if ((g_strcmp0(tl->fd->format_name, "heif") != 0) && (g_strcmp0(tl->fd->format_name, "jxl") != 0))
+			if (tl->fd->supports_exif_orientation())
 				{
 				tl->fd->exif_orientation = metadata_read_int(tl->fd, ORIENTATION_KEY, EXIF_ORIENTATION_TOP_LEFT);
 				}
