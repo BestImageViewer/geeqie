@@ -1852,45 +1852,41 @@ static void layout_image_scroll_cb(ImageWindow *imd, GdkEventScroll *event, gpoi
 
 static void layout_image_drag_cb(ImageWindow *imd, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer data)
 {
-	gint i;
 	auto lw = static_cast<LayoutWindow *>(data);
-	gdouble sx;
-	gdouble sy;
 
-	if (lw->full_screen && lw->image != lw->full_screen->imd &&
-	    imd != lw->full_screen->imd)
-		{
+	const auto set_scroll_center = [imd, event, dx, dy](ImageWindow *image)
+	{
+		if (image == imd) return;
+
+		gdouble sx;
+		gdouble sy;
+
 		if (event->state & GDK_CONTROL_MASK)
 			{
 			image_get_scroll_center(imd, &sx, &sy);
 			}
 		else
 			{
-			image_get_scroll_center(lw->full_screen->imd, &sx, &sy);
+			image_get_scroll_center(image, &sx, &sy);
 			sx += dx;
 			sy += dy;
 			}
-		image_set_scroll_center(lw->full_screen->imd, sx, sy);
+
+		image_set_scroll_center(image, sx, sy);
+	};
+
+	if (lw->full_screen && lw->full_screen->imd != lw->image)
+		{
+		set_scroll_center(lw->full_screen->imd);
 		}
 
 	if (!(event->state & GDK_SHIFT_MASK)) return;
 
-	for (i = 0; i < MAX_SPLIT_IMAGES; i++)
+	for (ImageWindow *split_image : lw->split_images)
 		{
-		if (lw->split_images[i] && lw->split_images[i] != imd)
+		if (split_image)
 			{
-
-			if (event->state & GDK_CONTROL_MASK)
-				{
-				image_get_scroll_center(imd, &sx, &sy);
-				}
-			else
-				{
-				image_get_scroll_center(lw->split_images[i], &sx, &sy);
-				sx += dx;
-				sy += dy;
-				}
-			image_set_scroll_center(lw->split_images[i], sx, sy);
+			set_scroll_center(split_image);
 			}
 		}
 }
