@@ -871,9 +871,10 @@ void gq_log_file(GtkApplication *, GApplicationCommandLine *, GVariantDict *comm
 	command_line->log_file = path_from_utf8(text);
 }
 
-#if HAVE_LUA // @todo Use [[maybe_unused]] for command_line_options_dict since C++17 and merge declarations
-void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
+void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line,
+            [[maybe_unused]] GVariantDict *command_line_options_dict, GList *)
 {
+#if HAVE_LUA
 	const gchar *text;
 	g_variant_dict_lookup(command_line_options_dict, "lua", "&s", &text);
 
@@ -895,13 +896,10 @@ void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVarian
 		{
 		g_application_command_line_print(app_command_line, _("lua error: no data\n"));
 		}
-}
 #else
-void gq_lua(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
-{
 	g_application_command_line_print(app_command_line, _("Lua is not available\n"));
-}
 #endif
+}
 
 void gq_new_window(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
 {

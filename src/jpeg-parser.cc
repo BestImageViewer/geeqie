@@ -304,9 +304,8 @@ MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 	                       [size](MPOEntry &mpe){ return mpe.offset + mpe.length > size; });
 	if (it != mpo.images.end())
 		{
-		const guint mpe_size = it->offset + it->length;
+		[[maybe_unused]] const guint mpe_size = it->offset + it->length;
 		mpo.images.erase(it, mpo.images.end());
-		(void)mpe_size; // @todo Use [[maybe_unused]] since C++17
 		DEBUG_1("MPO file truncated to %u valid images, %u %u", mpo.images.size(), mpe_size, size);
 		}
 

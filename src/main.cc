@@ -216,7 +216,6 @@ void sig_handler_cb(int signo, siginfo_t *info, void *)
 	gint i = 0;
 	guint64 addr;
 	guint64 char_index;
-	ssize_t len;
 #if HAVE_EXECINFO_H
 	gint bt_size;
 	void *bt[1024];
@@ -271,6 +270,7 @@ void sig_handler_cb(int signo, siginfo_t *info, void *)
 		i++;
 		}
 
+	[[maybe_unused]] ssize_t len;
 	len = write(STDERR_FILENO, "Geeqie fatal error\n", 19);
 	len = write(STDERR_FILENO, "Signal: ", 8);
 	len = write(STDERR_FILENO, signal_name, strlen(signal_name));
@@ -308,8 +308,6 @@ void sig_handler_cb(int signo, siginfo_t *info, void *)
 	bt_size = backtrace(bt, 1024);
 	backtrace_symbols_fd(bt, bt_size, STDERR_FILENO);
 #endif
-
-	(void)len; // @todo Use [[maybe_unused]] since C++17
 
 	exit(EXIT_FAILURE);
 }
@@ -672,7 +670,7 @@ void exit_program_write_metadata_cb(gint success, const gchar *)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 #if defined(SIGBUS) && defined(SA_SIGINFO)
-void sigbus_handler_cb_unused(int, siginfo_t *info, void *)
+void sigbus_handler_cb_unused(int, [[maybe_unused]] siginfo_t *info, void *)
 {
 	/*
 	 * @FIXME Design and implement a POSIX-acceptable approach,
@@ -680,7 +678,6 @@ void sigbus_handler_cb_unused(int, siginfo_t *info, void *)
 	 * See https://github.com/BestImageViewer/geeqie/issues/1052 for discussion
 	 */
 
-	(void)info; // @todo Use [[maybe_unused]] since C++17
 	DEBUG_1("SIGBUS %p NOT HANDLED", info->si_addr);
 	exit(EXIT_FAILURE);
 }

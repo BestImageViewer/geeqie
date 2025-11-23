@@ -1799,12 +1799,11 @@ static void start_element(GMarkupParseContext *,
 }
 
 static void end_element(GMarkupParseContext *,
-                        const gchar *element_name,
+                        [[maybe_unused]] const gchar *element_name,
                         gpointer user_data,
                         GError **)
 {
 	auto parser_data = static_cast<GQParserData *>(user_data);
-	(void)element_name; // @todo Use [[maybe_unused]] since C++17
 	DEBUG_2("end %s", element_name);
 
 	parser_data->end_func();
