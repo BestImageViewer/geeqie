@@ -226,6 +226,17 @@ static void image_loader_class_init(ImageLoaderClass *loader_class)
 
 }
 
+#ifdef DEBUG
+static const gchar *image_loader_get_error(ImageLoader *il)
+{
+	if (!il) return nullptr;
+
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+
+	return il->error ? il->error->message : nullptr;
+}
+#endif
+
 static void image_loader_finalize(GObject *object)
 {
 	auto il = reinterpret_cast<ImageLoader *>(object);
@@ -1316,16 +1327,6 @@ gboolean image_loader_get_shrunk(ImageLoader *il)
 
 	g_mutex_lock(il->data_mutex);
 	ret = il->shrunk;
-	g_mutex_unlock(il->data_mutex);
-	return ret;
-}
-
-const gchar *image_loader_get_error(ImageLoader *il)
-{
-	const gchar *ret = nullptr;
-	if (!il) return nullptr;
-	g_mutex_lock(il->data_mutex);
-	if (il->error) ret = il->error->message;
 	g_mutex_unlock(il->data_mutex);
 	return ret;
 }
