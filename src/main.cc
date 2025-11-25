@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cctype>
 #include <clocale>
 #include <csignal>
@@ -203,69 +204,30 @@ GOptionEntry command_line_options_cache_maintenance[] =
 	{ nullptr            ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, nullptr                                             , nullptr },
 };
 
-void sig_handler_cb(int signo, siginfo_t *info, void *)
+const gchar *get_signal_name(int signo)
 {
-	gchar hex_char[16];
-	const gchar *signal_name = nullptr;
-	gint i = 0;
-	guint64 addr;
-	guint64 char_index;
-#if HAVE_EXECINFO_H
-	gint bt_size;
-	void *bt[1024];
-#endif
-	struct signals
-		{
+	static const struct signals
+	{
 		gint sig_no;
 		const gchar *sig_name;
-		};
-	struct signals signals_list[7];
+	} signals_list[6] = {
+		{ SIGABRT, "Abort" },
+		{ SIGBUS, "Bus error" },
+		{ SIGFPE, "Floating-point exception" },
+		{ SIGILL, "Illegal instruction" },
+		{ SIGIOT, "IOT trap" }, // @todo Same value as SIGABRT. Remove SIGIOT?
+		{ SIGSEGV, "Invalid memory reference" },
+	};
+	const auto it = std::find_if(std::cbegin(signals_list), std::cend(signals_list),
+	                             [signo](const signals &s){ return s.sig_no == signo; });
+	return (it != std::cend(signals_list)) ? it->sig_name : "Unknown signal";
+}
 
-	signals_list[0].sig_no = SIGABRT;
-	signals_list[0].sig_name = "Abort";
-	signals_list[1].sig_no = SIGBUS;
-	signals_list[1].sig_name = "Bus error";
-	signals_list[2].sig_no = SIGFPE;
-	signals_list[2].sig_name = "Floating-point exception";
-	signals_list[3].sig_no = SIGILL;
-	signals_list[3].sig_name = "Illegal instruction";
-	signals_list[4].sig_no = SIGIOT;
-	signals_list[4].sig_name = "IOT trap";
-	signals_list[5].sig_no = SIGSEGV;
-	signals_list[5].sig_name = "Invalid memory reference";
-	signals_list[6].sig_no = -1;
-	signals_list[6].sig_name = "END";
+void sig_handler_cb(int signo, siginfo_t *info, void *)
+{
+	[[maybe_unused]] ssize_t len = write(STDERR_FILENO, "Geeqie fatal error\n", 19);
 
-	hex_char[0] = '0';
-	hex_char[1] = '1';
-	hex_char[2] = '2';
-	hex_char[3] = '3';
-	hex_char[4] = '4';
-	hex_char[5] = '5';
-	hex_char[6] = '6';
-	hex_char[7] = '7';
-	hex_char[8] = '8';
-	hex_char[9] = '9';
-	hex_char[10] = 'a';
-	hex_char[11] = 'b';
-	hex_char[12] = 'c';
-	hex_char[13] = 'd';
-	hex_char[14] = 'e';
-	hex_char[15] = 'f';
-
-	signal_name = "Unknown signal";
-	while (signals_list[i].sig_no != -1)
-		{
-		if (signo == signals_list[i].sig_no)
-			{
-			signal_name = signals_list[i].sig_name;
-			break;
-			}
-		i++;
-		}
-
-	[[maybe_unused]] ssize_t len;
-	len = write(STDERR_FILENO, "Geeqie fatal error\n", 19);
+	const gchar *signal_name = get_signal_name(signo);
 	len = write(STDERR_FILENO, "Signal: ", 8);
 	len = write(STDERR_FILENO, signal_name, strlen(signal_name));
 	len = write(STDERR_FILENO, "\n", 1);
@@ -275,31 +237,32 @@ void sig_handler_cb(int signo, siginfo_t *info, void *)
 	len = write(STDERR_FILENO, code_descr, strlen(code_descr));
 	len = write(STDERR_FILENO, "\n", 1);
 
-	len = write(STDERR_FILENO, "Address: ", 9);
-
+	len = write(STDERR_FILENO, "Address: 0x", 11);
 	if (info->si_addr == nullptr)
 		{
-		len = write(STDERR_FILENO, "0x0\n", 4);
+		len = write(STDERR_FILENO, "0", 1);
 		}
 	else
 		{
 		/* Assume the address is 64-bit */
-		len = write(STDERR_FILENO, "0x", 2);
-		addr = reinterpret_cast<guint64>(info->si_addr);
+		const gchar hex_char[16] = { '0', '1', '2', '3', '4', '5', '6', '7',
+		                             '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+		auto addr = reinterpret_cast<guint64>(info->si_addr);
 
-		for (i = 0; i < 16; i++)
+		for (gint i = 0; i < 16; i++)
 			{
-			char_index = addr & 0xf000000000000000;
+			guint64 char_index = addr & 0xf000000000000000;
 			char_index = char_index >> 60;
 			addr = addr << 4;
 
 			len = write(STDERR_FILENO, &hex_char[char_index], 1);
 			}
-		len = write(STDERR_FILENO, "\n", 1);
 		}
+	len = write(STDERR_FILENO, "\n", 1);
 
 #if HAVE_EXECINFO_H
-	bt_size = backtrace(bt, 1024);
+	void *bt[1024];
+	const int bt_size = backtrace(bt, 1024);
 	backtrace_symbols_fd(bt, bt_size, STDERR_FILENO);
 #endif
 
