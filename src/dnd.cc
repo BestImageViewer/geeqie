@@ -21,6 +21,8 @@
 
 #include "dnd.h"
 
+#include <algorithm>
+
 #include <glib-object.h>
 #include <pango/pango.h>
 
@@ -136,8 +138,8 @@ void dnd_set_drag_icon(GtkWidget *widget, GdkDragContext *context, GdkPixbuf *pi
 
 		x = std::max(0, w - lw);
 		y = std::max(0, h - lh);
-		lw = CLAMP(lw, 0, w - x - 1);
-		lh = CLAMP(lh, 0, h - y - 1);
+		lw = std::clamp(lw, 0, w - x - 1);
+		lh = std::clamp(lh, 0, h - y - 1);
 
 		pixbuf_draw_rect_fill(dest, {x, y, lw, lh}, 128, 128, 128, 255);
 		}

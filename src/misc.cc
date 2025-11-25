@@ -460,9 +460,9 @@ GdkRGBA convert_gdkcolor_to_gdkrgba(gpointer data)
 {
 	auto *gdk_color = static_cast<GdkColor *>(data);
 
-	return { CLAMP((double)gdk_color->red / 65535.0, 0.0, 1.0),
-	         CLAMP((double)gdk_color->green / 65535.0, 0.0, 1.0),
-	         CLAMP((double)gdk_color->blue / 65535.0, 0.0, 1.0),
+	return { std::clamp((double)gdk_color->red / 65535.0, 0.0, 1.0),
+	         std::clamp((double)gdk_color->green / 65535.0, 0.0, 1.0),
+	         std::clamp((double)gdk_color->blue / 65535.0, 0.0, 1.0),
 	         1.0 };
 }
 #endif
@@ -480,7 +480,7 @@ void shift_color(GdkRGBA &src, gshort val, gint direction)
 		}
 	else
 		{
-		val = CLAMP(val, 1, 100);
+		val = std::clamp<gshort>(val, 1, 100);
 		}
 
 	const gdouble cs = 1.0 / 100 * val;

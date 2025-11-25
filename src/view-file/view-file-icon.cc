@@ -875,11 +875,8 @@ static void vficon_move_focus(ViewFile *vf, gint row, gint col, gboolean relativ
 
 	if (relative)
 		{
-		new_row = VFICON(vf)->focus_row;
+		new_row = std::clamp(VFICON(vf)->focus_row + row, 0, VFICON(vf)->rows - 1);
 		new_col = VFICON(vf)->focus_column;
-
-		new_row += row;
-		new_row = CLAMP(new_row, 0, VFICON(vf)->rows - 1);
 
 		while (col != 0)
 			{

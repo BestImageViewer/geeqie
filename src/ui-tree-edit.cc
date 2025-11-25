@@ -21,6 +21,7 @@
 
 #include "ui-tree-edit.h"
 
+#include <algorithm>
 #include <cstring>
 
 #include <glib-object.h>
@@ -440,9 +441,9 @@ static gboolean widget_auto_scroll_cb(gpointer data)
 
 	if (amt != 0)
 		{
-		amt = CLAMP(amt, 0 - sd->max_step, sd->max_step);
+		amt = std::clamp(amt, 0 - sd->max_step, sd->max_step);
 
-		const gdouble value = CLAMP(gtk_adjustment_get_value(sd->adj) + amt, gtk_adjustment_get_lower(sd->adj), gtk_adjustment_get_upper(sd->adj) - gtk_adjustment_get_page_size(sd->adj));
+		const gdouble value = std::clamp(gtk_adjustment_get_value(sd->adj) + amt, gtk_adjustment_get_lower(sd->adj), gtk_adjustment_get_upper(sd->adj) - gtk_adjustment_get_page_size(sd->adj));
 		if (gtk_adjustment_get_value(sd->adj) != value)
 			{
 			/* only notify when scrolling is needed */

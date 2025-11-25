@@ -1724,35 +1724,23 @@ void rt_queue_merge(QueueData *parent, QueueData *qd)
 
 gboolean rt_clamp_to_visible(RendererTiles *rt, gint *x, gint *y, gint *w, gint *h)
 {
-	PixbufRenderer *pr = rt->pr;
-	gint nx;
-	gint ny;
-	gint nw;
-	gint nh;
-	gint vx;
-	gint vy;
-	gint vw;
-	gint vh;
+	const gint vx = rt->x_scroll;
+	const gint vy = rt->y_scroll;
 
-	vw = pr->vis_width;
-	vh = pr->vis_height;
-
-	vx = rt->x_scroll;
-	vy = rt->y_scroll;
+	const PixbufRenderer *pr = rt->pr;
+	const gint vw = pr->vis_width;
+	const gint vh = pr->vis_height;
 
 	if (*x + *w < vx || *x > vx + vw || *y + *h < vy || *y > vy + vh) return FALSE;
 
 	/* now clamp it */
-	nx = CLAMP(*x, vx, vx + vw);
-	nw = CLAMP(*w - (nx - *x), 1, vw);
-
-	ny = CLAMP(*y, vy, vy + vh);
-	nh = CLAMP(*h - (ny - *y), 1, vh);
-
+	const gint nx = std::max(*x, vx);
+	*w = std::clamp(*w - (nx - *x), 1, vw);
 	*x = nx;
+
+	const gint ny = std::max(*y, vy);
+	*h = std::clamp(*h - (ny - *y), 1, vh);
 	*y = ny;
-	*w = nw;
-	*h = nh;
 
 	return TRUE;
 }
@@ -1849,17 +1837,14 @@ void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
               gboolean new_data, gboolean only_existing)
 {
 	PixbufRenderer *pr = rt->pr;
-	gint nx;
-	gint ny;
 
 	rt_sync_scroll(rt);
 
-	nx = CLAMP(x, 0, pr->width - 1);
-	ny = CLAMP(y, 0, pr->height - 1);
-	w -= (nx - x);
-	h -= (ny - y);
-	w = CLAMP(w, 0, pr->width - nx);
-	h = CLAMP(h, 0, pr->height - ny);
+	const gint nx = std::clamp(x, 0, pr->width - 1);
+	const gint ny = std::clamp(y, 0, pr->height - 1);
+
+	w = std::clamp(w - (nx - x), 0, pr->width - nx);
+	h = std::clamp(h - (ny - y), 0, pr->height - ny);
 	if (w < 1 || h < 1) return;
 
 	if (rt_queue_to_tiles(rt, nx, ny, w, h, clamp, render, new_data, only_existing) &&

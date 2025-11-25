@@ -170,7 +170,7 @@ gint get_debug_level()
 
 void set_debug_level(gint new_level)
 {
-	debug_level = CLAMP(new_level, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX);
+	debug_level = std::clamp(new_level, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX);
 }
 
 void debug_level_add(gint delta)

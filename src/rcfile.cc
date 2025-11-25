@@ -21,6 +21,7 @@
 
 #include "rcfile.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <stack>
 #include <string>
@@ -311,7 +312,7 @@ gboolean read_uint_option_clamp(const gchar *option, const gchar *label, const g
 	gboolean ret;
 
 	ret = read_uint_option(option, label, value, n);
-	if (ret) *n = CLAMP(*n, min, max);
+	if (ret) *n = std::clamp(*n, min, max);
 
 	return ret;
 }
@@ -322,7 +323,7 @@ gboolean read_int_option_clamp(const gchar *option, const gchar *label, const gc
 	gboolean ret;
 
 	ret = read_int_option(option, label, value, n);
-	if (ret) *n = CLAMP(*n, min, max);
+	if (ret) *n = std::clamp(*n, min, max);
 
 	return ret;
 }

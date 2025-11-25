@@ -1068,8 +1068,8 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
 			std::swap(x1, x2);
 			}
 
-		x1 = CLAMP(x1, f.x, fx2);
-		x2 = CLAMP(x2, f.x, fx2);
+		x1 = std::clamp(x1, f.x, fx2);
+		x2 = std::clamp(x2, f.x, fx2);
 
 		pp = p_pix + y * prs + x1 * p_step;
 

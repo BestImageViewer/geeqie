@@ -794,7 +794,7 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 	if (l < 1) return;
 
 	col = static_cast<gint>((sqrt(static_cast<gdouble>(l) / grid_size) * width / height) + 0.999);
-	col = CLAMP(col, 1, (l / grid_size) + 1);
+	col = std::clamp(col, 1, (l / grid_size) + 1);
 	row = static_cast<gint>(static_cast<gdouble>(l) / grid_size / col);
 	row = std::max(row, 1);
 

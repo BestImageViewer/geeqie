@@ -21,6 +21,7 @@
 
 #include "layout-config.h"
 
+#include <algorithm>
 #include <cstring>
 #include <string>
 
@@ -102,11 +103,9 @@ void layout_config_set_order(LayoutLocation l, gint n,
 void layout_config_from_data(gint style, gint oa, gint ob, gint oc,
                              LayoutLocation &la, LayoutLocation &lb, LayoutLocation &lc)
 {
-	LayoutStyle ls;
+	style = std::clamp(style, 0, layout_config_style_count);
 
-	style = CLAMP(style, 0, layout_config_style_count);
-
-	ls = layout_config_styles[style];
+	LayoutStyle ls = layout_config_styles[style];
 
 	layout_config_set_order(ls.a, oa, la, lb, lc);
 	layout_config_set_order(ls.b, ob, la, lb, lc);
@@ -327,7 +326,7 @@ void layout_config_set(GtkWidget *widget, gint style, const gchar *order)
 
 	if (!lc) return;
 
-	style = CLAMP(style, 0, layout_config_style_count);
+	style = std::clamp(style, 0, layout_config_style_count);
 	button = static_cast<GtkWidget *>(g_list_nth_data(lc->style_widgets, style));
 	if (!button) return;
 
