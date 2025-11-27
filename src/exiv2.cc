@@ -624,49 +624,48 @@ char *exif_item_get_description(ExifItem *item)
 	}
 }
 
-/*
-invalidTypeId, unsignedByte, asciiString, unsignedShort,
-  unsignedLong, unsignedRational, signedByte, undefined,
-  signedShort, signedLong, signedRational, string,
-  date, time, comment, directory,
-  xmpText, xmpAlt, xmpBag, xmpSeq,
-  langAlt, lastTypeId
-*/
-
-static guint format_id_trans_tbl [] = {
-	EXIF_FORMAT_UNKNOWN,
-	EXIF_FORMAT_BYTE_UNSIGNED,
-	EXIF_FORMAT_STRING,
-	EXIF_FORMAT_SHORT_UNSIGNED,
-	EXIF_FORMAT_LONG_UNSIGNED,
-	EXIF_FORMAT_RATIONAL_UNSIGNED,
-	EXIF_FORMAT_BYTE,
-	EXIF_FORMAT_UNDEFINED,
-	EXIF_FORMAT_SHORT,
-	EXIF_FORMAT_LONG,
-	EXIF_FORMAT_RATIONAL,
-	EXIF_FORMAT_STRING,
-	EXIF_FORMAT_STRING,
-	EXIF_FORMAT_STRING,
-	EXIF_FORMAT_UNDEFINED,
-	EXIF_FORMAT_STRING,
-	EXIF_FORMAT_STRING,
-	EXIF_FORMAT_STRING,
-	EXIF_FORMAT_STRING
-	};
-
-
-
 guint exif_item_get_format_id(ExifItem *item)
 {
+	/*
+	invalidTypeId, unsignedByte, asciiString, unsignedShort,
+	  unsignedLong, unsignedRational, signedByte, undefined,
+	  signedShort, signedLong, signedRational, string,
+	  date, time, comment, directory,
+	  xmpText, xmpAlt, xmpBag, xmpSeq,
+	  langAlt, lastTypeId
+	*/
+	static constexpr std::array<guint, 19> format_id_trans_tbl{
+		EXIF_FORMAT_UNKNOWN,
+		EXIF_FORMAT_BYTE_UNSIGNED,
+		EXIF_FORMAT_STRING,
+		EXIF_FORMAT_SHORT_UNSIGNED,
+		EXIF_FORMAT_LONG_UNSIGNED,
+		EXIF_FORMAT_RATIONAL_UNSIGNED,
+		EXIF_FORMAT_BYTE,
+		EXIF_FORMAT_UNDEFINED,
+		EXIF_FORMAT_SHORT,
+		EXIF_FORMAT_LONG,
+		EXIF_FORMAT_RATIONAL,
+		EXIF_FORMAT_STRING,
+		EXIF_FORMAT_STRING,
+		EXIF_FORMAT_STRING,
+		EXIF_FORMAT_UNDEFINED,
+		EXIF_FORMAT_STRING,
+		EXIF_FORMAT_STRING,
+		EXIF_FORMAT_STRING,
+		EXIF_FORMAT_STRING
+	};
+
 	try {
 		if (!item) return EXIF_FORMAT_UNKNOWN;
 		guint id = (reinterpret_cast<Exiv2::Metadatum *>(item))->typeId();
-		if (id >= G_N_ELEMENTS(format_id_trans_tbl)) return EXIF_FORMAT_UNKNOWN;
-		return format_id_trans_tbl[id];
+		return format_id_trans_tbl.at(id);
 	}
-	catch (Exiv2::AnyError& e) {
+	catch (Exiv2::AnyError &e) {
 		debug_exception(e);
+		return EXIF_FORMAT_UNKNOWN;
+	}
+	catch (const std::out_of_range &) {
 		return EXIF_FORMAT_UNKNOWN;
 	}
 }
