@@ -1731,7 +1731,7 @@ gboolean rt_clamp_to_visible(RendererTiles *rt, gint *x, gint *y, gint *w, gint 
 	const gint vw = pr->vis_width;
 	const gint vh = pr->vis_height;
 
-	if (*x + *w < vx || *x > vx + vw || *y + *h < vy || *y > vy + vh) return FALSE;
+	if (vw < 1 || vh < 1 || *x + *w < vx || *x > vx + vw || *y + *h < vy || *y > vy + vh) return FALSE;
 
 	/* now clamp it */
 	const gint nx = std::max(*x, vx);
@@ -1839,6 +1839,8 @@ void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
 	PixbufRenderer *pr = rt->pr;
 
 	rt_sync_scroll(rt);
+
+	if (pr->width < 1 || pr->height < 1) return;
 
 	const gint nx = std::clamp(x, 0, pr->width - 1);
 	const gint ny = std::clamp(y, 0, pr->height - 1);
