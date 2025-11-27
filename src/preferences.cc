@@ -54,6 +54,7 @@
 #include "filedata.h"
 #include "filefilter.h"
 #include "fullscreen.h"
+#include "gq-size.h"
 #include "image.h"
 #include "img-view.h"
 #include "intl.h"
@@ -88,6 +89,24 @@ namespace
 constexpr gint PRE_FORMATTED_COLUMNS = 5;
 constexpr gint KEYWORD_DIALOG_WIDTH = 400;
 
+constexpr GqSize thumb_size_list[] =
+{
+	{ 24, 24 },
+	{ 32, 32 },
+	{ 48, 48 },
+	{ 64, 64 },
+	{ 96, 72 },
+	{ 96, 96 },
+	{ 128, 96 },
+	{ 128, 128 },
+	{ 160, 120 },
+	{ 160, 160 },
+	{ 192, 144 },
+	{ 192, 192 },
+	{ 256, 192 },
+	{ 256, 256 },
+};
+
 struct TZData
 {
 	GenericDialog *gd;
@@ -120,30 +139,6 @@ static void image_overlay_set_text_colors(gint i);
 
 static GtkWidget *keyword_text;
 static void config_tab_keywords_save();
-
-struct ThumbSize
-{
-	gint w;
-	gint h;
-};
-
-static ThumbSize thumb_size_list[] =
-{
-	{ 24, 24 },
-	{ 32, 32 },
-	{ 48, 48 },
-	{ 64, 64 },
-	{ 96, 72 },
-	{ 96, 96 },
-	{ 128, 96 },
-	{ 128, 128 },
-	{ 160, 120 },
-	{ 160, 160 },
-	{ 192, 144 },
-	{ 192, 192 },
-	{ 256, 192 },
-	{ 256, 256 }
-};
 
 enum {
 	FE_ENABLE,
@@ -856,8 +851,8 @@ static void thumb_size_menu_cb(GtkWidget *combo, gpointer)
 
 	if (static_cast<guint>(n) < G_N_ELEMENTS(thumb_size_list))
 		{
-		c_options->thumbnails.max_width = thumb_size_list[n].w;
-		c_options->thumbnails.max_height = thumb_size_list[n].h;
+		c_options->thumbnails.max_width = thumb_size_list[n].width;
+		c_options->thumbnails.max_height = thumb_size_list[n].height;
 		}
 	else
 		{
@@ -882,11 +877,8 @@ static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, gchar *
 	current = -1;
 	for (i = 0; static_cast<guint>(i) < G_N_ELEMENTS(thumb_size_list); i++)
 		{
-		gint w;
-		gint h;
-
-		w = thumb_size_list[i].w;
-		h = thumb_size_list[i].h;
+		const int w = thumb_size_list[i].width;
+		const int h = thumb_size_list[i].height;
 
 		g_autofree gchar *buf = g_strdup_printf("%d x %d", w, h);
 		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), buf);
