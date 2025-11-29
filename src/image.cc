@@ -198,15 +198,14 @@ static void image_press_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer d
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	LayoutWindow *lw;
-	gint x_pixel;
-	gint y_pixel;
 
 	if(options->draw_rectangle)
 		{
-		pixbuf_renderer_get_mouse_position(pr, &x_pixel, &y_pixel);
+		GdkPoint pixel;
+		pixbuf_renderer_get_mouse_position(pr, pixel);
 		selection_rectangle = SelectionRectangle(std::max(0, gint(event->x)), std::max(0, gint(event->y)), options->rectangle_draw_aspect_ratio);
-		image_start_x = std::max(0, x_pixel);
-		image_start_y = std::max(0, y_pixel);
+		image_start_x = std::max(0, pixel.x);
+		image_start_y = std::max(0, pixel.y);
 		}
 	if (rect_id)
 		{
@@ -246,35 +245,18 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 	gint width;
 	gint height;
 	GdkPixbuf *rect_pixbuf;
-	gint x_pixel;
-	gint y_pixel;
-	gint image_x_pixel;
-	gint image_y_pixel;
 
 	selection_rectangle.set_cursor(event->x, event->y);
 
 	if (options->draw_rectangle)
 		{
 		pixbuf_renderer_get_image_size(pr, &width, &height);
-		pixbuf_renderer_get_mouse_position(pr, &x_pixel, &y_pixel);
 
-		if (x_pixel == -1)
-			{
-			image_x_pixel = width;
-			}
-		else
-			{
-			image_x_pixel = x_pixel;
-			}
+		GdkPoint pixel;
+		pixbuf_renderer_get_mouse_position(pr, pixel);
 
-		if (y_pixel == -1)
-			{
-			image_y_pixel = height;
-			}
-		else
-			{
-			image_y_pixel = y_pixel;
-			}
+		gint image_x_pixel = (pixel.x != -1) ? pixel.x : width;
+		gint image_y_pixel = (pixel.y != -1) ? pixel.y : height;
 
 		if (options->rectangle_draw_aspect_ratio != RECTANGLE_DRAW_ASPECT_RATIO_NONE)
 			{

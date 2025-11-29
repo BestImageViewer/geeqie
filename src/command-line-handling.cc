@@ -928,28 +928,27 @@ void gq_pixel_info(GtkApplication *, GApplicationCommandLine *app_command_line, 
 	pixbuf_renderer_get_image_size(pr, &width, &height);
 	if (width < 1 || height < 1) return;
 
-	gint x_pixel;
-	gint y_pixel;
-	pixbuf_renderer_get_mouse_position(pr, &x_pixel, &y_pixel);
-	if (x_pixel < 0 || y_pixel < 0) return;
+	GdkPoint pixel;
+	pixbuf_renderer_get_mouse_position(pr, pixel);
+	if (pixel.x < 0 || pixel.y < 0) return;
 
 	gint r_mouse;
 	gint g_mouse;
 	gint b_mouse;
 	gint a_mouse;
-	pixbuf_renderer_get_pixel_colors(pr, x_pixel, y_pixel, &r_mouse, &g_mouse, &b_mouse, &a_mouse);
+	pixbuf_renderer_get_pixel_colors(pr, pixel, &r_mouse, &g_mouse, &b_mouse, &a_mouse);
 
 	g_autofree gchar *pixel_info = nullptr;
 	if (gdk_pixbuf_get_has_alpha(pr->pixbuf))
 		{
 		pixel_info = g_strdup_printf(_("[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"),
-		                             x_pixel, y_pixel,
+		                             pixel.x, pixel.y,
 		                             r_mouse, g_mouse, b_mouse, a_mouse);
 		}
 	else
 		{
 		pixel_info = g_strdup_printf(_("[%d,%d]: RGB(%3d,%3d,%3d)"),
-		                             x_pixel, y_pixel,
+		                             pixel.x, pixel.y,
 		                             r_mouse, g_mouse, b_mouse);
 		}
 

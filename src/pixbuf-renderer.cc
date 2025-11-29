@@ -2785,9 +2785,9 @@ static void pr_stereo_temp_disable(PixbufRenderer *pr, gboolean disable)
 }
 
 /**
- * @brief x_pixel and y_pixel are the pixel coordinates see #pixbuf_renderer_get_mouse_position
+ * @brief pixel are the pixel coordinates see #pixbuf_renderer_get_mouse_position
  */
-gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, gint x_pixel, gint y_pixel,
+gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GdkPoint pixel,
                                           gint *r_mouse, gint *g_mouse, gint *b_mouse, gint *a_mouse)
 {
 	GdkPixbuf *pb = pr->pixbuf;
@@ -2813,7 +2813,7 @@ gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, gint x_pixel, gint
 	if (!pb) return FALSE;
 
 	GdkRectangle map_rect = pr_tile_region_map_orientation(pr->orientation,
-	                                                       {x_pixel, y_pixel, 1, 1}, /*single pixel */
+	                                                       {pixel.x, pixel.y, 1, 1}, /*single pixel */
 	                                                       pr->image_width, pr->image_height);
 
 	if (map_rect.x < 0 || map_rect.x > gdk_pixbuf_get_width(pr->pixbuf) - 1) return FALSE;
@@ -2841,34 +2841,29 @@ gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, gint x_pixel, gint
 	return TRUE;
 }
 
-gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, gint *x_pixel_return, gint *y_pixel_return)
+gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, GdkPoint &pixel)
 {
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(x_pixel_return != nullptr && y_pixel_return != nullptr, FALSE);
 
 	if (!pr->pixbuf && !pr->source_tiles_enabled)
 		{
-		*x_pixel_return = -1;
-		*y_pixel_return = -1;
+		pixel = { -1, -1 };
 		return FALSE;
 		}
 
-	gint x_pixel = floor(static_cast<gdouble>(pr->x_mouse - pr->x_offset + pr->x_scroll) / pr->scale);
-	if (x_pixel != std::clamp(x_pixel, 0, pr->image_width - 1))
+	pixel.x = floor(static_cast<gdouble>(pr->x_mouse - pr->x_offset + pr->x_scroll) / pr->scale);
+	if (pixel.x != std::clamp(pixel.x, 0, pr->image_width - 1))
 		{
 		/* mouse is not on pr */
-		x_pixel = -1;
+		pixel.x = -1;
 		}
 
-	gint y_pixel = floor(static_cast<gdouble>(pr->y_mouse - pr->y_offset + pr->y_scroll) / pr->scale / pr->aspect_ratio);
-	if (y_pixel != std::clamp(y_pixel, 0, pr->image_height - 1))
+	pixel.y = floor(static_cast<gdouble>(pr->y_mouse - pr->y_offset + pr->y_scroll) / pr->scale / pr->aspect_ratio);
+	if (pixel.y != std::clamp(pixel.y, 0, pr->image_height - 1))
 		{
 		/* mouse is not on pr */
-		y_pixel = -1;
+		pixel.y = -1;
 		}
-
-	*x_pixel_return = x_pixel;
-	*y_pixel_return = y_pixel;
 
 	return TRUE;
 }
