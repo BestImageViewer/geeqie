@@ -146,61 +146,47 @@ static void switch_coords_orientation(ImageWindow *imd, gint x, gint y, gint wid
 {
 	switch (imd->orientation)
 		{
-		case EXIF_ORIENTATION_TOP_LEFT:
-			/* normal -- nothing to do */
+		case EXIF_ORIENTATION_TOP_LEFT: /* normal -- nothing to do */
+		case EXIF_ORIENTATION_LEFT_TOP: /* left mirrored, swap later */
 			rect_x1 = image_start_x;
 			rect_y1 = image_start_y;
 			rect_x2 = x;
 			rect_y2 = y;
 			break;
-		case EXIF_ORIENTATION_TOP_RIGHT:
-			/* mirrored */
+		case EXIF_ORIENTATION_TOP_RIGHT: /* mirrored */
+		case EXIF_ORIENTATION_RIGHT_TOP: /* rotated -90 (270), swap later */
 			rect_x1 = width - x;
 			rect_y1 = image_start_y;
 			rect_x2 = width - image_start_x;
 			rect_y2 = y;
 			break;
-		case EXIF_ORIENTATION_BOTTOM_RIGHT:
-			/* upside down */
+		case EXIF_ORIENTATION_BOTTOM_RIGHT: /* upside down */
+		case EXIF_ORIENTATION_RIGHT_BOTTOM: /* right mirrored, swap later */
 			rect_x1 = width - x;
 			rect_y1 = height - y;
 			rect_x2 = width - image_start_x;
 			rect_y2 = height - image_start_y;
 			break;
-		case EXIF_ORIENTATION_BOTTOM_LEFT:
-			/* flipped */
+		case EXIF_ORIENTATION_BOTTOM_LEFT: /* flipped */
+		case EXIF_ORIENTATION_LEFT_BOTTOM: /* rotated 90, swap later */
 			rect_x1 = image_start_x;
 			rect_y1 = height - y;
 			rect_x2 = x;
 			rect_y2 = height - image_start_y;
 			break;
-		case EXIF_ORIENTATION_LEFT_TOP:
-			/* left mirrored */
-			rect_x1 = image_start_y;
-			rect_y1 = image_start_x;
-			rect_x2 = y;
-			rect_y2 = x;
+		default:
+			/* The other values are out of range */
 			break;
-		case EXIF_ORIENTATION_RIGHT_TOP:
-			/* rotated -90 (270) */
-			rect_x1 = image_start_y;
-			rect_y1 = width - x;
-			rect_x2 = y;
-			rect_y2 = width - image_start_x;
-			break;
-		case EXIF_ORIENTATION_RIGHT_BOTTOM:
-			/* right mirrored */
-			rect_x1 = height - y;
-			rect_y1 = width - x;
-			rect_x2 = height - image_start_y;
-			rect_y2 = width - image_start_x;
-			break;
-		case EXIF_ORIENTATION_LEFT_BOTTOM:
-			/* rotated 90 */
-			rect_x1 = height - y;
-			rect_y1 = image_start_x;
-			rect_x2 = height - image_start_y;
-			rect_y2 = x;
+		}
+
+	switch (imd->orientation)
+		{
+		case EXIF_ORIENTATION_LEFT_TOP: /* left mirrored, swap EXIF_ORIENTATION_TOP_LEFT */
+		case EXIF_ORIENTATION_RIGHT_TOP: /* rotated -90 (270), swap EXIF_ORIENTATION_TOP_RIGHT */
+		case EXIF_ORIENTATION_RIGHT_BOTTOM: /* right mirrored, swap EXIF_ORIENTATION_BOTTOM_RIGHT */
+		case EXIF_ORIENTATION_LEFT_BOTTOM: /* rotated 90, swap EXIF_ORIENTATION_BOTTOM_LEFT */
+			std::swap(rect_x1, rect_y1);
+			std::swap(rect_x2, rect_y2);
 			break;
 		default:
 			/* The other values are out of range */
