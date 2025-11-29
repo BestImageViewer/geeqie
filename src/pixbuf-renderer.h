@@ -168,8 +168,7 @@ struct PixbufRenderer
 	gint x_offset;		/**< offset of image start (non-zero when viewport < window) */
 	gint y_offset;
 
-	gint x_mouse; /**< coordinates of the mouse taken from GtkEvent */
-	gint y_mouse;
+	GdkPoint mouse; /**< coordinates of the mouse taken from GtkEvent */
 
 	gint vis_width;		/**< dimensions of visible part of image */
 	gint vis_height;

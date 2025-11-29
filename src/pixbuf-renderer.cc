@@ -426,8 +426,7 @@ static void pixbuf_renderer_init(PixbufRenderer *pr)
 	pr->scroller_id = 0;
 	pr->scroller_overlay = -1;
 
-	pr->x_mouse = -1;
-	pr->y_mouse = -1;
+	pr->mouse = { -1, -1 };
 
 	pr->source_tiles_enabled = FALSE;
 	pr->source_tiles = nullptr;
@@ -1980,8 +1979,8 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 		pr->scroller_ypos = event->y;
 		}
 
-	pr->x_mouse = event->x;
-	pr->y_mouse = event->y;
+	pr->mouse.x = event->x;
+	pr->mouse.y = event->y;
 	pr_update_pixel_signal(pr);
 
 	if (!pr->in_drag || !gq_gdk_pointer_is_grabbed()) return FALSE;
@@ -2028,8 +2027,7 @@ static gboolean pr_leave_notify_cb(GtkWidget *widget, GdkEventCrossing *, gpoint
 	PixbufRenderer *pr;
 
 	pr = PIXBUF_RENDERER(widget);
-	pr->x_mouse = -1;
-	pr->y_mouse = -1;
+	pr->mouse = { -1, -1 };
 
 	pr_update_pixel_signal(pr);
 	return FALSE;
@@ -2545,8 +2543,7 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 
 	pr->x_scroll = source->x_scroll;
 	pr->y_scroll = source->y_scroll;
-	pr->x_mouse  = source->x_mouse;
-	pr->y_mouse  = source->y_mouse;
+	pr->mouse = source->mouse;
 
 	scroll_reset = pr->scroll_reset;
 	pr->scroll_reset = ScrollReset::NOCHANGE;
@@ -2605,8 +2602,7 @@ void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 
 	pr->x_scroll = source->x_scroll;
 	pr->y_scroll = source->y_scroll;
-	pr->x_mouse  = source->x_mouse;
-	pr->y_mouse  = source->y_mouse;
+	pr->mouse = source->mouse;
 
 	scroll_reset = pr->scroll_reset;
 	pr->scroll_reset = ScrollReset::NOCHANGE;
@@ -2851,14 +2847,14 @@ gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, GdkPoint &pixel)
 		return FALSE;
 		}
 
-	pixel.x = floor(static_cast<gdouble>(pr->x_mouse - pr->x_offset + pr->x_scroll) / pr->scale);
+	pixel.x = floor(static_cast<gdouble>(pr->mouse.x - pr->x_offset + pr->x_scroll) / pr->scale);
 	if (pixel.x != std::clamp(pixel.x, 0, pr->image_width - 1))
 		{
 		/* mouse is not on pr */
 		pixel.x = -1;
 		}
 
-	pixel.y = floor(static_cast<gdouble>(pr->y_mouse - pr->y_offset + pr->y_scroll) / pr->scale / pr->aspect_ratio);
+	pixel.y = floor(static_cast<gdouble>(pr->mouse.y - pr->y_offset + pr->y_scroll) / pr->scale / pr->aspect_ratio);
 	if (pixel.y != std::clamp(pixel.y, 0, pr->image_height - 1))
 		{
 		/* mouse is not on pr */
