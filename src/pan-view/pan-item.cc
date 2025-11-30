@@ -420,8 +420,8 @@ PanItem *pan_item_thumb_new(PanWindow *pw, FileData *fd, gint x, gint y)
 	pi->fd = fd;
 	pi->x = x;
 	pi->y = y;
-	pi->width = PAN_THUMB_SIZE + PAN_SHADOW_OFFSET * 2;
-	pi->height = PAN_THUMB_SIZE + PAN_SHADOW_OFFSET * 2;
+	pi->width = pw->thumb_size + PAN_SHADOW_OFFSET * 2;
+	pi->height = pw->thumb_size + PAN_SHADOW_OFFSET * 2;
 
 	pw->list = g_list_prepend(pw->list, pi);
 

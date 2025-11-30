@@ -43,11 +43,11 @@ void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height
 	grid_size = static_cast<gint>(sqrt(static_cast<gdouble>(g_list_length(list))));
 	if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)
 		{
-		grid_size = grid_size * (512 + PAN_THUMB_GAP) * pw->image_size / 100;
+		grid_size = grid_size * (512 + pw->thumb_gap) * pw->image_size / 100;
 		}
 	else
 		{
-		grid_size = grid_size * (PAN_THUMB_SIZE + PAN_THUMB_GAP);
+		grid_size = grid_size * (pw->thumb_size + pw->thumb_gap);
 		}
 
 	next_y = 0;
@@ -55,8 +55,8 @@ void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height
 	width = PAN_BOX_BORDER * 2;
 	height = PAN_BOX_BORDER * 2;
 
-	x = PAN_THUMB_GAP;
-	y = PAN_THUMB_GAP;
+	x = pw->thumb_gap;
+	y = pw->thumb_gap;
 	work = list;
 	while (work)
 		{
@@ -70,11 +70,11 @@ void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height
 			{
 			pi = pan_item_image_new(pw, fd, x, y, 10, 10);
 
-			x += pi->width + PAN_THUMB_GAP;
-			if (y + pi->height + PAN_THUMB_GAP > next_y) next_y = y + pi->height + PAN_THUMB_GAP;
+			x += pi->width + pw->thumb_gap;
+			if (y + pi->height + pw->thumb_gap > next_y) next_y = y + pi->height + pw->thumb_gap;
 			if (x > grid_size)
 				{
-				x = PAN_THUMB_GAP;
+				x = pw->thumb_gap;
 				y = next_y;
 				}
 			}
@@ -82,14 +82,14 @@ void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height
 			{
 			pi = pan_item_thumb_new(pw, fd, x, y);
 
-			x += PAN_THUMB_SIZE + PAN_THUMB_GAP;
+			x += pw->thumb_size + pw->thumb_gap;
 			if (x > grid_size)
 				{
-				x = PAN_THUMB_GAP;
-				y += PAN_THUMB_SIZE + PAN_THUMB_GAP;
+				x = pw->thumb_gap;
+				y += pw->thumb_size + pw->thumb_gap;
 				}
 			}
-		pan_item_size_coordinates(pi, PAN_THUMB_GAP, width, height);
+		pan_item_size_coordinates(pi, pw->thumb_gap, width, height);
 		}
 
 	g_list_free(list);

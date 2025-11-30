@@ -40,14 +40,12 @@ struct ThumbLoader;
 #define PAN_THUMB_SIZE_SMALL 64
 #define PAN_THUMB_SIZE_NORMAL 128
 #define PAN_THUMB_SIZE_LARGE 256
-#define PAN_THUMB_SIZE pw->thumb_size
 
 #define PAN_THUMB_GAP_DOTS 2
 #define PAN_THUMB_GAP_SMALL 14
 #define PAN_THUMB_GAP_NORMAL 30
 #define PAN_THUMB_GAP_LARGE 40
 #define PAN_THUMB_GAP_HUGE 50
-#define PAN_THUMB_GAP pw->thumb_gap
 
 /* basic sizes, colors, spacings */
 

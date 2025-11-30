@@ -177,8 +177,8 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 		else
 			{
 			pi = pan_item_thumb_new(pw, fd, x, y);
-			x_width = PAN_THUMB_SIZE;
-			y_height = PAN_THUMB_SIZE;
+			x_width = pw->thumb_size;
+			y_height = pw->thumb_size;
 			}
 
 		pan_item_size_by_item(pi_day, pi, PAN_BOX_BORDER);
@@ -189,11 +189,11 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 
 		if (total > 0 && count < PAN_GROUP_MAX)
 			{
-			y += y_height + PAN_THUMB_GAP;
+			y += y_height + pw->thumb_gap;
 			}
 		else
 			{
-			x += x_width + PAN_THUMB_GAP;
+			x += x_width + pw->thumb_gap;
 			x_width = 0;
 			count = 0;
 
