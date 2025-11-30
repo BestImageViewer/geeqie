@@ -742,12 +742,7 @@ void gq_get_rectangle(GtkApplication *, GApplicationCommandLine *app_command_lin
 	auto *pr = PIXBUF_RENDERER(lw_id->image->pr);
 	if (!pr) return;
 
-	gint x1;
-	gint y1;
-	gint x2;
-	gint y2;
-
-	image_get_rectangle(x1, y1, x2, y2);
+	const auto [x1, y1, x2, y2] = image_get_rectangle();
 
 	g_autofree gchar *rectangle_info = g_strdup_printf(_("%dx%d+%d+%d"),
 	                                                   std::abs(x1 - x2),

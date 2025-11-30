@@ -241,7 +241,7 @@ void image_to_root_window(ImageWindow *imd, gboolean scaled);
 
 void image_options_sync();
 
-void image_get_rectangle(gint &x1, gint &y1, gint &x2, gint &y2);
+std::tuple<int, int, int, int> image_get_rectangle();
 void image_update_title(ImageWindow *imd);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

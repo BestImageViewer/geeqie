@@ -748,12 +748,8 @@ static void layout_menu_zoom_1_4_cb(GtkAction *, gpointer data)
 static void layout_menu_zoom_to_rectangle_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint x1;
-	gint x2;
-	gint y1;
-	gint y2;
 
-	image_get_rectangle(x1, y1, x2, y2);
+	const auto [x1, y1, x2, y2] = image_get_rectangle();
 
 	auto *pr = reinterpret_cast<PixbufRenderer *>(lw->image->pr);
 

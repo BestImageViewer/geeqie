@@ -2132,12 +2132,9 @@ ImageWindow *image_new(gboolean frame)
 	return imd;
 }
 
-void image_get_rectangle(gint &x1, gint &y1, gint &x2, gint &y2)
+std::tuple<int, int, int, int> image_get_rectangle()
 {
-	x1 = rect_x1;
-	y1 = rect_y1;
-	x2 = rect_x2;
-	y2 = rect_y2;
+	return { rect_x1, rect_y1, rect_x2, rect_y2 };
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
