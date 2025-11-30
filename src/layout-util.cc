@@ -665,84 +665,20 @@ static void layout_menu_zoom_out_cb(GtkAction *, gpointer data)
 	layout_image_zoom_adjust(lw, -get_zoom_increment(), connect_zoom);
 }
 
-template<gboolean connect_zoom>
-static void layout_menu_zoom_1_1_cb(GtkAction *, gpointer data)
+template<int value, gboolean connect_zoom>
+static void layout_menu_zoom_set_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	layout_image_zoom_set(lw, 1.0, connect_zoom);
+	layout_image_zoom_set(lw, value, connect_zoom);
 }
 
-template<gboolean connect_zoom>
-static void layout_menu_zoom_fit_cb(GtkAction *, gpointer data)
+template<gboolean vertical, gboolean connect_zoom>
+static void layout_menu_zoom_fit_hv_cb(GtkAction *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	layout_image_zoom_set(lw, 0.0, connect_zoom);
-}
-
-template<gboolean connect_zoom>
-static void layout_menu_zoom_fit_hor_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_zoom_set_fill_geometry(lw, FALSE, connect_zoom);
-}
-
-template<gboolean connect_zoom>
-static void layout_menu_zoom_fit_vert_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_zoom_set_fill_geometry(lw, TRUE, connect_zoom);
-}
-
-template<gboolean connect_zoom>
-static void layout_menu_zoom_2_1_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_zoom_set(lw, 2.0, connect_zoom);
-}
-
-template<gboolean connect_zoom>
-static void layout_menu_zoom_3_1_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_zoom_set(lw, 3.0, connect_zoom);
-}
-
-template<gboolean connect_zoom>
-static void layout_menu_zoom_4_1_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_zoom_set(lw, 4.0, connect_zoom);
-}
-
-template<gboolean connect_zoom>
-static void layout_menu_zoom_1_2_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_zoom_set(lw, -2.0, connect_zoom);
-}
-
-template<gboolean connect_zoom>
-static void layout_menu_zoom_1_3_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_zoom_set(lw, -3.0, connect_zoom);
-}
-
-template<gboolean connect_zoom>
-static void layout_menu_zoom_1_4_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_zoom_set(lw, -4.0, connect_zoom);
+	layout_image_zoom_set_fill_geometry(lw, vertical, connect_zoom);
 }
 
 static void layout_menu_zoom_to_rectangle_cb(GtkAction *, gpointer data)
@@ -2430,18 +2366,18 @@ static GtkActionEntry menu_entries[] = {
   { "ClearMarks",            nullptr,                           N_("Clear Marks..."),                                   nullptr,               N_("Clear Marks"),                                     CB(layout_menu_clear_marks_cb) },
   { "CloseWindow",           GQ_ICON_CLOSE,                     N_("C_lose window"),                                    "<control>W",          N_("Close window"),                                    CB(layout_menu_close_cb) },
   { "ColorMenu",             nullptr,                           N_("_Color Management"),                                nullptr,               nullptr,                                               nullptr },
-  { "ConnectZoom100Alt1",    GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "<shift>KP_Divide",    N_("Connected Zoom 1:1"),                              CB(layout_menu_zoom_1_1_cb<TRUE>) },
-  { "ConnectZoom100",        GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "<shift>Z",            N_("Connected Zoom 1:1"),                              CB(layout_menu_zoom_1_1_cb<TRUE>) },
-  { "ConnectZoom200",        nullptr,                           N_("Zoom _2:1"),                                        nullptr,               N_("Connected Zoom 2:1"),                              CB(layout_menu_zoom_2_1_cb<TRUE>) },
-  { "ConnectZoom25",         nullptr,                           N_("Zoom 1:4"),                                         nullptr,               N_("Connected Zoom 1:4"),                              CB(layout_menu_zoom_1_4_cb<TRUE>) },
-  { "ConnectZoom300",        nullptr,                           N_("Zoom _3:1"),                                        nullptr,               N_("Connected Zoom 3:1"),                              CB(layout_menu_zoom_3_1_cb<TRUE>) },
-  { "ConnectZoom33",         nullptr,                           N_("Zoom 1:3"),                                         nullptr,               N_("Connected Zoom 1:3"),                              CB(layout_menu_zoom_1_3_cb<TRUE>) },
-  { "ConnectZoom400",        nullptr,                           N_("Zoom _4:1"),                                        nullptr,               N_("Connected Zoom 4:1"),                              CB(layout_menu_zoom_4_1_cb<TRUE>) },
-  { "ConnectZoom50",         nullptr,                           N_("Zoom 1:2"),                                         nullptr,               N_("Connected Zoom 1:2"),                              CB(layout_menu_zoom_1_2_cb<TRUE>) },
-  { "ConnectZoomFillHor",    nullptr,                           N_("Fit _Horizontally"),                                "<shift>H",            N_("Connected Fit Horizontally"),                      CB(layout_menu_zoom_fit_hor_cb<TRUE>) },
-  { "ConnectZoomFillVert",   nullptr,                           N_("Fit _Vertically"),                                  "<shift>W",            N_("Connected Fit Vertically"),                        CB(layout_menu_zoom_fit_vert_cb<TRUE>) },
-  { "ConnectZoomFitAlt1",    GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "<shift>KP_Multiply",  N_("Connected Zoom to fit"),                           CB(layout_menu_zoom_fit_cb<TRUE>) },
-  { "ConnectZoomFit",        GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "<shift>X",            N_("Connected Zoom to fit"),                           CB(layout_menu_zoom_fit_cb<TRUE>) },
+  { "ConnectZoom100Alt1",    GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "<shift>KP_Divide",    N_("Connected Zoom 1:1"),                              (GCallback)layout_menu_zoom_set_cb<1, TRUE> },
+  { "ConnectZoom100",        GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "<shift>Z",            N_("Connected Zoom 1:1"),                              (GCallback)layout_menu_zoom_set_cb<1, TRUE> },
+  { "ConnectZoom200",        nullptr,                           N_("Zoom _2:1"),                                        nullptr,               N_("Connected Zoom 2:1"),                              (GCallback)layout_menu_zoom_set_cb<2, TRUE> },
+  { "ConnectZoom25",         nullptr,                           N_("Zoom 1:4"),                                         nullptr,               N_("Connected Zoom 1:4"),                              (GCallback)layout_menu_zoom_set_cb<-4, TRUE> },
+  { "ConnectZoom300",        nullptr,                           N_("Zoom _3:1"),                                        nullptr,               N_("Connected Zoom 3:1"),                              (GCallback)layout_menu_zoom_set_cb<3, TRUE> },
+  { "ConnectZoom33",         nullptr,                           N_("Zoom 1:3"),                                         nullptr,               N_("Connected Zoom 1:3"),                              (GCallback)layout_menu_zoom_set_cb<-3, TRUE> },
+  { "ConnectZoom400",        nullptr,                           N_("Zoom _4:1"),                                        nullptr,               N_("Connected Zoom 4:1"),                              (GCallback)layout_menu_zoom_set_cb<4, TRUE> },
+  { "ConnectZoom50",         nullptr,                           N_("Zoom 1:2"),                                         nullptr,               N_("Connected Zoom 1:2"),                              (GCallback)layout_menu_zoom_set_cb<-2, TRUE> },
+  { "ConnectZoomFillHor",    nullptr,                           N_("Fit _Horizontally"),                                "<shift>H",            N_("Connected Fit Horizontally"),                      (GCallback)layout_menu_zoom_fit_hv_cb<FALSE, TRUE> },
+  { "ConnectZoomFillVert",   nullptr,                           N_("Fit _Vertically"),                                  "<shift>W",            N_("Connected Fit Vertically"),                        (GCallback)layout_menu_zoom_fit_hv_cb<TRUE, TRUE> },
+  { "ConnectZoomFitAlt1",    GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "<shift>KP_Multiply",  N_("Connected Zoom to fit"),                           (GCallback)layout_menu_zoom_set_cb<0, TRUE> },
+  { "ConnectZoomFit",        GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "<shift>X",            N_("Connected Zoom to fit"),                           (GCallback)layout_menu_zoom_set_cb<0, TRUE> },
   { "ConnectZoomInAlt1",     GQ_ICON_ZOOM_IN,                   N_("Zoom _in"),                                         "<shift>KP_Add",       N_("Connected Zoom in"),                               CB(layout_menu_zoom_in_cb<TRUE>) },
   { "ConnectZoomIn",         GQ_ICON_ZOOM_IN,                   N_("Zoom _in"),                                         "plus",                N_("Connected Zoom in"),                               CB(layout_menu_zoom_in_cb<TRUE>) },
   { "ConnectZoomMenu",       nullptr,                           N_("_Connected Zoom"),                                  nullptr,               nullptr,                                               nullptr },
@@ -2566,18 +2502,18 @@ static GtkActionEntry menu_entries[] = {
   { "WindowsMenu",           nullptr,                           N_("_Windows"),                                         nullptr,               nullptr,                                               CB(layout_menu_windows_menu_cb)  },
   { "WriteRotationKeepDate", nullptr,                           N_("_Write orientation to file (preserve timestamp)"),  nullptr,               N_("Write orientation to file (preserve timestamp)"),  CB(layout_menu_write_rotate_cb<TRUE>) },
   { "WriteRotation",         nullptr,                           N_("_Write orientation to file"),                       nullptr,               N_("Write orientation to file"),                       CB(layout_menu_write_rotate_cb<FALSE>) },
-  { "Zoom100Alt1",           GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "KP_Divide",           N_("Zoom 1:1"),                                        CB(layout_menu_zoom_1_1_cb<FALSE>) },
-  { "Zoom100",               GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "Z",                   N_("Zoom 1:1"),                                        CB(layout_menu_zoom_1_1_cb<FALSE>) },
-  { "Zoom200",               GQ_ICON_GENERIC,                   N_("Zoom _2:1"),                                        nullptr,               N_("Zoom 2:1"),                                        CB(layout_menu_zoom_2_1_cb<FALSE>) },
-  { "Zoom25",                GQ_ICON_GENERIC,                   N_("Zoom 1:4"),                                         nullptr,               N_("Zoom 1:4"),                                        CB(layout_menu_zoom_1_4_cb<FALSE>) },
-  { "Zoom300",               GQ_ICON_GENERIC,                   N_("Zoom _3:1"),                                        nullptr,               N_("Zoom 3:1"),                                        CB(layout_menu_zoom_3_1_cb<FALSE>) },
-  { "Zoom33",                GQ_ICON_GENERIC,                   N_("Zoom 1:3"),                                         nullptr,               N_("Zoom 1:3"),                                        CB(layout_menu_zoom_1_3_cb<FALSE>) },
-  { "Zoom400",               GQ_ICON_GENERIC,                   N_("Zoom _4:1"),                                        nullptr,               N_("Zoom 4:1"),                                        CB(layout_menu_zoom_4_1_cb<FALSE>) },
-  { "Zoom50",                GQ_ICON_GENERIC,                   N_("Zoom 1:2"),                                         nullptr,               N_("Zoom 1:2"),                                        CB(layout_menu_zoom_1_2_cb<FALSE>) },
-  { "ZoomFillHor",           PIXBUF_INLINE_ICON_ZOOMFILLHOR,    N_("Fit _Horizontally"),                                "H",                   N_("Fit Horizontally"),                                CB(layout_menu_zoom_fit_hor_cb<FALSE>) },
-  { "ZoomFillVert",          PIXBUF_INLINE_ICON_ZOOMFILLVERT,   N_("Fit _Vertically"),                                  "W",                   N_("Fit Vertically"),                                  CB(layout_menu_zoom_fit_vert_cb<FALSE>) },
-  { "ZoomFitAlt1",           GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "KP_Multiply",         N_("Zoom to fit"),                                     CB(layout_menu_zoom_fit_cb<FALSE>) },
-  { "ZoomFit",               GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "X",                   N_("Zoom to fit"),                                     CB(layout_menu_zoom_fit_cb<FALSE>) },
+  { "Zoom100Alt1",           GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "KP_Divide",           N_("Zoom 1:1"),                                        (GCallback)layout_menu_zoom_set_cb<1, FALSE> },
+  { "Zoom100",               GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "Z",                   N_("Zoom 1:1"),                                        (GCallback)layout_menu_zoom_set_cb<1, FALSE> },
+  { "Zoom200",               GQ_ICON_GENERIC,                   N_("Zoom _2:1"),                                        nullptr,               N_("Zoom 2:1"),                                        (GCallback)layout_menu_zoom_set_cb<2, FALSE> },
+  { "Zoom25",                GQ_ICON_GENERIC,                   N_("Zoom 1:4"),                                         nullptr,               N_("Zoom 1:4"),                                        (GCallback)layout_menu_zoom_set_cb<-4, FALSE> },
+  { "Zoom300",               GQ_ICON_GENERIC,                   N_("Zoom _3:1"),                                        nullptr,               N_("Zoom 3:1"),                                        (GCallback)layout_menu_zoom_set_cb<3, FALSE> },
+  { "Zoom33",                GQ_ICON_GENERIC,                   N_("Zoom 1:3"),                                         nullptr,               N_("Zoom 1:3"),                                        (GCallback)layout_menu_zoom_set_cb<-3, FALSE> },
+  { "Zoom400",               GQ_ICON_GENERIC,                   N_("Zoom _4:1"),                                        nullptr,               N_("Zoom 4:1"),                                        (GCallback)layout_menu_zoom_set_cb<4, FALSE> },
+  { "Zoom50",                GQ_ICON_GENERIC,                   N_("Zoom 1:2"),                                         nullptr,               N_("Zoom 1:2"),                                        (GCallback)layout_menu_zoom_set_cb<-2, FALSE> },
+  { "ZoomFillHor",           PIXBUF_INLINE_ICON_ZOOMFILLHOR,    N_("Fit _Horizontally"),                                "H",                   N_("Fit Horizontally"),                                (GCallback)layout_menu_zoom_fit_hv_cb<FALSE, FALSE> },
+  { "ZoomFillVert",          PIXBUF_INLINE_ICON_ZOOMFILLVERT,   N_("Fit _Vertically"),                                  "W",                   N_("Fit Vertically"),                                  (GCallback)layout_menu_zoom_fit_hv_cb<TRUE, FALSE> },
+  { "ZoomFitAlt1",           GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "KP_Multiply",         N_("Zoom to fit"),                                     (GCallback)layout_menu_zoom_set_cb<0, FALSE> },
+  { "ZoomFit",               GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "X",                   N_("Zoom to fit"),                                     (GCallback)layout_menu_zoom_set_cb<0, FALSE> },
   { "ZoomInAlt1",            GQ_ICON_ZOOM_IN,                   N_("Zoom _in"),                                         "KP_Add",              N_("Zoom in"),                                         CB(layout_menu_zoom_in_cb<FALSE>) },
   { "ZoomIn",                GQ_ICON_ZOOM_IN,                   N_("Zoom _in"),                                         "equal",               N_("Zoom in"),                                         CB(layout_menu_zoom_in_cb<FALSE>) },
   { "ZoomMenu",              nullptr,                           N_("_Zoom"),                                            nullptr,               nullptr,                                               nullptr },

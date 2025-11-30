@@ -507,18 +507,12 @@ static void li_pop_menu_zoom_out_cb(GtkWidget *, gpointer data)
 	layout_image_zoom_adjust(lw, -get_zoom_increment(), FALSE);
 }
 
-static void li_pop_menu_zoom_1_1_cb(GtkWidget *, gpointer data)
+template<int value>
+static void li_pop_menu_zoom_set_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	layout_image_zoom_set(lw, 1.0, FALSE);
-}
-
-static void li_pop_menu_zoom_fit_cb(GtkWidget *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_zoom_set(lw, 0.0, FALSE);
+	layout_image_zoom_set(lw, value, FALSE);
 }
 
 static void li_pop_menu_edit_cb(GtkWidget *widget, gpointer data)
@@ -767,8 +761,8 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	menu_item_add_icon(menu, _("Zoom _in"), GQ_ICON_ZOOM_IN, G_CALLBACK(li_pop_menu_zoom_in_cb), lw);
 	menu_item_add_icon(menu, _("Zoom _out"), GQ_ICON_ZOOM_OUT, G_CALLBACK(li_pop_menu_zoom_out_cb), lw);
-	menu_item_add_icon(menu, _("Zoom _1:1"), GQ_ICON_ZOOM_100, G_CALLBACK(li_pop_menu_zoom_1_1_cb), lw);
-	menu_item_add_icon(menu, _("Zoom to fit"), GQ_ICON_ZOOM_FIT, G_CALLBACK(li_pop_menu_zoom_fit_cb), lw);
+	menu_item_add_icon(menu, _("Zoom _1:1"), GQ_ICON_ZOOM_100, G_CALLBACK(li_pop_menu_zoom_set_cb<1>), lw);
+	menu_item_add_icon(menu, _("Zoom to fit"), GQ_ICON_ZOOM_FIT, G_CALLBACK(li_pop_menu_zoom_set_cb<0>), lw);
 	menu_item_add_divider(menu);
 
 	GList *editmenu_fd_list = layout_image_get_fd_list(lw);
