@@ -1417,7 +1417,11 @@ void widget_remove_from_parent_cb(GtkWidget *, gpointer data)
 void widget_input_grab(GtkWidget *widget, GdkSeatCapabilities capabilities, gboolean owner_events, GdkEventMask event_mask)
 {
 	GdkWindow *window = gtk_widget_get_window(widget);
-	gdk_window_set_events(window, event_mask); // TODO Is this needed?
+
+	const GdkEventMask prev_event_mask = gdk_window_get_events(window);
+	g_object_set_data(G_OBJECT(window), "prev_event_mask", GINT_TO_POINTER(prev_event_mask));
+	gdk_window_set_events(window, event_mask);
+
 	GdkDisplay *display = gdk_window_get_display(window);
 	GdkSeat *seat = gdk_display_get_default_seat(display);
 
@@ -1430,6 +1434,10 @@ void widget_input_grab(GtkWidget *widget, GdkSeatCapabilities capabilities, gboo
 void widget_input_ungrab(GtkWidget *widget)
 {
 	GdkWindow *window = gtk_widget_get_window(widget);
+
+	const auto prev_event_mask = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(window), "prev_event_mask"));
+	gdk_window_set_events(window, static_cast<GdkEventMask>(prev_event_mask));
+
 	GdkDisplay *display = gdk_window_get_display(window);
 	GdkSeat *seat = gdk_display_get_default_seat(display);
 
