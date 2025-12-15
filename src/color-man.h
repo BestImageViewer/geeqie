@@ -27,7 +27,7 @@
 
 struct ImageWindow;
 
-enum ColorManProfileType {
+enum ColorManProfileType : int {
 	COLOR_PROFILE_NONE = -1,
 	COLOR_PROFILE_MEM = -2,
 	COLOR_PROFILE_SRGB = 0,

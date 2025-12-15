@@ -24,8 +24,7 @@
 
 #include <glib.h>
 
-#include "color-man.h"
-
+enum ColorManProfileType : int;
 enum MetadataFormat : gint;
 
 struct ExifData;

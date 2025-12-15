@@ -29,8 +29,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "color-man.h"
-
+enum ColorManProfileType : int;
 enum StereoPixbufData : gint;
 
 struct CollectInfo;

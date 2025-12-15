@@ -39,6 +39,7 @@
 
 #include "cache.h"
 #include "color-man-heif.h"
+#include "color-man.h"
 #include "filecache.h"
 #include "filedata.h"
 #include "filefilter.h"
