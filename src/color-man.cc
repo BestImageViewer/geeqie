@@ -325,25 +325,17 @@ static ColorMan *color_man_new_real(ImageWindow *imd, GdkPixbuf *pixbuf,
 				    ColorManProfileType screen_type, const gchar *screen_file,
 				    guchar *screen_data, guint screen_data_len)
 {
-	ColorMan *cm;
-	gboolean has_alpha;
-
 	if (imd) pixbuf = image_get_pixbuf(imd);
 
-	cm = g_new0(ColorMan, 1);
+	ColorManCache *profile = color_man_cache_get(input_type, input_file, input_data, input_data_len,
+	                                             screen_type, screen_file, screen_data, screen_data_len,
+	                                             pixbuf ? gdk_pixbuf_get_has_alpha(pixbuf) : FALSE);
+	if (!profile) return nullptr;
+
+	auto *cm = g_new0(ColorMan, 1);
 	cm->imd = imd;
-	cm->pixbuf = pixbuf;
-	if (cm->pixbuf) g_object_ref(cm->pixbuf);
-
-	has_alpha = pixbuf ? gdk_pixbuf_get_has_alpha(pixbuf) : FALSE;
-
-	cm->profile = color_man_cache_get(input_type, input_file, input_data, input_data_len,
-					  screen_type, screen_file, screen_data, screen_data_len, has_alpha);
-	if (!cm->profile)
-		{
-		color_man_free(cm);
-		return nullptr;
-		}
+	cm->pixbuf = pixbuf ? g_object_ref(pixbuf) : nullptr;
+	cm->profile = profile;
 
 	return cm;
 }
