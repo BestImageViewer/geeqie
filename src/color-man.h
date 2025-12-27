@@ -56,6 +56,7 @@ ColorMan *color_man_new_embedded(ImageWindow *imd, GdkPixbuf *pixbuf,
                                  ColorManProfileType screen_type, const gchar *screen_file,
                                  const guchar *screen_data, guint screen_data_len);
 void color_man_free(ColorMan *cm);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(ColorMan, color_man_free)
 
 void color_man_update();
 
