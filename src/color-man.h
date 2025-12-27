@@ -22,6 +22,7 @@
 #ifndef COLOR_MAN_H
 #define COLOR_MAN_H
 
+#include <memory>
 #include <optional>
 #include <string>
 
@@ -42,7 +43,8 @@ enum ColorManProfileType : int {
 struct ColorMan {
 	ImageWindow *imd;
 
-	gpointer profile;
+	struct Cache;
+	std::shared_ptr<Cache> profile;
 };
 
 

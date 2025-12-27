@@ -38,12 +38,14 @@
 #include "options.h"
 #include "ui-fileops.h"
 
-namespace
-{
+struct ColorMan::Cache {
+	Cache() = default;
+	~Cache();
+	Cache(const Cache &) = delete;
+	Cache(Cache &&) = delete;
+	Cache &operator=(const Cache &) = delete;
+	Cache &operator=(Cache &&) = delete;
 
-#define GQ_RESOURCE_PATH_ICC "/org/geeqie/icc"
-
-struct ColorManCache {
 	cmsHPROFILE   profile_in;
 	cmsHPROFILE   profile_out;
 	cmsHTRANSFORM transform;
@@ -55,9 +57,24 @@ struct ColorManCache {
 	gchar *profile_out_file;
 
 	gboolean has_alpha;
-
-	gint refcount;
 };
+
+ColorMan::Cache::~Cache()
+{
+	if (transform) cmsDeleteTransform(transform);
+	if (profile_in) cmsCloseProfile(profile_in);
+	if (profile_out) cmsCloseProfile(profile_out);
+
+	g_free(profile_in_file);
+	g_free(profile_out_file);
+}
+
+using ColorManCachePtr = std::shared_ptr<ColorMan::Cache>;
+
+namespace
+{
+
+#define GQ_RESOURCE_PATH_ICC "/org/geeqie/icc"
 
 G_DEFINE_AUTO_CLEANUP_FREE_FUNC(cmsHPROFILE, cmsCloseProfile, nullptr)
 G_DEFINE_AUTO_CLEANUP_FREE_FUNC(cmsHTRANSFORM, cmsDeleteTransform, nullptr)
@@ -92,33 +109,8 @@ gint scale_factor()
  *-------------------------------------------------------------------
  */
 
-GList *cm_cache_list = nullptr;
+std::vector<ColorManCachePtr> cm_cache_list;
 
-
-void color_man_cache_ref(ColorManCache *cc)
-{
-	if (!cc) return;
-
-	cc->refcount++;
-}
-
-void color_man_cache_unref(ColorManCache *cc)
-{
-	if (!cc) return;
-
-	cc->refcount--;
-	if (cc->refcount < 1)
-		{
-		if (cc->transform) cmsDeleteTransform(cc->transform);
-		if (cc->profile_in) cmsCloseProfile(cc->profile_in);
-		if (cc->profile_out) cmsCloseProfile(cc->profile_out);
-
-		g_free(cc->profile_in_file);
-		g_free(cc->profile_out_file);
-
-		g_free(cc);
-		}
-}
 
 cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const gchar *file,
                                          const guchar *data, guint data_len)
@@ -154,11 +146,11 @@ cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const gchar *
 	return profile;
 }
 
-ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gchar *in_file,
-                                   const guchar *in_data, guint in_data_len,
-                                   ColorManProfileType out_type, const gchar *out_file,
-                                   const guchar *out_data, guint out_data_len,
-                                   gboolean has_alpha)
+ColorManCachePtr color_man_cache_new(ColorManProfileType in_type, const gchar *in_file,
+                                     const guchar *in_data, guint in_data_len,
+                                     ColorManProfileType out_type, const gchar *out_file,
+                                     const guchar *out_data, guint out_data_len,
+                                     gboolean has_alpha)
 {
 	g_auto(cmsHPROFILE) profile_in = color_man_cache_load_profile(in_type, in_file, in_data, in_data_len);
 	if (!profile_in)
@@ -184,8 +176,12 @@ ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gchar *in_
 		return nullptr;
 		}
 
-	auto *cc = g_new0(ColorManCache, 1);
-	cc->refcount = 1;
+	auto cc = std::make_shared<ColorMan::Cache>();
+
+	cc->profile_in = g_steal_pointer(&profile_in);
+	cc->profile_out = g_steal_pointer(&profile_out);
+
+	cc->transform = g_steal_pointer(&transform);
 
 	cc->profile_in_type = in_type;
 	cc->profile_in_file = g_strdup(in_file);
@@ -195,15 +191,9 @@ ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gchar *in_
 
 	cc->has_alpha = has_alpha;
 
-	cc->profile_in = g_steal_pointer(&profile_in);
-	cc->profile_out = g_steal_pointer(&profile_out);
-
-	cc->transform = g_steal_pointer(&transform);
-
-	if (cc->profile_in_type != COLOR_PROFILE_MEM && cc->profile_out_type != COLOR_PROFILE_MEM )
+	if (cc->profile_in_type != COLOR_PROFILE_MEM && cc->profile_out_type != COLOR_PROFILE_MEM)
 		{
-		cm_cache_list = g_list_append(cm_cache_list, cc);
-		color_man_cache_ref(cc);
+		cm_cache_list.push_back(cc);
 		}
 
 	return cc;
@@ -211,62 +201,45 @@ ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gchar *in_
 
 void color_man_cache_reset()
 {
-	g_list_free_full(cm_cache_list, reinterpret_cast<GDestroyNotify>(color_man_cache_unref));
+	cm_cache_list.clear();
 }
 
-ColorManCache *color_man_cache_find(ColorManProfileType in_type, const gchar *in_file,
-                                    ColorManProfileType out_type, const gchar *out_file,
-                                    gboolean has_alpha)
+ColorManCachePtr color_man_cache_find(ColorManProfileType in_type, const gchar *in_file,
+                                      ColorManProfileType out_type, const gchar *out_file,
+                                      gboolean has_alpha)
 {
-	GList *work;
-
-	work = cm_cache_list;
-	while (work)
-		{
-		ColorManCache *cc;
-		gboolean match = FALSE;
-
-		cc = static_cast<ColorManCache *>(work->data);
-		work = work->next;
-
-		if (cc->profile_in_type == in_type &&
-		    cc->profile_out_type == out_type &&
-		    cc->has_alpha == has_alpha)
-			{
-			match = TRUE;
-			}
+	const auto match_cache = [in_type, in_file, out_type, out_file, has_alpha](const ColorManCachePtr &cc)
+	{
+		bool match = (cc->profile_in_type == in_type &&
+		              cc->profile_out_type == out_type &&
+		              cc->has_alpha == has_alpha);
 
 		if (match && cc->profile_in_type == COLOR_PROFILE_FILE)
 			{
 			match = (cc->profile_in_file && in_file &&
-				 strcmp(cc->profile_in_file, in_file) == 0);
+			         strcmp(cc->profile_in_file, in_file) == 0);
 			}
 		if (match && cc->profile_out_type == COLOR_PROFILE_FILE)
 			{
 			match = (cc->profile_out_file && out_file &&
-				 strcmp(cc->profile_out_file, out_file) == 0);
+			         strcmp(cc->profile_out_file, out_file) == 0);
 			}
 
-		if (match) return cc;
-		}
+		return match;
+	};
+	auto it = std::find_if(cm_cache_list.begin(), cm_cache_list.end(), match_cache);
 
-	return nullptr;
+	return (it != cm_cache_list.end()) ? *it : nullptr;
 }
 
-ColorManCache *color_man_cache_get(ColorManProfileType in_type, const gchar *in_file,
-                                   const guchar *in_data, guint in_data_len,
-                                   ColorManProfileType out_type, const gchar *out_file,
-                                   const guchar *out_data, guint out_data_len,
-                                   gboolean has_alpha)
+ColorManCachePtr color_man_cache_get(ColorManProfileType in_type, const gchar *in_file,
+                                     const guchar *in_data, guint in_data_len,
+                                     ColorManProfileType out_type, const gchar *out_file,
+                                     const guchar *out_data, guint out_data_len,
+                                     gboolean has_alpha)
 {
-	ColorManCache *cc;
-
-	cc = color_man_cache_find(in_type, in_file, out_type, out_file, has_alpha);
-	if (cc)
-		{
-		color_man_cache_ref(cc);
-		return cc;
-		}
+	ColorManCachePtr cc = color_man_cache_find(in_type, in_file, out_type, out_file, has_alpha);
+	if (cc) return cc;
 
 	return color_man_cache_new(in_type, in_file, in_data, in_data_len,
 				   out_type, out_file, out_data, out_data_len, has_alpha);
@@ -288,7 +261,7 @@ void color_man_correct_region(const ColorMan *cm, GdkPixbuf *pixbuf, GdkRectangl
 	region.width = std::min(region.width * scale, gdk_pixbuf_get_width(pixbuf) - region.x);
 	region.height = std::min(region.height * scale, gdk_pixbuf_get_height(pixbuf) - region.y);
 
-	auto *cc = static_cast<ColorManCache *>(cm->profile);
+	ColorMan::Cache *cc = cm->profile.get();
 	const int step = cc->has_alpha ? 4 : 3;
 	guchar *pix = gdk_pixbuf_get_pixels(pixbuf) + (region.x * step);
 
@@ -313,12 +286,12 @@ static ColorMan *color_man_new_real(ImageWindow *imd, GdkPixbuf *pixbuf,
 		pixbuf = image_get_pixbuf(imd);
 		}
 
-	ColorManCache *profile = color_man_cache_get(input_type, input_file, input_data, input_data_len,
-	                                             screen_type, screen_file, screen_data, screen_data_len,
-	                                             pixbuf ? gdk_pixbuf_get_has_alpha(pixbuf) : FALSE);
+	ColorManCachePtr profile = color_man_cache_get(input_type, input_file, input_data, input_data_len,
+	                                               screen_type, screen_file, screen_data, screen_data_len,
+	                                               pixbuf ? gdk_pixbuf_get_has_alpha(pixbuf) : FALSE);
 	if (!profile) return nullptr;
 
-	auto *cm = g_new0(ColorMan, 1);
+	auto *cm = new ColorMan();
 	cm->imd = imd;
 	cm->profile = profile;
 
@@ -374,7 +347,7 @@ std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm)
 {
 	if (!cm) return {};
 
-	auto *cc = static_cast<ColorManCache *>(cm->profile);
+	ColorMan::Cache *cc = cm->profile.get();
 
 	ColorManStatus status = {
 	    color_man_get_profile_name(cc->profile_in_type, cc->profile_in),
@@ -385,11 +358,7 @@ std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm)
 
 void color_man_free(ColorMan *cm)
 {
-	if (!cm) return;
-
-	color_man_cache_unref(static_cast<ColorManCache *>(cm->profile));
-
-	g_free(cm);
+	delete cm;
 }
 
 void color_man_update()
