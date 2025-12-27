@@ -59,6 +59,8 @@ struct ColorManCache {
 	gint refcount;
 };
 
+G_DEFINE_AUTO_CLEANUP_FREE_FUNC(cmsHPROFILE, cmsCloseProfile, nullptr)
+G_DEFINE_AUTO_CLEANUP_FREE_FUNC(cmsHTRANSFORM, cmsDeleteTransform, nullptr)
 
 cmsHPROFILE color_man_create_adobe_comp()
 {
@@ -158,9 +160,31 @@ ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gchar *in_
                                    const guchar *out_data, guint out_data_len,
                                    gboolean has_alpha)
 {
-	ColorManCache *cc;
+	g_auto(cmsHPROFILE) profile_in = color_man_cache_load_profile(in_type, in_file, in_data, in_data_len);
+	if (!profile_in)
+		{
+		DEBUG_1("failed to load color profile for input: %d %s", in_type, in_file);
+		return nullptr;
+		}
 
-	cc = g_new0(ColorManCache, 1);
+	g_auto(cmsHPROFILE) profile_out = color_man_cache_load_profile(out_type, out_file, out_data, out_data_len);
+	if (!profile_out)
+		{
+		DEBUG_1("failed to load color profile for screen: %d %s", out_type, out_file);
+		return nullptr;
+		}
+
+	const cmsUInt32Number format = has_alpha ? TYPE_RGBA_8 : TYPE_RGB_8;
+	g_auto(cmsHTRANSFORM) transform = cmsCreateTransform(profile_in, format,
+	                                                     profile_out, format,
+	                                                     options->color_profile.render_intent, 0);
+	if (!transform)
+		{
+		DEBUG_1("failed to create color profile transform");
+		return nullptr;
+		}
+
+	auto *cc = g_new0(ColorManCache, 1);
 	cc->refcount = 1;
 
 	cc->profile_in_type = in_type;
@@ -171,35 +195,10 @@ ColorManCache *color_man_cache_new(ColorManProfileType in_type, const gchar *in_
 
 	cc->has_alpha = has_alpha;
 
-	cc->profile_in = color_man_cache_load_profile(cc->profile_in_type, cc->profile_in_file,
-						      in_data, in_data_len);
-	cc->profile_out = color_man_cache_load_profile(cc->profile_out_type, cc->profile_out_file,
-						       out_data, out_data_len);
+	cc->profile_in = g_steal_pointer(&profile_in);
+	cc->profile_out = g_steal_pointer(&profile_out);
 
-	if (!cc->profile_in || !cc->profile_out)
-		{
-		DEBUG_1("failed to load color profile for %s: %d %s",
-				  (!cc->profile_in) ? "input" : "screen",
-				  (!cc->profile_in) ? cc->profile_in_type : cc->profile_out_type,
-				  (!cc->profile_in) ? cc->profile_in_file : cc->profile_out_file);
-
-		color_man_cache_unref(cc);
-		return nullptr;
-		}
-
-	cc->transform = cmsCreateTransform(cc->profile_in,
-					   (has_alpha) ? TYPE_RGBA_8 : TYPE_RGB_8,
-					   cc->profile_out,
-					   (has_alpha) ? TYPE_RGBA_8 : TYPE_RGB_8,
-					   options->color_profile.render_intent, 0);
-
-	if (!cc->transform)
-		{
-		DEBUG_1("failed to create color profile transform");
-
-		color_man_cache_unref(cc);
-		return nullptr;
-		}
+	cc->transform = g_steal_pointer(&transform);
 
 	if (cc->profile_in_type != COLOR_PROFILE_MEM && cc->profile_out_type != COLOR_PROFILE_MEM )
 		{
