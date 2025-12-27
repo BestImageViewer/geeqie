@@ -629,7 +629,7 @@ static void image_set_pixbuf_renderer_post_process_func(ImageWindow *imd)
 		{
 		const auto image_post_process_tile_color_cb = [imd](PixbufRenderer *, GdkPixbuf **pixbuf, gint x, gint y, gint w, gint h)
 		{
-			if (imd->cm) color_man_correct_region(static_cast<ColorMan *>(imd->cm), *pixbuf, x, y, w, h);
+			if (imd->cm) color_man_correct_region(imd->cm, *pixbuf, x, y, w, h);
 			if (imd->desaturate) pixbuf_desaturate_rect(*pixbuf, x, y, w, h);
 			if (imd->overunderexposed) pixbuf_highlight_overunderexposed(*pixbuf, x, y, w, h);
 		};
@@ -1008,8 +1008,7 @@ static void image_reset(ImageWindow *imd)
 	image_loader_free(imd->il);
 	imd->il = nullptr;
 
-	color_man_free(static_cast<ColorMan *>(imd->cm));
-	imd->cm = nullptr;
+	g_clear_pointer(&imd->cm, color_man_free);
 
 	image_state_set(imd, IMAGE_STATE_NONE);
 }
@@ -1346,8 +1345,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 	pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, FALSE);
 	if (imd->cm)
 		{
-		color_man_free(static_cast<ColorMan *>(imd->cm));
-		imd->cm = nullptr;
+		g_clear_pointer(&imd->cm, color_man_free);
 		}
 
 	if (lazy)
@@ -1460,17 +1458,14 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->color_profile_enable = source->color_profile_enable;
 	imd->color_profile_input = source->color_profile_input;
 	imd->color_profile_use_image = source->color_profile_use_image;
-	color_man_free(static_cast<ColorMan *>(imd->cm));
-	imd->cm = nullptr;
+
+	g_clear_pointer(&imd->cm, color_man_free);
 	if (source->cm)
 		{
-		ColorMan *cm;
-
 		imd->cm = source->cm;
 		source->cm = nullptr;
 
-		cm = static_cast<ColorMan *>(imd->cm);
-		cm->imd = imd;
+		imd->cm->imd = imd;
 		}
 
 	file_data_unref(imd->read_ahead_fd);
@@ -1507,17 +1502,14 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->color_profile_enable = source->color_profile_enable;
 	imd->color_profile_input = source->color_profile_input;
 	imd->color_profile_use_image = source->color_profile_use_image;
-	color_man_free(static_cast<ColorMan *>(imd->cm));
-	imd->cm = nullptr;
+
+	g_clear_pointer(&imd->cm, color_man_free);
 	if (source->cm)
 		{
-		ColorMan *cm;
-
 		imd->cm = source->cm;
 		source->cm = nullptr;
 
-		cm = static_cast<ColorMan *>(imd->cm);
-		cm->imd = imd;
+		imd->cm->imd = imd;
 		}
 
 	image_loader_free(imd->read_ahead_il);
@@ -1856,13 +1848,9 @@ gboolean image_color_profile_get_use(ImageWindow *imd)
 
 gboolean image_color_profile_get_status(ImageWindow *imd, gchar **image_profile, gchar **screen_profile)
 {
-	ColorMan *cm;
 	if (!imd) return FALSE;
 
-	cm = static_cast<ColorMan *>(imd->cm);
-	if (!cm) return FALSE;
-	return color_man_get_status(cm, image_profile, screen_profile);
-
+	return color_man_get_status(imd->cm, image_profile, screen_profile);
 }
 
 /**

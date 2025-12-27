@@ -34,6 +34,7 @@ enum StereoPixbufData : gint;
 
 struct CollectInfo;
 struct CollectionData;
+struct ColorMan;
 class FileData;
 struct ImageLoader;
 
@@ -117,7 +118,7 @@ struct ImageWindow
 	gint color_profile_input;
 	gboolean color_profile_use_image;
 	ColorManProfileType color_profile_from_image;
-	gpointer cm;
+	ColorMan *cm;
 
 	FileData *read_ahead_fd;
 	ImageLoader *read_ahead_il;
