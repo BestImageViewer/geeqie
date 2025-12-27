@@ -35,13 +35,6 @@ enum ColorManProfileType : int {
 	COLOR_PROFILE_FILE,
 };
 
-enum ColorManReturnType {
-	COLOR_RETURN_SUCCESS = 0,
-	COLOR_RETURN_ERROR,
-	COLOR_RETURN_IMAGE_CHANGED
-};
-
-
 struct ColorMan {
 	ImageWindow *imd;
 	GdkPixbuf *pixbuf;
@@ -51,10 +44,6 @@ struct ColorMan {
 	gpointer profile;
 
 	guint idle_id; /* event source id */
-
-	using DoneFunc = void (*)(ColorMan *, ColorManReturnType, gpointer);
-	DoneFunc func_done;
-	gpointer func_done_data;
 };
 
 

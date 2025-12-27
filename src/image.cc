@@ -1471,7 +1471,6 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 
 		cm = static_cast<ColorMan *>(imd->cm);
 		cm->imd = imd;
-		cm->func_done_data = imd;
 		}
 
 	file_data_unref(imd->read_ahead_fd);
@@ -1519,7 +1518,6 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 
 		cm = static_cast<ColorMan *>(imd->cm);
 		cm->imd = imd;
-		cm->func_done_data = imd;
 		}
 
 	image_loader_free(imd->read_ahead_il);
