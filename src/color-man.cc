@@ -289,7 +289,9 @@ void color_man_correct_region(const ColorMan *cm, GdkPixbuf *pixbuf, GdkRectangl
 	region.height = std::min(region.height * scale, gdk_pixbuf_get_height(pixbuf) - region.y);
 
 	auto *cc = static_cast<ColorManCache *>(cm->profile);
-	guchar *pix = gdk_pixbuf_get_pixels(pixbuf) + region.x * (cc->has_alpha ? 4 : 3);
+	const int step = cc->has_alpha ? 4 : 3;
+	guchar *pix = gdk_pixbuf_get_pixels(pixbuf) + (region.x * step);
+
 	const gint rs = gdk_pixbuf_get_rowstride(pixbuf);
 
 	for (int i = 0; i < region.height; i++)
