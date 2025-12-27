@@ -22,6 +22,8 @@
 #ifndef LAYOUT_IMAGE_H
 #define LAYOUT_IMAGE_H
 
+#include <optional>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -31,6 +33,7 @@ enum StereoPixbufData : gint;
 
 struct CollectInfo;
 struct CollectionData;
+struct ColorManStatus;
 class FileData;
 struct LayoutWindow;
 
@@ -58,7 +61,7 @@ void layout_image_color_profile_set(LayoutWindow *lw, gint input_type, gboolean 
 gboolean layout_image_color_profile_get(LayoutWindow *lw, gint &input_type, gboolean &use_image);
 void layout_image_color_profile_set_use(LayoutWindow *lw, gint enable);
 gboolean layout_image_color_profile_get_use(LayoutWindow *lw);
-gboolean layout_image_color_profile_get_status(LayoutWindow *lw, gchar **image_profile, gchar **screen_profile);
+std::optional<ColorManStatus> layout_image_color_profile_get_status(LayoutWindow *lw);
 
 
 const gchar *layout_image_get_path(LayoutWindow *lw);

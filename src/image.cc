@@ -1846,11 +1846,11 @@ gboolean image_color_profile_get_use(ImageWindow *imd)
 	return imd->color_profile_enable;
 }
 
-gboolean image_color_profile_get_status(ImageWindow *imd, gchar **image_profile, gchar **screen_profile)
+std::optional<ColorManStatus> image_color_profile_get_status(const ImageWindow *imd)
 {
-	if (!imd) return FALSE;
+	if (!imd) return {};
 
-	return color_man_get_status(imd->cm, image_profile, screen_profile);
+	return color_man_get_status(imd->cm);
 }
 
 /**

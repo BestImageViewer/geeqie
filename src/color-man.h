@@ -22,6 +22,9 @@
 #ifndef COLOR_MAN_H
 #define COLOR_MAN_H
 
+#include <optional>
+#include <string>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
 
@@ -62,7 +65,12 @@ void color_man_update();
 
 void color_man_correct_region(ColorMan *cm, GdkPixbuf *pixbuf, gint x, gint y, gint w, gint h);
 
-gboolean color_man_get_status(ColorMan *cm, gchar **image_profile, gchar **screen_profile);
+struct ColorManStatus {
+	std::string image_profile;
+	std::string screen_profile;
+};
+
+std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm);
 
 const gchar *get_profile_name(const guchar *profile_data, guint profile_len);
 

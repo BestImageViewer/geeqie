@@ -23,6 +23,7 @@
 #define IMAGE_H
 
 #include <functional>
+#include <optional>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -35,6 +36,7 @@ enum StereoPixbufData : gint;
 struct CollectInfo;
 struct CollectionData;
 struct ColorMan;
+struct ColorManStatus;
 class FileData;
 struct ImageLoader;
 
@@ -232,7 +234,7 @@ void image_color_profile_set(ImageWindow *imd, gint input_type, gboolean use_ima
 gboolean image_color_profile_get(const ImageWindow *imd, gint &input_type, gboolean &use_image);
 void image_color_profile_set_use(ImageWindow *imd, gboolean enable);
 gboolean image_color_profile_get_use(ImageWindow *imd);
-gboolean image_color_profile_get_status(ImageWindow *imd, gchar **image_profile, gchar **screen_profile);
+std::optional<ColorManStatus> image_color_profile_get_status(const ImageWindow *imd);
 
 void image_set_delay_flip(ImageWindow *imd, gint delay);
 

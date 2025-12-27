@@ -3425,11 +3425,10 @@ void layout_util_sync_color(LayoutWindow *lw)
 #if HAVE_LCMS
 	gq_gtk_toggle_action_set_active(GQ_GTK_TOGGLE_ACTION(action), use_color);
 
-	g_autofree gchar *image_profile = nullptr;
-	g_autofree gchar *screen_profile = nullptr;
-	if (layout_image_color_profile_get_status(lw, &image_profile, &screen_profile))
+	if (const auto status = layout_image_color_profile_get_status(lw); status.has_value())
 		{
-		g_autofree gchar *buf = g_strdup_printf(_("Image profile: %s\nScreen profile: %s"), image_profile, screen_profile);
+		g_autofree gchar *buf = g_strdup_printf(_("Image profile: %s\nScreen profile: %s"),
+		                                        status->image_profile.c_str(), status->screen_profile.c_str());
 		gq_gtk_action_set_tooltip(action, buf);
 		}
 	else

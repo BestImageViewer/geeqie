@@ -360,15 +360,14 @@ ColorMan *color_man_new_embedded(ImageWindow *imd, GdkPixbuf *pixbuf,
 				  screen_type, screen_file, screen_data, screen_data_len);
 }
 
-static gchar *color_man_get_profile_name(ColorManProfileType type, cmsHPROFILE profile)
+static std::string color_man_get_profile_name(ColorManProfileType type, cmsHPROFILE profile)
 {
 	switch (type)
 		{
 		case COLOR_PROFILE_SRGB:
-			return g_strdup(_("sRGB"));
+			return _("sRGB");
 		case COLOR_PROFILE_ADOBERGB:
-			return g_strdup(_("Adobe RGB compatible"));
-			break;
+			return _("Adobe RGB compatible");
 		case COLOR_PROFILE_MEM:
 		case COLOR_PROFILE_FILE:
 			if (profile)
@@ -377,26 +376,26 @@ static gchar *color_man_get_profile_name(ColorManProfileType type, cmsHPROFILE p
 				buffer[0] = '\0';
 				cmsGetProfileInfoASCII(profile, cmsInfoDescription, "en", "US", buffer, 20);
 				buffer[19] = '\0'; /* Just to be sure */
-				return g_strdup(buffer);
+				return buffer;
 				}
-			return g_strdup(_("Custom profile"));
-			break;
+			return _("Custom profile");
 		case COLOR_PROFILE_NONE:
 		default:
-			return g_strdup("");
+			return "";
 		}
 }
 
-gboolean color_man_get_status(ColorMan *cm, gchar **image_profile, gchar **screen_profile)
+std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm)
 {
-	ColorManCache *cc;
-	if (!cm) return FALSE;
+	if (!cm) return {};
 
-	cc = static_cast<ColorManCache *>(cm->profile);
+	auto *cc = static_cast<ColorManCache *>(cm->profile);
 
-	if (image_profile) *image_profile = color_man_get_profile_name(cc->profile_in_type, cc->profile_in);
-	if (screen_profile) *screen_profile = color_man_get_profile_name(cc->profile_out_type, cc->profile_out);
-	return TRUE;
+	ColorManStatus status = {
+	    color_man_get_profile_name(cc->profile_in_type, cc->profile_in),
+	    color_man_get_profile_name(cc->profile_out_type, cc->profile_out)
+	};
+	return status;
 }
 
 void color_man_free(ColorMan *cm)
@@ -467,9 +466,9 @@ void color_man_correct_region(ColorMan *, GdkPixbuf *, gint, gint, gint, gint)
 	/* no op */
 }
 
-gboolean color_man_get_status(ColorMan *, gchar **, gchar **)
+std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm)
 {
-	return FALSE;
+	return {};
 }
 
 const gchar *get_profile_name(const guchar *, guint)

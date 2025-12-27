@@ -34,6 +34,7 @@
 
 #include "archives.h"
 #include "collect.h"
+#include "color-man.h"
 #include "compat-deprecated.h"
 #include "dnd.h"
 #include "editors.h"
@@ -1473,11 +1474,11 @@ gboolean layout_image_color_profile_get_use(LayoutWindow *lw)
 	return image_color_profile_get_use(lw->image);
 }
 
-gboolean layout_image_color_profile_get_status(LayoutWindow *lw, gchar **image_profile, gchar **screen_profile)
+std::optional<ColorManStatus> layout_image_color_profile_get_status(LayoutWindow *lw)
 {
-	if (!layout_valid(&lw)) return FALSE;
+	if (!layout_valid(&lw)) return {};
 
-	return image_color_profile_get_status(lw->image, image_profile, screen_profile);
+	return image_color_profile_get_status(lw->image);
 }
 
 /*
