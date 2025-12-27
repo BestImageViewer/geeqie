@@ -307,7 +307,10 @@ static ColorMan *color_man_new_real(ImageWindow *imd, GdkPixbuf *pixbuf,
                                     ColorManProfileType screen_type, const gchar *screen_file,
                                     const guchar *screen_data, guint screen_data_len)
 {
-	if (imd) pixbuf = image_get_pixbuf(imd);
+	if (imd)
+		{
+		pixbuf = image_get_pixbuf(imd);
+		}
 
 	ColorManCache *profile = color_man_cache_get(input_type, input_file, input_data, input_data_len,
 	                                             screen_type, screen_file, screen_data, screen_data_len,
@@ -316,7 +319,6 @@ static ColorMan *color_man_new_real(ImageWindow *imd, GdkPixbuf *pixbuf,
 
 	auto *cm = g_new0(ColorMan, 1);
 	cm->imd = imd;
-	cm->pixbuf = pixbuf ? g_object_ref(pixbuf) : nullptr;
 	cm->profile = profile;
 
 	return cm;
@@ -383,9 +385,6 @@ std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm)
 void color_man_free(ColorMan *cm)
 {
 	if (!cm) return;
-
-	if (cm->idle_id) g_source_remove(cm->idle_id);
-	if (cm->pixbuf) g_object_unref(cm->pixbuf);
 
 	color_man_cache_unref(static_cast<ColorManCache *>(cm->profile));
 

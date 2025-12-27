@@ -427,7 +427,7 @@ static gboolean image_get_x11_screen_profile(ImageWindow *imd, guchar **screen_p
 				 &type, &format, screen_profile_len, screen_profile) && *screen_profile_len > 0);
 }
 
-static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gboolean run_in_bg)
+static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 {
 	ColorMan *cm;
 	ColorManProfileType input_type;
@@ -513,12 +513,6 @@ static gboolean image_post_process_color(ImageWindow *imd, gint start_row, gbool
 
 	if (cm)
 		{
-		if (start_row > 0)
-			{
-			cm->row = start_row;
-			cm->incremental_sync = TRUE;
-			}
-
 		imd->cm = cm;
 		}
 
@@ -1365,7 +1359,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 	lw = layout_find_by_image(imd);
 	if (imd->color_profile_enable && lw && !lw->animation)
 		{
-		image_post_process_color(imd, 0, FALSE); /** @todo error handling */
+		image_post_process_color(imd, FALSE); /** @todo error handling */
 		}
 
 	image_set_pixbuf_renderer_post_process_func(imd);

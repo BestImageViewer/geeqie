@@ -41,13 +41,8 @@ enum ColorManProfileType : int {
 
 struct ColorMan {
 	ImageWindow *imd;
-	GdkPixbuf *pixbuf;
-	gint incremental_sync;
-	gint row;
 
 	gpointer profile;
-
-	guint idle_id; /* event source id */
 };
 
 
