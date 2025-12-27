@@ -391,7 +391,7 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf)
 
 	if(cm)
 		{
-		color_man_correct_region(cm, cm->pixbuf, 0, 0, sw, sh);
+		color_man_correct_region(cm, cm->pixbuf, {0, 0, sw, sh});
 		}
 }
 

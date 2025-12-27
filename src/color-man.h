@@ -26,6 +26,7 @@
 #include <string>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
 #include <glib.h>
 
 struct ImageWindow;
@@ -63,7 +64,7 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(ColorMan, color_man_free)
 
 void color_man_update();
 
-void color_man_correct_region(ColorMan *cm, GdkPixbuf *pixbuf, gint x, gint y, gint w, gint h);
+void color_man_correct_region(const ColorMan *cm, GdkPixbuf *pixbuf, GdkRectangle region);
 
 struct ColorManStatus {
 	std::string image_profile;

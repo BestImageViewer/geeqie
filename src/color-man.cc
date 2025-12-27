@@ -282,41 +282,23 @@ ColorManCache *color_man_cache_get(ColorManProfileType in_type, const gchar *in_
  *-------------------------------------------------------------------
  */
 
-void color_man_correct_region(ColorMan *cm, GdkPixbuf *pixbuf, gint x, gint y, gint w, gint h)
+void color_man_correct_region(const ColorMan *cm, GdkPixbuf *pixbuf, GdkRectangle region)
 {
-	ColorManCache *cc;
-	guchar *pix;
-	gint rs;
-	gint i;
-	gint pixbuf_width;
-	gint pixbuf_height;
+	/** @FIXME: region x,y expected to be = 0. Maybe this is not the right place for scaling */
+	const gint scale = scale_factor();
+	region.width = std::min(region.width * scale, gdk_pixbuf_get_width(pixbuf) - region.x);
+	region.height = std::min(region.height * scale, gdk_pixbuf_get_height(pixbuf) - region.y);
 
+	auto *cc = static_cast<ColorManCache *>(cm->profile);
+	guchar *pix = gdk_pixbuf_get_pixels(pixbuf) + region.x * (cc->has_alpha ? 4 : 3);
+	const gint rs = gdk_pixbuf_get_rowstride(pixbuf);
 
-	pixbuf_width = gdk_pixbuf_get_width(pixbuf);
-	pixbuf_height = gdk_pixbuf_get_height(pixbuf);
-
-	cc = static_cast<ColorManCache *>(cm->profile);
-
-	pix = gdk_pixbuf_get_pixels(pixbuf);
-	rs = gdk_pixbuf_get_rowstride(pixbuf);
-
-	/** @FIXME: x,y expected to be = 0. Maybe this is not the right place for scaling */
-	w = w * scale_factor();
-	h = h * scale_factor();
-
-	w = std::min(w, pixbuf_width - x);
-	h = std::min(h, pixbuf_height - y);
-
-	pix += x * ((cc->has_alpha) ? 4 : 3);
-	for (i = 0; i < h; i++)
+	for (int i = 0; i < region.height; i++)
 		{
-		guchar *pbuf;
+		guchar *pbuf = pix + ((region.y + i) * rs);
 
-		pbuf = pix + ((y + i) * rs);
-
-		cmsDoTransform(cc->transform, pbuf, pbuf, w);
+		cmsDoTransform(cc->transform, pbuf, pbuf, region.width);
 		}
-
 }
 
 static ColorMan *color_man_new_real(ImageWindow *imd, GdkPixbuf *pixbuf,
@@ -461,7 +443,7 @@ void color_man_update()
 	/* no op */
 }
 
-void color_man_correct_region(ColorMan *, GdkPixbuf *, gint, gint, gint, gint)
+void color_man_correct_region(const ColorMan *, GdkPixbuf *, GdkRectangle)
 {
 	/* no op */
 }
