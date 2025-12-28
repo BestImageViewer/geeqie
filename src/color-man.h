@@ -43,15 +43,19 @@ struct ColorMan {
 	std::shared_ptr<Cache> profile;
 };
 
+struct ColorManMemData {
+	std::unique_ptr<guchar, decltype(&g_free)> ptr{nullptr, g_free};
+	guint len = 0;
+};
 
 ColorMan *color_man_new(const GdkPixbuf *pixbuf,
                         ColorManProfileType input_type, const gchar *input_file,
                         ColorManProfileType screen_type, const gchar *screen_file,
-                        const guchar *screen_data, guint screen_data_len);
+                        const ColorManMemData &screen_data);
 ColorMan *color_man_new_embedded(const GdkPixbuf *pixbuf,
-                                 const guchar *input_data, guint input_data_len,
+                                 const ColorManMemData &input_data,
                                  ColorManProfileType screen_type, const gchar *screen_file,
-                                 const guchar *screen_data, guint screen_data_len);
+                                 const ColorManMemData &screen_data);
 void color_man_free(ColorMan *cm);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(ColorMan, color_man_free)
 

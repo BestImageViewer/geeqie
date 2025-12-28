@@ -361,8 +361,8 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf)
 	if (!options->thumbnails.use_color_management) return;
 
 	ColorManProfileType color_profile_from_image = COLOR_PROFILE_NONE;
-	guint profile_len;
-	g_autofree guchar *profile = exif_get_color_profile(fd, profile_len, color_profile_from_image);
+	ColorManMemData profile;
+	profile.ptr.reset(exif_get_color_profile(fd, profile.len, color_profile_from_image));
 
 	if (color_profile_from_image == COLOR_PROFILE_NONE) return;
 
@@ -373,15 +373,15 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf)
 	const gint sh = gdk_pixbuf_get_height(pixbuf);
 
 	g_autoptr(ColorMan) cm = nullptr;
-	if (profile)
+	if (profile.ptr)
 		{
-		cm = color_man_new_embedded(pixbuf, profile, profile_len,
-		                            screen_type, nullptr, nullptr, 0);
+		cm = color_man_new_embedded(pixbuf, profile,
+		                            screen_type, nullptr, {});
 		}
 	else
 		{
 		cm = color_man_new(pixbuf, COLOR_PROFILE_MEM, nullptr,
-		                   screen_type, nullptr, nullptr, 0);
+		                   screen_type, nullptr, {});
 		}
 
 	if(cm)

@@ -414,26 +414,38 @@ void image_update_title(ImageWindow *imd)
  * rotation, flip, etc.
  *-------------------------------------------------------------------
  */
-static gboolean image_get_x11_screen_profile(ImageWindow *imd, guchar **screen_profile, gint *screen_profile_len)
+static bool image_get_x11_screen_profile(const ImageWindow *imd, ColorManMemData &screen_data)
 {
+	screen_data.ptr.reset();
+	screen_data.len = 0;
+
 #if HAVE_GTK4
 	/* GTK4: direct X11 root-window ICC profile access is not supported.
 	* Color management must be done via GdkColorProfile / colord.
 	*/
-	*screen_profile = nullptr;
-	*screen_profile_len = 0;
-
-	return FALSE;
+	return false;
 #else
-	GdkScreen *screen = gtk_widget_get_screen(imd->widget);;
+	GdkScreen *screen = gtk_widget_get_screen(imd->widget);
 	GdkAtom    type   = GDK_NONE;
 	gint       format = 0;
 
-	return (gdk_property_get(gdk_screen_get_root_window(screen),
-				 gdk_atom_intern ("_ICC_PROFILE", FALSE),
-				 GDK_NONE,
-				 0, 64 * 1024 * 1024, FALSE,
-				 &type, &format, screen_profile_len, screen_profile) && *screen_profile_len > 0);
+	g_autofree guchar *screen_profile = nullptr;
+	gint screen_profile_len;
+
+	if (!gdk_property_get(gdk_screen_get_root_window(screen),
+	                      gdk_atom_intern("_ICC_PROFILE", FALSE),
+	                      GDK_NONE,
+	                      0, 64 * 1024 * 1024, FALSE,
+	                      &type, &format, &screen_profile_len, &screen_profile) ||
+	    screen_profile_len <= 0)
+		{
+		return false;
+		}
+
+	screen_data.ptr.reset(g_steal_pointer(&screen_profile));
+	screen_data.len = screen_profile_len;
+
+	return true;
 #endif
 }
 
@@ -444,7 +456,6 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 	ColorManProfileType screen_type;
 	const gchar *input_file = nullptr;
 	const gchar *screen_file = nullptr;
-	gint screen_profile_len;
 
 	if (imd->cm) return FALSE;
 
@@ -469,12 +480,12 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 		return FALSE;
 		}
 
-	g_autofree guchar *screen_profile = nullptr;
+	ColorManMemData screen_profile;
 	if (options->color_profile.use_x11_screen_profile &&
-	    image_get_x11_screen_profile(imd, &screen_profile, &screen_profile_len))
+	    image_get_x11_screen_profile(imd, screen_profile))
 		{
 		screen_type = COLOR_PROFILE_MEM;
-		DEBUG_1("Using X11 screen profile, length: %d", screen_profile_len);
+		DEBUG_1("Using X11 screen profile, length: %u", screen_profile.len);
 		}
 	else if (options->color_profile.screen_file &&
 	    is_readable_file(options->color_profile.screen_file))
@@ -491,15 +502,14 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 
 	imd->color_profile_from_image = COLOR_PROFILE_NONE;
 
-	guint profile_len;
-	g_autofree guchar *profile = exif_get_color_profile(imd->image_fd, profile_len, imd->color_profile_from_image);
+	ColorManMemData profile;
+	profile.ptr.reset(exif_get_color_profile(imd->image_fd, profile.len, imd->color_profile_from_image));
 
-	if (profile)
+	if (profile.ptr)
 		{
 		if (!imd->color_profile_use_image)
 			{
-			g_free(profile);
-			profile = nullptr;
+			profile.ptr.reset();
 			}
 		}
 	else if (imd->color_profile_use_image && imd->color_profile_from_image != COLOR_PROFILE_NONE)
@@ -510,15 +520,15 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 
 	const GdkPixbuf *pixbuf = run_in_bg ? image_get_pixbuf(imd) : nullptr;
 
-	if (profile)
+	if (profile.ptr)
 		{
-		cm = color_man_new_embedded(pixbuf, profile, profile_len,
-		                            screen_type, screen_file, screen_profile, screen_profile_len);
+		cm = color_man_new_embedded(pixbuf, profile,
+		                            screen_type, screen_file, screen_profile);
 		}
 	else
 		{
 		cm = color_man_new(pixbuf, input_type, input_file,
-		                   screen_type, screen_file, screen_profile, screen_profile_len);
+		                   screen_type, screen_file, screen_profile);
 		}
 
 	if (cm)

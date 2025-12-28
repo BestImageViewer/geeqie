@@ -111,8 +111,7 @@ gint scale_factor()
 std::vector<ColorManCachePtr> cm_cache_list;
 
 
-cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const gchar *file,
-                                         const guchar *data, guint data_len)
+cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const gchar *file, const ColorManMemData &data)
 {
 	cmsHPROFILE profile = nullptr;
 
@@ -132,9 +131,9 @@ cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const gchar *
 			profile = color_man_create_adobe_comp();
 			break;
 		case COLOR_PROFILE_MEM:
-			if (data)
+			if (data.ptr)
 				{
-				profile = cmsOpenProfileFromMem(data, data_len);
+				profile = cmsOpenProfileFromMem(data.ptr.get(), data.len);
 				}
 			break;
 		case COLOR_PROFILE_NONE:
@@ -145,20 +144,18 @@ cmsHPROFILE color_man_cache_load_profile(ColorManProfileType type, const gchar *
 	return profile;
 }
 
-ColorManCachePtr color_man_cache_new(ColorManProfileType in_type, const gchar *in_file,
-                                     const guchar *in_data, guint in_data_len,
-                                     ColorManProfileType out_type, const gchar *out_file,
-                                     const guchar *out_data, guint out_data_len,
+ColorManCachePtr color_man_cache_new(ColorManProfileType in_type, const gchar *in_file, const ColorManMemData &in_data,
+                                     ColorManProfileType out_type, const gchar *out_file, const ColorManMemData &out_data,
                                      gboolean has_alpha)
 {
-	g_auto(cmsHPROFILE) profile_in = color_man_cache_load_profile(in_type, in_file, in_data, in_data_len);
+	g_auto(cmsHPROFILE) profile_in = color_man_cache_load_profile(in_type, in_file, in_data);
 	if (!profile_in)
 		{
 		DEBUG_1("failed to load color profile for input: %d %s", in_type, in_file);
 		return nullptr;
 		}
 
-	g_auto(cmsHPROFILE) profile_out = color_man_cache_load_profile(out_type, out_file, out_data, out_data_len);
+	g_auto(cmsHPROFILE) profile_out = color_man_cache_load_profile(out_type, out_file, out_data);
 	if (!profile_out)
 		{
 		DEBUG_1("failed to load color profile for screen: %d %s", out_type, out_file);
@@ -231,17 +228,16 @@ ColorManCachePtr color_man_cache_find(ColorManProfileType in_type, const gchar *
 	return (it != cm_cache_list.end()) ? *it : nullptr;
 }
 
-ColorManCachePtr color_man_cache_get(ColorManProfileType in_type, const gchar *in_file,
-                                     const guchar *in_data, guint in_data_len,
-                                     ColorManProfileType out_type, const gchar *out_file,
-                                     const guchar *out_data, guint out_data_len,
+ColorManCachePtr color_man_cache_get(ColorManProfileType in_type, const gchar *in_file, const ColorManMemData &in_data,
+                                     ColorManProfileType out_type, const gchar *out_file, const ColorManMemData &out_data,
                                      gboolean has_alpha)
 {
 	ColorManCachePtr cc = color_man_cache_find(in_type, in_file, out_type, out_file, has_alpha);
 	if (cc) return cc;
 
-	return color_man_cache_new(in_type, in_file, in_data, in_data_len,
-				   out_type, out_file, out_data, out_data_len, has_alpha);
+	return color_man_cache_new(in_type, in_file, in_data,
+	                           out_type, out_file, out_data,
+	                           has_alpha);
 }
 
 } // namespace
@@ -276,12 +272,12 @@ void color_man_correct_region(const ColorMan *cm, GdkPixbuf *pixbuf, GdkRectangl
 
 static ColorMan *color_man_new_real(const GdkPixbuf *pixbuf,
                                     ColorManProfileType input_type, const gchar *input_file,
-                                    const guchar *input_data, guint input_data_len,
+                                    const ColorManMemData &input_data,
                                     ColorManProfileType screen_type, const gchar *screen_file,
-                                    const guchar *screen_data, guint screen_data_len)
+                                    const ColorManMemData &screen_data)
 {
-	ColorManCachePtr profile = color_man_cache_get(input_type, input_file, input_data, input_data_len,
-	                                               screen_type, screen_file, screen_data, screen_data_len,
+	ColorManCachePtr profile = color_man_cache_get(input_type, input_file, input_data,
+	                                               screen_type, screen_file, screen_data,
 	                                               pixbuf ? gdk_pixbuf_get_has_alpha(pixbuf) : FALSE);
 	if (!profile) return nullptr;
 
@@ -294,21 +290,21 @@ static ColorMan *color_man_new_real(const GdkPixbuf *pixbuf,
 ColorMan *color_man_new(const GdkPixbuf *pixbuf,
                         ColorManProfileType input_type, const gchar *input_file,
                         ColorManProfileType screen_type, const gchar *screen_file,
-                        const guchar *screen_data, guint screen_data_len)
+                        const ColorManMemData &screen_data)
 {
 	return color_man_new_real(pixbuf,
-	                          input_type, input_file, nullptr, 0,
-	                          screen_type, screen_file, screen_data, screen_data_len);
+	                          input_type, input_file, {},
+	                          screen_type, screen_file, screen_data);
 }
 
 ColorMan *color_man_new_embedded(const GdkPixbuf *pixbuf,
-                                 const guchar *input_data, guint input_data_len,
+                                 const ColorManMemData &input_data,
                                  ColorManProfileType screen_type, const gchar *screen_file,
-                                 const guchar *screen_data, guint screen_data_len)
+                                 const ColorManMemData &screen_data)
 {
 	return color_man_new_real(pixbuf,
-	                          COLOR_PROFILE_MEM, nullptr, input_data, input_data_len,
-	                          screen_type, screen_file, screen_data, screen_data_len);
+	                          COLOR_PROFILE_MEM, nullptr, input_data,
+	                          screen_type, screen_file, screen_data);
 }
 
 static std::string color_man_get_profile_name(ColorManProfileType type, cmsHPROFILE profile)
@@ -380,16 +376,16 @@ const gchar *get_profile_name(const guchar *profile_data, guint profile_len)
 ColorMan *color_man_new(const GdkPixbuf *,
                         ColorManProfileType, const gchar *,
                         ColorManProfileType, const gchar *,
-                        const guchar *, guint)
+                        const ColorManMemData &)
 {
 	/* no op */
 	return nullptr;
 }
 
 ColorMan *color_man_new_embedded(const GdkPixbuf *,
-                                 const guchar *, guint,
+                                 const ColorManMemData &,
                                  ColorManProfileType, const gchar *,
-                                 const guchar *, guint)
+                                 const ColorManMemData &)
 {
 	/* no op */
 	return nullptr;
