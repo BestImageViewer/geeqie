@@ -45,6 +45,9 @@ struct ColorMan::Cache {
 	Cache &operator=(const Cache &) = delete;
 	Cache &operator=(Cache &&) = delete;
 
+	void correct_region(GdkPixbuf *pixbuf, GdkRectangle region) const;
+	[[nodiscard]] ColorManStatus get_status() const;
+
 	cmsHPROFILE   profile_in;
 	cmsHPROFILE   profile_out;
 	cmsHTRANSFORM transform;
@@ -249,15 +252,19 @@ ColorManCachePtr color_man_cache_get(ColorManProfileType in_type, const gchar *i
  *-------------------------------------------------------------------
  */
 
-void color_man_correct_region(const ColorMan *cm, GdkPixbuf *pixbuf, GdkRectangle region)
+void ColorMan::correct_region(GdkPixbuf *pixbuf, GdkRectangle region) const
+{
+	profile->correct_region(pixbuf, region);
+}
+
+void ColorMan::Cache::correct_region(GdkPixbuf *pixbuf, GdkRectangle region) const
 {
 	/** @FIXME: region x,y expected to be = 0. Maybe this is not the right place for scaling */
 	const gint scale = scale_factor();
 	region.width = std::min(region.width * scale, gdk_pixbuf_get_width(pixbuf) - region.x);
 	region.height = std::min(region.height * scale, gdk_pixbuf_get_height(pixbuf) - region.y);
 
-	ColorMan::Cache *cc = cm->profile.get();
-	const int step = cc->has_alpha ? 4 : 3;
+	const int step = has_alpha ? 4 : 3;
 	guchar *pix = gdk_pixbuf_get_pixels(pixbuf) + (region.x * step);
 
 	const gint rs = gdk_pixbuf_get_rowstride(pixbuf);
@@ -266,7 +273,7 @@ void color_man_correct_region(const ColorMan *cm, GdkPixbuf *pixbuf, GdkRectangl
 		{
 		guchar *pbuf = pix + ((region.y + i) * rs);
 
-		cmsDoTransform(cc->transform, pbuf, pbuf, region.width);
+		cmsDoTransform(transform, pbuf, pbuf, region.width);
 		}
 }
 
@@ -281,10 +288,7 @@ static ColorMan *color_man_new_real(const GdkPixbuf *pixbuf,
 	                                               pixbuf ? gdk_pixbuf_get_has_alpha(pixbuf) : FALSE);
 	if (!profile) return nullptr;
 
-	auto *cm = new ColorMan();
-	cm->profile = profile;
-
-	return cm;
+	return new ColorMan(profile);
 }
 
 ColorMan *color_man_new(const GdkPixbuf *pixbuf,
@@ -332,17 +336,17 @@ static std::string color_man_get_profile_name(ColorManProfileType type, cmsHPROF
 		}
 }
 
-std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm)
+std::optional<ColorManStatus> ColorMan::get_status() const
 {
-	if (!cm) return {};
+	return profile->get_status();
+}
 
-	ColorMan::Cache *cc = cm->profile.get();
-
-	ColorManStatus status = {
-	    color_man_get_profile_name(cc->profile_in_type, cc->profile_in),
-	    color_man_get_profile_name(cc->profile_out_type, cc->profile_out)
+ColorManStatus ColorMan::Cache::get_status() const
+{
+	return {
+		color_man_get_profile_name(profile_in_type, profile_in),
+		color_man_get_profile_name(profile_out_type, profile_out)
 	};
-	return status;
 }
 
 void color_man_free(ColorMan *cm)
@@ -357,14 +361,13 @@ void color_man_update()
 
 const gchar *get_profile_name(const guchar *profile_data, guint profile_len)
 {
-	cmsHPROFILE profile = cmsOpenProfileFromMem(profile_data, profile_len);
+	g_auto(cmsHPROFILE) profile = cmsOpenProfileFromMem(profile_data, profile_len);
 	if (!profile) return nullptr;
 
 	static cmsUInt8Number profileID[17];
 	memset(profileID, 0, sizeof(profileID));
 
 	cmsGetHeaderProfileID(profile, profileID);
-	cmsCloseProfile(profile);
 
 	return reinterpret_cast<gchar *>(profileID);
 }
@@ -401,12 +404,12 @@ void color_man_update()
 	/* no op */
 }
 
-void color_man_correct_region(const ColorMan *, GdkPixbuf *, GdkRectangle)
+void ColorMan::correct_region(GdkPixbuf *, GdkRectangle) const
 {
 	/* no op */
 }
 
-std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm)
+std::optional<ColorManStatus> ColorMan::get_status() const
 {
 	/* no op */
 	return {};

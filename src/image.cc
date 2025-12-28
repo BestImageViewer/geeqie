@@ -641,7 +641,7 @@ static void image_set_pixbuf_renderer_post_process_func(ImageWindow *imd)
 		{
 		const auto image_post_process_tile_color_cb = [imd](PixbufRenderer *, GdkPixbuf **pixbuf, gint x, gint y, gint w, gint h)
 		{
-			if (imd->cm) color_man_correct_region(imd->cm, *pixbuf, {x, y, w, h});
+			if (imd->cm) imd->cm->correct_region(*pixbuf, {x, y, w, h});
 			if (imd->desaturate) pixbuf_desaturate_rect(*pixbuf, x, y, w, h);
 			if (imd->overunderexposed) pixbuf_highlight_overunderexposed(*pixbuf, x, y, w, h);
 		};
@@ -1854,9 +1854,9 @@ gboolean image_color_profile_get_use(ImageWindow *imd)
 
 std::optional<ColorManStatus> image_color_profile_get_status(const ImageWindow *imd)
 {
-	if (!imd) return {};
+	if (!imd || !imd->cm) return {};
 
-	return color_man_get_status(imd->cm);
+	return imd->cm->get_status();
 }
 
 /**

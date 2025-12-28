@@ -38,8 +38,22 @@ enum ColorManProfileType : int {
 	COLOR_PROFILE_FILE,
 };
 
+struct ColorManStatus {
+	std::string image_profile;
+	std::string screen_profile;
+};
+
 struct ColorMan {
 	struct Cache;
+
+	explicit ColorMan(std::shared_ptr<Cache> profile)
+	    : profile(std::move(profile))
+	{}
+
+	void correct_region(GdkPixbuf *pixbuf, GdkRectangle region) const;
+	std::optional<ColorManStatus> get_status() const;
+
+private:
 	std::shared_ptr<Cache> profile;
 };
 
@@ -59,15 +73,6 @@ ColorMan *color_man_new_embedded(const GdkPixbuf *pixbuf,
 void color_man_free(ColorMan *cm);
 
 void color_man_update();
-
-void color_man_correct_region(const ColorMan *cm, GdkPixbuf *pixbuf, GdkRectangle region);
-
-struct ColorManStatus {
-	std::string image_profile;
-	std::string screen_profile;
-};
-
-std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm);
 
 const gchar *get_profile_name(const guchar *profile_data, guint profile_len);
 
