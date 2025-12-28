@@ -375,17 +375,12 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf)
 	g_autoptr(ColorMan) cm = nullptr;
 	if (profile)
 		{
-		cm = color_man_new_embedded(nullptr, pixbuf,
-		                            profile, profile_len,
+		cm = color_man_new_embedded(pixbuf, profile, profile_len,
 		                            screen_type, nullptr, nullptr, 0);
 		}
 	else
 		{
-		constexpr ColorManProfileType input_type = COLOR_PROFILE_MEM;
-		const gchar *input_file = nullptr;
-
-		cm = color_man_new(nullptr, pixbuf,
-		                   input_type, input_file,
+		cm = color_man_new(pixbuf, COLOR_PROFILE_MEM, nullptr,
 		                   screen_type, nullptr, nullptr, 0);
 		}
 

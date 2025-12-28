@@ -32,7 +32,6 @@
 #include <glib-object.h>
 #include <lcms2.h>
 
-#include "image.h"
 #include "intl.h"
 #include "layout.h"
 #include "options.h"
@@ -275,47 +274,41 @@ void color_man_correct_region(const ColorMan *cm, GdkPixbuf *pixbuf, GdkRectangl
 		}
 }
 
-static ColorMan *color_man_new_real(ImageWindow *imd, GdkPixbuf *pixbuf,
+static ColorMan *color_man_new_real(const GdkPixbuf *pixbuf,
                                     ColorManProfileType input_type, const gchar *input_file,
                                     const guchar *input_data, guint input_data_len,
                                     ColorManProfileType screen_type, const gchar *screen_file,
                                     const guchar *screen_data, guint screen_data_len)
 {
-	if (imd)
-		{
-		pixbuf = image_get_pixbuf(imd);
-		}
-
 	ColorManCachePtr profile = color_man_cache_get(input_type, input_file, input_data, input_data_len,
 	                                               screen_type, screen_file, screen_data, screen_data_len,
 	                                               pixbuf ? gdk_pixbuf_get_has_alpha(pixbuf) : FALSE);
 	if (!profile) return nullptr;
 
 	auto *cm = new ColorMan();
-	cm->imd = imd;
 	cm->profile = profile;
 
 	return cm;
 }
 
-ColorMan *color_man_new(ImageWindow *imd, GdkPixbuf *pixbuf,
+ColorMan *color_man_new(const GdkPixbuf *pixbuf,
                         ColorManProfileType input_type, const gchar *input_file,
                         ColorManProfileType screen_type, const gchar *screen_file,
                         const guchar *screen_data, guint screen_data_len)
 {
-	return color_man_new_real(imd, pixbuf,
-				  input_type, input_file, nullptr, 0,
-				  screen_type, screen_file, screen_data, screen_data_len);
+	return color_man_new_real(pixbuf,
+	                          input_type, input_file, nullptr, 0,
+	                          screen_type, screen_file, screen_data, screen_data_len);
 }
 
-ColorMan *color_man_new_embedded(ImageWindow *imd, GdkPixbuf *pixbuf,
+ColorMan *color_man_new_embedded(const GdkPixbuf *pixbuf,
                                  const guchar *input_data, guint input_data_len,
                                  ColorManProfileType screen_type, const gchar *screen_file,
                                  const guchar *screen_data, guint screen_data_len)
 {
-	return color_man_new_real(imd, pixbuf,
-				  COLOR_PROFILE_MEM, nullptr, input_data, input_data_len,
-				  screen_type, screen_file, screen_data, screen_data_len);
+	return color_man_new_real(pixbuf,
+	                          COLOR_PROFILE_MEM, nullptr, input_data, input_data_len,
+	                          screen_type, screen_file, screen_data, screen_data_len);
 }
 
 static std::string color_man_get_profile_name(ColorManProfileType type, cmsHPROFILE profile)
@@ -384,7 +377,7 @@ const gchar *get_profile_name(const guchar *profile_data, guint profile_len)
 /*** color support not enabled ***/
 
 
-ColorMan *color_man_new(ImageWindow *, GdkPixbuf *,
+ColorMan *color_man_new(const GdkPixbuf *,
                         ColorManProfileType, const gchar *,
                         ColorManProfileType, const gchar *,
                         const guchar *, guint)
@@ -393,7 +386,7 @@ ColorMan *color_man_new(ImageWindow *, GdkPixbuf *,
 	return nullptr;
 }
 
-ColorMan *color_man_new_embedded(ImageWindow *, GdkPixbuf *,
+ColorMan *color_man_new_embedded(const GdkPixbuf *,
                                  const guchar *, guint,
                                  ColorManProfileType, const gchar *,
                                  const guchar *, guint)
@@ -419,6 +412,7 @@ void color_man_correct_region(const ColorMan *, GdkPixbuf *, GdkRectangle)
 
 std::optional<ColorManStatus> color_man_get_status(const ColorMan *cm)
 {
+	/* no op */
 	return {};
 }
 

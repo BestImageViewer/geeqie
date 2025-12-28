@@ -30,8 +30,6 @@
 #include <gdk/gdk.h>
 #include <glib.h>
 
-struct ImageWindow;
-
 enum ColorManProfileType : int {
 	COLOR_PROFILE_NONE = -1,
 	COLOR_PROFILE_MEM = -2,
@@ -41,18 +39,16 @@ enum ColorManProfileType : int {
 };
 
 struct ColorMan {
-	ImageWindow *imd;
-
 	struct Cache;
 	std::shared_ptr<Cache> profile;
 };
 
 
-ColorMan *color_man_new(ImageWindow *imd, GdkPixbuf *pixbuf,
+ColorMan *color_man_new(const GdkPixbuf *pixbuf,
                         ColorManProfileType input_type, const gchar *input_file,
                         ColorManProfileType screen_type, const gchar *screen_file,
                         const guchar *screen_data, guint screen_data_len);
-ColorMan *color_man_new_embedded(ImageWindow *imd, GdkPixbuf *pixbuf,
+ColorMan *color_man_new_embedded(const GdkPixbuf *pixbuf,
                                  const guchar *input_data, guint input_data_len,
                                  ColorManProfileType screen_type, const gchar *screen_file,
                                  const guchar *screen_data, guint screen_data_len);

@@ -498,17 +498,17 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 		input_file = nullptr;
 		}
 
+	const GdkPixbuf *pixbuf = run_in_bg ? image_get_pixbuf(imd) : nullptr;
+
 	if (profile)
 		{
-		cm = color_man_new_embedded(run_in_bg ? imd : nullptr, nullptr,
-					    profile, profile_len,
-					    screen_type, screen_file, screen_profile, screen_profile_len);
+		cm = color_man_new_embedded(pixbuf, profile, profile_len,
+		                            screen_type, screen_file, screen_profile, screen_profile_len);
 		}
 	else
 		{
-		cm = color_man_new(run_in_bg ? imd : nullptr, nullptr,
-				   input_type, input_file,
-				   screen_type, screen_file, screen_profile, screen_profile_len);
+		cm = color_man_new(pixbuf, input_type, input_file,
+		                   screen_type, screen_file, screen_profile, screen_profile_len);
 		}
 
 	if (cm)
@@ -1456,10 +1456,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	g_clear_pointer(&imd->cm, color_man_free);
 	if (source->cm)
 		{
-		imd->cm = source->cm;
-		source->cm = nullptr;
-
-		imd->cm->imd = imd;
+		std::swap(imd->cm, source->cm);
 		}
 
 	file_data_unref(imd->read_ahead_fd);
@@ -1500,10 +1497,7 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	g_clear_pointer(&imd->cm, color_man_free);
 	if (source->cm)
 		{
-		imd->cm = source->cm;
-		source->cm = nullptr;
-
-		imd->cm->imd = imd;
+		std::swap(imd->cm, source->cm);
 		}
 
 	image_loader_free(imd->read_ahead_il);
