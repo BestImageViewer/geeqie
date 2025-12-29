@@ -500,9 +500,8 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 		}
 
 
-	imd->color_profile_from_image = COLOR_PROFILE_NONE;
-
-	ColorManMemData profile = exif_get_color_profile(imd->image_fd, imd->color_profile_from_image);
+	ColorManProfileType color_profile_from_image = COLOR_PROFILE_NONE;
+	ColorManMemData profile = exif_get_color_profile(imd->image_fd, color_profile_from_image);
 
 	if (profile.ptr)
 		{
@@ -511,9 +510,9 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 			profile.ptr.reset();
 			}
 		}
-	else if (imd->color_profile_use_image && imd->color_profile_from_image != COLOR_PROFILE_NONE)
+	else if (imd->color_profile_use_image && color_profile_from_image != COLOR_PROFILE_NONE)
 		{
-		input_type = imd->color_profile_from_image;
+		input_type = color_profile_from_image;
 		input_file = nullptr;
 		}
 
@@ -2081,7 +2080,6 @@ ImageWindow *image_new(gboolean frame)
 	imd->unknown = TRUE;
 	imd->has_frame = -1; /* not initialized; for image_set_frame */
 	imd->state = IMAGE_STATE_NONE;
-	imd->color_profile_from_image = COLOR_PROFILE_NONE;
 	imd->orientation = 1;
 
 	imd->pr = GTK_WIDGET(pixbuf_renderer_new());

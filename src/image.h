@@ -119,7 +119,6 @@ struct ImageWindow
 	gboolean color_profile_enable;
 	gint color_profile_input;
 	gboolean color_profile_use_image;
-	ColorManProfileType color_profile_from_image;
 	ColorMan *cm;
 
 	FileData *read_ahead_fd;
