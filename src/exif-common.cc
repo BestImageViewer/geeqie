@@ -926,26 +926,26 @@ void exif_free_fd(FileData *fd, ExifData *exif)
 	g_assert(fd->exif == exif);
 }
 
-guchar *exif_get_color_profile(FileData *fd, guint &profile_len, ColorManProfileType &color_profile_from_image)
+ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_profile_from_image)
 {
 	color_profile_from_image = COLOR_PROFILE_NONE;
 
 	ExifData *exif = exif_read_fd(fd);
-	if (!exif) return nullptr;
+	if (!exif) return {};
 
-	guchar *profile = nullptr;
+	ColorManMemData profile{};
 
 	if (g_strcmp0(fd->format_name, "heif") == 0)
 		{
-		profile = heif_color_profile(fd->path, profile_len);
+		profile.ptr.reset(heif_color_profile(fd->path, profile.len));
 		}
 
-	if (!profile)
+	if (!profile.ptr)
 		{
-		profile = exif_get_color_profile(exif, &profile_len);
+		profile.ptr.reset(exif_get_color_profile(exif, &profile.len));
 		}
 
-	if (profile)
+	if (profile.ptr)
 		{
 		DEBUG_1("Found embedded color profile");
 		color_profile_from_image = COLOR_PROFILE_MEM;

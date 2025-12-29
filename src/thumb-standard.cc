@@ -361,8 +361,7 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf)
 	if (!options->thumbnails.use_color_management) return;
 
 	ColorManProfileType color_profile_from_image = COLOR_PROFILE_NONE;
-	ColorManMemData profile;
-	profile.ptr.reset(exif_get_color_profile(fd, profile.len, color_profile_from_image));
+	ColorManMemData profile = exif_get_color_profile(fd, color_profile_from_image);
 
 	if (color_profile_from_image == COLOR_PROFILE_NONE) return;
 

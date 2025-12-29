@@ -502,8 +502,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 
 	imd->color_profile_from_image = COLOR_PROFILE_NONE;
 
-	ColorManMemData profile;
-	profile.ptr.reset(exif_get_color_profile(imd->image_fd, profile.len, imd->color_profile_from_image));
+	ColorManMemData profile = exif_get_color_profile(imd->image_fd, imd->color_profile_from_image);
 
 	if (profile.ptr)
 		{
