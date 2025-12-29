@@ -368,24 +368,24 @@ void thumb_loader_std_calibrate_pixbuf(FileData *fd, GdkPixbuf *pixbuf)
 	// transform image, we always use sRGB as target for thumbnails
 	constexpr ColorManProfileType screen_type = COLOR_PROFILE_SRGB;
 
-	const gint sw = gdk_pixbuf_get_width(pixbuf);
-	const gint sh = gdk_pixbuf_get_height(pixbuf);
-
-	g_autoptr(ColorMan) cm = nullptr;
+	std::unique_ptr<ColorMan> cm = nullptr;
 	if (profile.ptr)
 		{
-		cm = color_man_new_embedded(pixbuf, profile,
-		                            screen_type, nullptr, {});
+		cm.reset(color_man_new_embedded(pixbuf, profile,
+		                                screen_type, nullptr, {}));
 		}
 	else
 		{
-		cm = color_man_new(pixbuf, COLOR_PROFILE_MEM, nullptr,
-		                   screen_type, nullptr, {});
+		cm.reset(color_man_new(pixbuf, COLOR_PROFILE_MEM, nullptr,
+		                       screen_type, nullptr, {}));
 		}
 
 	if(cm)
 		{
-		color_man_correct_region(cm, pixbuf, {0, 0, sw, sh});
+		const gint sw = gdk_pixbuf_get_width(pixbuf);
+		const gint sh = gdk_pixbuf_get_height(pixbuf);
+
+		color_man_correct_region(cm.get(), pixbuf, {0, 0, sw, sh});
 		}
 }
 
