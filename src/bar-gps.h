@@ -25,8 +25,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *map_id, gint zoom,
-			gdouble latitude, gdouble longitude, gboolean expanded, gint height);
 GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gchar **attribute_values);
 void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values);
 

@@ -270,7 +270,7 @@ if conf_data.get('HAVE_JPEGXL', 0) == 1
     )
 endif
 
-if conf_data.get('HAVE_LIBCHAMPLAIN', 0) == 1 and conf_data.get('HAVE_LIBCHAMPLAIN_GTK', 0) == 1
+if (conf_data.get('HAVE_LIBCHAMPLAIN', 0) == 1 and conf_data.get('HAVE_LIBCHAMPLAIN_GTK', 0) == 1) or conf_data.get('HAVE_LIBSHUMATE', 0) == 1
     main_sources += files(
         'bar-gps.cc',
         'bar-gps.h',
