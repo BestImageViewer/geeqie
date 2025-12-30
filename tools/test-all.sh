@@ -30,7 +30,6 @@ meson setup \
 -Dcms=disabled \
 -Ddoxygen=disabled \
 -Ddjvu=disabled \
--Devince=disabled \
 -Dexecinfo=disabled \
 -Dexiv2=disabled \
 -Dexr=disabled \

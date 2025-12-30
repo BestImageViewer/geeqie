@@ -229,18 +229,6 @@ else
     summary({'djvu' : ['disabled - djvu files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
-option = get_option('evince')
-if not option.disabled()
-    evince = find_program('evince', required : false)
-    if evince.found()
-        summary({'print preview' : ['print preview supported:', true]}, section : 'Configuration', bool_yn : true)
-    else
-        summary({'print preview' : ['evince not found - print preview supported:', false]}, section : 'Configuration', bool_yn : true)
-    endif
-else
-    summary({'print preview' : ['disabled - print preview supported:', false]}, section : 'Configuration', bool_yn : true)
-endif
-
 # Required only for seg. fault stacktrace and backtrace debugging
 conf_data.set('HAVE_EXECINFO_H', 0)
 option = get_option('execinfo')

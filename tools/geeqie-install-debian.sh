@@ -42,8 +42,6 @@ optional_array="LCMS (for color management)
 liblcms2-dev
 exiv2 (for exif handling)
 libgexiv2-dev
-evince (for print preview)
-evince
 lua (for lua commands)
 liblua5.3-dev
 libffmpegthumbnailer (for mpeg thumbnails)

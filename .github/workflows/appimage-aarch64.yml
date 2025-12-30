@@ -21,7 +21,6 @@ jobs:
             yes | sudo apt-get update
             yes | sudo apt-get install build-essential
             yes | sudo apt-get install curl
-            yes | sudo apt-get install evince
             yes | sudo apt-get install gettext
             yes | sudo apt-get install git
             yes | sudo apt-get install libarchive-dev

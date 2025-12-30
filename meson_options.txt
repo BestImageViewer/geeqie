@@ -16,7 +16,6 @@ option('archive', type : 'feature', value : 'auto', description : 'archive files
 option('cms', type : 'feature', value : 'auto', description : 'color management system')
 option('doxygen', type : 'feature', value : 'auto', description : 'lua api help file')
 option('djvu', type : 'feature', value : 'auto', description : 'djvu')
-option('evince', type : 'feature', value : 'auto', description : 'print preview')
 option('execinfo', type : 'feature', value : 'auto', description : 'execinfo.h')
 option('exiv2', type : 'feature', value : 'auto', description : 'exiv2')
 option('exr', type : 'feature', value : 'auto', description : 'exr')

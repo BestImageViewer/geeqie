@@ -16,7 +16,6 @@ jobs:
           apt install -y build-essential
           apt install -y curl
           apt install -y docbook-xsl
-          apt install -y evince
           apt install -y file
           apt install -y fop
           apt install -y fuse

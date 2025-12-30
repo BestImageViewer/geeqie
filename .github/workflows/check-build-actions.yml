@@ -44,7 +44,6 @@ jobs:
           -Dcms=disabled
           -Ddjvu=disabled
           -Ddoxygen=disabled
-          -Devince=disabled
           -Dexecinfo=disabled
           -Dexiv2=disabled
           -Dexr=disabled
@@ -105,7 +104,6 @@ jobs:
           -Dcms=disabled
           -Ddjvu=disabled
           -Ddoxygen=disabled
-          -Devince=disabled
           -Dexecinfo=disabled
           -Dexiv2=disabled
           -Dexr=disabled
@@ -149,7 +147,6 @@ jobs:
     - run: sudo apt-get install clang-tidy
     - run: sudo apt-get install desktop-file-utils
     - run: sudo apt-get install docbook-xsl
-    - run: sudo apt-get install evince
     - run: sudo apt-get install fop
     - run: sudo apt-get install gettext
     - run: sudo apt-get install libarchive-dev
@@ -212,7 +209,6 @@ jobs:
     - run: sudo apt-get install clang-tidy
     - run: sudo apt-get install desktop-file-utils
     - run: sudo apt-get install docbook-xsl
-    - run: sudo apt-get install evince
     - run: sudo apt-get install fop
     - run: sudo apt-get install gettext
     - run: sudo apt-get install libarchive-dev
