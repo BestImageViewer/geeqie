@@ -820,22 +820,17 @@ ExifFormattedText ExifFormattedList[] = {
 	{ nullptr, nullptr, nullptr }
 };
 
-gchar *exif_get_formatted_by_key(ExifData *exif, const gchar *key, gboolean *key_valid)
+std::optional<gchar *> exif_get_formatted_by_key(ExifData *exif, const gchar *key)
 {
-	if (strncmp(key, EXIF_FORMATTED(), EXIF_FORMATTED_LEN) == 0)
-		{
-		gint i;
+	if (strncmp(key, EXIF_FORMATTED(), EXIF_FORMATTED_LEN) != 0) return {};
 
-		if (key_valid) *key_valid = TRUE;
+	key += EXIF_FORMATTED_LEN;
 
-		key += EXIF_FORMATTED_LEN;
-		for (i = 0; ExifFormattedList[i].key; i++)
-			if (ExifFormattedList[i].build_func && strcmp(key, ExifFormattedList[i].key + EXIF_FORMATTED_LEN) == 0)
-				return ExifFormattedList[i].build_func(exif);
-		}
+	for (gint i = 0; ExifFormattedList[i].key; i++)
+		if (ExifFormattedList[i].build_func && strcmp(key, ExifFormattedList[i].key + EXIF_FORMATTED_LEN) == 0)
+			return ExifFormattedList[i].build_func(exif);
 
-	if (key_valid) *key_valid = FALSE;
-	return nullptr;
+	return {};
 }
 
 gchar *exif_get_description_by_key(const gchar *key)
@@ -872,16 +867,11 @@ ExifRational *exif_get_rational(ExifData *exif, const gchar *key, gint *sign)
 
 gchar *exif_get_data_as_text(ExifData *exif, const gchar *key)
 {
-	ExifItem *item;
-	gchar *text;
-	gboolean key_valid;
-
 	if (!key) return nullptr;
 
-	text = exif_get_formatted_by_key(exif, key, &key_valid);
-	if (key_valid) return text;
+	if (auto text = exif_get_formatted_by_key(exif, key); text.has_value()) return text.value();
 
-	item = exif_get_item(exif, key);
+	ExifItem *item = exif_get_item(exif, key);
 	if (item) return exif_item_get_data_as_text(item, exif);
 
 	return nullptr;

@@ -1535,12 +1535,11 @@ void exif_write_data_list(ExifData *exif, FILE *f, gint human_readable_list)
 		i = 0;
 		while (ExifFormattedList[i].key)
 			{
-			gchar *text;
-
-			text = exif_get_formatted_by_key(exif, ExifFormattedList[i].key, nullptr);
-			if (text)
+			auto text = exif_get_formatted_by_key(exif, ExifFormattedList[i].key);
+			if (text && text.value())
 				{
-				g_fprintf(f, "     %9s %30s %s\n", "string", ExifFormattedList[i].key, text);
+				g_autofree gchar *value = text.value();
+				g_fprintf(f, "     %9s %30s %s\n", "string", ExifFormattedList[i].key, value);
 				}
 			i++;
 			}
@@ -1593,10 +1592,8 @@ GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format
 
 	if (format == METADATA_FORMATTED)
 		{
-		gchar *text;
-		gint key_valid;
-		text = exif_get_formatted_by_key(exif, key, &key_valid);
-		if (key_valid) return g_list_append(nullptr, text);
+		auto text = exif_get_formatted_by_key(exif, key);
+		if (text) return g_list_append(nullptr, text.value());
 		}
 
 	item = exif_get_item(exif, key);

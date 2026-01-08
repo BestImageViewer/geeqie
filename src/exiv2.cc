@@ -965,10 +965,8 @@ GList *exif_get_metadata(ExifData *exif, const gchar *key, MetadataFormat format
 
 	if (format == METADATA_FORMATTED)
 		{
-		gchar *text;
-		gint key_valid;
-		text = exif_get_formatted_by_key(exif, key, &key_valid);
-		if (key_valid) return g_list_append(nullptr, text);
+		auto text = exif_get_formatted_by_key(exif, key);
+		if (text) return g_list_append(nullptr, text.value());
 		}
 
 	list = exif_get_metadata_simple(exif, key, format);
