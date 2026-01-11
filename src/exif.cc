@@ -1521,7 +1521,7 @@ static void exif_write_item(FILE *f, ExifItem *item, ExifData *exif)
 /**
  * @brief Usually for debugging to stdout
  */
-void exif_write_data_list(ExifData *exif, FILE *f, gint human_readable_list)
+void exif_write_data_list(ExifData *exif, FILE *f, bool human_readable_list)
 {
 	if (!f || !exif) return;
 
@@ -1530,19 +1530,13 @@ void exif_write_data_list(ExifData *exif, FILE *f, gint human_readable_list)
 
 	if (human_readable_list)
 		{
-		gint i;
-
-		i = 0;
-		while (ExifFormattedList[i].key)
-			{
-			auto text = exif_get_formatted_by_key(exif, ExifFormattedList[i].key);
-			if (text && text.value())
-				{
-				g_autofree gchar *value = text.value();
-				g_fprintf(f, "     %9s %30s %s\n", "string", ExifFormattedList[i].key, value);
-				}
-			i++;
-			}
+		static const auto print_formatted = [](gpointer key, gpointer value, gpointer data)
+		{
+			g_fprintf(static_cast<FILE *>(data), "     %9s %30s %s\n",
+			          "string", static_cast<gchar *>(key), static_cast<gchar *>(value));
+		};
+		g_autoptr(GHashTable) formatted = exif_get_formatted(exif);
+		g_hash_table_foreach(formatted, print_formatted, f);
 		}
 	else
 		{

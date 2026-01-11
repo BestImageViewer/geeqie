@@ -51,11 +51,17 @@
 #include "third-party/zonedetect.h"
 #include "ui-fileops.h"
 
-struct ExifData;
-struct ExifItem;
-struct FileCacheData;
-struct ZoneDetect;
+namespace
+{
 
+struct ExifFormattedText
+{
+	const gchar *key;
+	const gchar *description;
+	gchar *(*build_func)(ExifData *exif);
+};
+
+} // namespace
 
 static gdouble exif_rational_to_double(ExifRational *r, gint sign)
 {
@@ -784,9 +790,12 @@ static gchar *exif_build_formatted_star_rating(ExifData *exif)
 }
 
 /* List of custom formatted pseudo-exif tags */
+#define EXIF_FORMATTED() "formatted."
+#define EXIF_FORMATTED_LEN (sizeof(EXIF_FORMATTED()) - 1)
 #define EXIF_FORMATTED_TAG(name, label) { EXIF_FORMATTED()#name, label, exif_build_formatted##_##name }
 
-ExifFormattedText ExifFormattedList[] = {
+/**< the list of specially formatted keys, for human readable output */
+static const ExifFormattedText ExifFormattedList[] = {
 	EXIF_FORMATTED_TAG(Camera,		N_("Camera")),
 	EXIF_FORMATTED_TAG(DateTime,		N_("Date")),
 	EXIF_FORMATTED_TAG(DateTimeDigitized,	N_("DateDigitized")),
@@ -817,8 +826,23 @@ ExifFormattedText ExifFormattedList[] = {
 	{"file.class",				N_("File class"), 	nullptr},
 	{"file.page_no",			N_("Page no."), 	nullptr},
 	{"lua.lensID",				N_("Lens"), 		nullptr},
-	{ nullptr, nullptr, nullptr }
 };
+
+GHashTable *exif_get_formatted(ExifData *exif)
+{
+	GHashTable *formatted = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, g_free);
+
+	for (const auto &eft : ExifFormattedList)
+		{
+		auto text = exif_get_formatted_by_key(exif, eft.key);
+		if (text && text.value())
+			{
+			g_hash_table_insert(formatted, const_cast<gchar *>(eft.key), text.value());
+			}
+		}
+
+	return formatted;
+}
 
 std::optional<gchar *> exif_get_formatted_by_key(ExifData *exif, const gchar *key)
 {
@@ -826,9 +850,9 @@ std::optional<gchar *> exif_get_formatted_by_key(ExifData *exif, const gchar *ke
 
 	key += EXIF_FORMATTED_LEN;
 
-	for (gint i = 0; ExifFormattedList[i].key; i++)
-		if (ExifFormattedList[i].build_func && strcmp(key, ExifFormattedList[i].key + EXIF_FORMATTED_LEN) == 0)
-			return ExifFormattedList[i].build_func(exif);
+	for (const auto &eft : ExifFormattedList)
+		if (eft.build_func && strcmp(key, eft.key + EXIF_FORMATTED_LEN) == 0)
+			return eft.build_func(exif);
 
 	return {};
 }
@@ -839,11 +863,9 @@ gchar *exif_get_description_by_key(const gchar *key)
 
 	if (strncmp(key, EXIF_FORMATTED(), EXIF_FORMATTED_LEN) == 0 || strncmp(key, "file.", 5) == 0 || strncmp(key, "lua.", 4) == 0)
 		{
-		gint i;
-
-		for (i = 0; ExifFormattedList[i].key; i++)
-			if (strcmp(key, ExifFormattedList[i].key) == 0)
-				return g_strdup(_(ExifFormattedList[i].description));
+		for (const auto &eft : ExifFormattedList)
+			if (strcmp(key, eft.key) == 0)
+				return g_strdup(_(eft.description));
 		}
 
 	return exif_get_tag_description_by_key(key);

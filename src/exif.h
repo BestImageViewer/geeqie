@@ -34,9 +34,6 @@ struct ExifData;
 struct ExifItem;
 class FileData;
 
-#define EXIF_FORMATTED() "formatted."
-#define EXIF_FORMATTED_LEN (sizeof(EXIF_FORMATTED()) - 1)
-
 /*
  *-----------------------------------------------------------------------------
  * Tag formats
@@ -89,21 +86,6 @@ enum ExifOrientationType {
 	EXIF_ORIENTATION_LEFT_BOTTOM	= 8
 };
 
-struct ExifFormattedText
-{
-	const gchar *key;
-	const gchar *description;
-	gchar *(*build_func)(ExifData *exif);
-};
-
-/*
- *-----------------------------------------------------------------------------
- * Data
- *-----------------------------------------------------------------------------
- */
-
-extern ExifFormattedText ExifFormattedList[]; /**< the list of specially formatted keys, for human readable output */
-
 /*
  *-----------------------------------------------------------------------------
  * functions
@@ -150,6 +132,7 @@ gchar *exif_item_get_string(ExifItem *item, gint idx);
 gchar *exif_get_description_by_key(const gchar *key);
 gchar *exif_get_tag_description_by_key(const gchar *key);
 
+GHashTable *exif_get_formatted(ExifData *exif);
 std::optional<gchar *> exif_get_formatted_by_key(ExifData *exif, const gchar *key);
 
 gint exif_update_metadata(ExifData *exif, const gchar *key, const GList *values);
