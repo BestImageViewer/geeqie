@@ -624,49 +624,15 @@ char *exif_item_get_description(ExifItem *item)
 	}
 }
 
-guint exif_item_get_format_id(ExifItem *item)
+static Exiv2::TypeId exif_item_get_type_id(ExifItem *item)
 {
-	/*
-	invalidTypeId, unsignedByte, asciiString, unsignedShort,
-	  unsignedLong, unsignedRational, signedByte, undefined,
-	  signedShort, signedLong, signedRational, string,
-	  date, time, comment, directory,
-	  xmpText, xmpAlt, xmpBag, xmpSeq,
-	  langAlt, lastTypeId
-	*/
-	static constexpr std::array<guint, 19> format_id_trans_tbl{
-		EXIF_FORMAT_UNKNOWN,
-		EXIF_FORMAT_BYTE_UNSIGNED,
-		EXIF_FORMAT_STRING,
-		EXIF_FORMAT_SHORT_UNSIGNED,
-		EXIF_FORMAT_LONG_UNSIGNED,
-		EXIF_FORMAT_RATIONAL_UNSIGNED,
-		EXIF_FORMAT_BYTE,
-		EXIF_FORMAT_UNDEFINED,
-		EXIF_FORMAT_SHORT,
-		EXIF_FORMAT_LONG,
-		EXIF_FORMAT_RATIONAL,
-		EXIF_FORMAT_STRING,
-		EXIF_FORMAT_STRING,
-		EXIF_FORMAT_STRING,
-		EXIF_FORMAT_UNDEFINED,
-		EXIF_FORMAT_STRING,
-		EXIF_FORMAT_STRING,
-		EXIF_FORMAT_STRING,
-		EXIF_FORMAT_STRING
-	};
-
 	try {
-		if (!item) return EXIF_FORMAT_UNKNOWN;
-		guint id = (reinterpret_cast<Exiv2::Metadatum *>(item))->typeId();
-		return format_id_trans_tbl.at(id);
+		if (!item) return Exiv2::invalidTypeId;
+		return (reinterpret_cast<Exiv2::Metadatum *>(item))->typeId();
 	}
 	catch (Exiv2::AnyError &e) {
 		debug_exception(e);
-		return EXIF_FORMAT_UNKNOWN;
-	}
-	catch (const std::out_of_range &) {
-		return EXIF_FORMAT_UNKNOWN;
+		return Exiv2::invalidTypeId;
 	}
 }
 
@@ -993,7 +959,10 @@ guchar *exif_get_color_profile(ExifData *exif, guint *data_len)
 	if (ret) return ret;
 
 	ExifItem *prof_item = exif_get_item(exif, "Exif.Image.InterColorProfile");
-	if (prof_item && exif_item_get_format_id(prof_item) == EXIF_FORMAT_UNDEFINED)
+	if (!prof_item) return nullptr;
+
+	const Exiv2::TypeId type_id = exif_item_get_type_id(prof_item);
+	if (type_id == Exiv2::undefined || type_id == Exiv2::comment) // comment is stored as undefined
 		ret = reinterpret_cast<guchar *>(exif_item_get_data(prof_item, data_len));
 	return ret;
 }

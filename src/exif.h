@@ -34,30 +34,6 @@ struct ExifData;
 struct ExifItem;
 class FileData;
 
-/*
- *-----------------------------------------------------------------------------
- * Tag formats
- *-----------------------------------------------------------------------------
- */
-
-#define EXIF_FORMAT_COUNT 13
-
-enum ExifFormatType {
-	EXIF_FORMAT_UNKNOWN		= 0,
-	EXIF_FORMAT_BYTE_UNSIGNED	= 1,
-	EXIF_FORMAT_STRING		= 2,
-	EXIF_FORMAT_SHORT_UNSIGNED	= 3,
-	EXIF_FORMAT_LONG_UNSIGNED	= 4,
-	EXIF_FORMAT_RATIONAL_UNSIGNED	= 5,
-	EXIF_FORMAT_BYTE		= 6,
-	EXIF_FORMAT_UNDEFINED		= 7,
-	EXIF_FORMAT_SHORT		= 8,
-	EXIF_FORMAT_LONG		= 9,
-	EXIF_FORMAT_RATIONAL		= 10,
-	EXIF_FORMAT_FLOAT		= 11,
-	EXIF_FORMAT_DOUBLE		= 12
-};
-
 
 /*
  *-----------------------------------------------------------------------------
@@ -121,7 +97,6 @@ guint exif_item_get_tag_id(ExifItem *item);
 guint exif_item_get_elements(ExifItem *item);
 gchar *exif_item_get_data(ExifItem *item, guint *data_len);
 gchar *exif_item_get_description(ExifItem *item);
-guint exif_item_get_format_id(ExifItem *item);
 const gchar *exif_item_get_format_name(ExifItem *item, gboolean brief);
 gchar *exif_item_get_data_as_text(ExifItem *item, ExifData *exif);
 gint exif_item_get_integer(ExifItem *item, gint *value);

@@ -599,7 +599,7 @@ gchar *exif_item_get_data(ExifItem *item, guint *data_len)
 #endif
 }
 
-guint exif_item_get_format_id(ExifItem *item)
+static guint exif_item_get_format_id(ExifItem *item)
 {
 	if (!item) return EXIF_FORMAT_UNKNOWN;
 	return item->format;
