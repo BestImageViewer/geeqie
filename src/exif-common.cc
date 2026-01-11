@@ -61,9 +61,7 @@ struct ExifFormattedText
 	gchar *(*build_func)(ExifData *exif);
 };
 
-} // namespace
-
-static gdouble exif_rational_to_double(ExifRational *r, gint sign)
+gdouble exif_rational_to_double(const ExifRational *r, bool sign)
 {
 	if (!r || r->den == 0.0) return 0.0;
 
@@ -71,14 +69,15 @@ static gdouble exif_rational_to_double(ExifRational *r, gint sign)
 	return static_cast<gdouble>(r->num) / r->den;
 }
 
-static gdouble exif_get_rational_as_double(ExifData *exif, const gchar *key)
+gdouble exif_get_rational_as_double(ExifData *exif, const gchar *key)
 {
-	ExifRational *r;
-	gint sign;
+	bool sign;
+	ExifRational *r = exif_get_rational(exif, key, &sign);
 
-	r = exif_get_rational(exif, key, &sign);
 	return exif_rational_to_double(r, sign);
 }
+
+} // namespace
 
 static gchar *remove_common_prefix(gchar *s, gchar *t)
 {
@@ -257,17 +256,18 @@ static gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
 {
 	ExifRational *r;
 
-	r = exif_get_rational(exif, "Exif.Photo.ExposureTime", nullptr);
+	r = exif_get_rational(exif, "Exif.Photo.ExposureTime");
 	if (r && r->num && r->den)
 		{
 		gdouble n = static_cast<gdouble>(r->den) / static_cast<gdouble>(r->num);
 		return g_strdup_printf("%s%.0fs", n > 1.0 ? "1/" : "",
 						  n > 1.0 ? n : 1.0 / n);
 		}
-	r = exif_get_rational(exif, "Exif.Photo.ShutterSpeedValue", nullptr);
+
+	r = exif_get_rational(exif, "Exif.Photo.ShutterSpeedValue");
 	if (r && r->num  && r->den)
 		{
-		gdouble n = pow(2.0, exif_rational_to_double(r, TRUE));
+		gdouble n = pow(2.0, exif_rational_to_double(r, true));
 
 		/* Correct exposure time to avoid values like 1/91s (seen on Minolta DImage 7) */
 		if (n > 1.0 && static_cast<gint>(n) - (static_cast<gint>(n/10))*10 == 1) n--;
@@ -291,14 +291,11 @@ static gchar *exif_build_formatted_Aperture(ExifData *exif)
 
 static gchar *exif_build_formatted_ExposureBias(ExifData *exif)
 {
-	ExifRational *r;
-	gint sign;
-	gdouble n;
-
-	r = exif_get_rational(exif, "Exif.Photo.ExposureBiasValue", &sign);
+	bool sign;
+	ExifRational *r = exif_get_rational(exif, "Exif.Photo.ExposureBiasValue", &sign);
 	if (!r) return nullptr;
 
-	n = exif_rational_to_double(r, sign);
+	gdouble n = exif_rational_to_double(r, sign);
 	return g_strdup_printf("%+.1f", n);
 }
 
@@ -345,18 +342,16 @@ static gchar *exif_build_formatted_ISOSpeedRating(ExifData *exif)
 
 static gchar *exif_build_formatted_SubjectDistance(ExifData *exif)
 {
-	ExifRational *r;
-	gint sign;
-	gdouble n;
-
-	r = exif_get_rational(exif, "Exif.Photo.SubjectDistance", &sign);
+	bool sign;
+	ExifRational *r = exif_get_rational(exif, "Exif.Photo.SubjectDistance", &sign);
 	if (!r) return nullptr;
 
 	if (static_cast<glong>(r->num) == static_cast<glong>(0xffffffff)) return g_strdup(_("infinity"));
 	if (static_cast<glong>(r->num) == 0) return g_strdup(_("unknown"));
 
-	n = exif_rational_to_double(r, sign);
+	gdouble n = exif_rational_to_double(r, sign);
 	if (n == 0.0) return _("unknown");
+
 	return g_strdup_printf("%.3f m", n);
 }
 
@@ -411,11 +406,8 @@ static gchar *exif_build_formatted_Flash(ExifData *exif)
 
 static gchar *exif_build_formatted_Resolution(ExifData *exif)
 {
-	ExifRational *rx;
-	ExifRational *ry;
-
-	rx = exif_get_rational(exif, "Exif.Image.XResolution", nullptr);
-	ry = exif_get_rational(exif, "Exif.Image.YResolution", nullptr);
+	ExifRational *rx = exif_get_rational(exif, "Exif.Image.XResolution");
+	ExifRational *ry = exif_get_rational(exif, "Exif.Image.YResolution");
 	if (!rx || !ry) return nullptr;
 
 	g_autofree gchar *units = exif_get_data_as_text(exif, "Exif.Image.ResolutionUnit");
@@ -480,7 +472,7 @@ static gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 		gdouble p = 0;
 		for (guint i = 0, elements = exif_item_get_elements(item); i < elements; i++)
 			{
-			ExifRational *value = exif_item_get_rational(item, nullptr, i);
+			ExifRational *value = exif_item_get_rational(item, i);
 			if (value && value->num && value->den)
 				p += static_cast<gdouble>(value->num) / static_cast<gdouble>(value->den) / pow(60.0, static_cast<gdouble>(i));
 			}
@@ -503,17 +495,15 @@ static gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 
 static gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
 {
-	ExifRational *r;
-	ExifItem *item;
-	gdouble alt;
+	ExifItem *item = exif_get_item(exif, "Exif.GPSInfo.GPSAltitudeRef");
+	if (!item) return nullptr;
+
+	ExifRational *r = exif_get_rational(exif, "Exif.GPSInfo.GPSAltitude");
+	if (!r) return nullptr;
+
+	gdouble alt = exif_rational_to_double(r, false);
+
 	gint ref;
-
-	item = exif_get_item(exif, "Exif.GPSInfo.GPSAltitudeRef");
-	r = exif_get_rational(exif, "Exif.GPSInfo.GPSAltitude", nullptr);
-
-	if (!r || !item) return nullptr;
-
-	alt = exif_rational_to_double(r, 0);
 	exif_item_get_integer(item, &ref);
 
 	return g_strdup_printf("%0.f m %s", alt, (ref==0)?_("Above Sea Level"):_("Below Sea Level"));
@@ -879,12 +869,12 @@ gint exif_get_integer(ExifData *exif, const gchar *key, gint *value)
 	return exif_item_get_integer(item, value);
 }
 
-ExifRational *exif_get_rational(ExifData *exif, const gchar *key, gint *sign)
+ExifRational *exif_get_rational(ExifData *exif, const gchar *key, bool *sign)
 {
 	ExifItem *item;
 
 	item = exif_get_item(exif, key);
-	return exif_item_get_rational(item, sign, 0);
+	return exif_item_get_rational(item, 0, sign);
 }
 
 gchar *exif_get_data_as_text(ExifData *exif, const gchar *key)

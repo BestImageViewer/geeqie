@@ -85,7 +85,7 @@ void exif_free(ExifData *exif);
 
 gchar *exif_get_data_as_text(ExifData *exif, const gchar *key);
 gint exif_get_integer(ExifData *exif, const gchar *key, gint *value);
-ExifRational *exif_get_rational(ExifData *exif, const gchar *key, gint *sign);
+ExifRational *exif_get_rational(ExifData *exif, const gchar *key, bool *sign = nullptr);
 
 ExifItem *exif_get_item(ExifData *exif, const gchar *key);
 ExifItem *exif_get_first_item(ExifData *exif);
@@ -100,7 +100,7 @@ gchar *exif_item_get_description(ExifItem *item);
 const gchar *exif_item_get_format_name(ExifItem *item, gboolean brief);
 gchar *exif_item_get_data_as_text(ExifItem *item, ExifData *exif);
 gint exif_item_get_integer(ExifItem *item, gint *value);
-ExifRational *exif_item_get_rational(ExifItem *item, gint *sign, guint n);
+ExifRational *exif_item_get_rational(ExifItem *item, guint n, bool *sign = nullptr);
 
 gchar *exif_item_get_string(ExifItem *item, gint idx);
 

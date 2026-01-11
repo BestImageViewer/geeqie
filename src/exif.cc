@@ -1470,7 +1470,7 @@ gint exif_item_get_integer(ExifItem *item, gint *value)
 }
 
 
-ExifRational *exif_item_get_rational(ExifItem *item, gint *sign, guint n)
+ExifRational *exif_item_get_rational(ExifItem *item, guint n, bool *sign)
 {
 	if (!item) return nullptr;
 	if (n >= item->elements) return nullptr;
