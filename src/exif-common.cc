@@ -34,6 +34,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <numeric>
 
 #include <glib.h>
 
@@ -997,13 +998,16 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 
 /* embedded icc in jpeg */
 
-gboolean exif_jpeg_parse_color(ExifData *exif, guchar *data, guint size)
+bool exif_jpeg_parse_color(ExifData *exif, guchar *data, guint size)
 {
-	guint seg_offset = 0;
-	guint seg_length = 0;
-	guint chunk_offset[255];
-	guint chunk_length[255];
-	guint chunk_count = 0;
+	struct Chunk
+	{
+		guint offset = 0;
+		guint length = 0;
+	};
+
+	std::vector<Chunk> chunks;
+	chunks.reserve(255);
 
 	/* For jpeg/jfif, ICC color profile data can be in more than one segment.
 	   the data is in APP2 data segments that start with "ICC_PROFILE\x00\xNN\xTT"
@@ -1011,64 +1015,54 @@ gboolean exif_jpeg_parse_color(ExifData *exif, guchar *data, guint size)
 	   TT = total number of ICC segments (TT in each ICC segment should match)
 	 */
 
+	guint seg_offset = 0;
+	guint seg_length = 0;
 	while (jpeg_segment_find(data + seg_offset + seg_length,
 	                         size - seg_offset - seg_length,
 	                         JPEG_MARKER_APP2,
 	                         "ICC_PROFILE\x00", 12,
 	                         seg_offset, seg_length))
 		{
-		guchar chunk_num;
-		guchar chunk_tot;
+		if (seg_length < 14) return false;
 
-		if (seg_length < 14) return FALSE;
+		const guchar chunk_num = data[seg_offset + 12];
+		const guchar chunk_tot = data[seg_offset + 13];
 
-		chunk_num = data[seg_offset + 12];
-		chunk_tot = data[seg_offset + 13];
+		if (chunk_num == 0 || chunk_tot == 0) return false;
 
-		if (chunk_num == 0 || chunk_tot == 0) return FALSE;
-
-		if (chunk_count == 0)
+		if (chunks.empty())
 			{
-			guint i;
-
-			chunk_count = static_cast<guint>(chunk_tot);
-			for (i = 0; i < chunk_count; i++) chunk_offset[i] = 0;
-			for (i = 0; i < chunk_count; i++) chunk_length[i] = 0;
+			chunks.resize(chunk_tot);
 			}
 
-		if (chunk_tot != chunk_count ||
-		    chunk_num > chunk_count) return FALSE;
+		if (chunk_tot != chunks.size() ||
+		    chunk_num > chunks.size()) return false;
 
-		chunk_num--;
-		chunk_offset[chunk_num] = seg_offset + 14;
-		chunk_length[chunk_num] = seg_length - 14;
+		chunks[chunk_num - 1] = { seg_offset + 14, seg_length - 14 };
 		}
 
-	if (chunk_count > 0)
+	if (chunks.empty()) return false;
+
+	const guint cp_length = std::accumulate(chunks.cbegin(), chunks.cend(), 0,
+	                                        [](guint len, const Chunk &chunk){ return len + chunk.length; });
+	g_autofree auto *cp_data = static_cast<guchar *>(g_malloc(cp_length));
+
+	for (const Chunk &chunk : chunks)
 		{
-		guint cp_length = 0;
-		guint i;
-
-		for (i = 0; i < chunk_count; i++) cp_length += chunk_length[i];
-
-		g_autofree auto *cp_data = static_cast<guchar *>(g_malloc(cp_length));
-
-		for (i = 0; i < chunk_count; i++)
+		if (chunk.offset == 0)
 			{
-			if (chunk_offset[i] == 0)
-				{
-				/* error, we never saw this chunk */
-				return FALSE;
-				}
-			memcpy(cp_data, data + chunk_offset[i], chunk_length[i]);
+			/* error, we never saw this chunk */
+			return false;
 			}
-		DEBUG_1("Found embedded icc profile in jpeg");
-		exif_add_jpeg_color_profile(exif, g_steal_pointer(&cp_data), cp_length);
 
-		return TRUE;
+		// @fixme Each chunk overwrites cp_data from start. Is it intended?
+		memcpy(cp_data, data + chunk.offset, chunk.length);
 		}
 
-	return FALSE;
+	DEBUG_1("Found embedded icc profile in jpeg");
+	exif_add_jpeg_color_profile(exif, g_steal_pointer(&cp_data), cp_length);
+
+	return true;
 }
 
 /*

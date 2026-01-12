@@ -121,7 +121,7 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 void exif_add_jpeg_color_profile(ExifData *exif, guchar *cp_data, guint cp_length);
 
 
-gboolean exif_jpeg_parse_color(ExifData *exif, guchar *data, guint size);
+bool exif_jpeg_parse_color(ExifData *exif, guchar *data, guint size);
 
 /* support for so called "jpeg comment" */
 gchar* exif_get_image_comment(FileData* fd);
