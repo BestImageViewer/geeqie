@@ -62,7 +62,9 @@
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
-#include "glua.h"
+#if HAVE_LUA
+#  include "glua.h"
+#endif
 #include "histogram.h"
 #include "history-list.h"
 #include "image.h"

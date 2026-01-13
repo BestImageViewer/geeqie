@@ -38,7 +38,9 @@
 #include "compat.h"
 #include "dnd.h"
 #include "exif.h"
-#include "glua.h"
+#if HAVE_LUA
+#  include "glua.h"
+#endif
 #include "intl.h"
 #include "metadata.h"
 #include "ui-fileops.h"

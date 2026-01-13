@@ -44,7 +44,9 @@
 #include "filecache.h"
 #include "filedata.h"
 #include "filefilter.h"
-#include "glua.h"
+#if HAVE_LUA
+#  include "glua.h"
+#endif
 #include "intl.h"
 #include "jpeg-parser.h"
 #include "main-defines.h"

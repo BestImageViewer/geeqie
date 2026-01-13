@@ -35,7 +35,9 @@
 #include "filedata.h"
 #include "filefilter.h"
 #include "geometry.h"
-#include "glua.h"
+#if HAVE_LUA
+#  include "glua.h"
+#endif
 #include "image.h"
 #include "img-view.h"
 #include "intl.h"
