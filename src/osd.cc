@@ -300,7 +300,7 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 	gq_gtk_container_add(scrolled, viewport);
 	gtk_widget_show(viewport);
 
-	const gint entries = G_N_ELEMENTS(predefined_tags);
+	constexpr gint entries = std::size(predefined_tags);
 	const gint max_rows = ceil(static_cast<gdouble>(entries) / max_cols);
 
 	auto *grid = GTK_GRID(gtk_grid_new());

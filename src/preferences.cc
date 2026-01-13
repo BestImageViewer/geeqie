@@ -849,7 +849,7 @@ static void thumb_size_menu_cb(GtkWidget *combo, gpointer)
 	n = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
 	if (n < 0) return;
 
-	if (static_cast<guint>(n) < G_N_ELEMENTS(thumb_size_list))
+	if (static_cast<guint>(n) < std::size(thumb_size_list))
 		{
 		c_options->thumbnails.max_width = thumb_size_list[n].width;
 		c_options->thumbnails.max_height = thumb_size_list[n].height;
@@ -864,8 +864,6 @@ static void thumb_size_menu_cb(GtkWidget *combo, gpointer)
 static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, gchar *text)
 {
 	GtkWidget *combo;
-	gint current;
-	gint i;
 
 	c_options->thumbnails.max_width = options->thumbnails.max_width;
 	c_options->thumbnails.max_height = options->thumbnails.max_height;
@@ -874,8 +872,8 @@ static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, gchar *
 
 	combo = gtk_combo_box_text_new();
 
-	current = -1;
-	for (i = 0; static_cast<guint>(i) < G_N_ELEMENTS(thumb_size_list); i++)
+	gint current = -1;
+	for (size_t i = 0; i < std::size(thumb_size_list); i++)
 		{
 		const int w = thumb_size_list[i].width;
 		const int h = thumb_size_list[i].height;
@@ -891,7 +889,7 @@ static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, gchar *
 		g_autofree gchar *buf = g_strdup_printf("%s %d x %d", _("Custom"), options->thumbnails.max_width, options->thumbnails.max_height);
 		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), buf);
 
-		current = i;
+		current = std::size(thumb_size_list);
 		}
 
 	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);

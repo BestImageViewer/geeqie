@@ -69,7 +69,7 @@ constexpr LayoutStyle layout_config_styles[] = {
 	{ LAYOUT_TOP, static_cast<LayoutLocation>(LAYOUT_LEFT | LAYOUT_BOTTOM), static_cast<LayoutLocation>(LAYOUT_RIGHT | LAYOUT_BOTTOM) }
 };
 
-constexpr gint layout_config_style_count = G_N_ELEMENTS(layout_config_styles);
+constexpr gint layout_config_style_count = std::size(layout_config_styles);
 
 const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
