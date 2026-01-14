@@ -55,6 +55,10 @@
 namespace
 {
 
+#if !PANGO_VERSION_CHECK(1,49,4)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoFontDescription, pango_font_description_free)
+#endif
+
 struct PrintWindow
 {
 	GtkWidget *vbox;
