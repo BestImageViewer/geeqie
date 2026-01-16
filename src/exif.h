@@ -84,8 +84,6 @@ gboolean exif_write_sidecar(ExifData *exif, gchar *path);
 void exif_free(ExifData *exif);
 
 gchar *exif_get_data_as_text(ExifData *exif, const gchar *key);
-gint exif_get_integer(ExifData *exif, const gchar *key, gint *value);
-ExifRational *exif_get_rational(ExifData *exif, const gchar *key, bool *sign = nullptr);
 
 ExifItem *exif_get_item(ExifData *exif, const gchar *key);
 ExifItem *exif_get_first_item(ExifData *exif);

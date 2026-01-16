@@ -57,6 +57,20 @@ struct ExifFormattedText
 	gchar *(*build_func)(ExifData *exif);
 };
 
+gint exif_get_integer(ExifData *exif, const gchar *key, gint *value)
+{
+	ExifItem *item = exif_get_item(exif, key);
+
+	return exif_item_get_integer(item, value);
+}
+
+ExifRational *exif_get_rational(ExifData *exif, const gchar *key, bool *sign = nullptr)
+{
+	ExifItem *item = exif_get_item(exif, key);
+
+	return exif_item_get_rational(item, 0, sign);
+}
+
 gdouble exif_rational_to_double(const ExifRational *r, bool sign)
 {
 	if (!r || r->den == 0.0) return 0.0;
@@ -73,9 +87,7 @@ gdouble exif_get_rational_as_double(ExifData *exif, const gchar *key)
 	return exif_rational_to_double(r, sign);
 }
 
-} // namespace
-
-static gchar *remove_common_prefix(gchar *s, gchar *t)
+gchar *remove_common_prefix(gchar *s, gchar *t)
 {
 	gint i;
 
@@ -94,7 +106,7 @@ static gchar *remove_common_prefix(gchar *s, gchar *t)
 	return s;
 }
 
-static gdouble get_crop_factor(ExifData *exif)
+gdouble get_crop_factor(ExifData *exif)
 {
 	gdouble res_unit_tbl[] = {0.0, 25.4, 25.4, 10.0, 1.0, 0.001 };
 	gdouble xres = exif_get_rational_as_double(exif, "Exif.Photo.FocalPlaneXResolution");
@@ -129,7 +141,7 @@ static gdouble get_crop_factor(ExifData *exif)
 	return hypot(36, 24) / size;
 }
 
-static gboolean remove_suffix(gchar *str, const gchar *suffix, gint suffix_len)
+gboolean remove_suffix(gchar *str, const gchar *suffix, gint suffix_len)
 {
 	gint str_len = strlen(str);
 
@@ -142,7 +154,7 @@ static gboolean remove_suffix(gchar *str, const gchar *suffix, gint suffix_len)
 	return TRUE;
 }
 
-static gchar *exif_build_formatted_Camera(ExifData *exif)
+gchar *exif_build_formatted_Camera(ExifData *exif)
 {
 	g_autofree gchar *make = exif_get_data_as_text(exif, "Exif.Image.Make");
 	g_autofree gchar *model = exif_get_data_as_text(exif, "Exif.Image.Model");
@@ -191,7 +203,7 @@ static gchar *exif_build_formatted_Camera(ExifData *exif)
 	                       (software2 && (make || model2)) ? ")" : "");
 }
 
-static gchar *exif_build_formatted_DateTime(ExifData *exif, const gchar *text_key, const gchar *subsec_key)
+gchar *exif_build_formatted_DateTime(ExifData *exif, const gchar *text_key, const gchar *subsec_key)
 {
 	g_autofree gchar *subsec = nullptr;
 
@@ -238,17 +250,17 @@ static gchar *exif_build_formatted_DateTime(ExifData *exif, const gchar *text_ke
 	return text;
 }
 
-static gchar *exif_build_formatted_DateTime(ExifData *exif)
+gchar *exif_build_formatted_DateTime(ExifData *exif)
 {
 	return exif_build_formatted_DateTime(exif, "Exif.Photo.DateTimeOriginal", "Exif.Photo.SubSecTimeOriginal");
 }
 
-static gchar *exif_build_formatted_DateTimeDigitized(ExifData *exif)
+gchar *exif_build_formatted_DateTimeDigitized(ExifData *exif)
 {
 	return exif_build_formatted_DateTime(exif, "Exif.Photo.DateTimeDigitized", "Exif.Photo.SubSecTimeDigitized");
 }
 
-static gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
+gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
 {
 	ExifRational *r;
 
@@ -274,7 +286,7 @@ static gchar *exif_build_formatted_ShutterSpeed(ExifData *exif)
 	return nullptr;
 }
 
-static gchar *exif_build_formatted_Aperture(ExifData *exif)
+gchar *exif_build_formatted_Aperture(ExifData *exif)
 {
 	gdouble n;
 
@@ -285,7 +297,7 @@ static gchar *exif_build_formatted_Aperture(ExifData *exif)
 	return g_strdup_printf("f/%.1f", n);
 }
 
-static gchar *exif_build_formatted_ExposureBias(ExifData *exif)
+gchar *exif_build_formatted_ExposureBias(ExifData *exif)
 {
 	bool sign;
 	ExifRational *r = exif_get_rational(exif, "Exif.Photo.ExposureBiasValue", &sign);
@@ -295,7 +307,7 @@ static gchar *exif_build_formatted_ExposureBias(ExifData *exif)
 	return g_strdup_printf("%+.1f", n);
 }
 
-static gchar *exif_build_formatted_FocalLength(ExifData *exif)
+gchar *exif_build_formatted_FocalLength(ExifData *exif)
 {
 	gdouble n;
 
@@ -304,7 +316,7 @@ static gchar *exif_build_formatted_FocalLength(ExifData *exif)
 	return g_strdup_printf("%.0f mm", n);
 }
 
-static gchar *exif_build_formatted_FocalLength35mmFilm(ExifData *exif)
+gchar *exif_build_formatted_FocalLength35mmFilm(ExifData *exif)
 {
 	gint n;
 	gdouble f;
@@ -324,7 +336,7 @@ static gchar *exif_build_formatted_FocalLength35mmFilm(ExifData *exif)
 	return g_strdup_printf("%.0f mm", f * c);
 }
 
-static gchar *exif_build_formatted_ISOSpeedRating(ExifData *exif)
+gchar *exif_build_formatted_ISOSpeedRating(ExifData *exif)
 {
 	gchar *text;
 
@@ -336,7 +348,7 @@ static gchar *exif_build_formatted_ISOSpeedRating(ExifData *exif)
 	return text;
 }
 
-static gchar *exif_build_formatted_SubjectDistance(ExifData *exif)
+gchar *exif_build_formatted_SubjectDistance(ExifData *exif)
 {
 	bool sign;
 	ExifRational *r = exif_get_rational(exif, "Exif.Photo.SubjectDistance", &sign);
@@ -351,7 +363,7 @@ static gchar *exif_build_formatted_SubjectDistance(ExifData *exif)
 	return g_strdup_printf("%.3f m", n);
 }
 
-static gchar *exif_build_formatted_Flash(ExifData *exif)
+gchar *exif_build_formatted_Flash(ExifData *exif)
 {
 	/* grr, flash is a bitmask... */
 	GString *string;
@@ -400,7 +412,7 @@ static gchar *exif_build_formatted_Flash(ExifData *exif)
 	return g_string_free(string, FALSE);
 }
 
-static gchar *exif_build_formatted_Resolution(ExifData *exif)
+gchar *exif_build_formatted_Resolution(ExifData *exif)
 {
 	ExifRational *rx = exif_get_rational(exif, "Exif.Image.XResolution");
 	ExifRational *ry = exif_get_rational(exif, "Exif.Image.YResolution");
@@ -414,7 +426,7 @@ static gchar *exif_build_formatted_Resolution(ExifData *exif)
 	                       units ? units : _("unknown"));
 }
 
-static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
+gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 {
 	const gchar *name = "";
 	const gchar *source = "";
@@ -453,7 +465,7 @@ static gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 	return g_strdup_printf("%s (%s)", name, source);
 }
 
-static gchar *exif_build_formatted_GPSPosition(ExifData *exif)
+gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 {
 	GString *string = g_string_new("");
 
@@ -489,7 +501,7 @@ static gchar *exif_build_formatted_GPSPosition(ExifData *exif)
 	return g_string_free(string, FALSE);
 }
 
-static gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
+gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
 {
 	ExifItem *item = exif_get_item(exif, "Exif.GPSInfo.GPSAltitudeRef");
 	if (!item) return nullptr;
@@ -515,7 +527,7 @@ static gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
  * Refer to https://github.com/BertoldVdb/ZoneDetect
  * for structure details
  */
-static void zd_tz(ZoneDetectResult *results, gchar **timezone, gchar **countryname, gchar **countryalpha2)
+void zd_tz(ZoneDetectResult *results, gchar **timezone, gchar **countryname, gchar **countryalpha2)
 {
 	g_autofree gchar *timezone_pre = nullptr;
 	g_autofree gchar *timezone_id = nullptr;
@@ -551,7 +563,7 @@ static void zd_tz(ZoneDetectResult *results, gchar **timezone, gchar **countryna
 	*timezone = g_strconcat(timezone_pre, timezone_id, NULL);
 }
 
-static void ZoneDetect_onError(int errZD, int errNative)
+void ZoneDetect_onError(int errZD, int errNative)
 {
 	log_printf("Error: ZoneDetect %s (0x%08X)\n", ZDGetErrorString(errZD), (unsigned)errNative);
 }
@@ -567,7 +579,7 @@ static void ZoneDetect_onError(int errZD, int errNative)
  *
  *
  */
-static gboolean exif_build_tz_data(ExifData *exif, gchar **exif_date_time, gchar **timezone, gchar **countryname, gchar **countryalpha2)
+gboolean exif_build_tz_data(ExifData *exif, gchar **exif_date_time, gchar **timezone, gchar **countryname, gchar **countryalpha2)
 {
 	gfloat latitude;
 	gfloat longitude;
@@ -660,7 +672,7 @@ static gboolean exif_build_tz_data(ExifData *exif, gchar **exif_date_time, gchar
  * and the Unix timestamp converted to local time using locale.
  * If the conversion fails, unformatted UTC is returned.
  */
-static gchar *exif_build_formatted_localtime(ExifData *exif)
+gchar *exif_build_formatted_localtime(ExifData *exif)
 {
 	gchar buf[128];
 	gint buflen;
@@ -716,7 +728,7 @@ static gchar *exif_build_formatted_localtime(ExifData *exif)
  *
  *
  */
-static gchar *exif_build_formatted_timezone(ExifData *exif)
+gchar *exif_build_formatted_timezone(ExifData *exif)
 {
 	g_autofree gchar *exif_date_time = nullptr;
 	gchar *timezone = nullptr;
@@ -735,7 +747,7 @@ static gchar *exif_build_formatted_timezone(ExifData *exif)
  *
  *
  */
-static gchar *exif_build_formatted_countryname(ExifData *exif)
+gchar *exif_build_formatted_countryname(ExifData *exif)
 {
 	g_autofree gchar *exif_date_time = nullptr;
 	g_autofree gchar *timezone = nullptr;
@@ -754,7 +766,7 @@ static gchar *exif_build_formatted_countryname(ExifData *exif)
  *
  *
  */
-static gchar *exif_build_formatted_countrycode(ExifData *exif)
+gchar *exif_build_formatted_countrycode(ExifData *exif)
 {
 	g_autofree gchar *exif_date_time = nullptr;
 	g_autofree gchar *timezone = nullptr;
@@ -766,7 +778,7 @@ static gchar *exif_build_formatted_countrycode(ExifData *exif)
 	return countryalpha2;
 }
 
-static gchar *exif_build_formatted_star_rating(ExifData *exif)
+gchar *exif_build_formatted_star_rating(ExifData *exif)
 {
 	gint n = 0;
 
@@ -781,7 +793,7 @@ static gchar *exif_build_formatted_star_rating(ExifData *exif)
 #define EXIF_FORMATTED_TAG(name, label) { EXIF_FORMATTED()#name, label, exif_build_formatted##_##name }
 
 /**< the list of specially formatted keys, for human readable output */
-static const ExifFormattedText ExifFormattedList[] = {
+const ExifFormattedText ExifFormattedList[] = {
 	EXIF_FORMATTED_TAG(Camera,		N_("Camera")),
 	EXIF_FORMATTED_TAG(DateTime,		N_("Date")),
 	EXIF_FORMATTED_TAG(DateTimeDigitized,	N_("DateDigitized")),
@@ -813,6 +825,13 @@ static const ExifFormattedText ExifFormattedList[] = {
 	{"file.page_no",			N_("Page no."), 	nullptr},
 	{"lua.lensID",				N_("Lens"), 		nullptr},
 };
+
+void exif_release_cb(FileData *fd)
+{
+	g_clear_pointer(&fd->exif, exif_free);
+}
+
+} // namespace
 
 GHashTable *exif_get_formatted(ExifData *exif)
 {
@@ -857,22 +876,6 @@ gchar *exif_get_description_by_key(const gchar *key)
 	return exif_get_tag_description_by_key(key);
 }
 
-gint exif_get_integer(ExifData *exif, const gchar *key, gint *value)
-{
-	ExifItem *item;
-
-	item = exif_get_item(exif, key);
-	return exif_item_get_integer(item, value);
-}
-
-ExifRational *exif_get_rational(ExifData *exif, const gchar *key, bool *sign)
-{
-	ExifItem *item;
-
-	item = exif_get_item(exif, key);
-	return exif_item_get_rational(item, 0, sign);
-}
-
 gchar *exif_get_data_as_text(ExifData *exif, const gchar *key)
 {
 	if (!key) return nullptr;
@@ -885,11 +888,6 @@ gchar *exif_get_data_as_text(ExifData *exif, const gchar *key)
 	return nullptr;
 }
 
-
-static void exif_release_cb(FileData *fd)
-{
-	g_clear_pointer(&fd->exif, exif_free);
-}
 
 ExifData *exif_read_fd(FileData *fd)
 {
