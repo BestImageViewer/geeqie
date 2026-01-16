@@ -682,21 +682,20 @@ gchar *exif_item_get_string(ExifItem *item, int idx)
 }
 
 
-gint exif_item_get_integer(ExifItem *item, gint *value)
+std::optional<gint> exif_item_get_integer(ExifItem *item)
 {
 	try {
-		if (!item || exif_item_get_elements(item) == 0) return 0;
+		if (!item || exif_item_get_elements(item) == 0) return {};
 
 #if EXIV2_TEST_VERSION(0,28,0)
-        *value = ((Exiv2::Metadatum *)item)->toInt64();
+		return ((Exiv2::Metadatum *)item)->toInt64();
 #else
-		*value = (reinterpret_cast<Exiv2::Metadatum *>(item))->toLong();
+		return (reinterpret_cast<Exiv2::Metadatum *>(item))->toLong();
 #endif
-		return 1;
 	}
 	catch (Exiv2::AnyError& e) {
 		debug_exception(e);
-		return 0;
+		return {};
 	}
 }
 

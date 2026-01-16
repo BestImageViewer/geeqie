@@ -57,11 +57,11 @@ struct ExifFormattedText
 	gchar *(*build_func)(ExifData *exif);
 };
 
-gint exif_get_integer(ExifData *exif, const gchar *key, gint *value)
+std::optional<gint> exif_get_integer(ExifData *exif, const gchar *key)
 {
 	ExifItem *item = exif_get_item(exif, key);
 
-	return exif_item_get_integer(item, value);
+	return exif_item_get_integer(item);
 }
 
 ExifRational *exif_get_rational(ExifData *exif, const gchar *key, bool *sign = nullptr)
@@ -111,24 +111,22 @@ gdouble get_crop_factor(ExifData *exif)
 	gdouble res_unit_tbl[] = {0.0, 25.4, 25.4, 10.0, 1.0, 0.001 };
 	gdouble xres = exif_get_rational_as_double(exif, "Exif.Photo.FocalPlaneXResolution");
 	gdouble yres = exif_get_rational_as_double(exif, "Exif.Photo.FocalPlaneYResolution");
-	gint res_unit;
-	gint w;
-	gint h;
-	gdouble xsize;
-	gdouble ysize;
 	gdouble size;
 	gdouble ratio;
 
 	if (xres == 0.0 || yres == 0.0) return 0.0;
 
-	if (!exif_get_integer(exif, "Exif.Photo.FocalPlaneResolutionUnit", &res_unit)) return 0.0;
+	auto res_unit = exif_get_integer(exif, "Exif.Photo.FocalPlaneResolutionUnit");
+	if (!res_unit) return 0.0;
 	if (res_unit < 1 || res_unit > 5) return 0.0;
 
-	if (!exif_get_integer(exif, "Exif.Photo.PixelXDimension", &w)) return 0.0;
-	if (!exif_get_integer(exif, "Exif.Photo.PixelYDimension", &h)) return 0.0;
+	auto w = exif_get_integer(exif, "Exif.Photo.PixelXDimension");
+	if (!w) return 0.0;
+	auto h = exif_get_integer(exif, "Exif.Photo.PixelYDimension");
+	if (!h) return 0.0;
 
-	xsize = w * res_unit_tbl[res_unit] / xres;
-	ysize = h * res_unit_tbl[res_unit] / yres;
+	const gdouble xsize = w.value() * res_unit_tbl[res_unit.value()] / xres;
+	const gdouble ysize = h.value() * res_unit_tbl[res_unit.value()] / yres;
 
 	ratio = xsize / ysize;
 
@@ -318,13 +316,12 @@ gchar *exif_build_formatted_FocalLength(ExifData *exif)
 
 gchar *exif_build_formatted_FocalLength35mmFilm(ExifData *exif)
 {
-	gint n;
 	gdouble f;
 	gdouble c;
 
-	if (exif_get_integer(exif, "Exif.Photo.FocalLengthIn35mmFilm", &n) && n != 0)
+	if (auto n = exif_get_integer(exif, "Exif.Photo.FocalLengthIn35mmFilm"); n && n != 0)
 		{
-		return g_strdup_printf("%d mm", n);
+		return g_strdup_printf("%d mm", n.value());
 		}
 
 	f = exif_get_rational_as_double(exif, "Exif.Photo.FocalLength");
@@ -367,10 +364,12 @@ gchar *exif_build_formatted_Flash(ExifData *exif)
 {
 	/* grr, flash is a bitmask... */
 	GString *string;
-	gint n;
 	gint v;
 
-	if (!exif_get_integer(exif, "Exif.Photo.Flash", &n)) return nullptr;
+	auto flash = exif_get_integer(exif, "Exif.Photo.Flash");
+	if (!flash) return nullptr;
+
+	const gint n = flash.value();
 
 	/* Exif 2.1 only defines first 3 bits */
 	if (n <= 0x07) return exif_get_data_as_text(exif, "Exif.Photo.Flash");
@@ -435,13 +434,11 @@ gchar *exif_build_formatted_ColorProfile(ExifData *exif)
 	g_autofree guchar *profile_data = exif_get_color_profile(exif, &profile_len);
 	if (!profile_data)
 		{
-		gint cs;
-
-		/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
-		if (!exif_get_integer(exif, "Exif.Photo.ColorSpace", &cs)) cs = 0;
+		auto cs = exif_get_integer(exif, "Exif.Photo.ColorSpace");
 
 		g_autofree gchar *interop_index = exif_get_data_as_text(exif, "Exif.Iop.InteroperabilityIndex");
 
+		/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
 		if (cs == 1)
 			{
 			name = _("sRGB");
@@ -511,10 +508,11 @@ gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
 
 	gdouble alt = exif_rational_to_double(r, false);
 
-	gint ref;
-	exif_item_get_integer(item, &ref);
+	auto ref = exif_item_get_integer(item);
 
-	return g_strdup_printf("%0.f m %s", alt, (ref==0)?_("Above Sea Level"):_("Below Sea Level"));
+	return g_strdup_printf("%0.f m %s",
+	                       alt,
+	                       (ref.value_or(0) == 0) ? _("Above Sea Level") : _("Below Sea Level"));
 }
 
 /**
@@ -780,11 +778,9 @@ gchar *exif_build_formatted_countrycode(ExifData *exif)
 
 gchar *exif_build_formatted_star_rating(ExifData *exif)
 {
-	gint n = 0;
+	auto n = exif_get_integer(exif, "Xmp.xmp.Rating");
 
-	exif_get_integer(exif, "Xmp.xmp.Rating", &n);
-
-	return convert_rating_to_stars(n);
+	return convert_rating_to_stars(n.value_or(0));
 }
 
 /* List of custom formatted pseudo-exif tags */
@@ -966,10 +962,9 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 			}
 		else
 			{
-			gint cs;
+			auto cs = exif_get_integer(exif, "Exif.Photo.ColorSpace");
 
 			/* ColorSpace == 1 specifies sRGB per EXIF 2.2 */
-			if (!exif_get_integer(exif, "Exif.Photo.ColorSpace", &cs)) cs = 0;
 			if (cs == 1)
 				{
 				color_profile_from_image = COLOR_PROFILE_SRGB;

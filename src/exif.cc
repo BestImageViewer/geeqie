@@ -1440,33 +1440,26 @@ gchar *exif_item_get_data_as_text(ExifItem *item, ExifData *)
 	return exif_item_get_data_as_text_full(item, METADATA_FORMATTED);
 }
 
-gint exif_item_get_integer(ExifItem *item, gint *value)
+std::optional<gint> exif_item_get_integer(ExifItem *item)
 {
-	if (!item) return FALSE;
-	if (!item->elements) return FALSE;
+	if (!item || !item->elements) return {};
 
 	switch (item->format)
 		{
 		case EXIF_FORMAT_SHORT:
-			*value = static_cast<gint>((static_cast<gint16 *>(item->data))[0]);
-			return TRUE;
-			break;
+			return static_cast<gint>((static_cast<gint16 *>(item->data))[0]);
 		case EXIF_FORMAT_SHORT_UNSIGNED:
-			*value = static_cast<gint>((static_cast<guint16 *>(item->data))[0]);
-			return TRUE;
-			break;
+			return static_cast<gint>((static_cast<guint16 *>(item->data))[0]);
 		case EXIF_FORMAT_LONG:
-			*value = static_cast<gint>((static_cast<gint32 *>(item->data))[0]);
-			return TRUE;
-			break;
+			return static_cast<gint>((static_cast<gint32 *>(item->data))[0]);
 		case EXIF_FORMAT_LONG_UNSIGNED: /**< @FIXME overflow possible */
-			*value = static_cast<gint>((static_cast<guint32 *>(item->data))[0]);
-			return TRUE;
+			return static_cast<gint>((static_cast<guint32 *>(item->data))[0]);
 		default:
 			/* all other type return FALSE */
 			break;
 		}
-	return FALSE;
+
+	return {};
 }
 
 

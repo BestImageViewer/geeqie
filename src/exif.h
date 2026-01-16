@@ -97,7 +97,7 @@ gchar *exif_item_get_data(ExifItem *item, guint *data_len);
 gchar *exif_item_get_description(ExifItem *item);
 const gchar *exif_item_get_format_name(ExifItem *item, gboolean brief);
 gchar *exif_item_get_data_as_text(ExifItem *item, ExifData *exif);
-gint exif_item_get_integer(ExifItem *item, gint *value);
+std::optional<gint> exif_item_get_integer(ExifItem *item);
 ExifRational *exif_item_get_rational(ExifItem *item, guint n, bool *sign = nullptr);
 
 gchar *exif_item_get_string(ExifItem *item, gint idx);
