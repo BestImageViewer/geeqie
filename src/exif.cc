@@ -1088,13 +1088,12 @@ static gint exif_jpeg_parse(ExifData *exif,
 		return -2;
 		}
 
-	guint seg_offset = 0;
-	guint seg_length = 0;
+	JpegSegment seg;
 	if (jpeg_segment_find(data, size, JPEG_MARKER_APP1,
 	                      "Exif\x00\x00", 6,
-	                      seg_offset, seg_length))
+	                      seg))
 		{
-		res = exif_tiff_parse(exif, data + seg_offset + 6, seg_length - 6, list);
+		res = exif_tiff_parse(exif, data + seg.offset + 6, seg.length - 6, list);
 		}
 
 	if (exif_jpeg_parse_color(exif, data, size))

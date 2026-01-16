@@ -988,13 +988,7 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 
 bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 {
-	struct Chunk
-	{
-		guint offset = 0;
-		guint length = 0;
-	};
-
-	std::vector<Chunk> chunks;
+	std::vector<JpegSegment> chunks;
 	chunks.reserve(255);
 
 	/* For jpeg/jfif, ICC color profile data can be in more than one segment.
@@ -1003,18 +997,17 @@ bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 	   TT = total number of ICC segments (TT in each ICC segment should match)
 	 */
 
-	guint seg_offset = 0;
-	guint seg_length = 0;
-	while (jpeg_segment_find(data + seg_offset + seg_length,
-	                         size - seg_offset - seg_length,
+	JpegSegment seg;
+	while (jpeg_segment_find(data + (seg.offset + seg.length),
+	                         size - (seg.offset + seg.length),
 	                         JPEG_MARKER_APP2,
 	                         "ICC_PROFILE\x00", 12,
-	                         seg_offset, seg_length))
+	                         seg))
 		{
-		if (seg_length < 14) return false;
+		if (seg.length < 14) return false;
 
-		const guchar chunk_num = data[seg_offset + 12];
-		const guchar chunk_tot = data[seg_offset + 13];
+		const guchar chunk_num = data[seg.offset + 12];
+		const guchar chunk_tot = data[seg.offset + 13];
 
 		if (chunk_num == 0 || chunk_tot == 0) return false;
 
@@ -1026,16 +1019,16 @@ bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 		if (chunk_tot != chunks.size() ||
 		    chunk_num > chunks.size()) return false;
 
-		chunks[chunk_num - 1] = { seg_offset + 14, seg_length - 14 };
+		chunks[chunk_num - 1] = { seg.offset + 14, seg.length - 14 };
 		}
 
 	if (chunks.empty()) return false;
 
 	const guint cp_length = std::accumulate(chunks.cbegin(), chunks.cend(), 0,
-	                                        [](guint len, const Chunk &chunk){ return len + chunk.length; });
+	                                        [](guint len, const JpegSegment &chunk){ return len + chunk.length; });
 	g_autofree auto *cp_data = static_cast<guchar *>(g_malloc(cp_length));
 
-	for (const Chunk &chunk : chunks)
+	for (const JpegSegment &chunk : chunks)
 		{
 		if (chunk.offset == 0)
 			{
