@@ -150,6 +150,7 @@ else
     gtk_dep = dependency('gtk+-3.0', version : '>=3.24', required: true)
 endif
 glib_dep = dependency('glib-2.0', version : '>=2.66', required: true)
+pango_dep = dependency('pango', version : '>=1.46', required: true)
 
 # Required only for seg. fault stacktrace and backtrace debugging
 conf_data.set('HAVE_EXECINFO_H', 0)
