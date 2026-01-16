@@ -131,8 +131,5 @@ void exif_set_image_comment(FileData* fd, const gchar* comment);
 guchar *exif_get_preview(ExifData *exif, guint *data_len, gint requested_width, gint requested_height);
 void exif_free_preview(const guchar *buf);
 
-gchar *metadata_file_info(FileData *fd, const gchar *key, MetadataFormat format);
-gchar *metadata_lua_info(FileData *fd, const gchar *key, MetadataFormat format);
-
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

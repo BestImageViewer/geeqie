@@ -21,6 +21,9 @@
 
 #include "metadata.h"
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <algorithm>
 #include <array>
 #include <clocale>
@@ -36,6 +39,9 @@
 #include "cache.h"
 #include "exif.h"
 #include "filedata.h"
+#if HAVE_LUA
+#  include "glua.h"
+#endif
 #include "intl.h"
 #include "layout-util.h"
 #include "main-defines.h"
@@ -119,6 +125,107 @@ inline gboolean is_keywords_separator(gchar c)
 	    || c == '\r'
 	    || c == '\b';
 }
+
+/*
+ *-------------------------------------------------------------------
+ * file info
+ * shares tag naming infrastructure with exif
+ * we should probably not invest too much effort into this because
+ * new exiv2 will support the same functionality
+ * https://dev.exiv2.org/issues/505
+ *-------------------------------------------------------------------
+ */
+
+gchar *mode_number(mode_t m)
+{
+	gint mb = 0;
+	if (m & S_ISUID) mb |= 4;
+	if (m & S_ISGID) mb |= 2;
+	if (m & S_ISVTX) mb |= 1;
+
+	gint mu = 0;
+	if (m & S_IRUSR) mu |= 4;
+	if (m & S_IWUSR) mu |= 2;
+	if (m & S_IXUSR) mu |= 1;
+
+	gint mg = 0;
+	if (m & S_IRGRP) mg |= 4;
+	if (m & S_IWGRP) mg |= 2;
+	if (m & S_IXGRP) mg |= 1;
+
+	gint mo = 0;
+	if (m & S_IROTH) mo |= 4;
+	if (m & S_IWOTH) mo |= 2;
+	if (m & S_IXOTH) mo |= 1;
+
+	gchar pbuf[10];
+	pbuf[0] = (m & S_IRUSR) ? 'r' : '-';
+	pbuf[1] = (m & S_IWUSR) ? 'w' : '-';
+	pbuf[2] = (m & S_IXUSR) ? 'x' : '-';
+	pbuf[3] = (m & S_IRGRP) ? 'r' : '-';
+	pbuf[4] = (m & S_IWGRP) ? 'w' : '-';
+	pbuf[5] = (m & S_IXGRP) ? 'x' : '-';
+	pbuf[6] = (m & S_IROTH) ? 'r' : '-';
+	pbuf[7] = (m & S_IWOTH) ? 'w' : '-';
+	pbuf[8] = (m & S_IXOTH) ? 'x' : '-';
+	pbuf[9] = '\0';
+
+	return g_strdup_printf("%s (%d%d%d%d)", pbuf, mb, mu, mg, mo);
+}
+
+gchar *metadata_file_info(const FileData *fd, const gchar *key)
+{
+	if (strcmp(key, "file.size") == 0)
+		{
+		return g_strdup_printf("%ld", static_cast<long>(fd->size));
+		}
+	if (strcmp(key, "file.date") == 0)
+		{
+		return g_strdup(text_from_time(fd->date));
+		}
+	if (strcmp(key, "file.mode") == 0)
+		{
+		return mode_number(fd->mode);
+		}
+	if (strcmp(key, "file.ctime") == 0)
+		{
+		return g_strdup(text_from_time(fd->cdate));
+		}
+	if (strcmp(key, "file.class") == 0)
+		{
+		return g_strdup(format_class_list[fd->format_class]);
+		}
+	if (strcmp(key, "file.owner") == 0)
+		{
+		return get_file_owner(fd->path);
+		}
+	if (strcmp(key, "file.group") == 0)
+		{
+		return get_file_group(fd->path);
+		}
+	if (strcmp(key, "file.link") == 0)
+		{
+		return get_symbolic_link(fd->path);
+		}
+	if (strcmp(key, "file.page_no") == 0)
+		{
+		return (fd->page_total > 1) ? g_strdup_printf("[%d/%d]", fd->page_num + 1, fd->page_total) : nullptr;
+		}
+	return g_strdup("");
+}
+
+#if HAVE_LUA
+gchar *metadata_lua_info(FileData *fd, const gchar *key)
+{
+	const gchar *script_name_utf8 = key + 4;
+	g_autofree gchar *script_name = path_from_utf8(script_name_utf8);
+
+	g_autofree gchar *raw_data = lua_callvalue(fd, script_name, nullptr);
+	g_autofree gchar *valid_data = g_utf8_make_valid(raw_data, -1);
+
+	return g_utf8_substring(valid_data, 0, 150);
+}
+#endif
 
 } // namespace
 
@@ -665,16 +772,16 @@ GList *metadata_read_list(FileData *fd, const gchar *key, MetadataFormat format)
 	else if (strcmp(key, COMMENT_KEY) == 0)
 		{
 		gchar *comment = nullptr;
-	        if (metadata_legacy_read(fd, nullptr, &comment)) return g_list_append(nullptr, comment);
-	        }
+		if (metadata_legacy_read(fd, nullptr, &comment)) return g_list_append(nullptr, comment);
+		}
 	else if (strncmp(key, "file.", 5) == 0)
 		{
-	        return g_list_append(nullptr, metadata_file_info(fd, key, format));
+		return g_list_append(nullptr, metadata_file_info(fd, key));
 		}
 #if HAVE_LUA
 	else if (strncmp(key, "lua.", 4) == 0)
 		{
-		return g_list_append(nullptr, metadata_lua_info(fd, key, format));
+		return g_list_append(nullptr, metadata_lua_info(fd, key));
 		}
 #endif
 
