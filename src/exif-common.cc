@@ -986,7 +986,7 @@ ColorManMemData exif_get_color_profile(FileData *fd, ColorManProfileType &color_
 
 /* embedded icc in jpeg */
 
-bool exif_jpeg_parse_color(ExifData *exif, guchar *data, guint size)
+bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 {
 	struct Chunk
 	{
