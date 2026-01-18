@@ -996,18 +996,17 @@ bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 	   NN = segment number for data
 	   TT = total number of ICC segments (TT in each ICC segment should match)
 	 */
-
+	constexpr std::string_view magic{ "ICC_PROFILE\x00" };
+	constexpr guint magic_len = magic.size();
 	JpegSegment seg;
 	while (jpeg_segment_find(data + (seg.offset + seg.length),
 	                         size - (seg.offset + seg.length),
-	                         JPEG_MARKER_APP2,
-	                         "ICC_PROFILE\x00", 12,
-	                         seg))
+	                         JPEG_MARKER_APP2, magic, seg))
 		{
-		if (seg.length < 14) return false;
+		if (seg.length < magic_len + 2) return false;
 
-		const guchar chunk_num = data[seg.offset + 12];
-		const guchar chunk_tot = data[seg.offset + 13];
+		const guchar chunk_num = data[seg.offset + magic_len];
+		const guchar chunk_tot = data[seg.offset + magic_len + 1];
 
 		if (chunk_num == 0 || chunk_tot == 0) return false;
 
@@ -1019,7 +1018,7 @@ bool exif_jpeg_parse_color(ExifData *exif, const guchar *data, guint size)
 		if (chunk_tot != chunks.size() ||
 		    chunk_num > chunks.size()) return false;
 
-		chunks[chunk_num - 1] = { seg.offset + 14, seg.length - 14 };
+		chunks[chunk_num - 1] = { seg.offset + (magic_len + 2), seg.length - (magic_len + 2) };
 		}
 
 	if (chunks.empty()) return false;

@@ -22,6 +22,7 @@
 #ifndef JPEG_PARSER_H
 #define JPEG_PARSER_H
 
+#include <string_view>
 #include <vector>
 
 #include <glib.h>
@@ -53,7 +54,7 @@ struct JpegSegment
 };
 
 bool jpeg_segment_find(const guchar *data, guint size,
-                       guchar app_marker, const gchar *magic, guint magic_len,
+                       guchar app_marker, std::string_view magic,
                        JpegSegment &seg);
 
 

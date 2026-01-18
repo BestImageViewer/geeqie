@@ -240,7 +240,7 @@ gboolean is_jpeg_container(const guchar *data, guint size)
 }
 
 bool jpeg_segment_find(const guchar *data, guint size,
-                       guchar app_marker, const gchar *magic, guint magic_len,
+                       guchar app_marker, std::string_view magic,
                        JpegSegment &seg)
 {
 	guchar marker = 0;
@@ -264,8 +264,8 @@ bool jpeg_segment_find(const guchar *data, guint size,
 
 			if (marker == app_marker &&
 			    offset + length < size &&
-			    length >= 4 + magic_len &&
-			    memcmp(data + offset + 4, magic, magic_len) == 0)
+			    length >= 4 + magic.size() &&
+			    memcmp(data + offset + 4, magic.data(), magic.size()) == 0)
 				{
 				seg.offset = offset + 4;
 				seg.length = length - 4;
@@ -279,12 +279,13 @@ bool jpeg_segment_find(const guchar *data, guint size,
 
 MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 {
+	constexpr std::string_view magic{ "MPF\x00" };
 	JpegSegment seg;
-	if (!jpeg_segment_find(data, size, JPEG_MARKER_APP2, "MPF\x00", 4, seg) || seg.length <= 16) return {};
+	if (!jpeg_segment_find(data, size, JPEG_MARKER_APP2, magic, seg) || seg.length <= 16) return {};
 
 	DEBUG_1("mpo signature found at %x", seg.offset);
-	seg.offset += 4;
-	seg.length -= 4;
+	seg.offset += magic.size();
+	seg.length -= magic.size();
 
 	guint offset;
 	TiffByteOrder bo;
@@ -319,14 +320,14 @@ MPOData jpeg_get_mpo_data(const guchar *data, guint size)
 			}
 		else
 			{
-			if (!jpeg_segment_find(data + mpo.images[i].offset, mpo.images[i].length, JPEG_MARKER_APP2, "MPF\x00", 4, seg) || seg.length <= 16)
+			if (!jpeg_segment_find(data + mpo.images[i].offset, mpo.images[i].length, JPEG_MARKER_APP2, magic, seg) || seg.length <= 16)
 				{
 				DEBUG_1("MPO image %u: MPO signature not found", i);
 				continue;
 				}
 
-			seg.offset += 4;
-			seg.length -= 4;
+			seg.offset += magic.size();
+			seg.length -= magic.size();
 			if (!tiff_directory_offset(data + mpo.images[i].offset + seg.offset, seg.length, offset, bo))
 				{
 				DEBUG_1("MPO image %u: invalid directory offset", i);
