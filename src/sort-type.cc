@@ -23,7 +23,7 @@
 
 #include "intl.h"
 
-gchar *sort_type_get_text(SortType method)
+const gchar *sort_type_get_text(SortType method)
 {
 	switch (method)
 		{

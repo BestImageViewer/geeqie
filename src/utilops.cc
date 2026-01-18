@@ -2336,9 +2336,10 @@ static void file_util_delete_full(FileData *source_fd, GList *flist, GtkWidget *
 
 	ud->details_func = file_util_details_dialog;
 
-	gchar *message;
+	const gchar *message;
 	if (g_list_length(flist) > 1)
 		{
+		// @fixme message from here is never freed
 		if(options->file_ops.safe_delete_enable)
 			{
 			message = g_strdup_printf("%s%d%s", _("⚠ This will move the following    "), g_list_length(flist), _("    files to the Trash bin"));

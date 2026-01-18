@@ -38,7 +38,7 @@ enum SortType : gint {
 	SORT_CLASS
 };
 
-gchar *sort_type_get_text(SortType method);
+const gchar *sort_type_get_text(SortType method);
 bool sort_type_requires_metadata(SortType method);
 
 #endif

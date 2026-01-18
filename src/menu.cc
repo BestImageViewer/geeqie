@@ -145,7 +145,7 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
  *-----------------------------------------------------------------------------
  */
 
-static gchar *alter_type_get_text(AlterType type)
+static const gchar *alter_type_get_text(AlterType type)
 {
 	switch (type)
 		{

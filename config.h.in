@@ -200,6 +200,7 @@
 /* #undef OS_WIN32 */
 
 /* always defined to indicate that i18n is enabled */
+/* @todo convert to mesondefine or drop it and use libintl unconditionally */
 #define ENABLE_NLS 1
 
 /* Build on win32 OS */

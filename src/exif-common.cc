@@ -355,7 +355,7 @@ gchar *exif_build_formatted_SubjectDistance(ExifData *exif)
 	if (static_cast<glong>(r->num) == 0) return g_strdup(_("unknown"));
 
 	gdouble n = exif_rational_to_double(r, sign);
-	if (n == 0.0) return _("unknown");
+	if (n == 0.0) return g_strdup(_("unknown"));
 
 	return g_strdup_printf("%.3f m", n);
 }

@@ -2657,7 +2657,7 @@ static GtkRadioActionEntry menu_osd[] = {
 
 static gchar *menu_translate(const gchar *path, gpointer)
 {
-	return static_cast<gchar *>(_(path));
+	return const_cast<gchar *>(_(path));
 }
 
 static void layout_actions_setup_mark(LayoutWindow *lw, gint mark, const gchar *name_tmpl,

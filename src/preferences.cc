@@ -858,7 +858,7 @@ static void thumb_size_menu_cb(GtkWidget *combo, gpointer)
 		}
 }
 
-static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, gchar *text)
+static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, const gchar *text)
 {
 	GtkWidget *combo;
 
