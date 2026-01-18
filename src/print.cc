@@ -78,15 +78,9 @@ struct PrintWindow
 
 constexpr gint PRE_FORMATTED_COLUMNS = 4;
 
-gint print_layout_page_count(PrintWindow *pw)
+gint print_layout_page_count(const PrintWindow *pw)
 {
-	gint images;
-
-	images = g_list_length(pw->source_selection);
-
-	if (images < 1 ) return 0;
-
-	return images;
+	return g_list_length(pw->source_selection);
 }
 
 gboolean print_job_render_image(PrintWindow *pw);
@@ -371,7 +365,7 @@ gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)
 	return pw->job_render_finished;
 }
 
-gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *pw, gint page_nr, gint total)
+gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *pw, gint page_nr)
 {
 	if (!fd) return nullptr;
 
@@ -386,7 +380,7 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 		}
 
 	osd_template_insert(vars, "number", std::to_string(page_nr + 1).c_str());
-	osd_template_insert(vars, "total", std::to_string(total).c_str());
+	osd_template_insert(vars, "total", std::to_string(print_layout_page_count(pw)).c_str());
 	osd_template_insert(vars, "name", fd->name);
 	osd_template_insert(vars, "date", text_from_time(fd->date));
 
@@ -499,8 +493,7 @@ void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpoi
 
 	if (options->printer.show_image_text)
 		{
-		gint total = g_list_length(pw->source_selection);
-		g_autofree gchar *image_text = form_image_text(options->printer.template_string, fd, pw, page_nr, total);
+		g_autofree gchar *image_text = form_image_text(options->printer.template_string, fd, pw, page_nr);
 
 		layout_image = create_layout(image_text, options->printer.image_font, image_text_width, pango_image_height);
 		}
@@ -600,11 +593,9 @@ void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpoi
 
 void begin_print(GtkPrintOperation *operation, GtkPrintContext *, gpointer user_data)
 {
-	auto pw = static_cast<PrintWindow *>(user_data);
-	gint page_count;
+	auto *pw = static_cast<PrintWindow *>(user_data);
 
-	page_count = print_layout_page_count(pw);
-	gtk_print_operation_set_n_pages (operation, page_count);
+	gtk_print_operation_set_n_pages(operation, print_layout_page_count(pw));
 
 	print_job_render_image(pw);
 }
