@@ -133,15 +133,13 @@ gboolean print_job_render_image(PrintWindow *pw)
 
 	return TRUE;
 }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
-void font_activated_cb(GtkFontChooser *widget, gchar *fontname, gpointer option)
+
+void font_activated_cb(GtkFontChooser *widget, gchar *fontname, [[maybe_unused]] gpointer option)
 {
 	option = fontname;
 
 	gq_gtk_widget_destroy(GTK_WIDGET(widget));
 }
-#pragma GCC diagnostic pop
 
 void font_response_cb(GtkDialog *dialog, int response_id, gpointer option)
 {

@@ -608,10 +608,8 @@ void exit_program_write_metadata_cb(gint success, const gchar *)
 /** @FIXME this probably needs some better ifdefs. Please report any compilation problems */
 /** @FIXME This section needs revising */
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
 #if defined(SIGBUS) && defined(SA_SIGINFO)
-void sigbus_handler_cb_unused(int, [[maybe_unused]] siginfo_t *info, void *)
+[[maybe_unused]] void sigbus_handler_cb(int, [[maybe_unused]] siginfo_t *info, void *)
 {
 	/*
 	 * @FIXME Design and implement a POSIX-acceptable approach,
@@ -623,8 +621,6 @@ void sigbus_handler_cb_unused(int, [[maybe_unused]] siginfo_t *info, void *)
 	exit(EXIT_FAILURE);
 }
 #endif
-
-#pragma GCC diagnostic pop
 
 void setup_sig_handler()
 {
