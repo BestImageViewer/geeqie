@@ -66,9 +66,8 @@ struct PrintWindow
 
 	gint job_page;
 	GtkTextBuffer *page_text;
-	gchar *template_string;
 	GtkWidget *parent;
-	ImageLoader	*job_loader;
+	ImageLoader *job_loader;
 
 	GList *print_pixbuf_queue;
 	gboolean job_render_finished;
@@ -94,8 +93,7 @@ void print_job_render_image_loader_done(ImageLoader *il, gpointer data)
 
 	pw->print_pixbuf_queue = g_list_append(pw->print_pixbuf_queue, g_object_ref(pixbuf));
 
-	image_loader_free(pw->job_loader);
-	pw->job_loader = nullptr;
+	g_clear_pointer(&pw->job_loader, image_loader_free);
 
 	pw->job_page++;
 
@@ -112,17 +110,14 @@ gboolean print_job_render_image(PrintWindow *pw)
 	fd = static_cast<FileData *>(g_list_nth_data(pw->source_selection, pw->job_page));
 	if (!fd) return FALSE;
 
-	image_loader_free(pw->job_loader);
-	pw->job_loader = nullptr;
-
+	g_clear_pointer(&pw->job_loader, image_loader_free);
 	pw->job_loader = image_loader_new(fd);
 	g_signal_connect(G_OBJECT(pw->job_loader), "done",
 						(GCallback)print_job_render_image_loader_done, pw);
 
 	if (!image_loader_start(pw->job_loader))
 		{
-		image_loader_free(pw->job_loader);
-		pw->job_loader= nullptr;
+		g_clear_pointer(&pw->job_loader, image_loader_free);
 		}
 
 	return TRUE;
