@@ -50,6 +50,8 @@
 namespace
 {
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(ZoneDetect, ZDCloseDatabase)
+
 struct ExifFormattedText
 {
 	const gchar *key;
@@ -525,17 +527,18 @@ gchar *exif_build_formatted_GPSAltitude(ExifData *exif)
  * Refer to https://github.com/BertoldVdb/ZoneDetect
  * for structure details
  */
-void zd_tz(ZoneDetectResult *results, gchar **timezone, gchar **countryname, gchar **countryalpha2)
+void zd_tz(const ZoneDetectResult *results, gchar **timezone, gchar **countryname, gchar **countryalpha2)
 {
 	g_autofree gchar *timezone_pre = nullptr;
 	g_autofree gchar *timezone_id = nullptr;
-	unsigned int index = 0;
 
-	while(results[index].lookupResult != ZD_LOOKUP_END)
+	for (unsigned int index = 0; results[index].lookupResult != ZD_LOOKUP_END; index++)
 		{
-		if(results[index].data)
+		if (!results[index].data) continue;
+
+		for (unsigned int i = 0; i < results[index].numFields; i++)
 			{
-			for(unsigned int i=0; i<results[index].numFields; i++)
+			if (timezone)
 				{
 				if (g_strstr_len(results[index].fieldNames[i], -1, "TimezoneIdPrefix"))
 					{
@@ -545,20 +548,19 @@ void zd_tz(ZoneDetectResult *results, gchar **timezone, gchar **countryname, gch
 					{
 					timezone_id = g_strdup(results[index].data[i]);
 					}
-				if (g_strstr_len(results[index].fieldNames[i], -1, "CountryName"))
-					{
-					*countryname = g_strdup(results[index].data[i]);
-					}
-				if (g_strstr_len(results[index].fieldNames[i], -1, "CountryAlpha2"))
-					{
-					*countryalpha2 = g_strdup(results[index].data[i]);
-					}
+				}
+			if (countryname && g_strstr_len(results[index].fieldNames[i], -1, "CountryName"))
+				{
+				*countryname = g_strdup(results[index].data[i]);
+				}
+			if (countryalpha2 && g_strstr_len(results[index].fieldNames[i], -1, "CountryAlpha2"))
+				{
+				*countryalpha2 = g_strdup(results[index].data[i]);
 				}
 			}
-		index++;
 		}
 
-	*timezone = g_strconcat(timezone_pre, timezone_id, NULL);
+	if (timezone) *timezone = g_strconcat(timezone_pre, timezone_id, NULL);
 }
 
 void ZoneDetect_onError(int errZD, int errNative)
@@ -569,94 +571,74 @@ void ZoneDetect_onError(int errZD, int errNative)
 /**
  * @brief Gets timezone data from an exif structure
  * @param[in] exif
- * @returns TRUE if timezone data found AND GPS date and time found
- * @param[out] exif_date_time exif date/time in the form 2018:11:30:17:05:04
+ * @returns true if timezone data found
  * @param[out] timezone in the form "Europe/London"
  * @param[out] countryname in the form "United Kingdom"
  * @param[out] countryalpha2 in the form "GB"
- *
- *
  */
-gboolean exif_build_tz_data(ExifData *exif, gchar **exif_date_time, gchar **timezone, gchar **countryname, gchar **countryalpha2)
+bool exif_build_tz_data(ExifData *exif, gchar **timezone, gchar **countryname, gchar **countryalpha2)
 {
-	gfloat latitude;
-	gfloat longitude;
-	gchar *lat_deg;
-	gchar *lat_min;
-	gchar *lon_deg;
-	gchar *lon_min;
-	ZoneDetect *cd;
-	ZoneDetectResult *results;
-	gboolean ret = FALSE;
+	const auto get_latlon = [exif](const gchar *item_key, const gchar *ref_key, const gchar *ref_inverse) -> std::optional<gfloat>
+	{
+		g_autofree gchar *text = exif_get_data_as_text(exif, item_key);
+		if (!text) return {};
 
-	g_autofree gchar *text_latitude = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSLatitude");
-	g_autofree gchar *text_longitude = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSLongitude");
-	g_autofree gchar *text_latitude_ref = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSLatitudeRef");
-	g_autofree gchar *text_longitude_ref = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSLongitudeRef");
+		g_autofree gchar *text_ref = exif_get_data_as_text(exif, ref_key);
+		if (!text_ref) return {};
 
-	if (text_latitude && text_longitude && text_latitude_ref && text_longitude_ref)
+		const gchar *deg_val = strtok(text, "deg'");
+		const gchar *min_val = strtok(nullptr, "deg'");
+		if (!deg_val || !min_val) return {};
+
+		gfloat value = atof(deg_val) + atof(min_val) / 60;
+
+		if (!g_strcmp0(text_ref, ref_inverse))
+			{
+			value = -value;
+			}
+
+		return value;
+	};
+
+	auto latitude = get_latlon("Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef", "South");
+	if (!latitude) return false;
+
+	auto longitude = get_latlon("Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef", "West");
+	if (!longitude) return false;
+
+	g_autofree gchar *timezone_path = g_build_filename(get_rc_dir(), TIMEZONE_DATABASE_FILE, NULL);
+	if (!g_file_test(timezone_path, G_FILE_TEST_EXISTS)) return false;
+
+	ZDSetErrorHandler(ZoneDetect_onError);
+
+	g_autoptr(ZoneDetect) cd = ZDOpenDatabase(timezone_path);
+	if (!cd)
 		{
-		lat_deg = strtok(text_latitude, "deg'");
-		lat_min = strtok(nullptr, "deg'");
-		if (!lat_deg || !lat_min)
-			{
-			return FALSE;
-			}
-		latitude = atof(lat_deg) + atof(lat_min) / 60;
-		if (!g_strcmp0(text_latitude_ref, "South"))
-			{
-			latitude = -latitude;
-			}
-		lon_deg = strtok(text_longitude, "deg'");
-		lon_min = strtok(nullptr, "deg'");
-		if (!lon_deg || !lon_min)
-			{
-			return FALSE;
-			}
-		longitude = atof(lon_deg) + atof(lon_min) / 60;
-		if (!g_strcmp0(text_longitude_ref, "West"))
-			{
-			longitude = -longitude;
-			}
-
-		g_autofree gchar *timezone_path = g_build_filename(get_rc_dir(), TIMEZONE_DATABASE_FILE, NULL);
-		if (g_file_test(timezone_path, G_FILE_TEST_EXISTS))
-			{
-			ZDSetErrorHandler(ZoneDetect_onError);
-			cd = ZDOpenDatabase(timezone_path);
-			if (cd)
-				{
-				results = ZDLookup(cd, latitude, longitude, nullptr);
-				if (results)
-					{
-					zd_tz(results, timezone, countryname, countryalpha2);
-					ret = TRUE;
-					}
-				}
-			else
-				{
-				log_printf("Error: Init of timezone database %s failed\n", timezone_path);
-				}
-			ZDCloseDatabase(cd);
-			}
+		log_printf("Error: Init of timezone database %s failed\n", timezone_path);
+		return false;
 		}
 
-	if (ret)
-		{
-		g_autofree gchar *text_date = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSDateStamp");
-		g_autofree gchar *text_time = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSTimeStamp");
+	ZoneDetectResult *results = ZDLookup(cd, latitude.value(), longitude.value(), nullptr);
+	if (!results) return false;
 
-		if (text_date && text_time)
-			{
-			*exif_date_time = g_strconcat(text_date, ":", text_time, NULL);
-			}
-		else
-			{
-			ret = FALSE;
-			}
-		}
+	zd_tz(results, timezone, countryname, countryalpha2);
+	return true;
+}
 
-	return ret;
+/**
+ * @brief Gets date/time from an exif structure
+ * @param[in] exif
+ * @returns exif date/time in the form 2018:11:30:17:05:04 if GPS date and time found
+ */
+gchar *exif_build_date_time(ExifData *exif)
+{
+	g_autofree gchar *text_date = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSDateStamp");
+	if (!text_date) return nullptr;
+
+	g_autofree gchar *text_time = exif_get_data_as_text(exif, "Exif.GPSInfo.GPSTimeStamp");
+	if (!text_time) return nullptr;
+
+	return g_strconcat(text_date, ":", text_time, NULL);
 }
 
 /**
@@ -672,32 +654,28 @@ gboolean exif_build_tz_data(ExifData *exif, gchar **exif_date_time, gchar **time
  */
 gchar *exif_build_formatted_localtime(ExifData *exif)
 {
-	gchar buf[128];
-	gint buflen;
-	struct tm *tm_local;
-	struct tm tm_utc;
-	time_t stamp;
-	gchar *exif_date_time = nullptr;
 	g_autofree gchar *timezone = nullptr;
-	g_autofree gchar *countryname = nullptr;
-	g_autofree gchar *countryalpha2 = nullptr;
+	if (!exif_build_tz_data(exif, &timezone, nullptr, nullptr)) return nullptr;
 
-	if (exif_build_tz_data(exif, &exif_date_time, &timezone, &countryname, &countryalpha2))
+	gchar *exif_date_time = exif_build_date_time(exif);
+
+	if (exif_date_time)
 		{
 		g_autofree gchar *time_zone_image = g_strconcat("TZ=", timezone, NULL);
 		g_autofree gchar *time_zone_org = g_strconcat("TZ=", getenv("TZ"), NULL);
 		setenv("TZ", "UTC", TRUE);
 
-		memset(&tm_utc, 0, sizeof(tm_utc));
-		if (exif_date_time && strptime(exif_date_time, "%Y:%m:%d:%H:%M:%S", &tm_utc))
+		std::tm tm_utc{};
+		if (strptime(exif_date_time, "%Y:%m:%d:%H:%M:%S", &tm_utc))
 			{
-			stamp = mktime(&tm_utc);	// Convert the struct to a Unix timestamp
-			putenv(time_zone_image);	// Switch to destination time zone
+			const time_t stamp = mktime(&tm_utc); // Convert the struct to a Unix timestamp
+			putenv(time_zone_image);              // Switch to destination time zone
 
-			tm_local = localtime(&stamp);
+			std::tm *tm_local = localtime(&stamp);
 
 			/* Convert to localtime using locale */
-			buflen = strftime(buf, sizeof(buf), "%x %X", tm_local);
+			gchar buf[128];
+			const gint buflen = strftime(buf, sizeof(buf), "%x %X", tm_local);
 			if (buflen > 0)
 				{
 				g_autoptr(GError) error = nullptr;
@@ -728,12 +706,9 @@ gchar *exif_build_formatted_localtime(ExifData *exif)
  */
 gchar *exif_build_formatted_timezone(ExifData *exif)
 {
-	g_autofree gchar *exif_date_time = nullptr;
 	gchar *timezone = nullptr;
-	g_autofree gchar *countryname = nullptr;
-	g_autofree gchar *countryalpha2 = nullptr;
 
-	exif_build_tz_data(exif, &exif_date_time, &timezone, &countryname, &countryalpha2);
+	exif_build_tz_data(exif, &timezone, nullptr, nullptr);
 
 	return timezone;
 }
@@ -747,12 +722,9 @@ gchar *exif_build_formatted_timezone(ExifData *exif)
  */
 gchar *exif_build_formatted_countryname(ExifData *exif)
 {
-	g_autofree gchar *exif_date_time = nullptr;
-	g_autofree gchar *timezone = nullptr;
 	gchar *countryname = nullptr;
-	g_autofree gchar *countryalpha2 = nullptr;
 
-	exif_build_tz_data(exif, &exif_date_time, &timezone, &countryname, &countryalpha2);
+	exif_build_tz_data(exif, nullptr, &countryname, nullptr);
 
 	return countryname;
 }
@@ -766,12 +738,9 @@ gchar *exif_build_formatted_countryname(ExifData *exif)
  */
 gchar *exif_build_formatted_countrycode(ExifData *exif)
 {
-	g_autofree gchar *exif_date_time = nullptr;
-	g_autofree gchar *timezone = nullptr;
-	g_autofree gchar *countryname = nullptr;
 	gchar *countryalpha2 = nullptr;
 
-	exif_build_tz_data(exif, &exif_date_time, &timezone, &countryname, &countryalpha2);
+	exif_build_tz_data(exif, nullptr, nullptr, &countryalpha2);
 
 	return countryalpha2;
 }
