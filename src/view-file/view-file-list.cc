@@ -1704,7 +1704,7 @@ static GdkRGBA *vflist_listview_color_shifted(GtkWidget *widget)
 		{
 		GtkStyle *style;
 
-		style = gq_gtk_widget_get_style(widget);
+		style = deprecated_gtk_widget_get_style(widget);
 		color = convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL]);
 
 		shift_color(color);

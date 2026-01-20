@@ -243,13 +243,13 @@ static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
 {
 	static GtkIconFactory *icon_factory = []()
 	{
-		GtkIconFactory *icon_factory = gq_gtk_icon_factory_new();
-		gq_gtk_icon_factory_add_default(icon_factory);
+		GtkIconFactory *icon_factory = deprecated_gtk_icon_factory_new();
+		deprecated_gtk_icon_factory_add_default(icon_factory);
 		return icon_factory;
 	}();
 
-	GtkIconSet *icon_set = gtk_icon_set_new_from_pixbuf(pixbuf);
-	gq_gtk_icon_factory_add(icon_factory, key, icon_set);
+	GtkIconSet *icon_set = deprecated_gtk_icon_set_new_from_pixbuf(pixbuf);
+	deprecated_gtk_icon_factory_add(icon_factory, key, icon_set);
 }
 #endif
 

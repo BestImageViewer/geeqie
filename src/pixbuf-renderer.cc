@@ -448,7 +448,7 @@ static void pixbuf_renderer_init(PixbufRenderer *pr)
 
 	pr->renderer2 = nullptr;
 
-	gq_gtk_widget_set_double_buffered(box, FALSE);
+	deprecated_gtk_widget_set_double_buffered(box, FALSE);
 	gtk_widget_set_app_paintable(box, TRUE);
 	g_signal_connect_after(G_OBJECT(box), "size_allocate",
 			       G_CALLBACK(pr_size_cb), pr);
@@ -639,8 +639,8 @@ static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 
 	if (pr->window_limit)
 		{
-		gint sw = gq_gdk_screen_width() * pr->window_limit_size / 100;
-		gint sh = gq_gdk_screen_height() * pr->window_limit_size / 100;
+		gint sw = deprecated_gdk_screen_width() * pr->window_limit_size / 100;
+		gint sh = deprecated_gdk_screen_height() * pr->window_limit_size / 100;
 
 		w = std::min(w, sw);
 		h = std::min(h, sh);
@@ -1606,8 +1606,8 @@ static gboolean pr_zoom_clamp(PixbufRenderer *pr, gdouble zoom,
 
 		if (sizeable)
 			{
-			max_w = gq_gdk_screen_width();
-			max_h = gq_gdk_screen_height();
+			max_w = deprecated_gdk_screen_width();
+			max_h = deprecated_gdk_screen_height();
 
 			if (pr->window_limit)
 				{

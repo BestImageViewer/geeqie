@@ -576,7 +576,7 @@ void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it
 				cairo_fill(cr);
 				cairo_destroy (cr);
 
-				cr = gq_gdk_cairo_create(od->window);
+				cr = deprecated_gdk_cairo_create(od->window);
 				cairo_set_source_surface(cr, rt->overlay_buffer, r.x - od_rect.x, r.y - od_rect.y);
 				cairo_rectangle (cr, r.x - od_rect.x, r.y - od_rect.y, r.width, r.height);
 				cairo_fill (cr);

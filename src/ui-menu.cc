@@ -83,8 +83,8 @@ static gint actions_sort_cb(gconstpointer a, gconstpointer b)
 	const gchar *accel_path_b;
 	GtkAccelKey key_b;
 
-	accel_path_a = gq_gtk_action_get_accel_path(GQ_GTK_ACTION(a));
-	accel_path_b = gq_gtk_action_get_accel_path(GQ_GTK_ACTION(b));
+	accel_path_a = deprecated_gtk_action_get_accel_path(deprecated_GTK_ACTION(a));
+	accel_path_b = deprecated_gtk_action_get_accel_path(deprecated_GTK_ACTION(b));
 
 	if (accel_path_a && gtk_accel_map_lookup_entry(accel_path_a, &key_a) && accel_path_b && gtk_accel_map_lookup_entry(accel_path_b, &key_b))
 		{
@@ -117,17 +117,17 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 	LayoutWindow *lw = layout_window_first(); /* get the actions from the first window, it should not matter, they should be the same in all windows */
 
 	g_assert(lw && lw->ui_manager);
-	groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager);
+	groups = deprecated_gtk_ui_manager_get_action_groups(lw->ui_manager);
 
 	while (groups)
 		{
-		g_autoptr(GList) actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
+		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
 		actions = g_list_sort(actions, actions_sort_cb);
 
 		for (GList *work = actions; work; work = work->next)
 			{
-			GtkAction *action = GQ_GTK_ACTION(work->data);
-			accel_path = gq_gtk_action_get_accel_path(action);
+			GtkAction *action = deprecated_GTK_ACTION(work->data);
+			accel_path = deprecated_gtk_action_get_accel_path(action);
 			GtkAccelKey key;
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key) && key.accel_key != 0)
 				{
@@ -192,10 +192,10 @@ GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar 
 	GtkWidget *item;
 	GtkWidget *image;
 
-	item = gq_gtk_image_menu_item_new_with_mnemonic(label);
+	item = deprecated_gtk_image_menu_item_new_with_mnemonic(label);
 
 	image = gq_gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_MENU);
-	gq_gtk_image_menu_item_set_image(GQ_GTK_IMAGE_MENU_ITEM(item), image);
+	deprecated_gtk_image_menu_item_set_image(deprecated_GTK_IMAGE_MENU_ITEM(item), image);
 	gtk_widget_show(image);
 
 	menu_item_add_accelerator(menu, item);
@@ -211,10 +211,10 @@ GtkWidget *menu_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *
 	GtkWidget *item;
 	GtkWidget *image;
 
-	item = gq_gtk_image_menu_item_new_with_mnemonic(label);
+	item = deprecated_gtk_image_menu_item_new_with_mnemonic(label);
 
 	image = gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_MENU);
-	gq_gtk_image_menu_item_set_image(GQ_GTK_IMAGE_MENU_ITEM(item), image);
+	deprecated_gtk_image_menu_item_set_image(deprecated_GTK_IMAGE_MENU_ITEM(item), image);
 	gtk_widget_show(image);
 
 	menu_item_add_accelerator(menu, item);

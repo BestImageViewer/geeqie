@@ -1801,7 +1801,7 @@ void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscre
 		if (!lw) return;
 
 		style_context = gtk_widget_get_style_context(lw->window);
-		gq_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &bg_color);
+		deprecated_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &bg_color);
 
 		theme_color.red = bg_color.red * 1;
 		theme_color.green = bg_color.green * 1;

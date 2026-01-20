@@ -1587,14 +1587,14 @@ static void accel_store_populate()
 	LayoutWindow *lw = layout_window_first(); /* get the actions from the first window, it should not matter, they should be the same in all windows */
 
 	g_assert(lw && lw->ui_manager);
-	groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager);
+	groups = deprecated_gtk_ui_manager_get_action_groups(lw->ui_manager);
 	while (groups)
 		{
-		g_autoptr(GList) actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
+		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
 		for (GList *work = actions; work; work = work->next)
 			{
-			GtkAction *action = GQ_GTK_ACTION(work->data);
-			accel_path = gq_gtk_action_get_accel_path(action);
+			GtkAction *action = deprecated_GTK_ACTION(work->data);
+			accel_path = deprecated_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{
 				g_autofree gchar *label = nullptr;
@@ -1613,7 +1613,7 @@ static void accel_store_populate()
 						}
 
 					g_autofree gchar *accel = gtk_accelerator_name(key.accel_key, key.accel_mods);
-					const gchar *icon_name = gq_gtk_action_get_icon_name(action);
+					const gchar *icon_name = deprecated_gtk_action_get_icon_name(action);
 
 					gtk_tree_store_append(accel_store, &iter, nullptr);
 					gtk_tree_store_set(accel_store, &iter,

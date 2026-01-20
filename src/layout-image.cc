@@ -331,19 +331,19 @@ static gboolean show_next_frame(gpointer data)
 
 	PixbufRenderer *pr = PIXBUF_RENDERER(fd->iw->pr);
 
-	if (!gq_gdk_pixbuf_animation_iter_advance(fd->iter, nullptr))
+	if (!deprecated_gdk_pixbuf_animation_iter_advance(fd->iter, nullptr))
 		{
 		/* This indicates the animation is complete.
 		   Return FALSE here to disable looping. */
 		}
 
-	fd->gpb = gq_gdk_pixbuf_animation_iter_get_pixbuf(fd->iter);
+	fd->gpb = deprecated_gdk_pixbuf_animation_iter_get_pixbuf(fd->iter);
 	image_change_pixbuf(fd->iw,fd->gpb,pr->zoom,FALSE);
 
 	if (fd->iw->func_update)
 		fd->iw->func_update(fd->iw, fd->iw->data_update);
 
-	delay = gq_gdk_pixbuf_animation_iter_get_delay_time(fd->iter);
+	delay = deprecated_gdk_pixbuf_animation_iter_get_delay_time(fd->iter);
 	if (delay!=fd->delay)
 		{
 		if (delay>0) /* Current frame not static. */
@@ -404,7 +404,7 @@ static void animation_async_ready_cb(GObject *, GAsyncResult *res, gpointer data
 
 	if (g_cancellable_is_cancelled(animation->cancellable))
 		{
-		gq_gdk_pixbuf_animation_new_from_stream_finish(res, nullptr);
+		deprecated_gdk_pixbuf_animation_new_from_stream_finish(res, nullptr);
 		g_object_unref(animation->in_file);
 		g_object_unref(animation->gfstream);
 		image_animation_data_free(animation);
@@ -412,16 +412,16 @@ static void animation_async_ready_cb(GObject *, GAsyncResult *res, gpointer data
 		}
 
 	g_autoptr(GError) error = nullptr;
-	animation->gpa = gq_gdk_pixbuf_animation_new_from_stream_finish(res, &error);
+	animation->gpa = deprecated_gdk_pixbuf_animation_new_from_stream_finish(res, &error);
 	if (animation->gpa)
 		{
-		if (!gq_gdk_pixbuf_animation_is_static_image(animation->gpa))
+		if (!deprecated_gdk_pixbuf_animation_is_static_image(animation->gpa))
 			{
-			animation->iter = gq_gdk_pixbuf_animation_get_iter(animation->gpa, nullptr);
+			animation->iter = deprecated_gdk_pixbuf_animation_get_iter(animation->gpa, nullptr);
 			if (animation->iter)
 				{
 				animation->data_adr = animation->lw->image->image_fd;
-				animation->delay = gq_gdk_pixbuf_animation_iter_get_delay_time(animation->iter);
+				animation->delay = deprecated_gdk_pixbuf_animation_iter_get_delay_time(animation->iter);
 				animation->valid = TRUE;
 
 				layout_image_animate_update_image(animation->lw);
@@ -466,7 +466,7 @@ static gboolean layout_image_animate_new_file(LayoutWindow *lw)
 	if (gfstream)
 		{
 		animation->gfstream = gfstream;
-		gq_gdk_pixbuf_animation_new_from_stream_async(G_INPUT_STREAM(gfstream), animation->cancellable, animation_async_ready_cb, animation);
+		deprecated_gdk_pixbuf_animation_new_from_stream_async(G_INPUT_STREAM(gfstream), animation->cancellable, animation_async_ready_cb, animation);
 		}
 	else
 		{
@@ -484,8 +484,8 @@ void layout_image_animate_toggle(LayoutWindow *lw)
 
 	lw->options.animate = !lw->options.animate;
 
-	action = gq_gtk_action_group_get_action(lw->action_group, "Animate");
-	gq_gtk_toggle_action_set_active(GQ_GTK_TOGGLE_ACTION(action), lw->options.animate);
+	action = deprecated_gtk_action_group_get_action(lw->action_group, "Animate");
+	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.animate);
 
 	layout_image_animate_new_file(lw);
 }

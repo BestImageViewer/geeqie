@@ -954,8 +954,8 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 
 	if (options->image.limit_window_size)
 		{
-		gint mw = gq_gdk_screen_width() * options->image.max_window_size / 100;
-		gint mh = gq_gdk_screen_height() * options->image.max_window_size / 100;
+		gint mw = deprecated_gdk_screen_width() * options->image.max_window_size / 100;
+		gint mh = deprecated_gdk_screen_height() * options->image.max_window_size / 100;
 
 		w = std::min(w, mw);
 		h = std::min(h, mh);

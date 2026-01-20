@@ -1079,7 +1079,7 @@ static GdkRGBA *vd_color_shifted(GtkWidget *widget)
 		GtkStyleContext *style_context;
 
 		style_context = gtk_widget_get_style_context(widget);
-		gq_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &color);
+		deprecated_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &color);
 
 		shift_color(color);
 		done = widget;

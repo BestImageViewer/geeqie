@@ -222,8 +222,8 @@ GdkRectangle get_screen_default_geometry(GdkScreen *screen)
 
 	geometry.x = 0;
 	geometry.y = 0;
-	geometry.width = gq_gdk_screen_get_width(screen);
-	geometry.height = gq_gdk_screen_get_height(screen);
+	geometry.width = deprecated_gdk_screen_get_width(screen);
+	geometry.height = deprecated_gdk_screen_get_height(screen);
 
 	return geometry;
 }
@@ -393,7 +393,7 @@ GdkRectangle fullscreen_prefs_get_geometry(gint screen_num, GtkWidget *widget, G
 			same_region = (!widget || !gtk_widget_get_window(widget) ||
 			               (dest_screen == gtk_widget_get_screen(widget) &&
 			                (it->number%100 == 0 ||
-			                 it->number%100 == gq_gdk_screen_get_monitor_at_window(dest_screen, gtk_widget_get_window(widget)) + 1)));
+			                 it->number%100 == deprecated_gdk_screen_get_monitor_at_window(dest_screen, gtk_widget_get_window(widget)) + 1)));
 			return it->geometry;
 			}
 		}

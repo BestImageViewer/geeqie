@@ -71,14 +71,14 @@ static void command_store_populate(SarData* sar)
 
 	gtk_tree_sortable_set_sort_column_id(sortable, SAR_LABEL, GTK_SORT_ASCENDING);
 
-	groups = gq_gtk_ui_manager_get_action_groups(sar->lw->ui_manager);
+	groups = deprecated_gtk_ui_manager_get_action_groups(sar->lw->ui_manager);
 	while (groups)
 		{
-		g_autoptr(GList) actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
+		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
 		for (GList *work = actions; work; work = work->next)
 			{
-			GtkAction *action = GQ_GTK_ACTION(work->data);
-			accel_path = gq_gtk_action_get_accel_path(action);
+			GtkAction *action = deprecated_GTK_ACTION(work->data);
+			accel_path = deprecated_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
 				{
 				g_autofree gchar *label = nullptr;
@@ -164,7 +164,7 @@ static gboolean entry_box_activate_cb(GtkWidget *, gpointer data)
 
 	if (sar->action)
 		{
-		gq_gtk_action_activate(sar->action);
+		deprecated_gtk_action_activate(sar->action);
 		}
 
 	search_and_run_destroy(sar);
@@ -202,7 +202,7 @@ static gboolean match_selected_cb(GtkEntryCompletion *, GtkTreeModel *model, Gtk
 
 	if (sar->action)
 		{
-		gq_gtk_action_activate(sar->action);
+		deprecated_gtk_action_activate(sar->action);
 		}
 
 	g_idle_add(search_and_run_destroy, sar);

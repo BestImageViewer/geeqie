@@ -1948,7 +1948,7 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 			name_sidecars = g_string_append(name_sidecars, star_rating);
 			}
 
-		GtkStyle *style = gq_gtk_widget_get_style(vf->listview);
+		GtkStyle *style = deprecated_gtk_widget_get_style(vf->listview);
 		GtkStateType state = (fd->selected & SELECTION_SELECTED) ? GTK_STATE_SELECTED : GTK_STATE_NORMAL;
 
 		GdkRGBA color_fg = convert_gdkcolor_to_gdkrgba(&style->text[state]);

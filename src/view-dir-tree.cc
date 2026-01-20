@@ -82,7 +82,7 @@ static void set_cursor(GtkWidget *widget, gint cursor_type)
 	if (!widget) return;
 
 	widget_set_cursor(widget, cursor_type);
-	gq_gdk_flush();
+	deprecated_gdk_flush();
 }
 
 static void vdtree_busy_push(ViewDir *vd)

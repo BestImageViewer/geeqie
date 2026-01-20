@@ -825,7 +825,7 @@ static void date_selection_popup(DateSelection *ds)
 	x = wx + button_allocation.x + button_allocation.width - window_allocation.width;
 	y = wy + button_allocation.y + button_allocation.height;
 
-	if (y + window_allocation.height > gq_gdk_screen_height())
+	if (y + window_allocation.height > deprecated_gdk_screen_height())
 		{
 		y = wy + button_allocation.y - window_allocation.height;
 		}
@@ -856,7 +856,7 @@ static void button_size_allocate_cb(GtkWidget *button, GtkAllocation *allocation
 {
 	auto spin = static_cast<GtkWidget *>(data);
 	GtkRequisition spin_requisition;
-	gq_gtk_widget_get_requisition(spin, &spin_requisition);
+	deprecated_gtk_widget_get_requisition(spin, &spin_requisition);
 
 	if (allocation->height > spin_requisition.height)
 		{
@@ -1290,14 +1290,14 @@ std::vector<ActionItem> get_action_items()
 
 	std::vector<ActionItem> list_duplicates;
 
-	for (GList *groups = gq_gtk_ui_manager_get_action_groups(lw->ui_manager); groups; groups = groups->next)
+	for (GList *groups = deprecated_gtk_ui_manager_get_action_groups(lw->ui_manager); groups; groups = groups->next)
 		{
-		g_autoptr(GList) actions = gq_gtk_action_group_list_actions(GQ_GTK_ACTION_GROUP(groups->data));
+		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
 		for (GList *work = actions; work; work = work->next)
 			{
-			GtkAction *action = GQ_GTK_ACTION(work->data);
+			GtkAction *action = deprecated_GTK_ACTION(work->data);
 
-			const gchar *accel_path = gq_gtk_action_get_accel_path(action);
+			const gchar *accel_path = deprecated_gtk_action_get_accel_path(action);
 			if (accel_path && gtk_accel_map_lookup_entry(accel_path, nullptr))
 				{
 				g_autofree gchar *action_name = g_path_get_basename(accel_path);
@@ -1310,7 +1310,7 @@ std::vector<ActionItem> get_action_items()
 #if HAVE_GTK4
 /* @FIXME GTK4 stub */
 #else
-					list_duplicates.emplace_back(action_name, action_label, gtk_action_get_stock_id(action));
+					list_duplicates.emplace_back(action_name, action_label, deprecated_gtk_action_get_stock_id(action));
 #endif
 					}
 				}

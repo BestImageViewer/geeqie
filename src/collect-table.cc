@@ -2329,7 +2329,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 
 	info = static_cast<CollectInfo *>(g_list_nth_data(list, cd->number));
 
-	style = gq_gtk_widget_get_style(ct->listview);
+	style = deprecated_gtk_widget_get_style(ct->listview);
 	if (info && (info->flag_mask & SELECTION_SELECTED))
 		{
 		color_fg = convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_SELECTED]);

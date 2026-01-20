@@ -808,7 +808,7 @@ if gtk4_migration_check_sh.found()
     compat_h = join_paths(meson.project_source_root(), 'src', 'compat.h')
     foreach source_file : code_sources
         source_file_name = fs.name(source_file)
-        if (source_file_name != 'debug.h')
+        if (source_file_name != 'compat-deprecated.h' and source_file_name != 'debug.h')
             test('GTK4 migration_ ' + source_file_name, gtk4_migration_check_sh, args : [source_file, compat_cc, compat_h], timeout : 100, suite : 'analysis')
         endif
     endforeach

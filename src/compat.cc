@@ -22,6 +22,8 @@
 
 #include <config.h>
 
+#include "compat-deprecated.h"
+
 #if HAVE_GTK4
 void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 {
@@ -107,7 +109,7 @@ void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 
 GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, GtkIconSize size)
 {
-	return gtk_image_new_from_stock(stock_id, size);
+	return deprecated_gtk_image_new_from_stock(stock_id, size);
 }
 
 GtkWidget *gq_gtk_bin_get_child(GtkWidget *widget)

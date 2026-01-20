@@ -186,10 +186,10 @@ void gq_action(GtkApplication *, GApplicationCommandLine *app_command_line, GVar
 		{
 		GtkAction *action;
 
-		action = gq_gtk_action_group_get_action(lw_id->action_group, text);
+		action = deprecated_gtk_action_group_get_action(lw_id->action_group, text);
 		if (action)
 			{
-			gq_gtk_action_activate(action);
+			deprecated_gtk_action_activate(action);
 			}
 		else
 			{
