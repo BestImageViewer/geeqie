@@ -590,14 +590,9 @@ bool exif_build_tz_data(ExifData *exif, gchar **timezone, gchar **countryname, g
 		const gchar *min_val = strtok(nullptr, "deg'");
 		if (!deg_val || !min_val) return {};
 
-		gfloat value = atof(deg_val) + atof(min_val) / 60;
+		const gfloat value = atof(deg_val) + (atof(min_val) / 60);
 
-		if (!g_strcmp0(text_ref, ref_inverse))
-			{
-			value = -value;
-			}
-
-		return value;
+		return (g_strcmp0(text_ref, ref_inverse) != 0) ? value : -value;
 	};
 
 	auto latitude = get_latlon("Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef", "South");
