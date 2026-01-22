@@ -2307,19 +2307,9 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 /* @FIXME GTK4 stub */
 	return;
 #else
-	auto cd = static_cast<ColumnData *>(data);
-	CollectInfo *info;
-	CollectTable *ct;
-	GdkRGBA color_bg;
-	GdkRGBA color_fg;
-	GList *list;
-	GtkStyle *style;
-
 	if (!GQV_IS_CELL_RENDERER_ICON(cell)) return;
 
-	ct = cd->ct;
-
-	gtk_tree_model_get(tree_model, iter, CTABLE_COLUMN_POINTER, &list, -1);
+	auto *cd = static_cast<ColumnData *>(data);
 
 	/** @FIXME this is a primitive hack to stop a crash.
 	 * When compiled with GTK3, if a Collection window containing
@@ -2328,10 +2318,28 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 	 */
 	if (cd->number == COLLECT_TABLE_MAX_COLUMNS) return;
 
-	info = static_cast<CollectInfo *>(g_list_nth_data(list, cd->number));
+	GList *list;
+	gtk_tree_model_get(tree_model, iter, CTABLE_COLUMN_POINTER, &list, -1);
 
-	style = deprecated_gtk_widget_get_style(ct->listview);
-	if (info && (info->flag_mask & SELECTION_SELECTED))
+	auto *info = static_cast<CollectInfo *>(g_list_nth_data(list, cd->number));
+	if (!info)
+		{
+		g_object_set(cell,
+		             "pixbuf", NULL,
+		             "text", NULL,
+		             "cell-background-set", FALSE,
+		             "foreground-set", FALSE,
+		             "has-focus", FALSE,
+		             NULL);
+		return;
+		}
+
+	const CollectTable *ct = cd->ct;
+
+	GtkStyle *style = deprecated_gtk_widget_get_style(ct->listview);
+	GdkRGBA color_bg;
+	GdkRGBA color_fg;
+	if (info->flag_mask & SELECTION_SELECTED)
 		{
 		color_fg = convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_SELECTED]);
 		color_bg = convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_SELECTED]);
@@ -2342,23 +2350,13 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 		color_bg = convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL]);
 		}
 
-	if (info && (info->flag_mask & SELECTION_PRELIGHT))
+	if (info->flag_mask & SELECTION_PRELIGHT)
 		{
 		shift_color(color_bg);
 		}
 
-	g_autofree gchar *star_rating = nullptr;
-	if (ct->show_stars && info && info->fd)
-		{
-		star_rating = metadata_read_rating_stars(info->fd);
-		}
-	else
-		{
-		star_rating = g_strdup("");
-		}
-
 	g_autoptr(GString) display_text = g_string_new("");
-	if (info && info->fd)
+	if (info->fd)
 		{
 		if (ct->show_text)
 			{
@@ -2368,6 +2366,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 		if (ct->show_stars)
 			{
 			if (display_text->len) g_string_append(display_text, "\n");
+			g_autofree gchar *star_rating = metadata_read_rating_stars(info->fd);
 			g_string_append(display_text, star_rating);
 			}
 
@@ -2378,29 +2377,15 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 			}
 		}
 
-
-	if (info)
-		{
-		g_object_set(cell,
-		             "pixbuf", info->pixbuf,
-		             "text", display_text->str,
-		             "cell-background-rgba", &color_bg,
-		             "cell-background-set", TRUE,
-		             "foreground-rgba", &color_fg,
-		             "foreground-set", TRUE,
-		             "has-focus", (ct->focus_info == info),
-		             NULL);
-		}
-	else
-		{
-		g_object_set(cell,
-		             "pixbuf", NULL,
-		             "text", NULL,
-		             "cell-background-set", FALSE,
-		             "foreground-set", FALSE,
-		             "has-focus", FALSE,
-		             NULL);
-		}
+	g_object_set(cell,
+	             "pixbuf", info->pixbuf,
+	             "text", display_text->str,
+	             "cell-background-rgba", &color_bg,
+	             "cell-background-set", TRUE,
+	             "foreground-rgba", &color_fg,
+	             "foreground-set", TRUE,
+	             "has-focus", (ct->focus_info == info),
+	             NULL);
 #endif
 }
 
