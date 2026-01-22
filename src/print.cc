@@ -710,12 +710,11 @@ void print_response_cb(GtkDialog *dialog, gint, gpointer)
  */
 void print_window_new(GList *selection, GtkWidget *parent)
 {
+	selection = file_data_process_groups_in_selection(selection, FALSE, nullptr);
+	if (g_list_length(selection) == 0) return;
+
 	auto *pw = g_new0(PrintWindow, 1);
-
-	pw->source_selection = file_data_process_groups_in_selection(selection, FALSE, nullptr);
-
-	if (print_layout_page_count(pw) == 0) return;
-
+	pw->source_selection = selection;
 	pw->parent = parent;
 
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
