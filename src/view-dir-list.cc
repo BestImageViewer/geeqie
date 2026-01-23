@@ -107,21 +107,17 @@ FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row)
 
 static void vdlist_scroll_to_row(ViewDir *vd, FileData *fd, gfloat y_align)
 {
+	if (!gtk_widget_get_realized(vd->view)) return;
+
 	GtkTreeIter iter;
+	if (!vd_find_row(vd, fd, &iter)) return;
 
-	if (gtk_widget_get_realized(vd->view) && vd_find_row(vd, fd, &iter))
-		{
-		GtkTreeModel *store;
-		GtkTreePath *tpath;
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
+	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(vd->view), tpath, nullptr, TRUE, y_align, 0.0);
+	gtk_tree_view_set_cursor(GTK_TREE_VIEW(vd->view), tpath, nullptr, FALSE);
 
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
-		tpath = gtk_tree_model_get_path(store, &iter);
-		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(vd->view), tpath, nullptr, TRUE, y_align, 0.0);
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(vd->view), tpath, nullptr, FALSE);
-		gtk_tree_path_free(tpath);
-
-		if (!gtk_widget_has_focus(vd->view)) gtk_widget_grab_focus(vd->view);
-		}
+	if (!gtk_widget_has_focus(vd->view)) gtk_widget_grab_focus(vd->view);
 }
 
 /*
@@ -347,10 +343,10 @@ void vdlist_refresh(ViewDir *vd)
 gboolean vdlist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	GtkTreePath *tpath;
 
 	if (event->keyval != GDK_KEY_Menu) return FALSE;
 
+	g_autoptr(GtkTreePath) tpath = nullptr;
 	gtk_tree_view_get_cursor(GTK_TREE_VIEW(vd->view), &tpath, nullptr);
 	if (tpath)
 		{
@@ -360,8 +356,6 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &vd->click_fd, -1);
-
-		gtk_tree_path_free(tpath);
 		}
 	else
 		{
@@ -380,12 +374,12 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 gboolean vdlist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
-					  &tpath, nullptr, nullptr, nullptr))
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
+	                                  &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 
@@ -393,7 +387,6 @@ gboolean vdlist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &fd, -1);
 		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
-		gtk_tree_path_free(tpath);
 		}
 
 	vd->click_fd = fd;

@@ -147,12 +147,11 @@ static void vdtree_icon_set_by_iter(ViewDir *vd, GtkTreeIter *iter, GdkPixbuf *p
 static void vdtree_expand_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean expand)
 {
 	GtkTreeModel *store;
-	GtkTreePath *tpath;
 	NodeData *nd;
 	FileData *fd = nullptr;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
-	tpath = gtk_tree_model_get_path(store, iter);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, iter);
 
 	if (expand)
 		{
@@ -179,7 +178,6 @@ static void vdtree_expand_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean expan
 		/* signal handler vdtree_row_collapsed is called, it updates the icon */
 		gtk_tree_view_collapse_row(GTK_TREE_VIEW(vd->view), tpath);
 		}
-	gtk_tree_path_free(tpath);
 }
 
 static void vdtree_expand_by_data(ViewDir *vd, FileData *fd, gboolean expand)
@@ -405,17 +403,15 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 	if (parent)
 		{
 		NodeData *pnd;
-		GtkTreePath *tpath;
-
 		gtk_tree_model_get(GTK_TREE_MODEL(store), parent, DIR_COLUMN_POINTER, &pnd, -1);
-		tpath = gtk_tree_model_get_path(GTK_TREE_MODEL(store), parent);
+
+		g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(GTK_TREE_MODEL(store), parent);
 		if (options->tree_descend_subdirs &&
 		    gtk_tree_view_row_expanded(GTK_TREE_VIEW(vd->view), tpath) &&
 		    !nd->expanded)
 			{
 			vdtree_populate_path_by_iter(vd, &child, FALSE, vd->dir_fd);
 			}
-		gtk_tree_path_free(tpath);
 		}
 }
 
@@ -682,8 +678,6 @@ gboolean vdtree_set_fd(ViewDir *vd, FileData *dir_fd)
 	if (vd_find_row(vd, fd, &iter))
 		{
 		GtkTreeModel *store;
-		GtkTreePath *tpath;
-		GtkTreePath *old_tpath;
 		GtkTreeSelection *selection;
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
@@ -695,9 +689,9 @@ gboolean vdtree_set_fd(ViewDir *vd, FileData *dir_fd)
 		gtk_tree_selection_select_iter(selection, &iter);
 		selection_is_ok = FALSE;
 
+		g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
+		g_autoptr(GtkTreePath) old_tpath = nullptr;
 		gtk_tree_view_get_cursor(GTK_TREE_VIEW(vd->view), &old_tpath, nullptr);
-		tpath = gtk_tree_model_get_path(store, &iter);
-
 		if (!old_tpath || gtk_tree_path_compare(tpath, old_tpath) != 0)
 			{
 			/* setting the cursor scrolls the view; do not do that unless it is necessary */
@@ -707,8 +701,6 @@ gboolean vdtree_set_fd(ViewDir *vd, FileData *dir_fd)
 			   does not work (switch from dir_list to dir_tree) */
 			tree_view_row_make_visible(GTK_TREE_VIEW(vd->view), &iter, TRUE);
 			}
-		gtk_tree_path_free(tpath);
-		gtk_tree_path_free(old_tpath);
 		}
 
 	return TRUE;
@@ -728,10 +720,10 @@ void vdtree_refresh(ViewDir *vd)
 gboolean vdtree_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
 
+	g_autoptr(GtkTreePath) tpath = nullptr;
 	gtk_tree_view_get_cursor(GTK_TREE_VIEW(vd->view), &tpath, nullptr);
 	if (tpath)
 		{
@@ -741,8 +733,6 @@ gboolean vdtree_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &nd, -1);
-
-		gtk_tree_path_free(tpath);
 
 		fd = (nd) ? nd->fd : nullptr;
 		}
@@ -809,14 +799,14 @@ static gboolean vdtree_clicked_on_expander(GtkTreeView *treeview, GtkTreePath *t
 gboolean vdtree_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	GtkTreePath *tpath;
 	GtkTreeViewColumn *column;
 	GtkTreeIter iter;
 	NodeData *nd = nullptr;
 	FileData *fd;
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
-					  &tpath, &column, nullptr, nullptr))
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
+	                                  &tpath, &column, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 		gint left_of_expander;
@@ -850,11 +840,8 @@ gboolean vdtree_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 					}
 				}
 
-			gtk_tree_path_free(tpath);
 			return FALSE;
 			}
-
-		gtk_tree_path_free(tpath);
 		}
 
 	vd->click_fd = (nd) ? nd->fd : nullptr;

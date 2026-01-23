@@ -1470,8 +1470,6 @@ static void file_util_rename_preview_update(UtilityData *ud)
 	GtkTreeSelection *selection;
 	GtkTreeIter iter;
 	GtkTreeIter iter_selected;
-	GtkTreePath *path_iter;
-	GtkTreePath *path_selected;
 	const gchar *front;
 	const gchar *end;
 	const gchar *format;
@@ -1579,14 +1577,12 @@ static void file_util_rename_preview_update(UtilityData *ud)
 
 			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ud->listview));
 			gtk_tree_selection_get_selected(selection, &store, &iter_selected);
-			path_iter=gtk_tree_model_get_path(store,&iter);
-			path_selected=gtk_tree_model_get_path(store,&iter_selected);
-			if (!gtk_tree_path_compare(path_iter,path_selected))
+			g_autoptr(GtkTreePath) path_iter = gtk_tree_model_get_path(store, &iter);
+			g_autoptr(GtkTreePath) path_selected = gtk_tree_model_get_path(store, &iter_selected);
+			if (!gtk_tree_path_compare(path_iter, path_selected))
 				{
 				generic_dialog_image_set(ud, fd);
 				}
-			gtk_tree_path_free(path_iter);
-			gtk_tree_path_free(path_selected);
 
 			gtk_list_store_set(GTK_LIST_STORE(store), &iter,
 					   UTILITY_COLUMN_DEST_PATH, fd->change->dest,

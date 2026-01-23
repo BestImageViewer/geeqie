@@ -329,49 +329,37 @@ void tree_view_row_make_visible(GtkTreeView *widget, GtkTreeIter *iter, gboolean
  */
 gboolean tree_view_move_cursor_away(GtkTreeView *widget, GtkTreeIter *iter, gboolean only_selected)
 {
-	GtkTreeModel *store;
-	GtkTreePath *tpath;
-	GtkTreePath *fpath;
-	gboolean move = FALSE;
-
 	if (!iter) return FALSE;
 
-	store = gtk_tree_view_get_model(widget);
-	tpath = gtk_tree_model_get_path(store, iter);
+	GtkTreeModel *store = gtk_tree_view_get_model(widget);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, iter);
+	g_autoptr(GtkTreePath) fpath = nullptr;
 	gtk_tree_view_get_cursor(widget, &fpath, nullptr);
 
-	if (fpath && gtk_tree_path_compare(tpath, fpath) == 0)
+	if (!fpath || gtk_tree_path_compare(tpath, fpath) != 0) return FALSE;
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(widget);
+
+	if (only_selected && !gtk_tree_selection_path_is_selected(selection, tpath)) return FALSE;
+
+	gboolean move = FALSE;
+
+	GtkTreeIter current = *iter;
+	if (gtk_tree_model_iter_next(store, &current))
 		{
-		GtkTreeSelection *selection;
-
-		selection = gtk_tree_view_get_selection(widget);
-
-		if (!only_selected ||
-		    gtk_tree_selection_path_is_selected(selection, tpath))
-			{
-			GtkTreeIter current;
-
-			current = *iter;
-			if (gtk_tree_model_iter_next(store, &current))
-				{
-				gtk_tree_path_next(tpath);
-				move = TRUE;
-				}
-			else if (gtk_tree_path_prev(tpath) &&
-				 gtk_tree_model_get_iter(store, &current, tpath))
-				{
-				move = TRUE;
-				}
-
-			if (move)
-				{
-				gtk_tree_view_set_cursor(widget, tpath, nullptr, FALSE);
-				}
-			}
+		gtk_tree_path_next(tpath);
+		move = TRUE;
+		}
+	else if (gtk_tree_path_prev(tpath) &&
+	         gtk_tree_model_get_iter(store, &current, tpath))
+		{
+		move = TRUE;
 		}
 
-	gtk_tree_path_free(tpath);
-	if (fpath) gtk_tree_path_free(fpath);
+	if (move)
+		{
+		gtk_tree_view_set_cursor(widget, tpath, nullptr, FALSE);
+		}
 
 	return move;
 }

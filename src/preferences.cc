@@ -1086,19 +1086,17 @@ static void filter_store_ext_edit_cb(GtkCellRendererText *, gchar *path_str, gch
 {
 	auto model = static_cast<GtkWidget *>(data);
 	auto fe = static_cast<FilterEntry *>(data);
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 
 	if (!new_text || *new_text == '\0') return;
 
-	tpath = gtk_tree_path_new_from_string(path_str);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
 	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
 
 	g_free(fe->extensions);
 	fe->extensions = g_strdup(new_text);
 
-	gtk_tree_path_free(tpath);
 	filter_rebuild();
 }
 
@@ -1106,13 +1104,12 @@ static void filter_store_class_edit_cb(GtkCellRendererText *, gchar *path_str, g
 {
 	auto model = static_cast<GtkWidget *>(data);
 	auto fe = static_cast<FilterEntry *>(data);
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 	gint i;
 
 	if (!new_text || !new_text[0]) return;
 
-	tpath = gtk_tree_path_new_from_string(path_str);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
 	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
 
@@ -1125,7 +1122,6 @@ static void filter_store_class_edit_cb(GtkCellRendererText *, gchar *path_str, g
 			}
 		}
 
-	gtk_tree_path_free(tpath);
 	filter_rebuild();
 }
 
@@ -1133,35 +1129,30 @@ static void filter_store_desc_edit_cb(GtkCellRendererText *, gchar *path_str, gc
 {
 	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 
 	if (!new_text || !new_text[0]) return;
 
-	tpath = gtk_tree_path_new_from_string(path_str);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
 	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
 
 	g_free(fe->description);
 	fe->description = g_strdup(new_text);
-
-	gtk_tree_path_free(tpath);
 }
 
 static void filter_store_enable_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
 {
 	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 
-	tpath = gtk_tree_path_new_from_string(path_str);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
 	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
 
 	fe->enabled = !fe->enabled;
 
-	gtk_tree_path_free(tpath);
 	filter_rebuild();
 }
 
@@ -1169,17 +1160,15 @@ static void filter_store_writable_cb(GtkCellRendererToggle *, gchar *path_str, g
 {
 	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 
-	tpath = gtk_tree_path_new_from_string(path_str);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
 	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
 
 	fe->writable = !fe->writable;
 	if (fe->writable) fe->allow_sidecar = FALSE;
 
-	gtk_tree_path_free(tpath);
 	filter_rebuild();
 }
 
@@ -1187,17 +1176,15 @@ static void filter_store_sidecar_cb(GtkCellRendererToggle *, gchar *path_str, gp
 {
 	auto model = static_cast<GtkWidget *>(data);
 	FilterEntry *fe;
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 
-	tpath = gtk_tree_path_new_from_string(path_str);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
 	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
 	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 0, &fe, -1);
 
 	fe->allow_sidecar = !fe->allow_sidecar;
 	if (fe->allow_sidecar) fe->writable = FALSE;
 
-	gtk_tree_path_free(tpath);
 	filter_rebuild();
 }
 
@@ -1241,8 +1228,6 @@ static void filter_set_func(GtkTreeViewColumn *, GtkCellRenderer *cell,
 
 static gboolean filter_add_scroll(gpointer data)
 {
-	GtkTreePath *path;
-	GList *list_cells;
 	GtkCellRenderer *cell;
 	GtkTreeViewColumn *column;
 	gint rows;
@@ -1252,11 +1237,11 @@ static gboolean filter_add_scroll(gpointer data)
 	FilterEntry *filter;
 
 	rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(filter_store), nullptr);
-	path = gtk_tree_path_new_from_indices(rows-1, -1);
+	g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_indices(rows - 1, -1);
 
 	column = gtk_tree_view_get_column(GTK_TREE_VIEW(data), 0);
 
-	list_cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
+	g_autoptr(GList) list_cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
 	cell = static_cast<GtkCellRenderer *>(g_list_last(list_cells)->data);
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(data));
@@ -1268,7 +1253,7 @@ static gboolean filter_add_scroll(gpointer data)
 
 		if (g_strcmp0(filter->extensions, ".new") == 0)
 			{
-			path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
+			path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter); // @fixme This leaks previous path
 			break;
 			}
 
@@ -1279,9 +1264,6 @@ static gboolean filter_add_scroll(gpointer data)
 								path, column, FALSE, 0.0, 0.0 );
 	gtk_tree_view_set_cursor_on_cell(GTK_TREE_VIEW(data),
 								path, column, cell, TRUE);
-
-	gtk_tree_path_free(path);
-	g_list_free(list_cells);
 
 	return G_SOURCE_REMOVE;
 }
@@ -1315,18 +1297,15 @@ static void filter_remove_cb(GtkWidget *, gpointer data)
 static gboolean filter_default_ok_scroll(gpointer data)
 {
 	GtkTreeIter iter;
-	GtkTreePath *path;
 	GtkTreeViewColumn *column;
 
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(filter_store), &iter);
-	path = gtk_tree_model_get_path(GTK_TREE_MODEL(filter_store), &iter);
+	g_autoptr(GtkTreePath) path = gtk_tree_model_get_path(GTK_TREE_MODEL(filter_store), &iter);
 	column = gtk_tree_view_get_column(GTK_TREE_VIEW(data),0);
 
 	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(data),
 				     path, column,
 				     FALSE, 0.0, 0.0);
-
-	gtk_tree_path_free(path);
 
 	return G_SOURCE_REMOVE;
 }
@@ -1665,7 +1644,7 @@ static void accel_store_edited_cb(GtkCellRendererAccel *, gchar *path_string, gu
 	g_autofree gchar *accel_path = nullptr;
 	GtkAccelKey old_key;
 	GtkAccelKey key;
-	GtkTreePath *path = gtk_tree_path_new_from_string(path_string);
+	g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_string(path_string);
 
 	gtk_tree_model_get_iter(model, &iter, path);
 	gtk_tree_model_get(model, &iter, AE_ACCEL, &accel_path, -1);
@@ -1684,24 +1663,20 @@ static void accel_store_edited_cb(GtkCellRendererAccel *, gchar *path_string, gu
 	gtk_tree_model_foreach(GTK_TREE_MODEL(accel_store), accel_remove_key_cb, acc);
 
 	gtk_tree_store_set(accel_store, &iter, AE_KEY, acc, -1);
-	gtk_tree_path_free(path);
 }
 
 static gboolean accel_default_scroll(gpointer data)
 {
 	GtkTreeIter iter;
-	GtkTreePath *path;
 	GtkTreeViewColumn *column;
 
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(accel_store), &iter);
-	path = gtk_tree_model_get_path(GTK_TREE_MODEL(accel_store), &iter);
+	g_autoptr(GtkTreePath) path = gtk_tree_model_get_path(GTK_TREE_MODEL(accel_store), &iter);
 	column = gtk_tree_view_get_column(GTK_TREE_VIEW(data),0);
 
 	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(data),
 				     path, column,
 				     FALSE, 0.0, 0.0);
-
-	gtk_tree_path_free(path);
 
 	return G_SOURCE_REMOVE;
 }

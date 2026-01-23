@@ -241,15 +241,12 @@ GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, La
 void layout_config_number_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
                     GtkTreeModel *store, GtkTreeIter *iter, gpointer)
 {
-	GtkTreePath *tpath;
-	gint *indices;
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, iter);
 
-	tpath = gtk_tree_model_get_path(store, iter);
-	indices = gtk_tree_path_get_indices(tpath);
+	gint *indices = gtk_tree_path_get_indices(tpath);
 	g_object_set(G_OBJECT(cell),
 	             "text", std::to_string(indices[0] + 1).c_str(),
 	             NULL);
-	gtk_tree_path_free(tpath);
 }
 
 gchar num_to_text_char(gint n)

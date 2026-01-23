@@ -342,17 +342,14 @@ static gboolean vd_rename_cb(TreeEditData *td, const gchar *, const gchar *new_n
 
 static void vd_rename_by_data(ViewDir *vd, FileData *fd)
 {
-	GtkTreeModel *store;
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
-
 	if (!fd || !vd_find_row(vd, fd, &iter)) return;
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
-	tpath = gtk_tree_model_get_path(store, &iter);
+
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
 
 	tree_edit_by_path(GTK_TREE_VIEW(vd->view), tpath, 0, fd->name,
-			  vd_rename_cb, vd);
-	gtk_tree_path_free(tpath);
+	                  vd_rename_cb, vd);
 }
 
 
@@ -870,16 +867,15 @@ static void vd_dnd_drop_receive(GtkWidget *widget, GdkDragContext *context,
 				guint, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	GtkTreePath *tpath;
 	FileData *fd = nullptr;
 
 	vd->click_fd = nullptr;
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
-					  &tpath, nullptr, nullptr, nullptr))
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
+	                                  &tpath, nullptr, nullptr, nullptr))
 		{
 		fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(widget), tpath);
-		gtk_tree_path_free(tpath);
 		}
 
 	if (!fd) return;
@@ -943,14 +939,13 @@ static void vd_dnd_drop_receive(GtkWidget *widget, GdkDragContext *context,
 
 static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y)
 {
-	GtkTreePath *tpath;
 	FileData *fd = nullptr;
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vd->view), x, y,
-					  &tpath, nullptr, nullptr, nullptr))
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vd->view), x, y,
+	                                  &tpath, nullptr, nullptr, nullptr))
 		{
 		fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(vd->view), tpath);
-		gtk_tree_path_free(tpath);
 		}
 
 	if (fd != vd->drop_fd)
@@ -1105,7 +1100,6 @@ void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_
 gboolean vd_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	GtkTreePath *tpath;
 	FileData *fd = nullptr;
 
 	if (layout_handle_user_defined_mouse_buttons(vd->layout, bevent))
@@ -1121,12 +1115,12 @@ gboolean vd_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 
 	if (bevent->button != GDK_BUTTON_PRIMARY) return TRUE;
 
-	if ((bevent->x != 0 || bevent->y != 0) &&
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    (bevent->x != 0 || bevent->y != 0) &&
 	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
 					  &tpath, nullptr, nullptr, nullptr))
 		{
 		fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(widget), tpath);
-		gtk_tree_path_free(tpath);
 		}
 
 	if (fd && vd->click_fd == fd)

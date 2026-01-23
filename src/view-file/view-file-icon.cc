@@ -249,32 +249,28 @@ static FileData *vficon_find_data(ViewFile *vf, gint row, gint col, GtkTreeIter 
 
 FileData *vficon_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
 {
-	GtkTreePath *tpath;
+	g_autoptr(GtkTreePath) tpath = nullptr;
 	GtkTreeViewColumn *column;
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), x, y,
+	if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), x, y,
 					  &tpath, &column, nullptr, nullptr))
 		{
-		GtkTreeModel *store;
-		GtkTreeIter row;
-		GList *list;
-		gint n;
-
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-		gtk_tree_model_get_iter(store, &row, tpath);
-		gtk_tree_path_free(tpath);
-
-		gtk_tree_model_get(store, &row, FILE_COLUMN_POINTER, &list, -1);
-
-		n = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_number"));
-		if (list)
-			{
-			if (iter) *iter = row;
-			return static_cast<FileData *>(g_list_nth_data(list, n));
-			}
+		return nullptr;
 		}
 
-	return nullptr;
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+	GtkTreeIter row;
+	gtk_tree_model_get_iter(store, &row, tpath);
+
+	GList *list;
+	gtk_tree_model_get(store, &row, FILE_COLUMN_POINTER, &list, -1);
+	if (!list) return nullptr;
+
+	gint n = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_number"));
+
+	if (iter) *iter = row;
+
+	return static_cast<FileData *>(g_list_nth_data(list, n));
 }
 
 static void vficon_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str, gpointer data)
@@ -1005,18 +1001,16 @@ static void vficon_set_focus(ViewFile *vf, FileData *fd)
 
 	if (vficon_find_iter(vf, VFICON(vf)->focus_fd, &iter, nullptr))
 		{
-		GtkTreePath *tpath;
 		GtkTreeViewColumn *column;
 		GtkTreeModel *store;
 
 		tree_view_row_make_visible(GTK_TREE_VIEW(vf->listview), &iter, FALSE);
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-		tpath = gtk_tree_model_get_path(store, &iter);
+		g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
 		/* focus is set to an extra column with 0 width to hide focus, we draw it ourself */
 		column = gtk_tree_view_get_column(GTK_TREE_VIEW(vf->listview), VFICON_MAX_COLUMNS);
 		gtk_tree_view_set_cursor(GTK_TREE_VIEW(vf->listview), tpath, column, FALSE);
-		gtk_tree_path_free(tpath);
 		}
 }
 
@@ -1371,7 +1365,6 @@ static GList *vficon_add_row(ViewFile *vf, GtkTreeIter *iter)
 static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_position)
 {
 	GtkTreeModel *store;
-	GtkTreePath *tpath;
 	GList *work;
 	FileData *visible_fd = nullptr;
 	gint r;
@@ -1382,14 +1375,14 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 
-	if (keep_position && gtk_widget_get_realized(vf->listview) &&
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    keep_position && gtk_widget_get_realized(vf->listview) &&
 	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeIter iter;
 		GList *list;
 
 		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_path_free(tpath);
 
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &list, -1);
 		if (list) visible_fd = static_cast<FileData *>(list->data);
@@ -1483,14 +1476,14 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 
 	VFICON(vf)->rows = r;
 
-	if (visible_fd &&
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    visible_fd &&
 	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeIter iter;
 		GList *list;
 
 		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_path_free(tpath);
 
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &list, -1);
 		if (g_list_find(list, visible_fd) == nullptr &&
@@ -1595,10 +1588,9 @@ void vficon_set_thumb_fd(ViewFile *vf, FileData *fd)
 /* Returns the next fd without a loaded pixbuf, so the thumb-loader can load the pixbuf for it. */
 FileData *vficon_thumb_next_fd(ViewFile *vf)
 {
-	GtkTreePath *tpath;
-
 	/* First see if there are visible files that don't have a loaded thumb... */
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 		GtkTreeIter iter;
@@ -1606,8 +1598,6 @@ FileData *vficon_thumb_next_fd(ViewFile *vf)
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_path_free(tpath);
-		tpath = nullptr;
 
 		while (valid && tree_view_row_is_visible(GTK_TREE_VIEW(vf->listview), &iter, FALSE))
 			{
@@ -1656,11 +1646,10 @@ void vficon_set_star_fd(ViewFile *vf, FileData *fd)
 
 FileData *vficon_star_next_fd(ViewFile *vf)
 {
-	GtkTreePath *tpath;
-
 	/* first check the visible files */
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 		GtkTreeIter iter;
@@ -1668,8 +1657,6 @@ FileData *vficon_star_next_fd(ViewFile *vf)
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_path_free(tpath);
-		tpath = nullptr;
 
 		while (valid && tree_view_row_is_visible(GTK_TREE_VIEW(vf->listview), &iter, FALSE))
 			{
@@ -1732,11 +1719,11 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 	GList *new_filelist = nullptr;
 	GList *new_fd_list = nullptr;
 	GList *old_selected = nullptr;
-	GtkTreePath *end_path = nullptr;
-	GtkTreePath *start_path = nullptr;
 	GtkTreeIter iter;
 	GtkTreeModel *store;
 
+	g_autoptr(GtkTreePath) start_path = nullptr;
+	g_autoptr(GtkTreePath) end_path = nullptr;
 	gtk_tree_view_get_visible_range(GTK_TREE_VIEW(vf->listview), &start_path, &end_path);
 
 	if (vf->dir_fd)
@@ -1878,9 +1865,6 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 		{
 		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(vf->listview), start_path, nullptr, FALSE, 0.0, 0.0);
 		}
-
-	gtk_tree_path_free(start_path);
-	gtk_tree_path_free(end_path);
 
 	return ret;
 }

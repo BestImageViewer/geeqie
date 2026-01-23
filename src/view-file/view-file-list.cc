@@ -132,25 +132,23 @@ static gint vflist_find_row(const ViewFile *vf, const FileData *fd, GtkTreeIter 
 
 FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *)
 {
-	GtkTreePath *tpath;
+	g_autoptr(GtkTreePath) tpath = nullptr;
 	GtkTreeViewColumn *column;
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), x, y,
-					  &tpath, &column, nullptr, nullptr))
+	if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), x, y,
+	                                   &tpath, &column, nullptr, nullptr))
 		{
-		GtkTreeModel *store;
-		GtkTreeIter row;
-		FileData *fd;
-
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-		gtk_tree_model_get_iter(store, &row, tpath);
-		gtk_tree_path_free(tpath);
-		gtk_tree_model_get(store, &row, FILE_COLUMN_POINTER, &fd, -1);
-
-		return fd;
+		return nullptr;
 		}
 
-	return nullptr;
+	GtkTreeIter row;
+	FileData *fd;
+
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+	gtk_tree_model_get_iter(store, &row, tpath);
+	gtk_tree_model_get(store, &row, FILE_COLUMN_POINTER, &fd, -1);
+
+	return fd;
 }
 
 static gboolean vflist_store_clear_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer)
@@ -203,13 +201,11 @@ void vflist_color_set(ViewFile *vf, FileData *fd, gboolean color_set)
 static void vflist_move_cursor(ViewFile *vf, GtkTreeIter *iter)
 {
 	GtkTreeModel *store;
-	GtkTreePath *tpath;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 
-	tpath = gtk_tree_model_get_path(store, iter);
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, iter);
 	gtk_tree_view_set_cursor(GTK_TREE_VIEW(vf->listview), tpath, nullptr, FALSE);
-	gtk_tree_path_free(tpath);
 }
 
 
@@ -268,15 +264,12 @@ GList *vflist_selection_get_one(ViewFile *vf, FileData *fd)
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 		if (vflist_find_row(vf, fd, &iter) >= 0)
 			{
-			GtkTreePath *tpath;
-
-			tpath = gtk_tree_model_get_path(store, &iter);
+			g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
 			if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(vf->listview), tpath))
 				{
 				/* unexpanded - add whole group */
 				list = filelist_copy(fd->sidecar_files);
 				}
-			gtk_tree_path_free(tpath);
 			}
 		}
 
@@ -299,13 +292,10 @@ void vflist_pop_menu_rename_cb(ViewFile *vf)
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 		if (vflist_find_row(vf, vf->click_fd, &iter) >= 0)
 			{
-			GtkTreePath *tpath;
-
-			tpath = gtk_tree_model_get_path(store, &iter);
+			g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
 			tree_edit_by_path(GTK_TREE_VIEW(vf->listview), tpath,
 			                  FILE_VIEW_COLUMN_FORMATTED, vf->click_fd->name,
 			                  vflist_row_rename_cb, vf);
-			gtk_tree_path_free(tpath);
 			}
 		return;
 		}
@@ -424,10 +414,9 @@ static gboolean vflist_row_rename_cb(TreeEditData *, const gchar *old_name, cons
 
 gboolean vflist_press_key_cb(ViewFile *vf, GtkWidget *widget, GdkEventKey *event)
 {
-	GtkTreePath *tpath;
-
 	if (event->keyval != GDK_KEY_Menu) return FALSE;
 
+	g_autoptr(GtkTreePath) tpath = nullptr;
 	gtk_tree_view_get_cursor(GTK_TREE_VIEW(vf->listview), &tpath, nullptr);
 	if (tpath)
 		{
@@ -437,7 +426,6 @@ gboolean vflist_press_key_cb(ViewFile *vf, GtkWidget *widget, GdkEventKey *event
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &vf->click_fd, -1);
-		gtk_tree_path_free(tpath);
 		}
 	else
 		{
@@ -452,15 +440,15 @@ gboolean vflist_press_key_cb(ViewFile *vf, GtkWidget *widget, GdkEventKey *event
 
 gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent)
 {
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
 	GtkTreeViewColumn *column;
 
 	vf->clicked_mark = 0;
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
-					  &tpath, &column, nullptr, nullptr))
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
+	                                  &tpath, &column, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 		gint col_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
@@ -476,7 +464,6 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent
 
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
-		gtk_tree_path_free(tpath);
 		}
 
 	vf->click_fd = fd;
@@ -535,7 +522,6 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent
 
 gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent)
 {
-	GtkTreePath *tpath;
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
 
@@ -554,7 +540,8 @@ gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *beve
 		return TRUE;
 		}
 
-	if ((bevent->x != 0 || bevent->y != 0) &&
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    (bevent->x != 0 || bevent->y != 0) &&
 	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
 					  &tpath, nullptr, nullptr, nullptr))
 		{
@@ -563,7 +550,6 @@ gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *beve
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
-		gtk_tree_path_free(tpath);
 		}
 
 	if (bevent->button == GDK_BUTTON_MIDDLE)
@@ -654,18 +640,17 @@ static gboolean vflist_select_cb(GtkTreeSelection *, GtkTreeModel *store, GtkTre
 {
 	auto vf = static_cast<ViewFile *>(data);
 	GtkTreeIter iter;
-	GtkTreePath *cursor_path;
 
 	VFLIST(vf)->select_fd = nullptr;
 
 	if (!path_currently_selected && gtk_tree_model_get_iter(store, &iter, tpath))
 		{
+		g_autoptr(GtkTreePath) cursor_path = nullptr;
 		gtk_tree_view_get_cursor(GTK_TREE_VIEW(vf->listview), &cursor_path, nullptr);
 		if (cursor_path)
 			{
 			gtk_tree_model_get_iter(store, &iter, cursor_path);
 			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &VFLIST(vf)->select_fd, -1);
-			gtk_tree_path_free(cursor_path);
 			}
 		}
 
@@ -1020,12 +1005,12 @@ void vflist_set_thumb_fd(ViewFile *vf, FileData *fd)
 
 FileData *vflist_thumb_next_fd(ViewFile *vf)
 {
-	GtkTreePath *tpath;
 	FileData *fd = nullptr;
 
 	/* first check the visible files */
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 		GtkTreeIter iter;
@@ -1033,8 +1018,6 @@ FileData *vflist_thumb_next_fd(ViewFile *vf)
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_path_free(tpath);
-		tpath = nullptr;
 
 		while (!fd && valid && tree_view_row_is_visible(GTK_TREE_VIEW(vf->listview), &iter, FALSE))
 			{
@@ -1110,11 +1093,10 @@ void vflist_set_star_fd(ViewFile *vf, FileData *fd)
 
 FileData *vflist_star_next_fd(ViewFile *vf)
 {
-	GtkTreePath *tpath;
-
 	/* first check the visible files */
 
-	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), 0, 0, &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 		GtkTreeIter iter;
@@ -1122,8 +1104,6 @@ FileData *vflist_star_next_fd(ViewFile *vf)
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 		gtk_tree_model_get_iter(store, &iter, tpath);
-		gtk_tree_path_free(tpath);
-		tpath = nullptr;
 
 		while (valid && tree_view_row_is_visible(GTK_TREE_VIEW(vf->listview), &iter, FALSE))
 			{
@@ -1333,15 +1313,11 @@ void vflist_select_none(ViewFile *vf)
 
 static gboolean tree_model_iter_prev(GtkTreeModel *store, GtkTreeIter *iter)
 {
-	GtkTreePath *tpath;
-	gboolean result;
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, iter);
 
-	tpath = gtk_tree_model_get_path(store, iter);
-	result = gtk_tree_path_prev(tpath);
+	gboolean result = gtk_tree_path_prev(tpath);
 	if (result)
 		gtk_tree_model_get_iter(store, iter, tpath);
-
-	gtk_tree_path_free(tpath);
 
 	return result;
 }
@@ -1399,22 +1375,16 @@ void vflist_select_by_fd(ViewFile *vf, FileData *fd)
 
 	tree_view_row_make_visible(GTK_TREE_VIEW(vf->listview), &iter, TRUE);
 
-	if (!vflist_row_is_selected(vf, fd))
-		{
-		GtkTreeSelection *selection;
-		GtkTreeModel *store;
-		GtkTreePath *tpath;
+	if (vflist_row_is_selected(vf, fd)) return;
 
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
-		gtk_tree_selection_unselect_all(selection);
-		gtk_tree_selection_select_iter(selection, &iter);
-		vflist_move_cursor(vf, &iter);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
+	gtk_tree_selection_unselect_all(selection);
+	gtk_tree_selection_select_iter(selection, &iter);
+	vflist_move_cursor(vf, &iter);
 
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-		tpath = gtk_tree_model_get_path(store, &iter);
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(vf->listview), tpath, nullptr, FALSE);
-		gtk_tree_path_free(tpath);
-		}
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
+	gtk_tree_view_set_cursor(GTK_TREE_VIEW(vf->listview), tpath, nullptr, FALSE);
 }
 
 void vflist_select_list(ViewFile *vf, GList *list)
@@ -1770,16 +1740,16 @@ static void vflist_listview_add_column(ViewFile *vf, gint n, const gchar *title,
 static void vflist_listview_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	GtkTreeStore *store;
-	GtkTreePath *path = gtk_tree_path_new_from_string(path_str);
 	GtkTreeIter iter;
 	FileData *fd;
 	gboolean marked;
 	guint col_idx;
 
-	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview)));
-	if (!path || !gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, path))
-		return;
+	g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_string(path_str);
+	if (!path) return;
+
+	auto *store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview)));
+	if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, path)) return;
 
 	col_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(cell), "column_store_idx"));
 
@@ -1804,8 +1774,6 @@ static void vflist_listview_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *
 		vflist_setup_iter_recursive(vf, GTK_TREE_STORE(store), &iter, fd->sidecar_files, nullptr, FALSE);
 		}
 	file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
-
-	gtk_tree_path_free(path);
 }
 
 static void vflist_listview_add_column_toggle(ViewFile *vf, gint n, const gchar *title)
