@@ -182,8 +182,8 @@ SIGSEGV,
 Valencia
 
 ##print.cc
-G_CALLBACK(print_set_font_cb), const_cast<char *>(\"Image text font\"));
-G_CALLBACK(print_set_font_cb), const_cast<char *>(\"Page text font\"));
+static constexpr gchar image_text_font_title[] = \"Image text font\";
+static constexpr gchar page_text_font_title[] = \"Page text font\";
 
 ##remote.cc
 render_intent = g_strdup(\"Absolute Colorimetric\");

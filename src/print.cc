@@ -141,26 +141,16 @@ void font_response_cb(GtkDialog *dialog, int response_id, gpointer option)
 	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
+template<const gchar *title>
 void print_set_font_cb(GtkWidget *widget, gpointer data)
 {
-	gpointer option;
-	GtkWidget *dialog;
+	GtkWidget *dialog = gtk_font_chooser_dialog_new(title, GTK_WINDOW(widget_get_toplevel(widget)));
 
-	if (g_strcmp0(static_cast<const gchar *>(data), "Image text font") == 0)
-		{
-		option = options->printer.image_font;
-		}
-	else
-		{
-		option = options->printer.page_font;
-		}
-
-	dialog = gtk_font_chooser_dialog_new(static_cast<const gchar *>(data), GTK_WINDOW(widget_get_toplevel(widget)));
 	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
-	gtk_font_chooser_set_font(GTK_FONT_CHOOSER(dialog), static_cast<const gchar *>(option));
+	gtk_font_chooser_set_font(GTK_FONT_CHOOSER(dialog), static_cast<const gchar *>(data));
 
-	g_signal_connect(dialog, "font-activated", G_CALLBACK(font_activated_cb), option);
-	g_signal_connect(dialog, "response", G_CALLBACK(font_response_cb), option);
+	g_signal_connect(dialog, "font-activated", G_CALLBACK(font_activated_cb), data);
+	g_signal_connect(dialog, "response", G_CALLBACK(font_response_cb), data);
 
 	gtk_widget_show(dialog);
 }
@@ -292,8 +282,9 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
+	static constexpr gchar image_text_font_title[] = "Image text font";
 	button = pref_button_new(nullptr, GQ_ICON_SELECT_FONT, _("Font"),
-				 G_CALLBACK(print_set_font_cb), const_cast<char *>("Image text font"));
+	                         G_CALLBACK(print_set_font_cb<image_text_font_title>), options->printer.image_font);
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
@@ -346,8 +337,9 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
+	static constexpr gchar page_text_font_title[] = "Page text font";
 	button = pref_button_new(nullptr, GQ_ICON_SELECT_FONT, _("Font"),
-				 G_CALLBACK(print_set_font_cb), const_cast<char *>("Page text font"));
+	                         G_CALLBACK(print_set_font_cb<page_text_font_title>), options->printer.page_font);
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
