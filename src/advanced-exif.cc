@@ -307,21 +307,18 @@ static gboolean advanced_exif_mouseclick(GtkWidget *, GdkEventButton *, gpointer
 #endif
 {
 	auto ew = static_cast<ExifWin *>(data);
-	GtkTreePath *path;
+	g_autoptr(GtkTreePath) path = nullptr;
 	GtkTreeViewColumn *column;
-	GtkTreeIter iter;
-	GtkTreeModel *store;
-	GList *cols;
-	gint col_num;
 
 	gtk_tree_view_get_cursor(GTK_TREE_VIEW(ew->listview), &path, &column);
 	if (path && column)
 		{
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(ew->listview));
+		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(ew->listview));
+		GtkTreeIter iter;
 		gtk_tree_model_get_iter(store, &iter, path);
 
-		cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(ew->listview));
-		col_num = g_list_index(cols, column);
+		g_autoptr(GList) cols = gtk_tree_view_get_columns(GTK_TREE_VIEW(ew->listview));
+		const gint col_num = g_list_index(cols, column);
 
 		g_autofree gchar *value = nullptr;
 		gtk_tree_model_get(store, &iter, display_order[col_num], &value, -1);
@@ -332,13 +329,10 @@ static gboolean advanced_exif_mouseclick(GtkWidget *, GdkEventButton *, gpointer
 
 		gdk_clipboard_set_text(clipboard, value);
 #else
-		GtkClipboard *clipboard;
+		GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 
-		clipboard = gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 		gtk_clipboard_set_text(clipboard, value, -1);
 #endif
-
-		g_list_free(cols);
 
 		gtk_tree_view_set_search_column(GTK_TREE_VIEW(ew->listview), gtk_tree_view_column_get_sort_column_id(column));
 		}

@@ -1228,42 +1228,40 @@ static void filter_set_func(GtkTreeViewColumn *, GtkCellRenderer *cell,
 
 static gboolean filter_add_scroll(gpointer data)
 {
-	GtkCellRenderer *cell;
-	GtkTreeViewColumn *column;
-	gint rows;
+	auto *filter_view = GTK_TREE_VIEW(data);
+
+	g_autoptr(GtkTreePath) path = nullptr;
+
+	GtkTreeModel *model = gtk_tree_view_get_model(filter_view);
 	GtkTreeIter iter;
-	GtkTreeModel *store;
-	gboolean valid;
-	FilterEntry *filter;
-
-	rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(filter_store), nullptr);
-	g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_indices(rows - 1, -1);
-
-	column = gtk_tree_view_get_column(GTK_TREE_VIEW(data), 0);
-
-	g_autoptr(GList) list_cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
-	cell = static_cast<GtkCellRenderer *>(g_list_last(list_cells)->data);
-
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(data));
-	valid = gtk_tree_model_get_iter_first(store, &iter);
-
+	gboolean valid = gtk_tree_model_get_iter_first(model, &iter);
 	while (valid)
 		{
-		gtk_tree_model_get(store, &iter, 0, &filter, -1);
+		FilterEntry *filter;
+		gtk_tree_model_get(model, &iter, 0, &filter, -1);
 
 		if (g_strcmp0(filter->extensions, ".new") == 0)
 			{
-			path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter); // @fixme This leaks previous path
+			path = gtk_tree_model_get_path(model, &iter);
 			break;
 			}
 
-		valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
+		valid = gtk_tree_model_iter_next(model, &iter);
 		}
 
-	gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(data),
-								path, column, FALSE, 0.0, 0.0 );
-	gtk_tree_view_set_cursor_on_cell(GTK_TREE_VIEW(data),
-								path, column, cell, TRUE);
+	if (!path)
+		{
+		const gint rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(filter_store), nullptr);
+		path = gtk_tree_path_new_from_indices(rows - 1, -1);
+		}
+
+	GtkTreeViewColumn *column = gtk_tree_view_get_column(filter_view, 0);
+
+	g_autoptr(GList) list_cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
+	auto *cell = static_cast<GtkCellRenderer *>(g_list_last(list_cells)->data);
+
+	gtk_tree_view_scroll_to_cell(filter_view, path, column, FALSE, 0.0, 0.0);
+	gtk_tree_view_set_cursor_on_cell(filter_view, path, column, cell, TRUE);
 
 	return G_SOURCE_REMOVE;
 }

@@ -275,28 +275,26 @@ FileData *vficon_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *i
 
 static void vficon_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str, gpointer data)
 {
-	auto vf = static_cast<ViewFile *>(data);
-	GtkTreeModel *store;
-	GtkTreePath *path = gtk_tree_path_new_from_string(path_str);
+	g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_string(path_str);
+	if (!path) return;
+
+	auto *vf = static_cast<ViewFile *>(data);
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
 	GtkTreeIter row;
-	gint column;
+	if (!gtk_tree_model_get_iter(model, &row, path)) return;
+
 	GList *list;
+	gtk_tree_model_get(model, &row, FILE_COLUMN_POINTER, &list, -1);
+
+	auto column = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(cell), "column_number"));
+
+	auto *fd = static_cast<FileData *>(g_list_nth_data(list, column));
+	if (!fd) return;
+
 	guint toggled_mark;
-	FileData *fd;
-
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-	if (!path || !gtk_tree_model_get_iter(store, &row, path)) return;
-
-	gtk_tree_model_get(store, &row, FILE_COLUMN_POINTER, &list, -1);
-
-	column = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(cell), "column_number"));
 	g_object_get(G_OBJECT(cell), "toggled_mark", &toggled_mark, NULL);
 
-	fd = static_cast<FileData *>(g_list_nth_data(list, column));
-	if (fd)
-		{
-		file_data_set_mark(fd, toggled_mark, !file_data_get_mark(fd, toggled_mark));
-		}
+	file_data_set_mark(fd, toggled_mark, !file_data_get_mark(fd, toggled_mark));
 }
 
 

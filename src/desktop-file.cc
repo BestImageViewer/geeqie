@@ -432,40 +432,41 @@ gint editor_list_window_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter
 void plugin_disable_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
 {
 	auto ewl = static_cast<EditorListWindow *>(data);
-	GtkTreePath *tpath;
+
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(ewl->view));
 	GtkTreeIter iter;
-	GtkTreeModel *model;
+	g_autoptr(GtkTreePath) tpath = gtk_tree_path_new_from_string(path_str);
+	gtk_tree_model_get_iter(model, &iter, tpath);
+
 	gboolean disabled;
-	gchar *path;
-	GList *list;
-	gchar *haystack;
+	g_autofree gchar *path = nullptr;
+	gtk_tree_model_get(model, &iter,
+	                   DESKTOP_FILE_COLUMN_DISABLED, &disabled,
+	                   DESKTOP_FILE_COLUMN_PATH, &path,
+	                   -1);
 
-	tpath = gtk_tree_path_new_from_string(path_str);
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(ewl->view));
-	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, tpath);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, DESKTOP_FILE_COLUMN_DISABLED, &disabled, -1);
-	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, DESKTOP_FILE_COLUMN_PATH, &path, -1);
-
-	gtk_list_store_set(GTK_LIST_STORE(desktop_file_list), &iter, DESKTOP_FILE_COLUMN_DISABLED, !disabled, -1);
+	gtk_list_store_set(GTK_LIST_STORE(desktop_file_list), &iter,
+	                   DESKTOP_FILE_COLUMN_DISABLED, !disabled,
+	                   -1);
 
 	if (!disabled)
 		{
-		options->disabled_plugins = g_list_append((options->disabled_plugins), g_strdup(path));
+		options->disabled_plugins = g_list_append(options->disabled_plugins, g_steal_pointer(&path));
 		}
 	else
 		{
-		list = options->disabled_plugins;
+		GList *list = options->disabled_plugins;
 		while (list)
 			{
-			haystack = static_cast<gchar *>(list->data);
+			auto *needle = static_cast<gchar *>(list->data);
 
-			if (haystack && strcmp(haystack, path) == 0)
+			if (needle && strcmp(needle, path) == 0)
 				{
-				options->disabled_plugins = g_list_remove(options->disabled_plugins, haystack);
-				g_free(haystack);
+				options->disabled_plugins = g_list_remove(options->disabled_plugins, needle);
+				g_free(needle);
 				}
 
-			list = list->next;
+			list = list->next; // @todo If haystack is found and removed list->next is nullptr
 			}
 		}
 

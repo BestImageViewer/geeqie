@@ -1148,29 +1148,32 @@ gboolean vd_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 gboolean vd_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	gboolean ret = FALSE;
-	FileData *fd;
-	GtkTreePath *tpath;
-	GtkTreeIter iter;
-	NodeData *nd = nullptr;
-	GtkTreeModel *store;
 
 	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
-		if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y, &tpath, nullptr, nullptr, nullptr))
+		if (g_autoptr(GtkTreePath) tpath = nullptr;
+		    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y, &tpath, nullptr, nullptr, nullptr))
 			{
-			store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
-			gtk_tree_model_get_iter(store, &iter, tpath);
+			GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+			GtkTreeIter iter;
+			gtk_tree_model_get_iter(model, &iter, tpath);
 
 			switch (vd->type)
 				{
 				case DIRVIEW_LIST:
-					gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &fd, -1);
+					{
+					FileData *fd = nullptr;
+					gtk_tree_model_get(model, &iter, DIR_COLUMN_POINTER, &fd, -1);
 					vd->click_fd = fd;
+					}
 					break;
 				case DIRVIEW_TREE:
-					gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &nd, -1);
-					vd->click_fd = (nd) ? nd->fd : nullptr;
+					{
+					NodeData *nd = nullptr;
+					gtk_tree_model_get(model, &iter, DIR_COLUMN_POINTER, &nd, -1);
+					vd->click_fd = nd ? nd->fd : nullptr;
+					}
+					break;
 				}
 
 			if (vd->click_fd)
@@ -1184,6 +1187,8 @@ gboolean vd_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 
 		return TRUE;
 		}
+
+	gboolean ret = FALSE;
 
 	switch (vd->type)
 	{
