@@ -29,13 +29,13 @@
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
+#include <config.h>
+
 #if HAVE_MNTENT_H
 #include <mntent.h>
 #else
 #include <sys/mount.h>
 #endif
-
-#include <config.h>
 
 #include "collect.h"
 #include "filedata.h"
@@ -45,7 +45,6 @@
 #include "options.h"
 #include "thumb.h"
 #include "ui-fileops.h"
-#include "ui-utildlg.h"
 
 #ifdef __NetBSD__
 #define statfs statvfs
