@@ -23,6 +23,7 @@
 
 #include <unistd.h>
 
+#include <algorithm>
 #include <cstring>
 
 #include <gdk/gdk.h>
@@ -449,24 +450,16 @@ void plugin_disable_cb(GtkCellRendererToggle *, gchar *path_str, gpointer data)
 	                   DESKTOP_FILE_COLUMN_DISABLED, !disabled,
 	                   -1);
 
-	if (!disabled)
+	if (path)
 		{
-		options->disabled_plugins = g_list_append(options->disabled_plugins, g_steal_pointer(&path));
-		}
-	else
-		{
-		GList *list = options->disabled_plugins;
-		while (list)
+		if (!disabled)
 			{
-			auto *needle = static_cast<gchar *>(list->data);
-
-			if (needle && strcmp(needle, path) == 0)
-				{
-				options->disabled_plugins = g_list_remove(options->disabled_plugins, needle);
-				g_free(needle);
-				}
-
-			list = list->next; // @todo If haystack is found and removed list->next is nullptr
+			options->disabled_plugins.emplace_back(path);
+			}
+		else
+			{
+			options->disabled_plugins.erase(std::remove(options->disabled_plugins.begin(), options->disabled_plugins.end(), path),
+			                                options->disabled_plugins.end());
 			}
 		}
 

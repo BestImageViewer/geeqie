@@ -252,7 +252,7 @@ ConfOptions *init_options(ConfOptions *options)
 
 	options->threads.duplicates = get_cpu_cores() - 1;
 
-	options->disabled_plugins = nullptr;
+	options->disabled_plugins.clear();
 
 	options->mouse_button_8 = g_strdup("Back");
 	options->mouse_button_9 = g_strdup("Forward");

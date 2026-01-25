@@ -21,6 +21,9 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include <string>
+#include <vector>
+
 #include <cairo.h>
 #include <gdk/gdk.h>
 #include <glib.h>
@@ -456,7 +459,7 @@ struct ConfOptions
 	gboolean disable_gpu; /**< GPU - see main.cc */
 	gboolean override_disable_gpu; /**< GPU - see main.cc */
 
-	GList *disabled_plugins;
+	std::vector<std::string> disabled_plugins;
 };
 
 struct CommandLine

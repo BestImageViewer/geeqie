@@ -1206,10 +1206,10 @@ static void options_load_disabled_plugins(GQParserData *parser_data, const gchar
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		gchar *path = nullptr;
-		if (READ_CHAR_FULL("path", path))
+		if (g_autofree gchar *path = nullptr;
+		    READ_CHAR_FULL("path", path) && path)
 			{
-			options->disabled_plugins = g_list_append(options->disabled_plugins, path);
+			options->disabled_plugins.emplace_back(path);
 			continue;
 			}
 

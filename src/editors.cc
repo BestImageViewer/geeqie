@@ -340,7 +340,8 @@ gboolean editor_read_desktop_file(const gchar *path)
 
 	g_key_file_free(key_file);
 
-	editor->disabled = g_list_find_custom(options->disabled_plugins, path, reinterpret_cast<GCompareFunc>(g_strcmp0)) ? TRUE : FALSE;
+	editor->disabled = !path || std::any_of(options->disabled_plugins.cbegin(), options->disabled_plugins.cend(),
+	                                        [path](const std::string &plugin){ return plugin == path; });
 
 	gtk_list_store_append(desktop_file_list, &iter);
 	gtk_list_store_set(desktop_file_list, &iter,
