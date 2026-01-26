@@ -95,39 +95,31 @@ static gchar *vflist_get_formatted(ViewFile *vf, const gchar *name, const gchar 
 struct ViewFileFindRowData {
 	const FileData *fd;
 	GtkTreeIter *iter;
-	gboolean found;
-	gint row;
+	bool found;
 };
 
 static gboolean vflist_find_row_cb(GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
 {
-	auto find = static_cast<ViewFileFindRowData *>(data);
 	FileData *fd;
 	gtk_tree_model_get(model, iter, FILE_COLUMN_POINTER, &fd, -1);
-	if (fd == find->fd)
-		{
-		*find->iter = *iter;
-		find->found = TRUE;
-		return TRUE;
-		}
-	find->row++;
-	return FALSE;
+
+	auto *find = static_cast<ViewFileFindRowData *>(data);
+	find->found = (fd == find->fd);
+
+	if (!find->found) return FALSE;
+
+	*find->iter = *iter;
+	return TRUE;
 }
 
-static gint vflist_find_row(const ViewFile *vf, const FileData *fd, GtkTreeIter *iter)
+static bool vflist_find_row(const ViewFile *vf, const FileData *fd, GtkTreeIter *iter)
 {
-	GtkTreeModel *store;
-	ViewFileFindRowData data = {fd, iter, FALSE, 0};
+	ViewFileFindRowData data{ fd, iter, false };
 
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-	gtk_tree_model_foreach(store, vflist_find_row_cb, &data);
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+	gtk_tree_model_foreach(model, vflist_find_row_cb, &data);
 
-	if (data.found)
-		{
-		return data.row;
-		}
-
-	return -1;
+	return data.found;
 }
 
 FileData *vflist_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *)
@@ -190,12 +182,11 @@ static void vflist_store_clear(ViewFile *vf, gboolean unlock_files)
 
 void vflist_color_set(ViewFile *vf, FileData *fd, gboolean color_set)
 {
-	GtkTreeModel *store;
 	GtkTreeIter iter;
+	if (!vflist_find_row(vf, fd, &iter)) return;
 
-	if (vflist_find_row(vf, fd, &iter) < 0) return;
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-	gtk_tree_store_set(GTK_TREE_STORE(store), &iter, FILE_COLUMN_COLOR, color_set, -1);
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+	gtk_tree_store_set(GTK_TREE_STORE(model), &iter, FILE_COLUMN_COLOR, color_set, -1);
 }
 
 static void vflist_move_cursor(ViewFile *vf, GtkTreeIter *iter)
@@ -262,7 +253,7 @@ GList *vflist_selection_get_one(ViewFile *vf, FileData *fd)
 		GtkTreeIter iter;
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-		if (vflist_find_row(vf, fd, &iter) >= 0)
+		if (vflist_find_row(vf, fd, &iter))
 			{
 			g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
 			if (!gtk_tree_view_row_expanded(GTK_TREE_VIEW(vf->listview), tpath))
@@ -290,7 +281,7 @@ void vflist_pop_menu_rename_cb(ViewFile *vf)
 		file_data_list_free(list);
 
 		store = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
-		if (vflist_find_row(vf, vf->click_fd, &iter) >= 0)
+		if (vflist_find_row(vf, vf->click_fd, &iter))
 			{
 			g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
 			tree_edit_by_path(GTK_TREE_VIEW(vf->listview), tpath,
@@ -997,7 +988,7 @@ void vflist_set_thumb_fd(ViewFile *vf, FileData *fd)
 	GtkTreeStore *store;
 	GtkTreeIter iter;
 
-	if (!fd || vflist_find_row(vf, fd, &iter) < 0) return;
+	if (!fd || !vflist_find_row(vf, fd, &iter)) return;
 
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview)));
 	gtk_tree_store_set(store, &iter, FILE_COLUMN_THUMB, fd->thumb_pixbuf, -1);
@@ -1065,7 +1056,7 @@ void vflist_set_star_fd(ViewFile *vf, FileData *fd)
 	GtkTreeIter iter;
 	gboolean expanded;
 
-	if (!fd || vflist_find_row(vf, fd, &iter) < 0) return;
+	if (!fd || !vflist_find_row(vf, fd, &iter)) return;
 
 	g_autofree gchar *star_rating = metadata_read_rating_stars(fd);
 
@@ -1371,7 +1362,7 @@ void vflist_select_by_fd(ViewFile *vf, FileData *fd)
 {
 	GtkTreeIter iter;
 
-	if (vflist_find_row(vf, fd, &iter) < 0) return;
+	if (!vflist_find_row(vf, fd, &iter)) return;
 
 	tree_view_row_make_visible(GTK_TREE_VIEW(vf->listview), &iter, TRUE);
 
@@ -1400,7 +1391,8 @@ void vflist_select_list(ViewFile *vf, GList *list)
 
 		fd = static_cast<FileData *>(work->data);
 
-		if (vflist_find_row(vf, fd, &iter) < 0) return;
+		if (!vflist_find_row(vf, fd, &iter)) return;
+
 		if (!vflist_row_is_selected(vf, fd))
 			{
 			GtkTreeSelection *selection;
