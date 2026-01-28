@@ -1829,23 +1829,7 @@ static void layout_image_scroll_cb(ImageWindow *imd, GdkEventScroll *event, gpoi
 		}
 	else if (options->mousewheel_scrolls)
 		{
-		switch (event->direction)
-			{
-			case GDK_SCROLL_UP:
-				image_scroll(imd, 0, -MOUSEWHEEL_SCROLL_SIZE);
-				break;
-			case GDK_SCROLL_DOWN:
-				image_scroll(imd, 0, MOUSEWHEEL_SCROLL_SIZE);
-				break;
-			case GDK_SCROLL_LEFT:
-				image_scroll(imd, -MOUSEWHEEL_SCROLL_SIZE, 0);
-				break;
-			case GDK_SCROLL_RIGHT:
-				image_scroll(imd, MOUSEWHEEL_SCROLL_SIZE, 0);
-				break;
-			default:
-				break;
-			}
+		image_mousewheel_scroll(imd, event->direction);
 		}
 	else
 		{
