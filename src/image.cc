@@ -1556,6 +1556,29 @@ void image_reload(ImageWindow *imd)
 	image_change_complete(imd, image_zoom_get(imd));
 }
 
+void image_mousewheel_scroll(ImageWindow *imd, GdkScrollDirection direction)
+{
+	constexpr gint MOUSEWHEEL_SCROLL_SIZE = 20;
+
+	switch (direction)
+		{
+		case GDK_SCROLL_UP:
+			image_scroll(imd, 0, -MOUSEWHEEL_SCROLL_SIZE);
+			break;
+		case GDK_SCROLL_DOWN:
+			image_scroll(imd, 0, MOUSEWHEEL_SCROLL_SIZE);
+			break;
+		case GDK_SCROLL_LEFT:
+			image_scroll(imd, -MOUSEWHEEL_SCROLL_SIZE, 0);
+			break;
+		case GDK_SCROLL_RIGHT:
+			image_scroll(imd, MOUSEWHEEL_SCROLL_SIZE, 0);
+			break;
+		default:
+			break;
+		}
+}
+
 void image_scroll(ImageWindow *imd, gint x, gint y)
 {
 	pixbuf_renderer_scroll(PIXBUF_RENDERER(imd->pr), x, y);
