@@ -3728,9 +3728,10 @@ static void dupe_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 	gboolean set;
 
 	gtk_tree_model_get(tree_model, iter, DUPE_COLUMN_COLOR, &set, -1);
-	g_object_set(G_OBJECT(cell),
-		     "cell-background-rgba", dupe_listview_color_shifted(dw->listview),
-		     "cell-background-set", set, NULL);
+	g_object_set(cell,
+	             "cell-background-rgba", dupe_listview_color_shifted(dw->listview),
+	             "cell-background-set", set,
+	             NULL);
 }
 
 static void dupe_listview_add_column(DupeWindow *dw, GtkWidget *listview, gint n, const gchar *title, gboolean image, gboolean right_justify)
@@ -3755,7 +3756,7 @@ static void dupe_listview_add_column(DupeWindow *dw, GtkWidget *listview, gint n
 		renderer = gtk_cell_renderer_text_new();
 		if (right_justify)
 			{
-			g_object_set(G_OBJECT(renderer), "xalign", 1.0, NULL);
+			g_object_set(renderer, "xalign", 1.0, NULL);
 			}
 		gtk_tree_view_column_pack_start(column, renderer, TRUE);
 		gtk_tree_view_column_add_attribute(column, renderer, "text", n);
@@ -3795,7 +3796,7 @@ static void dupe_listview_set_height(GtkWidget *listview, gboolean thumb)
 	cell = static_cast<GtkCellRenderer *>(list->data);
 	g_list_free(list);
 
-	g_object_set(G_OBJECT(cell), "height", (thumb) ? options->thumbnails.max_height : -1, NULL);
+	g_object_set(cell, "height", thumb ? options->thumbnails.max_height : -1, NULL);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(listview));
 }
 

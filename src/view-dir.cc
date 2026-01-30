@@ -1092,9 +1092,10 @@ void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_
 	gboolean set;
 
 	gtk_tree_model_get(tree_model, iter, DIR_COLUMN_COLOR, &set, -1);
-	g_object_set(G_OBJECT(cell),
-		     "cell-background-rgba", vd_color_shifted(vd->view),
-		     "cell-background-set", set, NULL);
+	g_object_set(cell,
+	             "cell-background-rgba", vd_color_shifted(vd->view),
+	             "cell-background-set", set,
+	             NULL);
 }
 
 gboolean vd_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)

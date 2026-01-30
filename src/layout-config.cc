@@ -244,7 +244,7 @@ void layout_config_number_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 	g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, iter);
 
 	gint *indices = gtk_tree_path_get_indices(tpath);
-	g_object_set(G_OBJECT(cell),
+	g_object_set(cell,
 	             "text", std::to_string(indices[0] + 1).c_str(),
 	             NULL);
 }

@@ -842,7 +842,7 @@ static void image_load_done_cb(ImageLoader *, gpointer data)
 		image_cache_set(imd, imd->image_fd);
 		}
 	/* call the callback triggered by image_state after fd->pixbuf is set */
-	g_object_set(G_OBJECT(imd->pr), "loading", FALSE, NULL);
+	g_object_set(imd->pr, "loading", FALSE, NULL);
 	image_state_unset(imd, IMAGE_STATE_LOADING);
 
 	if (!image_loader_get_pixbuf(imd->il))
@@ -857,7 +857,7 @@ static void image_load_done_cb(ImageLoader *, gpointer data)
 	else if (imd->delay_flip &&
 	    image_get_pixbuf(imd) != image_loader_get_pixbuf(imd->il))
 		{
-		g_object_set(G_OBJECT(imd->pr), "complete", FALSE, NULL);
+		g_object_set(imd->pr, "complete", FALSE, NULL);
 		image_change_pixbuf(imd, image_loader_get_pixbuf(imd->il), image_zoom_get(imd), FALSE);
 		}
 
@@ -920,7 +920,7 @@ static gboolean image_read_ahead_check(ImageWindow *imd)
 
 		image_load_set_signals(imd, TRUE);
 
-		g_object_set(G_OBJECT(imd->pr), "loading", TRUE, NULL);
+		g_object_set(imd->pr, "loading", TRUE, NULL);
 		image_state_set(imd, IMAGE_STATE_LOADING);
 
 		if (!imd->delay_flip)
@@ -955,7 +955,7 @@ static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 	if (imd->il) return FALSE;
 
 	imd->completed = FALSE;
-	g_object_set(G_OBJECT(imd->pr), "complete", FALSE, NULL);
+	g_object_set(imd->pr, "complete", FALSE, NULL);
 
 	if (image_cache_get(imd))
 		{
@@ -978,7 +978,7 @@ static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 		pr->pixbuf = nullptr;
 		}
 
-	g_object_set(G_OBJECT(imd->pr), "loading", TRUE, NULL);
+	g_object_set(imd->pr, "loading", TRUE, NULL);
 
 	imd->il = image_loader_new(fd);
 
@@ -988,7 +988,7 @@ static gboolean image_load_begin(ImageWindow *imd, FileData *fd)
 		{
 		DEBUG_1("image start error");
 
-		g_object_set(G_OBJECT(imd->pr), "loading", FALSE, NULL);
+		g_object_set(imd->pr, "loading", FALSE, NULL);
 
 		image_loader_free(imd->il);
 		imd->il = nullptr;
@@ -1015,7 +1015,7 @@ static void image_reset(ImageWindow *imd)
 
 	DEBUG_1("%s image reset", get_exec_time());
 
-	g_object_set(G_OBJECT(imd->pr), "loading", FALSE, NULL);
+	g_object_set(imd->pr, "loading", FALSE, NULL);
 
 	image_loader_free(imd->il);
 	imd->il = nullptr;
@@ -1037,8 +1037,10 @@ static void image_change_complete(ImageWindow *imd, gdouble zoom)
 	imd->unknown = TRUE;
 
 	/** @FIXME Might be improved when the wepb animation changes happen */
-	g_object_set(G_OBJECT(imd->pr), "zoom_2pass", options->image.zoom_2pass, NULL);
-	g_object_set(G_OBJECT(imd->pr), "zoom_quality", options->image.zoom_quality, NULL);
+	g_object_set(imd->pr,
+	             "zoom_2pass", options->image.zoom_2pass,
+	             "zoom_quality", options->image.zoom_quality,
+	             NULL);
 
 	if (!imd->image_fd)
 		{
@@ -1061,8 +1063,10 @@ static void image_change_complete(ImageWindow *imd, gdouble zoom)
 				 * Reduce quality to worst but fastest to avoid dropped frames */
 				if (g_ascii_strcasecmp(imd->image_fd->extension, ".GIF") == 0)
 					{
-					g_object_set(G_OBJECT(imd->pr), "zoom_2pass", FALSE, NULL);
-					g_object_set(G_OBJECT(imd->pr), "zoom_quality", GDK_INTERP_NEAREST, NULL);
+					g_object_set(imd->pr,
+					             "zoom_2pass", FALSE,
+					             "zoom_quality", GDK_INTERP_NEAREST,
+					             NULL);
 					}
 				}
 
@@ -1797,7 +1801,7 @@ void image_top_window_set_sync(ImageWindow *imd, gboolean allow_sync)
 {
 	imd->top_window_sync = allow_sync;
 
-	g_object_set(G_OBJECT(imd->pr), "window_fit", allow_sync, NULL);
+	g_object_set(imd->pr, "window_fit", allow_sync, NULL);
 }
 
 void image_background_set_color(ImageWindow *imd, GdkRGBA *color)
@@ -1892,7 +1896,7 @@ void image_set_delay_flip(ImageWindow *imd, gboolean delay)
 
 	imd->delay_flip = delay;
 
-	g_object_set(G_OBJECT(imd->pr), "delay_flip", delay, NULL);
+	g_object_set(imd->pr, "delay_flip", delay, NULL);
 
 	if (!imd->delay_flip && imd->il)
 		{
@@ -1955,19 +1959,19 @@ void image_grab_focus(ImageWindow *imd)
 
 static void image_options_set(ImageWindow *imd)
 {
-	g_object_set(G_OBJECT(imd->pr), "zoom_quality", options->image.zoom_quality,
-					"zoom_2pass", options->image.zoom_2pass,
-					"zoom_expand", options->image.zoom_to_fit_allow_expand,
-					"scroll_reset", options->image.scroll_reset_method,
-					"cache_display", options->image.tile_cache_max,
-					"window_fit", (imd->top_window_sync && options->image.fit_window_to_image),
-					"window_limit", options->image.limit_window_size,
-					"window_limit_value", options->image.max_window_size,
-					"autofit_limit", options->image.limit_autofit_size,
-					"autofit_limit_value", options->image.max_autofit_size,
-					"enlargement_limit_value", options->image.max_enlargement_size,
-
-					NULL);
+	g_object_set(imd->pr,
+	             "zoom_quality", options->image.zoom_quality,
+	             "zoom_2pass", options->image.zoom_2pass,
+	             "zoom_expand", options->image.zoom_to_fit_allow_expand,
+	             "scroll_reset", options->image.scroll_reset_method,
+	             "cache_display", options->image.tile_cache_max,
+	             "window_fit", imd->top_window_sync && options->image.fit_window_to_image,
+	             "window_limit", options->image.limit_window_size,
+	             "window_limit_value", options->image.max_window_size,
+	             "autofit_limit", options->image.limit_autofit_size,
+	             "autofit_limit_value", options->image.max_autofit_size,
+	             "enlargement_limit_value", options->image.max_enlargement_size,
+	             NULL);
 
 	pixbuf_renderer_set_parent(PIXBUF_RENDERER(imd->pr), GTK_WINDOW(imd->top_window));
 

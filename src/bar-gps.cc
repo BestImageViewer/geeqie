@@ -677,7 +677,7 @@ void bar_pane_gps_set_map_source(PaneGPSData *pgd, const gchar *map_id)
 
 	if (map_source != nullptr)
 		{
-		g_object_set(G_OBJECT(pgd->gps_view), "map-source", map_source, NULL);
+		g_object_set(pgd->gps_view, "map-source", map_source, NULL);
 		}
 
 	g_object_unref(map_factory);
@@ -776,14 +776,14 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	write_char_option(outstr, "map-id", map_id);
 
 	gint zoom;
-	g_object_get(G_OBJECT(pgd->gps_view), "zoom-level", &zoom, NULL);
+	g_object_get(pgd->gps_view, "zoom-level", &zoom, NULL);
 	WRITE_NL();
 	write_int_option(outstr, "zoom-level", zoom);
 
 	const auto write_lat_long_option = [pgd, outstr, indent](const gchar *option)
 	{
 		gdouble position;
-		g_object_get(G_OBJECT(pgd->gps_view), option, &position, NULL);
+		g_object_get(pgd->gps_view, option, &position, NULL);
 		const gint int_position = position * 1000000;
 		WRITE_NL();
 		write_int_option(outstr, option, int_position);
@@ -804,20 +804,20 @@ void bar_pane_gps_slider_changed_cb(GtkScaleButton *slider,
 
 	g_autofree gchar *message = g_strdup_printf(_("Zoom %i"), static_cast<gint>(zoom));
 
-	g_object_set(G_OBJECT(CHAMPLAIN_VIEW(pgd->gps_view)), "zoom-level", static_cast<gint>(zoom), NULL);
+	g_object_set(CHAMPLAIN_VIEW(pgd->gps_view), "zoom-level", static_cast<gint>(zoom), NULL);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(slider), message);
 }
 
 void bar_pane_gps_view_state_changed_cb(ChamplainView *view, GParamSpec *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
+
  	ChamplainState status;
  	gint zoom;
+	g_object_get(view, "state", &status, "zoom-level", &zoom, NULL);
 
-	g_object_get(G_OBJECT(view), "zoom-level", &zoom, NULL);
 	g_autofree gchar *message = g_strdup_printf(_("Zoom level %i"), zoom);
 
-	g_object_get(G_OBJECT(view), "state", &status, NULL);
 	if (status == CHAMPLAIN_STATE_LOADING)
 		{
 		gtk_label_set_text(GTK_LABEL(pgd->state), _("Loading map"));
@@ -1055,14 +1055,15 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	bar_pane_gps_set_map_source(pgd, map_id);
 
-	g_object_set(G_OBJECT(view), "kinetic-mode", TRUE,
-				     "zoom-level", zoom,
-				     "keep-center-on-resize", TRUE,
-				     "deceleration", 1.1,
-				     "zoom-on-double-click", FALSE,
-				     "max-zoom-level", 17,
-				     "min-zoom-level", 1,
-				     NULL);
+	g_object_set(view,
+	             "kinetic-mode", TRUE,
+	             "zoom-level", zoom,
+	             "keep-center-on-resize", TRUE,
+	             "deceleration", 1.1,
+	             "zoom-on-double-click", FALSE,
+	             "max-zoom-level", 17,
+	             "min-zoom-level", 1,
+	             NULL);
 #if HAVE_GTK4
 	shumate_viewport_set_center(view, latitude, longitude);
 #else
@@ -1209,13 +1210,13 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 		if (READ_INT_CLAMP_FULL("longitude", int_longitude, -90000000, +90000000))
 			{
 			longitude = int_longitude / 1000000.0;
-			g_object_set(G_OBJECT(CHAMPLAIN_VIEW(pgd->gps_view)), "longitude", longitude, NULL);
+			g_object_set(CHAMPLAIN_VIEW(pgd->gps_view), "longitude", longitude, NULL);
 			continue;
 			}
 		if (READ_INT_CLAMP_FULL("latitude", int_latitude, -90000000, +90000000))
 			{
 			latitude = int_latitude / 1000000.0;
-			g_object_set(G_OBJECT(CHAMPLAIN_VIEW(pgd->gps_view)), "latitude", latitude, NULL);
+			g_object_set(CHAMPLAIN_VIEW(pgd->gps_view), "latitude", latitude, NULL);
 			continue;
 			}
 

@@ -1514,8 +1514,7 @@ static void vflist_listview_set_columns(ViewFile *vf)
 	g_autoptr(GList) list = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
 	if (!list) return;
 
-	auto *cell = static_cast<GtkCellRenderer *>(list->data);
-	g_object_set(G_OBJECT(cell), "height", options->thumbnails.max_height, NULL);
+	g_object_set(list->data, "height", options->thumbnails.max_height, NULL);
 
 	gtk_tree_view_column_set_visible(column, VFLIST(vf)->thumbs_enabled);
 
@@ -1679,9 +1678,10 @@ static void vflist_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 	gboolean set;
 
 	gtk_tree_model_get(tree_model, iter, FILE_COLUMN_COLOR, &set, -1);
-	g_object_set(G_OBJECT(cell),
-		     "cell-background-rgba", vflist_listview_color_shifted(vf->listview),
-		     "cell-background-set", set, NULL);
+	g_object_set(cell,
+	             "cell-background-rgba", vflist_listview_color_shifted(vf->listview),
+	             "cell-background-set", set,
+	             NULL);
 }
 
 static void vflist_listview_add_column(ViewFile *vf, gint n, const gchar *title, gboolean image, gboolean right_justify, gboolean expand)
@@ -1699,7 +1699,7 @@ static void vflist_listview_add_column(ViewFile *vf, gint n, const gchar *title,
 		renderer = gtk_cell_renderer_text_new();
 		if (right_justify)
 			{
-			g_object_set(G_OBJECT(renderer), "xalign", 1.0, NULL);
+			g_object_set(renderer, "xalign", 1.0, NULL);
 			}
 		gtk_tree_view_column_pack_start(column, renderer, TRUE);
 		gtk_tree_view_column_add_attribute(column, renderer, "text", n);

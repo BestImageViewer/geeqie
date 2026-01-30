@@ -668,17 +668,10 @@ void theme_change_cb(GSettings *iface, gchar, gpointer)
 	set_theme_bg_color();
 
 	g_autofree gchar *scheme = g_settings_get_string(iface, "color-scheme");
+	const gboolean prefer_dark_theme = (g_strcmp0(scheme, "prefer-dark") == 0);
 
 	GtkSettings *settings = gtk_settings_get_default();
-
-	if (g_strcmp0(scheme, "prefer-dark") == 0)
-		{
-		g_object_set(settings, "gtk-application-prefer-dark-theme", TRUE, nullptr);
-		}
-	else
-		{
-		g_object_set(settings, "gtk-application-prefer-dark-theme", FALSE, nullptr);
-		}
+	g_object_set(settings, "gtk-application-prefer-dark-theme", prefer_dark_theme, nullptr);
 }
 
 /**

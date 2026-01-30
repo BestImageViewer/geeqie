@@ -1720,9 +1720,11 @@ static void collection_table_populate(CollectTable *ct, gboolean resize)
 
 			if (cell && GQV_IS_CELL_RENDERER_ICON(cell))
 				{
-				g_object_set(G_OBJECT(cell), "fixed_width", thumb_width,
-							     "fixed_height", options->thumbnails.max_height,
-							     "show_text", ct->show_text || ct->show_stars || ct->show_infotext, NULL);
+				g_object_set(cell,
+				             "fixed_width", thumb_width,
+				             "fixed_height", options->thumbnails.max_height,
+				             "show_text", ct->show_text || ct->show_stars || ct->show_infotext,
+				             NULL);
 				}
 			}
 		if (gtk_widget_get_realized(ct->listview)) gtk_tree_view_columns_autosize(GTK_TREE_VIEW(ct->listview));
@@ -2396,9 +2398,11 @@ static void collection_table_append_column(CollectTable *ct, gint n)
 
 	renderer = gqv_cell_renderer_icon_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	g_object_set(G_OBJECT(renderer), "xpad", THUMB_BORDER_PADDING * 2,
-					 "ypad", THUMB_BORDER_PADDING,
-					 "mode", GTK_CELL_RENDERER_MODE_ACTIVATABLE, NULL);
+	g_object_set(renderer,
+	             "xpad", THUMB_BORDER_PADDING * 2,
+	             "ypad", THUMB_BORDER_PADDING,
+	             "mode", GTK_CELL_RENDERER_MODE_ACTIVATABLE,
+	             NULL);
 
 	g_object_set_data(G_OBJECT(column), "column_number", GINT_TO_POINTER(n));
 

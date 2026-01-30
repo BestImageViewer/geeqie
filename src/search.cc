@@ -999,7 +999,7 @@ static void search_result_thumb_height(SearchData *sd)
 	cell = static_cast<GtkCellRenderer *>(list->data);
 	g_list_free(list);
 
-	g_object_set(G_OBJECT(cell), "height", (sd->thumb_enable) ? options->thumbnails.max_height : -1, NULL);
+	g_object_set(cell, "height", sd->thumb_enable ? options->thumbnails.max_height : -1, NULL);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(sd->ui.result_view));
 }
 
@@ -2823,7 +2823,7 @@ static void search_result_add_column(SearchData * sd, gint n, const gchar *title
 		{
 		gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
 		renderer = gtk_cell_renderer_text_new();
-		if (right_justify) g_object_set(G_OBJECT(renderer), "xalign", 1.0, NULL);
+		if (right_justify) g_object_set(renderer, "xalign", 1.0, NULL);
 		gtk_tree_view_column_pack_start(column, renderer, TRUE);
 		gtk_tree_view_column_add_attribute(column, renderer, "text", n);
 

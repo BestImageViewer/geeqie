@@ -1198,28 +1198,22 @@ static void filter_set_func(GtkTreeViewColumn *, GtkCellRenderer *cell,
 	switch (GPOINTER_TO_INT(data))
 		{
 		case FE_ENABLE:
-			g_object_set(GTK_CELL_RENDERER(cell),
-				     "active", fe->enabled, NULL);
+			g_object_set(cell, "active", fe->enabled, NULL);
 			break;
 		case FE_EXTENSION:
-			g_object_set(GTK_CELL_RENDERER(cell),
-				     "text", fe->extensions, NULL);
+			g_object_set(cell, "text", fe->extensions, NULL);
 			break;
 		case FE_DESCRIPTION:
-			g_object_set(GTK_CELL_RENDERER(cell),
-				     "text", fe->description, NULL);
+			g_object_set(cell, "text", fe->description, NULL);
 			break;
 		case FE_CLASS:
-			g_object_set(GTK_CELL_RENDERER(cell),
-				     "text", _(format_class_list[fe->file_class]), NULL);
+			g_object_set(cell, "text", _(format_class_list[fe->file_class]), NULL);
 			break;
 		case FE_WRITABLE:
-			g_object_set(GTK_CELL_RENDERER(cell),
-				     "active", fe->writable, NULL);
+			g_object_set(cell, "active", fe->writable, NULL);
 			break;
 		case FE_ALLOW_SIDECAR:
-			g_object_set(GTK_CELL_RENDERER(cell),
-				     "active", fe->allow_sidecar, NULL);
+			g_object_set(cell, "active", fe->allow_sidecar, NULL);
 			break;
 		default:
 			break;
@@ -2616,7 +2610,7 @@ static void config_tab_files(GtkWidget *notebook)
 	g_signal_connect(G_OBJECT(renderer), "edited",
 			 G_CALLBACK(filter_store_ext_edit_cb), filter_store);
 	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	g_object_set(G_OBJECT(renderer), "editable", static_cast<gboolean>TRUE, NULL);
+	g_object_set(renderer, "editable", TRUE, NULL);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
 						GINT_TO_POINTER(FE_EXTENSION), nullptr);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(filter_view), column);
@@ -2634,7 +2628,7 @@ static void config_tab_files(GtkWidget *notebook)
 	renderer = gtk_cell_renderer_text_new();
 	g_signal_connect(G_OBJECT(renderer), "edited",
 			 G_CALLBACK(filter_store_desc_edit_cb), filter_store);
-	g_object_set(G_OBJECT(renderer), "editable", static_cast<gboolean>TRUE, NULL);
+	g_object_set(renderer, "editable", TRUE, NULL);
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, filter_set_func,
 						GINT_TO_POINTER(FE_DESCRIPTION), nullptr);
@@ -2646,11 +2640,12 @@ static void config_tab_files(GtkWidget *notebook)
 	gtk_tree_view_column_set_title(column, _("Class"));
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	renderer = gtk_cell_renderer_combo_new();
-	g_object_set(G_OBJECT(renderer), "editable", static_cast<gboolean>TRUE,
-					 "model", create_class_model(),
-					 "text-column", 0,
-					 "has-entry", FALSE,
-					 NULL);
+	g_object_set(renderer,
+	             "editable", TRUE,
+	             "model", create_class_model(),
+	             "text-column", 0,
+	             "has-entry", FALSE,
+	             NULL);
 
 	g_signal_connect(G_OBJECT(renderer), "edited",
 			 G_CALLBACK(filter_store_class_edit_cb), filter_store);
@@ -3557,10 +3552,10 @@ static void config_tab_accelerators(GtkWidget *notebook)
 			 G_CALLBACK(accel_store_edited_cb), accel_store);
 
 
-	g_object_set (renderer,
-		      "editable", TRUE,
-		      "accel-mode", GTK_CELL_RENDERER_ACCEL_MODE_OTHER,
-		      NULL);
+	g_object_set(renderer,
+	             "editable", TRUE,
+	             "accel-mode", GTK_CELL_RENDERER_ACCEL_MODE_OTHER,
+	             NULL);
 
 	column = gtk_tree_view_column_new_with_attributes(_("KEY"),
 							  renderer,

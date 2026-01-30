@@ -126,7 +126,7 @@ gqv_cell_renderer_icon_init_wrapper(void *data, void *)
 static void
 gqv_cell_renderer_icon_init(GQvCellRendererIcon *cellicon)
 {
-	g_object_set(G_OBJECT(cellicon), "mode", GTK_CELL_RENDERER_MODE_ACTIVATABLE, NULL);
+	g_object_set(cellicon, "mode", GTK_CELL_RENDERER_MODE_ACTIVATABLE, NULL);
 	gtk_cell_renderer_set_padding(GTK_CELL_RENDERER(cellicon), 2, 2);
 }
 

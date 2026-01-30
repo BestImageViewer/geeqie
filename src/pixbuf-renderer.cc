@@ -1274,7 +1274,7 @@ void pr_render_complete_signal(PixbufRenderer *pr)
 	if (!pr->complete)
 		{
 		g_signal_emit(pr, signals[SIGNAL_RENDER_COMPLETE], 0);
-		g_object_set(G_OBJECT(pr), "complete", TRUE, NULL);
+		g_object_set(pr, "complete", TRUE, NULL);
 		}
 	if (pr->debug_updated)
 		{
@@ -2526,19 +2526,16 @@ void pixbuf_renderer_set_post_process_func(PixbufRenderer *pr, const PixbufRende
  */
 void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 {
-	GObject *object;
-	ScrollReset scroll_reset;
-
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 	g_return_if_fail(IS_PIXBUF_RENDERER(source));
 
 	if (pr == source) return;
 
-	object = G_OBJECT(pr);
-
-	g_object_set(object, "zoom_min", source->zoom_min, NULL);
-	g_object_set(object, "zoom_max", source->zoom_max, NULL);
-	g_object_set(object, "loading", source->loading, NULL);
+	g_object_set(pr,
+	             "zoom_min", source->zoom_min,
+	             "zoom_max", source->zoom_max,
+	             "loading", source->loading,
+	             NULL);
 
 	pr->complete = source->complete;
 
@@ -2546,7 +2543,7 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 	pr->y_scroll = source->y_scroll;
 	pr->mouse = source->mouse;
 
-	scroll_reset = pr->scroll_reset;
+	const ScrollReset scroll_reset = pr->scroll_reset;
 	pr->scroll_reset = ScrollReset::NOCHANGE;
 
 	pr->func_post_process = source->func_post_process;
@@ -2585,19 +2582,16 @@ void pixbuf_renderer_move(PixbufRenderer *pr, PixbufRenderer *source)
 
 void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 {
-	GObject *object;
-	ScrollReset scroll_reset;
-
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 	g_return_if_fail(IS_PIXBUF_RENDERER(source));
 
 	if (pr == source) return;
 
-	object = G_OBJECT(pr);
-
-	g_object_set(object, "zoom_min", source->zoom_min, NULL);
-	g_object_set(object, "zoom_max", source->zoom_max, NULL);
-	g_object_set(object, "loading", source->loading, NULL);
+	g_object_set(pr,
+	             "zoom_min", source->zoom_min,
+	             "zoom_max", source->zoom_max,
+	             "loading", source->loading,
+	             NULL);
 
 	pr->complete = source->complete;
 
@@ -2605,7 +2599,7 @@ void pixbuf_renderer_copy(PixbufRenderer *pr, PixbufRenderer *source)
 	pr->y_scroll = source->y_scroll;
 	pr->mouse = source->mouse;
 
-	scroll_reset = pr->scroll_reset;
+	const ScrollReset scroll_reset = pr->scroll_reset;
 	pr->scroll_reset = ScrollReset::NOCHANGE;
 
 	pr->orientation = source->orientation;

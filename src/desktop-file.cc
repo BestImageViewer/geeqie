@@ -474,7 +474,7 @@ void plugin_disable_set_func(GtkTreeViewColumn *, GtkCellRenderer *cell,
 
 	gtk_tree_model_get(tree_model, iter, DESKTOP_FILE_COLUMN_DISABLED, &disabled, -1);
 
-	g_object_set(GTK_CELL_RENDERER(cell), "active", disabled, NULL);
+	g_object_set(cell, "active", disabled, NULL);
 }
 
 void editor_list_window_create()

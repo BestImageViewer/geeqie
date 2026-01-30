@@ -292,7 +292,7 @@ static void vficon_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str,
 	if (!fd) return;
 
 	guint toggled_mark;
-	g_object_get(G_OBJECT(cell), "toggled_mark", &toggled_mark, NULL);
+	g_object_get(cell, "toggled_mark", &toggled_mark, NULL);
 
 	file_data_set_mark(fd, toggled_mark, !file_data_get_mark(fd, toggled_mark));
 }
@@ -1412,12 +1412,13 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 
 			if (cell && GQV_IS_CELL_RENDERER_ICON(cell))
 				{
-				g_object_set(G_OBJECT(cell), "fixed_width", thumb_width,
-							     "fixed_height", options->thumbnails.max_height,
-							     "show_text", VFICON(vf)->show_text || options->show_star_rating,
-							     "show_marks", vf->marks_enabled,
-							     "num_marks", FILEDATA_MARKS_SIZE,
-							     NULL);
+				g_object_set(cell,
+				             "fixed_width", thumb_width,
+				             "fixed_height", options->thumbnails.max_height,
+				             "show_text", VFICON(vf)->show_text || options->show_star_rating,
+				             "show_marks", vf->marks_enabled,
+				             "num_marks", FILEDATA_MARKS_SIZE,
+				             NULL);
 				}
 			}
 		if (gtk_widget_get_realized(vf->listview)) gtk_tree_view_columns_autosize(GTK_TREE_VIEW(vf->listview));
@@ -1885,85 +1886,86 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 /* @FIXME GTK4 stub */
 	return;
 #else
-	auto cd = static_cast<ColumnData *>(data);
-	GList *list;
-
 	if (!GQV_IS_CELL_RENDERER_ICON(cell)) return;
 
+	auto cd = static_cast<ColumnData *>(data);
+
+	GList *list;
 	gtk_tree_model_get(tree_model, iter, FILE_COLUMN_POINTER, &list, -1);
 
 	auto *fd = static_cast<FileData *>(g_list_nth_data(list, cd->number));
-	if (fd)
+	if (!fd)
 		{
-		ViewFile *vf = cd->vf;
-
-		g_assert(fd->magick == FD_MAGICK);
-
-		g_autoptr(GString) name_sidecars = g_string_new(nullptr);
-
-		if (VFICON(vf)->show_text)
-			{
-			if (islink(fd->path))
-				{
-				name_sidecars = g_string_append(name_sidecars, GQ_LINK_STR);
-				}
-
-			name_sidecars = g_string_append(name_sidecars, fd->name);
-
-			if (fd->sidecar_files)
-				{
-				g_autofree gchar *sidecars = file_data_sc_list_to_string(fd);
-				g_string_append_printf(name_sidecars, " %s", sidecars);
-				}
-			else if (fd->disable_grouping)
-				{
-				name_sidecars = g_string_append(name_sidecars, _(" [NO GROUPING]"));
-				}
-			}
-
-		if (options->show_star_rating)
-			{
-			if (name_sidecars->len > 0)
-				{
-				name_sidecars = g_string_append_c(name_sidecars, '\n');
-				}
-
-			g_autofree gchar *star_rating = (fd->rating != STAR_RATING_NOT_READ) ? convert_rating_to_stars(fd->rating) : nullptr;
-			name_sidecars = g_string_append(name_sidecars, star_rating);
-			}
-
-		GtkStyle *style = deprecated_gtk_widget_get_style(vf->listview);
-		GtkStateType state = (fd->selected & SELECTION_SELECTED) ? GTK_STATE_SELECTED : GTK_STATE_NORMAL;
-
-		GdkRGBA color_fg = convert_gdkcolor_to_gdkrgba(&style->text[state]);
-
-		GdkRGBA color_bg = convert_gdkcolor_to_gdkrgba(&style->base[state]);
-		if (fd->selected & SELECTION_PRELIGHT)
-			{
-			shift_color(color_bg);
-			}
-
 		g_object_set(cell,
-		             "pixbuf", fd->thumb_pixbuf,
-		             "text", name_sidecars->str,
-		             "marks", file_data_get_marks(fd),
-		             "show_marks", vf->marks_enabled,
-		             "cell-background-rgba", &color_bg,
-		             "cell-background-set", TRUE,
-		             "foreground-rgba", &color_fg,
-		             "foreground-set", TRUE,
-		             "has-focus", VFICON(vf)->focus_fd == fd,
+		             "pixbuf", NULL,
+		             "text", NULL,
+		             "show_marks", FALSE,
+		             "cell-background-set", FALSE,
+		             "foreground-set", FALSE,
+		             "has-focus", FALSE,
 		             NULL);
+		return;
 		}
-	else
+
+	ViewFile *vf = cd->vf;
+
+	g_assert(fd->magick == FD_MAGICK);
+
+	g_autoptr(GString) name_sidecars = g_string_new(nullptr);
+
+	if (VFICON(vf)->show_text)
 		{
-		g_object_set(cell,	"pixbuf", NULL,
-					"text", NULL,
-					"show_marks", FALSE,
-					"cell-background-set", FALSE,
-					"foreground-set", FALSE,
-					"has-focus", FALSE, NULL);
+		if (islink(fd->path))
+			{
+			name_sidecars = g_string_append(name_sidecars, GQ_LINK_STR);
+			}
+
+		name_sidecars = g_string_append(name_sidecars, fd->name);
+
+		if (fd->sidecar_files)
+			{
+			g_autofree gchar *sidecars = file_data_sc_list_to_string(fd);
+			g_string_append_printf(name_sidecars, " %s", sidecars);
+			}
+		else if (fd->disable_grouping)
+			{
+			name_sidecars = g_string_append(name_sidecars, _(" [NO GROUPING]"));
+			}
 		}
+
+	if (options->show_star_rating)
+		{
+		if (name_sidecars->len > 0)
+			{
+			name_sidecars = g_string_append_c(name_sidecars, '\n');
+			}
+
+		g_autofree gchar *star_rating = (fd->rating != STAR_RATING_NOT_READ) ? convert_rating_to_stars(fd->rating) : nullptr;
+		name_sidecars = g_string_append(name_sidecars, star_rating);
+		}
+
+	GtkStyle *style = deprecated_gtk_widget_get_style(vf->listview);
+	GtkStateType state = (fd->selected & SELECTION_SELECTED) ? GTK_STATE_SELECTED : GTK_STATE_NORMAL;
+
+	GdkRGBA color_fg = convert_gdkcolor_to_gdkrgba(&style->text[state]);
+
+	GdkRGBA color_bg = convert_gdkcolor_to_gdkrgba(&style->base[state]);
+	if (fd->selected & SELECTION_PRELIGHT)
+		{
+		shift_color(color_bg);
+		}
+
+	g_object_set(cell,
+	             "pixbuf", fd->thumb_pixbuf,
+	             "text", name_sidecars->str,
+	             "marks", file_data_get_marks(fd),
+	             "show_marks", vf->marks_enabled,
+	             "cell-background-rgba", &color_bg,
+	             "cell-background-set", TRUE,
+	             "foreground-rgba", &color_fg,
+	             "foreground-set", TRUE,
+	             "has-focus", VFICON(vf)->focus_fd == fd,
+	             NULL);
 #endif
 }
 
@@ -1980,9 +1982,11 @@ static void vficon_append_column(ViewFile *vf, gint n)
 
 	renderer = gqv_cell_renderer_icon_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	g_object_set(G_OBJECT(renderer), "xpad", THUMB_BORDER_PADDING * 2,
-					 "ypad", THUMB_BORDER_PADDING,
-					 "mode", GTK_CELL_RENDERER_MODE_ACTIVATABLE, NULL);
+	g_object_set(renderer,
+	             "xpad", THUMB_BORDER_PADDING * 2,
+	             "ypad", THUMB_BORDER_PADDING,
+	             "mode", GTK_CELL_RENDERER_MODE_ACTIVATABLE,
+	             NULL);
 
 	g_object_set_data(G_OBJECT(column), "column_number", GINT_TO_POINTER(n));
 	g_object_set_data(G_OBJECT(renderer), "column_number", GINT_TO_POINTER(n));
