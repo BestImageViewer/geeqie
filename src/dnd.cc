@@ -31,18 +31,6 @@
 #include "pixbuf-util.h"
 
 
-constexpr std::array<GtkTargetEntry, 2> dnd_file_drag_types{{
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-}};
-
-constexpr std::array<GtkTargetEntry, 3> dnd_file_drop_types{{
-	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN },
-}};
-
-
 #define DND_ICON_SIZE (options->dnd_icon_size)
 
 
