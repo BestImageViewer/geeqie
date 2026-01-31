@@ -634,8 +634,6 @@ static void layout_menu_write_rotate_cb(GtkToggleAction *, gpointer data)
 
 			if (run_result == 1)
 				message = g_string_append(message, _("No file extension\n"));
-			else if (run_result == 3)
-				message = g_string_append(message, _("Cannot create tmp file\n"));
 			else if (run_result == 4)
 				message = g_string_append(message, _("Operation not supported for filetype\n"));
 			else if (run_result == 5)

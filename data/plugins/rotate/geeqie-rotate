@@ -232,8 +232,7 @@ do
 		then
 			if [ -n "$preserve_mtime" ]
 			then
-				mtime=$(mktemp "${TMPDIR:-/tmp}/geeqie-rotate.XXXXXXXXXX") || exit 3
-				touch --reference="$file" "$mtime"
+				mtime=$(date --reference="$file" +%s)
 			fi
 
 			rotate_image_file "$exiftran_param" "$mogrify_param" "$file"
@@ -241,8 +240,7 @@ do
 
 			if [ -n "$preserve_mtime" ]
 			then
-				touch --reference="$mtime" "$file"
-				rm "$mtime"
+				touch --date=@"$mtime" -m "$file"
 			fi
 			[ "$ret" != 0 ] && exit "$ret"
 		else
