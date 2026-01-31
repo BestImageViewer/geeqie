@@ -85,6 +85,8 @@ constexpr std::array<GtkTargetEntry, 4> target_types
 	{const_cast<gchar *>("UTF8_STRING"), 0, CLIPBOARD_UTF8_STRING},
 }};
 
+constexpr gint GQ_RESPONSE_WITH_RENAME = 1;
+
 constexpr gint DIALOG_DEF_IMAGE_DIM_X = 150;
 constexpr gint DIALOG_DEF_IMAGE_DIM_Y = 100;
 
