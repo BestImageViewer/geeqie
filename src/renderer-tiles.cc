@@ -1667,7 +1667,7 @@ void rt_queue_clear(RendererTiles *rt)
 	rt_sync_scroll(rt);
 }
 
-gboolean rt_clamp_to_visible(RendererTiles *rt, gint *x, gint *y, gint *w, gint *h)
+bool rt_clamp_to_visible(const RendererTiles *rt, gint &x, gint &y, gint &w, gint &h)
 {
 	const gint vx = rt->x_scroll;
 	const gint vy = rt->y_scroll;
@@ -1676,43 +1676,34 @@ gboolean rt_clamp_to_visible(RendererTiles *rt, gint *x, gint *y, gint *w, gint 
 	const gint vw = pr->vis_width;
 	const gint vh = pr->vis_height;
 
-	if (vw < 1 || vh < 1 || *x + *w < vx || *x > vx + vw || *y + *h < vy || *y > vy + vh) return FALSE;
+	if (vw < 1 || vh < 1 || x + w < vx || x > vx + vw || y + h < vy || y > vy + vh) return false;
 
 	/* now clamp it */
-	const gint nx = std::max(*x, vx);
-	*w = std::clamp(*w - (nx - *x), 1, vw);
-	*x = nx;
+	const gint nx = std::max(x, vx);
+	w = std::clamp(w - (nx - x), 1, vw);
+	x = nx;
 
-	const gint ny = std::max(*y, vy);
-	*h = std::clamp(*h - (ny - *y), 1, vh);
-	*y = ny;
+	const gint ny = std::max(y, vy);
+	h = std::clamp(h - (ny - y), 1, vh);
+	y = ny;
 
-	return TRUE;
+	return true;
 }
 
-bool rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
-                       bool clamp, TileRender render,
-                       gboolean new_data, bool only_existing)
+void rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
+                       TileRender render, gboolean new_data, bool only_existing)
 {
 	PixbufRenderer *pr = rt->pr;
-	gint i;
-	gint j;
-	gint x1;
-	gint x2;
-	gint y1;
-	gint y2;
 
-	if (clamp && !rt_clamp_to_visible(rt, &x, &y, &w, &h)) return false;
+	const gint x1 = ROUND_DOWN(x, rt->tile_width);
+	const gint x2 = ROUND_UP(x + w, rt->tile_width);
 
-	x1 = ROUND_DOWN(x, rt->tile_width);
-	x2 = ROUND_UP(x + w, rt->tile_width);
+	const gint y1 = ROUND_DOWN(y, rt->tile_height);
+	const gint y2 = ROUND_UP(y + h, rt->tile_height);
 
-	y1 = ROUND_DOWN(y, rt->tile_height);
-	y2 = ROUND_UP(y + h, rt->tile_height);
-
-	for (j = y1; j <= y2; j += rt->tile_height)
+	for (gint j = y1; j <= y2; j += rt->tile_height)
 		{
-		for (i = x1; i <= x2; i += rt->tile_width)
+		for (gint i = x1; i <= x2; i += rt->tile_width)
 			{
 			ImageTile *it;
 
@@ -1760,8 +1751,6 @@ bool rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
 				}
 			}
 		}
-
-	return true;
 }
 
 void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
@@ -1774,19 +1763,21 @@ void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
 
 	if (pr->width < 1 || pr->height < 1) return;
 
-	const gint nx = std::clamp(x, 0, pr->width - 1);
-	const gint ny = std::clamp(y, 0, pr->height - 1);
+	gint nx = std::clamp(x, 0, pr->width - 1);
+	gint ny = std::clamp(y, 0, pr->height - 1);
 
 	w = std::clamp(w - (nx - x), 0, pr->width - nx);
 	h = std::clamp(h - (ny - y), 0, pr->height - ny);
 	if (w < 1 || h < 1) return;
 
-	if (rt_queue_to_tiles(rt, nx, ny, w, h, clamp, render, new_data, only_existing) &&
-	    ((!rt->draw_queue && !rt->draw_queue_2pass) || !rt->draw_idle_id))
-		{
-		g_clear_handle_id(&rt->draw_idle_id, g_source_remove);
-		rt_queue_schedule_next_draw(rt, TRUE);
-		}
+	if (clamp && !rt_clamp_to_visible(rt, nx, ny, w, h)) return;
+
+	rt_queue_to_tiles(rt, nx, ny, w, h, render, new_data, only_existing);
+
+	if ((rt->draw_queue || rt->draw_queue_2pass) && rt->draw_idle_id) return;
+
+	g_clear_handle_id(&rt->draw_idle_id, g_source_remove);
+	rt_queue_schedule_next_draw(rt, TRUE);
 }
 
 void renderer_scroll(void *renderer, gint x_off, gint y_off)
