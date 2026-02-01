@@ -171,11 +171,10 @@ inline gint get_left_pixbuf_offset(RendererTiles *rt)
 void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it);
 
 gboolean rt_tile_is_visible(RendererTiles *rt, ImageTile *it);
-void rt_queue_merge(QueueData *parent, QueueData *qd);
 void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
               bool clamp, TileRender render, gboolean new_data, bool only_existing);
 
-gint rt_queue_draw_idle_cb(gpointer data);
+gboolean rt_queue_draw_idle_cb(gpointer data);
 
 
 void rt_sync_scroll(RendererTiles *rt)
@@ -1542,6 +1541,31 @@ gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_set)
 }
 
 
+void queue_data_merge(QueueData *parent, const QueueData *qd)
+{
+	if (parent->x + parent->w < qd->x + qd->w)
+		{
+		parent->w += (qd->x + qd->w) - (parent->x + parent->w);
+		}
+	if (parent->x > qd->x)
+		{
+		parent->w += parent->x - qd->x;
+		parent->x = qd->x;
+		}
+
+	if (parent->y + parent->h < qd->y + qd->h)
+		{
+		parent->h += (qd->y + qd->h) - (parent->y + parent->h);
+		}
+	if (parent->y > qd->y)
+		{
+		parent->h += parent->y - qd->y;
+		parent->y = qd->y;
+		}
+
+	parent->new_data |= qd->new_data;
+}
+
 gboolean rt_queue_draw_idle_cb(gpointer data)
 {
 	auto rt = static_cast<RendererTiles *>(data);
@@ -1602,7 +1626,7 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 			{
 			if (qd->it->qd2)
 				{
-				rt_queue_merge(qd->it->qd2, qd);
+				queue_data_merge(qd->it->qd2, qd);
 				g_free(qd);
 				}
 			else
@@ -1654,31 +1678,6 @@ void rt_queue_clear(RendererTiles *rt)
 	g_clear_handle_id(&rt->draw_idle_id, g_source_remove);
 
 	rt_sync_scroll(rt);
-}
-
-void rt_queue_merge(QueueData *parent, QueueData *qd)
-{
-	if (parent->x + parent->w < qd->x + qd->w)
-		{
-		parent->w += (qd->x + qd->w) - (parent->x + parent->w);
-		}
-	if (parent->x > qd->x)
-		{
-		parent->w += parent->x - qd->x;
-		parent->x = qd->x;
-		}
-
-	if (parent->y + parent->h < qd->y + qd->h)
-		{
-		parent->h += (qd->y + qd->h) - (parent->y + parent->h);
-		}
-	if (parent->y > qd->y)
-		{
-		parent->h += parent->y - qd->y;
-		parent->y = qd->y;
-		}
-
-	parent->new_data |= qd->new_data;
 }
 
 gboolean rt_clamp_to_visible(RendererTiles *rt, gint *x, gint *y, gint *w, gint *h)
@@ -1776,7 +1775,7 @@ bool rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
 					}
 				else if (it->qd)
 					{
-					rt_queue_merge(it->qd, qd);
+					queue_data_merge(it->qd, qd);
 					g_free(qd);
 					}
 				else
