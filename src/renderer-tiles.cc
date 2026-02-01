@@ -173,7 +173,7 @@ void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it
 gboolean rt_tile_is_visible(RendererTiles *rt, ImageTile *it);
 void rt_queue_merge(QueueData *parent, QueueData *qd);
 void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
-              gint clamp, TileRender render, gboolean new_data, gboolean only_existing);
+              bool clamp, TileRender render, gboolean new_data, bool only_existing);
 
 gint rt_queue_draw_idle_cb(gpointer data);
 
@@ -602,7 +602,7 @@ void rt_overlay_queue_draw(RendererTiles *rt, OverlayData *od, gint x1, gint y1,
 	         rt->x_scroll - pr->x_offset + od_rect.x,
 	         rt->y_scroll - pr->y_offset + od_rect.y,
 	         od_rect.width, od_rect.height,
-	         FALSE, TileRender::ALL, FALSE, FALSE);
+	         false, TileRender::ALL, FALSE, false);
 
 	rt_border_draw(rt, od_rect);
 }
@@ -1704,9 +1704,9 @@ gboolean rt_clamp_to_visible(RendererTiles *rt, gint *x, gint *y, gint *w, gint 
 	return TRUE;
 }
 
-gboolean rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
-                           gboolean clamp, TileRender render,
-                           gboolean new_data, gboolean only_existing)
+bool rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
+                       bool clamp, TileRender render,
+                       gboolean new_data, bool only_existing)
 {
 	PixbufRenderer *pr = rt->pr;
 	gint i;
@@ -1716,7 +1716,7 @@ gboolean rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
 	gint y1;
 	gint y2;
 
-	if (clamp && !rt_clamp_to_visible(rt, &x, &y, &w, &h)) return FALSE;
+	if (clamp && !rt_clamp_to_visible(rt, &x, &y, &w, &h)) return false;
 
 	x1 = ROUND_DOWN(x, rt->tile_width);
 	x2 = ROUND_UP(x + w, rt->tile_width);
@@ -1788,12 +1788,12 @@ gboolean rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
 			}
 		}
 
-	return TRUE;
+	return true;
 }
 
 void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
-              gboolean clamp, TileRender render,
-              gboolean new_data, gboolean only_existing)
+              bool clamp, TileRender render,
+              gboolean new_data, bool only_existing)
 {
 	PixbufRenderer *pr = rt->pr;
 
@@ -1831,7 +1831,7 @@ void renderer_scroll(void *renderer, gint x_off, gint y_off)
 	if (w < 1 || h < 1)
 		{
 		/* scrolled completely to new material */
-		rt_queue(rt, 0, 0, pr->width, pr->height, TRUE, TileRender::ALL, FALSE, FALSE);
+		rt_queue(rt, 0, 0, pr->width, pr->height, true, TileRender::ALL, FALSE, false);
 		return;
 		}
 
@@ -1889,14 +1889,14 @@ void renderer_scroll(void *renderer, gint x_off, gint y_off)
 			{
 			rt_queue(rt,
 			         x_off > 0 ? rt->x_scroll + (pr->vis_width - w) : rt->x_scroll, rt->y_scroll,
-			         w, pr->vis_height, TRUE, TileRender::ALL, FALSE, FALSE);
+			         w, pr->vis_height, true, TileRender::ALL, FALSE, false);
 			}
 		if (h > 0)
 			{
 			/** @FIXME to optimize this, remove overlap */
 			rt_queue(rt,
 			         rt->x_scroll, y_off > 0 ? rt->y_scroll + (pr->vis_height - h) : rt->y_scroll,
-			         pr->vis_width, h, TRUE, TileRender::ALL, FALSE, FALSE);
+			         pr->vis_width, h, true, TileRender::ALL, FALSE, false);
 			}
 }
 
@@ -1926,27 +1926,26 @@ void renderer_area_changed(void *renderer, GdkRectangle src)
 	x2 = static_cast<gint>(ceil(static_cast<gdouble>(rect.x + rect.width) * pr->scale));
 	y2 = static_cast<gint>(ceil(static_cast<gdouble>(rect.y + rect.height) * pr->scale * pr->aspect_ratio));
 
-	rt_queue(rt, x1, y1, x2 - x1, y2 - y1, FALSE, TileRender::AREA, TRUE, TRUE);
+	rt_queue(rt, x1, y1, x2 - x1, y2 - y1, false, TileRender::AREA, TRUE, true);
 }
 
-void rt_redraw(RendererTiles *rt, gint x, gint y, gint w, gint h,
-               gint clamp, TileRender render, gboolean new_data, gboolean only_existing)
+void rt_redraw(RendererTiles *rt, GdkRectangle rect,
+               bool clamp, gboolean new_data)
 {
 	PixbufRenderer *pr = rt->pr;
 
-	x -= rt->stereo_off_x;
-	y -= rt->stereo_off_y;
+	rect.x -= rt->stereo_off_x;
+	rect.y -= rt->stereo_off_y;
 
-	rt_border_draw(rt, {x, y, w, h});
+	rt_border_draw(rt, rect);
 
-	x = std::max(0, x - pr->x_offset + pr->x_scroll);
-	y = std::max(0, y - pr->y_offset + pr->y_scroll);
+	rect.x = std::max(0, rect.x - pr->x_offset + pr->x_scroll);
+	rect.y = std::max(0, rect.y - pr->y_offset + pr->y_scroll);
+	rect.width = std::min(rect.width, pr->width - rect.x);
+	rect.height = std::min(rect.height, pr->height - rect.y);
 
-	rt_queue(rt,
-		 x, y,
-		 std::min(w, pr->width - x),
-		 std::min(h, pr->height - y),
-		 clamp, render, new_data, only_existing);
+	rt_queue(rt, rect.x, rect.y, rect.width, rect.height,
+	         clamp, TileRender::ALL, new_data, false);
 }
 
 void renderer_update_pixbuf(void *renderer, gboolean)
@@ -1962,7 +1961,7 @@ void renderer_update_zoom(void *renderer, gboolean lazy)
 	rt_tile_invalidate_all(rt);
 	if (!lazy)
 		{
-		rt_redraw(rt, 0, 0, pr->width, pr->height, TRUE, TileRender::ALL, TRUE, FALSE);
+		rt_redraw(rt, {0, 0, pr->width, pr->height}, true, TRUE);
 		}
 	rt_border_clear(rt);
 }
@@ -2066,7 +2065,7 @@ gboolean rt_realize_cb(GtkWidget *widget, gpointer data)
 	return FALSE;
 }
 
-gboolean rt_size_allocate_cb(GtkWidget *widget,  GdkRectangle *allocation, gpointer data)
+gboolean rt_size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpointer data)
 {
 	auto rt = static_cast<RendererTiles *>(data);
 	cairo_t *cr;
@@ -2086,7 +2085,7 @@ gboolean rt_size_allocate_cb(GtkWidget *widget,  GdkRectangle *allocation, gpoin
 		cairo_destroy(cr);
 		cairo_surface_destroy(old_surface);
 
-		rt_redraw(rt, allocation->x, allocation->y, allocation->width, allocation->height, FALSE, TileRender::ALL, FALSE, FALSE);
+		rt_redraw(rt, *allocation, false, FALSE);
 	}
 
 	return FALSE;
