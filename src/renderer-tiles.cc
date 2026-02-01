@@ -1512,16 +1512,16 @@ gboolean rt_tile_is_visible(RendererTiles *rt, ImageTile *it)
  *-------------------------------------------------------------------
  */
 
-gint rt_get_queued_area(GList *work)
+gint rt_get_queued_area(const RendererTiles *rt)
 {
 	gint area = 0;
 
-	while (work)
+	for (GList *work = rt->draw_queue; work; work = work->next)
 		{
-		auto qd = static_cast<QueueData *>(work->data);
+		auto *qd = static_cast<QueueData *>(work->data);
 		area += qd->w * qd->h;
-		work = work->next;
 		}
+
 	return area;
 }
 
@@ -1529,8 +1529,6 @@ gint rt_get_queued_area(GList *work)
 gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_set)
 {
 	PixbufRenderer *pr = rt->pr;
-	gfloat percent;
-	gint visible_area = pr->vis_width * pr->vis_height;
 
 	if (!pr->loading)
 		{
@@ -1540,15 +1538,8 @@ gboolean rt_queue_schedule_next_draw(RendererTiles *rt, gboolean force_set)
 		return G_SOURCE_REMOVE;
 		}
 
-	if (visible_area == 0)
-		{
-		/* not known yet */
-		percent = 100.0;
-		}
-	else
-		{
-		percent = 100.0 * rt_get_queued_area(rt->draw_queue) / visible_area;
-		}
+	const gint visible_area = pr->vis_width * pr->vis_height;
+	const gfloat percent = visible_area ? (100.0 * rt_get_queued_area(rt) / visible_area) : 100.0;
 
 	if (percent > 10.0)
 		{
