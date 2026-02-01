@@ -424,7 +424,7 @@ ImageTile *rt_tile_get(RendererTiles *rt, gint x, gint y, gboolean only_existing
 	return rt_tile_add(rt, x, y);
 }
 
-gint pixmap_calc_size(cairo_surface_t *)
+gint pixmap_calc_size()
 {
 	return options->image.tile_size * options->image.tile_size * 4 / 8;
 }
@@ -444,21 +444,17 @@ void rt_hidpi_aware_draw(RendererTiles *rt,
 
 void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 {
-	PixbufRenderer *pr = rt->pr;
 	if (!it->surface)
 		{
-		cairo_surface_t *surface;
-		guint size;
+		const guint size = pixmap_calc_size() * rt->hidpi_scale * rt->hidpi_scale;
 
-		surface = gdk_window_create_similar_surface(gtk_widget_get_window(GTK_WIDGET(pr)),
-		                                            CAIRO_CONTENT_COLOR,
-		                                            rt->tile_width, rt->tile_height);
-
-		size = pixmap_calc_size(surface) * rt->hidpi_scale * rt->hidpi_scale;
 		rt_tile_free_space(rt, size, it);
 
-		it->surface = surface;
+		it->surface = gdk_window_create_similar_surface(gtk_widget_get_window(GTK_WIDGET(rt->pr)),
+		                                                CAIRO_CONTENT_COLOR,
+		                                                rt->tile_width, rt->tile_height);
 		it->size += size;
+
 		rt->tile_cache_size += size;
 		}
 
@@ -473,6 +469,7 @@ void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 
 		it->pixbuf = pixbuf;
 		it->size += size;
+
 		rt->tile_cache_size += size;
 		}
 }
