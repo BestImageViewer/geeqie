@@ -1816,7 +1816,7 @@ void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
 		}
 }
 
-void rt_scroll(void *renderer, gint x_off, gint y_off)
+void renderer_scroll(void *renderer, gint x_off, gint y_off)
 {
 	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
@@ -1929,8 +1929,8 @@ void renderer_area_changed(void *renderer, GdkRectangle src)
 	rt_queue(rt, x1, y1, x2 - x1, y2 - y1, FALSE, TILE_RENDER_AREA, TRUE, TRUE);
 }
 
-void renderer_redraw(RendererTiles *rt, gint x, gint y, gint w, gint h,
-                     gint clamp, ImageRenderType render, gboolean new_data, gboolean only_existing)
+void rt_redraw(RendererTiles *rt, gint x, gint y, gint w, gint h,
+               gint clamp, ImageRenderType render, gboolean new_data, gboolean only_existing)
 {
 	PixbufRenderer *pr = rt->pr;
 
@@ -1959,10 +1959,10 @@ void renderer_update_zoom(void *renderer, gboolean lazy)
 	auto rt = static_cast<RendererTiles *>(renderer);
 	PixbufRenderer *pr = rt->pr;
 
-	rt_tile_invalidate_all(static_cast<RendererTiles *>(renderer));
+	rt_tile_invalidate_all(rt);
 	if (!lazy)
 		{
-		renderer_redraw(static_cast<RendererTiles *>(renderer), 0, 0, pr->width, pr->height, TRUE, TILE_RENDER_ALL, TRUE, FALSE);
+		rt_redraw(rt, 0, 0, pr->width, pr->height, TRUE, TILE_RENDER_ALL, TRUE, FALSE);
 		}
 	rt_border_clear(rt);
 }
@@ -2086,7 +2086,7 @@ gboolean rt_size_allocate_cb(GtkWidget *widget,  GdkRectangle *allocation, gpoin
 		cairo_destroy(cr);
 		cairo_surface_destroy(old_surface);
 
-		renderer_redraw(rt, allocation->x, allocation->y, allocation->width, allocation->height, FALSE, TILE_RENDER_ALL, FALSE, FALSE);
+		rt_redraw(rt, allocation->x, allocation->y, allocation->width, allocation->height, FALSE, TILE_RENDER_ALL, FALSE, FALSE);
 	}
 
 	return FALSE;
@@ -2151,7 +2151,7 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 	rt->f.free = renderer_free;
 	rt->f.update_zoom = renderer_update_zoom;
 	rt->f.invalidate_region = renderer_invalidate_region;
-	rt->f.scroll = rt_scroll;
+	rt->f.scroll = renderer_scroll;
 	rt->f.update_viewport = renderer_update_viewport;
 
 
