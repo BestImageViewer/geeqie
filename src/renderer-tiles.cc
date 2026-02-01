@@ -1744,25 +1744,12 @@ bool rt_queue_to_tiles(RendererTiles *rt, gint x, gint y, gint w, gint h,
 				qd->it = it;
 				qd->new_data = new_data;
 
-				if (i < x)
-					{
-					qd->x = x - i;
-					}
-				else
-					{
-					qd->x = 0;
-					}
+				qd->x = std::max(0, x - i);
+				qd->y = std::max(0, y - j);
+
 				qd->w = x + w - i - qd->x;
 				if (qd->x + qd->w > rt->tile_width) qd->w = rt->tile_width - qd->x;
 
-				if (j < y)
-					{
-					qd->y = y - j;
-					}
-				else
-					{
-					qd->y = 0;
-					}
 				qd->h = y + h - j - qd->y;
 				if (qd->y + qd->h > rt->tile_height) qd->h = rt->tile_height - qd->y;
 
