@@ -708,36 +708,11 @@ gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint 
 	return od->id;
 }
 
-void rt_overlay_free(RendererTiles *rt, OverlayData *od)
-{
-	rt->overlay_list = g_list_remove(rt->overlay_list, od);
-
-	if (od->pixbuf) g_object_unref(G_OBJECT(od->pixbuf));
-	if (od->window) gdk_window_destroy(od->window);
-	g_free(od);
-
-	if (!rt->overlay_list && rt->overlay_buffer)
-		{
-		cairo_surface_destroy(rt->overlay_buffer);
-		rt->overlay_buffer = nullptr;
-		}
-}
-
-void rt_overlay_list_clear(RendererTiles *rt)
-{
-	while (rt->overlay_list)
-		{
-		auto od = static_cast<OverlayData *>(rt->overlay_list->data);
-		rt_overlay_free(rt, od);
-		}
-}
-
 void rt_overlay_list_reset_window(RendererTiles *rt)
 {
 	GList *work;
 
-	if (rt->overlay_buffer) cairo_surface_destroy(rt->overlay_buffer);
-	rt->overlay_buffer = nullptr;
+	g_clear_pointer(&rt->overlay_buffer, cairo_surface_destroy);
 
 	work = rt->overlay_list;
 	while (work)
@@ -749,15 +724,23 @@ void rt_overlay_list_reset_window(RendererTiles *rt)
 		}
 }
 
+void overlay_data_free(OverlayData *od)
+{
+	if (!od) return;
+
+	if (od->pixbuf) g_object_unref(od->pixbuf);
+	if (od->window) gdk_window_destroy(od->window);
+	g_free(od);
+}
+
 void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint, gint)
 {
-	auto rc = static_cast<RendererTiles *>(renderer);
-	PixbufRenderer *pr = rc->pr;
-	OverlayData *od;
+	auto *rt = static_cast<RendererTiles *>(renderer);
+	PixbufRenderer *pr = rt->pr;
 
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 
-	od = rt_overlay_find(rc, id);
+	OverlayData *od = rt_overlay_find(rt, id);
 	if (!od) return;
 
 	if (pixbuf)
@@ -767,10 +750,16 @@ void renderer_tiles_overlay_set(void *renderer, gint id, GdkPixbuf *pixbuf, gint
 		}
 	else
 		{
-		rt_overlay_free(rc, od);
+		rt->overlay_list = g_list_remove(rt->overlay_list, od);
+		overlay_data_free(od);
+
+		if (!rt->overlay_list)
+			{
+			g_clear_pointer(&rt->overlay_buffer, cairo_surface_destroy);
+			}
 		}
 
-	gtk_widget_queue_draw(GTK_WIDGET(rc->pr));
+	gtk_widget_queue_draw(GTK_WIDGET(rt->pr));
 }
 
 gboolean renderer_tiles_overlay_get(void *renderer, gint id, GdkPixbuf **pixbuf, gint *x, gint *y)
@@ -2063,12 +2052,12 @@ void renderer_free(void *renderer)
 	rt_queue_clear(rt);
 	rt_tile_free_all(rt);
 	if (rt->spare_tile) g_object_unref(rt->spare_tile);
-	if (rt->overlay_buffer) g_object_unref(rt->overlay_buffer);
-	rt_overlay_list_clear(rt);
+	g_list_free_full(rt->overlay_list, reinterpret_cast<GDestroyNotify>(overlay_data_free));
+	g_clear_pointer(&rt->overlay_buffer, cairo_surface_destroy);
 	/* disconnect "hierarchy-changed" */
 	g_signal_handlers_disconnect_matched(G_OBJECT(rt->pr), G_SIGNAL_MATCH_DATA,
-                                                     0, 0, nullptr, nullptr, rt);
-        g_free(rt);
+	                                     0, 0, nullptr, nullptr, rt);
+	g_free(rt);
 }
 
 gboolean rt_realize_cb(GtkWidget *widget, gpointer data)
