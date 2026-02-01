@@ -429,19 +429,6 @@ gint pixmap_calc_size()
 	return options->image.tile_size * options->image.tile_size * 4 / 8;
 }
 
-void rt_hidpi_aware_draw(RendererTiles *rt,
-                         cairo_t *cr,
-                         GdkPixbuf *pixbuf,
-                         double x,
-                         double y)
-{
-	cairo_surface_t *surface;
-	surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, rt->hidpi_scale, nullptr);
-	cairo_set_source_surface(cr, surface, x, y);
-	cairo_fill(cr);
-	cairo_surface_destroy(surface);
-}
-
 void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 {
 	if (!it->surface)
@@ -1411,14 +1398,17 @@ void rt_tile_render(RendererTiles *rt, ImageTile *it,
 
 	if (draw && it->pixbuf && !it->blank)
 		{
-		cairo_t *cr;
-
 		if (pr->func_post_process && (!pr->post_process_slow || !fast))
 			pr->func_post_process(pr, &it->pixbuf, x, y, w, h);
 
-		cr = cairo_create(it->surface);
+		cairo_t *cr = cairo_create(it->surface);
 		cairo_rectangle (cr, x, y, w, h);
-		rt_hidpi_aware_draw(rt, cr, it->pixbuf, 0, 0);
+
+		cairo_surface_t *surface = gdk_cairo_surface_create_from_pixbuf(it->pixbuf, rt->hidpi_scale, nullptr);
+		cairo_set_source_surface(cr, surface, 0, 0);
+		cairo_fill(cr);
+
+		cairo_surface_destroy(surface);
 		cairo_destroy (cr);
 		}
 }
