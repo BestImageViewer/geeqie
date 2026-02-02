@@ -1799,69 +1799,48 @@ void renderer_scroll(void *renderer, gint x_off, gint y_off)
 		return;
 		}
 
-		gint x1;
-		gint y1;
-		gint x2;
-		gint y2;
-		cairo_t *cr;
-		cairo_surface_t *surface;
+	const gint x1 = abs(std::min(0, x_off));
+	const gint y1 = abs(std::min(0, y_off));
 
-		if (x_off < 0)
-			{
-			x1 = abs(x_off);
-			x2 = 0;
-			}
-		else
-			{
-			x1 = 0;
-			x2 = abs(x_off);
-			}
+	const gint x2 = std::max(0, x_off);
+	const gint y2 = std::max(0, y_off);
 
-		if (y_off < 0)
-			{
-			y1 = abs(y_off);
-			y2 = 0;
-			}
-		else
-			{
-			y1 = 0;
-			y2 = abs(y_off);
-			}
+	cairo_t *cr = cairo_create(rt->surface);
+	cairo_surface_t *surface = rt->surface;
 
-		cr = cairo_create(rt->surface);
-		surface = rt->surface;
+	/* clipping restricts the intermediate surface's size, so it's a good idea
+	 * to use it. */
+	cairo_rectangle(cr, x1 + pr->x_offset + rt->stereo_off_x, y1 + pr->y_offset + rt->stereo_off_y, w, h);
+	cairo_clip (cr);
+	/* Now push a group to change the target */
+	cairo_push_group (cr);
+	cairo_set_source_surface(cr, surface, x1 - x2, y1 - y2);
+	cairo_paint(cr);
+	/* Now copy the intermediate target back */
+	cairo_pop_group_to_source(cr);
+	cairo_paint(cr);
+	cairo_destroy(cr);
 
-		/* clipping restricts the intermediate surface's size, so it's a good idea
-		 * to use it. */
-		cairo_rectangle(cr, x1 + pr->x_offset + rt->stereo_off_x, y1 + pr->y_offset + rt->stereo_off_y, w, h);
-		cairo_clip (cr);
-		/* Now push a group to change the target */
-		cairo_push_group (cr);
-		cairo_set_source_surface(cr, surface, x1 - x2, y1 - y2);
-		cairo_paint(cr);
-		/* Now copy the intermediate target back */
-		cairo_pop_group_to_source(cr);
-		cairo_paint(cr);
-		cairo_destroy(cr);
+	rt_overlay_queue_all(rt, x2, y2, x1, y1);
 
-		rt_overlay_queue_all(rt, x2, y2, x1, y1);
+	/* @todo Check if pr->vis_width/height could change after w/h initialization.
+	 * If not this could be simplified to w/h = abs(x/y_off) or even removed */
+	w = pr->vis_width - w;
+	h = pr->vis_height - h;
 
-		w = pr->vis_width - w;
-		h = pr->vis_height - h;
-
-		if (w > 0)
-			{
-			rt_queue(rt,
-			         x_off > 0 ? rt->x_scroll + (pr->vis_width - w) : rt->x_scroll, rt->y_scroll,
-			         w, pr->vis_height, true, TileRender::ALL, FALSE, false);
-			}
-		if (h > 0)
-			{
-			/** @FIXME to optimize this, remove overlap */
-			rt_queue(rt,
-			         rt->x_scroll, y_off > 0 ? rt->y_scroll + (pr->vis_height - h) : rt->y_scroll,
-			         pr->vis_width, h, true, TileRender::ALL, FALSE, false);
-			}
+	if (w > 0)
+		{
+		rt_queue(rt,
+		         x_off > 0 ? rt->x_scroll + (pr->vis_width - w) : rt->x_scroll, rt->y_scroll,
+		         w, pr->vis_height, true, TileRender::ALL, FALSE, false);
+		}
+	if (h > 0)
+		{
+		/** @FIXME to optimize this, remove overlap */
+		rt_queue(rt,
+		         rt->x_scroll, y_off > 0 ? rt->y_scroll + (pr->vis_height - h) : rt->y_scroll,
+		         pr->vis_width, h, true, TileRender::ALL, FALSE, false);
+		}
 }
 
 void renderer_area_changed(void *renderer, GdkRectangle src)
