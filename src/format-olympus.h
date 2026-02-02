@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __FORMAT_OLYMPUS_H
-#define __FORMAT_OLYMPUS_H
+#ifndef FORMAT_OLYMPUS_H
+#define FORMAT_OLYMPUS_H
 
 #include <glib.h>
 

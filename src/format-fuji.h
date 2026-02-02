@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __FORMAT_FUJI_H
-#define __FORMAT_FUJI_H
+#ifndef FORMAT_FUJI_H
+#define FORMAT_FUJI_H
 
 #include <glib.h>
 

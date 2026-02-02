@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _ARCHIVES_H
-#define _ARCHIVES_H
+#ifndef ARCHIVES_H
+#define ARCHIVES_H
 
 #include <glib.h>
 
@@ -27,5 +27,5 @@ class FileData;
 
 gchar *open_archive(const FileData *fd);
 
-#endif /* _ARCHIVES_H */
+#endif /* ARCHIVES_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

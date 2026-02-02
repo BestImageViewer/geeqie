@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __FORMAT_CANON_H
-#define __FORMAT_CANON_H
+#ifndef FORMAT_CANON_H
+#define FORMAT_CANON_H
 
 #include <glib.h>
 

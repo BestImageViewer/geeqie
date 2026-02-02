@@ -183,7 +183,7 @@ Pragma: (Indentation 2 spaces)
 Headers:
 
 ```c
-#ifndef _FILENAME_H
+#ifndef FILENAME_H
 ```
 
 Use [Names and Order of Includes](https://google.github.io/styleguide/cppguide.html#Names_and_Order_of_Includes) for headers include order.

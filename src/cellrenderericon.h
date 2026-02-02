@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __GQV_CELL_RENDERER_ICON_H__
-#define __GQV_CELL_RENDERER_ICON_H__
+#ifndef GQV_CELL_RENDERER_ICON_H
+#define GQV_CELL_RENDERER_ICON_H
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib-object.h>
@@ -82,5 +82,5 @@ struct GQvCellRendererIconClass
 GType            gqv_cell_renderer_icon_get_type();
 GtkCellRenderer *gqv_cell_renderer_icon_new();
 
-#endif /* __GQV_CELL_RENDERER_ICON_H__ */
+#endif /* GQV_CELL_RENDERER_ICON_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

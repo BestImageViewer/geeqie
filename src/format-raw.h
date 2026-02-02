@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __FORMAT_RAW_H
-#define __FORMAT_RAW_H
+#ifndef FORMAT_RAW_H
+#define FORMAT_RAW_H
 
 #include <glib.h>
 

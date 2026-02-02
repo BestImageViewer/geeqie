@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __GLUA_H
-#define __GLUA_H
+#ifndef GLUA_H
+#define GLUA_H
 
 #include <glib.h>
 
@@ -29,5 +29,5 @@ void lua_init();
 
 gchar *lua_callvalue(FileData *fd, const gchar *file, const gchar *function);
 
-#endif /* __GLUA_H */
+#endif /* GLUA_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __EXIF_INT_H
-#define __EXIF_INT_H
+#ifndef EXIF_INT_H
+#define EXIF_INT_H
 
 #include <cstdio>
 

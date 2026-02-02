@@ -92,16 +92,13 @@ static constexpr AltKey alt_keys[] = {
 	};
 
 #ifdef DEBUG
-static void _debug_exception(const char* file,
-                             int line,
-                             const char* func,
-                             Exiv2::AnyError& e)
+static void debug_exception_impl(const char* file, int line, const char* func, Exiv2::AnyError& e)
 {
 	g_autofree gchar *str = g_locale_from_utf8(e.what(), -1, nullptr, nullptr, nullptr);
 	DEBUG_1("%s:%d:%s:Exiv2: %s", file, line, func, str);
 }
 
-#  define debug_exception(e) _debug_exception(__FILE__, __LINE__, __func__, e)
+#  define debug_exception(e) debug_exception_impl(__FILE__, __LINE__, __func__, e)
 #else
 #  define debug_exception(e)
 #endif
@@ -260,7 +257,10 @@ public:
 	}
 };
 
-static void _ExifDataProcessed_update_xmp(gpointer key, gpointer value, gpointer data);
+static void ExifDataProcessed_update_xmp(gpointer key, gpointer value, gpointer data)
+{
+	exif_update_metadata(static_cast<ExifData *>(data), static_cast<gchar *>(key), static_cast<GList *>(value));
+}
 
 // This allows read-write access to the metadata
 struct ExifDataProcessed : public ExifData
@@ -300,7 +300,7 @@ public:
 			}
 		if (modified_xmp)
 			{
-			g_hash_table_foreach(modified_xmp, _ExifDataProcessed_update_xmp, this);
+			g_hash_table_foreach(modified_xmp, ExifDataProcessed_update_xmp, this);
 			}
 	}
 
@@ -407,11 +407,6 @@ void exif_init()
 }
 
 
-
-static void _ExifDataProcessed_update_xmp(gpointer key, gpointer value, gpointer data)
-{
-	exif_update_metadata(static_cast<ExifData *>(data), static_cast<gchar *>(key), static_cast<GList *>(value));
-}
 
 ExifData *exif_read(gchar *path, gchar *sidecar_path, GHashTable *modified_xmp)
 {
