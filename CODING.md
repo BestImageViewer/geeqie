@@ -70,7 +70,7 @@ This feature may be used to open an editor at a file location in the text string
 In all new files include a header, like this:
 
 ```c
-/* SPDX-License-Identifier: LGPL-2.1-or-later */
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 
 ```
 
