@@ -1217,47 +1217,35 @@ void rt_tile_get_region(gboolean has_alpha, gboolean ignore_alpha,
 		}
 	else
 		{
-		const auto convert_alpha_color = [](const GdkRGBA &alpha_color)
+		static const auto convert_alpha_color = [](const GdkRGBA &alpha_color) -> guint32
 		{
 			const auto red = static_cast<guint32>(alpha_color.red * 255) << 16 & 0x00FF0000;
 			const auto green = static_cast<guint32>(alpha_color.green * 255) << 8 & 0x0000FF00;
 			const auto blue = static_cast<guint32>(alpha_color.blue * 255) & 0x000000FF;
 			return red + green + blue;
 		};
-		guint32 alpha_1 = convert_alpha_color(options->image.alpha_color_1);
-		guint32 alpha_2 = convert_alpha_color(options->image.alpha_color_2);
 
 		if (scale_x == 1.0 && scale_y == 1.0) interp_type = GDK_INTERP_NEAREST;
 
+		g_autoptr(GdkPixbuf) tmppixbuf = nullptr;
+
 		if (ignore_alpha)
 			{
-			GdkPixbuf *tmppixbuf = gdk_pixbuf_add_alpha(src, FALSE, 0, 0, 0);
-
+			tmppixbuf = gdk_pixbuf_add_alpha(src, FALSE, 0, 0, 0);
 			pixbuf_ignore_alpha_rect(tmppixbuf, 0, 0, gdk_pixbuf_get_width(src), gdk_pixbuf_get_height(src));
 
-			gdk_pixbuf_composite_color(tmppixbuf, dest,
-			                           pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height,
-			                           offset_x, offset_y,
-			                           scale_x, scale_y,
-			                           (wide_image && interp_type == GDK_INTERP_NEAREST) ? GDK_INTERP_TILES : interp_type,
-			                           255, check_x, check_y,
-			                           PR_ALPHA_CHECK_SIZE,
-			                           alpha_1,
-			                           alpha_2);
-			g_object_unref(tmppixbuf);
+			src = tmppixbuf;
 			}
-		else
-			{
-			gdk_pixbuf_composite_color(src, dest,
-			                           pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height,
-			                           offset_x, offset_y,
-			                           scale_x, scale_y,
-			                           (wide_image && interp_type == GDK_INTERP_NEAREST) ? GDK_INTERP_TILES : interp_type,
-			                           255, check_x, check_y,
-			                           PR_ALPHA_CHECK_SIZE,
-			                           alpha_1,
-			                           alpha_2);
-			}
+
+		gdk_pixbuf_composite_color(src, dest,
+		                           pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height,
+		                           offset_x, offset_y,
+		                           scale_x, scale_y,
+		                           (wide_image && interp_type == GDK_INTERP_NEAREST) ? GDK_INTERP_TILES : interp_type,
+		                           255, check_x, check_y,
+		                           PR_ALPHA_CHECK_SIZE,
+		                           convert_alpha_color(options->image.alpha_color_1),
+		                           convert_alpha_color(options->image.alpha_color_2));
 		}
 }
 
