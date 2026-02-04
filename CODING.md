@@ -1,7 +1,7 @@
 # Coding and Documentation Style
 
 [Error Logging](#error-logging)  
-[GPL header](#gpl-header)  
+[SPDX license](#spdx-license)  
 [Git change log](#git-change-log)  
 [Source Code Style](#source-code-style)  
 [Shell Script Style](#shell-script-style)  
