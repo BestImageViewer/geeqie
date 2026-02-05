@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <vector>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -31,7 +32,6 @@
 
 #include <config.h>
 
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "editors.h"
 #include "intl.h"
@@ -66,25 +66,6 @@ static gboolean toolbar_press_cb(GtkGesture *, int, double, double, gpointer dat
 	popup_menu_bar(static_cast<GtkWidget *>(data), nullptr);
 
 	return TRUE;
-}
-
-static void get_toolbar_item(const gchar *name, gchar **label, gchar **stock_id)
-{
-	*label = nullptr;
-	*stock_id = nullptr;
-
-	std::vector<ActionItem> list = get_action_items();
-
-	const auto action_item_has_name = [name](const ActionItem &action_item)
-	{
-		return g_strcmp0(action_item.name, name) == 0;
-	};
-	const auto work = std::find_if(list.cbegin(), list.cend(), action_item_has_name);
-	if (work != list.cend())
-		{
-		*label = g_strdup(work->label);
-		*stock_id = g_strdup(work->icon_name);
-		}
 }
 
 static void toolbarlist_add_button(const gchar *name, const gchar *label,
@@ -161,25 +142,6 @@ static void toolbarlist_add_cb(GtkWidget *widget, gpointer data)
 	toolbarlist_add_button(name, label, stock_id, GTK_BOX(tbbd->vbox));
 }
 
-static void get_desktop_data(const gchar *name, gchar **label, gchar **stock_id)
-{
-	EditorsList editors_list = editor_list_get();
-	auto it = std::find_if(editors_list.cbegin(), editors_list.cend(),
-	                       [name](const EditorDescription *editor) { return g_strcmp0(editor->key, name) == 0; });
-	if (it != editors_list.cend())
-		{
-		auto *editor = *it;
-
-		*label = g_strdup(editor->name);
-		*stock_id = g_strconcat(editor->icon, ".desktop", NULL);
-		}
-	else
-		{
-		*label = nullptr;
-		*stock_id = nullptr;
-		}
-}
-
 // toolbar_menu_add_popup
 static gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
 {
@@ -242,22 +204,41 @@ void toolbar_apply(ToolbarType bar)
  */
 static void toolbarlist_populate(GList *toolbar_items, GtkBox *box)
 {
+	std::optional<std::vector<ActionItem>> actions_list;
+	std::optional<EditorsList> editors_list;
+
 	for (GList *work = toolbar_items; work; work = work->next)
 		{
 		auto name = static_cast<gchar *>(work->data);
 
 		if (g_strcmp0(name, "Separator") != 0)
 			{
-			g_autofree gchar *label = nullptr;
+			const gchar *label = nullptr;
 			g_autofree gchar *icon = nullptr;
 
 			if (file_extension_match(name, ".desktop"))
 				{
-				get_desktop_data(name, &label, &icon);
+				if (!editors_list) editors_list = editor_list_get();
+
+				const auto it = std::find_if(editors_list->cbegin(), editors_list->cend(),
+				                             [name](const EditorDescription *editor) { return g_strcmp0(editor->key, name) == 0; });
+				if (it != editors_list->cend())
+					{
+					label = (*it)->name;
+					icon = g_strconcat((*it)->icon, ".desktop", NULL);
+					}
 				}
 			else
 				{
-				get_toolbar_item(name, &label, &icon);
+				if (!actions_list) actions_list = get_action_items();
+
+				const auto it = std::find_if(actions_list->cbegin(), actions_list->cend(),
+				                             [name](const ActionItem &action_item) { return g_strcmp0(action_item.name, name) == 0; });
+				if (it != actions_list->cend())
+					{
+					label = it->label;
+					icon = g_strdup(it->icon_name);
+					}
 				}
 
 			toolbarlist_add_button(name, label, icon, box);
