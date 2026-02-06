@@ -3055,13 +3055,26 @@ static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 	DEBUG_1("%s layout_editors_reload_idle_cb: setup_editors done", get_exec_time());
 
 	/* The toolbars need to be regenerated in case they contain a plugin */
-	LayoutWindow *lw = get_current_layout();
+	LayoutWindow *cur_lw = get_current_layout();
 
-	for (gint i = 0; i < TOOLBAR_COUNT; i++)
-		{
-		toolbar_select_new(lw, static_cast<ToolbarType>(i));
-		toolbar_apply(static_cast<ToolbarType>(i));
-		}
+	const auto layout_toolbars_apply = [cur_lw](LayoutWindow *lw)
+	{
+		if (lw == cur_lw) return;
+
+		for (int i = 0; i < TOOLBAR_COUNT; i++)
+			{
+			layout_toolbar_clear(lw, static_cast<ToolbarType>(i));
+
+			for (GList *work = cur_lw->toolbar_actions[i]; work; work = work->next)
+				{
+				auto *action_name = static_cast<gchar *>(work->data);
+
+				layout_toolbar_add(lw, static_cast<ToolbarType>(i), action_name);
+				}
+			}
+	};
+
+	layout_window_foreach(layout_toolbars_apply);
 
 	layout_editors->reload_idle_id = -1;
 	return G_SOURCE_REMOVE;
