@@ -35,7 +35,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "compat-deprecated.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
 
@@ -538,11 +537,16 @@ void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it
 				cairo_fill(cr);
 				cairo_destroy (cr);
 
-				cr = deprecated_gdk_cairo_create(od->window);
+				cairo_region_t *region = gdk_window_get_clip_region(od->window);
+				GdkDrawingContext *drawing_context = gdk_window_begin_draw_frame(od->window, region);
+
+				cr = gdk_drawing_context_get_cairo_context(drawing_context);
 				cairo_set_source_surface(cr, rt->overlay_buffer, r.x - od_rect.x, r.y - od_rect.y);
 				cairo_rectangle (cr, r.x - od_rect.x, r.y - od_rect.y, r.width, r.height);
 				cairo_fill (cr);
-				cairo_destroy (cr);
+
+				gdk_window_end_draw_frame(od->window, drawing_context);
+				cairo_region_destroy(region);
 			};
 
 			if (it)
@@ -556,13 +560,18 @@ void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it
 			else
 				{
 				/* no ImageTile means region may be larger than our scratch buffer */
+				static const auto set_source = [](cairo_t *cr)
+				{
+					cairo_set_source_rgb(cr, 0, 0, 0);
+				};
+
 				for (gint sx = r.x; sx < r.x + r.width; sx += rt->tile_width)
 				    for (gint sy = r.y; sy < r.y + r.height; sy += rt->tile_height)
 					{
 					gint sw = std::min(r.x + r.width - sx, rt->tile_width);
 					gint sh = std::min(r.y + r.height - sy, rt->tile_height);
 
-					draw({sx, sy, sw, sh}, [](cairo_t *cr){ cairo_set_source_rgb(cr, 0, 0, 0); });
+					draw({sx, sy, sw, sh}, set_source);
 					}
 				}
 			}

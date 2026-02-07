@@ -75,7 +75,6 @@ const auto deprecated_gtk_ui_manager_remove_ui = gtk_ui_manager_remove_ui;
 const auto deprecated_gtk_ui_manager_set_add_tearoffs = gtk_ui_manager_set_add_tearoffs;
 
 // Hide other Gdk/Gtk deprecation warnings
-const auto deprecated_gdk_cairo_create = gdk_cairo_create;
 const auto deprecated_gdk_flush = gdk_flush;
 const auto deprecated_gdk_pixbuf_animation_get_iter = gdk_pixbuf_animation_get_iter;
 const auto deprecated_gdk_pixbuf_animation_iter_advance = gdk_pixbuf_animation_iter_advance;
