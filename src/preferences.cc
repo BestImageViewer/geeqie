@@ -3630,32 +3630,13 @@ static void config_tab_accelerators(GtkWidget *notebook)
 	gtk_widget_show(button);
 }
 
-/* toolbar main tab */
-static void config_tab_toolbar_main(GtkWidget *notebook)
+/* toolbar tab */
+static void config_tab_toolbar(GtkWidget *notebook, ToolbarType bar)
 {
-	GtkWidget *vbox;
-	GtkWidget *toolbardata;
+	const gchar *title = (bar == TOOLBAR_MAIN) ? _("Toolbar Main") : _("Toolbar Status");
+	GtkWidget *vbox = scrolled_notebook_page(notebook, title);
 
-	LayoutWindow *lw = layout_window_first();
-
-	vbox = scrolled_notebook_page(notebook, _("Toolbar Main"));
-
-	toolbardata = toolbar_select_new(lw, TOOLBAR_MAIN);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), toolbardata, TRUE, TRUE, 0);
-	gtk_widget_show(vbox);
-}
-
-/* toolbar status tab */
-static void config_tab_toolbar_status(GtkWidget *notebook)
-{
-	GtkWidget *vbox;
-	GtkWidget *toolbardata;
-
-	LayoutWindow *lw = layout_window_first();
-
-	vbox = scrolled_notebook_page(notebook, _("Toolbar Status"));
-
-	toolbardata = toolbar_select_new(lw, TOOLBAR_STATUS);
+	GtkWidget *toolbardata = toolbar_select_new(layout_window_first(), bar);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), toolbardata, TRUE, TRUE, 0);
 	gtk_widget_show(vbox);
 }
@@ -3852,8 +3833,8 @@ static void config_window_create(LayoutWindow *lw)
 	config_tab_color(notebook);
 	config_tab_stereo(notebook);
 	config_tab_behavior(notebook);
-	config_tab_toolbar_main(notebook);
-	config_tab_toolbar_status(notebook);
+	config_tab_toolbar(notebook, TOOLBAR_MAIN);
+	config_tab_toolbar(notebook, TOOLBAR_STATUS);
 	config_tab_advanced(notebook);
 
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), lw->options.preferences_window.page_number);
