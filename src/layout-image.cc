@@ -21,6 +21,7 @@
 
 #include "layout-image.h"
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 
@@ -1386,40 +1387,31 @@ void layout_image_set_index(LayoutWindow *lw, gint index)
 
 	if (layout_selection_count(lw) > 1)
 		{
-		GList *x = layout_selection_list_by_index(lw);
-		GList *y;
-		GList *last;
+		const std::vector<int> x = layout_selection_list_by_index(lw);
 
-		for (last = y = x; y; y = y->next)
-			last = y;
-		for (y = x; y && (GPOINTER_TO_INT(y->data)) != index; y = y->next)
-			;
-
-		if (y)
+		const auto y = std::find(x.cbegin(), x.cend(), index);
+		if (y != x.cend())
 			{
 			gint newindex;
 
-			if ((index > old && (index != GPOINTER_TO_INT(last->data) || old != GPOINTER_TO_INT(x->data)))
-			    || (old == GPOINTER_TO_INT(last->data) && index == GPOINTER_TO_INT(x->data)))
+			if ((index > old && (index != x.back() || old != x.front())) ||
+			    (old == x.back() && index == x.front()))
 				{
-				if (y->next)
-					newindex = GPOINTER_TO_INT(y->next->data);
+				if (const auto next = std::next(y); next != x.cend())
+					newindex = *next;
 				else
-					newindex = GPOINTER_TO_INT(x->data);
+					newindex = x.front();
 				}
 			else
 				{
-				if (y->prev)
-					newindex = GPOINTER_TO_INT(y->prev->data);
+				if (y != x.cbegin())
+					newindex = *(std::prev(y));
 				else
-					newindex = GPOINTER_TO_INT(last->data);
+					newindex = x.back();
 				}
 
 			read_ahead_fd = layout_list_get_fd(lw, newindex);
 			}
-
-		while (x)
-			x = g_list_remove(x, x->data);
 		}
 
 	layout_image_set_with_ahead(lw, fd, read_ahead_fd);
@@ -1520,28 +1512,21 @@ void layout_image_next(LayoutWindow *lw)
 
 	if (layout_selection_count(lw) > 1)
 		{
-		GList *x = layout_selection_list_by_index(lw);
+		const std::vector<int> x = layout_selection_list_by_index(lw);
 		gint old = layout_list_get_index(lw, layout_image_get_fd(lw));
-		GList *y;
 
-		for (y = x; y && (GPOINTER_TO_INT(y->data)) != old; y = y->next)
-			;
-		if (y)
+		const auto y = std::find(x.cbegin(), x.cend(), old);
+		if (y != x.cend())
 			{
-			if (y->next)
-				layout_image_set_index(lw, GPOINTER_TO_INT(y->next->data));
-			else
+			if (const auto next = std::next(y); next != x.cend())
+				layout_image_set_index(lw, *next);
+			else if (options->circular_selection_lists)
 				{
-				if (options->circular_selection_lists)
-					{
-					layout_image_set_index(lw, GPOINTER_TO_INT(x->data));
-					}
+				layout_image_set_index(lw, x.front());
 				}
-			}
-		while (x)
-			x = g_list_remove(x, x->data);
-		if (y) /* not dereferenced */
+
 			return;
+			}
 		}
 
 	cd = image_get_collection(lw->image, &info);
@@ -1595,31 +1580,24 @@ void layout_image_prev(LayoutWindow *lw)
 
 	if (layout_selection_count(lw) > 1)
 		{
-		GList *x = layout_selection_list_by_index(lw);
+		const std::vector<int> x = layout_selection_list_by_index(lw);
 		gint old = layout_list_get_index(lw, layout_image_get_fd(lw));
-		GList *y;
-		GList *last;
 
-		for (last = y = x; y; y = y->next)
-			last = y;
-		for (y = x; y && (GPOINTER_TO_INT(y->data)) != old; y = y->next)
-			;
-		if (y)
+		const auto y = std::find(x.cbegin(), x.cend(), old);
+		if (y != x.cend())
 			{
-			if (y->prev)
-				layout_image_set_index(lw, GPOINTER_TO_INT(y->prev->data));
-			else
+			if (y != x.cbegin())
 				{
-				if (options->circular_selection_lists)
-					{
-					layout_image_set_index(lw, GPOINTER_TO_INT(last->data));
-					}
+				const auto prev = std::prev(y);
+				layout_image_set_index(lw, *prev);
 				}
-			}
-		while (x)
-			x = g_list_remove(x, x->data);
-		if (y) /* not dereferenced */
+			else if (options->circular_selection_lists)
+				{
+				layout_image_set_index(lw, x.back());
+				}
+
 			return;
+			}
 		}
 
 	cd = image_get_collection(lw->image, &info);

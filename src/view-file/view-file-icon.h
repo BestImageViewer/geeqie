@@ -85,7 +85,7 @@ gint vficon_index_by_fd(const ViewFile *vf, const FileData *fd);
 gboolean vficon_is_selected(ViewFile *vf, FileData *fd);
 guint vficon_selection_count(ViewFile *vf, gint64 *bytes);
 GList *vficon_selection_get_list(ViewFile *vf);
-GList *vficon_selection_get_list_by_index(ViewFile *vf);
+std::vector<int> vficon_selection_get_list_by_index(const ViewFile *vf);
 void vficon_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func);
 
 void vficon_select_all(ViewFile *vf);

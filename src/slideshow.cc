@@ -68,12 +68,9 @@ static void slideshow_list_init(SlideShow *ss, gint start_index)
 
 	if (ss->from_selection)
 		{
-		g_autoptr(GList) list = layout_selection_list_by_index(ss->lw);
+		const std::vector<int> list = layout_selection_list_by_index(ss->lw);
 
-		for (GList *work = list; work; work = work->next)
-			{
-			ss->list.push_back(GPOINTER_TO_INT(work->data));
-			}
+		std::copy(list.cbegin(), list.cend(), std::back_inserter(ss->list));
 		}
 	else
 		{

@@ -1184,13 +1184,11 @@ GList *layout_selection_list(LayoutWindow *lw)
 	return nullptr;
 }
 
-GList *layout_selection_list_by_index(LayoutWindow *lw)
+std::vector<int> layout_selection_list_by_index(LayoutWindow *lw)
 {
-	if (!layout_valid(&lw)) return nullptr;
+	if (!layout_valid(&lw) || !lw->vf) return {};
 
-	if (lw->vf) return vf_selection_get_list_by_index(lw->vf);
-
-	return nullptr;
+	return vf_selection_get_list_by_index(lw->vf);
 }
 
 guint layout_selection_count(LayoutWindow *lw, gint64 *bytes)

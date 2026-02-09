@@ -1241,9 +1241,9 @@ GList *vflist_selection_get_list(ViewFile *vf)
 	return list;
 }
 
-GList *vflist_selection_get_list_by_index(ViewFile *vf)
+std::vector<int> vflist_selection_get_list_by_index(const ViewFile *vf)
 {
-	GList *list = nullptr;
+	std::vector<int> list;
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 	GtkTreeModel *store;
@@ -1252,16 +1252,16 @@ GList *vflist_selection_get_list_by_index(ViewFile *vf)
 	for (GList *work = slist; work; work = work->next)
 		{
 		auto tpath = static_cast<GtkTreePath *>(work->data);
-		FileData *fd;
 		GtkTreeIter iter;
-
 		gtk_tree_model_get_iter(store, &iter, tpath);
+
+		FileData *fd;
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
 
-		list = g_list_prepend(list, GINT_TO_POINTER(g_list_index(vf->list, fd)));
+		list.push_back(g_list_index(vf->list, fd));
 		}
 
-	return g_list_reverse(list);
+	return list;
 }
 
 void vflist_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func)

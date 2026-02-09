@@ -136,7 +136,7 @@ GList *vf_get_list(ViewFile *vf);
 
 guint vf_selection_count(ViewFile *vf, gint64 *bytes);
 GList *vf_selection_get_list(ViewFile *vf);
-GList *vf_selection_get_list_by_index(ViewFile *vf);
+std::vector<int> vf_selection_get_list_by_index(const ViewFile *vf);
 void vf_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func);
 
 void vf_select_all(ViewFile *vf);

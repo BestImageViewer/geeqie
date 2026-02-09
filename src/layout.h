@@ -279,8 +279,8 @@ void layout_list_sync_fd(LayoutWindow *lw, FileData *fd);
 gchar *layout_get_window_list();
 
 GList *layout_selection_list(LayoutWindow *lw);
-/* return list of pointers to int for selection */
-GList *layout_selection_list_by_index(LayoutWindow *lw);
+/* return list of indices for selection */
+std::vector<int> layout_selection_list_by_index(LayoutWindow *lw);
 guint layout_selection_count(LayoutWindow *lw, gint64 *bytes = nullptr);
 void layout_select_all(LayoutWindow *lw);
 void layout_select_none(LayoutWindow *lw);

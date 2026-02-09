@@ -755,19 +755,16 @@ GList *vficon_selection_get_list(ViewFile *vf)
 	return list;
 }
 
-GList *vficon_selection_get_list_by_index(ViewFile *vf)
+std::vector<int> vficon_selection_get_list_by_index(const ViewFile *vf)
 {
-	GList *list = nullptr;
-	GList *work;
+	std::vector<int> list;
 
-	work = VFICON(vf)->selection;
-	while (work)
+	for (GList *work = VFICON(vf)->selection; work; work = work->next)
 		{
-		list = g_list_prepend(list, GINT_TO_POINTER(g_list_index(vf->list, work->data)));
-		work = work->next;
+		list.push_back(g_list_index(vf->list, work->data));
 		}
 
-	return g_list_reverse(list);
+	return list;
 }
 
 void vficon_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func)

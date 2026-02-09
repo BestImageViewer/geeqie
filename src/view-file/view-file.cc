@@ -223,18 +223,14 @@ GList *vf_selection_get_list(ViewFile *vf)
 	return ret;
 }
 
-GList *vf_selection_get_list_by_index(ViewFile *vf)
+std::vector<int> vf_selection_get_list_by_index(const ViewFile *vf)
 {
-	GList *ret;
-
 	switch (vf->type)
 	{
-	case FILEVIEW_LIST: ret = vflist_selection_get_list_by_index(vf); break;
-	case FILEVIEW_ICON: ret = vficon_selection_get_list_by_index(vf); break;
-	default: ret = nullptr;
+	case FILEVIEW_LIST: return vflist_selection_get_list_by_index(vf);
+	case FILEVIEW_ICON: return vficon_selection_get_list_by_index(vf);
+	default: return {};
 	}
-
-	return ret;
 }
 
 void vf_selection_foreach(ViewFile *vf, const ViewFile::SelectionCallback &func)
