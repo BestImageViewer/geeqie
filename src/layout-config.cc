@@ -48,14 +48,11 @@ struct LayoutStyle
 
 struct LayoutConfig
 {
-	GtkWidget *box;
-
 	GList *style_widgets;
 
 	GtkWidget *listview;
 
 	gint style;
-	gint a, b, c;
 };
 
 constexpr gint LAYOUT_STYLE_SIZE = 48;
@@ -350,11 +347,11 @@ gchar *layout_config_get(GtkWidget *widget, gint *style)
 
 	*style = lc->style;
 
-	lc->a = layout_config_list_order_get(lc, 0);
-	lc->b = layout_config_list_order_get(lc, 1);
-	lc->c = layout_config_list_order_get(lc, 2);
+	const gint a = layout_config_list_order_get(lc, 0);
+	const gint b = layout_config_list_order_get(lc, 1);
+	const gint c = layout_config_list_order_get(lc, 2);
 
-	return layout_config_order_to_text(lc->a, lc->b, lc->c);
+	return layout_config_order_to_text(a, b, c);
 }
 
 GtkWidget *layout_config_new()
@@ -370,11 +367,11 @@ GtkWidget *layout_config_new()
 
 	lc = g_new0(LayoutConfig, 1);
 
-	lc->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	g_object_set_data_full(G_OBJECT(lc->box), "layout_config", lc, layout_config_destroy);
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+	g_object_set_data_full(G_OBJECT(box), "layout_config", lc, layout_config_destroy);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(lc->box), hbox, FALSE, FALSE, 0);
+	gq_gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, FALSE, 0);
 	for (i = 0; i < layout_config_style_count; i++)
 		{
 		group = layout_config_widget(group, hbox, i, lc);
@@ -386,7 +383,7 @@ GtkWidget *layout_config_new()
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-	gq_gtk_box_pack_start(GTK_BOX(lc->box), scrolled, FALSE, FALSE, 0);
+	gq_gtk_box_pack_start(GTK_BOX(box), scrolled, FALSE, FALSE, 0);
 	gtk_widget_show(scrolled);
 
 	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
@@ -421,8 +418,8 @@ GtkWidget *layout_config_new()
 	gq_gtk_container_add(scrolled, lc->listview);
 	gtk_widget_show(lc->listview);
 
-	pref_label_new(lc->box, _("(drag to change order)"));
+	pref_label_new(box, _("(drag to change order)"));
 
-	return lc->box;
+	return box;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
