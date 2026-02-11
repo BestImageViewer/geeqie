@@ -48,7 +48,7 @@ struct LayoutStyle
 
 struct LayoutConfig
 {
-	GList *style_widgets;
+	std::vector<GtkWidget *> style_widgets;
 
 	GtkWidget *listview;
 
@@ -71,12 +71,9 @@ constexpr gint layout_config_style_count = std::size(layout_config_styles);
 const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
 
-void layout_config_destroy(gpointer data)
+void layout_config_destroy(LayoutConfig *lc)
 {
-	auto lc = static_cast<LayoutConfig *>(data);
-
-	g_list_free(lc->style_widgets);
-	g_free(lc);
+	delete lc;
 }
 
 void layout_config_set_order(LayoutLocation l, gint n,
@@ -314,17 +311,13 @@ void layout_config_parse(gint style, const gchar *order,
 void layout_config_set(GtkWidget *widget, gint style, const gchar *order)
 {
 	LayoutConfig *lc;
-	GtkWidget *button;
 
 	lc = static_cast<LayoutConfig *>(g_object_get_data(G_OBJECT(widget), "layout_config"));
 
 	if (!lc) return;
 
 	style = std::clamp(style, 0, layout_config_style_count);
-	button = static_cast<GtkWidget *>(g_list_nth_data(lc->style_widgets, style));
-	if (!button) return;
-
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lc->style_widgets[style]), TRUE);
 
 	gint a;
 	gint b;
@@ -356,7 +349,6 @@ gchar *layout_config_get(GtkWidget *widget, gint *style)
 
 GtkWidget *layout_config_new()
 {
-	LayoutConfig *lc;
 	GtkWidget *hbox;
 	GtkWidget *group = nullptr;
 	GtkWidget *scrolled;
@@ -365,17 +357,18 @@ GtkWidget *layout_config_new()
 	GtkCellRenderer *renderer;
 	gint i;
 
-	lc = g_new0(LayoutConfig, 1);
+	auto *lc = new LayoutConfig();
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	g_object_set_data_full(G_OBJECT(box), "layout_config", lc, layout_config_destroy);
+	g_object_set_data_full(G_OBJECT(box), "layout_config", lc,
+	                       reinterpret_cast<GDestroyNotify>(layout_config_destroy));
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, FALSE, 0);
 	for (i = 0; i < layout_config_style_count; i++)
 		{
 		group = layout_config_widget(group, hbox, i, lc);
-		lc->style_widgets = g_list_append(lc->style_widgets, group);
+		lc->style_widgets.push_back(group);
 		}
 	gtk_widget_show(hbox);
 
