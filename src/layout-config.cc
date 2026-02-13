@@ -69,51 +69,40 @@ constexpr std::array<LayoutStyle, 4> layout_config_styles{{
 const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
 
+gboolean tree_model_get_row_iter(GtkTreeModel *model, int row, GtkTreeIter *iter)
+{
+	int cur = 0;
+
+	gboolean valid = gtk_tree_model_get_iter_first(model, iter);
+	while (valid && cur != row)
+		{
+		cur++;
+		valid = gtk_tree_model_iter_next(model, iter);
+		}
+
+	return valid;
+}
+
 void layout_config_list_order_set(LayoutConfig *lc, gint src, gint dest)
 {
-	GtkListStore *store;
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(lc->listview));
+
 	GtkTreeIter iter;
-	gboolean valid;
-	gint n;
+	if (!tree_model_get_row_iter(model, dest, &iter)) return;
 
-	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(lc->listview)));
-
-	n = 0;
-	valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
-	while (valid)
-		{
-		if (n == dest)
-			{
-			gtk_list_store_set(store, &iter, COLUMN_TEXT, _(layout_titles[src]), COLUMN_KEY, src, -1);
-			return;
-			}
-		n++;
-		valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
-		}
+	gtk_list_store_set(GTK_LIST_STORE(model), &iter, COLUMN_TEXT, _(layout_titles[src]), COLUMN_KEY, src, -1);
 }
 
 gint layout_config_list_order_get(LayoutConfig *lc, gint n)
 {
-	GtkTreeModel *store;
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(lc->listview));
+
 	GtkTreeIter iter;
-	gboolean valid;
-	gint c = 0;
+	if (!tree_model_get_row_iter(model, n, &iter)) return 0;
 
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(lc->listview));
-
-	valid = gtk_tree_model_get_iter_first(store, &iter);
-	while (valid)
-		{
-		if (c == n)
-			{
-			gint val;
-			gtk_tree_model_get(store, &iter, COLUMN_KEY, &val, -1);
-			return val;
-			}
-		c++;
-		valid = gtk_tree_model_iter_next(store, &iter);
-		}
-	return 0;
+	gint val;
+	gtk_tree_model_get(model, &iter, COLUMN_KEY, &val, -1);
+	return val;
 }
 
 void layout_config_widget_click_cb(GtkWidget *widget, gpointer data)
