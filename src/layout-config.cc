@@ -69,36 +69,6 @@ constexpr std::array<LayoutStyle, 4> layout_config_styles{{
 const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
 
-void layout_config_set_order(LayoutLocation l, gint n,
-                             LayoutLocation &a, LayoutLocation &b, LayoutLocation &c)
-{
-	switch (n)
-		{
-		case 0:
-			a = l;
-			break;
-		case 1:
-			b = l;
-			break;
-		case 2:
-		default:
-			c = l;
-			break;
-		}
-}
-
-void layout_config_from_data(gint style, gint oa, gint ob, gint oc,
-                             LayoutLocation &la, LayoutLocation &lb, LayoutLocation &lc)
-{
-	style = std::clamp<int>(style, 0, layout_config_styles.size());
-
-	LayoutStyle ls = layout_config_styles[style];
-
-	layout_config_set_order(ls.a, oa, la, lb, lc);
-	layout_config_set_order(ls.b, ob, la, lb, lc);
-	layout_config_set_order(ls.c, oc, la, lb, lc);
-}
-
 void layout_config_list_order_set(LayoutConfig *lc, gint src, gint dest)
 {
 	GtkListStore *store;
@@ -293,12 +263,18 @@ void layout_config_order_from_text(const gchar *text, gint &a, gint &b, gint &c)
 void layout_config_parse(gint style, const gchar *order,
                          LayoutLocation &a, LayoutLocation &b, LayoutLocation &c)
 {
-	gint na;
-	gint nb;
-	gint nc;
+	gint oa;
+	gint ob;
+	gint oc;
+	layout_config_order_from_text(order, oa, ob, oc);
 
-	layout_config_order_from_text(order, na, nb, nc);
-	layout_config_from_data(style, na, nb, nc, a, b, c);
+	style = std::clamp<int>(style, 0, layout_config_styles.size());
+	LayoutStyle ls = layout_config_styles[style];
+
+	LayoutLocation *lls[] = { &a, &b, &c };
+	*lls[oa] = ls.a;
+	*lls[ob] = ls.b;
+	*lls[oc] = ls.c;
 }
 
 void layout_config_set(GtkWidget *widget, gint style, const gchar *order)
