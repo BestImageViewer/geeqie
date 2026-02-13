@@ -57,16 +57,13 @@ struct LayoutConfig
 
 constexpr gint LAYOUT_STYLE_SIZE = 48;
 
-// @todo Use std::array
-constexpr LayoutStyle layout_config_styles[] = {
+constexpr std::array<LayoutStyle, 4> layout_config_styles{{
 	/* 1, 2, 3 */
 	{ static_cast<LayoutLocation>(LAYOUT_LEFT | LAYOUT_TOP), static_cast<LayoutLocation>(LAYOUT_LEFT | LAYOUT_BOTTOM), LAYOUT_RIGHT },
 	{ static_cast<LayoutLocation>(LAYOUT_LEFT | LAYOUT_TOP), static_cast<LayoutLocation>(LAYOUT_RIGHT | LAYOUT_TOP), LAYOUT_BOTTOM },
 	{ LAYOUT_LEFT, static_cast<LayoutLocation>(LAYOUT_RIGHT | LAYOUT_TOP), static_cast<LayoutLocation>(LAYOUT_RIGHT | LAYOUT_BOTTOM) },
 	{ LAYOUT_TOP, static_cast<LayoutLocation>(LAYOUT_LEFT | LAYOUT_BOTTOM), static_cast<LayoutLocation>(LAYOUT_RIGHT | LAYOUT_BOTTOM) }
-};
-
-constexpr gint layout_config_style_count = std::size(layout_config_styles);
+}};
 
 const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
@@ -97,7 +94,7 @@ void layout_config_set_order(LayoutLocation l, gint n,
 void layout_config_from_data(gint style, gint oa, gint ob, gint oc,
                              LayoutLocation &la, LayoutLocation &lb, LayoutLocation &lc)
 {
-	style = std::clamp(style, 0, layout_config_style_count);
+	style = std::clamp<int>(style, 0, layout_config_styles.size());
 
 	LayoutStyle ls = layout_config_styles[style];
 
@@ -316,7 +313,7 @@ void layout_config_set(GtkWidget *widget, gint style, const gchar *order)
 
 	if (!lc) return;
 
-	style = std::clamp(style, 0, layout_config_style_count);
+	style = std::clamp<int>(style, 0, layout_config_styles.size());
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lc->style_widgets[style]), TRUE);
 
 	gint a;
@@ -355,7 +352,6 @@ GtkWidget *layout_config_new()
 	GtkListStore *store;
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *renderer;
-	gint i;
 
 	auto *lc = new LayoutConfig();
 
@@ -365,7 +361,7 @@ GtkWidget *layout_config_new()
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, FALSE, 0);
-	for (i = 0; i < layout_config_style_count; i++)
+	for (size_t i = 0; i < layout_config_styles.size(); i++)
 		{
 		group = layout_config_widget(group, hbox, i, lc);
 		lc->style_widgets.push_back(group);
@@ -400,7 +396,7 @@ GtkWidget *layout_config_new()
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(lc->listview), column);
 
-	for (i = 0; i < 3; i++)
+	for (gint i = 0; i < 3; i++)
 		{
 		GtkTreeIter iter;
 
