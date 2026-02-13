@@ -27,6 +27,12 @@
 
 #include <config.h>
 
+template<typename T>
+void delete_cb(gpointer data)
+{
+	delete static_cast<T *>(data);
+}
+
 const gchar *gq_gtk_entry_get_text(GtkEntry *entry);
 gchar *convert_rating_to_stars(gint rating);
 gchar *date_get_abbreviated_day_name(gint day);

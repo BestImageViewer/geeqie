@@ -39,6 +39,7 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "menu.h"
+#include "misc.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
@@ -54,11 +55,6 @@ const gchar *action_name_key = "action_name";
 const gchar *toolbar_action_key = "toolbar_action";
 
 GtkWidget *toolbarlist[TOOLBAR_COUNT];
-
-void action_item_delete(ActionItem *action_item)
-{
-	delete action_item;
-}
 
 } // namespace
 
@@ -155,8 +151,7 @@ static gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
 	for (const ActionItem &action_item : list)
 		{
 		item = menu_item_add_stock(menu, action_item.label, action_item.icon_name, G_CALLBACK(toolbarlist_add_cb), data);
-		g_object_set_data_full(G_OBJECT(item), toolbar_action_key, new ActionItem(action_item),
-		                       reinterpret_cast<GDestroyNotify>(action_item_delete));
+		g_object_set_data_full(G_OBJECT(item), toolbar_action_key, new ActionItem(action_item), delete_cb<ActionItem>);
 		}
 
 	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);

@@ -31,6 +31,7 @@
 
 #include "compat.h"
 #include "intl.h"
+#include "misc.h"
 #include "ui-misc.h"
 
 namespace
@@ -67,11 +68,6 @@ constexpr std::array<LayoutStyle, 4> layout_config_styles{{
 
 const gchar *layout_titles[] = { N_("Tools"), N_("Files"), N_("Image") };
 
-
-void layout_config_destroy(LayoutConfig *lc)
-{
-	delete lc;
-}
 
 void layout_config_set_order(LayoutLocation l, gint n,
                              LayoutLocation &a, LayoutLocation &b, LayoutLocation &c)
@@ -356,8 +352,7 @@ GtkWidget *layout_config_new()
 	auto *lc = new LayoutConfig();
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	g_object_set_data_full(G_OBJECT(box), "layout_config", lc,
-	                       reinterpret_cast<GDestroyNotify>(layout_config_destroy));
+	g_object_set_data_full(G_OBJECT(box), "layout_config", lc, delete_cb<LayoutConfig>);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, FALSE, 0);

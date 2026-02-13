@@ -43,6 +43,7 @@
 #include "layout-util.h"
 #include "layout.h"
 #include "metadata.h"
+#include "misc.h"
 #include "options.h"
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
@@ -1020,7 +1021,7 @@ static void image_reset(ImageWindow *imd)
 	image_loader_free(imd->il);
 	imd->il = nullptr;
 
-	g_clear_pointer(&imd->cm, color_man_free);
+	g_clear_pointer(&imd->cm, delete_cb<ColorMan>);
 
 	image_state_set(imd, IMAGE_STATE_NONE);
 }
@@ -1361,7 +1362,7 @@ void image_change_pixbuf(ImageWindow *imd, GdkPixbuf *pixbuf, gdouble zoom, gboo
 	pixbuf_renderer_set_post_process_func(PIXBUF_RENDERER(imd->pr), nullptr, FALSE);
 	if (imd->cm)
 		{
-		g_clear_pointer(&imd->cm, color_man_free);
+		g_clear_pointer(&imd->cm, delete_cb<ColorMan>);
 		}
 
 	if (lazy)
@@ -1475,7 +1476,7 @@ void image_move_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->color_profile_input = source->color_profile_input;
 	imd->color_profile_use_image = source->color_profile_use_image;
 
-	g_clear_pointer(&imd->cm, color_man_free);
+	g_clear_pointer(&imd->cm, delete_cb<ColorMan>);
 	if (source->cm)
 		{
 		std::swap(imd->cm, source->cm);
@@ -1516,7 +1517,7 @@ void image_copy_from_image(ImageWindow *imd, ImageWindow *source)
 	imd->color_profile_input = source->color_profile_input;
 	imd->color_profile_use_image = source->color_profile_use_image;
 
-	g_clear_pointer(&imd->cm, color_man_free);
+	g_clear_pointer(&imd->cm, delete_cb<ColorMan>);
 	if (source->cm)
 		{
 		std::swap(imd->cm, source->cm);

@@ -70,7 +70,6 @@ ColorMan *color_man_new_embedded(const GdkPixbuf *pixbuf,
                                  const ColorManMemData &input_data,
                                  ColorManProfileType screen_type, const gchar *screen_file,
                                  const ColorManMemData &screen_data);
-void color_man_free(ColorMan *cm);
 
 void color_man_update();
 

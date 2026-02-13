@@ -349,11 +349,6 @@ ColorManStatus ColorMan::Cache::get_status() const
 	};
 }
 
-void color_man_free(ColorMan *cm)
-{
-	delete cm;
-}
-
 void color_man_update()
 {
 	color_man_cache_reset();
@@ -392,11 +387,6 @@ ColorMan *color_man_new_embedded(const GdkPixbuf *,
 {
 	/* no op */
 	return nullptr;
-}
-
-void color_man_free(ColorMan *)
-{
-	/* no op */
 }
 
 void color_man_update()
