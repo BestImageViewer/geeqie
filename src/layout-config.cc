@@ -202,20 +202,15 @@ gint text_char_to_num(gchar c)
 	return 0;
 }
 
-void layout_config_order_from_text(const gchar *text, gint &a, gint &b, gint &c)
+std::tuple<int, int, int> layout_config_order_from_text(const gchar *text)
 {
-	if (!text || strlen(text) < 3)
-		{
-		a = 0;
-		b = 1;
-		c = 2;
-		}
-	else
-		{
-		a = text_char_to_num(text[0]);
-		b = text_char_to_num(text[1]);
-		c = text_char_to_num(text[2]);
-		}
+	if (!text || strlen(text) < 3) return { 0, 1, 2 };
+
+	const int a = text_char_to_num(text[0]);
+	const int b = text_char_to_num(text[1]);
+	const int c = text_char_to_num(text[2]);
+
+	return { a, b, c };
 }
 
 } // namespace
@@ -223,10 +218,7 @@ void layout_config_order_from_text(const gchar *text, gint &a, gint &b, gint &c)
 void layout_config_parse(gint style, const gchar *order,
                          LayoutLocation &a, LayoutLocation &b, LayoutLocation &c)
 {
-	gint oa;
-	gint ob;
-	gint oc;
-	layout_config_order_from_text(order, oa, ob, oc);
+	const auto [oa, ob, oc] = layout_config_order_from_text(order);
 
 	style = std::clamp<int>(style, 0, layout_config_styles.size());
 	LayoutStyle ls = layout_config_styles[style];
@@ -248,10 +240,7 @@ void layout_config_set(GtkWidget *widget, gint style, const gchar *order)
 	style = std::clamp<int>(style, 0, layout_config_styles.size());
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lc->style_widgets[style]), TRUE);
 
-	gint a;
-	gint b;
-	gint c;
-	layout_config_order_from_text(order, a, b, c);
+	const auto [a, b, c] = layout_config_order_from_text(order);
 
 	layout_config_list_order_set(lc, a, 0);
 	layout_config_list_order_set(lc, b, 1);
