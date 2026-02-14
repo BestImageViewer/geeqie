@@ -2409,9 +2409,8 @@ void layout_show_config_window(LayoutWindow *lw)
 
 	group = pref_group_new(vbox, FALSE, _("Layout"), GTK_ORIENTATION_VERTICAL);
 
-	lc->layout_widget = layout_config_new();
+	lc->layout_widget = layout_config_new(lw->options.style, lw->options.order);
 	DEBUG_NAME(lc->layout_widget);
-	layout_config_set(lc->layout_widget, lw->options.style, lw->options.order);
 	gq_gtk_box_pack_start(GTK_BOX(group), lc->layout_widget, TRUE, TRUE, 0);
 
 	gtk_widget_show(lc->layout_widget);

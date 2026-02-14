@@ -28,9 +28,8 @@
 #include "layout.h"
 
 
-GtkWidget *layout_config_new();
+GtkWidget *layout_config_new(gint style, const gchar *order);
 
-void layout_config_set(GtkWidget *widget, gint style, const gchar *order);
 gchar *layout_config_get(GtkWidget *widget, gint *style);
 
 void layout_config_parse(gint style, const gchar *order,

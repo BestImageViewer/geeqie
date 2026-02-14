@@ -83,16 +83,6 @@ gboolean tree_model_get_row_iter(GtkTreeModel *model, int row, GtkTreeIter *iter
 	return valid;
 }
 
-void layout_config_list_order_set(LayoutConfig *lc, gint src, gint dest)
-{
-	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(lc->listview));
-
-	GtkTreeIter iter;
-	if (!tree_model_get_row_iter(model, dest, &iter)) return;
-
-	gtk_list_store_set(GTK_LIST_STORE(model), &iter, COLUMN_TEXT, _(layout_titles[src]), COLUMN_KEY, src, -1);
-}
-
 gint layout_config_list_order_get(LayoutConfig *lc, gint n)
 {
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(lc->listview));
@@ -213,6 +203,14 @@ std::tuple<int, int, int> layout_config_order_from_text(const gchar *text)
 	return { a, b, c };
 }
 
+void layout_config_list_append(GtkListStore *store, gint n)
+{
+	GtkTreeIter iter;
+	gtk_list_store_append(store, &iter);
+
+	gtk_list_store_set(store, &iter, COLUMN_TEXT, _(layout_titles[n]), COLUMN_KEY, n, -1);
+}
+
 } // namespace
 
 void layout_config_parse(gint style, const gchar *order,
@@ -227,24 +225,6 @@ void layout_config_parse(gint style, const gchar *order,
 	*lls[oa] = ls.a;
 	*lls[ob] = ls.b;
 	*lls[oc] = ls.c;
-}
-
-void layout_config_set(GtkWidget *widget, gint style, const gchar *order)
-{
-	LayoutConfig *lc;
-
-	lc = static_cast<LayoutConfig *>(g_object_get_data(G_OBJECT(widget), "layout_config"));
-
-	if (!lc) return;
-
-	style = std::clamp<int>(style, 0, layout_config_styles.size());
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lc->style_widgets[style]), TRUE);
-
-	const auto [a, b, c] = layout_config_order_from_text(order);
-
-	layout_config_list_order_set(lc, a, 0);
-	layout_config_list_order_set(lc, b, 1);
-	layout_config_list_order_set(lc, c, 2);
 }
 
 gchar *layout_config_get(GtkWidget *widget, gint *style)
@@ -265,7 +245,7 @@ gchar *layout_config_get(GtkWidget *widget, gint *style)
 	return g_strdup_printf("%d", (100 * a) + (10 * b) + c);
 }
 
-GtkWidget *layout_config_new()
+GtkWidget *layout_config_new(gint style, const gchar *order)
 {
 	GtkWidget *hbox;
 	GtkWidget *group = nullptr;
@@ -286,6 +266,8 @@ GtkWidget *layout_config_new()
 		group = layout_config_widget(group, hbox, i, lc);
 		lc->style_widgets.push_back(group);
 		}
+	style = std::clamp<int>(style, 0, layout_config_styles.size());
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lc->style_widgets[style]), TRUE);
 	gtk_widget_show(hbox);
 
 	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
@@ -316,13 +298,10 @@ GtkWidget *layout_config_new()
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(lc->listview), column);
 
-	for (gint i = 0; i < 3; i++)
-		{
-		GtkTreeIter iter;
-
-		gtk_list_store_append(store, &iter);
-		gtk_list_store_set(store, &iter, COLUMN_TEXT, _(layout_titles[i]), COLUMN_KEY, i, -1);
-		}
+	const auto [a, b, c] = layout_config_order_from_text(order);
+	layout_config_list_append(store, a);
+	layout_config_list_append(store, b);
+	layout_config_list_append(store, c);
 
 	gq_gtk_container_add(scrolled, lc->listview);
 	gtk_widget_show(lc->listview);
