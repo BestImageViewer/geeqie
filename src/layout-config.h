@@ -25,7 +25,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "layout.h"
+enum LayoutLocation : int;
 
 
 GtkWidget *layout_config_new(gint style, const gchar *order);

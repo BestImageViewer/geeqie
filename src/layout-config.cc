@@ -31,6 +31,7 @@
 
 #include "compat.h"
 #include "intl.h"
+#include "layout.h"
 #include "misc.h"
 #include "ui-misc.h"
 

@@ -44,7 +44,7 @@ struct ViewFile;
 
 #define MAX_SPLIT_IMAGES 4
 
-enum LayoutLocation {
+enum LayoutLocation : int {
 	LAYOUT_HIDE   = 0,
 	LAYOUT_LEFT   = 1 << 0,
 	LAYOUT_RIGHT  = 1 << 1,
