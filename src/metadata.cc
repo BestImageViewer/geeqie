@@ -175,7 +175,7 @@ gchar *mode_number(mode_t m)
 	return g_strdup_printf("%s (%d%d%d%d)", pbuf, mb, mu, mg, mo);
 }
 
-gchar *get_file_group(const gchar *path_utf8)
+gchar *get_file_owner(const gchar *path_utf8)
 {
 	struct stat st;
 	if (!stat_utf8(path_utf8, &st)) return nullptr;
@@ -185,7 +185,7 @@ gchar *get_file_group(const gchar *path_utf8)
 	return user ? g_strdup(user->pw_name) : g_strdup_printf("%u", st.st_uid);
 }
 
-gchar *get_file_owner(const gchar *path_utf8)
+gchar *get_file_group(const gchar *path_utf8)
 {
 	struct stat st;
 	if (!stat_utf8(path_utf8, &st)) return nullptr;
