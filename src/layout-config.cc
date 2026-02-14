@@ -195,10 +195,10 @@ void layout_config_number_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 	             NULL);
 }
 
-gint text_char_to_num(const gchar *text, gint n)
+gint text_char_to_num(gchar c)
 {
-	if (text[n] == '3') return 2;
-	if (text[n] == '2') return 1;
+	if (c == '3') return 2;
+	if (c == '2') return 1;
 	return 0;
 }
 
@@ -212,9 +212,9 @@ void layout_config_order_from_text(const gchar *text, gint &a, gint &b, gint &c)
 		}
 	else
 		{
-		a = text_char_to_num(text, 0);
-		b = text_char_to_num(text, 1);
-		c = text_char_to_num(text, 2);
+		a = text_char_to_num(text[0]);
+		b = text_char_to_num(text[1]);
+		c = text_char_to_num(text[2]);
 		}
 }
 
