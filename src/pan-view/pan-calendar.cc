@@ -21,17 +21,22 @@
 
 #include "pan-calendar.h"
 
+#include <config.h>
+
 #include <algorithm>
+#if !HAVE__NL_TIME_FIRST_WEEKDAY
+#  include <clocale>
+#endif
 #include <cmath>
 #include <cstring>
 #include <ctime>
 #include <string>
 
 #include <gdk/gdk.h>
+#include <langinfo.h>
 
 #include "filedata.h"
 #include "geometry.h"
-#include "misc.h"
 #include "pan-item.h"
 #include "pan-types.h"
 #include "pan-util.h"
@@ -40,6 +45,53 @@
 
 namespace
 {
+
+/**
+ * @brief Returns integer representing first_day_of_week
+ * @returns Integer in range 1 to 7
+ *
+ * Uses current locale to get first day of week.
+ * If _NL_TIME_FIRST_WEEKDAY is not available, ISO 8601
+ * states first day of week is Monday.
+ * USA, Mexico and Canada (and others) use Sunday as first day of week.
+ *
+ * Sunday == 1
+ */
+int date_get_first_day_of_week()
+{
+#if HAVE__NL_TIME_FIRST_WEEKDAY
+	return nl_langinfo(_NL_TIME_FIRST_WEEKDAY)[0];
+#else
+	gchar *current_locale = setlocale(LC_ALL, nullptr);
+	gchar *dot = strstr(current_locale, ".");
+
+	return ((strncmp(dot - 2, "CA", 2) == 0) || (strncmp(dot - 2, "MX", 2) == 0) || (strncmp(dot - 2, "US", 2) == 0)) ? 1 : 2;
+#endif
+}
+
+/**
+ * @brief Get an abbreviated day name from locale
+ * @param day Integer in range 1 to 7, representing day of week
+ * @returns String containing abbreviated day name
+ *
+ *  Uses current locale to get day name
+ *
+ * Sunday == 1
+ */
+const gchar *date_get_abbreviated_day_name(int day)
+{
+	switch (day)
+		{
+		case 1: return nl_langinfo(ABDAY_1);
+		case 2: return nl_langinfo(ABDAY_2);
+		case 3: return nl_langinfo(ABDAY_3);
+		case 4: return nl_langinfo(ABDAY_4);
+		case 5: return nl_langinfo(ABDAY_5);
+		case 6: return nl_langinfo(ABDAY_6);
+		case 7: return nl_langinfo(ABDAY_7);
+		default: return nullptr;
+		}
+}
 
 constexpr gint PAN_CAL_POPUP_BORDER = 1;
 constexpr guint8 PAN_CAL_POPUP_ALPHA = 255;
@@ -393,8 +445,8 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 			day_of_week = date_get_first_day_of_week() + col;
 			if (day_of_week > 7) day_of_week = day_of_week - 7;
 
-			g_autofree gchar *day_of_week_buf = date_get_abbreviated_day_name(day_of_week);
-			pan_item_text_new(pw, x + 4 + pi_day_number->width + 4, y + 4, day_of_week_buf,
+			const gchar *abbr_day_of_week = date_get_abbreviated_day_name(day_of_week);
+			pan_item_text_new(pw, x + 4 + pi_day_number->width + 4, y + 4, abbr_day_of_week,
 			                  PAN_TEXT_ATTR_NONE, PAN_BORDER_3, PAN_CAL_DAY_OF_WEEK_COLOR);
 
 			pan_item_size_coordinates(pi_day, PAN_BOX_BORDER, width, height);

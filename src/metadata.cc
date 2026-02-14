@@ -33,6 +33,8 @@
 #include <string>
 
 #include <glib-object.h>
+#include <grp.h>
+#include <pwd.h>
 
 #include <config.h>
 
@@ -171,6 +173,26 @@ gchar *mode_number(mode_t m)
 	pbuf[9] = '\0';
 
 	return g_strdup_printf("%s (%d%d%d%d)", pbuf, mb, mu, mg, mo);
+}
+
+gchar *get_file_group(const gchar *path_utf8)
+{
+	struct stat st;
+	if (!stat_utf8(path_utf8, &st)) return nullptr;
+
+	struct passwd *user = getpwuid(st.st_uid);
+
+	return user ? g_strdup(user->pw_name) : g_strdup_printf("%u", st.st_uid);
+}
+
+gchar *get_file_owner(const gchar *path_utf8)
+{
+	struct stat st;
+	if (!stat_utf8(path_utf8, &st)) return nullptr;
+
+	struct group *group = getgrgid(st.st_gid);
+
+	return group ? g_strdup(group->gr_name) : g_strdup_printf("%u", st.st_gid);
 }
 
 gchar *metadata_file_info(const FileData *fd, const gchar *key)
