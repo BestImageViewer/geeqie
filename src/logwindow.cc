@@ -234,7 +234,8 @@ static void search_activate_event(GtkEntry *, LogWindow *logwin)
 		}
 }
 
-static gboolean search_keypress_event(LogWindow *logwin, LogWindowSearchDirection direction)
+template<LogWindowSearchDirection direction>
+static gboolean search_keypress_event_cb(GtkWidget *, GdkEventKey *, LogWindow *logwin)
 {
 	GtkTextIter start_find;
 	GtkTextIter start_match;
@@ -293,16 +294,6 @@ static gboolean search_keypress_event(LogWindow *logwin, LogWindowSearchDirectio
 		}
 
 	return FALSE;
-}
-
-static gboolean backwards_keypress_event_cb(GtkWidget *, GdkEventKey *, LogWindow *logwin)
-{
-	return search_keypress_event(logwin, LOGWINDOW_SEARCH_BACKWARDS);
-}
-
-static gboolean forwards_keypress_event_cb(GtkWidget *, GdkEventKey *, LogWindow *logwin)
-{
-	return search_keypress_event(logwin, LOGWINDOW_SEARCH_FORWARDS);
 }
 
 static gboolean all_keypress_event_cb(GtkToggleButton *widget, LogWindow *logwin)
@@ -458,7 +449,8 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	gtk_widget_set_tooltip_text(backwards_button, _("Search backwards"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), backwards_button, FALSE, FALSE, 0);
 	gtk_widget_show(backwards_button);
-	g_signal_connect(backwards_button, "button_release_event", G_CALLBACK(backwards_keypress_event_cb), logwin);
+	g_signal_connect(backwards_button, "button_release_event",
+	                 G_CALLBACK(search_keypress_event_cb<LOGWINDOW_SEARCH_BACKWARDS>), logwin);
 	g_object_unref(pixbuf);
 
 	pixbuf = gtk_icon_theme_load_icon(theme, GQ_ICON_PAN_DOWN, 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
@@ -468,7 +460,8 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	gtk_widget_set_tooltip_text(forwards_button, _("Search forwards"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), forwards_button, FALSE, FALSE, 0);
 	gtk_widget_show(forwards_button);
-	g_signal_connect(forwards_button, "button_release_event", G_CALLBACK(forwards_keypress_event_cb), logwin);
+	g_signal_connect(forwards_button, "button_release_event",
+	                 G_CALLBACK(search_keypress_event_cb<LOGWINDOW_SEARCH_FORWARDS>), logwin);
 	g_object_unref(pixbuf);
 
 	pixbuf = gtk_icon_theme_load_icon(theme, "edit-select-all-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
