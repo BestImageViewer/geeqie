@@ -195,35 +195,6 @@ void layout_config_number_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 	             NULL);
 }
 
-gchar num_to_text_char(gint n)
-{
-	switch (n)
-		{
-		case 1:
-			return '2';
-			break;
-		case 2:
-			return '3';
-			break;
-		default:
-			break;
-		}
-	return '1';
-}
-
-gchar *layout_config_order_to_text(gint a, gint b, gint c)
-{
-	gchar *text;
-
-	text = g_strdup("   ");
-
-	text[0] = num_to_text_char(a);
-	text[1] = num_to_text_char(b);
-	text[2] = num_to_text_char(c);
-
-	return text;
-}
-
 gint text_char_to_num(const gchar *text, gint n)
 {
 	if (text[n] == '3') return 2;
@@ -298,11 +269,11 @@ gchar *layout_config_get(GtkWidget *widget, gint *style)
 
 	*style = lc->style;
 
-	const gint a = layout_config_list_order_get(lc, 0);
-	const gint b = layout_config_list_order_get(lc, 1);
-	const gint c = layout_config_list_order_get(lc, 2);
+	const gint a = layout_config_list_order_get(lc, 0) + 1;
+	const gint b = layout_config_list_order_get(lc, 1) + 1;
+	const gint c = layout_config_list_order_get(lc, 2) + 1;
 
-	return layout_config_order_to_text(a, b, c);
+	return g_strdup_printf("%d", (100 * a) + (10 * b) + c);
 }
 
 GtkWidget *layout_config_new()
