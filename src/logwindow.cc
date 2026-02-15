@@ -50,7 +50,9 @@ struct LogWindow
 	GtkWidget *text;
 	GtkTextTag *color_tags[LOG_COUNT];
 	gint lines;
+#ifdef DEBUG
 	GtkWidget *regexp_box;
+#endif
 	GtkWidget *bar;
 	GtkWidget *pause;
 	GtkWidget *wrap;
@@ -340,7 +342,6 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	GtkTextBuffer *buffer;
 	GtkTextIter iter;
 	GtkWidget *win_vbox;
-	GtkWidget *textbox = nullptr;
 
 	logwin = g_new0(LogWindow, 1);
 
@@ -467,20 +468,19 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 
 	pref_label_new(hbox, _("Filter regexp"));
 
-	textbox = gtk_entry_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), textbox, FALSE, FALSE, 0);
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(textbox), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
-	gtk_widget_show(textbox);
-	g_signal_connect(G_OBJECT(textbox), "activate",
-			 G_CALLBACK(log_window_regexp_cb), logwin);
-	g_signal_connect(textbox, "icon-press", G_CALLBACK(filter_entry_icon_cb), nullptr);
+	logwin->regexp_box = gtk_entry_new();
+	gq_gtk_box_pack_start(GTK_BOX(hbox), logwin->regexp_box, FALSE, FALSE, 0);
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->regexp_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
+	gtk_widget_show(logwin->regexp_box);
+	g_signal_connect(G_OBJECT(logwin->regexp_box), "activate",
+	                 G_CALLBACK(log_window_regexp_cb), logwin);
+	g_signal_connect(logwin->regexp_box, "icon-press", G_CALLBACK(filter_entry_icon_cb), nullptr);
 #endif
 
 	logwin->window = window;
 	logwin->scrolledwin = scrolledwin;
 	logwin->text = text;
 	logwin->lines = 1;
-	logwin->regexp_box = textbox;
 	lw->log_window = logwin->window;
 	return logwin;
 }
@@ -521,11 +521,13 @@ static void log_window_show(LogWindow *logwin)
 
 	log_window_append("", LOG_NORMAL); // to flush memorized lines
 
+#ifdef DEBUG
 	g_autofree gchar *regexp = get_regexp();
 	if (regexp != nullptr)
 		{
 		gq_gtk_entry_set_text(GTK_ENTRY(logwin->regexp_box), regexp);
 		}
+#endif
 }
 
 void log_window_new(LayoutWindow *lw)
