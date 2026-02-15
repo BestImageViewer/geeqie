@@ -384,26 +384,20 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	GtkWidget *debug_level = pref_spin_new_int(hbox, _("Debug level:"), nullptr, 0, 4, 1, get_debug_level(), &logwin->debug_value);
 	g_signal_connect(debug_level, "value-changed", G_CALLBACK(debug_changed_cb), nullptr);
 
-	GtkWidget *pause = gtk_toggle_button_new();
+	GtkWidget *pause = gtk_toggle_button_new_with_label("Pause");
 	gtk_widget_set_tooltip_text(pause, _("Pause scrolling"));
-	GtkWidget *label = gtk_label_new("Pause");
-	gq_gtk_container_add(pause, label);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), pause, FALSE, FALSE, 0);
 	g_signal_connect(pause, "toggled", G_CALLBACK(log_window_pause_cb), nullptr);
 	gq_gtk_widget_show_all(pause);
 
-	GtkWidget *wrap = gtk_toggle_button_new();
-	label = gtk_label_new("Wrap");
+	GtkWidget *wrap = gtk_toggle_button_new_with_label("Wrap");
 	gtk_widget_set_tooltip_text(wrap, _("Enable line wrap"));
-	gq_gtk_container_add(wrap, label);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), wrap, FALSE, FALSE, 0);
 	g_signal_connect(wrap, "toggled", G_CALLBACK(log_window_line_wrap_cb), logwin);
 	gq_gtk_widget_show_all(wrap);
 
-	GtkWidget *timer_data = gtk_toggle_button_new();
-	label = gtk_label_new(_("Timer"));
+	GtkWidget *timer_data = gtk_toggle_button_new_with_label(_("Timer"));
 	gtk_widget_set_tooltip_text(timer_data, _("Enable timer data"));
-	gq_gtk_container_add(timer_data, label);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), timer_data, FALSE, FALSE, 0);
 	if (options->log_window.timer_data)
 		{
