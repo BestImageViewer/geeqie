@@ -141,11 +141,9 @@ static void log_window_pause_cb(GtkWidget *, gpointer)
 
 static void log_window_line_wrap_cb(GtkWidget *, gpointer data)
 {
-	auto logwin = static_cast<LogWindow *>(data);
-
 	options->log_window.line_wrap = !options->log_window.line_wrap;
 
-	text_view_set_line_wrap(GTK_TEXT_VIEW(logwin->text), options->log_window.line_wrap);
+	text_view_set_line_wrap(GTK_TEXT_VIEW(data), options->log_window.line_wrap);
 }
 
 static void log_window_timer_data_cb(GtkWidget *, gpointer)
@@ -393,7 +391,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	GtkWidget *wrap = gtk_toggle_button_new_with_label("Wrap");
 	gtk_widget_set_tooltip_text(wrap, _("Enable line wrap"));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), wrap, FALSE, FALSE, 0);
-	g_signal_connect(wrap, "toggled", G_CALLBACK(log_window_line_wrap_cb), logwin);
+	g_signal_connect(wrap, "toggled", G_CALLBACK(log_window_line_wrap_cb), text);
 	gq_gtk_widget_show_all(wrap);
 
 	GtkWidget *timer_data = gtk_toggle_button_new_with_label(_("Timer"));
