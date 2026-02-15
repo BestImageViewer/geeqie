@@ -418,39 +418,31 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	g_signal_connect(logwin->search_entry_box, "icon-press", G_CALLBACK(search_entry_icon_cb), logwin);
 	g_signal_connect(logwin->search_entry_box, "activate", G_CALLBACK(search_activate_event), logwin);
 
-	GtkIconTheme *theme = gtk_icon_theme_get_default();
-
-	GdkPixbuf *pixbuf = gtk_icon_theme_load_icon(theme, GQ_ICON_PAN_UP, 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
-	GtkWidget *image = gtk_image_new_from_pixbuf(pixbuf);
 	GtkWidget *backwards_button = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(backwards_button), image);
+	gtk_button_set_image(GTK_BUTTON(backwards_button),
+	                     gtk_image_new_from_icon_name(GQ_ICON_PAN_UP, GTK_ICON_SIZE_LARGE_TOOLBAR));
 	gtk_widget_set_tooltip_text(backwards_button, _("Search backwards"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), backwards_button, FALSE, FALSE, 0);
 	gtk_widget_show(backwards_button);
 	g_signal_connect(backwards_button, "button_release_event",
 	                 G_CALLBACK(search_keypress_event_cb<LOGWINDOW_SEARCH_BACKWARDS>), logwin);
-	g_object_unref(pixbuf);
 
-	pixbuf = gtk_icon_theme_load_icon(theme, GQ_ICON_PAN_DOWN, 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
-	image = gtk_image_new_from_pixbuf(pixbuf);
 	GtkWidget *forwards_button = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(forwards_button), image);
+	gtk_button_set_image(GTK_BUTTON(forwards_button),
+	                     gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_LARGE_TOOLBAR));
 	gtk_widget_set_tooltip_text(forwards_button, _("Search forwards"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), forwards_button, FALSE, FALSE, 0);
 	gtk_widget_show(forwards_button);
 	g_signal_connect(forwards_button, "button_release_event",
 	                 G_CALLBACK(search_keypress_event_cb<LOGWINDOW_SEARCH_FORWARDS>), logwin);
-	g_object_unref(pixbuf);
 
-	pixbuf = gtk_icon_theme_load_icon(theme, "edit-select-all-symbolic", 20, GTK_ICON_LOOKUP_GENERIC_FALLBACK, nullptr);
-	image = gtk_image_new_from_pixbuf(pixbuf);
 	GtkWidget *all_button = gtk_toggle_button_new();
-	gtk_button_set_image(GTK_BUTTON(all_button), image);
+	gtk_button_set_image(GTK_BUTTON(all_button),
+	                     gtk_image_new_from_icon_name("edit-select-all-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR));
 	gtk_widget_set_tooltip_text(all_button, _("Highlight all"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), all_button, FALSE, FALSE, 0) ;
 	g_signal_connect(all_button, "toggled", G_CALLBACK(all_keypress_event_cb), logwin);
 	gq_gtk_widget_show_all(all_button);
-	g_object_unref(pixbuf);
 
 	pref_label_new(hbox, _("Filter regexp"));
 
