@@ -235,7 +235,7 @@ ConfOptions *init_options(ConfOptions *options)
 	options->stereo.fixed_y2 = 1125;
 
 	options->log_window_lines = 1000;
-	options->log_window.line_wrap = FALSE;
+	options->log_window.line_wrap = false;
 	options->log_window.paused = FALSE;
 	options->log_window.timer_data = TRUE;
 	options->log_window.action = g_strdup("echo");

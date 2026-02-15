@@ -132,6 +132,11 @@ static gboolean key_pressed(GtkWidget *, GdkEventKey *event, LogWindow *logwin)
 	return FALSE;
 }
 
+static void text_view_set_line_wrap(GtkTextView *text_view, bool line_wrap)
+{
+	gtk_text_view_set_wrap_mode(text_view, line_wrap ? GTK_WRAP_WORD : GTK_WRAP_NONE);
+}
+
 #ifdef DEBUG
 static void log_window_pause_cb(GtkWidget *, gpointer)
 {
@@ -144,14 +149,7 @@ static void log_window_line_wrap_cb(GtkWidget *, gpointer data)
 
 	options->log_window.line_wrap = !options->log_window.line_wrap;
 
-	if (options->log_window.line_wrap)
-		{
-		gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(logwin->text), GTK_WRAP_WORD);
-		}
-	else
-		{
-		gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(logwin->text), GTK_WRAP_NONE);
-		}
+	text_view_set_line_wrap(GTK_TEXT_VIEW(logwin->text), options->log_window.line_wrap);
 }
 
 static void log_window_timer_data_cb(GtkWidget *, gpointer)
@@ -374,14 +372,7 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 
 	text = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(text), FALSE);
-	if (options->log_window.line_wrap)
-		{
-		gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(text), GTK_WRAP_WORD);
-		}
-	else
-		{
-		gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(text), GTK_WRAP_NONE);
-		}
+	text_view_set_line_wrap(GTK_TEXT_VIEW(text), options->log_window.line_wrap);
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
 	gtk_text_buffer_get_start_iter(buffer, &iter);
 	gtk_text_buffer_create_mark(buffer, "end", &iter, FALSE);

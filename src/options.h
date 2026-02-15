@@ -409,7 +409,7 @@ struct ConfOptions
 	/* log window */
 	struct {
 		gboolean paused;
-		gboolean line_wrap;
+		bool line_wrap;
 		gboolean timer_data;
 		gchar *action; /** Used with F1 key */
 	} log_window;
