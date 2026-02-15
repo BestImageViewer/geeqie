@@ -46,18 +46,12 @@
 struct LogWindow
 {
 	GtkWidget *window;
-	GtkWidget *scrolledwin;
 	GtkWidget *text;
 	GtkTextTag *color_tags[LOG_COUNT];
 	gint lines;
 #ifdef DEBUG
 	GtkWidget *regexp_box;
 #endif
-	GtkWidget *bar;
-	GtkWidget *pause;
-	GtkWidget *wrap;
-	GtkWidget *timer_data;
-	GtkWidget *debug_level;
 	gint debug_value; /**< Not used */
 	GtkWidget *search_entry_box;
 	gboolean highlight_all;
@@ -385,38 +379,38 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	gtk_text_buffer_create_tag(buffer, "green_bg", "background", "#00FF00", NULL);
 
 	GtkWidget *hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-
 	gtk_widget_show(hbox);
-	logwin->debug_level = pref_spin_new_int(hbox, _("Debug level:"), nullptr, 0, 4, 1, get_debug_level(), &logwin->debug_value);
-	g_signal_connect(logwin->debug_level, "value-changed", G_CALLBACK(debug_changed_cb), logwin);
 
-	logwin->pause = gtk_toggle_button_new();
-	gtk_widget_set_tooltip_text(logwin->pause, _("Pause scrolling"));
+	GtkWidget *debug_level = pref_spin_new_int(hbox, _("Debug level:"), nullptr, 0, 4, 1, get_debug_level(), &logwin->debug_value);
+	g_signal_connect(debug_level, "value-changed", G_CALLBACK(debug_changed_cb), nullptr);
+
+	GtkWidget *pause = gtk_toggle_button_new();
+	gtk_widget_set_tooltip_text(pause, _("Pause scrolling"));
 	GtkWidget *label = gtk_label_new("Pause");
-	gq_gtk_container_add(logwin->pause, label) ;
-	gq_gtk_box_pack_start(GTK_BOX(hbox),logwin->pause, FALSE, FALSE, 0) ;
-	g_signal_connect(logwin->pause, "toggled", G_CALLBACK(log_window_pause_cb), logwin);
-	gq_gtk_widget_show_all(logwin->pause);
+	gq_gtk_container_add(pause, label);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), pause, FALSE, FALSE, 0);
+	g_signal_connect(pause, "toggled", G_CALLBACK(log_window_pause_cb), nullptr);
+	gq_gtk_widget_show_all(pause);
 
-	logwin->wrap = gtk_toggle_button_new();
+	GtkWidget *wrap = gtk_toggle_button_new();
 	label = gtk_label_new("Wrap");
-	gtk_widget_set_tooltip_text(logwin->wrap, _("Enable line wrap"));
-	gq_gtk_container_add(logwin->wrap, label) ;
-	gq_gtk_box_pack_start(GTK_BOX(hbox),logwin->wrap, FALSE, FALSE, 0) ;
-	g_signal_connect(logwin->wrap, "toggled", G_CALLBACK(log_window_line_wrap_cb), logwin);
-	gq_gtk_widget_show_all(logwin->wrap);
+	gtk_widget_set_tooltip_text(wrap, _("Enable line wrap"));
+	gq_gtk_container_add(wrap, label);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), wrap, FALSE, FALSE, 0);
+	g_signal_connect(wrap, "toggled", G_CALLBACK(log_window_line_wrap_cb), logwin);
+	gq_gtk_widget_show_all(wrap);
 
-	logwin->timer_data = gtk_toggle_button_new();
+	GtkWidget *timer_data = gtk_toggle_button_new();
 	label = gtk_label_new(_("Timer"));
-	gtk_widget_set_tooltip_text(logwin->timer_data, _("Enable timer data"));
-	gq_gtk_container_add(logwin->timer_data, label) ;
-	gq_gtk_box_pack_start(GTK_BOX(hbox),logwin->timer_data, FALSE, FALSE, 0) ;
+	gtk_widget_set_tooltip_text(timer_data, _("Enable timer data"));
+	gq_gtk_container_add(timer_data, label);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), timer_data, FALSE, FALSE, 0);
 	if (options->log_window.timer_data)
 		{
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(logwin->timer_data), TRUE);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(timer_data), TRUE);
 		}
-	g_signal_connect(logwin->timer_data, "toggled", G_CALLBACK(log_window_timer_data_cb), logwin);
-	gq_gtk_widget_show_all(logwin->timer_data);
+	g_signal_connect(timer_data, "toggled", G_CALLBACK(log_window_timer_data_cb), nullptr);
+	gq_gtk_widget_show_all(timer_data);
 
 	GtkWidget *search_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_container_add(hbox, search_box);
@@ -478,7 +472,6 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 #endif
 
 	logwin->window = window;
-	logwin->scrolledwin = scrolledwin;
 	logwin->text = text;
 	logwin->lines = 1;
 	lw->log_window = logwin->window;
