@@ -327,7 +327,7 @@ static void filter_entry_icon_cb(GtkEntry *entry, GtkEntryIconPosition, GdkEvent
 }
 #endif
 
-static LogWindow *log_window_create(LayoutWindow *lw)
+static LogWindow *log_window_create(GdkRectangle log_window)
 {
 	LogWindow *logwin;
 	GtkWidget *text;
@@ -343,8 +343,8 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	gq_gtk_container_add(window, win_vbox);
 	gtk_widget_show(win_vbox);
 
-	gq_gtk_window_resize(GTK_WINDOW(window), lw->options.log_window.width, lw->options.log_window.height);
-	gq_gtk_window_move(GTK_WINDOW(window), lw->options.log_window.x, lw->options.log_window.y);
+	gq_gtk_window_resize(GTK_WINDOW(window), log_window.width, log_window.height);
+	gq_gtk_window_move(GTK_WINDOW(window), log_window.x, log_window.y);
 
 	g_signal_connect(G_OBJECT(window), "delete_event",
 			 G_CALLBACK(gtk_widget_hide_on_delete), NULL);
@@ -455,33 +455,21 @@ static LogWindow *log_window_create(LayoutWindow *lw)
 	g_signal_connect(logwin->regexp_box, "icon-press", G_CALLBACK(filter_entry_icon_cb), nullptr);
 #endif
 
+	constexpr const gchar *tags[] = { "black", "blue", "orange", "red" };
+	for (int i = 0; i < LOG_COUNT; ++i)
+		{
+		g_autofree gchar *tag_name = g_strdup_printf("%s_foreground", tags[i]);
+
+		logwin->color_tags[i] = gtk_text_buffer_create_tag(buffer, tag_name,
+		                                                   "foreground", tags[i],
+		                                                   "family", "MonoSpace",
+		                                                   NULL);
+		}
+
 	logwin->window = window;
 	logwin->text = text;
 	logwin->lines = 1;
-	lw->log_window = logwin->window;
 	return logwin;
-}
-
-static void log_window_init(LogWindow *logwin)
-{
-	GtkTextBuffer *buffer;
-
-	g_assert(logwin != nullptr);
-
-	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text));
-
-	logwin->color_tags[LOG_NORMAL] = gtk_text_buffer_create_tag (buffer,
-							"black_foreground", "foreground", "black",
-							"family", "MonoSpace", NULL);
-	logwin->color_tags[LOG_MSG] = gtk_text_buffer_create_tag (buffer,
-							"blue_foreground", "foreground", "blue",
-							"family", "MonoSpace", NULL);
-	logwin->color_tags[LOG_WARN] = gtk_text_buffer_create_tag (buffer,
-							"orange_foreground", "foreground", "orange",
-							"family", "MonoSpace", NULL);
-	logwin->color_tags[LOG_ERROR] = gtk_text_buffer_create_tag (buffer,
-							"red_foreground", "foreground", "red",
-							"family", "MonoSpace", NULL);
 }
 
 static void log_window_show(LogWindow *logwin)
@@ -511,11 +499,9 @@ void log_window_new(LayoutWindow *lw)
 {
 	if (logwindow == nullptr)
 		{
-		LogWindow *logwin;
+		logwindow = log_window_create(lw->options.log_window);
 
-		logwin = log_window_create(lw);
-		log_window_init(logwin);
-		logwindow = logwin;
+		lw->log_window = logwindow->window;
 		}
 
 	log_window_show(logwindow);
