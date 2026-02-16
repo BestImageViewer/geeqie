@@ -70,9 +70,9 @@ static void hide_cb(GtkWidget *, LogWindow *)
 
 /**
  * @brief Handle escape and F1 keys
- * @param UNUSED
+ * @param window
  * @param event
- * @param logwin
+ * @param user_data
  * @returns
  *
  * If escape key pressed, hide log window. \n
@@ -81,42 +81,38 @@ static void hide_cb(GtkWidget *, LogWindow *)
  * <options->log_window.action> <selected text>
  *
 */
-static gboolean key_pressed(GtkWidget *, GdkEventKey *event, LogWindow *logwin)
+static gboolean log_window_key_pressed_cb(GtkWidget *window, GdkEventKey *event, gpointer user_data)
 {
-	GtkTextBuffer *buffer;
-	GtkTextIter chr_end;
-	GtkTextIter chr_marker;
-	GtkTextIter chr_start;
-	GtkTextIter cursor_iter;
-	GtkTextIter line_end;
-	GtkTextIter line_start;
-	GtkTextMark *cursor_mark;
-
-	if (event && event->keyval == GDK_KEY_Escape)
-		gtk_widget_hide(logwin->window);
-
-	if (event && event->keyval == GDK_KEY_F1)
+	if (event)
 		{
-		if (options->log_window.action[0] != '\0')
+		if (event->keyval == GDK_KEY_Escape)
 			{
-			buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text));
+			gtk_widget_hide(window);
+			}
+		else if (event->keyval == GDK_KEY_F1 && options->log_window.action[0] != '\0')
+			{
+			GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(user_data));
 
 			if (!gtk_text_buffer_get_has_selection(buffer))
 				{
-				cursor_mark = gtk_text_buffer_get_insert(buffer);
+				GtkTextMark *cursor_mark = gtk_text_buffer_get_insert(buffer);
+				GtkTextIter cursor_iter;
 				gtk_text_buffer_get_iter_at_mark(buffer, &cursor_iter, cursor_mark);
 
-				line_start = cursor_iter;
+				GtkTextIter line_start = cursor_iter;
 				gtk_text_iter_set_line_offset(&line_start, 0);
-				line_end = cursor_iter;
+
+				GtkTextIter line_end = cursor_iter;
 				gtk_text_iter_forward_to_line_end(&line_end);
-				chr_marker = line_end;
+
 				gtk_text_buffer_select_range(buffer, &line_start, &line_end);
 				}
 
-			if (gtk_text_buffer_get_selection_bounds(gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text)), &chr_start, &chr_end))
+			GtkTextIter chr_start;
+			GtkTextIter chr_end;
+			if (gtk_text_buffer_get_selection_bounds(buffer, &chr_start, &chr_end))
 				{
-				g_autofree gchar *sel_text = gtk_text_buffer_get_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text)), &chr_start, &chr_end, FALSE);
+				g_autofree gchar *sel_text = gtk_text_buffer_get_text(buffer, &chr_start, &chr_end, FALSE);
 
 				g_autofree gchar *cmd_line = g_strdup_printf("%s \"%s\"", options->log_window.action, sel_text);
 
@@ -348,8 +344,6 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	g_signal_connect(G_OBJECT(window), "delete_event",
 			 G_CALLBACK(gtk_widget_hide_on_delete), NULL);
-	g_signal_connect(G_OBJECT(window), "key_press_event",
-			 G_CALLBACK(key_pressed), logwin);
 	g_signal_connect(G_OBJECT(window), "hide",
 			 G_CALLBACK(hide_cb), logwin);
 	gtk_widget_realize(window);
@@ -371,6 +365,9 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_text_buffer_create_mark(buffer, "end", &iter, FALSE);
 	gq_gtk_container_add(scrolledwin, text);
 	gtk_widget_show(text);
+
+	g_signal_connect(G_OBJECT(window), "key-press-event",
+	                 G_CALLBACK(log_window_key_pressed_cb), text);
 
 #ifdef DEBUG
 	gtk_text_buffer_create_tag(buffer, "gray_bg", "background", "gray", NULL);
