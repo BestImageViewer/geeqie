@@ -63,10 +63,6 @@ struct LogWindow
 
 static LogWindow *logwindow = nullptr;
 
-static void hide_cb(GtkWidget *, LogWindow *)
-{
-}
-
 /**
  * @brief Handle escape and F1 keys
  * @param window
@@ -341,8 +337,6 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	g_signal_connect(G_OBJECT(window), "delete_event",
 			 G_CALLBACK(gtk_widget_hide_on_delete), NULL);
-	g_signal_connect(G_OBJECT(window), "hide",
-			 G_CALLBACK(hide_cb), logwin);
 	gtk_widget_realize(window);
 
 	GtkWidget *scrolledwin = gq_gtk_scrolled_window_new(nullptr, nullptr);
