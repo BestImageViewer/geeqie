@@ -56,7 +56,6 @@ struct LogWindow
 	};
 
 	GtkWidget *regexp_box;
-	gint debug_value; /**< Not used */
 	GtkWidget *search_entry_box;
 	gboolean highlight_all;
 #endif
@@ -291,11 +290,9 @@ static gboolean all_keypress_event_cb(GtkToggleButton *widget, LogWindow *logwin
 	return FALSE;
 }
 
-static gboolean debug_changed_cb(GtkSpinButton *widget, LogWindow *)
+static void debug_changed_cb(GtkSpinButton *widget, gpointer)
 {
-	set_debug_level((gtk_spin_button_get_value(widget)));
-
-	return FALSE;
+	set_debug_level(gtk_spin_button_get_value_as_int(widget));
 }
 
 static void search_entry_icon_cb(GtkEntry *search_entry_box, GtkEntryIconPosition pos, GdkEvent *, gpointer user_data)
@@ -376,8 +373,8 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	GtkWidget *hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gtk_widget_show(hbox);
 
-	GtkWidget *debug_level = pref_spin_new_int(hbox, _("Debug level:"), nullptr, 0, 4, 1, get_debug_level(), &logwin->debug_value);
-	g_signal_connect(debug_level, "value-changed", G_CALLBACK(debug_changed_cb), nullptr);
+	pref_spin_new(hbox, _("Debug level:"), nullptr, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX, 1, 0,
+	              get_debug_level(), G_CALLBACK(debug_changed_cb), nullptr);
 
 	GtkWidget *pause = gtk_toggle_button_new_with_label("Pause");
 	gtk_widget_set_tooltip_text(pause, _("Pause scrolling"));
