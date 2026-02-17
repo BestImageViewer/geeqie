@@ -50,16 +50,16 @@ struct LogWindow
 	GtkTextTag *color_tags[LOG_COUNT];
 	gint lines;
 #ifdef DEBUG
+	enum SearchDirection {
+		SEARCH_BACKWARDS,
+		SEARCH_FORWARDS
+	};
+
 	GtkWidget *regexp_box;
-#endif
 	gint debug_value; /**< Not used */
 	GtkWidget *search_entry_box;
 	gboolean highlight_all;
-};
-
-enum LogWindowSearchDirection {
-	LOGWINDOW_SEARCH_BACKWARDS,
-	LOGWINDOW_SEARCH_FORWARDS
+#endif
 };
 
 static LogWindow *logwindow = nullptr;
@@ -222,7 +222,7 @@ static void search_activate_event(GtkEntry *, LogWindow *logwin)
 		}
 }
 
-template<LogWindowSearchDirection direction>
+template<LogWindow::SearchDirection direction>
 static gboolean search_keypress_event_cb(GtkWidget *, GdkEventKey *, LogWindow *logwin)
 {
 	GtkTextIter start_find;
@@ -257,7 +257,7 @@ static gboolean search_keypress_event_cb(GtkWidget *, GdkEventKey *, LogWindow *
 			}
 		}
 
-	auto text_iter_search = (direction == LOGWINDOW_SEARCH_BACKWARDS) ? gtk_text_iter_backward_search : gtk_text_iter_forward_search;
+	auto text_iter_search = (direction == LogWindow::SEARCH_BACKWARDS) ? gtk_text_iter_backward_search : gtk_text_iter_forward_search;
 
 	GtkTextMark *cursor_mark = gtk_text_buffer_get_insert(buffer);
 	gtk_text_buffer_get_iter_at_mark(buffer, &cursor_iter, cursor_mark);
@@ -268,7 +268,7 @@ static gboolean search_keypress_event_cb(GtkWidget *, GdkEventKey *, LogWindow *
 
 		gtk_text_buffer_apply_tag_by_name(buffer, "green_bg",  &start_match, &end_match);
 
-		if (direction == LOGWINDOW_SEARCH_BACKWARDS)
+		if (direction == LogWindow::SEARCH_BACKWARDS)
 			{
 			gtk_text_buffer_place_cursor(buffer, &start_match);
 			}
@@ -422,7 +422,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gq_gtk_box_pack_start(GTK_BOX(search_box), backwards_button, FALSE, FALSE, 0);
 	gtk_widget_show(backwards_button);
 	g_signal_connect(backwards_button, "button_release_event",
-	                 G_CALLBACK(search_keypress_event_cb<LOGWINDOW_SEARCH_BACKWARDS>), logwin);
+	                 G_CALLBACK(search_keypress_event_cb<LogWindow::SEARCH_BACKWARDS>), logwin);
 
 	GtkWidget *forwards_button = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(forwards_button),
@@ -431,7 +431,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gq_gtk_box_pack_start(GTK_BOX(search_box), forwards_button, FALSE, FALSE, 0);
 	gtk_widget_show(forwards_button);
 	g_signal_connect(forwards_button, "button_release_event",
-	                 G_CALLBACK(search_keypress_event_cb<LOGWINDOW_SEARCH_FORWARDS>), logwin);
+	                 G_CALLBACK(search_keypress_event_cb<LogWindow::SEARCH_FORWARDS>), logwin);
 
 	GtkWidget *all_button = gtk_toggle_button_new();
 	gtk_button_set_image(GTK_BUTTON(all_button),
