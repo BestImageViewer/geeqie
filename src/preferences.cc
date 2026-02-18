@@ -205,12 +205,12 @@ enum {
  *-----------------------------------------------------------------------------
  */
 
-static void zoom_increment_cb(GtkWidget *spin, gpointer)
+static void zoom_increment_cb(GtkSpinButton *spin, gpointer)
 {
-	c_options->image.zoom_increment = static_cast<gint>((gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)) * 100.0) + 0.01);
+	c_options->image.zoom_increment = static_cast<gint>((gtk_spin_button_get_value(spin) * 100.0) + 0.01);
 }
 
-static void slideshow_delay_hours_cb(GtkWidget *spin, gpointer)
+static void slideshow_delay_hours_cb(GtkSpinButton *spin, gpointer)
 {
 	gint mins_secs_tenths;
 	gint delay;
@@ -218,7 +218,7 @@ static void slideshow_delay_hours_cb(GtkWidget *spin, gpointer)
 	mins_secs_tenths = c_options->slideshow.delay %
 						(3600 * SLIDESHOW_SUBSECOND_PRECISION);
 
-	delay = (gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)) *
+	delay = (gtk_spin_button_get_value(spin) *
 								(3600 * SLIDESHOW_SUBSECOND_PRECISION) +
 								mins_secs_tenths);
 
@@ -226,7 +226,7 @@ static void slideshow_delay_hours_cb(GtkWidget *spin, gpointer)
 													SLIDESHOW_SUBSECOND_PRECISION;
 }
 
-static void slideshow_delay_minutes_cb(GtkWidget *spin, gpointer)
+static void slideshow_delay_minutes_cb(GtkSpinButton *spin, gpointer)
 {
 	gint hours;
 	gint secs_tenths;
@@ -236,14 +236,14 @@ static void slideshow_delay_minutes_cb(GtkWidget *spin, gpointer)
 	secs_tenths = c_options->slideshow.delay % (60 * SLIDESHOW_SUBSECOND_PRECISION);
 
 	delay = hours * (3600 * SLIDESHOW_SUBSECOND_PRECISION) +
-					(gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)) *
+	        (gtk_spin_button_get_value(spin) *
 					(60 * SLIDESHOW_SUBSECOND_PRECISION) + secs_tenths);
 
 	c_options->slideshow.delay = delay > 0 ? delay : SLIDESHOW_MIN_SECONDS *
 													SLIDESHOW_SUBSECOND_PRECISION;
 }
 
-static void slideshow_delay_seconds_cb(GtkWidget *spin, gpointer)
+static void slideshow_delay_seconds_cb(GtkSpinButton *spin, gpointer)
 {
 	gint hours_mins;
 	gint delay;
@@ -251,7 +251,7 @@ static void slideshow_delay_seconds_cb(GtkWidget *spin, gpointer)
 	hours_mins = c_options->slideshow.delay / (60 * SLIDESHOW_SUBSECOND_PRECISION);
 
 	delay = (hours_mins * (60 * SLIDESHOW_SUBSECOND_PRECISION)) +
-							static_cast<gint>((gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin)) *
+	        static_cast<gint>((gtk_spin_button_get_value(spin) *
 							static_cast<gdouble>(SLIDESHOW_SUBSECOND_PRECISION)) + 0.01);
 
 	c_options->slideshow.delay = delay > 0 ? delay : SLIDESHOW_MIN_SECONDS *

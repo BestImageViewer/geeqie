@@ -414,7 +414,7 @@ static GtkWidget *real_pref_spin_new(GtkWidget *parent_box, const gchar *text, c
 
 	if (func)
 		{
-		g_signal_connect(G_OBJECT(spin), "value_changed", G_CALLBACK(func), data);
+		g_signal_connect(G_OBJECT(spin), "value-changed", G_CALLBACK(func), data);
 		}
 
 	if (text)
@@ -452,10 +452,10 @@ GtkWidget *pref_spin_new(GtkWidget *parent_box, const gchar *text, const gchar *
 				  min, max, step, digits, value, func, data);
 }
 
-static void pref_spin_int_cb(GtkWidget *widget, gpointer data)
+static void pref_spin_int_cb(GtkSpinButton *spin_button, gpointer data)
 {
-	auto var = static_cast<gint *>(data);
-	*var = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+	auto *var = static_cast<gint *>(data);
+	*var = gtk_spin_button_get_value_as_int(spin_button);
 }
 
 GtkWidget *pref_spin_new_int(GtkWidget *parent_box, const gchar *text, const gchar *suffix,

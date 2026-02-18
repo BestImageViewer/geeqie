@@ -1619,7 +1619,7 @@ static void file_util_rename_preview_entry_cb(GtkWidget *, gpointer data)
 	file_util_rename_preview_update(ud);
 }
 
-static void file_util_rename_preview_adj_cb(GtkWidget *, gpointer data)
+static void file_util_rename_preview_adj_cb(GtkSpinButton *, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 	file_util_rename_preview_update(ud);
