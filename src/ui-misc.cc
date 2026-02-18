@@ -571,7 +571,7 @@ GtkWidget *pref_table_spin(GtkWidget *table, gint column, gint row,
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), value);
 	if (func)
 		{
-		g_signal_connect(G_OBJECT(spin), "value_changed", G_CALLBACK(func), data);
+		g_signal_connect(G_OBJECT(spin), "value-changed", G_CALLBACK(func), data);
 		}
 
 	if (text)

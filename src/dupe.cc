@@ -3858,7 +3858,7 @@ static void dupe_window_rotation_invariant_cb(GtkWidget *widget, gpointer data)
 	dupe_window_recompare(dw);
 }
 
-static void dupe_window_custom_threshold_cb(GtkWidget *widget, gpointer data)
+static void dupe_window_custom_threshold_cb(GtkSpinButton *custom_threshold, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 	DupeMatchType match_type;
@@ -3866,7 +3866,7 @@ static void dupe_window_custom_threshold_cb(GtkWidget *widget, gpointer data)
 	gboolean valid;
 	GtkTreeIter iter;
 
-	options->duplicates_similarity_threshold = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+	options->duplicates_similarity_threshold = gtk_spin_button_get_value_as_int(custom_threshold);
 	dw->match_mask = DUPE_MATCH_SIM_CUSTOM;
 
 	store = gtk_combo_box_get_model(GTK_COMBO_BOX(dw->combo));
@@ -4463,7 +4463,7 @@ DupeWindow *dupe_window_new()
 	dw->custom_threshold = gtk_spin_button_new_with_range(1, 100, 1);
 	gtk_widget_set_tooltip_text(dw->custom_threshold, _("Custom similarity threshold\n(Use tab key to set value)"));
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(dw->custom_threshold), options->duplicates_similarity_threshold);
-	g_signal_connect(G_OBJECT(dw->custom_threshold), "value_changed", G_CALLBACK(dupe_window_custom_threshold_cb), dw);
+	g_signal_connect(G_OBJECT(dw->custom_threshold), "value-changed", G_CALLBACK(dupe_window_custom_threshold_cb), dw);
 	gq_gtk_box_pack_start(GTK_BOX(controls_box), dw->custom_threshold, FALSE, FALSE, PREF_PAD_SPACE);
 	gtk_widget_show(dw->custom_threshold);
 
