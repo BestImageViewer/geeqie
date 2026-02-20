@@ -30,6 +30,7 @@
 
 #include "compat-deprecated.h"
 #include "compat.h"
+#include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
@@ -55,94 +56,81 @@ static gint sort_iter_compare_func (GtkTreeModel *model, GtkTreeIter *a, GtkTree
 	return gq_gtk_tree_iter_utf8_collate(model, a, b, SAR_LABEL);
 }
 
-static void command_store_populate(SarData* sar)
+static void action_to_command_store(gpointer data, gpointer user_data)
 {
-	GList *groups;
-	const gchar *accel_path;
+	GtkAction *action = deprecated_GTK_ACTION(data);
+
+	const gchar *accel_path = deprecated_gtk_action_get_accel_path(action);
+	if (!accel_path) return;
+
 	GtkAccelKey key;
-	GtkTreeIter iter;
-	GtkTreeSortable *sortable;
-	gboolean iter_found;
-	gboolean duplicate_command;
+	if (!gtk_accel_map_lookup_entry(accel_path, &key)) return;
 
-	sar->command_store = GTK_LIST_STORE(gtk_builder_get_object(sar->builder, "command_store"));
-	sortable = GTK_TREE_SORTABLE(sar->command_store);
-	gtk_tree_sortable_set_sort_func(sortable, SAR_LABEL, sort_iter_compare_func, nullptr, nullptr);
+	g_autofree gchar *label = nullptr;
+	g_autofree gchar *tooltip = nullptr;
+	g_object_get(action, "tooltip", &tooltip, "label", &label, NULL);
 
-	gtk_tree_sortable_set_sort_column_id(sortable, SAR_LABEL, GTK_SORT_ASCENDING);
+	/* menu items with no tooltip are placeholders */
+	if (!g_strrstr(accel_path, ".desktop") && !tooltip) return;
 
-	groups = deprecated_gtk_ui_manager_get_action_groups(sar->lw->ui_manager);
-	while (groups)
+	g_autofree gchar *label2 = nullptr;
+	if (pango_parse_markup(label, -1, '_', nullptr, &label2, nullptr, nullptr) && label2)
 		{
-		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
-		for (GList *work = actions; work; work = work->next)
+		std::swap(label, label2);
+		}
+
+	g_autoptr(GString) new_command = g_string_new(label);
+
+	if (tooltip)
+		{
+		g_autofree gchar *tooltip2 = nullptr;
+		if (pango_parse_markup(tooltip, -1, '_', nullptr, &tooltip2, nullptr, nullptr) && tooltip2)
 			{
-			GtkAction *action = deprecated_GTK_ACTION(work->data);
-			accel_path = deprecated_gtk_action_get_accel_path(action);
-			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
-				{
-				g_autofree gchar *label = nullptr;
-				g_autofree gchar *tooltip = nullptr;
-				g_object_get(action, "tooltip", &tooltip, "label", &label, NULL);
-
-				/* menu items with no tooltip are placeholders */
-				if (g_strrstr(accel_path, ".desktop") != nullptr || tooltip != nullptr)
-					{
-					g_autofree gchar *label2 = nullptr;
-					if (pango_parse_markup(label, -1, '_', nullptr, &label2, nullptr, nullptr) && label2)
-						{
-						std::swap(label, label2);
-						}
-					if (tooltip)
-						{
-						g_autofree gchar *tooltip2 = nullptr;
-						if (pango_parse_markup(tooltip, -1, '_', nullptr, &tooltip2, nullptr, nullptr) && tooltip2)
-							{
-							std::swap(tooltip, tooltip2);
-							}
-						}
-
-					g_autofree gchar *accel = gtk_accelerator_get_label(key.accel_key, key.accel_mods);
-
-					g_autoptr(GString) new_command = g_string_new(nullptr);
-					if (!tooltip || g_strcmp0(label, tooltip) == 0)
-						{
-						g_string_append_printf(new_command, "%s : <b>%s</b>",label, accel);
-						}
-					else
-						{
-						g_string_append_printf(new_command, "%s - %s : <b>%s</b>",label, tooltip, accel);
-						}
-
-					iter_found = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(sar->command_store), &iter);
-					duplicate_command = FALSE;
-
-					while (iter_found)
-						{
-						g_autofree gchar *existing_command = nullptr;
-						gtk_tree_model_get(GTK_TREE_MODEL(sar->command_store), &iter, SAR_LABEL, &existing_command, -1);
-						if (g_strcmp0(new_command->str, existing_command) == 0)
-							{
-							duplicate_command = TRUE;
-							break;
-							}
-						iter_found = gtk_tree_model_iter_next(GTK_TREE_MODEL(sar->command_store), &iter);
-						}
-
-					if (!duplicate_command)
-						{
-						gtk_list_store_append(sar->command_store, &iter);
-						gtk_list_store_set(sar->command_store, &iter,
-								SAR_LABEL, new_command->str,
-								SAR_ACTION, action,
-								-1);
-						}
-					}
-				}
+			std::swap(tooltip, tooltip2);
 			}
 
-		groups = groups->next;
+		if (g_strcmp0(label, tooltip) != 0)
+			{
+			g_string_append_printf(new_command, " - %s", tooltip);
+			}
 		}
+
+	g_autofree gchar *accel = gtk_accelerator_get_label(key.accel_key, key.accel_mods);
+	g_string_append_printf(new_command, " : <b>%s</b>", accel);
+
+	bool duplicate_command = false;
+
+	GtkTreeIter iter;
+	gboolean iter_found = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(user_data), &iter);
+	while (iter_found && !duplicate_command)
+		{
+		g_autofree gchar *existing_command = nullptr;
+		gtk_tree_model_get(GTK_TREE_MODEL(user_data), &iter, SAR_LABEL, &existing_command, -1);
+
+		duplicate_command = (g_strcmp0(new_command->str, existing_command) == 0);
+
+		iter_found = gtk_tree_model_iter_next(GTK_TREE_MODEL(user_data), &iter);
+		}
+
+	if (duplicate_command) return;
+
+	auto *command_store = static_cast<GtkListStore *>(user_data);
+	gtk_list_store_append(command_store, &iter);
+	gtk_list_store_set(command_store, &iter,
+	                   SAR_LABEL, new_command->str,
+	                   SAR_ACTION, action,
+	                   -1);
+}
+
+static void command_store_populate(SarData* sar)
+{
+	sar->command_store = GTK_LIST_STORE(gtk_builder_get_object(sar->builder, "command_store"));
+
+	GtkTreeSortable *sortable = GTK_TREE_SORTABLE(sar->command_store);
+	gtk_tree_sortable_set_sort_func(sortable, SAR_LABEL, sort_iter_compare_func, nullptr, nullptr);
+	gtk_tree_sortable_set_sort_column_id(sortable, SAR_LABEL, GTK_SORT_ASCENDING);
+
+	layout_actions_foreach(sar->lw, action_to_command_store, sar->command_store);
 }
 
 static gboolean search_and_run_destroy(gpointer data)

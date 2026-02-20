@@ -1546,61 +1546,56 @@ static void image_overlay_set_background_color_cb(GtkWidget *widget, gpointer da
 	gtk_widget_show(dialog);
 }
 
+static void action_to_command_store(gpointer data, gpointer user_data)
+{
+	GtkAction *action = deprecated_GTK_ACTION(data);
+
+	const gchar *accel_path = deprecated_gtk_action_get_accel_path(action);
+	if (!accel_path) return;
+
+	GtkAccelKey key;
+	if (!gtk_accel_map_lookup_entry(accel_path, &key)) return;
+
+	g_autofree gchar *label = nullptr;
+	g_autofree gchar *tooltip = nullptr;
+	g_object_get(action,
+	             "tooltip", &tooltip,
+	             "label", &label,
+	             NULL);
+
+	if (!tooltip) return;
+
+	g_autofree gchar *label2 = nullptr;
+	if (pango_parse_markup(label, -1, '_', nullptr, &label2, nullptr, nullptr) && label2)
+		{
+		std::swap(label, label2);
+		}
+
+	g_autofree gchar *accel = gtk_accelerator_name(key.accel_key, key.accel_mods);
+
+	auto *accel_store = static_cast<GtkTreeStore *>(user_data);
+	GtkTreeIter iter;
+	gtk_tree_store_append(accel_store, &iter, nullptr);
+	gtk_tree_store_set(accel_store, &iter,
+	                   AE_ACTION, label,
+	                   AE_KEY, accel,
+	                   AE_TOOLTIP, tooltip,
+	                   AE_ACCEL, accel_path,
+	                   AE_ICON, deprecated_gtk_action_get_icon_name(action),
+	                   -1);
+}
+
 static void accel_store_populate()
 {
-	GList *groups;
-	const gchar *accel_path;
-	GtkAccelKey key;
-	GtkTreeIter iter;
+	if (!accel_store) return;
 
-	if (!accel_store || !layout_window_first()) return;
+	LayoutWindow *lw = layout_window_first(); /* get the actions from the first window, it should not matter, they should be the same in all windows */
+	if (!lw) return;
+
+	g_assert(lw->ui_manager);
 
 	gtk_tree_store_clear(accel_store);
-	LayoutWindow *lw = layout_window_first(); /* get the actions from the first window, it should not matter, they should be the same in all windows */
-
-	g_assert(lw && lw->ui_manager);
-	groups = deprecated_gtk_ui_manager_get_action_groups(lw->ui_manager);
-	while (groups)
-		{
-		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
-		for (GList *work = actions; work; work = work->next)
-			{
-			GtkAction *action = deprecated_GTK_ACTION(work->data);
-			accel_path = deprecated_gtk_action_get_accel_path(action);
-			if (accel_path && gtk_accel_map_lookup_entry(accel_path, &key))
-				{
-				g_autofree gchar *label = nullptr;
-				g_autofree gchar *tooltip = nullptr;
-				g_object_get(action,
-					     "tooltip", &tooltip,
-					     "label", &label,
-					     NULL);
-
-				if (tooltip)
-					{
-					g_autofree gchar *label2 = nullptr;
-					if (pango_parse_markup(label, -1, '_', nullptr, &label2, nullptr, nullptr) && label2)
-						{
-						std::swap(label, label2);
-						}
-
-					g_autofree gchar *accel = gtk_accelerator_name(key.accel_key, key.accel_mods);
-					const gchar *icon_name = deprecated_gtk_action_get_icon_name(action);
-
-					gtk_tree_store_append(accel_store, &iter, nullptr);
-					gtk_tree_store_set(accel_store, &iter,
-					                   AE_ACTION, label,
-					                   AE_KEY, accel,
-					                   AE_TOOLTIP, tooltip,
-					                   AE_ACCEL, accel_path,
-					                   AE_ICON, icon_name,
-					                   -1);
-					}
-				}
-			}
-
-		groups = groups->next;
-		}
+	layout_actions_foreach(lw, action_to_command_store, accel_store);
 }
 
 static void accel_store_cleared_cb(GtkCellRendererAccel *, gchar *, gpointer)
