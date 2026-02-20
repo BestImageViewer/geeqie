@@ -3157,6 +3157,16 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 	return g_object_ref(lw->menu_tool_bar);
 }
 
+void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data)
+{
+	for (GList *groups = deprecated_gtk_ui_manager_get_action_groups(lw->ui_manager); groups; groups = groups->next)
+		{
+		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
+
+		g_list_foreach(actions, func, data);
+		}
+}
+
 static void toolbar_clear_cb(GtkWidget *widget, gpointer)
 {
 	GtkAction *action;

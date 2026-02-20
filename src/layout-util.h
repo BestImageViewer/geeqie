@@ -85,6 +85,7 @@ gboolean is_help_key(GdkEventKey *event);
 
 void layout_menu_close_cb(GtkAction *action, gpointer data);
 GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw);
+void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data);
 
 void create_toolbars(LayoutWindow *lw);
 
