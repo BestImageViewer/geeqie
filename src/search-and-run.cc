@@ -44,7 +44,6 @@ enum {
 struct SarData
 {
 	GtkWidget *window;
-	GtkListStore *command_store;
 	GtkAction *action;
 	LayoutWindow *lw;
 	gboolean match_found;
@@ -124,13 +123,13 @@ static void action_to_command_store(gpointer data, gpointer user_data)
 
 static void command_store_populate(SarData* sar)
 {
-	sar->command_store = GTK_LIST_STORE(gtk_builder_get_object(sar->builder, "command_store"));
+	GtkListStore *command_store = GTK_LIST_STORE(gtk_builder_get_object(sar->builder, "command_store"));
 
-	GtkTreeSortable *sortable = GTK_TREE_SORTABLE(sar->command_store);
+	GtkTreeSortable *sortable = GTK_TREE_SORTABLE(command_store);
 	gtk_tree_sortable_set_sort_func(sortable, SAR_LABEL, sort_iter_compare_func, nullptr, nullptr);
 	gtk_tree_sortable_set_sort_column_id(sortable, SAR_LABEL, GTK_SORT_ASCENDING);
 
-	layout_actions_foreach(sar->lw, action_to_command_store, sar->command_store);
+	layout_actions_foreach(sar->lw, action_to_command_store, command_store);
 }
 
 static gboolean search_and_run_destroy(gpointer data)
