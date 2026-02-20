@@ -37,6 +37,7 @@
 #include "compat.h"
 #include "geometry.h"
 #include "history-list.h"
+#include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
@@ -1272,6 +1273,28 @@ static gchar *get_action_label(GtkAction *action, const gchar *action_name)
 	return g_strdup(label);
 }
 
+static void action_to_list_duplicates(gpointer data, gpointer user_data)
+{
+	GtkAction *action = deprecated_GTK_ACTION(data);
+
+	const gchar *accel_path = deprecated_gtk_action_get_accel_path(action);
+	if (!accel_path || !gtk_accel_map_lookup_entry(accel_path, nullptr)) return;
+
+	g_autofree gchar *action_name = g_path_get_basename(accel_path);
+
+	/* Menu actions are irrelevant */
+	if (g_strstr_len(action_name, -1, "Menu") != nullptr) return;
+
+	g_autofree gchar *action_label = get_action_label(action, action_name);
+
+#if HAVE_GTK4
+	/* @FIXME GTK4 stub */
+#else
+	auto *list_duplicates = static_cast<std::vector<ActionItem> *>(user_data);
+	list_duplicates->emplace_back(action_name, action_label, deprecated_gtk_action_get_stock_id(action));
+#endif
+}
+
 /**
  * @brief Get a list of menu actions
  * @param
@@ -1283,39 +1306,10 @@ static gchar *get_action_label(GtkAction *action, const gchar *action_name)
 std::vector<ActionItem> get_action_items()
 {
 	LayoutWindow *lw = get_current_layout();
-	if (!lw)
-		{
-		return {};
-		}
+	if (!lw) return {};
 
 	std::vector<ActionItem> list_duplicates;
-
-	for (GList *groups = deprecated_gtk_ui_manager_get_action_groups(lw->ui_manager); groups; groups = groups->next)
-		{
-		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
-		for (GList *work = actions; work; work = work->next)
-			{
-			GtkAction *action = deprecated_GTK_ACTION(work->data);
-
-			const gchar *accel_path = deprecated_gtk_action_get_accel_path(action);
-			if (accel_path && gtk_accel_map_lookup_entry(accel_path, nullptr))
-				{
-				g_autofree gchar *action_name = g_path_get_basename(accel_path);
-
-				/* Menu actions are irrelevant */
-				if (g_strstr_len(action_name, -1, "Menu") == nullptr)
-					{
-					g_autofree gchar *action_label = get_action_label(action, action_name);
-
-#if HAVE_GTK4
-/* @FIXME GTK4 stub */
-#else
-					list_duplicates.emplace_back(action_name, action_label, deprecated_gtk_action_get_stock_id(action));
-#endif
-					}
-				}
-			}
-		}
+	layout_actions_foreach(lw, action_to_list_duplicates, &list_duplicates);
 
 	/* Use the shortest name i.e. ignore -Alt versions. Sort makes the shortest first in the list */
 	const auto action_item_compare_names = [](const ActionItem &a, const ActionItem &b)
