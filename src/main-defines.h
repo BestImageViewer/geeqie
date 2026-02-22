@@ -36,7 +36,7 @@
 #define GQ_ARCHIVE_DIR	"geeqie-archive"
 #define GQ_RESOURCE_PATH_ICONS "/org/geeqie/icons"
 #define GQ_RESOURCE_PATH_CREDITS "/org/geeqie/credits"
-#define GQ_RESOURCE_PATH_IMAGES "/org/geeqie/ui"
+#define GQ_RESOURCE_PATH_IMAGES "/org/geeqie/images"
 #define GQ_RESOURCE_PATH_UI "/org/geeqie/ui"
 
 #define GQ_SYSTEM_WIDE_DIR    "/etc/" GQ_APPNAME_LC
