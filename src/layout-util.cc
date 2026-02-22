@@ -1366,17 +1366,17 @@ static void layout_menu_draw_rectangle_aspect_ratio_cb(GtkRadioAction *action, G
 static void overlay_screen_display_profile_set(gint i)
 {
 	g_free(options->image_overlay.template_string);
-	options->image_overlay.template_string = g_strdup(options->image_overlay_n.template_string[i]);
-	options->image_overlay.x = options->image_overlay_n.x[i];
-	options->image_overlay.y = options->image_overlay_n.y[i];
-	options->image_overlay.text_red = options->image_overlay_n.text_red[i];
-	options->image_overlay.text_green = options->image_overlay_n.text_green[i];
-	options->image_overlay.text_blue = options->image_overlay_n.text_blue[i];
-	options->image_overlay.background_red = options->image_overlay_n.background_red[i];
-	options->image_overlay.background_green = options->image_overlay_n.background_green[i];
-	options->image_overlay.background_blue = options->image_overlay_n.background_blue[i];
+	options->image_overlay.template_string = g_strdup(options->image_overlay_n[i].template_string);
+	options->image_overlay.x = options->image_overlay_n[i].x;
+	options->image_overlay.y = options->image_overlay_n[i].y;
+	options->image_overlay.text_red = options->image_overlay_n[i].text_red;
+	options->image_overlay.text_green = options->image_overlay_n[i].text_green;
+	options->image_overlay.text_blue = options->image_overlay_n[i].text_blue;
+	options->image_overlay.background_red = options->image_overlay_n[i].background_red;
+	options->image_overlay.background_green = options->image_overlay_n[i].background_green;
+	options->image_overlay.background_blue = options->image_overlay_n[i].background_blue;
 	g_free(options->image_overlay.font);
-	options->image_overlay.font = g_strdup(options->image_overlay_n.font[i]);
+	options->image_overlay.font = g_strdup(options->image_overlay_n[i].font);
 }
 
 static void layout_menu_osd_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)

@@ -688,18 +688,18 @@ static void write_osd_profiles(GString *outstr, gint indent)
 		{
 		WRITE_NL(); WRITE_STRING("<osd ");
 		indent++;
-		WRITE_NL(); write_char_option(outstr, "template_string", options->image_overlay_n.template_string[i]);
-		WRITE_NL(); write_int_option(outstr, "x", options->image_overlay_n.x[i]);
-		WRITE_NL(); write_int_option(outstr, "y", options->image_overlay_n.y[i]);
-		WRITE_NL(); write_int_option(outstr, "text_red", options->image_overlay_n.text_red[i]);
-		WRITE_NL(); write_int_option(outstr, "text_green", options->image_overlay_n.text_green[i]);
-		WRITE_NL(); write_int_option(outstr, "text_blue", options->image_overlay_n.text_blue[i]);
-		WRITE_NL(); write_int_option(outstr, "text_alpha", options->image_overlay_n.text_alpha[i]);
-		WRITE_NL(); write_int_option(outstr, "background_red", options->image_overlay_n.background_red[i]);
-		WRITE_NL(); write_int_option(outstr, "background_green", options->image_overlay_n.background_green[i]);
-		WRITE_NL(); write_int_option(outstr, "background_blue", options->image_overlay_n.background_blue[i]);
-		WRITE_NL(); write_int_option(outstr, "background_alpha", options->image_overlay_n.background_alpha[i]);
-		WRITE_NL(); write_char_option(outstr, "font", options->image_overlay_n.font[i]);
+		WRITE_NL(); write_char_option(outstr, "template_string", options->image_overlay_n[i].template_string);
+		WRITE_NL(); write_int_option(outstr, "x", options->image_overlay_n[i].x);
+		WRITE_NL(); write_int_option(outstr, "y", options->image_overlay_n[i].y);
+		WRITE_NL(); write_int_option(outstr, "text_red", options->image_overlay_n[i].text_red);
+		WRITE_NL(); write_int_option(outstr, "text_green", options->image_overlay_n[i].text_green);
+		WRITE_NL(); write_int_option(outstr, "text_blue", options->image_overlay_n[i].text_blue);
+		WRITE_NL(); write_int_option(outstr, "text_alpha", options->image_overlay_n[i].text_alpha);
+		WRITE_NL(); write_int_option(outstr, "background_red", options->image_overlay_n[i].background_red);
+		WRITE_NL(); write_int_option(outstr, "background_green", options->image_overlay_n[i].background_green);
+		WRITE_NL(); write_int_option(outstr, "background_blue", options->image_overlay_n[i].background_blue);
+		WRITE_NL(); write_int_option(outstr, "background_alpha", options->image_overlay_n[i].background_alpha);
+		WRITE_NL(); write_char_option(outstr, "font", options->image_overlay_n[i].font);
 		indent--;
 		WRITE_NL();
 		WRITE_STRING("/>");
@@ -1270,18 +1270,18 @@ static void options_load_osd_profiles(GQParserData *parser_data, const gchar **a
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("template_string", options->image_overlay_n.template_string[i])) continue;
-		if (READ_INT_FULL("x", options->image_overlay_n.x[i])) continue;
-		if (READ_INT_FULL("y", options->image_overlay_n.y[i])) continue;
-		if (READ_USHORT_FULL("text_red", options->image_overlay_n.text_red[i])) continue;
-		if (READ_USHORT_FULL("text_green", options->image_overlay_n.text_green[i])) continue;
-		if (READ_USHORT_FULL("text_blue", options->image_overlay_n.text_blue[i])) continue;
-		if (READ_USHORT_FULL("text_alpha", options->image_overlay_n.text_alpha[i])) continue;
-		if (READ_USHORT_FULL("background_red", options->image_overlay_n.background_red[i])) continue;
-		if (READ_USHORT_FULL("background_green", options->image_overlay_n.background_green[i])) continue;
-		if (READ_USHORT_FULL("background_blue", options->image_overlay_n.background_blue[i])) continue;
-		if (READ_USHORT_FULL("background_alpha", options->image_overlay_n.background_alpha[i])) continue;
-		if (READ_CHAR_FULL("font", options->image_overlay_n.font[i])) continue;
+		if (READ_CHAR_FULL("template_string", options->image_overlay_n[i].template_string)) continue;
+		if (READ_INT_FULL("x", options->image_overlay_n[i].x)) continue;
+		if (READ_INT_FULL("y", options->image_overlay_n[i].y)) continue;
+		if (READ_USHORT_FULL("text_red", options->image_overlay_n[i].text_red)) continue;
+		if (READ_USHORT_FULL("text_green", options->image_overlay_n[i].text_green)) continue;
+		if (READ_USHORT_FULL("text_blue", options->image_overlay_n[i].text_blue)) continue;
+		if (READ_USHORT_FULL("text_alpha", options->image_overlay_n[i].text_alpha)) continue;
+		if (READ_USHORT_FULL("background_red", options->image_overlay_n[i].background_red)) continue;
+		if (READ_USHORT_FULL("background_green", options->image_overlay_n[i].background_green)) continue;
+		if (READ_USHORT_FULL("background_blue", options->image_overlay_n[i].background_blue)) continue;
+		if (READ_USHORT_FULL("background_alpha", options->image_overlay_n[i].background_alpha)) continue;
+		if (READ_CHAR_FULL("font", options->image_overlay_n[i].font)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}

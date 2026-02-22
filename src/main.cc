@@ -854,18 +854,18 @@ void startup_cb(GtkApplication *app, gpointer)
 	/* If this is the first run with multiple OSD tabs, fill OSD_1 with the user's last setting.
 	 * If the user has intentionally set OSD_1 template to null, that will cause a problem...
 	 */
-	if (options->image_overlay_n.template_string[0] == nullptr)
+	if (options->image_overlay_n[0].template_string == nullptr)
 		{
-		options->image_overlay_n.template_string[0] = g_strdup(options->image_overlay.template_string);
-		options->image_overlay_n.font[0] = g_strdup(options->image_overlay.font);
-		options->image_overlay_n.text_red[0] = options->image_overlay.text_red;
-		options->image_overlay_n.text_green[0] = options->image_overlay.text_green;
-		options->image_overlay_n.text_blue[0] = options->image_overlay.text_blue;
-		options->image_overlay_n.text_alpha[0] = options->image_overlay.text_alpha;
-		options->image_overlay_n.background_red[0] = options->image_overlay.background_red;
-		options->image_overlay_n.background_green[0] = options->image_overlay.background_green;
-		options->image_overlay_n.background_blue[0] = options->image_overlay.background_blue;
-		options->image_overlay_n.background_alpha[0] = options->image_overlay.background_alpha;
+		options->image_overlay_n[0].template_string = g_strdup(options->image_overlay.template_string);
+		options->image_overlay_n[0].font = g_strdup(options->image_overlay.font);
+		options->image_overlay_n[0].text_red = options->image_overlay.text_red;
+		options->image_overlay_n[0].text_green = options->image_overlay.text_green;
+		options->image_overlay_n[0].text_blue = options->image_overlay.text_blue;
+		options->image_overlay_n[0].text_alpha = options->image_overlay.text_alpha;
+		options->image_overlay_n[0].background_red = options->image_overlay.background_red;
+		options->image_overlay_n[0].background_green = options->image_overlay.background_green;
+		options->image_overlay_n[0].background_blue = options->image_overlay.background_blue;
+		options->image_overlay_n[0].background_alpha = options->image_overlay.background_alpha;
 		}
 
 #if HAVE_CLUTTER
