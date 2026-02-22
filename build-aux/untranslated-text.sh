@@ -159,6 +159,9 @@ SIGILL,
 SIGIOT,
 SIGSEGV,
 
+##options.cc
+\"Sans 10\"
+
 ##pixbuf-renderer.cc
 \"Delay image update\",
 \"Display cache size MiB\",

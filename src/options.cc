@@ -40,6 +40,22 @@ namespace
 constexpr gint DEFAULT_THUMB_WIDTH = 96;
 constexpr gint DEFAULT_THUMB_HEIGHT = 72;
 
+void image_overlay_init(ConfOptions::ImageOverlay &image_overlay)
+{
+	image_overlay.template_string = nullptr;
+	image_overlay.x = 10;
+	image_overlay.y = -10;
+	image_overlay.font = g_strdup("Sans 10");
+	image_overlay.text_red = 0;
+	image_overlay.text_green = 0;
+	image_overlay.text_blue = 0;
+	image_overlay.text_alpha = 255;
+	image_overlay.background_red = 240;
+	image_overlay.background_green = 240;
+	image_overlay.background_blue = 240;
+	image_overlay.background_alpha = 210;
+}
+
 } // namespace
 
 ConfOptions *options;
@@ -140,33 +156,11 @@ ConfOptions *init_options(ConfOptions *options)
 	options->image.zoom_style = ZOOM_GEOMETRIC;
 	options->image.tile_size = 128;
 
-	options->image_overlay.template_string = nullptr;
-	options->image_overlay.x = 10;
-	options->image_overlay.y = -10;
-	options->image_overlay.font = g_strdup("Sans 10");
-	options->image_overlay.text_red = 0;
-	options->image_overlay.text_green = 0;
-	options->image_overlay.text_blue = 0;
-	options->image_overlay.text_alpha = 255;
-	options->image_overlay.background_red = 240;
-	options->image_overlay.background_green = 240;
-	options->image_overlay.background_blue = 240;
-	options->image_overlay.background_alpha = 210;
+	image_overlay_init(options->image_overlay);
 
-	for (gint i = 0; i < OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT; i++)
+	for (auto &image_overlay : options->image_overlay_n)
 		{
-		options->image_overlay_n.template_string[i] = nullptr;
-		options->image_overlay_n.x[i] = 10;
-		options->image_overlay_n.y[i] = -10;
-		options->image_overlay_n.font[i] = g_strdup("Sans 10");
-		options->image_overlay_n.text_red[i] = 0;
-		options->image_overlay_n.text_green[i] = 0;
-		options->image_overlay_n.text_blue[i] = 0;
-		options->image_overlay_n.text_alpha[i] = 255;
-		options->image_overlay_n.background_red[i] = 240;
-		options->image_overlay_n.background_green[i] = 240;
-		options->image_overlay_n.background_blue[i] = 240;
-		options->image_overlay_n.background_alpha[i] = 210;
+		image_overlay_init(image_overlay);
 		}
 
 	options->lazy_image_sync = FALSE;

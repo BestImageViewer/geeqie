@@ -291,7 +291,7 @@ struct ConfOptions
 	} fullscreen;
 
 	/* image overlay */
-	struct {
+	struct ImageOverlay {
 		gchar *template_string;
 		gint x;
 		gint y;
@@ -306,20 +306,7 @@ struct ConfOptions
 		gchar *font;
 	} image_overlay;
 
-	struct {
-		gchar *template_string[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		gint x[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		gint y[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		guint16 text_red[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		guint16 text_green[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		guint16 text_blue[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		guint16 text_alpha[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		guint16 background_red[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		guint16 background_green[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		guint16 background_blue[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		guint16 background_alpha[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-		gchar *font[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
-	} image_overlay_n;
+	ImageOverlay image_overlay_n[OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT];
 
 	OverlayScreenDisplaySelectedTab overlay_screen_display_selected_profile;
 
