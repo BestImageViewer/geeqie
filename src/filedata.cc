@@ -292,6 +292,11 @@ GList *file_data_filter_class_list(GList *list, guint filter)
 	return FileData::file_data_filter_class_list(list, filter);
 }
 
+GList *file_data_filter_rating_list(GList *list, guint filter)
+{
+	return FileData::file_data_filter_rating_list(list, filter);
+}
+
 
 gchar *file_data_sc_list_to_string(FileData *fd)
 {

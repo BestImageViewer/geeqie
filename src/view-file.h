@@ -124,6 +124,7 @@ guint vf_marks_get_filter(ViewFile *vf);
 void vf_mark_filter_toggle(ViewFile *vf, gint mark);
 
 guint vf_class_get_filter(ViewFile *vf);
+guint vf_rating_get_filter(ViewFile *vf);
 
 GList *vf_selection_get_one(ViewFile *vf, FileData *fd);
 GList *vf_pop_menu_file_list(ViewFile *vf);

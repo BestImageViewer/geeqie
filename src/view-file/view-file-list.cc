@@ -1628,6 +1628,9 @@ gboolean vflist_refresh(ViewFile *vf)
 		vf->list = g_list_first(vf->list);
 		vf->list = file_data_filter_class_list(vf->list, vf_class_get_filter(vf));
 
+		vf->list = g_list_first(vf->list);
+		vf->list = file_data_filter_rating_list(vf->list, options->rating_filter);
+
 		file_data_register_notify_func(vf_notify_cb, vf, NOTIFY_PRIORITY_MEDIUM);
 
 		DEBUG_1("%s vflist_refresh: sort", get_exec_time());

@@ -441,6 +441,7 @@ struct ConfOptions
 	gchar *mouse_button_9; /**< user-definable mouse buttons */
 
 	gboolean class_filter[FILE_FORMAT_CLASSES]; /**< class file filter */
+	guint rating_filter; /**< rating file filter */
 
 	gboolean read_metadata_in_idle;
 

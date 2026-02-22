@@ -1396,6 +1396,21 @@ static gboolean file_data_filter_class(FileData *fd, guint filter)
 	return FALSE;
 }
 
+static gboolean file_data_filter_rating(FileData *fd, guint filter)
+{
+	if (filter != 0)
+		{
+		gint rating = static_cast<gint>(filter_file_get_rating(fd));
+
+		gint idx = rating + 1;
+
+		return (filter & (1U << idx)) != 0;
+		}
+
+	/* Filter disabled - show all files */
+	return TRUE;
+}
+
 GList *FileData::file_data_filter_class_list(GList *list, guint filter)
 {
 	GList *work;
@@ -1408,6 +1423,28 @@ GList *FileData::file_data_filter_class_list(GList *list, guint filter)
 		work = work->next;
 
 		if (!file_data_filter_class(fd, filter))
+			{
+			list = g_list_remove_link(list, link);
+			::file_data_unref(fd);
+			g_list_free(link);
+			}
+		}
+
+	return list;
+}
+
+GList *FileData::file_data_filter_rating_list(GList *list, guint filter)
+{
+	GList *work;
+
+	work = list;
+	while (work)
+		{
+		auto fd = static_cast<FileData *>(work->data);
+		GList *link = work;
+		work = work->next;
+
+		if (!file_data_filter_rating(fd, filter))
 			{
 			list = g_list_remove_link(list, link);
 			::file_data_unref(fd);

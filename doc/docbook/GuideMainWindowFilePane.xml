@@ -82,6 +82,7 @@
     <para>By default filtering is case-insensitive. A checkbox labelled "Case" permits the filter to be made case-sensitive.
     </para>
     <para>Additionally a drop-down box permits any of the file <emphasis role="underline"><link linkend="Filetypes">Classes</link></emphasis> to be selected or deselected from the viewed list.</para>
+    <para>Also additionally a drop-down box permits any of the file <emphasis role="underline"><link linkend="GuideReferenceXmpExif">Rating</link></emphasis> to be selected or deselected from the viewed list.</para>
     <para />
   </section>
   <section id="Multipleselection">

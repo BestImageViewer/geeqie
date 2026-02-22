@@ -94,6 +94,16 @@ const gchar *format_class_list[] = {
 	N_("Archive"),
 };
 
+const gchar *format_rating_list[] = {
+	N_("Rejected"),
+	N_("Unrated"),
+	N_("1"),
+	N_("2"),
+	N_("3"),
+	N_("4"),
+	N_("5"),
+};
+
 GList *filter_get_list()
 {
 	return filter_list;
@@ -477,6 +487,49 @@ FileFormatClass filter_file_get_class(const gchar *name)
 	if (filter_file_class(name, FORMAT_CLASS_DOCUMENT)) return FORMAT_CLASS_DOCUMENT;
 	if (filter_file_class(name, FORMAT_CLASS_ARCHIVE)) return FORMAT_CLASS_ARCHIVE;
 	return FORMAT_CLASS_UNKNOWN;
+}
+
+FileFormatRating filter_file_get_rating(FileData *fd)
+{
+	FileFormatRating ret = FORMAT_RATING_UNRATED;
+
+	if (fd)
+		{
+		/* If rating metadata not yet read */
+		if (fd->rating == -12345)
+			{
+			read_rating_data(fd);
+			}
+
+		switch (fd->rating)
+			{
+			case 5:
+				ret = FORMAT_RATING_5;
+				break;
+			case 4:
+				ret = FORMAT_RATING_4;
+				break;
+			case 3:
+				ret = FORMAT_RATING_3;
+				break;
+			case 2:
+				ret = FORMAT_RATING_2;
+				break;
+			case 1:
+				ret = FORMAT_RATING_1;
+				break;
+			case 0:
+				ret = FORMAT_RATING_UNRATED;
+				break;
+			case -1:
+				ret = FORMAT_RATING_REJECTED;
+				break;
+			default:
+				ret = FORMAT_RATING_UNRATED;
+			}
+		}
+
+	return ret;
 }
 
 gboolean filter_name_is_writable(const gchar *name)

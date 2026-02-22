@@ -259,6 +259,12 @@ ConfOptions *init_options(ConfOptions *options)
 		{
 		options->class_filter[i] = TRUE;
 		}
+
+	 /* Always start with the filter disabled. Extracting Rating
+	  * from the metadata takes time
+	  */
+	options->rating_filter = 0;
+
 	return options;
 }
 

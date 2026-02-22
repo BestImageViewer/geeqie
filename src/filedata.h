@@ -34,6 +34,7 @@
 #include "sort-type.h"
 
 enum FileFormatClass : gint;
+enum FileFormatStar : gint;
 
 struct ExifData;
 struct HistMap;
@@ -291,6 +292,7 @@ public:
 	static GList *file_data_filter_file_filter_list(GList *list, const GRegex *filter);
 
 	static GList *file_data_filter_class_list(GList *list, guint filter);
+	static GList *file_data_filter_rating_list(GList *list, guint filter);
 
 	gchar *file_data_sc_list_to_string(FileData *fd);
 
@@ -536,6 +538,7 @@ gboolean file_data_filter_file_filter(FileData *fd, const GRegex *filter);
 GList *file_data_filter_file_filter_list(GList *list, const GRegex *filter);
 
 GList *file_data_filter_class_list(GList *list, guint filter);
+GList *file_data_filter_rating_list(GList *list, guint filter);
 
 gchar *file_data_sc_list_to_string(FileData *fd);
 
