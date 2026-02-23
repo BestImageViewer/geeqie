@@ -414,11 +414,8 @@ static void config_window_apply()
 			g_free(options->image_overlay_n[i].template_string);
 			options->image_overlay_n[i].template_string = g_strdup(c_options->image_overlay_n[i].template_string);
 			}
-		if (c_options->image_overlay_n[i].font)
-			{
-			g_free(options->image_overlay_n[i].font);
-			options->image_overlay_n[i].font = g_strdup(c_options->image_overlay_n[i].font);
-			}
+		options->image_overlay_n[i].x = c_options->image_overlay_n[i].x;
+		options->image_overlay_n[i].y = c_options->image_overlay_n[i].y;
 		options->image_overlay_n[i].text_red = c_options->image_overlay_n[i].text_red;
 		options->image_overlay_n[i].text_green = c_options->image_overlay_n[i].text_green;
 		options->image_overlay_n[i].text_blue = c_options->image_overlay_n[i].text_blue;
@@ -427,6 +424,11 @@ static void config_window_apply()
 		options->image_overlay_n[i].background_green = c_options->image_overlay_n[i].background_green;
 		options->image_overlay_n[i].background_blue = c_options->image_overlay_n[i].background_blue;
 		options->image_overlay_n[i].background_alpha = c_options->image_overlay_n[i].background_alpha;
+		if (c_options->image_overlay_n[i].font)
+			{
+			g_free(options->image_overlay_n[i].font);
+			options->image_overlay_n[i].font = g_strdup(c_options->image_overlay_n[i].font);
+			}
 		}
 
 	options->update_on_time_change = c_options->update_on_time_change;
