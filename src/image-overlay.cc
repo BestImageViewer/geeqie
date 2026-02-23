@@ -412,8 +412,9 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 	if (width > 0 && height > 0)
 		{
 		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, width, height);
-		pixbuf_set_rect_fill(pixbuf, 3, 3, width-6, height-6, options->image_overlay.background_red, options->image_overlay.background_green,
-															options->image_overlay.background_blue, options->image_overlay.background_alpha);
+		pixbuf_set_rect_fill(pixbuf, 3, 3, width-6, height-6,
+		                     options->image_overlay.background.red, options->image_overlay.background.green,
+		                     options->image_overlay.background.blue, options->image_overlay.background.alpha);
 		pixbuf_set_rect(pixbuf, 0, 0, width, height, 240, 240, 240, 80, 1, 1, 1, 1);
 		pixbuf_set_rect(pixbuf, 1, 1, width-2, height-2, 240, 240, 240, 130, 1, 1, 1, 1);
 		pixbuf_set_rect(pixbuf, 2, 2, width-4, height-4, 240, 240, 240, 180, 1, 1, 1, 1);
@@ -432,7 +433,8 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 			osd->histogram.draw(histmap, pixbuf, x, y, w, HISTOGRAM_HEIGHT);
 			}
 		pixbuf_draw_layout(pixbuf, layout, 5, 5,
-		                   options->image_overlay.text_red, options->image_overlay.text_green, options->image_overlay.text_blue, options->image_overlay.text_alpha);
+		                   options->image_overlay.text_color.red, options->image_overlay.text_color.green,
+		                   options->image_overlay.text_color.blue, options->image_overlay.text_color.alpha);
 	}
 
 	g_object_unref(G_OBJECT(layout));

@@ -416,14 +416,8 @@ static void config_window_apply()
 			}
 		options->image_overlay_n[i].x = c_options->image_overlay_n[i].x;
 		options->image_overlay_n[i].y = c_options->image_overlay_n[i].y;
-		options->image_overlay_n[i].text_red = c_options->image_overlay_n[i].text_red;
-		options->image_overlay_n[i].text_green = c_options->image_overlay_n[i].text_green;
-		options->image_overlay_n[i].text_blue = c_options->image_overlay_n[i].text_blue;
-		options->image_overlay_n[i].text_alpha = c_options->image_overlay_n[i].text_alpha;
-		options->image_overlay_n[i].background_red = c_options->image_overlay_n[i].background_red;
-		options->image_overlay_n[i].background_green = c_options->image_overlay_n[i].background_green;
-		options->image_overlay_n[i].background_blue = c_options->image_overlay_n[i].background_blue;
-		options->image_overlay_n[i].background_alpha = c_options->image_overlay_n[i].background_alpha;
+		options->image_overlay_n[i].text_color = c_options->image_overlay_n[i].text_color;
+		options->image_overlay_n[i].background = c_options->image_overlay_n[i].background;
 		if (c_options->image_overlay_n[i].font)
 			{
 			g_free(options->image_overlay_n[i].font);
@@ -1445,31 +1439,22 @@ static void text_color_activated_cb(GtkColorChooser *chooser, GdkRGBA *color, gp
 {
 	gint i = GPOINTER_TO_INT(data);
 
-	c_options->image_overlay_n[i].text_red = color->red * 255;
-	c_options->image_overlay_n[i].text_green = color->green * 255;
-	c_options->image_overlay_n[i].text_blue = color->blue * 255;
-	c_options->image_overlay_n[i].text_alpha = color->alpha * 255;
+	c_options->image_overlay_n[i].text_color.from_gdk_rgba(*color);
 
 	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
 static void text_color_response_cb(GtkDialog *dialog, gint response_id, gpointer data)
 {
-	GdkRGBA color;
 	gint i = GPOINTER_TO_INT(data);
 
-	c_options->image_overlay_n[i].text_red = options->image_overlay_n[i].text_red;
-	c_options->image_overlay_n[i].text_green = options->image_overlay_n[i].text_green;
-	c_options->image_overlay_n[i].text_blue = options->image_overlay_n[i].text_blue;
-	c_options->image_overlay_n[i].text_alpha = options->image_overlay_n[i].text_alpha;
+	c_options->image_overlay_n[i].text_color = options->image_overlay_n[i].text_color;
 
 	if (response_id == GTK_RESPONSE_OK)
 		{
+		GdkRGBA color;
 		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(dialog), &color);
-		c_options->image_overlay_n[i].text_red = color.red * 255;
-		c_options->image_overlay_n[i].text_green = color.green * 255;
-		c_options->image_overlay_n[i].text_blue = color.blue * 255;
-		c_options->image_overlay_n[i].text_alpha = color.alpha * 255;
+		c_options->image_overlay_n[i].text_color.from_gdk_rgba(color);
 		}
 
 	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
@@ -1477,16 +1462,12 @@ static void text_color_response_cb(GtkDialog *dialog, gint response_id, gpointer
 
 static void image_overlay_set_text_color_cb(GtkWidget *widget, gpointer data)
 {
-	GtkWidget *dialog;
-	GdkRGBA color;
-	gint i = GPOINTER_TO_INT(data);
+	GtkWidget *dialog = gtk_color_chooser_dialog_new(_("Image Overlay Text Color"), GTK_WINDOW(widget_get_toplevel(widget)));
 
-	dialog = gtk_color_chooser_dialog_new(_("Image Overlay Text Color"), GTK_WINDOW(widget_get_toplevel(widget)));
-	color.red = static_cast<double>(options->image_overlay_n[i].text_red) / 255;
-	color.green = static_cast<double>(options->image_overlay_n[i].text_green) / 255;
-	color.blue = static_cast<double>(options->image_overlay_n[i].text_blue) / 255;
-	color.alpha = static_cast<double>(options->image_overlay_n[i].text_alpha) / 255;
+	const gint i = GPOINTER_TO_INT(data);
+	GdkRGBA color = options->image_overlay_n[i].text_color.to_gdk_rgba();
 	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(dialog), &color);
+
 	gtk_color_chooser_set_use_alpha(GTK_COLOR_CHOOSER(dialog), TRUE);
 
 	g_signal_connect(dialog, "color-activated", G_CALLBACK(text_color_activated_cb), data);
@@ -1499,47 +1480,34 @@ static void bg_color_activated_cb(GtkColorChooser *chooser, GdkRGBA *color, gpoi
 {
 	gint i = GPOINTER_TO_INT(data);
 
-	c_options->image_overlay_n[i].background_red = color->red * 255;
-	c_options->image_overlay_n[i].background_green = color->green * 255;
-	c_options->image_overlay_n[i].background_blue = color->blue * 255;
-	c_options->image_overlay_n[i].background_alpha = color->alpha * 255;
+	c_options->image_overlay_n[i].background.from_gdk_rgba(*color);
 
 	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
 static void bg_color_response_cb(GtkDialog *dialog, gint response_id, gpointer data)
 {
-	GdkRGBA color;
 	gint i = GPOINTER_TO_INT(data);
 
-	c_options->image_overlay_n[i].background_red = options->image_overlay_n[i].background_red;
-	c_options->image_overlay_n[i].background_green = options->image_overlay_n[i].background_green;
-	c_options->image_overlay_n[i].background_blue = options->image_overlay_n[i].background_blue;
-	c_options->image_overlay_n[i].background_alpha = options->image_overlay_n[i].background_alpha;
+	c_options->image_overlay_n[i].background = options->image_overlay_n[i].background;
 
 	if (response_id == GTK_RESPONSE_OK)
 		{
+		GdkRGBA color;
 		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(dialog), &color);
-		c_options->image_overlay_n[i].background_red = color.red * 255;
-		c_options->image_overlay_n[i].background_green = color.green * 255;
-		c_options->image_overlay_n[i].background_blue = color.blue * 255;
-		c_options->image_overlay_n[i].background_alpha = color.alpha * 255;
+		c_options->image_overlay_n[i].background.from_gdk_rgba(color);
 		}
 	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
 static void image_overlay_set_background_color_cb(GtkWidget *widget, gpointer data)
 {
-	GtkWidget *dialog;
-	GdkRGBA color;
-	gint i = GPOINTER_TO_INT(data);
+	GtkWidget *dialog = gtk_color_chooser_dialog_new(_("Image Overlay Background Color"), GTK_WINDOW(widget_get_toplevel(widget)));
 
-	dialog = gtk_color_chooser_dialog_new(_("Image Overlay Background Color"), GTK_WINDOW(widget_get_toplevel(widget)));
-	color.red = static_cast<double>(options->image_overlay_n[i].background_red) / 255;
-	color.green = static_cast<double>(options->image_overlay_n[i].background_green) / 255;
-	color.blue = static_cast<double>(options->image_overlay_n[i].background_blue) / 255;
-	color.alpha = static_cast<double>(options->image_overlay_n[i].background_alpha) / 255;
+	const gint i = GPOINTER_TO_INT(data);
+	GdkRGBA color = options->image_overlay_n[i].background.to_gdk_rgba();
 	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(dialog), &color);
+
 	gtk_color_chooser_set_use_alpha(GTK_COLOR_CHOOSER(dialog), TRUE);
 
 	g_signal_connect(dialog, "color-activated", G_CALLBACK(bg_color_activated_cb), data);
@@ -3991,14 +3959,8 @@ void show_about_window(LayoutWindow *lw)
 
 static void image_overlay_set_text_colors(gint i)
 {
-	c_options->image_overlay_n[i].text_red = options->image_overlay_n[i].text_red;
-	c_options->image_overlay_n[i].text_green = options->image_overlay_n[i].text_green;
-	c_options->image_overlay_n[i].text_blue = options->image_overlay_n[i].text_blue;
-	c_options->image_overlay_n[i].text_alpha = options->image_overlay_n[i].text_alpha;
-	c_options->image_overlay_n[i].background_red = options->image_overlay_n[i].background_red;
-	c_options->image_overlay_n[i].background_green = options->image_overlay_n[i].background_green;
-	c_options->image_overlay_n[i].background_blue = options->image_overlay_n[i].background_blue;
-	c_options->image_overlay_n[i].background_alpha = options->image_overlay_n[i].background_alpha;
+	c_options->image_overlay_n[i].text_color = options->image_overlay_n[i].text_color;
+	c_options->image_overlay_n[i].background = options->image_overlay_n[i].background;
 }
 
 /*
