@@ -310,11 +310,6 @@ struct ConfOptions
 
 	OverlayScreenDisplaySelectedTab overlay_screen_display_selected_profile;
 
-	/* properties dialog */
-	struct {
-		gchar *tabs_order;
-	} properties;
-
 	/* color profiles */
 	struct {
 		gboolean enabled;
