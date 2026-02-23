@@ -485,9 +485,6 @@ static void write_global_attributes(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_INT(*options, file_ops.safe_delete_folder_maxsize);
 	WRITE_NL(); WRITE_BOOL(*options, file_ops.no_trash);
 
-	/* Properties dialog Options */
-	WRITE_NL(); WRITE_CHAR(*options, properties.tabs_order);
-
 	/* Image Options */
 	WRITE_NL(); WRITE_UINT(*options, image.zoom_mode);
 
@@ -970,9 +967,6 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, selectable_bars.menu_bar)) continue;
 		if (READ_BOOL(*options, selectable_bars.status_bar)) continue;
 		if (READ_BOOL(*options, selectable_bars.tool_bar)) continue;
-
-		/* Properties dialog options */
-		if (READ_CHAR(*options, properties.tabs_order)) continue;
 
 		if (READ_BOOL(*options, with_rename)) continue;
 
