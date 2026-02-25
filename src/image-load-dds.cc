@@ -55,11 +55,6 @@ private:
 	GdkPixbuf *pixbuf;
 };
 
-void free_buffer(guchar *pixels, gpointer)
-{
-	g_free(pixels);
-}
-
 uint ddsGetHeight(unsigned const char * buffer) {
 	return (buffer[12] & 0xFF) | (buffer[13] & 0xFF) << 8 | (buffer[14] & 0xFF) << 16 | (buffer[15] & 0xFF) << 24;
 }
@@ -571,7 +566,7 @@ gboolean ImageLoaderDDS::write(const guchar *buf, gsize &chunk_size, gsize count
 		default:
 			break;
 		}
-		pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8, width, height, rowstride, free_buffer, nullptr);
+		pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8, width, height, rowstride, free_pixels, nullptr);
 		area_updated_cb(nullptr, 0, 0, width, height, data);
 		chunk_size = count;
 		return TRUE;

@@ -143,5 +143,7 @@ gboolean image_loader_get_shrunk(ImageLoader *il);
 
 gboolean image_load_dimensions(FileData *fd, gint *width, gint *height);
 
+void free_pixels(guchar *pixels, gpointer data);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

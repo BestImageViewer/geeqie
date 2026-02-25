@@ -53,11 +53,6 @@ private:
 	gint page_total;
 };
 
-void free_buffer(guchar *pixels, gpointer)
-{
-	g_free (pixels);
-}
-
 gboolean ImageLoaderDJVU::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	ddjvu_context_t *ctx;
@@ -105,7 +100,7 @@ gboolean ImageLoaderDJVU::write(const guchar *buf, gsize &chunk_size, gsize coun
 
 	/**
 	 * @FIXME implementation of rotation is not correct */
-	g_autoptr(GdkPixbuf) tmp1 = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_buffer, nullptr);
+	g_autoptr(GdkPixbuf) tmp1 = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, alpha, 8, width, height, stride, free_pixels, nullptr);
 	g_autoptr(GdkPixbuf) tmp2 = gdk_pixbuf_flip(tmp1, TRUE);
 
 	pixbuf = gdk_pixbuf_rotate_simple(tmp2, GDK_PIXBUF_ROTATE_UPSIDEDOWN);

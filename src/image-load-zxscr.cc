@@ -69,11 +69,6 @@ constexpr guchar palette[2][8][3] = {
 	}
 };
 
-void free_buffer(guchar *pixels, gpointer)
-{
-	g_free(pixels);
-}
-
 gboolean ImageLoaderZXSCR::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
 	guint8 *pixels;
@@ -107,7 +102,7 @@ gboolean ImageLoaderZXSCR::write(const guchar *buf, gsize &chunk_size, gsize cou
 		return FALSE;
 		}
 
-	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE, 8, width, height, width * 3, free_buffer, nullptr);
+	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE, 8, width, height, width * 3, free_pixels, nullptr);
 
 	if (!pixbuf)
 		{

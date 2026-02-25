@@ -86,11 +86,6 @@ private:
 	GdkPixbuf *pixbuf;
 };
 
-void free_buffer(guchar *pixels, gpointer)
-{
-	g_free(pixels);
-}
-
 uint8_t *JxlMemoryToPixels(const uint8_t *next_in, size_t size, size_t &xsize, size_t &ysize, size_t &stride)
 {
 	JxlDecoderPtr dec = JxlDecoderMake(nullptr);
@@ -186,7 +181,7 @@ gboolean ImageLoaderJPEGXL::write(const guchar *buf, gsize &chunk_size, gsize co
 
 	if (pixels)
 		{
-		pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, TRUE, 8, xsize, ysize, stride, free_buffer, nullptr);
+		pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, TRUE, 8, xsize, ysize, stride, free_pixels, nullptr);
 
 		area_updated_cb(nullptr, 0, 0, xsize, ysize, data);
 

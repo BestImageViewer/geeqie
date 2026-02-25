@@ -58,11 +58,6 @@ private:
 	GdkPixbuf *pixbuf;
 };
 
-void free_buffer(guchar *pixels, gpointer)
-{
-	g_free (pixels);
-}
-
 struct OpjBufferInfo
 {
 	OpjBufferInfo(const OPJ_BYTE *buffer, OPJ_SIZE_T size)
@@ -205,7 +200,7 @@ gboolean ImageLoaderJ2K::write(const guchar *buf, gsize &chunk_size, gsize count
 			}
 		}
 
-	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE , 8, width, height, width * bytes_per_pixel, free_buffer, nullptr);
+	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, FALSE , 8, width, height, width * bytes_per_pixel, free_pixels, nullptr);
 
 	area_updated_cb(nullptr, 0, 0, width, height, data);
 
