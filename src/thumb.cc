@@ -521,11 +521,6 @@ static guchar *load_xv_thumbnail(gchar *filename, gint *widthp, gint *heightp)
 }
 #undef XV_BUFFER
 
-static void free_rgb_buffer(guchar *pixels, gpointer)
-{
-	g_free(pixels);
-}
-
 static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h)
 {
 	gint width;
@@ -551,7 +546,7 @@ static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h
 		}
 
 	pixbuf = gdk_pixbuf_new_from_data(rgb_data, GDK_COLORSPACE_RGB, FALSE, 8,
-	                                  width, height, 3 * width, free_rgb_buffer, nullptr);
+	                                  width, height, 3 * width, free_pixels, nullptr);
 
 	if (pixbuf_scale_aspect(width, height, max_w, max_h, width, height))
 		{

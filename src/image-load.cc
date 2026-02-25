@@ -1359,4 +1359,9 @@ gboolean image_load_dimensions(FileData *fd, gint *width, gint *height)
 
 	return success;
 }
+
+void free_pixels(guchar *pixels, gpointer)
+{
+	g_free(pixels);
+}
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

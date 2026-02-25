@@ -79,11 +79,6 @@ struct GqTiffContext
 	toff_t pos;
 };
 
-void free_buffer (guchar *pixels, gpointer)
-{
-	g_free (pixels);
-}
-
 tsize_t tiff_load_read (thandle_t handle, tdata_t buf, tsize_t size)
 {
 	auto context = static_cast<GqTiffContext *>(handle);
@@ -242,9 +237,9 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 		return FALSE;
 		}
 
-	pixbuf = gdk_pixbuf_new_from_data (pixels, GDK_COLORSPACE_RGB, TRUE, 8,
-										   width, height, rowstride,
-										   free_buffer, nullptr);
+	pixbuf = gdk_pixbuf_new_from_data(pixels, GDK_COLORSPACE_RGB, TRUE, 8,
+	                                  width, height, rowstride,
+	                                  free_pixels, nullptr);
 	if (!pixbuf)
 		{
 		g_free (pixels);

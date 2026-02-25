@@ -100,11 +100,6 @@ private:
 	size_t _pos;
 };
 
-void free_pixels(guchar *pixels, gpointer)
-{
-	g_free(pixels);
-}
-
 gboolean ImageLoaderEXR::write(const guchar *buffer, gsize &chunk_size, gsize count, GError **)
 {
 	try
