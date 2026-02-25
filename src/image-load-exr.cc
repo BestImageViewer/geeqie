@@ -100,6 +100,11 @@ private:
 	size_t _pos;
 };
 
+void free_pixels(guchar *pixels, gpointer)
+{
+	g_free(pixels);
+}
+
 gboolean ImageLoaderEXR::write(const guchar *buffer, gsize &chunk_size, gsize count, GError **)
 {
 	try
@@ -117,7 +122,7 @@ gboolean ImageLoaderEXR::write(const guchar *buffer, gsize &chunk_size, gsize co
 		file.readPixels(dw.min.y, dw.max.y);
 
 		// Convert EXR pixel data to GdkPixbuf format (8-bit RGBA)
-		std::vector<guchar> image_data(width * height * 4);
+		auto *image_data = g_new0(guchar, width * height * 4);
 		for (gint y = 0; y < height; ++y)
 			{
 			for (gint x = 0; x < width; ++x)
@@ -140,9 +145,7 @@ gboolean ImageLoaderEXR::write(const guchar *buffer, gsize &chunk_size, gsize co
 
 		/* Create GdkPixbuf from raw RGBA data
 		 * EXR always has alpha */
-		GdkPixbuf *pixbuf_tmp = gdk_pixbuf_new_from_data(image_data.data(), GDK_COLORSPACE_RGB, TRUE, 8, width, height, width * 4, nullptr, nullptr);
-
-		pixbuf = gdk_pixbuf_copy(pixbuf_tmp); // A copy of image_data is required
+		pixbuf = gdk_pixbuf_new_from_data(image_data, GDK_COLORSPACE_RGB, TRUE, 8, width, height, width * 4, free_pixels, nullptr);
 
 		area_updated_cb(nullptr, 0, 0, width, height, data);
 

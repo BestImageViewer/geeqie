@@ -108,7 +108,7 @@ gboolean ImageLoaderFITS::write(const guchar *buf, gsize &chunk_size, gsize coun
 	fits_close_file(fptr, &status);
 
 	/* Create a GdkPixbuf in RGB format (24-bit depth, 8 bits per channel) */
-	GdkPixbuf *pixbuf_tmp = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
+	g_autoptr(GdkPixbuf) pixbuf_tmp = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
 	if (!pixbuf_tmp)
 		{
 		log_printf("Failed to create GdkPixbuf for .fits file");
@@ -153,8 +153,7 @@ gboolean ImageLoaderFITS::write(const guchar *buf, gsize &chunk_size, gsize coun
 			}
 		}
 
-	pixbuf = gdk_pixbuf_copy(pixbuf_tmp);
-	g_object_unref(pixbuf_tmp);
+	pixbuf = g_steal_pointer(&pixbuf_tmp);
 
 	area_updated_cb(nullptr, 0, 0, width, height, data);
 

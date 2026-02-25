@@ -623,8 +623,8 @@ GdkPixbuf *pixbuf_copy_mirror(GdkPixbuf *src, gboolean mirror, gboolean flip)
 
 GdkPixbuf *pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation)
 {
-	GdkPixbuf *dest;
-	GdkPixbuf *tmp = nullptr;
+	GdkPixbuf *dest = nullptr;
+	g_autoptr(GdkPixbuf) tmp = nullptr;
 
 	switch (orientation)
 		{
@@ -663,9 +663,8 @@ GdkPixbuf *pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation)
 			dest = gdk_pixbuf_copy(pixbuf);
 			break;
 		}
-	if (tmp) g_object_unref(tmp);
-	return dest;
 
+	return dest;
 }
 
 

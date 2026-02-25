@@ -106,22 +106,21 @@ GdkPixbuf *load_npy_to_pixbuf(gchar *buf)
 
 	return pixbuf;
 }
+
 gboolean ImageLoaderNPY::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
 {
-	GdkPixbuf *pixbuf_tmp;
-
-	pixbuf_tmp = load_npy_to_pixbuf(reinterpret_cast<gchar *>(const_cast<guchar *>(buf)));
+	g_autoptr(GdkPixbuf) pixbuf_tmp = load_npy_to_pixbuf(reinterpret_cast<gchar *>(const_cast<guchar *>(buf)));
 	if (!pixbuf_tmp)
 		{
 		log_printf("Failed to load image from buffer");
 
+		// @fixme
 		return false;
 		return 1;
 		}
 
-	pixbuf = gdk_pixbuf_copy(pixbuf_tmp);
+	pixbuf = gdk_pixbuf_copy(pixbuf_tmp); // A copy of buf is required since it is not owned
 	chunk_size = count;
-	g_object_unref(pixbuf_tmp);
 
 	area_updated_cb(nullptr, 0, 0, gdk_pixbuf_get_width(pixbuf), gdk_pixbuf_get_height(pixbuf), data);
 
