@@ -262,24 +262,23 @@ gboolean read_int_option(const gchar *option, const gchar *label, const gchar *v
 	return TRUE;
 }
 
-gboolean read_ushort_option(const gchar *option, const gchar *label, const gchar *value, guint16 *n)
+bool read_uchar_option(const gchar *option, const gchar *label, const gchar *value, guint8 &n)
 {
-	if (g_ascii_strcasecmp(option, label) != 0) return FALSE;
-	if (!n) return FALSE;
+	if (g_ascii_strcasecmp(option, label) != 0) return false;
 
 	if (g_ascii_isdigit(value[0]))
 		{
-		*n = strtoul(value, nullptr, 10);
+		n = strtoul(value, nullptr, 10);
 		}
 	else
 		{
 		if (g_ascii_strcasecmp(value, "true") == 0)
-			*n = 1;
+			n = 1;
 		else
-			*n = 0;
+			n = 0;
 		}
 
-	return TRUE;
+	return true;
 }
 
 void write_uint_option(GString *str, const gchar *label, guint n)
@@ -1032,14 +1031,14 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_CHAR(*options, image_overlay.template_string)) continue;
 		if (READ_INT(*options, image_overlay.x)) continue;
 		if (READ_INT(*options, image_overlay.y)) continue;
-		if (READ_USHORT_FULL("image_overlay.text_red", options->image_overlay.text_color.red)) continue;
-		if (READ_USHORT_FULL("image_overlay.text_green", options->image_overlay.text_color.green)) continue;
-		if (READ_USHORT_FULL("image_overlay.text_blue", options->image_overlay.text_color.blue)) continue;
-		if (READ_USHORT_FULL("image_overlay.text_alpha", options->image_overlay.text_color.alpha)) continue;
-		if (READ_USHORT_FULL("image_overlay.background_red", options->image_overlay.background.red)) continue;
-		if (READ_USHORT_FULL("image_overlay.background_green", options->image_overlay.background.green)) continue;
-		if (READ_USHORT_FULL("image_overlay.background_blue", options->image_overlay.background.blue)) continue;
-		if (READ_USHORT_FULL("image_overlay.background_alpha", options->image_overlay.background.alpha)) continue;
+		if (READ_UCHAR_FULL("image_overlay.text_red", options->image_overlay.text_color.red)) continue;
+		if (READ_UCHAR_FULL("image_overlay.text_green", options->image_overlay.text_color.green)) continue;
+		if (READ_UCHAR_FULL("image_overlay.text_blue", options->image_overlay.text_color.blue)) continue;
+		if (READ_UCHAR_FULL("image_overlay.text_alpha", options->image_overlay.text_color.alpha)) continue;
+		if (READ_UCHAR_FULL("image_overlay.background_red", options->image_overlay.background.red)) continue;
+		if (READ_UCHAR_FULL("image_overlay.background_green", options->image_overlay.background.green)) continue;
+		if (READ_UCHAR_FULL("image_overlay.background_blue", options->image_overlay.background.blue)) continue;
+		if (READ_UCHAR_FULL("image_overlay.background_alpha", options->image_overlay.background.alpha)) continue;
 		if (READ_CHAR(*options, image_overlay.font)) continue;
 		if (READ_UINT_ENUM(*options, overlay_screen_display_selected_profile)) continue;
 
@@ -1267,14 +1266,14 @@ static void options_load_osd_profiles(GQParserData *parser_data, const gchar **a
 		if (READ_CHAR_FULL("template_string", options->image_overlay_n[i].template_string)) continue;
 		if (READ_INT_FULL("x", options->image_overlay_n[i].x)) continue;
 		if (READ_INT_FULL("y", options->image_overlay_n[i].y)) continue;
-		if (READ_USHORT_FULL("text_red", options->image_overlay_n[i].text_color.red)) continue;
-		if (READ_USHORT_FULL("text_green", options->image_overlay_n[i].text_color.green)) continue;
-		if (READ_USHORT_FULL("text_blue", options->image_overlay_n[i].text_color.blue)) continue;
-		if (READ_USHORT_FULL("text_alpha", options->image_overlay_n[i].text_color.alpha)) continue;
-		if (READ_USHORT_FULL("background_red", options->image_overlay_n[i].background.red)) continue;
-		if (READ_USHORT_FULL("background_green", options->image_overlay_n[i].background.green)) continue;
-		if (READ_USHORT_FULL("background_blue", options->image_overlay_n[i].background.blue)) continue;
-		if (READ_USHORT_FULL("background_alpha", options->image_overlay_n[i].background.alpha)) continue;
+		if (READ_UCHAR_FULL("text_red", options->image_overlay_n[i].text_color.red)) continue;
+		if (READ_UCHAR_FULL("text_green", options->image_overlay_n[i].text_color.green)) continue;
+		if (READ_UCHAR_FULL("text_blue", options->image_overlay_n[i].text_color.blue)) continue;
+		if (READ_UCHAR_FULL("text_alpha", options->image_overlay_n[i].text_color.alpha)) continue;
+		if (READ_UCHAR_FULL("background_red", options->image_overlay_n[i].background.red)) continue;
+		if (READ_UCHAR_FULL("background_green", options->image_overlay_n[i].background.green)) continue;
+		if (READ_UCHAR_FULL("background_blue", options->image_overlay_n[i].background.blue)) continue;
+		if (READ_UCHAR_FULL("background_alpha", options->image_overlay_n[i].background.alpha)) continue;
 		if (READ_CHAR_FULL("font", options->image_overlay_n[i].font)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());

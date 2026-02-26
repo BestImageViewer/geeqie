@@ -300,10 +300,10 @@ struct ConfOptions
 			void from_gdk_rgba(const GdkRGBA &color);
 			GdkRGBA to_gdk_rgba() const;
 
-			guint16 red;
-			guint16 green;
-			guint16 blue;
-			guint16 alpha;
+			guint8 red;
+			guint8 green;
+			guint8 blue;
+			guint8 alpha;
 		};
 		Color text_color;
 		Color background;
