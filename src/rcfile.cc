@@ -106,6 +106,26 @@ struct GQParserData
 	gboolean startup = FALSE; /* reading config for the first time - add commandline and defaults */
 };
 
+template<typename T>
+bool read_unsigned_int_option(const gchar *option, const gchar *label, const gchar *value, T &n)
+{
+	if (g_ascii_strcasecmp(option, label) != 0) return false;
+
+	if (g_ascii_isdigit(value[0]))
+		{
+		n = strtoul(value, nullptr, 10);
+		}
+	else
+		{
+		if (g_ascii_strcasecmp(value, "true") == 0)
+			n = 1;
+		else
+			n = 0;
+		}
+
+	return true;
+}
+
 } // namespace
 
 void config_file_error(const gchar *message)
@@ -264,21 +284,7 @@ gboolean read_int_option(const gchar *option, const gchar *label, const gchar *v
 
 bool read_uchar_option(const gchar *option, const gchar *label, const gchar *value, guint8 &n)
 {
-	if (g_ascii_strcasecmp(option, label) != 0) return false;
-
-	if (g_ascii_isdigit(value[0]))
-		{
-		n = strtoul(value, nullptr, 10);
-		}
-	else
-		{
-		if (g_ascii_strcasecmp(value, "true") == 0)
-			n = 1;
-		else
-			n = 0;
-		}
-
-	return true;
+	return read_unsigned_int_option(option, label, value, n);
 }
 
 void write_uint_option(GString *str, const gchar *label, guint n)
@@ -288,22 +294,7 @@ void write_uint_option(GString *str, const gchar *label, guint n)
 
 gboolean read_uint_option(const gchar *option, const gchar *label, const gchar *value, guint *n)
 {
-	if (g_ascii_strcasecmp(option, label) != 0) return FALSE;
-	if (!n) return FALSE;
-
-	if (g_ascii_isdigit(value[0]))
-		{
-		*n = strtoul(value, nullptr, 10);
-		}
-	else
-		{
-		if (g_ascii_strcasecmp(value, "true") == 0)
-			*n = 1;
-		else
-			*n = 0;
-		}
-
-	return TRUE;
+	return read_unsigned_int_option(option, label, value, *n);
 }
 
 gboolean read_uint_option_clamp(const gchar *option, const gchar *label, const gchar *value, guint *n, guint min, guint max)
