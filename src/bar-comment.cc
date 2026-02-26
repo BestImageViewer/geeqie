@@ -358,10 +358,10 @@ void bar_pane_comment_update_from_config(GtkWidget *pane, const gchar **attribut
 		const gchar *value = *attribute_values++;
 
 		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_CHAR_FULL("key", pcd->key)) continue;
-		if (READ_BOOL_FULL("expanded", pcd->pane.expanded)) continue;
-		if (READ_INT_FULL("height", pcd->height)) continue;
-		if (READ_CHAR_FULL("id", pcd->pane.id)) continue;
+		if (READ_CHAR(*pcd, key)) continue;
+		if (READ_BOOL(pcd->pane, expanded)) continue;
+		if (READ_INT(*pcd, height)) continue;
+		if (READ_CHAR(pcd->pane, id)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}

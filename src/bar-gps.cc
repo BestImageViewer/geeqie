@@ -1192,11 +1192,11 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 			continue;
 		if (READ_CHAR_FULL("map-id", pgd->map_source))
 			continue;
-		if (READ_BOOL_FULL("expanded", pgd->pane.expanded))
+		if (READ_BOOL(pgd->pane, expanded))
 			continue;
-		if (READ_INT_FULL("height", pgd->height))
+		if (READ_INT(*pgd, height))
 			continue;
-		if (READ_CHAR_FULL("id", pgd->pane.id))
+		if (READ_CHAR(pgd->pane, id))
 			continue;
 		if (READ_INT_CLAMP_FULL("zoom-level", zoom, 1, 8))
 			{
