@@ -1721,9 +1721,9 @@ void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribu
 		const gchar *value = *attribute_values++;
 
 		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_CHAR_FULL("key", pkd->key)) continue;
-		if (READ_BOOL_FULL("expanded", pkd->pane.expanded)) continue;
-		if (READ_CHAR_FULL("id", pkd->pane.id)) continue;
+		if (READ_CHAR(*pkd, key)) continue;
+		if (READ_BOOL(pkd->pane, expanded)) continue;
+		if (READ_CHAR(pkd->pane, id)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}

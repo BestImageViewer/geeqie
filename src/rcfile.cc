@@ -676,8 +676,8 @@ static void write_osd_profiles(GString *outstr, gint indent)
 		WRITE_NL(); WRITE_STRING("<osd ");
 		indent++;
 		WRITE_NL(); WRITE_CHAR(options->image_overlay_n[i], template_string);
-		WRITE_NL(); WRITE_INT_FULL("x", options->image_overlay_n[i].x);
-		WRITE_NL(); WRITE_INT_FULL("y", options->image_overlay_n[i].y);
+		WRITE_NL(); WRITE_INT(options->image_overlay_n[i], x);
+		WRITE_NL(); WRITE_INT(options->image_overlay_n[i], y);
 		WRITE_NL(); WRITE_INT_FULL("text_red", options->image_overlay_n[i].text_color.red);
 		WRITE_NL(); WRITE_INT_FULL("text_green", options->image_overlay_n[i].text_color.green);
 		WRITE_NL(); WRITE_INT_FULL("text_blue", options->image_overlay_n[i].text_color.blue);
@@ -1254,9 +1254,9 @@ static void options_load_osd_profiles(GQParserData *parser_data, const gchar **a
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
 
-		if (READ_CHAR_FULL("template_string", options->image_overlay_n[i].template_string)) continue;
-		if (READ_INT_FULL("x", options->image_overlay_n[i].x)) continue;
-		if (READ_INT_FULL("y", options->image_overlay_n[i].y)) continue;
+		if (READ_CHAR(options->image_overlay_n[i], template_string)) continue;
+		if (READ_INT(options->image_overlay_n[i], x)) continue;
+		if (READ_INT(options->image_overlay_n[i], y)) continue;
 		if (READ_UCHAR_FULL("text_red", options->image_overlay_n[i].text_color.red)) continue;
 		if (READ_UCHAR_FULL("text_green", options->image_overlay_n[i].text_color.green)) continue;
 		if (READ_UCHAR_FULL("text_blue", options->image_overlay_n[i].text_color.blue)) continue;
@@ -1265,7 +1265,7 @@ static void options_load_osd_profiles(GQParserData *parser_data, const gchar **a
 		if (READ_UCHAR_FULL("background_green", options->image_overlay_n[i].background.green)) continue;
 		if (READ_UCHAR_FULL("background_blue", options->image_overlay_n[i].background.blue)) continue;
 		if (READ_UCHAR_FULL("background_alpha", options->image_overlay_n[i].background.alpha)) continue;
-		if (READ_CHAR_FULL("font", options->image_overlay_n[i].font)) continue;
+		if (READ_CHAR(options->image_overlay_n[i], font)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}

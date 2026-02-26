@@ -678,7 +678,7 @@ void bar_sort_cold_start(LayoutWindow *lw, const gchar **attribute_names, const 
 		if (READ_INT_CLAMP_FULL("action", action, 0, BarSort::ACTION_COUNT - 1)) continue;
 		if (READ_INT_CLAMP_FULL("mode", mode, 0, BarSort::MODE_COUNT - 1)) continue;
 		if (READ_INT_CLAMP_FULL("selection", selection, 0, BarSort::SELECTION_COUNT - 1)) continue;
-		if (READ_CHAR_FULL("filter_key", lw->options.bar_sort.filter_key)) continue;
+		if (READ_CHAR(lw->options.bar_sort, filter_key)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
