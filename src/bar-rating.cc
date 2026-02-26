@@ -84,8 +84,8 @@ static void bar_pane_rating_write_config(GtkWidget *pane, GString *outstr, gint 
 
 	WRITE_NL();
 	WRITE_STRING("<pane_rating ");
-	write_char_option(outstr, "id", prd->pane.id);
-	write_char_option(outstr, "title", gtk_label_get_text(GTK_LABEL(prd->pane.title)));
+	WRITE_CHAR(prd->pane, id);
+	WRITE_CHAR_FULL("title", gtk_label_get_text(GTK_LABEL(prd->pane.title)));
 	WRITE_BOOL(prd->pane, expanded);
 	WRITE_STRING("/>");
 }

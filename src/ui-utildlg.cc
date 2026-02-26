@@ -339,12 +339,12 @@ void generic_dialog_windows_write_config(GString *outstr, gint indent)
 	for (const DialogWindow *dw : dialog_windows)
 		{
 		WRITE_NL(); WRITE_STRING("<window ");
-		write_char_option(outstr, "title", dw->title);
-		write_char_option(outstr, "role", dw->role);
+		WRITE_CHAR(*dw, title);
+		WRITE_CHAR(*dw, role);
 		WRITE_INT(dw->rect, x);
 		WRITE_INT(dw->rect, y);
-		write_int_option(outstr, "w", dw->rect.width);
-		write_int_option(outstr, "h", dw->rect.height);
+		WRITE_INT_FULL("w", dw->rect.width);
+		WRITE_INT_FULL("h", dw->rect.height);
 		WRITE_STRING("/>");
 		}
 
