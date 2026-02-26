@@ -704,8 +704,8 @@ static void write_marks_tooltips(GString *outstr, gint indent)
 	indent++;
 	for (i = 0; i < FILEDATA_MARKS_SIZE; i++)
 		{
-		WRITE_NL();
-		WRITE_CHAR_FULL("<tooltip text", options->marks_tooltips[i]);
+		WRITE_NL(); WRITE_STRING("<tooltip ");
+		WRITE_CHAR_FULL("text", options->marks_tooltips[i]);
 		WRITE_STRING("/>");
 		}
 	indent--;
@@ -749,8 +749,8 @@ static void write_disabled_plugins(GString *outstr, gint indent)
 				{
 				g_autofree gchar *desktop_path = nullptr;
 				gtk_tree_model_get(GTK_TREE_MODEL(desktop_file_list), &iter, DESKTOP_FILE_COLUMN_PATH, &desktop_path, -1);
-				WRITE_NL();
-				WRITE_CHAR_FULL("<plugin path", desktop_path);
+				WRITE_NL(); WRITE_STRING("<plugin ");
+				WRITE_CHAR_FULL("path", desktop_path);
 				WRITE_STRING("/>");
 				}
 			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(desktop_file_list), &iter);
