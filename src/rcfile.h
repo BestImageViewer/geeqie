@@ -53,7 +53,9 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 #define WRITE_CHAR(_source_, _name_) write_char_option(outstr, #_name_, (_source_)._name_)
 #define WRITE_COLOR(_source_, _name_) write_color_option(outstr, #_name_, &(_source_)._name_)
 
+#define WRITE_BOOL_FULL(_name_, _source_) write_bool_option(outstr, _name_, _source_)
 #define WRITE_INT_FULL(_name_, _source_) write_int_option(outstr, _name_, _source_)
+#define WRITE_CHAR_FULL(_name_, _source_) write_char_option(outstr, _name_, _source_)
 
 #define WRITE_NL() write_indent(outstr, indent)
 #define WRITE_SEPARATOR() g_string_append(outstr, "\n")
@@ -65,7 +67,6 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 #define READ_INT_ENUM(_target_, _name_) read_int_option(option, #_name_, value, (gint*)&(_target_)._name_)
 #define READ_UINT(_target_, _name_) read_uint_option(option, #_name_, value, &(_target_)._name_)
 #define READ_UINT_ENUM(_target_, _name_) read_uint_option(option, #_name_, value, (guint*)&(_target_)._name_)
-#define READ_UCHAR_FULL(_name_, _target_) read_uchar_option(option, _name_, value, (_target_))
 #define READ_INT_CLAMP(_target_, _name_, _min_, _max_) read_int_option_clamp(option, #_name_, value, &(_target_)._name_, _min_, _max_)
 #define READ_UINT_CLAMP(_target_, _name_, _min_, _max_) read_uint_option_clamp(option, #_name_, value, &(_target_)._name_, _min_, _max_)
 #define READ_UINT_ENUM_CLAMP(_target_, _name_, _min_, _max_) read_uint_option_clamp(option, #_name_, value, (guint*)&(_target_)._name_, _min_, _max_)
@@ -75,11 +76,9 @@ gboolean read_bool_option(const gchar *option, const gchar *label, const gchar *
 
 #define READ_BOOL_FULL(_name_, _target_) read_bool_option(option, _name_, value, &(_target_))
 #define READ_INT_FULL(_name_, _target_) read_int_option(option, _name_, value, &(_target_))
-#define READ_UINT_FULL(_name_, _target_) read_uint_option(option, _name_, value, &(_target_))
+#define READ_UCHAR_FULL(_name_, _target_) read_uchar_option(option, _name_, value, (_target_))
 #define READ_INT_CLAMP_FULL(_name_, _target_, _min_, _max_) read_int_option_clamp(option, _name_, value, &(_target_), _min_, _max_)
-#define READ_INT_UNIT_FULL(_name_, _target_, _unit_) read_int_unit_option(option, _name_, value, &(_target_), _unit_)
 #define READ_CHAR_FULL(_name_, _target_) read_char_option(option, _name_, value, &(_target_))
-#define READ_COLOR_FULL(_name_, _target_) read_color_option(option, _name_, value, &(_target_))
 
 #define READ_DUMMY(_target_, _name_, _msg_) read_dummy_option(option, #_name_, _msg_)
 

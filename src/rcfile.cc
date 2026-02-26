@@ -656,8 +656,8 @@ static void write_color_profile(GString *outstr, gint indent)
 	for (i = 0; i < COLOR_PROFILE_INPUTS; i++)
 		{
 		WRITE_NL(); WRITE_STRING("<profile ");
-		write_char_option(outstr, "input_file", options->color_profile.input_file[i]);
-		write_char_option(outstr, "input_name", options->color_profile.input_name[i]);
+		WRITE_CHAR_FULL("input_file", options->color_profile.input_file[i]);
+		WRITE_CHAR_FULL("input_name", options->color_profile.input_name[i]);
 		WRITE_STRING("/>");
 		}
 	indent--;
@@ -675,7 +675,7 @@ static void write_osd_profiles(GString *outstr, gint indent)
 		{
 		WRITE_NL(); WRITE_STRING("<osd ");
 		indent++;
-		WRITE_NL(); write_char_option(outstr, "template_string", options->image_overlay_n[i].template_string);
+		WRITE_NL(); WRITE_CHAR(options->image_overlay_n[i], template_string);
 		WRITE_NL(); WRITE_INT_FULL("x", options->image_overlay_n[i].x);
 		WRITE_NL(); WRITE_INT_FULL("y", options->image_overlay_n[i].y);
 		WRITE_NL(); WRITE_INT_FULL("text_red", options->image_overlay_n[i].text_color.red);
@@ -686,7 +686,7 @@ static void write_osd_profiles(GString *outstr, gint indent)
 		WRITE_NL(); WRITE_INT_FULL("background_green", options->image_overlay_n[i].background.green);
 		WRITE_NL(); WRITE_INT_FULL("background_blue", options->image_overlay_n[i].background.blue);
 		WRITE_NL(); WRITE_INT_FULL("background_alpha", options->image_overlay_n[i].background.alpha);
-		WRITE_NL(); write_char_option(outstr, "font", options->image_overlay_n[i].font);
+		WRITE_NL(); WRITE_CHAR(options->image_overlay_n[i], font);
 		indent--;
 		WRITE_NL();
 		WRITE_STRING("/>");
@@ -705,7 +705,7 @@ static void write_marks_tooltips(GString *outstr, gint indent)
 	for (i = 0; i < FILEDATA_MARKS_SIZE; i++)
 		{
 		WRITE_NL();
-		write_char_option(outstr, "<tooltip text", options->marks_tooltips[i]);
+		WRITE_CHAR_FULL("<tooltip text", options->marks_tooltips[i]);
 		WRITE_STRING("/>");
 		}
 	indent--;
@@ -721,8 +721,8 @@ static void write_class_filter(GString *outstr, gint indent)
 	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
 		{
 		WRITE_NL(); WRITE_STRING("<filter_type ");
-		write_char_option(outstr, "filter", format_class_list[i]);
-		write_bool_option(outstr, "enabled", options->class_filter[i]);
+		WRITE_CHAR_FULL("filter", format_class_list[i]);
+		WRITE_BOOL_FULL("enabled", options->class_filter[i]);
 		WRITE_STRING("/>");
 		}
 	indent--;
@@ -750,7 +750,7 @@ static void write_disabled_plugins(GString *outstr, gint indent)
 				g_autofree gchar *desktop_path = nullptr;
 				gtk_tree_model_get(GTK_TREE_MODEL(desktop_file_list), &iter, DESKTOP_FILE_COLUMN_PATH, &desktop_path, -1);
 				WRITE_NL();
-				write_char_option(outstr, "<plugin path", desktop_path);
+				WRITE_CHAR_FULL("<plugin path", desktop_path);
 				WRITE_STRING("/>");
 				}
 			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(desktop_file_list), &iter);
