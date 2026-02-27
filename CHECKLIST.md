@@ -4,6 +4,8 @@
 
 ### Before compiling the sources, carry out the following actions when necessary
 
+* Update `org.geeqie.Geeqie.appdata.xml.in` with the latest released version and date
+
 * Update `org.geeqie.Geeqie.metainfo.xml.in` with the latest released version and date
 
 * Update the desktop template if menus have changed
@@ -53,6 +55,7 @@ options
 
 Carry out the above actions to ensure the master branch is up to date, and then the following actions for new version \<n.m\>.
 
+* Edit `org.geeqie.Geeqie.appdata.xml.in` - Change date and version
 * Edit `org.geeqie.Geeqie.metainfo.xml.in` - Change date and version
 * Edit `NEWS` - The usual information. Ensure the first line is of the form `Geeqie <n.m[.p]>`
 
