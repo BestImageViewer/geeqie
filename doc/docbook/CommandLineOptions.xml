@@ -7,8 +7,8 @@
 <refmeta>
 <refentrytitle>GEEQIE</refentrytitle>
 <manvolnum>1</manvolnum>
-<refmiscinfo class='source'>July 2025</refmiscinfo>
-<refmiscinfo class='manual'>Geeqie 2.6+git20250709-d20f3045 GTK3</refmiscinfo>
+<refmiscinfo class='source'>February 2026</refmiscinfo>
+<refmiscinfo class='manual'>Geeqie 2.7 GTK3</refmiscinfo>
 </refmeta>
 <refnamediv>
 <refname>Geeqie</refname>
@@ -24,11 +24,11 @@ zooming, panning, thumbnails and sorting images into collections.</para>
 
 <refsect2 id='usage'><title>Usage:</title>
 
-<para>geeqie [OPTION?] [path...]</para>
+<para>geeqie [OPTION…] [path...]</para>
 
 <para>Geeqie is an image viewer.</para>
 
-<para>Version: Geeqie 2.6+git20250709-d20f3045</para>
+<para>Version: Geeqie 2.7</para>
 </refsect2>
 
 <refsect2 id='help_options'><title>Help Options:</title>
@@ -132,12 +132,6 @@ zooming, panning, thumbnails and sorting images into collections.</para>
   <term><emphasis role='strong' remap='B'>--config-load=</emphasis>&lt;FILE&gt;</term>
   <listitem>
 <para>load configuration from FILE</para>
-  </listitem>
-  </varlistentry>
-  <varlistentry>
-  <term><emphasis role='strong' remap='B'>--debug</emphasis>=<literal>0</literal>|1|2|3|4</term>
-  <listitem>
-<para>debug output: 0 none, 1 to 4 increasing level of verbosity</para>
   </listitem>
   </varlistentry>
   <varlistentry>
@@ -264,12 +258,6 @@ zooming, panning, thumbnails and sorting images into collections.</para>
   <term><emphasis role='strong' remap='B'>--get-window-list</emphasis></term>
   <listitem>
 <para>get list of windows</para>
-  </listitem>
-  </varlistentry>
-  <varlistentry>
-  <term><emphasis role='strong' remap='B'>-g</emphasis>, <emphasis role='strong' remap='B'>--grep=</emphasis>&lt;regexp&gt;</term>
-  <listitem>
-<para>filter debug output</para>
   </listitem>
   </varlistentry>
   <varlistentry>
@@ -435,7 +423,7 @@ Note that bash command line completion does not work in this mode.</para>
 </refsect1>
 
 <refsect1 id='copyright'><title>COPYRIGHT</title>
-<para>Copyright (C) 1999-2004 by John Ellis. Copyright (C) 2004-2025 by The Geeqie Team. Use this software  at  your
+<para>Copyright (C) 1999-2004 by John Ellis. Copyright (C) 2004-2026 by The Geeqie Team. Use this software  at  your
 own  risk! This  software released under the GNU General Public License. Please read the COPYING file for more
 information.</para>
 </refsect1>
