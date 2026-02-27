@@ -1,3 +1,23 @@
+Geeqie 2.7
+============
+
+- Additional file filter for Rating
+- Progress dialog for file copy/move operations
+- Geeqie is available as a Snap
+- Keyboard shortcuts shown in a window
+- Sort dir preview in ui-file-chooser
+- Include history combo in tabcomp button
+- Include folder preview in Open File action
+- Include preview pane for tabcomp button - ICC preview is included if iccdump is installed
+- Include preview pane in New Folder action
+- Per-image information text in the collection window
+- Revised algorithm for GPS distance
+- Update secure_save code
+- Include getrusage debug command
+- Code improvements
+- Bug fixes
+- More progress in GTK4 migration
+
 Geeqie 2.6
 ============
 
