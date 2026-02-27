@@ -164,7 +164,7 @@ fi
 
 git add NEWS
 git add data/org.geeqie.Geeqie.metainfo.xml.in
-git add geeqie.1
+git add data/man/geeqie.1
 git add doc/docbook/CommandLineOptions.xml
 git commit --message="Preparing for release v$revision"
 
@@ -199,13 +199,13 @@ cd "geeqie-$revision" || exit 1
 git checkout master
 
 git checkout stable/"$version" NEWS
-git checkout stable/"$version" geeqie.1
+git checkout stable/"$version" data/man/geeqie.1
 git checkout stable/"$version" doc/docbook/CommandLineOptions.xml
 git checkout stable/"$version" data/org.geeqie.Geeqie.metainfo.xml.in
 
 git add NEWS
 git add data/org.geeqie.Geeqie.metainfo.xml.in
-git add geeqie.1
+git add data/man/geeqie.1
 git add doc/docbook/CommandLineOptions.xml
 git commit --message="Release v$revision files"
 

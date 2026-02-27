@@ -48,9 +48,9 @@ Copyright (C) 1999-2004 by John Ellis. Copyright (C) 2004-$year by The Geeqie Te
 own  risk! This  software released under the GNU General Public License. Please read the COPYING file for more
 information." > "$options_file"
 
-help2man --no-info --include="$options_file" build/src/geeqie > geeqie.1
+help2man --locale=C.UTF-8 --no-info --include="$options_file" build/src/geeqie > data/man/geeqie.1
 
-doclifter geeqie.1
-mv geeqie.1.xml doc/docbook/CommandLineOptions.xml
+doclifter data/man/geeqie.1
+mv data/man/geeqie.1.xml doc/docbook/CommandLineOptions.xml
 
 rm "$options_file"
