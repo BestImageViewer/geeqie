@@ -52,6 +52,7 @@ const gchar *xdg_data_home_get();
 const gchar *xdg_config_home_get();
 const gchar *xdg_cache_home_get();
 const gchar *homedir();
+const gchar *get_desktop_dir();
 const gchar *get_rc_dir();
 const gchar *get_collections_dir();
 const gchar *get_trash_dir();

@@ -512,7 +512,7 @@ static void bookmark_populate(BookMarkData *bm)
 				history_list_add_to_key(bm->key, buf, 0);
 				}
 
-			g_autofree gchar *path = g_build_filename(homedir(), "Desktop", NULL);
+			const gchar *path = get_desktop_dir();
 			if (isname(path))
 				{
 				g_autofree gchar *buf = bookmark_string(_("Desktop"), path, nullptr);
@@ -827,12 +827,8 @@ void bookmark_setup_default()
 {
 	g_autofree gchar *current_path = get_current_dir();
 	bookmark_add_default(".", current_path);
-
 	bookmark_add_default(_("Home"), homedir());
-
-	g_autofree gchar *desktop_path = g_build_filename(homedir(), "Desktop", NULL);
-	bookmark_add_default(_("Desktop"), desktop_path);
-
+	bookmark_add_default(_("Desktop"), get_desktop_dir());
 	bookmark_add_default(_("Collections"), get_collections_dir());
 }
 
