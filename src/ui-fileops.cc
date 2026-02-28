@@ -182,6 +182,13 @@ const gchar *homedir()
 	return home;
 }
 
+const gchar *get_desktop_dir()
+{
+	static const gchar *desktop_dir = path_to_utf8(g_get_user_special_dir(G_USER_DIRECTORY_DESKTOP));
+
+	return desktop_dir;
+}
+
 const gchar *xdg_data_home_get()
 {
 	static const gchar *xdg_data_home = path_to_utf8(g_get_user_data_dir());
