@@ -816,11 +816,24 @@ void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 /**
  * @brief Allows apps to set up the defaults
  */
-void bookmark_add_default(const gchar *name, const gchar *path)
+static void bookmark_add_default(const gchar *name, const gchar *path)
 {
 	if (!name || !path) return;
 	bookmark_default_list = g_list_append(bookmark_default_list, g_strdup(name));
 	bookmark_default_list = g_list_append(bookmark_default_list, g_strdup(path));
+}
+
+void bookmark_setup_default()
+{
+	g_autofree gchar *current_path = get_current_dir();
+	bookmark_add_default(".", current_path);
+
+	bookmark_add_default(_("Home"), homedir());
+
+	g_autofree gchar *desktop_path = g_build_filename(homedir(), "Desktop", NULL);
+	bookmark_add_default(_("Desktop"), desktop_path);
+
+	bookmark_add_default(_("Collections"), get_collections_dir());
 }
 
 static void bookmark_add_response_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
