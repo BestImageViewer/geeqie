@@ -31,7 +31,6 @@
 #include "pixbuf-renderer.h"
 #include "print.h"
 #include "rcfile.h"
-#include "ui-bookmark.h"
 #include "ui-fileops.h"
 
 namespace
@@ -281,13 +280,6 @@ ConfOptions *init_options(ConfOptions *options)
 void setup_default_options(ConfOptions *options)
 {
 	gint i;
-
-	g_autofree gchar *current_path = get_current_dir();
-	bookmark_add_default(".", current_path);
-	bookmark_add_default(_("Home"), homedir());
-	g_autofree gchar *desktop_path = g_build_filename(homedir(), "Desktop", NULL);
-	bookmark_add_default(_("Desktop"), desktop_path);
-	bookmark_add_default(_("Collections"), get_collections_dir());
 
 	g_free(options->file_ops.safe_delete_path);
 	options->file_ops.safe_delete_path = g_strdup(get_trash_dir());

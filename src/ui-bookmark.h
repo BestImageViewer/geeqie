@@ -37,7 +37,7 @@ void bookmark_list_set_editable(GtkWidget *list, gint editable);
 void bookmark_list_set_only_directories(GtkWidget *list, gint only_directories);
 void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path);
 
-void bookmark_add_default(const gchar *name, const gchar *path);
+void bookmark_setup_default();
 
 void bookmark_add_dialog(const gchar *title, GtkWidget *list);
 

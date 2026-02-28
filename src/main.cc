@@ -80,6 +80,7 @@
 #include "pixbuf-util.h"
 #include "third-party/whereami.h"
 #include "thumb.h"
+#include "ui-bookmark.h"
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
 
@@ -779,6 +780,7 @@ void startup_common(GtkApplication *, gpointer)
 	DEBUG_1("%s main: setting default options before commandline handling", get_exec_time());
 	options = init_options(nullptr);
 	setup_default_options(options);
+	bookmark_setup_default();
 	/* Generate a unique identifier used by the open archive function */
 	instance_identifier = g_strdup_printf("%x", g_random_int());
 
