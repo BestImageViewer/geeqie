@@ -491,6 +491,93 @@ static gboolean bookmark_path_tooltip_cb(GtkWidget *button, gpointer)
 	return FALSE;
 }
 
+static void bookmark_add_button(BookMarkData *bm, const gchar *text)
+{
+	BookButtonData *b = bookmark_from_string(text);
+	if (!b) return;
+
+	if (strcmp(b->name, ".") == 0)
+		{
+		b->path = g_strdup(history_list_find_last_path_by_key("path_list"));
+
+		gchar *buf = bookmark_string(".", b->path, b->icon);
+		history_list_item_change("bookmarks", b->key, buf);
+		b->key = buf;
+		}
+
+	b->button = gtk_button_new();
+	gtk_button_set_relief(GTK_BUTTON(b->button), GTK_RELIEF_NONE);
+	gq_gtk_box_pack_start(GTK_BOX(bm->box), b->button, FALSE, FALSE, 0);
+	gtk_widget_show(b->button);
+
+	g_object_set_data_full(G_OBJECT(b->button), "bookbuttondata",
+	                       b, reinterpret_cast<GDestroyNotify>(bookmark_free));
+
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gq_gtk_container_add(b->button, box);
+	gtk_widget_show(box);
+
+	GtkWidget *image;
+	if (b->icon)
+		{
+		g_autoptr(GdkPixbuf) pixbuf = nullptr;
+
+		if (isfile(b->icon))
+			{
+			g_autofree gchar *iconl = path_from_utf8(b->icon);
+			pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
+			}
+		else
+			{
+			gint w = 16;
+			gint h = 16;
+			gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON, &w, &h);
+
+			pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), b->icon, w, GTK_ICON_LOOKUP_NO_SVG, nullptr);
+			}
+
+		if (pixbuf)
+			{
+			gint w = 16;
+			gint h = 16;
+			gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON, &w, &h);
+
+			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pixbuf, w, h, GDK_INTERP_BILINEAR);
+			image = gtk_image_new_from_pixbuf(scaled);
+			}
+		else
+			{
+			image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
+			}
+		}
+	else
+		{
+		image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
+		}
+	gq_gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 0);
+	gtk_widget_show(image);
+
+	pref_label_new(box, b->name);
+
+	g_signal_connect(G_OBJECT(b->button), "clicked",
+	                 G_CALLBACK(bookmark_select_cb), bm);
+	g_signal_connect(G_OBJECT(b->button), "button_press_event",
+	                 G_CALLBACK(bookmark_press_cb), bm);
+	g_signal_connect(G_OBJECT(b->button), "key_press_event",
+	                 G_CALLBACK(bookmark_keypress_cb), bm);
+
+	gq_gtk_drag_source_set(b->button, GDK_BUTTON1_MASK,
+	                       bookmark_drag_types.data(), bookmark_drag_types.size(),
+	                       static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gq_drag_g_signal_connect(G_OBJECT(b->button), "drag_data_get",
+	                         G_CALLBACK(bookmark_drag_set_data), bm);
+	gq_drag_g_signal_connect(G_OBJECT(b->button), "drag_begin",
+	                         G_CALLBACK(bookmark_drag_begin), bm);
+
+	gtk_widget_set_has_tooltip(b->button, TRUE);
+	g_signal_connect(G_OBJECT(b->button), "query_tooltip", G_CALLBACK(bookmark_path_tooltip_cb), bm);
+}
+
 static void bookmark_populate(BookMarkData *bm)
 {
 	static const auto destroy_widget = [](GtkWidget *widget, gpointer)
@@ -543,104 +630,9 @@ static void bookmark_populate(BookMarkData *bm)
 			}
 		}
 
-	GList *work = history_list_get_by_key(bm->key.c_str());
-	work = g_list_last(work);
-	while (work)
+	for (GList *work = g_list_last(history_list_get_by_key(bm->key.c_str())); work; work = work->prev)
 		{
-		BookButtonData *b;
-
-		b = bookmark_from_string(static_cast<const gchar *>(work->data));
-		if (b)
-			{
-			if (strcmp(b->name, ".") == 0)
-				{
-				gchar *buf;
-
-				b->path = g_strdup(history_list_find_last_path_by_key("path_list"));
-				buf = bookmark_string(".", b->path, b->icon);
-				history_list_item_change("bookmarks", b->key, buf);
-				b->key = buf;
-				}
-			GtkWidget *box;
-
-			b->button = gtk_button_new();
-			gtk_button_set_relief(GTK_BUTTON(b->button), GTK_RELIEF_NONE);
-			gq_gtk_box_pack_start(GTK_BOX(bm->box), b->button, FALSE, FALSE, 0);
-			gtk_widget_show(b->button);
-
-			g_object_set_data_full(G_OBJECT(b->button), "bookbuttondata",
-					       b, reinterpret_cast<GDestroyNotify>(bookmark_free));
-
-			box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-			gq_gtk_container_add(b->button, box);
-			gtk_widget_show(box);
-
-			GtkWidget *image;
-			if (b->icon)
-				{
-				g_autoptr(GdkPixbuf) pixbuf = nullptr;
-
-				if (isfile(b->icon))
-					{
-					g_autofree gchar *iconl = path_from_utf8(b->icon);
-					pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
-					}
-				else
-					{
-					gint w;
-					gint h;
-
-					w = h = 16;
-					gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON, &w, &h);
-
-					pixbuf = gtk_icon_theme_load_icon(gtk_icon_theme_get_default(), b->icon, w, GTK_ICON_LOOKUP_NO_SVG, nullptr);
-					}
-
-				if (pixbuf)
-					{
-					gint w;
-					gint h;
-
-					w = h = 16;
-					gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON, &w, &h);
-
-					g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pixbuf, w, h, GDK_INTERP_BILINEAR);
-					image = gtk_image_new_from_pixbuf(scaled);
-					}
-				else
-					{
-					image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
-					}
-				}
-			else
-				{
-				image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
-				}
-			gq_gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 0);
-			gtk_widget_show(image);
-
-			pref_label_new(box, b->name);
-
-			g_signal_connect(G_OBJECT(b->button), "clicked",
-					 G_CALLBACK(bookmark_select_cb), bm);
-			g_signal_connect(G_OBJECT(b->button), "button_press_event",
-					 G_CALLBACK(bookmark_press_cb), bm);
-			g_signal_connect(G_OBJECT(b->button), "key_press_event",
-					 G_CALLBACK(bookmark_keypress_cb), bm);
-
-			gq_gtk_drag_source_set(b->button, GDK_BUTTON1_MASK,
-			                    bookmark_drag_types.data(), bookmark_drag_types.size(),
-			                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-			gq_drag_g_signal_connect(G_OBJECT(b->button), "drag_data_get",
-					 G_CALLBACK(bookmark_drag_set_data), bm);
-			gq_drag_g_signal_connect(G_OBJECT(b->button), "drag_begin",
-					 G_CALLBACK(bookmark_drag_begin), bm);
-
-			gtk_widget_set_has_tooltip(b->button, TRUE);
-			g_signal_connect(G_OBJECT(b->button), "query_tooltip", G_CALLBACK(bookmark_path_tooltip_cb), bm);
-			}
-
-		work = work->prev;
+		bookmark_add_button(bm, static_cast<gchar *>(work->data));
 		}
 }
 
