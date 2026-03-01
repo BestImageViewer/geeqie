@@ -362,7 +362,7 @@ static void bookmark_menu_remove_cb(GtkWidget *, gpointer data)
 	bookmark_populate_all(bm->key.c_str());
 }
 
-static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button, gint, guint32, gboolean local)
+static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button, bool local)
 {
 	GtkWidget *menu;
 	BookButtonData *b;
@@ -398,7 +398,7 @@ static gboolean bookmark_press_cb(GtkWidget *button, GdkEventButton *event, gpoi
 
 	if (event->button != GDK_BUTTON_SECONDARY) return FALSE;
 
-	bookmark_menu_popup(bm, button, event->button, event->time, FALSE);
+	bookmark_menu_popup(bm, button, false);
 
 	return TRUE;
 }
@@ -413,7 +413,7 @@ static gboolean bookmark_keypress_cb(GtkWidget *button, GdkEventKey *event, gpoi
 			if (!(event->state & GDK_CONTROL_MASK)) return FALSE;
 			/* fall through */
 		case GDK_KEY_Menu:
-			bookmark_menu_popup(bm, button, 0, event->time, TRUE);
+			bookmark_menu_popup(bm, button, true);
 			return TRUE;
 			break;
 		case GDK_KEY_Up:
