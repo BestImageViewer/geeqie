@@ -7,7 +7,7 @@
 ## $1 Root of project sources or NULL for current
 ##
 ## Perform validity checks on project ancillary files:
-## appdata
+## appstream
 ## desktop
 ## scripts
 ## ui
@@ -209,7 +209,7 @@ $(find . -name "*.desktop.in")
 EOF
 fi
 echo "pwd $PWD"
-# Appdata lint
+# AppStream lint
 if [ -z "$(command -v appstreamcli)" ]
 then
 	printf "ERROR: appstreamcli is not installed"

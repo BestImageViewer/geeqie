@@ -49,22 +49,22 @@ done
 # It is not necessary to maintain a messages.pot file
 POT_FILE=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
 
-POT_APPDATA=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
-POT_APPDATA_SORTED=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
+POT_APPSTREAM=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
+POT_APPSTREAM_SORTED=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
 POT_DESKTOPS=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
 POT_DESKTOPS_SORTED=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
 POT_SOURCES=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
 POT_SOURCES_SORTED=$(mktemp "${TMPDIR:-/tmp}/geeqie.XXXXXX")
 
-find ../ -type f -name '*.appdata.xml.in' > "$POT_APPDATA"
+find ../ -type f -name '*.metainfo.xml.in' > "$POT_APPSTREAM"
 find ../ -type f -name '*.desktop.in' > "$POT_DESKTOPS"
 find ../src -type f -name '*.cc' > "$POT_SOURCES"
-sort "$POT_APPDATA" > "$POT_APPDATA_SORTED"
+sort "$POT_APPSTREAM" > "$POT_APPSTREAM_SORTED"
 sort "$POT_DESKTOPS" > "$POT_DESKTOPS_SORTED"
 sort "$POT_SOURCES" > "$POT_SOURCES_SORTED"
 
 xargs itstool  --output="$POT_FILE" \
-           < "$POT_APPDATA_SORTED"
+           < "$POT_APPSTREAM_SORTED"
 
 xargs xgettext --language=Desktop \
          --from-code=UTF-8 \
@@ -84,8 +84,8 @@ xargs xgettext --language=C++ \
 msgmerge --update "$1" "$POT_FILE"
 
 rm "$POT_FILE"
-rm "$POT_APPDATA"
-rm "$POT_APPDATA_SORTED"
+rm "$POT_APPSTREAM"
+rm "$POT_APPSTREAM_SORTED"
 rm "$POT_DESKTOPS"
 rm "$POT_DESKTOPS_SORTED"
 rm "$POT_SOURCES"

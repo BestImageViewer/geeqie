@@ -119,7 +119,7 @@ parts:
       - -Dunit_tests=disabled
       - -Dyelp-build=disabled
     parse-info:
-      - usr/share/metainfo/org.geeqie.Geeqie.appdata.xml
+      - usr/share/metainfo/org.geeqie.Geeqie.metainfo.xml
     build-environment:
       - LDFLAGS: -Wl,--as-needed -lzstd
       - MESON_PACKAGE_CACHE_DIR: $CRAFT_PART_BUILD/meson-packagecache

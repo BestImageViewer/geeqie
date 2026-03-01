@@ -56,19 +56,13 @@ then
 	exit 1
 fi
 
-if [ ! -f ./data/org.geeqie.Geeqie.appdata.xml.in ]
-then
-	printf '%s\n' "File ./data/org.geeqie.Geeqie.appdata.xml.in does not exist"
-	exit 1
-fi
-
 if [ ! -f ./data/org.geeqie.Geeqie.metainfo.xml.in ]
 then
 	printf '%s\n' "File ./data/org.geeqie.Geeqie.metainfo.xml.in does not exist"
 	exit 1
 fi
 
-if ! zenity --title="NEW RELEASE" --question --text "Have the following files been updated?\n\n$orig_dir/NEWS\n$orig_dir/data/org.geeqie.Geeqie.appdata.xml.in\n$orig_dir/data/org.geeqie.Geeqie.metainfo.xml.in\n\nContinue?"
+if ! zenity --title="NEW RELEASE" --question --text "Have the following files been updated?\n\n$orig_dir/NEWS\n$orig_dir/data/org.geeqie.Geeqie.metainfo.xml.in\n\nContinue?"
 then
 	exit 1
 fi

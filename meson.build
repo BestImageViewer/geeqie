@@ -17,7 +17,7 @@
 #               /usr/local/share/applications           org.geeqie.Geeqie.desktop
 # [gq_]appdir   /usr/local/share/geeqie/            *   org,geeqie.template.desktop
 # desktopdir    /usr/local/share/geeqie/applications    plugin desktop files
-# appdatadir    /usr/local/share/metainfo               org.geeqie.Geeqie.appdata.xml
+# appstreamdir  /usr/local/share/metainfo               org.geeqie.Geeqie.metainfo.xml
 # icondir       /usr/local/share/icons/hicolor/scalable/apps  geeqie.svg icon
 # [gq_]helpdir  /usr/local/share/doc/geeqie         *   readme files etc.
 # [gq_]htmldir  /usr/local/share/doc/geeqie/html    *   help files
@@ -110,7 +110,7 @@ datadir = join_paths(prefix, get_option('datadir'))
 
 # Installation paths are absolute
 appdir = join_paths(prefix, gq_appdir)
-appdatadir = join_paths(datadir, 'metainfo')
+appstreamdir = join_paths(datadir, 'metainfo')
 desktopdir = join_paths(datadir, meson.project_name(), 'applications')
 helpdir = join_paths(prefix, gq_helpdir)
 htmldir = join_paths(prefix, gq_htmldir)
@@ -683,7 +683,7 @@ i18n.merge_file(
     type : 'xml',
     po_dir : podir,
     install : true,
-    install_dir : appdatadir)
+    install_dir : appstreamdir)
 
 geeqie_spec_in = join_paths(packagingdir, 'rpm', 'geeqie.spec.in')
 configure_file(input: geeqie_spec_in, output: 'geeqie.spec', configuration: conf_data)

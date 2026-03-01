@@ -138,7 +138,7 @@ See `build-aux/untranslated-text.sh` for more details.
 ### Ancillary files checks
 
 Performs validation of non-source files within the project.  This includes
-linting of `appdata` files, `desktop` files, Markdown files, GTK UI builder
+linting of `appstream` files, `desktop` files, Markdown files, GTK UI builder
 files and shell scripts, all options are in the bash completions file,
 as well as ensuring that all relevant build options
 are covered in the functional test configuration.
