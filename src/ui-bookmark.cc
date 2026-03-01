@@ -21,6 +21,7 @@
 
 #include "ui-bookmark.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <cstring>
@@ -111,7 +112,7 @@ constexpr std::array<GtkTargetEntry, 2> bookmark_drag_types{{
 	{ const_cast<gchar *>("text/plain"),    0, TARGET_TEXT_PLAIN }
 }};
 
-GList *bookmark_widget_list = nullptr;
+std::vector<BookMarkData *> bookmark_widget_list;
 GList *bookmark_default_list = nullptr;
 
 const gchar *bookmark_icon(const gchar *path)
@@ -645,22 +646,13 @@ static void bookmark_populate(BookMarkData *bm)
 
 static void bookmark_populate_all(const gchar *key)
 {
-	GList *work;
-
 	if (!key) return;
 
-	work = bookmark_widget_list;
-	while (work)
+	for (BookMarkData *bm : bookmark_widget_list)
 		{
-		BookMarkData *bm;
+		if (bm->key != key) continue;
 
-		bm = static_cast<BookMarkData *>(work->data);
-		work = work->next;
-
-		if (bm->key == key)
-			{
-			bookmark_populate(bm);
-			}
+		bookmark_populate(bm);
 		}
 }
 
@@ -696,7 +688,11 @@ static void bookmark_data_destroy(gpointer data)
 {
 	auto *bm = static_cast<BookMarkData *>(data);
 
-	bookmark_widget_list = g_list_remove(bookmark_widget_list, bm);
+	if (auto it = std::find(bookmark_widget_list.cbegin(), bookmark_widget_list.cend(), bm);
+	    it != bookmark_widget_list.cend())
+		{
+		bookmark_widget_list.erase(it);
+		}
 
 	delete bm;
 }
@@ -740,7 +736,7 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 	g_signal_connect(G_OBJECT(scrolled), "drag_data_received",
 			 G_CALLBACK(bookmark_dnd_get_data), bm);
 
-	bookmark_widget_list = g_list_append(bookmark_widget_list, bm);
+	bookmark_widget_list.push_back(bm);
 
 	return scrolled;
 }
