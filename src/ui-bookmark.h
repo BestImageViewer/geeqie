@@ -23,6 +23,7 @@
 #define UI_BOOKMARK_H
 
 #include <functional>
+#include <string>
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -44,7 +45,7 @@ void bookmark_add_dialog(const gchar *title, GtkWidget *list);
 /* history combo entry */
 
 GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
-			     const gchar *history_key, gint max_levels);
+                             std::string history_key, gint max_levels);
 void history_combo_append_history(GtkWidget *widget, const gchar *text);
 
 

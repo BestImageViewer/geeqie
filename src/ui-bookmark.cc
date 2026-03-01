@@ -855,38 +855,29 @@ struct HistoryComboData
 {
 	GtkWidget *combo;
 	GtkWidget *entry;
-	gchar *history_key;
+	std::string history_key;
 	gint history_levels;
 };
 
-static void history_combo_destroy(gpointer data)
-{
-	auto hc = static_cast<HistoryComboData *>(data);
-
-	g_free(hc->history_key);
-	g_free(data);
-}
-
 /* if text is NULL, entry is set to the most recent item */
 GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
-			     const gchar *history_key, gint max_levels)
+                             std::string history_key, gint max_levels)
 {
-	HistoryComboData *hc;
 	GList *work;
 	gint n = 0;
 
-	hc = g_new0(HistoryComboData, 1);
-	hc->history_key = g_strdup(history_key);
+	auto *hc = new HistoryComboData();
+	hc->history_key = std::move(history_key);
 	hc->history_levels = max_levels;
 
 	hc->combo = gtk_combo_box_text_new_with_entry();
 
 	hc->entry = gq_gtk_bin_get_child(GTK_WIDGET(hc->combo));
 
-	g_object_set_data_full(G_OBJECT(hc->combo), "history_combo_data", hc, history_combo_destroy);
+	g_object_set_data_full(G_OBJECT(hc->combo), "history_combo_data", hc, delete_cb<HistoryComboData>);
 	g_object_set_data(G_OBJECT(hc->entry), "history_combo_data", hc);
 
-	work = history_list_get_by_key(hc->history_key);
+	work = history_list_get_by_key(hc->history_key.c_str());
 	while (work)
 		{
 		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(hc->combo), static_cast<gchar *>(work->data));
@@ -928,14 +919,14 @@ void history_combo_append_history(GtkWidget *widget, const gchar *text)
 		GtkTreeModel *store;
 		GList *work;
 
-		history_list_add_to_key(hc->history_key, new_text, hc->history_levels);
+		history_list_add_to_key(hc->history_key.c_str(), new_text, hc->history_levels);
 
 		gtk_combo_box_set_active(GTK_COMBO_BOX(hc->combo), -1);
 
 		store = gtk_combo_box_get_model(GTK_COMBO_BOX(hc->combo));
 		gtk_list_store_clear(GTK_LIST_STORE(store));
 
-		work = history_list_get_by_key(hc->history_key);
+		work = history_list_get_by_key(hc->history_key.c_str());
 		while (work)
 			{
 			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(hc->combo), static_cast<gchar *>(work->data));
