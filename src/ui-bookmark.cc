@@ -24,6 +24,7 @@
 #include <array>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -73,7 +74,7 @@ struct BookMarkData
 {
 	GtkWidget *widget;
 	GtkWidget *box;
-	gchar *key;
+	std::string key;
 
 	BookmarkSelectFunc select_func;
 
@@ -259,18 +260,16 @@ static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
 
 /* simply pass NULL for text to turn this into a 'new bookmark' dialog */
 
-static void bookmark_edit(const gchar *key, const gchar *text, GtkWidget *parent)
+static void bookmark_edit(const std::string &key, const gchar *text, GtkWidget *parent)
 {
 	BookPropData *p;
 	GtkWidget *table;
 	const gchar *icon;
 
-	if (!key) key = "bookmarks";
-
 	p = g_new0(BookPropData, 1);
 
 	p->bb = bookmark_from_string(text);
-	p->bb->parent = g_strdup(key);
+	p->bb->parent = g_strdup(key.c_str());
 
 	GenericDialog *gd = generic_dialog_new(_("Edit Bookmark"), "bookmark_edit",
 	                                       parent, TRUE,
@@ -324,10 +323,10 @@ static void bookmark_move(BookMarkData *bm, GtkWidget *button, gint direction)
 	gint p = g_list_index(list, button);
 	if (p < 0 || p + direction < 0) return;
 
-	gchar *key_holder = bm->key;
-	bm->key = const_cast<gchar *>("_TEMPHOLDER");
-	history_list_item_move(key_holder, b->key, -direction);
-	bookmark_populate_all(key_holder);
+	std::string key_holder = bm->key;
+	bm->key = "_TEMPHOLDER";
+	history_list_item_move(key_holder.c_str(), b->key, -direction);
+	bookmark_populate_all(key_holder.c_str());
 	bm->key = key_holder;
 
 	gtk_box_reorder_child(GTK_BOX(bm->box), button, p + direction);
@@ -358,8 +357,8 @@ static void bookmark_menu_remove_cb(GtkWidget *, gpointer data)
 
 	if (!bm->active_button) return;
 
-	history_list_item_remove(bm->key, bm->active_button->key);
-	bookmark_populate_all(bm->key);
+	history_list_item_remove(bm->key.c_str(), bm->active_button->key);
+	bookmark_populate_all(bm->key.c_str());
 }
 
 static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button, gint, guint32, gboolean local)
@@ -499,24 +498,24 @@ static void bookmark_populate(BookMarkData *bm)
 	};
 	gtk_container_foreach(GTK_CONTAINER(bm->box), destroy_widget, nullptr);
 
-	if (!bm->no_defaults && !history_list_get_by_key(bm->key))
+	if (!bm->no_defaults && !history_list_get_by_key(bm->key.c_str()))
 		{
 		if (!bookmark_default_list)
 			{
 			g_autofree gchar *home_buf = bookmark_string(_("Home"), homedir(), nullptr);
-			history_list_add_to_key(bm->key, home_buf, 0);
+			history_list_add_to_key(bm->key.c_str(), home_buf, 0);
 
-			if (g_strcmp0(bm->key, "shortcuts") != 0)
+			if (bm->key != "shortcuts")
 				{
 				g_autofree gchar *buf = bookmark_string(".", history_list_find_last_path_by_key("path_list"), nullptr);
-				history_list_add_to_key(bm->key, buf, 0);
+				history_list_add_to_key(bm->key.c_str(), buf, 0);
 				}
 
 			const gchar *path = get_desktop_dir();
 			if (isname(path))
 				{
 				g_autofree gchar *buf = bookmark_string(_("Desktop"), path, nullptr);
-				history_list_add_to_key(bm->key, buf, 0);
+				history_list_add_to_key(bm->key.c_str(), buf, 0);
 				}
 			}
 
@@ -531,7 +530,7 @@ static void bookmark_populate(BookMarkData *bm)
 			g_autofree gchar *buf = nullptr;
 			if (strcmp(name, ".") == 0)
 				{
-				if (g_strcmp0(bm->key, "shortcuts") == 0) continue;
+				if (bm->key == "shortcuts") continue;
 
 				buf = bookmark_string(name, history_list_find_last_path_by_key("path_list"), nullptr);
 				}
@@ -539,11 +538,11 @@ static void bookmark_populate(BookMarkData *bm)
 				{
 				buf = bookmark_string(name, path, nullptr);
 				}
-			history_list_add_to_key(bm->key, buf, 0);
+			history_list_add_to_key(bm->key.c_str(), buf, 0);
 			}
 		}
 
-	GList *work = history_list_get_by_key(bm->key);
+	GList *work = history_list_get_by_key(bm->key.c_str());
 	work = g_list_last(work);
 	while (work)
 		{
@@ -658,7 +657,7 @@ static void bookmark_populate_all(const gchar *key)
 		bm = static_cast<BookMarkData *>(work->data);
 		work = work->next;
 
-		if (strcmp(bm->key, key) == 0)
+		if (bm->key == key)
 			{
 			bookmark_populate(bm);
 			}
@@ -684,36 +683,29 @@ static void bookmark_dnd_get_data(GtkWidget *, GdkDragContext *,
 		if (bm->only_directories && !isdir(path)) continue;
 
 		g_autofree gchar *buf = bookmark_string(filename_from_path(path), path, bookmark_icon(path));
-		history_list_add_to_key(bm->key, buf, 0);
+		history_list_add_to_key(bm->key.c_str(), buf, 0);
 		}
 
 	g_list_free_full(list, g_free);
 
-	bookmark_populate_all(bm->key);
+	bookmark_populate_all(bm->key.c_str());
 }
 #endif
 
-static void bookmark_list_destroy(gpointer data)
+static void bookmark_data_destroy(gpointer data)
 {
-	auto bm = static_cast<BookMarkData *>(data);
+	auto *bm = static_cast<BookMarkData *>(data);
 
 	bookmark_widget_list = g_list_remove(bookmark_widget_list, bm);
 
-	g_free(bm->key);
-	g_free(bm);
+	delete bm;
 }
 
 GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_func)
 {
-	BookMarkData *bm;
-
-	if (!key) key = "bookmarks";
-
-	bm = g_new0(BookMarkData, 1);
-	bm->key = g_strdup(key);
-
+	auto *bm = new BookMarkData();
+	bm->key = key ? key : "bookmarks";
 	bm->select_func = select_func;
-
 	bm->no_defaults = FALSE;
 	bm->editable = TRUE;
 	bm->only_directories = FALSE;
@@ -737,7 +729,7 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 
 	bookmark_populate(bm);
 
-	g_object_set_data_full(G_OBJECT(bm->box), BOOKMARK_DATA_KEY, bm, bookmark_list_destroy);
+	g_object_set_data_full(G_OBJECT(bm->box), BOOKMARK_DATA_KEY, bm, bookmark_data_destroy);
 	g_object_set_data(G_OBJECT(scrolled), BOOKMARK_DATA_KEY, bm);
 	bm->widget = scrolled;
 
@@ -760,12 +752,9 @@ void bookmark_list_set_key(GtkWidget *list, const gchar *key)
 	if (!list || !key) return;
 
 	bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
-	if (!bm) return;
+	if (!bm || bm->key == key) return;
 
-	if (bm->key && strcmp(bm->key, key) == 0) return;
-
-	g_free(bm->key);
-	bm->key = g_strdup(key);
+	bm->key = key;
 
 	bookmark_populate(bm);
 }
@@ -808,9 +797,9 @@ void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)
 	if (!bm) return;
 
 	g_autofree gchar *buf = bookmark_string(name, path, bookmark_icon(path));
-	history_list_add_to_key(bm->key, buf, 0);
+	history_list_add_to_key(bm->key.c_str(), buf, 0);
 
-	bookmark_populate_all(bm->key);
+	bookmark_populate_all(bm->key.c_str());
 }
 
 /**
