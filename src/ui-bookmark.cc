@@ -131,30 +131,25 @@ static void bookmark_populate_all(const gchar *key);
 
 static BookButtonData *bookmark_from_string(const gchar *text)
 {
-	BookButtonData *b;
-	const gchar *path_ptr;
-	const gchar *icon_ptr;
-
-	b = g_new0(BookButtonData, 1);
-
 	if (!text)
 		{
+		auto *b = g_new0(BookButtonData, 1);
 		b->name = g_strdup(_("New Bookmark"));
 		b->path = g_strdup(homedir());
-		b->key = nullptr;
 		return b;
 		}
 
-	b->key = g_strdup(text);
-
-	path_ptr = strstr(text, MARKER_PATH);
-	icon_ptr = strstr(text, MARKER_ICON);
+	const gchar *path_ptr = strstr(text, MARKER_PATH);
+	const gchar *icon_ptr = strstr(text, MARKER_ICON);
 
 	if (path_ptr && icon_ptr && icon_ptr < path_ptr)
 		{
 		log_printf("warning, bookmark icon must be after path\n");
 		return nullptr;
 		}
+
+	auto *b = g_new0(BookButtonData, 1);
+	b->key = g_strdup(text);
 
 	if (path_ptr)
 		{
