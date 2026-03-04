@@ -90,7 +90,7 @@ struct BookPropData
 	GtkWidget *icon_entry;
 
 	std::string key;
-	BookButtonData *bb;
+	gchar *text;
 };
 
 enum {
@@ -220,7 +220,7 @@ static void bookmark_edit_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto p = static_cast<BookPropData *>(data);
 
-	bookmark_free(p->bb);
+	g_free(p->text);
 	delete p;
 }
 
@@ -236,9 +236,9 @@ static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
 
 	g_autofree gchar *new_string = bookmark_string(name, path, icon);
 
-	if (p->bb->key)
+	if (p->text)
 		{
-		history_list_item_change(p->key.c_str(), p->bb->key, new_string);
+		history_list_item_change(p->key.c_str(), p->text, new_string);
 		}
 	else
 		{
@@ -251,17 +251,13 @@ static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
 	bookmark_populate_all(p->key);
 }
 
-/* simply pass NULL for text to turn this into a 'new bookmark' dialog */
-
-static void bookmark_edit(const std::string &key, const gchar *text, GtkWidget *parent)
+static void bookmark_edit(const std::string &key, const BookButtonData *bb, GtkWidget *parent)
 {
 	GtkWidget *table;
-	const gchar *icon;
 
 	auto *p = new BookPropData();
-
 	p->key = key;
-	p->bb = bookmark_from_string(text);
+	p->text = g_strdup(bb->key);
 
 	GenericDialog *gd = generic_dialog_new(_("Edit Bookmark"), "bookmark_edit",
 	                                       parent, TRUE,
@@ -279,23 +275,21 @@ static void bookmark_edit(const std::string &key, const gchar *text, GtkWidget *
 
 	p->name_entry = gtk_entry_new();
 	gtk_widget_set_size_request(p->name_entry, 300, -1);
-	if (p->bb->name) gq_gtk_entry_set_text(GTK_ENTRY(p->name_entry), p->bb->name);
+	gq_gtk_entry_set_text(GTK_ENTRY(p->name_entry), bb->name);
 	gq_gtk_grid_attach_default(GTK_GRID(table), p->name_entry, 1, 2, 0, 1);
 	generic_dialog_attach_default(gd, p->name_entry);
 	gtk_widget_show(p->name_entry);
 
 	pref_table_label(table, 0, 1, _("Path:"), GTK_ALIGN_END);
 
-	p->path_entry = tab_completion_new_with_history(nullptr, p->bb->path, "bookmark_path", -1);
+	p->path_entry = tab_completion_new_with_history(nullptr, bb->path, "bookmark_path", -1);
 	tab_completion_add_select_button(p->path_entry, nullptr, TRUE, nullptr, nullptr, nullptr);
 	gq_gtk_grid_attach_default(GTK_GRID(table), tab_completion_get_box(p->path_entry), 1, 2, 1, 2);
 	generic_dialog_attach_default(gd, p->path_entry);
 
 	pref_table_label(table, 0, 2, _("Icon:"), GTK_ALIGN_END);
 
-	icon = p->bb->icon;
-	if (!icon) icon = "";
-	p->icon_entry = tab_completion_new_with_history(nullptr, icon, "bookmark_icons", -1);
+	p->icon_entry = tab_completion_new_with_history(nullptr, bb->icon ? bb->icon : "", "bookmark_icons", -1);
 	tab_completion_add_select_button(p->icon_entry, _("Select icon"), FALSE, nullptr, nullptr, nullptr);
 	gq_gtk_grid_attach_default(GTK_GRID(table), tab_completion_get_box(p->icon_entry), 1, 2, 2, 3);
 	generic_dialog_attach_default(gd, p->icon_entry);
@@ -333,7 +327,7 @@ static void bookmark_menu_prop_cb(GtkWidget *widget, gpointer data)
 	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(bm->active_button), "bookbuttondata"));
 	if (!b) return;
 
-	bookmark_edit(bm->key, b->key, widget);
+	bookmark_edit(bm->key, b, widget);
 }
 
 template<gint direction>
