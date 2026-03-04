@@ -34,7 +34,6 @@
 #include "sort-type.h"
 
 enum FileFormatClass : gint;
-enum FileFormatStar : gint;
 
 struct ExifData;
 struct HistMap;

@@ -24,7 +24,6 @@
 #include <string>
 #include <vector>
 
-#include <cairo.h>
 #include <gdk/gdk.h>
 #include <glib.h>
 
