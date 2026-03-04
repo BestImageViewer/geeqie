@@ -62,8 +62,6 @@ namespace
 
 struct BookButtonData
 {
-	GtkWidget *button;
-
 	gchar *key;
 	gchar *name;
 	gchar *path;
@@ -82,7 +80,7 @@ struct BookMarkData
 	gboolean editable;
 	gboolean only_directories;
 
-	BookButtonData *active_button;
+	GtkWidget *active_button;
 };
 
 struct BookPropData
@@ -332,7 +330,10 @@ static void bookmark_menu_prop_cb(GtkWidget *widget, gpointer data)
 
 	if (!bm->active_button) return;
 
-	bookmark_edit(bm->key, bm->active_button->key, widget);
+	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(bm->active_button), "bookbuttondata"));
+	if (!b) return;
+
+	bookmark_edit(bm->key, b->key, widget);
 }
 
 template<gint direction>
@@ -342,7 +343,7 @@ static void bookmark_menu_move_cb(GtkWidget *, gpointer data)
 
 	if (!bm->active_button) return;
 
-	bookmark_move(bm, bm->active_button->button, direction);
+	bookmark_move(bm, bm->active_button, direction);
 }
 
 static void bookmark_menu_remove_cb(GtkWidget *, gpointer data)
@@ -351,19 +352,18 @@ static void bookmark_menu_remove_cb(GtkWidget *, gpointer data)
 
 	if (!bm->active_button) return;
 
-	history_list_item_remove(bm->key.c_str(), bm->active_button->key);
+	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(bm->active_button), "bookbuttondata"));
+	if (!b) return;
+
+	history_list_item_remove(bm->key.c_str(), b->key);
 	bookmark_populate_all(bm->key);
 }
 
 static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button, bool local)
 {
 	GtkWidget *menu;
-	BookButtonData *b;
 
-	b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
-	if (!b) return;
-
-	bm->active_button = b;
+	bm->active_button = button;
 
 	menu = popup_menu_short_lived();
 	menu_item_add_icon_sensitive(menu, _("_Properties..."), PIXBUF_INLINE_ICON_PROPERTIES, bm->editable,
@@ -435,11 +435,12 @@ static void bookmark_drag_set_data(GtkWidget *button,
 				   GdkDragContext *context, GtkSelectionData *selection_data,
 				   guint, guint, gpointer data)
 {
+	return;
+
 	auto bm = static_cast<BookMarkData *>(data);
 	BookButtonData *b;
 	GList *list = nullptr;
 
-	return;
 	if (gdk_drag_context_get_dest_window(context) == gtk_widget_get_window(bm->widget)) return;
 
 	b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
@@ -474,11 +475,10 @@ static void bookmark_drag_begin(GtkWidget *button, GdkDragContext *context, gpoi
 }
 #endif
 
-static gboolean bookmark_path_tooltip_cb(GtkWidget *button, gpointer)
+static gboolean bookmark_path_tooltip_cb(GtkWidget *button, gpointer data)
 {
-	BookButtonData *b;
+	auto *b = static_cast<BookButtonData *>(data);
 
-	b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
 	gtk_widget_set_tooltip_text(button, b->path);
 
 	return FALSE;
@@ -498,16 +498,16 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 		b->key = buf;
 		}
 
-	b->button = gtk_button_new();
-	gtk_button_set_relief(GTK_BUTTON(b->button), GTK_RELIEF_NONE);
-	gq_gtk_box_pack_start(GTK_BOX(bm->box), b->button, FALSE, FALSE, 0);
-	gtk_widget_show(b->button);
+	GtkWidget *button = gtk_button_new();
+	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+	gq_gtk_box_pack_start(GTK_BOX(bm->box), button, FALSE, FALSE, 0);
+	gtk_widget_show(button);
 
-	g_object_set_data_full(G_OBJECT(b->button), "bookbuttondata",
+	g_object_set_data_full(G_OBJECT(button), "bookbuttondata",
 	                       b, reinterpret_cast<GDestroyNotify>(bookmark_free));
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-	gq_gtk_container_add(b->button, box);
+	gq_gtk_container_add(button, box);
 	gtk_widget_show(box);
 
 	GtkWidget *image;
@@ -552,23 +552,23 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 
 	pref_label_new(box, b->name);
 
-	g_signal_connect(G_OBJECT(b->button), "clicked",
+	g_signal_connect(G_OBJECT(button), "clicked",
 	                 G_CALLBACK(bookmark_select_cb), bm);
-	g_signal_connect(G_OBJECT(b->button), "button_press_event",
+	g_signal_connect(G_OBJECT(button), "button_press_event",
 	                 G_CALLBACK(bookmark_press_cb), bm);
-	g_signal_connect(G_OBJECT(b->button), "key_press_event",
+	g_signal_connect(G_OBJECT(button), "key_press_event",
 	                 G_CALLBACK(bookmark_keypress_cb), bm);
 
-	gq_gtk_drag_source_set(b->button, GDK_BUTTON1_MASK,
+	gq_gtk_drag_source_set(button, GDK_BUTTON1_MASK,
 	                       bookmark_drag_types.data(), bookmark_drag_types.size(),
 	                       static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(b->button), "drag_data_get",
+	gq_drag_g_signal_connect(G_OBJECT(button), "drag_data_get",
 	                         G_CALLBACK(bookmark_drag_set_data), bm);
-	gq_drag_g_signal_connect(G_OBJECT(b->button), "drag_begin",
-	                         G_CALLBACK(bookmark_drag_begin), bm);
+	gq_drag_g_signal_connect(G_OBJECT(button), "drag_begin",
+	                         G_CALLBACK(bookmark_drag_begin), nullptr);
 
-	gtk_widget_set_has_tooltip(b->button, TRUE);
-	g_signal_connect(G_OBJECT(b->button), "query_tooltip", G_CALLBACK(bookmark_path_tooltip_cb), bm);
+	gtk_widget_set_has_tooltip(button, TRUE);
+	g_signal_connect(G_OBJECT(button), "query_tooltip", G_CALLBACK(bookmark_path_tooltip_cb), b);
 }
 
 static void bookmark_populate(BookMarkData *bm)
