@@ -475,9 +475,10 @@ static void bookmark_drag_begin(GtkWidget *button, GdkDragContext *context, gpoi
 }
 #endif
 
-static gboolean bookmark_path_tooltip_cb(GtkWidget *button, gpointer data)
+static gboolean bookmark_tooltip_cb(GtkWidget *button, gint, gint, gboolean,
+                                    GtkTooltip *, gpointer user_data)
 {
-	auto *b = static_cast<BookButtonData *>(data);
+	auto *b = static_cast<BookButtonData *>(user_data);
 
 	gtk_widget_set_tooltip_text(button, b->path);
 
@@ -568,7 +569,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 	                         G_CALLBACK(bookmark_drag_begin), nullptr);
 
 	gtk_widget_set_has_tooltip(button, TRUE);
-	g_signal_connect(G_OBJECT(button), "query_tooltip", G_CALLBACK(bookmark_path_tooltip_cb), b);
+	g_signal_connect(G_OBJECT(button), "query-tooltip", G_CALLBACK(bookmark_tooltip_cb), b);
 }
 
 static void bookmark_populate(BookMarkData *bm)
