@@ -28,6 +28,7 @@
 #include <config.h>
 
 #include "cache.h"
+#include "filedata.h"
 #include "intl.h"
 #include "main-defines.h"
 #include "options.h"

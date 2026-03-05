@@ -24,7 +24,7 @@
 
 #include <glib.h>
 
-#include "filedata.h"
+class FileData;
 
 enum FileFormatClass : gint {
 	FORMAT_CLASS_UNKNOWN,
