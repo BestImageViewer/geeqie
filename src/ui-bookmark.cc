@@ -185,7 +185,7 @@ static gchar *bookmark_string(const gchar *name, const gchar *path, const gchar 
 {
 	if (!name) name = _("New Bookmark");
 
-	if (icon)
+	if (icon && icon[0] != '\0')
 		{
 		return g_strdup_printf("%s" MARKER_PATH "%s" MARKER_ICON "%s", name, path, icon);
 		}
@@ -466,9 +466,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 		{
 		b->path = history_list_find_last_path_by_key("path_list");
 
-		const gchar *icon = b->icon.empty() ? nullptr : b->icon.c_str();
-		g_autofree gchar *buf = bookmark_string(".", b->path.c_str(), icon);
-
+		g_autofree gchar *buf = bookmark_string(".", b->path.c_str(), b->icon.c_str());
 		history_list_item_change("bookmarks", b->text.c_str(), buf);
 		b->text = buf;
 		}
