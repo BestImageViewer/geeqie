@@ -243,7 +243,6 @@ static void image_release_cb(PixbufRenderer *, GdkEventButton *event, gpointer d
 static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
-	GdkPixbuf *rect_pixbuf;
 
 	selection_rectangle.set_cursor(event->x, event->y);
 
@@ -284,7 +283,7 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 			selection_rectangle.width = 1;
 
 		// decorative border
-		rect_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, selection_rectangle.width, selection_rectangle.height);
+		g_autoptr(GdkPixbuf) rect_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, selection_rectangle.width, selection_rectangle.height);
 		pixbuf_set_rect_fill(rect_pixbuf, 0, 0, selection_rectangle.width, selection_rectangle.height, 255, 255, 255, 0);
 		pixbuf_set_rect(rect_pixbuf, 1, 1, selection_rectangle.width-2, selection_rectangle.height - 2, 0, 0, 0, 255, 1, 1, 1, 1);
 		pixbuf_set_rect(rect_pixbuf, 0, 0, selection_rectangle.width, selection_rectangle.height, 255, 255, 255, 255, 1, 1, 1, 1);
