@@ -657,7 +657,7 @@ void set_theme_bg_color()
 
 		layout_window_foreach([&theme_color](LayoutWindow *lw)
 		{
-			image_background_set_color(lw->image, &theme_color);
+			image_background_set_color(lw->image, theme_color);
 		});
 		}
 

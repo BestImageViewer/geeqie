@@ -249,7 +249,7 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 		{
 		gint width;
 		gint height;
-		pixbuf_renderer_get_image_size(pr, &width, &height);
+		pixbuf_renderer_get_image_size(pr, width, height);
 
 		GqPoint pixel;
 		pixbuf_renderer_get_mouse_position(pr, pixel);
@@ -1305,7 +1305,7 @@ void image_change_fd(ImageWindow *imd, FileData *fd, gdouble zoom)
 	image_change_real(imd, fd, nullptr, nullptr, zoom);
 }
 
-gboolean image_get_image_size(ImageWindow *imd, gint *width, gint *height)
+gboolean image_get_image_size(ImageWindow *imd, gint &width, gint &height)
 {
 	return pixbuf_renderer_get_image_size(PIXBUF_RENDERER(imd->pr), width, height);
 }
@@ -1591,7 +1591,7 @@ void image_scroll_to_point(ImageWindow *imd, gint x, gint y,
 	pixbuf_renderer_scroll_to_point(PIXBUF_RENDERER(imd->pr), x, y, x_align, y_align);
 }
 
-void image_get_scroll_center(ImageWindow *imd, gdouble *x, gdouble *y)
+void image_get_scroll_center(ImageWindow *imd, gdouble &x, gdouble &y)
 {
 	pixbuf_renderer_get_scroll_center(PIXBUF_RENDERER(imd->pr), x, y);
 }
@@ -1629,7 +1629,7 @@ void image_zoom_set_fill_geometry(ImageWindow *imd, gboolean vertical)
 	gint height;
 
 	if (!pixbuf_renderer_get_pixbuf(pr) ||
-	    !pixbuf_renderer_get_image_size(pr, &width, &height)) return;
+	    !pixbuf_renderer_get_image_size(pr, width, height)) return;
 
 	if (vertical)
 		{
@@ -1801,7 +1801,7 @@ void image_top_window_set_sync(ImageWindow *imd, gboolean allow_sync)
 	g_object_set(imd->pr, "window_fit", allow_sync, NULL);
 }
 
-void image_background_set_color(ImageWindow *imd, GdkRGBA *color)
+void image_background_set_color(ImageWindow *imd, const GdkRGBA &color)
 {
 	pixbuf_renderer_set_color(PIXBUF_RENDERER(imd->pr), color);
 }
@@ -1818,7 +1818,6 @@ void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscre
 		{
 		color = &options->image.border_color;
 		}
-
 	else
 		{
 		LayoutWindow *lw = get_current_layout();
@@ -1834,7 +1833,7 @@ void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscre
 		color = &theme_color;
 		}
 
-	image_background_set_color(imd, color);
+	image_background_set_color(imd, *color);
 }
 
 void image_color_profile_set(ImageWindow *imd, gint input_type, gboolean use_image)

@@ -915,7 +915,7 @@ void layout_status_update_image(LayoutWindow *lw)
 			fd = image_get_fd(lw->image);
 			page_total = fd->page_total;
 			page_num = fd->page_num + 1;
-			image_get_image_size(lw->image, &width, &height);
+			image_get_image_size(lw->image, width, height);
 
 			if (page_total > 1)
 				{

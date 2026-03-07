@@ -183,7 +183,7 @@ CollectionData *image_get_collection(ImageWindow *imd, CollectInfo **info);
 void image_copy_from_image(ImageWindow *imd, ImageWindow *source);
 void image_move_from_image(ImageWindow *imd, ImageWindow *source);
 
-gboolean image_get_image_size(ImageWindow *imd, gint *width, gint *height);
+gboolean image_get_image_size(ImageWindow *imd, gint &width, gint &height);
 GdkPixbuf *image_get_pixbuf(ImageWindow *imd);
 
 /* manipulation */
@@ -193,7 +193,7 @@ void image_mousewheel_scroll(ImageWindow *imd, GdkScrollDirection direction);
 void image_scroll(ImageWindow *imd, gint x, gint y);
 void image_scroll_to_point(ImageWindow *imd, gint x, gint y,
 			   gdouble x_align, gdouble y_align);
-void image_get_scroll_center(ImageWindow *imd, gdouble *x, gdouble *y);
+void image_get_scroll_center(ImageWindow *imd, gdouble &x, gdouble &y);
 void image_set_scroll_center(ImageWindow *imd, gdouble x, gdouble y);
 void image_alter_orientation(ImageWindow *imd, FileData *fd, AlterType type);
 void image_set_desaturate(ImageWindow *imd, gboolean desaturate);
@@ -225,7 +225,7 @@ void image_auto_refresh_enable(ImageWindow *imd, gboolean enable);
 void image_top_window_set_sync(ImageWindow *imd, gboolean allow_sync);
 
 /* background of image */
-void image_background_set_color(ImageWindow *imd, GdkRGBA *color);
+void image_background_set_color(ImageWindow *imd, const GdkRGBA &color);
 void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscreen);
 
 /* color profiles */

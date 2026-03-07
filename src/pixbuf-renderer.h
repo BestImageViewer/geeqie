@@ -323,7 +323,7 @@ void pixbuf_renderer_scroll(PixbufRenderer *pr, gint x, gint y);
 void pixbuf_renderer_scroll_to_point(PixbufRenderer *pr, gint x, gint y,
 				     gdouble x_align, gdouble y_align);
 
-void pixbuf_renderer_get_scroll_center(PixbufRenderer *pr, gdouble *x, gdouble *y);
+void pixbuf_renderer_get_scroll_center(PixbufRenderer *pr, gdouble &x, gdouble &y);
 void pixbuf_renderer_set_scroll_center(PixbufRenderer *pr, gdouble x, gdouble y);
 /* zoom */
 
@@ -338,11 +338,11 @@ void pixbuf_renderer_zoom_set_limits(PixbufRenderer *pr, gdouble min, gdouble ma
 
 /* sizes */
 
-gboolean pixbuf_renderer_get_image_size(PixbufRenderer *pr, gint *width, gint *height);
+gboolean pixbuf_renderer_get_image_size(PixbufRenderer *pr, gint &width, gint &height);
 
-gboolean pixbuf_renderer_get_visible_rect(PixbufRenderer *pr, GdkRectangle *rect);
+gboolean pixbuf_renderer_get_visible_rect(PixbufRenderer *pr, GdkRectangle &rect);
 
-void pixbuf_renderer_set_color(PixbufRenderer *pr, GdkRGBA *color);
+void pixbuf_renderer_set_color(PixbufRenderer *pr, const GdkRGBA &color);
 
 /* overlay */
 
@@ -355,7 +355,7 @@ void pixbuf_renderer_overlay_remove(PixbufRenderer *pr, gint id);
 gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, GqPoint &pixel);
 
 gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel,
-	 				gint *r_mouse, gint *g_mouse, gint *b_mouse, gint *a_mouse);
+                                          gint &r_mouse, gint &g_mouse, gint &b_mouse, gint &a_mouse);
 
 void pixbuf_renderer_set_size_early(PixbufRenderer *pr, gint width, gint height);
 

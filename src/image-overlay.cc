@@ -314,7 +314,7 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 				}
 			else
 				{
-				image_get_image_size(imd, &w, &h);
+				image_get_image_size(imd, w, h);
 				}
 
 

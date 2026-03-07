@@ -1691,8 +1691,8 @@ static void pan_window_image_scroll_notify_cb(PixbufRenderer *pr, gpointer data)
 
 	if (pr->scale == 0.0) return;
 
-	pixbuf_renderer_get_visible_rect(pr, &rect);
-	pixbuf_renderer_get_image_size(pr, &width, &height);
+	pixbuf_renderer_get_visible_rect(pr, rect);
+	pixbuf_renderer_get_image_size(pr, width, height);
 
 	adj = gtk_range_get_adjustment(GTK_RANGE(pw->scrollbar_h));
 	gtk_adjustment_set_page_size(adj, rect.width);

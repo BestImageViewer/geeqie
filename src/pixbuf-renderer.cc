@@ -856,22 +856,11 @@ static void pr_scroller_stop(PixbufRenderer *pr)
 /**
  * @brief Background color
  */
-void pixbuf_renderer_set_color(PixbufRenderer *pr, GdkRGBA *color)
+void pixbuf_renderer_set_color(PixbufRenderer *pr, const GdkRGBA &color)
 {
 	g_return_if_fail(IS_PIXBUF_RENDERER(pr));
 
-	if (color)
-		{
-		pr->color.red = color->red;
-		pr->color.green = color->green;
-		pr->color.blue = color->blue;
-		}
-	else
-		{
-		pr->color.red = 0;
-		pr->color.green = 0;
-		pr->color.blue = 0;
-		}
+	pr->color = color;
 
 	pr->renderer->update_viewport(pr->renderer);
 	if (pr->renderer2) pr->renderer2->update_viewport(pr->renderer2);
@@ -1930,10 +1919,10 @@ void pixbuf_renderer_scroll_to_point(PixbufRenderer *pr, gint x, gint y,
 
 /* get or set coordinates of viewport center in the image, in range 0.0 - 1.0 */
 
-void pixbuf_renderer_get_scroll_center(PixbufRenderer *pr, gdouble *x, gdouble *y)
+void pixbuf_renderer_get_scroll_center(PixbufRenderer *pr, gdouble &x, gdouble &y)
 {
-	*x = pr->norm_center_x;
-	*y = pr->norm_center_y;
+	x = pr->norm_center_x;
+	y = pr->norm_center_y;
 }
 
 void pixbuf_renderer_set_scroll_center(PixbufRenderer *pr, gdouble x, gdouble y)
@@ -2778,7 +2767,7 @@ static void pr_stereo_temp_disable(PixbufRenderer *pr, gboolean disable)
  * @brief pixel are the pixel coordinates see #pixbuf_renderer_get_mouse_position
  */
 gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel,
-                                          gint *r_mouse, gint *g_mouse, gint *b_mouse, gint *a_mouse)
+                                          gint &r_mouse, gint &g_mouse, gint &b_mouse, gint &a_mouse)
 {
 	GdkPixbuf *pb = pr->pixbuf;
 	gint p_alpha;
@@ -2789,18 +2778,15 @@ gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel,
 	size_t yoff;
 
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(r_mouse != nullptr && g_mouse != nullptr && b_mouse != nullptr, FALSE);
 
-	if (!pr->pixbuf && !pr->source_tiles_enabled)
+	if (!pb && !pr->source_tiles_enabled)
 		{
-		*r_mouse = -1;
-		*g_mouse = -1;
-		*b_mouse = -1;
-		*a_mouse = -1;
+		r_mouse = -1;
+		g_mouse = -1;
+		b_mouse = -1;
+		a_mouse = -1;
 		return FALSE;
 		}
-
-	if (!pb) return FALSE;
 
 	GdkRectangle map_rect = pr_tile_region_map_orientation(pr->orientation,
 	                                                       {pixel.x, pixel.y, 1, 1}, /*single pixel */
@@ -2816,16 +2802,13 @@ gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel,
 	xoff = static_cast<size_t>(map_rect.x) * (p_alpha ? 4 : 3);
 	yoff = static_cast<size_t>(map_rect.y) * prs;
 	pp = p_pix + yoff + xoff;
-	*r_mouse = *pp;
-	pp++;
-	*g_mouse = *pp;
-	pp++;
-	*b_mouse = *pp;
+	r_mouse = pp[0];
+	g_mouse = pp[1];
+	b_mouse = pp[2];
 
 	if (p_alpha)
 		{
-		pp++;
-		*a_mouse = *pp;
+		a_mouse = pp[3];
 		}
 
 	return TRUE;
@@ -2858,45 +2841,43 @@ gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, GqPoint &pixel)
 	return TRUE;
 }
 
-gboolean pixbuf_renderer_get_image_size(PixbufRenderer *pr, gint *width, gint *height)
+gboolean pixbuf_renderer_get_image_size(PixbufRenderer *pr, gint &width, gint &height)
 {
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(width != nullptr && height != nullptr, FALSE);
 
 	if (!pr->pixbuf && !pr->source_tiles_enabled && (!pr->image_width || !pr->image_height))
 		{
-		*width = 0;
-		*height = 0;
+		width = 0;
+		height = 0;
 		return FALSE;
 		}
 
-	*width = pr->image_width;
-	*height = pr->image_height;
+	width = pr->image_width;
+	height = pr->image_height;
 	return TRUE;
 }
 
 /**
  * @brief Region of image in pixel coordinates
  */
-gboolean pixbuf_renderer_get_visible_rect(PixbufRenderer *pr, GdkRectangle *rect)
+gboolean pixbuf_renderer_get_visible_rect(PixbufRenderer *pr, GdkRectangle &rect)
 {
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(rect != nullptr, FALSE);
 
 	if ((!pr->pixbuf && !pr->source_tiles_enabled) ||
 	    !pr->scale)
 		{
-		rect->x = 0;
-		rect->y = 0;
-		rect->width = 0;
-		rect->height = 0;
+		rect.x = 0;
+		rect.y = 0;
+		rect.width = 0;
+		rect.height = 0;
 		return FALSE;
 		}
 
-	rect->x = static_cast<gint>(static_cast<gdouble>(pr->x_scroll) / pr->scale);
-	rect->y = static_cast<gint>(static_cast<gdouble>(pr->y_scroll) / pr->scale / pr->aspect_ratio);
-	rect->width = static_cast<gint>(static_cast<gdouble>(pr->vis_width) / pr->scale);
-	rect->height = static_cast<gint>(static_cast<gdouble>(pr->vis_height) / pr->scale / pr->aspect_ratio);
+	rect.x = static_cast<gint>(static_cast<gdouble>(pr->x_scroll) / pr->scale);
+	rect.y = static_cast<gint>(static_cast<gdouble>(pr->y_scroll) / pr->scale / pr->aspect_ratio);
+	rect.width = static_cast<gint>(static_cast<gdouble>(pr->vis_width) / pr->scale);
+	rect.height = static_cast<gint>(static_cast<gdouble>(pr->vis_height) / pr->scale / pr->aspect_ratio);
 	return TRUE;
 }
 

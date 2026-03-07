@@ -923,7 +923,7 @@ void gq_pixel_info(GtkApplication *, GApplicationCommandLine *app_command_line, 
 
 	gint width;
 	gint height;
-	pixbuf_renderer_get_image_size(pr, &width, &height);
+	pixbuf_renderer_get_image_size(pr, width, height);
 	if (width < 1 || height < 1) return;
 
 	GqPoint pixel;
@@ -934,7 +934,7 @@ void gq_pixel_info(GtkApplication *, GApplicationCommandLine *app_command_line, 
 	gint g_mouse;
 	gint b_mouse;
 	gint a_mouse;
-	pixbuf_renderer_get_pixel_colors(pr, pixel, &r_mouse, &g_mouse, &b_mouse, &a_mouse);
+	pixbuf_renderer_get_pixel_colors(pr, pixel, r_mouse, g_mouse, b_mouse, a_mouse);
 
 	g_autofree gchar *pixel_info = nullptr;
 	if (gdk_pixbuf_get_has_alpha(pr->pixbuf))

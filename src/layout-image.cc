@@ -1838,11 +1838,11 @@ static void layout_image_drag_cb(ImageWindow *imd, GdkEventMotion *event, gdoubl
 
 		if (event->state & GDK_CONTROL_MASK)
 			{
-			image_get_scroll_center(imd, &sx, &sy);
+			image_get_scroll_center(imd, sx, sy);
 			}
 		else
 			{
-			image_get_scroll_center(image, &sx, &sy);
+			image_get_scroll_center(image, sx, sy);
 			sx += dx;
 			sy += dy;
 			}
@@ -1943,7 +1943,7 @@ static void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
 	if (!data || !layout_valid(&lw) || !lw->image
 	    || !lw->options.show_info_pixel || lw->image->unknown) return;
 
-	pixbuf_renderer_get_image_size(pr, &width, &height);
+	pixbuf_renderer_get_image_size(pr, width, height);
 	if (width < 1 || height < 1) return;
 
 	GqPoint pixel;
@@ -1956,8 +1956,7 @@ static void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
 		gint g_mouse;
 		gint b_mouse;
 		gint a_mouse;
-
-		pixbuf_renderer_get_pixel_colors(pr, pixel, &r_mouse, &g_mouse, &b_mouse, &a_mouse);
+		pixbuf_renderer_get_pixel_colors(pr, pixel, r_mouse, g_mouse, b_mouse, a_mouse);
 
 		if (gdk_pixbuf_get_has_alpha(pr->pixbuf))
 			{
@@ -2139,7 +2138,7 @@ static void layout_image_setup_split_common(LayoutWindow *lw, gint n)
 				gdouble sx;
 				gdouble sy;
 				image_change_fd(lw->split_images[i], img_fd, zoom);
-				image_get_scroll_center(lw->image, &sx, &sy);
+				image_get_scroll_center(lw->image, sx, sy);
 				image_set_scroll_center(lw->split_images[i], sx, sy);
 				}
 			layout_image_deactivate(lw, i);
