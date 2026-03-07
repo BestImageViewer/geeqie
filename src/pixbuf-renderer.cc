@@ -702,8 +702,7 @@ gboolean pixbuf_renderer_overlay_get(PixbufRenderer *pr, gint id, GdkPixbuf **pi
 
 void pixbuf_renderer_overlay_remove(PixbufRenderer *pr, gint id)
 {
-	pr->renderer->overlay_set(pr->renderer, id, nullptr, 0, 0);
-	if (pr->renderer2) pr->renderer2->overlay_set(pr->renderer2, id, nullptr, 0, 0);
+	pixbuf_renderer_overlay_set(pr, id, nullptr, 0, 0);
 }
 
 /*
