@@ -2876,23 +2876,6 @@ gboolean pixbuf_renderer_get_image_size(PixbufRenderer *pr, gint *width, gint *h
 	return TRUE;
 }
 
-gboolean pixbuf_renderer_get_scaled_size(PixbufRenderer *pr, gint *width, gint *height)
-{
-	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-	g_return_val_if_fail(width != nullptr && height != nullptr, FALSE);
-
-	if (!pr->pixbuf && !pr->source_tiles_enabled && (!pr->image_width || !pr->image_height))
-		{
-		*width = 0;
-		*height = 0;
-		return FALSE;
-		}
-
-	*width = pr->width;
-	*height = pr->height;
-	return TRUE;
-}
-
 /**
  * @brief Region of image in pixel coordinates
  */

@@ -339,7 +339,6 @@ void pixbuf_renderer_zoom_set_limits(PixbufRenderer *pr, gdouble min, gdouble ma
 /* sizes */
 
 gboolean pixbuf_renderer_get_image_size(PixbufRenderer *pr, gint *width, gint *height);
-gboolean pixbuf_renderer_get_scaled_size(PixbufRenderer *pr, gint *width, gint *height);
 
 gboolean pixbuf_renderer_get_visible_rect(PixbufRenderer *pr, GdkRectangle *rect);
 

@@ -243,14 +243,14 @@ static void image_release_cb(PixbufRenderer *, GdkEventButton *event, gpointer d
 static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
-	gint width;
-	gint height;
 	GdkPixbuf *rect_pixbuf;
 
 	selection_rectangle.set_cursor(event->x, event->y);
 
 	if (options->draw_rectangle)
 		{
+		gint width;
+		gint height;
 		pixbuf_renderer_get_image_size(pr, &width, &height);
 
 		GqPoint pixel;
@@ -291,8 +291,6 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 
 		rect_id = pixbuf_renderer_overlay_add(PIXBUF_RENDERER(imd->pr), rect_pixbuf, selection_rectangle.x, selection_rectangle.y, OVL_NORMAL);
 		}
-
-	pixbuf_renderer_get_scaled_size(pr, &width, &height);
 
 	if (imd->func_drag)
 		{
