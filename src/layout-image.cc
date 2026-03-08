@@ -1936,13 +1936,12 @@ static gint num_length(gint num)
 static void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint width;
-	gint height;
-	PangoAttrList *attrs;
 
 	if (!data || !layout_valid(&lw) || !lw->image
 	    || !lw->options.show_info_pixel || lw->image->unknown) return;
 
+	gint width;
+	gint height;
 	pixbuf_renderer_get_image_size(pr, width, height);
 	if (width < 1 || height < 1) return;
 
@@ -1952,25 +1951,29 @@ static void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
 	g_autofree gchar *text = nullptr;
 	if(pixel.x >= 0 && pixel.y >= 0)
 		{
-		gint r_mouse;
-		gint g_mouse;
-		gint b_mouse;
-		gint a_mouse;
-		pixbuf_renderer_get_pixel_colors(pr, pixel, r_mouse, g_mouse, b_mouse, a_mouse);
-
-		if (gdk_pixbuf_get_has_alpha(pr->pixbuf))
+		if (const auto color = pixbuf_renderer_get_pixel_colors(pr, pixel);
+		    color.has_value())
 			{
-			text = g_strdup_printf(_("[%*d,%*d]: RGBA(%3d,%3d,%3d,%3d)"),
-			                       num_length(width - 1), pixel.x,
-			                       num_length(height - 1), pixel.y,
-			                       r_mouse, g_mouse, b_mouse, a_mouse);
+			if (gdk_pixbuf_get_has_alpha(pr->pixbuf))
+				{
+				text = g_strdup_printf(_("[%*d,%*d]: RGBA(%3d,%3d,%3d,%3d)"),
+				                       num_length(width - 1), pixel.x,
+				                       num_length(height - 1), pixel.y,
+				                       color->r, color->g, color->b, color->a);
+				}
+			else
+				{
+				text = g_strdup_printf(_("[%*d,%*d]: RGB(%3d,%3d,%3d)"),
+				                       num_length(width - 1), pixel.x,
+				                       num_length(height - 1), pixel.y,
+				                       color->r, color->g, color->b);
+				}
 			}
 		else
 			{
-			text = g_strdup_printf(_("[%*d,%*d]: RGB(%3d,%3d,%3d)"),
+			text = g_strdup_printf(_("[%*d,%*d]: RGB(---,---,---)"),
 			                       num_length(width - 1), pixel.x,
-			                       num_length(height - 1), pixel.y,
-			                       r_mouse, g_mouse, b_mouse);
+			                       num_length(height - 1), pixel.y);
 			}
 		}
 	else
@@ -1981,10 +1984,9 @@ static void layout_status_update_pixel_cb(PixbufRenderer *pr, gpointer data)
 		}
 	gtk_label_set_text(GTK_LABEL(lw->info_pixel), text);
 
-	attrs = pango_attr_list_new();
+	g_autoptr(PangoAttrList) attrs = pango_attr_list_new();
 	pango_attr_list_insert(attrs, pango_attr_family_new("Monospace"));
 	gtk_label_set_attributes(GTK_LABEL(lw->info_pixel), attrs);
-	pango_attr_list_unref(attrs);
 }
 
 

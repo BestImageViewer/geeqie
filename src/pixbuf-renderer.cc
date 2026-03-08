@@ -2766,52 +2766,38 @@ static void pr_stereo_temp_disable(PixbufRenderer *pr, gboolean disable)
 /**
  * @brief pixel are the pixel coordinates see #pixbuf_renderer_get_mouse_position
  */
-gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel,
-                                          gint &r_mouse, gint &g_mouse, gint &b_mouse, gint &a_mouse)
+std::optional<PixbufColor> pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel)
 {
-	GdkPixbuf *pb = pr->pixbuf;
-	gint p_alpha;
-	gint prs;
-	guchar *p_pix;
-	guchar *pp;
-	size_t xoff;
-	size_t yoff;
+	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), std::nullopt);
 
-	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), FALSE);
-
-	if (!pb && !pr->source_tiles_enabled)
-		{
-		r_mouse = -1;
-		g_mouse = -1;
-		b_mouse = -1;
-		a_mouse = -1;
-		return FALSE;
-		}
+	if (!pr->pixbuf && !pr->source_tiles_enabled) return {};
 
 	GdkRectangle map_rect = pr_tile_region_map_orientation(pr->orientation,
 	                                                       {pixel.x, pixel.y, 1, 1}, /*single pixel */
 	                                                       pr->image_width, pr->image_height);
 
-	if (map_rect.x < 0 || map_rect.x > gdk_pixbuf_get_width(pr->pixbuf) - 1) return FALSE;
-	if (map_rect.y < 0 || map_rect.y > gdk_pixbuf_get_height(pr->pixbuf) - 1) return FALSE;
+	if (map_rect.x < 0 || map_rect.x > gdk_pixbuf_get_width(pr->pixbuf) - 1) return {};
+	if (map_rect.y < 0 || map_rect.y > gdk_pixbuf_get_height(pr->pixbuf) - 1) return {};
 
-	p_alpha = gdk_pixbuf_get_has_alpha(pb);
-	prs = gdk_pixbuf_get_rowstride(pb);
-	p_pix = gdk_pixbuf_get_pixels(pb);
+	const gboolean p_alpha = gdk_pixbuf_get_has_alpha(pr->pixbuf);
+	const gint p_rs = gdk_pixbuf_get_rowstride(pr->pixbuf);
+	const guchar *p_pix = gdk_pixbuf_get_pixels(pr->pixbuf);
 
-	xoff = static_cast<size_t>(map_rect.x) * (p_alpha ? 4 : 3);
-	yoff = static_cast<size_t>(map_rect.y) * prs;
-	pp = p_pix + yoff + xoff;
-	r_mouse = pp[0];
-	g_mouse = pp[1];
-	b_mouse = pp[2];
+	const auto xoff = static_cast<size_t>(map_rect.x) * (p_alpha ? 4 : 3);
+	const auto yoff = static_cast<size_t>(map_rect.y) * p_rs;
+	p_pix += yoff + xoff;
+
+	PixbufColor color;
+	color.r = p_pix[0];
+	color.g = p_pix[1];
+	color.b = p_pix[2];
 
 	if (p_alpha)
 		{
-		a_mouse = pp[3];
+		color.a = p_pix[3];
 		}
 
-	return TRUE;
+	return color;
 }
 
 gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, GqPoint &pixel)

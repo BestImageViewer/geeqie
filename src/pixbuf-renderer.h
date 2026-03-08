@@ -23,6 +23,7 @@
 #define PIXBUF_RENDERER_H
 
 #include <functional>
+#include <optional>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -354,8 +355,14 @@ void pixbuf_renderer_overlay_remove(PixbufRenderer *pr, gint id);
 
 gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, GqPoint &pixel);
 
-gboolean pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel,
-                                          gint &r_mouse, gint &g_mouse, gint &b_mouse, gint &a_mouse);
+struct PixbufColor {
+	guint8 r;
+	guint8 g;
+	guint8 b;
+	guint8 a;
+};
+
+std::optional<PixbufColor> pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel);
 
 void pixbuf_renderer_set_size_early(PixbufRenderer *pr, gint width, gint height);
 

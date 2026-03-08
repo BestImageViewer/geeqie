@@ -930,24 +930,27 @@ void gq_pixel_info(GtkApplication *, GApplicationCommandLine *app_command_line, 
 	pixbuf_renderer_get_mouse_position(pr, pixel);
 	if (pixel.x < 0 || pixel.y < 0) return;
 
-	gint r_mouse;
-	gint g_mouse;
-	gint b_mouse;
-	gint a_mouse;
-	pixbuf_renderer_get_pixel_colors(pr, pixel, r_mouse, g_mouse, b_mouse, a_mouse);
-
 	g_autofree gchar *pixel_info = nullptr;
-	if (gdk_pixbuf_get_has_alpha(pr->pixbuf))
+	if (const auto color = pixbuf_renderer_get_pixel_colors(pr, pixel);
+	    color.has_value())
 		{
-		pixel_info = g_strdup_printf(_("[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"),
-		                             pixel.x, pixel.y,
-		                             r_mouse, g_mouse, b_mouse, a_mouse);
+		if (gdk_pixbuf_get_has_alpha(pr->pixbuf))
+			{
+			pixel_info = g_strdup_printf(_("[%d,%d]: RGBA(%3d,%3d,%3d,%3d)"),
+			                             pixel.x, pixel.y,
+			                             color->r, color->g, color->b, color->a);
+			}
+		else
+			{
+			pixel_info = g_strdup_printf(_("[%d,%d]: RGB(%3d,%3d,%3d)"),
+			                             pixel.x, pixel.y,
+			                             color->r, color->g, color->b);
+			}
 		}
 	else
 		{
-		pixel_info = g_strdup_printf(_("[%d,%d]: RGB(%3d,%3d,%3d)"),
-		                             pixel.x, pixel.y,
-		                             r_mouse, g_mouse, b_mouse);
+		pixel_info = g_strdup_printf(_("[%d,%d]: RGB(---,---,---)"),
+		                             pixel.x, pixel.y);
 		}
 
 	g_application_command_line_print(app_command_line, "%s\n", pixel_info);
