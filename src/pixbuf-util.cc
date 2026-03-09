@@ -114,6 +114,13 @@ gboolean pixbuf_clip_region(const GdkPixbuf *pb, GdkRectangle clip, GdkRectangle
 	return gdk_rectangle_intersect(&pb_rect, &clip, &r);
 }
 
+void pixel_set_color(guchar *pp, GqColor color)
+{
+	pp[0] = (color.r * color.a + pp[0] * (256 - color.a)) >> 8;
+	pp[1] = (color.g * color.a + pp[1] * (256 - color.a)) >> 8;
+	pp[2] = (color.b * color.a + pp[2] * (256 - color.a)) >> 8;
+}
+
 /*
  * Fills rectangular region of pixbuf defined by
  * corners `(x1, y1)` and `(x2, y2)` from `rect`
@@ -1079,9 +1086,7 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
 
 		while (x1 < x2)
 			{
-			pp[0] = (color.r * color.a + pp[0] * (256 - color.a)) >> 8;
-			pp[1] = (color.g * color.a + pp[1] * (256 - color.a)) >> 8;
-			pp[2] = (color.b * color.a + pp[2] * (256 - color.a)) >> 8;
+			pixel_set_color(pp, color);
 			pp += p_step;
 
 			x1++;
@@ -1266,9 +1271,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
 		    y < pb_rect.y || y >= pb_rect.y + pb_rect.height) return;
 
 		guchar *pp = p_pix + (y * prs) + (x * p_step);
-		pp[0] = (color.r * color.a + pp[0] * (256 - color.a)) >> 8;
-		pp[1] = (color.g * color.a + pp[1] * (256 - color.a)) >> 8;
-		pp[2] = (color.b * color.a + pp[2] * (256 - color.a)) >> 8;
+		pixel_set_color(pp, color);
 	};
 
 	// We draw the clipped line segment along the longer axis first, and
