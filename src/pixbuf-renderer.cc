@@ -2766,7 +2766,7 @@ static void pr_stereo_temp_disable(PixbufRenderer *pr, gboolean disable)
 /**
  * @brief pixel are the pixel coordinates see #pixbuf_renderer_get_mouse_position
  */
-std::optional<PixbufColor> pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel)
+std::optional<GqColor> pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel)
 {
 	g_return_val_if_fail(IS_PIXBUF_RENDERER(pr), std::nullopt);
 
@@ -2787,7 +2787,7 @@ std::optional<PixbufColor> pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, 
 	const auto yoff = static_cast<size_t>(map_rect.y) * p_rs;
 	p_pix += yoff + xoff;
 
-	PixbufColor color;
+	GqColor color;
 	color.r = p_pix[0];
 	color.g = p_pix[1];
 	color.b = p_pix[2];

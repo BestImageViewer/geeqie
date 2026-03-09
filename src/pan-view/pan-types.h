@@ -25,6 +25,7 @@
 #include <gtk/gtk.h>
 
 #include "cache-loader.h"
+#include "gq-color.h"
 #include "filedata.h"
 
 struct FullScreenData;
@@ -118,13 +119,6 @@ enum PanBorderType {
 #define PAN_BORDER_LEFT		PAN_BORDER_4
 
 
-struct PanColor {
-	guint8 r;
-	guint8 g;
-	guint8 b;
-	guint8 a;
-};
-
 struct PanItem {
 	PanItemType type;
 	gint x;
@@ -141,9 +135,9 @@ struct PanItem {
 	gchar *text;
 	PanTextAttrType text_attr;
 
-	PanColor color;
+	GqColor color;
 
-	PanColor color2;
+	GqColor color2;
 	gint border;
 
 	gpointer data;

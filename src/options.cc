@@ -54,22 +54,6 @@ void image_overlay_init(ConfOptions::ImageOverlay &image_overlay)
 ConfOptions *options;
 CommandLine *command_line;
 
-void ConfOptions::ImageOverlay::Color::from_gdk_rgba(const GdkRGBA &color)
-{
-	red = color.red * 255;
-	green = color.green * 255;
-	blue = color.blue * 255;
-	alpha = color.alpha * 255;
-}
-
-GdkRGBA ConfOptions::ImageOverlay::Color::to_gdk_rgba() const
-{
-	return { static_cast<double>(red) / 255,
-	         static_cast<double>(green) / 255,
-	         static_cast<double>(blue) / 255,
-	         static_cast<double>(alpha) / 255 };
-}
-
 ConfOptions *init_options(ConfOptions *options)
 {
 	gint i;

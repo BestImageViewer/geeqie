@@ -52,7 +52,7 @@ void histogram_vgrid(const Histogram::Grid &grid, GdkPixbuf *pixbuf, GdkRectangl
 		gint xpos = rect.x + static_cast<int>((i * add) + 0.5);
 
 		pixbuf_draw_line(pixbuf, rect, xpos, rect.y, xpos, rect.y + rect.height,
-		                 grid.color.R, grid.color.G, grid.color.B, grid.color.A);
+		                 grid.color.r, grid.color.g, grid.color.b, grid.color.a);
 		}
 }
 
@@ -67,7 +67,7 @@ void histogram_hgrid(const Histogram::Grid &grid, GdkPixbuf *pixbuf, GdkRectangl
 		gint ypos = rect.y + static_cast<int>((i * add) + 0.5);
 
 		pixbuf_draw_line(pixbuf, rect, rect.x, ypos, rect.x + rect.width, ypos,
-		                 grid.color.R, grid.color.G, grid.color.B, grid.color.A);
+		                 grid.color.r, grid.color.g, grid.color.b, grid.color.a);
 		}
 }
 

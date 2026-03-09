@@ -104,8 +104,8 @@ constexpr gint PAN_GRID_ALPHA = 20;
 /* popup info box */
 constexpr gint PAN_POPUP_BORDER = 1;
 constexpr guint8 PAN_POPUP_ALPHA = 255;
-constexpr PanColor PAN_POPUP_COLOR{255, 255, 225, PAN_POPUP_ALPHA};
-constexpr PanColor PAN_POPUP_BORDER_COLOR{0, 0, 0, PAN_POPUP_ALPHA};
+constexpr GqColor PAN_POPUP_COLOR{255, 255, 225, PAN_POPUP_ALPHA};
+constexpr GqColor PAN_POPUP_BORDER_COLOR{0, 0, 0, PAN_POPUP_ALPHA};
 
 void pan_cache_data_free(PanCacheData *pc)
 {

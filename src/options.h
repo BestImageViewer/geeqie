@@ -28,6 +28,7 @@
 #include <glib.h>
 
 #include "filefilter.h"
+#include "gq-color.h"
 #include "main-defines.h"
 
 enum DupeSelectType : guint;
@@ -294,18 +295,8 @@ struct ConfOptions
 		gchar *template_string;
 		gint x;
 		gint y;
-		struct Color
-		{
-			void from_gdk_rgba(const GdkRGBA &color);
-			GdkRGBA to_gdk_rgba() const;
-
-			guint8 red;
-			guint8 green;
-			guint8 blue;
-			guint8 alpha;
-		};
-		Color text_color;
-		Color background;
+		GqColor text_color;
+		GqColor background;
 		gchar *font;
 	} image_overlay;
 

@@ -95,30 +95,30 @@ const gchar *date_get_abbreviated_day_name(int day)
 
 constexpr gint PAN_CAL_POPUP_BORDER = 1;
 constexpr guint8 PAN_CAL_POPUP_ALPHA = 255;
-constexpr PanColor PAN_CAL_POPUP_COLOR{220, 220, 220, PAN_CAL_POPUP_ALPHA};
-constexpr PanColor PAN_CAL_POPUP_BORDER_COLOR{0, 0, 0, PAN_CAL_POPUP_ALPHA};
-constexpr PanColor PAN_CAL_POPUP_TEXT_COLOR{0, 0, 0, 255};
+constexpr GqColor PAN_CAL_POPUP_COLOR{220, 220, 220, PAN_CAL_POPUP_ALPHA};
+constexpr GqColor PAN_CAL_POPUP_BORDER_COLOR{0, 0, 0, PAN_CAL_POPUP_ALPHA};
+constexpr GqColor PAN_CAL_POPUP_TEXT_COLOR{0, 0, 0, 255};
 
 constexpr gint PAN_CAL_DAY_WIDTH = 100;
 constexpr gint PAN_CAL_DAY_HEIGHT = 80;
 constexpr gint PAN_CAL_DAY_BORDER = 2;
 constexpr guint8 PAN_CAL_DAY_ALPHA = 220;
-constexpr PanColor PAN_CAL_DAY_COLOR{255, 255, 255, PAN_CAL_DAY_ALPHA};
-constexpr PanColor PAN_CAL_DAY_BORDER_COLOR{0, 0, 0, PAN_CAL_DAY_ALPHA};
-constexpr PanColor PAN_CAL_DAY_TEXT_COLOR{0, 0, 0, 255};
+constexpr GqColor PAN_CAL_DAY_COLOR{255, 255, 255, PAN_CAL_DAY_ALPHA};
+constexpr GqColor PAN_CAL_DAY_BORDER_COLOR{0, 0, 0, PAN_CAL_DAY_ALPHA};
+constexpr GqColor PAN_CAL_DAY_TEXT_COLOR{0, 0, 0, 255};
 
 constexpr gint PAN_CAL_MONTH_BORDER = 4;
 constexpr guint8 PAN_CAL_MONTH_ALPHA = 200;
-constexpr PanColor PAN_CAL_MONTH_COLOR{255, 255, 255, PAN_CAL_MONTH_ALPHA};
-constexpr PanColor PAN_CAL_MONTH_BORDER_COLOR{0, 0, 0, PAN_CAL_MONTH_ALPHA};
-constexpr PanColor PAN_CAL_MONTH_TEXT_COLOR{0, 0, 0, 255};
+constexpr GqColor PAN_CAL_MONTH_COLOR{255, 255, 255, PAN_CAL_MONTH_ALPHA};
+constexpr GqColor PAN_CAL_MONTH_BORDER_COLOR{0, 0, 0, PAN_CAL_MONTH_ALPHA};
+constexpr GqColor PAN_CAL_MONTH_TEXT_COLOR{0, 0, 0, 255};
 
 constexpr gint PAN_CAL_DOT_SIZE = 3;
 constexpr gint PAN_CAL_DOT_GAP = 2;
 constexpr guint8 PAN_CAL_DOT_ALPHA = 128;
-constexpr PanColor PAN_CAL_DOT_COLOR{128, 128, 128, PAN_CAL_DOT_ALPHA};
+constexpr GqColor PAN_CAL_DOT_COLOR{128, 128, 128, PAN_CAL_DOT_ALPHA};
 
-constexpr PanColor PAN_CAL_DAY_OF_WEEK_COLOR{128, 128, 128, 255};
+constexpr GqColor PAN_CAL_DAY_OF_WEEK_COLOR{128, 128, 128, 255};
 
 } // namespace
 

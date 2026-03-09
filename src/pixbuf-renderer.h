@@ -33,6 +33,7 @@
 
 #include "geometry.h"
 
+struct GqColor;
 struct PixbufRenderer;
 
 #define TYPE_PIXBUF_RENDERER		(pixbuf_renderer_get_type())
@@ -355,14 +356,7 @@ void pixbuf_renderer_overlay_remove(PixbufRenderer *pr, gint id);
 
 gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, GqPoint &pixel);
 
-struct PixbufColor {
-	guint8 r;
-	guint8 g;
-	guint8 b;
-	guint8 a;
-};
-
-std::optional<PixbufColor> pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel);
+std::optional<GqColor> pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPoint pixel);
 
 void pixbuf_renderer_set_size_early(PixbufRenderer *pr, gint width, gint height);
 

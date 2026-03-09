@@ -24,6 +24,8 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
 
+#include "gq-color.h"
+
 enum NotifyType : gint;
 
 class FileData;
@@ -50,12 +52,7 @@ struct Histogram {
 	struct Grid {
 		guint v; /**< number of vertical divisions, 0 for none */
 		guint h; /**< number of horizontal divisions, 0 for none */
-		struct {
-			guint8 R; /**< red */
-			guint8 G; /**< green */
-			guint8 B; /**< blue */
-			guint8 A; /**< alpha */
-		} color;  /**< grid color */
+		GqColor color;  /**< grid color */
 	};
 
 	void set_channel(gint channel);
