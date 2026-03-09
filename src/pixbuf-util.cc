@@ -129,8 +129,7 @@ void pixel_set_color(guchar *pp, GqColor color)
  */
 void pixbuf_draw_rect_fill(guchar *p_pix, gint prs, gboolean has_alpha,
                            GdkRectangle rect,
-                           guint8 r, guint8 g, guint8 b,
-                           const GetAlpha &get_alpha)
+                           GqColor color, const GetAlpha &get_alpha)
 {
 	const gint x1 = rect.x;
 	const gint y1 = rect.y;
@@ -144,11 +143,9 @@ void pixbuf_draw_rect_fill(guchar *p_pix, gint prs, gboolean has_alpha,
 
 		for (gint x = x1; x < x2; x++)
 			{
-			guint8 a = get_alpha(x, y);
+			color.a = get_alpha(x, y);
 
-			pp[0] = (r * a + pp[0] * (256-a)) >> 8;
-			pp[1] = (g * a + pp[1] * (256-a)) >> 8;
-			pp[2] = (b * a + pp[2] * (256-a)) >> 8;
+			pixel_set_color(pp, color);
 			pp += p_step;
 			}
 		}
@@ -717,7 +714,7 @@ void pixbuf_draw_rect_fill(GdkPixbuf *pb, GdkRectangle rect, GqColor color)
 	// TODO(xsdg): Should we do anything about a potential
 	// existing alpha value here?
 
-	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, rect, color.r, color.g, color.b, get_a);
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, rect, color, get_a);
 }
 
 /**
@@ -1335,24 +1332,23 @@ void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
  *                 horizontally.
  * @param border The maximum extent of the gradient, in pixels.
  * @param fade_rect The region.
- * @param r,g,b Base color of the gradient.
- * @param a The peak alpha value when compositing the gradient.  The alpha varies
- *          from this value down to 0 (fully transparent).  Note that any alpha
- *          value associated with the original pixel is unmodified.
+ * @param color Base color of the gradient.
+ *              color.a is the peak alpha value when compositing the gradient.
+ *              The alpha varies from this value down to 0 (fully transparent).
+ *              Note that any alpha value associated with the original pixel is unmodified.
  */
 static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
                                     gint s, gboolean vertical, gint border,
-                                    GdkRectangle fade_rect,
-                                    guint8 r, guint8 g, guint8 b, guint8 a)
+                                    GdkRectangle fade_rect, GqColor color)
 {
-	const auto get_a = [s, vertical, border, a](gint x, gint y)
+	const auto get_a = [s, vertical, border, a = color.a](gint x, gint y)
 	{
 		gint coord = vertical ? x : y;
 		gint distance = std::min(border, abs(coord - s));
 		return a - (a * distance / border);
 	};
 
-	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, fade_rect, r, g, b, get_a);
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, fade_rect, color, get_a);
 }
 
 /**
@@ -1364,23 +1360,22 @@ static void pixbuf_draw_fade_linear(guchar *p_pix, gint prs, gboolean has_alpha,
  * @param border The max radius, in pixels, of the gradient.  Pixels farther away
  *               from the center than this will be unaffected.
  * @param fade_rect The region.
- * @param r,g,b Base color of the gradient.
- * @param a The peak alpha value when compositing the gradient.  The alpha varies
- *          from this value down to 0 (fully transparent).  Note that any alpha
- *          value associated with the original pixel is unmodified.
+ * @param color Base color of the gradient.
+ *              color.a is the peak alpha value when compositing the gradient.
+ *              The alpha varies from this value down to 0 (fully transparent).
+ *              Note that any alpha value associated with the original pixel is unmodified.
  */
 static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
                                     gint sx, gint sy, gint border,
-                                    GdkRectangle fade_rect,
-                                    guint8 r, guint8 g, guint8 b, guint8 a)
+                                    GdkRectangle fade_rect, GqColor color)
 {
-	const auto get_a = [sx, sy, border, a](gint x, gint y)
+	const auto get_a = [sx, sy, border, a = color.a](gint x, gint y)
 	{
 		gint radius = std::min(border, static_cast<gint>(hypot(x - sx, y - sy)));
 		return a - (a * radius / border);
 	};
 
-	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, fade_rect, r, g, b, get_a);
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, fade_rect, color, get_a);
 }
 
 /**
@@ -1435,7 +1430,7 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
 		                        s, vertical, border,
 		                        fade_rect,
-		                        r, g, b, a);
+		                        {r, g, b, a});
 	};
 
 	draw_fade_linear_if_intersect({x, y + border, border, h - (border * 2)}, x + border, TRUE);
@@ -1452,7 +1447,7 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
 		                        sx, sy, border,
 		                        fade_rect,
-		                        r, g, b, a);
+		                        {r, g, b, a});
 	};
 
 	draw_fade_radius_if_intersect({x, y, border, border}, x + border, y + border);
