@@ -105,7 +105,7 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,
 
 void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
                           GqPoint c1, GqPoint c2, GqPoint c3,
-                          guint8 r, guint8 g, guint8 b, guint8 a);
+                          GqColor color);
 
 void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
                       gint x1, gint y1, gint x2, gint y2,

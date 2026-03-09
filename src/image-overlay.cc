@@ -484,7 +484,7 @@ static GdkPixbuf *image_osd_icon_pixbuf(ImageOSDFlag flag)
 						3, 0, 3, 0);
 				pixbuf_draw_triangle(icon, {14, 3, 6, 12},
 				                     {20, 9}, {14, 15}, {14, 3},
-				                     0, 0, 0, 255);
+				                     {0, 0, 0, 255});
 				break;
 			case IMAGE_OSD_ROTATE_USER:
 				break;
@@ -497,13 +497,13 @@ static GdkPixbuf *image_osd_icon_pixbuf(ImageOSDFlag flag)
 				pixbuf_set_rect(icon, 3, 3, 18, 18, 0, 0, 0, 200, 3, 3, 3, 0);
 				pixbuf_draw_triangle(icon, {6, 5, 12, 6},
 				                     {12, 5}, {18, 11}, {6, 11},
-				                     0, 0, 0, 255);
+				                     {0, 0, 0, 255});
 				break;
 			case IMAGE_OSD_LAST:
 				pixbuf_set_rect(icon, 3, 3, 18, 18, 0, 0, 0, 200, 3, 3, 0, 3);
 				pixbuf_draw_triangle(icon, {6, 12, 12, 6},
 				                     {12, 18}, {6, 12}, {18, 12},
-				                     0, 0, 0, 255);
+				                     {0, 0, 0, 255});
 				break;
 			case IMAGE_OSD_ICON:
 				pixbuf_set_rect_fill(icon, 11, 3, 3, 12, 0, 0, 0, 255);

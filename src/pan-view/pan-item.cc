@@ -287,7 +287,7 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 		                     {coord[0].x - x, coord[0].y - y},
 		                     {coord[1].x - x, coord[1].y - y},
 		                     {coord[2].x - x, coord[2].y - y},
-		                     pi->color.r, pi->color.g, pi->color.b, pi->color.a);
+		                     pi->color);
 
 		const auto draw_line = [pixbuf, &r, x, y, pi](GqPoint start, GqPoint end)
 		{

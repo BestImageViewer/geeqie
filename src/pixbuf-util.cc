@@ -1002,11 +1002,11 @@ GdkRectangle util_triangle_bounding_box(GqPoint c1, GqPoint c2, GqPoint c3)
  * @param c1 Coordinates of the first corner of the triangle.
  * @param c2 Coordinates of the second corner of the triangle.
  * @param c3 Coordinates of the third corner of the triangle.
- * @param r,g,b,a Color and alpha.
+ * @param color Color and alpha.
  */
 void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
                           GqPoint c1, GqPoint c2, GqPoint c3,
-                          guint8 r, guint8 g, guint8 b, guint8 a)
+                          GqColor color)
 {
 	gboolean has_alpha;
 	gint prs;
@@ -1079,9 +1079,9 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
 
 		while (x1 < x2)
 			{
-			pp[0] = (r * a + pp[0] * (256-a)) >> 8;
-			pp[1] = (g * a + pp[1] * (256-a)) >> 8;
-			pp[2] = (b * a + pp[2] * (256-a)) >> 8;
+			pp[0] = (color.r * color.a + pp[0] * (256 - color.a)) >> 8;
+			pp[1] = (color.g * color.a + pp[1] * (256 - color.a)) >> 8;
+			pp[2] = (color.b * color.a + pp[2] * (256 - color.a)) >> 8;
 			pp += p_step;
 
 			x1++;
