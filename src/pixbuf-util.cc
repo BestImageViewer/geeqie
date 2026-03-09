@@ -44,6 +44,7 @@
 #include "filedata.h"
 #include "filefilter.h"
 #include "geometry.h"
+#include "gq-color.h"
 #include "main-defines.h"
 #include "ui-fileops.h"
 
@@ -1231,7 +1232,7 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
  */
 void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
                       gint x1, gint y1, gint x2, gint y2,
-                      guint8 r, guint8 g, guint8 b, guint8 a)
+                      GqColor color)
 {
 	gboolean has_alpha;
 	gint prs;
@@ -1263,15 +1264,15 @@ void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
 
 	p_step = (has_alpha) ? 4 : 3;
 
-	const auto fill_pixel = [pb_rect, p_pix, prs, p_step, r, g, b, a](gint x, gint y)
+	const auto fill_pixel = [pb_rect, p_pix, prs, p_step, &color](gint x, gint y)
 	{
 		if (x < pb_rect.x || x >= pb_rect.x + pb_rect.width ||
 		    y < pb_rect.y || y >= pb_rect.y + pb_rect.height) return;
 
 		guchar *pp = p_pix + (y * prs) + (x * p_step);
-		pp[0] = (r * a + pp[0] * (256-a)) >> 8;
-		pp[1] = (g * a + pp[1] * (256-a)) >> 8;
-		pp[2] = (b * a + pp[2] * (256-a)) >> 8;
+		pp[0] = (color.r * color.a + pp[0] * (256 - color.a)) >> 8;
+		pp[1] = (color.g * color.a + pp[1] * (256 - color.a)) >> 8;
+		pp[2] = (color.b * color.a + pp[2] * (256 - color.a)) >> 8;
 	};
 
 	// We draw the clipped line segment along the longer axis first, and

@@ -289,12 +289,12 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 		                     {coord[2].x - x, coord[2].y - y},
 		                     pi->color.r, pi->color.g, pi->color.b, pi->color.a);
 
-		const auto draw_line = [pixbuf, &r, x, y, &color = pi->color2](GqPoint start, GqPoint end)
+		const auto draw_line = [pixbuf, &r, x, y, pi](GqPoint start, GqPoint end)
 		{
 			pixbuf_draw_line(pixbuf, r,
 			                 start.x - x, start.y - y,
 			                 end.x - x, end.y - y,
-			                 color.r, color.g, color.b, color.a);
+			                 pi->color2);
 		};
 
 		if (pi->border & PAN_BORDER_1) draw_line(coord[0], coord[1]);

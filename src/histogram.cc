@@ -51,8 +51,7 @@ void histogram_vgrid(const Histogram::Grid &grid, GdkPixbuf *pixbuf, GdkRectangl
 		{
 		gint xpos = rect.x + static_cast<int>((i * add) + 0.5);
 
-		pixbuf_draw_line(pixbuf, rect, xpos, rect.y, xpos, rect.y + rect.height,
-		                 grid.color.r, grid.color.g, grid.color.b, grid.color.a);
+		pixbuf_draw_line(pixbuf, rect, xpos, rect.y, xpos, rect.y + rect.height, grid.color);
 		}
 }
 
@@ -66,8 +65,7 @@ void histogram_hgrid(const Histogram::Grid &grid, GdkPixbuf *pixbuf, GdkRectangl
 		{
 		gint ypos = rect.y + static_cast<int>((i * add) + 0.5);
 
-		pixbuf_draw_line(pixbuf, rect, rect.x, ypos, rect.x + rect.width, ypos,
-		                 grid.color.r, grid.color.g, grid.color.b, grid.color.a);
+		pixbuf_draw_line(pixbuf, rect, rect.x, ypos, rect.x + rect.width, ypos, grid.color);
 		}
 }
 
@@ -275,9 +273,7 @@ void Histogram::draw(const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, 
 		{
 		gint j;
 		glong v[4] = {0, 0, 0, 0};
-		gint rplus = 0;
-		gint gplus = 0;
-		gint bplus = 0;
+		GqColor plus{ 0, 0, 0, 255 };
 		gint ii = i * HISTMAP_SIZE / width;
 		gint xpos = x + i;
 		gint num_chan;
@@ -309,48 +305,41 @@ void Histogram::draw(const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, 
 				chanmax = histogram_channel;
 				}
 
-			    	{
-				gulong pt;
-				gint r = rplus;
-				gint g = gplus;
-				gint b = bplus;
-
-				switch (chanmax)
-					{
-					case HCHAN_R: rplus = r = 255; break;
-					case HCHAN_G: gplus = g = 255; break;
-					case HCHAN_B: bplus = b = 255; break;
-					default:
-						break;
-					}
-
-				switch (histogram_channel)
-					{
-					case HCHAN_RGB:
-						if (r == 255 && g == 255 && b == 255)
-							{
-							r = 0; 	b = 0; 	g = 0;
-							}
-						break;
-					case HCHAN_R:	  	b = 0; 	g = 0; 	break;
-					case HCHAN_G:   r = 0; 	b = 0;		break;
-					case HCHAN_B:   r = 0;		g = 0; 	break;
-					case HCHAN_MAX: r = 0; 	b = 0; 	g = 0; 	break;
-					default:
-						break;
-					}
-
-				if (v[chanmax] == 0)
-					pt = 0;
-				else if (histogram_mode == HMODE_LOG)
-					pt = (static_cast<gdouble>(log(v[chanmax]))) / logmax * (height - 1);
-				else
-					pt = (static_cast<gdouble>(v[chanmax])) / max * (height - 1);
-
-				pixbuf_draw_line(pixbuf, rect,
-				                 xpos, ypos, xpos, ypos - pt,
-				                 r, g, b, 255);
+			switch (chanmax)
+				{
+				case HCHAN_R: plus.r = 255; break;
+				case HCHAN_G: plus.g = 255; break;
+				case HCHAN_B: plus.b = 255; break;
+				default: break;
 				}
+
+			GqColor c = plus;
+
+			switch (histogram_channel)
+				{
+				case HCHAN_RGB:
+					if (c.r == 255 && c.g == 255 && c.b == 255)
+						{
+						c = { 0, 0, 0, 255 };
+						}
+					break;
+				case HCHAN_R:   c = { c.r, 0,   0, 255 }; break;
+				case HCHAN_G:   c = { 0,   0, c.g, 255 }; break;
+				case HCHAN_B:   c = { 0, c.b,   0, 255 }; break;
+				case HCHAN_MAX: c = { 0,   0,   0, 255 }; break;
+				default: break;
+				}
+
+			gulong pt;
+
+			if (v[chanmax] == 0)
+				pt = 0;
+			else if (histogram_mode == HMODE_LOG)
+				pt = (static_cast<gdouble>(log(v[chanmax]))) / logmax * (height - 1);
+			else
+				pt = (static_cast<gdouble>(v[chanmax])) / max * (height - 1);
+
+			pixbuf_draw_line(pixbuf, rect, xpos, ypos, xpos, ypos - pt, c);
 
 			v[chanmax] = -1;
 			}
