@@ -86,9 +86,7 @@ GdkPixbuf *pixbuf_copy_rotate_90(GdkPixbuf *src, gboolean counter_clockwise);
 GdkPixbuf *pixbuf_copy_mirror(GdkPixbuf *src, gboolean mirror, gboolean flip);
 GdkPixbuf* pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation);
 
-void pixbuf_draw_rect_fill(GdkPixbuf *pb,
-                           GdkRectangle rect,
-                           gint r, gint g, gint b, gint a);
+void pixbuf_draw_rect_fill(GdkPixbuf *pb, GdkRectangle rect, GqColor color);
 
 void pixbuf_set_rect_fill(GdkPixbuf *pb,
 			  gint x, gint y, gint w, gint h,

@@ -681,13 +681,11 @@ GdkPixbuf *pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation)
  *        parameter.
  * @param pb The `GdkPixbuf` to paint into.
  * @param rect The specified region.
- * @param r,g,b Fill color.
- * @param a The alpha to use for compositing. a=255 is solid (fully the new
- *          color).  a=0 is tranparent (fully the original contents).
+ * @param color Fill color. The color.a is used for compositing.
+ *              a=255 is solid (fully the new color).
+ *              a=0 is tranparent (fully the original contents).
  */
-void pixbuf_draw_rect_fill(GdkPixbuf *pb,
-                           GdkRectangle rect,
-                           gint r, gint g, gint b, gint a)
+void pixbuf_draw_rect_fill(GdkPixbuf *pb, GdkRectangle rect, GqColor color)
 {
 	gboolean has_alpha;
 	gint pw;
@@ -707,12 +705,12 @@ void pixbuf_draw_rect_fill(GdkPixbuf *pb,
 	prs = gdk_pixbuf_get_rowstride(pb);
 	p_pix = gdk_pixbuf_get_pixels(pb);
 
-	const auto get_a = [a](gint, gint){ return a; };
+	const auto get_a = [a = color.a](gint, gint){ return a; };
 
 	// TODO(xsdg): Should we do anything about a potential
 	// existing alpha value here?
 
-	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, rect, r, g, b, get_a);
+	pixbuf_draw_rect_fill(p_pix, prs, has_alpha, rect, color.r, color.g, color.b, get_a);
 }
 
 /**
@@ -1226,7 +1224,7 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
  * @param clip Clipping region.
  * @param x1,y1 Coordinates of the first point of the line segment.
  * @param x2,y2 Coordinates of the second point of the line segment.
- * @param r,g,b,a Color and alpha.
+ * @param color Color and alpha.
  */
 void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
                       gint x1, gint y1, gint x2, gint y2,
@@ -1420,7 +1418,7 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
 	GdkRectangle f;
 	if (gdk_rectangle_intersect(&contracted_rect, &pb_rect, &f))
 		{
-		pixbuf_draw_rect_fill(pb, f, r, g, b, a);
+		pixbuf_draw_rect_fill(pb, f, {r, g, b, a});
 		}
 
 	if (border < 1) return;

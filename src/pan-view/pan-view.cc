@@ -396,7 +396,7 @@ static gboolean pan_window_request_tile_cb(PanWindow *pw, PixbufRenderer *pr,
 
 		r.x -= x;
 		r.y -= y;
-		pixbuf_draw_rect_fill(pixbuf, r, PAN_GRID_COLOR);
+		pixbuf_draw_rect_fill(pixbuf, r, {PAN_GRID_COLOR});
 	};
 
 	pan_grid_rect = request_rect;

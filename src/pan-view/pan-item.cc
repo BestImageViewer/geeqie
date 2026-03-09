@@ -221,7 +221,7 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 
 		r.x -= x;
 		r.y -= y;
-		pixbuf_draw_rect_fill(pixbuf, r, color.r, color.g, color.b, color.a);
+		pixbuf_draw_rect_fill(pixbuf, r, color);
 	};
 
 	draw_rect_if_intersect({pi->x, pi->y, bw, bh}, pi->color);
@@ -496,7 +496,7 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 
 			r.x -= x;
 			r.y -= y;
-			pixbuf_draw_rect_fill(pixbuf, r, color.r, color.g, color.b, color.a);
+			pixbuf_draw_rect_fill(pixbuf, r, color);
 		};
 
 		thumb_rect = {tx, ty, tw, PAN_OUTLINE_THICKNESS};
@@ -525,8 +525,7 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 			r.y -= y;
 			d = (pw->size <= PAN_IMAGE_SIZE_THUMB_NONE) ? 2 : 8;
 			pixbuf_draw_rect_fill(pixbuf, r,
-			                      PAN_SHADOW_COLOR,
-			                      PAN_SHADOW_ALPHA / d);
+			                      { PAN_SHADOW_COLOR, static_cast<guint8>(PAN_SHADOW_ALPHA / d) });
 			}
 		}
 
@@ -588,7 +587,7 @@ gboolean pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, Pixbuf
 			}
 		else
 			{
-			pixbuf_draw_rect_fill(pixbuf, r, pi->color2.r, pi->color2.g, pi->color2.b, pi->color2.a);
+			pixbuf_draw_rect_fill(pixbuf, r, pi->color2);
 			}
 		}
 
