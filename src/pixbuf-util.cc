@@ -904,8 +904,7 @@ static void pixbuf_copy_font(GdkPixbuf *src, gint sx, gint sy,
 }
 
 void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,
-                        gint x, gint y,
-                        guint8 r, guint8 g, guint8 b, guint8 a)
+                        gint x, gint y, GqColor color)
 {
 	GdkPixbuf *buffer;
 	gint w;
@@ -962,9 +961,8 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,
 	if (x + w > dw)	w = dw - x;
 	if (y + h > dh) h = dh - y;
 
-	pixbuf_copy_font(buffer, sx, sy,
-			 pixbuf, x, y, w, h,
-			 r, g, b, a);
+	pixbuf_copy_font(buffer, sx, sy, pixbuf, x, y, w, h,
+	                 color.r, color.g, color.b, color.a);
 
 	g_object_unref(buffer);
 	cairo_surface_destroy(source);

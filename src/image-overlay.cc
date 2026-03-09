@@ -432,9 +432,8 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 			pixbuf_set_rect_fill(pixbuf, x, y, w, HISTOGRAM_HEIGHT, 220, 220, 220, 210);
 			osd->histogram.draw(histmap, pixbuf, x, y, w, HISTOGRAM_HEIGHT);
 			}
-		pixbuf_draw_layout(pixbuf, layout, 5, 5,
-		                   options->image_overlay.text_color.r, options->image_overlay.text_color.g,
-		                   options->image_overlay.text_color.b, options->image_overlay.text_color.a);
+
+		pixbuf_draw_layout(pixbuf, layout, 5, 5, options->image_overlay.text_color);
 	}
 
 	g_object_unref(G_OBJECT(layout));
