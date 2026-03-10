@@ -418,9 +418,8 @@ static void bookmark_drag_set_data(GtkWidget *button,
 	b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
 	if (!b) return;
 
-	GList *list = g_list_append(list, b->path.data());
+	g_autoptr(GList) list = g_list_append(nullptr, b->path.data());
 	uri_selection_data_set_uris_from_pathlist(selection_data, list);
-	g_list_free(list);
 }
 
 static void bookmark_drag_begin(GtkWidget *button, GdkDragContext *context, gpointer)
