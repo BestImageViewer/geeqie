@@ -52,8 +52,9 @@ struct ThumbLoader;
 
 #define PAN_SHADOW_OFFSET 6
 #define PAN_SHADOW_FADE 5
-#define PAN_SHADOW_COLOR 0, 0, 0
-#define PAN_SHADOW_ALPHA 64
+#define PAN_SHADOW_RGB 0, 0, 0
+constexpr guint8 PAN_SHADOW_ALPHA = 64;
+constexpr GqColor PAN_SHADOW_COLOR{ PAN_SHADOW_RGB, PAN_SHADOW_ALPHA };
 
 #define PAN_BOX_COLOR 255, 255, 255
 #define PAN_BOX_ALPHA 100

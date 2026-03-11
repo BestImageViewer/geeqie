@@ -1388,13 +1388,13 @@ static void pixbuf_draw_fade_radius(guchar *p_pix, gint prs, gboolean has_alpha,
  * @param w,h Extent of the shaded region.
  * @param border The thickness, in pixels, of the gradient border around the
  *        fully-shaded region.
- * @param r,g,b Shadow base color.
- * @param a The max shadow composition fraction.  Note that any alpha value of the
- *          original pixel will remain untouched.
+ * @param color Shadow base color.
+ *              color.a The max shadow composition fraction.
+ *              Note that any alpha value of the original pixel will remain untouched.
  */
 void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
-                        gint x, gint y, gint w, gint h, gint border,
-                        guint8 r, guint8 g, guint8 b, guint8 a)
+                        gint x, gint y, gint w, gint h,
+                        gint border, GqColor color)
 {
 	gint has_alpha;
 	gint prs;
@@ -1416,21 +1416,20 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
 	GdkRectangle f;
 	if (gdk_rectangle_intersect(&contracted_rect, &pb_rect, &f))
 		{
-		pixbuf_draw_rect_fill(pb, f, {r, g, b, a});
+		pixbuf_draw_rect_fill(pb, f, color);
 		}
 
 	if (border < 1) return;
 
 	// Draws linear gradients along each of the 4 edges.
-	const auto draw_fade_linear_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, r, g, b, a](GdkRectangle rect, gint s, gboolean vertical)
+	const auto draw_fade_linear_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, color](GdkRectangle rect, gint s, gboolean vertical)
 	{
 		GdkRectangle fade_rect;
 		if (!gdk_rectangle_intersect(&rect, &pb_rect, &fade_rect)) return;
 
 		pixbuf_draw_fade_linear(p_pix, prs, has_alpha,
 		                        s, vertical, border,
-		                        fade_rect,
-		                        {r, g, b, a});
+		                        fade_rect, color);
 	};
 
 	draw_fade_linear_if_intersect({x, y + border, border, h - (border * 2)}, x + border, TRUE);
@@ -1439,15 +1438,14 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
 	draw_fade_linear_if_intersect({x + border, y + h - border, w - (border * 2), border}, y + h - border, FALSE);
 
 	// Draws radial gradients at each of the 4 corners.
-	const auto draw_fade_radius_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, r, g, b, a](GdkRectangle rect, gint sx, gint sy)
+	const auto draw_fade_radius_if_intersect = [&pb_rect, p_pix, prs, has_alpha, border, color](GdkRectangle rect, gint sx, gint sy)
 	{
 		GdkRectangle fade_rect;
 		if (!gdk_rectangle_intersect(&rect, &pb_rect, &fade_rect)) return;
 
 		pixbuf_draw_fade_radius(p_pix, prs, has_alpha,
 		                        sx, sy, border,
-		                        fade_rect,
-		                        {r, g, b, a});
+		                        fade_rect, color);
 	};
 
 	draw_fade_radius_if_intersect({x, y, border, border}, x + border, y + border);

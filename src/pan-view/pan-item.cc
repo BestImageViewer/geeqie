@@ -193,23 +193,19 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			pixbuf_draw_shadow(pixbuf,
 			                   {pi->x - x + bw, pi->y - y + shadow->offset, shadow->offset, bh - shadow->offset},
 			                   pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh,
-			                   shadow->fade,
-			                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+			                   shadow->fade, PAN_SHADOW_COLOR);
 			pixbuf_draw_shadow(pixbuf,
 			                   {pi->x - x + shadow->offset, pi->y - y + bh, bw, shadow->offset},
 			                   pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh,
-			                   shadow->fade,
-			                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+			                   shadow->fade, PAN_SHADOW_COLOR);
 			}
 		else
 			{
-			gint a;
-			a = pi->color.a * PAN_SHADOW_ALPHA >> 8;
+			const guint8 a = pi->color.a * PAN_SHADOW_ALPHA >> 8;
 			pixbuf_draw_shadow(pixbuf,
 			                   {pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh},
 			                   pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh,
-			                   shadow->fade,
-			                   PAN_SHADOW_COLOR, a);
+			                   shadow->fade, {PAN_SHADOW_RGB, a});
 			}
 		}
 
@@ -452,8 +448,7 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 				pixbuf_draw_shadow(pixbuf,
 				                   {r.x - x, r.y - y, r.width, r.height},
 				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
-				                   PAN_SHADOW_FADE,
-				                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+				                   PAN_SHADOW_FADE, PAN_SHADOW_COLOR);
 				}
 			}
 		else
@@ -464,8 +459,7 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 				pixbuf_draw_shadow(pixbuf,
 				                   {r.x - x, r.y - y, r.width, r.height},
 				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
-				                   PAN_SHADOW_FADE,
-				                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+				                   PAN_SHADOW_FADE, PAN_SHADOW_COLOR);
 				}
 
 			thumb_rect = {tx + PAN_SHADOW_OFFSET, ty + th, tw, PAN_SHADOW_OFFSET};
@@ -474,8 +468,7 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 				pixbuf_draw_shadow(pixbuf,
 				                   {r.x - x, r.y - y, r.width, r.height},
 				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
-				                   PAN_SHADOW_FADE,
-				                   PAN_SHADOW_COLOR, PAN_SHADOW_ALPHA);
+				                   PAN_SHADOW_FADE, PAN_SHADOW_COLOR);
 				}
 			}
 
@@ -519,13 +512,11 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 		              pi->width - (PAN_SHADOW_OFFSET * 2), pi->height - (PAN_SHADOW_OFFSET * 2) };
 		if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
-			gint d;
-
 			r.x -= x;
 			r.y -= y;
-			d = (pw->size <= PAN_IMAGE_SIZE_THUMB_NONE) ? 2 : 8;
-			pixbuf_draw_rect_fill(pixbuf, r,
-			                      { PAN_SHADOW_COLOR, static_cast<guint8>(PAN_SHADOW_ALPHA / d) });
+
+			const guint8 a = PAN_SHADOW_ALPHA / ((pw->size <= PAN_IMAGE_SIZE_THUMB_NONE) ? 2 : 8);
+			pixbuf_draw_rect_fill(pixbuf, r, {PAN_SHADOW_RGB, a});
 			}
 		}
 
