@@ -412,12 +412,10 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 	if (width > 0 && height > 0)
 		{
 		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, width, height);
-		pixbuf_set_rect_fill(pixbuf, 3, 3, width-6, height-6,
-		                     options->image_overlay.background.r, options->image_overlay.background.g,
-		                     options->image_overlay.background.b, options->image_overlay.background.a);
-		pixbuf_set_rect(pixbuf, 0, 0, width, height, 240, 240, 240, 80, 1, 1, 1, 1);
-		pixbuf_set_rect(pixbuf, 1, 1, width-2, height-2, 240, 240, 240, 130, 1, 1, 1, 1);
-		pixbuf_set_rect(pixbuf, 2, 2, width-4, height-4, 240, 240, 240, 180, 1, 1, 1, 1);
+		pixbuf_set_rect_fill(pixbuf, 3, 3, width-6, height-6, options->image_overlay.background);
+		pixbuf_set_rect(pixbuf, 0, 0, width, height, {240, 240, 240, 80}, 1, 1, 1, 1);
+		pixbuf_set_rect(pixbuf, 1, 1, width-2, height-2, {240, 240, 240, 130}, 1, 1, 1, 1);
+		pixbuf_set_rect(pixbuf, 2, 2, width-4, height-4, {240, 240, 240, 180}, 1, 1, 1, 1);
 		pixbuf_pixel_set(pixbuf, 0, 0, 0, 0, 0, 0);
 		pixbuf_pixel_set(pixbuf, width - 1, 0, 0, 0, 0, 0);
 		pixbuf_pixel_set(pixbuf, 0, height - 1, 0, 0, 0, 0);
@@ -429,7 +427,7 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 			gint y = height - HISTOGRAM_HEIGHT - 5;
 			gint w = width - 10;
 
-			pixbuf_set_rect_fill(pixbuf, x, y, w, HISTOGRAM_HEIGHT, 220, 220, 220, 210);
+			pixbuf_set_rect_fill(pixbuf, x, y, w, HISTOGRAM_HEIGHT, {220, 220, 220, 210});
 			osd->histogram.draw(histmap, pixbuf, x, y, w, HISTOGRAM_HEIGHT);
 			}
 
@@ -474,14 +472,12 @@ static GdkPixbuf *image_osd_icon_pixbuf(ImageOSDFlag flag)
 	if (!icon)
 		{
 		icon = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 24, 24);
-		pixbuf_set_rect_fill(icon, 1, 1, 22, 22, 255, 255, 255, 200);
-		pixbuf_set_rect(icon, 0, 0, 24, 24, 0, 0, 0, 128, 1, 1, 1, 1);
+		pixbuf_set_rect_fill(icon, 1, 1, 22, 22, {255, 255, 255, 200});
+		pixbuf_set_rect(icon, 0, 0, 24, 24, {0, 0, 0, 128}, 1, 1, 1, 1);
 		switch (flag)
 			{
 			case IMAGE_OSD_ROTATE_AUTO:
-				pixbuf_set_rect(icon, 3, 8, 11, 12,
-						0, 0, 0, 255,
-						3, 0, 3, 0);
+				pixbuf_set_rect(icon, 3, 8, 11, 12, {0, 0, 0, 255}, 3, 0, 3, 0);
 				pixbuf_draw_triangle(icon, {14, 3, 6, 12},
 				                     {20, 9}, {14, 15}, {14, 3},
 				                     {0, 0, 0, 255});
@@ -489,25 +485,25 @@ static GdkPixbuf *image_osd_icon_pixbuf(ImageOSDFlag flag)
 			case IMAGE_OSD_ROTATE_USER:
 				break;
 			case IMAGE_OSD_COLOR:
-				pixbuf_set_rect_fill(icon, 3, 3, 18, 6, 200, 0, 0, 255);
-				pixbuf_set_rect_fill(icon, 3, 9, 18, 6, 0, 200, 0, 255);
-				pixbuf_set_rect_fill(icon, 3, 15, 18, 6, 0, 0, 200, 255);
+				pixbuf_set_rect_fill(icon, 3, 3, 18, 6, {200, 0, 0, 255});
+				pixbuf_set_rect_fill(icon, 3, 9, 18, 6, {0, 200, 0, 255});
+				pixbuf_set_rect_fill(icon, 3, 15, 18, 6, {0, 0, 200, 255});
 				break;
 			case IMAGE_OSD_FIRST:
-				pixbuf_set_rect(icon, 3, 3, 18, 18, 0, 0, 0, 200, 3, 3, 3, 0);
+				pixbuf_set_rect(icon, 3, 3, 18, 18, {0, 0, 0, 200}, 3, 3, 3, 0);
 				pixbuf_draw_triangle(icon, {6, 5, 12, 6},
 				                     {12, 5}, {18, 11}, {6, 11},
 				                     {0, 0, 0, 255});
 				break;
 			case IMAGE_OSD_LAST:
-				pixbuf_set_rect(icon, 3, 3, 18, 18, 0, 0, 0, 200, 3, 3, 0, 3);
+				pixbuf_set_rect(icon, 3, 3, 18, 18, {0, 0, 0, 200}, 3, 3, 0, 3);
 				pixbuf_draw_triangle(icon, {6, 12, 12, 6},
 				                     {12, 18}, {6, 12}, {18, 12},
 				                     {0, 0, 0, 255});
 				break;
 			case IMAGE_OSD_ICON:
-				pixbuf_set_rect_fill(icon, 11, 3, 3, 12, 0, 0, 0, 255);
-				pixbuf_set_rect_fill(icon, 11, 17, 3, 3, 0, 0, 0, 255);
+				pixbuf_set_rect_fill(icon, 11, 3, 3, 12, {0, 0, 0, 255});
+				pixbuf_set_rect_fill(icon, 11, 17, 3, 3, {0, 0, 0, 255});
 				break;
 			default:
 				break;

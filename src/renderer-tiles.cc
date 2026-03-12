@@ -1063,7 +1063,7 @@ gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 
 #if 0
 	// Draws red over draw region, to check for leaks (regions not filled)
-	pixbuf_set_rect_fill(it->pixbuf, x, y, rt->hidpi_scale * w, rt->hidpi_scale * h, 255, 0, 0, 255);
+	pixbuf_set_rect_fill(it->pixbuf, x, y, rt->hidpi_scale * w, rt->hidpi_scale * h, {255, 0, 0, 255});
 #endif
 
 	// Since the RendererTiles ImageTiles and PixbufRenderer SourceTiles are different

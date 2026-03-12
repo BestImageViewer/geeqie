@@ -722,11 +722,11 @@ void pixbuf_draw_rect_fill(GdkPixbuf *pb, GdkRectangle rect, GqColor color)
  * @param pb The `GdkPixbuf` to paint into.
  * @param x,y Coordinates of the top-left corner of the first region.
  * @param w,h Extent of the first region.
- * @param r,g,b,a Fill color and alpha.
+ * @param color Fill color and alpha.
  */
 void pixbuf_set_rect_fill(GdkPixbuf *pb,
-			  gint x, gint y, gint w, gint h,
-			  gint r, gint g, gint b, gint a)
+                          gint x, gint y, gint w, gint h,
+                          GqColor color)
 {
 	gboolean has_alpha;
 	gint pw;
@@ -756,10 +756,10 @@ void pixbuf_set_rect_fill(GdkPixbuf *pb,
 		pp = p_pix + (y + i) * prs + (x * p_step);
 		for (j = 0; j < w; j++)
 			{
-			*pp = r; pp++;
-			*pp = g; pp++;
-			*pp = b; pp++;
-			if (has_alpha) { *pp = a; pp++; }
+			*pp = color.r; pp++;
+			*pp = color.g; pp++;
+			*pp = color.b; pp++;
+			if (has_alpha) { *pp = color.a; pp++; }
 			}
 		}
 }
@@ -770,32 +770,32 @@ void pixbuf_set_rect_fill(GdkPixbuf *pb,
  * @param pb The `GdkPixbuf` to paint into.
  * @param x,y Coordinates of the top-left corner of the region.
  * @param w,h Extent of the region.
- * @param r,g,b,a Line color and alpha.
+ * @param color Line color and alpha.
  * @param left_width Stroke width of the left edge of the rectangle.
  * @param right_width Stroke width of the right edge of the rectangle.
  * @param top_width Stroke width of the top edge of the rectangle.
  * @param bottom_width Stroke width of the bottom edge of the rectangle.
  */
 void pixbuf_set_rect(GdkPixbuf *pb,
-		     gint x, gint y, gint w, gint h,
-		     gint r, gint g, gint b, gint a,
-		     gint left_width, gint right_width, gint top_width, gint bottom_width)
+                     gint x, gint y, gint w, gint h,
+                     GqColor color,
+                     gint left_width, gint right_width, gint top_width, gint bottom_width)
 {
 	// TODO(xsdg): This function has multiple off-by-one errors.  Would be
 	// much easier to read (and implement correctly) with temporaries to
 	// translate from (x, y, w, h) coordinates to (x1, y1, x2, y2).
 	pixbuf_set_rect_fill(pb,
-			     x + left_width, y, w - left_width - right_width, top_width,
-			     r, g, b ,a);
+	                     x + left_width, y, w - left_width - right_width, top_width,
+	                     color);
 	pixbuf_set_rect_fill(pb,
-			     x + w - right_width, y, right_width, h,
-			     r, g, b ,a);
+	                     x + w - right_width, y, right_width, h,
+	                     color);
 	pixbuf_set_rect_fill(pb,
-			     x + left_width, y + h - bottom_width, w - left_width - right_width, bottom_width,
-			     r, g, b ,a);
+	                     x + left_width, y + h - bottom_width, w - left_width - right_width, bottom_width,
+	                     color);
 	pixbuf_set_rect_fill(pb,
-			     x, y, left_width, h,
-			     r, g, b ,a);
+	                     x, y, left_width, h,
+	                     color);
 }
 
 /**

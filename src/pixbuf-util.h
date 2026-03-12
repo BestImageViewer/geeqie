@@ -89,13 +89,13 @@ GdkPixbuf* pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation);
 void pixbuf_draw_rect_fill(GdkPixbuf *pb, GdkRectangle rect, GqColor color);
 
 void pixbuf_set_rect_fill(GdkPixbuf *pb,
-			  gint x, gint y, gint w, gint h,
-			  gint r, gint g, gint b, gint a);
+                          gint x, gint y, gint w, gint h,
+                          GqColor color);
 
 void pixbuf_set_rect(GdkPixbuf *pb,
-		     gint x, gint y, gint w, gint h,
-		     gint r, gint g, gint b, gint a,
-		     gint left_width, gint right_width, gint top_width, gint bottom_width);
+                     gint x, gint y, gint w, gint h,
+                     GqColor color,
+                     gint left_width, gint right_width, gint top_width, gint bottom_width);
 
 void pixbuf_pixel_set(GdkPixbuf *pb, gint x, gint y, gint r, gint g, gint b, gint a);
 

@@ -97,9 +97,9 @@ constexpr gint ZOOM_LABEL_WIDTH = 64;
 
 constexpr gint PAN_GRID_SIZE = 60;
 constexpr gint PAN_GRID_ALPHA = 20;
-#define PAN_GRID_COLOR 0, 0, 0, PAN_GRID_ALPHA
+constexpr GqColor PAN_GRID_COLOR{ 0, 0, 0, PAN_GRID_ALPHA };
 
-#define PAN_BACKGROUND_COLOR 150, 150, 150, 255
+constexpr GqColor PAN_BACKGROUND_COLOR{ 150, 150, 150, 255 };
 
 /* popup info box */
 constexpr gint PAN_POPUP_BORDER = 1;
@@ -385,9 +385,7 @@ static gboolean pan_window_request_tile_cb(PanWindow *pw, PixbufRenderer *pr,
 	const GdkRectangle request_rect{x, y, width, height};
 	GdkRectangle pan_grid_rect;
 
-	pixbuf_set_rect_fill(pixbuf,
-			     0, 0, width, height,
-			     PAN_BACKGROUND_COLOR);
+	pixbuf_set_rect_fill(pixbuf, 0, 0, width, height, PAN_BACKGROUND_COLOR);
 
 	const auto draw_rect_if_intersect = [pixbuf, &request_rect, x, y](GdkRectangle pan_grid_rect)
 	{
@@ -396,7 +394,7 @@ static gboolean pan_window_request_tile_cb(PanWindow *pw, PixbufRenderer *pr,
 
 		r.x -= x;
 		r.y -= y;
-		pixbuf_draw_rect_fill(pixbuf, r, {PAN_GRID_COLOR});
+		pixbuf_draw_rect_fill(pixbuf, r, PAN_GRID_COLOR);
 	};
 
 	pan_grid_rect = request_rect;
