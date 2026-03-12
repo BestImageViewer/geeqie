@@ -833,70 +833,45 @@ void pixbuf_pixel_set(GdkPixbuf *pb, gint x, gint y, gint r, gint g, gint b, gin
  */
 
 static void pixbuf_copy_font(GdkPixbuf *src, gint sx, gint sy,
-			     GdkPixbuf *dest, gint dx, gint dy,
-			     gint w, gint h,
-			     guint8 r, guint8 g, guint8 b, guint8 a)
+                             GdkPixbuf *dest, gint dx, gint dy,
+                             gint w, gint h, GqColor color)
 {
-	gint sw;
-	gint sh;
-	gint srs;
-	gboolean s_alpha;
-	gint s_step;
-	guchar *s_pix;
-	gint dw;
-	gint dh;
-	gint drs;
-	gboolean d_alpha;
-	gint d_step;
-	guchar *d_pix;
+	if (!src || !dest || sx < 0 || sy < 0 || dx < 0 || dy < 0) return;
 
-	guchar *sp;
-	guchar *dp;
-	gint i;
-	gint j;
+	if (sx + w > gdk_pixbuf_get_width(src)) return;
+	if (sy + h > gdk_pixbuf_get_height(src)) return;
 
-	if (!src || !dest) return;
+	if (dx + w > gdk_pixbuf_get_width(dest)) return;
+	if (dy + h > gdk_pixbuf_get_height(dest)) return;
 
-	sw = gdk_pixbuf_get_width(src);
-	sh = gdk_pixbuf_get_height(src);
+	const gboolean s_alpha = gdk_pixbuf_get_has_alpha(src);
+	const gboolean d_alpha = gdk_pixbuf_get_has_alpha(dest);
+	const gint srs = gdk_pixbuf_get_rowstride(src);
+	const gint drs = gdk_pixbuf_get_rowstride(dest);
+	guchar *s_pix = gdk_pixbuf_get_pixels(src);
+	guchar *d_pix = gdk_pixbuf_get_pixels(dest);
 
-	if (sx < 0 || sx + w > sw) return;
-	if (sy < 0 || sy + h > sh) return;
+	const gint s_step = s_alpha ? 4 : 3;
+	const gint d_step = d_alpha ? 4 : 3;
 
-	dw = gdk_pixbuf_get_width(dest);
-	dh = gdk_pixbuf_get_height(dest);
-
-	if (dx < 0 || dx + w > dw) return;
-	if (dy < 0 || dy + h > dh) return;
-
-	s_alpha = gdk_pixbuf_get_has_alpha(src);
-	d_alpha = gdk_pixbuf_get_has_alpha(dest);
-	srs = gdk_pixbuf_get_rowstride(src);
-	drs = gdk_pixbuf_get_rowstride(dest);
-	s_pix = gdk_pixbuf_get_pixels(src);
-	d_pix = gdk_pixbuf_get_pixels(dest);
-
-	s_step = (s_alpha) ? 4 : 3;
-	d_step = (d_alpha) ? 4 : 3;
-
-	for (i = 0; i < h; i++)
+	for (gint i = 0; i < h; i++)
 		{
-		sp = s_pix + (sy + i) * srs + sx * s_step;
-		dp = d_pix + (dy + i) * drs + dx * d_step;
-		for (j = 0; j < w; j++)
+		guchar *sp = s_pix + (sy + i) * srs + sx * s_step;
+		guchar *dp = d_pix + (dy + i) * drs + dx * d_step;
+		for (gint j = 0; j < w; j++)
 			{
 			if (*sp)
 				{
 				guint8 asub;
 
-				asub = a * sp[0] / 255;
-				dp[0] = (r * asub + dp[0] * (256-asub)) >> 8;
-				asub = a * sp[1] / 255;
-				dp[1] = (g * asub + dp[1] * (256-asub)) >> 8;
-				asub = a * sp[2] / 255;
-				dp[2] = (b * asub + dp[2] * (256-asub)) >> 8;
+				asub = color.a * sp[0] / 255;
+				dp[0] = (color.r * asub + dp[0] * (256 - asub)) >> 8;
+				asub = color.a * sp[1] / 255;
+				dp[1] = (color.g * asub + dp[1] * (256 - asub)) >> 8;
+				asub = color.a * sp[2] / 255;
+				dp[2] = (color.b * asub + dp[2] * (256 - asub)) >> 8;
 
-				if (d_alpha) dp[3] = std::max<guchar>(dp[3], a * ((sp[0] + sp[1] + sp[2]) / 3) / 255);
+				if (d_alpha) dp[3] = std::max<guchar>(dp[3], color.a * ((sp[0] + sp[1] + sp[2]) / 3) / 255);
 				}
 
 			sp += s_step;
@@ -963,8 +938,7 @@ void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,
 	if (x + w > dw)	w = dw - x;
 	if (y + h > dh) h = dh - y;
 
-	pixbuf_copy_font(buffer, sx, sy, pixbuf, x, y, w, h,
-	                 color.r, color.g, color.b, color.a);
+	pixbuf_copy_font(buffer, sx, sy, pixbuf, x, y, w, h, color);
 
 	g_object_unref(buffer);
 	cairo_surface_destroy(source);
