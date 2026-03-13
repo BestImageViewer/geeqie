@@ -97,7 +97,7 @@ void pixbuf_set_rect(GdkPixbuf *pb,
                      GqColor color,
                      gint left_width, gint right_width, gint top_width, gint bottom_width);
 
-void pixbuf_pixel_set(GdkPixbuf *pb, gint x, gint y, gint r, gint g, gint b, gint a);
+void pixbuf_pixel_set(GdkPixbuf *pb, gint x, gint y, GqColor color);
 
 
 void pixbuf_draw_layout(GdkPixbuf *pixbuf, PangoLayout *layout,

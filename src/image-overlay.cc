@@ -416,10 +416,10 @@ static GdkPixbuf *image_osd_info_render(OverlayStateData *osd)
 		pixbuf_set_rect(pixbuf, 0, 0, width, height, {240, 240, 240, 80}, 1, 1, 1, 1);
 		pixbuf_set_rect(pixbuf, 1, 1, width-2, height-2, {240, 240, 240, 130}, 1, 1, 1, 1);
 		pixbuf_set_rect(pixbuf, 2, 2, width-4, height-4, {240, 240, 240, 180}, 1, 1, 1, 1);
-		pixbuf_pixel_set(pixbuf, 0, 0, 0, 0, 0, 0);
-		pixbuf_pixel_set(pixbuf, width - 1, 0, 0, 0, 0, 0);
-		pixbuf_pixel_set(pixbuf, 0, height - 1, 0, 0, 0, 0);
-		pixbuf_pixel_set(pixbuf, width - 1, height - 1, 0, 0, 0, 0);
+		pixbuf_pixel_set(pixbuf, 0, 0, {});
+		pixbuf_pixel_set(pixbuf, width - 1, 0, {});
+		pixbuf_pixel_set(pixbuf, 0, height - 1, {});
+		pixbuf_pixel_set(pixbuf, width - 1, height - 1, {});
 
 		if (with_hist)
 			{

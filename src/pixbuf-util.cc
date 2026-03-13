@@ -802,27 +802,22 @@ void pixbuf_set_rect(GdkPixbuf *pb,
  * @brief Sets the specified pixel of the pixbuf to the specified color.
  * @param pb The `GdkPixbuf` to paint into.
  * @param x,y Coordinates of the pixel to set.
- * @param r,g,b,a Color and alpha.
+ * @param color Color and alpha.
  */
-void pixbuf_pixel_set(GdkPixbuf *pb, gint x, gint y, gint r, gint g, gint b, gint a)
+void pixbuf_pixel_set(GdkPixbuf *pb, gint x, gint y, GqColor color)
 {
-	guchar *buf;
-	gboolean has_alpha;
-	gint rowstride;
-	guchar *p;
-
 	if (x < 0 || x >= gdk_pixbuf_get_width(pb) ||
 	    y < 0 || y >= gdk_pixbuf_get_height(pb)) return;
 
-	buf = gdk_pixbuf_get_pixels(pb);
-	has_alpha = gdk_pixbuf_get_has_alpha(pb);
-	rowstride = gdk_pixbuf_get_rowstride(pb);
+	guchar *buf = gdk_pixbuf_get_pixels(pb);
+	const gboolean has_alpha = gdk_pixbuf_get_has_alpha(pb);
+	const gint rowstride = gdk_pixbuf_get_rowstride(pb);
 
-	p = buf + (y * rowstride) + (x * (has_alpha ? 4 : 3));
-	*p = r; p++;
-	*p = g; p++;
-	*p = b; p++;
-	if (has_alpha) *p = a;
+	guchar *p = buf + (y * rowstride) + (x * (has_alpha ? 4 : 3));
+	p[0] = color.r;
+	p[1] = color.g;
+	p[2] = color.b;
+	if (has_alpha) p[3] = color.a;
 }
 
 
