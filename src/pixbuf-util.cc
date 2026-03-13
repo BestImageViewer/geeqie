@@ -114,11 +114,19 @@ gboolean pixbuf_clip_region(const GdkPixbuf *pb, GdkRectangle clip, GdkRectangle
 	return gdk_rectangle_intersect(&pb_rect, &clip, &r);
 }
 
-void pixel_set_color(guchar *pp, GqColor color)
+void pixel_mix_color(guchar *pp, GqColor color)
 {
 	pp[0] = (color.r * color.a + pp[0] * (256 - color.a)) >> 8;
 	pp[1] = (color.g * color.a + pp[1] * (256 - color.a)) >> 8;
 	pp[2] = (color.b * color.a + pp[2] * (256 - color.a)) >> 8;
+}
+
+void pixel_set_color(guchar *pp, GqColor color, gboolean set_alpha)
+{
+	pp[0] = color.r;
+	pp[1] = color.g;
+	pp[2] = color.b;
+	if (set_alpha) pp[3] = color.a;
 }
 
 /*
@@ -145,7 +153,7 @@ void pixbuf_draw_rect_fill(guchar *p_pix, gint prs, gboolean has_alpha,
 			{
 			color.a = get_alpha(x, y);
 
-			pixel_set_color(pp, color);
+			pixel_mix_color(pp, color);
 			pp += p_step;
 			}
 		}
@@ -756,10 +764,8 @@ void pixbuf_set_rect_fill(GdkPixbuf *pb,
 		pp = p_pix + (y + i) * prs + (x * p_step);
 		for (j = 0; j < w; j++)
 			{
-			*pp = color.r; pp++;
-			*pp = color.g; pp++;
-			*pp = color.b; pp++;
-			if (has_alpha) { *pp = color.a; pp++; }
+			pixel_set_color(pp, color, has_alpha);
+			pp += p_step;
 			}
 		}
 }
@@ -814,10 +820,7 @@ void pixbuf_pixel_set(GdkPixbuf *pb, gint x, gint y, GqColor color)
 	const gint rowstride = gdk_pixbuf_get_rowstride(pb);
 
 	guchar *p = buf + (y * rowstride) + (x * (has_alpha ? 4 : 3));
-	p[0] = color.r;
-	p[1] = color.g;
-	p[2] = color.b;
-	if (has_alpha) p[3] = color.a;
+	pixel_set_color(p, color, has_alpha);
 }
 
 
@@ -1052,7 +1055,7 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
 
 		while (x1 < x2)
 			{
-			pixel_set_color(pp, color);
+			pixel_mix_color(pp, color);
 			pp += p_step;
 
 			x1++;
@@ -1237,7 +1240,7 @@ void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
 		    y < pb_rect.y || y >= pb_rect.y + pb_rect.height) return;
 
 		guchar *pp = p_pix + (y * prs) + (x * p_step);
-		pixel_set_color(pp, color);
+		pixel_mix_color(pp, color);
 	};
 
 	// We draw the clipped line segment along the longer axis first, and
@@ -1516,6 +1519,7 @@ void pixbuf_desaturate_rect(GdkPixbuf *pb,
 	p_pix = gdk_pixbuf_get_pixels(pb);
 
 	const gint p_step = has_alpha ? 4 : 3;
+	constexpr GqColor full_red{ 255, 0, 0, 0 };
 
 	for (i = 0; i < h; i++)
 		{
@@ -1524,9 +1528,7 @@ void pixbuf_desaturate_rect(GdkPixbuf *pb,
 			{
 			if (pp[0] == 255 || pp[1] == 255 || pp[2] == 255 || pp[0] == 0 || pp[1] == 0 || pp[2] == 0)
 				{
-				pp[0] = 255;
-				pp[1] = 0;
-				pp[2] = 0;
+				pixel_set_color(pp, full_red, FALSE);
 				}
 			pp += p_step;
 			}
