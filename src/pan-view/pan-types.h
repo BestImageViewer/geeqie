@@ -56,15 +56,13 @@ struct ThumbLoader;
 constexpr guint8 PAN_SHADOW_ALPHA = 64;
 constexpr GqColor PAN_SHADOW_COLOR{ PAN_SHADOW_RGB, PAN_SHADOW_ALPHA };
 
-#define PAN_BOX_COLOR 255, 255, 255
-#define PAN_BOX_ALPHA 100
+constexpr GqColor PAN_BOX_COLOR{ 255, 255, 255, 100 };
 #define PAN_BOX_BORDER 20
 
 #define PAN_BOX_OUTLINE_THICKNESS 4
-#define PAN_BOX_OUTLINE_COLOR 0, 0, 0
-#define PAN_BOX_OUTLINE_ALPHA 128
+constexpr GqColor PAN_BOX_OUTLINE_COLOR{ 0, 0, 0, 128 };
 
-#define PAN_TEXT_COLOR 0, 0, 0
+constexpr GqColor PAN_TEXT_COLOR{ 0, 0, 0, 255 };
 
 
 enum PanLayoutType {

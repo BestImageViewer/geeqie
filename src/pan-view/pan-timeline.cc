@@ -112,16 +112,14 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 
 				g_autofree gchar *month_buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_MONTH);
 				pi = pan_item_text_new(pw, x, y, month_buf,
-						       static_cast<PanTextAttrType>(PAN_TEXT_ATTR_BOLD | PAN_TEXT_ATTR_HEADING),
-						       PAN_BORDER_3,
-						       {PAN_TEXT_COLOR, 255});
+				                       static_cast<PanTextAttrType>(PAN_TEXT_ATTR_BOLD | PAN_TEXT_ATTR_HEADING),
+				                       PAN_BORDER_3, PAN_TEXT_COLOR);
 				y += pi->height;
 
 				pi_month = pan_item_box_new(pw, file_data_ref(fd),
-							    x, y, 0, 0,
-							    PAN_BOX_OUTLINE_THICKNESS,
-							    {PAN_BOX_COLOR, PAN_BOX_ALPHA},
-							    {PAN_BOX_OUTLINE_COLOR, PAN_BOX_OUTLINE_ALPHA});
+				                            x, y, 0, 0,
+				                            PAN_BOX_OUTLINE_THICKNESS,
+				                            PAN_BOX_COLOR, PAN_BOX_OUTLINE_COLOR);
 
 				x += PAN_BOX_BORDER;
 				y += PAN_BOX_BORDER;
@@ -153,15 +151,13 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 
 			g_autofree gchar *week_buf = pan_date_value_string(fd->date, PAN_DATE_LENGTH_WEEK);
 			pi = pan_item_text_new(pw, x, y, week_buf, PAN_TEXT_ATTR_NONE,
-					       PAN_BORDER_3,
-					       {PAN_TEXT_COLOR, 255});
+			                       PAN_BORDER_3, PAN_TEXT_COLOR);
 
 			y += pi->height;
 
 			pi_day = pan_item_box_new(pw, file_data_ref(fd), x, y, 0, 0,
-						  PAN_BOX_OUTLINE_THICKNESS,
-						  {PAN_BOX_COLOR, PAN_BOX_ALPHA},
-						  {PAN_BOX_OUTLINE_COLOR, PAN_BOX_OUTLINE_ALPHA});
+			                          PAN_BOX_OUTLINE_THICKNESS,
+			                          PAN_BOX_COLOR, PAN_BOX_OUTLINE_COLOR);
 
 			x += PAN_BOX_BORDER;
 			y += PAN_BOX_BORDER;
