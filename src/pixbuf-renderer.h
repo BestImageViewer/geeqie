@@ -351,7 +351,6 @@ void pixbuf_renderer_set_color(PixbufRenderer *pr, const GdkRGBA &color);
 gint pixbuf_renderer_overlay_add(PixbufRenderer *pr, GdkPixbuf *pixbuf, gint x, gint y,
 				 OverlayRendererFlags flags);
 void pixbuf_renderer_overlay_set(PixbufRenderer *pr, gint id, GdkPixbuf *pixbuf, gint x, gint y);
-gboolean pixbuf_renderer_overlay_get(PixbufRenderer *pr, gint id, GdkPixbuf **pixbuf, gint *x, gint *y);
 void pixbuf_renderer_overlay_remove(PixbufRenderer *pr, gint id);
 
 gboolean pixbuf_renderer_get_mouse_position(PixbufRenderer *pr, GqPoint &pixel);
