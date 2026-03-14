@@ -28,6 +28,7 @@
 #include <glib.h>
 
 #include "filefilter.h"
+#include "geometry.h"
 #include "gq-color.h"
 #include "main-defines.h"
 
@@ -345,9 +346,9 @@ struct ConfOptions
 		gint mode;
 		gint fsmode;
 		gboolean enable_fsmode;
-		gint fixed_w, fixed_h;
-		gint fixed_x1, fixed_y1;
-		gint fixed_x2, fixed_y2;
+		GqSize fixed_size;
+		GqPoint fixed_left;
+		GqPoint fixed_right;
 		/**
 		 * @struct ModeOptions
 		 * options in this struct are packed to mode and fsmode entries

@@ -585,12 +585,12 @@ static void write_global_attributes(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_INT(*options, stereo.mode);
 	WRITE_NL(); WRITE_INT(*options, stereo.fsmode);
 	WRITE_NL(); WRITE_BOOL(*options, stereo.enable_fsmode);
-	WRITE_NL(); WRITE_INT(*options, stereo.fixed_w);
-	WRITE_NL(); WRITE_INT(*options, stereo.fixed_h);
-	WRITE_NL(); WRITE_INT(*options, stereo.fixed_x1);
-	WRITE_NL(); WRITE_INT(*options, stereo.fixed_y1);
-	WRITE_NL(); WRITE_INT(*options, stereo.fixed_x2);
-	WRITE_NL(); WRITE_INT(*options, stereo.fixed_y2);
+	WRITE_NL(); WRITE_INT_FULL("stereo.fixed_w", options->stereo.fixed_size.width);
+	WRITE_NL(); WRITE_INT_FULL("stereo.fixed_h", options->stereo.fixed_size.height);
+	WRITE_NL(); WRITE_INT_FULL("stereo.fixed_x1", options->stereo.fixed_left.x);
+	WRITE_NL(); WRITE_INT_FULL("stereo.fixed_y1", options->stereo.fixed_left.y);
+	WRITE_NL(); WRITE_INT_FULL("stereo.fixed_x2", options->stereo.fixed_right.x);
+	WRITE_NL(); WRITE_INT_FULL("stereo.fixed_y2", options->stereo.fixed_right.y);
 
 	WRITE_NL(); WRITE_BOOL(*options, read_metadata_in_idle);
 
@@ -1076,12 +1076,12 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_INT(*options, stereo.mode)) continue;
 		if (READ_INT(*options, stereo.fsmode)) continue;
 		if (READ_BOOL(*options, stereo.enable_fsmode)) continue;
-		if (READ_INT(*options, stereo.fixed_w)) continue;
-		if (READ_INT(*options, stereo.fixed_h)) continue;
-		if (READ_INT(*options, stereo.fixed_x1)) continue;
-		if (READ_INT(*options, stereo.fixed_y1)) continue;
-		if (READ_INT(*options, stereo.fixed_x2)) continue;
-		if (READ_INT(*options, stereo.fixed_y2)) continue;
+		if (READ_INT_FULL("stereo.fixed_w", options->stereo.fixed_size.width)) continue;
+		if (READ_INT_FULL("stereo.fixed_h", options->stereo.fixed_size.height)) continue;
+		if (READ_INT_FULL("stereo.fixed_x1", options->stereo.fixed_left.x)) continue;
+		if (READ_INT_FULL("stereo.fixed_y1", options->stereo.fixed_left.y)) continue;
+		if (READ_INT_FULL("stereo.fixed_x2", options->stereo.fixed_right.x)) continue;
+		if (READ_INT_FULL("stereo.fixed_y2", options->stereo.fixed_right.y)) continue;
 
 		if (READ_BOOL(*options, read_metadata_in_idle)) continue;
 

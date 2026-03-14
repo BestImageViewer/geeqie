@@ -214,12 +214,9 @@ ConfOptions *init_options(ConfOptions *options)
 	options->update_on_time_change = TRUE;
 	options->clipboard_selection = CLIPBOARD_BOTH;
 
-	options->stereo.fixed_w = 1920;
-	options->stereo.fixed_h = 1080;
-	options->stereo.fixed_x1 = 0;
-	options->stereo.fixed_y1 = 0;
-	options->stereo.fixed_x2 = 0;
-	options->stereo.fixed_y2 = 1125;
+	options->stereo.fixed_size = { 1920, 1080 };
+	options->stereo.fixed_left = { 0, 0 };
+	options->stereo.fixed_right = { 0, 1125 };
 
 	options->log_window_lines = 1000;
 	options->log_window.line_wrap = false;

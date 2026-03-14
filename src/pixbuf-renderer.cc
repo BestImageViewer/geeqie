@@ -1799,8 +1799,8 @@ static void pr_size_sync(PixbufRenderer *pr, gint new_width, gint new_height)
 			}
 		else if (pr->stereo_mode & PR_STEREO_FIXED)
 			{
-			new_viewport_width = pr->stereo_fixed_width;
-			new_viewport_height = pr->stereo_fixed_height;
+			new_viewport_width = pr->stereo_fixed_size.width;
+			new_viewport_height = pr->stereo_fixed_size.height;
 			}
 		}
 
@@ -2748,14 +2748,11 @@ void pixbuf_renderer_stereo_set(PixbufRenderer *pr, gint stereo_mode)
 		}
 }
 
-void pixbuf_renderer_stereo_fixed_set(PixbufRenderer *pr, gint width, gint height, gint x1, gint y1, gint x2, gint y2)
+void pixbuf_renderer_stereo_fixed_set(PixbufRenderer *pr, GqSize size, GqPoint left, GqPoint right)
 {
-	pr->stereo_fixed_width = width;
-	pr->stereo_fixed_height = height;
-	pr->stereo_fixed_x_left = x1;
-	pr->stereo_fixed_y_left = y1;
-	pr->stereo_fixed_x_right = x2;
-	pr->stereo_fixed_y_right = y2;
+	pr->stereo_fixed_size = size;
+	pr->stereo_fixed_left = left;
+	pr->stereo_fixed_right = right;
 }
 
 static void pr_stereo_temp_disable(PixbufRenderer *pr, gboolean disable)

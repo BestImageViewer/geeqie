@@ -456,12 +456,9 @@ static void config_window_apply()
 	options->stereo.mode = get_stereo_mode(c_options->stereo.mode, c_options->stereo.tmp);
 	options->stereo.fsmode = get_stereo_mode(c_options->stereo.fsmode, c_options->stereo.fstmp);
 	options->stereo.enable_fsmode = c_options->stereo.enable_fsmode;
-	options->stereo.fixed_w = c_options->stereo.fixed_w;
-	options->stereo.fixed_h = c_options->stereo.fixed_h;
-	options->stereo.fixed_x1 = c_options->stereo.fixed_x1;
-	options->stereo.fixed_y1 = c_options->stereo.fixed_y1;
-	options->stereo.fixed_x2 = c_options->stereo.fixed_x2;
-	options->stereo.fixed_y2 = c_options->stereo.fixed_y2;
+	options->stereo.fixed_size = c_options->stereo.fixed_size;
+	options->stereo.fixed_left = c_options->stereo.fixed_left;
+	options->stereo.fixed_right = c_options->stereo.fixed_right;
 
 	options->info_keywords.height = c_options->info_keywords.height;
 	options->info_title.height = c_options->info_title.height;
@@ -3736,19 +3733,18 @@ static void config_tab_stereo(GtkWidget *notebook)
 
 	group2 = pref_group_new(box2, FALSE, _("Fixed position"), GTK_ORIENTATION_VERTICAL);
 	table = pref_table_new(group2, 5, 3, FALSE, FALSE);
-	pref_table_spin_new_int(table, 0, 0, _("Width"), nullptr,
-			  1, 5000, 1, options->stereo.fixed_w, &c_options->stereo.fixed_w);
-	pref_table_spin_new_int(table, 3, 0,  _("Height"), nullptr,
-			  1, 5000, 1, options->stereo.fixed_h, &c_options->stereo.fixed_h);
-	pref_table_spin_new_int(table, 0, 1,  _("Left X"), nullptr,
-			  0, 5000, 1, options->stereo.fixed_x1, &c_options->stereo.fixed_x1);
-	pref_table_spin_new_int(table, 3, 1,  _("Left Y"), nullptr,
-			  0, 5000, 1, options->stereo.fixed_y1, &c_options->stereo.fixed_y1);
-	pref_table_spin_new_int(table, 0, 2,  _("Right X"), nullptr,
-			  0, 5000, 1, options->stereo.fixed_x2, &c_options->stereo.fixed_x2);
-	pref_table_spin_new_int(table, 3, 2,  _("Right Y"), nullptr,
-			  0, 5000, 1, options->stereo.fixed_y2, &c_options->stereo.fixed_y2);
-
+	pref_table_spin_new_int(table, 0, 0, _("Width"), nullptr, 1, 5000, 1,
+	                        options->stereo.fixed_size.width, &c_options->stereo.fixed_size.width);
+	pref_table_spin_new_int(table, 3, 0, _("Height"), nullptr, 1, 5000, 1,
+	                        options->stereo.fixed_size.height, &c_options->stereo.fixed_size.height);
+	pref_table_spin_new_int(table, 0, 1, _("Left X"), nullptr, 0, 5000, 1,
+	                        options->stereo.fixed_left.x, &c_options->stereo.fixed_left.x);
+	pref_table_spin_new_int(table, 3, 1, _("Left Y"), nullptr, 0, 5000, 1,
+	                        options->stereo.fixed_left.y, &c_options->stereo.fixed_left.y);
+	pref_table_spin_new_int(table, 0, 2, _("Right X"), nullptr, 0, 5000, 1,
+	                        options->stereo.fixed_right.x, &c_options->stereo.fixed_right.x);
+	pref_table_spin_new_int(table, 3, 2, _("Right Y"), nullptr, 0, 5000, 1,
+	                        options->stereo.fixed_right.y, &c_options->stereo.fixed_right.y);
 }
 
 /* Main preferences window */

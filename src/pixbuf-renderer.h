@@ -258,12 +258,9 @@ struct PixbufRenderer
 
 	StereoPixbufData stereo_data;
 	gboolean stereo_temp_disable;
-	gint stereo_fixed_width;
-	gint stereo_fixed_height;
-	gint stereo_fixed_x_left;
-	gint stereo_fixed_y_left;
-	gint stereo_fixed_x_right;
-	gint stereo_fixed_y_right;
+	GqSize stereo_fixed_size;
+	GqPoint stereo_fixed_left;
+	GqPoint stereo_fixed_right;
 
 	RendererFuncs *renderer;
 	RendererFuncs *renderer2;
@@ -361,7 +358,7 @@ void pixbuf_renderer_set_size_early(PixbufRenderer *pr, gint width, gint height)
 
 /* stereo */
 void pixbuf_renderer_stereo_set(PixbufRenderer *pr, gint stereo_mode);
-void pixbuf_renderer_stereo_fixed_set(PixbufRenderer *pr, gint width, gint height, gint x1, gint y1, gint x2, gint y2);
+void pixbuf_renderer_stereo_fixed_set(PixbufRenderer *pr, GqSize size, GqPoint left, GqPoint right);
 
 /**
  * @struct SourceTile

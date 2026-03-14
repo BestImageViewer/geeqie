@@ -1972,10 +1972,8 @@ static void image_options_set(ImageWindow *imd)
 	pixbuf_renderer_set_parent(PIXBUF_RENDERER(imd->pr), GTK_WINDOW(imd->top_window));
 
 	image_stereo_set(imd, options->stereo.mode);
-	pixbuf_renderer_stereo_fixed_set(PIXBUF_RENDERER(imd->pr),
-					options->stereo.fixed_w, options->stereo.fixed_h,
-					options->stereo.fixed_x1, options->stereo.fixed_y1,
-					options->stereo.fixed_x2, options->stereo.fixed_y2);
+	pixbuf_renderer_stereo_fixed_set(PIXBUF_RENDERER(imd->pr), options->stereo.fixed_size,
+	                                 options->stereo.fixed_left, options->stereo.fixed_right);
 }
 
 /**

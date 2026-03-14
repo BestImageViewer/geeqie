@@ -1948,19 +1948,19 @@ void renderer_update_viewport(void *renderer)
 			}
 		else if (rt->stereo_mode & PR_STEREO_FIXED)
 			{
-			rt->stereo_off_x = rt->pr->stereo_fixed_x_right;
-			rt->stereo_off_y = rt->pr->stereo_fixed_y_right;
+			rt->stereo_off_x = rt->pr->stereo_fixed_right.x;
+			rt->stereo_off_y = rt->pr->stereo_fixed_right.y;
 			}
 		}
 	else
 		{
 		if (rt->stereo_mode & PR_STEREO_FIXED)
 			{
-			rt->stereo_off_x = rt->pr->stereo_fixed_x_left;
-			rt->stereo_off_y = rt->pr->stereo_fixed_y_left;
+			rt->stereo_off_x = rt->pr->stereo_fixed_left.x;
+			rt->stereo_off_y = rt->pr->stereo_fixed_left.y;
 			}
 		}
-        DEBUG_1("update size: %p  %d %d   %d %d", (void *)rt, rt->stereo_off_x, rt->stereo_off_y, rt->pr->viewport_width, rt->pr->viewport_height);
+	DEBUG_1("update size: %p  %d %d   %d %d", (void *)rt, rt->stereo_off_x, rt->stereo_off_y, rt->pr->viewport_width, rt->pr->viewport_height);
 	rt_sync_scroll(rt);
 	rt_overlay_update_sizes(rt);
 	rt_border_clear(rt);
