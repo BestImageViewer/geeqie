@@ -1953,7 +1953,7 @@ void image_grab_focus(ImageWindow *imd)
  *-------------------------------------------------------------------
  */
 
-static void image_options_set(ImageWindow *imd)
+static void image_options_set(ImageWindow *imd, ConfOptions *options)
 {
 	g_object_set(imd->pr,
 	             "zoom_quality", options->image.zoom_quality,
@@ -1981,18 +1981,7 @@ static void image_options_set(ImageWindow *imd)
  */
 void image_options_sync()
 {
-	GList *work;
-
-	work = image_list;
-	while (work)
-		{
-		ImageWindow *imd;
-
-		imd = static_cast<ImageWindow *>(work->data);
-		work = work->next;
-
-		image_options_set(imd);
-		}
+	g_list_foreach(image_list, reinterpret_cast<GFunc>(image_options_set), options);
 }
 
 /*
@@ -2106,7 +2095,7 @@ ImageWindow *image_new(gboolean frame)
 	imd->pr = GTK_WIDGET(pixbuf_renderer_new());
 	DEBUG_NAME(imd->pr);
 
-	image_options_set(imd);
+	image_options_set(imd, options);
 
 	imd->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(imd->widget);
