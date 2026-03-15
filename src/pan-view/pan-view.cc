@@ -1606,12 +1606,10 @@ static void scroll_cb(PixbufRenderer *pr, GdkEventScroll *event, gpointer)
 		switch (event->direction)
 			{
 			case GDK_SCROLL_UP:
-				pixbuf_renderer_zoom_adjust_at_point(pr, ZOOM_INCREMENT,
-								     static_cast<gint>(event->x), static_cast<gint>(event->y));
+				pixbuf_renderer_zoom_adjust_at_point(pr, ZOOM_INCREMENT, event->x, event->y);
 				break;
 			case GDK_SCROLL_DOWN:
-				pixbuf_renderer_zoom_adjust_at_point(pr, -ZOOM_INCREMENT,
-								     static_cast<gint>(event->x), static_cast<gint>(event->y));
+				pixbuf_renderer_zoom_adjust_at_point(pr, -ZOOM_INCREMENT, event->x, event->y);
 				break;
 			default:
 				break;
