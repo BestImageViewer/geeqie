@@ -27,10 +27,9 @@
 #include <glib.h>
 #include <pango/pango.h>
 
-#include "geometry.h"
-
 class FileData;
 struct GqColor;
+struct GqPoint;
 
 gboolean pixbuf_to_file_as_png (GdkPixbuf *pixbuf, const gchar *filename);
 
@@ -82,8 +81,6 @@ gboolean pixbuf_scale_aspect(gint req_w, gint req_h, gint old_w, gint old_h, gin
 #define PIXBUF_INLINE_UNKNOWN               "gq-icon-unknown"
 #define PIXBUF_INLINE_VIDEO                 "gq-icon-video"
 
-GdkPixbuf *pixbuf_copy_rotate_90(GdkPixbuf *src, gboolean counter_clockwise);
-GdkPixbuf *pixbuf_copy_mirror(GdkPixbuf *src, gboolean mirror, gboolean flip);
 GdkPixbuf* pixbuf_apply_orientation(GdkPixbuf *pixbuf, gint orientation);
 
 void pixbuf_draw_rect_fill(GdkPixbuf *pb, GdkRectangle rect, GqColor color);

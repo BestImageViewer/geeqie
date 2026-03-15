@@ -461,7 +461,7 @@ static void pixbuf_copy_block(guchar *src, gint src_row_stride, gint w, gint h,
  * Returns a copy of pixbuf src rotated 90 degrees clockwise or 90 counterclockwise
  *
  */
-GdkPixbuf *pixbuf_copy_rotate_90(GdkPixbuf *src, gboolean counter_clockwise)
+static GdkPixbuf *pixbuf_copy_rotate_90(GdkPixbuf *src, gboolean counter_clockwise)
 {
 	GdkPixbuf *dest;
 	gboolean has_alpha;
@@ -566,7 +566,7 @@ GdkPixbuf *pixbuf_copy_rotate_90(GdkPixbuf *src, gboolean counter_clockwise)
  * TO do a 180 degree rotations set both mirror and flipped TRUE
  * if mirror and flip are FALSE, result is a simple copy.
  */
-GdkPixbuf *pixbuf_copy_mirror(GdkPixbuf *src, gboolean mirror, gboolean flip)
+static GdkPixbuf *pixbuf_copy_mirror(GdkPixbuf *src, gboolean mirror, gboolean flip)
 {
 	GdkPixbuf *dest;
 	gboolean has_alpha;
