@@ -320,8 +320,7 @@ static PangoLayout *pan_item_text_layout(PanItem *pi, GtkWidget *widget)
 		return layout;
 		}
 
-	if (pi->text_attr & PAN_TEXT_ATTR_BOLD ||
-	    pi->text_attr & PAN_TEXT_ATTR_HEADING)
+	if (pi->text_attr & PAN_TEXT_ATTR_BOLD_HEADING)
 		{
 		PangoAttrList *pal;
 		PangoAttribute *pa;
@@ -764,15 +763,15 @@ void PanTextAlignment::add(const gchar *label, const gchar *text)
 
 	if (label)
 		{
-		items.label = pan_item_text_new(pw, x, y, label,
-		                                PAN_TEXT_ATTR_BOLD, PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
+		items.label = pan_item_text_new(pw, x, y, label, PAN_TEXT_ATTR_BOLD,
+		                                PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
 		pan_item_set_key(items.label, key);
 		}
 
 	if (text)
 		{
-		items.text = pan_item_text_new(pw, x, y, text,
-		                               PAN_TEXT_ATTR_NONE, PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
+		items.text = pan_item_text_new(pw, x, y, text, PAN_TEXT_ATTR_NONE,
+		                               PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
 		pan_item_set_key(items.text, key);
 		}
 

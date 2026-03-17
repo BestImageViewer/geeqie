@@ -177,8 +177,8 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 		PanItem *plabel;
 
 		g_autofree gchar *buf = pan_date_value_string(pi_day->fd->date, PAN_DATE_LENGTH_WEEK);
-		plabel = pan_item_text_new(pw, x, y, buf, static_cast<PanTextAttrType>(PAN_TEXT_ATTR_BOLD | PAN_TEXT_ATTR_HEADING),
-					   PAN_BORDER_3, PAN_CAL_POPUP_TEXT_COLOR);
+		plabel = pan_item_text_new(pw, x, y, buf, PAN_TEXT_ATTR_BOLD_HEADING,
+		                           PAN_BORDER_3, PAN_CAL_POPUP_TEXT_COLOR);
 		pan_item_set_key(plabel, "day_bubble");
 
 		pan_item_size_by_item(pbox, plabel, 0);
@@ -358,8 +358,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 		pi_month = pan_item_box_new(pw, nullptr, x, y, PAN_CAL_DAY_WIDTH * 7, PAN_CAL_DAY_HEIGHT / 4,
 					    PAN_CAL_MONTH_BORDER, PAN_CAL_MONTH_COLOR, PAN_CAL_MONTH_BORDER_COLOR);
 		g_autofree gchar *month_buf = pan_date_value_string(dt, PAN_DATE_LENGTH_MONTH);
-		pi_text = pan_item_text_new(pw, x, y, month_buf,
-		                            static_cast<PanTextAttrType>(PAN_TEXT_ATTR_BOLD | PAN_TEXT_ATTR_HEADING),
+		pi_text = pan_item_text_new(pw, x, y, month_buf, PAN_TEXT_ATTR_BOLD_HEADING,
 		                            PAN_BORDER_3, PAN_CAL_MONTH_TEXT_COLOR);
 		pi_text->x = pi_month->x + (pi_month->width - pi_text->width) / 2;
 
@@ -439,8 +438,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 				}
 
 			pi_day_number = pan_item_text_new(pw, x + 4, y + 4, std::to_string(day).c_str(),
-			                                  static_cast<PanTextAttrType>(PAN_TEXT_ATTR_BOLD | PAN_TEXT_ATTR_HEADING),
-			                                  PAN_BORDER_3, PAN_CAL_DAY_TEXT_COLOR);
+			                                  PAN_TEXT_ATTR_BOLD_HEADING, PAN_BORDER_3, PAN_CAL_DAY_TEXT_COLOR);
 
 			day_of_week = date_get_first_day_of_week() + col;
 			if (day_of_week > 7) day_of_week = day_of_week - 7;
