@@ -49,7 +49,7 @@ enum FileFormatRating : gint {
     FORMAT_RATING_4        = 4,
     FORMAT_RATING_5        = 5,
 };
-constexpr gint FORMAT_RATING_COUNT = 7;
+inline constexpr gint FORMAT_RATING_COUNT = 7;
 
 extern const gchar *format_rating_list[];
 
