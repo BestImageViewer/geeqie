@@ -22,6 +22,7 @@
 #ifndef PAN_VIEW_PAN_ITEM_H
 #define PAN_VIEW_PAN_ITEM_H
 
+#include <string>
 #include <vector>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -88,8 +89,7 @@ gboolean pan_item_image_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 class PanTextAlignment
 {
 public:
-	PanTextAlignment(PanWindow *pw, gint x, gint y, const gchar *key);
-	~PanTextAlignment();
+	PanTextAlignment(PanWindow *pw, gint x, gint y, std::string key);
 
 	void add(const gchar *label, const gchar *text);
 	void calc(PanItem *box);
@@ -107,7 +107,7 @@ private:
 
 	gint x;
 	gint y;
-	gchar *key;
+	std::string key;
 };
 
 #endif

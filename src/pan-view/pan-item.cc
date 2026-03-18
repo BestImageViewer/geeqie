@@ -727,17 +727,12 @@ PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
  *-----------------------------------------------------------------------------
  */
 
-PanTextAlignment::PanTextAlignment(PanWindow *pw, gint x, gint y, const gchar *key)
+PanTextAlignment::PanTextAlignment(PanWindow *pw, gint x, gint y, std::string key)
 	: pw(pw)
 	, x(x)
 	, y(y)
-	, key(g_strdup(key))
+	, key(std::move(key))
 {
-}
-
-PanTextAlignment::~PanTextAlignment()
-{
-	g_free(key);
 }
 
 void PanTextAlignment::add(const gchar *label, const gchar *text)
@@ -748,14 +743,14 @@ void PanTextAlignment::add(const gchar *label, const gchar *text)
 		{
 		items.label = pan_item_text_new(pw, x, y, label, PAN_TEXT_ATTR_BOLD,
 		                                PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
-		pan_item_set_key(items.label, key);
+		pan_item_set_key(items.label, key.c_str());
 		}
 
 	if (text)
 		{
 		items.text = pan_item_text_new(pw, x, y, text, PAN_TEXT_ATTR_NONE,
 		                               PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
-		pan_item_set_key(items.text, key);
+		pan_item_set_key(items.text, key.c_str());
 		}
 
 	columns.push_back(items);
