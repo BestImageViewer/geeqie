@@ -61,6 +61,17 @@ constexpr GqColor PAN_POPUP_TEXT_COLOR{0, 0, 0, 225};
  *-----------------------------------------------------------------------------
  */
 
+static PanItem *pan_item_new(PanItemType type, gint x, gint y)
+{
+	auto *pi = g_new0(PanItem, 1);
+
+	pi->type = type;
+	pi->x = x;
+	pi->y = y;
+
+	return pi;
+}
+
 void pan_item_free(PanItem *pi)
 {
 	if (!pi) return;
@@ -131,18 +142,12 @@ void pan_item_size_coordinates(PanItem *pi, gint border, gint &w, gint &h)
 PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
                           gint border_size, GqColor base, GqColor bord)
 {
-	PanItem *pi;
+	PanItem *pi = pan_item_new(PAN_ITEM_BOX, x, y);
 
-	pi = g_new0(PanItem, 1);
-	pi->type = PAN_ITEM_BOX;
 	pi->fd = fd;
-	pi->x = x;
-	pi->y = y;
 	pi->width = width;
 	pi->height = height;
-
 	pi->color = base;
-
 	pi->color2 = bord;
 	pi->border = border_size;
 
@@ -244,23 +249,19 @@ PanItem *pan_item_tri_new(PanWindow *pw,
 {
 	GdkRectangle tri_rect = util_triangle_bounding_box(c1, c2, c3);
 
-	auto *pi = g_new0(PanItem, 1);
-	pi->type = PAN_ITEM_TRIANGLE;
-	pi->x = tri_rect.x;
-	pi->y = tri_rect.y;
+	PanItem *pi = pan_item_new(PAN_ITEM_TRIANGLE, tri_rect.x, tri_rect.y);
+
 	pi->width = tri_rect.width;
 	pi->height = tri_rect.height;
 	pi->color = color;
+	pi->color2 = border_color;
+	pi->border = borders;
 
 	auto *coord = g_new0(GqPoint, 3);
 	coord[0] = c1;
 	coord[1] = c2;
 	coord[2] = c3;
-
 	pi->data = coord;
-
-	pi->border = borders;
-	pi->color2 = border_color;
 
 	pw->list = g_list_prepend(pw->list, pi);
 
@@ -348,17 +349,11 @@ static void pan_item_text_compute_size(PanItem *pi, GtkWidget *widget)
 PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
                            PanTextAttrType attr, PanBorderType border, GqColor color)
 {
-	PanItem *pi;
+	PanItem *pi = pan_item_new(PAN_ITEM_TEXT, x, y);
 
-	pi = g_new0(PanItem, 1);
-	pi->type = PAN_ITEM_TEXT;
-	pi->x = x;
-	pi->y = y;
 	pi->text = g_strdup(text);
 	pi->text_attr = attr;
-
 	pi->color = color;
-
 	pi->border = border;
 
 	pan_item_text_compute_size(pi, pw->imd->pr);
@@ -391,14 +386,9 @@ gboolean pan_item_text_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufR
 
 PanItem *pan_item_thumb_new(PanWindow *pw, FileData *fd, gint x, gint y)
 {
-	PanItem *pi;
+	PanItem *pi = pan_item_new(PAN_ITEM_THUMB, x, y);
 
-	pi = g_new0(PanItem, 1);
-
-	pi->type = PAN_ITEM_THUMB;
 	pi->fd = fd;
-	pi->x = x;
-	pi->y = y;
 	pi->width = pw->thumb_size + PAN_SHADOW_OFFSET * 2;
 	pi->height = pw->thumb_size + PAN_SHADOW_OFFSET * 2;
 
@@ -514,23 +504,14 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 
 PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w, gint h)
 {
-	PanItem *pi;
-
 	pan_cache_get_image_size(pw, fd, w, h);
 
-	pi = g_new0(PanItem, 1);
-	pi->type = PAN_ITEM_IMAGE;
+	PanItem *pi = pan_item_new(PAN_ITEM_IMAGE, x, y);
+
 	pi->fd = fd;
-	pi->x = x;
-	pi->y = y;
 	pi->width = w;
 	pi->height = h;
-
 	pi->color.a = 255;
-
-	pi->color2.r = 0;
-	pi->color2.g = 0;
-	pi->color2.b = 0;
 	pi->color2.a = PAN_SHADOW_ALPHA / 2;
 
 	pw->list = g_list_prepend(pw->list, pi);
