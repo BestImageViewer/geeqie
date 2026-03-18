@@ -218,31 +218,10 @@ GtkWidget *pref_label_new_mnemonic(GtkWidget *parent_box, const gchar *text, Gtk
 
 void pref_label_bold(GtkWidget *label, gboolean bold, gboolean increase_size)
 {
-	PangoAttrList *pal;
-	PangoAttribute *pa;
-
-	if (!bold && !increase_size) return;
-
-	pal = pango_attr_list_new();
-
-	if (bold)
-		{
-		pa = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
-		pa->start_index = 0;
-		pa->end_index = G_MAXINT;
-		pango_attr_list_insert(pal, pa);
-		}
-
-	if (increase_size)
-		{
-		pa = pango_attr_scale_new(PANGO_SCALE_LARGE);
-		pa->start_index = 0;
-		pa->end_index = G_MAXINT;
-		pango_attr_list_insert(pal, pa);
-		}
+	g_autoptr(PangoAttrList) pal = get_pango_attr_list(bold, increase_size);
+	if (!pal) return;
 
 	gtk_label_set_attributes(GTK_LABEL(label), pal);
-	pango_attr_list_unref(pal);
 }
 
 GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *icon_name,
@@ -1588,6 +1567,31 @@ void get_device_position(GdkDevice *device, int &x, int &y)
 #else
 	gdk_device_get_position(device, nullptr, &x, &y);
 #endif
+}
+
+PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale)
+{
+	if (!weight && !scale) return nullptr;
+
+	PangoAttrList *pal = pango_attr_list_new();
+
+	if (weight)
+		{
+		PangoAttribute *pa = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
+		pa->start_index = 0;
+		pa->end_index = G_MAXINT;
+		pango_attr_list_insert(pal, pa);
+		}
+
+	if (scale)
+		{
+		PangoAttribute *pa = pango_attr_scale_new(PANGO_SCALE_LARGE);
+		pa->start_index = 0;
+		pa->end_index = G_MAXINT;
+		pango_attr_list_insert(pal, pa);
+		}
+
+	return pal;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -320,28 +320,11 @@ static PangoLayout *pan_item_text_layout(PanItem *pi, GtkWidget *widget)
 		return layout;
 		}
 
-	if (pi->text_attr & PAN_TEXT_ATTR_BOLD_HEADING)
+	g_autoptr(PangoAttrList) pal = get_pango_attr_list(pi->text_attr & PAN_TEXT_ATTR_BOLD,
+	                                                   pi->text_attr & PAN_TEXT_ATTR_HEADING);
+	if (pal)
 		{
-		PangoAttrList *pal;
-		PangoAttribute *pa;
-
-		pal = pango_attr_list_new();
-		if (pi->text_attr & PAN_TEXT_ATTR_BOLD)
-			{
-			pa = pango_attr_weight_new(PANGO_WEIGHT_BOLD);
-			pa->start_index = 0;
-			pa->end_index = G_MAXINT;
-			pango_attr_list_insert(pal, pa);
-			}
-		if (pi->text_attr & PAN_TEXT_ATTR_HEADING)
-			{
-			pa = pango_attr_scale_new(PANGO_SCALE_LARGE);
-			pa->start_index = 0;
-			pa->end_index = G_MAXINT;
-			pango_attr_list_insert(pal, pa);
-			}
 		pango_layout_set_attributes(layout, pal);
-		pango_attr_list_unref(pal);
 		}
 
 	pango_layout_set_text(layout, pi->text, -1);

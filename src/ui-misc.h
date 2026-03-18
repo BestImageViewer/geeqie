@@ -227,5 +227,7 @@ void widget_input_ungrab(GtkWidget *widget);
 gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int *y, GdkModifierType *mask);
 void get_device_position(GdkDevice *device, int &x, int &y);
 
+PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
