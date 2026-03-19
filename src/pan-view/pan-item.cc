@@ -84,11 +84,9 @@ void pan_item_free(PanItem *pi)
 	delete pi;
 }
 
-void pan_item_set_key(PanItem *pi, const std::string &key)
+void PanItem::set_key(const std::string &key)
 {
-	if (!pi) return;
-
-	pi->key = key;
+	this->key = key;
 }
 
 void pan_item_added(PanWindow *pw, PanItem *pi)
@@ -720,14 +718,14 @@ void PanTextAlignment::add(const gchar *label, const gchar *text)
 		{
 		items.label = pan_item_text_new(pw, x, y, label, PAN_TEXT_ATTR_BOLD,
 		                                PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
-		pan_item_set_key(items.label, key);
+		items.label->set_key(key);
 		}
 
 	if (text)
 		{
 		items.text = pan_item_text_new(pw, x, y, text, PAN_TEXT_ATTR_NONE,
 		                               PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
-		pan_item_set_key(items.text, key);
+		items.text->set_key(key);
 		}
 
 	columns.push_back(items);

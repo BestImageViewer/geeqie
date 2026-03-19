@@ -37,7 +37,6 @@ struct PixbufRenderer;
 
 void pan_item_free(PanItem *pi);
 
-void pan_item_set_key(PanItem *pi, const std::string &key);
 void pan_item_added(PanWindow *pw, PanItem *pi);
 void pan_item_remove(PanWindow *pw, PanItem *pi);
 

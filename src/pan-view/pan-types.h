@@ -122,6 +122,8 @@ enum PanBorderType {
 
 
 struct PanItem {
+	void set_key(const std::string &key);
+
 	PanItemType type;
 	gint x;
 	gint y;

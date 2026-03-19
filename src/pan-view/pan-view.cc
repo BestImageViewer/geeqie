@@ -1453,7 +1453,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 
 	pbox = pan_item_box_new(pw, nullptr, pi->x + pi->width + 4, pi->y, 10, 10,
 				PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
-	pan_item_set_key(pbox, "info");
+	pbox->set_key("info");
 
 	GqPoint c1{pi->x + pi->width - 8, pi->y + 8};
 	if (pi->type == PAN_ITEM_THUMB && pi->pixbuf)
@@ -1472,7 +1472,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	                     c1, c2, c3,
 	                     PAN_POPUP_COLOR,
 	                     PAN_BORDER_1 | PAN_BORDER_3, PAN_POPUP_BORDER_COLOR);
-	pan_item_set_key(p, "info");
+	p->set_key("info");
 	pan_item_added(pw, p);
 
 	pan_info_calc_text_alignment(pw, pbox, pi->fd);
@@ -1514,11 +1514,11 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 
 			pbox = pan_item_box_new(pw, nullptr, pbox->x, pbox->y + pbox->height + 8, 10, 10,
 						PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
-			pan_item_set_key(pbox, "info");
+			pbox->set_key("info");
 
 			p = pan_item_image_new(pw, file_data_new_group(pi->fd->path),
 					       pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, iw, ih);
-			pan_item_set_key(p, "info");
+			p->set_key("info");
 			pan_item_size_by_item(pbox, p, PREF_PAD_BORDER);
 
 			pan_item_box_shadow(pbox, PAN_SHADOW_OFFSET * 2, PAN_SHADOW_FADE * 2);
