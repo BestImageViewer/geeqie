@@ -141,8 +141,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 
 	while ((pi = pan_item_find_by_key(pw, PAN_ITEM_NONE, "day_bubble"))) pan_item_remove(pw, pi);
 
-	if (!pi_day || pi_day->type != PAN_ITEM_BOX ||
-	    !pi_day->key || strcmp(pi_day->key, "day") != 0) return;
+	if (!pi_day || pi_day->type != PAN_ITEM_BOX || pi_day->key != "day") return;
 
 	list = pan_layout_intersect(pw, pi_day->x, pi_day->y, pi_day->width, pi_day->height);
 
@@ -156,8 +155,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 		node = work;
 		work = work->next;
 
-		if (dot->type != PAN_ITEM_BOX || !dot->fd ||
-		    !dot->key || strcmp(dot->key, "dot") != 0)
+		if (dot->type != PAN_ITEM_BOX || !dot->fd || dot->key != "dot")
 			{
 			list = g_list_delete_link(list, node);
 			}

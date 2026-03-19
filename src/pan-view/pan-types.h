@@ -22,6 +22,8 @@
 #ifndef PAN_VIEW_PAN_TYPES_H
 #define PAN_VIEW_PAN_TYPES_H
 
+#include <string>
+
 #include <gtk/gtk.h>
 
 #include "cache-loader.h"
@@ -125,7 +127,7 @@ struct PanItem {
 	gint y;
 	gint width;
 	gint height;
-	gchar *key;
+	std::string key;
 
 	FileData *fd;
 

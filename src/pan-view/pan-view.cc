@@ -357,8 +357,7 @@ static gboolean pan_queue_step(PanWindow *pw)
 static void pan_queue_add(PanWindow *pw, PanItem *pi)
 {
 	if (!pi || pi->queued || pi->pixbuf) return;
-	if (pw->size <= PAN_IMAGE_SIZE_THUMB_NONE &&
-	    (!pi->key || strcmp(pi->key, "info") != 0) )
+	if (pw->size <= PAN_IMAGE_SIZE_THUMB_NONE && pi->key != "info")
 		{
 		return;
 		}
@@ -520,9 +519,7 @@ static void pan_window_message(PanWindow *pw, const gchar *text)
 			pi = static_cast<PanItem *>(work->data);
 			work = work->next;
 
-			if (pi->fd &&
-			    pi->type == PAN_ITEM_BOX &&
-			    pi->key && strcmp(pi->key, "dot") == 0)
+			if (pi->fd && pi->type == PAN_ITEM_BOX && pi->key == "dot")
 				{
 				size += pi->fd->size;
 				count++;

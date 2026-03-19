@@ -63,7 +63,7 @@ constexpr GqColor PAN_POPUP_TEXT_COLOR{0, 0, 0, 225};
 
 static PanItem *pan_item_new(PanItemType type, gint x, gint y)
 {
-	auto *pi = g_new0(PanItem, 1);
+	auto *pi = new PanItem();
 
 	pi->type = type;
 	pi->x = x;
@@ -79,18 +79,16 @@ void pan_item_free(PanItem *pi)
 	if (pi->pixbuf) g_object_unref(pi->pixbuf);
 	if (pi->fd) file_data_unref(pi->fd);
 	g_free(pi->text);
-	g_free(pi->key);
 	g_free(pi->data);
 
-	g_free(pi);
+	delete pi;
 }
 
-void pan_item_set_key(PanItem *pi, const gchar *key)
+void pan_item_set_key(PanItem *pi, const std::string &key)
 {
 	if (!pi) return;
 
-	g_free(pi->key);
-	pi->key = g_strdup(key);
+	pi->key = key;
 }
 
 void pan_item_added(PanWindow *pw, PanItem *pi)
@@ -567,8 +565,7 @@ PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key)
 		PanItem *pi;
 
 		pi = static_cast<PanItem *>(work->data);
-		if ((pi->type == type || type == PAN_ITEM_NONE) &&
-		     pi->key && strcmp(pi->key, key) == 0)
+		if ((pi->type == type || type == PAN_ITEM_NONE) && pi->key == key)
 			{
 			return pi;
 			}
@@ -580,8 +577,7 @@ PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key)
 		PanItem *pi;
 
 		pi = static_cast<PanItem *>(work->data);
-		if ((pi->type == type || type == PAN_ITEM_NONE) &&
-		     pi->key && strcmp(pi->key, key) == 0)
+		if ((pi->type == type || type == PAN_ITEM_NONE) && pi->key == key)
 			{
 			return pi;
 			}
@@ -678,9 +674,9 @@ static PanItem *pan_item_find_by_coord_l(GList *list, PanItemType type, gint x, 
 
 		pi = static_cast<PanItem *>(work->data);
 		if ((pi->type == type || type == PAN_ITEM_NONE) &&
-		     x >= pi->x && x < pi->x + pi->width &&
-		     y >= pi->y && y < pi->y + pi->height &&
-		    (!key || (pi->key && strcmp(pi->key, key) == 0)))
+		    x >= pi->x && x < pi->x + pi->width &&
+		    y >= pi->y && y < pi->y + pi->height &&
+		    (!key || pi->key == key))
 			{
 			return pi;
 			}
@@ -724,14 +720,14 @@ void PanTextAlignment::add(const gchar *label, const gchar *text)
 		{
 		items.label = pan_item_text_new(pw, x, y, label, PAN_TEXT_ATTR_BOLD,
 		                                PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
-		pan_item_set_key(items.label, key.c_str());
+		pan_item_set_key(items.label, key);
 		}
 
 	if (text)
 		{
 		items.text = pan_item_text_new(pw, x, y, text, PAN_TEXT_ATTR_NONE,
 		                               PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
-		pan_item_set_key(items.text, key.c_str());
+		pan_item_set_key(items.text, key);
 		}
 
 	columns.push_back(items);

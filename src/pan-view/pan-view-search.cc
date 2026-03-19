@@ -195,7 +195,7 @@ static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
 		work = work->prev;
 
 		if (pi->fd && (pi->type == type || type == PAN_ITEM_NONE) &&
-		    ((!key && !pi->key) || (key && pi->key && strcmp(key, pi->key) == 0)))
+		    key && pi->key == key)
 			{
 			struct tm *tl;
 
