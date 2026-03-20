@@ -192,7 +192,7 @@ static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
 		pi = static_cast<PanItem *>(work->data);
 		work = work->prev;
 
-		if (pi->fd && (pi->type == type || type == PAN_ITEM_NONE) && pi->key == key)
+		if (pi->fd && pi->is_type(type) && pi->key == key)
 			{
 			struct tm *tl;
 
@@ -326,7 +326,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 	pw->search_pi = pi;
 
-	if (pw->layout == PAN_LAYOUT_CALENDAR && pi && pi->type == PAN_ITEM_BOX)
+	if (pw->layout == PAN_LAYOUT_CALENDAR && pi && pi->is_type(PAN_ITEM_BOX))
 		{
 		pan_info_update(pw, nullptr);
 		pan_calendar_update(pw, pi);

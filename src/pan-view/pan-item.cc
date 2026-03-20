@@ -89,6 +89,11 @@ void pan_item_free(PanItem *pi)
 	delete pi;
 }
 
+bool PanItem::is_type(PanItemType type) const
+{
+	return type == PAN_ITEM_ANY || this->type == type;
+}
+
 void PanItem::set_key(const std::string &key)
 {
 	this->key = key;
@@ -159,7 +164,7 @@ PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint widt
 
 void pan_item_box_shadow(PanItem *pi, gint offset, gint fade)
 {
-	if (!pi || pi->type != PAN_ITEM_BOX) return;
+	if (!pi || !pi->is_type(PAN_ITEM_BOX)) return;
 
 	auto *shadow = static_cast<PanItemBoxShadow *>(pi->data);
 	if (shadow)
@@ -568,7 +573,7 @@ PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key)
 		PanItem *pi;
 
 		pi = static_cast<PanItem *>(work->data);
-		if ((pi->type == type || type == PAN_ITEM_NONE) && pi->key == key)
+		if (pi->is_type(type) && pi->key == key)
 			{
 			return pi;
 			}
@@ -580,7 +585,7 @@ PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key)
 		PanItem *pi;
 
 		pi = static_cast<PanItem *>(work->data);
-		if ((pi->type == type || type == PAN_ITEM_NONE) && pi->key == key)
+		if (pi->is_type(type) && pi->key == key)
 			{
 			return pi;
 			}
@@ -603,7 +608,7 @@ static GList *pan_item_find_by_path_l(GList *list, GList *search_list,
 		PanItem *pi;
 
 		pi = static_cast<PanItem *>(work->data);
-		if ((pi->type == type || type == PAN_ITEM_NONE) && pi->fd)
+		if (pi->is_type(type) && pi->fd)
 			{
 			gboolean match = FALSE;
 
@@ -676,7 +681,7 @@ static PanItem *pan_item_find_by_coord_l(GList *list, PanItemType type, gint x, 
 		PanItem *pi;
 
 		pi = static_cast<PanItem *>(work->data);
-		if ((pi->type == type || type == PAN_ITEM_NONE) &&
+		if (pi->is_type(type) &&
 		    x >= pi->x && x < pi->x + pi->width &&
 		    y >= pi->y && y < pi->y + pi->height &&
 		    (!key || pi->key == key))

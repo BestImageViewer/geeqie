@@ -308,7 +308,7 @@ static gboolean pan_queue_step(PanWindow *pw)
 	thumb_loader_free(pw->tl);
 	pw->tl = nullptr;
 
-	if (pi->type == PAN_ITEM_IMAGE)
+	if (pi->is_type(PAN_ITEM_IMAGE))
 		{
 		pw->il = image_loader_new(pi->fd);
 
@@ -325,7 +325,7 @@ static gboolean pan_queue_step(PanWindow *pw)
 		image_loader_free(pw->il);
 		pw->il = nullptr;
 		}
-	else if (pi->type == PAN_ITEM_THUMB)
+	else if (pi->is_type(PAN_ITEM_THUMB))
 		{
 		pw->tl = thumb_loader_new(pw->thumb_size, pw->thumb_size);
 
@@ -439,7 +439,6 @@ static gboolean pan_window_request_tile_cb(PanWindow *pw, PixbufRenderer *pr,
 			case PAN_ITEM_IMAGE:
 				queue = pan_item_image_draw(pw, pi, pixbuf, pr, x, y, width, height);
 				break;
-			case PAN_ITEM_NONE:
 			default:
 				break;
 			}
@@ -519,7 +518,7 @@ static void pan_window_message(PanWindow *pw, const gchar *text)
 			pi = static_cast<PanItem *>(work->data);
 			work = work->next;
 
-			if (pi->fd && pi->type == PAN_ITEM_BOX && pi->key == "dot")
+			if (pi->fd && pi->is_type(PAN_ITEM_BOX) && pi->key == "dot")
 				{
 				size += pi->fd->size;
 				count++;
@@ -536,7 +535,7 @@ static void pan_window_message(PanWindow *pw, const gchar *text)
 			work = work->next;
 
 			if (pi->fd &&
-			    (pi->type == PAN_ITEM_THUMB || pi->type == PAN_ITEM_IMAGE))
+			    (pi->is_type(PAN_ITEM_THUMB) || pi->is_type(PAN_ITEM_IMAGE)))
 				{
 				size += pi->fd->size;
 				count++;
@@ -1444,7 +1443,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	if (pw->click_pi == pi) return;
 	if (pi && !pi->fd) pi = nullptr;
 
-	while ((p = pan_item_find_by_key(pw, PAN_ITEM_NONE, "info"))) pan_item_remove(pw, p);
+	while ((p = pan_item_find_by_key(pw, PAN_ITEM_ANY, "info"))) pan_item_remove(pw, p);
 	pw->click_pi = pi;
 
 	if (!pi) return;
@@ -1456,7 +1455,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	pbox->set_key("info");
 
 	GqPoint c1{pi->x + pi->width - 8, pi->y + 8};
-	if (pi->type == PAN_ITEM_THUMB && pi->pixbuf)
+	if (pi->is_type(PAN_ITEM_THUMB) && pi->pixbuf)
 		{
 		gint w = gdk_pixbuf_get_width(pi->pixbuf);
 		gint h = gdk_pixbuf_get_height(pi->pixbuf);

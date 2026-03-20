@@ -76,7 +76,7 @@ static void pan_flower_size(PanWindow *pw, gint &width, gint &height)
 		pi->x -= x1;
 		pi->y -= y1;
 
-		if (pi->type == PAN_ITEM_TRIANGLE && pi->data)
+		if (pi->is_type(PAN_ITEM_TRIANGLE) && pi->data)
 			{
 			auto *coord = static_cast<GqPoint *>(pi->data);
 

@@ -91,7 +91,7 @@ enum PanImageSize {
 };
 
 enum PanItemType {
-	PAN_ITEM_NONE,
+	PAN_ITEM_ANY,
 	PAN_ITEM_THUMB,
 	PAN_ITEM_BOX,
 	PAN_ITEM_TRIANGLE,
@@ -122,6 +122,7 @@ enum PanBorderType {
 
 
 struct PanItem {
+	bool is_type(PanItemType type) const;
 	void set_key(const std::string &key);
 
 	PanItemType type;
