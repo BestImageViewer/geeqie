@@ -99,9 +99,8 @@ static gint pan_search_by_path(PanWindow *pw, const gchar *path)
 	PanItem *pi;
 	GList *list;
 	GList *found;
-	PanItemType type;
 
-	type = (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE) ? PAN_ITEM_IMAGE : PAN_ITEM_THUMB;
+	const PanItemType type = get_pan_item_type(pw->size);
 
 	list = pan_item_find_by_path(pw, type, path, FALSE, FALSE);
 	if (!list) return FALSE;
@@ -136,9 +135,8 @@ static gboolean pan_search_by_partial(PanWindow *pw, const gchar *text)
 	PanItem *pi;
 	GList *list;
 	GList *found;
-	PanItemType type;
 
-	type = (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE) ? PAN_ITEM_IMAGE : PAN_ITEM_THUMB;
+	const PanItemType type = get_pan_item_type(pw->size);
 
 	list = pan_item_find_by_path(pw, type, text, TRUE, FALSE);
 	if (!list) list = pan_item_find_by_path(pw, type, text, FALSE, TRUE);
@@ -307,9 +305,8 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 		}
 	else
 		{
-		PanItemType type;
+		const PanItemType type = get_pan_item_type(pw->size);
 
-		type = (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE) ? PAN_ITEM_IMAGE : PAN_ITEM_THUMB;
 		list = pan_search_by_date_val(pw, type, year, month, day, {});
 		}
 

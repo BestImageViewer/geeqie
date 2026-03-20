@@ -55,6 +55,11 @@ constexpr GqColor PAN_POPUP_TEXT_COLOR{0, 0, 0, 225};
 
 } // namespace
 
+PanItemType get_pan_item_type(PanImageSize size)
+{
+	return (size > PAN_IMAGE_SIZE_THUMB_LARGE) ? PAN_ITEM_IMAGE : PAN_ITEM_THUMB;
+}
+
 /*
  *-----------------------------------------------------------------------------
  * item base functions

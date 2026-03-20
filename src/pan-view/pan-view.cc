@@ -1558,8 +1558,7 @@ static void button_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer data)
 		return;
 		}
 
-	pi = pan_item_find_by_coord(pw, (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE) ? PAN_ITEM_IMAGE : PAN_ITEM_THUMB,
-				    rx, ry, nullptr);
+	pi = pan_item_find_by_coord(pw, get_pan_item_type(pw->size), rx, ry, nullptr);
 
 	switch (event->button)
 		{

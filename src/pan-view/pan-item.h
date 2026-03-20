@@ -35,6 +35,8 @@
 class FileData;
 struct PixbufRenderer;
 
+PanItemType get_pan_item_type(PanImageSize size);
+
 void pan_item_free(PanItem *pi);
 
 void pan_item_added(PanWindow *pw, PanItem *pi);
