@@ -180,8 +180,8 @@ static gboolean valid_date_separator(gchar c)
 }
 
 static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
-				     gint year, gint month, gint day,
-				     const gchar *key)
+                                     gint year, gint month, gint day,
+                                     const std::string &key)
 {
 	GList *list = nullptr;
 	GList *work;
@@ -194,8 +194,7 @@ static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
 		pi = static_cast<PanItem *>(work->data);
 		work = work->prev;
 
-		if (pi->fd && (pi->type == type || type == PAN_ITEM_NONE) &&
-		    key && pi->key == key)
+		if (pi->fd && (pi->type == type || type == PAN_ITEM_NONE) && pi->key == key)
 			{
 			struct tm *tl;
 
@@ -311,7 +310,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 		PanItemType type;
 
 		type = (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE) ? PAN_ITEM_IMAGE : PAN_ITEM_THUMB;
-		list = pan_search_by_date_val(pw, type, year, month, day, nullptr);
+		list = pan_search_by_date_val(pw, type, year, month, day, {});
 		}
 
 	if (list)
