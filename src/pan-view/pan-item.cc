@@ -550,36 +550,24 @@ gboolean pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, Pixbuf
 
 PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key)
 {
-	GList *work;
-
 	if (!key) return nullptr;
 
-	work = g_list_last(pw->list);
-	while (work)
-		{
-		PanItem *pi;
-
-		pi = static_cast<PanItem *>(work->data);
-		if (pi->is_type(type) && pi->key == key)
+	const auto pan_item_find_by_key_l = [type, key](GList *list) -> PanItem *
+	{
+		for (GList *work = g_list_last(list); work; work = work->prev)
 			{
-			return pi;
-			}
-		work = work->prev;
-		}
-	work = g_list_last(pw->list_static);
-	while (work)
-		{
-		PanItem *pi;
+			auto *pi = static_cast<PanItem *>(work->data);
 
-		pi = static_cast<PanItem *>(work->data);
-		if (pi->is_type(type) && pi->key == key)
-			{
-			return pi;
+			if (pi->is_type(type) && pi->key == key) return pi;
 			}
-		work = work->prev;
-		}
 
-	return nullptr;
+		return nullptr;
+	};
+
+	PanItem *pi = pan_item_find_by_key_l(pw->list);
+	if (!pi) pi = pan_item_find_by_key_l(pw->list_static);
+
+	return pi;
 }
 
 /* when ignore_case and partial are TRUE, path should be converted to lower case */
