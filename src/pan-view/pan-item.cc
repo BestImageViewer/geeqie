@@ -637,38 +637,31 @@ GList *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,
 }
 
 
-static PanItem *pan_item_find_by_coord_l(GList *list, PanItemType type, gint x, gint y, const gchar *key)
-{
-	GList *work;
-
-	work = list;
-	while (work)
-		{
-		PanItem *pi;
-
-		pi = static_cast<PanItem *>(work->data);
-		if (pi->is_type(type) &&
-		    x >= pi->x && x < pi->x + pi->width &&
-		    y >= pi->y && y < pi->y + pi->height &&
-		    (!key || pi->key == key))
-			{
-			return pi;
-			}
-		work = work->next;
-		}
-
-	return nullptr;
-}
-
 PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
 				gint x, gint y, const gchar *key)
 {
-	PanItem *pi;
+	const auto pan_item_find_by_coord_l = [type, x, y, key](GList *list) -> PanItem *
+	{
+		for (GList *work = list; work; work = work->next)
+			{
+			auto *pi = static_cast<PanItem *>(work->data);
 
-	pi = pan_item_find_by_coord_l(pw->list, type, x, y, key);
-	if (pi) return pi;
+			if (pi->is_type(type) &&
+			    x >= pi->x && x < pi->x + pi->width &&
+			    y >= pi->y && y < pi->y + pi->height &&
+			    (!key || pi->key == key))
+				{
+				return pi;
+				}
+			}
 
-	return pan_item_find_by_coord_l(pw->list_static, type, x, y, key);
+		return nullptr;
+	};
+
+	PanItem *pi = pan_item_find_by_coord_l(pw->list);
+	if (!pi) pi = pan_item_find_by_coord_l(pw->list_static);
+
+	return pi;
 }
 
 
