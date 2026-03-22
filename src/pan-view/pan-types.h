@@ -125,6 +125,10 @@ struct PanItem {
 	bool is_type(PanItemType type) const;
 	void set_key(const std::string &key);
 
+	// Determine sizes
+	void set_size_by_item(const PanItem *pi, gint border);
+	void adjust_size(gint border, gint &w, gint &h) const;
+
 	PanItemType type;
 	gint x;
 	gint y;

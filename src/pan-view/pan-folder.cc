@@ -287,7 +287,7 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 			y_height = 0;
 			}
 
-		pan_item_size_by_item(pi_box, pi, PAN_BOX_BORDER);
+		pi_box->set_size_by_item(pi, PAN_BOX_BORDER);
 		}
 
 	group = g_new0(FlowerGroup, 1);
@@ -408,7 +408,7 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 			y_height = pw->thumb_size;
 			}
 
-		pan_item_size_by_item(pi_box, pi, PAN_BOX_BORDER);
+		pi_box->set_size_by_item(pi, PAN_BOX_BORDER);
 		}
 
 	if (f) y = pi_box->y + pi_box->height;
@@ -431,11 +431,11 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 
 	file_data_list_free(d);
 
-	pan_item_size_by_item(parent, pi_box, PAN_BOX_BORDER);
+	if (parent) parent->set_size_by_item(pi_box, PAN_BOX_BORDER);
 
 	y = std::max(y, pi_box->y + pi_box->height + PAN_BOX_BORDER);
 
-	pan_item_size_coordinates(pi_box, PAN_BOX_BORDER, width, height);
+	pi_box->adjust_size(PAN_BOX_BORDER, width, height);
 }
 
 void pan_folder_tree_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height)

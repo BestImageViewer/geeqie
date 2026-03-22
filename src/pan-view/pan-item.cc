@@ -121,23 +121,18 @@ void pan_item_remove(PanWindow *pw, PanItem *pi)
 	pan_item_free(pi);
 }
 
-void pan_item_size_by_item(PanItem *pi, PanItem *child, gint border)
-{
-	if (!pi || !child) return;
-
-	if (pi->x + pi->width < child->x + child->width + border)
-		pi->width = child->x + child->width + border - pi->x;
-
-	if (pi->y + pi->height < child->y + child->height + border)
-		pi->height = child->y + child->height + border - pi->y;
-}
-
-void pan_item_size_coordinates(PanItem *pi, gint border, gint &w, gint &h)
+void PanItem::set_size_by_item(const PanItem *pi, gint border)
 {
 	if (!pi) return;
 
-	w = std::max(w, pi->x + pi->width + border);
-	h = std::max(h, pi->y + pi->height + border);
+	width = std::max(width, pi->x + pi->width + border - x);
+	height = std::max(height, pi->y + pi->height + border - y);
+}
+
+void PanItem::adjust_size(gint border, gint &w, gint &h) const
+{
+	w = std::max(w, x + width + border);
+	h = std::max(h, y + height + border);
 }
 
 
@@ -719,7 +714,7 @@ void PanTextAlignment::calc(PanItem *box)
 			{
 			pi_label->x = x;
 			pi_label->y = y;
-			pan_item_size_by_item(box, pi_label, PREF_PAD_BORDER);
+			box->set_size_by_item(pi_label, PREF_PAD_BORDER);
 			height = pi_label->height;
 			}
 
@@ -727,7 +722,7 @@ void PanTextAlignment::calc(PanItem *box)
 			{
 			pi_text->x = x + label_column_width + PREF_PAD_SPACE;
 			pi_text->y = y;
-			pan_item_size_by_item(box, pi_text, PREF_PAD_BORDER);
+			box->set_size_by_item(pi_text, PREF_PAD_BORDER);
 			height = std::max(height, pi_text->height);
 			}
 

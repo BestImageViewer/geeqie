@@ -1518,7 +1518,8 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 			p = pan_item_image_new(pw, file_data_new_group(pi->fd->path),
 					       pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, iw, ih);
 			p->set_key("info");
-			pan_item_size_by_item(pbox, p, PREF_PAD_BORDER);
+
+			pbox->set_size_by_item(p, PREF_PAD_BORDER);
 
 			pan_item_box_shadow(pbox, PAN_SHADOW_OFFSET * 2, PAN_SHADOW_FADE * 2);
 			pan_item_added(pw, pbox);

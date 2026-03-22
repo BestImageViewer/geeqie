@@ -179,7 +179,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 		                           PAN_BORDER_3, PAN_CAL_POPUP_TEXT_COLOR);
 		plabel->set_key("day_bubble");
 
-		pan_item_size_by_item(pbox, plabel, 0);
+		pbox->set_size_by_item(plabel, 0);
 
 		y += plabel->height;
 		}
@@ -206,7 +206,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 				pimg = pan_item_thumb_new(pw, file_data_ref(dot->fd), x, y);
 				pimg->set_key("day_bubble");
 
-				pan_item_size_by_item(pbox, pimg, PAN_BOX_BORDER);
+				pbox->set_size_by_item(pimg, PAN_BOX_BORDER);
 
 				column++;
 				if (column < grid)
@@ -445,7 +445,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 			pan_item_text_new(pw, x + 4 + pi_day_number->width + 4, y + 4, abbr_day_of_week,
 			                  PAN_TEXT_ATTR_NONE, PAN_BORDER_3, PAN_CAL_DAY_OF_WEEK_COLOR);
 
-			pan_item_size_coordinates(pi_day, PAN_BOX_BORDER, width, height);
+			pi_day->adjust_size(PAN_BOX_BORDER, width, height);
 
 			col++;
 			if (col > 6)

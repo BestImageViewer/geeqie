@@ -176,8 +176,8 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 			y_height = pw->thumb_size;
 			}
 
-		pan_item_size_by_item(pi_day, pi, PAN_BOX_BORDER);
-		pan_item_size_by_item(pi_month, pi_day, PAN_BOX_BORDER);
+		if (pi_day) pi_day->set_size_by_item(pi, PAN_BOX_BORDER);
+		if (pi_month) pi_month->set_size_by_item(pi_day, PAN_BOX_BORDER);
 
 		total--;
 		count++;
@@ -198,7 +198,7 @@ void pan_timeline_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 				y = month_start;
 			}
 
-		pan_item_size_coordinates(pi_month, PAN_BOX_BORDER, width, height);
+		if (pi_month) pi_month->adjust_size(PAN_BOX_BORDER, width, height);
 		}
 
 	g_list_free(list);

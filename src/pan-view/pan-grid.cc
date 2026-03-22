@@ -90,7 +90,8 @@ void pan_grid_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height
 				y += pw->thumb_size + pw->thumb_gap;
 				}
 			}
-		pan_item_size_coordinates(pi, pw->thumb_gap, width, height);
+
+		pi->adjust_size(pw->thumb_gap, width, height);
 		}
 
 	g_list_free(list);
