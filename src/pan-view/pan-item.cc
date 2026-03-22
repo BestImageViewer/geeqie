@@ -602,14 +602,14 @@ static bool pan_item_match_path(const PanItem *pi, const gchar *path,
  *
  * When ignore_case and partial are TRUE, path should be converted to lower case
  */
-GList *pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
-			     gboolean ignore_case, gboolean partial)
+PanItemList pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
+                                  gboolean ignore_case, gboolean partial)
 {
-	if (!path) return nullptr;
-	if (partial && path[0] == G_DIR_SEPARATOR) return nullptr;
+	if (!path) return {};
+	if (partial && path[0] == G_DIR_SEPARATOR) return {};
 
 	// Prepend items from search_list to list in reverse order
-	const auto pan_item_find_by_path_l = [type, path, ignore_case, partial](GList *list, const GList *search_list)
+	const auto pan_item_find_by_path_l = [type, path, ignore_case, partial](PanItemList &list, const GList *search_list)
 	{
 		for (const GList *work = search_list; work; work = work->next)
 			{
@@ -618,15 +618,14 @@ GList *pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
 			if (pi->is_type(type) && pi->fd &&
 			    pan_item_match_path(pi, path, ignore_case, partial))
 				{
-				list = g_list_prepend(list, pi);
+				list.push_front(pi);
 				}
 			}
-
-		return list;
 	};
 
-	GList *list = pan_item_find_by_path_l(nullptr, pw->list); // prepend items from pw->list in reverse order
-	list = pan_item_find_by_path_l(list, pw->list_static); // prepend items from pw->list_static in reverse order
+	PanItemList list;
+	pan_item_find_by_path_l(list, pw->list); // prepend items from pw->list in reverse order
+	pan_item_find_by_path_l(list, pw->list_static); // prepend items from pw->list_static in reverse order
 
 	return list;
 }
@@ -636,8 +635,8 @@ PanItem *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,
 {
 	if (!fd) return nullptr;
 
-	g_autoptr(GList) list = pan_item_find_by_path(pw, type, fd->path, ignore_case, partial);
-	return list ? static_cast<PanItem *>(list->data) : nullptr;
+	PanItemList list = pan_item_find_by_path(pw, type, fd->path, ignore_case, partial);
+	return list.empty() ? nullptr : list.front();
 }
 
 

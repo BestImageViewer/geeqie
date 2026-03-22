@@ -22,6 +22,7 @@
 #ifndef PAN_VIEW_PAN_ITEM_H
 #define PAN_VIEW_PAN_ITEM_H
 
+#include <list>
 #include <string>
 #include <vector>
 
@@ -44,8 +45,9 @@ void pan_item_remove(PanWindow *pw, PanItem *pi);
 
 // Find items
 PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key);
-GList *pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
-			     gboolean ignore_case, gboolean partial);
+using PanItemList = std::list<PanItem *>;
+PanItemList pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
+                                  gboolean ignore_case, gboolean partial);
 PanItem *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,
                              gboolean ignore_case, gboolean partial);
 PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
