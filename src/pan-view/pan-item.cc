@@ -624,11 +624,13 @@ GList *pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
 	return g_list_reverse(list);
 }
 
-GList *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,
-			   gboolean ignore_case, gboolean partial)
+PanItem *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,
+                             gboolean ignore_case, gboolean partial)
 {
 	if (!fd) return nullptr;
-	return pan_item_find_by_path(pw, type, fd->path, ignore_case, partial);
+
+	g_autoptr(GList) list = pan_item_find_by_path(pw, type, fd->path, ignore_case, partial);
+	return list ? static_cast<PanItem *>(list->data) : nullptr;
 }
 
 

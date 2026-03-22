@@ -334,21 +334,18 @@ void pan_flower_compute(PanWindow *pw, FileData *dir_fd,
                         gint &scroll_x, gint &scroll_y)
 {
 	FlowerGroup *group;
-	GList *list;
 
 	group = pan_flower_group(pw, dir_fd, 0, 0);
 	pan_flower_build(pw, group, nullptr);
 
 	pan_flower_size(pw, width, height);
 
-	list = pan_item_find_by_fd(pw, PAN_ITEM_BOX, dir_fd, FALSE, FALSE);
-	if (list)
+	PanItem *pi = pan_item_find_by_fd(pw, PAN_ITEM_BOX, dir_fd, FALSE, FALSE);
+	if (pi)
 		{
-		auto pi = static_cast<PanItem *>(list->data);
 		scroll_x = pi->x + pi->width / 2;
 		scroll_y = pi->y + pi->height / 2;
 		}
-	g_list_free(list);
 }
 
 static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
