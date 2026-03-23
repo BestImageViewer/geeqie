@@ -357,7 +357,7 @@ static gboolean pan_queue_step(PanWindow *pw)
 static void pan_queue_add(PanWindow *pw, PanItem *pi)
 {
 	if (!pi || pi->queued || pi->pixbuf) return;
-	if (pw->size <= PAN_IMAGE_SIZE_THUMB_NONE && pi->key != "info")
+	if (pw->size <= PAN_IMAGE_SIZE_THUMB_NONE && pi->key != PanKey::Info)
 		{
 		return;
 		}
@@ -518,7 +518,7 @@ static void pan_window_message(PanWindow *pw, const gchar *text)
 			pi = static_cast<PanItem *>(work->data);
 			work = work->next;
 
-			if (pi->fd && pi->is_type(PAN_ITEM_BOX) && pi->key == "dot")
+			if (pi->fd && pi->is_type(PAN_ITEM_BOX) && pi->key == PanKey::Dot)
 				{
 				size += pi->fd->size;
 				count++;
@@ -1415,7 +1415,7 @@ static void pan_info_add_exif(PanTextAlignment &ta, FileData *fd)
 
 static void pan_info_calc_text_alignment(PanWindow *pw, PanItem *pbox, FileData *fd)
 {
-	PanTextAlignment ta{pw, pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, "info"};
+	PanTextAlignment ta{ pw, pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, PanKey::Info };
 
 	ta.add(_("Filename:"), fd->name);
 
@@ -1443,7 +1443,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	if (pw->click_pi == pi) return;
 	if (pi && !pi->fd) pi = nullptr;
 
-	while ((p = pan_item_find_by_key(pw, PAN_ITEM_ANY, "info"))) pan_item_remove(pw, p);
+	while ((p = pan_item_find_by_key(pw, PAN_ITEM_ANY, PanKey::Info))) pan_item_remove(pw, p);
 	pw->click_pi = pi;
 
 	if (!pi) return;
@@ -1452,7 +1452,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 
 	pbox = pan_item_box_new(pw, nullptr, pi->x + pi->width + 4, pi->y, 10, 10,
 				PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
-	pbox->set_key("info");
+	pbox->set_key(PanKey::Info);
 
 	GqPoint c1{pi->x + pi->width - 8, pi->y + 8};
 	if (pi->is_type(PAN_ITEM_THUMB) && pi->pixbuf)
@@ -1471,7 +1471,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	                     c1, c2, c3,
 	                     PAN_POPUP_COLOR,
 	                     PAN_BORDER_1 | PAN_BORDER_3, PAN_POPUP_BORDER_COLOR);
-	p->set_key("info");
+	p->set_key(PanKey::Info);
 	pan_item_added(pw, p);
 
 	pan_info_calc_text_alignment(pw, pbox, pi->fd);
@@ -1513,11 +1513,11 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 
 			pbox = pan_item_box_new(pw, nullptr, pbox->x, pbox->y + pbox->height + 8, 10, 10,
 						PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
-			pbox->set_key("info");
+			pbox->set_key(PanKey::Info);
 
 			p = pan_item_image_new(pw, file_data_new_group(pi->fd->path),
 					       pbox->x + PREF_PAD_BORDER, pbox->y + PREF_PAD_BORDER, iw, ih);
-			p->set_key("info");
+			p->set_key(PanKey::Info);
 
 			pbox->set_size_by_item(p, PREF_PAD_BORDER);
 
@@ -1551,14 +1551,14 @@ static void button_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer data)
 		ry = static_cast<gdouble>(pr->y_scroll + event->y - pr->y_offset) / pr->scale;
 		}
 
-	pi = pan_item_find_by_coord(pw, PAN_ITEM_BOX, rx, ry, "info");
+	pi = pan_item_find_by_coord(pw, PAN_ITEM_BOX, rx, ry, PanKey::Info);
 	if (pi && event->button == GDK_BUTTON_PRIMARY)
 		{
 		pan_info_update(pw, nullptr);
 		return;
 		}
 
-	pi = pan_item_find_by_coord(pw, get_pan_item_type(pw->size), rx, ry, nullptr);
+	pi = pan_item_find_by_coord(pw, get_pan_item_type(pw->size), rx, ry, PanKey::None);
 
 	switch (event->button)
 		{
@@ -1567,7 +1567,7 @@ static void button_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer data)
 
 			if (!pi && pw->layout == PAN_LAYOUT_CALENDAR)
 				{
-				pi = pan_item_find_by_coord(pw, PAN_ITEM_BOX, rx, ry, "day");
+				pi = pan_item_find_by_coord(pw, PAN_ITEM_BOX, rx, ry, PanKey::Day);
 				pan_calendar_update(pw, pi);
 				}
 			break;

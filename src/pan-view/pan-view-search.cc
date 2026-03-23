@@ -151,7 +151,7 @@ static gboolean valid_date_separator(gchar c)
 
 static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
                                      gint year, gint month, gint day,
-                                     const std::string &key)
+                                     PanKey key)
 {
 	GList *list = nullptr;
 	GList *work;
@@ -273,13 +273,13 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 	if (pw->layout == PAN_LAYOUT_CALENDAR)
 		{
-		list = pan_search_by_date_val(pw, PAN_ITEM_BOX, year, month, day, "day");
+		list = pan_search_by_date_val(pw, PAN_ITEM_BOX, year, month, day, PanKey::Day);
 		}
 	else
 		{
 		const PanItemType type = get_pan_item_type(pw->size);
 
-		list = pan_search_by_date_val(pw, type, year, month, day, {});
+		list = pan_search_by_date_val(pw, type, year, month, day, PanKey::None);
 		}
 
 	if (list)

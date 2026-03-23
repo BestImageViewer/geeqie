@@ -139,9 +139,9 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	gint grid;
 	gint column;
 
-	while ((pi = pan_item_find_by_key(pw, PAN_ITEM_ANY, "day_bubble"))) pan_item_remove(pw, pi);
+	while ((pi = pan_item_find_by_key(pw, PAN_ITEM_ANY, PanKey::DayBubble))) pan_item_remove(pw, pi);
 
-	if (!pi_day || !pi_day->is_type(PAN_ITEM_BOX) || pi_day->key != "day") return;
+	g_return_if_fail(pi_day && pi_day->is_type(PAN_ITEM_BOX) && pi_day->key == PanKey::Day);
 
 	list = pan_layout_intersect(pw, pi_day->x, pi_day->y, pi_day->width, pi_day->height);
 
@@ -155,7 +155,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 		node = work;
 		work = work->next;
 
-		if (!dot->is_type(PAN_ITEM_BOX) || !dot->fd || dot->key != "dot")
+		if (!dot->is_type(PAN_ITEM_BOX) || !dot->fd || dot->key != PanKey::Dot)
 			{
 			list = g_list_delete_link(list, node);
 			}
@@ -168,7 +168,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 
 	pbox = pan_item_box_new(pw, nullptr, x, y, PAN_BOX_BORDER, PAN_BOX_BORDER,
 				PAN_CAL_POPUP_BORDER, PAN_CAL_POPUP_COLOR, PAN_CAL_POPUP_BORDER_COLOR);
-	pbox->set_key("day_bubble");
+	pbox->set_key(PanKey::DayBubble);
 
 	if (pi_day->fd)
 		{
@@ -177,7 +177,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 		g_autofree gchar *buf = pan_date_value_string(pi_day->fd->date, PAN_DATE_LENGTH_WEEK);
 		plabel = pan_item_text_new(pw, x, y, buf, PAN_TEXT_ATTR_BOLD_HEADING,
 		                           PAN_BORDER_3, PAN_CAL_POPUP_TEXT_COLOR);
-		plabel->set_key("day_bubble");
+		plabel->set_key(PanKey::DayBubble);
 
 		pbox->set_size_by_item(plabel, 0);
 
@@ -204,7 +204,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 				PanItem *pimg;
 
 				pimg = pan_item_thumb_new(pw, file_data_ref(dot->fd), x, y);
-				pimg->set_key("day_bubble");
+				pimg->set_key(PanKey::DayBubble);
 
 				pbox->set_size_by_item(pimg, PAN_BOX_BORDER);
 
@@ -231,7 +231,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	                      c1, c2, c3,
 	                      PAN_CAL_POPUP_COLOR,
 	                      PAN_BORDER_1 | PAN_BORDER_3, PAN_CAL_POPUP_BORDER_COLOR);
-	pi->set_key("day_bubble");
+	pi->set_key(PanKey::DayBubble);
 	pan_item_added(pw, pi);
 
 	pan_item_box_shadow(pbox, PAN_SHADOW_OFFSET * 2, PAN_SHADOW_FADE * 2);
@@ -386,7 +386,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 			fd->date = dt;
 			pi_day = pan_item_box_new(pw, fd, x, y, PAN_CAL_DAY_WIDTH, PAN_CAL_DAY_HEIGHT,
 						  PAN_CAL_DAY_BORDER, PAN_CAL_DAY_COLOR, PAN_CAL_DAY_BORDER_COLOR);
-			pi_day->set_key("day");
+			pi_day->set_key(PanKey::Day);
 
 			dx = x + PAN_CAL_DOT_GAP * 2;
 			dy = y + PAN_CAL_DOT_GAP * 2;
@@ -400,7 +400,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 						      0,
 						      PAN_CAL_DOT_COLOR,
 						      {0, 0, 0, 0});
-				pi->set_key("dot");
+				pi->set_key(PanKey::Dot);
 
 				dx += PAN_CAL_DOT_SIZE + PAN_CAL_DOT_GAP;
 				if (dx + PAN_CAL_DOT_SIZE > pi_day->x + pi_day->width - PAN_CAL_DOT_GAP * 2)

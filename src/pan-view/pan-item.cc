@@ -75,6 +75,7 @@ static PanItem *pan_item_new(PanItemType type, gint x, gint y, gint width, gint 
 	pi->y = y;
 	pi->width = width;
 	pi->height = height;
+	pi->key = PanKey::None;
 
 	return pi;
 }
@@ -96,7 +97,7 @@ bool PanItem::is_type(PanItemType type) const
 	return type == PAN_ITEM_ANY || this->type == type;
 }
 
-void PanItem::set_key(const std::string &key)
+void PanItem::set_key(PanKey key)
 {
 	this->key = key;
 }
@@ -543,9 +544,9 @@ gboolean pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, Pixbuf
  *-----------------------------------------------------------------------------
  */
 
-PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, const gchar *key)
+PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, PanKey key)
 {
-	if (!key) return nullptr;
+	g_return_val_if_fail(key != PanKey::None, nullptr);
 
 	const auto pan_item_find_by_key_l = [type, key](GList *list) -> PanItem *
 	{
@@ -641,7 +642,7 @@ PanItem *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,
 
 
 PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
-				gint x, gint y, const gchar *key)
+                                gint x, gint y, PanKey key)
 {
 	const auto pan_item_find_by_coord_l = [type, x, y, key](GList *list) -> PanItem *
 	{
@@ -652,7 +653,7 @@ PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
 			if (pi->is_type(type) &&
 			    x >= pi->x && x < pi->x + pi->width &&
 			    y >= pi->y && y < pi->y + pi->height &&
-			    (!key || pi->key == key))
+			    (key == PanKey::None || pi->key == key))
 				{
 				return pi;
 				}
@@ -674,11 +675,11 @@ PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
  *-----------------------------------------------------------------------------
  */
 
-PanTextAlignment::PanTextAlignment(PanWindow *pw, gint x, gint y, std::string key)
+PanTextAlignment::PanTextAlignment(PanWindow *pw, gint x, gint y, PanKey key)
 	: pw(pw)
 	, x(x)
 	, y(y)
-	, key(std::move(key))
+	, key(key)
 {
 }
 
