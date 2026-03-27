@@ -595,16 +595,23 @@ static bool pan_item_match_path(const PanItem *pi, const gchar *path,
 	return strcmp(path, pi->fd->name) == 0;
 }
 
-/* when ignore_case and partial are TRUE, path should be converted to lower case */
+/**
+ * @returns Suitable items from pw->list and pw->list_static in following order:
+ *          items from pw->list_static in reverse order,
+ *          items from pw->list in reverse order
+ *
+ * When ignore_case and partial are TRUE, path should be converted to lower case
+ */
 GList *pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
 			     gboolean ignore_case, gboolean partial)
 {
 	if (!path) return nullptr;
 	if (partial && path[0] == G_DIR_SEPARATOR) return nullptr;
 
-	const auto pan_item_find_by_path_l = [type, path, ignore_case, partial](GList *list, GList *search_list)
+	// Prepend items from search_list to list in reverse order
+	const auto pan_item_find_by_path_l = [type, path, ignore_case, partial](GList *list, const GList *search_list)
 	{
-		for (GList *work = g_list_last(search_list); work; work = work->prev)
+		for (const GList *work = search_list; work; work = work->next)
 			{
 			auto *pi = static_cast<PanItem *>(work->data);
 
@@ -618,10 +625,10 @@ GList *pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
 		return list;
 	};
 
-	GList *list = pan_item_find_by_path_l(nullptr, pw->list_static);
-	list = pan_item_find_by_path_l(list, pw->list);
+	GList *list = pan_item_find_by_path_l(nullptr, pw->list); // prepend items from pw->list in reverse order
+	list = pan_item_find_by_path_l(list, pw->list_static); // prepend items from pw->list_static in reverse order
 
-	return g_list_reverse(list);
+	return list;
 }
 
 PanItem *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,
