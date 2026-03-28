@@ -21,8 +21,8 @@
 
 #include "pan-view-search.h"
 
+#include <algorithm>
 #include <cstdlib>
-#include <cstring>
 #include <ctime>
 
 #include <glib-object.h>
@@ -94,28 +94,28 @@ static void pan_search_status(PanWindow *pw, const gchar *text)
 	gtk_label_set_text(GTK_LABEL(pw->search_ui->search_label), (text) ? text : "");
 }
 
-static bool pan_search_list(PanWindow *pw, GList *list, const gchar *desc)
+static bool pan_search_list(PanWindow *pw, const PanItemList &list, const gchar *desc)
 {
-	if (!list) return false;
+	if (list.empty()) return false;
 
-	GList *found = g_list_find(list, pw->click_pi);
-	if (found && found->next)
+	auto found = std::find(list.cbegin(), list.cend(), pw->click_pi);
+	if (found != list.cend() && std::next(found) != list.cend())
 		{
-		found = found->next;
+		found = std::next(found);
 		}
 	else
 		{
-		found = list;
+		found = list.cbegin();
 		}
 
-	auto *pi = static_cast<PanItem *>(found->data);
+	PanItem *pi = *found;
 
 	pan_info_update(pw, pi);
 	image_scroll_to_point(pw->imd, pi->x + (pi->width / 2), pi->y + (pi->height / 2), 0.5, 0.5);
 
-	g_autofree gchar *buf = g_strdup_printf("%s ( %d / %u )", desc,
-	                                        g_list_index(list, pi) + 1,
-	                                        g_list_length(list));
+	g_autofree gchar *buf = g_strdup_printf("%s ( %td / %zu )", desc,
+	                                        std::distance(list.cbegin(), found) + 1,
+	                                        list.size());
 	pan_search_status(pw, buf);
 
 	return true;
@@ -125,18 +125,17 @@ static bool pan_search_by_path(PanWindow *pw, const gchar *path)
 {
 	const PanItemType type = get_pan_item_type(pw->size);
 
-	g_autoptr(GList) list = pan_item_find_by_path(pw, type, path, FALSE, FALSE);
-
-	return pan_search_list(pw, list, (path[0] == G_DIR_SEPARATOR) ? _("path found") : _("filename found"));
+	return pan_search_list(pw, pan_item_find_by_path(pw, type, path, FALSE, FALSE),
+	                       (path[0] == G_DIR_SEPARATOR) ? _("path found") : _("filename found"));
 }
 
 static bool pan_search_by_partial(PanWindow *pw, const gchar *text)
 {
 	const PanItemType type = get_pan_item_type(pw->size);
 
-	g_autoptr(GList) list = pan_item_find_by_path(pw, type, text, TRUE, FALSE);
-	if (!list) list = pan_item_find_by_path(pw, type, text, FALSE, TRUE);
-	if (!list)
+	PanItemList list = pan_item_find_by_path(pw, type, text, TRUE, FALSE);
+	if (list.empty()) list = pan_item_find_by_path(pw, type, text, FALSE, TRUE);
+	if (list.empty())
 		{
 		g_autofree gchar *needle = g_utf8_strdown(text, -1);
 		list = pan_item_find_by_path(pw, type, needle, TRUE, TRUE);
