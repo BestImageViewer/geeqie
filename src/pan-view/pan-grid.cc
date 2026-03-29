@@ -26,19 +26,18 @@
 
 #include "pan-item.h"
 #include "pan-types.h"
-#include "pan-util.h"
 #include "pan-view-filter.h"
+#include "pan-view.h"
 
 void pan_grid_compute(PanWindow *pw, gint &width, gint &height)
 {
-	GList *list;
 	GList *work;
 	gint x;
 	gint y;
 	gint grid_size;
 	gint next_y;
 
-	list = pan_list_tree(pw->dir_fd, {SORT_NAME, TRUE, TRUE}, pw->ignore_symlinks);
+	g_autoptr(GList) list = pan_list_tree(pw, SORT_NAME);
 	pan_filter_fd_list(&list, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 
 	grid_size = static_cast<gint>(sqrt(static_cast<gdouble>(g_list_length(list))));
@@ -93,7 +92,5 @@ void pan_grid_compute(PanWindow *pw, gint &width, gint &height)
 
 		pi->adjust_size(pw->thumb_gap, width, height);
 		}
-
-	g_list_free(list);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

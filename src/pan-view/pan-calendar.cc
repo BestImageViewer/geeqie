@@ -242,7 +242,6 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 
 void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 {
-	GList *list;
 	GList *work;
 	gint x;
 	gint y;
@@ -256,7 +255,7 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 	gint end_month = 0;
 	gint day_of_week;
 
-	list = pan_list_tree(pw->dir_fd, {SORT_NONE, TRUE, TRUE}, pw->ignore_symlinks);
+	g_autoptr(GList) list = pan_list_tree(pw, SORT_NONE);
 	pan_filter_fd_list(&list, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 
 	if (pw->cache_list && pw->exif_date_enable)
@@ -473,7 +472,5 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 
 	width += grid;
 	height = std::max(height, grid + (PAN_BOX_BORDER * 2 * 2));
-
-	g_list_free(list);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

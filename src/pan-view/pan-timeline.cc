@@ -40,7 +40,6 @@ constexpr gint PAN_GROUP_MAX = 16;
 
 void pan_timeline_compute(PanWindow *pw, gint &width, gint &height)
 {
-	GList *list;
 	GList *work;
 	gint x;
 	gint y;
@@ -54,7 +53,7 @@ void pan_timeline_compute(PanWindow *pw, gint &width, gint &height)
 	gint x_width;
 	gint y_height;
 
-	list = pan_list_tree(pw->dir_fd, {SORT_NONE, TRUE, TRUE}, pw->ignore_symlinks);
+	g_autoptr(GList) list = pan_list_tree(pw, SORT_NONE);
 	pan_filter_fd_list(&list, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 
 	if (pw->cache_list && pw->exif_date_enable)
@@ -200,7 +199,5 @@ void pan_timeline_compute(PanWindow *pw, gint &width, gint &height)
 
 		if (pi_month) pi_month->adjust_size(PAN_BOX_BORDER, width, height);
 		}
-
-	g_list_free(list);
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

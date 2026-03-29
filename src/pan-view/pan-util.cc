@@ -209,46 +209,4 @@ gboolean pan_is_ignored(const gchar *s, gboolean ignore_symlinks)
 
 	return FALSE;
 }
-
-GList *pan_list_tree(FileData *dir_fd, FileData::FileList::SortSettings settings, gboolean ignore_symlinks)
-{
-	GList *flist;
-	GList *dlist;
-	GList *result;
-	GList *folders;
-
-	filelist_read(dir_fd, &flist, &dlist);
-	if (settings.method != SORT_NONE)
-		{
-		flist = filelist_sort(flist, settings);
-		dlist = filelist_sort(dlist, settings);
-		}
-
-	result = flist;
-	folders = dlist;
-	while (folders)
-		{
-		FileData *fd;
-
-		fd = static_cast<FileData *>(folders->data);
-		folders = g_list_remove(folders, fd);
-
-		if (!pan_is_ignored(fd->path, ignore_symlinks) &&
-		    filelist_read(fd, &flist, &dlist))
-			{
-			if (settings.method != SORT_NONE)
-				{
-				flist = filelist_sort(flist, settings);
-				dlist = filelist_sort(dlist, settings);
-				}
-
-			result = g_list_concat(result, flist);
-			folders = g_list_concat(dlist, folders);
-			}
-
-		file_data_unref(fd);
-		}
-
-	return result;
-}
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

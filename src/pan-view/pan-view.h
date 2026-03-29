@@ -39,5 +39,7 @@ void pan_cache_get_image_size(PanWindow *pw, const FileData *fd, gint &w, gint &
 
 void pan_info_update(PanWindow *pw, PanItem *pi);
 
+FileDataList *pan_list_tree(PanWindow *pw, SortType method);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

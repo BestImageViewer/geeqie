@@ -625,13 +625,11 @@ static void pan_cache_free(PanWindow *pw)
 	pw->cache_cl = nullptr;
 }
 
-static void pan_cache_fill(PanWindow *pw, FileData *dir_fd)
+static void pan_cache_fill(PanWindow *pw)
 {
-	GList *list;
-
 	pan_cache_free(pw);
 
-	list = pan_list_tree(dir_fd, {SORT_NAME, TRUE, TRUE}, pw->ignore_symlinks);
+	GList *list = pan_list_tree(pw, SORT_NAME);
 	pw->cache_todo = g_list_reverse(list);
 
 	pw->cache_total = g_list_length(pw->cache_todo);
@@ -1066,7 +1064,7 @@ static gint pan_layout_update_idle_cb(gpointer data)
 		{
 		if (!pw->cache_list && !pw->cache_todo)
 			{
-			pan_cache_fill(pw, pw->dir_fd);
+			pan_cache_fill(pw);
 			if (pw->cache_todo)
 				{
 				pan_window_message(pw, _("Reading image data…"));
@@ -2441,6 +2439,48 @@ static void pan_window_dnd_init(PanWindow *pw)
 	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	gq_drag_g_signal_connect(G_OBJECT(widget), "drag_data_received",
 			 G_CALLBACK(pan_window_get_dnd_data), pw);
+}
+
+FileDataList *pan_list_tree(PanWindow *pw, SortType method)
+{
+	const FileData::FileList::SortSettings settings{ method, TRUE, TRUE };
+
+	FileDataList *flist;
+	FileDataList *dlist;
+	filelist_read(pw->dir_fd, &flist, &dlist);
+
+	if (settings.method != SORT_NONE)
+		{
+		flist = filelist_sort(flist, settings);
+		dlist = filelist_sort(dlist, settings);
+		}
+
+	FileDataList *result = flist;
+
+	FileDataList *folders = dlist;
+	while (folders)
+		{
+		auto *fd = static_cast<FileData *>(folders->data);
+
+		folders = g_list_remove(folders, fd);
+
+		if (!pan_is_ignored(fd->path, pw->ignore_symlinks) &&
+		    filelist_read(fd, &flist, &dlist))
+			{
+			if (settings.method != SORT_NONE)
+				{
+				flist = filelist_sort(flist, settings);
+				dlist = filelist_sort(dlist, settings);
+				}
+
+			result = g_list_concat(result, flist);
+			folders = g_list_concat(dlist, folders);
+			}
+
+		file_data_unref(fd);
+		}
+
+	return result;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
