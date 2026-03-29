@@ -885,8 +885,7 @@ static void pan_window_items_free(PanWindow *pw)
  *-----------------------------------------------------------------------------
  */
 
-static void pan_layout_compute(PanWindow *pw, FileData *dir_fd,
-                               gint &width, gint &height,
+static void pan_layout_compute(PanWindow *pw, gint &width, gint &height,
                                gint &scroll_x, gint &scroll_y)
 {
 	pan_window_items_free(pw);
@@ -945,19 +944,19 @@ static void pan_layout_compute(PanWindow *pw, FileData *dir_fd,
 		{
 		case PAN_LAYOUT_GRID:
 		default:
-			pan_grid_compute(pw, dir_fd, width, height);
+			pan_grid_compute(pw, width, height);
 			break;
 		case PAN_LAYOUT_FOLDERS_LINEAR:
-			pan_folder_tree_compute(pw, dir_fd, width, height);
+			pan_folder_tree_compute(pw, width, height);
 			break;
 		case PAN_LAYOUT_FOLDERS_FLOWER:
-			pan_flower_compute(pw, dir_fd, width, height, scroll_x, scroll_y);
+			pan_flower_compute(pw, width, height, scroll_x, scroll_y);
 			break;
 		case PAN_LAYOUT_CALENDAR:
-			pan_calendar_compute(pw, dir_fd, width, height);
+			pan_calendar_compute(pw, width, height);
 			break;
 		case PAN_LAYOUT_TIMELINE:
-			pan_timeline_compute(pw, dir_fd, width, height);
+			pan_timeline_compute(pw, width, height);
 			break;
 		}
 
@@ -1098,7 +1097,7 @@ static gint pan_layout_update_idle_cb(gpointer data)
 			}
 		}
 
-	pan_layout_compute(pw, pw->dir_fd, width, height, scroll_x, scroll_y);
+	pan_layout_compute(pw, width, height, scroll_x, scroll_y);
 
 	pan_window_zoom_limit(pw);
 

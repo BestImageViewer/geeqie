@@ -240,7 +240,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	pan_layout_resize(pw);
 }
 
-void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height)
+void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 {
 	GList *list;
 	GList *work;
@@ -256,7 +256,7 @@ void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &he
 	gint end_month = 0;
 	gint day_of_week;
 
-	list = pan_list_tree(dir_fd, {SORT_NONE, TRUE, TRUE}, pw->ignore_symlinks);
+	list = pan_list_tree(pw->dir_fd, {SORT_NONE, TRUE, TRUE}, pw->ignore_symlinks);
 	pan_filter_fd_list(&list, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
 
 	if (pw->cache_list && pw->exif_date_enable)

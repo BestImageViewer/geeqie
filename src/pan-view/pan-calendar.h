@@ -24,11 +24,10 @@
 
 #include <glib.h>
 
-class FileData;
 struct PanItem;
 struct PanWindow;
 
 void pan_calendar_update(PanWindow *pw, PanItem *pi_day);
-void pan_calendar_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height);
+void pan_calendar_compute(PanWindow *pw, gint &width, gint &height);
 
 #endif

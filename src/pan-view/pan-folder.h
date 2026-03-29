@@ -24,12 +24,10 @@
 
 #include <glib.h>
 
-class FileData;
 struct PanWindow;
 
-void pan_flower_compute(PanWindow *pw, FileData *dir_fd,
-                        gint &width, gint &height,
+void pan_flower_compute(PanWindow *pw, gint &width, gint &height,
                         gint &scroll_x, gint &scroll_y);
-void pan_folder_tree_compute(PanWindow *pw, FileData *dir_fd, gint &width, gint &height);
+void pan_folder_tree_compute(PanWindow *pw, gint &width, gint &height);
 
 #endif
