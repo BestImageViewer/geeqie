@@ -163,11 +163,6 @@ GList *filelist_sort(GList *list, FileData::FileList::SortSettings settings)
 	return FileData::FileList::sort(list, settings);
 }
 
-GList *filelist_sort_full(GList *list, FileData::FileList::SortSettings settings, GCompareDataFunc cb)
-{
-	return FileData::FileList::sort_full(list, settings, cb);
-}
-
 
 gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs)
 {

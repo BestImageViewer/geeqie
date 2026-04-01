@@ -331,14 +331,9 @@ gint FileData::FileList::sort_file_cb(gconstpointer a, gconstpointer b, gpointer
                 static_cast<SortSettings *>(data));
 }
 
-GList *FileData::FileList::sort_full(GList *list, SortSettings settings, GCompareDataFunc cb)
-{
-	return g_list_sort_with_data(list, cb, &settings);
-}
-
 GList *FileData::FileList::sort(GList *list, SortSettings settings)
 {
-	return sort_full(list, settings, sort_file_cb);
+	return g_list_sort_with_data(list, sort_file_cb, &settings);
 }
 
 gboolean FileData::FileList::read_list(FileData *dir_fd, GList **files, GList **dirs)
@@ -515,7 +510,7 @@ void FileData::FileList::recursive_append_full(GList **list, GList *dirs, SortSe
 		if (read_list(fd, &f, &d))
 			{
 			f = filter(f, FALSE);
-			f = sort_full(f, settings, sort_file_cb);
+			f = sort(f, settings);
 			*list = g_list_concat(*list, f);
 
 			d = filter(d, TRUE);
@@ -552,7 +547,7 @@ GList *FileData::FileList::recursive_full(FileData *dir_fd, SortSettings setting
 
 	if (!read_list(dir_fd, &list, &d)) return nullptr;
 	list = filter(list, FALSE);
-	list = sort_full(list, settings, sort_file_cb);
+	list = sort(list, settings);
 
 	d = filter(d, TRUE);
 	d = sort_path(d);

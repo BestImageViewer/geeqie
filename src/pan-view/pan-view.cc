@@ -606,7 +606,7 @@ static gint pan_cache_sort_file_cb(gconstpointer a, gconstpointer b, gpointer da
 
 GList *pan_cache_sort(GList *list, FileData::FileList::SortSettings settings)
 {
-	return filelist_sort_full(list, settings, pan_cache_sort_file_cb);
+	return g_list_sort_with_data(list, pan_cache_sort_file_cb, &settings);
 }
 
 static void pan_cache_free(PanWindow *pw)

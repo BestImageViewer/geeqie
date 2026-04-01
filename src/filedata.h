@@ -419,7 +419,6 @@ class FileData::FileList
 	static gint sort_compare_filedata(const FileData *fa, const FileData *fb, SortSettings *settings);
 	static gint sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend);
 	static GList *sort(GList *list, SortSettings settings);
-	static GList *sort_full(GList *list, SortSettings settings, GCompareDataFunc cb);
 
 	static gboolean read_list(FileData *dir_fd, GList **files, GList **dirs);
 	static gboolean read_list_lstat(FileData *dir_fd, GList **files, GList **dirs);
@@ -501,7 +500,6 @@ void file_data_disable_grouping_list(GList *fd_list, gboolean disable);
 gint filelist_sort_compare_filedata(const FileData *fa, const FileData *fb, FileData::FileList::SortSettings *settings);
 gint filelist_sort_compare_filedata_full(const FileData *fa, const FileData *fb, SortType method, gboolean ascend);
 GList *filelist_sort(GList *list, FileData::FileList::SortSettings settings);
-GList *filelist_sort_full(GList *list, FileData::FileList::SortSettings settings, GCompareDataFunc cb);
 
 gboolean filelist_read(FileData *dir_fd, GList **files, GList **dirs);
 gboolean filelist_read_lstat(FileData *dir_fd, GList **files, GList **dirs);
