@@ -688,44 +688,31 @@ static gboolean pan_cache_step(PanWindow *pw)
 /* This sync date function is optimized for lists with a common sort */
 void pan_cache_sync_date(PanWindow *pw, GList *list)
 {
-	GList *haystack;
-	GList *work;
+	static const auto pan_cache_data_compare_fd = [](gconstpointer data, gconstpointer user_data)
+	{
+		auto *pc = static_cast<const PanCacheData *>(data);
+		return (pc->fd == user_data) ? 0 : 1;
+	};
 
-	haystack = g_list_copy(pw->cache_list);
+	g_autoptr(GList) haystack = g_list_copy(pw->cache_list);
 
-	work = list;
-	while (work)
+	for (GList *work = list; work; work = work->next)
 		{
-		FileData *fd;
-		GList *needle;
+		auto *fd = static_cast<FileData *>(work->data);
 
-		fd = static_cast<FileData *>(work->data);
-		work = work->next;
-
-		needle = haystack;
-		while (needle)
+		GList *needle = g_list_find_custom(haystack, fd, pan_cache_data_compare_fd);
+		if (needle)
 			{
-			PanCacheData *pc;
+			auto *pc = static_cast<PanCacheData *>(needle->data);
 
-			pc = static_cast<PanCacheData *>(needle->data);
-			if (pc->fd == fd)
+			if (pc->cd && pc->cd->have_date && pc->cd->date >= 0)
 				{
-				if (pc->cd && pc->cd->have_date && pc->cd->date >= 0)
-					{
-					fd->date = pc->cd->date;
-					}
+				fd->date = pc->cd->date;
+				}
 
-				haystack = g_list_delete_link(haystack, needle);
-				needle = nullptr;
-				}
-			else
-				{
-				needle = needle->next;
-				}
+			haystack = g_list_delete_link(haystack, needle);
 			}
 		}
-
-	g_list_free(haystack);
 }
 
 void pan_cache_get_image_size(PanWindow *pw, const FileData *fd, gint &w, gint &h)
