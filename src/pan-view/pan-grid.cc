@@ -38,7 +38,7 @@ void pan_grid_compute(PanWindow *pw, gint &width, gint &height)
 	gint next_y;
 
 	g_autoptr(GList) list = pan_list_tree(pw, SORT_NAME);
-	pan_filter_fd_list(&list, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
+	list = pan_filter_fd_list(list, pw->filter_ui);
 
 	grid_size = static_cast<gint>(sqrt(static_cast<gdouble>(g_list_length(list))));
 	if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)

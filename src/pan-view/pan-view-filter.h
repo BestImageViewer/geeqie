@@ -55,7 +55,7 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw);
  */
 void pan_filter_ui_destroy(PanViewFilterUi *ui);
 
-gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter_classes);
+[[nodiscard]] GList *pan_filter_fd_list(GList *fd_list, const PanViewFilterUi *ui);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

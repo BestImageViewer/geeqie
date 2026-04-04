@@ -256,7 +256,7 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 	gint day_of_week;
 
 	g_autoptr(GList) list = pan_list_tree(pw, SORT_NONE);
-	pan_filter_fd_list(&list, pw->filter_ui->filter_elements, pw->filter_ui->filter_classes);
+	list = pan_filter_fd_list(list, pw->filter_ui);
 
 	if (pw->cache_list && pw->exif_date_enable)
 		{

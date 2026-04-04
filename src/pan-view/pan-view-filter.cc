@@ -314,19 +314,16 @@ void pan_filter_ui_destroy(PanViewFilterUi *ui)
 	g_free(ui);
 }
 
-gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter_classes)
+GList *pan_filter_fd_list(GList *fd_list, const PanViewFilterUi *ui)
 {
-	GList *work;
-	gboolean modified = FALSE;
-	GHashTable *seen_kw_table = nullptr;
-
-	if (!fd_list || !*fd_list) return modified;
+	if (!fd_list) return nullptr;
 
 	// seen_kw_table is only valid in this scope, so don't take ownership of any strings.
-	if (filter_elements)
+	g_autoptr(GHashTable) seen_kw_table = nullptr;
+	if (ui->filter_elements)
 		seen_kw_table = g_hash_table_new_full(g_str_hash, g_str_equal, nullptr, nullptr);
 
-	work = *fd_list;
+	GList *work = fd_list;
 	while (work)
 		{
 		auto fd = static_cast<FileData *>(work->data);
@@ -335,18 +332,18 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 
 		gboolean should_reject = FALSE;
 
-		if (!((1 << fd -> format_class) & filter_classes))
+		if (!((1 << fd -> format_class) & ui->filter_classes))
 			{
 			should_reject = TRUE;
 			}
-		else if (filter_elements)
+		else if (ui->filter_elements)
 			{
 			/** @todo (xsdg): OPTIMIZATION Do the search inside of metadata.cc to avoid a bunch of string list copies. */
 			GList *img_keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
 			gchar *group_kw = nullptr; // group_kw references an item from img_keywords.
 
 			/** @todo (xsdg): OPTIMIZATION Determine a heuristic for when to linear-search the keywords list, and when to build a hash table for the image's keywords. */
-			GList *filter_element = filter_elements;
+			GList *filter_element = ui->filter_elements;
 
 			while (filter_element)
 				{
@@ -389,13 +386,9 @@ gboolean pan_filter_fd_list(GList **fd_list, GList *filter_elements, gint filter
 
 		if (should_reject)
 			{
-			*fd_list = g_list_delete_link(*fd_list, last_work);
-			modified = TRUE;
+			fd_list = g_list_delete_link(fd_list, last_work);
 			}
 		}
 
-	if (filter_elements)
-		g_hash_table_destroy(seen_kw_table);
-
-	return modified;
+	return fd_list;
 }
