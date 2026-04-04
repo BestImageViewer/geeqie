@@ -133,7 +133,7 @@ gboolean collection_window_modified_exists();
 
 gboolean is_collection(const gchar *param);
 gchar *collection_path(const gchar *param);
-GString *collection_contents(const gchar *name, GString *contents) G_GNUC_WARN_UNUSED_RESULT;
+[[nodiscard]] GString *collection_contents(const gchar *name, GString *contents);
 GList *collection_contents_fd(const gchar *name);
 void collection_by_index_add_filelist(gint index, GList *list);
 
