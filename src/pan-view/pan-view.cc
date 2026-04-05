@@ -2470,4 +2470,11 @@ FileDataList *pan_list_tree(PanWindow *pw, SortType method)
 	return result;
 }
 
+FileDataList *pan_list_tree_filtered(PanWindow *pw, SortType method)
+{
+	FileDataList *list = pan_list_tree(pw, method);
+
+	return pan_filter_fd_list(list, pw->filter_ui);
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

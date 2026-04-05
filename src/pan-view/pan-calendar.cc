@@ -40,7 +40,6 @@
 #include "pan-item.h"
 #include "pan-types.h"
 #include "pan-util.h"
-#include "pan-view-filter.h"
 #include "pan-view.h"
 
 namespace
@@ -255,8 +254,7 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 	gint end_month = 0;
 	gint day_of_week;
 
-	g_autoptr(GList) list = pan_list_tree(pw, SORT_NONE);
-	list = pan_filter_fd_list(list, pw->filter_ui);
+	g_autoptr(GList) list = pan_list_tree_filtered(pw, SORT_NONE);
 
 	if (pw->cache_list && pw->exif_date_enable)
 		{

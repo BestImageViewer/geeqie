@@ -26,7 +26,6 @@
 
 #include "pan-item.h"
 #include "pan-types.h"
-#include "pan-view-filter.h"
 #include "pan-view.h"
 
 void pan_grid_compute(PanWindow *pw, gint &width, gint &height)
@@ -37,8 +36,7 @@ void pan_grid_compute(PanWindow *pw, gint &width, gint &height)
 	gint grid_size;
 	gint next_y;
 
-	g_autoptr(GList) list = pan_list_tree(pw, SORT_NAME);
-	list = pan_filter_fd_list(list, pw->filter_ui);
+	g_autoptr(GList) list = pan_list_tree_filtered(pw, SORT_NAME);
 
 	grid_size = static_cast<gint>(sqrt(static_cast<gdouble>(g_list_length(list))));
 	if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)
