@@ -22,6 +22,8 @@
 #ifndef PAN_VIEW_PAN_TYPES_H
 #define PAN_VIEW_PAN_TYPES_H
 
+#include <list>
+
 #include <gtk/gtk.h>
 
 #include "cache-loader.h"
@@ -159,6 +161,8 @@ struct PanItem {
 
 	gboolean queued;
 };
+
+using PanItemList = std::list<PanItem *>;
 
 struct PanWindow
 {

@@ -379,8 +379,6 @@ static gboolean pan_window_request_tile_cb(PanWindow *pw, PixbufRenderer *pr,
                                            gint x, gint y, gint width, gint height,
                                            GdkPixbuf *pixbuf)
 {
-	GList *list;
-	GList *work;
 	const GdkRectangle request_rect{x, y, width, height};
 	GdkRectangle pan_grid_rect;
 
@@ -410,15 +408,11 @@ static gboolean pan_window_request_tile_cb(PanWindow *pw, PixbufRenderer *pr,
 		draw_rect_if_intersect(pan_grid_rect);
 		}
 
-	list = pan_layout_intersect(pw, x, y, width, height);
-	work = list;
-	while (work)
-		{
-		PanItem *pi;
-		gboolean queue = FALSE;
+	PanItemList list = pan_layout_intersect(pw, x, y, width, height);
 
-		pi = static_cast<PanItem *>(work->data);
-		work = work->next;
+	for (PanItem *pi : list)
+		{
+		gboolean queue = FALSE;
 
 		pi->refcount++;
 
@@ -446,25 +440,15 @@ static gboolean pan_window_request_tile_cb(PanWindow *pw, PixbufRenderer *pr,
 		if (queue) pan_queue_add(pw, pi);
 		}
 
-	g_list_free(list);
-
 	return TRUE;
 }
 
 static void pan_window_dispose_tile_cb(PanWindow *pw, gint x, gint y, gint width, gint height)
 {
-	GList *list;
-	GList *work;
+	PanItemList list = pan_layout_intersect(pw, x, y, width, height);
 
-	list = pan_layout_intersect(pw, x, y, width, height);
-	work = list;
-	while (work)
+	for (PanItem *pi : list)
 		{
-		PanItem *pi;
-
-		pi = static_cast<PanItem *>(work->data);
-		work = work->next;
-
 		if (pi->refcount > 0)
 			{
 			pi->refcount--;
@@ -476,17 +460,13 @@ static void pan_window_dispose_tile_cb(PanWindow *pw, gint x, gint y, gint width
 					pw->queue = g_list_remove(pw->queue, pi);
 					pi->queued = FALSE;
 					}
+
 				if (pw->queue_pi == pi) pw->queue_pi = nullptr;
-				if (pi->pixbuf)
-					{
-					g_object_unref(pi->pixbuf);
-					pi->pixbuf = nullptr;
-					}
+
+				g_clear_object(&pi->pixbuf);
 				}
 			}
 		}
-
-	g_list_free(list);
 }
 
 
@@ -950,26 +930,26 @@ static void pan_layout_compute(PanWindow *pw, gint &width, gint &height,
 	DEBUG_1("computed %u objects", g_list_length(pw->list));
 }
 
-static GList *pan_layout_intersect_l(GList *list, GList *item_list,
-                                     GdkRectangle rect)
+static PanItemList pan_layout_intersect_l(const GList *item_list, GdkRectangle rect)
 {
-	for (GList *work = item_list; work; work = work->next)
+	PanItemList list;
+
+	for (const GList *work = item_list; work; work = work->next)
 		{
 		auto *pi = static_cast<PanItem *>(work->data);
 		const GdkRectangle pi_rect = {pi->x, pi->y, pi->width, pi->height};
 
 		if (gdk_rectangle_intersect(&rect, &pi_rect, nullptr))
 			{
-			list = g_list_prepend(list, pi);
+			list.push_front(pi);
 			}
 		}
 
 	return list;
 }
 
-GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height)
+PanItemList pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height)
 {
-	GList *list = nullptr;
 	const GdkRectangle rect{x, y, width, height};
 
 	const auto pan_grid_contains_rect = [](gconstpointer data, gconstpointer user_data) -> gint
@@ -983,16 +963,16 @@ GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint heig
 		return gdk_rectangle_equal(rect, &intersection) ? 0 : 1;
 	};
 
-	list = pan_layout_intersect_l(list, pw->list, rect);
+	PanItemList list = pan_layout_intersect_l(pw->list, rect);
 
 	GList *grid = g_list_find_custom(pw->list_grid, &rect, pan_grid_contains_rect);
 	if (grid)
 		{
-		list = pan_layout_intersect_l(list, static_cast<PanGrid *>(grid->data)->list, rect);
+		list.splice(list.cbegin(), pan_layout_intersect_l(static_cast<PanGrid *>(grid->data)->list, rect));
 		}
 	else
 		{
-		list = pan_layout_intersect_l(list, pw->list_static, rect);
+		list.splice(list.cbegin(), pan_layout_intersect_l(pw->list_static, rect));
 		}
 
 	return list;

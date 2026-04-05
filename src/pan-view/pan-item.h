@@ -22,7 +22,6 @@
 #ifndef PAN_VIEW_PAN_ITEM_H
 #define PAN_VIEW_PAN_ITEM_H
 
-#include <list>
 #include <vector>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -44,7 +43,6 @@ void pan_item_remove(PanWindow *pw, PanItem *pi);
 
 // Find items
 PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, PanKey key);
-using PanItemList = std::list<PanItem *>;
 PanItemList pan_item_find_by_path(PanWindow *pw, PanItemType type, const gchar *path,
                                   gboolean ignore_case, gboolean partial);
 PanItem *pan_item_find_by_fd(PanWindow *pw, PanItemType type, FileData *fd,

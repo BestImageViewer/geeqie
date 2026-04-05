@@ -25,12 +25,10 @@
 #include <glib.h>
 
 #include "filedata.h"
-
-struct PanItem;
-struct PanWindow;
+#include "pan-types.h"
 
 void pan_layout_update(PanWindow *pw);
-GList *pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height);
+PanItemList pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height);
 void pan_layout_resize(PanWindow *pw);
 
 GList *pan_cache_sort(GList *list, FileData::FileList::SortSettings settings);

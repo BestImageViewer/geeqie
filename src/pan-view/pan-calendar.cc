@@ -131,36 +131,17 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 {
 	PanItem *pbox;
 	PanItem *pi;
-	GList *list;
-	GList *work;
 	gint x;
 	gint y;
-	gint grid;
-	gint column;
 
 	while ((pi = pan_item_find_by_key(pw, PAN_ITEM_ANY, PanKey::DayBubble))) pan_item_remove(pw, pi);
 
 	g_return_if_fail(pi_day && pi_day->is_type(PAN_ITEM_BOX) && pi_day->key == PanKey::Day);
 
-	list = pan_layout_intersect(pw, pi_day->x, pi_day->y, pi_day->width, pi_day->height);
+	PanItemList list = pan_layout_intersect(pw, pi_day->x, pi_day->y, pi_day->width, pi_day->height);
+	list.remove_if([](const PanItem *dot){ return !dot->is_type(PAN_ITEM_BOX) || !dot->fd || dot->key != PanKey::Dot; });
 
-	work = list;
-	while (work)
-		{
-		PanItem *dot;
-		GList *node;
-
-		dot = static_cast<PanItem *>(work->data);
-		node = work;
-		work = work->next;
-
-		if (!dot->is_type(PAN_ITEM_BOX) || !dot->fd || dot->key != PanKey::Dot)
-			{
-			list = g_list_delete_link(list, node);
-			}
-		}
-
-	grid = static_cast<gint>(sqrt(g_list_length(list)) + 0.5);
+	const auto grid = static_cast<gint>(sqrt(list.size()) + 0.5);
 
 	x = pi_day->x + pi_day->width + 4;
 	y = pi_day->y;
@@ -183,41 +164,30 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 		y += plabel->height;
 		}
 
-	if (list)
+	if (!list.empty())
 		{
-		column = 0;
+		gint column = 0;
 
 		x += PAN_BOX_BORDER;
 		y += PAN_BOX_BORDER;
 
-		work = list;
-		while (work)
+		for (PanItem *dot : list)
 			{
-			PanItem *dot;
+			PanItem *pimg = pan_item_thumb_new(pw, file_data_ref(dot->fd), x, y);
+			pimg->set_key(PanKey::DayBubble);
 
-			dot = static_cast<PanItem *>(work->data);
-			work = work->next;
+			pbox->set_size_by_item(pimg, PAN_BOX_BORDER);
 
-			if (dot->fd)
+			column++;
+			if (column < grid)
 				{
-				PanItem *pimg;
-
-				pimg = pan_item_thumb_new(pw, file_data_ref(dot->fd), x, y);
-				pimg->set_key(PanKey::DayBubble);
-
-				pbox->set_size_by_item(pimg, PAN_BOX_BORDER);
-
-				column++;
-				if (column < grid)
-					{
-					x += pw->thumb_size + pw->thumb_gap;
-					}
-				else
-					{
-					column = 0;
-					x = pbox->x + PAN_BOX_BORDER;
-					y += pw->thumb_size + pw->thumb_gap;
-					}
+				x += pw->thumb_size + pw->thumb_gap;
+				}
+			else
+				{
+				column = 0;
+				x = pbox->x + PAN_BOX_BORDER;
+				y += pw->thumb_size + pw->thumb_gap;
 				}
 			}
 		}
