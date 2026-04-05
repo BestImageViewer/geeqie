@@ -713,9 +713,9 @@ GList *pan_cache_sync_list(PanWindow *pw, GList *list)
 	return filelist_sort(list, {SORT_TIME, TRUE, TRUE});
 }
 
-void pan_cache_get_image_size(PanWindow *pw, const FileData *fd, gint &w, gint &h)
+std::optional<GqSize> pan_cache_get_image_size(PanWindow *pw, const FileData *fd)
 {
-	if (!fd) return;
+	if (!fd) return {};
 
 	const auto pan_cache_data_cd_dimensions_compare_fd = [](gconstpointer data, gconstpointer user_data)
 	{
@@ -724,15 +724,16 @@ void pan_cache_get_image_size(PanWindow *pw, const FileData *fd, gint &w, gint &
 	};
 
 	GList *work = g_list_find_custom(pw->cache_list, fd, pan_cache_data_cd_dimensions_compare_fd);
-	if (!work) return;
+	if (!work) return {};
 
 	auto *pc = static_cast<PanCacheData *>(work->data);
 
-	w = std::max(1, pc->cd->width * pw->image_size / 100);
-	h = std::max(1, pc->cd->height * pw->image_size / 100);
+	GqSize size{ pc->cd->width, pc->cd->height };
 
 	pw->cache_list = g_list_remove(pw->cache_list, pc);
 	pan_cache_data_free(pc);
+
+	return size;
 }
 
 /*

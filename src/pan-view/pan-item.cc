@@ -495,7 +495,11 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 
 PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w, gint h)
 {
-	pan_cache_get_image_size(pw, fd, w, h);
+	if (auto size = pan_cache_get_image_size(pw, fd); size.has_value())
+		{
+		w = std::max(1, size->width * pw->image_size / 100);
+		h = std::max(1, size->height * pw->image_size / 100);
+		}
 
 	PanItem *pi = pan_item_new(PAN_ITEM_IMAGE, x, y, w, h);
 
