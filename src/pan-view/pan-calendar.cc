@@ -225,16 +225,7 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 	gint day_of_week;
 
 	g_autoptr(GList) list = pan_list_tree_filtered(pw, SORT_NONE);
-
-	if (pw->cache_list && pw->exif_date_enable)
-		{
-		pw->cache_list = pan_cache_sort(pw->cache_list, {SORT_NAME, TRUE, TRUE});
-		list = filelist_sort(list, {SORT_NAME, TRUE, TRUE});
-		pan_cache_sync_date(pw, list);
-		}
-
-	pw->cache_list = pan_cache_sort(pw->cache_list, {SORT_TIME, TRUE, TRUE});
-	list = filelist_sort(list, {SORT_TIME, TRUE, TRUE});
+	list = pan_cache_sync_list(pw, list);
 
 	day_max = 0;
 	count = 0;

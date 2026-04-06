@@ -584,9 +584,9 @@ static gint pan_cache_sort_file_cb(gconstpointer a, gconstpointer b, gpointer da
 	return filelist_sort_compare_filedata(pca->fd, pcb->fd, settings);
 }
 
-GList *pan_cache_sort(GList *list, FileData::FileList::SortSettings settings)
+static void pan_cache_sort(PanWindow *pw, FileData::FileList::SortSettings settings)
 {
-	return g_list_sort_with_data(list, pan_cache_sort_file_cb, &settings);
+	pw->cache_list = g_list_sort_with_data(pw->cache_list, pan_cache_sort_file_cb, &settings);
 }
 
 static void pan_cache_free(PanWindow *pw)
@@ -666,7 +666,7 @@ static gboolean pan_cache_step(PanWindow *pw)
 }
 
 /* This sync date function is optimized for lists with a common sort */
-void pan_cache_sync_date(PanWindow *pw, GList *list)
+static void pan_cache_sync_date(const PanWindow *pw, GList *list)
 {
 	static const auto pan_cache_data_compare_fd = [](gconstpointer data, gconstpointer user_data)
 	{
@@ -693,6 +693,24 @@ void pan_cache_sync_date(PanWindow *pw, GList *list)
 			haystack = g_list_delete_link(haystack, needle);
 			}
 		}
+}
+
+GList *pan_cache_sync_list(PanWindow *pw, GList *list)
+{
+	if (pw->cache_list)
+		{
+		if (pw->exif_date_enable)
+			{
+			pan_cache_sort(pw, {SORT_NAME, TRUE, TRUE});
+			list = filelist_sort(list, {SORT_NAME, TRUE, TRUE});
+
+			pan_cache_sync_date(pw, list);
+			}
+
+		pan_cache_sort(pw, {SORT_TIME, TRUE, TRUE});
+		}
+
+	return filelist_sort(list, {SORT_TIME, TRUE, TRUE});
 }
 
 void pan_cache_get_image_size(PanWindow *pw, const FileData *fd, gint &w, gint &h)
