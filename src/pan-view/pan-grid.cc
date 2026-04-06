@@ -30,43 +30,27 @@
 
 void pan_grid_compute(PanWindow *pw, gint &width, gint &height)
 {
-	GList *work;
-	gint x;
-	gint y;
-	gint grid_size;
-	gint next_y;
-
-	g_autoptr(GList) list = pan_list_tree_filtered(pw, SORT_NAME);
-
-	grid_size = static_cast<gint>(sqrt(static_cast<gdouble>(g_list_length(list))));
-	if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)
-		{
-		grid_size = grid_size * (512 + pw->thumb_gap) * pw->image_size / 100;
-		}
-	else
-		{
-		grid_size = grid_size * (pw->thumb_size + pw->thumb_gap);
-		}
-
-	next_y = 0;
-
 	width = PAN_BOX_BORDER * 2;
 	height = PAN_BOX_BORDER * 2;
 
-	x = pw->thumb_gap;
-	y = pw->thumb_gap;
-	work = list;
-	while (work)
+	g_autoptr(GList) list = pan_list_tree_filtered(pw, SORT_NAME);
+
+	auto grid_size = static_cast<gint>(sqrt(g_list_length(list)));
+
+	gint x = pw->thumb_gap;
+	gint y = pw->thumb_gap;
+
+	if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)
 		{
-		FileData *fd;
-		PanItem *pi;
+		grid_size = grid_size * (512 + pw->thumb_gap) * pw->image_size / 100;
 
-		fd = static_cast<FileData *>(work->data);
-		work = work->next;
+		gint next_y = 0;
 
-		if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE)
+		for (GList *work = list; work; work = work->next)
 			{
-			pi = pan_item_image_new(pw, fd, x, y, 10, 10);
+			auto *fd = static_cast<FileData *>(work->data);
+
+			PanItem *pi = pan_item_image_new(pw, fd, x, y, 10, 10);
 
 			x += pi->width + pw->thumb_gap;
 			next_y = std::max(y + pi->height + pw->thumb_gap, next_y);
@@ -75,10 +59,19 @@ void pan_grid_compute(PanWindow *pw, gint &width, gint &height)
 				x = pw->thumb_gap;
 				y = next_y;
 				}
+
+			pi->adjust_size(pw->thumb_gap, width, height);
 			}
-		else
+		}
+	else
+		{
+		grid_size = grid_size * (pw->thumb_size + pw->thumb_gap);
+
+		for (GList *work = list; work; work = work->next)
 			{
-			pi = pan_item_thumb_new(pw, fd, x, y);
+			auto *fd = static_cast<FileData *>(work->data);
+
+			PanItem *pi = pan_item_thumb_new(pw, fd, x, y);
 
 			x += pw->thumb_size + pw->thumb_gap;
 			if (x > grid_size)
@@ -86,9 +79,9 @@ void pan_grid_compute(PanWindow *pw, gint &width, gint &height)
 				x = pw->thumb_gap;
 				y += pw->thumb_size + pw->thumb_gap;
 				}
-			}
 
-		pi->adjust_size(pw->thumb_gap, width, height);
+			pi->adjust_size(pw->thumb_gap, width, height);
+			}
 		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
