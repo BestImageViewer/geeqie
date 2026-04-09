@@ -156,7 +156,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 
 		g_autofree gchar *buf = pan_date_value_string(pi_day->fd->date, PAN_DATE_LENGTH_WEEK);
 		plabel = pan_item_text_new(pw, x, y, buf, PAN_TEXT_ATTR_BOLD_HEADING,
-		                           PAN_BORDER_3, PAN_CAL_POPUP_TEXT_COLOR);
+		                           PAN_TEXT_BORDER, PAN_CAL_POPUP_TEXT_COLOR);
 		plabel->set_key(PanKey::DayBubble);
 
 		pbox->set_size_by_item(plabel, 0);
@@ -315,7 +315,7 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 					    PAN_CAL_MONTH_BORDER, PAN_CAL_MONTH_COLOR, PAN_CAL_MONTH_BORDER_COLOR);
 		g_autofree gchar *month_buf = pan_date_value_string(dt, PAN_DATE_LENGTH_MONTH);
 		pi_text = pan_item_text_new(pw, x, y, month_buf, PAN_TEXT_ATTR_BOLD_HEADING,
-		                            PAN_BORDER_3, PAN_CAL_MONTH_TEXT_COLOR);
+		                            PAN_TEXT_BORDER, PAN_CAL_MONTH_TEXT_COLOR);
 		pi_text->x = pi_month->x + (pi_month->width - pi_text->width) / 2;
 
 		pi_month->height = pi_text->y + pi_text->height - pi_month->y;
@@ -387,21 +387,21 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 
 				g_autofree gchar *day_buf = g_strdup_printf("( %d )", n);
 				pi = pan_item_text_new(pw, x, y, day_buf, PAN_TEXT_ATTR_NONE,
-				                       PAN_BORDER_3, PAN_CAL_DAY_TEXT_COLOR);
+				                       PAN_TEXT_BORDER, PAN_CAL_DAY_TEXT_COLOR);
 
 				pi->x = pi_day->x + (pi_day->width - pi->width) / 2;
 				pi->y = pi_day->y + (pi_day->height - pi->height) / 2;
 				}
 
 			pi_day_number = pan_item_text_new(pw, x + 4, y + 4, std::to_string(day).c_str(),
-			                                  PAN_TEXT_ATTR_BOLD_HEADING, PAN_BORDER_3, PAN_CAL_DAY_TEXT_COLOR);
+			                                  PAN_TEXT_ATTR_BOLD_HEADING, PAN_TEXT_BORDER, PAN_CAL_DAY_TEXT_COLOR);
 
 			day_of_week = date_get_first_day_of_week() + col;
 			if (day_of_week > 7) day_of_week = day_of_week - 7;
 
 			const gchar *abbr_day_of_week = date_get_abbreviated_day_name(day_of_week);
 			pan_item_text_new(pw, x + 4 + pi_day_number->width + 4, y + 4, abbr_day_of_week,
-			                  PAN_TEXT_ATTR_NONE, PAN_BORDER_3, PAN_CAL_DAY_OF_WEEK_COLOR);
+			                  PAN_TEXT_ATTR_NONE, PAN_TEXT_BORDER, PAN_CAL_DAY_OF_WEEK_COLOR);
 
 			pi_day->adjust_size(PAN_BOX_BORDER, width, height);
 

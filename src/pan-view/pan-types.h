@@ -64,6 +64,7 @@ inline constexpr GqColor PAN_BOX_COLOR{ 255, 255, 255, 100 };
 #define PAN_BOX_OUTLINE_THICKNESS 4
 inline constexpr GqColor PAN_BOX_OUTLINE_COLOR{ 0, 0, 0, 128 };
 
+inline constexpr gint PAN_TEXT_BORDER = 4;
 inline constexpr GqColor PAN_TEXT_COLOR{ 0, 0, 0, 255 };
 
 
@@ -155,7 +156,8 @@ struct PanItem {
 	GqColor color;
 
 	GqColor color2;
-	gint border;
+	gint border; /**< size */
+	gint borders; /**< set of #PanBorderType */
 
 	gpointer data;
 

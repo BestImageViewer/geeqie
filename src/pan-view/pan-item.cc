@@ -255,7 +255,7 @@ PanItem *pan_item_tri_new(PanWindow *pw,
 
 	pi->color = color;
 	pi->color2 = border_color;
-	pi->border = borders;
+	pi->borders = borders;
 
 	auto *coord = g_new0(GqPoint, 3);
 	coord[0] = c1;
@@ -294,9 +294,9 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			                 pi->color2);
 		};
 
-		if (pi->border & PAN_BORDER_1) draw_line(coord[0], coord[1]);
-		if (pi->border & PAN_BORDER_2) draw_line(coord[1], coord[2]);
-		if (pi->border & PAN_BORDER_3) draw_line(coord[2], coord[0]);
+		if (pi->borders & PAN_BORDER_1) draw_line(coord[0], coord[1]);
+		if (pi->borders & PAN_BORDER_2) draw_line(coord[1], coord[2]);
+		if (pi->borders & PAN_BORDER_3) draw_line(coord[2], coord[0]);
 		}
 
 	return FALSE;
@@ -332,7 +332,7 @@ static PangoLayout *get_text_layout(GtkWidget *widget, const gchar *text,
 }
 
 PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
-                           PanTextAttrType attr, PanBorderType border, GqColor color)
+                           PanTextAttrType attr, gint border_size, GqColor color)
 {
 	GqSize size{};
 	if (pw->imd->pr && text)
@@ -340,8 +340,8 @@ PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
 		g_autoptr(PangoLayout) layout = get_text_layout(pw->imd->pr, text, attr);
 		pango_layout_get_pixel_size(layout, &size.width, &size.height);
 
-		size.width += border * 2;
-		size.height += border * 2;
+		size.width += border_size * 2;
+		size.height += border_size * 2;
 		}
 
 	PanItem *pi = pan_item_new(PAN_ITEM_TEXT, x, y, size.width, size.height);
@@ -349,7 +349,7 @@ PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
 	pi->text = g_strdup(text);
 	pi->text_attr = attr;
 	pi->color = color;
-	pi->border = border;
+	pi->border = border_size;
 
 	pw->list = g_list_prepend(pw->list, pi);
 
@@ -694,14 +694,14 @@ void PanTextAlignment::add(const gchar *label, const gchar *text)
 	if (label)
 		{
 		items.label = pan_item_text_new(pw, x, y, label, PAN_TEXT_ATTR_BOLD,
-		                                PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
+		                                0, PAN_POPUP_TEXT_COLOR);
 		items.label->set_key(key);
 		}
 
 	if (text)
 		{
 		items.text = pan_item_text_new(pw, x, y, text, PAN_TEXT_ATTR_NONE,
-		                               PAN_BORDER_NONE, PAN_POPUP_TEXT_COLOR);
+		                               0, PAN_POPUP_TEXT_COLOR);
 		items.text->set_key(key);
 		}
 

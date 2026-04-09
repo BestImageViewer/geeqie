@@ -67,7 +67,7 @@ gboolean pan_item_tri_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixbuf
 
 // Item text type
 PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
-                           PanTextAttrType attr, PanBorderType border, GqColor color);
+                           PanTextAttrType attr, gint border_size, GqColor color);
 gboolean pan_item_text_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
                             gint x, gint y, gint width, gint height);
 
