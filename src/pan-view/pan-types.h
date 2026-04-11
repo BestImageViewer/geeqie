@@ -121,13 +121,9 @@ enum PanBorderType {
 	PAN_BORDER_1 = 1 << 0,
 	PAN_BORDER_2 = 1 << 1,
 	PAN_BORDER_3 = 1 << 2,
+	PAN_BORDER_1_3 = PAN_BORDER_1 | PAN_BORDER_3,
 	PAN_BORDER_4 = 1 << 3
 };
-
-#define PAN_BORDER_TOP		PAN_BORDER_1
-#define PAN_BORDER_RIGHT		PAN_BORDER_2
-#define PAN_BORDER_BOTTOM	PAN_BORDER_3
-#define PAN_BORDER_LEFT		PAN_BORDER_4
 
 
 struct PanItem {
@@ -157,7 +153,7 @@ struct PanItem {
 
 	GqColor color2;
 	gint border; /**< size */
-	gint borders; /**< set of #PanBorderType */
+	PanBorderType borders;
 
 	gpointer data;
 

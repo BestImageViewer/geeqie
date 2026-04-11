@@ -61,7 +61,7 @@ gboolean pan_item_box_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixbuf
 PanItem *pan_item_tri_new(PanWindow *pw,
                           GqPoint c1, GqPoint c2, GqPoint c3,
                           GqColor color,
-                          gint borders, GqColor border_color);
+                          PanBorderType borders, GqColor border_color);
 gboolean pan_item_tri_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
                            gint x, gint y, gint width, gint height);
 

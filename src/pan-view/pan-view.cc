@@ -1450,10 +1450,8 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	GqPoint c2{pbox->x + 1, pbox->y + 36};
 	GqPoint c3{pbox->x + 1, pbox->y + 12};
 
-	p = pan_item_tri_new(pw,
-	                     c1, c2, c3,
-	                     PAN_POPUP_COLOR,
-	                     PAN_BORDER_1 | PAN_BORDER_3, PAN_POPUP_BORDER_COLOR);
+	p = pan_item_tri_new(pw, c1, c2, c3, PAN_POPUP_COLOR,
+	                     PAN_BORDER_1_3, PAN_POPUP_BORDER_COLOR);
 	p->set_key(PanKey::Info);
 	pan_item_added(pw, p);
 
