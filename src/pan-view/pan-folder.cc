@@ -181,10 +181,9 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 		GqPoint cp{parent->x + (parent->width / 2), parent->y + (parent->height / 2)};
 		GqPoint cg{group->x + (group->width / 2), group->y + (group->height / 2)};
 
-		pan_item_tri_new(pw,
-		                 cp, cg, {cg.x + 5, cg.y + 5},
+		pan_item_tri_new(pw, cp, cg, {cg.x + 5, cg.y + 5},
 		                 {255, 40, 40, 128},
-		                 PAN_BORDER_1 | PAN_BORDER_3, {255, 0, 0, 128});
+		                 PAN_BORDER_1_3, {255, 0, 0, 128});
 		}
 
 	pw->list = g_list_concat(group->items, pw->list);

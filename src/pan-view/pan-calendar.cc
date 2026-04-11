@@ -196,10 +196,8 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	GqPoint c2{pbox->x + 1, pbox->y + std::min(42, pbox->height)};
 	GqPoint c3{pbox->x + 1, std::max(pbox->y, c2.y - 30)};
 
-	pi = pan_item_tri_new(pw,
-	                      c1, c2, c3,
-	                      PAN_CAL_POPUP_COLOR,
-	                      PAN_BORDER_1 | PAN_BORDER_3, PAN_CAL_POPUP_BORDER_COLOR);
+	pi = pan_item_tri_new(pw, c1, c2, c3, PAN_CAL_POPUP_COLOR,
+	                      PAN_BORDER_1_3, PAN_CAL_POPUP_BORDER_COLOR);
 	pi->set_key(PanKey::DayBubble);
 	pan_item_added(pw, pi);
 

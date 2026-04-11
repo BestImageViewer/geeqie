@@ -247,7 +247,7 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 PanItem *pan_item_tri_new(PanWindow *pw,
                           GqPoint c1, GqPoint c2, GqPoint c3,
                           GqColor color,
-                          gint borders, GqColor border_color)
+                          PanBorderType borders, GqColor border_color)
 {
 	GdkRectangle tri_rect = util_triangle_bounding_box(c1, c2, c3);
 
