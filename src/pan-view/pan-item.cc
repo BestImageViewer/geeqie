@@ -273,25 +273,25 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 {
 	const GdkRectangle request_rect{x, y, width, height};
 	const GdkRectangle pi_rect{pi->x, pi->y, pi->width, pi->height};
-	GdkRectangle r;
 
-	if (pi->data && gdk_rectangle_intersect(&request_rect, &pi_rect, &r))
+	if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &pi_rect, &r))
 		{
-		auto coord = static_cast<GqPoint *>(pi->data);
 		r.x -= x;
 		r.y -= y;
-		pixbuf_draw_triangle(pixbuf, r,
-		                     {coord[0].x - x, coord[0].y - y},
-		                     {coord[1].x - x, coord[1].y - y},
-		                     {coord[2].x - x, coord[2].y - y},
-		                     pi->color);
 
-		const auto draw_line = [pixbuf, &r, x, y, pi](GqPoint start, GqPoint end)
+		auto *pi_coord = static_cast<GqPoint *>(pi->data);
+		GqPoint coord[3];
+		for (gint i = 0; i < 3; ++i)
+			{
+			coord[i].x = pi_coord[i].x - x;
+			coord[i].y = pi_coord[i].y - y;
+			}
+
+		pixbuf_draw_triangle(pixbuf, r, coord[0], coord[1], coord[2], pi->color);
+
+		const auto draw_line = [pixbuf, &r, pi](GqPoint start, GqPoint end)
 		{
-			pixbuf_draw_line(pixbuf, r,
-			                 start.x - x, start.y - y,
-			                 end.x - x, end.y - y,
-			                 pi->color2);
+			pixbuf_draw_line(pixbuf, r, start.x, start.y, end.x, end.y, pi->color2);
 		};
 
 		if (pi->borders & PAN_BORDER_1) draw_line(coord[0], coord[1]);
