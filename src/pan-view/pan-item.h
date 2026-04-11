@@ -62,6 +62,7 @@ PanItem *pan_item_tri_new(PanWindow *pw,
                           GqPoint c1, GqPoint c2, GqPoint c3,
                           GqColor color,
                           PanBorderType borders, GqColor border_color);
+void pan_item_tri_shift(PanItem *pi, gint x, gint y);
 gboolean pan_item_tri_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
                            gint x, gint y, gint width, gint height);
 

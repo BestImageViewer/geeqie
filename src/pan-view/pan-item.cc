@@ -45,6 +45,12 @@ struct PanItemBoxShadow
 	gint fade;
 };
 
+struct PanItemTriangleData
+{
+	GqPoint coord[3];
+	PanBorderType borders;
+};
+
 constexpr gint PAN_OUTLINE_THICKNESS = 1;
 constexpr guint8 PAN_OUTLINE_ALPHA = 180;
 constexpr GqColor PAN_OUTLINE_COLOR_1{255, 255, 255, PAN_OUTLINE_ALPHA};
@@ -251,21 +257,32 @@ PanItem *pan_item_tri_new(PanWindow *pw,
 {
 	GdkRectangle tri_rect = util_triangle_bounding_box(c1, c2, c3);
 
+	auto *data = g_new0(PanItemTriangleData, 1);
+	data->coord[0] = c1;
+	data->coord[1] = c2;
+	data->coord[2] = c3;
+	data->borders = borders;
+
 	PanItem *pi = pan_item_new(PAN_ITEM_TRIANGLE, tri_rect.x, tri_rect.y, tri_rect.width, tri_rect.height);
 
 	pi->color = color;
 	pi->color2 = border_color;
-	pi->borders = borders;
-
-	auto *coord = g_new0(GqPoint, 3);
-	coord[0] = c1;
-	coord[1] = c2;
-	coord[2] = c3;
-	pi->data = coord;
+	pi->data = data;
 
 	pw->list = g_list_prepend(pw->list, pi);
 
 	return pi;
+}
+
+void pan_item_tri_shift(PanItem *pi, gint x, gint y)
+{
+	auto *data = static_cast<PanItemTriangleData *>(pi->data);
+
+	for (GqPoint &coord : data->coord)
+		{
+		coord.x -= x;
+		coord.y -= y;
+		}
 }
 
 gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
@@ -279,12 +296,12 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 		r.x -= x;
 		r.y -= y;
 
-		auto *pi_coord = static_cast<GqPoint *>(pi->data);
+		auto *data = static_cast<PanItemTriangleData *>(pi->data);
 		GqPoint coord[3];
 		for (gint i = 0; i < 3; ++i)
 			{
-			coord[i].x = pi_coord[i].x - x;
-			coord[i].y = pi_coord[i].y - y;
+			coord[i].x = data->coord[i].x - x;
+			coord[i].y = data->coord[i].y - y;
 			}
 
 		pixbuf_draw_triangle(pixbuf, r, coord[0], coord[1], coord[2], pi->color);
@@ -294,9 +311,9 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 			pixbuf_draw_line(pixbuf, r, start.x, start.y, end.x, end.y, pi->color2);
 		};
 
-		if (pi->borders & PAN_BORDER_1) draw_line(coord[0], coord[1]);
-		if (pi->borders & PAN_BORDER_2) draw_line(coord[1], coord[2]);
-		if (pi->borders & PAN_BORDER_3) draw_line(coord[2], coord[0]);
+		if (data->borders & PAN_BORDER_1) draw_line(coord[0], coord[1]);
+		if (data->borders & PAN_BORDER_2) draw_line(coord[1], coord[2]);
+		if (data->borders & PAN_BORDER_3) draw_line(coord[2], coord[0]);
 		}
 
 	return FALSE;
