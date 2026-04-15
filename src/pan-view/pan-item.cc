@@ -150,14 +150,14 @@ void PanItem::adjust_size(gint border, gint &w, gint &h) const
  */
 
 PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
-                          gint border_size, GqColor base, GqColor bord)
+                          GqColor base, gint border_size, GqColor border_color)
 {
 	PanItem *pi = pan_item_new(PAN_ITEM_BOX, x, y, width, height);
 
 	pi->fd = fd;
 	pi->color = base;
-	pi->color2 = bord;
 	pi->border = border_size;
+	pi->border_color = border_color;
 
 	pw->list = g_list_prepend(pw->list, pi);
 
@@ -235,10 +235,10 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 
 	draw_rect_if_intersect({pi->x, pi->y, bw, bh}, pi->color);
 
-	draw_rect_if_intersect({pi->x, pi->y, bw, pi->border}, pi->color2);
-	draw_rect_if_intersect({pi->x, pi->y + pi->border, pi->border, bh - (pi->border * 2)}, pi->color2);
-	draw_rect_if_intersect({pi->x + bw - pi->border, pi->y + pi->border, pi->border, bh - (pi->border * 2)}, pi->color2);
-	draw_rect_if_intersect({pi->x, pi->y + bh - pi->border, bw, pi->border}, pi->color2);
+	draw_rect_if_intersect({pi->x, pi->y, bw, pi->border}, pi->border_color);
+	draw_rect_if_intersect({pi->x, pi->y + pi->border, pi->border, bh - (pi->border * 2)}, pi->border_color);
+	draw_rect_if_intersect({pi->x + bw - pi->border, pi->y + pi->border, pi->border, bh - (pi->border * 2)}, pi->border_color);
+	draw_rect_if_intersect({pi->x, pi->y + bh - pi->border, bw, pi->border}, pi->border_color);
 
 	return FALSE;
 }
@@ -266,7 +266,7 @@ PanItem *pan_item_tri_new(PanWindow *pw,
 	PanItem *pi = pan_item_new(PAN_ITEM_TRIANGLE, tri_rect.x, tri_rect.y, tri_rect.width, tri_rect.height);
 
 	pi->color = color;
-	pi->color2 = border_color;
+	pi->border_color = border_color;
 	pi->data = data;
 
 	pw->list = g_list_prepend(pw->list, pi);
@@ -308,7 +308,7 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 
 		const auto draw_line = [pixbuf, &r, pi](GqPoint start, GqPoint end)
 		{
-			pixbuf_draw_line(pixbuf, r, start.x, start.y, end.x, end.y, pi->color2);
+			pixbuf_draw_line(pixbuf, r, start.x, start.y, end.x, end.y, pi->border_color);
 		};
 
 		if (data->borders & PAN_BORDER_1) draw_line(coord[0], coord[1]);
@@ -521,8 +521,6 @@ PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w,
 	PanItem *pi = pan_item_new(PAN_ITEM_IMAGE, x, y, w, h);
 
 	pi->fd = fd;
-	pi->color.a = 255;
-	pi->color2.a = PAN_SHADOW_ALPHA / 2;
 
 	pw->list = g_list_prepend(pw->list, pi);
 
@@ -546,12 +544,11 @@ gboolean pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, Pixbuf
 			gdk_pixbuf_composite(pi->pixbuf, pixbuf, r.x, r.y, r.width, r.height,
 			                     static_cast<gdouble>(pi->x) - x,
 			                     static_cast<gdouble>(pi->y) - y,
-			                     1.0, 1.0, GDK_INTERP_NEAREST,
-			                     pi->color.a);
+			                     1.0, 1.0, GDK_INTERP_NEAREST, 255);
 			}
 		else
 			{
-			pixbuf_draw_rect_fill(pixbuf, r, pi->color2);
+			pixbuf_draw_rect_fill(pixbuf, r, {PAN_SHADOW_RGB, PAN_SHADOW_ALPHA / 2});
 			}
 		}
 

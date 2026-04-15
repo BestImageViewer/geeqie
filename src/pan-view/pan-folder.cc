@@ -236,10 +236,8 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 	y += pi_box->height;
 
 	pi_box = pan_item_box_new(pw, file_data_ref(dir_fd),
-	                          x, y,
-	                          PAN_BOX_BORDER * 2, PAN_BOX_BORDER * 2,
-	                          PAN_BOX_OUTLINE_THICKNESS,
-	                          PAN_BOX_COLOR, PAN_BOX_OUTLINE_COLOR);
+	                          x, y, PAN_BOX_BORDER * 2, PAN_BOX_BORDER * 2, PAN_BOX_COLOR,
+	                          PAN_BOX_OUTLINE_THICKNESS, PAN_BOX_OUTLINE_COLOR);
 
 	x += PAN_BOX_BORDER;
 	y += PAN_BOX_BORDER;
@@ -367,10 +365,8 @@ static void pan_folder_tree_path(PanWindow *pw, FileData *dir_fd,
 	y += pi_box->height;
 
 	pi_box = pan_item_box_new(pw, file_data_ref(dir_fd),
-	                          x, y,
-	                          PAN_BOX_BORDER, PAN_BOX_BORDER,
-	                          PAN_BOX_OUTLINE_THICKNESS,
-	                          PAN_BOX_COLOR, PAN_BOX_OUTLINE_COLOR);
+	                          x, y, PAN_BOX_BORDER, PAN_BOX_BORDER, PAN_BOX_COLOR,
+	                          PAN_BOX_OUTLINE_THICKNESS, PAN_BOX_OUTLINE_COLOR);
 
 	x += PAN_BOX_BORDER;
 	y += PAN_BOX_BORDER;

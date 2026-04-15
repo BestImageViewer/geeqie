@@ -1434,7 +1434,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	DEBUG_1("info set to %s", pi->fd->path);
 
 	pbox = pan_item_box_new(pw, nullptr, pi->x + pi->width + 4, pi->y, 10, 10,
-				PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
+	                        PAN_POPUP_COLOR, PAN_POPUP_BORDER, PAN_POPUP_BORDER_COLOR);
 	pbox->set_key(PanKey::Info);
 
 	GqPoint c1{pi->x + pi->width - 8, pi->y + 8};
@@ -1493,7 +1493,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 			ih = std::max(1, ih * scale / 100);
 
 			pbox = pan_item_box_new(pw, nullptr, pbox->x, pbox->y + pbox->height + 8, 10, 10,
-						PAN_POPUP_BORDER, PAN_POPUP_COLOR, PAN_POPUP_BORDER_COLOR);
+			                        PAN_POPUP_COLOR, PAN_POPUP_BORDER, PAN_POPUP_BORDER_COLOR);
 			pbox->set_key(PanKey::Info);
 
 			p = pan_item_image_new(pw, file_data_new_group(pi->fd->path),

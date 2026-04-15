@@ -52,7 +52,7 @@ PanItem *pan_item_find_by_coord(PanWindow *pw, PanItemType type,
 
 // Item box type
 PanItem *pan_item_box_new(PanWindow *pw, FileData *fd, gint x, gint y, gint width, gint height,
-                          gint border_size, GqColor base, GqColor bord);
+                          GqColor base, gint border_size, GqColor border_color);
 void pan_item_box_shadow(PanItem *pi, gint offset, gint fade);
 gboolean pan_item_box_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
                            gint x, gint y, gint width, gint height);

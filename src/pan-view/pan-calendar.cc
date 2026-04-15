@@ -147,7 +147,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	y = pi_day->y;
 
 	pbox = pan_item_box_new(pw, nullptr, x, y, PAN_BOX_BORDER, PAN_BOX_BORDER,
-				PAN_CAL_POPUP_BORDER, PAN_CAL_POPUP_COLOR, PAN_CAL_POPUP_BORDER_COLOR);
+	                        PAN_CAL_POPUP_COLOR, PAN_CAL_POPUP_BORDER, PAN_CAL_POPUP_BORDER_COLOR);
 	pbox->set_key(PanKey::DayBubble);
 
 	if (pi_day->fd)
@@ -310,7 +310,7 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 		x = PAN_BOX_BORDER;
 
 		pi_month = pan_item_box_new(pw, nullptr, x, y, PAN_CAL_DAY_WIDTH * 7, PAN_CAL_DAY_HEIGHT / 4,
-					    PAN_CAL_MONTH_BORDER, PAN_CAL_MONTH_COLOR, PAN_CAL_MONTH_BORDER_COLOR);
+		                            PAN_CAL_MONTH_COLOR, PAN_CAL_MONTH_BORDER, PAN_CAL_MONTH_BORDER_COLOR);
 		g_autofree gchar *month_buf = pan_date_value_string(dt, PAN_DATE_LENGTH_MONTH);
 		pi_text = pan_item_text_new(pw, x, y, month_buf, PAN_TEXT_ATTR_BOLD_HEADING,
 		                            PAN_TEXT_BORDER, PAN_CAL_MONTH_TEXT_COLOR);
@@ -341,7 +341,7 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 			fd = file_data_new_no_grouping(fake_path);
 			fd->date = dt;
 			pi_day = pan_item_box_new(pw, fd, x, y, PAN_CAL_DAY_WIDTH, PAN_CAL_DAY_HEIGHT,
-						  PAN_CAL_DAY_BORDER, PAN_CAL_DAY_COLOR, PAN_CAL_DAY_BORDER_COLOR);
+			                          PAN_CAL_DAY_COLOR, PAN_CAL_DAY_BORDER, PAN_CAL_DAY_BORDER_COLOR);
 			pi_day->set_key(PanKey::Day);
 
 			dx = x + PAN_CAL_DOT_GAP * 2;
@@ -353,9 +353,7 @@ void pan_calendar_compute(PanWindow *pw, gint &width, gint &height)
 				PanItem *pi;
 
 				pi = pan_item_box_new(pw, fd, dx, dy, PAN_CAL_DOT_SIZE, PAN_CAL_DOT_SIZE,
-						      0,
-						      PAN_CAL_DOT_COLOR,
-						      {0, 0, 0, 0});
+				                      PAN_CAL_DOT_COLOR, 0, {0, 0, 0, 0});
 				pi->set_key(PanKey::Dot);
 
 				dx += PAN_CAL_DOT_SIZE + PAN_CAL_DOT_GAP;

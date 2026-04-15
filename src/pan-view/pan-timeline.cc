@@ -103,10 +103,8 @@ void pan_timeline_compute(PanWindow *pw, gint &width, gint &height)
 				                       PAN_TEXT_BORDER, PAN_TEXT_COLOR);
 				y += pi->height;
 
-				pi_month = pan_item_box_new(pw, file_data_ref(fd),
-				                            x, y, 0, 0,
-				                            PAN_BOX_OUTLINE_THICKNESS,
-				                            PAN_BOX_COLOR, PAN_BOX_OUTLINE_COLOR);
+				pi_month = pan_item_box_new(pw, file_data_ref(fd), x, y, 0, 0, PAN_BOX_COLOR,
+				                            PAN_BOX_OUTLINE_THICKNESS, PAN_BOX_OUTLINE_COLOR);
 
 				x += PAN_BOX_BORDER;
 				y += PAN_BOX_BORDER;
@@ -142,9 +140,8 @@ void pan_timeline_compute(PanWindow *pw, gint &width, gint &height)
 
 			y += pi->height;
 
-			pi_day = pan_item_box_new(pw, file_data_ref(fd), x, y, 0, 0,
-			                          PAN_BOX_OUTLINE_THICKNESS,
-			                          PAN_BOX_COLOR, PAN_BOX_OUTLINE_COLOR);
+			pi_day = pan_item_box_new(pw, file_data_ref(fd), x, y, 0, 0, PAN_BOX_COLOR,
+			                          PAN_BOX_OUTLINE_THICKNESS, PAN_BOX_OUTLINE_COLOR);
 
 			x += PAN_BOX_BORDER;
 			y += PAN_BOX_BORDER;

@@ -151,8 +151,8 @@ struct PanItem {
 
 	GqColor color;
 
-	GqColor color2;
 	gint border;
+	GqColor border_color;
 
 	gpointer data;
 
