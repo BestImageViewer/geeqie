@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 20019 - The Geeqie Team
+ * Copyright (C) 2019 - The Geeqie Team
  *
  * Author: Colin Clark
  *

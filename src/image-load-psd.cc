@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 20019 - The Geeqie Team
+ * Copyright (C) 2019 - The Geeqie Team
  *
  * Author: Colin Clark
  *
@@ -77,14 +77,14 @@ private:
 	AreaUpdatedCb area_updated_cb;
 	gpointer data;
 
-	GdkPixbuf *pixbuf;
+	GdkPixbuf *pixbuf = nullptr;
 };
 
 struct PsdHeader
 {
 	guchar  signature[4];  /* file ID, always "8BPS" */
 	guint16 version;       /* version number, always 1 */
-	guchar  resetved[6];
+	guchar  reserved[6];
 	guint16 channels;      /* number of color channels (1-24) */
 	guint32 rows;          /* height of image in pixels (1-30000) */
 	guint32 columns;       /* width of image in pixels (1-30000) */
@@ -302,7 +302,7 @@ void free_context(PsdContext *ctx)
 	g_free(ctx);
 }
 
-gboolean ImageLoaderPSD::write(const guchar *buf, gsize &chunk_size, gsize count, GError **)
+gboolean ImageLoaderPSD::write(const guchar *input_buf, gsize &chunk_size, gsize count, GError **)
 {
 	auto ctx = g_new0(PsdContext, 1);
 	guint i;
@@ -327,7 +327,7 @@ gboolean ImageLoaderPSD::write(const guchar *buf, gsize &chunk_size, gsize count
 			case PSD_STATE_HEADER:
 				if (feed_buffer(
 						ctx->buffer, &ctx->bytes_read,
-						&buf, &size, PSD_HEADER_SIZE))
+						&input_buf, &size, PSD_HEADER_SIZE))
 				{
 					PsdHeader hd = psd_parse_header(ctx->buffer);
 
@@ -363,6 +363,8 @@ gboolean ImageLoaderPSD::write(const guchar *buf, gsize &chunk_size, gsize count
 					ctx->lines_lengths =
 						static_cast<guint16 *>(g_malloc(2 * ctx->channels * ctx->height));
 
+					/* TODO: Avoid leaking pixbuf on load failure.
+					   (Note that free_context does _not_ free ctx->pixbuf) */
 					ctx->pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB,
 						FALSE, 8, ctx->width, ctx->height);
 
@@ -378,12 +380,12 @@ gboolean ImageLoaderPSD::write(const guchar *buf, gsize &chunk_size, gsize count
 					ctx->ch_bufs = static_cast<guchar **>(g_malloc(sizeof(guchar*) * ctx->channels));
 					for (i = 0; i < ctx->channels; i++) {
 						ctx->ch_bufs[i] =
-							static_cast<guchar *>(g_malloc(ctx->width*ctx->height*ctx->depth_bytes));
+							static_cast<guchar *>(g_malloc(ctx->width * ctx->height * ctx->depth_bytes));
 
 						if (ctx->ch_bufs[i] == nullptr) {
-						log_printf("warning: Insufficient memory to load PSD image file\n");
-						free_context(ctx);
-						return FALSE;
+							log_printf("warning: Insufficient memory to load PSD image file\n");
+							free_context(ctx);
+							return FALSE;
 						}
 					}
 
@@ -392,25 +394,25 @@ gboolean ImageLoaderPSD::write(const guchar *buf, gsize &chunk_size, gsize count
 				}
 				break;
 			case PSD_STATE_COLOR_MODE_BLOCK:
-				if (skip_block(ctx, &buf, &size)) {
+				if (skip_block(ctx, &input_buf, &size)) {
 					ctx->state = PSD_STATE_RESOURCES_BLOCK;
 					reset_context_buffer(ctx);
 				}
 				break;
 			case PSD_STATE_RESOURCES_BLOCK:
-				if (skip_block(ctx, &buf, &size)) {
+				if (skip_block(ctx, &input_buf, &size)) {
 					ctx->state = PSD_STATE_LAYERS_BLOCK;
 					reset_context_buffer(ctx);
 				}
 				break;
 			case PSD_STATE_LAYERS_BLOCK:
-				if (skip_block(ctx, &buf, &size)) {
+				if (skip_block(ctx, &input_buf, &size)) {
 					ctx->state = PSD_STATE_COMPRESSION;
 					reset_context_buffer(ctx);
 				}
 				break;
 			case PSD_STATE_COMPRESSION:
-				if (feed_buffer(ctx->buffer, &ctx->bytes_read, &buf, &size, 2))
+				if (feed_buffer(ctx->buffer, &ctx->bytes_read, &input_buf, &size, 2))
 				{
 					ctx->compression = static_cast<PsdCompressionType>(read_uint16(ctx->buffer));
 
@@ -428,7 +430,7 @@ gboolean ImageLoaderPSD::write(const guchar *buf, gsize &chunk_size, gsize count
 				break;
 			case PSD_STATE_LINES_LENGTHS:
 				if (feed_buffer(
-						reinterpret_cast<guchar*>(ctx->lines_lengths), &ctx->bytes_read, &buf,
+						reinterpret_cast<guchar*>(ctx->lines_lengths), &ctx->bytes_read, &input_buf,
 						 &size,	2 * ctx->height * ctx->channels))
 				{
 					/* convert from different endianness */
@@ -448,7 +450,7 @@ gboolean ImageLoaderPSD::write(const guchar *buf, gsize &chunk_size, gsize count
 							(ctx->curr_ch * ctx->height) + ctx->curr_row];
 					}
 
-					if (feed_buffer(ctx->buffer, &ctx->bytes_read, &buf, &size,
+					if (feed_buffer(ctx->buffer, &ctx->bytes_read, &input_buf, &size,
 							line_length))
 					{
 						if (ctx->compression == PSD_COMPRESSION_RLE) {
