@@ -845,21 +845,16 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
 
 /**
  * @brief Clips the specified line segment to the specified clipping region.
- * @param[in] clip_x,clip_y Coordinates of the top-left corner of the clipping region.
- * @param[in] clip_w,clip_h Extent of the clipping region.
- * @param[in] x1,y1 Coordinates of the first point of the line segment.
- * @param[in] x2,y2 Coordinates of the second point of the line segment.
- * @param[out] rx1,ry1 Computed coordinates of the first point of the clipped line segment.
- * @param[out] rx2,ry2 Computed coordinates of the second point of the clipped line segment.
+ * @param[in] clip Clipping region.
+ * @param[in/out] x1,y1 Coordinates of the first point of the line segment.
+ * @param[in/out] x2,y2 Coordinates of the second point of the line segment.
  * @retval FALSE The line segment lies outside of the clipping region.
  * @retval TRUE The clip operation was performed, and the output params were set.
  */
-static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, gdouble clip_h,
-                               gdouble x1, gdouble y1, gdouble x2, gdouble y2,
-                               gdouble &rx1, gdouble &ry1, gdouble &rx2, gdouble &ry2)
+static gboolean util_clip_line(GdkRectangle clip,
+                               gdouble &x1, gdouble &y1, gdouble &x2, gdouble &y2)
 {
 	gboolean flip = FALSE;
-	gdouble d;
 
 	// Normalize: Line endpoint 1 must be farther left.
 	if (x1 > x2)
@@ -869,8 +864,11 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
 		flip = TRUE;
 		}
 
+	const gint clip_right = clip.x + clip.width;
+	const gint clip_bottom = clip.y + clip.height;
+
 	// Ensure the line horizontally overlaps with the clip region.
-	if (x2 < clip_x || x1 > clip_x + clip_w) return FALSE;
+	if (x2 < clip.x || x1 > clip_right) return FALSE;
 
 	// Ensure the line vertically overlaps with the clip region.
 	// Note that a line can both horizontally and vertically overlap with
@@ -878,33 +876,31 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
 	// case is detected further below.
 	if (y1 < y2)
 		{
-		if (y2 < clip_y || y1 > clip_y + clip_h) return FALSE;
+		if (y2 < clip.y || y1 > clip_bottom) return FALSE;
 		}
 	else
 		{
-		if (y1 < clip_y || y2 > clip_y + clip_h) return FALSE;
+		if (y1 < clip.y || y2 > clip_bottom) return FALSE;
 		}
 
-	d = x2 - x1;
 	// TODO(xsdg): Either use ints here, or define a reasonable epsilon to do the
 	// right thing if -epsilon < d < 0.  We already guaranteed above that x2 >= x1.
-	if (d > 0.0)
+	if (const gdouble d = x2 - x1; d > 0.0)
 		{
-		gdouble slope;
+		const gdouble slope = (y2 - y1) / d;
 
-		slope = (y2 - y1) / d;
 		// If needed, project (x1, y1) to be horizontally within the clip
 		// region, while maintaining the line's slope and y-offset.
-		if (x1 < clip_x)
+		if (x1 < clip.x)
 			{
-			y1 = y1 + slope * (clip_x - x1);
-			x1 = clip_x;
+			y1 = y1 + slope * (clip.x - x1);
+			x1 = clip.x;
 			}
 		// Likewise with (x2, y2).
-		if (x2 > clip_x + clip_w)
+		if (x2 > clip_right)
 			{
-			y2 = y2 + slope * (clip_x + clip_w - x2);
-			x2 = clip_x + clip_w;
+			y2 = y2 + slope * (clip_right - x2);
+			x2 = clip_right;
 			}
 		}
 
@@ -912,11 +908,11 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
 	// no longer vertically overlap with the clip region.
 	if (y1 < y2)
 		{
-		if (y2 < clip_y || y1 > clip_y + clip_h) return FALSE;
+		if (y2 < clip.y || y1 > clip_bottom) return FALSE;
 		}
 	else
 		{
-		if (y1 < clip_y || y2 > clip_y + clip_h) return FALSE;
+		if (y1 < clip.y || y2 > clip_bottom) return FALSE;
 
 		// Re-normalize: line endpoint 1 must be farther up.
 		std::swap(x1, x2);
@@ -924,24 +920,22 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
 		flip = !flip;
 		}
 
-	d = y2 - y1;
-	if (d > 0.0)
+	if (const gdouble d = y2 - y1; d > 0.0)
 		{
-		gdouble slope;
+		const gdouble slope = (x2 - x1) / d;
 
-		slope = (x2 - x1) / d;
 		// If needed, project (x1, y1) to be vertically within the clip
 		// region, while maintaining the line's slope and x-offset.
-		if (y1 < clip_y)
+		if (y1 < clip.y)
 			{
-			x1 = x1 + slope * (clip_y - y1);
-			y1 = clip_y;
+			x1 = x1 + slope * (clip.y - y1);
+			y1 = clip.y;
 			}
 		// Likewise with (x2, y2).
-		if (y2 > clip_y + clip_h)
+		if (y2 > clip_bottom)
 			{
-			x2 = x2 + slope * (clip_y + clip_h - y2);
-			y2 = clip_y + clip_h;
+			x2 = x2 + slope * (clip_bottom - y2);
+			y2 = clip_bottom;
 			}
 		}
 
@@ -949,17 +943,8 @@ static gboolean util_clip_line(gdouble clip_x, gdouble clip_y, gdouble clip_w, g
 	// happened during normalization.
 	if (flip)
 		{
-		rx1 = x2;
-		ry1 = y2;
-		rx2 = x1;
-		ry2 = y1;
-		}
-	else
-		{
-		rx1 = x1;
-		ry1 = y1;
-		rx2 = x2;
-		ry2 = y2;
+		std::swap(x1, x2);
+		std::swap(y1, y2);
 		}
 
 	return TRUE;
@@ -980,10 +965,6 @@ void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
 {
 	gboolean has_alpha;
 	gint prs;
-	gdouble rx1;
-	gdouble ry1;
-	gdouble rx2;
-	gdouble ry2;
 	guchar *p_pix;
 	gint p_step;
 	gdouble slope;
@@ -998,9 +979,11 @@ void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
 	if (!pixbuf_clip_region(pb, clip, pb_rect)) return;
 
 	// Clips the specified line segment to the intersecting region from above.
-	if (!util_clip_line(pb_rect.x, pb_rect.y, pb_rect.width, pb_rect.height,
-	                    x1, y1, x2, y2,
-	                    rx1, ry1, rx2, ry2)) return;
+	gdouble rx1 = x1;
+	gdouble ry1 = y1;
+	gdouble rx2 = x2;
+	gdouble ry2 = y2;
+	if (!util_clip_line(pb_rect, rx1, ry1, rx2, ry2)) return;
 
 	has_alpha = gdk_pixbuf_get_has_alpha(pb);
 	prs = gdk_pixbuf_get_rowstride(pb);
