@@ -34,6 +34,23 @@
 class FileData;
 struct PixbufRenderer;
 
+enum PanBorderType {
+	PAN_BORDER_NONE = 0,
+	PAN_BORDER_1 = 1 << 0,
+	PAN_BORDER_2 = 1 << 1,
+	PAN_BORDER_3 = 1 << 2,
+	PAN_BORDER_1_3 = PAN_BORDER_1 | PAN_BORDER_3,
+	PAN_BORDER_4 = 1 << 3
+};
+
+enum PanTextAttrType {
+	PAN_TEXT_ATTR_NONE = 0,
+	PAN_TEXT_ATTR_BOLD = 1 << 0,
+	PAN_TEXT_ATTR_HEADING = 1 << 1,
+	PAN_TEXT_ATTR_BOLD_HEADING = PAN_TEXT_ATTR_BOLD | PAN_TEXT_ATTR_HEADING,
+	PAN_TEXT_ATTR_MARKUP = 1 << 2
+};
+
 PanItemType get_pan_item_type(PanImageSize size);
 
 void pan_item_free(PanItem *pi);

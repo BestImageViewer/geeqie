@@ -51,6 +51,12 @@ struct PanItemTriangleData
 	PanBorderType borders;
 };
 
+struct PanItemTextData
+{
+	gchar *text;
+	PanTextAttrType attr;
+};
+
 constexpr gint PAN_OUTLINE_THICKNESS = 1;
 constexpr guint8 PAN_OUTLINE_ALPHA = 180;
 constexpr GqColor PAN_OUTLINE_COLOR_1{255, 255, 255, PAN_OUTLINE_ALPHA};
@@ -92,7 +98,11 @@ void pan_item_free(PanItem *pi)
 
 	if (pi->pixbuf) g_object_unref(pi->pixbuf);
 	if (pi->fd) file_data_unref(pi->fd);
-	g_free(pi->text);
+	if (pi->is_type(PAN_ITEM_TEXT))
+		{
+		auto *data = static_cast<PanItemTextData *>(pi->data);
+		g_free(data->text);
+		}
 	g_free(pi->data);
 
 	delete pi;
@@ -326,35 +336,38 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
  *-----------------------------------------------------------------------------
  */
 
-static PangoLayout *get_text_layout(GtkWidget *widget, const gchar *text,
-                                    PanTextAttrType text_attr)
+static PangoLayout *pan_item_text_layout(const PanItemTextData *data, GtkWidget *widget)
 {
 	PangoLayout *layout = gtk_widget_create_pango_layout(widget, nullptr);
 
-	if (text_attr & PAN_TEXT_ATTR_MARKUP)
+	if (data->attr & PAN_TEXT_ATTR_MARKUP)
 		{
-		pango_layout_set_markup(layout, text, -1);
+		pango_layout_set_markup(layout, data->text, -1);
 		return layout;
 		}
 
-	g_autoptr(PangoAttrList) pal = get_pango_attr_list(text_attr & PAN_TEXT_ATTR_BOLD,
-	                                                   text_attr & PAN_TEXT_ATTR_HEADING);
+	g_autoptr(PangoAttrList) pal = get_pango_attr_list(data->attr & PAN_TEXT_ATTR_BOLD,
+	                                                   data->attr & PAN_TEXT_ATTR_HEADING);
 	if (pal)
 		{
 		pango_layout_set_attributes(layout, pal);
 		}
 
-	pango_layout_set_text(layout, text, -1);
+	pango_layout_set_text(layout, data->text, -1);
 	return layout;
 }
 
 PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
                            PanTextAttrType attr, gint border_size, GqColor color)
 {
+	auto *data = g_new0(PanItemTextData, 1);
+	data->text = g_strdup(text);
+	data->attr = attr;
+
 	GqSize size{};
 	if (pw->imd->pr && text)
 		{
-		g_autoptr(PangoLayout) layout = get_text_layout(pw->imd->pr, text, attr);
+		g_autoptr(PangoLayout) layout = pan_item_text_layout(data, pw->imd->pr);
 		pango_layout_get_pixel_size(layout, &size.width, &size.height);
 
 		size.width += border_size * 2;
@@ -363,10 +376,9 @@ PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
 
 	PanItem *pi = pan_item_new(PAN_ITEM_TEXT, x, y, size.width, size.height);
 
-	pi->text = g_strdup(text);
-	pi->text_attr = attr;
 	pi->color = color;
 	pi->border = border_size;
+	pi->data = data;
 
 	pw->list = g_list_prepend(pw->list, pi);
 
@@ -376,7 +388,8 @@ PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
 gboolean pan_item_text_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
                             gint x, gint y, gint, gint)
 {
-	g_autoptr(PangoLayout) layout = get_text_layout(GTK_WIDGET(pr), pi->text, pi->text_attr);
+	auto *data = static_cast<PanItemTextData *>(pi->data);
+	g_autoptr(PangoLayout) layout = pan_item_text_layout(data, GTK_WIDGET(pr));
 
 	pixbuf_draw_layout(pixbuf, layout,
 	                   pi->x - x + pi->border, pi->y - y + pi->border,
