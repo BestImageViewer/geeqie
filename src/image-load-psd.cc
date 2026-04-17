@@ -62,6 +62,13 @@
 namespace
 {
 
+/** Image Loader class for PSD file format
+ *
+ *  Note that this _does not_ currently support the PSB format.
+ *
+ *  File format spec:
+ *  https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/#50577409_72092
+ */
 struct ImageLoaderPSD : public ImageLoaderBackend
 {
 public:
@@ -85,7 +92,7 @@ struct PsdHeader
 	guchar  signature[4];  /* file ID, always "8BPS" */
 	guint16 version;       /* version number, always 1 */
 	guchar  reserved[6];
-	guint16 channels;      /* number of color channels (1-24) */
+	guint16 channels;      /* number of color channels (1-56) */
 	guint32 rows;          /* height of image in pixels (1-30000) */
 	guint32 columns;       /* width of image in pixels (1-30000) */
 	guint16 depth;         /* number of bits per channel (1, 8, 16 or 32) */
@@ -93,6 +100,13 @@ struct PsdHeader
 };
 
 constexpr guint PSD_HEADER_SIZE = 26;
+
+// Constants for input file validation (from the file spec)
+constexpr guchar REQ_SIGNATURE[] = "8BPS";
+constexpr guint REQ_VERSION = 1;
+constexpr guint REQ_MAX_CHANNELS = 56;
+constexpr guint REQ_MAX_ROWS = 30000;
+constexpr guint REQ_MAX_COLS = 30000;
 
 enum PsdColorMode
 {
@@ -132,6 +146,7 @@ struct PsdContext
 	gpointer           user_data;
 
 	guchar*            buffer;
+	guint              buffer_size;
 	guint              bytes_read;
 	guint32            bytes_to_skip;
 	gboolean           bytes_to_skip_known;
@@ -139,7 +154,6 @@ struct PsdContext
 	guint32            width;
 	guint32            height;
 	guint16            channels;
-	guint16            depth;
 	guint16            depth_bytes;
 	PsdColorMode       color_mode;
 	PsdCompressionType compression;
@@ -182,6 +196,63 @@ PsdHeader psd_parse_header (guchar* str)
 	hd.color_mode = read_uint16(str + 24);
 
 	return hd;
+}
+
+/*
+ * Ensures that the header is valid, and describes file options that are reasonable for this parser.
+ *
+ * Returns false if header is invalid or doesn't work with this parser; true otherwise.
+ */
+gboolean can_parse_file(const PsdHeader &header)
+{
+	if (strncmp(reinterpret_cast<const char*>(header.signature),
+		    reinterpret_cast<const char*>(REQ_SIGNATURE),
+		    4) != 0)
+	{
+		log_printf("warning: psd - Invalid file signature\n");
+		return FALSE;
+	}
+
+	if (header.version != REQ_VERSION) {
+		log_printf("warning: psd - Unsupported file version %d\n", header.version);
+		return FALSE;
+	}
+
+	if (header.channels == 0 || header.channels > REQ_MAX_CHANNELS) {
+		log_printf("warning: psd - Invalid channel count: %d\n", header.channels);
+		return FALSE;
+	}
+
+	if (header.columns == 0 || header.columns > REQ_MAX_COLS) {
+		log_printf("warning: psd - Invalid column count: %d\n", header.columns);
+		return FALSE;
+	}
+
+	if (header.rows == 0 || header.rows > REQ_MAX_ROWS) {
+		log_printf("warning: psd - Invalid row count: %d\n", header.rows);
+		return FALSE;
+	}
+
+	switch (static_cast<PsdColorMode>(header.color_mode))
+	{
+		case PSD_MODE_RGB:
+		case PSD_MODE_GRAYSCALE:
+		case PSD_MODE_CMYK:
+		case PSD_MODE_DUOTONE:
+			/* Supported color modes. */
+			break;
+
+		default:
+			log_printf("warning: psd - Unsupported color mode %d\n", header.color_mode);
+			return FALSE;
+	}
+
+	if (header.depth != 8 && header.depth != 16) {
+		log_printf("warning: psd - Unsupported color depth %d\n", header.depth);
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 /*
@@ -304,6 +375,9 @@ void free_context(PsdContext *ctx)
 
 gboolean ImageLoaderPSD::write(const guchar *input_buf, gsize &chunk_size, gsize count, GError **)
 {
+	/* TODO: Find some way to have ctx auto-clean-up on exit.  Perhaps unique_ptr, or just turn
+	 * it into an object that can reset its own internal state?
+	 */
 	auto ctx = g_new0(PsdContext, 1);
 	guint i;
 	guint32 j;
@@ -331,33 +405,23 @@ gboolean ImageLoaderPSD::write(const guchar *input_buf, gsize &chunk_size, gsize
 				{
 					PsdHeader hd = psd_parse_header(ctx->buffer);
 
+					if (!can_parse_file(hd))
+					{
+						free_context(ctx);
+						return FALSE;
+					}
+
 					ctx->width = hd.columns;
 					ctx->height = hd.rows;
 					ctx->channels = hd.channels;
-					ctx->depth = hd.depth;
-					ctx->depth_bytes = (ctx->depth/8 > 0 ? ctx->depth/8 : 1);
+					ctx->depth_bytes = hd.depth / 8;
 					ctx->color_mode = static_cast<PsdColorMode>(hd.color_mode);
-
-					if (ctx->color_mode != PSD_MODE_RGB
-					    && ctx->color_mode != PSD_MODE_GRAYSCALE
-					    && ctx->color_mode != PSD_MODE_CMYK
-					    && ctx->color_mode != PSD_MODE_DUOTONE
-					) {
-						log_printf("warning: psd - Unsupported color mode\n");
-						free_context(ctx);
-						return FALSE;
-					}
-
-					if (ctx->depth != 8 && ctx->depth != 16) {
-						log_printf("warning: psd - Unsupported color depth\n");
-						free_context(ctx);
-						return FALSE;
-					}
 
 					/* we need buffer that can contain one channel data for one
 					   row in RLE compressed format. 2*width should be enough */
 					g_free(ctx->buffer);
-					ctx->buffer = static_cast<guchar *>(g_malloc(ctx->width * 2 * ctx->depth_bytes));
+					ctx->buffer_size = ctx->width * 2 * ctx->depth_bytes;
+					ctx->buffer = static_cast<guchar *>(g_malloc(ctx->buffer_size));
 
 					/* this will be needed for RLE decompression */
 					ctx->lines_lengths =
@@ -424,19 +488,42 @@ gboolean ImageLoaderPSD::write(const guchar *input_buf, gsize &chunk_size, gsize
 						reset_context_buffer(ctx);
 					} else {
 						log_printf("warning: psd - Unsupported compression type\n");
+						free_context(ctx);
 						return FALSE;
 					}
 				}
 				break;
 			case PSD_STATE_LINES_LENGTHS:
+				/* From the spec:
+				 * RLE compressed: the image data starts with the byte counts for all the scan
+				 * lines (rows * channels), with each count stored as a two-byte value. The
+				 * RLE compressed data follows, with each scan line compressed separately. The
+				 * RLE compression is the same compression algorithm used by the Macintosh ROM
+				 * routine PackBits , and the TIFF standard.
+				 */
+
+				/* So we read from the input buffer twice as many guchar (8-bit) values as
+				 * expected, and then reinterpret them as the correct number of guint16 values
+				 */
 				if (feed_buffer(
 						reinterpret_cast<guchar*>(ctx->lines_lengths), &ctx->bytes_read, &input_buf,
 						 &size,	2 * ctx->height * ctx->channels))
 				{
 					/* convert from different endianness */
 					for (i = 0; i < ctx->height * ctx->channels; i++) {
+						/* Note that the type of ctx->lines_lengths is guint16*.  So
+						 * we're indexing through the memory by 2-bytes, even though
+						 * we read into it by single bytes above.
+						 */
 						ctx->lines_lengths[i] = read_uint16(
 							reinterpret_cast<guchar*>(&ctx->lines_lengths[i]));
+
+						if (ctx->lines_lengths[i] > ctx->buffer_size) {
+							log_printf("warning: psd - Unexpectedly large RLE line length: %d > %d\n",
+								   ctx->lines_lengths[i], ctx->buffer_size);
+							free_context(ctx);
+							return FALSE;
+						}
 					}
 					ctx->state = PSD_STATE_CHANNEL_DATA;
 					reset_context_buffer(ctx);
