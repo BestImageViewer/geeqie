@@ -157,8 +157,22 @@ def main(argv) -> int:
 
 if __name__ == "__main__":
     try:
-        exit(main(sys.argv))
+        exit_code = main(sys.argv)
+        if exit_code not in [0, 1]:
+            # This is so that Geeqie crashes in expected-failure cases will
+            # still trigger a non-passing result.  This is following the
+            # protocol that Meson describes here:
+            # https://mesonbuild.com/Unit-tests.html#skipped-tests-and-hard-errors
+            #
+            # We can replace this with expected_exitcode once we bump our meson
+            # dependency to 1.11.0 .
+            exit_code = 99
+
+        exit(exit_code)
 
     except GeeqieTestError as e:
         traceback.print_exception(e)
+        if e.exit_code not in [0, 1]:
+            # See comment above.
+            exit(99)
         exit(e.exit_code)
