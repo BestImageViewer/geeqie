@@ -418,7 +418,6 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 {
 	const GdkRectangle request_rect{x, y, width, height};
 	GdkRectangle thumb_rect;
-	GdkRectangle r;
 
 	if (pi->pixbuf)
 		{
@@ -428,40 +427,30 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 		gint tx = pi->x + ((pi->width - tw) / 2);
 		gint ty = pi->y + ((pi->height - th) / 2);
 
+		const auto draw_shadow_if_intersect = [pixbuf, &request_rect, x, y, tx, ty, tw, th](GdkRectangle thumb_rect)
+		{
+			GdkRectangle r;
+			if (!gdk_rectangle_intersect(&request_rect, &thumb_rect, &r)) return;
+
+			r.x -= x;
+			r.y -= y;
+			pixbuf_draw_shadow(pixbuf, r,
+			                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
+			                   PAN_SHADOW_FADE, PAN_SHADOW_COLOR);
+		};
+
 		if (gdk_pixbuf_get_has_alpha(pi->pixbuf))
 			{
-			thumb_rect = {tx + PAN_SHADOW_OFFSET, ty + PAN_SHADOW_OFFSET, tw, th};
-			if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
-				{
-				pixbuf_draw_shadow(pixbuf,
-				                   {r.x - x, r.y - y, r.width, r.height},
-				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
-				                   PAN_SHADOW_FADE, PAN_SHADOW_COLOR);
-				}
+			draw_shadow_if_intersect({tx + PAN_SHADOW_OFFSET, ty + PAN_SHADOW_OFFSET, tw, th});
 			}
 		else
 			{
-			thumb_rect = {tx + tw, ty + PAN_SHADOW_OFFSET, PAN_SHADOW_OFFSET, th - PAN_SHADOW_OFFSET};
-			if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
-				{
-				pixbuf_draw_shadow(pixbuf,
-				                   {r.x - x, r.y - y, r.width, r.height},
-				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
-				                   PAN_SHADOW_FADE, PAN_SHADOW_COLOR);
-				}
-
-			thumb_rect = {tx + PAN_SHADOW_OFFSET, ty + th, tw, PAN_SHADOW_OFFSET};
-			if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
-				{
-				pixbuf_draw_shadow(pixbuf,
-				                   {r.x - x, r.y - y, r.width, r.height},
-				                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
-				                   PAN_SHADOW_FADE, PAN_SHADOW_COLOR);
-				}
+			draw_shadow_if_intersect({tx + tw, ty + PAN_SHADOW_OFFSET, PAN_SHADOW_OFFSET, th - PAN_SHADOW_OFFSET});
+			draw_shadow_if_intersect({tx + PAN_SHADOW_OFFSET, ty + th, tw, PAN_SHADOW_OFFSET});
 			}
 
 		thumb_rect = {tx, ty, tw, th};
-		if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
+		if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
 			gdk_pixbuf_composite(pi->pixbuf, pixbuf, r.x - x, r.y - y, r.width, r.height,
 					     static_cast<gdouble>(tx) - x,
@@ -498,7 +487,7 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 		{
 		thumb_rect = {pi->x + PAN_SHADOW_OFFSET, pi->y + PAN_SHADOW_OFFSET,
 		              pi->width - (PAN_SHADOW_OFFSET * 2), pi->height - (PAN_SHADOW_OFFSET * 2) };
-		if (gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
+		if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
 			r.x -= x;
 			r.y -= y;
