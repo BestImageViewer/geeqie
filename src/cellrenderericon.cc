@@ -675,7 +675,6 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 	if (pixbuf)
 		{
 		GdkRectangle pix_rect;
-		GdkRectangle draw_rect;
 
 		pix_rect.width = gdk_pixbuf_get_width(pixbuf);
 		pix_rect.height = gdk_pixbuf_get_height(pixbuf);
@@ -691,7 +690,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 			pix_rect.y = cell_area->y + cell_rect.y;
 			}
 
-		if (gdk_rectangle_intersect(cell_area, &pix_rect, &draw_rect))
+		if (GdkRectangle draw_rect; gdk_rectangle_intersect(cell_area, &pix_rect, &draw_rect))
 			{
 			gdk_cairo_set_source_pixbuf(cr, pixbuf, pix_rect.x, pix_rect.y);
 			cairo_rectangle (cr,
@@ -709,7 +708,6 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 		PangoLayout *layout;
 		PangoRectangle text_rect;
 		GdkRectangle pix_rect;
-		GdkRectangle draw_rect;
 		layout = gqv_cell_renderer_icon_get_layout(cellicon, widget, TRUE);
 		pango_layout_get_pixel_extents(layout, nullptr, &text_rect);
 
@@ -723,7 +721,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 			pix_rect.y -= TOGGLE_SPACING;
 			}
 
-		if (gdk_rectangle_intersect(cell_area, &pix_rect, &draw_rect))
+		if (gdk_rectangle_intersect(cell_area, &pix_rect, nullptr))
 			{
 			gtk_render_layout(context, cr, pix_rect.x - text_rect.x, pix_rect.y, layout);
 			}
@@ -733,7 +731,6 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 	if (cellicon->show_marks)
 		{
 		GdkRectangle pix_rect;
-		GdkRectangle draw_rect;
 		gint i;
 
 		pix_rect.width = TOGGLE_SPACING * cellicon->num_marks;
@@ -741,7 +738,7 @@ static void gqv_cell_renderer_icon_render(GtkCellRenderer *cell,
 		pix_rect.x = cell_area->x + xpad + (cell_rect.width - pix_rect.width + 1) / 2 + (TOGGLE_SPACING - TOGGLE_WIDTH) / 2;
 		pix_rect.y = cell_area->y + ypad + (cell_rect.height - pix_rect.height) + (TOGGLE_SPACING - TOGGLE_WIDTH) / 2;
 
-		if (gdk_rectangle_intersect(cell_area, &pix_rect, &draw_rect))
+		if (gdk_rectangle_intersect(cell_area, &pix_rect, nullptr))
 			{
 			for (i = 0; i < cellicon->num_marks; i++)
 				{

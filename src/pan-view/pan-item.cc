@@ -529,9 +529,8 @@ gboolean pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, Pixbuf
 {
 	const GdkRectangle request_rect{x, y, width, height};
 	const GdkRectangle pi_rect{pi->x, pi->y, pi->width, pi->height};
-	GdkRectangle r;
 
-	if (gdk_rectangle_intersect(&request_rect, &pi_rect, &r))
+	if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &pi_rect, &r))
 		{
 		r.x -= x;
 		r.y -= y;

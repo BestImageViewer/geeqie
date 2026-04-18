@@ -516,8 +516,7 @@ void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it
 
 		GdkRectangle od_rect = rt_overlay_get_position(rt, od);
 
-		GdkRectangle r;
-		if (gdk_rectangle_intersect(&request_rect, &od_rect, &r))
+		if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &od_rect, &r))
 			{
 			if (!rt->overlay_buffer)
 				{
@@ -1089,8 +1088,7 @@ gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 
 		// We find the overlapping region r between the ImageTile (output)
 		// region and the region that's covered by this SourceTile (input).
-		GdkRectangle r;
-		if (gdk_rectangle_intersect(&st_rect, &it_rect, &r))
+		if (GdkRectangle r; gdk_rectangle_intersect(&st_rect, &it_rect, &r))
 			{
 			if (st->blank)
 				{

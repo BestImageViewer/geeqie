@@ -1141,8 +1141,7 @@ void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
 	// as contracted by `border` pixels, with a composition fraction that's defined
 	// by the supplied `a` parameter.
 	const GdkRectangle contracted_rect{x + border, y + border, w - (border * 2), h - (border * 2)};
-	GdkRectangle f;
-	if (gdk_rectangle_intersect(&contracted_rect, &pb_rect, &f))
+	if (GdkRectangle f; gdk_rectangle_intersect(&contracted_rect, &pb_rect, &f))
 		{
 		pixbuf_draw_rect_fill(pb, f, color);
 		}
