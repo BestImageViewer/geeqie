@@ -34,6 +34,7 @@ struct FullScreenData;
 struct ImageWindow;
 struct PanViewFilterUi;
 struct PanViewSearchUi;
+struct PixbufRenderer;
 struct ThumbLoader;
 
 /* thumbnail sizes and spacing */
@@ -116,6 +117,9 @@ struct PanItem {
 	// Determine sizes
 	void set_size_by_item(const PanItem *pi, gint border);
 	void adjust_size(gint border, gint &w, gint &h) const;
+
+	bool draw(GdkPixbuf *pixbuf, GdkRectangle request_rect,
+	          PanImageSize size, PixbufRenderer *pr) const;
 
 	PanItemType type;
 	gint x;

@@ -412,31 +412,9 @@ static gboolean pan_window_request_tile_cb(PanWindow *pw, PixbufRenderer *pr,
 
 	for (PanItem *pi : list)
 		{
-		gboolean queue = FALSE;
-
 		pi->refcount++;
 
-		switch (pi->type)
-			{
-			case PAN_ITEM_BOX:
-				queue = pan_item_box_draw(pw, pi, pixbuf, pr, x, y, width, height);
-				break;
-			case PAN_ITEM_TRIANGLE:
-				queue = pan_item_tri_draw(pw, pi, pixbuf, pr, x, y, width, height);
-				break;
-			case PAN_ITEM_TEXT:
-				queue = pan_item_text_draw(pw, pi, pixbuf, pr, x, y, width, height);
-				break;
-			case PAN_ITEM_THUMB:
-				queue = pan_item_thumb_draw(pw, pi, pixbuf, pr, x, y, width, height);
-				break;
-			case PAN_ITEM_IMAGE:
-				queue = pan_item_image_draw(pw, pi, pixbuf, pr, x, y, width, height);
-				break;
-			default:
-				break;
-			}
-
+		bool queue = pi->draw(pixbuf, {x, y, width, height}, pw->size, pr);
 		if (queue) pan_queue_add(pw, pi);
 		}
 

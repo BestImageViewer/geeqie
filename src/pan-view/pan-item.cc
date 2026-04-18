@@ -196,8 +196,7 @@ void pan_item_box_shadow(PanItem *pi, gint offset, gint fade)
 	pi->data = shadow;
 }
 
-gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
-                           gint x, gint y, gint width, gint height)
+static bool pan_item_box_draw(const PanItem *pi, GdkPixbuf *pixbuf, GdkRectangle request_rect)
 {
 	gint bw;
 	gint bh;
@@ -208,38 +207,40 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 	auto *shadow = static_cast<PanItemBoxShadow *>(pi->data);
 	if (shadow)
 		{
+		const gint bx = pi->x - request_rect.x;
+		const gint by = pi->y - request_rect.y;
+
 		bw -= shadow->offset;
 		bh -= shadow->offset;
 
-		if (pi->color.a > 254)
+		if (pi->color.a == 255)
 			{
 			pixbuf_draw_shadow(pixbuf,
-			                   {pi->x - x + bw, pi->y - y + shadow->offset, shadow->offset, bh - shadow->offset},
-			                   pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh,
+			                   {bx + bw, by + shadow->offset, shadow->offset, bh - shadow->offset},
+			                   bx + shadow->offset, by + shadow->offset, bw, bh,
 			                   shadow->fade, PAN_SHADOW_COLOR);
 			pixbuf_draw_shadow(pixbuf,
-			                   {pi->x - x + shadow->offset, pi->y - y + bh, bw, shadow->offset},
-			                   pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh,
+			                   {bx + shadow->offset, by + bh, bw, shadow->offset},
+			                   bx + shadow->offset, by + shadow->offset, bw, bh,
 			                   shadow->fade, PAN_SHADOW_COLOR);
 			}
 		else
 			{
 			const guint8 a = pi->color.a * PAN_SHADOW_ALPHA >> 8;
 			pixbuf_draw_shadow(pixbuf,
-			                   {pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh},
-			                   pi->x - x + shadow->offset, pi->y - y + shadow->offset, bw, bh,
+			                   {bx + shadow->offset, by + shadow->offset, bw, bh},
+			                   bx + shadow->offset, by + shadow->offset, bw, bh,
 			                   shadow->fade, {PAN_SHADOW_RGB, a});
 			}
 		}
 
-	const GdkRectangle request_rect{x, y, width, height};
-	const auto draw_rect_if_intersect = [pixbuf, &request_rect, x, y](GdkRectangle box_rect, GqColor color)
+	const auto draw_rect_if_intersect = [pixbuf, &request_rect](GdkRectangle box_rect, GqColor color)
 	{
 		GdkRectangle r;
 		if (!gdk_rectangle_intersect(&request_rect, &box_rect, &r)) return;
 
-		r.x -= x;
-		r.y -= y;
+		r.x -= request_rect.x;
+		r.y -= request_rect.y;
 		pixbuf_draw_rect_fill(pixbuf, r, color);
 	};
 
@@ -250,7 +251,7 @@ gboolean pan_item_box_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 	draw_rect_if_intersect({pi->x + bw - pi->border, pi->y + pi->border, pi->border, bh - (pi->border * 2)}, pi->border_color);
 	draw_rect_if_intersect({pi->x, pi->y + bh - pi->border, bw, pi->border}, pi->border_color);
 
-	return FALSE;
+	return false;
 }
 
 
@@ -295,23 +296,21 @@ void pan_item_tri_shift(PanItem *pi, gint x, gint y)
 		}
 }
 
-gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
-                           gint x, gint y, gint width, gint height)
+static bool pan_item_tri_draw(const PanItem *pi, GdkPixbuf *pixbuf, GdkRectangle request_rect)
 {
-	const GdkRectangle request_rect{x, y, width, height};
 	const GdkRectangle pi_rect{pi->x, pi->y, pi->width, pi->height};
 
 	if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &pi_rect, &r))
 		{
-		r.x -= x;
-		r.y -= y;
+		r.x -= request_rect.x;
+		r.y -= request_rect.y;
 
 		auto *data = static_cast<PanItemTriangleData *>(pi->data);
 		GqPoint coord[3];
 		for (gint i = 0; i < 3; ++i)
 			{
-			coord[i].x = data->coord[i].x - x;
-			coord[i].y = data->coord[i].y - y;
+			coord[i].x = data->coord[i].x - request_rect.x;
+			coord[i].y = data->coord[i].y - request_rect.y;
 			}
 
 		pixbuf_draw_triangle(pixbuf, r, coord[0], coord[1], coord[2], pi->color);
@@ -321,7 +320,7 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 		if (data->borders & PAN_BORDER_3) pixbuf_draw_line(pixbuf, r, coord[2], coord[0], pi->border_color);
 		}
 
-	return FALSE;
+	return false;
 }
 
 
@@ -380,17 +379,18 @@ PanItem *pan_item_text_new(PanWindow *pw, gint x, gint y, const gchar *text,
 	return pi;
 }
 
-gboolean pan_item_text_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *pr,
-                            gint x, gint y, gint, gint)
+static bool pan_item_text_draw(const PanItem *pi, GdkPixbuf *pixbuf, GdkRectangle request_rect,
+                               PixbufRenderer *pr)
 {
 	auto *data = static_cast<PanItemTextData *>(pi->data);
 	g_autoptr(PangoLayout) layout = pan_item_text_layout(data, GTK_WIDGET(pr));
 
 	pixbuf_draw_layout(pixbuf, layout,
-	                   pi->x - x + pi->border, pi->y - y + pi->border,
+	                   pi->x - request_rect.x + pi->border,
+	                   pi->y - request_rect.y + pi->border,
 	                   pi->color);
 
-	return FALSE;
+	return false;
 }
 
 
@@ -413,10 +413,9 @@ PanItem *pan_item_thumb_new(PanWindow *pw, FileData *fd, gint x, gint y)
 	return pi;
 }
 
-gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
-                             gint x, gint y, gint width, gint height)
+static bool pan_item_thumb_draw(const PanItem *pi, GdkPixbuf *pixbuf, GdkRectangle request_rect,
+                                PanImageSize size)
 {
-	const GdkRectangle request_rect{x, y, width, height};
 	GdkRectangle thumb_rect;
 
 	if (pi->pixbuf)
@@ -427,15 +426,15 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 		gint tx = pi->x + ((pi->width - tw) / 2);
 		gint ty = pi->y + ((pi->height - th) / 2);
 
-		const auto draw_shadow_if_intersect = [pixbuf, &request_rect, x, y, tx, ty, tw, th](GdkRectangle thumb_rect)
+		const auto draw_shadow_if_intersect = [pixbuf, &request_rect, tx, ty, tw, th](GdkRectangle thumb_rect)
 		{
 			GdkRectangle r;
 			if (!gdk_rectangle_intersect(&request_rect, &thumb_rect, &r)) return;
 
-			r.x -= x;
-			r.y -= y;
+			r.x -= request_rect.x;
+			r.y -= request_rect.y;
 			pixbuf_draw_shadow(pixbuf, r,
-			                   tx + PAN_SHADOW_OFFSET - x, ty + PAN_SHADOW_OFFSET - y, tw, th,
+			                   tx + PAN_SHADOW_OFFSET - request_rect.x, ty + PAN_SHADOW_OFFSET - request_rect.y, tw, th,
 			                   PAN_SHADOW_FADE, PAN_SHADOW_COLOR);
 		};
 
@@ -452,20 +451,21 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 		thumb_rect = {tx, ty, tw, th};
 		if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
-			gdk_pixbuf_composite(pi->pixbuf, pixbuf, r.x - x, r.y - y, r.width, r.height,
-					     static_cast<gdouble>(tx) - x,
-					     static_cast<gdouble>(ty) - y,
-					     1.0, 1.0, GDK_INTERP_NEAREST,
-					     255);
+			r.x -= request_rect.x;
+			r.y -= request_rect.y;
+			gdk_pixbuf_composite(pi->pixbuf, pixbuf, r.x, r.y, r.width, r.height,
+			                     static_cast<gdouble>(tx) - request_rect.x,
+			                     static_cast<gdouble>(ty) - request_rect.y,
+			                     1.0, 1.0, GDK_INTERP_NEAREST, 255);
 			}
 
-		const auto draw_rect_if_intersect = [pixbuf, &request_rect, x, y](GdkRectangle thumb_rect, GqColor color)
+		const auto draw_rect_if_intersect = [pixbuf, &request_rect](GdkRectangle thumb_rect, GqColor color)
 		{
 			GdkRectangle r;
 			if (!gdk_rectangle_intersect(&request_rect, &thumb_rect, &r)) return;
 
-			r.x -= x;
-			r.y -= y;
+			r.x -= request_rect.x;
+			r.y -= request_rect.y;
 			pixbuf_draw_rect_fill(pixbuf, r, color);
 		};
 
@@ -489,10 +489,10 @@ gboolean pan_item_thumb_draw(PanWindow *pw, PanItem *pi, GdkPixbuf *pixbuf, Pixb
 		              pi->width - (PAN_SHADOW_OFFSET * 2), pi->height - (PAN_SHADOW_OFFSET * 2) };
 		if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
 			{
-			r.x -= x;
-			r.y -= y;
+			r.x -= request_rect.x;
+			r.y -= request_rect.y;
 
-			const guint8 a = PAN_SHADOW_ALPHA / ((pw->size <= PAN_IMAGE_SIZE_THUMB_NONE) ? 2 : 8);
+			const guint8 a = PAN_SHADOW_ALPHA / ((size <= PAN_IMAGE_SIZE_THUMB_NONE) ? 2 : 8);
 			pixbuf_draw_rect_fill(pixbuf, r, {PAN_SHADOW_RGB, a});
 			}
 		}
@@ -524,22 +524,20 @@ PanItem *pan_item_image_new(PanWindow *pw, FileData *fd, gint x, gint y, gint w,
 	return pi;
 }
 
-gboolean pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRenderer *,
-                             gint x, gint y, gint width, gint height)
+static bool pan_item_image_draw(const PanItem *pi, GdkPixbuf *pixbuf, GdkRectangle request_rect)
 {
-	const GdkRectangle request_rect{x, y, width, height};
 	const GdkRectangle pi_rect{pi->x, pi->y, pi->width, pi->height};
 
 	if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &pi_rect, &r))
 		{
-		r.x -= x;
-		r.y -= y;
+		r.x -= request_rect.x;
+		r.y -= request_rect.y;
 
 		if (pi->pixbuf)
 			{
 			gdk_pixbuf_composite(pi->pixbuf, pixbuf, r.x, r.y, r.width, r.height,
-			                     static_cast<gdouble>(pi->x) - x,
-			                     static_cast<gdouble>(pi->y) - y,
+			                     static_cast<gdouble>(pi->x) - request_rect.x,
+			                     static_cast<gdouble>(pi->y) - request_rect.y,
 			                     1.0, 1.0, GDK_INTERP_NEAREST, 255);
 			}
 		else
@@ -549,6 +547,33 @@ gboolean pan_item_image_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, Pixbuf
 		}
 
 	return (pi->pixbuf == nullptr);
+}
+
+
+/*
+ *-----------------------------------------------------------------------------
+ * item draw
+ *-----------------------------------------------------------------------------
+ */
+
+bool PanItem::draw(GdkPixbuf *pixbuf, GdkRectangle request_rect,
+                   PanImageSize size, PixbufRenderer *pr) const
+{
+	switch (type)
+		{
+		case PAN_ITEM_BOX:
+			return pan_item_box_draw(this, pixbuf, request_rect);
+		case PAN_ITEM_TRIANGLE:
+			return pan_item_tri_draw(this, pixbuf, request_rect);
+		case PAN_ITEM_TEXT:
+			return pan_item_text_draw(this, pixbuf, request_rect, pr);
+		case PAN_ITEM_THUMB:
+			return pan_item_thumb_draw(this, pixbuf, request_rect, size);
+		case PAN_ITEM_IMAGE:
+			return pan_item_image_draw(this, pixbuf, request_rect);
+		default:
+			return false;
+		}
 }
 
 
