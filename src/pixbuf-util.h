@@ -105,8 +105,7 @@ void pixbuf_draw_triangle(GdkPixbuf *pb, GdkRectangle clip,
                           GqColor color);
 
 void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
-                      gint x1, gint y1, gint x2, gint y2,
-                      GqColor color);
+                      GqPoint c1, GqPoint c2, GqColor color);
 
 void pixbuf_draw_shadow(GdkPixbuf *pb, GdkRectangle clip,
                         gint x, gint y, gint w, gint h,

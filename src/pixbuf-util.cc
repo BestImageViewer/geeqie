@@ -955,13 +955,12 @@ static gboolean util_clip_line(GdkRectangle clip,
  *        clip region into the pixbuf.
  * @param pb The `GdkPixbuf` to paint into.
  * @param clip Clipping region.
- * @param x1,y1 Coordinates of the first point of the line segment.
- * @param x2,y2 Coordinates of the second point of the line segment.
+ * @param c1 Coordinates of the first point of the line segment.
+ * @param c2 Coordinates of the second point of the line segment.
  * @param color Color and alpha.
  */
 void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
-                      gint x1, gint y1, gint x2, gint y2,
-                      GqColor color)
+                      GqPoint c1, GqPoint c2, GqColor color)
 {
 	gboolean has_alpha;
 	gint prs;
@@ -979,10 +978,10 @@ void pixbuf_draw_line(GdkPixbuf *pb, GdkRectangle clip,
 	if (!pixbuf_clip_region(pb, clip, pb_rect)) return;
 
 	// Clips the specified line segment to the intersecting region from above.
-	gdouble rx1 = x1;
-	gdouble ry1 = y1;
-	gdouble rx2 = x2;
-	gdouble ry2 = y2;
+	gdouble rx1 = c1.x;
+	gdouble ry1 = c1.y;
+	gdouble rx2 = c2.x;
+	gdouble ry2 = c2.y;
 	if (!util_clip_line(pb_rect, rx1, ry1, rx2, ry2)) return;
 
 	has_alpha = gdk_pixbuf_get_has_alpha(pb);

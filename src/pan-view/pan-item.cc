@@ -316,14 +316,9 @@ gboolean pan_item_tri_draw(PanWindow *, PanItem *pi, GdkPixbuf *pixbuf, PixbufRe
 
 		pixbuf_draw_triangle(pixbuf, r, coord[0], coord[1], coord[2], pi->color);
 
-		const auto draw_line = [pixbuf, &r, pi](GqPoint start, GqPoint end)
-		{
-			pixbuf_draw_line(pixbuf, r, start.x, start.y, end.x, end.y, pi->border_color);
-		};
-
-		if (data->borders & PAN_BORDER_1) draw_line(coord[0], coord[1]);
-		if (data->borders & PAN_BORDER_2) draw_line(coord[1], coord[2]);
-		if (data->borders & PAN_BORDER_3) draw_line(coord[2], coord[0]);
+		if (data->borders & PAN_BORDER_1) pixbuf_draw_line(pixbuf, r, coord[0], coord[1], pi->border_color);
+		if (data->borders & PAN_BORDER_2) pixbuf_draw_line(pixbuf, r, coord[1], coord[2], pi->border_color);
+		if (data->borders & PAN_BORDER_3) pixbuf_draw_line(pixbuf, r, coord[2], coord[0], pi->border_color);
 		}
 
 	return FALSE;
