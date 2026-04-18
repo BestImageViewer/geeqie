@@ -718,6 +718,7 @@ void PanTextAlignment::add(const gchar *label, const gchar *text)
 		items.label = pan_item_text_new(pw, x, y, label, PAN_TEXT_ATTR_BOLD,
 		                                0, PAN_POPUP_TEXT_COLOR);
 		items.label->set_key(key);
+		label_width_max = std::max(label_width_max, items.label->width);
 		}
 
 	if (text)
@@ -732,13 +733,8 @@ void PanTextAlignment::add(const gchar *label, const gchar *text)
 
 void PanTextAlignment::calc(PanItem *box)
 {
-	gint label_column_width = 0;
-	for (const Items &items : columns)
-		{
-		if (items.label) label_column_width = std::max(label_column_width, items.label->width);
-		}
-
 	gint y = this->y;
+
 	for (Items &items : columns)
 		{
 		PanItem *pi_label = items.label;
@@ -755,7 +751,7 @@ void PanTextAlignment::calc(PanItem *box)
 
 		if (pi_text)
 			{
-			pi_text->x = x + label_column_width + PREF_PAD_SPACE;
+			pi_text->x = x + label_width_max + PREF_PAD_SPACE;
 			pi_text->y = y;
 			box->set_size_by_item(pi_text, PREF_PAD_BORDER);
 			height = std::max(height, pi_text->height);

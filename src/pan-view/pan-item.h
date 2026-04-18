@@ -122,6 +122,7 @@ private:
 	gint x;
 	gint y;
 	PanKey key;
+	int label_width_max = 0;
 };
 
 #endif
