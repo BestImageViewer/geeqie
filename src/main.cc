@@ -524,6 +524,10 @@ void exit_program_final()
 		g_object_unref(archive_file);
 		}
 
+	#ifdef FD_VERBOSE_DEBUG
+	DEBUG_FD();  // Comment to disable debug check (see debug_check.sh)
+	#endif
+
 	exit(EXIT_SUCCESS);
 }
 
