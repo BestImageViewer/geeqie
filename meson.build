@@ -66,6 +66,7 @@ else
 endif
 
 debug = get_option('debug')
+fd_verbose_debug = get_option('fd_verbose_debug')
 
 # Note that main.cc sets prefix to the directory above where the executable is run from.
 # This is to allow AppImages to be used
@@ -134,6 +135,15 @@ summary({'gq_appdir': gq_appdir,
 conf_data = configuration_data()
 conf_data.set('DEBUG', debug)
 
+conf_data.set('FD_VERBOSE_DEBUG', 0)
+option = get_option('fd_verbose_debug')
+if not option.disabled()
+    conf_data.set('FD_VERBOSE_DEBUG', 1)
+    if conf_data.get('DEBUG', false) == false
+        message('fd_verbose_debug force-enabling debug')
+        conf_data.set('DEBUG', true)
+    endif
+endif
 
 # Detect if mntent.h is available
 conf_data.set('HAVE_MNTENT_H', 0)

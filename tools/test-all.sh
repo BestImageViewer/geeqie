@@ -33,6 +33,7 @@ meson setup \
 -Dexecinfo=disabled \
 -Dexiv2=disabled \
 -Dexr=disabled \
+-Dfd_verbose_debug=disabled \
 -Dfits=disabled \
 -Dgit=disabled \
 -Dgps-map=disabled \

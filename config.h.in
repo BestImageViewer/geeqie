@@ -4,6 +4,8 @@
 #define _INCLUDE_CONFIG_H
 
 #mesondefine DEBUG
+/* Verbose FileData debugging.  Adds significant memory overhead. */
+#mesondefine FD_VERBOSE_DEBUG
 
 /* Directories defines */
 
