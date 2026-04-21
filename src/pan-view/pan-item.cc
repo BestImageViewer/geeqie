@@ -418,6 +418,16 @@ static bool pan_item_thumb_draw(const PanItem *pi, GdkPixbuf *pixbuf, GdkRectang
 {
 	GdkRectangle thumb_rect;
 
+	const auto draw_rect_if_intersect = [pixbuf, &request_rect](GdkRectangle thumb_rect, GqColor color)
+	{
+		GdkRectangle r;
+		if (!gdk_rectangle_intersect(&request_rect, &thumb_rect, &r)) return;
+
+		r.x -= request_rect.x;
+		r.y -= request_rect.y;
+		pixbuf_draw_rect_fill(pixbuf, r, color);
+	};
+
 	if (pi->pixbuf)
 		{
 		gint tw = gdk_pixbuf_get_width(pi->pixbuf);
@@ -459,16 +469,6 @@ static bool pan_item_thumb_draw(const PanItem *pi, GdkPixbuf *pixbuf, GdkRectang
 			                     1.0, 1.0, GDK_INTERP_NEAREST, 255);
 			}
 
-		const auto draw_rect_if_intersect = [pixbuf, &request_rect](GdkRectangle thumb_rect, GqColor color)
-		{
-			GdkRectangle r;
-			if (!gdk_rectangle_intersect(&request_rect, &thumb_rect, &r)) return;
-
-			r.x -= request_rect.x;
-			r.y -= request_rect.y;
-			pixbuf_draw_rect_fill(pixbuf, r, color);
-		};
-
 		thumb_rect = {tx, ty, tw, PAN_OUTLINE_THICKNESS};
 		draw_rect_if_intersect(thumb_rect, PAN_OUTLINE_COLOR_1);
 
@@ -487,14 +487,8 @@ static bool pan_item_thumb_draw(const PanItem *pi, GdkPixbuf *pixbuf, GdkRectang
 		{
 		thumb_rect = {pi->x + PAN_SHADOW_OFFSET, pi->y + PAN_SHADOW_OFFSET,
 		              pi->width - (PAN_SHADOW_OFFSET * 2), pi->height - (PAN_SHADOW_OFFSET * 2) };
-		if (GdkRectangle r; gdk_rectangle_intersect(&request_rect, &thumb_rect, &r))
-			{
-			r.x -= request_rect.x;
-			r.y -= request_rect.y;
-
-			const guint8 a = PAN_SHADOW_ALPHA / ((size <= PAN_IMAGE_SIZE_THUMB_NONE) ? 2 : 8);
-			pixbuf_draw_rect_fill(pixbuf, r, {PAN_SHADOW_RGB, a});
-			}
+		const guint8 a = PAN_SHADOW_ALPHA / ((size <= PAN_IMAGE_SIZE_THUMB_NONE) ? 2 : 8);
+		draw_rect_if_intersect(thumb_rect, {PAN_SHADOW_RGB, a});
 		}
 
 	return (pi->pixbuf == nullptr);
