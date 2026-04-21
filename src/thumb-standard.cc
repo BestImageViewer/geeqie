@@ -448,7 +448,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 				                        thumb_w, thumb_h))
 					{
 					pixbuf_thumb = gdk_pixbuf_scale_simple(pixbuf, thumb_w, thumb_h,
-									       static_cast<GdkInterpType>(options->thumbnails.quality));
+					                                       options->thumbnails.quality);
 					}
 				else
 					{
@@ -501,7 +501,7 @@ static GdkPixbuf *thumb_loader_std_finish(ThumbLoaderStd *tl, GdkPixbuf *pixbuf,
 		                        thumb_w, thumb_h))
 			{
 			result = gdk_pixbuf_scale_simple(pixbuf, thumb_w, thumb_h,
-							 static_cast<GdkInterpType>(options->thumbnails.quality));
+			                                 options->thumbnails.quality);
 			}
 		else
 			{

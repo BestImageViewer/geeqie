@@ -219,7 +219,7 @@ struct ConfOptions
 		ZoomMode zoom_mode;
 		gboolean zoom_2pass;
 		gboolean zoom_to_fit_allow_expand;
-		guint zoom_quality;
+		GdkInterpType zoom_quality;
 		gint zoom_increment;	/**< 100 is 1.0, 5 is 0.05, 200 is 2.0, etc. */
 		ZoomStyle zoom_style;
 
@@ -240,7 +240,7 @@ struct ConfOptions
 		gboolean cache_into_dirs;
 		gboolean use_xvpics;
 		gboolean spec_standard;
-		guint quality;
+		GdkInterpType quality;
 		gboolean use_exif;
 		gboolean use_color_management;
 		gboolean use_ft_metadata;

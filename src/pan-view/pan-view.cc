@@ -267,7 +267,7 @@ static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
 		     gdk_pixbuf_get_height(pi->pixbuf) > pi->height))
 			{
 			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pi->pixbuf, pi->width, pi->height,
-			                                                      static_cast<GdkInterpType>(options->image.zoom_quality));
+			                                                      options->image.zoom_quality);
 			std::swap(pi->pixbuf, scaled);
 			}
 

@@ -603,7 +603,7 @@ static void config_window_ok_cb(GtkWidget *widget, gpointer data)
 
 static void quality_menu_cb(GtkWidget *combo, gpointer data)
 {
-	auto option = static_cast<gint *>(data);
+	auto *option = static_cast<GdkInterpType *>(data);
 
 	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
 		{
@@ -659,7 +659,7 @@ static void clipboard_selection_menu_cb(GtkWidget *combo, gpointer data)
 }
 
 static void add_quality_menu(GtkWidget *table, gint column, gint row, const gchar *text,
-			     guint option, guint *option_c)
+                             GdkInterpType option, GdkInterpType *option_c)
 {
 	GtkWidget *combo;
 	gint current = 0;
