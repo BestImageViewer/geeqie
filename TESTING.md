@@ -10,8 +10,8 @@ You can run all enabled suites using:
 meson test -C build
 ```
 
-Three test suites exist: `functional`, `unit`, and `analysis`.  You can pick out
-particular suites to execute with commands like:
+Four test suites exist: `functional`, `unit`, `analysis`, and `filedata`.  You
+can pick out particular suites to execute with commands like:
 
 ```text
 meson test -C build --suite functional
@@ -84,6 +84,25 @@ This tests that Geeqie can successfully open and provide metadata info about a
 library of images of different types.
 
 See `build-aux/image-test.py` for more details.
+
+### FileData refcount test
+
+The refcount test is a variation of the image tests that also requires verbose
+FD debugging to be enabled.  You can set that up with:
+
+```text
+meson setup -C build --debug -D unit_test=enabled -D fd_verbose_debug=enabled
+```
+
+Note that with `fd_verbose_debug` enabled, Geeqie will _always_ perform verbose
+diagnostics at exit.  This is not appropriate for non-development-oriented
+builds.
+
+This test attempts some directory changing patterns that may trigger Geeqie
+refcount bugs, and then runs verbose debugging on exit.  It does not currently
+automatically detect leaked FileData objects.
+
+See `build-aux/fd-refcount-test.py` for more details.
 
 ### Lua tests
 

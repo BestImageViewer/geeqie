@@ -721,10 +721,11 @@ if option.enabled()
         get_test_images_sh = find_program('get-test-images.sh', dirs : buildauxdir, required : true)
         image_test_py = find_program('image-test.py', dirs : buildauxdir, required : true)
 
-        images_dir = join_paths(meson.current_build_dir(), 'test-images.p')
+        images_parent_dir = join_paths(meson.current_build_dir(), 'test-images.p')
+        images_dir = join_paths(images_parent_dir, 'images')
 
         message('Downloading test images')
-        sources_list = run_command(get_test_images_sh, images_dir,  'https://github.com/BestImageViewer/geeqie-test-images.git', check: true)
+        sources_list = run_command(get_test_images_sh, images_parent_dir,  'https://github.com/BestImageViewer/geeqie-test-images.git', check: true)
 
         sources = sources_list.stdout().strip().split('\n')
 
@@ -738,11 +739,24 @@ if option.enabled()
 
         endforeach
         summary({'Image tests' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
+
+        # FileData refcounting test requires images, so running here, if enabled.
+        if conf_data.get('FD_VERBOSE_DEBUG', 0) == 1
+            fd_refcount_test_py = find_program('fd-refcount-test.py', dirs : buildauxdir, required : true)
+            test_cmd = [fd_refcount_test_py.full_path(), geeqie_exe.full_path(), images_dir]
+            test('FileData refcount test', isolate_test_sh, args: test_cmd, timeout: 100, suite: ['functional', 'image', 'filedata'])
+            summary({'FileData refcount test' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
+        else
+            summary({'FileData refcount test' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
+        endif
     else
+        # TODO: Any way to avoid code duplication in the "test not run" cases?
         summary({'Image tests' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
+        summary({'FileData refcount test' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
     endif
 else
     summary({'Image tests' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
+    summary({'FileData refcount test' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
 
 # Code correctness checks
