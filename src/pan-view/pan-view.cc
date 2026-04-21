@@ -225,7 +225,6 @@ static void pan_queue_thumb_done_cb(ThumbLoader *tl, gpointer data)
 static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
-	GdkPixbuf *rotated = nullptr;
 
 	if (pw->queue_pi)
 		{
@@ -239,6 +238,8 @@ static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
 
 		if (pi->pixbuf) g_object_unref(pi->pixbuf);
 		pi->pixbuf = image_loader_get_pixbuf(pw->il);
+
+		if (pi->pixbuf) g_object_ref(pi->pixbuf);
 
 		if (pi->pixbuf && options->image.exif_rotate_enable)
 			{
@@ -256,23 +257,18 @@ static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
 
 			if (il->fd->exif_orientation != EXIF_ORIENTATION_TOP_LEFT)
 				{
-				rotated = pixbuf_apply_orientation(pi->pixbuf, il->fd->exif_orientation);
-				pi->pixbuf = rotated;
+				g_autoptr(GdkPixbuf) rotated = pixbuf_apply_orientation(pi->pixbuf, il->fd->exif_orientation);
+				std::swap(pi->pixbuf, rotated);
 				}
 			}
-
-		if (pi->pixbuf) g_object_ref(pi->pixbuf);
 
 		if (pi->pixbuf && pw->size != PAN_IMAGE_SIZE_100 &&
 		    (gdk_pixbuf_get_width(pi->pixbuf) > pi->width ||
 		     gdk_pixbuf_get_height(pi->pixbuf) > pi->height))
 			{
-			GdkPixbuf *tmp;
-
-			tmp = pi->pixbuf;
-			pi->pixbuf = gdk_pixbuf_scale_simple(tmp, pi->width, pi->height,
-							     static_cast<GdkInterpType>(options->image.zoom_quality));
-			g_object_unref(tmp);
+			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pi->pixbuf, pi->width, pi->height,
+			                                                      static_cast<GdkInterpType>(options->image.zoom_quality));
+			std::swap(pi->pixbuf, scaled);
 			}
 
 		rc = pi->refcount;
