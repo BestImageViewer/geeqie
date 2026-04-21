@@ -78,7 +78,21 @@ class GeeqieTestError(Exception):
 
 def main(argv) -> int:
     geeqie_exe = argv[1]
-    test_image_path = "--file=" + argv[2]
+    test_image_path = pathlib.Path(argv[2])
+
+    if not test_image_path.exists():
+        raise RuntimeError(f"Test image path {test_image_path} does not exist")
+
+    # To avoid geeqie's behavior being potentially altered by other files in the
+    # same parent directory as test_image_path, we symlink test_image_path to
+    # an other-wise-empty container directory and access it from there.
+    container_dir = pathlib.Path.home() / "container_dir"
+    container_dir.mkdir()
+    symlink_image_file = container_dir / test_image_path.name
+    symlink_image_file.symlink_to(test_image_path)
+
+    if not symlink_image_file.exists():
+        raise RuntimeError("symlinking image file failed")
 
     # All geeqie commands start with this.
     geeqie_cmd_prefix = ["xvfb-run", "--auto-servernum", geeqie_exe]
@@ -88,7 +102,7 @@ def main(argv) -> int:
     # signal to the geeqie process.  See
     # <https://unix.stackexchange.com/questions/291804/howto-terminate-xvfb-run-properly>.
     # So we should modify or replace xvfb-run to allow us to kill an errant geeqie process.
-    geeqie_proc = subprocess.Popen(args=[*geeqie_cmd_prefix, test_image_path])
+    geeqie_proc = subprocess.Popen(args=[*geeqie_cmd_prefix, f"--file={symlink_image_file}"])
 
     # try/finally to ensure we clean up geeqie_proc
     try:
