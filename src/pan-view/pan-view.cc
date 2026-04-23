@@ -452,54 +452,9 @@ static void pan_window_dispose_tile_cb(PanWindow *pw, gint x, gint y, gint width
 
 static void pan_window_message(PanWindow *pw, const gchar *text)
 {
-	GList *work;
-	gint count = 0;
-	gint64 size = 0;
+	g_return_if_fail(text != nullptr);
 
-	if (text)
-		{
-		gtk_label_set_text(GTK_LABEL(pw->label_message), text);
-		return;
-		}
-
-	work = pw->list_static;
-	if (pw->layout == PAN_LAYOUT_CALENDAR)
-		{
-		while (work)
-			{
-			PanItem *pi;
-
-			pi = static_cast<PanItem *>(work->data);
-			work = work->next;
-
-			if (pi->fd && pi->is_type(PAN_ITEM_BOX) && pi->key == PanKey::Dot)
-				{
-				size += pi->fd->size;
-				count++;
-				}
-			}
-		}
-	else
-		{
-		while (work)
-			{
-			PanItem *pi;
-
-			pi = static_cast<PanItem *>(work->data);
-			work = work->next;
-
-			if (pi->fd &&
-			    (pi->is_type(PAN_ITEM_THUMB) || pi->is_type(PAN_ITEM_IMAGE)))
-				{
-				size += pi->fd->size;
-				count++;
-				}
-			}
-		}
-
-	g_autofree gchar *ss = text_from_size_abrev(size);
-	g_autofree gchar *buf = g_strdup_printf(_("%d images, %s"), count, ss);
-	gtk_label_set_text(GTK_LABEL(pw->label_message), buf);
+	gtk_label_set_text(GTK_LABEL(pw->label_message), text);
 }
 
 static void pan_warning_folder(const gchar *path, GtkWidget *parent)
@@ -1091,7 +1046,27 @@ static gint pan_layout_update_idle_cb(gpointer data)
 		pixbuf_renderer_scroll_to_point(PIXBUF_RENDERER(pw->imd->pr), scroll_x, scroll_y, align, align);
 		}
 
-	pan_window_message(pw, nullptr);
+	const auto filter = (pw->layout == PAN_LAYOUT_CALENDAR) ?
+	        [](const PanItem *pi){ return pi->is_type(PAN_ITEM_BOX) && pi->key == PanKey::Dot; } :
+	        [](const PanItem *pi){ return pi->is_type(PAN_ITEM_THUMB) || pi->is_type(PAN_ITEM_IMAGE); };
+
+	gint count = 0;
+	gint64 size = 0;
+
+	for (GList *work = pw->list_static; work; work = work->next)
+		{
+		auto *pi = static_cast<PanItem *>(work->data);
+
+		if (pi->fd && filter(pi))
+			{
+			size += pi->fd->size;
+			count++;
+			}
+		}
+
+	g_autofree gchar *ss = text_from_size_abrev(size);
+	g_autofree gchar *buf = g_strdup_printf(_("%d images, %s"), count, ss);
+	pan_window_message(pw, buf);
 
 	pw->idle_id = 0;
 	return G_SOURCE_REMOVE;
