@@ -93,11 +93,10 @@ enum PanImageSize {
 };
 
 enum PanItemType {
-	PAN_ITEM_ANY,
-	PAN_ITEM_THUMB,
 	PAN_ITEM_BOX,
 	PAN_ITEM_TRIANGLE,
 	PAN_ITEM_TEXT,
+	PAN_ITEM_THUMB,
 	PAN_ITEM_IMAGE
 };
 
