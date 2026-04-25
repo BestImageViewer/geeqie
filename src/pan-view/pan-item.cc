@@ -110,7 +110,7 @@ void pan_item_free(PanItem *pi)
 
 bool PanItem::is_type(PanItemType type) const
 {
-	return type == PAN_ITEM_ANY || this->type == type;
+	return this->type == type;
 }
 
 void PanItem::set_key(PanKey key)
@@ -124,10 +124,8 @@ void pan_item_added(PanWindow *pw, PanItem *pi)
 	image_area_changed(pw->imd, pi->x, pi->y, pi->width, pi->height);
 }
 
-void pan_item_remove(PanWindow *pw, PanItem *pi)
+static void pan_item_remove(PanWindow *pw, PanItem *pi)
 {
-	if (!pi) return;
-
 	if (pw->click_pi == pi) pw->click_pi = nullptr;
 	if (pw->queue_pi == pi)	pw->queue_pi = nullptr;
 	if (pw->search_pi == pi) pw->search_pi = nullptr;
@@ -577,26 +575,25 @@ bool PanItem::draw(GdkPixbuf *pixbuf, GdkRectangle request_rect,
  *-----------------------------------------------------------------------------
  */
 
-PanItem *pan_item_find_by_key(PanWindow *pw, PanItemType type, PanKey key)
+void pan_item_remove_by_key(PanWindow *pw, PanKey key)
 {
-	g_return_val_if_fail(key != PanKey::None, nullptr);
+	g_return_if_fail(key != PanKey::None);
 
-	const auto pan_item_find_by_key_l = [type, key](GList *list) -> PanItem *
+	const auto pan_item_find_by_key_l = [key](GList *list) -> PanItem *
 	{
 		for (GList *work = g_list_last(list); work; work = work->prev)
 			{
 			auto *pi = static_cast<PanItem *>(work->data);
 
-			if (pi->is_type(type) && pi->key == key) return pi;
+			if (pi->key == key) return pi;
 			}
 
 		return nullptr;
 	};
 
-	PanItem *pi = pan_item_find_by_key_l(pw->list);
-	if (!pi) pi = pan_item_find_by_key_l(pw->list_static);
-
-	return pi;
+	PanItem *pi;
+	while ((pi = pan_item_find_by_key_l(pw->list))) pan_item_remove(pw, pi);
+	while ((pi = pan_item_find_by_key_l(pw->list_static))) pan_item_remove(pw, pi);
 }
 
 /* when ignore_case and partial are TRUE, path should be converted to lower case */
