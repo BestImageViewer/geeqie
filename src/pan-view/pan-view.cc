@@ -1375,7 +1375,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
 	if (pw->click_pi == pi) return;
 	if (pi && !pi->fd) pi = nullptr;
 
-	while ((p = pan_item_find_by_key(pw, PAN_ITEM_ANY, PanKey::Info))) pan_item_remove(pw, p);
+	pan_item_remove_by_key(pw, PanKey::Info);
 	pw->click_pi = pi;
 
 	if (!pi) return;

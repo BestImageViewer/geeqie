@@ -134,7 +134,7 @@ void pan_calendar_update(PanWindow *pw, PanItem *pi_day)
 	gint x;
 	gint y;
 
-	while ((pi = pan_item_find_by_key(pw, PAN_ITEM_ANY, PanKey::DayBubble))) pan_item_remove(pw, pi);
+	pan_item_remove_by_key(pw, PanKey::DayBubble);
 
 	g_return_if_fail(pi_day && pi_day->is_type(PAN_ITEM_BOX) && pi_day->key == PanKey::Day);
 
