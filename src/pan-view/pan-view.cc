@@ -125,9 +125,6 @@ void pan_cache_data_free(PanCacheData *pc)
 #define PAN_PREF_INFO_EXIF	"info_includes_exif"
 
 
-static GList *pan_window_list = nullptr;
-
-
 static void pan_layout_update_idle(PanWindow *pw);
 
 static void pan_fullscreen_toggle(PanWindow *pw, gboolean force_off);
@@ -1707,8 +1704,6 @@ static void pan_window_entry_activate_cb(PanWindow *pw, const gchar *new_text)
 
 static void pan_window_close(PanWindow *pw)
 {
-	pan_window_list = g_list_remove(pan_window_list, pw);
-
 	pref_list_int_set(PAN_PREF_GROUP, PAN_PREF_EXIF_PAN_DATE, pw->exif_date_enable);
 	pref_list_int_set(PAN_PREF_GROUP, PAN_PREF_INFO_IMAGE, pw->info_image_size);
 	pref_list_int_set(PAN_PREF_GROUP, PAN_PREF_INFO_EXIF, pw->info_includes_exif);
@@ -1905,8 +1900,6 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	gtk_widget_grab_focus(pw->imd->widget);
 	gtk_widget_show(pw->window);
-
-	pan_window_list = g_list_append(pan_window_list, pw);
 }
 
 /*
