@@ -925,42 +925,28 @@ PanItemList pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint
 
 void pan_layout_resize(PanWindow *pw)
 {
-	gint width = 0;
-	gint height = 0;
-	GList *work;
-	PixbufRenderer *pr;
+	static const auto get_max_size = [](gpointer data, gpointer user_data)
+	{
+		auto *pi = static_cast<PanItem *>(data);
+		auto *size = static_cast<GqSize *>(user_data);
 
-	work = pw->list;
-	while (work)
-		{
-		PanItem *pi;
+		size->width = std::max(size->width, pi->x + pi->width);
+		size->height = std::max(size->height, pi->y + pi->height);
+	};
 
-		pi = static_cast<PanItem *>(work->data);
-		work = work->next;
+	GqSize size{};
 
-		width = std::max(width, pi->x + pi->width);
-		height = std::max(height, pi->y + pi->height);
-		}
-	work = pw->list_static;
-	while (work)
-		{
-		PanItem *pi;
+	g_list_foreach(pw->list, get_max_size, &size);
+	g_list_foreach(pw->list_static, get_max_size, &size);
 
-		pi = static_cast<PanItem *>(work->data);
-		work = work->next;
+	size.width += PAN_BOX_BORDER * 2;
+	size.height += PAN_BOX_BORDER * 2;
 
-		width = std::max(width, pi->x + pi->width);
-		height = std::max(height, pi->y + pi->height);
-		}
+	PixbufRenderer *pr = PIXBUF_RENDERER(pw->imd->pr);
+	size.width = std::max(size.width, pr->window_width);
+	size.height = std::max(size.height, pr->window_height);
 
-	width += PAN_BOX_BORDER * 2;
-	height += PAN_BOX_BORDER * 2;
-
-	pr = PIXBUF_RENDERER(pw->imd->pr);
-	width = std::max(width, pr->window_width);
-	if (height < pr->window_width) height = pr->window_height;
-
-	pixbuf_renderer_set_tiles_size(PIXBUF_RENDERER(pw->imd->pr), width, height);
+	pixbuf_renderer_set_tiles_size(pr, size.width, size.height);
 }
 
 static gint pan_layout_update_idle_cb(gpointer data)
