@@ -52,6 +52,7 @@
 #include "main-defines.h"
 #include "menu.h"
 #include "metadata.h"
+#include "misc.h"
 #include "options.h"
 #include "pan-calendar.h"
 #include "pan-folder.h"
@@ -84,7 +85,7 @@ struct PanCacheData {
 
 struct PanGrid {
 	GdkRectangle rect;
-	GList *list;
+	PanItemList list;
 };
 
 constexpr gint PAN_WINDOW_DEFAULT_WIDTH = 720;
@@ -281,12 +282,10 @@ static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
 
 static gboolean pan_queue_step(PanWindow *pw)
 {
-	PanItem *pi;
+	if (pw->queue.empty()) return FALSE;
 
-	if (!pw->queue) return FALSE;
-
-	pi = static_cast<PanItem *>(pw->queue->data);
-	pw->queue = g_list_remove(pw->queue, pi);
+	PanItem *pi = pw->queue.front();
+	pw->queue.pop_front();
 	pw->queue_pi = pi;
 
 	if (!pw->queue_pi->fd)
@@ -356,7 +355,7 @@ static void pan_queue_add(PanWindow *pw, PanItem *pi)
 		}
 
 	pi->queued = TRUE;
-	pw->queue = g_list_prepend(pw->queue, pi);
+	pw->queue.push_front(pi);
 
 	if (!pw->tl && !pw->il) while (pan_queue_step(pw));
 }
@@ -428,7 +427,7 @@ static void pan_window_dispose_tile_cb(PanWindow *pw, gint x, gint y, gint width
 				{
 				if (pi->queued)
 					{
-					pw->queue = g_list_remove(pw->queue, pi);
+					pw->queue.remove(pi);
 					pi->queued = FALSE;
 					}
 
@@ -670,16 +669,10 @@ std::optional<GqSize> pan_cache_get_image_size(PanWindow *pw, const FileData *fd
 
 static void pan_grid_clear(PanWindow *pw)
 {
-	g_list_free_full(pw->list_grid, [](gpointer data)
-		{
-		auto pg = static_cast<PanGrid *>(data);
-		g_list_free(pg->list);
-		g_free(pg);
-		});
+	g_list_free_full(pw->list_grid, delete_cb<PanGrid>);
 	pw->list_grid = nullptr;
 
-	pw->list = g_list_concat(pw->list, pw->list_static);
-	pw->list_static = nullptr;
+	pw->list.splice(pw->list.end(), pw->list_static);
 }
 
 static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_size)
@@ -688,15 +681,14 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 	gint row;
 	gint cw;
 	gint ch;
-	gint l;
 	gint i;
 	gint j;
 
 	pan_grid_clear(pw);
 
-	l = g_list_length(pw->list);
+	if (pw->list.empty()) return;
 
-	if (l < 1) return;
+	const gint l = pw->list.size();
 
 	col = static_cast<gint>((sqrt(static_cast<gdouble>(l) / grid_size) * width / height) + 0.999);
 	col = std::clamp(col, 1, (l / grid_size) + 1);
@@ -717,9 +709,7 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 		{
 		if ((i + 1) * cw / 2 < width && (j + 1) * ch / 2 < height)
 			{
-			PanGrid *pg;
-
-			pg = g_new0(PanGrid, 1);
+			auto *pg = new PanGrid();
 			pg->rect.x = i * cw / 2;
 			pg->rect.y = j * ch / 2;
 			pg->rect.width = cw;
@@ -731,10 +721,8 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 			}
 		}
 
-	for (GList *work = pw->list; work; work = work->next)
+	for (PanItem *pi : pw->list)
 		{
-		auto *pi = static_cast<PanItem *>(work->data);
-
 		// @todo use GdkRectangle in PanItem
 		const GdkRectangle pi_rect{pi->x, pi->y, pi->width, pi->height};
 
@@ -744,20 +732,13 @@ static void pan_grid_build(PanWindow *pw, gint width, gint height, gint grid_siz
 
 			if (gdk_rectangle_intersect(&pi_rect, &pg->rect, nullptr))
 				{
-				pg->list = g_list_prepend(pg->list, pi);
+				pg->list.push_back(pi);
 				}
 			}
 		}
 
-	for (GList *grid = pw->list_grid; grid; grid = grid->next)
-		{
-		auto *pg = static_cast<PanGrid *>(grid->data);
-
-		pg->list = g_list_reverse(pg->list);
-		}
-
 	pw->list_static = pw->list;
-	pw->list = nullptr;
+	pw->list.clear();
 }
 
 
@@ -771,11 +752,10 @@ static void pan_window_items_free(PanWindow *pw)
 {
 	pan_grid_clear(pw);
 
-	g_list_free_full(pw->list, reinterpret_cast<GDestroyNotify>(pan_item_free));
-	pw->list = nullptr;
+	for (PanItem *pi : pw->list) pan_item_free(pi);
+	pw->list.clear();
 
-	g_list_free(pw->queue);
-	pw->queue = nullptr;
+	pw->queue.clear();
 	pw->queue_pi = nullptr;
 
 	image_loader_free(pw->il);
@@ -872,16 +852,15 @@ static void pan_layout_compute(PanWindow *pw, gint &width, gint &height,
 
 	pan_cache_free(pw);
 
-	DEBUG_1("computed %u objects", g_list_length(pw->list));
+	DEBUG_1("computed %u objects", pw->list.size());
 }
 
-static PanItemList pan_layout_intersect_l(const GList *item_list, GdkRectangle rect)
+static PanItemList pan_layout_intersect_l(const PanItemList  &item_list, GdkRectangle rect)
 {
 	PanItemList list;
 
-	for (const GList *work = item_list; work; work = work->next)
+	for (PanItem *pi : item_list)
 		{
-		auto *pi = static_cast<PanItem *>(work->data);
 		const GdkRectangle pi_rect = {pi->x, pi->y, pi->width, pi->height};
 
 		if (gdk_rectangle_intersect(&rect, &pi_rect, nullptr))
@@ -925,19 +904,16 @@ PanItemList pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint
 
 void pan_layout_resize(PanWindow *pw)
 {
-	static const auto get_max_size = [](gpointer data, gpointer user_data)
-	{
-		auto *pi = static_cast<PanItem *>(data);
-		auto *size = static_cast<GqSize *>(user_data);
-
-		size->width = std::max(size->width, pi->x + pi->width);
-		size->height = std::max(size->height, pi->y + pi->height);
-	};
-
 	GqSize size{};
 
-	g_list_foreach(pw->list, get_max_size, &size);
-	g_list_foreach(pw->list_static, get_max_size, &size);
+	const auto get_max_size = [&size](const PanItem *pi)
+	{
+		size.width = std::max(size.width, pi->x + pi->width);
+		size.height = std::max(size.height, pi->y + pi->height);
+	};
+
+	for (const PanItem *pi : pw->list) get_max_size(pi);
+	for (const PanItem *pi : pw->list_static) get_max_size(pi);
 
 	size.width += PAN_BOX_BORDER * 2;
 	size.height += PAN_BOX_BORDER * 2;
@@ -1036,10 +1012,8 @@ static gint pan_layout_update_idle_cb(gpointer data)
 	gint count = 0;
 	gint64 size = 0;
 
-	for (GList *work = pw->list_static; work; work = work->next)
+	for (const PanItem *pi : pw->list_static)
 		{
-		auto *pi = static_cast<PanItem *>(work->data);
-
 		if (pi->fd && filter(pi))
 			{
 			size += pi->fd->size;
@@ -1706,7 +1680,7 @@ static void pan_window_close(PanWindow *pw)
 
 	file_data_unref(pw->dir_fd);
 
-	g_free(pw);
+	delete pw;
 }
 
 static gboolean pan_window_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
@@ -1719,7 +1693,6 @@ static gboolean pan_window_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
 
 static void pan_window_new_real(FileData *dir_fd)
 {
-	PanWindow *pw;
 	GdkGeometry geometry;
 	GtkWidget *box;
 	GtkWidget *combo;
@@ -1729,7 +1702,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	GtkWidget *vbox;
 	GtkWidget *vbox_imd_widget;
 
-	pw = g_new0(PanWindow, 1);
+	auto *pw = new PanWindow();
 
 	pw->dir_fd = file_data_ref(dir_fd);
 	pw->layout = PAN_LAYOUT_TIMELINE;

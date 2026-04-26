@@ -28,6 +28,7 @@
 
 #include "filedata.h"
 #include "geometry.h"
+#include "misc.h"
 #include "pan-item.h"
 #include "pan-types.h"
 #include "pan-util.h"
@@ -35,7 +36,6 @@
 
 static void pan_flower_size(PanWindow *pw, gint &width, gint &height)
 {
-	GList *work;
 	gint x1;
 	gint y1;
 	gint x2;
@@ -46,14 +46,8 @@ static void pan_flower_size(PanWindow *pw, gint &width, gint &height)
 	x2 = 0;
 	y2 = 0;
 
-	work = pw->list;
-	while (work)
+	for (const PanItem *pi : pw->list)
 		{
-		PanItem *pi;
-
-		pi = static_cast<PanItem *>(work->data);
-		work = work->next;
-
 		x1 = std::min(x1, pi->x);
 		y1 = std::min(y1, pi->y);
 		x2 = std::max(x2, pi->x + pi->width);
@@ -65,14 +59,8 @@ static void pan_flower_size(PanWindow *pw, gint &width, gint &height)
 	x2 += PAN_BOX_BORDER;
 	y2 += PAN_BOX_BORDER;
 
-	work = pw->list;
-	while (work)
+	for (PanItem *pi : pw->list)
 		{
-		PanItem *pi;
-
-		pi = static_cast<PanItem *>(work->data);
-		work = work->next;
-
 		pi->x -= x1;
 		pi->y -= y1;
 
@@ -87,7 +75,7 @@ static void pan_flower_size(PanWindow *pw, gint &width, gint &height)
 }
 
 struct FlowerGroup {
-	GList *items;
+	PanItemList items;
 	GList *children;
 	gint x;
 	gint y;
@@ -101,16 +89,8 @@ struct FlowerGroup {
 
 static void pan_flower_move(FlowerGroup *group, gint x, gint y)
 {
-	GList *work;
-
-	work = group->items;
-	while (work)
+	for (PanItem *pi : group->items)
 		{
-		PanItem *pi;
-
-		pi = static_cast<PanItem *>(work->data);
-		work = work->next;
-
 		pi->x += x;
 		pi->y += y;
 		}
@@ -180,8 +160,7 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 		                 PAN_BORDER_1_3, {255, 0, 0, 128});
 		}
 
-	pw->list = g_list_concat(group->items, pw->list);
-	group->items = nullptr;
+	pw->list.splice(pw->list.cbegin(), group->items);
 
 	group->circumference = 0;
 	work = group->children;
@@ -207,12 +186,11 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 		}
 
 	g_list_free(group->children);
-	g_free(group);
+	delete group;
 }
 
 static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gint y)
 {
-	FlowerGroup *group;
 	GList *f;
 	GList *d;
 	GList *work;
@@ -281,9 +259,8 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 		pi_box->set_size_by_item(pi, PAN_BOX_BORDER);
 		}
 
-	group = g_new0(FlowerGroup, 1);
-	group->items = pw->list;
-	pw->list = nullptr;
+	auto *group = new FlowerGroup();
+	group->items.splice(group->items.cend(), pw->list);
 
 	group->width = pi_box->width;
 	group->height = pi_box->y + pi_box->height;
@@ -309,9 +286,8 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 
 	if (!f && !group->children)
 		{
-		g_list_free_full(group->items, reinterpret_cast<GDestroyNotify>(pan_item_free));
-		g_free(group);
-		group = nullptr;
+		for (PanItem *pi : group->items) pan_item_free(pi);
+		g_clear_pointer(&group, delete_cb<FlowerGroup>);
 		}
 
 	g_list_free(f);

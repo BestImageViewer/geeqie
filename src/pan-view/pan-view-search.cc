@@ -167,10 +167,8 @@ static PanItemList pan_search_by_date_val(PanWindow *pw,
 		key = PanKey::None;
 		}
 
-	for (GList *work = pw->list_static; work; work = work->next)
+	for (PanItem *pi : pw->list_static)
 		{
-		auto *pi = static_cast<PanItem *>(work->data);
-
 		if (pi->fd && pi->is_type(type) && pi->key == key)
 			{
 			struct tm *tl;
