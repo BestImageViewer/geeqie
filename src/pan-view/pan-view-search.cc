@@ -187,9 +187,6 @@ static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
 
 static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 {
-	PanItem *pi = nullptr;
-	GList *list = nullptr;
-	GList *found;
 	gint year;
 	gint month = -1;
 	gint day = -1;
@@ -271,49 +268,6 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 	t = pan_date_to_time(year, month, day);
 	if (t < 0) return FALSE;
 
-	if (pw->layout == PAN_LAYOUT_CALENDAR)
-		{
-		list = pan_search_by_date_val(pw, PAN_ITEM_BOX, year, month, day, PanKey::Day);
-		}
-	else
-		{
-		const PanItemType type = get_pan_item_type(pw->size);
-
-		list = pan_search_by_date_val(pw, type, year, month, day, PanKey::None);
-		}
-
-	if (list)
-		{
-		found = g_list_find(list, pw->search_pi);
-		if (found && found->next)
-			{
-			found = found->next;
-			pi = static_cast<PanItem *>(found->data);
-			}
-		else
-			{
-			pi = static_cast<PanItem *>(list->data);
-			}
-		}
-
-	pw->search_pi = pi;
-
-	if (pw->layout == PAN_LAYOUT_CALENDAR && pi && pi->is_type(PAN_ITEM_BOX))
-		{
-		pan_info_update(pw, nullptr);
-		pan_calendar_update(pw, pi);
-		image_scroll_to_point(pw->imd,
-				      pi->x + (pi->width / 2),
-				      pi->y + (pi->height / 2), 0.5, 0.5);
-		}
-	else if (pi)
-		{
-		pan_info_update(pw, pi);
-		image_scroll_to_point(pw->imd,
-				      pi->x - (PAN_BOX_BORDER * 5 / 2),
-				      pi->y, 0.0, 0.5);
-		}
-
 	g_autofree gchar *buf = nullptr;
 	if (month > 0)
 		{
@@ -330,21 +284,64 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 		}
 
 	g_autofree gchar *buf_count = nullptr;
-	if (pi)
+
+	g_autoptr(GList) list = nullptr;
+	if (pw->layout == PAN_LAYOUT_CALENDAR)
 		{
+		list = pan_search_by_date_val(pw, PAN_ITEM_BOX, year, month, day, PanKey::Day);
+		}
+	else
+		{
+		const PanItemType type = get_pan_item_type(pw->size);
+
+		list = pan_search_by_date_val(pw, type, year, month, day, PanKey::None);
+		}
+
+	if (list)
+		{
+		GList *found = g_list_find(list, pw->search_pi);
+		if (found && found->next)
+			{
+			found = found->next;
+			}
+		else
+			{
+			found = list;
+			}
+
+		auto *pi = static_cast<PanItem *>(found->data);
+
+		pw->search_pi = pi;
+
+		if (pw->layout == PAN_LAYOUT_CALENDAR)
+			{
+			pan_info_update(pw, nullptr);
+			pan_calendar_update(pw, pi);
+			image_scroll_to_point(pw->imd,
+			                      pi->x + (pi->width / 2),
+			                      pi->y + (pi->height / 2), 0.5, 0.5);
+			}
+		else
+			{
+			pan_info_update(pw, pi);
+			image_scroll_to_point(pw->imd,
+			                      pi->x - (PAN_BOX_BORDER * 5 / 2),
+			                      pi->y, 0.0, 0.5);
+			}
+
 		buf_count = g_strdup_printf("( %d / %u )",
 		                            g_list_index(list, pi) + 1,
 		                            g_list_length(list));
 		}
 	else
 		{
+		pw->search_pi = nullptr;
+
 		buf_count = g_strdup_printf("(%s)", _("no match"));
 		}
 
 	g_autofree gchar *message = g_strdup_printf("%s %s %s", _("Date:"), buf, buf_count);
 	pan_search_status(pw, message);
-
-	g_list_free(list);
 
 	return TRUE;
 }
