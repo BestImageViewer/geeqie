@@ -149,20 +149,27 @@ static gboolean valid_date_separator(gchar c)
 	return (c == '/' || c == '-' || c == ' ' || c == '.' || c == ',');
 }
 
-static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
-                                     gint year, gint month, gint day,
-                                     PanKey key)
+static PanItemList pan_search_by_date_val(PanWindow *pw,
+                                          gint year, gint month, gint day)
 {
-	GList *list = nullptr;
-	GList *work;
+	PanItemList list;
 
-	work = g_list_last(pw->list_static);
-	while (work)
+	PanItemType type;
+	PanKey key;
+	if (pw->layout == PAN_LAYOUT_CALENDAR)
 		{
-		PanItem *pi;
+		type = PAN_ITEM_BOX;
+		key = PanKey::Day;
+		}
+	else
+		{
+		type = get_pan_item_type(pw->size);
+		key = PanKey::None;
+		}
 
-		pi = static_cast<PanItem *>(work->data);
-		work = work->prev;
+	for (GList *work = pw->list_static; work; work = work->next)
+		{
+		auto *pi = static_cast<PanItem *>(work->data);
 
 		if (pi->fd && pi->is_type(type) && pi->key == key)
 			{
@@ -171,18 +178,16 @@ static GList *pan_search_by_date_val(PanWindow *pw, PanItemType type,
 			tl = localtime(&pi->fd->date);
 			if (tl)
 				{
-				gint match;
-
-				match = (tl->tm_year == year - 1900);
+				bool match = (tl->tm_year == year - 1900);
 				if (match && month >= 0) match = (tl->tm_mon == month - 1);
 				if (match && day > 0) match = (tl->tm_mday == day);
 
-				if (match) list = g_list_prepend(list, pi);
+				if (match) list.push_front(pi);
 				}
 			}
 		}
 
-	return g_list_reverse(list);
+	return list;
 }
 
 static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
@@ -285,31 +290,20 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 	g_autofree gchar *buf_count = nullptr;
 
-	g_autoptr(GList) list = nullptr;
-	if (pw->layout == PAN_LAYOUT_CALENDAR)
+	PanItemList list = pan_search_by_date_val(pw, year, month, day);
+	if (!list.empty())
 		{
-		list = pan_search_by_date_val(pw, PAN_ITEM_BOX, year, month, day, PanKey::Day);
-		}
-	else
-		{
-		const PanItemType type = get_pan_item_type(pw->size);
-
-		list = pan_search_by_date_val(pw, type, year, month, day, PanKey::None);
-		}
-
-	if (list)
-		{
-		GList *found = g_list_find(list, pw->search_pi);
-		if (found && found->next)
+		auto found = std::find(list.cbegin(), list.cend(), pw->search_pi);
+		if (found != list.cend() && std::next(found) != list.cend())
 			{
-			found = found->next;
+			found = std::next(found);
 			}
 		else
 			{
-			found = list;
+			found = list.cbegin();
 			}
 
-		auto *pi = static_cast<PanItem *>(found->data);
+		PanItem *pi = *found;
 
 		pw->search_pi = pi;
 
@@ -329,9 +323,9 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 			                      pi->y, 0.0, 0.5);
 			}
 
-		buf_count = g_strdup_printf("( %d / %u )",
-		                            g_list_index(list, pi) + 1,
-		                            g_list_length(list));
+		buf_count = g_strdup_printf("( %td / %zu )",
+		                            std::distance(list.cbegin(), found) + 1,
+		                            list.size());
 		}
 	else
 		{
