@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: geeqie-1.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-24 14:02+0200\n"
-"PO-Revision-Date: 2026-04-24 14:35+0200\n"
+"PO-Revision-Date: 2026-04-29 23:00+0200\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak\n"
 "Language: sk_SK\n"
@@ -3838,7 +3838,7 @@ msgstr "Geeqie – Otvoriť súbor"
 # src/ui-pathsel.cc:398 src/utilops.cc:760
 #: ../src/layout-util.cc:1019
 msgid "Open Recent File - Geeqie"
-msgstr "Otvoriť nedávný súbor – Geeqie"
+msgstr "Otvoriť nedávny súbor – Geeqie"
 
 # src/collect-table.cc:1824 src/dupe.cc:2176 src/preferences.cc:536
 # src/ui-utildlg.cc:105
