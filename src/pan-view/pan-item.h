@@ -53,7 +53,7 @@ enum PanTextAttrType {
 
 PanItemType get_pan_item_type(PanImageSize size);
 
-void pan_item_free(PanItem *pi);
+void pan_item_list_clear(PanItemList &list);
 
 void pan_item_added(PanWindow *pw, PanItem *pi);
 void pan_item_remove_by_key(PanWindow *pw, PanKey key);

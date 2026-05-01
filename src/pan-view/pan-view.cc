@@ -752,8 +752,7 @@ static void pan_window_items_free(PanWindow *pw)
 {
 	pan_grid_clear(pw);
 
-	for (PanItem *pi : pw->list) pan_item_free(pi);
-	pw->list.clear();
+	pan_item_list_clear(pw->list);
 
 	pw->queue.clear();
 	pw->queue_pi = nullptr;

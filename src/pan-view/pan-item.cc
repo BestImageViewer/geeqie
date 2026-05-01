@@ -92,7 +92,7 @@ static PanItem *pan_item_new(PanItemType type, gint x, gint y, gint width, gint 
 	return pi;
 }
 
-void pan_item_free(PanItem *pi)
+static void pan_item_free(PanItem *pi)
 {
 	if (!pi) return;
 
@@ -150,6 +150,11 @@ void PanItem::adjust_size(gint border, gint &w, gint &h) const
 	h = std::max(h, y + height + border);
 }
 
+void pan_item_list_clear(PanItemList &list)
+{
+	for (PanItem *pi : list) pan_item_free(pi);
+	list.clear();
+}
 
 /*
  *-----------------------------------------------------------------------------

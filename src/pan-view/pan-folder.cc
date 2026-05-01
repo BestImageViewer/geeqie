@@ -286,7 +286,7 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 
 	if (!f && !group->children)
 		{
-		for (PanItem *pi : group->items) pan_item_free(pi);
+		pan_item_list_clear(group->items);
 		g_clear_pointer(&group, delete_cb<FlowerGroup>);
 		}
 
