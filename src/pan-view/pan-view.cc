@@ -855,28 +855,17 @@ static void pan_layout_compute(PanWindow *pw, gint &width, gint &height,
 	DEBUG_1("computed %u objects", pw->list.size());
 }
 
-static PanItemList pan_layout_intersect_l(const PanItemList  &item_list, GdkRectangle rect)
-{
-	PanItemList list;
-
-	for (PanItem *pi : item_list)
-		{
-		const GdkRectangle pi_rect = {pi->x, pi->y, pi->width, pi->height};
-
-		if (gdk_rectangle_intersect(&rect, &pi_rect, nullptr))
-			{
-			list.push_front(pi);
-			}
-		}
-
-	return list;
-}
-
 PanItemList pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint height)
 {
 	const GdkRectangle rect{x, y, width, height};
 
-	const auto pan_grid_contains_rect = [](gconstpointer data, gconstpointer user_data) -> gint
+	const auto pan_item_intersect = [&rect](const PanItem *pi)
+	{
+		const GdkRectangle pi_rect{ pi->x, pi->y, pi->width, pi->height };
+		return gdk_rectangle_intersect(&rect, &pi_rect, nullptr);
+	};
+
+	static const auto pan_grid_contains_rect = [](gconstpointer data, gconstpointer user_data) -> gint
 	{
 		const auto *pg = static_cast<const PanGrid *>(data);
 		const auto *rect = static_cast<const GdkRectangle *>(user_data);
@@ -887,16 +876,21 @@ PanItemList pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint
 		return gdk_rectangle_equal(rect, &intersection) ? 0 : 1;
 	};
 
-	PanItemList list = pan_layout_intersect_l(pw->list, rect);
+	PanItemList list;
+	std::copy_if(pw->list.cbegin(), pw->list.cend(),
+	             std::front_inserter(list), pan_item_intersect);
 
 	GList *grid = g_list_find_custom(pw->list_grid, &rect, pan_grid_contains_rect);
 	if (grid)
 		{
-		list.splice(list.cbegin(), pan_layout_intersect_l(static_cast<PanGrid *>(grid->data)->list, rect));
+		PanItemList &grid_items = static_cast<PanGrid *>(grid->data)->list;
+		std::copy_if(grid_items.cbegin(), grid_items.cend(),
+		             std::front_inserter(list), pan_item_intersect);
 		}
 	else
 		{
-		list.splice(list.cbegin(), pan_layout_intersect_l(pw->list_static, rect));
+		std::copy_if(pw->list_static.cbegin(), pw->list_static.cend(),
+		             std::front_inserter(list), pan_item_intersect);
 		}
 
 	return list;
