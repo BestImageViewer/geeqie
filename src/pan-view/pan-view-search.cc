@@ -188,29 +188,24 @@ static PanItemList pan_search_by_date_val(PanWindow *pw,
 	return list;
 }
 
-static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
+static bool pan_parse_date(const gchar *text, gint &year, gint &month, gint &day)
 {
-	gint year;
-	gint month = -1;
-	gint day = -1;
-	gchar *mptr;
-	struct tm *lt;
-	time_t t;
-
-	if (!text) return FALSE;
+	if (!text) return false;
 
 	const gchar *ptr = text;
 	while (*ptr != '\0')
 		{
-		if (!g_unichar_isdigit(*ptr) && !valid_date_separator(*ptr)) return FALSE;
+		if (!g_unichar_isdigit(*ptr) && !valid_date_separator(*ptr)) return false;
 		ptr++;
 		}
 
-	t = time(nullptr);
-	if (t == -1) return FALSE;
-	lt = localtime(&t);
-	if (!lt) return FALSE;
+	const time_t t = time(nullptr);
+	if (t == -1) return false;
 
+	struct tm *lt = localtime(&t);
+	if (!lt) return false;
+
+	gchar *mptr;
 	if (valid_date_separator(*text))
 		{
 		year = -1;
@@ -219,7 +214,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 	else
 		{
 		year = static_cast<gint>(strtol(text, &mptr, 10));
-		if (mptr == text) return FALSE;
+		if (mptr == text) return false;
 		}
 
 	if (*mptr != '\0' && valid_date_separator(*mptr))
@@ -264,11 +259,20 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 			year+= 2000;
 		}
 
-	if (year < 1970 ||
-	    month < -1 || month == 0 || month > 12 ||
-	    day < -1 || day == 0 || day > 31) return FALSE;
+	return year >= 1970
+	    && month >= -1 && month != 0 && month <= 12
+	    && day >= -1 && day != 0 && day <= 31;
+}
 
-	t = pan_date_to_time(year, month, day);
+static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
+{
+	gint year;
+	gint month = -1;
+	gint day = -1;
+
+	if (!pan_parse_date(text, year, month, day)) return FALSE;
+
+	const time_t t = pan_date_to_time(year, month, day);
 	if (t < 0) return FALSE;
 
 	g_autofree gchar *buf = nullptr;
