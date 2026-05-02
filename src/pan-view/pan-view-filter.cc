@@ -380,6 +380,7 @@ GList *pan_filter_fd_list(GList *fd_list, const PanViewFilterUi *ui)
 
 		if (should_reject)
 			{
+			file_data_unref(static_cast<FileData *>(last_work->data));
 			fd_list = g_list_delete_link(fd_list, last_work);
 			}
 		}
