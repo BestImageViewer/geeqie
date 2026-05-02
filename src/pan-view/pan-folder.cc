@@ -98,58 +98,32 @@ static void pan_flower_move(FlowerGroup *group, gint x, gint y)
 	group->y += y;
 }
 
-static void pan_flower_position(FlowerGroup *group, FlowerGroup *parent,
-							     gint *result_x, gint *result_y)
+static gdouble pan_flower_position(const FlowerGroup *group, const FlowerGroup *parent,
+                                   gint &x, gint &y)
 {
-	gint x;
-	gint y;
-	gint radius;
-	gdouble a;
-
-	radius = parent->circumference / (2*G_PI);
-	radius = std::max(radius, (parent->diameter / 2) + (group->diameter / 2));
-
-	a = 2*G_PI * group->diameter / parent->circumference;
+	const auto radius = std::max<gint>(parent->circumference / (2*G_PI),
+	                                   (parent->diameter / 2) + (group->diameter / 2));
+	const gdouble a = 2*G_PI * group->diameter / parent->circumference;
 
 	x = static_cast<gint>(static_cast<gdouble>(radius) * cos(parent->angle + (a / 2)));
 	y = static_cast<gint>(static_cast<gdouble>(radius) * sin(parent->angle + (a / 2)));
 
-	parent->angle += a;
+	x += parent->x + (parent->width / 2) - (group->width / 2);
+	y += parent->y + (parent->height / 2) - (group->height / 2);
 
-	x += parent->x;
-	y += parent->y;
-
-	x += parent->width / 2;
-	y += parent->height / 2;
-
-	x -= group->width / 2;
-	y -= group->height / 2;
-
-	*result_x = x;
-	*result_y = y;
+	return a;
 }
 
 static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *parent)
 {
-	gint x;
-	gint y;
-
-	if (!group) return;
-
-	if (parent && !parent->children.empty())
-		{
-		pan_flower_position(group, parent, &x, &y);
-		}
-	else
-		{
-		x = 0;
-		y = 0;
-		}
-
-	pan_flower_move(group, x, y);
-
 	if (parent)
 		{
+		gint x;
+		gint y;
+		parent->angle += pan_flower_position(group, parent, x, y);
+
+		pan_flower_move(group, x, y);
+
 		GqPoint cp{parent->x + (parent->width / 2), parent->y + (parent->height / 2)};
 		GqPoint cg{group->x + (group->width / 2), group->y + (group->height / 2)};
 
@@ -279,10 +253,11 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 void pan_flower_compute(PanWindow *pw, gint &width, gint &height,
                         gint &scroll_x, gint &scroll_y)
 {
-	FlowerGroup *group;
-
-	group = pan_flower_group(pw, pw->dir_fd, 0, 0);
-	pan_flower_build(pw, group, nullptr);
+	FlowerGroup *group = pan_flower_group(pw, pw->dir_fd, 0, 0);
+	if (group)
+		{
+		pan_flower_build(pw, group, nullptr);
+		}
 
 	pan_flower_size(pw, width, height);
 
