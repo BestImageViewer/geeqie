@@ -75,7 +75,7 @@ static void pan_flower_size(PanWindow *pw, gint &width, gint &height)
 
 struct FlowerGroup {
 	PanItemList items;
-	GList *children;
+	std::list<FlowerGroup *> children;
 	gint x;
 	gint y;
 	gint width;
@@ -131,13 +131,12 @@ static void pan_flower_position(FlowerGroup *group, FlowerGroup *parent,
 
 static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *parent)
 {
-	GList *work;
 	gint x;
 	gint y;
 
 	if (!group) return;
 
-	if (parent && parent->children)
+	if (parent && !parent->children.empty())
 		{
 		pan_flower_position(group, parent, &x, &y);
 		}
@@ -162,29 +161,16 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 	pw->list.splice(pw->list.cbegin(), group->items);
 
 	group->circumference = 0;
-	work = group->children;
-	while (work)
+	for (const FlowerGroup *child : group->children)
 		{
-		FlowerGroup *child;
-
-		child = static_cast<FlowerGroup *>(work->data);
-		work = work->next;
-
 		group->circumference += child->diameter;
 		}
 
-	work = g_list_last(group->children);
-	while (work)
+	for (FlowerGroup *child : group->children)
 		{
-		FlowerGroup *child;
-
-		child = static_cast<FlowerGroup *>(work->data);
-		work = work->prev;
-
 		pan_flower_build(pw, child, group);
 		}
 
-	g_list_free(group->children);
 	delete group;
 }
 
@@ -277,11 +263,11 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 		if (!pan_is_ignored(fd->path, pw->ignore_symlinks))
 			{
 			child = pan_flower_group(pw, fd, 0, 0);
-			if (child) group->children = g_list_prepend(group->children, child);
+			if (child) group->children.push_back(child);
 			}
 		}
 
-	if (!f && !group->children)
+	if (!f && group->children.empty())
 		{
 		pan_item_list_clear(group->items);
 		return nullptr;
