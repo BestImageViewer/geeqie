@@ -28,7 +28,6 @@
 
 #include "filedata.h"
 #include "geometry.h"
-#include "misc.h"
 #include "pan-item.h"
 #include "pan-types.h"
 #include "pan-util.h"
@@ -191,8 +190,8 @@ static void pan_flower_build(PanWindow *pw, FlowerGroup *group, FlowerGroup *par
 
 static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gint y)
 {
-	GList *f;
-	GList *d;
+	g_autoptr(GList) f = nullptr;
+	g_autoptr(FileDataList) d = nullptr;
 	GList *work;
 	PanItem *pi_box;
 	gint x_start;
@@ -259,14 +258,12 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 		pi_box->set_size_by_item(pi, PAN_BOX_BORDER);
 		}
 
-	auto *group = new FlowerGroup();
+	auto group = std::make_unique<FlowerGroup>();
 	group->items.splice(group->items.cend(), pw->list);
 
 	group->width = pi_box->width;
 	group->height = pi_box->y + pi_box->height;
 	group->diameter = static_cast<gint>(hypot(group->width, group->height));
-
-	group->children = nullptr;
 
 	work = d;
 	while (work)
@@ -287,13 +284,10 @@ static FlowerGroup *pan_flower_group(PanWindow *pw, FileData *dir_fd, gint x, gi
 	if (!f && !group->children)
 		{
 		pan_item_list_clear(group->items);
-		g_clear_pointer(&group, delete_cb<FlowerGroup>);
+		return nullptr;
 		}
 
-	g_list_free(f);
-	file_data_list_free(d);
-
-	return group;
+	return group.release();
 }
 
 void pan_flower_compute(PanWindow *pw, gint &width, gint &height,
