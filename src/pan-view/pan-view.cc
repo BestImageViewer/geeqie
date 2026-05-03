@@ -192,54 +192,47 @@ static HardcodedWindowKeyList pan_view_window_keys{
 static gboolean pan_queue_step(PanWindow *pw);
 
 
+static void pan_queue_pi_done(PanWindow *pw, const std::function<GdkPixbuf *(const PanItem *)> &get_pixbuf)
+{
+	if (!pw->queue_pi) return;
+
+	PanItem *pi = pw->queue_pi;
+	pw->queue_pi = nullptr;
+
+	pi->queued = FALSE;
+
+	g_clear_object(&pi->pixbuf);
+	pi->pixbuf = get_pixbuf(pi);
+
+	const gint rc = pi->refcount;
+	image_area_changed(pw->imd, pi->x, pi->y, pi->width, pi->height);
+	pi->refcount = rc;
+}
+
 static void pan_queue_thumb_done_cb(ThumbLoader *tl, gpointer data)
 {
-	auto pw = static_cast<PanWindow *>(data);
+	auto *pw = static_cast<PanWindow *>(data);
 
-	if (pw->queue_pi)
-		{
-		PanItem *pi;
-		gint rc;
+	pan_queue_pi_done(pw, [tl](const PanItem *){ return thumb_loader_get_pixbuf(tl); });
 
-		pi = pw->queue_pi;
-		pw->queue_pi = nullptr;
+	g_clear_pointer(&pw->tl, thumb_loader_free);
 
-		pi->queued = FALSE;
-
-		if (pi->pixbuf) g_object_unref(pi->pixbuf);
-		pi->pixbuf = thumb_loader_get_pixbuf(tl);
-
-		rc = pi->refcount;
-		image_area_changed(pw->imd, pi->x, pi->y, pi->width, pi->height);
-		pi->refcount = rc;
-		}
-
-	thumb_loader_free(pw->tl);
-	pw->tl = nullptr;
-
-	while (pan_queue_step(pw));
+	while (pan_queue_step(pw))
+		;
 }
 
 static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
 {
-	auto pw = static_cast<PanWindow *>(data);
+	auto *pw = static_cast<PanWindow *>(data);
 
-	if (pw->queue_pi)
-		{
-		PanItem *pi;
-		gint rc;
+	const auto get_pixbuf = [pw, il](const PanItem *pi) -> GdkPixbuf *
+	{
+		GdkPixbuf *pixbuf = image_loader_get_pixbuf(pw->il);
+		if (!pixbuf) return nullptr;
 
-		pi = pw->queue_pi;
-		pw->queue_pi = nullptr;
+		g_object_ref(pixbuf);
 
-		pi->queued = FALSE;
-
-		if (pi->pixbuf) g_object_unref(pi->pixbuf);
-		pi->pixbuf = image_loader_get_pixbuf(pw->il);
-
-		if (pi->pixbuf) g_object_ref(pi->pixbuf);
-
-		if (pi->pixbuf && options->image.exif_rotate_enable)
+		if (options->image.exif_rotate_enable)
 			{
 			if (!il->fd->exif_orientation)
 				{
@@ -255,29 +248,28 @@ static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
 
 			if (il->fd->exif_orientation != EXIF_ORIENTATION_TOP_LEFT)
 				{
-				g_autoptr(GdkPixbuf) rotated = pixbuf_apply_orientation(pi->pixbuf, il->fd->exif_orientation);
-				std::swap(pi->pixbuf, rotated);
+				g_autoptr(GdkPixbuf) rotated = pixbuf_apply_orientation(pixbuf, il->fd->exif_orientation);
+				std::swap(pixbuf, rotated);
 				}
 			}
 
-		if (pi->pixbuf && pw->size != PAN_IMAGE_SIZE_100 &&
-		    (gdk_pixbuf_get_width(pi->pixbuf) > pi->width ||
-		     gdk_pixbuf_get_height(pi->pixbuf) > pi->height))
+		if (pixbuf && pw->size != PAN_IMAGE_SIZE_100 &&
+		    (gdk_pixbuf_get_width(pixbuf) > pi->width ||
+		     gdk_pixbuf_get_height(pixbuf) > pi->height))
 			{
-			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pi->pixbuf, pi->width, pi->height,
+			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pixbuf, pi->width, pi->height,
 			                                                      options->image.zoom_quality);
-			std::swap(pi->pixbuf, scaled);
+			std::swap(pixbuf, scaled);
 			}
 
-		rc = pi->refcount;
-		image_area_changed(pw->imd, pi->x, pi->y, pi->width, pi->height);
-		pi->refcount = rc;
-		}
+		return pixbuf;
+	};
+	pan_queue_pi_done(pw, get_pixbuf);
 
-	image_loader_free(pw->il);
-	pw->il = nullptr;
+	g_clear_pointer(&pw->il, image_loader_free);
 
-	while (pan_queue_step(pw));
+	while (pan_queue_step(pw))
+		;
 }
 
 static gboolean pan_queue_step(PanWindow *pw)
