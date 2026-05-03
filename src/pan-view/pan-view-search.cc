@@ -149,23 +149,11 @@ static gboolean valid_date_separator(gchar c)
 	return (c == '/' || c == '-' || c == ' ' || c == '.' || c == ',');
 }
 
-static PanItemList pan_search_by_date_val(PanWindow *pw,
+static PanItemList pan_search_by_date_val(const PanWindow *pw,
+                                          PanItemType type, PanKey key,
                                           gint year, gint month, gint day)
 {
 	PanItemList list;
-
-	PanItemType type;
-	PanKey key;
-	if (pw->layout == PAN_LAYOUT_CALENDAR)
-		{
-		type = PAN_ITEM_BOX;
-		key = PanKey::Day;
-		}
-	else
-		{
-		type = get_pan_item_type(pw->size);
-		key = PanKey::None;
-		}
 
 	for (PanItem *pi : pw->list_static)
 		{
@@ -264,7 +252,8 @@ static bool pan_parse_date(const gchar *text, gint &year, gint &month, gint &day
 	    && day >= -1 && day != 0 && day <= 31;
 }
 
-static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
+static gboolean pan_search_by_date(PanWindow *pw, const gchar *text,
+                                   PanItemType type, PanKey key)
 {
 	gint year;
 	gint month = -1;
@@ -292,7 +281,7 @@ static gboolean pan_search_by_date(PanWindow *pw, const gchar *text)
 
 	g_autofree gchar *buf_count = nullptr;
 
-	PanItemList list = pan_search_by_date_val(pw, year, month, day);
+	PanItemList list = pan_search_by_date_val(pw, type, key, year, month, day);
 	if (!list.empty())
 		{
 		auto found = std::find(list.cbegin(), list.cend(), pw->search_pi);
@@ -350,9 +339,14 @@ static void pan_search_activate_cb(PanWindow *pw, const gchar *text)
 
 	if (pan_search_by_path(pw, text)) return;
 
-	if ((pw->layout == PAN_LAYOUT_TIMELINE ||
-	     pw->layout == PAN_LAYOUT_CALENDAR) &&
-	    pan_search_by_date(pw, text))
+	if (pw->layout == PAN_LAYOUT_TIMELINE &&
+	    pan_search_by_date(pw, text, get_pan_item_type(pw->size), PanKey::None))
+		{
+		return;
+		}
+
+	if (pw->layout == PAN_LAYOUT_CALENDAR &&
+	    pan_search_by_date(pw, text, PAN_ITEM_BOX, PanKey::Day))
 		{
 		return;
 		}
