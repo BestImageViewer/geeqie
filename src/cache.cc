@@ -331,9 +331,7 @@ static gboolean cache_sim_read_dimensions(FILE *f, gchar *buf, gint s, CacheData
 		buf[p] = '\0';
 		if (sscanf(buf, "%d x %d", &w, &h) != 2) return FALSE;
 
-		cd->width = w;
-		cd->height = h;
-		cd->dimensions = TRUE;
+		cache_sim_data_set_dimensions(cd, w, h);
 
 		return TRUE;
 		}

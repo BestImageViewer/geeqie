@@ -120,10 +120,11 @@ static gboolean cache_loader_phase2_process(gpointer data)
 	else if (cl->todo_mask & CACHE_LOADER_DIMENSIONS &&
 		 !cl->cd->dimensions)
 		{
-		if (!cl->error &&
-		    image_load_dimensions(cl->fd, &cl->cd->width, &cl->cd->height))
+		if (GqSize dimensions;
+		    !cl->error &&
+		    image_load_dimensions(cl->fd, &dimensions.width, &dimensions.height))
 			{
-			cl->cd->dimensions = TRUE;
+			cache_sim_data_set_dimensions(cl->cd, dimensions.width, dimensions.height);
 			cl->done_mask = static_cast<CacheDataType>(cl->done_mask | CACHE_LOADER_DIMENSIONS);
 			}
 		else
