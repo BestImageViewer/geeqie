@@ -288,9 +288,9 @@ static gboolean cache_sim_read_skipline(FILE *f, gint s)
 	return FALSE;
 }
 
-static gboolean cache_sim_read_comment(FILE *f, const gchar *buf, gint s, CacheData *cd)
+static gboolean cache_sim_read_comment(FILE *f, const gchar *buf, gint s)
 {
-	if (!f || !buf || !cd) return FALSE;
+	if (!f || !buf) return FALSE;
 
 	if (s < 1 || buf[0] != '#') return FALSE;
 
@@ -515,7 +515,7 @@ CacheData *cache_sim_data_load(const gchar *path)
 			}
 		else
 			{
-			if (!cache_sim_read_comment(f, buf, s, cd) &&
+			if (!cache_sim_read_comment(f, buf, s) &&
 			    !cache_sim_read_dimensions(f, buf, s, cd) &&
 			    !cache_sim_read_date(f, buf, s, cd) &&
 			    !cache_sim_read_md5sum(f, buf, s, cd) &&
