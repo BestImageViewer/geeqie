@@ -186,9 +186,9 @@ void cache_sim_data_free(CacheData *cd)
 
 static gboolean cache_sim_write_dimensions(GString *gstring, const CacheData *cd)
 {
-	if (!cd || !cd->dimensions) return FALSE;
+	if (!cd || !cd->have_dimensions) return FALSE;
 
-	g_string_append_printf(gstring, "Dimensions=[%d x %d]\n", cd->width, cd->height);
+	g_string_append_printf(gstring, "Dimensions=[%d x %d]\n", cd->dimensions.width, cd->dimensions.height);
 
 	return TRUE;
 }
@@ -539,7 +539,7 @@ CacheData *cache_sim_data_load(const gchar *path)
 
 	fclose(f);
 
-	if (!cd->dimensions &&
+	if (!cd->have_dimensions &&
 	    !cd->have_date &&
 	    !cd->have_md5sum &&
 	    !cd->similarity)
@@ -561,9 +561,9 @@ void cache_sim_data_set_dimensions(CacheData *cd, gint w, gint h)
 {
 	if (!cd) return;
 
-	cd->width = w;
-	cd->height = h;
-	cd->dimensions = TRUE;
+	cd->dimensions.width = w;
+	cd->dimensions.height = h;
+	cd->have_dimensions = TRUE;
 }
 
 void cache_sim_data_set_md5sum(CacheData *cd, const guchar digest[16])

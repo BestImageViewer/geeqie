@@ -637,7 +637,7 @@ std::optional<GqSize> pan_cache_get_image_size(PanWindow *pw, const FileData *fd
 	const auto pan_cache_data_cd_dimensions_compare_fd = [](gconstpointer data, gconstpointer user_data)
 	{
 		auto *pc = static_cast<const PanCacheData *>(data);
-		return (pc->cd && pc->cd->dimensions && pc->fd == user_data) ? 0 : 1;
+		return (pc->cd && pc->cd->have_dimensions && pc->fd == user_data) ? 0 : 1;
 	};
 
 	GList *work = g_list_find_custom(pw->cache_list, fd, pan_cache_data_cd_dimensions_compare_fd);
@@ -645,7 +645,7 @@ std::optional<GqSize> pan_cache_get_image_size(PanWindow *pw, const FileData *fd
 
 	auto *pc = static_cast<PanCacheData *>(work->data);
 
-	GqSize size{ pc->cd->width, pc->cd->height };
+	const GqSize size = pc->cd->dimensions;
 
 	pw->cache_list = g_list_remove(pw->cache_list, pc);
 	pan_cache_data_free(pc);

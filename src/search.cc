@@ -1727,14 +1727,14 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 	 */
 	if (cd && !pixbuf)
 		{
-		if (!cd->dimensions)
+		if (!cd->have_dimensions)
 			{
 			cache_sim_data_set_dimensions(cd, -1, -1);
 			}
 		}
 	else if (cd && pixbuf)
 		{
-		if (!cd->dimensions)
+		if (!cd->have_dimensions)
 			{
 			cache_sim_data_set_dimensions(cd, gdk_pixbuf_get_width(pixbuf),
 							  gdk_pixbuf_get_height(pixbuf));
@@ -1803,7 +1803,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 
 	if (new_data)
 		{
-		if ((sd->match_dimensions_enable && !sd->img_cd->dimensions) || (sd->match_similarity_enable && !sd->img_cd->similarity) || sd->match_broken_enable)
+		if ((sd->match_dimensions_enable && !sd->img_cd->have_dimensions) || (sd->match_similarity_enable && !sd->img_cd->similarity) || sd->match_broken_enable)
 			{
 			sd->img_loader = image_loader_new(mfd.fd);
 			g_signal_connect(G_OBJECT(sd->img_loader), "error", (GCallback)search_file_load_done_cb, sd);
@@ -1822,17 +1822,17 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 		{
 		tested = TRUE;
 		tmatch = FALSE;
-		if (sd->match_class == SEARCH_MATCH_EQUAL && sd->img_cd->width == -1)
+		if (sd->match_class == SEARCH_MATCH_EQUAL && sd->img_cd->dimensions.width == -1)
 			{
 			tmatch = TRUE;
 			}
-		else if (sd->match_class == SEARCH_MATCH_NONE && sd->img_cd->width != -1)
+		else if (sd->match_class == SEARCH_MATCH_NONE && sd->img_cd->dimensions.width != -1)
 			{
 			tmatch = TRUE;
 			}
 		}
 
-	if (tmatch && sd->match_dimensions_enable && sd->img_cd->dimensions)
+	if (tmatch && sd->match_dimensions_enable && sd->img_cd->have_dimensions)
 		{
 		CacheData *cd = sd->img_cd;
 
@@ -1841,20 +1841,20 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 
 		if (sd->match_dimensions == SEARCH_MATCH_EQUAL)
 			{
-			tmatch = (cd->width == sd->search_width && cd->height == sd->search_height);
+			tmatch = (cd->dimensions.width == sd->search_width && cd->dimensions.height == sd->search_height);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_UNDER)
 			{
-			tmatch = (cd->width < sd->search_width && cd->height < sd->search_height);
+			tmatch = (cd->dimensions.width < sd->search_width && cd->dimensions.height < sd->search_height);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_OVER)
 			{
-			tmatch = (cd->width > sd->search_width && cd->height > sd->search_height);
+			tmatch = (cd->dimensions.width > sd->search_width && cd->dimensions.height > sd->search_height);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_BETWEEN)
 			{
-			tmatch = match_is_between(cd->width, sd->search_width, sd->search_width_end) &&
-			         match_is_between(cd->height, sd->search_height, sd->search_height_end);
+			tmatch = match_is_between(cd->dimensions.width, sd->search_width, sd->search_width_end) &&
+			         match_is_between(cd->dimensions.height, sd->search_height, sd->search_height_end);
 			}
 		}
 
@@ -1879,10 +1879,10 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 			}
 		}
 
-	if (sd->img_cd->dimensions)
+	if (sd->img_cd->have_dimensions)
 		{
-		mfd.width = sd->img_cd->width;
-		mfd.height = sd->img_cd->height;
+		mfd.width = sd->img_cd->dimensions.width;
+		mfd.height = sd->img_cd->dimensions.height;
 		}
 
 	cache_sim_data_free(sd->img_cd);

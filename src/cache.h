@@ -26,6 +26,8 @@
 
 #include <glib.h>
 
+#include "geometry.h"
+
 struct ImageSimilarityData;
 
 #define GQ_CACHE_THUMB		"thumbnails"
@@ -50,13 +52,12 @@ enum CacheType {
 struct CacheData
 {
 	gchar *path;
-	gint width;
-	gint height;
+	GqSize dimensions;
 	time_t date;
 	guchar md5sum[16];
 	ImageSimilarityData *sim;
 
-	gboolean dimensions;
+	gboolean have_dimensions;
 	gboolean have_date;
 	gboolean have_md5sum;
 	gboolean similarity;

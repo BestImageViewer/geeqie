@@ -100,7 +100,7 @@ static gboolean cache_loader_phase2_process(gpointer data)
 				}
 
 			/* we have the dimensions via pixbuf */
-			if (!cl->cd->dimensions)
+			if (!cl->cd->have_dimensions)
 				{
 				cache_sim_data_set_dimensions(cl->cd, gdk_pixbuf_get_width(pixbuf),
 								      gdk_pixbuf_get_height(pixbuf));
@@ -117,8 +117,8 @@ static gboolean cache_loader_phase2_process(gpointer data)
 
 		cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_SIMILARITY);
 		}
-	else if (cl->todo_mask & CACHE_LOADER_DIMENSIONS &&
-		 !cl->cd->dimensions)
+	else if ((cl->todo_mask & CACHE_LOADER_DIMENSIONS) &&
+	         !cl->cd->have_dimensions)
 		{
 		if (GqSize dimensions;
 		    !cl->error &&

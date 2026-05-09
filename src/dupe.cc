@@ -495,10 +495,10 @@ static void dupe_item_read_cache(DupeItem *di)
 		cd->sim = nullptr;
 		}
 
-	if (di->width == 0 && di->height == 0 && cd->dimensions)
+	if (di->width == 0 && di->height == 0 && cd->have_dimensions)
 		{
-		di->width = cd->width;
-		di->height = cd->height;
+		di->width = cd->dimensions.width;
+		di->height = cd->dimensions.height;
 		di->dimensions = (di->width << 16) + di->height;
 		}
 
