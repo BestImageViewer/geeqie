@@ -813,7 +813,7 @@ gboolean recursive_mkdir_if_not_exists(const gchar *path, mode_t mode)
 }
 
 /* does filename utf8 to filesystem encoding first */
-gboolean md5_get_digest_from_file_utf8(const gchar *path, guchar digest[16])
+gboolean md5_get_digest_from_file_utf8(const gchar *path, Md5Digest &digest)
 {
 	g_autofree gchar *pathl = path_from_utf8(path);
 

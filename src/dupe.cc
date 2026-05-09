@@ -525,7 +525,7 @@ static void dupe_item_write_cache(DupeItem *di)
 		if (di->width != 0) cache_sim_data_set_dimensions(cd, {di->width, di->height});
 		if (di->md5sum)
 			{
-			guchar digest[16];
+			Md5Digest digest;
 			if (md5_digest_from_text(di->md5sum, digest)) cache_sim_data_set_md5sum(cd, digest);
 			}
 		if (di->simd) cache_sim_data_set_similarity(cd, di->simd);

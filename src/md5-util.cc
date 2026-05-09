@@ -39,8 +39,6 @@
 namespace
 {
 
-constexpr gsize MD5_SIZE = 16;
-
 /**
  * md5_update_from_file: get the md5 hash of a file
  * @md5: MD5 checksumming context
@@ -95,7 +93,7 @@ gchar *md5_get_string(const guchar *buffer, gint buffer_size)
  * Get the md5 hash of a file. The result is put in
  * the 16 bytes buffer @digest .
  **/
-gboolean md5_get_digest_from_file(const gchar *path, guchar digest[16])
+gboolean md5_get_digest_from_file(const gchar *path, Md5Digest &digest)
 {
 	g_autoptr(GChecksum) md5 = g_checksum_new(G_CHECKSUM_MD5);
 	if (!md5) return FALSE;
@@ -103,7 +101,7 @@ gboolean md5_get_digest_from_file(const gchar *path, guchar digest[16])
 	if (!md5_update_from_file(md5, path)) return FALSE;
 
 	gsize digest_size = MD5_SIZE;
-	g_checksum_get_digest(md5, digest, &digest_size);
+	g_checksum_get_digest(md5, digest.data(), &digest_size);
 	if (digest_size != MD5_SIZE) return FALSE;
 
 	return TRUE;
@@ -136,7 +134,7 @@ gchar *md5_get_string_from_file(const gchar *path)
  * and assumes a NULL terminated string.
  */
 
-gchar *md5_digest_to_text(const guchar digest[16])
+gchar *md5_digest_to_text(const Md5Digest &digest)
 {
 	static gchar hex_digits[] = "0123456789abcdef";
 	gchar *result;
@@ -156,7 +154,7 @@ gchar *md5_digest_to_text(const guchar digest[16])
 /**
  * @brief Convert digest from a NULL terminated text string, in ascii encoding
  */
-gboolean md5_digest_from_text(const gchar *text, guchar digest[16])
+gboolean md5_digest_from_text(const gchar *text, Md5Digest &digest)
 {
 	for (gsize i = 0; i < MD5_SIZE; i++)
 		{

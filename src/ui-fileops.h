@@ -32,6 +32,8 @@
 
 #include <config.h>
 
+#include "md5-util.h"
+
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, fclose)
 
 #ifdef DEBUG
@@ -99,7 +101,7 @@ gboolean file_in_path(const gchar *name);
 gboolean recursive_mkdir_if_not_exists(const gchar *path, mode_t mode);
 
 gchar *md5_text_from_file_utf8(const gchar *path, const gchar *error_text);
-gboolean md5_get_digest_from_file_utf8(const gchar *path, guchar digest[16]);
+gboolean md5_get_digest_from_file_utf8(const gchar *path, Md5Digest &digest);
 
 gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data);
 gboolean rmdir_recursive(GFile *file, GCancellable *cancellable, GError **error);

@@ -27,6 +27,7 @@
 #include <glib.h>
 
 #include "geometry.h"
+#include "md5-util.h"
 
 struct ImageSimilarityData;
 
@@ -54,7 +55,7 @@ struct CacheData
 	gchar *path;
 	GqSize dimensions;
 	time_t date;
-	guchar md5sum[16];
+	Md5Digest md5sum;
 	ImageSimilarityData *sim;
 
 	gboolean have_dimensions;
@@ -73,7 +74,7 @@ gboolean cache_sim_data_save(CacheData *cd);
 CacheData *cache_sim_data_load(const gchar *path);
 
 void cache_sim_data_set_dimensions(CacheData *cd, GqSize dimensions);
-void cache_sim_data_set_md5sum(CacheData *cd, const guchar digest[16]);
+void cache_sim_data_set_md5sum(CacheData *cd, const Md5Digest &digest);
 void cache_sim_data_set_similarity(CacheData *cd, ImageSimilarityData *sd);
 
 gchar *cache_create_location(CacheType cache_type, const gchar *source);

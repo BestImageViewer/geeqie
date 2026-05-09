@@ -161,9 +161,7 @@ gchar *cache_get_location(CacheType type, const gchar *source, gint include_name
 
 CacheData *cache_sim_data_new()
 {
-	CacheData *cd;
-
-	cd = g_new0(CacheData, 1);
+	auto *cd = new CacheData();
 	cd->date = -1;
 
 	return cd;
@@ -175,7 +173,7 @@ void cache_sim_data_free(CacheData *cd)
 
 	g_free(cd->path);
 	image_sim_free(cd->sim);
-	g_free(cd);
+	delete cd;
 }
 
 /*
@@ -483,7 +481,6 @@ static gboolean cache_sim_read_similarity(FILE *f, gchar *buf, gint s, CacheData
 CacheData *cache_sim_data_load(const gchar *path)
 {
 	FILE *f;
-	CacheData *cd = nullptr;
 	gchar buf[32];
 	gint success = CACHE_LOAD_LINE_NOISE;
 
@@ -493,7 +490,7 @@ CacheData *cache_sim_data_load(const gchar *path)
 	f = fopen(pathl, "r");
 	if (!f) return nullptr;
 
-	cd = cache_sim_data_new();
+	CacheData *cd = cache_sim_data_new();
 	cd->path = g_strdup(path);
 
 	if (fread(&buf, sizeof(gchar), 9, f) != 9 ||
@@ -564,16 +561,11 @@ void cache_sim_data_set_dimensions(CacheData *cd, GqSize dimensions)
 	cd->have_dimensions = TRUE;
 }
 
-void cache_sim_data_set_md5sum(CacheData *cd, const guchar digest[16])
+void cache_sim_data_set_md5sum(CacheData *cd, const Md5Digest &digest)
 {
-	gint i;
-
 	if (!cd) return;
 
-	for (i = 0; i < 16; i++)
-		{
-		cd->md5sum[i] = digest[i];
-		}
+	cd->md5sum = digest;
 	cd->have_md5sum = TRUE;
 }
 
