@@ -308,8 +308,6 @@ static gboolean cache_sim_read_dimensions(FILE *f, gchar *buf, gint s, CacheData
 		gchar b;
 		gchar buf[1024];
 		gsize p = 0;
-		gint w;
-		gint h;
 
 		b = 'X';
 		while (b != '[')
@@ -329,9 +327,10 @@ static gboolean cache_sim_read_dimensions(FILE *f, gchar *buf, gint s, CacheData
 			}
 
 		buf[p] = '\0';
-		if (sscanf(buf, "%d x %d", &w, &h) != 2) return FALSE;
+		GqSize dimensions;
+		if (sscanf(buf, "%d x %d", &dimensions.width, &dimensions.height) != 2) return FALSE;
 
-		cache_sim_data_set_dimensions(cd, w, h);
+		cache_sim_data_set_dimensions(cd, dimensions);
 
 		return TRUE;
 		}
@@ -557,12 +556,11 @@ CacheData *cache_sim_data_load(const gchar *path)
  *-------------------------------------------------------------------
  */
 
-void cache_sim_data_set_dimensions(CacheData *cd, gint w, gint h)
+void cache_sim_data_set_dimensions(CacheData *cd, GqSize dimensions)
 {
 	if (!cd) return;
 
-	cd->dimensions.width = w;
-	cd->dimensions.height = h;
+	cd->dimensions = dimensions;
 	cd->have_dimensions = TRUE;
 }
 

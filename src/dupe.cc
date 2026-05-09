@@ -522,7 +522,7 @@ static void dupe_item_write_cache(DupeItem *di)
 		cd = cache_sim_data_new();
 		cd->path = cache_get_location(CACHE_TYPE_SIM, di->fd->path);
 
-		if (di->width != 0) cache_sim_data_set_dimensions(cd, di->width, di->height);
+		if (di->width != 0) cache_sim_data_set_dimensions(cd, {di->width, di->height});
 		if (di->md5sum)
 			{
 			guchar digest[16];

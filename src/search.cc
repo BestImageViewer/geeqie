@@ -1729,15 +1729,15 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 		{
 		if (!cd->have_dimensions)
 			{
-			cache_sim_data_set_dimensions(cd, -1, -1);
+			cache_sim_data_set_dimensions(cd, {-1, -1});
 			}
 		}
 	else if (cd && pixbuf)
 		{
 		if (!cd->have_dimensions)
 			{
-			cache_sim_data_set_dimensions(cd, gdk_pixbuf_get_width(pixbuf),
-							  gdk_pixbuf_get_height(pixbuf));
+			cache_sim_data_set_dimensions(cd, {gdk_pixbuf_get_width(pixbuf),
+			                                   gdk_pixbuf_get_height(pixbuf)});
 			}
 
 		if (sd->match_similarity_enable && !cd->similarity)
