@@ -517,7 +517,7 @@ static void dupe_item_write_cache(DupeItem *di)
 		CacheData *cd;
 
 		cd = cache_sim_data_new();
-		cd->path = cache_get_location(CACHE_TYPE_SIM, di->fd->path);
+		g_autofree gchar *path = cache_get_location(CACHE_TYPE_SIM, di->fd->path);
 
 		if (di->width != 0) cd->set_dimensions({di->width, di->height});
 		if (di->md5sum)
@@ -527,9 +527,9 @@ static void dupe_item_write_cache(DupeItem *di)
 			}
 		if (di->simd) cd->set_similarity(*di->simd);
 
-		if (cd->save())
+		if (cd->save(path))
 			{
-			filetime_set(cd->path, filetime(di->fd->path));
+			filetime_set(path, filetime(di->fd->path));
 			}
 		cache_sim_data_free(cd);
 		}

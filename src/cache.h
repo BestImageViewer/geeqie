@@ -55,14 +55,13 @@ enum CacheType {
 
 struct CacheData
 {
-	bool save() const;
+	bool save(const gchar *path) const;
 	bool load(const gchar *path);
 
 	void set_dimensions(GqSize dimensions);
 	void set_md5sum(const Md5Digest &digest);
 	void set_similarity(const ImageSimilarityData &sd);
 
-	gchar *path;
 	GqSize dimensions;
 	time_t date;
 	Md5Digest md5sum;

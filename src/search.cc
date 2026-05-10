@@ -1756,11 +1756,10 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 			g_autofree gchar *base = cache_create_location(CACHE_TYPE_SIM, path);
 			if (base)
 				{
-				g_free(cd->path);
-				cd->path = cache_get_location(CACHE_TYPE_SIM, path);
-				if (cd->save())
+				g_autofree gchar *cd_path = cache_get_location(CACHE_TYPE_SIM, path);
+				if (cd->save(cd_path))
 					{
-					filetime_set(cd->path, filetime(image_loader_get_fd(sd->img_loader)->path));
+					filetime_set(cd_path, filetime(path));
 					}
 				}
 			}

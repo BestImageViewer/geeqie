@@ -178,11 +178,10 @@ static gboolean cache_loader_phase2_process(gpointer data)
 			g_autofree gchar *base = cache_create_location(CACHE_TYPE_SIM, cl->fd->path);
 			if (base)
 				{
-				g_free(cl->cd->path);
-				cl->cd->path = cache_get_location(CACHE_TYPE_SIM, cl->fd->path);
-				if (cl->cd->save())
+				g_autofree gchar *path = cache_get_location(CACHE_TYPE_SIM, cl->fd->path);
+				if (cl->cd->save(path))
 					{
-					filetime_set(cl->cd->path, filetime(cl->fd->path));
+					filetime_set(path, filetime(cl->fd->path));
 					}
 				}
 			}

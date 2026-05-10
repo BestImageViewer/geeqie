@@ -170,7 +170,6 @@ CacheData *cache_sim_data_new()
 CacheData *cache_sim_data_new(const gchar *path)
 {
 	CacheData *cd = cache_sim_data_new();
-	cd->path = g_strdup(path);
 
 	if (!cd->load(path))
 		{
@@ -183,9 +182,6 @@ CacheData *cache_sim_data_new(const gchar *path)
 
 void cache_sim_data_free(CacheData *cd)
 {
-	if (!cd) return;
-
-	g_free(cd->path);
 	delete cd;
 }
 
@@ -251,7 +247,7 @@ bool CacheData::write_similarity(GString *gstring) const
 	return true;
 }
 
-bool CacheData::save() const
+bool CacheData::save(const gchar *path) const
 {
 	if (!path) return false;
 
