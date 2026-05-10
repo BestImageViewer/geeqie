@@ -24,6 +24,8 @@
 
 #include <sys/types.h>
 
+#include <cstdio>
+
 #include <glib.h>
 
 #include "geometry.h"
@@ -52,6 +54,13 @@ enum CacheType {
 
 struct CacheData
 {
+	bool save() const;
+	static CacheData *load(const gchar *path);
+
+	void set_dimensions(GqSize dimensions);
+	void set_md5sum(const Md5Digest &digest);
+	void set_similarity(ImageSimilarityData *sd);
+
 	gchar *path;
 	GqSize dimensions;
 	time_t date;
@@ -62,20 +71,23 @@ struct CacheData
 	gboolean have_date;
 	gboolean have_md5sum;
 	gboolean similarity;
+
+private:
+	bool write_dimensions(GString *gstring) const;
+	bool write_date(GString *gstring) const;
+	bool write_md5sum(GString *gstring) const;
+	bool write_similarity(GString *gstring) const;
+
+	bool read_dimensions(FILE *f, gchar *buf, gint s);
+	bool read_date(FILE *f, gchar *buf, gint s);
+	bool read_md5sum(FILE *f, gchar *buf, gint s);
+	bool read_similarity(FILE *f, gchar *buf, gint s);
 };
 
 gboolean cache_time_valid(const gchar *cache, const gchar *path);
 
-
 CacheData *cache_sim_data_new();
 void cache_sim_data_free(CacheData *cd);
-
-gboolean cache_sim_data_save(CacheData *cd);
-CacheData *cache_sim_data_load(const gchar *path);
-
-void cache_sim_data_set_dimensions(CacheData *cd, GqSize dimensions);
-void cache_sim_data_set_md5sum(CacheData *cd, const Md5Digest &digest);
-void cache_sim_data_set_similarity(CacheData *cd, ImageSimilarityData *sd);
 
 gchar *cache_create_location(CacheType cache_type, const gchar *source);
 gchar *cache_get_location(CacheType cache_type, const gchar *source);

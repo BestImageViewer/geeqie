@@ -477,8 +477,6 @@ static void dupe_item_free(DupeItem *di)
 
 static void dupe_item_read_cache(DupeItem *di)
 {
-	CacheData *cd;
-
 	if (!di) return;
 
 	g_autofree gchar *path = cache_find_location(CACHE_TYPE_SIM, di->fd->path);
@@ -486,7 +484,7 @@ static void dupe_item_read_cache(DupeItem *di)
 
 	if (filetime(di->fd->path) != filetime(path)) return;
 
-	cd = cache_sim_data_load(path);
+	CacheData *cd = CacheData::load(path);
 	if (!cd) return;
 
 	if (!di->simd && cd->sim)
@@ -522,15 +520,15 @@ static void dupe_item_write_cache(DupeItem *di)
 		cd = cache_sim_data_new();
 		cd->path = cache_get_location(CACHE_TYPE_SIM, di->fd->path);
 
-		if (di->width != 0) cache_sim_data_set_dimensions(cd, {di->width, di->height});
+		if (di->width != 0) cd->set_dimensions({di->width, di->height});
 		if (di->md5sum)
 			{
 			Md5Digest digest;
-			if (md5_digest_from_text(di->md5sum, digest)) cache_sim_data_set_md5sum(cd, digest);
+			if (md5_digest_from_text(di->md5sum, digest)) cd->set_md5sum(digest);
 			}
-		if (di->simd) cache_sim_data_set_similarity(cd, di->simd);
+		if (di->simd) cd->set_similarity(di->simd);
 
-		if (cache_sim_data_save(cd))
+		if (cd->save())
 			{
 			filetime_set(cd->path, filetime(di->fd->path));
 			}

@@ -1729,15 +1729,15 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 		{
 		if (!cd->have_dimensions)
 			{
-			cache_sim_data_set_dimensions(cd, {-1, -1});
+			cd->set_dimensions({-1, -1});
 			}
 		}
 	else if (cd && pixbuf)
 		{
 		if (!cd->have_dimensions)
 			{
-			cache_sim_data_set_dimensions(cd, {gdk_pixbuf_get_width(pixbuf),
-			                                   gdk_pixbuf_get_height(pixbuf)});
+			cd->set_dimensions({gdk_pixbuf_get_width(pixbuf),
+			                    gdk_pixbuf_get_height(pixbuf)});
 			}
 
 		if (sd->match_similarity_enable && !cd->similarity)
@@ -1745,7 +1745,7 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 			ImageSimilarityData *sim;
 
 			sim = image_sim_new_from_pixbuf(pixbuf);
-			cache_sim_data_set_similarity(cd, sim);
+			cd->set_similarity(sim);
 			image_sim_free(sim);
 			}
 
@@ -1759,7 +1759,7 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 				{
 				g_free(cd->path);
 				cd->path = cache_get_location(CACHE_TYPE_SIM, path);
-				if (cache_sim_data_save(cd))
+				if (cd->save())
 					{
 					filetime_set(cd->path, filetime(image_loader_get_fd(sd->img_loader)->path));
 					}
@@ -1792,7 +1792,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 		g_autofree gchar *cd_path = cache_find_location(CACHE_TYPE_SIM, mfd.fd->path);
 		if (cd_path && filetime(mfd.fd->path) == filetime(cd_path))
 			{
-			sd->img_cd = cache_sim_data_load(cd_path);
+			sd->img_cd = CacheData::load(cd_path);
 			}
 		}
 
@@ -2451,7 +2451,7 @@ static void search_start(SearchData *sd)
 		g_autofree gchar *cd_path = cache_find_location(CACHE_TYPE_SIM, sd->search_similarity_path);
 		if (cd_path && filetime(sd->search_similarity_path) == filetime(cd_path))
 			{
-			sd->search_similarity_cd = cache_sim_data_load(cd_path);
+			sd->search_similarity_cd = CacheData::load(cd_path);
 			}
 
 		if (!sd->search_similarity_cd || !sd->search_similarity_cd->similarity)
