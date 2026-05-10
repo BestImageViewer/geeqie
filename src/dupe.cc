@@ -525,7 +525,7 @@ static void dupe_item_write_cache(DupeItem *di)
 			Md5Digest digest;
 			if (md5_digest_from_text(di->md5sum, digest)) cd->set_md5sum(digest);
 			}
-		if (di->simd) cd->set_similarity(di->simd);
+		if (di->simd) cd->set_similarity(*di->simd);
 
 		if (cd->save())
 			{
@@ -2057,12 +2057,10 @@ static void dupe_loader_done_cb(ImageLoader *il, gpointer data)
 
 		if (!di->simd)
 			{
-			di->simd = image_sim_new_from_pixbuf(pixbuf);
+			di->simd = image_sim_new();
 			}
-		else
-			{
-			image_sim_fill_data(di->simd, pixbuf);
-			}
+
+		di->simd->fill_data(pixbuf);
 
 		if (di->width == 0 && di->height == 0 && pixbuf)
 			{

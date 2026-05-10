@@ -60,7 +60,7 @@ struct CacheData
 
 	void set_dimensions(GqSize dimensions);
 	void set_md5sum(const Md5Digest &digest);
-	void set_similarity(ImageSimilarityData *sd);
+	void set_similarity(const ImageSimilarityData &sd);
 
 	gchar *path;
 	GqSize dimensions;

@@ -491,13 +491,13 @@ void CacheData::set_md5sum(const Md5Digest &digest)
 	have_md5sum = TRUE;
 }
 
-void CacheData::set_similarity(ImageSimilarityData *sd)
+void CacheData::set_similarity(const ImageSimilarityData &sd)
 {
-	if (!sd || !sd->filled) return;
+	if (!sd.filled) return;
 
 	if (!sim) sim.reset(image_sim_new());
 
-	*sim = *sd;
+	*sim = sd;
 	have_similarity = TRUE;
 }
 

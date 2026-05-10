@@ -190,41 +190,22 @@ void image_sim_alternate_processing(ImageSimilarityData *sd)
 		}
 }
 
-void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
+void ImageSimilarityData::fill_data(GdkPixbuf *pixbuf)
 {
-	gint w;
-	gint h;
-	gint rs;
-	guchar *pix;
-	gboolean has_alpha;
-	gint p_step;
+	if (!pixbuf) return;
 
-	guchar *p;
-	gint i;
-	gint j;
-	gint x_inc;
-	gint y_inc;
-	gint xy_inc;
-	gint xs;
-	gint ys;
-	gint w_left;
-	gint h_left;
+	const gint w = gdk_pixbuf_get_width(pixbuf);
+	const gint h = gdk_pixbuf_get_height(pixbuf);
+	const gint rs = gdk_pixbuf_get_rowstride(pixbuf);
+	const guchar *pix = gdk_pixbuf_get_pixels(pixbuf);
+	const gint p_step = gdk_pixbuf_get_has_alpha(pixbuf) ? 4 : 3;
 
+	gint x_inc = w / 32;
+	gint y_inc = h / 32;
 	gboolean x_small = FALSE;	/* if less than 32 w or h, set TRUE */
 	gboolean y_small = FALSE;
-	if (!sd || !pixbuf) return;
-
-	w = gdk_pixbuf_get_width(pixbuf);
-	h = gdk_pixbuf_get_height(pixbuf);
-	rs = gdk_pixbuf_get_rowstride(pixbuf);
-	pix = gdk_pixbuf_get_pixels(pixbuf);
-	has_alpha = gdk_pixbuf_get_has_alpha(pixbuf);
-
-	p_step = has_alpha ? 4 : 3;
-	x_inc = w / 32;
-	y_inc = h / 32;
-	w_left = w;
-	h_left = h;
+	gint w_left = w;
+	gint h_left = h;
 
 	if (x_inc < 1)
 		{
@@ -237,35 +218,32 @@ void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 		y_small = TRUE;
 		}
 
-	j = 0;
+	gint j = 0;
 
-	for (ys = 0; ys < 32; ys++)
+	for (gint ys = 0; ys < 32; ys++)
 		{
+		gint i = 0;
+
 		if (y_small) j = static_cast<gdouble>(h) / 32 * ys;
 		else y_inc = std::lround(static_cast<gdouble>(h_left)/(32-ys));
-		i = 0;
 
 		w_left = w;
-		for (xs = 0; xs < 32; xs++)
+		for (gint xs = 0; xs < 32; xs++)
 			{
-			gint x;
-			gint y;
-			gint r;
-			gint g;
-			gint b;
-			gint t;
-			guchar *xpos;
+			gint r = 0;
+			gint g = 0;
+			gint b = 0;
 
 			if (x_small) i = static_cast<gdouble>(w) / 32 * xs;
 			else x_inc = std::lround(static_cast<gdouble>(w_left)/(32-xs));
-			xy_inc = x_inc * y_inc;
-			r = g = b = 0;
-			xpos = pix + (i * p_step);
 
-			for (y = j; y < j + y_inc; y++)
+			const gint xy_inc = x_inc * y_inc;
+			const guchar *xpos = pix + (i * p_step);
+
+			for (gint y = j; y < j + y_inc; y++)
 				{
-				p = xpos + (y * rs);
-				for (x = i; x < i + x_inc; x++)
+				const guchar *p = xpos + (y * rs);
+				for (gint x = i; x < i + x_inc; x++)
 					{
 					r += p[0];
 					g += p[1];
@@ -278,10 +256,10 @@ void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 			g /= xy_inc;
 			b /= xy_inc;
 
-			t = ys * 32 + xs;
-			sd->avg_r[t] = r;
-			sd->avg_g[t] = g;
-			sd->avg_b[t] = b;
+			gint t = ys * 32 + xs;
+			avg_r[t] = r;
+			avg_g[t] = g;
+			avg_b[t] = b;
 
 			i += x_inc;
 			w_left -= x_inc;
@@ -291,17 +269,7 @@ void image_sim_fill_data(ImageSimilarityData *sd, GdkPixbuf *pixbuf)
 		h_left -= y_inc;
 		}
 
-	sd->filled = TRUE;
-}
-
-ImageSimilarityData *image_sim_new_from_pixbuf(GdkPixbuf *pixbuf)
-{
-	ImageSimilarityData *sd;
-
-	sd = image_sim_new();
-	image_sim_fill_data(sd, pixbuf);
-
-	return sd;
+	filled = TRUE;
 }
 
 static gdouble alternate_image_sim_compare_fast(const ImageSimilarityData *a, const ImageSimilarityData *b, gdouble min)

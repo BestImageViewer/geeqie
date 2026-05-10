@@ -1742,8 +1742,10 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 
 		if (sd->match_similarity_enable && !cd->have_similarity)
 			{
-			std::unique_ptr<ImageSimilarityData> sim(image_sim_new_from_pixbuf(pixbuf));
-			cd->set_similarity(sim.get());
+			ImageSimilarityData sim{};
+			sim.fill_data(pixbuf);
+
+			cd->set_similarity(sim);
 			}
 
 		if (options->thumbnails.enable_caching &&
