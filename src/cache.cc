@@ -226,27 +226,21 @@ bool CacheData::write_md5sum(GString *gstring) const
 
 bool CacheData::write_similarity(GString *gstring) const
 {
-	guint x;
-	guint y;
-	guint8 buf[3 * 32];
-
 	if (!have_similarity || !sim || !sim->filled) return false;
 
 	g_string_append(gstring, "SimilarityGrid[32 x 32]=");
 
-	for (y = 0; y < 32; y++)
+	guint8 buf[3 * 32];
+	for (guint y = 0; y < 32; y++)
 		{
 		guint s = y * 32;
-		guint8 *avg_r = &sim->avg_r[s];
-		guint8 *avg_g = &sim->avg_g[s];
-		guint8 *avg_b = &sim->avg_b[s];
 		guint n = 0;
 
-		for (x = 0; x < 32; x++)
+		for (guint x = 0; x < 32; x++)
 			{
-			buf[n++] = avg_r[x];
-			buf[n++] = avg_g[x];
-			buf[n++] = avg_b[x];
+			buf[n++] = sim->avg_r[s + x];
+			buf[n++] = sim->avg_g[s + x];
+			buf[n++] = sim->avg_b[s + x];
 			}
 
 		g_string_append_len(gstring, (const gchar *)buf, sizeof(buf));
@@ -503,11 +497,7 @@ void CacheData::set_similarity(ImageSimilarityData *sd)
 
 	if (!sim) sim.reset(image_sim_new());
 
-	memcpy(sim->avg_r, sd->avg_r, 1024);
-	memcpy(sim->avg_g, sd->avg_g, 1024);
-	memcpy(sim->avg_b, sd->avg_b, 1024);
-	sim->filled = TRUE;
-
+	*sim = *sd;
 	have_similarity = TRUE;
 }
 

@@ -60,7 +60,7 @@ namespace
 
 using ImageSimilarityCheckAbort = std::function<bool(gdouble)>;
 
-void image_sim_channel_equal(guint8 *pix, gsize len)
+void image_sim_channel_equal(ImageSimilarityData::Avg &pix)
 {
 	struct IndexedPix
 	{
@@ -69,20 +69,20 @@ void image_sim_channel_equal(guint8 *pix, gsize len)
 	};
 
 	std::vector<IndexedPix> buf;
-	buf.reserve(len);
+	buf.reserve(pix.size());
 
-	for (gsize i = 0; i < len; i++)
+	for (gsize i = 0; i < pix.size(); i++)
 		{
 		buf.push_back({i, pix[i]});
 		}
 
 	std::sort(buf.begin(), buf.end(), [](const IndexedPix &a, const IndexedPix &b){ return a.pix < b.pix; });
 
-	for (gsize i = 0; i < len; i++)
+	for (gsize i = 0; i < pix.size(); i++)
 		{
 		gint n = buf[i].index;
 
-		pix[n] = static_cast<guint8>(255 * i / len);
+		pix[n] = static_cast<guint8>(255 * i / pix.size());
 		}
 }
 
@@ -145,28 +145,15 @@ void image_sim_free(ImageSimilarityData *sd)
 	delete sd;
 }
 
-static void image_sim_channel_norm(guint8 *pix, gint len)
+static void image_sim_channel_norm(ImageSimilarityData::Avg &pix)
 {
-	guint8 l;
-	guint8 h;
-	guint8 delta;
-	gint i;
-	gdouble scale;
+	const auto [l, h] = std::minmax_element(pix.cbegin(), pix.cend());
+	const guint8 delta = *h - *l;
+	const gdouble scale = (delta != 0) ? 255.0 / static_cast<gdouble>(delta) : 1.0;
 
-	l = h = pix[0];
-
-	for (i = 1; i < len; i++)
+	for (guint8 &n : pix)
 		{
-		l = std::min(pix[i], l);
-		h = std::max(pix[i], h);
-		}
-
-	delta = h - l;
-	scale = (delta != 0) ? 255.0 / static_cast<gdouble>(delta) : 1.0;
-
-	for (i = 0; i < len; i++)
-		{
-		pix[i] = static_cast<guint8>(static_cast<gdouble>(pix[i] - l) * scale);
+		n = static_cast<guint8>(static_cast<gdouble>(n - *l) * scale);
 		}
 }
 
@@ -183,13 +170,13 @@ void image_sim_alternate_processing(ImageSimilarityData *sd)
 		return;
 		}
 
-	image_sim_channel_norm(sd->avg_r, sizeof(sd->avg_r));
-	image_sim_channel_norm(sd->avg_g, sizeof(sd->avg_g));
-	image_sim_channel_norm(sd->avg_b, sizeof(sd->avg_b));
+	image_sim_channel_norm(sd->avg_r);
+	image_sim_channel_norm(sd->avg_g);
+	image_sim_channel_norm(sd->avg_b);
 
-	image_sim_channel_equal(sd->avg_r, sizeof(sd->avg_r));
-	image_sim_channel_equal(sd->avg_g, sizeof(sd->avg_g));
-	image_sim_channel_equal(sd->avg_b, sizeof(sd->avg_b));
+	image_sim_channel_equal(sd->avg_r);
+	image_sim_channel_equal(sd->avg_g);
+	image_sim_channel_equal(sd->avg_b);
 
 	if (options->alternate_similarity_algorithm.grayscale)
 		{
