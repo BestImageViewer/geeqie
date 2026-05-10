@@ -479,7 +479,7 @@ static void dupe_item_read_cache(DupeItem *di)
 {
 	if (!di) return;
 
-	g_autofree gchar *path = cache_find_location(CACHE_TYPE_SIM, di->fd->path);
+	g_autofree gchar *path = cache_find_location(CacheType::SIM, di->fd->path);
 	if (!path) return;
 
 	if (filetime(di->fd->path) != filetime(path)) return;
@@ -509,12 +509,12 @@ static void dupe_item_write_cache(DupeItem *di)
 {
 	if (!di) return;
 
-	g_autofree gchar *base = cache_create_location(CACHE_TYPE_SIM, di->fd->path);
+	g_autofree gchar *base = cache_create_location(CacheType::SIM, di->fd->path);
 	if (base)
 		{
 		CacheData cd{};
 
-		g_autofree gchar *path = cache_get_location(CACHE_TYPE_SIM, di->fd->path);
+		g_autofree gchar *path = cache_get_location(CacheType::SIM, di->fd->path);
 
 		if (di->width != 0) cd.set_dimensions({di->width, di->height});
 		if (di->md5sum)
@@ -4900,7 +4900,7 @@ static GString *export_duplicates_data(DupeWindow *dw, const gchar *sep)
 		g_string_append_printf(output_string, "%d", di->second + 1);
 		output_string = g_string_append(output_string, sep);
 
-		g_autofree gchar *thumb_cache = cache_find_location(CACHE_TYPE_THUMB, di->fd->path);
+		g_autofree gchar *thumb_cache = cache_find_location(CacheType::THUMB, di->fd->path);
 		output_string = g_string_append(output_string, thumb_cache ? thumb_cache : "");
 		output_string = g_string_append(output_string, sep);
 

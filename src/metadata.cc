@@ -699,7 +699,7 @@ static void metadata_legacy_delete(FileData *fd, const gchar *except)
 {
 	if (!fd) return;
 
-	g_autofree gchar *metadata_path = cache_find_location(CACHE_TYPE_METADATA, fd->path);
+	g_autofree gchar *metadata_path = cache_find_location(CacheType::METADATA, fd->path);
 	if (metadata_path && (!except || strcmp(metadata_path, except) != 0))
 		{
 		unlink_file(metadata_path);
@@ -708,7 +708,7 @@ static void metadata_legacy_delete(FileData *fd, const gchar *except)
 #if HAVE_EXIV2
 	/* without exiv2: do not delete xmp metadata because we are not able to convert it,
 	   just ignore it */
-	g_autofree gchar *xmp_metadata_path = cache_find_location(CACHE_TYPE_XMP_METADATA, fd->path);
+	g_autofree gchar *xmp_metadata_path = cache_find_location(CacheType::XMP_METADATA, fd->path);
 	if (xmp_metadata_path && (!except || strcmp(xmp_metadata_path, except) != 0))
 		{
 		unlink_file(xmp_metadata_path);
@@ -720,7 +720,7 @@ static gboolean metadata_legacy_read(FileData *fd, GList **keywords, gchar **com
 {
 	if (!fd) return FALSE;
 
-	g_autofree gchar *metadata_path = cache_find_location(CACHE_TYPE_METADATA, fd->path);
+	g_autofree gchar *metadata_path = cache_find_location(CacheType::METADATA, fd->path);
 	if (!metadata_path) return FALSE;
 
 	g_autofree gchar *metadata_pathl = path_from_utf8(metadata_path);

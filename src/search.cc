@@ -1753,10 +1753,10 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 			{
 			const gchar *path = image_loader_get_fd(sd->img_loader)->path;
 
-			g_autofree gchar *base = cache_create_location(CACHE_TYPE_SIM, path);
+			g_autofree gchar *base = cache_create_location(CacheType::SIM, path);
 			if (base)
 				{
-				g_autofree gchar *cd_path = cache_get_location(CACHE_TYPE_SIM, path);
+				g_autofree gchar *cd_path = cache_get_location(CacheType::SIM, path);
 				if (cd->save(cd_path))
 					{
 					filetime_set(cd_path, filetime(path));
@@ -1787,7 +1787,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 		{
 		new_data = TRUE;
 
-		g_autofree gchar *cd_path = cache_find_location(CACHE_TYPE_SIM, mfd.fd->path);
+		g_autofree gchar *cd_path = cache_find_location(CacheType::SIM, mfd.fd->path);
 		if (cd_path && filetime(mfd.fd->path) == filetime(cd_path))
 			{
 			sd->img_cd = cache_sim_data_new(cd_path);
@@ -2328,7 +2328,7 @@ static gboolean search_step_cb(gpointer data)
 					link = work;
 					work = work->next;
 
-					g_autofree gchar *meta_path = cache_find_location(CACHE_TYPE_METADATA, fdp->path);
+					g_autofree gchar *meta_path = cache_find_location(CacheType::METADATA, fdp->path);
 					if (!meta_path)
 						{
 						list = g_list_delete_link(list, link);
@@ -2448,7 +2448,7 @@ static void search_start(SearchData *sd)
 	    !sd->search_similarity_cd &&
 	    isfile(sd->search_similarity_path))
 		{
-		g_autofree gchar *cd_path = cache_find_location(CACHE_TYPE_SIM, sd->search_similarity_path);
+		g_autofree gchar *cd_path = cache_find_location(CacheType::SIM, sd->search_similarity_path);
 		if (cd_path && filetime(sd->search_similarity_path) == filetime(cd_path))
 			{
 			sd->search_similarity_cd = cache_sim_data_new(cd_path);

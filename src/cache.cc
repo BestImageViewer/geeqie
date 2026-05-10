@@ -67,7 +67,7 @@ struct CachePathParts
 {
 	CachePathParts(CacheType cache_type)
 	{
-		if (cache_type == CACHE_TYPE_METADATA || cache_type == CACHE_TYPE_XMP_METADATA)
+		if (cache_type == CacheType::METADATA || cache_type == CacheType::XMP_METADATA)
 			{
 			rc = get_metadata_cache_dir();
 			local = GQ_CACHE_LOCAL_METADATA;
@@ -82,16 +82,16 @@ struct CachePathParts
 
 		switch (cache_type)
 			{
-			case CACHE_TYPE_THUMB:
+			case CacheType::THUMB:
 				ext = GQ_CACHE_EXT_THUMB;
 				break;
-			case CACHE_TYPE_SIM:
+			case CacheType::SIM:
 				ext = GQ_CACHE_EXT_SIM;
 				break;
-			case CACHE_TYPE_METADATA:
+			case CacheType::METADATA:
 				ext = GQ_CACHE_EXT_METADATA;
 				break;
-			case CACHE_TYPE_XMP_METADATA:
+			case CacheType::XMP_METADATA:
 				ext = GQ_CACHE_EXT_XMP_METADATA;
 				break;
 			}

@@ -472,9 +472,9 @@ static void cache_maint_moved(FileData *fd)
 			}
 	};
 
-	cache_move(CACHE_TYPE_THUMB);
-	cache_move(CACHE_TYPE_SIM);
-	cache_move(CACHE_TYPE_METADATA);
+	cache_move(CacheType::THUMB);
+	cache_move(CacheType::SIM);
+	cache_move(CacheType::METADATA);
 
 	if (options->thumbnails.enable_caching && options->thumbnails.spec_standard)
 		thumb_std_maint_moved(src, dest);
@@ -493,9 +493,9 @@ static void cache_maint_removed(FileData *fd)
 			}
 	};
 
-	cache_remove(CACHE_TYPE_THUMB);
-	cache_remove(CACHE_TYPE_SIM);
-	cache_remove(CACHE_TYPE_METADATA);
+	cache_remove(CacheType::THUMB);
+	cache_remove(CacheType::SIM);
+	cache_remove(CacheType::METADATA);
 
 	if (options->thumbnails.enable_caching && options->thumbnails.spec_standard)
 		thumb_std_maint_removed(fd->path);
@@ -503,13 +503,13 @@ static void cache_maint_removed(FileData *fd)
 
 static void cache_maint_copied(FileData *fd)
 {
-	g_autofree gchar *src_path = cache_find_location(CACHE_TYPE_METADATA, fd->change->source);
+	g_autofree gchar *src_path = cache_find_location(CacheType::METADATA, fd->change->source);
 	if (!src_path) return;
 
-	g_autofree gchar *dest_base = cache_create_location(CACHE_TYPE_METADATA, fd->change->dest);
+	g_autofree gchar *dest_base = cache_create_location(CacheType::METADATA, fd->change->dest);
 	if (!dest_base) return;
 
-	g_autofree gchar *dest_path = cache_get_location(CACHE_TYPE_METADATA, fd->change->dest);
+	g_autofree gchar *dest_path = cache_get_location(CacheType::METADATA, fd->change->dest);
 	if (!copy_file(src_path, dest_path))
 		{
 		DEBUG_1("failed to copy metadata %s to %s", src_path, dest_path);

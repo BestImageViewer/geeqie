@@ -646,7 +646,7 @@ void gq_get_file_info(GtkApplication *, GApplicationCommandLine *app_command_lin
 		out_string = g_string_append(out_string, "\n");
 		}
 
-	g_autofree gchar *thumb_file = cache_find_location(CACHE_TYPE_THUMB, filename);
+	g_autofree gchar *thumb_file = cache_find_location(CacheType::THUMB, filename);
 	if (thumb_file)
 		{
 		g_string_append_printf(out_string, _("Thumb: %s\n"), thumb_file);

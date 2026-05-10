@@ -77,7 +77,7 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 				if (line[0] && line[0] != '#')
 					{
 					g_auto(GStrv) split_line = g_strsplit(line, "\"", 4);
-					g_autofree gchar *cache_found = cache_find_location(CACHE_TYPE_THUMB, split_line[1]);
+					g_autofree gchar *cache_found = cache_find_location(CacheType::THUMB, split_line[1]);
 					if (cache_found)
 						{
 						g_string_append_printf(file_names, "\"%s\" ", cache_found);

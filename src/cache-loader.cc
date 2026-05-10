@@ -175,10 +175,10 @@ static gboolean cache_loader_phase2_process(gpointer data)
 		if (options->thumbnails.enable_caching &&
 		    cl->done_mask != CACHE_LOADER_NONE)
 			{
-			g_autofree gchar *base = cache_create_location(CACHE_TYPE_SIM, cl->fd->path);
+			g_autofree gchar *base = cache_create_location(CacheType::SIM, cl->fd->path);
 			if (base)
 				{
-				g_autofree gchar *path = cache_get_location(CACHE_TYPE_SIM, cl->fd->path);
+				g_autofree gchar *path = cache_get_location(CacheType::SIM, cl->fd->path);
 				if (cl->cd->save(path))
 					{
 					filetime_set(path, filetime(cl->fd->path));
@@ -212,7 +212,7 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 	cl->done_func = done_func;
 	cl->done_data = done_data;
 
-	g_autofree gchar *found = cache_find_location(CACHE_TYPE_SIM, cl->fd->path);
+	g_autofree gchar *found = cache_find_location(CacheType::SIM, cl->fd->path);
 	if (found && filetime(found) == filetime(cl->fd->path))
 		{
 		cl->cd = cache_sim_data_new(found);

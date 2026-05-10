@@ -57,7 +57,7 @@ static gboolean thumb_loader_save_thumbnail(ThumbLoader *tl, gboolean mark_failu
 	if (!tl || !tl->fd) return FALSE;
 	if (!mark_failure && !tl->fd->thumb_pixbuf) return FALSE;
 
-	g_autofree gchar *cache_dir = cache_create_location(CACHE_TYPE_THUMB, tl->fd->path);
+	g_autofree gchar *cache_dir = cache_create_location(CacheType::THUMB, tl->fd->path);
 	if (!cache_dir) return FALSE;
 
 	g_autofree gchar *name = g_strconcat(filename_from_path(tl->fd->path), GQ_CACHE_EXT_THUMB, NULL);
@@ -324,7 +324,7 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 		return FALSE;
 		}
 
-	g_autofree gchar *cache_path = tl->cache_enable ? cache_find_location(CACHE_TYPE_THUMB, tl->fd->path) : nullptr;
+	g_autofree gchar *cache_path = tl->cache_enable ? cache_find_location(CacheType::THUMB, tl->fd->path) : nullptr;
 	if (cache_time_valid(cache_path, tl->fd->path))
 		{
 		DEBUG_1("Found in cache:%s", tl->fd->path);

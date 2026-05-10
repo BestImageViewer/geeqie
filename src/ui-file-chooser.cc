@@ -380,7 +380,7 @@ GtkWidget *create_image_preview(const char *file_path)
 {
 	GtkWidget *image_widget = nullptr;
 
-	g_autofree gchar *thumb_file = cache_find_location(CACHE_TYPE_THUMB, file_path);
+	g_autofree gchar *thumb_file = cache_find_location(CacheType::THUMB, file_path);
 	GdkPixbuf *pixbuf = nullptr;
 
 	if (thumb_file)

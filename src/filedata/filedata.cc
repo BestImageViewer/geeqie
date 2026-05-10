@@ -2175,9 +2175,9 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 			g_autofree gchar *metadata_path = nullptr;
 #if HAVE_EXIV2
 			/* but ignore XMP if we are not able to write it */
-			metadata_path = cache_find_location(CACHE_TYPE_XMP_METADATA, fd->path);
+			metadata_path = cache_find_location(CacheType::XMP_METADATA, fd->path);
 #endif
-			if (!metadata_path) metadata_path = cache_find_location(CACHE_TYPE_METADATA, fd->path);
+			if (!metadata_path) metadata_path = cache_find_location(CacheType::METADATA, fd->path);
 
 			if (metadata_path && !access_file(metadata_path, W_OK))
 				{
@@ -2188,7 +2188,7 @@ gint FileData::file_data_verify_ci(FileData *fd, GList *list)
 			g_autofree gchar *dest_dir = nullptr;
 			if (!metadata_path)
 				{
-				dest_dir = cache_create_location(CACHE_TYPE_METADATA, fd->path);
+				dest_dir = cache_create_location(CacheType::METADATA, fd->path);
 				if (dest_dir)
 					{
 					g_autofree gchar *filename = g_strconcat(fd->name, options->metadata.save_legacy_format ? GQ_CACHE_EXT_METADATA : GQ_CACHE_EXT_XMP_METADATA, NULL);

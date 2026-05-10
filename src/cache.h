@@ -46,11 +46,11 @@ struct ImageSimilarityData;
 #define GQ_CACHE_EXT_XMP_METADATA   ".gq.xmp"
 
 
-enum CacheType {
-	CACHE_TYPE_THUMB,
-	CACHE_TYPE_SIM,
-	CACHE_TYPE_METADATA,
-	CACHE_TYPE_XMP_METADATA
+enum class CacheType {
+	THUMB,
+	SIM,
+	METADATA,
+	XMP_METADATA
 };
 
 struct CacheData

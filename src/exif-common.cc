@@ -858,13 +858,13 @@ ExifData *exif_read_fd(FileData *fd)
 	if (file_cache_get(exif_cache, fd)) return fd->exif;
 	g_assert(fd->exif == nullptr);
 
-	/* CACHE_TYPE_XMP_METADATA file should exist only if the metadata are
+	/* CacheType::XMP_METADATA file should exist only if the metadata are
 	 * not writable directly, thus it should contain the most up-to-date version */
 	g_autofree gchar *sidecar_path = nullptr;
 
 #if HAVE_EXIV2
 	/* we are not able to handle XMP sidecars without exiv2 */
-	sidecar_path = cache_find_location(CACHE_TYPE_XMP_METADATA, fd->path);
+	sidecar_path = cache_find_location(CacheType::XMP_METADATA, fd->path);
 
 	if (!sidecar_path) sidecar_path = file_data_get_sidecar_path(fd, TRUE);
 #endif
