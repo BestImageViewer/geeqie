@@ -217,7 +217,7 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 	g_autofree gchar *found = cache_find_location(CACHE_TYPE_SIM, cl->fd->path);
 	if (found && filetime(found) == filetime(cl->fd->path))
 		{
-		cl->cd = CacheData::load(found);
+		cl->cd = cache_sim_data_new(found);
 		}
 
 	if (!cl->cd) cl->cd = cache_sim_data_new();

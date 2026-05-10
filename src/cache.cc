@@ -167,6 +167,20 @@ CacheData *cache_sim_data_new()
 	return cd;
 }
 
+CacheData *cache_sim_data_new(const gchar *path)
+{
+	CacheData *cd = cache_sim_data_new();
+	cd->path = g_strdup(path);
+
+	if (!cd->load(path))
+		{
+		cache_sim_data_free(cd);
+		return nullptr;
+		}
+
+	return cd;
+}
+
 void cache_sim_data_free(CacheData *cd)
 {
 	if (!cd) return;
@@ -425,73 +439,48 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 	return true;
 }
 
-CacheData *CacheData::load(const gchar *path)
+bool CacheData::load(const gchar *path)
 {
-	FILE *f;
-	gchar buf[32];
-	gint success = CACHE_LOAD_LINE_NOISE;
-
-	if (!path) return nullptr;
+	if (!path) return false;
 
 	g_autofree gchar *pathl = path_from_utf8(path);
-	f = fopen(pathl, "r");
-	if (!f) return nullptr;
+	g_autoptr(FILE) f = fopen(pathl, "r");
+	if (!f) return false;
 
-	CacheData *cd = cache_sim_data_new();
-	cd->path = g_strdup(path);
-
+	gchar buf[32];
 	if (fread(&buf, sizeof(gchar), 9, f) != 9 ||
 	    strncmp(buf, "SIMcache", 8) != 0)
 		{
-		DEBUG_1("%s is not a cache file", cd->path);
-		success = 0;
+		DEBUG_1("%s is not a cache file", path);
+		return false;
 		}
 
+	gint success = CACHE_LOAD_LINE_NOISE;
 	while (success > 0)
 		{
-		gint s;
-		s = fread(&buf, sizeof(gchar), sizeof(buf), f);
+		const gint s = fread(&buf, sizeof(gchar), sizeof(buf), f);
+		if (s < 1) break;
 
-		if (s < 1)
+		if (!cache_sim_read_comment(f, buf, s) &&
+		    !read_dimensions(f, buf, s) &&
+		    !read_date(f, buf, s) &&
+		    !read_md5sum(f, buf, s) &&
+		    !read_similarity(f, buf, s))
 			{
-			success = 0;
+			if (!cache_sim_read_skipline(f, s)) break;
+
+			success--;
 			}
 		else
 			{
-			if (!cache_sim_read_comment(f, buf, s) &&
-			    !cd->read_dimensions(f, buf, s) &&
-			    !cd->read_date(f, buf, s) &&
-			    !cd->read_md5sum(f, buf, s) &&
-			    !cd->read_similarity(f, buf, s))
-				{
-				if (!cache_sim_read_skipline(f, s))
-					{
-					success = 0;
-					}
-				else
-					{
-					success--;
-					}
-				}
-			else
-				{
-				success = CACHE_LOAD_LINE_NOISE;
-				}
+			success = CACHE_LOAD_LINE_NOISE;
 			}
 		}
 
-	fclose(f);
-
-	if (!cd->have_dimensions &&
-	    !cd->have_date &&
-	    !cd->have_md5sum &&
-	    !cd->similarity)
-		{
-		cache_sim_data_free(cd);
-		cd = nullptr;
-		}
-
-	return cd;
+	return have_dimensions
+	    || have_date
+	    || have_md5sum
+	    || similarity;
 }
 
 /*

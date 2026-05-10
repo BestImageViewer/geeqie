@@ -55,7 +55,7 @@ enum CacheType {
 struct CacheData
 {
 	bool save() const;
-	static CacheData *load(const gchar *path);
+	bool load(const gchar *path);
 
 	void set_dimensions(GqSize dimensions);
 	void set_md5sum(const Md5Digest &digest);
@@ -87,6 +87,7 @@ private:
 gboolean cache_time_valid(const gchar *cache, const gchar *path);
 
 CacheData *cache_sim_data_new();
+CacheData *cache_sim_data_new(const gchar *path);
 void cache_sim_data_free(CacheData *cd);
 
 gchar *cache_create_location(CacheType cache_type, const gchar *source);

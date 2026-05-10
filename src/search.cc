@@ -1792,7 +1792,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 		g_autofree gchar *cd_path = cache_find_location(CACHE_TYPE_SIM, mfd.fd->path);
 		if (cd_path && filetime(mfd.fd->path) == filetime(cd_path))
 			{
-			sd->img_cd = CacheData::load(cd_path);
+			sd->img_cd = cache_sim_data_new(cd_path);
 			}
 		}
 
@@ -2451,7 +2451,7 @@ static void search_start(SearchData *sd)
 		g_autofree gchar *cd_path = cache_find_location(CACHE_TYPE_SIM, sd->search_similarity_path);
 		if (cd_path && filetime(sd->search_similarity_path) == filetime(cd_path))
 			{
-			sd->search_similarity_cd = CacheData::load(cd_path);
+			sd->search_similarity_cd = cache_sim_data_new(cd_path);
 			}
 
 		if (!sd->search_similarity_cd || !sd->search_similarity_cd->similarity)

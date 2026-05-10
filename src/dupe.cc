@@ -484,7 +484,7 @@ static void dupe_item_read_cache(DupeItem *di)
 
 	if (filetime(di->fd->path) != filetime(path)) return;
 
-	CacheData *cd = CacheData::load(path);
+	CacheData *cd = cache_sim_data_new(path);
 	if (!cd) return;
 
 	if (!di->simd && cd->sim)
