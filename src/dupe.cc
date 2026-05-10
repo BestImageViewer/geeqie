@@ -484,27 +484,25 @@ static void dupe_item_read_cache(DupeItem *di)
 
 	if (filetime(di->fd->path) != filetime(path)) return;
 
-	CacheData *cd = cache_sim_data_new(path);
-	if (!cd) return;
+	CacheData cd{};
+	if (!cd.load(path)) return;
 
-	if (!di->simd && cd->sim)
+	if (!di->simd && cd.sim)
 		{
-		di->simd = cd->sim.release();
+		di->simd = cd.sim.release();
 		}
 
-	if (di->width == 0 && di->height == 0 && cd->have_dimensions)
+	if (di->width == 0 && di->height == 0 && cd.have_dimensions)
 		{
-		di->width = cd->dimensions.width;
-		di->height = cd->dimensions.height;
+		di->width = cd.dimensions.width;
+		di->height = cd.dimensions.height;
 		di->dimensions = (di->width << 16) + di->height;
 		}
 
-	if (!di->md5sum && cd->have_md5sum)
+	if (!di->md5sum && cd.have_md5sum)
 		{
-		di->md5sum = md5_digest_to_text(cd->md5sum);
+		di->md5sum = md5_digest_to_text(cd.md5sum);
 		}
-
-	cache_sim_data_free(cd);
 }
 
 static void dupe_item_write_cache(DupeItem *di)
@@ -514,24 +512,22 @@ static void dupe_item_write_cache(DupeItem *di)
 	g_autofree gchar *base = cache_create_location(CACHE_TYPE_SIM, di->fd->path);
 	if (base)
 		{
-		CacheData *cd;
+		CacheData cd{};
 
-		cd = cache_sim_data_new();
 		g_autofree gchar *path = cache_get_location(CACHE_TYPE_SIM, di->fd->path);
 
-		if (di->width != 0) cd->set_dimensions({di->width, di->height});
+		if (di->width != 0) cd.set_dimensions({di->width, di->height});
 		if (di->md5sum)
 			{
 			Md5Digest digest;
-			if (md5_digest_from_text(di->md5sum, digest)) cd->set_md5sum(digest);
+			if (md5_digest_from_text(di->md5sum, digest)) cd.set_md5sum(digest);
 			}
-		if (di->simd) cd->set_similarity(*di->simd);
+		if (di->simd) cd.set_similarity(*di->simd);
 
-		if (cd->save(path))
+		if (cd.save(path))
 			{
 			filetime_set(path, filetime(di->fd->path));
 			}
-		cache_sim_data_free(cd);
 		}
 }
 

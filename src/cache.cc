@@ -169,15 +169,11 @@ CacheData *cache_sim_data_new()
 
 CacheData *cache_sim_data_new(const gchar *path)
 {
-	CacheData *cd = cache_sim_data_new();
+	std::unique_ptr<CacheData> cd(cache_sim_data_new());
 
-	if (!cd->load(path))
-		{
-		cache_sim_data_free(cd);
-		return nullptr;
-		}
+	if (!cd->load(path)) return nullptr;
 
-	return cd;
+	return cd.release();
 }
 
 void cache_sim_data_free(CacheData *cd)
