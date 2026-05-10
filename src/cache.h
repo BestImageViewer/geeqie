@@ -78,10 +78,10 @@ private:
 	bool write_md5sum(GString *gstring) const;
 	bool write_similarity(GString *gstring) const;
 
-	bool read_dimensions(FILE *f, gchar *buf, gint s);
-	bool read_date(FILE *f, gchar *buf, gint s);
-	bool read_md5sum(FILE *f, gchar *buf, gint s);
-	bool read_similarity(FILE *f, gchar *buf, gint s);
+	bool read_dimensions(FILE *f, const gchar *buffer, gint s);
+	bool read_date(FILE *f, const gchar *buffer, gint s);
+	bool read_md5sum(FILE *f, const gchar *buffer, gint s);
+	bool read_similarity(FILE *f, const gchar *buffer, gint s);
 };
 
 gboolean cache_time_valid(const gchar *cache, const gchar *path);
