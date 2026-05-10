@@ -1740,7 +1740,7 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 			                    gdk_pixbuf_get_height(pixbuf)});
 			}
 
-		if (sd->match_similarity_enable && !cd->similarity)
+		if (sd->match_similarity_enable && !cd->have_similarity)
 			{
 			ImageSimilarityData *sim;
 
@@ -1803,7 +1803,9 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 
 	if (new_data)
 		{
-		if ((sd->match_dimensions_enable && !sd->img_cd->have_dimensions) || (sd->match_similarity_enable && !sd->img_cd->similarity) || sd->match_broken_enable)
+		if ((sd->match_dimensions_enable && !sd->img_cd->have_dimensions) ||
+		    (sd->match_similarity_enable && !sd->img_cd->have_similarity) ||
+		    sd->match_broken_enable)
 			{
 			sd->img_loader = image_loader_new(mfd.fd);
 			g_signal_connect(G_OBJECT(sd->img_loader), "error", (GCallback)search_file_load_done_cb, sd);
@@ -1858,18 +1860,18 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 			}
 		}
 
-	if (tmatch && sd->match_similarity_enable && sd->img_cd->similarity)
+	if (tmatch && sd->match_similarity_enable && sd->img_cd->have_similarity)
 		{
 		tmatch = FALSE;
 		tested = TRUE;
 
 		/** @FIXME implement similarity checking */
-		if (sd->search_similarity_cd && sd->search_similarity_cd->similarity)
+		if (sd->search_similarity_cd && sd->search_similarity_cd->have_similarity)
 			{
 			gdouble result;
 
-			result = image_sim_compare_fast(sd->search_similarity_cd->sim, sd->img_cd->sim,
-							static_cast<gdouble>(sd->search_similarity) / 100.0);
+			result = image_sim_compare_fast(sd->search_similarity_cd->sim.get(), sd->img_cd->sim.get(),
+			                                static_cast<gdouble>(sd->search_similarity) / 100.0);
 			result *= 100.0;
 			if (result >= static_cast<gdouble>(sd->search_similarity))
 				{
@@ -2454,7 +2456,7 @@ static void search_start(SearchData *sd)
 			sd->search_similarity_cd = cache_sim_data_new(cd_path);
 			}
 
-		if (!sd->search_similarity_cd || !sd->search_similarity_cd->similarity)
+		if (!sd->search_similarity_cd || !sd->search_similarity_cd->have_similarity)
 			{
 			if (!sd->search_similarity_cd)
 				{

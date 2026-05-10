@@ -56,7 +56,7 @@ static gboolean cache_loader_phase1_process(gpointer data)
 {
 	auto *cl = static_cast<CacheLoader *>(data);
 
-	if (cl->todo_mask & CACHE_LOADER_SIMILARITY && !cl->cd->similarity)
+	if (cl->todo_mask & CACHE_LOADER_SIMILARITY && !cl->cd->have_similarity)
 		{
 		if (!cl->il && !cl->error)
 			{
@@ -81,7 +81,7 @@ static gboolean cache_loader_phase2_process(gpointer data)
 {
 	auto *cl = static_cast<CacheLoader *>(data);
 
-	if (cl->todo_mask & CACHE_LOADER_SIMILARITY && !cl->cd->similarity && cl->il)
+	if (cl->todo_mask & CACHE_LOADER_SIMILARITY && !cl->cd->have_similarity && cl->il)
 		{
 		GdkPixbuf *pixbuf;
 		pixbuf = image_loader_get_pixbuf(cl->il);

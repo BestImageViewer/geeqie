@@ -137,14 +137,12 @@ gdouble image_sim_data_compare(const ImageSimilarityData *a, const ImageSimilari
 
 ImageSimilarityData *image_sim_new()
 {
-	auto sd = g_new0(ImageSimilarityData, 1);
-
-	return sd;
+	return new ImageSimilarityData();
 }
 
 void image_sim_free(ImageSimilarityData *sd)
 {
-	g_free(sd);
+	delete sd;
 }
 
 static void image_sim_channel_norm(guint8 *pix, gint len)

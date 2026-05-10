@@ -25,6 +25,7 @@
 #include <sys/types.h>
 
 #include <cstdio>
+#include <memory>
 
 #include <glib.h>
 
@@ -65,12 +66,12 @@ struct CacheData
 	GqSize dimensions;
 	time_t date;
 	Md5Digest md5sum;
-	ImageSimilarityData *sim;
+	std::unique_ptr<ImageSimilarityData> sim;
 
 	gboolean have_dimensions;
 	gboolean have_date;
 	gboolean have_md5sum;
-	gboolean similarity;
+	gboolean have_similarity;
 
 private:
 	bool write_dimensions(GString *gstring) const;

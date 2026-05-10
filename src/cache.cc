@@ -186,7 +186,6 @@ void cache_sim_data_free(CacheData *cd)
 	if (!cd) return;
 
 	g_free(cd->path);
-	image_sim_free(cd->sim);
 	delete cd;
 }
 
@@ -231,7 +230,7 @@ bool CacheData::write_similarity(GString *gstring) const
 	guint y;
 	guint8 buf[3 * 32];
 
-	if (!similarity || !sim || !sim->filled) return false;
+	if (!have_similarity || !sim || !sim->filled) return false;
 
 	g_string_append(gstring, "SimilarityGrid[32 x 32]=");
 
@@ -397,18 +396,17 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 		}
 
 	guint8 pixel_buf[3];
-	ImageSimilarityData *sd;
+	std::unique_ptr<ImageSimilarityData> sd;
 
 	if (sim)
 		{
 		/* use current sim that may already contain data we will not touch here */
-		sd = sim;
-		sim = nullptr;
-		similarity = FALSE;
+		sd.swap(sim);
+		have_similarity = FALSE;
 		}
 	else
 		{
-		sd = image_sim_new();
+		sd.reset(image_sim_new());
 		}
 
 	for (gint y = 0; y < 32; y++)
@@ -416,11 +414,8 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 		gint s = y * 32;
 		for (gint x = 0; x < 32; x++)
 			{
-			if (fread(&pixel_buf, sizeof(pixel_buf), 1, f) != 1)
-				{
-				image_sim_free(sd);
-				return false;
-				}
+			if (fread(&pixel_buf, sizeof(pixel_buf), 1, f) != 1) return false;
+
 			sd->avg_r[s + x] = pixel_buf[0];
 			sd->avg_g[s + x] = pixel_buf[1];
 			sd->avg_b[s + x] = pixel_buf[2];
@@ -432,9 +427,10 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 		if (b != '\n') fseek(f, -1, SEEK_CUR);
 		}
 
-	sim = sd;
-	sim->filled = TRUE;
-	similarity = TRUE;
+	sd->filled = TRUE;
+
+	sim.swap(sd);
+	have_similarity = TRUE;
 
 	return true;
 }
@@ -480,7 +476,7 @@ bool CacheData::load(const gchar *path)
 	return have_dimensions
 	    || have_date
 	    || have_md5sum
-	    || similarity;
+	    || have_similarity;
 }
 
 /*
@@ -505,14 +501,14 @@ void CacheData::set_similarity(ImageSimilarityData *sd)
 {
 	if (!sd || !sd->filled) return;
 
-	if (!sim) sim = image_sim_new();
+	if (!sim) sim.reset(image_sim_new());
 
 	memcpy(sim->avg_r, sd->avg_r, 1024);
 	memcpy(sim->avg_g, sd->avg_g, 1024);
 	memcpy(sim->avg_b, sd->avg_b, 1024);
 	sim->filled = TRUE;
 
-	similarity = TRUE;
+	have_similarity = TRUE;
 }
 
 /*

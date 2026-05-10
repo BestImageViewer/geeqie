@@ -489,8 +489,7 @@ static void dupe_item_read_cache(DupeItem *di)
 
 	if (!di->simd && cd->sim)
 		{
-		di->simd = cd->sim;
-		cd->sim = nullptr;
+		di->simd = cd->sim.release();
 		}
 
 	if (di->width == 0 && di->height == 0 && cd->have_dimensions)
