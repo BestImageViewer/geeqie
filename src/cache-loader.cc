@@ -99,7 +99,7 @@ static gboolean cache_loader_phase2_process(gpointer data)
 				}
 
 			/* we have the dimensions via pixbuf */
-			if (!cl->cd->have_dimensions)
+			if (!cl->cd->dimensions)
 				{
 				cl->cd->set_dimensions({gdk_pixbuf_get_width(pixbuf),
 				                        gdk_pixbuf_get_height(pixbuf)});
@@ -117,7 +117,7 @@ static gboolean cache_loader_phase2_process(gpointer data)
 		cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_SIMILARITY);
 		}
 	else if ((cl->todo_mask & CACHE_LOADER_DIMENSIONS) &&
-	         !cl->cd->have_dimensions)
+	         !cl->cd->dimensions)
 		{
 		if (GqSize dimensions;
 		    !cl->error &&
@@ -133,8 +133,8 @@ static gboolean cache_loader_phase2_process(gpointer data)
 
 		cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_DIMENSIONS);
 		}
-	else if (cl->todo_mask & CACHE_LOADER_MD5SUM &&
-		 !cl->cd->have_md5sum)
+	else if ((cl->todo_mask & CACHE_LOADER_MD5SUM) &&
+	         !cl->cd->md5sum)
 		{
 		if (Md5Digest digest; md5_get_digest_from_file_utf8(cl->fd->path, digest))
 			{
@@ -148,8 +148,8 @@ static gboolean cache_loader_phase2_process(gpointer data)
 
 		cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_MD5SUM);
 		}
-	else if (cl->todo_mask & CACHE_LOADER_DATE &&
-		 !cl->cd->have_date)
+	else if ((cl->todo_mask & CACHE_LOADER_DATE) &&
+	         !cl->cd->date)
 		{
 		static const auto get_date = [](FileData *fd) -> time_t
 		{
@@ -164,7 +164,6 @@ static gboolean cache_loader_phase2_process(gpointer data)
 		};
 
 		cl->cd->date = get_date(cl->fd);
-		cl->cd->have_date = TRUE;
 
 		cl->done_mask = static_cast<CacheDataType>(cl->done_mask | CACHE_LOADER_DATE);
 		cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_DATE);

@@ -26,6 +26,7 @@
 
 #include <cstdio>
 #include <memory>
+#include <optional>
 
 #include <glib.h>
 
@@ -62,14 +63,10 @@ struct CacheData
 	void set_md5sum(const Md5Digest &digest);
 	void set_similarity(const ImageSimilarityData &sd);
 
-	GqSize dimensions;
-	time_t date;
-	Md5Digest md5sum;
+	std::optional<GqSize> dimensions;
+	std::optional<time_t> date;
+	std::optional<Md5Digest> md5sum;
 	std::unique_ptr<ImageSimilarityData> similarity;
-
-	gboolean have_dimensions;
-	gboolean have_date;
-	gboolean have_md5sum;
 
 private:
 	bool write_dimensions(GString *gstring) const;

@@ -487,16 +487,16 @@ static void dupe_item_read_cache(DupeItem *di)
 		di->simd = cd.similarity.release();
 		}
 
-	if (di->width == 0 && di->height == 0 && cd.have_dimensions)
+	if (di->width == 0 && di->height == 0 && cd.dimensions)
 		{
-		di->width = cd.dimensions.width;
-		di->height = cd.dimensions.height;
+		di->width = cd.dimensions->width;
+		di->height = cd.dimensions->height;
 		di->dimensions = (di->width << 16) + di->height;
 		}
 
-	if (!di->md5sum && cd.have_md5sum)
+	if (!di->md5sum && cd.md5sum)
 		{
-		di->md5sum = md5_digest_to_text(cd.md5sum);
+		di->md5sum = md5_digest_to_text(cd.md5sum.value());
 		}
 }
 

@@ -162,7 +162,6 @@ gchar *cache_get_location(CacheType type, const gchar *source, gint include_name
 CacheData *cache_sim_data_new(const gchar *path)
 {
 	auto *cd = new CacheData();
-	cd->date = -1;
 
 	if (path) cd->load(path);
 
@@ -182,27 +181,27 @@ void cache_sim_data_free(CacheData *cd)
 
 bool CacheData::write_dimensions(GString *gstring) const
 {
-	if (!have_dimensions) return false;
+	if (!dimensions) return false;
 
-	g_string_append_printf(gstring, "Dimensions=[%d x %d]\n", dimensions.width, dimensions.height);
+	g_string_append_printf(gstring, "Dimensions=[%d x %d]\n", dimensions->width, dimensions->height);
 
 	return true;
 }
 
 bool CacheData::write_date(GString *gstring) const
 {
-	if (!have_date) return false;
+	if (!date) return false;
 
-	g_string_append_printf(gstring, "Date=[%ld]\n", date);
+	g_string_append_printf(gstring, "Date=[%ld]\n", *date);
 
 	return true;
 }
 
 bool CacheData::write_md5sum(GString *gstring) const
 {
-	if (!have_md5sum) return false;
+	if (!md5sum) return false;
 
-	g_autofree gchar *text = md5_digest_to_text(md5sum);
+	g_autofree gchar *text = md5_digest_to_text(*md5sum);
 
 	g_string_append_printf(gstring, "MD5sum=[%s]\n", text);
 
@@ -343,7 +342,6 @@ bool CacheData::read_date(FILE *f, const gchar *buffer, gint s)
 	if (!cache_sim_read_buf(f, s, buf, sizeof(buf))) return false;
 
 	date = strtol(buf, nullptr, 10);
-	have_date = TRUE;
 
 	return true;
 }
@@ -457,9 +455,9 @@ bool CacheData::load(const gchar *source)
 			}
 		}
 
-	return have_dimensions
-	    || have_date
-	    || have_md5sum
+	return dimensions
+	    || date
+	    || md5sum
 	    || similarity;
 }
 
@@ -472,13 +470,11 @@ bool CacheData::load(const gchar *source)
 void CacheData::set_dimensions(GqSize dimensions)
 {
 	this->dimensions = dimensions;
-	have_dimensions = TRUE;
 }
 
 void CacheData::set_md5sum(const Md5Digest &digest)
 {
 	md5sum = digest;
-	have_md5sum = TRUE;
 }
 
 void CacheData::set_similarity(const ImageSimilarityData &sd)

@@ -602,9 +602,9 @@ static void pan_cache_sync_date(const PanWindow *pw, GList *list)
 			{
 			auto *pc = static_cast<PanCacheData *>(needle->data);
 
-			if (pc->cd && pc->cd->have_date && pc->cd->date >= 0)
+			if (pc->cd && pc->cd->date && pc->cd->date >= 0)
 				{
-				fd->date = pc->cd->date;
+				fd->date = pc->cd->date.value();
 				}
 
 			haystack = g_list_delete_link(haystack, needle);
@@ -637,7 +637,7 @@ std::optional<GqSize> pan_cache_get_image_size(PanWindow *pw, const FileData *fd
 	const auto pan_cache_data_cd_dimensions_compare_fd = [](gconstpointer data, gconstpointer user_data)
 	{
 		auto *pc = static_cast<const PanCacheData *>(data);
-		return (pc->cd && pc->cd->have_dimensions && pc->fd == user_data) ? 0 : 1;
+		return (pc->cd && pc->cd->dimensions && pc->fd == user_data) ? 0 : 1;
 	};
 
 	GList *work = g_list_find_custom(pw->cache_list, fd, pan_cache_data_cd_dimensions_compare_fd);
@@ -645,7 +645,8 @@ std::optional<GqSize> pan_cache_get_image_size(PanWindow *pw, const FileData *fd
 
 	auto *pc = static_cast<PanCacheData *>(work->data);
 
-	const GqSize size = pc->cd->dimensions;
+	// pc->cd->dimensions was checked in pan_cache_data_cd_dimensions_compare_fd()
+	const GqSize size = pc->cd->dimensions.value(); // NOLINT(bugprone-unchecked-optional-access)
 
 	pw->cache_list = g_list_remove(pw->cache_list, pc);
 	pan_cache_data_free(pc);
