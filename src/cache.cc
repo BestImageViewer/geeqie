@@ -357,7 +357,7 @@ bool CacheData::read_md5sum(FILE *f, const gchar *buffer, gint s)
 	gchar buf[64];
 	if (!cache_sim_read_buf(f, s, buf, sizeof(buf))) return false;
 
-	have_md5sum = md5_digest_from_text(buf, md5sum);
+	if (Md5Digest digest; md5_digest_from_text(buf, digest)) set_md5sum(digest);
 
 	return true;
 }

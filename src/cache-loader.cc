@@ -136,9 +136,9 @@ static gboolean cache_loader_phase2_process(gpointer data)
 	else if (cl->todo_mask & CACHE_LOADER_MD5SUM &&
 		 !cl->cd->have_md5sum)
 		{
-		if (md5_get_digest_from_file_utf8(cl->fd->path, cl->cd->md5sum))
+		if (Md5Digest digest; md5_get_digest_from_file_utf8(cl->fd->path, digest))
 			{
-			cl->cd->have_md5sum = TRUE;
+			cl->cd->set_md5sum(digest);
 			cl->done_mask = static_cast<CacheDataType>(cl->done_mask | CACHE_LOADER_MD5SUM);
 			}
 		else
