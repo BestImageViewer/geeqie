@@ -55,8 +55,8 @@ enum class CacheType {
 
 struct CacheData
 {
-	bool save(const gchar *path) const;
-	bool load(const gchar *path);
+	void save(const gchar *source) const;
+	bool load(const gchar *source);
 
 	void set_dimensions(GqSize dimensions);
 	void set_md5sum(const Md5Digest &digest);

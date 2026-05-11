@@ -243,9 +243,13 @@ bool CacheData::write_similarity(GString *gstring) const
 	return true;
 }
 
-bool CacheData::save(const gchar *path) const
+void CacheData::save(const gchar *source) const
 {
-	if (!path) return false;
+	g_autofree gchar *base = cache_create_location(CacheType::SIM, source);
+	if (!base) return;
+
+	g_autofree gchar *path = cache_get_location(CacheType::SIM, source);
+	if (!path) return;
 
 	g_autofree gchar *pathl = path_from_utf8(path);
 
@@ -258,7 +262,7 @@ bool CacheData::save(const gchar *path) const
 
 	secure_save(pathl, gstring->str, gstring->len);
 
-	return true;
+	filetime_set(path, filetime(source));
 }
 
 /*
@@ -421,9 +425,12 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 	return true;
 }
 
-bool CacheData::load(const gchar *path)
+bool CacheData::load(const gchar *source)
 {
+	g_autofree gchar *path = cache_find_location(CacheType::SIM, source);
 	if (!path) return false;
+
+	if (filetime(path) != filetime(source)) return false;
 
 	g_autofree gchar *pathl = path_from_utf8(path);
 	g_autoptr(FILE) f = fopen(pathl, "r");

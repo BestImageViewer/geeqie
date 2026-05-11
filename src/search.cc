@@ -1751,17 +1751,9 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 		if (options->thumbnails.enable_caching &&
 		    sd->img_loader && image_loader_get_fd(sd->img_loader))
 			{
-			const gchar *path = image_loader_get_fd(sd->img_loader)->path;
+			const FileData *fd = image_loader_get_fd(sd->img_loader);
 
-			g_autofree gchar *base = cache_create_location(CacheType::SIM, path);
-			if (base)
-				{
-				g_autofree gchar *cd_path = cache_get_location(CacheType::SIM, path);
-				if (cd->save(cd_path))
-					{
-					filetime_set(cd_path, filetime(path));
-					}
-				}
+			cd->save(fd->path);
 			}
 		}
 
@@ -1787,11 +1779,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 		{
 		new_data = TRUE;
 
-		g_autofree gchar *cd_path = cache_find_location(CacheType::SIM, mfd.fd->path);
-		if (cd_path && filetime(mfd.fd->path) == filetime(cd_path))
-			{
-			sd->img_cd = cache_sim_data_new(cd_path);
-			}
+		sd->img_cd = cache_sim_data_new(mfd.fd->path);
 		}
 
 	if (!sd->img_cd)
@@ -2448,11 +2436,7 @@ static void search_start(SearchData *sd)
 	    !sd->search_similarity_cd &&
 	    isfile(sd->search_similarity_path))
 		{
-		g_autofree gchar *cd_path = cache_find_location(CacheType::SIM, sd->search_similarity_path);
-		if (cd_path && filetime(sd->search_similarity_path) == filetime(cd_path))
-			{
-			sd->search_similarity_cd = cache_sim_data_new(cd_path);
-			}
+		sd->search_similarity_cd = cache_sim_data_new(sd->search_similarity_path);
 
 		if (!sd->search_similarity_cd || !sd->search_similarity_cd->have_similarity)
 			{
