@@ -159,21 +159,14 @@ gchar *cache_get_location(CacheType type, const gchar *source, gint include_name
  *-------------------------------------------------------------------
  */
 
-CacheData *cache_sim_data_new()
+CacheData *cache_sim_data_new(const gchar *path)
 {
 	auto *cd = new CacheData();
 	cd->date = -1;
 
+	if (path) cd->load(path);
+
 	return cd;
-}
-
-CacheData *cache_sim_data_new(const gchar *path)
-{
-	std::unique_ptr<CacheData> cd(cache_sim_data_new());
-
-	if (!cd->load(path)) return nullptr;
-
-	return cd.release();
 }
 
 void cache_sim_data_free(CacheData *cd)

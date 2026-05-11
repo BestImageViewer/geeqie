@@ -205,7 +205,6 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 	cl->done_data = done_data;
 
 	cl->cd = cache_sim_data_new(cl->fd->path);
-	if (!cl->cd) cl->cd = cache_sim_data_new();
 
 	cl->todo_mask = load_mask;
 	cl->done_mask = CACHE_LOADER_NONE;

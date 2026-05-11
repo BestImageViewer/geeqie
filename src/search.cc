@@ -1771,24 +1771,13 @@ static void search_file_load_done_cb(ImageLoader *, gpointer data)
 
 static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolean &match)
 {
-	gboolean new_data = FALSE;
 	gboolean tmatch = TRUE;
 	gboolean tested = FALSE;
 
 	if (!sd->img_cd)
 		{
-		new_data = TRUE;
-
 		sd->img_cd = cache_sim_data_new(mfd.fd->path);
-		}
 
-	if (!sd->img_cd)
-		{
-		sd->img_cd = cache_sim_data_new();
-		}
-
-	if (new_data)
-		{
 		if ((sd->match_dimensions_enable && !sd->img_cd->have_dimensions) ||
 		    (sd->match_similarity_enable && !sd->img_cd->have_similarity) ||
 		    sd->match_broken_enable)
@@ -2438,13 +2427,8 @@ static void search_start(SearchData *sd)
 		{
 		sd->search_similarity_cd = cache_sim_data_new(sd->search_similarity_path);
 
-		if (!sd->search_similarity_cd || !sd->search_similarity_cd->have_similarity)
+		if (!sd->search_similarity_cd->have_similarity)
 			{
-			if (!sd->search_similarity_cd)
-				{
-				sd->search_similarity_cd = cache_sim_data_new();
-				}
-
 			sd->img_loader = image_loader_new(file_data_new_group(sd->search_similarity_path));
 			g_signal_connect(G_OBJECT(sd->img_loader), "error", (GCallback)search_similarity_load_done_cb, sd);
 			g_signal_connect(G_OBJECT(sd->img_loader), "done", (GCallback)search_similarity_load_done_cb, sd);

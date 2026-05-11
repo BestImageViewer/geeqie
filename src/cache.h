@@ -86,7 +86,6 @@ private:
 
 gboolean cache_time_valid(const gchar *cache, const gchar *path);
 
-CacheData *cache_sim_data_new();
 CacheData *cache_sim_data_new(const gchar *path);
 void cache_sim_data_free(CacheData *cd);
 
