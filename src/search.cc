@@ -1740,7 +1740,7 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 			                    gdk_pixbuf_get_height(pixbuf)});
 			}
 
-		if (sd->match_similarity_enable && !cd->have_similarity)
+		if (sd->match_similarity_enable && !cd->similarity)
 			{
 			ImageSimilarityData sim{};
 			sim.fill_data(pixbuf);
@@ -1779,7 +1779,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 		sd->img_cd = cache_sim_data_new(mfd.fd->path);
 
 		if ((sd->match_dimensions_enable && !sd->img_cd->have_dimensions) ||
-		    (sd->match_similarity_enable && !sd->img_cd->have_similarity) ||
+		    (sd->match_similarity_enable && !sd->img_cd->similarity) ||
 		    sd->match_broken_enable)
 			{
 			sd->img_loader = image_loader_new(mfd.fd);
@@ -1835,17 +1835,17 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 			}
 		}
 
-	if (tmatch && sd->match_similarity_enable && sd->img_cd->have_similarity)
+	if (tmatch && sd->match_similarity_enable && sd->img_cd->similarity)
 		{
 		tmatch = FALSE;
 		tested = TRUE;
 
 		/** @FIXME implement similarity checking */
-		if (sd->search_similarity_cd && sd->search_similarity_cd->have_similarity)
+		if (sd->search_similarity_cd && sd->search_similarity_cd->similarity)
 			{
 			gdouble result;
 
-			result = image_sim_compare_fast(sd->search_similarity_cd->sim.get(), sd->img_cd->sim.get(),
+			result = image_sim_compare_fast(sd->search_similarity_cd->similarity.get(), sd->img_cd->similarity.get(),
 			                                static_cast<gdouble>(sd->search_similarity) / 100.0);
 			result *= 100.0;
 			if (result >= static_cast<gdouble>(sd->search_similarity))
@@ -2427,7 +2427,7 @@ static void search_start(SearchData *sd)
 		{
 		sd->search_similarity_cd = cache_sim_data_new(sd->search_similarity_path);
 
-		if (!sd->search_similarity_cd->have_similarity)
+		if (!sd->search_similarity_cd->similarity)
 			{
 			sd->img_loader = image_loader_new(file_data_new_group(sd->search_similarity_path));
 			g_signal_connect(G_OBJECT(sd->img_loader), "error", (GCallback)search_similarity_load_done_cb, sd);

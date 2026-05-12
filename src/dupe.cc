@@ -482,9 +482,9 @@ static void dupe_item_read_cache(DupeItem *di)
 	CacheData cd{};
 	if (!cd.load(di->fd->path)) return;
 
-	if (!di->simd && cd.sim)
+	if (!di->simd && cd.similarity)
 		{
-		di->simd = cd.sim.release();
+		di->simd = cd.similarity.release();
 		}
 
 	if (di->width == 0 && di->height == 0 && cd.have_dimensions)

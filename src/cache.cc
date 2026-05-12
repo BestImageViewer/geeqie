@@ -211,7 +211,7 @@ bool CacheData::write_md5sum(GString *gstring) const
 
 bool CacheData::write_similarity(GString *gstring) const
 {
-	if (!have_similarity || !sim || !sim->filled) return false;
+	if (!similarity || !similarity->filled) return false;
 
 	g_string_append(gstring, "SimilarityGrid[32 x 32]=");
 
@@ -223,9 +223,9 @@ bool CacheData::write_similarity(GString *gstring) const
 
 		for (guint x = 0; x < 32; x++)
 			{
-			buf[n++] = sim->avg_r[s + x];
-			buf[n++] = sim->avg_g[s + x];
-			buf[n++] = sim->avg_b[s + x];
+			buf[n++] = similarity->avg_r[s + x];
+			buf[n++] = similarity->avg_g[s + x];
+			buf[n++] = similarity->avg_b[s + x];
 			}
 
 		g_string_append_len(gstring, (const gchar *)buf, sizeof(buf));
@@ -379,13 +379,12 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 		}
 
 	guint8 pixel_buf[3];
-	std::unique_ptr<ImageSimilarityData> sd;
+	std::unique_ptr<ImageSimilarityData> sd = nullptr;
 
-	if (sim)
+	if (similarity)
 		{
 		/* use current sim that may already contain data we will not touch here */
-		sd.swap(sim);
-		have_similarity = FALSE;
+		sd.swap(similarity);
 		}
 	else
 		{
@@ -412,8 +411,7 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 
 	sd->filled = TRUE;
 
-	sim.swap(sd);
-	have_similarity = TRUE;
+	set_similarity(*sd);
 
 	return true;
 }
@@ -462,7 +460,7 @@ bool CacheData::load(const gchar *source)
 	return have_dimensions
 	    || have_date
 	    || have_md5sum
-	    || have_similarity;
+	    || similarity;
 }
 
 /*
@@ -487,10 +485,7 @@ void CacheData::set_similarity(const ImageSimilarityData &sd)
 {
 	if (!sd.filled) return;
 
-	if (!sim) sim.reset(image_sim_new());
-
-	*sim = sd;
-	have_similarity = TRUE;
+	similarity = std::make_unique<ImageSimilarityData>(sd);
 }
 
 /*

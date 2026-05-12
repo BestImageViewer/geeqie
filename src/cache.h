@@ -65,12 +65,11 @@ struct CacheData
 	GqSize dimensions;
 	time_t date;
 	Md5Digest md5sum;
-	std::unique_ptr<ImageSimilarityData> sim;
+	std::unique_ptr<ImageSimilarityData> similarity;
 
 	gboolean have_dimensions;
 	gboolean have_date;
 	gboolean have_md5sum;
-	gboolean have_similarity;
 
 private:
 	bool write_dimensions(GString *gstring) const;
