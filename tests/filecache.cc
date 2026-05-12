@@ -56,6 +56,7 @@ class FileCacheTest : public t::Test
 
 TEST_F(FileCacheTest, BasicLifecycle)
 {
+	// TODO[xsdg]: Create a mock FileData that acts like the underlying file exists.
 	fd = FileData::file_data_new_simple("/does/not/exist.jpg", &context);
 	fd2 = FileData::file_data_new_simple("/does/not/exist2.jpg", &context);
 	FileCacheData *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
@@ -63,15 +64,15 @@ TEST_F(FileCacheTest, BasicLifecycle)
 	ASSERT_FALSE(file_cache_get(fc, fd));
 	ASSERT_FALSE(file_cache_get(fc, fd2));
 
+	// Because the FileDatas point to files that don't exist, they will get evicted from the
+	// cache during file_cache_get.
 	file_cache_put(fc, fd, /*size=*/1);
-	ASSERT_TRUE(file_cache_get(fc, fd));
+	ASSERT_FALSE(file_cache_get(fc, fd));
 	ASSERT_FALSE(file_cache_get(fc, fd2));
 
-	// Because the FileDatas point to files that don't exist, they will get evicted from the
-	// cache during file_cache_get.  But this only happens when size > 1.
 	file_cache_put(fc, fd2, /*size=*/1);
 	ASSERT_FALSE(file_cache_get(fc, fd));
-	ASSERT_TRUE(file_cache_get(fc, fd2));
+	ASSERT_FALSE(file_cache_get(fc, fd2));
 }
 
 }  // anonymous namespace
