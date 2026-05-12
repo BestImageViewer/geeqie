@@ -138,6 +138,8 @@ gboolean file_cache_get(FileCacheData *fc, FileData *fd)
 	/* entry exists */
 	DEBUG_2("cache hit: fc=%p %s", (void *)fc, fd->path);
 
+	/* TODO[xsdg]: This short-circuit skips the file existence check for files at the beginning
+	   of the list. */
 	if (work == fc->list) return TRUE; /* already at the beginning */
 
 	/* move it to the beginning */
