@@ -148,8 +148,11 @@ gboolean file_cache_get(FileCacheData *fc, FileData *fd)
 	if (file_data_check_changed_files(fd))
 		{
 		/* file has been changed, cache entry is no longer valid */
+		/* note that it may have already been evicted from the cache! */
 		file_cache_dump(fc);
-		file_cache_remove_entry(fc, work);
+		work = g_list_find_custom(fc->list, fd, reinterpret_cast<GCompareFunc>(file_cache_entry_compare_fd));
+		if (work) file_cache_remove_entry(fc, work);
+
 		return FALSE;
 		}
 
