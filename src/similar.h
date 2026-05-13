@@ -30,6 +30,7 @@
 struct ImageSimilarityData
 {
 	void fill_data(GdkPixbuf *pixbuf);
+	GdkPixbuf *to_pixbuf() const;
 
 	using Avg = std::array<guint8, 1024>;
 	Avg avg_r;

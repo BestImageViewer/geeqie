@@ -272,6 +272,29 @@ void ImageSimilarityData::fill_data(GdkPixbuf *pixbuf)
 	filled = TRUE;
 }
 
+GdkPixbuf *ImageSimilarityData::to_pixbuf() const
+{
+	GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 32, 32);
+
+	const gint rs = gdk_pixbuf_get_rowstride(pixbuf);
+	guchar *d_pix = gdk_pixbuf_get_pixels(pixbuf);
+
+	for (gint y = 0; y < 32; y++)
+		{
+		guchar *dp = d_pix + (y * rs);
+		const gint sp = y * 32;
+
+		for (gint x = 0; x < 32; x++)
+			{
+			*(dp++) = avg_r[sp + x];
+			*(dp++) = avg_g[sp + x];
+			*(dp++) = avg_b[sp + x];
+			}
+		}
+
+	return pixbuf;
+}
+
 static gdouble alternate_image_sim_compare_fast(const ImageSimilarityData *a, const ImageSimilarityData *b, gdouble min)
 {
 	gint sim;

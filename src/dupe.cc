@@ -2907,36 +2907,11 @@ static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 	dupe_display_label(gd->vbox, "thumbprint:", (di->simd) ? "" : "not generated");
 	if (di->simd)
 		{
-		GtkWidget *image;
-		GdkPixbuf *pixbuf;
-		gint x;
-		gint y;
-		guchar *d_pix;
-		guchar *dp;
-		gint rs;
-		gint sp;
+		g_autoptr(GdkPixbuf) pixbuf = di->simd->to_pixbuf();
 
-		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, 32, 32);
-		rs = gdk_pixbuf_get_rowstride(pixbuf);
-		d_pix = gdk_pixbuf_get_pixels(pixbuf);
-
-		for (y = 0; y < 32; y++)
-			{
-			dp = d_pix + (y * rs);
-			sp = y * 32;
-			for (x = 0; x < 32; x++)
-				{
-				*(dp++) = di->simd->avg_r[sp + x];
-				*(dp++) = di->simd->avg_g[sp + x];
-				*(dp++) = di->simd->avg_b[sp + x];
-				}
-			}
-
-		image = gtk_image_new_from_pixbuf(pixbuf);
+		GtkWidget *image = gtk_image_new_from_pixbuf(pixbuf);
 		gq_gtk_box_pack_start(GTK_BOX(gd->vbox), image, FALSE, FALSE, 0);
 		gtk_widget_show(image);
-
-		g_object_unref(pixbuf);
 		}
 
 	gtk_widget_show(gd->dialog);
