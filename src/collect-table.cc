@@ -998,7 +998,7 @@ static GtkWidget *collection_table_popup_menu(CollectTable *ct, gboolean over_ic
 			G_CALLBACK(collection_table_popup_unselectall_cb), ct);
 	menu_item_add(submenu, _("Invert selection"),
 			G_CALLBACK(collection_table_popup_select_invert_cb), ct);
-	menu_item_add_check(submenu, _("Rectangular selection"), (options->collections.rectangular_selection != FALSE),
+	menu_item_add_check(submenu, _("Rectangular selection"), options->collections.rectangular_selection,
 			G_CALLBACK(collection_table_popup_rectangular_selection_cb), ct);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
 	menu_item_add_divider(menu);

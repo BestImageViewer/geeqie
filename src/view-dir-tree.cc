@@ -903,7 +903,7 @@ static gint vdtree_sort_cb(GtkTreeModel *store, GtkTreeIter *a, GtkTreeIter *b, 
 
 	if (vd->layout->options.dir_view_list_sort.method == SORT_NUMBER)
 		{
-		if (vd->layout->options.dir_view_list_sort.case_sensitive == TRUE)
+		if (vd->layout->options.dir_view_list_sort.case_sensitive)
 			{
 			return strcmp(nda->fd->collate_key_name_natural, ndb->fd->collate_key_name_natural);
 			}
@@ -918,7 +918,7 @@ static gint vdtree_sort_cb(GtkTreeModel *store, GtkTreeIter *a, GtkTreeIter *b, 
 		return 0;
 		}
 
-	if (vd->layout->options.dir_view_list_sort.case_sensitive == TRUE)
+	if (vd->layout->options.dir_view_list_sort.case_sensitive)
 		{
 		return strcmp(nda->fd->collate_key_name, ndb->fd->collate_key_name);
 		}

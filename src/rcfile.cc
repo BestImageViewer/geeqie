@@ -1824,7 +1824,7 @@ gboolean load_config_from_buf(const gchar *buf, gsize size, gboolean startup)
 	context = g_markup_parse_context_new(&parser, static_cast<GMarkupParseFlags>(0), &parser_data, nullptr);
 
 	g_autoptr(GError) error = nullptr;
-	if (g_markup_parse_context_parse(context, buf, size, &error) == FALSE)
+	if (!g_markup_parse_context_parse(context, buf, size, &error))
 		{
 		config_file_error(error->message);
 
@@ -1842,7 +1842,7 @@ gboolean load_config_from_file(const gchar *utf8_path, gboolean startup)
 	g_autofree gchar *buf = nullptr;
 
 	g_autoptr(GError) error = nullptr;
-	if (g_file_get_contents(utf8_path, &buf, &size, &error) == FALSE)
+	if (!g_file_get_contents(utf8_path, &buf, &size, &error))
 		{
 		config_file_error(error->message);
 

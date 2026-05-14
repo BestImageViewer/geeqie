@@ -221,7 +221,7 @@ static gboolean match_func(GtkEntryCompletion *completion, const gchar *key, Gtk
 
 	auto *sar = static_cast<SarData *>(data);
 
-	if (sar->match_found == FALSE)
+	if (!sar->match_found)
 		{
 		gtk_tree_model_get(model, iter, SAR_ACTION, &sar->action, -1);
 		sar->match_found = TRUE;

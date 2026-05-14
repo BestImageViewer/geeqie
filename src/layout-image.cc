@@ -325,7 +325,7 @@ static gboolean show_next_frame(gpointer data)
 	auto fd = static_cast<AnimationData*>(data);
 	int delay;
 
-	if(animation_should_continue(fd)==FALSE)
+	if (!animation_should_continue(fd))
 		{
 		image_animation_data_free(fd);
 		return G_SOURCE_REMOVE;

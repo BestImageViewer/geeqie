@@ -1074,7 +1074,7 @@ static void image_change_complete(ImageWindow *imd, gdouble zoom)
 				}
 			}
 
-		if (imd->unknown == TRUE)
+		if (imd->unknown)
 			{
 			GdkPixbuf *pixbuf;
 

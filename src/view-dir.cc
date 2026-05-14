@@ -926,7 +926,7 @@ static void vd_dnd_drop_receive(GtkWidget *widget, GdkDragContext *context,
 				}
 			}
 
-		if (done == FALSE)
+		if (!done)
 			{
 			vd->popup = vd_drop_menu(vd, active);
 			gtk_menu_popup_at_pointer(GTK_MENU(vd->popup), nullptr);
