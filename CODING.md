@@ -196,7 +196,6 @@ In `function(<var>)` there is no space before the `(`.
 You *may* use more tabs/spaces than you *ought to* (according to this CodingStyle), if it makes your code nicer in being vertically indented.  
 Variables declarations should be followed by a blank line and should always be at the start of the block.  
 
-Use glib types when possible (ie. gint and gchar instead of int and char).  
 Use glib functions when possible (i.e. `g_ascii_isspace()` instead of `isspace()`).  
 Check if used functions are not deprecated.  
 
