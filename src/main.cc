@@ -90,9 +90,9 @@
 
 gboolean thumb_format_changed = FALSE;
 
-gchar *gq_prefix;
+ gchar *gq_prefix;
 gchar *gq_localedir;
-gchar *gq_helpdir;
+ gchar *gq_helpdir;
 gchar *gq_htmldir;
  gchar *gq_appdir;
 gchar *gq_bindir;
