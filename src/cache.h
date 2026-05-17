@@ -32,8 +32,7 @@
 
 #include "geometry.h"
 #include "md5-util.h"
-
-struct ImageSimilarityData;
+#include "similar.h"
 
 #define GQ_CACHE_THUMB		"thumbnails"
 #define GQ_CACHE_METADATA    	"metadata"

@@ -80,7 +80,7 @@ namespace
 
 struct PanCacheData {
 	FileData *fd;
-	CacheData *cd;
+	std::unique_ptr<CacheData> cd;
 };
 
 struct PanGrid {
@@ -112,9 +112,8 @@ void pan_cache_data_free(PanCacheData *pc)
 {
 	if (!pc) return;
 
-	cache_sim_data_free(pc->cd);
 	file_data_unref(pc->fd);
-	g_free(pc);
+	delete pc;
 }
 
 } // namespace
@@ -543,8 +542,7 @@ static void pan_cache_step_done_cb(CacheLoader *cl, gint, gpointer data)
 
 		if (!pc->cd)
 			{
-			pc->cd = cl->cd;
-			cl->cd = nullptr;
+			pc->cd.reset(g_steal_pointer(&cl->cd));
 			}
 		}
 
@@ -557,7 +555,6 @@ static void pan_cache_step_done_cb(CacheLoader *cl, gint, gpointer data)
 static gboolean pan_cache_step(PanWindow *pw)
 {
 	FileData *fd;
-	PanCacheData *pc;
 	CacheDataType load_mask;
 
 	if (!pw->cache_todo) return TRUE;
@@ -565,10 +562,8 @@ static gboolean pan_cache_step(PanWindow *pw)
 	fd = static_cast<FileData *>(pw->cache_todo->data);
 	pw->cache_todo = g_list_remove(pw->cache_todo, fd);
 
-	pc = g_new0(PanCacheData, 1);
+	auto *pc = new PanCacheData();
 	pc->fd = file_data_ref(fd);
-
-	pc->cd = nullptr;
 
 	pw->cache_list = g_list_prepend(pw->cache_list, pc);
 
@@ -602,9 +597,14 @@ static void pan_cache_sync_date(const PanWindow *pw, GList *list)
 			{
 			auto *pc = static_cast<PanCacheData *>(needle->data);
 
-			if (pc->cd && pc->cd->date && pc->cd->date >= 0)
+			if (pc->cd)
 				{
-				fd->date = pc->cd->date.value();
+				const time_t date = pc->cd->date.value_or(-1);
+
+				if (date >= 0)
+					{
+					fd->date = date;
+					}
 				}
 
 			haystack = g_list_delete_link(haystack, needle);
