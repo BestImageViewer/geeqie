@@ -183,7 +183,7 @@ gint required_debug_level(gint level)
 	return (debug_level >= level);
 }
 
-static gint timeval_delta(struct timeval *result, struct timeval *x, struct timeval *y)
+static struct timeval timeval_delta(struct timeval *x, struct timeval *y)
 {
 	if (x->tv_usec < y->tv_usec)
 		{
@@ -199,40 +199,33 @@ static gint timeval_delta(struct timeval *result, struct timeval *x, struct time
 		y->tv_sec -= nsec;
 	}
 
-	result->tv_sec = x->tv_sec - y->tv_sec;
-	result->tv_usec = x->tv_usec - y->tv_usec;
-
-	return x->tv_sec < y->tv_sec;
+	return { x->tv_sec - y->tv_sec, x->tv_usec - y->tv_usec };
 }
 
 const gchar *get_exec_time()
 {
-	static gchar timestr[30];
-	static struct timeval start_tv = {0, 0};
-	static struct timeval previous = {0, 0};
-	static gint started = 0;
-
-	struct timeval tv = {0, 0};
-	static struct timeval delta = {0, 0};
-
+	struct timeval tv{ 0, 0 };
 	gettimeofday(&tv, nullptr);
 
-	if (start_tv.tv_sec == 0) start_tv = tv;
+	static const struct timeval start_tv = tv;
 
 	tv.tv_sec -= start_tv.tv_sec;
 	if (tv.tv_usec >= start_tv.tv_usec)
+		{
 		tv.tv_usec -= start_tv.tv_usec;
+		}
 	else
 		{
 		tv.tv_usec += 1000000 - start_tv.tv_usec;
 		tv.tv_sec -= 1;
 		}
 
-	if (started) timeval_delta(&delta, &tv, &previous);
+	static struct timeval previous{ 0, 0 };
+	const struct timeval delta = timeval_delta(&tv, &previous);
 
 	previous = tv;
-	started = 1;
 
+	static gchar timestr[30];
 	g_snprintf(timestr, sizeof(timestr), "%5d.%06d (+%05d.%06d)", static_cast<gint>(tv.tv_sec), static_cast<gint>(tv.tv_usec), static_cast<gint>(delta.tv_sec), static_cast<gint>(delta.tv_usec));
 
 	return timestr;
