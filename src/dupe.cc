@@ -21,9 +21,8 @@
 
 #include "dupe.h"
 
-#include <sys/time.h>
-
 #include <array>
+#include <chrono>
 #include <cinttypes>
 #include <cmath>
 #include <cstdlib>
@@ -298,11 +297,9 @@ static void dupe_window_update_count(DupeWindow *dw, gboolean count_only)
  */
 static guint64 msec_time()
 {
-	struct timeval tv;
+	const auto duration = std::chrono::system_clock::now().time_since_epoch();
 
-	if (gettimeofday(&tv, nullptr) == -1) return 0;
-
-	return (static_cast<guint64>(tv.tv_sec) * 1000000) + static_cast<guint64>(tv.tv_usec);
+	return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 }
 
 static gint dupe_iterations(gint n)

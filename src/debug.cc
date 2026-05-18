@@ -21,8 +21,8 @@
 #include "debug.h"
 
 #include <sys/resource.h>
-#include <sys/time.h>
 
+#include <chrono>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -183,50 +183,22 @@ gint required_debug_level(gint level)
 	return (debug_level >= level);
 }
 
-static struct timeval timeval_delta(struct timeval *x, struct timeval *y)
-{
-	if (x->tv_usec < y->tv_usec)
-		{
-		gint nsec = ((y->tv_usec - x->tv_usec) / 1000000) + 1;
-		y->tv_usec -= 1000000 * nsec;
-		y->tv_sec += nsec;
-		}
-
-	if (x->tv_usec - y->tv_usec > 1000000)
-		{
-		gint nsec = (x->tv_usec - y->tv_usec) / 1000000;
-		y->tv_usec += 1000000 * nsec;
-		y->tv_sec -= nsec;
-	}
-
-	return { x->tv_sec - y->tv_sec, x->tv_usec - y->tv_usec };
-}
-
 const gchar *get_exec_time()
 {
-	struct timeval tv{ 0, 0 };
-	gettimeofday(&tv, nullptr);
+	using FloatSeconds = std::chrono::duration<double>;
 
-	static const struct timeval start_tv = tv;
+	const auto now = std::chrono::steady_clock::now();
 
-	tv.tv_sec -= start_tv.tv_sec;
-	if (tv.tv_usec >= start_tv.tv_usec)
-		{
-		tv.tv_usec -= start_tv.tv_usec;
-		}
-	else
-		{
-		tv.tv_usec += 1000000 - start_tv.tv_usec;
-		tv.tv_sec -= 1;
-		}
+	static const auto start_tp = now;
+	const FloatSeconds duration = now - start_tp;
 
-	static struct timeval previous{ 0, 0 };
-	const struct timeval delta = timeval_delta(&tv, &previous);
+	static auto prev_tp = now;
+	const FloatSeconds delta = now - prev_tp;
 
-	previous = tv;
+	prev_tp = now;
 
 	static gchar timestr[30];
-	g_snprintf(timestr, sizeof(timestr), "%5d.%06d (+%05d.%06d)", static_cast<gint>(tv.tv_sec), static_cast<gint>(tv.tv_usec), static_cast<gint>(delta.tv_sec), static_cast<gint>(delta.tv_usec));
+	g_snprintf(timestr, sizeof(timestr), "%12.6lf (+%012.6lf)", duration.count(), delta.count());
 
 	return timestr;
 }
