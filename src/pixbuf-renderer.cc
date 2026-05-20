@@ -2795,11 +2795,7 @@ std::optional<GqColor> pixbuf_renderer_get_pixel_colors(PixbufRenderer *pr, GqPo
 	const auto yoff = static_cast<size_t>(map_rect.y) * p_rs;
 	p_pix += yoff + xoff;
 
-	GqColor color;
-	color.r = p_pix[0];
-	color.g = p_pix[1];
-	color.b = p_pix[2];
-
+	GqColor color{ p_pix[0], p_pix[1], p_pix[2], 0 };
 	if (p_alpha)
 		{
 		color.a = p_pix[3];
