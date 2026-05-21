@@ -1323,6 +1323,16 @@ static void dupe_match_rank(DupeWindow *dw)
  * ------------------------------------------------------------------
  */
 
+static gboolean dupe_match_md5sum(DupeItem *a, DupeItem *b)
+{
+	if (!a->md5sum) a->md5sum = md5_text_from_file_utf8(a->fd->path, "");
+	if (!b->md5sum) b->md5sum = md5_text_from_file_utf8(b->fd->path, "");
+
+	return a->md5sum[0] != '\0'
+	    && b->md5sum[0] != '\0'
+	    && strcmp(a->md5sum, b->md5sum) == 0;
+}
+
 /**
  * @brief
  * @param[in] a
@@ -1361,16 +1371,7 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 		{
 		if (strcmp(a->fd->collate_key_name, b->fd->collate_key_name) == 0)
 			{
-			if (!a->md5sum) a->md5sum = md5_text_from_file_utf8(a->fd->path, "");
-			if (!b->md5sum) b->md5sum = md5_text_from_file_utf8(b->fd->path, "");
-			if (a->md5sum[0] == '\0' ||
-			    b->md5sum[0] == '\0' ||
-			    strcmp(a->md5sum, b->md5sum) != 0)
-				{
-				return TRUE;
-				}
-
-			return FALSE;
+			return !dupe_match_md5sum(a, b);
 			}
 		return FALSE;
 		}
@@ -1378,16 +1379,7 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 		{
 		if (strcmp(a->fd->collate_key_name_nocase, b->fd->collate_key_name_nocase) == 0)
 			{
-			if (!a->md5sum) a->md5sum = md5_text_from_file_utf8(a->fd->path, "");
-			if (!b->md5sum) b->md5sum = md5_text_from_file_utf8(b->fd->path, "");
-			if (a->md5sum[0] == '\0' ||
-			    b->md5sum[0] == '\0' ||
-			    strcmp(a->md5sum, b->md5sum) != 0)
-				{
-				return TRUE;
-				}
-
-			return FALSE;
+			return !dupe_match_md5sum(a, b);
 			}
 		return FALSE;
 
@@ -1402,11 +1394,7 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 		}
 	if (mask & DUPE_MATCH_SUM)
 		{
-		if (!a->md5sum) a->md5sum = md5_text_from_file_utf8(a->fd->path, "");
-		if (!b->md5sum) b->md5sum = md5_text_from_file_utf8(b->fd->path, "");
-		if (a->md5sum[0] == '\0' ||
-		    b->md5sum[0] == '\0' ||
-		    strcmp(a->md5sum, b->md5sum) != 0) return FALSE;
+		if (!dupe_match_md5sum(a, b)) return FALSE;
 		}
 	if (mask & DUPE_MATCH_DIM)
 		{
