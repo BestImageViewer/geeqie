@@ -2051,7 +2051,7 @@ static void dupe_loader_done_cb(ImageLoader *il, gpointer data)
 			dupe_item_write_cache(di);
 			}
 
-		image_sim_alternate_processing(di->simd);
+		di->simd->alternate_processing();
 		}
 
 	image_loader_free(dw->img_loader);
@@ -2238,7 +2238,7 @@ static gboolean dupe_check_cb(gpointer data)
 						dupe_item_read_cache(di);
 						if (image_sim_filled(di->simd))
 							{
-							image_sim_alternate_processing(di->simd);
+							di->simd->alternate_processing();
 							return G_SOURCE_CONTINUE;
 							}
 						}

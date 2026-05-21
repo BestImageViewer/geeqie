@@ -161,31 +161,28 @@ static void image_sim_channel_norm(ImageSimilarityData::Avg &pix)
  * The Alternate algorithm is only for testing of new techniques to
  * improve the result, and hopes to reduce false positives.
  */
-void image_sim_alternate_processing(ImageSimilarityData *sd)
+void ImageSimilarityData::alternate_processing()
 {
-	gint i;
-
 	if (!options->alternate_similarity_algorithm.enabled)
 		{
 		return;
 		}
 
-	image_sim_channel_norm(sd->avg_r);
-	image_sim_channel_norm(sd->avg_g);
-	image_sim_channel_norm(sd->avg_b);
+	image_sim_channel_norm(avg_r);
+	image_sim_channel_norm(avg_g);
+	image_sim_channel_norm(avg_b);
 
-	image_sim_channel_equal(sd->avg_r);
-	image_sim_channel_equal(sd->avg_g);
-	image_sim_channel_equal(sd->avg_b);
+	image_sim_channel_equal(avg_r);
+	image_sim_channel_equal(avg_g);
+	image_sim_channel_equal(avg_b);
 
 	if (options->alternate_similarity_algorithm.grayscale)
 		{
-		for (i = 0; i < (gint)sizeof(sd->avg_r); i++)
+		for (size_t i = 0; i < std::tuple_size_v<Avg>; i++)
 			{
-			guint8 n;
+			guint8 n = static_cast<gint>(avg_r[i] + avg_g[i] + avg_b[i]) / 3;
 
-			n = (guint8)((gint)(sd->avg_r[i] + sd->avg_g[i] + sd->avg_b[i]) / 3);
-			sd->avg_r[i] = sd->avg_g[i] = sd->avg_b[i] = n;
+			avg_r[i] = avg_g[i] = avg_b[i] = n;
 			}
 		}
 }
