@@ -89,9 +89,7 @@ static gboolean cache_loader_phase2_process(gpointer data)
 			{
 			if (!cl->error)
 				{
-				ImageSimilarityData sim{};
-				sim.fill_data(pixbuf);
-
+				ImageSimilarityData sim{ pixbuf };
 				cl->cd->set_similarity(sim);
 
 				cl->todo_mask = static_cast<CacheDataType>(cl->todo_mask & ~CACHE_LOADER_SIMILARITY);

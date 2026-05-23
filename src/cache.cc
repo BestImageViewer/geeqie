@@ -386,7 +386,7 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 		}
 	else
 		{
-		sd.reset(image_sim_new());
+		sd = std::make_unique<ImageSimilarityData>();
 		}
 
 	for (gint y = 0; y < 32; y++)

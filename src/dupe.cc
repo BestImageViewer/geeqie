@@ -2021,7 +2021,7 @@ static void dupe_loader_done_cb(ImageLoader *il, gpointer data)
 
 		if (!di->simd)
 			{
-			di->simd.reset(image_sim_new());
+			di->simd = std::make_unique<ImageSimilarityData>();
 			}
 
 		di->simd->fill_data(pixbuf);
@@ -2235,7 +2235,7 @@ static gboolean dupe_check_cb(gpointer data)
 
 					if (!image_loader_start(dw->img_loader))
 						{
-						di->simd.reset(image_sim_new());
+						di->simd = std::make_unique<ImageSimilarityData>();
 						image_loader_free(dw->img_loader);
 						dw->img_loader = nullptr;
 						return G_SOURCE_CONTINUE;

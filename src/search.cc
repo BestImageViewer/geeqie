@@ -1742,8 +1742,7 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 
 		if (sd->match_similarity_enable && !cd->similarity)
 			{
-			ImageSimilarityData sim{};
-			sim.fill_data(pixbuf);
+			ImageSimilarityData sim{ pixbuf };
 
 			cd->set_similarity(sim);
 			}

@@ -135,11 +135,6 @@ gdouble image_sim_data_compare(const ImageSimilarityData *a, const ImageSimilari
 
 } // namespace
 
-ImageSimilarityData *image_sim_new()
-{
-	return new ImageSimilarityData();
-}
-
 static void image_sim_channel_norm(ImageSimilarityData::Avg &pix)
 {
 	const auto [l, h] = std::minmax_element(pix.cbegin(), pix.cend());
@@ -150,6 +145,12 @@ static void image_sim_channel_norm(ImageSimilarityData::Avg &pix)
 		{
 		n = static_cast<guint8>(static_cast<gdouble>(n - *l) * scale);
 		}
+}
+
+ImageSimilarityData::ImageSimilarityData(GdkPixbuf *pixbuf)
+	: ImageSimilarityData()
+{
+	fill_data(pixbuf);
 }
 
 /*

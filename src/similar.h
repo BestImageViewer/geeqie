@@ -29,6 +29,9 @@
 
 struct ImageSimilarityData
 {
+	ImageSimilarityData() = default;
+	ImageSimilarityData(GdkPixbuf *pixbuf);
+
 	void alternate_processing();
 	void fill_data(GdkPixbuf *pixbuf);
 	GdkPixbuf *to_pixbuf() const;
@@ -41,8 +44,6 @@ struct ImageSimilarityData
 	gboolean filled;
 };
 
-
-ImageSimilarityData *image_sim_new();
 
 gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b);
 gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min);
