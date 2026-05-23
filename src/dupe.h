@@ -22,6 +22,8 @@
 #ifndef DUPE_H
 #define DUPE_H
 
+#include <memory>
+
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -75,7 +77,7 @@ struct DupeItem
 	gint height;
 	gint dimensions; /**< Computed as (#DupeItem->width << 16) + #DupeItem->height */
 
-	ImageSimilarityData *simd;
+	std::unique_ptr<ImageSimilarityData> simd;
 
 	GdkPixbuf *pixbuf; /**< thumb */
 

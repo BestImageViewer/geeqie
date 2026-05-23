@@ -446,9 +446,7 @@ static void dupe_listview_realign_colors(DupeWindow *dw)
 
 static DupeItem *dupe_item_new(FileData *fd)
 {
-	DupeItem *di;
-
-	di = g_new0(DupeItem, 1);
+	auto *di = new DupeItem();
 
 	di->fd = file_data_ref(fd);
 	di->group_rank = 0.0;
@@ -459,11 +457,10 @@ static DupeItem *dupe_item_new(FileData *fd)
 static void dupe_item_free(DupeItem *di)
 {
 	file_data_unref(di->fd);
-	image_sim_free(di->simd);
 	g_free(di->md5sum);
 	if (di->pixbuf) g_object_unref(di->pixbuf);
 
-	g_free(di);
+	delete di;
 }
 
 /*
@@ -481,7 +478,7 @@ static void dupe_item_read_cache(DupeItem *di)
 
 	if (!di->simd && cd.similarity)
 		{
-		di->simd = cd.similarity.release();
+		di->simd.swap(cd.similarity);
 		}
 
 	if (di->width == 0 && di->height == 0 && cd.dimensions)
@@ -1414,11 +1411,11 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 
 		if (fast)
 			{
-			f = image_sim_compare_fast(a->simd, b->simd, m);
+			f = image_sim_compare_fast(a->simd.get(), b->simd.get(), m);
 			}
 		else
 			{
-			f = image_sim_compare(a->simd, b->simd);
+			f = image_sim_compare(a->simd.get(), b->simd.get());
 			}
 
 		*rank = f * 100.0;
@@ -2024,7 +2021,7 @@ static void dupe_loader_done_cb(ImageLoader *il, gpointer data)
 
 		if (!di->simd)
 			{
-			di->simd = image_sim_new();
+			di->simd.reset(image_sim_new());
 			}
 
 		di->simd->fill_data(pixbuf);
@@ -2224,7 +2221,7 @@ static gboolean dupe_check_cb(gpointer data)
 					if (options->thumbnails.enable_caching)
 						{
 						dupe_item_read_cache(di);
-						if (image_sim_filled(di->simd))
+						if (image_sim_filled(di->simd.get()))
 							{
 							di->simd->alternate_processing();
 							return G_SOURCE_CONTINUE;
@@ -2238,8 +2235,7 @@ static gboolean dupe_check_cb(gpointer data)
 
 					if (!image_loader_start(dw->img_loader))
 						{
-						image_sim_free(di->simd);
-						di->simd = image_sim_new();
+						di->simd.reset(image_sim_new());
 						image_loader_free(dw->img_loader);
 						dw->img_loader = nullptr;
 						return G_SOURCE_CONTINUE;

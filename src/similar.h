@@ -43,7 +43,6 @@ struct ImageSimilarityData
 
 
 ImageSimilarityData *image_sim_new();
-void image_sim_free(ImageSimilarityData *sd);
 
 gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b);
 gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min);

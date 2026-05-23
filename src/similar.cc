@@ -140,11 +140,6 @@ ImageSimilarityData *image_sim_new()
 	return new ImageSimilarityData();
 }
 
-void image_sim_free(ImageSimilarityData *sd)
-{
-	delete sd;
-}
-
 static void image_sim_channel_norm(ImageSimilarityData::Avg &pix)
 {
 	const auto [l, h] = std::minmax_element(pix.cbegin(), pix.cend());
