@@ -210,7 +210,7 @@ bool CacheData::write_md5sum(GString *gstring) const
 
 bool CacheData::write_similarity(GString *gstring) const
 {
-	if (!similarity || !similarity->filled) return false;
+	if (!image_sim_filled(similarity.get())) return false;
 
 	g_string_append(gstring, "SimilarityGrid[32 x 32]=");
 

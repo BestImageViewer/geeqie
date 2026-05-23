@@ -45,14 +45,14 @@ struct ImageSimilarityData
 	Avg avg_g;
 	Avg avg_b;
 
-	gboolean filled;
+	bool filled;
 };
 
 
 gdouble image_sim_compare(ImageSimilarityData *a, ImageSimilarityData *b);
 gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, gdouble min);
 
-gboolean image_sim_filled(const ImageSimilarityData *sd);
+bool image_sim_filled(const ImageSimilarityData *sd);
 
 
 #endif

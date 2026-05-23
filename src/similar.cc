@@ -94,7 +94,7 @@ void image_sim_channel_equal(ImageSimilarityData::Avg &pix)
  */
 gdouble image_sim_data_compare_transfo(const ImageSimilarityData *a, const ImageSimilarityData *b, gchar transfo, const ImageSimilarityCheckAbort &check_abort)
 {
-	if (!a || !b || !a->filled || !b->filled) return 0.0;
+	if (!image_sim_filled(a) || !image_sim_filled(b)) return 0.0;
 
 	gint sim = 0.0;
 	gint i2;
@@ -262,7 +262,7 @@ void ImageSimilarityData::fill_data(GdkPixbuf *pixbuf)
 		h_left -= y_inc;
 		}
 
-	filled = TRUE;
+	filled = true;
 }
 
 GdkPixbuf *ImageSimilarityData::to_pixbuf() const
@@ -305,7 +305,7 @@ bool ImageSimilarityData::fill_data(FILE *f)
 			}
 		}
 
-	filled = TRUE;
+	filled = true;
 	return true;
 }
 
@@ -336,7 +336,7 @@ static gdouble alternate_image_sim_compare_fast(const ImageSimilarityData *a, co
 	gint j;
 	gint ld;
 
-	if (!a || !b || !a->filled || !b->filled) return 0.0;
+	if (!image_sim_filled(a) || !image_sim_filled(b)) return 0.0;
 
 	sim = 0.0;
 	ld = 0;
@@ -385,9 +385,8 @@ gdouble image_sim_compare_fast(ImageSimilarityData *a, ImageSimilarityData *b, g
 	return image_sim_data_compare(a, b, [min](gdouble sim){ return (sim / (255.0 * 1024.0 * 3.0)) > min; });
 }
 
-gboolean image_sim_filled(const ImageSimilarityData *sd)
+bool image_sim_filled(const ImageSimilarityData *sd)
 {
-	if (!sd) return FALSE;
-	return sd->filled;
+	return sd && sd->filled;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
