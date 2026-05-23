@@ -288,6 +288,47 @@ GdkPixbuf *ImageSimilarityData::to_pixbuf() const
 	return pixbuf;
 }
 
+bool ImageSimilarityData::fill_data(FILE *f)
+{
+	guint8 pixel_buf[3];
+
+	for (gint y = 0; y < 32; y++)
+		{
+		gint s = y * 32;
+		for (gint x = 0; x < 32; x++)
+			{
+			if (fread(&pixel_buf, sizeof(pixel_buf), 1, f) != 1) return false;
+
+			avg_r[s + x] = pixel_buf[0];
+			avg_g[s + x] = pixel_buf[1];
+			avg_b[s + x] = pixel_buf[2];
+			}
+		}
+
+	filled = TRUE;
+	return true;
+}
+
+void ImageSimilarityData::to_string(GString *str) const
+{
+	guint8 buf[3 * 32];
+
+	for (guint y = 0; y < 32; y++)
+		{
+		guint s = y * 32;
+		guint n = 0;
+
+		for (guint x = 0; x < 32; x++)
+			{
+			buf[n++] = avg_r[s + x];
+			buf[n++] = avg_g[s + x];
+			buf[n++] = avg_b[s + x];
+			}
+
+		g_string_append_len(str, (const gchar *)buf, sizeof(buf));
+		}
+}
+
 static gdouble alternate_image_sim_compare_fast(const ImageSimilarityData *a, const ImageSimilarityData *b, gdouble min)
 {
 	gint sim;

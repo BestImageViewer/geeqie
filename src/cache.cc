@@ -214,21 +214,7 @@ bool CacheData::write_similarity(GString *gstring) const
 
 	g_string_append(gstring, "SimilarityGrid[32 x 32]=");
 
-	guint8 buf[3 * 32];
-	for (guint y = 0; y < 32; y++)
-		{
-		guint s = y * 32;
-		guint n = 0;
-
-		for (guint x = 0; x < 32; x++)
-			{
-			buf[n++] = similarity->avg_r[s + x];
-			buf[n++] = similarity->avg_g[s + x];
-			buf[n++] = similarity->avg_b[s + x];
-			}
-
-		g_string_append_len(gstring, (const gchar *)buf, sizeof(buf));
-		}
+	similarity->to_string(gstring);
 
 	g_string_append(gstring, "\n");
 
@@ -376,7 +362,6 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 		if (fread(&b, sizeof(b), 1, f) != 1) return false;
 		}
 
-	guint8 pixel_buf[3];
 	std::unique_ptr<ImageSimilarityData> sd = nullptr;
 
 	if (similarity)
@@ -389,25 +374,12 @@ bool CacheData::read_similarity(FILE *f, const gchar *buffer, gint s)
 		sd = std::make_unique<ImageSimilarityData>();
 		}
 
-	for (gint y = 0; y < 32; y++)
-		{
-		gint s = y * 32;
-		for (gint x = 0; x < 32; x++)
-			{
-			if (fread(&pixel_buf, sizeof(pixel_buf), 1, f) != 1) return false;
-
-			sd->avg_r[s + x] = pixel_buf[0];
-			sd->avg_g[s + x] = pixel_buf[1];
-			sd->avg_b[s + x] = pixel_buf[2];
-			}
-		}
+	if (!sd->fill_data(f)) return false;
 
 	if (fread(&b, sizeof(b), 1, f) == 1)
 		{
 		if (b != '\n') fseek(f, -1, SEEK_CUR);
 		}
-
-	sd->filled = TRUE;
 
 	set_similarity(*sd);
 
