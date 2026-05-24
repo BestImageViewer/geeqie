@@ -490,7 +490,7 @@ static void dupe_item_read_cache(DupeItem *di)
 
 	if (!di->md5sum && cd.md5sum)
 		{
-		di->md5sum = md5_digest_to_text(cd.md5sum.value());
+		di->md5sum = g_strdup(md5_digest_to_text(cd.md5sum.value()).c_str());
 		}
 }
 

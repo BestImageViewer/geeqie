@@ -134,19 +134,17 @@ gchar *md5_get_string_from_file(const gchar *path)
  * and assumes a NULL terminated string.
  */
 
-gchar *md5_digest_to_text(const Md5Digest &digest)
+std::string md5_digest_to_text(const Md5Digest &digest)
 {
 	static gchar hex_digits[] = "0123456789abcdef";
-	gchar *result;
-	constexpr gsize result_size = 2 * MD5_SIZE;
 
-	result = static_cast<gchar *>(g_malloc((result_size + 1) * sizeof(gchar)));
+	std::string result{ (2 * MD5_SIZE) + 1, '\0' };
+
 	for (gsize i = 0; i < MD5_SIZE; i++)
 		{
 		result[2*i] = hex_digits[digest[i] >> 4];
 		result[(2*i)+1] = hex_digits[digest[i] & 0xf];
 		}
-	result[result_size] = '\0';
 
 	return result;
 }

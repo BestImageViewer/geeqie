@@ -39,6 +39,7 @@
 #define MD5_UTIL_H
 
 #include <array>
+#include <string>
 
 #include <glib.h>
 
@@ -52,7 +53,7 @@ gboolean md5_get_digest_from_file(const gchar *path, Md5Digest &digest);
 
 gchar *md5_get_string_from_file(const gchar *path);
 
-gchar *md5_digest_to_text(const Md5Digest &digest);
+std::string md5_digest_to_text(const Md5Digest &digest);
 
 gboolean md5_digest_from_text(const gchar *text, Md5Digest &digest);
 

@@ -201,9 +201,7 @@ bool CacheData::write_md5sum(GString *gstring) const
 {
 	if (!md5sum) return false;
 
-	g_autofree gchar *text = md5_digest_to_text(*md5sum);
-
-	g_string_append_printf(gstring, "MD5sum=[%s]\n", text);
+	g_string_append_printf(gstring, "MD5sum=[%s]\n", md5_digest_to_text(*md5sum).c_str());
 
 	return true;
 }
