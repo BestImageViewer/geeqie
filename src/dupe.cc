@@ -482,11 +482,10 @@ static void dupe_item_read_cache(DupeItem *di)
 		di->simd.swap(cd.similarity);
 		}
 
-	if (di->width == 0 && di->height == 0 && cd.dimensions)
+	if (di->dimensions.width == 0 && di->dimensions.height == 0 && cd.dimensions)
 		{
-		di->width = cd.dimensions->width;
-		di->height = cd.dimensions->height;
-		di->dimensions = (di->width << 16) + di->height;
+		di->dimensions = cd.dimensions.value();
+		di->dimensions_sum = (di->dimensions.width << 16) + di->dimensions.height;
 		}
 
 	if (!di->md5sum && cd.md5sum)
@@ -501,7 +500,7 @@ static void dupe_item_write_cache(DupeItem *di)
 
 	CacheData cd{};
 
-	if (di->width != 0) cd.set_dimensions({di->width, di->height});
+	if (di->dimensions.width != 0) cd.set_dimensions(di->dimensions);
 	if (di->md5sum)
 		{
 		Md5Digest digest;
@@ -605,9 +604,9 @@ static void dupe_listview_add(DupeWindow *dw, DupeItem *parent, DupeItem *child)
 	g_autofree gchar *size_text = text_from_size(di->fd->size);
 
 	g_autofree gchar *dimensions_text = nullptr;
-	if (di->width > 0 && di->height > 0)
+	if (di->dimensions.width > 0 && di->dimensions.height > 0)
 		{
-		dimensions_text = g_strdup_printf("%d x %d", di->width, di->height);
+		dimensions_text = g_strdup_printf("%d x %d", di->dimensions.width, di->dimensions.height);
 		}
 	else
 		{
@@ -1391,9 +1390,9 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 		}
 	if (mask & DUPE_MATCH_DIM)
 		{
-		if (a->width == 0) image_load_dimensions(a->fd, &a->width, &a->height);
-		if (b->width == 0) image_load_dimensions(b->fd, &b->width, &b->height);
-		if (a->width != b->width || a->height != b->height) return FALSE;
+		if (a->dimensions.width == 0) image_load_dimensions(a->fd, &a->dimensions.width, &a->dimensions.height);
+		if (b->dimensions.width == 0) image_load_dimensions(b->fd, &b->dimensions.width, &b->dimensions.height);
+		if (a->dimensions.width != b->dimensions.width || a->dimensions.height != b->dimensions.height) return FALSE;
 		}
 	if (mask & DUPE_MATCH_SIM)
 		{
@@ -1516,7 +1515,7 @@ static DUPE_CHECK_RESULT dupe_match_check(DupeItem *di1, DupeItem *di2, gpointer
 		}
 	if (mask & DUPE_MATCH_DIM)
 		{
-		if (di1->dimensions != di2->dimensions)
+		if (di1->dimensions_sum != di2->dimensions_sum)
 			{
 			return DUPE_NO_MATCH;
 			}
@@ -1584,7 +1583,7 @@ static gint dupe_match_binary_search_cb(gconstpointer a, gconstpointer b)
 		}
 	if (mask & DUPE_MATCH_DIM)
 		{
-		return (di1->dimensions - di2->dimensions);
+		return (di1->dimensions_sum - di2->dimensions_sum);
 		}
 
 	return 0;
@@ -1650,11 +1649,11 @@ static gint dupe_match_sort_cb(gconstpointer a, gconstpointer b, gpointer data)
 		}
 	if (mask & DUPE_MATCH_DIM)
 		{
-		if (!di1 || !di2 || !di1->width || !di1->height || !di2->width || !di2->height)
+		if (!di1 || !di2 || !di1->dimensions.width || !di1->dimensions.height || !di2->dimensions.width || !di2->dimensions.height)
 			{
 			return -1;
 			}
-		return (di1->dimensions - di2->dimensions);
+		return (di1->dimensions_sum - di2->dimensions_sum);
 		}
 
 	return 0; // should not execute
@@ -2021,10 +2020,10 @@ static void dupe_loader_done_cb(ImageLoader *il, gpointer data)
 
 		di->simd->fill_data(pixbuf);
 
-		if (di->width == 0 && di->height == 0 && pixbuf)
+		if (di->dimensions.width == 0 && di->dimensions.height == 0 && pixbuf)
 			{
-			di->width = gdk_pixbuf_get_width(pixbuf);
-			di->height = gdk_pixbuf_get_height(pixbuf);
+			di->dimensions.width = gdk_pixbuf_get_width(pixbuf);
+			di->dimensions.height = gdk_pixbuf_get_height(pixbuf);
 			}
 		if (options->thumbnails.enable_caching)
 			{
@@ -2060,90 +2059,87 @@ static GList *dupe_setup_point_step(DupeWindow *dw, GList *p)
 }
 
 /**
- * @brief Generates the sumcheck or dimensions
+ * @brief Generates the sumcheck or dimensions_sum
  * @param list Set1 or set2
  * @returns TRUE/FALSE = not completed/completed
  *
- * Ensures that the DIs contain the MD5SUM or dimensions for all items in
+ * Ensures that the DIs contain the MD5SUM or dimensions_sum for all items in
  * the list. One item at a time. Re-enters if not completed.
  */
 static gboolean create_checksums_dimensions(DupeWindow *dw, GList *list)
 {
-		if ((dw->match_mask & DUPE_MATCH_SUM) ||
-			(dw->match_mask & DUPE_MATCH_NAME_CONTENT) ||
-			(dw->match_mask & DUPE_MATCH_NAME_CI_CONTENT))
+	static const auto setup_progress = [](const DupeWindow *dw)
+	{
+		return (dw->setup_count == 0) ? 0.0 : static_cast<gdouble>(dw->setup_n - 1) / dw->setup_count;
+	};
+
+	if ((dw->match_mask & DUPE_MATCH_SUM) ||
+	    (dw->match_mask & DUPE_MATCH_NAME_CONTENT) ||
+	    (dw->match_mask & DUPE_MATCH_NAME_CI_CONTENT))
+		{
+		/* MD5SUM only */
+		if (!dw->setup_point) dw->setup_point = list; // setup_point clear on 1st entry
+
+		while (dw->setup_point)
 			{
-			/* MD5SUM only */
-			if (!dw->setup_point) dw->setup_point = list; // setup_point clear on 1st entry
+			auto di = static_cast<DupeItem *>(dw->setup_point->data);
 
-			while (dw->setup_point)
+			dw->setup_point = dupe_setup_point_step(dw, dw->setup_point);
+			dw->setup_n++;
+
+			if (!di->md5sum)
 				{
-				auto di = static_cast<DupeItem *>(dw->setup_point->data);
+				dupe_window_update_progress(dw, _("Reading checksums…"), setup_progress(dw), FALSE);
 
-				dw->setup_point = dupe_setup_point_step(dw, dw->setup_point);
-				dw->setup_n++;
-
-				if (!di->md5sum)
+				if (options->thumbnails.enable_caching)
 					{
-					dupe_window_update_progress(dw, _("Reading checksums…"),
-						dw->setup_count == 0 ? 0.0 : static_cast<gdouble>(dw->setup_n - 1) / dw->setup_count, FALSE);
-
-					if (options->thumbnails.enable_caching)
-						{
-						dupe_item_read_cache(di);
-						if (di->md5sum)
-							{
-							return TRUE;
-							}
-						}
-
-					di->md5sum = md5_text_from_file_utf8(di->fd->path);
-					if (options->thumbnails.enable_caching)
-						{
-						dupe_item_write_cache(di);
-						}
-					return TRUE;
+					dupe_item_read_cache(di);
+					if (di->md5sum) return TRUE;
 					}
-				}
-			dupe_setup_reset(dw);
-			}
 
-		if ((dw->match_mask & DUPE_MATCH_DIM)  )
+				di->md5sum = md5_text_from_file_utf8(di->fd->path);
+				if (options->thumbnails.enable_caching)
+					{
+					dupe_item_write_cache(di);
+					}
+				return TRUE;
+				}
+			}
+		dupe_setup_reset(dw);
+		}
+
+	if (dw->match_mask & DUPE_MATCH_DIM)
+		{
+		/* Dimensions only */
+		if (!dw->setup_point) dw->setup_point = list;
+
+		while (dw->setup_point)
 			{
-			/* Dimensions only */
-			if (!dw->setup_point) dw->setup_point = list;
+			auto di = static_cast<DupeItem *>(dw->setup_point->data);
 
-			while (dw->setup_point)
+			dw->setup_point = dupe_setup_point_step(dw, dw->setup_point);
+			dw->setup_n++;
+			if (di->dimensions.width == 0 && di->dimensions.height == 0)
 				{
-				auto di = static_cast<DupeItem *>(dw->setup_point->data);
+				dupe_window_update_progress(dw, _("Reading dimensions…"), setup_progress(dw), FALSE);
 
-				dw->setup_point = dupe_setup_point_step(dw, dw->setup_point);
-				dw->setup_n++;
-				if (di->width == 0 && di->height == 0)
+				if (options->thumbnails.enable_caching)
 					{
-					dupe_window_update_progress(dw, _("Reading dimensions…"),
-						dw->setup_count == 0 ? 0.0 : static_cast<gdouble>(dw->setup_n - 1) / dw->setup_count, FALSE);
-
-					if (options->thumbnails.enable_caching)
-						{
-						dupe_item_read_cache(di);
-						if (di->width != 0 || di->height != 0)
-							{
-							return TRUE;
-							}
-						}
-
-					image_load_dimensions(di->fd, &di->width, &di->height);
-					di->dimensions = (di->width << 16) + di->height;
-					if (options->thumbnails.enable_caching)
-						{
-						dupe_item_write_cache(di);
-						}
-					return TRUE;
+					dupe_item_read_cache(di);
+					if (di->dimensions.width != 0 || di->dimensions.height != 0) return TRUE;
 					}
+
+				image_load_dimensions(di->fd, &di->dimensions.width, &di->dimensions.height);
+				di->dimensions_sum = (di->dimensions.width << 16) + di->dimensions.height;
+				if (options->thumbnails.enable_caching)
+					{
+					dupe_item_write_cache(di);
+					}
+				return TRUE;
 				}
-			dupe_setup_reset(dw);
 			}
+		dupe_setup_reset(dw);
+		}
 
 	return FALSE;
 }
@@ -2875,7 +2871,7 @@ static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 
 	dupe_display_label(gd->vbox, "date:", text_from_time(di->fd->date));
 
-	g_autofree gchar *dimensions_buf = g_strdup_printf("%d x %d", di->width, di->height);
+	g_autofree gchar *dimensions_buf = g_strdup_printf("%d x %d", di->dimensions.width, di->dimensions.height);
 	dupe_display_label(gd->vbox, "dimensions:", dimensions_buf);
 
 	dupe_display_label(gd->vbox, "md5sum:", di->md5sum.value_or("not generated"s).c_str());
@@ -4137,13 +4133,13 @@ static gint column_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, 
 					}
 				break;
 			case DUPE_COLUMN_DIMENSIONS:
-				if ((di_a->width == di_b->width) && (di_a->height == di_b->height))
+				if ((di_a->dimensions.width == di_b->dimensions.width) && (di_a->dimensions.height == di_b->dimensions.height))
 					{
 					ret = 0;
 					}
 				else
 					{
-					ret = ((di_a->width * di_a->height) > (di_b->width * di_b->height)) ? 1 : -1;
+					ret = ((di_a->dimensions.width * di_a->dimensions.height) > (di_b->dimensions.width * di_b->dimensions.height)) ? 1 : -1;
 					}
 				break;
 			case DUPE_COLUMN_RANK:
@@ -4850,9 +4846,9 @@ static GString *export_duplicates_data(DupeWindow *dw, const gchar *sep)
 		output_string = g_string_append(output_string, sep);
 		output_string = g_string_append(output_string, text_from_time(di->fd->date));
 		output_string = g_string_append(output_string, sep);
-		g_string_append_printf(output_string, "%d", di->width);
+		g_string_append_printf(output_string, "%d", di->dimensions.width);
 		output_string = g_string_append(output_string, sep);
-		g_string_append_printf(output_string, "%d", di->height);
+		g_string_append_printf(output_string, "%d", di->dimensions.height);
 		output_string = g_string_append(output_string, sep);
 		output_string = g_string_append(output_string, di->fd->path);
 		output_string = g_string_append_c(output_string, '\n');

@@ -30,6 +30,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "geometry.h"
+
 struct CollectInfo;
 struct CollectionData;
 class FileData;
@@ -75,9 +77,8 @@ struct DupeItem
 	FileData *fd;
 
 	std::optional<std::string> md5sum;
-	gint width;
-	gint height;
-	gint dimensions; /**< Computed as (#DupeItem->width << 16) + #DupeItem->height */
+	GqSize dimensions;
+	gint dimensions_sum; /**< Computed as (#DupeItem->dimensions.width << 16) + #DupeItem->dimensions.height */
 
 	std::unique_ptr<ImageSimilarityData> simd;
 
