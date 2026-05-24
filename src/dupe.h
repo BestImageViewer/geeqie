@@ -23,6 +23,8 @@
 #define DUPE_H
 
 #include <memory>
+#include <optional>
+#include <string>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
@@ -72,7 +74,7 @@ struct DupeItem
 
 	FileData *fd;
 
-	gchar *md5sum;
+	std::optional<std::string> md5sum;
 	gint width;
 	gint height;
 	gint dimensions; /**< Computed as (#DupeItem->width << 16) + #DupeItem->height */

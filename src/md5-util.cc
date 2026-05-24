@@ -96,14 +96,17 @@ gboolean md5_get_digest_from_file(const gchar *path, Md5Digest &digest)
  * Get the md5 hash of a file. The result is returned
  * as a hexadecimal string.
  **/
-gchar *md5_get_string_from_file(const gchar *path)
+std::string md5_get_string_from_file(const gchar *path)
 {
 	g_autoptr(GChecksum) md5 = g_checksum_new(G_CHECKSUM_MD5);
-	if (!md5) return nullptr;
+	if (!md5) return {};
 
-	if (!md5_update_from_file(md5, path)) return nullptr;
+	if (!md5_update_from_file(md5, path)) return {};
 
-	return g_strdup(g_checksum_get_string(md5));
+	const gchar *str = g_checksum_get_string(md5);
+	if (!str) return {};
+
+	return str;
 }
 
 /**

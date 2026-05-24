@@ -49,7 +49,7 @@ using Md5Digest = std::array<guchar, MD5_SIZE>;
 
 gboolean md5_get_digest_from_file(const gchar *path, Md5Digest &digest);
 
-gchar *md5_get_string_from_file(const gchar *path);
+std::string md5_get_string_from_file(const gchar *path);
 
 std::string md5_digest_to_text(const Md5Digest &digest);
 

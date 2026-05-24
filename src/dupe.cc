@@ -63,6 +63,8 @@
 #include "utilops.h"
 #include "window.h"
 
+using namespace std::string_literals;
+
 namespace {
 
 /** column assignment order (simply change them here)
@@ -457,7 +459,6 @@ static DupeItem *dupe_item_new(FileData *fd)
 static void dupe_item_free(DupeItem *di)
 {
 	file_data_unref(di->fd);
-	g_free(di->md5sum);
 	if (di->pixbuf) g_object_unref(di->pixbuf);
 
 	delete di;
@@ -490,7 +491,7 @@ static void dupe_item_read_cache(DupeItem *di)
 
 	if (!di->md5sum && cd.md5sum)
 		{
-		di->md5sum = g_strdup(md5_digest_to_text(cd.md5sum.value()).c_str());
+		di->md5sum = md5_digest_to_text(cd.md5sum.value());
 		}
 }
 
@@ -504,7 +505,7 @@ static void dupe_item_write_cache(DupeItem *di)
 	if (di->md5sum)
 		{
 		Md5Digest digest;
-		if (md5_digest_from_text(di->md5sum, digest)) cd.set_md5sum(digest);
+		if (md5_digest_from_text(di->md5sum->c_str(), digest)) cd.set_md5sum(digest);
 		}
 	if (di->simd) cd.set_similarity(*di->simd);
 
@@ -1322,12 +1323,12 @@ static void dupe_match_rank(DupeWindow *dw)
 
 static gboolean dupe_match_md5sum(DupeItem *a, DupeItem *b)
 {
-	if (!a->md5sum) a->md5sum = md5_text_from_file_utf8(a->fd->path, "");
-	if (!b->md5sum) b->md5sum = md5_text_from_file_utf8(b->fd->path, "");
+	if (!a->md5sum) a->md5sum = md5_text_from_file_utf8(a->fd->path);
+	if (!b->md5sum) b->md5sum = md5_text_from_file_utf8(b->fd->path);
 
-	return a->md5sum[0] != '\0'
-	    && b->md5sum[0] != '\0'
-	    && strcmp(a->md5sum, b->md5sum) == 0;
+	return !a->md5sum->empty()
+	    && !b->md5sum->empty()
+	    && a->md5sum == b->md5sum;
 }
 
 /**
@@ -1366,20 +1367,15 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 		}
 	if (mask & DUPE_MATCH_NAME_CONTENT)
 		{
-		if (strcmp(a->fd->collate_key_name, b->fd->collate_key_name) == 0)
-			{
-			return !dupe_match_md5sum(a, b);
-			}
-		return FALSE;
+		if (strcmp(a->fd->collate_key_name, b->fd->collate_key_name) != 0) return FALSE;
+
+		return !dupe_match_md5sum(a, b);
 		}
 	if (mask & DUPE_MATCH_NAME_CI_CONTENT)
 		{
-		if (strcmp(a->fd->collate_key_name_nocase, b->fd->collate_key_name_nocase) == 0)
-			{
-			return !dupe_match_md5sum(a, b);
-			}
-		return FALSE;
+		if (strcmp(a->fd->collate_key_name_nocase, b->fd->collate_key_name_nocase) != 0) return FALSE;
 
+		return !dupe_match_md5sum(a, b);
 		}
 	if (mask & DUPE_MATCH_SIZE)
 		{
@@ -1475,30 +1471,26 @@ static DUPE_CHECK_RESULT dupe_match_check(DupeItem *di1, DupeItem *di2, gpointer
 		}
 	if (mask & DUPE_MATCH_NAME_CONTENT)
 		{
-		if (g_strcmp0(di1->fd->collate_key_name, di2->fd->collate_key_name) == 0)
-			{
-			if (g_strcmp0(di1->md5sum, di2->md5sum) == 0)
-				{
-				return DUPE_NAME_MATCH;
-				}
-			}
-		else
+		if (g_strcmp0(di1->fd->collate_key_name, di2->fd->collate_key_name) != 0)
 			{
 			return DUPE_NO_MATCH;
+			}
+
+		if (di1->md5sum == di2->md5sum)
+			{
+			return DUPE_NAME_MATCH;
 			}
 		}
 	if (mask & DUPE_MATCH_NAME_CI_CONTENT)
 		{
-		if (strcmp(di1->fd->collate_key_name_nocase, di2->fd->collate_key_name_nocase) == 0)
-			{
-			if (g_strcmp0(di1->md5sum, di2->md5sum) == 0)
-				{
-				return DUPE_NAME_MATCH;
-				}
-			}
-		else
+		if (strcmp(di1->fd->collate_key_name_nocase, di2->fd->collate_key_name_nocase) != 0)
 			{
 			return DUPE_NO_MATCH;
+			}
+
+		if (di1->md5sum == di2->md5sum)
+			{
+			return DUPE_NAME_MATCH;
 			}
 		}
 	if (mask & DUPE_MATCH_SIZE)
@@ -1517,7 +1509,7 @@ static DUPE_CHECK_RESULT dupe_match_check(DupeItem *di1, DupeItem *di2, gpointer
 		}
 	if (mask & DUPE_MATCH_SUM)
 		{
-		if (g_strcmp0(di1->md5sum, di2->md5sum) != 0)
+		if (di1->md5sum != di2->md5sum)
 			{
 			return DUPE_NO_MATCH;
 			}
@@ -1586,7 +1578,9 @@ static gint dupe_match_binary_search_cb(gconstpointer a, gconstpointer b)
 		}
 	if (mask & DUPE_MATCH_SUM)
 		{
-		return g_strcmp0(di1->md5sum, di2->md5sum);
+		if (di1->md5sum < di2->md5sum) return -1;
+		if (di1->md5sum > di2->md5sum) return 1;
+		return 0;
 		}
 	if (mask & DUPE_MATCH_DIM)
 		{
@@ -1646,12 +1640,13 @@ static gint dupe_match_sort_cb(gconstpointer a, gconstpointer b, gpointer data)
 		}
 	if (mask & DUPE_MATCH_SUM)
 		{
-		if (di1->md5sum[0] == '\0' || di2->md5sum[0] == '\0')
-		    {
+		if (!di1->md5sum || di1->md5sum->empty() ||
+		    !di2->md5sum || di2->md5sum->empty())
+			{
 			return -1;
 			}
 
-		return strcmp(di1->md5sum, di2->md5sum);
+		return di1->md5sum->compare(di2->md5sum.value());
 		}
 	if (mask & DUPE_MATCH_DIM)
 		{
@@ -2102,7 +2097,7 @@ static gboolean create_checksums_dimensions(DupeWindow *dw, GList *list)
 							}
 						}
 
-					di->md5sum = md5_text_from_file_utf8(di->fd->path, "");
+					di->md5sum = md5_text_from_file_utf8(di->fd->path);
 					if (options->thumbnails.enable_caching)
 						{
 						dupe_item_write_cache(di);
@@ -2883,7 +2878,7 @@ static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 	g_autofree gchar *dimensions_buf = g_strdup_printf("%d x %d", di->width, di->height);
 	dupe_display_label(gd->vbox, "dimensions:", dimensions_buf);
 
-	dupe_display_label(gd->vbox, "md5sum:", (di->md5sum) ? di->md5sum : "not generated");
+	dupe_display_label(gd->vbox, "md5sum:", di->md5sum.value_or("not generated"s).c_str());
 
 	dupe_display_label(gd->vbox, "thumbprint:", (di->simd) ? "" : "not generated");
 	if (di->simd)
