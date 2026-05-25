@@ -66,25 +66,6 @@ gboolean md5_update_from_file(GChecksum *md5, const gchar *path)
 } // namespace
 
 /**
- * @brief Get the md5 hash of a buffer
- * @buffer: byte buffer
- * @buffer_size: buffer size (in bytes)
- * @return: hash as a hexadecimal string
- *
- * Get the md5 hash of a buffer. The result is returned
- * as a hexadecimal string.
- **/
-gchar *md5_get_string(const guchar *buffer, gint buffer_size)
-{
-	g_autoptr(GChecksum) md5 = g_checksum_new(G_CHECKSUM_MD5);
-	if (!md5) return nullptr;
-
-	g_checksum_update(md5, buffer, buffer_size);
-
-	return g_strdup(g_checksum_get_string(md5));
-}
-
-/**
  * @brief Get the md5 hash of a file
  * @filename: file name
  * @digest: 16 bytes buffer receiving the hash code.

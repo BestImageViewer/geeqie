@@ -47,8 +47,6 @@ inline constexpr gsize MD5_SIZE = 16;
 
 using Md5Digest = std::array<guchar, MD5_SIZE>;
 
-gchar *md5_get_string(const guchar *buffer, gint buffer_size);
-
 gboolean md5_get_digest_from_file(const gchar *path, Md5Digest &digest);
 
 gchar *md5_get_string_from_file(const gchar *path);

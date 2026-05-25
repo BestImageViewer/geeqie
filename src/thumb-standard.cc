@@ -37,7 +37,6 @@
 #include "exif.h"
 #include "filedata.h"
 #include "image-load.h"
-#include "md5-util.h"
 #include "metadata.h"
 #include "options.h"
 #include "pixbuf-util.h"
@@ -147,7 +146,7 @@ static gchar *thumb_std_cache_path(const gchar *path, const gchar *uri, gboolean
 {
 	if (!path || !uri || !cache_subfolder) return nullptr;
 
-	g_autofree gchar *md5_text = md5_get_string(reinterpret_cast<const guchar *>(uri), strlen(uri));
+	g_autofree gchar *md5_text = g_compute_checksum_for_string(G_CHECKSUM_MD5, uri, -1);
 	if (!md5_text) return nullptr;
 
 	g_autofree gchar *name = g_strconcat(md5_text, THUMB_NAME_EXTENSION, NULL);
