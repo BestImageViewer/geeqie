@@ -138,7 +138,7 @@ std::string md5_digest_to_text(const Md5Digest &digest)
 {
 	static gchar hex_digits[] = "0123456789abcdef";
 
-	std::string result{ (2 * MD5_SIZE) + 1, '\0' };
+	std::string result(2 * MD5_SIZE, '\0');
 
 	for (gsize i = 0; i < MD5_SIZE; i++)
 		{
