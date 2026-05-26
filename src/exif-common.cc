@@ -853,7 +853,7 @@ ExifData *exif_read_fd(FileData *fd)
 {
 	if (!fd) return nullptr;
 
-	static FileCacheData *exif_cache = file_cache_new(exif_release_cb, 4);
+	static FileCache *exif_cache = file_cache_new(exif_release_cb, 4);
 
 	if (file_cache_get(exif_cache, fd)) return fd->exif;
 	g_assert(fd->exif == nullptr);

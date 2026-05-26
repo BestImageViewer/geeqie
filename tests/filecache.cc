@@ -72,7 +72,7 @@ TEST_F(FileCacheTest, BasicLifecycle)
 	// TODO[xsdg]: Create a mock FileData that acts like the underlying file exists.
 	fd = FileData::file_data_new_simple("/does/not/exist.jpg", &context);
 	fd2 = FileData::file_data_new_simple("/does/not/exist2.jpg", &context);
-	FileCacheData *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
+	FileCache *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
 
 	ASSERT_FALSE(file_cache_get(fc, fd));
 	ASSERT_FALSE(file_cache_get(fc, fd2));
@@ -90,7 +90,7 @@ TEST_F(FileCacheTest, BasicLifecycle)
 
 struct CacheAndFds
 {
-	FileCacheData *fc;
+	FileCache *fc;
 	FileData *fd;
 	FileData *fd2;
 	int trigger_count = 0;
@@ -124,7 +124,7 @@ TEST_F(FileCacheTest, ReentrantCacheGet)
 	// TODO[xsdg]: Create a mock FileData that acts like the underlying file exists.
 	fd = FileData::file_data_new_simple("/does/not/exist.jpg", &context);
 	fd2 = FileData::file_data_new_simple("/does/not/exist2.jpg", &context);
-	FileCacheData *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
+	FileCache *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
 
 	CacheAndFds cache_and_fds = {fc, fd, fd2};
 	register_notify_func_with_cleanup(
@@ -161,7 +161,7 @@ TEST_F(FileCacheTest, ReentrantNotifyPutGet)
 	// TODO[xsdg]: Create a mock FileData that acts like the underlying file exists.
 	fd = FileData::file_data_new_simple("/does/not/exist.jpg", &context);
 	fd2 = FileData::file_data_new_simple("/does/not/exist2.jpg", &context);
-	FileCacheData *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
+	FileCache *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
 
 	CacheAndFds cache_and_fds = {fc, fd, fd2};
 	register_notify_func_with_cleanup(

@@ -232,22 +232,22 @@ void FileCache::set_max_size(size_t size)
 }
 
 // Trampoline implementation of C-style API.
-FileCacheData *file_cache_new(FileCacheReleaseFunc release, size_t max_size)
+FileCache *file_cache_new(FileCacheReleaseFunc release, size_t max_size)
 {
 	return new FileCache(release, max_size);
 }
 
-bool file_cache_get(FileCacheData *fc, FileData *fd)
+bool file_cache_get(FileCache *fc, FileData *fd)
 {
 	return fc->get(fd);
 }
 
-void file_cache_put(FileCacheData *fc, FileData *fd, size_t size)
+void file_cache_put(FileCache *fc, FileData *fd, size_t size)
 {
 	fc->put(fd, size);
 }
 
-void file_cache_set_max_size(FileCacheData *fc, size_t size)
+void file_cache_set_max_size(FileCache *fc, size_t size)
 {
 	fc->set_max_size(size);
 }

@@ -63,24 +63,21 @@ class FileCache {
 	void dump();
 	bool remove_entry(ListIterT entry_iter);
 	std::optional<ListIterT> find_by_fd(FileData *fd);
-	// TODO[xsdg]: Figure out how to define this here without including filedata.h
 	static void notify_cb(FileData *fd, NotifyType type, gpointer data);
 	void shrink_to_max_size();
 
-	// TODO[xsdg]: turn file_cache_new into a c++ constructor.
 	ReleaseFunc release_;
 	std::list<Entry> contents_;
 	size_t max_size_;
 	size_t size_ = 0;
 };
 
-using FileCacheData = FileCache;  // Temporary prior to bulk rename.
 using FileCacheReleaseFunc = FileCache::ReleaseFunc;
 
-FileCacheData *file_cache_new(FileCacheReleaseFunc release, size_t max_size);
-bool file_cache_get(FileCacheData *fc, FileData *fd);
-void file_cache_put(FileCacheData *fc, FileData *fd, size_t size);
-void file_cache_set_max_size(FileCacheData *fc, size_t size);
+FileCache *file_cache_new(FileCacheReleaseFunc release, size_t max_size);
+bool file_cache_get(FileCache *fc, FileData *fd);
+void file_cache_put(FileCache *fc, FileData *fd, size_t size);
+void file_cache_set_max_size(FileCache *fc, size_t size);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
