@@ -21,17 +21,13 @@
 #include "filecache.h"
 
 #include <config.h>
+#include <algorithm>
+#include <list>
+#include <optional>
 
 #include "filedata.h"
 
 /* this implements a simple LRU algorithm */
-
-struct FileCacheData {
-	FileCacheReleaseFunc release;
-	GList *list;
-	gulong max_size;
-	gulong size;
-};
 
 namespace
 {
@@ -41,6 +37,21 @@ struct FileCacheEntry {
 	gulong size;
 	gboolean checking_if_changed;
 };
+
+}  // namespace
+
+struct FileCacheData {
+	using ListIterT = std::list<FileCacheEntry>::iterator;
+
+	// TODO[xsdg]: turn file_cache_new into a c++ constructor.
+	FileCacheReleaseFunc release;
+	std::list<FileCacheEntry> *list;
+	gulong max_size;
+	gulong size;
+};
+
+namespace
+{
 
 #ifdef DEBUG
 constexpr bool debug_file_cache = false; /* Set to true to add file cache dumps to the debug output */
@@ -52,41 +63,45 @@ void file_cache_dump(FileCacheData *fc)
 	DEBUG_1("cache dump: fc=%p max size:%lu size:%lu", (void *)fc, fc->max_size, fc->size);
 
 	gulong n = 0;
-	for (GList *work = fc->list; work; work = work->next)
+	for (const auto &entry : *fc->list)
 		{
-		auto fe = static_cast<FileCacheEntry *>(work->data);
-		DEBUG_1("cache entry: fc=%p [%lu] %s %lu", (void *)fc, ++n, fe->fd->path, fe->size);
+		DEBUG_1("cache entry: fc=%p [%lu] %s %lu", (void *)fc, ++n, entry.fd->path, entry.size);
 		}
 }
 #else
 #  define file_cache_dump(fc)
 #endif
 
-gint file_cache_entry_compare_fd(const FileCacheEntry *fe, const FileData *fd)
+gboolean file_cache_remove_entry(FileCacheData *fc, FileCacheData::ListIterT entry_iter)
 {
-	return (fe->fd == fd) ? 0 : 1;
-}
-
-gboolean file_cache_remove_entry(FileCacheData *fc, GList *link)
-{
-	auto *fe = static_cast<FileCacheEntry *>(link->data);
+	auto &entry = *entry_iter;
 
 	// Avoid evicting a FileCacheEntry that implicitly triggered this removal attempt.
-	if (fe->checking_if_changed)
+	if (entry.checking_if_changed)
 		{
-		DEBUG_1("deferring cache remove: fc=%p %s", (void *)fc, fe->fd->path);
+		DEBUG_1("deferring cache remove: fc=%p %s", (void *)fc, entry.fd->path);
 		return FALSE;
 		}
 
-	DEBUG_1("cache remove: fc=%p %s", (void *)fc, fe->fd->path);
+	DEBUG_1("cache remove: fc=%p %s", (void *)fc, entry.fd->path);
 
-	fc->list = g_list_delete_link(fc->list, link);
-	fc->size -= fe->size;
-	fc->release(fe->fd);
-	file_data_unref(fe->fd);
-	g_free(fe);
+	fc->size -= entry.size;
+	fc->release(entry.fd);
+	file_data_unref(entry.fd);
+	fc->list->erase(entry_iter);
 
 	return TRUE;
+}
+
+std::optional<FileCacheData::ListIterT> file_cache_find_by_fd(FileCacheData *fc, FileData *fd)
+{
+	const auto entry_iter = std::find_if(
+		fc->list->begin(),
+		fc->list->end(),
+		[fd](const FileCacheEntry &entry) { return entry.fd == fd; });
+
+	if (entry_iter != fc->list->end()) return entry_iter;
+	return std::nullopt;
 }
 
 void file_cache_notify_cb(FileData *fd, NotifyType type, gpointer data)
@@ -99,26 +114,41 @@ void file_cache_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	auto *fc = static_cast<FileCacheData *>(data);
 	file_cache_dump(fc);
 
-	GList *work = g_list_find_custom(fc->list, fd, reinterpret_cast<GCompareFunc>(file_cache_entry_compare_fd));
-	if (!work) return;
+	const auto maybe_iter = file_cache_find_by_fd(fc, fd);
+	if (!maybe_iter) return;
 
-	file_cache_remove_entry(fc, work);
+	file_cache_remove_entry(fc, *maybe_iter);
 }
 
 void file_cache_shrink_to_max_size(FileCacheData *fc)
 {
 	file_cache_dump(fc);
 
-	GList *work = g_list_last(fc->list);
-	while (fc->size > fc->max_size && work)
+	g_assert((fc->size == 0) == fc->list->empty());  // Assert that size is consistent with emptiness.
+
+	if (fc->list->empty()) return;
+	auto entry_iter = std::prev(fc->list->end());
+	while(fc->size > fc->max_size && entry_iter != fc->list->begin())
 		{
-		GList *prev = work->prev;
+		// This is valid since the list is guaranteed non-empty.
+		auto evict_iter = entry_iter;
+		--entry_iter;
+
 		// This may fail to remove the specified entry if this resize was implicitly
 		// triggered during a file_cache_get call.  Any file_cache_put after the
 		// file_cache_get will re-trigger the shrink and correct the cache size, if needed.
-		file_cache_remove_entry(fc, work);
-		work = prev;
+		file_cache_remove_entry(fc, evict_iter);
 		}
+
+	g_assert((fc->size == 0) == fc->list->empty());  // Assert that size is consistent with emptiness.
+
+	// At this point, the loop won't have been able to evict the begin() entry.  Maybe do so now.
+	if (fc->size > fc->max_size && !fc->list->empty())
+		{
+		file_cache_remove_entry(fc, fc->list->begin());
+		}
+
+	g_assert((fc->size == 0) == fc->list->empty());  // Assert that size is consistent with emptiness.
 }
 
 } // namespace
@@ -128,7 +158,7 @@ FileCacheData *file_cache_new(FileCacheReleaseFunc release, gulong max_size)
 	auto fc = g_new(FileCacheData, 1);
 
 	fc->release = release;
-	fc->list = nullptr;
+	fc->list = new std::list<FileCacheEntry>();  // TODO[xsdg]: This is never freed.
 	fc->max_size = max_size;
 	fc->size = 0;
 
@@ -159,52 +189,51 @@ gboolean file_cache_get(FileCacheData *fc, FileData *fd)
 
 	g_assert(fc && fd);
 
-	GList *work = g_list_find_custom(fc->list, fd, reinterpret_cast<GCompareFunc>(file_cache_entry_compare_fd));
-	if (!work)
-		{
-		DEBUG_2("cache miss: fc=%p %s", (void *)fc, fd->path);
-		return FALSE;
-		}
-
-	// Entry exists.
-	DEBUG_2("cache hit: fc=%p %s", (void *)fc, fd->path);
-
-	// Move it to the beginning, if needed.
-	if (work != fc->list)
-		{
-		DEBUG_2("cache move to front: fc=%p %s", (void *)fc, fd->path);
-		fc->list = g_list_remove_link(fc->list, work);
-		fc->list = g_list_concat(work, fc->list);
-		}
-
-	// Most of the following code is defending against the case where
-	// file_data_check_changed_files triggers a re-entrant call back into this file_cache_get.
+	// We assume that file_data_check_changed_files may invalidate fc iterators.  So we create
+	// a "before" scope, so that the iters will be undefined by the time we make the
+	// invalidating call
 	{
-		auto *entry = static_cast<FileCacheEntry *>(work->data);
-		if (entry->checking_if_changed) return TRUE;  // Avoid infinite recursion.
+		const auto maybe_entry_iter = file_cache_find_by_fd(fc, fd);
+		if (!maybe_entry_iter)
+			{
+			DEBUG_2("cache miss: fc=%p %s", (void *)fc, fd->path);
+			return FALSE;
+			}
+		auto entry_iter = *maybe_entry_iter;
 
-		entry->checking_if_changed = TRUE;
+		// Entry exists.
+		DEBUG_2("cache hit: fc=%p %s", (void *)fc, fd->path);
+
+		// Move it to the beginning, if needed.
+		if (entry_iter != fc->list->begin())
+			{
+			DEBUG_2("cache move to front: fc=%p %s", (void *)fc, fd->path);
+			// Moves entry_iter from fc->list to before fc->list->begin();
+			fc->list->splice(fc->list->begin(), *fc->list, entry_iter);
+			}
+
+		// Most of the following code is defending against the case where
+		// file_data_check_changed_files triggers a re-entrant call back into this file_cache_get.
+		if (entry_iter->checking_if_changed) return TRUE;  // Avoid infinite recursion.
+		entry_iter->checking_if_changed = TRUE;
 	}
 
-	// We assume that file_data_check_changed_files may invalidate work.
-	work = nullptr;
+	// We assume that file_data_check_changed_files may invalidate fc iterators.
 	const gboolean fd_changed = file_data_check_changed_files(fd);
 
-	// Now we re-acquire work to take the appropriate action, if it still exists.
-	work = g_list_find_custom(fc->list, fd, reinterpret_cast<GCompareFunc>(file_cache_entry_compare_fd));
-	if (!work) return FALSE;
+	// Now we re-acquire entry_iter to take the appropriate action, if it still exists.
+	const auto maybe_entry_iter = file_cache_find_by_fd(fc, fd);
+	if (!maybe_entry_iter) return FALSE;
+	auto &entry_iter = *maybe_entry_iter;
 
 	// Doing this here for correctness, even though we might immediately evict the entry.
-	{
-		auto *entry = static_cast<FileCacheEntry *>(work->data);
-		entry->checking_if_changed = FALSE;
-	}
+	entry_iter->checking_if_changed = FALSE;
 
 	if (fd_changed)
 		{
 		// Underlying file has been changed.  Evict the cache entry.
 		file_cache_dump(fc);
-		file_cache_remove_entry(fc, work);
+		file_cache_remove_entry(fc, entry_iter);
 		return FALSE;
 		}
 
@@ -214,17 +243,15 @@ gboolean file_cache_get(FileCacheData *fc, FileData *fd)
 
 void file_cache_put(FileCacheData *fc, FileData *fd, gulong size)
 {
-	FileCacheEntry *fe;
-
 	if (file_cache_get(fc, fd)) return;
 
 	DEBUG_2("cache add: fc=%p %s", (void *)fc, fd->path);
 	// TODO[xsdg]: Switch to an stl container and do this initialization in a constructor.
-	fe = g_new(FileCacheEntry, 1);
-	fe->fd = file_data_ref(fd);
-	fe->size = size;
-	fe->checking_if_changed = FALSE;
-	fc->list = g_list_prepend(fc->list, fe);
+	FileCacheEntry entry;
+	entry.fd = file_data_ref(fd);
+	entry.size = size;
+	entry.checking_if_changed = FALSE;
+	fc->list->push_front(std::move(entry));
 	fc->size += size;
 
 	file_cache_shrink_to_max_size(fc);
