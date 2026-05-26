@@ -23,10 +23,51 @@
 
 #include <glib.h>
 
-struct FileCacheData;
+#include <list>
+#include <optional>
+
 class FileData;
+struct FileCacheData;
 
 using FileCacheReleaseFunc = void (*)(FileData *);
+
+class FileCache {
+    public:
+	using ReleaseFunc = void (*)(FileData *);
+
+	FileCache(ReleaseFunc release, size_t max_size);
+	~FileCache();
+
+	// Not copyable.
+	FileCache(const FileCache &) = delete;
+	FileCache &operator=(const FileCache &) = delete;
+
+	// TODO[xsdg]: The name "get" here is really misleading.  Rename.
+	bool get(FileData *fd);
+	void put(FileData *fd, size_t size);
+	void set_max_size(size_t size);
+
+    private:
+	struct Entry {
+		FileData *fd;
+		size_t size;
+		bool checking_if_changed;
+	};
+	using ListIterT = std::list<Entry>::iterator;
+
+	void dump();
+	bool remove_entry(ListIterT entry_iter);
+	std::optional<ListIterT> find_by_fd(FileData *fd);
+	// TODO[xsdg]: Figure out how to define this here without including filedata.h
+	//static notify_cb(FileData *fd, NotifyType type, gpointer data);
+	void shrink_to_max_size();
+
+	// TODO[xsdg]: turn file_cache_new into a c++ constructor.
+	ReleaseFunc release_;
+	std::list<Entry> list_;
+	size_t max_size_;
+	size_t size_ = 0;
+};
 
 FileCacheData *file_cache_new(FileCacheReleaseFunc release, size_t max_size);
 gboolean file_cache_get(FileCacheData *fc, FileData *fd);

@@ -153,6 +153,16 @@ void file_cache_shrink_to_max_size(FileCacheData *fc)
 
 } // namespace
 
+FileCache::FileCache(ReleaseFunc release, size_t max_size) : release_(release), max_size_(max_size)
+{
+	file_data_register_notify_func(file_cache_notify_cb, this, NOTIFY_PRIORITY_HIGH);
+}
+
+FileCache::~FileCache()
+{
+	file_data_unregister_notify_func(file_cache_notify_cb, this);
+}
+
 FileCacheData *file_cache_new(FileCacheReleaseFunc release, size_t max_size)
 {
 	auto fc = g_new(FileCacheData, 1);
