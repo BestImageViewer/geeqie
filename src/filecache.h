@@ -28,10 +28,10 @@ class FileData;
 
 using FileCacheReleaseFunc = void (*)(FileData *);
 
-FileCacheData *file_cache_new(FileCacheReleaseFunc release, gulong max_size);
+FileCacheData *file_cache_new(FileCacheReleaseFunc release, size_t max_size);
 gboolean file_cache_get(FileCacheData *fc, FileData *fd);
-void file_cache_put(FileCacheData *fc, FileData *fd, gulong size);
-void file_cache_set_max_size(FileCacheData *fc, gulong size);
+void file_cache_put(FileCacheData *fc, FileData *fd, size_t size);
+void file_cache_set_max_size(FileCacheData *fc, size_t size);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

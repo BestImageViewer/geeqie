@@ -34,7 +34,7 @@ namespace
 
 struct FileCacheEntry {
 	FileData *fd;
-	gulong size;
+	size_t size;
 	gboolean checking_if_changed;
 };
 
@@ -46,8 +46,8 @@ struct FileCacheData {
 	// TODO[xsdg]: turn file_cache_new into a c++ constructor.
 	FileCacheReleaseFunc release;
 	std::list<FileCacheEntry> *list;
-	gulong max_size;
-	gulong size;
+	size_t max_size;
+	size_t size;
 };
 
 namespace
@@ -62,7 +62,7 @@ void file_cache_dump(FileCacheData *fc)
 
 	DEBUG_1("cache dump: fc=%p max size:%lu size:%lu", (void *)fc, fc->max_size, fc->size);
 
-	gulong n = 0;
+	size_t n = 0;
 	for (const auto &entry : *fc->list)
 		{
 		DEBUG_1("cache entry: fc=%p [%lu] %s %lu", (void *)fc, ++n, entry.fd->path, entry.size);
@@ -153,7 +153,7 @@ void file_cache_shrink_to_max_size(FileCacheData *fc)
 
 } // namespace
 
-FileCacheData *file_cache_new(FileCacheReleaseFunc release, gulong max_size)
+FileCacheData *file_cache_new(FileCacheReleaseFunc release, size_t max_size)
 {
 	auto fc = g_new(FileCacheData, 1);
 
@@ -241,7 +241,7 @@ gboolean file_cache_get(FileCacheData *fc, FileData *fd)
 	return TRUE;
 }
 
-void file_cache_put(FileCacheData *fc, FileData *fd, gulong size)
+void file_cache_put(FileCacheData *fc, FileData *fd, size_t size)
 {
 	if (file_cache_get(fc, fd)) return;
 
@@ -257,7 +257,7 @@ void file_cache_put(FileCacheData *fc, FileData *fd, gulong size)
 	file_cache_shrink_to_max_size(fc);
 }
 
-void file_cache_set_max_size(FileCacheData *fc, gulong size)
+void file_cache_set_max_size(FileCacheData *fc, size_t size)
 {
 	fc->max_size = size;
 	file_cache_shrink_to_max_size(fc);
