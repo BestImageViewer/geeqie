@@ -20,8 +20,8 @@
 
 #include "filecache.h"
 
-#include <config.h>
 #include <algorithm>
+#include <config.h>
 #include <list>
 #include <optional>
 
@@ -29,106 +29,85 @@
 
 /* this implements a simple LRU algorithm */
 
-namespace
-{
-
-struct FileCacheEntry {
-	FileData *fd;
-	size_t size;
-	gboolean checking_if_changed;
-};
-
-}  // namespace
-
-struct FileCacheData {
-	using ListIterT = std::list<FileCacheEntry>::iterator;
-
-	// TODO[xsdg]: turn file_cache_new into a c++ constructor.
-	FileCacheReleaseFunc release;
-	std::list<FileCacheEntry> *list;
-	size_t max_size;
-	size_t size;
-};
-
-namespace
-{
-
 #ifdef DEBUG
 constexpr bool debug_file_cache = false; /* Set to true to add file cache dumps to the debug output */
 
-void file_cache_dump(FileCacheData *fc)
+void FileCache::dump()
 {
 	if (!debug_file_cache) return;
 
-	DEBUG_1("cache dump: fc=%p max size:%lu size:%lu", (void *)fc, fc->max_size, fc->size);
+	DEBUG_1("cache dump: fc=%p max size:%lu size:%lu", (void *)this, max_size_, size_);
 
 	size_t n = 0;
-	for (const auto &entry : *fc->list)
+	for (const auto &entry : contents_)
 		{
-		DEBUG_1("cache entry: fc=%p [%lu] %s %lu", (void *)fc, ++n, entry.fd->path, entry.size);
+		DEBUG_1("cache entry: fc=%p [%lu] %s %lu", (void *)this, ++n, entry.fd->path, entry.size);
 		}
 }
 #else
-#  define file_cache_dump(fc)
+// TODO[xsdg]: Make this a no-op again.
+void FileCache::dump() {}
+// #  define file_cache_dump(fc)
 #endif
 
-gboolean file_cache_remove_entry(FileCacheData *fc, FileCacheData::ListIterT entry_iter)
+bool FileCache::remove_entry(FileCache::ListIterT entry_iter)
 {
 	auto &entry = *entry_iter;
 
 	// Avoid evicting a FileCacheEntry that implicitly triggered this removal attempt.
 	if (entry.checking_if_changed)
 		{
-		DEBUG_1("deferring cache remove: fc=%p %s", (void *)fc, entry.fd->path);
-		return FALSE;
+		DEBUG_1("deferring cache remove: fc=%p %s", (void *)this, entry.fd->path);
+		return false;
 		}
 
-	DEBUG_1("cache remove: fc=%p %s", (void *)fc, entry.fd->path);
+	DEBUG_1("cache remove: fc=%p %s", (void *)this, entry.fd->path);
 
-	fc->size -= entry.size;
-	fc->release(entry.fd);
+	size_ -= entry.size;
+	release_(entry.fd);
 	file_data_unref(entry.fd);
-	fc->list->erase(entry_iter);
+	contents_.erase(entry_iter);
 
-	return TRUE;
+	return true;
 }
 
-std::optional<FileCacheData::ListIterT> file_cache_find_by_fd(FileCacheData *fc, FileData *fd)
+std::optional<FileCache::ListIterT> FileCache::find_by_fd(FileData *fd)
 {
 	const auto entry_iter = std::find_if(
-		fc->list->begin(),
-		fc->list->end(),
-		[fd](const FileCacheEntry &entry) { return entry.fd == fd; });
+		contents_.begin(),
+		contents_.end(),
+		[fd](const Entry &entry) { return entry.fd == fd; });
 
-	if (entry_iter != fc->list->end()) return entry_iter;
+	if (entry_iter != contents_.end()) return entry_iter;
 	return std::nullopt;
 }
 
-void file_cache_notify_cb(FileData *fd, NotifyType type, gpointer data)
+// static
+void FileCache::notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	/* invalidate the entry on each file change */
 	if (!(type & (NOTIFY_REREAD | NOTIFY_CHANGE))) return;
 
 	DEBUG_1("Notify cache: %s %04x", fd->path, type);
 
-	auto *fc = static_cast<FileCacheData *>(data);
-	file_cache_dump(fc);
+	auto *fc = static_cast<FileCache *>(data);
+	fc->dump();
 
-	const auto maybe_iter = file_cache_find_by_fd(fc, fd);
+	const auto maybe_iter = fc->find_by_fd(fd);
 	if (!maybe_iter) return;
 
-	file_cache_remove_entry(fc, *maybe_iter);
+	fc->remove_entry(*maybe_iter);
 }
 
-void file_cache_shrink_to_max_size(FileCacheData *fc)
+void FileCache::shrink_to_max_size()
 {
-	file_cache_dump(fc);
+	dump();
 
-	g_assert((fc->size == 0) == fc->list->empty());  // Assert that size is consistent with emptiness.
+	g_assert((size_ == 0) == contents_.empty());  // Assert that size is consistent with emptiness.
 
-	if (fc->list->empty()) return;
-	auto entry_iter = std::prev(fc->list->end());
-	while(fc->size > fc->max_size && entry_iter != fc->list->begin())
+	if (contents_.empty()) return;
+	auto entry_iter = std::prev(contents_.end());
+	while(size_ > max_size_ && entry_iter != contents_.begin())
 		{
 		// This is valid since the list is guaranteed non-empty.
 		auto evict_iter = entry_iter;
@@ -137,47 +116,31 @@ void file_cache_shrink_to_max_size(FileCacheData *fc)
 		// This may fail to remove the specified entry if this resize was implicitly
 		// triggered during a file_cache_get call.  Any file_cache_put after the
 		// file_cache_get will re-trigger the shrink and correct the cache size, if needed.
-		file_cache_remove_entry(fc, evict_iter);
+		remove_entry(evict_iter);
 		}
 
-	g_assert((fc->size == 0) == fc->list->empty());  // Assert that size is consistent with emptiness.
+	g_assert((size_ == 0) == contents_.empty());  // Assert that size is consistent with emptiness.
 
 	// At this point, the loop won't have been able to evict the begin() entry.  Maybe do so now.
-	if (fc->size > fc->max_size && !fc->list->empty())
+	if (size_ > max_size_ && !contents_.empty())
 		{
-		file_cache_remove_entry(fc, fc->list->begin());
+		remove_entry(contents_.begin());
 		}
 
-	g_assert((fc->size == 0) == fc->list->empty());  // Assert that size is consistent with emptiness.
+	g_assert((size_ == 0) == contents_.empty());  // Assert that size is consistent with emptiness.
 }
-
-} // namespace
 
 FileCache::FileCache(ReleaseFunc release, size_t max_size) : release_(release), max_size_(max_size)
 {
-	file_data_register_notify_func(file_cache_notify_cb, this, NOTIFY_PRIORITY_HIGH);
+	file_data_register_notify_func(FileCache::notify_cb, this, NOTIFY_PRIORITY_HIGH);
 }
 
 FileCache::~FileCache()
 {
-	file_data_unregister_notify_func(file_cache_notify_cb, this);
+	file_data_unregister_notify_func(FileCache::notify_cb, this);
 }
 
-FileCacheData *file_cache_new(FileCacheReleaseFunc release, size_t max_size)
-{
-	auto fc = g_new(FileCacheData, 1);
-
-	fc->release = release;
-	fc->list = new std::list<FileCacheEntry>();  // TODO[xsdg]: This is never freed.
-	fc->max_size = max_size;
-	fc->size = 0;
-
-	file_data_register_notify_func(file_cache_notify_cb, fc, NOTIFY_PRIORITY_HIGH);
-
-	return fc;
-}
-
-gboolean file_cache_get(FileCacheData *fc, FileData *fd)
+bool FileCache::get(FileData *fd)
 {
 	/* Operating theory of this function:
 	 * This function must be re-entrant, which means it must specifically be implemented in a
@@ -197,79 +160,96 @@ gboolean file_cache_get(FileCacheData *fc, FileData *fd)
 	 * file_cache_get(fc, fd_A) again.
 	 */
 
-	g_assert(fc && fd);
+	g_assert(fd);
 
 	// We assume that file_data_check_changed_files may invalidate fc iterators.  So we create
 	// a "before" scope, so that the iters will be undefined by the time we make the
 	// invalidating call
 	{
-		const auto maybe_entry_iter = file_cache_find_by_fd(fc, fd);
+		const auto maybe_entry_iter = find_by_fd(fd);
 		if (!maybe_entry_iter)
 			{
-			DEBUG_2("cache miss: fc=%p %s", (void *)fc, fd->path);
+			DEBUG_2("cache miss: fc=%p %s", (void *)this, fd->path);
 			return FALSE;
 			}
 		auto entry_iter = *maybe_entry_iter;
 
 		// Entry exists.
-		DEBUG_2("cache hit: fc=%p %s", (void *)fc, fd->path);
+		DEBUG_2("cache hit: fc=%p %s", (void *)this, fd->path);
 
 		// Move it to the beginning, if needed.
-		if (entry_iter != fc->list->begin())
+		if (entry_iter != contents_.begin())
 			{
-			DEBUG_2("cache move to front: fc=%p %s", (void *)fc, fd->path);
-			// Moves entry_iter from fc->list to before fc->list->begin();
-			fc->list->splice(fc->list->begin(), *fc->list, entry_iter);
+			DEBUG_2("cache move to front: fc=%p %s", (void *)this, fd->path);
+			// Moves entry_iter from somewhere in contents_ to before contents_.begin();
+			contents_.splice(contents_.begin(), contents_, entry_iter);
 			}
 
 		// Most of the following code is defending against the case where
 		// file_data_check_changed_files triggers a re-entrant call back into this file_cache_get.
-		if (entry_iter->checking_if_changed) return TRUE;  // Avoid infinite recursion.
+		if (entry_iter->checking_if_changed) return true;  // Avoid infinite recursion.
 		entry_iter->checking_if_changed = TRUE;
 	}
 
 	// We assume that file_data_check_changed_files may invalidate fc iterators.
-	const gboolean fd_changed = file_data_check_changed_files(fd);
+	const bool fd_changed = file_data_check_changed_files(fd);
 
 	// Now we re-acquire entry_iter to take the appropriate action, if it still exists.
-	const auto maybe_entry_iter = file_cache_find_by_fd(fc, fd);
-	if (!maybe_entry_iter) return FALSE;
+	const auto maybe_entry_iter = find_by_fd(fd);
+	if (!maybe_entry_iter) return false;
 	auto &entry_iter = *maybe_entry_iter;
 
 	// Doing this here for correctness, even though we might immediately evict the entry.
-	entry_iter->checking_if_changed = FALSE;
+	entry_iter->checking_if_changed = false;
 
 	if (fd_changed)
 		{
 		// Underlying file has been changed.  Evict the cache entry.
-		file_cache_dump(fc);
-		file_cache_remove_entry(fc, entry_iter);
-		return FALSE;
+		dump();
+		remove_entry(entry_iter);
+		return false;
 		}
 
-	file_cache_dump(fc);
-	return TRUE;
+	dump();
+	return true;
+}
+
+void FileCache::put(FileData *fd, size_t size)
+{
+	if (get(fd)) return;
+
+	DEBUG_2("cache add: fc=%p %s", (void *)this, fd->path);
+	contents_.emplace_front(file_data_ref(fd), size);
+	size_ += size;
+
+	shrink_to_max_size();
+}
+
+void FileCache::set_max_size(size_t size)
+{
+	max_size_ = size;
+	shrink_to_max_size();
+}
+
+// Trampoline implementation of C-style API.
+FileCacheData *file_cache_new(FileCacheReleaseFunc release, size_t max_size)
+{
+	return new FileCache(release, max_size);
+}
+
+bool file_cache_get(FileCacheData *fc, FileData *fd)
+{
+	return fc->get(fd);
 }
 
 void file_cache_put(FileCacheData *fc, FileData *fd, size_t size)
 {
-	if (file_cache_get(fc, fd)) return;
-
-	DEBUG_2("cache add: fc=%p %s", (void *)fc, fd->path);
-	// TODO[xsdg]: Switch to an stl container and do this initialization in a constructor.
-	FileCacheEntry entry;
-	entry.fd = file_data_ref(fd);
-	entry.size = size;
-	entry.checking_if_changed = FALSE;
-	fc->list->push_front(std::move(entry));
-	fc->size += size;
-
-	file_cache_shrink_to_max_size(fc);
+	fc->put(fd, size);
 }
 
 void file_cache_set_max_size(FileCacheData *fc, size_t size)
 {
-	fc->max_size = size;
-	file_cache_shrink_to_max_size(fc);
+	fc->set_max_size(size);
 }
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

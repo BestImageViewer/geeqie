@@ -50,7 +50,7 @@
 #include "ui-fileops.h"
 
 struct ExifData;
-struct FileCacheData;
+class FileCache;
 
 namespace
 {
@@ -769,9 +769,9 @@ static void image_cache_release_cb(FileData *fd)
 	fd->pixbuf = nullptr;
 }
 
-static FileCacheData *image_get_cache()
+static FileCache *image_get_cache()
 {
-	static FileCacheData *cache = file_cache_new(image_cache_release_cb, 1);
+	static FileCache *cache = file_cache_new(image_cache_release_cb, 1);
 	file_cache_set_max_size(cache, static_cast<gulong>(options->image.image_cache_max) * 1048576); /* update from options */
 	return cache;
 }

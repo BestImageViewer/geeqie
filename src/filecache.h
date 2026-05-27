@@ -26,10 +26,9 @@
 #include <list>
 #include <optional>
 
+// From filedata.h
 class FileData;
-struct FileCacheData;
-
-using FileCacheReleaseFunc = void (*)(FileData *);
+enum NotifyType : gint;
 
 class FileCache {
     public:
@@ -49,9 +48,15 @@ class FileCache {
 
     private:
 	struct Entry {
+		Entry(FileData *fd, size_t size) : fd(fd), size(size) {}
+
+		// Not copyable.
+		Entry(const Entry &other) = delete;
+		Entry &operator=(const Entry &other) = delete;
+
 		FileData *fd;
 		size_t size;
-		bool checking_if_changed;
+		bool checking_if_changed = false;
 	};
 	using ListIterT = std::list<Entry>::iterator;
 
@@ -59,18 +64,21 @@ class FileCache {
 	bool remove_entry(ListIterT entry_iter);
 	std::optional<ListIterT> find_by_fd(FileData *fd);
 	// TODO[xsdg]: Figure out how to define this here without including filedata.h
-	//static notify_cb(FileData *fd, NotifyType type, gpointer data);
+	static void notify_cb(FileData *fd, NotifyType type, gpointer data);
 	void shrink_to_max_size();
 
 	// TODO[xsdg]: turn file_cache_new into a c++ constructor.
 	ReleaseFunc release_;
-	std::list<Entry> list_;
+	std::list<Entry> contents_;
 	size_t max_size_;
 	size_t size_ = 0;
 };
 
+using FileCacheData = FileCache;  // Temporary prior to bulk rename.
+using FileCacheReleaseFunc = FileCache::ReleaseFunc;
+
 FileCacheData *file_cache_new(FileCacheReleaseFunc release, size_t max_size);
-gboolean file_cache_get(FileCacheData *fc, FileData *fd);
+bool file_cache_get(FileCacheData *fc, FileData *fd);
 void file_cache_put(FileCacheData *fc, FileData *fd, size_t size);
 void file_cache_set_max_size(FileCacheData *fc, size_t size);
 
