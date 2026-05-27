@@ -22,6 +22,8 @@
 #ifndef CACHE_LOADER_H
 #define CACHE_LOADER_H
 
+#include <memory>
+
 #include <glib.h>
 
 struct CacheData;
@@ -38,7 +40,7 @@ enum CacheDataType {
 
 struct CacheLoader {
 	FileData *fd;
-	CacheData *cd;
+	std::unique_ptr<CacheData> cd;
 
 	CacheDataType todo_mask;
 	CacheDataType done_mask;

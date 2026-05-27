@@ -191,22 +191,19 @@ static gboolean cache_loader_phase2_process(gpointer data)
 CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 			      CacheLoader::DoneFunc done_func, gpointer done_data)
 {
-	CacheLoader *cl;
-
 	if (!fd || !isfile(fd->path)) return nullptr;
 
-	cl = g_new0(CacheLoader, 1);
+	auto *cl = new CacheLoader();
 	cl->fd = file_data_ref(fd);
 
 	cl->done_func = done_func;
 	cl->done_data = done_data;
 
-	cl->cd = cache_sim_data_new(cl->fd->path);
+	cl->cd.reset(cache_sim_data_new(fd->path));
 
 	cl->todo_mask = load_mask;
 	cl->done_mask = CACHE_LOADER_NONE;
 
-	cl->il = nullptr;
 	cl->idle_id = g_idle_add(cache_loader_phase1_process, cl);
 
 	cl->error = FALSE;
@@ -225,9 +222,8 @@ void cache_loader_free(CacheLoader *cl)
 		}
 
 	image_loader_free(cl->il);
-	cache_sim_data_free(cl->cd);
 
 	file_data_unref(cl->fd);
-	g_free(cl);
+	delete cl;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

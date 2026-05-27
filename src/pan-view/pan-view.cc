@@ -542,7 +542,7 @@ static void pan_cache_step_done_cb(CacheLoader *cl, gint, gpointer data)
 
 		if (!pc->cd)
 			{
-			pc->cd.reset(g_steal_pointer(&cl->cd));
+			pc->cd.swap(cl->cd);
 			}
 		}
 
