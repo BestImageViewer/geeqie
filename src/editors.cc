@@ -641,62 +641,49 @@ enum PathType {
 
 static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_sidecars, PathType type, const EditorDescription *editor)
 {
-	gchar *pathl;
 	const gchar *p = nullptr;
 
 	DEBUG_2("editor_command_path_parse: %s %d %d %s", fd->path, consider_sidecars, type, editor->key);
 
 	if (type == PATH_FILE || type == PATH_FILE_URL)
 		{
-		GList *work = editor->ext_list;
-
-		if (!work)
+		if (!editor->ext_list ||
+		    g_list_find_custom(editor->ext_list, fd->extension, reinterpret_cast<GCompareFunc>(g_ascii_strcasecmp)))
+			{
 			p = fd->path;
+			}
 		else
 			{
-			const auto file_data_compare_ext = [](gconstpointer data, gconstpointer user_data)
+			static const auto file_data_compare_ext = [](gconstpointer data, gconstpointer user_data)
 				{
 				return g_ascii_strcasecmp(static_cast<const FileData *>(data)->extension, static_cast<const gchar *>(user_data));
 				};
 
-			const auto file_data_compare_primary_image = [](gconstpointer data, gconstpointer user_data)
+			for (GList *work = editor->ext_list; work; work = work->next)
 				{
-				return g_ascii_strcasecmp(static_cast<const gchar *>(data), static_cast<const gchar *>(user_data));
-				};
+				auto *ext = static_cast<gchar *>(work->data);
 
-			GList *work_primary_image = g_list_find_custom(editor->ext_list, fd->extension, file_data_compare_primary_image);
-
-			if (work_primary_image)
-				{
-				p = fd->path;
-				}
-			else
-				{
-				while (work)
+				if (strcmp(ext, "*") == 0)
 					{
-					auto ext = static_cast<gchar *>(work->data);
-					work = work->next;
+					p = fd->path;
+					break;
+					}
 
-					if (strcmp(ext, "*") == 0 ||
-							g_ascii_strcasecmp(ext, fd->extension) == 0)
+				if (consider_sidecars)
+					{
+					GList *work2 = g_list_find_custom(fd->sidecar_files, ext, file_data_compare_ext);
+					if (work2)
 						{
-						p = fd->path;
-						break;
-						}
-
-					if (consider_sidecars)
-						{
-						GList *work2 = g_list_find_custom(fd->sidecar_files, ext, file_data_compare_ext);
-						if (work2)
+						auto *sfd = static_cast<FileData *>(work2->data);
+						if (sfd->path)
 							{
-							auto sfd = static_cast<FileData *>(work2->data);
 							p = sfd->path;
+							break;
 							}
 						}
-
-					if (p) break;
 					}
 				}
+
 			if (!p) return nullptr;
 			}
 		}
@@ -713,11 +700,10 @@ static gchar *editor_command_path_parse(const FileData *fd, gboolean consider_si
 	g_autoptr(GString) string = g_string_new(p);
 	if (type == PATH_FILE_URL) g_string_prepend(string, "file://");
 
-	pathl = path_from_utf8(string->str);
+	gchar *pathl = path_from_utf8(string->str);
 	if (pathl && !pathl[0]) /* empty string case */
 		{
-		g_free(pathl);
-		pathl = nullptr;
+		g_clear_pointer(&pathl, g_free);
 		}
 
 	DEBUG_2("editor_command_path_parse: return %s", pathl);
