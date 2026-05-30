@@ -257,7 +257,7 @@ struct SearchData
 	gint   search_height_end;
 	gint   search_similarity;
 	gchar *search_similarity_path;
-	CacheData *search_similarity_cd;
+	std::unique_ptr<CacheData> search_similarity_cd;
 	GList *search_keyword_list;
 	gchar *search_comment;
 	GRegex *search_comment_regex;
@@ -316,7 +316,7 @@ struct SearchData
 	guint update_idle_id; /* event source id */
 
 	ImageLoader *img_loader;
-	CacheData   *img_cd;
+	std::unique_ptr<CacheData> img_cd;
 
 	FileData *click_fd;
 
@@ -1690,11 +1690,9 @@ static void search_stop(SearchData *sd)
 
 	image_loader_free(sd->img_loader);
 	sd->img_loader = nullptr;
-	cache_sim_data_free(sd->img_cd);
-	sd->img_cd = nullptr;
+	sd->img_cd.reset();
 
-	cache_sim_data_free(sd->search_similarity_cd);
-	sd->search_similarity_cd = nullptr;
+	sd->search_similarity_cd.reset();
 
 	search_buffer_flush(sd);
 
@@ -1765,7 +1763,7 @@ static void search_file_load_process(SearchData *sd, CacheData *cd)
 static void search_file_load_done_cb(ImageLoader *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
-	search_file_load_process(sd, sd->img_cd);
+	search_file_load_process(sd, sd->img_cd.get());
 }
 
 static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolean &match)
@@ -1775,7 +1773,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 
 	if (!sd->img_cd)
 		{
-		sd->img_cd = cache_sim_data_new(mfd.fd->path);
+		sd->img_cd.reset(cache_sim_data_new(mfd.fd->path));
 
 		if ((sd->match_dimensions_enable && !sd->img_cd->dimensions) ||
 		    (sd->match_similarity_enable && !sd->img_cd->similarity) ||
@@ -1794,43 +1792,43 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 			}
 		}
 
-	if (sd->match_broken_enable && sd->img_cd->dimensions)
+	const auto &dimensions = sd->img_cd->dimensions; // prevent clang-tidy bugprone-unchecked-optional-access
+
+	if (sd->match_broken_enable && dimensions)
 		{
 		tested = TRUE;
 		tmatch = FALSE;
-		if (sd->match_class == SEARCH_MATCH_EQUAL && sd->img_cd->dimensions->width == -1)
+		if (sd->match_class == SEARCH_MATCH_EQUAL && dimensions->width == -1)
 			{
 			tmatch = TRUE;
 			}
-		else if (sd->match_class == SEARCH_MATCH_NONE && sd->img_cd->dimensions->width != -1)
+		else if (sd->match_class == SEARCH_MATCH_NONE && dimensions->width != -1)
 			{
 			tmatch = TRUE;
 			}
 		}
 
-	if (tmatch && sd->match_dimensions_enable && sd->img_cd->dimensions)
+	if (tmatch && sd->match_dimensions_enable && dimensions)
 		{
-		const GqSize &dimensions = sd->img_cd->dimensions.value();
-
 		tmatch = FALSE;
 		tested = TRUE;
 
 		if (sd->match_dimensions == SEARCH_MATCH_EQUAL)
 			{
-			tmatch = (dimensions.width == sd->search_width && dimensions.height == sd->search_height);
+			tmatch = (dimensions->width == sd->search_width && dimensions->height == sd->search_height);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_UNDER)
 			{
-			tmatch = (dimensions.width < sd->search_width && dimensions.height < sd->search_height);
+			tmatch = (dimensions->width < sd->search_width && dimensions->height < sd->search_height);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_OVER)
 			{
-			tmatch = (dimensions.width > sd->search_width && dimensions.height > sd->search_height);
+			tmatch = (dimensions->width > sd->search_width && dimensions->height > sd->search_height);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_BETWEEN)
 			{
-			tmatch = match_is_between(dimensions.width, sd->search_width, sd->search_width_end) &&
-			         match_is_between(dimensions.height, sd->search_height, sd->search_height_end);
+			tmatch = match_is_between(dimensions->width, sd->search_width, sd->search_width_end) &&
+			         match_is_between(dimensions->height, sd->search_height, sd->search_height_end);
 			}
 		}
 
@@ -1855,14 +1853,13 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 			}
 		}
 
-	if (sd->img_cd->dimensions)
+	if (dimensions)
 		{
-		mfd.width = sd->img_cd->dimensions->width;
-		mfd.height = sd->img_cd->dimensions->height;
+		mfd.width = dimensions->width;
+		mfd.height = dimensions->height;
 		}
 
-	cache_sim_data_free(sd->img_cd);
-	sd->img_cd = nullptr;
+	sd->img_cd.reset();
 
 	match = (tmatch && tested);
 
@@ -2343,7 +2340,7 @@ static gboolean search_step_cb(gpointer data)
 static void search_similarity_load_done_cb(ImageLoader *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
-	search_file_load_process(sd, sd->search_similarity_cd);
+	search_file_load_process(sd, sd->search_similarity_cd.get());
 }
 
 static GRegex *create_search_regex(const gchar *pattern)
@@ -2424,7 +2421,7 @@ static void search_start(SearchData *sd)
 	    !sd->search_similarity_cd &&
 	    isfile(sd->search_similarity_path))
 		{
-		sd->search_similarity_cd = cache_sim_data_new(sd->search_similarity_path);
+		sd->search_similarity_cd.reset(cache_sim_data_new(sd->search_similarity_path));
 
 		if (!sd->search_similarity_cd->similarity)
 			{
@@ -3038,7 +3035,7 @@ static void search_window_destroy_cb(GtkWidget *, gpointer data)
 
 	file_data_unregister_notify_func(search_notify_cb, sd);
 
-	g_free(sd);
+	delete sd;
 }
 
 static void select_collection_response_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
@@ -3102,7 +3099,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	GtkTreeSortable *sortable;
 	GdkGeometry geometry;
 
-	auto sd = g_new0(SearchData, 1);
+	auto *sd = new SearchData();
 
 	sd->search_dir_fd = file_data_ref(dir_fd);
 	sd->search_path_recurse = TRUE;
