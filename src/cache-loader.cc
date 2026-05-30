@@ -193,7 +193,7 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 	cl->done_func = done_func;
 	cl->done_data = done_data;
 
-	cl->cd.reset(cache_sim_data_new(fd->path));
+	cl->cd = std::make_unique<CacheData>(fd->path);
 
 	cl->todo_mask = load_mask;
 	cl->done_mask = CACHE_LOADER_NONE;

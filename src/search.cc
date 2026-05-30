@@ -1773,7 +1773,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 
 	if (!sd->img_cd)
 		{
-		sd->img_cd.reset(cache_sim_data_new(mfd.fd->path));
+		sd->img_cd = std::make_unique<CacheData>(mfd.fd->path);
 
 		if ((sd->match_dimensions_enable && !sd->img_cd->dimensions) ||
 		    (sd->match_similarity_enable && !sd->img_cd->similarity) ||
@@ -2421,7 +2421,7 @@ static void search_start(SearchData *sd)
 	    !sd->search_similarity_cd &&
 	    isfile(sd->search_similarity_path))
 		{
-		sd->search_similarity_cd.reset(cache_sim_data_new(sd->search_similarity_path));
+		sd->search_similarity_cd = std::make_unique<CacheData>(sd->search_similarity_path);
 
 		if (!sd->search_similarity_cd->similarity)
 			{

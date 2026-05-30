@@ -159,18 +159,10 @@ gchar *cache_get_location(CacheType type, const gchar *source, gint include_name
  *-------------------------------------------------------------------
  */
 
-CacheData *cache_sim_data_new(const gchar *path)
+CacheData::CacheData(const gchar *path)
+	: CacheData()
 {
-	auto *cd = new CacheData();
-
-	if (path) cd->load(path);
-
-	return cd;
-}
-
-void cache_sim_data_free(CacheData *cd)
-{
-	delete cd;
+	if (path) load(path);
 }
 
 /*
