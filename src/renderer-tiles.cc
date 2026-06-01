@@ -2036,7 +2036,7 @@ gboolean rt_draw_cb(GtkWidget *, cairo_t *cr, gpointer data)
 	if (rt->stereo_mode & (PR_STEREO_HORIZ | PR_STEREO_VERT))
 		{
 		cairo_push_group(cr);
-		cairo_set_source_rgb(cr, static_cast<double>(rt->pr->color.red), static_cast<double>(rt->pr->color.green), static_cast<double>(rt->pr->color.blue));
+		cairo_set_source_rgb(cr, rt->pr->color.red, rt->pr->color.green, rt->pr->color.blue);
 
 		if (rt->stereo_mode & PR_STEREO_HORIZ)
 			{
