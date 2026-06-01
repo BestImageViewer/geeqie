@@ -37,36 +37,32 @@
 
 static gboolean cache_loader_phase2_process(gpointer data);
 
+static void cache_loader_phase1_done(CacheLoader *cl, gboolean error)
+{
+	cl->error = error;
+	cl->idle_id = g_idle_add(cache_loader_phase2_process, cl);
+}
+
 template<gboolean error>
 static void cache_loader_phase1_done_cb(ImageLoader *, gpointer data)
 {
 	auto cl = static_cast<CacheLoader *>(data);
 
-	cl->error = error;
-	cl->idle_id = g_idle_add(cache_loader_phase2_process, cl);
+	cache_loader_phase1_done(cl, error);
 }
 
 static gboolean cache_loader_phase1_process(gpointer data)
 {
 	auto *cl = static_cast<CacheLoader *>(data);
 
-	if (cl->todo_mask & CACHE_LOADER_SIMILARITY && !cl->cd->similarity)
+	cl->il = image_loader_new(cl->fd);
+	g_signal_connect(G_OBJECT(cl->il), "error", G_CALLBACK(cache_loader_phase1_done_cb<TRUE>), cl);
+	g_signal_connect(G_OBJECT(cl->il), "done", G_CALLBACK(cache_loader_phase1_done_cb<FALSE>), cl);
+
+	if (!image_loader_start(cl->il))
 		{
-		if (!cl->il && !cl->error)
-			{
-			cl->il = image_loader_new(cl->fd);
-			g_signal_connect(G_OBJECT(cl->il), "error", G_CALLBACK(cache_loader_phase1_done_cb<TRUE>), cl);
-			g_signal_connect(G_OBJECT(cl->il), "done", G_CALLBACK(cache_loader_phase1_done_cb<FALSE>), cl);
-			if (image_loader_start(cl->il))
-				{
-				return G_SOURCE_REMOVE;
-				}
-
-			cl->error = TRUE;
-			}
+		cache_loader_phase1_done(cl, TRUE);
 		}
-
-	cl->idle_id = g_idle_add(cache_loader_phase2_process, cl);
 
 	return G_SOURCE_REMOVE;
 }
@@ -198,7 +194,9 @@ CacheLoader *cache_loader_new(FileData *fd, CacheDataType load_mask,
 	cl->todo_mask = load_mask;
 	cl->done_mask = CACHE_LOADER_NONE;
 
-	cl->idle_id = g_idle_add(cache_loader_phase1_process, cl);
+	cl->idle_id = g_idle_add((cl->todo_mask & CACHE_LOADER_SIMILARITY && !cl->cd->similarity) ?
+	                             cache_loader_phase1_process : cache_loader_phase2_process,
+	                         cl);
 
 	cl->error = FALSE;
 
