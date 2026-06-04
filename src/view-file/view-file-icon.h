@@ -92,7 +92,7 @@ void vficon_select_all(ViewFile *vf);
 void vficon_select_none(ViewFile *vf);
 void vficon_select_invert(ViewFile *vf);
 void vficon_select_by_fd(ViewFile *vf, FileData *fd);
-void vficon_select_list(ViewFile *vf, GList *list);
+void vficon_select_list(ViewFile *vf, const FileDataList *list);
 
 void vficon_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode);
 void vficon_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode);

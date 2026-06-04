@@ -280,7 +280,7 @@ void vf_select_by_fd(ViewFile *vf, FileData *fd)
 	}
 }
 
-void vf_select_list(ViewFile *vf, GList *list)
+void vf_select_list(ViewFile *vf, const FileDataList *list)
 {
 	switch (vf->type)
 	{

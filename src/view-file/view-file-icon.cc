@@ -196,7 +196,7 @@ static gint vficon_get_icon_width(ViewFile *vf)
  *-------------------------------------------------------------------
  */
 
-static gboolean vficon_find_position(ViewFile *vf, FileData *fd, gint *row, gint *col)
+static gboolean vficon_find_position(ViewFile *vf, const FileData *fd, gint *row, gint *col)
 {
 	gint n;
 
@@ -210,7 +210,7 @@ static gboolean vficon_find_position(ViewFile *vf, FileData *fd, gint *row, gint
 	return TRUE;
 }
 
-static gboolean vficon_find_iter(ViewFile *vf, FileData *fd, GtkTreeIter *iter, gint *column)
+static gboolean vficon_find_iter(ViewFile *vf, const FileData *fd, GtkTreeIter *iter, gint *column)
 {
 	GtkTreeModel *store;
 	gint row;
@@ -791,23 +791,18 @@ void vficon_select_by_fd(ViewFile *vf, FileData *fd)
 	vficon_set_focus(vf, fd);
 }
 
-void vficon_select_list(ViewFile *vf, GList *list)
+void vficon_select_list(ViewFile *vf, const FileDataList *list)
 {
-	GList *work;
-	FileData *fd;
-
 	if (!list) return;
 
-	work = list;
-	while (work)
+	for (const GList *work = list; work; work = work->next)
 		{
-		fd = static_cast<FileData *>(work->data);
+		auto *fd = static_cast<FileData *>(work->data);
 		if (g_list_find(vf->list, fd))
 			{
 			VFICON(vf)->selection = g_list_append(VFICON(vf)->selection, fd);
 			vficon_selection_add(vf, fd, SELECTION_SELECTED, nullptr);
 			}
-		work = work->next;
 		}
 }
 

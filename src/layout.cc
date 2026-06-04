@@ -1221,7 +1221,7 @@ void layout_select_invert(LayoutWindow *lw)
 	if (lw->vf) vf_select_invert(lw->vf);
 }
 
-void layout_select_list(LayoutWindow *lw, GList *list)
+void layout_select_list(LayoutWindow *lw, const FileDataList *list)
 {
 	if (!layout_valid(&lw)) return;
 

@@ -1339,22 +1339,17 @@ void process_files(GList *file_list)
 			}
 		else
 			{
-			GList *work;
-			GList *selected;
-			FileData *fd;
 			layout_valid(&lw_id);
+			layout_set_path(lw_id, static_cast<const gchar *>(file_list->data));
 
-			selected = nullptr;
-			work = file_list;
-			layout_set_path(lw_id, static_cast<const gchar *>(work->data));
-			while (work)
+			g_autoptr(FileDataList) selected = nullptr;
+			for (GList *work = file_list; work; work = work->next)
 				{
-				fd = file_data_new_simple(static_cast<gchar *>(work->data));
+				FileData *fd = file_data_new_simple(static_cast<gchar *>(work->data));
 				selected = g_list_append(selected, fd);
 				layout_list_sync_fd(lw_id, fd);
-				file_data_unref(fd);
-				work = work->next;
 				}
+
 			layout_select_list(lw_id, selected);
 			}
 		}

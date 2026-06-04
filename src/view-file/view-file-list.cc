@@ -80,7 +80,7 @@ enum {
 
 
 
-static gboolean vflist_row_is_selected(ViewFile *vf, FileData *fd);
+static gboolean vflist_row_is_selected(ViewFile *vf, const FileData *fd);
 static gboolean vflist_row_rename_cb(TreeEditData *td, const gchar *old_name, const gchar *new_name, gpointer data);
 static void vflist_populate_view(ViewFile *vf, gboolean force);
 static gboolean vflist_is_multiline(ViewFile *vf);
@@ -1158,7 +1158,7 @@ gint vflist_index_by_fd(const ViewFile *vf, const FileData *fd)
  *-----------------------------------------------------------------------------
  */
 
-static gboolean vflist_row_is_selected(ViewFile *vf, FileData *fd)
+static gboolean vflist_row_is_selected(ViewFile *vf, const FileData *fd)
 {
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 	GtkTreeModel *store;
@@ -1378,18 +1378,13 @@ void vflist_select_by_fd(ViewFile *vf, FileData *fd)
 	gtk_tree_view_set_cursor(GTK_TREE_VIEW(vf->listview), tpath, nullptr, FALSE);
 }
 
-void vflist_select_list(ViewFile *vf, GList *list)
+void vflist_select_list(ViewFile *vf, const FileDataList *list)
 {
 	GtkTreeIter iter;
-	GList *work;
 
-	work = list;
-
-	while (work)
+	for (const GList *work = list; work; work = work->next)
 		{
-		FileData *fd;
-
-		fd = static_cast<FileData *>(work->data);
+		const auto *fd = static_cast<const FileData *>(work->data);
 
 		if (!vflist_find_row(vf, fd, &iter)) return;
 
@@ -1400,7 +1395,6 @@ void vflist_select_list(ViewFile *vf, GList *list)
 			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 			gtk_tree_selection_select_iter(selection, &iter);
 			}
-		work = work->next;
 		}
 }
 

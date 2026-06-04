@@ -144,7 +144,7 @@ void vf_select_all(ViewFile *vf);
 void vf_select_none(ViewFile *vf);
 void vf_select_invert(ViewFile *vf);
 void vf_select_by_fd(ViewFile *vf, FileData *fd);
-void vf_select_list(ViewFile *vf, GList *list);
+void vf_select_list(ViewFile *vf, const FileDataList *list);
 
 void vf_mark_to_selection(ViewFile *vf, gint mark, MarkToSelectionMode mode);
 void vf_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode);
