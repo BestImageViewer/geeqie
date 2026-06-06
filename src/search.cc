@@ -1809,7 +1809,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 
 		if (sd->match_dimensions == SEARCH_MATCH_EQUAL)
 			{
-			tmatch = (dimensions->width == sd->search_dimensions.width && dimensions->height == sd->search_dimensions.height);
+			tmatch = (dimensions.value() == sd->search_dimensions);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_UNDER)
 			{
@@ -2705,14 +2705,6 @@ static void search_thumb_toggle_cb(GtkWidget *button, gpointer data)
 	search_result_thumb_enable(sd, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)));
 }
 
-static gint sort_matchdata_dimensions(MatchFileData *a, MatchFileData *b)
-{
-	gint sa = a->dimensions.width * a->dimensions.height;
-	gint sb = b->dimensions.width * b->dimensions.height;
-
-	return sa - sb;
-}
-
 static gint search_result_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
 	gint n = GPOINTER_TO_INT(data);
@@ -2748,8 +2740,7 @@ static gint search_result_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIt
 			return 0;
 			break;
 		case SEARCH_COLUMN_DIMENSIONS:
-			return sort_matchdata_dimensions(fda, fdb);
-			break;
+			return fda->dimensions.area() - fdb->dimensions.area();
 		case SEARCH_COLUMN_PATH:
 			return utf8_compare(fda->fd->path, fdb->fd->path, TRUE);
 			break;

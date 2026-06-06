@@ -482,7 +482,7 @@ static void dupe_item_read_cache(DupeItem *di)
 		di->simd.swap(cd.similarity);
 		}
 
-	if (di->dimensions.width == 0 && di->dimensions.height == 0 && cd.dimensions)
+	if (di->dimensions.empty() && cd.dimensions)
 		{
 		di->dimensions = cd.dimensions.value();
 		di->dimensions_sum = (di->dimensions.width << 16) + di->dimensions.height;
@@ -500,7 +500,7 @@ static void dupe_item_write_cache(DupeItem *di)
 
 	CacheData cd{};
 
-	if (di->dimensions.width != 0) cd.set_dimensions(di->dimensions);
+	if (!di->dimensions.empty()) cd.set_dimensions(di->dimensions);
 	if (di->md5sum)
 		{
 		Md5Digest digest;
@@ -1390,9 +1390,9 @@ static gboolean dupe_match(DupeItem *a, DupeItem *b, DupeMatchType mask, gdouble
 		}
 	if (mask & DUPE_MATCH_DIM)
 		{
-		if (a->dimensions.width == 0) image_load_dimensions(a->fd, &a->dimensions.width, &a->dimensions.height);
-		if (b->dimensions.width == 0) image_load_dimensions(b->fd, &b->dimensions.width, &b->dimensions.height);
-		if (a->dimensions.width != b->dimensions.width || a->dimensions.height != b->dimensions.height) return FALSE;
+		if (a->dimensions.empty()) image_load_dimensions(a->fd, &a->dimensions.width, &a->dimensions.height);
+		if (b->dimensions.empty()) image_load_dimensions(b->fd, &b->dimensions.width, &b->dimensions.height);
+		if (a->dimensions != b->dimensions) return FALSE;
 		}
 	if (mask & DUPE_MATCH_SIM)
 		{
@@ -2020,7 +2020,7 @@ static void dupe_loader_done_cb(ImageLoader *il, gpointer data)
 
 		di->simd->fill_data(pixbuf);
 
-		if (di->dimensions.width == 0 && di->dimensions.height == 0 && pixbuf)
+		if (di->dimensions.empty() && pixbuf)
 			{
 			di->dimensions.width = gdk_pixbuf_get_width(pixbuf);
 			di->dimensions.height = gdk_pixbuf_get_height(pixbuf);
@@ -2119,14 +2119,14 @@ static gboolean create_checksums_dimensions(DupeWindow *dw, GList *list)
 
 			dw->setup_point = dupe_setup_point_step(dw, dw->setup_point);
 			dw->setup_n++;
-			if (di->dimensions.width == 0 && di->dimensions.height == 0)
+			if (di->dimensions.empty())
 				{
 				dupe_window_update_progress(dw, _("Reading dimensions…"), setup_progress(dw), FALSE);
 
 				if (options->thumbnails.enable_caching)
 					{
 					dupe_item_read_cache(di);
-					if (di->dimensions.width != 0 || di->dimensions.height != 0) return TRUE;
+					if (!di->dimensions.empty()) return TRUE;
 					}
 
 				image_load_dimensions(di->fd, &di->dimensions.width, &di->dimensions.height);
@@ -4121,11 +4121,7 @@ static gint column_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, 
 		case DUPE_COLUMN_DATE:
 			return di_a->fd->date - di_b->fd->date;
 		case DUPE_COLUMN_DIMENSIONS:
-			if ((di_a->dimensions.width == di_b->dimensions.width) && (di_a->dimensions.height == di_b->dimensions.height))
-				{
-				return 0;
-				}
-			return (di_a->dimensions.width * di_a->dimensions.height) - (di_b->dimensions.width * di_b->dimensions.height);
+			return di_a->dimensions.area() - di_b->dimensions.area();
 		case DUPE_COLUMN_RANK:
 			{
 			gint rank_int_a = atoi(rank_str_a);

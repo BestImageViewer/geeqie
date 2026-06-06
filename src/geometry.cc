@@ -4,13 +4,13 @@
 
 #include "geometry.h"
 
-G_DEFINE_BOXED_TYPE(GqSize, gq_size, gq_size_copy, g_free)
+#include "misc.h"
 
 GqSize *gq_size_copy(GqSize *size)
 {
-	auto *size_copy = g_new0(GqSize, 1);
-	*size_copy = *size;
-	return size_copy;
+	return new GqSize(*size);
 }
+
+G_DEFINE_BOXED_TYPE(GqSize, gq_size, gq_size_copy, delete_cb<GqSize>)
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
