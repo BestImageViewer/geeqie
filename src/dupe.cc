@@ -4086,94 +4086,62 @@ static gint default_sort_cb(GtkTreeModel *, GtkTreeIter *, GtkTreeIter *, gpoint
 
 static gint column_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
-	auto sortable = static_cast<GtkTreeSortable *>(data);
-	gint ret = 0;
-	gchar *rank_str_a;
-	gchar *rank_str_b;
-	gint rank_int_a;
-	gint rank_int_b;
-	gint group_a;
-	gint group_b;
 	gint sort_column_id;
 	GtkSortType sort_order;
+	gtk_tree_sortable_get_sort_column_id(static_cast<GtkTreeSortable *>(data), &sort_column_id, &sort_order);
+
+	g_autofree gchar *rank_str_a = nullptr;
+	gint group_a;
 	DupeItem *di_a;
-	DupeItem *di_b;
-
-	gtk_tree_sortable_get_sort_column_id(sortable, &sort_column_id, &sort_order);
-
 	gtk_tree_model_get(model, a, DUPE_COLUMN_RANK, &rank_str_a, DUPE_COLUMN_SET, &group_a, DUPE_COLUMN_POINTER, &di_a, -1);
 
+	g_autofree gchar *rank_str_b = nullptr;
+	gint group_b;
+	DupeItem *di_b;
 	gtk_tree_model_get(model, b, DUPE_COLUMN_RANK, &rank_str_b, DUPE_COLUMN_SET, &group_b, DUPE_COLUMN_POINTER, &di_b, -1);
 
-	if (group_a == group_b)
+	if (group_a != group_b)
 		{
-		switch (sort_column_id)
+		gint ret = group_a - group_b;
+
+		if (sort_order == GTK_SORT_ASCENDING)
 			{
-			case DUPE_COLUMN_NAME:
-				ret = utf8_compare(di_a->fd->name, di_b->fd->name, TRUE);
-				break;
-			case DUPE_COLUMN_SIZE:
-				if (di_a->fd->size == di_b->fd->size)
-					{
-					ret = 0;
-					}
-				else
-					{
-					ret = (di_a->fd->size > di_b->fd->size) ? 1 : -1;
-					}
-				break;
-			case DUPE_COLUMN_DATE:
-				if (di_a->fd->date == di_b->fd->date)
-					{
-					ret = 0;
-					}
-				else
-					{
-					ret = (di_a->fd->date > di_b->fd->date) ? 1 : -1;
-					}
-				break;
-			case DUPE_COLUMN_DIMENSIONS:
-				if ((di_a->dimensions.width == di_b->dimensions.width) && (di_a->dimensions.height == di_b->dimensions.height))
-					{
-					ret = 0;
-					}
-				else
-					{
-					ret = ((di_a->dimensions.width * di_a->dimensions.height) > (di_b->dimensions.width * di_b->dimensions.height)) ? 1 : -1;
-					}
-				break;
-			case DUPE_COLUMN_RANK:
-				rank_int_a = atoi(rank_str_a);
-				rank_int_b = atoi(rank_str_b);
-				if (rank_int_a == 0) rank_int_a = 101;
-				if (rank_int_b == 0) rank_int_b = 101;
-
-				if (rank_int_a == rank_int_b)
-					{
-					ret = 0;
-					}
-				else
-					{
-					ret = (rank_int_a > rank_int_b) ? 1 : -1;
-					}
-				break;
-			case DUPE_COLUMN_PATH:
-				ret = utf8_compare(di_a->fd->path, di_b->fd->path, TRUE);
-				break;
-			default:
-				break;
+			ret *= -1;
 			}
-		}
-	else if (group_a < group_b)
-		{
-		ret = (sort_order == GTK_SORT_ASCENDING) ? 1 : -1;
-		}
-	else
-		{
-		ret = (sort_order == GTK_SORT_ASCENDING) ? -1 : 1;
+
+		return ret;
 		}
 
-	return ret;
+	switch (sort_column_id)
+		{
+		case DUPE_COLUMN_NAME:
+			return utf8_compare(di_a->fd->name, di_b->fd->name, TRUE);
+		case DUPE_COLUMN_SIZE:
+			return di_a->fd->size - di_b->fd->size;
+		case DUPE_COLUMN_DATE:
+			return di_a->fd->date - di_b->fd->date;
+		case DUPE_COLUMN_DIMENSIONS:
+			if ((di_a->dimensions.width == di_b->dimensions.width) && (di_a->dimensions.height == di_b->dimensions.height))
+				{
+				return 0;
+				}
+			return (di_a->dimensions.width * di_a->dimensions.height) - (di_b->dimensions.width * di_b->dimensions.height);
+		case DUPE_COLUMN_RANK:
+			{
+			gint rank_int_a = atoi(rank_str_a);
+			gint rank_int_b = atoi(rank_str_b);
+			if (rank_int_a == 0) rank_int_a = 101;
+			if (rank_int_b == 0) rank_int_b = 101;
+
+			return rank_int_a - rank_int_b;
+			}
+		case DUPE_COLUMN_PATH:
+			return utf8_compare(di_a->fd->path, di_b->fd->path, TRUE);
+		default:
+			break;
+		}
+
+	return 0;
 }
 
 static void column_clicked_cb(GtkWidget *,  gpointer data)
