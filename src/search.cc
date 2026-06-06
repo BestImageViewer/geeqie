@@ -126,10 +126,7 @@ struct SearchUi
 
 	// "Image dimensions" row
 	GtkWidget *menu_dimensions;
-	GtkWidget *spin_width;
-	GtkWidget *spin_height;
-	GtkWidget *spin_width_end;
-	GtkWidget *spin_height_end;
+	GtkWidget *box_dimensions_end;
 
 	// "Image content" row
 	GtkWidget *spin_similarity;
@@ -251,10 +248,8 @@ struct SearchData
 	GetFileDate get_file_date;
 	SearchDate search_date;
 	SearchDate search_date_end;
-	gint   search_width;
-	gint   search_height;
-	gint   search_width_end;
-	gint   search_height_end;
+	GqSize search_dimensions;
+	GqSize search_dimensions_end;
 	gint   search_similarity;
 	gchar *search_similarity_path;
 	std::unique_ptr<CacheData> search_similarity_cd;
@@ -1815,20 +1810,20 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 
 		if (sd->match_dimensions == SEARCH_MATCH_EQUAL)
 			{
-			tmatch = (dimensions->width == sd->search_width && dimensions->height == sd->search_height);
+			tmatch = (dimensions->width == sd->search_dimensions.width && dimensions->height == sd->search_dimensions.height);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_UNDER)
 			{
-			tmatch = (dimensions->width < sd->search_width && dimensions->height < sd->search_height);
+			tmatch = (dimensions->width < sd->search_dimensions.width && dimensions->height < sd->search_dimensions.height);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_OVER)
 			{
-			tmatch = (dimensions->width > sd->search_width && dimensions->height > sd->search_height);
+			tmatch = (dimensions->width > sd->search_dimensions.width && dimensions->height > sd->search_dimensions.height);
 			}
 		else if (sd->match_dimensions == SEARCH_MATCH_BETWEEN)
 			{
-			tmatch = match_is_between(dimensions->width, sd->search_width, sd->search_width_end) &&
-			         match_is_between(dimensions->height, sd->search_height, sd->search_height_end);
+			tmatch = match_is_between(dimensions->width, sd->search_dimensions.width, sd->search_dimensions_end.width) &&
+			         match_is_between(dimensions->height, sd->search_dimensions.height, sd->search_dimensions_end.height);
 			}
 		}
 
@@ -2852,7 +2847,7 @@ static void menu_choice_dimensions_cb(GtkWidget *combo, gpointer data)
 
 	if (!menu_choice_get_match_type(combo, &sd->match_dimensions)) return;
 
-	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.spin_width_end),
+	gtk_widget_set_visible(sd->ui.box_dimensions_end,
 	                       sd->match_dimensions == SEARCH_MATCH_BETWEEN);
 }
 
@@ -2887,6 +2882,15 @@ static GtkWidget *menu_spin(GtkWidget *box, gdouble min, gdouble max, gpointer d
 	gtk_widget_show(spin);
 
 	return spin;
+}
+
+static void menu_dimensions_spin(GtkWidget *box, GqSize &dimensions)
+{
+	constexpr std::size_t dimension_max = 1000000;
+
+	menu_spin(box, 0, dimension_max, &dimensions.width);
+	pref_label_new(box, "x");
+	menu_spin(box, 0, dimension_max, &dimensions.height);
 }
 
 static void menu_choice_check_cb(GtkWidget *button, gpointer data)
@@ -3104,10 +3108,8 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->search_dir_fd = file_data_ref(dir_fd);
 	sd->search_path_recurse = TRUE;
 	sd->search_size = 0;
-	sd->search_width = 640;
-	sd->search_height = 480;
-	sd->search_width_end = 1024;
-	sd->search_height_end = 768;
+	sd->search_dimensions = { 640, 480 };
+	sd->search_dimensions_end = { 1024, 768 };
 
 	sd->search_type = SEARCH_MATCH_NONE;
 
@@ -3256,17 +3258,13 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.menu_dimensions = menu_choice_menu(hbox, text_search_menu_dimensions,
 	                                          G_CALLBACK(menu_choice_dimensions_cb), sd);
 	pad_box = pref_box_new(hbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 2);
-	constexpr std::size_t dimension_max = 1000000;
-	sd->ui.spin_width = menu_spin(pad_box, 0, dimension_max, &sd->search_width);
-	pref_label_new(pad_box, "x");
-	sd->ui.spin_height = menu_spin(pad_box, 0, dimension_max, &sd->search_height);
+	menu_dimensions_spin(pad_box, sd->search_dimensions);
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
 	pref_label_new(hbox2, _("and"));
 	pref_spacer(hbox2, PREF_PAD_SPACE - (2*2));
-	sd->ui.spin_width_end = menu_spin(hbox2, 0, dimension_max, &sd->search_width_end);
-	pref_label_new(hbox2, "x");
-	sd->ui.spin_height_end = menu_spin(hbox2, 0, dimension_max, &sd->search_height_end);
+	menu_dimensions_spin(hbox2, sd->search_dimensions_end);
+	sd->ui.box_dimensions_end = hbox2;
 
 	/* Search for image similarity */
 	hbox = menu_choice(sd->ui.box_search, _("Image content is"), &sd->match_similarity_enable);
