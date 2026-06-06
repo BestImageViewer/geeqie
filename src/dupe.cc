@@ -4237,16 +4237,15 @@ DupeWindow *dupe_window_new()
 	dw->listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
 
-	dw->sortable = GTK_TREE_SORTABLE(store);
-
-	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_RANK, column_sort_cb, dw->sortable, nullptr);
-	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_SET, default_sort_cb, dw->sortable, nullptr);
-	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_THUMB, default_sort_cb, dw->sortable, nullptr);
-	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_NAME, column_sort_cb, dw->sortable, nullptr);
-	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_SIZE, column_sort_cb, dw->sortable, nullptr);
-	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_DATE, column_sort_cb, dw->sortable, nullptr);
-	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_DIMENSIONS, column_sort_cb, dw->sortable, nullptr);
-	gtk_tree_sortable_set_sort_func(dw->sortable, DUPE_COLUMN_PATH, column_sort_cb, dw->sortable, nullptr);
+	GtkTreeSortable *sortable = GTK_TREE_SORTABLE(store);
+	gtk_tree_sortable_set_sort_func(sortable, DUPE_COLUMN_RANK, column_sort_cb, sortable, nullptr);
+	gtk_tree_sortable_set_sort_func(sortable, DUPE_COLUMN_SET, default_sort_cb, sortable, nullptr);
+	gtk_tree_sortable_set_sort_func(sortable, DUPE_COLUMN_THUMB, default_sort_cb, sortable, nullptr);
+	gtk_tree_sortable_set_sort_func(sortable, DUPE_COLUMN_NAME, column_sort_cb, sortable, nullptr);
+	gtk_tree_sortable_set_sort_func(sortable, DUPE_COLUMN_SIZE, column_sort_cb, sortable, nullptr);
+	gtk_tree_sortable_set_sort_func(sortable, DUPE_COLUMN_DATE, column_sort_cb, sortable, nullptr);
+	gtk_tree_sortable_set_sort_func(sortable, DUPE_COLUMN_DIMENSIONS, column_sort_cb, sortable, nullptr);
+	gtk_tree_sortable_set_sort_func(sortable, DUPE_COLUMN_PATH, column_sort_cb, sortable, nullptr);
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dw->listview));
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);

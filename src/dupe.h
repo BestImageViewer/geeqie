@@ -136,7 +136,6 @@ struct DupeWindow
 
 	ImageLoader *img_loader;
 
-	GtkTreeSortable *sortable;
 	gint set_count; /**< Index/counter for number of duplicate sets found */
 
 	/* second set comparison stuff */
