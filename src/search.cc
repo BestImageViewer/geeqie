@@ -323,8 +323,7 @@ struct SearchData
 struct MatchFileData
 {
 	FileData *fd;
-	gint width;
-	gint height;
+	GqSize dimensions;
 	gint rank;
 };
 
@@ -701,8 +700,8 @@ static void search_result_append(SearchData *sd, MatchFileData *mfd)
 	if (!fd) return;
 
 	g_autofree gchar *text_size = text_from_size(fd->size);
-	g_autofree gchar *text_dim = (mfd->width > 0 && mfd->height > 0) ?
-	            g_strdup_printf("%d x %d", mfd->width, mfd->height) : nullptr;
+	g_autofree gchar *text_dim = (mfd->dimensions.width > 0 && mfd->dimensions.height > 0) ?
+	            g_strdup_printf("%d x %d", mfd->dimensions.width, mfd->dimensions.height) : nullptr;
 
 	auto *store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(sd->ui.result_view)));
 	gtk_list_store_append(store, &iter);
@@ -1850,8 +1849,7 @@ static gboolean search_file_do_extra(SearchData *sd, MatchFileData &mfd, gboolea
 
 	if (dimensions)
 		{
-		mfd.width = dimensions->width;
-		mfd.height = dimensions->height;
+		mfd.dimensions = dimensions.value();
 		}
 
 	sd->img_cd.reset();
@@ -2709,15 +2707,10 @@ static void search_thumb_toggle_cb(GtkWidget *button, gpointer data)
 
 static gint sort_matchdata_dimensions(MatchFileData *a, MatchFileData *b)
 {
-	gint sa;
-	gint sb;
+	gint sa = a->dimensions.width * a->dimensions.height;
+	gint sb = b->dimensions.width * b->dimensions.height;
 
-	sa = a->width * a->height;
-	sb = b->width * b->height;
-
-	if (sa > sb) return 1;
-	if (sa < sb) return -1;
-	return 0;
+	return sa - sb;
 }
 
 static gint search_result_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
