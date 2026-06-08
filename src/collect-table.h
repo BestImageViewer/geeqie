@@ -57,7 +57,6 @@ struct CollectTable
 	gint focus_column;
 	CollectInfo *focus_info;
 
-	GtkWidget *popup;
 	CollectInfo *drop_info;
 	GList *drop_list;
 

@@ -70,5 +70,9 @@ GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
 
 GtkWidget *popup_menu_short_lived();
 
+bool menu_item_include_ellipsis(GMenuModel *model, const gchar *action);
+void plugins_menu_populate(GMenu *plugins_menu, const gchar *action);
+void popup_menu(GMenu *menu_model, GtkWidget *window);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

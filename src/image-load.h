@@ -141,7 +141,7 @@ gboolean image_loader_get_is_done(ImageLoader *il);
 FileData *image_loader_get_fd(ImageLoader *il);
 gboolean image_loader_get_shrunk(ImageLoader *il);
 
-gboolean image_load_dimensions(FileData *fd, GqSize &dimensions);
+gboolean image_load_dimensions(FileData *fd, gint *width, gint *height);
 
 void free_pixels(guchar *pixels, gpointer data);
 

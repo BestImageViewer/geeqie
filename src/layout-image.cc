@@ -325,12 +325,11 @@ static gboolean show_next_frame(gpointer data)
 	auto fd = static_cast<AnimationData*>(data);
 	int delay;
 
-	if (!animation_should_continue(fd))
+	if(!animation_should_continue(fd))
 		{
 		image_animation_data_free(fd);
 		return G_SOURCE_REMOVE;
 		}
-
 	PixbufRenderer *pr = PIXBUF_RENDERER(fd->iw->pr);
 
 	if (!deprecated_gdk_pixbuf_animation_iter_advance(fd->iter, nullptr))
@@ -856,11 +855,11 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	if (!fullscreen)
 		{
-		menu_item_add_icon(menu, _("_Full screen"), GQ_ICON_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
+		menu_item_add_icon(menu, _("_Fullscreen"), GQ_ICON_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
 		}
 	else
 		{
-		menu_item_add_icon(menu, _("Exit _full screen"), GQ_ICON_LEAVE_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
+		menu_item_add_icon(menu, _("Exit _fullscreen"), GQ_ICON_LEAVE_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
 		}
 
 	menu_item_add_check(menu, _("GIF _animation"), lw->options.animate, G_CALLBACK(li_pop_menu_animate_cb), lw);

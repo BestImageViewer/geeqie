@@ -26,9 +26,13 @@
 
 #include <pango/pango.h>
 
+#include "accelerators.h"
 #include "compat-deprecated.h"
 #include "compat.h"
+#include "editors.h"
 #include "layout.h"
+#include "layout-util.h"
+#include "main-defines.h"
 
 /*
  *-----------------------------------------------------------------------------
@@ -36,35 +40,11 @@
  *-----------------------------------------------------------------------------
  */
 
-/**
- * @brief Add accelerator key to a window popup menu
- * @param menu
- * @param accel_group
- * @param window_keys
- *
- * This is used only so that the user can see the applicable
- * shortcut key displayed in the menu. The actual handling of
- * the keystroke is done elsewhere in the code.
- */
-static void menu_item_add_accelerator(GtkWidget *menu, GtkAccelGroup *accel_group, const HardcodedWindowKeyList &window_keys)
-{
-	const gchar *label = gtk_menu_item_get_label(GTK_MENU_ITEM(menu));
 
-	g_autofree gchar *label_text = nullptr;
-	pango_parse_markup(label, -1, '_', nullptr, &label_text, nullptr, nullptr);
 
-	g_auto(GStrv) label_stripped = g_strsplit(label_text, "…", 2);
 
-	const auto has_text = [text = label_stripped[0]](const HardcodedWindowKey &window_key)
-	{
-		return g_strcmp0(window_key.text, text) == 0;
-	};
 
-	const auto it = std::find_if(window_keys.cbegin(), window_keys.cend(), has_text);
-	if (it == window_keys.cend()) return;
 
-	gtk_widget_add_accelerator(menu, "activate", accel_group, it->key_value, it->mask, GTK_ACCEL_VISIBLE);
-}
 
 /**
  * @brief Callback for the actions GList sort function
@@ -106,6 +86,9 @@ static gint actions_sort_cb(gconstpointer a, gconstpointer b)
  */
 static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup *accel_group)
 {
+
+return;
+
 	GList *groups;
 	const gchar *accel_path;
 
@@ -151,18 +134,10 @@ static void menu_item_add_main_window_accelerator(GtkWidget *menu, GtkAccelGroup
 
 static void menu_item_add_accelerator(GtkWidget *menu, GtkWidget *item)
 {
-	auto *accel_group = static_cast<GtkAccelGroup *>(g_object_get_data(G_OBJECT(menu), "accel_group"));
-	if (!accel_group) return;
 
-	auto *window_keys = static_cast<HardcodedWindowKeyList *>(g_object_get_data(G_OBJECT(menu), "window_keys"));
-	if (window_keys)
-		{
-		menu_item_add_accelerator(item, accel_group, *window_keys);
-		}
-	else
-		{
-		menu_item_add_main_window_accelerator(item, accel_group);
-		}
+return;
+
+
 }
 
 static void menu_item_finish(GtkWidget *menu, GtkWidget *item, GCallback func, gpointer data)
@@ -315,4 +290,171 @@ GtkWidget *popup_menu_short_lived()
 	                 G_CALLBACK(g_object_unref), NULL); // destroy the menu
 	return menu;
 }
+
+
+void popup_menu(GMenu *menu_model, GtkWidget *window)
+{
+#if HAVE_GTK4
+	static void popover_closed_cb(GtkPopover *popover, gpointer)
+		{
+		gtk_widget_unparent(GTK_WIDGET(popover));
+		}
+
+	GtkWidget *popover = gtk_popover_menu_new_from_model(menu_model);
+	gtk_widget_set_parent(popover, window);
+	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_BOTTOM);
+	g_signal_connect(popover, "closed", G_CALLBACK(popover_closed_cb), nullptr);
+	gtk_popover_popup(GTK_POPOVER(popover));
+#else
+	GtkWidget *menu = gtk_menu_new_from_model(G_MENU_MODEL(menu_model));
+	gtk_menu_attach_to_widget(GTK_MENU(menu), window, nullptr);
+	gtk_menu_popup_at_widget(GTK_MENU(menu), window, GDK_GRAVITY_CENTER, GDK_GRAVITY_CENTER, nullptr);
+#endif
+}
+
+
+static inline bool is_app_action(const char *name)
+{
+	return g_str_has_prefix(name, "app.");
+}
+
+char ** print_help_contents_group(GKeyFile *kf, char *action_name)
+{
+	size_t n_keys = 0;
+	GError *error = nullptr;
+
+	}
+
+static GMenuItem *menu_item_clone_with_new_label(GMenuModel *model, int index, const char *new_label)
+{
+	g_autoptr(GMenuItem) item = g_menu_item_new(NULL, NULL);
+
+	/* Copy all attributes, replacing only "label" */
+	g_autoptr(GMenuAttributeIter) attr_iter = g_menu_model_iterate_item_attributes(model, index);
+	if (attr_iter)
+		{
+		const char *name = NULL;
+		GVariant *value = NULL;
+
+		while (g_menu_attribute_iter_get_next(attr_iter, &name, &value))
+			{
+			if (g_strcmp0(name, G_MENU_ATTRIBUTE_LABEL) == 0)
+				{
+				g_menu_item_set_attribute(item, G_MENU_ATTRIBUTE_LABEL, "s", new_label);
+				}
+			else
+				{
+				g_menu_item_set_attribute_value(item, name, value);
+				}
+
+			g_variant_unref(value);
+			}
+		}
+	else
+		{
+		/* No attributes at all: at least set the label */
+		g_menu_item_set_attribute(item, G_MENU_ATTRIBUTE_LABEL, "s", new_label);
+		}
+
+	/* If there was no label attribute originally, add it now */
+	g_autofree char *existing_label = NULL;
+	g_menu_model_get_item_attribute(model, index, G_MENU_ATTRIBUTE_LABEL, "s", &existing_label);
+	if (!existing_label)
+		{
+		g_menu_item_set_attribute(item, G_MENU_ATTRIBUTE_LABEL, "s", new_label);
+		}
+
+	/* Copy all links (submenu, section, etc.) */
+	g_autoptr(GMenuLinkIter) link_iter = g_menu_model_iterate_item_links(model, index);
+	if (link_iter)
+		{
+		const char *name = NULL;
+		GMenuModel *link_model = NULL;
+
+		while (g_menu_link_iter_get_next(link_iter, &name, &link_model))
+			{
+			g_menu_item_set_link(item, name, link_model);
+			g_object_unref(link_model);
+			}
+		}
+
+	return g_steal_pointer(&item);
+}
+
+bool menu_item_include_ellipsis(GMenuModel *model, const char *action)
+{
+	if (!model || !action) return FALSE;
+
+	const int n = g_menu_model_get_n_items(model);
+
+	for (int i = 0; i < n; i++)
+		{
+		g_autofree char *action_i = NULL;
+		g_autofree char *label_i = NULL;
+
+		g_menu_model_get_item_attribute(model, i, G_MENU_ATTRIBUTE_ACTION, "s", &action_i);
+		g_menu_model_get_item_attribute(model, i, G_MENU_ATTRIBUTE_LABEL, "s", &label_i);
+
+		if (action_i && g_strcmp0(action_i, action) == 0)
+			{
+			if (!label_i) return TRUE;
+			if (g_str_has_suffix(label_i, "…")) return TRUE;
+
+			GMenu *menu = G_MENU(model);
+			g_autofree char *new_label = g_strconcat(label_i, "…", NULL);
+			g_autoptr(GMenuItem) new_item = menu_item_clone_with_new_label(model, i, new_label);
+
+			g_menu_remove(menu, i);
+			g_menu_insert_item(menu, i, new_item);
+
+			return TRUE;
+			}
+
+		GMenuModel *section = g_menu_model_get_item_link(model, i, G_MENU_LINK_SECTION);
+		if (section)
+			{
+			const bool found = menu_item_include_ellipsis(section, action);
+			g_object_unref(section);
+			if (found) return TRUE;
+			}
+
+		GMenuModel *submenu = g_menu_model_get_item_link(model, i, G_MENU_LINK_SUBMENU);
+		if (submenu)
+			{
+			const bool found = menu_item_include_ellipsis(submenu, action);
+			g_object_unref(submenu);
+			if (found) return TRUE;
+			}
+		}
+
+	return FALSE;
+}
+
+void plugins_menu_populate(GMenu *plugins_menu, const char *action)
+{
+	EditorsList editors_list = editor_list_get();
+
+
+	for (EditorDescription *ed : editors_list)
+		{
+		if (!ed || ed->ignored || ed->hidden || ed->disabled)
+			{
+			continue;
+			}
+
+		const char *label = (ed->name && *ed->name) ? ed->name : ed->key;
+		const char *icon_name = (ed->icon && *ed->icon) ? ed->icon : GQ_ICON_MISSING_IMAGE;
+
+		g_autoptr(GMenuItem) item = g_menu_item_new(label, nullptr);
+
+		g_menu_item_set_action_and_target_value( item, action, g_variant_new_string(ed->key)
+		);
+
+		g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
+		g_menu_item_set_icon(item, icon);
+
+		g_menu_append_item(plugins_menu, item);
+		}
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -6,8 +6,16 @@
 <gresources>
   <gresource prefix="/org/geeqie/geeqie/ui">
     <file>keyboard-shortcuts.ui</file>
-    <file>menu-classic.ui</file>
-    <file>menu-hamburger.ui</file>
+    <file>menu-collection.ui</file>
+    <file>menu-dupe-main.ui</file>
+    <file>menu-dupe-second.ui</file>
+    <file>menu-img-view.ui</file>
+    <file>menu-pan-view.ui</file>
+    <file>menu-popup.ui</file>
+    <file>menu-search.ui</file>
+    <file>menu-toolbar.ui</file>
+    <file>menu-toolbar-add.ui</file>
+    <file>menu-main.ui</file>
     <file>search-and-run.ui</file>
   </gresource>
 </gresources>

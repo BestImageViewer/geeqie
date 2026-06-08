@@ -109,7 +109,7 @@ static gboolean cache_loader_phase2_process(gpointer data)
 		{
 		if (GqSize dimensions;
 		    !cl->error &&
-		    image_load_dimensions(cl->fd, dimensions))
+		    image_load_dimensions(cl->fd, &dimensions.width, &dimensions.height))
 			{
 			cl->cd->set_dimensions(dimensions);
 			cl->done_mask = static_cast<CacheDataType>(cl->done_mask | CACHE_LOADER_DIMENSIONS);

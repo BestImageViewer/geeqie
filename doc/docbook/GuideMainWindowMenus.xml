@@ -605,11 +605,11 @@
         <term>
           <menuchoice>
             <guimenu>Mark n</guimenu>
-            <guimenuitem>Reset mark n</guimenuitem>
+            <guimenuitem>Clear mark n</guimenuitem>
           </menuchoice>
         </term>
         <listitem>
-          <para>Unset mark n on selected files</para>
+          <para>Clear mark n on selected files</para>
         </listitem>
       </varlistentry>
       <varlistentry>

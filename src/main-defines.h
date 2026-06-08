@@ -36,6 +36,7 @@
 #define GQ_ARCHIVE_DIR	"geeqie-archive"
 #define GQ_RESOURCE_PATH_ICONS "/org/geeqie/geeqie/icons"
 #define GQ_RESOURCE_PATH_CREDITS "/org/geeqie/geeqie/credits"
+#define GQ_RESOURCE_PATH_DATA "/org/geeqie/geeqie/data"
 #define GQ_RESOURCE_PATH_IMAGES "/org/geeqie/geeqie/images"
 #define GQ_RESOURCE_PATH_UI "/org/geeqie/geeqie/ui"
 

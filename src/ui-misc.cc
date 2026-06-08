@@ -1430,7 +1430,10 @@ GdkRectangle widget_get_root_origin_geometry(GtkWidget *widget)
 	return rect;
 #else
 	GdkWindow *win = gtk_widget_get_window(widget);
-
+	if (!win)
+		{
+		return rect;
+		}
 	gdk_window_get_root_origin(win, &rect.x, &rect.y);
 	rect.width = gdk_window_get_width(win);
 	rect.height = gdk_window_get_height(win);
@@ -1479,7 +1482,7 @@ void widget_remove_from_parent(GtkWidget *widget)
 	gtk_container_remove(GTK_CONTAINER(gtk_widget_get_parent(widget)), widget);
 }
 
-void widget_remove_from_parent_cb(GtkWidget *, gpointer data)
+void widget_remove_from_parent_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	widget_remove_from_parent(static_cast<GtkWidget *>(data));
 }
@@ -1592,6 +1595,44 @@ PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale)
 		}
 
 	return pal;
+}
+
+bool focus_is_text_editable(GtkWindow *window)
+{
+    GtkWidget *focus = gtk_window_get_focus(window);
+
+    return GTK_IS_ENTRY(focus) ||
+           GTK_IS_TEXT_VIEW(focus) ||
+           GTK_IS_SEARCH_ENTRY(focus) ||
+           GTK_IS_SPIN_BUTTON(focus);
+}
+
+bool focus_is_editable(GtkWindow *window)
+{
+    GtkWidget *focus = gtk_window_get_focus(window);
+
+    return focus &&
+           (GTK_IS_ENTRY(focus) ||
+            GTK_IS_TEXT_VIEW(focus) ||
+            GTK_IS_SEARCH_ENTRY(focus) ||
+            GTK_IS_SPIN_BUTTON(focus));
+}
+
+bool key_is_text_editing_key(GdkEventKey *event)
+{
+    switch (event->keyval) {
+    case GDK_KEY_BackSpace:
+    case GDK_KEY_Delete:
+    case GDK_KEY_Left:
+    case GDK_KEY_Right:
+    case GDK_KEY_Up:
+    case GDK_KEY_Down:
+    case GDK_KEY_Home:
+    case GDK_KEY_End:
+        return TRUE;
+    default:
+        return FALSE;
+    }
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

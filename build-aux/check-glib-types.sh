@@ -26,11 +26,72 @@ trap 'rm -f "$tmpfile"' EXIT
 
 for file in "$@"
 do
-	# Skip files not changed in git
-	if git -C "$src_root" diff --quiet -- "$file" && git -C "$src_root" diff --cached --quiet -- "$file"
+# If file is tracked by git, skip it when clean.
+# If it is not tracked, check the whole file.
+if git -C "$src_root" ls-files --error-unmatch -- "$file" >/dev/null 2>&1
+then
+	if git -C "$src_root" diff --quiet -- "$file" &&
+	   git -C "$src_root" diff --cached --quiet -- "$file"
 	then
 		continue
 	fi
+
+	check_whole_file=false
+else
+	check_whole_file=true
+fi
+
+if [ "$check_whole_file" = true ]
+then
+	awk -v file="$file" '
+	BEGIN {
+		type_map["gchar"]    = "char"
+		type_map["guchar"]   = "unsigned char"
+		type_map["gshort"]   = "short"
+		type_map["gushort"]  = "unsigned short"
+		type_map["gint"]     = "int"
+		type_map["guint"]    = "unsigned int"
+		type_map["glong"]    = "long"
+		type_map["gulong"]   = "unsigned long"
+		type_map["gint8"]    = "int8_t"
+		type_map["guint8"]   = "uint8_t"
+		type_map["gint16"]   = "int16_t"
+		type_map["guint16"]  = "uint16_t"
+		type_map["gint32"]   = "int32_t"
+		type_map["guint32"]  = "uint32_t"
+		type_map["gint64"]   = "int64_t"
+		type_map["guint64"]  = "uint64_t"
+		type_map["gfloat"]   = "float"
+		type_map["gdouble"]  = "double"
+		type_map["gboolean"] = "bool"
+		type_map["gsize"]    = "size_t"
+		type_map["gssize"]   = "ssize_t"
+	}
+
+	{
+		orig = $0
+		line = orig
+
+		sub(/\/\/.*/, "", line)
+
+		for (glib_type in type_map) {
+			pattern = "(^|[^A-Za-z0-9_])" glib_type "([ \t*]+)[A-Za-z_][A-Za-z0-9_]*"
+
+			if (line ~ pattern) {
+				printf("%s:%d: warning: use '\''%s'\'' instead of '\''%s'\''\n",
+				       file,
+				       NR,
+				       type_map[glib_type],
+				       glib_type)
+				print "  " orig
+			}
+		}
+	}
+	' "$src_root/$file" >> "$tmpfile"
+
+	continue
+fi
+
 
 	git -C "$src_root" diff -U0 -- "$file" | awk -v file="$file" '
 	BEGIN {

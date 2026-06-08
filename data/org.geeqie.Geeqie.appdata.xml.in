@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>org.geeqie.Geeqie</id>
+  <metadata_license>CC-BY-SA-4.0</metadata_license>
+  <content_rating type="oars-1.1" />
+  <project_license>GPL-3.0+</project_license>
+  <name>Geeqie</name>
+  <summary>A lightweight image viewer</summary>
+  <description>
+    <p>Geeqie is a lightweight image viewer for Linux, BSDs and compatibles. It can be used as a simple, fast, database-free image viewer, but equally it can be used to manage large collections of images.</p>
+    <p>Geeqie is an image viewer that makes navigation of images easy. Images can be viewed as thumbnails, in multiple windows or in full screen mode. Geeqie is an image manager, with complete copy, move, rename, and delete functions available at the press of a button. Extensive image collections can be easily handled using a combination of Geeqie's flexible Keyword facility and powerful Image searches.</p>
+    <p>Image collections can be refined with a duplicate image finder. Geeqie is ideal for making presentations. A slide-show feature is built in, and Geeqie can be remotely controlled either via command line scripts. Information such as f-stop, shutter speed and descriptive text can be overlaid onto the image display. There is no need to import images into Geeqie - simply point Geeqie to a folder containing images, and your data will be displayed.</p>
+  </description>
+  <developer id="org.geeqie">
+    <name>Geeqie developers</name>
+  </developer>
+  <launchable type="desktop-id">org.geeqie.Geeqie.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <caption></caption>
+      <image>https://github.com/caclark/geeqie-test/raw/main/screenshots/Screenshot_2017-08-13_12-02-32_rescaled.png</image>
+    </screenshot>
+    <screenshot>
+      <caption></caption>
+      <image>https://github.com/caclark/geeqie-test/raw/main/screenshots/Screenshot_2017-08-13_12-29-44_rescaled.png</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="v2.6" date="2025-05-05" />
+  </releases>
+  <keywords>
+    <keyword>image</keyword>
+    <keyword>photography</keyword>
+    <keyword>fast</keyword>
+    <keyword>graphics</keyword>
+  </keywords>
+  <url type="homepage">https://www.geeqie.org</url>
+  <update_contact>geeqie@freelists.org</update_contact>
+  <translation type="gettext">geeqie</translation>
+</component>

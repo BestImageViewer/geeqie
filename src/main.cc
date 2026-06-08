@@ -53,12 +53,16 @@
 #  include <libintl.h>
 #endif
 
+#include "accelerators.h"
+#include "actions.h"
 #include "cache-maint.h"
 #include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "command-line-handling.h"
+#include "compat.h"
 #include "compat-deprecated.h"
+#include "convert-configuration.h"
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -161,7 +165,7 @@ GOptionEntry command_line_options[] =
 	{ "File"                      ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("open FILE or URL do not bring Geeqie window to the top")                      , "<FILE>|<URL>" },
 	{ "file-extensions"           ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("list known file extensions")                                                  , nullptr },
 	{ "first"                     ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("first image")                                                                 , nullptr },
-	{ "fullscreen"                , 'f', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("start / toggle in full screen mode")                                          , nullptr },
+	{ "fullscreen"                , 'f', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("start / toggle in fullscreen mode")                                          , nullptr },
 	{ "geometry"                  ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("set main window location and geometry")                                       , "<W>x<H>[+<XOFF>+<YOFF>]" },
 	{ "get-collection"            ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, nullptr, _("get collection content")                                                      , "<COLLECTION>" },
 	{ "get-collection-list"       ,   0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE  , nullptr, _("get collection list")                                                         , nullptr },
@@ -397,68 +401,6 @@ void mkdir_if_not_exists(const gchar *path)
 		}
 }
 
-void gq_accel_map_print(
-		    gpointer 	data,
-		    const gchar	*accel_path,
-		    guint	accel_key,
-		    GdkModifierType accel_mods,
-		    gboolean	changed)
-{
-	auto gstring = static_cast<GString *>(data);
-
-	if (!changed)
-		g_string_append(gstring, "; ");
-
-	g_string_append(gstring, "(gtk_accel_path \"");
-
-	g_autofree gchar *accel_path_escaped = g_strescape(accel_path, nullptr);
-	g_string_append(gstring, accel_path_escaped);
-
-	g_string_append(gstring, "\" \"");
-
-	g_autofree gchar *name = gtk_accelerator_name(accel_key, accel_mods);
-	g_autofree gchar *name_escaped = g_strescape(name, nullptr);
-	g_string_append(gstring, name_escaped);
-
-	g_string_append(gstring, "\")\n");
-}
-
-gboolean gq_accel_map_save(const gchar *path)
-{
-	g_autofree gchar *pathl = path_from_utf8(path);
-
-	g_autoptr(GString) gstring = g_string_new("; ");
-	if (g_get_prgname())
-		g_string_append(gstring, g_get_prgname());
-	g_string_append(gstring, " GtkAccelMap rc-file         -*- scheme -*-\n");
-	g_string_append(gstring, "; this file is an automated accelerator map dump\n");
-	g_string_append(gstring, ";\n");
-
-	gtk_accel_map_foreach(gstring, gq_accel_map_print);
-
-	secure_save(pathl, gstring->str, -1);
-
-	return TRUE;
-}
-
-gchar *accep_map_filename()
-{
-	return g_build_filename(get_rc_dir(), "accels", NULL);
-}
-
-void accel_map_save()
-{
-	g_autofree gchar *path = accep_map_filename();
-	gq_accel_map_save(path);
-}
-
-void accel_map_load()
-{
-	g_autofree gchar *path = accep_map_filename();
-	g_autofree gchar *pathl = path_from_utf8(path);
-	gtk_accel_map_load(pathl);
-}
-
 void gq_gtk_css_load()
 {
 	/* Load gtk.css file from the rc directory */
@@ -497,7 +439,6 @@ void exit_program_final()
 
 	save_options(options);
 	keys_save();
-	accel_map_save();
 
 	LayoutWindow *lw = get_current_layout();
 	if (lw)
@@ -799,7 +740,55 @@ void startup_common(GtkApplication *, gpointer)
 	setup_env_path();
 
 	keys_load();
-	accel_map_load();
+
+	/* If this is the first run with the revised style action/accelerator list,
+	 * convert accels from:
+	 *
+	 * (gtk_accel_path "<Actions>/MenuActions/FirstPage" "<Alt>d")
+	 * to
+	 * [first_page}
+	 * accel=<Alt>d
+	 *
+	 * convert the Toolbars sections of geeqie.xml from
+	 * ColorProfile0
+	 * to
+	 * color-profile-0
+	 */
+	g_autofree char *accels_ini_path = accels_ini_filename();
+
+	if (!isfile(accels_ini_path))
+		{
+		const char *description =
+			_("As part of the GTK3/GTK4 migration, it was necessary to rework the entire menu and action code. \n \
+Superficially, you should not see significant differences, however you should be aware there may be resulting problems. \n\n \
+Some shortcuts have changed. \n \
+Command line option --action parameters are all changed. \n\n \
+If you find problems, check these files: \n \
+$HOME/.config/geeqie/accels (old) \n \
+$HOME/.config/geeqie/accels.ini (new) \n \
+$HOME/.config/geeqie/geeqierc.xml (revised Toolbar sections) \n \
+$HOME/.config/geeqie/geeqierc.xml~ (backup of original) \n\n \
+If you press Yes to continue, shortcuts and configuration files will be automatically converted. \n\n \
+This message will not be shown again. \n\n \
+Continue?");
+
+		GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Some keyboard shortcuts and \n menu actions have changed."));
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", description);
+
+		int result = gtk_dialog_run(GTK_DIALOG(dialog));
+
+		if (result == GTK_RESPONSE_NO)
+			{
+			abort();
+			}
+
+		gq_gtk_widget_destroy(dialog);
+
+		convert_configuration_file();
+		convert_accel_map();
+		}
+
+	accel_map_load_merged();
 
 	command_line = g_new0(CommandLine, 1);
 }
@@ -847,6 +836,11 @@ void startup_cb(GtkApplication *app, gpointer)
 		{
 		options->disable_gpu = TRUE;
 		}
+
+	/* This must run before the layout is loaded. The layout may contain
+	 * app level actions.
+	 */
+	register_app_actions(app);
 
 	/* restore session from the config file */
 
@@ -913,6 +907,7 @@ void startup_cb(GtkApplication *app, gpointer)
 			new_appimage_notification(app);
 			}
 		}
+	//~ register_app_actions(app);
 
 	gtk_application_window_new(app);
 }

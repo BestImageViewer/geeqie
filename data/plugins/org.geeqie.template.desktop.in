@@ -85,52 +85,5 @@ OnlyShowIn=X-Geeqie;
 # geeqie-delete-command.desktop
 # geeqie-folder-command.desktop
 
-# Uncomment the following line to include in a Geeqie menu
-# other than in the default path of PluginsMenu
-#X-Geeqie-Menu-Path=<FileMenuPath>
-
-# e.g.
-#X-Geeqie-Menu-Path=SelectMenu/SelectSection
-
-# Valid sections are:
-#    FileMenu
-#    FileMenu/OpenSection
-#    FileMenu/SearchSection
-#    FileMenu/PrintSection
-#    FileMenu/FileOpsSection
-#    FileMenu/QuitSection
-#    GoMenu
-#    SelectMenu
-#    SelectMenu/SelectSection
-#    SelectMenu/ClipboardSection
-#    SelectMenu/MarksSection
-#    EditMenu
-#    EditMenu/EditSection
-#    EditMenu/OrientationMenu
-#    EditMenu/RatingMenu
-#    EditMenu/PropertiesSection
-#    EditMenu/AspectRatioMenu
-#    EditMenu/PreferencesSection
-#    PluginsMenu
-#    ViewMenu
-#    ViewMenu/WindowSection
-#    ViewMenu/FileDirMenu
-#    ViewMenu/FileDirMenu/FolderSection
-#    ViewMenu/FileDirMenu/ListSection
-#    ViewMenu/DirSection
-#    ViewMenu/ZoomMenu
-#    ViewMenu/ZoomMenu/ConnectZoomMenu
-#    ViewMenu/SplitMenu
-#    ViewMenu/StereoMenu
-#    ViewMenu/ColorMenu
-#    ViewMenu/OverlayMenu
-#    ViewMenu/ViewSection
-#    ViewMenu/ToolsSection
-#    ViewMenu/SlideShowSection
-#    WindowsMenu
-#    WindowsMenu/NewWindow
-#    HelpMenu
-#    HelpMenu/HelpSection
-
 # For other keys such as MimeType see:
 # https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-0.9.5.html

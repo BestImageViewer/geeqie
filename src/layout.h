@@ -142,6 +142,7 @@ struct LayoutOptions
 struct LayoutWindow
 {
 	LayoutOptions options;
+GtkBuilder *builder;
 
 	FileData *dir_fd;
 
@@ -154,6 +155,7 @@ struct LayoutWindow
 	GtkWidget *group_box;
 	GtkWidget *h_pane;
 	GtkWidget *v_pane;
+	GtkWidget *scrolled_window;
 
 	/* menus, path selector */
 
@@ -187,6 +189,7 @@ struct LayoutWindow
 
 	GtkWidget *menu_tool_bar; /**< Combined menu and toolbar box */
 	GtkWidget *menu_bar; /**< referenced by lw, exist during whole lw lifetime */
+	GMenuModel *menu_model;
 	/* toolbar */
 
 	GtkWidget *toolbar[TOOLBAR_COUNT]; /**< referenced by lw, exist during whole lw lifetime */

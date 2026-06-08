@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <vector>
 
+#include "actions.h"
 #include "cache-maint.h"
 #include "cache.h"
 #include "collect-io.h"
@@ -121,7 +122,7 @@ gchar *set_cwd(gchar *filename, GApplicationCommandLine *app_command_line)
 
 gboolean close_window_cb(gpointer)
 {
-	if (layout_valid(&lw_id)) layout_menu_close_cb(nullptr, lw_id);
+	if (layout_valid(&lw_id)) layout_menu_close_cb(nullptr, nullptr, lw_id);
 
 	return G_SOURCE_REMOVE;
 }
@@ -167,13 +168,66 @@ gboolean wait_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
+static bool activate_detailed_action(GActionGroup *group, const char *action_name, GVariant *target)
+{
+
+	gsize n_actions = 0;
+	g_auto(GStrv) actions = g_action_group_list_actions(group);
+
+	for (guint i = 0; actions[i] != nullptr; i++)
+		{
+		g_print("%s\n", actions[i]);
+		}
+
+	const GVariantType *ptype = g_action_group_get_action_parameter_type(group, action_name);
+
+	if ((ptype == nullptr && target == nullptr) ||
+	        (ptype != nullptr && target != nullptr &&
+	         g_variant_is_of_type(target, ptype)))
+		{
+		g_action_group_activate_action(group, action_name, target);
+
+		return true;
+		}
+
+	return false;
+}
+
+bool run_action(const char *text, GApplication *app, GtkWidget *win)
+{
+	g_autofree char *action_name = nullptr;
+	g_autoptr(GVariant) target = nullptr;
+	g_autoptr(GError) error = nullptr;
+
+	if (!g_action_parse_detailed_name(text, &action_name, &target, &error))
+		{
+		log_printf("Invalid detailed action name: %s\n", text);
+
+		return FALSE;
+		}
+
+	if (!activate_detailed_action(G_ACTION_GROUP(app), action_name, target))
+		{
+		char *new_action = g_strconcat("main-win-", action_name, nullptr);
+
+		if (!activate_detailed_action(G_ACTION_GROUP(win), new_action, target))
+			{
+			log_printf("Action not found or invalid target: %s\n", action_name);
+
+			return FALSE;
+			}
+		}
+
+	return TRUE;
+}
+
 void gq_action(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *command_line_options_dict, GList *)
 {
 	gboolean remote_instance;
 
 	remote_instance = g_application_command_line_get_is_remote(app_command_line);
 
-	gchar *text = nullptr;
+	const gchar *text = nullptr;
 	g_variant_dict_lookup(command_line_options_dict, "action", "&s", &text);
 
 	layout_valid(&lw_id);
@@ -184,47 +238,34 @@ void gq_action(GtkApplication *, GApplicationCommandLine *app_command_line, GVar
 		}
 	else
 		{
-		GtkAction *action;
+		GApplication *app = g_application_get_default();
 
-		action = deprecated_gtk_action_group_get_action(lw_id->action_group, text);
-		if (action)
-			{
-			deprecated_gtk_action_activate(action);
-			}
-		else
-			{
-			g_application_command_line_print(app_command_line, _("Action %s is unknown\n"), text);
-			if (!remote_instance)
-				{
-				exit_program();
-				}
-			}
+		run_action(text, app, lw_id->window);
+		}
+
+	if (!remote_instance)
+		{
+		exit_program();
 		}
 }
 
-void gq_action_list(GtkApplication *, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
+void gq_action_list(GtkApplication *, GApplicationCommandLine *app_command_line, GVariantDict *, GList *)
 {
-	gint max_length = 0;
+	const ActionDef *ad_app = get_app_actions();
+	g_auto(GStrv) app_lines = action_defs_to_aligned_lines(ad_app);
 
-	std::vector<ActionItem> list = get_action_items();
-
-	/* Get the length required for padding */
-	for (const ActionItem &action_item : list)
+	for (int i = 0; app_lines[i]; i++)
 		{
-		const auto length = g_utf8_strlen(action_item.name, -1);
-		max_length = std::max<gint>(length, max_length);
+		g_application_command_line_print(app_command_line, "%s\n", app_lines[i]);
 		}
 
-	/* Pad the action names to the same column for readable output */
-	g_autoptr(GString) out_string = g_string_new(nullptr);
-	for (const ActionItem &action_item : list)
-		{
-		g_string_append_printf(out_string, "%-*s", max_length + 4, action_item.name);
-		out_string = g_string_append(out_string, action_item.label);
-		out_string = g_string_append(out_string, "\n");
-		}
+	const ActionDef *ad_layout = get_main_actions();
+	g_auto(GStrv) layout_lines = action_defs_to_aligned_lines(ad_layout);
 
-	g_application_command_line_print(app_command_line, "%s\n", out_string->str);
+	for (int i = 0; layout_lines[i]; i++)
+		{
+		g_application_command_line_print(app_command_line, "%s\n", layout_lines[i]);
+		}
 }
 
 void gq_back(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList *)

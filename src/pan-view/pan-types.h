@@ -156,6 +156,8 @@ struct PanWindow
 	GtkWidget *label_message;
 	GtkWidget *label_zoom;
 
+	GtkWidget *menu;
+
 	PanViewSearchUi *search_ui;
 	PanViewFilterUi *filter_ui;
 
