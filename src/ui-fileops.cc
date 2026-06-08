@@ -901,7 +901,7 @@ gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data)
 	g_autofree gchar *scheme = g_uri_parse_scheme(text);
 	if (g_strcmp0("http", scheme) != 0 && g_strcmp0("https", scheme) != 0)
 		{
-		return FALSE;
+		return nullptr;
 		}
 
 	FileFormatClass format_class = filter_file_get_class(text);
@@ -910,7 +910,7 @@ gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data)
 	    format_class != FORMAT_CLASS_VIDEO &&
 	    format_class != FORMAT_CLASS_DOCUMENT)
 		{
-		return FALSE;
+		return nullptr;
 		}
 
 	g_autoptr(GError) error = nullptr;
