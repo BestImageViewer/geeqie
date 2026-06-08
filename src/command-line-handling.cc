@@ -1330,11 +1330,11 @@ void process_files(GList *file_list)
 			g_free(cd->path);
 			cd->path = nullptr;
 
-			work = file_list;
-			while (work)
+			for (GList *work = file_list; work; work = work->next)
 				{
-				collection_add(cd, file_data_new_no_grouping((gchar *)(work->data)), FALSE);
-				work = work->next;
+				FileData *fd = file_data_new_no_grouping(static_cast<gchar *>(work->data));
+				collection_add(cd, fd, FALSE);
+				file_data_unref(fd);
 				}
 			}
 		else
