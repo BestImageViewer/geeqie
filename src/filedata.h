@@ -488,13 +488,21 @@ class FileData::FileList
 class FileDataRef
 {
     public:
-	explicit FileDataRef(FileData &fd, gboolean skip_ref = FALSE);
+	explicit FileDataRef(FileData *fd, bool skip_initial_ref = false);
 	FileDataRef(FileDataRef &) = delete;  // Not copyable.
 	FileDataRef &operator=(const FileDataRef &) = delete;  // Not assignable.
 	~FileDataRef();
 
+	// Allow implicit conversion directly to FileData*.
+	// This allows a FileDataRef to be used anywhere a FileData* is expected.
+	operator FileData*() const { return fd_; }
+
+	void reset(FileData *new_fd);
+	FileData* operator*() const { return fd_; }
+	FileData* operator->() const { return fd_; }
+
     private:
-	FileData &fd_;
+	FileData *fd_;
 };
 
 // C-style compatibility API.

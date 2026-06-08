@@ -44,19 +44,13 @@ class FileDataTest : public t::Test
     protected:
 	void TearDown() override
 	{
-		if (fd != nullptr)
-		{
-			g_free(fd);
-			fd = nullptr;
-		}
-		if (parent_fd != nullptr)
-		{
-			g_free(parent_fd);
-			parent_fd = nullptr;
-		}
+		g_clear_pointer(&fd, g_free);
+		g_clear_pointer(&fd2, g_free);
+		g_clear_pointer(&parent_fd, g_free);
 	}
 
 	FileData *fd = nullptr;
+	FileData *fd2 = nullptr;
 	FileData *parent_fd = nullptr;
 	FileDataContext context;
 };
@@ -160,16 +154,70 @@ TEST_F(FileDataTest, FileDataRef)
 		ASSERT_EQ(0, fd->ref);
 
 		// Refcount should increase by 1 after the FileDataRef is created.
-		FileDataRef fd_ref(*fd);
+		FileDataRef fd_ref(fd);
 		ASSERT_EQ(1, fd->ref);
 
 		// Refcount should increase by 1 more with the second FileDataRef.
-		FileDataRef fd_ref2(*fd);
+		FileDataRef fd_ref2(fd);
 		ASSERT_EQ(2, fd->ref);
 	}
 
 	// And refcount drops back down to 0 after both of the FileDataRefs go out of scope.
 	ASSERT_EQ(0, fd->ref);
+}
+
+TEST_F(FileDataTest, FileDataRefReset)
+{
+	fd = g_new0(FileData, 1);
+	fd->magick = FD_MAGICK;
+	fd2 = g_new0(FileData, 1);
+	fd2->magick = FD_MAGICK;
+
+	// Avoids having the FileData objects automatically freed when its
+	// refcount drops back to zero.
+	file_data_lock(fd);
+	file_data_lock(fd2);
+
+	// Start off with no refs.
+	ASSERT_EQ(0, fd->ref);
+	ASSERT_EQ(0, fd2->ref);
+
+	// This should ref fd.
+	FileDataRef fd_ref(fd);
+
+	ASSERT_EQ(1, fd->ref);
+	ASSERT_EQ(0, fd2->ref);
+	ASSERT_EQ(fd, static_cast<FileData *>(fd_ref));
+
+	// This should ref fd2 and unref fd.
+	fd_ref.reset(fd2);
+
+	ASSERT_EQ(0, fd->ref);
+	ASSERT_EQ(1, fd2->ref);
+	ASSERT_EQ(fd2, static_cast<FileData *>(fd_ref));
+}
+
+TEST_F(FileDataTest, FileDataRefResetToNull)
+{
+	fd = g_new0(FileData, 1);
+	fd->magick = FD_MAGICK;
+
+	// Avoids having the FileData objects automatically freed when its
+	// refcount drops back to zero.
+	file_data_lock(fd);
+
+	FileDataRef fd_ref(fd);
+	ASSERT_EQ(1, fd->ref);
+
+	// Reset to nullptr shouldn't crash, and should unref the previously held fd.
+	fd_ref.reset(nullptr);
+	ASSERT_EQ(0, fd->ref);
+	ASSERT_EQ(nullptr, static_cast<FileData *>(fd_ref));
+
+	// And we should be able to re-ref the original fd without crashing.
+	fd_ref.reset(fd);
+	ASSERT_EQ(1, fd->ref);
+	ASSERT_EQ(fd, static_cast<FileData *>(fd_ref));
 }
 
 }  // anonymous namespace

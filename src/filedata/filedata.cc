@@ -1582,7 +1582,7 @@ gboolean FileData::file_data_add_ci(FileData *fd, FileDataChangeType type, const
 void FileData::planned_change_remove()
 {
         // Avoids potentially having the class destructed out from under us.
-        FileDataRef this_ref(*this);
+        FileDataRef this_ref(this);
 
 	if (g_hash_table_size(context->planned_change_map) != 0 &&
 	    (change->type == FILEDATA_CHANGE_MOVE || change->type == FILEDATA_CHANGE_RENAME))
@@ -1858,7 +1858,7 @@ void FileData::file_data_sc_free_ci_list(GList *fd_list)
 void FileData::update_planned_change_hash(const gchar *old_path, gchar *new_path)
 {
         // Avoids potentially having the class destructed out from under us.
-        FileDataRef this_ref(*this);
+        FileDataRef this_ref(this);
 
 	FileDataChangeType type = change->type;
 
@@ -3010,14 +3010,24 @@ bool FileData::supports_exif_orientation() const
 	    && (g_strcmp0(format_name, "jxl") != 0);
 }
 
-FileDataRef::FileDataRef(FileData &fd, gboolean skip_ref) : fd_(fd)
+FileDataRef::FileDataRef(FileData *fd, bool skip_initial_ref) : fd_(fd)
 {
-        if (!skip_ref) fd_.file_data_ref();
+	if (!skip_initial_ref && fd != nullptr) fd_->file_data_ref();
 }
 
 FileDataRef::~FileDataRef()
 {
-        fd_.file_data_unref();
+	if(fd_ != nullptr) fd_->file_data_unref();
+}
+
+void FileDataRef::reset(FileData *new_fd)
+{
+	if(new_fd != nullptr) new_fd->file_data_ref();
+
+	FileData *old_fd = fd_;
+	fd_ = new_fd;
+
+	if (old_fd != nullptr) old_fd->file_data_unref();
 }
 
 // NOLINTEND(readability-convert-member-functions-to-static)
