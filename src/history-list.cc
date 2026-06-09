@@ -192,29 +192,16 @@ static GList *history_list = nullptr;
 
 static gchar *quoted_from_text(const gchar *text)
 {
-	const gchar *ptr;
-	gint c = 0;
-	gint l = strlen(text);
+	if (text[0] == '\0') return nullptr;
 
-	if (l == 0) return nullptr;
+	constexpr gint max_tokens = 3;
+	g_auto(GStrv) text_split = g_strsplit(text, "\"", max_tokens);
+	if (g_strv_length(text_split) < max_tokens) return nullptr; // text doesn't have quoted substring
 
-	while (c < l && text[c] !='"') c++;
-	if (text[c] == '"')
-		{
-		gint e;
-		c++;
-		ptr = text + c;
-		e = c;
-		while (e < l && text[e] !='"') e++;
-		if (text[e] == '"')
-			{
-			if (e - c > 0)
-				{
-				return g_strndup(ptr, e - c);
-				}
-			}
-		}
-	return nullptr;
+	const gchar *quoted = text_split[1];
+	if (quoted[0] == '\0') return nullptr; // skip empty quoted substring
+
+	return g_strdup(quoted);
 }
 
 gboolean history_list_load(const gchar *path)
