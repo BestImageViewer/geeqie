@@ -322,6 +322,20 @@ static HistoryData *history_list_find_by_key(const gchar *key)
 	return work ? static_cast<HistoryData *>(work->data) : nullptr;
 }
 
+static HistoryData *history_data_get_by_key(const gchar *key)
+{
+	HistoryData *hd = history_list_find_by_key(key);
+
+	if (!hd)
+		{
+		hd = g_new0(HistoryData, 1);
+		hd->key = g_strdup(key);
+		history_list = g_list_prepend(history_list, hd);
+		}
+
+	return hd;
+}
+
 const gchar *history_list_find_last_path_by_key(const gchar *key)
 {
 	HistoryData *hd;
@@ -344,19 +358,11 @@ void history_list_free_key(const gchar *key)
 
 void history_list_add_to_key(const gchar *key, const gchar *path, gint max)
 {
-	HistoryData *hd;
 	GList *work;
 
 	if (!key || !path) return;
 
-	hd = history_list_find_by_key(key);
-	if (!hd)
-		{
-		hd = g_new(HistoryData, 1);
-		hd->key = g_strdup(key);
-		hd->list = nullptr;
-		history_list = g_list_prepend(history_list, hd);
-		}
+	HistoryData *hd = history_data_get_by_key(key);
 
 	/* if already in the list, simply move it to the top */
 	work = g_list_find_custom(hd->list, path, reinterpret_cast<GCompareFunc>(strcmp));
@@ -480,7 +486,6 @@ GList *history_list_get_by_key(const gchar *key)
  */
 gchar *get_recent_viewed_folder_image(gchar *path)
 {
-	HistoryData *hd;
 	GList *work;
 
 	if (options->recent_folder_image_list_maxsize == 0)
@@ -488,15 +493,7 @@ gchar *get_recent_viewed_folder_image(gchar *path)
 		return nullptr;
 		}
 
-	hd = history_list_find_by_key("image_list");
-
-	if (!hd)
-		{
-		hd = g_new(HistoryData, 1);
-		hd->key = g_strdup("image_list");
-		hd->list = nullptr;
-		history_list = g_list_prepend(history_list, hd);
-		}
+	HistoryData *hd = history_data_get_by_key("image_list");
 
 	work = g_list_find_custom(hd->list, path, dirname_compare);
 	if (!work || !isfile(static_cast<const gchar *>(work->data)))
@@ -509,7 +506,6 @@ gchar *get_recent_viewed_folder_image(gchar *path)
 
 static void update_recent_viewed_folder_image_list(const gchar *path)
 {
-	HistoryData *hd;
 	GList *work;
 
 	if (options->recent_folder_image_list_maxsize == 0)
@@ -517,14 +513,7 @@ static void update_recent_viewed_folder_image_list(const gchar *path)
 		return;
 		}
 
-	hd = history_list_find_by_key("image_list");
-	if (!hd)
-		{
-		hd = g_new(HistoryData, 1);
-		hd->key = g_strdup("image_list");
-		hd->list = nullptr;
-		history_list = g_list_prepend(history_list, hd);
-		}
+	HistoryData *hd = history_data_get_by_key("image_list");
 
 	g_autofree gchar *image_dir = g_path_get_dirname(path);
 	work = g_list_find_custom(hd->list, image_dir, dirname_compare);
