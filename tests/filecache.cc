@@ -39,8 +39,9 @@ class FileCacheTest : public t::Test
     protected:
 	void TearDown() override
 	{
-		g_clear_pointer(&fd, g_free);
-		g_clear_pointer(&fd2, g_free);
+		// Free Refs before cleaning up fd_funcs
+		fd.reset(nullptr);
+		fd2.reset(nullptr);
 
 		// We have to clean this up by hand since the notify funcs are stored in a global.
 		for (const auto notify_func_pair : unregister_fd_funcs_at_teardown)
@@ -60,9 +61,9 @@ class FileCacheTest : public t::Test
 		std::cerr << "released " << static_cast<void *>(fd) << " (" << fd->path << ")\n";
 	}
 
-	FileData *fd = nullptr;
-	FileData *fd2 = nullptr;
-	FileDataContext context;
+	FileDataContext context;  // Needs to be constructed before Refs.
+	FileDataRef fd{nullptr};
+	FileDataRef fd2{nullptr};
 	std::vector<std::pair<FileData::NotifyFunc, gpointer>> unregister_fd_funcs_at_teardown;
 };
 
@@ -70,8 +71,8 @@ class FileCacheTest : public t::Test
 TEST_F(FileCacheTest, BasicLifecycle)
 {
 	// TODO[xsdg]: Create a mock FileData that acts like the underlying file exists.
-	fd = FileData::file_data_new_simple("/does/not/exist.jpg", &context);
-	fd2 = FileData::file_data_new_simple("/does/not/exist2.jpg", &context);
+	fd = FileData::new_simple("/does/not/exist.jpg", &context);
+	fd2 = FileData::new_simple("/does/not/exist2.jpg", &context);
 	FileCache *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
 
 	ASSERT_FALSE(file_cache_get(fc, fd));
@@ -122,8 +123,8 @@ void reentrant_cache_notify_cb(FileData *fd, NotifyType, gpointer data)
 TEST_F(FileCacheTest, ReentrantCacheGet)
 {
 	// TODO[xsdg]: Create a mock FileData that acts like the underlying file exists.
-	fd = FileData::file_data_new_simple("/does/not/exist.jpg", &context);
-	fd2 = FileData::file_data_new_simple("/does/not/exist2.jpg", &context);
+	fd = FileData::new_simple("/does/not/exist.jpg", &context);
+	fd2 = FileData::new_simple("/does/not/exist2.jpg", &context);
 	FileCache *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
 
 	CacheAndFds cache_and_fds = {fc, fd, fd2};
@@ -159,8 +160,8 @@ void notify_put_get_cache_notify_cb(FileData *fd, NotifyType, gpointer data)
 TEST_F(FileCacheTest, ReentrantNotifyPutGet)
 {
 	// TODO[xsdg]: Create a mock FileData that acts like the underlying file exists.
-	fd = FileData::file_data_new_simple("/does/not/exist.jpg", &context);
-	fd2 = FileData::file_data_new_simple("/does/not/exist2.jpg", &context);
+	fd = FileData::new_simple("/does/not/exist.jpg", &context);
+	fd2 = FileData::new_simple("/does/not/exist2.jpg", &context);
 	FileCache *fc = file_cache_new(&FileCacheTest::cache_release, /*max_size=*/5);
 
 	CacheAndFds cache_and_fds = {fc, fd, fd2};

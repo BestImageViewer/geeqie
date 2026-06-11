@@ -353,57 +353,51 @@ GlobalFileDataContext &GlobalFileDataContext::get_instance()
  * create or reuse Filedata
  *-----------------------------------------------------------------------------
  */
-FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gboolean disable_sidecars, FileDataContext *context)
+FileDataRef FileData::make_new(const gchar *path_utf8, struct stat *st, gboolean disable_sidecars, FileDataContext *context)
 {
 	if (context == nullptr)
 		{
 		context = FileData::DefaultFileDataContext();
 		}
 
-	FileData *fd;
-
 	DEBUG_2("file_data_new: '%s' %d", path_utf8, disable_sidecars);
 
 	if (S_ISDIR(st->st_mode)) disable_sidecars = TRUE;
 
-	fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
-	if (fd)
+	FileDataRef fd_ref{
+		static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8))};
+	if (!fd_ref)
 		{
-		::file_data_ref(fd);
-		}
-	else
-		{
-		fd = static_cast<FileData *>(g_hash_table_lookup(context->planned_change_map, path_utf8));
-		if (fd)
+		fd_ref.reset(static_cast<FileData *>(g_hash_table_lookup(context->planned_change_map, path_utf8)));
+		if (fd_ref)
 			{
-			DEBUG_1("planned change: using %s -> %s", path_utf8, fd->path);
-			if (!isfile(fd->path))
+			DEBUG_1("planned change: using %s -> %s", path_utf8, fd_ref->path);
+			if (!isfile(fd_ref->path))
 				{
-				::file_data_ref(fd);
-				::file_data_apply_ci(fd);
+				::file_data_apply_ci(fd_ref);
 				}
 			else
 				{
-				fd = nullptr;
+				fd_ref.reset(nullptr);
 				}
 			}
 		}
 
-	if (fd)
+	if (fd_ref)
 		{
-		if (disable_sidecars) ::file_data_disable_grouping(fd, TRUE);
+		if (disable_sidecars) ::file_data_disable_grouping(fd_ref, TRUE);
 
 #ifdef DEBUG_FILEDATA
 		gboolean changed =
 #endif
-		file_data_check_changed_single_file(fd, st);
+		file_data_check_changed_single_file(fd_ref, st);
 
-		DEBUG_2("file_data_pool hit: '%s' %s", fd->path, changed ? "(changed)" : "");
+		DEBUG_2("file_data_pool hit: '%s' %s", fd_ref->path, changed ? "(changed)" : "");
 
-		return fd;
+		return fd_ref;
 		}
 
-	fd = g_new0(FileData, 1);
+	auto *fd = g_new0(FileData, 1);
 #ifdef DEBUG_FILEDATA
 	context->global_file_data_count++;
 	DEBUG_2("file data count++: %d", context->global_file_data_count);
@@ -414,7 +408,7 @@ FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gbool
 	fd->date = st->st_mtime;
 	fd->cdate = st->st_ctime;
 	fd->mode = st->st_mode;
-	fd->ref = 1;
+	fd->ref = 0;  // Will be reffed by the FileDataRef.
 	fd->magick = FD_MAGICK;
 	fd->exifdate = 0;
 	fd->rating = STAR_RATING_NOT_READ;
@@ -425,17 +419,19 @@ FileData *FileData::file_data_new(const gchar *path_utf8, struct stat *st, gbool
 
 	fd->set_path(path_utf8); /* set path, name, collate_key_*, original_path */
 
-	return fd;
+	return FileDataRef{fd};
 }
 
-FileData *FileData::file_data_new_local(const gchar *path, struct stat *st, gboolean disable_sidecars, FileDataContext *context)
+// static
+FileDataRef FileData::make_new_local(const gchar *path, struct stat *st, gboolean disable_sidecars, FileDataContext *context)
 {
 	g_autofree gchar *path_utf8 = path_to_utf8(path);
 
-	return file_data_new(path_utf8, st, disable_sidecars, context);
+	return make_new(path_utf8, st, disable_sidecars, context);
 }
 
-FileData *FileData::file_data_new_simple(const gchar *path_utf8, FileDataContext *context)
+// static
+FileDataRef FileData::new_simple(const gchar *path_utf8, FileDataContext *context)
 {
 	struct stat st{};
 
@@ -451,16 +447,9 @@ FileData *FileData::file_data_new_simple(const gchar *path_utf8, FileDataContext
 		}
 
 	auto *fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
-	if (!fd)
-		{
-		fd = file_data_new(path_utf8, &st, TRUE, context);
-		}
-	else
-		{
-		::file_data_ref(fd);
-		}
+	if (fd) return FileDataRef{fd};
 
-	return fd;
+	return make_new(path_utf8, &st, TRUE, context);
 }
 
 void FileData::read_exif_time_data(FileData *file)
@@ -533,7 +522,7 @@ void FileData::read_rating_data(FileData *file)
 		}
 }
 
-FileData *FileData::file_data_new_no_grouping(const gchar *path_utf8, FileDataContext *context)
+FileDataRef FileData::new_no_grouping(const gchar *path_utf8, FileDataContext *context)
 {
 	struct stat st;
 
@@ -543,10 +532,10 @@ FileData *FileData::file_data_new_no_grouping(const gchar *path_utf8, FileDataCo
 		st.st_mtime = 0;
 		}
 
-	return file_data_new(path_utf8, &st, TRUE, context);
+	return FileData::make_new(path_utf8, &st, TRUE, context);
 }
 
-FileData *FileData::file_data_new_dir(const gchar *path_utf8, FileDataContext *context)
+FileDataRef FileData::new_dir(const gchar *path_utf8, FileDataContext *context)
 {
 	struct stat st;
 
@@ -559,7 +548,7 @@ FileData *FileData::file_data_new_dir(const gchar *path_utf8, FileDataContext *c
 		/* dir or non-existing yet */
 		g_assert(S_ISDIR(st.st_mode));
 
-	return file_data_new(path_utf8, &st, TRUE, context);
+	return FileData::make_new(path_utf8, &st, TRUE, context);
 }
 
 /*
@@ -1125,7 +1114,7 @@ void FileData::file_data_basename_hash_to_sidecars(gpointer, gpointer value, gpo
 }
 
 
-FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext *context)
+FileDataRef FileData::new_group(const gchar *path_utf8, FileDataContext *context)
 {
 	if (context == nullptr)
 		{
@@ -1140,7 +1129,7 @@ FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext 
 		}
 
 	if (S_ISDIR(st.st_mode))
-		return file_data_new(path_utf8, &st, TRUE, context);
+		return FileData::make_new(path_utf8, &st, TRUE, context);
 
 	g_autofree gchar *dir = remove_level_from_path(path_utf8);
 
@@ -1148,16 +1137,9 @@ FileData *FileData::file_data_new_group(const gchar *path_utf8, FileDataContext 
 	FileList::read_list_real(dir, &files, nullptr, TRUE);
 
 	auto *fd = static_cast<FileData *>(g_hash_table_lookup(context->file_data_pool, path_utf8));
-	if (!fd)
-		{
-		fd = file_data_new(path_utf8, &st, TRUE, context);
-		}
-	else
-		{
-		::file_data_ref(fd);
-		}
+	if (fd) return FileDataRef{fd};
 
-	return fd;
+	return FileData::make_new(path_utf8, &st, TRUE, context);
 }
 
 /*
@@ -2896,6 +2878,8 @@ gboolean FileData::marks_list_load(const gchar *path)
 		const gchar *marks_str = strtok(nullptr, ",");
 		const gint marks_value = atoi(marks_str); // marks_str is guaranteed to contain a non-zero number
 
+		// TODO[xsdg]: This looks like it leaks a bunch of FileDatas.  Are these cleaned
+		// up anywhere?
 		FileData *fd = file_data_new_no_grouping(file_path);
 		::file_data_ref(fd);
 
@@ -3010,9 +2994,22 @@ bool FileData::supports_exif_orientation() const
 	    && (g_strcmp0(format_name, "jxl") != 0);
 }
 
-FileDataRef::FileDataRef(FileData *fd, bool skip_initial_ref) : fd_(fd)
+FileDataRef::FileDataRef(FileData *fd) : fd_(fd)
 {
-	if (!skip_initial_ref && fd != nullptr) fd_->file_data_ref();
+	if (fd_ != nullptr) fd_->file_data_ref();
+}
+
+FileDataRef::FileDataRef(FileDataRef &&other) noexcept
+{
+	*this = std::move(other);
+}
+
+FileDataRef &FileDataRef::operator=(FileDataRef &&other) noexcept
+{
+	fd_ = other.fd_;
+	other.fd_ = nullptr;
+
+	return *this;
 }
 
 FileDataRef::~FileDataRef()
@@ -3028,6 +3025,11 @@ void FileDataRef::reset(FileData *new_fd)
 	fd_ = new_fd;
 
 	if (old_fd != nullptr) old_fd->file_data_unref();
+}
+
+FileData *FileDataRef::release()
+{
+	return g_steal_pointer(&fd_);
 }
 
 // NOLINTEND(readability-convert-member-functions-to-static)

@@ -45,21 +45,21 @@ class FileDataSortTest : public t::Test
 	{
 		// We construct these so that fd_first < fd_middle < f_last in
 		// every sortable attribute.
-		fd_first = FileData::file_data_new_simple("/noexist/noexist/1_first.jpg", &context);
+		fd_first = FileData::new_simple("/noexist/noexist/1_first.jpg", &context);
 		fd_first->size = 11;
 		fd_first->date = fd_first->cdate = 1111111111;
 		fd_first->exifdate = fd_first->exifdate_digitized = 1111111111;
 		fd_first->rating = 1;
 		fd_first->format_class = FORMAT_CLASS_IMAGE;
 
-		fd_middle = FileData::file_data_new_simple("/noexist/noexist/2_middle.jpg", &context);
+		fd_middle = FileData::new_simple("/noexist/noexist/2_middle.jpg", &context);
 		fd_middle->size = 222;
 		fd_middle->date = fd_middle->cdate = 2222222222;
 		fd_middle->exifdate = fd_middle->exifdate_digitized = 2222222222;
 		fd_middle->rating = 2;
 		fd_middle->format_class = FORMAT_CLASS_RAWIMAGE;
 
-		fd_last = FileData::file_data_new_simple("/noexist/noexist/3_last.jpg", &context);
+		fd_last = FileData::new_simple("/noexist/noexist/3_last.jpg", &context);
 		fd_last->size = 3333;
 		fd_last->date = fd_last->cdate = 3333333333;
 		fd_last->exifdate = fd_last->exifdate_digitized = 3333333333;
@@ -67,22 +67,10 @@ class FileDataSortTest : public t::Test
 		fd_last->format_class = FORMAT_CLASS_META;
 	}
 
-	void TearDown() override
-	{
-		file_data_unref(fd_last);
-		fd_last = nullptr;
-
-		file_data_unref(fd_middle);
-		fd_middle = nullptr;
-
-		file_data_unref(fd_first);
-		fd_first = nullptr;
-	}
-
-	FileData *fd_first = nullptr;
-	FileData *fd_middle = nullptr;
-	FileData *fd_last = nullptr;
-	FileDataContext context;
+	FileDataContext context;  // Needs to be constructed before RefPtrs.
+	FileDataRef fd_first{nullptr};
+	FileDataRef fd_middle{nullptr};
+	FileDataRef fd_last{nullptr};
 
 	FileData::FileList::SortSettings default_sort = {SORT_NAME, TRUE, TRUE};
 	FileData::FileList::SortSettings reverse_sort = {SORT_NAME, FALSE, TRUE};
@@ -170,14 +158,10 @@ TEST_F(FileDataSortTest, NumberSort)
 	auto &sort_compare_filedata = FileData::FileList::sort_compare_filedata;
 
 	// We create multiple filedatas which only differ in the path name
-	FileDataRef fd_1(FileData::file_data_new_simple("/noexist/noexist/1_image.jpg", &context),
-			    /*skip_initial_ref=*/TRUE);
-	FileDataRef fd_5(FileData::file_data_new_simple("/noexist/noexist/5_image.jpg", &context),
-			    /*skip_initial_ref=*/TRUE);
-	FileDataRef fd_10(FileData::file_data_new_simple("/noexist/noexist/10_image.jpg", &context),
-			     /*skip_initial_ref=*/TRUE);
-	FileDataRef fd_50(FileData::file_data_new_simple("/noexist/noexist/50_image.jpg", &context),
-			     /*skip_initial_ref=*/TRUE);
+	auto fd_1 = FileData::new_simple("/noexist/noexist/1_image.jpg", &context);
+	auto fd_5 = FileData::new_simple("/noexist/noexist/5_image.jpg", &context);
+	auto fd_10 = FileData::new_simple("/noexist/noexist/10_image.jpg", &context);
+	auto fd_50 = FileData::new_simple("/noexist/noexist/50_image.jpg", &context);
 
 	FileData::FileList::SortSettings number_sort = {SORT_NUMBER, TRUE, TRUE};
 
@@ -211,8 +195,7 @@ TEST_F(FileDataSortTest, TieBreakerFallbackBehavior)
 	auto &sort_compare_filedata = FileData::FileList::sort_compare_filedata;
 
 	// Create a FileData that is identical to fd_middle except for original_path.
-	FileDataRef fd_other_middle(FileData::file_data_new_simple("/noexist/otherdir/2_middle.jpg", &context),
-				       /*skip_initial_ref=*/TRUE);
+	auto fd_other_middle = FileData::new_simple("/noexist/otherdir/2_middle.jpg", &context);
 	fd_other_middle->size = fd_middle->size;
 	fd_other_middle->date = fd_middle->date;
 	fd_other_middle->cdate = fd_middle->cdate;
@@ -248,14 +231,10 @@ TEST_F(FileDataSortTest, CaseSensitivity)
 	auto &sort_compare_filedata = FileData::FileList::sort_compare_filedata;
 	using SortSettings = FileData::FileList::SortSettings;
 
-	FileDataRef fd_lower_1(FileData::file_data_new_simple("/noexist/noexist/1_image.jpg", &context),
-				  /*skip_initial_ref=*/TRUE);
-	FileDataRef fd_upper_1(FileData::file_data_new_simple("/noexist/noexist/1_IMAGE.JPG", &context),
-				  /*skip_initial_ref=*/TRUE);
-	FileDataRef fd_lower_10(FileData::file_data_new_simple("/noexist/noexist/10_image.jpg", &context),
-				   /*skip_initial_ref=*/TRUE);
-	FileDataRef fd_upper_10(FileData::file_data_new_simple("/noexist/noexist/10_IMAGE.JPG", &context),
-				   /*skip_initial_ref=*/TRUE);
+	auto fd_lower_1 = FileData::new_simple("/noexist/noexist/1_image.jpg", &context);
+	auto fd_upper_1 = FileData::new_simple("/noexist/noexist/1_IMAGE.JPG", &context);
+	auto fd_lower_10 = FileData::new_simple("/noexist/noexist/10_image.jpg", &context);
+	auto fd_upper_10 = FileData::new_simple("/noexist/noexist/10_IMAGE.JPG", &context);
 
 	// To avoid inadvertently relying on the original_path fallthrough behavior,
 	// we set all of the original_paths to be identical.

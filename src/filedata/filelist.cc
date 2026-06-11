@@ -183,14 +183,14 @@ gboolean FileData::FileList::read_list_real(const gchar *dir_path, GList **files
 				    strcmp(name, GQ_CACHE_LOCAL_METADATA) != 0 &&
 				    strcmp(name, THUMB_FOLDER_LOCAL) != 0)
 					{
-					dlist = g_list_prepend(dlist, file_data_new_local(filepath, &ent_sbuf, TRUE));
+					dlist = g_list_prepend(dlist, FileData::make_new_local(filepath, &ent_sbuf, TRUE).release());
 					}
 				}
 			else
 				{
 				if (files && filter_name_exists(name))
 					{
-					FileData *fd = file_data_new_local(filepath, &ent_sbuf, FALSE);
+					FileData *fd = FileData::make_new_local(filepath, &ent_sbuf, FALSE).release();
 					flist = g_list_prepend(flist, fd);
 					if (fd->sidecar_priority && !fd->disable_grouping)
 						{

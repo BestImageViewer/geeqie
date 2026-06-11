@@ -41,7 +41,7 @@ const gchar *text_from_time(time_t t)
  */
 FileData *file_data_new_group(const gchar *path_utf8)
 {
-	return FileData::file_data_new_group(path_utf8);
+	return FileData::new_group(path_utf8).release();
 }
 
 /**
@@ -49,7 +49,7 @@ FileData *file_data_new_group(const gchar *path_utf8)
  */
 FileData *file_data_new_no_grouping(const gchar *path_utf8)
 {
-	return FileData::file_data_new_no_grouping(path_utf8);
+	return FileData::new_no_grouping(path_utf8).release();
 }
 
 /**
@@ -57,13 +57,13 @@ FileData *file_data_new_no_grouping(const gchar *path_utf8)
  */
 FileData *file_data_new_dir(const gchar *path_utf8)
 {
-	return FileData::file_data_new_dir(path_utf8);
+	return FileData::new_dir(path_utf8).release();
 }
 
 
 FileData *file_data_new_simple(const gchar *path_utf8)
 {
-	return FileData::file_data_new_simple(path_utf8);
+	return FileData::new_simple(path_utf8).release();
 }
 
 #ifdef DEBUG_FILEDATA

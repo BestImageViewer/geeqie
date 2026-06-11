@@ -49,10 +49,10 @@ class FileDataTest : public t::Test
 		g_clear_pointer(&parent_fd, g_free);
 	}
 
+	FileDataContext context;
 	FileData *fd = nullptr;
 	FileData *fd2 = nullptr;
 	FileData *parent_fd = nullptr;
-	FileDataContext context;
 };
 
 TEST_F(FileDataTest, text_from_size_test)
@@ -79,37 +79,43 @@ TEST_F(FileDataTest, text_from_size_test)
 	}
 }
 
-#ifdef DEBUG_FILEDATA
 TEST_F(FileDataTest, FileDataNewSimpleAndFree)
 {
-	ASSERT_EQ(0, context.global_file_data_count);
-
-	auto *_fd = FileData::file_data_new_simple("/does/not/exist.jpg", &context);
-	ASSERT_NE(_fd, nullptr);
-	ASSERT_EQ(1, context.global_file_data_count);
-	ASSERT_EQ(1, _fd->ref);
-
-	_fd->file_data_unref();
-	_fd = nullptr;
-	ASSERT_EQ(0, context.global_file_data_count);
-}
-#endif
-
 #ifdef DEBUG_FILEDATA
+	ASSERT_EQ(0, context.global_file_data_count);
+
+	{
+		auto _fd = FileData::new_simple("/does/not/exist.jpg", &context);
+		ASSERT_NE(*_fd, nullptr);
+		ASSERT_EQ(1, context.global_file_data_count);
+		ASSERT_EQ(1, _fd->ref);
+	}
+
+	// _fd should have been unreffed and freed after going out of scope.
+	ASSERT_EQ(0, context.global_file_data_count);
+#else
+	GTEST_SKIP() << "Test requires DEBUG_FILEDATA";
+#endif
+}
+
 TEST_F(FileDataTest, FileDataNewGroupAndFree)
 {
+#ifdef DEBUG_FILEDATA
 	ASSERT_EQ(0, context.global_file_data_count);
 
-	auto *_fd = FileData::file_data_new_group("/does/not/exist/file.jpg", &context);
-	ASSERT_NE(_fd, nullptr);
-	EXPECT_EQ(1, context.global_file_data_count);
-	ASSERT_EQ(1, _fd->ref);
+	{
+		auto _fd = FileData::new_group("/does/not/exist/file.jpg", &context);
+		ASSERT_NE(*_fd, nullptr);
+		EXPECT_EQ(1, context.global_file_data_count);
+		ASSERT_EQ(1, _fd->ref);
+	}
 
-	_fd->file_data_unref();
-	_fd = nullptr;
+	// _fd should have been unreffed and freed after going out of scope.
 	ASSERT_EQ(0, context.global_file_data_count);
-}
+#else
+	GTEST_SKIP() << "Test requires DEBUG_FILEDATA";
 #endif
+}
 
 TEST_F(FileDataTest, BasicIncrementVersion)
 {
@@ -218,6 +224,75 @@ TEST_F(FileDataTest, FileDataRefResetToNull)
 	fd_ref.reset(fd);
 	ASSERT_EQ(1, fd->ref);
 	ASSERT_EQ(fd, static_cast<FileData *>(fd_ref));
+}
+
+TEST_F(FileDataTest, FileDataRefRelease)
+{
+#ifdef DEBUG_FILEDATA
+	ASSERT_EQ(0, context.global_file_data_count);
+	FileData *fd_ptr = nullptr;
+
+	{
+		auto fd_ref = FileData::new_simple("/does/not/exist.jpg", &context);
+		ASSERT_EQ(1, context.global_file_data_count);
+		ASSERT_EQ(1, fd_ref->ref);
+
+		fd_ptr = fd_ref.release();
+		ASSERT_EQ(1, context.global_file_data_count);
+		ASSERT_EQ(nullptr, *fd_ref);
+		ASSERT_NE(nullptr, fd_ptr);
+		ASSERT_EQ(1, fd_ptr->ref);
+	}
+
+	// fd_ref should have been empty, so it going out of scope should be a no-op.
+	ASSERT_EQ(1, context.global_file_data_count);
+	ASSERT_NE(nullptr, fd_ptr);
+	ASSERT_EQ(1, fd_ptr->ref);
+
+	fd_ptr->file_data_unref();
+	ASSERT_EQ(0, context.global_file_data_count);
+#else
+	GTEST_SKIP() << "Test requires DEBUG_FILEDATA";
+#endif
+}
+
+TEST_F(FileDataTest, ReturnFileDataRef)
+{
+	const auto &make_ref = []() -> FileDataRef {
+		auto *fd = g_new0(FileData, 1);
+		fd->magick = FD_MAGICK;
+		// Avoids having the FileData objects automatically freed when its
+		// refcount drops back to zero.
+		file_data_lock(fd);
+
+		return FileDataRef{fd};
+	};
+
+	// This ensures that the post-move anonymous FileDataRef can be destructed without crashing.
+	FileDataRef fd_ref = make_ref();
+	ASSERT_EQ(1, fd_ref->ref);
+
+	// We need to manually free the FileData* since it doesn't have a context.
+	g_free(fd_ref.release());
+}
+
+TEST_F(FileDataTest, ReturnFileDataRefAndRelease)
+{
+	const auto &make_ref = []() -> FileDataRef {
+		auto *fd = g_new0(FileData, 1);
+		fd->magick = FD_MAGICK;
+		// Avoids having the FileData objects automatically freed when its
+		// refcount drops back to zero.
+		file_data_lock(fd);
+
+		return FileDataRef{fd};
+	};
+
+	// This ensures that the post-move anonymous FileDataRef can be destructed without crashing.
+	FileData *fd_ptr = make_ref().release();
+	ASSERT_NE(nullptr, fd_ptr);
+	ASSERT_EQ(1, fd_ptr->ref);
+	g_free(fd_ptr);
 }
 
 }  // anonymous namespace
