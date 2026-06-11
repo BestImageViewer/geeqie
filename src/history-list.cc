@@ -183,7 +183,7 @@ void image_chain_append_end(const gchar *path)
 
 struct HistoryData
 {
-	gchar *key;
+	std::string key;
 	GList *list;
 };
 
@@ -258,19 +258,19 @@ gboolean history_list_save(const gchar *path)
 		{
 		const auto *hd = static_cast<HistoryData *>(list->data);
 
-		g_string_append_printf(gstring, "[%s]\n", hd->key);
+		g_string_append_printf(gstring, "[%s]\n", hd->key.c_str());
 
-		const bool is_recent = (strcmp(hd->key, "recent") == 0);
+		const bool is_recent = (hd->key == "recent");
 
 		/* save them inverted (oldest to newest)
 		 * so that when reading they are added correctly
 		 */
 		GList *work = nullptr;
-		if (strcmp(hd->key, "path_list") == 0)
+		if (hd->key == "path_list")
 			{
 			work = g_list_nth(hd->list, options->open_recent_list_maxsize - 1);
 			}
-		else if (strcmp(hd->key, "image_list") == 0)
+		else if (hd->key == "image_list")
 			{
 			work = g_list_nth(hd->list, options->recent_folder_image_list_maxsize - 1);
 			}
@@ -295,9 +295,8 @@ static void history_list_free(HistoryData *hd)
 {
 	if (!hd) return;
 
-	g_free(hd->key);
 	g_list_free_full(hd->list, g_free);
-	g_free(hd);
+	delete hd;
 }
 
 static HistoryData *history_list_find_by_key(const gchar *key)
@@ -307,7 +306,7 @@ static HistoryData *history_list_find_by_key(const gchar *key)
 	static const auto history_data_compare_key = [](gconstpointer data, gconstpointer user_data)
 	{
 		auto *hd = static_cast<const HistoryData *>(data);
-		return strcmp(hd->key, static_cast<const gchar *>(user_data));
+		return hd->key.compare(static_cast<const gchar *>(user_data));
 	};
 
 	GList *work = g_list_find_custom(history_list, key, history_data_compare_key);
@@ -320,8 +319,8 @@ static HistoryData *history_data_get_by_key(const gchar *key)
 
 	if (!hd)
 		{
-		hd = g_new0(HistoryData, 1);
-		hd->key = g_strdup(key);
+		hd = new HistoryData();
+		hd->key = key;
 		history_list = g_list_prepend(history_list, hd);
 		}
 
