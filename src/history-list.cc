@@ -260,23 +260,28 @@ gboolean history_list_save(const gchar *path)
 
 		g_string_append_printf(gstring, "[%s]\n", hd->key);
 
+		const bool is_recent = (strcmp(hd->key, "recent") == 0);
+
 		/* save them inverted (oldest to newest)
 		 * so that when reading they are added correctly
 		 */
-		gint list_count = g_list_length(hd->list);
-		for (GList *work = g_list_last(hd->list); work; work = work->prev)
+		GList *work = nullptr;
+		if (strcmp(hd->key, "path_list") == 0)
+			{
+			work = g_list_nth(hd->list, options->open_recent_list_maxsize - 1);
+			}
+		else if (strcmp(hd->key, "image_list") == 0)
+			{
+			work = g_list_nth(hd->list, options->recent_folder_image_list_maxsize - 1);
+			}
+
+		if (!work) work = g_list_last(hd->list);
+		for (; work; work = work->prev)
 			{
 			const auto *item = static_cast<gchar *>(work->data);
-			if ((strcmp(hd->key, "path_list") != 0 || list_count <= options->open_recent_list_maxsize)
-			    &&
-			    (strcmp(hd->key, "recent") != 0 || isfile(item))
-			    &&
-			    (strcmp(hd->key, "image_list") != 0 || list_count <= options->recent_folder_image_list_maxsize))
-				{
-				g_string_append_printf(gstring, "\"%s\"\n", item);
-				}
+			if (is_recent && !isfile(item)) continue;
 
-			list_count--;
+			g_string_append_printf(gstring, "\"%s\"\n", item);
 			}
 		g_string_append(gstring, "\n");
 		}
