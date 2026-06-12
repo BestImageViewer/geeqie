@@ -392,41 +392,39 @@ void history_list_add_to_key(const gchar *key, const gchar *path, gint max)
 
 void history_list_item_change(const gchar *key, const gchar *oldpath, const gchar *newpath)
 {
-	HistoryData *hd;
-	GList *work;
-
 	if (!oldpath) return;
-	hd = history_list_find_by_key(key);
+
+	HistoryData *hd = history_list_find_by_key(key);
 	if (!hd) return;
 
-	work = hd->list;
-	while (work)
-		{
-		auto buf = static_cast<gchar *>(work->data);
+	struct Paths
+	{
+		const gchar *oldpath;
+		const gchar *newpath;
+	} paths{ oldpath, newpath };
 
-		if (!g_str_has_prefix(buf, ".") || newpath)
-			{
-			if (strcmp(buf, oldpath) == 0)
-				{
-				if (newpath)
-					{
-					work->data = g_strdup(newpath);
-					}
-				else
-					{
-					hd->list = g_list_remove(hd->list, buf);
-					}
-				g_free(buf);
-				return;
-				}
-			}
-		else
-			{
-			hd->list = g_list_remove(hd->list, buf);
-			g_free(buf);
-			return;
-			}
-		work = work->next;
+	static const auto find_path = [](gconstpointer data, gconstpointer user_data)
+	{
+		const auto *buf = static_cast<const gchar *>(data);
+		const auto *paths = static_cast<const Paths *>(user_data);
+
+		if (g_str_has_prefix(buf, ".") && !paths->newpath) return 0;
+
+		return strcmp(buf, paths->oldpath);
+	};
+
+	GList *work = g_list_find_custom(hd->list, &paths, find_path);
+	if (!work) return;
+
+	g_autofree auto *buf = static_cast<gchar *>(work->data);
+
+	if (newpath)
+		{
+		work->data = g_strdup(newpath);
+		}
+	else
+		{
+		hd->list = g_list_remove(hd->list, buf);
 		}
 }
 
