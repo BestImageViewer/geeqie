@@ -1274,8 +1274,6 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 {
 	GtkWidget *frame = gtk_frame_new(nullptr);
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	GList *work;
-	gint n = 0;
 	GtkWidget *combo_entry;
 	GtkWidget *menubar;
 	GtkWidget *icon;
@@ -1292,13 +1290,14 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	g_signal_connect(GTK_ENTRY(combo_entry), "icon-press",
 	                 G_CALLBACK(file_filter_clear_cb), nullptr);
 
-	work = history_list_get_by_key("file_filter");
-	while (work)
+	const HistoryList *history_list = history_list_find_by_key("file_filter");
+	if (history_list)
 		{
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), static_cast<gchar *>(work->data));
-		work = work->next;
-		n++;
-		vf->file_filter.count = n;
+		vf->file_filter.count = history_list->size();
+		for (const std::string &item : *history_list)
+			{
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), item.c_str());
+			}
 		}
 	gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), 0);
 

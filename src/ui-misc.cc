@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -935,21 +936,16 @@ void date_selection_time_set(GtkWidget *widget, time_t t)
 
 #define PREF_LIST_MARKER_INT "[INT]:"
 
-static GList *pref_list_find(const gchar *group, const gchar *token, size_t token_len)
+static std::optional<HistoryList::iterator> pref_list_find(const gchar *group, const gchar *token, size_t token_len)
 {
-	GList *work;
+	HistoryList *history_list = history_list_find_by_key(group);
+	if (!history_list) return {};
 
-	work = history_list_get_by_key(group);
-	while (work)
-		{
-		auto text = static_cast<const gchar *>(work->data);
+	auto work = std::find_if(history_list->begin(), history_list->end(),
+	                         [token, token_len](const std::string &text){ return text.compare(0, token_len, token) == 0; });
+	if (work == history_list->end()) return {};
 
-		if (strncmp(text, token, token_len) == 0) return work;
-
-		work = work->next;
-		}
-
-	return nullptr;
+	return work;
 }
 
 static const gchar *pref_list_get(const gchar *group, const gchar *key, const gchar *marker)
@@ -959,37 +955,33 @@ static const gchar *pref_list_get(const gchar *group, const gchar *key, const gc
 	g_autofree gchar *token = g_strconcat(key, marker, NULL);
 	const size_t token_len = strlen(token);
 
-	GList *work = pref_list_find(group, token, token_len);
+	auto work = pref_list_find(group, token, token_len);
 	if (!work) return nullptr;
 
-	const auto *result = static_cast<const gchar *>(work->data) + token_len;
+	const gchar *result = work.value()->c_str() + token_len;
 
 	return (result[0] != '\0') ? result : nullptr;
 }
 
 static void pref_list_set(const gchar *group, const gchar *key, const gchar *marker, const gchar *text)
 {
-	GList *work;
-
 	if (!group || !key || !marker) return;
 
 	g_autofree gchar *token = g_strconcat(key, marker, NULL);
 	g_autofree gchar *path = g_strconcat(token, text, NULL);
 
-	work = pref_list_find(group, token, strlen(token));
+	auto work = pref_list_find(group, token, strlen(token));
 	if (work)
 		{
-		auto old_path = static_cast<gchar *>(work->data);
+		auto &it = work.value();
 
 		if (text)
 			{
-			work->data = g_steal_pointer(&path);
-
-			g_free(old_path);
+			*it = path;
 			}
 		else
 			{
-			history_list_item_remove(group, old_path);
+			history_list_item_remove(group, it->c_str());
 			}
 		}
 	else if (text)

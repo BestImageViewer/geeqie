@@ -21,6 +21,9 @@
 #ifndef HISTORY_LIST_H
 #define HISTORY_LIST_H
 
+#include <list>
+#include <string>
+
 #include <glib.h>
 
 /* history lists */
@@ -47,7 +50,8 @@ const gchar *image_chain_back();
 const gchar *image_chain_forward();
 void image_chain_append_end(const gchar *path);
 
-GList *history_list_get_by_key(const gchar *key);
+using HistoryList = std::list<std::string>;
+HistoryList *history_list_find_by_key(const gchar *key);
 
 
 #endif /* HISTORY_LIST_H */

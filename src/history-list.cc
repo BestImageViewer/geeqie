@@ -20,8 +20,10 @@
 
 #include "history-list.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <unordered_map>
 #include <vector>
 
 #include "options.h"
@@ -91,10 +93,12 @@ bool HistoryChain::push_back(const gchar *path)
 HistoryChain history_chain{};
 HistoryChain image_chain{};
 
-gint dirname_compare(gconstpointer data, gconstpointer user_data)
+std::unordered_map<std::string, HistoryList> history_list_map;
+
+bool dirname_compare(const std::string &item, const gchar *path)
 {
-	g_autofree gchar *dirname = g_path_get_dirname(static_cast<const gchar *>(data));
-	return g_strcmp0(dirname, static_cast<const gchar *>(user_data));
+	g_autofree gchar *dirname = g_path_get_dirname(item.c_str());
+	return g_strcmp0(dirname, path) == 0;
 }
 
 } // namespace
@@ -181,15 +185,6 @@ void image_chain_append_end(const gchar *path)
  *-----------------------------------------------------------------------------
  */
 
-struct HistoryData
-{
-	std::string key;
-	GList *list;
-};
-
-static GList *history_list = nullptr;
-
-
 static gchar *quoted_from_text(const gchar *text)
 {
 	if (text[0] == '\0') return nullptr;
@@ -254,34 +249,36 @@ gboolean history_list_save(const gchar *path)
 
 	g_autoptr(GString) gstring = g_string_new("#History lists\n\n");
 
-	for (GList *list = g_list_last(history_list); list; list = list->prev)
+	for (const auto &[key, items] : history_list_map)
 		{
-		const auto *hd = static_cast<HistoryData *>(list->data);
+		g_string_append_printf(gstring, "[%s]\n", key.c_str());
 
-		g_string_append_printf(gstring, "[%s]\n", hd->key.c_str());
-
-		const bool is_recent = (hd->key == "recent");
+		const bool is_recent = (key == "recent");
 
 		/* save them inverted (oldest to newest)
 		 * so that when reading they are added correctly
 		 */
-		GList *work = nullptr;
-		if (hd->key == "path_list")
+		auto last = items.crend();
+		if (key == "path_list")
 			{
-			work = g_list_nth(hd->list, options->open_recent_list_maxsize - 1);
+			if (static_cast<size_t>(options->open_recent_list_maxsize) < items.size())
+				{
+				last = std::next(items.crbegin(), options->open_recent_list_maxsize);
+				}
 			}
-		else if (hd->key == "image_list")
+		else if (key == "image_list")
 			{
-			work = g_list_nth(hd->list, options->recent_folder_image_list_maxsize - 1);
+			if (static_cast<size_t>(options->recent_folder_image_list_maxsize) < items.size())
+				{
+				last = std::next(items.crbegin(), options->recent_folder_image_list_maxsize);
+				}
 			}
 
-		if (!work) work = g_list_last(hd->list);
-		for (; work; work = work->prev)
+		for (auto work = items.crbegin(); work != last; ++work)
 			{
-			const auto *item = static_cast<gchar *>(work->data);
-			if (is_recent && !isfile(item)) continue;
+			if (is_recent && !isfile(work->c_str())) continue;
 
-			g_string_append_printf(gstring, "\"%s\"\n", item);
+			g_string_append_printf(gstring, "\"%s\"\n", work->c_str());
 			}
 		g_string_append(gstring, "\n");
 		}
@@ -291,161 +288,110 @@ gboolean history_list_save(const gchar *path)
 	return secure_save(pathl, gstring->str, -1);
 }
 
-static void history_list_free(HistoryData *hd)
+static HistoryList &history_list_get_by_key(const gchar *key)
 {
-	if (!hd) return;
-
-	g_list_free_full(hd->list, g_free);
-	delete hd;
-}
-
-static HistoryData *history_list_find_by_key(const gchar *key)
-{
-	if (!key) return nullptr;
-
-	static const auto history_data_compare_key = [](gconstpointer data, gconstpointer user_data)
-	{
-		auto *hd = static_cast<const HistoryData *>(data);
-		return hd->key.compare(static_cast<const gchar *>(user_data));
-	};
-
-	GList *work = g_list_find_custom(history_list, key, history_data_compare_key);
-	return work ? static_cast<HistoryData *>(work->data) : nullptr;
-}
-
-static HistoryData *history_data_get_by_key(const gchar *key)
-{
-	HistoryData *hd = history_list_find_by_key(key);
-
-	if (!hd)
+	if (history_list_map.find(key) == history_list_map.end())
 		{
-		hd = new HistoryData();
-		hd->key = key;
-		history_list = g_list_prepend(history_list, hd);
+		history_list_map[key] = {};
 		}
 
-	return hd;
+	return history_list_map[key];
 }
 
 const gchar *history_list_find_last_path_by_key(const gchar *key)
 {
-	HistoryData *hd;
+	HistoryList *items = history_list_find_by_key(key);
+	if (!items) return nullptr;
 
-	hd = history_list_find_by_key(key);
-	if (!hd || !hd->list) return nullptr;
-
-	return static_cast<const gchar *>(hd->list->data);
+	return items->front().c_str();
 }
 
 void history_list_free_key(const gchar *key)
 {
-	HistoryData *hd;
-	hd = history_list_find_by_key(key);
-	if (!hd) return;
-
-	history_list = g_list_remove(history_list, hd);
-	history_list_free(hd);
+	if (key) history_list_map.erase(key);
 }
 
 void history_list_add_to_key(const gchar *key, const gchar *path, gint max)
 {
-	GList *work;
-
 	if (!key || !path) return;
 
-	HistoryData *hd = history_data_get_by_key(key);
+	HistoryList &items = history_list_get_by_key(key);
 
 	/* if already in the list, simply move it to the top */
-	work = g_list_find_custom(hd->list, path, reinterpret_cast<GCompareFunc>(strcmp));
-	if (work)
+	const auto work = std::find(items.cbegin(), items.cend(), path);
+	if (work != items.cend())
 		{
 		/* if not first, move it */
-		if (work != hd->list)
+		if (work != items.cbegin())
 			{
-			auto buf = static_cast<gchar *>(work->data);
-
-			hd->list = g_list_remove(hd->list, buf);
-			hd->list = g_list_prepend(hd->list, buf);
+			items.splice(items.cbegin(), items, work);
 			}
+
 		return;
 		}
 
-	hd->list = g_list_prepend(hd->list, g_strdup(path));
+	items.emplace_front(path);
 
 	if (max == -1) max = options->open_recent_list_maxsize;
-	if (max > 0)
+	if (max > 0 && static_cast<size_t>(max) < items.size())
 		{
-		work = g_list_nth(hd->list, max);
-		if (work)
-			{
-			GList *last = work->prev;
-			if (last)
-				{
-				last->next = nullptr;
-				}
+		auto last = std::next(items.begin(), max);
 
-			work->prev = nullptr;
-			g_list_free_full(work, g_free);
-			}
+		items.erase(last, items.end());
 		}
 }
 
+/**
+ * @brief Replaces or removes (if newpath is nullptr)
+ * oldpath in history list for key.
+ * If found item should be removed, also check for "dot" entries.
+ * See commit 9ccfac429a9bd1a745efd8bc94b6081a7dd6ee23 for rationale.
+ */
 void history_list_item_change(const gchar *key, const gchar *oldpath, const gchar *newpath)
 {
 	if (!oldpath) return;
 
-	HistoryData *hd = history_list_find_by_key(key);
-	if (!hd) return;
+	HistoryList *items = history_list_find_by_key(key);
+	if (!items) return;
 
-	struct Paths
+	const auto find_path = [oldpath, newpath](const std::string &buf)
 	{
-		const gchar *oldpath;
-		const gchar *newpath;
-	} paths{ oldpath, newpath };
-
-	static const auto find_path = [](gconstpointer data, gconstpointer user_data)
-	{
-		const auto *buf = static_cast<const gchar *>(data);
-		const auto *paths = static_cast<const Paths *>(user_data);
-
-		if (g_str_has_prefix(buf, ".") && !paths->newpath) return 0;
-
-		return strcmp(buf, paths->oldpath);
+		return (!newpath && g_str_has_prefix(buf.c_str(), "."))
+		    || buf == oldpath;
 	};
 
-	GList *work = g_list_find_custom(hd->list, &paths, find_path);
-	if (!work) return;
-
-	g_autofree auto *buf = static_cast<gchar *>(work->data);
+	auto work = std::find_if(items->begin(), items->end(), find_path);
+	if (work == items->end()) return;
 
 	if (newpath)
 		{
-		work->data = g_strdup(newpath);
+		*work = newpath;
 		}
 	else
 		{
-		hd->list = g_list_remove(hd->list, buf);
+		items->erase(work);
 		}
 }
 
 void history_list_item_move(const gchar *key, const gchar *path, gint direction)
 {
-	HistoryData *hd;
-	GList *work;
+	if (!path || direction == 0) return;
 
-	if (!path) return;
-	hd = history_list_find_by_key(key);
-	if (!hd) return;
+	HistoryList *items = history_list_find_by_key(key);
+	if (!items) return;
 
-	work = g_list_find_custom(hd->list, path, reinterpret_cast<GCompareFunc>(strcmp));
-	if (!work) return;
+	const auto work = std::find(items->cbegin(), items->cend(), path);
+	if (work == items->cend()) return;
 
-	gint p = g_list_position(hd->list, work) + direction;
-	if (p < 0) return;
+	if ((direction < 0 && std::distance(items->cbegin(), work) < abs(direction)) ||
+	    (direction > 0 && std::distance(work, items->cend()) < direction))
+		{
+		return;
+		}
 
-	auto buf = static_cast<gchar *>(work->data);
-	hd->list = g_list_remove(hd->list, buf);
-	hd->list = g_list_insert(hd->list, buf, p);
+	const auto pos = std::next(work, direction);
+
+	items->splice(pos, *items, work);
 }
 
 void history_list_item_remove(const gchar *key, const gchar *path)
@@ -454,16 +400,16 @@ void history_list_item_remove(const gchar *key, const gchar *path)
 }
 
 /**
- * @brief The returned GList is internal, don't free it
+ * @brief Returns nullptr if found history list is empty
  */
-GList *history_list_get_by_key(const gchar *key)
+HistoryList *history_list_find_by_key(const gchar *key)
 {
-	HistoryData *hd;
+	if (!key) return nullptr;
 
-	hd = history_list_find_by_key(key);
-	if (!hd) return nullptr;
+	auto work = history_list_map.find(key);
+	if (work == history_list_map.end() || work->second.empty()) return nullptr;
 
-	return hd->list;
+	return &work->second;
 }
 
 /**
@@ -475,47 +421,43 @@ GList *history_list_get_by_key(const gchar *key)
  */
 gchar *get_recent_viewed_folder_image(gchar *path)
 {
-	GList *work;
-
 	if (options->recent_folder_image_list_maxsize == 0)
 		{
 		return nullptr;
 		}
 
-	HistoryData *hd = history_data_get_by_key("image_list");
+	HistoryList &items = history_list_get_by_key("image_list");
 
-	work = g_list_find_custom(hd->list, path, dirname_compare);
-	if (!work || !isfile(static_cast<const gchar *>(work->data)))
+	auto work = std::find_if(items.cbegin(), items.cend(),
+	                         [path](const std::string &item){ return dirname_compare(item, path); });
+	if (work == items.cend() || !isfile(work->c_str()))
 		{
 		return nullptr;
 		}
 
-	return g_strdup(static_cast<const gchar *>(work->data));
+	return g_strdup(work->c_str());
 }
 
 static void update_recent_viewed_folder_image_list(const gchar *path)
 {
-	GList *work;
-
 	if (options->recent_folder_image_list_maxsize == 0)
 		{
 		return;
 		}
 
-	HistoryData *hd = history_data_get_by_key("image_list");
+	HistoryList &items = history_list_get_by_key("image_list");
 
 	g_autofree gchar *image_dir = g_path_get_dirname(path);
-	work = g_list_find_custom(hd->list, image_dir, dirname_compare);
-	if (work)
+	auto work = std::find_if(items.begin(), items.end(),
+	                         [image_dir](const std::string &item){ return dirname_compare(item, image_dir); });
+	if (work != items.end())
 		{
-		g_free(work->data);
-		work->data = g_strdup(path);
-		hd->list = g_list_remove_link(hd->list, work);
-		hd->list = g_list_concat(work, hd->list);
+		*work = path;
+		items.splice(items.begin(), items, work);
 		}
 	else
 		{
-		hd->list = g_list_prepend(hd->list, g_strdup(path));
+		items.emplace_front(path);
 		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

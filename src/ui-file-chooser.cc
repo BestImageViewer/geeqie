@@ -472,24 +472,19 @@ void update_file_chooser_preview_cb(GtkFileChooser *chooser, gpointer)
 
 GtkWidget* create_history_combo_box(const gchar *history_key)
 {
-	GList *work = history_list_get_by_key(history_key);
+	const HistoryList *history_list = history_list_find_by_key(history_key);
+	if (!history_list) return nullptr;
 
-	if (work)
+	GtkWidget *history_combo = gtk_combo_box_text_new();
+
+	for (const std::string &path : *history_list)
 		{
-		GtkWidget *history_combo = gtk_combo_box_text_new();
-
-		for (GList *history_list = work; history_list != nullptr; history_list = history_list->next)
-			{
-			const auto path = static_cast<const gchar*>(history_list->data);
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(history_combo), path);
-			}
-
-		gtk_combo_box_set_active(GTK_COMBO_BOX(history_combo), 0);
-
-		return history_combo;
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(history_combo), path.c_str());
 		}
 
-	return nullptr;
+	gtk_combo_box_set_active(GTK_COMBO_BOX(history_combo), 0);
+
+	return history_combo;
 }
 
 void history_combo_changed_cb(GtkComboBoxText *history_combo, gpointer data)

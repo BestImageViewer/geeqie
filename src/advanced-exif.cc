@@ -21,6 +21,7 @@
 
 #include "advanced-exif.h"
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 #include <string>
@@ -42,7 +43,6 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "misc.h"
-#include "options.h"
 #include "ui-misc.h"
 #include "window.h"
 
@@ -102,7 +102,10 @@ static gboolean advanced_exif_row_enabled(const gchar *name)
 {
 	if (!name) return FALSE;
 
-	return g_list_find_custom(history_list_get_by_key("exif_extras"), name, reinterpret_cast<GCompareFunc>(strcmp)) ? TRUE : FALSE;
+	const HistoryList *history_list = history_list_find_by_key("exif_extras");
+	if (!history_list) return FALSE;
+
+	return (std::find(history_list->cbegin(), history_list->cend(), name) != history_list->cend()) ? TRUE : FALSE;
 }
 
 static void advanced_exif_update(ExifWin *ew)
