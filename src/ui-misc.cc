@@ -935,19 +935,16 @@ void date_selection_time_set(GtkWidget *widget, time_t t)
 
 #define PREF_LIST_MARKER_INT "[INT]:"
 
-static GList *pref_list_find(const gchar *group, const gchar *token)
+static GList *pref_list_find(const gchar *group, const gchar *token, size_t token_len)
 {
 	GList *work;
-	gint l;
-
-	l = strlen(token);
 
 	work = history_list_get_by_key(group);
 	while (work)
 		{
 		auto text = static_cast<const gchar *>(work->data);
 
-		if (strncmp(text, token, l) == 0) return work;
+		if (strncmp(text, token, token_len) == 0) return work;
 
 		work = work->next;
 		}
@@ -955,28 +952,19 @@ static GList *pref_list_find(const gchar *group, const gchar *token)
 	return nullptr;
 }
 
-static gboolean pref_list_get(const gchar *group, const gchar *key, const gchar *marker, const gchar **result)
+static const gchar *pref_list_get(const gchar *group, const gchar *key, const gchar *marker)
 {
-	GList *work;
-
-	if (!group || !key || !marker)
-		{
-		*result = nullptr;
-		return FALSE;
-		}
+	if (!group || !key || !marker) return nullptr;
 
 	g_autofree gchar *token = g_strconcat(key, marker, NULL);
+	const size_t token_len = strlen(token);
 
-	work = pref_list_find(group, token);
-	if (!work)
-		{
-		*result = nullptr;
-		return FALSE;
-		}
+	GList *work = pref_list_find(group, token, token_len);
+	if (!work) return nullptr;
 
-	*result = static_cast<const gchar *>(work->data) + strlen(token);
-	if (*result[0] == '\0') *result = nullptr;
-	return TRUE;
+	const auto *result = static_cast<const gchar *>(work->data) + token_len;
+
+	return (result[0] != '\0') ? result : nullptr;
 }
 
 static void pref_list_set(const gchar *group, const gchar *key, const gchar *marker, const gchar *text)
@@ -988,7 +976,7 @@ static void pref_list_set(const gchar *group, const gchar *key, const gchar *mar
 	g_autofree gchar *token = g_strconcat(key, marker, NULL);
 	g_autofree gchar *path = g_strconcat(token, text, NULL);
 
-	work = pref_list_find(group, token);
+	work = pref_list_find(group, token, strlen(token));
 	if (work)
 		{
 		auto old_path = static_cast<gchar *>(work->data);
@@ -1019,10 +1007,9 @@ gint pref_list_int_get(const gchar *group, const gchar *key, gint fallback)
 {
 	if (!group || !key) return fallback;
 
-	const gchar *text;
-	if (!pref_list_get(group, key, PREF_LIST_MARKER_INT, &text) || !text) return fallback;
+	const gchar *text = pref_list_get(group, key, PREF_LIST_MARKER_INT);
 
-	return static_cast<gint>(strtol(text, nullptr, 10));
+	return text ? static_cast<gint>(strtol(text, nullptr, 10)) : fallback;
 }
 
 GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title, const GdkRGBA *color, GdkRGBA *result)
