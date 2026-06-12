@@ -43,11 +43,6 @@ struct CollectTable
 
 	CollectInfo *click_info;
 
-	GtkWidget *tip_window;
-	guint tip_delay_id; /**< event source id */
-	CollectInfo *tip_info;
-
-	GdkWindow *marker_window;
 	CollectInfo *marker_info;
 
 	GtkWidget *status_label;
@@ -58,21 +53,15 @@ struct CollectTable
 	CollectInfo *focus_info;
 
 	GtkWidget *popup;
-	CollectInfo *drop_info;
 	GList *drop_list;
 
 	guint sync_idle_id; /**< event source id */
-	guint drop_idle_id; /**< event source id */
 
 	gboolean show_text;
 	gboolean show_stars;
 	gboolean show_infotext;
 
 	GList *editmenu_fd_list; /**< file list for edit menu */
-
-	gint last_x;
-	gint last_y;
-	gboolean pointer_valid;
 };
 
 void collection_table_select_all(CollectTable *ct);

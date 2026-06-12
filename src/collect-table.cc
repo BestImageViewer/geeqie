@@ -37,7 +37,6 @@
 #include "dnd.h"
 #include "dupe.h"
 #include "filedata.h"
-#include "geometry.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout-image.h"
@@ -77,9 +76,6 @@ constexpr gint THUMB_MAX_ICON_WIDTH = 150;
 constexpr gint COLLECT_TABLE_MAX_COLUMNS = 32;
 
 constexpr gint THUMB_BORDER_PADDING = 2;
-
-constexpr gint COLLECT_TABLE_TIP_DELAY = 500;
-constexpr gint COLLECT_TABLE_TIP_DELAY_PATH = 850;
 
 constexpr std::array<GtkTargetEntry, 3> collection_drag_types{{
 	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
@@ -839,7 +835,6 @@ static void collection_table_popup_destroy_cb(GtkWidget *, gpointer data)
 
 	file_data_list_free(ct->drop_list);
 	ct->drop_list = nullptr;
-	ct->drop_info = nullptr;
 
 	file_data_list_free(ct->editmenu_fd_list);
 	ct->editmenu_fd_list = nullptr;
@@ -1356,7 +1351,6 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
 {
 	if (!scroll)
 		{
-		g_clear_handle_id(&ct->drop_idle_id, g_source_remove);
 		widget_auto_scroll_stop(ct->listview);
 		}
 }
@@ -2019,7 +2013,6 @@ static void collection_table_dnd_receive(GtkWidget *, GdkDragContext *context,
 			if (file_data_list_has_dir(list))
 				{
 				ct->drop_list = g_steal_pointer(&list);
-				ct->drop_info = drop_info;
 
 				GtkWidget *menu = collection_table_drop_menu(ct);
 				gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
@@ -2269,29 +2262,6 @@ static void collection_table_sized(GtkWidget *, GtkAllocation *allocation, gpoin
 	collection_table_populate_at_new_size(ct, allocation->width, allocation->height, FALSE);
 }
 
-#if HAVE_GTK4
-static void listview_motion_cb(GtkEventControllerMotion *motion, gdouble x, gdouble y, gpointer data)
-{
-	auto *ct = static_cast<CollectTable *>(data);
-
-	ct->last_x = static_cast<gint>(x);
-	ct->last_y = static_cast<gint>(y);
-	ct->pointer_valid = TRUE;
-}
-
-#else
-static gboolean listview_motion_cb(GtkWidget *, GdkEventMotion *event, gpointer data)
-{
-	auto *ct = static_cast<CollectTable*>(data);
-
-	ct->last_x = event->x;
-	ct->last_y = event->y;
-	ct->pointer_valid = TRUE;
-
-	return FALSE;
-}
-#endif
-
 static gboolean collection_table_query_tooltip_cb(GtkWidget *, gint x, gint y, gboolean keyboard_mode, GtkTooltip *tooltip, gpointer data)
 {
 	auto *ct = static_cast<CollectTable *>(data);
@@ -2373,14 +2343,6 @@ CollectTable *collection_table_new(CollectionData *cd)
 	g_signal_connect(G_OBJECT(ct->listview),"button_release_event",
 			 G_CALLBACK(collection_table_release_cb), ct);
 
-#if HAVE_GTK4
-	GtkEventController *motion = gtk_event_controller_motion_new();
-	g_signal_connect(motion, "motion", G_CALLBACK(listview_motion_cb), ct);
-	gtk_widget_add_controller(ct->listview, motion);
-#else
-	gtk_widget_add_events(ct->listview, GDK_POINTER_MOTION_MASK);
-	g_signal_connect(ct->listview, "motion-notify-event", G_CALLBACK(listview_motion_cb), ct);
-#endif
 	return ct;
 }
 
