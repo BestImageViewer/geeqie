@@ -136,8 +136,7 @@ conf_data = configuration_data()
 conf_data.set('DEBUG', debug)
 
 conf_data.set('FD_VERBOSE_DEBUG', 0)
-option = get_option('fd_verbose_debug')
-if not option.disabled()
+if get_option('fd_verbose_debug').allowed()
     conf_data.set('FD_VERBOSE_DEBUG', 1)
     if conf_data.get('DEBUG', false) == false
         message('fd_verbose_debug force-enabling debug')
@@ -715,69 +714,65 @@ endif
 # download the test image database.
 
 # Image checks
-option = get_option('unit_tests')
-if option.enabled()
-    if xvfb.found()
-        get_test_images_sh = find_program('get-test-images.sh', dirs : buildauxdir, required : true)
-        image_test_py = find_program('image-test.py', dirs : buildauxdir, required : true)
+unit_tests_enabled = get_option('unit_tests').allowed()
+have_xvfb = xvfb.found()
+should_run_image_tests = unit_tests_enabled and have_xvfb
 
-        images_parent_dir = join_paths(meson.current_build_dir(), 'test-images.p')
-        images_dir = join_paths(images_parent_dir, 'images')
+# Download test images
+if should_run_image_tests
+    # Download test images
+    get_test_images_sh = find_program('get-test-images.sh', dirs : buildauxdir, required : true)
+    image_test_py = find_program('image-test.py', dirs : buildauxdir, required : true)
 
-        message('Downloading test images')
-        sources_list = run_command(get_test_images_sh, images_parent_dir,  'https://github.com/BestImageViewer/geeqie-test-images.git', check: true)
+    test_image_parent_dir = join_paths(meson.current_build_dir(), 'test-images.p')
+    test_image_dir = join_paths(test_image_parent_dir, 'images')
 
-        sources = sources_list.stdout().strip().split('\n')
+    message('Downloading test images')
+    _sources_list = run_command(get_test_images_sh, test_image_parent_dir,  'https://github.com/BestImageViewer/geeqie-test-images.git', check: true)
+    test_image_sources = _sources_list.stdout().strip().split('\n')
+endif
 
-        foreach image : sources
-            path_array = image.split('/')
-            image_name = path_array[path_array.length() - 1]
+# Run image checks
+if should_run_image_tests
+    foreach image : test_image_sources
+        path_array = image.split('/')
+        image_name = path_array[-1]
 
-            should_fail = image_name.startswith('fail')
-            test_cmd = [image_test_py.full_path(), geeqie_exe.full_path(), image]
-            test('Image_ ' + image_name, isolate_test_sh, args: test_cmd, should_fail : should_fail, timeout: 100, suite: ['functional', 'image'])
+        should_fail = image_name.startswith('fail')
+        test_cmd = [image_test_py.full_path(), geeqie_exe.full_path(), image]
+        test('Image_ ' + image_name, isolate_test_sh, args: test_cmd, should_fail : should_fail, timeout: 100, suite: ['functional', 'image'])
 
-        endforeach
-        summary({'Image tests' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
-
-        # FileData refcounting test requires images, so running here, if enabled.
-        if conf_data.get('FD_VERBOSE_DEBUG', 0) == 1
-            fd_refcount_test_py = find_program('fd-refcount-test.py', dirs : buildauxdir, required : true)
-            test_cmd = [fd_refcount_test_py.full_path(), geeqie_exe.full_path(), images_dir]
-            test('FileData refcount test', isolate_test_sh, args: test_cmd, timeout: 100, suite: ['functional', 'image', 'filedata'])
-            summary({'FileData refcount test' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
-        else
-            summary({'FileData refcount test' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
-        endif
-    else
-        # TODO: Any way to avoid code duplication in the "test not run" cases?
-        summary({'Image tests' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
-        summary({'FileData refcount test' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
-    endif
+    endforeach
+    summary({'Image tests' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
 else
     summary({'Image tests' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
+endif
+
+# FileData refcounting test
+if should_run_image_tests and fd_verbose_debug.allowed()
+    fd_refcount_test_py = find_program('fd-refcount-test.py', dirs : buildauxdir, required : true)
+    test_cmd = [fd_refcount_test_py.full_path(), geeqie_exe.full_path(), test_image_dir]
+    test('FileData refcount test', isolate_test_sh, args: test_cmd, timeout: 100, suite: ['functional', 'image', 'filedata'])
+    summary({'FileData refcount test' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
+else
     summary({'FileData refcount test' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
 
 # Code correctness checks
-if running_from_git
-    clang_tidy_exe = find_program('clang-tidy', required : false)
-    if clang_tidy_exe.found()
-        git_exe = find_program('git', required : true)
+clang_tidy_exe = find_program('clang-tidy', required : false)
+if running_from_git and clang_tidy_exe.found()
+    git_exe = find_program('git', required : true)
 
-        foreach source_file : code_sources
-            if fs.name(source_file).endswith('.cc')
-                source_file_name = fs.name(source_file)
-                config_file = join_paths(meson.project_source_root(), '.clang-tidy')
+    foreach source_file : code_sources
+        if fs.name(source_file).endswith('.cc')
+            source_file_name = fs.name(source_file)
+            config_file = join_paths(meson.project_source_root(), '.clang-tidy')
 
-                test('Code Correctness_ ' + source_file_name, clang_tidy_exe, args : ['-p', './build', '-quiet', '--config-file', config_file,  source_file], timeout : 100, suite : 'analysis')
-            endif
-        endforeach
+            test('Code Correctness_ ' + source_file_name, clang_tidy_exe, args : ['-p', './build', '-quiet', '--config-file', config_file,  source_file], timeout : 100, suite : 'analysis')
+        endif
+    endforeach
 
-        summary({'Code Correctness' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
-    else
-        summary({'Code Correctness' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
-    endif
+    summary({'Code Correctness' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
 else
     summary({'Code Correctness' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
@@ -873,20 +868,11 @@ else
 endif
 
 # Lua test
-option = get_option('lua')
-if not option.disabled()
-    if lua_dep.found()
-        if xvfb.found()
-            lua_test_sh = find_program('lua-test.sh', dirs : buildauxdir, required : true)
-            test('Lua test', isolate_test_sh, args: [lua_test_sh.full_path(), geeqie_exe.full_path()], timeout: 100, suite : 'analysis')
+if get_option('lua').allowed() and lua_dep.found() and xvfb.found()
+    lua_test_sh = find_program('lua-test.sh', dirs : buildauxdir, required : true)
+    test('Lua test', isolate_test_sh, args: [lua_test_sh.full_path(), geeqie_exe.full_path()], timeout: 100, suite : 'analysis')
 
-            summary({'lua' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
-        else
-            summary({'lua' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
-        endif
-    else
-        summary({'lua' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
-    endif
+    summary({'lua' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
 else
     summary({'lua' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
@@ -909,29 +895,23 @@ else
 endif
 
 # glib types checks
-option = get_option('glib-types')
-if not option.disabled()
+if get_option('glib-types').allowed()
     cc_sources = []
     glib_types_check = find_program('check-glib-types.sh', dirs : buildauxdir, required : true)
-    if glib_types_check.found()
 
-         foreach source_file : code_sources
-            if fs.name(source_file).endswith('.cc')
-                source_file_name = fs.name(source_file)
-
-                test('Glib Types_ ' + source_file_name, glib_types_check, args : [meson.project_source_root(), meson.project_build_root(), source_file], timeout : 200, suite : 'analysis')
-            endif
-        endforeach
-        summary({'Glib Types' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
-    else
-        summary({'Glib Types' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
-    endif
+    foreach source_file : code_sources
+        source_file_name = fs.name(source_file)
+        if source_file_name.endswith('.cc')
+            test('Glib Types_ ' + source_file_name, glib_types_check, args : [meson.project_source_root(), meson.project_build_root(), source_file], timeout : 200, suite : 'analysis')
+        endif
+    endforeach
+    summary({'Glib Types' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
 else
-    summary({'Glib types' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
+    summary({'Glib Types' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
 
 # Unit tests
-if conf_data.get('ENABLE_UNIT_TESTS', 0) == 1
+if unit_tests_enabled
     test('Unit tests', isolate_test_sh, args: [geeqie_exe.full_path(), '--run-unit-tests'], suite : 'unit')
     summary({'unit_tests' : ['Tests run:', true]}, section : 'Testing', bool_yn : true)
 else
