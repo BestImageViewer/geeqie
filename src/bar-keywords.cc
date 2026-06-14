@@ -21,7 +21,9 @@
 
 #include "bar-keywords.h"
 
-#if HAVE_GTK4
+#define DISABLE_FILE_WITH_GTK4 HAVE_GTK4
+
+#if DISABLE_FILE_WITH_GTK4
 #else
 
 #include <array>

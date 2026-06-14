@@ -353,7 +353,7 @@ static gboolean advanced_exif_keypress(GtkWidget *, GdkEventKey *event, gpointer
 	const GdkModifierType event_state = state;
 #else
 	const guint event_keyval = event->keyval;
-	const GdkModifierType event_state = static_cast<GdkModifierType>(event->state);
+	const auto event_state = static_cast<GdkModifierType>(event->state);
 #endif
 
 	if (event_state & GDK_CONTROL_MASK)
