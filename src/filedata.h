@@ -42,7 +42,7 @@ struct HistMap;
 #define DEBUG_FILEDATA
 #endif
 
-#ifdef FD_VERBOSE_DEBUG
+#if FD_VERBOSE_DEBUG
 #include <sstream>
 #include <vector>
 #endif
@@ -160,7 +160,7 @@ class GlobalFileDataContext
 	FileDataContext context_;
 };
 
-#ifdef FD_VERBOSE_DEBUG
+#if FD_VERBOSE_DEBUG
 struct FileDataDebugInfo {
 	std::vector<std::string> ref_unref_history;
 
@@ -299,7 +299,7 @@ public:
 	static gchar *text_from_size_abrev(gint64 size);
 	static const gchar *text_from_time(time_t t);
 
-	#ifdef FD_VERBOSE_DEBUG
+	#if FD_VERBOSE_DEBUG
 	FileDataDebugInfo debug_info;
 	#endif
 

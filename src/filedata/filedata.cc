@@ -575,7 +575,7 @@ FileData *FileData::file_data_ref()
 
 #ifdef DEBUG_FILEDATA
 	DEBUG_2("file_data_ref fd=%p (%d): '%s' @ %s:%d", (void *)fd, fd->ref, fd->path, file, line);
-        #ifdef FD_VERBOSE_DEBUG
+        #if FD_VERBOSE_DEBUG
         fd->debug_info.record_ref(file, line, fd->ref);
         #endif
 #else
@@ -608,7 +608,7 @@ void FileData::file_data_dump()
 		auto *fd = static_cast<FileData *>(work->data);
 		log_printf("%-4d %s", fd->ref, fd->path);
 
-		#ifdef FD_VERBOSE_DEBUG
+		#if FD_VERBOSE_DEBUG
 		for (const auto &record : fd->debug_info.ref_unref_history) {
 			log_printf("    %s", record.c_str());
 		}
@@ -717,7 +717,7 @@ void FileData::file_data_unref()
 	DEBUG_2("file_data_unref fd=%p (%d:%d): '%s' @ %s:%d", (void *)fd, fd->ref, fd->locked, fd->path,
 		file, line);
 
-	#ifdef FD_VERBOSE_DEBUG
+	#if FD_VERBOSE_DEBUG
 	fd->debug_info.record_unref(file, line, fd->ref);
 	#endif
 
