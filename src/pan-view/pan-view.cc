@@ -79,7 +79,7 @@ namespace
 {
 
 struct PanCacheData {
-	FileData *fd;
+	FileDataRef fd_ref{nullptr};
 	std::unique_ptr<CacheData> cd;
 };
 
@@ -110,9 +110,7 @@ constexpr GqColor PAN_POPUP_BORDER_COLOR{0, 0, 0, PAN_POPUP_ALPHA};
 
 void pan_cache_data_free(PanCacheData *pc)
 {
-	if (!pc) return;
-
-	file_data_unref(pc->fd);
+	// delete can handle nullptr, so no need to check.
 	delete pc;
 }
 
@@ -216,8 +214,7 @@ static void pan_queue_thumb_done_cb(ThumbLoader *tl, gpointer data)
 
 	g_clear_pointer(&pw->tl, thumb_loader_free);
 
-	while (pan_queue_step(pw))
-		;
+	while (pan_queue_step(pw)) {}
 }
 
 static void pan_queue_image_done_cb(ImageLoader *il, gpointer data)
@@ -497,7 +494,7 @@ static gint pan_cache_sort_file_cb(gconstpointer a, gconstpointer b, gpointer da
 	auto pca = static_cast<const PanCacheData *>(a);
 	auto pcb = static_cast<const PanCacheData *>(b);
 	auto settings = static_cast<FileData::FileList::SortSettings *>(data);
-	return filelist_sort_compare_filedata(pca->fd, pcb->fd, settings);
+	return filelist_sort_compare_filedata(pca->fd_ref, pcb->fd_ref, settings);
 }
 
 static void pan_cache_sort(PanWindow *pw, FileData::FileList::SortSettings settings)
@@ -563,7 +560,7 @@ static gboolean pan_cache_step(PanWindow *pw)
 	pw->cache_todo = g_list_remove(pw->cache_todo, fd);
 
 	auto *pc = new PanCacheData();
-	pc->fd = file_data_ref(fd);
+	pc->fd_ref.reset(fd);
 
 	pw->cache_list = g_list_prepend(pw->cache_list, pc);
 
@@ -572,7 +569,7 @@ static gboolean pan_cache_step(PanWindow *pw)
 	load_mask = CACHE_LOADER_NONE;
 	if (pw->size > PAN_IMAGE_SIZE_THUMB_LARGE) load_mask = static_cast<CacheDataType>(load_mask | CACHE_LOADER_DIMENSIONS);
 	if (pw->exif_date_enable) load_mask = static_cast<CacheDataType>(load_mask | CACHE_LOADER_DATE);
-	pw->cache_cl = cache_loader_new(pc->fd, load_mask,
+	pw->cache_cl = cache_loader_new(pc->fd_ref, load_mask,
 					pan_cache_step_done_cb, pw);
 	return (pw->cache_cl == nullptr);
 }
@@ -580,10 +577,10 @@ static gboolean pan_cache_step(PanWindow *pw)
 /* This sync date function is optimized for lists with a common sort */
 static void pan_cache_sync_date(const PanWindow *pw, GList *list)
 {
-	static const auto pan_cache_data_compare_fd = [](gconstpointer data, gconstpointer user_data)
+	static const auto pan_cache_data_compare_fd = [](gconstpointer data, gconstpointer user_data) -> int
 	{
 		auto *pc = static_cast<const PanCacheData *>(data);
-		return (pc->fd == user_data) ? 0 : 1;
+		return *(pc->fd_ref) == user_data;
 	};
 
 	g_autoptr(GList) haystack = g_list_copy(pw->cache_list);
@@ -634,10 +631,10 @@ std::optional<GqSize> pan_cache_get_image_size(PanWindow *pw, const FileData *fd
 {
 	if (!fd) return {};
 
-	const auto pan_cache_data_cd_dimensions_compare_fd = [](gconstpointer data, gconstpointer user_data)
+	const auto pan_cache_data_cd_dimensions_compare_fd = [](gconstpointer data, gconstpointer user_data) -> int
 	{
 		auto *pc = static_cast<const PanCacheData *>(data);
-		return (pc->cd && pc->cd->dimensions && pc->fd == user_data) ? 0 : 1;
+		return pc->cd && pc->cd->dimensions && *(pc->fd_ref) == user_data;
 	};
 
 	GList *work = g_list_find_custom(pw->cache_list, fd, pan_cache_data_cd_dimensions_compare_fd);
@@ -865,7 +862,7 @@ PanItemList pan_layout_intersect(PanWindow *pw, gint x, gint y, gint width, gint
 		GdkRectangle intersection;
 		if (!gdk_rectangle_intersect(&pg->rect, rect, &intersection)) return 1;
 
-		return gdk_rectangle_equal(rect, &intersection) ? 0 : 1;
+		return gdk_rectangle_equal(rect, &intersection);
 	};
 
 	PanItemList list;

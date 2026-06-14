@@ -758,6 +758,16 @@ else
     summary({'FileData refcount test' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
 
+# Pan-view test
+if should_run_image_tests
+    trigger_panview_test_py = find_program('trigger-panview-test.py', dirs : buildauxdir, required : true)
+    test_cmd = [trigger_panview_test_py.full_path(), geeqie_exe.full_path(), test_image_dir]
+    test('Pan-view execution test', isolate_test_sh, args: test_cmd, timeout: 100, suite: ['functional', 'image'])
+    summary({'Pan-view execution test' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
+else
+    summary({'Pan-view execution test' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
+endif
+
 # Code correctness checks
 clang_tidy_exe = find_program('clang-tidy', required : false)
 if running_from_git and clang_tidy_exe.found()
