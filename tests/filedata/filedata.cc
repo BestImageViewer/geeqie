@@ -55,6 +55,9 @@ class FileDataTest : public t::Test
 	FileData *parent_fd = nullptr;
 };
 
+// Used to group and report tests separately, even though it's the same fixture implementation.
+class FileDataRefTest : public FileDataTest {};
+
 TEST_F(FileDataTest, text_from_size_test)
 {
 	std::vector<std::pair<gint64, std::string>> test_cases = {
@@ -144,7 +147,7 @@ TEST_F(FileDataTest, BasicIncrementVersionWithParent)
 	ASSERT_EQ(0x0, parent_fd->valid_marks);
 }
 
-TEST_F(FileDataTest, FileDataRef)
+TEST_F(FileDataRefTest, NonOwningRefCount)
 {
 	fd = g_new0(FileData, 1);
 	fd->magick = FD_MAGICK;
@@ -172,7 +175,7 @@ TEST_F(FileDataTest, FileDataRef)
 	ASSERT_EQ(0, fd->ref);
 }
 
-TEST_F(FileDataTest, FileDataRefReset)
+TEST_F(FileDataRefTest, Reset)
 {
 	fd = g_new0(FileData, 1);
 	fd->magick = FD_MAGICK;
@@ -203,7 +206,7 @@ TEST_F(FileDataTest, FileDataRefReset)
 	ASSERT_EQ(fd2, static_cast<FileData *>(fd_ref));
 }
 
-TEST_F(FileDataTest, FileDataRefResetToNull)
+TEST_F(FileDataRefTest, ResetToNull)
 {
 	fd = g_new0(FileData, 1);
 	fd->magick = FD_MAGICK;
@@ -226,7 +229,7 @@ TEST_F(FileDataTest, FileDataRefResetToNull)
 	ASSERT_EQ(fd, static_cast<FileData *>(fd_ref));
 }
 
-TEST_F(FileDataTest, FileDataRefRelease)
+TEST_F(FileDataRefTest, Release)
 {
 #ifdef DEBUG_FILEDATA
 	ASSERT_EQ(0, context.global_file_data_count);
@@ -256,7 +259,7 @@ TEST_F(FileDataTest, FileDataRefRelease)
 #endif
 }
 
-TEST_F(FileDataTest, ReturnFileDataRef)
+TEST_F(FileDataRefTest, AnonymousReturn)
 {
 	const auto &make_ref = []() -> FileDataRef {
 		auto *fd = g_new0(FileData, 1);
@@ -276,23 +279,25 @@ TEST_F(FileDataTest, ReturnFileDataRef)
 	g_free(fd_ref.release());
 }
 
-TEST_F(FileDataTest, ReturnFileDataRefAndRelease)
+/**
+ * Validates a common compatibility pattern for interacting with code that stores FileData*.
+ */
+TEST_F(FileDataRefTest, AnonymousReturnAndRelease)
 {
 	const auto &make_ref = []() -> FileDataRef {
-		auto *fd = g_new0(FileData, 1);
-		fd->magick = FD_MAGICK;
+		auto *_fd = g_new0(FileData, 1);
+		_fd->magick = FD_MAGICK;
 		// Avoids having the FileData objects automatically freed when its
 		// refcount drops back to zero.
-		file_data_lock(fd);
+		file_data_lock(_fd);
 
-		return FileDataRef{fd};
+		return FileDataRef{_fd};
 	};
 
 	// This ensures that the post-move anonymous FileDataRef can be destructed without crashing.
-	FileData *fd_ptr = make_ref().release();
-	ASSERT_NE(nullptr, fd_ptr);
-	ASSERT_EQ(1, fd_ptr->ref);
-	g_free(fd_ptr);
+	fd = make_ref().release();
+	ASSERT_NE(nullptr, fd);
+	ASSERT_EQ(1, fd->ref);
 }
 
 }  // anonymous namespace
