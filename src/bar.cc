@@ -284,7 +284,6 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	GdkDisplay *display;
 	GdkSeat *seat;
 	GdkDevice *device;
-	GtkEventController *controller;
 
 	display = gdk_display_get_default();
 	seat = gdk_display_get_default_seat(display);
@@ -314,7 +313,7 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	GtkWidget *spin = gtk_spin_button_new_with_range(1, 1000, 1);
 	g_signal_connect(G_OBJECT(spin), "value-changed", G_CALLBACK(height_spin_changed_cb), data_box);
 #if HAVE_GTK4
-	controller = gtk_event_controller_key_new();
+	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(height_spin_key_press_cb), window);
 	gtk_widget_add_controller(spin, controller);
 #else

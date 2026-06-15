@@ -418,7 +418,6 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	GtkWidget *box;
 	GtkWidget *button_box;
 	GtkWidget *hbox;
-	GtkEventController *controller;
 
 	ew = g_new0(ExifWin, 1);
 
@@ -510,7 +509,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 #endif
 
 #if HAVE_GTK4
-	controller = gtk_event_controller_key_new();
+	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(advanced_exif_keypress), ew);
 	gtk_widget_add_controller(ew->window, controller);
 #else
