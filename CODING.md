@@ -194,7 +194,7 @@ Unary operator `*` and `&` are missing the space from right, (and also unary `-`
 As you can see above, parentheses are closed to inside, i.e. ` (blah blah) `  
 In `function(<var>)` there is no space before the `(`.  
 You *may* use more tabs/spaces than you *ought to* (according to this CodingStyle), if it makes your code nicer in being vertically indented.  
-Variables declarations should be followed by a blank line and should always be at the start of the block.  
+Don’t introduce a variable before you need to use it (C++ Core Guidelines rule [ES.21](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#es21-dont-introduce-a-variable-or-constant-before-you-need-to-use-it)).  
 
 Use glib functions when possible (i.e. `g_ascii_isspace()` instead of `isspace()`).  
 Check if used functions are not deprecated.  
