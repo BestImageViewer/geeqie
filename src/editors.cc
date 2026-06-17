@@ -194,7 +194,6 @@ gboolean editor_read_desktop_file(const gchar *path)
 {
 	GKeyFile *key_file;
 	EditorDescription *editor;
-	gchar *extensions;
 	const gchar *key = filename_from_path(path);
 	GtkTreeIter iter;
 	gboolean category_geeqie = FALSE;
@@ -315,7 +314,7 @@ gboolean editor_read_desktop_file(const gchar *path)
 
 	editor->comment = g_key_file_get_string(key_file, DESKTOP_GROUP, "Comment", nullptr);
 
-	extensions = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-File-Extensions", nullptr);
+	g_autofree gchar *extensions = g_key_file_get_string(key_file, DESKTOP_GROUP, "X-Geeqie-File-Extensions", nullptr);
 	if (extensions)
 		editor->ext_list = filter_to_list(extensions);
 	else
