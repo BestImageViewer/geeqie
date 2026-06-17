@@ -314,26 +314,15 @@ void filter_add_defaults()
 
 GList *filter_to_list(const gchar *extensions)
 {
-	GList *list = nullptr;
-	const gchar *p;
-
 	if (!extensions) return nullptr;
 
-	p = extensions;
-	while (*p != '\0')
+	GList *list = nullptr;
+
+	g_auto(GStrv) ext_list = g_strsplit(extensions, ";", -1);
+	for (size_t i = 0; ext_list[i]; i++)
 		{
-		const gchar *b;
+		const gchar *ext = ext_list[i];
 		gint file_class = -1;
-		guint l = 0;
-
-		b = p;
-		while (*p != '\0' && *p != ';')
-			{
-			p++;
-			l++;
-			}
-
-		g_autofree gchar *ext = g_strndup(b, l);
 
 		if (g_ascii_strcasecmp(ext, "%image") == 0) file_class = FORMAT_CLASS_IMAGE;
 		else if (g_ascii_strcasecmp(ext, "%raw") == 0) file_class = FORMAT_CLASS_RAWIMAGE;
@@ -342,14 +331,12 @@ GList *filter_to_list(const gchar *extensions)
 
 		if (file_class == -1)
 			{
-			list = g_list_append(list, g_steal_pointer(&ext));
+			list = g_list_append(list, g_strdup(ext));
 			}
 		else
 			{
 			list = g_list_concat(list, string_list_copy(file_class_extension_list[file_class]));
 			}
-
-		if (*p == ';') p++;
 		}
 
 	return list;
