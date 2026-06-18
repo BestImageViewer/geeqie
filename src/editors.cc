@@ -194,11 +194,11 @@ gboolean editor_read_desktop_file(const gchar *path)
 {
 	GKeyFile *key_file;
 	EditorDescription *editor;
-	const gchar *key = filename_from_path(path);
 	GtkTreeIter iter;
 	gboolean category_geeqie = FALSE;
 
-	if (g_hash_table_lookup(editors, key)) return FALSE; /* the file found earlier wins */
+	const gchar *key = filename_from_path(path);
+	if (is_valid_editor_command(key)) return FALSE; /* the file found earlier wins */
 
 	key_file = g_key_file_new();
 	if (!g_key_file_load_from_file(key_file, path, static_cast<GKeyFileFlags>(0), nullptr))
@@ -1257,17 +1257,12 @@ bool is_valid_editor_command(const gchar *key)
 
 EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const gchar *working_directory, EditorCallback cb, gpointer data)
 {
-	EditorFlags error;
-	EditorDescription *editor;
-	if (!key) return EDITOR_ERROR_EMPTY;
-
-	editor = static_cast<EditorDescription *>(g_hash_table_lookup(editors, key));
-
+	EditorDescription *editor = get_editor_by_command(key);
 	if (!editor) return EDITOR_ERROR_EMPTY;
+
 	if (!list && !(editor->flags & EDITOR_NO_PARAM)) return EDITOR_ERROR_NO_FILE;
 
-	error = editor_command_parse(editor, list, TRUE, nullptr);
-
+	EditorFlags error = editor_command_parse(editor, list, TRUE, nullptr);
 	if (editor_errors(error)) return error;
 
 	error = static_cast<EditorFlags>(error | editor_command_start(editor, editor->name, list, working_directory, cb, data));
@@ -1312,10 +1307,7 @@ EditorFlags start_editor(const gchar *key, const gchar *working_directory)
 
 gboolean editor_window_flag_set(const gchar *key)
 {
-	EditorDescription *editor;
-	if (!key) return TRUE;
-
-	editor = static_cast<EditorDescription *>(g_hash_table_lookup(editors, key));
+	EditorDescription *editor = get_editor_by_command(key);
 	if (!editor) return TRUE;
 
 	return !!(editor->flags & EDITOR_KEEP_FS);
@@ -1323,10 +1315,7 @@ gboolean editor_window_flag_set(const gchar *key)
 
 gboolean editor_is_filter(const gchar *key)
 {
-	EditorDescription *editor;
-	if (!key) return TRUE;
-
-	editor = static_cast<EditorDescription *>(g_hash_table_lookup(editors, key));
+	EditorDescription *editor = get_editor_by_command(key);
 	if (!editor) return TRUE;
 
 	return !!(editor->flags & EDITOR_DEST);
@@ -1334,10 +1323,7 @@ gboolean editor_is_filter(const gchar *key)
 
 gboolean editor_no_param(const gchar *key)
 {
-	EditorDescription *editor;
-	if (!key) return FALSE;
-
-	editor = static_cast<EditorDescription *>(g_hash_table_lookup(editors, key));
+	EditorDescription *editor = get_editor_by_command(key);
 	if (!editor) return FALSE;
 
 	return !!(editor->flags & EDITOR_NO_PARAM);
@@ -1345,10 +1331,7 @@ gboolean editor_no_param(const gchar *key)
 
 gboolean editor_blocks_file(const gchar *key)
 {
-	EditorDescription *editor;
-	if (!key) return FALSE;
-
-	editor = static_cast<EditorDescription *>(g_hash_table_lookup(editors, key));
+	EditorDescription *editor = get_editor_by_command(key);
 	if (!editor) return FALSE;
 
 	/* Decide if the image file should be blocked during editor execution
