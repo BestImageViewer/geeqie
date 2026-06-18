@@ -595,7 +595,7 @@ static void editor_verbose_window_progress(EditorData *ed, const gchar *text)
 
 static gboolean editor_verbose_io_cb(GIOChannel *source, GIOCondition condition, gpointer data)
 {
-	auto ed = static_cast<EditorData *>(data);
+	auto *vd = static_cast<EditorVerboseData *>(data);
 	gchar buf[512];
 	gsize count;
 
@@ -608,16 +608,16 @@ static gboolean editor_verbose_io_cb(GIOChannel *source, GIOCondition condition,
 				g_autofree gchar *utf8 = g_locale_to_utf8(buf, count, nullptr, nullptr, nullptr);
 				if (utf8)
 					{
-					editor_verbose_window_fill(ed->vd, utf8, -1);
+					editor_verbose_window_fill(vd, utf8, -1);
 					}
 				else
 					{
-					editor_verbose_window_fill(ed->vd, "Error converting text to valid utf8\n", -1);
+					editor_verbose_window_fill(vd, "Error converting text to valid utf8\n", -1);
 					}
 				}
 			else
 				{
-				editor_verbose_window_fill(ed->vd, buf, count);
+				editor_verbose_window_fill(vd, buf, count);
 				}
 			}
 		}
@@ -1070,9 +1070,9 @@ static EditorFlags editor_command_one(EditorData *ed)
 			g_io_channel_set_encoding(channel_output, nullptr, nullptr);
 
 			g_io_add_watch_full(channel_output, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
-					    editor_verbose_io_cb, ed, nullptr);
+			                    editor_verbose_io_cb, ed->vd, nullptr);
 			g_io_add_watch_full(channel_output, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
-					    editor_verbose_io_cb, ed, nullptr);
+			                    editor_verbose_io_cb, ed->vd, nullptr);
 			g_io_channel_unref(channel_output);
 
 			channel_error = g_io_channel_unix_new(standard_error);
@@ -1080,7 +1080,7 @@ static EditorFlags editor_command_one(EditorData *ed)
 			g_io_channel_set_encoding(channel_error, nullptr, nullptr);
 
 			g_io_add_watch_full(channel_error, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
-					    editor_verbose_io_cb, ed, nullptr);
+			                    editor_verbose_io_cb, ed->vd, nullptr);
 			g_io_channel_unref(channel_error);
 			}
 		}
