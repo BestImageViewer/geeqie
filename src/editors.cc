@@ -985,18 +985,17 @@ static void editor_child_exit_cb(GPid pid, gint status, gpointer data)
 }
 
 
-static EditorFlags editor_command_one(const EditorDescription *editor, GList *list, EditorData *ed)
+static EditorFlags editor_command_one(EditorData *ed)
 {
 	g_autofree gchar *command = nullptr;
-	auto fd = static_cast<FileData *>((ed->flags & EDITOR_NO_PARAM) ? nullptr : list->data);;
+	auto *fd = static_cast<FileData *>((ed->flags & EDITOR_NO_PARAM) ? nullptr : ed->list->data);
 	GPid pid;
 	gint standard_output;
 	gint standard_error;
 	gboolean ok;
 
 	ed->pid = -1;
-	ed->flags = editor->flags;
-	ed->flags = static_cast<EditorFlags>(ed->flags | editor_command_parse(editor, list, TRUE, &command));
+	ed->flags = static_cast<EditorFlags>(ed->editor->flags | editor_command_parse(ed->editor, ed->list, TRUE, &command));
 
 	ok = !editor_errors(ed->flags);
 
@@ -1057,7 +1056,7 @@ static EditorFlags editor_command_one(const EditorDescription *editor, GList *li
 		{
 		if (!ok)
 			{
-			g_autofree gchar *buf = g_strdup_printf(_("Failed to run command:\n%s\n"), editor->file);
+			g_autofree gchar *buf = g_strdup_printf(_("Failed to run command:\n%s\n"), ed->editor->file);
 
 			editor_verbose_window_fill(ed->vd, buf, -1);
 			}
@@ -1109,7 +1108,7 @@ static EditorFlags editor_command_next_start(EditorData *ed)
 			}
 		ed->count++;
 
-		error = editor_command_one(ed->editor, ed->list, ed);
+		error = editor_command_one(ed);
 		if (!error && ed->vd)
 			{
 			gtk_widget_set_sensitive(ed->vd->button_stop, (ed->list != nullptr) );
@@ -1217,7 +1216,7 @@ void editor_skip(gpointer ed)
 	editor_command_done(static_cast<EditorData *>(ed));
 }
 
-static EditorFlags editor_command_start(const EditorDescription *editor, const gchar *text, GList *list, const gchar *working_directory, EditorCallback cb, gpointer data)
+static EditorFlags editor_command_start(const EditorDescription *editor, GList *list, const gchar *working_directory, EditorCallback cb, gpointer data)
 {
 	EditorData *ed;
 	EditorFlags flags = editor->flags;
@@ -1237,7 +1236,7 @@ static EditorFlags editor_command_start(const EditorDescription *editor, const g
 		flags = static_cast<EditorFlags>(flags | EDITOR_VERBOSE);
 
 	if (flags & EDITOR_VERBOSE)
-		editor_verbose_window(ed, text);
+		editor_verbose_window(ed, editor->name);
 
 	editor_command_next_start(ed);
 	/* errors from editor_command_next_start will be handled via callback */
@@ -1265,7 +1264,7 @@ EditorFlags start_editor_from_filelist_full(const gchar *key, GList *list, const
 	EditorFlags error = editor_command_parse(editor, list, TRUE, nullptr);
 	if (editor_errors(error)) return error;
 
-	error = static_cast<EditorFlags>(error | editor_command_start(editor, editor->name, list, working_directory, cb, data));
+	error = static_cast<EditorFlags>(error | editor_command_start(editor, list, working_directory, cb, data));
 
 	if (editor_errors(error))
 		{
