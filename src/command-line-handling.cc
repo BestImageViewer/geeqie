@@ -328,7 +328,7 @@ void gq_config_load(GtkApplication *, GApplicationCommandLine *app_command_line,
  */
 void gq_debug(GtkApplication *, GApplicationCommandLine *, GVariantDict *command_line_options_dict, GList *)
 {
-	g_autofree gchar *debug_level = nullptr;;
+	g_autofree gchar *debug_level = nullptr;
 	g_variant_dict_lookup(command_line_options_dict, "debug", "s", &debug_level);
 	set_debug_level((gint)g_ascii_strtoll(debug_level, nullptr, 10));
 }

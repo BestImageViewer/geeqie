@@ -338,7 +338,7 @@ public:
 			}
 		else
 			{
-			g_autofree gchar *pathl = path_from_utf8(path);;
+			g_autofree gchar *pathl = path_from_utf8(path);
 
 			auto sidecar = Exiv2::ImageFactory::create(Exiv2::ImageType::xmp, pathl);
 

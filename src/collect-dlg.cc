@@ -89,7 +89,7 @@ static void collection_dialog_new(CollectionData *cd, const gchar *title, GtkFil
 	fcdd.filename = get_collections_dir();
 	fcdd.filter = GQ_COLLECTION_EXT;
 	fcdd.filter_description = _("Collection files");
-	fcdd.history_key = "open_collection";;
+	fcdd.history_key = "open_collection";
 	fcdd.response_callback = response_callback;
 	fcdd.shortcuts = get_collections_dir();
 	fcdd.suggested_name = _("Untitled.gqv");

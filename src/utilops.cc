@@ -2165,7 +2165,7 @@ static gchar *file_util_details_get_message(UtilityData *ud, FileData *fd, const
 		if (icon_name) *icon_name = GQ_ICON_DIALOG_INFO;
 		}
 
-	return g_string_free(message, FALSE);;
+	return g_string_free(message, FALSE);
 }
 
 static void file_util_details_dialog(UtilityData *ud, FileData *fd)

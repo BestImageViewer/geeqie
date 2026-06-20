@@ -1344,7 +1344,7 @@ gboolean image_load_dimensions(FileData *fd, GqSize &dimensions)
 	if (success && il->pixbuf)
 		{
 		dimensions.width = gdk_pixbuf_get_width(il->pixbuf);
-		dimensions.height = gdk_pixbuf_get_height(il->pixbuf);;
+		dimensions.height = gdk_pixbuf_get_height(il->pixbuf);
 		}
 	else
 		{
