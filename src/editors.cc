@@ -53,6 +53,7 @@ struct EditorVerboseWindow {
 	void enable_close() const;
 	void fill(const gchar *text, gint len) const;
 	void progress(const EditorData *ed, const gchar *text) const;
+	void watch_channel(int fd);
 
 	GenericDialog *gd;
 	GtkWidget *button_close;
@@ -583,12 +584,18 @@ void EditorVerboseWindow::progress(const EditorData *ed, const gchar *text) cons
 
 static gboolean editor_verbose_io_cb(GIOChannel *source, GIOCondition condition, gpointer data)
 {
-	auto *vw = static_cast<EditorVerboseWindow *>(data);
-	gchar buf[512];
-	gsize count;
+	if (condition & (G_IO_ERR | G_IO_HUP))
+		{
+		g_io_channel_shutdown(source, TRUE, nullptr);
+		return FALSE;
+		}
 
 	if (condition & G_IO_IN)
 		{
+		auto *vw = static_cast<EditorVerboseWindow *>(data);
+		gchar buf[512];
+		gsize count;
+
 		while (g_io_channel_read_chars(source, buf, sizeof(buf), &count, nullptr) == G_IO_STATUS_NORMAL)
 			{
 			if (!g_utf8_validate(buf, count, nullptr))
@@ -603,13 +610,17 @@ static gboolean editor_verbose_io_cb(GIOChannel *source, GIOCondition condition,
 			}
 		}
 
-	if (condition & (G_IO_ERR | G_IO_HUP))
-		{
-		g_io_channel_shutdown(source, TRUE, nullptr);
-		return FALSE;
-		}
-
 	return TRUE;
+}
+
+void EditorVerboseWindow::watch_channel(int fd)
+{
+	g_autoptr(GIOChannel) channel = g_io_channel_unix_new(fd);
+	g_io_channel_set_flags(channel, G_IO_FLAG_NONBLOCK, nullptr);
+	g_io_channel_set_encoding(channel, nullptr, nullptr);
+
+	g_io_add_watch_full(channel, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
+	                    editor_verbose_io_cb, this, nullptr);
 }
 
 enum PathType {
@@ -1043,26 +1054,8 @@ static EditorFlags editor_command_one(EditorData *ed)
 			}
 		else
 			{
-			GIOChannel *channel_output;
-			GIOChannel *channel_error;
-
-			channel_output = g_io_channel_unix_new(standard_output);
-			g_io_channel_set_flags(channel_output, G_IO_FLAG_NONBLOCK, nullptr);
-			g_io_channel_set_encoding(channel_output, nullptr, nullptr);
-
-			g_io_add_watch_full(channel_output, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
-			                    editor_verbose_io_cb, ed->vw.get(), nullptr);
-			g_io_add_watch_full(channel_output, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
-			                    editor_verbose_io_cb, ed->vw.get(), nullptr);
-			g_io_channel_unref(channel_output);
-
-			channel_error = g_io_channel_unix_new(standard_error);
-			g_io_channel_set_flags(channel_error, G_IO_FLAG_NONBLOCK, nullptr);
-			g_io_channel_set_encoding(channel_error, nullptr, nullptr);
-
-			g_io_add_watch_full(channel_error, G_PRIORITY_HIGH, static_cast<GIOCondition>(G_IO_IN | G_IO_ERR | G_IO_HUP),
-			                    editor_verbose_io_cb, ed->vw.get(), nullptr);
-			g_io_channel_unref(channel_error);
+			ed->vw->watch_channel(standard_output);
+			ed->vw->watch_channel(standard_error);
 			}
 		}
 
