@@ -21,11 +21,10 @@
 
 #include "ui-utildlg.h"
 
-#include <algorithm>
 #include <cstdio>
 #include <ctime>
+#include <map>
 #include <string>
-#include <vector>
 
 #include <gdk/gdk.h>
 #include <gio/gio.h>
@@ -45,28 +44,19 @@
 namespace
 {
 
-struct DialogWindow
+using DialogWindowKey = std::pair<std::string, std::string>;
+
+DialogWindowKey dialog_window_key_create(const gchar *title, const gchar *role)
 {
-	GdkRectangle rect;
-	gchar *title;
-	gchar *role;
-};
+	DialogWindowKey key{};
 
-DialogWindow *dialog_window_find_by_title_and_role(const std::vector<DialogWindow *> &dialog_windows,
-                                                   const gchar *title, const gchar *role)
-{
-	const auto dialog_window_has_title_and_role = [title, role](const DialogWindow *dw)
-	{
-		return g_strcmp0(dw->title, title) == 0 && g_strcmp0(dw->role, role) == 0;
-	};
+	if (title) key.first = title;
+	if (role) key.second = role;
 
-	auto it = std::find_if(dialog_windows.begin(), dialog_windows.end(),
-	                       dialog_window_has_title_and_role);
-
-	return (it != dialog_windows.end()) ? *it : nullptr;
+	return key;
 }
 
-std::vector<DialogWindow *> dialog_windows;
+std::map<DialogWindowKey, GdkRectangle> dialog_windows;
 
 } // namespace
 
@@ -78,27 +68,26 @@ std::vector<DialogWindow *> dialog_windows;
 
 static void generic_dialog_save_window(const gchar *title, const gchar *role, GdkRectangle rect)
 {
-	DialogWindow *dw = dialog_window_find_by_title_and_role(dialog_windows, title, role);
-	if (dw)
+	DialogWindowKey key = dialog_window_key_create(title, role);
+
+	auto it = dialog_windows.find(key);
+	if (it != dialog_windows.end())
 		{
-		dw->rect = rect;
+		it->second = rect;
 		return;
 		}
 
-	dw = g_new0(DialogWindow, 1);
-	dw->rect = rect;
-	dw->title = g_strdup(title);
-	dw->role = g_strdup(role);
-
-	dialog_windows.push_back(dw);
+	dialog_windows[key] = rect;
 }
 
 std::optional<GdkRectangle> generic_dialog_find_window(const gchar *title, const gchar *role)
 {
-	DialogWindow *dw = dialog_window_find_by_title_and_role(dialog_windows, title, role);
-	if (!dw) return {};
+	DialogWindowKey key = dialog_window_key_create(title, role);
 
-	return dw->rect;
+	auto it = dialog_windows.find(key);
+	if (it == dialog_windows.end()) return {};
+
+	return it->second;
 }
 
 void generic_dialog_close(GenericDialog *gd)
@@ -300,29 +289,28 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	DialogWindow dw{};
+	g_autofree gchar *title = nullptr;
+	g_autofree gchar *role = nullptr;
+	GdkRectangle rect;
 
 	while (*attribute_names)
 		{
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
-		if (READ_CHAR(dw, title)) continue;
-		if (READ_CHAR(dw, role)) continue;
-		if (READ_INT(dw.rect, x)) continue;
-		if (READ_INT(dw.rect, y)) continue;
-		if (READ_INT_FULL("w", dw.rect.width)) continue;
-		if (READ_INT_FULL("h", dw.rect.height)) continue;
+		if (READ_CHAR_FULL("title", title)) continue;
+		if (READ_CHAR_FULL("role", role)) continue;
+		if (READ_INT(rect, x)) continue;
+		if (READ_INT(rect, y)) continue;
+		if (READ_INT_FULL("w", rect.width)) continue;
+		if (READ_INT_FULL("h", rect.height)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	if (dw.title && dw.title[0] != 0)
+	if (title && title[0] != 0)
 		{
-		generic_dialog_save_window(dw.title, dw.role, dw.rect);
+		generic_dialog_save_window(title, role, rect);
 		}
-
-	g_free(dw.title);
-	g_free(dw.role);
 }
 
 void generic_dialog_windows_write_config(GString *outstr, gint indent)
@@ -332,15 +320,15 @@ void generic_dialog_windows_write_config(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_STRING("<dialogs>");
 	indent++;
 
-	for (const DialogWindow *dw : dialog_windows)
+	for (const auto &[key, rect] : dialog_windows)
 		{
 		WRITE_NL(); WRITE_STRING("<window ");
-		WRITE_CHAR(*dw, title);
-		WRITE_CHAR(*dw, role);
-		WRITE_INT(dw->rect, x);
-		WRITE_INT(dw->rect, y);
-		WRITE_INT_FULL("w", dw->rect.width);
-		WRITE_INT_FULL("h", dw->rect.height);
+		WRITE_CHAR_FULL("title", key.first.c_str());
+		WRITE_CHAR_FULL("role", key.second.c_str());
+		WRITE_INT(rect, x);
+		WRITE_INT(rect, y);
+		WRITE_INT_FULL("w", rect.width);
+		WRITE_INT_FULL("h", rect.height);
 		WRITE_STRING("/>");
 		}
 
