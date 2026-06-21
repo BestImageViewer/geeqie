@@ -994,7 +994,7 @@ void vdtree_destroy_cb(GtkWidget *, gpointer data)
 	gtk_tree_model_foreach(store, vdtree_destroy_node_cb, vd);
 }
 
-ViewDir *vdtree_new(ViewDir *vd, FileData *)
+ViewDir *vdtree_new(ViewDir *vd)
 {
 	GtkTreeStore *store;
 	GtkTreeSelection *selection;

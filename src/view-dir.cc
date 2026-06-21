@@ -201,8 +201,8 @@ ViewDir *vd_new(LayoutWindow *lw)
 
 	switch (lw->options.dir_view_type)
 		{
-		case DIRVIEW_LIST: vd = vdlist_new(vd, lw->dir_fd); break;
-		case DIRVIEW_TREE: vd = vdtree_new(vd, lw->dir_fd); break;
+		case DIRVIEW_LIST: vd = vdlist_new(vd); break;
+		case DIRVIEW_TREE: vd = vdtree_new(vd); break;
 		}
 
 	gq_gtk_container_add(vd->widget, vd->view);

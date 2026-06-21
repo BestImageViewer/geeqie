@@ -41,7 +41,7 @@ struct NodeData
 	gint version;
 };
 
-ViewDir *vdtree_new(ViewDir *vd, FileData *dir_fd);
+ViewDir *vdtree_new(ViewDir *vd);
 
 gboolean vdtree_set_fd(ViewDir *vd, FileData *dir_fd);
 void vdtree_refresh(ViewDir *vd);

@@ -31,7 +31,7 @@
 class FileData;
 struct ViewDir;
 
-ViewDir *vdlist_new(ViewDir *vd, FileData *dir_fd);
+ViewDir *vdlist_new(ViewDir *vd);
 
 gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd);
 void vdlist_refresh(ViewDir *vd);

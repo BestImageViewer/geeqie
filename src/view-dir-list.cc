@@ -426,7 +426,7 @@ void vdlist_destroy_cb(GtkWidget *, gpointer data)
 	file_data_list_free(VDLIST(vd)->list);
 }
 
-ViewDir *vdlist_new(ViewDir *vd, FileData *)
+ViewDir *vdlist_new(ViewDir *vd)
 {
 	GtkListStore *store;
 	GtkTreeSelection *selection;
