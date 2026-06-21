@@ -93,13 +93,12 @@ static void generic_dialog_save_window(const gchar *title, const gchar *role, Gd
 	dialog_windows.push_back(dw);
 }
 
-gboolean generic_dialog_find_window(const gchar *title, const gchar *role, GdkRectangle &rect)
+std::optional<GdkRectangle> generic_dialog_find_window(const gchar *title, const gchar *role)
 {
 	DialogWindow *dw = dialog_window_find_by_title_and_role(dialog_windows, title, role);
-	if (!dw) return FALSE;
+	if (!dw) return {};
 
-	rect = dw->rect;
-	return TRUE;
+	return dw->rect;
 }
 
 void generic_dialog_close(GenericDialog *gd)
@@ -370,11 +369,10 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	if (options->save_dialog_window_positions)
 		{
-		GdkRectangle rect;
-		if (generic_dialog_find_window(title, role, rect))
+		if (auto rect = generic_dialog_find_window(title, role); rect)
 			{
-			gtk_window_set_default_size(GTK_WINDOW(gd->dialog), rect.width, rect.height);
-			gq_gtk_window_move(GTK_WINDOW(gd->dialog), rect.x, rect.y);
+			gtk_window_set_default_size(GTK_WINDOW(gd->dialog), rect->width, rect->height);
+			gq_gtk_window_move(GTK_WINDOW(gd->dialog), rect->x, rect->y);
 			}
 		}
 
