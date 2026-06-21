@@ -301,32 +301,29 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-	auto dw = g_new0(DialogWindow, 1);
+	DialogWindow dw{};
 
 	while (*attribute_names)
 		{
 		const gchar *option = *attribute_names++;
 		const gchar *value = *attribute_values++;
-		if (READ_CHAR(*dw, title)) continue;
-		if (READ_CHAR(*dw, role)) continue;
-		if (READ_INT(dw->rect, x)) continue;
-		if (READ_INT(dw->rect, y)) continue;
-		if (READ_INT_FULL("w", dw->rect.width)) continue;
-		if (READ_INT_FULL("h", dw->rect.height)) continue;
+		if (READ_CHAR(dw, title)) continue;
+		if (READ_CHAR(dw, role)) continue;
+		if (READ_INT(dw.rect, x)) continue;
+		if (READ_INT(dw.rect, y)) continue;
+		if (READ_INT_FULL("w", dw.rect.width)) continue;
+		if (READ_INT_FULL("h", dw.rect.height)) continue;
 
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	if (dw->title && dw->title[0] != 0)
+	if (dw.title && dw.title[0] != 0)
 		{
-		dialog_windows.push_back(dw);
+		generic_dialog_save_window(dw.title, dw.role, dw.rect);
 		}
-	else
-		{
-		g_free(dw->title);
-		g_free(dw->role);
-		g_free(dw);
-		}
+
+	g_free(dw.title);
+	g_free(dw.role);
 }
 
 void generic_dialog_windows_write_config(GString *outstr, gint indent)
