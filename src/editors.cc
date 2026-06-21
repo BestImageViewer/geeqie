@@ -439,6 +439,33 @@ GList *editor_get_desktop_files()
 	return list;
 }
 
+std::vector<std::string> editor_get_disabled_plugins()
+{
+	if (!desktop_file_list) return {};
+
+	static const auto get_disabled_plugins = [](GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
+	{
+		gboolean disabled;
+		gtk_tree_model_get(model, iter, DESKTOP_FILE_COLUMN_DISABLED, &disabled, -1);
+
+		if (disabled)
+			{
+			g_autofree gchar *desktop_path = nullptr;
+			gtk_tree_model_get(model, iter, DESKTOP_FILE_COLUMN_PATH, &desktop_path, -1);
+
+			auto *list = static_cast<std::vector<std::string> *>(data);
+			list->emplace_back(desktop_path);
+			}
+
+		return FALSE;
+	};
+
+	std::vector<std::string> result;
+	gtk_tree_model_foreach(GTK_TREE_MODEL(desktop_file_list), get_disabled_plugins, &result);
+
+	return result;
+}
+
 static void editor_list_add_cb(gpointer, gpointer value, gpointer data)
 {
 	auto editor = static_cast<EditorDescription *>(value);

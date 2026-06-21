@@ -33,7 +33,9 @@
 
 #include "bar-comment.h"
 #include "bar-exif.h"
-#include "bar-gps.h"
+#if HAVE_LIBCHAMPLAIN && HAVE_LIBCHAMPLAIN_GTK
+#  include "bar-gps.h"
+#endif
 #include "bar-histogram.h"
 #include "bar-keywords.h"
 #include "bar-rating.h"
@@ -731,30 +733,15 @@ static void write_class_filter(GString *outstr, gint indent)
 
 static void write_disabled_plugins(GString *outstr, gint indent)
 {
-	GtkTreeIter iter;
-	gboolean valid;
-	gboolean disabled;
-
 	WRITE_NL(); WRITE_STRING("<disabled_plugins>");
 	indent++;
 
-	if (desktop_file_list)
+	std::vector<std::string> disabled_plugins = editor_get_disabled_plugins();
+	for (const std::string &plugin : disabled_plugins)
 		{
-		valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(desktop_file_list), &iter);
-		while (valid)
-			{
-			gtk_tree_model_get(GTK_TREE_MODEL(desktop_file_list), &iter, DESKTOP_FILE_COLUMN_DISABLED, &disabled, -1);
-
-			if (disabled)
-				{
-				g_autofree gchar *desktop_path = nullptr;
-				gtk_tree_model_get(GTK_TREE_MODEL(desktop_file_list), &iter, DESKTOP_FILE_COLUMN_PATH, &desktop_path, -1);
-				WRITE_NL(); WRITE_STRING("<plugin ");
-				WRITE_CHAR_FULL("path", desktop_path);
-				WRITE_STRING("/>");
-				}
-			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(desktop_file_list), &iter);
-			}
+		WRITE_NL(); WRITE_STRING("<plugin ");
+		WRITE_CHAR_FULL("path", plugin.c_str());
+		WRITE_STRING("/>");
 		}
 
 	indent--;
