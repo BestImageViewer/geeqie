@@ -2016,8 +2016,7 @@ void file_util_dialog_run(UtilityData *ud)
 				case UtilityType::RENAME:
 					file_util_dialog_init_source_dest(ud, TRUE);
 
-					GdkRectangle rect;
-					if (!options->save_dialog_window_positions || !generic_dialog_find_window("Rename", "dlg_confirm", rect))
+					if (!options->save_dialog_window_positions || !generic_dialog_find_window("Rename", "dlg_confirm"))
 						{
 						gq_gtk_window_resize(GTK_WINDOW(ud->gd->dialog), RENAME_WINDOW_WIDTH, RENAME_WINDOW_HEIGHT);
 						}

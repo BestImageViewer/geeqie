@@ -22,6 +22,8 @@
 #ifndef UI_UTILDLG_H
 #define UI_UTILDLG_H
 
+#include <optional>
+
 #include <glib.h>
 #include <gtk/gtk.h>
 
@@ -64,7 +66,7 @@ gboolean generic_dialog_get_alternative_button_order(GtkWidget *widget);
 GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 			      const gchar *icon_name, GtkWidget *parent);
 
-gboolean generic_dialog_find_window(const gchar *title, const gchar *role, GdkRectangle &rect);
+std::optional<GdkRectangle> generic_dialog_find_window(const gchar *title, const gchar *role);
 void generic_dialog_windows_load_config(const gchar **attribute_names, const gchar **attribute_values);
 void generic_dialog_windows_write_config(GString *outstr, gint indent);
 
