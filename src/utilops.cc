@@ -1882,7 +1882,7 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 
 	ud->rename_entry = gtk_entry_new();
 	gq_gtk_grid_attach(GTK_GRID(table), ud->rename_entry, 1, 2, 1, 2);
-	generic_dialog_attach_default(GENERIC_DIALOG(ud->gd), ud->rename_entry);
+	generic_dialog_attach_default(ud->gd, ud->rename_entry);
 	gtk_widget_grab_focus(ud->rename_entry);
 
 	g_signal_connect(G_OBJECT(ud->rename_entry), "changed",

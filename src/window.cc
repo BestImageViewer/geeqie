@@ -233,15 +233,15 @@ void help_search_window_show()
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK",
 				  help_search_window_ok_cb, TRUE);
 
-	label1 = pref_label_new(GENERIC_DIALOG(gd)->vbox, _("Search engine:"));
+	label1 = pref_label_new(gd->vbox, _("Search engine:"));
 	gtk_label_set_xalign(GTK_LABEL(label1), 0.0);
 	gtk_label_set_yalign(GTK_LABEL(label1), 0.5);
 
-	label2 = pref_label_new(GENERIC_DIALOG(gd)->vbox, options->help_search_engine);
+	label2 = pref_label_new(gd->vbox, options->help_search_engine);
 	gtk_label_set_xalign(GTK_LABEL(label2), 0.0);
 	gtk_label_set_yalign(GTK_LABEL(label2), 0.5);
 
-	pref_spacer(GENERIC_DIALOG(gd)->vbox, 0);
+	pref_spacer(gd->vbox, 0);
 
 	table = pref_table_new(gd->vbox, 3, 1, FALSE, TRUE);
 	pref_table_label(table, 0, 0, _("Search terms:"), GTK_ALIGN_END);

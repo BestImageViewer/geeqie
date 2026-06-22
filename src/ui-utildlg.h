@@ -44,8 +44,6 @@ struct GenericDialog
 
 };
 
-#define GENERIC_DIALOG(gd) ((GenericDialog *)gd)
-
 GenericDialog *generic_dialog_new(const gchar *title,
 				  const gchar *role,
 				  GtkWidget *parent, gboolean auto_close,
