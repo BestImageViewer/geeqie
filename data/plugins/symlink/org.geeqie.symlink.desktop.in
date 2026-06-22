@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Symlink
+Name=Symlink grouped files
 
 # call the helper script
 Exec=geeqie-symlink %f
@@ -10,11 +10,10 @@ Exec=geeqie-symlink %f
 Categories=X-Geeqie;Graphics;
 OnlyShowIn=X-Geeqie;
 
-# Show in menu "File"
-X-Geeqie-Menu-Path=FileMenu/FileOpsSection
-
 # This is a filter - $GEEQIE_DESTINATION is required
 X-Geeqie-Filter=true
 
 # It can be made verbose
 # X-Geeqie-Verbose=true
+
+Icon=geeqie

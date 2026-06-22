@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu-dir-popup">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Up to parent</attribute>
+        <attribute name="action">win.dir-win-up</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Slideshow</attribute>
+        <attribute name="action">win.dir-win-slideshow</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Slideshow recursive</attribute>
+        <attribute name="action">win.dir-win-slideshow-recursive</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Find _duplicates…</attribute>
+        <attribute name="action">win.dir-win-find-duplicates</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Find duplicates recursive…</attribute>
+        <attribute name="action">win.dir-win-find-duplicates-recursive</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_New folder…</attribute>
+        <attribute name="action">win.dir-win-new-folder</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Rename…</attribute>
+        <attribute name="action">win.dir-win-rename</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Copy to clipboard</attribute>
+        <attribute name="action">win.dir-win-copy-path</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Copy to clipboard (unquoted)</attribute>
+        <attribute name="action">win.dir-win-copy-path-unquoted</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Cut to clipboard</attribute>
+        <attribute name="action">win.dir-win-cut-path</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Delete…</attribute>
+        <attribute name="action">win.dir-win-delete</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">View as _List</attribute>
+        <attribute name="action">win.dir-win-view-type</attribute>
+        <attribute name="target">list</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">View as _Tree</attribute>
+        <attribute name="action">win.dir-win-view-type</attribute>
+        <attribute name="target">tree</attribute>
+      </item>
+    </section>
+    <section>
+      <submenu>
+        <attribute name="label" translatable="yes">_Sort</attribute>
+        <section>
+          <item>
+            <attribute name="label" translatable="yes">Sort by name</attribute>
+            <attribute name="action">win.dir-win-sort</attribute>
+            <attribute name="target">name</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Sort by number</attribute>
+            <attribute name="action">win.dir-win-sort</attribute>
+            <attribute name="target">number</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Sort by date</attribute>
+            <attribute name="action">win.dir-win-sort</attribute>
+            <attribute name="target">date</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Ascending</attribute>
+            <attribute name="action">win.dir-win-sort-ascending</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Case</attribute>
+            <attribute name="action">win.dir-win-sort-case</attribute>
+          </item>
+        </section>
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Show _hidden files</attribute>
+        <attribute name="action">win.dir-win-show-hidden-files</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Re_fresh</attribute>
+        <attribute name="action">win.dir-win-refresh</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

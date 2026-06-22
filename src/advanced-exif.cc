@@ -373,11 +373,13 @@ static gboolean advanced_exif_keypress(GtkWidget *, GdkEventKey *event, gpointer
 			}
 		}
 
+/** @FIXME GTK4
 	if (!stop_signal && is_help_key(event_keyval, event_state))
 		{
 		help_window_show("GuideOtherWindowsExif.html");
 		stop_signal = TRUE;
 		}
+*/
 
 	return stop_signal;
 }

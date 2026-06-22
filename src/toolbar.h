@@ -36,6 +36,8 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar);
 void toolbar_apply(ToolbarType bar);
 
 const gchar *toolbar_type_config_name(ToolbarType type);
+void toolbarlist_add_cb(GSimpleAction *, GVariant *, gpointer data);
+void toolbarlist_add_button_cb(GSimpleAction *, GVariant *parameter, gpointer data);
 
 #endif
 

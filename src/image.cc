@@ -240,7 +240,7 @@ static void image_press_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer d
 #if HAVE_GTK4
 static void image_release_cb(PixbufRenderer *, GqMouseButtonEvent *event, gpointer data)
 #else
-static void image_release_cb(PixbufRenderer *, GdkEventButton *event, gpointer data)
+static void image_release_cb(PixbufRenderer *, GdkEventButton *, gpointer data)
 #endif
 {
 	auto imd = static_cast<ImageWindow *>(data);
@@ -252,7 +252,9 @@ static void image_release_cb(PixbufRenderer *, GdkEventButton *event, gpointer d
 		lw = get_current_layout();
 		}
 
+/** @FIXME GTK4
 	layout_handle_user_defined_mouse_buttons(lw, event->button);
+*/
 }
 
 static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer data)

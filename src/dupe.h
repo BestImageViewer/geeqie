@@ -31,6 +31,7 @@
 #include <gtk/gtk.h>
 
 #include "geometry.h"
+#include "ui-menu.h"
 
 struct CollectInfo;
 struct CollectionData;

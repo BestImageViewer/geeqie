@@ -364,9 +364,7 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
 	vd_color_set(vd, vd->click_fd, TRUE);
 
-	vd->popup = vd_pop_menu(vd, vd->click_fd);
-
-	gtk_menu_popup_at_pointer(GTK_MENU(vd->popup), nullptr);
+	vd_pop_menu(vd, vd->click_fd);
 
 	return TRUE;
 }
@@ -408,8 +406,7 @@ gboolean vdlist_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 	if (bevent->button == GDK_BUTTON_SECONDARY)
 #endif
 		{
-		vd->popup = vd_pop_menu(vd, vd->click_fd);
-		gtk_menu_popup_at_pointer(GTK_MENU(vd->popup), nullptr);
+		vd_pop_menu(vd, vd->click_fd);
 		return TRUE;
 		}
 

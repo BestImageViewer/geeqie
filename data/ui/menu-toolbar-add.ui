@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu-main-toolbar-add">
+    <section>
+      <item>
+        <attribute name="action">win.preferences-win-main-toolbarlist-add</attribute>
+        <attribute name="label" translatable="yes">Separator</attribute>
+        <attribute name="target">separator</attribute>
+      </item>
+    </section>
+    <section>
+      <section id="section-main" />
+    </section>
+  </menu>
+  <menu id="menu-status-toolbar-add">
+    <section>
+      <item>
+        <attribute name="action">win.preferences-win-status-toolbarlist-add</attribute>
+        <attribute name="label" translatable="yes">Separator</attribute>
+        <attribute name="target">separator</attribute>
+      </item>
+    </section>
+    <section>
+      <section id="section-status" />
+    </section>
+  </menu>
+</interface>

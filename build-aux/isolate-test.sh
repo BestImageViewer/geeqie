@@ -54,6 +54,10 @@ chmod 0700 "$XDG_RUNTIME_DIR"
 cd
 mkdir -p "$XDG_CONFIG_HOME"
 
+# This file must exist to prevent a modal dialog in main.cc being triggered.
+mkdir -p "$XDG_CONFIG_HOME/geeqie"
+touch "$XDG_CONFIG_HOME/geeqie/accels.ini"
+
 # Debug setting
 # export G_DEBUG="fatal-warnings"  # Causes persistent SIGTRAP currently.
 export G_DEBUG="fatal-critical"

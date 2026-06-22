@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menubar-popup">
+    <section>
+      <item>
+        <attribute name="action">popup.move-to-top</attribute>
+        <attribute name="label" translatable="yes">Move to top</attribute>
+      </item>
+      <item>
+        <attribute name="action">popup.move-up</attribute>
+        <attribute name="label" translatable="yes">Move up</attribute>
+      </item>
+      <item>
+        <attribute name="action">popup.move-down</attribute>
+        <attribute name="label" translatable="yes">Move down</attribute>
+      </item>
+      <item>
+        <attribute name="action">popup.move-to-bottom</attribute>
+        <attribute name="label" translatable="yes">Move to bottom</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">popup.remove</attribute>
+        <attribute name="label" translatable="yes">Remove</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">popup.height</attribute>
+        <attribute name="label" translatable="yes">Height…</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

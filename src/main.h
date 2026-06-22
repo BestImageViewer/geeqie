@@ -24,6 +24,12 @@
 
 #include <glib.h>
 
+#include <gdk/gdk.h>
+#include <gio/gio.h>
+#include <glib-object.h>
+#include <gtk/gtk.h>
+
+
 extern gboolean thumb_format_changed;
 
 extern gchar *gq_prefix;

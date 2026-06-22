@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu-image">
+    <section>
+      <item>
+        <attribute name="action">win.image-win-zoom-in</attribute>
+        <attribute name="label" translatable="yes">Zoom in</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.image-win-zoom-out</attribute>
+        <attribute name="label" translatable="yes">Zoom out</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.image-win-zoom-1-1</attribute>
+        <attribute name="label" translatable="yes">Zoom 1:1</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.image-win-zoom-to-fit</attribute>
+        <attribute name="label" translatable="yes">Zoom to fit</attribute>
+      </item>
+    </section>
+    <section>
+      <submenu>
+        <section id="plugins-submenu" />
+        <attribute name="label">Plugins</attribute>
+      </submenu>
+      <submenu>
+        <attribute name="label" translatable="yes">_Orientation</attribute>
+        <item>
+          <attribute name="action">win.image-win-rotate-cw-90</attribute>
+          <attribute name="label" translatable="yes">_Rotate clockwise 90°</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.image-win-rotate-ccw-90</attribute>
+          <attribute name="label" translatable="yes">Rotate _counterclockwise 90°</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.image-win-rotate-180</attribute>
+          <attribute name="label" translatable="yes">Rotate 1_80°</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.image-win-mirror</attribute>
+          <attribute name="label" translatable="yes">_Mirror</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.image-win-flip</attribute>
+          <attribute name="label" translatable="yes">_Flip</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.image-win-orientation-original</attribute>
+          <attribute name="label" translatable="yes">_Original state</attribute>
+        </item>
+      </submenu>
+           <item>
+          <attribute name="action">win.image-win-view-in-new-window</attribute>
+          <attribute name="label" translatable="yes">View in new window</attribute>
+        </item>
+  
+           <item>
+          <attribute name="action">win.image-win-go-to-directory-view</attribute>
+          <attribute name="label" translatable="yes">Go to directory view</attribute>
+        </item>
+  
+    </section>
+    <item>
+      <attribute name="action">win.image-win-collections</attribute>
+      <attribute name="label" translatable="yes">New collection</attribute>
+    </item>
+    <section>
+      <item>
+        <attribute name="action">win.image-win-copy</attribute>
+        <attribute name="label" translatable="yes">Copy…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.image-win-move</attribute>
+        <attribute name="label" translatable="yes">Move…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.image-win-rename</attribute>
+        <attribute name="label" translatable="yes">Rename…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.image-win-copy-path</attribute>
+        <attribute name="label" translatable="yes">Copy path</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.image-win-copy-path-unquoted</attribute>
+        <attribute name="label" translatable="yes">Copy path unquoted</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.image-win-delete</attribute>
+        <attribute name="label" translatable="yes">Move selection to trash</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.image-win-delete-permanent</attribute>
+        <attribute name="label" translatable="yes">Delete</attribute>
+      </item>
+    </section>
+    <section>
+      <submenu>
+        <attribute name="label">Add to Collection</attribute>
+        <section>
+          <item>
+            <attribute name="action">win.image-win-collections</attribute>
+            <attribute name="label" translatable="yes">Add to Collection</attribute>
+            <attribute name="target" type="i">-1</attribute>
+          </item>
+        </section>
+        <section id="collections-submenu" />
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.image-win-toggle-slideshow</attribute>
+        <attribute name="label" translatable="yes">Toggle slideshow</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.image-win-pause-slideshow</attribute>
+        <attribute name="label" translatable="yes">Pause slideshow</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.image-win-fullscreen</attribute>
+        <attribute name="label" translatable="yes">Fullscreen</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.image-win-close-window</attribute>
+        <attribute name="label" translatable="yes">Close window</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

@@ -3,7 +3,7 @@
   <title id="titleGuideOptionsKeyboard">Keyboard Options</title>
   <para>This dialogue enables changes to be be made to the default key short-cut allocated to menu items.</para>
   <para>The data displayed may be ordered by clicking at the top of each column.</para>
-  <para>To change or create a new short-cut, double click on the KEY column of the relevant item. The text displayed will change to "New accelerator...". Press the key combination required for this action.</para>
-  <para>Only shortcuts in the main window can be redefined. Shortcuts in other windows are fixed.</para>
+  <para>To change or create a new short-cut, click on the Keystroke Converter box and type the key combination you wish to use. The correct character sequence is automatically loaded into the clipboard. Double click on the Shortcut column of the relevant item. Insert the new text. If multiple shortcuts are used, separate them with a semi-colon. Geeqie must be restarted for the new code to be registered.</para>
+  <para>Commands preceded by "app." are available in all windows. Commands preceded by "win." are available only in the relevant window.</para>
   <para>A text search may be made in any of the columns. Click anywhere in a column and type characters. The search is case-insensitive</para>
 </section>

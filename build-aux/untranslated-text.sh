@@ -197,6 +197,7 @@ render_intent = g_strdup(\"Saturation\");
 "
 
 exclude_files_array="
+convert-configuration.cc
 exif.cc
 format-canon.cc
 format-fuji.cc

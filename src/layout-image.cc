@@ -325,12 +325,11 @@ static gboolean show_next_frame(gpointer data)
 	auto fd = static_cast<AnimationData*>(data);
 	int delay;
 
-	if (!animation_should_continue(fd))
+	if(!animation_should_continue(fd))
 		{
 		image_animation_data_free(fd);
 		return G_SOURCE_REMOVE;
 		}
-
 	PixbufRenderer *pr = PIXBUF_RENDERER(fd->iw->pr);
 
 	if (!deprecated_gdk_pixbuf_animation_iter_advance(fd->iter, nullptr))
@@ -480,14 +479,12 @@ static gboolean layout_image_animate_new_file(LayoutWindow *lw)
 
 void layout_image_animate_toggle(LayoutWindow *lw)
 {
-	GtkAction *action;
-
 	if (!lw) return;
 
 	lw->options.animate = !lw->options.animate;
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "Animate");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.animate);
+	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-animate");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.animate));
 
 	layout_image_animate_new_file(lw);
 }
@@ -856,11 +853,11 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	if (!fullscreen)
 		{
-		menu_item_add_icon(menu, _("_Full screen"), GQ_ICON_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
+		menu_item_add_icon(menu, _("_Fullscreen"), GQ_ICON_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
 		}
 	else
 		{
-		menu_item_add_icon(menu, _("Exit _full screen"), GQ_ICON_LEAVE_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
+		menu_item_add_icon(menu, _("Exit _fullscreen"), GQ_ICON_LEAVE_FULLSCREEN, G_CALLBACK(li_pop_menu_full_screen_cb), lw);
 		}
 
 	menu_item_add_check(menu, _("GIF _animation"), lw->options.animate, G_CALLBACK(li_pop_menu_animate_cb), lw);

@@ -560,7 +560,10 @@ gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *beve
 #if HAVE_GTK4
 	if (layout_handle_user_defined_mouse_buttons(vf->layout, event->button))
 #else
+/** @FIXME GTK4
+
 	if (layout_handle_user_defined_mouse_buttons(vf->layout, bevent->button))
+*/
 #endif
 		{
 		return TRUE;
@@ -1714,7 +1717,7 @@ gboolean vflist_refresh(ViewFile *vf)
 static GdkRGBA *vflist_listview_color_shifted(GtkWidget *widget)
 {
 #if HAVE_GTK4
-/* @FIXME GTK4 stub */
+/** @FIXME GTK4 stub */
 	return nullptr;
 #else
 	static GdkRGBA color;

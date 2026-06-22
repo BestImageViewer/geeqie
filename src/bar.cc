@@ -326,6 +326,11 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	gtk_widget_grab_focus(spin);
 }
 
+void menu_expander_height_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	bar_expander_height_cb(nullptr, data);
+}
+
 static void bar_expander_add_cb(GtkWidget *, gpointer data)
 {
 	const auto *config = static_cast<const gchar *>(data);
@@ -363,7 +368,7 @@ static void bar_menu_popup(GtkWidget *widget)
 		                        (g_strcmp0(label, "GPS Map") == 0);
 		}
 
-	popup_menu_bar(expander, display_height_option ? G_CALLBACK(bar_expander_height_cb) : nullptr);
+	popup_menu_bar(expander, display_height_option ? G_CALLBACK(bar_expander_height_cb) : nullptr, widget);
 }
 
 
