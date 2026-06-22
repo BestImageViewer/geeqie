@@ -502,9 +502,7 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 	work = list;
 	while (work)
 		{
-		FileData *fd;
-
-		fd = static_cast<FileData *>(work->data);
+		auto *fd = static_cast<FileData *>(work->data);
 		work = work->next;
 
 		if (strcmp(fd->name, ".") == 0 || strcmp(fd->name, "..") == 0)
