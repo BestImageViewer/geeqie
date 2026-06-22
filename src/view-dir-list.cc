@@ -313,8 +313,7 @@ gboolean vdlist_set_fd(ViewDir *vd, FileData *dir_fd)
 			}
 		}
 
-	file_data_unref(vd->dir_fd);
-	vd->dir_fd = file_data_ref(dir_fd);
+	vd->dir_fd.reset(dir_fd);
 
 	ret = vdlist_populate(vd, TRUE);
 

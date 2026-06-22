@@ -173,23 +173,22 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 		}
 
 	switch (vd->type)
-	{
-	case DIRVIEW_LIST: vdlist_destroy_cb(widget, data); break;
-	case DIRVIEW_TREE: vdtree_destroy_cb(widget, data); break;
-	}
+		{
+		case DIRVIEW_LIST: vdlist_destroy_cb(widget, data); break;
+		case DIRVIEW_TREE: vdtree_destroy_cb(widget, data); break;
+		}
 
 	folder_icons_free(vd->pf);
 	file_data_list_free(vd->drop_list);
 
-	file_data_unref(vd->dir_fd);
-	g_free(vd->info);
+	g_clear_pointer(&vd->info, g_free);
 
-	g_free(vd);
+	delete vd;
 }
 
 ViewDir *vd_new(LayoutWindow *lw)
 {
-	auto vd = g_new0(ViewDir, 1);
+	auto *vd = new ViewDir();
 
 	vd->widget = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(vd->widget), GTK_SHADOW_IN);

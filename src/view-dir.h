@@ -27,8 +27,8 @@
 #include <gtk/gtk.h>
 
 #include "compat.h"
+#include "filedata/ref.h"
 
-class FileData;
 struct LayoutWindow;
 
 enum DirViewType : guint {
@@ -61,31 +61,31 @@ struct PixmapFolders
 struct ViewDir
 {
 	DirViewType type;
-	gpointer info;
+	gpointer info = nullptr;
 
-	GtkWidget *widget;
-	GtkWidget *view;
+	GtkWidget *widget = nullptr;
+	GtkWidget *view = nullptr;
 
-	FileData *dir_fd;
+	FileDataRef dir_fd{nullptr};
 
-	FileData *click_fd;
+	FileData *click_fd = nullptr;
 
-	FileData *drop_fd;
-	GList *drop_list;
+	FileData *drop_fd = nullptr;
+	GList *drop_list = nullptr;
 	guint drop_scroll_id; /**< event source id */
 
 	/* func list */
 	void (*select_func)(ViewDir *vd, FileData *fd, gpointer data);
-	gpointer select_data;
+	gpointer select_data = nullptr;
 
 	void (*dnd_drop_update_func)(ViewDir *vd);
 	void (*dnd_drop_leave_func)(ViewDir *vd);
 
-	LayoutWindow *layout;
+	LayoutWindow *layout = nullptr;
 
-	GtkWidget *popup;
+	GtkWidget *popup = nullptr;
 
-	PixmapFolders *pf;
+	PixmapFolders *pf = nullptr;
 };
 
 ViewDir *vd_new(LayoutWindow *lw);
