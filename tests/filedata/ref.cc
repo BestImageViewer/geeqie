@@ -179,6 +179,53 @@ TEST_F(FileDataRefTest, AnonymousReturnAndRelease)
 	ASSERT_EQ(1, fd->ref);
 }
 
+
+/**
+ * Ensures that equality comparisons are consistent and correct against either FileData* or FileDataRef.
+ */
+TEST_F(FileDataRefTest, FileDataEquality)
+{
+	fd = g_new0(FileData, 1);
+	fd->magick = FD_MAGICK;
+
+	// Avoids having the FileData objects automatically freed when its
+	// refcount drops back to zero.
+	file_data_lock(fd);
+	FileData *null_fd = nullptr;
+
+	FileDataRef fd_ref{fd};
+	FileDataRef fd_ref2{fd};
+	FileDataRef fd_null_ref{nullptr};
+
+	// Using ASSERT_TRUE instead of ASSERT_EQ to ensure the macro isn't affecting implicit behavior.
+	// We evaluate == and !=
+	ASSERT_TRUE(fd_ref == fd);
+	ASSERT_TRUE(fd_ref2 == fd);
+	ASSERT_TRUE(fd_ref == fd_ref2);
+	ASSERT_TRUE(*fd_ref == fd);
+	ASSERT_TRUE(*fd_ref2 == fd);
+	ASSERT_TRUE(*fd_ref == *fd_ref2);
+	ASSERT_TRUE(fd_ref == fd_ref);
+	ASSERT_TRUE(fd_ref2 == fd_ref2);
+
+	ASSERT_TRUE(fd_null_ref == null_fd);
+	ASSERT_TRUE(fd_null_ref == fd_null_ref);
+
+	ASSERT_TRUE(fd_ref != null_fd);
+	ASSERT_TRUE(fd_null_ref != fd);
+	ASSERT_TRUE(fd_ref != fd_null_ref);
+	ASSERT_TRUE(fd_null_ref != fd_ref2);
+
+	ASSERT_FALSE(fd_ref == null_fd);
+	ASSERT_FALSE(fd_null_ref == fd);
+	ASSERT_FALSE(fd_ref == fd_null_ref);
+
+	FileDataRef fd_ref3{nullptr};
+	fd_ref3.reset(fd_ref.release());
+	ASSERT_TRUE(fd_ref3 == fd);
+	ASSERT_TRUE(fd_ref == null_fd);
+}
+
 }  // anonymous namespace
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

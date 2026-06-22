@@ -30,6 +30,12 @@ class FileDataRef
 	// In a boolean context, return whether or not we're holding nullptr.
 	operator bool() const { return fd_ != nullptr; }
 
+	// FileDataRef equality means equality of the contained FileData*.
+	// This is aligned with the behavior of `FileDataRef == FileData*`, which is implicitly
+	// converted to `FileData* == FileData*`.
+	bool operator==(const FileDataRef &other) const { return fd_ == other.fd_; }
+	bool operator!=(const FileDataRef &other) const { return !(*this == other); }
+
 	void reset(FileData *new_fd);
 	FileData *release();
 	FileData* operator*() const { return fd_; }
