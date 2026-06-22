@@ -4,6 +4,7 @@ unit_test_sources = files(
 'filecache.cc',
 'filedata/filedata.cc',
 'filedata/filelist.cc',
+'filedata/ref.cc',
 'pixbuf-util.cc')
 
 code_sources += unit_test_sources
