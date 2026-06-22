@@ -1284,8 +1284,8 @@ static void vd_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdoub
 static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
-	gboolean refresh;
 
+	if (!vd->dir_fd) return;
 	if (!S_ISDIR(fd->mode)) return; /* this gives correct results even on recently deleted files/directories */
 
 	DEBUG_1("Notify vd: %s %04x", fd->path, type);
@@ -1294,29 +1294,29 @@ static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 	if (vd->type == DIRVIEW_LIST)
 		{
-		refresh = (fd == vd->dir_fd);
+		bool should_refresh = (fd == vd->dir_fd);
 
-		if (!refresh)
+		if (!should_refresh)
 			{
-			refresh = (strcmp(base, vd->dir_fd->path) == 0);
+			should_refresh = (strcmp(base, vd->dir_fd->path) == 0);
 			}
 
 		if ((type & NOTIFY_CHANGE) && fd->change)
 			{
-			if (!refresh && fd->change->dest)
+			if (!should_refresh && fd->change->dest)
 				{
 				g_autofree gchar *dest_base = remove_level_from_path(fd->change->dest);
-				refresh = (strcmp(dest_base, vd->dir_fd->path) == 0);
+				should_refresh = (strcmp(dest_base, vd->dir_fd->path) == 0);
 				}
 
-			if (!refresh && fd->change->source)
+			if (!should_refresh && fd->change->source)
 				{
 				g_autofree gchar *source_base = remove_level_from_path(fd->change->source);
-				refresh = (strcmp(source_base, vd->dir_fd->path) == 0);
+				should_refresh = (strcmp(source_base, vd->dir_fd->path) == 0);
 				}
 			}
 
-		if (refresh) vd_refresh(vd);
+		if (should_refresh) vd_refresh(vd);
 		}
 
 	if (vd->type == DIRVIEW_TREE)
@@ -1330,4 +1330,5 @@ static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 			}
 		}
 }
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
