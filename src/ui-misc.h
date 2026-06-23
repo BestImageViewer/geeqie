@@ -231,5 +231,7 @@ void get_device_position(GdkDevice *device, int &x, int &y);
 
 PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale);
 
+gboolean get_alternative_button_order(GtkWidget *widget);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

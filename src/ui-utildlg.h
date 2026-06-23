@@ -59,8 +59,6 @@ void generic_dialog_attach_default(GenericDialog *gd, GtkWidget *widget);
 GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 				      const gchar *heading, const gchar *text, gboolean expand);
 
-gboolean generic_dialog_get_alternative_button_order(GtkWidget *widget);
-
 GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 			      const gchar *icon_name, GtkWidget *parent);
 

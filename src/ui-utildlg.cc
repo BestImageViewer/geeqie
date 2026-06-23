@@ -190,22 +190,6 @@ static void generic_dialog_show_cb(GtkWidget *widget, gpointer data)
 	g_signal_handlers_disconnect_by_func(G_OBJECT(widget), (gpointer)(generic_dialog_show_cb), gd);
 }
 
-gboolean generic_dialog_get_alternative_button_order(GtkWidget *widget)
-{
-	GtkSettings *settings;
-	GObjectClass *klass;
-	gboolean alternative_order = FALSE;
-
-	settings = gtk_settings_get_for_screen(gtk_widget_get_screen(widget));
-	klass = G_OBJECT_CLASS(GTK_SETTINGS_GET_CLASS(settings));
-	if (g_object_class_find_property(klass, "gtk-alternative-button-order"))
-		{
-		g_object_get(settings, "gtk-alternative-button-order", &alternative_order, NULL);
-		}
-
-	return alternative_order;
-}
-
 GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, const gchar *text,
 				     void (*func_cb)(GenericDialog *, gpointer), gboolean is_default)
 {
@@ -220,7 +204,7 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, 
 
 	gq_gtk_container_add(gd->hbox, button);
 
-	alternative_order = generic_dialog_get_alternative_button_order(gd->hbox);
+	alternative_order = get_alternative_button_order(gd->hbox);
 
 	if (is_default)
 		{
@@ -417,7 +401,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 		gd->cancel_button = nullptr;
 		}
 
-	if (generic_dialog_get_alternative_button_order(gd->hbox))
+	if (get_alternative_button_order(gd->hbox))
 		{
 		g_signal_connect(G_OBJECT(gd->dialog), "show",
 				 G_CALLBACK(generic_dialog_show_cb), gd);

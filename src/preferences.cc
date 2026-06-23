@@ -3825,7 +3825,7 @@ static void config_window_create(LayoutWindow *lw)
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	if (!generic_dialog_get_alternative_button_order(configwindow))
+	if (!get_alternative_button_order(configwindow))
 		{
 		gtk_box_reorder_child(GTK_BOX(hbox), ct_button, -1);
 		}

@@ -240,7 +240,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	if (!generic_dialog_get_alternative_button_order(ew->window))
+	if (!get_alternative_button_order(ew->window))
 		{
 		gtk_box_reorder_child(GTK_BOX(button_hbox), ct_button, -1);
 		}

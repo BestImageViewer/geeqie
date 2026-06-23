@@ -1526,4 +1526,17 @@ PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale)
 	return pal;
 }
 
+gboolean get_alternative_button_order(GtkWidget *widget)
+{
+	GtkSettings *settings = gtk_settings_get_for_screen(gtk_widget_get_screen(widget));
+	GObjectClass *klass = G_OBJECT_CLASS(GTK_SETTINGS_GET_CLASS(settings));
+
+	if (!g_object_class_find_property(klass, "gtk-alternative-button-order")) return FALSE;
+
+	gboolean alternative_order = FALSE;
+	g_object_get(settings, "gtk-alternative-button-order", &alternative_order, NULL);
+
+	return alternative_order;
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
