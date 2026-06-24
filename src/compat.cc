@@ -23,11 +23,14 @@
 #include <config.h>
 
 #include "compat-deprecated.h"
-#include "main-defines.h"
+#if HAVE_GTK4
+#  include "main-defines.h"
+#endif
 
 namespace
 {
 
+#if HAVE_GTK4
 constexpr auto GTK4_DRAG_SOURCE_CONTROLLER_DATA_KEY = "gq-gtk4-drag-source-controller";
 constexpr auto GTK4_DROP_TARGET_CONTROLLER_DATA_KEY = "gq-gtk4-drop-target-controller";
 constexpr auto GTK4_BOX_PACK_END_DATA_KEY = "gq-gtk4-box-pack-end";
@@ -101,6 +104,7 @@ void gtk4_box_apply_child_packing(GtkBox *box, GtkWidget *child, gboolean expand
 		gtk_widget_set_margin_bottom(child, padding);
 		}
 }
+#endif
 
 } // namespace
 
