@@ -7,8 +7,8 @@
 <refmeta>
 <refentrytitle>GEEQIE</refentrytitle>
 <manvolnum>1</manvolnum>
-<refmiscinfo class='source'>February 2026</refmiscinfo>
-<refmiscinfo class='manual'>Geeqie 2.7 GTK3</refmiscinfo>
+<refmiscinfo class='source'>June 2026</refmiscinfo>
+<refmiscinfo class='manual'>warning: inline pixbuf error: Unrecognized image file format</refmiscinfo>
 </refmeta>
 <refnamediv>
 <refname>Geeqie</refname>
@@ -24,11 +24,11 @@ zooming, panning, thumbnails and sorting images into collections.</para>
 
 <refsect2 id='usage'><title>Usage:</title>
 
-<para>geeqie [OPTION…] [path...]</para>
+<para>geeqie [OPTION…] [path…]</para>
 
 <para>Geeqie is an image viewer.</para>
 
-<para>Version: Geeqie 2.7</para>
+<para>Version: Geeqie 2.8</para>
 </refsect2>
 
 <refsect2 id='help_options'><title>Help Options:</title>
@@ -185,7 +185,7 @@ zooming, panning, thumbnails and sorting images into collections.</para>
   <varlistentry>
   <term><emphasis role='strong' remap='B'>-f</emphasis>, <emphasis role='strong' remap='B'>--fullscreen</emphasis></term>
   <listitem>
-<para>start / toggle in full screen mode</para>
+<para>start / toggle in fullscreen mode</para>
   </listitem>
   </varlistentry>
   <varlistentry>
@@ -415,6 +415,8 @@ Note that bash command line completion does not work in this mode.</para>
   </listitem>
   </varlistentry>
 </variablelist>
+
+<para>Geeqie 2.8 GTK3</para>
 </refsect2>
 </refsect1>
 
