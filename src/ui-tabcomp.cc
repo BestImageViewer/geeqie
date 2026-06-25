@@ -232,16 +232,7 @@ static gboolean tab_completion_popup_key_press(GtkWidget *widget, GdkEventKey *e
 		const gchar *prefix = filename_from_path(entry_text);
 		TabCompPrefix tp{ prefix, strlen(prefix), 0 };
 
-#if HAVE_GTK4
-		for (GtkWidget *child = gtk_widget_get_first_child(widget);
-		     child != nullptr;
-		     child = gtk_widget_get_next_sibling(child))
-			{
-			tab_completion_iter_menu_items(child, &tp);
-			}
-#else
 		gq_gtk_container_foreach(widget, tab_completion_iter_menu_items, &tp);
-#endif
 
 		if (tp.choices > 1) return TRUE; /* multiple choices */
 		if (tp.choices > 0) tab_completion_do(td); /* one choice */

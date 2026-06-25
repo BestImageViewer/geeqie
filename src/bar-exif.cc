@@ -310,14 +310,6 @@ void bar_pane_exif_update(PaneExifData *ped)
 {
 	ped->all_hidden = TRUE;
 
-#if HAVE_GTK4
-	for (GtkWidget *entry = gtk_widget_get_first_child(ped->vbox);
-	     entry != nullptr;
-	     entry = gtk_widget_get_next_sibling(entry))
-		{
-		bar_pane_exif_update_entry(ped, entry, FALSE);
-		}
-#else
 	static const auto update_entry = [](GtkWidget *entry, gpointer data)
 	{
 		auto *ped = static_cast<PaneExifData *>(data);
@@ -325,7 +317,6 @@ void bar_pane_exif_update(PaneExifData *ped)
 	};
 
 	gq_gtk_container_foreach(ped->vbox, update_entry, ped);
-#endif
 
 	gtk_widget_set_sensitive(ped->pane.title, !ped->all_hidden);
 }
@@ -873,18 +864,6 @@ GList *bar_pane_exif_list()
 
 	GList *exif_list = nullptr;
 
-#if HAVE_GTK4
-	for (GtkWidget *child = gtk_widget_get_first_child(ped->vbox);
-	     child != nullptr;
-	     child = gtk_widget_get_next_sibling(child))
-		{
-		auto *ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(child), "entry_data"));
-		if (!ee) continue;
-
-		exif_list = g_list_append(exif_list, g_strdup(ee->title));
-		exif_list = g_list_append(exif_list, g_strdup(ee->key));
-		}
-#else
 	static const auto exif_entry_to_list = [](GtkWidget *widget, gpointer data)
 	{
 		auto *ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
@@ -896,7 +875,6 @@ GList *bar_pane_exif_list()
 	};
 
 	gq_gtk_container_foreach(ped->vbox, exif_entry_to_list, &exif_list);
-#endif
 
 	return exif_list;
 }
