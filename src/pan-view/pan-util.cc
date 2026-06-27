@@ -91,7 +91,7 @@ gint pan_date_value(time_t d, PanDateLengthType length)
 	return -1;
 }
 
-#if defined(__GLIBC_PREREQ)
+#ifdef __GLIBC_PREREQ
 # if __GLIBC_PREREQ(2, 27)
 #  define HAS_GLIBC_STRFTIME_EXTENSIONS
 # endif

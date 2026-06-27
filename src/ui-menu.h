@@ -47,6 +47,8 @@ struct HardcodedWindowKey
 
 using HardcodedWindowKeyList = std::vector<HardcodedWindowKey>;
 
+struct LayoutWindow;
+
 GtkWidget *menu_item_add(GtkWidget *menu, const gchar *label,
 			 GCallback func, gpointer data);
 GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar *stock_id,
@@ -69,6 +71,11 @@ GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
 				GCallback func, gpointer data);
 
 GtkWidget *popup_menu_short_lived();
+
+bool menu_item_include_ellipsis(GMenuModel *model, const gchar *action);
+void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_list);
+void color_profiles_menu_populate(LayoutWindow *lw, const char *action);
+GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

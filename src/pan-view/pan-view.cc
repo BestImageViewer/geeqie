@@ -32,6 +32,8 @@
 #include <gtk/gtk.h>
 
 #include "../pan-view.h"
+#include "accelerators.h"
+#include "actions.h"
 #include "bar-exif.h"
 #include "cache-loader.h"
 #include "cache.h"
@@ -123,9 +125,11 @@ static void pan_fullscreen_toggle(PanWindow *pw, gboolean force_off);
 
 static void pan_window_close(PanWindow *pw);
 
-static GtkWidget *pan_popup_menu(PanWindow *pw);
+static void pan_popup_menu(PanWindow *pw);
 
 static void pan_window_dnd_init(PanWindow *pw);
+static void pan_window_new_real(FileData *dir_fd);
+static void pan_popup_menu_cb(GSimpleAction *, GVariant *, gpointer data);
 
 /**
  * This array must be kept in sync with the contents of:\n
@@ -1048,7 +1052,7 @@ static FileData *pan_menu_click_fd(PanWindow *pw)
 	return nullptr;
 }
 
-static gboolean pan_window_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean pan_window_key_press_cb(GtkWidget *, GdkEventKey *event, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
 	PixbufRenderer *pr;
@@ -1104,146 +1108,19 @@ static gboolean pan_window_key_press_cb(GtkWidget *widget, GdkEventKey *event, g
 				break;
 			}
 
-		if (x != 0 || y!= 0)
+		if (x != 0 || y != 0)
 			{
 			keyboard_scroll_calc(x, y, static_cast<GdkModifierType>(event->state), event->keyval, event->time);
 			pixbuf_renderer_scroll(pr, x, y);
 			}
 		}
 
-	if (stop_signal) return stop_signal;
-
-	stop_signal = TRUE;
-	if (event->state & GDK_CONTROL_MASK)
+	if (stop_signal)
 		{
-		switch (event->keyval)
-			{
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-			case '0':
-				break;
-			case 'C': case 'c':
-				if (fd) file_util_copy(fd, nullptr, nullptr, GTK_WIDGET(pr));
-				break;
-			case 'M': case 'm':
-				if (fd) file_util_move(fd, nullptr, nullptr, GTK_WIDGET(pr));
-				break;
-			case 'R': case 'r':
-				if (fd) file_util_rename(fd, nullptr, GTK_WIDGET(pr));
-				break;
-			case 'D': case 'd':
-				if (fd)
-					{
-					file_util_delete(fd, nullptr, GTK_WIDGET(pr), TRUE);
-					}
-				break;
-			case 'F': case 'f':
-				pan_search_toggle_visible(pw, TRUE);
-				break;
-			case 'G': case 'g':
-				pan_search_activate(pw);
-				break;
-			case 'W': case 'w':
-				pan_window_close(pw);
-				break;
-			default:
-				stop_signal = FALSE;
-				break;
-			}
-		}
-	else
-		{
-		switch (event->keyval)
-			{
-			case GDK_KEY_Escape:
-				if (pw->fs)
-					{
-					pan_fullscreen_toggle(pw, TRUE);
-					}
-				else
-					{
-					pan_search_toggle_visible(pw, FALSE);
-					}
-				break;
-			default:
-				stop_signal = FALSE;
-				break;
-			}
-
-		if (stop_signal) return stop_signal;
-
-		// Don't steal characters from entry boxes.
-		if (!on_entry)
-			{
-			stop_signal = TRUE;
-			switch (event->keyval)
-				{
-				case '+': case '=': case GDK_KEY_KP_Add:
-					pixbuf_renderer_zoom_adjust(pr, ZOOM_INCREMENT);
-					break;
-				case '-': case GDK_KEY_KP_Subtract:
-					pixbuf_renderer_zoom_adjust(pr, -ZOOM_INCREMENT);
-					break;
-				case 'Z': case 'z': case GDK_KEY_KP_Divide: case '1':
-					pixbuf_renderer_zoom_set(pr, 1.0);
-					break;
-				case '2':
-					pixbuf_renderer_zoom_set(pr, 2.0);
-					break;
-				case '3':
-					pixbuf_renderer_zoom_set(pr, 3.0);
-					break;
-				case '4':
-					pixbuf_renderer_zoom_set(pr, 4.0);
-					break;
-				case '7':
-					pixbuf_renderer_zoom_set(pr, -4.0);
-					break;
-				case '8':
-					pixbuf_renderer_zoom_set(pr, -3.0);
-					break;
-				case '9':
-					pixbuf_renderer_zoom_set(pr, -2.0);
-					break;
-				case 'F': case 'f':
-				case 'V': case 'v':
-				case GDK_KEY_F11:
-					pan_fullscreen_toggle(pw, FALSE);
-					break;
-				case 'I': case 'i':
-					break;
-				case GDK_KEY_Delete: case GDK_KEY_KP_Delete:
-					break;
-				case GDK_KEY_Menu:
-				case GDK_KEY_F10:
-					menu = pan_popup_menu(pw);
-					gtk_menu_popup_at_widget(GTK_MENU(menu), widget, GDK_GRAVITY_SOUTH, GDK_GRAVITY_CENTER, nullptr);
-
-					break;
-				case '/':
-					pan_search_toggle_visible(pw, TRUE);
-					break;
-					stop_signal = FALSE;
-					break;
-				default:
-					break;
-				}
-			}
-		}
-	if (!stop_signal && is_help_key(event))
-		{
-		help_window_show("GuideOtherWindowsPanView.html");
-		stop_signal = TRUE;
+		return GDK_EVENT_STOP;
 		}
 
-	return stop_signal;
+	return GDK_EVENT_PROPAGATE;
 }
 
 /*
@@ -1406,7 +1283,6 @@ static void button_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
 	PanItem *pi = nullptr;
-	GtkWidget *menu;
 	gint rx;
 	gint ry;
 
@@ -1441,8 +1317,7 @@ static void button_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer data)
 			break;
 		case GDK_BUTTON_SECONDARY:
 			pan_info_update(pw, pi);
-			menu = pan_popup_menu(pw);
-			gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+			pan_popup_menu(pw);
 			break;
 		default:
 			break;
@@ -1670,6 +1545,374 @@ static gboolean pan_window_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
 	return TRUE;
 }
 
+/*
+ *-----------------------------------------------------------------------------
+ * performance warnings
+ *-----------------------------------------------------------------------------
+ */
+
+static void pan_warning_ok_cb(GenericDialog *gd, gpointer data)
+{
+	auto dir_fd = static_cast<FileData *>(data);
+
+	generic_dialog_close(gd);
+
+	pan_window_new_real(dir_fd);
+	file_data_unref(dir_fd);
+}
+
+static void pan_warning_hide_cb(GtkWidget *button, gpointer)
+{
+	gboolean hide_dlg;
+
+	hide_dlg = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	pref_list_int_set(PAN_PREF_GROUP, PAN_PREF_HIDE_WARNING, hide_dlg);
+}
+
+static gboolean pan_warning(FileData *dir_fd)
+{
+	GenericDialog *gd;
+	GtkWidget *box;
+	GtkWidget *group;
+	GtkWidget *checkbox;
+	GtkWidget *ct_button;
+
+	if (dir_fd && strcmp(dir_fd->path, G_DIR_SEPARATOR_S) == 0)
+		{
+		pan_warning_folder(dir_fd->path, nullptr);
+		return TRUE;
+		}
+
+	if (options->thumbnails.enable_caching &&
+	    options->thumbnails.spec_standard) return FALSE;
+
+	gboolean hide_dlg = pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_HIDE_WARNING, FALSE);
+	if (hide_dlg) return FALSE;
+
+	gd = generic_dialog_new(_("Pan View Performance"), "pan_view_warning", nullptr, FALSE,
+				nullptr, nullptr);
+	gd->data = file_data_ref(dir_fd);
+	generic_dialog_add_button(gd, GQ_ICON_OK, "OK",
+				  pan_warning_ok_cb, TRUE);
+
+	box = generic_dialog_add_message(gd, GQ_ICON_DIALOG_INFO,
+					 _("Pan view performance may be poor."),
+					 _("To improve the performance of thumbnails in\npan view the following options can be enabled.\n\nNote that both options must be enabled to\nnotice a change in performance."), TRUE);
+
+	group = pref_box_new(box, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
+	pref_spacer(group, PREF_PAD_INDENT);
+	group = pref_box_new(group, TRUE, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
+
+	ct_button = pref_checkbox_new_int(group, _("Cache thumbnails"),
+					  options->thumbnails.enable_caching, &options->thumbnails.enable_caching);
+	checkbox = pref_checkbox_new_int(group, _("Use shared thumbnail cache"),
+				       options->thumbnails.spec_standard, &options->thumbnails.spec_standard);
+	pref_checkbox_link_sensitivity(ct_button, checkbox);
+
+	pref_line(box, 0);
+
+	pref_checkbox_new(box, _("Do not show this dialog again"), hide_dlg,
+			  G_CALLBACK(pan_warning_hide_cb), nullptr);
+
+	gtk_widget_show(gd->dialog);
+
+	return TRUE;
+}
+
+
+/*
+ *-----------------------------------------------------------------------------
+ * entry point
+ *-----------------------------------------------------------------------------
+ */
+
+void pan_window_new(FileData *dir_fd)
+{
+	if (pan_warning(dir_fd)) return;
+
+	pan_window_new_real(dir_fd);
+}
+
+
+/*
+ *-----------------------------------------------------------------------------
+ * menus
+ *-----------------------------------------------------------------------------
+ */
+
+static void pan_new_window_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+	FileData *fd;
+
+	fd = pan_menu_click_fd(pw);
+	if (fd)
+		{
+		pan_fullscreen_toggle(pw, TRUE);
+		view_window_new(fd);
+		}
+}
+
+static void pan_go_to_original_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+	FileData *fd;
+
+	LayoutWindow *lw = get_current_layout();
+	if (!lw) return;
+
+	fd = pan_menu_click_fd(pw);
+	if (fd)
+		{
+		layout_set_fd(lw, fd);
+		}
+}
+
+static void pan_edit_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+{
+	auto *pw = static_cast<PanWindow *>(data);
+	if (!pw) return;
+
+	FileData *fd = pan_menu_click_fd(pw);
+	if (!fd) return;
+
+	const char *key = g_variant_get_string(parameter, nullptr);
+
+	if (!editor_window_flag_set(key))
+		{
+		pan_fullscreen_toggle(pw, TRUE);
+		}
+
+	file_util_start_editor_from_file(key, fd, pw->imd->widget);
+}
+
+static void pan_copy_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+	FileData *fd;
+
+	fd = pan_menu_click_fd(pw);
+	if (fd) file_util_copy(fd, nullptr, nullptr, pw->imd->widget);
+}
+
+static void pan_move_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+	FileData *fd;
+
+	fd = pan_menu_click_fd(pw);
+	if (fd) file_util_move(fd, nullptr, nullptr, pw->imd->widget);
+}
+
+static void pan_rename_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+	FileData *fd;
+
+	fd = pan_menu_click_fd(pw);
+	if (fd) file_util_rename(fd, nullptr, pw->imd->widget);
+}
+
+template<gboolean safe_delete>
+static void pan_delete_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	FileData *fd = pan_menu_click_fd(pw);
+	if (!fd) return;
+
+	file_util_delete(fd, nullptr, pw->imd->widget, safe_delete);
+}
+
+template<gboolean quoted>
+static void pan_copy_path_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+	FileData *fd = pan_menu_click_fd(pw);
+
+	if (fd) file_util_copy_path_to_clipboard(fd, quoted, ClipboardAction::COPY);
+}
+
+static void pan_exif_date_toggle_cb(GSimpleAction *action, GVariant *value, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	gboolean active = g_variant_get_boolean(value);
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
+
+	pw->exif_date_enable = !active;
+	pan_layout_update(pw);
+}
+
+static void pan_info_toggle_exif_cb(GSimpleAction *action, GVariant *value, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	gboolean active = g_variant_get_boolean(value);
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
+
+	pw->info_includes_exif = !active;
+	/** @FIXME sync info now */
+}
+
+static void pan_info_toggle_image_cb(GSimpleAction *action, GVariant *state, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	const char *value = g_variant_get_string(state, nullptr);
+
+	PanImageSize pan_image_size;
+
+	if (g_str_equal(value, "none"))
+		pan_image_size = PAN_IMAGE_SIZE_THUMB_NONE;
+	else if (g_str_equal(value, "full-size"))
+		pan_image_size = PAN_IMAGE_SIZE_100;
+	else if (g_str_equal(value, "1-2"))
+		pan_image_size = PAN_IMAGE_SIZE_50;
+	else if (g_str_equal(value, "1-3"))
+		pan_image_size = PAN_IMAGE_SIZE_33;
+	else if (g_str_equal(value, "1-4"))
+		pan_image_size = PAN_IMAGE_SIZE_25;
+	else if (g_str_equal(value, "1-10"))
+		pan_image_size = PAN_IMAGE_SIZE_10;
+	else
+		pan_image_size = PAN_IMAGE_SIZE_THUMB_NONE;
+
+	pw->info_image_size = pan_image_size;
+	/** @FIXME sync info now */
+
+	g_simple_action_set_state((action), state);
+}
+
+static void pan_fullscreen_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	pan_fullscreen_toggle(pw, FALSE);
+}
+
+static void pan_close_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	pan_window_close(pw);
+}
+
+static void pan_play_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	start_editor_from_file(options->image_l_click_video_editor, pw->click_pi->fd);
+}
+
+static void pan_search_bar_visible_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	pan_search_toggle_visible(pw, TRUE);
+}
+
+static void pan_search_start_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	pan_search_activate(pw);
+}
+
+static void pan_escape_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+
+	if (pw->fs)
+		{
+		pan_fullscreen_toggle(pw, TRUE);
+		}
+	else
+		{
+		pan_search_toggle_visible(pw, FALSE);
+		}
+}
+
+static void pan_zoom_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
+	const char *value = g_variant_get_string(parameter, nullptr);
+
+	PixbufRenderer *pr = PIXBUF_RENDERER(pw->imd->pr);
+
+	gdouble mode = 0.0;
+	gboolean set_mode = TRUE;
+
+	if (g_str_equal(value, "in"))
+		{
+		pixbuf_renderer_zoom_adjust(pr, ZOOM_INCREMENT);
+		set_mode = FALSE;
+		}
+	else if (g_str_equal(value, "out"))
+		{
+		pixbuf_renderer_zoom_adjust(pr, -ZOOM_INCREMENT);
+		set_mode = FALSE;
+		}
+	else if (g_str_equal(value, "1-1"))
+		mode = PAN_IMAGE_SIZE_100;
+	else if (g_str_equal(value, "1-2"))
+		mode = 2.0;
+	else if (g_str_equal(value, "1-3"))
+		mode = 3.0;
+	else if (g_str_equal(value, "1-4"))
+		mode = 4.0;
+	else if (g_str_equal(value, "4-1"))
+		mode = -4.0;
+	else if (g_str_equal(value, "3-1"))
+		mode = -3.0;
+	else if (g_str_equal(value, "2-1"))
+		mode = -2.0;
+	else
+		mode = 1.0;
+
+	if (set_mode)
+		{
+		pixbuf_renderer_zoom_set(pr, mode);
+		}
+}
+
+
+static GList *pan_view_get_fd_list(PanWindow *pw)
+{
+	GList *list = nullptr;
+	FileData *fd = pan_menu_click_fd(pw);
+
+	if (fd) list = g_list_prepend(filelist_copy(fd->sidecar_files), file_data_ref(fd));
+
+	return list;
+}
+
+static void pan_window_help_action_cb(GSimpleAction *, GVariant *, gpointer)
+{
+help_window_show("GuideOtherWindowsPanView.html");
+}
+
+/**
+ * @brief Add file selection list to a collection
+ * @param[in] widget
+ * @param[in] data Index to the collection list menu item selected, or -1 for new collection
+ *
+ *
+ */
+static void pan_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+{
+	auto *pw = static_cast<PanWindow *>(data);
+
+	gint32 index = g_variant_get_int32(parameter);
+
+	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, pan_menu_click_fd(pw));
+	collection_by_index_add_filelist(index, selection_list);
+}
+
+/* static const ActionDef pan_actions[]
+ */
+#include "pan-view-actions.inc"
+
 static void pan_window_new_real(FileData *dir_fd)
 {
 	GdkGeometry geometry;
@@ -1705,11 +1948,12 @@ static void pan_window_new_real(FileData *dir_fd)
 	gtk_window_set_geometry_hints(GTK_WINDOW(pw->window), nullptr, &geometry, GDK_HINT_MIN_SIZE);
 
 	gtk_window_set_resizable(GTK_WINDOW(pw->window), TRUE);
-	gq_gtk_widget_set_border_width(pw->window, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(pw->window), 0);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(vbox);
 	gq_gtk_container_add(pw->window, vbox);
+	gtk_widget_show(pw->window);
 	gtk_widget_show(vbox);
 
 	box = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
@@ -1836,405 +2080,87 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	pan_layout_update(pw);
 
+	GApplication *app = g_application_get_default();
+	register_actions_from_table(GTK_APPLICATION(app), pw->window, pan_actions, get_keyfile_merged(), pw);
+
 	gtk_widget_grab_focus(pw->imd->widget);
 	gtk_widget_show(pw->window);
 }
 
-/*
- *-----------------------------------------------------------------------------
- * performance warnings
- *-----------------------------------------------------------------------------
- */
-
-static void pan_warning_ok_cb(GenericDialog *gd, gpointer data)
+static void pan_popup_menu(PanWindow *pw)
 {
-	auto dir_fd = static_cast<FileData *>(data);
-
-	generic_dialog_close(gd);
-
-	pan_window_new_real(dir_fd);
-	file_data_unref(dir_fd);
-}
-
-static void pan_warning_hide_cb(GtkWidget *button, gpointer)
-{
-	gboolean hide_dlg;
-
-	hide_dlg = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
-	pref_list_int_set(PAN_PREF_GROUP, PAN_PREF_HIDE_WARNING, hide_dlg);
-}
-
-static gboolean pan_warning(FileData *dir_fd)
-{
-	GenericDialog *gd;
-	GtkWidget *box;
-	GtkWidget *group;
-	GtkWidget *checkbox;
-	GtkWidget *ct_button;
-
-	if (dir_fd && strcmp(dir_fd->path, G_DIR_SEPARATOR_S) == 0)
-		{
-		pan_warning_folder(dir_fd->path, nullptr);
-		return TRUE;
-		}
-
-	if (options->thumbnails.enable_caching &&
-	    options->thumbnails.spec_standard) return FALSE;
-
-	gboolean hide_dlg = pref_list_int_get(PAN_PREF_GROUP, PAN_PREF_HIDE_WARNING, FALSE);
-	if (hide_dlg) return FALSE;
-
-	gd = generic_dialog_new(_("Pan View Performance"), "pan_view_warning", nullptr, FALSE,
-				nullptr, nullptr);
-	gd->data = file_data_ref(dir_fd);
-	generic_dialog_add_button(gd, GQ_ICON_OK, "OK",
-				  pan_warning_ok_cb, TRUE);
-
-	box = generic_dialog_add_message(gd, GQ_ICON_DIALOG_INFO,
-					 _("Pan view performance may be poor."),
-					 _("To improve the performance of thumbnails in\npan view the following options can be enabled.\n\nNote that both options must be enabled to\nnotice a change in performance."), TRUE);
-
-	group = pref_box_new(box, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
-	pref_spacer(group, PREF_PAD_INDENT);
-	group = pref_box_new(group, TRUE, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-
-	ct_button = pref_checkbox_new_int(group, _("Cache thumbnails"),
-					  options->thumbnails.enable_caching, &options->thumbnails.enable_caching);
-	checkbox = pref_checkbox_new_int(group, _("Use shared thumbnail cache"),
-				       options->thumbnails.spec_standard, &options->thumbnails.spec_standard);
-	pref_checkbox_link_sensitivity(ct_button, checkbox);
-
-	pref_line(box, 0);
-
-	pref_checkbox_new(box, _("Do not show this dialog again"), hide_dlg,
-			  G_CALLBACK(pan_warning_hide_cb), nullptr);
-
-	gtk_widget_show(gd->dialog);
-
-	return TRUE;
-}
-
-
-/*
- *-----------------------------------------------------------------------------
- * entry point
- *-----------------------------------------------------------------------------
- */
-
-void pan_window_new(FileData *dir_fd)
-{
-	if (pan_warning(dir_fd)) return;
-
-	pan_window_new_real(dir_fd);
-}
-
-
-/*
- *-----------------------------------------------------------------------------
- * menus
- *-----------------------------------------------------------------------------
- */
-
-static void pan_new_window_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-	FileData *fd;
-
-	fd = pan_menu_click_fd(pw);
-	if (fd)
-		{
-		pan_fullscreen_toggle(pw, TRUE);
-		view_window_new(fd);
-		}
-}
-
-static void pan_go_to_original_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-	FileData *fd;
-
-	LayoutWindow *lw = get_current_layout();
-	if (!lw) return;
-
-	fd = pan_menu_click_fd(pw);
-	if (fd)
-		{
-		layout_set_fd(lw, fd);
-		}
-}
-
-static void pan_edit_cb(GtkWidget *widget, gpointer data)
-{
-	auto *pw = static_cast<PanWindow *>(submenu_item_get_data(widget));
-	if (!pw) return;
-
-	FileData *fd = pan_menu_click_fd(pw);
-	if (!fd) return;
-
-	auto *key = static_cast<const gchar *>(data);
-
-	if (!editor_window_flag_set(key))
-		{
-		pan_fullscreen_toggle(pw, TRUE);
-		}
-
-	file_util_start_editor_from_file(key, fd, pw->imd->widget);
-}
-
-static void pan_zoom_in_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	image_zoom_adjust(pw->imd, ZOOM_INCREMENT);
-}
-
-static void pan_zoom_out_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	image_zoom_adjust(pw->imd, -ZOOM_INCREMENT);
-}
-
-static void pan_zoom_1_1_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	image_zoom_set(pw->imd, 1.0);
-}
-
-static void pan_copy_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-	FileData *fd;
-
-	fd = pan_menu_click_fd(pw);
-	if (fd) file_util_copy(fd, nullptr, nullptr, pw->imd->widget);
-}
-
-static void pan_move_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-	FileData *fd;
-
-	fd = pan_menu_click_fd(pw);
-	if (fd) file_util_move(fd, nullptr, nullptr, pw->imd->widget);
-}
-
-static void pan_rename_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-	FileData *fd;
-
-	fd = pan_menu_click_fd(pw);
-	if (fd) file_util_rename(fd, nullptr, pw->imd->widget);
-}
-
-template<gboolean safe_delete>
-static void pan_delete_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	FileData *fd = pan_menu_click_fd(pw);
-	if (!fd) return;
-
-	file_util_delete(fd, nullptr, pw->imd->widget, safe_delete);
-}
-
-template<gboolean quoted>
-static void pan_copy_path_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-	FileData *fd = pan_menu_click_fd(pw);
-
-	if (fd) file_util_copy_path_to_clipboard(fd, quoted, ClipboardAction::COPY);
-}
-
-static void pan_exif_date_toggle_cb(GtkWidget *widget, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	pw->exif_date_enable = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
-	pan_layout_update(pw);
-}
-
-static void pan_info_toggle_exif_cb(GtkWidget *widget, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	pw->info_includes_exif = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
-	/** @FIXME sync info now */
-}
-
-template<PanImageSize pan_image_size>
-static void pan_info_toggle_image_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	pw->info_image_size = pan_image_size;
-	/** @FIXME sync info now */
-}
-
-static void pan_fullscreen_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	pan_fullscreen_toggle(pw, FALSE);
-}
-
-static void pan_close_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	pan_window_close(pw);
-}
-
-static void pan_play_cb(GtkWidget *, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	start_editor_from_file(options->image_l_click_video_editor, pw->click_pi->fd);
-}
-
-static GList *pan_view_get_fd_list(PanWindow *pw)
-{
-	GList *list = nullptr;
-	FileData *fd = pan_menu_click_fd(pw);
-
-	if (fd) list = g_list_prepend(filelist_copy(fd->sidecar_files), file_data_ref(fd));
-
-	return list;
-}
-
-/**
- * @brief Add file selection list to a collection
- * @param[in] widget
- * @param[in] data Index to the collection list menu item selected, or -1 for new collection
- *
- *
- */
-static void pan_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
-{
-	auto *pw = static_cast<PanWindow *>(submenu_item_get_data(widget));
-
-	g_autoptr(FileDataList) selection_list = g_list_append(nullptr, pan_menu_click_fd(pw));
-	collection_by_index_add_filelist(GPOINTER_TO_INT(data), selection_list);
-}
-
-static GtkWidget *pan_popup_menu(PanWindow *pw)
-{
-	GtkWidget *menu;
-	GtkWidget *submenu;
-	GtkWidget *item;
 	gboolean active;
 	gboolean video;
+	GAction *action;
 	GList *editmenu_fd_list;
-	GtkAccelGroup *accel_group;
+
+	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-pan-view.ui");
+	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-pan-view"));
 
 	active = (pw->click_pi != nullptr);
-	video = (active && pw->click_pi->fd && pw->click_pi->fd->format_class == FORMAT_CLASS_VIDEO);
-
-	menu = popup_menu_short_lived();
-	accel_group = gtk_accel_group_new();
-	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
-
-	g_object_set_data(G_OBJECT(menu), "window_keys", &pan_view_window_keys);
-	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
-
-	menu_item_add_icon_sensitive(menu, _("_Play"), GQ_ICON_PLAY, video,
-			    G_CALLBACK(pan_play_cb), pw);
-	menu_item_add_divider(menu);
-
-	menu_item_add_icon(menu, _("Zoom _in"), GQ_ICON_ZOOM_IN,
-			    G_CALLBACK(pan_zoom_in_cb), pw);
-	menu_item_add_icon(menu, _("Zoom _out"), GQ_ICON_ZOOM_OUT,
-			    G_CALLBACK(pan_zoom_out_cb), pw);
-	menu_item_add_icon(menu, _("Zoom _1:1"), GQ_ICON_ZOOM_100,
-			    G_CALLBACK(pan_zoom_1_1_cb), pw);
-	menu_item_add_divider(menu);
 
 	editmenu_fd_list = pan_view_get_fd_list(pw);
-	g_signal_connect_swapped(G_OBJECT(menu), "destroy",
-	                         G_CALLBACK(file_data_list_free), editmenu_fd_list);
 
-	submenu_add_edit(menu, active, editmenu_fd_list, G_CALLBACK(pan_edit_cb), pw);
+	GMenu *plugins_menu = G_MENU(gtk_builder_get_object(builder, "plugins-submenu"));
+	plugins_menu_populate(plugins_menu, "win.pan-win-plugin-run", editmenu_fd_list);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-plugin-run");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), active);
 
-	menu_item_add_icon_sensitive(menu, _("View in _new window"), GQ_ICON_NEW, active,
-				      G_CALLBACK(pan_new_window_cb), pw);
-	menu_item_add_icon(menu, _("Go to original"), GQ_ICON_FIND,
-			G_CALLBACK(pan_go_to_original_cb), pw);
+	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
+	submenu_add_collections_new(collections_menu, active, "win.pan-win-collections", pw);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-collections");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), active);
 
-	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, _("_Copy…"), GQ_ICON_COPY, active,
-				      G_CALLBACK(pan_copy_cb), pw);
-	menu_item_add_sensitive(menu, _("_Move…"), active,
-				G_CALLBACK(pan_move_cb), pw);
-	menu_item_add_sensitive(menu, _("_Rename…"), active,
-				G_CALLBACK(pan_rename_cb), pw);
-	menu_item_add_sensitive(menu, _("_Copy to clipboard"), active,
-	                        G_CALLBACK(pan_copy_path_cb<TRUE>), pw);
-	menu_item_add_sensitive(menu, _("_Copy to clipboard (unquoted)"), active,
-	                        G_CALLBACK(pan_copy_path_cb<FALSE>), pw);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-play");
+	video = (active && pw->click_pi->fd && pw->click_pi->fd->format_class == FORMAT_CLASS_VIDEO);
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (video));
 
-	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_move_to_trash ?
-	                                 _("Move to Trash…") : _("Move to Trash"),
-	                             GQ_ICON_DELETE, active,
-	                             G_CALLBACK(pan_delete_cb<TRUE>), pw);
-	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_delete ?
-	                                 _("_Delete…") : _("_Delete"),
-	                             GQ_ICON_DELETE_SHRED, active,
-	                             G_CALLBACK(pan_delete_cb<FALSE>), pw);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-view-in-new-window");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	menu_item_add_divider(menu);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-go-to-original");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	submenu = submenu_add_collections(menu, TRUE,
-	                                  G_CALLBACK(pan_pop_menu_collections_cb), pw);
-	menu_item_add_divider(menu);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-copy");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-move");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	item = menu_item_add_check(menu, _("Sort by E_xif date"), pw->exif_date_enable,
-				   G_CALLBACK(pan_exif_date_toggle_cb), pw);
-	gtk_widget_set_sensitive(item, (pw->layout == PAN_LAYOUT_TIMELINE || pw->layout == PAN_LAYOUT_CALENDAR));
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-rename");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	menu_item_add_divider(menu);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-copy-path");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	menu_item_add_check(menu, _("_Show Exif information"), pw->info_includes_exif,
-			    G_CALLBACK(pan_info_toggle_exif_cb), pw);
-	item = menu_item_add(menu, _("Show im_age"), nullptr, nullptr);
-	submenu = gtk_menu_new();
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-copy-path-unquoted");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	menu_item_add_check(submenu, _("_None"), pw->info_image_size == PAN_IMAGE_SIZE_THUMB_NONE,
-	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_THUMB_NONE>), pw);
-	menu_item_add_check(submenu, _("_Full size"), pw->info_image_size == PAN_IMAGE_SIZE_100,
-	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_100>), pw);
-	menu_item_add_check(submenu, _("1:2 (50%)"), pw->info_image_size == PAN_IMAGE_SIZE_50,
-	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_50>), pw);
-	menu_item_add_check(submenu, _("1:3 (33%)"), pw->info_image_size == PAN_IMAGE_SIZE_33,
-	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_33>), pw);
-	menu_item_add_check(submenu, _("1:4 (25%)"), pw->info_image_size == PAN_IMAGE_SIZE_25,
-	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_25>), pw);
-	menu_item_add_check(submenu, _("1:10 (10%)"), pw->info_image_size == PAN_IMAGE_SIZE_10,
-	                    G_CALLBACK(pan_info_toggle_image_cb<PAN_IMAGE_SIZE_10>), pw);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-delete");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	menu_item_add_divider(menu);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-delete-permanent");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	if (pw->fs)
-		{
-		menu_item_add_icon(menu, _("Exit _full screen"), GQ_ICON_LEAVE_FULLSCREEN, G_CALLBACK(pan_fullscreen_cb), pw);
-		}
-	else
-		{
-		menu_item_add_icon(menu, _("_Full screen"), GQ_ICON_FULLSCREEN, G_CALLBACK(pan_fullscreen_cb), pw);
-		}
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-sort-exifdate");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("C_lose window"), GQ_ICON_CLOSE, G_CALLBACK(pan_close_cb), pw);
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-show-exif-information");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	return menu;
+	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-show-image");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
+
+	GtkWidget *menu = popup_menu(menu_model, pw->window);
+ 	g_signal_connect_swapped(G_OBJECT(menu), "destroy", G_CALLBACK(file_data_list_free), editmenu_fd_list);
 }
 
+static void pan_popup_menu_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto pw = static_cast<PanWindow *>(data);
 
+	pan_popup_menu(pw);
+}
 /*
  *-----------------------------------------------------------------------------
  * drag and drop
@@ -2359,6 +2285,11 @@ FileDataList *pan_list_tree_filtered(PanWindow *pw, SortType method)
 	FileDataList *list = pan_list_tree(pw, method);
 
 	return pan_filter_fd_list(list, pw->filter_ui);
+}
+
+const ActionDef *get_pan_view_actions()
+{
+	return pan_actions;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

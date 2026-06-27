@@ -126,7 +126,7 @@ LINT = "fatal"
 valid_found = 0
 }
 
-/About/ {
+/about/ {
 	valid_found = 1
 	}
 

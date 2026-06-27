@@ -53,6 +53,8 @@
 #  include <libintl.h>
 #endif
 
+#include "accelerators.h"
+#include "actions.h"
 #include "cache-maint.h"
 #include "cache.h"
 #include "collect-io.h"
@@ -60,6 +62,7 @@
 #include "command-line-handling.h"
 #include "compat-deprecated.h"
 #include "compat.h"
+#include "convert-configuration.h"
 #include "exif.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -453,13 +456,6 @@ void accel_map_save()
 	gq_accel_map_save(path);
 }
 
-void accel_map_load()
-{
-	g_autofree gchar *path = accep_map_filename();
-	g_autofree gchar *pathl = path_from_utf8(path);
-	gtk_accel_map_load(pathl);
-}
-
 void gq_gtk_css_load()
 {
 	/* Load gtk.css file from the rc directory */
@@ -650,6 +646,10 @@ void setup_sig_handler()
 
 void set_theme_bg_color()
 {
+	GdkRGBA bg_color;
+	GdkRGBA theme_color;
+	GtkStyleContext *style_context;
+
 	if (!options->image.use_custom_border_color)
 		{
 		LayoutWindow *lw = layout_window_first();
@@ -809,7 +809,55 @@ void startup_common(GtkApplication *, gpointer)
 	setup_env_path();
 
 	keys_load();
-	accel_map_load();
+
+	/* If this is the first run with the revised style action/accelerator list,
+	 * convert accels from:
+	 *
+	 * (gtk_accel_path "<Actions>/MenuActions/FirstPage" "<Alt>d")
+	 * to
+	 * [first_page}
+	 * accel=<Alt>d
+	 *
+	 * convert the Toolbars sections of geeqie.xml from
+	 * ColorProfile0
+	 * to
+	 * color-profile-0
+	 */
+	g_autofree char *accels_ini_path = accels_ini_filename();
+
+	if (!isfile(accels_ini_path))
+		{
+		const char *description =
+			_("As part of the GTK3/GTK4 migration, it was necessary to rework the entire menu and action code. \n \
+Superficially, you should not see significant differences, however you should be aware there may be resulting problems. \n\n \
+Some shortcuts have changed. \n \
+Command line option --action parameters are all changed. \n\n \
+If you find problems, check these files: \n \
+$HOME/.config/geeqie/accels (old) \n \
+$HOME/.config/geeqie/accels.ini (new) \n \
+$HOME/.config/geeqie/geeqierc.xml (revised Toolbar sections) \n \
+$HOME/.config/geeqie/geeqierc.xml~ (backup of original) \n\n \
+If you press Yes to continue, shortcuts and configuration files will be automatically converted. \n\n \
+This message will not be shown again. \n\n \
+Continue?");
+
+		GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Some keyboard shortcuts and \n menu actions have changed."));
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", description);
+
+		int result = gtk_dialog_run(GTK_DIALOG(dialog));
+
+		if (result == GTK_RESPONSE_NO)
+			{
+			abort();
+			}
+
+		gq_gtk_widget_destroy(dialog);
+
+		convert_configuration_file();
+		convert_accel_map();
+		}
+
+	accel_map_load_merged();
 
 	command_line = g_new0(CommandLine, 1);
 }
@@ -857,6 +905,11 @@ void startup_cb(GtkApplication *app, gpointer)
 		{
 		options->disable_gpu = TRUE;
 		}
+
+	/* This must run before the layout is loaded. The layout may contain
+	 * app level actions.
+	 */
+	register_app_actions(app);
 
 	/* restore session from the config file */
 
@@ -1054,7 +1107,7 @@ Version: Geeqie "), VERSION, nullptr);
     g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(config_file_error_notification_action));
 
 	status = g_application_run(G_APPLICATION(app), argc, argv);
-
+g_abort();
 	g_object_unref(app);
 
 	return status;

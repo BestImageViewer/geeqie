@@ -35,6 +35,8 @@
 
 #include <config.h>
 
+#include "accelerators.h"
+#include "actions.h"
 #include "advanced-exif.h"
 #include "archives.h"
 #include "bar-keywords.h"
@@ -58,11 +60,13 @@
 #include "image.h"
 #include "img-view.h"
 #include "intl.h"
+#include "keyboard-shortcuts.h"
 #include "layout-image.h"
 #include "layout.h"
 #include "logwindow.h"
 #include "main-defines.h"
 #include "main.h"
+#include "menu.h"
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
@@ -85,6 +89,8 @@
 #include "view-dir.h"
 #include "view-file.h"
 #include "window.h"
+
+extern const ActionDef app_actions[];
 
 namespace
 {
@@ -123,21 +129,6 @@ struct LayoutEditors
  * Note: help_key.accel_mods and state
  * differ in the higher bits
  */
-gboolean is_help_key_impl(guint keyval, GdkModifierType state)
-{
-	GtkAccelKey help_key;
-	guint mask = GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK;
-
-	if (gtk_accel_map_lookup_entry("<Actions>/MenuActions/HelpContents", &help_key))
-		{
-		if (help_key.accel_key == keyval && (help_key.accel_mods & mask) == (state & mask))
-			{
-			return TRUE;
-			}
-		}
-
-	return FALSE;
-}
 
 } // namespace
 
@@ -435,55 +426,49 @@ static gboolean layout_key_press_cb(GtkEventControllerKey *controller, guint key
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 
+/** @FIXME
 	return layout_key_press_common(widget, keyval, state, data);
+*/
 }
 #endif
 
 void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window)
 {
-#if HAVE_GTK4
-	GtkEventController *controller = gtk_event_controller_key_new();
-
-	g_signal_connect(controller, "key-pressed", G_CALLBACK(layout_key_press_cb), lw);
-
-	gtk_widget_add_controller(window, controller);
-#else
-	g_signal_connect(window, "key_press_event", G_CALLBACK(layout_key_press_cb), lw);
-#endif
+	g_signal_connect(G_OBJECT(window), "key_press_event",
+			 G_CALLBACK(layout_key_press_cb), lw);
 }
 
-bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, guint button)
+static bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, GdkEventButton *event)
 {
-	enum MouseButton {
+	enum MouseButton
+		{
 		MOUSE_BUTTON_8 = 8,
 		MOUSE_BUTTON_9 = 9
-	};
+		};
 
 	const auto handle_button = [lw](const gchar *action_name)
-	{
+		{
 		if (!action_name) return false;
 
 		if (g_strstr_len(action_name, -1, ".desktop") != nullptr)
 			{
-			file_util_start_editor_from_filelist(action_name,
-			                                     layout_selection_list(lw),
-			                                     layout_get_path(lw),
-			                                     lw->window);
+			file_util_start_editor_from_filelist(action_name, layout_selection_list(lw), layout_get_path(lw), lw->window);
 			}
 		else
 			{
-			GtkAction *action = deprecated_gtk_action_group_get_action(lw->action_group,
-				                                       action_name);
+/** @FIXME GTK4
+			GtkAction *action = deprecated_gtk_action_group_get_action(lw->action_group, action_name);
 			if (action)
 				{
-				deprecated_gtk_action_activate(action);
+				g_action_activate(action, nullptr);
 				}
+*/
 			}
 
 		return true;
-	};
+		};
 
-	switch (button)
+	switch (event->button)
 		{
 		case MOUSE_BUTTON_8:
 			return handle_button(options->mouse_button_8);
@@ -508,6 +493,7 @@ static GtkWidget *layout_window(LayoutWindow *lw)
 
 static void layout_exit_fullscreen(LayoutWindow *lw)
 {
+	if (!lw) return;
 	if (!lw->full_screen) return;
 	layout_image_full_screen_stop(lw);
 }
@@ -528,7 +514,7 @@ static void layout_menu_clear_marks_ok_cb(GenericDialog *gd, gpointer)
 	generic_dialog_close(gd);
 }
 
-static void layout_menu_clear_marks_cb(GtkAction *, gpointer)
+static void layout_menu_clear_marks_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	GenericDialog *gd;
 
@@ -542,70 +528,72 @@ static void layout_menu_clear_marks_cb(GtkAction *, gpointer)
 	gtk_widget_show(gd->dialog);
 }
 
-static void layout_menu_new_cb(GtkAction *, gpointer data)
+static void layout_menu_new_collection_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
-	collection_window_new(nullptr);
+
+		collection_window_new(nullptr);
 }
 
-static void layout_menu_search_cb(GtkAction *, gpointer data)
+static void layout_menu_search_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	search_new(lw->dir_fd, layout_image_get_fd(lw));
 }
 
-static void layout_menu_dupes_cb(GtkAction *, gpointer data)
+static void layout_menu_dupes_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	dupe_window_new();
 }
 
-static void layout_menu_pan_cb(GtkAction *, gpointer data)
+static void layout_menu_pan_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	pan_window_new(lw->dir_fd);
 }
 
-static void layout_menu_print_cb(GtkAction *, gpointer data)
+static void layout_menu_print_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	print_window_new(layout_selection_list(lw), layout_window(lw));
 }
 
-static void layout_menu_dir_cb(GtkAction *, gpointer data)
+static void layout_menu_dir_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	if (lw->vd) vd_new_folder(lw->vd, lw->dir_fd);
 }
 
-static void layout_menu_copy_cb(GtkAction *, gpointer data)
+static void layout_menu_copy_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	file_util_copy(nullptr, layout_selection_list(lw), nullptr, layout_window(lw));
+
+		file_util_copy(nullptr, layout_selection_list(lw), nullptr, layout_window(lw));
 }
 
 template<gboolean quoted>
-static void layout_menu_copy_path_cb(GtkAction *, gpointer data)
+static void layout_menu_copy_path_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	file_util_path_list_to_clipboard(layout_selection_list(lw), quoted, ClipboardAction::COPY);
 }
 
-static void layout_menu_copy_image_cb(GtkAction *, gpointer data)
+static void layout_menu_copy_image_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	ImageWindow *imd = lw->image;
 
 	GdkPixbuf *pixbuf;
@@ -633,134 +621,160 @@ static void layout_menu_copy_image_cb(GtkAction *, gpointer data)
 #endif
 }
 
-static void layout_menu_cut_path_cb(GtkAction *, gpointer data)
+static void layout_menu_cut_path_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	file_util_path_list_to_clipboard(layout_selection_list(lw), FALSE, ClipboardAction::CUT);
 }
 
-static void layout_menu_move_cb(GtkAction *, gpointer data)
+static void layout_menu_move_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	file_util_move(nullptr, layout_selection_list(lw), nullptr, layout_window(lw));
+		file_util_move(nullptr, layout_selection_list(lw), nullptr, layout_window(lw));
 }
 
-static void layout_menu_rename_cb(GtkAction *, gpointer data)
+static void layout_menu_rename_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	file_util_rename(nullptr, layout_selection_list(lw), layout_window(lw));
+		file_util_rename(nullptr, layout_selection_list(lw), layout_window(lw));
 }
 
 template<gboolean safe_delete>
-static void layout_menu_delete_cb(GtkAction *, gpointer data)
+static void layout_menu_delete_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), safe_delete);
+		file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), safe_delete);
 }
 
-static void layout_menu_move_to_trash_key_cb(GtkAction *, gpointer data)
+static void layout_menu_return_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
 
-	if (options->file_ops.enable_delete_key)
-		{
-		file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), TRUE);
-		}
+}
+
+static void layout_menu_return_primary_cb(GSimpleAction *, GVariant *, gpointer)
+{
+
+}
+
+static void layout_menu_remove_cb(GSimpleAction *, GVariant *, gpointer)
+{
+
 }
 
 template<gboolean disable>
-static void layout_menu_disable_grouping_cb(GtkAction *, gpointer data)
+static void layout_menu_disable_grouping_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	file_data_disable_grouping_list(layout_selection_list(lw), disable);
 }
 
-void layout_menu_close_cb(GtkAction *, gpointer data)
+void layout_menu_close_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	layout_close(lw);
 }
 
-static void layout_menu_exit_cb(GtkAction *, gpointer)
+static void layout_return_cb(GSimpleAction *, GVariant *, gpointer)
+{
+	auto lw = get_current_layout();
+
+	layout_exit_fullscreen(lw);
+
+		layout_close(lw);
+}
+
+static void layout_menu_exit_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	exit_program();
 }
 
 template<AlterType type>
-static void layout_menu_alter_cb(GtkAction *, gpointer data)
+static void layout_menu_alter_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_image_alter_orientation(lw, type);
 }
 
-template<gint rating>
-static void layout_menu_rating_cb(GtkAction *, gpointer data)
+template<int rating>
+static void layout_menu_rating_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_image_rating(lw, std::to_string(rating).c_str());
 }
 
-static void layout_menu_alter_desaturate_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_alter_desaturate_cb(GSimpleAction *action, GVariant  *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	layout_image_set_desaturate(lw, deprecated_gtk_toggle_action_get_active(action));
+	layout_image_set_desaturate(lw, g_variant_get_boolean(g_action_get_state(G_ACTION(action))));
 }
 
-static void layout_menu_alter_ignore_alpha_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_alter_ignore_alpha_cb(GSimpleAction *action, GVariant   *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+   auto lw = get_current_layout();
 
-	if (lw->options.ignore_alpha == deprecated_gtk_toggle_action_get_active(action)) return;
+	if (lw->options.ignore_alpha == g_variant_get_boolean(g_action_get_state(G_ACTION(action)))) return;
 
-	layout_image_set_ignore_alpha(lw, deprecated_gtk_toggle_action_get_active(action));
+   layout_image_set_ignore_alpha(lw, g_variant_get_boolean(g_action_get_state(G_ACTION(action))));
 }
 
-static void layout_menu_exif_rotate_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_exif_rotate_cb(GSimpleAction *action, GVariant *value, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	options->image.exif_rotate_enable = deprecated_gtk_toggle_action_get_active(action);
+	gboolean active = g_variant_get_boolean(value);
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
+
+	options->image.exif_rotate_enable = !active;
 	layout_image_reset_orientation(lw);
 }
 
-static void layout_menu_select_rectangle_cb(GtkToggleAction *action, gpointer)
+static void layout_menu_select_rectangle_cb(GSimpleAction *action, GVariant *value, gpointer)
 {
-	options->draw_rectangle = deprecated_gtk_toggle_action_get_active(action);
+	gboolean active = g_variant_get_boolean(value);
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
+
+	options->draw_rectangle = !active;
 }
 
-static void layout_menu_split_pane_sync_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_split_pane_sync_cb(GSimpleAction *action, GVariant *, gpointer       data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	lw->options.split_pane_sync = deprecated_gtk_toggle_action_get_active(action);
+	GVariant *state = g_action_get_state(G_ACTION(action));
+	gboolean active = !g_variant_get_boolean(state);
+	g_variant_unref(state);
+
+	g_simple_action_set_state(action, g_variant_new_boolean(active));
+
+	lw->options.split_pane_sync = active;
 }
 
-static void layout_menu_select_overunderexposed_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_select_overunderexposed_cb(GSimpleAction *action, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	layout_image_set_overunderexposed(lw, deprecated_gtk_toggle_action_get_active(action));
+	layout_image_set_overunderexposed(lw, g_variant_get_boolean(g_action_get_state(G_ACTION(action))));
 }
 
-template<gboolean keep_date>
-static void layout_menu_write_rotate_cb(GtkToggleAction *, gpointer data)
+template<bool keep_date>
+static void layout_menu_write_rotate_cb(GSimpleAction  *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	if (!layout_valid(&lw)) return;
 	if (!lw || !lw->vf) return;
 
-	const gchar *keep_date_arg = keep_date ? "-t" : "";
+	const char *keep_date_arg = keep_date ? "-t" : "";
 
 	vf_selection_foreach(lw->vf, [keep_date_arg](FileData *fd_n)
 	{
@@ -798,80 +812,74 @@ static void layout_menu_write_rotate_cb(GtkToggleAction *, gpointer data)
 	});
 }
 
-static void layout_menu_config_cb(GtkAction *, gpointer data)
+static void layout_menu_config_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
+
 
 	layout_exit_fullscreen(lw);
 	show_config_window(lw);
 }
 
-static void layout_menu_editors_cb(GtkAction *, gpointer data)
+static void layout_menu_editors_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	show_editor_list_window();
 }
 
-static void layout_menu_layout_config_cb(GtkAction *, gpointer data)
+static void layout_menu_layout_config_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	layout_show_config_window(lw);
 }
 
-static void layout_menu_remove_thumb_cb(GtkAction *, gpointer data)
+static void layout_menu_remove_thumb_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	cache_manager_show();
 }
 
-static void layout_menu_wallpaper_cb(GtkAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_image_to_root(lw);
-}
-
 template<gboolean connect_zoom>
-static void layout_menu_zoom_in_cb(GtkAction *, gpointer data)
+static void layout_menu_zoom_in_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_image_zoom_adjust(lw, get_zoom_increment(), connect_zoom);
 }
 
 template<gboolean connect_zoom>
-static void layout_menu_zoom_out_cb(GtkAction *, gpointer data)
+static void layout_menu_zoom_out_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_image_zoom_adjust(lw, -get_zoom_increment(), connect_zoom);
 }
 
 template<int value, gboolean connect_zoom>
-static void layout_menu_zoom_set_cb(GtkAction *, gpointer data)
+static void layout_menu_zoom_set_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_image_zoom_set(lw, value, connect_zoom);
 }
 
 template<gboolean vertical, gboolean connect_zoom>
-static void layout_menu_zoom_fit_hv_cb(GtkAction *, gpointer data)
+static void layout_menu_zoom_fit_hv_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_image_zoom_set_fill_geometry(lw, vertical, connect_zoom);
 }
 
-static void layout_menu_zoom_to_rectangle_cb(GtkAction *, gpointer data)
+static void layout_menu_zoom_to_rectangle_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	const auto [x1, y1, x2, y2] = image_get_rectangle();
 
@@ -894,55 +902,93 @@ static void layout_menu_zoom_to_rectangle_cb(GtkAction *, gpointer data)
 	image_scroll_to_point(lw->image, center_x, center_y, 0.5, 0.5);
 }
 
-static void layout_menu_split_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
+static void layout_menu_split_cb(GSimpleAction *, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	ImageSplitMode mode;
 
 	layout_exit_fullscreen(lw);
-	mode = static_cast<ImageSplitMode>(deprecated_gtk_radio_action_get_current_value(action));
+
+	const char *value = g_variant_get_string(state, nullptr);
+
+	if (g_str_equal(value, "none"))
+		mode = SPLIT_NONE;
+	else if (g_str_equal(value, "vertical"))
+		mode = SPLIT_VERT;
+	else if (g_str_equal(value, "horizontal"))
+		mode = SPLIT_HOR;
+	else if (g_str_equal(value, "triple"))
+		mode = SPLIT_TRIPLE;
+	else if (g_str_equal(value, "quad"))
+		mode = SPLIT_QUAD;
+	else
+		mode = SPLIT_NONE;
+
 	layout_split_change(lw, mode);
 }
 
-
-static void layout_menu_thumb_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_thumb_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
+	bool enabled = g_variant_get_boolean(state);
 
-	layout_thumb_set(lw, deprecated_gtk_toggle_action_get_active(action));
+	layout_thumb_set(lw, enabled);
+
+	g_simple_action_set_state(action, g_variant_new_boolean(!enabled));
 }
 
-
-static void layout_menu_list_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	layout_exit_fullscreen(lw);
-	layout_views_set(lw, lw->options.dir_view_type, static_cast<FileViewType>(deprecated_gtk_radio_action_get_current_value(action)));
-}
-
-static void layout_menu_view_dir_as_cb(GtkToggleAction *action,  gpointer data)
+static void layout_menu_list_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	layout_exit_fullscreen(lw);
 
-	if (deprecated_gtk_toggle_action_get_active(action))
+	const char *value = g_variant_get_string(state, nullptr);
+
+	if (g_str_equal(value, "list"))
 		{
-		layout_views_set(lw, DIRVIEW_TREE, lw->options.file_view_type);
+		layout_views_set(lw, lw->options.dir_view_type, FILEVIEW_LIST);
+		g_simple_action_set_state(G_SIMPLE_ACTION (action), g_variant_new_string("list"));
+
 		}
 	else
 		{
-		layout_views_set(lw, DIRVIEW_LIST, lw->options.file_view_type);
+		layout_views_set(lw, lw->options.dir_view_type, FILEVIEW_ICON);
+		g_simple_action_set_state(G_SIMPLE_ACTION (action), g_variant_new_string("icons"));
 		}
 }
 
-static void layout_menu_view_in_new_window_cb(GtkAction *, gpointer data)
+static void layout_menu_view_dir_as_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
+	if (!lw)
+		{
+		return;
+		}
 
 	layout_exit_fullscreen(lw);
-	view_window_new(layout_image_get_fd(lw));
+
+	bool active = g_variant_get_boolean(state);
+
+	if (active)
+		{
+		layout_views_set(lw, DIRVIEW_LIST, lw->options.file_view_type);
+		}
+	else
+		{
+		layout_views_set(lw, DIRVIEW_TREE, lw->options.file_view_type);
+		}
+
+	g_simple_action_set_state((action), state);
+}
+
+static void layout_menu_view_in_new_window_cb(GSimpleAction *, GVariant *, gpointer)
+{
+	auto lw = get_current_layout();
+
+	layout_exit_fullscreen(lw);
+
+		view_window_new(layout_image_get_fd(lw));
 }
 
 struct OpenWithData
@@ -1012,9 +1058,9 @@ static void open_with_application_activated_cb(GtkAppChooserWidget *, GAppInfo *
 	open_with_data_free(open_with_data);
 }
 
-static void layout_menu_open_with_cb(GtkAction *, gpointer data)
+static void layout_menu_open_with_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	FileData *fd;
 	GtkWidget *widget;
 	OpenWithData *open_with_data;
@@ -1056,9 +1102,9 @@ static void layout_menu_open_with_cb(GtkAction *, gpointer data)
 		}
 }
 
-static void layout_menu_open_archive_cb(GtkAction *, gpointer data)
+static void layout_menu_open_archive_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	FileData *fd;
 
 	layout_exit_fullscreen(lw);
@@ -1121,7 +1167,7 @@ static void open_recent_file_cb(GtkFileChooser *chooser, gint response_id, gpoin
 	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
-static void layout_menu_open_file_cb(GtkAction *, gpointer)
+static void layout_menu_open_file_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	GList *work = filter_get_list();
 	g_autoptr(GString) extlist = g_string_new(nullptr);
@@ -1156,7 +1202,7 @@ static void layout_menu_open_file_cb(GtkAction *, gpointer)
 	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
 }
 
-static void layout_menu_open_recent_file_cb(GtkAction *, gpointer)
+static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	GtkWidget *dialog;
 
@@ -1229,7 +1275,7 @@ static void open_collection_cb(GtkFileChooser *chooser, gint response_id, gpoint
 	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
-static void layout_menu_open_collection_cb(GtkWidget *, gpointer)
+static void layout_menu_open_collection_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	FileChooserDialogData fcdd{};
 
@@ -1247,34 +1293,36 @@ static void layout_menu_open_collection_cb(GtkWidget *, gpointer)
 	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
 }
 
-static void layout_menu_fullscreen_cb(GtkAction *, gpointer data)
+static void layout_menu_fullscreen_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_image_full_screen_toggle(lw);
 }
 
-static void layout_menu_escape_cb(GtkAction *, gpointer data)
+static void layout_menu_escape_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 }
 
-static void layout_menu_overlay_toggle_cb(GtkAction *, gpointer data)
+static void layout_menu_overlay_toggle_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	image_osd_toggle(lw->image);
 	layout_util_sync_views(lw);
 }
 
-
-static void layout_menu_overlay_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_overlay_cb(GSimpleAction *action, GVariant *value, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	if (deprecated_gtk_toggle_action_get_active(action))
+	gboolean active = g_variant_get_boolean(value);
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
+
+	if (active)
 		{
 		OsdShowFlags flags = image_osd_get(lw->image);
 
@@ -1283,18 +1331,19 @@ static void layout_menu_overlay_cb(GtkToggleAction *action, gpointer data)
 		}
 	else
 		{
-		GtkToggleAction *histogram_action = deprecated_GTK_TOGGLE_ACTION(deprecated_gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
 
 		image_osd_set(lw->image, OSD_SHOW_NOTHING);
-		deprecated_gtk_toggle_action_set_active(histogram_action, FALSE); /* this calls layout_menu_histogram_cb */
 		}
 }
 
-static void layout_menu_histogram_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_histogram_cb(GSimpleAction *action, GVariant *value , gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	if (deprecated_gtk_toggle_action_get_active(action))
+	gboolean active = g_variant_get_boolean(value);
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
+
+	if (!active)
 		{
 		image_osd_set(lw->image, static_cast<OsdShowFlags>(OSD_SHOW_INFO | OSD_SHOW_STATUS | OSD_SHOW_HISTOGRAM));
 		layout_util_sync_views(lw); /* show the overlay state, default channel and mode in the menu */
@@ -1307,188 +1356,200 @@ static void layout_menu_histogram_cb(GtkToggleAction *action, gpointer data)
 		}
 }
 
-static void layout_menu_animate_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_animate_cb(GSimpleAction *action, GVariant *value, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	if (lw->options.animate == deprecated_gtk_toggle_action_get_active(action)) return;
 	layout_image_animate_toggle(lw);
+
+	g_simple_action_set_state(action,  value);
 }
 
-static void layout_menu_rectangular_selection_cb(GtkToggleAction *action, gpointer)
+static void layout_menu_rectangular_selection_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	options->collections.rectangular_selection = deprecated_gtk_toggle_action_get_active(action);
+
+	bool enabled = g_variant_get_boolean(state);
+
+	options->collections.rectangular_selection = enabled;
+
+   g_simple_action_set_state(action, g_variant_new_boolean(enabled));
 }
 
-static void layout_menu_histogram_toggle_channel_cb(GtkAction *, gpointer data)
+static void layout_menu_histogram_toggle_channel_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	image_osd_histogram_toggle_channel(lw->image);
 	layout_util_sync_views(lw);
 }
 
-static void layout_menu_histogram_toggle_mode_cb(GtkAction *, gpointer data)
+static void layout_menu_histogram_toggle_mode_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	image_osd_histogram_toggle_mode(lw->image);
 	layout_util_sync_views(lw);
 }
 
-static void layout_menu_histogram_channel_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
+static void layout_menu_histogram_channel_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	gint channel = deprecated_gtk_radio_action_get_current_value(action);
-	if (channel < 0 || channel >= HCHAN_COUNT) return;
-
-	auto *lw = static_cast<LayoutWindow *>(data);
-	GtkToggleAction *histogram_action = deprecated_GTK_TOGGLE_ACTION(deprecated_gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
-	deprecated_gtk_toggle_action_set_active(histogram_action, TRUE); /* this calls layout_menu_histogram_cb */
-
-	image_osd_histogram_set_channel(lw->image, channel);
+/** @FIXME GTK4
+ */
 }
 
-static void layout_menu_histogram_mode_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
+static void layout_menu_histogram_mode_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	gint mode = deprecated_gtk_radio_action_get_current_value(action);
-	if (mode < 0 || mode >= HMODE_COUNT) return;
-
-	auto *lw = static_cast<LayoutWindow *>(data);
-	GtkToggleAction *histogram_action = deprecated_GTK_TOGGLE_ACTION(deprecated_gtk_action_group_get_action(lw->action_group, "ImageHistogram"));
-	deprecated_gtk_toggle_action_set_active(histogram_action, TRUE); /* this calls layout_menu_histogram_cb */
-
-	image_osd_histogram_set_mode(lw->image, mode);
+/** @FIXME GTK4
+ */
 }
 
-static void layout_menu_refresh_cb(GtkAction *, gpointer data)
+static void layout_menu_refresh_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_refresh(lw);
 }
 
-static void layout_menu_bar_exif_cb(GtkAction *, gpointer data)
+static void layout_menu_bar_exif_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	layout_exif_window_new(lw);
 }
 
-static void layout_menu_search_and_run_cb(GtkAction *, gpointer data)
+static void layout_menu_search_and_run_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	layout_search_and_run_window_new(lw);
 }
 
 
-static void layout_menu_float_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_float_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	if (lw->options.tools_float == deprecated_gtk_toggle_action_get_active(action)) return;
-
+	auto lw = get_current_layout();
 	layout_exit_fullscreen(lw);
 	layout_tools_float_toggle(lw);
+
+	g_simple_action_set_state((action), state);
 }
 
-static void layout_menu_hide_cb(GtkAction *, gpointer data)
+static void layout_menu_hide_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	layout_tools_hide_toggle(lw);
 }
 
-static void layout_menu_selectable_toolbars_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_selectable_toolbars_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	if (lw->options.selectable_toolbars_hidden == deprecated_gtk_toggle_action_get_active(action)) return;
+	if (lw->options.selectable_toolbars_hidden == g_variant_get_boolean(g_action_get_state(G_ACTION(action)))) return;
 
 	layout_exit_fullscreen(lw);
 	current_layout_selectable_toolbars_toggle();
+
+	g_simple_action_set_state(action, state);
 }
 
-static void layout_menu_info_pixel_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_info_pixel_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	if (lw->options.show_info_pixel == deprecated_gtk_toggle_action_get_active(action)) return;
+	if (lw->options.show_info_pixel == g_variant_get_boolean(g_action_get_state(G_ACTION(action)))) return;
 
 	layout_exit_fullscreen(lw);
 	layout_info_pixel_set(lw, !lw->options.show_info_pixel);
+
+	g_simple_action_set_state(action, state);
 }
 
 /* NOTE: these callbacks are called also from layout_util_sync_views */
-static void layout_menu_bar_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_bar_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	if (layout_bar_enabled(lw) == deprecated_gtk_toggle_action_get_active(action)) return;
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
+
 	layout_bar_toggle(lw);
+
 }
 
-static void layout_menu_bar_sort_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_bar_sort_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	if (layout_bar_sort_enabled(lw) == deprecated_gtk_toggle_action_get_active(action)) return;
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	layout_bar_sort_toggle(lw);
+
 }
 
-static void layout_menu_hide_bars_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_hide_bars_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	if (lw->options.bars_state.hidden == deprecated_gtk_toggle_action_get_active(action))
-		{
-		return;
-		}
 	layout_bars_hide_toggle(lw);
+
+	bool enabled = g_variant_get_boolean(state);
+	g_simple_action_set_state(action, g_variant_new_boolean(!enabled));
 }
 
-static void layout_menu_slideshow_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_slideshow_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	if (layout_image_slideshow_active(lw) == deprecated_gtk_toggle_action_get_active(action)) return;
 	layout_image_slideshow_toggle(lw);
+
+	bool enabled = g_variant_get_boolean(state);
+	g_simple_action_set_state(action, g_variant_new_boolean(!enabled));
 }
 
-static void layout_menu_slideshow_pause_cb(GtkAction *, gpointer data)
+static void layout_menu_slideshow_pause_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_image_slideshow_pause_toggle(lw);
 }
 
-static void layout_menu_slideshow_slower_cb(GtkAction *, gpointer)
+static void layout_menu_slideshow_slower_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	options->slideshow.delay = std::min<gdouble>(options->slideshow.delay + 5, SLIDESHOW_MAX_SECONDS);
 }
 
-static void layout_menu_slideshow_faster_cb(GtkAction *, gpointer)
+static void layout_menu_slideshow_faster_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	options->slideshow.delay = std::max<gdouble>(options->slideshow.delay - 5, SLIDESHOW_MIN_SECONDS * 10);
 }
 
-
-static void layout_menu_stereo_mode_next_cb(GtkAction *, gpointer data)
+static void layout_menu_stereo_mode_next_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
+	const char* next_value;
 
 	/* 0->1, 1->2, 2->3, 3->1 - disable auto, then cycle */
-	const gint mode = (layout_image_stereo_pixbuf_get(lw) % 3) + 1;
 
-	GtkAction *radio = deprecated_gtk_action_group_get_action(lw->action_group, "StereoAuto");
-	deprecated_gtk_radio_action_set_current_value(deprecated_GTK_RADIO_ACTION(radio), mode);
+	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-stereo");
+
+	GVariant *state = g_action_get_state(G_ACTION(action));
+	const gchar *value = g_variant_get_string(state, nullptr);
+
+
+	if (g_str_equal(value, "auto"))
+		next_value = "side-by-side";
+	else if (g_str_equal(value, "side-by-side"))
+		next_value = "cross";
+	else if (g_str_equal(value, "cross"))
+		next_value = "off";
+	else if (g_str_equal(value, "off"))
+		next_value = "auto";
+	else
+		next_value = "auto";
+
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string(next_value));
 
 	/*
 	this is called via fallback in layout_menu_stereo_mode_cb
@@ -1496,15 +1557,63 @@ static void layout_menu_stereo_mode_next_cb(GtkAction *, gpointer data)
 	*/
 }
 
-static void layout_menu_stereo_mode_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
+static const char *stereo_mode_to_string(StereoPixbufData mode)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-	layout_image_stereo_pixbuf_set(lw, static_cast<StereoPixbufData>(deprecated_gtk_radio_action_get_current_value(action)));
+	switch (mode)
+		{
+		case STEREO_PIXBUF_DEFAULT: return "auto";
+		case STEREO_PIXBUF_SBS:     return "side-by-side";
+		case STEREO_PIXBUF_CROSS:   return "cross";
+		case STEREO_PIXBUF_NONE:    return "none";
+		}
+
+	return "auto";
 }
 
-static void layout_menu_draw_rectangle_aspect_ratio_cb(GtkRadioAction *action, GtkRadioAction *, gpointer)
+static void layout_menu_stereo_mode_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	options->rectangle_draw_aspect_ratio = static_cast<RectangleDrawAspectRatio>(deprecated_gtk_radio_action_get_current_value(action));
+	auto lw = static_cast<LayoutWindow *>(data);
+	const char *value = g_variant_get_string(state, nullptr);
+	StereoPixbufData mode;
+
+	if (g_str_equal(value, "auto"))
+		mode = STEREO_PIXBUF_DEFAULT;
+	else if (g_str_equal(value, "side-by-side"))
+		mode = STEREO_PIXBUF_SBS;
+	else if (g_str_equal(value, "cross"))
+		mode = STEREO_PIXBUF_CROSS;
+	else if (g_str_equal(value, "off"))
+		mode = STEREO_PIXBUF_NONE;
+	else
+		mode = STEREO_PIXBUF_DEFAULT;
+
+	g_simple_action_set_state(action, g_variant_new_string(value));
+
+	layout_image_stereo_pixbuf_set(lw, mode);
+}
+
+static void layout_menu_draw_rectangle_aspect_ratio_cb(GSimpleAction *action, GVariant *state, gpointer)
+{
+	const char *value = g_variant_get_string(state, nullptr);
+
+	RectangleDrawAspectRatio mode;
+
+	if (g_str_equal(value, "none"))
+		mode = RECTANGLE_DRAW_ASPECT_RATIO_NONE;
+	else if (g_str_equal(value, "1-1"))
+		mode = RECTANGLE_DRAW_ASPECT_RATIO_ONE_ONE;
+	else if (g_str_equal(value, "4-3"))
+		mode = RECTANGLE_DRAW_ASPECT_RATIO_FOUR_THREE;
+	else if (g_str_equal(value, "3-2"))
+		mode = RECTANGLE_DRAW_ASPECT_RATIO_THREE_TWO;
+	else if (g_str_equal(value, "16-9"))
+		mode = RECTANGLE_DRAW_ASPECT_RATIO_SIXTEEN_NINE;
+	else
+		mode = RECTANGLE_DRAW_ASPECT_RATIO_NONE;
+
+	g_simple_action_set_state((action), state);
+
+	options->rectangle_draw_aspect_ratio = mode;
 }
 
 static void overlay_screen_display_profile_set(gint i)
@@ -1518,66 +1627,87 @@ static void overlay_screen_display_profile_set(gint i)
 	options->image_overlay.font = g_strdup(options->image_overlay_n[i].font);
 }
 
-static void layout_menu_osd_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
+static void layout_menu_osd_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	options->overlay_screen_display_selected_profile = static_cast<OverlayScreenDisplaySelectedTab>(deprecated_gtk_radio_action_get_current_value(action));
+	const char *value = g_variant_get_string(state, nullptr);
+	OverlayScreenDisplaySelectedTab mode;
+	
+	if (g_str_equal(value, "0"))
+		mode = OVERLAY_SCREEN_DISPLAY_1;
+	else if (g_str_equal(value, "1"))
+		mode = OVERLAY_SCREEN_DISPLAY_2;
+	else if (g_str_equal(value, "2"))
+		mode = OVERLAY_SCREEN_DISPLAY_3;
+	else if (g_str_equal(value, "3"))
+		mode = OVERLAY_SCREEN_DISPLAY_4;
+	else
+		mode = OVERLAY_SCREEN_DISPLAY_1;
+
+options->overlay_screen_display_selected_profile = mode;
+
+		g_simple_action_set_state((action), state);
+
 	overlay_screen_display_profile_set(options->overlay_screen_display_selected_profile);
 
 	layout_image_refresh(lw);
 }
 
-static void layout_menu_help_cb(GtkAction *, gpointer data)
+static void layout_menu_help_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
-	help_window_show("index.html");
+
+	GApplication *app = g_application_get_default();
+	GtkWindow *win = gtk_application_get_active_window(GTK_APPLICATION(app));
+
+	const char *type = static_cast<gchar *>(g_object_get_data(G_OBJECT(win), "window-type"));
+
+	if (g_strcmp0(type, "search") == 0)
+		{
+		help_window_show("GuideImageSearchSearch.html");
+		}
+	else
+		{
+		help_window_show("index.html");
+		}
 }
 
-static void layout_menu_help_search_cb(GtkAction *, gpointer data)
+static void layout_menu_help_search_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	help_search_window_show();
 }
 
-static void layout_menu_help_pdf_cb(GtkAction *, gpointer)
+static void layout_menu_help_pdf_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	help_pdf();
 }
 
-static void layout_menu_help_keys_cb(GtkAction *, gpointer data)
+static void layout_menu_help_keys_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 
-	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/keyboard-shortcuts.ui");
-
-	GtkWidget *win = GTK_WIDGET(gtk_builder_get_object(builder, "shortcuts-builder"));
-
-#if !HAVE_GTK4
-	gtk_window_set_type_hint(GTK_WINDOW(win), GDK_WINDOW_TYPE_HINT_NORMAL);
-#endif
-
-	g_object_unref(builder);
-	gq_gtk_widget_show_all(win);
+	shortcuts_window_new_from_keyfile();
 }
 
-static void layout_menu_notes_cb(GtkAction *, gpointer data)
+static void layout_menu_notes_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	help_window_show("release_notes");
 }
 
-static void layout_menu_changelog_cb(GtkAction *, gpointer data)
+static void layout_menu_changelog_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	help_window_show("changelog");
@@ -1616,37 +1746,6 @@ static constexpr struct
 	{"ZoomOut", "&lt;Primary&gt;MW5"},
 };
 
-static void layout_menu_foreach_func(
-					gpointer data,
-					const gchar *accel_path,
-					guint accel_key,
-					GdkModifierType accel_mods,
-					gboolean)
-{
-	gchar *key_name;
-	gchar *menu_name;
-	auto array = static_cast<GPtrArray *>(data);
-
-	g_autofree gchar *path = g_strescape(accel_path, nullptr);
-	g_autofree gchar *name = gtk_accelerator_name(accel_key, accel_mods);
-
-	menu_name = g_strdup(strrchr(path, '/') + 1);
-
-	if (strrchr(name, '>'))
-		{
-		g_auto(GStrv) subset_lt_arr = g_strsplit_set(name, "<", 4);
-		g_autofree gchar *subset_lt = g_strjoinv("&lt;", subset_lt_arr);
-		g_auto(GStrv) subset_gt_arr = g_strsplit_set(subset_lt, ">", 4);
-
-		key_name = g_strjoinv("&gt;", subset_gt_arr);
-		}
-	else
-		key_name = g_steal_pointer(&name);
-
-	g_ptr_array_add(array, menu_name);
-	g_ptr_array_add(array, key_name);
-}
-
 static gchar *convert_template_line(const gchar *template_line, const GPtrArray *keyboard_map_array)
 {
 	if (!g_strrstr(template_line, ">key:"))
@@ -1677,7 +1776,7 @@ static gchar *convert_template_line(const gchar *template_line, const GPtrArray 
 			}
 		}
 
-	return g_strconcat(pre_key[0], ">", menu_name, "<", post_key[1], "\n", NULL);
+	return g_strconcat(pre_key[0], ">", menu_name, "<", post_key[1], "\n", nullptr);
 }
 
 static void convert_keymap_template_to_file(const gint fd, const GPtrArray *keyboard_map_array)
@@ -1702,10 +1801,12 @@ static void convert_keymap_template_to_file(const gint fd, const GPtrArray *keyb
 	if (error) log_printf("Warning: Keyboard Map:%s\n", error->message);
 }
 
-static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
+static void layout_menu_kbd_map_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	g_autofree gchar *tmp_file = nullptr;
 	g_autoptr(GError) error = nullptr;
+
+	g_autoptr(GPtrArray) array = g_ptr_array_new_with_free_func(g_free);
 
 	const gint fd = g_file_open_tmp("geeqie_keymap_XXXXXX.svg", &tmp_file, &error);
 	if (error)
@@ -1714,32 +1815,31 @@ static void layout_menu_kbd_map_cb(GtkAction *, gpointer)
 		return;
 		}
 
-	g_autoptr(GPtrArray) array = g_ptr_array_new_with_free_func(g_free);
-	gtk_accel_map_foreach(array, layout_menu_foreach_func);
+	get_actions_and_accelerators(get_keyfile_merged(), array);
 
 	convert_keymap_template_to_file(fd, array);
 
 	view_window_new(file_data_new_simple(tmp_file));
 }
 
-static void layout_menu_about_cb(GtkAction *, gpointer data)
+static void layout_menu_about_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	show_about_window(lw);
 }
 
-static void layout_menu_crop_selection_cb(GtkAction *, gpointer data)
+static void layout_menu_crop_selection_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	start_editor_from_file("org.geeqie.image-crop.desktop", lw->image->image_fd);
 }
 
-static void layout_menu_log_window_cb(GtkAction *, gpointer data)
+static void layout_menu_log_window_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_exit_fullscreen(lw);
 	log_window_new(lw);
@@ -1752,65 +1852,71 @@ static void layout_menu_log_window_cb(GtkAction *, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-static void layout_menu_select_all_cb(GtkAction *, gpointer data)
+static void layout_menu_select_all_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_select_all(lw);
 }
 
-static void layout_menu_unselect_all_cb(GtkAction *, gpointer data)
+static void layout_menu_unselect_all_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_select_none(lw);
 }
 
-static void layout_menu_invert_selection_cb(GtkAction *, gpointer data)
+static void layout_menu_invert_selection_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_select_invert(lw);
 }
 
-static void layout_menu_file_filter_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_file_filter_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	layout_file_filter_set(lw, deprecated_gtk_toggle_action_get_active(action));
+	bool active = g_variant_get_boolean(state);
+
+	g_simple_action_set_state((action), state);
+
+	layout_file_filter_set(lw, active);
 }
 
-static void layout_menu_marks_cb(GtkToggleAction *action, gpointer data)
+static void layout_menu_marks_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	layout_marks_set(lw, deprecated_gtk_toggle_action_get_active(action));
+	bool active = g_variant_get_boolean(state);
+
+	g_simple_action_set_state( (action), state);
+
+	layout_marks_set(lw, active);
 }
 
-template<SelectionToMarkMode mode>
-static void layout_menu_selection_to_mark_cb(GtkAction *action, gpointer data)
+template<SelectionToMarkMode mode, int mark>
+static void layout_menu_selection_to_mark_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-	gint mark = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(action), "mark_num"));
+	auto lw = get_current_layout();
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
 	layout_selection_to_mark(lw, mark, mode);
 }
 
-template<MarkToSelectionMode mode>
-static void layout_menu_mark_to_selection_cb(GtkAction *action, gpointer data)
+template<MarkToSelectionMode mode, int mark>
+static void layout_menu_mark_to_selection_cb(GSimpleAction  * , GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-	gint mark = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(action), "mark_num"));
+	auto lw = get_current_layout();
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
 	layout_mark_to_selection(lw, mark, mode);
 }
 
-static void layout_menu_mark_filter_toggle_cb(GtkAction *action, gpointer data)
+template<int mark>
+static void layout_menu_mark_filter_toggle_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-	gint mark = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(action), "mark_num"));
+	auto lw = get_current_layout();
 	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
 	layout_marks_set(lw, TRUE);
@@ -1824,15 +1930,15 @@ static void layout_menu_mark_filter_toggle_cb(GtkAction *action, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-static void layout_menu_image_first_cb(GtkAction *, gpointer data)
+static void layout_menu_image_first_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	layout_image_first(lw);
 }
 
-static void layout_menu_image_prev_cb(GtkAction *, gpointer data)
+static void layout_menu_image_prev_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	if (lw->options.split_pane_sync)
 		{
@@ -1852,9 +1958,9 @@ static void layout_menu_image_prev_cb(GtkAction *, gpointer data)
 		}
 }
 
-static void layout_menu_image_next_cb(GtkAction *, gpointer data)
+static void layout_menu_image_next_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	if (lw->options.split_pane_sync)
 		{
@@ -1874,9 +1980,9 @@ static void layout_menu_image_next_cb(GtkAction *, gpointer data)
 		}
 }
 
-static void layout_menu_page_first_cb(GtkAction *, gpointer data)
+static void layout_menu_page_first_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	FileData *fd = layout_image_get_fd(lw);
 
 	if (fd && fd->page_total > 0)
@@ -1885,9 +1991,9 @@ static void layout_menu_page_first_cb(GtkAction *, gpointer data)
 		}
 }
 
-static void layout_menu_page_last_cb(GtkAction *, gpointer data)
+static void layout_menu_page_last_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	FileData *fd = layout_image_get_fd(lw);
 
 	if (fd && fd->page_total > 0)
@@ -1896,9 +2002,9 @@ static void layout_menu_page_last_cb(GtkAction *, gpointer data)
 		}
 }
 
-static void layout_menu_page_next_cb(GtkAction *, gpointer data)
+static void layout_menu_page_next_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	FileData *fd = layout_image_get_fd(lw);
 
 	if (fd && fd->page_total > 0)
@@ -1907,9 +2013,9 @@ static void layout_menu_page_next_cb(GtkAction *, gpointer data)
 		}
 }
 
-static void layout_menu_page_previous_cb(GtkAction *, gpointer data)
+static void layout_menu_page_previous_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	FileData *fd = layout_image_get_fd(lw);
 
 	if (fd && fd->page_total > 0)
@@ -1918,25 +2024,25 @@ static void layout_menu_page_previous_cb(GtkAction *, gpointer data)
 		}
 }
 
-static void layout_menu_image_forward_cb(GtkAction *, gpointer data)
+static void layout_menu_image_forward_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	/* Obtain next image */
 	layout_set_path(lw, image_chain_forward());
 }
 
-static void layout_menu_image_back_cb(GtkAction *, gpointer data)
+static void layout_menu_image_back_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	/* Obtain previous image */
 	layout_set_path(lw, image_chain_back());
 }
 
-static void layout_menu_split_pane_next_cb(GtkAction *, gpointer data)
+static void layout_menu_split_pane_next_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	gint active_frame;
 
 	active_frame = lw->active_split_image;
@@ -1952,9 +2058,9 @@ static void layout_menu_split_pane_next_cb(GtkAction *, gpointer data)
 	layout_image_activate(lw, active_frame, FALSE);
 }
 
-static void layout_menu_split_pane_prev_cb(GtkAction *, gpointer data)
+static void layout_menu_split_pane_prev_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	gint active_frame;
 
 	active_frame = lw->active_split_image;
@@ -1974,9 +2080,9 @@ static void layout_menu_split_pane_prev_cb(GtkAction *, gpointer data)
 	layout_image_activate(lw, active_frame, FALSE);
 }
 
-static void layout_menu_split_pane_updown_cb(GtkAction *, gpointer data)
+static void layout_menu_split_pane_updown_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	gint active_frame;
 
 	active_frame = lw->active_split_image;
@@ -1992,15 +2098,15 @@ static void layout_menu_split_pane_updown_cb(GtkAction *, gpointer data)
 	layout_image_activate(lw, active_frame, FALSE);
 }
 
-static void layout_menu_image_last_cb(GtkAction *, gpointer data)
+static void layout_menu_image_last_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	layout_image_last(lw);
 }
 
-static void layout_menu_back_cb(GtkAction *, gpointer data)
+static void layout_menu_back_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	FileData *dir_fd;
 
 	/* Obtain previous path */
@@ -2009,9 +2115,9 @@ static void layout_menu_back_cb(GtkAction *, gpointer data)
 	file_data_unref(dir_fd);
 }
 
-static void layout_menu_forward_cb(GtkAction *, gpointer data)
+static void layout_menu_forward_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	FileData *dir_fd;
 
 	/* Obtain next path */
@@ -2020,9 +2126,9 @@ static void layout_menu_forward_cb(GtkAction *, gpointer data)
 	file_data_unref(dir_fd);
 }
 
-static void layout_menu_home_cb(GtkAction *, gpointer data)
+static void layout_menu_home_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	const gchar *path;
 
 	if (lw->options.home_path && *lw->options.home_path)
@@ -2038,9 +2144,9 @@ static void layout_menu_home_cb(GtkAction *, gpointer data)
 		}
 }
 
-static void layout_menu_up_cb(GtkAction *, gpointer data)
+static void layout_menu_up_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	ViewDir *vd = lw->vd;
 
 	if (!vd->dir_fd || strcmp(vd->dir_fd->path, G_DIR_SEPARATOR_S) == 0) return;
@@ -2060,27 +2166,18 @@ static void layout_menu_up_cb(GtkAction *, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-static void layout_menu_edit_cb(GtkAction *action, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-	const gchar *key = deprecated_gtk_action_get_name(action);
-
-	if (!editor_window_flag_set(key))
-		layout_exit_fullscreen(lw);
-
-	file_util_start_editor_from_filelist(key, layout_selection_list(lw), layout_get_path(lw), lw->window);
-}
 
 
-static void layout_menu_metadata_write_cb(GtkAction *, gpointer)
+
+static void layout_menu_metadata_write_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	metadata_write_queue_confirm(TRUE, nullptr);
 }
 
 static GtkWidget *last_focussed = nullptr;
-static void layout_menu_keyword_autocomplete_cb(GtkAction *, gpointer data)
+static void layout_menu_keyword_autocomplete_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	GtkWidget *tmp;
 	gboolean auto_has_focus;
 
@@ -2103,38 +2200,44 @@ static void layout_menu_keyword_autocomplete_cb(GtkAction *, gpointer data)
  *-----------------------------------------------------------------------------
  */
 #if HAVE_LCMS
-static void layout_color_menu_enable_cb(GtkToggleAction *action, gpointer data)
+static void layout_color_menu_enable_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
-	if (layout_image_color_profile_get_use(lw) == deprecated_gtk_toggle_action_get_active(action)) return;
 
-	layout_image_color_profile_set_use(lw, deprecated_gtk_toggle_action_get_active(action));
 	layout_util_sync_color(lw);
 	layout_image_refresh(lw);
+
+	g_simple_action_set_state(action, state);
 }
 
-static void layout_color_menu_use_image_cb(GtkToggleAction *action, gpointer data)
+static void layout_color_menu_use_image_cb(GSimpleAction *action, GVariant *parameter, gpointer)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	gint input;
 	gboolean use_image;
+
+	gboolean active = g_variant_get_boolean(parameter);
 
 	if (!layout_image_color_profile_get(lw, input, use_image)) return;
-	if (use_image == deprecated_gtk_toggle_action_get_active(action)) return;
-	layout_image_color_profile_set(lw, input, deprecated_gtk_toggle_action_get_active(action));
+
+	if (use_image == active) return;
+
+	layout_image_color_profile_set(lw, input, active);
 	layout_util_sync_color(lw);
 	layout_image_refresh(lw);
+
+	g_simple_action_set_state(action, g_variant_new_boolean(active));
 }
 
-static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *, gpointer data)
+static void layout_color_menu_input_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
-	gint type;
 	gint input;
 	gboolean use_image;
 
-	type = deprecated_gtk_radio_action_get_current_value(action);
+	gint32 type = g_variant_get_int32(parameter);
+
 	if (type < 0 || type >= COLOR_PROFILE_FILE + COLOR_PROFILE_INPUTS) return;
 
 	if (!layout_image_color_profile_get(lw, input, use_image)) return;
@@ -2144,15 +2247,15 @@ static void layout_color_menu_input_cb(GtkRadioAction *action, GtkRadioAction *,
 	layout_image_refresh(lw);
 }
 #else
-static void layout_color_menu_enable_cb()
+static void layout_color_menu_enable_cb(GSimpleAction *action, GVariant *parameter, gpointer)
 {
 }
 
-static void layout_color_menu_use_image_cb()
+static void layout_color_menu_use_image_cb(GSimpleAction *action, GVariant *parameter, gpointer)
 {
 }
 
-static void layout_color_menu_input_cb()
+static void layout_color_menu_input_cb(GSimpleAction *action, GVariant *parameter, gpointer)
 {
 }
 #endif
@@ -2216,7 +2319,7 @@ static GList *layout_window_menu_list()
 
 			auto *wn  = g_new0(WindowNames, 1);
 			wn->name = g_strndup(name_utf8, strlen(name_utf8) - 4);
-			wn->path = g_build_filename(pathl, name_utf8, NULL);
+			wn->path = g_build_filename(pathl, name_utf8, nullptr);
 
 			list = g_list_prepend(list, wn);
 			}
@@ -2226,27 +2329,9 @@ static GList *layout_window_menu_list()
 	return g_list_sort(list, layout_window_menu_list_sort_cb);
 }
 
-static void layout_menu_new_window_cb(GtkWidget *, gpointer data)
+static void layout_menu_new_window_update(LayoutWindow *)
 {
-	gint n;
-
-	n = GPOINTER_TO_INT(data);
-
-	g_autolist(WindowNames) menulist = layout_window_menu_list();
-	auto wn = static_cast<WindowNames *>(g_list_nth(menulist, n )->data);
-
-	if (wn->path) // @FIXME path can not be nullptr. Check for path existence?
-		{
-		load_config_from_file(wn->path, FALSE);
-		}
-	else
-		{
-		log_printf(_("Error: window layout name: %s does not exist\n"), wn->path);
-		}
-}
-
-static void layout_menu_new_window_update(LayoutWindow *lw)
-{
+/** @FIXME GTK4
 	if (!lw->ui_manager) return;
 
 	g_autolist(WindowNames) list = layout_window_menu_list();
@@ -2272,6 +2357,12 @@ static void layout_menu_new_window_update(LayoutWindow *lw)
 		                                       G_CALLBACK(layout_menu_new_window_cb), GINT_TO_POINTER(n));
 		gtk_widget_set_sensitive(item, !layout_window_is_displayed(wn->name));
 		}
+*/
+}
+
+static void connected_zoom_menu_cb(GSimpleAction *, GVariant *, gpointer)
+{
+	/* no-op */
 }
 
 static void window_rename_cancel_cb(GenericDialog *, gpointer data)
@@ -2300,7 +2391,7 @@ static void window_rename_ok(RenameWindow *rw)
 	else
 		{
 		g_autofree gchar *xml_name = g_strdup_printf("%s.xml", rw->lw->options.id);
-		g_autofree gchar *path = g_build_filename(get_window_layouts_dir(), xml_name, NULL);
+		g_autofree gchar *path = g_build_filename(get_window_layouts_dir(), xml_name, nullptr);
 
 		if (isfile(path))
 			{
@@ -2339,7 +2430,7 @@ static void window_delete_ok_cb(GenericDialog *, gpointer data)
 	auto dw = static_cast<DeleteWindow *>(data);
 
 	g_autofree gchar *xml_name = g_strdup_printf("%s.xml", dw->lw->options.id);
-	g_autofree gchar *path = g_build_filename(get_window_layouts_dir(), xml_name, NULL);
+	g_autofree gchar *path = g_build_filename(get_window_layouts_dir(), xml_name, nullptr);
 
 	layout_close(dw->lw);
 	g_free(dw);
@@ -2350,57 +2441,9 @@ static void window_delete_ok_cb(GenericDialog *, gpointer data)
 		}
 }
 
-static void layout_menu_window_default_cb(GtkWidget *, gpointer)
+static void layout_menu_window_default_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	layout_new_from_default();
-}
-
-static void layout_menu_windows_menu_cb(GtkWidget *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-	GtkWidget *menu;
-	GtkWidget *sub_menu;
-
-	menu = deprecated_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/" : "/MainMenu/WindowsMenu/");
-
-	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(menu));
-
-	/* disable Delete for temporary windows */
-	if (!g_str_has_prefix(lw->options.id, "lw")) return;
-
-	static const auto set_sensitive = [](GtkWidget *widget, gpointer)
-	{
-		const gchar *menu_label = gtk_menu_item_get_label(GTK_MENU_ITEM(widget));
-		if (g_strcmp0(menu_label, _("Delete window")) == 0)
-			{
-			gtk_widget_set_sensitive(widget, FALSE);
-			}
-	};
-	gq_gtk_container_foreach(sub_menu, set_sensitive, nullptr);
-}
-
-static void layout_menu_view_menu_cb(GtkWidget *, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-	GtkWidget *menu;
-	GtkWidget *sub_menu;
-	FileData *fd;
-
-	menu = deprecated_gtk_ui_manager_get_widget(lw->ui_manager, options->hamburger_menu ? "/MainMenu/OpenMenu/ViewMenu/" : "/MainMenu/ViewMenu/");
-	sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(menu));
-
-	fd = layout_image_get_fd(lw);
-	const gboolean sensitive = (fd && fd->format_class == FORMAT_CLASS_ARCHIVE);
-
-	static const auto set_sensitive = [](GtkWidget *widget, gpointer data)
-	{
-		const gchar *menu_label = gtk_menu_item_get_label(GTK_MENU_ITEM(widget));
-		if (g_strcmp0(menu_label, _("Open archive")) == 0)
-			{
-			gtk_widget_set_sensitive(widget, GPOINTER_TO_INT(data));
-			}
-	};
-	gq_gtk_container_foreach(sub_menu, set_sensitive, GINT_TO_POINTER(sensitive));
 }
 
 static gchar *create_tmp_config_file()
@@ -2452,7 +2495,7 @@ static void change_window_id(const gchar *infile, const gchar *outfile)
 		}
 }
 
-static void layout_menu_window_from_current_cb(GtkWidget *, gpointer data)
+static void layout_menu_window_from_current_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	g_autofree gchar *tmp_file_in = create_tmp_config_file();
 	if (!tmp_file_in)
@@ -2476,16 +2519,16 @@ static void layout_menu_window_from_current_cb(GtkWidget *, gpointer data)
 	unlink_file(tmp_file_out);
 }
 
-static void layout_menu_window_cb(GtkWidget *, gpointer data)
+static void layout_menu_window_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	layout_menu_new_window_update(lw);
 }
 
-static void layout_menu_window_rename_cb(GtkWidget *, gpointer data)
+static void layout_menu_window_rename_cb(GSimpleAction *, GVariant *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 	RenameWindow *rw;
 	GtkWidget *hbox;
 
@@ -2514,9 +2557,100 @@ static void layout_menu_window_rename_cb(GtkWidget *, gpointer data)
 	gtk_widget_show(rw->gd->dialog);
 }
 
-static void layout_menu_window_delete_cb(GtkWidget *, gpointer data)
+
+void plugin_run_cb(GSimpleAction *, GVariant *parameter, gpointer user_data)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+    /* parameter is a string key like "foo.desktop" */
+    const char *key = g_variant_get_string(parameter, nullptr);
+
+	auto lw = static_cast<LayoutWindow *>(user_data);
+
+	if (!editor_window_flag_set(key))
+		layout_exit_fullscreen(lw);
+
+	lw = get_current_layout();
+
+	file_util_start_editor_from_filelist(key, layout_selection_list(lw), layout_get_path(lw), lw->window);
+
+
+    /* run ed->exec, etc. */
+}
+
+static void layout_actions_setup_editors(LayoutWindow *lw)
+{
+	GMenu *plugins_menu = G_MENU(gtk_builder_get_object(lw->builder, "plugins-submenu"));
+	g_menu_remove_all(plugins_menu);
+
+	plugins_menu_populate(plugins_menu, "win.plugin-run", nullptr);
+}
+
+void create_toolbars(LayoutWindow *lw)
+{
+	// creates first group called only from one place
+	int i; 
+
+	for (i = 0; i < TOOLBAR_COUNT; i++)
+		{
+		layout_actions_toolbar(lw, static_cast<ToolbarType>(i)); // creates the box
+		layout_toolbar_add_default(lw, static_cast<ToolbarType>(i));
+		}
+}
+
+static int find_section_by_label (GMenuModel *model, const gchar )
+{
+    int n = g_menu_model_get_n_items (model);
+
+    for (int i = 0; i < n; i++) {
+
+        /* Check label `
+            continue;
+
+        if (g_strcmp0 (item_label, label) != 0)
+            continue;
+*/
+        /* Check that this item is a section */
+        GMenuModel *section =
+            g_menu_model_get_item_link (model, i, "section");
+
+        if (section) {
+            g_object_unref (section);
+            return i;  /* FOUND */
+        }
+    }
+
+    return -1;
+}
+
+static int find_item_by_label (GMenuModel *model, const char *label)
+{
+	int n = g_menu_model_get_n_items (model);
+
+	for (int i = 0; i < n; i++)
+		{
+		const char *item_action = nullptr;
+		const char *item_label = nullptr;
+
+g_menu_model_get_item_attribute (
+		            model, i, "action", "s", &item_action);
+g_menu_model_get_item_attribute (
+		            model, i, "target", "s", &item_action);
+	            
+		if (g_menu_model_get_item_attribute (
+		            model, i, "label", "s", &item_label))
+			{
+			if (g_strcmp0 (item_label, label) == 0)
+				{
+				return i;
+				}
+			}
+		}
+	return -1;
+}
+
+
+static void layout_menu_window_delete_cb(GSimpleAction *, GVariant *, gpointer  )
+{
+	auto lw = get_current_layout();
 	DeleteWindow *dw;
 	GtkWidget *hbox;
 
@@ -2544,367 +2678,9 @@ static void layout_menu_window_delete_cb(GtkWidget *, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-#define CB G_CALLBACK
-/**
- * tooltip is used as the description field in the Help manual shortcuts documentation
- *
- * struct GtkActionEntry:
- *  name, stock_id, label, accelerator, tooltip, callback
- */
-static GtkActionEntry menu_entries[] = {
-  { "About",                 GQ_ICON_ABOUT,                     N_("_About"),                                           nullptr,               N_("About"),                                           CB(layout_menu_about_cb) },
-  { "AlterNone",             PIXBUF_INLINE_ICON_ORIGINAL,       N_("_Original state"),                                  "<shift>O",            N_("Image rotate Original state"),                     CB(layout_menu_alter_cb<ALTER_NONE>) },
-  { "AspectRatioMenu",       PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Aspect Ratio"),                                     nullptr,               N_("Aspect Ratio"),                                    nullptr },
-  { "Back",                  GQ_ICON_GO_PREV,                   N_("_Back"),                                            nullptr,               N_("Back in folder history"),                          CB(layout_menu_back_cb) },
-  { "ClearMarks",            PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Clear Marks…"),                                   nullptr,               N_("Clear Marks"),                                     CB(layout_menu_clear_marks_cb) },
-  { "CloseWindow",           GQ_ICON_CLOSE,                     N_("C_lose window"),                                    "<control>W",          N_("Close window"),                                    CB(layout_menu_close_cb) },
-  { "ColorMenu",             PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Color Management"),                                nullptr,               nullptr,                                               nullptr },
-  { "ConnectZoom100Alt1",    GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "<shift>KP_Divide",    N_("Connected Zoom 1:1"),                              (GCallback)layout_menu_zoom_set_cb<1, TRUE> },
-  { "ConnectZoom100",        GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "<shift>Z",            N_("Connected Zoom 1:1"),                              (GCallback)layout_menu_zoom_set_cb<1, TRUE> },
-  { "ConnectZoom200",        PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Zoom _2:1"),                                        nullptr,               N_("Connected Zoom 2:1"),                              (GCallback)layout_menu_zoom_set_cb<2, TRUE> },
-  { "ConnectZoom25",         PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Zoom 1:4"),                                         nullptr,               N_("Connected Zoom 1:4"),                              (GCallback)layout_menu_zoom_set_cb<-4, TRUE> },
-  { "ConnectZoom300",        PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Zoom _3:1"),                                        nullptr,               N_("Connected Zoom 3:1"),                              (GCallback)layout_menu_zoom_set_cb<3, TRUE> },
-  { "ConnectZoom33",         PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Zoom 1:3"),                                         nullptr,               N_("Connected Zoom 1:3"),                              (GCallback)layout_menu_zoom_set_cb<-3, TRUE> },
-  { "ConnectZoom400",        PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Zoom _4:1"),                                        nullptr,               N_("Connected Zoom 4:1"),                              (GCallback)layout_menu_zoom_set_cb<4, TRUE> },
-  { "ConnectZoom50",         PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Zoom 1:2"),                                         nullptr,               N_("Connected Zoom 1:2"),                              (GCallback)layout_menu_zoom_set_cb<-2, TRUE> },
-  { "ConnectZoomFillHor",    PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Fit _Horizontally"),                                "<shift>H",            N_("Connected Fit Horizontally"),                      (GCallback)layout_menu_zoom_fit_hv_cb<FALSE, TRUE> },
-  { "ConnectZoomFillVert",   PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Fit _Vertically"),                                  "<shift>W",            N_("Connected Fit Vertically"),                        (GCallback)layout_menu_zoom_fit_hv_cb<TRUE, TRUE> },
-  { "ConnectZoomFitAlt1",    GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "<shift>KP_Multiply",  N_("Connected Zoom to fit"),                           (GCallback)layout_menu_zoom_set_cb<0, TRUE> },
-  { "ConnectZoomFit",        GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "<shift>X",            N_("Connected Zoom to fit"),                           (GCallback)layout_menu_zoom_set_cb<0, TRUE> },
-  { "ConnectZoomInAlt1",     GQ_ICON_ZOOM_IN,                   N_("Zoom _in"),                                         "<shift>KP_Add",       N_("Connected Zoom in"),                               CB(layout_menu_zoom_in_cb<TRUE>) },
-  { "ConnectZoomIn",         GQ_ICON_ZOOM_IN,                   N_("Zoom _in"),                                         "plus",                N_("Connected Zoom in"),                               CB(layout_menu_zoom_in_cb<TRUE>) },
-  { "ConnectZoomMenu",       PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Connected Zoom"),                                  nullptr,               nullptr,                                               nullptr },
-  { "ConnectZoomOutAlt1",    GQ_ICON_ZOOM_OUT,                  N_("Zoom _out"),                                        "<shift>KP_Subtract",  N_("Connected Zoom out"),                              CB(layout_menu_zoom_out_cb<TRUE>) },
-  { "ConnectZoomOut",        GQ_ICON_ZOOM_OUT,                  N_("Zoom _out"),                                        "underscore",          N_("Connected Zoom out"),                              CB(layout_menu_zoom_out_cb<TRUE>) },
-  { "Copy",                  GQ_ICON_COPY,                      N_("_Copy…"),                                         "<control>C",          N_("Copy…"),                                         CB(layout_menu_copy_cb) },
-  { "CopyImage",             PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Copy image to clipboard"),                         nullptr,               N_("Copy image to clipboard"),                         CB(layout_menu_copy_image_cb) },
-  { "CopyPath",              PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Copy to clipboard"),                               nullptr,               N_("Copy to clipboard"),                               CB(layout_menu_copy_path_cb<TRUE>) },
-  { "CopyPathUnquoted",      PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Copy to clipboard (unquoted)"),                    nullptr,               N_("Copy to clipboard (unquoted)"),                    CB(layout_menu_copy_path_cb<FALSE>) },
-  { "CropRectangle",         PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Crop Rectangle"),                                   nullptr,               N_("Crop Rectangle"),                                  CB(layout_menu_crop_selection_cb) },
-  { "CutPath",               PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Cut to clipboard"),                                "<control>X",          N_("Cut to clipboard"),                                CB(layout_menu_cut_path_cb) },
-  { "DeleteAlt1",            GQ_ICON_USER_TRASH,                N_("Move selection to Trash…"),                       "Delete",              N_("Move selection to Trash…"),                      CB(layout_menu_move_to_trash_key_cb) },
-  { "DeleteAlt2",            GQ_ICON_USER_TRASH,                N_("Move selection to Trash…"),                       "KP_Delete",           N_("Move selection to Trash…"),                      CB(layout_menu_move_to_trash_key_cb) },
-  { "Delete",                GQ_ICON_USER_TRASH,                N_("Move selection to Trash…"),                       "<control>D",          N_("Move selection to Trash…"),                      CB(layout_menu_delete_cb<TRUE>) },
-  { "DeleteWindow",          GQ_ICON_DELETE,                    N_("Delete window"),                                    nullptr,               N_("Delete window"),                                   CB(layout_menu_window_delete_cb) },
-  { "DisableGrouping",       PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Disable file groupi_ng"),                           nullptr,               N_("Disable file grouping"),                           CB(layout_menu_disable_grouping_cb<TRUE>) },
-  { "EditMenu",              PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Edit"),                                            nullptr,               nullptr,                                               nullptr },
-  { "EnableGrouping",        PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Enable file _grouping"),                            nullptr,               N_("Enable file grouping"),                            CB(layout_menu_disable_grouping_cb<FALSE>) },
-  { "EscapeAlt1",            GQ_ICON_LEAVE_FULLSCREEN,          N_("_Leave full screen"),                               "Q",                   N_("Leave full screen"),                               CB(layout_menu_escape_cb) },
-  { "Escape",                GQ_ICON_LEAVE_FULLSCREEN,          N_("_Leave full screen"),                              "Escape",               N_("Leave full screen"),                               CB(layout_menu_escape_cb) },
-  { "ExifWin",               PIXBUF_INLINE_ICON_EXIF,           N_("_Exif window"),                                     "<control>E",          N_("Exif window"),                                     CB(layout_menu_bar_exif_cb) },
-  { "FileDirMenu",           PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Files and Folders"),                               nullptr,               nullptr,                                               nullptr },
-  { "FileMenu",              PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_File"),                                            nullptr,               nullptr,                                               nullptr },
-  { "FindDupes",             GQ_ICON_FIND,                      N_("_Find duplicates…"),                              "D",                   N_("Find duplicates…"),                              CB(layout_menu_dupes_cb) },
-  { "FirstImage",            GQ_ICON_GO_TOP,                    N_("_First Image"),                                     "Home",                N_("First Image"),                                     CB(layout_menu_image_first_cb) },
-  { "FirstPage",             GQ_ICON_PREV_PAGE,                 N_("_First Page"),                                      "<control>Home",       N_( "First Page of multi-page image"),                 CB(layout_menu_page_first_cb) },
-  { "Flip",                  GQ_ICON_FLIP_VERTICAL,             N_("_Flip"),                                            "<shift>F",            N_("Image Flip"),                                      CB(layout_menu_alter_cb<ALTER_FLIP>) },
-  { "Forward",               GQ_ICON_GO_NEXT,                   N_("_Forward"),                                         nullptr,               N_("Forward in folder history"),                       CB(layout_menu_forward_cb) },
-  { "FullScreenAlt1",        GQ_ICON_FULLSCREEN,                N_("F_ull screen"),                                     "V",                   N_("Full screen"),                                     CB(layout_menu_fullscreen_cb) },
-  { "FullScreenAlt2",        GQ_ICON_FULLSCREEN,                N_("F_ull screen"),                                     "F11",                 N_("Full screen"),                                     CB(layout_menu_fullscreen_cb) },
-  { "FullScreen",            GQ_ICON_FULLSCREEN,                N_("F_ull screen"),                                     "F",                   N_("Full screen"),                                     CB(layout_menu_fullscreen_cb) },
-  { "GoMenu",                PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Go"),                                              nullptr,               nullptr,                                               nullptr },
-  { "HelpChangeLog",         PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_ChangeLog"),                                       nullptr,               N_("ChangeLog notes"),                                 CB(layout_menu_changelog_cb) },
-  { "HelpContents",          GQ_ICON_HELP,                      N_("_Help manual"),                                     "F1",                  N_("Help manual"),                                     CB(layout_menu_help_cb) },
-  { "HelpKbd",               PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Keyboard map"),                                    nullptr,               N_("Keyboard map"),                                    CB(layout_menu_kbd_map_cb) },
-  { "HelpMenu",              PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Help"),                                            nullptr,               nullptr,                                               nullptr },
-  { "HelpNotes",             PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Readme"),                                          nullptr,               N_("Readme"),                                          CB(layout_menu_notes_cb) },
-  { "HelpPdf",               PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Help in pdf format"),                               nullptr,               N_("Help in pdf format"),                              CB(layout_menu_help_pdf_cb) },
-  { "HelpSearch",            PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("On-line help search"),                              nullptr,               N_("On-line help search"),                             CB(layout_menu_help_search_cb) },
-  { "HelpShortcuts",         PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Keyboard shortcuts"),                              nullptr,               N_("Keyboard shortcuts"),                              CB(layout_menu_help_keys_cb) },
-  { "HideTools",             PIXBUF_INLINE_ICON_HIDETOOLS,      N_("_Hide file list"),                                  "<control>H",          N_("Hide file list"),                                  CB(layout_menu_hide_cb) },
-  { "HistogramChanCycle",    PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Cycle through histogram ch_annels"),                "K",                   N_("Cycle through histogram channels"),                CB(layout_menu_histogram_toggle_channel_cb) },
-  { "HistogramModeCycle",    PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Cycle through histogram mo_des"),                   "J",                   N_("Cycle through histogram modes"),                   CB(layout_menu_histogram_toggle_mode_cb) },
-  { "Home",                  GQ_ICON_HOME,                      N_("_Home"),                                            nullptr,               N_("Home"),                                            CB(layout_menu_home_cb) },
-  { "ImageBack",             GQ_ICON_GO_FIRST,                  N_("Image Back"),                                       nullptr,               N_("Back in image history"),                           CB(layout_menu_image_back_cb) },
-  { "ImageForward",          GQ_ICON_GO_LAST,                   N_("Image Forward"),                                    nullptr,               N_("Forward in image history"),                        CB(layout_menu_image_forward_cb) },
-  { "ImageOverlayCycle",     PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Cycle through overlay modes"),                     "I",                   N_("Cycle through Overlay modes"),                     CB(layout_menu_overlay_toggle_cb) },
-  { "KeywordAutocomplete",   PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Keyword autocomplete"),                             "<alt>K",              N_("Keyword Autocomplete"),                            CB(layout_menu_keyword_autocomplete_cb) },
-  { "LastImage",             GQ_ICON_GO_BOTTOM,                 N_("_Last Image"),                                      "End",                 N_("Last Image"),                                      CB(layout_menu_image_last_cb) },
-  { "LastPage",              GQ_ICON_NEXT_PAGE,                 N_("_Last Page"),                                       "<control>End",        N_("Last Page of multi-page image"),                   CB(layout_menu_page_last_cb) },
-  { "LayoutConfig",          GQ_ICON_PREFERENCES,               N_("_Configure this window…"),                        nullptr,               N_("Configure this window…"),                        CB(layout_menu_layout_config_cb) },
-  { "LogWindow",             PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Log Window"),                                      nullptr,               N_("Log Window"),                                      CB(layout_menu_log_window_cb) },
-  { "Maintenance",           PIXBUF_INLINE_ICON_MAINTENANCE,    N_("_Cache maintenance…"),                            nullptr,               N_("Cache maintenance…"),                            CB(layout_menu_remove_thumb_cb) },
-  { "Mirror",                GQ_ICON_FLIP_HORIZONTAL,           N_("_Mirror"),                                          "<shift>M",            N_("Image Mirror"),                                    CB(layout_menu_alter_cb<ALTER_MIRROR>) },
-  { "Move",                  PIXBUF_INLINE_ICON_MOVE,           N_("_Move…"),                                         "<control>M",          N_("Move…"),                                         CB(layout_menu_move_cb) },
-  { "NewCollection",         PIXBUF_INLINE_COLLECTION,          N_("_New collection"),                                  "C",                   N_("New collection"),                                  CB(layout_menu_new_cb) },
-  { "NewFolder",             GQ_ICON_DIRECTORY,                 N_("N_ew folder…"),                                   "<control>F",          N_("New folder…"),                                   CB(layout_menu_dir_cb) },
-  { "NewWindowDefault",      PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("default"),                                          "<control>N",          N_("New window (default)"),                            CB(layout_menu_window_default_cb)  },
-  { "NewWindowFromCurrent",  PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("from current"),                                     nullptr,               N_("from current"),                                    CB(layout_menu_window_from_current_cb)  },
-  { "NewWindow",             PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("New window"),                                       nullptr,               N_("New window"),                                      CB(layout_menu_window_cb) },
-  { "NextImageAlt1",         GQ_ICON_GO_DOWN,                   N_("_Next Image"),                                      "Page_Down",           N_("Next Image"),                                      CB(layout_menu_image_next_cb) },
-  { "NextImageAlt2",         GQ_ICON_GO_DOWN,                   N_("_Next Image"),                                      "KP_Page_Down",        N_("Next Image"),                                      CB(layout_menu_image_next_cb) },
-  { "NextImage",             GQ_ICON_GO_DOWN,                   N_("_Next Image"),                                      "space",               N_("Next Image"),                                      CB(layout_menu_image_next_cb) },
-  { "NextPage",              GQ_ICON_FORWARD_PAGE,              N_("_Next Page"),                                       "<control>Page_Down",  N_("Next Page of multi-page image"),                   CB(layout_menu_page_next_cb) },
-  { "OpenArchive",           GQ_ICON_OPEN,                      N_("Open archive"),                                     nullptr,               N_("Open archive"),                                    CB(layout_menu_open_archive_cb) },
-  { "OpenCollection",        GQ_ICON_OPEN,                      N_("_Open collection…"),                              "O",                   N_("Open collection…"),                              CB(layout_menu_open_collection_cb) },
-  { "OpenFile",              GQ_ICON_OPEN,                      N_("Open file…"),                                     nullptr,               N_("Open file…"),                                    CB(layout_menu_open_file_cb) },
-  { "OpenMenu",              PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("☰"),                                                nullptr,               nullptr,                                               nullptr },
-  { "OpenRecent",            PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Open recen_t"),                                     nullptr,               N_("Open recent collection"),                          nullptr },
-  { "OpenRecentFile",        PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Open recent file…"),                              nullptr,               N_("Open recent file…"),                                CB(layout_menu_open_recent_file_cb) },
-  { "OpenWith",              GQ_ICON_OPEN_WITH,                 N_("Open With…"),                                     nullptr,               N_("Open With…"),                                    CB(layout_menu_open_with_cb) },
-  { "OrientationMenu",       PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Orientation"),                                     nullptr,               nullptr,                                               nullptr },
-  { "OverlayMenu",           PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Image _Overlay"),                                   nullptr,               nullptr,                                               nullptr },
-  { "PanView",               PIXBUF_INLINE_ICON_PANORAMA,       N_("Pa_n view"),                                        "<control>J",          N_("Pan view"),                                        CB(layout_menu_pan_cb) },
-  { "PermanentDelete",       GQ_ICON_DELETE,                    N_("Delete selection…"),                              "<shift>Delete",       N_("Delete selection…"),                             CB(layout_menu_delete_cb<FALSE>) },
-  { "Plugins",               GQ_ICON_PREFERENCES,               N_("Configure _Plugins…"),                            nullptr,               N_("Configure Plugins…"),                            CB(layout_menu_editors_cb) },
-  { "PluginsMenu",           PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Plugins"),                                         nullptr,               nullptr,                                               nullptr },
-  { "Preferences",           GQ_ICON_PREFERENCES,               N_("P_references…"),                                  "<control>O",          N_("Preferences…"),                                  CB(layout_menu_config_cb) },
-  { "PreferencesMenu",       PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("P_references"),                                     nullptr,               nullptr,                                               nullptr },
-  { "PrevImageAlt1",         GQ_ICON_GO_UP,                     N_("_Previous Image"),                                  "Page_Up",             N_("Previous Image"),                                  CB(layout_menu_image_prev_cb) },
-  { "PrevImageAlt2",         GQ_ICON_GO_UP,                     N_("_Previous Image"),                                  "KP_Page_Up",          N_("Previous Image"),                                  CB(layout_menu_image_prev_cb) },
-  { "PrevImage",             GQ_ICON_GO_UP,                     N_("_Previous Image"),                                  "BackSpace",           N_("Previous Image"),                                  CB(layout_menu_image_prev_cb) },
-  { "PrevPage",              GQ_ICON_BACK_PAGE,                 N_("_Previous Page"),                                   "<control>Page_Up",    N_("Previous Page of multi-page image"),               CB(layout_menu_page_previous_cb) },
-  { "Print",                 GQ_ICON_PRINT,                     N_("_Print…"),                                        "<shift>P",            N_("Print…"),                                        CB(layout_menu_print_cb) },
-  { "Quit",                  GQ_ICON_QUIT,                      N_("_Quit"),                                            "<control>Q",          N_("Quit"),                                            CB(layout_menu_exit_cb) },
-  { "Rating0",               PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Rating 0"),                                        "<alt>KP_0",           N_("Rating 0"),                                        CB(layout_menu_rating_cb<0>) },
-  { "Rating1",               PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Rating 1"),                                        "<alt>KP_1",           N_("Rating 1"),                                        CB(layout_menu_rating_cb<1>) },
-  { "Rating2",               PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Rating 2"),                                        "<alt>KP_2",           N_("Rating 2"),                                        CB(layout_menu_rating_cb<2>) },
-  { "Rating3",               PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Rating 3"),                                        "<alt>KP_3",           N_("Rating 3"),                                        CB(layout_menu_rating_cb<3>) },
-  { "Rating4",               PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Rating 4"),                                        "<alt>KP_4",           N_("Rating 4"),                                        CB(layout_menu_rating_cb<4>) },
-  { "Rating5",               PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Rating 5"),                                        "<alt>KP_5",           N_("Rating 5"),                                        CB(layout_menu_rating_cb<5>) },
-  { "RatingM1",              PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Rating -1"),                                       "<alt>KP_Subtract",    N_("Rating -1"),                                       CB(layout_menu_rating_cb<-1>) },
-  { "RatingMenu",            PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Rating"),                                          nullptr,               nullptr,                                               nullptr },
-  { "Refresh",               GQ_ICON_REFRESH,                   N_("_Refresh"),                                         "R",                   N_("Refresh"),                                         CB(layout_menu_refresh_cb) },
-  { "Rename",                PIXBUF_INLINE_ICON_RENAME,         N_("_Rename…"),                                       "<control>R",          N_("Rename…"),                                       CB(layout_menu_rename_cb) },
-  { "RenameWindow",          GQ_ICON_EDIT,                      N_("Rename window"),                                    nullptr,               N_("Rename window"),                                   CB(layout_menu_window_rename_cb) },
-  { "Rotate180",             PIXBUF_INLINE_ICON_180,            N_("Rotate 1_80°"),                                     "<shift>R",            N_("Image Rotate 180°"),                               CB(layout_menu_alter_cb<ALTER_ROTATE_180>) },
-  { "RotateCCW",             GQ_ICON_ROTATE_LEFT,               N_("Rotate _counterclockwise 90°"),                     "bracketleft",         N_("Rotate counterclockwise 90°"),                     CB(layout_menu_alter_cb<ALTER_ROTATE_90_CC>) },
-  { "RotateCW",              GQ_ICON_ROTATE_RIGHT,              N_("_Rotate clockwise 90°"),                            "bracketright",        N_("Image Rotate clockwise 90°"),                      CB(layout_menu_alter_cb<ALTER_ROTATE_90>) },
-  { "SaveMetadata",          GQ_ICON_SAVE,                      N_("_Save metadata"),                                   "<control>S",          N_("Save metadata"),                                   CB(layout_menu_metadata_write_cb) },
-  { "SearchAndRunCommand",   GQ_ICON_FIND,                      N_("Search and Run command"),                           "slash",               N_("Search commands by keyword and run them"),         CB(layout_menu_search_and_run_cb) },
-  { "Search",                GQ_ICON_FIND,                      N_("_Search…"),                                       "F3",                  N_("Search…"),                                       CB(layout_menu_search_cb) },
-  { "SelectAll",             PIXBUF_INLINE_ICON_SELECT_ALL,     N_("Select _all"),                                      "<control>A",          N_("Select all"),                                      CB(layout_menu_select_all_cb) },
-  { "SelectInvert",          PIXBUF_INLINE_ICON_SELECT_INVERT,  N_("_Invert Selection"),                                "<control><shift>I",   N_("Invert Selection"),                                CB(layout_menu_invert_selection_cb) },
-  { "SelectMenu",            PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Select"),                                          nullptr,               nullptr,                                               nullptr },
-  { "SelectNone",            PIXBUF_INLINE_ICON_SELECT_NONE,    N_("Select _none"),                                     "<control><shift>A",   N_("Select none"),                                     CB(layout_menu_unselect_all_cb) },
-  { "SelectOSD",             PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Select Overlay Screen Display"),                    nullptr,               N_("Select Overlay Screen Display"),                   nullptr },
-  { "SlideShowFaster",       GQ_ICON_GENERIC,                   N_("Faster"),                                           "<control>equal",      N_("Slideshow Faster"),                                CB(layout_menu_slideshow_faster_cb) },
-  { "SlideShowPause",        GQ_ICON_PAUSE,                     N_("_Pause slideshow"),                                 "P",                   N_("Pause slideshow"),                                 CB(layout_menu_slideshow_pause_cb) },
-  { "SlideShowSlower",       GQ_ICON_GENERIC,                   N_("Slower"),                                           "<control>minus",      N_("Slideshow Slower"),                                CB(layout_menu_slideshow_slower_cb) },
-  { "SplitDownPane",         PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Down Pane"),                                       "<alt>Down",           N_("Down Split Pane"),                                 CB(layout_menu_split_pane_updown_cb) },
-  { "SplitMenu",             PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Spli_t"),                                           nullptr,               nullptr,                                               nullptr },
-  { "SplitNextPane",         PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Next Pane"),                                       "<alt>Right",          N_("Next Split Pane"),                                 CB(layout_menu_split_pane_next_cb) },
-  { "SplitPreviousPane",     PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Previous Pane"),                                   "<alt>Left",           N_("Previous Split Pane"),                             CB(layout_menu_split_pane_prev_cb) },
-  { "SplitUpPane",           PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Up Pane"),                                         "<alt>Up",             N_("Up Split Pane"),                                   CB(layout_menu_split_pane_updown_cb) },
-  { "StereoCycle",           PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Cycle through stereo modes"),                      nullptr,               N_("Cycle through stereo modes"),                      CB(layout_menu_stereo_mode_next_cb) },
-  { "StereoMenu",            PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Stere_o"),                                          nullptr,               nullptr,                                               nullptr },
-  { "Up",                    GQ_ICON_GO_UP,                     N_("_Up"),                                              nullptr,               N_("Up one folder"),                                   CB(layout_menu_up_cb) },
-  { "ViewInNewWindow",       PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_View in new window"),                              "<control>V",          N_("View in new window"),                              CB(layout_menu_view_in_new_window_cb) },
-  { "ViewMenu",              PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_View"),                                            nullptr,               nullptr,                                               CB(layout_menu_view_menu_cb)  },
-  { "Wallpaper",             PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Set as _wallpaper"),                                nullptr,               N_("Set as wallpaper"),                                CB(layout_menu_wallpaper_cb) },
-  { "WindowsMenu",           PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Windows"),                                         nullptr,               nullptr,                                               CB(layout_menu_windows_menu_cb)  },
-  { "WriteRotationKeepDate", PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Write orientation to file (preserve timestamp)"),  nullptr,               N_("Write orientation to file (preserve timestamp)"),  CB(layout_menu_write_rotate_cb<TRUE>) },
-  { "WriteRotation",         PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Write orientation to file"),                       nullptr,               N_("Write orientation to file"),                       CB(layout_menu_write_rotate_cb<FALSE>) },
-  { "Zoom100Alt1",           GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "KP_Divide",           N_("Zoom 1:1"),                                        (GCallback)layout_menu_zoom_set_cb<1, FALSE> },
-  { "Zoom100",               GQ_ICON_ZOOM_100,                  N_("Zoom _1:1"),                                        "Z",                   N_("Zoom 1:1"),                                        (GCallback)layout_menu_zoom_set_cb<1, FALSE> },
-  { "Zoom200",               GQ_ICON_GENERIC,                   N_("Zoom _2:1"),                                        nullptr,               N_("Zoom 2:1"),                                        (GCallback)layout_menu_zoom_set_cb<2, FALSE> },
-  { "Zoom25",                GQ_ICON_GENERIC,                   N_("Zoom 1:4"),                                         nullptr,               N_("Zoom 1:4"),                                        (GCallback)layout_menu_zoom_set_cb<-4, FALSE> },
-  { "Zoom300",               GQ_ICON_GENERIC,                   N_("Zoom _3:1"),                                        nullptr,               N_("Zoom 3:1"),                                        (GCallback)layout_menu_zoom_set_cb<3, FALSE> },
-  { "Zoom33",                GQ_ICON_GENERIC,                   N_("Zoom 1:3"),                                         nullptr,               N_("Zoom 1:3"),                                        (GCallback)layout_menu_zoom_set_cb<-3, FALSE> },
-  { "Zoom400",               GQ_ICON_GENERIC,                   N_("Zoom _4:1"),                                        nullptr,               N_("Zoom 4:1"),                                        (GCallback)layout_menu_zoom_set_cb<4, FALSE> },
-  { "Zoom50",                GQ_ICON_GENERIC,                   N_("Zoom 1:2"),                                         nullptr,               N_("Zoom 1:2"),                                        (GCallback)layout_menu_zoom_set_cb<-2, FALSE> },
-  { "ZoomFillHor",           PIXBUF_INLINE_ICON_ZOOMFILLHOR,    N_("Fit _Horizontally"),                                "H",                   N_("Fit Horizontally"),                                (GCallback)layout_menu_zoom_fit_hv_cb<FALSE, FALSE> },
-  { "ZoomFillVert",          PIXBUF_INLINE_ICON_ZOOMFILLVERT,   N_("Fit _Vertically"),                                  "W",                   N_("Fit Vertically"),                                  (GCallback)layout_menu_zoom_fit_hv_cb<TRUE, FALSE> },
-  { "ZoomFitAlt1",           GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "KP_Multiply",         N_("Zoom to fit"),                                     (GCallback)layout_menu_zoom_set_cb<0, FALSE> },
-  { "ZoomFit",               GQ_ICON_ZOOM_FIT,                  N_("_Zoom to fit"),                                     "X",                   N_("Zoom to fit"),                                     (GCallback)layout_menu_zoom_set_cb<0, FALSE> },
-  { "ZoomInAlt1",            GQ_ICON_ZOOM_IN,                   N_("Zoom _in"),                                         "KP_Add",              N_("Zoom in"),                                         CB(layout_menu_zoom_in_cb<FALSE>) },
-  { "ZoomIn",                GQ_ICON_ZOOM_IN,                   N_("Zoom _in"),                                         "equal",               N_("Zoom in"),                                         CB(layout_menu_zoom_in_cb<FALSE>) },
-  { "ZoomMenu",              PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("_Zoom"),                                            nullptr,               nullptr,                                               nullptr },
-  { "ZoomOutAlt1",           GQ_ICON_ZOOM_OUT,                  N_("Zoom _out"),                                        "KP_Subtract",         N_("Zoom out"),                                        CB(layout_menu_zoom_out_cb<FALSE>) },
-  { "ZoomToRectangle",       PIXBUF_INLINE_ICON_PLACEHOLDER,    N_("Zoom to rectangle"),                                nullptr,               N_("Zoom to rectangle"),                               CB(layout_menu_zoom_to_rectangle_cb) },
-  { "ZoomOut",               GQ_ICON_ZOOM_OUT,                  N_("Zoom _out"),                                        "minus",               N_("Zoom out"),                                        CB(layout_menu_zoom_out_cb<FALSE>) }
-};
-
-static GtkToggleActionEntry menu_toggle_entries[] = {
-  { "Animate",                 PIXBUF_INLINE_ICON_PLACEHOLDER,       N_("_Animation"),               "A",               N_("Toggle animation"),              CB(layout_menu_animate_cb),                  FALSE  },
-  { "DrawRectangle",           PIXBUF_INLINE_ICON_DRAW_RECTANGLE,    N_("Draw Rectangle"),           nullptr,           N_("Draw Rectangle"),                CB(layout_menu_select_rectangle_cb),         FALSE  },
-  { "ExifRotate",              GQ_ICON_ROTATE_LEFT,                  N_("_Exif rotate"),             "<alt>X",          N_("Toggle Exif rotate"),            CB(layout_menu_exif_rotate_cb),              FALSE  },
-  { "FloatTools",              PIXBUF_INLINE_ICON_FLOAT,             N_("_Float file list"),         "L",               N_("Float file list"),               CB(layout_menu_float_cb),                    FALSE  },
-  { "Grayscale",               PIXBUF_INLINE_ICON_GRAYSCALE,         N_("Toggle _grayscale"),        "<shift>G",        N_("Toggle grayscale"),              CB(layout_menu_alter_desaturate_cb),         FALSE  },
-  { "HideBars",                PIXBUF_INLINE_ICON_PLACEHOLDER,       N_("Hide Bars and Files"),      "grave",           N_("Hide Bars and Files"),           CB(layout_menu_hide_bars_cb),                FALSE  },
-  { "HideSelectableToolbars",  PIXBUF_INLINE_ICON_PLACEHOLDER,       N_("Hide Selectable Bars"),     "<control>grave",  N_("Hide Selectable Bars"),          CB(layout_menu_selectable_toolbars_cb),      FALSE  },
-  { "IgnoreAlpha",             GQ_ICON_STRIKETHROUGH,                N_("Hide _alpha"),              "<shift>A",        N_("Hide alpha channel"),            CB(layout_menu_alter_ignore_alpha_cb),       FALSE  },
-  { "ImageHistogram",          PIXBUF_INLINE_ICON_PLACEHOLDER,       N_("_Show Histogram"),          nullptr,           N_("Show Histogram"),                CB(layout_menu_histogram_cb),                FALSE  },
-  { "ImageOverlay",            PIXBUF_INLINE_ICON_PLACEHOLDER,       N_("Image _Overlay"),           nullptr,           N_("Image Overlay"),                 CB(layout_menu_overlay_cb),                  FALSE  },
-  { "OverUnderExposed",        PIXBUF_INLINE_ICON_EXPOSURE,          N_("Over/Under Exposed"),       "<shift>E",        N_("Highlight over/under exposed"),  CB(layout_menu_select_overunderexposed_cb),  FALSE  },
-  { "RectangularSelection",    PIXBUF_INLINE_ICON_SELECT_RECTANGLE,  N_("Rectangular Selection"),    "<alt>R",          N_("Rectangular Selection"),         CB(layout_menu_rectangular_selection_cb),    FALSE  },
-  { "SBar",                    PIXBUF_INLINE_ICON_PROPERTIES,        N_("_Info sidebar"),            "<control>K",      N_("Info sidebar"),                  CB(layout_menu_bar_cb),                      FALSE  },
-  { "SBarSort",                PIXBUF_INLINE_ICON_SORT,              N_("Sort _manager"),            "<shift>S",        N_("Sort manager"),                  CB(layout_menu_bar_sort_cb),                 FALSE  },
-  { "ShowFileFilter",          GQ_ICON_FILE_FILTER,                  N_("Show File Filter"),         nullptr,           N_("Show File Filter"),              CB(layout_menu_file_filter_cb),              FALSE  },
-  { "ShowInfoPixel",           GQ_ICON_SELECT_COLOR,                 N_("Pi_xel Info"),              nullptr,           N_("Show Pixel Info"),               CB(layout_menu_info_pixel_cb),               FALSE  },
-  { "ShowMarks",               PIXBUF_INLINE_ICON_MARKS,             N_("Show _Marks"),              "M",               N_("Show Marks"),                    CB(layout_menu_marks_cb),                    FALSE  },
-  { "SlideShow",               GQ_ICON_PLAY,                         N_("Toggle _slideshow"),        "S",               N_("Toggle slideshow"),              CB(layout_menu_slideshow_cb),                FALSE  },
-  { "SplitPaneSync",           PIXBUF_INLINE_SPLIT_PANE_SYNC,        N_("Split Pane Sync"),          nullptr,           N_("Split Pane Sync"),               CB(layout_menu_split_pane_sync_cb),          FALSE  },
-  { "Thumbnails",              PIXBUF_INLINE_ICON_THUMB,             N_("Show _Thumbnails"),         "T",               N_("Show Thumbnails"),               CB(layout_menu_thumb_cb),                    FALSE  },
-  { "UseColorProfiles",        GQ_ICON_COLOR_MANAGEMENT,             N_("Use _color profiles"),      nullptr,           N_("Use color profiles"),            CB(layout_color_menu_enable_cb),             FALSE  },
-  { "UseImageProfile",         PIXBUF_INLINE_ICON_PLACEHOLDER,       N_("Use profile from _image"),  nullptr,           N_("Use profile from image"),        CB(layout_color_menu_use_image_cb),          FALSE  }
-};
-
-static GtkRadioActionEntry menu_radio_entries[] = {
-  { "ViewIcons",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Images as I_cons"),  "<control>I",  N_("View Images as Icons"),  FILEVIEW_ICON },
-  { "ViewList",   PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Images as _List"),   "<control>L",  N_("View Images as List"),   FILEVIEW_LIST }
-};
-
-static GtkToggleActionEntry menu_view_dir_toggle_entries[] = {
-  { "FolderTree",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("T_oggle Folder View"),  "<control>T",  N_("Toggle Folders View"),  CB(layout_menu_view_dir_as_cb),FALSE },
-};
-
-static GtkRadioActionEntry menu_split_radio_entries[] = {
-  { "SplitHorizontal",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Horizontal"),  "E",      N_("Split panes horizontal."),  SPLIT_HOR },
-  { "SplitQuad",        PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Quad"),        nullptr,  N_("Split panes quad"),         SPLIT_QUAD },
-  { "SplitSingle",      PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Single"),      "Y",      N_("Single pane"),              SPLIT_NONE },
-  { "SplitTriple",      PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Triple"),      nullptr,  N_("Split panes triple"),       SPLIT_TRIPLE },
-  { "SplitVertical",    PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Vertical"),    "U",      N_("Split panes vertical"),     SPLIT_VERT }
-};
-
-static GtkRadioActionEntry menu_color_radio_entries[] = {
-  { "ColorProfile0",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Input _0: sRGB"),                 nullptr,  N_("Input 0: sRGB"),                 COLOR_PROFILE_SRGB },
-  { "ColorProfile1",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Input _1: AdobeRGB compatible"),  nullptr,  N_("Input 1: AdobeRGB compatible"),  COLOR_PROFILE_ADOBERGB },
-  { "ColorProfile2",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Input _2"),                       nullptr,  N_("Input 2"),                       COLOR_PROFILE_FILE },
-  { "ColorProfile3",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Input _3"),                       nullptr,  N_("Input 3"),                       COLOR_PROFILE_FILE + 1 },
-  { "ColorProfile4",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Input _4"),                       nullptr,  N_("Input 4"),                       COLOR_PROFILE_FILE + 2 },
-  { "ColorProfile5",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Input _5"),                       nullptr,  N_("Input 5"),                       COLOR_PROFILE_FILE + 3 }
-};
-
-static GtkRadioActionEntry menu_histogram_channel[] = {
-  { "HistogramChanB",    PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Histogram on _Blue"),   nullptr,  N_("Histogram on Blue"),   HCHAN_B },
-  { "HistogramChanG",    PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Histogram on _Green"),  nullptr,  N_("Histogram on Green"),  HCHAN_G },
-  { "HistogramChanRGB",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Histogram on RGB"),    nullptr,  N_("Histogram on RGB"),    HCHAN_RGB },
-  { "HistogramChanR",    PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Histogram on _Red"),    nullptr,  N_("Histogram on Red"),    HCHAN_R },
-  { "HistogramChanV",    PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Histogram on _Value"),  nullptr,  N_("Histogram on Value"),  HCHAN_MAX }
-};
-
-static GtkRadioActionEntry menu_histogram_mode[] = {
-  { "HistogramModeLin",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("Li_near Histogram"),  nullptr,  N_("Linear Histogram"),  0 },
-  { "HistogramModeLog",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Log Histogram"),     nullptr,  N_("Log Histogram"),     1 },
-};
-
-static GtkRadioActionEntry menu_stereo_mode_entries[] = {
-  { "StereoAuto",   PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Auto"),          nullptr,  N_("Stereo Auto"),          STEREO_PIXBUF_DEFAULT },
-  { "StereoCross",  PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Cross"),         nullptr,  N_("Stereo Cross"),         STEREO_PIXBUF_CROSS },
-  { "StereoOff",    PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Off"),           nullptr,  N_("Stereo Off"),           STEREO_PIXBUF_NONE },
-  { "StereoSBS",    PIXBUF_INLINE_ICON_PLACEHOLDER,  N_("_Side by Side"),  nullptr,  N_("Stereo Side by Side"),  STEREO_PIXBUF_SBS }
-};
-
-static GtkRadioActionEntry menu_draw_rectangle_aspect_ratios[] = {
-  { "CropNone",        PIXBUF_INLINE_ICON_PLACEHOLDER, N_("Crop None"), nullptr, N_("Crop rectangle None"), RECTANGLE_DRAW_ASPECT_RATIO_NONE },
-  { "CropOneOne",      PIXBUF_INLINE_ICON_PLACEHOLDER, N_("Crop 1:1"),  nullptr, N_("Crop rectangle 1:1"),  RECTANGLE_DRAW_ASPECT_RATIO_ONE_ONE },
-  { "CropFourThree",   PIXBUF_INLINE_ICON_PLACEHOLDER, N_("Crop 4:3"),  nullptr, N_("Crop rectangle 4:3"),  RECTANGLE_DRAW_ASPECT_RATIO_FOUR_THREE },
-  { "CropThreeTwo",    PIXBUF_INLINE_ICON_PLACEHOLDER, N_("Crop 3:2"),  nullptr, N_("Crop rectangle 3:2"),  RECTANGLE_DRAW_ASPECT_RATIO_THREE_TWO },
-  { "CropSixteenNine", PIXBUF_INLINE_ICON_PLACEHOLDER, N_("Crop 16:9"), nullptr, N_("Crop rectangle 16:9"), RECTANGLE_DRAW_ASPECT_RATIO_SIXTEEN_NINE }
-};
-
-static GtkRadioActionEntry menu_osd[] = {
-  { "OSD1", PIXBUF_INLINE_ICON_PLACEHOLDER, N_("OSD 1"), nullptr, N_("Overlay Screen Display 1"), OVERLAY_SCREEN_DISPLAY_1 },
-  { "OSD2", PIXBUF_INLINE_ICON_PLACEHOLDER, N_("OSD 2"), nullptr, N_("Overlay Screen Display 2"), OVERLAY_SCREEN_DISPLAY_2 },
-  { "OSD3", PIXBUF_INLINE_ICON_PLACEHOLDER, N_("OSD 3"), nullptr, N_("Overlay Screen Display 3"), OVERLAY_SCREEN_DISPLAY_3 },
-  { "OSD4", PIXBUF_INLINE_ICON_PLACEHOLDER, N_("OSD 4"), nullptr, N_("Overlay Screen Display 4"), OVERLAY_SCREEN_DISPLAY_4 }
-};
-#undef CB
-
 static gchar *menu_translate(const gchar *path, gpointer)
 {
 	return const_cast<gchar *>(_(path));
-}
-
-static void layout_actions_setup_mark(LayoutWindow *lw, gint mark, const gchar *name_tmpl,
-				      const gchar *label_tmpl, const gchar *accel_tmpl, const gchar *tooltip_tmpl, GCallback cb)
-{
-	gchar name[50];
-	gchar label[100];
-	gchar accel[50];
-	gchar tooltip[100];
-	GtkActionEntry entry = { name, nullptr, label, accel, tooltip, cb };
-	GtkAction *action;
-
-	g_snprintf(name, sizeof(name), name_tmpl, mark);
-	g_snprintf(label, sizeof(label), label_tmpl, mark);
-
-	if (accel_tmpl)
-		g_snprintf(accel, sizeof(accel), accel_tmpl, mark % 10);
-	else
-		entry.accelerator = nullptr;
-
-	if (tooltip_tmpl)
-		g_snprintf(tooltip, sizeof(tooltip), tooltip_tmpl, mark);
-	else
-		entry.tooltip = nullptr;
-
-	deprecated_gtk_action_group_add_actions(lw->action_group, &entry, 1, lw);
-	action = deprecated_gtk_action_group_get_action(lw->action_group, name);
-	g_object_set_data(G_OBJECT(action), "mark_num", GINT_TO_POINTER(mark > 0 ? mark : 10));
-}
-
-static void layout_actions_setup_marks(LayoutWindow *lw)
-{
-	gint mark;
-	g_autoptr(GString) desc = g_string_new(
-				"<ui>"
-				"  <menubar name='MainMenu'>");
-
-	if (options->hamburger_menu)
-		{
-		g_string_append(desc, "    <menu action='OpenMenu'>");
-		}
-	g_string_append(desc, "      <menu action='SelectMenu'>");
-
-	for (mark = 1; mark <= FILEDATA_MARKS_SIZE; mark++)
-		{
-		gint i = (mark < 10 ? mark : 0);
-
-		layout_actions_setup_mark(lw, i, "Mark%d",		_("Mark _%d"), nullptr, nullptr, nullptr);
-		layout_actions_setup_mark(lw, i, "SetMark%d",	_("_Set mark %d"),			nullptr,		_("Set mark %d"), G_CALLBACK(layout_menu_selection_to_mark_cb<STM_MODE_SET>));
-		layout_actions_setup_mark(lw, i, "ResetMark%d",	_("_Reset mark %d"),			nullptr,		_("Reset mark %d"), G_CALLBACK(layout_menu_selection_to_mark_cb<STM_MODE_RESET>));
-		layout_actions_setup_mark(lw, i, "ToggleMark%d",	_("_Toggle mark %d"),			"%d",		_("Toggle mark %d"), G_CALLBACK(layout_menu_selection_to_mark_cb<STM_MODE_TOGGLE>));
-		layout_actions_setup_mark(lw, i, "ToggleMark%dAlt1",	_("_Toggle mark %d"),			"KP_%d",	_("Toggle mark %d"), G_CALLBACK(layout_menu_selection_to_mark_cb<STM_MODE_TOGGLE>));
-		layout_actions_setup_mark(lw, i, "SelectMark%d",	_("Se_lect mark %d"),			"<control>%d",	_("Select mark %d"), G_CALLBACK(layout_menu_mark_to_selection_cb<MTS_MODE_SET>));
-		layout_actions_setup_mark(lw, i, "SelectMark%dAlt1",	_("_Select mark %d"),			"<control>KP_%d", _("Select mark %d"), G_CALLBACK(layout_menu_mark_to_selection_cb<MTS_MODE_SET>));
-		layout_actions_setup_mark(lw, i, "AddMark%d",	_("_Add mark %d"),			nullptr,		_("Add mark %d"), G_CALLBACK(layout_menu_mark_to_selection_cb<MTS_MODE_OR>));
-		layout_actions_setup_mark(lw, i, "IntMark%d",	_("_Intersection with mark %d"),	nullptr,		_("Intersection with mark %d"), G_CALLBACK(layout_menu_mark_to_selection_cb<MTS_MODE_AND>));
-		layout_actions_setup_mark(lw, i, "UnselMark%d",	_("_Unselect mark %d"),			nullptr,		_("Unselect mark %d"), G_CALLBACK(layout_menu_mark_to_selection_cb<MTS_MODE_MINUS>));
-		layout_actions_setup_mark(lw, i, "FilterMark%d",	_("_Filter mark %d"),			nullptr,		_("Filter mark %d"), G_CALLBACK(layout_menu_mark_filter_toggle_cb));
-
-		g_string_append_printf(desc,
-				"      <menu action='Mark%d'>"
-				"        <menuitem action='ToggleMark%d'/>"
-				"        <menuitem action='SetMark%d'/>"
-				"        <menuitem action='ResetMark%d'/>"
-				"        <separator/>"
-				"        <menuitem action='SelectMark%d'/>"
-				"        <menuitem action='AddMark%d'/>"
-				"        <menuitem action='IntMark%d'/>"
-				"        <menuitem action='UnselMark%d'/>"
-				"        <separator/>"
-				"        <menuitem action='FilterMark%d'/>"
-				"      </menu>",
-				i, i, i, i, i, i, i, i, i);
-		}
-
-	g_string_append(desc,
-				"      </menu>");
-	if (options->hamburger_menu)
-		{
-		g_string_append(desc, "    </menu>");
-		}
-	g_string_append(desc, "  </menubar>");
-
-	for (mark = 1; mark <= FILEDATA_MARKS_SIZE; mark++)
-		{
-		gint i = (mark < 10 ? mark : 0);
-
-		g_string_append_printf(desc,
-				"<accelerator action='ToggleMark%dAlt1'/>"
-				"<accelerator action='SelectMark%dAlt1'/>",
-				i, i);
-		}
-	g_string_append(desc,   "</ui>" );
-
-	g_autoptr(GError) error = nullptr;
-	if (!deprecated_gtk_ui_manager_add_ui_from_string(lw->ui_manager, desc->str, -1, &error))
-		{
-		g_message("building menus failed: %s", error->message);
-		exit(EXIT_FAILURE);
-		}
 }
 
 static GList *layout_actions_editor_menu_path(const EditorDescription *editor)
@@ -2984,182 +2760,8 @@ static void layout_actions_editor_add(GString *desc, GList *path, GList *old_pat
 		g_string_append_printf(desc, "      <menuitem action='%s'/>", static_cast<gchar *>(path->data));
 }
 
-static void layout_actions_setup_editors(LayoutWindow *lw)
-{
-	if (lw->ui_editors_id)
-		{
-		deprecated_gtk_ui_manager_remove_ui(lw->ui_manager, lw->ui_editors_id);
-		}
-
-	if (lw->action_group_editors)
-		{
-		deprecated_gtk_ui_manager_remove_action_group(lw->ui_manager, lw->action_group_editors);
-		g_object_unref(lw->action_group_editors);
-		}
-	lw->action_group_editors = deprecated_gtk_action_group_new("MenuActionsExternal");
-	deprecated_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group_editors, 1);
-
-	/* lw->action_group_editors contains translated entries, no translate func is required */
-	g_autoptr(GString) desc = g_string_new(
-				"<ui>"
-				"  <menubar name='MainMenu'>");
-
-	if (options->hamburger_menu)
-		{
-		g_string_append(desc, "    <menu action='OpenMenu'>");
-		}
-
-	GList *old_path = nullptr;
-
-	GtkWidget *main_toolbar = lw->toolbar[TOOLBAR_MAIN];
-	if (GTK_IS_CONTAINER(main_toolbar))
-		{
-		static const auto set_image_and_tooltip_from_editor = [](GtkWidget *widget, gpointer data)
-		{
-#if HAVE_GTK4
-			const gchar *tooltip = gtk_widget_get_tooltip_text(widget);
-#else
-			g_autofree gchar *tooltip = gtk_widget_get_tooltip_text(widget);
-#endif
-			auto *editor = static_cast<EditorDescription *>(data);
-			if (g_strcmp0(tooltip, editor->key) != 0) return; // @todo Use g_list_find_custom() if tooltip is unique
-
-			GtkWidget *image = nullptr;
-			if (editor->icon)
-				{
-				image = gq_gtk_image_new_from_stock(editor->key, GTK_ICON_SIZE_BUTTON);
-				}
-			else
-				{
-				image = gq_gtk_image_new_from_icon_name(GQ_ICON_MISSING_IMAGE, GTK_ICON_SIZE_BUTTON);
-				}
-			gtk_button_set_image(GTK_BUTTON(widget), image);
-			gtk_widget_set_tooltip_text(widget, editor->name);
-		};
-
-		EditorsList editors_list = editor_list_get();
-		for (EditorDescription *editor : editors_list)
-			{
-			GtkActionEntry entry = { editor->key,
-			                         editor->icon ? editor->key : nullptr,
-			                         editor->name,
-			                         editor->hotkey,
-			                         editor->comment ? editor->comment : editor->name,
-			                         G_CALLBACK(layout_menu_edit_cb) };
-
-			deprecated_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
-
-			// @todo Use g_list_find_custom() if tooltip is unique
-			gq_gtk_container_foreach(main_toolbar, set_image_and_tooltip_from_editor, editor);
-
-			GList *path = layout_actions_editor_menu_path(editor);
-			layout_actions_editor_add(desc, path, old_path);
-
-			g_list_free_full(old_path, g_free);
-			old_path = path;
-			}
-		}
-
-	layout_actions_editor_add(desc, nullptr, old_path);
-	g_list_free_full(old_path, g_free);
-
-	if (options->hamburger_menu)
-		{
-		g_string_append(desc, "</menu>");
-		}
-
-	g_string_append(desc,
-	                "  </menubar>"
-	                "</ui>" );
-
-	g_autoptr(GError) error = nullptr;
-
-	lw->ui_editors_id = deprecated_gtk_ui_manager_add_ui_from_string(lw->ui_manager, desc->str, -1, &error);
-	if (!lw->ui_editors_id)
-		{
-		g_message("building menus failed: %s", error->message);
-		exit(EXIT_FAILURE);
-		}
-}
-
-void create_toolbars(LayoutWindow *lw)
-{
-	gint i;
-
-	for (i = 0; i < TOOLBAR_COUNT; i++)
-		{
-		layout_actions_toolbar(lw, static_cast<ToolbarType>(i));
-		layout_toolbar_add_default(lw, static_cast<ToolbarType>(i));
-		}
-}
-
 void layout_actions_setup(LayoutWindow *lw)
 {
-	DEBUG_1("%s layout_actions_setup: start", get_exec_time());
-	if (lw->ui_manager) return;
-
-	lw->action_group = deprecated_gtk_action_group_new("MenuActions");
-	deprecated_gtk_action_group_set_translate_func(lw->action_group, menu_translate, nullptr, nullptr);
-
-	deprecated_gtk_action_group_add_actions(lw->action_group,
-	                                menu_entries, std::size(menu_entries), lw);
-	deprecated_gtk_action_group_add_toggle_actions(lw->action_group,
-	                                       menu_toggle_entries, std::size(menu_toggle_entries),
-	                                       lw);
-	deprecated_gtk_action_group_add_radio_actions(lw->action_group,
-	                                      menu_radio_entries, std::size(menu_radio_entries),
-	                                      0, G_CALLBACK(layout_menu_list_cb), lw);
-	deprecated_gtk_action_group_add_radio_actions(lw->action_group,
-	                                      menu_split_radio_entries, std::size(menu_split_radio_entries),
-	                                      0, G_CALLBACK(layout_menu_split_cb), lw);
-	deprecated_gtk_action_group_add_toggle_actions(lw->action_group,
-	                                       menu_view_dir_toggle_entries, std::size(menu_view_dir_toggle_entries),
-	                                       lw);
-	deprecated_gtk_action_group_add_radio_actions(lw->action_group,
-	                                      menu_color_radio_entries, std::size(menu_color_radio_entries),
-	                                      0, G_CALLBACK(layout_color_menu_input_cb), lw);
-	deprecated_gtk_action_group_add_radio_actions(lw->action_group,
-	                                      menu_histogram_channel, std::size(menu_histogram_channel),
-	                                      0, G_CALLBACK(layout_menu_histogram_channel_cb), lw);
-	deprecated_gtk_action_group_add_radio_actions(lw->action_group,
-	                                      menu_histogram_mode, std::size(menu_histogram_mode),
-	                                      0, G_CALLBACK(layout_menu_histogram_mode_cb), lw);
-	deprecated_gtk_action_group_add_radio_actions(lw->action_group,
-	                                      menu_stereo_mode_entries, std::size(menu_stereo_mode_entries),
-	                                      0, G_CALLBACK(layout_menu_stereo_mode_cb), lw);
-	deprecated_gtk_action_group_add_radio_actions(lw->action_group,
-	                                      menu_draw_rectangle_aspect_ratios, std::size(menu_draw_rectangle_aspect_ratios),
-	                                      0, G_CALLBACK(layout_menu_draw_rectangle_aspect_ratio_cb), lw);
-	deprecated_gtk_action_group_add_radio_actions(lw->action_group,
-	                                      menu_osd, std::size(menu_osd),
-	                                      0, G_CALLBACK(layout_menu_osd_cb), lw);
-
-
-	lw->ui_manager = deprecated_gtk_ui_manager_new();
-	deprecated_gtk_ui_manager_set_add_tearoffs(lw->ui_manager, TRUE);
-	deprecated_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group, 0);
-
-	DEBUG_1("%s layout_actions_setup: add menu", get_exec_time());
-	g_autoptr(GError) error = nullptr;
-
-	if (!deprecated_gtk_ui_manager_add_ui_from_resource(lw->ui_manager, options->hamburger_menu ? GQ_RESOURCE_PATH_UI "/menu-hamburger.ui" : GQ_RESOURCE_PATH_UI "/menu-classic.ui" , &error))
-		{
-		g_message("building menus failed: %s", error->message);
-		exit(EXIT_FAILURE);
-		}
-
-	DEBUG_1("%s layout_actions_setup: marks", get_exec_time());
-	layout_actions_setup_marks(lw);
-
-	DEBUG_1("%s layout_actions_setup: editors", get_exec_time());
-	layout_actions_setup_editors(lw);
-
-	DEBUG_1("%s layout_actions_setup: status_update_write", get_exec_time());
-	layout_util_status_update_write(lw);
-
-	DEBUG_1("%s layout_actions_setup: actions_add_window", get_exec_time());
-	layout_actions_add_window(lw, lw->window);
-	DEBUG_1("%s layout_actions_setup: end", get_exec_time());
 }
 
 static gboolean layout_editors_reload_idle_cb(gpointer user_data)
@@ -3246,20 +2848,27 @@ void layout_editors_reload_finish()
 		}
 }
 
-void layout_actions_add_window(LayoutWindow *lw, GtkWidget *window)
+void layout_actions_add_window(LayoutWindow *, GtkWidget *)
 {
+/** @FIXME GTK4
 	GtkAccelGroup *group;
 
 	if (!lw->ui_manager) return;
 
 	group = deprecated_gtk_ui_manager_get_accel_group(lw->ui_manager);
 	gtk_window_add_accel_group(GTK_WINDOW(window), group);
+*/
 }
 
 GtkWidget *layout_actions_menu_bar(LayoutWindow *lw)
 {
 	if (lw->menu_bar) return lw->menu_bar;
-	lw->menu_bar = deprecated_gtk_ui_manager_get_widget(lw->ui_manager, "/MainMenu");
+
+#if HAVE_GTK4
+#else
+	lw->menu_bar = gtk_menu_bar_new_from_model(lw->menu_model);
+#endif
+
 	return g_object_ref(lw->menu_bar);
 }
 
@@ -3298,12 +2907,14 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 
 void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data)
 {
+/** @FIXME GTK4
 	for (GList *groups = deprecated_gtk_ui_manager_get_action_groups(lw->ui_manager); groups; groups = groups->next)
 		{
 		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
 
 		g_list_foreach(actions, func, data);
 		}
+*/
 }
 
 static void toolbar_clear_cb(GtkWidget *widget, gpointer)
@@ -3323,15 +2934,8 @@ static void toolbar_clear_cb(GtkWidget *widget, gpointer)
 
 void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 {
-	if (lw->toolbar_merge_id[type])
-		{
-		deprecated_gtk_ui_manager_remove_ui(lw->ui_manager, lw->toolbar_merge_id[type]);
-		deprecated_gtk_ui_manager_ensure_update(lw->ui_manager);
-		}
 	g_list_free_full(lw->toolbar_actions[type], g_free);
 	lw->toolbar_actions[type] = nullptr;
-
-	lw->toolbar_merge_id[type] = deprecated_gtk_ui_manager_new_merge_id(lw->ui_manager);
 
 	if (lw->toolbar[type])
 		{
@@ -3364,54 +2968,46 @@ static gboolean toolbar_button_press_event_cb(GtkWidget *, GdkEvent *, gpointer 
 
 void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_name)
 {
-	const gchar *path = nullptr;
 	const gchar *tooltip_text = nullptr;
-	GtkAction *action;
-	GtkWidget *action_icon = nullptr;
-	GtkWidget *button;
-	gulong id;
+	GtkWidget *button = nullptr;
 
-	if (!action_name || !lw->ui_manager) return;
-
-	if (!lw->toolbar[type])
+	if (!action_name)
 		{
+		g_abort();
 		return;
 		}
 
-	switch (type)
+	if (!lw->toolbar[type])
 		{
-		case TOOLBAR_MAIN:
-			path = "/ToolBar";
-			break;
-		case TOOLBAR_STATUS:
-			path = "/StatusBar";
-			break;
-		default:
-			break;
+		g_abort();
+		return;
 		}
 
 	if (g_str_has_suffix(action_name, ".desktop"))
 		{
-		/* this may be called before the external editors are read
-		   create a dummy action for now */
+/** @FIXME GTK4
+		/ this may be called before the external editors are read
+		   create a dummy action for now /
 		if (!lw->action_group_editors)
-			{
-			lw->action_group_editors = deprecated_gtk_action_group_new("MenuActionsExternal");
-			deprecated_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group_editors, 1);
-			}
-		if (!deprecated_gtk_action_group_get_action(lw->action_group_editors, action_name))
-			{
-			GtkActionEntry entry = { action_name,
-			                         GQ_ICON_MISSING_IMAGE,
-			                         action_name,
-			                         nullptr,
-			                         nullptr,
-			                         nullptr
-			                       };
-			DEBUG_1("Creating temporary action %s", action_name);
-			deprecated_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
-			}
+		{
+		lw->action_group_editors = deprecated_gtk_action_group_new("MenuActionsExternal");
+		deprecated_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group_editors, 1);
 		}
+		if (!deprecated_gtk_action_group_get_action(lw->action_group_editors, action_name))
+		{
+		GtkActionEntry entry = { action_name,
+		GQ_ICON_MISSING_IMAGE,
+		action_name,
+		nullptr,
+		nullptr,
+		nullptr
+		};
+		DEBUG_1("Creating temporary action %s", action_name);
+		deprecated_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
+		}
+*/
+		}
+
 
 	if (g_strcmp0(action_name, "Separator") == 0)
 		{
@@ -3421,69 +3017,87 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 		{
 		if (g_str_has_suffix(action_name, ".desktop"))
 			{
+/** FIXME GTK4
 			action = deprecated_gtk_action_group_get_action(lw->action_group_editors, action_name);
+			const gchar *kk = get_description_for_action_name("org.gnome.Evince.desktop");
 
-			/** @FIXME Using tootip as a flag to layout_actions_setup_editors()
-			 * is not a good way.
-			 */
+			 @FIXME Using tootip as a flag to layout_actions_setup_editors()
+			 is not a good way.
+			
 			tooltip_text = deprecated_gtk_action_get_label(action);
+*/
 			}
 		else
 			{
-			action = deprecated_gtk_action_group_get_action(lw->action_group, action_name);
+			GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), action_name+4);
+			if (action)
+				{
+				const GVariantType *state_type =
+				    g_action_get_state_type(action);
 
-			tooltip_text = deprecated_gtk_action_get_tooltip(action);
-			}
+				if (state_type == nullptr)
+					{
+					/* stateless action */
+					button = gtk_button_new(); // !!
+					}
+				else if (g_variant_type_equal(state_type, G_VARIANT_TYPE_BOOLEAN))
+					{
+					/* toggle */
+					button = gtk_toggle_button_new(); // !!
+					}
+				else
+					{
+					/* radio / choice action */
+					button = gtk_toggle_button_new(); // !!
+					}
+				tooltip_text = get_description_for_action_name(action_name);
+				}
 
-		action_icon = deprecated_gtk_action_create_icon(action, GTK_ICON_SIZE_SMALL_TOOLBAR);
+			else
+				{
+				GApplication *app = g_application_get_default();
+				GAction *action = g_action_map_lookup_action(G_ACTION_MAP(app), action_name + 4);
+				if (action)
+					{
+					const GVariantType *state_type = g_action_get_state_type(action);
 
-		/** @FIXME This is a hack to remove run-time errors */
-		if (lw->toolbar_merge_id[type] > 0)
-			{
-			deprecated_gtk_ui_manager_add_ui(lw->ui_manager, lw->toolbar_merge_id[type], path, action_name, action_name, GTK_UI_MANAGER_TOOLITEM, FALSE);
+					if (state_type == nullptr)
+						{
+						/* stateless action */
+						button = gtk_button_new(); // !!
+						}
+					else if (g_variant_type_equal(state_type, G_VARIANT_TYPE_BOOLEAN))
+						{
+						/* toggle */
+						button = gtk_toggle_button_new(); // !!
+						}
+					else
+						{
+						/* radio / choice action */
+						button = gtk_toggle_button_new(); // !!
+						}
+					tooltip_text = get_description_for_action_name(action_name);
+					}
+				}
 			}
+		}
 
-		if (deprecated_GTK_IS_RADIO_ACTION(action) || deprecated_GTK_IS_TOGGLE_ACTION(action))
-			{
-			button = gtk_toggle_button_new();
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), deprecated_gtk_toggle_action_get_active(deprecated_GTK_TOGGLE_ACTION(action)));
-			}
-		else
-			{
-			button = gtk_button_new();
-			}
-
-		if (action_icon)
-			{
-			gtk_button_set_image(GTK_BUTTON(button), action_icon);
-			}
-		else
-			{
-			gtk_button_set_label(GTK_BUTTON(button), action_name);
-			}
-
+	if (button)
+		{
 		gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 		gtk_widget_set_tooltip_text(button, tooltip_text);
 
-		if (deprecated_GTK_IS_RADIO_ACTION(action))
-			{
-			id = g_signal_connect(G_OBJECT(action), "changed", G_CALLBACK(action_radio_changed_cb), button);
-			g_object_set_data(G_OBJECT(button), "id", GUINT_TO_POINTER(id));
-			}
-		else if (deprecated_GTK_IS_TOGGLE_ACTION(action))
-			{
-			id = g_signal_connect(G_OBJECT(action), "activate", G_CALLBACK(action_toggle_activate_cb), button);
-			g_object_set_data(G_OBJECT(button), "id", GUINT_TO_POINTER(id));
-			}
+		gtk_actionable_set_detailed_action_name(GTK_ACTIONABLE(button), action_name);
 
-		g_signal_connect(G_OBJECT(button), "button_press_event", G_CALLBACK(toolbar_button_press_event_cb), action);
-		g_object_set_data(G_OBJECT(button), "action", action);
+		GtkWidget *image = gq_gtk_image_new_from_icon_name(get_icon_for_action_name(action_name), GTK_ICON_SIZE_BUTTON);
+		gtk_button_set_always_show_image(GTK_BUTTON(button), TRUE);
+		gtk_button_set_image(GTK_BUTTON(button), image);
+
+		gq_gtk_container_add(lw->toolbar[type], button);
+		gq_gtk_widget_show_all(button);
+
+		lw->toolbar_actions[type] = g_list_append(lw->toolbar_actions[type], g_strdup(action_name));
 		}
-
-	gq_gtk_container_add(lw->toolbar[type], button);
-	gtk_widget_show(button);
-
-	lw->toolbar_actions[type] = g_list_append(lw->toolbar_actions[type], g_strdup(action_name));
 }
 
 void layout_toolbar_add_default(LayoutWindow *lw, ToolbarType type)
@@ -3498,24 +3112,24 @@ void layout_toolbar_add_default(LayoutWindow *lw, ToolbarType type)
 	switch (type)
 		{
 		case TOOLBAR_MAIN:
-			layout_toolbar_add(lw, type, "Thumbnails");
-			layout_toolbar_add(lw, type, "Back");
-			layout_toolbar_add(lw, type, "Forward");
-			layout_toolbar_add(lw, type, "Up");
-			layout_toolbar_add(lw, type, "Home");
-			layout_toolbar_add(lw, type, "Refresh");
-			layout_toolbar_add(lw, type, "ZoomIn");
-			layout_toolbar_add(lw, type, "ZoomOut");
-			layout_toolbar_add(lw, type, "ZoomFit");
-			layout_toolbar_add(lw, type, "Zoom100");
-			layout_toolbar_add(lw, type, "Preferences");
-			layout_toolbar_add(lw, type, "FloatTools");
+			layout_toolbar_add(lw, type, "win.main-win-thumbnails");
+			layout_toolbar_add(lw, type, "win.main-win-back");
+			layout_toolbar_add(lw, type, "win.main-win-forward");
+			layout_toolbar_add(lw, type, "win.main-win-up");
+			layout_toolbar_add(lw, type, "win.main-win-home");
+			layout_toolbar_add(lw, type, "win.main-win-refresh");
+			layout_toolbar_add(lw, type, "win.main-win-zoom-in");
+			layout_toolbar_add(lw, type, "win.main-win-zoom-out");
+			layout_toolbar_add(lw, type, "win.main-win-zoom-fit");
+			layout_toolbar_add(lw, type, "win.main-win-zoom-1-1");
+			layout_toolbar_add(lw, type, "app.preferences");
+			layout_toolbar_add(lw, type, "win.main-win-float-tools");
 			break;
 		case TOOLBAR_STATUS:
-			layout_toolbar_add(lw, type, "ExifRotate");
-			layout_toolbar_add(lw, type, "ShowInfoPixel");
-			layout_toolbar_add(lw, type, "UseColorProfiles");
-			layout_toolbar_add(lw, type, "SaveMetadata");
+			layout_toolbar_add(lw, type, "win.main-win-exif-rotate");
+			layout_toolbar_add(lw, type, "win.main-win-show-info-pixel");
+			layout_toolbar_add(lw, type, "win.main-win-use-color-profiles");
+			layout_toolbar_add(lw, type, "win.main-win-save-metadata");
 			break;
 		default:
 			break;
@@ -3541,7 +3155,7 @@ void layout_toolbar_write_config(LayoutWindow *lw, ToolbarType type, GString *ou
 	WRITE_NL(); WRITE_FORMAT_STRING("</%s>", name);
 }
 
-void layout_toolbar_add_from_config(LayoutWindow *lw, ToolbarType type, const char **attribute_names, const gchar **attribute_values)
+void layout_toolbar_add_from_config(LayoutWindow *lw, ToolbarType type, const char **attribute_names, const char **attribute_values)
 {
 	g_autofree gchar *action = nullptr;
 
@@ -3566,17 +3180,17 @@ void layout_toolbar_add_from_config(LayoutWindow *lw, ToolbarType type, const ch
 
 void layout_util_status_update_write(LayoutWindow *lw)
 {
-	GtkAction *action;
 	gint n = metadata_queue_length();
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SaveMetadata");
-	deprecated_gtk_action_set_sensitive(action, n > 0);
+
+	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-save-metadata");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (n > 0));
 
 	const gchar *icon_name = n > 0 ? GQ_ICON_SAVE_AS : GQ_ICON_SAVE;
 	g_autofree const gchar *icon_tooltip= n > 0 ? g_strdup_printf("Number of files with unsaved metadata: %d",n) : g_strdup("No unsaved metadata");
 
 	struct UpdateIconData
 		{
-		GtkAction *act;
+		GAction *act;
 		const gchar *name;
 		const gchar *tooltip;
 		};
@@ -3585,7 +3199,7 @@ void layout_util_status_update_write(LayoutWindow *lw)
 		{
 		auto *uid = static_cast<UpdateIconData *>(data);
 		if (!GTK_IS_BUTTON(widget)) return;
-		auto *waction = static_cast<GtkAction *>(g_object_get_data(G_OBJECT(widget), "action"));
+		auto *waction = static_cast<GAction *>(g_object_get_data(G_OBJECT(widget), "action"));
 		if (waction != uid->act) return;
 #if HAVE_GTK4
 		GtkWidget *image = gtk_button_get_child(GTK_BUTTON(widget));
@@ -3618,202 +3232,257 @@ void layout_util_status_update_write_all()
 	layout_window_foreach(layout_util_status_update_write);
 }
 
-static gchar *layout_color_name_parse(const gchar *name)
-{
-	if (!name || !*name) return g_strdup(_("Empty"));
-	return g_strdelimit(g_strdup(name), "_", '-');
-}
-
 void layout_util_sync_color(LayoutWindow *lw)
 {
-	GtkAction *action;
+	GAction *action;
 	gint input = 0;
 	gboolean use_color;
 	gboolean use_image = FALSE;
-	gint i;
-	gchar action_name[15];
 
-	if (!lw->action_group) return;
 	if (!layout_image_color_profile_get(lw, input, use_image)) return;
 
 	use_color = layout_image_color_profile_get_use(lw);
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "UseColorProfiles");
-#if HAVE_LCMS
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), use_color);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-use-color-profiles");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(use_color));
 
+#if HAVE_LCMS
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(use_color));
+
+/** @FIXME GTK4
 	if (const auto status = layout_image_color_profile_get_status(lw); status.has_value())
 		{
 		g_autofree gchar *buf = g_strdup_printf(_("Image profile: %s\nScreen profile: %s"),
 		                                        status->image_profile.c_str(), status->screen_profile.c_str());
+
 		deprecated_gtk_action_set_tooltip(action, buf);
 		}
 	else
 		{
 		deprecated_gtk_action_set_tooltip(action, _("Click to enable color management"));
 		}
+*/
 #else
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), FALSE);
-	deprecated_gtk_action_set_sensitive(action, FALSE);
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(FALSE));
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), FALSE);
+/** @FIXME GTK4
 	deprecated_gtk_action_set_tooltip(action, _("Color profiles not supported"));
+*/
 #endif
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "UseImageProfile");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), use_image);
-	deprecated_gtk_action_set_sensitive(action, use_color);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-use-image-profile");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(use_image));
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), use_color);
 
-	for (i = 0; i < COLOR_PROFILE_FILE + COLOR_PROFILE_INPUTS; i++)
-		{
-		sprintf(action_name, "ColorProfile%d", i);
-		action = deprecated_gtk_action_group_get_action(lw->action_group, action_name);
+	color_profiles_menu_populate(lw, "win.main-win-color-profile");
 
-		if (i >= COLOR_PROFILE_FILE)
-			{
-			const gchar *name = options->color_profile.input_name[i - COLOR_PROFILE_FILE];
-			const gchar *file = options->color_profile.input_file[i - COLOR_PROFILE_FILE];
-
-			if (!name || !name[0]) name = filename_from_path(file);
-
-			g_autofree gchar *end = layout_color_name_parse(name);
-			g_autofree gchar *buf = g_strdup_printf(_("Input _%d: %s"), i, end);
-
-			deprecated_gtk_action_set_label(action, buf);
-			deprecated_gtk_action_set_visible(action, file && file[0]);
-			}
-
-		deprecated_gtk_action_set_sensitive(action, !use_image);
-		deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), (i == input));
-		}
-
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "Grayscale");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), layout_image_get_desaturate(lw));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-grayscale");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(layout_image_get_desaturate(lw)));
 }
 
 void layout_util_sync_file_filter(LayoutWindow *lw)
 {
-	GtkAction *action;
-
-	if (!lw->action_group) return;
-
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "ShowFileFilter");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.show_file_filter);
+	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-show-file-filter");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.show_file_filter));
 }
 
 void layout_util_sync_marks(LayoutWindow *lw)
 {
-	GtkAction *action;
-
-	if (!lw->action_group) return;
-
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "ShowMarks");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.show_marks);
+	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-show-marks");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.show_marks));
 }
 
 static void layout_util_sync_views(LayoutWindow *lw)
 {
-	GtkAction *action;
+	GAction *action;
 	OsdShowFlags osd_flags = image_osd_get(lw->image);
 
-	if (!lw->action_group) return;
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-folder-tree");
+		if (lw->options.dir_view_type == DIRVIEW_LIST)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(FALSE));
+			}
+		else
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(TRUE));
+			}
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "FolderTree");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.dir_view_type);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-split-mode");
+		if (lw->split_mode == SPLIT_NONE)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("none"));
+			}
+		else if (lw->split_mode == SPLIT_VERT)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("vertical"));
+			}
+		else if (lw->split_mode == SPLIT_HOR)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("horizontal"));
+			}
+		else if (lw->split_mode == SPLIT_TRIPLE)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("triple"));
+			}
+		else if (lw->split_mode == SPLIT_QUAD)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("quad"));
+			}
+		else
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("none"));
+			}
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-split-next-pane");
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SplitSingle");
-	deprecated_gtk_radio_action_set_current_value(deprecated_GTK_RADIO_ACTION(action), lw->split_mode);
+		g_simple_action_set_enabled(G_SIMPLE_ACTION(action), !(lw->split_mode == SPLIT_NONE));
+		action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-split-previous-pane");
+		g_simple_action_set_enabled(G_SIMPLE_ACTION(action), !(lw->split_mode == SPLIT_NONE));
+		action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-split-up-pane");
+		g_simple_action_set_enabled(G_SIMPLE_ACTION(action), !(lw->split_mode == SPLIT_NONE));
+		action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-split-down-pane");
+		g_simple_action_set_enabled(G_SIMPLE_ACTION(action), !(lw->split_mode == SPLIT_NONE));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SplitNextPane");
-	deprecated_gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SplitPreviousPane");
-	deprecated_gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SplitUpPane");
-	deprecated_gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SplitDownPane");
-	deprecated_gtk_action_set_sensitive(action, !(lw->split_mode == SPLIT_NONE));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SplitPaneSync");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.split_pane_sync);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-connected-zoom-menu");
+		g_simple_action_set_enabled(G_SIMPLE_ACTION(action), FALSE);
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "ViewIcons");
-	deprecated_gtk_radio_action_set_current_value(deprecated_GTK_RADIO_ACTION(action), lw->options.file_view_type);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-split-pane-sync");
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.split_pane_sync));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-view-mode");
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "CropNone");
-	deprecated_gtk_radio_action_set_current_value(deprecated_GTK_RADIO_ACTION(action), options->rectangle_draw_aspect_ratio);
+		if (lw->options.file_view_type == FILEVIEW_LIST)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("main-win-list"));
+			}
+		else if (lw->split_mode == SPLIT_VERT)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("main-win-icons"));
+			}
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-crop");
+		if (options->rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_NONE)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("none"));
+			}
+		else if (options->rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_ONE_ONE)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("1-1"));
+			}
+		else if (options->rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_FOUR_THREE)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("4-3"));
+			}
+		else if (options->rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_THREE_TWO)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("3-2"));
+			}
+		else if (options->rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_SIXTEEN_NINE)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("16-9"));
+			}
+		else
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("none"));
+			}
+			
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-osd");
+		if (options->overlay_screen_display_selected_profile == OVERLAY_SCREEN_DISPLAY_1)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("1"));
+			}
+		else if (options->overlay_screen_display_selected_profile == OVERLAY_SCREEN_DISPLAY_2)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("2"));
+			}
+		else if (options->overlay_screen_display_selected_profile == OVERLAY_SCREEN_DISPLAY_3)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("3"));
+			}
+		else if (options->overlay_screen_display_selected_profile == OVERLAY_SCREEN_DISPLAY_4)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("4"));
+			}
+		else
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("1"));
+			}
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-float-tools");
+		if (lw->options.tools_float)
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(TRUE));
+			}
+		else
+			{
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(FALSE));
+			}
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-info-sidebar");
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(layout_bar_enabled(lw)));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-sort-manager");
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(layout_bar_enabled(lw)));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "OSD1");
-	deprecated_gtk_radio_action_set_current_value(deprecated_GTK_RADIO_ACTION(action), options->overlay_screen_display_selected_profile);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-hide-selectable-toolbars");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.selectable_toolbars_hidden));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-show-info-pixel");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.show_info_pixel));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "FloatTools");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.tools_float);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-slideshow");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(layout_image_slideshow_active(lw)));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SBar");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), layout_bar_enabled(lw));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-ignore-alpha");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.ignore_alpha));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SBarSort");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), layout_bar_sort_enabled(lw));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-animate");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.animate));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-image-overlay");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(osd_flags != OSD_SHOW_NOTHING));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "HideSelectableToolbars");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.selectable_toolbars_hidden);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-image-histogram");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(osd_flags != OSD_SHOW_HISTOGRAM));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "ShowInfoPixel");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.show_info_pixel);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-exif-rotate");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->image.exif_rotate_enable));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "SlideShow");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), layout_image_slideshow_active(lw));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-over-under-exposed");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->overunderexposed));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "IgnoreAlpha");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.ignore_alpha);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-draw-rectangle");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->draw_rectangle));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "Animate");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.animate);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-rectangular-selection");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->collections.rectangular_selection));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "ImageOverlay");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), osd_flags != OSD_SHOW_NOTHING);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-show-file-filter");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.show_file_filter));
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "ImageHistogram");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), osd_flags & OSD_SHOW_HISTOGRAM);
-
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "ExifRotate");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), options->image.exif_rotate_enable);
-
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "OverUnderExposed");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), options->overunderexposed);
-
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "DrawRectangle");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), options->draw_rectangle);
-
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "RectangularSelection");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), options->collections.rectangular_selection);
-
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "ShowFileFilter");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.show_file_filter);
-
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "HideBars");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), (lw->options.bars_state.hidden));
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-hide-bars");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.bars_state.hidden));
 
 	if (osd_flags & OSD_SHOW_HISTOGRAM)
 		{
-		action = deprecated_gtk_action_group_get_action(lw->action_group, "HistogramChanR");
-		deprecated_gtk_radio_action_set_current_value(deprecated_GTK_RADIO_ACTION(action), image_osd_histogram_get_channel(lw->image));
+		action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-histogram-channel");
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_int64(image_osd_histogram_get_channel(lw->image)));
 
-		action = deprecated_gtk_action_group_get_action(lw->action_group, "HistogramModeLin");
-		deprecated_gtk_radio_action_set_current_value(deprecated_GTK_RADIO_ACTION(action), image_osd_histogram_get_mode(lw->image));
+		action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-histogram-mode");
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_int64(image_osd_histogram_get_mode(lw->image)));
 		}
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "ConnectZoomMenu");
-	deprecated_gtk_action_set_sensitive(action, lw->split_mode != SPLIT_NONE);
+//	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-connect-zoom-menu");
+//	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (lw->split_mode != SPLIT_NONE));
 
-	// @todo `which` is deprecated, use command -v
-	gboolean is_write_rotation = !runcmd("which exiftran >/dev/null 2>&1")
-	                          && !runcmd("which mogrify >/dev/null 2>&1")
-	                          && !options->metadata.write_orientation;
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "WriteRotation");
-	deprecated_gtk_action_set_sensitive(action, is_write_rotation);
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "WriteRotationKeepDate");
-	deprecated_gtk_action_set_sensitive(action, is_write_rotation);
+	g_autofree char *exiftran = g_find_program_in_path("exiftran");
+	g_autofree char *mogrify  = g_find_program_in_path("mogrify");
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "StereoAuto");
-	deprecated_gtk_radio_action_set_current_value(deprecated_GTK_RADIO_ACTION(action), layout_image_stereo_pixbuf_get(lw));
+	bool is_write_rotation =
+	    (exiftran != nullptr) &&
+	    (mogrify  != nullptr) &&
+	    !options->metadata.write_orientation;
+
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-write-rotation");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), is_write_rotation);
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-write-rotation-keep-date");
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), is_write_rotation);
+
+	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-stereo");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string(stereo_mode_to_string(layout_image_stereo_pixbuf_get(lw))));
 
 	layout_util_sync_marks(lw);
 	layout_util_sync_color(lw);
@@ -3822,8 +3491,9 @@ static void layout_util_sync_views(LayoutWindow *lw)
 	overlay_screen_display_profile_set(options->overlay_screen_display_selected_profile);
 }
 
-void layout_util_sync_thumb(LayoutWindow *lw)
+void layout_util_sync_thumb(LayoutWindow *)
 {
+/** FIXME GTK4
 	GtkAction *action;
 
 	if (!lw->action_group) return;
@@ -3831,6 +3501,7 @@ void layout_util_sync_thumb(LayoutWindow *lw)
 	action = deprecated_gtk_action_group_get_action(lw->action_group, "Thumbnails");
 	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.show_thumbnails);
 	deprecated_gtk_action_set_sensitive(action, lw->options.file_view_type == FILEVIEW_LIST);
+*/
 }
 
 void layout_util_sync(LayoutWindow *lw)
@@ -3839,16 +3510,8 @@ void layout_util_sync(LayoutWindow *lw)
 	layout_util_sync_thumb(lw);
 }
 
-gboolean is_help_key(guint keyval, GdkModifierType state)
-{
-	return is_help_key_impl(keyval, state);
-}
-#if !HAVE_GTK4
-gboolean is_help_key(GdkEventKey *event)
-{
-	return is_help_key_impl(event->keyval, (GdkModifierType)event->state);
-}
-#endif
+/** @FIXME GTK4 menus
+*/
 
 /*
  *-----------------------------------------------------------------------------
@@ -3958,9 +3621,9 @@ static gboolean layout_bar_sort_enabled(LayoutWindow *lw)
 }
 
 
-static void layout_bar_sort_destroyed(GtkWidget *, gpointer data)
+static void layout_bar_sort_destroyed(GtkWidget *, gpointer  )
 {
-	auto lw = static_cast<LayoutWindow *>(data);
+	auto lw = get_current_layout();
 
 	lw->bar_sort = nullptr;
 
@@ -4143,6 +3806,109 @@ static void layout_search_and_run_window_new(LayoutWindow *lw)
 		}
 
 	lw->sar_window = search_and_run_new(lw);
+}
+
+/* const ActionDef app_actions[] =
+ */
+#include "layout-util-app-actions.inc"
+
+/* const ActionDef main_actions[] =
+ */
+#include "layout-util-main-actions.inc"
+
+void register_main_window_actions(GtkApplication *app,  LayoutWindow *lw)
+{
+	GKeyFile *accels_keyfile = get_keyfile_merged();
+
+	register_actions_from_table(app, lw->window, main_actions, accels_keyfile, lw);
+}
+
+GStrv get_tooltips()
+{
+	GPtrArray *array = g_ptr_array_new_with_free_func(g_free);
+
+	for (const auto & app_action : app_actions)
+		{
+		if (app_action.description)
+			{
+			g_ptr_array_add(array, g_strdup(app_action.description));
+			}
+		}
+
+	g_ptr_array_add(array, nullptr);  /* NULL terminate */
+
+	return (GStrv) g_ptr_array_free(array, FALSE);
+}
+
+struct ActionLine
+{
+	const char *action_name;
+	const char *description;
+};
+
+struct ActionLine2
+{
+	const char *action_name;
+};
+
+GStrv get_actions_for_toolbar()
+{
+	size_t n_app_actions = G_N_ELEMENTS(app_actions);
+
+	std::vector<ActionLine2> rows;
+	rows.reserve(n_app_actions);
+
+	size_t max_entry_len = 0;
+
+	for (size_t i = 0; i < n_app_actions; i++)
+		{
+		if (!app_actions[i].icon_name)
+			{
+			continue;
+			}
+
+		if (!app_actions[i].action_name || !app_actions[i].description || (g_strcmp0(app_actions[i].icon_name, GQ_ICON_MISSING_IMAGE) == 0) || app_actions[i].parameter_type || !app_actions[i].icon_name)
+			{
+			continue;
+			}
+
+		rows.push_back({ app_actions[i].action_name});
+
+		size_t len = strlen(app_actions[i].description);
+		max_entry_len = std::max(len, max_entry_len);
+		}
+
+	std::sort(rows.begin(), rows.end(), [](const ActionLine2 & a, const ActionLine2 & b)
+		{
+		return g_strcmp0(a.action_name, b.action_name) < 0;
+		});
+
+	GPtrArray *array = g_ptr_array_new_with_free_func(g_free);
+
+	for (const auto &row : rows)
+		{
+		g_ptr_array_add(array, g_strdup_printf("%s", row.action_name));
+		}
+
+	g_ptr_array_add(array, nullptr);
+
+	return (GStrv) g_ptr_array_free(array, FALSE);
+}
+
+const ActionDef *get_app_actions()
+{
+	return app_actions;
+}
+
+
+const ActionDef *get_main_actions()
+{
+	return main_actions;
+}
+
+void register_app_actions(GtkApplication *app)
+{
+	register_actions_from_table(app, nullptr, app_actions, get_keyfile_merged(), nullptr);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -286,8 +286,8 @@ gboolean ImageLoaderTiff::write(const guchar *buf, gsize &chunk_size, gsize coun
 				guchar *top_line;
 				guchar *bottom_line;
 
-				top_line = pixels + (row + i_row) * rowstride;
-				bottom_line = pixels + (row + rows_to_write - i_row - 1) * rowstride;
+				top_line = pixels + ((row + i_row) * rowstride);
+				bottom_line = pixels + ((row + rows_to_write - i_row - 1) * rowstride);
 
 				memcpy(wrk_line, top_line, line_bytes);
 				memcpy(top_line, bottom_line, line_bytes);

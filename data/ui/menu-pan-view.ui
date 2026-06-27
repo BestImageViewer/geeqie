@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu-pan-view">
+    <section>
+      <item>
+        <attribute name="action">win.pan-win-play</attribute>
+        <attribute name="label" translatable="yes">Play</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.pan-win-zoom</attribute>
+        <attribute name="label" translatable="yes">Zoom in</attribute>
+        <attribute name="target">in</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.pan-win-zoom</attribute>
+        <attribute name="label" translatable="yes">Zoom out</attribute>
+        <attribute name="target">out</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.pan-win-zoom</attribute>
+        <attribute name="label" translatable="yes">Zoom 1:1</attribute>
+        <attribute name="target">1-1</attribute>
+      </item>
+    </section>
+    <section>
+      <submenu id="plugins-submenu">
+        <attribute name="label" translatable="yes">Plugins</attribute>
+      </submenu>
+      <item>
+        <attribute name="action">win.pan-win-view-in-new-window</attribute>
+        <attribute name="label" translatable="yes">View in new window</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.pan-win-go-to-original</attribute>
+        <attribute name="label" translatable="yes">Go to original</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.pan-win-copy</attribute>
+        <attribute name="label" translatable="yes">Copy…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.pan-win-move</attribute>
+        <attribute name="label" translatable="yes">Move…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.pan-win-rename</attribute>
+        <attribute name="label" translatable="yes">Rename…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.pan-win-copy-path</attribute>
+        <attribute name="label" translatable="yes">Copy path</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.pan-win-copy-path-unquoted</attribute>
+        <attribute name="label" translatable="yes">Copy path unquoted</attribute>
+      </item>
+    </section>
+    <section id="delete-section">
+      <item>
+        <attribute name="action">win.pan-win-delete</attribute>
+        <attribute name="label" translatable="yes">Move selection to trash</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.pan-win-delete-permanent</attribute>
+        <attribute name="label" translatable="yes">Delete</attribute>
+      </item>
+    </section>
+    <section>
+      <submenu>
+        <attribute name="label">Add to Collection</attribute>
+        <section>
+          <item>
+            <attribute name="action">win.pan-win-collections</attribute>
+            <attribute name="label" translatable="yes">New collection</attribute>
+            <attribute name="target" type="i">-1</attribute>
+          </item>
+        </section>
+        <section id="collections-submenu" />
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.pan-win-sort-by-exif-date</attribute>
+        <attribute name="label" translatable="yes">Sort by Exif date</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.pan-win-show-exif-information</attribute>
+        <attribute name="label" translatable="yes">Show Exif information</attribute>
+      </item>
+    </section>
+    <section>
+      <submenu>
+        <attribute name="label" translatable="yes">Show image</attribute>
+        <item>
+          <attribute name="action">win.pan-win-show-image</attribute>
+          <attribute name="label" translatable="yes">None</attribute>
+          <attribute name="target">none</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.pan-win-show-image</attribute>
+          <attribute name="label" translatable="yes">Full size</attribute>
+          <attribute name="target">full-size</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.pan-win-show-image</attribute>
+          <attribute name="label" translatable="yes">1:2 (50%)</attribute>
+          <attribute name="target">1-2</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.pan-win-show-image</attribute>
+          <attribute name="label" translatable="yes">1:3 (30%)</attribute>
+          <attribute name="target">1-3</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.pan-win-show-image</attribute>
+          <attribute name="label" translatable="yes">1:4 (25%)</attribute>
+          <attribute name="target">1-4</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.pan-win-show-image</attribute>
+          <attribute name="label" translatable="yes">1:10 (10%)</attribute>
+          <attribute name="target">1-10</attribute>
+        </item>
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.pan-win-fullscreen-toggle</attribute>
+        <attribute name="label" translatable="yes">Fullscreen toggle</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.pan-win-close-window</attribute>
+        <attribute name="label" translatable="yes">Close window</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

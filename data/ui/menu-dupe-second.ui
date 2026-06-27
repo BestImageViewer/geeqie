@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu-dupe-second">
+    <section>
+      <item>
+        <attribute name="action">win.dupe-win-second-view</attribute>
+        <attribute name="label" translatable="yes">View</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.dupe-win-second-view-in-new-window</attribute>
+        <attribute name="label" translatable="yes">View in new window</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.dupe-win-second-select-all</attribute>
+        <attribute name="label" translatable="yes">Select all</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.dupe-win-second-select-none</attribute>
+        <attribute name="label" translatable="yes">Select none</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.dupe-win-second-remove</attribute>
+        <attribute name="label" translatable="yes">Remove</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.dupe-win-second-clear</attribute>
+        <attribute name="label" translatable="yes">Clear</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.dupe-win-second-window-close</attribute>
+        <attribute name="label" translatable="yes">Close window</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

@@ -26,6 +26,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "ui-menu.h"
+
 enum ToolbarType : gint;
 
 struct LayoutWindow;
@@ -82,12 +84,22 @@ gboolean is_help_key(guint keyval, GdkModifierType state);
 #if !HAVE_GTK4
 gboolean is_help_key(GdkEventKey *event);
 #endif
-
-void layout_menu_close_cb(GtkAction *action, gpointer data);
+void layout_menu_close_cb(GSimpleAction *action, GVariant *, gpointer data);
 GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw);
 void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data);
 
 void create_toolbars(LayoutWindow *lw);
+
+void register_main_window_actions(GtkApplication *app,  LayoutWindow *lw);
+
+void plugin_run_cb(GSimpleAction *action, GVariant *parameter, gpointer user_data);
+
+GKeyFile *get_accels_as_keyfile();
+
+GStrv get_tooltips(void);
+GStrv get_actions_for_toolbar();
+
+void register_app_actions(GtkApplication *app );
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

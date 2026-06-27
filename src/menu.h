@@ -39,7 +39,13 @@ GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data);
 
 GtkWidget *submenu_add_collections(GtkWidget *menu, gboolean sensitive,
                                    GCallback func, gpointer data);
+void gsubmenu_add_collections(GMenu *menu, gboolean sensitive, GCallback func, gpointer data);
 
-void popup_menu_bar(GtkWidget *widget, GCallback expander_height_cb);
+void gsubmenu_add_edit(GMenu *menu, gboolean sensitive, GList *fd_list, GCallback func, gpointer data);
+
+void popup_menu_bar(GtkWidget *widget, GCallback expander_height_cb, gpointer data);
+void submenu_add_collections_new(GMenu *menu, gboolean sensitive,
+                                   const gchar *func, gpointer data);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

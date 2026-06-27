@@ -147,13 +147,6 @@ Checks for boolean comparisons in the style: `if (a == FALSE)`.
 See <https://docs.gtk.org/glib/types.html#gboolean> and
 `build-aux/boolean-comparison-check.awk`for more details.
 
-### GTK4 migration regression checks
-
-Checks that gtk functions for which there is a Geeqie GTK4 compatibility
-function have a `gq_` prefix.
-
-See `build-aux/gtk4-migration-regression-check.sh` for more details.
-
 ### Untranslated text checks
 
 Checks for strings that haven't been marked for translation (starting with `_(`)

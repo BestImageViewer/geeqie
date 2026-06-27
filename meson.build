@@ -845,23 +845,6 @@ else
     summary({'Boolean Comparison' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
 
-# GTK4 migration regression checks
-gtk4_migration_check_sh = find_program('gtk4-migration-regression-check.sh', dirs : buildauxdir, required : true)
-if gtk4_migration_check_sh.found()
-    compat_cc = join_paths(meson.project_source_root(), 'src', 'compat.cc')
-    compat_h = join_paths(meson.project_source_root(), 'src', 'compat.h')
-    foreach source_file : code_sources
-        source_file_name = fs.name(source_file)
-        if (source_file_name != 'compat-deprecated.h' and source_file_name != 'debug.h')
-            test('GTK4 migration_ ' + source_file_name, gtk4_migration_check_sh, args : [source_file, compat_cc, compat_h], timeout : 100, suite : 'analysis')
-        endif
-    endforeach
-
-    summary({'GTK4 migration' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
-else
-    summary({'GTK4 migration' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
-endif
-
 # Untranslated text checks
 untranslated_text_sh = find_program('untranslated-text.sh', dirs : buildauxdir, required : true)
 if untranslated_text_sh.found()

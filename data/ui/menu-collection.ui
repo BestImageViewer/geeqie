@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu-collection">
+    <section>
+      <item>
+        <attribute name="action">win.collection-win-view</attribute>
+        <attribute name="label" translatable="yes">View</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-view-new-window</attribute>
+        <attribute name="label" translatable="yes">View in _new window</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-go-to-original</attribute>
+        <attribute name="label" translatable="yes">Go to original</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.collection-win-remove</attribute>
+        <attribute name="label" translatable="yes">Rem_ove</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-append-from-file-selection</attribute>
+        <attribute name="label" translatable="yes">Append from file selection</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-append-from-collection</attribute>
+        <attribute name="label" translatable="yes">Append from collection…</attribute>
+      </item>
+    </section>
+    <section id="selections-submenu">
+      <submenu>
+        <attribute name="label">Selection</attribute>
+        <section>
+          <item>
+            <attribute name="action">win.collection-win-select-all</attribute>
+            <attribute name="label" translatable="yes">Select all</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-select-none</attribute>
+            <attribute name="label" translatable="yes">Select none</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-invert-selection</attribute>
+            <attribute name="label" translatable="yes">Invert selection</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-rectangular-selection</attribute>
+            <attribute name="label" translatable="yes">Rectangular selection</attribute>
+          </item>
+        </section>
+      </submenu>
+    </section>
+    <section>
+      <submenu>
+        <attribute name="label">Plugins</attribute>
+        <section id="plugins-submenu" />
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.collection-win-copy</attribute>
+        <attribute name="label" translatable="yes">Copy…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-move</attribute>
+        <attribute name="label" translatable="yes">Move…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-rename</attribute>
+        <attribute name="label" translatable="yes">Rename…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-copy-path</attribute>
+        <attribute name="label" translatable="yes">Copy path</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-copy-path-unquoted</attribute>
+        <attribute name="label" translatable="yes">Copy path unquoted</attribute>
+      </item>
+    </section>
+    <section id="delete-section">
+      <item>
+        <attribute name="action">win.collection-win-delete</attribute>
+        <attribute name="label" translatable="yes">Move selection to trash</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-delete-permanent</attribute>
+        <attribute name="label" translatable="yes">Delete</attribute>
+      </item>
+    </section>
+    <section>
+      <submenu>
+        <attribute name="label">Sort</attribute>
+        <section>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by name</attribute>
+            <attribute name="target">name</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by number</attribute>
+            <attribute name="target">number</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by date</attribute>
+            <attribute name="target">date</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by file creation date</attribute>
+            <attribute name="target">date-creation</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by Exif date original</attribute>
+            <attribute name="target">exif-original</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by Exif date digitized</attribute>
+            <attribute name="target">exif-digitized</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by size</attribute>
+            <attribute name="target">size</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by rating</attribute>
+            <attribute name="target">rating</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by class</attribute>
+            <attribute name="target">class</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.collection-win-sort</attribute>
+            <attribute name="label" translatable="yes">Sort by path</attribute>
+            <attribute name="target">path</attribute>
+          </item>
+        </section>
+        <section>
+          <item>
+            <attribute name="action">win.collection-win-sort-random</attribute>
+            <attribute name="label" translatable="yes">Randomize</attribute>
+          </item>
+        </section>
+      </submenu>
+      <item>
+        <attribute name="action">win.collection-win-show-filename-text</attribute>
+        <attribute name="label" translatable="yes">Show filename text</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-show-star-rating</attribute>
+        <attribute name="label" translatable="yes">Show star rating</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-show-infotext</attribute>
+        <attribute name="label" translatable="yes">Show infotext</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.collection-win-save-collection</attribute>
+        <attribute name="label" translatable="yes">Save collection</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-save-collection-as</attribute>
+        <attribute name="label" translatable="yes">Save collection as…</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.collection-win-find-duplicates</attribute>
+        <attribute name="label" translatable="yes">Find duplicates…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.collection-win-print</attribute>
+        <attribute name="label" translatable="yes">Print…</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

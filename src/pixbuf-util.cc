@@ -81,7 +81,6 @@ constexpr PixbufInline inline_pixbuf_data[] = {
 	{ PIXBUF_INLINE_ICON_MOVE,              "gq-icon-move" },
 	{ PIXBUF_INLINE_ICON_ORIGINAL,          "gq-icon-original" },
 	{ PIXBUF_INLINE_ICON_PANORAMA,          "gq-icon-panorama" },
-	{ PIXBUF_INLINE_ICON_PLACEHOLDER,       "gq-icon-placeholder" },
 	{ PIXBUF_INLINE_ICON_PDF,               "gq-icon-pdf" },
 	{ PIXBUF_INLINE_ICON_PROPERTIES,        "gq-icon-properties" },
 	{ PIXBUF_INLINE_ICON_RENAME,            "gq-icon-rename" },
@@ -267,7 +266,7 @@ static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
 
 void pixbuf_inline_register_stock_icons()
 {
-	for (const PixbufInline &pi : inline_pixbuf_data)
+for (const PixbufInline &pi : inline_pixbuf_data)
 		{
 		g_autoptr(GdkPixbuf) pixbuf = pixbuf_inline(pi.key);
 		register_stock_icon(pi.key, pixbuf);

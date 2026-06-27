@@ -30,6 +30,7 @@
 
 #include <glib-object.h>
 
+#include "actions.h"
 #include "collect-dlg.h"
 #include "collect-io.h"
 #include "collect-table.h"
@@ -1005,11 +1006,8 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 			}
 		}
 
-	if (!stop_signal && is_help_key(event))
-		{
-		help_window_show("GuideCollections.html");
-		stop_signal = TRUE;
-		}
+/* @FIXME GTK4 menus
+*/
 
 	return stop_signal;
 }

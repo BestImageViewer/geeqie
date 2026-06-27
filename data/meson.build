@@ -9,3 +9,5 @@ subdir('images')
 subdir('man')
 subdir('plugins')
 subdir('ui')
+
+project_sources += gnome.compile_resources('data', 'data.gresource.xml')
