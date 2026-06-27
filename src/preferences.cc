@@ -522,8 +522,6 @@ static void config_window_apply()
 	options->mouse_button_8 = c_options->mouse_button_8;
 	options->mouse_button_9 = c_options->mouse_button_9;
 
-	options->override_disable_gpu = c_options->override_disable_gpu;
-
 	config_tab_keywords_save();
 
 	image_options_sync();
@@ -3352,14 +3350,6 @@ static void config_tab_behavior(GtkWidget *notebook)
 	add_mouse_selection_menu(table, 0, 0, _("Mouse button Back:"), options->mouse_button_8, &c_options->mouse_button_8);
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 	add_mouse_selection_menu(table, 0, 0, _("Mouse button Forward:"), options->mouse_button_9, &c_options->mouse_button_9);
-
-	pref_spacer(group, PREF_PAD_GROUP);
-
-	group = pref_group_new(vbox, FALSE, _("GPU"), GTK_ORIENTATION_VERTICAL);
-
-	checkbox = pref_checkbox_new_int(group, _("Override disable GPU"),
-				options->override_disable_gpu, &c_options->override_disable_gpu);
-	gtk_widget_set_tooltip_text(checkbox, _("Contact the developers for usage"));
 
 #ifdef DEBUG
 	pref_spacer(group, PREF_PAD_GROUP);

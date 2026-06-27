@@ -35,11 +35,6 @@
 
 #include <config.h>
 
-#if HAVE_CLUTTER
-#  include <clutter-gtk/clutter-gtk.h>
-#  include <clutter/clutter.h>
-#endif
-
 #if HAVE_EXECINFO_H
 #include <execinfo.h>
 #endif
@@ -120,8 +115,6 @@ Normally a single set of configuration files is used for all instances.\n \
 However, the environment variables XDG_CONFIG_HOME, XDG_CACHE_HOME, XDG_DATA_HOME\n \
 can be used to modify this behavior on an individual basis e.g.\n \
 XDG_CONFIG_HOME=/tmp/a XDG_CACHE_HOME=/tmp/b GQ_NEW_INSTANCE=y geeqie\n\n \
-To disable Clutter use:\n \
-GQ_DISABLE_CLUTTER=y[es] geeqie\n\n \
 To run or stop Geeqie in cache maintenance (non-GUI) mode use:\n \
 GQ_CACHE_MAINTENANCE=y[es] geeqie --help\n \
 Note that bash command line completion does not work in this mode.\n\n \
@@ -887,13 +880,6 @@ void startup_cb(GtkApplication *app, gpointer)
 {
 	startup_common(app, nullptr);
 
-	const gchar *gq_disable_clutter = g_getenv("GQ_DISABLE_CLUTTER");
-
-	if (gq_disable_clutter && (gq_disable_clutter[0] == 'y' || gq_disable_clutter[0] == 'Y'))
-		{
-		options->disable_gpu = TRUE;
-		}
-
 	/* This must run before the layout is loaded. The layout may contain
 	 * app level actions.
 	 */
@@ -917,23 +903,6 @@ void startup_cb(GtkApplication *app, gpointer)
 		options->image_overlay_n[0].template_string = g_strdup(options->image_overlay.template_string);
 		options->image_overlay_n[0].font = g_strdup(options->image_overlay.font);
 		}
-
-#if HAVE_CLUTTER
-	/** @FIXME For the background of this see:
-	 * https://github.com/BestImageViewer/geeqie/issues/397
-	 * The feature CLUTTER_FEATURE_SWAP_EVENTS indictates if the
-	 * system is liable to exhibit this problem.
-	 * The user is provided with an override in Preferences/Behavior
-	 */
-	if (!options->override_disable_gpu && !options->disable_gpu)
-		{
-		DEBUG_1("CLUTTER_FEATURE_SWAP_EVENTS %d",clutter_feature_available(CLUTTER_FEATURE_SWAP_EVENTS));
-		if (clutter_feature_available(CLUTTER_FEATURE_SWAP_EVENTS) != 0)
-			{
-			options->disable_gpu = TRUE;
-			}
-		}
-#endif
 
 	/* handle missing config file and commandline additions*/
 	if (!layout_window_first())
@@ -1010,22 +979,6 @@ gint main(gint argc, gchar *argv[])
 #endif
 		}
 
-#if HAVE_CLUTTER
-	const gchar *gq_disable_clutter = g_getenv("GQ_DISABLE_CLUTTER");
-
-	if (!gq_disable_clutter || tolower(gq_disable_clutter[0]) != 'y')
-		{
-		if (gtk_clutter_init(nullptr, nullptr) != CLUTTER_INIT_SUCCESS)
-			{
-			fprintf(stderr,
-				_("Can't initialize clutter-gtk. \n \
-				To start Geeqie use: \n \
-				GQ_DISABLE_CLUTTER=y geeqie\n\n"));
-
-			return EXIT_FAILURE;
-			}
-		}
-#endif
 	const gchar *gq_cache_maintenance = g_getenv("GQ_CACHE_MAINTENANCE");
 	if (gq_cache_maintenance && tolower(gq_cache_maintenance[0]) == 'y')
 		{
