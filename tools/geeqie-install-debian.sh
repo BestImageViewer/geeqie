@@ -37,7 +37,7 @@ yelp-tools
 help2man
 doclifter"
 
-# Optional for GTK3
+# Optional for GTK4
 optional_array="LCMS (for color management)
 liblcms2-dev
 exiv2 (for exif handling)
@@ -186,16 +186,11 @@ install_essential()
 		fi
 	done
 
-	if [ "$1" = "GTK3" ]
+	if [ "$1" = "GTK4" ]
 	then
-		if package_query "libgtk-3-dev"
+		if package_query "libgtk-4-dev"
 		then
-			package_install libgtk-3-dev
-		fi
-	else
-		if package_query "libgtk2.0-dev"
-		then
-			package_install libgtk2.0-dev
+			package_install libgtk-4-dev
 		fi
 	fi
 }
@@ -392,8 +387,7 @@ else
 	fi
 fi
 
-# Use GTK3 as default
-gtk3_installed=TRUE
+gtk4_installed=TRUE
 
 if [ "$mode" = "install" ]
 then
@@ -408,9 +402,9 @@ else
 	install_option=FALSE
 fi
 
-# Ask whether to install GTK3 or uninstall
+# Ask whether to install GTK4 or uninstall
 
-if ! gtk_version=$(zenity --title="$title" --text="$message" --list --radiolist --column "" --column "" "$gtk3_installed" "Install" FALSE "Uninstall" --cancel-label="Cancel" --ok-label="OK" --hide-header 2> /dev/null)
+if ! gtk_version=$(zenity --title="$title" --text="$message" --list --radiolist --column "" --column "" "$gtk4_installed" "Install" FALSE "Uninstall" --cancel-label="Cancel" --ok-label="OK" --hide-header 2> /dev/null)
 then
 	exit
 fi
@@ -557,19 +551,11 @@ fi
 printf '%b\n' "40" > "$zen_pipe"
 printf '%b\n' "#Creating configuration files…" > "$zen_pipe"
 
-if [ -z "${gtk_version%%GTK3*}" ]
-then
-	meson setup build
-	printf '%b\n' "90 " > "$zen_pipe"
-	printf '%b\n' "#Installing Geeqie…" > "$zen_pipe"
-	ninja -C build install
-else
-	meson setup build
-	meson configure --no-pager build
-	printf '%b\n' "90 " > "$zen_pipe"
-	printf '%b\n' "#Installing Geeqie…" > "$zen_pipe"
-	sudo --askpass meson install -C build
-fi
+meson setup build
+meson configure --no-pager build
+printf '%b\n' "90 " > "$zen_pipe"
+printf '%b\n' "#Installing Geeqie…" > "$zen_pipe"
+sudo --askpass meson install -C build
 
 rm "$install_pass_script"
 mv -f "$install_log" "./build/install.log"

@@ -402,17 +402,6 @@ constexpr gint SEARCH_BUFFER_FLUSH_SIZE = 99;
 
 constexpr auto FORMAT_CLASS_BROKEN = static_cast<FileFormatClass>(FILE_FORMAT_CLASSES + 1);
 
-#if !HAVE_GTK4
-constexpr std::array<GtkTargetEntry, 2> result_drag_types{{
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-}};
-
-constexpr std::array<GtkTargetEntry, 2> result_drop_types{{
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-}};
-#endif
 
 template<typename T>
 bool match_is_between(T val, T a, T b)
@@ -1336,18 +1325,6 @@ static bool text_box_on_focus_out_cb(GtkWidget *, GdkEventFocus *, gpointer data
  * dnd
  *-------------------------------------------------------------------
  */
-#if !HAVE_GTK4
-static void search_dnd_data_set(GtkWidget *, GdkDragContext *,
-				GtkSelectionData *selection_data, guint,
-				guint, gpointer data)
-{
-	auto sd = static_cast<SearchData *>(data);
-
-	g_autoptr(FileDataList) list = search_result_selection_list(sd);
-	if (!list) return;
-
-	uri_selection_data_set_uris_from_filelist(selection_data, list);
-}
 
 static void search_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
 {

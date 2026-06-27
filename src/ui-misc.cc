@@ -323,19 +323,11 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 					    GCallback func, gpointer data)
 {
 	GtkWidget *button;
-#if HAVE_GTK4
 	GtkToggleButton *group;
-#else
-	GSList *group;
-#endif
 
 	if (sibling)
 		{
-#if HAVE_GTK4
 		group = sibling;
-#else
-		group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(sibling));
-#endif
 		}
 	else
 		{
@@ -344,21 +336,13 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 
 	if (mnemonic_text)
 		{
-#if HAVE_GTK4
 		button = gtk_toggle_button_new_with_mnemonic(text);
 		gtk_toggle_button_set_group(button, group);
-#else
-		button = gtk_radio_button_new_with_mnemonic(group, text);
-#endif
 		}
 	else
 		{
-#if HAVE_GTK4
 		button = gtk_toggle_button_new_with_label(text);
 		gtk_toggle_button_set_group(button, group);
-#else
-		button = gtk_radio_button_new_with_label(group, text);
-#endif
 		}
 
 	if (active) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), active);
@@ -675,18 +659,13 @@ static void date_selection_popup_hide(DateSelection *ds)
 {
 	if (!ds->popover) return;
 
-#if HAVE_GTK4
 	gtk_popover_popdown(GTK_POPOVER(ds->popover));
-#else
-	gtk_widget_hide(ds->popover);
-#endif
 
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), FALSE);
 }
 
 static void date_selection_popup_sync(DateSelection *ds)
 {
-#if HAVE_GTK4
 	g_autoptr(GDateTime) date_selected = gtk_calendar_get_date(GTK_CALENDAR(ds->calendar));
 
 	gint year;
@@ -696,77 +675,35 @@ static void date_selection_popup_sync(DateSelection *ds)
 	g_date_time_get_ymd(date_selected, &year, &month, &day);
 
 	date_selection_set(ds->box, day, month, year);
-#else
-	guint year;
-	guint month;
-	guint day;
-
-	gtk_calendar_get_date(GTK_CALENDAR(ds->calendar), &year, &month, &day);
-
-	/* GTK3 month is 0..11 */
-	date_selection_set(ds->box, day, month + 1, year);
-#endif
 }
 
 static void date_selection_popup(DateSelection *ds)
 {
 	if (ds->popover)
 		{
-#if HAVE_GTK4
 		gtk_popover_popup(GTK_POPOVER(ds->popover));
-#else
-		gtk_widget_show(ds->popover);
-#endif
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), TRUE);
 		return;
 		}
 
-#if HAVE_GTK4
 	ds->popover = gtk_popover_new();
 	gtk_widget_set_parent(ds->popover, ds->button);
-#else
-	ds->popover = gtk_popover_new(ds->button);
-#endif
 
 	ds->calendar = gtk_calendar_new();
 
-#if HAVE_GTK4
 	gtk_popover_set_child(GTK_POPOVER(ds->popover), ds->calendar);
-#else
-	gq_gtk_container_add(ds->popover, ds->calendar);
-	gtk_widget_show(ds->calendar);
-#endif
 
 	g_autoptr(GDateTime) date = date_selection_get(ds->box);
 
-#if HAVE_GTK4
 	gtk_calendar_select_day(GTK_CALENDAR(ds->calendar), date);
-#else
-	gtk_calendar_select_month(GTK_CALENDAR(ds->calendar),
-	                          g_date_time_get_month(date) - 1,
-	                          g_date_time_get_year(date));
-
-	gtk_calendar_select_day(GTK_CALENDAR(ds->calendar),
-	                        g_date_time_get_day_of_month(date));
-#endif
 
 	g_signal_connect_swapped(ds->calendar,
 	                         "day-selected",
 	                         G_CALLBACK(date_selection_popup_sync),
 	                         ds);
 
-#if !HAVE_GTK4
-	g_signal_connect_swapped(ds->calendar,
-	                         "day-selected-double-click",
-	                         G_CALLBACK(date_selection_popup_hide),
-	                         ds);
-#endif
 
-#if HAVE_GTK4
 	gtk_popover_popup(GTK_POPOVER(ds->popover));
-#else
-	gtk_widget_show(ds->popover);
-#endif
 
 	gtk_widget_grab_focus(ds->calendar);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), TRUE);
@@ -1198,12 +1135,7 @@ static void action_to_list_duplicates(gpointer data, gpointer user_data)
 
 	g_autofree gchar *action_label = get_action_label(action, action_name);
 
-#if HAVE_GTK4
 	/* @FIXME GTK4 stub */
-#else
-	auto *list_duplicates = static_cast<std::vector<ActionItem> *>(user_data);
-	list_duplicates->emplace_back(action_name, action_label, deprecated_gtk_action_get_stock_id(action));
-#endif
 }
 
 /**
@@ -1257,8 +1189,6 @@ GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gcha
 
 gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos)
 {
-#if HAVE_GTK4
-
 	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
 
 	if (!surface)
@@ -1296,30 +1226,12 @@ gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos)
 	int height = gdk_surface_get_height(surface);
 
 	return 0 <= pos.x && pos.x < width && 0 <= pos.y && pos.y < height;
-#else
-	GdkWindow *window = gtk_widget_get_window(widget);
-
-	if (!window)
-		{
-		return FALSE;
-		}
-
-	GdkSeat *seat = gdk_display_get_default_seat(gdk_window_get_display(window));
-	GdkDevice *device = gdk_seat_get_pointer(seat);
-
-	get_pointer_position(widget, device, &pos.x, &pos.y, nullptr);
-	gint width = gdk_window_get_width(window);
-	gint height = gdk_window_get_height(window);
-
-	return 0 <= pos.x && pos.x < width && 0 <= pos.y && pos.y < height;
-#endif
 }
 
 GdkRectangle widget_get_position_geometry(GtkWidget *widget)
 {
 	GdkRectangle rect = {};
 
-#if HAVE_GTK4
 	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
 
 	if (!surface)
@@ -1340,22 +1252,11 @@ GdkRectangle widget_get_position_geometry(GtkWidget *widget)
 
 	return rect;
 }
-#else
-	GdkWindow *window = gtk_widget_get_window(widget);
-
-	gdk_window_get_position(window, &rect.x, &rect.y);
-	rect.width = gdk_window_get_width(window);
-	rect.height = gdk_window_get_height(window);
-
-	return rect;
-}
-#endif
 
 GdkRectangle widget_get_root_origin_geometry(GtkWidget *widget)
 {
 	GdkRectangle rect = {};
 
-#if HAVE_GTK4
 	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
 
 	if (!surface)
@@ -1372,23 +1273,10 @@ GdkRectangle widget_get_root_origin_geometry(GtkWidget *widget)
 	rect.height = gdk_surface_get_height(surface);
 
 	return rect;
-#else
-	GdkWindow *win = gtk_widget_get_window(widget);
-	if (!win)
-		{
-		return rect;
-		}
-	gdk_window_get_root_origin(win, &rect.x, &rect.y);
-	rect.width = gdk_window_get_width(win);
-	rect.height = gdk_window_get_height(win);
-
-	return rect;
-#endif
 }
 
 gboolean widget_received_event(GtkWidget *widget, GqPoint event)
 {
-#if HAVE_GTK4
 	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
 
 	if (!surface)
@@ -1400,26 +1288,7 @@ gboolean widget_received_event(GtkWidget *widget, GqPoint event)
 	int height = gdk_surface_get_height(surface);
 
 	return 0 <= event.x && event.x <= width && 0 <= event.y && event.y <= height;
-
-#else
-	GdkWindow *window = gtk_widget_get_window(widget);
-
-	if (!window)
-		{
-		return FALSE;
-		}
-
-	gint x;
-	gint y;
-	gdk_window_get_origin(window, &x, &y);
-
-	gint width  = gdk_window_get_width(window);
-	gint height = gdk_window_get_height(window);
-
-	return x <= event.x && event.x <= x + width &&
-	       y <= event.y && event.y <= y + height;
 }
-#endif
 
 void widget_remove_from_parent(GtkWidget *widget)
 {
@@ -1464,7 +1333,6 @@ void widget_input_ungrab(GtkWidget *widget)
 
 gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int *y, GdkModifierType *mask)
 {
-#if HAVE_GTK4
 	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
 	GdkSurface *ps = NULL;
 	double dx;
@@ -1480,16 +1348,10 @@ gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int 
 	*y = (int)dy;
 
 	return TRUE;
-#else
-	gdk_window_get_device_position(gtk_widget_get_window(widget), device, x, y, mask);
-
-	return TRUE;
-#endif
 }
 
 void get_device_position(GdkDevice *device, int &x, int &y)
 {
-#if HAVE_GTK4
 	double dx = 0.0;
 	double dy = 0.0;
 	GdkSurface *surface = nullptr;
@@ -1511,9 +1373,6 @@ void get_device_position(GdkDevice *device, int &x, int &y)
 
 	x = (int)dx;
 	y = (int)dy;
-#else
-	gdk_device_get_position(device, nullptr, &x, &y);
-#endif
 }
 
 PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale)

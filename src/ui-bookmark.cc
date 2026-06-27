@@ -99,19 +99,6 @@ enum {
 	TARGET_TEXT_PLAIN
 };
 
-#if !HAVE_GTK4
-constexpr std::array<GtkTargetEntry, 3> bookmark_drop_types{{
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("x-url/http"),    0, TARGET_X_URL },
-	{ const_cast<gchar *>("_NETSCAPE_URL"), 0, TARGET_X_URL }
-}};
-
-constexpr std::array<GtkTargetEntry, 2> bookmark_drag_types{{
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"),    0, TARGET_TEXT_PLAIN }
-}};
-#endif
-
 std::vector<BookMarkData *> bookmark_widget_list;
 std::vector<std::pair<std::string, std::string>> bookmark_default_list;
 
@@ -371,18 +358,11 @@ static gboolean bookmark_press_common(GtkWidget *button, guint button_id, gpoint
 	return TRUE;
 }
 
-#if HAVE_GTK4
 static void bookmark_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer data)
 {
 	GtkWidget *button = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 	bookmark_press_common(button, gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)), data);
 }
-#else
-static gboolean bookmark_press_cb(GtkWidget *button, GdkEventButton *event, gpointer data)
-{
-	return bookmark_press_common(button, event->button, data);
-}
-#endif
 
 static gboolean bookmark_keypress_cb(GtkWidget *button, GdkEventKey *event, gpointer data)
 {
@@ -417,49 +397,6 @@ static gboolean bookmark_keypress_cb(GtkWidget *button, GdkEventKey *event, gpoi
 
 	return FALSE;
 }
-
-#if !HAVE_GTK4
-static void bookmark_drag_set_data(GtkWidget *button,
-				   GdkDragContext *context, GtkSelectionData *selection_data,
-				   guint, guint, gpointer data)
-{
-	return;
-
-	auto bm = static_cast<BookMarkData *>(data);
-	BookButtonData *b;
-
-	if (gdk_drag_context_get_dest_window(context) == gtk_widget_get_window(bm->widget)) return;
-
-	b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
-	if (!b) return;
-
-	g_autoptr(GList) list = g_list_append(nullptr, b->path.data());
-	uri_selection_data_set_uris_from_pathlist(selection_data, list);
-}
-
-static void bookmark_drag_begin(GtkWidget *button, GdkDragContext *context, gpointer)
-{
-	GdkPixbuf *pixbuf;
-	gint x;
-	gint y;
-	GtkAllocation allocation;
-	GdkSeat *seat;
-	GdkDevice *device;
-
-	gtk_widget_get_allocation(button, &allocation);
-
-	pixbuf = gdk_pixbuf_get_from_window(gtk_widget_get_window(button),
-					    allocation.x, allocation.y,
-					    allocation.width, allocation.height);
-	seat = gdk_display_get_default_seat(gdk_window_get_display(gtk_widget_get_window(button)));
-	device = gdk_seat_get_pointer(seat);
-	get_pointer_position(button, device, &x, &y, nullptr);
-
-	gtk_drag_set_icon_pixbuf(context, pixbuf,
-				 x - allocation.x, y - allocation.y);
-	g_object_unref(pixbuf);
-}
-#endif
 
 static gboolean bookmark_tooltip_cb(GtkWidget *button, gint, gint, gboolean,
                                     GtkTooltip *, gpointer user_data)
@@ -540,27 +477,12 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 
 	g_signal_connect(G_OBJECT(button), "clicked",
 	                 G_CALLBACK(bookmark_select_cb), bm);
-#if HAVE_GTK4
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(bookmark_gesture_press_cb), bm);
 	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(gesture));
-#else
-	g_signal_connect(G_OBJECT(button), "button_press_event",
-	                 G_CALLBACK(bookmark_press_cb), bm);
-#endif
 	g_signal_connect(G_OBJECT(button), "key_press_event",
 	                 G_CALLBACK(bookmark_keypress_cb), bm);
-
-#if !HAVE_GTK4
-	gq_gtk_drag_source_set(button, GDK_BUTTON1_MASK,
-	                       bookmark_drag_types.data(), bookmark_drag_types.size(),
-	                       static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(button), "drag_data_get",
-	                         G_CALLBACK(bookmark_drag_set_data), bm);
-	gq_drag_g_signal_connect(G_OBJECT(button), "drag_begin",
-	                         G_CALLBACK(bookmark_drag_begin), nullptr);
-#endif
 
 	gtk_widget_set_has_tooltip(button, TRUE);
 	g_signal_connect(G_OBJECT(button), "query-tooltip", G_CALLBACK(bookmark_tooltip_cb), b);
@@ -568,18 +490,10 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 
 static void bookmark_populate(BookMarkData *bm)
 {
-#if HAVE_GTK4
 	while (GtkWidget *child = gtk_widget_get_first_child(bm->box))
 		{
 		gtk_box_remove(GTK_BOX(bm->box), child);
 		}
-#else
-	static const auto destroy_widget = [](GtkWidget *widget, gpointer)
-	{
-		gq_gtk_widget_destroy(widget);
-	};
-	gq_gtk_container_foreach(bm->box, destroy_widget, nullptr);
-#endif
 
 	if (!bm->no_defaults && !history_list_find_by_key(bm->key.c_str()))
 		{
@@ -637,34 +551,6 @@ static void bookmark_populate_all(const std::string &key)
 		}
 }
 
-#if !HAVE_GTK4
-static void bookmark_dnd_get_data(GtkWidget *, GdkDragContext *,
-				  gint, gint,
-				  GtkSelectionData *selection_data, guint,
-				  guint, gpointer data)
-{
-	auto bm = static_cast<BookMarkData *>(data);
-
-	if (!bm->editable) return;
-
-	GList *list = uri_pathlist_from_gtk_selection_data(selection_data);
-
-	for (GList *work = list; work; work = work->next)
-		{
-		auto path = static_cast<gchar *>(work->data);
-
-		if (bm->only_directories && !isdir(path)) continue;
-
-		g_autofree gchar *buf = bookmark_string(filename_from_path(path), path, bookmark_icon(path));
-		history_list_add_to_key(bm->key.c_str(), buf, 0);
-		}
-
-	g_list_free_full(list, g_free);
-
-	bookmark_populate_all(bm->key);
-}
-#endif
-
 static void bookmark_data_destroy(gpointer data)
 {
 	auto *bm = static_cast<BookMarkData *>(data);
@@ -705,15 +591,6 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 	g_object_set_data_full(G_OBJECT(bm->box), BOOKMARK_DATA_KEY, bm, bookmark_data_destroy);
 	g_object_set_data(G_OBJECT(scrolled), BOOKMARK_DATA_KEY, bm);
 	bm->widget = scrolled;
-
-#if !HAVE_GTK4
-	gq_gtk_drag_dest_set(scrolled,
-	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
-	                  bookmark_drop_types.data(), bookmark_drop_types.size(),
-	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	g_signal_connect(G_OBJECT(scrolled), "drag_data_received",
-			 G_CALLBACK(bookmark_dnd_get_data), bm);
-#endif
 
 	bookmark_widget_list.push_back(bm);
 

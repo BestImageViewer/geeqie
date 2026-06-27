@@ -53,11 +53,7 @@ FileData *vdtree_populate_path(ViewDir *vd, FileData *target_fd, gboolean expand
 void vdtree_rename_by_data(ViewDir *vd, FileData *fd);
 
 gboolean vdtree_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
-#if HAVE_GTK4
 gboolean vdtree_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
-#else
-gboolean vdtree_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);
-#endif
 
 void vdtree_destroy_cb(GtkWidget *widget, gpointer data);
 

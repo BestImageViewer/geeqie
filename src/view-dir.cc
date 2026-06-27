@@ -60,12 +60,6 @@
 namespace
 {
 
-#if !HAVE_GTK4
-constexpr std::array<GtkTargetEntry, 1> vd_dnd_drop_types{{
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST }
-}};
-#endif
-
 GdkPixbuf *create_folder_icon_with_emblem(GtkIconTheme *icon_theme, const gchar *emblem, const gchar *fallback_icon, gint size)
 {
 	GdkPixbuf *pixbuf = nullptr;
@@ -791,168 +785,6 @@ void vd_new_folder(ViewDir *vd, FileData *dir_fd)
  *-----------------------------------------------------------------------------
  */
 
-#if !HAVE_GTK4
-static void vd_dest_set(ViewDir *vd, gint enable)
-{
-	if (enable)
-		{
-		gq_gtk_drag_dest_set(vd->view,
-		                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
-		                  vd_dnd_drop_types.data(), vd_dnd_drop_types.size(),
-		                  static_cast<GdkDragAction>(GDK_ACTION_MOVE | GDK_ACTION_COPY));
-		}
-	else
-		{
-		gq_gtk_drag_dest_unset(vd->view);
-		}
-}
-
-static void vd_dnd_get(GtkWidget *, GdkDragContext *,
-			   GtkSelectionData *selection_data, guint info,
-			   guint, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
-	GList *list;
-
-	if (!vd->click_fd) return;
-
-	switch (info)
-		{
-		case TARGET_URI_LIST:
-		case TARGET_TEXT_PLAIN:
-			list = g_list_prepend(nullptr, vd->click_fd);
-			uri_selection_data_set_uris_from_filelist(selection_data, list);
-			g_list_free(list);
-			break;
-		default:
-			break;
-		}
-}
-
-static void vd_dnd_begin(GtkWidget *, GdkDragContext *, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
-
-	vd_color_set(vd, vd->click_fd, TRUE);
-	vd_dest_set(vd, FALSE);
-}
-
-static void vd_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
-
-	vd_color_set(vd, vd->click_fd, FALSE);
-
-	if (vd->type == DIRVIEW_LIST && gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
-		{
-		vd_refresh(vd);
-		}
-	vd_dest_set(vd, TRUE);
-}
-
-static void vd_dnd_drop_receive(GtkWidget *widget, GdkDragContext *context,
-				gint x, gint y,
-				GtkSelectionData *selection_data, guint info,
-				guint, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
-	FileData *fd = nullptr;
-
-	vd->click_fd = nullptr;
-
-	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
-	                                  &tpath, nullptr, nullptr, nullptr))
-		{
-		fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(widget), tpath);
-		}
-
-	if (!fd) return;
-
-	if (info == TARGET_URI_LIST)
-		{
-		GList *list;
-		gint active;
-		gboolean done = FALSE;
-
-		list = uri_filelist_from_gtk_selection_data(selection_data);
-		if (!list) return;
-
-		active = access_file(fd->path, W_OK | X_OK);
-
-		vd_color_set(vd, fd, TRUE);
-
-		if (active)
-			{
-			/** @FIXME With GTK2 gdk_drag_context_get_actions() shows the state of the
-			 * shift and control keys during the drag operation. With GTK3 this is not
-			 * so. This is a workaround.
-			 */
-			GdkModifierType mask;
-			DnDAction action = options->dnd_default_action;
-
-			get_pointer_position(widget, gdk_drag_context_get_device(context), nullptr, nullptr, &mask);
-			if (mask & GDK_CONTROL_MASK)
-				{
-				action = DND_ACTION_COPY;
-				}
-			else if (mask & GDK_SHIFT_MASK)
-				{
-				action = DND_ACTION_MOVE;
-				}
-
-			if (action == DND_ACTION_COPY)
-				{
-				file_util_copy_simple(list, fd->path, vd->widget);
-				done = TRUE;
-				list = nullptr;
-				}
-			else if (action == DND_ACTION_MOVE)
-				{
-				file_util_move_simple(list, fd->path, vd->widget);
-				done = TRUE;
-				list = nullptr;
-				}
-			}
-
-		if (!done)
-			{
-			vd->popup = vd_drop_menu(vd, active);
-			gtk_menu_popup_at_pointer(GTK_MENU(vd->popup), nullptr);
-			}
-
-		vd->drop_fd = fd;
-		vd->drop_list = list;
-		}
-}
-
-static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y)
-{
-	FileData *fd = nullptr;
-
-	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vd->view), x, y,
-	                                  &tpath, nullptr, nullptr, nullptr))
-		{
-		fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(vd->view), tpath);
-		}
-
-	if (fd != vd->drop_fd)
-		{
-		vd_color_set(vd, vd->drop_fd, FALSE);
-		vd_color_set(vd, fd, TRUE);
-		if (fd && vd->dnd_drop_update_func) vd->dnd_drop_update_func(vd);
-		}
-
-	vd->drop_fd = fd;
-}
-
-void vd_dnd_drop_scroll_cancel(ViewDir *vd)
-{
-	g_clear_handle_id(&vd->drop_scroll_id, g_source_remove);
-}
-#endif
-
 static gboolean vd_auto_scroll_idle_cb(gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
@@ -1019,27 +851,7 @@ static void vd_dnd_drop_leave(GtkWidget *, GdkDragContext *, guint, gpointer dat
 
 void vd_dnd_init(ViewDir *vd)
 {
-#if !HAVE_GTK4
-	gq_gtk_drag_source_set(vd->view, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-	                    dnd_file_drag_types.data(), dnd_file_drag_types.size(),
-	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_ASK));
-	gq_drag_g_signal_connect(G_OBJECT(vd->view), "drag_data_get",
-			 G_CALLBACK(vd_dnd_get), vd);
-	gq_drag_g_signal_connect(G_OBJECT(vd->view), "drag_begin",
-			 G_CALLBACK(vd_dnd_begin), vd);
-	gq_drag_g_signal_connect(G_OBJECT(vd->view), "drag_end",
-			 G_CALLBACK(vd_dnd_end), vd);
-
-	vd_dest_set(vd, TRUE);
-	gq_drag_g_signal_connect(G_OBJECT(vd->view), "drag_data_received",
-			 G_CALLBACK(vd_dnd_drop_receive), vd);
-	gq_drag_g_signal_connect(G_OBJECT(vd->view), "drag_motion",
-			 G_CALLBACK(vd_dnd_drop_motion), vd);
-	gq_drag_g_signal_connect(G_OBJECT(vd->view), "drag_leave",
-			 G_CALLBACK(vd_dnd_drop_leave), vd);
-#else
 	(void)vd;
-#endif
 }
 
 /*
@@ -1061,20 +873,7 @@ static GdkRGBA *vd_color_shifted(GtkWidget *widget)
 	static GdkRGBA color;
 	static GtkWidget *done = nullptr;
 
-#if HAVE_GTK4
 /* @FIXME GTK4 no background color */
-#else
-	if (done != widget)
-		{
-		GtkStyleContext *style_context;
-
-		style_context = gtk_widget_get_style_context(widget);
-		deprecated_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &color);
-
-		shift_color(color);
-		done = widget;
-		}
-#endif
 
 	return &color;
 }
@@ -1091,26 +890,15 @@ void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_
 	             NULL);
 }
 
-#if HAVE_GTK4
 gboolean vd_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
-#else
-gboolean vd_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
-#endif
 {
 	auto vd = static_cast<ViewDir *>(data);
 	FileData *fd = nullptr;
 
-#if HAVE_GTK4
 	if (layout_handle_user_defined_mouse_buttons(vd->layout, event->button))
 		{
 		return TRUE;
 		}
-#else
-/** @FIXME GTK4
-
-	if (layout_handle_user_defined_mouse_buttons(vf->layout, bevent->button))
-*/
-#endif
 
 	if (vd->type == DIRVIEW_LIST && !options->view_dir_list_single_click_enter)
 		return FALSE;
@@ -1118,20 +906,11 @@ gboolean vd_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 	if (!vd->click_fd) return FALSE;
 	vd_color_set(vd, vd->click_fd, FALSE);
 
-#if HAVE_GTK4
 	if (event->button != GDK_BUTTON_PRIMARY) return TRUE;
-#else
-	if (bevent->button != GDK_BUTTON_PRIMARY) return TRUE;
-#endif
 
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-#if HAVE_GTK4
 	    (event->x != 0 || event->y != 0) &&
 	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y,
-#else
-	    (bevent->x != 0 || bevent->y != 0) &&
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
-#endif
 					  &tpath, nullptr, nullptr, nullptr))
 		{
 		fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(widget), tpath);
@@ -1145,7 +924,6 @@ gboolean vd_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 	return FALSE;
 }
 
-#if HAVE_GTK4
 static void vd_gesture_release_cb(GtkGestureClick *gesture,  gint, gdouble x, gdouble y, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
@@ -1161,7 +939,6 @@ static void vd_gesture_release_cb(GtkGestureClick *gesture,  gint, gdouble x, gd
 		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 		}
 }
-#endif
 
 gboolean vd_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
@@ -1177,26 +954,14 @@ gboolean vd_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
 	return ret;
 }
 
-#if HAVE_GTK4
 gboolean vd_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
-#else
-gboolean vd_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
-#endif
 {
 	auto vd = static_cast<ViewDir *>(data);
 
-#if HAVE_GTK4
 	if (event->button == GDK_BUTTON_SECONDARY)
-#else
-	if (bevent->button == GDK_BUTTON_SECONDARY)
-#endif
 		{
 		if (g_autoptr(GtkTreePath) tpath = nullptr;
-#if HAVE_GTK4
 		    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y, &tpath, nullptr, nullptr, nullptr))
-#else
-		    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y, &tpath, nullptr, nullptr, nullptr))
-#endif
 			{
 			GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 			GtkTreeIter iter;
@@ -1235,19 +1000,13 @@ gboolean vd_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
 
 	switch (vd->type)
 	{
-#if HAVE_GTK4
 	case DIRVIEW_LIST: ret = vdlist_press_cb(widget, event, data); break;
 	case DIRVIEW_TREE: ret = vdtree_press_cb(widget, event, data); break;
-#else
-	case DIRVIEW_LIST: ret = vdlist_press_cb(widget, bevent, data); break;
-	case DIRVIEW_TREE: ret = vdtree_press_cb(widget, bevent, data); break;
-#endif
 	}
 
 	return ret;
 }
 
-#if HAVE_GTK4
 static void vd_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
@@ -1263,7 +1022,6 @@ static void vd_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdoub
 		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 		}
 }
-#endif
 
 static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
@@ -1346,7 +1104,6 @@ ViewDir *vd_new(LayoutWindow *lw)
 	g_signal_connect(G_OBJECT(vd->view), "key_press_event",
 			 G_CALLBACK(vd_press_key_cb), vd);
 
-#if HAVE_GTK4
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
 
@@ -1354,11 +1111,6 @@ ViewDir *vd_new(LayoutWindow *lw)
 	g_signal_connect(gesture, "released",  G_CALLBACK(vd_gesture_release_cb), vd);
 
 	gtk_widget_add_controller(vd->view, GTK_EVENT_CONTROLLER(gesture));
-#else
-	g_signal_connect(G_OBJECT(vd->view), "button_press_event",
-			 G_CALLBACK(vd_press_cb), vd);
-	g_signal_connect(vd->view, "button_release_event", G_CALLBACK(vd_release_cb), vd);
-#endif
 
 	file_data_register_notify_func(vd_notify_cb, vd, NOTIFY_PRIORITY_HIGH);
 

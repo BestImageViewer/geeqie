@@ -315,11 +315,7 @@ static void tip_show(ViewFile *vf)
 
 	if (VFICON(vf)->tip_window) return;
 
-#if HAVE_GTK4
 	seat = gdk_display_get_default_seat(gtk_widget_get_display(GTK_WIDGET(vf->listview)));
-#else
-	seat = gdk_display_get_default_seat(gdk_window_get_display(gtk_tree_view_get_bin_window(GTK_TREE_VIEW(vf->listview))));
-#endif
 
 	device = gdk_seat_get_pointer(seat);
 	get_pointer_position(vf->listview, device, &x, &y, nullptr);
@@ -362,7 +358,6 @@ static gboolean tip_schedule_cb(gpointer data)
 		{
 		auto *window = widget_get_toplevel(vf->listview);
 
-#if HAVE_GTK4
 		if (GTK_IS_WINDOW(window))
 			{
 			if (gtk_widget_get_sensitive(GTK_WIDGET(window)) && gtk_window_is_active(window))
@@ -370,13 +365,6 @@ static gboolean tip_schedule_cb(gpointer data)
 				tip_show(vf);
 				}
 			}
-#else
-		if (gtk_widget_get_sensitive(window) && gtk_window_has_toplevel_focus(GTK_WINDOW(window)))
-			{
-			tip_show(vf);
-			}
-#endif
-
 		VFICON(vf)->tip_delay_id = 0;
 		}
 
@@ -443,37 +431,6 @@ static void tip_update(ViewFile *vf, FileData *fd)
  * dnd
  *-------------------------------------------------------------------
  */
-
-#if !HAVE_GTK4
-void vficon_dnd_begin(ViewFile *vf, GtkWidget *widget, GdkDragContext *context)
-{
-	tip_unschedule(vf);
-
-	if (vf->click_fd && vf->click_fd->thumb_pixbuf)
-		{
-		gint items;
-
-		if (vf->click_fd->selected & SELECTION_SELECTED)
-			items = g_list_length(VFICON(vf)->selection);
-		else
-			items = 1;
-
-		dnd_set_drag_icon(widget, context, vf->click_fd->thumb_pixbuf, items);
-		}
-}
-
-void vficon_dnd_end(ViewFile *vf, GdkDragContext *context)
-{
-	vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
-
-	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
-		{
-		vficon_refresh(vf);
-		}
-
-	tip_unschedule(vf);
-}
-#endif
 
 /*
  *-------------------------------------------------------------------
@@ -1172,33 +1129,21 @@ static gboolean vficon_motion_cb(GtkWidget *, GdkEventMotion *event, gpointer da
 	return FALSE;
 }
 
-#if HAVE_GTK4
 gboolean vficon_press_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *event)
-#else
-gboolean vficon_press_cb(ViewFile *vf, GtkWidget *, GdkEventButton *bevent)
-#endif
 {
 	GtkTreeIter iter;
 	FileData *fd;
 
 	tip_unschedule(vf);
 
-#if HAVE_GTK4
 	fd = vficon_find_data_by_coord(vf, static_cast<gint>(event->x), static_cast<gint>(event->y), &iter);
-#else
-	fd = vficon_find_data_by_coord(vf, static_cast<gint>(bevent->x), static_cast<gint>(bevent->y), &iter);
-#endif
 
 	if (fd)
 		{
 		vf->click_fd = fd;
 		vficon_selection_add(vf, vf->click_fd, SELECTION_PRELIGHT, &iter);
 
-#if HAVE_GTK4
 		switch (event->button)
-#else
-		switch (bevent->button)
-#endif
 			{
 			case GDK_BUTTON_PRIMARY:
 				if (!gtk_widget_has_focus(vf->listview))
@@ -1206,11 +1151,7 @@ gboolean vficon_press_cb(ViewFile *vf, GtkWidget *, GdkEventButton *bevent)
 					gtk_widget_grab_focus(vf->listview);
 					}
 
-#if HAVE_GTK4
 				if (event->press_count == 2 && vf->layout)
-#else
-				if (bevent->type == GDK_2BUTTON_PRESS && vf->layout)
-#endif
 					{
 					if (vf->click_fd->format_class == FORMAT_CLASS_COLLECTION)
 						{
@@ -1235,11 +1176,7 @@ gboolean vficon_press_cb(ViewFile *vf, GtkWidget *, GdkEventButton *bevent)
 	return FALSE;
 }
 
-#if HAVE_GTK4
 gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *event)
-#else
-gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, GdkEventButton *bevent)
-#endif
 {
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
@@ -1247,28 +1184,15 @@ gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, GdkEventButton *bevent)
 
 	tip_schedule(vf);
 
-#if HAVE_GTK4
 	if (layout_handle_user_defined_mouse_buttons(vf->layout, event->button))
-#else
-/** @FIXME GTK4
-	if (layout_handle_user_defined_mouse_buttons(vf->layout, bevent->button))
-*/
-#endif
 		{
 		return TRUE;
 		}
 
-#if HAVE_GTK4
 	if (static_cast<gint>(event->x) != 0 || static_cast<gint>(event->y) != 0)
 		{
 		fd = vficon_find_data_by_coord(vf, static_cast<gint>(event->x), static_cast<gint>(event->y), &iter);
 		}
-#else
-	if (static_cast<gint>(bevent->x) != 0 || static_cast<gint>(bevent->y) != 0)
-		{
-		fd = vficon_find_data_by_coord(vf, static_cast<gint>(bevent->x), static_cast<gint>(bevent->y), &iter);
-		}
-#endif
 
 	if (vf->click_fd)
 		{
@@ -1279,30 +1203,18 @@ gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, GdkEventButton *bevent)
 
 	was_selected = !!(fd->selected & SELECTION_SELECTED);
 
-#if HAVE_GTK4
 	switch (event->button)
-#else
-	switch (bevent->button)
-#endif
 		{
 		case GDK_BUTTON_PRIMARY:
 			{
 			vficon_set_focus(vf, fd);
 
-#if HAVE_GTK4
 			if (event->state & GDK_CONTROL_MASK)
-#else
-			if (bevent->state & GDK_CONTROL_MASK)
-#endif
 				{
 				gboolean select;
 
 				select = !(fd->selected & SELECTION_SELECTED);
-#if HAVE_GTK4
 				if ((event->state & GDK_SHIFT_MASK) && VFICON(vf)->prev_selection)
-#else
-				if ((bevent->state & GDK_SHIFT_MASK) && VFICON(vf)->prev_selection)
-#endif
 					{
 					vficon_select_region_util(vf, VFICON(vf)->prev_selection, fd, select);
 					}
@@ -1315,11 +1227,7 @@ gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, GdkEventButton *bevent)
 				{
 				vficon_select_none(vf);
 
-#if HAVE_GTK4
 				if ((event->state & GDK_SHIFT_MASK) && VFICON(vf)->prev_selection)
-#else
-				if ((bevent->state & GDK_SHIFT_MASK) && VFICON(vf)->prev_selection)
-#endif
 					{
 					vficon_select_region_util(vf, VFICON(vf)->prev_selection, fd, TRUE);
 					}
@@ -1348,18 +1256,11 @@ gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, GdkEventButton *bevent)
 	return TRUE;
 }
 
-#if HAVE_GTK4
 static void vficon_leave_cb(GtkEventControllerMotion *, gpointer data)
-#else
-static gboolean vficon_leave_cb(GtkWidget *, GdkEventCrossing *, gpointer data)
-#endif
 {
 	auto vf = static_cast<ViewFile *>(data);
 
 	tip_unschedule(vf);
-#if !HAVE_GTK4
-	return FALSE;
-#endif
 }
 
 /*
@@ -1931,91 +1832,8 @@ gboolean vficon_refresh(ViewFile *vf)
 static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 				GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
-#if HAVE_GTK4
 /* @FIXME GTK4 stub */
 	return;
-#else
-	if (!GQV_IS_CELL_RENDERER_ICON(cell)) return;
-
-	auto cd = static_cast<ColumnData *>(data);
-
-	GList *list;
-	gtk_tree_model_get(tree_model, iter, FILE_COLUMN_POINTER, &list, -1);
-
-	auto *fd = static_cast<FileData *>(g_list_nth_data(list, cd->number));
-	if (!fd)
-		{
-		g_object_set(cell,
-		             "pixbuf", NULL,
-		             "text", NULL,
-		             "show_marks", FALSE,
-		             "cell-background-set", FALSE,
-		             "foreground-set", FALSE,
-		             "has-focus", FALSE,
-		             NULL);
-		return;
-		}
-
-	ViewFile *vf = cd->vf;
-
-	g_assert(fd->magick == FD_MAGICK);
-
-	g_autoptr(GString) name_sidecars = g_string_new(nullptr);
-
-	if (VFICON(vf)->show_text)
-		{
-		if (islink(fd->path))
-			{
-			name_sidecars = g_string_append(name_sidecars, GQ_LINK_STR);
-			}
-
-		name_sidecars = g_string_append(name_sidecars, fd->name);
-
-		if (fd->sidecar_files)
-			{
-			g_autofree gchar *sidecars = file_data_sc_list_to_string(fd);
-			g_string_append_printf(name_sidecars, " %s", sidecars);
-			}
-		else if (fd->disable_grouping)
-			{
-			name_sidecars = g_string_append(name_sidecars, _(" [NO GROUPING]"));
-			}
-		}
-
-	if (options->show_star_rating)
-		{
-		if (name_sidecars->len > 0)
-			{
-			name_sidecars = g_string_append_c(name_sidecars, '\n');
-			}
-
-		g_autofree gchar *star_rating = (fd->rating != STAR_RATING_NOT_READ) ? convert_rating_to_stars(fd->rating) : nullptr;
-		name_sidecars = g_string_append(name_sidecars, star_rating);
-		}
-
-	GtkStyle *style = deprecated_gtk_widget_get_style(vf->listview);
-	GtkStateType state = (fd->selected & SELECTION_SELECTED) ? GTK_STATE_SELECTED : GTK_STATE_NORMAL;
-
-	GdkRGBA color_fg = convert_gdkcolor_to_gdkrgba(&style->text[state]);
-
-	GdkRGBA color_bg = convert_gdkcolor_to_gdkrgba(&style->base[state]);
-	if (fd->selected & SELECTION_PRELIGHT)
-		{
-		shift_color(color_bg);
-		}
-
-	g_object_set(cell,
-	             "pixbuf", fd->thumb_pixbuf,
-	             "text", name_sidecars->str,
-	             "marks", file_data_get_marks(fd),
-	             "show_marks", vf->marks_enabled,
-	             "cell-background-rgba", &color_bg,
-	             "cell-background-set", TRUE,
-	             "foreground-rgba", &color_fg,
-	             "foreground-set", TRUE,
-	             "has-focus", VFICON(vf)->focus_fd == fd,
-	             NULL);
-#endif
 }
 
 static void vficon_append_column(ViewFile *vf, gint n)
@@ -2133,14 +1951,9 @@ ViewFile *vficon_new(ViewFile *vf)
 
 	g_signal_connect(G_OBJECT(vf->listview),"motion_notify_event",
 			 G_CALLBACK(vficon_motion_cb), vf);
-#if HAVE_GTK4
 	GtkEventController *motion_controller = gtk_event_controller_motion_new();
 	g_signal_connect(motion_controller, "leave", G_CALLBACK(vficon_leave_cb), vf);
 	gtk_widget_add_controller(vf->listview, motion_controller);
-#else
-	g_signal_connect(G_OBJECT(vf->listview), "leave_notify_event",
-			 G_CALLBACK(vficon_leave_cb), vf);
-#endif
 
 	/* force VFICON(vf)->columns to be at least 1 (sane) - this will be corrected in the size_cb */
 	vficon_populate_at_new_size(vf, 1, 1, FALSE);

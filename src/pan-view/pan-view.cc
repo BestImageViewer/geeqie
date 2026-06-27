@@ -1275,11 +1275,7 @@ void pan_info_update(PanWindow *pw, PanItem *pi)
  *-----------------------------------------------------------------------------
  */
 
-#if HAVE_GTK4
 static void button_cb(PixbufRenderer *pr, GqMouseButtonEvent *event, gpointer data)
-#else
-static void button_cb(PixbufRenderer *pr, GdkEventButton *event, gpointer data)
-#endif
 {
 	auto pw = static_cast<PanWindow *>(data);
 	PanItem *pi = nullptr;
@@ -2167,76 +2163,10 @@ static void pan_popup_menu_cb(GSimpleAction *, GVariant *, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-#if !HAVE_GTK4
-static void pan_window_get_dnd_data(GtkWidget *, GdkDragContext *context,
-				    gint, gint,
-				    GtkSelectionData *selection_data, guint info,
-				    guint, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-
-	if (gtk_drag_get_source_widget(context) == pw->imd->pr) return;
-
-	if (info == TARGET_URI_LIST)
-		{
-		g_autoptr(FileDataList) list = uri_filelist_from_gtk_selection_data(selection_data);
-		if (list && isdir((static_cast<FileData *>(list->data))->path))
-			{
-			auto fd = static_cast<FileData *>(list->data);
-
-			pan_layout_set_fd(pw, fd);
-			}
-		}
-}
-
-static void pan_window_set_dnd_data(GtkWidget *, GdkDragContext *,
-				    GtkSelectionData *selection_data, guint,
-				    guint, gpointer data)
-{
-	auto pw = static_cast<PanWindow *>(data);
-	FileData *fd;
-
-	fd = pan_menu_click_fd(pw);
-	if (fd)
-		{
-		GList *list;
-
-		list = g_list_append(nullptr, fd);
-		uri_selection_data_set_uris_from_filelist(selection_data, list);
-		g_list_free(list);
-		}
-	else
-		{
-		gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data),
-				       8, nullptr, 0);
-		}
-}
-
-static void pan_window_dnd_init(PanWindow *pw)
-{
-	GtkWidget *widget;
-
-	widget = pw->imd->pr;
-
-	gq_gtk_drag_source_set(widget, GDK_BUTTON2_MASK,
-	                    dnd_file_drag_types.data(), dnd_file_drag_types.size(),
-	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(widget), "drag_data_get",
-			 G_CALLBACK(pan_window_set_dnd_data), pw);
-
-	gq_gtk_drag_dest_set(widget,
-	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
-	                  dnd_file_drop_types.data(), dnd_file_drop_types.size(),
-	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(widget), "drag_data_received",
-			 G_CALLBACK(pan_window_get_dnd_data), pw);
-}
-#else
 static void pan_window_dnd_init(PanWindow *pw)
 {
 	(void)pw;
 }
-#endif
 
 FileDataList *pan_list_tree(PanWindow *pw, SortType method)
 {

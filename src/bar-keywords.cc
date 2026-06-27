@@ -330,24 +330,9 @@ void bar_pane_keywords_write_config(GtkWidget *pane, GString *outstr, gint inden
 
 gint bar_pane_keywords_event(GtkWidget *bar, GdkEvent *event)
 {
-#if HAVE_GTK4
 	(void)bar;
 	(void)event;
 	return FALSE;
-#else
-	PaneKeywordsData *pkd;
-
-	pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
-	if (!pkd) return FALSE;
-
-	if (gtk_widget_has_focus(pkd->keyword_view)) return gq_gtk_widget_key_event(pkd->keyword_view, reinterpret_cast<GdkEventKey *>(event));
-
-	if (gtk_widget_has_focus(pkd->autocomplete))
-		{
-		return gq_gtk_widget_key_event(pkd->autocomplete, reinterpret_cast<GdkEventKey *>(event));
-		}
-	return FALSE;
-#endif
 }
 
 void bar_pane_keywords_keyword_toggle(GtkCellRendererToggle *, const gchar *path, gpointer data)
@@ -505,280 +490,6 @@ void bar_pane_keywords_changed(GtkTextBuffer *, gpointer data)
  * dnd
  *-------------------------------------------------------------------
  */
-
-#if !HAVE_GTK4
-constexpr std::array<GtkTargetEntry, 2> bar_pane_keywords_drag_types{{
-	{ const_cast<gchar *>(TARGET_APP_KEYWORD_PATH_STRING), GTK_TARGET_SAME_WIDGET, TARGET_APP_KEYWORD_PATH },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-}};
-
-constexpr std::array<GtkTargetEntry, 2> bar_pane_keywords_drop_types{{
-	{ const_cast<gchar *>(TARGET_APP_KEYWORD_PATH_STRING), GTK_TARGET_SAME_WIDGET, TARGET_APP_KEYWORD_PATH },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-}};
-#endif
-
-#if !HAVE_GTK4
-void bar_pane_keywords_dnd_get(GtkWidget *tree_view, GdkDragContext *,
-				     GtkSelectionData *selection_data, guint info,
-				     guint, gpointer)
-{
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	GtkTreeIter child_iter;
-	GtkTreeModel *keyword_tree;
-
-	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
-
-        if (!gtk_tree_selection_get_selected(sel, &model, &iter)) return;
-
-	keyword_tree = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
-	gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &child_iter, &iter);
-
-	switch (info)
-		{
-		case TARGET_APP_KEYWORD_PATH:
-			{
-			GList *path = keyword_tree_get_path(keyword_tree, &child_iter);
-			gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data),
-					       8, reinterpret_cast<const guchar *>(&path), sizeof(path));
-			break;
-			}
-
-		case TARGET_TEXT_PLAIN:
-		default:
-			{
-			g_autofree gchar *name = keyword_get_name(keyword_tree, &child_iter);
-			gtk_selection_data_set_text(selection_data, name, -1);
-			}
-			break;
-		}
-}
-
-void bar_pane_keywords_dnd_begin(GtkWidget *tree_view, GdkDragContext *context, gpointer)
-{
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	GtkTreeIter child_iter;
-	GtkTreeModel *keyword_tree;
-
-	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
-
-	if (!gtk_tree_selection_get_selected(sel, &model, &iter)) return;
-
-	keyword_tree = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
-	gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &child_iter, &iter);
-
-	g_autofree gchar *name = keyword_get_name(keyword_tree, &child_iter);
-
-	dnd_set_drag_label(tree_view, context, name);
-}
-
-void bar_pane_keywords_dnd_end(GtkWidget *, GdkDragContext *, gpointer)
-{
-}
-
-
-gboolean bar_pane_keywords_dnd_can_move(GtkTreeModel *keyword_tree, GtkTreeIter *src_kw_iter, GtkTreeIter *dest_kw_iter)
-{
-	GtkTreeIter parent;
-
-	if (dest_kw_iter && keyword_same_parent(keyword_tree, src_kw_iter, dest_kw_iter))
-		{
-		return TRUE; /* reordering of siblings is ok */
-		}
-	if (!dest_kw_iter && !gtk_tree_model_iter_parent(keyword_tree, &parent, src_kw_iter))
-		{
-		return TRUE; /* reordering of top-level siblings is ok */
-		}
-
-	g_autofree gchar *src_name = keyword_get_name(keyword_tree, src_kw_iter);
-	return !keyword_exists(keyword_tree, nullptr, dest_kw_iter, src_name, FALSE, nullptr);
-}
-
-gboolean bar_pane_keywords_dnd_skip_existing(GtkTreeModel *keyword_tree, GtkTreeIter *dest_kw_iter, GList **keywords)
-{
-	/* we have to find at least one keyword that does not already exist as a sibling of dest_kw_iter */
-	GList *work = *keywords;
-	while (work)
-		{
-		auto keyword = static_cast<gchar *>(work->data);
-		if (keyword_exists(keyword_tree, nullptr, dest_kw_iter, keyword, FALSE, nullptr))
-			{
-			GList *next = work->next;
-			g_free(keyword);
-			*keywords = g_list_delete_link(*keywords, work);
-			work = next;
-			}
-		else
-			{
-			work = work->next;
-			}
-		}
-	return !!*keywords;
-}
-
-void bar_pane_keywords_dnd_receive(GtkWidget *tree_view, GdkDragContext *,
-					  gint x, gint y,
-					  GtkSelectionData *selection_data, guint info,
-					  guint, gpointer data)
-{
-	auto pkd = static_cast<PaneKeywordsData *>(data);
-	GtkTreeModel *model;
-
-	GtkTreeModel *keyword_tree;
-	gboolean src_valid = FALSE;
-	GList *new_keywords = nullptr;
-	GList *work;
-
-	/* iterators for keyword_tree */
-	GtkTreeIter src_kw_iter;
-	GtkTreeIter dest_kw_iter;
-	GtkTreeIter new_kw_iter;
-
-	g_signal_stop_emission_by_name(tree_view, "drag_data_received");
-
-	model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
-	keyword_tree = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
-
-	g_autoptr(GtkTreePath) tpath = nullptr;
-	GtkTreeViewDropPosition pos;
-	gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(tree_view), x, y, &tpath, &pos);
-	gtk_tree_view_set_drag_dest_row(GTK_TREE_VIEW(tree_view), nullptr, pos);
-
-	switch (info)
-		{
-		case TARGET_APP_KEYWORD_PATH:
-			{
-			auto path = static_cast<GList *>(*reinterpret_cast<const gpointer *>(gtk_selection_data_get_data(selection_data)));
-			src_valid = keyword_tree_get_iter(keyword_tree, &src_kw_iter, path);
-			g_list_free_full(path, g_free);
-			break;
-			}
-		default:
-			new_keywords = string_to_keywords_list(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)));
-			break;
-		}
-
-	if (tpath)
-		{
-		GtkTreeIter dest_iter;
-		gtk_tree_model_get_iter(model, &dest_iter, tpath);
-		gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &dest_kw_iter, &dest_iter);
-
-		if (src_valid && gtk_tree_store_is_ancestor(GTK_TREE_STORE(keyword_tree), &src_kw_iter, &dest_kw_iter))
-			{
-			/* can't move to it's own child */
-			return;
-			}
-
-		if (src_valid && keyword_equal(keyword_tree, &src_kw_iter, &dest_kw_iter))
-			{
-			/* can't move to itself */
-			return;
-			}
-
-		if ((pos == GTK_TREE_VIEW_DROP_INTO_OR_BEFORE || pos == GTK_TREE_VIEW_DROP_INTO_OR_AFTER) &&
-		    !gtk_tree_model_iter_has_child(keyword_tree, &dest_kw_iter))
-			{
-			/* the node has no children, all keywords can be added */
-			gtk_tree_store_append(GTK_TREE_STORE(keyword_tree), &new_kw_iter, &dest_kw_iter);
-			}
-		else
-			{
-			if (src_valid && !bar_pane_keywords_dnd_can_move(keyword_tree, &src_kw_iter, &dest_kw_iter))
-				{
-				/* the keyword can't be moved if the same name already exist */
-				return;
-				}
-			if (new_keywords && !bar_pane_keywords_dnd_skip_existing(keyword_tree, &dest_kw_iter, &new_keywords))
-				{
-				/* the keywords can't be added if the same name already exist */
-				return;
-				}
-
-			switch (pos)
-				{
-				case GTK_TREE_VIEW_DROP_INTO_OR_BEFORE:
-				case GTK_TREE_VIEW_DROP_BEFORE:
-					gtk_tree_store_insert_before(GTK_TREE_STORE(keyword_tree), &new_kw_iter, nullptr, &dest_kw_iter);
-					break;
-				case GTK_TREE_VIEW_DROP_INTO_OR_AFTER:
-				case GTK_TREE_VIEW_DROP_AFTER:
-					gtk_tree_store_insert_after(GTK_TREE_STORE(keyword_tree), &new_kw_iter, nullptr, &dest_kw_iter);
-					break;
-				}
-			}
-
-		}
-	else
-		{
-		if (src_valid && !bar_pane_keywords_dnd_can_move(keyword_tree, &src_kw_iter, nullptr))
-			{
-			/* the keyword can't be moved if the same name already exist */
-			return;
-			}
-		if (new_keywords && !bar_pane_keywords_dnd_skip_existing(keyword_tree, nullptr, &new_keywords))
-			{
-			/* the keywords can't be added if the same name already exist */
-			return;
-			}
-		gtk_tree_store_append(GTK_TREE_STORE(keyword_tree), &new_kw_iter, nullptr);
-		}
-
-
-	if (src_valid)
-		{
-		keyword_move_recursive(GTK_TREE_STORE(keyword_tree), &new_kw_iter, &src_kw_iter);
-		}
-
-	work = new_keywords;
-	while (work)
-		{
-		auto keyword = static_cast<gchar *>(work->data);
-		keyword_set(GTK_TREE_STORE(keyword_tree), &new_kw_iter, keyword, TRUE);
-		work = work->next;
-
-		if (work)
-			{
-			GtkTreeIter add;
-			gtk_tree_store_insert_after(GTK_TREE_STORE(keyword_tree), &add, nullptr, &new_kw_iter);
-			new_kw_iter = add;
-			}
-		}
-	g_list_free_full(new_keywords, g_free);
-	bar_keyword_tree_sync(pkd);
-}
-
-gint bar_pane_keywords_dnd_motion(GtkWidget *tree_view, GdkDragContext *context,
-					gint x, gint y, guint time, gpointer)
-{
-	g_autoptr(GtkTreePath) tpath = nullptr;
-	GtkTreeViewDropPosition pos;
-	gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(tree_view), x, y, &tpath, &pos);
-	if (tpath)
-		{
-		GtkTreeModel *model;
-		GtkTreeIter dest_iter;
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
-                gtk_tree_model_get_iter(model, &dest_iter, tpath);
-		if (pos == GTK_TREE_VIEW_DROP_INTO_OR_BEFORE && gtk_tree_model_iter_has_child(model, &dest_iter))
-			pos = GTK_TREE_VIEW_DROP_BEFORE;
-
-		if (pos == GTK_TREE_VIEW_DROP_INTO_OR_AFTER && gtk_tree_model_iter_has_child(model, &dest_iter))
-			pos = GTK_TREE_VIEW_DROP_AFTER;
-		}
-
-	gtk_tree_view_set_drag_dest_row(GTK_TREE_VIEW(tree_view), tpath, pos);
-
-	if (tree_view == gtk_drag_get_source_widget(context))
-		gdk_drag_status(context, GDK_ACTION_MOVE, time);
-	else
-		gdk_drag_status(context, GDK_ACTION_COPY, time);
-
-	return TRUE;
-}
-#endif
 
 /*
  *-------------------------------------------------------------------
@@ -1336,18 +1047,11 @@ gboolean bar_pane_keywords_menu_common(GtkWidget *widget, gdouble x, gdouble y, 
 	return FALSE;
 }
 
-#if HAVE_GTK4
 static void bar_pane_keywords_gesture_menu_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 	bar_pane_keywords_menu_common(widget, x, y, gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)), data);
 }
-#else
-gboolean bar_pane_keywords_menu_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
-{
-	return bar_pane_keywords_menu_common(widget, bevent->x, bevent->y, bevent->button, data);
-}
-#endif
 
 /*
  *-------------------------------------------------------------------
@@ -1513,41 +1217,10 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_tree_view_append_column(GTK_TREE_VIEW(pkd->keyword_treeview), column);
 	gtk_tree_view_set_expander_column(GTK_TREE_VIEW(pkd->keyword_treeview), column);
 
-#if !HAVE_GTK4
-	gq_gtk_drag_source_set(pkd->keyword_treeview,
-	                    static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-	                    bar_pane_keywords_drag_types.data(), bar_pane_keywords_drag_types.size(),
-	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-
-	gq_drag_g_signal_connect(G_OBJECT(pkd->keyword_treeview), "drag_data_get",
-			 G_CALLBACK(bar_pane_keywords_dnd_get), pkd);
-
-	gq_drag_g_signal_connect(G_OBJECT(pkd->keyword_treeview), "drag_begin",
-			 G_CALLBACK(bar_pane_keywords_dnd_begin), pkd);
-	gq_drag_g_signal_connect(G_OBJECT(pkd->keyword_treeview), "drag_end",
-			 G_CALLBACK(bar_pane_keywords_dnd_end), pkd);
-
-	gq_gtk_drag_dest_set(pkd->keyword_treeview,
-	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
-	                  bar_pane_keywords_drop_types.data(), bar_pane_keywords_drop_types.size(),
-	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
-
-	gq_drag_g_signal_connect(G_OBJECT(pkd->keyword_treeview), "drag_data_received",
-			 G_CALLBACK(bar_pane_keywords_dnd_receive), pkd);
-
-	gq_drag_g_signal_connect(G_OBJECT(pkd->keyword_treeview), "drag_motion",
-			 G_CALLBACK(bar_pane_keywords_dnd_motion), pkd);
-#endif
-
-#if HAVE_GTK4
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "released", G_CALLBACK(bar_pane_keywords_gesture_menu_cb), pkd);
 	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(gesture));
-#else
-	g_signal_connect(G_OBJECT(pkd->keyword_treeview), "button_release_event",
-			 G_CALLBACK(bar_pane_keywords_menu_cb), pkd);
-#endif
 
 	if (options->show_predefined_keyword_tree)
 		{
@@ -1704,102 +1377,21 @@ gboolean autocomplete_keywords_list_save(const gchar *path)
 
 GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-#if HAVE_GTK4
 /* @FIXME GTK4 stub */
 	return nullptr;
-#else
-	g_autofree gchar *id = g_strdup("keywords");
-	g_autofree gchar *title = nullptr;
-	g_autofree gchar *key = g_strdup(COMMENT_KEY);
-	gboolean expanded = TRUE;
-	gint height = 200;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR_FULL("id", id)) continue;
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_CHAR_FULL("key", key)) continue;
-		if (READ_BOOL_FULL("expanded", expanded)) continue;
-		if (READ_INT_FULL("height", height)) continue;
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-
-	options->info_keywords.height = height;
-	bar_pane_translate_title(PANE_KEYWORDS, id, &title);
-	return bar_pane_keywords_new(id, title, key, expanded, height);
-#endif
 }
 
 void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
-#if HAVE_GTK4
 /* @FIXME GTK4 stub */
 	return;
-#else
-	PaneKeywordsData *pkd;
-
-	pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!pkd) return;
-
-	g_autofree gchar *title = nullptr;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR_FULL("title", title)) continue;
-		if (READ_CHAR(*pkd, key)) continue;
-		if (READ_BOOL(pkd->pane, expanded)) continue;
-		if (READ_CHAR(pkd->pane, id)) continue;
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-
-	if (title)
-		{
-		bar_pane_translate_title(PANE_KEYWORDS, pkd->pane.id, &title);
-		gtk_label_set_text(GTK_LABEL(pkd->pane.title), title);
-		}
-
-	bar_update_expander(pane);
-	bar_pane_keywords_update(pkd);
-#endif
 }
 
 
 void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
-#if HAVE_GTK4
 /* @FIXME GTK4 stub */
 	return;
-#else
-	PaneKeywordsData *pkd;
-	gchar *path = nullptr;
-
-	pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
-	if (!pkd) return;
-
-	while (*attribute_names)
-		{
-		const gchar *option = *attribute_names++;
-		const gchar *value = *attribute_values++;
-
-		if (READ_CHAR_FULL("path", path))
-			{
-			g_autoptr(GtkTreePath) tree_path = gtk_tree_path_new_from_string(path);
-			gtk_tree_view_expand_to_path(GTK_TREE_VIEW(pkd->keyword_treeview), tree_path);
-			pkd->expanded_rows = g_list_append(pkd->expanded_rows, g_strdup(path));
-			continue;
-			}
-
-		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
-		}
-#endif
 }
 
 /*
@@ -1810,104 +1402,25 @@ void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attr
 
 GList *keyword_list_pull(GtkWidget *text_widget)
 {
-#if HAVE_GTK4
 /* @FIXME GTK4 stub */
 	return nullptr;
-#else
-	g_autofree gchar *text = text_widget_text_pull(text_widget);
-
-	return string_to_keywords_list(text);
-#endif
 }
 
 GList *keyword_list_get()
 {
-#if HAVE_GTK4
 /* @FIXME GTK4 stub */
 	return nullptr;
-#else
-	GList *ret_list = nullptr;
-	gchar *string;
-	GtkTreeIter iter;
-	gboolean valid;
-
-	if (keyword_store)
-		{
-		valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_store), &iter);
-
-		while (valid)
-			{
-			gtk_tree_model_get (GTK_TREE_MODEL(keyword_store), &iter, 0, &string, -1);
-			ret_list = g_list_append(ret_list, string);
-			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(keyword_store), &iter);
-			}
-		}
-
-	return ret_list;
-#endif
 }
 
 void keyword_list_set(GList *keyword_list)
 {
-#if HAVE_GTK4
 /* @FIXME GTK4 stub */
 	return;
-#else
-	GtkTreeIter  iter;
-
-	if (!keyword_list) return;
-
-	if (keyword_store)
-		{
-		gtk_list_store_clear(keyword_store);
-		}
-	else
-		{
-		keyword_store = gtk_list_store_new(1, G_TYPE_STRING);
-		}
-
-	while (keyword_list)
-		{
-		gtk_list_store_append (keyword_store, &iter);
-		gtk_list_store_set(keyword_store, &iter, 0, keyword_list->data, -1);
-
-		keyword_list = keyword_list->next;
-		}
-#endif
 }
 
 gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)
 {
-#if HAVE_GTK4
 /* @FIXME GTK4 stub */
 	return FALSE;
-#else
-	GtkWidget *pane = bar_find_pane_by_id(lw->bar, PANE_KEYWORDS, "keywords");
-	if (!pane)
-		{
-		GApplication *app = g_application_get_default();
-
-		g_autoptr(GNotification) notification = g_notification_new("Geeqie");
-
-		g_notification_set_title(notification, _("Keyword Autocomplete"));
-		g_notification_set_body(notification, _("The Info Sidebar has not yet been opened"));
-		g_notification_set_priority(notification, G_NOTIFICATION_PRIORITY_NORMAL);
-		g_notification_set_default_action(notification, "app.null");
-
-		g_application_send_notification(G_APPLICATION(app), "keyword-autocomplete-notification", notification);
-		return FALSE;
-		}
-
-	g_autoptr(GList) children = gq_gtk_widget_get_children(GTK_WIDGET(pane));
-	const GList *last_child = g_list_last(children);
-
-	gboolean is_focused = (gtk_window_get_focus(GTK_WINDOW(lw->window)) == last_child->data);
-	if (!is_focused)
-		{
-		gtk_widget_grab_focus(static_cast<GtkWidget *>(last_child->data));
-		}
-
-	return is_focused;
-#endif
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

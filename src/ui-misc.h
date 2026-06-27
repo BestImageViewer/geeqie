@@ -221,9 +221,6 @@ gboolean widget_received_event(GtkWidget *widget, GqPoint event);
 void widget_remove_from_parent(GtkWidget *widget);
 void widget_remove_from_parent_cb(GSimpleAction *action, GVariant *parameter, gpointer data);
 
-#if !HAVE_GTK4
-void widget_input_grab(GtkWidget *widget, GdkSeatCapabilities capabilities, gboolean owner_events, GdkEventMask event_mask);
-#endif
 void widget_input_ungrab(GtkWidget *widget);
 
 gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int *y, GdkModifierType *mask);

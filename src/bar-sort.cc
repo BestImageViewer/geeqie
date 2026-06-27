@@ -380,17 +380,10 @@ static gboolean bar_filter_message_common(guint button)
 	return TRUE;
 }
 
-#if HAVE_GTK4
 static void bar_filter_message_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer)
 {
 	bar_filter_message_common(gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)));
 }
-#else
-static gboolean bar_filter_message_cb(GtkWidget *, GdkEventButton *event, gpointer)
-{
-	return bar_filter_message_common(event->button);
-}
-#endif
 
 static void bar_sort_help_cb(gpointer)
 {
@@ -573,24 +566,16 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 
 	buttongrp = pref_radiobutton_new(sd->folder_group, nullptr, _("Copy"), sd->action == BarSort::COPY,
 	                                 G_CALLBACK(bar_sort_set_action_cb<BarSort::COPY>), sd);
-#if HAVE_GTK4
 	GtkGesture *copy_gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(copy_gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(copy_gesture, "pressed", G_CALLBACK(bar_filter_message_cb), NULL);
 	gtk_widget_add_controller(buttongrp, GTK_EVENT_CONTROLLER(copy_gesture));
-#else
-	g_signal_connect(G_OBJECT(buttongrp), "button_press_event", G_CALLBACK(bar_filter_message_cb), NULL);
-#endif
 	button = pref_radiobutton_new(sd->folder_group, buttongrp, _("Move"), sd->action == BarSort::MOVE,
 	                              G_CALLBACK(bar_sort_set_action_cb<BarSort::MOVE>), sd);
-#if HAVE_GTK4
 	GtkGesture *move_gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(move_gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(move_gesture, "pressed", G_CALLBACK(bar_filter_message_cb), NULL);
 	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(move_gesture));
-#else
-	g_signal_connect(G_OBJECT(button), "button_press_event", G_CALLBACK(bar_filter_message_cb), NULL);
-#endif
 
 
 	have_filter = FALSE;
@@ -610,14 +595,10 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 
 		GtkWidget *button = pref_radiobutton_new(sd->folder_group, buttongrp, editor->name, select,
 		                                         G_CALLBACK(bar_sort_set_action_cb<BarSort::FILTER>), sd);
-#if HAVE_GTK4
 		GtkGesture *filter_gesture = gtk_gesture_click_new();
 		gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(filter_gesture), GDK_BUTTON_SECONDARY);
 		g_signal_connect(filter_gesture, "pressed", G_CALLBACK(bar_filter_message_cb), NULL);
 		gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(filter_gesture));
-#else
-		g_signal_connect(G_OBJECT(button), "button_press_event", G_CALLBACK(bar_filter_message_cb), NULL);
-#endif
 
 		g_object_set_data_full(G_OBJECT(button), "filter_key", key, g_free);
 		}

@@ -150,14 +150,8 @@ if cc.has_header('mntent.h')
     conf_data.set('HAVE_MNTENT_H', 1)
 endif
 
-conf_data.set('HAVE_GTK4', 0)
-option = get_option('gtk4')
-if option.enabled()
-    gtk_dep = dependency('gtk4', required: true)
-    conf_data.set('HAVE_GTK4', 1)
-else
-    gtk_dep = dependency('gtk+-3.0', version : '>=3.24', required: true)
-endif
+conf_data.set('HAVE_GTK4', 1)
+gtk_dep = dependency('gtk4', required: true)
 glib_dep = dependency('glib-2.0', version : '>=2.66', required: true)
 pango_dep = dependency('pango', version : '>=1.46', required: true)
 

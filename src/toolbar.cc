@@ -86,12 +86,8 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	gq_gtk_container_add(button, hbox);
 	gtk_widget_show(hbox);
 
-#if HAVE_GTK4
 	gesture = gtk_gesture_click_new();
 	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(gesture));
-#else
-	gesture = gtk_gesture_multi_press_new(button);
-#endif
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "released", G_CALLBACK(toolbar_press_cb), button);
 

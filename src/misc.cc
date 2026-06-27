@@ -319,22 +319,10 @@ gint get_cpu_cores()
     return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-#if HAVE_GTK4
 GdkRGBA convert_gdkcolor_to_gdkrgba(gpointer data)
 {
 /* @FIXME GTK4 stub */
 }
-#else
-GdkRGBA convert_gdkcolor_to_gdkrgba(gpointer data)
-{
-	auto *gdk_color = static_cast<GdkColor *>(data);
-
-	return { std::clamp((double)gdk_color->red / 65535.0, 0.0, 1.0),
-	         std::clamp((double)gdk_color->green / 65535.0, 0.0, 1.0),
-	         std::clamp((double)gdk_color->blue / 65535.0, 0.0, 1.0),
-	         1.0 };
-}
-#endif
 
 /**
  * @brief Shifts a GdkRGBA values lighter or darker \n
@@ -419,7 +407,6 @@ void cell_renderer_height_override(GtkCellRenderer *renderer)
  *        Value -1 means using the cursor of its parent window.
  * @todo Use std::optional for icon since C++17 instead of special -1 value
  */
-#if HAVE_GTK4
 static const gchar *cursor_name_from_legacy_icon(gint icon)
 {
 	switch (icon)
@@ -440,7 +427,6 @@ static const gchar *cursor_name_from_legacy_icon(gint icon)
 			return nullptr;
 		}
 }
-#endif
 
 void widget_set_cursor(GtkWidget *widget, gint icon)
 {
@@ -449,7 +435,6 @@ void widget_set_cursor(GtkWidget *widget, gint icon)
 		return;
 		}
 
-#if HAVE_GTK4
 	if (icon == -1)
 		{
 		gtk_widget_set_cursor(widget, nullptr);
@@ -463,23 +448,6 @@ void widget_set_cursor(GtkWidget *widget, gint icon)
 			}
 		}
 
-#else
-	auto *window = gtk_widget_get_window(widget);
-
-	if (!window)
-		{
-		return;
-		}
-
-	GdkCursor *cursor = nullptr;
-
-	if (icon != -1)
-		{
-		auto *display = gdk_window_get_display(window);
-		cursor = gdk_cursor_new_for_display(display, static_cast<GdkCursorType>(icon));
-		}
-#endif
-
 	gdk_window_set_cursor(window, cursor);
 
 	if (cursor) g_object_unref(cursor);
@@ -487,7 +455,6 @@ void widget_set_cursor(GtkWidget *widget, gint icon)
 
 GtkWidget *widget_get_toplevel(GtkWidget *widget)
 {
-#if HAVE_GTK4
 	auto *root = gtk_widget_get_root(vf->listview);
 
 	if (GTK_IS_WINDOW(root))
@@ -498,8 +465,5 @@ GtkWidget *widget_get_toplevel(GtkWidget *widget)
 		{
 		return nullptr;
 		}
-#else
-	return gtk_widget_get_toplevel(widget);
-#endif
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

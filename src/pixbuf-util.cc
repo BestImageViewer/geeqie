@@ -244,25 +244,10 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 	return icon_pixbuf;
 }
 
-#if HAVE_GTK4
 static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
 {
 /* @FIXME GTK4 stub */
 }
-#else
-static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
-{
-	static GtkIconFactory *icon_factory = []()
-	{
-		GtkIconFactory *icon_factory = deprecated_gtk_icon_factory_new();
-		deprecated_gtk_icon_factory_add_default(icon_factory);
-		return icon_factory;
-	}();
-
-	GtkIconSet *icon_set = deprecated_gtk_icon_set_new_from_pixbuf(pixbuf);
-	deprecated_gtk_icon_factory_add(icon_factory, key, icon_set);
-}
-#endif
 
 void pixbuf_inline_register_stock_icons()
 {

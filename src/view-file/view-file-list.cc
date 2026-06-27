@@ -206,36 +206,6 @@ static void vflist_move_cursor(ViewFile *vf, GtkTreeIter *iter)
  *-----------------------------------------------------------------------------
  */
 
-#if !HAVE_GTK4
-void vflist_dnd_begin(ViewFile *vf, GtkWidget *widget, GdkDragContext *context)
-{
-	vflist_color_set(vf, vf->click_fd, TRUE);
-
-	if (VFLIST(vf)->thumbs_enabled &&
-	    vf->click_fd && vf->click_fd->thumb_pixbuf)
-		{
-		guint items;
-
-		if (vflist_row_is_selected(vf, vf->click_fd))
-			items = vflist_selection_count(vf);
-		else
-			items = 1;
-
-		dnd_set_drag_icon(widget, context, vf->click_fd->thumb_pixbuf, items);
-		}
-}
-
-void vflist_dnd_end(ViewFile *vf, GdkDragContext *context)
-{
-	vflist_color_set(vf, vf->click_fd, FALSE);
-
-	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
-		{
-		vflist_refresh(vf);
-		}
-}
-#endif
-
 /*
  *-----------------------------------------------------------------------------
  * pop-up menu
@@ -427,20 +397,12 @@ gboolean vflist_press_key_cb(ViewFile *vf, GtkWidget *widget, guint keyval, GdkM
 
 	vf->popup = vf_pop_menu(vf);
 
-#if HAVE_GTK4
 	popup_menu(G_MENU(vf->popup), widget);
-#else
-	gtk_menu_popup_at_widget(GTK_MENU(vf->popup), widget, GDK_GRAVITY_EAST, GDK_GRAVITY_CENTER, nullptr);
-#endif
 
 	return TRUE;
 }
 
-#if HAVE_GTK4
 gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEvent *event)
-#else
-gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent)
-#endif
 {
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
@@ -449,21 +411,13 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent
 	vf->clicked_mark = 0;
 
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-#if HAVE_GTK4
 	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y,
-#else
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
-#endif
 	                                  &tpath, &column, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 		gint col_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
 
-#if HAVE_GTK4
 		if (event->button == GDK_BUTTON_PRIMARY &&
-#else
-		if (bevent->button == GDK_BUTTON_PRIMARY &&
-#endif
 		    col_idx >= FILE_COLUMN_MARKS && col_idx <= FILE_COLUMN_MARKS_LAST)
 			return FALSE;
 
@@ -478,11 +432,7 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent
 
 	vf->click_fd = fd;
 
-#if HAVE_GTK4
 	if (event->button == GDK_BUTTON_SECONDARY)
-#else
-	if (bevent->button == GDK_BUTTON_SECONDARY)
-#endif
 		{
 		vf->popup = vf_pop_menu(vf);
 		gtk_menu_popup_at_pointer(GTK_MENU(vf->popup), nullptr);
@@ -491,11 +441,7 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent
 
 	if (!fd) return FALSE;
 
-#if HAVE_GTK4
 	if (event->button == GDK_BUTTON_MIDDLE)
-#else
-	if (bevent->button == GDK_BUTTON_MIDDLE)
-#endif
 		{
 		if (!vflist_row_is_selected(vf, fd))
 			{
@@ -505,15 +451,10 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent
 		}
 
 
-#if HAVE_GTK4
 	if (event->button == GDK_BUTTON_PRIMARY && event->press_count == 1 &&
 	    !(event->state & GDK_SHIFT_MASK ) &&
 	    !(event->state & GDK_CONTROL_MASK ) &&
-#else
-	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->type == GDK_BUTTON_PRESS &&
-	    !(bevent->state & GDK_SHIFT_MASK ) &&
-	    !(bevent->state & GDK_CONTROL_MASK ) &&
-#endif
+
 	    vflist_row_is_selected(vf, fd))
 		{
 		GtkTreeSelection *selection;
@@ -529,11 +470,7 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent
 		return (gtk_tree_selection_count_selected_rows(selection) > 1);
 		}
 
-#if HAVE_GTK4
 	if (event->button == GDK_BUTTON_PRIMARY && event->press_count == 2)
-#else
-	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->type == GDK_2BUTTON_PRESS)
-#endif
 		{
 		if (vf->click_fd->format_class == FORMAT_CLASS_COLLECTION)
 			{
@@ -548,53 +485,29 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent
 	return FALSE;
 }
 
-#if HAVE_GTK4
 gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEvent *event)
-#else
-gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *bevent)
-#endif
 {
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
 
-#if HAVE_GTK4
 	if (layout_handle_user_defined_mouse_buttons(vf->layout, event->button))
-#else
-/** @FIXME GTK4
-
-	if (layout_handle_user_defined_mouse_buttons(vf->layout, bevent->button))
-*/
-#endif
 		{
 		return TRUE;
 		}
 
-#if HAVE_GTK4
 	if (event->button == GDK_BUTTON_MIDDLE)
-#else
-	if (bevent->button == GDK_BUTTON_MIDDLE)
-#endif
 		{
 		vflist_color_set(vf, vf->click_fd, FALSE);
 		}
 
-#if HAVE_GTK4
 	if (event->button != GDK_BUTTON_PRIMARY && event->button != GDK_BUTTON_MIDDLE)
-#else
-	if (bevent->button != GDK_BUTTON_PRIMARY && bevent->button != GDK_BUTTON_MIDDLE)
-#endif
 		{
 		return TRUE;
 		}
 
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-#if HAVE_GTK4
 	    (event->x != 0 || event->y != 0) &&
 	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y,
-#else
-	    (bevent->x != 0 || bevent->y != 0) &&
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
-#endif
 					  &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
@@ -604,11 +517,7 @@ gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *beve
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
 		}
 
-#if HAVE_GTK4
 	if (event->button == GDK_BUTTON_MIDDLE)
-#else
-	if (bevent->button == GDK_BUTTON_MIDDLE)
-#endif
 		{
 		if (fd && vf->click_fd == fd)
 			{
@@ -628,13 +537,8 @@ gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, GdkEventButton *beve
 		}
 
 	if (fd && vf->click_fd == fd &&
-#if HAVE_GTK4
 	    !(event->state & GDK_SHIFT_MASK ) &&
 	    !(event->state & GDK_CONTROL_MASK ) &&
-#else
-	    !(bevent->state & GDK_SHIFT_MASK ) &&
-	    !(bevent->state & GDK_CONTROL_MASK ) &&
-#endif
 	    vflist_row_is_selected(vf, fd))
 		{
 		GtkTreeSelection *selection;
@@ -1716,26 +1620,8 @@ gboolean vflist_refresh(ViewFile *vf)
 
 static GdkRGBA *vflist_listview_color_shifted(GtkWidget *widget)
 {
-#if HAVE_GTK4
 /** @FIXME GTK4 stub */
 	return nullptr;
-#else
-	static GdkRGBA color;
-	static GtkWidget *done = nullptr;
-
-	if (done != widget)
-		{
-		GtkStyle *style;
-
-		style = deprecated_gtk_widget_get_style(widget);
-		color = convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL]);
-
-		shift_color(color);
-		done = widget;
-		}
-
-	return &color;
-#endif
 }
 
 static void vflist_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,

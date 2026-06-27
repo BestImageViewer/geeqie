@@ -152,7 +152,6 @@ static gboolean vf_press_key_common(ViewFile *vf, GtkWidget *widget, guint keyva
 		}
 }
 
-#if HAVE_GTK4
 static gboolean vf_press_key_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -160,14 +159,6 @@ static gboolean vf_press_key_cb(GtkEventControllerKey *, guint keyval, guint, Gd
 
 	return vf_press_key_common(vf, widget, keyval, state);
 }
-#else
-static gboolean vf_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
-	return vf_press_key_common(vf, widget, event->keyval, static_cast<GdkModifierType>(event->state));
-}
-#endif
 
 /*
  *-------------------------------------------------------------------
@@ -175,48 +166,31 @@ static gboolean vf_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer 
  *-------------------------------------------------------------------
  */
 
-#if HAVE_GTK4
 static gboolean vf_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
-#else
-static gboolean vf_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
-#endif
 {
 	auto vf = static_cast<ViewFile *>(data);
 	gboolean ret;
 
 	switch (vf->type)
 	{
-#if HAVE_GTK4
 	case FILEVIEW_LIST: ret = vflist_press_cb(vf, widget, event); break;
 	case FILEVIEW_ICON: ret = vficon_press_cb(vf, widget, event); break;
-#else
-	case FILEVIEW_LIST: ret = vflist_press_cb(vf, widget, bevent); break;
-	case FILEVIEW_ICON: ret = vficon_press_cb(vf, widget, bevent); break;
-#endif
 	default: ret = FALSE;
 	}
 
 	return ret;
 }
 
-#if HAVE_GTK4
 static gboolean vf_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
-#else
-static gboolean vf_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
-#endif
 {
 	auto vf = static_cast<ViewFile *>(data);
 	gboolean ret;
 
 	switch (vf->type)
 	{
-#if HAVE_GTK4
 	case FILEVIEW_LIST: ret = vflist_release_cb(vf, widget, event); break;
 	case FILEVIEW_ICON: ret = vficon_release_cb(vf, widget, event); break;
-#else
-	case FILEVIEW_LIST: ret = vflist_release_cb(vf, widget, bevent); break;
-	case FILEVIEW_ICON: ret = vficon_release_cb(vf, widget, bevent); break;
-#endif
+
 	default: ret = FALSE;
 	}
 
@@ -347,115 +321,6 @@ void vf_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
  * dnd
  *-----------------------------------------------------------------------------
  */
-
-#if !HAVE_GTK4
-static gboolean vf_is_selected(ViewFile *vf, FileData *fd)
-{
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST: return vflist_is_selected(vf, fd);
-	case FILEVIEW_ICON: return vficon_is_selected(vf, fd);
-	}
-
-	return FALSE;
-}
-
-static void vf_dnd_get(GtkWidget *, GdkDragContext *,
-                       GtkSelectionData *selection_data, guint,
-                       guint, gpointer data)
-{
-	auto *vf = static_cast<ViewFile *>(data);
-
-	if (!vf->click_fd) return;
-
-	g_autoptr(FileDataList) list = nullptr;
-
-	if (vf_is_selected(vf, vf->click_fd))
-		{
-		list = vf_selection_get_list(vf);
-		}
-	else
-		{
-		list = g_list_append(nullptr, file_data_ref(vf->click_fd));
-		}
-
-	if (!list) return;
-
-	uri_selection_data_set_uris_from_filelist(selection_data, list);
-}
-
-static void vf_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
-{
-	auto *vf = static_cast<ViewFile *>(data);
-
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST: vflist_dnd_begin(vf, widget, context); break;
-	case FILEVIEW_ICON: vficon_dnd_begin(vf, widget, context); break;
-	}
-}
-
-static void vf_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
-{
-	auto *vf = static_cast<ViewFile *>(data);
-
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST: vflist_dnd_end(vf, context); break;
-	case FILEVIEW_ICON: vficon_dnd_end(vf, context); break;
-	}
-}
-
-static FileData *vf_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
-{
-	switch (vf->type)
-	{
-	case FILEVIEW_LIST: return vflist_find_data_by_coord(vf, x, y, iter);
-	case FILEVIEW_ICON: return vficon_find_data_by_coord(vf, x, y, iter);
-	}
-
-	return nullptr;
-}
-
-static void vf_drag_data_received(GtkWidget *, GdkDragContext *,
-                                  int x, int y, GtkSelectionData *selection,
-                                  guint info, guint, gpointer data)
-{
-	if (info != TARGET_TEXT_PLAIN) return;
-
-	auto *vf = static_cast<ViewFile *>(data);
-
-	FileData *fd = vf_find_data_by_coord(vf, x, y, nullptr);
-	if (!fd) return;
-
-	/* Add keywords to file */
-	g_autofree auto str = reinterpret_cast<gchar *>(gtk_selection_data_get_text(selection));
-	GList *kw_list = string_to_keywords_list(str);
-
-	metadata_append_list(fd, KEYWORD_KEY, kw_list);
-
-	g_list_free_full(kw_list, g_free);
-}
-
-static void vf_dnd_init(ViewFile *vf)
-{
-	gq_gtk_drag_source_set(vf->listview, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-	                    dnd_file_drag_types.data(), dnd_file_drag_types.size(),
-	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_gtk_drag_dest_set(vf->listview, GTK_DEST_DEFAULT_ALL,
-	                  dnd_file_drag_types.data(), dnd_file_drag_types.size(),
-	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-
-	gq_drag_g_signal_connect(G_OBJECT(vf->listview), "drag_data_get",
-	                 G_CALLBACK(vf_dnd_get), vf);
-	gq_drag_g_signal_connect(G_OBJECT(vf->listview), "drag_begin",
-	                 G_CALLBACK(vf_dnd_begin), vf);
-	gq_drag_g_signal_connect(G_OBJECT(vf->listview), "drag_end",
-	                 G_CALLBACK(vf_dnd_end), vf);
-	gq_drag_g_signal_connect(G_OBJECT(vf->listview), "drag_data_received",
-	                 G_CALLBACK(vf_drag_data_received), vf);
-}
-#endif
 
 /*
  *-----------------------------------------------------------------------------
@@ -1007,26 +872,12 @@ static void vf_marks_tooltip_open_dialog(GtkWidget *widget, gint mark_no)
 	gtk_widget_show(gd->dialog);
 }
 
-#if HAVE_GTK4
 static void vf_marks_tooltip_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer user_data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 
 	vf_marks_tooltip_open_dialog(widget, GPOINTER_TO_INT(user_data));
 }
-#else
-static gboolean vf_marks_tooltip_cb(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
-{
-	if (event->button != GDK_BUTTON_SECONDARY)
-		{
-		return FALSE;
-		}
-
-	vf_marks_tooltip_open_dialog(widget, GPOINTER_TO_INT(user_data));
-
-	return TRUE;
-}
-#endif
 
 static void vf_file_filter_save_cb(GtkEntry *combo_entry, gpointer data)
 {
@@ -1076,11 +927,7 @@ static void vf_file_filter_cb(GtkWidget *, gpointer data)
 	vf_refresh(vf);
 }
 
-#if HAVE_GTK4
 static gboolean vf_file_filter_press_cb(GtkWidget *widget, gpointer data)
-#else
-static gboolean vf_file_filter_press_cb(GtkWidget *widget, GdkEventButton *, gpointer data)
-#endif
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf->file_filter.last_selected = gtk_combo_box_get_active(GTK_COMBO_BOX(vf->file_filter.combo));
@@ -1090,7 +937,6 @@ static gboolean vf_file_filter_press_cb(GtkWidget *widget, GdkEventButton *, gpo
 	return TRUE;
 }
 
-#if HAVE_GTK4
 static void vf_gesture_press_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
@@ -1122,7 +968,6 @@ static void vf_file_filter_gesture_press_cb(GtkGestureClick *gesture, gint, gdou
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 	vf_file_filter_press_cb(widget, data);
 }
-#endif
 
 static GtkWidget *vf_marks_filter_init(ViewFile *vf)
 {
@@ -1138,31 +983,19 @@ static GtkWidget *vf_marks_filter_init(ViewFile *vf)
 		g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(vf_marks_filter_toggle_cb), vf);
 
-#if HAVE_GTK4
 		GtkGesture *gesture = gtk_gesture_click_new();
 		gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 
 		g_signal_connect(gesture, "released", G_CALLBACK(vf_marks_tooltip_cb), GINT_TO_POINTER(i));
 
 		gtk_widget_add_controller(check, GTK_EVENT_CONTROLLER(gesture));
-#else
-		g_signal_connect(check, "button_press_event", G_CALLBACK(vf_marks_tooltip_cb), GINT_TO_POINTER(i));
-#endif
 
 		gtk_widget_set_tooltip_text(check, options->marks_tooltips[i]);
-
-#if !HAVE_GTK4
-		gtk_widget_show(check);
-#endif
 
 		vf->filter_check[i] = check;
 		}
 
 	gq_gtk_container_add(frame, hbox);
-
-#if !HAVE_GTK4
-	gtk_widget_show(hbox);
-#endif
 
 	return frame;
 }
@@ -1380,15 +1213,10 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	g_signal_connect(G_OBJECT(vf->file_filter.combo), "changed",
 		G_CALLBACK(vf_file_filter_cb), vf);
 
-#if HAVE_GTK4
 	GtkGesture *filter_gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(filter_gesture), 0);
 	g_signal_connect(filter_gesture, "pressed", G_CALLBACK(vf_file_filter_gesture_press_cb), vf);
 	gtk_widget_add_controller(combo_entry, GTK_EVENT_CONTROLLER(filter_gesture));
-#else
-	g_signal_connect(G_OBJECT(combo_entry), "button_press_event",
-			 G_CALLBACK(vf_file_filter_press_cb), vf);
-#endif
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), vf->file_filter.combo, FALSE, FALSE, 0);
 	gtk_widget_show(vf->file_filter.combo);
@@ -1478,30 +1306,17 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	case FILEVIEW_ICON: vf = vficon_new(vf); break;
 	}
 
-#if !HAVE_GTK4
-	vf_dnd_init(vf);
-#endif
-
-#if HAVE_GTK4
 	GtkEventController *key_controller = gtk_event_controller_key_new();
 
 	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(vf_press_key_cb), vf);
 
 	gtk_widget_add_controller(vf->listview, key_controller);
-#else
-	g_signal_connect(vf->listview, "key_press_event", G_CALLBACK(vf_press_key_cb), vf);
-#endif
 
-#if HAVE_GTK4
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(vf_gesture_press_cb), vf);
 	g_signal_connect(gesture, "released", G_CALLBACK(vf_gesture_release_cb), vf);
 	gtk_widget_add_controller(vf->listview, GTK_EVENT_CONTROLLER(gesture));
-#else
-	g_signal_connect(G_OBJECT(vf->listview), "button_press_event", G_CALLBACK(vf_press_cb), vf);
-	g_signal_connect(G_OBJECT(vf->listview), "button_release_event", G_CALLBACK(vf_release_cb), vf);
-#endif
 
 	gq_gtk_container_add(vf->scrolled, vf->listview);
 	gtk_widget_show(vf->listview);

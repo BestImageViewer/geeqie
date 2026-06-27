@@ -597,7 +597,6 @@ static void li_pop_menu_copy_image_cb(GtkWidget *widget, gpointer data)
 		return;
 		}
 
-#if HAVE_GTK4
 	GdkDisplay *display = gtk_widget_get_display(widget);
 	if (!display)
 		{
@@ -614,9 +613,6 @@ static void li_pop_menu_copy_image_cb(GtkWidget *widget, gpointer data)
 
 	gdk_clipboard_set_texture(clipboard, texture);
 	g_object_unref(texture);
-#else
-	gtk_clipboard_set_image( gtk_widget_get_clipboard(widget, GDK_SELECTION_CLIPBOARD), pixbuf);
-#endif
 }
 
 static void li_pop_menu_move_cb(GtkWidget *widget, gpointer data)
@@ -887,179 +883,11 @@ void layout_image_menu_popup(LayoutWindow *lw)
  * dnd
  *----------------------------------------------------------------------------
  */
-#if !HAVE_GTK4
-static void layout_image_dnd_receive(GtkWidget *widget, GdkDragContext *,
-				     gint, gint,
-				     GtkSelectionData *selection_data, guint info,
-				     guint, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-	gint i;
-
-
-	for (i = 0; i < MAX_SPLIT_IMAGES; i++)
-		{
-		if (lw->split_images[i] && lw->split_images[i]->pr == widget)
-			break;
-		}
-	if (i < MAX_SPLIT_IMAGES)
-		{
-		DEBUG_1("dnd image activate %d", i);
-		layout_image_activate(lw, i, FALSE);
-		}
-
-	if (info == TARGET_TEXT_PLAIN)
-		{
-		const auto *url = reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data));
-		download_web_file(url, FALSE, lw);
-		}
-	else if (info == TARGET_URI_LIST || info == TARGET_APP_COLLECTION_MEMBER)
-		{
-		CollectionData *source;
-		g_autoptr(FileDataList) list = nullptr;
-		GList *info_list;
-
-		if (info == TARGET_URI_LIST)
-			{
-			list = uri_filelist_from_gtk_selection_data(selection_data);
-			source = nullptr;
-			info_list = nullptr;
-			}
-		else
-			{
-			source = collection_from_dnd_data(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), &list, &info_list);
-			}
-
-		if (list)
-			{
-			auto fd = static_cast<FileData *>(list->data);
-
-			if (isfile(fd->path))
-				{
-				gint row;
-				FileData *dir_fd;
-
-				g_autofree gchar *base = remove_level_from_path(fd->path);
-				dir_fd = file_data_new_dir(base);
-				if (dir_fd != lw->dir_fd)
-					{
-					layout_set_fd(lw, dir_fd);
-					}
-				file_data_unref(dir_fd);
-
-				row = layout_list_get_index(lw, fd);
-				if (source && info_list)
-					{
-					layout_image_set_collection(lw, source, static_cast<CollectInfo *>(info_list->data));
-					}
-				else if (row == -1)
-					{
-					layout_image_set_fd(lw, fd);
-					}
-				else
-					{
-					layout_image_set_index(lw, row);
-					}
-				}
-			else if (isdir(fd->path))
-				{
-				layout_set_fd(lw, fd);
-				layout_image_set_fd(lw, nullptr);
-				}
-			}
-
-		g_list_free(info_list);
-		}
-}
-
-static void layout_image_dnd_get(GtkWidget *widget, GdkDragContext *,
-				 GtkSelectionData *selection_data, guint,
-				 guint, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-	FileData *fd;
-	gint i;
-
-
-	for (i = 0; i < MAX_SPLIT_IMAGES; i++)
-		{
-		if (lw->split_images[i] && lw->split_images[i]->pr == widget)
-			break;
-		}
-	if (i < MAX_SPLIT_IMAGES)
-		{
-		DEBUG_1("dnd get from %d", i);
-		fd = image_get_fd(lw->split_images[i]);
-		}
-	else
-		fd = layout_image_get_fd(lw);
-
-	if (fd)
-		{
-		GList *list;
-
-		list = g_list_append(nullptr, fd);
-		uri_selection_data_set_uris_from_filelist(selection_data, list);
-		g_list_free(list);
-		}
-	else
-		{
-		gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data),
-				       8, nullptr, 0);
-		}
-}
-
-static void layout_image_dnd_end(GtkWidget *, GdkDragContext *context, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-	if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
-		{
-		FileData *fd;
-		gint row;
-
-		fd = layout_image_get_fd(lw);
-		row = layout_list_get_index(lw, fd);
-		if (row < 0) return;
-
-		if (!isfile(fd->path))
-			{
-			if (static_cast<guint>(row) < layout_list_count(lw) - 1)
-				{
-				layout_image_next(lw);
-				}
-			else
-				{
-				layout_image_prev(lw);
-				}
-			}
-		layout_refresh(lw);
-		}
-}
-#endif
 
 static void layout_image_dnd_init(LayoutWindow *lw, gint i)
 {
-#if !HAVE_GTK4
-	ImageWindow *imd = lw->split_images[i];
-
-	gq_gtk_drag_source_set(imd->pr, GDK_BUTTON2_MASK,
-	                    dnd_file_drag_types.data(), dnd_file_drag_types.size(),
-	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(imd->pr), "drag_data_get",
-			 G_CALLBACK(layout_image_dnd_get), lw);
-	gq_drag_g_signal_connect(G_OBJECT(imd->pr), "drag_end",
-			 G_CALLBACK(layout_image_dnd_end), lw);
-
-	gq_gtk_drag_dest_set(imd->pr,
-	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
-	                  dnd_file_drop_types.data(), dnd_file_drop_types.size(),
-	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(imd->pr), "drag_data_received",
-			 G_CALLBACK(layout_image_dnd_receive), lw);
-#else
 	(void)lw;
 	(void)i;
-#endif
 }
 
 
@@ -1728,11 +1556,7 @@ static void layout_image_focus_in_cb(ImageWindow *imd, gpointer data)
 }
 
 
-#if HAVE_GTK4
 static void layout_image_button_cb(ImageWindow *imd, GqMouseButtonEvent *event, gpointer data)
-#else
-static void layout_image_button_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
-#endif
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *menu;
@@ -1741,11 +1565,7 @@ static void layout_image_button_cb(ImageWindow *imd, GdkEventButton *event, gpoi
 	switch (event->button)
 		{
 		case GDK_BUTTON_PRIMARY:
-#if HAVE_GTK4
 			if (event->press_count == 2)
-#else
-			if (event->type == GDK_2BUTTON_PRESS)
-#endif
 				{
 				layout_image_full_screen_toggle(lw);
 				}
@@ -1876,11 +1696,7 @@ static void layout_image_drag_cb(ImageWindow *imd, GdkEventMotion *event, gdoubl
 		}
 }
 
-#if HAVE_GTK4
 static void layout_image_button_inactive_cb(ImageWindow *imd, GqMouseButtonEvent *event, gpointer data)
-#else
-static void layout_image_button_inactive_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
-#endif
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *menu;
@@ -2206,16 +2022,8 @@ static GtkWidget *layout_image_setup_split_hv(LayoutWindow *lw, ImageSplitMode m
 	GtkWidget *paned = gtk_paned_new((mode == SPLIT_HOR) ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(paned);
 
-#if HAVE_GTK4
 	gtk_paned_set_start_child(GTK_PANED(paned), lw->split_images[0]->widget);
-#else
-	gtk_paned_pack1(GTK_PANED(paned), lw->split_images[0]->widget, TRUE, TRUE);
-#endif
-#if HAVE_GTK4
 	gtk_paned_set_end_child(GTK_PANED(paned), lw->split_images[1]->widget);
-#else
-	gtk_paned_pack2(GTK_PANED(paned), lw->split_images[1]->widget, TRUE, TRUE);
-#endif
 
 	gtk_widget_show(lw->split_images[0]->widget);
 	gtk_widget_show(lw->split_images[1]->widget);
@@ -2254,26 +2062,10 @@ static GtkWidget *layout_image_setup_split_triple(LayoutWindow *lw)
 	gtk_paned_set_position(GTK_PANED(hpaned1), pane_pos);
 	gtk_paned_set_position(GTK_PANED(hpaned2), pane_pos);
 
-#if HAVE_GTK4
 	gtk_paned_set_start_child(GTK_PANED(hpaned1), lw->split_images[0]->widget);
-#else
-	gtk_paned_pack1(GTK_PANED(hpaned1), lw->split_images[0]->widget, TRUE, TRUE);
-#endif
-#if HAVE_GTK4
 	gtk_paned_set_start_child(GTK_PANED(hpaned2), lw->split_images[1]->widget);
-#else
-	gtk_paned_pack1(GTK_PANED(hpaned2), lw->split_images[1]->widget, TRUE, TRUE);
-#endif
-#if HAVE_GTK4
 	gtk_paned_set_end_child(GTK_PANED(hpaned2), lw->split_images[2]->widget);
-#else
-	gtk_paned_pack2(GTK_PANED(hpaned2), lw->split_images[2]->widget, TRUE, TRUE);
-#endif
-#if HAVE_GTK4
 	gtk_paned_set_end_child(GTK_PANED(hpaned1), hpaned2);
-#else
-	gtk_paned_pack2(GTK_PANED(hpaned1), hpaned2, TRUE, TRUE);
-#endif
 
 	for (i = 0; i < 3; i++)
 		{
@@ -2304,36 +2096,12 @@ static GtkWidget *layout_image_setup_split_quad(LayoutWindow *lw)
 	vpaned2 = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
 	DEBUG_NAME(vpaned2);
 
-#if HAVE_GTK4
 	gtk_paned_set_start_child(GTK_PANED(vpaned1), lw->split_images[0]->widget);
-#else
-	gtk_paned_pack1(GTK_PANED(vpaned1), lw->split_images[0]->widget, TRUE, TRUE);
-#endif
-#if HAVE_GTK4
 	gtk_paned_set_end_child(GTK_PANED(vpaned1), lw->split_images[2]->widget);
-#else
-	gtk_paned_pack2(GTK_PANED(vpaned1), lw->split_images[2]->widget, TRUE, TRUE);
-#endif
-#if HAVE_GTK4
 	gtk_paned_set_start_child(GTK_PANED(vpaned2), lw->split_images[1]->widget);
-#else
-	gtk_paned_pack1(GTK_PANED(vpaned2), lw->split_images[1]->widget, TRUE, TRUE);
-#endif
-#if HAVE_GTK4
 	gtk_paned_set_end_child(GTK_PANED(vpaned2), lw->split_images[3]->widget);
-#else
-	gtk_paned_pack2(GTK_PANED(vpaned2), lw->split_images[3]->widget, TRUE, TRUE);
-#endif
-#if HAVE_GTK4
 	gtk_paned_set_start_child(GTK_PANED(hpaned), vpaned1);
-#else
-	gtk_paned_pack1(GTK_PANED(hpaned), vpaned1, TRUE, TRUE);
-#endif
-#if HAVE_GTK4
 	gtk_paned_set_end_child(GTK_PANED(hpaned), vpaned2);
-#else
-	gtk_paned_pack2(GTK_PANED(hpaned), vpaned2, TRUE, TRUE);
-#endif
 
 	for (i = 0; i < 4; i++)
 		gtk_widget_show(lw->split_images[i]->widget);

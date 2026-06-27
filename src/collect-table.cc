@@ -81,22 +81,6 @@ constexpr gint COLLECT_TABLE_MAX_COLUMNS = 32;
 
 constexpr gint THUMB_BORDER_PADDING = 2;
 
-#if !HAVE_GTK4
-constexpr gint COLLECT_TABLE_TIP_DELAY = 500;
-constexpr gint COLLECT_TABLE_TIP_DELAY_PATH = 850;
-
-constexpr std::array<GtkTargetEntry, 3> collection_drag_types{{
-	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST },
-	{ const_cast<gchar *>("text/plain"), 0, TARGET_TEXT_PLAIN }
-}};
-
-constexpr std::array<GtkTargetEntry, 2> collection_drop_types{{
-	{ const_cast<gchar *>(TARGET_APP_COLLECTION_MEMBER_STRING), 0, TARGET_APP_COLLECTION_MEMBER },
-	{ const_cast<gchar *>("text/uri-list"), 0, TARGET_URI_LIST }
-}};
-#endif
-
 inline gboolean info_selected(const CollectInfo *info)
 {
 	return info->flag_mask & SELECTION_SELECTED;
@@ -1877,193 +1861,6 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
  * dnd
  *-------------------------------------------------------------------
  */
-#if !HAVE_GTK4
-static void collection_table_dnd_get(GtkWidget *, GdkDragContext *,
-				     GtkSelectionData *selection_data, guint info,
-				     guint, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
-	gboolean selected;
-	GList *list = nullptr;
-	g_autofree gchar *uri_text = nullptr;
-	gint total;
-
-	if (!ct->click_info) return;
-
-	selected = info_selected(ct->click_info);
-
-	switch (info)
-		{
-		case TARGET_APP_COLLECTION_MEMBER:
-			if (selected)
-				{
-				uri_text = collection_info_list_to_dnd_data(ct->cd, ct->selection, total);
-				}
-			else
-				{
-				list = g_list_append(nullptr, ct->click_info);
-				uri_text = collection_info_list_to_dnd_data(ct->cd, list, total);
-				g_list_free(list);
-				}
-			gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data),
-						8, reinterpret_cast<guchar *>(uri_text), total);
-			break;
-		case TARGET_URI_LIST:
-		case TARGET_TEXT_PLAIN:
-		default:
-			if (selected)
-				{
-				list = collection_table_selection_get_list(ct);
-				}
-			else
-				{
-				list = g_list_append(nullptr, file_data_ref(ct->click_info->fd));
-				}
-			if (!list) return;
-
-			uri_selection_data_set_uris_from_filelist(selection_data, list);
-			file_data_list_free(list);
-			break;
-		}
-}
-
-
-static void collection_table_dnd_receive(GtkWidget *, GdkDragContext *context,
-					  gint x, gint y,
-					  GtkSelectionData *selection_data, guint info,
-					  guint, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
-	GList *info_list = nullptr;
-	CollectionData *source;
-	CollectInfo *drop_info;
-
-	DEBUG_1("%s", gtk_selection_data_get_data(selection_data));
-
-	collection_table_scroll(ct, FALSE);
-
-	drop_info = collection_table_insert_point(ct, x, y);
-
-	g_autoptr(FileDataList) list = nullptr;
-	switch (info)
-		{
-		case TARGET_APP_COLLECTION_MEMBER:
-			source = collection_from_dnd_data(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), &list, &info_list);
-			if (source)
-				{
-				if (source == ct->cd)
-					{
-					gint row = -1;
-					gint col = -1;
-
-					/* it is a move within a collection */
-					g_clear_pointer(&list, file_data_list_free);
-
-					if (!drop_info)
-						{
-						collection_table_move_by_info_list(ct, info_list, -1, -1);
-						}
-					else if (collection_table_find_position(ct, drop_info, &row, &col))
-						{
-						collection_table_move_by_info_list(ct, info_list, row, col);
-						}
-					}
-				else
-					{
-					/* it is a move/copy across collections */
-					if (gdk_drag_context_get_selected_action(context) == GDK_ACTION_MOVE)
-						{
-						collection_remove_by_info_list(source, info_list);
-						}
-					}
-				g_list_free(info_list);
-				}
-			break;
-		case TARGET_URI_LIST:
-			list = uri_filelist_from_gtk_selection_data(selection_data);
-			if (file_data_list_has_dir(list))
-				{
-				ct->drop_list = g_steal_pointer(&list);
-				ct->drop_info = drop_info;
-
-				GtkWidget *menu = collection_table_drop_menu(ct);
-				gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-				return;
-				}
-			break;
-		default:
-			break;
-		}
-
-	if (list)
-		{
-		collection_table_insert_filelist(ct, list, drop_info);
-		}
-}
-
-static void collection_table_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
-
-	if (ct->click_info && ct->click_info->pixbuf)
-		{
-		gint items;
-
-		if (info_selected(ct->click_info))
-			items = g_list_length(ct->selection);
-		else
-			items = 1;
-		dnd_set_drag_icon(widget, context, ct->click_info->pixbuf, items);
-		}
-}
-
-static void collection_table_dnd_end(GtkWidget *, GdkDragContext *, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
-
-	collection_table_scroll(ct, FALSE);
-}
-
-static gint collection_table_dnd_motion(GtkWidget *, GdkDragContext *, gint, gint, guint, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
-
-	collection_table_scroll(ct, TRUE);
-
-	return FALSE;
-}
-
-static void collection_table_dnd_leave(GtkWidget *, GdkDragContext *, guint, gpointer data)
-{
-	auto ct = static_cast<CollectTable *>(data);
-
-	collection_table_scroll(ct, FALSE);
-}
-
-static void collection_table_dnd_init(CollectTable *ct)
-{
-	gq_gtk_drag_source_set(ct->listview, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-	                    collection_drag_types.data(), collection_drag_types.size(),
-	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(ct->listview), "drag_data_get",
-			 G_CALLBACK(collection_table_dnd_get), ct);
-	gq_drag_g_signal_connect(G_OBJECT(ct->listview), "drag_begin",
-			 G_CALLBACK(collection_table_dnd_begin), ct);
-	gq_drag_g_signal_connect(G_OBJECT(ct->listview), "drag_end",
-			 G_CALLBACK(collection_table_dnd_end), ct);
-
-	gq_gtk_drag_dest_set(ct->listview,
-	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_HIGHLIGHT | GTK_DEST_DEFAULT_DROP),
-	                  collection_drop_types.data(), collection_drop_types.size(),
-	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_ASK));
-	gq_drag_g_signal_connect(G_OBJECT(ct->listview), "drag_motion",
-			 G_CALLBACK(collection_table_dnd_motion), ct);
-	gq_drag_g_signal_connect(G_OBJECT(ct->listview), "drag_leave",
-			 G_CALLBACK(collection_table_dnd_leave), ct);
-	gq_drag_g_signal_connect(G_OBJECT(ct->listview), "drag_data_received",
-			 G_CALLBACK(collection_table_dnd_receive), ct);
-}
-#endif
 
 /*
  *-----------------------------------------------------------------------------
@@ -2074,90 +1871,8 @@ static void collection_table_dnd_init(CollectTable *ct)
 static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 					  GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
-#if HAVE_GTK4
 /* @FIXME GTK4 stub */
 	return;
-#else
-	if (!GQV_IS_CELL_RENDERER_ICON(cell)) return;
-
-	auto *cd = static_cast<ColumnData *>(data);
-
-	/** @FIXME this is a primitive hack to stop a crash.
-	 * When compiled with GTK3, if a Collection window containing
-	 * say, 50 or so, images has its width changed, there is a segfault
-	 * https://github.com/BestImageViewer/geeqie/issues/531
-	 */
-	if (cd->number == COLLECT_TABLE_MAX_COLUMNS) return;
-
-	GList *list;
-	gtk_tree_model_get(tree_model, iter, CTABLE_COLUMN_POINTER, &list, -1);
-
-	auto *info = static_cast<CollectInfo *>(g_list_nth_data(list, cd->number));
-	if (!info)
-		{
-		g_object_set(cell,
-		             "pixbuf", NULL,
-		             "text", NULL,
-		             "cell-background-set", FALSE,
-		             "foreground-set", FALSE,
-		             "has-focus", FALSE,
-		             NULL);
-		return;
-		}
-
-	const CollectTable *ct = cd->ct;
-
-	GtkStyle *style = deprecated_gtk_widget_get_style(ct->listview);
-	GdkRGBA color_bg;
-	GdkRGBA color_fg;
-	if (info->flag_mask & SELECTION_SELECTED)
-		{
-		color_fg = convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_SELECTED]);
-		color_bg = convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_SELECTED]);
-		}
-	else
-		{
-		color_fg = convert_gdkcolor_to_gdkrgba(&style->text[GTK_STATE_NORMAL]);
-		color_bg = convert_gdkcolor_to_gdkrgba(&style->base[GTK_STATE_NORMAL]);
-		}
-
-	if (info->flag_mask & SELECTION_PRELIGHT)
-		{
-		shift_color(color_bg);
-		}
-
-	g_autoptr(GString) display_text = g_string_new("");
-	if (info->fd)
-		{
-		if (ct->show_text)
-			{
-			g_string_append(display_text, info->fd->name);
-			}
-
-		if (ct->show_stars)
-			{
-			if (display_text->len) g_string_append(display_text, "\n");
-			g_autofree gchar *star_rating = metadata_read_rating_stars(info->fd);
-			g_string_append(display_text, star_rating);
-			}
-
-		if (ct->show_infotext && info->infotext)
-			{
-			if (display_text->len) g_string_append(display_text, "\n");
-			g_string_append(display_text, info->infotext);
-			}
-		}
-
-	g_object_set(cell,
-	             "pixbuf", info->pixbuf,
-	             "text", display_text->str,
-	             "cell-background-rgba", &color_bg,
-	             "cell-background-set", TRUE,
-	             "foreground-rgba", &color_fg,
-	             "foreground-set", TRUE,
-	             "has-focus", (ct->focus_info == info),
-	             NULL);
-#endif
 }
 
 static void collection_table_append_column(CollectTable *ct, gint n)
@@ -2234,7 +1949,6 @@ static void collection_table_sized(GtkWidget *, GtkAllocation *allocation, gpoin
 	collection_table_populate_at_new_size(ct, allocation->width, allocation->height, FALSE);
 }
 
-#if HAVE_GTK4
 static void listview_motion_cb(GtkEventControllerMotion *motion, gdouble x, gdouble y, gpointer data)
 {
 	auto *ct = static_cast<CollectTable *>(data);
@@ -2243,19 +1957,6 @@ static void listview_motion_cb(GtkEventControllerMotion *motion, gdouble x, gdou
 	ct->last_y = static_cast<gint>(y);
 	ct->pointer_valid = TRUE;
 }
-
-#else
-static gboolean listview_motion_cb(GtkWidget *, GdkEventMotion *event, gpointer data)
-{
-	auto *ct = static_cast<CollectTable*>(data);
-
-	ct->last_x = event->x;
-	ct->last_y = event->y;
-	ct->pointer_valid = TRUE;
-
-	return FALSE;
-}
-#endif
 
 static gboolean collection_table_query_tooltip_cb(GtkWidget *, gint x, gint y, gboolean keyboard_mode, GtkTooltip *tooltip, gpointer data)
 {
@@ -2340,14 +2041,9 @@ CollectTable *collection_table_new(CollectionData *cd)
 	g_signal_connect(G_OBJECT(ct->listview),"button_release_event",
 			 G_CALLBACK(collection_table_release_cb), ct);
 
-#if HAVE_GTK4
 	GtkEventController *motion = gtk_event_controller_motion_new();
 	g_signal_connect(motion, "motion", G_CALLBACK(listview_motion_cb), ct);
 	gtk_widget_add_controller(ct->listview, motion);
-#else
-	gtk_widget_add_events(ct->listview, GDK_POINTER_MOTION_MASK);
-	g_signal_connect(ct->listview, "motion-notify-event", G_CALLBACK(listview_motion_cb), ct);
-#endif
 
 	CollectWindow *cw = collection_window_find(ct->cd);
 

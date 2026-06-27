@@ -115,7 +115,6 @@ static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer da
 {
 	auto prd = static_cast<PaneRatingData *>(data);
 
-#if HAVE_GTK4
 	const gchar *rating_label;
 
 	rating_label = gtk_check_button_get_label(checkbutton);
@@ -135,19 +134,6 @@ static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer da
 		}
 
 	metadata_write_string(prd->fd, RATING_KEY, rating);
-#else
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkbutton)))
-		{
-		for (gint i = 0; i < 7; i++)
-			{
-			if (prd->rating_buttons[i] == checkbutton)
-				{
-				metadata_write_string(prd->fd, RATING_KEY, std::to_string(i - 1).c_str());
-				break;
-				}
-			}
-		}
-#endif
 }
 
 static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gboolean expanded)
@@ -176,21 +162,13 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 	row_1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gq_gtk_box_pack_start(GTK_BOX(prd->widget), row_1, FALSE, FALSE, 0);
 
-#if HAVE_GTK4
 	radio_rejected = gtk_check_button_new_with_label(_("Rejected"));
-#else
-	radio_rejected = gtk_radio_button_new_with_label(nullptr, _("Rejected"));
-#endif
 	gq_gtk_box_pack_start(GTK_BOX(row_1), radio_rejected, FALSE, FALSE, 0);
 	g_signal_connect(radio_rejected, "released", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 	prd->rating_buttons[0] = GTK_CHECK_BUTTON(radio_rejected);
 
-#if HAVE_GTK4
 	radio_unrated = gtk_check_button_new_with_label(_("Unrated"));
 	gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_unrated), GTK_CHECK_BUTTON(radio_rejected));
-#else
-	radio_unrated = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio_rejected), _("Unrated"));
-#endif
 	gq_gtk_box_pack_start(GTK_BOX(row_1), radio_unrated, FALSE, FALSE, 0);
 	g_signal_connect(radio_unrated, "released", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 	prd->rating_buttons[1] = GTK_CHECK_BUTTON(radio_unrated);
@@ -202,12 +180,8 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 		{
 		const std::string i_str = std::to_string(i - 1);
 
-#if HAVE_GTK4
 		radio_rating = gtk_check_button_new_with_label(i_str.c_str());
 		gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_rating), GTK_CHECK_BUTTON(radio_rejected));
-#else
-		radio_rating = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio_rejected), i_str.c_str());
-#endif
 		g_signal_connect(radio_rating, "released", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 
 		gq_gtk_box_pack_start(GTK_BOX(row_2), radio_rating, FALSE, FALSE, 1);

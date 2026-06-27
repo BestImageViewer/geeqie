@@ -216,10 +216,6 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 			return TRUE;
 			}
 
-#if !HAVE_GTK4
-		/* GTK3 hack: let the entry handle keys stolen by the accel group. */
-		return FALSE;
-#endif
 		}
 
 	if (lw->vf->file_filter.combo)
@@ -227,41 +223,13 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 		GtkWidget *combo_entry =
 			gq_gtk_bin_get_child(GTK_WIDGET(lw->vf->file_filter.combo));
 
-#if !HAVE_GTK4
-		if (gtk_widget_has_focus(combo_entry))
-			{
-			return FALSE;
-			}
-#else
 		if (combo_entry && gtk_widget_has_focus(combo_entry))
 			{
 			return FALSE;
 			}
-#endif
 		}
-
-#if !HAVE_GTK4
-	if (lw->vd &&
-	    lw->options.dir_view_type == DIRVIEW_TREE &&
-	    gtk_widget_has_focus(lw->vd->view) &&
-	    !layout_key_match(keyval))
-		{
-		return FALSE;
-		}
-#endif
-
-#if !HAVE_GTK4
-	if (lw->bar)
-		{
-		return FALSE;
-		}
-#endif
 
 	GtkWidget *focused = nullptr;
-
-#if !HAVE_GTK4
-	focused = gq_gtk_widget_get_focus_child(lw->image->widget);
-#endif
 
 	gboolean stop_signal = FALSE;
 	gint x = 0;
@@ -320,108 +288,13 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 
 	if (x != 0 || y != 0)
 		{
-#if !HAVE_GTK4
-		/* Existing function needs GdkEventKey. Keep GTK3 path below. */
-#else
 		keyboard_scroll_calc(x, y, state, keyval, static_cast<guint32>(g_get_monotonic_time() / 1000));
-#endif
 		layout_image_scroll(lw, x, y, (state & GDK_SHIFT_MASK));
 		}
 
 	return stop_signal;
 }
 
-#if !HAVE_GTK4
-static gboolean layout_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
-{
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	if (lw->path_entry && gtk_widget_has_focus(lw->path_entry))
-		{
-		if (event->keyval == GDK_KEY_Escape && lw->dir_fd)
-			{
-			gq_gtk_entry_set_text(GTK_ENTRY(lw->path_entry), lw->dir_fd->path);
-			}
-
-		if (gq_gtk_widget_key_event(lw->path_entry, event))
-			{
-			return TRUE;
-			}
-		}
-
-	if (lw->vf->file_filter.combo)
-		{
-		GtkWidget *combo_entry =
-			gq_gtk_bin_get_child(GTK_WIDGET(lw->vf->file_filter.combo));
-
-		if (gtk_widget_has_focus(combo_entry) &&
-		    gq_gtk_widget_key_event(combo_entry, event))
-			{
-			return TRUE;
-			}
-		}
-
-	if (lw->vd &&
-	    lw->options.dir_view_type == DIRVIEW_TREE &&
-	    gtk_widget_has_focus(lw->vd->view) &&
-	    !layout_key_match(event->keyval) &&
-	    gq_gtk_widget_key_event(lw->vd->view, event))
-		{
-		return TRUE;
-		}
-
-	if (lw->bar &&
-	    bar_event(lw->bar, reinterpret_cast<GdkEvent *>(event)))
-		{
-		return TRUE;
-		}
-
-	gboolean stop_signal =
-		layout_key_press_common(widget, event->keyval, static_cast<GdkModifierType>(event->state), data);
-
-	if (stop_signal)
-		{
-		gint x = 0;
-		gint y = 0;
-
-		switch (event->keyval)
-			{
-			case GDK_KEY_Left:
-			case GDK_KEY_KP_Left:
-				x = -1;
-				break;
-
-			case GDK_KEY_Right:
-			case GDK_KEY_KP_Right:
-				x = 1;
-				break;
-
-			case GDK_KEY_Up:
-			case GDK_KEY_KP_Up:
-				y = -1;
-				break;
-
-			case GDK_KEY_Down:
-			case GDK_KEY_KP_Down:
-				y = 1;
-				break;
-
-			default:
-				break;
-			}
-
-		if (x != 0 || y != 0)
-			{
-			keyboard_scroll_calc(x, y, static_cast<GdkModifierType>(event->state), event->keyval, event->time);
-			layout_image_scroll(lw, x, y, (event->state & GDK_SHIFT_MASK));
-			}
-		}
-
-	return stop_signal;
-}
-#endif
-
-#if HAVE_GTK4
 static gboolean layout_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint GdkModifierType state, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
@@ -430,7 +303,6 @@ static gboolean layout_key_press_cb(GtkEventControllerKey *controller, guint key
 	return layout_key_press_common(widget, keyval, state, data);
 */
 }
-#endif
 
 void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window)
 {
@@ -600,7 +472,6 @@ static void layout_menu_copy_image_cb(GSimpleAction *, GVariant *, gpointer)
 	pixbuf = image_get_pixbuf(imd);
 	if (!pixbuf) return;
 
-#if HAVE_GTK4
 	GdkDisplay *display = gdk_display_get_default();
 	if (!display)
 		{
@@ -616,9 +487,6 @@ static void layout_menu_copy_image_cb(GSimpleAction *, GVariant *, gpointer)
 	GdkTexture *texture = gdk_texture_new_for_pixbuf(pixbuf);
 	gdk_clipboard_set_texture(clipboard, texture);
 	g_object_unref(texture);
-#else
-	gtk_clipboard_set_image(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD), pixbuf);
-#endif
 }
 
 static void layout_menu_cut_path_cb(GSimpleAction *, GVariant *, gpointer)
@@ -2864,11 +2732,6 @@ GtkWidget *layout_actions_menu_bar(LayoutWindow *lw)
 {
 	if (lw->menu_bar) return lw->menu_bar;
 
-#if HAVE_GTK4
-#else
-	lw->menu_bar = gtk_menu_bar_new_from_model(lw->menu_model);
-#endif
-
 	return g_object_ref(lw->menu_bar);
 }
 
@@ -3201,19 +3064,13 @@ void layout_util_status_update_write(LayoutWindow *lw)
 		if (!GTK_IS_BUTTON(widget)) return;
 		auto *waction = static_cast<GAction *>(g_object_get_data(G_OBJECT(widget), "action"));
 		if (waction != uid->act) return;
-#if HAVE_GTK4
+
 		GtkWidget *image = gtk_button_get_child(GTK_BUTTON(widget));
 		if (GTK_IS_IMAGE(image))
 			{
 			gtk_image_set_from_icon_name(GTK_IMAGE(image), uid->name);
 			}
-#else
-		GtkWidget *image = gtk_button_get_image(GTK_BUTTON(widget));
-		if (GTK_IS_IMAGE(image))
-			{
-			gtk_image_set_from_icon_name(GTK_IMAGE(image), uid->name, GTK_ICON_SIZE_SMALL_TOOLBAR);
-			}
-#endif
+
 		gtk_widget_set_tooltip_text(widget, uid->tooltip);
 		};
 
@@ -3573,15 +3430,10 @@ void layout_bar_set(LayoutWindow *lw, GtkWidget *bar)
 	g_signal_connect(G_OBJECT(lw->bar), "destroy",
 			 G_CALLBACK(layout_bar_destroyed), lw);
 
-#if HAVE_GTK4
 	gtk_paned_set_end_child(GTK_PANED(lw->utility_paned), lw->bar);
-#else
-	gtk_paned_pack2(GTK_PANED(lw->utility_paned), lw->bar, FALSE, TRUE);
-#endif
 
 	bar_set_fd(lw->bar, layout_image_get_fd(lw));
 }
-
 
 void layout_bar_toggle(LayoutWindow *lw)
 {
@@ -3759,11 +3611,7 @@ GtkWidget *layout_bars_prepare(LayoutWindow *lw, GtkWidget *image)
 	 */
 	gtk_paned_set_wide_handle(GTK_PANED(lw->utility_paned), TRUE);
 
-#if HAVE_GTK4
 	gtk_paned_set_start_child(GTK_PANED(lw->utility_paned), image);
-#else
-	gtk_paned_pack1(GTK_PANED(lw->utility_paned), image, TRUE, FALSE);
-#endif
 
 	gtk_widget_show(lw->utility_paned);
 

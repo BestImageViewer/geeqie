@@ -140,21 +140,14 @@ GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, La
 
 	if (group)
 		{
-#if HAVE_GTK4
 		group = gtk_toggle_button_new();
 		gtk_toggle_button_set_group(button, group);
-#else
-		group = gtk_radio_button_new(gtk_radio_button_get_group(GTK_RADIO_BUTTON(group)));
-#endif
 		}
 	else
 		{
-#if HAVE_GTK4
 		group = gtk_toggle_button_new();
-#else
-		group = gtk_radio_button_new(nullptr);
-#endif
 		}
+
 	g_object_set_data(G_OBJECT(group), "layout_config", lc);
 	g_signal_connect(G_OBJECT(group), "clicked",
 	                 G_CALLBACK(layout_config_widget_click_cb), GINT_TO_POINTER(style));

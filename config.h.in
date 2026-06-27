@@ -222,9 +222,6 @@
 /* Define to 1 if you have the <execinfo.h> header file. */
 #mesondefine HAVE_EXECINFO_H
 
-/* Do not use */
-#mesondefine HAVE_GTK4
-
 /* Whether to enable a mode of Geeqie that executes unit tests instead of
    running the actual app.  Actually executing the unit tests _also_ requires
    a command-line argument to be supplied. */

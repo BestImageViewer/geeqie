@@ -792,11 +792,7 @@ static gboolean vdtree_clicked_on_expander(GtkTreeView *treeview, GtkTreePath *t
 	return FALSE;
 }
 
-#if HAVE_GTK4
 gboolean vdtree_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
-#else
-gboolean vdtree_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
-#endif
 {
 	auto vd = static_cast<ViewDir *>(data);
 	GtkTreeViewColumn *column;
@@ -805,11 +801,7 @@ gboolean vdtree_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 	FileData *fd;
 
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-#if HAVE_GTK4
 	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y,
-#else
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
-#endif
 	                                  &tpath, &column, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
@@ -821,11 +813,7 @@ gboolean vdtree_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
 
 		if (vdtree_clicked_on_expander(GTK_TREE_VIEW(widget), tpath, column,
-#if HAVE_GTK4
 		                               event->x, event->y,
-#else
-		                               bevent->x, bevent->y,
-#endif
 		                               &left_of_expander))
 			{
 			vd->click_fd = nullptr;
@@ -833,11 +821,7 @@ gboolean vdtree_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 			/* clicking this region should automatically reveal an expander, if necessary
 			 * treeview bug: the expander will not expand until a button_motion_event highlights it.
 			 */
-#if HAVE_GTK4
 			if (event->button == GDK_BUTTON_PRIMARY &&
-#else
-			if (bevent->button == GDK_BUTTON_PRIMARY &&
-#endif
 			    !left_of_expander &&
 			    !gtk_tree_view_row_expanded(GTK_TREE_VIEW(vd->view), tpath))
 				{
@@ -861,20 +845,12 @@ gboolean vdtree_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer dat
 	vd->click_fd = (nd) ? nd->fd : nullptr;
 	vd_color_set(vd, vd->click_fd, TRUE);
 
-#if HAVE_GTK4
 	if (event->button == GDK_BUTTON_SECONDARY)
-#else
-	if (bevent->button == GDK_BUTTON_SECONDARY)
-#endif
 		{
 		vd_pop_menu(vd, vd->click_fd);
 		}
 
-#if HAVE_GTK4
 	return (event->button != GDK_BUTTON_PRIMARY);
-#else
-	return (bevent->button != GDK_BUTTON_PRIMARY);
-#endif
 }
 
 static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GdkPixbuf *pixbuf)

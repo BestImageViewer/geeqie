@@ -146,20 +146,10 @@ static void bar_pane_comment_set_fd(GtkWidget *bar, FileData *fd)
 
 static gint bar_pane_comment_event(GtkWidget *bar, GdkEvent *event)
 {
-#if HAVE_GTK4
 	(void)bar;
 	(void)event;
-	return FALSE;
-#else
-	PaneCommentData *pcd;
-
-	pcd = static_cast<PaneCommentData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
-	if (!pcd) return FALSE;
-
-	if (gtk_widget_has_focus(pcd->comment_view)) return gq_gtk_widget_key_event(pcd->comment_view, reinterpret_cast<GdkEventKey *>(event));
 
 	return FALSE;
-#endif
 }
 
 static void bar_pane_comment_write_config(GtkWidget *pane, GString *outstr, gint indent)

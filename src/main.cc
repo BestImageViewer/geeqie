@@ -464,16 +464,8 @@ void gq_gtk_css_load()
 	if (access(pathl, R_OK) != 0) return;
 
 	g_autoptr(GtkCssProvider) css_provider = gtk_css_provider_new();
-#if HAVE_GTK4
 	gtk_css_provider_load_from_path(css_provider, pathl);
 	gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(css_provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
-#else
-	if (!gtk_css_provider_load_from_path(css_provider, pathl, nullptr))
-		{
-		return;
-		}
-	gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(css_provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
-#endif
 }
 
 void exit_program_final()
@@ -659,13 +651,9 @@ void set_theme_bg_color()
 			GdkRGBA theme_color {};
 			GtkStyleContext *style_context = gtk_widget_get_style_context(lw->window);
 
-#if HAVE_GTK4
 /** @FIXME This sets the foreground color. CSS should be used.
  */
 			gtk_style_context_get_color(style_context, &theme_color);
-#else
-			gtk_style_context_get(style_context, GTK_STATE_FLAG_NORMAL, "background-color", &theme_color, nullptr);
-#endif
 
 			layout_window_foreach([&theme_color](LayoutWindow *lw)
 				{

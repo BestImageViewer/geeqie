@@ -239,13 +239,7 @@ static gboolean tab_completion_popup_key_press(GtkWidget *widget, GdkEventKey *e
 		}
 
 	/* close the menu */
-#if HAVE_GTK4
 	gtk_popover_popdown(GTK_POPOVER(widget));
-#else
-	gtk_menu_popdown(GTK_MENU(widget));
-	/* doing this does not emit the "selection done" signal, unref it ourselves */
-	g_object_unref(widget);
-#endif
 
 	return TRUE;
 }

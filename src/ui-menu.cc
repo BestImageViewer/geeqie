@@ -203,7 +203,6 @@ GtkWidget *popup_menu_short_lived()
 
 GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 {
-#if HAVE_GTK4
 	static void popover_closed_cb(GtkPopover *popover, gpointer)
 		{
 		gtk_widget_unparent(GTK_WIDGET(popover));
@@ -216,13 +215,6 @@ GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 	gtk_popover_popup(GTK_POPOVER(popover));
 
 	return nullptr;
-#else
-	GtkWidget *menu = gtk_menu_new_from_model(G_MENU_MODEL(menu_model));
-	gtk_menu_attach_to_widget(GTK_MENU(menu), window, nullptr);
-	gtk_menu_popup_at_widget(GTK_MENU(menu), window, GDK_GRAVITY_CENTER, GDK_GRAVITY_CENTER, nullptr);
-
-	return menu;
-#endif
 }
 
 static GMenuItem *menu_item_clone_with_new_label(GMenuModel *model, int index, const char *new_label)

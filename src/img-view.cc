@@ -530,11 +530,7 @@ static gboolean view_window_key_press_cb(GtkWidget *, GdkEventKey *event, gpoint
  * view window main routines
  *-----------------------------------------------------------------------------
  */
-#if HAVE_GTK4
 static void button_cb(ImageWindow *imd, GqMouseButtonEvent *event, gpointer data)
-#else
-static void button_cb(ImageWindow *imd, GdkEventButton *event, gpointer data)
-#endif
 {
 	auto vw = static_cast<ViewWindow *>(data);
 	LayoutWindow *lw_new;
@@ -1338,122 +1334,6 @@ static GtkWidget *view_confirm_dir_list(ViewWindow *vw, GList *list)
  * image drag and drop routines
  *-----------------------------------------------------------------------------
  */
-#if !HAVE_GTK4
-static void view_window_get_dnd_data(GtkWidget *, GdkDragContext *context,
-				     gint, gint,
-				     GtkSelectionData *selection_data, guint info,
-				     guint, gpointer data)
-{
-	auto vw = static_cast<ViewWindow *>(data);
-	ImageWindow *imd;
-
-	if (gtk_drag_get_source_widget(context) == vw->imd->pr) return;
-
-	imd = vw->imd;
-
-	if (info == TARGET_URI_LIST || info == TARGET_APP_COLLECTION_MEMBER)
-		{
-		CollectionData *source;
-		g_autoptr(FileDataList) list = nullptr;
-		GList *info_list;
-
-		if (info == TARGET_URI_LIST)
-			{
-			list = uri_filelist_from_gtk_selection_data(selection_data);
-
-			if (file_data_list_has_dir(list))
-				{
-				GtkWidget *menu = view_confirm_dir_list(vw, g_steal_pointer(&list));
-				gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
-				return;
-				}
-
-			list = filelist_filter(list, FALSE);
-
-			source = nullptr;
-			info_list = nullptr;
-			}
-		else
-			{
-			source = collection_from_dnd_data(reinterpret_cast<const gchar *>(gtk_selection_data_get_data(selection_data)), &list, &info_list);
-			}
-
-		if (list)
-			{
-			FileData *fd;
-
-			fd = static_cast<FileData *>(list->data);
-			if (isfile(fd->path))
-				{
-				view_slideshow_stop(vw);
-				view_window_set_list(vw, nullptr);
-
-				if (source && info_list)
-					{
-					image_change_from_collection(imd, source, static_cast<CollectInfo *>(info_list->data), image_zoom_get_default(imd));
-					}
-				else
-					{
-					if (list->next)
-						{
-						vw->list = list;
-						list = nullptr;
-
-						vw->list_pointer = vw->list;
-						}
-					image_change_fd(imd, fd, image_zoom_get_default(imd));
-					}
-				}
-			}
-
-		g_list_free(info_list);
-		}
-}
-
-static void view_window_set_dnd_data(GtkWidget *, GdkDragContext *,
-				     GtkSelectionData *selection_data, guint,
-				     guint, gpointer data)
-{
-	auto vw = static_cast<ViewWindow *>(data);
-	FileData *fd;
-
-	fd = image_get_fd(vw->imd);
-
-	if (fd)
-		{
-		GList *list;
-
-		list = g_list_append(nullptr, fd);
-		uri_selection_data_set_uris_from_filelist(selection_data, list);
-		g_list_free(list);
-		}
-	else
-		{
-		gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data),
-				       8, nullptr, 0);
-		}
-}
-
-static void view_window_dnd_init(ViewWindow *vw)
-{
-	ImageWindow *imd;
-
-	imd = vw->imd;
-
-	gq_gtk_drag_source_set(imd->pr, GDK_BUTTON2_MASK,
-	                    dnd_file_drag_types.data(), dnd_file_drag_types.size(),
-	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(imd->pr), "drag_data_get",
-			 G_CALLBACK(view_window_set_dnd_data), vw);
-
-	gq_gtk_drag_dest_set(imd->pr,
-	                  static_cast<GtkDestDefaults>(GTK_DEST_DEFAULT_MOTION | GTK_DEST_DEFAULT_DROP),
-	                  dnd_file_drop_types.data(), dnd_file_drop_types.size(),
-	                  static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(imd->pr), "drag_data_received",
-			 G_CALLBACK(view_window_get_dnd_data), vw);
-}
-#endif
 
 /*
  *-----------------------------------------------------------------------------

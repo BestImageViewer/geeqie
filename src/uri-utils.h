@@ -24,12 +24,5 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#if !HAVE_GTK4
-gboolean uri_selection_data_set_uris_from_filelist(GtkSelectionData *selection_data, GList *list);
-gboolean uri_selection_data_set_uris_from_pathlist(GtkSelectionData *selection_data, GList *list);
-GList *uri_filelist_from_gtk_selection_data(const GtkSelectionData *selection_data);
-GList *uri_pathlist_from_gtk_selection_data(const GtkSelectionData *selection_data);
-#endif
-
 #endif /* URI_UTILS_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

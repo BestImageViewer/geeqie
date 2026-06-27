@@ -3156,12 +3156,8 @@ static void create_folder_cb(GtkFileChooser *chooser, gint response_id, gpointer
 
 	if (response_id == GTK_RESPONSE_ACCEPT)
 		{
-#if HAVE_GTK4
 		g_autoptr(GFile) folder = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(chooser));
 		g_autofree gchar *current_folder = g_file_get_path(folder);
-#else
-		g_autofree gchar *current_folder = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(chooser));
-#endif
 		if (g_file_test(current_folder, G_FILE_TEST_IS_DIR))
 			{
 			cfd->done_func(TRUE, current_folder);
@@ -3218,7 +3214,6 @@ void file_util_rename_dir(FileData *source_fd, const gchar *new_path, GtkWidget 
 	file_util_rename_dir_full(source_fd, new_path, parent, UtilityPhase::ENTERING, done_func);
 }
 
-#if HAVE_GTK4
 static GdkContentProvider * clipboard_build_provider(ClipboardData *cbd)
 {
 	g_autoptr(GdkContentProvider) provider = gdk_content_provider_new_union(NULL, 0);
@@ -3298,100 +3293,6 @@ static gboolean path_list_to_clipboard(GList *path_list, gboolean quoted, Clipbo
 
 	return TRUE;
 }
-#else
-
-/**
- * @brief
- * @param clipboard
- * @param selection_data
- * @param info
- * @param data #_ClipboardData
- *
- *
- */
-static void clipboard_get_func(GtkClipboard *clipboard, GtkSelectionData *selection_data, guint info, gpointer data)
-{
-	auto cbd = static_cast<ClipboardData *>(data);
-	gchar *file_path;
-	GList *work;
-
-	g_autoptr(GString) path_list_str = g_string_new("");
-	work = cbd->path_list;
-
-	if (clipboard == gtk_clipboard_get(GDK_SELECTION_CLIPBOARD) && info == CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES)
-		{
-		switch (cbd->action)
-			{
-			case ClipboardAction::COPY:
-				g_string_append(path_list_str, "copy");
-				break;
-			case ClipboardAction::CUT:
-				g_string_append(path_list_str, "cut");
-				break;
-			}
-
-		while (work)
-			{
-			file_path = static_cast<gchar *>(work->data);
-			work = work->next;
-
-			g_autofree gchar *file_path_uri = g_filename_to_uri(file_path, nullptr, nullptr);
-			g_string_append(path_list_str, "\n");
-			g_string_append(path_list_str, file_path_uri);
-			}
-		}
-	else
-		{
-		while (work)
-			{
-			file_path = static_cast<gchar *>(work->data);
-			work = work->next;
-
-			if (cbd->quoted)
-				{
-				g_autofree gchar *file_path_quoted = g_shell_quote(file_path);
-				g_string_append(path_list_str, file_path_quoted);
-				}
-			else
-				{
-				g_string_append(path_list_str, file_path);
-				}
-
-			if (work)
-				{
-				g_string_append_c(path_list_str, ' ');
-				}
-			}
-		}
-
-	gtk_selection_data_set(selection_data, gtk_selection_data_get_target(selection_data), 8, reinterpret_cast<guchar *>(path_list_str->str), path_list_str->len);
-}
-
-/**
- * @brief
- * @param UNUSED
- * @param data _ClipboardData
- *
- *
- */
-static void clipboard_clear_func(GtkClipboard *, gpointer data)
-{
-	auto cbd = static_cast<ClipboardData *>(data);
-
-	g_list_free_full(cbd->path_list, g_free);
-	g_free(cbd);
-}
-
-static gboolean path_list_to_clipboard(GList *path_list, gboolean quoted, ClipboardAction action, GdkAtom selection)
-{
-	auto *cbd = g_new0(ClipboardData, 1);
-	cbd->path_list = path_list;
-	cbd->quoted = quoted;
-	cbd->action = action;
-
-	return gtk_clipboard_set_with_data(gtk_clipboard_get(selection), target_types.data(), target_types.size(), clipboard_get_func, clipboard_clear_func, cbd);
-}
-#endif
 
 /**
  * @brief

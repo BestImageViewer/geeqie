@@ -23,14 +23,11 @@
 #include <config.h>
 
 #include "compat-deprecated.h"
-#if HAVE_GTK4
-#  include "main-defines.h"
-#endif
+#include "main-defines.h"
 
 namespace
 {
 
-#if HAVE_GTK4
 constexpr auto GTK4_DRAG_SOURCE_CONTROLLER_DATA_KEY = "gq-gtk4-drag-source-controller";
 constexpr auto GTK4_DROP_TARGET_CONTROLLER_DATA_KEY = "gq-gtk4-drop-target-controller";
 constexpr auto GTK4_BOX_PACK_END_DATA_KEY = "gq-gtk4-box-pack-end";
@@ -104,11 +101,9 @@ void gtk4_box_apply_child_packing(GtkBox *box, GtkWidget *child, gboolean expand
 		gtk_widget_set_margin_bottom(child, padding);
 		}
 }
-#endif
 
 } // namespace
 
-#if HAVE_GTK4
 void gq_gtk_box_pack_start(GtkBox *box, GtkWidget *child, gboolean expand, gboolean fill, guint padding)
 {
 	gtk_box_append(box, child);
@@ -555,152 +550,5 @@ void gq_gtk_drag_dest_unset(GtkWidget *widget)
 	g_object_set_data(G_OBJECT(widget), GTK4_DROP_TARGET_CONTROLLER_DATA_KEY, nullptr);
 	gtk_widget_remove_controller(widget, controller);
 }
-
-#else
-gint gq_gtk_box_get_child_position(GtkBox *box, GtkWidget *child)
-{
-	gint position = -1;
-	gtk_container_child_get(GTK_CONTAINER(box), child, "position", &position, NULL);
-	return position;
-}
-
-void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position)
-{
-	gtk_box_reorder_child(box, child, position);
-}
-
-gboolean gq_gtk_window_get_position(GtkWindow *window, gint *x, gint *y)
-{
-	GdkWindow *gdk_window = gtk_widget_get_window(GTK_WIDGET(window));
-	if (!gdk_window)
-		{
-		return FALSE;
-		}
-
-	gint window_x;
-	gint window_y;
-	gdk_window_get_position(gdk_window, &window_x, &window_y);
-	if (x) *x = window_x;
-	if (y) *y = window_y;
-
-	return TRUE;
-}
-
-void gq_gtk_window_move(GtkWindow *window, gint x, gint y)
-{
-	gtk_window_move(window, x, y);
-}
-
-void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting)
-{
-	gtk_window_set_keep_above(window, setting);
-}
-
-void gq_gtk_window_set_position(GtkWindow *window, GtkWindowPosition position)
-{
-	gtk_window_set_position(window, position);
-}
-
-void gq_gtk_widget_show_all(GtkWidget *widget)
-{
-	gtk_widget_show_all(widget);
-}
-
-void gq_gtk_frame_set_shadow_type(GtkFrame *frame, GtkShadowType type)
-{
-	gtk_frame_set_shadow_type(frame, type);
-}
-
-void gq_gtk_scrolled_window_set_shadow_type(GtkScrolledWindow *scrolled_window, GtkShadowType type)
-{
-	gtk_scrolled_window_set_shadow_type(scrolled_window, type);
-}
-
-void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
-{
-	gtk_container_add(GTK_CONTAINER(container), widget);
-}
-
-void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget)
-{
-	gtk_container_remove(GTK_CONTAINER(container), widget);
-}
-
-void gq_gtk_container_foreach(GtkWidget *container, GtkCallback callback, gpointer callback_data)
-{
-	gtk_container_foreach(GTK_CONTAINER(container), callback, callback_data);
-}
-
-void gq_gtk_widget_destroy(GtkWidget *widget)
-{
-	gtk_widget_destroy(widget);
-}
-
-void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width)
-{
-	gtk_container_set_border_width(GTK_CONTAINER(widget), width);
-}
-
-gboolean gq_gtk_icon_size_lookup(GtkIconSize size, gint *width, gint *height)
-{
-	return gtk_icon_size_lookup(size, width, height);
-}
-
-GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, GtkIconSize size)
-{
-	return deprecated_gtk_image_new_from_stock(stock_id, size);
-}
-
-GtkWidget *gq_gtk_bin_get_child(GtkWidget *widget)
-{
-	return gtk_bin_get_child(GTK_BIN(widget));
-}
-
-GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget)
-{
-	return gtk_container_get_focus_child(GTK_CONTAINER(widget));
-}
-
-GList *gq_gtk_widget_get_children(GtkWidget *widget)
-{
-	return gtk_container_get_children(GTK_CONTAINER(widget));
-}
-
-void gq_gtk_viewport_set_shadow_type(GtkWidget *viewport, int type)
-{
-	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), static_cast<GtkShadowType>(type));
-}
-
-gboolean gq_gtk_widget_key_event(GtkWidget *widget, GdkEventKey *event)
-{
-	return gtk_widget_event(widget, reinterpret_cast<GdkEvent *>(event));
-}
-
-void gq_drag_g_signal_connect(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data)
-{
-	g_signal_connect(instance, detailed_signal, c_handler, data);
-}
-
-void gq_drag_g_signal_swapped(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data)
-{
-	g_signal_connect_swapped(instance, detailed_signal, c_handler, data);
-}
-
-void gq_gtk_drag_source_set(GtkWidget *widget, GdkModifierType start_button_mask, const GtkTargetEntry *targets, gint n_targets, GdkDragAction actions)
-{
-	gtk_drag_source_set(widget, start_button_mask, targets, n_targets, actions);
-}
-
-void gq_gtk_drag_dest_set(GtkWidget *widget, GtkDestDefaults flags, const GtkTargetEntry *targets, gint n_targets, GdkDragAction actions)
-{
-	gtk_drag_dest_set(widget, flags, targets, n_targets, actions);
-}
-
-void gq_gtk_drag_dest_unset(GtkWidget *widget)
-{
-	gtk_drag_dest_unset(widget);
-}
-
-#endif
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

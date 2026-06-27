@@ -184,10 +184,6 @@ static gboolean tree_edit_by_path_idle_cb(gpointer data)
 	 * is not set, and causes no edit cursor to appear ( popups not allowed focus? )
 	 */
 	gtk_widget_grab_focus(ted->entry);
-#if !HAVE_GTK4
-	widget_input_grab(ted->window, GDK_SEAT_CAPABILITY_ALL, TRUE,
-	                  static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK));
-#endif
 
 	return G_SOURCE_REMOVE;
 }

@@ -247,7 +247,6 @@ static void height_spin_changed_cb(GtkSpinButton *spin, gpointer data)
 	gtk_widget_set_size_request(static_cast<GtkWidget *>(data), -1, gtk_spin_button_get_value_as_int(spin));
 }
 
-#if HAVE_GTK4
 static void height_spin_key_press_cb(GtkEventControllerKey *, gint keyval, guint, GdkModifierType, gpointer data)
 {
 	if ((keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter || keyval == GDK_KEY_Escape))
@@ -255,18 +254,6 @@ static void height_spin_key_press_cb(GtkEventControllerKey *, gint keyval, guint
 		gq_gtk_widget_destroy(static_cast<GtkWidget *>(data));
 		}
 }
-#else
-static gboolean height_spin_key_press_cb(GtkWidget *, GdkEventKey *event, gpointer data)
-{
-	if (event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter || event->keyval == GDK_KEY_Escape)
-		{
-		gq_gtk_widget_destroy(static_cast<GtkWidget *>(data));
-		return TRUE;
-		}
-
-	return FALSE;
-}
-#endif
 
 static void expander_height_cb(GtkWidget *widget, GdkEvent *, gpointer)
 {
@@ -293,11 +280,7 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(expander));
 	auto *data_box = static_cast<GtkWidget *>(list->data);
 
-#if HAVE_GTK4
 	window = gtk_window_new();
-#else
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-#endif
 
 	gtk_window_set_modal(GTK_WINDOW(window), TRUE);
 	gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
@@ -312,13 +295,9 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 
 	GtkWidget *spin = gtk_spin_button_new_with_range(1, 1000, 1);
 	g_signal_connect(G_OBJECT(spin), "value-changed", G_CALLBACK(height_spin_changed_cb), data_box);
-#if HAVE_GTK4
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(height_spin_key_press_cb), window);
 	gtk_widget_add_controller(spin, controller);
-#else
-	g_signal_connect(G_OBJECT(spin), "key_press_event", G_CALLBACK(height_spin_key_press_cb), window);
-#endif
 
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), h);
 	gq_gtk_container_add(window, spin);
@@ -382,18 +361,11 @@ static gboolean bar_menu_expander_common(GtkWidget *widget, guint button)
 	return FALSE;
 }
 
-#if HAVE_GTK4
 static void bar_menu_expander_gesture_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 	bar_menu_expander_common(widget, gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)));
 }
-#else
-static gboolean bar_menu_expander_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer)
-{
-	return bar_menu_expander_common(widget, bevent->button);
-}
-#endif
 
 static void bar_expander_cb(GObject *object, GParamSpec *, gpointer)
 {
@@ -591,14 +563,10 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 
 	gq_gtk_box_pack_start(GTK_BOX(bd->vbox), expander, FALSE, TRUE, 0);
 
-#if HAVE_GTK4
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "released", G_CALLBACK(bar_menu_expander_gesture_cb), bd);
 	gtk_widget_add_controller(expander, GTK_EVENT_CONTROLLER(gesture));
-#else
-	g_signal_connect(expander, "button_release_event", G_CALLBACK(bar_menu_expander_cb), bd);
-#endif
 	g_signal_connect(expander, "notify::expanded", G_CALLBACK(bar_expander_cb), pd);
 
 	gq_gtk_container_add(expander, pane);
