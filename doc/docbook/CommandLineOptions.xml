@@ -28,7 +28,7 @@ zooming, panning, thumbnails and sorting images into collections.</para>
 
 <para>Geeqie is an image viewer.</para>
 
-<para>Version: Geeqie 2.8</para>
+<para>Version: Geeqie 2.9</para>
 </refsect2>
 
 <refsect2 id='help_options'><title>Help Options:</title>
@@ -416,7 +416,7 @@ Note that bash command line completion does not work in this mode.</para>
   </varlistentry>
 </variablelist>
 
-<para>Geeqie 2.8 GTK3</para>
+<para>Geeqie 2.9 GTK3</para>
 </refsect2>
 </refsect1>
 
