@@ -43,7 +43,6 @@ struct GqMouseButtonEvent
 };
 
 #define gq_gtk_image_new_from_icon_name(icon_name, size) gtk_image_new_from_icon_name(icon_name)
-#define gq_gtk_icon_theme_has_icon(icon_theme, icon_name) gtk_icon_theme_has_icon(icon_theme, icon_name)
 #define gq_gtk_scrolled_window_new(hadjustment, vadjustment) gtk_scrolled_window_new()
 #define gq_gtk_widget_queue_draw_area(widget, x, y, width, height) gtk_widget_queue_draw(widget);
 #define gq_gtk_window_resize(window, width, height) gtk_window_set_default_size(window, width, height)
