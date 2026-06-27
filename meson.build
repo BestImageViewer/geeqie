@@ -302,66 +302,21 @@ else
     summary({'fits' : ['disabled - fits files supported:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
-champlain_dep = []
-champlain_gtk_dep = []
-clutter_dep = []
-clutter_gtk_dep = []
 shumate_dep = []
 
-if conf_data.get('HAVE_GTK4', 0) == 1
-    conf_data.set('HAVE_LIBSHUMATE', 0)
-    req_version_shumate = '>=1.5.0'
-    option = get_option('gps-map')
-    if not option.disabled()
-        shumate_dep = dependency('shumate-1.0', version : req_version_shumate, required : get_option('gps-map'))
-        if shumate_dep.found()
-            conf_data.set('HAVE_LIBSHUMATE', 1)
-            summary({'gps-map' : ['GPS map displayed', true]}, section : 'Configuration', bool_yn : true)
-        else
-            summary({'gps-map' : ['shumate-1.0 ' + req_version_shumate + ' not found - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
-        endif
+conf_data.set('HAVE_LIBSHUMATE', 0)
+req_version_shumate = '>=1.5.0'
+option = get_option('gps-map')
+if not option.disabled()
+    shumate_dep = dependency('shumate-1.0', version : req_version_shumate, required : get_option('gps-map'))
+    if shumate_dep.found()
+        conf_data.set('HAVE_LIBSHUMATE', 1)
+        summary({'gps-map' : ['GPS map displayed', true]}, section : 'Configuration', bool_yn : true)
     else
-        summary({'gps-map' : ['disabled - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
+        summary({'gps-map' : ['shumate-1.0 ' + req_version_shumate + ' not found - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
     endif
 else
-    conf_data.set('HAVE_CLUTTER', 0)
-    conf_data.set('HAVE_LIBCHAMPLAIN', 0)
-    conf_data.set('HAVE_LIBCHAMPLAIN_GTK', 0)
-    req_version_champlain = '>=0.12'
-    req_version_champlain_gtk = '>=0.12'
-    req_version_clutter = '>=1.0'
-    req_version_clutter_gtk = '>=1.0'
-    option = get_option('gps-map')
-    if not option.disabled()
-        champlain_dep = dependency('champlain-0.12', version : req_version_champlain, required : get_option('gps-map'))
-        champlain_gtk_dep = dependency('champlain-gtk-0.12', version : req_version_champlain_gtk, required : get_option('gps-map'))
-        if champlain_dep.found() and champlain_gtk_dep.found()
-            clutter_dep = dependency('clutter-1.0', version : req_version_clutter, required : get_option('gps-map'))
-            clutter_gtk_dep = dependency('clutter-gtk-1.0', version : req_version_clutter_gtk, required : get_option('gps-map'))
-            if clutter_dep.found() and clutter_gtk_dep.found()
-                conf_data.set('HAVE_CLUTTER', 1)
-                conf_data.set('HAVE_LIBCHAMPLAIN', 1)
-                conf_data.set('HAVE_LIBCHAMPLAIN_GTK', 1)
-                summary({'gps-map' : ['GPS map displayed', true]}, section : 'Configuration', bool_yn : true)
-            else
-                if not clutter_dep.found()
-                    summary({'gps-map-clutter' : ['clutter-1.0 ' + req_version_clutter + ' not found - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
-                endif
-                if not clutter_gtk_dep.found()
-                    summary({'gps-map-clutter-gtk' : ['clutter-gtk-1.0 ' + req_version_clutter_gtk + ' not found - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
-                endif
-            endif
-        else
-            if not champlain_dep.found()
-                summary({'gps-map-champlain' : ['champlain-0.12 ' + req_version_champlain + ' not found - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
-            endif
-            if not champlain_gtk_dep.found()
-                summary({'gps-map-champlain-gtk' : ['champlain-gtk-0.12 ' + req_version_champlain_gtk + ' not found - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
-            endif
-        endif
-    else
-        summary({'gps-map' : ['disabled - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
-    endif
+    summary({'gps-map' : ['disabled - GPS map displayed:', false]}, section : 'Configuration', bool_yn : true)
 endif
 
 conf_data.set('HAVE_HEIF', 0)

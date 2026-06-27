@@ -435,9 +435,6 @@ struct ConfOptions
 
 	gboolean read_metadata_in_idle;
 
-	gboolean disable_gpu; /**< GPU - see main.cc */
-	gboolean override_disable_gpu; /**< GPU - see main.cc */
-
 	std::vector<std::string> disabled_plugins;
 };
 

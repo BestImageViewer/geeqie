@@ -13,7 +13,6 @@
     <defines>
         <define name="FILEDATA_MARKS_SIZE=10"/>
         <define name="HAVE_ARCHIVE"/>
-        <define name="HAVE_CLUTTER"/>
         <define name="HAVE_DJVU"/>
         <define name="HAVE_EXECINFO_H"/>
         <define name="HAVE_EXIV2"/>
@@ -29,8 +28,6 @@
         <define name="HAVE_JPEG"/>
         <define name="HAVE_JPEGXL"/>
         <define name="HAVE_LCMS"/>
-        <define name="HAVE_LIBCHAMPLAIN"/>
-        <define name="HAVE_LIBCHAMPLAIN_GTK"/>
         <define name="HAVE_LUA"/>
         <define name="HAVE_PDF"/>
         <define name="HAVE_RAW"/>
