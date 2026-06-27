@@ -266,7 +266,7 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 
 	icon_theme = gq_icon_theme_get_default();
 
-	if (gq_gtk_icon_theme_has_icon(icon_theme, key)) return FALSE;
+	if (gtk_icon_theme_has_icon(icon_theme, key)) return FALSE;
 
 	pixbuf = gq_gtk_icon_theme_load_icon_copy(icon_theme, icon, 64, static_cast<GtkIconLookupFlags>(0));
 	if (!pixbuf)
