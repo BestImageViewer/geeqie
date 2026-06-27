@@ -33,9 +33,6 @@
 /* Define to enable archive support */
 #mesondefine HAVE_ARCHIVE
 
-/* Define to enable use of clutter library */
-#mesondefine HAVE_CLUTTER
-
 /* Define to enable DjVu support */
 #mesondefine HAVE_DJVU
 
@@ -74,12 +71,6 @@
 
 /* color profiles with lcms */
 #mesondefine HAVE_LCMS
-
-/* Define to enable use of maps */
-#mesondefine HAVE_LIBCHAMPLAIN
-
-/* Define to enable use of maps */
-#mesondefine HAVE_LIBCHAMPLAIN_GTK
 
 /* Define to enable use of maps */
 #mesondefine HAVE_LIBSHUMATE

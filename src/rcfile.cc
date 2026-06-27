@@ -33,7 +33,7 @@
 
 #include "bar-comment.h"
 #include "bar-exif.h"
-#if HAVE_LIBCHAMPLAIN && HAVE_LIBCHAMPLAIN_GTK
+#if HAVE_LIBSHUMATE
 #  include "bar-gps.h"
 #endif
 #include "bar-histogram.h"
@@ -627,10 +627,6 @@ static void write_global_attributes(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_CHAR(*options, mouse_button_9);
 	WRITE_SEPARATOR();
 
-	/* GPU - see main.cc */
-	WRITE_NL(); WRITE_BOOL(*options, override_disable_gpu);
-	WRITE_SEPARATOR();
-
 	/* Alternate similarity algorithm */
 	WRITE_NL(); WRITE_BOOL(*options, alternate_similarity_algorithm.enabled);
 	WRITE_NL(); WRITE_BOOL(*options, alternate_similarity_algorithm.grayscale);
@@ -1098,9 +1094,6 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_CHAR(*options, mouse_button_8)) continue;
 		if (READ_CHAR(*options, mouse_button_9)) continue;
 
-		/* GPU - see main.cc */
-		if (READ_BOOL(*options, override_disable_gpu)) continue;
-
 		/* Alternative similarity algorithm */
 		if (READ_BOOL(*options, alternate_similarity_algorithm.enabled)) continue;
 		if (READ_BOOL(*options, alternate_similarity_algorithm.grayscale)) continue;
@@ -1537,24 +1530,20 @@ static void options_parse_bar(GQParserData *parser_data, const gchar *element_na
 			}
 		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
-#if HAVE_LIBCHAMPLAIN && HAVE_LIBCHAMPLAIN_GTK
+#if HAVE_LIBSHUMATE
 	else if (g_ascii_strcasecmp(element_name, "pane_gps") == 0)
 		{
-		/* Use this flag to determine if --disable-clutter has been issued */
-		if (!options->disable_gpu)
+		GtkWidget *pane = bar_find_pane_by_id(bar, PANE_GPS, options_get_id(attribute_names, attribute_values));
+		if (pane)
 			{
-			GtkWidget *pane = bar_find_pane_by_id(bar, PANE_GPS, options_get_id(attribute_names, attribute_values));
-			if (pane)
-				{
-				bar_pane_gps_update_from_config(pane, attribute_names, attribute_values);
-				}
-			else
-				{
-				pane = bar_pane_gps_new_from_config(attribute_names, attribute_values);
-				bar_add(bar, pane);
-				}
-			parser_data->func_push(options_parse_leaf, nullptr, nullptr);
+			bar_pane_gps_update_from_config(pane, attribute_names, attribute_values);
 			}
+		else
+			{
+			pane = bar_pane_gps_new_from_config(attribute_names, attribute_values);
+			bar_add(bar, pane);
+			}
+		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}
 #endif
 	else if (g_ascii_strcasecmp(element_name, "pane_exif") == 0)

@@ -184,7 +184,7 @@ static const gchar default_config_copyright[] =
 "    </layout>"
 "</gq>";
 
-#if (HAVE_LIBCHAMPLAIN && HAVE_LIBCHAMPLAIN_GTK) || HAVE_LIBSHUMATE
+#if HAVE_LIBSHUMATE
 static const gchar default_config_gps[] =
 "<gq>"
 "    <layout id = '_current_'>"
@@ -212,7 +212,7 @@ static const KnownPanes known_panes[] = {
 	{PANE_EXIF,		"file_info",	N_("File info"),	default_config_file_info},
 	{PANE_EXIF,		"location",	N_("Location and GPS"),	default_config_location},
 	{PANE_EXIF,		"copyright",	N_("Copyright"),	default_config_copyright},
-#if (HAVE_LIBCHAMPLAIN && HAVE_LIBCHAMPLAIN_GTK) || HAVE_LIBSHUMATE
+#if HAVE_LIBSHUMATE
 	{PANE_GPS,		"gps",	N_("GPS Map"),	default_config_gps},
 #endif
 	{PANE_UNDEF,		nullptr,		nullptr,			nullptr}
@@ -615,21 +615,6 @@ static void bar_destroy(gpointer data)
 	g_free(bd);
 }
 
-#if HAVE_LIBCHAMPLAIN_GTK
-/**
-   @FIXME this is an ugly hack that works around this bug:
-   https://bugzilla.gnome.org/show_bug.cgi?id=590692
-   http://bugzilla.openedhand.com/show_bug.cgi?id=1751
-   it should be removed as soon as a better solution exists
-*/
-
-static void bar_unrealize_clutter_fix_cb(GtkWidget *widget, gpointer)
-{
-	GtkWidget *child = gq_gtk_bin_get_child(GTK_WIDGET(widget));
-	if (child) gtk_widget_unrealize(child);
-}
-#endif
-
 GtkWidget *bar_new(LayoutWindow *lw)
 {
 	BarData *bd;
@@ -684,10 +669,6 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
 	                    _("Add Pane"), G_CALLBACK(bar_menu_add_cb), nullptr);
 	gtk_widget_show(add_box);
-
-#if HAVE_LIBCHAMPLAIN_GTK
-	g_signal_connect(G_OBJECT(gq_gtk_bin_get_child(GTK_WIDGET(scrolled))), "unrealize", G_CALLBACK(bar_unrealize_clutter_fix_cb), NULL);
-#endif
 
 	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_NONE);
 	gtk_widget_show(bd->vbox);
