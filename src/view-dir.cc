@@ -45,7 +45,6 @@
 #include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "menu.h"
 #include "misc.h"
 #include "options.h"
 #include "ui-fileops.h"
@@ -639,7 +638,6 @@ static void vd_pop_menu_sort_cb(GSimpleAction *, GVariant *parameter, gpointer d
 
 void vd_pop_menu(ViewDir *vd, FileData *fd)
 {
-	GtkWidget *menu;
 	gboolean active;
 	gboolean rename_delete_active = FALSE;
 	gboolean new_folder_active = FALSE;

@@ -66,7 +66,6 @@
 #include "logwindow.h"
 #include "main-defines.h"
 #include "main.h"
-#include "menu.h"
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
@@ -438,6 +437,7 @@ void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window)
 			 G_CALLBACK(layout_key_press_cb), lw);
 }
 
+[[maybe_unused]]
 static bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, GdkEventButton *event)
 {
 	enum MouseButton
@@ -681,6 +681,7 @@ void layout_menu_close_cb(GSimpleAction *, GVariant *, gpointer)
 	layout_close(lw);
 }
 
+[[maybe_unused]]
 static void layout_return_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	auto lw = get_current_layout();
@@ -2596,6 +2597,7 @@ void create_toolbars(LayoutWindow *lw)
 		}
 }
 
+[[maybe_unused]]
 static int find_section_by_label (GMenuModel *model, const gchar )
 {
     int n = g_menu_model_get_n_items (model);
@@ -2621,6 +2623,7 @@ static int find_section_by_label (GMenuModel *model, const gchar )
     return -1;
 }
 
+[[maybe_unused]]
 static int find_item_by_label (GMenuModel *model, const char *label)
 {
 	int n = g_menu_model_get_n_items (model);
@@ -2678,11 +2681,13 @@ static void layout_menu_window_delete_cb(GSimpleAction *, GVariant *, gpointer  
  *-----------------------------------------------------------------------------
  */
 
+[[maybe_unused]]
 static gchar *menu_translate(const gchar *path, gpointer)
 {
 	return const_cast<gchar *>(_(path));
 }
 
+[[maybe_unused]]
 static GList *layout_actions_editor_menu_path(const EditorDescription *editor)
 {
 	g_auto(GStrv) split = g_strsplit(editor->menu_path, "/", 0);
@@ -2701,6 +2706,7 @@ static GList *layout_actions_editor_menu_path(const EditorDescription *editor)
 	return g_list_reverse(ret);
 }
 
+[[maybe_unused]]
 static void layout_actions_editor_add(GString *desc, GList *path, GList *old_path)
 {
 	gint to_open;
@@ -2760,7 +2766,7 @@ static void layout_actions_editor_add(GString *desc, GList *path, GList *old_pat
 		g_string_append_printf(desc, "      <menuitem action='%s'/>", static_cast<gchar *>(path->data));
 }
 
-void layout_actions_setup(LayoutWindow *lw)
+void layout_actions_setup([[maybe_unused]] LayoutWindow *lw)
 {
 }
 
@@ -2905,7 +2911,9 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 	return g_object_ref(lw->menu_tool_bar);
 }
 
-void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data)
+void layout_actions_foreach([[maybe_unused]] LayoutWindow *lw,
+                            [[maybe_unused]] GFunc func,
+                            [[maybe_unused]] gpointer data)
 {
 /** @FIXME GTK4
 	for (GList *groups = deprecated_gtk_ui_manager_get_action_groups(lw->ui_manager); groups; groups = groups->next)
@@ -2943,11 +2951,13 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 		}
 }
 
+[[maybe_unused]]
 static void action_radio_changed_cb(GtkAction *action, GtkAction *current, gpointer data)
 {
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data), action == current);
 }
 
+[[maybe_unused]]
 static void action_toggle_activate_cb(GtkAction* self, gpointer data)
 {
 	auto button = static_cast<GtkToggleButton *>(data);
@@ -2959,6 +2969,7 @@ static void action_toggle_activate_cb(GtkAction* self, gpointer data)
 		}
 }
 
+[[maybe_unused]]
 static gboolean toolbar_button_press_event_cb(GtkWidget *, GdkEvent *, gpointer data)
 {
 	deprecated_gtk_action_activate(deprecated_GTK_ACTION(data));

@@ -54,13 +54,11 @@
 #endif
 
 #include "accelerators.h"
-#include "actions.h"
 #include "cache-maint.h"
 #include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
 #include "command-line-handling.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "convert-configuration.h"
 #include "exif.h"
@@ -646,10 +644,6 @@ void setup_sig_handler()
 
 void set_theme_bg_color()
 {
-	GdkRGBA bg_color;
-	GdkRGBA theme_color;
-	GtkStyleContext *style_context;
-
 	if (!options->image.use_custom_border_color)
 		{
 		LayoutWindow *lw = layout_window_first();
