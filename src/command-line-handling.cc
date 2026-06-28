@@ -22,6 +22,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <glib.h>
 #include <vector>
 
 #include "actions.h"
@@ -1248,7 +1249,7 @@ void gq_tools(GtkApplication *, GApplicationCommandLine *, GVariantDict *, GList
 
 void gq_version(GtkApplication *, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
 {
-	g_application_command_line_print(app_command_line, "%s %s GTK%d\n", GQ_APPNAME, VERSION, gtk_major_version);
+	g_application_command_line_print(app_command_line, "%s %s GTK%"G_GUINT_FORMAT"\n", GQ_APPNAME, VERSION, gtk_get_major_version);
 }
 
 void gq_get_window_list(GtkApplication *, GApplicationCommandLine *app_command_line,GVariantDict *, GList *)
