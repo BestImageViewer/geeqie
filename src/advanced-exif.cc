@@ -211,15 +211,7 @@ static void advanced_exif_window_get_geometry(ExifWin *ew)
 	LayoutWindow *lw = get_current_layout();
 	if (!ew || !lw) return;
 
-	GdkSurface *surface;
-
-	surface = gtk_native_get_surface(GTK_NATIVE(ew->window));
-	if (!surface)
-		{
-		return;
-		}
-
-	lw->options.advanced_exif_window = widget_get_position_geometry(surface);
+	lw->options.advanced_exif_window = widget_get_position_geometry(ew->window);
 }
 
 static void advanced_exif_close(ExifWin *ew)

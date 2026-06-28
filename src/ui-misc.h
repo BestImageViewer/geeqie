@@ -233,7 +233,5 @@ gboolean get_alternative_button_order(GtkWidget *widget);
 bool focus_is_text_editable(GtkWindow *window);
 bool focus_is_editable(GtkWindow *window);
 
-bool key_is_text_editing_key(GdkEventKey *event);
-
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
