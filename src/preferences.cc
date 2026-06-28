@@ -2637,7 +2637,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 	gtk_widget_set_tooltip_text(label, _("A flowchart of the sequence is shown in the Help file"));
 
 	ct_button = pref_checkbox_new_int(group, "", options->metadata.save_in_image_file, &c_options->metadata.save_in_image_file);
-	text_label = gq_gtk_bin_get_child(GTK_WIDGET(ct_button));
+	text_label = gtk_widget_get_first_child(ct_button);
 	g_autofree gchar *step1_markup = g_markup_printf_escaped("<span weight=\"bold\">%s</span>%s",
 	                                                         _("Step 1"), _(") Save metadata in either the image file or the sidecar file, according to the XMP standard"));
 	gtk_label_set_markup(GTK_LABEL(text_label), step1_markup);
@@ -2652,7 +2652,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 #endif
 
 	tmp_widget = pref_checkbox_new_int(group, "", options->metadata.enable_metadata_dirs, &c_options->metadata.enable_metadata_dirs);
-	text_label = gq_gtk_bin_get_child(GTK_WIDGET(tmp_widget));
+	text_label = gtk_widget_get_first_child(tmp_widget);
 	g_autofree gchar *step2_markup = g_markup_printf_escaped("<span weight=\"bold\">%s</span>%s<span style=\"italic\">%s</span>%s",
 	                                                         _("Step 2"), _(") Save metadata in the folder "),".metadata,", _(" local to the image folder (non-standard)"));
 	gtk_label_set_markup(GTK_LABEL(text_label), step2_markup);
@@ -2684,7 +2684,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 
 	tmp_widget=	pref_checkbox_new_int(hbox, "", options->metadata.sidecar_extended_name, &c_options->metadata.sidecar_extended_name);
 	gtk_widget_set_tooltip_text(tmp_widget, _("This file naming convention is used by Darktable"));
-	text_label = gq_gtk_bin_get_child(GTK_WIDGET(tmp_widget));
+	text_label = gtk_widget_get_first_child(tmp_widget);
 
 	g_autofree gchar *markup = g_markup_printf_escaped("%s<span style=\"italic\">%s</span>%s<span style=\"italic\">%s</span>%s",
 	                                                   _("Create sidecar files named "), "image.ext.xmp", _(" (as opposed to the normal "), "image.xmp", ")");

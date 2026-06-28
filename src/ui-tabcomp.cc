@@ -189,7 +189,7 @@ static void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
 {
 	if (!gtk_widget_get_visible(widget)) return;
 
-	GtkWidget *child = gq_gtk_bin_get_child(GTK_WIDGET(widget));
+	GtkWidget *child = gtk_widget_get_first_child(widget);
 	if (!GTK_IS_LABEL(child)) return;
 
 	auto *tp = static_cast<TabCompPrefix *>(data);
@@ -568,7 +568,6 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 {
 	GtkWidget *box;
 	GtkWidget *combo;
-	GtkWidget *combo_entry;
 	GtkWidget *button;
 
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -577,7 +576,7 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 	gq_gtk_box_pack_start(GTK_BOX(box), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);
 
-	combo_entry = gq_gtk_bin_get_child(GTK_WIDGET(combo));
+	GtkWidget *combo_entry = gtk_widget_get_first_child(combo);
 
 	button = tab_completion_create_complete_button(combo_entry, combo);
 	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
