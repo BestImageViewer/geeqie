@@ -76,7 +76,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	GtkGesture *gesture;
 
 	GtkWidget *button = gtk_button_new();
-	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+	gtk_widget_add_css_class(button, "flat");
 	gq_gtk_box_pack_start(box, button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 

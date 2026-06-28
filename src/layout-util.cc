@@ -2946,7 +2946,7 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 
 	if (button)
 		{
-		gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+		gtk_widget_add_css_class(button, "flat");
 		gtk_widget_set_tooltip_text(button, tooltip_text);
 
 		gtk_actionable_set_detailed_action_name(GTK_ACTIONABLE(button), action_name);

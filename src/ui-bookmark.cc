@@ -423,7 +423,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 		}
 
 	GtkWidget *button = gtk_button_new();
-	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+	gtk_widget_add_css_class(button, "flat");
 	gq_gtk_box_pack_start(GTK_BOX(bm->box), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 

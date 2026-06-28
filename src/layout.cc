@@ -674,7 +674,7 @@ static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(layout_sort_button_press_cb), lw);
-	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+	gtk_widget_add_css_class(button, "flat");
 	gtk_button_set_image_position(GTK_BUTTON(button), GTK_POS_RIGHT);
 
 	gq_gtk_container_add(frame, button);
@@ -748,7 +748,7 @@ static GtkWidget *layout_zoom_button(LayoutWindow *lw, GtkWidget *box, gint size
 
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(layout_zoom_button_press_cb), lw);
-	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+	gtk_widget_add_css_class(button, "flat");
 	gtk_button_set_image_position(GTK_BUTTON(button), GTK_POS_RIGHT);
 
 	gq_gtk_container_add(frame, button);
