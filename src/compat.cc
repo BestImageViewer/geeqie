@@ -241,25 +241,6 @@ void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting)
 		}
 }
 
-void gq_gtk_window_set_position(GtkWindow *window, GtkWindowPosition position)
-{
-	g_object_set_data(G_OBJECT(window), GTK4_WINDOW_POSITION_POLICY_DATA_KEY, GINT_TO_POINTER(static_cast<gint>(position)));
-
-	switch (position)
-		{
-		case GTK_WIN_POS_CENTER:
-		case GTK_WIN_POS_CENTER_ON_PARENT:
-		case GTK_WIN_POS_MOUSE:
-			if (gtk_widget_get_visible(GTK_WIDGET(window)))
-				{
-				gtk_window_present(window);
-				}
-			break;
-		default:
-			break;
-		}
-}
-
 void gq_gtk_widget_show_all(GtkWidget *widget)
 {
 	if (!widget) return;

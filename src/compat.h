@@ -64,7 +64,6 @@ void gq_gtk_frame_set_shadow_type(GtkFrame *frame, int);
 gboolean gq_gtk_window_get_position(GtkWindow *window, gint *x, gint *y);
 void gq_gtk_window_move(GtkWindow *window, gint x, gint y);
 void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting);
-void gq_gtk_window_set_position(GtkWindow *window, GtkWindowPosition position);
 void gq_gtk_widget_destroy(GtkWidget *widget);
 void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width);
 gboolean gq_gtk_icon_size_lookup(GtkIconSize size, gint *width, gint *height);
