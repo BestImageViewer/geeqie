@@ -205,18 +205,6 @@ void gq_gtk_widget_show_all(GtkWidget *widget)
 		}
 }
 
-void gq_gtk_frame_set_shadow_type(GtkFrame *frame, int type)
-{
-	if (type == 1)
-		{
-		gtk_widget_remove_css_class(GTK_WIDGET(frame), "frame");
-		}
-	else
-		{
-		gtk_widget_add_css_class(GTK_WIDGET(frame), "frame");
-		}
-}
-
 void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 {
 	if (GTK_IS_BUTTON(container))
@@ -373,18 +361,6 @@ GList *gq_gtk_widget_get_children(GtkWidget *widget)
 		}
 
 	return g_list_reverse(list);
-}
-
-void gq_gtk_viewport_set_shadow_type(GtkWidget *viewport, int type)
-{
-	if (type == GTK_SHADOW_NONE)
-		{
-		gtk_widget_remove_css_class(viewport, "frame");
-		}
-	else
-		{
-		gtk_widget_add_css_class(viewport, "frame");
-		}
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

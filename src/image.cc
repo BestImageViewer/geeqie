@@ -1934,7 +1934,7 @@ void image_set_selectable(ImageWindow *imd, gboolean selectable)
 {
 	if (!imd->has_frame) return;
 
-	gq_gtk_frame_set_shadow_type(GTK_FRAME(imd->frame), GTK_SHADOW_NONE);
+	gtk_widget_remove_css_class(imd->frame, "frame");
 	gq_gtk_widget_set_border_width(imd->frame, selectable ? 4 : 0);
 }
 

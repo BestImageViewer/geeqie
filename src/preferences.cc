@@ -1640,7 +1640,7 @@ static GtkWidget *scrolled_notebook_page(GtkWidget *notebook, const gchar *title
 	gtk_widget_show(scrolled);
 
 	GtkWidget *viewport = gtk_viewport_new(nullptr, nullptr);
-	gq_gtk_viewport_set_shadow_type(GTK_WIDGET(viewport), GTK_SHADOW_NONE);
+	gtk_widget_remove_css_class(viewport, "frame");
 	gq_gtk_container_add(scrolled, viewport);
 	gtk_widget_show(viewport);
 

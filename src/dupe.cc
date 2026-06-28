@@ -4389,7 +4389,7 @@ DupeWindow *dupe_window_new()
 
 	frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
-	gq_gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
+	gtk_widget_add_css_class(frame, "frame");
 	gq_gtk_box_pack_start(GTK_BOX(status_box), frame, TRUE, TRUE, 0);
 	gtk_widget_show(frame);
 

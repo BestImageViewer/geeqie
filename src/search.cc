@@ -3260,7 +3260,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
-	gq_gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
+	gtk_widget_add_css_class(frame, "frame");
 	gq_gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, PREF_PAD_SPACE);
 	gtk_widget_show(frame);
 

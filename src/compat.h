@@ -83,20 +83,12 @@ void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget);
 using GqGtkCallback = void (*)(GtkWidget *widget, gpointer data);
 void gq_gtk_container_foreach(GtkWidget *container, GqGtkCallback callback, gpointer callback_data);
 void gq_gtk_widget_show_all(GtkWidget *widget);
-void gq_gtk_frame_set_shadow_type(GtkFrame *frame, int);
 void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting);
 void gq_gtk_widget_destroy(GtkWidget *widget);
 void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width);
 GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, GtkIconSize size);
 GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget);
 GList *gq_gtk_widget_get_children(GtkWidget *widget);
-void gq_gtk_viewport_set_shadow_type(GtkWidget *viewport, int type);
-
-/** @FIXME These are used in calls to gtk_frame_set_shadow_type
- * These defines will permit a compile. CSS should be used.
- */
-#define GTK_SHADOW_IN 0
-#define GTK_SHADOW_NONE 1
 
 #endif /* COMPAT_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
