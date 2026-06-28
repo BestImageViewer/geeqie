@@ -1237,7 +1237,6 @@ CollectWindow *collection_window_new(const gchar *path)
 	GtkWidget *vbox;
 	GtkWidget *status_label;
 	GtkWidget *extra_label;
-	GdkGeometry geometry;
 
 	/* If the collection is already opened in another window, return that one */
 	cw = collection_window_find_by_path(path);
@@ -1255,12 +1254,7 @@ CollectWindow *collection_window_new(const gchar *path)
 	cw->window = window_new("collection", PIXBUF_INLINE_ICON_BOOK, nullptr);
 	DEBUG_NAME(cw->window);
 
-	geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;
-	geometry.min_height = DEFAULT_MINIMAL_WINDOW_SIZE;
-	geometry.base_width = COLLECT_DEF_WIDTH;
-	geometry.base_height = COLLECT_DEF_HEIGHT;
-	gtk_window_set_geometry_hints(GTK_WINDOW(cw->window), nullptr, &geometry,
-				      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE));
+	gtk_widget_set_size_request(cw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
 	if (options->collections_on_top)
 		{
@@ -1270,7 +1264,6 @@ CollectWindow *collection_window_new(const gchar *path)
 	if (options->save_window_positions && path && collection_load_only_geometry(cw->cd, path))
 		{
 		gtk_window_set_default_size(GTK_WINDOW(cw->window), cw->cd->window.width, cw->cd->window.height);
-		gq_gtk_window_move(GTK_WINDOW(cw->window), cw->cd->window.x, cw->cd->window.y);
 		}
 	else
 		{
