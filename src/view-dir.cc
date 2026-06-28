@@ -59,36 +59,42 @@
 
 namespace
 {
+	
+static GdkPaintable *load_icon_paintable(GtkIconTheme *icon_theme,
+                                         const gchar *icon_name,
+                                         gint size)
+{
+	return GDK_PAINTABLE(
+		gtk_icon_theme_lookup_icon(icon_theme,
+		                           icon_name,
+		                           nullptr,
+		                           size,
+		                           1,
+		                           GTK_TEXT_DIR_NONE,
+		                           GTK_ICON_LOOKUP_FORCE_REGULAR));
+}
 
 GdkPixbuf *create_folder_icon_with_emblem(GtkIconTheme *icon_theme, const gchar *emblem, const gchar *fallback_icon, gint size)
 {
-	GdkPixbuf *pixbuf = nullptr;
-	GtkIconInfo *info;
+	g_autoptr(GIcon) icon_folder = g_themed_icon_new(GQ_ICON_DIRECTORY);
+	g_autoptr(GIcon) icon_emblem = g_themed_icon_new(emblem);
+	g_autoptr(GEmblem) emblem_new = g_emblem_new(icon_emblem);
+	g_autoptr(GIcon) emblemed_icon = g_emblemed_icon_new(icon_folder, emblem_new);
 
-	GIcon *icon_folder = g_themed_icon_new(GQ_ICON_DIRECTORY);
-	GIcon *icon_emblem = g_themed_icon_new(emblem);
-	GEmblem *emblem_new = g_emblem_new(icon_emblem);
-	GIcon *emblemed_icon = g_emblemed_icon_new(icon_folder, emblem_new);
+	GtkIconPaintable *paintable =
+		gtk_icon_theme_lookup_by_gicon(icon_theme,
+		                               emblemed_icon,
+		                               size,
+		                               1,
+		                               GTK_TEXT_DIR_NONE,
+		                               GTK_ICON_LOOKUP_FORCE_REGULAR);
 
-	info = gtk_icon_theme_lookup_by_gicon(icon_theme, emblemed_icon, size, GTK_ICON_LOOKUP_USE_BUILTIN);
-
-	if (info)
+	if (paintable)
 		{
-		pixbuf = gtk_icon_info_load_icon(info, nullptr);
+		return GDK_PAINTABLE(paintable);
 		}
 
-	if (pixbuf == nullptr)
-		{
-		pixbuf = gq_gtk_icon_theme_load_icon_copy(icon_theme, fallback_icon, size, GTK_ICON_LOOKUP_USE_BUILTIN);
-		}
-
-	g_object_unref(emblem_new);
-	g_object_unref(emblemed_icon);
-	g_object_unref(icon_emblem);
-	g_object_unref(icon_folder);
-	g_object_unref(info);
-
-	return pixbuf;
+	return load_icon_paintable(icon_theme, fallback_icon, size);
 }
 
 /* Folders icons to be used in tree or list directory view */
@@ -97,60 +103,43 @@ PixmapFolders *folder_icons_new()
 	auto pf = g_new0(PixmapFolders, 1);
 	GtkIconTheme *icon_theme = gq_icon_theme_get_default();
 
-	gint size;
-	if (!gq_gtk_icon_size_lookup(&size, &size))
-		{
-		size = 16;
-		}
+	gint size = 16;
 
-	pf->close  = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_DIRECTORY, size, GTK_ICON_LOOKUP_USE_BUILTIN);
-	pf->open   = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_OPEN, size, GTK_ICON_LOOKUP_USE_BUILTIN);
-	pf->parent = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_GO_UP, size, GTK_ICON_LOOKUP_USE_BUILTIN);
+	pf->close  = load_icon_paintable(icon_theme, GQ_ICON_DIRECTORY, size);
+	pf->open   = load_icon_paintable(icon_theme, GQ_ICON_OPEN, size);
+	pf->parent = load_icon_paintable(icon_theme, GQ_ICON_GO_UP, size);
 
-	pf->deny = create_folder_icon_with_emblem(icon_theme, GQ_ICON_UNREADABLE, GQ_ICON_STOP, size);
-	pf->link = create_folder_icon_with_emblem(icon_theme, GQ_ICON_LINK, GQ_ICON_REDO, size);
-	pf->read_only = create_folder_icon_with_emblem(icon_theme, GQ_ICON_READONLY, GQ_ICON_DIRECTORY, size);
+	pf->deny = create_folder_icon_with_emblem(icon_theme,
+	                                          GQ_ICON_UNREADABLE,
+	                                          GQ_ICON_STOP,
+	                                          size);
+
+	pf->link = create_folder_icon_with_emblem(icon_theme,
+	                                          GQ_ICON_LINK,
+	                                          GQ_ICON_REDO,
+	                                          size);
+
+	pf->read_only = create_folder_icon_with_emblem(icon_theme,
+	                                               GQ_ICON_READONLY,
+	                                               GQ_ICON_DIRECTORY,
+	                                               size);
 
 	return pf;
 }
 
-void folder_icons_free(PixmapFolders *pf)
+static void folder_icons_free(PixmapFolders *pf)
 {
 	if (!pf) return;
 
-	if (pf->close)
-		{
-		g_object_unref(pf->close);
-		}
-
-	if (pf->open)
-		{
-		g_object_unref(pf->open);
-		}
-
-	if (pf->deny)
-		{
-		g_object_unref(pf->deny);
-		}
-
-	if (pf->parent)
-		{
-		g_object_unref(pf->parent);
-		}
-
-	if (pf->link)
-		{
-		g_object_unref(pf->link);
-		}
-
-	if (pf->read_only)
-		{
-		g_object_unref(pf->read_only);
-		}
+	g_clear_object(&pf->close);
+	g_clear_object(&pf->open);
+	g_clear_object(&pf->parent);
+	g_clear_object(&pf->deny);
+	g_clear_object(&pf->link);
+	g_clear_object(&pf->read_only);
 
 	g_free(pf);
 }
-
 }
 
 static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data);

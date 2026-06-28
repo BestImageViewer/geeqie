@@ -167,7 +167,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	while (work)
 		{
 		gint match;
-		GdkPixbuf *pixbuf;
+		GdkPaintable *icon;
 		const gchar *date = "";
 		gboolean done = FALSE;
 
@@ -177,30 +177,30 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 			{
 			if (islink(fd->path))
 				{
-				pixbuf = vd->pf->link;
+				icon = vd->pf->link;
 				}
 			else if (fd->name[0] == '.' && fd->name[1] == '\0')
 				{
-				pixbuf = vd->pf->open;
+				icon = vd->pf->open;
 				}
 			else if (fd->name[0] == '.' && fd->name[1] == '.' && fd->name[2] == '\0')
 				{
-				pixbuf = vd->pf->parent;
+				icon = vd->pf->parent;
 				}
 			else if (!access_file(fd->path, W_OK) )
 				{
-				pixbuf = vd->pf->read_only;
+				icon = vd->pf->read_only;
 				}
 			else
 				{
-				pixbuf = vd->pf->close;
+				icon = vd->pf->close;
 				if (vd->layout && vd->layout->options.show_directory_date)
 					date = text_from_time(fd->date);
 				}
 			}
 		else
 			{
-			pixbuf = vd->pf->deny;
+			icon = vd->pf->deny;
 			}
 
 		while (!done)
@@ -421,7 +421,7 @@ ViewDir *vdlist_new(ViewDir *vd)
 
 	vd->type = DIRVIEW_LIST;
 
-	store = gtk_list_store_new(6, G_TYPE_POINTER, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_list_store_new(6, G_TYPE_POINTER, GDK_TYPE_PAINTABLE, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING);
 	vd->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
 
