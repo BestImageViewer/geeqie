@@ -42,7 +42,6 @@ struct GqMouseButtonEvent
 	guint press_count;
 };
 
-#define gq_gtk_window_fullscreen_on_monitor(window, monitor) ;
 #define gq_icon_theme_get_default() gtk_icon_theme_get_for_display(gdk_display_get_default())
 
 void gq_gtk_box_pack_start(GtkBox *box, GtkWidget *child, gboolean expand, gboolean fill, guint padding);

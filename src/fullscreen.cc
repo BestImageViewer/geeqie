@@ -426,30 +426,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	DEBUG_NAME(fs->window);
 
 	gtk_window_set_decorated(GTK_WINDOW(fs->window), FALSE);
-
-	/* Monitor selection */
-	auto monitor_number = options->fullscreen.screen;
-
-	if (monitor_number < 0)
-		{
-		monitor_number = 0;
-		}
-	else if (monitor_number == 1)
-		{
-		}
-	else if (monitor_number >= 100)
-		{
-		monitor_number = (monitor_number % 100) - 1;
-		}
-
-	if (monitor_number >= 0)
-		{
-		gq_gtk_window_fullscreen_on_monitor(GTK_WINDOW(fs->window), monitor_number);
-		}
-	else
-		{
-		gtk_window_fullscreen(GTK_WINDOW(fs->window));
-		}
+	gtk_window_fullscreen(GTK_WINDOW(fs->window));
 
 	fs->imd = image_new(FALSE);
 
