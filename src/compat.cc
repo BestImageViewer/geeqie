@@ -421,11 +421,6 @@ GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, GtkIconSize size)
 	return gtk_image_new_from_icon_name(stock_id_to_icon_name(stock_id));
 }
 
-GtkWidget *gq_gtk_bin_get_child(GtkWidget *widget)
-{
-	return gtk_widget_get_first_child(widget);
-}
-
 GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget)
 {
 	GtkRoot *root = gtk_widget_get_root(widget);

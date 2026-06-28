@@ -1761,7 +1761,7 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 		{
 		layout_tools_geometry_sync(lw);
 		/* dump the contents */
-		gq_gtk_widget_destroy(gq_gtk_bin_get_child(GTK_WIDGET(lw->tools)));
+		gq_gtk_widget_destroy(gtk_widget_get_first_child(lw->tools));
 		}
 
 	layout_actions_add_window(lw, lw->tools);

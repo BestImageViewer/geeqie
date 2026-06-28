@@ -345,8 +345,7 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 	toolbarlist[bar] = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_show(toolbarlist[bar]);
 	gq_gtk_container_add(scrolled, toolbarlist[bar]);
-	gq_gtk_viewport_set_shadow_type(GTK_WIDGET(gq_gtk_bin_get_child(GTK_WIDGET(scrolled))),
-	                                GTK_SHADOW_NONE);
+	gq_gtk_viewport_set_shadow_type(gtk_widget_get_first_child(scrolled), GTK_SHADOW_NONE);
 
 	add_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_show(add_box);

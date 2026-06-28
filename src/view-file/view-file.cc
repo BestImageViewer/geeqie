@@ -1186,8 +1186,8 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	GtkWidget *label;
 
 	vf->file_filter.combo = gtk_combo_box_text_new_with_entry();
-	combo_entry = gq_gtk_bin_get_child(GTK_WIDGET(vf->file_filter.combo));
-	gtk_widget_show(gq_gtk_bin_get_child(GTK_WIDGET(vf->file_filter.combo)));
+	combo_entry = gtk_widget_get_first_child(vf->file_filter.combo);
+	gtk_widget_show(combo_entry);
 	gtk_widget_show(vf->file_filter.combo);
 	gtk_widget_set_tooltip_text(vf->file_filter.combo, _("Use regular expressions"));
 

@@ -373,10 +373,9 @@ static void bar_menu_expander_gesture_cb(GtkGestureClick *gesture, gint, gdouble
 static void bar_expander_cb(GObject *object, GParamSpec *, gpointer)
 {
 	GtkExpander *expander;
-	GtkWidget *child;
 
 	expander = GTK_EXPANDER(object);
-	child = gq_gtk_bin_get_child(GTK_WIDGET(expander));
+	GtkWidget *child = gtk_widget_get_first_child(GTK_WIDGET(expander));
 
 	if (gtk_expander_get_expanded(expander))
 		{
@@ -404,7 +403,7 @@ static void bar_menu_add_cb(GtkWidget *, gpointer)
 
 static void bar_pane_set_fd_cb(GtkWidget *expander, gpointer data)
 {
-	GtkWidget *widget = gq_gtk_bin_get_child(GTK_WIDGET(expander));
+	GtkWidget *widget = gtk_widget_get_first_child(expander);
 	auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 	if (!pd) return;
 	if (pd->pane_set_fd) pd->pane_set_fd(widget, static_cast<FileData *>(data));
@@ -425,7 +424,7 @@ void bar_set_fd(GtkWidget *bar, FileData *fd)
 
 static void bar_pane_notify_selection_cb(GtkWidget *expander, gpointer data)
 {
-	GtkWidget *widget = gq_gtk_bin_get_child(GTK_WIDGET(expander));
+	GtkWidget *widget = gtk_widget_get_first_child(expander);
 	auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 	if (!pd) return;
 	if (pd->pane_notify_selection) pd->pane_notify_selection(widget, GPOINTER_TO_INT(data));
@@ -448,7 +447,7 @@ gboolean bar_event(GtkWidget *bar, GdkEvent *event)
 
 	for (GList *work = list; work; work = work->next)
 		{
-		GtkWidget *widget = gq_gtk_bin_get_child(GTK_WIDGET(work->data));
+		GtkWidget *widget = gtk_widget_get_first_child(GTK_WIDGET(work->data));
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (pd && pd->pane_event && pd->pane_event(widget, event))
@@ -475,7 +474,7 @@ GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id)
 	g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(bd->vbox));
 	for (GList *work = list; work; work = work->next)
 		{
-		GtkWidget *widget = gq_gtk_bin_get_child(GTK_WIDGET(work->data));
+		GtkWidget *widget = gtk_widget_get_first_child(GTK_WIDGET(work->data));
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (pd && type == pd->type && strcmp(id, pd->id) == 0)
@@ -519,7 +518,7 @@ void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
 	for (GList *work = list; work; work = work->next)
 		{
 		auto *expander = static_cast<GtkWidget *>(work->data);
-		GtkWidget *widget = gq_gtk_bin_get_child(GTK_WIDGET(expander));
+		GtkWidget *widget = gtk_widget_get_first_child(expander);
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (!pd) continue;
@@ -663,7 +662,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 
 	bd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_container_add(scrolled, bd->vbox);
-	gq_gtk_viewport_set_shadow_type(GTK_WIDGET(gq_gtk_bin_get_child(GTK_WIDGET(scrolled))), GTK_SHADOW_NONE);
+	gq_gtk_viewport_set_shadow_type(gtk_widget_get_first_child(scrolled), GTK_SHADOW_NONE);
 
 	add_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(add_box);

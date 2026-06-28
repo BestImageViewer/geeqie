@@ -63,7 +63,6 @@ void gq_gtk_widget_destroy(GtkWidget *widget);
 void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width);
 gboolean gq_gtk_icon_size_lookup(GtkIconSize size, gint *width, gint *height);
 GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, GtkIconSize size);
-GtkWidget *gq_gtk_bin_get_child(GtkWidget *widget);
 GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget);
 GList *gq_gtk_widget_get_children(GtkWidget *widget);
 void gq_gtk_viewport_set_shadow_type(GtkWidget *viewport, int type);

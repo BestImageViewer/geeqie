@@ -2951,7 +2951,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_widget_set_tooltip_text(combo,
 	                            _("When set to 'contains' or 'path contains', this field uses Perl Compatible Regular Expressions.\ne.g. use \n.*\\.jpg\n and not \n*.jpg\n\nSee the Help file."));
 
-	GtkWidget *entry = gq_gtk_bin_get_child(GTK_WIDGET(combo));
+	GtkWidget *entry = gtk_widget_get_first_child(combo);
 	g_signal_connect(entry, "focus-in-event", G_CALLBACK(text_box_on_focus_in_cb), sd);
 	g_signal_connect(entry, "focus-out-event", G_CALLBACK(text_box_on_focus_out_cb), sd);
 
