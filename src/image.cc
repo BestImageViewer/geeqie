@@ -1101,8 +1101,7 @@ static void image_change_real(ImageWindow *imd, FileData *fd,
  * focus stuff
  *-------------------------------------------------------------------
  */
-
-static gboolean image_focus_in_cb(GtkWidget *, GdkEventFocus *, gpointer data)
+static void image_focus_in_cb(GtkEventControllerFocus *, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
@@ -1110,8 +1109,6 @@ static gboolean image_focus_in_cb(GtkWidget *, GdkEventFocus *, gpointer data)
 		{
 		imd->func_focus_in(imd, imd->data_focus_in);
 		}
-
-	return TRUE;
 }
 
 static gboolean image_scroll_cb(GtkWidget *, GdkEventScroll *event, gpointer data)
@@ -2041,8 +2038,10 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 
 		g_signal_connect(G_OBJECT(imd->frame), "draw",
 				 G_CALLBACK(selectable_frame_draw_cb), NULL);
-		g_signal_connect(G_OBJECT(imd->frame), "focus_in_event",
-				 G_CALLBACK(image_focus_in_cb), imd);
+
+		GtkEventController *controller = gtk_event_controller_focus_new();
+		g_signal_connect(controller, "enter", G_CALLBACK(image_focus_in_cb), imd);
+		gtk_widget_add_controller(imd->frame, controller);
 
 		gq_gtk_box_pack_start(GTK_BOX(imd->widget), imd->frame, TRUE, TRUE, 0);
 		gtk_widget_show(imd->frame);
