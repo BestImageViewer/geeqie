@@ -355,15 +355,18 @@ static gboolean tip_schedule_cb(gpointer data)
 
 	if (VFICON(vf)->tip_delay_id)
 		{
-		auto *window = widget_get_toplevel(vf->listview);
+		GtkRoot *root = gtk_widget_get_root(vf->listview);
 
-		if (GTK_IS_WINDOW(window))
+		if (GTK_IS_WINDOW(root))
 			{
+			auto *window = GTK_WINDOW(root);
+
 			if (gtk_widget_get_sensitive(GTK_WIDGET(window)) && gtk_window_is_active(window))
 				{
 				tip_show(vf);
 				}
 			}
+
 		VFICON(vf)->tip_delay_id = 0;
 		}
 
