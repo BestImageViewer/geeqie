@@ -806,7 +806,7 @@ static void gqv_cell_renderer_icon_snapshot(GtkCellRenderer *cell,
 				gtk_style_context_save(context);
 				gtk_style_context_set_state(context, state);
 
-				gtk_style_context_add_class(context, GTK_STYLE_CLASS_CHECK);
+				gtk_style_context_add_class(context, "check");
 
 				gtk_style_context_add_class(context, "marks");
 
