@@ -2004,7 +2004,7 @@ void pixbuf_renderer_set_scroll_center(PixbufRenderer *pr, gdouble x, gdouble y)
  *-------------------------------------------------------------------
  */
 
-static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpointer)
+static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double x, double y, gpointer data)
 {
 	PixbufRenderer *pr;
 	gint accel;
@@ -2020,19 +2020,19 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 
 	get_pointer_position(widget, device, &x, &y, nullptr);
 
-	event->x = x;
-	event->y = y;
+	x = x;
+	y = y;
 
 	pr = PIXBUF_RENDERER(widget);
 
 	if (pr->scroller_id)
 		{
-		pr->scroller_xpos = event->x;
-		pr->scroller_ypos = event->y;
+		pr->scroller_xpos = x;
+		pr->scroller_ypos = y;
 		}
 
-	pr->mouse.x = event->x;
-	pr->mouse.y = event->y;
+	pr->mouse.x = x;
+	pr->mouse.y = y;
 	pr_update_pixel_signal(pr);
 
 	if (!pr->in_drag || !gdk_display_device_is_grabbed(gdk_device_get_display(device), device)) return FALSE;
@@ -2046,7 +2046,14 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 		widget_set_cursor(widget, GDK_FLEUR);
 		}
 
-	if (event->state & GDK_CONTROL_MASK)
+	GdkModifierType state = GDK_MODIFIER_MASK;
+
+	if (GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(controller)))
+		{
+		state = static_cast<GdkModifierType>( gdk_event_get_modifier_state(event));
+		}
+
+	if (state & GDK_CONTROL_MASK)
 		{
 		accel = PR_PAN_SHIFT_MULTIPLIER;
 		}
@@ -2058,13 +2065,16 @@ static gboolean pr_mouse_motion_cb(GtkWidget *widget, GdkEventMotion *event, gpo
 	/* do the scroll - not when drawing rectangle*/
 	if (!options->draw_rectangle)
 		{
-		pixbuf_renderer_scroll(pr, (pr->drag_last_x - event->x) * accel,
-					(pr->drag_last_y - event->y) * accel);
+		pixbuf_renderer_scroll(pr, (pr->drag_last_x - x) * accel,
+					(pr->drag_last_y - y) * accel);
 		}
-	pr_drag_signal(pr, event);
 
-	pr->drag_last_x = event->x;
-	pr->drag_last_y = event->y;
+/** @FIXME GTK4
+	pr_drag_signal(pr, event);
+*/
+
+	pr->drag_last_x = x;
+	pr->drag_last_y = y;
 
 	/* This is recommended by the GTK+ documentation, but does not work properly.
 	 * Use deprecated way until GTK+ gets a solution for correct motion hint handling:
@@ -2232,8 +2242,11 @@ static void pr_mouse_drag_cb(GtkWidget *widget, GdkDragContext *, gpointer)
 
 static void pr_signals_connect(PixbufRenderer *pr)
 {
-	g_signal_connect(G_OBJECT(pr), "motion_notify_event",
-			 G_CALLBACK(pr_mouse_motion_cb), pr);
+
+	GtkEventController *controller = gtk_event_controller_motion_new();
+	g_signal_connect(controller, "motion", G_CALLBACK(pr_mouse_motion_cb), pr);
+	gtk_widget_add_controller(G_OBJECT(pr), controller);
+
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(pr_mouse_press_cb), pr);

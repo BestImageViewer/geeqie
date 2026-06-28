@@ -1117,12 +1117,12 @@ gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *widget, guint keyval, GdkM
  *-------------------------------------------------------------------
  */
 
-static gboolean vficon_motion_cb(GtkWidget *, GdkEventMotion *event, gpointer data)
+static gboolean vficon_motion_cb(GtkEventControllerMotion *, double x, double y, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	FileData *fd;
 
-	fd = vficon_find_data_by_coord(vf, static_cast<gint>(event->x), static_cast<gint>(event->y), nullptr);
+	fd = vficon_find_data_by_coord(vf, static_cast<gint>(x), static_cast<gint>(y), nullptr);
 	tip_update(vf, fd);
 
 	return FALSE;
@@ -1947,8 +1947,10 @@ ViewFile *vficon_new(ViewFile *vf)
 	gtk_widget_set_events(vf->listview, GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK |
 			      static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_LEAVE_NOTIFY_MASK));
 
-	g_signal_connect(G_OBJECT(vf->listview),"motion_notify_event",
-			 G_CALLBACK(vficon_motion_cb), vf);
+	GtkEventController *controller = gtk_event_controller_motion_new();
+	g_signal_connect(controller, "motion", G_CALLBACK(vficon_motion_cb), vf);
+	gtk_widget_add_controller(G_OBJECT(vf->listview), controller);
+
 	GtkEventController *motion_controller = gtk_event_controller_motion_new();
 	g_signal_connect(motion_controller, "leave", G_CALLBACK(vficon_leave_cb), vf);
 	gtk_widget_add_controller(vf->listview, motion_controller);

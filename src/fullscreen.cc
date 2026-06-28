@@ -95,7 +95,7 @@ void fullscreen_hide_mouse_reset(FullScreenData *fs)
 	fs->hide_mouse_id = g_timeout_add(FULL_SCREEN_HIDE_MOUSE_DELAY, fullscreen_hide_mouse_cb, fs);
 }
 
-gboolean fullscreen_mouse_moved(GtkWidget *, GdkEventMotion *, gpointer data)
+gboolean fullscreen_mouse_moved(GtkEventControllerMotion *, double x, double y, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -482,8 +482,10 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	gtk_widget_show(fs->window);
 
 	/* for hiding the mouse */
-	g_signal_connect(G_OBJECT(fs->imd->pr), "motion_notify_event",
-			   G_CALLBACK(fullscreen_mouse_moved), fs);
+	GtkEventController *controller = gtk_event_controller_motion_new();
+	g_signal_connect(controller, "motion", G_CALLBACK(fullscreen_mouse_moved), fs);
+	gtk_widget_add_controller(G_OBJECT(fs->imd->pr), controller);
+
 	clear_mouse_cursor(fs->window, fs->cursor_state);
 
 	/* set timer to block screen saver */

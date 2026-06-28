@@ -1363,7 +1363,7 @@ gboolean autocomplete_keywords_list_save(const gchar *path)
 }
 
 } // namespace
-#endif
+
 /*
  *-------------------------------------------------------------------
  * init
