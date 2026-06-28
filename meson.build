@@ -57,6 +57,11 @@ i18n = import('i18n')
 fs = import('fs')
 configuration_inc = include_directories('.')
 
+# Main library dependencies
+gtk_dep = dependency('gtk4', version : '>=4.0', required : true)
+glib_dep = dependency('glib-2.0', version : '>=2.66', required: true)
+pango_dep = dependency('pango', version : '>=1.46', required: true)
+
 option = get_option('git')
 if not option.disabled()
     running_from_git = find_program('git', required: false).found() and fs.is_dir('.git')
@@ -149,11 +154,6 @@ conf_data.set('HAVE_MNTENT_H', 0)
 if cc.has_header('mntent.h')
     conf_data.set('HAVE_MNTENT_H', 1)
 endif
-
-conf_data.set('HAVE_GTK4', 1)
-gtk_dep = dependency('gtk4', required: true)
-glib_dep = dependency('glib-2.0', version : '>=2.66', required: true)
-pango_dep = dependency('pango', version : '>=1.46', required: true)
 
 # Required only for seg. fault stacktrace and backtrace debugging
 conf_data.set('HAVE_EXECINFO_H', 0)
