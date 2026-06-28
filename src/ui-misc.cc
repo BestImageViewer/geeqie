@@ -1434,21 +1434,4 @@ bool focus_is_editable(GtkWindow *window)
             GTK_IS_SPIN_BUTTON(focus));
 }
 
-bool key_is_text_editing_key(GdkEventKey *event)
-{
-    switch (event->keyval) {
-    case GDK_KEY_BackSpace:
-    case GDK_KEY_Delete:
-    case GDK_KEY_Left:
-    case GDK_KEY_Right:
-    case GDK_KEY_Up:
-    case GDK_KEY_Down:
-    case GDK_KEY_Home:
-    case GDK_KEY_End:
-        return TRUE;
-    default:
-        return FALSE;
-    }
-}
-
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
