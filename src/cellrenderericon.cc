@@ -853,26 +853,27 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 		{
 		GdkRectangle rect;
 		GdkRectangle cell_rect;
-		GdkModifierType state;
+		const GdkModifierType state = static_cast<GdkModifierType>(gdk_event_get_modifier_state(event));
 		gdouble event_x;
 		gdouble event_y;
-		gint i;
 		gint xpad;
 		gint ypad;
 
-		state = gdk_button_event_get_state(event);
-		if ((state & GDK_SHIFT_MASK) || (state & GDK_CONTROL_MASK))
+		if (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK))
 			{
 			return FALSE;
 			}
 
-		gdk_button_event_get_position(event, &event_x, &event_y);
+		if (!gdk_event_get_position(event, &event_x, &event_y))
+			{
+			return FALSE;
+			}
 
 		gtk_cell_renderer_get_padding(cell, &xpad, &ypad);
 
 		gqv_cell_renderer_icon_get_size(cell, widget, cell_area,
-						&cell_rect.x, &cell_rect.y,
-						&cell_rect.width, &cell_rect.height);
+		                                &cell_rect.x, &cell_rect.y,
+		                                &cell_rect.width, &cell_rect.height);
 
 		cell_rect.x += xpad;
 		cell_rect.y += ypad;
@@ -882,7 +883,8 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 		rect.width = TOGGLE_WIDTH;
 		rect.height = TOGGLE_WIDTH;
 		rect.y = cell_area->y + ypad + (cell_rect.height - TOGGLE_SPACING) + ((TOGGLE_SPACING - TOGGLE_WIDTH) / 2);
-		for (i = 0; i < cellicon->num_marks; i++)
+
+		for (gint i = 0; i < cellicon->num_marks; i++)
 			{
 			rect.x = cell_area->x + xpad + ((cell_rect.width - TOGGLE_SPACING * cellicon->num_marks + 1) / 2) + (i * TOGGLE_SPACING);
 
@@ -895,6 +897,7 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 				}
 			}
 		}
+
 	return FALSE;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
