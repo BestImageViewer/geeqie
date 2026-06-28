@@ -76,43 +76,40 @@ static LogWindow *logwindow = nullptr;
  * <options->log_window.action> <selected text>
  *
 */
-static gboolean log_window_key_pressed_cb(GtkWidget *window, GdkEventKey *event, gpointer user_data)
+static gboolean log_window_key_pressed_cb(GtkEventControllerKey *, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
-	if (event)
+	if (keyval == GDK_KEY_Escape)
 		{
-		if (event->keyval == GDK_KEY_Escape)
+		gtk_widget_hide(window);
+		}
+	else if (keyval == GDK_KEY_F1 && options->log_window.action[0] != '\0')
+		{
+		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(user_data));
+
+		if (!gtk_text_buffer_get_has_selection(buffer))
 			{
-			gtk_widget_hide(window);
+			GtkTextMark *cursor_mark = gtk_text_buffer_get_insert(buffer);
+			GtkTextIter cursor_iter;
+			gtk_text_buffer_get_iter_at_mark(buffer, &cursor_iter, cursor_mark);
+
+			GtkTextIter line_start = cursor_iter;
+			gtk_text_iter_set_line_offset(&line_start, 0);
+
+			GtkTextIter line_end = cursor_iter;
+			gtk_text_iter_forward_to_line_end(&line_end);
+
+			gtk_text_buffer_select_range(buffer, &line_start, &line_end);
 			}
-		else if (event->keyval == GDK_KEY_F1 && options->log_window.action[0] != '\0')
+
+		GtkTextIter chr_start;
+		GtkTextIter chr_end;
+		if (gtk_text_buffer_get_selection_bounds(buffer, &chr_start, &chr_end))
 			{
-			GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(user_data));
+			g_autofree gchar *sel_text = gtk_text_buffer_get_text(buffer, &chr_start, &chr_end, FALSE);
 
-			if (!gtk_text_buffer_get_has_selection(buffer))
-				{
-				GtkTextMark *cursor_mark = gtk_text_buffer_get_insert(buffer);
-				GtkTextIter cursor_iter;
-				gtk_text_buffer_get_iter_at_mark(buffer, &cursor_iter, cursor_mark);
+			g_autofree gchar *cmd_line = g_strdup_printf("%s \"%s\"", options->log_window.action, sel_text);
 
-				GtkTextIter line_start = cursor_iter;
-				gtk_text_iter_set_line_offset(&line_start, 0);
-
-				GtkTextIter line_end = cursor_iter;
-				gtk_text_iter_forward_to_line_end(&line_end);
-
-				gtk_text_buffer_select_range(buffer, &line_start, &line_end);
-				}
-
-			GtkTextIter chr_start;
-			GtkTextIter chr_end;
-			if (gtk_text_buffer_get_selection_bounds(buffer, &chr_start, &chr_end))
-				{
-				g_autofree gchar *sel_text = gtk_text_buffer_get_text(buffer, &chr_start, &chr_end, FALSE);
-
-				g_autofree gchar *cmd_line = g_strdup_printf("%s \"%s\"", options->log_window.action, sel_text);
-
-				runcmd(cmd_line);
-				}
+			runcmd(cmd_line);
 			}
 		}
 
@@ -356,8 +353,9 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gq_gtk_container_add(scrolledwin, text);
 	gtk_widget_show(text);
 
-	g_signal_connect(G_OBJECT(window), "key-press-event",
-	                 G_CALLBACK(log_window_key_pressed_cb), text);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(log_window_key_pressed_cb), text);
+	gtk_widget_add_controller(widget, controller);
 
 #ifdef DEBUG
 	gtk_text_buffer_create_tag(buffer, "gray_bg", "background", "gray", NULL);

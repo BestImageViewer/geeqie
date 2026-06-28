@@ -3401,10 +3401,10 @@ static void accel_row_activated_cb(GtkTreeView *tree_view, GtkTreePath *, GtkTre
 	gtk_tree_view_set_search_column(tree_view, col_num);
 }
 
-static bool accel_capture_key_press(GtkWidget *widget, GdkEventKey *event, gpointer  )
+static bool accel_capture_key_press(GtkEventControllerKey *, guint keyval, guint keycode, GdkModifierType state, gpointer data)
 {
-	unsigned int key = event->keyval;
-	auto mods = (GdkModifierType)(event->state & gtk_accelerator_get_default_mod_mask());
+	unsigned int key = keyval;
+	auto mods = (GdkModifierType)(state & gtk_accelerator_get_default_mod_mask());
 
 	/* Ignore pure modifier presses */
 	if (key == GDK_KEY_Shift_L || key == GDK_KEY_Shift_R ||
@@ -3530,7 +3530,9 @@ Geeqie must be restarted for the changes to take effect.\n");
 	gtk_widget_show(key_value);
 	gtk_widget_show(key_label);
 
-	g_signal_connect(key_value, "key-press-event", G_CALLBACK(accel_capture_key_press), nullptr);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed",  G_CALLBACK(accel_capture_key_press), nullptr);
+	gtk_widget_add_controller(widget, controller);
 
 	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(accel_default_cb), accel_view);
 	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);

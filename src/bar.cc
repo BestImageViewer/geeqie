@@ -255,9 +255,10 @@ static void height_spin_key_press_cb(GtkEventControllerKey *, gint keyval, guint
 		}
 }
 
-static void expander_height_cb(GtkWidget *widget, GdkEvent *, gpointer)
+static void expander_height_cb(GtkEventControllerKey *, guint keyval, guint keycode, GdkModifierType state, gpointer data)
 {
-	gq_gtk_widget_destroy(widget);
+/** @FIXME GTK4 Destroy the widget
+ */
 }
 
 static void bar_expander_height_cb(GtkWidget *, gpointer data)
@@ -286,7 +287,9 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
 	gq_gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
 	gtk_window_set_default_size(GTK_WINDOW(window), 50, 30); //** @FIXME set these values in a more sensible way */
-	g_signal_connect(window, "key-press-event", G_CALLBACK(expander_height_cb), nullptr);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(expander_height_cb), nullptr);
+	gtk_widget_add_controller(widget, controller);
 
 	gq_gtk_window_move(GTK_WINDOW(window), x, y);
 	gtk_widget_show(window);
