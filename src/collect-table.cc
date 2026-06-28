@@ -109,7 +109,7 @@ static HardcodedWindowKeyList collection_window_keys{
 	{static_cast<GdkModifierType>(0), 'V', N_("View in new window")},
 	{GDK_CONTROL_MASK, 'A', N_("Select all")},
 	{static_cast<GdkModifierType>(GDK_CONTROL_MASK + GDK_SHIFT_MASK), 'A', N_("Select none")},
-	{GDK_MOD1_MASK, 'R', N_("Rectangular selection")},
+	{GDK_ALT_MASK, 'R', N_("Rectangular selection")},
 	{static_cast<GdkModifierType>(0), GDK_KEY_space, N_("Select single file")},
 	{GDK_CONTROL_MASK, GDK_KEY_space, N_("Toggle select image")},
 	{GDK_CONTROL_MASK, 'L', N_("Append from file selection")},
@@ -123,8 +123,8 @@ static HardcodedWindowKeyList collection_window_keys{
 	{static_cast<GdkModifierType>(0), 'B', N_("Sort by size")},
 	{static_cast<GdkModifierType>(0), 'P', N_("Sort by path")},
 	{GDK_SHIFT_MASK, 'P', N_("Print")},
-	{GDK_MOD1_MASK, 'A', N_("Append (Append collection dialog)")},
-	{GDK_MOD1_MASK, 'D', N_("Discard (Close modified collection dialog)")},
+	{GDK_ALT_MASK, 'A', N_("Append (Append collection dialog)")},
+	{GDK_ALT_MASK, 'D', N_("Discard (Close modified collection dialog)")},
 };
 
 /*

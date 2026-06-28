@@ -981,7 +981,7 @@ static gboolean collection_window_keypress(GtkEventControllerKey *, guint keyval
 					}
 				break;
 			case 'R': case 'r':
-				if (state & GDK_MOD1_MASK)
+				if (state & GDK_ALT_MASK)
 					{
 						options->collections.rectangular_selection = !(options->collections.rectangular_selection);
 					}
