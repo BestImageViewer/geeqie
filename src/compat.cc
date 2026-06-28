@@ -181,31 +181,6 @@ void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position)
 	gtk_box_reorder_child_after(box, child, previous);
 }
 
-gboolean gq_gtk_window_get_position(GtkWindow *window, gint *x, gint *y)
-{
-	auto *position = static_cast<GqWindowPosition *>(g_object_get_data(G_OBJECT(window), GTK4_WINDOW_POSITION_DATA_KEY));
-	if (position)
-		{
-		if (x) *x = position->x;
-		if (y) *y = position->y;
-		return TRUE;
-		}
-
-	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(window));
-	if (!surface)
-		{
-		return FALSE;
-		}
-
-	gint surface_x;
-	gint surface_y;
-	gdk_surface_get_position(surface, &surface_x, &surface_y);
-	if (x) *x = surface_x;
-	if (y) *y = surface_y;
-
-	return TRUE;
-}
-
 void gq_gtk_window_move(GtkWindow *window, gint x, gint y)
 {
 	auto *position = g_new(GqWindowPosition, 1);

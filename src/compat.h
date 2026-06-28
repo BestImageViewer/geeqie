@@ -56,7 +56,6 @@ using GqGtkCallback = void (*)(GtkWidget *widget, gpointer data);
 void gq_gtk_container_foreach(GtkWidget *container, GqGtkCallback callback, gpointer callback_data);
 void gq_gtk_widget_show_all(GtkWidget *widget);
 void gq_gtk_frame_set_shadow_type(GtkFrame *frame, int);
-gboolean gq_gtk_window_get_position(GtkWindow *window, gint *x, gint *y);
 void gq_gtk_window_move(GtkWindow *window, gint x, gint y);
 void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting);
 void gq_gtk_widget_destroy(GtkWidget *widget);

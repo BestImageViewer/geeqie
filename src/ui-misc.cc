@@ -1256,20 +1256,23 @@ GdkRectangle widget_get_root_origin_geometry(GtkWidget *widget)
 {
 	GdkRectangle rect = {};
 
-	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
+	if (!widget)
+		{
+		return rect;
+		}
 
+	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
 	if (!surface)
 		{
 		return rect;
 		}
 
-	if (GTK_IS_WINDOW(widget))
-		{
-		gq_gtk_window_get_position(GTK_WINDOW(widget), &rect.x, &rect.y);
-		}
-
-	rect.width  = gdk_surface_get_width(surface);
+	rect.width = gdk_surface_get_width(surface);
 	rect.height = gdk_surface_get_height(surface);
+
+	/* GTK4/Wayland: window position is compositor controlled. */
+	rect.x = 0;
+	rect.y = 0;
 
 	return rect;
 }
