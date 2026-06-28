@@ -341,21 +341,6 @@ void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width)
 	gtk_widget_set_margin_end(widget, width);
 }
 
-gboolean gq_gtk_icon_size_lookup(gint *width, gint *height)
-{
-	if (width)
-		{
-		*width = 16;
-		}
-
-	if (height)
-		{
-		*height = 16;
-		}
-
-	return TRUE;
-}
-
 GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, GtkIconSize size)
 {
 	(void)size;

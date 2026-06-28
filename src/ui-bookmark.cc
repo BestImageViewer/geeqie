@@ -445,18 +445,15 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 			}
 		else
 			{
-			gint w = 16;
-			gint h = 16;
-			gq_gtk_icon_size_lookup(&w, &h);
+			constexpr gint size = 16;
 
-			pixbuf = gq_gtk_icon_theme_load_icon_copy(gq_icon_theme_get_default(), b->icon.c_str(), w, GTK_ICON_LOOKUP_NO_SVG);
+			pixbuf = gq_gtk_icon_theme_load_icon_copy(gq_icon_theme_get_default(), b->icon.c_str(), size, GTK_ICON_LOOKUP_NO_SVG);
 			}
 
 		if (pixbuf)
 			{
-			gint w = 16;
-			gint h = 16;
-			gq_gtk_icon_size_lookup(&w, &h);
+			constexpr gint w = 16;
+			constexpr gint h = 16;
 
 			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pixbuf, w, h, GDK_INTERP_BILINEAR);
 			image = gtk_image_new_from_pixbuf(scaled);
