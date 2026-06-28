@@ -1795,8 +1795,6 @@ void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscre
 {
 	GdkRGBA *color = nullptr;
 	GdkRGBA theme_color;
-	GdkRGBA bg_color;
-	GtkStyleContext *style_context;
 
 	if ((options->image.use_custom_border_color && !fullscreen) ||
 	    (options->image.use_custom_border_color_in_fullscreen && fullscreen))
@@ -1805,15 +1803,10 @@ void image_background_set_color_from_options(ImageWindow *imd, gboolean fullscre
 		}
 	else
 		{
-		LayoutWindow *lw = get_current_layout();
-		if (!lw) return;
-
-		style_context = gtk_widget_get_style_context(lw->window);
-		deprecated_gtk_style_context_get_background_color(style_context, GTK_STATE_FLAG_NORMAL, &bg_color);
-
-		theme_color.red = bg_color.red * 1;
-		theme_color.green = bg_color.green * 1;
-		theme_color.blue = bg_color.blue * 1;
+		theme_color.red = 0.0;
+		theme_color.green = 0.0;
+		theme_color.blue = 0.0;
+		theme_color.alpha = 1.0;
 
 		color = &theme_color;
 		}
