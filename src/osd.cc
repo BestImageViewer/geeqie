@@ -286,7 +286,7 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 	gtk_widget_set_size_request(scrolled, -1, 140);
 
 	GtkWidget *viewport = gtk_viewport_new(nullptr, nullptr);
-	gq_gtk_viewport_set_shadow_type(GTK_WIDGET(viewport), GTK_SHADOW_NONE);
+	gtk_widget_remove_css_class(viewport, "frame");
 	gq_gtk_container_add(scrolled, viewport);
 	gtk_widget_show(viewport);
 

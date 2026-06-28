@@ -736,7 +736,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	pgd->centre_map_checked = TRUE;
 	g_object_set_data_full(G_OBJECT(pgd->widget), "pane_data", pgd, bar_pane_gps_destroy);
 
-	gq_gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
+	gtk_widget_add_css_class(frame, "frame");
 
 	gtk_widget_set_size_request(pgd->widget, -1, height);
 

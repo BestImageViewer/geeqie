@@ -665,7 +665,7 @@ static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 
 	GtkWidget *frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
-	gq_gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
+	gtk_widget_add_css_class(frame, "frame");
 	gq_gtk_box_pack_start(GTK_BOX(box), frame, FALSE, FALSE, 0);
 	gtk_widget_show(frame);
 
@@ -737,7 +737,7 @@ static GtkWidget *layout_zoom_button(LayoutWindow *lw, GtkWidget *box, gint size
 	GtkWidget *frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
 	if (size) gtk_widget_set_size_request(frame, size, -1);
-	gq_gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
+	gtk_widget_add_css_class(frame, "frame");
 
 	gq_gtk_box_pack_start(GTK_BOX(box), frame, FALSE, FALSE, 0);
 
@@ -949,7 +949,7 @@ static GtkWidget *layout_status_label(const gchar *text, GtkWidget *box, gboolea
 	GtkWidget *frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
 	if (size) gtk_widget_set_size_request(frame, size, -1);
-	gq_gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
+	gtk_widget_add_css_class(frame, "frame");
 	if (start)
 		{
 		gq_gtk_box_pack_start(GTK_BOX(box), frame, expand, expand, 0);
@@ -1032,7 +1032,7 @@ static void layout_status_setup(LayoutWindow *lw, GtkWidget *box, gboolean small
 
 	toolbar_frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(toolbar_frame);
-	gq_gtk_frame_set_shadow_type(GTK_FRAME(toolbar_frame), GTK_SHADOW_IN);
+	gtk_widget_add_css_class(toolbar_frame, "frame");
 	gq_gtk_container_add(toolbar_frame, toolbar);
 	gtk_widget_show(toolbar_frame);
 	gtk_widget_show(toolbar);

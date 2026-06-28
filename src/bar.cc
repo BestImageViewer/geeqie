@@ -662,7 +662,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 
 	bd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_container_add(scrolled, bd->vbox);
-	gq_gtk_viewport_set_shadow_type(gtk_widget_get_first_child(scrolled), GTK_SHADOW_NONE);
+	gtk_widget_remove_css_class(gtk_widget_get_first_child(scrolled), "frame");
 
 	add_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(add_box);

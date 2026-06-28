@@ -196,7 +196,7 @@ GtkWidget *bar_pane_exif_add_entry(PaneExifData *ped, const gchar *key, const gc
 	ee->ped = ped;
 
 	ee->ebox = gtk_frame_new(nullptr);
-	gq_gtk_frame_set_shadow_type(GTK_FRAME(ee->ebox), GTK_SHADOW_NONE);
+	gtk_widget_remove_css_class(ee->ebox, "frame");
 	g_object_set_data_full(G_OBJECT(ee->ebox), "entry_data", ee, bar_pane_exif_entry_destroy);
 
 	gq_gtk_box_pack_start(GTK_BOX(ped->vbox), ee->ebox, FALSE, FALSE, 0);
