@@ -68,13 +68,6 @@ GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget);
 GList *gq_gtk_widget_get_children(GtkWidget *widget);
 void gq_gtk_viewport_set_shadow_type(GtkWidget *viewport, int type);
 
-void gq_drag_g_signal_connect(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data);
-void gq_drag_g_signal_swapped(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data);
-void gq_gtk_drag_dest_unset(GtkWidget *widget);
-
-void gq_gtk_drag_source_set(GtkWidget *widget, GdkModifierType start_button_mask, gpointer, gint n_targets, GdkDragAction actions);
-void gq_gtk_drag_dest_set(GtkWidget *widget, gpointer, gpointer, gint n_targets, GdkDragAction actions);
-
 /** @FIXME These are used in calls to gtk_frame_set_shadow_type
  * These defines will permit a compile. CSS should be used.
  */

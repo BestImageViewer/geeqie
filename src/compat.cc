@@ -22,14 +22,11 @@
 
 #include <config.h>
 
-#include "compat-deprecated.h"
 #include "main-defines.h"
 
 namespace
 {
 
-constexpr auto GTK4_DRAG_SOURCE_CONTROLLER_DATA_KEY = "gq-gtk4-drag-source-controller";
-constexpr auto GTK4_DROP_TARGET_CONTROLLER_DATA_KEY = "gq-gtk4-drop-target-controller";
 constexpr auto GTK4_BOX_PACK_END_DATA_KEY = "gq-gtk4-box-pack-end";
 constexpr auto GTK4_WINDOW_POSITION_DATA_KEY = "gq-gtk4-window-position";
 constexpr auto GTK4_WINDOW_POSITION_POLICY_DATA_KEY = "gq-gtk4-window-position-policy";
@@ -40,15 +37,6 @@ struct GqWindowPosition
 	gint x;
 	gint y;
 };
-
-guint start_button_mask_to_button(GdkModifierType start_button_mask)
-{
-	if (start_button_mask & GDK_BUTTON1_MASK) return GDK_BUTTON_PRIMARY;
-	if (start_button_mask & GDK_BUTTON2_MASK) return GDK_BUTTON_MIDDLE;
-	if (start_button_mask & GDK_BUTTON3_MASK) return GDK_BUTTON_SECONDARY;
-
-	return 0;
-}
 
 const gchar *stock_id_to_icon_name(const gchar *stock_id)
 {
@@ -476,55 +464,6 @@ void gq_gtk_viewport_set_shadow_type(GtkWidget *viewport, int type)
 		{
 		gtk_widget_add_css_class(viewport, "frame");
 		}
-}
-
-void gq_drag_g_signal_connect(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data)
-{
-	g_signal_connect(instance, detailed_signal, c_handler, data);
-}
-
-void gq_drag_g_signal_swapped(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data)
-{
-	g_signal_connect_swapped(instance, detailed_signal, c_handler, data);
-}
-
-void gq_gtk_drag_source_set(GtkWidget *widget, GdkModifierType start_button_mask, gpointer, gint n_targets, GdkDragAction actions)
-{
-	auto *controller = static_cast<GtkEventController *>(g_object_get_data(G_OBJECT(widget), GTK4_DRAG_SOURCE_CONTROLLER_DATA_KEY));
-	if (controller)
-		{
-		gtk_widget_remove_controller(widget, controller);
-		}
-
-	auto *drag_source = gtk_drag_source_new();
-	gtk_drag_source_set_actions(drag_source, actions);
-	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), start_button_mask_to_button(start_button_mask));
-	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(drag_source));
-	g_object_set_data(G_OBJECT(widget), GTK4_DRAG_SOURCE_CONTROLLER_DATA_KEY, drag_source);
-}
-
-void gq_gtk_drag_dest_set(GtkWidget *widget, gpointer, gpointer, gint n_targets, GdkDragAction actions)
-{
-	(void)n_targets;
-
-	auto *controller = static_cast<GtkEventController *>(g_object_get_data(G_OBJECT(widget), GTK4_DROP_TARGET_CONTROLLER_DATA_KEY));
-	if (controller)
-		{
-		gtk_widget_remove_controller(widget, controller);
-		}
-
-	auto *drop_target = gtk_drop_target_async_new(actions);
-	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(drop_target));
-	g_object_set_data(G_OBJECT(widget), GTK4_DROP_TARGET_CONTROLLER_DATA_KEY, drop_target);
-}
-
-void gq_gtk_drag_dest_unset(GtkWidget *widget)
-{
-	auto *controller = static_cast<GtkEventController *>(g_object_get_data(G_OBJECT(widget), GTK4_DROP_TARGET_CONTROLLER_DATA_KEY));
-	if (!controller) return;
-
-	g_object_set_data(G_OBJECT(widget), GTK4_DROP_TARGET_CONTROLLER_DATA_KEY, nullptr);
-	gtk_widget_remove_controller(widget, controller);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
