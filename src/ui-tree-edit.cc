@@ -238,7 +238,7 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 
 	/* create the window */
 
-	ted->window = gtk_window_new(GTK_WINDOW_POPUP);
+	ted->window = gtk_window_new();
 
 	LayoutWindow * lw = get_current_layout();
 	gtk_window_set_transient_for(GTK_WINDOW(ted->window), GTK_WINDOW(lw->window));

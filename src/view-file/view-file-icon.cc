@@ -323,7 +323,7 @@ static void tip_show(ViewFile *vf)
 	VFICON(vf)->tip_fd = vficon_find_data_by_coord(vf, x, y, nullptr);
 	if (!VFICON(vf)->tip_fd) return;
 
-	VFICON(vf)->tip_window = gtk_window_new(GTK_WINDOW_POPUP);
+	VFICON(vf)->tip_window = gtk_window_new();
 	gtk_window_set_transient_for(GTK_WINDOW(VFICON(vf)->tip_window), GTK_WINDOW(widget_get_toplevel(vf->listview)));
 	gtk_window_set_resizable(GTK_WINDOW(VFICON(vf)->tip_window), FALSE);
 	gq_gtk_widget_set_border_width(VFICON(vf)->tip_window, 2);
