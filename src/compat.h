@@ -57,7 +57,8 @@ void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position);
 
 void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget);
 void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget);
-void gq_gtk_container_foreach(GtkWidget *container, GtkCallback callback, gpointer callback_data);
+using GqGtkCallback = void (*)(GtkWidget *widget, gpointer data);
+void gq_gtk_container_foreach(GtkWidget *container, GqGtkCallback callback, gpointer callback_data);
 void gq_gtk_widget_show_all(GtkWidget *widget);
 void gq_gtk_frame_set_shadow_type(GtkFrame *frame, int);
 gboolean gq_gtk_window_get_position(GtkWindow *window, gint *x, gint *y);

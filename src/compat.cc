@@ -391,7 +391,7 @@ void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget)
 		}
 }
 
-void gq_gtk_container_foreach(GtkWidget *container, GtkCallback callback, gpointer callback_data)
+void gq_gtk_container_foreach(GtkWidget *container, GqGtkCallback callback, gpointer callback_data)
 {
 	for (GtkWidget *child = gtk_widget_get_first_child(container);
 	     child;
