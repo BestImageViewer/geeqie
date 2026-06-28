@@ -274,7 +274,7 @@ void gq_gtk_widget_show_all(GtkWidget *widget)
 		}
 }
 
-void gq_gtk_frame_set_shadow_type(GtkFrame *frame, GtkShadowType type)
+void gq_gtk_frame_set_shadow_type(GtkFrame *frame, int)
 {
 	if (type == GTK_SHADOW_NONE)
 		{

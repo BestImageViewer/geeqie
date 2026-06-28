@@ -59,7 +59,7 @@ void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget);
 void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget);
 void gq_gtk_container_foreach(GtkWidget *container, GtkCallback callback, gpointer callback_data);
 void gq_gtk_widget_show_all(GtkWidget *widget);
-void gq_gtk_frame_set_shadow_type(GtkFrame *frame, GtkShadowType type);
+void gq_gtk_frame_set_shadow_type(GtkFrame *frame, int);
 gboolean gq_gtk_window_get_position(GtkWindow *window, gint *x, gint *y);
 void gq_gtk_window_move(GtkWindow *window, gint x, gint y);
 void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting);
@@ -79,6 +79,12 @@ void gq_gtk_drag_dest_unset(GtkWidget *widget);
 
 void gq_gtk_drag_source_set(GtkWidget *widget, GdkModifierType start_button_mask, gpointer, gint n_targets, GdkDragAction actions);
 void gq_gtk_drag_dest_set(GtkWidget *widget, gpointer, gpointer, gint n_targets, GdkDragAction actions);
+
+/** @FIXME These are used in calls to gtk_frame_set_shadow_type
+ * These defines will permit a compile. CSS should be used.
+ */
+#define GTK_SHADOW_IN 0
+#define GTK_SHADOW_NONE 1
 
 #endif /* COMPAT_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
