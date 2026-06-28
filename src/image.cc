@@ -241,11 +241,11 @@ static void image_release_cb(PixbufRenderer *, GqMouseButtonEvent *event, gpoint
 */
 }
 
-static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer data)
+static void image_drag_cb(PixbufRenderer *pr, gdouble x, gdouble y, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
-	selection_rectangle.set_cursor(event->x, event->y);
+	selection_rectangle.set_cursor(x, y);
 
 	if (options->draw_rectangle)
 		{
@@ -279,11 +279,14 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 			}
 
 		if (selection_rectangle.height <= 0)
+			{
 			selection_rectangle.height = 1;
+			}
 		if (selection_rectangle.width <= 0)
+			{
 			selection_rectangle.width = 1;
+			}
 
-		// decorative border
 		g_autoptr(GdkPixbuf) rect_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, selection_rectangle.width, selection_rectangle.height);
 		pixbuf_set_rect_fill(rect_pixbuf, 0, 0, selection_rectangle.width, selection_rectangle.height, {255, 255, 255, 0});
 		pixbuf_set_rect(rect_pixbuf, 1, 1, selection_rectangle.width-2, selection_rectangle.height - 2, {0, 0, 0, 255}, 1, 1, 1, 1);
@@ -294,7 +297,12 @@ static void image_drag_cb(PixbufRenderer *pr, GdkEventMotion *event, gpointer da
 
 	if (imd->func_drag)
 		{
-		imd->func_drag(imd, event, static_cast<gfloat>(selection_rectangle.x) / selection_rectangle.width, static_cast<gfloat>(selection_rectangle.y) / selection_rectangle.height, imd->data_drag);
+		imd->func_drag(imd,
+		               x,
+		               y,
+		               static_cast<gfloat>(selection_rectangle.x) / selection_rectangle.width,
+		               static_cast<gfloat>(selection_rectangle.y) / selection_rectangle.height,
+		               imd->data_drag);
 		}
 }
 

@@ -96,7 +96,7 @@ struct ImageWindow
 
 	/* button, scroll functions */
 	void (*func_button)(ImageWindow *, GqMouseButtonEvent *event, gpointer);
-	void (*func_drag)(ImageWindow *, GdkEvent *event, gdouble dx, gdouble dy, gpointer);
+	void (*func_drag)(ImageWindow *, gdouble x, gdouble y, gdouble dx, gdouble dy, gpointer);
 	void (*func_scroll)(ImageWindow *, GdkEvent *event, gpointer);
 	void (*func_focus_in)(ImageWindow *, gpointer);
 
