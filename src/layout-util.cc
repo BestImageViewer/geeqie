@@ -2952,7 +2952,7 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 
 		gtk_actionable_set_detailed_action_name(GTK_ACTIONABLE(button), action_name);
 
-		GtkWidget *image = gq_gtk_image_new_from_icon_name(get_icon_for_action_name(action_name), GTK_ICON_SIZE_BUTTON);
+		GtkWidget *image = gtk_image_new_from_icon_name(get_icon_for_action_name(action_name));
 		gtk_button_set_always_show_image(GTK_BUTTON(button), TRUE);
 		gtk_button_set_image(GTK_BUTTON(button), image);
 

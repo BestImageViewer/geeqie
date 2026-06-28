@@ -463,12 +463,12 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 			}
 		else
 			{
-			image = gq_gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
+			image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY);
 			}
 		}
 	else
 		{
-		image = gq_gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY, GTK_ICON_SIZE_BUTTON);
+		image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY);
 		}
 	gq_gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 0);
 	gtk_widget_show(image);
@@ -573,7 +573,7 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 	bm->editable = TRUE;
 	bm->only_directories = FALSE;
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 
 	g_autoptr(PangoLayout) layout = gtk_widget_create_pango_layout(scrolled, "reasonable width");
 	GqSize size;

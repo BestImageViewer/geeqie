@@ -329,14 +329,14 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gq_gtk_container_add(window, win_vbox);
 	gtk_widget_show(win_vbox);
 
-	gq_gtk_window_resize(GTK_WINDOW(window), log_window.width, log_window.height);
+	gtk_window_set_default_size(GTK_WINDOW(window), log_window.width, log_window.height);
 	gq_gtk_window_move(GTK_WINDOW(window), log_window.x, log_window.y);
 
 	g_signal_connect(G_OBJECT(window), "delete_event",
 			 G_CALLBACK(gtk_widget_hide_on_delete), NULL);
 	gtk_widget_realize(window);
 
-	GtkWidget *scrolledwin = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolledwin = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledwin),
 				       GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolledwin), true);
@@ -405,7 +405,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	GtkWidget *backwards_button = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(backwards_button),
-	                     gq_gtk_image_new_from_icon_name(GQ_ICON_PAN_UP, GTK_ICON_SIZE_LARGE_TOOLBAR));
+	                     gtk_image_new_from_icon_name(GQ_ICON_PAN_UP));
 	gtk_widget_set_tooltip_text(backwards_button, _("Search backwards"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), backwards_button, FALSE, FALSE, 0);
 	gtk_widget_show(backwards_button);
@@ -414,7 +414,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	GtkWidget *forwards_button = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(forwards_button),
-	                     gq_gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_LARGE_TOOLBAR));
+	                     gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN));
 	gtk_widget_set_tooltip_text(forwards_button, _("Search forwards"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), forwards_button, FALSE, FALSE, 0);
 	gtk_widget_show(forwards_button);
@@ -423,7 +423,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	GtkWidget *all_button = gtk_toggle_button_new();
 	gtk_button_set_image(GTK_BUTTON(all_button),
-	                     gq_gtk_image_new_from_icon_name("edit-select-all-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR));
+	                     gtk_image_new_from_icon_name("edit-select-all-symbolic"));
 	gtk_widget_set_tooltip_text(all_button, _("Highlight all"));
 	gq_gtk_box_pack_start(GTK_BOX(search_box), all_button, FALSE, FALSE, 0) ;
 	g_signal_connect(all_button, "toggled", G_CALLBACK(all_keypress_event_cb), logwin);

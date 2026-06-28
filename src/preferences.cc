@@ -1631,7 +1631,7 @@ static GtkWidget *scrolled_notebook_page(GtkWidget *notebook, const gchar *title
 	GtkWidget *label;
 	GtkWidget *vbox;
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gq_gtk_widget_set_border_width(scrolled, PREF_PAD_BORDER);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -2235,7 +2235,7 @@ static GtkWidget *osd_profiles(gint i)
 
 	pref_label_new(group, _("Image overlay template"));
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	scrolled = gtk_scrolled_window_new();
 	gtk_widget_set_size_request(scrolled, 200, 150);
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -2480,7 +2480,7 @@ static void config_tab_files(GtkWidget *notebook)
 			 G_CALLBACK(filter_disable_cb), frame);
 	gtk_widget_set_sensitive(frame, !options->file_filter.disable);
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
@@ -3012,7 +3012,7 @@ static void config_tab_keywords(GtkWidget *notebook)
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(keyword_text), TRUE);
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(keyword_text), GTK_WRAP_WORD);
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
 	gtk_widget_show(scrolled);
 
@@ -3442,7 +3442,7 @@ static void config_tab_accelerators(GtkWidget *notebook)
 
 	group = pref_group_new(vbox, TRUE, _("Keyboard Shortcuts"), GTK_ORIENTATION_VERTICAL);
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
@@ -3715,7 +3715,7 @@ static void config_window_create(LayoutWindow *lw)
 			 G_CALLBACK(config_window_delete), NULL);
 	if (options->save_dialog_window_positions)
 		{
-		gq_gtk_window_resize(GTK_WINDOW(configwindow), lw->options.preferences_window.rect.width, lw->options.preferences_window.rect.height);
+		gtk_window_set_default_size(GTK_WINDOW(configwindow), lw->options.preferences_window.rect.width, lw->options.preferences_window.rect.height);
 		gq_gtk_window_move(GTK_WINDOW(configwindow), lw->options.preferences_window.rect.x, lw->options.preferences_window.rect.y);
 		}
 	else

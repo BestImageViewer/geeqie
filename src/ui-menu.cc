@@ -98,7 +98,7 @@ GtkWidget *menu_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *
 
 	item = deprecated_gtk_image_menu_item_new_with_mnemonic(label);
 
-	image = gq_gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_MENU);
+	image = gtk_image_new_from_icon_name(icon_name);
 	deprecated_gtk_image_menu_item_set_image(deprecated_GTK_IMAGE_MENU_ITEM(item), image);
 	gtk_widget_show(image);
 

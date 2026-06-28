@@ -245,7 +245,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 		gq_gtk_box_reorder_child(GTK_BOX(button_hbox), ct_button, -1);
 		}
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -544,7 +544,7 @@ void editor_list_window_create()
 	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);

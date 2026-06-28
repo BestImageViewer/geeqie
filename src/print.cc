@@ -264,7 +264,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_widget_set_tooltip_markup(image_text_template_view,
 					_("Extensive formatting options are shown in the Help file"));
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_widget_set_size_request(scrolled, 200, 50);
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
@@ -318,7 +318,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_widget_show(hbox);
 	pw->page_group = (gtk_radio_button_get_group(GTK_RADIO_BUTTON(button2)));
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	scrolled = gtk_scrolled_window_new();
 	gtk_widget_set_size_request(scrolled, 50, 50);
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),

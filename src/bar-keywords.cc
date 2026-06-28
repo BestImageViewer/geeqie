@@ -1111,7 +1111,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_widget_set_size_request(pkd->widget, -1, height);
 	gtk_widget_show(hbox);
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -1130,7 +1130,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	if (options->show_predefined_keyword_tree)
 		{
-		scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+		scrolled = gtk_scrolled_window_new();
 		gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 						GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);

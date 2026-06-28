@@ -358,7 +358,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	gtk_window_set_resizable(GTK_WINDOW(ew->window), TRUE);
 
-	gq_gtk_window_resize(GTK_WINDOW(ew->window), lw->options.advanced_exif_window.width, lw->options.advanced_exif_window.height);
+	gtk_window_set_default_size(GTK_WINDOW(ew->window), lw->options.advanced_exif_window.width, lw->options.advanced_exif_window.height);
 	if (lw->options.advanced_exif_window.x != 0 && lw->options.advanced_exif_window.y != 0)
 		{
 		gq_gtk_window_move(GTK_WINDOW(ew->window), lw->options.advanced_exif_window.x, lw->options.advanced_exif_window.y);
@@ -425,7 +425,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	g_signal_connect(click, "released", G_CALLBACK(advanced_exif_mouseclick), ew);
 	g_object_unref(click);
 
-	ew->scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	ew->scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(ew->scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ew->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
