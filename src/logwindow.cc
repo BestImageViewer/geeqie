@@ -355,7 +355,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(log_window_key_pressed_cb), text);
-	gtk_widget_add_controller(widget, controller);
+	gtk_widget_add_controller(window, controller);
 
 #ifdef DEBUG
 	gtk_text_buffer_create_tag(buffer, "gray_bg", "background", "gray", NULL);

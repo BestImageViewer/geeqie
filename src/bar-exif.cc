@@ -514,25 +514,14 @@ void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped)
 	   we can decide it by the attached data */
 	auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
 
-	menu = popup_menu_short_lived();
+	GAction *action;
+	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-bar-exif.ui");
+	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-bar-exif"));
 
-	if (ee)
-		{
-		/* for the entry */
-		g_autofree gchar *conf = g_strdup_printf(_("Configure \"%s\""), ee->title);
-		g_autofree gchar *del = g_strdup_printf(_("Remove \"%s\""), ee->title);
-		g_autofree gchar *copy = g_strdup_printf(_("Copy \"%s\""), ee->title);
-
-		menu_item_add_icon(menu, conf, GQ_ICON_EDIT, G_CALLBACK(bar_pane_exif_conf_dialog_cb), widget);
-		menu_item_add_icon(menu, copy, GQ_ICON_COPY, G_CALLBACK(bar_pane_exif_copy_entry_cb), widget);
-		menu_item_add_divider(menu);
-		}
-
-	/* for the pane */
-	menu_item_add_icon(menu, _("Add entry"), GQ_ICON_ADD, G_CALLBACK(bar_pane_exif_conf_dialog_cb), ped->widget);
-	menu_item_add_check(menu, _("Show hidden entries"), ped->show_all, G_CALLBACK(bar_pane_exif_toggle_show_all_cb), ped);
-
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+/** @FIXME GTK4 Enable/disable the first 3 entries dependent on if (ee)
+ * See original code.
+ */
+	popup_menu(menu_model, cw->window);
 }
 
 void bar_pane_exif_menu_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)

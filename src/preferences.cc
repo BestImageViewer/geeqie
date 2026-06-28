@@ -3532,7 +3532,7 @@ Geeqie must be restarted for the changes to take effect.\n");
 
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed",  G_CALLBACK(accel_capture_key_press), nullptr);
-	gtk_widget_add_controller(widget, controller);
+	gtk_widget_add_controller(key_value, controller);
 
 	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(accel_default_cb), accel_view);
 	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
