@@ -40,7 +40,6 @@
 #include "cache.h"
 #include "collect.h"
 #include "compat.h"
-#include "dnd.h"
 #include "editors.h"
 #include "filedata.h"
 #include "history-list.h"
@@ -64,7 +63,6 @@
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
 #include "ui-tree-edit.h"
-#include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
 
@@ -1319,170 +1317,6 @@ static bool text_box_on_focus_out_cb(GtkWidget *, GdkEventFocus *, gpointer data
 
 	return GDK_EVENT_PROPAGATE;
 }
-
-/*
- *-------------------------------------------------------------------
- * dnd
- *-------------------------------------------------------------------
- */
-
-static void search_dnd_begin(GtkWidget *widget, GdkDragContext *context, gpointer data)
-{
-	auto sd = static_cast<SearchData *>(data);
-
-	if (sd->click_fd && !search_result_row_selected(sd, sd->click_fd))
-		{
-		GtkListStore *store;
-		GtkTreeIter iter;
-
-		store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
-		if (search_result_find_row(sd, sd->click_fd, &iter) >= 0)
-			{
-			GtkTreeSelection *selection;
-
-			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
-			gtk_tree_selection_unselect_all(selection);
-			gtk_tree_selection_select_iter(selection, &iter);
-
-			g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
-			gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
-			}
-		}
-
-	if (sd->thumb_enable &&
-	    sd->click_fd && sd->click_fd->thumb_pixbuf)
-		{
-		dnd_set_drag_icon(widget, context, sd->click_fd->thumb_pixbuf, search_result_selection_count(sd));
-		}
-}
-
-static void search_gps_dnd_received_cb(GtkWidget *, GdkDragContext *,
-										gint, gint,
-										GtkSelectionData *selection_data, guint info,
-										guint, gpointer data)
-{
-	auto sd = static_cast<SearchData *>(data);
-	GList *list;
-	gdouble latitude;
-	gdouble longitude;
-	FileData *fd;
-
-	if (info == TARGET_URI_LIST)
-		{
-		list = uri_filelist_from_gtk_selection_data(selection_data);
-
-		/* If more than one file, use only the first file in a list.
-		*/
-		if (list != nullptr)
-			{
-			fd = static_cast<FileData *>(list->data);
-			latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
-			longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
-			if (latitude != 1000 && longitude != 1000)
-				{
-				g_autofree gchar *text = g_strdup_printf("%f %f", latitude, longitude);
-				gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_gps_coord), text);
-				}
-			else
-				{
-				gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_gps_coord), _("Image is not geocoded"));
-				}
-			}
-		}
-
-	if (info == TARGET_TEXT_PLAIN)
-		{
-		gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_gps_coord),"");
-		}
-}
-
-static void search_path_entry_dnd_received_cb(GtkWidget *, GdkDragContext *,
-										gint, gint,
-										GtkSelectionData *selection_data, guint info,
-										guint, gpointer data)
-{
-	auto sd = static_cast<SearchData *>(data);
-
-	if (info == TARGET_URI_LIST)
-		{
-		GList *list = uri_filelist_from_gtk_selection_data(selection_data);
-		/* If more than one file, use only the first file in a list.
-		*/
-		if (list != nullptr)
-			{
-			auto *fd = static_cast<FileData *>(list->data);
-			g_autofree gchar *text = g_strdup_printf("%s", fd->path);
-			gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.path_entry), text);
-			gtk_widget_set_tooltip_text(sd->ui.path_entry, text);
-			}
-		}
-	else if (info == TARGET_TEXT_PLAIN)
-		{
-		gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.path_entry),"");
-		}
-}
-
-static void search_image_content_dnd_received_cb(GtkWidget *, GdkDragContext *,
-										gint, gint,
-										GtkSelectionData *selection_data, guint info,
-										guint, gpointer data)
-{
-	auto sd = static_cast<SearchData *>(data);
-
-	if (info == TARGET_URI_LIST)
-		{
-		GList *list = uri_filelist_from_gtk_selection_data(selection_data);
-		/* If more than one file, use only the first file in a list.
-		*/
-		if (list != nullptr)
-			{
-			auto *fd = static_cast<FileData *>(list->data);
-			g_autofree gchar *text = g_strdup_printf("%s", fd->path);
-			gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_similarity), text);
-			gtk_widget_set_tooltip_text(sd->ui.entry_similarity, text);
-			}
-		}
-	else if (info == TARGET_TEXT_PLAIN)
-		{
-		gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_similarity),"");
-		}
-}
-
-static void search_dnd_init(SearchData *sd)
-{
-	gq_gtk_drag_source_set(sd->ui.result_view, static_cast<GdkModifierType>(GDK_BUTTON1_MASK | GDK_BUTTON2_MASK),
-	                    result_drag_types.data(), result_drag_types.size(),
-	                    static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
-	gq_drag_g_signal_connect(G_OBJECT(sd->ui.result_view), "drag_data_get",
-	                 G_CALLBACK(search_dnd_data_set), sd);
-	gq_drag_g_signal_connect(G_OBJECT(sd->ui.result_view), "drag_begin",
-	                 G_CALLBACK(search_dnd_begin), sd);
-
-	gq_gtk_drag_dest_set(sd->ui.entry_gps_coord,
-	                  GTK_DEST_DEFAULT_ALL,
-	                  result_drop_types.data(), result_drop_types.size(),
-	                  GDK_ACTION_COPY);
-
-	gq_drag_g_signal_connect(G_OBJECT(sd->ui.entry_gps_coord), "drag_data_received",
-	                 G_CALLBACK(search_gps_dnd_received_cb), sd);
-
-	gq_gtk_drag_dest_set(sd->ui.path_entry,
-	                  GTK_DEST_DEFAULT_ALL,
-	                  result_drop_types.data(), result_drop_types.size(),
-	                  GDK_ACTION_COPY);
-
-	gq_drag_g_signal_connect(G_OBJECT(sd->ui.path_entry), "drag_data_received",
-	                 G_CALLBACK(search_path_entry_dnd_received_cb), sd);
-
-	gq_gtk_drag_dest_set(sd->ui.entry_similarity,
-	                  GTK_DEST_DEFAULT_ALL,
-	                  result_drop_types.data(), result_drop_types.size(),
-	                  GDK_ACTION_COPY);
-
-	gq_drag_g_signal_connect(G_OBJECT(sd->ui.entry_similarity), "drag_data_received",
-	                 G_CALLBACK(search_image_content_dnd_received_cb), sd);
-}
-#endif
 
 static void search_win_result_clear_cb(GSimpleAction *, GVariant *, gpointer data)
 {
@@ -3400,8 +3234,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	search_result_add_column(sd, SEARCH_COLUMN_DATE, _("Date"), FALSE, TRUE);
 	search_result_add_column(sd, SEARCH_COLUMN_DIMENSIONS, _("Dimensions"), FALSE, FALSE);
 	search_result_add_column(sd, SEARCH_COLUMN_PATH, _("Path"), FALSE, FALSE);
-
-	search_dnd_init(sd);
 
 	g_signal_connect(G_OBJECT(sd->ui.result_view), "button_press_event",
 	                 G_CALLBACK(search_result_press_cb), sd);
