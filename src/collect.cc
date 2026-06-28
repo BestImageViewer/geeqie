@@ -874,14 +874,14 @@ static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data)
  *-------------------------------------------------------------------
  */
 
-static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpointer data)
+static gboolean collection_window_keypress(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
 {
 	auto cw = static_cast<CollectWindow *>(data);
 	gboolean stop_signal = TRUE;
 
-	if (event->state & GDK_CONTROL_MASK)
+	if (state & GDK_CONTROL_MASK)
 		{
-		switch (event->keyval)
+		switch (keyval)
 			{
 			case '1':
 			case '2':
@@ -895,7 +895,7 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 			case '0':
 				break;
 			case 'A': case 'a':
-				if (event->state & GDK_SHIFT_MASK)
+				if (state & GDK_SHIFT_MASK)
 					{
 					collection_table_unselect_all(cw->table);
 					}
@@ -938,7 +938,7 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 		}
 	else
 		{
-		switch (event->keyval)
+		switch (keyval)
 			{
 			case GDK_KEY_Return: case GDK_KEY_KP_Enter:
 				layout_image_set_collection(nullptr, cw->cd,
@@ -971,7 +971,7 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 				collection_set_sort_method(cw->cd, SORT_SIZE);
 				break;
 			case 'P': case 'p':
-				if (event->state & GDK_SHIFT_MASK)
+				if (state & GDK_SHIFT_MASK)
 					{
 					print_window_new(collection_table_selection_get_list(cw->table), cw->window);
 					}
@@ -981,7 +981,7 @@ static gboolean collection_window_keypress(GtkWidget *, GdkEventKey *event, gpoi
 					}
 				break;
 			case 'R': case 'r':
-				if (event->state & GDK_MOD1_MASK)
+				if (state & GDK_MOD1_MASK)
 					{
 						options->collections.rectangular_selection = !(options->collections.rectangular_selection);
 					}
@@ -1284,8 +1284,9 @@ CollectWindow *collection_window_new(const gchar *path)
 	g_signal_connect(G_OBJECT(cw->window), "delete_event",
 			 G_CALLBACK(collection_window_delete), cw);
 
-	g_signal_connect(G_OBJECT(cw->window), "key_press_event",
-			 G_CALLBACK(collection_window_keypress), cw);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(collection_window_keypress), cw);
+	gtk_widget_add_controller(cw->window, controller);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_container_add(cw->window, vbox);
