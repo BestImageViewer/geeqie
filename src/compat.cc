@@ -286,11 +286,6 @@ void gq_gtk_frame_set_shadow_type(GtkFrame *frame, GtkShadowType type)
 		}
 }
 
-void gq_gtk_scrolled_window_set_shadow_type(GtkScrolledWindow *scrolled_window, GtkShadowType type)
-{
-	gtk_scrolled_window_set_has_frame(scrolled_window, type != GTK_SHADOW_NONE);
-}
-
 void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 {
 	if (GTK_IS_BUTTON(container))

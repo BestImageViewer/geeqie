@@ -342,8 +342,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	GtkWidget *scrolledwin = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledwin),
 				       GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
-	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolledwin),
-					    GTK_SHADOW_IN);
+	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolledwin), true);
 
 	gq_gtk_box_pack_start(GTK_BOX(win_vbox), scrolledwin, TRUE, TRUE, 0);
 	gtk_widget_show(scrolledwin);

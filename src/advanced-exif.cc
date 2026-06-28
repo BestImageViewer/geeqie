@@ -434,7 +434,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	g_object_unref(click);
 
 	ew->scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
-	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(ew->scrolled), GTK_SHADOW_IN);
+	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(ew->scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ew->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), ew->scrolled, TRUE, TRUE, 0);

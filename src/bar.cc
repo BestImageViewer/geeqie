@@ -670,7 +670,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	                    _("Add Pane"), G_CALLBACK(bar_menu_add_cb), nullptr);
 	gtk_widget_show(add_box);
 
-	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_NONE);
+	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_widget_show(bd->vbox);
 	return bd->widget;
 }

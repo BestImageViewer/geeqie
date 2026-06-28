@@ -60,7 +60,6 @@ void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget);
 void gq_gtk_container_foreach(GtkWidget *container, GtkCallback callback, gpointer callback_data);
 void gq_gtk_widget_show_all(GtkWidget *widget);
 void gq_gtk_frame_set_shadow_type(GtkFrame *frame, GtkShadowType type);
-void gq_gtk_scrolled_window_set_shadow_type(GtkScrolledWindow *scrolled_window, GtkShadowType type);
 gboolean gq_gtk_window_get_position(GtkWindow *window, gint *x, gint *y);
 void gq_gtk_window_move(GtkWindow *window, gint x, gint y);
 void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting);

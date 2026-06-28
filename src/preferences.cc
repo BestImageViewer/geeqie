@@ -2237,7 +2237,7 @@ static GtkWidget *osd_profiles(gint i)
 
 	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
 	gtk_widget_set_size_request(scrolled, 200, 150);
-	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
+	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 5);
 	gtk_widget_show(scrolled);
@@ -2481,7 +2481,7 @@ static void config_tab_files(GtkWidget *notebook)
 	gtk_widget_set_sensitive(frame, !options->file_filter.disable);
 
 	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
-	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
+	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
 	gtk_widget_show(scrolled);
@@ -3443,7 +3443,7 @@ static void config_tab_accelerators(GtkWidget *notebook)
 	group = pref_group_new(vbox, TRUE, _("Keyboard Shortcuts"), GTK_ORIENTATION_VERTICAL);
 
 	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
-	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
+	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
 	gtk_widget_show(scrolled);

@@ -1080,7 +1080,7 @@ ViewDir *vd_new(LayoutWindow *lw)
 	auto vd = g_new0(ViewDir, 1);
 
 	vd->widget = gq_gtk_scrolled_window_new(nullptr, nullptr);
-	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(vd->widget), GTK_SHADOW_IN);
+	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(vd->widget), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(vd->widget),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 

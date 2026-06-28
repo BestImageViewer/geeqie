@@ -265,7 +265,7 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 	gtk_widget_show(hbox);
 
 	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
-	gq_gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolled), GTK_SHADOW_IN);
+	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_NEVER);
 	gq_gtk_box_pack_start(GTK_BOX(box), scrolled, FALSE, FALSE, 0);
