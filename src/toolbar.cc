@@ -98,18 +98,12 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 		GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(iconl, nullptr);
 		if (pixbuf)
 			{
-			GdkPixbuf *scaled;
-			gint w;
-			gint h;
+			constexpr gint w = 16;
+			constexpr gint h = 16;
 
-			w = h = 16;
-			gq_gtk_icon_size_lookup(&w, &h);
-
-			scaled = gdk_pixbuf_scale_simple(pixbuf, w, h,
-							 GDK_INTERP_BILINEAR);
+			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pixbuf, w, h, GDK_INTERP_BILINEAR);
 			image = gtk_image_new_from_pixbuf(scaled);
 
-			g_object_unref(scaled);
 			g_object_unref(pixbuf);
 			}
 		else
