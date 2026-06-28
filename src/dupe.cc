@@ -4288,7 +4288,6 @@ DupeWindow *dupe_window_new()
 	if (lw && options->save_window_positions)
 		{
 		gtk_window_set_default_size(GTK_WINDOW(dw->window), lw->options.dupe_window.rect.width, lw->options.dupe_window.rect.height);
-		gq_gtk_window_move(GTK_WINDOW(dw->window), lw->options.dupe_window.rect.x, lw->options.dupe_window.rect.y);
 		}
 	else
 		{

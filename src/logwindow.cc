@@ -330,7 +330,6 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_widget_show(win_vbox);
 
 	gtk_window_set_default_size(GTK_WINDOW(window), log_window.width, log_window.height);
-	gq_gtk_window_move(GTK_WINDOW(window), log_window.x, log_window.y);
 
 	g_signal_connect(G_OBJECT(window), "delete_event",
 			 G_CALLBACK(gtk_widget_hide_on_delete), NULL);

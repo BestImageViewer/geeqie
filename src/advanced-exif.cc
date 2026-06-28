@@ -361,7 +361,6 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_window_set_default_size(GTK_WINDOW(ew->window), lw->options.advanced_exif_window.width, lw->options.advanced_exif_window.height);
 	if (lw->options.advanced_exif_window.x != 0 && lw->options.advanced_exif_window.y != 0)
 		{
-		gq_gtk_window_move(GTK_WINDOW(ew->window), lw->options.advanced_exif_window.x, lw->options.advanced_exif_window.y);
 		}
 
 	g_object_set_data(G_OBJECT(ew->window), "advanced_exif_data", ew);

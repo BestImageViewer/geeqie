@@ -341,7 +341,6 @@ static void generic_dialog_setup(GenericDialog *gd,
 		if (auto rect = generic_dialog_find_window(title, role); rect)
 			{
 			gtk_window_set_default_size(GTK_WINDOW(gd->dialog), rect->width, rect->height);
-			gq_gtk_window_move(GTK_WINDOW(gd->dialog), rect->x, rect->y);
 			}
 		}
 

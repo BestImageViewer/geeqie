@@ -291,7 +291,6 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(expander_height_cb), nullptr);
 	gtk_widget_add_controller(window, controller);
 
-	gq_gtk_window_move(GTK_WINDOW(window), x, y);
 	gtk_widget_show(window);
 
 	gtk_widget_get_size_request(data_box, &w, &h);

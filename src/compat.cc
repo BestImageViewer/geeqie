@@ -181,19 +181,6 @@ void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position)
 	gtk_box_reorder_child_after(box, child, previous);
 }
 
-void gq_gtk_window_move(GtkWindow *window, gint x, gint y)
-{
-	auto *position = g_new(GqWindowPosition, 1);
-	position->x = x;
-	position->y = y;
-	g_object_set_data_full(G_OBJECT(window), GTK4_WINDOW_POSITION_DATA_KEY, position, g_free);
-
-	if (gtk_widget_get_visible(GTK_WIDGET(window)))
-		{
-		gtk_window_present(window);
-		}
-}
-
 void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting)
 {
 	g_object_set_data(G_OBJECT(window), GTK4_WINDOW_KEEP_ABOVE_DATA_KEY, GINT_TO_POINTER(setting));
