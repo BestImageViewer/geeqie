@@ -1059,7 +1059,6 @@ gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *widget, guint keyval, GdkM
 			tip_unschedule(vf);
 
 			vf->popup = vf_pop_menu(vf);
-			gtk_menu_popup_at_widget(GTK_MENU(vf->popup), widget, GDK_GRAVITY_EAST, GDK_GRAVITY_CENTER, nullptr);
 			break;
 		default:
 			stop_signal = FALSE;
@@ -1166,7 +1165,6 @@ gboolean vficon_press_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *ev
 				break;
 			case GDK_BUTTON_SECONDARY:
 				vf->popup = vf_pop_menu(vf);
-				gtk_menu_popup_at_pointer(GTK_MENU(vf->popup), nullptr);
 				break;
 			default:
 				break;

@@ -397,8 +397,6 @@ gboolean vflist_press_key_cb(ViewFile *vf, GtkWidget *widget, guint keyval, GdkM
 
 	vf->popup = vf_pop_menu(vf);
 
-	popup_menu(G_MENU(vf->popup), widget);
-
 	return TRUE;
 }
 
@@ -435,7 +433,6 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEve
 	if (event->button == GDK_BUTTON_SECONDARY)
 		{
 		vf->popup = vf_pop_menu(vf);
-		gtk_menu_popup_at_pointer(GTK_MENU(vf->popup), nullptr);
 		return TRUE;
 		}
 
