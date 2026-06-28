@@ -1111,18 +1111,22 @@ static void image_focus_in_cb(GtkEventControllerFocus *, gpointer data)
 		}
 }
 
-static gboolean image_scroll_cb(GtkWidget *, GdkEventScroll *event, gpointer data)
+static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble, gdouble, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
-	gboolean in_lw = FALSE;
-	gint i = 0;
+	GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(controller));
 
-	if (imd->func_scroll && event && event->type == GDK_SCROLL)
+	if (!imd->func_scroll || !event)
 		{
-		LayoutWindow *lw = get_current_layout();
+		return FALSE;
+		}
 
-		/* check if the image is in a layout window */
-		for (i = 0; i < MAX_SPLIT_IMAGES; i++)
+	LayoutWindow *lw = get_current_layout();
+	gboolean in_lw = FALSE;
+
+	if (lw)
+		{
+		for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
 			{
 			if (imd == lw->split_images[i])
 				{
@@ -1130,32 +1134,31 @@ static gboolean image_scroll_cb(GtkWidget *, GdkEventScroll *event, gpointer dat
 				break;
 				}
 			}
+		}
 
-		if (in_lw)
+	if (in_lw)
+		{
+		if (lw->options.split_pane_sync)
 			{
-			if (lw->options.split_pane_sync)
+			for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
 				{
-				for (i = 0; i < MAX_SPLIT_IMAGES; i++)
+				if (lw->split_images[i])
 					{
-					if (lw->split_images[i])
-						{
-						layout_image_activate(lw, i, FALSE);
-						imd->func_scroll(lw->split_images[i], event, lw->split_images[i]->data_scroll);
-						}
+					layout_image_activate(lw, i, FALSE);
+					imd->func_scroll(lw->split_images[i], event, lw->split_images[i]->data_scroll);
 					}
 				}
-			else
-				{
-				imd->func_scroll(imd, event, imd->data_scroll);
-				}
-			return TRUE;
+			}
+		else
+			{
+			imd->func_scroll(imd, event, imd->data_scroll);
 			}
 
-		imd->func_scroll(imd, event, imd->data_scroll);
 		return TRUE;
 		}
 
-	return FALSE;
+	imd->func_scroll(imd, event, imd->data_scroll);
+	return TRUE;
 }
 
 /*
@@ -2097,8 +2100,9 @@ ImageWindow *image_new(gboolean frame)
 	g_signal_connect(G_OBJECT(imd->pr), "scroll_notify",
 			 G_CALLBACK(image_scroll_notify_cb), imd);
 
-	g_signal_connect(G_OBJECT(imd->pr), "scroll_event",
-			 G_CALLBACK(image_scroll_cb), imd);
+	GtkEventController *controller = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	g_signal_connect(controller, "scroll", G_CALLBACK(image_scroll_cb), imd);
+	gtk_widget_add_controller(GTK_WIDGET(imd->pr), controller);
 
 	g_signal_connect(G_OBJECT(imd->pr), "destroy",
 			 G_CALLBACK(image_destroy_cb), imd);
