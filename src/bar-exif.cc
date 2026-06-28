@@ -521,7 +521,7 @@ void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped)
 /** @FIXME GTK4 Enable/disable the first 3 entries dependent on if (ee)
  * See original code.
  */
-	popup_menu(menu_model, cw->window);
+	popup_menu(menu_model, ped->pane->lw->window);
 }
 
 void bar_pane_exif_menu_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)

@@ -298,7 +298,7 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 
 	GtkWidget *spin = gtk_spin_button_new_with_range(1, 1000, 1);
 	g_signal_connect(G_OBJECT(spin), "value-changed", G_CALLBACK(height_spin_changed_cb), data_box);
-	GtkEventController *controller = gtk_event_controller_key_new();
+	controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(height_spin_key_press_cb), window);
 	gtk_widget_add_controller(spin, controller);
 
@@ -392,13 +392,14 @@ static void bar_menu_add_cb(GtkWidget *, gpointer)
 {
 	GtkWidget *menu = popup_menu_short_lived();
 
-	for (const KnownPanes *pane = known_panes; pane->id; pane++)
-		{
-		menu_item_add_icon(menu, _(pane->title), GQ_ICON_ADD,
-		                   G_CALLBACK(bar_expander_add_cb), const_cast<gchar *>(pane->config));
-		}
+/** @FIXME GTK$ This is a placeholder for the moment.
+ * The style should be, for example:
+ * 	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-collection.ui");
+	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-collection"));
+	popup_menu(menu_model, cw->window);
 
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+	See the original code.
+*/
 }
 
 
