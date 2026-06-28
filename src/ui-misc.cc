@@ -1310,7 +1310,7 @@ void widget_input_grab(GtkWidget *widget, GdkSeatCapabilities capabilities, gboo
 	g_object_set_data(G_OBJECT(window), "prev_event_mask", GINT_TO_POINTER(prev_event_mask));
 	gdk_window_set_events(window, event_mask);
 
-	GdkDisplay *display = gdk_window_get_display(window);
+	GdkDisplay *display = gtk_widget_get_display(window);
 	GdkSeat *seat = gdk_display_get_default_seat(display);
 
 	gdk_seat_grab(seat, window, capabilities, owner_events,
@@ -1326,7 +1326,7 @@ void widget_input_ungrab(GtkWidget *widget)
 	const auto prev_event_mask = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(window), "prev_event_mask"));
 	gdk_window_set_events(window, static_cast<GdkEventMask>(prev_event_mask));
 
-	GdkDisplay *display = gdk_window_get_display(window);
+	GdkDisplay *display = gtk_widget_get_display(window);
 	GdkSeat *seat = gdk_display_get_default_seat(display);
 
 	gdk_seat_ungrab(seat);

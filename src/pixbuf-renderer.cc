@@ -2015,7 +2015,7 @@ static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double 
 	 * See https://bugzilla.gnome.org/show_bug.cgi?id=587714 for more. */
 	gint x;
 	gint y;
-	seat = gdk_display_get_default_seat(gdk_window_get_display(event->window));
+	seat = gdk_display_get_default_seat(gtk_widget_get_display(event->window));
 	device = gdk_seat_get_pointer(seat);
 
 	get_pointer_position(widget, device, &x, &y, nullptr);
@@ -2189,7 +2189,7 @@ static gboolean pr_mouse_release_cb(GtkWidget *widget, GdkEventButton *bevent, g
 		return TRUE;
 		}
 
-	GdkSeat *seat = gdk_display_get_default_seat(gdk_window_get_display(bevent->window));
+	GdkSeat *seat = gdk_display_get_default_seat(gtk_widget_get_display(bevent->window));
 	GdkDevice *device = gdk_seat_get_pointer(seat);
 	if (gdk_display_device_is_grabbed(gdk_device_get_display(device), device) && gtk_widget_has_grab(GTK_WIDGET(pr)))
 		{

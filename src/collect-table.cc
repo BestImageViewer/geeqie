@@ -1199,7 +1199,7 @@ static CollectInfo *collection_table_insert_find(CollectTable *ct, CollectInfo *
 
 	if (!use_coord)
 		{
-		seat = gdk_display_get_default_seat(gdk_window_get_display(gtk_widget_get_window(ct->listview)));
+		seat = gdk_display_get_default_seat(gtk_widget_get_display(ct->listview));
 		device = gdk_seat_get_pointer(seat);
 		get_pointer_position(ct->listview, device, &x, &y, nullptr);
 		}
