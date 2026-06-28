@@ -103,7 +103,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 			gint h;
 
 			w = h = 16;
-			gq_gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON, &w, &h);
+			gq_gtk_icon_size_lookup(&w, &h);
 
 			scaled = gdk_pixbuf_scale_simple(pixbuf, w, h,
 							 GDK_INTERP_BILINEAR);

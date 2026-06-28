@@ -113,7 +113,7 @@ GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *)
 		GtkIconTheme *icon_theme = gq_icon_theme_get_default();
 
 		gint size;
-		if (!gq_gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &size, &size))
+		if (!gq_gtk_icon_size_lookup(&size, &size))
 			{
 			size = 16;
 			}

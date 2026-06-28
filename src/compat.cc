@@ -354,22 +354,17 @@ void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width)
 	gtk_widget_set_margin_end(widget, width);
 }
 
-gboolean gq_gtk_icon_size_lookup(GtkIconSize size, gint *width, gint *height)
+gboolean gq_gtk_icon_size_lookup(gint *width, gint *height)
 {
-	gint dimension = 16;
-
-	switch (size)
+	if (width)
 		{
-		case GTK_ICON_SIZE_MENU:
-		case GTK_ICON_SIZE_BUTTON:
-			dimension = 16;
-			break;
-		default:
-			break;
+		*width = 16;
 		}
 
-	if (width) *width = dimension;
-	if (height) *height = dimension;
+	if (height)
+		{
+		*height = 16;
+		}
 
 	return TRUE;
 }

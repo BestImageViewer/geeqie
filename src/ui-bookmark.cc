@@ -447,7 +447,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 			{
 			gint w = 16;
 			gint h = 16;
-			gq_gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON, &w, &h);
+			gq_gtk_icon_size_lookup(&w, &h);
 
 			pixbuf = gq_gtk_icon_theme_load_icon_copy(gq_icon_theme_get_default(), b->icon.c_str(), w, GTK_ICON_LOOKUP_NO_SVG);
 			}
@@ -456,7 +456,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 			{
 			gint w = 16;
 			gint h = 16;
-			gq_gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON, &w, &h);
+			gq_gtk_icon_size_lookup(&w, &h);
 
 			g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(pixbuf, w, h, GDK_INTERP_BILINEAR);
 			image = gtk_image_new_from_pixbuf(scaled);
