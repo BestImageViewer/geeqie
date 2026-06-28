@@ -30,7 +30,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #ifdef GDK_WINDOWING_X11
-#  include <gdk/gdkx.h>
+#  include <gdk/x11/gdkx.h>
 #endif
 #include <glib-object.h>
 #include <pango/pango.h>
