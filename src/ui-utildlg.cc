@@ -245,7 +245,7 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 	hbox = pref_box_new(gd->vbox, expand, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	if (icon_name)
 		{
-		GtkWidget *image = gq_gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_DIALOG);
+		GtkWidget *image = gtk_image_new_from_icon_name(icon_name);
 		gtk_widget_set_halign(image, GTK_ALIGN_CENTER);
 		gtk_widget_set_valign(image, GTK_ALIGN_START);
 		gq_gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
@@ -372,7 +372,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 	gtk_window_set_resizable(GTK_WINDOW(gd->dialog), TRUE);
 	gq_gtk_widget_set_border_width(gd->dialog, PREF_PAD_BORDER);
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
 	gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(scrolled), TRUE);
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_BUTTON_SPACE);

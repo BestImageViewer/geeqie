@@ -96,7 +96,7 @@ static gboolean bar_pane_histogram_update_cb(gpointer data)
 	phd->idle_id = 0;
 	phd->need_update = FALSE;
 
-	gq_gtk_widget_queue_draw_area(phd->drawing_area, 0, 0, phd->histogram_width, phd->histogram_height);
+	gtk_widget_queue_draw(phd->drawing_area);
 
 	if (phd->fd != nullptr)
 		{

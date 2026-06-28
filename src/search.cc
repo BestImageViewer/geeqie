@@ -3348,7 +3348,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	/* Done the types of searches */
 
-	scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);

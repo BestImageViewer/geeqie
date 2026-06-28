@@ -1234,14 +1234,14 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	gtk_widget_show(menubar);
 
 	GtkWidget *box_class = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	icon = gq_gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_MENU);
+	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	label = gtk_label_new(_("Class"));
 
 	gq_gtk_box_pack_start(GTK_BOX(box_class), label, FALSE, FALSE, 0);
 	gq_gtk_box_pack_start(GTK_BOX(box_class), icon, FALSE, FALSE, 0);
 
 	GtkWidget *box_rating = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	icon = gq_gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_MENU);
+	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	label = gtk_label_new(_("Rating"));
 
 	gq_gtk_box_pack_start(GTK_BOX(box_rating), label, FALSE, FALSE, 0);
@@ -1283,7 +1283,7 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	vf->sort = { SORT_NAME, TRUE, FALSE };
 	vf->read_metadata_in_idle_id = 0;
 
-	vf->scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	vf->scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(vf->scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(vf->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);

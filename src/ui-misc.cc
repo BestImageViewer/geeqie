@@ -612,7 +612,7 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 		GtkWidget *icon = nullptr;
 		if (icon_name)
 			{
-			icon = gq_gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_LARGE_TOOLBAR); // TODO: TG which size?
+			icon = gtk_image_new_from_icon_name(icon_name);
 			gtk_widget_show(icon);
 			}
 		item = GTK_WIDGET(gtk_tool_button_new(icon, label));
@@ -799,7 +799,7 @@ GtkWidget *date_selection_new()
 	g_signal_connect(G_OBJECT(ds->button), "size_allocate",
 			 G_CALLBACK(button_size_allocate_cb), ds->spin_y);
 
-	icon = gq_gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN, GTK_ICON_SIZE_BUTTON);
+	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	gq_gtk_container_add(ds->button, icon);
 	gtk_widget_show(icon);
 

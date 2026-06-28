@@ -1994,7 +1994,7 @@ CollectTable *collection_table_new(CollectionData *cd)
 	ct->show_stars = options->show_star_rating;
 	ct->show_infotext = options->show_collection_infotext;
 
-	ct->scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	ct->scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(ct->scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ct->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);

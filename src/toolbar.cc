@@ -114,12 +114,12 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 			}
 		else
 			{
-			image = gq_gtk_image_new_from_icon_name(get_icon_for_action_name(name), GTK_ICON_SIZE_BUTTON);
+			image = gtk_image_new_from_icon_name(get_icon_for_action_name(name));
 			}
 		}
 	else
 		{
-		image = gq_gtk_image_new_from_icon_name(GQ_ICON_GO_JUMP, GTK_ICON_SIZE_BUTTON);
+		image = gtk_image_new_from_icon_name(GQ_ICON_GO_JUMP);
 		}
 	gq_gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
 	gtk_widget_show(image);
@@ -336,7 +336,7 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 	GtkWidget *widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gtk_widget_show(widget);
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gq_gtk_box_pack_start(GTK_BOX(widget), scrolled, TRUE, TRUE, 0);

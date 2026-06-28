@@ -513,7 +513,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 	DEBUG_NAME(menu_tool_bar);
 	gtk_widget_show(menu_tool_bar);
 
-	GtkWidget *scroll_window = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scroll_window = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 
 	gq_gtk_container_add(scroll_window, menu_tool_bar);
@@ -538,7 +538,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		gtk_window_set_titlebar(GTK_WINDOW(lw->window), header);
 		gq_gtk_widget_show_all(header);
 		GtkWidget *menu_button = gtk_menu_button_new();
-		GtkWidget *image = gq_gtk_image_new_from_icon_name("open-menu-symbolic", GTK_ICON_SIZE_BUTTON);
+		GtkWidget *image = gtk_image_new_from_icon_name("open-menu-symbolic");
 
 		gtk_button_set_image(GTK_BUTTON(menu_button), image);
 

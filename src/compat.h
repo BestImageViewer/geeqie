@@ -42,10 +42,6 @@ struct GqMouseButtonEvent
 	guint press_count;
 };
 
-#define gq_gtk_image_new_from_icon_name(icon_name, size) gtk_image_new_from_icon_name(icon_name)
-#define gq_gtk_scrolled_window_new(hadjustment, vadjustment) gtk_scrolled_window_new()
-#define gq_gtk_widget_queue_draw_area(widget, x, y, width, height) gtk_widget_queue_draw(widget);
-#define gq_gtk_window_resize(window, width, height) gtk_window_set_default_size(window, width, height)
 #define gq_gtk_window_fullscreen_on_monitor(window, monitor) ;
 #define gq_icon_theme_get_default() gtk_icon_theme_get_for_display(gdk_display_get_default())
 

@@ -559,7 +559,7 @@ void gq_geometry(GtkApplication *, GApplicationCommandLine *, GVariantDict *comm
 		g_auto(GStrv) geometry = g_strsplit_set(text, "+x", 4);
 		if (geometry[0] != nullptr && geometry[1] != nullptr)
 			{
-			gq_gtk_window_resize(GTK_WINDOW(lw_id->window), atoi(geometry[0]), atoi(geometry[1]));
+			gtk_window_set_default_size(GTK_WINDOW(lw_id->window), atoi(geometry[0]), atoi(geometry[1]));
 			}
 		if (geometry[2] != nullptr && geometry[3] != nullptr)
 			{

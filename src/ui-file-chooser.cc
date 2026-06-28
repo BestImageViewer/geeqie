@@ -583,7 +583,7 @@ GtkFileChooserDialog *file_chooser_dialog_new(const FileChooserDialogData &fcdd)
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(textview), FALSE);
 	gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(textview), FALSE);
 
-	GtkWidget *scroller = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scroller = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_container_add(scroller, textview);
 	gtk_widget_set_size_request(scroller, 200, -1);

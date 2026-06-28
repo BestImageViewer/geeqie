@@ -569,7 +569,7 @@ static GtkWidget *file_util_dialog_add_list(GtkWidget *box, GList *list, gboolea
 	GtkWidget *view;
 	GtkListStore *store;
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -753,7 +753,7 @@ static void file_util_progress_window_new(UtilityData *ud)
 	gtk_widget_show(ud->progress_spinner);
 
 	/* Set default window size */
-	gq_gtk_window_resize(GTK_WINDOW(ud->progress_gd->dialog), PROGRESS_WINDOW_WIDTH, PROGRESS_WINDOW_HEIGHT);
+	gtk_window_set_default_size(GTK_WINDOW(ud->progress_gd->dialog), PROGRESS_WINDOW_WIDTH, PROGRESS_WINDOW_HEIGHT);
 
 	gtk_widget_show(ud->progress_gd->dialog);
 }
@@ -2020,7 +2020,7 @@ void file_util_dialog_run(UtilityData *ud)
 
 					if (!options->save_dialog_window_positions || !generic_dialog_find_window("Rename", "dlg_confirm"))
 						{
-						gq_gtk_window_resize(GTK_WINDOW(ud->gd->dialog), RENAME_WINDOW_WIDTH, RENAME_WINDOW_HEIGHT);
+						gtk_window_set_default_size(GTK_WINDOW(ud->gd->dialog), RENAME_WINDOW_WIDTH, RENAME_WINDOW_HEIGHT);
 						}
 					ud->phase = UtilityPhase::ENTERING;
 					break;

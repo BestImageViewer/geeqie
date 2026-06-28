@@ -653,7 +653,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	gq_gtk_box_pack_start(GTK_BOX(bd->widget), box, FALSE, FALSE, 0);
 	gtk_widget_show(box);
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 	DEBUG_NAME(scrolled);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);

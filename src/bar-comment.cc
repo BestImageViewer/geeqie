@@ -255,7 +255,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd->key = g_strdup(key);
 	pcd->height = height;
 
-	GtkWidget *scrolled = gq_gtk_scrolled_window_new(nullptr, nullptr);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
 
 	pcd->widget = scrolled;
 	g_object_set_data_full(G_OBJECT(pcd->widget), "pane_data", pcd, bar_pane_comment_destroy);
