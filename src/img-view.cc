@@ -430,23 +430,14 @@ static void view_help_cb(GSimpleAction *, GVariant *, gpointer)
  *-----------------------------------------------------------------------------
  */
 
-static gboolean view_window_press_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
+static void view_window_press_cb(GtkGestureClick *gesture, gint n_press, gdouble, gdouble, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
-	switch (bevent->button)
+	if (gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)) == GDK_BUTTON_PRIMARY && n_press == 2)
 		{
-		case GDK_BUTTON_PRIMARY:
-			if (bevent->type == GDK_2BUTTON_PRESS)
-				{
-				view_fullscreen_toggle(vw, TRUE);
-				}
-			break;
-		default:
-			break;
+		view_fullscreen_toggle(vw, TRUE);
 		}
-
-	return FALSE;
 }
 
 static gboolean view_window_key_press_cb(GtkWidget *, GdkEventKey *event, gpointer data)
@@ -995,8 +986,10 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 			 G_CALLBACK(view_window_delete_cb), vw);
 	g_signal_connect(G_OBJECT(vw->window), "key_press_event",
 			 G_CALLBACK(view_window_key_press_cb), vw);
-	g_signal_connect(G_OBJECT(vw->window), "button_press_event",
-			 G_CALLBACK(view_window_press_cb), vw);
+
+	GtkGesture *gesture = gtk_gesture_click_new();
+	g_signal_connect(gesture, "pressed", G_CALLBACK(view_window_press_cb), vw);
+	gtk_widget_add_controller(vw->window, GTK_EVENT_CONTROLLER(gesture));
 
 	if (cd && info)
 		{

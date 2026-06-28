@@ -1221,7 +1221,7 @@ void image_set_button_func(ImageWindow *imd,
 }
 
 void image_set_drag_func(ImageWindow *imd,
-                         void (*func)(ImageWindow *, GdkEvent *event, gdouble dx, gdouble dy, gpointer),
+                         void (*func)(ImageWindow *, gdouble x, gdouble y, gdouble dx, gdouble dy, gpointer),
                          gpointer data)
 {
 	imd->func_drag = func;
