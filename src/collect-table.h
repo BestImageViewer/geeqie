@@ -47,7 +47,6 @@ struct CollectTable
 	guint tip_delay_id; /**< event source id */
 	CollectInfo *tip_info;
 
-	GdkWindow *marker_window;
 	CollectInfo *marker_info;
 
 	GtkWidget *status_label;

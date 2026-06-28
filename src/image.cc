@@ -1204,7 +1204,6 @@ void image_set_state_func(ImageWindow *imd,
 	imd->data_state = data;
 }
 
-
 void image_set_button_func(ImageWindow *imd,
 			   void (*func)(ImageWindow *, GqMouseButtonEvent *event, gpointer),
 			   gpointer data)
@@ -1214,16 +1213,16 @@ void image_set_button_func(ImageWindow *imd,
 }
 
 void image_set_drag_func(ImageWindow *imd,
-			   void (*func)(ImageWindow *, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer),
-			   gpointer data)
+                         void (*func)(ImageWindow *, GdkEvent *event, gdouble dx, gdouble dy, gpointer),
+                         gpointer data)
 {
 	imd->func_drag = func;
 	imd->data_drag = data;
 }
 
 void image_set_scroll_func(ImageWindow *imd,
-			   void (*func)(ImageWindow *, GdkEventScroll *event, gpointer),
-			   gpointer data)
+                           void (*func)(ImageWindow *, GdkEvent *event, gpointer),
+                           gpointer data)
 {
 	imd->func_scroll = func;
 	imd->data_scroll = data;
