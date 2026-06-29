@@ -90,13 +90,10 @@ GtkWidget *pref_group_new(GtkWidget *parent_box, gboolean fill,
 
 	/* add additional spacing if necessary */
 	if (GTK_IS_ORIENTABLE(parent_box) &&
-	    gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box)) == GTK_ORIENTATION_VERTICAL)
+	    gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box)) == GTK_ORIENTATION_VERTICAL &&
+	    gtk_widget_get_first_child(parent_box))
 		{
-		g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(parent_box));
-		if (list)
-			{
-			pref_spacer(vbox, PREF_PAD_GROUP - PREF_PAD_GAP);
-			}
+		pref_spacer(vbox, PREF_PAD_GROUP - PREF_PAD_GAP);
 		}
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), vbox, fill, fill, 0);
