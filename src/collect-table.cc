@@ -1083,7 +1083,7 @@ static gint page_height(CollectTable *ct)
 	return ret;
 }
 
-static gboolean collection_table_press_key_cb(GtkWidget *, GdkEventKey *event, gpointer data)
+static gboolean collection_table_press_key_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 	gint focus_row = 0;
@@ -1091,7 +1091,7 @@ static gboolean collection_table_press_key_cb(GtkWidget *, GdkEventKey *event, g
 	CollectInfo *info;
 	gboolean stop_signal = TRUE;
 
-	switch (event->keyval)
+	switch (keyval)
 		{
 		case GDK_KEY_Left: case GDK_KEY_KP_Left:
 			focus_col = -1;
@@ -1124,7 +1124,7 @@ static gboolean collection_table_press_key_cb(GtkWidget *, GdkEventKey *event, g
 			if (info)
 				{
 				ct->click_info = info;
-				if (event->state & GDK_CONTROL_MASK)
+				if (state & GDK_CONTROL_MASK)
 					{
 					collection_table_select_util(ct, info, !info_selected(info));
 					}
@@ -1142,16 +1142,15 @@ static gboolean collection_table_press_key_cb(GtkWidget *, GdkEventKey *event, g
 
 	if (focus_row != 0 || focus_col != 0)
 		{
-		CollectInfo *new_info;
-		CollectInfo *old_info;
+		CollectInfo *old_info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, nullptr);
 
-		old_info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, nullptr);
 		collection_table_move_focus(ct, focus_row, focus_col, TRUE);
-		new_info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, nullptr);
+
+		CollectInfo *new_info = collection_table_find_data(ct, ct->focus_row, ct->focus_column, nullptr);
 
 		if (new_info != old_info)
 			{
-			if (event->state & GDK_SHIFT_MASK)
+			if (state & GDK_SHIFT_MASK)
 				{
 				if (!options->collections.rectangular_selection)
 					{
@@ -1163,7 +1162,7 @@ static gboolean collection_table_press_key_cb(GtkWidget *, GdkEventKey *event, g
 					}
 				collection_table_select_region_util(ct, ct->click_info, new_info, TRUE);
 				}
-			else if (event->state & GDK_CONTROL_MASK)
+			else if (state & GDK_CONTROL_MASK)
 				{
 				ct->click_info = new_info;
 				}
@@ -2026,8 +2025,10 @@ CollectTable *collection_table_new(CollectionData *cd)
 			 G_CALLBACK(collection_table_destroy), ct);
 	g_signal_connect(G_OBJECT(ct->listview), "size_allocate",
 			 G_CALLBACK(collection_table_sized), ct);
-	g_signal_connect(G_OBJECT(ct->listview), "key_press_event",
-			 G_CALLBACK(collection_table_press_key_cb), ct);
+
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(collection_table_press_key_cb), ct);
+	gtk_widget_add_controller(ct->listview, controller);
 
 	gq_gtk_container_add(ct->scrolled, ct->listview);
 	gtk_widget_show(ct->listview);
