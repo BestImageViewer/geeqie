@@ -440,18 +440,16 @@ static void view_window_press_cb(GtkGestureClick *gesture, gint n_press, gdouble
 		}
 }
 
-static gboolean view_window_key_press_cb(GtkWidget *, GdkEventKey *event, gpointer data)
+static gboolean view_window_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
-	ImageWindow *imd;
-	gint stop_signal;
+	ImageWindow *imd = view_window_active_image(vw);
+
+	gint stop_signal = TRUE;
 	gint x = 0;
 	gint y = 0;
 
-	imd = view_window_active_image(vw);
-
-	stop_signal = TRUE;
-	switch (event->keyval)
+	switch (keyval)
 		{
 		case GDK_KEY_Left: case GDK_KEY_KP_Left:
 			x -= 1;
@@ -470,48 +468,18 @@ static gboolean view_window_key_press_cb(GtkWidget *, GdkEventKey *event, gpoint
 			break;
 		}
 
-	if (x != 0 || y!= 0)
+	if (x != 0 || y != 0)
 		{
-		keyboard_scroll_calc(x, y,static_cast<GdkModifierType>(event->state), event->keyval, event->time);
+		guint32 event_time = GDK_CURRENT_TIME;
 
-		keyboard_scroll_calc(x, y,static_cast<GdkModifierType>(event->state), event->keyval, event->time);
-		image_scroll(imd, x, y);
-
-		image_scroll(imd, x, y);
-		}
-
-	if (stop_signal) return stop_signal;
-
-/** @FIXME GTK4
-	stop_signal = TRUE;
-	if (event->state & GDK_CONTROL_MASK)
-		{
-		}
-	else if (event->state & GDK_SHIFT_MASK)
-		{
-		}
-	else
-		{
-		switch (event->keyval)
+		if (GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(controller)))
 			{
-				break;
-			case GDK_KEY_Menu:
-			case GDK_KEY_F10:
-				menu = view_popup_menu(vw);
-				gtk_menu_popup_at_widget(GTK_MENU(menu), widget, GDK_GRAVITY_CENTER, GDK_GRAVITY_CENTER, nullptr);
-				break;
-			default:
-				stop_signal = FALSE;
-				break;
+			event_time = gdk_event_get_time(event);
 			}
-		}
 
-	if (!stop_signal && is_help_key(event))
-		{
-		help_window_show("GuideOtherWindowsImageWindow.html");
-		stop_signal = TRUE;
+		keyboard_scroll_calc(x, y, state, keyval, event_time);
+		image_scroll(imd, x, y);
 		}
-*/
 
 	return stop_signal;
 }
@@ -628,8 +596,10 @@ static void view_fullscreen_toggle(ViewWindow *vw, gboolean force_off)
 		vw->fs = fullscreen_start(vw->window, vw->imd, view_fullscreen_stop_func);
 
 		view_image_set_buttons(vw, vw->fs->imd);
-		g_signal_connect(G_OBJECT(vw->fs->window), "key_press_event",
-				 G_CALLBACK(view_window_key_press_cb), vw);
+
+		GtkEventController *controller = gtk_event_controller_key_new();
+		g_signal_connect(controller, "key-pressed", G_CALLBACK(view_window_key_press_cb), vw);
+		gtk_widget_add_controller(vw->fs->window, controller);
 
 		if (vw->ss) vw->ss->imd = vw->fs->imd;
 
@@ -984,8 +954,10 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 			 G_CALLBACK(view_window_destroy_cb), vw);
 	g_signal_connect(G_OBJECT(vw->window), "delete_event",
 			 G_CALLBACK(view_window_delete_cb), vw);
-	g_signal_connect(G_OBJECT(vw->window), "key_press_event",
-			 G_CALLBACK(view_window_key_press_cb), vw);
+
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(view_window_key_press_cb), vw);
+	gtk_widget_add_controller(vw->window, controller);
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	g_signal_connect(gesture, "pressed", G_CALLBACK(view_window_press_cb), vw);
