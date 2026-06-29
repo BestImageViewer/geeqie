@@ -912,7 +912,6 @@ static void image_set_desaturate_cb(GSimpleAction *, GVariant *, gpointer data)
 static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionData *cd, CollectInfo *info)
 {
 	ViewWindow *vw;
-	GdkGeometry geometry;
 
 	if (!fd && !list && (!cd || !info)) return nullptr;
 
@@ -921,9 +920,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	vw->window = window_new("view", PIXBUF_INLINE_ICON_VIEW, nullptr);
 	DEBUG_NAME(vw->window);
 
-	geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;
-	geometry.min_height = DEFAULT_MINIMAL_WINDOW_SIZE;
-	gtk_window_set_geometry_hints(GTK_WINDOW(vw->window), nullptr, &geometry, GDK_HINT_MIN_SIZE);
+	gtk_widget_set_size_request(vw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
 	gtk_window_set_resizable(GTK_WINDOW(vw->window), TRUE);
 	gq_gtk_widget_set_border_width(vw->window, 0);
@@ -1009,9 +1006,6 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 		}
 
 	gtk_window_set_default_size(GTK_WINDOW(vw->window), size.width, size.height);
-
-	GtkAllocation req_size{ 0, 0, size.width, size.height };
-	gtk_widget_size_allocate(vw->window, &req_size);
 
 	gtk_window_set_focus_on_map(GTK_WINDOW(vw->window), FALSE);
 	gtk_widget_show(vw->window);
