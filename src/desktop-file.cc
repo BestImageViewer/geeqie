@@ -220,11 +220,9 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_widget_show(ew->entry);
 	g_signal_connect(G_OBJECT(ew->entry), "changed", G_CALLBACK(editor_window_entry_changed_cb), ew);
 
-	GtkWidget *button_hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(button_hbox), GTK_BUTTONBOX_END);
-	gtk_box_set_spacing(GTK_BOX(button_hbox), PREF_PAD_BUTTON_GAP);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button_hbox, FALSE, FALSE, 0);
-	gtk_widget_show(button_hbox);
+	GtkWidget *button_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_halign(button_hbox, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(hbox), button_hbox);
 
 	ew->save_button = pref_button_new(nullptr, GQ_ICON_SAVE, _("Save"),
 				 G_CALLBACK(editor_window_save_cb), ew);
@@ -504,11 +502,9 @@ void editor_list_window_create()
 	gq_gtk_container_add(ewl->window, win_vbox);
 	gtk_widget_show(win_vbox);
 
-	hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_END);
-	gtk_box_set_spacing(GTK_BOX(hbox), PREF_PAD_BUTTON_GAP);
-	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(win_vbox), hbox);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(editor_list_window_help_cb), ewl);

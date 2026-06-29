@@ -385,11 +385,9 @@ static void generic_dialog_setup(GenericDialog *gd,
 	gq_gtk_box_pack_start(GTK_BOX(vbox), gd->vbox, TRUE, TRUE, 0);
 	gtk_widget_show(gd->vbox);
 
-	gd->hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(gd->hbox), GTK_BUTTONBOX_END);
-	gtk_box_set_spacing(GTK_BOX(gd->hbox), PREF_PAD_BUTTON_GAP);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), gd->hbox, FALSE, FALSE, 0);
-	gtk_widget_show(gd->hbox);
+	gd->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_halign(gd->hbox, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(vbox), gd->hbox);
 
 	if (gd->cancel_cb)
 		{

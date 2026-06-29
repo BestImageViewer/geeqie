@@ -216,11 +216,9 @@ GtkWidget *help_window_new(const gchar *title,
 	gtk_text_buffer_create_tag(buffer, "monospace",
 				   "family", "monospace", NULL);
 
-	hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gq_gtk_widget_set_border_width(hbox, PREF_PAD_BORDER);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_END);
-	gq_gtk_box_pack_end(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(vbox), hbox);
 
 	button = gtk_button_new_from_icon_name(GQ_ICON_CLOSE, GTK_ICON_SIZE_BUTTON);
 	g_signal_connect(G_OBJECT(button), "clicked",

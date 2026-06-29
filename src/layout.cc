@@ -2345,11 +2345,9 @@ void layout_show_config_window(LayoutWindow *lw)
 	gq_gtk_container_add(lc->configwindow, win_vbox);
 	gtk_widget_show(win_vbox);
 
-	GtkWidget *hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_END);
-	gtk_box_set_spacing(GTK_BOX(hbox), PREF_PAD_BUTTON_GAP);
-	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
+	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(win_vbox), hbox);
 
 	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
 				 G_CALLBACK(layout_config_ok_cb), lc);

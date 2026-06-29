@@ -4470,11 +4470,9 @@ DupeWindow *dupe_window_new()
 	gq_gtk_box_pack_start(GTK_BOX(vbox), button_box, FALSE, FALSE, 0);
 	gtk_widget_show(button_box);
 
-	hbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-	gtk_button_box_set_layout(GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_END);
-	gtk_box_set_spacing(GTK_BOX(hbox), PREF_PAD_SPACE);
-	gq_gtk_box_pack_end(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(button_box), hbox);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
 	gtk_widget_set_tooltip_text(button, "F1");
