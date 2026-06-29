@@ -2039,7 +2039,9 @@ CollectTable *collection_table_new(CollectionData *cd)
 	gq_gtk_container_add(ct->scrolled, ct->listview);
 	gtk_widget_show(ct->listview);
 
+/** @FIXME GTK4
 	collection_table_dnd_init(ct);
+*/
 
 	GtkGesture *click = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(click), 0);

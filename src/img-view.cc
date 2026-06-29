@@ -92,8 +92,6 @@ static void view_slideshow_stop(ViewWindow *vw);
 
 static void view_window_close(ViewWindow *vw);
 
-static void view_window_dnd_init(ViewWindow *vw);
-
 static void view_window_notify_cb(FileData *fd, NotifyType type, gpointer data);
 
 /*
@@ -946,7 +944,9 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	gq_gtk_container_add(vw->window, vw->imd->widget);
 	gtk_widget_show(vw->imd->widget);
 
+/** @FIXME GTK4
 	view_window_dnd_init(vw);
+*/
 
 	view_image_set_buttons(vw, vw->imd);
 

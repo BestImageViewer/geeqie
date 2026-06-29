@@ -783,7 +783,9 @@ static gboolean vd_auto_scroll_idle_cb(gpointer data)
 		GqPoint pos;
 		if (widget_get_pointer_position(vd->view, pos))
 			{
+/** @FIXME GTK4
 			vd_dnd_drop_update(vd, pos.x, pos.y);
+*/
 			}
 		}
 
@@ -791,57 +793,60 @@ static gboolean vd_auto_scroll_idle_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static gboolean vd_dnd_drop_motion(GtkWidget *, GdkDragContext *context, gint x, gint y, guint time, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
+/** @FIXME GTK4
+ */
+//~ static gboolean vd_dnd_drop_motion(GtkWidget *, GdkDragContext *context, gint x, gint y, guint time, gpointer data)
+//~ {
+	//~ auto vd = static_cast<ViewDir *>(data);
 
-	vd->click_fd = nullptr;
+	//~ vd->click_fd = nullptr;
 
-	if (gtk_drag_get_source_widget(context) == vd->view)
-		{
-		/* from same window */
-		gdk_drag_status(context, GDK_ACTION_DEFAULT, time);
-		return TRUE;
-		}
+	//~ if (gtk_drag_get_source_widget(context) == vd->view)
+		//~ {
+		//~ /* from same window */
+		//~ gdk_drag_status(context, GDK_ACTION_DEFAULT, time);
+		//~ return TRUE;
+		//~ }
 
-	gdk_drag_status(context, gdk_drag_context_get_suggested_action(context), time);
+	//~ gdk_drag_status(context, gdk_drag_context_get_suggested_action(context), time);
 
-	vd_dnd_drop_update(vd, x, y);
+	//~ vd_dnd_drop_update(vd, x, y);
 
-	if (vd->drop_fd)
-		{
-		const auto vd_auto_scroll_notify_cb = [vd](GtkWidget *, GqPoint)
-		{
-			if (!vd->drop_fd || vd->drop_list) return false;
+	//~ if (vd->drop_fd)
+		//~ {
+		//~ const auto vd_auto_scroll_notify_cb = [vd](GtkWidget *, GqPoint)
+		//~ {
+			//~ if (!vd->drop_fd || vd->drop_list) return false;
 
-			if (!vd->drop_scroll_id)
-				{
-				vd->drop_scroll_id = g_idle_add(vd_auto_scroll_idle_cb, vd);
-				}
+			//~ if (!vd->drop_scroll_id)
+				//~ {
+				//~ vd->drop_scroll_id = g_idle_add(vd_auto_scroll_idle_cb, vd);
+				//~ }
 
-			return true;
-		};
-		widget_auto_scroll_start(vd->view, -1, -1, vd_auto_scroll_notify_cb);
-		}
+			//~ return true;
+		//~ };
+		//~ widget_auto_scroll_start(vd->view, -1, -1, vd_auto_scroll_notify_cb);
+		//~ }
 
-	return FALSE;
-}
+	//~ return FALSE;
+//~ }
 
-static void vd_dnd_drop_leave(GtkWidget *, GdkDragContext *, guint, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
+//~ static void vd_dnd_drop_leave(GtkWidget *, GdkDragContext *, guint, gpointer data)
+//~ {
+	//~ auto vd = static_cast<ViewDir *>(data);
 
-	if (vd->drop_fd != vd->click_fd) vd_color_set(vd, vd->drop_fd, FALSE);
+	//~ if (vd->drop_fd != vd->click_fd) vd_color_set(vd, vd->drop_fd, FALSE);
 
-	vd->drop_fd = nullptr;
+	//~ vd->drop_fd = nullptr;
 
-	if (vd->dnd_drop_leave_func) vd->dnd_drop_leave_func(vd);
-}
+	//~ if (vd->dnd_drop_leave_func) vd->dnd_drop_leave_func(vd);
+//~ }
 
-void vd_dnd_init(ViewDir *vd)
-{
-	(void)vd;
-}
+//~ void vd_dnd_init(ViewDir *vd)
+//~ {
+	//~ (void)vd;
+//~ }
+*/
 
 /*
  *----------------------------------------------------------------------------
@@ -1084,7 +1089,9 @@ ViewDir *vd_new(LayoutWindow *lw)
 
 	gq_gtk_container_add(vd->widget, vd->view);
 
+/** @FIXME GTK4
 	vd_dnd_init(vd);
+*/
 
 	g_signal_connect(G_OBJECT(vd->view), "row_activated",
 			 G_CALLBACK(vd_activate_cb), vd);
