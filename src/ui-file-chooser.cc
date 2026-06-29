@@ -597,7 +597,7 @@ GtkFileChooserDialog *file_chooser_dialog_new(const FileChooserDialogData &fcdd)
 	/* Add book mark shortcuts. Always include the current dir.
 	 * Current layout folder
 	 */
-	g_autoptr(GFile) path = g_file_new_for_path(layout_get_path(get_current_layout()), nullptr);
+	g_autoptr(GFile) path = g_file_new_for_path(layout_get_path(get_current_layout()));
 	gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), path, nullptr);
 
 	if (fcdd.shortcuts)
@@ -606,7 +606,7 @@ GtkFileChooserDialog *file_chooser_dialog_new(const FileChooserDialogData &fcdd)
 
 		for (gint i = 0; shortcut_list[i] != nullptr; i++)
 			{
-			g_autoptr(GFile) path = g_file_new_for_path(shortcut_list[i], nullptr);
+			g_autoptr(GFile) path = g_file_new_for_path(shortcut_list[i]);
 			gtk_file_chooser_add_shortcut_folder(GTK_FILE_CHOOSER(dialog), path, nullptr);
 			}
 		}
