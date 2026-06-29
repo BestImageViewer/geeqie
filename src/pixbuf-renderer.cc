@@ -641,15 +641,16 @@ static void pixbuf_renderer_get_property(GObject *object, guint prop_id,
 
 static gboolean pr_parent_window_sizable(PixbufRenderer *pr)
 {
-	GdkWindowState state;
-
 	if (!pr->parent_window) return FALSE;
 	if (!pr->window_fit) return FALSE;
-	if (!gtk_widget_get_window(GTK_WIDGET(pr))) return FALSE;
 
-	if (!gtk_widget_get_window(pr->parent_window)) return FALSE;
-	state = gdk_window_get_state(gtk_widget_get_window(pr->parent_window));
-	if (state & GDK_WINDOW_STATE_MAXIMIZED) return FALSE;
+	GtkRoot *root = gtk_widget_get_root(GTK_WIDGET(pr));
+	if (!GTK_IS_WINDOW(root)) return FALSE;
+
+	GtkRoot *parent_root = gtk_widget_get_root(pr->parent_window);
+	if (!GTK_IS_WINDOW(parent_root)) return FALSE;
+
+	if (gtk_window_is_maximized(GTK_WINDOW(parent_root))) return FALSE;
 
 	return TRUE;
 }
@@ -675,15 +676,15 @@ static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 	gtk_widget_get_allocation(widget, &widget_allocation);
 	gtk_widget_get_allocation(pr->parent_window, &parent_allocation);
 
-	w += (parent_allocation.width - widget_allocation.width);
-	h += (parent_allocation.height - widget_allocation.height);
+	w += parent_allocation.width - widget_allocation.width;
+	h += parent_allocation.height - widget_allocation.height;
 
-	GdkWindow *window = gtk_widget_get_window(pr->parent_window);
-	if (w == gdk_window_get_width(window) &&
-	    h == gdk_window_get_height(window))
+	if (w == parent_allocation.width && h == parent_allocation.height)
+		{
 		return FALSE;
+		}
 
-	gdk_window_resize(window, w, h);
+	gtk_window_set_default_size(GTK_WINDOW(pr->parent_window), w, h);
 
 	return TRUE;
 }

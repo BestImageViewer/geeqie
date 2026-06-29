@@ -2466,8 +2466,12 @@ void layout_sync_options_with_current_state(LayoutWindow *lw)
 
 		if (GDK_IS_X11_DISPLAY(display))
 			{
-			GdkWindow *window = gtk_widget_get_window(lw->window);
-			lw->options.workspace = gdk_x11_window_get_desktop(window);
+			GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(lw->window));
+
+			if (surface)
+				{
+				lw->options.workspace = gdk_x11_surface_get_desktop(surface);
+				}
 			}
 		}
 #endif

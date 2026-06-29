@@ -198,16 +198,12 @@ void rt_sync_scroll(RendererTiles *rt)
 void rt_border_draw(RendererTiles *rt, GdkRectangle border_rect)
 {
 	PixbufRenderer *pr = rt->pr;
-	GtkWidget *box;
-	GdkWindow *window;
-	cairo_t *cr;
+	auto *box = GTK_WIDGET(pr);
 
-	box = GTK_WIDGET(pr);
-	window = gtk_widget_get_window(box);
+	if (!gtk_widget_get_root(box)) return;
+	if (!rt->surface) return;
 
-	if (!window) return;
-
-	cr = cairo_create(rt->surface);
+	cairo_t *cr = cairo_create(rt->surface);
 
 	auto draw_if_intersect = [&border_rect, rt, pr, cr](GdkRectangle rect)
 	{
@@ -436,26 +432,22 @@ void rt_tile_prepare(RendererTiles *rt, ImageTile *it)
 
 		rt_tile_free_space(rt, size, it);
 
-		it->surface = gdk_window_create_similar_surface(gtk_widget_get_window(GTK_WIDGET(rt->pr)),
-		                                                CAIRO_CONTENT_COLOR,
-		                                                rt->tile_width, rt->tile_height);
-		it->size += size;
+		it->surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, rt->tile_width, rt->tile_height);
 
+		it->size += size;
 		rt->tile_cache_size += size;
 		}
 
 	if (!it->pixbuf)
 		{
-		GdkPixbuf *pixbuf;
-		guint size;
-		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rt->hidpi_scale * rt->tile_width, rt->hidpi_scale * rt->tile_height);
+		GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, rt->hidpi_scale * rt->tile_width, rt->hidpi_scale * rt->tile_height);
 
-		size = gdk_pixbuf_get_rowstride(pixbuf) * rt->tile_height * rt->hidpi_scale;
+		const guint size = gdk_pixbuf_get_rowstride(pixbuf) * rt->tile_height * rt->hidpi_scale;
+
 		rt_tile_free_space(rt, size, it);
 
 		it->pixbuf = pixbuf;
 		it->size += size;
-
 		rt->tile_cache_size += size;
 		}
 }
