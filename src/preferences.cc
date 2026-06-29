@@ -3757,14 +3757,12 @@ static void config_window_create(LayoutWindow *lw)
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(config_window_help_cb), notebook);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
 	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
 				 G_CALLBACK(config_window_ok_cb), notebook);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
-	gtk_widget_grab_default(button);
+	gtk_window_set_default_widget(GTK_WINDOW(configwindow), button);
 	gtk_widget_show(button);
 
 	ct_button = button;
@@ -3772,7 +3770,6 @@ static void config_window_create(LayoutWindow *lw)
 	button = pref_button_new(nullptr, GQ_ICON_CANCEL, _("Cancel"),
 				 G_CALLBACK(config_window_close_cb), nullptr);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
 	if (!get_alternative_button_order(configwindow))

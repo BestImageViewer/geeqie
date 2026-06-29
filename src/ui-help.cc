@@ -224,8 +224,7 @@ GtkWidget *help_window_new(const gchar *title,
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(help_window_close), window);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
-	gtk_widget_grab_default(button);
+	gtk_window_set_default_widget(GTK_WINDOW(window), button);
 	gtk_widget_show(button);
 
 	g_object_set_data(G_OBJECT(window), "text_widget", text);

@@ -226,7 +226,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	ew->save_button = pref_button_new(nullptr, GQ_ICON_SAVE, _("Save"),
 				 G_CALLBACK(editor_window_save_cb), ew);
 	gq_gtk_container_add(button_hbox, ew->save_button);
-	gtk_widget_set_can_default(ew->save_button, TRUE);
+	gtk_window_set_default_widget(GTK_WINDOW(ew->window), ew->save_button);
 	gtk_widget_set_sensitive(ew->save_button, FALSE);
 	gtk_widget_show(ew->save_button);
 	ct_button = ew->save_button;
@@ -234,7 +234,6 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"),
 				 G_CALLBACK(editor_window_close_cb), ew);
 	gq_gtk_container_add(button_hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
 	if (!get_alternative_button_order(ew->window))
@@ -507,19 +506,16 @@ void editor_list_window_create()
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(editor_list_window_help_cb), ewl);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
 	button = pref_button_new(nullptr, GQ_ICON_NEW, _("New"),
 				 G_CALLBACK(editor_list_window_new_cb), ewl);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
 	button = pref_button_new(nullptr, GQ_ICON_EDIT, _("Edit"),
 				 G_CALLBACK(editor_list_window_edit_cb), ewl);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_set_sensitive(button, FALSE);
 	gtk_widget_show(button);
 	ewl->edit_button = button;
@@ -527,7 +523,6 @@ void editor_list_window_create()
 	button = pref_button_new(nullptr, GQ_ICON_DELETE, _("Delete"),
 				 G_CALLBACK(editor_list_window_delete_cb), ewl);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_set_sensitive(button, FALSE);
 	gtk_widget_show(button);
 	ewl->delete_button = button;
@@ -535,7 +530,6 @@ void editor_list_window_create()
 	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"),
 				 G_CALLBACK(editor_list_window_close_cb), ewl);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_set_can_default(button, TRUE);
 	gtk_widget_show(button);
 
 	scrolled = gtk_scrolled_window_new();

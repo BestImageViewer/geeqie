@@ -202,7 +202,6 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, 
 	button = pref_button_new(nullptr, icon_name, text,
 				 G_CALLBACK(generic_dialog_click_cb), gd);
 
-	gtk_widget_set_can_default(button, TRUE);
 	g_object_set_data(G_OBJECT(button), "dialog_function", reinterpret_cast<void *>(func_cb));
 
 	gq_gtk_container_add(gd->hbox, button);
@@ -211,7 +210,7 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, 
 
 	if (is_default)
 		{
-		gtk_widget_grab_default(button);
+		gtk_window_set_default_widget(GTK_WINDOW(gd->dialog), button);
 		gtk_widget_grab_focus(button);
 		gd->default_cb = func_cb;
 
