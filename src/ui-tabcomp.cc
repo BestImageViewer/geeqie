@@ -521,7 +521,7 @@ static void tab_completion_button_size_allocate(GtkWidget *button, GtkAllocation
 		gtk_widget_get_allocation(button, &button_allocation);
 		button_allocation.height = parent_allocation.height;
 		button_allocation.y = parent_allocation.y;
-		gtk_widget_size_allocate(button, &button_allocation);
+		gtk_widget_size_allocate(button, &button_allocation, -1);
 		}
 }
 
