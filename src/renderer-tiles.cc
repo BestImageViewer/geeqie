@@ -111,7 +111,6 @@ struct OverlayData
 	gint id;
 
 	GdkPixbuf *pixbuf;
-	GdkWindow *window;
 
 	gint x;
 	gint y;
@@ -477,34 +476,11 @@ GdkRectangle rt_overlay_get_position(const RendererTiles *rt, const OverlayData 
 	return od_rect;
 }
 
-void rt_overlay_init_window(RendererTiles *rt, OverlayData *od)
-{
-	PixbufRenderer *pr = rt->pr;
-	GdkWindowAttr attributes;
-	gint attributes_mask;
-
-	GdkRectangle od_rect = rt_overlay_get_position(rt, od);
-
-	attributes.window_type = GDK_WINDOW_CHILD;
-	attributes.wclass = GDK_INPUT_OUTPUT;
-	attributes.width = od_rect.width;
-	attributes.height = od_rect.height;
-	attributes.event_mask = GDK_EXPOSURE_MASK;
-	attributes_mask = 0;
-
-	od->window = gdk_window_new(gtk_widget_get_window(GTK_WIDGET(pr)), &attributes, attributes_mask);
-	gdk_window_set_user_data(od->window, pr);
-	gdk_window_move(od->window, od_rect.x + rt->stereo_off_x, od_rect.y + rt->stereo_off_y);
-	gdk_window_show(od->window);
-}
-
 void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it)
 {
 	for (GList *work = rt->overlay_list; work; work = work->next)
 		{
 		auto *od = static_cast<OverlayData *>(work->data);
-
-		if (!od->window) rt_overlay_init_window(rt, od);
 
 		GdkRectangle od_rect = rt_overlay_get_position(rt, od);
 
@@ -512,9 +488,7 @@ void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it
 			{
 			if (!rt->overlay_buffer)
 				{
-				rt->overlay_buffer = gdk_window_create_similar_surface(gtk_widget_get_window(GTK_WIDGET(rt->pr)),
-				                                                       CAIRO_CONTENT_COLOR,
-				                                                       rt->tile_width, rt->tile_height);
+				rt->overlay_buffer = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, rt->tile_width, rt->tile_height);
 				}
 
 			const auto draw = [rt, od, &od_rect](GdkRectangle r, const std::function<void(cairo_t *)> &set_source)
@@ -528,16 +502,11 @@ void rt_overlay_draw(RendererTiles *rt, GdkRectangle request_rect, ImageTile *it
 				cairo_fill(cr);
 				cairo_destroy (cr);
 
-				cairo_region_t *region = gdk_window_get_clip_region(od->window);
-				GdkDrawingContext *drawing_context = gdk_window_begin_draw_frame(od->window, region);
-
-				cr = gdk_drawing_context_get_cairo_context(drawing_context);
-				cairo_set_source_surface(cr, rt->overlay_buffer, r.x - od_rect.x, r.y - od_rect.y);
-				cairo_rectangle (cr, r.x - od_rect.x, r.y - od_rect.y, r.width, r.height);
-				cairo_fill (cr);
-
-				gdk_window_end_draw_frame(od->window, drawing_context);
-				cairo_region_destroy(region);
+				cairo_t *cr = cairo_create(rt->surface);
+				cairo_set_source_surface(cr, rt->overlay_buffer, r.x + rt->stereo_off_x, r.y + rt->stereo_off_y);
+				cairo_rectangle(cr, r.x + rt->stereo_off_x, r.y + rt->stereo_off_y, r.width, r.height);
+				cairo_fill(cr);
+				cairo_destroy(cr);
 			};
 
 			if (it)
@@ -606,22 +575,6 @@ void rt_overlay_queue_all(RendererTiles *rt, gint x1, gint y1, gint x2, gint y2)
 
 void rt_overlay_update_sizes(RendererTiles *rt)
 {
-	for (GList *work = rt->overlay_list; work; work = work->next)
-		{
-		auto od = static_cast<OverlayData *>(work->data);
-
-		if (!od->window) rt_overlay_init_window(rt, od);
-
-		if (od->flags & OVL_RELATIVE)
-			{
-			GdkRectangle od_rect = rt_overlay_get_position(rt, od);
-			gdk_window_move_resize(od->window,
-			                       od_rect.x + rt->stereo_off_x,
-			                       od_rect.y + rt->stereo_off_y,
-			                       od_rect.width,
-			                       od_rect.height);
-			}
-		}
 }
 
 OverlayData *rt_overlay_find(RendererTiles *rt, gint id)
@@ -672,26 +625,16 @@ gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint 
 
 void rt_overlay_list_reset_window(RendererTiles *rt)
 {
-	GList *work;
-
 	g_clear_pointer(&rt->overlay_buffer, cairo_surface_destroy);
-
-	work = rt->overlay_list;
-	while (work)
-		{
-		auto od = static_cast<OverlayData *>(work->data);
-		work = work->next;
-		if (od->window) gdk_window_destroy(od->window);
-		od->window = nullptr;
-		}
 }
 
 void overlay_data_free(OverlayData *od)
 {
 	if (!od) return;
 
-	if (od->pixbuf) g_object_unref(od->pixbuf);
-	if (od->window) gdk_window_destroy(od->window);
+	if (od->pixbuf)
+		g_object_unref(od->pixbuf);
+
 	g_free(od);
 }
 
