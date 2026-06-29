@@ -131,17 +131,20 @@ gboolean vdtree_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter, GtkTreeIt
 	return FALSE;
 }
 
-static void vdtree_icon_set_by_iter(ViewDir *vd, GtkTreeIter *iter, GdkPixbuf *pixbuf)
+static void vdtree_icon_set_by_iter(ViewDir *vd, GtkTreeIter *iter, GdkPaintable *paintable)
 {
 	GtkTreeModel *store;
-	GdkPixbuf *old;
+	GdkPaintable *old = nullptr;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
 	gtk_tree_model_get(store, iter, DIR_COLUMN_ICON, &old, -1);
+
 	if (old != vd->pf->deny)
 		{
-		gtk_tree_store_set(GTK_TREE_STORE(store), iter, DIR_COLUMN_ICON, pixbuf, -1);
+		gtk_tree_store_set(GTK_TREE_STORE(store), iter, DIR_COLUMN_ICON, paintable, -1);
 		}
+
+	g_clear_object(&old);
 }
 
 static void vdtree_expand_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean expand)
@@ -345,7 +348,7 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 {
 	GtkTreeStore *store;
 	GtkTreeIter child;
-	GdkPixbuf *pixbuf;
+	GdkPaintable *paintable;
 	GtkTreeIter empty;
 
 	if (!fd) return;
@@ -354,20 +357,20 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 		{
 		if (islink(fd->path))
 			{
-			pixbuf = vd->pf->link;
+			paintable = vd->pf->link;
 			}
-		else if (!access_file(fd->path, W_OK) )
+		else if (!access_file(fd->path, W_OK))
 			{
-			pixbuf = vd->pf->read_only;
+			paintable = vd->pf->read_only;
 			}
 		else
 			{
-			pixbuf = vd->pf->close;
+			paintable = vd->pf->close;
 			}
 		}
 	else
 		{
-		pixbuf = vd->pf->deny;
+		paintable = vd->pf->deny;
 		}
 
 	auto nd = g_new0(NodeData, 1);
@@ -384,21 +387,20 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view)));
 	gtk_tree_store_append(store, &child, parent);
-	gtk_tree_store_set(store, &child, DIR_COLUMN_POINTER, nd,
-					 DIR_COLUMN_ICON, pixbuf,
-					 DIR_COLUMN_NAME, nd->fd->name,
-					 DIR_COLUMN_LINK, link,
-					 DIR_COLUMN_COLOR, FALSE, -1);
+	gtk_tree_store_set(store, &child,
+	                   DIR_COLUMN_POINTER, nd,
+	                   DIR_COLUMN_ICON, paintable,
+	                   DIR_COLUMN_NAME, nd->fd->name,
+	                   DIR_COLUMN_LINK, link,
+	                   DIR_COLUMN_COLOR, FALSE,
+	                   -1);
 
-	/* all nodes are created with an "empty" node, so that the expander is shown
-	 * this is removed when the child is populated */
 	auto end = g_new0(NodeData, 1);
 	end->fd = nullptr;
 	end->expanded = TRUE;
 
 	gtk_tree_store_append(store, &empty, &child);
-	gtk_tree_store_set(store, &empty, DIR_COLUMN_POINTER, end,
-					  DIR_COLUMN_NAME, "empty", -1);
+	gtk_tree_store_set(store, &empty, DIR_COLUMN_POINTER, end, DIR_COLUMN_NAME, "empty", -1);
 
 	if (parent)
 		{
@@ -853,7 +855,7 @@ gboolean vdtree_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpo
 	return (event->button != GDK_BUTTON_PRIMARY);
 }
 
-static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GdkPixbuf *pixbuf)
+sstatic void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GdkPaintable *paintable)
 {
 	vdtree_populate_path_by_iter(vd, iter, FALSE, nullptr);
 
@@ -866,9 +868,10 @@ static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *i
 	FileData *fd = nd ? nd->fd : nullptr;
 	if (fd && islink(fd->path))
 		{
-		pixbuf = vd->pf->link;
+		paintable = vd->pf->link;
 		}
-	vdtree_icon_set_by_iter(vd, iter, pixbuf);
+
+	vdtree_icon_set_by_iter(vd, iter, paintable);
 }
 
 static void vdtree_row_expanded(GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, gpointer data)

@@ -74,7 +74,7 @@ static GdkPaintable *load_icon_paintable(GtkIconTheme *icon_theme,
 		                           GTK_ICON_LOOKUP_FORCE_REGULAR));
 }
 
-GdkPixbuf *create_folder_icon_with_emblem(GtkIconTheme *icon_theme, const gchar *emblem, const gchar *fallback_icon, gint size)
+GdkPaintable *create_folder_icon_with_emblem(GtkIconTheme *icon_theme, const gchar *emblem, const gchar *fallback_icon, gint size)
 {
 	g_autoptr(GIcon) icon_folder = g_themed_icon_new(GQ_ICON_DIRECTORY);
 	g_autoptr(GIcon) icon_emblem = g_themed_icon_new(emblem);
