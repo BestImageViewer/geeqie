@@ -2030,7 +2030,6 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 
 		g_object_unref(imd->pr);
 		gtk_widget_set_can_focus(imd->frame, TRUE);
-		gtk_widget_set_app_paintable(imd->frame, TRUE);
 
 		g_signal_connect(G_OBJECT(imd->frame), "draw",
 				 G_CALLBACK(selectable_frame_draw_cb), NULL);

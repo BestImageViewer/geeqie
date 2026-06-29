@@ -141,7 +141,9 @@ GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, La
 	if (group)
 		{
 		group = gtk_toggle_button_new();
+/** @FIXME GTK4 This implementation is wrong
 		gtk_toggle_button_set_group(button, group);
+*/
 		}
 	else
 		{
