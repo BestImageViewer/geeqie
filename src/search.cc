@@ -2837,7 +2837,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	GtkWidget *scrolled;
 	GtkListStore *store;
 	GtkTreeSortable *sortable;
-	GdkGeometry geometry;
 
 	auto *sd = new SearchData();
 
@@ -2877,12 +2876,8 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	gtk_window_set_resizable(GTK_WINDOW(sd->ui.window), TRUE);
 
-	geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;
-	geometry.min_height = DEFAULT_MINIMAL_WINDOW_SIZE;
-	geometry.base_width = DEF_SEARCH_WIDTH;
-	geometry.base_height = DEF_SEARCH_HEIGHT;
-	gtk_window_set_geometry_hints(GTK_WINDOW(sd->ui.window), nullptr, &geometry,
-				      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE));
+	gtk_widget_set_size_request(sd->ui.window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
+	gtk_window_set_default_size(GTK_WINDOW(sd->ui.window), DEF_SEARCH_WIDTH, DEF_SEARCH_HEIGHT);
 
 	LayoutWindow *lw = get_current_layout();
 	if (lw && options->save_window_positions)

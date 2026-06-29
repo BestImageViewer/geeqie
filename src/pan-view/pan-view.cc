@@ -1911,7 +1911,6 @@ static void pan_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, gp
 
 static void pan_window_new_real(FileData *dir_fd)
 {
-	GdkGeometry geometry;
 	GtkWidget *box;
 	GtkWidget *combo;
 	GtkWidget *frame;
@@ -1939,9 +1938,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	pw->window = window_new("panview", nullptr, _("Pan View"));
 	DEBUG_NAME(pw->window);
 
-	geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;
-	geometry.min_height = DEFAULT_MINIMAL_WINDOW_SIZE;
-	gtk_window_set_geometry_hints(GTK_WINDOW(pw->window), nullptr, &geometry, GDK_HINT_MIN_SIZE);
+	gtk_widget_set_size_request(pw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
 	gtk_window_set_resizable(GTK_WINDOW(pw->window), TRUE);
 	gtk_container_set_border_width(GTK_CONTAINER(pw->window), 0);

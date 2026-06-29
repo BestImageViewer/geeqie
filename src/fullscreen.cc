@@ -392,7 +392,6 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 {
 	FullScreenData *fs;
 	GdkDisplay *display = nullptr;
-	GdkGeometry geometry;
 	GdkMonitor *monitor;
 	GdkScreen *screen;
 

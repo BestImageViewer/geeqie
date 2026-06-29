@@ -4252,7 +4252,6 @@ DupeWindow *dupe_window_new()
 	GtkWidget *label;
 	GtkWidget *button;
 	GtkListStore *store;
-	GdkGeometry geometry;
 
 	dw = g_new0(DupeWindow, 1);
 	dw->add_files_queue = nullptr;
@@ -4277,12 +4276,7 @@ DupeWindow *dupe_window_new()
 	dw->window = window_new("dupe", nullptr, _("Find duplicates"));
 	DEBUG_NAME(dw->window);
 
-	geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;
-	geometry.min_height = DEFAULT_MINIMAL_WINDOW_SIZE;
-	geometry.base_width = DUPE_DEF_WIDTH;
-	geometry.base_height = DUPE_DEF_HEIGHT;
-	gtk_window_set_geometry_hints(GTK_WINDOW(dw->window), nullptr, &geometry,
-				      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE));
+	gtk_widget_set_size_request(dw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
 	LayoutWindow *lw = get_current_layout();
 	if (lw && options->save_window_positions)

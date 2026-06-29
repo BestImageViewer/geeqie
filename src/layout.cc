@@ -1725,34 +1725,19 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 
 	if (!lw->tools)
 		{
-		GdkGeometry geometry;
-		GdkWindowHints hints;
-
 		lw->tools = window_new("tools", PIXBUF_INLINE_ICON_TOOLS, _("Tools"));
 		DEBUG_NAME(lw->tools);
-		g_signal_connect(G_OBJECT(lw->tools), "delete_event",
-				 G_CALLBACK(layout_tools_delete_cb), lw);
+		g_signal_connect(lw->tools, "close-request", G_CALLBACK(layout_tools_delete_cb), lw);
+
 		layout_keyboard_init(lw, lw->tools);
 
-		if (options->save_window_positions)
-			{
-			hints = GDK_HINT_USER_POS;
-			}
-		else
-			{
-			hints = static_cast<GdkWindowHints>(0);
-			}
+		gtk_widget_set_size_request(lw->tools, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
-		geometry.min_width = DEFAULT_MINIMAL_WINDOW_SIZE;
-		geometry.min_height = DEFAULT_MINIMAL_WINDOW_SIZE;
-		geometry.base_width = TOOLWINDOW_DEF_WIDTH;
-		geometry.base_height = TOOLWINDOW_DEF_HEIGHT;
-		gtk_window_set_geometry_hints(GTK_WINDOW(lw->tools), nullptr, &geometry,
-					      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE | hints));
-
+		gtk_window_set_default_size(GTK_WINDOW(lw->tools), TOOLWINDOW_DEF_WIDTH, TOOLWINDOW_DEF_HEIGHT);
 
 		gtk_window_set_resizable(GTK_WINDOW(lw->tools), TRUE);
 		gq_gtk_widget_set_border_width(lw->tools, 0);
+
 		if (options->expand_menu_toolbar) gq_gtk_container_remove(lw->main_box, lw->menu_tool_bar);
 
 		new_window = TRUE;
@@ -2567,8 +2552,6 @@ static gboolean move_window_to_workspace_cb(gpointer data)
 static LayoutWindow *layout_new(const LayoutOptions &lop)
 {
 	LayoutWindow *lw;
-	GdkGeometry hint;
-	GdkWindowHints hint_mask;
 
 	DEBUG_1("%s layout_new: start", get_exec_time());
 	lw = g_new0(LayoutWindow, 1);
@@ -2602,31 +2585,13 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	lw->window = window_new(GQ_APPNAME_LC, nullptr, nullptr);
 	DEBUG_NAME(lw->window);
 
-		GApplication *app = g_application_get_default();
-register_main_window_actions(GTK_APPLICATION(app), (lw));
-
-
-
-
+	GApplication *app = g_application_get_default();
+	register_main_window_actions(GTK_APPLICATION(app), (lw));
 
 	gtk_window_set_resizable(GTK_WINDOW(lw->window), TRUE);
 	gq_gtk_widget_set_border_width(lw->window, 0);
 
-	if (options->save_window_positions)
-		{
-		hint_mask = GDK_HINT_USER_POS;
-		}
-	else
-		{
-		hint_mask = static_cast<GdkWindowHints>(0);
-		}
-
-	hint.min_width = 32;
-	hint.min_height = 32;
-	hint.base_width = 0;
-	hint.base_height = 0;
-	gtk_window_set_geometry_hints(GTK_WINDOW(lw->window), nullptr, &hint,
-				      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_BASE_SIZE | hint_mask));
+	gtk_widget_set_size_request(lw->window, 32, 32);
 
 	if (options->save_window_positions || isfile(default_path))
 		{
@@ -2640,7 +2605,7 @@ register_main_window_actions(GTK_APPLICATION(app), (lw));
 		gtk_window_set_default_size(GTK_WINDOW(lw->window), MAINWINDOW_DEF_WIDTH, MAINWINDOW_DEF_HEIGHT);
 		}
 
-	g_signal_connect(G_OBJECT(lw->window), "delete_event",
+	g_signal_connect(lw->window, "close-request",
 			 G_CALLBACK(layout_delete_cb), lw);
 
 	g_signal_connect(G_OBJECT(lw->window), "focus-in-event",
