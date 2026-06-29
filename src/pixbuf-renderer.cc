@@ -2087,7 +2087,7 @@ static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double 
 static void pr_leave_notify_cb(GtkEventControllerMotion *controller, gpointer)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
-{
+
 	PixbufRenderer *pr;
 
 	pr = PIXBUF_RENDERER(widget);
@@ -2217,7 +2217,6 @@ static gboolean pr_mouse_release_cb(GtkWidget *widget, GdkEventButton *bevent, g
 static void pr_mouse_leave_cb(GtkEventControllerMotion *controller, gpointer)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
-{
 	PixbufRenderer *pr;
 
 	pr = PIXBUF_RENDERER(widget);

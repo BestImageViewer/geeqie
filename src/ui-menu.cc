@@ -203,7 +203,10 @@ GtkWidget *popup_menu_short_lived()
 
 GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 {
-	static void popover_closed_cb(GtkPopover *popover, gpointer)
+}
+
+static void popover_closed_cb(GtkPopover *popover, gpointer)
+{
 		{
 		gtk_widget_unparent(GTK_WIDGET(popover));
 		}
