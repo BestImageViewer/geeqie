@@ -394,61 +394,6 @@ void mkdir_if_not_exists(const gchar *path)
 		}
 }
 
-void gq_accel_map_print(
-		    gpointer 	data,
-		    const gchar	*accel_path,
-		    guint	accel_key,
-		    GdkModifierType accel_mods,
-		    gboolean	changed)
-{
-	auto gstring = static_cast<GString *>(data);
-
-	if (!changed)
-		g_string_append(gstring, "; ");
-
-	g_string_append(gstring, "(gtk_accel_path \"");
-
-	g_autofree gchar *accel_path_escaped = g_strescape(accel_path, nullptr);
-	g_string_append(gstring, accel_path_escaped);
-
-	g_string_append(gstring, "\" \"");
-
-	g_autofree gchar *name = gtk_accelerator_name(accel_key, accel_mods);
-	g_autofree gchar *name_escaped = g_strescape(name, nullptr);
-	g_string_append(gstring, name_escaped);
-
-	g_string_append(gstring, "\")\n");
-}
-
-gboolean gq_accel_map_save(const gchar *path)
-{
-	g_autofree gchar *pathl = path_from_utf8(path);
-
-	g_autoptr(GString) gstring = g_string_new("; ");
-	if (g_get_prgname())
-		g_string_append(gstring, g_get_prgname());
-	g_string_append(gstring, " GtkAccelMap rc-file         -*- scheme -*-\n");
-	g_string_append(gstring, "; this file is an automated accelerator map dump\n");
-	g_string_append(gstring, ";\n");
-
-	gtk_accel_map_foreach(gstring, gq_accel_map_print);
-
-	secure_save(pathl, gstring->str, -1);
-
-	return TRUE;
-}
-
-gchar *accep_map_filename()
-{
-	return g_build_filename(get_rc_dir(), "accels", NULL);
-}
-
-void accel_map_save()
-{
-	g_autofree gchar *path = accep_map_filename();
-	gq_accel_map_save(path);
-}
-
 void gq_gtk_css_load()
 {
 	/* Load gtk.css file from the rc directory */
@@ -484,7 +429,6 @@ void exit_program_final()
 
 	save_options(options);
 	keys_save();
-	accel_map_save();
 
 	LayoutWindow *lw = get_current_layout();
 	if (lw)
