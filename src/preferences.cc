@@ -2121,7 +2121,7 @@ static void default_layout_changed_cb(GtkWidget *, GtkPopover *popover)
 
 static GtkWidget *create_popover(GtkWidget *parent, GtkWidget *child, GtkPositionType pos)
 {
-	GtkWidget *popover = gtk_popover_new(parent);
+	GtkWidget *popover = gtk_popover_new();
 
 	gtk_popover_set_position(GTK_POPOVER (popover), pos);
 	gq_gtk_container_add(popover, child);

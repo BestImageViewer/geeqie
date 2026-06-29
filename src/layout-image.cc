@@ -115,7 +115,7 @@ void layout_image_full_screen_start(LayoutWindow *lw)
 
 	layout_keyboard_init(lw, lw->full_screen->window);
 
-	lw->touchpad_zoom = GTK_EVENT_CONTROLLER(gtk_gesture_zoom_new(lw->full_screen->window));
+	lw->touchpad_zoom = GTK_EVENT_CONTROLLER(gtk_gesture_zoom_new());
 	g_signal_connect(lw->touchpad_zoom, "scale-changed", G_CALLBACK(touchpad_zoom_cb), lw);
 
 	layout_actions_add_window(lw, lw->full_screen->window);
@@ -1860,7 +1860,7 @@ GtkWidget *layout_image_new(LayoutWindow *lw, gint i)
 
 		image_set_focus_in_func(lw->split_images[i], layout_image_focus_in_cb, lw);
 
-		lw->split_images_touchpad_zoom[i] = GTK_EVENT_CONTROLLER(gtk_gesture_zoom_new(lw->split_images[i]->pr));
+		lw->split_images_touchpad_zoom[i] = GTK_EVENT_CONTROLLER(gtk_gesture_zoom_new());
 		g_signal_connect(lw->split_images_touchpad_zoom[i], "scale-changed", G_CALLBACK(touchpad_zoom_cb), lw);
 		}
 
