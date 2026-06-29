@@ -486,8 +486,8 @@ static void layout_path_entry_tab_append_cb(LayoutWindow *lw, gint n)
 
 static gboolean path_entry_tooltip_cb(GtkWidget *widget, gpointer)
 {
-	g_autoptr(GList) box_child_list = gq_gtk_widget_get_children(GTK_WIDGET(widget));
-	g_autofree gchar *current_path = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box_child_list->data));
+	GtkComboBoxText *box_child = GTK_COMBO_BOX_TEXT(gtk_widget_get_first_child(widget));
+	g_autofree gchar *current_path = gtk_combo_box_text_get_active_text(box_child);
 
 	gtk_widget_set_tooltip_text(widget, current_path);
 

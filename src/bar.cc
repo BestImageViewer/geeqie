@@ -278,9 +278,6 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	device = gdk_seat_get_pointer(seat);
 	get_device_position(device, x, y);
 
-	g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(expander));
-	auto *data_box = static_cast<GtkWidget *>(list->data);
-
 	window = gtk_window_new();
 
 	gtk_window_set_modal(GTK_WINDOW(window), TRUE);
@@ -293,6 +290,7 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 
 	gtk_widget_show(window);
 
+	GtkWidget *data_box = gtk_widget_get_first_child(expander);
 	gtk_widget_get_size_request(data_box, &w, &h);
 
 	GtkWidget *spin = gtk_spin_button_new_with_range(1, 1000, 1);
