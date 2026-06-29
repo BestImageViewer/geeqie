@@ -1308,22 +1308,23 @@ static void collection_table_scroll(CollectTable *ct, gboolean scroll)
  * mouse callbacks
  *-------------------------------------------------------------------
  */
-
-static gboolean collection_table_press_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
+static void collection_table_press_cb(GtkGestureClick *gesture,  gint n_press, gdouble x, gdouble y, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 	GtkTreeIter iter;
 	CollectInfo *info;
 
-	info = collection_table_find_data_by_coord(ct, static_cast<gint>(bevent->x), static_cast<gint>(bevent->y), &iter);
+	info = collection_table_find_data_by_coord(ct, static_cast<gint>(x), static_cast<gint>(y), &iter);
 
 	ct->click_info = info;
 	collection_table_selection_add(ct, ct->click_info, SELECTION_PRELIGHT, &iter);
 
-	switch (bevent->button)
+	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
+
+	switch (button)
 		{
 		case GDK_BUTTON_PRIMARY:
-			if (bevent->type == GDK_2BUTTON_PRESS)
+			if (n_press == 2)
 				{
 				if (info)
 					{
@@ -1335,25 +1336,25 @@ static gboolean collection_table_press_cb(GtkWidget *, GdkEventButton *bevent, g
 				gtk_widget_grab_focus(ct->listview);
 				}
 			break;
+
 		case GDK_BUTTON_SECONDARY:
-			collection_table_popup_menu(ct, (info != nullptr));
+			collection_table_popup_menu(ct, info != nullptr);
 			break;
+
 		default:
 			break;
 		}
-
-	return TRUE;
 }
 
-static gboolean collection_table_release_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
+static void collection_table_release_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 	GtkTreeIter iter;
 	CollectInfo *info = nullptr;
 
-	if (static_cast<gint>(bevent->x) != 0 || static_cast<gint>(bevent->y) != 0)
+	if (static_cast<gint>(x) != 0 || static_cast<gint>(y) != 0)
 		{
-		info = collection_table_find_data_by_coord(ct, static_cast<gint>(bevent->x), static_cast<gint>(bevent->y), &iter);
+		info = collection_table_find_data_by_coord(ct, static_cast<gint>(x), static_cast<gint>(y), &iter);
 		}
 
 	if (ct->click_info)
@@ -1361,16 +1362,24 @@ static gboolean collection_table_release_cb(GtkWidget *, GdkEventButton *bevent,
 		collection_table_selection_remove(ct, ct->click_info, SELECTION_PRELIGHT, nullptr);
 		}
 
-	if (bevent->button == GDK_BUTTON_PRIMARY &&
+	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
+
+	GdkModifierType state = static_cast<GdkModifierType>(0);
+	if (GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(gesture)))
+		{
+		state = static_cast<GdkModifierType>(gdk_event_get_modifier_state(event));
+		}
+
+	if (button == GDK_BUTTON_PRIMARY &&
 	    info && ct->click_info == info)
 		{
 		collection_table_set_focus(ct, info);
 
-		if (bevent->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			{
 			gboolean select = !info_selected(info);
 
-			if ((bevent->state & GDK_SHIFT_MASK) && ct->prev_selection)
+			if ((state & GDK_SHIFT_MASK) && ct->prev_selection)
 				{
 				collection_table_select_region_util(ct, ct->prev_selection, info, select);
 				}
@@ -1383,8 +1392,7 @@ static gboolean collection_table_release_cb(GtkWidget *, GdkEventButton *bevent,
 			{
 			collection_table_unselect_all(ct);
 
-			if ((bevent->state & GDK_SHIFT_MASK) &&
-			    ct->prev_selection)
+			if ((state & GDK_SHIFT_MASK) && ct->prev_selection)
 				{
 				collection_table_select_region_util(ct, ct->prev_selection, info, TRUE);
 				}
@@ -1394,13 +1402,11 @@ static gboolean collection_table_release_cb(GtkWidget *, GdkEventButton *bevent,
 				}
 			}
 		}
-	else if (bevent->button == GDK_BUTTON_MIDDLE &&
-		 info && ct->click_info == info)
+	else if (button == GDK_BUTTON_MIDDLE &&
+	         info && ct->click_info == info)
 		{
 		collection_table_select_util(ct, info, !info_selected(info));
 		}
-
-	return TRUE;
 }
 
 static void collection_menu_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -2035,12 +2041,11 @@ CollectTable *collection_table_new(CollectionData *cd)
 
 	collection_table_dnd_init(ct);
 
-	gtk_widget_set_events(ct->listview, GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK |
-			      static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_LEAVE_NOTIFY_MASK));
-	g_signal_connect(G_OBJECT(ct->listview),"button_press_event",
-			 G_CALLBACK(collection_table_press_cb), ct);
-	g_signal_connect(G_OBJECT(ct->listview),"button_release_event",
-			 G_CALLBACK(collection_table_release_cb), ct);
+	GtkGesture *click = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(click), 0);
+	g_signal_connect(click, "pressed", G_CALLBACK(collection_table_press_cb), ct);
+	g_signal_connect(click, "released", G_CALLBACK(collection_table_release_cb), ct);
+	gtk_widget_add_controller(ct->listview, GTK_EVENT_CONTROLLER(click));
 
 	GtkEventController *motion = gtk_event_controller_motion_new();
 	g_signal_connect(motion, "motion", G_CALLBACK(listview_motion_cb), ct);
