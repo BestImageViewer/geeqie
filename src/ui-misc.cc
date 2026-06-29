@@ -1302,37 +1302,6 @@ void widget_remove_from_parent_cb(GSimpleAction *, GVariant *, gpointer data)
 	widget_remove_from_parent(static_cast<GtkWidget *>(data));
 }
 
-void widget_input_grab(GtkWidget *widget, GdkSeatCapabilities capabilities, gboolean owner_events, GdkEventMask event_mask)
-{
-	GdkWindow *window = gtk_widget_get_window(widget);
-
-	const GdkEventMask prev_event_mask = gdk_window_get_events(window);
-	g_object_set_data(G_OBJECT(window), "prev_event_mask", GINT_TO_POINTER(prev_event_mask));
-	gdk_window_set_events(window, event_mask);
-
-	GdkDisplay *display = gtk_widget_get_display(window);
-	GdkSeat *seat = gdk_display_get_default_seat(display);
-
-	gdk_seat_grab(seat, window, capabilities, owner_events,
-	              nullptr, nullptr, nullptr, nullptr);
-
-	gtk_grab_add(widget);
-}
-
-void widget_input_ungrab(GtkWidget *widget)
-{
-	GdkWindow *window = gtk_widget_get_window(widget);
-
-	const auto prev_event_mask = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(window), "prev_event_mask"));
-	gdk_window_set_events(window, static_cast<GdkEventMask>(prev_event_mask));
-
-	GdkDisplay *display = gtk_widget_get_display(window);
-	GdkSeat *seat = gdk_display_get_default_seat(display);
-
-	gdk_seat_ungrab(seat);
-	gtk_grab_remove(widget);
-}
-
 gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int *y, GdkModifierType *mask)
 {
 	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));

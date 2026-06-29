@@ -64,6 +64,11 @@ enum ExifOrientationType {
 namespace
 {
 
+cairo_surface_t *rt_surface_new(gint width, gint height)
+{
+	return cairo_image_surface_create(CAIRO_FORMAT_RGB24, std::max(width, 1), std::max(height, 1));
+}
+
 struct QueueData;
 
 enum class TileRender {
@@ -1927,7 +1932,7 @@ gboolean rt_realize_cb(GtkWidget *widget, gpointer data)
 
 	if (!rt->surface)
 		{
-		rt->surface = gdk_window_create_similar_surface(gtk_widget_get_window(widget), CAIRO_CONTENT_COLOR, gtk_widget_get_allocated_width(widget), gtk_widget_get_allocated_height(widget));
+		rt->surface = rt_surface_new(gtk_widget_get_width(widget), gtk_widget_get_height(widget));
 
 		cr = cairo_create(rt->surface);
 		cairo_set_source_rgb(cr, rt->pr->color.red, rt->pr->color.green, rt->pr->color.blue);
@@ -1947,16 +1952,19 @@ gboolean rt_size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpoint
 	if (gtk_widget_get_realized(GTK_WIDGET(rt->pr)))
 		{
 		old_surface = rt->surface;
-		rt->surface = gdk_window_create_similar_surface(gtk_widget_get_window(widget), CAIRO_CONTENT_COLOR, allocation->width, allocation->height);
+		rt->surface = rt_surface_new(allocation->width, allocation->height);
 
 		cr = cairo_create(rt->surface);
 
 		cairo_set_source_rgb(cr, options->image.border_color.red, options->image.border_color.green, options->image.border_color.blue);
 		cairo_paint(cr);
-		cairo_set_source_surface(cr, old_surface, 0, 0);
-		cairo_paint(cr);
+		if (old_surface)
+			{
+			cairo_set_source_surface(cr, old_surface, 0, 0);
+			cairo_paint(cr);
+			}
 		cairo_destroy(cr);
-		cairo_surface_destroy(old_surface);
+		g_clear_pointer(&old_surface, cairo_surface_destroy);
 
 		rt_redraw(rt, *allocation, false, FALSE);
 	}

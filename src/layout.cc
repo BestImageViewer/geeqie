@@ -2540,8 +2540,11 @@ static gboolean move_window_to_workspace_cb(gpointer data)
 			{
 			if (lw->options.workspace != -1)
 				{
-				GdkWindow *window = gtk_widget_get_window(lw->window);
-				gdk_x11_window_move_to_desktop(window, lw->options.workspace);
+				GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(lw->window));
+				if (surface)
+					{
+					gdk_x11_surface_move_to_desktop(surface, lw->options.workspace);
+					}
 				}
 			}
 		}

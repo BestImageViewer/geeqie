@@ -221,8 +221,6 @@ gboolean widget_received_event(GtkWidget *widget, GqPoint event);
 void widget_remove_from_parent(GtkWidget *widget);
 void widget_remove_from_parent_cb(GSimpleAction *action, GVariant *parameter, gpointer data);
 
-void widget_input_ungrab(GtkWidget *widget);
-
 gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int *y, GdkModifierType *mask);
 void get_device_position(GdkDevice *device, int &x, int &y);
 

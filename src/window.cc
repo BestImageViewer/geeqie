@@ -77,12 +77,7 @@ GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *subtitl
 
 gboolean window_maximized(GtkWidget *window)
 {
-	GdkWindowState state;
-
-	if (!window || !gtk_widget_get_window(window)) return FALSE;
-
-	state = gdk_window_get_state(gtk_widget_get_window(window));
-	return !!(state & GDK_WINDOW_STATE_MAXIMIZED);
+	return window && gtk_window_is_maximized(GTK_WINDOW(window));
 }
 
 /*

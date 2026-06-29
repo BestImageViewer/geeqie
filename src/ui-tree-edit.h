@@ -34,6 +34,7 @@ struct TreeEditData
 {
 	GtkWidget *window;
 	GtkWidget *entry;
+	gboolean closing;
 
 	gchar *old_name;
 

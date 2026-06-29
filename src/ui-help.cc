@@ -162,7 +162,7 @@ void help_window_set_key(GtkWidget *window, const gchar *key)
 	text = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(window), "text_widget"));
 	if (!text) return;
 
-	gdk_window_raise(gtk_widget_get_window(window));
+	gtk_window_present(GTK_WINDOW(window));
 
 	if (key) help_window_scroll(text, key);
 }
