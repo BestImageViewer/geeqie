@@ -4190,22 +4190,16 @@ static void save_export_file(GFile *file, ExportDupesData *edd)
 	history_list_add_to_key("export_duplicates", dirname, -1);
 }
 
-static void export_response_cb(GtkFileChooser *chooser, int response_id, gpointer data)
+static void export_response_cb(GFile *file, gpointer data)
 {
 	auto edd = static_cast<ExportDupesData *>(data);
 
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (file != nullptr)
 		{
-		g_autoptr(GFile) file = gtk_file_chooser_get_file(chooser);
-
-		if (file != nullptr)
-			{
-			save_export_file(file, edd);
-			}
+		save_export_file(file, edd);
 		}
 
 	g_free(edd);
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
 
@@ -4220,21 +4214,19 @@ static void dupe_pop_menu_export_cb(GSimpleAction *, GVariant *, gpointer data)
 	edd->dupewindow = dw;
 	edd->separator = separator;
 
-	FileChooserDialogData fcdd{};
+	FileDialogData fdd{};
 
-	fcdd.action = GTK_FILE_CHOOSER_ACTION_SAVE;
-	fcdd.accept_text = _("Save");
-	fcdd.data = edd;
-	fcdd.filter = (separator == EXPORT_CSV) ? ".csv" : ".tsv";
-	fcdd.filter_description = (separator == EXPORT_CSV) ? "csv files" : "tsv files";
-	fcdd.history_key = "export_duplicates";
-	fcdd.response_callback = G_CALLBACK(export_response_cb);
-	fcdd.suggested_name = (separator == EXPORT_CSV) ? _("Untitled.csv") : _("Untitled.tsv");
-	fcdd.title = _("Export duplicates data");
+	fdd.action = FileDialogAction::SAVE;
+	fdd.accept_text = _("Save");
+	fdd.callback = export_response_cb;
+	fdd.data = edd;
+	fdd.filter = (separator == EXPORT_CSV) ? ".csv" : ".tsv";
+	fdd.filter_description = (separator == EXPORT_CSV) ? "csv files" : "tsv files";
+	fdd.history_key = "export_duplicates";
+	fdd.suggested_name = (separator == EXPORT_CSV) ? _("Untitled.csv") : _("Untitled.tsv");
+	fdd.title = _("Export duplicates data");
 
-	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
-
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+	file_dialog_show(fdd);
 }
 
 /* static const ActionDef dupe_main_actions[]

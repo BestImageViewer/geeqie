@@ -694,39 +694,39 @@ void tab_completion_set_tab_append_func(GtkWidget *entry, const TabCompTabAppend
 	td->tab_append_func = tab_append_func;
 }
 
-static void tab_completion_response_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
+static void tab_completion_response_cb(GFile *file, gpointer data)
 {
 	auto td = static_cast<TabCompData *>(data);
 
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (file)
 		{
-		g_autofree gchar *filename = gtk_file_chooser_get_filename(chooser);
+		g_autofree gchar *filename = g_file_get_path(file);
 		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), filename);
 		}
-
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 
 	tab_completion_emit_enter_signal(td);
 }
 
 static void tab_completion_select_show(TabCompData *td)
 {
-	FileChooserDialogData fcdd{};
+	FileDialogData fdd{};
 
-	fcdd.action = td->fd_folders_only ? GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER : GTK_FILE_CHOOSER_ACTION_OPEN;
-	fcdd.accept_text = _("Open");
-	fcdd.data = td;
-	fcdd.filename = gtk_entry_get_text(GTK_ENTRY(td->entry));
-	fcdd.filter = td->fd_filter;
-	fcdd.filter_description = td->fd_filter_desc;
-	fcdd.history_key = td->history_key;
-	fcdd.response_callback = G_CALLBACK(tab_completion_response_cb);
-	fcdd.shortcuts = td->fd_shortcuts;
-	fcdd.title = td->fd_title;
+	fdd.action = td->fd_folders_only ? FileDialogAction::SELECT_FOLDER : FileDialogAction::OPEN;
+	fdd.accept_text = _("Open");
+	fdd.callback = tab_completion_response_cb;
+	fdd.data = td;
+	fdd.filename = gtk_entry_get_text(GTK_ENTRY(td->entry));
+	fdd.filter = td->fd_filter;
+	fdd.filter_description = td->fd_filter_desc;
+	fdd.history_key = td->history_key;
+	fdd.title = td->fd_title;
 
-	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
+	if (!fdd.filename || fdd.filename[0] == '\0')
+		{
+		fdd.filename = td->fd_shortcuts;
+		}
 
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+	file_dialog_show(fdd);
 }
 
 static void tab_completion_select_pressed(GtkWidget *, gpointer data)

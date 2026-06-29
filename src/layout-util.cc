@@ -989,11 +989,10 @@ static void layout_menu_open_archive_cb(GSimpleAction *, GVariant *, gpointer)
 	layout_set_path(lw_new, dest_dir);
 }
 
-static void open_file_cb(GtkFileChooser *chooser, gint response_id, gpointer)
+static void open_file_cb(GFile *file, gpointer)
 {
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (file)
 		{
-		g_autoptr(GFile) file = gtk_file_chooser_get_file(chooser);
 		g_autoptr(GFile) parent = g_file_get_parent(file);
 		g_autofree gchar *dirname = g_file_get_path(parent);
 		g_autofree gchar *filename = g_file_get_path(file);
@@ -1009,11 +1008,9 @@ static void open_file_cb(GtkFileChooser *chooser, gint response_id, gpointer)
 			layout_set_path(get_current_layout(), filename);
 			}
 		}
-
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
-static void open_recent_file_cb(GtkFileChooser *chooser, gint response_id, gpointer)
+static void open_recent_file_cb(GtkWidget *chooser, gint response_id, gpointer)
 {
 	if (response_id == GTK_RESPONSE_ACCEPT)
 		{
@@ -1052,20 +1049,18 @@ static void layout_menu_open_file_cb(GSimpleAction *, GVariant *, gpointer)
 		work = work->next;
 		}
 
-	FileChooserDialogData fcdd{};
+	FileDialogData fdd{};
 
-	fcdd.action = GTK_FILE_CHOOSER_ACTION_OPEN;
-	fcdd.accept_text = _("Open");
-	fcdd.filter = extlist->str;
-	fcdd.filter_description = _("Image files");
-	fcdd.history_key = "open_file";
-	fcdd.response_callback = G_CALLBACK(open_file_cb);
-	fcdd.suggested_name = _("Untitled.gqv");
-	fcdd.title = _("Geeqie - Open File");
+	fdd.action = FileDialogAction::OPEN;
+	fdd.accept_text = _("Open");
+	fdd.callback = open_file_cb;
+	fdd.filter = extlist->str;
+	fdd.filter_description = _("Image files");
+	fdd.history_key = "open_file";
+	fdd.suggested_name = _("Untitled.gqv");
+	fdd.title = _("Geeqie - Open File");
 
-	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
-
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+	file_dialog_show(fdd);
 }
 
 static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointer)
@@ -1114,49 +1109,41 @@ static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointe
 	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
 }
 
-static void open_collection_cb(GtkFileChooser *chooser, gint response_id, gpointer)
+static void open_collection_cb(GFile *file, gpointer)
 {
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (file)
 		{
-		g_autoptr(GFile) file = gtk_file_chooser_get_file(chooser);
+		g_autoptr(GFile) parent = g_file_get_parent(file);
 
-		if (file != nullptr)
+		if (parent != nullptr)
 			{
-			g_autoptr(GFile) parent = g_file_get_parent(file);
+			g_autofree gchar *dirname = g_file_get_path(parent);
+			history_list_add_to_key("open_collection", dirname, -1);
+			}
 
-			if (parent != nullptr)
-				{
-				g_autofree gchar *dirname = g_file_get_path(parent);
-				history_list_add_to_key("open_collection", dirname, -1);
-				}
+		g_autofree gchar *filename = g_file_get_path(file);
 
-			g_autofree gchar *filename = g_file_get_path(file);
-
-			if (file_extension_match(filename, GQ_COLLECTION_EXT))
-				{
-				collection_window_new(filename);
-				}
+		if (file_extension_match(filename, GQ_COLLECTION_EXT))
+			{
+			collection_window_new(filename);
 			}
 		}
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
 static void layout_menu_open_collection_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	FileChooserDialogData fcdd{};
+	FileDialogData fdd{};
 
-	fcdd.action = GTK_FILE_CHOOSER_ACTION_OPEN;
-	fcdd.accept_text = _("Open");
-	fcdd.filter = GQ_COLLECTION_EXT;
-	fcdd.filter_description = _("Collection files");
-	fcdd.history_key = "open_collection";
-	fcdd.response_callback = G_CALLBACK(open_collection_cb);
-	fcdd.shortcuts = get_collections_dir();
-	fcdd.title = _("Geeqie - Open Collection");
+	fdd.action = FileDialogAction::OPEN;
+	fdd.accept_text = _("Open");
+	fdd.callback = open_collection_cb;
+	fdd.filter = GQ_COLLECTION_EXT;
+	fdd.filter_description = _("Collection files");
+	fdd.history_key = "open_collection";
+	fdd.filename = get_collections_dir();
+	fdd.title = _("Geeqie - Open Collection");
 
-	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
-
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+	file_dialog_show(fdd);
 }
 
 static void layout_menu_fullscreen_cb(GSimpleAction *, GVariant *, gpointer)

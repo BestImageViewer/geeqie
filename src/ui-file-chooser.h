@@ -7,23 +7,31 @@
 
 #include <gtk/gtk.h>
 
-struct FileChooserDialogData {
-	GCallback response_callback;
-	GtkFileChooserAction action;
+enum class FileDialogAction
+{
+	OPEN,
+	SAVE,
+	SELECT_FOLDER
+};
+
+using FileDialogCallback = void (*)(GFile *file, gpointer data);
+
+struct FileDialogData
+{
+	FileDialogCallback callback;
+	FileDialogAction action;
 	const gchar *accept_text;
-	const gchar *entry_text;
-	const gchar *entry_tooltip;
 	const gchar *filter_description;
 	const gchar *history_key;
 	const gchar *suggested_name;
 	const gchar *title;
 	const gchar *filename;
 	const gchar *filter;
-	const gchar *shortcuts;
 	gpointer data;
+	GtkWindow *parent;
 };
 
-GtkFileChooserDialog *file_chooser_dialog_new(const FileChooserDialogData &fcdd);
+void file_dialog_show(const FileDialogData &fdd);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

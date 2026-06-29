@@ -85,8 +85,6 @@ constexpr std::array<GtkTargetEntry, 4> target_types
 	{const_cast<gchar *>("UTF8_STRING"), 0, CLIPBOARD_UTF8_STRING},
 }};
 
-constexpr gint GQ_RESPONSE_WITH_RENAME = 1;
-
 constexpr gint DIALOG_DEF_IMAGE_DIM_X = 150;
 constexpr gint DIALOG_DEF_IMAGE_DIM_Y = 100;
 
@@ -367,7 +365,6 @@ struct UtilityData {
 
 	GtkWidget *parent;
 	GenericDialog *gd;
-	GtkFileChooserDialog *fdlg;
 
 	guint update_idle_id; /* event source id */
 	guint perform_idle_id; /* event source id */
@@ -1283,11 +1280,10 @@ static void file_util_ok_cb(GenericDialog *gd, gpointer data)
 	file_util_dialog_run(ud);
 }
 
-static void file_util_dest_folder_update_path(UtilityData *ud)
+static void file_util_dest_folder_update_path(UtilityData *ud, GFile *file)
 {
 	g_free(ud->dest_path);
 
-	g_autoptr(GFile) file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(ud->fdlg));
 	gchar *path = g_file_get_path(file);
 
 	ud->dest_path = path;
@@ -1314,98 +1310,41 @@ static void file_util_dest_folder_update_path(UtilityData *ud)
 		}
 }
 
-static void file_util_fdlg_rename_cb(GtkFileChooserDialog *chooser, gpointer data)
-{
-	auto ud = static_cast<UtilityData *>(data);
-	GenericDialog *d = nullptr;
-
-	file_util_dest_folder_update_path(ud);
-
-	if (isdir(ud->dest_path))
-		{
-		gq_gtk_widget_destroy(GTK_WIDGET(chooser));
-
-		ud->fdlg = nullptr;
-		file_util_dialog_run(ud);
-		}
-	else
-		{
-		/* During copy/move operations it is necessary to ensure that the
-		 * target directory exists before continuing with the next step.
-		 * If not revert to the select directory dialog_
-		 */
-		g_autofree gchar *desc = g_strdup_printf(_("%s is not a directory"), ud->dest_path);
-
-		d = file_util_gen_dlg(ud->messages.title, "dlg_confirm",
-					ud->parent, TRUE,
-					file_util_check_abort_cb, ud);
-		generic_dialog_add_message(d, GQ_ICON_DIALOG_WARNING, _("This operation can't continue:"), desc, TRUE);
-
-		gtk_widget_show(d->dialog);
-		ud->phase = UtilityPhase::START;
-
-		gq_gtk_widget_destroy(GTK_WIDGET(chooser));
-		ud->fdlg = nullptr;
-		}
-}
-
-static void file_util_fdlg_ok_cb(GtkFileChooserDialog *chooser, gint response_id, gpointer data)
+static void file_util_fdlg_ok_cb(GFile *file, gpointer data)
 {
 	auto ud = static_cast<UtilityData *>(data);
 
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (file != nullptr)
 		{
+		g_autofree gchar *path = g_file_get_path(file);
+		file_util_dest_folder_update_path(ud, file);
 
-		g_autoptr(GFile) file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(chooser));
-		if (file != nullptr)
+		if (file)
 			{
-			g_autoptr(GFile) file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(chooser));
-			g_autofree gchar *path = g_file_get_path(file);
+			g_autoptr(GFile) parent = nullptr;
 
-			file_util_dest_folder_update_path(ud);
-
-			if (file)
+			if (g_file_query_file_type(file, G_FILE_QUERY_INFO_NONE, nullptr) == G_FILE_TYPE_REGULAR)
 				{
-				g_autoptr(GFile) parent = nullptr;
+				parent = g_file_get_parent(file);
+				}
 
-				if (g_file_query_file_type(file, G_FILE_QUERY_INFO_NONE, nullptr) == G_FILE_TYPE_REGULAR)
-					{
-					parent = g_file_get_parent(file);
-					}
-
-				if (parent)
-					{
-					g_autofree gchar *dirname = g_file_get_path(parent);
-					history_list_add_to_key("move_copy", dirname, -1);
-					}
-				else
-					{
-					history_list_add_to_key("move_copy", path, -1);
-					}
+			if (parent)
+				{
+				g_autofree gchar *dirname = g_file_get_path(parent);
+				history_list_add_to_key("move_copy", dirname, -1);
+				}
+			else
+				{
+				history_list_add_to_key("move_copy", path, -1);
 				}
 			}
 
-		gq_gtk_widget_destroy(GTK_WIDGET(chooser));
-
-		ud->fdlg = nullptr;
 		ud->phase = UtilityPhase::ENTERING;
 
 		file_util_dialog_run(ud);
 		}
-	else if (response_id == GQ_RESPONSE_WITH_RENAME)
-		{
-		file_util_dest_folder_update_path(ud);
-		ud->dest_path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(ud->fdlg));
-		file_util_fdlg_rename_cb(chooser, ud);
-		gq_gtk_widget_destroy(GTK_WIDGET(ud->fdlg));
-		}
 	else
 		{
-		auto ud = static_cast<UtilityData *>(data);
-
-		gq_gtk_widget_destroy(GTK_WIDGET(chooser));
-		ud->fdlg = nullptr;
-
 		ud->phase = UtilityPhase::CANCEL;
 		file_util_dialog_run(ud);
 		}
@@ -1765,24 +1704,17 @@ static void file_util_dialog_init_simple_list(UtilityData *ud)
 
 static void file_util_dialog_init_dest_folder(UtilityData *ud)
 {
-	FileChooserDialogData fcdd{};
+	FileDialogData fdd{};
 
-	fcdd.action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
-	fcdd.accept_text = (ud->type == UtilityType::MOVE) ? _("Move") : _("Copy");
-	fcdd.data = ud;
-	fcdd.history_key = "move_copy";
-	fcdd.response_callback = G_CALLBACK(file_util_fdlg_ok_cb);
-	fcdd.title = (ud->type == UtilityType::MOVE) ? _("Geeqie - Move File") : _("Geeqie - Copy File");
+	fdd.action = FileDialogAction::SELECT_FOLDER;
+	fdd.accept_text = (ud->type == UtilityType::MOVE) ? _("Move") : _("Copy");
+	fdd.callback = file_util_fdlg_ok_cb;
+	fdd.data = ud;
+	fdd.history_key = "move_copy";
+	fdd.title = (ud->type == UtilityType::MOVE) ? _("Geeqie - Move File") : _("Geeqie - Copy File");
+	fdd.parent = GTK_WINDOW(ud->parent);
 
-	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
-
-	ud->fdlg = dialog;
-
-	GtkWidget *with_rename = gtk_button_new_with_label(_("With Rename"));
-
-	gtk_dialog_add_action_widget(GTK_DIALOG(dialog), with_rename, GQ_RESPONSE_WITH_RENAME);
-
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+	file_dialog_show(fdd);
 }
 
 static GtkWidget *furm_simple_vlabel(GtkWidget *box, const gchar *text, gboolean expand)
@@ -3148,13 +3080,12 @@ struct CreateFolderdData
 	FileUtilDoneFunc done_func;
 };
 
-static void create_folder_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
+static void create_folder_cb(GFile *folder, gpointer data)
 {
 	auto cfd = static_cast<CreateFolderdData *>(data);
 
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (folder)
 		{
-		g_autoptr(GFile) folder = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(chooser));
 		g_autofree gchar *current_folder = g_file_get_path(folder);
 		if (g_file_test(current_folder, G_FILE_TEST_IS_DIR))
 			{
@@ -3177,7 +3108,6 @@ static void create_folder_cb(GtkFileChooser *chooser, gint response_id, gpointer
 		}
 
 	g_free(cfd);
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
 void file_util_create_dir(const gchar *path, GtkWidget *parent, const FileUtilDoneFunc &done_func)
@@ -3190,21 +3120,20 @@ void file_util_create_dir(const gchar *path, GtkWidget *parent, const FileUtilDo
 	auto cfd = g_new0(CreateFolderdData, 1);
 	cfd->done_func = done_func;
 
-	FileChooserDialogData fcdd{};
+	FileDialogData fdd{};
 
 	/* The select-folder interface is simpler for creating a new
 	 * folder than the create-folder interface
 	 */
-	fcdd.action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
-	fcdd.accept_text = _("Close");
-	fcdd.data = cfd;
-	fcdd.filename = path;
-	fcdd.response_callback = G_CALLBACK(create_folder_cb);
-	fcdd.title = _("Geeqie - Create Folder");
+	fdd.action = FileDialogAction::SELECT_FOLDER;
+	fdd.accept_text = _("Close");
+	fdd.callback = create_folder_cb;
+	fdd.data = cfd;
+	fdd.filename = path;
+	fdd.title = _("Geeqie - Create Folder");
+	fdd.parent = GTK_WINDOW(parent);
 
-	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
-
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+	file_dialog_show(fdd);
 }
 
 void file_util_rename_dir(FileData *source_fd, const gchar *new_path, GtkWidget *parent, const FileUtilDoneFunc &done_func)

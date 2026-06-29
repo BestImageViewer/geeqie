@@ -404,13 +404,12 @@ static void new_collection_file_save_failed_cb(GtkDialog *dialog, gint, gpointer
 	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
-static gboolean save_new_collection(GtkFileChooser *chooser, gpointer data)
+static gboolean save_new_collection(GFile *file, gpointer data)
 {
 	auto sd = static_cast<SortData *>(data);
 	CollectionData *cd;
 	gboolean ret;
 
-	g_autoptr(GFile) file = gtk_file_chooser_get_file(chooser);
 	g_autofree gchar *path = g_file_get_path(file);
 
 	cd = collection_new(path);
@@ -421,7 +420,7 @@ static gboolean save_new_collection(GtkFileChooser *chooser, gpointer data)
 		}
 	else
 		{
-		GtkWidget *new_collection_file_save_failed = gtk_message_dialog_new_with_markup(GTK_WINDOW(chooser), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, _("<b>File save failed.</b>\n\nFile \"%s\" was not saved."), path);
+		GtkWidget *new_collection_file_save_failed = gtk_message_dialog_new_with_markup(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, _("<b>File save failed.</b>\n\nFile \"%s\" was not saved."), path);
 		gtk_window_set_modal(GTK_WINDOW(new_collection_file_save_failed), TRUE);
 
 		g_signal_connect(new_collection_file_save_failed, "response", G_CALLBACK(new_collection_file_save_failed_cb), nullptr);
@@ -436,30 +435,23 @@ static gboolean save_new_collection(GtkFileChooser *chooser, gpointer data)
 	return ret;
 }
 
-static void new_collection_file_response_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
+static void new_collection_file_response_cb(GFile *file, gpointer data)
 {
 	auto sd = static_cast<SortData *>(data);
 
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (file != nullptr)
 		{
-		g_autoptr(GFile) file = gtk_file_chooser_get_file(chooser);
+		g_autoptr(GFile) parent = g_file_get_parent(file);
 
-		if (file != nullptr)
+		if (save_new_collection(file, sd))
 			{
-			g_autoptr(GFile) parent = g_file_get_parent(file);
-
-			if (save_new_collection(chooser, sd))
+			if (parent != nullptr)
 				{
-				if (parent != nullptr)
-					{
-					g_autofree gchar *dirname = g_file_get_path(parent);
-					history_list_add_to_key("open_collection", dirname, -1);
-					}
+				g_autofree gchar *dirname = g_file_get_path(parent);
+				history_list_add_to_key("open_collection", dirname, -1);
 				}
 			}
 		}
-
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
 static void bar_sort_add_cb(GtkWidget *, gpointer data)
@@ -472,23 +464,20 @@ static void bar_sort_add_cb(GtkWidget *, gpointer data)
 		}
 	else
 		{
-		FileChooserDialogData fcdd{};
+		FileDialogData fdd{};
 
-		fcdd.action = GTK_FILE_CHOOSER_ACTION_SAVE;
-		fcdd.accept_text = _("Save");
-		fcdd.data = sd;
-		fcdd.filename = get_collections_dir();
-		fcdd.filter = GQ_COLLECTION_EXT;
-		fcdd.filter_description = _("Collection files");
-		fcdd.history_key = "open_collection";
-		fcdd.response_callback = G_CALLBACK(new_collection_file_response_cb);
-		fcdd.shortcuts = get_collections_dir();
-		fcdd.suggested_name = _("Untitled.gqv");
-		fcdd.title = _("Create empty Collection file");
+		fdd.action = FileDialogAction::SAVE;
+		fdd.accept_text = _("Save");
+		fdd.callback = new_collection_file_response_cb;
+		fdd.data = sd;
+		fdd.filename = get_collections_dir();
+		fdd.filter = GQ_COLLECTION_EXT;
+		fdd.filter_description = _("Collection files");
+		fdd.history_key = "open_collection";
+		fdd.suggested_name = _("Untitled.gqv");
+		fdd.title = _("Create empty Collection file");
 
-		GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
-
-		gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+		file_dialog_show(fdd);
 		}
 }
 

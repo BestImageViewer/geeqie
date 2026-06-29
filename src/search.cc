@@ -2774,54 +2774,45 @@ static void search_window_destroy_cb(GtkWidget *, gpointer data)
 	delete sd;
 }
 
-static void select_collection_response_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
+static void select_collection_response_cb(GFile *file, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (file)
 		{
-		g_autoptr(GFile) file = gtk_file_chooser_get_file(chooser);
+		g_autofree gchar *filename = g_file_get_path(file);
+		g_autofree gchar *path_noext = remove_extension_from_path(filename);
+		g_autofree gchar *collection = g_path_get_basename(path_noext);
 
-		if (file != nullptr)
+		gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_collection), collection);
+
+		g_autoptr(GFile) parent = g_file_get_parent(file);
+
+		if (parent != nullptr)
 			{
-			g_autofree gchar *filename = g_file_get_path(file);
-			g_autofree gchar *path_noext = remove_extension_from_path(filename);
-			g_autofree gchar *collection = g_path_get_basename(path_noext);
-
-			gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_collection), collection);
-
-			g_autoptr(GFile) parent = g_file_get_parent(file);
-
-			if (parent != nullptr)
-				{
-				g_autofree gchar *dirname = g_file_get_path(parent);
-				history_list_add_to_key("search_collection", dirname, -1);
-				}
+			g_autofree gchar *dirname = g_file_get_path(parent);
+			history_list_add_to_key("search_collection", dirname, -1);
 			}
 		}
-
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
 }
 
 static void select_collection_clicked_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	FileChooserDialogData fcdd{};
+	FileDialogData fdd{};
 
-	fcdd.accept_text = _("Open");
-	fcdd.action = GTK_FILE_CHOOSER_ACTION_OPEN;
-	fcdd.data = sd;
-	fcdd.filename = get_collections_dir();
-	fcdd.filter = GQ_COLLECTION_EXT;
-	fcdd.filter_description = _("Collection files");
-	fcdd.history_key = "open_collection";
-	fcdd.response_callback = G_CALLBACK(select_collection_response_cb);
-	fcdd.title = _("Select collection");
+	fdd.accept_text = _("Open");
+	fdd.action = FileDialogAction::OPEN;
+	fdd.callback = select_collection_response_cb;
+	fdd.data = sd;
+	fdd.filename = get_collections_dir();
+	fdd.filter = GQ_COLLECTION_EXT;
+	fdd.filter_description = _("Collection files");
+	fdd.history_key = "open_collection";
+	fdd.title = _("Select collection");
 
-	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
-
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+	file_dialog_show(fdd);
 }
 
 /* static const ActionDef search_actions[]

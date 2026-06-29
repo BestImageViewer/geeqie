@@ -672,40 +672,76 @@ void bookmark_setup_default()
 	bookmark_add_default(_("Collections"), get_collections_dir());
 }
 
-static void bookmark_add_response_cb(GtkFileChooser *chooser, gint response_id, gpointer data)
+struct BookmarkAliasData
 {
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	GtkWidget *entry;
+	GtkWidget *list;
+	gchar *selected_dir;
+};
+
+void bookmark_alias_data_free(gpointer data)
+{
+	auto *bad = static_cast<BookmarkAliasData *>(data);
+	g_free(bad->selected_dir);
+	g_free(bad);
+}
+
+void bookmark_alias_ok_cb(GenericDialog *, gpointer data)
+{
+	auto *bad = static_cast<BookmarkAliasData *>(data);
+	const gchar *name = gtk_entry_get_text(GTK_ENTRY(bad->entry));
+	gboolean empty_name = (g_strcmp0(name, "") == 0);
+
+	bookmark_list_add(bad->list, empty_name ? filename_from_path(bad->selected_dir) : name, bad->selected_dir);
+}
+
+void bookmark_prompt_for_alias(GtkWidget *list, const gchar *selected_dir)
+{
+	auto *bad = g_new0(BookmarkAliasData, 1);
+	bad->list = list;
+	bad->selected_dir = g_strdup(selected_dir);
+
+	GenericDialog *gd = generic_dialog_new(_("Add Bookmark"), "bookmark_add_alias", widget_get_toplevel(list), TRUE, nullptr, bad);
+	g_object_set_data_full(G_OBJECT(gd->dialog), "bookmark_alias_data", bad, bookmark_alias_data_free);
+
+	generic_dialog_add_message(gd, nullptr, _("Optional name"), nullptr, FALSE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, _("OK"), bookmark_alias_ok_cb, TRUE);
+
+	GtkWidget *entry = gtk_entry_new();
+	gtk_entry_set_placeholder_text(GTK_ENTRY(entry), _("Optional name…"));
+	gtk_widget_set_tooltip_text(entry, _("Optional alias name for the shortcut.\nThis may be amended or added from the Sort Manager pane.\nIf none given, the basename of the folder is used"));
+	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), entry, FALSE, FALSE, 0);
+	gtk_widget_show(entry);
+	generic_dialog_attach_default(gd, entry);
+
+	bad->entry = entry;
+	gtk_widget_show(gd->dialog);
+}
+
+static void bookmark_add_response_cb(GFile *file, gpointer data)
+{
+	if (!file)
 		{
-		GtkWidget *name_entry = gtk_file_chooser_get_extra_widget(chooser);
-		const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
-		gboolean empty_name = (g_strcmp0(name, "") == 0);
-
-		g_autoptr(GFile) file = gtk_file_chooser_get_file(chooser);
-		g_autofree gchar *selected_dir = g_file_get_path(file);
-
-		auto *list = static_cast<GtkWidget *>(data);
-		bookmark_list_add(list, empty_name ? filename_from_path(selected_dir) : name, selected_dir);
+		return;
 		}
 
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
+	g_autofree gchar *selected_dir = g_file_get_path(file);
+	auto *list = static_cast<GtkWidget *>(data);
+	bookmark_prompt_for_alias(list, selected_dir);
 }
 
 void bookmark_add_dialog(const gchar *title, GtkWidget *list)
 {
-	FileChooserDialogData fcdd{};
+	FileDialogData fdd{};
 
-	fcdd.action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
-	fcdd.accept_text = _("Open");
-	fcdd.data = list;
-	fcdd.entry_text = _("Optional name…");
-	fcdd.entry_tooltip =  _("Optional alias name for the shortcut.\nThis may be amended or added from the Sort Manager pane.\nIf none given, the basename of the folder is used");
-	fcdd.filename = layout_get_path(get_current_layout());
-	fcdd.response_callback = G_CALLBACK(bookmark_add_response_cb);
-	fcdd.title = title;
+	fdd.action = FileDialogAction::SELECT_FOLDER;
+	fdd.accept_text = _("Open");
+	fdd.callback = bookmark_add_response_cb;
+	fdd.data = list;
+	fdd.filename = layout_get_path(get_current_layout());
+	fdd.title = title;
 
-	GtkFileChooserDialog *dialog = file_chooser_dialog_new(fcdd);
-
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+	file_dialog_show(fdd);
 }
 
 /*
