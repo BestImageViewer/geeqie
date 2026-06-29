@@ -3710,7 +3710,7 @@ static void config_window_create(LayoutWindow *lw)
 
 	configwindow = window_new("preferences", PIXBUF_INLINE_ICON_CONFIG, _("Preferences"));
 	DEBUG_NAME(configwindow);
-	gtk_window_set_type_hint(GTK_WINDOW(configwindow), GDK_WINDOW_TYPE_HINT_DIALOG);
+	if (lw && lw->window) gtk_window_set_transient_for(GTK_WINDOW(configwindow), GTK_WINDOW(lw->window));
 	g_signal_connect(G_OBJECT(configwindow), "close-request",
 			 G_CALLBACK(config_window_delete), NULL);
 	if (options->save_dialog_window_positions)

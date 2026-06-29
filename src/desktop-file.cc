@@ -192,7 +192,6 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 
 	ew->window = window_new("Desktop", PIXBUF_INLINE_ICON_CONFIG, _("Desktop file"));
 	DEBUG_NAME(ew->window);
-	gtk_window_set_type_hint(GTK_WINDOW(ew->window), GDK_WINDOW_TYPE_HINT_DIALOG);
 
 	g_signal_connect(G_OBJECT(ew->window), "close-request",
 			 G_CALLBACK(editor_window_delete_cb), ew);
@@ -491,7 +490,6 @@ void editor_list_window_create()
 
 	ewl->window = window_new("editors", PIXBUF_INLINE_ICON_CONFIG, _("Plugins"));
 	DEBUG_NAME(ewl->window);
-	gtk_window_set_type_hint(GTK_WINDOW(ewl->window), GDK_WINDOW_TYPE_HINT_DIALOG);
 	g_signal_connect(G_OBJECT(ewl->window), "close-request",
 			 G_CALLBACK(editor_list_window_delete), NULL);
 	gtk_window_set_default_size(GTK_WINDOW(ewl->window), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);

@@ -337,7 +337,6 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	gd->dialog = window_new(role, nullptr, title);
 	DEBUG_NAME(gd->dialog);
-	gtk_window_set_type_hint(GTK_WINDOW(gd->dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
 
 	if (options->save_dialog_window_positions)
 		{
