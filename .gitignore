@@ -18,3 +18,4 @@ README.html
 # Development tools (IDE, linters, etc) files
 .vscode
 meson.build.user
+__pycache__
