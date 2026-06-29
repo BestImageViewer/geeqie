@@ -311,6 +311,13 @@ static void filter_entry_icon_cb(GtkEntry *entry, GtkEntryIconPosition, GdkEvent
 }
 #endif
 
+static gboolean hide_on_close_request(GtkWindow *window, gpointer)
+{
+	gtk_widget_set_visible(GTK_WIDGET(window), FALSE);
+
+	return TRUE; /* prevent destruction */
+}
+
 static LogWindow *log_window_create(GdkRectangle log_window)
 {
 	LogWindow *logwin;
@@ -329,9 +336,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	gtk_window_set_default_size(GTK_WINDOW(window), log_window.width, log_window.height);
 
-	g_signal_connect(G_OBJECT(window), "delete_event",
-			 G_CALLBACK(gtk_widget_hide_on_delete), NULL);
-	gtk_widget_realize(window);
+	g_signal_connect(window, "close-request",  G_CALLBACK(hide_on_close_request), nullptr);
 
 	GtkWidget *scrolledwin = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledwin),
@@ -411,12 +416,13 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	g_signal_connect(forwards_button, "clicked", G_CALLBACK(search_keypress_event_cb<LogWindow::SEARCH_FORWARDS>), logwin);
 
 	GtkWidget *all_button = gtk_toggle_button_new();
-	gtk_button_set_image(GTK_BUTTON(all_button),
-	                     gtk_image_new_from_icon_name("edit-select-all-symbolic"));
+
+	gtk_button_set_child(GTK_BUTTON(all_button), gtk_image_new_from_icon_name("edit-select-all-symbolic"));
+
 	gtk_widget_set_tooltip_text(all_button, _("Highlight all"));
-	gq_gtk_box_pack_start(GTK_BOX(search_box), all_button, FALSE, FALSE, 0) ;
+	gq_gtk_box_pack_start(GTK_BOX(search_box), all_button, FALSE, FALSE, 0);
+
 	g_signal_connect(all_button, "toggled", G_CALLBACK(all_keypress_event_cb), logwin);
-	gq_gtk_widget_show_all(all_button);
 
 	pref_label_new(hbox, _("Filter regexp"));
 
