@@ -578,7 +578,7 @@ static void config_window_help_cb(GtkWidget *, gpointer data)
 	help_window_show(html_section[i]);
 }
 
-static gboolean config_window_delete(GtkWidget *, GdkEventAny *, gpointer)
+static gboolean config_window_delete(GtkWidget *, gpointer)
 {
 	config_window_close_cb(nullptr, nullptr);
 	return TRUE;
@@ -3711,7 +3711,7 @@ static void config_window_create(LayoutWindow *lw)
 	configwindow = window_new("preferences", PIXBUF_INLINE_ICON_CONFIG, _("Preferences"));
 	DEBUG_NAME(configwindow);
 	gtk_window_set_type_hint(GTK_WINDOW(configwindow), GDK_WINDOW_TYPE_HINT_DIALOG);
-	g_signal_connect(G_OBJECT(configwindow), "delete_event",
+	g_signal_connect(G_OBJECT(configwindow), "close-request",
 			 G_CALLBACK(config_window_delete), NULL);
 	if (options->save_dialog_window_positions)
 		{

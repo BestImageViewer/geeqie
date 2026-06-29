@@ -934,7 +934,14 @@ static void vd_gesture_release_cb(GtkGestureClick *gesture,  gint, gdouble x, gd
 		}
 }
 
-gboolean vd_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean vd_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer data)
+{
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	const GqKeyEvent event{keyval, keycode, state, 0};
+	return vd_press_key_cb(widget, &event, data);
+}
+
+gboolean vd_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 	gboolean ret = FALSE;
@@ -1097,8 +1104,9 @@ ViewDir *vd_new(LayoutWindow *lw)
 			 G_CALLBACK(vd_activate_cb), vd);
 	g_signal_connect(G_OBJECT(vd->widget), "destroy",
 			 G_CALLBACK(vd_destroy_cb), vd);
-	g_signal_connect(G_OBJECT(vd->view), "key_press_event",
-			 G_CALLBACK(vd_press_key_cb), vd);
+	GtkEventController *key_controller = gtk_event_controller_key_new();
+	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(vd_key_pressed_cb), vd);
+	gtk_widget_add_controller(vd->view, key_controller);
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);

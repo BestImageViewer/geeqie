@@ -41,7 +41,7 @@ gboolean vdlist_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter);
 void vdlist_rename_by_row(ViewDir *vd, FileData *fd);
 FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row);
 
-gboolean vdlist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
+gboolean vdlist_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data);
 gboolean vdlist_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
 
 void vdlist_destroy_cb(GtkWidget *widget, gpointer data);

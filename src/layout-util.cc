@@ -294,22 +294,21 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 	return stop_signal;
 }
 
-static gboolean layout_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint GdkModifierType state, gpointer data)
+static gboolean layout_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
-
-/** @FIXME
+	(void)keycode;
 	return layout_key_press_common(widget, keyval, state, data);
-*/
 }
 
 void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window)
 {
-	g_signal_connect(G_OBJECT(window), "key_press_event",
-			 G_CALLBACK(layout_key_press_cb), lw);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(layout_key_press_cb), lw);
+	gtk_widget_add_controller(window, controller);
 }
 
-static bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, GdkEventButton *event)
+static bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, const GqMouseButtonEvent *event)
 {
 	enum MouseButton
 		{

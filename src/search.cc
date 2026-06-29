@@ -1133,7 +1133,7 @@ static void search_result_menu_cb(GSimpleAction *, GVariant *, gpointer data)
  *-------------------------------------------------------------------
  */
 
-static gboolean search_result_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+static gboolean search_result_press_cb(GtkWidget *widget, const GqMouseButtonEvent *bevent, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 	GtkTreeModel *store;
@@ -1159,7 +1159,7 @@ static gboolean search_result_press_cb(GtkWidget *widget, GdkEventButton *bevent
 
 	if (!mfd) return FALSE;
 
-	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->type == GDK_2BUTTON_PRESS)
+	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->press_count == 2)
 		{
 		layout_set_fd(nullptr, mfd->fd);
 		}
@@ -1182,7 +1182,7 @@ static gboolean search_result_press_cb(GtkWidget *widget, GdkEventButton *bevent
 		return TRUE;
 		}
 
-	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->type == GDK_BUTTON_PRESS &&
+	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->press_count == 1 &&
 	    !(bevent->state & GDK_SHIFT_MASK ) &&
 	    !(bevent->state & GDK_CONTROL_MASK ) &&
 	    search_result_row_selected(sd, mfd->fd))
@@ -1195,7 +1195,7 @@ static gboolean search_result_press_cb(GtkWidget *widget, GdkEventButton *bevent
 	return FALSE;
 }
 
-static gboolean search_result_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+static gboolean search_result_release_cb(GtkWidget *widget, const GqMouseButtonEvent *bevent, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 	GtkTreeModel *store;
@@ -2725,7 +2725,7 @@ static void search_window_help_action_cb(GSimpleAction *, GVariant *, gpointer)
 	help_window_show("GuideImageSearchSearch.html");
 }
 
-static gboolean search_window_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
+static gboolean search_window_delete_cb(GtkWidget *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
@@ -2889,7 +2889,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 		gtk_window_set_default_size(GTK_WINDOW(sd->ui.window), DEF_SEARCH_WIDTH, DEF_SEARCH_HEIGHT);
 		}
 
-	g_signal_connect(G_OBJECT(sd->ui.window), "delete_event",
+	g_signal_connect(G_OBJECT(sd->ui.window), "close-request",
 	                 G_CALLBACK(search_window_delete_cb), sd);
 	g_signal_connect(G_OBJECT(sd->ui.window), "destroy",
 	                 G_CALLBACK(search_window_destroy_cb), sd);
@@ -3229,10 +3229,37 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	search_result_add_column(sd, SEARCH_COLUMN_DIMENSIONS, _("Dimensions"), FALSE, FALSE);
 	search_result_add_column(sd, SEARCH_COLUMN_PATH, _("Path"), FALSE, FALSE);
 
-	g_signal_connect(G_OBJECT(sd->ui.result_view), "button_press_event",
-	                 G_CALLBACK(search_result_press_cb), sd);
-	g_signal_connect(G_OBJECT(sd->ui.result_view), "button_release_event",
-	                 G_CALLBACK(search_result_release_cb), sd);
+	GtkGesture *gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
+	g_signal_connect(gesture, "pressed", G_CALLBACK(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+	{
+		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+		const GqMouseButtonEvent event{
+			gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
+			x, y,
+			gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
+			static_cast<guint>(n_press)
+		};
+		if (search_result_press_cb(widget, &event, data))
+			{
+			gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+			}
+	}), sd);
+	g_signal_connect(gesture, "released", G_CALLBACK(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+	{
+		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+		const GqMouseButtonEvent event{
+			gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
+			x, y,
+			gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
+			static_cast<guint>(n_press)
+		};
+		if (search_result_release_cb(widget, &event, data))
+			{
+			gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+			}
+	}), sd);
+	gtk_widget_add_controller(sd->ui.result_view, GTK_EVENT_CONTROLLER(gesture));
 
 	hbox = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
 

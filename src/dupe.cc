@@ -3172,7 +3172,7 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 
 }
 
-static gboolean dupe_listview_press_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+static gboolean dupe_listview_press_cb(GtkWidget *widget, const GqMouseButtonEvent *bevent, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 	GtkTreeModel *store;
@@ -3215,7 +3215,7 @@ static gboolean dupe_listview_press_cb(GtkWidget *widget, GdkEventButton *bevent
 	if (!di) return FALSE;
 
 	if (bevent->button == GDK_BUTTON_PRIMARY &&
-	    bevent->type == GDK_2BUTTON_PRESS)
+	    bevent->press_count == 2)
 		{
 		dupe_menu_view(di, widget, FALSE);
 		}
@@ -3240,7 +3240,7 @@ static gboolean dupe_listview_press_cb(GtkWidget *widget, GdkEventButton *bevent
 		}
 
 	if (bevent->button == GDK_BUTTON_PRIMARY &&
-	    bevent->type == GDK_BUTTON_PRESS &&
+	    bevent->press_count == 1 &&
 	    !(bevent->state & GDK_SHIFT_MASK ) &&
 	    !(bevent->state & GDK_CONTROL_MASK ) &&
 	    dupe_listview_item_is_selected(di, widget))
@@ -3253,7 +3253,7 @@ static gboolean dupe_listview_press_cb(GtkWidget *widget, GdkEventButton *bevent
 	return FALSE;
 }
 
-static gboolean dupe_listview_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data)
+static gboolean dupe_listview_release_cb(GtkWidget *widget, const GqMouseButtonEvent *bevent, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 	GtkTreeModel *store;
@@ -3706,8 +3706,11 @@ static void dupe_window_custom_threshold_cb(GtkSpinButton *custom_threshold, gpo
 	dupe_window_recompare(dw);
 }
 
-static gboolean dupe_window_keypress_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean dupe_window_keypress_cb(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer data)
 {
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	const GqKeyEvent event_data{keyval, keycode, state, 0};
+	const GqKeyEvent *event = &event_data;
 	auto dw = static_cast<DupeWindow *>(data);
 	gboolean stop_signal = FALSE;
 	gboolean on_second;
@@ -3958,7 +3961,7 @@ static void dupe_window_close_cb(GSimpleAction *, GVariant *, gpointer data)
 	dupe_window_close(dw);
 }
 
-static gint dupe_window_delete(GtkWidget *, GdkEvent *, gpointer data)
+static gint dupe_window_delete(GtkWidget *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 	dupe_window_close(dw);
@@ -4291,10 +4294,11 @@ DupeWindow *dupe_window_new()
 	gtk_window_set_resizable(GTK_WINDOW(dw->window), TRUE);
 	gq_gtk_widget_set_border_width(dw->window, 0);
 
-	g_signal_connect(G_OBJECT(dw->window), "delete_event",
+	g_signal_connect(G_OBJECT(dw->window), "close-request",
 			 G_CALLBACK(dupe_window_delete), dw);
-	g_signal_connect(G_OBJECT(dw->window), "key_press_event",
-			 G_CALLBACK(dupe_window_keypress_cb), dw);
+	GtkEventController *key_controller = gtk_event_controller_key_new();
+	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(dupe_window_keypress_cb), dw);
+	gtk_widget_add_controller(dw->window, key_controller);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_container_add(dw->window, vbox);
@@ -4489,14 +4493,69 @@ DupeWindow *dupe_window_new()
 	/* order is important here, dnd_init should be seeing mouse
 	 * presses before we possibly handle (and stop) the signal
 	 */
-	g_signal_connect(G_OBJECT(dw->listview), "button_press_event",
-			 G_CALLBACK(dupe_listview_press_cb), dw);
-	g_signal_connect(G_OBJECT(dw->listview), "button_release_event",
-			 G_CALLBACK(dupe_listview_release_cb), dw);
-	g_signal_connect(G_OBJECT(dw->second_listview), "button_press_event",
-			 G_CALLBACK(dupe_listview_press_cb), dw);
-	g_signal_connect(G_OBJECT(dw->second_listview), "button_release_event",
-			 G_CALLBACK(dupe_listview_release_cb), dw);
+	GtkGesture *gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
+	g_signal_connect(gesture, "pressed", G_CALLBACK(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+	{
+		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+		const GqMouseButtonEvent event{
+			gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
+			x, y,
+			gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
+			static_cast<guint>(n_press)
+		};
+		if (dupe_listview_press_cb(widget, &event, data))
+			{
+			gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+			}
+	}), dw);
+	g_signal_connect(gesture, "released", G_CALLBACK(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+	{
+		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+		const GqMouseButtonEvent event{
+			gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
+			x, y,
+			gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
+			static_cast<guint>(n_press)
+		};
+		if (dupe_listview_release_cb(widget, &event, data))
+			{
+			gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+			}
+	}), dw);
+	gtk_widget_add_controller(dw->listview, GTK_EVENT_CONTROLLER(gesture));
+
+	gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
+	g_signal_connect(gesture, "pressed", G_CALLBACK(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+	{
+		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+		const GqMouseButtonEvent event{
+			gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
+			x, y,
+			gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
+			static_cast<guint>(n_press)
+		};
+		if (dupe_listview_press_cb(widget, &event, data))
+			{
+			gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+			}
+	}), dw);
+	g_signal_connect(gesture, "released", G_CALLBACK(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+	{
+		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+		const GqMouseButtonEvent event{
+			gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
+			x, y,
+			gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
+			static_cast<guint>(n_press)
+		};
+		if (dupe_listview_release_cb(widget, &event, data))
+			{
+			gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+			}
+	}), dw);
+	gtk_widget_add_controller(dw->second_listview, GTK_EVENT_CONTROLLER(gesture));
 
 	gtk_widget_show(dw->window);
 

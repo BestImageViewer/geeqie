@@ -83,7 +83,7 @@ static void tree_edit_do(TreeEditData *ted)
 		}
 }
 
-static gboolean tree_edit_click_end_cb(GtkWidget *, GdkEventButton *, gpointer data)
+static gboolean tree_edit_click_end_cb(GtkGestureClick *, gint, gdouble, gdouble, gpointer data)
 {
 	auto ted = static_cast<TreeEditData *>(data);
 
@@ -93,28 +93,29 @@ static gboolean tree_edit_click_end_cb(GtkWidget *, GdkEventButton *, gpointer d
 	return TRUE;
 }
 
-static gboolean tree_edit_click_cb(GtkWidget *, GdkEventButton *event, gpointer data)
+static gboolean tree_edit_click_cb(GtkGestureClick *, gint, gdouble x, gdouble y, gpointer data)
 {
 	auto ted = static_cast<TreeEditData *>(data);
 
-	auto xr = static_cast<gint>(event->x_root);
-	auto yr = static_cast<gint>(event->y_root);
+	auto xr = static_cast<gint>(x);
+	auto yr = static_cast<gint>(y);
 
 	if (!widget_received_event(ted->window, {xr, yr}))
 		{
 		/* gobble the release event, so it does not propgate to an underlying widget */
-		g_signal_connect(G_OBJECT(ted->window), "button_release_event",
-				 G_CALLBACK(tree_edit_click_end_cb), ted);
+		GtkGesture *release_gesture = gtk_gesture_click_new();
+		g_signal_connect(release_gesture, "released", G_CALLBACK(tree_edit_click_end_cb), ted);
+		gtk_widget_add_controller(ted->window, GTK_EVENT_CONTROLLER(release_gesture));
 		return TRUE;
 		}
 	return FALSE;
 }
 
-static gboolean tree_edit_key_press_cb(GtkWidget *, GdkEventKey *event, gpointer data)
+static gboolean tree_edit_key_press_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType, gpointer data)
 {
 	auto ted = static_cast<TreeEditData *>(data);
 
-	switch (event->keyval)
+	switch (keyval)
 		{
 		case GDK_KEY_Return:
 		case GDK_KEY_KP_Enter:
@@ -244,10 +245,12 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 	gtk_window_set_transient_for(GTK_WINDOW(ted->window), GTK_WINDOW(lw->window));
 
 	gtk_window_set_resizable(GTK_WINDOW(ted->window), FALSE);
-	g_signal_connect(G_OBJECT(ted->window), "button_press_event",
-			 G_CALLBACK(tree_edit_click_cb), ted);
-	g_signal_connect(G_OBJECT(ted->window), "key_press_event",
-			 G_CALLBACK(tree_edit_key_press_cb), ted);
+	GtkGesture *gesture = gtk_gesture_click_new();
+	g_signal_connect(gesture, "pressed", G_CALLBACK(tree_edit_click_cb), ted);
+	gtk_widget_add_controller(ted->window, GTK_EVENT_CONTROLLER(gesture));
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(tree_edit_key_press_cb), ted);
+	gtk_widget_add_controller(ted->window, controller);
 
 	ted->entry = gtk_entry_new();
 	gq_gtk_entry_set_text(GTK_ENTRY(ted->entry), ted->old_name);

@@ -282,7 +282,7 @@ struct PixbufRendererClass
 	void (*update_pixel)(PixbufRenderer *pr);
 
 	void (*render_complete)(PixbufRenderer *pr);
-	void (*drag)(PixbufRenderer *pr, GdkEvent *event);
+	void (*drag)(PixbufRenderer *pr, GqPointerMotionEvent *event);
 };
 
 

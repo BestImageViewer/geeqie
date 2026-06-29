@@ -57,6 +57,16 @@ namespace
 
 constexpr gdouble aspect_ratios[5] {0.0, gdouble(1.0), gdouble(4.0) / 3, gdouble(3) / 2, gdouble(16) / 9};
 
+GdkScrollDirection scroll_direction_from_deltas(gdouble dx, gdouble dy)
+{
+	if (std::abs(dx) > std::abs(dy))
+		{
+		return dx < 0 ? GDK_SCROLL_LEFT : GDK_SCROLL_RIGHT;
+		}
+
+	return dy < 0 ? GDK_SCROLL_UP : GDK_SCROLL_DOWN;
+}
+
 /*
  * SelectionRectangle
  */
@@ -239,13 +249,14 @@ static void image_release_cb(PixbufRenderer *, GqMouseButtonEvent *event, gpoint
 /** @FIXME GTK4
 	layout_handle_user_defined_mouse_buttons(lw, event->button);
 */
+	(void)event;
 }
 
-static void image_drag_cb(PixbufRenderer *pr, gdouble x, gdouble y, gpointer data)
+static void image_drag_cb(PixbufRenderer *pr, GqPointerMotionEvent *event, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 
-	selection_rectangle.set_cursor(x, y);
+	selection_rectangle.set_cursor(event->x, event->y);
 
 	if (options->draw_rectangle)
 		{
@@ -298,10 +309,7 @@ static void image_drag_cb(PixbufRenderer *pr, gdouble x, gdouble y, gpointer dat
 	if (imd->func_drag)
 		{
 		imd->func_drag(imd,
-		               x,
-		               y,
-		               static_cast<gfloat>(selection_rectangle.x) / selection_rectangle.width,
-		               static_cast<gfloat>(selection_rectangle.y) / selection_rectangle.height,
+		               event,
 		               imd->data_drag);
 		}
 }
@@ -1121,6 +1129,24 @@ static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble, g
 		return FALSE;
 		}
 
+	gdouble x = 0;
+	gdouble y = 0;
+	gdouble dx = 0;
+	gdouble dy = 0;
+	gdk_event_get_position(event, &x, &y);
+	gdk_scroll_event_get_deltas(event, &dx, &dy);
+	const GqScrollEvent scroll_event{
+		x,
+		y,
+		dx,
+		dy,
+		gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(controller)),
+		gdk_scroll_event_get_direction(event) != GDK_SCROLL_SMOOTH
+			? gdk_scroll_event_get_direction(event)
+			: scroll_direction_from_deltas(dx, dy),
+		gdk_event_get_time(event)
+	};
+
 	LayoutWindow *lw = get_current_layout();
 	gboolean in_lw = FALSE;
 
@@ -1145,19 +1171,19 @@ static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble, g
 				if (lw->split_images[i])
 					{
 					layout_image_activate(lw, i, FALSE);
-					imd->func_scroll(lw->split_images[i], event, lw->split_images[i]->data_scroll);
+					imd->func_scroll(lw->split_images[i], &scroll_event, lw->split_images[i]->data_scroll);
 					}
 				}
 			}
 		else
 			{
-			imd->func_scroll(imd, event, imd->data_scroll);
+			imd->func_scroll(imd, &scroll_event, imd->data_scroll);
 			}
 
 		return TRUE;
 		}
 
-	imd->func_scroll(imd, event, imd->data_scroll);
+	imd->func_scroll(imd, &scroll_event, imd->data_scroll);
 	return TRUE;
 }
 
@@ -1221,7 +1247,7 @@ void image_set_button_func(ImageWindow *imd,
 }
 
 void image_set_drag_func(ImageWindow *imd,
-                         void (*func)(ImageWindow *, gdouble x, gdouble y, gdouble dx, gdouble dy, gpointer),
+                         void (*func)(ImageWindow *, const GqPointerMotionEvent *event, gpointer),
                          gpointer data)
 {
 	imd->func_drag = func;
@@ -1229,7 +1255,7 @@ void image_set_drag_func(ImageWindow *imd,
 }
 
 void image_set_scroll_func(ImageWindow *imd,
-                           void (*func)(ImageWindow *, GdkEvent *event, gpointer),
+                           void (*func)(ImageWindow *, const GqScrollEvent *event, gpointer),
                            gpointer data)
 {
 	imd->func_scroll = func;

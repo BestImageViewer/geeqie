@@ -186,7 +186,7 @@ gboolean fullscreen_saver_block_cb(gpointer)
 	return G_SOURCE_CONTINUE;
 }
 
-gboolean fullscreen_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
+gboolean fullscreen_delete_cb(GtkWidget *, GdkEvent *, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 

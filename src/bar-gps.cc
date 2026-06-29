@@ -596,7 +596,7 @@ void bar_pane_gps_map_centreing(PaneGPSData *pgd)
 	gtk_widget_show(gd->dialog);
 }
 
-gboolean bar_pane_gps_map_keypress_cb(GtkWidget *, GdkEventButton *bevent, gpointer data)
+gboolean bar_pane_gps_map_keypress_cb(GtkWidget *, const GqMouseButtonEvent *bevent, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 	GtkWidget *menu;

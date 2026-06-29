@@ -1607,7 +1607,7 @@ static void layout_image_button_cb(ImageWindow *imd, GqMouseButtonEvent *event, 
 		}
 }
 
-static void layout_image_scroll_cb(ImageWindow *imd, GdkEventScroll *event, gpointer data)
+static void layout_image_scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -1655,11 +1655,11 @@ static void layout_image_scroll_cb(ImageWindow *imd, GdkEventScroll *event, gpoi
 		}
 }
 
-static void layout_image_drag_cb(ImageWindow *imd, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer data)
+static void layout_image_drag_cb(ImageWindow *imd, const GqPointerMotionEvent *event, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
-	const auto set_scroll_center = [imd, event, dx, dy](ImageWindow *image)
+	const auto set_scroll_center = [imd, event](ImageWindow *image)
 	{
 		if (image == imd) return;
 
@@ -1673,8 +1673,8 @@ static void layout_image_drag_cb(ImageWindow *imd, GdkEventMotion *event, gdoubl
 		else
 			{
 			image_get_scroll_center(image, sx, sy);
-			sx += dx;
-			sy += dy;
+			sx += event->dx;
+			sy += event->dy;
 			}
 
 		image_set_scroll_center(image, sx, sy);
@@ -1723,7 +1723,7 @@ static void layout_image_button_inactive_cb(ImageWindow *imd, GqMouseButtonEvent
 
 }
 
-static void layout_image_drag_inactive_cb(ImageWindow *imd, GdkEventMotion *event, gdouble dx, gdouble dy, gpointer data)
+static void layout_image_drag_inactive_cb(ImageWindow *imd, const GqPointerMotionEvent *event, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	gint i = image_idx(lw, imd);
@@ -1734,7 +1734,7 @@ static void layout_image_drag_inactive_cb(ImageWindow *imd, GdkEventMotion *even
 		}
 
 	/* continue as with active image */
-	layout_image_drag_cb(imd, event, dx, dy, data);
+	layout_image_drag_cb(imd, event, data);
 }
 
 

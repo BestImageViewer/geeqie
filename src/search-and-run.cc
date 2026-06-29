@@ -159,12 +159,12 @@ static gboolean entry_box_activate_cb(GtkWidget *, gpointer data)
 	return TRUE;
 }
 
-static gboolean keypress_cb(GtkWidget *, GdkEventKey *event, gpointer data)
+static gboolean keypress_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType, gpointer data)
 {
 	auto sar = static_cast<SarData *>(data);
 	gboolean ret = FALSE;
 
-	switch (event->keyval)
+	switch (keyval)
 		{
 		case GDK_KEY_Escape:
 			search_and_run_destroy(sar);
@@ -246,7 +246,9 @@ GtkWidget *search_and_run_new(LayoutWindow *lw)
 	gtk_entry_completion_set_match_func(GTK_ENTRY_COMPLETION(gtk_builder_get_object(sar->builder, "completion")), match_func, sar, nullptr);
 
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(sar->builder, "completion")), "match-selected", G_CALLBACK(match_selected_cb), sar);
-	g_signal_connect(G_OBJECT(gtk_builder_get_object(sar->builder, "entry")), "key_press_event", G_CALLBACK(keypress_cb), sar);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(keypress_cb), sar);
+	gtk_widget_add_controller(GTK_WIDGET(gtk_builder_get_object(sar->builder, "entry")), controller);
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(sar->builder, "entry")), "activate", G_CALLBACK(entry_box_activate_cb), sar);
 
 	gtk_widget_show(sar->window);

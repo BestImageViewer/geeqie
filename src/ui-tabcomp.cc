@@ -207,12 +207,13 @@ static void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
 		}
 }
 
-static gboolean tab_completion_popup_key_press(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean tab_completion_popup_key_press(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType, gpointer data)
 {
-	const bool is_supported_key = event->keyval >= 0x20 && event->keyval <= 0xFF;
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	const bool is_supported_key = keyval >= 0x20 && keyval <= 0xFF;
 
-	if (event->keyval != GDK_KEY_Tab &&
-	    event->keyval != GDK_KEY_BackSpace &&
+	if (keyval != GDK_KEY_Tab &&
+	    keyval != GDK_KEY_BackSpace &&
 	    !is_supported_key)
 		return FALSE;
 
@@ -222,7 +223,7 @@ static gboolean tab_completion_popup_key_press(GtkWidget *widget, GdkEventKey *e
 		gchar buf[2];
 		gint p = -1;
 
-		buf[0] = event->keyval;
+		buf[0] = keyval;
 		buf[1] = '\0';
 		gtk_editable_insert_text(GTK_EDITABLE(td->entry), buf, 1, &p);
 		gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
@@ -289,8 +290,9 @@ static void tab_completion_popup_list(TabCompData *td, GList *list)
 		count++;
 		}
 
-	g_signal_connect(G_OBJECT(menu), "key_press_event",
-			 G_CALLBACK(tab_completion_popup_key_press), td);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(tab_completion_popup_key_press), td);
+	gtk_widget_add_controller(menu, controller);
 
 	gtk_menu_popup_at_widget(GTK_MENU(menu), td->entry, GDK_GRAVITY_NORTH_EAST, GDK_GRAVITY_NORTH, nullptr);
 }
@@ -452,15 +454,16 @@ static gboolean tab_completion_do(TabCompData *td)
 	return FALSE;
 }
 
-static gboolean tab_completion_key_pressed(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean tab_completion_key_pressed(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
 {
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	auto td = static_cast<TabCompData *>(data);
 	gboolean stop_signal = FALSE;
 
-	switch (event->keyval)
+	switch (keyval)
 		{
 		case GDK_KEY_Tab:
-			if (!(event->state & GDK_CONTROL_MASK))
+			if (!(state & GDK_CONTROL_MASK))
 				{
 				if (tab_completion_do(td))
 					{
@@ -471,7 +474,7 @@ static gboolean tab_completion_key_pressed(GtkWidget *widget, GdkEventKey *event
 			break;
 		case GDK_KEY_Return: case GDK_KEY_KP_Enter:
 			if (td->fd_button &&
-			    (event->state & GDK_CONTROL_MASK))
+			    (state & GDK_CONTROL_MASK))
 				{
 				tab_completion_select_show(td);
 				stop_signal = TRUE;
@@ -484,8 +487,6 @@ static gboolean tab_completion_key_pressed(GtkWidget *widget, GdkEventKey *event
 		default:
 			break;
 		}
-
-	if (stop_signal) g_signal_stop_emission_by_name(G_OBJECT(widget), "key_press_event");
 
 	return (stop_signal);
 }
@@ -552,8 +553,9 @@ static TabCompData *tab_completion_set_to_entry(GtkWidget *entry)
 
 	g_object_set_data_full(G_OBJECT(entry), "tab_completion_data", td, tab_completion_destroy);
 
-	g_signal_connect(G_OBJECT(entry), "key_press_event",
-	                 G_CALLBACK(tab_completion_key_pressed), td);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(tab_completion_key_pressed), td);
+	gtk_widget_add_controller(entry, controller);
 	return td;
 }
 

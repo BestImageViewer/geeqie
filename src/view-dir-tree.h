@@ -52,7 +52,7 @@ gboolean vdtree_populate_path_by_iter(ViewDir *vd, GtkTreeIter *iter, gboolean f
 FileData *vdtree_populate_path(ViewDir *vd, FileData *target_fd, gboolean expand, gboolean force);
 void vdtree_rename_by_data(ViewDir *vd, FileData *fd);
 
-gboolean vdtree_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
+gboolean vdtree_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data);
 gboolean vdtree_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
 
 void vdtree_destroy_cb(GtkWidget *widget, gpointer data);

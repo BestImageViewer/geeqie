@@ -527,7 +527,7 @@ static void button_cb(ImageWindow *imd, GqMouseButtonEvent *event, gpointer data
 		}
 }
 
-static void scroll_cb(ImageWindow *imd, GdkEventScroll *event, gpointer data)
+static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
@@ -702,7 +702,7 @@ static void view_window_close(ViewWindow *vw)
 	gq_gtk_widget_destroy(vw->window);
 }
 
-static gboolean view_window_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
+static gboolean view_window_delete_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
@@ -949,7 +949,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 
 	g_signal_connect(G_OBJECT(vw->window), "destroy",
 			 G_CALLBACK(view_window_destroy_cb), vw);
-	g_signal_connect(G_OBJECT(vw->window), "delete_event",
+	g_signal_connect(G_OBJECT(vw->window), "close-request",
 			 G_CALLBACK(view_window_delete_cb), vw);
 
 	GtkEventController *controller = gtk_event_controller_key_new();

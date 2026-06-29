@@ -111,12 +111,7 @@ void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *c
 void vd_color_cb(GtkTreeViewColumn *tree_column, GtkCellRenderer *cell, GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data);
 
 gboolean vd_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
-gboolean vd_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
+gboolean vd_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data);
 gboolean vd_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
-#else
-gboolean vd_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer data);
-gboolean vd_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data);
-gboolean vd_press_cb(GtkWidget *widget,  GdkEventButton *bevent, gpointer data);
-
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

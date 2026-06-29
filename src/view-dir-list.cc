@@ -339,7 +339,7 @@ void vdlist_refresh(ViewDir *vd)
 	vdlist_populate(vd, FALSE);
 }
 
-gboolean vdlist_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
+gboolean vdlist_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 

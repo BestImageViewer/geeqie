@@ -716,7 +716,7 @@ void vdtree_refresh(ViewDir *vd)
  *----------------------------------------------------------------------------
  */
 
-gboolean vdtree_press_key_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
+gboolean vdtree_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 	GtkTreeIter iter;

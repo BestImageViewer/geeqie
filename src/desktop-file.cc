@@ -126,7 +126,7 @@ void editor_window_close_cb(GtkWidget *, gpointer data)
 	g_free(ew);
 }
 
-gint editor_window_delete_cb(GtkWidget *w, GdkEventAny *, gpointer data)
+gint editor_window_delete_cb(GtkWidget *w, gpointer data)
 {
 	editor_window_close_cb(w, data);
 	return TRUE;
@@ -194,7 +194,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	DEBUG_NAME(ew->window);
 	gtk_window_set_type_hint(GTK_WINDOW(ew->window), GDK_WINDOW_TYPE_HINT_DIALOG);
 
-	g_signal_connect(G_OBJECT(ew->window), "delete_event",
+	g_signal_connect(G_OBJECT(ew->window), "close-request",
 			 G_CALLBACK(editor_window_delete_cb), ew);
 
 	gtk_window_set_default_size(GTK_WINDOW(ew->window), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
@@ -274,7 +274,7 @@ void editor_list_window_close_cb(GtkWidget *, gpointer)
 	editor_list_window = nullptr;
 }
 
-gboolean editor_list_window_delete(GtkWidget *, GdkEventAny *, gpointer)
+gboolean editor_list_window_delete(GtkWidget *, gpointer)
 {
 	editor_list_window_close_cb(nullptr, nullptr);
 	return TRUE;
@@ -492,7 +492,7 @@ void editor_list_window_create()
 	ewl->window = window_new("editors", PIXBUF_INLINE_ICON_CONFIG, _("Plugins"));
 	DEBUG_NAME(ewl->window);
 	gtk_window_set_type_hint(GTK_WINDOW(ewl->window), GDK_WINDOW_TYPE_HINT_DIALOG);
-	g_signal_connect(G_OBJECT(ewl->window), "delete_event",
+	g_signal_connect(G_OBJECT(ewl->window), "close-request",
 			 G_CALLBACK(editor_list_window_delete), NULL);
 	gtk_window_set_default_size(GTK_WINDOW(ewl->window), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
 	gtk_window_set_resizable(GTK_WINDOW(ewl->window), TRUE);

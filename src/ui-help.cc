@@ -139,7 +139,7 @@ void help_window_load_text(GtkWidget *text, const gchar *path)
 	gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(text), &iter, 0.0, TRUE, 0, 0);
 }
 
-gboolean help_window_delete_cb(GtkWidget *widget, GdkEventAny *, gpointer)
+gboolean help_window_delete_cb(GtkWidget *widget, gpointer)
 {
 	gq_gtk_widget_destroy(widget);
 	return TRUE;
@@ -185,7 +185,7 @@ GtkWidget *help_window_new(const gchar *title,
 	gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
 	gtk_window_set_default_size(GTK_WINDOW(window), HELP_WINDOW_WIDTH, HELP_WINDOW_HEIGHT);
 
-	g_signal_connect(G_OBJECT(window), "delete_event",
+	g_signal_connect(G_OBJECT(window), "close-request",
 			 G_CALLBACK(help_window_delete_cb), NULL);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);

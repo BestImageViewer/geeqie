@@ -1052,8 +1052,10 @@ static FileData *pan_menu_click_fd(PanWindow *pw)
 	return nullptr;
 }
 
-static gboolean pan_window_key_press_cb(GtkWidget *, GdkEventKey *event, gpointer data)
+static gboolean pan_window_key_press_cb(GtkEventControllerKey *, guint keyval, guint keycode, GdkModifierType state, gpointer data)
 {
+	const GqKeyEvent event_data{keyval, keycode, state, 0};
+	const GqKeyEvent *event = &event_data;
 	auto pw = static_cast<PanWindow *>(data);
 	PixbufRenderer *pr;
 	FileData *fd;
@@ -1320,10 +1322,11 @@ static void button_cb(PixbufRenderer *pr, GqMouseButtonEvent *event, gpointer da
 		}
 }
 
-static void scroll_cb(PixbufRenderer *pr, GdkEventScroll *event, gpointer)
+static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer)
 {
 	gint w;
 	gint h;
+	auto *pr = PIXBUF_RENDERER(imd->pr);
 
 	w = pr->vis_width;
 	h = pr->vis_height;
@@ -1374,8 +1377,7 @@ static void pan_image_set_buttons(PanWindow *pw, ImageWindow *imd)
 {
 	g_signal_connect(G_OBJECT(imd->pr), "clicked",
 			 G_CALLBACK(button_cb), pw);
-	g_signal_connect(G_OBJECT(imd->pr), "scroll_event",
-			 G_CALLBACK(scroll_cb), pw);
+	image_set_scroll_func(imd, scroll_cb, pw);
 }
 
 static void pan_fullscreen_toggle(PanWindow *pw, gboolean force_off)
@@ -1395,8 +1397,9 @@ static void pan_fullscreen_toggle(PanWindow *pw, gboolean force_off)
 		};
 		pw->fs = fullscreen_start(pw->window, pw->imd, pan_fullscreen_stop_func);
 		pan_image_set_buttons(pw, pw->fs->imd);
-		g_signal_connect(G_OBJECT(pw->fs->window), "key_press_event",
-				 G_CALLBACK(pan_window_key_press_cb), pw);
+		GtkEventController *controller = gtk_event_controller_key_new();
+		g_signal_connect(controller, "key-pressed", G_CALLBACK(pan_window_key_press_cb), pw);
+		gtk_widget_add_controller(pw->fs->window, controller);
 
 		pw->imd = pw->fs->imd;
 		}
@@ -1533,7 +1536,7 @@ static void pan_window_close(PanWindow *pw)
 	delete pw;
 }
 
-static gboolean pan_window_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
+static gboolean pan_window_delete_cb(GtkWidget *, gpointer data)
 {
 	auto pw = static_cast<PanWindow *>(data);
 
@@ -2066,8 +2069,10 @@ static void pan_window_new_real(FileData *dir_fd)
 	gq_gtk_box_pack_end(GTK_BOX(box), pw->filter_ui->filter_button, FALSE, FALSE, 0);
 	gtk_widget_show(pw->filter_ui->filter_button);
 
-	g_signal_connect(G_OBJECT(pw->window), "delete_event", G_CALLBACK(pan_window_delete_cb), pw);
-	g_signal_connect(G_OBJECT(pw->window), "key_press_event", G_CALLBACK(pan_window_key_press_cb), pw);
+	g_signal_connect(G_OBJECT(pw->window), "close-request", G_CALLBACK(pan_window_delete_cb), pw);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(pan_window_key_press_cb), pw);
+	gtk_widget_add_controller(pw->window, controller);
 
 	gtk_window_set_default_size(GTK_WINDOW(pw->window), PAN_WINDOW_DEFAULT_WIDTH, PAN_WINDOW_DEFAULT_HEIGHT);
 

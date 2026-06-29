@@ -1700,7 +1700,7 @@ static void layout_tools_hide(LayoutWindow *lw, gboolean hide)
 	lw->options.tools_hidden = hide;
 }
 
-static gboolean layout_tools_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
+static gboolean layout_tools_delete_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
@@ -2243,7 +2243,7 @@ void layout_info_pixel_set(LayoutWindow *lw, gboolean show)
  *-----------------------------------------------------------------------------
  */
 
-static gint layout_config_delete_cb(GtkWidget *w, GdkEventAny *event, gpointer data);
+static gint layout_config_delete_cb(GtkWidget *w, gpointer data);
 
 static void layout_config_close_cb(GtkWidget *, gpointer data)
 {
@@ -2254,7 +2254,7 @@ static void layout_config_close_cb(GtkWidget *, gpointer data)
 	g_free(lc);
 }
 
-static gint layout_config_delete_cb(GtkWidget *w, GdkEventAny *, gpointer data)
+static gint layout_config_delete_cb(GtkWidget *w, gpointer data)
 {
 	layout_config_close_cb(w, data);
 	return TRUE;
@@ -2318,7 +2318,7 @@ void layout_show_config_window(LayoutWindow *lw)
 	DEBUG_NAME(lc->configwindow);
 	gtk_window_set_type_hint(GTK_WINDOW(lc->configwindow), GDK_WINDOW_TYPE_HINT_DIALOG);
 
-	g_signal_connect(G_OBJECT(lc->configwindow), "delete_event",
+	g_signal_connect(G_OBJECT(lc->configwindow), "close-request",
 			 G_CALLBACK(layout_config_delete_cb), lc);
 
 	gtk_window_set_default_size(GTK_WINDOW(lc->configwindow), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
@@ -2520,7 +2520,7 @@ void layout_free(LayoutWindow *lw)
 	g_free(lw);
 }
 
-static gboolean layout_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
+static gboolean layout_delete_cb(GtkWidget *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 

@@ -42,6 +42,34 @@ struct GqMouseButtonEvent
 	guint press_count;
 };
 
+struct GqKeyEvent
+{
+	guint keyval;
+	guint keycode;
+	GdkModifierType state;
+	guint32 time;
+};
+
+struct GqScrollEvent
+{
+	gdouble x;
+	gdouble y;
+	gdouble dx;
+	gdouble dy;
+	GdkModifierType state;
+	GdkScrollDirection direction;
+	guint32 time;
+};
+
+struct GqPointerMotionEvent
+{
+	gdouble x;
+	gdouble y;
+	gdouble dx;
+	gdouble dy;
+	GdkModifierType state;
+};
+
 #define gq_icon_theme_get_default() gtk_icon_theme_get_for_display(gdk_display_get_default())
 
 void gq_gtk_box_pack_start(GtkBox *box, GtkWidget *child, gboolean expand, gboolean fill, guint padding);

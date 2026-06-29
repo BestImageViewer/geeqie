@@ -120,11 +120,12 @@ static void generic_dialog_click_cb(GtkWidget *widget, gpointer data)
 	if (auto_close) generic_dialog_close(gd);
 }
 
-static gboolean generic_dialog_default_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean generic_dialog_default_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType, gpointer data)
 {
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	auto gd = static_cast<GenericDialog *>(data);
 
-	if ((event->keyval == (GDK_KEY_Return) || (event->keyval == GDK_KEY_KP_Enter)) && gtk_widget_has_focus(widget)
+	if ((keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter) && gtk_widget_has_focus(widget)
 	    && gd->default_cb)
 		{
 		gboolean auto_close;
@@ -141,16 +142,18 @@ static gboolean generic_dialog_default_key_press_cb(GtkWidget *widget, GdkEventK
 void generic_dialog_attach_default(GenericDialog *gd, GtkWidget *widget)
 {
 	if (!gd || !widget) return;
-	g_signal_connect(G_OBJECT(widget), "key_press_event",
-			 G_CALLBACK(generic_dialog_default_key_press_cb), gd);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(generic_dialog_default_key_press_cb), gd);
+	gtk_widget_add_controller(widget, controller);
 }
 
-static gboolean generic_dialog_key_press_cb(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean generic_dialog_key_press_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType, gpointer data)
 {
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	auto gd = static_cast<GenericDialog *>(data);
 	gboolean auto_close = gd->auto_close;
 
-	if (event->keyval == GDK_KEY_Escape)
+	if (keyval == GDK_KEY_Escape)
 		{
 		if (gd->cancel_cb)
 			{
@@ -166,7 +169,7 @@ static gboolean generic_dialog_key_press_cb(GtkWidget *widget, GdkEventKey *even
 	return FALSE;
 }
 
-static gboolean generic_dialog_delete_cb(GtkWidget *, GdkEventAny *, gpointer data)
+static gboolean generic_dialog_delete_cb(GtkWidget *, gpointer data)
 {
 	auto gd = static_cast<GenericDialog *>(data);
 	gboolean auto_close;
@@ -363,10 +366,11 @@ static void generic_dialog_setup(GenericDialog *gd,
 		if (window) gtk_window_set_transient_for(GTK_WINDOW(gd->dialog), window);
 		}
 
-	g_signal_connect(G_OBJECT(gd->dialog), "delete_event",
+	g_signal_connect(G_OBJECT(gd->dialog), "close-request",
 			 G_CALLBACK(generic_dialog_delete_cb), gd);
-	g_signal_connect(G_OBJECT(gd->dialog), "key_press_event",
-			 G_CALLBACK(generic_dialog_key_press_cb), gd);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(generic_dialog_key_press_cb), gd);
+	gtk_widget_add_controller(gd->dialog, controller);
 
 	gtk_window_set_resizable(GTK_WINDOW(gd->dialog), TRUE);
 	gq_gtk_widget_set_border_width(gd->dialog, PREF_PAD_BORDER);

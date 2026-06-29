@@ -413,9 +413,9 @@ static void pixbuf_renderer_class_init(PixbufRendererClass *renderer_class)
 			     G_SIGNAL_RUN_LAST,
 			     G_STRUCT_OFFSET(PixbufRendererClass, drag),
 			     nullptr, nullptr,
-			     g_cclosure_marshal_VOID__BOXED,
+			     g_cclosure_marshal_VOID__POINTER,
 			     G_TYPE_NONE, 1,
-			     GDK_TYPE_EVENT);
+			     G_TYPE_POINTER);
 
 	signals[SIGNAL_UPDATE_PIXEL] =
 		g_signal_new("update-pixel",
@@ -1290,11 +1290,6 @@ static void pr_zoom_signal(PixbufRenderer *pr)
 	g_signal_emit(pr, signals[SIGNAL_ZOOM], 0, pr->zoom);
 }
 
-static void pr_clicked_signal(PixbufRenderer *pr, GdkEventButton *bevent)
-{
-	g_signal_emit(pr, signals[SIGNAL_CLICKED], 0, bevent);
-}
-
 static GqMouseButtonEvent pr_button_event_new(guint button, gdouble x, gdouble y, GdkModifierType state, guint press_count)
 {
 	return {button, x, y, state, press_count};
@@ -1337,7 +1332,7 @@ void pr_render_complete_signal(PixbufRenderer *pr)
 		}
 }
 
-static void pr_drag_signal(PixbufRenderer *pr, GdkEventMotion *event)
+static void pr_drag_signal(PixbufRenderer *pr, const GqPointerMotionEvent *event)
 {
 	g_signal_emit(pr, signals[SIGNAL_DRAG], 0, event);
 }
@@ -2006,22 +2001,9 @@ void pixbuf_renderer_set_scroll_center(PixbufRenderer *pr, gdouble x, gdouble y)
 
 static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double x, double y, gpointer data)
 {
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	PixbufRenderer *pr;
 	gint accel;
-	GdkSeat *seat;
-	GdkDevice *device;
-
-	/* This is a hack, but work far the best, at least for single pointer systems.
-	 * See https://bugzilla.gnome.org/show_bug.cgi?id=587714 for more. */
-	gint x;
-	gint y;
-	seat = gdk_display_get_default_seat(gtk_widget_get_display(event->window));
-	device = gdk_seat_get_pointer(seat);
-
-	get_pointer_position(widget, device, &x, &y, nullptr);
-
-	x = x;
-	y = y;
 
 	pr = PIXBUF_RENDERER(widget);
 
@@ -2035,7 +2017,7 @@ static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double 
 	pr->mouse.y = y;
 	pr_update_pixel_signal(pr);
 
-	if (!pr->in_drag || !gdk_display_device_is_grabbed(gdk_device_get_display(device), device)) return FALSE;
+	if (!pr->in_drag) return FALSE;
 
 	if (pr->drag_moved < PR_DRAG_SCROLL_THRESHHOLD)
 		{
@@ -2069,9 +2051,14 @@ static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double 
 					(pr->drag_last_y - y) * accel);
 		}
 
-/** @FIXME GTK4
-	pr_drag_signal(pr, event);
-*/
+	const GqPointerMotionEvent event{
+		x,
+		y,
+		static_cast<gdouble>(pr->drag_last_x - x) * accel,
+		static_cast<gdouble>(pr->drag_last_y - y) * accel,
+		state
+	};
+	pr_drag_signal(pr, &event);
 
 	pr->drag_last_x = x;
 	pr->drag_last_y = y;
@@ -2175,43 +2162,6 @@ static void pr_mouse_release_cb(GtkGestureClick *gesture, gint n_press, gdouble 
 		}
 
 	pr->in_drag = FALSE;
-}
-
-static gboolean pr_mouse_release_cb(GtkWidget *widget, GdkEventButton *bevent, gpointer)
-{
-	PixbufRenderer *pr;
-
-	pr = PIXBUF_RENDERER(widget);
-
-	if (pr->scroller_id)
-		{
-		pr_scroller_stop(pr);
-		return TRUE;
-		}
-
-	GdkSeat *seat = gdk_display_get_default_seat(gtk_widget_get_display(bevent->window));
-	GdkDevice *device = gdk_seat_get_pointer(seat);
-	if (gdk_display_device_is_grabbed(gdk_device_get_display(device), device) && gtk_widget_has_grab(GTK_WIDGET(pr)))
-		{
-		widget_input_ungrab(widget);
-		widget_set_cursor(widget, -1);
-		}
-
-	if (pr->drag_moved < PR_DRAG_SCROLL_THRESHHOLD)
-		{
-		if (bevent->button == GDK_BUTTON_PRIMARY && (bevent->state & GDK_CONTROL_MASK))
-			{
-			pr_scroller_start(pr, bevent->x, bevent->y);
-			}
-		else if (bevent->button == GDK_BUTTON_PRIMARY || bevent->button == GDK_BUTTON_MIDDLE)
-			{
-			pr_clicked_signal(pr, bevent);
-			}
-		}
-
-	pr->in_drag = FALSE;
-
-	return FALSE;
 }
 
 static void pr_mouse_leave_cb(GtkEventControllerMotion *controller, gpointer)

@@ -226,7 +226,7 @@ static void advanced_exif_close(ExifWin *ew)
 	g_free(ew);
 }
 
-static gboolean advanced_exif_delete_cb(GtkWidget *, GdkEvent *, gpointer data)
+static gboolean advanced_exif_delete_cb(GtkWidget *, gpointer data)
 {
 	auto ew = static_cast<ExifWin *>(data);
 
@@ -364,7 +364,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 		}
 
 	g_object_set_data(G_OBJECT(ew->window), "advanced_exif_data", ew);
-	g_signal_connect(G_OBJECT(ew->window), "delete_event", G_CALLBACK(advanced_exif_delete_cb), ew);
+	g_signal_connect(G_OBJECT(ew->window), "close-request", G_CALLBACK(advanced_exif_delete_cb), ew);
 
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gq_gtk_container_add(ew->window, vbox);

@@ -1223,7 +1223,7 @@ gboolean collection_window_modified_exists()
 	return ret;
 }
 
-static gboolean collection_window_delete(GtkWidget *, GdkEvent *, gpointer data)
+static gboolean collection_window_delete(GtkWidget *, gpointer data)
 {
 	auto cw = static_cast<CollectWindow *>(data);
 	collection_window_close(cw);
@@ -1274,7 +1274,7 @@ CollectWindow *collection_window_new(const gchar *path)
 	collection_window_update_title(cw);
 	gq_gtk_widget_set_border_width(cw->window, 0);
 
-	g_signal_connect(G_OBJECT(cw->window), "delete_event",
+	g_signal_connect(G_OBJECT(cw->window), "close-request",
 			 G_CALLBACK(collection_window_delete), cw);
 
 	GtkEventController *controller = gtk_event_controller_key_new();

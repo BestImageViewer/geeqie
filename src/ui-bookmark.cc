@@ -364,28 +364,29 @@ static void bookmark_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble, g
 	bookmark_press_common(button, gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)), data);
 }
 
-static gboolean bookmark_keypress_cb(GtkWidget *button, GdkEventKey *event, gpointer data)
+static gboolean bookmark_keypress_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
 {
+	GtkWidget *button = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	auto bm = static_cast<BookMarkData *>(data);
 
-	switch (event->keyval)
+	switch (keyval)
 		{
 		case GDK_KEY_F10:
-			if (!(event->state & GDK_CONTROL_MASK)) return FALSE;
+			if (!(state & GDK_CONTROL_MASK)) return FALSE;
 			/* fall through */
 		case GDK_KEY_Menu:
 			bookmark_menu_popup(bm, button, true);
 			return TRUE;
 			break;
 		case GDK_KEY_Up:
-			if (event->state & GDK_SHIFT_MASK)
+			if (state & GDK_SHIFT_MASK)
 				{
 				bookmark_move(bm, button, -1);
 				return TRUE;
 				}
 			break;
 		case GDK_KEY_Down:
-			if (event->state & GDK_SHIFT_MASK)
+			if (state & GDK_SHIFT_MASK)
 				{
 				bookmark_move(bm, button, 1);
 				return TRUE;
@@ -478,8 +479,9 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(bookmark_gesture_press_cb), bm);
 	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(gesture));
-	g_signal_connect(G_OBJECT(button), "key_press_event",
-	                 G_CALLBACK(bookmark_keypress_cb), bm);
+	GtkEventController *controller = gtk_event_controller_key_new();
+	g_signal_connect(controller, "key-pressed", G_CALLBACK(bookmark_keypress_cb), bm);
+	gtk_widget_add_controller(button, controller);
 
 	gtk_widget_set_has_tooltip(button, TRUE);
 	g_signal_connect(G_OBJECT(button), "query-tooltip", G_CALLBACK(bookmark_tooltip_cb), b);
