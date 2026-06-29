@@ -2258,10 +2258,6 @@ static void pr_signals_connect(PixbufRenderer *pr)
 	g_signal_connect(motion_controller, "leave", G_CALLBACK(pr_leave_notify_cb), pr);
 	gtk_widget_add_controller(GTK_WIDGET(pr), motion_controller);
 
-	gtk_widget_set_events(GTK_WIDGET(pr), GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK |
-					      static_cast<GdkEventMask>(GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_PRESS_MASK | GDK_SCROLL_MASK |
-					      GDK_LEAVE_NOTIFY_MASK));
-
 	g_signal_connect(G_OBJECT(pr), "drag_begin",
 			 G_CALLBACK(pr_mouse_drag_cb), pr);
 

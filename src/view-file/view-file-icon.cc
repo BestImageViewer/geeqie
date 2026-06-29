@@ -1945,12 +1945,9 @@ ViewFile *vficon_new(ViewFile *vf)
 	g_signal_connect(G_OBJECT(vf->listview), "size_allocate",
 			 G_CALLBACK(vficon_sized_cb), vf);
 
-	gtk_widget_set_events(vf->listview, GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK |
-			      static_cast<GdkEventMask>(GDK_BUTTON_PRESS_MASK | GDK_LEAVE_NOTIFY_MASK));
-
 	GtkEventController *controller = gtk_event_controller_motion_new();
 	g_signal_connect(controller, "motion", G_CALLBACK(vficon_motion_cb), vf);
-	gtk_widget_add_controller(G_OBJECT(vf->listview), controller);
+	gtk_widget_add_controller(vf->listview, controller);
 
 	GtkEventController *motion_controller = gtk_event_controller_motion_new();
 	g_signal_connect(motion_controller, "leave", G_CALLBACK(vficon_leave_cb), vf);
