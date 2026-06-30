@@ -2857,14 +2857,16 @@ void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data)
 
 static void toolbar_clear_cb(GtkWidget *widget, gpointer)
 {
-	GtkAction *action;
-
 	if (GTK_IS_BUTTON(widget))
 		{
-		action = static_cast<GtkAction *>(g_object_get_data(G_OBJECT(widget), "action"));
+		/* Temporary GTK4 stub: legacy GtkAction signal bookkeeping has been removed. */
+		GObject *action = static_cast<GObject *>(g_object_get_data(G_OBJECT(widget), "action"));
 		if (g_object_get_data(G_OBJECT(widget), "id") )
 			{
-			g_signal_handler_disconnect(action, GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(widget), "id")));
+			if (action)
+				{
+				g_signal_handler_disconnect(action, GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(widget), "id")));
+				}
 			}
 		}
 	gq_gtk_widget_destroy(widget);
@@ -2881,25 +2883,25 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 		}
 }
 
-static void action_radio_changed_cb(GtkAction *action, GtkAction *current, gpointer data)
+static void action_radio_changed_cb(gpointer action, gpointer current, gpointer data)
 {
+	/* Temporary GTK4 stub: old GtkRadioAction state sync is gone. */
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data), action == current);
 }
 
-static void action_toggle_activate_cb(GtkAction* self, gpointer data)
+static void action_toggle_activate_cb(gpointer, gpointer data)
 {
-	auto button = static_cast<GtkToggleButton *>(data);
-	const gboolean action_active = deprecated_gtk_toggle_action_get_active(deprecated_GTK_TOGGLE_ACTION(self));
-
-	if (gtk_toggle_button_get_active(button) != action_active)
-		{
-		gtk_toggle_button_set_active(button, action_active);
-		}
+	/* Temporary GTK4 stub: legacy GtkToggleAction callback path is disabled until ported. */
+	(void)data;
 }
 
 static gboolean toolbar_button_press_event_cb(GtkWidget *, GdkEvent *, gpointer data)
 {
-	deprecated_gtk_action_activate(deprecated_GTK_ACTION(data));
+	/* Temporary GTK4 bridge: activate modern GAction objects only. */
+	if (G_IS_ACTION(data))
+		{
+		g_action_activate(G_ACTION(data), nullptr);
+		}
 
 	return TRUE;
 }

@@ -1101,38 +1101,17 @@ bool ActionItem::has_label(const gchar *label) const
 	return g_strcmp0(this->label, label) == 0;
 }
 
-static gchar *get_action_label(GtkAction *action, const gchar *action_name)
+static gchar *get_action_label(gpointer, const gchar *action_name)
 {
-	g_autofree gchar *tooltip = nullptr;
-	g_autofree gchar *label = nullptr;
-	g_object_get(action, "tooltip", &tooltip, "label", &label, NULL);
-
-	/* .desktop items need the program name, Geeqie menu items need the tooltip */
-	if (g_strstr_len(action_name, -1, ".desktop") == nullptr &&
-	    /* Tooltips with newlines affect output format */
-	    tooltip && (g_strstr_len(tooltip, -1, "\n") == nullptr))
-		{
-		return g_strdup(tooltip);
-		}
-
-	return g_strdup(label);
+	/* Temporary GTK4 stub: GtkAction metadata lookup has been removed. */
+	return g_strdup(action_name);
 }
 
 static void action_to_list_duplicates(gpointer data, gpointer user_data)
 {
-	GtkAction *action = deprecated_GTK_ACTION(data);
-
-	const gchar *accel_path = deprecated_gtk_action_get_accel_path(action);
-	if (!accel_path || !gtk_accel_map_lookup_entry(accel_path, nullptr)) return;
-
-	g_autofree gchar *action_name = g_path_get_basename(accel_path);
-
-	/* Menu actions are irrelevant */
-	if (g_strstr_len(action_name, -1, "Menu") != nullptr) return;
-
-	g_autofree gchar *action_label = get_action_label(action, action_name);
-
-	/* @FIXME GTK4 stub */
+	/* Temporary GTK4 stub: the old GtkAction enumeration path is disabled. */
+	(void)data;
+	(void)user_data;
 }
 
 /**
