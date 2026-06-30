@@ -3222,7 +3222,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
-	g_signal_connect(gesture, "pressed", G_CALLBACK(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+	g_signal_connect(gesture, "pressed", reinterpret_cast<GCallback>(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
 	{
 		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 		const GqMouseButtonEvent event{
@@ -3236,7 +3236,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 			gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 			}
 	}), sd);
-	g_signal_connect(gesture, "released", G_CALLBACK(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+	g_signal_connect(gesture, "released", reinterpret_cast<GCallback>(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
 	{
 		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 		const GqMouseButtonEvent event{
