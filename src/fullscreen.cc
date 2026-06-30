@@ -30,7 +30,6 @@
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "image-load.h"
 #include "image.h"
@@ -42,6 +41,17 @@
 #include "window.h"
 
 namespace {
+
+GdkMonitor *get_first_monitor(GdkDisplay *display)
+{
+	GListModel *monitors = gdk_display_get_monitors(display);
+	if (!monitors || g_list_model_get_n_items(monitors) == 0)
+		{
+		return nullptr;
+		}
+
+	return GDK_MONITOR(g_list_model_get_item(monitors, 0));
+}
 
 /*
  *----------------------------------------------------------------------------
@@ -95,7 +105,7 @@ void fullscreen_hide_mouse_reset(FullScreenData *fs)
 	fs->hide_mouse_id = g_timeout_add(FULL_SCREEN_HIDE_MOUSE_DELAY, fullscreen_hide_mouse_cb, fs);
 }
 
-gboolean fullscreen_mouse_moved(GtkEventControllerMotion *, double x, double y, gpointer data)
+void fullscreen_mouse_moved(GtkEventControllerMotion *, double, double, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -105,8 +115,6 @@ gboolean fullscreen_mouse_moved(GtkEventControllerMotion *, double x, double y, 
 		if (!(fs->cursor_state & FULLSCREEN_CURSOR_BUSY)) clear_mouse_cursor(fs->window, fs->cursor_state);
 		}
 	fullscreen_hide_mouse_reset(fs);
-
-	return FALSE;
 }
 
 void fullscreen_mouse_set_busy(FullScreenData *fs, gboolean busy)
@@ -186,7 +194,7 @@ gboolean fullscreen_saver_block_cb(gpointer)
 	return G_SOURCE_CONTINUE;
 }
 
-gboolean fullscreen_delete_cb(GtkWidget *, GdkEvent *, gpointer data)
+gboolean fullscreen_close_request_cb(GtkWidget *, gpointer data)
 {
 	auto fs = static_cast<FullScreenData *>(data);
 
@@ -293,7 +301,7 @@ std::vector<ScreenData> fullscreen_prefs_list()
  * 101  size of monitor 1 on screen 1
  * 203  size of monitor 3 on screen 2
  * returns:
- * dest_screen: screen to place widget [use gtk_window_set_screen()]
+ * In GTK4 this returns the target geometry that fullscreen should cover.
  * same_region: the returned region will overlap the current location of widget.
  */
 
@@ -312,7 +320,7 @@ GdkRectangle fullscreen_prefs_get_geometry( int screen_num, GtkWidget *widget, g
 
 		if (it != list.cend())
 			{
-			dest_monitor = gdk_display_get_primary_monitor(display);
+			g_autoptr(GdkMonitor) first_monitor = get_first_monitor(display);
 
 			GdkSurface *surface = nullptr;
 			if (widget && gtk_widget_get_native(widget))
@@ -320,7 +328,7 @@ GdkRectangle fullscreen_prefs_get_geometry( int screen_num, GtkWidget *widget, g
 				surface = gtk_native_get_surface( gtk_widget_get_native(widget));
 				}
 
-			same_region = (!surface || (dest_monitor == gdk_display_get_monitor_at_surface(display, surface)));
+			same_region = (!surface || (first_monitor == gdk_display_get_monitor_at_surface(display, surface)));
 
 			return it->geometry;
 			}
@@ -340,14 +348,30 @@ GdkRectangle fullscreen_prefs_get_geometry( int screen_num, GtkWidget *widget, g
 
 	if (screen_num != 1 || !surface)
 		{
-		dest_monitor = gdk_display_get_primary_monitor(display);
+		dest_monitor = get_first_monitor(display);
+		if (!dest_monitor)
+			{
+			same_region = TRUE;
+			return geometry;
+			}
 		gdk_monitor_get_geometry(dest_monitor, &geometry);
+		g_object_unref(dest_monitor);
 		}
 	else
 		{
 		dest_monitor = gdk_display_get_monitor_at_surface(display, surface);
+		if (!dest_monitor)
+			{
+			dest_monitor = get_first_monitor(display);
+			}
+		if (!dest_monitor)
+			{
+			same_region = TRUE;
+			return geometry;
+			}
 
 		gdk_monitor_get_geometry(dest_monitor, &geometry);
+		g_object_unref(dest_monitor);
 		}
 
 	same_region = TRUE;
@@ -368,24 +392,6 @@ void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer value)
 	if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(combo), &iter)) return;
 
 	gtk_tree_model_get(store, &iter, FS_MENU_COLUMN_VALUE, value, -1);
-}
-
-gint get_monitor_index(GdkDisplay *display, GdkMonitor *target_monitor)
-{
-	GListModel *monitors = gdk_display_get_monitors(display);
-	guint n_monitors = g_list_model_get_n_items(monitors);
-
-	for (guint i = 0; i < n_monitors; i++)
-		{
-		g_autoptr(GdkMonitor) monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
-
-		if (monitor == target_monitor)
-			{
-			return static_cast<gint>(i);
-			}
-		}
-
-	return -1;
 }
 
 } // namespace
@@ -432,6 +438,9 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	DEBUG_NAME(fs->window);
 
 	gtk_window_set_decorated(GTK_WINDOW(fs->window), FALSE);
+	gtk_window_set_default_size(GTK_WINDOW(fs->window), rect.width, rect.height);
+	g_signal_connect(G_OBJECT(fs->window), "close-request",
+			 G_CALLBACK(fullscreen_close_request_cb), fs);
 	gtk_window_fullscreen(GTK_WINDOW(fs->window));
 
 	fs->imd = image_new(FALSE);
