@@ -3029,7 +3029,7 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 
 		GtkWidget *image = gtk_image_new_from_icon_name(get_icon_for_action_name(action_name));
 		gtk_button_set_always_show_image(GTK_BUTTON(button), TRUE);
-		gtk_button_set_image(GTK_BUTTON(button), image);
+		gtk_menu_button_set_child(GTK_MENU_BUTTON(button), image);
 
 		gq_gtk_container_add(lw->toolbar[type], button);
 		gq_gtk_widget_show_all(button);

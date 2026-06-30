@@ -540,7 +540,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		GtkWidget *menu_button = gtk_menu_button_new();
 		GtkWidget *image = gtk_image_new_from_icon_name("open-menu-symbolic");
 
-		gtk_button_set_image(GTK_BUTTON(menu_button), image);
+		gtk_menu_button_set_child(GTK_MENU_BUTTON(menu_button), image);
 
 		gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), lw->menu_model);
 
