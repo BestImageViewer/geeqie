@@ -80,7 +80,6 @@ enum {
 
 
 
-static gboolean vflist_row_is_selected(ViewFile *vf, const FileData *fd);
 static gboolean vflist_row_rename_cb(TreeEditData *td, const gchar *old_name, const gchar *new_name, gpointer data);
 static void vflist_populate_view(ViewFile *vf, gboolean force);
 static gboolean vflist_is_multiline(ViewFile *vf);
@@ -440,7 +439,7 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEve
 
 	if (event->button == GDK_BUTTON_MIDDLE)
 		{
-		if (!vflist_row_is_selected(vf, fd))
+		if (!vflist_is_selected(vf, fd))
 			{
 			vflist_color_set(vf, fd, TRUE);
 			}
@@ -451,8 +450,7 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEve
 	if (event->button == GDK_BUTTON_PRIMARY && event->press_count == 1 &&
 	    !(event->state & GDK_SHIFT_MASK ) &&
 	    !(event->state & GDK_CONTROL_MASK ) &&
-
-	    vflist_row_is_selected(vf, fd))
+	    vflist_is_selected(vf, fd))
 		{
 		GtkTreeSelection *selection;
 
@@ -521,7 +519,7 @@ gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonE
 			GtkTreeSelection *selection;
 
 			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
-			if (vflist_row_is_selected(vf, fd))
+			if (vflist_is_selected(vf, fd))
 				{
 				gtk_tree_selection_unselect_iter(selection, &iter);
 				}
@@ -536,7 +534,7 @@ gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonE
 	if (fd && vf->click_fd == fd &&
 	    !(event->state & GDK_SHIFT_MASK ) &&
 	    !(event->state & GDK_CONTROL_MASK ) &&
-	    vflist_row_is_selected(vf, fd))
+	    vflist_is_selected(vf, fd))
 		{
 		GtkTreeSelection *selection;
 
@@ -1129,7 +1127,7 @@ gint vflist_index_by_fd(const ViewFile *vf, const FileData *fd)
  *-----------------------------------------------------------------------------
  */
 
-static gboolean vflist_row_is_selected(ViewFile *vf, const FileData *fd)
+bool vflist_is_selected(const ViewFile *vf, const FileData *fd)
 {
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 	GtkTreeModel *store;
@@ -1144,15 +1142,10 @@ static gboolean vflist_row_is_selected(ViewFile *vf, const FileData *fd)
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd_n, -1);
 
-		if (fd_n == fd) return TRUE;
+		if (fd_n == fd) return true;
 		}
 
-	return FALSE;
-}
-
-gboolean vflist_is_selected(ViewFile *vf, FileData *fd)
-{
-	return vflist_row_is_selected(vf, fd);
+	return false;
 }
 
 guint vflist_selection_count(ViewFile *vf, gint64 *bytes)
@@ -1337,7 +1330,7 @@ void vflist_select_by_fd(ViewFile *vf, FileData *fd)
 
 	tree_view_row_make_visible(GTK_TREE_VIEW(vf->listview), &iter, TRUE);
 
-	if (vflist_row_is_selected(vf, fd)) return;
+	if (vflist_is_selected(vf, fd)) return;
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview));
 	gtk_tree_selection_unselect_all(selection);
@@ -1359,7 +1352,7 @@ void vflist_select_list(ViewFile *vf, const FileDataList *list)
 
 		if (!vflist_find_row(vf, fd, &iter)) return;
 
-		if (!vflist_row_is_selected(vf, fd))
+		if (!vflist_is_selected(vf, fd))
 			{
 			GtkTreeSelection *selection;
 

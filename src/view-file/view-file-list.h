@@ -67,7 +67,7 @@ void vflist_popup_destroy_cb(ViewFile *vf);
 
 gint vflist_index_by_fd(const ViewFile *vf, const FileData *fd);
 
-gboolean vflist_is_selected(ViewFile *vf, FileData *fd);
+bool vflist_is_selected(const ViewFile *vf, const FileData *fd);
 guint vflist_selection_count(ViewFile *vf, gint64 *bytes = nullptr);
 GList *vflist_selection_get_list(ViewFile *vf);
 std::vector<int> vflist_selection_get_list_by_index(const ViewFile *vf);
