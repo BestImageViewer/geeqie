@@ -853,7 +853,7 @@ static void vf_marks_tooltip_open_dialog(GtkWidget *widget, gint mark_no)
 		{
 		gq_gtk_entry_set_text(GTK_ENTRY(mte->edit_widget), options->marks_tooltips[mte->mark_no]);
 		}
-	gq_gtk_grid_attach_default(GTK_GRID(table), mte->edit_widget, 1, 2, 0, 1);
+	gtk_grid_attach(GTK_GRID(table), mte->edit_widget, 1, 0, 1, 1);
 	generic_dialog_attach_default(gd, mte->edit_widget);
 
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(mte->edit_widget),

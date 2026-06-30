@@ -234,7 +234,7 @@ void help_search_window_show()
 
 	table = pref_table_new(gd->vbox, 3, 1, FALSE, TRUE);
 	pref_table_label(table, 0, 0, _("Search terms:"), GTK_ALIGN_END);
-	gq_gtk_grid_attach_default(GTK_GRID(table), edit_widget, 1, 2, 0, 1);
+	gtk_grid_attach(GTK_GRID(table), edit_widget, 1, 0, 1, 1);
 	generic_dialog_attach_default(gd, edit_widget);
 	gtk_widget_show(edit_widget);
 

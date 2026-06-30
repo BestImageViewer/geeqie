@@ -492,7 +492,7 @@ GtkWidget *pref_table_box(GtkWidget *table, gint column, gint row,
 		shell = box;
 		}
 
-	gq_gtk_grid_attach(GTK_GRID(table), shell, column, column + 1, row, row + 1);
+	gtk_grid_attach(GTK_GRID(table), shell, column, row, 1, 1);
 
 	gtk_widget_show(shell);
 
@@ -507,7 +507,7 @@ GtkWidget *pref_table_label(GtkWidget *table, gint column, gint row,
 	label = gtk_label_new(text);
 	gtk_widget_set_halign(label, alignment);
 	gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
-	gq_gtk_grid_attach(GTK_GRID(table), label, column, column + 1, row, row + 1);
+	gtk_grid_attach(GTK_GRID(table), label, column, row, 1, 1);
 	gtk_widget_show(label);
 
 	return label;
@@ -520,7 +520,7 @@ GtkWidget *pref_table_button(GtkWidget *table, gint column, gint row,
 	GtkWidget *button;
 
 	button = pref_button_new(nullptr, stock_id, text, func, data);
-	gq_gtk_grid_attach(GTK_GRID(table), button, column, column + 1, row, row + 1);
+	gtk_grid_attach(GTK_GRID(table), button, column, row, 1, 1);
 	gtk_widget_show(button);
 
 	return button;
@@ -565,7 +565,7 @@ GtkWidget *pref_table_spin(GtkWidget *table, gint column, gint row,
 		box = spin;
 		}
 
-	gq_gtk_grid_attach(GTK_GRID(table), box, column, column + 1, row, row + 1);
+	gtk_grid_attach(GTK_GRID(table), box, column, row, 1, 1);
 	gtk_widget_show(box);
 
 	return spin;
