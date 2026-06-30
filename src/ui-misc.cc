@@ -1215,12 +1215,11 @@ gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos)
 	if (!device)
 		return FALSE;
 
-	GdkSurface *pointer_surface = nullptr;
-	double x = 0.0, y = 0.0;
+	double x = 0.0;
+	double y = 0.0;
+	GdkModifierType mask = static_cast<GdkModifierType>(0);
 
-	gdk_device_get_position(device, &pointer_surface, &x, &y);
-
-	if (pointer_surface != surface)
+	if (!gdk_surface_get_device_position(surface, device, &x, &y, &mask))
 		return FALSE;
 
 	pos.x = (int)x;
@@ -1309,18 +1308,23 @@ void widget_remove_from_parent_cb(GSimpleAction *, GVariant *, gpointer data)
 gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int *y, GdkModifierType *mask)
 {
 	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
-	GdkSurface *ps = NULL;
 	double dx;
 	double dy;
 
-	gdk_device_get_position(device, &ps, &dx, &dy);
-	if (ps != surface)
+	if (!surface)
+		{
+		return FALSE;
+		}
+
+	GdkModifierType local_mask = static_cast<GdkModifierType>(0);
+	if (!gdk_surface_get_device_position(surface, device, &dx, &dy, &local_mask))
 		{
 		return FALSE;
 		}
 
 	*x = (int)dx;
 	*y = (int)dy;
+	if (mask) *mask = local_mask;
 
 	return TRUE;
 }
@@ -1337,7 +1341,7 @@ void get_device_position(GdkDevice *device, int &x, int &y)
 		return;
 		}
 
-	gdk_device_get_position(device, &surface, &dx, &dy);
+	surface = gdk_device_get_surface_at_position(device, &dx, &dy);
 
 	if (!surface)
 		{
