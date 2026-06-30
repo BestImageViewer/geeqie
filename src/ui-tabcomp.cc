@@ -715,7 +715,7 @@ static void tab_completion_select_show(TabCompData *td)
 	fdd.accept_text = _("Open");
 	fdd.callback = tab_completion_response_cb;
 	fdd.data = td;
-	fdd.filename = gtk_entry_get_text(GTK_ENTRY(td->entry));
+	fdd.filename = gq_gtk_entry_get_text(GTK_ENTRY(td->entry));
 	fdd.filter = td->fd_filter;
 	fdd.filter_description = td->fd_filter_desc;
 	fdd.history_key = td->history_key;

@@ -367,10 +367,7 @@ void gq_gtk_entry_set_text(GtkEntry *entry, const gchar *text)
 
 const gchar *gq_gtk_entry_get_text(GtkEntry *entry)
 {
-	GtkEntryBuffer *buffer;
-
-	buffer = gtk_entry_get_buffer(entry);
-	return gtk_entry_buffer_get_text(buffer);
+	return gtk_editable_get_text(GTK_EDITABLE(entry));
 }
 
 void gq_gtk_grid_attach(GtkGrid *grid, GtkWidget *child, guint left_attach, guint right_attach, guint top_attach, guint bottom_attach)

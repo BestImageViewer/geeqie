@@ -689,7 +689,7 @@ void bookmark_alias_data_free(gpointer data)
 void bookmark_alias_ok_cb(GenericDialog *, gpointer data)
 {
 	auto *bad = static_cast<BookmarkAliasData *>(data);
-	const gchar *name = gtk_entry_get_text(GTK_ENTRY(bad->entry));
+	const gchar *name = gq_gtk_entry_get_text(GTK_ENTRY(bad->entry));
 	gboolean empty_name = (g_strcmp0(name, "") == 0);
 
 	bookmark_list_add(bad->list, empty_name ? filename_from_path(bad->selected_dir) : name, bad->selected_dir);
