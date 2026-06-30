@@ -3191,7 +3191,14 @@ static GdkContentProvider * clipboard_build_provider(ClipboardData *cbd)
 	return g_steal_pointer(&provider);
 }
 
-static gboolean path_list_to_clipboard(GList *path_list, gboolean quoted, ClipboardAction action, GdkAtom)
+enum class GqClipboardTarget
+{
+	Primary,
+	Clipboard
+};
+
+
+static gboolean path_list_to_clipboard(GList *path_list, gboolean quoted, ClipboardAction action, GqClipboardTarget target)
 {
 	ClipboardData cbd = {};
 	cbd.path_list = path_list;
@@ -3204,19 +3211,31 @@ static gboolean path_list_to_clipboard(GList *path_list, gboolean quoted, Clipbo
 		return FALSE;
 		}
 
-	GdkClipboard *clipboard = gdk_display_get_clipboard(display);
+	GdkClipboard *clipboard = nullptr;
+
+	switch (target)
+		{
+		case GqClipboardTarget::Primary:
+			clipboard = gdk_display_get_primary_clipboard(display);
+			break;
+		case GqClipboardTarget::Clipboard:
+			clipboard = gdk_display_get_clipboard(display);
+			break;
+		}
+
 	if (!clipboard)
 		{
 		return FALSE;
 		}
 
 	GdkContentProvider *provider = clipboard_build_provider(&cbd);
+	if (!provider)
+		{
+		return FALSE;
+		}
 
 	gdk_clipboard_set_content(clipboard, provider);
 	g_object_unref(provider);
-
-	GdkClipboard *primary = gdk_display_get_primary_clipboard(display);
-	gdk_clipboard_set_content(primary, provider);
 
 	return TRUE;
 }
@@ -3231,18 +3250,18 @@ void file_util_copy_path_to_clipboard(FileData *fd, gboolean quoted, ClipboardAc
 {
 	if (!fd || !*fd->path) return;
 
-	if (options->clipboard_selection == CLIPBOARD_PRIMARY || options->clipboard_selection == CLIPBOARD_BOTH)
+	if (options->clipboard_selection == CLIPBOARD_PRIMARY ||
+	    options->clipboard_selection == CLIPBOARD_BOTH)
 		{
 		GList *path_list = g_list_append(nullptr, g_strdup(fd->path));
-
-		path_list_to_clipboard(path_list, quoted, action, GDK_SELECTION_PRIMARY);
+		path_list_to_clipboard(path_list, quoted, action, GqClipboardTarget::Primary);
 		}
 
-	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD || options->clipboard_selection == CLIPBOARD_BOTH)
+	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD ||
+	    options->clipboard_selection == CLIPBOARD_BOTH)
 		{
 		GList *path_list = g_list_append(nullptr, g_strdup(fd->path));
-
-		path_list_to_clipboard(path_list, quoted, action, GDK_SELECTION_CLIPBOARD);
+		path_list_to_clipboard(path_list, quoted, action, GqClipboardTarget::Clipboard);
 		}
 }
 
@@ -3273,12 +3292,12 @@ void file_util_path_list_to_clipboard(GList *fd_list, gboolean quoted, Clipboard
 
 	if (options->clipboard_selection == CLIPBOARD_PRIMARY || options->clipboard_selection == CLIPBOARD_BOTH)
 		{
-		path_list_to_clipboard(get_path_list(fd_list), quoted, action, GDK_SELECTION_PRIMARY);
+		path_list_to_clipboard(get_path_list(fd_list), quoted, action, GqClipboardTarget::Primary);
 		}
 
 	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD || options->clipboard_selection == CLIPBOARD_BOTH)
 		{
-		path_list_to_clipboard(get_path_list(fd_list), quoted, action, GDK_SELECTION_CLIPBOARD);
+		path_list_to_clipboard(get_path_list(fd_list), quoted, action, GqClipboardTarget::Clipboard);
 		}
 
 	file_data_list_free(fd_list);

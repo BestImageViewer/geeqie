@@ -3419,8 +3419,8 @@ static bool accel_capture_key_press(GtkEventControllerKey *, guint keyval, guint
 	char *accel = gtk_accelerator_name(key, mods);
 	gtk_entry_set_text(GTK_ENTRY(widget), accel);
 
-	GtkClipboard *cb = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-	gtk_clipboard_set_text(cb, accel, -1);
+	GtkClipboard *cb = gdk_display_get_clipboard(gdk_display_get_default());
+	gdk_clipboard_set_text(cb, accel);
 
 	g_free(accel);
 
