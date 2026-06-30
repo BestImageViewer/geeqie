@@ -533,8 +533,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 	if (options->hamburger_menu)
 		{
 		GtkWidget *header = gtk_header_bar_new();
-		gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), TRUE);
-		gtk_header_bar_set_title(GTK_HEADER_BAR(header), "My Application"); // ??
+		gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
 		gtk_window_set_titlebar(GTK_WINDOW(lw->window), header);
 		gq_gtk_widget_show_all(header);
 		GtkWidget *menu_button = gtk_menu_button_new();
