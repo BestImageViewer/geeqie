@@ -223,10 +223,11 @@ std::vector<ScreenData> fullscreen_prefs_list()
 	const gchar *name;
 
 	display = gdk_display_get_default();
-	monitors = gdk_display_get_n_monitors(display);
+	GListModel *monitors = gdk_display_get_monitors(display);
+	guint n_monitors = g_list_model_get_n_items(monitors);
 	name = gdk_display_get_name(display);
 
-	for (gint j = -1; j < monitors; j++)
+	for (gint j = -1; j < static_cast<gint>(n_monitors); j++)
 		{
 		GdkRectangle rect;
 		g_autofree gchar *subname = nullptr;
@@ -236,9 +237,10 @@ std::vector<ScreenData> fullscreen_prefs_list()
 			/* GTK4: compute full size by union of all monitors */
 			gboolean first = TRUE;
 
-			for (gint i = 0; i < monitors; i++)
+			for (guint i = 0; i < n_monitors; i++)
 				{
-				GdkMonitor *monitor = gdk_display_get_monitor(display, i);
+				g_autoptr(GdkMonitor) monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
+
 				GdkRectangle mrect;
 				gdk_monitor_get_geometry(monitor, &mrect);
 
@@ -262,6 +264,12 @@ std::vector<ScreenData> fullscreen_prefs_list()
 				}
 
 			subname = g_strdup(_("Full size"));
+			}
+		else
+			{
+			g_autoptr(GdkMonitor) monitor = GDK_MONITOR(g_list_model_get_item(monitors, j));
+			gdk_monitor_get_geometry(monitor, &rect);
+			subname = g_strdup_printf(_("Monitor %d"), j + 1);
 			}
 
 		ScreenData sd;
@@ -292,6 +300,7 @@ std::vector<ScreenData> fullscreen_prefs_list()
 
 GdkRectangle fullscreen_prefs_get_geometry( int screen_num, GtkWidget *widget, gboolean &same_region)
 {
+	GdkMonitor *dest_monitor = nullptr;
 	GdkDisplay *display = widget ? gtk_widget_get_display(widget)  : gdk_display_get_default();
 
 	if (screen_num >= 100)
@@ -364,19 +373,20 @@ void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer value)
 
 gint get_monitor_index(GdkDisplay *display, GdkMonitor *target_monitor)
 {
-	gint num_monitors = gdk_display_get_n_monitors(display);
+	GListModel *monitors = gdk_display_get_monitors(display);
+	guint n_monitors = g_list_model_get_n_items(monitors);
 
-	for (gint i = 0; i < num_monitors; i++)
+	for (guint i = 0; i < n_monitors; i++)
 		{
-		GdkMonitor *monitor = gdk_display_get_monitor(display, i);
+		g_autoptr(GdkMonitor) monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
 
 		if (monitor == target_monitor)
 			{
-			return i;
+			return static_cast<gint>(i);
 			}
 		}
 
-	return -1; // Monitor not found
+	return -1;
 }
 
 } // namespace
@@ -392,8 +402,6 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 {
 	FullScreenData *fs;
 	GdkDisplay *display = nullptr;
-	GdkMonitor *monitor;
-	GdkScreen *screen;
 
 	if (!window || !imd) return nullptr;
 
@@ -483,7 +491,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	/* for hiding the mouse */
 	GtkEventController *controller = gtk_event_controller_motion_new();
 	g_signal_connect(controller, "motion", G_CALLBACK(fullscreen_mouse_moved), fs);
-	gtk_widget_add_controller(G_OBJECT(fs->imd->pr), controller);
+	gtk_widget_add_controller(fs->imd->pr, controller);
 
 	clear_mouse_cursor(fs->window, fs->cursor_state);
 
