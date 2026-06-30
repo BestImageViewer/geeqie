@@ -1300,22 +1300,28 @@ static void enable_window_actions(GtkApplicationWindow *window, bool state)
 		}
 }
 
-static bool text_box_on_focus_in_cb(GtkWidget *, GdkEventFocus *, gpointer data)
+static void text_box_on_focus_in_cb(GtkEventControllerFocus *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
 	enable_window_actions(GTK_APPLICATION_WINDOW(sd->ui.window), FALSE);
-
-	return GDK_EVENT_STOP;
 }
 
-static bool text_box_on_focus_out_cb(GtkWidget *, GdkEventFocus *, gpointer data)
+static void text_box_on_focus_out_cb(GtkEventControllerFocus *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
 	enable_window_actions(GTK_APPLICATION_WINDOW(sd->ui.window), TRUE);
+}
 
-	return GDK_EVENT_PROPAGATE;
+static void search_entry_attach_focus_controller(GtkWidget *widget, SearchData *sd)
+{
+	GtkEventController *focus_controller = gtk_event_controller_focus_new();
+	g_signal_connect(focus_controller, "enter",
+			 G_CALLBACK(text_box_on_focus_in_cb), sd);
+	g_signal_connect(focus_controller, "leave",
+			 G_CALLBACK(text_box_on_focus_out_cb), sd);
+	gtk_widget_add_controller(widget, focus_controller);
 }
 
 static void search_win_result_clear_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -2903,8 +2909,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.path_entry = tab_completion_new_with_history(hbox2, sd->search_dir_fd->path,
 	                                                    "search_path", -1);
 
-	g_signal_connect(sd->ui.path_entry, "focus-in-event", G_CALLBACK(text_box_on_focus_in_cb), sd);
-	g_signal_connect(sd->ui.path_entry, "focus-out-event", G_CALLBACK(text_box_on_focus_out_cb), sd);
+	search_entry_attach_focus_controller(sd->ui.path_entry, sd);
 
 	tab_completion_add_select_button(sd->ui.path_entry, nullptr, TRUE, nullptr, nullptr, nullptr);
 	sd->ui.check_recurse = pref_checkbox_new_int(hbox2, _("Recurse"),
@@ -2937,8 +2942,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	                            _("When set to 'contains' or 'path contains', this field uses Perl Compatible Regular Expressions.\ne.g. use \n.*\\.jpg\n and not \n*.jpg\n\nSee the Help file."));
 
 	GtkWidget *entry = gtk_widget_get_first_child(combo);
-	g_signal_connect(entry, "focus-in-event", G_CALLBACK(text_box_on_focus_in_cb), sd);
-	g_signal_connect(entry, "focus-out-event", G_CALLBACK(text_box_on_focus_out_cb), sd);
+	search_entry_attach_focus_controller(entry, sd);
 
 	/* Search for file size */
 	hbox = menu_choice(sd->ui.box_search, _("File size is"), &sd->match_size_enable);
@@ -3002,8 +3006,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.entry_similarity = tab_completion_new_with_history(hbox, sd->search_similarity_path ?
 	                                                              sd->search_similarity_path : "",
 	                                                          "search_similarity_path", -1);
-	g_signal_connect(sd->ui.entry_similarity, "focus-in-event", G_CALLBACK(text_box_on_focus_in_cb), sd);
-	g_signal_connect(sd->ui.entry_similarity, "focus-out-event", G_CALLBACK(text_box_on_focus_out_cb), sd);
+	search_entry_attach_focus_controller(sd->ui.entry_similarity, sd);
 
 	tab_completion_add_select_button(sd->ui.entry_similarity, nullptr, FALSE, nullptr, nullptr, nullptr);
 	pref_checkbox_new_int(hbox, _("Ignore rotation"),
@@ -3018,8 +3021,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.entry_keywords = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.entry_keywords, TRUE, TRUE, 0);
 
-	g_signal_connect(sd->ui.entry_keywords, "focus-in-event", G_CALLBACK(text_box_on_focus_in_cb), sd);
-	g_signal_connect(sd->ui.entry_keywords, "focus-out-event", G_CALLBACK(text_box_on_focus_out_cb), sd);
+	search_entry_attach_focus_controller(sd->ui.entry_keywords, sd);
 
 	gtk_widget_set_sensitive(sd->ui.entry_keywords, sd->match_keywords_enable);
 	g_signal_connect(G_OBJECT(check_keywords), "toggled",
@@ -3035,8 +3037,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.entry_comment = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.entry_comment, TRUE, TRUE, 0);
 
-	g_signal_connect(sd->ui.entry_comment, "focus-in-event", G_CALLBACK(text_box_on_focus_in_cb), sd);
-	g_signal_connect(sd->ui.entry_comment, "focus-out-event", G_CALLBACK(text_box_on_focus_out_cb), sd);
+	search_entry_attach_focus_controller(sd->ui.entry_comment, sd);
 
 	gtk_widget_set_sensitive(sd->ui.entry_comment, sd->match_comment_enable);
 	g_signal_connect(G_OBJECT(check_comment), "toggled",
@@ -3059,8 +3060,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.entry_exif_tag = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.entry_exif_tag, TRUE, TRUE, 0);
 
-	g_signal_connect(sd->ui.entry_exif_tag, "focus-in-event", G_CALLBACK(text_box_on_focus_in_cb), sd);
-	g_signal_connect(sd->ui.entry_exif_tag, "focus-out-event", G_CALLBACK(text_box_on_focus_out_cb), sd);
+	search_entry_attach_focus_controller(sd->ui.entry_exif_tag, sd);
 
 	gtk_widget_set_sensitive(sd->ui.entry_exif_tag, sd->match_exif_enable);
 	g_signal_connect(G_OBJECT(check_exif), "toggled",
@@ -3074,8 +3074,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.entry_exif_value = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.entry_exif_value, TRUE, TRUE, 0);
 
-	g_signal_connect(sd->ui.entry_exif_value, "focus-in-event", G_CALLBACK(text_box_on_focus_in_cb), sd);
-	g_signal_connect(sd->ui.entry_exif_value, "focus-out-event", G_CALLBACK(text_box_on_focus_out_cb), sd);
+	search_entry_attach_focus_controller(sd->ui.entry_exif_value, sd);
 
 	gtk_widget_set_sensitive(sd->ui.entry_exif_value, sd->match_exif_enable);
 	g_signal_connect(G_OBJECT(check_exif), "toggled",

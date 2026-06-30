@@ -381,11 +381,10 @@ gchar *layout_get_unique_id()
 		}
 }
 
-static gboolean layout_set_current_cb(GtkWidget *, GdkEventFocus *, gpointer data)
+static void layout_set_current_cb(GtkEventControllerFocus *, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 	current_lw = lw;
-	return FALSE;
 }
 
 static void layout_box_folders_changed_cb(GtkWidget *widget, gpointer)
@@ -2606,8 +2605,10 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	g_signal_connect(lw->window, "close-request",
 			 G_CALLBACK(layout_delete_cb), lw);
 
-	g_signal_connect(G_OBJECT(lw->window), "focus-in-event",
+	GtkEventController *focus_controller = gtk_event_controller_focus_new();
+	g_signal_connect(focus_controller, "enter",
 			 G_CALLBACK(layout_set_current_cb), lw);
+	gtk_widget_add_controller(lw->window, focus_controller);
 
 	layout_keyboard_init(lw, lw->window);
 
