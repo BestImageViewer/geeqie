@@ -1010,24 +1010,80 @@ static void open_file_cb(GFile *file, gpointer)
 		}
 }
 
-static void open_recent_file_cb(GtkWidget *chooser, gint response_id, gpointer)
+static void open_recent_path(const gchar *file_name)
 {
-	if (response_id == GTK_RESPONSE_ACCEPT)
+	if (!file_name)
 		{
-		g_autofree gchar *uri_name = gtk_recent_chooser_get_current_uri(GTK_RECENT_CHOOSER(chooser));
-		g_autofree gchar *file_name = g_filename_from_uri(uri_name, nullptr, nullptr);
-
-		if (g_str_has_suffix(file_name, GQ_COLLECTION_EXT))
-			{
-			collection_window_new(file_name);
-			}
-		else
-			{
-			layout_set_path(get_current_layout(), file_name);
-			}
+		return;
 		}
 
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
+	if (g_str_has_suffix(file_name, GQ_COLLECTION_EXT))
+		{
+		collection_window_new(file_name);
+		}
+	else
+		{
+		layout_set_path(get_current_layout(), file_name);
+		}
+}
+
+struct OpenRecentDialogData
+{
+	GenericDialog *gd;
+	GtkWidget *list;
+	GtkWidget *open_button;
+};
+
+static void open_recent_dialog_data_free(OpenRecentDialogData *dialog_data)
+{
+	if (!dialog_data) return;
+
+	generic_dialog_close(dialog_data->gd);
+	g_free(dialog_data);
+}
+
+static void open_recent_dialog_update(OpenRecentDialogData *dialog_data)
+{
+	if (!dialog_data->open_button)
+		{
+		return;
+		}
+
+	GtkListBoxRow *row = gtk_list_box_get_selected_row(GTK_LIST_BOX(dialog_data->list));
+	gtk_widget_set_sensitive(dialog_data->open_button, row != nullptr);
+}
+
+static void open_recent_dialog_open(OpenRecentDialogData *dialog_data)
+{
+	GtkListBoxRow *row = gtk_list_box_get_selected_row(GTK_LIST_BOX(dialog_data->list));
+	if (!row)
+		{
+		return;
+		}
+
+	const auto *path = static_cast<const gchar *>(g_object_get_data(G_OBJECT(row), "recent-path"));
+	open_recent_path(path);
+	open_recent_dialog_data_free(dialog_data);
+}
+
+static void open_recent_dialog_cancel_cb(GenericDialog *, gpointer data)
+{
+	open_recent_dialog_data_free(static_cast<OpenRecentDialogData *>(data));
+}
+
+static void open_recent_dialog_open_cb(GenericDialog *, gpointer data)
+{
+	open_recent_dialog_open(static_cast<OpenRecentDialogData *>(data));
+}
+
+static void open_recent_dialog_row_selected_cb(GtkListBox *, GtkListBoxRow *, gpointer data)
+{
+	open_recent_dialog_update(static_cast<OpenRecentDialogData *>(data));
+}
+
+static void open_recent_dialog_row_activated_cb(GtkListBox *, GtkListBoxRow *, gpointer data)
+{
+	open_recent_dialog_open(static_cast<OpenRecentDialogData *>(data));
 }
 
 static void layout_menu_open_file_cb(GSimpleAction *, GVariant *, gpointer)
@@ -1065,48 +1121,82 @@ static void layout_menu_open_file_cb(GSimpleAction *, GVariant *, gpointer)
 
 static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointer)
 {
-	GtkWidget *dialog;
+	auto *dialog_data = g_new0(OpenRecentDialogData, 1);
+	dialog_data->gd = generic_dialog_new(_("Open Recent File"),
+					     "open_recent_file",
+					     get_current_layout()->window,
+					     FALSE,
+					     open_recent_dialog_cancel_cb,
+					     dialog_data);
 
-	dialog = gtk_recent_chooser_dialog_new(_("Open Recent File - Geeqie"), nullptr, _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, nullptr);
+	gtk_window_set_default_size(GTK_WINDOW(dialog_data->gd->dialog), 700, 400);
 
-	gtk_recent_chooser_set_show_tips(GTK_RECENT_CHOOSER(dialog), TRUE);
-	gtk_recent_chooser_set_show_icons(GTK_RECENT_CHOOSER(dialog), TRUE);
+	dialog_data->list = gtk_list_box_new();
+	gtk_list_box_set_selection_mode(GTK_LIST_BOX(dialog_data->list), GTK_SELECTION_SINGLE);
+	gtk_list_box_set_activate_on_single_click(GTK_LIST_BOX(dialog_data->list), FALSE);
+	g_signal_connect(dialog_data->list, "row-selected",
+			 G_CALLBACK(open_recent_dialog_row_selected_cb), dialog_data);
+	g_signal_connect(dialog_data->list, "row-activated",
+			 G_CALLBACK(open_recent_dialog_row_activated_cb), dialog_data);
+	gq_gtk_box_pack_start(GTK_BOX(dialog_data->gd->vbox), dialog_data->list, TRUE, TRUE, 0);
 
-	GtkRecentFilter *recent_filter = gtk_recent_filter_new();
-	gtk_recent_filter_set_name(recent_filter, _("Geeqie image files"));
+	HistoryList *recent_items = history_list_find_by_key("recent");
 
-	GList *work = filter_get_list();
-
-	while (work)
+	if (recent_items)
 		{
-		FilterEntry *fe;
-
-		fe = static_cast<FilterEntry *>(work->data);
-
-		g_auto(GStrv) extension_list = g_strsplit(fe->extensions, ";", -1);
-
-		for (gint i = 0; extension_list[i] != nullptr; i++)
+		for (const auto &path : *recent_items)
 			{
-			gchar ext[64];
-			g_snprintf(ext, sizeof(ext), "*%s", extension_list[i]);
-			gtk_recent_filter_add_pattern(recent_filter, ext);
-			}
+			if (!isfile(path.c_str()))
+				{
+				continue;
+				}
 
-		work = work->next;
+			GtkWidget *row = gtk_list_box_row_new();
+			GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+			g_autofree gchar *basename = g_path_get_basename(path.c_str());
+
+			GtkWidget *name_label = gtk_label_new(basename);
+			gtk_label_set_xalign(GTK_LABEL(name_label), 0.0);
+			gtk_label_set_ellipsize(GTK_LABEL(name_label), PANGO_ELLIPSIZE_END);
+			gtk_widget_add_css_class(name_label, "heading");
+			gtk_box_append(GTK_BOX(box), name_label);
+
+			GtkWidget *path_label = gtk_label_new(path.c_str());
+			gtk_label_set_xalign(GTK_LABEL(path_label), 0.0);
+			gtk_label_set_wrap(GTK_LABEL(path_label), TRUE);
+			gtk_label_set_wrap_mode(GTK_LABEL(path_label), PANGO_WRAP_WORD_CHAR);
+			gtk_widget_add_css_class(path_label, "dim-label");
+			gtk_box_append(GTK_BOX(box), path_label);
+
+			gq_gtk_widget_set_border_width(box, 6);
+			gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(row), box);
+			g_object_set_data_full(G_OBJECT(row), "recent-path", g_strdup(path.c_str()), g_free);
+			gtk_list_box_append(GTK_LIST_BOX(dialog_data->list), row);
+			}
 		}
 
-	gtk_recent_chooser_add_filter(GTK_RECENT_CHOOSER(dialog), recent_filter);
+	if (gtk_widget_get_first_child(dialog_data->list) == nullptr)
+		{
+		GtkWidget *label = gtk_label_new(_("No recent files available."));
+		gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+		gq_gtk_box_pack_start(GTK_BOX(dialog_data->gd->vbox), label, FALSE, FALSE, 0);
+		}
+	else
+		{
+		gtk_list_box_select_row(GTK_LIST_BOX(dialog_data->list),
+					GTK_LIST_BOX_ROW(gtk_widget_get_first_child(dialog_data->list)));
+		}
 
-	GtkRecentFilter *all_filter = gtk_recent_filter_new();
-	gtk_recent_filter_set_name(all_filter, _("All files"));
-	gtk_recent_filter_add_pattern(all_filter, "*");
-	gtk_recent_chooser_add_filter(GTK_RECENT_CHOOSER(dialog), all_filter);
+	dialog_data->open_button = generic_dialog_add_button(dialog_data->gd,
+							     GQ_ICON_OPEN,
+							     _("_Open"),
+							     open_recent_dialog_open_cb,
+							     TRUE);
+	gtk_widget_set_sensitive(dialog_data->open_button, FALSE);
+	open_recent_dialog_update(dialog_data);
 
-	gtk_recent_chooser_set_filter(GTK_RECENT_CHOOSER(dialog), recent_filter);
-
-	g_signal_connect(dialog, "response", G_CALLBACK(open_recent_file_cb), dialog);
-
-	gq_gtk_widget_show_all(GTK_WIDGET(dialog));
+	gtk_widget_show(dialog_data->list);
+	gtk_widget_show(dialog_data->gd->dialog);
 }
 
 static void open_collection_cb(GFile *file, gpointer)
