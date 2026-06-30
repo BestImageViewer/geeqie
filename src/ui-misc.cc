@@ -229,7 +229,7 @@ GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *icon_name,
 
 	if (icon_name)
 		{
-		button = gtk_button_new_from_icon_name(icon_name, GTK_ICON_SIZE_BUTTON);
+		button = gtk_button_new_from_icon_name(icon_name);
 		}
 	else
 		{
@@ -1156,11 +1156,36 @@ std::vector<ActionItem> get_action_items()
 
 GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags)
 {
+	g_autoptr(GtkIconPaintable) icon = nullptr;
+	g_autoptr(GFile) file = nullptr;
+	g_autofree gchar *path = nullptr;
 	g_autoptr(GError) error = nullptr;
-	g_autoptr(GdkPixbuf) icon = gtk_icon_theme_load_icon(icon_theme, icon_name, size, flags, &error);
-	if (error) return nullptr;
 
-	return gdk_pixbuf_copy(icon);
+	icon = gtk_icon_theme_lookup_icon(icon_theme,
+					  icon_name,
+					  nullptr,
+					  size,
+					  1,
+					  GTK_TEXT_DIR_NONE,
+					  flags);
+	if (!icon)
+		{
+		return nullptr;
+		}
+
+	file = gtk_icon_paintable_get_file(icon);
+	if (!file)
+		{
+		return nullptr;
+		}
+
+	path = g_file_get_path(file);
+	if (!path)
+		{
+		return nullptr;
+		}
+
+	return gdk_pixbuf_new_from_file_at_scale(path, size, size, TRUE, &error);
 }
 
 gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos)

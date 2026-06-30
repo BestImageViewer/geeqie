@@ -329,7 +329,7 @@ void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width)
 	gtk_widget_set_margin_end(widget, width);
 }
 
-GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, GtkIconSize size)
+GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, gint size)
 {
 	(void)size;
 	return gtk_image_new_from_icon_name(stock_id_to_icon_name(stock_id));

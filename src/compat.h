@@ -86,7 +86,7 @@ void gq_gtk_widget_show_all(GtkWidget *widget);
 void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting);
 void gq_gtk_widget_destroy(GtkWidget *widget);
 void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width);
-GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, GtkIconSize size);
+GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, gint size);
 GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget);
 GList *gq_gtk_widget_get_children(GtkWidget *widget);
 

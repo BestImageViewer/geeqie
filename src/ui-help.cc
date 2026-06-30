@@ -220,7 +220,7 @@ GtkWidget *help_window_new(const gchar *title,
 	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
 	gtk_box_append(GTK_BOX(vbox), hbox);
 
-	button = gtk_button_new_from_icon_name(GQ_ICON_CLOSE, GTK_ICON_SIZE_BUTTON);
+	button = gtk_button_new_from_icon_name(GQ_ICON_CLOSE);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(help_window_close), window);
 	gq_gtk_container_add(hbox, button);

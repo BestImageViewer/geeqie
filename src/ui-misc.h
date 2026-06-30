@@ -210,7 +210,7 @@ struct ActionItem
 
 std::vector<ActionItem> get_action_items();
 
-// Copy pixbuf returned by gtk_icon_theme_load_icon() to avoid GTK+ keeping the old icon theme loaded
+// Load a themed icon through the GTK4 icon theme API and return a copy as a pixbuf
 GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags);
 
 gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos);

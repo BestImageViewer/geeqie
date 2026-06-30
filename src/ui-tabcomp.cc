@@ -530,7 +530,7 @@ static GtkWidget *tab_completion_create_complete_button(GtkWidget *entry, GtkWid
 {
 	GtkWidget *button;
 
-	button = gtk_button_new_from_icon_name(GQ_ICON_GO_LAST, GTK_ICON_SIZE_BUTTON);
+	button = gtk_button_new_from_icon_name(GQ_ICON_GO_LAST);
 	gtk_widget_set_can_focus(button, FALSE);
 	g_signal_connect(G_OBJECT(button), "size_allocate",
 			 G_CALLBACK(tab_completion_button_size_allocate), parent);
