@@ -32,6 +32,7 @@ void delete_cb(gpointer data)
 }
 
 const gchar *gq_gtk_entry_get_text(GtkEntry *entry);
+gint gq_gtk_dialog_run(GtkDialog *dialog);
 gchar *convert_rating_to_stars(gint rating);
 gchar *decode_geo_parameters(const gchar *input_text);
 gchar *expand_tilde(const gchar *filename);

@@ -1585,7 +1585,7 @@ Geeqie must now be restarted for the changes to take effect.\n");
 
 	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", description);
 
-	gtk_dialog_run(GTK_DIALOG(dialog));
+	gq_gtk_dialog_run(GTK_DIALOG(dialog));
 	gq_gtk_widget_destroy(dialog);
 }
 

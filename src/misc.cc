@@ -370,6 +370,40 @@ const gchar *gq_gtk_entry_get_text(GtkEntry *entry)
 	return gtk_editable_get_text(GTK_EDITABLE(entry));
 }
 
+namespace
+{
+
+struct DialogRunData
+{
+	GMainLoop *loop;
+	gint response_id;
+};
+
+void dialog_run_response_cb(GtkDialog *, gint response_id, gpointer data)
+{
+	auto *run_data = static_cast<DialogRunData *>(data);
+	run_data->response_id = response_id;
+	g_main_loop_quit(run_data->loop);
+}
+
+} // namespace
+
+gint gq_gtk_dialog_run(GtkDialog *dialog)
+{
+	DialogRunData run_data{};
+	run_data.loop = g_main_loop_new(nullptr, FALSE);
+	run_data.response_id = GTK_RESPONSE_NONE;
+
+	gulong handler_id = g_signal_connect(dialog, "response",
+					     G_CALLBACK(dialog_run_response_cb), &run_data);
+	gtk_widget_show(GTK_WIDGET(dialog));
+	g_main_loop_run(run_data.loop);
+	g_signal_handler_disconnect(dialog, handler_id);
+	g_main_loop_unref(run_data.loop);
+
+	return run_data.response_id;
+}
+
 void gq_gtk_grid_attach(GtkGrid *grid, GtkWidget *child, guint left_attach, guint right_attach, guint top_attach, guint bottom_attach)
 {
 	gtk_grid_attach(grid, child, left_attach, top_attach, right_attach - left_attach, bottom_attach - top_attach);

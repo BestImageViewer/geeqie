@@ -769,7 +769,7 @@ Continue?");
 		GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Some keyboard shortcuts and \n menu actions have changed."));
 		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", description);
 
-		int result = gtk_dialog_run(GTK_DIALOG(dialog));
+		int result = gq_gtk_dialog_run(GTK_DIALOG(dialog));
 
 		if (result == GTK_RESPONSE_NO)
 			{
