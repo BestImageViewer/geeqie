@@ -655,6 +655,35 @@ static gboolean pr_parent_window_sizable(PixbufRenderer *pr)
 	return TRUE;
 }
 
+static void pr_get_monitor_size(PixbufRenderer *pr, gint *width, gint *height)
+{
+	GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(pr));
+	GdkMonitor *monitor = nullptr;
+
+	if (pr->parent_window)
+		{
+		if (auto *native = gtk_widget_get_native(pr->parent_window))
+			{
+			GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(native));
+			if (surface)
+				{
+					monitor = gdk_display_get_monitor_at_surface(display, surface);
+				}
+			}
+		}
+
+	if (!monitor)
+		{
+			monitor = gdk_display_get_primary_monitor(display);
+		}
+
+	GdkRectangle geometry;
+	gdk_monitor_get_geometry(monitor, &geometry);
+
+	*width = geometry.width;
+	*height = geometry.height;
+}
+
 static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 {
 	GtkAllocation widget_allocation;
@@ -664,8 +693,12 @@ static gboolean pr_parent_window_resize(PixbufRenderer *pr, gint w, gint h)
 
 	if (pr->window_limit)
 		{
-		gint sw = deprecated_gdk_screen_width() * pr->window_limit_size / 100;
-		gint sh = deprecated_gdk_screen_height() * pr->window_limit_size / 100;
+		gint sw;
+		gint sh;
+		pr_get_monitor_size(pr, &sw, &sh);
+
+		sw = sw * pr->window_limit_size / 100;
+		sh = sh * pr->window_limit_size / 100;
 
 		w = std::min(w, sw);
 		h = std::min(h, sh);
@@ -1655,8 +1688,7 @@ static gboolean pr_zoom_clamp(PixbufRenderer *pr, gdouble zoom,
 
 		if (sizeable)
 			{
-			max_w = deprecated_gdk_screen_width();
-			max_h = deprecated_gdk_screen_height();
+			pr_get_monitor_size(pr, &max_w, &max_h);
 
 			if (pr->window_limit)
 				{

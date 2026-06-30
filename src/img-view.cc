@@ -905,6 +905,36 @@ static void image_set_desaturate_cb(GSimpleAction *, GVariant *, gpointer data)
 	image_set_desaturate(imd, !image_get_desaturate(imd));
 }
 
+
+static void pr_get_monitor_size(PixbufRenderer *pr, gint *width, gint *height)
+{
+	GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(pr));
+	GdkMonitor *monitor = nullptr;
+
+	if (pr->parent_window)
+		{
+		if (auto *native = gtk_widget_get_native(pr->parent_window))
+			{
+			GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(native));
+			if (surface)
+				{
+					monitor = gdk_display_get_monitor_at_surface(display, surface);
+				}
+			}
+		}
+
+	if (!monitor)
+		{
+			monitor = gdk_display_get_primary_monitor(display);
+		}
+
+	GdkRectangle geometry;
+	gdk_monitor_get_geometry(monitor, &geometry);
+
+	*width = geometry.width;
+	*height = geometry.height;
+}
+
 /* const ActionDef image_actions[]
  */
 #include "img-view-actions.inc"
@@ -998,8 +1028,12 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 
 	if (options->image.limit_window_size)
 		{
-		gint mw = deprecated_gdk_screen_width() * options->image.max_window_size / 100;
-		gint mh = deprecated_gdk_screen_height() * options->image.max_window_size / 100;
+		gint mw;
+		gint mh;
+		pr_get_monitor_size(pr, &mw, &mh);
+
+		mw = mw * pr->window_limit_size / 100;
+		mh = mh * pr->window_limit_size / 100;
 
 		size.width = std::min(size.width, mw);
 		size.height = std::min(size.height, mh);
