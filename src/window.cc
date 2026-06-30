@@ -23,7 +23,6 @@
 #include <cstdio>
 #include <cstring>
 
-#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
@@ -34,7 +33,6 @@
 #include "main.h"
 #include "misc.h"
 #include "options.h"
-#include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "ui-help.h"
 #include "ui-misc.h"
@@ -59,13 +57,9 @@ GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *subtitl
 
 	gtk_window_set_title(GTK_WINDOW(window), title);
 
-	g_autoptr(GdkPixbuf) pixbuf = pixbuf_inline(icon ? icon : PIXBUF_INLINE_ICON);
-	if (pixbuf)
-		{
-		gtk_window_set_icon(GTK_WINDOW(window), pixbuf);
-		}
-
-	gtk_window_set_role(GTK_WINDOW(window), role);
+	/* GTK4: per-window pixbuf icons and window roles are not supported. */
+	(void)role;
+	gtk_window_set_icon_name(GTK_WINDOW(window), icon ? icon : GQ_ICON_IMAGE);
 
 	if (options->hide_window_decorations)
 		{
@@ -190,7 +184,7 @@ void help_window_show(const gchar *key)
  *-----------------------------------------------------------------------------
  */
 
-static void help_search_window_show_icon_press(GtkEntry *edit_widget, GtkEntryIconPosition, GdkEvent *, gpointer)
+static void help_search_window_show_icon_press(GtkEntry *edit_widget, GtkEntryIconPosition, gpointer)
 {
 	gq_gtk_entry_set_text(edit_widget, "");
 }
