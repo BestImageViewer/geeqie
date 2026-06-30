@@ -600,21 +600,24 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 
 	if (toggle) // TODO: TG seems no function uses toggle now
 		{
-		item = GTK_WIDGET(gtk_toggle_tool_button_new());
-		if (icon_name) gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(item), icon_name);
-		if (label) gtk_tool_button_set_label(GTK_TOOL_BUTTON(item), label);
+		item = gtk_toggle_button_new();
 		}
 	else
 		{
-		GtkWidget *icon = nullptr;
-		if (icon_name)
-			{
-			icon = gtk_image_new_from_icon_name(icon_name);
-			gtk_widget_show(icon);
-			}
-		item = GTK_WIDGET(gtk_tool_button_new(icon, label));
+		item = gtk_button_new();
 		}
-	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(item), TRUE);
+
+	if (icon_name)
+		{
+		gtk_button_set_icon_name(GTK_BUTTON(item), icon_name);
+		}
+
+	if (label)
+		{
+		gtk_button_set_label(GTK_BUTTON(item), label);
+		}
+
+	gtk_button_set_use_underline(GTK_BUTTON(item), TRUE);
 
 	if (func) g_signal_connect(item, "clicked", func, data);
 	gq_gtk_container_add(toolbar, item);
