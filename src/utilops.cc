@@ -3143,8 +3143,6 @@ void file_util_rename_dir(FileData *source_fd, const gchar *new_path, GtkWidget 
 
 static GdkContentProvider * clipboard_build_provider(ClipboardData *cbd)
 {
-	g_autoptr(GdkContentProvider) provider = gdk_content_provider_new_union(NULL, 0);
-
 	GList *work = cbd->path_list;
 
 	/* Plain text version */
@@ -3171,7 +3169,8 @@ static GdkContentProvider * clipboard_build_provider(ClipboardData *cbd)
 			}
 		}
 
-	gdk_content_provider_union_add( provider, gdk_content_provider_new_typed(G_TYPE_STRING, g_strdup(text->str)));
+	g_autoptr(GdkContentProvider) text_provider =
+		gdk_content_provider_new_typed(G_TYPE_STRING, g_strdup(text->str));
 
 	/* GNOME copied-files format */
 	g_autoptr(GString) copied = g_string_new(cbd->action == ClipboardAction::CUT ? "cut" : "copy");
@@ -3186,9 +3185,16 @@ static GdkContentProvider * clipboard_build_provider(ClipboardData *cbd)
 		work = work->next;
 		}
 
-	gdk_content_provider_union_add(provider, gdk_content_provider_new_for_bytes("application/x-special-gnome-copied-files", g_bytes_new(copied->str, copied->len)));
+	g_autoptr(GdkContentProvider) copied_provider =
+		gdk_content_provider_new_for_bytes("application/x-special-gnome-copied-files",
+						     g_bytes_new(copied->str, copied->len));
 
-	return g_steal_pointer(&provider);
+	GdkContentProvider *providers[] = {
+		text_provider,
+		copied_provider
+	};
+
+	return gdk_content_provider_new_union(providers, G_N_ELEMENTS(providers));
 }
 
 enum class GqClipboardTarget
