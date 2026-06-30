@@ -1952,7 +1952,7 @@ static void dupe_check_stop(DupeWindow *dw)
 	while (dw->thread_count < dw->queue_count) // Wait for the queue to empty
 		{
 		dupe_window_update_progress(dw, nullptr, 0.0, FALSE);
-		widget_set_cursor(dw->listview, -1);
+		gtk_widget_set_cursor_from_name(dw->listview, nullptr);
 		}
 
 	g_list_free(dw->search_matches);
@@ -1962,7 +1962,7 @@ static void dupe_check_stop(DupeWindow *dw)
 		{
 		g_clear_handle_id(&dw->idle_id, g_source_remove);
 		dupe_window_update_progress(dw, nullptr, 0.0, FALSE);
-		widget_set_cursor(dw->listview, -1);
+		gtk_widget_set_cursor_from_name(dw->listview, nullptr);
 		}
 
 	if (dw->add_files_queue_id)
@@ -1976,7 +1976,7 @@ static void dupe_check_stop(DupeWindow *dw)
 			}
 		dw->add_files_queue = nullptr;
 		dupe_window_update_progress(dw, nullptr, 0.0, FALSE);
-		widget_set_cursor(dw->listview, -1);
+		gtk_widget_set_cursor_from_name(dw->listview, nullptr);
 		}
 
 	thumb_loader_free(dw->thumb_loader);
@@ -2308,7 +2308,7 @@ static gboolean dupe_check_cb(gpointer data)
 		/* check thumbs */
 		if (dw->show_thumbs) dupe_thumb_step(dw);
 
-		widget_set_cursor(dw->listview, -1);
+		gtk_widget_set_cursor_from_name(dw->listview, nullptr);
 
 		return G_SOURCE_REMOVE;
 		/* The end */
@@ -2351,7 +2351,7 @@ static void dupe_check_start(DupeWindow *dw)
 	dw->working = g_list_last(dw->list);
 
 	dupe_window_update_count(dw, TRUE);
-	widget_set_cursor(dw->listview, GDK_WATCH);
+	gtk_widget_set_cursor_from_name(dw->listview, "wait");
 	dw->queue_count = 0;
 	dw->thread_count = 0;
 	dw->search_matches_sorted = nullptr;

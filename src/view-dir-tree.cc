@@ -77,23 +77,23 @@ static void vdtree_row_expanded(GtkTreeView *treeview, GtkTreeIter *iter, GtkTre
  *----------------------------------------------------------------------------
  */
 
-static void set_cursor(GtkWidget *widget, gint cursor_type)
+static void set_cursor(GtkWidget *widget, const gchar cursor_name)
 {
 	if (!widget) return;
 
-	widget_set_cursor(widget, cursor_type);
+	gtk_widget_set_cursor_from_name(widget, cursor_name);
 	deprecated_gdk_flush();
 }
 
 static void vdtree_busy_push(ViewDir *vd)
 {
-	if (VDTREE(vd)->busy_ref == 0) set_cursor(vd->view, GDK_WATCH);
+	if (VDTREE(vd)->busy_ref == 0) set_cursor(vd->view, "wait");
 	VDTREE(vd)->busy_ref++;
 }
 
 static void vdtree_busy_pop(ViewDir *vd)
 {
-	if (VDTREE(vd)->busy_ref == 1) set_cursor(vd->view, -1);
+	if (VDTREE(vd)->busy_ref == 1) set_cursor(vd->view, nullptr);
 	if (VDTREE(vd)->busy_ref > 0) VDTREE(vd)->busy_ref--;
 }
 

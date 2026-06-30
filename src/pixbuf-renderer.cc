@@ -2025,7 +2025,7 @@ static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double 
 		}
 	else
 		{
-		widget_set_cursor(widget, GDK_FLEUR);
+		gtk_widget_set_cursor_from_name(widget, "crosshair");
 		}
 
 	GdkModifierType state = GDK_MODIFIER_MASK;

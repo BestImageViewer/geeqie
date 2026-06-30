@@ -51,8 +51,6 @@ void shift_color(GdkRGBA &src, gshort val = -1, gint direction = 0);
 
 void cell_renderer_height_override(GtkCellRenderer *renderer); /**< cell max with/height hack utility */
 
-void widget_set_cursor(GtkWidget *widget, gint icon);
-
 GtkWidget *widget_get_toplevel(GtkWidget *widget);
 
 #endif /* MISC_H */

@@ -62,15 +62,15 @@ void clear_mouse_cursor(GtkWidget *widget, gint state)
 {
 	if (state & FULLSCREEN_CURSOR_BUSY)
 		{
-		widget_set_cursor(widget, GDK_WATCH);
+		gtk_widget_set_cursor_from_name(widget, "wait");
 		}
 	else if (state & FULLSCREEN_CURSOR_NORMAL)
 		{
-		widget_set_cursor(widget, -1);
+		gtk_widget_set_cursor_from_name(widget, nullptr);
 		}
 	else
 		{
-		widget_set_cursor(widget, GDK_BLANK_CURSOR);
+		gtk_widget_set_cursor_from_name(widget, nullptr);
 		}
 }
 

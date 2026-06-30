@@ -400,59 +400,6 @@ void cell_renderer_height_override(GtkCellRenderer *renderer)
 		}
 }
 
-/**
- * @brief Set cursor for widget's window.
- * @param widget Widget for which cursor is set
- * @param icon Cursor type from GdkCursorType.
- *        Value -1 means using the cursor of its parent window.
- * @todo Use std::optional for icon since C++17 instead of special -1 value
- */
-static const gchar *cursor_name_from_legacy_icon(gint icon)
-{
-	switch (icon)
-		{
-		case GDK_ARROW:
-			return "default";
-		case GDK_HAND2:
-			return "pointer";
-		case GDK_CROSS:
-			return "crosshair";
-		case GDK_WATCH:
-			return "wait";
-		case GDK_XTERM:
-			return "text";
-		case GDK_FLEUR:
-			return "move";
-		default:
-			return nullptr;
-		}
-}
-
-void widget_set_cursor(GtkWidget *widget, gint icon)
-{
-	if (!widget)
-		{
-		return;
-		}
-
-	if (icon == -1)
-		{
-		gtk_widget_set_cursor(widget, nullptr);
-		}
-	else
-		{
-		auto *name = cursor_name_from_legacy_icon(icon);
-		if (name)
-			{
-			gtk_widget_set_cursor_from_name(widget, name);
-			}
-		}
-
-	gdk_window_set_cursor(window, cursor);
-
-	if (cursor) g_object_unref(cursor);
-}
-
 GtkWidget *widget_get_toplevel(GtkWidget *widget)
 {
 	auto *root = gtk_widget_get_root(vf->listview);
