@@ -669,7 +669,7 @@ static void vficon_select_region_util(ViewFile *vf, FileData *start, FileData *e
 		}
 }
 
-gboolean vficon_is_selected(ViewFile *, FileData *fd)
+bool vficon_is_selected(const ViewFile *, const FileData *fd)
 {
 	return (fd->selected & SELECTION_SELECTED);
 }

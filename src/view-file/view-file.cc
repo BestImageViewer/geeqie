@@ -204,6 +204,17 @@ static gboolean vf_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event
  *-----------------------------------------------------------------------------
  */
 
+static bool vf_is_selected(const ViewFile *vf, const FileData *fd)
+{
+	switch (vf->type)
+		{
+		case FILEVIEW_LIST: return vflist_is_selected(vf, fd);
+		case FILEVIEW_ICON: return vficon_is_selected(vf, fd);
+		}
+
+	return false;
+}
+
 guint vf_selection_count(ViewFile *vf, gint64 *bytes)
 {
 	guint ret;
