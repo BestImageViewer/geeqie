@@ -2201,7 +2201,7 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 		gtk_label_set_xalign(GTK_LABEL(label), 0.0);
 		gtk_label_set_yalign(GTK_LABEL(label), 0.0);
 
-		gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+		gtk_label_set_wrap(GTK_LABEL(label), TRUE);
 		gq_gtk_grid_attach(GTK_GRID(table), label,  1, 2, i, i + 1);
 		gtk_widget_show(label);
 

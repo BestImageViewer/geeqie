@@ -3580,7 +3580,7 @@ static void config_tab_advanced(GtkWidget *notebook)
 
 	types_string = g_string_prepend(types_string, _("Usable file types:\n"));
 	types_string_label = pref_label_new(group, types_string->str);
-	gtk_label_set_line_wrap(GTK_LABEL(types_string_label), TRUE);
+	gtk_label_set_wrap(GTK_LABEL(types_string_label), TRUE);
 
 	pref_spacer(group, PREF_PAD_GROUP);
 
@@ -3600,7 +3600,7 @@ static void config_tab_advanced(GtkWidget *notebook)
 	group = pref_group_new(vbox, FALSE, _("Thread pool limits"), GTK_ORIENTATION_VERTICAL);
 
 	threads_string_label = pref_label_new(group, _("This option limits the number of threads (or cpu cores) that Geeqie will use when running duplicate checks.\nThe value 0 means all available cores will be used."));
-	gtk_label_set_line_wrap(GTK_LABEL(threads_string_label), TRUE);
+	gtk_label_set_wrap(GTK_LABEL(threads_string_label), TRUE);
 
 	pref_spacer(vbox, PREF_PAD_GROUP);
 
