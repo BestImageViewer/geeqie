@@ -610,7 +610,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 
 static void layout_sort_menu_cb(GtkWidget *widget, gpointer data)
 {
-	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	auto *lw = static_cast<LayoutWindow *>(data);
 	if (!lw) return;
@@ -656,7 +656,7 @@ static void layout_sort_button_press_cb(GtkWidget *, gpointer data)
 	menu_item_add_check(menu, _("Ascending"), lw->options.file_view_list_sort.ascending, G_CALLBACK(layout_sort_menu_ascend_cb), lw);
 	menu_item_add_check(menu, _("Case"), lw->options.file_view_list_sort.case_sensitive, G_CALLBACK(layout_sort_menu_case_cb), lw);
 
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+	(void)menu;
 }
 
 static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
@@ -687,7 +687,7 @@ static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 template<ZoomMode mode>
 static void layout_zoom_menu_cb(GtkWidget *widget, gpointer)
 {
-	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	options->image.zoom_mode = mode;
 }
@@ -695,7 +695,7 @@ static void layout_zoom_menu_cb(GtkWidget *widget, gpointer)
 template<ScrollReset scroll_reset_method>
 static void layout_scroll_menu_cb(GtkWidget *widget, gpointer)
 {
-	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	options->image.scroll_reset_method = scroll_reset_method;
 	image_options_sync();
@@ -727,7 +727,7 @@ static void layout_zoom_button_press_cb(GtkWidget *, gpointer)
 	                    options->image.scroll_reset_method == ScrollReset::NOCHANGE,
 	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::NOCHANGE>), nullptr);
 
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+	(void)menu;
 }
 
 static GtkWidget *layout_zoom_button(LayoutWindow *lw, GtkWidget *box, gint size, gboolean)

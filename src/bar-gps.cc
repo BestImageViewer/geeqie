@@ -394,7 +394,7 @@ void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *, gpointer data)
 
 void bar_pane_gps_change_map_cb(GtkWidget *widget, gpointer data)
 {
-	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)))
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget)))
 		return;
 
 	auto *pgd = static_cast<PaneGPSData *>(data);
@@ -604,7 +604,7 @@ gboolean bar_pane_gps_map_keypress_cb(GtkWidget *, const GqMouseButtonEvent *bev
 	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
 		menu = bar_pane_gps_menu(pgd);
-		gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+		(void)menu;
 		return TRUE;
 		}
 

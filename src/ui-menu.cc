@@ -45,15 +45,19 @@
 
 static void menu_item_add_accelerator(GtkWidget *, GtkWidget *)
 {
-
-/* @FIXME GTK4 menus
- */
+	/* Temporary GTK4 compatibility stub. */
 }
 
 static void menu_item_finish(GtkWidget *menu, GtkWidget *item, GCallback func, gpointer data)
 {
-	if (func) g_signal_connect(G_OBJECT(item), "activate", func, data);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+	if (func && GTK_IS_BUTTON(item))
+		{
+		g_signal_connect(G_OBJECT(item), "clicked", func, data);
+		}
+	if (GTK_IS_BOX(menu))
+		{
+		gtk_box_append(GTK_BOX(menu), item);
+		}
 	gtk_widget_show(item);
 }
 
@@ -62,7 +66,8 @@ GtkWidget *menu_item_add(GtkWidget *menu, const gchar *label,
 {
 	GtkWidget *item;
 
-	item = gtk_menu_item_new_with_mnemonic(label);
+	item = gtk_button_new_with_label(label);
+	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
 
 	menu_item_add_accelerator(menu, item);
 
@@ -75,13 +80,11 @@ GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar 
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item;
-	GtkWidget *image;
+	(void)stock_id;
 
-	item = deprecated_gtk_image_menu_item_new_with_mnemonic(label);
-
-	image = gq_gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_MENU);
-	deprecated_gtk_image_menu_item_set_image(deprecated_GTK_IMAGE_MENU_ITEM(item), image);
-	gtk_widget_show(image);
+	/* Temporary GTK4 stub: stock images are dropped until this path is ported. */
+	item = gtk_button_new_with_label(label);
+	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
 
 	menu_item_add_accelerator(menu, item);
 
@@ -94,13 +97,11 @@ GtkWidget *menu_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item;
-	GtkWidget *image;
+	(void)icon_name;
 
-	item = deprecated_gtk_image_menu_item_new_with_mnemonic(label);
-
-	image = gtk_image_new_from_icon_name(icon_name);
-	deprecated_gtk_image_menu_item_set_image(deprecated_GTK_IMAGE_MENU_ITEM(item), image);
-	gtk_widget_show(image);
+	/* Temporary GTK4 stub: icons are dropped until this path is ported. */
+	item = gtk_button_new_with_label(label);
+	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
 
 	menu_item_add_accelerator(menu, item);
 
@@ -136,8 +137,9 @@ GtkWidget *menu_item_add_check(GtkWidget *menu, const gchar *label, gboolean act
 {
 	GtkWidget *item;
 
-	item = gtk_check_menu_item_new_with_mnemonic(label);
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), active);
+	item = gtk_check_button_new_with_label(label);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(item), active);
+	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
 
 	menu_item_add_accelerator(menu, item);
 
@@ -150,7 +152,6 @@ GtkWidget *menu_item_add_radio(GtkWidget *menu, const gchar *label, gpointer ite
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item = menu_item_add_check(menu, label, active, func, data);
-	gtk_check_menu_item_set_draw_as_radio(GTK_CHECK_MENU_ITEM(item), TRUE);
 
 	if (item_data) g_object_set_data(G_OBJECT(item), "menu_item_radio_data", item_data);
 
@@ -164,8 +165,7 @@ gpointer menu_item_radio_get_data(GtkWidget *menu_item)
 
 void menu_item_add_divider(GtkWidget *menu)
 {
-	GtkWidget *item = gtk_separator_menu_item_new();
-	gtk_widget_set_sensitive(item, FALSE);
+	GtkWidget *item = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	menu_item_finish(menu, item, nullptr, nullptr);
 }
 
@@ -175,7 +175,8 @@ void menu_item_add_divider(GtkWidget *menu)
 GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
 				GCallback func, gpointer data)
 {
-	GtkWidget *item = gtk_menu_item_new_with_label(label);
+	GtkWidget *item = gtk_button_new_with_label(label);
+	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
 	menu_item_finish(menu, item, func, data);
 
 	return item;
@@ -189,35 +190,18 @@ GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
 
 GtkWidget *popup_menu_short_lived()
 {
-	GtkWidget *menu;
-
-	menu = gtk_menu_new();
-
-	/* take ownership of menu */
-	g_object_ref_sink(G_OBJECT(menu));
-
-	g_signal_connect(G_OBJECT(menu), "selection_done",
-	                 G_CALLBACK(g_object_unref), NULL); // destroy the menu
-	return menu;
+	/* Temporary GTK4 stub: callers still build a widget tree, but popup display is disabled. */
+	return gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 }
 
 GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 {
-}
-
-static void popover_closed_cb(GtkPopover *popover, gpointer)
-{
-		{
-		gtk_widget_unparent(GTK_WIDGET(popover));
-		}
-
 	GtkWidget *popover = gtk_popover_menu_new_from_model(menu_model);
 	gtk_widget_set_parent(popover, window);
 	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_BOTTOM);
-	g_signal_connect(popover, "closed", G_CALLBACK(popover_closed_cb), nullptr);
 	gtk_popover_popup(GTK_POPOVER(popover));
 
-	return nullptr;
+	return popover;
 }
 
 static GMenuItem *menu_item_clone_with_new_label(GMenuModel *model, int index, const char *new_label)

@@ -339,11 +339,11 @@ static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button, bool local)
 
 	if (local)
 		{
-		gtk_menu_popup_at_widget(GTK_MENU(menu), button, GDK_GRAVITY_NORTH_EAST, GDK_GRAVITY_CENTER, nullptr);
+		(void)button;
 		}
 	else
 		{
-		gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+		(void)menu;
 		}
 }
 

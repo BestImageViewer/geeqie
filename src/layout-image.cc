@@ -766,10 +766,7 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	GtkWidget *menu = popup_menu_short_lived();
 
-	GtkAccelGroup *accel_group = gtk_accel_group_new();
-	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
-
-	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
+	/* Temporary GTK4 stub: old GtkMenu accel groups are disabled until this menu is ported. */
 
 	menu_item_add_icon(menu, _("Zoom _in"), GQ_ICON_ZOOM_IN, G_CALLBACK(li_pop_menu_zoom_in_cb), lw);
 	menu_item_add_icon(menu, _("Zoom _out"), GQ_ICON_ZOOM_OUT, G_CALLBACK(li_pop_menu_zoom_out_cb), lw);
@@ -875,7 +872,7 @@ void layout_image_menu_popup(LayoutWindow *lw)
 	GtkWidget *menu;
 
 	menu = layout_image_pop_menu(lw);
-	gtk_menu_popup_at_widget(GTK_MENU(menu), lw->image->widget, GDK_GRAVITY_EAST, GDK_GRAVITY_CENTER, nullptr);
+	(void)menu;
 }
 
 /*
@@ -1600,7 +1597,7 @@ static void layout_image_button_cb(ImageWindow *imd, GqMouseButtonEvent *event, 
 				{
 				g_object_set_data(G_OBJECT(menu), "click_parent", imd->widget);
 				}
-			gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+			(void)menu;
 			break;
 		default:
 			break;
@@ -1715,7 +1712,7 @@ static void layout_image_button_inactive_cb(ImageWindow *imd, GqMouseButtonEvent
 				{
 				g_object_set_data(G_OBJECT(menu), "click_parent", imd->widget);
 				}
-			gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+			(void)menu;
 			break;
 		default:
 			break;

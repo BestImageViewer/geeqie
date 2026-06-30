@@ -204,7 +204,7 @@ static void bar_pane_histogram_popup_channels_cb(GtkWidget *widget, gpointer dat
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if (!phd) return;
 
-	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	if (channel == phd->histogram.get_channel()) return;
 
@@ -218,7 +218,7 @@ static void bar_pane_histogram_popup_mode_cb(GtkWidget *widget, gpointer data)
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if (!phd) return;
 
-	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	if (mode == phd->histogram.get_mode()) return;
 
@@ -255,7 +255,7 @@ static gboolean bar_pane_histogram_press_cb(GtkGesture *, gint, gdouble, gdouble
 	GtkWidget *menu;
 
 	menu = bar_pane_histogram_menu(phd);
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+	(void)menu;
 
 	return TRUE;
 }

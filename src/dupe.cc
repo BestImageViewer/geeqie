@@ -3209,7 +3209,7 @@ static gboolean dupe_listview_press_cb(GtkWidget *widget, const GqMouseButtonEve
 			{
 			menu = dupe_menu_popup_second(dw, di);
 			}
-		gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+		(void)menu;
 		}
 
 	if (!di) return FALSE;
@@ -3879,14 +3879,14 @@ static gboolean dupe_window_keypress_cb(GtkEventControllerKey *controller, guint
 					GtkWidget *menu;
 
 					menu = dupe_menu_popup_main(dw, di);
-					gtk_menu_popup_at_widget(GTK_MENU(menu), widget, GDK_GRAVITY_CENTER, GDK_GRAVITY_CENTER, nullptr);
+					(void)menu;
 					}
 				else
 					{
 					GtkWidget *menu;
 
 					menu = dupe_menu_popup_second(dw, di);
-					gtk_menu_popup_at_widget(GTK_MENU(menu), widget, GDK_GRAVITY_CENTER, GDK_GRAVITY_CENTER, nullptr);
+					(void)menu;
 					}
 				break;
 			default:

@@ -971,19 +971,22 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 		g_autofree gchar *hide_text = g_strdup_printf(_("Hide \"%s\""), name);
 		menu_item_add(menu, hide_text, G_CALLBACK(bar_pane_keywords_hide_cb), pkd);
 
-		submenu = gtk_menu_new();
+		/* Temporary GTK4 stub: disabled nested mark submenu until this menu is ported. */
+		submenu = nullptr;
 		for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
 			{
-			g_autofree gchar *text = g_strdup_printf(_("Mark %d"), 1 + (i < 9 ? i : -1));
-			item = menu_item_add(submenu, text, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
-			g_object_set_data(G_OBJECT(item), "mark", GINT_TO_POINTER(i + 1));
+			if (submenu)
+				{
+				g_autofree gchar *text = g_strdup_printf(_("Mark %d"), 1 + (i < 9 ? i : -1));
+				item = menu_item_add(submenu, text, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
+				g_object_set_data(G_OBJECT(item), "mark", GINT_TO_POINTER(i + 1));
+				}
 			}
 
 		if (is_keyword)
 			{
 			g_autofree gchar *text = g_strdup_printf(_("Connect \"%s\" to mark"), name);
-			item = menu_item_add(menu, text, nullptr, nullptr);
-			gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
+			menu_item_add(menu, text, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
 			}
 		menu_item_add_divider(menu);
 
@@ -1020,15 +1023,14 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 	menu_item_add(menu, _("Revert"), G_CALLBACK(bar_pane_keywords_revert_cb), pkd);
 	menu_item_add_divider(menu);
 
-	submenu = gtk_menu_new();
-	item = menu_item_add(menu, _("On any change"), nullptr, nullptr);
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
+	/* Temporary GTK4 stub: flatten "On any change" submenu until popup menus are ported. */
+	menu_item_add_check(menu, _("On any change: Expand checked"), pkd->expand_checked, G_CALLBACK(bar_pane_keywords_expand_checked_toggle_cb), pkd);
+	menu_item_add_check(menu, _("On any change: Collapse unchecked"), pkd->collapse_unchecked, G_CALLBACK(bar_pane_keywords_collapse_unchecked_toggle_cb), pkd);
+	menu_item_add_check(menu, _("On any change: Hide unchecked"), pkd->hide_unchecked, G_CALLBACK(bar_pane_keywords_hide_unchecked_toggle_cb), pkd);
 
-	menu_item_add_check(submenu, _("Expand checked"), pkd->expand_checked, G_CALLBACK(bar_pane_keywords_expand_checked_toggle_cb), pkd);
-	menu_item_add_check(submenu, _("Collapse unchecked"), pkd->collapse_unchecked, G_CALLBACK(bar_pane_keywords_collapse_unchecked_toggle_cb), pkd);
-	menu_item_add_check(submenu, _("Hide unchecked"), pkd->hide_unchecked, G_CALLBACK(bar_pane_keywords_hide_unchecked_toggle_cb), pkd);
-
-	gtk_menu_popup_at_pointer(GTK_MENU(menu), nullptr);
+	(void)submenu;
+	(void)item;
+	(void)menu;
 }
 
 gboolean bar_pane_keywords_menu_common(GtkWidget *widget, gdouble x, gdouble y, guint button, gpointer data)

@@ -465,7 +465,7 @@ static void vf_pop_menu_duplicates_cb(GtkWidget *, gpointer data)
 
 static void vf_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
 {
-	if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	auto *vf = static_cast<ViewFile *>(data);
 	if (!vf) return;
@@ -606,7 +606,6 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	GtkWidget *submenu;
 	gboolean active = FALSE;
 	gboolean class_archive = FALSE;
-	GtkAccelGroup *accel_group;
 
 	if (vf->type == FILEVIEW_LIST)
 		{
@@ -618,10 +617,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 
 	menu = popup_menu_short_lived();
 
-	accel_group = gtk_accel_group_new();
-	gtk_menu_set_accel_group(GTK_MENU(menu), accel_group);
-
-	g_object_set_data(G_OBJECT(menu), "accel_group", accel_group);
+	/* Temporary GTK4 stub: old GtkMenu accel groups are disabled until this menu is ported. */
 
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(vf_popup_destroy_cb), vf);
@@ -1013,15 +1009,9 @@ static gboolean vf_file_filter_class_cb(GtkWidget *widget, gpointer data)
 	auto vf = static_cast<ViewFile *>(data);
 	gint i;
 
-	gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
-
-	for (i = 0; i < FILE_FORMAT_CLASSES; i++)
-		{
-		if (g_strcmp0(format_class_list[i], gtk_menu_item_get_label(GTK_MENU_ITEM(widget))) == 0)
-			{
-			options->class_filter[i] = state;
-			}
-		}
+	gboolean state = gtk_check_button_get_active(GTK_CHECK_BUTTON(widget));
+	i = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "filter-index"));
+	if (i >= 0 && i < FILE_FORMAT_CLASSES) options->class_filter[i] = state;
 	vf_refresh(vf);
 
 	return TRUE;
@@ -1032,15 +1022,8 @@ static gboolean vf_file_filter_rating_cb(GtkWidget *widget, gpointer data)
 	auto vf = static_cast<ViewFile *>(data);
 	gint i;
 
-	gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
-
-	for (i = 0; i < FORMAT_RATING_COUNT; i++)
-		{
-		if (g_strcmp0(format_rating_list[i], gtk_menu_item_get_label(GTK_MENU_ITEM(widget))) == 0)
-			{
-			break;
-			}
-		}
+	gboolean state = gtk_check_button_get_active(GTK_CHECK_BUTTON(widget));
+	i = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "filter-index"));
 
 	options->rating_filter = state ? (options->rating_filter | (1U << i)) : (options->rating_filter & ~(1U << i));
 
@@ -1061,7 +1044,7 @@ static gboolean vf_file_filter_class_set_all(GtkWidget *widget, gpointer data, g
 
 		if (work)
 			{
-			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(work->data), state);
+			gtk_check_button_set_active(GTK_CHECK_BUTTON(work->data), state);
 			work = work->next;
 			}
 		}
@@ -1090,9 +1073,9 @@ static gboolean vf_file_filter_rating_set_all(GtkWidget *widget, gpointer data, 
 	while (work)
 		{
 		/* Select All and Ignore Rating are not check box menu items */
-		if (GTK_IS_CHECK_MENU_ITEM(work->data))
+		if (GTK_IS_CHECK_BUTTON(work->data))
 			{
-			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(work->data), state);
+			gtk_check_button_set_active(GTK_CHECK_BUTTON(work->data), state);
 			}
 		work = work->next;
 		}
@@ -1124,14 +1107,15 @@ static gboolean vf_file_filter_star_select_none_cb(GtkWidget *widget, gpointer d
 
 static GtkWidget *class_filter_menu (ViewFile *vf)
 {
-	GtkWidget *menu = gtk_menu_new();
+	GtkWidget *menu = popup_menu_short_lived();
 
 	for (int i = 0; i < FILE_FORMAT_CLASSES; i++)
 		{
-		GtkWidget *menu_item = gtk_check_menu_item_new_with_label(format_class_list[i]);
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), options->class_filter[i]);
+		GtkWidget *menu_item = gtk_check_button_new_with_label(format_class_list[i]);
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(menu_item), options->class_filter[i]);
+		g_object_set_data(G_OBJECT(menu_item), "filter-index", GINT_TO_POINTER(i));
 		g_signal_connect(G_OBJECT(menu_item), "toggled", G_CALLBACK(vf_file_filter_class_cb), vf);
-		gtk_menu_shell_append(GTK_MENU_SHELL (menu), menu_item);
+		gtk_box_append(GTK_BOX(menu), menu_item);
 		gtk_widget_show(menu_item);
 		}
 
@@ -1143,14 +1127,15 @@ static GtkWidget *class_filter_menu (ViewFile *vf)
 
 static GtkWidget *rating_filter_menu(ViewFile *vf)
 {
-	GtkWidget *menu = gtk_menu_new();
+	GtkWidget *menu = popup_menu_short_lived();
 
 	for (int i = 0; i < FORMAT_RATING_COUNT; i++)
 		{
-		GtkWidget *menu_item = gtk_check_menu_item_new_with_label(format_rating_list[i]);
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), (options->rating_filter & (1U << i)));
+		GtkWidget *menu_item = gtk_check_button_new_with_label(format_rating_list[i]);
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(menu_item), (options->rating_filter & (1U << i)));
+		g_object_set_data(G_OBJECT(menu_item), "filter-index", GINT_TO_POINTER(i));
 		g_signal_connect(G_OBJECT(menu_item), "toggled", G_CALLBACK(vf_file_filter_rating_cb), vf);
-		gtk_menu_shell_append(GTK_MENU_SHELL (menu), menu_item);
+		gtk_box_append(GTK_BOX(menu), menu_item);
 		gtk_widget_show(menu_item);
 		}
 
@@ -1181,7 +1166,6 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	GtkWidget *frame = gtk_frame_new(nullptr);
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	GtkWidget *combo_entry;
-	GtkWidget *menubar;
 	GtkWidget *icon;
 	GtkWidget *label;
 
@@ -1229,10 +1213,7 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	g_signal_connect(G_OBJECT(case_sensitive), "clicked", G_CALLBACK(case_sensitive_cb), vf);
 	gtk_widget_show(case_sensitive);
 
-	menubar = gtk_menu_bar_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), menubar, FALSE, TRUE, 0);
-	gtk_widget_show(menubar);
-
+	/* Temporary GTK4 stub: the old class/rating GtkMenuBar filter UI is disabled until ported. */
 	GtkWidget *box_class = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	label = gtk_label_new(_("Class"));
@@ -1247,21 +1228,10 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	gq_gtk_box_pack_start(GTK_BOX(box_rating), label, FALSE, FALSE, 0);
 	gq_gtk_box_pack_end(GTK_BOX(box_rating), icon, FALSE, FALSE, 0);
 
-	GtkWidget *menuitem = gtk_menu_item_new();
-
-	gtk_widget_set_tooltip_text(menuitem, _("Select Class filter"));
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), class_filter_menu(vf));
-	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), menuitem);
-	gq_gtk_container_add(menuitem, box_class);
-	gq_gtk_widget_show_all(menuitem);
-
-	GtkWidget *menuitem2 = gtk_menu_item_new();
-
-	gtk_widget_set_tooltip_text(menuitem2, _("Select Rating filter"));
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem2), rating_filter_menu(vf));
-	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), menuitem2);
-	gq_gtk_container_add(menuitem2, box_rating);
-	gq_gtk_widget_show_all(menuitem2);
+	(void)box_class;
+	(void)box_rating;
+	(void)icon;
+	(void)label;
 
 	return frame;
 }

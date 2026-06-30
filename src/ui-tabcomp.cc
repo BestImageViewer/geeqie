@@ -294,7 +294,7 @@ static void tab_completion_popup_list(TabCompData *td, GList *list)
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(tab_completion_popup_key_press), td);
 	gtk_widget_add_controller(menu, controller);
 
-	gtk_menu_popup_at_widget(GTK_MENU(menu), td->entry, GDK_GRAVITY_NORTH_EAST, GDK_GRAVITY_NORTH, nullptr);
+	(void)menu;
 }
 
 static gboolean tab_completion_do(TabCompData *td)
