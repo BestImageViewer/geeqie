@@ -34,7 +34,6 @@
 
 #include <config.h>
 
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "geometry.h"
 #include "history-list.h"
@@ -57,6 +56,15 @@ inline void pref_link_sensitivity(GtkWidget *widget, GtkWidget *watch)
 {
 	g_signal_connect(G_OBJECT(watch), "state-flags-changed",
 	                 G_CALLBACK(pref_link_sensitivity_cb), widget);
+}
+
+GtkNative *widget_get_native_safe(GtkWidget *widget)
+{
+	if (!widget) return nullptr;
+
+	GtkNative *native = gtk_widget_get_native(widget);
+
+	return GTK_IS_NATIVE(native) ? native : nullptr;
 }
 
 } // namespace
@@ -723,26 +731,6 @@ static void date_selection_button_cb(GtkWidget *, gpointer data)
 		}
 }
 
-static void button_size_allocate_cb(GtkWidget *button, GtkAllocation *allocation, gpointer data)
-{
-	auto spin = static_cast<GtkWidget *>(data);
-	GtkRequisition spin_requisition;
-	deprecated_gtk_widget_get_requisition(spin, &spin_requisition);
-
-	if (allocation->height > spin_requisition.height)
-		{
-		GtkAllocation button_allocation;
-		GtkAllocation spin_allocation;
-
-		gtk_widget_get_allocation(button, &button_allocation);
-		gtk_widget_get_allocation(spin, &spin_allocation);
-		button_allocation.height = spin_requisition.height;
-		button_allocation.y = spin_allocation.y +
-			((spin_allocation.height - spin_requisition.height) / 2);
-		gtk_widget_size_allocate(button, &button_allocation, -1);
-		}
-}
-
 static void date_selection_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
@@ -796,8 +784,9 @@ GtkWidget *date_selection_new()
 		}
 
 	ds->button = gtk_toggle_button_new();
-	g_signal_connect(G_OBJECT(ds->button), "size_allocate",
-			 G_CALLBACK(button_size_allocate_cb), ds->spin_y);
+	/* Temporary GTK4 fallback: the old requisition/size_allocate hack used by
+	 * this button depended on GTK3 layout internals, so the button currently
+	 * uses its natural size until this widget is restyled for GTK4. */
 
 	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	gq_gtk_container_add(ds->button, icon);
@@ -1193,15 +1182,15 @@ GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gcha
 
 gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos)
 {
-	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
+	GtkNative *native = widget_get_native_safe(widget);
+	if (!native) return FALSE;
+
+	GdkSurface *surface = gtk_native_get_surface(native);
 
 	if (!surface)
 		{
-		return rect;
-		}
-
-	if (!surface)
 		return FALSE;
+		}
 
 	GdkDisplay *display = gdk_surface_get_display(surface);
 	if (!display)
@@ -1240,7 +1229,13 @@ GdkRectangle widget_get_position_geometry(GtkWidget *widget)
 		return rect;
 		}
 
-	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
+	GtkNative *native = widget_get_native_safe(widget);
+	if (!native)
+		{
+		return rect;
+		}
+
+	GdkSurface *surface = gtk_native_get_surface(native);
 	if (!surface)
 		{
 		return rect;
@@ -1264,7 +1259,13 @@ GdkRectangle widget_get_root_origin_geometry(GtkWidget *widget)
 		return rect;
 		}
 
-	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
+	GtkNative *native = widget_get_native_safe(widget);
+	if (!native)
+		{
+		return rect;
+		}
+
+	GdkSurface *surface = gtk_native_get_surface(native);
 	if (!surface)
 		{
 		return rect;
@@ -1282,7 +1283,10 @@ GdkRectangle widget_get_root_origin_geometry(GtkWidget *widget)
 
 gboolean widget_received_event(GtkWidget *widget, GqPoint event)
 {
-	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
+	GtkNative *native = widget_get_native_safe(widget);
+	if (!native) return FALSE;
+
+	GdkSurface *surface = gtk_native_get_surface(native);
 
 	if (!surface)
 		{
@@ -1307,7 +1311,13 @@ void widget_remove_from_parent_cb(GSimpleAction *, GVariant *, gpointer data)
 
 gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int *y, GdkModifierType *mask)
 {
-	GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(widget));
+	GtkNative *native = widget_get_native_safe(widget);
+	if (!native)
+		{
+		return FALSE;
+		}
+
+	GdkSurface *surface = gtk_native_get_surface(native);
 	double dx;
 	double dy;
 
@@ -1381,9 +1391,16 @@ PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale)
 
 gboolean get_alternative_button_order(GtkWidget *widget)
 {
-	GtkSettings *settings = gtk_settings_get_for_screen(gtk_widget_get_screen(widget));
+	(void)widget;
+
+	GtkSettings *settings = gtk_settings_get_default();
+	if (!settings) return FALSE;
+
 	GObjectClass *klass = G_OBJECT_CLASS(GTK_SETTINGS_GET_CLASS(settings));
 
+	/* Temporary GTK4 fallback: this property is not guaranteed to exist
+	 * anymore, so default to standard button ordering when GTK does not
+	 * expose a value. */
 	if (!g_object_class_find_property(klass, "gtk-alternative-button-order")) return FALSE;
 
 	gboolean alternative_order = FALSE;
