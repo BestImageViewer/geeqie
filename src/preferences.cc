@@ -1756,7 +1756,7 @@ static void add_star_rating(GtkWidget *group, const gchar *label, gunichar star_
 	GtkWidget *star_rating_entry = gtk_entry_new();
 	g_autofree gchar *rating_symbol = g_strdup_printf("U+%X", star_rating);
 	gq_gtk_entry_set_text(GTK_ENTRY(star_rating_entry), rating_symbol);
-	gtk_entry_set_width_chars(GTK_ENTRY(star_rating_entry), 15);
+	gtk_editable_set_width_chars(GTK_EDITABLE(star_rating_entry), 15);
 	gtk_widget_set_tooltip_text(star_rating_entry, _("Hexadecimal representation of a Unicode character. A list of all Unicode characters may be found on the Internet."));
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(star_rating_entry),
 	                                  GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
@@ -3370,7 +3370,7 @@ static void config_tab_behavior(GtkWidget *notebook)
 	log_window_f1_entry = gtk_entry_new();
 	gq_gtk_entry_set_text(GTK_ENTRY(log_window_f1_entry), options->log_window.action);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), log_window_f1_entry, FALSE, FALSE, 0);
-	gtk_entry_set_width_chars(GTK_ENTRY(log_window_f1_entry), 15);
+	gtk_editable_set_width_chars(GTK_EDITABLE(log_window_f1_entry), 15);
 	gtk_widget_show(log_window_f1_entry);
 #endif
 }
@@ -3417,7 +3417,7 @@ static bool accel_capture_key_press(GtkEventControllerKey *, guint keyval, guint
 		}
 
 	char *accel = gtk_accelerator_name(key, mods);
-	gtk_entry_set_text(GTK_ENTRY(widget), accel);
+	gtk_editable_set_text(GTK_EDITABLE(widget), accel);
 
 	GtkClipboard *cb = gdk_display_get_clipboard(gdk_display_get_default());
 	gdk_clipboard_set_text(cb, accel);
