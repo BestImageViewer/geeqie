@@ -219,7 +219,6 @@ std::vector<ScreenData> fullscreen_prefs_list()
 {
 	std::vector<ScreenData> list;
 	GdkDisplay *display;
-	gint monitors;
 	const gchar *name;
 
 	display = gdk_display_get_default();
