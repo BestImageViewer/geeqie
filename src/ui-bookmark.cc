@@ -244,7 +244,7 @@ static void bookmark_edit(const std::string &key, const BookButtonData *bb, GtkW
 	p->name_entry = gtk_entry_new();
 	gtk_widget_set_size_request(p->name_entry, 300, -1);
 	gq_gtk_entry_set_text(GTK_ENTRY(p->name_entry), bb->name.c_str());
-	gq_gtk_grid_attach_default(GTK_GRID(table), p->name_entry, 1, 2, 0, 1);
+	gtk_grid_attach(GTK_GRID(table), p->name_entry, 1, 0, 1, 1);
 	generic_dialog_attach_default(gd, p->name_entry);
 	gtk_widget_show(p->name_entry);
 
@@ -252,14 +252,14 @@ static void bookmark_edit(const std::string &key, const BookButtonData *bb, GtkW
 
 	p->path_entry = tab_completion_new_with_history(nullptr, bb->path.c_str(), "bookmark_path", -1);
 	tab_completion_add_select_button(p->path_entry, nullptr, TRUE, nullptr, nullptr, nullptr);
-	gq_gtk_grid_attach_default(GTK_GRID(table), tab_completion_get_box(p->path_entry), 1, 2, 1, 2);
+	gtk_grid_attach(GTK_GRID(table), tab_completion_get_box(p->path_entry), 1, 1, 1, 1);
 	generic_dialog_attach_default(gd, p->path_entry);
 
 	pref_table_label(table, 0, 2, _("Icon:"), GTK_ALIGN_END);
 
 	p->icon_entry = tab_completion_new_with_history(nullptr, bb->icon.c_str(), "bookmark_icons", -1);
 	tab_completion_add_select_button(p->icon_entry, _("Select icon"), FALSE, nullptr, nullptr, nullptr);
-	gq_gtk_grid_attach_default(GTK_GRID(table), tab_completion_get_box(p->icon_entry), 1, 2, 2, 3);
+	gtk_grid_attach(GTK_GRID(table), tab_completion_get_box(p->icon_entry), 1, 2, 1, 1);
 	generic_dialog_attach_default(gd, p->icon_entry);
 
 	gtk_widget_show(gd->dialog);

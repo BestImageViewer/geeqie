@@ -404,16 +404,6 @@ gint gq_gtk_dialog_run(GtkDialog *dialog)
 	return run_data.response_id;
 }
 
-void gq_gtk_grid_attach(GtkGrid *grid, GtkWidget *child, guint left_attach, guint right_attach, guint top_attach, guint bottom_attach)
-{
-	gtk_grid_attach(grid, child, left_attach, top_attach, right_attach - left_attach, bottom_attach - top_attach);
-}
-
-void gq_gtk_grid_attach_default(GtkGrid *grid, GtkWidget *child, guint left_attach, guint right_attach, guint top_attach, guint bottom_attach )
-{
-	gtk_grid_attach(grid, child, left_attach, top_attach, right_attach - left_attach, bottom_attach - top_attach);
-}
-
 /**
  * @brief This overrides the low default of a GtkCellRenderer from 100 to CELL_HEIGHT_OVERRIDE, something sane for our purposes
  */

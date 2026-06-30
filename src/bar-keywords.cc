@@ -643,7 +643,7 @@ void bar_pane_keywords_edit_dialog_cb(GtkWidget *, gpointer data)
 	cdd->edit_widget = gtk_entry_new();
 	gtk_widget_set_size_request(cdd->edit_widget, 300, -1);
 	if (name) gq_gtk_entry_set_text(GTK_ENTRY(cdd->edit_widget), name);
-	gq_gtk_grid_attach_default(GTK_GRID(table), cdd->edit_widget, 1, 2, 0, 1);
+	gtk_grid_attach(GTK_GRID(table), cdd->edit_widget, 1, 0, 1, 1);
 	/* here could eventually be a text view instead of entry */
 	generic_dialog_attach_default(gd, cdd->edit_widget);
 	gtk_widget_show(cdd->edit_widget);
