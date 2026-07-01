@@ -37,7 +37,9 @@
 #include "metadata.h"
 #include "options.h"
 #include "rcfile.h"
-#include "spell.h"
+#if HAVE_SPELL
+#  include "spell.h"
+#endif
 #include "ui-menu.h"
 #include "ui-misc.h"
 
