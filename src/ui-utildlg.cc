@@ -46,6 +46,8 @@ namespace
 
 using DialogWindowKey = std::pair<std::string, std::string>;
 
+constexpr auto GENERIC_DIALOG_ROLE_DATA_KEY = "gq-generic-dialog-role";
+
 DialogWindowKey dialog_window_key_create(const gchar *title, const gchar *role)
 {
 	DialogWindowKey key{};
@@ -101,7 +103,8 @@ void generic_dialog_close(GenericDialog *gd)
 
 	GdkRectangle rect = widget_get_root_origin_geometry(gd->dialog);
 
-	generic_dialog_save_window(actual_title, gtk_window_get_role(GTK_WINDOW(gd->dialog)), rect);
+	auto *role = static_cast<const gchar *>(g_object_get_data(G_OBJECT(gd->dialog), GENERIC_DIALOG_ROLE_DATA_KEY));
+	generic_dialog_save_window(actual_title, role, rect);
 
 	gq_gtk_widget_destroy(gd->dialog);
 	g_free(gd);
@@ -336,6 +339,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	gd->dialog = window_new(role, nullptr, title);
 	DEBUG_NAME(gd->dialog);
+	g_object_set_data_full(G_OBJECT(gd->dialog), GENERIC_DIALOG_ROLE_DATA_KEY, g_strdup(role), g_free);
 
 	if (options->save_dialog_window_positions)
 		{
