@@ -1393,20 +1393,9 @@ gboolean get_alternative_button_order(GtkWidget *widget)
 {
 	(void)widget;
 
-	GtkSettings *settings = gtk_settings_get_default();
-	if (!settings) return FALSE;
-
-	GObjectClass *klass = G_OBJECT_CLASS(GTK_SETTINGS_GET_CLASS(settings));
-
-	/* Temporary GTK4 fallback: this property is not guaranteed to exist
-	 * anymore, so default to standard button ordering when GTK does not
-	 * expose a value. */
-	if (!g_object_class_find_property(klass, "gtk-alternative-button-order")) return FALSE;
-
-	gboolean alternative_order = FALSE;
-	g_object_get(settings, "gtk-alternative-button-order", &alternative_order, NULL);
-
-	return alternative_order;
+	/* GTK4 no longer exposes the old alternative button order setting.
+	 * Use the standard application-defined order consistently. */
+	return FALSE;
 }
 
 bool focus_is_text_editable(GtkWindow *window)
