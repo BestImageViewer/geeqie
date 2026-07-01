@@ -34,7 +34,6 @@
 #include "archives.h"
 #include "collect-io.h"
 #include "collect.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "dnd.h"
 #include "editors.h"
@@ -51,6 +50,7 @@
 #include "menu.h"
 #include "misc.h"
 #include "options.h"
+#include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "print.h"
 #include "slideshow.h"
@@ -1030,10 +1030,11 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 		{
 		gint mw;
 		gint mh;
+		auto *pr = PIXBUF_RENDERER(vw->imd->pr);
 		pr_get_monitor_size(pr, &mw, &mh);
 
-		mw = mw * pr->window_limit_size / 100;
-		mh = mh * pr->window_limit_size / 100;
+		mw = mw * options->image.max_window_size / 100;
+		mh = mh * options->image.max_window_size / 100;
 
 		size.width = std::min(size.width, mw);
 		size.height = std::min(size.height, mh);
