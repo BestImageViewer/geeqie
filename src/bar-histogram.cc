@@ -76,7 +76,7 @@ static void bar_pane_histogram_update(PaneHistogramData *phd)
 	/** histmap_get is relatively expensive, run it only when we really need it
 	   and with lower priority than pixbuf_renderer
 	   @FIXME this does not work for fullscreen */
-	if (gtk_widget_is_drawable(phd->drawing_area))
+	if (gtk_widget_get_mapped(phd->drawing_area))
 		{
 		if (!phd->idle_id)
 			{
@@ -157,30 +157,28 @@ static void bar_pane_histogram_notify_cb(FileData *fd, NotifyType type, gpointer
 		}
 }
 
-static gboolean bar_pane_histogram_draw_cb(GtkWidget *, cairo_t *cr, gpointer data)
+static void bar_pane_histogram_draw_cb(GtkDrawingArea *, cairo_t *cr, gint, gint, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
-	if (!phd) return TRUE;
+	if (!phd) return;
 
 	if (phd->need_update)
 		{
 		bar_pane_histogram_update(phd);
 		}
 
-	if (!phd->pixbuf) return TRUE;
+	if (!phd->pixbuf) return;
 
 	gdk_cairo_set_source_pixbuf(cr, phd->pixbuf, 0, 0);
 	cairo_paint (cr);
-
-	return TRUE;
 }
 
-static void bar_pane_histogram_size_cb(GtkWidget *, GtkAllocation *allocation, gpointer data)
+static void bar_pane_histogram_resize_cb(GtkWidget *, gint width, gint height, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 
-	phd->histogram_width = allocation->width;
-	phd->histogram_height = allocation->height;
+	phd->histogram_width = width;
+	phd->histogram_height = height;
 	bar_pane_histogram_update(phd);
 }
 
@@ -286,6 +284,7 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 	                               bar_pane_histogram_draw_cb,
 	                               phd,
 	                               nullptr);
+	g_signal_connect(phd->drawing_area, "resize", G_CALLBACK(bar_pane_histogram_resize_cb), phd);
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture),
