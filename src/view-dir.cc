@@ -793,6 +793,11 @@ static gboolean vd_auto_scroll_idle_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
+void vd_dnd_drop_scroll_cancel(ViewDir *vd)
+{
+	g_clear_handle_id(&vd->drop_scroll_id, g_source_remove);
+}
+
 /** @FIXME GTK4
  */
 //~ static gboolean vd_dnd_drop_motion(GtkWidget *, GdkDragContext *context, gint x, gint y, guint time, gpointer data)

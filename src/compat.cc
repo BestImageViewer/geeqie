@@ -207,7 +207,11 @@ void gq_gtk_widget_show_all(GtkWidget *widget)
 
 void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 {
-	if (GTK_IS_BUTTON(container))
+	if (GTK_IS_BOX(container))
+		{
+		gtk_box_append(GTK_BOX(container), widget);
+		}
+	else if (GTK_IS_BUTTON(container))
 		{
 		gtk_button_set_child(GTK_BUTTON(container), widget);
 		}
@@ -222,6 +226,10 @@ void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 	else if (GTK_IS_POPOVER(container))
 		{
 		gtk_popover_set_child(GTK_POPOVER(container), widget);
+		}
+	else if (GTK_IS_SCROLLED_WINDOW(container))
+		{
+		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(container), widget);
 		}
 	else if (GTK_IS_VIEWPORT(container))
 		{

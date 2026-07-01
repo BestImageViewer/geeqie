@@ -308,7 +308,7 @@ void layout_keyboard_init(LayoutWindow *lw, GtkWidget *window)
 	gtk_widget_add_controller(window, controller);
 }
 
-static bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, const GqMouseButtonEvent *event)
+bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, guint button)
 {
 	enum MouseButton
 		{
@@ -338,7 +338,7 @@ static bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, const GqM
 		return true;
 		};
 
-	switch (event->button)
+	switch (button)
 		{
 		case MOUSE_BUTTON_8:
 			return handle_button(options->mouse_button_8);
