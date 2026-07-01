@@ -4752,12 +4752,6 @@ msgid ""
 "      --cache-maintenance=<path>   run cache maintenance in non-GUI mode\n"
 msgstr ""
 
-#: src/main.cc:495
-msgid ""
-"      --disable-clutter            disable use of Clutter library (i.e. GPU "
-"accel.)\n"
-msgstr ""
-
 #: src/main.cc:496
 msgid "  -f, --fullscreen                 start in full screen mode\n"
 msgstr ""
@@ -8814,10 +8808,6 @@ msgstr ""
 #, c-format
 #~ msgid "disconnected from LIRC\n"
 #~ msgstr "LIRCから切断されました\n"
-
-#, fuzzy
-#~ msgid "Use GPU acceleration via Clutter library (Requires restart)"
-#~ msgstr "Clutterライブラリ経由でGPUアクセラレーションを使う"
 
 #~ msgid ""
 #~ "Metadata are written in the following order. The process ends after first "

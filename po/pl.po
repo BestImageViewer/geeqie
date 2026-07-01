@@ -4706,12 +4706,6 @@ msgid ""
 "      --cache-maintenance=<path>   run cache maintenance in non-GUI mode\n"
 msgstr ""
 
-#: src/main.cc:495
-msgid ""
-"      --disable-clutter            disable use of Clutter library (i.e. GPU "
-"accel.)\n"
-msgstr ""
-
 #: src/main.cc:496
 msgid "  -f, --fullscreen                 start in full screen mode\n"
 msgstr "  -f, --fullscreen                 uruchamia w trybie pełnoekranowym\n"
@@ -8803,10 +8797,6 @@ msgstr ""
 #~ "nie można odczytać pliku konfiguracji LIRC\n"
 #~ "proszę przeczytać dokumentację LIRC, żeby  \n"
 #~ "dowiedzieć się, jak utworzyć poprawny plik konfiguracji\n"
-
-#, fuzzy
-#~ msgid "Use GPU acceleration via Clutter library (Requires restart)"
-#~ msgstr "Użyj akceleracji GPU przy pomocy biblioteki Clutter"
 
 #~ msgid ""
 #~ "Metadata are written in the following order. The process ends after first "

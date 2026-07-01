@@ -4733,12 +4733,6 @@ msgid ""
 "      --cache-maintenance=<path>   run cache maintenance in non-GUI mode\n"
 msgstr ""
 
-#: src/main.cc:495
-msgid ""
-"      --disable-clutter            disable use of Clutter library (i.e. GPU "
-"accel.)\n"
-msgstr ""
-
 #: src/main.cc:496
 #, fuzzy
 msgid "  -f, --fullscreen                 start in full screen mode\n"

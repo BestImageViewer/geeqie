@@ -9873,13 +9873,6 @@ msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
 #~ "      --cache-maintenance=<cesta>  spustiť údržbu vyrovnávacej pamäte v "
 #~ "režime bez GUI\n"
 
-#~ msgid ""
-#~ "      --disable-clutter            disable use of Clutter library (i.e. "
-#~ "GPU accel.)\n"
-#~ msgstr ""
-#~ "      --disable-clutter            zakázať použitie knižnice Clutter (t. "
-#~ "j. GPU akcel.)\n"
-
 # src/main.cc:461
 #~ msgid "  -f, --fullscreen                 start in full screen mode\n"
 #~ msgstr ""
@@ -10339,10 +10332,6 @@ msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
 #~ "nepodarilo sa otvoriť konfiguračný súbor LIRC\n"
 #~ "prosím prečítajte si dokumentáciu LIRC,\n"
 #~ "aby ste dokázali vytvoriť správny konfiguračný súbor\n"
-
-#~ msgid "Use GPU acceleration via Clutter library (Requires restart)"
-#~ msgstr ""
-#~ "Použiť GPU akceleráciu s využitím knižnice Clutter (vyžaduje reštart)"
 
 #~ msgid ""
 #~ "Metadata are written in the following order. The process ends after first "
