@@ -422,7 +422,6 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	gtk_widget_add_controller(ew->listview, GTK_EVENT_CONTROLLER(click));
 	g_signal_connect(click, "released", G_CALLBACK(advanced_exif_mouseclick), ew);
-	g_object_unref(click);
 
 	ew->scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(ew->scrolled), true);
@@ -435,10 +434,11 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_box_pack_end(GTK_BOX(vbox), button_box, FALSE, FALSE, 0);
+	gtk_widget_set_halign(button_box, GTK_ALIGN_END);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_spacing(GTK_BOX(hbox), PREF_PAD_SPACE);
-	gq_gtk_box_pack_end(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
+	gq_gtk_box_pack_start(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
 
 	GtkWidget *button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(exif_window_help_cb), ew);
 	gtk_widget_set_tooltip_text(button_help, "F1");
