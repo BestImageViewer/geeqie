@@ -939,7 +939,7 @@ gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data)
 	gtk_widget_show(web->progress);
 	if (minimized)
 		{
-		gtk_window_iconify(GTK_WINDOW(web->gd->dialog));
+		gtk_window_minimize(GTK_WINDOW(web->gd->dialog));
 		}
 
 	gtk_widget_show(web->gd->dialog);
