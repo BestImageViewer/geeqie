@@ -1665,7 +1665,7 @@ static gboolean layout_geometry_get_tools(LayoutWindow *lw, GdkRectangle &rect, 
 		}
 
 	rect = widget_get_root_origin_geometry(lw->tools);
-	gtk_widget_get_allocation(gtk_paned_get_child1(GTK_PANED(lw->tools_pane)), &allocation);
+	gtk_widget_get_allocation(gtk_paned_get_start_child(GTK_PANED(lw->tools_pane)), &allocation);
 
 	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(lw->tools_pane)) == GTK_ORIENTATION_VERTICAL)
 		{
