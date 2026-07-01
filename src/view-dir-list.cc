@@ -251,7 +251,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 
 				gtk_list_store_set(store, &new_iter,
 						   DIR_COLUMN_POINTER, fd,
-						   DIR_COLUMN_ICON, pixbuf,
+						   DIR_COLUMN_ICON, icon,
 						   DIR_COLUMN_NAME, fd->name,
 						   DIR_COLUMN_LINK, link,
 						   DIR_COLUMN_DATE, date,
@@ -266,7 +266,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 			else
 				{
 				gtk_list_store_set(store, &iter,
-						   DIR_COLUMN_ICON, pixbuf,
+						   DIR_COLUMN_ICON, icon,
 						   DIR_COLUMN_NAME, fd->name,
 						   DIR_COLUMN_LINK, link,
 						   DIR_COLUMN_DATE, date,
@@ -436,7 +436,7 @@ ViewDir *vdlist_new(ViewDir *vd)
 
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", DIR_COLUMN_ICON);
+	gtk_tree_view_column_add_attribute(column, renderer, "paintable", DIR_COLUMN_ICON);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
 
 	renderer = gtk_cell_renderer_text_new();
