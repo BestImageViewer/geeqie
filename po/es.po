@@ -8973,13 +8973,6 @@ msgstr "Error al ejecutar comando: %s\n"
 #~ "      --cache-maintenance=<ruta>   ejecuta el mantenimiento de caché en "
 #~ "modo no GUI\n"
 
-#~ msgid ""
-#~ "      --disable-clutter            disable use of Clutter library (i.e. "
-#~ "GPU accel.)\n"
-#~ msgstr ""
-#~ "      --disable-clutter            deshabilita el uso de la biblioteca "
-#~ "Clutter (es decir, aceleración de GPU.)\n"
-
 #~ msgid "  -f, --fullscreen                 start in full screen mode\n"
 #~ msgstr ""
 #~ "  -f, --fullscreen                   comenzar en modo de pantalla "
@@ -9406,10 +9399,6 @@ msgstr "Error al ejecutar comando: %s\n"
 #~ "No se puede leer el archivo de configuración de LIRC\n"
 #~ "consulte el manual de LIRC para saber\n"
 #~ "cómo crear un archivo de configuración correcto\n"
-
-#, fuzzy
-#~ msgid "Use GPU acceleration via Clutter library (Requires restart)"
-#~ msgstr "Usar aceleración por GPU mediante la biblioteca Clutter"
 
 #~ msgid ""
 #~ "Metadata are written in the following order. The process ends after first "

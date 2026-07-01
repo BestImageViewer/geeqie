@@ -6,8 +6,6 @@
 
     { include: [ "\"cairo.h\"",                        private, "<cairo.h>",               public ] },
 
-    { include: [ "@\"champlain/champlain-[a-z-]+.h\"", private, "<champlain/champlain.h>", public ] },
-
     { include: [ "@<exiv2/[a-z_]+.hpp>",               private, "<exiv2/exiv2.hpp>",       public ] },
     { include: [ "<exiv2/exv_conf.h>",                 private, "<exiv2/exiv2.hpp>",       public ] },
     { include: [ "<exiv2/xmp_exiv2.hpp>",              private, "<exiv2/exiv2.hpp>",       public ] },

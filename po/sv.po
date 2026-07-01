@@ -4549,14 +4549,6 @@ msgid ""
 msgstr ""
 "      --cache-maintenance <sökväg>   kör cache-underhåll i icke-GUI-läge\n"
 
-#: src/main.cc:495
-msgid ""
-"      --disable-clutter            disable use of Clutter library (i.e. GPU "
-"accel.)\n"
-msgstr ""
-"      --disable-clutter              inaktivera användning av biblioteket "
-"Clutter (som ger GPU-acceleration)\n"
-
 #: src/main.cc:496
 msgid "  -f, --fullscreen                 start in full screen mode\n"
 msgstr "  -f, --fullscreen                   starta i fullskärmsläge\n"

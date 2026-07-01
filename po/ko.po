@@ -4556,14 +4556,6 @@ msgid ""
 msgstr ""
 "      --cache-maintenance <경로>   비 GUI 모드에서 캐시 유지 관리 실행하기\n"
 
-#: src/main.cc:495
-msgid ""
-"      --disable-clutter            disable use of Clutter library (i.e. GPU "
-"accel.)\n"
-msgstr ""
-"      --disable-clutter            클러터 라이브러리 사용 비활성화 (예: GPU "
-"가속)\n"
-
 #: src/main.cc:496
 msgid "  -f, --fullscreen                 start in full screen mode\n"
 msgstr "  -f, --fullscreen                 전체 화면 모드에서 시작하기\n"
