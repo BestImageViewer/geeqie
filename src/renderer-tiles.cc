@@ -619,8 +619,6 @@ gint renderer_tiles_overlay_add(void *renderer, GdkPixbuf *pixbuf, gint x, gint 
 	od->y = y;
 	od->flags = flags;
 
-	rt_overlay_init_window(rt, od);
-
 	rt->overlay_list = g_list_append(rt->overlay_list, od);
 
 	gtk_widget_queue_draw(GTK_WIDGET(rt->pr));
@@ -1940,7 +1938,7 @@ gboolean rt_realize_cb(GtkWidget *widget, gpointer data)
 	return FALSE;
 }
 
-gboolean rt_size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpointer data)
+void rt_resize_cb(GtkDrawingArea *, gint width, gint height, gpointer data)
 {
 	auto rt = static_cast<RendererTiles *>(data);
 	cairo_t *cr;
@@ -1949,7 +1947,7 @@ gboolean rt_size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpoint
 	if (gtk_widget_get_realized(GTK_WIDGET(rt->pr)))
 		{
 		old_surface = rt->surface;
-		rt->surface = rt_surface_new(allocation->width, allocation->height);
+		rt->surface = rt_surface_new(width, height);
 
 		cr = cairo_create(rt->surface);
 
@@ -1960,16 +1958,14 @@ gboolean rt_size_allocate_cb(GtkWidget *widget, GdkRectangle *allocation, gpoint
 			cairo_set_source_surface(cr, old_surface, 0, 0);
 			cairo_paint(cr);
 			}
-		cairo_destroy(cr);
-		g_clear_pointer(&old_surface, cairo_surface_destroy);
+			cairo_destroy(cr);
+			g_clear_pointer(&old_surface, cairo_surface_destroy);
 
-		rt_redraw(rt, *allocation, false, FALSE);
-	}
-
-	return FALSE;
+			rt_redraw(rt, {0, 0, width, height}, false, FALSE);
+		}
 }
 
-gboolean rt_draw_cb(GtkWidget *, cairo_t *cr, gpointer data)
+void rt_draw_cb(GtkDrawingArea *, cairo_t *cr, gint, gint, gpointer data)
 {
 	auto rt = static_cast<RendererTiles *>(data);
 
@@ -2011,8 +2007,6 @@ gboolean rt_draw_cb(GtkWidget *, cairo_t *cr, gpointer data)
 		gdk_cairo_set_source_pixbuf(cr, od->pixbuf, od_rect.x, od_rect.y);
 		cairo_paint(cr);
 		}
-
-	return FALSE;
 }
 
 } // namespace
@@ -2057,10 +2051,9 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 	g_signal_connect(G_OBJECT(pr), "hierarchy-changed",
 			 G_CALLBACK(rt_hierarchy_changed_cb), rt);
 
-	g_signal_connect(G_OBJECT(pr), "draw",
-	                 G_CALLBACK(rt_draw_cb), rt);
+	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(pr), rt_draw_cb, rt, nullptr);
 	g_signal_connect(G_OBJECT(pr), "realize", G_CALLBACK(rt_realize_cb), rt);
-	g_signal_connect(G_OBJECT(pr), "size-allocate", G_CALLBACK(rt_size_allocate_cb), rt);
+	g_signal_connect(G_OBJECT(pr), "resize", G_CALLBACK(rt_resize_cb), rt);
 
 	return reinterpret_cast<RendererFuncs *>(rt);
 }
