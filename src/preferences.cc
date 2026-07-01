@@ -3275,7 +3275,7 @@ static void config_tab_behavior(GtkWidget *notebook)
 	pref_checkbox_new_int(group, _("Descend folders in tree view"),
 			      options->tree_descend_subdirs, &c_options->tree_descend_subdirs);
 
-	pref_checkbox_new_int(group, _("In place renaming"),
+	pref_checkbox_new_int(group, _("In-place renaming"),
 			      options->file_ops.enable_in_place_rename, &c_options->file_ops.enable_in_place_rename);
 
 	pref_checkbox_new_int(group, _("List directory view uses single click to enter"),
@@ -3315,11 +3315,11 @@ static void config_tab_behavior(GtkWidget *notebook)
 	tmp = pref_spin_new_int(group, _("Recent folder-image list maximum size"), nullptr, 0, 50, 1, options->recent_folder_image_list_maxsize, &c_options->recent_folder_image_list_maxsize);
 	gtk_widget_set_tooltip_text(tmp, _("List of the last image viewed in each recent folder.\nRe-opening a folder will set focus to the last image viewed."));
 
-	pref_spin_new_int(group, _("Drag'n drop icon size"), nullptr,
+	pref_spin_new_int(group, _("Drag-and-drop icon size"), nullptr,
 			  16, 256, 16, options->dnd_icon_size, &c_options->dnd_icon_size);
 
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
-	add_dnd_default_action_selection_menu(table, 0, 0, _("Drag`n drop default action:"), options->dnd_default_action, &c_options->dnd_default_action);
+	add_dnd_default_action_selection_menu(table, 0, 0, _("Drag-and-drop default action:"), options->dnd_default_action, &c_options->dnd_default_action);
 
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);
 	add_clipboard_selection_menu(table, 0, 0, _("Copy path clipboard selection:"), options->clipboard_selection, &c_options->clipboard_selection);
