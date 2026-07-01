@@ -1944,7 +1944,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	gtk_widget_set_size_request(pw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
 	gtk_window_set_resizable(GTK_WINDOW(pw->window), TRUE);
-	gtk_container_set_border_width(GTK_CONTAINER(pw->window), 0);
+	gq_gtk_widget_set_border_width(pw->window, 0);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(vbox);
