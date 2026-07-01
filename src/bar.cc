@@ -549,6 +549,7 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 	auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 
 	if (!bd) return;
+	if (!pd) return;
 
 	pd->lw = bd->lw;
 	pd->bar = bar;
