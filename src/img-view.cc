@@ -50,7 +50,6 @@
 #include "menu.h"
 #include "misc.h"
 #include "options.h"
-#include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "print.h"
 #include "slideshow.h"
@@ -906,20 +905,17 @@ static void image_set_desaturate_cb(GSimpleAction *, GVariant *, gpointer data)
 }
 
 
-static void pr_get_monitor_size(PixbufRenderer *pr, gint *width, gint *height)
+static void view_get_monitor_size(GtkWidget *widget, gint *width, gint *height)
 {
-	GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(pr));
+	GdkDisplay *display = gtk_widget_get_display(widget);
 	GdkMonitor *monitor = nullptr;
 
-	if (pr->parent_window)
+	if (auto *native = gtk_widget_get_native(widget))
 		{
-		if (auto *native = gtk_widget_get_native(pr->parent_window))
+		GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(native));
+		if (surface)
 			{
-			GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(native));
-			if (surface)
-				{
-					monitor = gdk_display_get_monitor_at_surface(display, surface);
-				}
+			monitor = gdk_display_get_monitor_at_surface(display, surface);
 			}
 		}
 
@@ -1036,8 +1032,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 		{
 		gint mw;
 		gint mh;
-		auto *pr = PIXBUF_RENDERER(vw->imd->pr);
-		pr_get_monitor_size(pr, &mw, &mh);
+		view_get_monitor_size(vw->window, &mw, &mh);
 
 		mw = mw * options->image.max_window_size / 100;
 		mh = mh * options->image.max_window_size / 100;
@@ -1048,7 +1043,6 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 
 	gtk_window_set_default_size(GTK_WINDOW(vw->window), size.width, size.height);
 
-	gtk_window_set_focus_on_map(GTK_WINDOW(vw->window), FALSE);
 	gtk_widget_show(vw->window);
 
 	view_window_list.push_back(vw);
