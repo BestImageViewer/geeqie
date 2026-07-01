@@ -70,21 +70,6 @@ struct ClipboardData
 	ClipboardAction action;
 };
 
-enum ClipboardDestination {
-	CLIPBOARD_TEXT_PLAIN	= 0,
-	CLIPBOARD_TEXT_URI_LIST	= 1,
-	CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES	= 2,
-	CLIPBOARD_UTF8_STRING	= 3
-};
-
-constexpr std::array<GtkTargetEntry, 4> target_types
-{{
-	{const_cast<gchar *>("text/plain"), 0, CLIPBOARD_TEXT_PLAIN},
-	{const_cast<gchar *>("text/uri-list"), 0, CLIPBOARD_TEXT_URI_LIST},
-	{const_cast<gchar *>("x-special/gnome-copied-files"), 0, CLIPBOARD_X_SPECIAL_GNOME_COPIED_FILES},
-	{const_cast<gchar *>("UTF8_STRING"), 0, CLIPBOARD_UTF8_STRING},
-}};
-
 constexpr gint DIALOG_DEF_IMAGE_DIM_X = 150;
 constexpr gint DIALOG_DEF_IMAGE_DIM_Y = 100;
 
