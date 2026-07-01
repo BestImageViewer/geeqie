@@ -296,13 +296,14 @@ static gboolean accel_apply_cb(GtkTreeModel * , GtkTreePath *, GtkTreeIter * , g
 	g_autofree gchar *accel_path = nullptr;
 	g_autofree gchar *accel = nullptr;
 
-
-	if (accel_path && accel_path[0])
-		{
-		GtkAccelKey key;
-		gtk_accelerator_parse(accel, &key.accel_key, &key.accel_mods);
-		gtk_accel_map_change_entry(accel_path, key.accel_key, key.accel_mods, TRUE);
-		}
+/** @FIXME GTK4
+ */
+	//~ if (accel_path && accel_path[0])
+		//~ {
+		//~ GtkAccelKey key;
+		//~ gtk_accelerator_parse(accel, &key.accel_key, &key.accel_mods);
+		//~ gtk_accel_map_change_entry(accel_path, key.accel_key, key.accel_mods, TRUE);
+		//~ }
 
 	return FALSE;
 }
