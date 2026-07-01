@@ -196,7 +196,7 @@ GtkWidget *popup_menu_short_lived()
 
 GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 {
-	GtkWidget *popover = gtk_popover_menu_new_from_model(menu_model);
+	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
 	gtk_widget_set_parent(popover, window);
 	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_BOTTOM);
 	gtk_popover_popup(GTK_POPOVER(popover));
