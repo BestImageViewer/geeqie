@@ -2831,13 +2831,6 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 	DEBUG_NAME(toolbar);
 	lw->menu_tool_bar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-	if (!options->hamburger_menu)
-		{
-		menu_bar = layout_actions_menu_bar(lw);
-		DEBUG_NAME(menu_bar);
-		gq_gtk_box_pack_start(GTK_BOX(lw->menu_tool_bar), menu_bar, FALSE, FALSE, 0);
-		}
-
 	gq_gtk_box_pack_start(GTK_BOX(lw->menu_tool_bar), toolbar, FALSE, FALSE, 0);
 
 	return g_object_ref(lw->menu_tool_bar);

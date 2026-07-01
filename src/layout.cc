@@ -543,9 +543,13 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(menu_button), lw->menu_model);
 
 		gtk_header_bar_pack_end(GTK_HEADER_BAR(header), menu_button);
-
-		gq_gtk_widget_show_all(lw->window);
 		}
+	else
+		{
+		GtkWidget *menubar = gtk_popover_menu_bar_new_from_model(lw->menu_model);
+
+		gtk_box_prepend(GTK_BOX(lw->main_box), menubar);
+	}
 
 	lw->path_entry = tab_completion_new_with_history(nullptr, nullptr, "path_list", -1);
 	GtkWidget *tabcomp = tab_completion_get_box(lw->path_entry);
