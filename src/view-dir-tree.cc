@@ -77,7 +77,7 @@ static void vdtree_row_expanded(GtkTreeView *treeview, GtkTreeIter *iter, GtkTre
  *----------------------------------------------------------------------------
  */
 
-static void set_cursor(GtkWidget *widget, const gchar cursor_name)
+static void set_cursor(GtkWidget *widget, const gchar *cursor_name)
 {
 	if (!widget) return;
 
@@ -774,16 +774,15 @@ static gboolean vdtree_clicked_on_expander(GtkTreeView *treeview, GtkTreePath *t
 				           GtkTreeViewColumn *column, gint x, gint, gint *left_of_expander)
 {
 	gint depth;
-	gint size;
-	gint sep;
 	gint exp_width;
 
 	if (column != gtk_tree_view_get_expander_column(treeview)) return FALSE;
 
-	gtk_widget_style_get(GTK_WIDGET(treeview), "expander-size", &size, "horizontal-separator", &sep, NULL);
 	depth = gtk_tree_path_get_depth(tpath);
 
-	exp_width = sep + size + sep;
+	/* GTK4 no longer exposes these old GtkTreeView style properties. Use a
+	 * small fixed hit area that matches the current folder icon scale. */
+	exp_width = 20;
 
 	if (x <= depth * exp_width)
 		{
@@ -855,7 +854,7 @@ gboolean vdtree_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpo
 	return (event->button != GDK_BUTTON_PRIMARY);
 }
 
-sstatic void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GdkPaintable *paintable)
+static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GdkPaintable *paintable)
 {
 	vdtree_populate_path_by_iter(vd, iter, FALSE, nullptr);
 
@@ -981,7 +980,7 @@ ViewDir *vdtree_new(ViewDir *vd)
 	vd->dnd_drop_leave_func = vdtree_dnd_drop_expand_cancel;
 	vd->dnd_drop_update_func = vdtree_dnd_drop_expand;
 
-	store = gtk_tree_store_new(6, G_TYPE_POINTER, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_tree_store_new(6, G_TYPE_POINTER, GDK_TYPE_PAINTABLE, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);
 	vd->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
 
@@ -1000,7 +999,7 @@ ViewDir *vdtree_new(ViewDir *vd)
 
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", DIR_COLUMN_ICON);
+	gtk_tree_view_column_add_attribute(column, renderer, "paintable", DIR_COLUMN_ICON);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
 
 	renderer = gtk_cell_renderer_text_new();
