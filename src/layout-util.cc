@@ -3027,11 +3027,16 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 		gtk_widget_add_css_class(button, "flat");
 		gtk_widget_set_tooltip_text(button, tooltip_text);
 
-		gtk_actionable_set_detailed_action_name(GTK_ACTIONABLE(button), action_name);
+		if (GTK_IS_ACTIONABLE(button))
+			{
+			gtk_actionable_set_detailed_action_name(GTK_ACTIONABLE(button), action_name);
+			}
 
-		GtkWidget *image = gtk_image_new_from_icon_name(get_icon_for_action_name(action_name));
-		gtk_button_set_always_show_image(GTK_BUTTON(button), TRUE);
-		gtk_menu_button_set_child(GTK_MENU_BUTTON(button), image);
+		if (GTK_IS_BUTTON(button))
+			{
+			GtkWidget *image = gtk_image_new_from_icon_name(get_icon_for_action_name(action_name));
+			gtk_button_set_child(GTK_BUTTON(button), image);
+			}
 
 		gq_gtk_container_add(lw->toolbar[type], button);
 		gq_gtk_widget_show_all(button);
