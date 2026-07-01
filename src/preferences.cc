@@ -2124,7 +2124,9 @@ static GtkWidget *create_popover(GtkWidget *parent, GtkWidget *child, GtkPositio
 {
 	GtkWidget *popover = gtk_popover_new();
 
+	gtk_widget_set_parent(popover, parent);
 	gtk_popover_set_position(GTK_POPOVER (popover), pos);
+	gtk_popover_set_autohide(GTK_POPOVER(popover), FALSE);
 	gq_gtk_container_add(popover, child);
 	gq_gtk_widget_set_border_width(popover, 6);
 	gtk_widget_show (child);
@@ -2179,7 +2181,6 @@ static void config_tab_windows(GtkWidget *notebook)
 	GtkWidget *popover;
 
 	popover = create_popover(button, gtk_label_new(_("Current window layout\nhas been set as default")), GTK_POS_TOP);
-	gtk_popover_set_modal(GTK_POPOVER (popover), FALSE);
 	g_signal_connect(button, "clicked", G_CALLBACK(default_layout_changed_cb), popover);
 
 	group = pref_group_new(vbox, FALSE, _("Size"), GTK_ORIENTATION_VERTICAL);
