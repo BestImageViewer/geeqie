@@ -246,6 +246,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(win_vbox), scrolled, TRUE, TRUE, 5);
+	gq_gtk_box_reorder_child(GTK_BOX(win_vbox), hbox, -1);
 	gtk_widget_show(scrolled);
 
 	text_view = gtk_text_view_new();
@@ -501,7 +502,7 @@ void editor_list_window_create()
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
-	gtk_box_append(GTK_BOX(win_vbox), hbox);
+	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(editor_list_window_help_cb), ewl);
@@ -537,6 +538,7 @@ void editor_list_window_create()
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(win_vbox), scrolled, TRUE, TRUE, 5);
+	gq_gtk_box_reorder_child(GTK_BOX(win_vbox), hbox, -1);
 	gtk_widget_show(scrolled);
 
 	ewl->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(desktop_file_list));
