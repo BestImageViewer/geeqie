@@ -156,8 +156,6 @@ main_sources = files('accelerators.cc',
 'similar.h',
 'slideshow.cc',
 'slideshow.h',
-'spell.cc',
-'spell.h',
 'sort-type.cc',
 'sort-type.h',
 'thumb.cc',
@@ -309,6 +307,13 @@ if conf_data.get('HAVE_PDF', 0) == 1
     main_sources += files(
         'image-load-pdf.cc',
         'image-load-pdf.h',
+    )
+endif
+
+if conf_data.get('HAVE_SPELL', 0) == 1
+    main_sources += files(
+        'spell.cc',
+        'spell.h',
     )
 endif
 

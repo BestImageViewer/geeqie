@@ -1,23 +1,13 @@
 /*
- * Copyright (C) 2008 - 2016 The Geeqie Team
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 #include "spell.h"
 
-#include <config.h>
-
-#if HAVE_SPELL
-#  include <libspelling.h>
-#endif
+#include <libspelling.h>
 
 void spell_text_view_enable(GtkTextView *text_view)
 {
-#if HAVE_SPELL
 	static gsize initialized = 0;
 
 	if (g_once_init_enter(&initialized))
@@ -50,9 +40,6 @@ void spell_text_view_enable(GtkTextView *text_view)
 	gtk_text_view_set_extra_menu(text_view, spelling_text_buffer_adapter_get_menu_model(adapter));
 
 	g_object_set_data_full(G_OBJECT(buffer), "geeqie-spelling-adapter", adapter, g_object_unref);
-#else
-	(void)text_view;
-#endif
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
