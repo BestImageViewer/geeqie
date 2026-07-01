@@ -26,7 +26,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "compat-deprecated.h"
 #include "geometry.h"
 #include "main-defines.h"
 #include "misc.h"
@@ -141,7 +140,7 @@ static void pr_zoom_sync(PixbufRenderer *pr, gdouble zoom,
 			 PrZoomFlags flags, gint px, gint py);
 
 static void pr_signals_connect(PixbufRenderer *pr);
-static void pr_size_cb(GtkWidget *widget, GtkAllocation *allocation, gpointer data);
+static void pr_resize_cb(GtkDrawingArea *area, gint width, gint height, gpointer data);
 static void pr_stereo_temp_disable(PixbufRenderer *pr, gboolean disable);
 static void pr_clicked_signal_button(PixbufRenderer *pr, guint button, gdouble x, gdouble y, GdkModifierType state, guint press_count);
 static void pr_button_press_signal(PixbufRenderer *pr, guint button, gdouble x, gdouble y, GdkModifierType state, guint press_count);
@@ -473,9 +472,7 @@ static void pixbuf_renderer_init(PixbufRenderer *pr)
 
 	pr->renderer2 = nullptr;
 
-	deprecated_gtk_widget_set_double_buffered(box, FALSE);
-	g_signal_connect_after(G_OBJECT(box), "size_allocate",
-			       G_CALLBACK(pr_size_cb), pr);
+	g_signal_connect(box, "resize", G_CALLBACK(pr_resize_cb), pr);
 
 	pr_signals_connect(pr);
 }
@@ -1941,11 +1938,11 @@ static void pr_size_sync(PixbufRenderer *pr, gint new_width, gint new_height)
 	pr_update_signal(pr);
 }
 
-static void pr_size_cb(GtkWidget *, GtkAllocation *allocation, gpointer data)
+static void pr_resize_cb(GtkDrawingArea *, gint width, gint height, gpointer data)
 {
 	auto pr = static_cast<PixbufRenderer *>(data);
 
-	pr_size_sync(pr, allocation->width, allocation->height);
+	pr_size_sync(pr, width, height);
 }
 
 /*
@@ -2212,21 +2209,12 @@ static void pr_mouse_leave_cb(GtkEventControllerMotion *controller, gpointer)
 		}
 }
 
-static void pr_mouse_drag_cb(GtkWidget *widget, GdkDragContext *, gpointer)
-{
-	PixbufRenderer *pr;
-
-	pr = PIXBUF_RENDERER(widget);
-
-	pr->drag_moved = PR_DRAG_SCROLL_THRESHHOLD;
-}
-
 static void pr_signals_connect(PixbufRenderer *pr)
 {
 
 	GtkEventController *controller = gtk_event_controller_motion_new();
 	g_signal_connect(controller, "motion", G_CALLBACK(pr_mouse_motion_cb), pr);
-	gtk_widget_add_controller(G_OBJECT(pr), controller);
+	gtk_widget_add_controller(GTK_WIDGET(pr), controller);
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
@@ -2238,10 +2226,6 @@ static void pr_signals_connect(PixbufRenderer *pr)
 	g_signal_connect(motion_controller, "leave", G_CALLBACK(pr_mouse_leave_cb), pr);
 	g_signal_connect(motion_controller, "leave", G_CALLBACK(pr_leave_notify_cb), pr);
 	gtk_widget_add_controller(GTK_WIDGET(pr), motion_controller);
-
-	g_signal_connect(G_OBJECT(pr), "drag_begin",
-			 G_CALLBACK(pr_mouse_drag_cb), pr);
-
 }
 
 /*
