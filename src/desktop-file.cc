@@ -247,7 +247,6 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(win_vbox), scrolled, TRUE, TRUE, 5);
 	gtk_widget_show(scrolled);
-	gq_gtk_box_reorder_child(GTK_BOX(win_vbox), hbox, -1);
 
 	text_view = gtk_text_view_new();
 	gq_gtk_container_add(scrolled, text_view);
@@ -539,7 +538,6 @@ void editor_list_window_create()
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(win_vbox), scrolled, TRUE, TRUE, 5);
 	gtk_widget_show(scrolled);
-	gq_gtk_box_reorder_child(GTK_BOX(win_vbox), hbox, -1);
 
 	ewl->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(desktop_file_list));
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));

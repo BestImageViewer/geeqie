@@ -90,11 +90,42 @@ void gtk4_box_apply_child_packing(GtkBox *box, GtkWidget *child, gboolean expand
 		}
 }
 
+GtkWidget *gtk4_box_get_first_pack_end_child(GtkBox *box)
+{
+	for (GtkWidget *work = gtk_widget_get_first_child(GTK_WIDGET(box));
+	     work != nullptr;
+	     work = gtk_widget_get_next_sibling(work))
+		{
+		if (g_object_get_data(G_OBJECT(work), GTK4_BOX_PACK_END_DATA_KEY))
+			{
+			return work;
+			}
+		}
+
+	return nullptr;
+}
+
 } // namespace
 
 void gq_gtk_box_pack_start(GtkBox *box, GtkWidget *child, gboolean expand, gboolean fill, guint padding)
 {
-	gtk_box_append(box, child);
+	if (GtkWidget *first_end_child = gtk4_box_get_first_pack_end_child(box))
+		{
+		GtkWidget *previous = gtk_widget_get_prev_sibling(first_end_child);
+		if (previous)
+			{
+			gtk_box_insert_child_after(box, child, previous);
+			}
+		else
+			{
+			gtk_box_prepend(box, child);
+			}
+		}
+	else
+		{
+		gtk_box_append(box, child);
+		}
+
 	gtk4_box_apply_child_packing(box, child, expand, fill, padding);
 }
 
@@ -102,32 +133,22 @@ void gq_gtk_box_pack_end(GtkBox *box, GtkWidget *child, gboolean expand, gboolea
 {
 	g_object_set_data(G_OBJECT(child), GTK4_BOX_PACK_END_DATA_KEY, GINT_TO_POINTER(TRUE));
 
-	GtkWidget *first_end_child = nullptr;
-	for (GtkWidget *work = gtk_widget_get_first_child(GTK_WIDGET(box));
-	     work != nullptr;
-	     work = gtk_widget_get_next_sibling(work))
-		{
-		if (g_object_get_data(G_OBJECT(work), GTK4_BOX_PACK_END_DATA_KEY))
-			{
-			first_end_child = work;
-			break;
-			}
-		}
-
+	GtkWidget *first_end_child = gtk4_box_get_first_pack_end_child(box);
 	if (!first_end_child)
 		{
 		gtk_box_append(box, child);
-		return;
-		}
-
-	GtkWidget *previous = gtk_widget_get_prev_sibling(first_end_child);
-	if (previous)
-		{
-		gtk_box_insert_child_after(box, child, previous);
 		}
 	else
 		{
-		gtk_box_prepend(box, child);
+		GtkWidget *previous = gtk_widget_get_prev_sibling(first_end_child);
+		if (previous)
+			{
+			gtk_box_insert_child_after(box, child, previous);
+			}
+		else
+			{
+			gtk_box_prepend(box, child);
+			}
 		}
 
 	gtk4_box_apply_child_packing(box, child, expand, fill, padding);
