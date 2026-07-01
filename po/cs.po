@@ -4549,14 +4549,6 @@ msgstr ""
 "      --cache-maintenance <path>   spustí údržbu mezipaměti v režimu bez "
 "uživatelského rozhraní\n"
 
-#: src/main.cc:495
-msgid ""
-"      --disable-clutter            disable use of Clutter library (i.e. GPU "
-"accel.)\n"
-msgstr ""
-"      --disable-clutter            zakáže používání knihovny Clutter (tj. "
-"GPU accel.)\n"
-
 #: src/main.cc:496
 msgid "  -f, --fullscreen                 start in full screen mode\n"
 msgstr "  -f, --fullscreen                 začít v celoobrazovkovém režimu\n"

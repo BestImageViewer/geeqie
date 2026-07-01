@@ -130,10 +130,6 @@ parts:
       - gettext
       - libarchive-dev
       - libcfitsio-dev
-      - libchamplain-0.12-dev
-      - libchamplain-gtk-0.12-dev
-      - libclutter-1.0-dev
-      - libclutter-gtk-1.0-dev
       - libcogl-dev
       - libdjvulibre-dev
       - libdw-dev
@@ -170,10 +166,6 @@ parts:
       - libproxy1-plugin-gsettings
       - libproxy1-plugin-networkmanager   # optional, but nice to have
 
-      - libchamplain-0.12-0
-      - libchamplain-gtk-0.12-0
-      - libclutter-1.0-0
-      - libclutter-gtk-1.0-0
       - libcogl20
       - libdjvulibre21
       - libexif12
