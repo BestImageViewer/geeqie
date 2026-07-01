@@ -37,7 +37,6 @@ meson setup \
 -Dfits=disabled \
 -Dgit=disabled \
 -Dgps-map=disabled \
--Dgtk4=disabled \
 -Dheif=disabled \
 -Dhelp_pdf=disabled \
 -Dj2k=disabled \
@@ -97,4 +96,3 @@ then
 else
 	printf "%s \033[1;31m FAIL \033[0m\n" "$tmpdir/testlog-options-enabled.txt"
 fi
-

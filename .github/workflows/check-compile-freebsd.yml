@@ -31,7 +31,7 @@ jobs:
           pkg install -y curl
           pkg install -y at-spi2-core
           pkg install -y gettext
-          pkg install -y gtk3
+          pkg install -y gtk4 libshumate
         run: |
           meson setup build
           meson compile -C build --verbose > ./build/meson-logs/meson-log-compile.txt
