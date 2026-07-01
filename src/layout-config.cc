@@ -140,14 +140,13 @@ GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, La
 
 	if (group)
 		{
-		group = gtk_toggle_button_new();
-/** @FIXME GTK4 This implementation is wrong
-		gtk_toggle_button_set_group(button, group);
-*/
+		GtkWidget *sibling = group;
+		group = gtk_check_button_new();
+		gtk_check_button_set_group(GTK_CHECK_BUTTON(group), GTK_CHECK_BUTTON(sibling));
 		}
 	else
 		{
-		group = gtk_toggle_button_new();
+		group = gtk_check_button_new();
 		}
 
 	g_object_set_data(G_OBJECT(group), "layout_config", lc);

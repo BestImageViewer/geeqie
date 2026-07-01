@@ -328,11 +328,11 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 					    GCallback func, gpointer data)
 {
 	GtkWidget *button;
-	GtkToggleButton *group;
+	GtkCheckButton *group;
 
 	if (sibling)
 		{
-		group = sibling;
+		group = GTK_CHECK_BUTTON(sibling);
 		}
 	else
 		{
@@ -341,13 +341,13 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 
 	if (mnemonic_text)
 		{
-		button = gtk_toggle_button_new_with_mnemonic(text);
-		gtk_toggle_button_set_group(button, group);
+		button = gtk_check_button_new_with_mnemonic(text);
+		gtk_check_button_set_group(GTK_CHECK_BUTTON(button), group);
 		}
 	else
 		{
-		button = gtk_toggle_button_new_with_label(text);
-		gtk_toggle_button_set_group(button, group);
+		button = gtk_check_button_new_with_label(text);
+		gtk_check_button_set_group(GTK_CHECK_BUTTON(button), group);
 		}
 
 	if (active) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), active);
