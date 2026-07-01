@@ -59,7 +59,7 @@ GtkWidget *window_new(const gchar *role, const gchar *icon, const gchar *subtitl
 
 	/* GTK4: per-window pixbuf icons and window roles are not supported. */
 	(void)role;
-	gtk_window_set_icon_name(GTK_WINDOW(window), icon ? icon : GQ_ICON_IMAGE);
+	gtk_window_set_icon_name(GTK_WINDOW(window), icon ? icon : "org.geeqie.Geeqie");
 
 	if (options->hide_window_decorations)
 		{
