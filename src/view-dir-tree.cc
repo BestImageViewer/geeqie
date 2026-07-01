@@ -82,7 +82,6 @@ static void set_cursor(GtkWidget *widget, const gchar *cursor_name)
 	if (!widget) return;
 
 	gtk_widget_set_cursor_from_name(widget, cursor_name);
-	deprecated_gdk_flush();
 }
 
 static void vdtree_busy_push(ViewDir *vd)
