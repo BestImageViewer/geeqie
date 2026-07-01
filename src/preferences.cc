@@ -70,7 +70,9 @@
 #include "rcfile.h"
 #include "search.h"
 #include "slideshow.h"
-#include "spell.h"
+#if HAVE_SPELL
+#  include "spell.h"
+#endif
 #include "third-party/zonedetect.h"
 #include "toolbar.h"
 #include "trash.h"
