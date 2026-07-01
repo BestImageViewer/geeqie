@@ -97,9 +97,16 @@ GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *)
 
 		constexpr gint size = 16;
 
+#if GTK_CHECK_VERSION(4,18,0)
 		GdkPixbuf *pb_error = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_DIALOG_ERROR, size, GTK_ICON_LOOKUP_NONE);
 		GdkPixbuf *pb_warning = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_DIALOG_WARNING, size, GTK_ICON_LOOKUP_NONE);
 		GdkPixbuf *pb_apply = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_APPLY, size, GTK_ICON_LOOKUP_NONE);
+#else
+		GdkPixbuf *pb_error = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_DIALOG_ERROR, size, static_cast<GtkIconLookupFlags>(0));
+		GdkPixbuf *pb_warning = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_DIALOG_WARNING, size, static_cast<GtkIconLookupFlags>(0));
+		GdkPixbuf *pb_apply = gq_gtk_icon_theme_load_icon_copy(icon_theme, GQ_ICON_APPLY, size, static_cast<GtkIconLookupFlags>(0));
+#endif
+
 		return {pb_error, pb_warning, pb_apply};
 	}();
 
