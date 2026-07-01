@@ -358,7 +358,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 			GtkWidget *top;
 
 			top = widget_get_toplevel(parent);
-			if (GTK_IS_WINDOW(top) && gtk_widget_is_toplevel(top)) window = GTK_WINDOW(top);
+			if (GTK_IS_WINDOW(top)) window = GTK_WINDOW(top);
 			}
 
 		if (window) gtk_window_set_transient_for(GTK_WINDOW(gd->dialog), window);

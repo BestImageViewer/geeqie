@@ -423,11 +423,11 @@ void cell_renderer_height_override(GtkCellRenderer *renderer)
 
 GtkWidget *widget_get_toplevel(GtkWidget *widget)
 {
-	auto *root = gtk_widget_get_root(vf->listview);
+	auto *root = widget ? gtk_widget_get_root(widget) : nullptr;
 
 	if (GTK_IS_WINDOW(root))
 		{
-		return GTK_WINDOW(root);
+		return GTK_WIDGET(root);
 		}
 	else
 		{
