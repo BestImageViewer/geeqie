@@ -4458,11 +4458,11 @@ DupeWindow *dupe_window_new()
 
 	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), button_box, FALSE, FALSE, 0);
+	gtk_widget_set_halign(button_box, GTK_ALIGN_END);
 	gtk_widget_show(button_box);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
-	gtk_box_append(GTK_BOX(button_box), hbox);
+	gq_gtk_box_pack_start(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
 	gtk_widget_set_tooltip_text(button, "F1");
@@ -4473,6 +4473,7 @@ DupeWindow *dupe_window_new()
 	gq_gtk_container_add(hbox, button);
 	gtk_widget_show(button);
 
+	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(dupe_window_close), dw);
 	gtk_widget_set_tooltip_text(button, _("Ctrl-W"));
 	gq_gtk_container_add(hbox, button);
 	gtk_window_set_default_widget(GTK_WINDOW(dw->window), button);
