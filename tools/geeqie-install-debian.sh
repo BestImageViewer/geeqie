@@ -86,8 +86,8 @@ libomp (required by libraw)
 libomp-dev
 libarchive (for compressed files e.g. zip, including timezone)
 libarchive-dev
-libgspell (for spelling checks)
-libgspell-1-dev
+libspelling (for spelling checks)
+libspelling-1-dev
 libchamplain gtk (for GPS maps)
 libchamplain-gtk-0.12-dev
 libchamplain (for GPS maps)

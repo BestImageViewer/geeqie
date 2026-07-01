@@ -466,16 +466,15 @@ else
 endif
 
 conf_data.set('HAVE_SPELL', 0)
-gspell_dep = []
-req_version = '>=1.6'
+spelling_dep = []
 option = get_option('spell')
 if not option.disabled()
-    gspell_dep = dependency('gspell-1', version : req_version, required: get_option('spell'))
-    if gspell_dep.found()
+    spelling_dep = dependency('libspelling-1', required: get_option('spell'))
+    if spelling_dep.found()
         conf_data.set('HAVE_SPELL', 1)
         summary({'spell' : ['spelling checks enabled', true]}, section : 'Configuration', bool_yn : true)
     else
-        summary({'spell' : ['gspell-1 ' + req_version + ' not found - spelling checks enabled', false]}, section : 'Configuration', bool_yn : true)
+        summary({'spell' : ['libspelling-1 not found - spelling checks enabled', false]}, section : 'Configuration', bool_yn : true)
     endif
 else
     summary({'spell' : ['disabled - spelling checks enabled', false]}, section : 'Configuration', bool_yn : true)

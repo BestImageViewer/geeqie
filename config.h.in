@@ -96,7 +96,7 @@
 /* Define to enable libraw support */
 #mesondefine HAVE_RAW
 
-/* Define to enable libgspell support */
+/* Define to enable libspelling support */
 #mesondefine HAVE_SPELL
 
 /* Define to enable use of custom tiff loader */

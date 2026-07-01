@@ -141,7 +141,7 @@ parts:
       - libfftw3-dev
       - libgexiv2-dev
       - libglib2.0-dev
-      - libgspell-1-dev
+      - libspelling-1-dev
       - libgtk-4-dev
       - libheif-dev
       - libimath-dev
@@ -182,7 +182,7 @@ parts:
       - libfftw3-double3
       - libgexiv2-2
       - libgfortran5
-      - libgspell-1-2
+      - libspelling-1-2
       - libheif1
       - libimath-3-1-29
       - libjpeg-turbo8

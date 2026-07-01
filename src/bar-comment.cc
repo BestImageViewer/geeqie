@@ -27,9 +27,6 @@
 
 #include <gdk/gdk.h>
 #include <glib-object.h>
-#if HAVE_SPELL
-#  include <gspell/gspell.h>
-#endif
 
 #include "bar.h"
 #include "compat.h"
@@ -40,6 +37,7 @@
 #include "metadata.h"
 #include "options.h"
 #include "rcfile.h"
+#include "spell.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 
@@ -61,9 +59,6 @@ struct PaneCommentData
 	FileData *fd;
 	gchar *key;
 	gint height;
-#if HAVE_SPELL
-	GspellTextView *gspell_view;
-#endif
 };
 
 
@@ -247,9 +242,6 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd->pane.title = bar_pane_expander_title(title);
 	pcd->pane.id = g_strdup(id);
 	pcd->pane.type = PANE_COMMENT;
-#if HAVE_SPELL
-	pcd->gspell_view = nullptr;
-#endif
 	pcd->pane.expanded = expanded;
 
 	pcd->key = g_strdup(key);
@@ -279,8 +271,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 		{
 		if (options->metadata.check_spelling)
 			{
-			pcd->gspell_view = gspell_text_view_get_from_gtk_text_view(GTK_TEXT_VIEW(pcd->comment_view));
-			gspell_text_view_basic_setup(pcd->gspell_view);
+			spell_text_view_enable(GTK_TEXT_VIEW(pcd->comment_view));
 			}
 	}
 #endif

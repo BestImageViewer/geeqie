@@ -34,10 +34,6 @@
 #include <gio/gio.h>
 #include <glib-object.h>
 
-#if HAVE_SPELL
-#include <gspell/gspell.h>
-#endif
-
 #if HAVE_LCMS
 #  include <lcms2.h>
 #endif
@@ -74,6 +70,7 @@
 #include "rcfile.h"
 #include "search.h"
 #include "slideshow.h"
+#include "spell.h"
 #include "third-party/zonedetect.h"
 #include "toolbar.h"
 #include "trash.h"
@@ -3021,8 +3018,7 @@ static void config_tab_keywords(GtkWidget *notebook)
 #if HAVE_SPELL
 	if (options->metadata.check_spelling)
 		{
-		GspellTextView *gspell_view = gspell_text_view_get_from_gtk_text_view(GTK_TEXT_VIEW(keyword_text));
-		gspell_text_view_basic_setup(gspell_view);
+		spell_text_view_enable(GTK_TEXT_VIEW(keyword_text));
 		}
 #endif
 

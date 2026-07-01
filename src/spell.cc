@@ -1,0 +1,58 @@
+/*
+ * Copyright (C) 2008 - 2016 The Geeqie Team
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
+#include "spell.h"
+
+#include <config.h>
+
+#if HAVE_SPELL
+#  include <libspelling.h>
+#endif
+
+void spell_text_view_enable(GtkTextView *text_view)
+{
+#if HAVE_SPELL
+	static gsize initialized = 0;
+
+	if (g_once_init_enter(&initialized))
+		{
+		spelling_init();
+		g_once_init_leave(&initialized, 1);
+		}
+
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(text_view);
+	if (!GTK_SOURCE_IS_BUFFER(buffer))
+		{
+		GtkSourceBuffer *source_buffer = gtk_source_buffer_new(nullptr);
+		GtkTextIter start;
+		GtkTextIter end;
+
+		gtk_text_buffer_get_bounds(buffer, &start, &end);
+		g_autofree gchar *text = gtk_text_buffer_get_text(buffer, &start, &end, TRUE);
+		gtk_text_buffer_set_text(GTK_TEXT_BUFFER(source_buffer), text, -1);
+		gtk_text_view_set_buffer(text_view, GTK_TEXT_BUFFER(source_buffer));
+		g_object_unref(source_buffer);
+
+		buffer = gtk_text_view_get_buffer(text_view);
+		}
+
+	SpellingChecker *checker = spelling_checker_get_default();
+	SpellingTextBufferAdapter *adapter = spelling_text_buffer_adapter_new(GTK_SOURCE_BUFFER(buffer), checker);
+
+	spelling_text_buffer_adapter_set_enabled(adapter, TRUE);
+	gtk_widget_insert_action_group(GTK_WIDGET(text_view), "spelling", G_ACTION_GROUP(adapter));
+	gtk_text_view_set_extra_menu(text_view, spelling_text_buffer_adapter_get_menu_model(adapter));
+
+	g_object_set_data_full(G_OBJECT(buffer), "geeqie-spelling-adapter", adapter, g_object_unref);
+#else
+	(void)text_view;
+#endif
+}
+
+/* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
