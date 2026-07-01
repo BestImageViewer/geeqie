@@ -925,7 +925,11 @@ static void pr_get_monitor_size(PixbufRenderer *pr, gint *width, gint *height)
 
 	if (!monitor)
 		{
-			monitor = gdk_display_get_primary_monitor(display);
+		GListModel *monitors = gdk_display_get_monitors(display);
+		if (monitors && g_list_model_get_n_items(monitors) > 0)
+			{
+			monitor = GDK_MONITOR(g_list_model_get_item(monitors, 0));
+			}
 		}
 
 	GdkRectangle geometry;
@@ -933,6 +937,8 @@ static void pr_get_monitor_size(PixbufRenderer *pr, gint *width, gint *height)
 
 	*width = geometry.width;
 	*height = geometry.height;
+
+	g_clear_object(&monitor);
 }
 
 /* const ActionDef image_actions[]
