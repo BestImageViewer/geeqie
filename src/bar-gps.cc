@@ -21,16 +21,13 @@
 
 #include "bar-gps.h"
 
-#include <array>
 #include <string>
 
-#include <cairo.h>
-#include <gtk/gtk.h>
-#include <shumate/shumate.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
-#include <glib-object.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gtk/gtk.h>
 #include <pango/pango.h>
+#include <shumate/shumate.h>
 
 #include <config.h>
 
@@ -52,14 +49,9 @@
 namespace
 {
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC(ChamplainMapSource, g_object_unref)
-
 constexpr gint THUMB_SIZE = 100;
-constexpr int DIRECTION_SIZE = 300;
-
-#define MARKER_COLOUR 0x00, 0x00, 0xff, 0xff
-#define TEXT_COLOUR 0x00, 0x00, 0x00, 0xff
-#define THUMB_COLOUR 0xff, 0xff, 0xff, 0xff
+constexpr gint DEFAULT_ZOOM = 7;
+constexpr const gchar *DEFAULT_MAP_ID = SHUMATE_MAP_SOURCE_OSM_MAPNIK;
 
 /*
  *-------------------------------------------------------------------
@@ -78,18 +70,12 @@ struct PaneGPSData
 	ShumateMarkerLayer *marker_layer;
 	ShumateViewport *viewport;
 	GList *selection_list;
-	GList *not_added;
-	guint num_added;
-	guint create_markers_id;
 	GtkWidget *progress;
 	GtkWidget *slider;
 	GtkWidget *state;
 	gint selection_count;
 	gboolean centre_map_checked;
 	gboolean enable_markers_checked;
-	gdouble dest_latitude;
-	gdouble dest_longitude;
-	GList *geocode_list;
 };
 
 /*
@@ -98,65 +84,19 @@ struct PaneGPSData
  *-------------------------------------------------------------------
  */
 
-void bar_pane_gps_close_cancel_cb(GenericDialog *, gpointer data)
-{
-	auto pgd = static_cast<PaneGPSData *>(data);
-
-	g_list_free(pgd->geocode_list);
-}
-
-void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
-{
-	auto pgd = static_cast<PaneGPSData *>(data);
-	FileData *fd;
-	GList *work;
-
-	work = g_list_first(pgd->geocode_list);
-	while (work)
-		{
-		fd = static_cast<FileData *>(work->data);
-		if (fd->name && !fd->parent)
-			{
-			work = work->next;
-			metadata_write_GPS_coord(fd, "Xmp.exif.GPSLatitude", pgd->dest_latitude);
-			metadata_write_GPS_coord(fd, "Xmp.exif.GPSLongitude", pgd->dest_longitude);
-			}
-		}
-	g_list_free(pgd->geocode_list);
-}
-
 void bar_pane_gps_dnd_init(gpointer data)
 {
 	(void)data;
 }
 
-gboolean bar_gps_draw_direction (ClutterCanvas *, cairo_t *cr, gpointer)
-{
-	cairo_set_source_rgb(cr, 255, 0, 0);
-
-	cairo_set_line_width(cr, 2);
-	cairo_move_to(cr, 0, 1);
-	cairo_line_to(cr, DIRECTION_SIZE, 1);
-
-	cairo_stroke(cr);
-
-	return TRUE;
-}
-
 void bar_pane_gps_thumb_done_cb(ThumbLoader *tl, gpointer data)
 {
 	FileData *fd;
-	ClutterActor *marker;
-	ClutterActor *actor;
+	GtkImage *image;
 
-	marker = CLUTTER_ACTOR(data);
-	fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(marker), "file_fd"));
-	if (fd->thumb_pixbuf != nullptr)
-		{
-		actor = gtk_clutter_texture_new();
-		gtk_clutter_texture_set_from_pixbuf(GTK_CLUTTER_TEXTURE(actor), fd->thumb_pixbuf, nullptr);
-		champlain_label_set_image(CHAMPLAIN_LABEL(marker), actor);
-		}
+	image = GTK_IMAGE(data);
+	fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(image), "file_fd"));
+	if (fd && fd->thumb_pixbuf) gtk_image_set_from_pixbuf(image, fd->thumb_pixbuf);
 	thumb_loader_free(tl);
 }
 
@@ -165,177 +105,101 @@ void bar_pane_gps_thumb_error_cb(ThumbLoader *tl, gpointer)
 	thumb_loader_free(tl);
 }
 
-gboolean bar_pane_gps_marker_keypress_cb(GtkWidget *widget, ClutterButtonEvent *bevent, gpointer)
+GtkWidget *bar_pane_gps_marker_child_new(FileData *fd)
 {
-	FileData *fd;
-	ClutterActor *label_marker;
-	ClutterActor *parent_marker;
-	ClutterColor marker_colour = { MARKER_COLOUR };
-	ClutterColor text_colour = { TEXT_COLOUR };
-	ClutterColor thumb_colour = { THUMB_COLOUR };
-	ClutterActor *actor;
-	ClutterActor *direction;
-	ClutterActor *current_image;
-	gint height;
-	gint width;
-	GdkPixbufRotation rotate;
-	ThumbLoader *tl;
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	GtkWidget *image = gtk_image_new();
+	GtkWidget *label = gtk_label_new("i");
 
-	if (bevent->button == GDK_BUTTON_PRIMARY)
-		{
-		label_marker = CLUTTER_ACTOR(widget);
-		fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(label_marker), "file_fd"));
+	gtk_widget_add_css_class(box, "map-marker");
+	gtk_widget_set_visible(image, FALSE);
+	gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
 
-		/* If the marker is showing a thumbnail, delete it
-		 */
-		current_image = champlain_label_get_image(CHAMPLAIN_LABEL(label_marker));
-		if (current_image != nullptr)
+	g_object_set_data(G_OBJECT(box), "file_fd", fd);
+	g_object_set_data(G_OBJECT(image), "file_fd", fd);
+	g_object_set_data(G_OBJECT(label), "short-label", label);
+	g_object_set_data(G_OBJECT(label), "thumb-image", image);
+
+	gtk_box_append(GTK_BOX(box), image);
+	gtk_box_append(GTK_BOX(box), label);
+
+	GtkGesture *click = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(click), GDK_BUTTON_PRIMARY);
+	g_signal_connect(click, "pressed", G_CALLBACK(+[](GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer)
+	{
+		GtkWidget *child = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+		auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(child), "file_fd"));
+		GtkWidget *label = GTK_WIDGET(gtk_widget_get_last_child(child));
+		GtkWidget *image = GTK_WIDGET(gtk_widget_get_first_child(child));
+		const gchar *text = gtk_label_get_text(GTK_LABEL(label));
+
+		if (!fd) return;
+
+		if (g_strcmp0(text, "i") == 0)
 			{
-			clutter_actor_destroy(CLUTTER_ACTOR(current_image));
-		 	champlain_label_set_image(CHAMPLAIN_LABEL(label_marker), nullptr);
-			}
-
-		g_autofree gchar *current_text = g_strdup(champlain_label_get_text(CHAMPLAIN_LABEL(label_marker)));
-
-		/* If the marker is showing only the text character, replace it with a
-		 * thumbnail and date and altitude
-		 */
-		if (g_strcmp0(current_text, "i") == 0)
-			{
-			/* If a thumbail has already been generated, use that. If not try the pixbuf of the full image.
-			 * If not, call the thumb_loader to generate a thumbnail and update the marker later in the
-			 * thumb_loader callback
-			 */
-			if (fd->thumb_pixbuf != nullptr)
+			if (fd->thumb_pixbuf)
 				{
-				actor = gtk_clutter_texture_new();
-				gtk_clutter_texture_set_from_pixbuf(GTK_CLUTTER_TEXTURE(actor), fd->thumb_pixbuf, nullptr);
-				champlain_label_set_image(CHAMPLAIN_LABEL(label_marker), actor);
+				gtk_image_set_from_pixbuf(GTK_IMAGE(image), fd->thumb_pixbuf);
+				gtk_widget_set_visible(image, TRUE);
 				}
-			else if (fd->pixbuf != nullptr)
+			else if (fd->pixbuf)
 				{
-				actor = gtk_clutter_texture_new();
-				width = gdk_pixbuf_get_width (fd->pixbuf);
-				height = gdk_pixbuf_get_height (fd->pixbuf);
-				switch (fd->exif_orientation)
-					{
-					case 8:
-						rotate = GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE;
-						break;
-					case 3:
-						rotate = GDK_PIXBUF_ROTATE_UPSIDEDOWN;
-						break;
-					case 6:
-						rotate = GDK_PIXBUF_ROTATE_CLOCKWISE;
-						break;
-					default:
-						rotate = GDK_PIXBUF_ROTATE_NONE;
-					}
-
-					gtk_clutter_texture_set_from_pixbuf(GTK_CLUTTER_TEXTURE(actor),
-										gdk_pixbuf_rotate_simple(gdk_pixbuf_scale_simple(fd->pixbuf, THUMB_SIZE, height * THUMB_SIZE / width,
-										GDK_INTERP_NEAREST), rotate), nullptr);
-					champlain_label_set_image(CHAMPLAIN_LABEL(label_marker), actor);
+				gint width = gdk_pixbuf_get_width(fd->pixbuf);
+				gint height = gdk_pixbuf_get_height(fd->pixbuf);
+				g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(fd->pixbuf, THUMB_SIZE, height * THUMB_SIZE / width, GDK_INTERP_NEAREST);
+				gtk_image_set_from_pixbuf(GTK_IMAGE(image), scaled);
+				gtk_widget_set_visible(image, TRUE);
 				}
 			else
 				{
-				tl = thumb_loader_new(THUMB_SIZE, THUMB_SIZE);
-				thumb_loader_set_callbacks(tl,
-											bar_pane_gps_thumb_done_cb,
-											bar_pane_gps_thumb_error_cb,
-											nullptr,
-											label_marker);
+				ThumbLoader *tl = thumb_loader_new(THUMB_SIZE, THUMB_SIZE);
+				thumb_loader_set_callbacks(tl, bar_pane_gps_thumb_done_cb, bar_pane_gps_thumb_error_cb, nullptr, image);
 				thumb_loader_start(tl, fd);
+				gtk_widget_set_visible(image, TRUE);
 				}
 
-			g_autoptr(GString) text = g_string_new(fd->name);
-			g_string_append(text, "\n");
-			g_string_append(text, text_from_time(fd->date));
-			g_string_append(text, "\n");
+			g_autoptr(GString) marker_text = g_string_new(fd->name);
+			g_string_append(marker_text, "\n");
+			g_string_append(marker_text, text_from_time(fd->date));
 
 			g_autofree gchar *altitude = metadata_read_string(fd, "formatted.GPSAltitude", METADATA_FORMATTED);
-			if (altitude != nullptr)
+			if (altitude)
 				{
-				g_string_append(text, altitude);
+				g_string_append(marker_text, "\n");
+				g_string_append(marker_text, altitude);
 				}
 
-			champlain_label_set_text(CHAMPLAIN_LABEL(label_marker), text->str);
-			champlain_label_set_font_name(CHAMPLAIN_LABEL(label_marker), "sans 8");
-			champlain_marker_set_selection_color(&thumb_colour);
-			champlain_marker_set_selection_text_color(&text_colour);
-
-			parent_marker = clutter_actor_get_parent(label_marker);
-			if (clutter_actor_get_n_children(parent_marker ) > 1 )
-				{
-				direction = clutter_actor_get_child_at_index(parent_marker, 0);
-				clutter_actor_set_opacity(direction, 255);
-				}
+			gtk_label_set_text(GTK_LABEL(label), marker_text->str);
 			}
-		/* otherwise, revert to the hidden text marker
-		 */
 		else
 			{
-			champlain_label_set_text(CHAMPLAIN_LABEL(label_marker), "i");
-			champlain_label_set_font_name(CHAMPLAIN_LABEL(label_marker), "courier 5");
-			champlain_marker_set_selection_color(&marker_colour);
-			champlain_marker_set_selection_text_color(&marker_colour);
-
-			parent_marker = clutter_actor_get_parent(label_marker);
-			if (clutter_actor_get_n_children(parent_marker ) > 1 )
-				{
-				direction = clutter_actor_get_child_at_index(parent_marker, 0);
-				clutter_actor_set_opacity(direction, 0);
-				}
+			gtk_widget_set_visible(image, FALSE);
+			gtk_label_set_text(GTK_LABEL(label), "i");
 			}
+	}), nullptr);
+	gtk_widget_add_controller(box, GTK_EVENT_CONTROLLER(click));
 
-		return TRUE;
-		}
-	return TRUE;
+	return box;
 }
 
-gboolean bar_pane_gps_create_markers_cb(gpointer data)
+void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, gdouble longitude)
 {
-	auto pgd = static_cast<PaneGPSData *>(data);
-	gdouble latitude;
-	gdouble longitude;
-	gdouble compass;
-	FileData *fd;
+	ShumateMarker *marker = shumate_marker_new();
+	shumate_location_set_location(SHUMATE_LOCATION(marker), latitude, longitude);
+	shumate_marker_set_child(marker, bar_pane_gps_marker_child_new(fd));
+	shumate_marker_layer_add_marker(pgd->marker_layer, marker);
+}
 
-	const gint selection_added = pgd->selection_count - g_list_length(pgd->not_added);
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress), static_cast<gdouble>(selection_added) / static_cast<gdouble>(pgd->selection_count));
+void bar_pane_gps_set_status(PaneGPSData *pgd)
+{
+	if (!pgd->viewport) return;
 
-	g_autofree gchar *message = g_strdup_printf("%u/%i", selection_added, pgd->selection_count);
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), message);
+	gdouble zoom = shumate_viewport_get_zoom_level(pgd->viewport);
+	g_autofree gchar *message = g_strdup_printf(_("Zoom level %i"), static_cast<gint>(zoom));
 
-	if(pgd->not_added)
-		{
-		fd = static_cast<FileData *>(pgd->not_added->data);
-		pgd->not_added = pgd->not_added->next;
-
-		latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 0);
-		longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 0);
-		compass = metadata_read_GPS_direction(fd, "Xmp.exif.GPSImgDirection", 1000);
-
-		if (latitude != 0 || longitude != 0)
-			{
-			pgd->num_added++;
-
-			ShumateMarker *marker = shumate_marker_new();
-			shumate_marker_set_location(marker, latitude, longitude);
-
-			GtkWidget *label = gtk_label_new("i");
-			shumate_marker_set_child(marker, label);
-
-			shumate_marker_layer_add_marker(pgd->marker_layer, marker);
-			}
-		return G_SOURCE_CONTINUE;
-		}
-
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress), 0);
-	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), nullptr);
-	pgd->create_markers_id = 0;
-
-	return G_SOURCE_REMOVE;
+	gtk_label_set_text(GTK_LABEL(pgd->state), message);
+	gtk_widget_set_tooltip_text(pgd->slider, message);
+	gtk_scale_button_set_value(GTK_SCALE_BUTTON(pgd->slider), zoom);
 }
 
 void bar_pane_gps_update(PaneGPSData *pgd)
@@ -353,10 +217,7 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 		if (lat == 0 && lon == 0)
 			continue;
 
-		auto *marker = shumate_marker_new();
-		shumate_marker_set_location(marker, lat, lon);
-		shumate_marker_set_child(marker, gtk_label_new("i"));
-		shumate_marker_layer_add_marker(pgd->marker_layer, marker);
+		bar_pane_gps_add_marker(pgd, fd, lat, lon);
 		}
 
 	file_data_list_free(list);
@@ -364,15 +225,19 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 
 void bar_pane_gps_set_map_source(PaneGPSData *pgd, const gchar *map_id)
 {
+	if (!map_id || !*map_id) map_id = DEFAULT_MAP_ID;
+
 	ShumateMapSource *source;
 	ShumateMapSourceRegistry *registry;
 
-	registry = shumate_map_source_registry_new();
+	registry = shumate_map_source_registry_new_with_defaults();
 	source = shumate_map_source_registry_get_by_id(registry, map_id);
 
 	if (source)
 		{
 		shumate_map_set_map_source(SHUMATE_MAP(pgd->map), source);
+		g_free(pgd->map_source);
+		pgd->map_source = g_strdup(map_id);
 		}
 
 	g_object_unref(registry);
@@ -390,18 +255,6 @@ void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *, gpointer data)
 	auto pgd = static_cast<PaneGPSData *>(data);
 
 	pgd->centre_map_checked = !pgd->centre_map_checked;
-}
-
-void bar_pane_gps_change_map_cb(GtkWidget *widget, gpointer data)
-{
-	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget)))
-		return;
-
-	auto *pgd = static_cast<PaneGPSData *>(data);
-	if (!pgd) return;
-
-	auto *mapsource = static_cast<gchar *>(menu_item_radio_get_data(widget));
-	bar_pane_gps_set_map_source(pgd, mapsource);
 }
 
 void bar_pane_gps_notify_selection(GtkWidget *bar, gint count)
@@ -438,10 +291,7 @@ gint bar_pane_gps_event(GtkWidget *bar, GdkEvent *event)
 
 const gchar *bar_pane_gps_get_map_id(const PaneGPSData *pgd)
 {
-	g_autoptr(ChamplainMapSource) mapsource = nullptr;
-	g_object_get(pgd->gps_view, "map-source", &mapsource, NULL);
-
-	return champlain_map_source_get_id(mapsource);
+	return pgd->map_source ? pgd->map_source : DEFAULT_MAP_ID;
 }
 
 void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
@@ -464,15 +314,16 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	WRITE_NL();
 	WRITE_CHAR_FULL("map-id", map_id);
 
-	gint zoom;
-	g_object_get(pgd->gps_view, "zoom-level", &zoom, NULL);
+	gdouble zoom = DEFAULT_ZOOM;
+	g_object_get(pgd->viewport, "zoom-level", &zoom, NULL);
 	WRITE_NL();
-	WRITE_INT_FULL("zoom-level", zoom);
+	WRITE_INT_FULL("zoom-level", static_cast<gint>(zoom));
 
 	const auto write_lat_long_option = [pgd, outstr, indent](const gchar *option)
 	{
-		gdouble position;
-		g_object_get(pgd->gps_view, option, &position, NULL);
+		gdouble position = g_strcmp0(option, "latitude") == 0
+		                    ? shumate_location_get_latitude(SHUMATE_LOCATION(pgd->viewport))
+		                    : shumate_location_get_longitude(SHUMATE_LOCATION(pgd->viewport));
 		const gint int_position = position * 1000000;
 		WRITE_NL();
 		WRITE_INT_FULL(option, int_position);
@@ -493,31 +344,16 @@ void bar_pane_gps_slider_changed_cb(GtkScaleButton *slider,
 
 	g_autofree gchar *message = g_strdup_printf(_("Zoom %i"), static_cast<gint>(zoom));
 
-	g_object_set(CHAMPLAIN_VIEW(pgd->gps_view), "zoom-level", static_cast<gint>(zoom), NULL);
+	shumate_viewport_set_zoom_level(pgd->viewport, zoom);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(slider), message);
+	bar_pane_gps_set_status(pgd);
 }
 
-void bar_pane_gps_view_state_changed_cb(ChamplainView *view, GParamSpec *, gpointer data)
+void bar_pane_gps_view_state_changed_cb(GObject *, GParamSpec *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 
- 	ChamplainState status;
- 	gint zoom;
-	g_object_get(view, "state", &status, "zoom-level", &zoom, NULL);
-
-	g_autofree gchar *message = g_strdup_printf(_("Zoom level %i"), zoom);
-
-	if (status == CHAMPLAIN_STATE_LOADING)
-		{
-		gtk_label_set_text(GTK_LABEL(pgd->state), _("Loading map"));
-		}
-	else
-		{
-		gtk_label_set_text(GTK_LABEL(pgd->state), message);
-		}
-
-	gtk_widget_set_tooltip_text(pgd->slider, message);
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(pgd->slider), static_cast<gdouble>(zoom));
+	bar_pane_gps_set_status(pgd);
 }
 
 void bar_pane_gps_notify_cb(FileData *fd, NotifyType type, gpointer data)
@@ -533,102 +369,27 @@ void bar_pane_gps_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 GtkWidget *bar_pane_gps_menu(PaneGPSData *pgd)
 {
-	GtkWidget *menu;
+	GtkWidget *popover;
+	GtkWidget *menu_box;
 	GtkWidget *map_centre;
-	ChamplainMapSourceFactory *map_factory;
-	GSList *map_list;
-	const gchar *current;
 
-	menu = popup_menu_short_lived();
+	popover = gtk_popover_new();
+	gtk_widget_set_parent(popover, pgd->map);
+	menu_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_popover_set_child(GTK_POPOVER(popover), menu_box);
 
-	map_factory = champlain_map_source_factory_dup_default();
-	map_list = champlain_map_source_factory_get_registered(map_factory);
-	current = bar_pane_gps_get_map_id(pgd);
+	GtkWidget *enable_markers = gtk_check_button_new_with_label(_("Enable markers"));
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(enable_markers), pgd->enable_markers_checked);
+	g_signal_connect(enable_markers, "toggled", G_CALLBACK(bar_pane_gps_enable_markers_checked_toggle_cb), pgd);
+	gtk_box_append(GTK_BOX(menu_box), enable_markers);
 
-	for (GSList *work = map_list; work; work = work->next)
-		{
-		auto *map_desc = static_cast<ChamplainMapSourceDesc *>(work->data);
-		const gchar *map_desc_id = champlain_map_source_desc_get_id(map_desc);
-
-		menu_item_add_radio(menu,
-		                    champlain_map_source_desc_get_name(map_desc),
-		                    const_cast<gchar *>(map_desc_id),
-		                    strcmp(map_desc_id, current) == 0,
-		                    G_CALLBACK(bar_pane_gps_change_map_cb), pgd);
-		}
-	g_slist_free(map_list);
-
-	menu_item_add_divider(menu);
-	menu_item_add_check(menu, _("Enable markers"), pgd->enable_markers_checked,
-	                    G_CALLBACK(bar_pane_gps_enable_markers_checked_toggle_cb), pgd);
-	map_centre = menu_item_add_check(menu, _("Centre map on marker"), pgd->centre_map_checked,
-	                                 G_CALLBACK(bar_pane_gps_centre_map_checked_toggle_cb), pgd);
+	map_centre = gtk_check_button_new_with_label(_("Centre map on marker"));
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(map_centre), pgd->centre_map_checked);
+	g_signal_connect(map_centre, "toggled", G_CALLBACK(bar_pane_gps_centre_map_checked_toggle_cb), pgd);
+	gtk_box_append(GTK_BOX(menu_box), map_centre);
 	gtk_widget_set_sensitive(map_centre, pgd->enable_markers_checked);
 
-	g_object_unref(map_factory);
-
-	return menu;
-}
-
-/* Determine if the map is to be re-centred on the marker when another photo is selected
- */
-void bar_pane_gps_map_centreing(PaneGPSData *pgd)
-{
-	GenericDialog *gd;
-
-	const gchar *message;
-	if (pgd->centre_map_checked)
-		{
-		message = _("Move map centre to marker\n is disabled");
-		}
-	else
-		{
-		message = _("Move map centre to marker\n is enabled");
-		}
-
-	pgd->centre_map_checked = !pgd->centre_map_checked;
-
-	gd = generic_dialog_new(_("Map centering"),
-				"map_centering", nullptr, TRUE, nullptr, pgd);
-	generic_dialog_add_message(gd, GQ_ICON_DIALOG_INFO, _("Map Centering"), message, TRUE);
-	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", nullptr, TRUE);
-
-	gtk_widget_show(gd->dialog);
-}
-
-gboolean bar_pane_gps_map_keypress_cb(GtkWidget *, const GqMouseButtonEvent *bevent, gpointer data)
-{
-	auto pgd = static_cast<PaneGPSData *>(data);
-	GtkWidget *menu;
-
-	if (bevent->button == GDK_BUTTON_SECONDARY)
-		{
-		menu = bar_pane_gps_menu(pgd);
-		(void)menu;
-		return TRUE;
-		}
-
-	if (bevent->button == GDK_BUTTON_MIDDLE)
-		{
-		bar_pane_gps_map_centreing(pgd);
-		return TRUE;
-		}
-
-	if (bevent->button == GDK_BUTTON_PRIMARY)
-		{
-		g_autofree gchar *geo_coords = g_strdup_printf("%f %f",
-		                                               champlain_view_y_to_latitude(CHAMPLAIN_VIEW(pgd->gps_view),bevent->y),
-		                                               champlain_view_x_to_longitude(CHAMPLAIN_VIEW(pgd->gps_view),bevent->x));
-
-		GdkDisplay *display = gdk_display_get_default();
-		GdkClipboard *clipboard = gdk_display_get_primary_clipboard(display);
-
-		gdk_clipboard_set_text(clipboard, geo_coords);
-
-		return TRUE;
-		}
-
-	return FALSE;
+	return popover;
 }
 
 void bar_pane_gps_destroy(gpointer data)
@@ -640,12 +401,10 @@ void bar_pane_gps_destroy(gpointer data)
 	g_idle_remove_by_data(pgd);
 
 	file_data_list_free(pgd->selection_list);
-	if (pgd->bbox) champlain_bounding_box_free(pgd->bbox);
 
 	file_data_unref(pgd->fd);
 	g_free(pgd->map_source);
 	g_free(pgd->pane.id);
-	clutter_actor_destroy(pgd->gps_view);
 	g_free(pgd);
 }
 
@@ -655,13 +414,10 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 {
 	PaneGPSData *pgd;
 	GtkWidget *vbox;
-	GtkWidget *gpswidget;
 	GtkWidget *status;
 	GtkWidget *state;
 	GtkWidget *progress;
 	GtkWidget *slider;
-	ChamplainMarkerLayer *layer;
-	ChamplainView *view;
 	const gchar *slider_list[] = {GQ_ICON_ZOOM_IN, GQ_ICON_ZOOM_OUT, nullptr};
 
 	pgd = g_new0(PaneGPSData, 1);
@@ -680,7 +436,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	DEBUG_NAME(frame);
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-	pgd->map = shumate_map_new();
+	pgd->map = GTK_WIDGET(shumate_map_new());
 	pgd->viewport = shumate_map_get_viewport(SHUMATE_MAP(pgd->map));
 
 	gtk_widget_set_hexpand(pgd->map, TRUE);
@@ -714,8 +470,6 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	pgd->marker_layer = shumate_marker_layer_new(pgd->viewport);
 	shumate_map_add_layer(SHUMATE_MAP(pgd->map), SHUMATE_LAYER(pgd->marker_layer));
 
-	pgd->icon_layer = layer;
-	pgd->gps_view = CLUTTER_ACTOR(view);
 	pgd->widget = frame;
 	pgd->progress = progress;
 	pgd->slider = slider;
@@ -723,16 +477,8 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	bar_pane_gps_set_map_source(pgd, map_id);
 
-	g_object_set(view,
-	             "kinetic-mode", TRUE,
-	             "zoom-level", zoom,
-	             "keep-center-on-resize", TRUE,
-	             "deceleration", 1.1,
-	             "zoom-on-double-click", FALSE,
-	             "max-zoom-level", 17,
-	             "min-zoom-level", 1,
-	             NULL);
-	shumate_viewport_set_center(view, latitude, longitude);
+	shumate_viewport_set_zoom_level(pgd->viewport, zoom);
+	shumate_map_center_on(SHUMATE_MAP(pgd->map), latitude, longitude);
 	pgd->centre_map_checked = TRUE;
 	g_object_set_data_full(G_OBJECT(pgd->widget), "pane_data", pgd, bar_pane_gps_destroy);
 
@@ -760,14 +506,13 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	            loading ? _("Loading map") : _("Map ready"));
 	    }), pgd);
 
-	g_signal_connect(pgd->gps_view, "notify::zoom-level", G_CALLBACK(bar_pane_gps_view_state_changed_cb), pgd);
+	g_signal_connect(pgd->viewport, "notify::zoom-level", G_CALLBACK(bar_pane_gps_view_state_changed_cb), pgd);
 	g_signal_connect(G_OBJECT(slider), "value-changed", G_CALLBACK(bar_pane_gps_slider_changed_cb), pgd);
 
 	bar_pane_gps_dnd_init(pgd);
 
 	file_data_register_notify_func(bar_pane_gps_notify_cb, pgd, NOTIFY_PRIORITY_LOW);
 
-	pgd->create_markers_id = 0;
 	pgd->enable_markers_checked = TRUE;
 	pgd->centre_map_checked = TRUE;
 
@@ -817,7 +562,7 @@ GtkWidget *bar_pane_gps_new_from_config(const gchar **attribute_names, const gch
 		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
 		}
 
-	bar_pane_translate_title(PANE_COMMENT, id, &title);
+	bar_pane_translate_title(PANE_GPS, id, &title);
 	latitude = static_cast<gdouble>(int_latitude) / 1000000;
 	longitude = static_cast<gdouble>(int_longitude) / 1000000;
 
@@ -828,17 +573,20 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
                                 						const gchar **attribute_values)
 {
 	PaneGPSData *pgd;
-	gint zoom;
-	gint int_longitude;
-	gint int_latitude;
-	gdouble longitude;
-	gdouble latitude;
+	gint zoom = DEFAULT_ZOOM;
+	gint int_longitude = 0;
+	gint int_latitude = 0;
+	gdouble longitude = 0;
+	gdouble latitude = 0;
 
 	pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
 	if (!pgd)
 		return;
 
 	g_autofree gchar *title = nullptr;
+	g_autofree gchar *map_id = nullptr;
+	latitude = shumate_location_get_latitude(SHUMATE_LOCATION(pgd->viewport));
+	longitude = shumate_location_get_longitude(SHUMATE_LOCATION(pgd->viewport));
 
 	while (*attribute_names)
 	{
@@ -847,8 +595,11 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 
 		if (READ_CHAR_FULL("title", title))
 			continue;
-		if (READ_CHAR_FULL("map-id", pgd->map_source))
+		if (READ_CHAR_FULL("map-id", map_id))
+			{
+			bar_pane_gps_set_map_source(pgd, map_id);
 			continue;
+			}
 		if (READ_BOOL(pgd->pane, expanded))
 			continue;
 		if (READ_INT(*pgd, height))
@@ -857,19 +608,19 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 			continue;
 		if (READ_INT_CLAMP_FULL("zoom-level", zoom, 1, 8))
 			{
-			shumate_viewport_set_zoom_level(CHAMPLAIN_VIEW(pgd->gps_view), zoom);
+			shumate_viewport_set_zoom_level(pgd->viewport, zoom);
 			continue;
 			}
 		if (READ_INT_CLAMP_FULL("longitude", int_longitude, -90000000, +90000000))
 			{
 			longitude = int_longitude / 1000000.0;
-			g_object_set(CHAMPLAIN_VIEW(pgd->gps_view), "longitude", longitude, NULL);
+			shumate_map_center_on(SHUMATE_MAP(pgd->map), latitude, longitude);
 			continue;
 			}
 		if (READ_INT_CLAMP_FULL("latitude", int_latitude, -90000000, +90000000))
 			{
 			latitude = int_latitude / 1000000.0;
-			g_object_set(CHAMPLAIN_VIEW(pgd->gps_view), "latitude", latitude, NULL);
+			shumate_map_center_on(SHUMATE_MAP(pgd->map), latitude, longitude);
 			continue;
 			}
 
@@ -878,7 +629,7 @@ void bar_pane_gps_update_from_config(GtkWidget *pane, const gchar **attribute_na
 
 	if (title)
 		{
-		bar_pane_translate_title(PANE_COMMENT, pgd->pane.id, &title);
+		bar_pane_translate_title(PANE_GPS, pgd->pane.id, &title);
 		gtk_label_set_text(GTK_LABEL(pgd->pane.title), title);
 		}
 
