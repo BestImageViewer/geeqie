@@ -657,6 +657,34 @@ static void layout_sort_button_press_cb(GtkWidget *, gpointer data)
 	(void)menu;
 }
 
+namespace
+{
+
+constexpr auto INFO_BUTTON_LABEL_KEY = "gq-info-button-label";
+
+GtkWidget *layout_info_button_new(const gchar *label_text, const gchar *icon_name)
+{
+	GtkWidget *button = gtk_button_new();
+	GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+	GtkWidget *label = gtk_label_new(label_text);
+	GtkWidget *image = gtk_image_new_from_icon_name(icon_name);
+
+	gtk_box_append(GTK_BOX(content), label);
+	gtk_box_append(GTK_BOX(content), image);
+	gtk_button_set_child(GTK_BUTTON(button), content);
+	g_object_set_data(G_OBJECT(button), INFO_BUTTON_LABEL_KEY, label);
+
+	return button;
+}
+
+void layout_info_button_set_label(GtkWidget *button, const gchar *label_text)
+{
+	auto *label = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(button), INFO_BUTTON_LABEL_KEY));
+	if (label) gtk_label_set_text(GTK_LABEL(label), label_text);
+}
+
+} // namespace
+
 static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 {
 	GtkWidget *button;
@@ -667,13 +695,11 @@ static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 	gq_gtk_box_pack_start(GTK_BOX(box), frame, FALSE, FALSE, 0);
 	gtk_widget_show(frame);
 
-	button = gtk_button_new_with_label(sort_type_get_text(lw->options.file_view_list_sort.method));
-	gtk_button_set_icon_name(GTK_BUTTON(button), GQ_ICON_PAN_DOWN);
+	button = layout_info_button_new(sort_type_get_text(lw->options.file_view_list_sort.method), GQ_ICON_PAN_DOWN);
 
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(layout_sort_button_press_cb), lw);
 	gtk_widget_add_css_class(button, "flat");
-	gtk_button_set_image_position(GTK_BUTTON(button), GTK_POS_RIGHT);
 
 	gq_gtk_container_add(frame, button);
 
@@ -741,13 +767,11 @@ static GtkWidget *layout_zoom_button(LayoutWindow *lw, GtkWidget *box, gint size
 
 	gtk_widget_show(frame);
 
-	button = gtk_button_new_with_label("1:1");
-	gtk_button_set_icon_name(GTK_BUTTON(button), GQ_ICON_PAN_DOWN);
+	button = layout_info_button_new("1:1", GQ_ICON_PAN_DOWN);
 
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(layout_zoom_button_press_cb), lw);
 	gtk_widget_add_css_class(button, "flat");
-	gtk_button_set_image_position(GTK_BUTTON(button), GTK_POS_RIGHT);
 
 	gq_gtk_container_add(frame, button);
 	gtk_widget_show(button);
@@ -883,13 +907,13 @@ void layout_status_update_image(LayoutWindow *lw)
 
 	if (!lw->image->image_fd)
 		{
-		gtk_button_set_label(GTK_BUTTON(lw->info_zoom), "");
+		layout_info_button_set_label(lw->info_zoom, "");
 		gtk_label_set_text(GTK_LABEL(lw->info_details), "");
 		}
 	else
 		{
 		g_autofree gchar *zoom_text = image_zoom_get_as_text(lw->image);
-		gtk_button_set_label(GTK_BUTTON(lw->info_zoom), zoom_text);
+		layout_info_button_set_label(lw->info_zoom, zoom_text);
 
 		g_autofree gchar *b = image_get_fd(lw->image) ? text_from_size(image_get_fd(lw->image)->size) : g_strdup("0");
 
@@ -1475,7 +1499,7 @@ void layout_sort_set_files(LayoutWindow *lw, FileData::FileList::SortSettings se
 
 	lw->options.file_view_list_sort = settings;
 
-	if (lw->info_sort) gtk_button_set_label(GTK_BUTTON(lw->info_sort), sort_type_get_text(settings.method));
+	if (lw->info_sort) layout_info_button_set_label(lw->info_sort, sort_type_get_text(settings.method));
 	layout_list_sync_sort(lw);
 }
 
