@@ -9,7 +9,7 @@
 ## Dialogs allow the user to install additional features.
 ##
 
-version="2024-11-11"
+version="2026-07-01"
 description='
 Geeqie is an image viewer.
 This script will download, compile, and install Geeqie on Debian-based systems.
@@ -30,6 +30,7 @@ Command line options are:
 essential_array="git
 build-essential
 libglib2.0-0
+libgtk-4-dev
 libtool
 meson
 ninja-build
@@ -37,7 +38,7 @@ yelp-tools
 help2man
 doclifter"
 
-# Optional for GTK4
+# Optional libraries
 optional_array="LCMS (for color management)
 liblcms2-dev
 exiv2 (for exif handling)
@@ -88,10 +89,8 @@ libarchive (for compressed files e.g. zip, including timezone)
 libarchive-dev
 libspelling (for spelling checks)
 libspelling-1-dev
-libchamplain gtk (for GPS maps)
-libchamplain-gtk-0.12-dev
-libchamplain (for GPS maps)
-libchamplain-0.12-dev
+libshumate (for GPS maps)
+libshumate-dev
 libpoppler (for pdf file preview)
 libpoppler-glib-dev
 libjxl (for viewing .jxl images)
@@ -185,14 +184,6 @@ install_essential()
 			package_install "$file"
 		fi
 	done
-
-	if [ "$1" = "GTK4" ]
-	then
-		if package_query "libgtk-4-dev"
-		then
-			package_install libgtk-4-dev
-		fi
-	fi
 }
 
 install_options()
@@ -387,8 +378,6 @@ else
 	fi
 fi
 
-gtk4_installed=TRUE
-
 if [ "$mode" = "install" ]
 then
 	message="This script is for use on Ubuntu and other\nDebian-based installations.\nIt will download, compile, and install Geeqie source\ncode and its dependencies.\n\nA sub-folder named \"geeqie\" will be created in the\nfolder this script is run from, and the source code\nwill be downloaded to that sub-folder.\n\nIn subsequent dialogs you may choose which\noptional features to install."
@@ -402,9 +391,8 @@ else
 	install_option=FALSE
 fi
 
-# Ask whether to install GTK4 or uninstall
-
-if ! gtk_version=$(zenity --title="$title" --text="$message" --list --radiolist --column "" --column "" "$gtk4_installed" "Install" FALSE "Uninstall" --cancel-label="Cancel" --ok-label="OK" --hide-header 2> /dev/null)
+# Ask whether to install or uninstall
+if ! install_action=$(zenity --title="$title" --text="$message" --list --radiolist --column "" --column "" TRUE "Install" FALSE "Uninstall" --cancel-label="Cancel" --ok-label="OK" --hide-header 2> /dev/null)
 then
 	exit
 fi
@@ -420,7 +408,7 @@ fi" > "$install_pass_script"
 chmod +x "$install_pass_script"
 export SUDO_ASKPASS="$install_pass_script"
 
-if [ "$gtk_version" = "Uninstall" ]
+if [ "$install_action" = "Uninstall" ]
 then
 	uninstall
 fi
@@ -472,7 +460,7 @@ mkfifo "$zen_pipe"
 printf '%b\n' "2" > "$zen_pipe"
 printf '%b\n' "#Installing essential libraries…" > "$zen_pipe"
 
-install_essential "$gtk_version"
+install_essential
 
 printf '%b\n' "4" > "$zen_pipe"
 printf '%b\n' "#Installing options…" > "$zen_pipe"
