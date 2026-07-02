@@ -151,9 +151,9 @@ EOF
 fi
 
 # gtk-builder ui lint - should not check the menu.ui files
-if [ -z "$(command -v gtk-builder-tool)" ]
+if [ -z "$(command -v gtk4-builder-tool)" ]
 then
-	printf "ERROR: gtk-builder-tool is not installed"
+	printf "ERROR: gtk4-builder-tool is not installed"
 	exit_status=1
 else
 	while read -r line
@@ -164,15 +164,15 @@ else
 			then
 				if [ -z "$GITHUB_WORKSPACE" ]
 				then
-					if ! builder_error=$(gtk-builder-tool validate "$line" 2>&1)
+					if ! builder_error=$(gtk4-builder-tool validate "$line" 2>&1)
 					then
-						printf "ERROR; gtk-builder-tool error in: %s\n" "$builder_error"
+						printf "ERROR; gtk4-builder-tool error in: %s\n" "$builder_error"
 						exit_status=1
 					fi
 				else
-					if ! builder_error=$(xvfb-run --auto-servernum gtk-builder-tool validate "$line" 2>&1)
+					if ! builder_error=$(xvfb-run --auto-servernum gtk4-builder-tool validate "$line" 2>&1)
 					then
-						printf "ERROR; gtk-builder-tool error in: %s\n" "$builder_error"
+						printf "ERROR; gtk4-builder-tool error in: %s\n" "$builder_error"
 						exit_status=1
 					fi
 				fi
