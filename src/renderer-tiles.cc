@@ -688,7 +688,7 @@ gboolean renderer_tiles_overlay_get(void *renderer, gint id, GdkPixbuf **pixbuf,
 	return TRUE;
 }
 
-void rt_hierarchy_changed_cb(GtkWidget *, GtkWidget *, gpointer data)
+void rt_root_changed_cb(GObject *, GParamSpec *, gpointer data)
 {
 	auto rt = static_cast<RendererTiles *>(data);
 	rt_overlay_list_reset_window(rt);
@@ -1914,7 +1914,6 @@ void renderer_free(void *renderer)
 	if (rt->spare_tile) g_object_unref(rt->spare_tile);
 	g_list_free_full(rt->overlay_list, reinterpret_cast<GDestroyNotify>(overlay_data_free));
 	g_clear_pointer(&rt->overlay_buffer, cairo_surface_destroy);
-	/* disconnect "hierarchy-changed" */
 	g_signal_handlers_disconnect_matched(G_OBJECT(rt->pr), G_SIGNAL_MATCH_DATA,
 	                                     0, 0, nullptr, nullptr, rt);
 	g_free(rt);
@@ -2048,8 +2047,8 @@ RendererFuncs *renderer_tiles_new(PixbufRenderer *pr)
 
 	rt->hidpi_scale = gtk_widget_get_scale_factor(GTK_WIDGET(rt->pr));
 
-	g_signal_connect(G_OBJECT(pr), "hierarchy-changed",
-			 G_CALLBACK(rt_hierarchy_changed_cb), rt);
+	g_signal_connect(G_OBJECT(pr), "notify::root",
+			 G_CALLBACK(rt_root_changed_cb), rt);
 
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(pr), rt_draw_cb, rt, nullptr);
 	g_signal_connect(G_OBJECT(pr), "realize", G_CALLBACK(rt_realize_cb), rt);
