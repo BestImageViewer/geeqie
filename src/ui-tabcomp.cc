@@ -509,31 +509,12 @@ static void tab_completion_button_pressed(GtkWidget *, gpointer data)
 		}
 }
 
-static void tab_completion_button_size_allocate(GtkWidget *button, GtkAllocation *allocation, gpointer data)
-{
-	auto parent = static_cast<GtkWidget *>(data);
-	GtkAllocation parent_allocation;
-	gtk_widget_get_allocation(parent, &parent_allocation);
-
-	if (allocation->height > parent_allocation.height)
-		{
-		GtkAllocation button_allocation;
-
-		gtk_widget_get_allocation(button, &button_allocation);
-		button_allocation.height = parent_allocation.height;
-		button_allocation.y = parent_allocation.y;
-		gtk_widget_size_allocate(button, &button_allocation, -1);
-		}
-}
-
-static GtkWidget *tab_completion_create_complete_button(GtkWidget *entry, GtkWidget *parent)
+static GtkWidget *tab_completion_create_complete_button(GtkWidget *entry)
 {
 	GtkWidget *button;
 
 	button = gtk_button_new_from_icon_name(GQ_ICON_GO_LAST);
 	gtk_widget_set_can_focus(button, FALSE);
-	g_signal_connect(G_OBJECT(button), "size_allocate",
-			 G_CALLBACK(tab_completion_button_size_allocate), parent);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(tab_completion_button_pressed), entry);
 
@@ -580,7 +561,7 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 
 	GtkWidget *combo_entry = gtk_widget_get_first_child(combo);
 
-	button = tab_completion_create_complete_button(combo_entry, combo);
+	button = tab_completion_create_complete_button(combo_entry);
 	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
@@ -656,7 +637,7 @@ GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text)
 	gq_gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
 	gtk_widget_show(entry);
 
-	GtkWidget *button = tab_completion_create_complete_button(entry, entry);
+	GtkWidget *button = tab_completion_create_complete_button(entry);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
@@ -757,8 +738,6 @@ void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboo
 	if (!GTK_IS_BOX(hbox)) return;
 
 	td->fd_button = gtk_button_new_with_label("…");
-	g_signal_connect(G_OBJECT(td->fd_button), "size_allocate",
-			 G_CALLBACK(tab_completion_button_size_allocate), parent);
 	g_signal_connect(G_OBJECT(td->fd_button), "clicked",
 			 G_CALLBACK(tab_completion_select_pressed), td);
 
