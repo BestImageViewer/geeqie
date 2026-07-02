@@ -25,12 +25,16 @@ import subprocess
 import sys
 import time
 import traceback
+from lib import screenshot
 from typing import Optional
+
+# Change this to True to enable screenshots.
+# Requires "psutil" import, plus `import` command from ImageMagick/GraphicsMagick.
+SHOULD_TAKE_SCREENSHOT = False
 
 MAX_GEEQIE_INIT_TIME_S = 10
 MAX_REMOTE_CMD_TIME_S = 10
 MAX_GEEQIE_SHUTDOWN_TIME_S = 10
-
 
 class GeeqieTestError(Exception):
     """A custom exception type that forwards the geeqie exit code.
@@ -94,6 +98,8 @@ def main(argv) -> int:
     if not symlink_image_file.exists():
         raise RuntimeError("symlinking image file failed")
 
+    gq_sshot = screenshot.GeeqieScreenshot() if SHOULD_TAKE_SCREENSHOT else None
+
     # All geeqie commands start with this.
     geeqie_cmd_prefix = ["xvfb-run", "--auto-servernum", geeqie_exe]
 
@@ -134,6 +140,13 @@ def main(argv) -> int:
         time.sleep(1)
         if geeqie_proc.poll() is not None:
             raise GeeqieTestError("remote command processing", geeqie_proc)
+
+        if gq_sshot:
+            ss_result = gq_sshot.capture(symlink_image_file.name, geeqie_proc)
+            if ss_result:
+                print(f"\nCAPTURED SCREENSHOT: {ss_result}\n")
+            else:
+                print("FAILED TO CAPTURE SCREENSHOT")
 
         # Request shutdown
         subprocess.run(args=[*geeqie_cmd_prefix, "--quit"],
