@@ -45,6 +45,7 @@ void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboo
                                       const gchar *filter, const gchar *filter_desc, const gchar *shortcuts);
 
 GtkWidget *tab_completion_get_box(GtkWidget *entry);
+GtkWidget *tab_completion_get_combo(GtkWidget *entry);
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -559,7 +559,8 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 	gq_gtk_box_pack_start(GTK_BOX(box), combo, TRUE, TRUE, 0);
 	gtk_widget_show(combo);
 
-	GtkWidget *combo_entry = gtk_widget_get_first_child(combo);
+	GtkWidget *combo_entry = gtk_combo_box_get_child(GTK_COMBO_BOX(combo));
+	if (!GTK_IS_ENTRY(combo_entry)) return nullptr;
 
 	button = tab_completion_create_complete_button(combo_entry);
 	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
@@ -752,6 +753,14 @@ GtkWidget *tab_completion_get_box(GtkWidget *entry)
 	if (!td) return nullptr;
 
 	return gtk_widget_get_parent(td->combo ? td->combo : td->entry);
+}
+
+GtkWidget *tab_completion_get_combo(GtkWidget *entry)
+{
+	TabCompData *td = tab_completion_get_from_entry(entry);
+	if (!td) return nullptr;
+
+	return td->combo;
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

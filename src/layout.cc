@@ -572,7 +572,11 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 	gtk_widget_set_has_tooltip(tabcomp, TRUE);
 	g_signal_connect(G_OBJECT(tabcomp), "query_tooltip", G_CALLBACK(path_entry_tooltip_cb), lw);
 
-	g_signal_connect(G_OBJECT(gtk_widget_get_parent(gtk_widget_get_parent(lw->path_entry))), "changed", G_CALLBACK(layout_path_entry_changed_cb), lw);
+	GtkWidget *path_combo = tab_completion_get_combo(lw->path_entry);
+	if (path_combo)
+		{
+		g_signal_connect(G_OBJECT(path_combo), "changed", G_CALLBACK(layout_path_entry_changed_cb), lw);
+		}
 
 	GtkWidget *box_folders = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(box_folders);
