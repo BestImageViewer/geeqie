@@ -289,25 +289,6 @@ void config_entry_to_option(GtkWidget *entry, gchar **option, gchar *(*func)(con
 		}
 }
 
-
-static gboolean accel_apply_cb(GtkTreeModel * , GtkTreePath *, GtkTreeIter * , gpointer)
-{
-	g_autofree gchar *accel_path = nullptr;
-	g_autofree gchar *accel = nullptr;
-
-/** @FIXME GTK4
- */
-	//~ if (accel_path && accel_path[0])
-		//~ {
-		//~ GtkAccelKey key;
-		//~ gtk_accelerator_parse(accel, &key.accel_key, &key.accel_mods);
-		//~ gtk_accel_map_change_entry(accel_path, key.accel_key, key.accel_mods, TRUE);
-		//~ }
-
-	return FALSE;
-}
-
-
 static void config_window_apply()
 {
 	gboolean refresh = FALSE;
@@ -531,8 +512,6 @@ static void config_window_apply()
 		filter_rebuild();
 		layout_refresh(nullptr);
 		}
-
-	if (accel_store) gtk_tree_model_foreach(GTK_TREE_MODEL(accel_store), accel_apply_cb, nullptr);
 
 	toolbar_apply(TOOLBAR_MAIN);
 	toolbar_apply(TOOLBAR_STATUS);
