@@ -429,9 +429,8 @@ GtkWidget *widget_get_toplevel(GtkWidget *widget)
 		{
 		return GTK_WIDGET(root);
 		}
-	else
-		{
-		return nullptr;
-		}
+	
+				return nullptr;
+	
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

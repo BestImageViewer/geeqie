@@ -429,7 +429,7 @@ void image_update_title(ImageWindow *imd)
  * rotation, flip, etc.
  *-------------------------------------------------------------------
  */
-static bool image_get_x11_screen_profile(const ImageWindow *imd, ColorManMemData &screen_data)
+static bool image_get_x11_screen_profile(ColorManMemData &screen_data)
 {
 	screen_data.ptr.reset();
 	screen_data.len = 0;
@@ -473,7 +473,7 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 
 	ColorManMemData screen_profile;
 	if (options->color_profile.use_x11_screen_profile &&
-	    image_get_x11_screen_profile(imd, screen_profile))
+	    image_get_x11_screen_profile(screen_profile))
 		{
 		screen_type = COLOR_PROFILE_MEM;
 		DEBUG_1("Using X11 screen profile, length: %u", screen_profile.len);
@@ -1152,9 +1152,9 @@ static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble, g
 
 	if (lw)
 		{
-		for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
+		for (auto & split_image : lw->split_images)
 			{
-			if (imd == lw->split_images[i])
+			if (imd == split_image)
 				{
 				in_lw = TRUE;
 				break;

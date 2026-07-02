@@ -3142,7 +3142,7 @@ static GdkContentProvider * clipboard_build_provider(ClipboardData *cbd)
 
 	while (work)
 		{
-		const gchar *path = (const gchar *)work->data;
+		const auto *path = (const gchar *)work->data;
 		work = work->next;
 
 		if (cbd->quoted)
@@ -3171,7 +3171,7 @@ static GdkContentProvider * clipboard_build_provider(ClipboardData *cbd)
 	while (work)
 		{
 		g_autofree gchar *uri =
-			g_filename_to_uri((gchar *)work->data, NULL, NULL);
+			g_filename_to_uri((gchar *)work->data, nullptr, nullptr);
 		g_string_append(copied, "\n");
 		g_string_append(copied, uri);
 		work = work->next;

@@ -76,7 +76,7 @@ static LogWindow *logwindow = nullptr;
  * <options->log_window.action> <selected text>
  *
 */
-static gboolean log_window_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
+static gboolean log_window_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint  /*keycode*/, GdkModifierType  /*state*/, gpointer user_data)
 {
 	if (keyval == GDK_KEY_Escape)
 		{

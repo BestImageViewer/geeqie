@@ -853,7 +853,7 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 		{
 		GdkRectangle rect;
 		GdkRectangle cell_rect;
-		const GdkModifierType state = static_cast<GdkModifierType>(gdk_event_get_modifier_state(event));
+		const auto state = gdk_event_get_modifier_state(event);
 		gdouble event_x;
 		gdouble event_y;
 		gint xpad;

@@ -60,7 +60,7 @@
 namespace
 {
 	
-static GdkPaintable *load_icon_paintable(GtkIconTheme *icon_theme,
+GdkPaintable *load_icon_paintable(GtkIconTheme *icon_theme,
                                          const gchar *icon_name,
                                          gint size)
 {
@@ -127,7 +127,7 @@ PixmapFolders *folder_icons_new()
 	return pf;
 }
 
-static void folder_icons_free(PixmapFolders *pf)
+void folder_icons_free(PixmapFolders *pf)
 {
 	if (!pf) return;
 
@@ -1022,7 +1022,7 @@ void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *,
 	vd_select_row(vd, fd);
 }
 
-static GdkRGBA *vd_color_shifted(GtkWidget *widget)
+static GdkRGBA *vd_color_shifted()
 {
 	static GdkRGBA color;
 	static GtkWidget *done = nullptr;
@@ -1039,7 +1039,7 @@ void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_
 
 	gtk_tree_model_get(tree_model, iter, DIR_COLUMN_COLOR, &set, -1);
 	g_object_set(cell,
-	             "cell-background-rgba", vd_color_shifted(vd->view),
+	             "cell-background-rgba", vd_color_shifted(),
 	             "cell-background-set", set,
 	             NULL);
 }

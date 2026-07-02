@@ -2853,7 +2853,7 @@ static void toolbar_clear_cb(GtkWidget *widget, gpointer)
 	if (GTK_IS_BUTTON(widget))
 		{
 		/* Temporary GTK4 stub: legacy GtkAction signal bookkeeping has been removed. */
-		GObject *action = static_cast<GObject *>(g_object_get_data(G_OBJECT(widget), "action"));
+		auto *action = static_cast<GObject *>(g_object_get_data(G_OBJECT(widget), "action"));
 		if (g_object_get_data(G_OBJECT(widget), "id") )
 			{
 			if (action)

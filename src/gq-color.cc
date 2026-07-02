@@ -14,10 +14,13 @@ void GqColor::from_gdk_rgba(const GdkRGBA &color)
 
 GdkRGBA GqColor::to_gdk_rgba() const
 {
-	return { static_cast<double>(r) / 255,
-	         static_cast<double>(g) / 255,
-	         static_cast<double>(b) / 255,
-	         static_cast<double>(a) / 255 };
+	return
+		{
+		static_cast<float>(r) / 255.f,
+		static_cast<float>(g) / 255.f,
+		static_cast<float>(b) / 255.f,
+		static_cast<float>(a) / 255.f
+		};
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

@@ -339,7 +339,7 @@ std::unique_ptr<GlobalFileDataContext> GlobalFileDataContext::s_instance;
 
 GlobalFileDataContext &GlobalFileDataContext::get_instance()
 {
-	std::lock_guard<std::mutex> instance_lock(GlobalFileDataContext::s_instance_mutex);
+	std::scoped_lock instance_lock(GlobalFileDataContext::s_instance_mutex);
 	if (GlobalFileDataContext::s_instance == nullptr)
 		{
 		GlobalFileDataContext::s_instance = std::make_unique<GlobalFileDataContext>();

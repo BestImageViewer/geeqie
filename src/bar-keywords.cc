@@ -1044,7 +1044,7 @@ gboolean bar_pane_keywords_menu_common(GtkWidget *widget, gdouble x, gdouble y, 
 	return FALSE;
 }
 
-static void bar_pane_keywords_gesture_menu_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
+void bar_pane_keywords_gesture_menu_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 	bar_pane_keywords_menu_common(widget, x, y, gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)), data);
@@ -1372,24 +1372,22 @@ gboolean autocomplete_keywords_list_save(const gchar *path)
  *-------------------------------------------------------------------
  */
 
-GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
+GtkWidget *bar_pane_keywords_new_from_config(const gchar ** /*attribute_names*/, const gchar ** /*attribute_values*/)
 {
 /* @FIXME GTK4 stub */
 	return nullptr;
 }
 
-void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+void bar_pane_keywords_update_from_config(GtkWidget * /*pane*/, const gchar ** /*attribute_names*/, const gchar ** /*attribute_values*/)
 {
 /* @FIXME GTK4 stub */
-	return;
-}
+	}
 
 
-void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
+void bar_pane_keywords_entry_add_from_config(GtkWidget * /*pane*/, const gchar ** /*attribute_names*/, const gchar ** /*attribute_values*/)
 {
 /* @FIXME GTK4 stub */
-	return;
-}
+	}
 
 /*
  *-------------------------------------------------------------------
@@ -1397,7 +1395,7 @@ void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attr
  *-------------------------------------------------------------------
  */
 
-GList *keyword_list_pull(GtkWidget *text_widget)
+GList *keyword_list_pull(GtkWidget * /*text_widget*/)
 {
 /* @FIXME GTK4 stub */
 	return nullptr;
@@ -1409,13 +1407,12 @@ GList *keyword_list_get()
 	return nullptr;
 }
 
-void keyword_list_set(GList *keyword_list)
+void keyword_list_set(GList * /*keyword_list*/)
 {
 /* @FIXME GTK4 stub */
-	return;
-}
+	}
 
-gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)
+gboolean bar_keywords_autocomplete_focus(LayoutWindow * /*lw*/)
 {
 /* @FIXME GTK4 stub */
 	return FALSE;

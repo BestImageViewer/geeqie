@@ -2034,7 +2034,7 @@ void pixbuf_renderer_set_scroll_center(PixbufRenderer *pr, gdouble x, gdouble y)
  *-------------------------------------------------------------------
  */
 
-static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double x, double y, gpointer data)
+static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double x, double y, gpointer  /*data*/)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	PixbufRenderer *pr;
@@ -2063,11 +2063,11 @@ static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double 
 		gtk_widget_set_cursor_from_name(widget, "crosshair");
 		}
 
-	GdkModifierType state = static_cast<GdkModifierType>(0);
+	auto state = static_cast<GdkModifierType>(0);
 
 	if (GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(controller)))
 		{
-		state = static_cast<GdkModifierType>( gdk_event_get_modifier_state(event));
+		state = gdk_event_get_modifier_state(event);
 		}
 
 	if (state & GDK_CONTROL_MASK)

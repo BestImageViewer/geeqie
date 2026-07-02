@@ -1364,10 +1364,10 @@ static void collection_table_release_cb(GtkGestureClick *gesture, gint, gdouble 
 
 	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
 
-	GdkModifierType state = static_cast<GdkModifierType>(0);
+	auto state = static_cast<GdkModifierType>(0);
 	if (GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(gesture)))
 		{
-		state = static_cast<GdkModifierType>(gdk_event_get_modifier_state(event));
+		state = gdk_event_get_modifier_state(event);
 		}
 
 	if (button == GDK_BUTTON_PRIMARY &&
@@ -1873,12 +1873,11 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
  *-----------------------------------------------------------------------------
  */
 
-static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
-					  GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
+static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer * /*cell*/,
+					  GtkTreeModel * /*tree_model*/, GtkTreeIter * /*iter*/, gpointer  /*data*/)
 {
 /* @FIXME GTK4 stub */
-	return;
-}
+	}
 
 static void collection_table_append_column(CollectTable *ct, gint n)
 {
@@ -1954,7 +1953,7 @@ static void collection_table_sized(GtkWidget *, GtkAllocation *allocation, gpoin
 	collection_table_populate_at_new_size(ct, allocation->width, allocation->height, FALSE);
 }
 
-static void listview_motion_cb(GtkEventControllerMotion *motion, gdouble x, gdouble y, gpointer data)
+static void listview_motion_cb(GtkEventControllerMotion * /*motion*/, gdouble x, gdouble y, gpointer data)
 {
 	auto *ct = static_cast<CollectTable *>(data);
 

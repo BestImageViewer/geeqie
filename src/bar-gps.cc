@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <gdk/gdk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <pango/pango.h>
 #include <shumate/shumate.h>
@@ -209,7 +209,7 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 	GList *list = layout_selection_list(pgd->pane.lw);
 	for (GList *l = list; l; l = l->next)
 		{
-		FileData *fd = static_cast<FileData*>(l->data);
+		auto *fd = static_cast<FileData*>(l->data);
 
 		double lat = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 0);
 		double lon = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 0);

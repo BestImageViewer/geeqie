@@ -3536,7 +3536,7 @@ static void dupe_menu_setup(DupeWindow *dw)
  *-------------------------------------------------------------------
  */
 
-static GdkRGBA *dupe_listview_color_shifted(GtkWidget *widget)
+static GdkRGBA *dupe_listview_color_shifted()
 {
 /* @FIXME GTK4 stub */
 	return nullptr;
@@ -3550,7 +3550,7 @@ static void dupe_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 
 	gtk_tree_model_get(tree_model, iter, DUPE_COLUMN_COLOR, &set, -1);
 	g_object_set(cell,
-	             "cell-background-rgba", dupe_listview_color_shifted(dw->listview),
+	             "cell-background-rgba", dupe_listview_color_shifted(),
 	             "cell-background-set", set,
 	             NULL);
 }

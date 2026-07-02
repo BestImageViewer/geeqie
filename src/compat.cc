@@ -380,7 +380,7 @@ GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget)
 
 GList *gq_gtk_widget_get_children(GtkWidget *widget)
 {
-	GList *list = NULL;
+	GList *list = nullptr;
 
 	for (GtkWidget *child = gtk_widget_get_first_child(widget);
 		child;

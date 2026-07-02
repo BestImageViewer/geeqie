@@ -524,7 +524,7 @@ void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped)
 	popup_menu(menu_model, ped->pane.lw->window);
 }
 
-void bar_pane_exif_menu_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+void bar_pane_exif_menu_cb(GtkGestureClick *gesture, gint  /*n_press*/, gdouble  /*x*/, gdouble  /*y*/, gpointer data)
 {
 	auto *ped = static_cast<PaneExifData *>(data);
 

@@ -683,14 +683,14 @@ struct BookmarkAliasData
 	gchar *selected_dir;
 };
 
-void bookmark_alias_data_free(gpointer data)
+static void bookmark_alias_data_free(gpointer data)
 {
 	auto *bad = static_cast<BookmarkAliasData *>(data);
 	g_free(bad->selected_dir);
 	g_free(bad);
 }
 
-void bookmark_alias_ok_cb(GenericDialog *, gpointer data)
+static void bookmark_alias_ok_cb(GenericDialog *, gpointer data)
 {
 	auto *bad = static_cast<BookmarkAliasData *>(data);
 	const gchar *name = gq_gtk_entry_get_text(GTK_ENTRY(bad->entry));
@@ -699,7 +699,7 @@ void bookmark_alias_ok_cb(GenericDialog *, gpointer data)
 	bookmark_list_add(bad->list, empty_name ? filename_from_path(bad->selected_dir) : name, bad->selected_dir);
 }
 
-void bookmark_prompt_for_alias(GtkWidget *list, const gchar *selected_dir)
+static void bookmark_prompt_for_alias(GtkWidget *list, const gchar *selected_dir)
 {
 	auto *bad = g_new0(BookmarkAliasData, 1);
 	bad->list = list;

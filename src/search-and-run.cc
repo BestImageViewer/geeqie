@@ -101,7 +101,7 @@ gchar *action_accelerator_label(const gchar *action_name)
 	if (!accels || !accels[0]) return nullptr;
 
 	guint accelerator_key = 0;
-	GdkModifierType accelerator_mods = static_cast<GdkModifierType>(0);
+	auto accelerator_mods = static_cast<GdkModifierType>(0);
 	gtk_accelerator_parse(accels[0], &accelerator_key, &accelerator_mods);
 	if (accelerator_key == 0) return nullptr;
 
