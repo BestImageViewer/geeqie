@@ -772,7 +772,12 @@ GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
 
 	hc->combo = gtk_combo_box_text_new_with_entry();
 
-	hc->entry = gtk_widget_get_first_child(hc->combo);
+	hc->entry = gtk_combo_box_get_child(GTK_COMBO_BOX(hc->combo));
+	if (!GTK_IS_ENTRY(hc->entry))
+		{
+		delete hc;
+		return nullptr;
+		}
 
 	g_object_set_data_full(G_OBJECT(hc->combo), "history_combo_data", hc, delete_cb<HistoryComboData>);
 	g_object_set_data(G_OBJECT(hc->entry), "history_combo_data", hc);

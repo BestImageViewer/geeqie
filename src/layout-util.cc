@@ -220,7 +220,7 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 
 	if (lw->vf->file_filter.combo)
 		{
-		GtkWidget *combo_entry = gtk_widget_get_first_child(lw->vf->file_filter.combo);
+		GtkWidget *combo_entry = gtk_combo_box_get_child(GTK_COMBO_BOX(lw->vf->file_filter.combo));
 
 		if (combo_entry && gtk_widget_has_focus(combo_entry))
 			{
