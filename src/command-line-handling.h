@@ -23,6 +23,12 @@
 
 #include <gtk/gtk.h>
 
+struct CommandLineProcessResult
+{
+	gboolean activate = TRUE;
+	gint status = 0;
+};
+
 gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer data);
 gint process_command_line_cache_maintenance(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer data);
 

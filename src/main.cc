@@ -299,6 +299,11 @@ gboolean search_command_line_for_unit_test_option(gint argc, gchar *argv[])
 	return search_command_line_for_option(argc, argv, "--run-unit-tests");
 }
 
+gboolean command_line_is_version_only(gint argc, gchar *argv[])
+{
+	return argc == 2 && (g_strcmp0(argv[1], "--version") == 0 || g_strcmp0(argv[1], "-v") == 0);
+}
+
 /**
  * @brief Show log window for config. file errors
  * @param GSimpleAction
@@ -646,13 +651,16 @@ void create_application_paths()
 
 gint command_line_cb(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer)
 {
-	gint ret;
+	CommandLineProcessResult result;
 
-	ret = process_command_line((app), app_command_line, nullptr);
+	process_command_line(app, app_command_line, &result);
 
-	g_application_activate(G_APPLICATION(app));
+	if (result.activate)
+		{
+		g_application_activate(G_APPLICATION(app));
+		}
 
-	return ret;
+	return result.status;
 }
 
 gint shutdown_cache_maintenance_cb(GtkApplication *, gpointer)
@@ -911,6 +919,13 @@ gint main(gint argc, gchar *argv[])
 {
 	gint status;
 	GtkApplication *app;
+
+	if (command_line_is_version_only(argc, argv))
+		{
+		printf("%s %s GTK%d\n", GQ_APPNAME, VERSION, GTK_MAJOR_VERSION);
+		return EXIT_SUCCESS;
+		}
+
 	// We handle unit tests here because it takes the place of running the
 	// rest of the app.
 	if (search_command_line_for_unit_test_option(argc, argv))
@@ -993,7 +1008,6 @@ Version: Geeqie "), VERSION, nullptr);
     g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(config_file_error_notification_action));
 
 	status = g_application_run(G_APPLICATION(app), argc, argv);
-g_abort();
 	g_object_unref(app);
 
 	return status;

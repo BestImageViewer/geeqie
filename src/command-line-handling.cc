@@ -63,6 +63,8 @@ namespace
 enum OUTPUT_TYPE {
 	GUI, /**< Option requires the GUI */
 	TEXT, /**< Option only outputs text to the command line */
+	QUIET, /**< Option does not output text and must not activate the GUI */
+	TEXT_QUIET, /**< Option outputs text and must not activate the GUI */
 	N_A /**< Not Applicable */
 };
 
@@ -1395,10 +1397,10 @@ void process_files(GList *file_list)
 /* print0 and id are first so that they can affect other command line entries */
 CommandLineOptionEntry command_line_options[] =
 {
-	{ "print0",                      gq_print0,                      PRIMARY_REMOTE, GUI  },
-	{ "id",                          gq_id,                          REMOTE        , N_A  },
+	{ "print0",                      gq_print0,                      PRIMARY_REMOTE, QUIET },
+	{ "id",                          gq_id,                          REMOTE        , QUIET },
 	{ "action",                      gq_action,                      PRIMARY_REMOTE, GUI  },
-	{ "action-list",                 gq_action_list,                 PRIMARY_REMOTE, TEXT },
+	{ "action-list",                 gq_action_list,                 PRIMARY_REMOTE, TEXT_QUIET },
 	{ "back",                        gq_back,                        PRIMARY_REMOTE, GUI  },
 	{ "cache-metadata",              gq_cache_metadata,              PRIMARY_REMOTE, GUI  },
 	{ "cache-render",                gq_cache_render<FALSE, FALSE>,  PRIMARY_REMOTE, GUI  },
@@ -1415,44 +1417,44 @@ CommandLineOptionEntry command_line_options[] =
 	{ "delay",                       gq_delay,                       PRIMARY_REMOTE, GUI  },
 	{ "file",                        gq_file,                        PRIMARY_REMOTE, GUI  },
 	{ "dupes",                       gq_dupes<FALSE>,                PRIMARY_REMOTE, GUI  },
-	{ "dupes-export",                gq_dupes_export,                PRIMARY_REMOTE, TEXT },
+	{ "dupes-export",                gq_dupes_export,                PRIMARY_REMOTE, TEXT_QUIET },
 	{ "dupes-recurse",               gq_dupes<TRUE>,                 PRIMARY_REMOTE, GUI  },
 	{ "File",                        gq_File,                        PRIMARY_REMOTE, GUI  },
-	{ "file-extensions",             gq_file_extensions,             PRIMARY_REMOTE, TEXT },
+	{ "file-extensions",             gq_file_extensions,             PRIMARY_REMOTE, TEXT_QUIET },
 	{ "first",                       gq_first,                       PRIMARY_REMOTE, GUI  },
 	{ "fullscreen",                  gq_fullscreen,                  PRIMARY_REMOTE, GUI  },
 	{ "geometry",                    gq_geometry,                    PRIMARY_REMOTE, GUI  },
-	{ "get-collection",              gq_get_collection,              PRIMARY_REMOTE, TEXT },
-	{ "get-collection-list",         gq_get_collection_list,         PRIMARY_REMOTE, TEXT },
+	{ "get-collection",              gq_get_collection,              PRIMARY_REMOTE, TEXT_QUIET },
+	{ "get-collection-list",         gq_get_collection_list,         PRIMARY_REMOTE, TEXT_QUIET },
 	{ "get-destination",             gq_get_destination,             PRIMARY_REMOTE, GUI  },
-	{ "get-file-info",               gq_get_file_info,               REMOTE        , N_A  },
+	{ "get-file-info",               gq_get_file_info,               REMOTE        , TEXT_QUIET },
 	{ "get-filelist",                gq_get_filelist<false>,         PRIMARY_REMOTE, GUI  },
 	{ "get-filelist-recurse",        gq_get_filelist<true>,          PRIMARY_REMOTE, GUI  },
-	{ "get-rectangle",               gq_get_rectangle,               REMOTE        , N_A  },
-	{ "get-render-intent",           gq_get_render_intent,           REMOTE        , N_A  },
-	{ "get-selection",               gq_get_selection,               REMOTE        , N_A  },
-	{ "get-sidecars",                gq_get_sidecars,                REMOTE        , N_A  },
-	{ "get-window-list",             gq_get_window_list,             REMOTE        , N_A  },
+	{ "get-rectangle",               gq_get_rectangle,               REMOTE        , TEXT_QUIET },
+	{ "get-render-intent",           gq_get_render_intent,           REMOTE        , TEXT_QUIET },
+	{ "get-selection",               gq_get_selection,               REMOTE        , TEXT_QUIET },
+	{ "get-sidecars",                gq_get_sidecars,                REMOTE        , TEXT_QUIET },
+	{ "get-window-list",             gq_get_window_list,             REMOTE        , TEXT_QUIET },
 #ifdef DEBUG
 	{ "grep",                        gq_grep,                        PRIMARY_REMOTE, GUI  },
 #endif
 	{ "last",                        gq_last,                        PRIMARY_REMOTE, GUI  },
 	{ "log-file",                    gq_log_file,                    PRIMARY_REMOTE, GUI  },
-	{ "lua",                         gq_lua,                         REMOTE        , N_A  },
+	{ "lua",                         gq_lua,                         REMOTE        , TEXT_QUIET },
 	{ "new-window",                  gq_new_window,                  PRIMARY_REMOTE, GUI  },
 	{ "next",                        gq_next,                        PRIMARY_REMOTE, GUI  },
-	{ "pixel-info",                  gq_pixel_info,                  REMOTE        , N_A  },
+	{ "pixel-info",                  gq_pixel_info,                  REMOTE        , TEXT_QUIET },
 	{ "quit",                        gq_quit,                        PRIMARY_REMOTE, GUI  },
 	{ "raise",                       gq_raise,                       PRIMARY_REMOTE, GUI  },
-	{ "selection-add",               gq_selection_add,               REMOTE        , N_A  },
-	{ "selection-clear",             gq_selection_clear,             REMOTE        , N_A  },
-	{ "selection-remove",            gq_selection_remove,            REMOTE        , N_A  },
+	{ "selection-add",               gq_selection_add,               REMOTE        , QUIET },
+	{ "selection-clear",             gq_selection_clear,             REMOTE        , QUIET },
+	{ "selection-remove",            gq_selection_remove,            REMOTE        , QUIET },
 	{ "show-log-window",             gq_show_log_window,             PRIMARY_REMOTE, GUI  },
 	{ "slideshow-recurse",           gq_slideshow_recurse,           PRIMARY_REMOTE, GUI  },
 	{ "slideshow",                   gq_slideshow,                   PRIMARY_REMOTE, GUI  },
-	{ "tell",                        gq_tell,                        REMOTE        , N_A  },
+	{ "tell",                        gq_tell,                        REMOTE        , TEXT_QUIET },
 	{ "tools",                       gq_tools,                       PRIMARY_REMOTE, GUI  },
-	{ "version",                     gq_version,                     PRIMARY_REMOTE, TEXT },
+	{ "version",                     gq_version,                     PRIMARY_REMOTE, TEXT_QUIET },
 	{ "view",                        gq_view,                        PRIMARY_REMOTE, GUI  },
 	{ nullptr,                       nullptr,                        NA,             N_A }
 };
@@ -1549,11 +1551,22 @@ CommandLineOptionEntry command_line_options_cache_maintenance[] =
 
 } // namespace
 
-gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer )
+gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer data)
 {
 	GVariantDict* command_line_options_dict;
 	gint i;
 	GList *file_list = nullptr;
+	CommandLineProcessResult default_result;
+	auto *result = &default_result;
+	gboolean option_found = FALSE;
+
+	if (data)
+		{
+		result = static_cast<CommandLineProcessResult *>(data);
+		}
+
+	result->activate = FALSE;
+	result->status = EXIT_SUCCESS;
 
 	/* These values are used for the rest of this command line */
 	/* Make lw_id point to current window
@@ -1569,6 +1582,10 @@ gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_comm
 	 * option needs to modify the file list.
 	 */
 	file_list = directories_collections_files(app, app_command_line);
+	if (file_list)
+		{
+		result->activate = TRUE;
+		}
 
 	/* Execute the command line options */
 	i = 0;
@@ -1576,6 +1593,8 @@ gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_comm
 		{
 		if (g_variant_dict_contains(command_line_options_dict, command_line_options[i].option_name))
 			{
+			option_found = TRUE;
+
 			/* Exit if option is a remote only and the instance is primary */
 			if (command_line_options[i].option_type == REMOTE)
 				{
@@ -1584,22 +1603,28 @@ gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_comm
 					g_application_command_line_print(app_command_line, "%s%s%s%s%s", _("Geeqie is not running: --"), BOLD_ON, command_line_options[i].option_name, BOLD_OFF, _(" is a Remote command\n"));
 
 					g_application_quit(G_APPLICATION(app));
-					exit(EXIT_FAILURE);
+					result->status = EXIT_FAILURE;
+					return result->status;
 					}
 				}
 
 			/* Instance is either primary or remote */
 			command_line_options[i].func(app, app_command_line, command_line_options_dict, file_list);
 
+			if (command_line_options[i].display_type == GUI)
+				{
+				result->activate = TRUE;
+				}
+
 			/* If the instance is a primary and the option only outputs text,
 			 * e.g. --version, kill the application after the text is output
 			 */
 			if (! g_application_command_line_get_is_remote(app_command_line))
 				{
-				if (command_line_options[i].display_type == TEXT)
+				if (command_line_options[i].display_type == TEXT || command_line_options[i].display_type == TEXT_QUIET)
 					{
 					g_application_quit(G_APPLICATION(app));
-					exit(EXIT_SUCCESS);
+					return result->status;
 					}
 				}
 			}
@@ -1607,11 +1632,16 @@ gint process_command_line(GtkApplication *app, GApplicationCommandLine *app_comm
 		i++;
 		}
 
+	if (!option_found && !file_list)
+		{
+		result->activate = TRUE;
+		}
+
 	process_files(file_list);
 
 	g_list_free_full(file_list, g_free);
 
-	return TRUE;
+	return result->status;
 }
 
 gint process_command_line_cache_maintenance(GtkApplication *app, GApplicationCommandLine *app_command_line, gpointer)
