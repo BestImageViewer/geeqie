@@ -60,69 +60,34 @@
 namespace
 {
 	
-GdkPaintable *load_icon_paintable(GtkIconTheme *icon_theme,
-                                         const gchar *icon_name,
-                                         gint size)
+GIcon *load_icon(const gchar *icon_name)
 {
-	return GDK_PAINTABLE(
-		gtk_icon_theme_lookup_icon(icon_theme,
-		                           icon_name,
-		                           nullptr,
-		                           size,
-		                           1,
-		                           GTK_TEXT_DIR_NONE,
-		                           GTK_ICON_LOOKUP_FORCE_REGULAR));
+	return g_themed_icon_new(icon_name);
 }
 
-GdkPaintable *create_folder_icon_with_emblem(GtkIconTheme *icon_theme, const gchar *emblem, const gchar *fallback_icon, gint size)
+GIcon *create_folder_icon_with_emblem(const gchar *emblem)
 {
 	g_autoptr(GIcon) icon_folder = g_themed_icon_new(GQ_ICON_DIRECTORY);
 	g_autoptr(GIcon) icon_emblem = g_themed_icon_new(emblem);
 	g_autoptr(GEmblem) emblem_new = g_emblem_new(icon_emblem);
-	g_autoptr(GIcon) emblemed_icon = g_emblemed_icon_new(icon_folder, emblem_new);
 
-	GtkIconPaintable *paintable =
-		gtk_icon_theme_lookup_by_gicon(icon_theme,
-		                               emblemed_icon,
-		                               size,
-		                               1,
-		                               GTK_TEXT_DIR_NONE,
-		                               GTK_ICON_LOOKUP_FORCE_REGULAR);
-
-	if (paintable)
-		{
-		return GDK_PAINTABLE(paintable);
-		}
-
-	return load_icon_paintable(icon_theme, fallback_icon, size);
+	return g_emblemed_icon_new(icon_folder, emblem_new);
 }
 
 /* Folders icons to be used in tree or list directory view */
 PixmapFolders *folder_icons_new()
 {
 	auto pf = g_new0(PixmapFolders, 1);
-	GtkIconTheme *icon_theme = gq_icon_theme_get_default();
 
-	gint size = 16;
+	pf->close  = load_icon(GQ_ICON_DIRECTORY);
+	pf->open   = load_icon(GQ_ICON_OPEN);
+	pf->parent = load_icon(GQ_ICON_GO_UP);
 
-	pf->close  = load_icon_paintable(icon_theme, GQ_ICON_DIRECTORY, size);
-	pf->open   = load_icon_paintable(icon_theme, GQ_ICON_OPEN, size);
-	pf->parent = load_icon_paintable(icon_theme, GQ_ICON_GO_UP, size);
+	pf->deny = create_folder_icon_with_emblem(GQ_ICON_UNREADABLE);
 
-	pf->deny = create_folder_icon_with_emblem(icon_theme,
-	                                          GQ_ICON_UNREADABLE,
-	                                          GQ_ICON_STOP,
-	                                          size);
+	pf->link = create_folder_icon_with_emblem(GQ_ICON_LINK);
 
-	pf->link = create_folder_icon_with_emblem(icon_theme,
-	                                          GQ_ICON_LINK,
-	                                          GQ_ICON_REDO,
-	                                          size);
-
-	pf->read_only = create_folder_icon_with_emblem(icon_theme,
-	                                               GQ_ICON_READONLY,
-	                                               GQ_ICON_DIRECTORY,
-	                                               size);
+	pf->read_only = create_folder_icon_with_emblem(GQ_ICON_READONLY);
 
 	return pf;
 }

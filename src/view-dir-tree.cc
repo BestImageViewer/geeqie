@@ -130,17 +130,17 @@ gboolean vdtree_find_row(ViewDir *vd, FileData *fd, GtkTreeIter *iter, GtkTreeIt
 	return FALSE;
 }
 
-static void vdtree_icon_set_by_iter(ViewDir *vd, GtkTreeIter *iter, GdkPaintable *paintable)
+static void vdtree_icon_set_by_iter(ViewDir *vd, GtkTreeIter *iter, GIcon *icon)
 {
 	GtkTreeModel *store;
-	GdkPaintable *old = nullptr;
+	GIcon *old = nullptr;
 
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
 	gtk_tree_model_get(store, iter, DIR_COLUMN_ICON, &old, -1);
 
 	if (old != vd->pf->deny)
 		{
-		gtk_tree_store_set(GTK_TREE_STORE(store), iter, DIR_COLUMN_ICON, paintable, -1);
+		gtk_tree_store_set(GTK_TREE_STORE(store), iter, DIR_COLUMN_ICON, icon, -1);
 		}
 
 	g_clear_object(&old);
@@ -347,7 +347,7 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 {
 	GtkTreeStore *store;
 	GtkTreeIter child;
-	GdkPaintable *paintable;
+	GIcon *icon;
 	GtkTreeIter empty;
 
 	if (!fd) return;
@@ -356,20 +356,20 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 		{
 		if (islink(fd->path))
 			{
-			paintable = vd->pf->link;
+			icon = vd->pf->link;
 			}
 		else if (!access_file(fd->path, W_OK))
 			{
-			paintable = vd->pf->read_only;
+			icon = vd->pf->read_only;
 			}
 		else
 			{
-			paintable = vd->pf->close;
+			icon = vd->pf->close;
 			}
 		}
 	else
 		{
-		paintable = vd->pf->deny;
+		icon = vd->pf->deny;
 		}
 
 	auto nd = g_new0(NodeData, 1);
@@ -388,7 +388,7 @@ static void vdtree_add_by_data(ViewDir *vd, FileData *fd, GtkTreeIter *parent)
 	gtk_tree_store_append(store, &child, parent);
 	gtk_tree_store_set(store, &child,
 	                   DIR_COLUMN_POINTER, nd,
-	                   DIR_COLUMN_ICON, paintable,
+	                   DIR_COLUMN_ICON, icon,
 	                   DIR_COLUMN_NAME, nd->fd->name,
 	                   DIR_COLUMN_LINK, link,
 	                   DIR_COLUMN_COLOR, FALSE,
@@ -853,7 +853,7 @@ gboolean vdtree_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpo
 	return (event->button != GDK_BUTTON_PRIMARY);
 }
 
-static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GdkPaintable *paintable)
+static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GIcon *icon)
 {
 	vdtree_populate_path_by_iter(vd, iter, FALSE, nullptr);
 
@@ -866,10 +866,10 @@ static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *i
 	FileData *fd = nd ? nd->fd : nullptr;
 	if (fd && islink(fd->path))
 		{
-		paintable = vd->pf->link;
+		icon = vd->pf->link;
 		}
 
-	vdtree_icon_set_by_iter(vd, iter, paintable);
+	vdtree_icon_set_by_iter(vd, iter, icon);
 }
 
 static void vdtree_row_expanded(GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, gpointer data)
@@ -979,7 +979,7 @@ ViewDir *vdtree_new(ViewDir *vd)
 	vd->dnd_drop_leave_func = vdtree_dnd_drop_expand_cancel;
 	vd->dnd_drop_update_func = vdtree_dnd_drop_expand;
 
-	store = gtk_tree_store_new(6, G_TYPE_POINTER, GDK_TYPE_PAINTABLE, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_tree_store_new(6, G_TYPE_POINTER, G_TYPE_ICON, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);
 	vd->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
 
@@ -998,7 +998,7 @@ ViewDir *vdtree_new(ViewDir *vd)
 
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute(column, renderer, "paintable", DIR_COLUMN_ICON);
+	gtk_tree_view_column_add_attribute(column, renderer, "gicon", DIR_COLUMN_ICON);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
 
 	renderer = gtk_cell_renderer_text_new();

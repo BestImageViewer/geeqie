@@ -50,12 +50,12 @@ enum {
 
 struct PixmapFolders
 {
-	GdkPaintable *close;
-	GdkPaintable *open;
-	GdkPaintable *parent;
-	GdkPaintable *deny;
-	GdkPaintable *link;
-	GdkPaintable *read_only;
+	GIcon *close;
+	GIcon *open;
+	GIcon *parent;
+	GIcon *deny;
+	GIcon *link;
+	GIcon *read_only;
 };
 
 struct ViewDir

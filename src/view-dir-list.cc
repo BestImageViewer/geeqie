@@ -167,7 +167,7 @@ static gboolean vdlist_populate(ViewDir *vd, gboolean clear)
 	while (work)
 		{
 		gint match;
-		GdkPaintable *icon;
+		GIcon *icon;
 		const gchar *date = "";
 		gboolean done = FALSE;
 
@@ -421,7 +421,7 @@ ViewDir *vdlist_new(ViewDir *vd)
 
 	vd->type = DIRVIEW_LIST;
 
-	store = gtk_list_store_new(6, G_TYPE_POINTER, GDK_TYPE_PAINTABLE, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_list_store_new(6, G_TYPE_POINTER, G_TYPE_ICON, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING);
 	vd->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
 
@@ -436,7 +436,7 @@ ViewDir *vdlist_new(ViewDir *vd)
 
 	renderer = gtk_cell_renderer_pixbuf_new();
 	gtk_tree_view_column_pack_start(column, renderer, FALSE);
-	gtk_tree_view_column_add_attribute(column, renderer, "paintable", DIR_COLUMN_ICON);
+	gtk_tree_view_column_add_attribute(column, renderer, "gicon", DIR_COLUMN_ICON);
 	gtk_tree_view_column_set_cell_data_func(column, renderer, vd_color_cb, vd, nullptr);
 
 	renderer = gtk_cell_renderer_text_new();
