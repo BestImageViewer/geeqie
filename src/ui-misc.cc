@@ -273,9 +273,9 @@ static GtkWidget *real_pref_checkbox_new(GtkWidget *parent_box, const gchar *tex
 	else
 		{
 		button = gtk_check_button_new_with_label(text);
-		}
+	}
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), active);
-	if (func) g_signal_connect(G_OBJECT(button), "clicked", func, data);
+	if (func) g_signal_connect(G_OBJECT(button), "toggled", func, data);
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
@@ -351,7 +351,7 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 		}
 
 	if (active) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), active);
-	if (func) g_signal_connect(G_OBJECT(button), "clicked", func, data);
+	if (func) g_signal_connect(G_OBJECT(button), "toggled", func, data);
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);

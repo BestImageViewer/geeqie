@@ -50,7 +50,11 @@ static void menu_item_add_accelerator(GtkWidget *, GtkWidget *)
 
 static void menu_item_finish(GtkWidget *menu, GtkWidget *item, GCallback func, gpointer data)
 {
-	if (func && GTK_IS_BUTTON(item))
+	if (func && GTK_IS_CHECK_BUTTON(item))
+		{
+		g_signal_connect(G_OBJECT(item), "toggled", func, data);
+		}
+	else if (func && GTK_IS_BUTTON(item))
 		{
 		g_signal_connect(G_OBJECT(item), "clicked", func, data);
 		}
