@@ -16,10 +16,10 @@ GdkRGBA GqColor::to_gdk_rgba() const
 {
 	return
 		{
-		static_cast<float>(r) / 255.f,
-		static_cast<float>(g) / 255.f,
-		static_cast<float>(b) / 255.f,
-		static_cast<float>(a) / 255.f
+		static_cast<float>(r) / 255.F,
+		static_cast<float>(g) / 255.F,
+		static_cast<float>(b) / 255.F,
+		static_cast<float>(a) / 255.F
 		};
 }
 
