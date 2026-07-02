@@ -148,6 +148,11 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
+	if (vd->view)
+		{
+		g_object_set_data(G_OBJECT(vd->view), "view-dir", nullptr);
+		}
+
 	file_data_unregister_notify_func(vd_notify_cb, vd);
 
 	if (vd->popup)
@@ -774,6 +779,8 @@ void vd_new_folder(ViewDir *vd, FileData *dir_fd)
  *-----------------------------------------------------------------------------
  */
 
+static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y);
+
 static gboolean vd_auto_scroll_idle_cb(gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
@@ -783,9 +790,7 @@ static gboolean vd_auto_scroll_idle_cb(gpointer data)
 		GqPoint pos;
 		if (widget_get_pointer_position(vd->view, pos))
 			{
-/** @FIXME GTK4
 			vd_dnd_drop_update(vd, pos.x, pos.y);
-*/
 			}
 		}
 
@@ -798,60 +803,210 @@ void vd_dnd_drop_scroll_cancel(ViewDir *vd)
 	g_clear_handle_id(&vd->drop_scroll_id, g_source_remove);
 }
 
-/** @FIXME GTK4
- */
-//~ static gboolean vd_dnd_drop_motion(GtkWidget *, GdkDragContext *context, gint x, gint y, guint time, gpointer data)
-//~ {
-	//~ auto vd = static_cast<ViewDir *>(data);
+static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y)
+{
+	FileData *fd = nullptr;
 
-	//~ vd->click_fd = nullptr;
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vd->view), x, y, &tpath, nullptr, nullptr, nullptr))
+		{
+		fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(vd->view), tpath);
+		}
 
-	//~ if (gtk_drag_get_source_widget(context) == vd->view)
-		//~ {
-		//~ /* from same window */
-		//~ gdk_drag_status(context, GDK_ACTION_DEFAULT, time);
-		//~ return TRUE;
-		//~ }
+	if (fd == vd->drop_fd) return;
 
-	//~ gdk_drag_status(context, gdk_drag_context_get_suggested_action(context), time);
+	if (vd->drop_fd != vd->click_fd)
+		{
+		vd_color_set(vd, vd->drop_fd, FALSE);
+		}
 
-	//~ vd_dnd_drop_update(vd, x, y);
+	vd->drop_fd = fd;
 
-	//~ if (vd->drop_fd)
-		//~ {
-		//~ const auto vd_auto_scroll_notify_cb = [vd](GtkWidget *, GqPoint)
-		//~ {
-			//~ if (!vd->drop_fd || vd->drop_list) return false;
+	if (vd->drop_fd)
+		{
+		vd_color_set(vd, vd->drop_fd, TRUE);
+		}
 
-			//~ if (!vd->drop_scroll_id)
-				//~ {
-				//~ vd->drop_scroll_id = g_idle_add(vd_auto_scroll_idle_cb, vd);
-				//~ }
+	if (vd->dnd_drop_update_func)
+		{
+		vd->dnd_drop_update_func(vd);
+		}
+}
 
-			//~ return true;
-		//~ };
-		//~ widget_auto_scroll_start(vd->view, -1, -1, vd_auto_scroll_notify_cb);
-		//~ }
+static GdkDragAction vd_dnd_select_action(GdkDrop *drop)
+{
+	GdkDragAction actions = gdk_drop_get_actions(drop);
 
-	//~ return FALSE;
-//~ }
+	if (actions & GDK_ACTION_COPY) return GDK_ACTION_COPY;
+	if (actions & GDK_ACTION_MOVE) return GDK_ACTION_MOVE;
+	if (actions & GDK_ACTION_LINK) return GDK_ACTION_LINK;
 
-//~ static void vd_dnd_drop_leave(GtkWidget *, GdkDragContext *, guint, gpointer data)
-//~ {
-	//~ auto vd = static_cast<ViewDir *>(data);
+	return GDK_ACTION_NONE;
+}
 
-	//~ if (vd->drop_fd != vd->click_fd) vd_color_set(vd, vd->drop_fd, FALSE);
+static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
+{
+	auto vd = static_cast<ViewDir *>(data);
 
-	//~ vd->drop_fd = nullptr;
+	vd->click_fd = nullptr;
 
-	//~ if (vd->dnd_drop_leave_func) vd->dnd_drop_leave_func(vd);
-//~ }
+	vd_dnd_drop_update(vd, x, y);
 
-//~ void vd_dnd_init(ViewDir *vd)
-//~ {
-	//~ (void)vd;
-//~ }
-//~ */
+	if (vd->drop_fd)
+		{
+		const auto vd_auto_scroll_notify_cb = [vd](GtkWidget *, GqPoint)
+		{
+			if (!vd->drop_fd || vd->drop_list) return false;
+
+			if (!vd->drop_scroll_id)
+				{
+				vd->drop_scroll_id = g_idle_add(vd_auto_scroll_idle_cb, vd);
+				}
+
+			return true;
+		};
+		widget_auto_scroll_start(vd->view, -1, -1, vd_auto_scroll_notify_cb);
+		}
+	else
+		{
+		widget_auto_scroll_stop(vd->view);
+		}
+
+	return vd->drop_fd ? vd_dnd_select_action(drop) : GDK_ACTION_NONE;
+}
+
+static void vd_dnd_drop_leave(GtkDropTargetAsync *, GdkDrop *, gpointer data)
+{
+	auto vd = static_cast<ViewDir *>(data);
+
+	if (vd->drop_fd != vd->click_fd) vd_color_set(vd, vd->drop_fd, FALSE);
+
+	vd->drop_fd = nullptr;
+	vd_dnd_drop_scroll_cancel(vd);
+	widget_auto_scroll_stop(vd->view);
+
+	if (vd->dnd_drop_leave_func) vd->dnd_drop_leave_func(vd);
+}
+
+struct VdDropReadData
+{
+	GtkWidget *view;
+	GdkDrop *drop;
+};
+
+static GList *vd_dnd_file_list_from_uri_list(const gchar *data)
+{
+	g_auto(GStrv) uris = g_uri_list_extract_uris(data);
+	GList *path_list = nullptr;
+
+	for (gint i = 0; uris && uris[i]; i++)
+		{
+		g_autofree gchar *path = g_filename_from_uri(uris[i], nullptr, nullptr);
+		if (path)
+			{
+			path_list = g_list_prepend(path_list, g_steal_pointer(&path));
+			}
+		}
+
+	path_list = g_list_reverse(path_list);
+	GList *file_list = filelist_from_path_list(path_list);
+	g_list_free_full(path_list, g_free);
+
+	return file_list;
+}
+
+static GList *vd_dnd_file_list_from_stream(GInputStream *stream)
+{
+	GString *text = g_string_new(nullptr);
+	gchar buffer[4096];
+	gssize bytes_read;
+
+	while ((bytes_read = g_input_stream_read(stream, buffer, sizeof(buffer), nullptr, nullptr)) > 0)
+		{
+		g_string_append_len(text, buffer, bytes_read);
+		}
+
+	GList *file_list = (bytes_read < 0) ? nullptr : vd_dnd_file_list_from_uri_list(text->str);
+	g_string_free(text, TRUE);
+
+	return file_list;
+}
+
+static void vd_dnd_drop_read_cb(GObject *source_object, GAsyncResult *result, gpointer data)
+{
+	g_autofree auto *drop_data = static_cast<VdDropReadData *>(data);
+	GdkDrop *drop = GDK_DROP(source_object);
+	GError *error = nullptr;
+	const gchar *mime_type = nullptr;
+	g_autoptr(GInputStream) stream = gdk_drop_read_finish(drop, result, &mime_type, &error);
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	if (stream && g_strcmp0(mime_type, "text/uri-list") == 0)
+		{
+		GList *list = vd_dnd_file_list_from_stream(stream);
+		auto *vd = static_cast<ViewDir *>(g_object_get_data(G_OBJECT(drop_data->view), "view-dir"));
+
+		if (vd && vd->drop_fd && list)
+			{
+			file_data_list_free(vd->drop_list);
+			vd->drop_list = list;
+
+			GtkWidget *menu = vd_drop_menu(vd, access_file(vd->drop_fd->path, W_OK | X_OK));
+			(void)menu;
+			action = vd_dnd_select_action(drop);
+			}
+		else
+			{
+			file_data_list_free(list);
+			}
+		}
+
+	if (error)
+		{
+		DEBUG_1("Directory drop read failed: %s", error->message);
+		g_error_free(error);
+		}
+
+	gdk_drop_finish(drop_data->drop, action);
+	g_object_unref(drop_data->drop);
+	g_object_unref(drop_data->view);
+}
+
+static gboolean vd_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
+{
+	auto vd = static_cast<ViewDir *>(data);
+
+	vd_dnd_drop_update(vd, x, y);
+	vd_dnd_drop_scroll_cancel(vd);
+	widget_auto_scroll_stop(vd->view);
+
+	if (!vd->drop_fd) return FALSE;
+
+	static const gchar *mime_types[] = {"text/uri-list", nullptr};
+	auto *drop_data = g_new0(VdDropReadData, 1);
+	drop_data->view = GTK_WIDGET(g_object_ref(vd->view));
+	drop_data->drop = GDK_DROP(g_object_ref(drop));
+
+	gdk_drop_read_async(drop, mime_types, G_PRIORITY_DEFAULT, nullptr, vd_dnd_drop_read_cb, drop_data);
+
+	return TRUE;
+}
+
+void vd_dnd_init(ViewDir *vd)
+{
+	static const char *mime_types[] = {"text/uri-list"};
+
+	g_object_set_data(G_OBJECT(vd->view), "view-dir", vd);
+
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+
+	g_signal_connect(drop_target, "drag-motion", G_CALLBACK(vd_dnd_drop_motion), vd);
+	g_signal_connect(drop_target, "drag-leave", G_CALLBACK(vd_dnd_drop_leave), vd);
+	g_signal_connect(drop_target, "drop", G_CALLBACK(vd_dnd_drop), vd);
+
+	gtk_widget_add_controller(vd->view, GTK_EVENT_CONTROLLER(drop_target));
+}
 
 /*
  *----------------------------------------------------------------------------
@@ -1101,9 +1256,7 @@ ViewDir *vd_new(LayoutWindow *lw)
 
 	gq_gtk_container_add(vd->widget, vd->view);
 
-/** @FIXME GTK4
 	vd_dnd_init(vd);
-*/
 
 	g_signal_connect(G_OBJECT(vd->view), "row_activated",
 			 G_CALLBACK(vd_activate_cb), vd);
