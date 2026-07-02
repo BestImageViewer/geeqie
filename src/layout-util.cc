@@ -2807,6 +2807,8 @@ GtkWidget *layout_actions_menu_bar(LayoutWindow *lw)
 {
 	if (lw->menu_bar) return lw->menu_bar;
 
+	lw->menu_bar = gtk_popover_menu_bar_new_from_model(lw->menu_model);
+
 	return g_object_ref(lw->menu_bar);
 }
 
@@ -2822,7 +2824,6 @@ GtkWidget *layout_actions_toolbar(LayoutWindow *lw, ToolbarType type)
 
 GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 {
-	GtkWidget *menu_bar;
 	GtkWidget *toolbar;
 
 	if (lw->menu_tool_bar) return lw->menu_tool_bar;

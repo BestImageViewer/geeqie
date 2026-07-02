@@ -113,11 +113,6 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
-	if (vd->view)
-		{
-		g_object_set_data(G_OBJECT(vd->view), "view-dir", nullptr);
-		}
-
 	file_data_unregister_notify_func(vd_notify_cb, vd);
 
 	if (vd->popup)

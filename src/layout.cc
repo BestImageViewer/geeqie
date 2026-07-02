@@ -546,9 +546,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		}
 	else
 		{
-		GtkWidget *menubar = gtk_popover_menu_bar_new_from_model(lw->menu_model);
-
-		gtk_box_prepend(GTK_BOX(lw->main_box), menubar);
+		gtk_box_prepend(GTK_BOX(lw->main_box), layout_actions_menu_bar(lw));
 	}
 
 	lw->path_entry = tab_completion_new_with_history(nullptr, nullptr, "path_list", -1);
@@ -2522,8 +2520,8 @@ void layout_free(LayoutWindow *lw)
 
 	layout_bars_close(lw);
 
-	g_object_unref(lw->menu_bar);
-	g_object_unref(lw->utility_box);
+	if (lw->menu_bar) g_object_unref(lw->menu_bar);
+	if (lw->utility_box) g_object_unref(lw->utility_box);
 
 	for (i = 0; i < TOOLBAR_COUNT; i++)
 		{
