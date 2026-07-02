@@ -2019,25 +2019,6 @@ static void image_destroy_cb(GtkWidget *, gpointer data)
 	image_free(imd);
 }
 
-static gboolean selectable_frame_draw_cb(GtkWidget *widget, cairo_t *cr, gpointer)
-{
-	GtkAllocation allocation;
-	gtk_widget_get_allocation(widget, &allocation);
-
-	gtk_render_frame(gtk_widget_get_style_context(widget), cr, allocation.x + 3, allocation.y + 3, allocation.width - 6, allocation.height - 6);
-	gtk_render_background(gtk_widget_get_style_context(widget), cr, allocation.x + 3, allocation.y + 3, allocation.width - 6, allocation.height - 6);
-
-	if (gtk_widget_has_focus(widget))
-		{
-		gtk_render_focus(gtk_widget_get_style_context(widget), cr, allocation.x, allocation.y, allocation.width - 1, allocation.height - 1);
-		}
-	else
-		{
-		gtk_render_frame(gtk_widget_get_style_context(widget), cr, allocation.x, allocation.y, allocation.width - 1, allocation.height - 1);
-		}
-	return FALSE;
-}
-
 void image_set_frame(ImageWindow *imd, gboolean frame)
 {
 	frame = !!frame;
@@ -2056,9 +2037,6 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 
 		g_object_unref(imd->pr);
 		gtk_widget_set_can_focus(imd->frame, TRUE);
-
-		g_signal_connect(G_OBJECT(imd->frame), "draw",
-				 G_CALLBACK(selectable_frame_draw_cb), NULL);
 
 		GtkEventController *controller = gtk_event_controller_focus_new();
 		g_signal_connect(controller, "enter", G_CALLBACK(image_focus_in_cb), imd);
