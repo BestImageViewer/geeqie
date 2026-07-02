@@ -1220,7 +1220,7 @@ ViewDir *vd_new(LayoutWindow *lw)
 
 	g_signal_connect(G_OBJECT(vd->view), "row_activated",
 			 G_CALLBACK(vd_activate_cb), vd);
-	g_signal_connect(G_OBJECT(vd->widget), "destroy",
+	g_signal_connect(G_OBJECT(vd->view), "destroy",
 			 G_CALLBACK(vd_destroy_cb), vd);
 	GtkEventController *key_controller = gtk_event_controller_key_new();
 	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(vd_key_pressed_cb), vd);

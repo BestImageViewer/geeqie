@@ -400,12 +400,12 @@ gboolean vdlist_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpo
 	return options->view_dir_list_single_click_enter;
 }
 
-void vdlist_destroy_cb(GtkWidget *, gpointer data)
+void vdlist_destroy_cb(GtkWidget *widget, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
 	vd_dnd_drop_scroll_cancel(vd);
-	widget_auto_scroll_stop(vd->view);
+	widget_auto_scroll_stop(widget);
 
 	file_data_list_free(VDLIST(vd)->list);
 }

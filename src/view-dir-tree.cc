@@ -953,15 +953,15 @@ static gboolean vdtree_destroy_node_cb(GtkTreeModel *store, GtkTreePath *, GtkTr
 	return FALSE;
 }
 
-void vdtree_destroy_cb(GtkWidget *, gpointer data)
+void vdtree_destroy_cb(GtkWidget *widget, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
 	vdtree_dnd_drop_expand_cancel(vd);
 	vd_dnd_drop_scroll_cancel(vd);
-	widget_auto_scroll_stop(vd->view);
+	widget_auto_scroll_stop(widget);
 
-	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(vd->view));
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 	gtk_tree_model_foreach(store, vdtree_destroy_node_cb, vd);
 }
 
