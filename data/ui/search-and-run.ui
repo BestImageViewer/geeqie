@@ -28,7 +28,6 @@
     <property name="valign">start</property>
     <property name="hexpand">False</property>
     <property name="title" translatable="yes">Search and Run command - Geeqie</property>
-    <property name="role">sar_window</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="icon-name">geeqie.png</property>
