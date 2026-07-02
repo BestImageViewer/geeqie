@@ -120,6 +120,12 @@ def main(argv) -> int:
         if geeqie_proc.poll() is not None:
             raise GeeqieTestError("2-second post-init check", geeqie_proc)
 
+## @FIXME After the GTK4 migration, at this point fd->pixbuf was null.
+## This extra command forces the pixbuf to be created
+        file_info_result = subprocess.run(
+                args=[*geeqie_cmd_prefix, "--get-render-intent"],
+                capture_output=True, text=True, timeout=MAX_REMOTE_CMD_TIME_S)
+
         file_info_result = subprocess.run(
                 args=[*geeqie_cmd_prefix, "--get-file-info"],
                 capture_output=True, text=True, timeout=MAX_REMOTE_CMD_TIME_S)
