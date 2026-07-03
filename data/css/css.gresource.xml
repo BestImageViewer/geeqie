@@ -5,6 +5,6 @@
 
 <gresources>
   <gresource prefix="/org/geeqie/geeqie/css">
-    <file>custom.css</file>
+    <file>geeqie.css</file>
   </gresource>
 </gresources>

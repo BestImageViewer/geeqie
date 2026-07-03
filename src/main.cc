@@ -400,18 +400,6 @@ void mkdir_if_not_exists(const gchar *path)
 		}
 }
 
-void gq_gtk_css_load()
-{
-	/* Load gtk.css file from the rc directory */
-	g_autofree gchar *path = g_build_filename(get_rc_dir(), "gtk.css", nullptr);
-	g_autofree gchar *pathl = path_from_utf8(path);
-	if (access(pathl, R_OK) != 0) return;
-
-	g_autoptr(GtkCssProvider) css_provider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(css_provider, pathl);
-	gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(css_provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
-}
-
 void exit_program_final()
 {
 	GFile *archive_file;
@@ -708,8 +696,6 @@ void startup_common(GtkApplication *, gpointer)
 	file_data_register_notify_func(collect_manager_notify_cb, nullptr, NOTIFY_PRIORITY_LOW);
 	file_data_register_notify_func(metadata_notify_cb, nullptr, NOTIFY_PRIORITY_LOW);
 
-	gq_gtk_css_load();
-
 	const gchar *gtk_version_error = gtk_check_version(GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION);
 
 	if (gtk_version_error)
@@ -886,6 +872,11 @@ void startup_cb(GtkApplication *app, gpointer)
 			new_appimage_notification(app);
 			}
 		}
+
+	auto *provider = gtk_css_provider_new();
+	gtk_css_provider_load_from_resource(provider, "/org/geeqie/geeqie/css/geeqie.css");
+	gtk_style_context_add_provider_for_display( gdk_display_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	g_object_unref(provider);
 
 	gtk_application_window_new(app);
 }
