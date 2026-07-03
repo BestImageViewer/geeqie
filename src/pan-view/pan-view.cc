@@ -125,7 +125,7 @@ static void pan_fullscreen_toggle(PanWindow *pw, gboolean force_off);
 
 static void pan_window_close(PanWindow *pw);
 
-static void pan_popup_menu(PanWindow *pw);
+static void pan_popup_menu(PanWindow *pw, GtkWidget *parent = nullptr, gdouble x = 0, gdouble y = 0);
 
 static void pan_window_dnd_init(PanWindow *pw);
 static void pan_window_new_real(FileData *dir_fd);
@@ -1315,7 +1315,7 @@ static void button_cb(PixbufRenderer *pr, GqMouseButtonEvent *event, gpointer da
 			break;
 		case GDK_BUTTON_SECONDARY:
 			pan_info_update(pw, pi);
-			pan_popup_menu(pw);
+			pan_popup_menu(pw, GTK_WIDGET(pw->imd->pr), event->x, event->y);
 			break;
 		default:
 			break;
@@ -2085,7 +2085,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	gtk_widget_show(pw->window);
 }
 
-static void pan_popup_menu(PanWindow *pw)
+static void pan_popup_menu(PanWindow *pw, GtkWidget *parent, gdouble x, gdouble y)
 {
 	gboolean active;
 	gboolean video;
@@ -2149,7 +2149,7 @@ static void pan_popup_menu(PanWindow *pw)
 	action = g_action_map_lookup_action(G_ACTION_MAP(pw->window), "pan-win-show-image");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), (active));
 
-	GtkWidget *menu = popup_menu(menu_model, pw->window);
+	GtkWidget *menu = parent ? popup_menu_at(menu_model, parent, x, y) : popup_menu(menu_model, pw->window);
  	g_signal_connect_swapped(G_OBJECT(menu), "destroy", G_CALLBACK(file_data_list_free), editmenu_fd_list);
 }
 

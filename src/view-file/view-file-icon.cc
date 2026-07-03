@@ -1129,7 +1129,7 @@ static gboolean vficon_motion_cb(GtkEventControllerMotion *, double x, double y,
 	return FALSE;
 }
 
-gboolean vficon_press_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *event)
+gboolean vficon_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEvent *event)
 {
 	GtkTreeIter iter;
 	FileData *fd;
@@ -1165,7 +1165,7 @@ gboolean vficon_press_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *ev
 					}
 				break;
 			case GDK_BUTTON_SECONDARY:
-				vf->popup = vf_pop_menu(vf);
+				vf->popup = vf_pop_menu(vf, widget, event->x, event->y);
 				break;
 			default:
 				break;

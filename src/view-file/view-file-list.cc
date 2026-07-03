@@ -431,7 +431,7 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEve
 
 	if (event->button == GDK_BUTTON_SECONDARY)
 		{
-		vf->popup = vf_pop_menu(vf);
+		vf->popup = vf_pop_menu(vf, widget, event->x, event->y);
 		return TRUE;
 		}
 

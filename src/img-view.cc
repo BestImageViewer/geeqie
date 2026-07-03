@@ -80,7 +80,7 @@ std::vector<ViewWindow *> view_window_list;
 } // namespace
 
 static void image_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, gpointer data);
-static void view_popup_menu(ViewWindow *vw);
+static void view_popup_menu(ViewWindow *vw, GtkWidget *parent = nullptr, gdouble x = 0, gdouble y = 0);
 static void view_fullscreen_toggle(ViewWindow *vw, gboolean force_off);
 static void view_overlay_toggle(GSimpleAction *, GVariant *, gpointer data);
 
@@ -519,7 +519,7 @@ static void button_cb(ImageWindow *imd, GqMouseButtonEvent *event, gpointer data
 				view_step_prev(vw);
 			break;
 		case GDK_BUTTON_SECONDARY:
-			view_popup_menu(vw);
+			view_popup_menu(vw, GTK_WIDGET(imd->pr), event->x, event->y);
 			break;
 		default:
 			break;
@@ -1176,7 +1176,7 @@ static void image_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, 
 	collection_by_index_add_filelist(index, selection_list);
 }
 
-static void view_popup_menu(ViewWindow *vw)
+static void view_popup_menu(ViewWindow *vw, GtkWidget *parent, gdouble x, gdouble y)
 {
 	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-img-view.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-image"));
@@ -1198,7 +1198,7 @@ static void view_popup_menu(ViewWindow *vw)
 		menu_item_include_ellipsis(G_MENU_MODEL(menu_model), "win.image-win-delete-permanent");
 		}
 
-	GtkWidget *menu = popup_menu(menu_model, vw->window);
+	GtkWidget *menu = parent ? popup_menu_at(menu_model, parent, x, y) : popup_menu(menu_model, vw->window);
  	g_signal_connect_swapped(G_OBJECT(menu), "destroy", G_CALLBACK(file_data_list_free), editmenu_fd_list);
 }
 

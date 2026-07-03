@@ -208,6 +208,23 @@ GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 	return popover;
 }
 
+GtkWidget *popup_menu_at(GMenu *menu_model, GtkWidget *parent, gdouble x, gdouble y)
+{
+	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
+	GdkRectangle pointing_to{
+		static_cast<int>(x),
+		static_cast<int>(y),
+		1, 1
+	};
+
+	gtk_widget_set_parent(popover, parent);
+	gtk_popover_set_pointing_to(GTK_POPOVER(popover), &pointing_to);
+	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_BOTTOM);
+	gtk_popover_popup(GTK_POPOVER(popover));
+
+	return popover;
+}
+
 static GMenuItem *menu_item_clone_with_new_label(GMenuModel *model, int index, const char *new_label)
 {
 	g_autoptr(GMenuItem) item = g_menu_item_new(nullptr, nullptr);

@@ -470,7 +470,7 @@ static gint search_result_count(SearchData *sd, gint64 *bytes = nullptr);
 
 static void search_notify_cb(FileData *fd, NotifyType type, gpointer data);
 static void search_start_do(SearchData *sd);
-static void search_result_menu(SearchData *sd, bool on_row, bool empty);
+static void search_result_menu(SearchData *sd, bool on_row, bool empty, GtkWidget *parent = nullptr, gdouble x = 0, gdouble y = 0);
 
 /*
  *-------------------------------------------------------------------
@@ -1154,7 +1154,7 @@ static gboolean search_result_press_cb(GtkWidget *widget, const GqMouseButtonEve
 
 	if (bevent->button == GDK_BUTTON_SECONDARY)
 		{
-		search_result_menu(sd, mfd != nullptr, search_result_count(sd) == 0);
+		search_result_menu(sd, mfd != nullptr, search_result_count(sd) == 0, widget, bevent->x, bevent->y);
 		}
 
 	if (!mfd) return FALSE;
@@ -1330,7 +1330,7 @@ static void search_win_result_clear_cb(GSimpleAction *, GVariant *, gpointer dat
 	search_result_clear(sd);
 }
 
-static void search_result_menu(SearchData *sd, bool on_row, bool empty)
+static void search_result_menu(SearchData *sd, bool on_row, bool empty, GtkWidget *parent, gdouble x, gdouble y)
 {
 	GAction *action;
 	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-search.ui");
@@ -1391,7 +1391,7 @@ static void search_result_menu(SearchData *sd, bool on_row, bool empty)
 	action = g_action_map_lookup_action(G_ACTION_MAP(sd->ui.window), "search-win-delete-permanent");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), on_row);
 
-	GtkWidget *menu = popup_menu(menu_model, sd->ui.result_view);
+	GtkWidget *menu = parent ? popup_menu_at(menu_model, parent, x, y) : popup_menu(menu_model, sd->ui.result_view);
  	g_signal_connect_swapped(G_OBJECT(menu), "destroy", G_CALLBACK(file_data_list_free), editmenu_fd_list);
 }
 

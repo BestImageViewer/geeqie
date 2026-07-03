@@ -606,7 +606,7 @@ static void collection_table_popup_edit_cb(GSimpleAction *, GVariant *parameter,
 	file_util_start_editor_from_filelist(key, collection_table_popup_file_list(ct), nullptr, ct->listview);
 }
 
-static void collection_table_popup_menu(CollectTable *ct, bool over_icon);
+static void collection_table_popup_menu(CollectTable *ct, bool over_icon, GtkWidget *parent = nullptr, gdouble x = 0, gdouble y = 0);
 
 static void collection_table_help_cb(GSimpleAction *, GVariant *, gpointer)
 {
@@ -870,7 +870,7 @@ static void collection_table_popup_destroy_cb(GtkWidget *, gpointer data)
 	ct->editmenu_fd_list = nullptr;
 }
 
-static void collection_table_popup_menu(CollectTable *ct, bool over_icon)
+static void collection_table_popup_menu(CollectTable *ct, bool over_icon, GtkWidget *parent, gdouble x, gdouble y)
 {
 	GAction *action;
 	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-collection.ui");
@@ -904,7 +904,14 @@ static void collection_table_popup_menu(CollectTable *ct, bool over_icon)
 	action = g_action_map_lookup_action(G_ACTION_MAP(cw->window), "collection-win-append-from-collection");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), over_icon);
 
-	popup_menu(menu_model, cw->window);
+	if (parent)
+		{
+		popup_menu_at(menu_model, parent, x, y);
+		}
+	else
+		{
+		popup_menu(menu_model, cw->window);
+		}
 }
 /*
  *-------------------------------------------------------------------
@@ -1338,7 +1345,7 @@ static void collection_table_press_cb(GtkGestureClick *gesture,  gint n_press, g
 			break;
 
 		case GDK_BUTTON_SECONDARY:
-			collection_table_popup_menu(ct, info != nullptr);
+			collection_table_popup_menu(ct, info != nullptr, ct->listview, x, y);
 			break;
 
 		default:

@@ -585,7 +585,7 @@ static void vd_pop_menu_sort_cb(GSimpleAction *, GVariant *parameter, gpointer d
 	layout_refresh(vd->layout);
 }
 
-void vd_pop_menu(ViewDir *vd, FileData *fd)
+void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdouble y)
 {
 	GtkWidget *menu;
 	gboolean active;
@@ -697,7 +697,14 @@ void vd_pop_menu(ViewDir *vd, FileData *fd)
 	action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-show-hidden-files");
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->file_filter.show_hidden_files));
 
-	popup_menu(menu_model, vd->layout->window);
+	if (parent)
+		{
+		popup_menu_at(menu_model, parent, x, y);
+		}
+	else
+		{
+		popup_menu(menu_model, vd->layout->window);
+		}
 }
 
 void vd_new_folder(ViewDir *vd, FileData *dir_fd)
@@ -1112,7 +1119,7 @@ gboolean vd_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointe
 				}
 			}
 
-		vd_pop_menu(vd, vd->click_fd);
+		vd_pop_menu(vd, vd->click_fd, widget, event->x, event->y);
 
 		return TRUE;
 		}

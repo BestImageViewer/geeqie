@@ -507,7 +507,7 @@ void bar_pane_exif_toggle_show_all_cb(GtkWidget *, gpointer data)
 	bar_pane_exif_update(ped);
 }
 
-void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped)
+void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *, gdouble x, gdouble y)
 {
 	GtkWidget *menu;
 	/* the widget can be either ExifEntry (for editing) or Pane (for new entry)
@@ -521,16 +521,16 @@ void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped)
 /** @FIXME GTK4 Enable/disable the first 3 entries dependent on if (ee)
  * See original code.
  */
-	popup_menu(menu_model, ped->pane.lw->window);
+	popup_menu_at(menu_model, widget, x, y);
 }
 
-void bar_pane_exif_menu_cb(GtkGestureClick *gesture, gint  /*n_press*/, gdouble  /*x*/, gdouble  /*y*/, gpointer data)
+void bar_pane_exif_menu_cb(GtkGestureClick *gesture, gint  /*n_press*/, gdouble x, gdouble y, gpointer data)
 {
 	auto *ped = static_cast<PaneExifData *>(data);
 
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
 
-	bar_pane_exif_menu_popup(widget, ped);
+	bar_pane_exif_menu_popup(widget, ped, x, y);
 }
 
 void bar_pane_exif_copy_gesture_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer)

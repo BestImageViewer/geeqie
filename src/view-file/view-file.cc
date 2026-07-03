@@ -759,7 +759,7 @@ static void gmenu_append_int32_action_item(GMenu *menu, const gchar *label, cons
 	g_menu_append_item(menu, item);
 }
 
-GtkWidget *vf_pop_menu(ViewFile *vf)
+GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 {
 	gboolean active = FALSE;
 	gboolean class_archive = FALSE;
@@ -861,7 +861,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	vf_pop_menu_set_int32_state(vf, "view-file-view-type", vf->type);
 	vf_pop_menu_set_boolean_state(vf, "view-file-show-star-rating", options->show_star_rating);
 
-	GtkWidget *menu = popup_menu(menu_model, vf->listview);
+	GtkWidget *menu = parent ? popup_menu_at(menu_model, parent, x, y) : popup_menu(menu_model, vf->listview);
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(vf_popup_destroy_cb), vf);
 
