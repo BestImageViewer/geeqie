@@ -1000,8 +1000,8 @@ gboolean rt_source_tile_render(RendererTiles *rt, ImageTile *it,
 				}
 			else
 				{
-				const gdouble offset_x = static_cast<gdouble>(st_rect.x - it->x);
-				const gdouble offset_y = static_cast<gdouble>(st_rect.y - it->y);
+				const auto offset_x = static_cast<gdouble>(st_rect.x - it->x);
+				const auto offset_y = static_cast<gdouble>(st_rect.y - it->y);
 
 				// TODO(xsdg): Just draw instead of usign scale-draw for the case where
 				// (pr->zoom == 1.0 || pr->scale == 1.0)
