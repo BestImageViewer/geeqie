@@ -26,7 +26,8 @@ const char *get_description_for_action_name(const char *action_name)
 		get_image_actions(),
 		get_main_actions(),
 		get_pan_view_actions(),
-		get_search_actions()
+		get_search_actions(),
+		get_view_file_actions()
 		};
 
 	g_autofree gchar *base_name = nullptr;
@@ -219,7 +220,8 @@ const char *get_icon_for_action_name(const char *action_name)
 		get_image_actions(),
 		get_main_actions(),
 		get_pan_view_actions(),
-		get_search_actions()
+		get_search_actions(),
+		get_view_file_actions()
 		};
 
 	for (const ActionDef *action_table : action_sets)

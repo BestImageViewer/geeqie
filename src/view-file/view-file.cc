@@ -25,6 +25,8 @@
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
+#include "accelerators.h"
+#include "actions.h"
 #include "archives.h"
 #include "collect.h"
 #include "compat.h"
@@ -42,6 +44,7 @@
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
+#include "sort-type.h"
 #include "thumb.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
@@ -365,16 +368,6 @@ GList *vf_selection_get_one(ViewFile *vf, FileData *fd)
 	return ret;
 }
 
-static void vf_pop_menu_edit_cb(GtkWidget *widget, gpointer data)
-{
-	auto *vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
-	if (!vf) return;
-
-	auto *key = static_cast<const gchar *>(data);
-
-	file_util_start_editor_from_filelist(key, vf_pop_menu_file_list(vf), vf->dir_fd->path, vf->listview);
-}
-
 static void vf_pop_menu_view_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -474,88 +467,6 @@ static void vf_pop_menu_duplicates_cb(GtkWidget *, gpointer data)
 	dupe_window_add_files(dw, vf_pop_menu_file_list(vf), FALSE);
 }
 
-static void vf_pop_menu_sort_cb(GtkWidget *widget, gpointer data)
-{
-	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
-
-	auto *vf = static_cast<ViewFile *>(data);
-	if (!vf) return;
-
-	auto sort = vf->sort;
-	sort.method = static_cast<SortType>(GPOINTER_TO_INT(menu_item_radio_get_data(widget)));
-
-	if (sort_type_requires_metadata(sort.method))
-		{
-		vf_read_metadata_in_idle(vf);
-		}
-
-	if (vf->layout)
-		{
-		layout_sort_set_files(vf->layout, sort);
-		}
-	else
-		{
-		vf_sort_set(vf, sort);
-		}
-}
-
-static void vf_pop_menu_sort_ascend_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
-	auto sort = vf->sort;
-	sort.ascending = !sort.ascending;
-
-	if (vf->layout)
-		{
-		layout_sort_set_files(vf->layout, sort);
-		}
-	else
-		{
-		vf_sort_set(vf, sort);
-		}
-}
-
-static void vf_pop_menu_sort_case_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-
-	auto sort = vf->sort;
-	sort.case_sensitive = !sort.case_sensitive;
-
-	if (vf->layout)
-		{
-		layout_sort_set_files(vf->layout, sort);
-		}
-	else
-		{
-		vf_sort_set(vf, sort);
-		}
-}
-
-template<MarkToSelectionMode mode>
-static void vf_pop_menu_mark_to_selection_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	vf_mark_to_selection(vf, vf->active_mark, mode);
-}
-
-template<SelectionToMarkMode mode>
-static void vf_pop_menu_selection_to_mark_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	vf_selection_to_mark(vf, vf->active_mark, mode);
-}
-
-template<FileViewType file_view_type>
-static void vf_pop_menu_toggle_view_type_cb(GtkWidget *, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	if (!vf->layout) return;
-
-	layout_views_set(vf->layout, vf->layout->options.dir_view_type, file_view_type);
-}
-
 static void vf_pop_menu_refresh_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -584,37 +495,272 @@ static void vf_popup_destroy_cb(GtkWidget *, gpointer data)
 	vf->editmenu_fd_list = nullptr;
 }
 
-/**
- * @brief Add file selection list to a collection
- * @param[in] widget
- * @param[in] data Index to the collection list menu item selected, or -1 for new collection
- *
- */
-static void vf_pop_menu_collections_cb(GtkWidget *widget, gpointer data)
+static ViewFile *vf_from_action_data(gpointer data)
 {
-	auto *vf = static_cast<ViewFile *>(submenu_item_get_data(widget));
+	auto *layout = static_cast<LayoutWindow *>(data);
 
-	g_autoptr(FileDataList) selection_list = vf_selection_get_list(vf);
-	collection_by_index_add_filelist(GPOINTER_TO_INT(data), selection_list);
+	return layout ? layout->vf : nullptr;
 }
 
-static void vf_pop_menu_show_star_rating_cb(GtkWidget *, gpointer data)
+static void vf_pop_menu_edit_action_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
-	auto *vf = static_cast<ViewFile *>(data);
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !parameter) return;
 
-	options->show_star_rating = !options->show_star_rating;
+	const gchar *key = g_variant_get_string(parameter, nullptr);
+	file_util_start_editor_from_filelist(key, vf_pop_menu_file_list(vf), vf->dir_fd->path, vf->listview);
+}
 
+static void vf_pop_menu_view_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_view_cb(nullptr, vf_from_action_data(data));
+}
+
+static void vf_pop_menu_open_archive_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_open_archive_cb(nullptr, vf_from_action_data(data));
+}
+
+static void vf_pop_menu_copy_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_copy_cb(nullptr, vf_from_action_data(data));
+}
+
+static void vf_pop_menu_move_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_move_cb(nullptr, vf_from_action_data(data));
+}
+
+static void vf_pop_menu_rename_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_rename_cb(nullptr, vf_from_action_data(data));
+}
+
+template<gboolean safe_delete>
+static void vf_pop_menu_delete_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_delete_cb<safe_delete>(nullptr, vf_from_action_data(data));
+}
+
+template<gboolean quoted>
+static void vf_pop_menu_copy_path_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_copy_path_cb<quoted>(nullptr, vf_from_action_data(data));
+}
+
+static void vf_pop_menu_cut_path_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_cut_path_cb(nullptr, vf_from_action_data(data));
+}
+
+template<gboolean disable>
+static void vf_pop_menu_disable_grouping_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_disable_grouping_cb<disable>(nullptr, vf_from_action_data(data));
+}
+
+static void vf_pop_menu_duplicates_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_duplicates_cb(nullptr, vf_from_action_data(data));
+}
+
+static void vf_pop_menu_set_sort(ViewFile *vf, FileData::FileList::SortSettings sort)
+{
+	if (!vf) return;
+
+	if (sort_type_requires_metadata(sort.method))
+		{
+		vf_read_metadata_in_idle(vf);
+		}
+
+	if (vf->layout)
+		{
+		layout_sort_set_files(vf->layout, sort);
+		}
+	else
+		{
+		vf_sort_set(vf, sort);
+		}
+}
+
+static void vf_pop_menu_sort_action_cb(GSimpleAction *action, GVariant *parameter, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !parameter) return;
+
+	auto sort = vf->sort;
+	sort.method = static_cast<SortType>(g_variant_get_int32(parameter));
+	vf_pop_menu_set_sort(vf, sort);
+
+	g_simple_action_set_state(action, parameter);
+}
+
+static void vf_pop_menu_sort_ascending_action_cb(GSimpleAction *action, GVariant *state, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !state) return;
+
+	auto sort = vf->sort;
+	sort.ascending = g_variant_get_boolean(state);
+	vf_pop_menu_set_sort(vf, sort);
+
+	g_simple_action_set_state(action, state);
+}
+
+static void vf_pop_menu_sort_case_action_cb(GSimpleAction *action, GVariant *state, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !state) return;
+
+	auto sort = vf->sort;
+	sort.case_sensitive = g_variant_get_boolean(state);
+	vf_pop_menu_set_sort(vf, sort);
+
+	g_simple_action_set_state(action, state);
+}
+
+static void vf_pop_menu_mark_to_selection_action_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !parameter) return;
+
+	switch (g_variant_get_int32(parameter))
+		{
+		case MTS_MODE_SET: vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_SET); break;
+		case MTS_MODE_OR: vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_OR); break;
+		case MTS_MODE_AND: vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_AND); break;
+		case MTS_MODE_MINUS: vf_mark_to_selection(vf, vf->active_mark, MTS_MODE_MINUS); break;
+		default: break;
+		}
+}
+
+static void vf_pop_menu_selection_to_mark_action_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !parameter) return;
+
+	switch (g_variant_get_int32(parameter))
+		{
+		case STM_MODE_SET: vf_selection_to_mark(vf, vf->active_mark, STM_MODE_SET); break;
+		case STM_MODE_RESET: vf_selection_to_mark(vf, vf->active_mark, STM_MODE_RESET); break;
+		case STM_MODE_TOGGLE: vf_selection_to_mark(vf, vf->active_mark, STM_MODE_TOGGLE); break;
+		default: break;
+		}
+}
+
+static void vf_pop_menu_view_type_action_cb(GSimpleAction *action, GVariant *parameter, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !vf->layout || !parameter) return;
+
+	auto file_view_type = static_cast<FileViewType>(g_variant_get_int32(parameter));
+	layout_views_set(vf->layout, vf->layout->options.dir_view_type, file_view_type);
+
+	g_simple_action_set_state(action, parameter);
+}
+
+static void vf_pop_menu_show_thumbnails_action_cb(GSimpleAction *action, GVariant *state, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || vf->type != FILEVIEW_LIST || !state) return;
+
+	const gboolean enabled = g_variant_get_boolean(state);
+	vflist_color_set(vf, vf->click_fd, FALSE);
+	if (vf->layout)
+		{
+		layout_thumb_set(vf->layout, enabled);
+		}
+	else
+		{
+		vflist_thumb_set(vf, enabled);
+		}
+
+	g_simple_action_set_state(action, state);
+}
+
+static void vf_pop_menu_show_filename_text_action_cb(GSimpleAction *action, GVariant *state, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || vf->type != FILEVIEW_ICON || !state) return;
+
+	VFICON(vf)->show_text = g_variant_get_boolean(state);
+	options->show_icon_names = VFICON(vf)->show_text;
+	vficon_refresh(vf);
+
+	g_simple_action_set_state(action, state);
+}
+
+static void vf_pop_menu_refresh_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_refresh_cb(nullptr, vf_from_action_data(data));
+}
+
+static void vf_pop_menu_collections_action_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !parameter) return;
+
+	g_autoptr(FileDataList) selection_list = vf_pop_menu_file_list(vf);
+	collection_by_index_add_filelist(g_variant_get_int32(parameter), selection_list);
+}
+
+static void vf_pop_menu_show_star_rating_action_cb(GSimpleAction *action, GVariant *state, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !state) return;
+
+	options->show_star_rating = g_variant_get_boolean(state);
 	switch (vf->type)
-	{
-	case FILEVIEW_LIST: vflist_pop_menu_show_star_rating_cb(vf); break;
-	case FILEVIEW_ICON: vficon_pop_menu_show_star_rating_cb(vf); break;
-	}
+		{
+		case FILEVIEW_LIST: vflist_pop_menu_show_star_rating_cb(vf); break;
+		case FILEVIEW_ICON: vficon_pop_menu_show_star_rating_cb(vf); break;
+		}
+
+	g_simple_action_set_state(action, state);
+}
+
+#include "view-file-actions.inc"
+
+static GSimpleAction *vf_pop_menu_action(ViewFile *vf, const gchar *name)
+{
+	if (!vf || !vf->layout || !vf->layout->window) return nullptr;
+
+	return G_SIMPLE_ACTION(g_action_map_lookup_action(G_ACTION_MAP(vf->layout->window), name));
+}
+
+static void vf_pop_menu_set_action_enabled(ViewFile *vf, const gchar *name, gboolean enabled)
+{
+	GSimpleAction *action = vf_pop_menu_action(vf, name);
+	if (action) g_simple_action_set_enabled(action, enabled);
+}
+
+static void vf_pop_menu_set_boolean_state(ViewFile *vf, const gchar *name, gboolean state)
+{
+	GSimpleAction *action = vf_pop_menu_action(vf, name);
+	if (action) g_simple_action_set_state(action, g_variant_new_boolean(state));
+}
+
+static void vf_pop_menu_set_int32_state(ViewFile *vf, const gchar *name, gint32 state)
+{
+	GSimpleAction *action = vf_pop_menu_action(vf, name);
+	if (action) g_simple_action_set_state(action, g_variant_new_int32(state));
+}
+
+static void gmenu_append_action_item(GMenu *menu, const gchar *label, const gchar *action)
+{
+	g_autoptr(GMenuItem) item = g_menu_item_new(label, action);
+	g_menu_append_item(menu, item);
+}
+
+static void gmenu_append_int32_action_item(GMenu *menu, const gchar *label, const gchar *action, gint32 target)
+{
+	g_autoptr(GMenuItem) item = g_menu_item_new(label, nullptr);
+	g_menu_item_set_action_and_target(item, action, "i", target);
+	g_menu_append_item(menu, item);
 }
 
 GtkWidget *vf_pop_menu(ViewFile *vf)
 {
-	GtkWidget *menu;
-	GtkWidget *submenu;
 	gboolean active = FALSE;
 	gboolean class_archive = FALSE;
 
@@ -626,121 +772,98 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	active = (vf->click_fd != nullptr);
 	class_archive = (vf->click_fd != nullptr && vf->click_fd->format_class == FORMAT_CLASS_ARCHIVE);
 
-	menu = popup_menu_short_lived();
-
-	/* Temporary GTK4 stub: old GtkMenu accel groups are disabled until this menu is ported. */
-
-	g_signal_connect(G_OBJECT(menu), "destroy",
-			 G_CALLBACK(vf_popup_destroy_cb), vf);
+	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-view-file.ui");
+	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-view-file"));
 
 	if (vf->clicked_mark > 0)
 		{
 		gint mark = vf->clicked_mark;
-		g_autofree gchar *str_set_mark = g_strdup_printf(_("_Set mark %d"), mark);
-		g_autofree gchar *str_res_mark = g_strdup_printf(_("_Reset mark %d"), mark);
-		g_autofree gchar *str_toggle_mark = g_strdup_printf(_("_Toggle mark %d"), mark);
-		g_autofree gchar *str_sel_mark = g_strdup_printf(_("_Select mark %d"), mark);
-		g_autofree gchar *str_sel_mark_or = g_strdup_printf(_("_Add mark %d"), mark);
-		g_autofree gchar *str_sel_mark_and = g_strdup_printf(_("_Intersection with mark %d"), mark);
-		g_autofree gchar *str_sel_mark_minus = g_strdup_printf(_("_Unselect mark %d"), mark);
+		g_autofree gchar *str_set_mark = g_strdup_printf(_("Set mark %d"), mark);
+		g_autofree gchar *str_res_mark = g_strdup_printf(_("Reset mark %d"), mark);
+		g_autofree gchar *str_toggle_mark = g_strdup_printf(_("Toggle mark %d"), mark);
+		g_autofree gchar *str_sel_mark = g_strdup_printf(_("Select mark %d"), mark);
+		g_autofree gchar *str_sel_mark_or = g_strdup_printf(_("Add mark %d"), mark);
+		g_autofree gchar *str_sel_mark_and = g_strdup_printf(_("Intersection with mark %d"), mark);
+		g_autofree gchar *str_sel_mark_minus = g_strdup_printf(_("Unselect mark %d"), mark);
 
 		g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
 
 		vf->active_mark = mark;
 		vf->clicked_mark = 0;
 
-		menu_item_add_sensitive(menu, str_set_mark, active,
-		                        G_CALLBACK(vf_pop_menu_selection_to_mark_cb<STM_MODE_SET>), vf);
-
-		menu_item_add_sensitive(menu, str_res_mark, active,
-		                        G_CALLBACK(vf_pop_menu_selection_to_mark_cb<STM_MODE_RESET>), vf);
-
-		menu_item_add_sensitive(menu, str_toggle_mark, active,
-		                        G_CALLBACK(vf_pop_menu_selection_to_mark_cb<STM_MODE_TOGGLE>), vf);
-
-		menu_item_add_divider(menu);
-
-		menu_item_add_sensitive(menu, str_sel_mark, active,
-		                        G_CALLBACK(vf_pop_menu_mark_to_selection_cb<MTS_MODE_SET>), vf);
-		menu_item_add_sensitive(menu, str_sel_mark_or, active,
-		                        G_CALLBACK(vf_pop_menu_mark_to_selection_cb<MTS_MODE_OR>), vf);
-		menu_item_add_sensitive(menu, str_sel_mark_and, active,
-		                        G_CALLBACK(vf_pop_menu_mark_to_selection_cb<MTS_MODE_AND>), vf);
-		menu_item_add_sensitive(menu, str_sel_mark_minus, active,
-		                        G_CALLBACK(vf_pop_menu_mark_to_selection_cb<MTS_MODE_MINUS>), vf);
-
-		menu_item_add_divider(menu);
+		GMenu *marks_menu = G_MENU(gtk_builder_get_object(builder, "marks-section"));
+		gmenu_append_int32_action_item(marks_menu, str_set_mark, "win.view-file-selection-to-mark", STM_MODE_SET);
+		gmenu_append_int32_action_item(marks_menu, str_res_mark, "win.view-file-selection-to-mark", STM_MODE_RESET);
+		gmenu_append_int32_action_item(marks_menu, str_toggle_mark, "win.view-file-selection-to-mark", STM_MODE_TOGGLE);
+		gmenu_append_int32_action_item(marks_menu, str_sel_mark, "win.view-file-mark-to-selection", MTS_MODE_SET);
+		gmenu_append_int32_action_item(marks_menu, str_sel_mark_or, "win.view-file-mark-to-selection", MTS_MODE_OR);
+		gmenu_append_int32_action_item(marks_menu, str_sel_mark_and, "win.view-file-mark-to-selection", MTS_MODE_AND);
+		gmenu_append_int32_action_item(marks_menu, str_sel_mark_minus, "win.view-file-mark-to-selection", MTS_MODE_MINUS);
 		}
 
 	vf->editmenu_fd_list = vf_pop_menu_file_list(vf);
-	submenu_add_edit(menu, active, vf->editmenu_fd_list, G_CALLBACK(vf_pop_menu_edit_cb), vf);
+	GMenu *plugins_menu = G_MENU(gtk_builder_get_object(builder, "plugins-submenu"));
+	plugins_menu_populate(plugins_menu, "win.view-file-plugin-run", vf->editmenu_fd_list);
 
-	menu_item_add_icon_sensitive(menu, _("View in _new window"), GQ_ICON_NEW, active,
-				      G_CALLBACK(vf_pop_menu_view_cb), vf);
+	GMenu *collections_menu = G_MENU(gtk_builder_get_object(builder, "collections-submenu"));
+	submenu_add_collections_new(collections_menu, active, "win.view-file-collections", vf);
 
-	menu_item_add_icon_sensitive(menu, _("Open archive"), GQ_ICON_OPEN, active & class_archive, G_CALLBACK(vf_pop_menu_open_archive_cb), vf);
+	GMenu *sort_menu = G_MENU(gtk_builder_get_object(builder, "sort-submenu"));
+	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
+	                                  SORT_EXIFTIMEDIGITIZED, SORT_SIZE, SORT_RATING, SORT_CLASS })
+		{
+		gmenu_append_int32_action_item(sort_menu, sort_type_get_text(sort_type), "win.view-file-sort", sort_type);
+		}
 
-	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, _("_Copy…"), GQ_ICON_COPY, active,
-				      G_CALLBACK(vf_pop_menu_copy_cb), vf);
-	menu_item_add_sensitive(menu, _("_Move…"), active,
-				G_CALLBACK(vf_pop_menu_move_cb), vf);
-	menu_item_add_sensitive(menu, _("_Rename…"), active,
-				G_CALLBACK(vf_pop_menu_rename_cb), vf);
-	menu_item_add_sensitive(menu, _("_Copy to clipboard"), active,
-	                        G_CALLBACK(vf_pop_menu_copy_path_cb<TRUE>), vf);
-	menu_item_add_sensitive(menu, _("_Copy to clipboard (unquoted)"), active,
-	                        G_CALLBACK(vf_pop_menu_copy_path_cb<FALSE>), vf);
-	menu_item_add_sensitive(menu, _("_Cut to clipboard"), active,
-				G_CALLBACK(vf_pop_menu_cut_path_cb), vf);
-	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_move_to_trash ?
-	                                 _("Move selection to Trash…") : _("Move selection to Trash"),
-	                             GQ_ICON_DELETE, active,
-	                             G_CALLBACK(vf_pop_menu_delete_cb<TRUE>), vf);
-	menu_item_add_icon_sensitive(menu, options->file_ops.confirm_delete ?
-	                                 _("_Delete selection…") : _("_Delete selection"),
-	                             GQ_ICON_DELETE_SHRED, active,
-	                             G_CALLBACK(vf_pop_menu_delete_cb<FALSE>), vf);
-	menu_item_add_divider(menu);
-
-	menu_item_add_sensitive(menu, _("Enable file _grouping"), active,
-	                        G_CALLBACK(vf_pop_menu_disable_grouping_cb<FALSE>), vf);
-	menu_item_add_sensitive(menu, _("Disable file groupi_ng"), active,
-	                        G_CALLBACK(vf_pop_menu_disable_grouping_cb<TRUE>), vf);
-
-	menu_item_add_divider(menu);
-	menu_item_add_icon_sensitive(menu, _("_Find duplicates…"), GQ_ICON_FIND, active,
-				G_CALLBACK(vf_pop_menu_duplicates_cb), vf);
-	menu_item_add_divider(menu);
-
-	submenu = submenu_add_collections(menu, active,
-	                                  G_CALLBACK(vf_pop_menu_collections_cb), vf);
-	menu_item_add_divider(menu);
-
-	submenu = submenu_add_sort(menu, G_CALLBACK(vf_pop_menu_sort_cb), vf,
-	                           TRUE, vf->sort.method);
-	menu_item_add_divider(submenu);
-	menu_item_add_check(submenu, _("Ascending"), vf->sort.ascending,
-	                    G_CALLBACK(vf_pop_menu_sort_ascend_cb), vf);
-	menu_item_add_check(submenu, _("Case"), vf->sort.case_sensitive,
-	                    G_CALLBACK(vf_pop_menu_sort_case_cb), vf);
-
-	menu_item_add_radio(menu, _("Images as List"), nullptr, vf->type == FILEVIEW_LIST,
-	                    G_CALLBACK(vf_pop_menu_toggle_view_type_cb<FILEVIEW_LIST>), vf);
-	menu_item_add_radio(menu, _("Images as Icons"), nullptr, vf->type == FILEVIEW_ICON,
-	                    G_CALLBACK(vf_pop_menu_toggle_view_type_cb<FILEVIEW_ICON>), vf);
-
+	GMenu *view_specific_menu = G_MENU(gtk_builder_get_object(builder, "view-specific-section"));
 	switch (vf->type)
-	{
-	case FILEVIEW_LIST: vflist_pop_menu_add_items(vf, menu); break;
-	case FILEVIEW_ICON: vficon_pop_menu_add_items(vf, menu); break;
-	}
+		{
+		case FILEVIEW_LIST:
+			gmenu_append_action_item(view_specific_menu, _("Show thumbnails"), "win.view-file-show-thumbnails");
+			vf_pop_menu_set_boolean_state(vf, "view-file-show-thumbnails", VFLIST(vf)->thumbs_enabled);
+			break;
+		case FILEVIEW_ICON:
+			gmenu_append_action_item(view_specific_menu, _("Show filename text"), "win.view-file-show-filename-text");
+			vf_pop_menu_set_boolean_state(vf, "view-file-show-filename-text", VFICON(vf)->show_text);
+			break;
+		}
 
-	menu_item_add_check(menu, _("Show star rating"), options->show_star_rating,
-	                    G_CALLBACK(vf_pop_menu_show_star_rating_cb), vf);
+	vf_pop_menu_set_action_enabled(vf, "view-file-plugin-run", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-view-new", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-open-archive", active && class_archive);
+	vf_pop_menu_set_action_enabled(vf, "view-file-copy", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-move", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-rename", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-copy-path", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-copy-path-unquoted", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-cut-path", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-delete", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-delete-permanent", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-enable-grouping", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-disable-grouping", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-duplicates", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-collections", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-mark-to-selection", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-selection-to-mark", active);
 
-	menu_item_add_icon(menu, _("Re_fresh"), GQ_ICON_REFRESH, G_CALLBACK(vf_pop_menu_refresh_cb), vf);
+	if (options->file_ops.confirm_move_to_trash)
+		{
+		menu_item_include_ellipsis(G_MENU_MODEL(menu_model), "win.view-file-delete");
+		}
+	if (options->file_ops.confirm_delete)
+		{
+		menu_item_include_ellipsis(G_MENU_MODEL(menu_model), "win.view-file-delete-permanent");
+		}
+
+	vf_pop_menu_set_int32_state(vf, "view-file-sort", vf->sort.method);
+	vf_pop_menu_set_boolean_state(vf, "view-file-sort-ascending", vf->sort.ascending);
+	vf_pop_menu_set_boolean_state(vf, "view-file-sort-case", vf->sort.case_sensitive);
+	vf_pop_menu_set_int32_state(vf, "view-file-view-type", vf->type);
+	vf_pop_menu_set_boolean_state(vf, "view-file-show-star-rating", options->show_star_rating);
+
+	GtkWidget *menu = popup_menu(menu_model, vf->listview);
+	g_signal_connect(G_OBJECT(menu), "destroy",
+			 G_CALLBACK(vf_popup_destroy_cb), vf);
 
 	return menu;
 }
@@ -1672,6 +1795,18 @@ guint vf_class_get_filter(ViewFile *vf)
 void vf_set_layout(ViewFile *vf, LayoutWindow *layout)
 {
 	vf->layout = layout;
+
+	if (layout && layout->window &&
+	    !g_action_map_lookup_action(G_ACTION_MAP(layout->window), "view-file-view-new"))
+		{
+		auto *application = GTK_APPLICATION(gtk_window_get_application(GTK_WINDOW(layout->window)));
+		register_actions_from_table(application, layout->window, view_file_actions, get_keyfile_merged(), layout);
+		}
+}
+
+const ActionDef *get_view_file_actions()
+{
+	return view_file_actions;
 }
 
 

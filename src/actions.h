@@ -46,6 +46,7 @@ const ActionDef *get_app_actions();
 const ActionDef *get_main_actions();
 const ActionDef *get_pan_view_actions();
 const ActionDef *get_search_actions();
+const ActionDef *get_view_file_actions();
 
 void register_actions_from_table(GtkApplication *app, GtkWidget *window, const ActionDef *defs, GKeyFile *accels_keyfile, gpointer user_data);
 const char *get_icon_for_action_name(const char *action_name);

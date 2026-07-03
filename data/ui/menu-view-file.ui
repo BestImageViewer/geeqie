@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu-view-file">
+    <section id="marks-section" />
+    <section>
+      <submenu>
+        <section id="plugins-submenu" />
+        <attribute name="label" translatable="yes">Plugins</attribute>
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.view-file-view-new</attribute>
+        <attribute name="label" translatable="yes">View in new window</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-open-archive</attribute>
+        <attribute name="label" translatable="yes">Open archive</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.view-file-copy</attribute>
+        <attribute name="label" translatable="yes">Copy…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-move</attribute>
+        <attribute name="label" translatable="yes">Move…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-rename</attribute>
+        <attribute name="label" translatable="yes">Rename…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-copy-path</attribute>
+        <attribute name="label" translatable="yes">Copy path</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-copy-path-unquoted</attribute>
+        <attribute name="label" translatable="yes">Copy path unquoted</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-cut-path</attribute>
+        <attribute name="label" translatable="yes">Cut path</attribute>
+      </item>
+    </section>
+    <section id="delete-section">
+      <item>
+        <attribute name="action">win.view-file-delete</attribute>
+        <attribute name="label" translatable="yes">Move selection to trash</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-delete-permanent</attribute>
+        <attribute name="label" translatable="yes">Delete selection</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.view-file-enable-grouping</attribute>
+        <attribute name="label" translatable="yes">Enable file grouping</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-disable-grouping</attribute>
+        <attribute name="label" translatable="yes">Disable file grouping</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.view-file-duplicates</attribute>
+        <attribute name="label" translatable="yes">Find duplicates…</attribute>
+      </item>
+      <submenu>
+        <attribute name="label" translatable="yes">Add to Collection</attribute>
+        <section>
+          <item>
+            <attribute name="action">win.view-file-collections</attribute>
+            <attribute name="label" translatable="yes">New collection</attribute>
+            <attribute name="target" type="i">-1</attribute>
+          </item>
+        </section>
+        <section id="collections-submenu" />
+      </submenu>
+    </section>
+    <section>
+      <submenu>
+        <attribute name="label" translatable="yes">Sort</attribute>
+        <section id="sort-submenu" />
+        <section>
+          <item>
+            <attribute name="action">win.view-file-sort-ascending</attribute>
+            <attribute name="label" translatable="yes">Ascending</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.view-file-sort-case</attribute>
+            <attribute name="label" translatable="yes">Case</attribute>
+          </item>
+        </section>
+      </submenu>
+      <submenu>
+        <attribute name="label" translatable="yes">View</attribute>
+        <section>
+          <item>
+            <attribute name="action">win.view-file-view-type</attribute>
+            <attribute name="target" type="i">0</attribute>
+            <attribute name="label" translatable="yes">Images as List</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.view-file-view-type</attribute>
+            <attribute name="target" type="i">1</attribute>
+            <attribute name="label" translatable="yes">Images as Icons</attribute>
+          </item>
+        </section>
+        <section id="view-specific-section" />
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.view-file-show-star-rating</attribute>
+        <attribute name="label" translatable="yes">Show star rating</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-refresh</attribute>
+        <attribute name="label" translatable="yes">Refresh</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>
