@@ -1945,6 +1945,8 @@ static void dupe_thumb_step(DupeWindow *dw)
 
 static void dupe_check_stop(DupeWindow *dw)
 {
+	if (!dw) return;
+
 	g_clear_handle_id(&dw->idle_id, g_source_remove);
 
 	dw->abort = TRUE;
@@ -3961,6 +3963,13 @@ static void dupe_window_close_cb(GSimpleAction *, GVariant *, gpointer data)
 	dupe_window_close(dw);
 }
 
+static void dupe_window_close_button_cb(GtkWidget *, gpointer data)
+{
+	auto dw = static_cast<DupeWindow *>(data);
+
+	dupe_window_close(dw);
+}
+
 static gint dupe_window_delete(GtkWidget *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
@@ -4473,7 +4482,7 @@ DupeWindow *dupe_window_new()
 	gq_gtk_container_add(hbox, button);
 	gtk_widget_show(button);
 
-	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(dupe_window_close), dw);
+	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(dupe_window_close_button_cb), dw);
 	gtk_widget_set_tooltip_text(button, _("Ctrl-W"));
 	gq_gtk_container_add(hbox, button);
 	gtk_window_set_default_widget(GTK_WINDOW(dw->window), button);
