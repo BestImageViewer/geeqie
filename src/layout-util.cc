@@ -2873,7 +2873,10 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 
 	if (lw->toolbar[type])
 		{
-		gq_gtk_container_foreach(lw->toolbar[type], toolbar_clear_cb, nullptr);
+		while (GtkWidget *child = gtk_widget_get_first_child(lw->toolbar[type]))
+			{
+			toolbar_clear_cb(child, nullptr);
+			}
 		}
 }
 
