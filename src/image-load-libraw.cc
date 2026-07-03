@@ -37,7 +37,6 @@
 
 #include <libraw/libraw.h>
 
-#include "filefilter.h"
 #include "ui-fileops.h"
 
 struct UnmapData
@@ -72,10 +71,9 @@ void libraw_free_preview(const guchar *buf)
 
 guchar *libraw_get_preview(const gchar *path, gsize &data_len)
 {
-	if (!filter_file_class(path, FORMAT_CLASS_RAWIMAGE)) return nullptr;
-
 	size_t map_len;
-	guchar *map_data = map_file(path, map_len);
+	g_autofree gchar *pathl = path_from_utf8(path);
+	guchar *map_data = map_file(pathl, map_len);
 	if (!map_data)
 		{
 		return nullptr;
