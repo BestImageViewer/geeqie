@@ -1160,7 +1160,7 @@ static void case_sensitive_cb(GtkWidget *widget, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	vf->file_filter.case_sensitive = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	vf->file_filter.case_sensitive = gtk_check_button_get_active(GTK_CHECK_BUTTON(widget));
 	vf_refresh(vf);
 }
 
@@ -1252,8 +1252,8 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 void vf_mark_filter_toggle(ViewFile *vf, gint mark)
 {
 	gint n = mark - 1;
-	auto *filter_check = GTK_TOGGLE_BUTTON(vf->filter_check[n]);
-	gtk_toggle_button_set_active(filter_check, !gtk_toggle_button_get_active(filter_check));
+	auto *filter_check = GTK_CHECK_BUTTON(vf->filter_check[n]);
+	gtk_check_button_set_active(filter_check, !gtk_check_button_get_active(filter_check));
 }
 
 ViewFile *vf_new(FileViewType type, FileData *dir_fd)
@@ -1616,7 +1616,7 @@ guint vf_marks_get_filter(ViewFile *vf)
 
 	for (i = 0; i < FILEDATA_MARKS_SIZE ; i++)
 		{
-		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(vf->filter_check[i])))
+		if (gtk_check_button_get_active(GTK_CHECK_BUTTON(vf->filter_check[i])))
 			{
 			ret |= 1 << i;
 			}

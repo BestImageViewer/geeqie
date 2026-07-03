@@ -1305,7 +1305,7 @@ static void filter_disable_cb(GtkWidget *widget, gpointer data)
 	auto frame = static_cast<GtkWidget *>(data);
 
 	gtk_widget_set_sensitive(frame,
-				 !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+				 !gtk_check_button_get_active(GTK_CHECK_BUTTON(widget)));
 }
 
 static void safe_delete_view_cb(GtkWidget *, gpointer)
@@ -1632,7 +1632,7 @@ static GtkWidget *scrolled_notebook_page(GtkWidget *notebook, const gchar *title
 
 static void cache_standard_cb(GtkWidget *widget, gpointer)
 {
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(widget)))
 		{
 		c_options->thumbnails.spec_standard =TRUE;
 		c_options->thumbnails.cache_into_dirs = FALSE;
@@ -1641,7 +1641,7 @@ static void cache_standard_cb(GtkWidget *widget, gpointer)
 
 static void cache_geeqie_cb(GtkWidget *widget, gpointer)
 {
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(widget)))
 		{
 		c_options->thumbnails.spec_standard =FALSE;
 		c_options->thumbnails.cache_into_dirs = FALSE;
@@ -1650,7 +1650,7 @@ static void cache_geeqie_cb(GtkWidget *widget, gpointer)
 
 static void cache_local_cb(GtkWidget *widget, gpointer)
 {
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(widget)))
 		{
 		c_options->thumbnails.cache_into_dirs = TRUE;
 		c_options->thumbnails.spec_standard =FALSE;
@@ -3159,7 +3159,7 @@ static void config_tab_color(GtkWidget *notebook)
 template<gboolean use_system_trash>
 static void use_trash_cb(GtkWidget *widget, gpointer)
 {
-	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	c_options->file_ops.use_system_trash = use_system_trash;
 	c_options->file_ops.no_trash = FALSE;
@@ -3167,7 +3167,7 @@ static void use_trash_cb(GtkWidget *widget, gpointer)
 
 static void use_no_trash_cb(GtkWidget *widget, gpointer)
 {
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(widget)))
 		{
 		c_options->file_ops.no_trash = TRUE;
 		}

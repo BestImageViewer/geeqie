@@ -161,7 +161,7 @@ gint set_toggle(const std::array<GtkWidget *, 4> &group, TextPosition pos)
 	gint new_pos = - 1;
 
 	GtkWidget *current_sel = group[pos];
-	if (current_sel && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_sel)))
+	if (current_sel && gtk_check_button_get_active(GTK_CHECK_BUTTON(current_sel)))
 		{
 		new_pos = (pos - 1);
 		if (new_pos < 0)
@@ -169,7 +169,7 @@ gint set_toggle(const std::array<GtkWidget *, 4> &group, TextPosition pos)
 			new_pos = HEADER_1;
 			}
 		GtkWidget *new_sel = group[new_pos];
-		if (new_sel) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(new_sel), TRUE);
+		if (new_sel) gtk_check_button_set_active(GTK_CHECK_BUTTON(new_sel), TRUE);
 		}
 	return new_pos;
 }
@@ -177,7 +177,7 @@ gint set_toggle(const std::array<GtkWidget *, 4> &group, TextPosition pos)
 template<TextPosition pos>
 void image_text_position_cb(GtkWidget *widget, gpointer data)
 {
-	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set = set_toggle(pw->page_group, pos);
@@ -192,7 +192,7 @@ void image_text_position_cb(GtkWidget *widget, gpointer data)
 template<TextPosition pos>
 void page_text_position_cb(GtkWidget *widget, gpointer data)
 {
-	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	auto pw = static_cast<PrintWindow *>(data);
 	gint new_set = set_toggle(pw->image_group, pos);

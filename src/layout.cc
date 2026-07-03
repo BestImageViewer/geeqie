@@ -2321,7 +2321,7 @@ static void home_path_set_current_cb(GtkWidget *, gpointer data)
 template<StartUpPath startup_path>
 static void startup_path_set_cb(GtkWidget *widget, gpointer data)
 {
-	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
 
 	auto *lc = static_cast<LayoutConfig *>(data);
 	lc->options.startup_path = startup_path;

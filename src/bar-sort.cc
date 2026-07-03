@@ -345,7 +345,7 @@ static void bar_sort_set_action(SortData *sd, BarSort::Action action, const gcha
 template<BarSort::Action action>
 static void bar_sort_set_action_cb(GtkWidget *button, gpointer data)
 {
-	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(button))) return;
 
 	auto *sd = static_cast<SortData *>(data);
 	const auto *key = static_cast<const gchar *>(g_object_get_data(G_OBJECT(button), "filter_key"));
@@ -393,7 +393,7 @@ static void bar_sort_help_cb(gpointer)
 template<BarSort::Selection selection>
 static void bar_sort_set_selection_cb(GtkWidget *button, gpointer data)
 {
-	if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))) return;
+	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(button))) return;
 
 	auto *sd = static_cast<SortData *>(data);
 	sd->selection = selection;

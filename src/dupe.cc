@@ -3432,7 +3432,7 @@ static void dupe_second_set_toggle_cb(GtkWidget *widget, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	dw->second_set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	dw->second_set = gtk_check_button_get_active(GTK_CHECK_BUTTON(widget));
 
 	if (dw->second_set)
 		{
@@ -3452,7 +3452,7 @@ static void dupe_sort_totals_toggle_cb(GtkWidget *widget, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	options->sort_totals = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	options->sort_totals = gtk_check_button_get_active(GTK_CHECK_BUTTON(widget));
 	dupe_window_recompare(dw);
 
 }
@@ -3641,7 +3641,7 @@ static void dupe_window_show_thumb_cb(GtkWidget *widget, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	dw->show_thumbs = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	dw->show_thumbs = gtk_check_button_get_active(GTK_CHECK_BUTTON(widget));
 	options->duplicates_thumbnails = dw->show_thumbs;
 
 	if (dw->show_thumbs)
@@ -3675,7 +3675,7 @@ static void dupe_window_rotation_invariant_cb(GtkWidget *widget, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
 
-	options->rot_invariant_sim = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	options->rot_invariant_sim = gtk_check_button_get_active(GTK_CHECK_BUTTON(widget));
 	dupe_window_recompare(dw);
 }
 
@@ -3798,8 +3798,8 @@ static gboolean dupe_window_keypress_cb(GtkEventControllerKey *controller, guint
 					break;
 				case 'T': case 't':
 					{
-					auto *button_thumbs = GTK_TOGGLE_BUTTON(dw->button_thumbs);
-					gtk_toggle_button_set_active(button_thumbs, !gtk_toggle_button_get_active(button_thumbs));
+					auto *button_thumbs = GTK_CHECK_BUTTON(dw->button_thumbs);
+					gtk_check_button_set_active(button_thumbs, !gtk_check_button_get_active(button_thumbs));
 					}
 					break;
 				case 'W': case 'w':
@@ -4410,7 +4410,7 @@ DupeWindow *dupe_window_new()
 	dw->button_thumbs = gtk_check_button_new_with_label(_("Thumbnails"));
 	gtk_widget_set_tooltip_text(dw->button_thumbs, _("Ctrl-T"));
 	dw->show_thumbs = options->duplicates_thumbnails;
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dw->button_thumbs), dw->show_thumbs);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_thumbs), dw->show_thumbs);
 	g_signal_connect(G_OBJECT(dw->button_thumbs), "toggled",
 			 G_CALLBACK(dupe_window_show_thumb_cb), dw);
 	gq_gtk_box_pack_start(GTK_BOX(controls_box), dw->button_thumbs, FALSE, FALSE, PREF_PAD_SPACE);
@@ -4436,21 +4436,21 @@ DupeWindow *dupe_window_new()
 
 	button = gtk_check_button_new_with_label(_("Sort"));
 	gtk_widget_set_tooltip_text(button, _("Sort by group totals"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), options->sort_totals);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(button), options->sort_totals);
 	g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(dupe_sort_totals_toggle_cb), dw);
 	gq_gtk_box_pack_start(GTK_BOX(controls_box), button, FALSE, FALSE, PREF_PAD_SPACE);
 	gtk_widget_show(button);
 
 	dw->button_rotation_invariant = gtk_check_button_new_with_label(_("Ignore Orientation"));
 	gtk_widget_set_tooltip_text(dw->button_rotation_invariant, _("Ignore image orientation"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dw->button_rotation_invariant), options->rot_invariant_sim);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_rotation_invariant), options->rot_invariant_sim);
 	g_signal_connect(G_OBJECT(dw->button_rotation_invariant), "toggled",
 			 G_CALLBACK(dupe_window_rotation_invariant_cb), dw);
 	gq_gtk_box_pack_start(GTK_BOX(controls_box), dw->button_rotation_invariant, FALSE, FALSE, PREF_PAD_SPACE);
 	gtk_widget_show(dw->button_rotation_invariant);
 
 	button = gtk_check_button_new_with_label(_("Compare two file sets"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), dw->second_set);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(button), dw->second_set);
 	g_signal_connect(G_OBJECT(button), "toggled",
 			 G_CALLBACK(dupe_second_set_toggle_cb), dw);
 	gq_gtk_box_pack_start(GTK_BOX(controls_box), button, FALSE, FALSE, PREF_PAD_SPACE);

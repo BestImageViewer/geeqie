@@ -1564,7 +1564,7 @@ static void pan_warning_hide_cb(GtkWidget *button, gpointer)
 {
 	gboolean hide_dlg;
 
-	hide_dlg = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	hide_dlg = gtk_check_button_get_active(GTK_CHECK_BUTTON(button));
 	pref_list_int_set(PAN_PREF_GROUP, PAN_PREF_HIDE_WARNING, hide_dlg);
 }
 

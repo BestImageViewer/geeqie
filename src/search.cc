@@ -1111,8 +1111,8 @@ static void search_thumbnails_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *sd = static_cast<SearchData *>(data);
 
-	auto *button_thumbs = GTK_TOGGLE_BUTTON(sd->ui.button_thumbs);
-	gtk_toggle_button_set_active(button_thumbs, !gtk_toggle_button_get_active(button_thumbs));
+	auto *button_thumbs = GTK_CHECK_BUTTON(sd->ui.button_thumbs);
+	gtk_check_button_set_active(button_thumbs, !gtk_check_button_get_active(button_thumbs));
 }
 
 static void search_result_menu_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -2444,7 +2444,7 @@ static void search_thumb_toggle_cb(GtkWidget *button, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	search_result_thumb_enable(sd, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)));
+	search_result_thumb_enable(sd, gtk_check_button_get_active(GTK_CHECK_BUTTON(button)));
 }
 
 static gint search_result_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
@@ -2625,7 +2625,7 @@ static void menu_choice_check_cb(GtkWidget *button, gpointer data)
 	gboolean active;
 	gboolean *value;
 
-	active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+	active = gtk_check_button_get_active(GTK_CHECK_BUTTON(button));
 	gtk_widget_set_sensitive(widget, active);
 
 	value = static_cast<gboolean *>(g_object_get_data(G_OBJECT(button), "check_var"));
@@ -2676,7 +2676,7 @@ static GtkWidget *menu_choice(GtkWidget *box, const gchar *text, gboolean *value
 	gtk_widget_show(base_box);
 
 	button = gtk_check_button_new();
-	if (value) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), *value);
+	if (value) gtk_check_button_set_active(GTK_CHECK_BUTTON(button), *value);
 	gq_gtk_box_pack_start(GTK_BOX(base_box), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 	if (check) *check = button;

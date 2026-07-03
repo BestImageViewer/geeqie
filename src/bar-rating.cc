@@ -59,7 +59,7 @@ static void bar_pane_rating_update(PaneRatingData *prd)
 
 	rating = metadata_read_int(prd->fd, RATING_KEY, 0) + 1;
 
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(prd->rating_buttons[rating]), TRUE);
+	gtk_check_button_set_active(prd->rating_buttons[rating], TRUE);
 }
 
 static void bar_pane_rating_set_fd(GtkWidget *pane, FileData *fd)

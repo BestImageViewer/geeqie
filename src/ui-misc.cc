@@ -274,7 +274,7 @@ static GtkWidget *real_pref_checkbox_new(GtkWidget *parent_box, const gchar *tex
 		{
 		button = gtk_check_button_new_with_label(text);
 	}
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), active);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(button), active);
 	if (func) g_signal_connect(G_OBJECT(button), "toggled", func, data);
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
@@ -293,7 +293,7 @@ static void pref_checkbox_int_cb(GtkWidget *widget, gpointer data)
 {
 	auto result = static_cast<gboolean *>(data);
 
-	*result = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	*result = gtk_check_button_get_active(GTK_CHECK_BUTTON(widget));
 }
 
 GtkWidget *pref_checkbox_new_int(GtkWidget *parent_box, const gchar *text, gboolean active,
@@ -312,7 +312,7 @@ static void pref_checkbox_link_sensitivity_cb(GtkWidget *button, gpointer data)
 {
 	auto widget = static_cast<GtkWidget *>(data);
 
-	gtk_widget_set_sensitive(widget, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)));
+	gtk_widget_set_sensitive(widget, gtk_check_button_get_active(GTK_CHECK_BUTTON(button)));
 }
 
 void pref_checkbox_link_sensitivity(GtkWidget *button, GtkWidget *widget)
@@ -350,7 +350,7 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 		gtk_check_button_set_group(GTK_CHECK_BUTTON(button), group);
 		}
 
-	if (active) gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), active);
+	if (active) gtk_check_button_set_active(GTK_CHECK_BUTTON(button), active);
 	if (func) g_signal_connect(G_OBJECT(button), "toggled", func, data);
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
