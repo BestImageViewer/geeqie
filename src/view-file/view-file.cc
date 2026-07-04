@@ -1279,6 +1279,25 @@ static GtkWidget *rating_filter_menu(ViewFile *vf)
 	return menu;
 }
 
+static GtkWidget *file_filter_menu_button_new(const gchar *label_text, const gchar *tooltip_text, GtkWidget *menu)
+{
+	GtkWidget *button = gtk_menu_button_new();
+	GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
+	GtkWidget *label = gtk_label_new(label_text);
+	GtkWidget *icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
+	GtkWidget *popover = gtk_popover_new();
+
+	gtk_box_append(GTK_BOX(content), label);
+	gtk_box_append(GTK_BOX(content), icon);
+	gtk_menu_button_set_child(GTK_MENU_BUTTON(button), content);
+	gtk_widget_set_tooltip_text(button, tooltip_text);
+
+	gtk_popover_set_child(GTK_POPOVER(popover), menu);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(button), popover);
+
+	return button;
+}
+
 static void case_sensitive_cb(GtkWidget *widget, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -1300,8 +1319,6 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	GtkWidget *frame = gtk_frame_new(nullptr);
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	GtkWidget *combo_entry;
-	GtkWidget *icon;
-	GtkWidget *label;
 
 	vf->file_filter.combo = gtk_combo_box_text_new_with_entry();
 	combo_entry = gtk_combo_box_get_child(GTK_COMBO_BOX(vf->file_filter.combo));
@@ -1349,25 +1366,13 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	g_signal_connect(G_OBJECT(case_sensitive), "toggled", G_CALLBACK(case_sensitive_cb), vf);
 	gtk_widget_show(case_sensitive);
 
-	/* Temporary GTK4 stub: the old class/rating GtkMenuBar filter UI is disabled until ported. */
-	GtkWidget *box_class = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
-	label = gtk_label_new(_("Class"));
+	GtkWidget *class_button = file_filter_menu_button_new(_("Class"), _("Select Class filter"), class_filter_menu(vf));
+	gq_gtk_box_pack_start(GTK_BOX(hbox), class_button, FALSE, TRUE, 0);
+	gtk_widget_show(class_button);
 
-	gq_gtk_box_pack_start(GTK_BOX(box_class), label, FALSE, FALSE, 0);
-	gq_gtk_box_pack_start(GTK_BOX(box_class), icon, FALSE, FALSE, 0);
-
-	GtkWidget *box_rating = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
-	label = gtk_label_new(_("Rating"));
-
-	gq_gtk_box_pack_start(GTK_BOX(box_rating), label, FALSE, FALSE, 0);
-	gq_gtk_box_pack_end(GTK_BOX(box_rating), icon, FALSE, FALSE, 0);
-
-	(void)box_class;
-	(void)box_rating;
-	(void)icon;
-	(void)label;
+	GtkWidget *rating_button = file_filter_menu_button_new(_("Rating"), _("Select Rating filter"), rating_filter_menu(vf));
+	gq_gtk_box_pack_start(GTK_BOX(hbox), rating_button, FALSE, TRUE, 0);
+	gtk_widget_show(rating_button);
 
 	return frame;
 }
