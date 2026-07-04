@@ -46,7 +46,6 @@
 #include "collect-io.h"
 #include "collect.h"
 #include "color-man.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "desktop-file.h"
 #include "dupe.h"
@@ -66,7 +65,6 @@
 #include "logwindow.h"
 #include "main-defines.h"
 #include "main.h"
-#include "menu.h"
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
@@ -3133,35 +3131,26 @@ void layout_util_status_update_write(LayoutWindow *lw)
 	const gchar *icon_name = n > 0 ? GQ_ICON_SAVE_AS : GQ_ICON_SAVE;
 	g_autofree const gchar *icon_tooltip= n > 0 ? g_strdup_printf("Number of files with unsaved metadata: %d",n) : g_strdup("No unsaved metadata");
 
-	struct UpdateIconData
-		{
-		GAction *act;
-		const gchar *name;
-		const gchar *tooltip;
-		};
-
-	static const auto update_icon_cb = [](GtkWidget *widget, gpointer data)
-		{
-		auto *uid = static_cast<UpdateIconData *>(data);
-		if (!GTK_IS_BUTTON(widget)) return;
-		auto *waction = static_cast<GAction *>(g_object_get_data(G_OBJECT(widget), "action"));
-		if (waction != uid->act) return;
-
-		GtkWidget *image = gtk_button_get_child(GTK_BUTTON(widget));
-		if (GTK_IS_IMAGE(image))
-			{
-			gtk_image_set_from_icon_name(GTK_IMAGE(image), uid->name);
-			}
-
-		gtk_widget_set_tooltip_text(widget, uid->tooltip);
-		};
-
-	UpdateIconData uid = {action, icon_name, icon_tooltip};
 	for (int i = 0; i < TOOLBAR_COUNT; i++) // NOLINT(modernize-loop-convert)
 		{
-		if (lw->toolbar[i])
+		if (!lw->toolbar[i]) continue;
+
+		for (GtkWidget *widget = gtk_widget_get_first_child(lw->toolbar[i]);
+		     widget;
+		     widget = gtk_widget_get_next_sibling(widget))
 			{
-			gq_gtk_container_foreach(lw->toolbar[i], update_icon_cb, &uid);
+			if (!GTK_IS_BUTTON(widget)) continue;
+
+			auto *waction = static_cast<GAction *>(g_object_get_data(G_OBJECT(widget), "action"));
+			if (waction != action) continue;
+
+			GtkWidget *image = gtk_button_get_child(GTK_BUTTON(widget));
+			if (GTK_IS_IMAGE(image))
+				{
+				gtk_image_set_from_icon_name(GTK_IMAGE(image), icon_name);
+				}
+
+			gtk_widget_set_tooltip_text(widget, icon_tooltip);
 			}
 		}
 }

@@ -323,16 +323,6 @@ void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget)
 		}
 }
 
-void gq_gtk_container_foreach(GtkWidget *container, GqGtkCallback callback, gpointer callback_data)
-{
-	for (GtkWidget *child = gtk_widget_get_first_child(container);
-	     child;
-	     child = gtk_widget_get_next_sibling(child))
-		{
-		callback(child, callback_data);
-		}
-}
-
 void gq_gtk_widget_destroy(GtkWidget *widget)
 {
 	if (!widget) return;
@@ -376,20 +366,6 @@ GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget)
 		}
 
 	return nullptr;
-}
-
-GList *gq_gtk_widget_get_children(GtkWidget *widget)
-{
-	GList *list = nullptr;
-
-	for (GtkWidget *child = gtk_widget_get_first_child(widget);
-		child;
-		child = gtk_widget_get_next_sibling(child))
-		{
-		list = g_list_prepend(list, child);
-		}
-
-	return g_list_reverse(list);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

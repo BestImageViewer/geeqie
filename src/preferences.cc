@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
-#include <utility>
 #include <vector>
 
 #include <config.h>
@@ -46,7 +45,6 @@
 #include "bar-keywords.h"
 #include "cache.h"
 #include "color-man.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "editors.h"
 #include "filedata.h"
@@ -60,7 +58,6 @@
 #include "layout.h"
 #include "main-defines.h"
 #include "main.h"
-#include "menu.h"
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
@@ -1689,10 +1686,11 @@ static gunichar star_rating_symbol_test(gpointer data)
 {
 	guint64 hex_value = 0;
 
-	g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(data));
+	GtkWidget *child = gtk_widget_get_first_child(GTK_WIDGET(data));
+	GtkWidget *hex_code_label = gtk_widget_get_next_sibling(child);
 
-	auto *hex_code_entry = static_cast<GtkEntry *>(g_list_nth_data(list, 2));
-	const gchar *hex_code_full = gq_gtk_entry_get_text(hex_code_entry);
+	GtkWidget *hex_code_entry = gtk_widget_get_next_sibling(hex_code_label);
+	const gchar *hex_code_full = gtk_editable_get_text(GTK_EDITABLE(hex_code_entry));
 
 	g_auto(GStrv) hex_code = g_strsplit(hex_code_full, "+", 2);
 	if (hex_code[0] && hex_code[1])
@@ -1707,7 +1705,7 @@ static gunichar star_rating_symbol_test(gpointer data)
 
 	g_autoptr(GString) str = g_string_new(nullptr);
 	str = g_string_append_unichar(str, static_cast<gunichar>(hex_value));
-	gtk_label_set_text(static_cast<GtkLabel *>(g_list_nth_data(list, 1)), str->str);
+	gtk_label_set_text(GTK_LABEL(hex_code_label), str->str);
 
 	return hex_value;
 }

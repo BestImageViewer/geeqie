@@ -21,7 +21,6 @@
 
 #include "bar-exif.h"
 
-#include <array>
 #include <string>
 
 #include <gdk/gdk.h>
@@ -32,7 +31,6 @@
 
 #include "bar.h"
 #include "compat.h"
-#include "dnd.h"
 #include "exif.h"
 #include "filedata.h"
 #include "intl.h"
@@ -295,13 +293,12 @@ void bar_pane_exif_update(PaneExifData *ped)
 {
 	ped->all_hidden = TRUE;
 
-	static const auto update_entry = [](GtkWidget *entry, gpointer data)
-	{
-		auto *ped = static_cast<PaneExifData *>(data);
+	for (GtkWidget *entry = gtk_widget_get_first_child(ped->vbox);
+	     entry;
+	     entry = gtk_widget_get_next_sibling(entry))
+		{
 		bar_pane_exif_update_entry(ped, entry, FALSE);
-	};
-
-	gq_gtk_container_foreach(ped->vbox, update_entry, ped);
+		}
 
 	gtk_widget_set_sensitive(ped->pane.title, !ped->all_hidden);
 }
@@ -567,11 +564,10 @@ void bar_pane_exif_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	WRITE_STRING(">");
 	indent++;
 
-	g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(ped->vbox));
-	for (GList *work = list; work; work = work->next)
+	for (GtkWidget *entry = gtk_widget_get_first_child(ped->vbox);
+	    entry;
+	    entry = gtk_widget_get_next_sibling(entry))
 		{
-		auto entry = static_cast<GtkWidget *>(work->data);
-
 		bar_pane_exif_entry_write_config(entry, outstr, indent);
 		}
 
@@ -654,17 +650,16 @@ GList *bar_pane_exif_list()
 
 	GList *exif_list = nullptr;
 
-	static const auto exif_entry_to_list = [](GtkWidget *widget, gpointer data)
-	{
+	for (GtkWidget *widget = gtk_widget_get_first_child(ped->vbox);
+	     widget;
+	     widget = gtk_widget_get_next_sibling(widget))
+		{
 		auto *ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
-		if (!ee) return;
+		if (!ee) continue;
 
-		auto *list = static_cast<GList **>(data);
-		*list = g_list_append(*list, g_strdup(ee->title));
-		*list = g_list_append(*list, g_strdup(ee->key));
-	};
-
-	gq_gtk_container_foreach(ped->vbox, exif_entry_to_list, &exif_list);
+		exif_list = g_list_append(exif_list, g_strdup(ee->title));
+		exif_list = g_list_append(exif_list, g_strdup(ee->key));
+		}
 
 	return exif_list;
 }
