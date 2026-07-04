@@ -185,17 +185,16 @@ static void tab_completion_emit_tab_signal(TabCompData *td)
 	td->tab_func(text);
 }
 
-static void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
+static void tab_completion_iter_menu_items(GtkWidget *widget, TabCompPrefix &tp)
 {
 	if (!gtk_widget_get_visible(widget)) return;
 
 	GtkWidget *child = gtk_widget_get_first_child(widget);
 	if (!GTK_IS_LABEL(child)) return;
 
-	auto *tp = static_cast<TabCompPrefix *>(data);
 	const gchar *text = gtk_label_get_text(GTK_LABEL(child));
 
-	if (!tp->match(text))
+	if (!tp.match(text))
 		{
 		/* Hide menu items not matching */
 		gtk_widget_hide(widget);
@@ -203,7 +202,7 @@ static void tab_completion_iter_menu_items(GtkWidget *widget, gpointer data)
 	else
 		{
 		/* Count how many choices are left in the menu */
-		tp->choices++;
+		tp.choices++;
 		}
 }
 
@@ -233,7 +232,12 @@ static gboolean tab_completion_popup_key_press(GtkEventControllerKey *controller
 		const gchar *prefix = filename_from_path(entry_text);
 		TabCompPrefix tp{ prefix, strlen(prefix), 0 };
 
-		gq_gtk_container_foreach(widget, tab_completion_iter_menu_items, &tp);
+		for (GtkWidget *child = gtk_widget_get_first_child(widget);
+		     child;
+		     child = gtk_widget_get_next_sibling(child))
+			{
+			tab_completion_iter_menu_items(child, tp);
+			}
 
 		if (tp.choices > 1) return TRUE; /* multiple choices */
 		if (tp.choices > 0) tab_completion_do(td); /* one choice */

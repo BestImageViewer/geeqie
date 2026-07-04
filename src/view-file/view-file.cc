@@ -20,8 +20,6 @@
 
 #include "view-file.h"
 
-#include <array>
-
 #include <gdk/gdk.h>
 #include <glib-object.h>
 
@@ -30,7 +28,6 @@
 #include "archives.h"
 #include "collect.h"
 #include "compat.h"
-#include "dnd.h"
 #include "dupe.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -50,7 +47,6 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-utildlg.h"
-#include "uri-utils.h"
 #include "utilops.h"
 #include "view-file/view-file-icon.h"
 #include "view-file/view-file-list.h"
@@ -1169,17 +1165,16 @@ static gboolean vf_file_filter_rating_cb(GtkWidget *widget, gpointer data)
 static gboolean vf_file_filter_class_set_all(GtkWidget *widget, gpointer data, gboolean state)
 {
 	GtkWidget *parent = gtk_widget_get_parent(widget);
-	g_autoptr(GList) children = gq_gtk_widget_get_children(GTK_WIDGET(parent));
+	GtkWidget *child = gtk_widget_get_first_child(parent);
 
-	GList *work = children;
 	for (gboolean &class_filter : options->class_filter)
 		{
 		class_filter = state;
 
-		if (work)
+		if (child)
 			{
-			gtk_check_button_set_active(GTK_CHECK_BUTTON(work->data), state);
-			work = work->next;
+			gtk_check_button_set_active(GTK_CHECK_BUTTON(child), state);
+			child = gtk_widget_get_next_sibling(child);
 			}
 		}
 
@@ -1191,7 +1186,6 @@ static gboolean vf_file_filter_class_set_all(GtkWidget *widget, gpointer data, g
 static gboolean vf_file_filter_rating_set_all(GtkWidget *widget, gpointer data, gboolean state)
 {
 	GtkWidget *parent = gtk_widget_get_parent(widget);
-	g_autoptr(GList) children = gq_gtk_widget_get_children(GTK_WIDGET(parent));
 
 	if (state)
 		{
@@ -1202,16 +1196,15 @@ static gboolean vf_file_filter_rating_set_all(GtkWidget *widget, gpointer data, 
 		options->rating_filter = 0;
 		}
 
-	GList *work = children;
-
-	while (work)
+	for (GtkWidget *child = gtk_widget_get_first_child(parent);
+	    child;
+	    child = gtk_widget_get_next_sibling(child))
 		{
 		/* Select All and Ignore Rating are not check box menu items */
-		if (GTK_IS_CHECK_BUTTON(work->data))
+		if (GTK_IS_CHECK_BUTTON(child))
 			{
-			gtk_check_button_set_active(GTK_CHECK_BUTTON(work->data), state);
+			gtk_check_button_set_active(GTK_CHECK_BUTTON(child), state);
 			}
-		work = work->next;
 		}
 
 	vf_refresh(static_cast<ViewFile *>(data));

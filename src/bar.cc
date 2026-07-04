@@ -399,14 +399,6 @@ static void bar_menu_add_cb(GtkWidget *, gpointer)
 }
 
 
-static void bar_pane_set_fd_cb(GtkWidget *expander, gpointer data)
-{
-	GtkWidget *widget = gtk_widget_get_first_child(expander);
-	auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
-	if (!pd) return;
-	if (pd->pane_set_fd) pd->pane_set_fd(widget, static_cast<FileData *>(data));
-}
-
 void bar_set_fd(GtkWidget *bar, FileData *fd)
 {
 	auto *bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
@@ -415,17 +407,20 @@ void bar_set_fd(GtkWidget *bar, FileData *fd)
 	file_data_unref(bd->fd);
 	bd->fd = file_data_ref(fd);
 
-	gq_gtk_container_foreach(bd->vbox, bar_pane_set_fd_cb, fd);
+	for (GtkWidget *expander = gtk_widget_get_first_child(bd->vbox);
+	     expander;
+	     expander = gtk_widget_get_next_sibling(expander))
+		{
+		GtkWidget *widget = gtk_widget_get_first_child(expander);
+
+		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
+		if (pd && pd->pane_set_fd)
+			{
+			pd->pane_set_fd(widget, fd);
+			}
+		}
 
 	gtk_label_set_text(GTK_LABEL(bd->label_file_name), bd->fd ? bd->fd->name : "");
-}
-
-static void bar_pane_notify_selection_cb(GtkWidget *expander, gpointer data)
-{
-	GtkWidget *widget = gtk_widget_get_first_child(expander);
-	auto pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
-	if (!pd) return;
-	if (pd->pane_notify_selection) pd->pane_notify_selection(widget, GPOINTER_TO_INT(data));
 }
 
 void bar_notify_selection(GtkWidget *bar, gint count)
@@ -433,7 +428,18 @@ void bar_notify_selection(GtkWidget *bar, gint count)
 	auto *bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
 	if (!bd) return;
 
-	gq_gtk_container_foreach(bd->vbox,  bar_pane_notify_selection_cb, GINT_TO_POINTER(count));
+	for (GtkWidget *expander = gtk_widget_get_first_child(bd->vbox);
+	     expander;
+	     expander = gtk_widget_get_next_sibling(expander))
+		{
+		GtkWidget *widget = gtk_widget_get_first_child(expander);
+
+		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
+		if (pd && pd->pane_notify_selection)
+			{
+			pd->pane_notify_selection(widget, count);
+			}
+		}
 }
 
 gboolean bar_event(GtkWidget *bar, GdkEvent *event)
@@ -441,11 +447,11 @@ gboolean bar_event(GtkWidget *bar, GdkEvent *event)
 	auto *bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
 	if (!bd) return FALSE;
 
-	g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(bd->vbox));
-
-	for (GList *work = list; work; work = work->next)
+	for (GtkWidget *child = gtk_widget_get_first_child(bd->vbox);
+	    child;
+	    child = gtk_widget_get_next_sibling(child))
 		{
-		GtkWidget *widget = gtk_widget_get_first_child(GTK_WIDGET(work->data));
+		GtkWidget *widget = gtk_widget_get_first_child(child);
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (pd && pd->pane_event && pd->pane_event(widget, event))
@@ -469,10 +475,11 @@ GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id)
 	auto *bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
 	if (!bd) return nullptr;
 
-	g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(bd->vbox));
-	for (GList *work = list; work; work = work->next)
+	for (GtkWidget *child = gtk_widget_get_first_child(bd->vbox);
+	    child;
+	    child = gtk_widget_get_next_sibling(child))
 		{
-		GtkWidget *widget = gtk_widget_get_first_child(GTK_WIDGET(work->data));
+		GtkWidget *widget = gtk_widget_get_first_child(child);
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (pd && type == pd->type && strcmp(id, pd->id) == 0)
@@ -487,14 +494,14 @@ GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id)
 void bar_clear(GtkWidget *bar)
 {
 	BarData *bd;
-	GList *list;
 
 	bd = static_cast<BarData *>(g_object_get_data(G_OBJECT(bar), "bar_data"));
 	if (!bd) return;
 
-	list = gq_gtk_widget_get_children(GTK_WIDGET(bd->vbox));
-
-	g_list_free_full(list, reinterpret_cast<GDestroyNotify>(widget_remove_from_parent));
+	while (GtkWidget *child = gtk_widget_get_first_child(bd->vbox))
+		{
+		gtk_box_remove(GTK_BOX(bd->vbox), child);
+		}
 }
 
 void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
@@ -512,10 +519,10 @@ void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
 	indent++;
 	WRITE_NL(); WRITE_STRING("<clear/>");
 
-	g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(bd->vbox));
-	for (GList *work = list; work; work = work->next)
+	for (GtkWidget *expander = gtk_widget_get_first_child(bd->vbox);
+	    expander;
+	    expander = gtk_widget_get_next_sibling(expander))
 		{
-		auto *expander = static_cast<GtkWidget *>(work->data);
 		GtkWidget *widget = gtk_widget_get_first_child(expander);
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));

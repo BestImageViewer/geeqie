@@ -22,7 +22,6 @@
 #include "toolbar.h"
 
 #include <algorithm>
-#include <cstddef>
 #include <optional>
 #include <vector>
 
@@ -41,9 +40,7 @@
 #include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "main.h"
 #include "menu.h"
-#include "misc.h"
 #include "preferences.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
@@ -233,15 +230,14 @@ static gboolean toolbar_menu_add_cb(GtkWidget *, gpointer data)
  */
 void toolbar_apply(ToolbarType bar)
 {
-	g_autoptr(GList) list = gq_gtk_widget_get_children(toolbarlist[bar]);
-
-	const auto layout_toolbar_apply = [bar, list](LayoutWindow *lw)
+	const auto layout_toolbar_apply = [bar](LayoutWindow *lw)
 	{
 		layout_toolbar_clear(lw, bar);
 
-		for (GList *work = list; work; work = work->next)
+		for (GtkWidget *button = gtk_widget_get_first_child(toolbarlist[bar]);
+		    button;
+		    button = gtk_widget_get_next_sibling(button))
 			{
-			auto button = static_cast<GtkButton *>(work->data);
 			auto *action_name = static_cast<gchar *>(g_object_get_data(G_OBJECT(button), action_name_key));
 
 			layout_toolbar_add(lw, bar, action_name);

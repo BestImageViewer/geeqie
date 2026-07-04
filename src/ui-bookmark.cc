@@ -45,7 +45,6 @@
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
 #include "ui-utildlg.h"
-#include "uri-utils.h"
 
 /*
  *-----------------------------------------------------------------------------
@@ -272,9 +271,19 @@ static void bookmark_move(BookMarkData *bm, GtkWidget *button, gint direction)
 	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
 	if (!b) return;
 
-	g_autoptr(GList) list = gq_gtk_widget_get_children(GTK_WIDGET(bm->box));
+	int p = -1;
+	int i = 0;
+	for (GtkWidget *child = gtk_widget_get_first_child(bm->box);
+	    child;
+	    child = gtk_widget_get_next_sibling(child), ++i)
+		{
+		if (child == button)
+			{
+			p = i;
+			break;
+			}
+		}
 
-	gint p = g_list_index(list, button);
 	if (p < 0 || p + direction < 0) return;
 
 	std::string key_holder = bm->key;
