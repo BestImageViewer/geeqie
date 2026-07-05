@@ -21,16 +21,9 @@
 
 #include "ui-menu.h"
 
-#include <algorithm>
-#include <cstddef>
-
 #include <glib/gi18n.h>
-
 #include <pango/pango.h>
 
-#include "accelerators.h"
-#include "compat-deprecated.h"
-#include "compat.h"
 #include "editors.h"
 #include "layout-util.h"
 #include "layout.h"
@@ -50,7 +43,7 @@ static void menu_item_add_accelerator(GtkWidget *, GtkWidget *)
 
 static void menu_item_finish(GtkWidget *menu, GtkWidget *item, GCallback func, gpointer data)
 {
-	GtkWidget *popover = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(menu), "gq-popover"));
+	auto *popover = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(menu), "gq-popover"));
 
 	if (func && GTK_IS_CHECK_BUTTON(item))
 		{
