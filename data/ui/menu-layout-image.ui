@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu-layout-image">
+    <section>
+      <item>
+        <attribute name="action">win.layout-image-zoom-in</attribute>
+        <attribute name="label" translatable="yes">Zoom in</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-zoom-out</attribute>
+        <attribute name="label" translatable="yes">Zoom out</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-zoom-1-1</attribute>
+        <attribute name="label" translatable="yes">Zoom 1:1</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-zoom-fit</attribute>
+        <attribute name="label" translatable="yes">Zoom to fit</attribute>
+      </item>
+    </section>
+    <section>
+      <submenu>
+        <section id="plugins-submenu" />
+        <attribute name="label" translatable="yes">Plugins</attribute>
+      </submenu>
+      <submenu>
+        <section id="orientation-submenu" />
+        <attribute name="label" translatable="yes">Orientation</attribute>
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.layout-image-view-in-new-window</attribute>
+        <attribute name="label" translatable="yes">View in new window</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-go-to-directory</attribute>
+        <attribute name="label" translatable="yes">Go to directory view</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-open-archive</attribute>
+        <attribute name="label" translatable="yes">Open archive</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.layout-image-copy</attribute>
+        <attribute name="label" translatable="yes">Copy…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-move</attribute>
+        <attribute name="label" translatable="yes">Move…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-rename</attribute>
+        <attribute name="label" translatable="yes">Rename…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-copy-path</attribute>
+        <attribute name="label" translatable="yes">Copy to clipboard</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-copy-path-unquoted</attribute>
+        <attribute name="label" translatable="yes">Copy to clipboard (unquoted)</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-copy-image</attribute>
+        <attribute name="label" translatable="yes">Copy image to clipboard</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-cut-path</attribute>
+        <attribute name="label" translatable="yes">Cut to clipboard</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.layout-image-delete</attribute>
+        <attribute name="label" translatable="yes">Move to Trash</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-delete-permanent</attribute>
+        <attribute name="label" translatable="yes">Delete</attribute>
+      </item>
+    </section>
+    <section>
+      <submenu>
+        <attribute name="label" translatable="yes">Add to Collection</attribute>
+        <section>
+          <item>
+            <attribute name="action">win.layout-image-collections</attribute>
+            <attribute name="label" translatable="yes">New collection</attribute>
+            <attribute name="target" type="i">-1</attribute>
+          </item>
+        </section>
+        <section id="collections-submenu" />
+      </submenu>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.layout-image-slideshow</attribute>
+        <attribute name="label" translatable="yes">Toggle slideshow</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-slideshow-pause</attribute>
+        <attribute name="label" translatable="yes">Pause slideshow</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-fullscreen</attribute>
+        <attribute name="label" translatable="yes">Fullscreen</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-animate</attribute>
+        <attribute name="label" translatable="yes">GIF animation</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="action">win.layout-image-hide-tools</attribute>
+        <attribute name="label" translatable="yes">Hide file list</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-hide-selectable-toolbars</attribute>
+        <attribute name="label" translatable="yes">Hide Selectable Bars</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>
