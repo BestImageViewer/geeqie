@@ -1247,7 +1247,7 @@ gboolean autocomplete_activate_cb(GtkWidget *, gpointer data)
 	gboolean found = FALSE;
 	gchar *string;
 
-	g_autofree gchar *entry_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(pkd->autocomplete)));
+	g_autofree gchar *entry_text = g_strdup(gtk_editable_get_text(GTK_EDITABLE(pkd->autocomplete)));
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pkd->keyword_view));
 
 	kw_split = strtok(entry_text, ",");
@@ -1262,7 +1262,7 @@ gboolean autocomplete_activate_cb(GtkWidget *, gpointer data)
 		}
 
 	g_free(entry_text);
-	entry_text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(pkd->autocomplete)));
+	entry_text = g_strdup(gtk_editable_get_text(GTK_EDITABLE(pkd->autocomplete)));
 
 	gq_gtk_entry_set_text(GTK_ENTRY(pkd->autocomplete), "");
 

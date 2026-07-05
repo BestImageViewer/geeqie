@@ -156,7 +156,7 @@ static gchar *tab_completion_get_text(TabCompData *td)
 {
 	gchar *text;
 
-	text = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(td->entry)));
+	text = g_strdup(gtk_editable_get_text(GTK_EDITABLE(td->entry)));
 
 	if (text[0] == '~')
 		{
@@ -228,7 +228,7 @@ static gboolean tab_completion_popup_key_press(GtkEventControllerKey *controller
 		gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
 		/* Reduce the number of entries in the menu */
-		const gchar *entry_text = gq_gtk_entry_get_text(GTK_ENTRY(td->entry));
+		const char *entry_text = gtk_editable_get_text(GTK_EDITABLE(td->entry));
 		const gchar *prefix = filename_from_path(entry_text);
 		TabCompPrefix tp{ prefix, strlen(prefix), 0 };
 
@@ -303,7 +303,7 @@ static void tab_completion_popup_list(TabCompData *td, GList *list, GtkWidget *p
 
 static gboolean tab_completion_do(TabCompData *td)
 {
-	const gchar *entry_text = gq_gtk_entry_get_text(GTK_ENTRY(td->entry));
+	const char *entry_text = gtk_editable_get_text(GTK_EDITABLE(td->entry));
 	const gchar *entry_file;
 	gchar *ptr;
 	gboolean home_exp = FALSE;
@@ -701,7 +701,7 @@ static void tab_completion_select_show(TabCompData *td)
 	fdd.accept_text = _("Open");
 	fdd.callback = tab_completion_response_cb;
 	fdd.data = td;
-	fdd.filename = gq_gtk_entry_get_text(GTK_ENTRY(td->entry));
+	fdd.filename = gtk_editable_get_text(GTK_EDITABLE(td->entry));
 	fdd.filter = td->fd_filter;
 	fdd.filter_description = td->fd_filter_desc;
 	fdd.history_key = td->history_key;

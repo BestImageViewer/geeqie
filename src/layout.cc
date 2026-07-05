@@ -423,7 +423,7 @@ static void layout_path_entry_changed_cb(GtkWidget *widget, gpointer data)
 
 	if (gtk_combo_box_get_active(GTK_COMBO_BOX(widget)) < 0) return;
 
-	const gchar *buf = gq_gtk_entry_get_text(GTK_ENTRY(lw->path_entry));
+	const gchar *buf = gtk_editable_get_text(GTK_EDITABLE(lw->path_entry));
 	if (!lw->dir_fd || strcmp(buf, lw->dir_fd->path) != 0)
 		{
 		layout_set_path(lw, buf);

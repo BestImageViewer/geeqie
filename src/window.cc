@@ -191,10 +191,8 @@ static void help_search_window_show_icon_press(GtkEntry *edit_widget, GtkEntryIc
 
 static void help_search_window_ok_cb(GenericDialog *, gpointer data)
 {
-	auto *edit_widget = GTK_ENTRY(data);
-
 	g_autofree gchar *search_command = g_strconcat(options->help_search_engine,
-	                                               gq_gtk_entry_get_text(edit_widget),
+	                                               gtk_editable_get_text(GTK_EDITABLE(data)),
 	                                               NULL);
 	help_browser_run(search_command);
 }

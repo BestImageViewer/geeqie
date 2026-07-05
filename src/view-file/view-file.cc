@@ -940,7 +940,7 @@ static void vf_marks_tooltip_ok_cb(GenericDialog *gd, gpointer data)
 	auto mte = static_cast<MarksTextEntry *>(data);
 
 	g_free(options->marks_tooltips[mte->mark_no]);
-	options->marks_tooltips[mte->mark_no] = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(mte->edit_widget)));
+	options->marks_tooltips[mte->mark_no] = g_strdup(gtk_editable_get_text(GTK_EDITABLE(mte->edit_widget)));
 
 	gtk_widget_set_tooltip_text(mte->parent, options->marks_tooltips[mte->mark_no]);
 
@@ -1009,7 +1009,7 @@ static void vf_file_filter_save_cb(GtkEntry *combo_entry, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	const gchar *entry_text = gq_gtk_entry_get_text(combo_entry);
+	const char *entry_text = gtk_editable_get_text(GTK_EDITABLE(combo_entry));
 
 	if (entry_text[0] != '\0')
 		{

@@ -2305,7 +2305,7 @@ static void window_rename_cancel_cb(GenericDialog *, gpointer data)
 static void window_rename_ok(RenameWindow *rw)
 {
 	g_autolist(WindowNames) list = layout_window_menu_list();
-	const gchar *new_id = gq_gtk_entry_get_text(GTK_ENTRY(rw->window_name_entry));
+	const char *new_id = gtk_editable_get_text(GTK_EDITABLE(rw->window_name_entry));
 
 	const auto window_names_compare_name = [](gconstpointer data, gconstpointer user_data)
 	{

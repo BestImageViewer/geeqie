@@ -141,7 +141,7 @@ static void log_window_timer_data_cb(GtkWidget *, gpointer)
 
 static void log_window_regexp_cb(GtkWidget *text_entry, gpointer)
 {
-	const gchar *new_regexp = gq_gtk_entry_get_text(GTK_ENTRY(text_entry));
+	const char *new_regexp = gtk_editable_get_text(GTK_EDITABLE(text_entry));
 	set_regexp(new_regexp);
 }
 
@@ -151,10 +151,9 @@ static void remove_green_bg(LogWindow *logwin)
 	GtkTextIter start_match;
 	GtkTextIter end_match;
 	GtkTextBuffer *buffer;
-	const gchar *text;
 	gint offset;
 
-	text = gq_gtk_entry_get_text(GTK_ENTRY(logwin->search_entry_box));
+	const char *text = gtk_editable_get_text(GTK_EDITABLE(logwin->search_entry_box));
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text));
 	gtk_text_buffer_get_start_iter(buffer, &start_find);
 
@@ -185,11 +184,10 @@ static void search_activate_event(GtkEntry *, LogWindow *logwin)
 	GtkTextBuffer *buffer;
 	GtkTextMark *cursor_mark;
 	GtkTextIter cursor_iter;
-	const gchar *text;
 	gint offset;
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(logwin->text));
-	text = gq_gtk_entry_get_text(GTK_ENTRY(logwin->search_entry_box));
+	const char *text = gtk_editable_get_text(GTK_EDITABLE(logwin->search_entry_box));
 
 	if (logwin->highlight_all)
 		{
@@ -226,7 +224,7 @@ static void search_keypress_event_cb(GtkButton *, LogWindow *logwin)
 	gtk_text_buffer_get_start_iter(buffer, &start_find);
 
 	g_autofree gchar *selected = nullptr;
-	const gchar *text = gq_gtk_entry_get_text(GTK_ENTRY(logwin->search_entry_box));
+	const char *text = gtk_editable_get_text(GTK_EDITABLE(logwin->search_entry_box));
 	if (text[0] == '\0')
 		{
 		GtkTextIter start_sel;

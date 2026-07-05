@@ -1412,7 +1412,7 @@ static void file_util_rename_preview_update(UtilityData *ud)
 		if (gtk_tree_selection_get_selected(selection, &store, &iter))
 			{
 			FileData *fd;
-			const gchar *dest = gq_gtk_entry_get_text(GTK_ENTRY(ud->rename_entry));
+			const char *dest = gtk_editable_get_text(GTK_EDITABLE(ud->rename_entry));
 
 			gtk_tree_model_get(store, &iter, UTILITY_COLUMN_FD, &fd, -1);
 			g_assert(ud->with_sidecars); /* sidecars must be renamed too, it would break the pairing otherwise */
@@ -1442,11 +1442,11 @@ static void file_util_rename_preview_update(UtilityData *ud)
 		}
 	else
 		{
-		front = gq_gtk_entry_get_text(GTK_ENTRY(ud->auto_entry_front));
-		end = gq_gtk_entry_get_text(GTK_ENTRY(ud->auto_entry_end));
+		front = gtk_editable_get_text(GTK_EDITABLE(ud->auto_entry_front));
+		end = gtk_editable_get_text(GTK_EDITABLE(ud->auto_entry_end));
 		padding = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(ud->auto_spin_pad));
 
-		format = gq_gtk_entry_get_text(GTK_ENTRY(ud->format_entry));
+		format = gtk_editable_get_text(GTK_EDITABLE(ud->format_entry));
 
 		g_free(options->cp_mv_rn.auto_end);
 		options->cp_mv_rn.auto_end = g_strdup(end);
