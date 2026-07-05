@@ -649,14 +649,14 @@ static void layout_sort_menu_case_cb(GtkWidget *, gpointer data)
 	layout_sort_set_files(lw, sort);
 }
 
-static void layout_sort_button_press_cb(GtkWidget *widget, gpointer data)
+static void layout_sort_button_press_cb(GtkWidget *button, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	GtkWidget *menu = submenu_add_sort(nullptr, G_CALLBACK(layout_sort_menu_cb), lw, TRUE, lw->options.file_view_list_sort.method);
 	GtkWidget *popover = gtk_popover_new();
 	gtk_popover_set_child(GTK_POPOVER(popover), menu);
-	gtk_widget_set_parent(popover, widget);
+	gtk_widget_set_parent(popover, button);
 
 	/* ascending option */
 	popover_item_add_divider(menu);
