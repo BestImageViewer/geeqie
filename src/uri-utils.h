@@ -24,5 +24,10 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+gchar *uri_text_from_filelist(GList *list);
+gchar *uri_text_from_pathlist(GList *list);
+GList *uri_filelist_from_text(const gchar *text);
+GList *uri_pathlist_from_text(const gchar *text);
+
 #endif /* URI_UTILS_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

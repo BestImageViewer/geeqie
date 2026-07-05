@@ -70,12 +70,15 @@ struct PaneGPSData
 	ShumateMarkerLayer *marker_layer;
 	ShumateViewport *viewport;
 	GList *selection_list;
+	GList *geocode_list;
 	GtkWidget *progress;
 	GtkWidget *slider;
 	GtkWidget *state;
 	gint selection_count;
 	gboolean centre_map_checked;
 	gboolean enable_markers_checked;
+	gdouble dest_latitude;
+	gdouble dest_longitude;
 };
 
 /*
@@ -84,9 +87,153 @@ struct PaneGPSData
  *-------------------------------------------------------------------
  */
 
+void bar_pane_gps_close_cancel_cb(GenericDialog *, gpointer data)
+{
+	auto *pgd = static_cast<PaneGPSData *>(data);
+
+	file_data_list_free(pgd->geocode_list);
+	pgd->geocode_list = nullptr;
+}
+
+void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
+{
+	auto *pgd = static_cast<PaneGPSData *>(data);
+
+	for (GList *work = g_list_first(pgd->geocode_list); work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		if (fd->name && !fd->parent)
+			{
+			metadata_write_GPS_coord(fd, "Xmp.exif.GPSLatitude", pgd->dest_latitude);
+			metadata_write_GPS_coord(fd, "Xmp.exif.GPSLongitude", pgd->dest_longitude);
+			}
+		}
+
+	file_data_list_free(pgd->geocode_list);
+	pgd->geocode_list = nullptr;
+}
+
+void bar_pane_gps_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
+{
+	auto *pgd = static_cast<PaneGPSData *>(data);
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	gint count = 0;
+	gint geocoded_count = 0;
+
+	file_data_list_free(pgd->geocode_list);
+	pgd->geocode_list = nullptr;
+
+	for (GList *work = list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		if (fd->name && !fd->parent)
+			{
+			count++;
+			pgd->geocode_list = g_list_append(pgd->geocode_list, file_data_ref(fd));
+			gdouble latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
+			gdouble longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
+			if (latitude != 1000 && longitude != 1000)
+				{
+				geocoded_count++;
+				}
+			}
+		}
+
+	if (count)
+		{
+		g_autoptr(GString) message = g_string_new("");
+		if (count == 1)
+			{
+			auto *fd_found = static_cast<FileData *>(g_list_first(pgd->geocode_list)->data);
+			g_string_append_printf(message, _("\nDo you want to geocode image %s?"), fd_found->name);
+			}
+		else
+			{
+			g_string_append_printf(message, _("\nDo you want to geocode %i images?"), count);
+			}
+
+		if (geocoded_count == 1 && count == 1)
+			{
+			g_string_append(message, _("\nThis image is already geocoded!"));
+			}
+		else if (geocoded_count == 1 && count > 1)
+			{
+			g_string_append(message, _("\nOne image is already geocoded!"));
+			}
+		else if (geocoded_count > 1 && count > 1)
+			{
+			g_string_append_printf(message, _("\n%i Images are already geocoded!"), geocoded_count);
+			}
+
+		g_string_append_printf(message, _("\n\nPosition: %lf %lf \n"), pgd->dest_latitude, pgd->dest_longitude);
+
+		GenericDialog *gd = generic_dialog_new(_("Geocode images"), "geocode_images", nullptr, TRUE, bar_pane_gps_close_cancel_cb, pgd);
+		generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Write lat/long to meta-data?"), message->str, TRUE);
+		generic_dialog_add_button(gd, GQ_ICON_SAVE, _("Save"), bar_pane_gps_close_save_cb, TRUE);
+
+		gtk_widget_show(gd->dialog);
+		action = GDK_ACTION_COPY;
+		}
+
+	gdk_drop_finish(drop, action);
+}
+
+void bar_pane_gps_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data)
+{
+	auto *pgd = static_cast<PaneGPSData *>(data);
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	if (text)
+		{
+		g_autofree gchar *location = decode_geo_parameters(text);
+		if (location && !g_strstr_len(location, -1, "Error"))
+			{
+			g_auto(GStrv) latlong = g_strsplit(location, " ", 2);
+			if (latlong[0] && latlong[1])
+				{
+				shumate_map_center_on(SHUMATE_MAP(pgd->map),
+				                      g_ascii_strtod(latlong[0], nullptr),
+				                      g_ascii_strtod(latlong[1], nullptr));
+				action = GDK_ACTION_COPY;
+				}
+			}
+		}
+
+	gdk_drop_finish(drop, action);
+}
+
+gboolean bar_pane_gps_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
+{
+	auto *pgd = static_cast<PaneGPSData *>(data);
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
+
+	GdkContentFormats *formats = gdk_drop_get_formats(drop);
+	if (gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
+		{
+		shumate_viewport_widget_coords_to_location(pgd->viewport, widget, x, y, &pgd->dest_latitude, &pgd->dest_longitude);
+		dnd_read_file_list_async(drop, bar_pane_gps_dnd_file_received, pgd);
+		return TRUE;
+		}
+
+	if (gdk_content_formats_contain_mime_type(formats, "text/plain"))
+		{
+		dnd_read_text_async(drop, bar_pane_gps_dnd_text_received, pgd);
+		return TRUE;
+		}
+
+	return FALSE;
+}
+
 void bar_pane_gps_dnd_init(gpointer data)
 {
-	(void)data;
+	auto *pgd = static_cast<PaneGPSData *>(data);
+
+	static const char *mime_types[] = {"text/uri-list", "text/plain"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	g_signal_connect(drop_target, "drop", G_CALLBACK(bar_pane_gps_dnd_drop), pgd);
+	gtk_widget_add_controller(pgd->widget, GTK_EVENT_CONTROLLER(drop_target));
 }
 
 void bar_pane_gps_thumb_done_cb(ThumbLoader *tl, gpointer data)

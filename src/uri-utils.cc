@@ -26,4 +26,119 @@
 #include "ui-fileops.h"
 #include "ui-utildlg.h"
 
+static void warning_dialog_dnd_uri_error(GList *uri_error_list)
+{
+	g_autoptr(GString) msg = g_string_new(nullptr);
+	guint count = g_list_length(uri_error_list);
+	g_string_printf(msg, "Failed to convert %u dropped item(s) to files\n", count);
+	if (count < 10)
+		{
+		for (GList *work = uri_error_list; work; work = work->next)
+			{
+			g_string_append_printf(msg, "\n%s", static_cast<gchar *>(work->data));
+			}
+		}
+	warning_dialog(_("Drag and Drop failed"), msg->str, GQ_ICON_DIALOG_WARNING, nullptr);
+}
+
+static gchar **uris_from_pathlist(GList *list)
+{
+	guint i = 0;
+	guint num = g_list_length(list);
+	auto uris = g_new0(gchar *, num + 1);
+
+	for (GList *work = list; work; work = work->next)
+		{
+		auto path = static_cast<const gchar *>(work->data);
+		g_autofree gchar *local_path = path_from_utf8(path);
+		uris[i] = g_filename_to_uri(local_path, nullptr, nullptr);
+		i++;
+		}
+
+	uris[i] = nullptr;
+	return uris;
+}
+
+gchar *uri_text_from_pathlist(GList *list)
+{
+	g_auto(GStrv) uris = uris_from_pathlist(list);
+	return g_strjoinv("\r\n", uris);
+}
+
+gchar *uri_text_from_filelist(GList *list)
+{
+	GList *path_list = filelist_to_path_list(list);
+	gchar *ret = uri_text_from_pathlist(path_list);
+
+	g_list_free_full(path_list, g_free);
+	return ret;
+}
+
+static GList *uri_pathlist_from_uris(gchar **uris, GList **uri_error_list)
+{
+	GList *list = nullptr;
+	guint i = 0;
+
+	while (uris[i])
+		{
+		g_autoptr(GError) error = nullptr;
+		g_autofree gchar *local_path = g_filename_from_uri(uris[i], nullptr, &error);
+		if (error)
+			{
+			DEBUG_1("g_filename_from_uri failed on uri \"%s\"", uris[i]);
+			DEBUG_1("   error %d: %s", error->code, error->message);
+			if (error->code == G_CONVERT_ERROR_BAD_URI)
+				{
+				g_autofree gchar *escaped = g_uri_escape_string(uris[i], ":/", TRUE);
+				g_autoptr(GError) retry_error = nullptr;
+				local_path = g_filename_from_uri(escaped, nullptr, &retry_error);
+				if (retry_error)
+					{
+					DEBUG_1("manually escaped uri \"%s\" also failed g_filename_from_uri", escaped);
+					DEBUG_1("   error %d: %s", retry_error->code, retry_error->message);
+					}
+				}
+
+			if (!local_path)
+				{
+				*uri_error_list = g_list_prepend(*uri_error_list, g_strdup(uris[i]));
+				i++;
+				continue;
+				}
+			}
+
+		gchar *path = path_to_utf8(local_path);
+		list = g_list_prepend(list, path);
+		i++;
+		}
+
+	*uri_error_list = g_list_reverse(*uri_error_list);
+	return g_list_reverse(list);
+}
+
+GList *uri_pathlist_from_text(const gchar *text)
+{
+	if (!text) return nullptr;
+
+	g_auto(GStrv) uris = g_uri_list_extract_uris(text);
+	GList *errors = nullptr;
+	GList *ret = uri_pathlist_from_uris(uris, &errors);
+	if (errors)
+		{
+		warning_dialog_dnd_uri_error(errors);
+		g_list_free_full(errors, g_free);
+		}
+
+	return ret;
+}
+
+GList *uri_filelist_from_text(const gchar *text)
+{
+	GList *path_list = uri_pathlist_from_text(text);
+	GList *ret = filelist_from_path_list(path_list);
+
+	g_list_free_full(path_list, g_free);
+	return ret;
+}
+
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

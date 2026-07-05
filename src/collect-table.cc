@@ -1868,11 +1868,133 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
 	return menu;
 }
 
+struct CollectTableDropData
+{
+	CollectTable *ct;
+	gdouble x;
+	gdouble y;
+};
+
 /*
  *-------------------------------------------------------------------
  * dnd
  *-------------------------------------------------------------------
  */
+
+static GdkContentProvider *collection_table_dnd_prepare(GtkDragSource *, gdouble, gdouble, gpointer data)
+{
+	auto *ct = static_cast<CollectTable *>(data);
+
+	if (!ct->click_info) return nullptr;
+
+	g_autoptr(FileDataList) list = nullptr;
+	if (info_selected(ct->click_info))
+		{
+		list = collection_table_selection_get_list(ct);
+		}
+	else
+		{
+		list = g_list_append(nullptr, file_data_ref(ct->click_info->fd));
+		}
+
+	if (!list) return nullptr;
+
+	return dnd_file_list_content_provider(list);
+}
+
+static GdkDragAction collection_table_dnd_motion(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
+{
+	auto *ct = static_cast<CollectTable *>(data);
+
+	ct->marker_info = collection_table_insert_point(ct, static_cast<gint>(x), static_cast<gint>(y));
+	collection_table_scroll(ct, TRUE);
+
+	return (gdk_drop_get_actions(drop) & GDK_ACTION_COPY) ? GDK_ACTION_COPY : GDK_ACTION_NONE;
+}
+
+static void collection_table_dnd_leave(GtkDropTargetAsync *, GdkDrop *, gpointer data)
+{
+	auto *ct = static_cast<CollectTable *>(data);
+
+	collection_table_scroll(ct, FALSE);
+}
+
+static void collection_table_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
+{
+	auto *drop_data = static_cast<CollectTableDropData *>(data);
+	auto *ct = drop_data->ct;
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	collection_table_scroll(ct, FALSE);
+
+	/* FIXME: the collection target still needs a proper async-safe drop
+	 * anchor. Recomputing from coordinates avoids the stale marker pointer,
+	 * but the collection-specific drop path remains the failing area.
+	 */
+	CollectInfo *drop_info = collection_table_insert_point(ct, static_cast<gint>(drop_data->x), static_cast<gint>(drop_data->y));
+	if (!drop_info || !g_list_find(ct->cd->list, drop_info))
+		{
+		drop_info = nullptr;
+		}
+
+	if (list)
+		{
+		if (file_data_list_has_dir(list))
+			{
+			file_data_list_free(ct->drop_list);
+			ct->drop_list = filelist_copy(list);
+			ct->drop_info = drop_info;
+			ct->marker_info = drop_info;
+
+			GtkWidget *menu = collection_table_drop_menu(ct);
+			(void)menu;
+			}
+		else
+			{
+			collection_table_insert_filelist(ct, list, drop_info);
+			}
+
+		action = GDK_ACTION_COPY;
+		}
+
+	gdk_drop_finish(drop, action);
+	g_free(drop_data);
+}
+
+static gboolean collection_table_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
+{
+	auto *ct = static_cast<CollectTable *>(data);
+	auto *drop_data = g_new0(CollectTableDropData, 1);
+	drop_data->ct = ct;
+	drop_data->x = x;
+	drop_data->y = y;
+
+	collection_table_scroll(ct, FALSE);
+	/* FIXME: this marker is still used by collection-specific code paths
+	 * that are not safe across the async read.
+	 */
+	ct->marker_info = collection_table_insert_point(ct, static_cast<gint>(x), static_cast<gint>(y));
+	dnd_read_file_list_async(drop, collection_table_dnd_file_received, drop_data);
+
+	return TRUE;
+}
+
+static void collection_table_dnd_init(CollectTable *ct)
+{
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(collection_table_dnd_prepare), ct);
+	gtk_widget_add_controller(ct->listview, GTK_EVENT_CONTROLLER(drag_source));
+
+	static const char *mime_types[] = {"text/uri-list"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	g_signal_connect(drop_target, "drag-motion", G_CALLBACK(collection_table_dnd_motion), ct);
+	g_signal_connect(drop_target, "drag-leave", G_CALLBACK(collection_table_dnd_leave), ct);
+	g_signal_connect(drop_target, "drop", G_CALLBACK(collection_table_dnd_drop), ct);
+	gtk_widget_add_controller(ct->listview, GTK_EVENT_CONTROLLER(drop_target));
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -2045,9 +2167,7 @@ CollectTable *collection_table_new(CollectionData *cd)
 	gq_gtk_container_add(ct->scrolled, ct->listview);
 	gtk_widget_show(ct->listview);
 
-/** @FIXME GTK4
 	collection_table_dnd_init(ct);
-*/
 
 	GtkGesture *click = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(click), 0);

@@ -92,6 +92,7 @@ static void view_slideshow_stop(ViewWindow *vw);
 static void view_window_close(ViewWindow *vw);
 
 static void view_window_notify_cb(FileData *fd, NotifyType type, gpointer data);
+static void view_window_dnd_init(ViewWindow *vw);
 
 /*
  *-----------------------------------------------------------------------------
@@ -973,9 +974,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	gq_gtk_container_add(vw->window, vw->imd->widget);
 	gtk_widget_show(vw->imd->widget);
 
-/** @FIXME GTK4
 	view_window_dnd_init(vw);
-*/
 
 	view_image_set_buttons(vw, vw->imd);
 
@@ -1328,6 +1327,94 @@ static GtkWidget *view_confirm_dir_list(ViewWindow *vw, GList *list)
  * image drag and drop routines
  *-----------------------------------------------------------------------------
  */
+
+static GdkDragAction view_window_dnd_select_action(GdkDrop *drop)
+{
+	GdkDragAction actions = gdk_drop_get_actions(drop);
+
+	if (actions & GDK_ACTION_COPY) return GDK_ACTION_COPY;
+	if (actions & GDK_ACTION_MOVE) return GDK_ACTION_MOVE;
+	if (actions & GDK_ACTION_LINK) return GDK_ACTION_LINK;
+
+	return GDK_ACTION_NONE;
+}
+
+static GdkContentProvider *view_window_dnd_prepare(GtkDragSource *, gdouble, gdouble, gpointer data)
+{
+	auto *vw = static_cast<ViewWindow *>(data);
+	FileData *fd = image_get_fd(vw->imd);
+	if (!fd) return nullptr;
+
+	GList *list = g_list_append(nullptr, fd);
+	GdkContentProvider *provider = dnd_file_list_content_provider(list);
+	g_list_free(list);
+
+	return provider;
+}
+
+static void view_window_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
+{
+	auto *vw = static_cast<ViewWindow *>(data);
+	ImageWindow *imd = vw->imd;
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	if (list)
+		{
+		if (file_data_list_has_dir(list))
+			{
+			GtkWidget *menu = view_confirm_dir_list(vw, filelist_copy(list));
+			(void)menu;
+			action = view_window_dnd_select_action(drop);
+			}
+		else
+			{
+			g_autoptr(FileDataList) filtered = filelist_filter(filelist_copy(list), FALSE);
+			if (filtered)
+				{
+				auto *fd = static_cast<FileData *>(filtered->data);
+				if (isfile(fd->path))
+					{
+					view_slideshow_stop(vw);
+					view_window_set_list(vw, nullptr);
+
+					if (filtered->next)
+						{
+						view_window_set_list(vw, filtered);
+						vw->list_pointer = vw->list;
+						}
+					image_change_fd(imd, fd, image_zoom_get_default(imd));
+					action = view_window_dnd_select_action(drop);
+					}
+				}
+			}
+		}
+
+	gdk_drop_finish(drop, action);
+}
+
+static gboolean view_window_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble, gdouble, gpointer data)
+{
+	dnd_read_file_list_async(drop, view_window_dnd_file_received, data);
+
+	return TRUE;
+}
+
+static void view_window_dnd_init(ViewWindow *vw)
+{
+	ImageWindow *imd = vw->imd;
+
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 2);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(view_window_dnd_prepare), vw);
+	gtk_widget_add_controller(imd->pr, GTK_EVENT_CONTROLLER(drag_source));
+
+	static const char *mime_types[] = {"text/uri-list"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	g_signal_connect(drop_target, "drop", G_CALLBACK(view_window_dnd_drop), vw);
+	gtk_widget_add_controller(imd->pr, GTK_EVENT_CONTROLLER(drop_target));
+}
 
 /*
  *-----------------------------------------------------------------------------

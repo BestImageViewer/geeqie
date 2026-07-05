@@ -28,6 +28,7 @@
 #include "archives.h"
 #include "collect.h"
 #include "compat.h"
+#include "dnd.h"
 #include "dupe.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -331,6 +332,108 @@ void vf_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
  * dnd
  *-----------------------------------------------------------------------------
  */
+
+static FileData *vf_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
+{
+	switch (vf->type)
+	{
+	case FILEVIEW_LIST: return vflist_find_data_by_coord(vf, x, y, iter);
+	case FILEVIEW_ICON: return vficon_find_data_by_coord(vf, x, y, iter);
+	}
+
+	return nullptr;
+}
+
+static GdkContentProvider *vf_dnd_prepare(GtkDragSource *, gdouble x, gdouble y, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+
+	FileData *fd = vf_find_data_by_coord(vf, static_cast<gint>(x), static_cast<gint>(y), nullptr);
+	if (fd)
+		{
+		vf->click_fd = fd;
+		}
+
+	if (!vf->click_fd) return nullptr;
+
+	g_autoptr(FileDataList) list = nullptr;
+
+	if (vf_is_selected(vf, vf->click_fd))
+		{
+		list = vf_selection_get_list(vf);
+		}
+	else
+		{
+		list = g_list_append(nullptr, file_data_ref(vf->click_fd));
+		}
+
+	if (!list) return nullptr;
+
+	return dnd_file_list_content_provider(list);
+}
+
+struct VfDndTextDropData
+{
+	ViewFile *vf;
+	gint x;
+	gint y;
+};
+
+static void vf_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data)
+{
+	g_autofree auto *drop_data = static_cast<VfDndTextDropData *>(data);
+	ViewFile *vf = drop_data->vf;
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	if (text)
+		{
+		FileData *fd = vf_find_data_by_coord(vf, drop_data->x, drop_data->y, nullptr);
+		if (fd)
+			{
+			GList *kw_list = string_to_keywords_list(text);
+
+			metadata_append_list(fd, KEYWORD_KEY, kw_list);
+			g_list_free_full(kw_list, g_free);
+			action = GDK_ACTION_COPY;
+			}
+		}
+
+	gdk_drop_finish(drop, action);
+}
+
+static gboolean vf_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+
+	if (!vf_find_data_by_coord(vf, static_cast<gint>(x), static_cast<gint>(y), nullptr))
+		{
+		return FALSE;
+		}
+
+	auto *drop_data = g_new(VfDndTextDropData, 1);
+	drop_data->vf = vf;
+	drop_data->x = static_cast<gint>(x);
+	drop_data->y = static_cast<gint>(y);
+
+	dnd_read_text_async(drop, vf_dnd_text_received, drop_data);
+
+	return TRUE;
+}
+
+static void vf_dnd_init(ViewFile *vf)
+{
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(vf_dnd_prepare), vf);
+	gtk_widget_add_controller(vf->listview, GTK_EVENT_CONTROLLER(drag_source));
+
+	static const char *mime_types[] = {"text/plain"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, GDK_ACTION_COPY);
+	g_signal_connect(drop_target, "drop", G_CALLBACK(vf_dnd_drop), vf);
+	gtk_widget_add_controller(vf->listview, GTK_EVENT_CONTROLLER(drop_target));
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -1424,6 +1527,8 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 
 	gq_gtk_container_add(vf->scrolled, vf->listview);
 	gtk_widget_show(vf->listview);
+
+	vf_dnd_init(vf);
 
 	if (dir_fd) vf_set_fd(vf, dir_fd);
 

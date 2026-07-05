@@ -4677,9 +4677,101 @@ static GtkWidget *dupe_confirm_dir_list(DupeWindow *dw, GList *list)
  *-------------------------------------------------------------------
  */
 
+static void dupe_dnd_select_click_item(DupeWindow *dw, GtkWidget *widget)
+{
+	if (!dw->click_item || dupe_listview_item_is_selected(dw->click_item, widget)) return;
+
+	auto *store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+	GtkTreeIter iter;
+	if (dupe_listview_find_item(store, dw->click_item, &iter) >= 0)
+		{
+		GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+		gtk_tree_selection_unselect_all(selection);
+		gtk_tree_selection_select_iter(selection, &iter);
+
+		g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
+		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
+		}
+}
+
+static GdkContentProvider *dupe_dnd_prepare(GtkDragSource *source, gdouble, gdouble, gpointer data)
+{
+	auto *dw = static_cast<DupeWindow *>(data);
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(source));
+
+	dupe_dnd_select_click_item(dw, widget);
+
+	g_autoptr(FileDataList) list = dupe_listview_get_selection(widget);
+	if (!list) return nullptr;
+
+	return dnd_file_list_content_provider(list);
+}
+
+struct DupeDndDropData
+{
+	DupeWindow *dw;
+	GtkWidget *widget;
+};
+
+static void dupe_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
+{
+	g_autofree auto *drop_data = static_cast<DupeDndDropData *>(data);
+	DupeWindow *dw = drop_data->dw;
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	if (dw->add_files_queue_id > 0)
+		{
+		warning_dialog(_("Find duplicates"), _("Please wait for the current file selection to be loaded."), GQ_ICON_DIALOG_INFO, dw->window);
+		}
+	else if (list)
+		{
+		dw->second_drop = (dw->second_set && drop_data->widget == dw->second_listview);
+
+		if (file_data_list_has_dir(list))
+			{
+			GtkWidget *menu = dupe_confirm_dir_list(dw, filelist_copy(list));
+			(void)menu;
+			}
+		else
+			{
+			dupe_window_add_files(dw, list, FALSE);
+			}
+		action = GDK_ACTION_COPY;
+		}
+
+	gdk_drop_finish(drop, action);
+}
+
+static gboolean dupe_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble, gdouble, gpointer data)
+{
+	auto *drop_data = g_new(DupeDndDropData, 1);
+	drop_data->dw = static_cast<DupeWindow *>(data);
+	drop_data->widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
+
+	dnd_read_file_list_async(drop, dupe_dnd_file_received, drop_data);
+
+	return TRUE;
+}
+
+static void dupe_dnd_setup_widget(DupeWindow *dw, GtkWidget *widget)
+{
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(dupe_dnd_prepare), dw);
+	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(drag_source));
+
+	static const char *mime_types[] = {"text/uri-list"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	g_signal_connect(drop_target, "drop", G_CALLBACK(dupe_dnd_drop), dw);
+	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(drop_target));
+}
+
 static void dupe_dnd_init(DupeWindow *dw)
 {
-	(void)dw;
+	dupe_dnd_setup_widget(dw, dw->listview);
+	dupe_dnd_setup_widget(dw, dw->second_listview);
 }
 
 /*

@@ -2165,9 +2165,57 @@ static void pan_popup_menu_cb(GSimpleAction *, GVariant *, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
+static GdkContentProvider *pan_window_dnd_prepare(GtkDragSource *, gdouble, gdouble, gpointer data)
+{
+	auto *pw = static_cast<PanWindow *>(data);
+	FileData *fd = pan_menu_click_fd(pw);
+	if (!fd) return nullptr;
+
+	GList *list = g_list_append(nullptr, fd);
+	GdkContentProvider *provider = dnd_file_list_content_provider(list);
+	g_list_free(list);
+
+	return provider;
+}
+
+static void pan_window_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
+{
+	auto *pw = static_cast<PanWindow *>(data);
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	if (list && isdir((static_cast<FileData *>(list->data))->path))
+		{
+		auto *fd = static_cast<FileData *>(list->data);
+
+		pan_layout_set_fd(pw, fd);
+		action = GDK_ACTION_COPY;
+		}
+
+	gdk_drop_finish(drop, action);
+}
+
+static gboolean pan_window_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble, gdouble, gpointer data)
+{
+	dnd_read_file_list_async(drop, pan_window_dnd_file_received, data);
+
+	return TRUE;
+}
+
 static void pan_window_dnd_init(PanWindow *pw)
 {
-	(void)pw;
+	GtkWidget *widget = pw->imd->pr;
+
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 2);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(pan_window_dnd_prepare), pw);
+	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(drag_source));
+
+	static const char *mime_types[] = {"text/uri-list"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	g_signal_connect(drop_target, "drop", G_CALLBACK(pan_window_dnd_drop), pw);
+	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(drop_target));
 }
 
 FileDataList *pan_list_tree(PanWindow *pw, SortType method)

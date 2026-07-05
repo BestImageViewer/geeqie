@@ -339,14 +339,98 @@ void bar_pane_exif_notify_cb(FileData *fd, NotifyType type, gpointer data)
  * dnd
  *-------------------------------------------------------------------
  */
+
+GdkContentProvider *bar_pane_exif_entry_dnd_prepare(GtkDragSource *source, gdouble, gdouble, gpointer)
+{
+	GtkWidget *entry = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(source));
+	auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(entry), "entry_data"));
+	if (!ee) return nullptr;
+
+	GdkContentProvider *providers[] = {
+		gdk_content_provider_new_typed(G_TYPE_POINTER, entry),
+		gdk_content_provider_new_typed(G_TYPE_STRING, ee->key)
+	};
+
+	return gdk_content_provider_new_union(providers, G_N_ELEMENTS(providers));
+}
+
+gboolean bar_pane_exif_dnd_drop(GtkDropTarget *, const GValue *value, gdouble x, gdouble y, gpointer data)
+{
+	auto *pane = static_cast<GtkWidget *>(data);
+	auto *ped = static_cast<PaneExifData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!ped) return FALSE;
+
+	GtkWidget *new_entry = nullptr;
+	if (G_VALUE_HOLDS(value, G_TYPE_POINTER))
+		{
+		new_entry = GTK_WIDGET(g_value_get_pointer(value));
+		if (gtk_widget_get_parent(new_entry) && gtk_widget_get_parent(new_entry) != ped->vbox)
+			{
+			bar_pane_exif_reparent_entry(new_entry, pane);
+			}
+		}
+	else if (G_VALUE_HOLDS(value, G_TYPE_STRING))
+		{
+		const gchar *key = g_value_get_string(value);
+		if (key && key[0])
+			{
+			new_entry = bar_pane_exif_add_entry(ped, key, nullptr, TRUE, FALSE);
+			}
+		}
+
+	if (!new_entry) return FALSE;
+
+	GList *list = nullptr;
+
+	for (GtkWidget *child = gtk_widget_get_first_child(ped->vbox); child != nullptr; child = gtk_widget_get_next_sibling(child))
+		{
+		list = g_list_prepend(list, child);
+		}
+
+	list = g_list_reverse(list);
+
+	gint pos = 0;
+	for (GList *work = list; work; work = work->next)
+		{
+		auto *entry = static_cast<GtkWidget *>(work->data);
+		if (entry == new_entry) continue;
+
+		GtkAllocation allocation;
+		gtk_widget_get_allocation(entry, &allocation);
+
+		double nx;
+		double ny;
+		if (gtk_widget_is_drawable(entry) &&
+		        gtk_widget_translate_coordinates(pane, entry, x, y, &nx, &ny) &&
+		        ny < allocation.height / 2.F)
+			{
+			break;
+			}
+
+		pos++;
+		}
+
+	gq_gtk_box_reorder_child(GTK_BOX(ped->vbox), new_entry, pos);
+
+	return TRUE;
+}
+
 void bar_pane_exif_entry_dnd_init(GtkWidget *entry)
 {
-	(void)entry;
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(bar_pane_exif_entry_dnd_prepare), nullptr);
+	gtk_widget_add_controller(entry, GTK_EVENT_CONTROLLER(drag_source));
 }
 
 void bar_pane_exif_dnd_init(GtkWidget *pane)
 {
-	(void)pane;
+	GtkDropTarget *drop_target = gtk_drop_target_new(G_TYPE_INVALID, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	GType types[] = {G_TYPE_POINTER, G_TYPE_STRING};
+	gtk_drop_target_set_gtypes(drop_target, types, G_N_ELEMENTS(types));
+	g_signal_connect(drop_target, "drop", G_CALLBACK(bar_pane_exif_dnd_drop), pane);
+	gtk_widget_add_controller(pane, GTK_EVENT_CONTROLLER(drop_target));
 }
 
 void bar_pane_exif_edit_close_cb(GtkWidget *, gpointer data)

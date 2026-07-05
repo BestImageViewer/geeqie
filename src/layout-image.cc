@@ -878,10 +878,185 @@ void layout_image_menu_popup(LayoutWindow *lw)
  *----------------------------------------------------------------------------
  */
 
+static gint layout_image_dnd_split_index(LayoutWindow *lw, GtkWidget *widget)
+{
+	for (gint i = 0; i < MAX_SPLIT_IMAGES; i++)
+		{
+		if (lw->split_images[i] && lw->split_images[i]->pr == widget)
+			{
+			return i;
+			}
+		}
+
+	return -1;
+}
+
+static GdkDragAction layout_image_dnd_select_action(GdkDrop *drop)
+{
+	GdkDragAction actions = gdk_drop_get_actions(drop);
+
+	if (actions & GDK_ACTION_COPY) return GDK_ACTION_COPY;
+	if (actions & GDK_ACTION_MOVE) return GDK_ACTION_MOVE;
+	if (actions & GDK_ACTION_LINK) return GDK_ACTION_LINK;
+
+	return GDK_ACTION_NONE;
+}
+
+static GdkContentProvider *layout_image_dnd_prepare(GtkDragSource *source, gdouble, gdouble, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(source));
+	FileData *fd = nullptr;
+
+	const gint i = layout_image_dnd_split_index(lw, widget);
+	if (i >= 0)
+		{
+		DEBUG_1("dnd get from %d", i);
+		fd = image_get_fd(lw->split_images[i]);
+		}
+	else
+		{
+		fd = layout_image_get_fd(lw);
+		}
+
+	if (!fd) return nullptr;
+
+	GList *list = g_list_append(nullptr, fd);
+	GdkContentProvider *provider = dnd_file_list_content_provider(list);
+	g_list_free(list);
+
+	return provider;
+}
+
+static void layout_image_dnd_end(GtkDragSource *, GdkDrag *drag, gboolean, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+
+	if (gdk_drag_get_selected_action(drag) != GDK_ACTION_MOVE) return;
+
+	FileData *fd = layout_image_get_fd(lw);
+	gint row = layout_list_get_index(lw, fd);
+	if (row < 0) return;
+
+	if (!isfile(fd->path))
+		{
+		if (static_cast<guint>(row) < layout_list_count(lw) - 1)
+			{
+			layout_image_next(lw);
+			}
+		else
+			{
+			layout_image_prev(lw);
+			}
+		}
+	layout_refresh(lw);
+}
+
+static void layout_image_dnd_activate_split(LayoutWindow *lw, GtkWidget *widget)
+{
+	const gint i = layout_image_dnd_split_index(lw, widget);
+
+	if (i >= 0)
+		{
+		DEBUG_1("dnd image activate %d", i);
+		layout_image_activate(lw, i, FALSE);
+		}
+}
+
+static void layout_image_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	if (list)
+		{
+		auto *fd = static_cast<FileData *>(list->data);
+
+		if (isfile(fd->path))
+			{
+			g_autofree gchar *base = remove_level_from_path(fd->path);
+			FileData *dir_fd = file_data_new_dir(base);
+			if (dir_fd != lw->dir_fd)
+				{
+				layout_set_fd(lw, dir_fd);
+				}
+			file_data_unref(dir_fd);
+
+			gint row = layout_list_get_index(lw, fd);
+			if (row == -1)
+				{
+				layout_image_set_fd(lw, fd);
+				}
+			else
+				{
+				layout_image_set_index(lw, row);
+				}
+
+			action = layout_image_dnd_select_action(drop);
+			}
+		else if (isdir(fd->path))
+			{
+			layout_set_fd(lw, fd);
+			layout_image_set_fd(lw, nullptr);
+			action = layout_image_dnd_select_action(drop);
+			}
+		}
+
+	gdk_drop_finish(drop, action);
+}
+
+static void layout_image_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	GdkDragAction action = GDK_ACTION_NONE;
+
+	if (text && download_web_file(text, FALSE, lw))
+		{
+		action = layout_image_dnd_select_action(drop);
+		}
+
+	gdk_drop_finish(drop, action);
+}
+
+static gboolean layout_image_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble, gdouble, gpointer data)
+{
+	auto *lw = static_cast<LayoutWindow *>(data);
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
+
+	layout_image_dnd_activate_split(lw, widget);
+
+	GdkContentFormats *formats = gdk_drop_get_formats(drop);
+	if (gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
+		{
+		dnd_read_file_list_async(drop, layout_image_dnd_file_received, lw);
+		return TRUE;
+		}
+
+	if (gdk_content_formats_contain_mime_type(formats, "text/plain"))
+		{
+		dnd_read_text_async(drop, layout_image_dnd_text_received, lw);
+		return TRUE;
+		}
+
+	return FALSE;
+}
+
 static void layout_image_dnd_init(LayoutWindow *lw, gint i)
 {
-	(void)lw;
-	(void)i;
+	ImageWindow *imd = lw->split_images[i];
+
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 2);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(layout_image_dnd_prepare), lw);
+	g_signal_connect(drag_source, "drag-end", G_CALLBACK(layout_image_dnd_end), lw);
+	gtk_widget_add_controller(imd->pr, GTK_EVENT_CONTROLLER(drag_source));
+
+	static const char *mime_types[] = {"text/uri-list", "text/plain"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	g_signal_connect(drop_target, "drop", G_CALLBACK(layout_image_dnd_drop), lw);
+	gtk_widget_add_controller(imd->pr, GTK_EVENT_CONTROLLER(drop_target));
 }
 
 
