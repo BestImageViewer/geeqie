@@ -704,7 +704,7 @@ static void cache_manager_render_start_cb(GenericDialog *, gpointer data)
 		if (cd->list || !gtk_widget_get_sensitive(cd->button_start)) return;
 		}
 
-	g_autofree gchar *path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(cd->entry))));
+	g_autofree gchar *path = remove_trailing_slash((gtk_editable_get_text(GTK_EDITABLE(cd->entry))));
 	parse_out_relatives(path);
 
 	if (!isdir(path))
@@ -1334,7 +1334,7 @@ static void cache_manager_sim_start_cb(GenericDialog *, gpointer data)
 		if (cd->list || !gtk_widget_get_sensitive(cd->button_start)) return;
 		}
 
-	g_autofree gchar *path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(cd->entry))));
+	g_autofree gchar *path = remove_trailing_slash((gtk_editable_get_text(GTK_EDITABLE(cd->entry))));
 	parse_out_relatives(path);
 
 	if (!isdir(path))
@@ -1458,7 +1458,7 @@ static void cache_manager_cache_maintenance_start_cb(GenericDialog *, gpointer d
 		if (cd->list || !gtk_widget_get_sensitive(cd->button_start)) return;
 		}
 
-	g_autofree gchar *path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(cd->entry))));
+	g_autofree gchar *path = remove_trailing_slash((gtk_editable_get_text(GTK_EDITABLE(cd->entry))));
 	parse_out_relatives(path);
 
 	if (!isdir(path))

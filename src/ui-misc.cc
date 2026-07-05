@@ -994,7 +994,7 @@ gchar *text_widget_text_pull(GtkWidget *text_widget, gboolean include_hidden_cha
 
 	if (GTK_IS_ENTRY(text_widget))
 		{
-		return g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(text_widget)));
+		return g_strdup(gtk_editable_get_text(GTK_EDITABLE(text_widget)));
 		}
 
 	return nullptr;
@@ -1022,7 +1022,7 @@ gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
 
 	if (GTK_IS_ENTRY(text_widget))
 		{
-		return g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(text_widget)));
+		return g_strdup(gtk_editable_get_text(GTK_EDITABLE(text_widget)));
 		}
 
 	return nullptr;

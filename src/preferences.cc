@@ -272,11 +272,10 @@ static void slideshow_delay_seconds_cb(GtkSpinButton *spin, gpointer)
  */
 void config_entry_to_option(GtkWidget *entry, gchar **option, gchar *(*func)(const gchar *))
 {
-	const gchar *buf;
-
 	g_free(*option);
 	*option = nullptr;
-	buf = gq_gtk_entry_get_text(GTK_ENTRY(entry));
+
+	const char *buf = gtk_editable_get_text(GTK_EDITABLE(entry));
 	if (buf && buf[0] != '\0')
 		{
 		if (func)
@@ -1307,7 +1306,7 @@ static void filter_disable_cb(GtkWidget *widget, gpointer data)
 
 static void safe_delete_view_cb(GtkWidget *, gpointer)
 {
-	layout_set_path(nullptr, gq_gtk_entry_get_text(GTK_ENTRY(safe_delete_path_entry)));
+	layout_set_path(nullptr, gtk_editable_get_text(GTK_EDITABLE(safe_delete_path_entry)));
 }
 
 static void safe_delete_clear_ok_cb(GenericDialog *, gpointer)
@@ -2865,7 +2864,7 @@ static void keywords_find_start_cb(GenericDialog *, gpointer data)
 
 	if (kfd->list || !gtk_widget_get_sensitive(kfd->button_start)) return;
 
-	g_autofree gchar *path = remove_trailing_slash((gq_gtk_entry_get_text(GTK_ENTRY(kfd->entry))));
+	g_autofree gchar *path = remove_trailing_slash((gtk_editable_get_text(GTK_EDITABLE(kfd->entry))));
 	parse_out_relatives(path);
 
 	if (!isdir(path))

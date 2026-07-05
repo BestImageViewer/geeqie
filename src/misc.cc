@@ -365,11 +365,6 @@ void gq_gtk_entry_set_text(GtkEntry *entry, const gchar *text)
 	gtk_entry_buffer_set_text(buffer, text, static_cast<gint>(g_utf8_strlen(text, -1)));
 }
 
-const gchar *gq_gtk_entry_get_text(GtkEntry *entry)
-{
-	return gtk_editable_get_text(GTK_EDITABLE(entry));
-}
-
 namespace
 {
 

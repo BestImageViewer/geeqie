@@ -195,12 +195,10 @@ static void bookmark_select_cb(GtkWidget *button, gpointer data)
 static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
 {
 	auto p = static_cast<BookPropData *>(data);
-	const gchar *name;
-	const gchar *icon;
 
-	name = gq_gtk_entry_get_text(GTK_ENTRY(p->name_entry));
-	g_autofree gchar *path = remove_trailing_slash(gq_gtk_entry_get_text(GTK_ENTRY(p->path_entry)));
-	icon = gq_gtk_entry_get_text(GTK_ENTRY(p->icon_entry));
+	const char *name = gtk_editable_get_text(GTK_EDITABLE(p->name_entry));
+	g_autofree gchar *path = remove_trailing_slash(gtk_editable_get_text(GTK_EDITABLE(p->path_entry)));
+	const char *icon = gtk_editable_get_text(GTK_EDITABLE(p->icon_entry));
 
 	g_autofree gchar *new_string = bookmark_string(name, path, icon);
 
@@ -698,7 +696,7 @@ static void bookmark_alias_data_free(gpointer data)
 static void bookmark_alias_ok_cb(GenericDialog *, gpointer data)
 {
 	auto *bad = static_cast<BookmarkAliasData *>(data);
-	const gchar *name = gq_gtk_entry_get_text(GTK_ENTRY(bad->entry));
+	const char *name = gtk_editable_get_text(GTK_EDITABLE(bad->entry));
 	gboolean empty_name = (g_strcmp0(name, "") == 0);
 
 	bookmark_list_add(bad->list, empty_name ? filename_from_path(bad->selected_dir) : name, bad->selected_dir);
@@ -825,7 +823,7 @@ void history_combo_append_history(GtkWidget *widget, const gchar *text)
 		return;
 		}
 
-	g_autofree gchar *new_text = g_strdup(text ? text : gq_gtk_entry_get_text(GTK_ENTRY(hc->entry)));
+	g_autofree gchar *new_text = g_strdup(text ? text : gtk_editable_get_text(GTK_EDITABLE(hc->entry)));
 
 	if (new_text && new_text[0] != '\0')
 		{

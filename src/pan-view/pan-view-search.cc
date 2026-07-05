@@ -358,7 +358,7 @@ static void pan_search_activate_cb(PanWindow *pw, const gchar *text)
 
 void pan_search_activate(PanWindow *pw)
 {
-	const gchar *text = gq_gtk_entry_get_text(GTK_ENTRY(pw->search_ui->search_entry));
+	const char *text = gtk_editable_get_text(GTK_EDITABLE(pw->search_ui->search_entry));
 
 	pan_search_activate_cb(pw, text);
 }

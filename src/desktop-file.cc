@@ -84,8 +84,8 @@ gboolean editor_window_save(EditorWindow *ew)
 	GtkTextIter start;
 	GtkTextIter end;
 	gboolean ret = TRUE;
-	const gchar *name = gq_gtk_entry_get_text(GTK_ENTRY(ew->entry));
 
+	const char *name = gtk_editable_get_text(GTK_EDITABLE(ew->entry));
 	if (!name || !name[0])
 		{
 		file_util_warning_dialog(_("Can't save"), _("Please specify file name."), GQ_ICON_DIALOG_ERROR, nullptr);
@@ -160,7 +160,7 @@ void editor_window_text_modified_cb(GtkWidget *, gpointer data)
 void editor_window_entry_changed_cb(GtkWidget *, gpointer data)
 {
 	auto ew = static_cast<EditorWindow *>(data);
-	const gchar *content = gq_gtk_entry_get_text(GTK_ENTRY(ew->entry));
+	const char *content = gtk_editable_get_text(GTK_EDITABLE(ew->entry));
 	gboolean modified = ew->modified;
 
 	if (!modified)

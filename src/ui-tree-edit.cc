@@ -83,7 +83,7 @@ static void tree_edit_do(TreeEditData *ted)
 {
 	if (!ted->edit_func) return;
 
-	const gchar *new_name = gq_gtk_entry_get_text(GTK_ENTRY(ted->entry));
+	const char *new_name = gtk_editable_get_text(GTK_EDITABLE(ted->entry));
 	if (strcmp(new_name, ted->old_name) == 0) return;
 
 	if (ted->edit_func(ted, ted->old_name, new_name, ted->edit_data))

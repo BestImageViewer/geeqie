@@ -373,14 +373,13 @@ void bar_pane_exif_edit_ok_cb(GenericDialog *, gpointer data)
 	if (ped)
 		{
 		bar_pane_exif_add_entry(ped,
-					gq_gtk_entry_get_text(GTK_ENTRY(cdd->key_entry)),
-					gq_gtk_entry_get_text(GTK_ENTRY(cdd->title_entry)),
+					gtk_editable_get_text(GTK_EDITABLE(cdd->key_entry)),
+					gtk_editable_get_text(GTK_EDITABLE(cdd->title_entry)),
 					cdd->if_set, cdd->editable);
 		}
 
 	if (ee)
 		{
-		const gchar *title;
 		GtkWidget *pane = gtk_widget_get_parent(cdd->widget);
 
 		while (pane)
@@ -393,8 +392,9 @@ void bar_pane_exif_edit_ok_cb(GenericDialog *, gpointer data)
 		if (!pane) return;
 
 		g_free(ee->key);
-		ee->key = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(cdd->key_entry)));
-		title = gq_gtk_entry_get_text(GTK_ENTRY(cdd->title_entry));
+		ee->key = g_strdup(gtk_editable_get_text(GTK_EDITABLE(cdd->key_entry)));
+
+		const char *title = gtk_editable_get_text(GTK_EDITABLE(cdd->title_entry));
 		if (!title || title[0] == '\0')
 			{
 			g_free(ee->title);

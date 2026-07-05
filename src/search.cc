@@ -2193,7 +2193,7 @@ static void search_start_do(SearchData *sd)
 		history_combo_append_history(sd->ui.entry_name, nullptr);
 
 		g_free(sd->search_name);
-		sd->search_name = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.entry_name)));
+		sd->search_name = g_strdup(gtk_editable_get_text(GTK_EDITABLE(sd->ui.entry_name)));
 		}
 
 	/* XXX */
@@ -2202,7 +2202,7 @@ static void search_start_do(SearchData *sd)
 		menu_choice_get_match_type(sd->ui.menu_comment, &sd->match_comment);
 
 		g_free(sd->search_comment);
-		sd->search_comment = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.entry_comment)));
+		sd->search_comment = g_strdup(gtk_editable_get_text(GTK_EDITABLE(sd->ui.entry_comment)));
 		}
 
 	if (sd->match_exif_enable)
@@ -2210,14 +2210,14 @@ static void search_start_do(SearchData *sd)
 		menu_choice_get_match_type(sd->ui.menu_exif, &sd->match_exif);
 
 		g_free(sd->search_exif_tag);
-		sd->search_exif_tag = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.entry_exif_tag)));
+		sd->search_exif_tag = g_strdup(gtk_editable_get_text(GTK_EDITABLE(sd->ui.entry_exif_tag)));
 
 		g_free(sd->search_exif_value);
-		sd->search_exif_value = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.entry_exif_value)));
+		sd->search_exif_value = g_strdup(gtk_editable_get_text(GTK_EDITABLE(sd->ui.entry_exif_value)));
 		}
 
 	g_free(sd->search_similarity_path);
-	sd->search_similarity_path = g_strdup(gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.entry_similarity)));
+	sd->search_similarity_path = g_strdup(gtk_editable_get_text(GTK_EDITABLE(sd->ui.entry_similarity)));
 	if (sd->match_similarity_enable)
 		{
 		if (!isfile(sd->search_similarity_path))
@@ -2235,7 +2235,7 @@ static void search_start_do(SearchData *sd)
 	*/
 	if (sd->match_gps_enable && sd->match_gps != SEARCH_MATCH_NONE)
 		{
-		g_autofree gchar *entry_text = decode_geo_parameters(gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.entry_gps_coord)));
+		g_autofree gchar *entry_text = decode_geo_parameters(gtk_editable_get_text(GTK_EDITABLE(sd->ui.entry_gps_coord)));
 
 		sd->search_lat = 1000;
 		sd->search_lon = 1000;
@@ -2372,7 +2372,7 @@ static void search_start_do(SearchData *sd)
 	if (sd->search_type == SEARCH_MATCH_NONE)
 		{
 		/* search path */
-		g_autofree gchar *path = remove_trailing_slash(gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.path_entry)));
+		g_autofree gchar *path = remove_trailing_slash(gtk_editable_get_text(GTK_EDITABLE(sd->ui.path_entry)));
 		if (isdir(path))
 			{
 			file_data_unref(sd->search_dir_fd);
@@ -2412,7 +2412,7 @@ static void search_start_do(SearchData *sd)
 		}
 	else if (sd->search_type == SEARCH_MATCH_COLLECTION)
 		{
-		const gchar *collection = gq_gtk_entry_get_text(GTK_ENTRY(sd->ui.entry_collection));
+		const char *collection = gtk_editable_get_text(GTK_EDITABLE(sd->ui.entry_collection));
 
 		if (is_collection(collection))
 			{
