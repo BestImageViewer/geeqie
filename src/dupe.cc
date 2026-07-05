@@ -4656,17 +4656,17 @@ static GtkWidget *dupe_confirm_dir_list(DupeWindow *dw, GList *list)
 	d->dw = dw;
 	d->list = list;
 
-	menu = popup_menu_short_lived();
+	menu = popover_box_new();
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(confirm_dir_list_destroy), d);
 
-	menu_item_add_icon_sensitive(menu, _("Dropped list includes folders - Select"), GQ_ICON_DIRECTORY, FALSE, nullptr, nullptr);
-	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK, G_CALLBACK(confirm_dir_list_add), d);
-	menu_item_add_icon(menu, _("Add contents _recursive"), GQ_ICON_ADD, G_CALLBACK(confirm_dir_list_recurse), d);
-	menu_item_add_icon(menu, _("_Skip folders"), GQ_ICON_REMOVE, G_CALLBACK(confirm_dir_list_skip), d);
-	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, G_CALLBACK(confirm_dir_list_cancel), d);
+	popover_item_add_icon_sensitive(menu, _("Dropped list includes folders - Select"), GQ_ICON_DIRECTORY, FALSE, nullptr, nullptr);
+	popover_item_add_divider(menu);
+	popover_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK, G_CALLBACK(confirm_dir_list_add), d);
+	popover_item_add_icon(menu, _("Add contents _recursive"), GQ_ICON_ADD, G_CALLBACK(confirm_dir_list_recurse), d);
+	popover_item_add_icon(menu, _("_Skip folders"), GQ_ICON_REMOVE, G_CALLBACK(confirm_dir_list_skip), d);
+	popover_item_add_divider(menu);
+	popover_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, G_CALLBACK(confirm_dir_list_cancel), d);
 
 	return menu;
 }

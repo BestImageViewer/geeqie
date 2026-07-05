@@ -209,10 +209,10 @@ static void bar_pane_comment_populate_popup(GtkTextView *, GtkWidget *menu, gpoi
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
 
-	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("Add text to selected files"), GQ_ICON_ADD,
+	popover_item_add_divider(menu);
+	popover_item_add_icon(menu, _("Add text to selected files"), GQ_ICON_ADD,
 	                   G_CALLBACK(bar_pane_comment_set_selection_cb<TRUE>), pcd);
-	menu_item_add_icon(menu, _("Replace existing text in selected files"), GQ_ICON_REPLACE,
+	popover_item_add_icon(menu, _("Replace existing text in selected files"), GQ_ICON_REPLACE,
 	                   G_CALLBACK(bar_pane_comment_set_selection_cb<FALSE>), data);
 }
 

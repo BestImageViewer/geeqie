@@ -106,7 +106,7 @@ static void vficon_pop_menu_show_names_cb(GtkWidget *, gpointer data)
 
 void vficon_pop_menu_add_items(ViewFile *vf, GtkWidget *menu)
 {
-	menu_item_add_check(menu, _("Show filename _text"), VFICON(vf)->show_text,
+	popover_item_add_check(menu, _("Show filename _text"), VFICON(vf)->show_text,
 	                    G_CALLBACK(vficon_pop_menu_show_names_cb), vf);
 }
 

@@ -224,35 +224,35 @@ static void bar_pane_histogram_popup_mode_cb(GtkWidget *widget, gpointer data)
 	bar_pane_histogram_update(phd);
 }
 
-static GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd)
+static GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd, GtkWidget *parent, gdouble x, gdouble y)
 {
 	GtkWidget *menu;
 	gint channel = phd->histogram.get_channel();
 	gint mode = phd->histogram.get_mode();
 
-	menu = popup_menu_short_lived();
+	menu = popover_box_new(parent, x, y);
 
 	/* use the same strings as in layout-util.cc */
-	menu_item_add_radio(menu, _("Histogram on _Red"),   nullptr, channel == HCHAN_R, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_R>), phd);
-	menu_item_add_radio(menu, _("Histogram on _Green"), nullptr, channel == HCHAN_G, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_G>), phd);
-	menu_item_add_radio(menu, _("Histogram on _Blue"),  nullptr, channel == HCHAN_B, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_B>), phd);
-	menu_item_add_radio(menu, _("_Histogram on RGB"),   nullptr, channel == HCHAN_RGB, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_RGB>), phd);
-	menu_item_add_radio(menu, _("Histogram on _Value"), nullptr, channel == HCHAN_MAX, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_MAX>), phd);
+	popover_item_add_radio(menu, _("Histogram on _Red"),   nullptr, channel == HCHAN_R, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_R>), phd);
+	popover_item_add_radio(menu, _("Histogram on _Green"), nullptr, channel == HCHAN_G, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_G>), phd);
+	popover_item_add_radio(menu, _("Histogram on _Blue"),  nullptr, channel == HCHAN_B, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_B>), phd);
+	popover_item_add_radio(menu, _("_Histogram on RGB"),   nullptr, channel == HCHAN_RGB, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_RGB>), phd);
+	popover_item_add_radio(menu, _("Histogram on _Value"), nullptr, channel == HCHAN_MAX, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_MAX>), phd);
 
-	menu_item_add_divider(menu);
+	popover_item_add_divider(menu);
 
-	menu_item_add_radio(menu, _("Li_near Histogram"), nullptr, mode == HMODE_LINEAR, G_CALLBACK(bar_pane_histogram_popup_mode_cb<HMODE_LINEAR>), phd);
-	menu_item_add_radio(menu, _("L_og Histogram"),    nullptr, mode == HMODE_LOG, G_CALLBACK(bar_pane_histogram_popup_mode_cb<HMODE_LOG>), phd);
+	popover_item_add_radio(menu, _("Li_near Histogram"), nullptr, mode == HMODE_LINEAR, G_CALLBACK(bar_pane_histogram_popup_mode_cb<HMODE_LINEAR>), phd);
+	popover_item_add_radio(menu, _("L_og Histogram"),    nullptr, mode == HMODE_LOG, G_CALLBACK(bar_pane_histogram_popup_mode_cb<HMODE_LOG>), phd);
 
 	return menu;
 }
 
-static gboolean bar_pane_histogram_press_cb(GtkGesture *, gint, gdouble, gdouble, gpointer data)
+static gboolean bar_pane_histogram_press_cb(GtkGesture *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	GtkWidget *menu;
 
-	menu = bar_pane_histogram_menu(phd);
+	menu = bar_pane_histogram_menu(phd, gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture)), x, y);
 	(void)menu;
 
 	return TRUE;

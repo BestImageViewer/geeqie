@@ -442,10 +442,10 @@ void bar_pane_keywords_populate_popup_cb(GtkTextView *, GtkWidget *menu, gpointe
 {
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 
-	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("Add selected keywords to selected files"), GQ_ICON_ADD,
+	popover_item_add_divider(menu);
+	popover_item_add_icon(menu, _("Add selected keywords to selected files"), GQ_ICON_ADD,
 	                   G_CALLBACK(bar_pane_keywords_set_selection_cb<TRUE>), pkd);
-	menu_item_add_icon(menu, _("Replace existing keywords in selected files with selected keywords"), GQ_ICON_REPLACE,
+	popover_item_add_icon(menu, _("Replace existing keywords in selected files with selected keywords"), GQ_ICON_REPLACE,
 	                   G_CALLBACK(bar_pane_keywords_set_selection_cb<FALSE>), pkd);
 }
 
@@ -926,7 +926,7 @@ void bar_pane_keywords_add_to_selected_cb(GtkWidget *, gpointer data)
 	g_list_free_full(keywords, g_free);
 }
 
-void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gint y)
+void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint x, gint y)
 {
 	GtkWidget *menu;
 	GtkWidget *item;
@@ -937,12 +937,12 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 	pkd->click_tpath = nullptr;
 	gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(pkd->keyword_treeview), x, y, &pkd->click_tpath, &pos);
 
-	menu = popup_menu_short_lived();
+	menu = popover_box_new(widget, x, y);
 
-	menu_item_add_icon(menu, _("New keyword"), GQ_ICON_NEW,
+	popover_item_add_icon(menu, _("New keyword"), GQ_ICON_NEW,
 	                   G_CALLBACK(bar_pane_keywords_edit_dialog_cb<FALSE>), pkd);
 
-	menu_item_add_divider(menu);
+	popover_item_add_divider(menu);
 
 	if (pkd->click_tpath)
 		{
@@ -964,12 +964,12 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 		if (is_keyword)
 			{
 			g_autofree gchar *text = g_strdup_printf(_("Add \"%s\" to all selected images"), name);
-			menu_item_add_icon(menu, text, GQ_ICON_ADD, G_CALLBACK(bar_pane_keywords_add_to_selected_cb), pkd);
+			popover_item_add_icon(menu, text, GQ_ICON_ADD, G_CALLBACK(bar_pane_keywords_add_to_selected_cb), pkd);
 			}
-		menu_item_add_divider(menu);
+		popover_item_add_divider(menu);
 
 		g_autofree gchar *hide_text = g_strdup_printf(_("Hide \"%s\""), name);
-		menu_item_add(menu, hide_text, G_CALLBACK(bar_pane_keywords_hide_cb), pkd);
+		popover_item_add(menu, hide_text, G_CALLBACK(bar_pane_keywords_hide_cb), pkd);
 
 		/* Temporary GTK4 stub: disabled nested mark submenu until this menu is ported. */
 		submenu = nullptr;
@@ -978,7 +978,7 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 			if (submenu)
 				{
 				g_autofree gchar *text = g_strdup_printf(_("Mark %d"), 1 + (i < 9 ? i : -1));
-				item = menu_item_add(submenu, text, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
+				item = popover_item_add(submenu, text, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
 				g_object_set_data(G_OBJECT(item), "mark", GINT_TO_POINTER(i + 1));
 				}
 			}
@@ -986,47 +986,47 @@ void bar_pane_keywords_menu_popup(GtkWidget *, PaneKeywordsData *pkd, gint x, gi
 		if (is_keyword)
 			{
 			g_autofree gchar *text = g_strdup_printf(_("Connect \"%s\" to mark"), name);
-			menu_item_add(menu, text, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
+			popover_item_add(menu, text, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
 			}
-		menu_item_add_divider(menu);
+		popover_item_add_divider(menu);
 
 		g_autofree gchar *edit_text = g_strdup_printf(_("Edit \"%s\""), name);
-		menu_item_add_icon(menu, edit_text, GQ_ICON_EDIT,
+		popover_item_add_icon(menu, edit_text, GQ_ICON_EDIT,
 		                   G_CALLBACK(bar_pane_keywords_edit_dialog_cb<TRUE>), pkd);
 
 		g_autofree gchar *delete_text = g_strdup_printf(_("Remove \"%s\""), name);
-		menu_item_add_icon(menu, delete_text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_delete_cb), pkd);
+		popover_item_add_icon(menu, delete_text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_delete_cb), pkd);
 
 		if (mark && mark[0])
 			{
 			g_autofree gchar *text = g_strdup_printf(_("Disconnect \"%s\" from mark %s"), name, mark);
-			menu_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
+			popover_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
 			}
 
 		if (is_keyword)
 			{
 			g_autofree gchar *text = g_strdup_printf("%s", _("Disconnect all Mark Keyword connections"));
-			menu_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
+			popover_item_add_icon(menu, text, GQ_ICON_DELETE, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
 			}
-		menu_item_add_divider(menu);
+		popover_item_add_divider(menu);
 		}
 	/* for the pane */
 
 
-	menu_item_add(menu, _("Expand checked"), G_CALLBACK(bar_pane_keywords_expand_checked_cb), pkd);
-	menu_item_add(menu, _("Collapse unchecked"), G_CALLBACK(bar_pane_keywords_collapse_unchecked_cb), pkd);
-	menu_item_add(menu, _("Hide unchecked"), G_CALLBACK(bar_pane_keywords_hide_unchecked_cb), pkd);
-	menu_item_add(menu, _("Revert all hidden"), G_CALLBACK(bar_pane_keywords_revert_hidden_cb), pkd);
-	menu_item_add_divider(menu);
-	menu_item_add(menu, _("Show all"), G_CALLBACK(bar_pane_keywords_show_all_cb), pkd);
-	menu_item_add(menu, _("Collapse all"), G_CALLBACK(bar_pane_keywords_collapse_all_cb), pkd);
-	menu_item_add(menu, _("Revert"), G_CALLBACK(bar_pane_keywords_revert_cb), pkd);
-	menu_item_add_divider(menu);
+	popover_item_add(menu, _("Expand checked"), G_CALLBACK(bar_pane_keywords_expand_checked_cb), pkd);
+	popover_item_add(menu, _("Collapse unchecked"), G_CALLBACK(bar_pane_keywords_collapse_unchecked_cb), pkd);
+	popover_item_add(menu, _("Hide unchecked"), G_CALLBACK(bar_pane_keywords_hide_unchecked_cb), pkd);
+	popover_item_add(menu, _("Revert all hidden"), G_CALLBACK(bar_pane_keywords_revert_hidden_cb), pkd);
+	popover_item_add_divider(menu);
+	popover_item_add(menu, _("Show all"), G_CALLBACK(bar_pane_keywords_show_all_cb), pkd);
+	popover_item_add(menu, _("Collapse all"), G_CALLBACK(bar_pane_keywords_collapse_all_cb), pkd);
+	popover_item_add(menu, _("Revert"), G_CALLBACK(bar_pane_keywords_revert_cb), pkd);
+	popover_item_add_divider(menu);
 
 	/* Temporary GTK4 stub: flatten "On any change" submenu until popup menus are ported. */
-	menu_item_add_check(menu, _("On any change: Expand checked"), pkd->expand_checked, G_CALLBACK(bar_pane_keywords_expand_checked_toggle_cb), pkd);
-	menu_item_add_check(menu, _("On any change: Collapse unchecked"), pkd->collapse_unchecked, G_CALLBACK(bar_pane_keywords_collapse_unchecked_toggle_cb), pkd);
-	menu_item_add_check(menu, _("On any change: Hide unchecked"), pkd->hide_unchecked, G_CALLBACK(bar_pane_keywords_hide_unchecked_toggle_cb), pkd);
+	popover_item_add_check(menu, _("On any change: Expand checked"), pkd->expand_checked, G_CALLBACK(bar_pane_keywords_expand_checked_toggle_cb), pkd);
+	popover_item_add_check(menu, _("On any change: Collapse unchecked"), pkd->collapse_unchecked, G_CALLBACK(bar_pane_keywords_collapse_unchecked_toggle_cb), pkd);
+	popover_item_add_check(menu, _("On any change: Hide unchecked"), pkd->hide_unchecked, G_CALLBACK(bar_pane_keywords_hide_unchecked_toggle_cb), pkd);
 
 	(void)submenu;
 	(void)item;

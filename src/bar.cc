@@ -386,7 +386,7 @@ static void bar_expander_cb(GObject *object, GParamSpec *, gpointer)
 
 static void bar_menu_add_cb(GtkWidget *, gpointer)
 {
-	GtkWidget *menu = popup_menu_short_lived();
+	GtkWidget *menu = popover_box_new();
 
 /** @FIXME GTK$ This is a placeholder for the moment.
  * The style should be, for example:

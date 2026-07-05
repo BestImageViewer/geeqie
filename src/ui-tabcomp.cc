@@ -258,7 +258,7 @@ static void tab_completion_popup_cb(GtkWidget *widget, gpointer data)
 	tab_completion_emit_tab_signal(td);
 }
 
-static void tab_completion_popup_list(TabCompData *td, GList *list)
+static void tab_completion_popup_list(TabCompData *td, GList *list, GtkWidget *parent = nullptr)
 {
 	GtkWidget *menu;
 	GList *work;
@@ -275,7 +275,7 @@ static void tab_completion_popup_list(TabCompData *td, GList *list)
 	if (g_list_length(list) > 200) return;
 #endif
 
-	menu = popup_menu_short_lived();
+	menu = popover_box_new(parent);
 
 	work = list;
 	while (work && count < TAB_COMP_POPUP_MAX)
@@ -283,7 +283,7 @@ static void tab_completion_popup_list(TabCompData *td, GList *list)
 		auto name = static_cast<gchar *>(work->data);
 		GtkWidget *item;
 
-		item = menu_item_add_simple(menu, name, G_CALLBACK(tab_completion_popup_cb), name);
+		item = popover_item_add_simple(menu, name, G_CALLBACK(tab_completion_popup_cb), name);
 		g_object_set_data(G_OBJECT(item), "tab_completion_data", td);
 
 		work = work->next;
@@ -366,7 +366,7 @@ static gboolean tab_completion_do(TabCompData *td)
 				}
 			else
 				{
-				tab_completion_popup_list(td, td->file_list);
+				tab_completion_popup_list(td, td->file_list, td->entry);
 				}
 
 			return home_exp;
@@ -444,7 +444,7 @@ static gboolean tab_completion_do(TabCompData *td)
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
 				poss = g_list_sort(poss, reinterpret_cast<GCompareFunc>(CASE_SORT));
-				tab_completion_popup_list(td, poss);
+				tab_completion_popup_list(td, poss, td->entry);
 
 				return TRUE;
 				}

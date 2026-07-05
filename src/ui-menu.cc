@@ -50,13 +50,23 @@ static void menu_item_add_accelerator(GtkWidget *, GtkWidget *)
 
 static void menu_item_finish(GtkWidget *menu, GtkWidget *item, GCallback func, gpointer data)
 {
+	GtkWidget *popover = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(menu), "gq-popover"));
+
 	if (func && GTK_IS_CHECK_BUTTON(item))
 		{
 		g_signal_connect(G_OBJECT(item), "toggled", func, data);
+		if (popover)
+			{
+			g_signal_connect_swapped(G_OBJECT(item), "toggled", G_CALLBACK(gtk_popover_popdown), popover);
+			}
 		}
 	else if (func && GTK_IS_BUTTON(item))
 		{
 		g_signal_connect(G_OBJECT(item), "clicked", func, data);
+		if (popover)
+			{
+			g_signal_connect_swapped(G_OBJECT(item), "clicked", G_CALLBACK(gtk_popover_popdown), popover);
+			}
 		}
 	if (GTK_IS_BOX(menu))
 		{
@@ -65,7 +75,7 @@ static void menu_item_finish(GtkWidget *menu, GtkWidget *item, GCallback func, g
 	gtk_widget_show(item);
 }
 
-GtkWidget *menu_item_add(GtkWidget *menu, const gchar *label,
+GtkWidget *popover_item_add(GtkWidget *menu, const gchar *label,
 			 GCallback func, gpointer data)
 {
 	GtkWidget *item;
@@ -80,7 +90,7 @@ GtkWidget *menu_item_add(GtkWidget *menu, const gchar *label,
 	return item;
 }
 
-GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar *stock_id,
+GtkWidget *popover_item_add_stock(GtkWidget *menu, const gchar *label, const gchar *stock_id,
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item;
@@ -97,7 +107,7 @@ GtkWidget *menu_item_add_stock(GtkWidget *menu, const gchar *label, const gchar 
 	return item;
 }
 
-GtkWidget *menu_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *icon_name,
+GtkWidget *popover_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *icon_name,
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item;
@@ -114,29 +124,29 @@ GtkWidget *menu_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *
 	return item;
 }
 
-GtkWidget *menu_item_add_sensitive(GtkWidget *menu, const gchar *label, gboolean sensitive,
+GtkWidget *popover_item_add_sensitive(GtkWidget *menu, const gchar *label, gboolean sensitive,
 				   GCallback func, gpointer data)
 {
 	GtkWidget *item;
 
-	item = menu_item_add(menu, label, func, data);
+	item = popover_item_add(menu, label, func, data);
 	gtk_widget_set_sensitive(item, sensitive);
 
 	return item;
 }
 
-GtkWidget *menu_item_add_icon_sensitive(GtkWidget *menu, const gchar *label, const gchar *icon_name, gboolean sensitive,
+GtkWidget *popover_item_add_icon_sensitive(GtkWidget *menu, const gchar *label, const gchar *icon_name, gboolean sensitive,
 					 GCallback func, gpointer data)
 {
 	GtkWidget *item;
 
-	item = menu_item_add_icon(menu, label, icon_name, func, data);
+	item = popover_item_add_icon(menu, label, icon_name, func, data);
 	gtk_widget_set_sensitive(item, sensitive);
 
 	return item;
 }
 
-GtkWidget *menu_item_add_check(GtkWidget *menu, const gchar *label, gboolean active,
+GtkWidget *popover_item_add_check(GtkWidget *menu, const gchar *label, gboolean active,
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item;
@@ -152,22 +162,22 @@ GtkWidget *menu_item_add_check(GtkWidget *menu, const gchar *label, gboolean act
 	return item;
 }
 
-GtkWidget *menu_item_add_radio(GtkWidget *menu, const gchar *label, gpointer item_data, gboolean active,
+GtkWidget *popover_item_add_radio(GtkWidget *menu, const gchar *label, gpointer item_data, gboolean active,
 			       GCallback func, gpointer data)
 {
-	GtkWidget *item = menu_item_add_check(menu, label, active, func, data);
+	GtkWidget *item = popover_item_add_check(menu, label, active, func, data);
 
 	if (item_data) g_object_set_data(G_OBJECT(item), "menu_item_radio_data", item_data);
 
 	return item;
 }
 
-gpointer menu_item_radio_get_data(GtkWidget *menu_item)
+gpointer popover_item_radio_get_data(GtkWidget *menu_item)
 {
 	return g_object_get_data(G_OBJECT(menu_item), "menu_item_radio_data");
 }
 
-void menu_item_add_divider(GtkWidget *menu)
+void popover_item_add_divider(GtkWidget *menu)
 {
 	GtkWidget *item = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 	menu_item_finish(menu, item, nullptr, nullptr);
@@ -176,7 +186,7 @@ void menu_item_add_divider(GtkWidget *menu)
 /**
  * @brief Use to avoid mnemonics, for example filenames
  */
-GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
+GtkWidget *popover_item_add_simple(GtkWidget *menu, const gchar *label,
 				GCallback func, gpointer data)
 {
 	GtkWidget *item = gtk_button_new_with_label(label);
@@ -192,10 +202,29 @@ GtkWidget *menu_item_add_simple(GtkWidget *menu, const gchar *label,
  *-----------------------------------------------------------------------------
  */
 
-GtkWidget *popup_menu_short_lived()
+GtkWidget *popover_box_new(GtkWidget *parent, gdouble x, gdouble y)
 {
-	/* Temporary GTK4 stub: callers still build a widget tree, but popup display is disabled. */
-	return gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+	if (parent)
+		{
+		GtkWidget *popover = gtk_popover_new();
+		g_object_set_data(G_OBJECT(box), "gq-popover", popover);
+		gtk_popover_set_child(GTK_POPOVER(popover), box);
+		gtk_widget_set_parent(popover, parent);
+		if (x >= 0 && y >= 0)
+			{
+			GdkRectangle pointing_to{
+				static_cast<int>(x),
+				static_cast<int>(y),
+				1, 1
+			};
+			gtk_popover_set_pointing_to(GTK_POPOVER(popover), &pointing_to);
+			}
+		gtk_popover_popup(GTK_POPOVER(popover));
+		}
+
+	return box;
 }
 
 GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)

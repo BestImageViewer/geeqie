@@ -73,7 +73,7 @@ static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
 			stock_id = key;
 			}
 
-		GtkWidget *item = menu_item_add_stock(menu, editor->name, stock_id, func, key);
+		GtkWidget *item = popover_item_add_stock(menu, editor->name, stock_id, func, key);
 		g_signal_connect_swapped(G_OBJECT(item), "destroy", G_CALLBACK(g_free), key);
 		}
 }
@@ -81,14 +81,14 @@ static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
 GtkWidget *submenu_add_edit(GtkWidget *menu, gboolean sensitive, GList *fd_list, GCallback func, gpointer data)
 {
 	GtkWidget *submenu;
-	submenu = popup_menu_short_lived();
+	submenu = popover_box_new();
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
 	add_edit_items(submenu, func, fd_list);
 
 	if (menu)
 		{
-		GtkWidget *item = menu_item_add(menu, _("_Plugins"), nullptr, nullptr);
+		GtkWidget *item = popover_item_add(menu, _("_Plugins"), nullptr, nullptr);
 		gtk_widget_set_sensitive(item, sensitive);
 		}
 
@@ -124,13 +124,13 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
 
 	if (menu)
 		{
-		submenu = popup_menu_short_lived();
-		GtkWidget *item = menu_item_add(menu, _("_Sort"), nullptr, nullptr);
+		submenu = popover_box_new();
+		GtkWidget *item = popover_item_add(menu, _("_Sort"), nullptr, nullptr);
 		gtk_widget_set_sensitive(item, TRUE);
 		}
 	else
 		{
-		submenu = popup_menu_short_lived();
+		submenu = popover_box_new();
 		}
 
 	if (!show_current) g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
@@ -140,13 +140,13 @@ GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
 		{
 		if (show_current)
 			{
-			menu_item_add_radio(submenu, sort_type_get_text(sort_type),
+			popover_item_add_radio(submenu, sort_type_get_text(sort_type),
 			                    GINT_TO_POINTER(sort_type), sort_type == type,
 			                    func, data);
 			}
 		else
 			{
-			menu_item_add(submenu, sort_type_get_text(sort_type),
+			popover_item_add(submenu, sort_type_get_text(sort_type),
 			              func, GINT_TO_POINTER(sort_type));
 			}
 		}
@@ -194,14 +194,14 @@ static void submenu_add_alter_item(GtkWidget *menu, GCallback func, AlterType ty
 {
 	(void)accel_key;
 	(void)accel_mods;
-	menu_item_add_simple(menu, alter_type_get_text(type), func, GINT_TO_POINTER(type));
+	popover_item_add_simple(menu, alter_type_get_text(type), func, GINT_TO_POINTER(type));
 }
 
 GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data)
 {
 	GtkWidget *submenu;
 
-	submenu = popup_menu_short_lived();
+	submenu = popover_box_new();
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
 	submenu_add_alter_item(submenu, func, ALTER_ROTATE_90, ']', 0);
@@ -213,7 +213,7 @@ GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data)
 
 	if (menu)
 		{
-		return menu_item_add(menu, _("_Orientation"), nullptr, nullptr);
+		return popover_item_add(menu, _("_Orientation"), nullptr, nullptr);
 		}
 
 	return submenu;
@@ -240,12 +240,12 @@ GtkWidget *submenu_add_collections(GtkWidget *menu, gboolean sensitive,
 	GtkWidget *submenu;
 	GList *collection_list = nullptr;
 
-	submenu = popup_menu_short_lived();
+	submenu = popover_box_new();
 	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
 
-	menu_item_add_icon_sensitive(submenu, _("New collection"), PIXBUF_INLINE_COLLECTION,
+	popover_item_add_icon_sensitive(submenu, _("New collection"), PIXBUF_INLINE_COLLECTION,
 	                             TRUE, G_CALLBACK(func), GINT_TO_POINTER(-1));
-	menu_item_add_divider(submenu);
+	popover_item_add_divider(submenu);
 
 	collect_manager_list(&collection_list,nullptr,nullptr);
 
@@ -253,12 +253,12 @@ GtkWidget *submenu_add_collections(GtkWidget *menu, gboolean sensitive,
 	for (GList *work = collection_list; work; work = work->next, index++)
 		{
 		auto *collection_name = static_cast<gchar *>(work->data);
-		menu_item_add(submenu, collection_name, func, GINT_TO_POINTER(index));
+		popover_item_add(submenu, collection_name, func, GINT_TO_POINTER(index));
 		}
 
 	if (menu)
 		{
-		GtkWidget *item = menu_item_add(menu, _("_Add to Collection"), nullptr, nullptr);
+		GtkWidget *item = popover_item_add(menu, _("_Add to Collection"), nullptr, nullptr);
 		gtk_widget_set_sensitive(item, sensitive);
 		}
 
@@ -387,7 +387,7 @@ void popup_menu_bar(GtkWidget *widget, GCallback expander_height_cb, gpointer)
 
 	g_object_unref(group);
 
-	/* Temporary GTK4 path: use the shared popover helper instead of GtkMenu. */
+	/* Temporary GTK4 path: use the shared popover helper. */
 	menu = popup_menu(menu_model, widget);
 	(void)menu;
 }

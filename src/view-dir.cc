@@ -352,26 +352,26 @@ GtkWidget *vd_drop_menu(ViewDir *vd, gint active)
 {
 	GtkWidget *menu;
 
-	menu = popup_menu_short_lived();
+	menu = popover_box_new(vd->widget);
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(vd_popup_destroy_cb), vd);
 
-	menu_item_add_icon_sensitive(menu, _("_Copy"), GQ_ICON_COPY, active,
+	popover_item_add_icon_sensitive(menu, _("_Copy"), GQ_ICON_COPY, active,
 				      G_CALLBACK(vd_drop_menu_copy_cb), vd);
-	menu_item_add_sensitive(menu, _("_Move"), active, G_CALLBACK(vd_drop_menu_move_cb), vd);
+	popover_item_add_sensitive(menu, _("_Move"), active, G_CALLBACK(vd_drop_menu_move_cb), vd);
 
 	EditorsList editors_list = editor_list_get();
 	for (const EditorDescription *editor : editors_list)
 		{
 		if (!editor_is_filter(editor->key)) continue;
 
-		GtkWidget *item = menu_item_add_sensitive(menu, editor->name, active,
+		GtkWidget *item = popover_item_add_sensitive(menu, editor->name, active,
 		                                          G_CALLBACK(vd_drop_menu_filter_cb), vd);
 		g_object_set_data_full(G_OBJECT(item), "filter_key", g_strdup(editor->key), g_free);
 		}
 
-	menu_item_add_divider(menu);
-	menu_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, nullptr, vd);
+	popover_item_add_divider(menu);
+	popover_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, nullptr, vd);
 
 	return menu;
 }

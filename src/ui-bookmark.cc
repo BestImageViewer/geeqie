@@ -327,14 +327,14 @@ static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button, bool local)
 
 	bm->active_button = button;
 
-	menu = popup_menu_short_lived();
-	menu_item_add_icon_sensitive(menu, _("_Properties…"), PIXBUF_INLINE_ICON_PROPERTIES, bm->editable,
+	menu = popover_box_new(button);
+	popover_item_add_icon_sensitive(menu, _("_Properties…"), PIXBUF_INLINE_ICON_PROPERTIES, bm->editable,
 		      G_CALLBACK(bookmark_menu_prop_cb), bm);
-	menu_item_add_icon_sensitive(menu, _("Move _up"), GQ_ICON_GO_UP, bm->editable,
+	popover_item_add_icon_sensitive(menu, _("Move _up"), GQ_ICON_GO_UP, bm->editable,
 	                             G_CALLBACK(bookmark_menu_move_cb<-1>), bm);
-	menu_item_add_icon_sensitive(menu, _("Move _down"), GQ_ICON_GO_DOWN, bm->editable,
+	popover_item_add_icon_sensitive(menu, _("Move _down"), GQ_ICON_GO_DOWN, bm->editable,
 	                             G_CALLBACK(bookmark_menu_move_cb<1>), bm);
-	menu_item_add_icon_sensitive(menu, _("_Remove"), GQ_ICON_REMOVE, bm->editable,
+	popover_item_add_icon_sensitive(menu, _("_Remove"), GQ_ICON_REMOVE, bm->editable,
 		      G_CALLBACK(bookmark_menu_remove_cb), bm);
 
 	if (local)

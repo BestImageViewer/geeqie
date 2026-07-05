@@ -280,7 +280,7 @@ static void vflist_pop_menu_thumbs_cb(GtkWidget *, gpointer data)
 
 void vflist_pop_menu_add_items(ViewFile *vf, GtkWidget *menu)
 {
-	menu_item_add_check(menu, _("Show _thumbnails"), VFLIST(vf)->thumbs_enabled,
+	popover_item_add_check(menu, _("Show _thumbnails"), VFLIST(vf)->thumbs_enabled,
 	                    G_CALLBACK(vflist_pop_menu_thumbs_cb), vf);
 }
 

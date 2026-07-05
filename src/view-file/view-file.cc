@@ -1241,7 +1241,7 @@ static gboolean vf_file_filter_star_select_none_cb(GtkWidget *widget, gpointer d
 
 static GtkWidget *class_filter_menu (ViewFile *vf)
 {
-	GtkWidget *menu = popup_menu_short_lived();
+	GtkWidget *menu = popover_box_new();
 
 	for (int i = 0; i < FILE_FORMAT_CLASSES; i++)
 		{
@@ -1253,15 +1253,15 @@ static GtkWidget *class_filter_menu (ViewFile *vf)
 		gtk_widget_show(menu_item);
 		}
 
-	menu_item_add_simple(menu, _("Select all"), G_CALLBACK(vf_file_filter_class_select_all_cb), vf);
-	menu_item_add_simple(menu, _("Select none"), G_CALLBACK(vf_file_filter_class_select_none_cb), vf);
+	popover_item_add_simple(menu, _("Select all"), G_CALLBACK(vf_file_filter_class_select_all_cb), vf);
+	popover_item_add_simple(menu, _("Select none"), G_CALLBACK(vf_file_filter_class_select_none_cb), vf);
 
 	return menu;
 }
 
 static GtkWidget *rating_filter_menu(ViewFile *vf)
 {
-	GtkWidget *menu = popup_menu_short_lived();
+	GtkWidget *menu = popover_box_new();
 
 	for (int i = 0; i < FORMAT_RATING_COUNT; i++)
 		{
@@ -1273,8 +1273,8 @@ static GtkWidget *rating_filter_menu(ViewFile *vf)
 		gtk_widget_show(menu_item);
 		}
 
-	menu_item_add_simple(menu, _("Select all"), G_CALLBACK(vf_file_filter_rating_select_all_cb), vf);
-	menu_item_add_simple(menu, _("Ignore Rating"), G_CALLBACK(vf_file_filter_star_select_none_cb), vf);
+	popover_item_add_simple(menu, _("Select all"), G_CALLBACK(vf_file_filter_rating_select_all_cb), vf);
+	popover_item_add_simple(menu, _("Ignore Rating"), G_CALLBACK(vf_file_filter_star_select_none_cb), vf);
 
 	return menu;
 }

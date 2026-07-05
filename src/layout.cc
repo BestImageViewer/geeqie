@@ -620,7 +620,7 @@ static void layout_sort_menu_cb(GtkWidget *widget, gpointer data)
 	if (!lw) return;
 
 	auto sort = lw->options.file_view_list_sort;
-	sort.method = static_cast<SortType>(GPOINTER_TO_INT(menu_item_radio_get_data(widget)));
+	sort.method = static_cast<SortType>(GPOINTER_TO_INT(popover_item_radio_get_data(widget)));
 
 	if (sort_type_requires_metadata(sort.method))
 		{
@@ -649,18 +649,21 @@ static void layout_sort_menu_case_cb(GtkWidget *, gpointer data)
 	layout_sort_set_files(lw, sort);
 }
 
-static void layout_sort_button_press_cb(GtkWidget *, gpointer data)
+static void layout_sort_button_press_cb(GtkWidget *widget, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
 
 	GtkWidget *menu = submenu_add_sort(nullptr, G_CALLBACK(layout_sort_menu_cb), lw, TRUE, lw->options.file_view_list_sort.method);
+	GtkWidget *popover = gtk_popover_new();
+	gtk_popover_set_child(GTK_POPOVER(popover), menu);
+	gtk_widget_set_parent(popover, widget);
 
 	/* ascending option */
-	menu_item_add_divider(menu);
-	menu_item_add_check(menu, _("Ascending"), lw->options.file_view_list_sort.ascending, G_CALLBACK(layout_sort_menu_ascend_cb), lw);
-	menu_item_add_check(menu, _("Case"), lw->options.file_view_list_sort.case_sensitive, G_CALLBACK(layout_sort_menu_case_cb), lw);
+	popover_item_add_divider(menu);
+	popover_item_add_check(menu, _("Ascending"), lw->options.file_view_list_sort.ascending, G_CALLBACK(layout_sort_menu_ascend_cb), lw);
+	popover_item_add_check(menu, _("Case"), lw->options.file_view_list_sort.case_sensitive, G_CALLBACK(layout_sort_menu_case_cb), lw);
 
-	(void)menu;
+	gtk_popover_popup(GTK_POPOVER(popover));
 }
 
 namespace
@@ -731,29 +734,29 @@ static void layout_scroll_menu_cb(GtkWidget *widget, gpointer)
 	image_options_sync();
 }
 
-static void layout_zoom_button_press_cb(GtkWidget *, gpointer)
+static void layout_zoom_button_press_cb(GtkWidget *widget, gpointer)
 {
-	GtkWidget *menu = popup_menu_short_lived();
+	GtkWidget *menu = popover_box_new(widget);
 
-	menu_item_add_radio(menu, _("Zoom to original size"), nullptr,
+	popover_item_add_radio(menu, _("Zoom to original size"), nullptr,
 	                    options->image.zoom_mode == ZOOM_RESET_ORIGINAL,
 	                    G_CALLBACK(layout_zoom_menu_cb<ZOOM_RESET_ORIGINAL>), nullptr);
-	menu_item_add_radio(menu, _("Fit image to window"), nullptr,
+	popover_item_add_radio(menu, _("Fit image to window"), nullptr,
 	                    options->image.zoom_mode == ZOOM_RESET_FIT_WINDOW,
 	                    G_CALLBACK(layout_zoom_menu_cb<ZOOM_RESET_FIT_WINDOW>), nullptr);
-	menu_item_add_radio(menu, _("Leave Zoom at previous setting"), nullptr,
+	popover_item_add_radio(menu, _("Leave Zoom at previous setting"), nullptr,
 	                    options->image.zoom_mode == ZOOM_RESET_NONE,
 	                    G_CALLBACK(layout_zoom_menu_cb<ZOOM_RESET_NONE>), nullptr);
 
-	menu_item_add_divider(menu);
+	popover_item_add_divider(menu);
 
-	menu_item_add_radio(menu, _("Scroll to top left corner"), nullptr,
+	popover_item_add_radio(menu, _("Scroll to top left corner"), nullptr,
 	                    options->image.scroll_reset_method == ScrollReset::TOPLEFT,
 	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::TOPLEFT>), nullptr);
-	menu_item_add_radio(menu, _("Scroll to image center"), nullptr,
+	popover_item_add_radio(menu, _("Scroll to image center"), nullptr,
 	                    options->image.scroll_reset_method == ScrollReset::CENTER,
 	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::CENTER>), nullptr);
-	menu_item_add_radio(menu, _("Keep the region from previous image"), nullptr,
+	popover_item_add_radio(menu, _("Keep the region from previous image"), nullptr,
 	                    options->image.scroll_reset_method == ScrollReset::NOCHANGE,
 	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::NOCHANGE>), nullptr);
 
