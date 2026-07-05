@@ -695,11 +695,6 @@ void end_print_cb(GtkPrintOperation *operation, GtkPrintContext *, gpointer data
 	print_window_free(pw);
 }
 
-void print_response_cb(GtkDialog *dialog, gint, gpointer)
-{
-	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
-}
-
 } // namespace
 
 /**
@@ -758,17 +753,9 @@ void print_window_new(GList *selection, GtkWidget *parent)
 
 	if (error)
 		{
-		GtkWidget *dialog;
-
-		dialog = gtk_message_dialog_new(GTK_WINDOW (parent),
-								GTK_DIALOG_DESTROY_WITH_PARENT,
-								GTK_MESSAGE_ERROR,
-								GTK_BUTTONS_CLOSE,
-								"%s", error->message);
-
-		g_signal_connect(dialog, "response", G_CALLBACK(print_response_cb), NULL);
-
-		gtk_widget_show (dialog);
+		g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new("%s", error->message);
+		gtk_alert_dialog_set_modal(dialog, TRUE);
+		gtk_alert_dialog_show(dialog, GTK_WINDOW(parent));
 		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
