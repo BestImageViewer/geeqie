@@ -1598,11 +1598,37 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-new-window-default",
+		nullptr,
+		N_("New window default"),
+		layout_menu_window_default_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-new-window-from-current",
 		nullptr,
 		N_("New window from current"),
 		layout_menu_window_from_current_cb,
 		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.main-win-new-window-layout",
+		nullptr,
+		N_("New window from layout"),
+		layout_menu_window_layout_cb,
+		G_VARIANT_TYPE_STRING,
 		ActionStateType::NONE,
 		FALSE,
 		nullptr,

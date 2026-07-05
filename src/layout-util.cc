@@ -2272,35 +2272,23 @@ static GList *layout_window_menu_list()
 	return g_list_sort(list, layout_window_menu_list_sort_cb);
 }
 
-static void layout_menu_new_window_update(LayoutWindow *)
+static void layout_menu_new_window_update(LayoutWindow *lw)
 {
-/** @FIXME GTK4
-	if (!lw->ui_manager) return;
+	if (!lw || !lw->builder) return;
 
 	g_autolist(WindowNames) list = layout_window_menu_list();
 
-	GtkWidget *menu = deprecated_gtk_ui_manager_get_widget(lw->ui_manager,
-	                                               options->hamburger_menu ? "/MainMenu/OpenMenu/WindowsMenu/NewWindow" : "/MainMenu/WindowsMenu/NewWindow");
-	GtkWidget *sub_menu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(menu));
+	GMenu *layouts_section = G_MENU(gtk_builder_get_object(lw->builder, "new-window-layouts-section"));
+	if (!layouts_section) return;
 
-	g_autoptr(GList) children = gq_gtk_widget_get_children(GTK_WIDGET(sub_menu));
-	for (GList *iter = g_list_nth(children, 4); // separator, default, from current, separator
-	     iter != nullptr; iter = g_list_next(iter))
-		{
-		gq_gtk_widget_destroy(static_cast<GtkWidget *>(iter->data));
-		}
-
-	menu_item_add_divider(sub_menu);
-
-	gint n = 0;
-	for (GList *work = list; work; work = work->next, n++)
+	g_menu_remove_all(layouts_section);
+	for (GList *work = list; work; work = work->next)
 		{
 		auto *wn = static_cast<WindowNames *>(work->data);
-		GtkWidget *item = menu_item_add_simple(sub_menu, wn->name,
-		                                       G_CALLBACK(layout_menu_new_window_cb), GINT_TO_POINTER(n));
-		gtk_widget_set_sensitive(item, !layout_window_is_displayed(wn->name));
+		g_autoptr(GMenuItem) item = g_menu_item_new(wn->name, nullptr);
+		g_menu_item_set_action_and_target_value(item, "win.main-win-new-window-layout", g_variant_new_string(wn->name));
+		g_menu_append_item(layouts_section, item);
 		}
-*/
 }
 
 static void connected_zoom_menu_cb(GSimpleAction *, GVariant *, gpointer)
@@ -2343,7 +2331,7 @@ static void window_rename_ok(RenameWindow *rw)
 
 		g_free(rw->lw->options.id);
 		rw->lw->options.id = g_strdup(new_id);
-		layout_menu_new_window_update(rw->lw);
+		layout_window_foreach(layout_menu_new_window_update);
 		layout_refresh(rw->lw);
 		image_update_title(rw->lw->image);
 		}
@@ -2382,11 +2370,26 @@ static void window_delete_ok_cb(GenericDialog *, gpointer data)
 		{
 		unlink_file(path);
 		}
+
+	layout_window_foreach(layout_menu_new_window_update);
 }
 
 static void layout_menu_window_default_cb(GSimpleAction *, GVariant *, gpointer)
 {
 	layout_new_from_default();
+}
+
+static void layout_menu_window_layout_cb(GSimpleAction *, GVariant *parameter, gpointer)
+{
+	const gchar *id = g_variant_get_string(parameter, nullptr);
+	if (!id || layout_window_is_displayed(id))
+		{
+		return;
+		}
+
+	g_autofree gchar *xml_name = g_strdup_printf("%s.xml", id);
+	g_autofree gchar *path = g_build_filename(get_window_layouts_dir(), xml_name, nullptr);
+	load_config_from_file(path, FALSE);
 }
 
 static gchar *create_tmp_config_file()
@@ -3748,6 +3751,7 @@ void register_main_window_actions(GtkApplication *app,  LayoutWindow *lw)
 	GKeyFile *accels_keyfile = get_keyfile_merged();
 
 	register_actions_from_table(app, lw->window, main_actions, accels_keyfile, lw);
+	layout_menu_new_window_update(lw);
 }
 
 GStrv get_tooltips()

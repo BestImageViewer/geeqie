@@ -1138,16 +1138,19 @@
     -->
     <submenu>
       <attribute name="label" translatable="yes">_Windows</attribute>
-      <submenu>
+      <submenu id="new-window-submenu">
         <attribute name="label" translatable="yes">New window</attribute>
-        <item>
-          <attribute name="action">win.main-win-new-window-default</attribute>
-          <attribute name="label" translatable="yes">New window default</attribute>
-        </item>
-        <item>
-          <attribute name="action">win.main-win-new-window-from-current</attribute>
-          <attribute name="label" translatable="yes">New window from current</attribute>
-        </item>
+        <section>
+          <item>
+            <attribute name="action">win.main-win-new-window-default</attribute>
+            <attribute name="label" translatable="yes">New window default</attribute>
+          </item>
+          <item>
+            <attribute name="action">win.main-win-new-window-from-current</attribute>
+            <attribute name="label" translatable="yes">New window from current</attribute>
+          </item>
+        </section>
+        <section id="new-window-layouts-section" />
       </submenu>
       <item>
         <attribute name="action">win.main-win-rename-window</attribute>
