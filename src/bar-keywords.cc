@@ -1372,22 +1372,86 @@ gboolean autocomplete_keywords_list_save(const gchar *path)
  *-------------------------------------------------------------------
  */
 
-GtkWidget *bar_pane_keywords_new_from_config(const gchar ** /*attribute_names*/, const gchar ** /*attribute_values*/)
+GtkWidget *bar_pane_keywords_new_from_config(const gchar **attribute_names, const gchar **attribute_values)
 {
-/* @FIXME GTK4 stub */
-	return nullptr;
+	g_autofree gchar *id = g_strdup("keywords");
+	g_autofree gchar *title = nullptr;
+	g_autofree gchar *key = g_strdup(COMMENT_KEY);
+	gboolean expanded = TRUE;
+	gint height = 200;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		if (READ_CHAR_FULL("id", id)) continue;
+		if (READ_CHAR_FULL("title", title)) continue;
+		if (READ_CHAR_FULL("key", key)) continue;
+		if (READ_BOOL_FULL("expanded", expanded)) continue;
+		if (READ_INT_FULL("height", height)) continue;
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+
+	options->info_keywords.height = height;
+	bar_pane_translate_title(PANE_KEYWORDS, id, &title);
+	return bar_pane_keywords_new(id, title, key, expanded, height);
 }
 
-void bar_pane_keywords_update_from_config(GtkWidget * /*pane*/, const gchar ** /*attribute_names*/, const gchar ** /*attribute_values*/)
+void bar_pane_keywords_update_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
-/* @FIXME GTK4 stub */
-	}
+	auto pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pkd) return;
+
+	g_autofree gchar *title = nullptr;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+
+		if (READ_CHAR_FULL("title", title)) continue;
+		if (READ_CHAR(*pkd, key)) continue;
+		if (READ_BOOL(pkd->pane, expanded)) continue;
+		if (READ_CHAR(pkd->pane, id)) continue;
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+
+	if (title)
+		{
+		bar_pane_translate_title(PANE_KEYWORDS, pkd->pane.id, &title);
+		gtk_label_set_text(GTK_LABEL(pkd->pane.title), title);
+		}
+
+	bar_update_expander(pane);
+	bar_pane_keywords_update(pkd);
+}
 
 
-void bar_pane_keywords_entry_add_from_config(GtkWidget * /*pane*/, const gchar ** /*attribute_names*/, const gchar ** /*attribute_values*/)
+void bar_pane_keywords_entry_add_from_config(GtkWidget *pane, const gchar **attribute_names, const gchar **attribute_values)
 {
-/* @FIXME GTK4 stub */
-	}
+	auto pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pkd) return;
+
+	while (*attribute_names)
+		{
+		const gchar *option = *attribute_names++;
+		const gchar *value = *attribute_values++;
+		gchar *path = nullptr;
+
+		if (READ_CHAR_FULL("path", path))
+			{
+			g_autoptr(GtkTreePath) tree_path = gtk_tree_path_new_from_string(path);
+			gtk_tree_view_expand_to_path(GTK_TREE_VIEW(pkd->keyword_treeview), tree_path);
+			pkd->expanded_rows = g_list_append(pkd->expanded_rows, path);
+			continue;
+			}
+
+		config_file_error((std::string("Unknown attribute: ") + option + " = " + value).c_str());
+		}
+}
 
 /*
  *-------------------------------------------------------------------
@@ -1395,26 +1459,86 @@ void bar_pane_keywords_entry_add_from_config(GtkWidget * /*pane*/, const gchar *
  *-------------------------------------------------------------------
  */
 
-GList *keyword_list_pull(GtkWidget * /*text_widget*/)
+GList *keyword_list_pull(GtkWidget *text_widget)
 {
-/* @FIXME GTK4 stub */
-	return nullptr;
+	g_autofree gchar *text = text_widget_text_pull(text_widget);
+
+	return string_to_keywords_list(text);
 }
 
 GList *keyword_list_get()
 {
-/* @FIXME GTK4 stub */
-	return nullptr;
+	GList *ret_list = nullptr;
+	gchar *string;
+	GtkTreeIter iter;
+	gboolean valid;
+
+	if (keyword_store)
+		{
+		valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_store), &iter);
+
+		while (valid)
+			{
+			gtk_tree_model_get(GTK_TREE_MODEL(keyword_store), &iter, 0, &string, -1);
+			ret_list = g_list_append(ret_list, string);
+			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(keyword_store), &iter);
+			}
+		}
+
+	return ret_list;
 }
 
-void keyword_list_set(GList * /*keyword_list*/)
+void keyword_list_set(GList *keyword_list)
 {
-/* @FIXME GTK4 stub */
-	}
+	GtkTreeIter iter;
 
-gboolean bar_keywords_autocomplete_focus(LayoutWindow * /*lw*/)
+	if (!keyword_list) return;
+
+	if (keyword_store)
+		{
+		gtk_list_store_clear(keyword_store);
+		}
+	else
+		{
+		keyword_store = gtk_list_store_new(1, G_TYPE_STRING);
+		}
+
+	while (keyword_list)
+		{
+		gtk_list_store_append(keyword_store, &iter);
+		gtk_list_store_set(keyword_store, &iter, 0, keyword_list->data, -1);
+
+		keyword_list = keyword_list->next;
+		}
+}
+
+gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)
 {
-/* @FIXME GTK4 stub */
-	return FALSE;
+	GtkWidget *pane = bar_find_pane_by_id(lw->bar, PANE_KEYWORDS, "keywords");
+	if (!pane)
+		{
+		GApplication *app = g_application_get_default();
+
+		g_autoptr(GNotification) notification = g_notification_new("Geeqie");
+
+		g_notification_set_title(notification, _("Keyword Autocomplete"));
+		g_notification_set_body(notification, _("The Info Sidebar has not yet been opened"));
+		g_notification_set_priority(notification, G_NOTIFICATION_PRIORITY_NORMAL);
+		g_notification_set_default_action(notification, "app.null");
+
+		g_application_send_notification(G_APPLICATION(app), "keyword-autocomplete-notification", notification);
+		return FALSE;
+		}
+
+	auto pkd = static_cast<PaneKeywordsData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+	if (!pkd || !pkd->autocomplete) return FALSE;
+
+	gboolean is_focused = (gtk_window_get_focus(GTK_WINDOW(lw->window)) == pkd->autocomplete);
+	if (!is_focused)
+		{
+		gtk_widget_grab_focus(pkd->autocomplete);
+		}
+
+	return is_focused;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
