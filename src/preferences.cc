@@ -3813,6 +3813,7 @@ void show_about_window(LayoutWindow *lw)
 		ZDCloseDatabase(cd);
 		}
 
+	copyright = g_string_append(copyright, _("\n\nMap Data Open Database License OpenStreetMap Contributors Map Imagery CC-BY-SA 2.0"));
 	copyright = g_string_append(copyright, _("\n\nSome icons by https://www.flaticon.com"));
 
 	in_stream_authors = g_resources_open_stream(GQ_RESOURCE_PATH_CREDITS "/authors", G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);

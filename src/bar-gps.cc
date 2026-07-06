@@ -690,6 +690,11 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	gtk_widget_set_size_request(pgd->widget, -1, height);
 
+	/* The licence data is in the About page
+	 */
+	ShumateLicense *license = shumate_simple_map_get_license(SHUMATE_SIMPLE_MAP(pgd->map));
+	gtk_widget_add_css_class(GTK_WIDGET(license), "hidden-license");
+
 	auto *click = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(click), GDK_BUTTON_SECONDARY);
 

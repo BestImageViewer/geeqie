@@ -9,3 +9,11 @@ modelbutton check
 {
 	margin-right: 6px;
 }
+
+.hidden-license {
+	opacity: 0;
+	min-width: 0;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+}
