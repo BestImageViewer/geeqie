@@ -1,6 +1,8 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0-or-later
 
+set -eu
+
 ## @file
 ## @brief Create a new release
 ##
@@ -80,9 +82,6 @@ working_dir=$(mktemp --directory "$tmp_dir/geeqie.XXXXXXXXXX")
 
 git clone git://git.geeqie.org/geeqie.git "$working_dir"
 
-cp "$orig_dir/NEWS" "$working_dir"
-cp "$orig_dir/data/org.geeqie.Geeqie.metainfo.xml.in" "$working_dir/data/"
-
 cd "$working_dir" || exit 1
 
 if [ -n "$start" ] && [ -n "$patch" ]
@@ -91,11 +90,17 @@ then
 	exit 1
 fi
 
-if [ "$(printf '%s\n' "$version" | awk -W posix -F "." 'BEGIN {LINT = "fatal"} {print NF-1}')" -ne 1 ]
-then
-	printf '%s\n' "Version major.minor $version is not valid"
-	exit 1
-fi
+case $version in
+	"" | *[!0123456789.]* | *.*.* | .* | *.)
+		printf '%s\n' "Version major.minor $version is not valid"
+		exit 1
+		;;
+	*.*) ;;
+	*)
+		printf '%s\n' "Version major.minor $version is not valid"
+		exit 1
+		;;
+esac
 
 if [ -n "$start" ]
 then
@@ -108,7 +113,7 @@ fi
 
 if [ -n "$patch" ]
 then
-	if ! git rev-parse stable/"$version" > /dev/null 2>&1
+	if ! git rev-parse --verify --quiet refs/remotes/origin/stable/"$version" > /dev/null
 	then
 		printf '%s\n' "Version $version does not exist"
 		exit 1
@@ -120,7 +125,7 @@ then
 		exit 1
 	fi
 else
-	if git rev-parse stable/"$version" > /dev/null 2>&1
+	if git rev-parse --verify --quiet refs/remotes/origin/stable/"$version" > /dev/null
 	then
 		printf '%s\n' "Version $version already exists"
 		exit 1
@@ -134,6 +139,12 @@ else
 	revision="$version.$patch"
 fi
 
+if git rev-parse --verify --quiet refs/tags/v"$revision" > /dev/null
+then
+	printf '%s\n' "Tag v$revision already exists"
+	exit 1
+fi
+
 if [ -z "$patch" ]
 then
 	if [ -z "$start" ]
@@ -143,12 +154,24 @@ then
 		git checkout -b stable/"$version" "$start"
 	fi
 
-	if [ "$push" = true ]
-	then
-		git push git@geeqie.org:geeqie stable/"$version"
-	fi
 else
-	git checkout stable/"$version"
+	git checkout -b stable/"$version" --track origin/stable/"$version"
+fi
+
+cp "$orig_dir/NEWS" "$working_dir"
+cp "$orig_dir/data/org.geeqie.Geeqie.metainfo.xml.in" "$working_dir/data/"
+
+news_version=$(sed -n '1s/^Geeqie //p' NEWS)
+if [ "$news_version" != "$revision" ]
+then
+	printf '%s\n' "NEWS version $news_version does not match release $revision"
+	exit 1
+fi
+
+if ! grep -F -q "<release version=\"$revision\"" data/org.geeqie.Geeqie.metainfo.xml.in
+then
+	printf '%s\n' "Metainfo release entry for $revision does not exist"
+	exit 1
 fi
 
 # Regenerate to get the new version number in the man page
@@ -170,7 +193,7 @@ git commit --message="Preparing for release v$revision"
 
 if [ "$push" = true ]
 then
-	git push git@geeqie.org:geeqie
+	git push git@geeqie.org:geeqie stable/"$version"
 fi
 
 git tag --sign "v$revision" --message="Release v$revision"
@@ -198,10 +221,10 @@ cd "geeqie-$revision" || exit 1
 
 git checkout master
 
-git checkout stable/"$version" NEWS
-git checkout stable/"$version" data/man/geeqie.1
-git checkout stable/"$version" doc/docbook/CommandLineOptions.xml
-git checkout stable/"$version" data/org.geeqie.Geeqie.metainfo.xml.in
+git checkout v"$revision" -- NEWS
+git checkout v"$revision" -- data/man/geeqie.1
+git checkout v"$revision" -- doc/docbook/CommandLineOptions.xml
+git checkout v"$revision" -- data/org.geeqie.Geeqie.metainfo.xml.in
 
 git add NEWS
 git add data/org.geeqie.Geeqie.metainfo.xml.in
@@ -211,7 +234,7 @@ git commit --message="Release v$revision files"
 
 if [ "$push" = true ]
 then
-	git push git@geeqie.org:geeqie
+	git push git@geeqie.org:geeqie master
 fi
 
 zenity --info --window-icon="info" --text="Upload files:\n\n$tmp_dir/geeqie-$revision.tar.xz\n$tmp_dir/geeqie-$revision.tar.xz.asc\n\nto https://github.com/BestImageViewer/geeqie/releases"
