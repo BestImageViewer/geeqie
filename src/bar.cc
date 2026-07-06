@@ -310,9 +310,12 @@ void menu_expander_height_cb(GSimpleAction *, GVariant *, gpointer data)
 	bar_expander_height_cb(nullptr, data);
 }
 
-static void bar_expander_add_cb(GtkWidget *, gpointer data)
+static void bar_expander_add_action_cb(GSimpleAction *, GVariant *parameter, gpointer)
 {
-	const auto *config = static_cast<const gchar *>(data);
+	if (!parameter) return;
+
+	const gchar *id = g_variant_get_string(parameter, nullptr);
+	const gchar *config = bar_pane_get_default_config(id);
 
 	if (config) load_config_from_buf(config, strlen(config), FALSE);
 }
@@ -418,15 +421,32 @@ static GtkWidget *bar_expander_label_widget_new(GtkWidget *expander, GtkWidget *
 	return box;
 }
 
-static void bar_menu_add_cb(GtkWidget *widget, gpointer)
+static void bar_menu_add_cb(GtkWidget *tbar, gpointer)
 {
-	GtkWidget *menu = popover_box_new(widget);
+	GMenu *menu_model = g_menu_new();
 
 	for (const KnownPanes *pane = known_panes; pane->id; pane++)
 		{
-		popover_item_add_icon(menu, _(pane->title), GQ_ICON_ADD,
-		                      G_CALLBACK(bar_expander_add_cb), const_cast<gchar *>(pane->config));
+		g_autoptr(GMenuItem) item = g_menu_item_new(_(pane->title), nullptr);
+		g_menu_item_set_action_and_target_value(item, "bar.add-pane", g_variant_new_string(pane->id));
+		g_menu_append_item(menu_model, item);
 		}
+
+	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
+	gtk_widget_set_parent(popover, tbar);
+
+	GSimpleActionGroup *action_group = g_simple_action_group_new();
+	GSimpleAction *action = g_simple_action_new("add-pane", G_VARIANT_TYPE_STRING);
+	g_signal_connect(action, "activate", G_CALLBACK(bar_expander_add_action_cb), nullptr);
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(action));
+	g_object_unref(action);
+
+	gtk_widget_insert_action_group(popover, "bar", G_ACTION_GROUP(action_group));
+	g_object_set_data_full(G_OBJECT(popover), "bar-action-group", action_group, g_object_unref);
+
+	g_object_unref(menu_model);
+
+	gtk_popover_popup(GTK_POPOVER(popover));
 }
 
 

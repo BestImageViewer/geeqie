@@ -41,6 +41,47 @@ static void menu_item_add_accelerator(GtkWidget *, GtkWidget *)
 	/* Temporary GTK4 compatibility stub. */
 }
 
+static GtkWidget *menu_item_label_new(const gchar *text, gboolean use_mnemonic)
+{
+	GtkWidget *label = use_mnemonic ? gtk_label_new_with_mnemonic(text) : gtk_label_new(text);
+
+	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+	gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
+	gtk_widget_set_hexpand(label, TRUE);
+	gtk_widget_set_halign(label, GTK_ALIGN_FILL);
+
+	return label;
+}
+
+static GtkWidget *menu_item_button_new(const gchar *text, gboolean use_mnemonic)
+{
+	GtkWidget *item = gtk_button_new();
+	GtkWidget *label = menu_item_label_new(text, use_mnemonic);
+
+	gtk_button_set_child(GTK_BUTTON(item), label);
+	gtk_button_set_has_frame(GTK_BUTTON(item), FALSE);
+	gtk_widget_add_css_class(item, "flat");
+	gtk_widget_set_hexpand(item, TRUE);
+	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
+	gtk_label_set_mnemonic_widget(GTK_LABEL(label), item);
+
+	return item;
+}
+
+static GtkWidget *menu_item_check_new(const gchar *text)
+{
+	GtkWidget *item = gtk_check_button_new();
+	GtkWidget *label = menu_item_label_new(text, TRUE);
+
+	gtk_check_button_set_child(GTK_CHECK_BUTTON(item), label);
+	gtk_widget_add_css_class(item, "flat");
+	gtk_widget_set_hexpand(item, TRUE);
+	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
+	gtk_label_set_mnemonic_widget(GTK_LABEL(label), item);
+
+	return item;
+}
+
 static void menu_item_finish(GtkWidget *menu, GtkWidget *item, GCallback func, gpointer data)
 {
 	auto *popover = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(menu), "gq-popover"));
@@ -73,8 +114,7 @@ GtkWidget *popover_item_add(GtkWidget *menu, const gchar *label,
 {
 	GtkWidget *item;
 
-	item = gtk_button_new_with_label(label);
-	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
+	item = menu_item_button_new(label, TRUE);
 
 	menu_item_add_accelerator(menu, item);
 
@@ -90,8 +130,7 @@ GtkWidget *popover_item_add_stock(GtkWidget *menu, const gchar *label, const gch
 	(void)stock_id;
 
 	/* Temporary GTK4 stub: stock images are dropped until this path is ported. */
-	item = gtk_button_new_with_label(label);
-	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
+	item = menu_item_button_new(label, TRUE);
 
 	menu_item_add_accelerator(menu, item);
 
@@ -107,8 +146,7 @@ GtkWidget *popover_item_add_icon(GtkWidget *menu, const gchar *label, const gcha
 	(void)icon_name;
 
 	/* Temporary GTK4 stub: icons are dropped until this path is ported. */
-	item = gtk_button_new_with_label(label);
-	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
+	item = menu_item_button_new(label, TRUE);
 
 	menu_item_add_accelerator(menu, item);
 
@@ -144,9 +182,8 @@ GtkWidget *popover_item_add_check(GtkWidget *menu, const gchar *label, gboolean 
 {
 	GtkWidget *item;
 
-	item = gtk_check_button_new_with_label(label);
+	item = menu_item_check_new(label);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(item), active);
-	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
 
 	menu_item_add_accelerator(menu, item);
 
@@ -182,8 +219,7 @@ void popover_item_add_divider(GtkWidget *menu)
 GtkWidget *popover_item_add_simple(GtkWidget *menu, const gchar *label,
 				GCallback func, gpointer data)
 {
-	GtkWidget *item = gtk_button_new_with_label(label);
-	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
+	GtkWidget *item = menu_item_button_new(label, FALSE);
 	menu_item_finish(menu, item, func, data);
 
 	return item;
