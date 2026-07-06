@@ -502,7 +502,7 @@ gboolean bar_event(GtkWidget *bar, GdkEvent *event)
 	    child;
 	    child = gtk_widget_get_next_sibling(child))
 		{
-		GtkWidget *widget = gtk_widget_get_first_child(child);
+		GtkWidget *widget = gtk_expander_get_child(GTK_EXPANDER(child));
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (pd && pd->pane_event && pd->pane_event(widget, event))
@@ -530,7 +530,7 @@ GtkWidget *bar_find_pane_by_id(GtkWidget *bar, PaneType type, const gchar *id)
 	    child;
 	    child = gtk_widget_get_next_sibling(child))
 		{
-		GtkWidget *widget = gtk_widget_get_first_child(child);
+		GtkWidget *widget = gtk_expander_get_child(GTK_EXPANDER(child));
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (pd && type == pd->type && strcmp(id, pd->id) == 0)
