@@ -290,7 +290,7 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 
 	gtk_widget_show(window);
 
-	GtkWidget *data_box = gtk_widget_get_first_child(expander);
+	GtkWidget *data_box = gtk_expander_get_child(GTK_EXPANDER(expander));
 	gtk_widget_get_size_request(data_box, &w, &h);
 
 	GtkWidget *spin = gtk_spin_button_new_with_range(1, 1000, 1);
@@ -372,7 +372,7 @@ static void bar_expander_cb(GObject *object, GParamSpec *, gpointer)
 	GtkExpander *expander;
 
 	expander = GTK_EXPANDER(object);
-	GtkWidget *child = gtk_widget_get_first_child(GTK_WIDGET(expander));
+	GtkWidget *child = gtk_expander_get_child(expander);
 
 	if (gtk_expander_get_expanded(expander))
 		{
@@ -382,6 +382,40 @@ static void bar_expander_cb(GObject *object, GParamSpec *, gpointer)
 		{
 		gtk_widget_hide(child);
 		}
+
+	auto *image = static_cast<GtkImage *>(g_object_get_data(G_OBJECT(expander), "bar_expander_button_image"));
+	if (image)
+		{
+		gtk_image_set_from_icon_name(image, gtk_expander_get_expanded(expander) ? GQ_ICON_PAN_UP : GQ_ICON_PAN_DOWN);
+		}
+}
+
+static void bar_expander_button_clicked_cb(GtkButton *, gpointer data)
+{
+	auto *expander = GTK_EXPANDER(data);
+
+	gtk_expander_set_expanded(expander, !gtk_expander_get_expanded(expander));
+}
+
+static GtkWidget *bar_expander_label_widget_new(GtkWidget *expander, GtkWidget *title)
+{
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	GtkWidget *button = gtk_button_new();
+	GtkWidget *image = gtk_image_new_from_icon_name(gtk_expander_get_expanded(GTK_EXPANDER(expander)) ? GQ_ICON_PAN_UP : GQ_ICON_PAN_DOWN);
+
+	gtk_button_set_child(GTK_BUTTON(button), image);
+	gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
+	gtk_widget_set_tooltip_text(button, _("Expand or collapse pane"));
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(bar_expander_button_clicked_cb), expander);
+
+	gtk_box_append(GTK_BOX(box), button);
+	gtk_box_append(GTK_BOX(box), title);
+	gtk_widget_set_hexpand(title, TRUE);
+	gtk_widget_set_halign(title, GTK_ALIGN_FILL);
+
+	g_object_set_data(G_OBJECT(expander), "bar_expander_button_image", image);
+
+	return box;
 }
 
 static void bar_menu_add_cb(GtkWidget *widget, gpointer)
@@ -408,7 +442,7 @@ void bar_set_fd(GtkWidget *bar, FileData *fd)
 	     expander;
 	     expander = gtk_widget_get_next_sibling(expander))
 		{
-		GtkWidget *widget = gtk_widget_get_first_child(expander);
+		GtkWidget *widget = gtk_expander_get_child(GTK_EXPANDER(expander));
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (pd && pd->pane_set_fd)
@@ -429,7 +463,7 @@ void bar_notify_selection(GtkWidget *bar, gint count)
 	     expander;
 	     expander = gtk_widget_get_next_sibling(expander))
 		{
-		GtkWidget *widget = gtk_widget_get_first_child(expander);
+		GtkWidget *widget = gtk_expander_get_child(GTK_EXPANDER(expander));
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (pd && pd->pane_notify_selection)
@@ -520,7 +554,7 @@ void bar_write_config(GtkWidget *bar, GString *outstr, gint indent)
 	    expander;
 	    expander = gtk_widget_get_next_sibling(expander))
 		{
-		GtkWidget *widget = gtk_widget_get_first_child(expander);
+		GtkWidget *widget = gtk_expander_get_child(GTK_EXPANDER(expander));
 
 		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(widget), "pane_data"));
 		if (!pd) continue;
@@ -562,7 +596,7 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 	DEBUG_NAME(expander);
 	if (pd && pd->title)
 		{
-		gtk_expander_set_label_widget(GTK_EXPANDER(expander), pd->title);
+		gtk_expander_set_label_widget(GTK_EXPANDER(expander), bar_expander_label_widget_new(expander, pd->title));
 		gtk_widget_show(pd->title);
 		}
 
