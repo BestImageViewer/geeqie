@@ -384,18 +384,15 @@ static void bar_expander_cb(GObject *object, GParamSpec *, gpointer)
 		}
 }
 
-static void bar_menu_add_cb(GtkWidget *, gpointer)
+static void bar_menu_add_cb(GtkWidget *widget, gpointer)
 {
-	GtkWidget *menu = popover_box_new();
+	GtkWidget *menu = popover_box_new(widget);
 
-/** @FIXME GTK$ This is a placeholder for the moment.
- * The style should be, for example:
- * 	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-collection.ui");
-	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-collection"));
-	popup_menu(menu_model, cw->window);
-
-	See the original code.
-*/
+	for (const KnownPanes *pane = known_panes; pane->id; pane++)
+		{
+		popover_item_add_icon(menu, _(pane->title), GQ_ICON_ADD,
+		                      G_CALLBACK(bar_expander_add_cb), const_cast<gchar *>(pane->config));
+		}
 }
 
 

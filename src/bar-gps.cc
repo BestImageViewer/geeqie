@@ -75,8 +75,6 @@ struct PaneGPSData
 	guint create_markers_id;
 	GList *geocode_list;
 	GtkWidget *progress;
-	GtkWidget *slider;
-	GtkWidget *state;
 	gint selection_count;
 	gboolean centre_map_checked;
 	gboolean enable_markers_checked;
@@ -340,23 +338,9 @@ void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, g
 	shumate_marker_layer_add_marker(pgd->marker_layer, marker);
 }
 
-void bar_pane_gps_slider_changed_cb(GtkScaleButton *slider,
-                                    gdouble zoom,
-                                    gpointer data);
-
 void bar_pane_gps_set_status(PaneGPSData *pgd)
 {
 	if (!pgd->viewport) return;
-
-	gdouble zoom = shumate_viewport_get_zoom_level(pgd->viewport);
-	g_autofree gchar *message = g_strdup_printf(_("Zoom level %i"), static_cast<gint>(zoom));
-
-	gtk_label_set_text(GTK_LABEL(pgd->state), message);
-	gtk_widget_set_tooltip_text(pgd->slider, message);
-
-	g_signal_handlers_block_by_func(pgd->slider, reinterpret_cast<gpointer>(bar_pane_gps_slider_changed_cb), pgd);
-	gtk_scale_button_set_value(GTK_SCALE_BUTTON(pgd->slider), zoom);
-	g_signal_handlers_unblock_by_func(pgd->slider, reinterpret_cast<gpointer>(bar_pane_gps_slider_changed_cb), pgd);
 }
 
 gboolean bar_pane_gps_create_markers_cb(gpointer data)
@@ -561,19 +545,6 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	WRITE_STRING("/>");
 }
 
-void bar_pane_gps_slider_changed_cb(GtkScaleButton *slider,
-                                    gdouble zoom,
-                                    gpointer data)
-{
-	auto pgd = static_cast<PaneGPSData *>(data);
-
-	g_autofree gchar *message = g_strdup_printf(_("Zoom %i"), static_cast<gint>(zoom));
-
-	shumate_viewport_set_zoom_level(pgd->viewport, zoom);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(slider), message);
-	bar_pane_gps_set_status(pgd);
-}
-
 void bar_pane_gps_view_state_changed_cb(GObject *, GParamSpec *, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
@@ -640,7 +611,6 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	PaneGPSData *pgd;
 	GtkWidget *vbox;
 	GtkWidget *status;
-	GtkWidget *state;
 	GtkWidget *progress;
 	GtkWidget *slider;
 	const gchar *slider_list[] = {GQ_ICON_ZOOM_IN, GQ_ICON_ZOOM_OUT, nullptr};
@@ -671,13 +641,20 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	gq_gtk_container_add(frame, vbox);
 
+	status = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+	progress = gtk_progress_bar_new();
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress), "");
+	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress), TRUE);
+
+	gtk_box_append(GTK_BOX(status), progress);
+	gtk_box_append(GTK_BOX(vbox), status);
+
 	pgd->marker_layer = shumate_marker_layer_new(pgd->viewport);
 	shumate_simple_map_add_overlay_layer(pgd->map, SHUMATE_LAYER(pgd->marker_layer));
 
 	pgd->widget = frame;
 	pgd->progress = progress;
-	pgd->slider = slider;
-	pgd->state = state;
 
 	bar_pane_gps_set_map_source(pgd, map_id);
 
