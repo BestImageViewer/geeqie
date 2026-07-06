@@ -247,15 +247,13 @@ static GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd, GtkWidget *par
 	return menu;
 }
 
-static gboolean bar_pane_histogram_press_cb(GtkGesture *gesture, gint, gdouble x, gdouble y, gpointer data)
+static void bar_pane_histogram_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	GtkWidget *menu;
 
 	menu = bar_pane_histogram_menu(phd, gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture)), x, y);
 	(void)menu;
-
-	return TRUE;
 }
 
 
@@ -279,6 +277,10 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 	gtk_widget_set_size_request(phd->widget, -1, height);
 
 	phd->drawing_area = gtk_drawing_area_new();
+	gtk_drawing_area_set_content_height(GTK_DRAWING_AREA(phd->drawing_area), height);
+	gtk_drawing_area_set_content_width(GTK_DRAWING_AREA(phd->drawing_area), 1);
+	gtk_widget_set_hexpand(phd->drawing_area, TRUE);
+	gtk_widget_set_vexpand(phd->drawing_area, TRUE);
 
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(phd->drawing_area),
 	                               bar_pane_histogram_draw_cb,
@@ -290,9 +292,8 @@ static GtkWidget *bar_pane_histogram_new(const gchar *id, const gchar *title, gi
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture),
 	                              GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(bar_pane_histogram_press_cb), phd);
-	gtk_widget_add_controller(phd->drawing_area, GTK_EVENT_CONTROLLER(gesture));
-
 	gtk_box_append(GTK_BOX(phd->widget), phd->drawing_area);
+	gtk_widget_add_controller(phd->widget, GTK_EVENT_CONTROLLER(gesture));
 
 	file_data_register_notify_func(bar_pane_histogram_notify_cb, phd, NOTIFY_PRIORITY_LOW);
 
