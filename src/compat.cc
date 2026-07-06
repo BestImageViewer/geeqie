@@ -268,7 +268,8 @@ void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 
 void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget)
 {
-	if (!widget || gtk_widget_get_parent(widget) != container) return;
+	if (!GTK_IS_WIDGET(container) || !GTK_IS_WIDGET(widget)) return;
+	if (gtk_widget_get_parent(widget) != container) return;
 
 	if (GTK_IS_BOX(container))
 		{
@@ -325,7 +326,7 @@ void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget)
 
 void gq_gtk_widget_destroy(GtkWidget *widget)
 {
-	if (!widget) return;
+	if (!GTK_IS_WIDGET(widget)) return;
 
 	if (GTK_IS_WINDOW(widget))
 		{

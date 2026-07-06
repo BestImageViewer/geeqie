@@ -1301,6 +1301,8 @@ gboolean widget_received_event(GtkWidget *widget, GqPoint event)
 
 void widget_remove_from_parent(GtkWidget *widget)
 {
+	if (!GTK_IS_WIDGET(widget)) return;
+
 	gq_gtk_container_remove(gtk_widget_get_parent(widget), widget);
 }
 
