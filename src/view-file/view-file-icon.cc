@@ -78,7 +78,8 @@ static void vficon_toggle_filenames(ViewFile *vf);
 static void vficon_selection_remove(ViewFile *vf, FileData *fd, SelectionType mask, GtkTreeIter *iter);
 static void vficon_move_focus(ViewFile *vf, gint row, gint col, gboolean relative);
 static void vficon_set_focus(ViewFile *vf, FileData *fd);
-static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint h, gboolean force);
+static gint vficon_viewport_width(ViewFile *vf);
+static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint h, gboolean force, gboolean keep_position = TRUE);
 
 
 /*
@@ -1445,7 +1446,7 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 	vf_star_update(vf);
 }
 
-static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint, gboolean force)
+static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint, gboolean force, gboolean keep_position)
 {
 	gint new_cols;
 	gint thumb_width;
@@ -1459,16 +1460,29 @@ static void vficon_populate_at_new_size(ViewFile *vf, gint w, gint, gboolean for
 
 	VFICON(vf)->columns = new_cols;
 
-	vficon_populate(vf, TRUE, TRUE);
+	vficon_populate(vf, TRUE, keep_position);
 
 	DEBUG_1("col tab pop cols=%d rows=%d", VFICON(vf)->columns, VFICON(vf)->rows);
 }
 
-static void vficon_sized_cb(GtkWidget *, GtkAllocation *allocation, gpointer data)
+static gint vficon_viewport_width(ViewFile *vf)
+{
+	GtkAdjustment *hadjustment = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(vf->scrolled));
+	const gint page_width = static_cast<gint>(gtk_adjustment_get_page_size(hadjustment));
+
+	if (page_width > 0) return page_width;
+
+	const gint scrolled_width = gtk_widget_get_width(vf->scrolled);
+	if (scrolled_width > 0) return scrolled_width;
+
+	return gtk_widget_get_width(vf->listview);
+}
+
+static void vficon_sized_cb(GObject *, GParamSpec *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	vficon_populate_at_new_size(vf, allocation->width, allocation->height, FALSE);
+	vficon_populate_at_new_size(vf, vficon_viewport_width(vf), gtk_widget_get_height(vf->scrolled), FALSE);
 }
 
 /*
@@ -1798,7 +1812,7 @@ static gboolean vficon_refresh_real(ViewFile *vf, gboolean keep_position)
 
 	file_data_list_free(new_filelist);
 
-	vficon_populate(vf, TRUE, keep_position);
+	vficon_populate_at_new_size(vf, vficon_viewport_width(vf), gtk_widget_get_height(vf->scrolled), TRUE, keep_position);
 
 	if (first_selected && !VFICON(vf)->selection)
 		{
@@ -1831,8 +1845,73 @@ gboolean vficon_refresh(ViewFile *vf)
 static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 				GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
 {
-/* @FIXME GTK4 stub */
-	return;
+	if (!GQV_IS_CELL_RENDERER_ICON(cell)) return;
+
+	auto cd = static_cast<ColumnData *>(data);
+
+	GList *list;
+	gtk_tree_model_get(tree_model, iter, FILE_COLUMN_POINTER, &list, -1);
+
+	auto *fd = static_cast<FileData *>(g_list_nth_data(list, cd->number));
+	if (!fd)
+		{
+		g_object_set(cell,
+		             "pixbuf", NULL,
+		             "text", NULL,
+		             "show_marks", FALSE,
+		             "cell-background-set", FALSE,
+		             "foreground-set", FALSE,
+		             "has-focus", FALSE,
+		             NULL);
+		return;
+		}
+
+	ViewFile *vf = cd->vf;
+
+	g_assert(fd->magick == FD_MAGICK);
+
+	g_autoptr(GString) name_sidecars = g_string_new(nullptr);
+
+	if (VFICON(vf)->show_text)
+		{
+		if (islink(fd->path))
+			{
+			name_sidecars = g_string_append(name_sidecars, GQ_LINK_STR);
+			}
+
+		name_sidecars = g_string_append(name_sidecars, fd->name);
+
+		if (fd->sidecar_files)
+			{
+			g_autofree gchar *sidecars = file_data_sc_list_to_string(fd);
+			g_string_append_printf(name_sidecars, " %s", sidecars);
+			}
+		else if (fd->disable_grouping)
+			{
+			name_sidecars = g_string_append(name_sidecars, _(" [NO GROUPING]"));
+			}
+		}
+
+	if (options->show_star_rating)
+		{
+		if (name_sidecars->len > 0)
+			{
+			name_sidecars = g_string_append_c(name_sidecars, '\n');
+			}
+
+		g_autofree gchar *star_rating = (fd->rating != STAR_RATING_NOT_READ) ? convert_rating_to_stars(fd->rating) : nullptr;
+		name_sidecars = g_string_append(name_sidecars, star_rating);
+		}
+
+	g_object_set(cell,
+	             "pixbuf", fd->thumb_pixbuf,
+	             "text", name_sidecars->str,
+	             "marks", file_data_get_marks(fd),
+	             "show_marks", vf->marks_enabled,
+	             "cell-background-set", FALSE,
+	             "foreground-set", FALSE,
+	             "has-focus", VFICON(vf)->focus_fd == fd,
+	             NULL);
 }
 
 static void vficon_append_column(ViewFile *vf, gint n)
@@ -1942,7 +2021,7 @@ ViewFile *vficon_new(ViewFile *vf)
 	/* end column to fill white space */
 	vficon_append_column(vf, i);
 
-	g_signal_connect(G_OBJECT(vf->listview), "size_allocate",
+	g_signal_connect(G_OBJECT(gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(vf->scrolled))), "notify::page-size",
 			 G_CALLBACK(vficon_sized_cb), vf);
 
 	GtkEventController *controller = gtk_event_controller_motion_new();
