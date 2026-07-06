@@ -343,6 +343,12 @@ void bar_pane_gps_set_status(PaneGPSData *pgd)
 	if (!pgd->viewport) return;
 }
 
+void bar_pane_gps_clear_marker_queue(PaneGPSData *pgd)
+{
+	g_list_free(pgd->not_added);
+	pgd->not_added = nullptr;
+}
+
 gboolean bar_pane_gps_create_markers_cb(gpointer data)
 {
 	auto *pgd = static_cast<PaneGPSData *>(data);
@@ -377,6 +383,10 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 	if (lat != 0 || lon != 0)
 		{
 		bar_pane_gps_add_marker(pgd, fd, lat, lon);
+		if (pgd->centre_map_checked && pgd->selection_count == 1)
+			{
+			shumate_map_center_on(shumate_simple_map_get_map(pgd->map), lat, lon);
+			}
 		}
 
 	bar_pane_gps_set_status(pgd);
@@ -389,6 +399,7 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 		{
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(pgd->progress), 0);
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), nullptr);
+		bar_pane_gps_clear_marker_queue(pgd);
 		pgd->create_markers_id = 0;
 		}
 
@@ -411,11 +422,15 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 			}
 		}
 
+	bar_pane_gps_clear_marker_queue(pgd);
 	file_data_list_free(pgd->selection_list);
 	pgd->selection_list = layout_selection_list(pgd->pane.lw);
+	if (!pgd->selection_list && pgd->fd)
+		{
+		pgd->selection_list = g_list_append(nullptr, file_data_ref(pgd->fd));
+		}
 	pgd->selection_list = file_data_process_groups_in_selection(pgd->selection_list, FALSE, nullptr);
 	pgd->selection_count = g_list_length(pgd->selection_list);
-	pgd->not_added = pgd->selection_list;
 	pgd->num_added = 0;
 
 	shumate_marker_layer_remove_all(pgd->marker_layer);
@@ -428,6 +443,7 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 
 	if (pgd->selection_list)
 		{
+		pgd->not_added = g_list_copy(pgd->selection_list);
 		pgd->create_markers_id = g_idle_add(bar_pane_gps_create_markers_cb, pgd);
 		}
 }
@@ -468,9 +484,8 @@ void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *, gpointer data)
 
 void bar_pane_gps_notify_selection(GtkWidget *bar, gint count)
 {
+	(void)count;
 	PaneGPSData *pgd;
-
-	if (count == 0) return;
 
 	pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
 	if (!pgd) return;
@@ -545,13 +560,6 @@ void bar_pane_gps_write_config(GtkWidget *pane, GString *outstr, gint indent)
 	WRITE_STRING("/>");
 }
 
-void bar_pane_gps_view_state_changed_cb(GObject *, GParamSpec *, gpointer data)
-{
-	auto pgd = static_cast<PaneGPSData *>(data);
-
-	bar_pane_gps_set_status(pgd);
-}
-
 void bar_pane_gps_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
@@ -595,6 +603,7 @@ void bar_pane_gps_destroy(gpointer data)
 	file_data_unregister_notify_func(bar_pane_gps_notify_cb, pgd);
 
 	g_idle_remove_by_data(pgd);
+	bar_pane_gps_clear_marker_queue(pgd);
 
 	file_data_list_free(pgd->selection_list);
 
@@ -612,8 +621,6 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	GtkWidget *vbox;
 	GtkWidget *status;
 	GtkWidget *progress;
-	GtkWidget *slider;
-	const gchar *slider_list[] = {GQ_ICON_ZOOM_IN, GQ_ICON_ZOOM_OUT, nullptr};
 
 	pgd = g_new0(PaneGPSData, 1);
 
