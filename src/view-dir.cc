@@ -989,28 +989,6 @@ void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *,
 	vd_select_row(vd, fd);
 }
 
-static GdkRGBA *vd_color_shifted()
-{
-	static GdkRGBA color;
-	static GtkWidget *done = nullptr;
-
-/* @FIXME GTK4 no background color */
-
-	return &color;
-}
-
-void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
-{
-	auto vd = static_cast<ViewDir *>(data);
-	gboolean set;
-
-	gtk_tree_model_get(tree_model, iter, DIR_COLUMN_COLOR, &set, -1);
-	g_object_set(cell,
-	             "cell-background-rgba", vd_color_shifted(),
-	             "cell-background-set", set,
-	             NULL);
-}
-
 gboolean vd_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);

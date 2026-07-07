@@ -1608,25 +1608,6 @@ gboolean vflist_refresh(ViewFile *vf)
 }
 
 
-static GdkRGBA *vflist_listview_color_shifted(GtkWidget *widget)
-{
-/** @FIXME GTK4 stub */
-	return nullptr;
-}
-
-static void vflist_listview_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
-				     GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
-{
-	auto vf = static_cast<ViewFile *>(data);
-	gboolean set;
-
-	gtk_tree_model_get(tree_model, iter, FILE_COLUMN_COLOR, &set, -1);
-	g_object_set(cell,
-	             "cell-background-rgba", vflist_listview_color_shifted(vf->listview),
-	             "cell-background-set", set,
-	             NULL);
-}
-
 static void vflist_listview_add_column(ViewFile *vf, gint n, const gchar *title, gboolean image, gboolean right_justify, gboolean expand)
 {
 	GtkTreeViewColumn *column;
@@ -1658,7 +1639,6 @@ static void vflist_listview_add_column(ViewFile *vf, gint n, const gchar *title,
 		gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", n);
 		}
 
-	gtk_tree_view_column_set_cell_data_func(column, renderer, vflist_listview_color_cb, vf, nullptr);
 	g_object_set_data(G_OBJECT(column), "column_store_idx", GUINT_TO_POINTER(n));
 	g_object_set_data(G_OBJECT(renderer), "column_store_idx", GUINT_TO_POINTER(n));
 
