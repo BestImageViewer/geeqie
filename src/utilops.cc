@@ -249,11 +249,6 @@ GenericDialog *file_util_gen_dlg(const gchar *title,
 	GenericDialog *gd;
 
 	gd = generic_dialog_new(title, role, parent, auto_close, cancel_cb, data);
-	if (options->place_dialogs_under_mouse)
-		{
-/** @FIXME GTK4 has no window positioning
-*/
-		}
 
 	return gd;
 }
@@ -270,12 +265,6 @@ GenericDialog *file_util_warning_dialog(const gchar *heading, const gchar *messa
 	gd = file_util_gen_dlg(heading, "warning", parent, TRUE, nullptr, nullptr);
 	generic_dialog_add_message(gd, icon_name, heading, message, TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", generic_dialog_dummy_cb, TRUE);
-	if (options->place_dialogs_under_mouse)
-		{
-/** @FIXME GTK4 has no window positioning
-*/
-		}
-	gtk_widget_show(gd->dialog);
 
 	return gd;
 }
