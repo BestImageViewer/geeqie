@@ -33,6 +33,8 @@
 
 #include <config.h>
 
+#include "accelerators.h"
+#include "actions.h"
 #include "compat.h"
 #include "dnd.h"
 #include "exif.h"
@@ -214,8 +216,10 @@ static void advanced_exif_window_get_geometry(ExifWin *ew)
 	lw->options.advanced_exif_window = widget_get_position_geometry(ew->window);
 }
 
-static void advanced_exif_close(ExifWin *ew)
+static void advanced_exif_close_cb(GSimpleAction *, GVariant *, gpointer data)
 {
+	auto ew = static_cast<ExifWin *>(data);
+
 	if (!ew) return;
 
 	advanced_exif_window_get_geometry(ew);
@@ -279,38 +283,6 @@ static gboolean advanced_exif_mouseclick(GtkGestureClick *, gint, gdouble, gdoub
 	return TRUE;
 }
 
-static gboolean advanced_exif_keypress(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
-{
-	auto ew = static_cast<ExifWin *>(data);
-	gboolean stop_signal = FALSE;
-	const guint event_keyval = keyval;
-	const GdkModifierType event_state = state;
-
-	if (event_state & GDK_CONTROL_MASK)
-		{
-		switch (event_keyval)
-			{
-			case GDK_KEY_w:
-			case GDK_KEY_W:
-				advanced_exif_close(ew);
-				stop_signal = TRUE;
-				break;
-			default:
-				break;
-			}
-		}
-
-/** @FIXME GTK4
-	if (!stop_signal && is_help_key(event_keyval, event_state))
-		{
-		help_window_show("GuideOtherWindowsExif.html");
-		stop_signal = TRUE;
-		}
-*/
-
-	return stop_signal;
-}
-
 static gboolean search_function_cb(GtkTreeModel *model, gint column, const gchar *key, GtkTreeIter *iter, gpointer)
 {
 	g_autofree gchar *field_contents = nullptr;
@@ -320,6 +292,11 @@ static gboolean search_function_cb(GtkTreeModel *model, gint column, const gchar
 	g_autofree gchar *key_nocase = g_utf8_casefold(key, -1);
 
 	return g_strstr_len(field_contents_nocase, -1, key_nocase) == nullptr;
+}
+
+static void exif_window_context_help_cb(GSimpleAction *, GVariant *, gpointer)
+{
+	help_window_show("GuideOtherWindowsExif.html");
 }
 
 static void exif_window_help_cb(GtkWidget *, gpointer)
@@ -338,6 +315,10 @@ static void exif_window_close_cb(GtkWidget *, gpointer data)
 
 	exif_window_close(ew);
 }
+
+/* const ActionDef advanced_exif_actions[]
+ */
+#include "advanced-exif-actions.inc"
 
 GtkWidget *advanced_exif_new(LayoutWindow *lw)
 {
@@ -414,10 +395,6 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_tree_view_set_search_column(GTK_TREE_VIEW(ew->listview), EXIF_ADVCOL_DESCRIPTION);
 	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(ew->listview), search_function_cb, ew, nullptr);
 
-	GtkEventController *controller = gtk_event_controller_key_new();
-	g_signal_connect(controller, "key-pressed", G_CALLBACK(advanced_exif_keypress), ew);
-	gtk_widget_add_controller(ew->window, controller);
-
 	GtkGesture *click = gtk_gesture_click_new();
 
 	gtk_widget_add_controller(ew->listview, GTK_EVENT_CONTROLLER(click));
@@ -449,6 +426,9 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_widget_set_sensitive(button_close, TRUE);
 
 	gq_gtk_widget_show_all(button_box);
+
+	GApplication *app = g_application_get_default();
+	register_actions_from_table(GTK_APPLICATION(app), ew->window, advanced_exif_actions, get_keyfile_merged(), ew);
 
 	gtk_widget_show(ew->window);
 	return ew->window;
