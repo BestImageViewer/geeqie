@@ -14,6 +14,7 @@
 #include "main-defines.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
+#include "ui-misc.h"
 
 const char *get_description_for_action_name(const char *action_name)
 {
@@ -98,6 +99,83 @@ static inline bool is_app_action(const char *name)
 	return g_str_has_prefix(name, "app.");
 }
 
+namespace
+{
+
+constexpr const char *ACCEL_FOCUS_HANDLER_ATTACHED = "geeqie-accel-focus-handler-attached";
+
+GHashTable *registered_accels = nullptr;
+bool registered_accels_suppressed = false;
+
+void registered_accels_ensure()
+{
+	if (!registered_accels)
+		{
+		registered_accels = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, reinterpret_cast<GDestroyNotify>(g_strfreev));
+		}
+}
+
+void registered_accels_set(GtkApplication *app, const char *detailed_action, GStrv accels)
+{
+	if (!app || !detailed_action || !accels)
+		{
+		return;
+		}
+
+	registered_accels_ensure();
+	g_hash_table_replace(registered_accels, g_strdup(detailed_action), g_strdupv(accels));
+
+	const char *empty_accels[] = {nullptr};
+	gtk_application_set_accels_for_action(app, detailed_action,
+	                                      registered_accels_suppressed ? empty_accels : const_cast<const char * const *>(accels));
+}
+
+void registered_accels_apply(GtkApplication *app, bool suppress)
+{
+	if (!app || !registered_accels || registered_accels_suppressed == suppress)
+		{
+		return;
+		}
+
+	registered_accels_suppressed = suppress;
+	const char *empty_accels[] = {nullptr};
+
+	GHashTableIter iter;
+	gpointer key;
+	gpointer value;
+
+	g_hash_table_iter_init(&iter, registered_accels);
+	while (g_hash_table_iter_next(&iter, &key, &value))
+		{
+		const auto *detailed_action = static_cast<const char *>(key);
+		auto accels = static_cast<GStrv>(value);
+
+		gtk_application_set_accels_for_action(app, detailed_action,
+		                                      suppress ? empty_accels : const_cast<const char * const *>(accels));
+		}
+}
+
+void window_focus_widget_notify_cb(GtkWindow *window, GParamSpec *, gpointer data)
+{
+	auto app = GTK_APPLICATION(data);
+
+	registered_accels_apply(app, focus_is_editable(window));
+}
+
+void attach_accel_focus_handler(GtkApplication *app, GtkWidget *window)
+{
+	if (!app || !GTK_IS_WINDOW(window) ||
+	    g_object_get_data(G_OBJECT(window), ACCEL_FOCUS_HANDLER_ATTACHED))
+		{
+		return;
+		}
+
+	g_signal_connect(window, "notify::focus-widget", G_CALLBACK(window_focus_widget_notify_cb), app);
+	g_object_set_data(G_OBJECT(window), ACCEL_FOCUS_HANDLER_ATTACHED, GINT_TO_POINTER(TRUE));
+}
+
+} // namespace
+
 static GVariant *action_def_create_state(const ActionDef *d)
 {
 	switch (d->state_type)
@@ -120,6 +198,8 @@ static GVariant *action_def_create_state(const ActionDef *d)
 void register_actions_from_table(GtkApplication *app, GtkWidget *window, const ActionDef *defs, GKeyFile *accels_keyfile, gpointer data)
 {
 	char *action_name;
+	attach_accel_focus_handler(app, window);
+
 	for (const ActionDef *d = defs; d->action_name; ++d)
 		{
 		const char *full_action_name = strchr(d->action_name, '.') + 1; /* strip app./win. */
@@ -172,7 +252,7 @@ void register_actions_from_table(GtkApplication *app, GtkWidget *window, const A
 
 				if (accels)
 					{
-					gtk_application_set_accels_for_action(app, target, (const char *const *)accels);
+					registered_accels_set(app, target, accels);
 					}
 				}
 			}
@@ -192,7 +272,7 @@ void register_actions_from_table(GtkApplication *app, GtkWidget *window, const A
 
 					if (accels && n_accels > 0)
 						{
-						gtk_application_set_accels_for_action(app, detailed_action, (const char * const *)accels);
+						registered_accels_set(app, detailed_action, accels);
 						}
 					}
 				}
@@ -201,7 +281,7 @@ void register_actions_from_table(GtkApplication *app, GtkWidget *window, const A
 				char **accels = g_key_file_get_string_list(accels_keyfile, d->action_name, "accels", nullptr, nullptr);
 				if (accels)
 					{
-					gtk_application_set_accels_for_action(app, d->action_name, (const char *const *)accels);
+					registered_accels_set(app, d->action_name, accels);
 					g_strfreev(accels);
 					}
 				}
