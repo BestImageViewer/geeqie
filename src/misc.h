@@ -44,7 +44,6 @@ gint gq_gtk_tree_iter_utf8_collate(GtkTreeModel *model, GtkTreeIter *a, GtkTreeI
 int runcmd(const gchar *cmd);
 void gq_gtk_entry_set_text(GtkEntry *entry, const gchar *text);
 
-GdkRGBA convert_gdkcolor_to_gdkrgba(/* GdkColor * */ gpointer data);
 void shift_color(GdkRGBA &src, gshort val = -1, gint direction = 0);
 
 void cell_renderer_height_override(GtkCellRenderer *renderer); /**< cell max with/height hack utility */

@@ -319,11 +319,6 @@ gint get_cpu_cores()
     return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-GdkRGBA convert_gdkcolor_to_gdkrgba(gpointer data)
-{
-/* @FIXME GTK4 stub */
-}
-
 /**
  * @brief Shifts a GdkRGBA values lighter or darker \n
  * val is percent from 1 to 100, or -1 for default (usually 10%) \n

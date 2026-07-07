@@ -2002,10 +2002,120 @@ static void collection_table_dnd_init(CollectTable *ct)
  *-----------------------------------------------------------------------------
  */
 
-static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer * /*cell*/,
-					  GtkTreeModel * /*tree_model*/, GtkTreeIter * /*iter*/, gpointer  /*data*/)
+static gboolean collection_table_get_theme_bg(GtkStyleContext *style_context, const gchar *color_name, GdkRGBA &color)
 {
-/* @FIXME GTK4 stub */
+	if (gtk_style_context_lookup_color(style_context, color_name, &color))
+		{
+		return TRUE;
+		}
+
+	gtk_style_context_get_color(style_context, &color);
+	color.alpha = 0.35;
+
+	return FALSE;
+}
+
+static void collection_table_cell_colors(GtkWidget *widget, gboolean selected, gboolean prelight,
+                                         GdkRGBA &color_fg, GdkRGBA &color_bg,
+                                         gboolean &foreground_set, gboolean &background_set)
+{
+	GtkStyleContext *style_context = gtk_widget_get_style_context(widget);
+	GtkStateFlags state = selected ? GTK_STATE_FLAG_SELECTED : GTK_STATE_FLAG_NORMAL;
+
+	gtk_style_context_save(style_context);
+	gtk_style_context_set_state(style_context, state);
+
+	gtk_style_context_get_color(style_context, &color_fg);
+
+	foreground_set = selected;
+	background_set = selected || prelight;
+
+	if (background_set)
+		{
+		collection_table_get_theme_bg(style_context,
+		                              selected ? "theme_selected_bg_color" : "theme_base_color",
+		                              color_bg);
+		}
+
+	gtk_style_context_restore(style_context);
+
+	if (prelight)
+		{
+		shift_color(color_bg);
+		}
+}
+
+static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
+					  GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
+{
+	if (!GQV_IS_CELL_RENDERER_ICON(cell)) return;
+
+	auto *cd = static_cast<ColumnData *>(data);
+
+	if (cd->number >= COLLECT_TABLE_MAX_COLUMNS) return;
+
+	GList *list;
+	gtk_tree_model_get(tree_model, iter, CTABLE_COLUMN_POINTER, &list, -1);
+
+	auto *info = static_cast<CollectInfo *>(g_list_nth_data(list, cd->number));
+	if (!info)
+		{
+		g_object_set(cell,
+		             "pixbuf", nullptr,
+		             "text", nullptr,
+		             "show-marks", FALSE,
+		             "cell-background-set", FALSE,
+		             "foreground-set", FALSE,
+		             "has-focus", FALSE,
+		             nullptr);
+		return;
+		}
+
+	const CollectTable *ct = cd->ct;
+
+	g_autoptr(GString) display_text = g_string_new(nullptr);
+	if (info->fd)
+		{
+		if (ct->show_text)
+			{
+			g_string_append(display_text, info->fd->name);
+			}
+
+		if (ct->show_stars)
+			{
+			if (display_text->len) g_string_append_c(display_text, '\n');
+			g_autofree gchar *star_rating = metadata_read_rating_stars(info->fd);
+			g_string_append(display_text, star_rating);
+			}
+
+		if (ct->show_infotext && info->infotext)
+			{
+			if (display_text->len) g_string_append_c(display_text, '\n');
+			g_string_append(display_text, info->infotext);
+			}
+		}
+
+	const gboolean selected = info->flag_mask & SELECTION_SELECTED;
+	const gboolean prelight = info->flag_mask & SELECTION_PRELIGHT;
+	GdkRGBA color_fg{};
+	GdkRGBA color_bg{};
+	gboolean foreground_set = FALSE;
+	gboolean background_set = FALSE;
+
+	collection_table_cell_colors(ct->listview, selected, prelight,
+	                             color_fg, color_bg, foreground_set, background_set);
+
+	g_object_set(cell,
+	             "pixbuf", info->pixbuf,
+	             "text", display_text->len ? display_text->str : nullptr,
+	             "cell-background-rgba", &color_bg,
+	             "cell-background-set", background_set,
+	             "foreground-rgba", &color_fg,
+	             "foreground-set", foreground_set,
+	             "has-focus", ct->focus_info == info,
+	             "marks", info->fd ? file_data_get_marks(info->fd) : 0,
+	             "show-marks", info->fd != nullptr,
+	             nullptr);
 	}
 
 static void collection_table_append_column(CollectTable *ct, gint n)
@@ -2026,6 +2136,7 @@ static void collection_table_append_column(CollectTable *ct, gint n)
 	             "xpad", THUMB_BORDER_PADDING * 2,
 	             "ypad", THUMB_BORDER_PADDING,
 	             "mode", GTK_CELL_RENDERER_MODE_ACTIVATABLE,
+	             "num-marks", FILEDATA_MARKS_SIZE,
 	             NULL);
 
 	g_object_set_data(G_OBJECT(column), "column_number", GINT_TO_POINTER(n));
