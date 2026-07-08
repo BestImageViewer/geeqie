@@ -648,13 +648,6 @@ void bar_populate_default(GtkWidget *)
 		}
 }
 
-static void bar_size_allocate(GtkWidget *, GtkAllocation *, gpointer data)
-{
-	auto bd = static_cast<BarData *>(data);
-
-	bd->width = gtk_paned_get_position(GTK_PANED(bd->lw->utility_paned));
-}
-
 void bar_close(GtkWidget *bar)
 {
 	BarData *bd;
@@ -688,9 +681,6 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	bd->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	DEBUG_NAME(bd->widget);
 	g_object_set_data_full(G_OBJECT(bd->widget), "bar_data", bd, bar_destroy);
-
-	g_signal_connect(G_OBJECT(bd->widget), "size-allocate",
-			 G_CALLBACK(bar_size_allocate), bd);
 
 	bd->width = SIDEBAR_DEFAULT_WIDTH;
 

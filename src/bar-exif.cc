@@ -670,13 +670,6 @@ void bar_pane_exif_destroy(gpointer data)
 	g_free(ped);
 }
 
-void bar_pane_exif_size_allocate(GtkWidget *, GtkAllocation *alloc, gpointer data)
-{
-	auto ped = static_cast<PaneExifData *>(data);
-	ped->min_height = alloc->height;
-	gtk_widget_set_size_request(ped->widget, -1, ped->min_height);
-}
-
 GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expanded, gboolean show_all)
 {
 	PaneExifData *ped;
@@ -700,9 +693,6 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 
 	ped->min_height = MIN_HEIGHT;
 	g_object_set_data_full(G_OBJECT(ped->widget), "pane_data", ped, bar_pane_exif_destroy);
-	gtk_widget_set_size_request(ped->widget, -1, ped->min_height);
-	g_signal_connect(G_OBJECT(ped->widget), "size-allocate",
-			 G_CALLBACK(bar_pane_exif_size_allocate), ped);
 
 	bar_pane_exif_dnd_init(ped->widget);
 
