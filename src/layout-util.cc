@@ -2568,7 +2568,7 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 	GMenu *plugins_menu = G_MENU(gtk_builder_get_object(lw->builder, "plugins-submenu"));
 	g_menu_remove_all(plugins_menu);
 
-	plugins_menu_populate(plugins_menu, "win.plugin-run", nullptr);
+	plugins_menu_populate(plugins_menu, "win.main-win-plugin-run", nullptr);
 }
 
 void create_toolbars(LayoutWindow *lw)
