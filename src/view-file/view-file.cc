@@ -1819,7 +1819,11 @@ void vf_star_update(ViewFile *vf)
 
 void vf_marks_set(ViewFile *vf, gboolean enable)
 {
-	if (vf->marks_enabled == enable) return;
+	gboolean changed = (vf->marks_enabled != enable);
+
+	gtk_widget_set_visible(vf->filter, enable);
+
+	if (!changed) return;
 
 	vf->marks_enabled = enable;
 
@@ -1828,8 +1832,6 @@ void vf_marks_set(ViewFile *vf, gboolean enable)
 	case FILEVIEW_LIST: vflist_marks_set(vf, enable); break;
 	case FILEVIEW_ICON: vficon_marks_set(vf, enable); break;
 	}
-
-	gtk_widget_set_visible(vf->filter, enable);
 
 	vf_refresh_idle(vf);
 }
