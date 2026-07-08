@@ -1362,6 +1362,19 @@ static const gchar *histogram_channel_to_string(gint channel)
 		}
 }
 
+static const gchar *histogram_mode_to_string(gint mode)
+{
+	switch (mode)
+		{
+		case HMODE_LINEAR:
+			return "linear";
+		case HMODE_LOG:
+			return "log";
+		default:
+			return "linear";
+		}
+}
+
 static void layout_menu_histogram_channel_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
 	const gchar *value = g_variant_get_string(state, nullptr);
@@ -3433,7 +3446,7 @@ static void layout_util_sync_views(LayoutWindow *lw)
 		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string(histogram_channel_to_string(image_osd_histogram_get_channel(lw->image))));
 
 		action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-histogram-mode");
-		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_int64(image_osd_histogram_get_mode(lw->image)));
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string(histogram_mode_to_string(image_osd_histogram_get_mode(lw->image))));
 		}
 
 //	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-connect-zoom-menu");
