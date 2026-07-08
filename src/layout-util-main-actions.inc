@@ -47,7 +47,7 @@ static const gchar *const osd_targets[] =
 static const gchar *const histogram_channel_targets[] =
 {
 	"red",
-	"gree",
+	"green",
 	"blue",
 	"rgb",
 	"value",

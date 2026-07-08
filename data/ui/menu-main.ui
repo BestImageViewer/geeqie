@@ -1024,22 +1024,22 @@
         </item>
         <section>
           <item>
-            <attribute name="action">win.main-win-histogram-chan</attribute>
+            <attribute name="action">win.main-win-histogram-channel</attribute>
             <attribute name="label" translatable="yes">Histogram on Red</attribute>
             <attribute name="target">red</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-histogram-linear</attribute>
+            <attribute name="action">win.main-win-histogram-channel</attribute>
             <attribute name="label" translatable="yes">Histogram on Green</attribute>
             <attribute name="target">green</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-histogram-linear</attribute>
+            <attribute name="action">win.main-win-histogram-channel</attribute>
             <attribute name="label" translatable="yes">Histogram on Blue</attribute>
             <attribute name="target">blue</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-histogram-linear</attribute>
+            <attribute name="action">win.main-win-histogram-channel</attribute>
             <attribute name="label" translatable="yes">Histogram on RGB</attribute>
             <attribute name="target">rgb</attribute>
           </item>

@@ -1332,10 +1332,53 @@ static void layout_menu_histogram_toggle_mode_cb(GSimpleAction *, GVariant *, gp
 	layout_util_sync_views(lw);
 }
 
-static void layout_menu_histogram_channel_cb(GSimpleAction *, GVariant *, gpointer  )
+static gint histogram_channel_from_string(const gchar *value)
 {
-/** @FIXME GTK4
- */
+	if (g_str_equal(value, "red")) return HCHAN_R;
+	if (g_str_equal(value, "green")) return HCHAN_G;
+	if (g_str_equal(value, "blue")) return HCHAN_B;
+	if (g_str_equal(value, "rgb")) return HCHAN_RGB;
+	if (g_str_equal(value, "value")) return HCHAN_MAX;
+
+	return -1;
+}
+
+static const gchar *histogram_channel_to_string(gint channel)
+{
+	switch (channel)
+		{
+		case HCHAN_R:
+			return "red";
+		case HCHAN_G:
+			return "green";
+		case HCHAN_B:
+			return "blue";
+		case HCHAN_RGB:
+			return "rgb";
+		case HCHAN_MAX:
+			return "value";
+		default:
+			return "rgb";
+		}
+}
+
+static void layout_menu_histogram_channel_cb(GSimpleAction *action, GVariant *state, gpointer)
+{
+	const gchar *value = g_variant_get_string(state, nullptr);
+	gint channel = histogram_channel_from_string(value);
+	if (channel < 0 || channel >= HCHAN_COUNT) return;
+
+	auto lw = get_current_layout();
+
+	g_simple_action_set_state(action, g_variant_new_string(value));
+
+	OsdShowFlags flags = image_osd_get(lw->image);
+	if (!(flags & OSD_SHOW_HISTOGRAM))
+		{
+		image_osd_set(lw->image, static_cast<OsdShowFlags>(flags | OSD_SHOW_INFO | OSD_SHOW_STATUS | OSD_SHOW_HISTOGRAM));
+		}
+
+	image_osd_histogram_set_channel(lw->image, channel);
 }
 
 static void layout_menu_histogram_mode_cb(GSimpleAction *, GVariant *, gpointer  )
@@ -3387,7 +3430,7 @@ static void layout_util_sync_views(LayoutWindow *lw)
 	if (osd_flags & OSD_SHOW_HISTOGRAM)
 		{
 		action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-histogram-channel");
-		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_int64(image_osd_histogram_get_channel(lw->image)));
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string(histogram_channel_to_string(image_osd_histogram_get_channel(lw->image))));
 
 		action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-histogram-mode");
 		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_int64(image_osd_histogram_get_mode(lw->image)));

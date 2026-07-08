@@ -324,8 +324,8 @@ void Histogram::draw(const HistMap *histmap, GdkPixbuf *pixbuf, gint x, gint y, 
 						}
 					break;
 				case HCHAN_R:   c = { c.r, 0,   0, 255 }; break;
-				case HCHAN_G:   c = { 0,   0, c.g, 255 }; break;
-				case HCHAN_B:   c = { 0, c.b,   0, 255 }; break;
+				case HCHAN_G:   c = { 0, c.g,   0, 255 }; break;
+				case HCHAN_B:   c = { 0,   0, c.b, 255 }; break;
 				case HCHAN_MAX: c = { 0,   0,   0, 255 }; break;
 				default: break;
 				}
