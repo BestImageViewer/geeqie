@@ -26,6 +26,7 @@
 #include <config.h>
 
 #include <gdk/gdk.h>
+#include <gio/gio.h>
 #include <glib-object.h>
 
 #include "bar.h"
@@ -104,9 +105,8 @@ static void bar_pane_comment_update(PaneCommentData *pcd)
 }
 
 template<gboolean append>
-static void bar_pane_comment_set_selection_cb(GtkWidget *, gpointer data)
+static void bar_pane_comment_set_selection(PaneCommentData *pcd)
 {
-	auto *pcd = static_cast<PaneCommentData *>(data);
 	GList *work;
 
 	g_autofree gchar *comment = text_widget_text_pull(pcd->comment_view);
@@ -125,6 +125,16 @@ static void bar_pane_comment_set_selection_cb(GtkWidget *, gpointer data)
 
 		func(fd, pcd->key, comment);
 		}
+}
+
+static void bar_pane_comment_append_selection_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	bar_pane_comment_set_selection<TRUE>(static_cast<PaneCommentData *>(data));
+}
+
+static void bar_pane_comment_replace_selection_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	bar_pane_comment_set_selection<FALSE>(static_cast<PaneCommentData *>(data));
 }
 
 
@@ -205,17 +215,6 @@ static void bar_pane_comment_changed(GtkTextBuffer *, gpointer data)
 }
 
 
-static void bar_pane_comment_populate_popup(GtkTextView *, GtkWidget *menu, gpointer data)
-{
-	auto pcd = static_cast<PaneCommentData *>(data);
-
-	popover_item_add_divider(menu);
-	popover_item_add_icon(menu, _("Add text to selected files"), GQ_ICON_ADD,
-	                   G_CALLBACK(bar_pane_comment_set_selection_cb<TRUE>), pcd);
-	popover_item_add_icon(menu, _("Replace existing text in selected files"), GQ_ICON_REPLACE,
-	                   G_CALLBACK(bar_pane_comment_set_selection_cb<FALSE>), data);
-}
-
 static void bar_pane_comment_destroy(gpointer data)
 {
 	auto pcd = static_cast<PaneCommentData *>(data);
@@ -228,6 +227,30 @@ static void bar_pane_comment_destroy(gpointer data)
 	g_free(pcd->pane.id);
 
 	g_free(pcd);
+}
+
+static void bar_pane_comment_set_extra_menu(PaneCommentData *pcd)
+{
+	static const GActionEntry comment_actions[] = {
+		{ "append-to-selection",  bar_pane_comment_append_selection_cb,  nullptr, nullptr, nullptr, {} },
+		{ "replace-in-selection", bar_pane_comment_replace_selection_cb, nullptr, nullptr, nullptr, {} },
+	};
+
+	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
+	g_action_map_add_action_entries(G_ACTION_MAP(action_group), comment_actions, G_N_ELEMENTS(comment_actions), pcd);
+	gtk_widget_insert_action_group(pcd->comment_view, "comment", G_ACTION_GROUP(action_group));
+
+	g_autoptr(GMenu) menu = g_menu_new();
+
+	g_autoptr(GMenuItem) append_item = g_menu_item_new(_("Add text to selected files"), "comment.append-to-selection");
+	g_menu_item_set_attribute(append_item, "verb-icon", "s", GQ_ICON_ADD);
+	g_menu_append_item(menu, append_item);
+
+	g_autoptr(GMenuItem) replace_item = g_menu_item_new(_("Replace existing text in selected files"), "comment.replace-in-selection");
+	g_menu_item_set_attribute(replace_item, "verb-icon", "s", GQ_ICON_REPLACE);
+	g_menu_append_item(menu, replace_item);
+
+	gtk_text_view_set_extra_menu(GTK_TEXT_VIEW(pcd->comment_view), G_MENU_MODEL(menu));
 }
 
 
@@ -264,8 +287,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 	pcd->comment_view = gtk_text_view_new();
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(pcd->comment_view), GTK_WRAP_WORD);
 	gq_gtk_container_add(scrolled, pcd->comment_view);
-	g_signal_connect(G_OBJECT(pcd->comment_view), "populate-popup",
-			 G_CALLBACK(bar_pane_comment_populate_popup), pcd);
+	bar_pane_comment_set_extra_menu(pcd);
 	gtk_widget_show(pcd->comment_view);
 
 #if HAVE_SPELL

@@ -26,6 +26,7 @@
 #include <string>
 
 #include <gdk/gdk.h>
+#include <gio/gio.h>
 #include <glib-object.h>
 
 #include "bar.h"
@@ -413,9 +414,8 @@ gboolean bar_pane_keywords_filter_visible(GtkTreeModel *keyword_tree, GtkTreeIte
 }
 
 template<gboolean append>
-void bar_pane_keywords_set_selection_cb(GtkWidget *, gpointer data)
+void bar_pane_keywords_set_selection(PaneKeywordsData *pkd)
 {
-	auto *pkd = static_cast<PaneKeywordsData *>(data);
 	GList *keywords = nullptr;
 	GList *work;
 
@@ -438,15 +438,14 @@ void bar_pane_keywords_set_selection_cb(GtkWidget *, gpointer data)
 	g_list_free_full(keywords, g_free);
 }
 
-void bar_pane_keywords_populate_popup_cb(GtkTextView *, GtkWidget *menu, gpointer data)
+void bar_pane_keywords_append_selection_cb(GSimpleAction *, GVariant *, gpointer data)
 {
-	auto pkd = static_cast<PaneKeywordsData *>(data);
+	bar_pane_keywords_set_selection<TRUE>(static_cast<PaneKeywordsData *>(data));
+}
 
-	popover_item_add_divider(menu);
-	popover_item_add_icon(menu, _("Add selected keywords to selected files"), GQ_ICON_ADD,
-	                   G_CALLBACK(bar_pane_keywords_set_selection_cb<TRUE>), pkd);
-	popover_item_add_icon(menu, _("Replace existing keywords in selected files with selected keywords"), GQ_ICON_REPLACE,
-	                   G_CALLBACK(bar_pane_keywords_set_selection_cb<FALSE>), pkd);
+void bar_pane_keywords_replace_selection_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	bar_pane_keywords_set_selection<FALSE>(static_cast<PaneKeywordsData *>(data));
 }
 
 
@@ -477,6 +476,30 @@ void bar_pane_keywords_changed(GtkTextBuffer *, gpointer data)
 	if (pkd->idle_id) return;
 	/* higher prio than redraw */
 	pkd->idle_id = g_idle_add_full(G_PRIORITY_HIGH_IDLE, bar_pane_keywords_changed_idle_cb, pkd, nullptr);
+}
+
+void bar_pane_keywords_set_extra_menu(PaneKeywordsData *pkd)
+{
+	static const GActionEntry keyword_actions[] = {
+		{ "append-to-selection",  bar_pane_keywords_append_selection_cb,  nullptr, nullptr, nullptr, {} },
+		{ "replace-in-selection", bar_pane_keywords_replace_selection_cb, nullptr, nullptr, nullptr, {} },
+	};
+
+	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
+	g_action_map_add_action_entries(G_ACTION_MAP(action_group), keyword_actions, G_N_ELEMENTS(keyword_actions), pkd);
+	gtk_widget_insert_action_group(pkd->keyword_view, "keywords", G_ACTION_GROUP(action_group));
+
+	g_autoptr(GMenu) menu = g_menu_new();
+
+	g_autoptr(GMenuItem) append_item = g_menu_item_new(_("Add selected keywords to selected files"), "keywords.append-to-selection");
+	g_menu_item_set_attribute(append_item, "verb-icon", "s", GQ_ICON_ADD);
+	g_menu_append_item(menu, append_item);
+
+	g_autoptr(GMenuItem) replace_item = g_menu_item_new(_("Replace existing keywords in selected files with selected keywords"), "keywords.replace-in-selection");
+	g_menu_item_set_attribute(replace_item, "verb-icon", "s", GQ_ICON_REPLACE);
+	g_menu_append_item(menu, replace_item);
+
+	gtk_text_view_set_extra_menu(GTK_TEXT_VIEW(pkd->keyword_view), G_MENU_MODEL(menu));
 }
 
 
@@ -1122,8 +1145,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	pkd->keyword_view = gtk_text_view_new();
 	gq_gtk_container_add(scrolled, pkd->keyword_view);
-	g_signal_connect(G_OBJECT(pkd->keyword_view), "populate-popup",
-			 G_CALLBACK(bar_pane_keywords_populate_popup_cb), pkd);
+	bar_pane_keywords_set_extra_menu(pkd);
 	gtk_widget_show(pkd->keyword_view);
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pkd->keyword_view));
