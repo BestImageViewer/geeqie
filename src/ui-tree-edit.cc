@@ -31,6 +31,7 @@
 #include "geometry.h"
 #include "layout.h"
 #include "misc.h"
+#include "ui-menu.h"
 #include "ui-misc.h"
 
 namespace
@@ -160,7 +161,7 @@ static gboolean tree_edit_by_path_idle_cb(gpointer data)
 	gtk_widget_set_size_request(ted->entry, w, h);
 	gtk_popover_set_pointing_to(GTK_POPOVER(ted->window), &pointing_to);
 	gtk_widget_show(ted->window);
-	gtk_popover_popup(GTK_POPOVER(ted->window));
+	popover_popup(ted->window);
 
 	/* grab it */
 	gtk_widget_grab_focus(ted->entry);
@@ -229,7 +230,7 @@ gboolean tree_edit_by_path(GtkTreeView *tree, GtkTreePath *tpath, gint column, c
 	gtk_widget_show(ted->entry);
 
 	ted->window = gtk_popover_new();
-	gtk_widget_set_parent(ted->window, GTK_WIDGET(ted->tree));
+	popover_set_parent(ted->window, GTK_WIDGET(ted->tree));
 	gtk_popover_set_autohide(GTK_POPOVER(ted->window), FALSE);
 	gtk_popover_set_has_arrow(GTK_POPOVER(ted->window), FALSE);
 	gtk_popover_set_position(GTK_POPOVER(ted->window), GTK_POS_BOTTOM);

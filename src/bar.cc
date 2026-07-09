@@ -36,7 +36,6 @@
 #include "menu.h"
 #include "metadata.h"
 #include "rcfile.h"
-#include "ui-menu.h"
 #include "ui-misc.h"
 
 
@@ -421,9 +420,13 @@ static GtkWidget *bar_expander_label_widget_new(GtkWidget *expander, GtkWidget *
 	return box;
 }
 
-static void bar_menu_add_cb(GtkWidget *tbar, gpointer)
+static GtkWidget *bar_menu_add_button_new(GtkWidget *toolbar)
 {
-	GMenu *menu_model = g_menu_new();
+	GtkWidget *button = gtk_menu_button_new();
+	GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+	GtkWidget *image = gtk_image_new_from_icon_name(GQ_ICON_ADD);
+	GtkWidget *label = gtk_label_new(_("Add"));
+	g_autoptr(GMenu) menu_model = g_menu_new();
 
 	for (const KnownPanes *pane = known_panes; pane->id; pane++)
 		{
@@ -433,7 +436,6 @@ static void bar_menu_add_cb(GtkWidget *tbar, gpointer)
 		}
 
 	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
-	gtk_widget_set_parent(popover, tbar);
 
 	GSimpleActionGroup *action_group = g_simple_action_group_new();
 	GSimpleAction *action = g_simple_action_new("add-pane", G_VARIANT_TYPE_STRING);
@@ -441,12 +443,18 @@ static void bar_menu_add_cb(GtkWidget *tbar, gpointer)
 	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(action));
 	g_object_unref(action);
 
-	gtk_widget_insert_action_group(popover, "bar", G_ACTION_GROUP(action_group));
-	g_object_set_data_full(G_OBJECT(popover), "bar-action-group", action_group, g_object_unref);
+	gtk_box_append(GTK_BOX(content), image);
+	gtk_box_append(GTK_BOX(content), label);
+	gtk_menu_button_set_child(GTK_MENU_BUTTON(button), content);
+	gtk_widget_set_tooltip_text(button, _("Add Pane"));
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(button), popover);
+	gtk_widget_insert_action_group(button, "bar", G_ACTION_GROUP(action_group));
+	g_object_set_data_full(G_OBJECT(button), "bar-action-group", action_group, g_object_unref);
 
-	g_object_unref(menu_model);
+	gq_gtk_container_add(toolbar, button);
+	gtk_widget_show(button);
 
-	gtk_popover_popup(GTK_POPOVER(popover));
+	return button;
 }
 
 
@@ -715,8 +723,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	DEBUG_NAME(add_box);
 	gq_gtk_box_pack_end(GTK_BOX(bd->widget), add_box, FALSE, FALSE, 0);
 	tbar = pref_toolbar_new(add_box);
-	pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE,
-	                    _("Add Pane"), G_CALLBACK(bar_menu_add_cb), nullptr);
+	bar_menu_add_button_new(tbar);
 	gtk_widget_show(add_box);
 
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);

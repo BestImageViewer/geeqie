@@ -668,8 +668,6 @@ static void date_selection_popup_hide(DateSelection *ds)
 	if (!ds->popover) return;
 
 	gtk_popover_popdown(GTK_POPOVER(ds->popover));
-
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), FALSE);
 }
 
 static void date_selection_popup_sync(DateSelection *ds)
@@ -689,13 +687,12 @@ static void date_selection_popup(DateSelection *ds)
 {
 	if (ds->popover)
 		{
-		gtk_popover_popup(GTK_POPOVER(ds->popover));
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), TRUE);
+		g_autoptr(GDateTime) date = date_selection_get(ds->box);
+		gtk_calendar_select_day(GTK_CALENDAR(ds->calendar), date);
 		return;
 		}
 
 	ds->popover = gtk_popover_new();
-	gtk_widget_set_parent(ds->popover, ds->button);
 
 	ds->calendar = gtk_calendar_new();
 
@@ -710,24 +707,17 @@ static void date_selection_popup(DateSelection *ds)
 	                         G_CALLBACK(date_selection_popup_sync),
 	                         ds);
 
-
-	gtk_popover_popup(GTK_POPOVER(ds->popover));
-
-	gtk_widget_grab_focus(ds->calendar);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ds->button), TRUE);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(ds->button), ds->popover);
 }
 
-static void date_selection_button_cb(GtkWidget *, gpointer data)
+static void date_selection_button_active_cb(GtkMenuButton *button, GParamSpec *, gpointer data)
 {
 	auto ds = static_cast<DateSelection *>(data);
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ds->button)))
+	if (gtk_menu_button_get_active(button))
 		{
 		date_selection_popup(ds);
-		}
-	else
-		{
-		date_selection_popup_hide(ds);
+		gtk_widget_grab_focus(ds->calendar);
 		}
 }
 
@@ -783,21 +773,21 @@ GtkWidget *date_selection_new()
 		ds->spin_y = pref_spin_new(ds->box, nullptr, nullptr, 1900, 9999, 1, 0, 1900, nullptr, nullptr);
 		}
 
-	ds->button = gtk_toggle_button_new();
+	ds->button = gtk_menu_button_new();
 	/* Temporary GTK4 fallback: the old requisition/size_allocate hack used by
 	 * this button depended on GTK3 layout internals, so the button currently
 	 * uses its natural size until this widget is restyled for GTK4. */
 
 	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
-	gq_gtk_container_add(ds->button, icon);
+	gtk_menu_button_set_child(GTK_MENU_BUTTON(ds->button), icon);
 	gtk_widget_show(icon);
 
 	gq_gtk_box_pack_start(GTK_BOX(ds->box), ds->button, FALSE, FALSE, 0);
-	g_signal_connect(G_OBJECT(ds->button), "clicked",
-			 G_CALLBACK(date_selection_button_cb), ds);
-	gtk_widget_show(ds->button);
-
+	g_signal_connect(G_OBJECT(ds->button), "notify::active",
+			 G_CALLBACK(date_selection_button_active_cb), ds);
 	g_object_set_data(G_OBJECT(ds->box), DATE_SELECION_KEY, ds);
+	date_selection_popup(ds);
+	gtk_widget_show(ds->button);
 
 	return ds->box;
 }

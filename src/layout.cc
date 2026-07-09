@@ -649,21 +649,18 @@ static void layout_sort_menu_case_cb(GtkWidget *, gpointer data)
 	layout_sort_set_files(lw, sort);
 }
 
-static void layout_sort_button_press_cb(GtkWidget *button, gpointer data)
+static GtkWidget *layout_sort_popover_new(LayoutWindow *lw)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
 	GtkWidget *menu = submenu_add_sort(nullptr, G_CALLBACK(layout_sort_menu_cb), lw, TRUE, lw->options.file_view_list_sort.method);
 	GtkWidget *popover = gtk_popover_new();
 	gtk_popover_set_child(GTK_POPOVER(popover), menu);
-	gtk_widget_set_parent(popover, button);
 
 	/* ascending option */
 	popover_item_add_divider(menu);
 	popover_item_add_check(menu, _("Ascending"), lw->options.file_view_list_sort.ascending, G_CALLBACK(layout_sort_menu_ascend_cb), lw);
 	popover_item_add_check(menu, _("Case"), lw->options.file_view_list_sort.case_sensitive, G_CALLBACK(layout_sort_menu_case_cb), lw);
 
-	gtk_popover_popup(GTK_POPOVER(popover));
+	return popover;
 }
 
 namespace
@@ -681,6 +678,21 @@ GtkWidget *layout_info_button_new(const gchar *label_text, const gchar *icon_nam
 	gtk_box_append(GTK_BOX(content), label);
 	gtk_box_append(GTK_BOX(content), image);
 	gtk_button_set_child(GTK_BUTTON(button), content);
+	g_object_set_data(G_OBJECT(button), INFO_BUTTON_LABEL_KEY, label);
+
+	return button;
+}
+
+GtkWidget *layout_info_menu_button_new(const gchar *label_text, const gchar *icon_name)
+{
+	GtkWidget *button = gtk_menu_button_new();
+	GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+	GtkWidget *label = gtk_label_new(label_text);
+	GtkWidget *image = gtk_image_new_from_icon_name(icon_name);
+
+	gtk_box_append(GTK_BOX(content), label);
+	gtk_box_append(GTK_BOX(content), image);
+	gtk_menu_button_set_child(GTK_MENU_BUTTON(button), content);
 	g_object_set_data(G_OBJECT(button), INFO_BUTTON_LABEL_KEY, label);
 
 	return button;
@@ -704,10 +716,8 @@ static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 	gq_gtk_box_pack_start(GTK_BOX(box), frame, FALSE, FALSE, 0);
 	gtk_widget_show(frame);
 
-	button = layout_info_button_new(sort_type_get_text(lw->options.file_view_list_sort.method), GQ_ICON_PAN_DOWN);
-
-	g_signal_connect(G_OBJECT(button), "clicked",
-			 G_CALLBACK(layout_sort_button_press_cb), lw);
+	button = layout_info_menu_button_new(sort_type_get_text(lw->options.file_view_list_sort.method), GQ_ICON_PAN_DOWN);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(button), layout_sort_popover_new(lw));
 	gtk_widget_add_css_class(button, "flat");
 
 	gq_gtk_container_add(frame, button);
@@ -1508,7 +1518,11 @@ void layout_sort_set_files(LayoutWindow *lw, FileData::FileList::SortSettings se
 
 	lw->options.file_view_list_sort = settings;
 
-	if (lw->info_sort) layout_info_button_set_label(lw->info_sort, sort_type_get_text(settings.method));
+	if (lw->info_sort)
+		{
+		layout_info_button_set_label(lw->info_sort, sort_type_get_text(settings.method));
+		gtk_menu_button_set_popover(GTK_MENU_BUTTON(lw->info_sort), layout_sort_popover_new(lw));
+		}
 	layout_list_sync_sort(lw);
 }
 

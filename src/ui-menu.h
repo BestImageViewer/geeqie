@@ -71,6 +71,9 @@ GtkWidget *popover_item_add_simple(GtkWidget *menu, const gchar *label,
 				GCallback func, gpointer data);
 
 GtkWidget *popover_box_new(GtkWidget *parent = nullptr, gdouble x = -1, gdouble y = -1);
+GtkWidget *popover_parent_new(GtkWidget *child);
+void popover_set_parent(GtkWidget *popover, GtkWidget *parent);
+void popover_popup(GtkWidget *popover);
 
 bool menu_item_include_ellipsis(GMenuModel *model, const gchar *action);
 void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_list);

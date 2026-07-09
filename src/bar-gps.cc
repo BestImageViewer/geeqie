@@ -69,6 +69,7 @@ struct PaneGPSData
 	ShumateSimpleMap *map;
 	ShumateMarkerLayer *marker_layer;
 	ShumateViewport *viewport;
+	GtkWidget *map_popover_parent;
 	GList *selection_list;
 	GList *not_added;
 	guint num_added;
@@ -578,7 +579,7 @@ GtkWidget *bar_pane_gps_menu(PaneGPSData *pgd)
 	GtkWidget *map_centre;
 
 	popover = gtk_popover_new();
-	gtk_widget_set_parent(popover, GTK_WIDGET(pgd->map));
+	popover_set_parent(popover, pgd->map_popover_parent);
 	menu_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_popover_set_child(GTK_POPOVER(popover), menu_box);
 
@@ -639,12 +640,13 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
 	pgd->map = shumate_simple_map_new();
+	pgd->map_popover_parent = popover_parent_new(GTK_WIDGET(pgd->map));
 	pgd->viewport = shumate_simple_map_get_viewport(pgd->map);
 
-	gtk_widget_set_hexpand(GTK_WIDGET(pgd->map), TRUE);
-	gtk_widget_set_vexpand(GTK_WIDGET(pgd->map), TRUE);
+	gtk_widget_set_hexpand(pgd->map_popover_parent, TRUE);
+	gtk_widget_set_vexpand(pgd->map_popover_parent, TRUE);
 
-	gtk_box_append(GTK_BOX(vbox), GTK_WIDGET(pgd->map));
+	gtk_box_append(GTK_BOX(vbox), pgd->map_popover_parent);
 
 	gq_gtk_container_add(frame, vbox);
 
@@ -684,10 +686,10 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	g_signal_connect(click, "pressed",
 	    G_CALLBACK(+[](GtkGestureClick*, int, double, double, gpointer data){
-	        auto *pgd = static_cast<PaneGPSData*>(data);
-	        GtkWidget *menu = bar_pane_gps_menu(pgd);
-	        gtk_popover_popup(GTK_POPOVER(menu));
-	    }), pgd);
+		        auto *pgd = static_cast<PaneGPSData*>(data);
+		        GtkWidget *menu = bar_pane_gps_menu(pgd);
+		        popover_popup(menu);
+		    }), pgd);
 
 	bar_pane_gps_dnd_init(pgd);
 

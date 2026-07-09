@@ -74,7 +74,6 @@
 #include "toolbar.h"
 #include "trash.h"
 #include "ui-fileops.h"
-#include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
 #include "ui-utildlg.h"
@@ -2088,18 +2087,19 @@ static gboolean popover_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static void default_layout_changed_cb(GtkWidget *, GtkPopover *popover)
+static void default_layout_changed_cb(GtkMenuButton *button, GParamSpec *, gpointer)
 {
-	gtk_popover_popup(popover);
+	if (!gtk_menu_button_get_active(button)) return;
 
+	save_default_window_layout_cb(GTK_WIDGET(button), nullptr);
+	GtkPopover *popover = gtk_menu_button_get_popover(button);
 	g_timeout_add(2000, popover_cb, popover);
 }
 
-static GtkWidget *create_popover(GtkWidget *parent, GtkWidget *child, GtkPositionType pos)
+static GtkWidget *create_popover(GtkWidget *child, GtkPositionType pos)
 {
 	GtkWidget *popover = gtk_popover_new();
 
-	gtk_widget_set_parent(popover, parent);
 	gtk_popover_set_position(GTK_POPOVER (popover), pos);
 	gtk_popover_set_autohide(GTK_POPOVER(popover), FALSE);
 	gq_gtk_container_add(popover, child);
@@ -2151,12 +2151,16 @@ static void config_tab_windows(GtkWidget *notebook)
 
 	subgroup = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(subgroup, _("Use current layout for default: "));
-	button = pref_button_new(subgroup, nullptr, _("Set"), G_CALLBACK(save_default_window_layout_cb), nullptr);
+	button = gtk_menu_button_new();
+	gtk_menu_button_set_child(GTK_MENU_BUTTON(button), gtk_label_new_with_mnemonic(_("Set")));
+	gq_gtk_container_add(subgroup, button);
+	gtk_widget_show(button);
 
 	GtkWidget *popover;
 
-	popover = create_popover(button, gtk_label_new(_("Current window layout\nhas been set as default")), GTK_POS_TOP);
-	g_signal_connect(button, "clicked", G_CALLBACK(default_layout_changed_cb), popover);
+	popover = create_popover(gtk_label_new(_("Current window layout\nhas been set as default")), GTK_POS_TOP);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(button), popover);
+	g_signal_connect(button, "notify::active", G_CALLBACK(default_layout_changed_cb), nullptr);
 
 	group = pref_group_new(vbox, FALSE, _("Size"), GTK_ORIENTATION_VERTICAL);
 

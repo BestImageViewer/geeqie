@@ -240,7 +240,7 @@ GtkWidget *popover_box_new(GtkWidget *parent, gdouble x, gdouble y)
 		GtkWidget *popover = gtk_popover_new();
 		g_object_set_data(G_OBJECT(box), "gq-popover", popover);
 		gtk_popover_set_child(GTK_POPOVER(popover), box);
-		gtk_widget_set_parent(popover, parent);
+		popover_set_parent(popover, parent);
 		if (x >= 0 && y >= 0)
 			{
 			GdkRectangle pointing_to{
@@ -250,18 +250,58 @@ GtkWidget *popover_box_new(GtkWidget *parent, gdouble x, gdouble y)
 			};
 			gtk_popover_set_pointing_to(GTK_POPOVER(popover), &pointing_to);
 			}
-		gtk_popover_popup(GTK_POPOVER(popover));
+		popover_popup(popover);
 		}
 
 	return box;
 }
 
+GtkWidget *popover_parent_new(GtkWidget *child)
+{
+#if HAVE_GTK4_22
+	GtkWidget *popover_parent = gtk_popover_bin_new();
+	gtk_popover_bin_set_child(GTK_POPOVER_BIN(popover_parent), child);
+
+	return popover_parent;
+#else
+	return child;
+#endif
+}
+
+void popover_set_parent(GtkWidget *popover, GtkWidget *parent)
+{
+#if HAVE_GTK4_22
+	if (GTK_IS_POPOVER_BIN(parent))
+		{
+		gtk_popover_bin_set_popover(GTK_POPOVER_BIN(parent), popover);
+		return;
+		}
+#endif
+
+	gtk_widget_set_parent(popover, parent);
+}
+
+void popover_popup(GtkWidget *popover)
+{
+#if HAVE_GTK4_22
+	GtkWidget *parent = gtk_widget_get_parent(popover);
+	if (parent && GTK_IS_POPOVER_BIN(parent))
+		{
+		gtk_popover_bin_popup(GTK_POPOVER_BIN(parent));
+		return;
+		}
+#endif
+
+	gtk_popover_present(GTK_POPOVER(popover));
+	gtk_popover_popup(GTK_POPOVER(popover));
+}
+
 GtkWidget *popup_menu(GMenu *menu_model, GtkWidget *window)
 {
 	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
-	gtk_widget_set_parent(popover, window);
+	popover_set_parent(popover, window);
 	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_BOTTOM);
-	gtk_popover_popup(GTK_POPOVER(popover));
+	popover_popup(popover);
 
 	return popover;
 }
@@ -275,10 +315,10 @@ GtkWidget *popup_menu_at(GMenu *menu_model, GtkWidget *parent, gdouble x, gdoubl
 		1, 1
 	};
 
-	gtk_widget_set_parent(popover, parent);
+	popover_set_parent(popover, parent);
 	gtk_popover_set_pointing_to(GTK_POPOVER(popover), &pointing_to);
 	gtk_popover_set_position(GTK_POPOVER(popover), GTK_POS_BOTTOM);
-	gtk_popover_popup(GTK_POPOVER(popover));
+	popover_popup(popover);
 
 	return popover;
 }
