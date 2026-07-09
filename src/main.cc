@@ -744,22 +744,32 @@ void startup_common(GtkApplication *, gpointer)
 	 * color-profile-0
 	 */
 	g_autofree char *accels_ini_path = accels_ini_filename();
+	const gchar *config_home = xdg_config_home_get();
+
+	g_autofree gchar *accels_old = g_build_filename(config_home, GQ_APPNAME_LC, "accels", nullptr);
+	g_autofree gchar *accels_new = g_build_filename(config_home, GQ_APPNAME_LC, "accels.ini", nullptr);
+	g_autofree gchar *rc_file = g_build_filename(config_home, GQ_APPNAME_LC, RC_FILE_NAME, nullptr);
+	g_autofree gchar *rc_backup = g_strconcat(rc_file, "~", nullptr);
 
 	if (!isfile(accels_ini_path))
 		{
-		const char *description =
-			_("As part of the GTK3/GTK4 migration, it was necessary to rework the entire menu and action code. \n \
-Superficially, you should not see significant differences, however you should be aware there may be resulting problems. \n\n \
-Some shortcuts have changed. \n \
-Command line option --action parameters are all changed. \n\n \
-If you find problems, check these files: \n \
-$HOME/.config/geeqie/accels (old) \n \
-$HOME/.config/geeqie/accels.ini (new) \n \
-$HOME/.config/geeqie/geeqierc.xml (revised Toolbar sections) \n \
-$HOME/.config/geeqie/geeqierc.xml~ (backup of original) \n\n \
-If you press Yes to continue, shortcuts and configuration files will be automatically converted. \n\n \
-This message will not be shown again. \n\n \
-Continue?");
+		g_autofree gchar *description = g_strdup_printf(
+		_("As part of the GTK3/GTK4 migration, it was necessary to rework the entire menu and action code.\n \
+Superficially, you should not see significant differences, however you should be aware there may be resulting problems.\n\n \
+Some shortcuts have changed.\n \
+Command line option --action parameters are all changed.\n\n \
+If you find problems, check these files:\n \
+%s (old)\n \
+%s (new)\n \
+%s (revised Toolbar sections)\n \
+%s (backup of original)\n\n \
+If you press Yes to continue, shortcuts and configuration files will be automatically converted.\n\n \
+This message will not be shown again.\n\n \
+Continue?"),
+		accels_old,
+		accels_new,
+		rc_file,
+		rc_backup);
 
 		GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Some keyboard shortcuts and \n menu actions have changed."));
 		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", description);
