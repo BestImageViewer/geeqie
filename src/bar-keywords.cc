@@ -414,38 +414,24 @@ gboolean bar_pane_keywords_filter_visible(GtkTreeModel *keyword_tree, GtkTreeIte
 }
 
 template<gboolean append>
-void bar_pane_keywords_set_selection(PaneKeywordsData *pkd)
+void bar_pane_keywords_set_selection_cb(GSimpleAction *, GVariant *, gpointer data)
 {
-	GList *keywords = nullptr;
-	GList *work;
-
-	keywords = keyword_list_pull_selected(pkd->keyword_view);
+	auto *pkd = static_cast<PaneKeywordsData *>(data);
+	GList *keywords = keyword_list_pull_selected(pkd->keyword_view);
 
 	g_autoptr(FileDataList) list = layout_selection_list(pkd->pane.lw);
 	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
 
-	const auto func = append ? metadata_append_list : metadata_write_list;
+	const auto metadata_func = append ? metadata_append_list : metadata_write_list;
 
-	work = list;
-	while (work)
+	for (GList *work = list; work; work = work->next)
 		{
-		auto fd = static_cast<FileData *>(work->data);
-		work = work->next;
+		auto *fd = static_cast<FileData *>(work->data);
 
-		func(fd, KEYWORD_KEY, keywords);
+		metadata_func(fd, KEYWORD_KEY, keywords);
 		}
 
 	g_list_free_full(keywords, g_free);
-}
-
-void bar_pane_keywords_append_selection_cb(GSimpleAction *, GVariant *, gpointer data)
-{
-	bar_pane_keywords_set_selection<TRUE>(static_cast<PaneKeywordsData *>(data));
-}
-
-void bar_pane_keywords_replace_selection_cb(GSimpleAction *, GVariant *, gpointer data)
-{
-	bar_pane_keywords_set_selection<FALSE>(static_cast<PaneKeywordsData *>(data));
 }
 
 
@@ -481,8 +467,8 @@ void bar_pane_keywords_changed(GtkTextBuffer *, gpointer data)
 void bar_pane_keywords_set_extra_menu(PaneKeywordsData *pkd)
 {
 	static const GActionEntry keyword_actions[] = {
-		{ "append-to-selection",  bar_pane_keywords_append_selection_cb,  nullptr, nullptr, nullptr, {} },
-		{ "replace-in-selection", bar_pane_keywords_replace_selection_cb, nullptr, nullptr, nullptr, {} },
+		{ "append-to-selection",  bar_pane_keywords_set_selection_cb<TRUE>,  nullptr, nullptr, nullptr, {} },
+		{ "replace-in-selection", bar_pane_keywords_set_selection_cb<FALSE>, nullptr, nullptr, nullptr, {} },
 	};
 
 	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
