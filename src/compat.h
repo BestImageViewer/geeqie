@@ -33,6 +33,10 @@
 #define	MAP_ANON	MAP_ANONYMOUS
 #endif
 
+#ifndef GDK_ACTION_NONE
+#define GDK_ACTION_NONE static_cast<GdkDragAction>(0)
+#endif
+
 struct GqMouseButtonEvent
 {
 	guint button;
