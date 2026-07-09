@@ -916,7 +916,10 @@ static void view_get_monitor_size(GtkWidget *widget, gint *width, gint *height)
 		GdkSurface *surface = gtk_native_get_surface(GTK_NATIVE(native));
 		if (surface)
 			{
-			monitor = gdk_display_get_monitor_at_surface(display, surface);
+			if (GdkMonitor *surface_monitor = gdk_display_get_monitor_at_surface(display, surface))
+				{
+				monitor = static_cast<GdkMonitor *>(g_object_ref(surface_monitor));
+				}
 			}
 		}
 
@@ -927,6 +930,13 @@ static void view_get_monitor_size(GtkWidget *widget, gint *width, gint *height)
 			{
 			monitor = GDK_MONITOR(g_list_model_get_item(monitors, 0));
 			}
+		}
+
+	if (!monitor)
+		{
+		*width = 0;
+		*height = 0;
+		return;
 		}
 
 	GdkRectangle geometry;

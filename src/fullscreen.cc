@@ -363,15 +363,19 @@ GdkRectangle fullscreen_prefs_get_geometry( int screen_num, GtkWidget *widget, g
 		if (!dest_monitor)
 			{
 			dest_monitor = get_first_monitor(display);
-			}
-		if (!dest_monitor)
-			{
-			same_region = TRUE;
-			return geometry;
-			}
+			if (!dest_monitor)
+				{
+				same_region = TRUE;
+				return geometry;
+				}
 
-		gdk_monitor_get_geometry(dest_monitor, &geometry);
-		g_object_unref(dest_monitor);
+			gdk_monitor_get_geometry(dest_monitor, &geometry);
+			g_object_unref(dest_monitor);
+			}
+		else
+			{
+			gdk_monitor_get_geometry(dest_monitor, &geometry);
+			}
 		}
 
 	same_region = TRUE;
