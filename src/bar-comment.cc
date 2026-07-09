@@ -105,36 +105,23 @@ static void bar_pane_comment_update(PaneCommentData *pcd)
 }
 
 template<gboolean append>
-static void bar_pane_comment_set_selection(PaneCommentData *pcd)
+static void bar_pane_comment_set_selection_cb(GSimpleAction *, GVariant *, gpointer data)
 {
-	GList *work;
-
+	auto *pcd = static_cast<PaneCommentData *>(data);
 	g_autofree gchar *comment = text_widget_text_pull(pcd->comment_view);
 
 	g_autoptr(FileDataList) list = layout_selection_list(pcd->pane.lw);
 	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
 
-	const auto func = append ? metadata_append_string : metadata_write_string;
+	const auto metadata_func = append ? metadata_append_string : metadata_write_string;
 
-	work = list;
-	while (work)
+	for (GList *work = list; work; work = work->next)
 		{
-		auto fd = static_cast<FileData *>(work->data);
-		work = work->next;
+		auto *fd = static_cast<FileData *>(work->data);
 		if (fd == pcd->fd) continue;
 
-		func(fd, pcd->key, comment);
+		metadata_func(fd, pcd->key, comment);
 		}
-}
-
-static void bar_pane_comment_append_selection_cb(GSimpleAction *, GVariant *, gpointer data)
-{
-	bar_pane_comment_set_selection<TRUE>(static_cast<PaneCommentData *>(data));
-}
-
-static void bar_pane_comment_replace_selection_cb(GSimpleAction *, GVariant *, gpointer data)
-{
-	bar_pane_comment_set_selection<FALSE>(static_cast<PaneCommentData *>(data));
 }
 
 
@@ -232,8 +219,8 @@ static void bar_pane_comment_destroy(gpointer data)
 static void bar_pane_comment_set_extra_menu(PaneCommentData *pcd)
 {
 	static const GActionEntry comment_actions[] = {
-		{ "append-to-selection",  bar_pane_comment_append_selection_cb,  nullptr, nullptr, nullptr, {} },
-		{ "replace-in-selection", bar_pane_comment_replace_selection_cb, nullptr, nullptr, nullptr, {} },
+		{ "append-to-selection",  bar_pane_comment_set_selection_cb<TRUE>,  nullptr, nullptr, nullptr, {} },
+		{ "replace-in-selection", bar_pane_comment_set_selection_cb<FALSE>, nullptr, nullptr, nullptr, {} },
 	};
 
 	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
