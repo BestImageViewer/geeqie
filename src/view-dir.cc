@@ -906,7 +906,7 @@ static void vd_dnd_drop_read_cb(GObject *source_object, GAsyncResult *result, gp
 	GError *error = nullptr;
 	const gchar *mime_type = nullptr;
 	g_autoptr(GInputStream) stream = gdk_drop_read_finish(drop, result, &mime_type, &error);
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	if (stream && g_strcmp0(mime_type, "text/uri-list") == 0)
 		{

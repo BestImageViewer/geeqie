@@ -4692,7 +4692,7 @@ static void dupe_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
 	g_autofree auto *drop_data = static_cast<DupeDndDropData *>(data);
 	DupeWindow *dw = drop_data->dw;
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	if (dw->add_files_queue_id > 0)
 		{

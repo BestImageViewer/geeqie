@@ -966,7 +966,7 @@ static void layout_image_dnd_activate_split(LayoutWindow *lw, GtkWidget *widget)
 static void layout_image_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
 	auto *lw = static_cast<LayoutWindow *>(data);
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	if (list)
 		{
@@ -1008,7 +1008,7 @@ static void layout_image_dnd_file_received(GdkDrop *drop, GList *list, gpointer 
 static void layout_image_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data)
 {
 	auto *lw = static_cast<LayoutWindow *>(data);
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	if (text && download_web_file(text, FALSE, lw))
 		{

@@ -1923,7 +1923,7 @@ static void collection_table_dnd_file_received(GdkDrop *drop, GList *list, gpoin
 {
 	auto *drop_data = static_cast<CollectTableDropData *>(data);
 	auto *ct = drop_data->ct;
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	collection_table_scroll(ct, FALSE);
 

@@ -1356,7 +1356,7 @@ static void view_window_dnd_file_received(GdkDrop *drop, GList *list, gpointer d
 {
 	auto *vw = static_cast<ViewWindow *>(data);
 	ImageWindow *imd = vw->imd;
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	if (list)
 		{

@@ -383,7 +383,7 @@ static void vf_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data
 {
 	g_autofree auto *drop_data = static_cast<VfDndTextDropData *>(data);
 	ViewFile *vf = drop_data->vf;
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	if (text)
 		{

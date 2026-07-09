@@ -118,7 +118,7 @@ void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
 void bar_pane_gps_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
 	auto *pgd = static_cast<PaneGPSData *>(data);
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	gint count = 0;
 	gint geocoded_count = 0;
@@ -184,7 +184,7 @@ void bar_pane_gps_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 void bar_pane_gps_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data)
 {
 	auto *pgd = static_cast<PaneGPSData *>(data);
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	if (text)
 		{

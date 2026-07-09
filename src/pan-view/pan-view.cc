@@ -2181,7 +2181,7 @@ static GdkContentProvider *pan_window_dnd_prepare(GtkDragSource *, gdouble, gdou
 static void pan_window_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
 	auto *pw = static_cast<PanWindow *>(data);
-	GdkDragAction action = GDK_ACTION_NONE;
+	auto action = GDK_ACTION_NONE;
 
 	if (list && isdir((static_cast<FileData *>(list->data))->path))
 		{
