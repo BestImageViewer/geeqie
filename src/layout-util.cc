@@ -1334,6 +1334,14 @@ static void layout_menu_histogram_toggle_mode_cb(GSimpleAction *, GVariant *, gp
 	layout_util_sync_views(lw);
 }
 
+static gint histogram_mode_from_string(const gchar *value)
+{
+	if (g_str_equal(value, "linear")) return HMODE_LINEAR;
+	if (g_str_equal(value, "log")) return HMODE_LOG;
+
+	return -1;
+}
+
 static gint histogram_channel_from_string(const gchar *value)
 {
 	if (g_str_equal(value, "red")) return HCHAN_R;
@@ -1396,10 +1404,17 @@ static void layout_menu_histogram_channel_cb(GSimpleAction *action, GVariant *st
 	image_osd_histogram_set_channel(lw->image, channel);
 }
 
-static void layout_menu_histogram_mode_cb(GSimpleAction *, GVariant *, gpointer  )
+static void layout_menu_histogram_mode_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-/** @FIXME GTK4
- */
+	const gchar *value = g_variant_get_string(state, nullptr);
+	gint mode = histogram_mode_from_string(value);
+	if (mode < 0 || mode >= HMODE_COUNT) return;
+
+	auto lw = get_current_layout();
+
+	g_simple_action_set_state(action, g_variant_new_string(value));
+
+	image_osd_histogram_set_mode(lw->image, mode);
 }
 
 static void layout_menu_refresh_cb(GSimpleAction *, GVariant *, gpointer)
@@ -3522,9 +3537,6 @@ void layout_util_sync(LayoutWindow *lw)
 	layout_util_sync_views(lw);
 	layout_util_sync_thumb(lw);
 }
-
-/** @FIXME GTK4 menus
-*/
 
 /*
  *-----------------------------------------------------------------------------
