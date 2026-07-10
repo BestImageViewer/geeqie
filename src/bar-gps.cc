@@ -26,7 +26,6 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
-#include <pango/pango.h>
 #include <shumate/shumate.h>
 
 #include <config.h>
@@ -41,7 +40,6 @@
 #include "metadata.h"
 #include "misc.h"
 #include "rcfile.h"
-#include "thumb.h"
 #include "ui-menu.h"
 #include "ui-utildlg.h"
 #include "uri-utils.h"
@@ -49,7 +47,6 @@
 namespace
 {
 
-constexpr gint THUMB_SIZE = 100;
 constexpr gint DEFAULT_ZOOM = 7;
 constexpr const gchar *DEFAULT_MAP_ID = SHUMATE_MAP_SOURCE_OSM_MAPNIK;
 
@@ -238,105 +235,34 @@ void bar_pane_gps_dnd_init(gpointer data)
 	gtk_widget_add_controller(pgd->widget, GTK_EVENT_CONTROLLER(drop_target));
 }
 
-void bar_pane_gps_thumb_done_cb(ThumbLoader *tl, gpointer data)
-{
-	FileData *fd;
-	GtkImage *image;
-
-	image = GTK_IMAGE(data);
-	fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(image), "file_fd"));
-	if (fd && fd->thumb_pixbuf) gtk_image_set_from_pixbuf(image, fd->thumb_pixbuf);
-	thumb_loader_free(tl);
-}
-
-void bar_pane_gps_thumb_error_cb(ThumbLoader *tl, gpointer)
-{
-	thumb_loader_free(tl);
-}
-
-GtkWidget *bar_pane_gps_marker_child_new(FileData *fd)
-{
-	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-	GtkWidget *image = gtk_image_new();
-	GtkWidget *label = gtk_label_new("i");
-
-	gtk_widget_add_css_class(box, "map-marker");
-	gtk_widget_set_visible(image, FALSE);
-	gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
-
-	g_object_set_data(G_OBJECT(box), "file_fd", fd);
-	g_object_set_data(G_OBJECT(image), "file_fd", fd);
-	g_object_set_data(G_OBJECT(label), "short-label", label);
-	g_object_set_data(G_OBJECT(label), "thumb-image", image);
-
-	gtk_box_append(GTK_BOX(box), image);
-	gtk_box_append(GTK_BOX(box), label);
-
-	GtkGesture *click = gtk_gesture_click_new();
-	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(click), GDK_BUTTON_PRIMARY);
-	g_signal_connect(click, "pressed", G_CALLBACK(+[](GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer)
-	{
-		GtkWidget *child = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-		auto *fd = static_cast<FileData *>(g_object_get_data(G_OBJECT(child), "file_fd"));
-		GtkWidget *label = GTK_WIDGET(gtk_widget_get_last_child(child));
-		GtkWidget *image = GTK_WIDGET(gtk_widget_get_first_child(child));
-		const gchar *text = gtk_label_get_text(GTK_LABEL(label));
-
-		if (!fd) return;
-
-		if (g_strcmp0(text, "i") == 0)
-			{
-			if (fd->thumb_pixbuf)
-				{
-				gtk_image_set_from_pixbuf(GTK_IMAGE(image), fd->thumb_pixbuf);
-				gtk_widget_set_visible(image, TRUE);
-				}
-			else if (fd->pixbuf)
-				{
-				gint width = gdk_pixbuf_get_width(fd->pixbuf);
-				gint height = gdk_pixbuf_get_height(fd->pixbuf);
-				g_autoptr(GdkPixbuf) scaled = gdk_pixbuf_scale_simple(fd->pixbuf, THUMB_SIZE, height * THUMB_SIZE / width, GDK_INTERP_NEAREST);
-				gtk_image_set_from_pixbuf(GTK_IMAGE(image), scaled);
-				gtk_widget_set_visible(image, TRUE);
-				}
-			else
-				{
-				ThumbLoader *tl = thumb_loader_new(THUMB_SIZE, THUMB_SIZE);
-				thumb_loader_set_callbacks(tl, bar_pane_gps_thumb_done_cb, bar_pane_gps_thumb_error_cb, nullptr, image);
-				thumb_loader_start(tl, fd);
-				gtk_widget_set_visible(image, TRUE);
-				}
-
-			g_autoptr(GString) marker_text = g_string_new(fd->name);
-			g_string_append(marker_text, "\n");
-			g_string_append(marker_text, text_from_time(fd->date));
-
-			g_autofree gchar *altitude = metadata_read_string(fd, "formatted.GPSAltitude", METADATA_FORMATTED);
-			if (altitude)
-				{
-				g_string_append(marker_text, "\n");
-				g_string_append(marker_text, altitude);
-				}
-
-			gtk_label_set_text(GTK_LABEL(label), marker_text->str);
-			}
-		else
-			{
-			gtk_widget_set_visible(image, FALSE);
-			gtk_label_set_text(GTK_LABEL(label), "i");
-			}
-	}), nullptr);
-	gtk_widget_add_controller(box, GTK_EVENT_CONTROLLER(click));
-
-	return box;
-}
-
 void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, gdouble longitude)
 {
-	ShumateMarker *marker = shumate_marker_new();
+	(void)fd;
+	ShumateMarker *marker = shumate_point_new();
+
 	shumate_location_set_location(SHUMATE_LOCATION(marker), latitude, longitude);
-	shumate_marker_set_child(marker, bar_pane_gps_marker_child_new(fd));
 	shumate_marker_layer_add_marker(pgd->marker_layer, marker);
+}
+
+gboolean bar_pane_gps_add_file_marker(PaneGPSData *pgd, FileData *fd)
+{
+	if (!pgd || !fd) return FALSE;
+
+	const double lat = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 0);
+	const double lon = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 0);
+
+	if (lat == 0 && lon == 0)
+		{
+		return FALSE;
+		}
+
+	bar_pane_gps_add_marker(pgd, fd, lat, lon);
+	if (pgd->centre_map_checked && pgd->selection_count == 1)
+		{
+		shumate_map_center_on(shumate_simple_map_get_map(pgd->map), lat, lon);
+		}
+
+	return TRUE;
 }
 
 void bar_pane_gps_set_status(PaneGPSData *pgd)
@@ -378,17 +304,7 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 	pgd->not_added = work->next;
 	g_list_free_1(work);
 
-	double lat = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 0);
-	double lon = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 0);
-
-	if (lat != 0 || lon != 0)
-		{
-		bar_pane_gps_add_marker(pgd, fd, lat, lon);
-		if (pgd->centre_map_checked && pgd->selection_count == 1)
-			{
-			shumate_map_center_on(shumate_simple_map_get_map(pgd->map), lat, lon);
-			}
-		}
+	bar_pane_gps_add_file_marker(pgd, fd);
 
 	bar_pane_gps_set_status(pgd);
 
@@ -407,25 +323,19 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-void bar_pane_gps_update(PaneGPSData *pgd)
+void bar_pane_gps_update(PaneGPSData *pgd, gboolean use_selection)
 {
 	if (!pgd) return;
 
 	if (pgd->create_markers_id != 0)
 		{
-		if (g_idle_remove_by_data(pgd))
-			{
-			pgd->create_markers_id = 0;
-			}
-		else
-			{
-			return;
-			}
+		g_source_remove(pgd->create_markers_id);
+		pgd->create_markers_id = 0;
 		}
 
 	bar_pane_gps_clear_marker_queue(pgd);
 	file_data_list_free(pgd->selection_list);
-	pgd->selection_list = layout_selection_list(pgd->pane.lw);
+	pgd->selection_list = use_selection ? layout_selection_list(pgd->pane.lw) : nullptr;
 	if (!pgd->selection_list && pgd->fd)
 		{
 		pgd->selection_list = g_list_append(nullptr, file_data_ref(pgd->fd));
@@ -444,8 +354,16 @@ void bar_pane_gps_update(PaneGPSData *pgd)
 
 	if (pgd->selection_list)
 		{
-		pgd->not_added = g_list_copy(pgd->selection_list);
-		pgd->create_markers_id = g_idle_add(bar_pane_gps_create_markers_cb, pgd);
+		if (pgd->selection_count == 1)
+			{
+			auto *fd = static_cast<FileData *>(pgd->selection_list->data);
+			bar_pane_gps_add_file_marker(pgd, fd);
+			}
+		else
+			{
+			pgd->not_added = g_list_copy(pgd->selection_list);
+			pgd->create_markers_id = g_idle_add(bar_pane_gps_create_markers_cb, pgd);
+			}
 		}
 }
 
@@ -469,18 +387,19 @@ void bar_pane_gps_set_map_source(PaneGPSData *pgd, const gchar *map_id)
 	g_object_unref(registry);
 }
 
-void bar_pane_gps_enable_markers_checked_toggle_cb(GtkWidget *, gpointer data)
+void bar_pane_gps_enable_markers_checked_toggle_cb(GtkWidget *button, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 
-	pgd->enable_markers_checked = !pgd->enable_markers_checked;
+	pgd->enable_markers_checked = gtk_check_button_get_active(GTK_CHECK_BUTTON(button));
+	bar_pane_gps_update(pgd, pgd->selection_count > 1);
 }
 
-void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *, gpointer data)
+void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *button, gpointer data)
 {
 	auto pgd = static_cast<PaneGPSData *>(data);
 
-	pgd->centre_map_checked = !pgd->centre_map_checked;
+	pgd->centre_map_checked = gtk_check_button_get_active(GTK_CHECK_BUTTON(button));
 }
 
 void bar_pane_gps_notify_selection(GtkWidget *bar, gint count)
@@ -491,7 +410,7 @@ void bar_pane_gps_notify_selection(GtkWidget *bar, gint count)
 	pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
 	if (!pgd) return;
 
-	bar_pane_gps_update(pgd);
+	bar_pane_gps_update(pgd, count > 1);
 }
 
 void bar_pane_gps_set_fd(GtkWidget *bar, FileData *fd)
@@ -504,7 +423,7 @@ void bar_pane_gps_set_fd(GtkWidget *bar, FileData *fd)
 	file_data_unref(pgd->fd);
 	pgd->fd = file_data_ref(fd);
 
-	bar_pane_gps_update(pgd);
+	bar_pane_gps_update(pgd, FALSE);
 }
 
 gint bar_pane_gps_event(GtkWidget *bar, GdkEvent *event)
@@ -568,7 +487,7 @@ void bar_pane_gps_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) &&
 	    g_list_find(pgd->selection_list, fd))
 		{
-		bar_pane_gps_update(pgd);
+		bar_pane_gps_update(pgd, pgd->selection_count > 1);
 		}
 }
 
@@ -659,13 +578,13 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	gtk_box_append(GTK_BOX(status), progress);
 	gtk_box_append(GTK_BOX(vbox), status);
 
-	pgd->marker_layer = shumate_marker_layer_new(pgd->viewport);
-	shumate_simple_map_add_overlay_layer(pgd->map, SHUMATE_LAYER(pgd->marker_layer));
-
 	pgd->widget = frame;
 	pgd->progress = progress;
 
 	bar_pane_gps_set_map_source(pgd, map_id);
+
+	pgd->marker_layer = shumate_marker_layer_new(pgd->viewport);
+	shumate_simple_map_insert_overlay_layer_behind(pgd->map, SHUMATE_LAYER(pgd->marker_layer), nullptr);
 
 	shumate_viewport_set_zoom_level(pgd->viewport, zoom);
 	shumate_map_center_on(shumate_simple_map_get_map(pgd->map), latitude, longitude);
@@ -690,6 +609,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 		        GtkWidget *menu = bar_pane_gps_menu(pgd);
 		        popover_popup(menu);
 		    }), pgd);
+	gtk_widget_add_controller(GTK_WIDGET(pgd->map), GTK_EVENT_CONTROLLER(click));
 
 	bar_pane_gps_dnd_init(pgd);
 
