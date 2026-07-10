@@ -2848,16 +2848,11 @@ void layout_editors_reload_finish()
 		}
 }
 
-void layout_actions_add_window(LayoutWindow *, GtkWidget *)
+void layout_actions_add_window(LayoutWindow *lw, GtkWidget *window)
 {
-/** @FIXME GTK4
-	GtkAccelGroup *group;
+	GApplication *app = g_application_get_default();
 
-	if (!lw->ui_manager) return;
-
-	group = deprecated_gtk_ui_manager_get_accel_group(lw->ui_manager);
-	gtk_window_add_accel_group(GTK_WINDOW(window), group);
-*/
+	register_actions_from_table(GTK_APPLICATION(app), window, get_main_actions(), get_keyfile_merged(), lw);
 }
 
 GtkWidget *layout_actions_menu_bar(LayoutWindow *lw)
