@@ -176,6 +176,11 @@ void attach_accel_focus_handler(GtkApplication *app, GtkWidget *window)
 
 } // namespace
 
+void register_accels_for_action(GtkApplication *app, const char *detailed_action, GStrv accels)
+{
+	registered_accels_set(app, detailed_action, accels);
+}
+
 static GVariant *action_def_create_state(const ActionDef *d)
 {
 	switch (d->state_type)
