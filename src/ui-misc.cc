@@ -40,7 +40,6 @@
 #include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "misc.h"
 
 namespace
 {
@@ -920,44 +919,47 @@ gint pref_list_int_get(const gchar *group, const gchar *key, gint fallback)
 	return text ? static_cast<gint>(strtol(text, nullptr, 10)) : fallback;
 }
 
+static void color_button_rgba_cb(GtkColorDialogButton *button, GParamSpec *, gpointer user_data)
+{
+	auto *color = static_cast<GdkRGBA *>(user_data);
+
+	*color = *(gtk_color_dialog_button_get_rgba(button));
+}
+
 GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title, const GdkRGBA *color, GdkRGBA *result)
 {
-	GtkWidget *button;
+	GtkColorDialog *dialog = gtk_color_dialog_new();
+
+	GtkWidget *button = gtk_color_dialog_button_new(dialog);
 
 	if (color)
 		{
- 		button = gtk_color_button_new_with_rgba(color);
-		}
-	else
-		{
-		button = gtk_color_button_new();
+		gtk_color_dialog_button_set_rgba(GTK_COLOR_DIALOG_BUTTON(button), color);
 		}
 
 	if (result)
 		{
-		g_signal_connect(G_OBJECT(button), "color-set", G_CALLBACK(gtk_color_chooser_get_rgba), result);
+		g_signal_connect(G_OBJECT(button), "notify::rgba", G_CALLBACK(color_button_rgba_cb), result);
 		*result = *color;
 		}
 
 	if (title)
 		{
-		GtkWidget *label;
-		GtkWidget *hbox;
+		gtk_color_dialog_set_title(dialog, title);
 
-		gtk_color_button_set_title(GTK_COLOR_BUTTON(button), title);
-		label = gtk_label_new(title);
+		GtkWidget *label = gtk_label_new(title);
 
-		hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+		GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 		gq_gtk_box_pack_start(GTK_BOX(parent_box), hbox, TRUE, TRUE, 0);
 
 		gq_gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 		gq_gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 
-		gq_gtk_widget_show_all(hbox);
+		gtk_widget_set_visible(hbox, TRUE);
 		}
 	else
 		{
-		gtk_widget_show(button);
+		gtk_widget_set_visible(button, TRUE);
 		}
 
 	return button;
