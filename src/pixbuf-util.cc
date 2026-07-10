@@ -244,9 +244,11 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 	return icon_pixbuf;
 }
 
-static void register_stock_icon(const gchar *key, GdkPixbuf *pixbuf)
+static void register_stock_icon(const gchar *, GdkPixbuf *)
 {
-/* @FIXME GTK4 stub */
+/* GTK4 has no GtkIconFactory. Icons are resolved by name from GtkIconTheme.
+ * Built-in Geeqie icons are exposed by gtk_icon_theme_add_resource_path().
+ */
 }
 
 void pixbuf_inline_register_stock_icons()
