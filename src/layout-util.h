@@ -54,7 +54,6 @@ void layout_copy_path_update_all();
 
 void layout_editors_reload_start();
 void layout_editors_reload_finish();
-void layout_actions_setup(LayoutWindow *lw);
 void layout_actions_add_window(LayoutWindow *lw, GtkWidget *window);
 GtkWidget *layout_actions_menu_bar(LayoutWindow *lw);
 void layout_toolbar_add_from_config(LayoutWindow *lw, ToolbarType type, const gchar **attribute_names, const gchar **attribute_values);

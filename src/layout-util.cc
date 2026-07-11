@@ -2809,10 +2809,6 @@ static void layout_actions_editor_add(GString *desc, GList *path, GList *old_pat
 		g_string_append_printf(desc, "      <menuitem action='%s'/>", static_cast<gchar *>(path->data));
 }
 
-void layout_actions_setup(LayoutWindow *lw)
-{
-}
-
 static gboolean layout_editors_reload_idle_cb(gpointer user_data)
 {
 	auto *layout_editors = static_cast<LayoutEditors *>(user_data);
