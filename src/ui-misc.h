@@ -23,7 +23,6 @@
 #define UI_MISC_H
 
 #include <ctime>
-#include <vector>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -192,24 +191,6 @@ GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title,
 char *text_buffer_get_text(GtkTextBuffer *buffer, gboolean include_hidden_chars);
 gchar *text_widget_text_pull(GtkWidget *text_widget, gboolean include_hidden_chars = FALSE);
 gchar *text_widget_text_pull_selected(GtkWidget *text_widget);
-
-struct ActionItem
-{
-	ActionItem(const gchar *name, const gchar *label, const gchar *icon_name);
-	ActionItem(const ActionItem &other);
-	ActionItem(ActionItem &&other) noexcept;
-	~ActionItem();
-	ActionItem &operator=(const ActionItem &other);
-	ActionItem &operator=(ActionItem &&other) noexcept;
-
-	bool has_label(const gchar *label) const;
-
-	gchar *name = nullptr; /* GtkActionEntry terminology */
-	gchar *label = nullptr;
-	gchar *icon_name = nullptr;
-};
-
-std::vector<ActionItem> get_action_items();
 
 // Load a themed icon through the GTK4 icon theme API and return a copy as a pixbuf
 GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags);

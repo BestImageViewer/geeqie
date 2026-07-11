@@ -28,18 +28,14 @@
 #include <cstring>
 #include <optional>
 #include <string>
-#include <utility>
 
 #include <pango/pango.h>
 
 #include <config.h>
 
-#include "actions.h"
 #include "compat.h"
 #include "geometry.h"
 #include "history-list.h"
-#include "layout-util.h"
-#include "layout.h"
 #include "main-defines.h"
 
 namespace
@@ -998,142 +994,6 @@ gchar *text_widget_text_pull_selected(GtkWidget *text_widget)
 
 	return nullptr;
 	
-}
-
-ActionItem::ActionItem(const gchar *name, const gchar *label, const gchar *icon_name)
-    : name(g_strdup(name))
-    , label(g_strdup(label))
-    , icon_name(g_strdup(icon_name))
-{}
-
-ActionItem::ActionItem(const ActionItem &other)
-    : name(g_strdup(other.name))
-    , label(g_strdup(other.label))
-    , icon_name(g_strdup(other.icon_name))
-{}
-
-ActionItem::ActionItem(ActionItem &&other) noexcept
-    : name(std::exchange(other.name, nullptr))
-    , label(std::exchange(other.label, nullptr))
-    , icon_name(std::exchange(other.icon_name, nullptr))
-{}
-
-ActionItem::~ActionItem()
-{
-	g_free(name);
-	g_free(label);
-	g_free(icon_name);
-}
-
-ActionItem &ActionItem::operator=(const ActionItem &other)
-{
-	if (this != &other)
-		{
-		g_free(name);
-		name = g_strdup(other.name);
-
-		g_free(label);
-		label = g_strdup(other.label);
-
-		g_free(icon_name);
-		icon_name = g_strdup(other.icon_name);
-		}
-
-	return *this;
-}
-
-ActionItem &ActionItem::operator=(ActionItem &&other) noexcept
-{
-	if (this != &other)
-		{
-		g_free(name);
-		name = std::exchange(other.name, nullptr);
-
-		g_free(label);
-		label = std::exchange(other.label, nullptr);
-
-		g_free(icon_name);
-		icon_name = std::exchange(other.icon_name, nullptr);
-		}
-
-	return *this;
-}
-
-bool ActionItem::has_label(const gchar *label) const
-{
-	return g_strcmp0(this->label, label) == 0;
-}
-
-static gchar *get_action_label(gpointer, const gchar *action_name)
-{
-	const gchar *label = get_description_for_action_name(action_name);
-	if (label) return g_strdup(label);
-
-	if (!strchr(action_name, '.'))
-		{
-		g_autofree gchar *window_action_name = g_strdup_printf("win.%s", action_name);
-		label = get_description_for_action_name(window_action_name);
-		if (label) return g_strdup(label);
-
-		g_autofree gchar *app_action_name = g_strdup_printf("app.%s", action_name);
-		label = get_description_for_action_name(app_action_name);
-		if (label) return g_strdup(label);
-		}
-
-	return g_strdup(action_name);
-}
-
-static void action_to_list_duplicates(gpointer data, gpointer user_data)
-{
-	if (!G_IS_ACTION(data) || !user_data) return;
-
-	auto *list_duplicates = static_cast<std::vector<ActionItem> *>(user_data);
-	const gchar *action_name = g_action_get_name(G_ACTION(data));
-	g_autofree gchar *label = get_action_label(nullptr, action_name);
-	g_autofree gchar *window_action_name = g_strdup_printf("win.%s", action_name);
-	auto icon_name = get_icon_for_action_name(window_action_name);
-
-	list_duplicates->emplace_back(action_name, label, icon_name);
-}
-
-/**
- * @brief Get a list of menu actions
- * @param
- * @returns std::vector<ActionItem>
- *
- * The list generated is used in the --action-list command and
- * programmable mouse buttons 8 and 9.
- */
-std::vector<ActionItem> get_action_items()
-{
-	LayoutWindow *lw = get_current_layout();
-	if (!lw) return {};
-
-	std::vector<ActionItem> list_duplicates;
-	layout_actions_foreach(lw, action_to_list_duplicates, &list_duplicates);
-
-	/* Use the shortest name i.e. ignore -Alt versions. Sort makes the shortest first in the list */
-	const auto action_item_compare_names = [](const ActionItem &a, const ActionItem &b)
-	{
-		return g_strcmp0(a.name, b.name) < 0;
-	};
-	std::sort(list_duplicates.begin(), list_duplicates.end(), action_item_compare_names);
-
-	/* Ignore duplicate entries */
-	std::vector<ActionItem> list_unique;
-	for (const ActionItem &action_item : list_duplicates)
-		{
-		const auto action_item_has_label = [label = action_item.label](const ActionItem &action_item)
-		{
-			return action_item.has_label(label);
-		};
-		if (std::none_of(list_unique.cbegin(), list_unique.cend(), action_item_has_label))
-			{
-			list_unique.push_back(action_item);
-			}
-		}
-
-	return list_unique;
 }
 
 GdkPixbuf *gq_gtk_icon_theme_load_icon_copy(GtkIconTheme *icon_theme, const gchar *icon_name, gint size, GtkIconLookupFlags flags)

@@ -2841,9 +2841,9 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 	return g_object_ref(lw->menu_tool_bar);
 }
 
-void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data)
+void layout_actions_foreach(LayoutWindow *lw, const LayoutActionFunc &action_func)
 {
-	if (!lw || !lw->window || !func) return;
+	if (!lw || !lw->window || !action_func) return;
 
 	g_auto(GStrv) action_names = g_action_group_list_actions(G_ACTION_GROUP(lw->window));
 	for (guint i = 0; action_names && action_names[i]; i++)
@@ -2851,7 +2851,7 @@ void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data)
 		GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), action_names[i]);
 		if (!action) continue;
 
-		func(action, data);
+		action_func(action);
 		}
 }
 
