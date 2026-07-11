@@ -124,36 +124,28 @@ gboolean print_job_render_image(PrintWindow *pw)
 	return TRUE;
 }
 
-void font_activated_cb(GtkFontChooser *widget, gchar *fontname, [[maybe_unused]] gpointer option)
+void font_dialog_done(GObject *source, GAsyncResult *result, gpointer option)
 {
-	option = fontname;
-
-	gq_gtk_widget_destroy(GTK_WIDGET(widget));
-}
-
-void font_response_cb(GtkDialog *dialog, int response_id, gpointer option)
-{
-	if (response_id == GTK_RESPONSE_OK)
+	g_autoptr(PangoFontDescription) desc = gtk_font_dialog_choose_font_finish(GTK_FONT_DIALOG(source), result, nullptr);
+	if (desc)
 		{
 		g_free(option);
-		option = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(dialog));
+		option = pango_font_description_to_string(desc);
 		}
-
-	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
 template<const gchar *title>
 void print_set_font_cb(GtkWidget *widget, gpointer data)
 {
-	GtkWidget *dialog = gtk_font_chooser_dialog_new(title, GTK_WINDOW(widget_get_toplevel(widget)));
+	g_autoptr(GtkFontDialog) dialog = gtk_font_dialog_new();
+	gtk_font_dialog_set_title(dialog, title);
+	gtk_font_dialog_set_modal(dialog, TRUE);
 
-	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
-	gtk_font_chooser_set_font(GTK_FONT_CHOOSER(dialog), static_cast<const gchar *>(data));
+	const auto *font = static_cast<const char *>(data);
+	g_autoptr(PangoFontDescription) desc = pango_font_description_from_string(font);
 
-	g_signal_connect(dialog, "font-activated", G_CALLBACK(font_activated_cb), data);
-	g_signal_connect(dialog, "response", G_CALLBACK(font_response_cb), data);
-
-	gtk_widget_show(dialog);
+	gtk_font_dialog_choose_font(dialog, GTK_WINDOW(widget_get_toplevel(widget)),
+	                            desc, nullptr, font_dialog_done, data);
 }
 
 gint set_toggle(const std::array<GtkWidget *, 4> &group, TextPosition pos)
