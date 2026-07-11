@@ -2979,29 +2979,6 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 		}
 }
 
-static void action_radio_changed_cb(gpointer action, gpointer current, gpointer data)
-{
-	/* Temporary GTK4 stub: old GtkRadioAction state sync is gone. */
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data), action == current);
-}
-
-static void action_toggle_activate_cb(gpointer, gpointer data)
-{
-	/* Temporary GTK4 stub: legacy GtkToggleAction callback path is disabled until ported. */
-	(void)data;
-}
-
-static gboolean toolbar_button_press_event_cb(GtkWidget *, GdkEvent *, gpointer data)
-{
-	/* Temporary GTK4 bridge: activate modern GAction objects only. */
-	if (G_IS_ACTION(data))
-		{
-		g_action_activate(G_ACTION(data), nullptr);
-		}
-
-	return TRUE;
-}
-
 void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_name)
 {
 	const gchar *tooltip_text = nullptr;
