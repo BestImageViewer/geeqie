@@ -293,7 +293,7 @@ static void bookmark_move(BookMarkData *bm, GtkWidget *button, gint direction)
 	gq_gtk_box_reorder_child(GTK_BOX(bm->box), button, p + direction);
 }
 
-static void bookmark_menu_prop_cb(GtkWidget *widget, gpointer data)
+static void bookmark_menu_prop_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto bm = static_cast<BookMarkData *>(data);
 
@@ -302,11 +302,11 @@ static void bookmark_menu_prop_cb(GtkWidget *widget, gpointer data)
 	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(bm->active_button), "bookbuttondata"));
 	if (!b) return;
 
-	bookmark_edit(bm->key, b, widget);
+	bookmark_edit(bm->key, b, bm->active_button);
 }
 
 template<gint direction>
-static void bookmark_menu_move_cb(GtkWidget *, gpointer data)
+static void bookmark_menu_move_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *bm = static_cast<BookMarkData *>(data);
 
@@ -315,7 +315,7 @@ static void bookmark_menu_move_cb(GtkWidget *, gpointer data)
 	bookmark_move(bm, bm->active_button, direction);
 }
 
-static void bookmark_menu_remove_cb(GtkWidget *, gpointer data)
+static void bookmark_menu_remove_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto bm = static_cast<BookMarkData *>(data);
 
@@ -328,30 +328,51 @@ static void bookmark_menu_remove_cb(GtkWidget *, gpointer data)
 	bookmark_populate_all(bm->key);
 }
 
-static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button, bool local)
+static void bookmark_menu_append_item(GMenu *menu, const gchar *label, const gchar *icon_name, const gchar *action_name)
 {
-	GtkWidget *menu;
+	g_autoptr(GMenuItem) item = g_menu_item_new(label, action_name);
+	g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
+
+	g_menu_item_set_icon(item, icon);
+	g_menu_append_item(menu, item);
+}
+
+static void bookmark_menu_popup(BookMarkData *bm, GtkWidget *button)
+{
+	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
+	g_autoptr(GMenu) menu = g_menu_new();
 
 	bm->active_button = button;
 
-	menu = popover_box_new(button);
-	popover_item_add_icon_sensitive(menu, _("_Properties…"), PIXBUF_INLINE_ICON_PROPERTIES, bm->editable,
-		      G_CALLBACK(bookmark_menu_prop_cb), bm);
-	popover_item_add_icon_sensitive(menu, _("Move _up"), GQ_ICON_GO_UP, bm->editable,
-	                             G_CALLBACK(bookmark_menu_move_cb<-1>), bm);
-	popover_item_add_icon_sensitive(menu, _("Move _down"), GQ_ICON_GO_DOWN, bm->editable,
-	                             G_CALLBACK(bookmark_menu_move_cb<1>), bm);
-	popover_item_add_icon_sensitive(menu, _("_Remove"), GQ_ICON_REMOVE, bm->editable,
-		      G_CALLBACK(bookmark_menu_remove_cb), bm);
+	g_autoptr(GSimpleAction) properties_action = g_simple_action_new("properties", nullptr);
+	g_autoptr(GSimpleAction) move_up_action = g_simple_action_new("move-up", nullptr);
+	g_autoptr(GSimpleAction) move_down_action = g_simple_action_new("move-down", nullptr);
+	g_autoptr(GSimpleAction) remove_action = g_simple_action_new("remove", nullptr);
 
-	if (local)
+	for (GSimpleAction *action : {properties_action, move_up_action, move_down_action, remove_action})
 		{
-		(void)button;
+		g_simple_action_set_enabled(action, bm->editable);
 		}
-	else
-		{
-		(void)menu;
-		}
+
+	g_signal_connect(properties_action, "activate", G_CALLBACK(bookmark_menu_prop_cb), bm);
+	g_signal_connect(move_up_action, "activate", G_CALLBACK(bookmark_menu_move_cb<-1>), bm);
+	g_signal_connect(move_down_action, "activate", G_CALLBACK(bookmark_menu_move_cb<1>), bm);
+	g_signal_connect(remove_action, "activate", G_CALLBACK(bookmark_menu_remove_cb), bm);
+
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(properties_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(move_up_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(move_down_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(remove_action));
+
+	bookmark_menu_append_item(menu, _("_Properties…"), PIXBUF_INLINE_ICON_PROPERTIES, "bookmark.properties");
+	bookmark_menu_append_item(menu, _("Move _up"), GQ_ICON_GO_UP, "bookmark.move-up");
+	bookmark_menu_append_item(menu, _("Move _down"), GQ_ICON_GO_DOWN, "bookmark.move-down");
+	bookmark_menu_append_item(menu, _("_Remove"), GQ_ICON_REMOVE, "bookmark.remove");
+
+	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu));
+	gtk_widget_insert_action_group(popover, "bookmark", G_ACTION_GROUP(action_group));
+	popover_set_parent(popover, button);
+	popover_popup(popover);
 }
 
 static gboolean bookmark_press_common(GtkWidget *button, guint button_id, gpointer data)
@@ -360,7 +381,7 @@ static gboolean bookmark_press_common(GtkWidget *button, guint button_id, gpoint
 
 	if (button_id != GDK_BUTTON_SECONDARY) return FALSE;
 
-	bookmark_menu_popup(bm, button, false);
+	bookmark_menu_popup(bm, button);
 
 	return TRUE;
 }
@@ -382,7 +403,7 @@ static gboolean bookmark_keypress_cb(GtkEventControllerKey *controller, guint ke
 			if (!(state & GDK_CONTROL_MASK)) return FALSE;
 			/* fall through */
 		case GDK_KEY_Menu:
-			bookmark_menu_popup(bm, button, true);
+			bookmark_menu_popup(bm, button);
 			return TRUE;
 			break;
 		case GDK_KEY_Up:
