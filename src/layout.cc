@@ -612,54 +612,84 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
  *-----------------------------------------------------------------------------
  */
 
-static void layout_sort_menu_cb(GtkWidget *widget, gpointer data)
+static void layout_sort_method_change_state_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
-
 	auto *lw = static_cast<LayoutWindow *>(data);
 	if (!lw) return;
 
 	auto sort = lw->options.file_view_list_sort;
-	sort.method = static_cast<SortType>(GPOINTER_TO_INT(popover_item_radio_get_data(widget)));
+	sort.method = static_cast<SortType>(g_variant_get_int32(state));
 
 	if (sort_type_requires_metadata(sort.method))
 		{
 		vf_read_metadata_in_idle(lw->vf);
 		}
+	g_simple_action_set_state(action, state);
 	layout_sort_set_files(lw, sort);
 }
 
-static void layout_sort_menu_ascend_cb(GtkWidget *, gpointer data)
+static void layout_sort_ascending_change_state_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
+	if (!lw) return;
 
 	auto sort = lw->options.file_view_list_sort;
-	sort.ascending = !sort.ascending;
+	sort.ascending = g_variant_get_boolean(state);
 
+	g_simple_action_set_state(action, state);
 	layout_sort_set_files(lw, sort);
 }
 
-static void layout_sort_menu_case_cb(GtkWidget *, gpointer data)
+static void layout_sort_case_change_state_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
+	if (!lw) return;
 
 	auto sort = lw->options.file_view_list_sort;
-	sort.case_sensitive = !sort.case_sensitive;
+	sort.case_sensitive = g_variant_get_boolean(state);
 
+	g_simple_action_set_state(action, state);
 	layout_sort_set_files(lw, sort);
+}
+
+static void layout_sort_popover_append_method_item(GMenu *menu, SortType sort_type)
+{
+	g_autoptr(GMenuItem) item = g_menu_item_new(sort_type_get_text(sort_type), "sort.method");
+	g_menu_item_set_attribute(item, G_MENU_ATTRIBUTE_TARGET, "i", sort_type);
+	g_menu_append_item(menu, item);
 }
 
 static GtkWidget *layout_sort_popover_new(LayoutWindow *lw)
 {
-	GtkWidget *menu = submenu_add_sort(nullptr, G_CALLBACK(layout_sort_menu_cb), lw, TRUE, lw->options.file_view_list_sort.method);
-	GtkWidget *popover = gtk_popover_new();
-	gtk_popover_set_child(GTK_POPOVER(popover), menu);
+	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
+	g_autoptr(GSimpleAction) method_action = g_simple_action_new_stateful("method", G_VARIANT_TYPE_INT32, g_variant_new_int32(lw->options.file_view_list_sort.method));
+	g_autoptr(GSimpleAction) ascending_action = g_simple_action_new_stateful("ascending", nullptr, g_variant_new_boolean(lw->options.file_view_list_sort.ascending));
+	g_autoptr(GSimpleAction) case_action = g_simple_action_new_stateful("case", nullptr, g_variant_new_boolean(lw->options.file_view_list_sort.case_sensitive));
 
-	/* ascending option */
-	popover_item_add_divider(menu);
-	popover_item_add_check(menu, _("Ascending"), lw->options.file_view_list_sort.ascending, G_CALLBACK(layout_sort_menu_ascend_cb), lw);
-	popover_item_add_check(menu, _("Case"), lw->options.file_view_list_sort.case_sensitive, G_CALLBACK(layout_sort_menu_case_cb), lw);
+	g_signal_connect(method_action, "change-state", G_CALLBACK(layout_sort_method_change_state_cb), lw);
+	g_signal_connect(ascending_action, "change-state", G_CALLBACK(layout_sort_ascending_change_state_cb), lw);
+	g_signal_connect(case_action, "change-state", G_CALLBACK(layout_sort_case_change_state_cb), lw);
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(method_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(ascending_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(case_action));
 
+	g_autoptr(GMenu) menu = g_menu_new();
+	g_autoptr(GMenu) sort_section = g_menu_new();
+	g_autoptr(GMenu) options_section = g_menu_new();
+
+	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
+	                                  SORT_EXIFTIMEDIGITIZED, SORT_SIZE, SORT_RATING, SORT_CLASS })
+		{
+		layout_sort_popover_append_method_item(sort_section, sort_type);
+		}
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(sort_section));
+
+	g_menu_append(options_section, _("Ascending"), "sort.ascending");
+	g_menu_append(options_section, _("Case"), "sort.case");
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(options_section));
+
+	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu));
+	gtk_widget_insert_action_group(popover, "sort", G_ACTION_GROUP(action_group));
 	return popover;
 }
 
