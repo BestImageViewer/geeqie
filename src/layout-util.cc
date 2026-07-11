@@ -144,20 +144,6 @@ static void layout_search_and_run_window_new(LayoutWindow *lw);
  *-----------------------------------------------------------------------------
  */
 
-static guint tree_key_overrides[] = {
-	GDK_KEY_Page_Up,	GDK_KEY_KP_Page_Up,
-	GDK_KEY_Page_Down,	GDK_KEY_KP_Page_Down,
-	GDK_KEY_Home,	GDK_KEY_KP_Home,
-	GDK_KEY_End,	GDK_KEY_KP_End
-};
-
-static gboolean layout_key_match(guint keyval)
-{
-	const auto it = std::find(std::cbegin(tree_key_overrides), std::cend(tree_key_overrides), keyval);
-
-	return it != std::cend(tree_key_overrides);
-}
-
 void keyboard_scroll_calc(gint &x, gint &y, GdkModifierType state, guint keyval, guint32 time)
 {
 	static gint delta = 0;
@@ -545,15 +531,6 @@ void layout_menu_close_cb(GSimpleAction *, GVariant *, gpointer)
 
 	layout_exit_fullscreen(lw);
 	layout_close(lw);
-}
-
-static void layout_return_cb(GSimpleAction *, GVariant *, gpointer)
-{
-	auto lw = get_current_layout();
-
-	layout_exit_fullscreen(lw);
-
-		layout_close(lw);
 }
 
 static void layout_menu_exit_cb(GSimpleAction *, GVariant *, gpointer)
