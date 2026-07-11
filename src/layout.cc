@@ -698,21 +698,6 @@ namespace
 
 constexpr auto INFO_BUTTON_LABEL_KEY = "gq-info-button-label";
 
-GtkWidget *layout_info_button_new(const gchar *label_text, const gchar *icon_name)
-{
-	GtkWidget *button = gtk_button_new();
-	GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-	GtkWidget *label = gtk_label_new(label_text);
-	GtkWidget *image = gtk_image_new_from_icon_name(icon_name);
-
-	gtk_box_append(GTK_BOX(content), label);
-	gtk_box_append(GTK_BOX(content), image);
-	gtk_button_set_child(GTK_BUTTON(button), content);
-	g_object_set_data(G_OBJECT(button), INFO_BUTTON_LABEL_KEY, label);
-
-	return button;
-}
-
 GtkWidget *layout_info_menu_button_new(const gchar *label_text, const gchar *icon_name)
 {
 	GtkWidget *button = gtk_menu_button_new();
@@ -757,53 +742,60 @@ static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 	return button;
 }
 
-template<ZoomMode mode>
-static void layout_zoom_menu_cb(GtkWidget *widget, gpointer)
+static void layout_zoom_mode_change_state_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
-
-	options->image.zoom_mode = mode;
+	options->image.zoom_mode = static_cast<ZoomMode>(g_variant_get_int32(state));
+	g_simple_action_set_state(action, state);
 }
 
-template<ScrollReset scroll_reset_method>
-static void layout_scroll_menu_cb(GtkWidget *widget, gpointer)
+static void layout_scroll_reset_change_state_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
-	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
-
-	options->image.scroll_reset_method = scroll_reset_method;
+	options->image.scroll_reset_method = static_cast<ScrollReset>(g_variant_get_int32(state));
+	g_simple_action_set_state(action, state);
 	image_options_sync();
 }
 
-static void layout_zoom_button_press_cb(GtkWidget *widget, gpointer)
+static void layout_zoom_popover_append_item(GMenu *menu, const gchar *label, const gchar *action_name, gint target)
 {
-	GtkWidget *menu = popover_box_new(widget);
-
-	popover_item_add_radio(menu, _("Zoom to original size"), nullptr,
-	                    options->image.zoom_mode == ZOOM_RESET_ORIGINAL,
-	                    G_CALLBACK(layout_zoom_menu_cb<ZOOM_RESET_ORIGINAL>), nullptr);
-	popover_item_add_radio(menu, _("Fit image to window"), nullptr,
-	                    options->image.zoom_mode == ZOOM_RESET_FIT_WINDOW,
-	                    G_CALLBACK(layout_zoom_menu_cb<ZOOM_RESET_FIT_WINDOW>), nullptr);
-	popover_item_add_radio(menu, _("Leave Zoom at previous setting"), nullptr,
-	                    options->image.zoom_mode == ZOOM_RESET_NONE,
-	                    G_CALLBACK(layout_zoom_menu_cb<ZOOM_RESET_NONE>), nullptr);
-
-	popover_item_add_divider(menu);
-
-	popover_item_add_radio(menu, _("Scroll to top left corner"), nullptr,
-	                    options->image.scroll_reset_method == ScrollReset::TOPLEFT,
-	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::TOPLEFT>), nullptr);
-	popover_item_add_radio(menu, _("Scroll to image center"), nullptr,
-	                    options->image.scroll_reset_method == ScrollReset::CENTER,
-	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::CENTER>), nullptr);
-	popover_item_add_radio(menu, _("Keep the region from previous image"), nullptr,
-	                    options->image.scroll_reset_method == ScrollReset::NOCHANGE,
-	                    G_CALLBACK(layout_scroll_menu_cb<ScrollReset::NOCHANGE>), nullptr);
-
-	(void)menu;
+	g_autoptr(GMenuItem) item = g_menu_item_new(label, action_name);
+	g_menu_item_set_attribute(item, G_MENU_ATTRIBUTE_TARGET, "i", target);
+	g_menu_append_item(menu, item);
 }
 
-static GtkWidget *layout_zoom_button(LayoutWindow *lw, GtkWidget *box, gint size, gboolean)
+static GtkWidget *layout_zoom_popover_new()
+{
+	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
+	g_autoptr(GSimpleAction) zoom_action = g_simple_action_new_stateful("mode", G_VARIANT_TYPE_INT32,
+	                                                                    g_variant_new_int32(options->image.zoom_mode));
+	g_autoptr(GSimpleAction) scroll_action = g_simple_action_new_stateful("scroll-reset", G_VARIANT_TYPE_INT32,
+	                                                                      g_variant_new_int32(options->image.scroll_reset_method));
+
+	g_signal_connect(zoom_action, "change-state", G_CALLBACK(layout_zoom_mode_change_state_cb), nullptr);
+	g_signal_connect(scroll_action, "change-state", G_CALLBACK(layout_scroll_reset_change_state_cb), nullptr);
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(zoom_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(scroll_action));
+
+	g_autoptr(GMenu) menu = g_menu_new();
+	g_autoptr(GMenu) zoom_section = g_menu_new();
+	g_autoptr(GMenu) scroll_section = g_menu_new();
+
+	layout_zoom_popover_append_item(zoom_section, _("Zoom to original size"), "zoom.mode", static_cast<gint>(ZOOM_RESET_ORIGINAL));
+	layout_zoom_popover_append_item(zoom_section, _("Fit image to window"), "zoom.mode", static_cast<gint>(ZOOM_RESET_FIT_WINDOW));
+	layout_zoom_popover_append_item(zoom_section, _("Leave Zoom at previous setting"), "zoom.mode", static_cast<gint>(ZOOM_RESET_NONE));
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(zoom_section));
+
+	layout_zoom_popover_append_item(scroll_section, _("Scroll to top left corner"), "zoom.scroll-reset", static_cast<gint>(ScrollReset::TOPLEFT));
+	layout_zoom_popover_append_item(scroll_section, _("Scroll to image center"), "zoom.scroll-reset", static_cast<gint>(ScrollReset::CENTER));
+	layout_zoom_popover_append_item(scroll_section, _("Keep the region from previous image"), "zoom.scroll-reset", static_cast<gint>(ScrollReset::NOCHANGE));
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(scroll_section));
+
+	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu));
+	gtk_widget_insert_action_group(popover, "zoom", G_ACTION_GROUP(action_group));
+
+	return popover;
+}
+
+static GtkWidget *layout_zoom_button(LayoutWindow *, GtkWidget *box, gint size, gboolean)
 {
 	GtkWidget *button;
 
@@ -816,11 +808,10 @@ static GtkWidget *layout_zoom_button(LayoutWindow *lw, GtkWidget *box, gint size
 
 	gtk_widget_show(frame);
 
-	button = layout_info_button_new("1:1", GQ_ICON_PAN_DOWN);
+	button = layout_info_menu_button_new("1:1", GQ_ICON_PAN_DOWN);
 
-	g_signal_connect(G_OBJECT(button), "clicked",
-			 G_CALLBACK(layout_zoom_button_press_cb), lw);
 	gtk_widget_add_css_class(button, "flat");
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(button), layout_zoom_popover_new());
 
 	gq_gtk_container_add(frame, button);
 	gtk_widget_show(button);
