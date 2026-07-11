@@ -298,7 +298,7 @@ void vd_popup_destroy_cb(GtkWidget *, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-static void vd_drop_menu_copy_cb(GtkWidget *, gpointer data)
+static void vd_drop_menu_copy_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 	const gchar *path;
@@ -313,7 +313,7 @@ static void vd_drop_menu_copy_cb(GtkWidget *, gpointer data)
 	file_util_copy_simple(list, path, vd->widget);
 }
 
-static void vd_drop_menu_move_cb(GtkWidget *, gpointer data)
+static void vd_drop_menu_move_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 	const gchar *path;
@@ -329,51 +329,84 @@ static void vd_drop_menu_move_cb(GtkWidget *, gpointer data)
 	file_util_move_simple(list, path, vd->widget);
 }
 
-static void vd_drop_menu_filter_cb(GtkWidget *widget, gpointer data)
+static void vd_drop_menu_filter_cb(GSimpleAction *, GVariant *parameter, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 	const gchar *path;
 	GList *list;
-	const gchar *key;
 
 	if (!vd->drop_fd) return;
-
-	key = static_cast<const gchar *>(g_object_get_data(G_OBJECT(widget), "filter_key"));
 
 	path = vd->drop_fd->path;
 	list = vd->drop_list;
 
 	vd->drop_list = nullptr;
 
-	file_util_start_filter_from_filelist(key, list, path, vd->widget);
+	file_util_start_filter_from_filelist(g_variant_get_string(parameter, nullptr), list, path, vd->widget);
+}
+
+static void vd_drop_menu_append_item(GMenu *menu, const gchar *label, const gchar *icon_name, const gchar *action_name)
+{
+	g_autoptr(GMenuItem) item = g_menu_item_new(label, action_name);
+
+	if (icon_name)
+		{
+		g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
+		g_menu_item_set_icon(item, icon);
+		}
+
+	g_menu_append_item(menu, item);
 }
 
 GtkWidget *vd_drop_menu(ViewDir *vd, gint active)
 {
-	GtkWidget *menu;
+	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
+	g_autoptr(GMenu) menu = g_menu_new();
+	g_autoptr(GMenu) transfer_section = g_menu_new();
+	g_autoptr(GMenu) filter_section = g_menu_new();
+	g_autoptr(GMenu) cancel_section = g_menu_new();
 
-	menu = popover_box_new(vd->widget);
-	g_signal_connect(G_OBJECT(menu), "destroy",
-			 G_CALLBACK(vd_popup_destroy_cb), vd);
+	g_autoptr(GSimpleAction) copy_action = g_simple_action_new("copy", nullptr);
+	g_autoptr(GSimpleAction) move_action = g_simple_action_new("move", nullptr);
+	g_autoptr(GSimpleAction) filter_action = g_simple_action_new("filter", G_VARIANT_TYPE_STRING);
 
-	popover_item_add_icon_sensitive(menu, _("_Copy"), GQ_ICON_COPY, active,
-				      G_CALLBACK(vd_drop_menu_copy_cb), vd);
-	popover_item_add_sensitive(menu, _("_Move"), active, G_CALLBACK(vd_drop_menu_move_cb), vd);
+	g_simple_action_set_enabled(copy_action, active);
+	g_simple_action_set_enabled(move_action, active);
+	g_simple_action_set_enabled(filter_action, active);
+
+	g_signal_connect(copy_action, "activate", G_CALLBACK(vd_drop_menu_copy_cb), vd);
+	g_signal_connect(move_action, "activate", G_CALLBACK(vd_drop_menu_move_cb), vd);
+	g_signal_connect(filter_action, "activate", G_CALLBACK(vd_drop_menu_filter_cb), vd);
+
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(copy_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(move_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(filter_action));
+
+	vd_drop_menu_append_item(transfer_section, _("_Copy"), GQ_ICON_COPY, "dir-drop.copy");
+	vd_drop_menu_append_item(transfer_section, _("_Move"), nullptr, "dir-drop.move");
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(transfer_section));
 
 	EditorsList editors_list = editor_list_get();
 	for (const EditorDescription *editor : editors_list)
 		{
 		if (!editor_is_filter(editor->key)) continue;
 
-		GtkWidget *item = popover_item_add_sensitive(menu, editor->name, active,
-		                                          G_CALLBACK(vd_drop_menu_filter_cb), vd);
-		g_object_set_data_full(G_OBJECT(item), "filter_key", g_strdup(editor->key), g_free);
+		g_autoptr(GMenuItem) item = g_menu_item_new(editor->name, "dir-drop.filter");
+		g_menu_item_set_attribute(item, G_MENU_ATTRIBUTE_TARGET, "s", editor->key);
+		g_menu_append_item(filter_section, item);
 		}
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(filter_section));
 
-	popover_item_add_divider(menu);
-	popover_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, nullptr, vd);
+	vd_drop_menu_append_item(cancel_section, _("Cancel"), GQ_ICON_CANCEL, nullptr);
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(cancel_section));
 
-	return menu;
+	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu));
+	gtk_widget_insert_action_group(popover, "dir-drop", G_ACTION_GROUP(action_group));
+	popover_set_parent(popover, vd->widget);
+	g_signal_connect(G_OBJECT(popover), "destroy", G_CALLBACK(vd_popup_destroy_cb), vd);
+	popover_popup(popover);
+
+	return popover;
 }
 
 /*
