@@ -1663,65 +1663,6 @@ static void collection_table_insert_filelist(CollectTable *ct, GList *list, Coll
 	collection_table_sync_idle(ct);
 }
 
-static void collection_table_move_by_info_list(CollectTable *ct, GList *info_list, gint row, gint col)
-{
-	GList *work;
-	GList *insert_pos = nullptr;
-	GList *temp;
-	CollectInfo *info;
-
-	if (!info_list) return;
-
-	info = collection_table_find_data(ct, row, col, nullptr);
-
-	if (!info_list->next && info_list->data == info) return;
-
-	if (info) insert_pos = g_list_find(ct->cd->list, info);
-
-	/** @FIXME this may get slow for large lists */
-	work = info_list;
-	while (insert_pos && work)
-		{
-		if (insert_pos->data == work->data)
-			{
-			insert_pos = insert_pos->next;
-			work = info_list;
-			}
-		else
-			{
-			work = work->next;
-			}
-		}
-
-	work = info_list;
-	while (work)
-		{
-		ct->cd->list = g_list_remove(ct->cd->list, work->data);
-		work = work->next;
-		}
-
-	/* place them back in */
-	temp = g_list_copy(info_list);
-
-	if (insert_pos)
-		{
-		ct->cd->list = uig_list_insert_list(ct->cd->list, insert_pos, temp);
-		}
-	else if (info)
-		{
-		ct->cd->list = g_list_concat(temp, ct->cd->list);
-		}
-	else
-		{
-		ct->cd->list = g_list_concat(ct->cd->list, temp);
-		}
-
-	ct->cd->changed = TRUE;
-
-	collection_table_sync_idle(ct);
-}
-
-
 /*
  *-------------------------------------------------------------------
  * updating
@@ -1825,7 +1766,7 @@ static void collection_table_add_dir_recursive(CollectTable *ct, FileData *dir_f
 }
 
 template<gboolean recursive>
-static void confirm_dir_list_add(GtkWidget *, gpointer data)
+static void confirm_dir_list_add(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *ct = static_cast<CollectTable *>(data);
 
@@ -1839,33 +1780,70 @@ static void confirm_dir_list_add(GtkWidget *, gpointer data)
 	collection_table_insert_filelist(ct, ct->drop_list, ct->marker_info);
 }
 
-static void confirm_dir_list_skip(GtkWidget *, gpointer data)
+static void confirm_dir_list_skip(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
 	collection_table_insert_filelist(ct, ct->drop_list, ct->marker_info);
 }
 
+static void collection_table_drop_menu_append_item(GMenu *menu, const gchar *label, const gchar *icon_name, const gchar *action_name)
+{
+	g_autoptr(GMenuItem) item = g_menu_item_new(label, action_name);
+
+	if (icon_name)
+		{
+		g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
+		g_menu_item_set_icon(item, icon);
+		}
+
+	g_menu_append_item(menu, item);
+}
+
 static GtkWidget *collection_table_drop_menu(CollectTable *ct)
 {
-	GtkWidget *menu;
+	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
+	g_autoptr(GMenu) menu = g_menu_new();
+	g_autoptr(GMenu) info_section = g_menu_new();
+	g_autoptr(GMenu) choice_section = g_menu_new();
+	g_autoptr(GMenu) cancel_section = g_menu_new();
 
-	menu = popover_box_new();
-	g_signal_connect(G_OBJECT(menu), "destroy",
-			 G_CALLBACK(collection_table_popup_destroy_cb), ct);
+	g_autoptr(GSimpleAction) info_action = g_simple_action_new("info", nullptr);
+	g_autoptr(GSimpleAction) add_action = g_simple_action_new("add", nullptr);
+	g_autoptr(GSimpleAction) add_recursive_action = g_simple_action_new("add-recursive", nullptr);
+	g_autoptr(GSimpleAction) skip_action = g_simple_action_new("skip", nullptr);
+	g_autoptr(GSimpleAction) cancel_action = g_simple_action_new("cancel", nullptr);
 
-	popover_item_add_icon(menu, _("Dropped list includes folders."), GQ_ICON_DIRECTORY, nullptr, nullptr);
-	popover_item_add_divider(menu);
-	popover_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK,
-	                   G_CALLBACK(confirm_dir_list_add<FALSE>), ct);
-	popover_item_add_icon(menu, _("Add contents _recursive"), GQ_ICON_ADD,
-	                   G_CALLBACK(confirm_dir_list_add<TRUE>), ct);
-	popover_item_add_icon(menu, _("_Skip folders"), GQ_ICON_REMOVE,
-	                   G_CALLBACK(confirm_dir_list_skip), ct);
-	popover_item_add_divider(menu);
-	popover_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, nullptr, ct);
+	g_simple_action_set_enabled(info_action, FALSE);
 
-	return menu;
+	g_signal_connect(add_action, "activate", G_CALLBACK(confirm_dir_list_add<FALSE>), ct);
+	g_signal_connect(add_recursive_action, "activate", G_CALLBACK(confirm_dir_list_add<TRUE>), ct);
+	g_signal_connect(skip_action, "activate", G_CALLBACK(confirm_dir_list_skip), ct);
+
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(info_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(add_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(add_recursive_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(skip_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(cancel_action));
+
+	collection_table_drop_menu_append_item(info_section, _("Dropped list includes folders."), GQ_ICON_DIRECTORY, "collection-drop.info");
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(info_section));
+
+	collection_table_drop_menu_append_item(choice_section, _("_Add contents"), GQ_ICON_OK, "collection-drop.add");
+	collection_table_drop_menu_append_item(choice_section, _("Add contents _recursive"), GQ_ICON_ADD, "collection-drop.add-recursive");
+	collection_table_drop_menu_append_item(choice_section, _("_Skip folders"), GQ_ICON_REMOVE, "collection-drop.skip");
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(choice_section));
+
+	collection_table_drop_menu_append_item(cancel_section, _("Cancel"), GQ_ICON_CANCEL, "collection-drop.cancel");
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(cancel_section));
+
+	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu));
+	gtk_widget_insert_action_group(popover, "collection-drop", G_ACTION_GROUP(action_group));
+	popover_set_parent(popover, ct->listview);
+	g_signal_connect(G_OBJECT(popover), "destroy", G_CALLBACK(collection_table_popup_destroy_cb), ct);
+	popover_popup(popover);
+
+	return popover;
 }
 
 struct CollectTableDropData
