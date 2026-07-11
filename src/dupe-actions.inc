@@ -276,6 +276,19 @@ static const ActionDef dupe_main_actions[] =
 		},
 
 		{
+		"win.dupe-win-toggle-thumbnails",
+		nullptr,
+		N_("Thumbnails"),
+		dupe_menu_toggle_thumbnails_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.dupe-win-view",
 		nullptr,
 		N_("View"),

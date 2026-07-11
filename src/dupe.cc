@@ -3110,6 +3110,14 @@ static void dupe_menu_clear_cb(GSimpleAction *, GVariant *, gpointer data)
 	dupe_window_clear(dw);
 }
 
+static void dupe_menu_toggle_thumbnails_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto dw = static_cast<DupeWindow *>(data);
+
+	auto *button_thumbs = GTK_CHECK_BUTTON(dw->button_thumbs);
+	gtk_check_button_set_active(button_thumbs, !gtk_check_button_get_active(button_thumbs));
+}
+
 static void dupe_menu_close_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto dw = static_cast<DupeWindow *>(data);
@@ -3683,9 +3691,8 @@ static void dupe_window_custom_threshold_cb(GtkSpinButton *custom_threshold, gpo
 	dupe_window_recompare(dw);
 }
 
-static gboolean dupe_window_keypress_cb(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer data)
+static gboolean dupe_window_keypress_cb(GtkEventControllerKey *, guint keyval, guint keycode, GdkModifierType state, gpointer data)
 {
-	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	const GqKeyEvent event_data{keyval, keycode, state, 0};
 	const GqKeyEvent *event = &event_data;
 	auto dw = static_cast<DupeWindow *>(data);
@@ -3772,12 +3779,6 @@ static gboolean dupe_window_keypress_cb(GtkEventControllerKey *controller, guint
 					break;
 				case 'L': case 'l':
 					dupe_window_append_file_list(dw, FALSE);
-					break;
-				case 'T': case 't':
-					{
-					auto *button_thumbs = GTK_CHECK_BUTTON(dw->button_thumbs);
-					gtk_check_button_set_active(button_thumbs, !gtk_check_button_get_active(button_thumbs));
-					}
 					break;
 				case 'W': case 'w':
 					dupe_window_close(dw);
