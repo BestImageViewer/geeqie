@@ -24,6 +24,7 @@
 #include <glib/gi18n.h>
 #include <pango/pango.h>
 
+#include "compat.h"
 #include "editors.h"
 #include "layout-util.h"
 #include "layout.h"
@@ -59,6 +60,28 @@ static GtkWidget *menu_item_button_new(const gchar *text, gboolean use_mnemonic)
 	GtkWidget *label = menu_item_label_new(text, use_mnemonic);
 
 	gtk_button_set_child(GTK_BUTTON(item), label);
+	gtk_button_set_has_frame(GTK_BUTTON(item), FALSE);
+	gtk_widget_add_css_class(item, "flat");
+	gtk_widget_set_hexpand(item, TRUE);
+	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
+	gtk_label_set_mnemonic_widget(GTK_LABEL(label), item);
+
+	return item;
+}
+
+static GtkWidget *menu_item_icon_button_new(const gchar *text, const gchar *icon_name, gboolean use_mnemonic)
+{
+	GtkWidget *item = gtk_button_new();
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+	GtkWidget *image = gtk_image_new_from_icon_name(icon_name ? icon_name : GQ_ICON_MISSING_IMAGE);
+	GtkWidget *label = menu_item_label_new(text, use_mnemonic);
+
+	gtk_widget_set_size_request(image, 16, -1);
+	gtk_widget_set_halign(image, GTK_ALIGN_CENTER);
+	gtk_box_append(GTK_BOX(box), image);
+	gtk_box_append(GTK_BOX(box), label);
+
+	gtk_button_set_child(GTK_BUTTON(item), box);
 	gtk_button_set_has_frame(GTK_BUTTON(item), FALSE);
 	gtk_widget_add_css_class(item, "flat");
 	gtk_widget_set_hexpand(item, TRUE);
@@ -127,10 +150,8 @@ GtkWidget *popover_item_add_stock(GtkWidget *menu, const gchar *label, const gch
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item;
-	(void)stock_id;
 
-	/* Temporary GTK4 stub: stock images are dropped until this path is ported. */
-	item = menu_item_button_new(label, TRUE);
+	item = menu_item_icon_button_new(label, stock_id_to_icon_name(stock_id), TRUE);
 
 	menu_item_add_accelerator(menu, item);
 
@@ -143,10 +164,8 @@ GtkWidget *popover_item_add_icon(GtkWidget *menu, const gchar *label, const gcha
 			       GCallback func, gpointer data)
 {
 	GtkWidget *item;
-	(void)icon_name;
 
-	/* Temporary GTK4 stub: icons are dropped until this path is ported. */
-	item = menu_item_button_new(label, TRUE);
+	item = menu_item_icon_button_new(label, icon_name, TRUE);
 
 	menu_item_add_accelerator(menu, item);
 
