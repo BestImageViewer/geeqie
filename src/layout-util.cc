@@ -3519,17 +3519,15 @@ static void layout_util_sync_views(LayoutWindow *lw)
 	overlay_screen_display_profile_set(options->overlay_screen_display_selected_profile);
 }
 
-void layout_util_sync_thumb(LayoutWindow *)
+void layout_util_sync_thumb(LayoutWindow *lw)
 {
-/** FIXME GTK4
-	GtkAction *action;
+	if (!lw || !lw->window) return;
 
-	if (!lw->action_group) return;
+	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-thumbnails");
+	if (!action) return;
 
-	action = deprecated_gtk_action_group_get_action(lw->action_group, "Thumbnails");
-	deprecated_gtk_toggle_action_set_active(deprecated_GTK_TOGGLE_ACTION(action), lw->options.show_thumbnails);
-	deprecated_gtk_action_set_sensitive(action, lw->options.file_view_type == FILEVIEW_LIST);
-*/
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.show_thumbnails));
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), lw->options.file_view_type == FILEVIEW_LIST);
 }
 
 void layout_util_sync(LayoutWindow *lw)
