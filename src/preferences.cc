@@ -1369,45 +1369,33 @@ static void image_overlay_help_cb(GtkWidget *, gpointer)
 	help_window_show("GuideOptionsOSD.html");
 }
 
-static void font_activated_cb(GtkFontChooser *widget, gchar *fontname, gpointer)
+static void font_dialog_done(GObject *source, GAsyncResult *result, gpointer user_data)
 {
-	g_free(c_options->image_overlay.font);
-	c_options->image_overlay.font = fontname;
-
-	gq_gtk_widget_destroy(GTK_WIDGET(widget));
-}
-
-static void font_response_cb(GtkDialog *dialog, gint response_id, gpointer data)
-{
-	gint i = GPOINTER_TO_INT(data);
-
+	const gint i = GPOINTER_TO_INT(user_data);
 	g_free(c_options->image_overlay_n[i].font);
 
-	if (response_id == GTK_RESPONSE_OK)
+	g_autoptr(PangoFontDescription) desc = gtk_font_dialog_choose_font_finish(GTK_FONT_DIALOG(source), result, nullptr);
+	if (desc)
 		{
-		c_options->image_overlay_n[i].font = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(dialog));
+		c_options->image_overlay_n[i].font = pango_font_description_to_string(desc);
 		}
 	else
 		{
 		c_options->image_overlay_n[i].font = g_strdup(options->image_overlay_n[i].font);
 		}
-
-	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
 static void image_overlay_set_font_cb(GtkWidget *widget, gpointer data)
 {
-	GtkWidget *dialog;
-	gint i = GPOINTER_TO_INT(data);
+	g_autoptr(GtkFontDialog) dialog = gtk_font_dialog_new();
+	gtk_font_dialog_set_title(dialog, _("Image Overlay Font"));
+	gtk_font_dialog_set_modal(dialog, TRUE);
 
-	dialog = gtk_font_chooser_dialog_new(_("Image Overlay Font"), GTK_WINDOW(widget_get_toplevel(widget)));
-	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
-	gtk_font_chooser_set_font(GTK_FONT_CHOOSER(dialog), options->image_overlay_n[i].font);
+	const gint i = GPOINTER_TO_INT(data);
+	g_autoptr(PangoFontDescription) desc = pango_font_description_from_string(options->image_overlay_n[i].font);
 
-	g_signal_connect(dialog, "font-activated", G_CALLBACK(font_activated_cb), data);
-	g_signal_connect(dialog, "response", G_CALLBACK(font_response_cb), data);
-
-	gtk_widget_show(dialog);
+	gtk_font_dialog_choose_font(dialog, GTK_WINDOW(widget_get_toplevel(widget)),
+	                            desc, nullptr, font_dialog_done, data);
 }
 
 static void show_color_dialog(const char *title, GtkWidget *widget, GdkRGBA color,
