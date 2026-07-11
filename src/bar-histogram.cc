@@ -196,55 +196,122 @@ static void bar_pane_histogram_destroy(gpointer data)
 	g_free(phd);
 }
 
-template<HistogramChannel channel>
-static void bar_pane_histogram_popup_channels_cb(GtkWidget *widget, gpointer data)
+static const gchar *histogram_channel_action_value(HistogramChannel channel)
+{
+	switch (channel)
+		{
+		case HCHAN_R:
+			return "red";
+		case HCHAN_G:
+			return "green";
+		case HCHAN_B:
+			return "blue";
+		case HCHAN_RGB:
+			return "rgb";
+		case HCHAN_MAX:
+			return "value";
+		default:
+			return "rgb";
+		}
+}
+
+static HistogramChannel histogram_channel_from_action_value(const gchar *value)
+{
+	if (g_str_equal(value, "red")) return HCHAN_R;
+	if (g_str_equal(value, "green")) return HCHAN_G;
+	if (g_str_equal(value, "blue")) return HCHAN_B;
+	if (g_str_equal(value, "rgb")) return HCHAN_RGB;
+	if (g_str_equal(value, "value")) return HCHAN_MAX;
+
+	return HCHAN_RGB;
+}
+
+static const gchar *histogram_mode_action_value(HistogramMode mode)
+{
+	switch (mode)
+		{
+		case HMODE_LINEAR:
+			return "linear";
+		case HMODE_LOG:
+			return "log";
+		default:
+			return "linear";
+		}
+}
+
+static HistogramMode histogram_mode_from_action_value(const gchar *value)
+{
+	if (g_str_equal(value, "linear")) return HMODE_LINEAR;
+	if (g_str_equal(value, "log")) return HMODE_LOG;
+
+	return HMODE_LINEAR;
+}
+
+static void bar_pane_histogram_channel_change_state_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if (!phd) return;
 
-	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
-
+	HistogramChannel channel = histogram_channel_from_action_value(g_variant_get_string(state, nullptr));
 	if (channel == phd->histogram.get_channel()) return;
 
 	phd->histogram.set_channel(channel);
+	g_simple_action_set_state(action, state);
 	bar_pane_histogram_update(phd);
 }
 
-template<HistogramMode mode>
-static void bar_pane_histogram_popup_mode_cb(GtkWidget *widget, gpointer data)
+static void bar_pane_histogram_mode_change_state_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
 	auto phd = static_cast<PaneHistogramData *>(data);
 	if (!phd) return;
 
-	if (!gtk_check_button_get_active(GTK_CHECK_BUTTON(widget))) return;
-
+	HistogramMode mode = histogram_mode_from_action_value(g_variant_get_string(state, nullptr));
 	if (mode == phd->histogram.get_mode()) return;
 
 	phd->histogram.set_mode(mode);
+	g_simple_action_set_state(action, state);
 	bar_pane_histogram_update(phd);
+}
+
+static void bar_pane_histogram_append_radio_item(GMenu *menu, const gchar *label, const gchar *action_name, const gchar *target)
+{
+	g_autoptr(GMenuItem) item = g_menu_item_new(label, action_name);
+
+	g_menu_item_set_attribute(item, G_MENU_ATTRIBUTE_TARGET, "s", target);
+	g_menu_append_item(menu, item);
 }
 
 static GtkWidget *bar_pane_histogram_menu(PaneHistogramData *phd, GtkWidget *parent, gdouble x, gdouble y)
 {
-	GtkWidget *menu;
-	gint channel = phd->histogram.get_channel();
-	gint mode = phd->histogram.get_mode();
+	g_autoptr(GSimpleActionGroup) action_group = g_simple_action_group_new();
+	g_autoptr(GSimpleAction) channel_action = g_simple_action_new_stateful("channel", G_VARIANT_TYPE_STRING,
+	                                                                       g_variant_new_string(histogram_channel_action_value(static_cast<HistogramChannel>(phd->histogram.get_channel()))));
+	g_autoptr(GSimpleAction) mode_action = g_simple_action_new_stateful("mode", G_VARIANT_TYPE_STRING,
+	                                                                    g_variant_new_string(histogram_mode_action_value(static_cast<HistogramMode>(phd->histogram.get_mode()))));
 
-	menu = popover_box_new(parent, x, y);
+	g_signal_connect(channel_action, "change-state", G_CALLBACK(bar_pane_histogram_channel_change_state_cb), phd);
+	g_signal_connect(mode_action, "change-state", G_CALLBACK(bar_pane_histogram_mode_change_state_cb), phd);
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(channel_action));
+	g_action_map_add_action(G_ACTION_MAP(action_group), G_ACTION(mode_action));
+	gtk_widget_insert_action_group(parent, "histogram", G_ACTION_GROUP(action_group));
+
+	g_autoptr(GMenu) menu = g_menu_new();
+	g_autoptr(GMenu) channel_section = g_menu_new();
+	g_autoptr(GMenu) mode_section = g_menu_new();
 
 	/* use the same strings as in layout-util.cc */
-	popover_item_add_radio(menu, _("Histogram on _Red"),   nullptr, channel == HCHAN_R, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_R>), phd);
-	popover_item_add_radio(menu, _("Histogram on _Green"), nullptr, channel == HCHAN_G, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_G>), phd);
-	popover_item_add_radio(menu, _("Histogram on _Blue"),  nullptr, channel == HCHAN_B, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_B>), phd);
-	popover_item_add_radio(menu, _("_Histogram on RGB"),   nullptr, channel == HCHAN_RGB, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_RGB>), phd);
-	popover_item_add_radio(menu, _("Histogram on _Value"), nullptr, channel == HCHAN_MAX, G_CALLBACK(bar_pane_histogram_popup_channels_cb<HCHAN_MAX>), phd);
+	bar_pane_histogram_append_radio_item(channel_section, _("Histogram on _Red"), "histogram.channel", "red");
+	bar_pane_histogram_append_radio_item(channel_section, _("Histogram on _Green"), "histogram.channel", "green");
+	bar_pane_histogram_append_radio_item(channel_section, _("Histogram on _Blue"), "histogram.channel", "blue");
+	bar_pane_histogram_append_radio_item(channel_section, _("_Histogram on RGB"), "histogram.channel", "rgb");
+	bar_pane_histogram_append_radio_item(channel_section, _("Histogram on _Value"), "histogram.channel", "value");
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(channel_section));
 
-	popover_item_add_divider(menu);
+	bar_pane_histogram_append_radio_item(mode_section, _("Li_near Histogram"), "histogram.mode", "linear");
+	bar_pane_histogram_append_radio_item(mode_section, _("L_og Histogram"), "histogram.mode", "log");
+	g_menu_append_section(menu, nullptr, G_MENU_MODEL(mode_section));
 
-	popover_item_add_radio(menu, _("Li_near Histogram"), nullptr, mode == HMODE_LINEAR, G_CALLBACK(bar_pane_histogram_popup_mode_cb<HMODE_LINEAR>), phd);
-	popover_item_add_radio(menu, _("L_og Histogram"),    nullptr, mode == HMODE_LOG, G_CALLBACK(bar_pane_histogram_popup_mode_cb<HMODE_LOG>), phd);
-
-	return menu;
+	return popup_menu_at(menu, parent, x, y);
 }
 
 static void bar_pane_histogram_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
