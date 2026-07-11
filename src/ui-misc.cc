@@ -34,6 +34,7 @@
 
 #include <config.h>
 
+#include "actions.h"
 #include "compat.h"
 #include "geometry.h"
 #include "history-list.h"
@@ -1087,15 +1088,34 @@ bool ActionItem::has_label(const gchar *label) const
 
 static gchar *get_action_label(gpointer, const gchar *action_name)
 {
-	/* Temporary GTK4 stub: GtkAction metadata lookup has been removed. */
+	const gchar *label = get_description_for_action_name(action_name);
+	if (label) return g_strdup(label);
+
+	if (!strchr(action_name, '.'))
+		{
+		g_autofree gchar *window_action_name = g_strdup_printf("win.%s", action_name);
+		label = get_description_for_action_name(window_action_name);
+		if (label) return g_strdup(label);
+
+		g_autofree gchar *app_action_name = g_strdup_printf("app.%s", action_name);
+		label = get_description_for_action_name(app_action_name);
+		if (label) return g_strdup(label);
+		}
+
 	return g_strdup(action_name);
 }
 
 static void action_to_list_duplicates(gpointer data, gpointer user_data)
 {
-	/* Temporary GTK4 stub: the old GtkAction enumeration path is disabled. */
-	(void)data;
-	(void)user_data;
+	if (!G_IS_ACTION(data) || !user_data) return;
+
+	auto *list_duplicates = static_cast<std::vector<ActionItem> *>(user_data);
+	const gchar *action_name = g_action_get_name(G_ACTION(data));
+	g_autofree gchar *label = get_action_label(nullptr, action_name);
+	g_autofree gchar *window_action_name = g_strdup_printf("win.%s", action_name);
+	auto icon_name = get_icon_for_action_name(window_action_name);
+
+	list_duplicates->emplace_back(action_name, label, icon_name);
 }
 
 /**
