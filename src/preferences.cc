@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <vector>
 
 #include <config.h>
@@ -128,9 +129,92 @@ void tz_data_free(TZData *tz)
 	g_free(tz);
 }
 
-} // namespace
+struct ActionItem
+{
+	ActionItem(const gchar *name, const gchar *label)
+	    : name(name)
+	    , label(label)
+	{}
 
-struct ZoneDetect;
+	bool has_name(const gchar *name) const
+	{
+		return g_strcmp0(this->name.c_str(), name) == 0;
+	}
+
+	bool has_label(const gchar *label) const
+	{
+		return g_strcmp0(this->label.c_str(), label) == 0;
+	}
+
+	std::string name; /* GAction terminology */
+	std::string label;
+};
+
+const gchar *get_action_label(const gchar *action_name)
+{
+	const gchar *label = get_description_for_action_name(action_name);
+	if (label) return label;
+
+	if (!strchr(action_name, '.'))
+		{
+		g_autofree gchar *window_action_name = g_strdup_printf("win.%s", action_name);
+		label = get_description_for_action_name(window_action_name);
+		if (label) return label;
+
+		g_autofree gchar *app_action_name = g_strdup_printf("app.%s", action_name);
+		label = get_description_for_action_name(app_action_name);
+		if (label) return label;
+		}
+
+	return action_name;
+}
+
+/**
+ * @brief Get a list of menu actions
+ * @returns std::vector<ActionItem>
+ *
+ * The list generated is used in programmable mouse buttons 8 and 9.
+ */
+std::vector<ActionItem> get_action_items()
+{
+	LayoutWindow *lw = get_current_layout();
+	if (!lw) return {};
+
+	std::vector<ActionItem> list_duplicates;
+	const auto action_to_list_duplicates = [&list_duplicates](GAction *action)
+	{
+		const gchar *action_name = g_action_get_name(action);
+		const gchar *label = get_action_label(action_name);
+
+		list_duplicates.emplace_back(action_name, label);
+	};
+	layout_actions_foreach(lw, action_to_list_duplicates);
+
+	/* Use the shortest name i.e. ignore -Alt versions. Sort makes the shortest first in the list */
+	static const auto action_item_compare_names = [](const ActionItem &a, const ActionItem &b)
+	{
+		return a.name < b.name;
+	};
+	std::sort(list_duplicates.begin(), list_duplicates.end(), action_item_compare_names);
+
+	/* Ignore duplicate entries */
+	std::vector<ActionItem> list_unique;
+	for (const ActionItem &action_item : list_duplicates)
+		{
+		const auto action_item_has_label = [&label = action_item.label](const ActionItem &action_item)
+		{
+			return action_item.label == label;
+		};
+		if (std::none_of(list_unique.cbegin(), list_unique.cend(), action_item_has_label))
+			{
+			list_unique.push_back(action_item);
+			}
+		}
+
+	return list_unique;
+}
+
+} // namespace
 
 enum {
 	EDITOR_NAME_MAX_LENGTH = 32,
@@ -742,7 +826,7 @@ static void mouse_buttons_selection_menu_cb(GtkDropDown *drop_down, GParamSpec *
 	if (work != list.cend())
 		{
 		g_free(*option);
-		*option = g_strdup(work->name);
+		*option = g_strdup(work->name.c_str());
 		}
 }
 
@@ -756,9 +840,9 @@ static void add_mouse_selection_menu(GtkWidget *table, gint column, gint row, co
 	guint i = 0;
 	for (const ActionItem &action_item : list)
 		{
-		gtk_string_list_append(string_list, action_item.label);
+		gtk_string_list_append(string_list, action_item.label.c_str());
 
-		if (g_strcmp0(action_item.name, option) == 0)
+		if (action_item.has_name(option))
 			{
 			current = i;
 			}

@@ -22,6 +22,8 @@
 #ifndef LAYOUT_UTIL_H
 #define LAYOUT_UTIL_H
 
+#include <functional>
+
 #include <gdk/gdk.h>
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -83,7 +85,8 @@ void layout_exif_window_new(LayoutWindow *lw);
 gboolean is_help_key(guint keyval, GdkModifierType state);
 void layout_menu_close_cb(GSimpleAction *action, GVariant *, gpointer data);
 GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw);
-void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data);
+using LayoutActionFunc = std::function<void(GAction *)>;
+void layout_actions_foreach(LayoutWindow *lw, const LayoutActionFunc &action_func);
 
 void create_toolbars(LayoutWindow *lw);
 
