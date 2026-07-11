@@ -3160,7 +3160,6 @@ static void config_tab_behavior(GtkWidget *notebook)
 	GtkWidget *collections_on_top;
 	GtkWidget *hide_window_in_fullscreen;
 	GtkWidget *hide_osd_in_fullscreen;
-	GtkWidget *checkbox;
 	GtkWidget *tmp;
 
 	vbox = scrolled_notebook_page(notebook, _("Behavior"));

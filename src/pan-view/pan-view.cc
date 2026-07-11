@@ -1058,23 +1058,16 @@ static gboolean pan_window_key_press_cb(GtkEventControllerKey *, guint keyval, g
 	const GqKeyEvent *event = &event_data;
 	auto pw = static_cast<PanWindow *>(data);
 	PixbufRenderer *pr;
-	FileData *fd;
 	gboolean stop_signal = FALSE;
-	GtkWidget *menu;
 	GtkWidget *imd_widget;
 	gint x = 0;
 	gint y = 0;
 	gint focused;
-	gint on_entry;
 
 	pr = PIXBUF_RENDERER(pw->imd->pr);
-	fd = pan_menu_click_fd(pw);
 
 	imd_widget = gq_gtk_widget_get_focus_child(pw->imd->widget);
 	focused = (pw->fs || (imd_widget && gtk_widget_has_focus(imd_widget)));
-	on_entry = (gtk_widget_has_focus(pw->path_entry) ||
-		    gtk_widget_has_focus(pw->search_ui->search_entry) ||
-		    gtk_widget_has_focus(pw->filter_ui->filter_entry));
 
 	if (focused)
 		{

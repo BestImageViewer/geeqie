@@ -587,7 +587,6 @@ static void vd_pop_menu_sort_cb(GSimpleAction *, GVariant *parameter, gpointer d
 
 void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdouble y)
 {
-	GtkWidget *menu;
 	gboolean active;
 	gboolean rename_delete_active = FALSE;
 	gboolean new_folder_active = FALSE;

@@ -159,13 +159,8 @@ gboolean is_config_file(const gchar *param)
 	return name != nullptr;
 }
 
-gboolean wait_cb(gpointer data)
+gboolean wait_cb(gpointer)
 {
-	gint position = GPOINTER_TO_INT(data);
-	gint x = position >> 16;
-	gint y = position - (x << 16);
-
-
 	return G_SOURCE_REMOVE;
 }
 

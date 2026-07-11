@@ -989,7 +989,7 @@ static gint page_height(ViewFile *vf)
  *-------------------------------------------------------------------
  */
 
-gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *widget, guint keyval, GdkModifierType state)
+gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *, guint keyval, GdkModifierType state)
 {
 	gint focus_row = 0;
 	gint focus_col = 0;
