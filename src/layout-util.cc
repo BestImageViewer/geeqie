@@ -2940,14 +2940,16 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 
 void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data)
 {
-/** @FIXME GTK4
-	for (GList *groups = deprecated_gtk_ui_manager_get_action_groups(lw->ui_manager); groups; groups = groups->next)
-		{
-		g_autoptr(GList) actions = deprecated_gtk_action_group_list_actions(deprecated_GTK_ACTION_GROUP(groups->data));
+	if (!lw || !lw->window || !func) return;
 
-		g_list_foreach(actions, func, data);
+	g_auto(GStrv) action_names = g_action_group_list_actions(G_ACTION_GROUP(lw->window));
+	for (guint i = 0; action_names && action_names[i]; i++)
+		{
+		GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), action_names[i]);
+		if (!action) continue;
+
+		func(action, data);
 		}
-*/
 }
 
 static void toolbar_clear_cb(GtkWidget *widget, gpointer)
