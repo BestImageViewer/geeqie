@@ -1410,85 +1410,63 @@ static void image_overlay_set_font_cb(GtkWidget *widget, gpointer data)
 	gtk_widget_show(dialog);
 }
 
-static void text_color_activated_cb(GtkColorChooser *chooser, GdkRGBA *color, gpointer data)
+static void show_color_dialog(const char *title, GtkWidget *widget, GdkRGBA color,
+                              GAsyncReadyCallback callback, gpointer user_data)
 {
-	gint i = GPOINTER_TO_INT(data);
+	g_autoptr(GtkColorDialog) dialog = gtk_color_dialog_new();
+	gtk_color_dialog_set_title(dialog, title);
+	gtk_color_dialog_set_modal(dialog, TRUE);
+	gtk_color_dialog_set_with_alpha(dialog, TRUE);
 
-	c_options->image_overlay_n[i].text_color.from_gdk_rgba(*color);
-
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
+	gtk_color_dialog_choose_rgba(dialog, GTK_WINDOW(widget_get_toplevel(widget)),
+	                             &color, nullptr, callback, user_data);
 }
 
-static void text_color_response_cb(GtkDialog *dialog, gint response_id, gpointer data)
+static void color_dialog_done(GObject *source, GAsyncResult *result, GqColor init_color, GqColor &result_color)
 {
-	gint i = GPOINTER_TO_INT(data);
-
-	c_options->image_overlay_n[i].text_color = options->image_overlay_n[i].text_color;
-
-	if (response_id == GTK_RESPONSE_OK)
+	g_autoptr(GdkRGBA) color = gtk_color_dialog_choose_rgba_finish(GTK_COLOR_DIALOG(source), result, nullptr);
+	if (color)
 		{
-		GdkRGBA color;
-		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(dialog), &color);
-		c_options->image_overlay_n[i].text_color.from_gdk_rgba(color);
+		result_color.from_gdk_rgba(*color);
 		}
+	else
+		{
+		result_color = init_color;
+		}
+}
 
-	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
+static void text_color_dialog_done(GObject *source, GAsyncResult *result, gpointer user_data)
+{
+	const gint i = GPOINTER_TO_INT(user_data);
+
+	color_dialog_done(source, result, options->image_overlay_n[i].text_color,
+	                  c_options->image_overlay_n[i].text_color);
 }
 
 static void image_overlay_set_text_color_cb(GtkWidget *widget, gpointer data)
 {
-	GtkWidget *dialog = gtk_color_chooser_dialog_new(_("Image Overlay Text Color"), GTK_WINDOW(widget_get_toplevel(widget)));
-
 	const gint i = GPOINTER_TO_INT(data);
-	GdkRGBA color = options->image_overlay_n[i].text_color.to_gdk_rgba();
-	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(dialog), &color);
 
-	gtk_color_chooser_set_use_alpha(GTK_COLOR_CHOOSER(dialog), TRUE);
-
-	g_signal_connect(dialog, "color-activated", G_CALLBACK(text_color_activated_cb), data);
-	g_signal_connect(dialog, "response", G_CALLBACK(text_color_response_cb), data);
-
-	gtk_widget_show(dialog);
+	show_color_dialog(_("Image Overlay Text Color"), widget,
+	                  options->image_overlay_n[i].text_color.to_gdk_rgba(),
+	                  text_color_dialog_done, data);
 }
 
-static void bg_color_activated_cb(GtkColorChooser *chooser, GdkRGBA *color, gpointer data)
+static void bg_color_dialog_done(GObject *source, GAsyncResult *result, gpointer user_data)
 {
-	gint i = GPOINTER_TO_INT(data);
+	const gint i = GPOINTER_TO_INT(user_data);
 
-	c_options->image_overlay_n[i].background.from_gdk_rgba(*color);
-
-	gq_gtk_widget_destroy(GTK_WIDGET(chooser));
-}
-
-static void bg_color_response_cb(GtkDialog *dialog, gint response_id, gpointer data)
-{
-	gint i = GPOINTER_TO_INT(data);
-
-	c_options->image_overlay_n[i].background = options->image_overlay_n[i].background;
-
-	if (response_id == GTK_RESPONSE_OK)
-		{
-		GdkRGBA color;
-		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(dialog), &color);
-		c_options->image_overlay_n[i].background.from_gdk_rgba(color);
-		}
-	gq_gtk_widget_destroy(GTK_WIDGET(dialog));
+	color_dialog_done(source, result, options->image_overlay_n[i].background,
+	                  c_options->image_overlay_n[i].background);
 }
 
 static void image_overlay_set_background_color_cb(GtkWidget *widget, gpointer data)
 {
-	GtkWidget *dialog = gtk_color_chooser_dialog_new(_("Image Overlay Background Color"), GTK_WINDOW(widget_get_toplevel(widget)));
-
 	const gint i = GPOINTER_TO_INT(data);
-	GdkRGBA color = options->image_overlay_n[i].background.to_gdk_rgba();
-	gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(dialog), &color);
 
-	gtk_color_chooser_set_use_alpha(GTK_COLOR_CHOOSER(dialog), TRUE);
-
-	g_signal_connect(dialog, "color-activated", G_CALLBACK(bg_color_activated_cb), data);
-	g_signal_connect(dialog, "response", G_CALLBACK(bg_color_response_cb), data);
-
-	gtk_widget_show(dialog);
+	show_color_dialog(_("Image Overlay Background Color"), widget,
+	                  options->image_overlay_n[i].background.to_gdk_rgba(),
+	                  bg_color_dialog_done, data);
 }
 
 static void accel_store_populate()
