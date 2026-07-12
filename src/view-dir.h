@@ -108,6 +108,7 @@ void vd_new_folder(ViewDir *vd, FileData *dir_fd);
 void vd_dnd_drop_scroll_cancel(ViewDir *vd);
 void vd_dnd_init(ViewDir *vd);
 
+void vd_color_cb(GtkTreeViewColumn *tree_column, GtkCellRenderer *cell, GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data);
 void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *column, gpointer data);
 
 gboolean vd_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);

@@ -60,6 +60,7 @@ namespace
 {
 
 constexpr auto VIEW_DIR_DATA_KEY = "view-dir";
+constexpr gint VIEW_DIR_DND_SCROLL_REGION = 20;
 
 GIcon *load_icon(const gchar *icon_name)
 {
@@ -855,7 +856,10 @@ static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *, GdkDrop *drop, gdo
 
 	vd_dnd_drop_update(vd, x, y);
 
-	if (vd->drop_fd)
+	gint h = gtk_widget_get_height(vd->view);
+	gboolean near_edge = (y < VIEW_DIR_DND_SCROLL_REGION || y >= h - VIEW_DIR_DND_SCROLL_REGION);
+
+	if (vd->drop_fd && near_edge)
 		{
 		const auto vd_auto_scroll_notify_cb = [vd](GtkWidget *, GqPoint)
 		{
@@ -868,7 +872,7 @@ static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *, GdkDrop *drop, gdo
 
 			return true;
 		};
-		widget_auto_scroll_start(vd->view, -1, -1, vd_auto_scroll_notify_cb);
+		widget_auto_scroll_start(vd->view, -1, VIEW_DIR_DND_SCROLL_REGION, vd_auto_scroll_notify_cb);
 		}
 	else
 		{
@@ -968,6 +972,28 @@ void vd_dnd_init(ViewDir *vd)
  * callbacks
  *----------------------------------------------------------------------------
  */
+
+void vd_color_cb(GtkTreeViewColumn *, GtkCellRenderer *cell, GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data)
+{
+	auto vd = static_cast<ViewDir *>(data);
+	gboolean set;
+
+	gtk_tree_model_get(tree_model, iter, DIR_COLUMN_COLOR, &set, -1);
+
+	GdkRGBA color_bg;
+	GtkStyleContext *style_context = gtk_widget_get_style_context(vd->view);
+	if (!gtk_style_context_lookup_color(style_context, "theme_base_color", &color_bg))
+		{
+		gtk_style_context_get_color(style_context, &color_bg);
+		color_bg.alpha = 0.35;
+		}
+	shift_color(color_bg);
+
+	g_object_set(cell,
+	             "cell-background-rgba", &color_bg,
+	             "cell-background-set", set,
+	             nullptr);
+}
 
 void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *, gpointer data)
 {
