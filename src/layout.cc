@@ -512,21 +512,39 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 	DEBUG_NAME(menu_tool_bar);
 	gtk_widget_show(menu_tool_bar);
 
-	GtkWidget *scroll_window = gtk_scrolled_window_new();
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
+	if (!lw->scrolled_window)
+		{
+		lw->scrolled_window = gtk_scrolled_window_new();
+		g_object_ref(lw->scrolled_window);
+		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(lw->scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
+		}
 
-	gq_gtk_container_add(scroll_window, menu_tool_bar);
+	if (gtk_widget_get_parent(menu_tool_bar) != lw->scrolled_window)
+		{
+		widget_remove_from_parent(menu_tool_bar);
+		gq_gtk_container_add(lw->scrolled_window, menu_tool_bar);
+		}
 
 	if (!options->expand_menu_toolbar)
 		{
-		gq_gtk_box_pack_start(GTK_BOX(box), scroll_window, FALSE, FALSE, 0);
+		if (!options->hamburger_menu)
+			{
+			GtkWidget *menu_bar = layout_actions_menu_bar(lw);
 
-		gq_gtk_widget_show_all(scroll_window);
+			widget_remove_from_parent(menu_bar);
+			gq_gtk_box_pack_start(GTK_BOX(box), menu_bar, FALSE, FALSE, 0);
+			}
+
+		widget_remove_from_parent(lw->scrolled_window);
+		gq_gtk_box_pack_start(GTK_BOX(box), lw->scrolled_window, FALSE, FALSE, 0);
+
+		gq_gtk_widget_show_all(lw->scrolled_window);
 		}
 	else
 		{
-		gq_gtk_box_pack_start(GTK_BOX(lw->main_box), scroll_window, FALSE, FALSE, 0);
-		gq_gtk_widget_show_all(scroll_window);
+		widget_remove_from_parent(lw->scrolled_window);
+		gq_gtk_box_pack_start(GTK_BOX(lw->main_box), lw->scrolled_window, FALSE, FALSE, 0);
+		gq_gtk_widget_show_all(lw->scrolled_window);
 		}
 
 	if (options->hamburger_menu)
@@ -544,9 +562,12 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 
 		gtk_header_bar_pack_end(GTK_HEADER_BAR(header), menu_button);
 		}
-	else
+	else if (options->expand_menu_toolbar)
 		{
-		gtk_box_prepend(GTK_BOX(lw->main_box), layout_actions_menu_bar(lw));
+		GtkWidget *menu_bar = layout_actions_menu_bar(lw);
+
+		widget_remove_from_parent(menu_bar);
+		gtk_box_prepend(GTK_BOX(lw->main_box), menu_bar);
 	}
 
 	lw->path_entry = tab_completion_new_with_history(nullptr, nullptr, "path_list", -1);
@@ -1804,7 +1825,11 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 		gtk_window_set_resizable(GTK_WINDOW(lw->tools), TRUE);
 		gq_gtk_widget_set_border_width(lw->tools, 0);
 
-		if (options->expand_menu_toolbar) gq_gtk_container_remove(lw->main_box, lw->menu_tool_bar);
+		if (options->expand_menu_toolbar)
+			{
+			widget_remove_from_parent(lw->menu_bar);
+			widget_remove_from_parent(lw->scrolled_window);
+			}
 
 		new_window = TRUE;
 		}
@@ -1822,7 +1847,14 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 	gq_gtk_container_add(lw->tools, vbox);
 	if (options->expand_menu_toolbar)
 		{
-			gq_gtk_box_pack_start(GTK_BOX(vbox), lw->menu_tool_bar, FALSE, FALSE, 0);
+		if (!options->hamburger_menu)
+			{
+			widget_remove_from_parent(lw->menu_bar);
+			gq_gtk_box_pack_start(GTK_BOX(vbox), lw->menu_bar, FALSE, FALSE, 0);
+			}
+
+		widget_remove_from_parent(lw->scrolled_window);
+		gq_gtk_box_pack_start(GTK_BOX(vbox), lw->scrolled_window, FALSE, FALSE, 0);
 		}
 	gtk_widget_show(vbox);
 
@@ -2125,13 +2157,15 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 		{
 		if (lw->toolbar[TOOLBAR_STATUS]) widget_remove_from_parent(lw->toolbar[TOOLBAR_STATUS]);
 
-		if (lw->menu_tool_bar) widget_remove_from_parent(lw->menu_tool_bar);
+		if (lw->scrolled_window) widget_remove_from_parent(lw->scrolled_window);
+		if (lw->menu_bar) widget_remove_from_parent(lw->menu_bar);
 		}
 	else
 		{
 		if (lw->menu_bar) widget_remove_from_parent(lw->menu_bar);
+		if (lw->scrolled_window) widget_remove_from_parent(lw->scrolled_window);
 		for (i = 0; i < TOOLBAR_COUNT; i++)
-			if (lw->toolbar[i]) widget_remove_from_parent(lw->toolbar[i]);
+			if (i != TOOLBAR_MAIN && lw->toolbar[i]) widget_remove_from_parent(lw->toolbar[i]);
 		}
 
 	/* clear it all */
@@ -2559,6 +2593,7 @@ void layout_free(LayoutWindow *lw)
 	layout_bars_close(lw);
 
 	if (lw->menu_bar) g_object_unref(lw->menu_bar);
+	if (lw->scrolled_window) g_object_unref(lw->scrolled_window);
 	if (lw->utility_box) g_object_unref(lw->utility_box);
 
 	for (i = 0; i < TOOLBAR_COUNT; i++)

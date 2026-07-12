@@ -2760,10 +2760,20 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 {
 	GtkWidget *toolbar;
 
-	if (lw->menu_tool_bar) return lw->menu_tool_bar;
-
 	toolbar = layout_actions_toolbar(lw, TOOLBAR_MAIN);
 	DEBUG_NAME(toolbar);
+
+	if (lw->menu_tool_bar)
+		{
+		if (gtk_widget_get_parent(toolbar) != lw->menu_tool_bar)
+			{
+			widget_remove_from_parent(toolbar);
+			gq_gtk_box_pack_start(GTK_BOX(lw->menu_tool_bar), toolbar, FALSE, FALSE, 0);
+			}
+
+		return lw->menu_tool_bar;
+		}
+
 	lw->menu_tool_bar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
 	gq_gtk_box_pack_start(GTK_BOX(lw->menu_tool_bar), toolbar, FALSE, FALSE, 0);
