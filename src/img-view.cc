@@ -77,6 +77,8 @@ struct ViewWindow
 
 std::vector<ViewWindow *> view_window_list;
 
+constexpr auto VIEW_WINDOW_DATA_KEY = "view-window";
+
 } // namespace
 
 static void image_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, gpointer data);
@@ -682,6 +684,8 @@ static void view_window_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
+	g_object_set_data(G_OBJECT(vw->window), VIEW_WINDOW_DATA_KEY, nullptr);
+
 	view_window_list.erase(std::remove(view_window_list.begin(), view_window_list.end(), vw),
 	                       view_window_list.end());
 
@@ -962,6 +966,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 
 	vw->window = window_new("view", PIXBUF_INLINE_ICON_VIEW, nullptr);
 	DEBUG_NAME(vw->window);
+	g_object_set_data(G_OBJECT(vw->window), VIEW_WINDOW_DATA_KEY, vw);
 
 	gtk_widget_set_size_request(vw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
@@ -1401,9 +1406,23 @@ static GdkContentProvider *view_window_dnd_prepare(GtkDragSource *, gdouble, gdo
 	return provider;
 }
 
+struct ViewWindowDndDropData
+{
+	GtkWidget *window;
+};
+
 static void view_window_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
-	auto *vw = static_cast<ViewWindow *>(data);
+	auto *drop_data = static_cast<ViewWindowDndDropData *>(data);
+	auto *vw = static_cast<ViewWindow *>(g_object_get_data(G_OBJECT(drop_data->window), VIEW_WINDOW_DATA_KEY));
+	if (!vw)
+		{
+		gdk_drop_finish(drop, GDK_ACTION_NONE);
+		g_object_unref(drop_data->window);
+		g_free(drop_data);
+		return;
+		}
+
 	ImageWindow *imd = vw->imd;
 	auto action = GDK_ACTION_NONE;
 
@@ -1439,11 +1458,17 @@ static void view_window_dnd_file_received(GdkDrop *drop, GList *list, gpointer d
 		}
 
 	gdk_drop_finish(drop, action);
+	g_object_unref(drop_data->window);
+	g_free(drop_data);
 }
 
 static gboolean view_window_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble, gdouble, gpointer data)
 {
-	dnd_read_file_list_async(drop, view_window_dnd_file_received, data);
+	auto *vw = static_cast<ViewWindow *>(data);
+	auto *drop_data = g_new(ViewWindowDndDropData, 1);
+	drop_data->window = GTK_WIDGET(g_object_ref(vw->window));
+
+	dnd_read_file_list_async(drop, view_window_dnd_file_received, drop_data);
 
 	return TRUE;
 }

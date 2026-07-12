@@ -382,22 +382,20 @@ GdkRectangle fullscreen_prefs_get_geometry( int screen_num, GtkWidget *widget, g
 	return geometry;
 }
 
-void fullscreen_prefs_selection_cb(GObject *object, GParamSpec *, gpointer value)
+enum {
+	FS_MENU_COLUMN_NAME = 0,
+	FS_MENU_COLUMN_VALUE
+};
+
+void fullscreen_prefs_selection_cb(GtkWidget *combo, gpointer value)
 {
 	if (!value) return;
 
-	GtkDropDown *drop_down = GTK_DROP_DOWN(object);
+	GtkTreeModel *store = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+	GtkTreeIter iter;
+	if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(combo), &iter)) return;
 
-	guint selected_index = gtk_drop_down_get_selected(drop_down);
-	if (selected_index == GTK_INVALID_LIST_POSITION) return;
-
-	GListModel *model = gtk_drop_down_get_model(drop_down);
-
-	g_autoptr(GObject) item = G_OBJECT(g_list_model_get_item(model, selected_index));
-	if (!item) return;
-
-	auto *screen_value = static_cast<gint *>(value);
-	*screen_value = GPOINTER_TO_INT(g_object_get_data(item, "number"));
+	gtk_tree_model_get(store, &iter, FS_MENU_COLUMN_VALUE, value, -1);
 }
 
 } // namespace
@@ -589,6 +587,14 @@ GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value)
 
 	if (text) pref_label_new(hbox, text);
 
+	g_autoptr(GtkListStore) store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+	GtkWidget *combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), renderer, TRUE);
+	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), renderer,
+				       "text", FS_MENU_COLUMN_NAME, NULL);
+
 	const std::array<ScreenData, 3> default_list = {{
 	    {-1, _("Determined by Window Manager"), {}},
 	    { 0, _("Active screen"), {},},
@@ -597,28 +603,27 @@ GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value)
 
 	std::vector<ScreenData> list = fullscreen_prefs_list();
 	list.insert(list.begin(), default_list.cbegin(), default_list.cend());
-
-	GtkStringList *string_list = gtk_string_list_new(nullptr);
-	guint index = 0;
 	for (const ScreenData &sd : list)
 		{
-		gtk_string_list_append(string_list, sd.description.c_str());
+		GtkTreeIter iter;
 
-		g_autoptr(GObject) item = G_OBJECT(g_list_model_get_item(G_LIST_MODEL(string_list), index++));
-		g_object_set_data(item, "number", GINT_TO_POINTER(sd.number));
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter,
+		                   FS_MENU_COLUMN_NAME, sd.description.c_str(),
+		                   FS_MENU_COLUMN_VALUE, sd.number,
+		                   -1);
 		}
-
-	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(string_list), nullptr);
 
 	const auto it = std::find_if(list.cbegin(), list.cend(),
 	                             [screen_num = *screen_value](const ScreenData &sd){ return sd.number == screen_num; });
 	const gint current = (it != list.cend()) ? std::distance(list.cbegin(), it) : 0;
-	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox), drop_down, FALSE, FALSE, 0);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, FALSE, FALSE, 0);
+	gtk_widget_show(combo);
 
-	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
-	                 G_CALLBACK(fullscreen_prefs_selection_cb), screen_value);
+	g_signal_connect(G_OBJECT(combo), "changed",
+			 G_CALLBACK(fullscreen_prefs_selection_cb), screen_value);
 
 	return hbox;
 }

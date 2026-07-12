@@ -963,9 +963,33 @@ static void layout_image_dnd_activate_split(LayoutWindow *lw, GtkWidget *widget)
 		}
 }
 
+struct LayoutImageDndDropData
+{
+	GtkWidget *window;
+};
+
+static LayoutWindow *layout_image_dnd_drop_data_get_layout(LayoutImageDndDropData *drop_data)
+{
+	return static_cast<LayoutWindow *>(g_object_get_data(G_OBJECT(drop_data->window), "layout-window"));
+}
+
+static void layout_image_dnd_drop_data_free(LayoutImageDndDropData *drop_data)
+{
+	g_object_unref(drop_data->window);
+	g_free(drop_data);
+}
+
 static void layout_image_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
-	auto *lw = static_cast<LayoutWindow *>(data);
+	auto *drop_data = static_cast<LayoutImageDndDropData *>(data);
+	auto *lw = layout_image_dnd_drop_data_get_layout(drop_data);
+	if (!lw)
+		{
+		gdk_drop_finish(drop, GDK_ACTION_NONE);
+		layout_image_dnd_drop_data_free(drop_data);
+		return;
+		}
+
 	auto action = GDK_ACTION_NONE;
 
 	if (list)
@@ -1003,11 +1027,20 @@ static void layout_image_dnd_file_received(GdkDrop *drop, GList *list, gpointer 
 		}
 
 	gdk_drop_finish(drop, action);
+	layout_image_dnd_drop_data_free(drop_data);
 }
 
 static void layout_image_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data)
 {
-	auto *lw = static_cast<LayoutWindow *>(data);
+	auto *drop_data = static_cast<LayoutImageDndDropData *>(data);
+	auto *lw = layout_image_dnd_drop_data_get_layout(drop_data);
+	if (!lw)
+		{
+		gdk_drop_finish(drop, GDK_ACTION_NONE);
+		layout_image_dnd_drop_data_free(drop_data);
+		return;
+		}
+
 	auto action = GDK_ACTION_NONE;
 
 	if (text && download_web_file(text, FALSE, lw))
@@ -1016,6 +1049,7 @@ static void layout_image_dnd_text_received(GdkDrop *drop, const gchar *text, gpo
 		}
 
 	gdk_drop_finish(drop, action);
+	layout_image_dnd_drop_data_free(drop_data);
 }
 
 static gboolean layout_image_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble, gdouble, gpointer data)
@@ -1028,13 +1062,17 @@ static gboolean layout_image_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop,
 	GdkContentFormats *formats = gdk_drop_get_formats(drop);
 	if (gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
 		{
-		dnd_read_file_list_async(drop, layout_image_dnd_file_received, lw);
+		auto *drop_data = g_new(LayoutImageDndDropData, 1);
+		drop_data->window = GTK_WIDGET(g_object_ref(lw->window));
+		dnd_read_file_list_async(drop, layout_image_dnd_file_received, drop_data);
 		return TRUE;
 		}
 
 	if (gdk_content_formats_contain_mime_type(formats, "text/plain"))
 		{
-		dnd_read_text_async(drop, layout_image_dnd_text_received, lw);
+		auto *drop_data = g_new(LayoutImageDndDropData, 1);
+		drop_data->window = GTK_WIDGET(g_object_ref(lw->window));
+		dnd_read_text_async(drop, layout_image_dnd_text_received, drop_data);
 		return TRUE;
 		}
 

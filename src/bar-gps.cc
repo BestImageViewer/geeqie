@@ -80,6 +80,22 @@ struct PaneGPSData
 	gdouble dest_longitude;
 };
 
+struct PaneGPSDndDropData
+{
+	GtkWidget *widget;
+};
+
+PaneGPSData *bar_pane_gps_dnd_drop_data_get_pane(PaneGPSDndDropData *drop_data)
+{
+	return static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(drop_data->widget), "pane_data"));
+}
+
+void bar_pane_gps_dnd_drop_data_free(PaneGPSDndDropData *drop_data)
+{
+	g_object_unref(drop_data->widget);
+	g_free(drop_data);
+}
+
 /*
  *-------------------------------------------------------------------
  * drag-and-drop
@@ -114,7 +130,15 @@ void bar_pane_gps_close_save_cb(GenericDialog *, gpointer data)
 
 void bar_pane_gps_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
-	auto *pgd = static_cast<PaneGPSData *>(data);
+	auto *drop_data = static_cast<PaneGPSDndDropData *>(data);
+	auto *pgd = bar_pane_gps_dnd_drop_data_get_pane(drop_data);
+	if (!pgd)
+		{
+		gdk_drop_finish(drop, GDK_ACTION_NONE);
+		bar_pane_gps_dnd_drop_data_free(drop_data);
+		return;
+		}
+
 	auto action = GDK_ACTION_NONE;
 
 	gint count = 0;
@@ -176,11 +200,20 @@ void bar_pane_gps_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 		}
 
 	gdk_drop_finish(drop, action);
+	bar_pane_gps_dnd_drop_data_free(drop_data);
 }
 
 void bar_pane_gps_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data)
 {
-	auto *pgd = static_cast<PaneGPSData *>(data);
+	auto *drop_data = static_cast<PaneGPSDndDropData *>(data);
+	auto *pgd = bar_pane_gps_dnd_drop_data_get_pane(drop_data);
+	if (!pgd)
+		{
+		gdk_drop_finish(drop, GDK_ACTION_NONE);
+		bar_pane_gps_dnd_drop_data_free(drop_data);
+		return;
+		}
+
 	auto action = GDK_ACTION_NONE;
 
 	if (text)
@@ -200,6 +233,7 @@ void bar_pane_gps_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer d
 		}
 
 	gdk_drop_finish(drop, action);
+	bar_pane_gps_dnd_drop_data_free(drop_data);
 }
 
 gboolean bar_pane_gps_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
@@ -211,13 +245,17 @@ gboolean bar_pane_gps_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdoubl
 	if (gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
 		{
 		shumate_viewport_widget_coords_to_location(pgd->viewport, widget, x, y, &pgd->dest_latitude, &pgd->dest_longitude);
-		dnd_read_file_list_async(drop, bar_pane_gps_dnd_file_received, pgd);
+		auto *drop_data = g_new(PaneGPSDndDropData, 1);
+		drop_data->widget = GTK_WIDGET(g_object_ref(pgd->widget));
+		dnd_read_file_list_async(drop, bar_pane_gps_dnd_file_received, drop_data);
 		return TRUE;
 		}
 
 	if (gdk_content_formats_contain_mime_type(formats, "text/plain"))
 		{
-		dnd_read_text_async(drop, bar_pane_gps_dnd_text_received, pgd);
+		auto *drop_data = g_new(PaneGPSDndDropData, 1);
+		drop_data->widget = GTK_WIDGET(g_object_ref(pgd->widget));
+		dnd_read_text_async(drop, bar_pane_gps_dnd_text_received, drop_data);
 		return TRUE;
 		}
 
@@ -233,6 +271,11 @@ void bar_pane_gps_dnd_init(gpointer data)
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 	g_signal_connect(drop_target, "drop", G_CALLBACK(bar_pane_gps_dnd_drop), pgd);
 	gtk_widget_add_controller(pgd->widget, GTK_EVENT_CONTROLLER(drop_target));
+}
+
+void bar_pane_gps_widget_destroy_cb(GtkWidget *widget, gpointer)
+{
+	g_object_set_data(G_OBJECT(widget), "pane_data", nullptr);
 }
 
 void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, gdouble longitude)
@@ -590,6 +633,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 	shumate_map_center_on(shumate_simple_map_get_map(pgd->map), latitude, longitude);
 	pgd->centre_map_checked = TRUE;
 	g_object_set_data_full(G_OBJECT(pgd->widget), "pane_data", pgd, bar_pane_gps_destroy);
+	g_signal_connect(G_OBJECT(pgd->widget), "destroy", G_CALLBACK(bar_pane_gps_widget_destroy_cb), nullptr);
 
 	gtk_widget_add_css_class(frame, "frame");
 

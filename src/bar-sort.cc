@@ -139,11 +139,11 @@ static void bar_sort_mode_sync(SortData *sd, BarSort::Mode mode)
 	bar_sort_undo_set(sd, nullptr, nullptr);
 }
 
-static void bar_sort_mode_cb(GObject *object, GParamSpec *, gpointer data)
+static void bar_sort_mode_cb(GtkWidget *combo, gpointer data)
 {
 	auto sd = static_cast<SortData *>(data);
 
-	if (gtk_drop_down_get_selected(GTK_DROP_DOWN(object)) == BarSort::MODE_FOLDER)
+	if (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)) == BarSort::MODE_FOLDER)
 		{
 		gtk_widget_set_tooltip_text(sd->add_button, _("Add Bookmark"));
 		bar_sort_mode_sync(sd, BarSort::MODE_FOLDER);
@@ -508,6 +508,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	GtkWidget *buttongrp;
 	GtkWidget *label;
 	GtkWidget *tbar;
+	GtkWidget *combo;
 	gboolean have_filter;
 	GtkWidget *button;
 
@@ -538,13 +539,15 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
 
-	static const char *sort_mode_items[] = { _("Folders"), _("Collections"), nullptr };
-	GtkStringList *sort_mode_list = gtk_string_list_new(sort_mode_items);
-	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(sort_mode_list), nullptr);
-	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), drop_down, FALSE, FALSE, 0);
+	combo = gtk_combo_box_text_new();
+	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), combo, FALSE, FALSE, 0);
+	gtk_widget_show(combo);
 
-	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
-	                 G_CALLBACK(bar_sort_mode_cb), sd);
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Folders"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Collections"));
+
+	g_signal_connect(G_OBJECT(combo), "changed",
+			 G_CALLBACK(bar_sort_mode_cb), sd);
 
 	sd->folder_group = pref_box_new(sd->vbox, FALSE, GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(sd->folder_group);
@@ -633,7 +636,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 
 	sd->mode = static_cast<BarSort::Mode>(-1);
 	bar_sort_mode_sync(sd, bar_sort.mode);
-	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), static_cast<guint>(sd->mode));
+	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), static_cast<gint>(sd->mode));
 
 	return sd->vbox;
 }

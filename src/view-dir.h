@@ -71,6 +71,7 @@ struct ViewDir
 	FileData *click_fd = nullptr;
 
 	FileData *drop_fd = nullptr;
+	FileDataRef drop_fd_ref{nullptr};
 	GList *drop_list = nullptr;
 	guint drop_scroll_id; /**< event source id */
 

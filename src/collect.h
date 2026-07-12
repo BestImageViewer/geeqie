@@ -63,6 +63,7 @@ struct CollectionData
 
 	ThumbLoader *thumb_loader;
 	CollectInfo *thumb_info;
+	guint thumb_idle_id;
 
 	using InfoUpdatedFunc = std::function<void(CollectionData *, CollectInfo *)>;
 	InfoUpdatedFunc info_updated_func;

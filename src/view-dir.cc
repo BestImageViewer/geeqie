@@ -52,14 +52,15 @@
 #include "ui-menu.h"
 #include "ui-misc.h"
 #include "ui-tree-edit.h"
-#include "uri-utils.h"
 #include "utilops.h"
 #include "view-dir-list.h"
 #include "view-dir-tree.h"
 
 namespace
 {
-	
+
+constexpr auto VIEW_DIR_DATA_KEY = "view-dir";
+
 GIcon *load_icon(const gchar *icon_name)
 {
 	return g_themed_icon_new(icon_name);
@@ -113,6 +114,7 @@ static void vd_destroy_cb(GtkWidget *widget, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
+	g_object_set_data(G_OBJECT(vd->view), VIEW_DIR_DATA_KEY, nullptr);
 	file_data_unregister_notify_func(vd_notify_cb, vd);
 
 	if (vd->popup)
@@ -290,6 +292,7 @@ void vd_popup_destroy_cb(GtkWidget *, gpointer data)
 	file_data_list_free(vd->drop_list);
 	vd->drop_list = nullptr;
 	vd->drop_fd = nullptr;
+	vd->drop_fd_ref.reset(nullptr);
 }
 
 /*
@@ -820,6 +823,7 @@ static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y)
 		}
 
 	vd->drop_fd = fd;
+	vd->drop_fd_ref.reset(fd);
 
 	if (vd->drop_fd)
 		{
@@ -881,6 +885,7 @@ static void vd_dnd_drop_leave(GtkDropTargetAsync *, GdkDrop *, gpointer data)
 	if (vd->drop_fd != vd->click_fd) vd_color_set(vd, vd->drop_fd, FALSE);
 
 	vd->drop_fd = nullptr;
+	vd->drop_fd_ref.reset(nullptr);
 	vd_dnd_drop_scroll_cancel(vd);
 	widget_auto_scroll_stop(vd->view);
 
@@ -890,85 +895,37 @@ static void vd_dnd_drop_leave(GtkDropTargetAsync *, GdkDrop *, gpointer data)
 struct VdDropReadData
 {
 	GtkWidget *view;
-	GdkDrop *drop;
+	FileData *drop_fd;
 };
 
-static GList *vd_dnd_file_list_from_uri_list(const gchar *data)
+static void vd_dnd_drop_data_free(VdDropReadData *drop_data)
 {
-	g_auto(GStrv) uris = g_uri_list_extract_uris(data);
-	GList *path_list = nullptr;
+	if (!drop_data) return;
 
-	for (gint i = 0; uris && uris[i]; i++)
-		{
-		g_autofree gchar *path = g_filename_from_uri(uris[i], nullptr, nullptr);
-		if (path)
-			{
-			path_list = g_list_prepend(path_list, g_steal_pointer(&path));
-			}
-		}
-
-	path_list = g_list_reverse(path_list);
-	GList *file_list = filelist_from_path_list(path_list);
-	g_list_free_full(path_list, g_free);
-
-	return file_list;
+	g_object_unref(drop_data->view);
+	file_data_unref(drop_data->drop_fd);
+	g_free(drop_data);
 }
 
-static GList *vd_dnd_file_list_from_stream(GInputStream *stream)
+static void vd_dnd_drop_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
-	GString *text = g_string_new(nullptr);
-	gchar buffer[4096];
-	gssize bytes_read;
-
-	while ((bytes_read = g_input_stream_read(stream, buffer, sizeof(buffer), nullptr, nullptr)) > 0)
-		{
-		g_string_append_len(text, buffer, bytes_read);
-		}
-
-	GList *file_list = (bytes_read < 0) ? nullptr : vd_dnd_file_list_from_uri_list(text->str);
-	g_string_free(text, TRUE);
-
-	return file_list;
-}
-
-static void vd_dnd_drop_read_cb(GObject *source_object, GAsyncResult *result, gpointer data)
-{
-	g_autofree auto *drop_data = static_cast<VdDropReadData *>(data);
-	GdkDrop *drop = GDK_DROP(source_object);
-	GError *error = nullptr;
-	const gchar *mime_type = nullptr;
-	g_autoptr(GInputStream) stream = gdk_drop_read_finish(drop, result, &mime_type, &error);
+	auto *drop_data = static_cast<VdDropReadData *>(data);
+	auto *vd = static_cast<ViewDir *>(g_object_get_data(G_OBJECT(drop_data->view), VIEW_DIR_DATA_KEY));
 	auto action = GDK_ACTION_NONE;
 
-	if (stream && g_strcmp0(mime_type, "text/uri-list") == 0)
+	if (vd && drop_data->drop_fd && list)
 		{
-		GList *list = vd_dnd_file_list_from_stream(stream);
-		auto *vd = static_cast<ViewDir *>(g_object_get_data(G_OBJECT(drop_data->view), "view-dir"));
+		file_data_list_free(vd->drop_list);
+		vd->drop_list = filelist_copy(list);
+		vd->drop_fd = drop_data->drop_fd;
+		vd->drop_fd_ref.reset(drop_data->drop_fd);
 
-		if (vd && vd->drop_fd && list)
-			{
-			file_data_list_free(vd->drop_list);
-			vd->drop_list = list;
-
-			GtkWidget *menu = vd_drop_menu(vd, access_file(vd->drop_fd->path, W_OK | X_OK));
-			(void)menu;
-			action = vd_dnd_select_action(drop);
-			}
-		else
-			{
-			file_data_list_free(list);
-			}
+		vd_drop_menu(vd, access_file(vd->drop_fd->path, W_OK | X_OK));
+		action = vd_dnd_select_action(drop);
 		}
 
-	if (error)
-		{
-		DEBUG_1("Directory drop read failed: %s", error->message);
-		g_error_free(error);
-		}
-
-	gdk_drop_finish(drop_data->drop, action);
-	g_object_unref(drop_data->drop);
-	g_object_unref(drop_data->view);
+	gdk_drop_finish(drop, action);
+	vd_dnd_drop_data_free(drop_data);
 }
 
 static gboolean vd_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
@@ -981,12 +938,11 @@ static gboolean vd_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdou
 
 	if (!vd->drop_fd) return FALSE;
 
-	static const gchar *mime_types[] = {"text/uri-list", nullptr};
 	auto *drop_data = g_new0(VdDropReadData, 1);
 	drop_data->view = GTK_WIDGET(g_object_ref(vd->view));
-	drop_data->drop = GDK_DROP(g_object_ref(drop));
+	drop_data->drop_fd = file_data_ref(vd->drop_fd);
 
-	gdk_drop_read_async(drop, mime_types, G_PRIORITY_DEFAULT, nullptr, vd_dnd_drop_read_cb, drop_data);
+	dnd_read_file_list_async(drop, vd_dnd_drop_file_received, drop_data);
 
 	return TRUE;
 }
@@ -995,7 +951,7 @@ void vd_dnd_init(ViewDir *vd)
 {
 	static const char *mime_types[] = {"text/uri-list"};
 
-	g_object_set_data(G_OBJECT(vd->view), "view-dir", vd);
+	g_object_set_data(G_OBJECT(vd->view), VIEW_DIR_DATA_KEY, vd);
 
 	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));

@@ -110,6 +110,8 @@ constexpr guint8 PAN_POPUP_ALPHA = 255;
 constexpr GqColor PAN_POPUP_COLOR{255, 255, 225, PAN_POPUP_ALPHA};
 constexpr GqColor PAN_POPUP_BORDER_COLOR{0, 0, 0, PAN_POPUP_ALPHA};
 
+constexpr auto PAN_WINDOW_DATA_KEY = "pan-window";
+
 } // namespace
 
 #define PAN_PREF_GROUP		"pan_view_options"
@@ -1519,6 +1521,7 @@ static void pan_window_close(PanWindow *pw)
 	pan_fullscreen_toggle(pw, TRUE);
 	pan_search_ui_destroy(g_steal_pointer(&pw->search_ui));
 	pan_filter_ui_destroy(g_steal_pointer(&pw->filter_ui));
+	g_object_set_data(G_OBJECT(pw->window), PAN_WINDOW_DATA_KEY, nullptr);
 	gq_gtk_widget_destroy(pw->window);
 
 	pan_window_items_free(pw);
@@ -1933,6 +1936,7 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	pw->window = window_new("panview", nullptr, _("Pan View"));
 	DEBUG_NAME(pw->window);
+	g_object_set_data(G_OBJECT(pw->window), PAN_WINDOW_DATA_KEY, pw);
 
 	gtk_widget_set_size_request(pw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
@@ -2171,9 +2175,23 @@ static GdkContentProvider *pan_window_dnd_prepare(GtkDragSource *, gdouble, gdou
 	return provider;
 }
 
+struct PanWindowDndDropData
+{
+	GtkWidget *window;
+};
+
 static void pan_window_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
-	auto *pw = static_cast<PanWindow *>(data);
+	auto *drop_data = static_cast<PanWindowDndDropData *>(data);
+	auto *pw = static_cast<PanWindow *>(g_object_get_data(G_OBJECT(drop_data->window), PAN_WINDOW_DATA_KEY));
+	if (!pw)
+		{
+		gdk_drop_finish(drop, GDK_ACTION_NONE);
+		g_object_unref(drop_data->window);
+		g_free(drop_data);
+		return;
+		}
+
 	auto action = GDK_ACTION_NONE;
 
 	if (list && isdir((static_cast<FileData *>(list->data))->path))
@@ -2185,11 +2203,17 @@ static void pan_window_dnd_file_received(GdkDrop *drop, GList *list, gpointer da
 		}
 
 	gdk_drop_finish(drop, action);
+	g_object_unref(drop_data->window);
+	g_free(drop_data);
 }
 
 static gboolean pan_window_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble, gdouble, gpointer data)
 {
-	dnd_read_file_list_async(drop, pan_window_dnd_file_received, data);
+	auto *pw = static_cast<PanWindow *>(data);
+	auto *drop_data = g_new(PanWindowDndDropData, 1);
+	drop_data->window = GTK_WIDGET(g_object_ref(pw->window));
+
+	dnd_read_file_list_async(drop, pan_window_dnd_file_received, drop_data);
 
 	return TRUE;
 }

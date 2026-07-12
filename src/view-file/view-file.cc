@@ -53,6 +53,13 @@
 #include "view-file/view-file-list.h"
 #include "window.h"
 
+namespace
+{
+
+constexpr auto VIEW_FILE_DATA_KEY = "view-file";
+
+} // namespace
+
 /*
  *-----------------------------------------------------------------------------
  * signals
@@ -374,7 +381,7 @@ static GdkContentProvider *vf_dnd_prepare(GtkDragSource *, gdouble x, gdouble y,
 
 struct VfDndTextDropData
 {
-	ViewFile *vf;
+	GtkWidget *listview;
 	gint x;
 	gint y;
 };
@@ -382,7 +389,14 @@ struct VfDndTextDropData
 static void vf_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data)
 {
 	g_autofree auto *drop_data = static_cast<VfDndTextDropData *>(data);
-	ViewFile *vf = drop_data->vf;
+	auto *vf = static_cast<ViewFile *>(g_object_get_data(G_OBJECT(drop_data->listview), VIEW_FILE_DATA_KEY));
+	if (!vf)
+		{
+		gdk_drop_finish(drop, GDK_ACTION_NONE);
+		g_object_unref(drop_data->listview);
+		return;
+		}
+
 	auto action = GDK_ACTION_NONE;
 
 	if (text)
@@ -399,6 +413,7 @@ static void vf_dnd_text_received(GdkDrop *drop, const gchar *text, gpointer data
 		}
 
 	gdk_drop_finish(drop, action);
+	g_object_unref(drop_data->listview);
 }
 
 static gboolean vf_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
@@ -411,7 +426,7 @@ static gboolean vf_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdou
 		}
 
 	auto *drop_data = g_new(VfDndTextDropData, 1);
-	drop_data->vf = vf;
+	drop_data->listview = GTK_WIDGET(g_object_ref(vf->listview));
 	drop_data->x = static_cast<gint>(x);
 	drop_data->y = static_cast<gint>(y);
 
@@ -999,6 +1014,8 @@ static void vf_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
+	if (vf->listview) g_object_set_data(G_OBJECT(vf->listview), VIEW_FILE_DATA_KEY, nullptr);
+
 	switch (vf->type)
 	{
 	case FILEVIEW_LIST: vflist_destroy_cb(vf); break;
@@ -1544,6 +1561,7 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	case FILEVIEW_LIST: vf = vflist_new(vf); break;
 	case FILEVIEW_ICON: vf = vficon_new(vf); break;
 	}
+	g_object_set_data(G_OBJECT(vf->listview), VIEW_FILE_DATA_KEY, vf);
 
 	GtkEventController *key_controller = gtk_event_controller_key_new();
 

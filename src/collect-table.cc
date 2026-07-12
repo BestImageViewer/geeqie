@@ -81,6 +81,8 @@ constexpr gint COLLECT_TABLE_MAX_COLUMNS = 32;
 
 constexpr gint THUMB_BORDER_PADDING = 2;
 
+constexpr auto COLLECT_TABLE_DATA_KEY = "collect-table";
+
 inline gboolean info_selected(const CollectInfo *info)
 {
 	return info->flag_mask & SELECTION_SELECTED;
@@ -1295,6 +1297,21 @@ static CollectInfo *collection_table_insert_point(CollectTable *ct, gint x, gint
 	return info;
 }
 
+static gint collection_table_drop_index_from_info(CollectTable *ct, CollectInfo *info)
+{
+	if (!info) return -1;
+
+	GList *work = g_list_find(ct->cd->list, info);
+	return work ? g_list_position(ct->cd->list, work) : -1;
+}
+
+static CollectInfo *collection_table_drop_info_from_index(CollectTable *ct, gint index)
+{
+	if (index < 0) return nullptr;
+
+	return static_cast<CollectInfo *>(g_list_nth_data(ct->cd->list, index));
+}
+
 /*
  *-------------------------------------------------------------------
  * mouse drag auto-scroll
@@ -1556,6 +1573,8 @@ static void collection_table_sync(CollectTable *ct)
 	GList *work;
 	gint r;
 
+	ct->columns = std::max(ct->columns, 1);
+
 	store = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
 
 	r = -1;
@@ -1614,7 +1633,7 @@ static gboolean collection_table_sync_idle_cb(gpointer data)
 
 	if (ct->sync_idle_id)
 		{
-		g_clear_handle_id(&ct->sync_idle_id, g_source_remove);
+		ct->sync_idle_id = 0;
 
 		collection_table_sync(ct);
 		}
@@ -1737,7 +1756,7 @@ void collection_table_refresh(CollectTable *ct)
  *-------------------------------------------------------------------
  */
 
-static void collection_table_add_dir_recursive(CollectTable *ct, FileData *dir_fd, gboolean recursive)
+static void collection_table_add_dir_recursive(CollectTable *ct, FileData *dir_fd, gboolean recursive, CollectInfo *insert_info)
 {
 	GList *d;
 	GList *f;
@@ -1752,12 +1771,12 @@ static void collection_table_add_dir_recursive(CollectTable *ct, FileData *dir_f
 	f = filelist_sort_path(f);
 	d = filelist_sort_path(d);
 
-	collection_table_insert_filelist(ct, f, ct->marker_info);
+	collection_table_insert_filelist(ct, f, insert_info);
 
 	work = g_list_last(d);
 	while (work)
 		{
-		collection_table_add_dir_recursive(ct, static_cast<FileData *>(work->data), TRUE);
+		collection_table_add_dir_recursive(ct, static_cast<FileData *>(work->data), TRUE, insert_info);
 		work = work->prev;
 		}
 
@@ -1769,22 +1788,23 @@ template<gboolean recursive>
 static void confirm_dir_list_add(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto *ct = static_cast<CollectTable *>(data);
+	CollectInfo *drop_info = collection_table_drop_info_from_index(ct, ct->drop_index);
 
 	for (GList *work = ct->drop_list; work; work = work->next)
 		{
 		auto fd = static_cast<FileData *>(work->data);
 
-		if (isdir(fd->path)) collection_table_add_dir_recursive(ct, fd, recursive);
+		if (isdir(fd->path)) collection_table_add_dir_recursive(ct, fd, recursive, drop_info);
 		}
 
-	collection_table_insert_filelist(ct, ct->drop_list, ct->marker_info);
+	collection_table_insert_filelist(ct, ct->drop_list, drop_info);
 }
 
 static void confirm_dir_list_skip(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	collection_table_insert_filelist(ct, ct->drop_list, ct->marker_info);
+	collection_table_insert_filelist(ct, ct->drop_list, collection_table_drop_info_from_index(ct, ct->drop_index));
 }
 
 static void collection_table_drop_menu_append_item(GMenu *menu, const gchar *label, const gchar *icon_name, const gchar *action_name)
@@ -1848,10 +1868,48 @@ static GtkWidget *collection_table_drop_menu(CollectTable *ct)
 
 struct CollectTableDropData
 {
-	CollectTable *ct;
-	gdouble x;
-	gdouble y;
+	GtkWidget *listview;
+	gint drop_index;
 };
+
+struct CollectTableDropInsertData
+{
+	GtkWidget *listview;
+	GList *list;
+	gint drop_index;
+};
+
+static void collection_table_drop_insert_data_free(CollectTableDropInsertData *insert_data)
+{
+	if (!insert_data) return;
+
+	file_data_list_free(insert_data->list);
+	g_object_unref(insert_data->listview);
+	g_free(insert_data);
+}
+
+static gboolean collection_table_dnd_get_listview_coords(GtkDropTargetAsync *target, CollectTable *ct, gdouble x, gdouble y, gint &listview_x, gint &listview_y)
+{
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
+
+	if (widget == ct->listview)
+		{
+		listview_x = static_cast<gint>(x);
+		listview_y = static_cast<gint>(y);
+		return TRUE;
+		}
+
+	double translated_x;
+	double translated_y;
+	if (!gtk_widget_translate_coordinates(widget, ct->listview, x, y, &translated_x, &translated_y))
+		{
+		return FALSE;
+		}
+
+	listview_x = static_cast<gint>(translated_x);
+	listview_y = static_cast<gint>(translated_y);
+	return TRUE;
+}
 
 /*
  *-------------------------------------------------------------------
@@ -1880,11 +1938,15 @@ static GdkContentProvider *collection_table_dnd_prepare(GtkDragSource *, gdouble
 	return dnd_file_list_content_provider(list);
 }
 
-static GdkDragAction collection_table_dnd_motion(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
+static GdkDragAction collection_table_dnd_motion(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
 {
 	auto *ct = static_cast<CollectTable *>(data);
 
-	ct->marker_info = collection_table_insert_point(ct, static_cast<gint>(x), static_cast<gint>(y));
+	gint listview_x = -1;
+	gint listview_y = -1;
+	ct->marker_info = collection_table_dnd_get_listview_coords(target, ct, x, y, listview_x, listview_y)
+	                  ? collection_table_insert_point(ct, listview_x, listview_y)
+	                  : nullptr;
 	collection_table_scroll(ct, TRUE);
 
 	return (gdk_drop_get_actions(drop) & GDK_ACTION_COPY) ? GDK_ACTION_COPY : GDK_ACTION_NONE;
@@ -1897,64 +1959,103 @@ static void collection_table_dnd_leave(GtkDropTargetAsync *, GdkDrop *, gpointer
 	collection_table_scroll(ct, FALSE);
 }
 
+static gboolean collection_table_dnd_insert_idle_cb(gpointer data)
+{
+	auto *insert_data = static_cast<CollectTableDropInsertData *>(data);
+	auto *ct = static_cast<CollectTable *>(g_object_get_data(G_OBJECT(insert_data->listview), COLLECT_TABLE_DATA_KEY));
+
+	if (!ct)
+		{
+		collection_table_drop_insert_data_free(insert_data);
+		return G_SOURCE_REMOVE;
+		}
+
+	collection_table_scroll(ct, FALSE);
+	CollectInfo *drop_info = collection_table_drop_info_from_index(ct, insert_data->drop_index);
+
+	if (file_data_list_has_dir(insert_data->list))
+		{
+		file_data_list_free(ct->drop_list);
+		ct->drop_list = filelist_copy(insert_data->list);
+		ct->drop_info = drop_info;
+		ct->marker_info = drop_info;
+		ct->drop_index = insert_data->drop_index;
+
+		collection_table_drop_menu(ct);
+		}
+	else
+		{
+		collection_table_insert_filelist(ct, insert_data->list, drop_info);
+		}
+
+	collection_table_drop_insert_data_free(insert_data);
+	return G_SOURCE_REMOVE;
+}
+
 static void collection_table_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
 	auto *drop_data = static_cast<CollectTableDropData *>(data);
-	auto *ct = drop_data->ct;
+	auto *ct = static_cast<CollectTable *>(g_object_get_data(G_OBJECT(drop_data->listview), COLLECT_TABLE_DATA_KEY));
+	if (!ct)
+		{
+		gdk_drop_finish(drop, GDK_ACTION_NONE);
+		g_object_unref(drop_data->listview);
+		g_free(drop_data);
+		return;
+		}
+
 	auto action = GDK_ACTION_NONE;
 
 	collection_table_scroll(ct, FALSE);
 
-	/* FIXME: the collection target still needs a proper async-safe drop
-	 * anchor. Recomputing from coordinates avoids the stale marker pointer,
-	 * but the collection-specific drop path remains the failing area.
-	 */
-	CollectInfo *drop_info = collection_table_insert_point(ct, static_cast<gint>(drop_data->x), static_cast<gint>(drop_data->y));
-	if (!drop_info || !g_list_find(ct->cd->list, drop_info))
-		{
-		drop_info = nullptr;
-		}
-
 	if (list)
 		{
-		if (file_data_list_has_dir(list))
-			{
-			file_data_list_free(ct->drop_list);
-			ct->drop_list = filelist_copy(list);
-			ct->drop_info = drop_info;
-			ct->marker_info = drop_info;
-
-			GtkWidget *menu = collection_table_drop_menu(ct);
-			(void)menu;
-			}
-		else
-			{
-			collection_table_insert_filelist(ct, list, drop_info);
-			}
-
 		action = GDK_ACTION_COPY;
 		}
 
 	gdk_drop_finish(drop, action);
+
+	if (list)
+		{
+		auto *insert_data = g_new0(CollectTableDropInsertData, 1);
+		insert_data->listview = GTK_WIDGET(g_object_ref(drop_data->listview));
+		insert_data->list = filelist_copy(list);
+		insert_data->drop_index = drop_data->drop_index;
+		g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, collection_table_dnd_insert_idle_cb, insert_data, nullptr);
+		}
+
+	g_object_unref(drop_data->listview);
 	g_free(drop_data);
 }
 
-static gboolean collection_table_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
+static gboolean collection_table_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
 {
 	auto *ct = static_cast<CollectTable *>(data);
 	auto *drop_data = g_new0(CollectTableDropData, 1);
-	drop_data->ct = ct;
-	drop_data->x = x;
-	drop_data->y = y;
+	gint listview_x = -1;
+	gint listview_y = -1;
 
 	collection_table_scroll(ct, FALSE);
-	/* FIXME: this marker is still used by collection-specific code paths
-	 * that are not safe across the async read.
-	 */
-	ct->marker_info = collection_table_insert_point(ct, static_cast<gint>(x), static_cast<gint>(y));
+	ct->marker_info = collection_table_dnd_get_listview_coords(target, ct, x, y, listview_x, listview_y)
+	                  ? collection_table_insert_point(ct, listview_x, listview_y)
+	                  : nullptr;
+	ct->drop_index = collection_table_drop_index_from_info(ct, ct->marker_info);
+	drop_data->listview = GTK_WIDGET(g_object_ref(ct->listview));
+	drop_data->drop_index = ct->drop_index;
 	dnd_read_file_list_async(drop, collection_table_dnd_file_received, drop_data);
 
 	return TRUE;
+}
+
+static void collection_table_dnd_init_drop_target(CollectTable *ct, GtkWidget *widget)
+{
+	static const char *mime_types[] = {"text/uri-list"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	g_signal_connect(drop_target, "drag-motion", G_CALLBACK(collection_table_dnd_motion), ct);
+	g_signal_connect(drop_target, "drag-leave", G_CALLBACK(collection_table_dnd_leave), ct);
+	g_signal_connect(drop_target, "drop", G_CALLBACK(collection_table_dnd_drop), ct);
+	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(drop_target));
 }
 
 static void collection_table_dnd_init(CollectTable *ct)
@@ -1965,13 +2066,8 @@ static void collection_table_dnd_init(CollectTable *ct)
 	g_signal_connect(drag_source, "prepare", G_CALLBACK(collection_table_dnd_prepare), ct);
 	gtk_widget_add_controller(ct->listview, GTK_EVENT_CONTROLLER(drag_source));
 
-	static const char *mime_types[] = {"text/uri-list"};
-	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
-	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
-	g_signal_connect(drop_target, "drag-motion", G_CALLBACK(collection_table_dnd_motion), ct);
-	g_signal_connect(drop_target, "drag-leave", G_CALLBACK(collection_table_dnd_leave), ct);
-	g_signal_connect(drop_target, "drop", G_CALLBACK(collection_table_dnd_drop), ct);
-	gtk_widget_add_controller(ct->listview, GTK_EVENT_CONTROLLER(drop_target));
+	collection_table_dnd_init_drop_target(ct, ct->listview);
+	collection_table_dnd_init_drop_target(ct, ct->scrolled);
 }
 
 /*
@@ -2137,6 +2233,8 @@ static void collection_table_destroy(GtkWidget *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
+	g_object_set_data(G_OBJECT(ct->listview), COLLECT_TABLE_DATA_KEY, nullptr);
+
 	/* If there is no unsaved data, save the window geometry
 	 */
 	/** @FIXME  This code interferes with the code detecting files on unmounted drives. See collection_load_private() in collect-io,cc. If the user wants to save the geometry of an unchanged Collection, just slightly move one of the thumbnails. */
@@ -2212,6 +2310,8 @@ CollectTable *collection_table_new(CollectionData *cd)
 	ct = g_new0(CollectTable, 1);
 
 	ct->cd = cd;
+	ct->columns = 1;
+	ct->drop_index = -1;
 	ct->show_text = options->show_icon_names;
 	ct->show_stars = options->show_star_rating;
 	ct->show_infotext = options->show_collection_infotext;
@@ -2224,6 +2324,7 @@ CollectTable *collection_table_new(CollectionData *cd)
 	store = gtk_list_store_new(1, G_TYPE_POINTER);
 	ct->listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
+	g_object_set_data(G_OBJECT(ct->listview), COLLECT_TABLE_DATA_KEY, ct);
 
 	gtk_widget_set_has_tooltip(ct->listview, TRUE);
 	g_signal_connect(ct->listview, "query-tooltip", G_CALLBACK(collection_table_query_tooltip_cb), ct);

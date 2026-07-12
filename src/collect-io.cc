@@ -176,6 +176,7 @@ bool is_file_on_mounted_drive(const gchar *filename)
 } // namespace
 
 static void collection_load_thumb_step(CollectionData *cd);
+static gboolean collection_load_thumb_idle_cb(gpointer data);
 static gboolean collection_save_private(CollectionData *cd, const gchar *path);
 
 static void collect_manager_entry_reset(CollectManagerEntry *entry);
@@ -519,9 +520,22 @@ static void collection_load_thumb_step(CollectionData *cd)
 		}
 }
 
+static gboolean collection_load_thumb_idle_cb(gpointer data)
+{
+	auto cd = static_cast<CollectionData *>(data);
+
+	cd->thumb_idle_id = 0;
+
+	if (!cd->thumb_loader) collection_load_thumb_step(cd);
+
+	return G_SOURCE_REMOVE;
+}
+
 void collection_load_thumb_idle(CollectionData *cd)
 {
-	if (!cd->thumb_loader) collection_load_thumb_step(cd);
+	if (cd->thumb_loader || cd->thumb_idle_id) return;
+
+	cd->thumb_idle_id = g_idle_add_full(G_PRIORITY_LOW, collection_load_thumb_idle_cb, cd, nullptr);
 }
 
 gboolean collection_load_begin(CollectionData *cd, const gchar *path, CollectionLoadFlags flags)
@@ -535,10 +549,13 @@ gboolean collection_load_begin(CollectionData *cd, const gchar *path, Collection
 
 void collection_load_stop(CollectionData *cd)
 {
+	g_clear_handle_id(&cd->thumb_idle_id, g_source_remove);
+
 	if (!cd->thumb_loader) return;
 
 	thumb_loader_free(cd->thumb_loader);
 	cd->thumb_loader = nullptr;
+	cd->thumb_info = nullptr;
 }
 
 static gboolean collection_save_private(CollectionData *cd, const gchar *path)

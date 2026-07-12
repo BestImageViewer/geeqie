@@ -50,6 +50,22 @@ struct DndTextReadData
 	gpointer data;
 };
 
+GList *dnd_file_list_from_uri_text(const gchar *text)
+{
+	GList *path_list = uri_pathlist_from_text(text);
+	GList *list = nullptr;
+
+	for (GList *work = path_list; work; work = work->next)
+		{
+		const auto *path = static_cast<const gchar *>(work->data);
+		list = g_list_prepend(list, file_data_new_no_grouping(path));
+		}
+
+	g_list_free_full(path_list, g_free);
+
+	return g_list_reverse(list);
+}
+
 } // namespace name
 
 void drag_signal_connect(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data)
@@ -107,12 +123,7 @@ GdkContentProvider *dnd_file_list_content_provider(GList *list)
 
 	g_autoptr(GBytes) bytes = g_bytes_new(uri_text, strlen(uri_text));
 
-	GdkContentProvider *providers[] = {
-		gdk_content_provider_new_for_bytes("text/uri-list", bytes),
-		gdk_content_provider_new_typed(G_TYPE_STRING, g_strdup(uri_text))
-	};
-
-	return gdk_content_provider_new_union(providers, G_N_ELEMENTS(providers));
+	return gdk_content_provider_new_for_bytes("text/uri-list", bytes);
 }
 
 static void dnd_read_file_list_stream_cb(GObject *source_object, GAsyncResult *result, gpointer data)
@@ -140,8 +151,8 @@ static void dnd_read_file_list_stream_cb(GObject *source_object, GAsyncResult *r
 	g_autoptr(FileDataList) list = nullptr;
 	if (!error)
 		{
-		list = uri_filelist_from_text(read_data->text->str);
-		}
+		list = dnd_file_list_from_uri_text(read_data->text->str);
+	}
 
 	read_data->callback(read_data->drop, list, read_data->data);
 	g_object_unref(read_data->stream);

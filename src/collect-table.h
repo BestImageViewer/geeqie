@@ -59,6 +59,7 @@ struct CollectTable
 	GtkWidget *popup;
 	CollectInfo *drop_info;
 	GList *drop_list;
+	gint drop_index;
 
 	guint sync_idle_id; /**< event source id */
 	guint drop_idle_id; /**< event source id */

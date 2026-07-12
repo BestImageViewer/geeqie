@@ -118,6 +118,8 @@ constexpr gint DUPE_DEF_HEIGHT = 400;
 
 constexpr gdouble DUPE_PROGRESS_PULSE_STEP = 0.0001;
 
+constexpr auto DUPE_WINDOW_DATA_KEY = "dupe-window";
+
 DupeMatchType param_match_mask;
 GList *dupe_window_list = nullptr;	/**< list of open DupeWindow *s */
 
@@ -3846,6 +3848,7 @@ void dupe_window_close(DupeWindow *dw)
 	dupe_window_get_geometry(dw);
 
 	dupe_window_list = g_list_remove(dupe_window_list, dw);
+	g_object_set_data(G_OBJECT(dw->window), DUPE_WINDOW_DATA_KEY, nullptr);
 	gq_gtk_widget_destroy(dw->window);
 
 	g_list_free(dw->dupes);
@@ -4183,6 +4186,7 @@ DupeWindow *dupe_window_new()
 
 	dw->window = window_new("dupe", nullptr, _("Find duplicates"));
 	DEBUG_NAME(dw->window);
+	g_object_set_data(G_OBJECT(dw->window), DUPE_WINDOW_DATA_KEY, dw);
 
 	gtk_widget_set_size_request(dw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
@@ -4610,14 +4614,21 @@ static GdkContentProvider *dupe_dnd_prepare(GtkDragSource *source, gdouble, gdou
 
 struct DupeDndDropData
 {
-	DupeWindow *dw;
+	GtkWidget *window;
 	GtkWidget *widget;
 };
 
 static void dupe_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 {
 	g_autofree auto *drop_data = static_cast<DupeDndDropData *>(data);
-	DupeWindow *dw = drop_data->dw;
+	auto *dw = static_cast<DupeWindow *>(g_object_get_data(G_OBJECT(drop_data->window), DUPE_WINDOW_DATA_KEY));
+	if (!dw)
+		{
+		gdk_drop_finish(drop, GDK_ACTION_NONE);
+		g_object_unref(drop_data->window);
+		return;
+		}
+
 	auto action = GDK_ACTION_NONE;
 
 	if (dw->add_files_queue_id > 0)
@@ -4641,12 +4652,14 @@ static void dupe_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 		}
 
 	gdk_drop_finish(drop, action);
+	g_object_unref(drop_data->window);
 }
 
 static gboolean dupe_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble, gdouble, gpointer data)
 {
 	auto *drop_data = g_new(DupeDndDropData, 1);
-	drop_data->dw = static_cast<DupeWindow *>(data);
+	auto *dw = static_cast<DupeWindow *>(data);
+	drop_data->window = GTK_WIDGET(g_object_ref(dw->window));
 	drop_data->widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
 
 	dnd_read_file_list_async(drop, dupe_dnd_file_received, drop_data);

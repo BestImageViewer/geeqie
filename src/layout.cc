@@ -2566,6 +2566,7 @@ void layout_free(LayoutWindow *lw)
 		if (lw->toolbar[i]) g_object_unref(lw->toolbar[i]);
 		}
 
+	g_object_set_data(G_OBJECT(lw->window), "layout-window", nullptr);
 	gq_gtk_widget_destroy(lw->window);
 
 	if (lw->split_image_sizegroup) g_object_unref(lw->split_image_sizegroup);
@@ -2649,6 +2650,7 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 
 	lw->window = window_new(GQ_APPNAME_LC, nullptr, nullptr);
 	DEBUG_NAME(lw->window);
+	g_object_set_data(G_OBJECT(lw->window), "layout-window", lw);
 
 	GApplication *app = g_application_get_default();
 	register_main_window_actions(GTK_APPLICATION(app), (lw));
