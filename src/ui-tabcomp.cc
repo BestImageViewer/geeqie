@@ -458,9 +458,8 @@ static gboolean tab_completion_do(TabCompData *td)
 	return FALSE;
 }
 
-static gboolean tab_completion_key_pressed(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType state, gpointer data)
+static gboolean tab_completion_key_pressed(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
 {
-	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	auto td = static_cast<TabCompData *>(data);
 	gboolean stop_signal = FALSE;
 

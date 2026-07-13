@@ -340,7 +340,7 @@ void vf_selection_to_mark(ViewFile *vf, gint mark, SelectionToMarkMode mode)
  *-----------------------------------------------------------------------------
  */
 
-static FileData *vf_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
+FileData *vf_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
 {
 	switch (vf->type)
 	{

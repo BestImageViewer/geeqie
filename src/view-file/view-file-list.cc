@@ -601,17 +601,9 @@ static gboolean vflist_select_cb(GtkTreeSelection *, GtkTreeModel *store, GtkTre
 	auto vf = static_cast<ViewFile *>(data);
 	GtkTreeIter iter;
 
-	VFLIST(vf)->select_fd = nullptr;
-
 	if (!path_currently_selected && gtk_tree_model_get_iter(store, &iter, tpath))
 		{
-		g_autoptr(GtkTreePath) cursor_path = nullptr;
-		gtk_tree_view_get_cursor(GTK_TREE_VIEW(vf->listview), &cursor_path, nullptr);
-		if (cursor_path)
-			{
-			gtk_tree_model_get_iter(store, &iter, cursor_path);
-			gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &VFLIST(vf)->select_fd, -1);
-			}
+		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &VFLIST(vf)->select_fd, -1);
 		}
 
 	if (vf->layout &&
@@ -1718,6 +1710,11 @@ gboolean vflist_set_fd(ViewFile *vf, FileData *dir_fd)
 
 	file_data_unref(vf->dir_fd);
 	vf->dir_fd = file_data_ref(dir_fd);
+
+	g_clear_handle_id(&(VFLIST(vf)->select_idle_id), g_source_remove);
+	VFLIST(vf)->select_fd = nullptr;
+	vf->click_fd = nullptr;
+	gtk_tree_selection_unselect_all(gtk_tree_view_get_selection(GTK_TREE_VIEW(vf->listview)));
 
 	/* force complete reload */
 	vflist_store_clear(vf, TRUE);

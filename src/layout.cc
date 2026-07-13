@@ -2044,7 +2044,14 @@ static void layout_grid_setup(LayoutWindow *lw)
 
 		layout_tools_setup(lw, tools, files);
 
-		image_grab_focus(lw->image);
+		if (lw->options.tools_hidden || !lw->vf)
+			{
+			image_grab_focus(lw->image);
+			}
+		else
+			{
+			gtk_widget_grab_focus(lw->vf->listview);
+			}
 
 		return;
 		}
@@ -2650,6 +2657,45 @@ static gboolean move_window_to_workspace_cb(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
+static void layout_file_view_click_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
+{
+	auto lw = static_cast<LayoutWindow *>(data);
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
+	const GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
+
+	if (button != GDK_BUTTON_PRIMARY ||
+	    n_press != 1 ||
+	    (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) ||
+	    !lw->vf)
+		{
+		return;
+		}
+
+	GtkWidget *picked = gtk_widget_pick(widget, x, y, GTK_PICK_DEFAULT);
+	for (GtkWidget *work = picked; work; work = gtk_widget_get_parent(work))
+		{
+		if (work == lw->vf->listview)
+			{
+			graphene_point_t window_point{static_cast<float>(x), static_cast<float>(y)};
+			graphene_point_t file_point{};
+
+			if (!gtk_widget_compute_point(widget, lw->vf->listview, &window_point, &file_point))
+				{
+				return;
+				}
+
+			FileData *fd = vf_find_data_by_coord(lw->vf, static_cast<gint>(file_point.x), static_cast<gint>(file_point.y), nullptr);
+			if (fd)
+				{
+				layout_image_set_fd(lw, fd);
+				}
+
+			return;
+			}
+		}
+}
+
 static LayoutWindow *layout_new(const LayoutOptions &lop)
 {
 	LayoutWindow *lw;
@@ -2714,6 +2760,12 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	g_signal_connect(focus_controller, "enter",
 			 G_CALLBACK(layout_set_current_cb), lw);
 	gtk_widget_add_controller(lw->window, focus_controller);
+
+	GtkGesture *file_view_click = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(file_view_click), 0);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(file_view_click), GTK_PHASE_CAPTURE);
+	g_signal_connect(file_view_click, "pressed", G_CALLBACK(layout_file_view_click_cb), lw);
+	gtk_widget_add_controller(lw->window, GTK_EVENT_CONTROLLER(file_view_click));
 
 	layout_keyboard_init(lw, lw->window);
 
