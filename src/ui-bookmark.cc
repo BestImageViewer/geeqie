@@ -33,6 +33,7 @@
 #include <pango/pango.h>
 
 #include "compat.h"
+#include "dnd.h"
 #include "history-list.h"
 #include "intl.h"
 #include "layout.h"
@@ -74,12 +75,19 @@ struct BookMarkData
 	std::string key;
 
 	BookmarkSelectFunc select_func;
+	BookmarkDropFunc drop_func;
 
 	gboolean no_defaults;
 	gboolean editable;
 	gboolean only_directories;
 
 	GtkWidget *active_button;
+};
+
+struct BookmarkDropData
+{
+	GtkWidget *list;
+	gchar *path;
 };
 
 struct BookPropData
@@ -190,6 +198,57 @@ static void bookmark_select_cb(GtkWidget *button, gpointer data)
 	if (!b) return;
 
 	if (bm->select_func) bm->select_func(b->path.c_str());
+}
+
+static void bookmark_drop_data_free(BookmarkDropData *drop_data)
+{
+	g_object_unref(drop_data->list);
+	g_free(drop_data->path);
+	g_free(drop_data);
+}
+
+static void bookmark_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
+{
+	auto *drop_data = static_cast<BookmarkDropData *>(data);
+	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(drop_data->list), BOOKMARK_DATA_KEY));
+	auto action = GDK_ACTION_NONE;
+
+	if (bm && bm->drop_func && list)
+		{
+		bm->drop_func(drop_data->path, list);
+		action = GDK_ACTION_COPY;
+		}
+
+	gdk_drop_finish(drop, action);
+	bookmark_drop_data_free(drop_data);
+}
+
+static gboolean bookmark_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble, gdouble, gpointer data)
+{
+	auto *bm = static_cast<BookMarkData *>(data);
+	GtkWidget *button = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
+	auto *b = static_cast<BookButtonData *>(g_object_get_data(G_OBJECT(button), "bookbuttondata"));
+
+	if (!bm || !bm->drop_func || !b) return FALSE;
+
+	auto *drop_data = g_new(BookmarkDropData, 1);
+	drop_data->list = GTK_WIDGET(g_object_ref(bm->widget));
+	drop_data->path = g_strdup(b->path.c_str());
+
+	dnd_read_file_list_async(drop, bookmark_dnd_file_received, drop_data);
+
+	return TRUE;
+}
+
+static void bookmark_dnd_init(BookMarkData *bm, GtkWidget *button)
+{
+	if (!bm->drop_func) return;
+
+	static const char *mime_types[] = {"text/uri-list"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	g_signal_connect(drop_target, "drop", G_CALLBACK(bookmark_dnd_drop), bm);
+	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(drop_target));
 }
 
 static void bookmark_edit_ok_cb(GenericDialog *, gpointer data)
@@ -503,6 +562,8 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 
 	g_signal_connect(G_OBJECT(button), "clicked",
 	                 G_CALLBACK(bookmark_select_cb), bm);
+	bookmark_dnd_init(bm, button);
+
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(bookmark_gesture_press_cb), bm);
@@ -596,6 +657,7 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 	auto *bm = new BookMarkData();
 	bm->key = key ? key : "bookmarks";
 	bm->select_func = select_func;
+	bm->drop_func = nullptr;
 	bm->no_defaults = FALSE;
 	bm->editable = TRUE;
 	bm->only_directories = FALSE;
@@ -666,6 +728,17 @@ void bookmark_list_set_only_directories(GtkWidget *list, gboolean only_directori
 	if (!bm) return;
 
 	bm->only_directories = only_directories;
+}
+
+void bookmark_list_set_drop_func(GtkWidget *list, const BookmarkDropFunc &drop_func)
+{
+	BookMarkData *bm;
+
+	bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(list), BOOKMARK_DATA_KEY));
+	if (!bm) return;
+
+	bm->drop_func = drop_func;
+	bookmark_populate(bm);
 }
 
 void bookmark_list_add(GtkWidget *list, const gchar *name, const gchar *path)

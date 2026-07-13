@@ -328,6 +328,56 @@ static void bar_sort_bookmark_select_collection(SortData *sd, const gchar *path)
 	g_list_foreach(list, reinterpret_cast<GFunc>(collect_manager_add), const_cast<gchar *>(path));
 }
 
+static void bar_sort_bookmark_drop_folder(SortData *sd, const gchar *path, GList *list)
+{
+	if (!isdir(path) || !list) return;
+
+	bar_sort_undo_set(sd, list, path);
+
+	switch (sd->action)
+		{
+		case BarSort::COPY:
+			file_util_copy_simple(filelist_copy(list), path, sd->lw->window);
+			break;
+
+		case BarSort::MOVE:
+			file_util_move_simple(filelist_copy(list), path, sd->lw->window);
+			break;
+
+		case BarSort::FILTER:
+			file_util_start_filter_from_filelist(sd->filter_key, filelist_copy(list), path, sd->lw->window);
+			break;
+
+		default:
+			break;
+		}
+}
+
+static void bar_sort_bookmark_drop_collection(SortData *sd, const gchar *path, GList *list)
+{
+	if (!path || !list) return;
+
+	bar_sort_undo_set(sd, list, path);
+	g_free(sd->undo_collection);
+	sd->undo_collection = g_strdup(path);
+
+	g_list_foreach(list, reinterpret_cast<GFunc>(collect_manager_add), const_cast<gchar *>(path));
+}
+
+static void bar_sort_bookmark_drop(SortData *sd, const gchar *path, GList *list)
+{
+	if (!path || !list) return;
+
+	if (sd->mode == BarSort::MODE_FOLDER)
+		{
+		bar_sort_bookmark_drop_folder(sd, path, list);
+		}
+	else
+		{
+		bar_sort_bookmark_drop_collection(sd, path, list);
+		}
+}
+
 static void bar_sort_set_action(SortData *sd, BarSort::Action action, const gchar *filter_key)
 {
 	sd->action = action;
@@ -614,6 +664,10 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 			}
 	};
 	sd->bookmarks = bookmark_list_new(SORT_KEY_FOLDERS, bar_sort_bookmark_select);
+	bookmark_list_set_drop_func(sd->bookmarks, [sd](const gchar *path, GList *list)
+	{
+		bar_sort_bookmark_drop(sd, path, list);
+	});
 	DEBUG_NAME(sd->bookmarks);
 	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), sd->bookmarks, TRUE, TRUE, 0);
 	gtk_widget_show(sd->bookmarks);
