@@ -34,6 +34,7 @@ SHOULD_TAKE_SCREENSHOT = False
 
 MAX_GEEQIE_INIT_TIME_S = 10
 MAX_REMOTE_CMD_TIME_S = 10
+MAX_IMAGE_LOAD_TIME_S = 30
 MAX_GEEQIE_SHUTDOWN_TIME_S = 10
 
 class GeeqieTestError(Exception):
@@ -103,6 +104,30 @@ def main(argv) -> int:
     # All geeqie commands start with this.
     geeqie_cmd_prefix = ["xvfb-run", "--auto-servernum", geeqie_exe]
 
+    def run_remote_command(command: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+                args=[*geeqie_cmd_prefix, command],
+                capture_output=True, text=True, timeout=MAX_REMOTE_CMD_TIME_S)
+
+    def wait_for_file_info() -> subprocess.CompletedProcess:
+        """Wait until Geeqie reports that the current image has been loaded."""
+        deadline = time.monotonic() + MAX_IMAGE_LOAD_TIME_S
+
+        while True:
+            # After the GTK4 migration, fd->pixbuf can still be null at this
+            # point. This extra command forces the pixbuf to be created.
+            run_remote_command("--get-render-intent")
+            file_info_result = run_remote_command("--get-file-info")
+
+            if ("Class: " in file_info_result.stdout
+                    and "Class: Unknown" not in file_info_result.stdout):
+                return file_info_result
+
+            if time.monotonic() >= deadline:
+                return file_info_result
+
+            time.sleep(1)
+
     # Start geeqie and have it open the provided test image path.
     # TODO(xsdg): Note that killing the `xvfb-run` script will not forward that
     # signal to the geeqie process.  See
@@ -126,15 +151,7 @@ def main(argv) -> int:
         if geeqie_proc.poll() is not None:
             raise GeeqieTestError("2-second post-init check", geeqie_proc)
 
-## @FIXME After the GTK4 migration, at this point fd->pixbuf was null.
-## This extra command forces the pixbuf to be created
-        file_info_result = subprocess.run(
-                args=[*geeqie_cmd_prefix, "--get-render-intent"],
-                capture_output=True, text=True, timeout=MAX_REMOTE_CMD_TIME_S)
-
-        file_info_result = subprocess.run(
-                args=[*geeqie_cmd_prefix, "--get-file-info"],
-                capture_output=True, text=True, timeout=MAX_REMOTE_CMD_TIME_S)
+        file_info_result = wait_for_file_info()
 
         # Check if Geeqie crashed (which would cause xvfb-run to terminate)
         time.sleep(1)
@@ -161,7 +178,8 @@ def main(argv) -> int:
             raise GeeqieTestError("shutdown", geeqie_proc)
 
         # Check if file was recognized correctly or not
-        if "Class: Unknown" in file_info_result.stdout:
+        if ("Class: Unknown" in file_info_result.stdout
+                or "Class: " not in file_info_result.stdout):
             raise GeeqieTestError("file was not loaded correctly", geeqie_proc=None)
 
     except subprocess.TimeoutExpired as e:
