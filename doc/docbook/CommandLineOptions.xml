@@ -7,8 +7,8 @@
 <refmeta>
 <refentrytitle>GEEQIE</refentrytitle>
 <manvolnum>1</manvolnum>
-<refmiscinfo class='source'>June 2026</refmiscinfo>
-<refmiscinfo class='manual'>warning: inline pixbuf error: Unrecognized image file format</refmiscinfo>
+<refmiscinfo class='source'>July 2026</refmiscinfo>
+<refmiscinfo class='manual'>Geeqie 3.0 GTK4</refmiscinfo>
 </refmeta>
 <refnamediv>
 <refname>Geeqie</refname>
@@ -28,7 +28,7 @@ zooming, panning, thumbnails and sorting images into collections.</para>
 
 <para>Geeqie is an image viewer.</para>
 
-<para>Version: Geeqie 2.9</para>
+<para>Version: Geeqie 3.0</para>
 </refsect2>
 
 <refsect2 id='help_options'><title>Help Options:</title>
@@ -49,12 +49,6 @@ zooming, panning, thumbnails and sorting images into collections.</para>
   <term><emphasis role='strong' remap='B'>--help-gapplication</emphasis></term>
   <listitem>
 <para>Show GApplication options</para>
-  </listitem>
-  </varlistentry>
-  <varlistentry>
-  <term><emphasis role='strong' remap='B'>--help-gtk</emphasis></term>
-  <listitem>
-<para>Show GTK+ Options</para>
   </listitem>
   </varlistentry>
 </variablelist>
@@ -378,12 +372,6 @@ zooming, panning, thumbnails and sorting images into collections.</para>
   <term><emphasis role='strong' remap='B'>--view=</emphasis>&lt;FILE&gt;</term>
   <listitem>
 <para>open FILE in new window</para>
-  </listitem>
-  </varlistentry>
-  <varlistentry>
-  <term><emphasis role='strong' remap='B'>--display</emphasis>=<emphasis remap='I'>DISPLAY</emphasis></term>
-  <listitem>
-<para>X display to use</para>
 
 <para>All other command line parameters are used as plain files if they exist, or a URL or a folder.
 The name of a collection, with or without either path or extension (.gqv) may be used.</para>
@@ -412,8 +400,6 @@ Note that bash command line completion does not work in this mode.</para>
   </listitem>
   </varlistentry>
 </variablelist>
-
-<para>Geeqie 2.9 GTK3</para>
 </refsect2>
 </refsect1>
 
