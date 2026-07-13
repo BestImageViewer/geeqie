@@ -23,7 +23,6 @@
 
 #include <unistd.h>
 
-#include <array>
 #include <cstring>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -56,18 +55,13 @@
 namespace
 {
 
+using PathList = std::list<std::string>;
+
 struct PixmapErrors
 {
 	GdkPixbuf *error;
 	GdkPixbuf *warning;
 	GdkPixbuf *apply;
-};
-
-struct ClipboardData
-{
-	GList *path_list; /**< g_strdup(fd->path) */
-	gboolean quoted;
-	ClipboardAction action;
 };
 
 constexpr gint DIALOG_DEF_IMAGE_DIM_X = 150;
@@ -3116,53 +3110,47 @@ void file_util_rename_dir(FileData *source_fd, const gchar *new_path, GtkWidget 
 	file_util_rename_dir_full(source_fd, new_path, parent, UtilityPhase::ENTERING, done_func);
 }
 
-static GdkContentProvider * clipboard_build_provider(ClipboardData *cbd)
+static GdkContentProvider *clipboard_build_provider(const PathList &path_list, gboolean quoted, ClipboardAction action)
 {
-	GList *work = cbd->path_list;
-
 	/* Plain text version */
 	g_autoptr(GString) text = g_string_new("");
 
-	while (work)
+	for (auto work = path_list.cbegin(); work != path_list.cend(); ++work)
 		{
-		const auto *path = (const gchar *)work->data;
-		work = work->next;
-
-		if (cbd->quoted)
+		if (quoted)
 			{
-			g_autofree gchar *q = g_shell_quote(path);
+			g_autofree gchar *q = g_shell_quote(work->c_str());
 			g_string_append(text, q);
 			}
 		else
 			{
-			g_string_append(text, path);
+			g_string_append(text, work->c_str());
 			}
 
-		if (work)
+		if (std::next(work) != path_list.cend())
 			{
 			g_string_append_c(text, ' ');
 			}
 		}
 
-	g_autoptr(GdkContentProvider) text_provider =
-		gdk_content_provider_new_typed(G_TYPE_STRING, g_strdup(text->str));
+	GdkContentProvider *text_provider =
+	        gdk_content_provider_new_typed(G_TYPE_STRING, text->str);
 
 	/* GNOME copied-files format */
-	g_autoptr(GString) copied = g_string_new(cbd->action == ClipboardAction::CUT ? "cut" : "copy");
+	g_autoptr(GString) copied = g_string_new(action == ClipboardAction::CUT ? "cut" : "copy");
 
-	work = cbd->path_list;
-	while (work)
+	for (const std::string &path : path_list)
 		{
-		g_autofree gchar *uri =
-			g_filename_to_uri((gchar *)work->data, nullptr, nullptr);
+		g_autofree gchar *uri = g_filename_to_uri(path.c_str(), nullptr, nullptr);
 		g_string_append(copied, "\n");
 		g_string_append(copied, uri);
-		work = work->next;
 		}
 
-	g_autoptr(GdkContentProvider) copied_provider =
-		gdk_content_provider_new_for_bytes("application/x-special-gnome-copied-files",
-						     g_bytes_new(copied->str, copied->len));
+	g_autoptr(GBytes) copied_bytes = g_bytes_new(copied->str, copied->len);
+
+	GdkContentProvider *copied_provider =
+	        gdk_content_provider_new_for_bytes("application/x-special-gnome-copied-files",
+	                                           copied_bytes);
 
 	GdkContentProvider *providers[] = {
 		text_provider,
@@ -3172,53 +3160,39 @@ static GdkContentProvider * clipboard_build_provider(ClipboardData *cbd)
 	return gdk_content_provider_new_union(providers, G_N_ELEMENTS(providers));
 }
 
-enum class GqClipboardTarget
+static void path_list_to_clipboard(const PathList &path_list, gboolean quoted, ClipboardAction action)
 {
-	Primary,
-	Clipboard
-};
-
-
-static gboolean path_list_to_clipboard(GList *path_list, gboolean quoted, ClipboardAction action, GqClipboardTarget target)
-{
-	ClipboardData cbd = {};
-	cbd.path_list = path_list;
-	cbd.quoted = quoted;
-	cbd.action = action;
-
 	GdkDisplay *display = gdk_display_get_default();
 	if (!display)
 		{
-		return FALSE;
+		return;
 		}
 
-	GdkClipboard *clipboard = nullptr;
-
-	switch (target)
-		{
-		case GqClipboardTarget::Primary:
-			clipboard = gdk_display_get_primary_clipboard(display);
-			break;
-		case GqClipboardTarget::Clipboard:
-			clipboard = gdk_display_get_clipboard(display);
-			break;
-		}
-
-	if (!clipboard)
-		{
-		return FALSE;
-		}
-
-	GdkContentProvider *provider = clipboard_build_provider(&cbd);
+	g_autoptr(GdkContentProvider) provider = clipboard_build_provider(path_list, quoted, action);
 	if (!provider)
 		{
-		return FALSE;
+		return;
 		}
 
-	gdk_clipboard_set_content(clipboard, provider);
-	g_object_unref(provider);
+	if (options->clipboard_selection == CLIPBOARD_PRIMARY ||
+	    options->clipboard_selection == CLIPBOARD_BOTH)
+		{
+		GdkClipboard *clipboard = gdk_display_get_primary_clipboard(display);
+		if (clipboard)
+			{
+			gdk_clipboard_set_content(clipboard, provider);
+			}
+		}
 
-	return TRUE;
+	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD ||
+	    options->clipboard_selection == CLIPBOARD_BOTH)
+		{
+		GdkClipboard *clipboard = gdk_display_get_clipboard(display);
+		if (clipboard)
+			{
+			gdk_clipboard_set_content(clipboard, provider);
+			}
+		}
 }
 
 /**
@@ -3231,55 +3205,30 @@ void file_util_copy_path_to_clipboard(FileData *fd, gboolean quoted, ClipboardAc
 {
 	if (!fd || !*fd->path) return;
 
-	if (options->clipboard_selection == CLIPBOARD_PRIMARY ||
-	    options->clipboard_selection == CLIPBOARD_BOTH)
-		{
-		GList *path_list = g_list_append(nullptr, g_strdup(fd->path));
-		path_list_to_clipboard(path_list, quoted, action, GqClipboardTarget::Primary);
-		}
-
-	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD ||
-	    options->clipboard_selection == CLIPBOARD_BOTH)
-		{
-		GList *path_list = g_list_append(nullptr, g_strdup(fd->path));
-		path_list_to_clipboard(path_list, quoted, action, GqClipboardTarget::Clipboard);
-		}
+	path_list_to_clipboard({ fd->path }, quoted, action);
 }
 
 /**
  * @brief
- * @param fd_list List of fd
+ * @param fd_list List of FileData, takes ownership
  * @param quoted
  * @param action
  */
-void file_util_path_list_to_clipboard(GList *fd_list, gboolean quoted, ClipboardAction action)
+void file_util_path_list_to_clipboard(FileDataList *fd_list, gboolean quoted, ClipboardAction action)
 {
 	// FIXME Is it safe to use FileList::to_path_list()?
-	static const auto get_path_list = [](GList *fd_list)
+	static const auto get_path_list = [](gpointer data, gpointer user_data)
 	{
-		GList *path_list = nullptr;
+		auto *fd = static_cast<FileData *>(data);
+		if (!fd || !*fd->path) return;
 
-		for (GList *work = fd_list; work; work = work->next)
-			{
-			auto *fd = static_cast<FileData *>(work->data);
-
-			if (!fd || !*fd->path) continue;
-
-			path_list = g_list_append(path_list, g_strdup(fd->path));
-			}
-
-		return path_list;
+		auto *path_list = static_cast<PathList *>(user_data);
+		path_list->emplace_back(fd->path);
 	};
+	PathList path_list;
+	g_list_foreach(fd_list, get_path_list, &path_list);
 
-	if (options->clipboard_selection == CLIPBOARD_PRIMARY || options->clipboard_selection == CLIPBOARD_BOTH)
-		{
-		path_list_to_clipboard(get_path_list(fd_list), quoted, action, GqClipboardTarget::Primary);
-		}
-
-	if (options->clipboard_selection == CLIPBOARD_CLIPBOARD || options->clipboard_selection == CLIPBOARD_BOTH)
-		{
-		path_list_to_clipboard(get_path_list(fd_list), quoted, action, GqClipboardTarget::Clipboard);
-		}
+	path_list_to_clipboard(path_list, quoted, action);
 
 	file_data_list_free(fd_list);
 }
