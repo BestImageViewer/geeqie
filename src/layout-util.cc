@@ -586,7 +586,7 @@ static void layout_menu_select_rectangle_cb(GSimpleAction *action, GVariant *val
 	gboolean active = g_variant_get_boolean(value);
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), value);
 
-	options->draw_rectangle = !active;
+	options->draw_rectangle = active;
 }
 
 static void layout_menu_split_pane_sync_cb(GSimpleAction *action, GVariant *, gpointer       data)
