@@ -392,30 +392,14 @@ static void bar_expander_cb(GObject *object, GParamSpec *, gpointer)
 		}
 }
 
-static void bar_expander_button_clicked_cb(GtkButton *, gpointer data)
-{
-	auto *expander = GTK_EXPANDER(data);
-
-	gtk_expander_set_expanded(expander, !gtk_expander_get_expanded(expander));
-}
-
 static GtkWidget *bar_expander_label_widget_new(GtkWidget *expander, GtkWidget *title)
 {
-	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	GtkWidget *button = gtk_button_new();
-	GtkWidget *image = gtk_image_new_from_icon_name(gtk_expander_get_expanded(GTK_EXPANDER(expander)) ? GQ_ICON_PAN_UP : GQ_ICON_PAN_DOWN);
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-	gtk_button_set_child(GTK_BUTTON(button), image);
-	gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
-	gtk_widget_set_tooltip_text(button, _("Expand or collapse pane"));
-	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(bar_expander_button_clicked_cb), expander);
-
-	gtk_box_append(GTK_BOX(box), button);
+	gtk_widget_set_tooltip_text(expander, _("Expand or collapse pane"));
 	gtk_box_append(GTK_BOX(box), title);
 	gtk_widget_set_hexpand(title, TRUE);
 	gtk_widget_set_halign(title, GTK_ALIGN_FILL);
-
-	g_object_set_data(G_OBJECT(expander), "bar_expander_button_image", image);
 
 	return box;
 }
