@@ -1,0 +1,121 @@
+name: Geeqie x86_64 AppImage build
+run-name: ${{ github.actor }} is running Geeqie x86_64 AppImage build
+on: [push]
+
+permissions:
+  contents: write
+
+jobs:
+  Build-AppImage:
+    runs-on: ubuntu-26.04
+
+    container:
+      image: ubuntu:26.04
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            appstream \
+            build-essential \
+            curl \
+            desktop-file-utils \
+            docbook-xsl \
+            dpkg-dev \
+            file \
+            findutils \
+            fop \
+            fuse \
+            gettext \
+            git \
+            libarchive-dev \
+            libcfitsio-dev \
+            libdjvulibre-dev \
+            libdw-dev \
+            libdwarf-dev \
+            libffmpegthumbnailer-dev \
+            libgexiv2-dev \
+            libgtk-4-dev \
+            libheif-dev \
+            libimath-dev \
+            libjxl-dev \
+            liblua5.3-dev \
+            libomp-dev \
+            libopenexr-dev \
+            libopenjp2-7-dev \
+            libpoppler-glib-dev \
+            libraw-dev \
+            librsvg2-dev \
+            libshumate-dev \
+            libspelling-1-dev \
+            libunwind-dev \
+            libwebp-dev \
+            libwebp7 \
+            libxml2-utils \
+            meson \
+            ninja-build \
+            pandoc \
+            patchelf \
+            pkgconf \
+            python3 \
+            python3-pip \
+            python3-venv \
+            wget \
+            xsltproc \
+            yelp-tools
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mark repo as safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Meson setup
+        run: meson setup build --prefix=/usr --datadir=share
+
+      - name: Ninja compile
+        run: DESTDIR="${{ github.workspace }}/AppDir" ninja -C build install
+
+      # The linuxdeploy-plugin-gtk forces the backend to be X11, as it was considered
+      # that Wayland has problems. Delete this and let the user choose.
+      - name: Download linuxdeploy and plugin
+        run: |
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage
+          wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
+          chmod +x linuxdeploy-plugin-gtk.sh
+          sed -i '/GDK_BACKEND/d' linuxdeploy-plugin-gtk.sh
+
+      - name: Extract linuxdeploy to avoid FUSE
+        run: |
+          chmod +x linuxdeploy-x86_64.AppImage
+          ./linuxdeploy-x86_64.AppImage --appimage-extract
+          mv squashfs-root linuxdeploy
+
+      - name: Build AppImage
+        run: |
+          DEPLOY_GTK_VERSION=4 ./linuxdeploy/AppRun --appdir "${{ github.workspace }}/AppDir" \
+            --desktop-file "${{ github.workspace }}/AppDir/usr/share/applications/org.geeqie.Geeqie.desktop" \
+            --plugin gtk \
+            --output appimage
+          mv Geeqie-x86_64.AppImage Geeqie-latest-x86_64.AppImage
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          tag: continuous
+          name: Continuous build
+          prerelease: true
+          artifacts: "Geeqie-latest-x86_64.AppImage"
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: logs-all-build-appimage
+          path: ${{ github.workspace }}/build/meson-logs/*.txt
+          retention-days: 5
