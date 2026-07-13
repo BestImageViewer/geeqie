@@ -57,6 +57,48 @@ def start_xephyr(xargs: list) -> list[subprocess.Popen, str]:
     return [xephyr_proc, xephyr_display]
 
 
+def start_weston(wargs: list, env: dict) -> [subprocess.Popen, dict]:
+    """Starts a weston instance with the specified arguments."""
+    # Argument merging behavior:
+    default_weston_args = [['--xwayland']]
+
+    weston_args = [arg.split("=", 2) for arg in wargs]
+    weston_arg_keys = set([arg[0] for arg in weston_args])
+
+    # Prepend default args to weston_args only-if they haven't been overridden.
+    accepted_defaults = [arg for arg in default_weston_args
+                         if arg[0] not in weston_arg_keys]
+
+    # Concatenate and flatten final args list.
+    weston_args = itertools.chain.from_iterable(accepted_defaults + weston_args)
+
+    home_path = pathlib.Path(env["HOME"])
+    weston_env_file = home_path / "weston_env.txt"
+    capture_cmd = home_path / "bin/capture_env_and_block.sh"
+    weston_cmd = ["weston", *weston_args, "--", str(capture_cmd), str(weston_env_file)]
+
+    if DEBUG_MODE:
+        print("Weston: " + repr(weston_cmd))
+        dbg_arg = {}
+    else:
+        dbg_arg = {"stderr": subprocess.DEVNULL}
+
+    weston_proc = subprocess.Popen(weston_cmd, **dbg_arg)
+    time.sleep(1)
+
+    # Reads and parses captured weston env to find DISPLAY and WAYLAND_DISPLAY.
+    with open(weston_env_file, 'r', encoding='utf-8') as weston_env:
+        weston_lines = weston_env.read().splitlines()
+    weston_env = dict([line.split('=', 1) for line in weston_lines])
+    weston_child_env = {k: weston_env[k] for k in ['DISPLAY', 'WAYLAND_DISPLAY'] if k in weston_env}
+
+    if DEBUG_MODE:
+        print("weston env: " + repr(weston_env))
+        print("weston child env: " + repr(weston_child_env))
+
+    return [weston_proc, weston_child_env]
+
+
 def add_symlink(parent_dir: pathlib.Path, spec: str):
     """Creates a symlink in the specified location.
 
@@ -85,10 +127,13 @@ def add_symlink(parent_dir: pathlib.Path, spec: str):
 
 # Inspired by isolate-test.sh, but intended for interactive development and diagnostics
 def main(args, passthrough_argv) -> int:
+    script_path = (pathlib.Path.cwd() / __file__).absolute()
+
     # We need to clean this up by hand, because there's a race condition with dbus
     # infrastructure shutting down asynchronously, so it often takes two attempts.
-    test_home = tempfile.TemporaryDirectory(prefix="gq_xephyr_")
+    test_home = tempfile.TemporaryDirectory(prefix="gq_isolated_disp_")
     xephyr_proc = None
+    weston_proc = None
     try:
         env = {}
 
@@ -122,29 +167,49 @@ def main(args, passthrough_argv) -> int:
         if bwrap_path:
             add_symlink(env["HOME"], f"bin/bwrap={bwrap_path}")
 
-        xephyr_proc, xephyr_display = start_xephyr(args.xarg)
-        env["DISPLAY"] = xephyr_display
+        # Weston helper script to forward environment variables to the child process
+        if args.server == "weston":
+            capture_env_path = script_path.parent / "capture_env_and_block.sh"
+            add_symlink(env["HOME"], f"bin/capture_env_and_block.sh={capture_env_path}")
 
         str_env = {k: str(v) for k, v in env.items()}
-        print("Variables in isolated environment:", file=sys.stderr)
+        print("Non-display variables in isolated environment:", file=sys.stderr)
         subprocess.run(["dbus-run-session", "--", "env"], env=str_env, stdout=sys.stderr)
         print("", file=sys.stderr)
 
-        # TODO: Use single dbus-run-session?
-        # Optionally starts a window manager.
-        # We don't clean it up manually; it should exit when the Xephyr server dies.
-        if args.wm:
-            wm_proc = subprocess.Popen(args.wm, env=str_env, stdout=sys.stderr)
-            time.sleep(1)
+        if args.server == "Xephyr":
+            xephyr_proc, xephyr_display = start_xephyr(args.xarg)
+            str_env["DISPLAY"] = env["DISPLAY"] = xephyr_display
+            print(f"Added DISPLAY={env["DISPLAY"]} to environment", file=sys.stderr)
+
+            # TODO: Use single dbus-run-session?
+            # Optionally starts a window manager.
+            # We don't clean it up manually; it should exit when the Xephyr server dies.
+            if args.wm:
+                wm_proc = subprocess.Popen(args.wm, env=str_env, stdout=sys.stderr)
+                time.sleep(1)
+
+        elif args.server == "weston":
+            weston_proc, weston_child_env = start_weston(args.warg, str_env)
+            str_env.update(weston_child_env)
+            env.update(weston_child_env)
+
+        else:
+            raise RuntimeError(f"Unknown server: {args.server}")
 
         run_cmd = ["dbus-run-session", "--", *passthrough_argv]
         print(f"running: {repr(run_cmd)}", file=sys.stderr)
         subprocess.run(run_cmd, env=str_env)
 
+
     finally:
         if xephyr_proc and xephyr_proc.poll() is None:
             print("Terminating Xephyr…", file=sys.stderr)
             xephyr_proc.terminate()
+
+        if weston_proc and weston_proc.poll() is None:
+            print("Terminating weston…", file=sys.stderr)
+            weston_proc.terminate()
 
         try:
             test_home.cleanup()
@@ -157,12 +222,29 @@ def main(args, passthrough_argv) -> int:
 
     return 0
 
+
+# A version of optparse.OptionParser that doesn't drop newlines in the epilog.
+class VerbatimEpilogOptionParser(optparse.OptionParser):
+    def format_epilog(self, formatter):
+        return self.epilog
+
+
 if __name__ == "__main__":
+    script_name = os.path.basename(sys.argv[0])
     # Using optparse instead of argparse to correctly handle Xephyr args that start with
     # a dash.  See https://github.com/python/cpython/issues/53580
-    parser = optparse.OptionParser()
+    parser = VerbatimEpilogOptionParser(
+        epilog=("\n\nSample commands:\n"
+                     f'Xephyr:  {script_name} --wm xfwm4 --link_path imgs="${{PWD}}/build/test-images.p/images/" --xarg -screen=2000x1500 -- ~+/build/src/geeqie --file=imgs/\n'
+                     f'weston:  {script_name} --server=weston --link_path imgs="${{PWD}}/build/test-images.p/images/" --warg --scale=2 -- ~+/build/src/geeqie --file=imgs/\n'
+                    ))
+
+    parser.add_option("--server", type="choice", choices=["Xephyr", "weston"], default="Xephyr",
+			help="Server, 'Xephyr' or 'weston'")
     parser.add_option("--xarg", action="append", default=[],
                         help="Arg for Xephyr server; repeatable. Use key=value when needed.")
+    parser.add_option("--warg", action="append", default=[],
+                        help="Arg for weston compositor; repeatable. Use key=value when needed.")
     parser.add_option("--debug", action="store_true", help="Enables harness debug logging")
     parser.add_option("--link_path", action="append", default=[],
                         help=("File or dir to symlink into the isolated homedir.  Use "
