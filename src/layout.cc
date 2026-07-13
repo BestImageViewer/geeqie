@@ -2688,6 +2688,8 @@ static void layout_file_view_click_cb(GtkGestureClick *gesture, gint n_press, gd
 			FileData *fd = vf_find_data_by_coord(lw->vf, static_cast<gint>(file_point.x), static_cast<gint>(file_point.y), nullptr);
 			if (fd)
 				{
+				gtk_widget_grab_focus(lw->vf->listview);
+				vf_click_at_point(lw->vf, file_point.x, file_point.y, state);
 				layout_image_set_fd(lw, fd);
 				}
 

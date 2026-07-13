@@ -351,6 +351,22 @@ FileData *vf_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter)
 	return nullptr;
 }
 
+void vf_click_at_point(ViewFile *vf, gdouble x, gdouble y, GdkModifierType state)
+{
+	if (!vf) return;
+
+	const GqMouseButtonEvent event{
+		GDK_BUTTON_PRIMARY,
+		x,
+		y,
+		state,
+		1
+	};
+
+	vf_press_cb(vf->listview, &event, vf);
+	vf_release_cb(vf->listview, &event, vf);
+}
+
 static GdkContentProvider *vf_dnd_prepare(GtkDragSource *, gdouble x, gdouble y, gpointer data)
 {
 	auto *vf = static_cast<ViewFile *>(data);

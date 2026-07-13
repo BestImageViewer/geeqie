@@ -49,6 +49,7 @@ struct GQvCellRendererIcon
 	PangoColor foreground;
 	PangoColor background;
 	gboolean focused;
+	gboolean selected;
 
 	gint fixed_width;
 	gint fixed_height;

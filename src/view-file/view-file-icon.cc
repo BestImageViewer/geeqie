@@ -1862,6 +1862,7 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 		             "cell-background-set", FALSE,
 		             "foreground-set", FALSE,
 		             "has-focus", FALSE,
+		             "selected", FALSE,
 		             NULL);
 		return;
 		}
@@ -1911,6 +1912,7 @@ static void vficon_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *cell,
 	             "cell-background-set", FALSE,
 	             "foreground-set", FALSE,
 	             "has-focus", VFICON(vf)->focus_fd == fd,
+	             "selected", !!(fd->selected & SELECTION_SELECTED),
 	             NULL);
 }
 

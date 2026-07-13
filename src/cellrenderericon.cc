@@ -88,6 +88,7 @@ enum {
 	PROP_BACKGROUND_GDK,
 	PROP_FOREGROUND_GDK,
 	PROP_FOCUSED,
+	PROP_SELECTED,
 	PROP_FIXED_WIDTH,
 	PROP_FIXED_HEIGHT,
 
@@ -201,6 +202,14 @@ gqv_cell_renderer_icon_class_init(GQvCellRendererIconClass *icon_class)
 					g_param_spec_boolean("has_focus",
 							"Focus",
 							"Draw focus indicator",
+							FALSE,
+							G_PARAM_READWRITE));
+
+	g_object_class_install_property(object_class,
+					PROP_SELECTED,
+					g_param_spec_boolean("selected",
+							"Selected",
+							"Draw selected state",
 							FALSE,
 							G_PARAM_READWRITE));
 
@@ -345,6 +354,9 @@ gqv_cell_renderer_icon_get_property(GObject	*object,
 	case PROP_FOCUSED:
 		g_value_set_boolean(value, cellicon->focused);
 		break;
+	case PROP_SELECTED:
+		g_value_set_boolean(value, cellicon->selected);
+		break;
 	case PROP_FIXED_WIDTH:
 		g_value_set_int(value, cellicon->fixed_width);
 		break;
@@ -461,6 +473,9 @@ gqv_cell_renderer_icon_set_property(GObject		*object,
 		break;
 	case PROP_FOCUSED:
 		cellicon->focused = g_value_get_boolean(value);
+		break;
+	case PROP_SELECTED:
+		cellicon->selected = g_value_get_boolean(value);
 		break;
 	case PROP_FIXED_WIDTH:
 		cellicon->fixed_width = g_value_get_int(value);
@@ -703,7 +718,7 @@ static void gqv_cell_renderer_icon_snapshot(GtkCellRenderer *cell,
 	cell_rect.width -= xpad * 2;
 	cell_rect.height -= ypad * 2;
 
-	if ((flags & GTK_CELL_RENDERER_SELECTED) == GTK_CELL_RENDERER_SELECTED)
+	if ((flags & GTK_CELL_RENDERER_SELECTED) == GTK_CELL_RENDERER_SELECTED || cellicon->selected)
 		{
 		if (gtk_widget_has_focus(widget))
 			state = GTK_STATE_FLAG_SELECTED;
@@ -720,6 +735,11 @@ static void gqv_cell_renderer_icon_snapshot(GtkCellRenderer *cell,
 	gtk_style_context_set_state(context, state);
 	graphene_rect_init(&bounds, cell_area->x, cell_area->y, cell_area->width, cell_area->height);
 	cr = gtk_snapshot_append_cairo(snapshot, &bounds);
+
+	if ((flags & GTK_CELL_RENDERER_SELECTED) == GTK_CELL_RENDERER_SELECTED || cellicon->selected)
+		{
+		gtk_render_background(context, cr, cell_area->x, cell_area->y, cell_area->width, cell_area->height);
+		}
 
 	if (pixbuf)
 		{
