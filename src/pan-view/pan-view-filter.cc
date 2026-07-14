@@ -39,6 +39,9 @@
 namespace
 {
 
+#define FILTER_MODE_KEY "filter_mode"
+#define SHORT_MODE_KEY "short_mode"
+
 enum PanViewFilterMode {
 	PAN_VIEW_FILTER_REQUIRE,
 	PAN_VIEW_FILTER_EXCLUDE,
@@ -86,21 +89,20 @@ void pan_filter_kw_button_cb(GtkButton *widget, gpointer data)
 
 void pan_filter_activate_cb(PanWindow *pw, const gchar *text)
 {
-	GtkWidget *kw_button;
 	PanViewFilterUi *ui = pw->filter_ui;
-	GtkTreeIter iter;
 
 	if (!text) return;
 
+	g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(ui->filter_mode_drop_down)));
+	if (!item) return;
+
 	// Get all relevant state and reset UI.
-	GtkTreeModel *filter_mode_model = gtk_combo_box_get_model(GTK_COMBO_BOX(ui->filter_mode_combo));
-	gtk_combo_box_get_active_iter(GTK_COMBO_BOX(ui->filter_mode_combo), &iter);
 	gq_gtk_entry_set_text(GTK_ENTRY(ui->filter_entry), "");
 	tab_completion_append_to_history(ui->filter_entry, text);
 
 	// Add new filter element.
-	auto element = g_new0(PanViewFilterElement, 1);
-	gtk_tree_model_get(filter_mode_model, &iter, 0, &element->mode, -1);
+	auto *element = g_new0(PanViewFilterElement, 1);
+	element->mode = static_cast<PanViewFilterMode>(GPOINTER_TO_INT(g_object_get_data(item, FILTER_MODE_KEY)));
 	element->keyword = g_strdup(text);
 	if (g_strcmp0(text, g_regex_escape_string(text, -1)))
 		{
@@ -110,13 +112,12 @@ void pan_filter_activate_cb(PanWindow *pw, const gchar *text)
 	ui->filter_elements = g_list_append(ui->filter_elements, element);
 
 	// Get the short version of the mode value.
-	g_autofree gchar *short_mode = nullptr;
-	gtk_tree_model_get(filter_mode_model, &iter, 2, &short_mode, -1);
+	const auto *short_mode = static_cast<const gchar *>(g_object_get_data(item, SHORT_MODE_KEY));
 
 	// Create the button.
 	/** @todo (xsdg): Use MVC so that the button list is an actual representation of the GList */
 	g_autofree gchar *label = g_strdup_printf("(%s) %s", short_mode, text);
-	kw_button = gtk_button_new_with_label(label);
+	GtkWidget *kw_button = gtk_button_new_with_label(label);
 
 	gq_gtk_box_pack_start(GTK_BOX(ui->filter_kw_hbox), kw_button, FALSE, FALSE, 0);
 	gtk_widget_show(kw_button);
@@ -219,28 +220,24 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	 * cause a double-free.
 	 */
 	{
-		GtkTreeIter iter;
-		g_autoptr(GtkListStore) filter_mode_model = gtk_list_store_new(3, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);
-		gtk_list_store_append(filter_mode_model, &iter);
-		gtk_list_store_set(filter_mode_model, &iter,
-				   0, PAN_VIEW_FILTER_REQUIRE, 1, _("Require"), 2, _("R"), -1);
-		gtk_list_store_append(filter_mode_model, &iter);
-		gtk_list_store_set(filter_mode_model, &iter,
-				   0, PAN_VIEW_FILTER_EXCLUDE, 1, _("Exclude"), 2, _("E"), -1);
-		gtk_list_store_append(filter_mode_model, &iter);
-		gtk_list_store_set(filter_mode_model, &iter,
-				   0, PAN_VIEW_FILTER_INCLUDE, 1, _("Include"), 2, _("I"), -1);
-		gtk_list_store_append(filter_mode_model, &iter);
-		gtk_list_store_set(filter_mode_model, &iter,
-				   0, PAN_VIEW_FILTER_GROUP, 1, _("Group"), 2, _("G"), -1);
+		GtkStringList *string_list = gtk_string_list_new(nullptr);
+		guint index = 0;
+		const auto string_list_append = [string_list, &index](PanViewFilterMode mode, const char *name, const char *short_mode)
+		{
+			gtk_string_list_append(string_list, name);
 
-		ui->filter_mode_combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(filter_mode_model));
-		gtk_widget_set_focus_on_click(ui->filter_mode_combo, FALSE);
-		gtk_combo_box_set_active(GTK_COMBO_BOX(ui->filter_mode_combo), 0);
+			g_autoptr(GObject) item = G_OBJECT(g_list_model_get_item(G_LIST_MODEL(string_list), index++));
+			g_object_set_data(item, FILTER_MODE_KEY, GINT_TO_POINTER(mode));
+			g_object_set_data_full(item, SHORT_MODE_KEY, g_strdup(short_mode), g_free);
+		};
+		string_list_append(PAN_VIEW_FILTER_REQUIRE, _("Require"), _("R"));
+		string_list_append(PAN_VIEW_FILTER_EXCLUDE, _("Exclude"), _("E"));
+		string_list_append(PAN_VIEW_FILTER_INCLUDE, _("Include"), _("I"));
+		string_list_append(PAN_VIEW_FILTER_GROUP,   _("Group"),   _("G"));
 
-		GtkCellRenderer *render = gtk_cell_renderer_text_new();
-		gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(ui->filter_mode_combo), render, TRUE);
-		gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(ui->filter_mode_combo), render, "text", 1, NULL);
+		ui->filter_mode_drop_down = gtk_drop_down_new(G_LIST_MODEL(string_list), nullptr);
+		gtk_widget_set_focus_on_click(ui->filter_mode_drop_down, FALSE);
+		gtk_drop_down_set_selected(GTK_DROP_DOWN(ui->filter_mode_drop_down), 0);
 	}
 
 	// Build the actual filter UI.
@@ -248,8 +245,8 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	pref_spacer(ui->filter_box, 0);
 	pref_label_new(ui->filter_box, _("Keyword Filter:"));
 
-	gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), ui->filter_mode_combo, FALSE, FALSE, 0);
-	gtk_widget_show(ui->filter_mode_combo);
+	gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), ui->filter_mode_drop_down, FALSE, FALSE, 0);
+	gtk_widget_show(ui->filter_mode_drop_down);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), hbox, TRUE, TRUE, 0);

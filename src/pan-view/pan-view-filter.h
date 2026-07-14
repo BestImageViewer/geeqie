@@ -38,7 +38,7 @@ struct PanViewFilterUi
 	GtkWidget *filter_button_arrow;
 	GtkWidget *filter_kw_hbox;
 	GtkWidget *filter_check_buttons[FILE_FORMAT_CLASSES];
-	GtkWidget *filter_mode_combo;
+	GtkWidget *filter_mode_drop_down;
 	GList *filter_elements;  /**< List of #PanViewFilterElement. */
 	gint filter_classes;
 };
