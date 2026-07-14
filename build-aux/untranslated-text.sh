@@ -52,6 +52,7 @@ LUA_
 MonoSpace
 N_(
 NikonTag
+OpenStreetMap
 Pause
 PixbufRenderer
 PluginsMenu

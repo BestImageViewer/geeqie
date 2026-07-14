@@ -5,7 +5,7 @@
 unset DISABLE_WAYLAND
 if [ -n "$WAYLAND_DISPLAY" ]
 then
-  export GDK_BACKEND=wayland
+  export GDK_BACKEND=wayland,x11
 else
   export GDK_BACKEND=x11
 fi

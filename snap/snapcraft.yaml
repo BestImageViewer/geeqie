@@ -2,7 +2,7 @@
 
 name: geeqie
 title: Geeqie
-base: core24
+base: core26
 adopt-info: geeqie
 
 summary: Lightweight, fast GTK image viewer
@@ -15,27 +15,18 @@ compression: lzo
 grade: devel
 confinement: strict
 
-package-repositories:
-  - type: apt
-    url: http://archive.ubuntu.com/ubuntu/
-    suites: [ noble ]
-    components: [ main, universe ]
-    key-id: 790BC7277767219C42C86F933B4FE6ACC0B21F32
-
 apps:
   geeqie:  # auto-detect (Wayland if available, else X11)
     command-chain:
       - bin/fix-platform-order.sh
+      - bin/env-gtk.sh
       - bin/auto-backend.sh
       - bin/env-imagemagick.sh
       - bin/set-xdg-vars.sh
     command: usr/bin/geeqie
-    extensions: [ gnome ]
     environment:
-      GIO_USE_NETWORK_MONITOR: netlink
-      GIO_USE_PROXY_RESOLVER: libproxy
-      MAGICK_CONFIGURE_PATH: "$SNAP/etc/ImageMagick-6:$SNAP/usr/share/ImageMagick-6:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6/config-Q16:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6.9.12/config-Q16"
-      MAGICK_CODER_MODULE_PATH: "$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6/modules-Q16/coders:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6.9.12/modules-Q16/coders"
+      GIO_USE_NETWORK_MONITOR: base
+      GIO_USE_PROXY_RESOLVER: dummy
       MAGICK_HOME: "$SNAP/usr"
       PATH: "$SNAP/usr/bin:$SNAP/bin:$PATH"
     plugs:
@@ -52,15 +43,13 @@ apps:
   wayland:
     command-chain:
       - bin/fix-platform-order.sh
+      - bin/env-gtk.sh
       - bin/force-wayland.sh
       - bin/env-imagemagick.sh
     command: usr/bin/geeqie
-    extensions: [ gnome ]
     environment:
-      GIO_USE_NETWORK_MONITOR: netlink
-      GIO_USE_PROXY_RESOLVER: libproxy
-      MAGICK_CONFIGURE_PATH: "$SNAP/etc/ImageMagick-6:$SNAP/usr/share/ImageMagick-6:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6/config-Q16:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6.9.12/config-Q16"
-      MAGICK_CODER_MODULE_PATH: "$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6/modules-Q16/coders:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6.9.12/modules-Q16/coders"
+      GIO_USE_NETWORK_MONITOR: base
+      GIO_USE_PROXY_RESOLVER: dummy
       MAGICK_HOME: "$SNAP/usr"
       PATH: "$SNAP/usr/bin:$SNAP/bin:$PATH"
     plugs:
@@ -77,15 +66,13 @@ apps:
   x11:
     command-chain:
       - bin/fix-platform-order.sh
+      - bin/env-gtk.sh
       - bin/force-x11.sh
       - bin/env-imagemagick.sh
     command: usr/bin/geeqie
-    extensions: [ gnome ]
     environment:
-      GIO_USE_NETWORK_MONITOR: netlink
-      GIO_USE_PROXY_RESOLVER: libproxy
-      MAGICK_CONFIGURE_PATH: "$SNAP/etc/ImageMagick-6:$SNAP/usr/share/ImageMagick-6:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6/config-Q16:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6.9.12/config-Q16"
-      MAGICK_CODER_MODULE_PATH: "$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6/modules-Q16/coders:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/ImageMagick-6.9.12/modules-Q16/coders"
+      GIO_USE_NETWORK_MONITOR: base
+      GIO_USE_PROXY_RESOLVER: dummy
       MAGICK_HOME: "$SNAP/usr"
       PATH: "$SNAP/usr/bin:$SNAP/bin:$PATH"
     plugs:
@@ -142,7 +129,7 @@ parts:
       - libheif-dev
       - libimath-dev
       - libjpeg-turbo8-dev
-      # - libjxl-dev            # removed: not available on noble by default
+      - libjxl-dev
       - liblcms2-dev
       - liblua5.3-dev
       - libomp-dev
@@ -151,6 +138,7 @@ parts:
       - libpng-dev
       - libpoppler-glib-dev
       - libraw-dev
+      - libshumate-dev
       - libtiff-dev
       - libunwind-dev
       - libwebp-dev
@@ -159,38 +147,59 @@ parts:
       - ninja-build
       - pkg-config
     stage-packages:
+      - adwaita-icon-theme
       - ca-certificates
+      - fonts-cantarell
+      - glycin-loaders
       - glib-networking
+      - gsettings-desktop-schemas
+      - hicolor-icon-theme
+      - iso-codes
       - libsoup-3.0-0
       - libproxy1v5
-      - libproxy1-plugin-gsettings
-      - libproxy1-plugin-networkmanager   # optional, but nice to have
 
+      - libarchive13t64
+      - libcfitsio10t64
       - libcogl20
       - libdjvulibre21
       - libexif12
-      - libexiv2-27
+      - libexiv2-28
       - libffmpegthumbnailer4v5
       - libfftw3-double3
+      - libgdk-pixbuf2.0-bin
       - libgexiv2-2
       - libgfortran5
+      - libglycin-gtk4-2-0
+      - libegl1
+      - libgl1
+      - libgl1-mesa-dri
+      - libgles2
+      - libglx-mesa0
+      - libgtk-4-1
+      - libgtk-4-bin
+      - libgtk-4-common
       - libspelling-1-2
       - libheif1
-      - libimath-3-1-29
+      - libimath-3-1-29t64
       - libjpeg-turbo8
+      - libjxl0.11
       - liblcms2-2
       - liblua5.3-0
       - libopenexr-3-1-30
-      - libpng16-16
-      - libpoppler-glib8
-      - libraw23
+      - libpng16-16t64
+      - libpoppler-glib8t64
+      - libraw23t64
+      - librsvg2-common
+      - libshumate-1.0-1
       - libtiff6
+      - libvulkan1
       - libwebp7
+      - mesa-vulkan-drivers
       - shared-mime-info
 
       # ImageMagick (tools + configs) for scripts
-      - imagemagick-6.q16
-      - imagemagick-6-common
+      - imagemagick-7.q16
+      - imagemagick-7-common
 
       # LAPACK/BLAS (needed by your env chain)
       - libblas3
@@ -198,7 +207,7 @@ parts:
 
       # Helpers
       - bc
-      - exiftool
+      - libimage-exiftool-perl
       - exiftran
       - exiv2
       - gphoto2
@@ -213,16 +222,34 @@ parts:
       ver="$(git describe --tags --dirty --always 2>/dev/null || date +'%Y%m%d').edge"
       craftctl set version="$ver"
 
-      # Compat symlinks for IM6 tools
+      # Compat symlinks for IM7 tools
       for tool in convert mogrify identify composite compare; do
-        if [ -x "$CRAFT_PRIME/usr/bin/${tool}-im6.q16" ] && [ ! -e "$CRAFT_PRIME/usr/bin/$tool" ]; then
-          ln -s "${tool}-im6.q16" "$CRAFT_PRIME/usr/bin/$tool"
+        if [ -x "$CRAFT_PRIME/usr/bin/${tool}-im7.q16" ] && [ ! -e "$CRAFT_PRIME/usr/bin/$tool" ]; then
+          ln -s "${tool}-im7.q16" "$CRAFT_PRIME/usr/bin/$tool"
         fi
       done
 
       # Ensure delegates.xml uses in-snap libs
-      f="$CRAFT_PRIME/etc/ImageMagick-6/delegates.xml"
+      f="$CRAFT_PRIME/etc/ImageMagick-7/delegates.xml"
       [ -f "$f" ] && sed -i 's|/usr/lib/|${SNAP}/usr/lib/|g' "$f"
+
+      ca_cert_dir="$CRAFT_PRIME/etc/ssl/certs"
+      ca_source_dir="$CRAFT_PRIME/usr/share/ca-certificates/mozilla"
+      if [ -d "$ca_source_dir" ]; then
+        mkdir -p "$ca_cert_dir"
+        cat "$ca_source_dir"/*.crt > "$ca_cert_dir/ca-certificates.crt"
+      fi
+
+      schema_dir="$CRAFT_PRIME/usr/share/glib-2.0/schemas"
+      if [ -d "$schema_dir" ]; then
+        glib-compile-schemas "$schema_dir"
+      fi
+
+      glycin_conf_dir="$CRAFT_PRIME/usr/share/glycin-loaders"
+      if [ -d "$glycin_conf_dir" ]; then
+        find "$glycin_conf_dir" -type f -name '*.conf' -exec \
+          sed -i 's|Exec=/usr/libexec/|Exec=/snap/geeqie/current/usr/libexec/|g' {} +
+      fi
 
       # Make BLAS/LAPACK visible at /usr/lib/$arch by creating symlinks
       arch_dir="$CRAFT_PRIME/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
@@ -244,8 +271,21 @@ parts:
   launcher:
     plugin: nil
     source: .
+    build-packages:
+      - gcc
+      - libgdk-pixbuf-2.0-dev
+      - libpng-dev
+      - pkg-config
     override-build: |
+      arch="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+      mkdir -p "$CRAFT_PART_INSTALL/usr/lib/$arch/geeqie"
+      cc -shared -fPIC snap/local/gdk-pixbuf-png-shim.c \
+        -o "$CRAFT_PART_INSTALL/usr/lib/$arch/geeqie/libgdk-pixbuf-png-shim.so" \
+        $(pkg-config --cflags --libs gdk-pixbuf-2.0 libpng) -ldl
+
       install -Dm755 snap/local/fix-platform-order.sh "$CRAFT_PART_INSTALL/bin/fix-platform-order.sh"
+      install -Dm755 snap/local/env-gtk.sh "$CRAFT_PART_INSTALL/bin/env-gtk.sh"
+      install -Dm755 snap/local/ensure-gdkpixbuf-cache.sh "$CRAFT_PART_INSTALL/bin/ensure-gdkpixbuf-cache.sh"
       install -Dm755 snap/local/env-imagemagick.sh "$CRAFT_PART_INSTALL/bin/env-imagemagick.sh"
       install -Dm755 snap/local/auto-backend.sh    "$CRAFT_PART_INSTALL/bin/auto-backend.sh"
       install -Dm755 snap/local/force-wayland.sh   "$CRAFT_PART_INSTALL/bin/force-wayland.sh"

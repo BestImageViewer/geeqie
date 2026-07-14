@@ -26,7 +26,13 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <shumate/shumate.h>
+#ifdef __cplusplus
+}
+#endif
 
 #include <config.h>
 
@@ -49,6 +55,10 @@ namespace
 
 constexpr gint DEFAULT_ZOOM = 7;
 constexpr const gchar *DEFAULT_MAP_ID = SHUMATE_MAP_SOURCE_OSM_MAPNIK;
+constexpr const gchar *DEFAULT_MAP_NAME = "OpenStreetMap";
+constexpr const gchar *DEFAULT_MAP_LICENSE = "OpenStreetMap contributors";
+constexpr const gchar *DEFAULT_MAP_LICENSE_URI = "https://www.openstreetmap.org/copyright";
+constexpr const gchar *DEFAULT_MAP_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
 /*
  *-------------------------------------------------------------------
@@ -61,6 +71,7 @@ struct PaneGPSData
 	PaneData pane;
 	GtkWidget *widget;
 	gchar *map_source;
+	ShumateMapSource *shumate_map_source;
 	gint height;
 	FileData *fd;
 	ShumateSimpleMap *map;
@@ -415,19 +426,37 @@ void bar_pane_gps_set_map_source(PaneGPSData *pgd, const gchar *map_id)
 	if (!map_id || !*map_id) map_id = DEFAULT_MAP_ID;
 	if (g_strcmp0(pgd->map_source, map_id) == 0) return;
 
-	ShumateMapSource *source;
-	ShumateMapSourceRegistry *registry = shumate_map_source_registry_new_with_defaults();
+	ShumateMapSource *source = nullptr;
+	g_autoptr(ShumateMapSourceRegistry) registry = shumate_map_source_registry_new_with_defaults();
 
-	source = shumate_map_source_registry_get_by_id(registry, map_id);
+	if (g_strcmp0(map_id, DEFAULT_MAP_ID) == 0)
+		{
+		source = SHUMATE_MAP_SOURCE(shumate_raster_renderer_new_full_from_url(DEFAULT_MAP_ID,
+		                                                                      DEFAULT_MAP_NAME,
+		                                                                      DEFAULT_MAP_LICENSE,
+		                                                                      DEFAULT_MAP_LICENSE_URI,
+		                                                                      0,
+		                                                                      19,
+		                                                                      256,
+		                                                                      SHUMATE_MAP_PROJECTION_MERCATOR,
+		                                                                      DEFAULT_MAP_URL));
+		}
+
+	if (!source)
+		{
+		source = shumate_map_source_registry_get_by_id(registry, map_id);
+		if (source) g_object_ref(source);
+		}
 
 	if (source)
 		{
 		shumate_simple_map_set_map_source(pgd->map, source);
+		shumate_viewport_set_reference_map_source(pgd->viewport, source);
+		g_clear_object(&pgd->shumate_map_source);
+		pgd->shumate_map_source = source;
 		g_free(pgd->map_source);
 		pgd->map_source = g_strdup(map_id);
 		}
-
-	g_object_unref(registry);
 }
 
 void bar_pane_gps_enable_markers_checked_toggle_cb(GtkWidget *button, gpointer data)
@@ -571,6 +600,7 @@ void bar_pane_gps_destroy(gpointer data)
 	file_data_list_free(pgd->selection_list);
 
 	file_data_unref(pgd->fd);
+	g_clear_object(&pgd->shumate_map_source);
 	g_free(pgd->map_source);
 	g_free(pgd->pane.id);
 	g_free(pgd);
@@ -623,6 +653,9 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	pgd->widget = frame;
 	pgd->progress = progress;
+
+	g_autofree gchar *user_agent = g_strdup_printf("%s/%s (%s)", GQ_APPNAME, VERSION, GQ_WEBSITE);
+	shumate_set_user_agent(user_agent);
 
 	bar_pane_gps_set_map_source(pgd, map_id);
 
