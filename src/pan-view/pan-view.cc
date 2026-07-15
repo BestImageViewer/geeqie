@@ -22,7 +22,6 @@
 #include "pan-view.h"
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <cstring>
 
@@ -73,7 +72,6 @@
 #include "ui-misc.h"
 #include "ui-tabcomp.h"
 #include "ui-utildlg.h"
-#include "uri-utils.h"
 #include "utilops.h"
 #include "window.h"
 
@@ -1474,19 +1472,19 @@ static void pan_window_scrollbar_v_value_cb(GtkRange *range, gpointer data)
 	pixbuf_renderer_scroll_to_point(pr, static_cast<gint>(static_cast<gdouble>(pr->x_scroll) / pr->scale), y, 0.0, 0.0);
 }
 
-static void pan_window_layout_change_cb(GtkWidget *combo, gpointer data)
+static void pan_window_layout_change_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
-	auto pw = static_cast<PanWindow *>(data);
+	auto *pw = static_cast<PanWindow *>(data);
 
-	pw->layout = static_cast<PanLayoutType>(gtk_combo_box_get_active(GTK_COMBO_BOX(combo)));
+	pw->layout = static_cast<PanLayoutType>(gtk_drop_down_get_selected(drop_down));
 	pan_layout_update(pw);
 }
 
-static void pan_window_layout_size_cb(GtkWidget *combo, gpointer data)
+static void pan_window_layout_size_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
-	auto pw = static_cast<PanWindow *>(data);
+	auto *pw = static_cast<PanWindow *>(data);
 
-	pw->size = static_cast<PanImageSize>(gtk_combo_box_get_active(GTK_COMBO_BOX(combo)));
+	pw->size = static_cast<PanImageSize>(gtk_drop_down_get_selected(drop_down));
 	pan_layout_update(pw);
 }
 
@@ -1911,7 +1909,6 @@ static void pan_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, gp
 static void pan_window_new_real(FileData *dir_fd)
 {
 	GtkWidget *box;
-	GtkWidget *combo;
 	GtkWidget *frame;
 	GtkWidget *hbox;
 	GtkWidget *hbox_imd_widget;
@@ -1957,34 +1954,40 @@ static void pan_window_new_real(FileData *dir_fd)
 	tab_completion_set_enter_func(pw->path_entry,
 	                              [pw](const gchar *text){ pan_window_entry_activate_cb(pw, text); });
 
-	combo = gtk_combo_box_text_new();
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Timeline"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Calendar"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Folders"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Folders (flower)"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Grid"));
+	static const char *layout_strings[] =
+		{
+		_("Timeline"),
+		_("Calendar"),
+		_("Folders"),
+		_("Folders (flower)"),
+		_("Grid"),
+		nullptr
+		};
+	GtkWidget *layout_drop_down = gtk_drop_down_new_from_strings(layout_strings);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(layout_drop_down), pw->layout);
+	g_signal_connect(G_OBJECT(layout_drop_down), "notify::selected",
+	                 G_CALLBACK(pan_window_layout_change_cb), pw);
+	gq_gtk_box_pack_start(GTK_BOX(box), layout_drop_down, FALSE, FALSE, 0);
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), pw->layout);
-	g_signal_connect(G_OBJECT(combo), "changed", G_CALLBACK(pan_window_layout_change_cb), pw);
-	gq_gtk_box_pack_start(GTK_BOX(box), combo, FALSE, FALSE, 0);
-	gtk_widget_show(combo);
-
-	combo = gtk_combo_box_text_new();
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Dots"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("No Images"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Small Thumbnails"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Normal Thumbnails"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Large Thumbnails"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("1:10 (10%)"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("1:4 (25%)"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("1:3 (33%)"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("1:2 (50%)"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("1:1 (100%)"));
-
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), pw->size);
-	g_signal_connect(G_OBJECT(combo), "changed", G_CALLBACK(pan_window_layout_size_cb), pw);
-	gq_gtk_box_pack_start(GTK_BOX(box), combo, FALSE, FALSE, 0);
-	gtk_widget_show(combo);
+	static const char *size_strings[] =
+		{
+		_("Dots"),
+		_("No Images"),
+		_("Small Thumbnails"),
+		_("Normal Thumbnails"),
+		_("Large Thumbnails"),
+		_("1:10 (10%)"),
+		_("1:4 (25%)"),
+		_("1:3 (33%)"),
+		_("1:2 (50%)"),
+		_("1:1 (100%)"),
+		nullptr
+		};
+	GtkWidget *size_drop_down = gtk_drop_down_new_from_strings(size_strings);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(size_drop_down), pw->size);
+	g_signal_connect(G_OBJECT(size_drop_down), "notify::selected",
+	                 G_CALLBACK(pan_window_layout_size_cb), pw);
+	gq_gtk_box_pack_start(GTK_BOX(box), size_drop_down, FALSE, FALSE, 0);
 
 	pw->imd = image_new(TRUE);
 	pw->imd_normal = pw->imd;

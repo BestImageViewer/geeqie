@@ -589,8 +589,7 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	gtk_widget_show(label);
 
 	static const char *sort_mode_items[] = { _("Folders"), _("Collections"), nullptr };
-	GtkStringList *sort_mode_list = gtk_string_list_new(sort_mode_items);
-	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(sort_mode_list), nullptr);
+	GtkWidget *drop_down = gtk_drop_down_new_from_strings(sort_mode_items);
 	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), drop_down, FALSE, FALSE, 0);
 
 	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
