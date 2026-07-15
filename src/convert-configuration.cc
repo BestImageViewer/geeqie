@@ -428,6 +428,12 @@ void convert_accel_map()
 		{
 		log_printf("Error loading accelerator file");
 
+		g_autoptr(GError) error = nullptr;
+		if (!g_file_set_contents(accels_ini_filename(), "", 0, &error))
+			{
+			log_printf("Failed to create accels.ini file: %s\n", error->message);
+			}
+
 		return;
 		}
 
