@@ -2262,11 +2262,24 @@ static void collection_table_destroy(GtkWidget *, gpointer data)
 	g_free(ct);
 }
 
-static void collection_table_sized(GtkWidget *, GtkAllocation *allocation, gpointer data)
+static gint collection_table_viewport_width(CollectTable *ct)
+{
+	GtkAdjustment *hadjustment = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(ct->scrolled));
+	const gint page_width = static_cast<gint>(gtk_adjustment_get_page_size(hadjustment));
+
+	if (page_width > 0) return page_width;
+
+	const gint scrolled_width = gtk_widget_get_width(ct->scrolled);
+	if (scrolled_width > 0) return scrolled_width;
+
+	return gtk_widget_get_width(ct->listview);
+}
+
+static void collection_table_sized(GObject *, GParamSpec *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
 
-	collection_table_populate_at_new_size(ct, allocation->width, allocation->height, FALSE);
+	collection_table_populate_at_new_size(ct, collection_table_viewport_width(ct), gtk_widget_get_height(ct->scrolled), FALSE);
 }
 
 static void listview_motion_cb(GtkEventControllerMotion * /*motion*/, gdouble x, gdouble y, gpointer data)
@@ -2347,7 +2360,7 @@ CollectTable *collection_table_new(CollectionData *cd)
 
 	g_signal_connect(G_OBJECT(ct->listview), "destroy",
 			 G_CALLBACK(collection_table_destroy), ct);
-	g_signal_connect(G_OBJECT(ct->listview), "size_allocate",
+	g_signal_connect(G_OBJECT(gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(ct->scrolled))), "notify::page-size",
 			 G_CALLBACK(collection_table_sized), ct);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
