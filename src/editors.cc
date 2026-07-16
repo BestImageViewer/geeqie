@@ -30,6 +30,7 @@
 
 #include <glib-object.h>
 
+#include "actions.h"
 #include "compat.h"
 #include "filedata.h"
 #include "filefilter.h"
@@ -81,6 +82,59 @@ constexpr gint EDITOR_WINDOW_WIDTH = 500;
 constexpr gint EDITOR_WINDOW_HEIGHT = 300;
 
 GHashTable *editors = nullptr;
+GPtrArray *plugin_accel_actions = nullptr;
+
+void editor_plugin_accels_clear()
+{
+	if (!plugin_accel_actions)
+		{
+		return;
+		}
+
+	GApplication *default_app = g_application_get_default();
+	const char *empty_accels[] = {nullptr};
+
+	if (default_app)
+		{
+		GtkApplication *app = GTK_APPLICATION(default_app);
+
+		for (guint i = 0; i < plugin_accel_actions->len; i++)
+			{
+			auto *detailed_action = static_cast<gchar *>(g_ptr_array_index(plugin_accel_actions, i));
+			register_accels_for_action(app, detailed_action, const_cast<GStrv>(empty_accels));
+			}
+		}
+
+	g_ptr_array_set_size(plugin_accel_actions, 0);
+}
+
+void editor_plugin_accel_register(const EditorDescription *editor)
+{
+	if (!editor || editor->disabled || editor->hidden || editor->ignored ||
+	    !editor->hotkey || !*editor->hotkey)
+		{
+		return;
+		}
+
+	GApplication *default_app = g_application_get_default();
+	if (!default_app)
+		{
+		return;
+		}
+
+	GtkApplication *app = GTK_APPLICATION(default_app);
+
+	if (!plugin_accel_actions)
+		{
+		plugin_accel_actions = g_ptr_array_new_with_free_func(g_free);
+		}
+
+	g_autofree gchar *detailed_action = g_strdup_printf("win.main-win-plugin-run::%s", editor->key);
+	g_auto(GStrv) accels = g_strsplit(editor->hotkey, ";", -1);
+
+	register_accels_for_action(app, detailed_action, accels);
+	g_ptr_array_add(plugin_accel_actions, g_strdup(detailed_action));
+}
 
 } // namespace
 
@@ -350,6 +404,8 @@ gboolean editor_read_desktop_file(const gchar *path)
 	editor->disabled = !path || std::any_of(options->disabled_plugins.cbegin(), options->disabled_plugins.cend(),
 	                                        [path](const std::string &plugin){ return plugin == path; });
 
+	editor_plugin_accel_register(editor);
+
 	gtk_list_store_append(desktop_file_list, &iter);
 	gtk_list_store_set(desktop_file_list, &iter,
 			   DESKTOP_FILE_COLUMN_KEY, key,
@@ -376,6 +432,8 @@ void editor_table_finish()
 
 void editor_table_clear()
 {
+	editor_plugin_accels_clear();
+
 	if (desktop_file_list)
 		{
 		gtk_list_store_clear(desktop_file_list);

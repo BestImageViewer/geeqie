@@ -116,8 +116,6 @@ struct LayoutEditors
 	GList *desktop_files = nullptr;
 } layout_editors;
 
-GPtrArray *plugin_accel_actions = nullptr;
-
 /**
  * @brief Checks if event key is mapped to Help
  * @param event
@@ -2576,38 +2574,6 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 	g_menu_remove_all(plugins_menu);
 
 	plugins_menu_populate(plugins_menu, "win.main-win-plugin-run", nullptr);
-
-	GtkApplication *app = GTK_APPLICATION(g_application_get_default());
-	const char *empty_accels[] = {nullptr};
-
-	if (!plugin_accel_actions)
-		{
-		plugin_accel_actions = g_ptr_array_new_with_free_func(g_free);
-		}
-	else
-		{
-		for (guint i = 0; i < plugin_accel_actions->len; i++)
-			{
-			auto *detailed_action = static_cast<gchar *>(g_ptr_array_index(plugin_accel_actions, i));
-			register_accels_for_action(app, detailed_action, const_cast<GStrv>(empty_accels));
-			}
-		g_ptr_array_set_size(plugin_accel_actions, 0);
-		}
-
-	EditorsList editors_list = editor_list_get();
-
-	for (EditorDescription *editor : editors_list)
-		{
-		if (!editor->hotkey || !*editor->hotkey)
-			{
-			continue;
-			}
-
-		g_autofree gchar *detailed_action = g_strdup_printf("win.main-win-plugin-run::%s", editor->key);
-		g_auto(GStrv) accels = g_strsplit(editor->hotkey, ";", -1);
-		register_accels_for_action(app, detailed_action, accels);
-		g_ptr_array_add(plugin_accel_actions, g_strdup(detailed_action));
-		}
 }
 
 void create_toolbars(LayoutWindow *lw)
