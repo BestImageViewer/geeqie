@@ -1,0 +1,92 @@
+name: Geeqie aarch64 AppImage build
+run-name: ${{ github.actor }} is running Geeqie aarch64 AppImage build
+on: [push]
+
+permissions:
+  contents: write
+
+jobs:
+  Build-AppImage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: git fetch --tags --force
+      - run: git fetch --depth=1000000
+      - uses: pguyot/arm-runner-action@v2.6.5
+        with:
+          base_image: raspios_lite_arm64:latest
+          cpu: cortex-a53
+          image_additional_mb: 8000
+          bind_mount_repository: false
+          import_github_env: true
+          export_github_env: true
+          copy_artifact_path: "*.AppImage;build/meson-logs/*.txt"
+          commands: |
+            yes | sudo apt-get update
+            yes | sudo apt-get install build-essential
+            yes | sudo apt-get install curl
+            yes | sudo apt-get install gettext
+            yes | sudo apt-get install git
+            yes | sudo apt-get install libarchive-dev
+            yes | sudo apt-get install libdw-dev
+            yes | sudo apt-get install libdwarf-dev
+            yes | sudo apt-get install libffmpegthumbnailer-dev
+            yes | sudo apt-get install libgexiv2-dev
+            yes | sudo apt-get install libgtk-4-dev
+            yes | sudo apt-get install libheif-dev
+            yes | sudo apt-get install libimath-dev
+            yes | sudo apt-get install liblua5.3-dev
+            yes | sudo apt-get install libomp-dev
+            yes | sudo apt-get install libopenexr-dev
+            yes | sudo apt-get install libpoppler-glib-dev
+            yes | sudo apt-get install libraw-dev
+            yes | sudo apt-get install libshumate-dev
+            yes | sudo apt-get install libspelling-1-dev
+            yes | sudo apt-get install libunwind-dev
+            yes | sudo apt-get install libwebp-dev
+            yes | sudo apt-get install meson
+            yes | sudo apt-get install ninja-build
+            yes | sudo apt-get install pandoc
+            yes | sudo apt-get install python3
+            yes | sudo apt-get install python3-pip
+            yes | sudo apt-get install python3-setuptools
+            yes | sudo apt-get install python3-wheel
+            yes | sudo apt-get install wget fuse
+            yes | sudo apt-get install yelp-tools
+            mkdir -p $GITHUB_WORKSPACE/AppDir
+            mkdir -p $GITHUB_WORKSPACE/AppDir/usr
+            meson setup \
+              -Ddoxygen=disabled \
+              -Dunit_tests=disabled \
+              -Dyelp-build=disabled \
+              -Dprefix=$GITHUB_WORKSPACE/AppDir/usr build
+            ninja -C build install
+            mkdir -p tools
+            wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage \
+              -O tools/linuxdeploy-aarch64.AppImage
+            chmod +x tools/linuxdeploy-aarch64.AppImage
+            wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
+            chmod +x linuxdeploy-plugin-gtk.sh
+            sed -i '/GDK_BACKEND/d' linuxdeploy-plugin-gtk.sh
+            DEPLOY_GTK_VERSION=4 tools/linuxdeploy-aarch64.AppImage \
+              --desktop-file $GITHUB_WORKSPACE/AppDir/usr/share/applications/org.geeqie.Geeqie.desktop \
+              --icon-file $GITHUB_WORKSPACE/AppDir/usr/share/icons/hicolor/scalable/apps/geeqie.svg \
+              --appdir $GITHUB_WORKSPACE/AppDir \
+              --plugin gtk \
+              --output appimage
+            mv Geeqie-aarch64.AppImage Geeqie-latest-aarch64.AppImage
+
+      - uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          tag: continuous
+          name: Continuous build
+          prerelease: true
+          artifacts: "*.AppImage"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: logs-all-build-appimage
+          path: "*-log.txt"
+          retention-days: 5

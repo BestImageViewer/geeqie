@@ -1,0 +1,119 @@
+name: Geeqie minimal x86_64 AppImage build
+run-name: ${{ github.actor }} is running Geeqie minimal x86_64 AppImage build
+on: [push]
+
+permissions:
+  contents: write
+
+jobs:
+  Build-AppImage:
+    runs-on: ubuntu-26.04
+    container:
+      image: ubuntu:26.04
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install -y appstream
+          apt install -y build-essential
+          apt install -y curl
+          apt install -y file
+          apt install -y fuse
+          apt install -y gettext
+          apt install -y git
+          apt install -y libgtk-4-dev
+          apt install -y librsvg2-dev
+          apt install -y pandoc
+          apt install -y patchelf
+          apt install -y wget
+          apt install -y yelp-tools
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            python3 python3-pip python3-venv \
+            ninja-build meson  # ← avoid pip ninja; use distro ninja
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Mark repo as safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: git fetch
+        run: |
+          git fetch --tags --force
+          git fetch --depth=1000000
+
+      - name: Meson setup
+        run: |
+          meson setup build \
+            --prefix=/usr \
+            --datadir=share \
+            -Darchive=disabled \
+            -Dcms=disabled \
+            -Ddjvu=disabled \
+            -Ddoxygen=disabled \
+            -Dexecinfo=disabled \
+            -Dexiv2=disabled \
+            -Dexr=disabled \
+            -Dfits=disabled \
+            -Dgit=disabled \
+            -Dgps-map=disabled \
+            -Dheif=disabled \
+            -Dhelp_pdf=disabled \
+            -Dj2k=disabled \
+            -Djpeg=disabled \
+            -Djpegxl=disabled \
+            -Dlibraw=disabled \
+            -Dlua=disabled \
+            -Dnpy=disabled \
+            -Dpandoc=disabled \
+            -Dpdf=disabled \
+            -Dspell=disabled \
+            -Dtiff=disabled \
+            -Dvideothumbnailer=disabled \
+            -Dwebp=disabled \
+            -Dyelp-build=disabled
+
+      - name: Ninja compile
+        run: DESTDIR=${{ github.workspace }}/AppDir ninja -C build install
+
+# The linuxdeploy-plugin-gtk forces the backend to be X11, as it was considered
+# that Wayland has problems. Delete this and let the user choose.
+      - name: Download linuxdeploy and plugin
+        run: |
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage
+          wget https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
+          chmod +x linuxdeploy-plugin-gtk.sh
+          sed -i '/GDK_BACKEND/d' linuxdeploy-plugin-gtk.sh
+
+      - name: Extract linuxdeploy to avoid FUSE
+        run: |
+          chmod +x linuxdeploy-x86_64.AppImage
+          ./linuxdeploy-x86_64.AppImage --appimage-extract
+          mv squashfs-root linuxdeploy
+
+      - name: Build AppImage
+        run: |
+          DEPLOY_GTK_VERSION=4 ./linuxdeploy/AppRun --appdir ${{ github.workspace }}/AppDir \
+            --desktop-file ${{ github.workspace }}/AppDir/usr/share/applications/org.geeqie.Geeqie.desktop \
+            --plugin gtk \
+            --output appimage
+          mv Geeqie-x86_64.AppImage Geeqie-minimal-latest-x86_64.AppImage
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          tag: continuous
+          name: Continuous build
+          prerelease: true
+          artifacts: "Geeqie-minimal-latest-x86_64.AppImage"
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: logs-all-build-appimage
+          path: ${{ github.workspace }}/build/meson-logs/*.txt
+          retention-days: 5
