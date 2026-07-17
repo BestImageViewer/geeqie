@@ -227,10 +227,10 @@ LayoutOptions init_layout_options(const gchar **attribute_names, const gchar **a
 	lop.file_view_list_sort = { SORT_NAME, TRUE, TRUE };
 	lop.file_view_type = FILEVIEW_LIST;
 	lop.float_window.rect = {0, 0, 260, 450};
-	lop.float_window.vdivider_pos = -1;
+	lop.float_window.vdivider_pos = 200;
 	lop.home_path = nullptr;
 	lop.id = g_strdup("null");
-	lop.main_window.hdivider_pos = -1;
+	lop.main_window.hdivider_pos = 300;
 	lop.main_window.maximized = FALSE;
 	lop.main_window.rect = {0, 0, 720, 540};
 	lop.main_window.vdivider_pos = 200;
