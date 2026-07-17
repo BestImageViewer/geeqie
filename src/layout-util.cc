@@ -3233,7 +3233,7 @@ static void layout_util_sync_views(LayoutWindow *lw)
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-info-sidebar");
 		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(layout_bar_enabled(lw)));
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-sort-manager");
-		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(layout_bar_enabled(lw)));
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(layout_bar_sort_enabled(lw)));
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-hide-selectable-toolbars");
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.selectable_toolbars_hidden));
