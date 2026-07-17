@@ -24,6 +24,7 @@
 #include <glib/gi18n.h>
 #include <pango/pango.h>
 
+#include "actions.h"
 #include "compat.h"
 #include "editors.h"
 #include "layout-util.h"
@@ -465,6 +466,15 @@ void plugins_menu_populate(GMenu *plugins_menu, const char *action, GList *fd_li
 
 		g_menu_item_set_action_and_target_value( item, action, g_variant_new_string(ed->key)
 		);
+
+		if (ed->hotkey && *ed->hotkey)
+			{
+			auto *app = GTK_APPLICATION(g_application_get_default());
+			g_autofree gchar *detailed_action = g_strdup_printf("%s::%s", action, ed->key);
+			g_auto(GStrv) accels = g_strsplit(ed->hotkey, ";", -1);
+
+			register_accels_for_action(app, detailed_action, accels);
+			}
 
 		g_autoptr(GIcon) icon = g_themed_icon_new(icon_name);
 		g_menu_item_set_icon(item, icon);
