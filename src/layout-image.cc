@@ -38,7 +38,6 @@
 #include "archives.h"
 #include "collect.h"
 #include "color-man.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "dnd.h"
 #include "editors.h"

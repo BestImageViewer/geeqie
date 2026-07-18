@@ -55,7 +55,6 @@
 #include "collect-io.h"
 #include "collect.h"
 #include "command-line-handling.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "convert-configuration.h"
 #include "exif.h"

@@ -29,7 +29,6 @@
 #include "cache.h"
 #include "collect-io.h"
 #include "collect.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "dupe.h"
 #include "exif.h"

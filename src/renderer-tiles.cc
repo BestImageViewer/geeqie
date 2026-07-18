@@ -504,7 +504,7 @@ void rt_overlay_queue_all(RendererTiles *rt, gint x1, gint y1, gint x2, gint y2)
 		}
 }
 
-void rt_overlay_update_sizes(RendererTiles *rt)
+void rt_overlay_update_sizes(RendererTiles *)
 {
 }
 

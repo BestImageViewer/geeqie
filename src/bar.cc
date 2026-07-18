@@ -254,7 +254,11 @@ static void height_spin_key_press_cb(GtkEventControllerKey *, gint keyval, guint
 		}
 }
 
-static void expander_height_cb(GtkEventControllerKey *, guint keyval, guint keycode, GdkModifierType state, gpointer data)
+static void expander_height_cb(GtkEventControllerKey *,
+                               [[maybe_unused]] guint keyval,
+                               [[maybe_unused]] guint keycode,
+                               [[maybe_unused]] GdkModifierType state,
+                               [[maybe_unused]] gpointer data)
 {
 /** @FIXME GTK4 Destroy the widget
  */
