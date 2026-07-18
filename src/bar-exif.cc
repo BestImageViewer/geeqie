@@ -560,13 +560,13 @@ void bar_pane_exif_conf_dialog(GtkWidget *widget)
 	gtk_widget_show(gd->dialog);
 }
 
-void bar_pane_exif_conf_dialog_cb(GtkWidget *, gpointer data)
+[[maybe_unused]] void bar_pane_exif_conf_dialog_cb(GtkWidget *, gpointer data)
 {
 	auto widget = static_cast<GtkWidget *>(data);
 	bar_pane_exif_conf_dialog(widget);
 }
 
-void bar_pane_exif_copy_entry_cb(GtkWidget *, gpointer data)
+[[maybe_unused]] void bar_pane_exif_copy_entry_cb(GtkWidget *, gpointer data)
 {
 	auto widget = static_cast<GtkWidget *>(data);
 	const gchar *value;
@@ -581,7 +581,7 @@ void bar_pane_exif_copy_entry_cb(GtkWidget *, gpointer data)
 	gdk_clipboard_set_text(clipboard, value);
 }
 
-void bar_pane_exif_toggle_show_all_cb(GtkWidget *, gpointer data)
+[[maybe_unused]] void bar_pane_exif_toggle_show_all_cb(GtkWidget *, gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
 	ped->show_all = !ped->show_all;
@@ -590,12 +590,12 @@ void bar_pane_exif_toggle_show_all_cb(GtkWidget *, gpointer data)
 
 void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *, gdouble x, gdouble y)
 {
-	GtkWidget *menu;
+	[[maybe_unused]] GtkWidget *menu;
 	/* the widget can be either ExifEntry (for editing) or Pane (for new entry)
 	   we can decide it by the attached data */
-	auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
+	[[maybe_unused]] auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
 
-	GAction *action;
+	[[maybe_unused]] GAction *action;
 	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-bar-exif.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-bar-exif"));
 

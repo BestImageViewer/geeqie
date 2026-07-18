@@ -34,7 +34,6 @@
 #include "collect-dlg.h"
 #include "collect-io.h"
 #include "collect.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "dnd.h"
 #include "dupe.h"

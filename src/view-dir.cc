@@ -33,7 +33,6 @@
 
 #include "accelerators.h"
 #include "actions.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "dnd.h"
 #include "dupe.h"

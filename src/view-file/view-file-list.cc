@@ -28,7 +28,6 @@
 #include <glib-object.h>
 
 #include "collect.h"
-#include "compat-deprecated.h"
 #include "dnd.h"
 #include "filedata.h"
 #include "intl.h"

@@ -26,7 +26,6 @@
 
 #include <glib-object.h>
 
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "geometry.h"
 #include "layout.h"

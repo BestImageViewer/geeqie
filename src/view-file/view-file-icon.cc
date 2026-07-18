@@ -29,7 +29,6 @@
 
 #include "cellrenderericon.h"
 #include "collect.h"
-#include "compat-deprecated.h"
 #include "compat.h"
 #include "dnd.h"
 #include "filedata.h"
