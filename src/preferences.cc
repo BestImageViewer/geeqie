@@ -88,6 +88,8 @@ namespace
 #define GQ_ICC_LOCAL "/usr/local/share/color/icc/"
 #define GQ_ICC_SYSTEM "/usr/share/color/icc/"
 
+constexpr gint SLIDESHOW_DELAY = SLIDESHOW_MIN_SECONDS * SLIDESHOW_SUBSECOND_PRECISION;
+
 constexpr gint PRE_FORMATTED_COLUMNS = 5;
 constexpr gint KEYWORD_DIALOG_WIDTH = 400;
 
@@ -207,57 +209,52 @@ enum {
  *-----------------------------------------------------------------------------
  */
 
-static void zoom_increment_cb(GtkSpinButton *spin, gpointer)
+static void zoom_increment_cb(GtkSpinButton *spin, gpointer data)
 {
-	c_options->image.zoom_increment = static_cast<gint>((gtk_spin_button_get_value(spin) * 100.0) + 0.01);
+	auto *option = static_cast<gint *>(data);
+
+	*option = static_cast<gint>((gtk_spin_button_get_value(spin) * 100.0) + 0.01);
 }
 
-static void slideshow_delay_hours_cb(GtkSpinButton *spin, gpointer)
+static void slideshow_delay_hours_cb(GtkSpinButton *spin, gpointer data)
 {
-	gint mins_secs_tenths;
-	gint delay;
+	auto *option = static_cast<gint *>(data);
 
-	mins_secs_tenths = c_options->slideshow.delay %
-						(3600 * SLIDESHOW_SUBSECOND_PRECISION);
+	const gint mins_secs_tenths = *option %
+	        (3600 * SLIDESHOW_SUBSECOND_PRECISION);
 
-	delay = ((gtk_spin_button_get_value(spin) *
-								(3600 * SLIDESHOW_SUBSECOND_PRECISION)) +
-								mins_secs_tenths);
+	const gint delay = (gtk_spin_button_get_value(spin) *
+	                    (3600 * SLIDESHOW_SUBSECOND_PRECISION)) +
+	        mins_secs_tenths;
 
-	c_options->slideshow.delay = delay > 0 ? delay : SLIDESHOW_MIN_SECONDS *
-													SLIDESHOW_SUBSECOND_PRECISION;
+	*option = delay > 0 ? delay : SLIDESHOW_DELAY;
 }
 
-static void slideshow_delay_minutes_cb(GtkSpinButton *spin, gpointer)
+static void slideshow_delay_minutes_cb(GtkSpinButton *spin, gpointer data)
 {
-	gint hours;
-	gint secs_tenths;
-	gint delay;
+	auto *option = static_cast<gint *>(data);
 
-	hours = c_options->slideshow.delay / (3600 * SLIDESHOW_SUBSECOND_PRECISION);
-	secs_tenths = c_options->slideshow.delay % (60 * SLIDESHOW_SUBSECOND_PRECISION);
+	const gint hours = *option / (3600 * SLIDESHOW_SUBSECOND_PRECISION);
+	const gint secs_tenths = *option % (60 * SLIDESHOW_SUBSECOND_PRECISION);
 
-	delay = (hours * (3600 * SLIDESHOW_SUBSECOND_PRECISION)) +
+	const gint delay = (hours * (3600 * SLIDESHOW_SUBSECOND_PRECISION)) +
 	        (gtk_spin_button_get_value(spin) *
-					(60 * SLIDESHOW_SUBSECOND_PRECISION) + secs_tenths);
+	         (60 * SLIDESHOW_SUBSECOND_PRECISION) + secs_tenths);
 
-	c_options->slideshow.delay = delay > 0 ? delay : SLIDESHOW_MIN_SECONDS *
-													SLIDESHOW_SUBSECOND_PRECISION;
+	*option = delay > 0 ? delay : SLIDESHOW_DELAY;
 }
 
-static void slideshow_delay_seconds_cb(GtkSpinButton *spin, gpointer)
+static void slideshow_delay_seconds_cb(GtkSpinButton *spin, gpointer data)
 {
-	gint hours_mins;
-	gint delay;
+	auto *option = static_cast<gint *>(data);
 
-	hours_mins = c_options->slideshow.delay / (60 * SLIDESHOW_SUBSECOND_PRECISION);
+	const gint hours_mins = *option / (60 * SLIDESHOW_SUBSECOND_PRECISION);
 
-	delay = (hours_mins * (60 * SLIDESHOW_SUBSECOND_PRECISION)) +
+	const gint delay = (hours_mins * (60 * SLIDESHOW_SUBSECOND_PRECISION)) +
 	        static_cast<gint>((gtk_spin_button_get_value(spin) *
-							static_cast<gdouble>(SLIDESHOW_SUBSECOND_PRECISION)) + 0.01);
+	                           static_cast<gdouble>(SLIDESHOW_SUBSECOND_PRECISION)) + 0.01);
 
-	c_options->slideshow.delay = delay > 0 ? delay : SLIDESHOW_MIN_SECONDS *
-													SLIDESHOW_SUBSECOND_PRECISION;
+	*option = delay > 0 ? delay : SLIDESHOW_DELAY;
 }
 
 /*
@@ -1614,14 +1611,11 @@ static void star_rating_icon_cb(GtkEntry *entry, GtkEntryIconPosition pos, GdkEv
 		}
 }
 
-static gunichar star_rating_symbol_test(gpointer data)
+static void star_rating_symbol_test_cb(GtkWidget *button, gpointer data)
 {
 	guint64 hex_value = 0;
 
-	GtkWidget *child = gtk_widget_get_first_child(GTK_WIDGET(data));
-	GtkWidget *hex_code_label = gtk_widget_get_next_sibling(child);
-
-	GtkWidget *hex_code_entry = gtk_widget_get_next_sibling(hex_code_label);
+	GtkWidget *hex_code_entry = gtk_widget_get_prev_sibling(button);
 	const gchar *hex_code_full = gtk_editable_get_text(GTK_EDITABLE(hex_code_entry));
 
 	g_auto(GStrv) hex_code = g_strsplit(hex_code_full, "+", 2);
@@ -1635,25 +1629,18 @@ static gunichar star_rating_symbol_test(gpointer data)
 		hex_value = 0x003F; // Unicode 'Question Mark'
 		}
 
+	auto *option = static_cast<gunichar *>(data);
+	*option = hex_value;
+
 	g_autoptr(GString) str = g_string_new(nullptr);
-	str = g_string_append_unichar(str, static_cast<gunichar>(hex_value));
+	str = g_string_append_unichar(str, *option);
+
+	GtkWidget *hex_code_label = gtk_widget_get_prev_sibling(hex_code_entry);
 	gtk_label_set_text(GTK_LABEL(hex_code_label), str->str);
-
-	return hex_value;
-}
-
-static void star_rating_star_test_cb(GtkWidget *, gpointer data)
-{
-	c_options->star_rating.star = star_rating_symbol_test(data);
-}
-
-static void star_rating_rejected_test_cb(GtkWidget *, gpointer data)
-{
-	c_options->star_rating.rejected = star_rating_symbol_test(data);
 }
 
 template<gunichar star_rating_default>
-static void add_star_rating(GtkWidget *group, const gchar *label, gunichar star_rating, GCallback star_rating_test_cb)
+static void add_star_rating(GtkWidget *group, const gchar *label, gunichar star_rating, gpointer data)
 {
 	GtkWidget *hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, label);
@@ -1681,7 +1668,7 @@ static void add_star_rating(GtkWidget *group, const gchar *label, gunichar star_
 	gtk_widget_show(star_rating_entry);
 
 	GtkWidget *button = pref_button_new(nullptr, nullptr, _("Set"),
-	                                    star_rating_test_cb, hbox);
+	                                    G_CALLBACK(star_rating_symbol_test_cb), data);
 	gtk_widget_set_tooltip_text(button, _("Display selected character"));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
@@ -1773,9 +1760,9 @@ static void config_tab_general(GtkWidget *notebook)
 	c_options->star_rating = options->star_rating;
 
 	add_star_rating<STAR_RATING_STAR>(group, _("Star character: "), options->star_rating.star,
-	                                  G_CALLBACK(star_rating_star_test_cb));
+	                                  &c_options->star_rating.star);
 	add_star_rating<STAR_RATING_REJECTED>(group, _("Rejected character: "), options->star_rating.rejected,
-	                                      G_CALLBACK(star_rating_rejected_test_cb));
+	                                      &c_options->star_rating.rejected);
 
 	pref_spacer(group, PREF_PAD_GROUP);
 
@@ -1791,19 +1778,19 @@ static void config_tab_general(GtkWidget *notebook)
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
 	spin = pref_spin_new(hbox, _("Delay between image change hrs:mins:secs.dec"), nullptr,
-										0, 23, 1.0, 0,
-										options->slideshow.delay ? hours : 0.0,
-										G_CALLBACK(slideshow_delay_hours_cb), nullptr);
+	                     0, 23, 1.0, 0,
+	                     options->slideshow.delay ? hours : 0.0,
+	                     G_CALLBACK(slideshow_delay_hours_cb), &c_options->slideshow.delay);
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_ALWAYS);
 	spin = pref_spin_new(hbox, ":" , nullptr,
-										0, 59, 1.0, 0,
-										options->slideshow.delay ? minutes: 0.0,
-										G_CALLBACK(slideshow_delay_minutes_cb), nullptr);
+	                     0, 59, 1.0, 0,
+	                     options->slideshow.delay ? minutes: 0.0,
+	                     G_CALLBACK(slideshow_delay_minutes_cb), &c_options->slideshow.delay);
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_ALWAYS);
 	spin = pref_spin_new(hbox, ":", nullptr,
-										SLIDESHOW_MIN_SECONDS, 59, 1.0, 1,
-										options->slideshow.delay ? seconds : 10.0,
-										G_CALLBACK(slideshow_delay_seconds_cb), nullptr);
+	                     SLIDESHOW_MIN_SECONDS, 59, 1.0, 1,
+	                     options->slideshow.delay ? seconds : 10.0,
+	                     G_CALLBACK(slideshow_delay_seconds_cb), &c_options->slideshow.delay);
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_ALWAYS);
 
 	pref_checkbox_new_int(group, _("Random"), options->slideshow.random, &c_options->slideshow.random);
@@ -1943,9 +1930,9 @@ static void config_tab_image(GtkWidget *notebook)
 			      options->image.zoom_2pass, &c_options->image.zoom_2pass);
 
 	c_options->image.zoom_increment = options->image.zoom_increment;
-	spin = pref_spin_new(group, _("Zoom increment:"), nullptr,
-			     0.01, 4.0, 0.01, 2, static_cast<gdouble>(options->image.zoom_increment) / 100.0,
-			     G_CALLBACK(zoom_increment_cb), nullptr);
+	spin = pref_spin_new(group, _("Zoom increment:"), nullptr, 0.01, 4.0, 0.01, 2,
+	                     static_cast<gdouble>(options->image.zoom_increment) / 100.0,
+	                     G_CALLBACK(zoom_increment_cb), &c_options->image.zoom_increment);
 	gtk_spin_button_set_update_policy(GTK_SPIN_BUTTON(spin), GTK_UPDATE_ALWAYS);
 
 	c_options->image.zoom_style = options->image.zoom_style;
