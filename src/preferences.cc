@@ -579,11 +579,11 @@ static void config_window_ok_cb(GtkWidget *widget, gpointer data)
  *-----------------------------------------------------------------------------
  */
 
-static void quality_menu_cb(GtkWidget *combo, gpointer data)
+static void quality_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
 	auto *option = static_cast<GdkInterpType *>(data);
 
-	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
+	switch (gtk_drop_down_get_selected(drop_down))
 		{
 		case 0:
 		default:
@@ -598,11 +598,11 @@ static void quality_menu_cb(GtkWidget *combo, gpointer data)
 		}
 }
 
-static void dnd_default_action_selection_menu_cb(GtkWidget *combo, gpointer data)
+static void dnd_default_action_selection_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
 	auto option = static_cast<gint *>(data);
 
-	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
+	switch (gtk_drop_down_get_selected(drop_down))
 		{
 		case 0:
 		default:
@@ -616,11 +616,11 @@ static void dnd_default_action_selection_menu_cb(GtkWidget *combo, gpointer data
 			break;
 		}
 }
-static void clipboard_selection_menu_cb(GtkWidget *combo, gpointer data)
+static void clipboard_selection_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
 	auto *option = static_cast<ClipboardSelection *>(data);
 
-	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
+	switch (gtk_drop_down_get_selected(drop_down))
 		{
 		case 0:
 			*option = CLIPBOARD_PRIMARY;
@@ -639,91 +639,78 @@ static void clipboard_selection_menu_cb(GtkWidget *combo, gpointer data)
 static void add_quality_menu(GtkWidget *table, gint column, gint row, const gchar *text,
                              GdkInterpType option, GdkInterpType *option_c)
 {
-	GtkWidget *combo;
-	gint current = 0;
-
-	*option_c = option;
-
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
-	combo = gtk_combo_box_text_new();
+	static const char *strings[] = {
+	    _("Nearest (worst, but fastest)"),
+	    _("Tiles"),
+	    _("Bilinear (best, but slowest)"),
+	    nullptr
+	};
 
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Nearest (worst, but fastest)"));
+	guint current = 0;
 	if (option == GDK_INTERP_NEAREST) current = 0;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Tiles"));
-	if (option == GDK_INTERP_TILES) current = 1;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Bilinear (best, but slowest)"));
-	if (option == GDK_INTERP_BILINEAR) current = 2;
+	else if (option == GDK_INTERP_TILES) current = 1;
+	else if (option == GDK_INTERP_BILINEAR) current = 2;
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
+	GtkWidget *drop_down = gtk_drop_down_new_from_strings(strings);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
 
-	g_signal_connect(G_OBJECT(combo), "changed",
-			 G_CALLBACK(quality_menu_cb), option_c);
+	*option_c = option;
+	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
+	                 G_CALLBACK(quality_menu_cb), option_c);
 
-	gtk_grid_attach(GTK_GRID(table), combo, column + 1, row, 1, 1);
-	gtk_widget_show(combo);
+	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 
 static void add_dnd_default_action_selection_menu(GtkWidget *table, gint column, gint row, const gchar *text, DnDAction option, DnDAction *option_c)
 {
-	GtkWidget *combo;
-	gint current = 0;
-
-	*option_c = option;
-
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
-	combo = gtk_combo_box_text_new();
+	static const char *strings[] = { _("Ask"), _("Copy"), _("Move"), nullptr };
 
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Ask"));
+	guint current = 0;
 	if (option == DND_ACTION_ASK) current = 0;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Copy"));
-	if (option == DND_ACTION_COPY) current = 1;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Move"));
-	if (option == DND_ACTION_MOVE) current = 2;
+	else if (option == DND_ACTION_COPY) current = 1;
+	else if (option == DND_ACTION_MOVE) current = 2;
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
+	GtkWidget *drop_down = gtk_drop_down_new_from_strings(strings);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
 
-	g_signal_connect(G_OBJECT(combo), "changed",
-			 G_CALLBACK(dnd_default_action_selection_menu_cb), option_c);
+	*option_c = option;
+	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
+	                 G_CALLBACK(dnd_default_action_selection_menu_cb), option_c);
 
-	gtk_grid_attach(GTK_GRID(table), combo, column + 1, row, 1, 1);
-	gtk_widget_show(combo);
+	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 
 static void add_clipboard_selection_menu(GtkWidget *table, gint column, gint row, const gchar *text,
                                          ClipboardSelection option, ClipboardSelection *option_c)
 {
-	GtkWidget *combo;
-	gint current = 0;
-
-	*option_c = option;
-
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
-	combo = gtk_combo_box_text_new();
+	static const char *strings[] = { _("Primary"), _("Clipboard"), _("Both"), nullptr };
 
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Primary"));
+	guint current = 0;
 	if (option == CLIPBOARD_PRIMARY) current = 0;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Clipboard"));
-	if (option == CLIPBOARD_CLIPBOARD) current = 1;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Both"));
-	if (option == CLIPBOARD_BOTH) current = 2;
+	else if (option == CLIPBOARD_CLIPBOARD) current = 1;
+	else if (option == CLIPBOARD_BOTH) current = 2;
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
+	GtkWidget *drop_down = gtk_drop_down_new_from_strings(strings);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
 
-	g_signal_connect(G_OBJECT(combo), "changed",
-			 G_CALLBACK(clipboard_selection_menu_cb), option_c);
+	*option_c = option;
+	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
+	                 G_CALLBACK(clipboard_selection_menu_cb), option_c);
 
-	gtk_grid_attach(GTK_GRID(table), combo, column + 1, row, 1, 1);
-	gtk_widget_show(combo);
+	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 
-static void zoom_style_selection_menu_cb(GtkWidget *combo, gpointer data)
+static void zoom_style_selection_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
 	auto option = static_cast<gint *>(data);
 
-	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
+	switch (gtk_drop_down_get_selected(drop_down))
 		{
 		case 0:
 			*option = ZOOM_GEOMETRIC;
@@ -738,33 +725,30 @@ static void zoom_style_selection_menu_cb(GtkWidget *combo, gpointer data)
 
 static void add_zoom_style_selection_menu(GtkWidget *table, gint column, gint row, const gchar *text, ZoomStyle option, ZoomStyle *option_c)
 {
-	GtkWidget *combo;
-	gint current = 0;
-
-	*option_c = option;
-
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
-	combo = gtk_combo_box_text_new();
+	static const char *strings[] = { _("Geometric"), _("Arithmetic"), nullptr };
 
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Geometric"));
+	guint current = 0;
 	if (option == ZOOM_GEOMETRIC) current = 0;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Arithmetic"));
-	if (option == ZOOM_ARITHMETIC) current = 1;
+	else if (option == ZOOM_ARITHMETIC) current = 1;
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
+	GtkWidget *drop_down = gtk_drop_down_new_from_strings(strings);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
 
-	g_signal_connect(G_OBJECT(combo), "changed", G_CALLBACK(zoom_style_selection_menu_cb), option_c);
+	*option_c = option;
+	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
+	                 G_CALLBACK(zoom_style_selection_menu_cb), option_c);
 
-	gtk_grid_attach(GTK_GRID(table), combo, column + 1, row, 1, 1);
-	gtk_widget_show(combo);
+	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 
-static void mouse_buttons_selection_menu_cb(GtkWidget *combo, gpointer data)
+static void mouse_buttons_selection_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
 	auto option = static_cast<gchar **>(data);
 
-	g_autofree gchar *label = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo));
+	g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(drop_down));
+	const char *label = gtk_string_object_get_string(GTK_STRING_OBJECT(item));
 
 	std::vector<ActionItem> list = get_action_items();
 	const auto action_item_has_label = [label](const ActionItem &action_item)
@@ -781,20 +765,15 @@ static void mouse_buttons_selection_menu_cb(GtkWidget *combo, gpointer data)
 
 static void add_mouse_selection_menu(GtkWidget *table, gint column, gint row, const gchar *text, gchar *option, gchar **option_c)
 {
-	gint current = 0;
-	gint i = 0;
-	GtkWidget *combo;
-
-	*option_c = option;
-
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
-	combo = gtk_combo_box_text_new();
-
+	GtkStringList *string_list = gtk_string_list_new(nullptr);
 	std::vector<ActionItem> list = get_action_items();
+	guint current = 0;
+	guint i = 0;
 	for (const ActionItem &action_item : list)
 		{
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), action_item.label);
+		gtk_string_list_append(string_list, action_item.label);
 
 		if (g_strcmp0(action_item.name, option) == 0)
 			{
@@ -803,22 +782,22 @@ static void add_mouse_selection_menu(GtkWidget *table, gint column, gint row, co
 		i++;
 		}
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
+	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(string_list), nullptr);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
 
-	g_signal_connect(G_OBJECT(combo), "changed", G_CALLBACK(mouse_buttons_selection_menu_cb), option_c);
+	*option_c = option;
+	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
+	                 G_CALLBACK(mouse_buttons_selection_menu_cb), option_c);
 
-	gtk_grid_attach(GTK_GRID(table), combo, column + 1, row, 1, 1);
-	gtk_widget_show(combo);
+	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 
-static void thumb_size_menu_cb(GtkWidget *combo, gpointer)
+static void thumb_size_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer)
 {
-	gint n;
+	const guint n = gtk_drop_down_get_selected(drop_down);
+	if (n == GTK_INVALID_LIST_POSITION) return;
 
-	n = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
-	if (n < 0) return;
-
-	if (static_cast<guint>(n) < std::size(thumb_size_list))
+	if (n < std::size(thumb_size_list))
 		{
 		c_options->thumbnails.max_width = thumb_size_list[n].width;
 		c_options->thumbnails.max_height = thumb_size_list[n].height;
@@ -832,48 +811,45 @@ static void thumb_size_menu_cb(GtkWidget *combo, gpointer)
 
 static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, const gchar *text)
 {
-	GtkWidget *combo;
-
 	c_options->thumbnails.max_width = options->thumbnails.max_width;
 	c_options->thumbnails.max_height = options->thumbnails.max_height;
 
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
-	combo = gtk_combo_box_text_new();
-
-	gint current = -1;
+	GtkStringList *string_list = gtk_string_list_new(nullptr);
+	guint current = GTK_INVALID_LIST_POSITION;
 	for (size_t i = 0; i < std::size(thumb_size_list); i++)
 		{
 		const int w = thumb_size_list[i].width;
 		const int h = thumb_size_list[i].height;
 
 		g_autofree gchar *buf = g_strdup_printf("%d x %d", w, h);
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), buf);
+		gtk_string_list_append(string_list, buf);
 
 		if (w == options->thumbnails.max_width && h == options->thumbnails.max_height) current = i;
 		}
 
-	if (current == -1)
+	if (current == GTK_INVALID_LIST_POSITION)
 		{
 		g_autofree gchar *buf = g_strdup_printf("%s %d x %d", _("Custom"), options->thumbnails.max_width, options->thumbnails.max_height);
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), buf);
+		gtk_string_list_append(string_list, buf);
 
 		current = std::size(thumb_size_list);
 		}
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
-	g_signal_connect(G_OBJECT(combo), "changed",
-			 G_CALLBACK(thumb_size_menu_cb), NULL);
+	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(string_list), nullptr);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
+	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
+	                 G_CALLBACK(thumb_size_menu_cb), NULL);
 
-	gtk_grid_attach(GTK_GRID(table), combo, column + 1, row, 1, 1);
-	gtk_widget_show(combo);
+	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 
-static void stereo_mode_menu_cb(GtkWidget *combo, gpointer data)
+static void stereo_mode_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
 	auto option = static_cast<gint *>(data);
 
-	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
+	switch (gtk_drop_down_get_selected(drop_down))
 		{
 		case 0:
 		default:
@@ -927,46 +903,44 @@ static void stereo_mode_menu_cb(GtkWidget *combo, gpointer data)
 static void add_stereo_mode_menu(GtkWidget *table, gint column, gint row, const gchar *text,
 			     gint option, gint *option_c, gboolean add_fixed)
 {
-	GtkWidget *combo;
-	gint current = 0;
-
-	*option_c = option;
-
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
-	combo = gtk_combo_box_text_new();
+	static const char *strings[] = {
+	    _("Single image"),
+	    _("Anaglyph Red-Cyan"),
+	    _("Anaglyph Green-Magenta"),
+	    _("Anaglyph Yellow-Blue"),
+	    _("Anaglyph Gray Red-Cyan"),
+	    _("Anaglyph Gray Green-Magenta"),
+	    _("Anaglyph Gray Yellow-Blue"),
+	    _("Anaglyph Dubois Red-Cyan"),
+	    _("Anaglyph Dubois Green-Magenta"),
+	    _("Anaglyph Dubois Yellow-Blue"),
+	    _("Side by Side"),
+	    _("Side by Side Half size"),
+	    _("Top - Bottom"),
+	    _("Top - Bottom Half size"),
+	    nullptr
+	};
+	GtkStringList *string_list = gtk_string_list_new(strings);
 
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Single image"));
-
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Anaglyph Red-Cyan"));
+	guint current = 0;
 	if (option & PR_STEREO_ANAGLYPH_RC) current = 1;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Anaglyph Green-Magenta"));
 	if (option & PR_STEREO_ANAGLYPH_GM) current = 2;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Anaglyph Yellow-Blue"));
 	if (option & PR_STEREO_ANAGLYPH_YB) current = 3;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Anaglyph Gray Red-Cyan"));
 	if (option & PR_STEREO_ANAGLYPH_GRAY_RC) current = 4;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Anaglyph Gray Green-Magenta"));
 	if (option & PR_STEREO_ANAGLYPH_GRAY_GM) current = 5;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Anaglyph Gray Yellow-Blue"));
 	if (option & PR_STEREO_ANAGLYPH_GRAY_YB) current = 6;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Anaglyph Dubois Red-Cyan"));
 	if (option & PR_STEREO_ANAGLYPH_DB_RC) current = 7;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Anaglyph Dubois Green-Magenta"));
 	if (option & PR_STEREO_ANAGLYPH_DB_GM) current = 8;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Anaglyph Dubois Yellow-Blue"));
 	if (option & PR_STEREO_ANAGLYPH_DB_YB) current = 9;
 
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Side by Side"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Side by Side Half size"));
 	if (option & PR_STEREO_HORIZ)
 		{
 		current = 10;
 		if (option & PR_STEREO_HALF) current = 11;
 		}
 
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Top - Bottom"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Top - Bottom Half size"));
 	if (option & PR_STEREO_VERT)
 		{
 		current = 12;
@@ -975,46 +949,44 @@ static void add_stereo_mode_menu(GtkWidget *table, gint column, gint row, const 
 
 	if (add_fixed)
 		{
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Fixed position"));
+		gtk_string_list_append(string_list, _("Fixed position"));
 		if (option & PR_STEREO_FIXED) current = 14;
 		}
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
+	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(string_list), nullptr);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
 
-	g_signal_connect(G_OBJECT(combo), "changed",
-			 G_CALLBACK(stereo_mode_menu_cb), option_c);
+	*option_c = option;
+	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
+	                 G_CALLBACK(stereo_mode_menu_cb), option_c);
 
-	gtk_grid_attach(GTK_GRID(table), combo, column + 1, row, 1, 1);
-	gtk_widget_show(combo);
+	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 
-static void video_menu_cb(GtkWidget *combo, gpointer data)
+static void video_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
 	auto option = static_cast<gchar **>(data);
 
 	EditorsList eds = editor_list_get();
-	gint index = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
+	guint index = gtk_drop_down_get_selected(drop_down);
 	*option = eds[index]->key;
 }
 
 static void add_video_menu(GtkWidget *table, gint column, gint row, const gchar *text,
 			     gchar *option, gchar **option_c)
 {
-	GtkWidget *combo;
 	/* use lists since they are sorted */
 	EditorsList eds = editor_list_get();
 
-	*option_c = option;
-
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
-	combo = gtk_combo_box_text_new();
+	GtkStringList *string_list = gtk_string_list_new(nullptr);
 	for (const EditorDescription *ed : eds)
 		{
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), ed->name);
+		gtk_string_list_append(string_list, ed->name);
 		}
 
-	gint current = -1;
+	guint current = GTK_INVALID_LIST_POSITION;
 	if (option)
 		{
 		auto it = std::find(eds.cbegin(), eds.cend(), get_editor_by_command(option));
@@ -1023,13 +995,15 @@ static void add_video_menu(GtkWidget *table, gint column, gint row, const gchar 
 			current = std::distance(eds.cbegin(), it);
 			}
 		}
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
 
-	g_signal_connect(G_OBJECT(combo), "changed",
-			 G_CALLBACK(video_menu_cb), option_c);
+	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(string_list), nullptr);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
 
-	gtk_grid_attach(GTK_GRID(table), combo, column + 1, row, 1, 1);
-	gtk_widget_show(combo);
+	*option_c = option;
+	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
+	                 G_CALLBACK(video_menu_cb), option_c);
+
+	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 
 static void filter_store_populate()
@@ -3002,11 +2976,11 @@ static void config_tab_keywords(GtkWidget *notebook)
 
 /* metadata tab */
 #if HAVE_LCMS
-static void intent_menu_cb(GtkWidget *combo, gpointer data)
+static void intent_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
 	auto option = static_cast<gint *>(data);
 
-	switch (gtk_combo_box_get_active(GTK_COMBO_BOX(combo)))
+	switch (gtk_drop_down_get_selected(drop_down))
 		{
 		case 0:
 		default:
@@ -3027,33 +3001,31 @@ static void intent_menu_cb(GtkWidget *combo, gpointer data)
 static void add_intent_menu(GtkWidget *table, gint column, gint row, const gchar *text,
 			     gint option, gint *option_c)
 {
-	GtkWidget *combo;
-	gint current = 0;
-
-	*option_c = option;
-
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
-	combo = gtk_combo_box_text_new();
+	static const char *strings[] = {
+	    _("Perceptual"),
+	    _("Relative Colorimetric"),
+	    _("Saturation"),
+	    _("Absolute Colorimetric"),
+	    nullptr
+	};
 
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Perceptual"));
+	guint current = 0;
 	if (option == INTENT_PERCEPTUAL) current = 0;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Relative Colorimetric"));
-	if (option == INTENT_RELATIVE_COLORIMETRIC) current = 1;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Saturation"));
-	if (option == INTENT_SATURATION) current = 2;
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), _("Absolute Colorimetric"));
-	if (option == INTENT_ABSOLUTE_COLORIMETRIC) current = 3;
+	else if (option == INTENT_RELATIVE_COLORIMETRIC) current = 1;
+	else if (option == INTENT_SATURATION) current = 2;
+	else if (option == INTENT_ABSOLUTE_COLORIMETRIC) current = 3;
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), current);
+	GtkWidget *drop_down = gtk_drop_down_new_from_strings(strings);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
+	gtk_widget_set_tooltip_text(drop_down, _("Refer to the lcms documentation for the defaults used when the selected Intent is not available"));
 
-	gtk_widget_set_tooltip_text(combo,_("Refer to the lcms documentation for the defaults used when the selected Intent is not available"));
+	*option_c = option;
+	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
+	                 G_CALLBACK(intent_menu_cb), option_c);
 
-	g_signal_connect(G_OBJECT(combo), "changed",
-			 G_CALLBACK(intent_menu_cb), option_c);
-
-	gtk_grid_attach(GTK_GRID(table), combo, column + 1, row, 1, 1);
-	gtk_widget_show(combo);
+	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 #endif
 
