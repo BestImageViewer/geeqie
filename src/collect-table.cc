@@ -308,13 +308,11 @@ static void collection_table_toggle_info(CollectTable *ct)
 
 static gint collection_table_get_icon_width(CollectTable *ct)
 {
-	gint width;
+	if (!ct->show_text && !ct->show_infotext) return options->thumbnails.size.width;
 
-	if (!ct->show_text && !ct->show_infotext) return options->thumbnails.max_width;
-
-	width = options->thumbnails.max_width + (options->thumbnails.max_width / 2);
+	gint width = options->thumbnails.size.width + (options->thumbnails.size.width / 2);
 	width = std::max(width, THUMB_MIN_ICON_WIDTH);
-	if (width > THUMB_MAX_ICON_WIDTH) width = options->thumbnails.max_width;
+	if (width > THUMB_MAX_ICON_WIDTH) width = options->thumbnails.size.width;
 
 	return width;
 }
@@ -1075,15 +1073,14 @@ static gint page_height(CollectTable *ct)
 {
 	GtkAdjustment *adj;
 	gint page_size;
-	gint row_height;
 	gint ret;
 
 	adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(ct->listview));
 	page_size = static_cast<gint>(gtk_adjustment_get_page_increment(adj));
 
-	row_height = options->thumbnails.max_height + (THUMB_BORDER_PADDING * 2);
-	if (ct->show_text) row_height += options->thumbnails.max_height / 3;
-	if (ct->show_infotext) row_height += options->thumbnails.max_height / 3;
+	gint row_height = options->thumbnails.size.height + (THUMB_BORDER_PADDING * 2);
+	if (ct->show_text) row_height += options->thumbnails.size.height / 3;
+	if (ct->show_infotext) row_height += options->thumbnails.size.height / 3;
 
 	ret = page_size / row_height;
 	ret = std::max(ret, 1);
@@ -1514,7 +1511,7 @@ static void collection_table_populate(CollectTable *ct, gboolean resize)
 				{
 				g_object_set(cell,
 				             "fixed_width", thumb_width,
-				             "fixed_height", options->thumbnails.max_height,
+				             "fixed_height", options->thumbnails.size.height,
 				             "show_text", ct->show_text || ct->show_stars || ct->show_infotext,
 				             NULL);
 				}

@@ -1922,7 +1922,7 @@ static void dupe_thumb_step(DupeWindow *dw)
 
 	dw->thumb_item = di;
 	thumb_loader_free(dw->thumb_loader);
-	dw->thumb_loader = thumb_loader_new(options->thumbnails.max_width, options->thumbnails.max_height);
+	dw->thumb_loader = thumb_loader_new(options->thumbnails.size.width, options->thumbnails.size.height);
 
 	thumb_loader_set_callbacks(dw->thumb_loader,
 				   dupe_thumb_done_cb,
@@ -3711,7 +3711,7 @@ static void dupe_listview_set_height(GtkWidget *listview, gboolean thumb)
 	column = gtk_tree_view_get_column(GTK_TREE_VIEW(listview), DUPE_COLUMN_THUMB - 1);
 	if (!column) return;
 
-	gtk_tree_view_column_set_fixed_width(column, (thumb) ? options->thumbnails.max_width : 4);
+	gtk_tree_view_column_set_fixed_width(column, thumb ? options->thumbnails.size.width : 4);
 	gtk_tree_view_column_set_visible(column, thumb);
 
 	list = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
@@ -3719,7 +3719,7 @@ static void dupe_listview_set_height(GtkWidget *listview, gboolean thumb)
 	cell = static_cast<GtkCellRenderer *>(list->data);
 	g_list_free(list);
 
-	g_object_set(cell, "height", thumb ? options->thumbnails.max_height : -1, NULL);
+	g_object_set(cell, "height", thumb ? options->thumbnails.size.height : -1, NULL);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(listview));
 }
 

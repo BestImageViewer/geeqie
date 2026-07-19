@@ -505,8 +505,8 @@ static void write_global_attributes(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_INT(*options, image.tile_size);
 
 	/* Thumbnails Options */
-	WRITE_NL(); WRITE_INT(*options, thumbnails.max_width);
-	WRITE_NL(); WRITE_INT(*options, thumbnails.max_height);
+	WRITE_NL(); WRITE_INT_FULL("thumbnails.max_width", options->thumbnails.size.width);
+	WRITE_NL(); WRITE_INT_FULL("thumbnails.max_height", options->thumbnails.size.height);
 	WRITE_NL(); WRITE_BOOL(*options, thumbnails.enable_caching);
 	WRITE_NL(); WRITE_BOOL(*options, thumbnails.cache_into_dirs);
 	WRITE_NL(); WRITE_BOOL(*options, thumbnails.use_xvpics);
@@ -969,8 +969,8 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_INT(*options, image.tile_size)) continue;
 
 		/* Thumbnails options */
-		if (READ_INT_CLAMP(*options, thumbnails.max_width, 16, 512)) continue;
-		if (READ_INT_CLAMP(*options, thumbnails.max_height, 16, 512)) continue;
+		if (READ_INT_CLAMP_FULL("thumbnails.max_width", options->thumbnails.size.width, 16, 512)) continue;
+		if (READ_INT_CLAMP_FULL("thumbnails.max_height", options->thumbnails.size.height, 16, 512)) continue;
 
 		if (READ_BOOL(*options, thumbnails.enable_caching)) continue;
 		if (READ_BOOL(*options, thumbnails.cache_into_dirs)) continue;

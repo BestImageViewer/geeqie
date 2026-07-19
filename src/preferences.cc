@@ -324,14 +324,12 @@ static void config_window_apply()
 	options->progressive_key_scrolling = c_options->progressive_key_scrolling;
 	options->keyboard_scroll_step = c_options->keyboard_scroll_step;
 
-	if (options->thumbnails.max_width != c_options->thumbnails.max_width
-	    || options->thumbnails.max_height != c_options->thumbnails.max_height
+	if (options->thumbnails.size != c_options->thumbnails.size
 	    || options->thumbnails.quality != c_options->thumbnails.quality)
 		{
 		thumb_format_changed = TRUE;
 		refresh = TRUE;
-		options->thumbnails.max_width = c_options->thumbnails.max_width;
-		options->thumbnails.max_height = c_options->thumbnails.max_height;
+		options->thumbnails.size = c_options->thumbnails.size;
 		options->thumbnails.quality = c_options->thumbnails.quality;
 		}
 	options->thumbnails.enable_caching = c_options->thumbnails.enable_caching;
@@ -792,46 +790,40 @@ static void add_mouse_selection_menu(GtkWidget *table, gint column, gint row, co
 	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
 
-static void thumb_size_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer)
+static void thumb_size_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
 	const guint n = gtk_drop_down_get_selected(drop_down);
 	if (n == GTK_INVALID_LIST_POSITION) return;
 
+	auto *option = static_cast<GqSize *>(data);
+
 	if (n < std::size(thumb_size_list))
 		{
-		c_options->thumbnails.max_width = thumb_size_list[n].width;
-		c_options->thumbnails.max_height = thumb_size_list[n].height;
+		*option = thumb_size_list[n];
 		}
 	else
 		{
-		c_options->thumbnails.max_width = options->thumbnails.max_width;
-		c_options->thumbnails.max_height = options->thumbnails.max_height;
+		*option = options->thumbnails.size;
 		}
 }
 
-static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, const gchar *text)
+static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, const gchar *text, GqSize option, GqSize *option_c)
 {
-	c_options->thumbnails.max_width = options->thumbnails.max_width;
-	c_options->thumbnails.max_height = options->thumbnails.max_height;
-
 	pref_table_label(table, column, row, text, GTK_ALIGN_START);
 
 	GtkStringList *string_list = gtk_string_list_new(nullptr);
 	guint current = GTK_INVALID_LIST_POSITION;
 	for (size_t i = 0; i < std::size(thumb_size_list); i++)
 		{
-		const int w = thumb_size_list[i].width;
-		const int h = thumb_size_list[i].height;
-
-		g_autofree gchar *buf = g_strdup_printf("%d x %d", w, h);
+		g_autofree gchar *buf = g_strdup_printf("%d x %d", thumb_size_list[i].width, thumb_size_list[i].height);
 		gtk_string_list_append(string_list, buf);
 
-		if (w == options->thumbnails.max_width && h == options->thumbnails.max_height) current = i;
+		if (thumb_size_list[i] == option) current = i;
 		}
 
 	if (current == GTK_INVALID_LIST_POSITION)
 		{
-		g_autofree gchar *buf = g_strdup_printf("%s %d x %d", _("Custom"), options->thumbnails.max_width, options->thumbnails.max_height);
+		g_autofree gchar *buf = g_strdup_printf("%s %d x %d", _("Custom"), option.width, option.height);
 		gtk_string_list_append(string_list, buf);
 
 		current = std::size(thumb_size_list);
@@ -839,8 +831,10 @@ static void add_thumb_size_menu(GtkWidget *table, gint column, gint row, const g
 
 	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(string_list), nullptr);
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
+
+	*option_c = option;
 	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
-	                 G_CALLBACK(thumb_size_menu_cb), NULL);
+	                 G_CALLBACK(thumb_size_menu_cb), option_c);
 
 	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
 }
@@ -1720,13 +1714,13 @@ static void config_tab_general(GtkWidget *notebook)
 	group = pref_group_new(vbox, FALSE, _("Thumbnails"), GTK_ORIENTATION_VERTICAL);
 
 	table = pref_table_new(group, 2, 2, FALSE, FALSE);
-	add_thumb_size_menu(table, 0, 0, _("Size:"));
+	add_thumb_size_menu(table, 0, 0, _("Size:"), options->thumbnails.size, &c_options->thumbnails.size);
 	add_quality_menu(table, 0, 1, _("Quality:"), options->thumbnails.quality, &c_options->thumbnails.quality);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, _("Custom size: "));
-	pref_spin_new_int(hbox, _("Width:"), nullptr, 1, 512, 1, options->thumbnails.max_width, &c_options->thumbnails.max_width);
-	pref_spin_new_int(hbox, _("Height:"), nullptr, 1, 512, 1, options->thumbnails.max_height, &c_options->thumbnails.max_height);
+	pref_spin_new_int(hbox, _("Width:"), nullptr, 1, 512, 1, options->thumbnails.size.width, &c_options->thumbnails.size.width);
+	pref_spin_new_int(hbox, _("Height:"), nullptr, 1, 512, 1, options->thumbnails.size.height, &c_options->thumbnails.size.height);
 
 	ct_button = pref_checkbox_new_int(group, _("Cache thumbnails and sim. files"),
 					  options->thumbnails.enable_caching, &c_options->thumbnails.enable_caching);

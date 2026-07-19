@@ -292,8 +292,8 @@ GtkWidget *create_pdf_preview(const gchar *filename)
 	double page_height;
 	poppler_page_get_size(page, &page_width, &page_height);
 
-	const double scale_x = options->thumbnails.max_width / page_width;
-	const double scale_y = options->thumbnails.max_height / page_height;
+	const double scale_x = options->thumbnails.size.width / page_width;
+	const double scale_y = options->thumbnails.size.height / page_height;
 	const double scale = std::min(scale_x, scale_y);
 	const auto target_width = static_cast<gint>(page_width * scale);
 	const auto target_height = static_cast<gint>(page_height * scale);
@@ -320,7 +320,7 @@ GtkWidget *create_pdf_preview(const gchar *filename)
 	GtkWidget *picture = gtk_picture_new_for_paintable(GDK_PAINTABLE(texture));
 	gtk_picture_set_content_fit(GTK_PICTURE(picture), GTK_CONTENT_FIT_CONTAIN);
 	gtk_picture_set_can_shrink(GTK_PICTURE(picture), TRUE);
-	gtk_widget_set_size_request(picture, options->thumbnails.max_width, options->thumbnails.max_height);
+	gtk_widget_set_size_request(picture, options->thumbnails.size.width, options->thumbnails.size.height);
 
 	return picture;
 }
@@ -394,7 +394,7 @@ GtkWidget *create_image_preview(const gchar *file_path)
 		g_autoptr(GdkPixbuf) orig_pixbuf = gdk_pixbuf_new_from_file(file_path, nullptr);
 		if (orig_pixbuf)
 			{
-			pixbuf = gdk_pixbuf_scale_simple(orig_pixbuf, options->thumbnails.max_width, options->thumbnails.max_height, GDK_INTERP_BILINEAR);
+			pixbuf = gdk_pixbuf_scale_simple(orig_pixbuf, options->thumbnails.size.width, options->thumbnails.size.height, GDK_INTERP_BILINEAR);
 			}
 		}
 
@@ -407,7 +407,7 @@ GtkWidget *create_image_preview(const gchar *file_path)
 	GtkWidget *picture = gtk_picture_new_for_paintable(GDK_PAINTABLE(texture));
 	gtk_picture_set_content_fit(GTK_PICTURE(picture), GTK_CONTENT_FIT_CONTAIN);
 	gtk_picture_set_can_shrink(GTK_PICTURE(picture), TRUE);
-	gtk_widget_set_size_request(picture, options->thumbnails.max_width, options->thumbnails.max_height);
+	gtk_widget_set_size_request(picture, options->thumbnails.size.width, options->thumbnails.size.height);
 
 	return picture;
 }

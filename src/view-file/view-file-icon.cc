@@ -178,13 +178,11 @@ static void vficon_toggle_filenames(ViewFile *vf)
 
 static gint vficon_get_icon_width(ViewFile *vf)
 {
-	gint width;
+	if (!VFICON(vf)->show_text && !vf->marks_enabled) return options->thumbnails.size.width;
 
-	if (!VFICON(vf)->show_text && !vf->marks_enabled ) return options->thumbnails.max_width;
-
-	width = options->thumbnails.max_width + (options->thumbnails.max_width / 2);
+	gint width = options->thumbnails.size.width + (options->thumbnails.size.width / 2);
 	width = std::max(width, THUMB_MIN_ICON_WIDTH);
-	if (width > THUMB_MAX_ICON_WIDTH) width = options->thumbnails.max_width;
+	if (width > THUMB_MAX_ICON_WIDTH) width = options->thumbnails.size.width;
 	if (vf->marks_enabled && width < THUMB_MIN_ICON_WIDTH_WITH_MARKS) width = THUMB_MIN_ICON_WIDTH_WITH_MARKS;
 
 	return width;
@@ -967,14 +965,13 @@ static gint page_height(ViewFile *vf)
 {
 	GtkAdjustment *adj;
 	gint page_size;
-	gint row_height;
 	gint ret;
 
 	adj = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(vf->listview));
 	page_size = static_cast<gint>(gtk_adjustment_get_page_increment(adj));
 
-	row_height = options->thumbnails.max_height + (THUMB_BORDER_PADDING * 2);
-	if (VFICON(vf)->show_text) row_height += options->thumbnails.max_height / 3;
+	gint row_height = options->thumbnails.size.height + (THUMB_BORDER_PADDING * 2);
+	if (VFICON(vf)->show_text) row_height += options->thumbnails.size.height / 3;
 
 	ret = page_size / row_height;
 	ret = std::max(ret, 1);
@@ -1361,7 +1358,7 @@ static void vficon_populate(ViewFile *vf, gboolean resize, gboolean keep_positio
 				{
 				g_object_set(cell,
 				             "fixed_width", thumb_width,
-				             "fixed_height", options->thumbnails.max_height,
+				             "fixed_height", options->thumbnails.size.height,
 				             "show_text", VFICON(vf)->show_text || options->show_star_rating,
 				             "show_marks", vf->marks_enabled,
 				             "num_marks", FILEDATA_MARKS_SIZE,
