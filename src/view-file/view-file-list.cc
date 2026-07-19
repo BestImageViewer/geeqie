@@ -1458,12 +1458,12 @@ static void vflist_listview_set_columns(ViewFile *vf)
 	column = gtk_tree_view_get_column(GTK_TREE_VIEW(vf->listview), FILE_VIEW_COLUMN_THUMB);
 	if (!column) return;
 
-	gtk_tree_view_column_set_fixed_width(column, options->thumbnails.max_width + 4);
+	gtk_tree_view_column_set_fixed_width(column, options->thumbnails.size.width + 4);
 
 	g_autoptr(GList) list = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
 	if (!list) return;
 
-	g_object_set(list->data, "height", options->thumbnails.max_height, NULL);
+	g_object_set(list->data, "height", options->thumbnails.size.height, NULL);
 
 	gtk_tree_view_column_set_visible(column, VFLIST(vf)->thumbs_enabled);
 
@@ -1500,7 +1500,7 @@ static void vflist_listview_set_columns(ViewFile *vf)
 
 static gboolean vflist_is_multiline(ViewFile *vf)
 {
-	return (VFLIST(vf)->thumbs_enabled && options->thumbnails.max_height >= 48);
+	return (VFLIST(vf)->thumbs_enabled && options->thumbnails.size.height >= 48);
 }
 
 

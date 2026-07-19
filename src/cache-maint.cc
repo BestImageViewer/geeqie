@@ -640,7 +640,7 @@ static gboolean cache_manager_render_file(CacheOpsData *cd)
 		fd = static_cast<FileData *>(cd->list->data);
 		cd->list = g_list_remove(cd->list, fd);
 
-		cd->tl = reinterpret_cast<ThumbLoaderStd *>(thumb_loader_new(options->thumbnails.max_width, options->thumbnails.max_height));
+		cd->tl = reinterpret_cast<ThumbLoaderStd *>(thumb_loader_new(options->thumbnails.size.width, options->thumbnails.size.height));
 		thumb_loader_set_callbacks(reinterpret_cast<ThumbLoader *>(cd->tl),
 					   cache_manager_render_thumb_done_cb,
 					   cache_manager_render_thumb_done_cb,

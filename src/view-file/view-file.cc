@@ -1745,7 +1745,7 @@ static gboolean vf_thumb_next(ViewFile *vf)
 
 	thumb_loader_free(vf->thumbs_loader);
 
-	vf->thumbs_loader = thumb_loader_new(options->thumbnails.max_width, options->thumbnails.max_height);
+	vf->thumbs_loader = thumb_loader_new(options->thumbnails.size.width, options->thumbnails.size.height);
 	thumb_loader_set_callbacks(vf->thumbs_loader,
 				   vf_thumb_done_cb,
 				   vf_thumb_error_cb,

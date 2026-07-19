@@ -93,7 +93,7 @@ gboolean ImageLoaderCOLLECTION::write(const guchar *, gsize &chunk_size, gsize c
 				g_mkstemp(randname);
 
 				g_autofree gchar *cmd_line = g_strdup_printf("montage %s -geometry %dx%d+1+1 %s >/dev/null 2>&1",
-				                                             file_names->str, options->thumbnails.max_width, options->thumbnails.max_height, randname);
+				                                             file_names->str, options->thumbnails.size.width, options->thumbnails.size.height, randname);
 
 				runcmd(cmd_line);
 				pixbuf = gdk_pixbuf_new_from_file(randname, nullptr);

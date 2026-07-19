@@ -503,7 +503,7 @@ static void collection_load_thumb_step(CollectionData *cd)
 	/* setup loader and call it */
 	cd->thumb_info = ci;
 	thumb_loader_free(cd->thumb_loader);
-	cd->thumb_loader = thumb_loader_new(options->thumbnails.max_width, options->thumbnails.max_height);
+	cd->thumb_loader = thumb_loader_new(options->thumbnails.size.width, options->thumbnails.size.height);
 	thumb_loader_set_callbacks(cd->thumb_loader,
 				   collection_load_thumb_done_cb,
 				   collection_load_thumb_error_cb,
