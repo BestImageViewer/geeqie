@@ -434,19 +434,14 @@ gdouble get_gps_range(const SearchData *sd, gdouble latitude, gdouble longitude)
 	return std::sqrt((x * x) + (y * y)) * sd->search_earth_radius;
 }
 
-enum {
-	MENU_CHOICE_COLUMN_NAME = 0,
-	MENU_CHOICE_COLUMN_VALUE
-};
+#define MATCH_TYPE_KEY "match_type"
 
-bool menu_choice_get_match_type(GtkWidget *combo, MatchType *type)
+bool menu_choice_get_match_type(GtkWidget *drop_down, MatchType &type)
 {
-	GtkTreeModel *store = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+	g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(drop_down)));
+	if (!item) return false;
 
-	GtkTreeIter iter;
-	if (!gtk_combo_box_get_active_iter(GTK_COMBO_BOX(combo), &iter)) return false;
-
-	gtk_tree_model_get(store, &iter, MENU_CHOICE_COLUMN_VALUE, type, -1);
+	type = static_cast<MatchType>(GPOINTER_TO_INT(g_object_get_data(item, MATCH_TYPE_KEY)));
 	return true;
 }
 
@@ -2188,7 +2183,7 @@ static void search_start_do(SearchData *sd)
 
 	if (sd->match_name_enable)
 		{
-		menu_choice_get_match_type(sd->ui.menu_name, &sd->match_name);
+		menu_choice_get_match_type(sd->ui.menu_name, sd->match_name);
 
 		history_combo_append_history(sd->ui.entry_name, nullptr);
 
@@ -2199,7 +2194,7 @@ static void search_start_do(SearchData *sd)
 	/* XXX */
 	if (sd->match_comment_enable)
 		{
-		menu_choice_get_match_type(sd->ui.menu_comment, &sd->match_comment);
+		menu_choice_get_match_type(sd->ui.menu_comment, sd->match_comment);
 
 		g_free(sd->search_comment);
 		sd->search_comment = g_strdup(gtk_editable_get_text(GTK_EDITABLE(sd->ui.entry_comment)));
@@ -2207,7 +2202,7 @@ static void search_start_do(SearchData *sd)
 
 	if (sd->match_exif_enable)
 		{
-		menu_choice_get_match_type(sd->ui.menu_exif, &sd->match_exif);
+		menu_choice_get_match_type(sd->ui.menu_exif, sd->match_exif);
 
 		g_free(sd->search_exif_tag);
 		sd->search_exif_tag = g_strdup(gtk_editable_get_text(GTK_EDITABLE(sd->ui.entry_exif_tag)));
@@ -2248,7 +2243,8 @@ static void search_start_do(SearchData *sd)
 			return;
 			}
 
-		g_autofree gchar *units_gps = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.units_gps));
+		g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.units_gps)));
+		const char *units_gps = item ? gtk_string_object_get_string(GTK_STRING_OBJECT(item)) : nullptr;
 
 		if (g_strcmp0(units_gps, _("km")) == 0)
 			{
@@ -2269,7 +2265,7 @@ static void search_start_do(SearchData *sd)
 
 	if (sd->match_keywords_enable)
 		{
-		menu_choice_get_match_type(sd->ui.menu_keywords, &sd->match_keywords);
+		menu_choice_get_match_type(sd->ui.menu_keywords, sd->match_keywords);
 
 		g_list_free_full(sd->search_keyword_list, g_free);
 		sd->search_keyword_list = keyword_list_pull(sd->ui.entry_keywords);
@@ -2277,7 +2273,8 @@ static void search_start_do(SearchData *sd)
 
 	if (sd->match_date_enable)
 		{
-		g_autofree gchar *date_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.date_type));
+		g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.date_type)));
+		const char *date_type = item ? gtk_string_object_get_string(GTK_STRING_OBJECT(item)) : nullptr;
 		const auto it = std::find_if(std::cbegin(search_date_types), std::cend(search_date_types),
 		                             [date_type](const SearchDateType &sdt){ return g_strcmp0(date_type, sdt.name) == 0; });
 		if (it != std::cend(search_date_types))
@@ -2291,9 +2288,10 @@ static void search_start_do(SearchData *sd)
 
 	if (sd->match_class_enable)
 		{
-		menu_choice_get_match_type(sd->ui.menu_class, &sd->match_class);
+		menu_choice_get_match_type(sd->ui.menu_class, sd->match_class);
 
-		g_autofree gchar *class_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type));
+		g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.class_type)));
+		const char *class_type = item ? gtk_string_object_get_string(GTK_STRING_OBJECT(item)) : nullptr;
 
 		if (g_strcmp0(class_type, _("Image")) == 0)
 			{
@@ -2331,11 +2329,12 @@ static void search_start_do(SearchData *sd)
 
 	if (sd->match_marks_enable)
 		{
-		menu_choice_get_match_type(sd->ui.menu_marks, &sd->match_marks);
+		menu_choice_get_match_type(sd->ui.menu_marks, sd->match_marks);
 
 		sd->search_marks = -1;
 
-		g_autofree gchar *marks_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(sd->ui.marks_type));
+		g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.marks_type)));
+		const char *marks_type = item ? gtk_string_object_get_string(GTK_STRING_OBJECT(item)) : nullptr;
 
 		if (g_strcmp0(marks_type, _("Any mark")) != 0)
 			{
@@ -2526,52 +2525,52 @@ static void search_result_add_column(SearchData * sd, gint n, const gchar *title
 	gtk_tree_view_append_column(GTK_TREE_VIEW(sd->ui.result_view), column);
 }
 
-static void menu_choice_path_cb(GtkWidget *combo, gpointer data)
+static void menu_choice_path_cb(GtkWidget *drop_down, GParamSpec *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	if (!menu_choice_get_match_type(combo, &sd->search_type)) return;
+	if (!menu_choice_get_match_type(drop_down, sd->search_type)) return;
 
 	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.check_recurse),
 	                       sd->search_type == SEARCH_MATCH_NONE);
 	gtk_widget_set_visible(sd->ui.box_collection, sd->search_type == SEARCH_MATCH_COLLECTION);
 }
 
-static void menu_choice_size_cb(GtkWidget *combo, gpointer data)
+static void menu_choice_size_cb(GtkWidget *drop_down, GParamSpec *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	if (!menu_choice_get_match_type(combo, &sd->match_size)) return;
+	if (!menu_choice_get_match_type(drop_down, sd->match_size)) return;
 
 	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.spin_size_end),
 	                       sd->match_size == SEARCH_MATCH_BETWEEN);
 }
 
-static void menu_choice_rating_cb(GtkWidget *combo, gpointer data)
+static void menu_choice_rating_cb(GtkWidget *drop_down, GParamSpec *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	if (!menu_choice_get_match_type(combo, &sd->match_rating)) return;
+	if (!menu_choice_get_match_type(drop_down, sd->match_rating)) return;
 
 	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.spin_rating_end),
 	                       sd->match_rating == SEARCH_MATCH_BETWEEN);
 }
 
-static void menu_choice_date_cb(GtkWidget *combo, gpointer data)
+static void menu_choice_date_cb(GtkWidget *drop_down, GParamSpec *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	if (!menu_choice_get_match_type(combo, &sd->match_date)) return;
+	if (!menu_choice_get_match_type(drop_down, sd->match_date)) return;
 
 	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.date_sel_end),
 	                       sd->match_date == SEARCH_MATCH_BETWEEN);
 }
 
-static void menu_choice_dimensions_cb(GtkWidget *combo, gpointer data)
+static void menu_choice_dimensions_cb(GtkWidget *drop_down, GParamSpec *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	if (!menu_choice_get_match_type(combo, &sd->match_dimensions)) return;
+	if (!menu_choice_get_match_type(drop_down, sd->match_dimensions)) return;
 
 	gtk_widget_set_visible(sd->ui.box_dimensions_end,
 	                       sd->match_dimensions == SEARCH_MATCH_BETWEEN);
@@ -2584,11 +2583,11 @@ static void menu_choice_spin_cb(GtkAdjustment *adjustment, gpointer data)
 	*value = static_cast<gint>(gtk_adjustment_get_value(adjustment));
 }
 
-static void menu_choice_gps_cb(GtkWidget *combo, gpointer data)
+static void menu_choice_gps_cb(GtkWidget *drop_down, GParamSpec *, gpointer data)
 {
 	auto sd = static_cast<SearchData *>(data);
 
-	if (!menu_choice_get_match_type(combo, &sd->match_gps)) return;
+	if (!menu_choice_get_match_type(drop_down, sd->match_gps)) return;
 
 	gtk_widget_set_visible(gtk_widget_get_parent(sd->ui.spin_gps),
 	                       sd->match_gps != SEARCH_MATCH_NONE);
@@ -2634,34 +2633,25 @@ static void menu_choice_check_cb(GtkWidget *button, gpointer data)
 
 template<size_t N>
 static GtkWidget *menu_choice_menu(GtkWidget *box, const std::array<MatchList, N> &items,
-                                   GCallback changed_cb, gpointer data)
+                                   GCallback selected_cb, gpointer data)
 {
-	g_autoptr(GtkListStore) store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-	GtkWidget *combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-
-	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo), renderer, TRUE);
-	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), renderer,
-				       "text", MENU_CHOICE_COLUMN_NAME, NULL);
-
+	GtkStringList *string_list = gtk_string_list_new(nullptr);
+	guint index = 0;
 	for (const MatchList &item : items)
 		{
-		GtkTreeIter iter;
-		gtk_list_store_append(store, &iter);
+		gtk_string_list_append(string_list, _(item.text));
 
-		gtk_list_store_set(store, &iter,
-		                   MENU_CHOICE_COLUMN_NAME, _(item.text),
-		                   MENU_CHOICE_COLUMN_VALUE, item.type,
-		                   -1);
+		g_autoptr(GObject) obj_item = G_OBJECT(g_list_model_get_item(G_LIST_MODEL(string_list), index++));
+		g_object_set_data(obj_item, MATCH_TYPE_KEY, GINT_TO_POINTER(item.type));
 		}
 
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
-	gq_gtk_box_pack_start(GTK_BOX(box), combo, FALSE, FALSE, 0);
-	gtk_widget_show(combo);
+	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(string_list), nullptr);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), 0);
+	gq_gtk_box_pack_start(GTK_BOX(box), drop_down, FALSE, FALSE, 0);
 
-	if (changed_cb) g_signal_connect(G_OBJECT(combo), "changed", changed_cb, data);
+	if (selected_cb) g_signal_connect(G_OBJECT(drop_down), "notify::selected", selected_cb, data);
 
-	return combo;
+	return drop_down;
 }
 
 static GtkWidget *menu_choice(GtkWidget *box, const gchar *text, gboolean *value,
@@ -2973,15 +2963,15 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gq_gtk_box_pack_start(GTK_BOX(hbox2), sd->ui.date_sel_end, FALSE, FALSE, 0);
 	gtk_widget_show(sd->ui.date_sel_end);
 
-	sd->ui.date_type = gtk_combo_box_text_new();
+	GtkStringList *date_list = gtk_string_list_new(nullptr);
 	for (const SearchDateType &sdt : search_date_types)
 		{
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.date_type), sdt.name);
+		gtk_string_list_append(date_list, sdt.name);
 		}
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.date_type, FALSE, FALSE, 0);
-	gtk_combo_box_set_active(GTK_COMBO_BOX(sd->ui.date_type), 0);
+	sd->ui.date_type = gtk_drop_down_new(G_LIST_MODEL(date_list), nullptr);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.date_type), 0);
 	gtk_widget_set_tooltip_text(sd->ui.date_type, "Modified (mtime)\nStatus Changed (ctime)\nOriginal (Exif.Photo.DateTimeOriginal)\nDigitized (Exif.Photo.DateTimeDigitized)");
-	gtk_widget_show(sd->ui.date_type);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.date_type, FALSE, FALSE, 0);
 
 	/* Search for image dimensions */
 	hbox = menu_choice(sd->ui.box_search, _("Image dimensions are"), &sd->match_dimensions_enable);
@@ -3108,14 +3098,11 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
 	sd->ui.spin_gps = menu_spin(hbox2, 1, 9999, &sd->search_gps);
 
-	sd->ui.units_gps = gtk_combo_box_text_new();
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.units_gps), _("km"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.units_gps), _("miles"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.units_gps), _("n.m."));
-	gq_gtk_box_pack_start(GTK_BOX(hbox2), sd->ui.units_gps, FALSE, FALSE, 0);
-	gtk_combo_box_set_active(GTK_COMBO_BOX(sd->ui.units_gps), 0);
+	static const char *units_strings[] = { _("km"), _("miles"), _("n.m."), nullptr };
+	sd->ui.units_gps = gtk_drop_down_new_from_strings(units_strings);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.units_gps), 0);
 	gtk_widget_set_tooltip_text(sd->ui.units_gps, "kilometres, miles or nautical miles");
-	gtk_widget_show(sd->ui.units_gps);
+	gq_gtk_box_pack_start(GTK_BOX(hbox2), sd->ui.units_gps, FALSE, FALSE, 0);
 
 	pref_label_new(hbox2, _("from"));
 
@@ -3134,35 +3121,37 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.menu_class = menu_choice_menu(hbox, text_search_menu_class,
 	                                     nullptr, nullptr);
 
-	sd->ui.class_type = gtk_combo_box_text_new();
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type), _("Image"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type), _("Raw Image"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type), _("Video"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type), _("Document"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type), _("Metadata"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type), _("Archive"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type), _("Unknown"));
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.class_type), _("Broken"));
+	static const char *class_strings[] = {
+	    _("Image"),
+	    _("Raw Image"),
+	    _("Video"),
+	    _("Document"),
+	    _("Metadata"),
+	    _("Archive"),
+	    _("Unknown"),
+	    _("Broken"),
+	    nullptr
+	};
+	sd->ui.class_type = gtk_drop_down_new_from_strings(class_strings);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.class_type), 0);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.class_type, FALSE, FALSE, 0);
-	gtk_combo_box_set_active(GTK_COMBO_BOX(sd->ui.class_type), 0);
-	gtk_widget_show(sd->ui.class_type);
 
 	/* Search for image marks */
 	hbox = menu_choice(sd->ui.box_search, _("Marks"), &sd->match_marks_enable);
 	sd->ui.menu_marks = menu_choice_menu(hbox, text_search_menu_marks,
 	                                     nullptr, nullptr);
 
-	sd->ui.marks_type = gtk_combo_box_text_new();
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.marks_type), _("Any mark"));
+	GtkStringList *marks_list = gtk_string_list_new(nullptr);
+	gtk_string_list_append(marks_list, _("Any mark"));
 	for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
 		{
 		g_autoptr(GString) marks_string = get_marks_string(i);
 
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(sd->ui.marks_type), marks_string->str);
+		gtk_string_list_append(marks_list, marks_string->str);
 		}
+	sd->ui.marks_type = gtk_drop_down_new(G_LIST_MODEL(marks_list), nullptr);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.marks_type, FALSE, FALSE, 0);
-	gtk_combo_box_set_active(GTK_COMBO_BOX(sd->ui.marks_type), 0);
-	gtk_widget_show(sd->ui.marks_type);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.marks_type), 0);
 
 	/* Done the types of searches */
 
