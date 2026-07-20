@@ -2590,6 +2590,7 @@ static void config_tab_metadata(GtkWidget *notebook)
 	label = pref_label_new(group, _("Warning: Geeqie is built without Exiv2. Some options are disabled."));
 #endif
 	label = pref_label_new(group, _("When writing metadata, Geeqie will follow these steps, if selected. This process will stop when the first successful write occurs."));
+	gtk_label_set_wrap(GTK_LABEL(label), TRUE);
 	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
 	gtk_label_set_yalign(GTK_LABEL(label), 0.5);
 
