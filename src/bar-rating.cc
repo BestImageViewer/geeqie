@@ -51,6 +51,7 @@ struct PaneRatingData
 	GtkWidget *radio_button_first;
 	FileData *fd;
 	GtkCheckButton *rating_buttons[7];
+	gboolean updating;
 };
 
 static void bar_pane_rating_update(PaneRatingData *prd)
@@ -59,7 +60,9 @@ static void bar_pane_rating_update(PaneRatingData *prd)
 
 	rating = metadata_read_int(prd->fd, RATING_KEY, 0) + 1;
 
+	prd->updating = TRUE;
 	gtk_check_button_set_active(prd->rating_buttons[rating], TRUE);
+	prd->updating = FALSE;
 }
 
 static void bar_pane_rating_set_fd(GtkWidget *pane, FileData *fd)
@@ -114,6 +117,7 @@ static void bar_pane_rating_destroy(gpointer data)
 static void bar_pane_rating_selected_cb(GtkCheckButton *checkbutton, gpointer data)
 {
 	auto prd = static_cast<PaneRatingData *>(data);
+	if (prd->updating || !gtk_check_button_get_active(checkbutton)) return;
 
 	const gchar *rating_label;
 
@@ -164,13 +168,13 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 
 	radio_rejected = gtk_check_button_new_with_label(_("Rejected"));
 	gq_gtk_box_pack_start(GTK_BOX(row_1), radio_rejected, FALSE, FALSE, 0);
-	g_signal_connect(radio_rejected, "released", G_CALLBACK(bar_pane_rating_selected_cb), prd);
+	g_signal_connect(radio_rejected, "toggled", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 	prd->rating_buttons[0] = GTK_CHECK_BUTTON(radio_rejected);
 
 	radio_unrated = gtk_check_button_new_with_label(_("Unrated"));
 	gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_unrated), GTK_CHECK_BUTTON(radio_rejected));
 	gq_gtk_box_pack_start(GTK_BOX(row_1), radio_unrated, FALSE, FALSE, 0);
-	g_signal_connect(radio_unrated, "released", G_CALLBACK(bar_pane_rating_selected_cb), prd);
+	g_signal_connect(radio_unrated, "toggled", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 	prd->rating_buttons[1] = GTK_CHECK_BUTTON(radio_unrated);
 
 	row_2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
@@ -182,7 +186,7 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 
 		radio_rating = gtk_check_button_new_with_label(i_str.c_str());
 		gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_rating), GTK_CHECK_BUTTON(radio_rejected));
-		g_signal_connect(radio_rating, "released", G_CALLBACK(bar_pane_rating_selected_cb), prd);
+		g_signal_connect(radio_rating, "toggled", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 
 		gq_gtk_box_pack_start(GTK_BOX(row_2), radio_rating, FALSE, FALSE, 1);
 		prd->rating_buttons[i] = GTK_CHECK_BUTTON(radio_rating);
