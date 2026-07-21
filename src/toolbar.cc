@@ -159,16 +159,14 @@ static void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, Tool
 			continue;
 			}
 
-		g_autoptr(GMenuItem) item;
-
-		g_autoptr(GIcon) themed_icon;
+		g_autoptr(GMenuItem) item = nullptr;
 
 		if (bar == TOOLBAR_MAIN)
 			{
 			item = g_menu_item_new(actions[i].description,
 			                       "win.preferences-win-main-toolbarlist-add");
 
-			themed_icon = g_themed_icon_new(icon);
+			g_autoptr(GIcon) themed_icon = g_themed_icon_new(icon);
 			g_menu_item_set_icon(item, themed_icon);
 
 			g_menu_item_set_action_and_target(item,
@@ -178,21 +176,19 @@ static void toolbar_menu_add_actions(GMenu *menu, const ActionDef *actions, Tool
 			}
 		else
 			{
-
 			item = g_menu_item_new(actions[i].description,
 			                       "win.preferences-win-status-toolbarlist-add");
 
-			themed_icon = g_themed_icon_new(icon);
+			g_autoptr(GIcon) themed_icon = g_themed_icon_new(icon);
 			g_menu_item_set_icon(item, themed_icon);
 
 			g_menu_item_set_action_and_target(item,
 			                                  "win.preferences-win-status-toolbarlist-add",
 			                                  "s",
 			                                  actions[i].action_name);
-
 			}
-		g_menu_append_item(menu, item);
 
+		g_menu_append_item(menu, item);
 		}
 }
 
