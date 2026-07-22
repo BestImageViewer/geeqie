@@ -1297,13 +1297,15 @@ static void safe_delete_clear_cb(GtkWidget *widget, gpointer)
 	gtk_widget_show(gd->dialog);
 }
 
-static void image_overlay_template_view_changed_cb(GtkWidget *buffer, gpointer data)
+static void image_overlay_template_view_changed_cb(GtkTextBuffer *buffer, gpointer data)
 {
-	gpointer profile_number_pointer = g_object_get_data(G_OBJECT(buffer), "osd_profile_number");
-	gint i = GPOINTER_TO_INT(profile_number_pointer);
+	GtkTextIter start;
+	GtkTextIter end;
+	gtk_text_buffer_get_bounds(buffer, &start, &end);
 
-	g_free(c_options->image_overlay_n[i].template_string);
-	c_options->image_overlay_n[i].template_string = text_widget_text_pull(static_cast<GtkWidget *>(data), TRUE);
+	auto **option = static_cast<gchar **>(data);
+	g_free(*option);
+	*option = gtk_text_buffer_get_text(buffer, &start, &end, TRUE);
 }
 
 static void image_overlay_default_template_ok_cb(GenericDialog *, gpointer data)
@@ -2111,7 +2113,6 @@ static void config_tab_windows(GtkWidget *notebook)
 
 static GtkWidget *osd_profiles(gint i)
 {
-	GtkTextBuffer *buffer;
 	GtkWidget *button;
 	GtkWidget *group;
 	GtkWidget *hbox;
@@ -2173,12 +2174,11 @@ static GtkWidget *osd_profiles(gint i)
 	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(image_overlay_template_view));
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(image_overlay_template_view));
 	if (options->image_overlay_n[i].template_string) gtk_text_buffer_set_text(buffer, options->image_overlay_n[i].template_string, -1);
-	g_object_set_data(G_OBJECT(buffer), "osd_profile_number", GINT_TO_POINTER(i));
 
 	g_signal_connect(G_OBJECT(buffer), "changed",
-	                 G_CALLBACK(image_overlay_template_view_changed_cb), image_overlay_template_view);
+	                 G_CALLBACK(image_overlay_template_view_changed_cb), &c_options->image_overlay_n[i].template_string);
 
 	return page;
 }
