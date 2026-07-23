@@ -189,6 +189,7 @@ gint pref_list_int_get(const gchar *group, const gchar *key, gint fallback);
 GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title,
                                  const GdkRGBA *color, GdkRGBA *result);
 
+char *text_buffer_get_text(GtkTextBuffer *buffer, gboolean include_hidden_chars);
 gchar *text_widget_text_pull(GtkWidget *text_widget, gboolean include_hidden_chars = FALSE);
 gchar *text_widget_text_pull_selected(GtkWidget *text_widget);
 

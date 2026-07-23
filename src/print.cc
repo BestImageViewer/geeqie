@@ -396,11 +396,7 @@ gchar *form_image_text(const gchar *template_string, FileData *fd, PrintWindow *
 
 gchar *print_get_page_text(const PrintWindow *pw)
 {
-	GtkTextIter start;
-	GtkTextIter end;
-	gtk_text_buffer_get_bounds(pw->page_text, &start, &end);
-
-	return gtk_text_buffer_get_text(pw->page_text, &start, &end, FALSE);
+	return text_buffer_get_text(pw->page_text, FALSE);
 }
 
 void draw_page(GtkPrintOperation *, GtkPrintContext *context, gint page_nr, gpointer data)

@@ -81,8 +81,6 @@ EditorListWindow *editor_list_window = nullptr;
 
 gboolean editor_window_save(EditorWindow *ew)
 {
-	GtkTextIter start;
-	GtkTextIter end;
 	gboolean ret = TRUE;
 
 	const char *name = gtk_editable_get_text(GTK_EDITABLE(ew->entry));
@@ -92,8 +90,7 @@ gboolean editor_window_save(EditorWindow *ew)
 		return FALSE;
 		}
 
-	gtk_text_buffer_get_bounds(ew->buffer, &start, &end);
-	g_autofree gchar *text = gtk_text_buffer_get_text(ew->buffer, &start, &end, FALSE);
+	g_autofree gchar *text = text_buffer_get_text(ew->buffer, FALSE);
 
 	g_autofree gchar *dir = g_build_filename(get_rc_dir(), "applications", NULL);
 	g_autofree gchar *path = g_build_filename(dir, name, NULL);

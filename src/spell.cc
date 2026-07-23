@@ -6,6 +6,8 @@
 
 #include <libspelling.h>
 
+#include "ui-misc.h"
+
 void spell_text_view_enable(GtkTextView *text_view)
 {
 	static gsize initialized = 0;
@@ -20,11 +22,8 @@ void spell_text_view_enable(GtkTextView *text_view)
 	if (!GTK_SOURCE_IS_BUFFER(buffer))
 		{
 		GtkSourceBuffer *source_buffer = gtk_source_buffer_new(nullptr);
-		GtkTextIter start;
-		GtkTextIter end;
 
-		gtk_text_buffer_get_bounds(buffer, &start, &end);
-		g_autofree gchar *text = gtk_text_buffer_get_text(buffer, &start, &end, TRUE);
+		g_autofree gchar *text = text_buffer_get_text(buffer, TRUE);
 		gtk_text_buffer_set_text(GTK_TEXT_BUFFER(source_buffer), text, -1);
 		gtk_text_view_set_buffer(text_view, GTK_TEXT_BUFFER(source_buffer));
 		g_object_unref(source_buffer);
