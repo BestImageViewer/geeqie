@@ -1299,13 +1299,10 @@ static void safe_delete_clear_cb(GtkWidget *widget, gpointer)
 
 static void image_overlay_template_view_changed_cb(GtkTextBuffer *buffer, gpointer data)
 {
-	GtkTextIter start;
-	GtkTextIter end;
-	gtk_text_buffer_get_bounds(buffer, &start, &end);
-
 	auto **option = static_cast<gchar **>(data);
+
 	g_free(*option);
-	*option = gtk_text_buffer_get_text(buffer, &start, &end, TRUE);
+	*option = text_buffer_get_text(buffer, TRUE);
 }
 
 static void image_overlay_default_template_ok_cb(GenericDialog *, gpointer data)
