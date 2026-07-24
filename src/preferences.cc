@@ -139,8 +139,6 @@ enum {
 	EDITOR_COMMAND_MAX_LENGTH = 1024
 };
 
-static void image_overlay_set_text_colors(gint i);
-
 static GtkWidget *keyword_text;
 static void config_tab_keywords_save();
 
@@ -2156,12 +2154,11 @@ static GtkWidget *osd_profiles(gint i)
 
 	button = pref_button_new(nullptr, GQ_ICON_SELECT_COLOR, _("Text"), G_CALLBACK(image_overlay_set_text_color_cb), GINT_TO_POINTER(i));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
+	c_options->image_overlay_n[i].text_color = options->image_overlay_n[i].text_color;
 
 	button = pref_button_new(nullptr, GQ_ICON_SELECT_COLOR, _("Background"), G_CALLBACK(image_overlay_set_background_color_cb), GINT_TO_POINTER(i));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
-	image_overlay_set_text_colors(i);
+	c_options->image_overlay_n[i].background = options->image_overlay_n[i].background;
 
 	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(image_overlay_default_template_cb), image_overlay_template_view);
 	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
@@ -3799,12 +3796,6 @@ void show_about_window(LayoutWindow *lw)
 	g_object_unref(data_stream);
 	g_object_unref(in_stream_authors);
 	g_object_unref(in_stream_translators);
-}
-
-static void image_overlay_set_text_colors(gint i)
-{
-	c_options->image_overlay_n[i].text_color = options->image_overlay_n[i].text_color;
-	c_options->image_overlay_n[i].background = options->image_overlay_n[i].background;
 }
 
 /*
