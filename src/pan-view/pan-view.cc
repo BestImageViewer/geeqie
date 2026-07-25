@@ -1315,7 +1315,7 @@ static void button_cb(PixbufRenderer *pr, GqMouseButtonEvent *event, gpointer da
 		}
 }
 
-static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer)
+static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer data)
 {
 	gint w;
 	gint h;
