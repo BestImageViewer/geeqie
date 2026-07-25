@@ -571,6 +571,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 	}
 
 	lw->path_entry = tab_completion_new_with_history(nullptr, nullptr, "path_list", -1);
+	tab_completion_set_directory_only(lw->path_entry, TRUE);
 	GtkWidget *tabcomp = tab_completion_get_box(lw->path_entry);
 	DEBUG_NAME(tabcomp);
 	tab_completion_set_enter_func(lw->path_entry, [lw](const char * text)

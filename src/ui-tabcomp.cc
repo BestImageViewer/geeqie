@@ -62,6 +62,7 @@ struct TabCompData
 	TabCompEnterFunc enter_func;
 	TabCompTabFunc tab_func;
 	TabCompTabAppendFunc tab_append_func;
+	gboolean directory_only;
 
 	GtkWidget *combo;
 	gboolean has_history;
@@ -125,7 +126,7 @@ static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 			g_autofree gchar *dname = g_strconcat(name, G_DIR_SEPARATOR_S, NULL);
 			list = g_list_prepend(list, path_to_utf8(dname));
 			}
-		else
+		else if (!td->directory_only)
 			{
 			list = g_list_prepend(list, path_to_utf8(name));
 			}
@@ -232,7 +233,8 @@ static gboolean tab_completion_popup_key_press(GtkEventControllerKey *controller
 		const gchar *prefix = filename_from_path(entry_text);
 		TabCompPrefix tp{ prefix, strlen(prefix), 0 };
 
-		for (GtkWidget *child = gtk_widget_get_first_child(widget);
+		GtkWidget *menu = gtk_popover_get_child(GTK_POPOVER(widget));
+		for (GtkWidget *child = gtk_widget_get_first_child(menu);
 		     child;
 		     child = gtk_widget_get_next_sibling(child))
 			{
@@ -262,9 +264,8 @@ static void tab_completion_popup_cb(GtkWidget *widget, gpointer data)
 	tab_completion_emit_tab_signal(td);
 }
 
-static void tab_completion_popup_list(TabCompData *td, GList *list, GtkWidget *parent = nullptr)
+static void tab_completion_popup_list(TabCompData *td, GList *list)
 {
-	GtkWidget *menu;
 	GList *work;
 	gint count = 0;
 
@@ -279,7 +280,10 @@ static void tab_completion_popup_list(TabCompData *td, GList *list, GtkWidget *p
 	if (g_list_length(list) > 200) return;
 #endif
 
-	menu = popover_box_new(parent);
+	GtkWidget *popover = gtk_popover_new();
+	GtkWidget *menu = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	g_object_set_data(G_OBJECT(menu), "gq-popover", popover);
+	gtk_popover_set_child(GTK_POPOVER(popover), menu);
 
 	work = list;
 	while (work && count < TAB_COMP_POPUP_MAX)
@@ -296,9 +300,10 @@ static void tab_completion_popup_list(TabCompData *td, GList *list, GtkWidget *p
 
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(tab_completion_popup_key_press), td);
-	gtk_widget_add_controller(menu, controller);
+	gtk_widget_add_controller(popover, controller);
 
-	(void)menu;
+	popover_set_parent(popover, td->entry);
+	popover_popup(popover);
 }
 
 static gboolean tab_completion_do(TabCompData *td)
@@ -370,7 +375,7 @@ static gboolean tab_completion_do(TabCompData *td)
 				}
 			else
 				{
-				tab_completion_popup_list(td, td->file_list, td->entry);
+				tab_completion_popup_list(td, td->file_list);
 				}
 
 			return home_exp;
@@ -448,7 +453,7 @@ static gboolean tab_completion_do(TabCompData *td)
 				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 
 				poss = g_list_sort(poss, reinterpret_cast<GCompareFunc>(CASE_SORT));
-				tab_completion_popup_list(td, poss, td->entry);
+				tab_completion_popup_list(td, poss);
 
 				return TRUE;
 				}
@@ -538,6 +543,8 @@ static TabCompData *tab_completion_set_to_entry(GtkWidget *entry)
 	g_object_set_data_full(G_OBJECT(entry), "tab_completion_data", td, tab_completion_destroy);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
+	/* Handle Tab before GtkEntry's focus-navigation controller consumes it. */
+	gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(tab_completion_key_pressed), td);
 	gtk_widget_add_controller(entry, controller);
 	return td;
@@ -677,6 +684,16 @@ void tab_completion_set_tab_append_func(GtkWidget *entry, const TabCompTabAppend
 	if (!td) return;
 
 	td->tab_append_func = tab_append_func;
+}
+
+void tab_completion_set_directory_only(GtkWidget *entry, gboolean directory_only)
+{
+	TabCompData *td = tab_completion_get_from_entry(entry);
+	if (!td || td->directory_only == directory_only) return;
+
+	td->directory_only = directory_only;
+	g_clear_pointer(&td->dir_path, g_free);
+	g_clear_list(&td->file_list, g_free);
 }
 
 static void tab_completion_response_cb(GFile *file, gpointer data)

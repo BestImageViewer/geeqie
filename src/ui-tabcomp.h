@@ -40,6 +40,7 @@ GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text);
 void tab_completion_set_enter_func(GtkWidget *entry, const TabCompEnterFunc &enter_func);
 void tab_completion_set_tab_func(GtkWidget *entry, const TabCompTabFunc &tab_func);
 void tab_completion_set_tab_append_func(GtkWidget *entry, const TabCompTabAppendFunc &tab_append_func);
+void tab_completion_set_directory_only(GtkWidget *entry, gboolean directory_only);
 
 void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboolean folders_only,
                                       const gchar *filter, const gchar *filter_desc, const gchar *shortcuts);
