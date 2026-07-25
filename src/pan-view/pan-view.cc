@@ -1592,7 +1592,7 @@ static gboolean pan_window_delete_cb(GtkWidget *, gpointer data)
 	auto pw = static_cast<PanWindow *>(data);
 
 	pan_window_close(pw);
-	return TRUE;
+	return FALSE;
 }
 
 /*
