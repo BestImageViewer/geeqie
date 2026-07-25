@@ -1393,12 +1393,13 @@ static GdkDragAction view_window_dnd_select_action(GdkDrop *drop)
 	return GDK_ACTION_NONE;
 }
 
-static GdkContentProvider *view_window_dnd_prepare(GtkDragSource *, gdouble, gdouble, gpointer data)
+static GdkContentProvider *view_window_dnd_prepare(GtkDragSource *source, gdouble, gdouble, gpointer data)
 {
 	auto *vw = static_cast<ViewWindow *>(data);
 	FileData *fd = image_get_fd(vw->imd);
 	if (!fd) return nullptr;
 
+	dnd_set_drag_icon(source, fd->thumb_pixbuf, 1);
 	GList *list = g_list_append(nullptr, fd);
 	GdkContentProvider *provider = dnd_file_list_content_provider(list);
 	g_list_free(list);

@@ -21,11 +21,14 @@
 
 #include "dnd.h"
 
+#include <algorithm>
 #include <cstring>
 
 #include <gio/gio.h>
 
 #include "filedata.h"
+#include "options.h"
+#include "pixbuf-util.h"
 #include "ui-fileops.h"
 #include "uri-utils.h"
 
@@ -122,8 +125,50 @@ GdkContentProvider *dnd_file_list_content_provider(GList *list)
 	if (!uri_text || uri_text[0] == '\0') return nullptr;
 
 	g_autoptr(GBytes) bytes = g_bytes_new(uri_text, strlen(uri_text));
+	GdkContentProvider *providers[] = {
+		gdk_content_provider_new_for_bytes("text/uri-list", bytes),
+		gdk_content_provider_new_typed(G_TYPE_STRING, uri_text)
+	};
 
-	return gdk_content_provider_new_for_bytes("text/uri-list", bytes);
+	return gdk_content_provider_new_union(providers, G_N_ELEMENTS(providers));
+}
+
+void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items)
+{
+	if (!pixbuf) return;
+
+	const gint source_width = gdk_pixbuf_get_width(pixbuf);
+	const gint source_height = gdk_pixbuf_get_height(pixbuf);
+	const gint max_size = options->dnd_icon_size;
+	const gdouble scale = std::min(1.0, static_cast<gdouble>(max_size) / std::max(source_width, source_height));
+	const gint width = std::max(1, static_cast<gint>(source_width * scale));
+	const gint height = std::max(1, static_cast<gint>(source_height * scale));
+
+	g_autoptr(GdkPixbuf) icon = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
+	if (!icon) return;
+
+	if (items > 1)
+		{
+		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(source));
+		g_autoptr(PangoLayout) layout = gtk_widget_create_pango_layout(widget, nullptr);
+		g_autofree gchar *text = g_strdup_printf("<small> %u </small>", items);
+		pango_layout_set_markup(layout, text, -1);
+
+		gint label_width;
+		gint label_height;
+		pango_layout_get_pixel_size(layout, &label_width, &label_height);
+		const gint x = std::max(0, width - label_width);
+		const gint y = std::max(0, height - label_height);
+		label_width = std::clamp(label_width, 0, width - x);
+		label_height = std::clamp(label_height, 0, height - y);
+
+		pixbuf_draw_rect_fill(icon, {x, y, label_width, label_height}, {128, 128, 128, 255});
+		pixbuf_draw_layout(icon, layout, x + 1, y + 1, {0, 0, 0, 255});
+		pixbuf_draw_layout(icon, layout, x, y, {255, 255, 255, 255});
+		}
+
+	g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(icon);
+	gtk_drag_source_set_icon(source, GDK_PAINTABLE(texture), -8, -6);
 }
 
 static void dnd_read_file_list_stream_cb(GObject *source_object, GAsyncResult *result, gpointer data)

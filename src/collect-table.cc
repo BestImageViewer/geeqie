@@ -1913,7 +1913,7 @@ static gboolean collection_table_dnd_get_listview_coords(GtkDropTargetAsync *tar
  *-------------------------------------------------------------------
  */
 
-static GdkContentProvider *collection_table_dnd_prepare(GtkDragSource *, gdouble, gdouble, gpointer data)
+static GdkContentProvider *collection_table_dnd_prepare(GtkDragSource *source, gdouble, gdouble, gpointer data)
 {
 	auto *ct = static_cast<CollectTable *>(data);
 
@@ -1931,6 +1931,7 @@ static GdkContentProvider *collection_table_dnd_prepare(GtkDragSource *, gdouble
 
 	if (!list) return nullptr;
 
+	dnd_set_drag_icon(source, ct->click_info->fd->thumb_pixbuf, g_list_length(list));
 	return dnd_file_list_content_provider(list);
 }
 

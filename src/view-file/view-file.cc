@@ -367,7 +367,7 @@ void vf_click_at_point(ViewFile *vf, gdouble x, gdouble y, GdkModifierType state
 	vf_release_cb(vf->listview, &event, vf);
 }
 
-static GdkContentProvider *vf_dnd_prepare(GtkDragSource *, gdouble x, gdouble y, gpointer data)
+static GdkContentProvider *vf_dnd_prepare(GtkDragSource *source, gdouble x, gdouble y, gpointer data)
 {
 	auto *vf = static_cast<ViewFile *>(data);
 
@@ -392,6 +392,7 @@ static GdkContentProvider *vf_dnd_prepare(GtkDragSource *, gdouble x, gdouble y,
 
 	if (!list) return nullptr;
 
+	dnd_set_drag_icon(source, vf->click_fd->thumb_pixbuf, g_list_length(list));
 	return dnd_file_list_content_provider(list);
 }
 

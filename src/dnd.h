@@ -36,6 +36,7 @@ using DndFileListCallback = void (*)(GdkDrop *drop, GList *list, gpointer data);
 using DndTextCallback = void (*)(GdkDrop *drop, const gchar *text, gpointer data);
 
 GdkContentProvider *dnd_file_list_content_provider(GList *list);
+void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items);
 void dnd_read_file_list_async(GdkDrop *drop, DndFileListCallback callback, gpointer data);
 void dnd_read_text_async(GdkDrop *drop, DndTextCallback callback, gpointer data);
 
