@@ -165,12 +165,7 @@ gboolean wait_cb(gpointer)
 
 bool activate_detailed_action(GActionGroup *group, const char *action_name, GVariant *target)
 {
-	g_auto(GStrv) actions = g_action_group_list_actions(group);
-
-	for (guint i = 0; actions[i] != nullptr; i++)
-		{
-		g_print("%s\n", actions[i]);
-		}
+	if (!g_action_group_has_action(group, action_name)) return false;
 
 	const GVariantType *ptype = g_action_group_get_action_parameter_type(group, action_name);
 
