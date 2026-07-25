@@ -1342,24 +1342,27 @@ static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer dat
 				break;
 			case GDK_SCROLL_SMOOTH:
 				{
+				{
 				gdouble delta_y = event->dy;
 
 				if (delta_y != 0.0)
 					{
 					auto pw = static_cast<PanWindow *>(data);
 					/* Touchpad zoom sensitivity */
-					constexpr gdouble TOUCHPAD_ZOOM_SENSITIVITY = 0.001;
+					constexpr gdouble TOUCHPAD_ZOOM_SENSITIVITY = 0.1;
 
-					constexpr gdouble PAN_VIEW_SMOOTH_ZOOM_THRESHOLD = ZOOM_INCREMENT;
-
+					constexpr gdouble PAN_VIEW_SMOOTH_ZOOM_THRESHOLD = TOUCHPAD_ZOOM_SENSITIVITY * ZOOM_INCREMENT;
+					// Touchpad direction changed
 					if (sign(pw->accum_zoom) != sign(delta_y)) pw->accum_zoom = 0.0;
 
 					/* Accumulate micro-zoom */
-					pw->accum_zoom -= delta_y * TOUCHPAD_ZOOM_SENSITIVITY;
+					pw->accum_zoom += delta_y * TOUCHPAD_ZOOM_SENSITIVITY;
 
-					if (fabs(imd->accum_zoom) >=  PAN_VIEW_SMOOTH_ZOOM_THRESHOLD)
+					if (fabs(pw->accum_zoom) >=  PAN_VIEW_SMOOTH_ZOOM_THRESHOLD)
 						{
-						gdouble increment = sign(delta_y) * ZOOM_INCREMENT;
+						/* We are using 0.1 * ZOOM_INCREMENT for smooth zoom */
+						/* Use ZOOM_INCREMENT for step zoom */
+						gdouble increment = sign(delta_y) * PAN_VIEW_SMOOTH_ZOOM_THRESHOLD; //ZOOM_INCREMENT;
 
 						pixbuf_renderer_zoom_adjust_at_point(pr, increment, event->x, event->y);
 
