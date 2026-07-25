@@ -106,7 +106,7 @@ struct DupeWindow
 	GtkWidget *window;
 	GtkWidget *paned;
 	GtkWidget *listview;
-	GtkWidget *combo;
+	GtkWidget *drop_down;
 	GtkWidget *status_label;
 	GtkWidget *extra_label; /**< Progress bar widget */
 	GtkWidget *button_thumbs;
