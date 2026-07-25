@@ -1118,7 +1118,7 @@ static void image_focus_in_cb(GtkEventControllerFocus *, gpointer data)
 		}
 }
 
-// Callback для отслеживания движения мыши
+// Mouse Callback
 static void
 image_motion_cb (GtkEventControllerMotion *motion_controller, double x, double y, gpointer data)
 {
