@@ -2794,6 +2794,9 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_name)
 {
 	const gchar *tooltip_text = nullptr;
+	const gchar *icon_name = nullptr;
+	const gchar *button_action_name = action_name;
+	g_autofree gchar *plugin_action_name = nullptr;
 	GtkWidget *button = nullptr;
 
 	if (!action_name)
@@ -2808,32 +2811,6 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 		return;
 		}
 
-	if (g_str_has_suffix(action_name, ".desktop"))
-		{
-/** @FIXME GTK4
-		/ this may be called before the external editors are read
-		   create a dummy action for now /
-		if (!lw->action_group_editors)
-		{
-		lw->action_group_editors = deprecated_gtk_action_group_new("MenuActionsExternal");
-		deprecated_gtk_ui_manager_insert_action_group(lw->ui_manager, lw->action_group_editors, 1);
-		}
-		if (!deprecated_gtk_action_group_get_action(lw->action_group_editors, action_name))
-		{
-		GtkActionEntry entry = { action_name,
-		GQ_ICON_MISSING_IMAGE,
-		action_name,
-		nullptr,
-		nullptr,
-		nullptr
-		};
-		DEBUG_1("Creating temporary action %s", action_name);
-		deprecated_gtk_action_group_add_actions(lw->action_group_editors, &entry, 1, lw);
-		}
-*/
-		}
-
-
 	if (g_strcmp0(action_name, "Separator") == 0)
 		{
 		button = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
@@ -2842,15 +2819,12 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 		{
 		if (g_str_has_suffix(action_name, ".desktop"))
 			{
-/** FIXME GTK4
-			action = deprecated_gtk_action_group_get_action(lw->action_group_editors, action_name);
-			const gchar *kk = get_description_for_action_name("org.gnome.Evince.desktop");
-
-			 @FIXME Using tootip as a flag to layout_actions_setup_editors()
-			 is not a good way.
-			
-			tooltip_text = deprecated_gtk_action_get_label(action);
-*/
+			const EditorDescription *editor = get_editor_by_command(action_name);
+			tooltip_text = (editor && editor->name && *editor->name) ? editor->name : action_name;
+			icon_name = (editor && editor->icon && *editor->icon) ? editor->icon : GQ_ICON_MISSING_IMAGE;
+			plugin_action_name = g_strdup_printf("win.main-win-plugin-run::%s", action_name);
+			button_action_name = plugin_action_name;
+			button = gtk_button_new();
 			}
 		else
 			{
@@ -2914,12 +2888,12 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 
 		if (GTK_IS_ACTIONABLE(button))
 			{
-			gtk_actionable_set_detailed_action_name(GTK_ACTIONABLE(button), action_name);
+			gtk_actionable_set_detailed_action_name(GTK_ACTIONABLE(button), button_action_name);
 			}
 
 		if (GTK_IS_BUTTON(button))
 			{
-			GtkWidget *image = gtk_image_new_from_icon_name(get_icon_for_action_name(action_name));
+			GtkWidget *image = gtk_image_new_from_icon_name(icon_name ? icon_name : get_icon_for_action_name(action_name));
 			gtk_button_set_child(GTK_BUTTON(button), image);
 			}
 
