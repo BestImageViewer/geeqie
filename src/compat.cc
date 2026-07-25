@@ -335,7 +335,7 @@ void gq_gtk_widget_destroy(GtkWidget *widget)
 
 	if (GTK_IS_WINDOW(widget))
 		{
-		gtk_window_destroy(GTK_WINDOW(widget));
+		gtk_window_close(GTK_WINDOW(widget));
 		return;
 		}
 
