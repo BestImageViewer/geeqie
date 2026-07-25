@@ -310,13 +310,12 @@ bool layout_handle_user_defined_mouse_buttons(LayoutWindow *lw, guint button)
 			}
 		else
 			{
-/** @FIXME GTK4
-			GtkAction *action = deprecated_gtk_action_group_get_action(lw->action_group, action_name);
+			const gchar *window_action_name = g_str_has_prefix(action_name, "win.") ? action_name + 4 : action_name;
+			GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), window_action_name);
 			if (action)
 				{
 				g_action_activate(action, nullptr);
 				}
-*/
 			}
 
 		return true;
