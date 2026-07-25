@@ -1118,7 +1118,7 @@ static void image_focus_in_cb(GtkEventControllerFocus *, gpointer data)
 		}
 }
 
-static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble, gdouble, gpointer data)
+static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble dx, gdouble dy, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(controller));
@@ -1130,10 +1130,10 @@ static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble, g
 
 	gdouble x = 0;
 	gdouble y = 0;
-	gdouble dx = 0;
-	gdouble dy = 0;
+	//gdouble dx = 0;
+	//gdouble dy = 0;
 	gdk_event_get_position(event, &x, &y);
-	gdk_scroll_event_get_deltas(event, &dx, &dy);
+	//gdk_scroll_event_get_deltas(event, &dx, &dy);
 	const GqScrollEvent scroll_event{
 		x,
 		y,
@@ -1142,7 +1142,7 @@ static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble, g
 		gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(controller)),
 		gdk_scroll_event_get_direction(event) != GDK_SCROLL_SMOOTH
 			? gdk_scroll_event_get_direction(event)
-			: scroll_direction_from_deltas(dx, dy),
+			: GDK_SCROLL_SMOOTH,
 		gdk_event_get_time(event)
 	};
 
@@ -2073,6 +2073,10 @@ ImageWindow *image_new(gboolean frame)
 	imd->has_frame = -1; /* not initialized; for image_set_frame */
 	imd->state = IMAGE_STATE_NONE;
 	imd->orientation = 1;
+
+	imd->accum_zoom = 0.0;
+	imd->accum_x = 0.0;
+	imd->accum_y = 0.0;
 
 	imd->pr = GTK_WIDGET(pixbuf_renderer_new());
 	DEBUG_NAME(imd->pr);

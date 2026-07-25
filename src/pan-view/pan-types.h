@@ -199,6 +199,11 @@ struct PanWindow
 	PanItem *search_pi;
 
 	gint idle_id;
+
+	gdouble accum_zoom;
+
+	gdouble accum_x;
+	gdouble accum_y;
 };
 
 #endif

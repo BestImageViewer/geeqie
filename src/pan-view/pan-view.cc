@@ -1340,6 +1340,35 @@ static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer)
 			case GDK_SCROLL_DOWN:
 				pixbuf_renderer_zoom_adjust_at_point(pr, -ZOOM_INCREMENT, event->x, event->y);
 				break;
+			case GDK_SCROLL_SMOOTH:
+				{
+				gdouble delta_y = event->dy;
+
+				if (delta_y != 0.0)
+					{
+					auto pw = static_cast<PanWindow *>(data);
+					/* Touchpad zoom sensitivity */
+					constexpr gdouble TOUCHPAD_ZOOM_SENSITIVITY = 0.001;
+
+					constexpr gdouble PAN_VIEW_SMOOTH_ZOOM_THRESHOLD = ZOOM_INCREMENT;
+
+					if (sign(pw->accum_zoom) != sign(delta_y)) pw->accum_zoom = 0.0;
+
+					/* Accumulate micro-zoom */
+					pw->accum_zoom -= delta_y * TOUCHPAD_ZOOM_SENSITIVITY;
+
+					if (fabs(imd->accum_zoom) >=  PAN_VIEW_SMOOTH_ZOOM_THRESHOLD)
+						{
+						gdouble increment = sign(delta_y) * ZOOM_INCREMENT;
+
+						pixbuf_renderer_zoom_adjust_at_point(pr, increment, event->x, event->y);
+
+						/* Keep fractional part for the next zoom */
+						pw->accum_zoom -= increment;
+						}
+					}
+				}
+				break;
 			default:
 				break;
 			}
@@ -1359,6 +1388,32 @@ static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer)
 				break;
 			case GDK_SCROLL_RIGHT:
 				pixbuf_renderer_scroll(pr, w, 0);
+				break;
+			case GDK_SCROLL_SMOOTH:
+				{
+				auto pw = static_cast<PanWindow *>(data);
+
+				gdouble delta_x = event->dx;
+				gdouble delta_y = event->dy;
+
+				/* TouchPad scroll sensitivity */
+				constexpr gdouble TOUCHPAD_SENSITIVITY = 25.0;
+
+				pw->accum_x += delta_x * TOUCHPAD_SENSITIVITY;
+				pw->accum_y += delta_y * TOUCHPAD_SENSITIVITY;
+
+				int x_amount = static_cast<int>(pw->accum_x);
+				int y_amount = static_cast<int>(pw->accum_y);
+
+				if (x_amount != 0 || y_amount != 0)
+					{
+					pixbuf_renderer_scroll(pr, x_amount, y_amount);
+
+					/* Fractional part for the next scroll */
+					pw->accum_x -= x_amount;
+					pw->accum_y -= y_amount;
+					}
+				}
 				break;
 			default:
 				break;

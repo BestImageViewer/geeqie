@@ -136,6 +136,11 @@ struct ImageWindow
 	StereoPixbufData user_stereo;
 
 	gboolean mouse_wheel_mode;
+
+	/* Fractional values accumulated between events */
+	gdouble accum_zoom;
+	gdouble accum_x;
+	gdouble accum_y;
 };
 
 void image_set_frame(ImageWindow *imd, gboolean frame);

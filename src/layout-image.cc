@@ -1821,6 +1821,73 @@ static void layout_image_scroll_cb(ImageWindow *imd, const GqScrollEvent *event,
 		layout_image_activate(lw, i, FALSE);
 		}
 
+	/* --- TouchPad processing start (GDK_SCROLL_SMOOTH) --- */
+	if (event->direction == GDK_SCROLL_SMOOTH)
+		{
+		gdouble delta_x = 0.0;
+		gdouble delta_y = 0.0;
+
+		delta_x = event->dx;
+		delta_y = event->dy;
+			{
+			/* Zoom with Ctrl */
+			if (event->state & GDK_CONTROL_MASK)
+				{
+				if (delta_y != 0.0)
+					{
+					/* TouchPad sensitivity: Use some default comfort value */
+					/* TODO get_touchpad_sensitivity setting() */
+					constexpr gdouble TOUCHPAD_ZOOM_SENSITIVITY = 10.0;
+
+					const gdouble ZOOM_INCREMENT = get_zoom_increment();
+
+					const gdouble LAYOUT_SMOOTH_ZOOM_THRESHOLD = ZOOM_INCREMENT;
+
+					/* Zoom direction changed */
+					if (sign(imd->accum_zoom) != sign(delta_y)) imd->accum_zoom = 0.0;
+
+					/* Accumulate micro-zoom */
+					imd->accum_zoom -= delta_y * TOUCHPAD_ZOOM_SENSITIVITY;
+
+					if (fabs(imd->accum_zoom) >=  LAYOUT_SMOOTH_ZOOM_THRESHOLD)
+						{
+						gdouble increment = sign(imd->accum_zoom) * ZOOM_INCREMENT;
+
+						//image_zoom_adjust_at_point(imd, increment, event->x, event->y);
+						layout_image_zoom_adjust_at_point(lw, increment, event->x, event->y, event->state & GDK_SHIFT_MASK);
+
+						/* Keep fractional part for the mext zoom */
+						imd->accum_zoom -= increment;
+						}
+					}
+				}
+			/* Pan / Two fingers image moving */
+			else
+				{
+				/* TouchPad sensitivity. TODO: create get_touchpad_sensitivity() setting */
+				/* Use some default comfort value */
+				constexpr gdouble TOUCHPAD_SENSITIVITY = 10.0;
+
+				imd->accum_x += delta_x * TOUCHPAD_SENSITIVITY;
+				imd->accum_y += delta_y * TOUCHPAD_SENSITIVITY;
+
+				int x_amount = static_cast<int>(imd->accum_x);
+				int y_amount = static_cast<int>(imd->accum_y);
+
+				if (x_amount != 0 || y_amount != 0)
+					{
+					// Should we check lw->options.split_pane_sync?
+					layout_image_scroll(lw, x_amount, y_amount, (event->state & GDK_SHIFT_MASK));
+
+					/* Keep fractional parts for the next scroll */
+					imd->accum_x -= x_amount;
+					imd->accum_y -= y_amount;
+					}
+				}
+			}
+		return;
+		}
+	/* --- TouchPad processing finish --- */
 
 	if ((event->state & GDK_CONTROL_MASK) ||
 				(imd->mouse_wheel_mode && !options->image_lm_click_nav))

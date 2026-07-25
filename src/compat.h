@@ -92,5 +92,15 @@ const gchar *stock_id_to_icon_name(const gchar *stock_id);
 GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, gint size);
 GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget);
 
+static inline double sign(double x)
+{
+	if (!isnan(x))
+	{
+	if (x > 0.0) return 1.0;
+	if (x < 0.0) return -1.0;
+	}
+	return x;
+}
+
 #endif /* COMPAT_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

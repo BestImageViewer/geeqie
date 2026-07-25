@@ -533,6 +533,68 @@ static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer dat
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
+	/* --- TouchPad processing start (GDK_SCROLL_SMOOTH) --- */
+	if (event->direction == GDK_SCROLL_SMOOTH)
+	{
+		gdouble delta_x = event->dx;
+		gdouble delta_y = event->dy;
+		
+		/* Zoom with Ctrl */
+		if (event->state & GDK_CONTROL_MASK)
+			{
+			if (delta_y != 0.0)
+				{
+				/* TouchPad zoom sensitivity: Use some default comfort value */
+				/* TODO get_touchpad_sensitivity setting() */
+				constexpr gdouble TOUCHPAD_ZOOM_SENSITIVITY = 10.0;
+
+				const gdouble ZOOM_INCREMENT = get_zoom_increment();
+
+				const gdouble VIEW_SMOOTH_ZOOM_THRESHOLD = ZOOM_INCREMENT;
+
+				/* Zoom direction changed */
+				if (sign(imd->accum_zoom) != sign(delta_y)) imd->accum_zoom = 0.0;
+
+				/* Accumulate micro-zoom */
+				imd->accum_zoom -= delta_y * TOUCHPAD_ZOOM_SENSITIVITY;
+
+				if (fabs(imd->accum_zoom) >=  VIEW_SMOOTH_ZOOM_THRESHOLD)
+					{
+					gdouble increment = sign(imd->accum_zoom) * ZOOM_INCREMENT;
+
+					image_zoom_adjust_at_point(imd, increment, event->x, event->y);
+
+					/* Fractional part for the next zoom */
+					imd->accum_zoom -= increment;
+					}
+				}
+			}
+		/* Pan / Two fingers image scrolling */
+		else
+			{
+			/* TouchPad sensitivity */ 
+			constexpr gdouble TOUCHPAD_SENSITIVITY = 10.0;
+
+			imd->accum_x += delta_x * TOUCHPAD_SENSITIVITY;
+			imd->accum_y += delta_y * TOUCHPAD_SENSITIVITY;
+
+			int x_amount = static_cast<int>(imd->accum_x);
+			int y_amount = static_cast<int>(imd->accum_y);
+
+			/* Check if shift is more then one px */
+			if (x_amount != 0 || y_amount != 0)
+				{
+				image_scroll(imd, x_amount, y_amount);
+
+				/* Fractional parts for the next scroll */
+				imd->accum_x -= x_amount;
+				imd->accum_y -= y_amount;
+				}
+			}
+		return;
+	}
+	/* --- TouchPad processing finish --- */
+
 	if ((event->state & GDK_CONTROL_MASK) ||
 				(imd->mouse_wheel_mode && !options->image_lm_click_nav))
 		{
