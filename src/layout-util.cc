@@ -3047,6 +3047,24 @@ void layout_util_status_update_write_all()
 	layout_window_foreach(layout_util_status_update_write);
 }
 
+static void layout_toolbar_set_action_tooltip(LayoutWindow *lw, const gchar *action_name, const gchar *tooltip)
+{
+	for (GtkWidget *toolbar : lw->toolbar)
+		{
+		if (!toolbar) continue;
+
+		for (GtkWidget *widget = gtk_widget_get_first_child(toolbar);
+		     widget;
+		     widget = gtk_widget_get_next_sibling(widget))
+			{
+			if (!GTK_IS_ACTIONABLE(widget)) continue;
+			if (g_strcmp0(gtk_actionable_get_action_name(GTK_ACTIONABLE(widget)), action_name) != 0) continue;
+
+			gtk_widget_set_tooltip_text(widget, tooltip);
+			}
+		}
+}
+
 void layout_util_sync_color(LayoutWindow *lw)
 {
 	GAction *action;
@@ -3064,25 +3082,21 @@ void layout_util_sync_color(LayoutWindow *lw)
 #if HAVE_LCMS
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(use_color));
 
-/** @FIXME GTK4
 	if (const auto status = layout_image_color_profile_get_status(lw); status.has_value())
 		{
 		g_autofree gchar *buf = g_strdup_printf(_("Image profile: %s\nScreen profile: %s"),
 		                                        status->image_profile.c_str(), status->screen_profile.c_str());
 
-		deprecated_gtk_action_set_tooltip(action, buf);
+		layout_toolbar_set_action_tooltip(lw, "win.main-win-use-color-profiles", buf);
 		}
 	else
 		{
-		deprecated_gtk_action_set_tooltip(action, _("Click to enable color management"));
+		layout_toolbar_set_action_tooltip(lw, "win.main-win-use-color-profiles", _("Click to enable color management"));
 		}
-*/
 #else
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(FALSE));
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), FALSE);
-/** @FIXME GTK4
-	deprecated_gtk_action_set_tooltip(action, _("Color profiles not supported"));
-*/
+	layout_toolbar_set_action_tooltip(lw, "win.main-win-use-color-profiles", _("Color profiles not supported"));
 #endif
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-use-image-profile");
