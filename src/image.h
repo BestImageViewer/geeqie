@@ -137,6 +137,8 @@ struct ImageWindow
 
 	gboolean mouse_wheel_mode;
 
+	gdouble mouse_x;
+	gdouble mouse_y;
 	/* Fractional values accumulated between events */
 	gdouble accum_zoom;
 	gdouble accum_x;

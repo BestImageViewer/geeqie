@@ -1118,6 +1118,17 @@ static void image_focus_in_cb(GtkEventControllerFocus *, gpointer data)
 		}
 }
 
+// Callback для отслеживания движения мыши
+static void
+image_motion_cb (GtkEventControllerMotion *motion_controller, double x, double y, gpointer data)
+{
+	auto imd = static_cast<ImageWindow *>(data);
+
+	// Preserving the current coordinates relative to your widget.
+	imd->mouse_x = x;
+	imd->mouse_y = y;
+}
+
 static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble dx, gdouble dy, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
@@ -1128,12 +1139,9 @@ static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble dx
 		return FALSE;
 		}
 
-	gdouble x = 0;
-	gdouble y = 0;
-	//gdouble dx = 0;
-	//gdouble dy = 0;
-	gdk_event_get_position(event, &x, &y);
-	//gdk_scroll_event_get_deltas(event, &dx, &dy);
+	gdouble x = imd->mouse_x;
+	gdouble y = imd->mouse_y;
+
 	const GqScrollEvent scroll_event{
 		x,
 		y,
@@ -2074,6 +2082,8 @@ ImageWindow *image_new(gboolean frame)
 	imd->state = IMAGE_STATE_NONE;
 	imd->orientation = 1;
 
+	imd->mouse_x = 0.0;
+	imd->mouse_y = 0.0;
 	imd->accum_zoom = 0.0;
 	imd->accum_x = 0.0;
 	imd->accum_y = 0.0;
@@ -2098,6 +2108,10 @@ ImageWindow *image_new(gboolean frame)
 			 G_CALLBACK(image_release_cb), imd);
 	g_signal_connect(G_OBJECT(imd->pr), "scroll_notify",
 			 G_CALLBACK(image_scroll_notify_cb), imd);
+
+	GtkEventController *motion = gtk_event_controller_motion_new ();
+	gtk_widget_add_controller (GTK_WIDGET(imd->pr), motion);
+	g_signal_connect (motion, "motion", G_CALLBACK (image_motion_cb), imd);
 
 	GtkEventController *controller = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
 	g_signal_connect(controller, "scroll", G_CALLBACK(image_scroll_cb), imd);
