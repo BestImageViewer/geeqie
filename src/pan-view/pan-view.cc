@@ -1342,7 +1342,6 @@ static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer dat
 				break;
 			case GDK_SCROLL_SMOOTH:
 				{
-				{
 				gdouble delta_y = event->dy;
 
 				if (delta_y != 0.0)
