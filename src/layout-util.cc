@@ -1447,11 +1447,13 @@ static void layout_menu_selectable_toolbars_cb(GSimpleAction *action, GVariant *
 static void layout_menu_info_pixel_cb(GSimpleAction *action, GVariant *state, gpointer)
 {
 	auto lw = get_current_layout();
+	const gboolean enabled = g_variant_get_boolean(state);
 
-	if (lw->options.show_info_pixel == g_variant_get_boolean(g_action_get_state(G_ACTION(action)))) return;
-
-	layout_exit_fullscreen(lw);
-	layout_info_pixel_set(lw, !lw->options.show_info_pixel);
+	if (lw->options.show_info_pixel != enabled)
+		{
+		layout_exit_fullscreen(lw);
+		layout_info_pixel_set(lw, enabled);
+		}
 
 	g_simple_action_set_state(action, state);
 }
