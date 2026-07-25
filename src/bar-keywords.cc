@@ -1083,6 +1083,15 @@ void bar_pane_keywords_destroy(gpointer data)
 	g_free(pkd);
 }
 
+void autocomplete_changed_cb(GtkEditable *editable, gpointer)
+{
+	GtkEntryCompletion *completion = gtk_entry_get_completion(GTK_ENTRY(editable));
+	const gboolean have_text = gtk_editable_get_text(editable)[0] != '\0';
+
+	gtk_entry_completion_set_popup_completion(completion, have_text);
+	if (have_text) gtk_entry_completion_complete(completion);
+}
+
 
 GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gchar *key, gboolean expanded, gint height)
 {
@@ -1158,16 +1167,18 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	autocomplete_keywords_list_load(path);
 
 	completion = gtk_entry_completion_new();
-	gtk_entry_set_completion(GTK_ENTRY(pkd->autocomplete), completion);
 	gtk_entry_completion_set_inline_completion(completion, TRUE);
 	gtk_entry_completion_set_inline_selection(completion, TRUE);
-	g_object_unref(completion);
-
+	gtk_entry_completion_set_popup_completion(completion, FALSE);
 	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(keyword_store));
 	gtk_entry_completion_set_text_column(completion, 0);
+	gtk_entry_set_completion(GTK_ENTRY(pkd->autocomplete), completion);
+	g_object_unref(completion);
 
 	g_signal_connect(G_OBJECT(pkd->autocomplete), "activate",
 			 G_CALLBACK(autocomplete_activate_cb), pkd);
+	g_signal_connect(G_OBJECT(pkd->autocomplete), "changed",
+			 G_CALLBACK(autocomplete_changed_cb), nullptr);
 
 	GtkTreeStore *keyword_tree = keyword_tree_get_or_new();
 	if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_tree), &iter))
