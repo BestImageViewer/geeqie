@@ -783,6 +783,39 @@ void vd_new_folder(ViewDir *vd, FileData *dir_fd)
 
 static void vd_dnd_drop_update(ViewDir *vd, gint x, gint y);
 
+constexpr gchar VIEW_DIR_DRAG_DATA_KEY[] = "view-dir-drag-data";
+
+static GdkContentProvider *vd_dnd_prepare(GtkDragSource *, gdouble, gdouble, gpointer data)
+{
+	auto *vd = static_cast<ViewDir *>(data);
+	if (!vd->click_fd) return nullptr;
+
+	GList *list = g_list_prepend(nullptr, vd->click_fd);
+	GdkContentProvider *provider = dnd_file_list_content_provider(list);
+	g_list_free(list);
+
+	return provider;
+}
+
+static void vd_dnd_begin(GtkDragSource *, GdkDrag *drag, gpointer data)
+{
+	auto *vd = static_cast<ViewDir *>(data);
+
+	g_object_set_data(G_OBJECT(drag), VIEW_DIR_DRAG_DATA_KEY, vd);
+	vd_color_set(vd, vd->click_fd, TRUE);
+}
+
+static void vd_dnd_end(GtkDragSource *, GdkDrag *drag, gboolean, gpointer data)
+{
+	auto *vd = static_cast<ViewDir *>(data);
+
+	vd_color_set(vd, vd->click_fd, FALSE);
+	if (vd->type == DIRVIEW_LIST && gdk_drag_get_selected_action(drag) == GDK_ACTION_MOVE)
+		{
+		vd_refresh(vd);
+		}
+}
+
 static gboolean vd_auto_scroll_idle_cb(gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
@@ -850,6 +883,11 @@ static GdkDragAction vd_dnd_select_action(GdkDrop *drop)
 static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
+	GdkDrag *drag = gdk_drop_get_drag(drop);
+	if (drag && g_object_get_data(G_OBJECT(drag), VIEW_DIR_DRAG_DATA_KEY) == vd)
+		{
+		return GDK_ACTION_NONE;
+		}
 
 	vd->click_fd = nullptr;
 
@@ -934,6 +972,11 @@ static void vd_dnd_drop_file_received(GdkDrop *drop, GList *list, gpointer data)
 static gboolean vd_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
+	GdkDrag *drag = gdk_drop_get_drag(drop);
+	if (drag && g_object_get_data(G_OBJECT(drag), VIEW_DIR_DRAG_DATA_KEY) == vd)
+		{
+		return FALSE;
+		}
 
 	vd_dnd_drop_update(vd, x, y);
 	vd_dnd_drop_scroll_cancel(vd);
@@ -955,6 +998,13 @@ void vd_dnd_init(ViewDir *vd)
 	static const char *mime_types[] = {"text/uri-list"};
 
 	g_object_set_data(G_OBJECT(vd->view), VIEW_DIR_DATA_KEY, vd);
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(vd_dnd_prepare), vd);
+	g_signal_connect(drag_source, "drag-begin", G_CALLBACK(vd_dnd_begin), vd);
+	g_signal_connect(drag_source, "drag-end", G_CALLBACK(vd_dnd_end), vd);
+	gtk_widget_add_controller(vd->view, GTK_EVENT_CONTROLLER(drag_source));
 
 	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
