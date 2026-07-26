@@ -519,7 +519,50 @@ GdkContentProvider *bar_pane_keywords_dnd_prepare(GtkDragSource *, gdouble x, gd
 	return name ? gdk_content_provider_new_typed(G_TYPE_STRING, name) : nullptr;
 }
 
-gboolean bar_pane_keywords_dnd_drop(GtkDropTarget *, const GValue *value, gdouble x, gdouble y, gpointer data)
+struct KeywordDragData
+{
+	PaneKeywordsData *pkd;
+	GtkTreeRowReference *row;
+};
+
+void bar_pane_keywords_drag_data_free(gpointer data)
+{
+	auto *drag_data = static_cast<KeywordDragData *>(data);
+	gtk_tree_row_reference_free(drag_data->row);
+	g_free(drag_data);
+}
+
+void bar_pane_keywords_dnd_begin(GtkDragSource *, GdkDrag *drag, gpointer data)
+{
+	auto *pkd = static_cast<PaneKeywordsData *>(data);
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(pkd->keyword_treeview));
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	if (!gtk_tree_selection_get_selected(selection, &model, &iter)) return;
+
+	GtkTreeIter child_iter;
+	auto *filter = GTK_TREE_MODEL_FILTER(model);
+	gtk_tree_model_filter_convert_iter_to_child_iter(filter, &child_iter, &iter);
+	GtkTreeModel *keyword_tree = gtk_tree_model_filter_get_model(filter);
+	g_autoptr(GtkTreePath) path = gtk_tree_model_get_path(keyword_tree, &child_iter);
+
+	auto *drag_data = g_new(KeywordDragData, 1);
+	drag_data->pkd = pkd;
+	drag_data->row = gtk_tree_row_reference_new(keyword_tree, path);
+	g_object_set_data_full(G_OBJECT(drag), "keyword-drag-data", drag_data, bar_pane_keywords_drag_data_free);
+}
+
+gboolean bar_pane_keywords_dnd_can_move(GtkTreeModel *keyword_tree, GtkTreeIter *source, GtkTreeIter *destination)
+{
+	GtkTreeIter parent;
+	if (destination && keyword_same_parent(keyword_tree, source, destination)) return TRUE;
+	if (!destination && !gtk_tree_model_iter_parent(keyword_tree, &parent, source)) return TRUE;
+
+	g_autofree gchar *name = keyword_get_name(keyword_tree, source);
+	return !keyword_exists(keyword_tree, nullptr, destination, name, FALSE, nullptr);
+}
+
+gboolean bar_pane_keywords_dnd_drop(GtkDropTarget *target, const GValue *value, gdouble x, gdouble y, gpointer data)
 {
 	auto *pkd = static_cast<PaneKeywordsData *>(data);
 	const gchar *text = g_value_get_string(value);
@@ -543,6 +586,52 @@ gboolean bar_pane_keywords_dnd_drop(GtkDropTarget *, const GValue *value, gdoubl
 	if (have_destination)
 		{
 		gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &child_destination, &destination);
+		}
+
+	GdkDrop *drop = gtk_drop_target_get_current_drop(target);
+	GdkDrag *drag = drop ? gdk_drop_get_drag(drop) : nullptr;
+	auto *drag_data = drag ? static_cast<KeywordDragData *>(g_object_get_data(G_OBJECT(drag), "keyword-drag-data")) : nullptr;
+	if (drag_data && drag_data->pkd == pkd && gtk_tree_row_reference_valid(drag_data->row))
+		{
+		g_autoptr(GtkTreePath) source_path = gtk_tree_row_reference_get_path(drag_data->row);
+		GtkTreeIter source;
+		if (!gtk_tree_model_get_iter(keyword_tree, &source, source_path))
+			{
+			g_list_free_full(keywords, g_free);
+			return FALSE;
+			}
+
+		if (have_destination &&
+		    (keyword_equal(keyword_tree, &source, &child_destination) ||
+		     gtk_tree_store_is_ancestor(tree_store, &source, &child_destination)))
+			{
+			g_list_free_full(keywords, g_free);
+			return FALSE;
+			}
+		const gboolean into_empty_destination = have_destination &&
+		        (position == GTK_TREE_VIEW_DROP_INTO_OR_BEFORE || position == GTK_TREE_VIEW_DROP_INTO_OR_AFTER) &&
+		        !gtk_tree_model_iter_has_child(keyword_tree, &child_destination);
+		if (!into_empty_destination &&
+		    !bar_pane_keywords_dnd_can_move(keyword_tree, &source, have_destination ? &child_destination : nullptr))
+			{
+			g_list_free_full(keywords, g_free);
+			return FALSE;
+			}
+
+		GtkTreeIter inserted;
+		if (!have_destination)
+			gtk_tree_store_append(tree_store, &inserted, nullptr);
+		else if (into_empty_destination)
+			gtk_tree_store_append(tree_store, &inserted, &child_destination);
+		else if (position == GTK_TREE_VIEW_DROP_BEFORE || position == GTK_TREE_VIEW_DROP_INTO_OR_BEFORE)
+			gtk_tree_store_insert_before(tree_store, &inserted, nullptr, &child_destination);
+		else
+			gtk_tree_store_insert_after(tree_store, &inserted, nullptr, &child_destination);
+
+		keyword_move_recursive(tree_store, &inserted, &source);
+		g_list_free_full(keywords, g_free);
+		bar_keyword_tree_sync(pkd);
+		return TRUE;
 		}
 
 	GtkTreeIter previous;
@@ -1337,12 +1426,13 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(gesture));
 
 	GtkDragSource *drag_source = gtk_drag_source_new();
-	gtk_drag_source_set_actions(drag_source, GDK_ACTION_COPY);
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
 	g_signal_connect(drag_source, "prepare", G_CALLBACK(bar_pane_keywords_dnd_prepare), pkd);
+	g_signal_connect(drag_source, "drag-begin", G_CALLBACK(bar_pane_keywords_dnd_begin), pkd);
 	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(drag_source));
 
-	GtkDropTarget *drop_target = gtk_drop_target_new(G_TYPE_STRING, GDK_ACTION_COPY);
+	GtkDropTarget *drop_target = gtk_drop_target_new(G_TYPE_STRING, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 	g_signal_connect(drop_target, "drop", G_CALLBACK(bar_pane_keywords_dnd_drop), pkd);
 	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(drop_target));
 
