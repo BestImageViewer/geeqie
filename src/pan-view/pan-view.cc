@@ -2171,7 +2171,8 @@ static GdkContentProvider *pan_window_dnd_prepare(GtkDragSource *source, gdouble
 	FileData *fd = pan_menu_click_fd(pw);
 	if (!fd) return nullptr;
 
-	dnd_set_drag_icon(source, fd->thumb_pixbuf, 1);
+	GdkPixbuf *icon = pw->click_pi->pixbuf ? pw->click_pi->pixbuf : fd->thumb_pixbuf;
+	dnd_set_drag_icon(source, icon, 1);
 	GList *list = g_list_append(nullptr, fd);
 	GdkContentProvider *provider = dnd_file_list_content_provider(list);
 	g_list_free(list);

@@ -906,12 +906,14 @@ static GdkContentProvider *layout_image_dnd_prepare(GtkDragSource *source, gdoub
 	auto *lw = static_cast<LayoutWindow *>(data);
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(source));
 	FileData *fd = nullptr;
+	ImageWindow *imd = lw->image;
 
 	const gint i = layout_image_dnd_split_index(lw, widget);
 	if (i >= 0)
 		{
 		DEBUG_1("dnd get from %d", i);
-		fd = image_get_fd(lw->split_images[i]);
+		imd = lw->split_images[i];
+		fd = image_get_fd(imd);
 		}
 	else
 		{
@@ -920,7 +922,8 @@ static GdkContentProvider *layout_image_dnd_prepare(GtkDragSource *source, gdoub
 
 	if (!fd) return nullptr;
 
-	dnd_set_drag_icon(source, fd->thumb_pixbuf, 1);
+	GdkPixbuf *icon = fd->thumb_pixbuf ? fd->thumb_pixbuf : image_get_pixbuf(imd);
+	dnd_set_drag_icon(source, icon, 1);
 	GList *list = g_list_append(nullptr, fd);
 	GdkContentProvider *provider = dnd_file_list_content_provider(list);
 	g_list_free(list);
