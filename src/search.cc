@@ -40,6 +40,7 @@
 #include "cache.h"
 #include "collect.h"
 #include "compat.h"
+#include "dnd.h"
 #include "editors.h"
 #include "filedata.h"
 #include "history-list.h"
@@ -1388,6 +1389,36 @@ static void search_result_menu(SearchData *sd, bool on_row, bool empty, GtkWidge
 
 	GtkWidget *menu = parent ? popup_menu_at(menu_model, parent, x, y) : popup_menu(menu_model, sd->ui.result_view);
  	g_signal_connect_swapped(G_OBJECT(menu), "destroy", G_CALLBACK(file_data_list_free), editmenu_fd_list);
+}
+
+static GdkContentProvider *search_dnd_prepare(GtkDragSource *source, gdouble, gdouble, gpointer data)
+{
+	auto *sd = static_cast<SearchData *>(data);
+
+	if (sd->click_fd && !search_result_row_selected(sd, sd->click_fd))
+		{
+		GtkTreeIter iter;
+		if (search_result_find_row(sd, sd->click_fd, &iter) >= 0)
+			{
+			GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(sd->ui.result_view));
+			gtk_tree_selection_unselect_all(selection);
+			gtk_tree_selection_select_iter(selection, &iter);
+
+			GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(sd->ui.result_view));
+			g_autoptr(GtkTreePath) path = gtk_tree_model_get_path(model, &iter);
+			gtk_tree_view_set_cursor(GTK_TREE_VIEW(sd->ui.result_view), path, nullptr, FALSE);
+			}
+		}
+
+	g_autoptr(FileDataList) list = search_result_selection_list(sd);
+	if (!list) return nullptr;
+
+	if (sd->click_fd)
+		{
+		dnd_set_drag_icon(source, sd->click_fd->thumb_pixbuf, g_list_length(list));
+		}
+
+	return dnd_file_list_content_provider(list);
 }
 
 /*
@@ -3239,6 +3270,12 @@ void search_new(FileData *dir_fd, FileData *example_file)
 			}
 	}), sd);
 	gtk_widget_add_controller(sd->ui.result_view, GTK_EVENT_CONTROLLER(gesture));
+
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(search_dnd_prepare), sd);
+	gtk_widget_add_controller(sd->ui.result_view, GTK_EVENT_CONTROLLER(drag_source));
 
 	hbox = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
 
