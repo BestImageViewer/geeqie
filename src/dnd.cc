@@ -143,6 +143,15 @@ GdkContentProvider *dnd_file_list_content_provider(GList *list)
 	return gdk_content_provider_new_union(providers, G_N_ELEMENTS(providers));
 }
 
+GdkContentFormats *dnd_file_drop_formats()
+{
+	GdkContentFormatsBuilder *builder = gdk_content_formats_builder_new();
+	gdk_content_formats_builder_add_gtype(builder, GDK_TYPE_FILE_LIST);
+	gdk_content_formats_builder_add_mime_type(builder, "text/uri-list");
+
+	return gdk_content_formats_builder_free_to_formats(builder);
+}
+
 void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items, FileData *fd)
 {
 	g_autoptr(GdkPixbuf) fallback = nullptr;
@@ -256,14 +265,46 @@ static void dnd_read_file_list_cb(GObject *source_object, GAsyncResult *result, 
 					dnd_read_file_list_stream_cb, read_data);
 }
 
+static void dnd_read_file_list_value_cb(GObject *source_object, GAsyncResult *result, gpointer data)
+{
+	auto *read_data = static_cast<DndFileListReadData *>(data);
+	GdkDrop *drop = GDK_DROP(source_object);
+	g_autoptr(GError) error = nullptr;
+	const GValue *value = gdk_drop_read_value_finish(drop, result, &error);
+	GList *list = nullptr;
+
+	if (value && G_VALUE_HOLDS(value, GDK_TYPE_FILE_LIST))
+		{
+		auto *file_list = static_cast<GdkFileList *>(g_value_get_boxed(value));
+		for (GSList *work = gdk_file_list_get_files(file_list); work; work = work->next)
+			{
+			g_autofree gchar *path = g_file_get_path(G_FILE(work->data));
+			if (path) list = g_list_prepend(list, file_data_new_no_grouping(path));
+			}
+		list = g_list_reverse(list);
+		}
+
+	read_data->callback(drop, list, read_data->data);
+	file_data_list_free(list);
+	g_free(read_data);
+}
+
 void dnd_read_file_list_async(GdkDrop *drop, DndFileListCallback callback, gpointer data)
 {
-	static const gchar *mime_types[] = {"text/uri-list", nullptr};
 	auto *read_data = g_new0(DndFileListReadData, 1);
 	read_data->callback = callback;
 	read_data->data = data;
 
-	gdk_drop_read_async(drop, mime_types, G_PRIORITY_DEFAULT, nullptr, dnd_read_file_list_cb, read_data);
+	if (gdk_content_formats_contain_gtype(gdk_drop_get_formats(drop), GDK_TYPE_FILE_LIST))
+		{
+		gdk_drop_read_value_async(drop, GDK_TYPE_FILE_LIST, G_PRIORITY_DEFAULT, nullptr,
+		                          dnd_read_file_list_value_cb, read_data);
+		}
+	else
+		{
+		static const gchar *mime_types[] = {"text/uri-list", nullptr};
+		gdk_drop_read_async(drop, mime_types, G_PRIORITY_DEFAULT, nullptr, dnd_read_file_list_cb, read_data);
+		}
 }
 
 static void dnd_read_text_cb(GObject *source_object, GAsyncResult *result, gpointer data)

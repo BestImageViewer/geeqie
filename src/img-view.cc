@@ -1485,8 +1485,7 @@ static void view_window_dnd_init(ViewWindow *vw)
 	g_signal_connect(drag_source, "prepare", G_CALLBACK(view_window_dnd_prepare), vw);
 	gtk_widget_add_controller(imd->pr, GTK_EVENT_CONTROLLER(drag_source));
 
-	static const char *mime_types[] = {"text/uri-list"};
-	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GdkContentFormats *formats = dnd_file_drop_formats();
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(drop_target, "drop", G_CALLBACK(view_window_dnd_drop), vw);
 	gtk_widget_add_controller(imd->pr, GTK_EVENT_CONTROLLER(drop_target));

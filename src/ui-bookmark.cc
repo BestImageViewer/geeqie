@@ -244,8 +244,7 @@ static void bookmark_dnd_init(BookMarkData *bm, GtkWidget *button)
 {
 	if (!bm->drop_func) return;
 
-	static const char *mime_types[] = {"text/uri-list"};
-	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GdkContentFormats *formats = dnd_file_drop_formats();
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 	g_signal_connect(drop_target, "drop", G_CALLBACK(bookmark_dnd_drop), bm);
 	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(drop_target));
@@ -684,8 +683,7 @@ static gboolean bookmark_list_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdou
 
 static void bookmark_list_dnd_init(BookMarkData *bm)
 {
-	static const char *mime_types[] = {"text/uri-list"};
-	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GdkContentFormats *formats = dnd_file_drop_formats();
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, GDK_ACTION_COPY);
 	g_signal_connect(drop_target, "drop", G_CALLBACK(bookmark_list_dnd_drop), bm);
 	gtk_widget_add_controller(bm->widget, GTK_EVENT_CONTROLLER(drop_target));

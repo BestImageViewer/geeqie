@@ -995,8 +995,6 @@ static gboolean vd_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdou
 
 void vd_dnd_init(ViewDir *vd)
 {
-	static const char *mime_types[] = {"text/uri-list"};
-
 	g_object_set_data(G_OBJECT(vd->view), VIEW_DIR_DATA_KEY, vd);
 	GtkDragSource *drag_source = gtk_drag_source_new();
 	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
@@ -1006,7 +1004,7 @@ void vd_dnd_init(ViewDir *vd)
 	g_signal_connect(drag_source, "drag-end", G_CALLBACK(vd_dnd_end), vd);
 	gtk_widget_add_controller(vd->view, GTK_EVENT_CONTROLLER(drag_source));
 
-	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GdkContentFormats *formats = dnd_file_drop_formats();
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 
 	g_signal_connect(drop_target, "drag-motion", G_CALLBACK(vd_dnd_drop_motion), vd);
