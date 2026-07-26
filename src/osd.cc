@@ -113,6 +113,15 @@ void tag_data_add_key_to_template(TagData *td)
 	gtk_widget_grab_focus(td->image_overlay_template_view);
 }
 
+GdkContentProvider *tag_data_dnd_prepare(GtkDragSource *, gdouble, gdouble, gpointer data)
+{
+	auto *td = static_cast<TagData *>(data);
+	if (!td->key) return nullptr;
+
+	gtk_widget_grab_focus(td->image_overlay_template_view);
+	return gdk_content_provider_new_typed(G_TYPE_STRING, td->key);
+}
+
 void tag_data_free(TagData *td)
 {
 	g_free(td->key);
@@ -128,6 +137,13 @@ GtkWidget *osd_tag_button_new(const OsdTag &tag, GtkWidget *template_view)
 	GtkWidget *tag_button = gtk_button_new_with_label(tag.title);
 	g_signal_connect_swapped(G_OBJECT(tag_button), "clicked", G_CALLBACK(tag_data_add_key_to_template), td);
 	g_signal_connect_swapped(G_OBJECT(tag_button), "destroy", G_CALLBACK(tag_data_free), td);
+
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, GDK_ACTION_COPY);
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), GDK_BUTTON_PRIMARY);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(tag_data_dnd_prepare), td);
+	gtk_widget_add_controller(tag_button, GTK_EVENT_CONTROLLER(drag_source));
+
 	gtk_widget_show(tag_button);
 
 	return tag_button;
