@@ -495,6 +495,30 @@ void bar_pane_keywords_set_extra_menu(PaneKeywordsData *pkd)
  *-------------------------------------------------------------------
  */
 
+GdkContentProvider *bar_pane_keywords_dnd_prepare(GtkDragSource *, gdouble x, gdouble y, gpointer data)
+{
+	auto *pkd = static_cast<PaneKeywordsData *>(data);
+	auto *tree_view = GTK_TREE_VIEW(pkd->keyword_treeview);
+	g_autoptr(GtkTreePath) path = nullptr;
+
+	if (!gtk_tree_view_get_path_at_pos(tree_view, static_cast<gint>(x), static_cast<gint>(y),
+	                                   &path, nullptr, nullptr, nullptr))
+		{
+		return nullptr;
+		}
+
+	gtk_tree_view_set_cursor(tree_view, path, nullptr, FALSE);
+
+	GtkTreeIter iter;
+	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
+	if (!gtk_tree_model_get_iter(model, &iter, path)) return nullptr;
+
+	g_autofree gchar *name = nullptr;
+	gtk_tree_model_get(model, &iter, FILTER_KEYWORD_COLUMN_NAME, &name, -1);
+
+	return name ? gdk_content_provider_new_typed(G_TYPE_STRING, name) : nullptr;
+}
+
 /*
  *-------------------------------------------------------------------
  * edit dialog
@@ -1237,6 +1261,12 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
 	g_signal_connect(gesture, "released", G_CALLBACK(bar_pane_keywords_gesture_menu_cb), pkd);
 	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(gesture));
+
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, GDK_ACTION_COPY);
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(bar_pane_keywords_dnd_prepare), pkd);
+	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(drag_source));
 
 	if (options->show_predefined_keyword_tree)
 		{
