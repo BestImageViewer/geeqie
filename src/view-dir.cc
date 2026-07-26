@@ -880,7 +880,16 @@ static GdkDragAction vd_dnd_select_action(GdkDrop *drop)
 	return GDK_ACTION_NONE;
 }
 
-static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
+static DnDAction vd_dnd_requested_action(GtkDropTargetAsync *target)
+{
+	const GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(target));
+	if (state & GDK_CONTROL_MASK) return DND_ACTION_COPY;
+	if (state & GDK_SHIFT_MASK) return DND_ACTION_MOVE;
+
+	return options->dnd_default_action;
+}
+
+static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x, gdouble y, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 	GdkDrag *drag = gdk_drop_get_drag(drop);
@@ -916,7 +925,19 @@ static GdkDragAction vd_dnd_drop_motion(GtkDropTargetAsync *, GdkDrop *drop, gdo
 		widget_auto_scroll_stop(vd->view);
 		}
 
-	return vd->drop_fd ? vd_dnd_select_action(drop) : GDK_ACTION_NONE;
+	if (!vd->drop_fd) return GDK_ACTION_NONE;
+
+	const GdkDragAction actions = gdk_drop_get_actions(drop);
+	switch (vd_dnd_requested_action(target))
+		{
+		case DND_ACTION_COPY:
+			return (actions & GDK_ACTION_COPY) ? GDK_ACTION_COPY : vd_dnd_select_action(drop);
+		case DND_ACTION_MOVE:
+			return (actions & GDK_ACTION_MOVE) ? GDK_ACTION_MOVE : vd_dnd_select_action(drop);
+		case DND_ACTION_ASK:
+		default:
+			return vd_dnd_select_action(drop);
+		}
 }
 
 static void vd_dnd_drop_leave(GtkDropTargetAsync *, GdkDrop *, gpointer data)
@@ -1009,16 +1030,7 @@ static gboolean vd_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdouble x
 	auto *drop_data = g_new0(VdDropReadData, 1);
 	drop_data->view = GTK_WIDGET(g_object_ref(vd->view));
 	drop_data->drop_fd = file_data_ref(vd->drop_fd);
-	drop_data->action = options->dnd_default_action;
-	const GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(target));
-	if (state & GDK_CONTROL_MASK)
-		{
-		drop_data->action = DND_ACTION_COPY;
-		}
-	else if (state & GDK_SHIFT_MASK)
-		{
-		drop_data->action = DND_ACTION_MOVE;
-		}
+	drop_data->action = vd_dnd_requested_action(target);
 
 	dnd_read_file_list_async(drop, vd_dnd_drop_file_received, drop_data);
 
