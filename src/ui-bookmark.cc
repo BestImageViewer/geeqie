@@ -639,6 +639,58 @@ static void bookmark_populate_all(const std::string &key)
 		}
 }
 
+struct BookmarkListDropData
+{
+	GtkWidget *list;
+};
+
+static void bookmark_list_dnd_file_received(GdkDrop *drop, GList *files, gpointer data)
+{
+	auto *drop_data = static_cast<BookmarkListDropData *>(data);
+	auto *bm = static_cast<BookMarkData *>(g_object_get_data(G_OBJECT(drop_data->list), BOOKMARK_DATA_KEY));
+	gboolean added = FALSE;
+
+	if (bm && bm->editable)
+		{
+		for (GList *work = files; work; work = work->next)
+			{
+			auto *fd = static_cast<FileData *>(work->data);
+			if (bm->only_directories && !isdir(fd->path)) continue;
+
+			g_autofree gchar *entry = bookmark_string(filename_from_path(fd->path), fd->path, bookmark_icon(fd->path));
+			history_list_add_to_key(bm->key.c_str(), entry, 0);
+			added = TRUE;
+			}
+
+		if (added) bookmark_populate_all(bm->key);
+		}
+
+	gdk_drop_finish(drop, added ? GDK_ACTION_COPY : GDK_ACTION_NONE);
+	g_object_unref(drop_data->list);
+	g_free(drop_data);
+}
+
+static gboolean bookmark_list_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble, gdouble, gpointer data)
+{
+	auto *bm = static_cast<BookMarkData *>(data);
+	if (!bm->editable) return FALSE;
+
+	auto *drop_data = g_new(BookmarkListDropData, 1);
+	drop_data->list = GTK_WIDGET(g_object_ref(bm->widget));
+	dnd_read_file_list_async(drop, bookmark_list_dnd_file_received, drop_data);
+
+	return TRUE;
+}
+
+static void bookmark_list_dnd_init(BookMarkData *bm)
+{
+	static const char *mime_types[] = {"text/uri-list"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, GDK_ACTION_COPY);
+	g_signal_connect(drop_target, "drop", G_CALLBACK(bookmark_list_dnd_drop), bm);
+	gtk_widget_add_controller(bm->widget, GTK_EVENT_CONTROLLER(drop_target));
+}
+
 static void bookmark_data_destroy(gpointer data)
 {
 	auto *bm = static_cast<BookMarkData *>(data);
@@ -680,6 +732,7 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 	g_object_set_data_full(G_OBJECT(bm->box), BOOKMARK_DATA_KEY, bm, bookmark_data_destroy);
 	g_object_set_data(G_OBJECT(scrolled), BOOKMARK_DATA_KEY, bm);
 	bm->widget = scrolled;
+	bookmark_list_dnd_init(bm);
 
 	bookmark_widget_list.push_back(bm);
 
