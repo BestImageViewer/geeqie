@@ -4608,8 +4608,7 @@ static GdkContentProvider *dupe_dnd_prepare(GtkDragSource *source, gdouble, gdou
 	g_autoptr(FileDataList) list = dupe_listview_get_selection(widget);
 	if (!list) return nullptr;
 
-	auto *fd = static_cast<FileData *>(list->data);
-	dnd_set_drag_icon(source, fd->thumb_pixbuf, g_list_length(list));
+	dnd_set_drag_icon(source, dw->click_item->pixbuf, g_list_length(list));
 	return dnd_file_list_content_provider(list);
 }
 

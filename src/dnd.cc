@@ -147,6 +147,12 @@ void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items)
 	g_autoptr(GdkPixbuf) icon = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 	if (!icon) return;
 
+	const GqColor border_color{0, 0, 0, 255};
+	pixbuf_draw_rect_fill(icon, {0, 0, width, 1}, border_color);
+	pixbuf_draw_rect_fill(icon, {0, height - 1, width, 1}, border_color);
+	pixbuf_draw_rect_fill(icon, {0, 0, 1, height}, border_color);
+	pixbuf_draw_rect_fill(icon, {width - 1, 0, 1, height}, border_color);
+
 	if (items > 1)
 		{
 		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(source));
