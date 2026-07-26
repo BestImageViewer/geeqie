@@ -1488,8 +1488,7 @@ static void search_dnd_drop_data_free(gpointer data, GClosure *)
 
 static void search_dnd_add_drop_target(GtkWidget *widget, SearchDndDestination destination)
 {
-	static const char *mime_types[] = {"text/uri-list"};
-	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GdkContentFormats *formats = dnd_file_drop_formats();
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, GDK_ACTION_COPY);
 	auto *drop_data = g_new(SearchDndDropData, 1);
 	drop_data->entry = widget;

@@ -253,7 +253,8 @@ gboolean bar_pane_gps_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop, gdoubl
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(target));
 
 	GdkContentFormats *formats = gdk_drop_get_formats(drop);
-	if (gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
+	if (gdk_content_formats_contain_gtype(formats, GDK_TYPE_FILE_LIST) ||
+	    gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
 		{
 		shumate_viewport_widget_coords_to_location(pgd->viewport, widget, x, y, &pgd->dest_latitude, &pgd->dest_longitude);
 		auto *drop_data = g_new(PaneGPSDndDropData, 1);
@@ -277,8 +278,7 @@ void bar_pane_gps_dnd_init(gpointer data)
 {
 	auto *pgd = static_cast<PaneGPSData *>(data);
 
-	static const char *mime_types[] = {"text/uri-list", "text/plain"};
-	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GdkContentFormats *formats = dnd_file_drop_formats(TRUE);
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 	g_signal_connect(drop_target, "drop", G_CALLBACK(bar_pane_gps_dnd_drop), pgd);
 	gtk_widget_add_controller(pgd->widget, GTK_EVENT_CONTROLLER(drop_target));

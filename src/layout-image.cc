@@ -1063,7 +1063,8 @@ static gboolean layout_image_dnd_drop(GtkDropTargetAsync *target, GdkDrop *drop,
 	layout_image_dnd_activate_split(lw, widget);
 
 	GdkContentFormats *formats = gdk_drop_get_formats(drop);
-	if (gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
+	if (gdk_content_formats_contain_gtype(formats, GDK_TYPE_FILE_LIST) ||
+	    gdk_content_formats_contain_mime_type(formats, "text/uri-list"))
 		{
 		auto *drop_data = g_new(LayoutImageDndDropData, 1);
 		drop_data->window = GTK_WIDGET(g_object_ref(lw->window));
@@ -1093,8 +1094,7 @@ static void layout_image_dnd_init(LayoutWindow *lw, gint i)
 	g_signal_connect(drag_source, "drag-end", G_CALLBACK(layout_image_dnd_end), lw);
 	gtk_widget_add_controller(imd->pr, GTK_EVENT_CONTROLLER(drag_source));
 
-	static const char *mime_types[] = {"text/uri-list", "text/plain"};
-	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GdkContentFormats *formats = dnd_file_drop_formats(TRUE);
 	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
 	g_signal_connect(drop_target, "drop", G_CALLBACK(layout_image_dnd_drop), lw);
 	gtk_widget_add_controller(imd->pr, GTK_EVENT_CONTROLLER(drop_target));

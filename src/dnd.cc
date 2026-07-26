@@ -143,11 +143,12 @@ GdkContentProvider *dnd_file_list_content_provider(GList *list)
 	return gdk_content_provider_new_union(providers, G_N_ELEMENTS(providers));
 }
 
-GdkContentFormats *dnd_file_drop_formats()
+GdkContentFormats *dnd_file_drop_formats(gboolean include_text)
 {
 	GdkContentFormatsBuilder *builder = gdk_content_formats_builder_new();
 	gdk_content_formats_builder_add_gtype(builder, GDK_TYPE_FILE_LIST);
 	gdk_content_formats_builder_add_mime_type(builder, "text/uri-list");
+	if (include_text) gdk_content_formats_builder_add_mime_type(builder, "text/plain");
 
 	return gdk_content_formats_builder_free_to_formats(builder);
 }
