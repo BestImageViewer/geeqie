@@ -961,8 +961,29 @@ static void vd_dnd_drop_file_received(GdkDrop *drop, GList *list, gpointer data)
 		vd->drop_fd = drop_data->drop_fd;
 		vd->drop_fd_ref.reset(drop_data->drop_fd);
 
-		vd_drop_menu(vd, access_file(vd->drop_fd->path, W_OK | X_OK));
-		action = vd_dnd_select_action(drop);
+		const gboolean writable = access_file(vd->drop_fd->path, W_OK | X_OK);
+		if (writable && options->dnd_default_action == DND_ACTION_COPY)
+			{
+			GList *copy_list = vd->drop_list;
+			vd->drop_list = nullptr;
+			file_util_copy_simple(copy_list, vd->drop_fd->path, vd->widget);
+			action = GDK_ACTION_COPY;
+			}
+		else if (writable && options->dnd_default_action == DND_ACTION_MOVE &&
+		         (gdk_drop_get_actions(drop) & GDK_ACTION_MOVE))
+			{
+			GList *move_list = vd->drop_list;
+			vd->drop_list = nullptr;
+			file_util_move_simple(move_list, vd->drop_fd->path, vd->widget);
+			action = GDK_ACTION_MOVE;
+			}
+		else
+			{
+			vd_drop_menu(vd, writable);
+			/* The menu owns the eventual operation, so the source must not
+			 * remove its data before the user chooses an action. */
+			action = (gdk_drop_get_actions(drop) & GDK_ACTION_COPY) ? GDK_ACTION_COPY : GDK_ACTION_NONE;
+			}
 		}
 
 	gdk_drop_finish(drop, action);
