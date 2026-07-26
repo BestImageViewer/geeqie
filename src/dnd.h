@@ -25,6 +25,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+struct FileData;
+
 void drag_signal_connect(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data);
 void drag_signal_swapped(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data);
 void drag_dest_unset(GtkWidget *widget);
@@ -36,7 +38,7 @@ using DndFileListCallback = void (*)(GdkDrop *drop, GList *list, gpointer data);
 using DndTextCallback = void (*)(GdkDrop *drop, const gchar *text, gpointer data);
 
 GdkContentProvider *dnd_file_list_content_provider(GList *list);
-void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items);
+void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items, FileData *fd = nullptr);
 void dnd_read_file_list_async(GdkDrop *drop, DndFileListCallback callback, gpointer data);
 void dnd_read_text_async(GdkDrop *drop, DndTextCallback callback, gpointer data);
 

@@ -133,8 +133,14 @@ GdkContentProvider *dnd_file_list_content_provider(GList *list)
 	return gdk_content_provider_new_union(providers, G_N_ELEMENTS(providers));
 }
 
-void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items)
+void dnd_set_drag_icon(GtkDragSource *source, GdkPixbuf *pixbuf, guint items, FileData *fd)
 {
+	g_autoptr(GdkPixbuf) fallback = nullptr;
+	if (!pixbuf && fd)
+		{
+		fallback = pixbuf_fallback(fd, options->dnd_icon_size, options->dnd_icon_size);
+		pixbuf = fallback;
+		}
 	if (!pixbuf) return;
 
 	const gint source_width = gdk_pixbuf_get_width(pixbuf);

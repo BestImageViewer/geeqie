@@ -923,7 +923,7 @@ static GdkContentProvider *layout_image_dnd_prepare(GtkDragSource *source, gdoub
 	if (!fd) return nullptr;
 
 	GdkPixbuf *icon = fd->thumb_pixbuf ? fd->thumb_pixbuf : image_get_pixbuf(imd);
-	dnd_set_drag_icon(source, icon, 1);
+	dnd_set_drag_icon(source, icon, 1, fd);
 	GList *list = g_list_append(nullptr, fd);
 	GdkContentProvider *provider = dnd_file_list_content_provider(list);
 	g_list_free(list);

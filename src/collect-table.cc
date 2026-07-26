@@ -1931,7 +1931,7 @@ static GdkContentProvider *collection_table_dnd_prepare(GtkDragSource *source, g
 
 	if (!list) return nullptr;
 
-	dnd_set_drag_icon(source, ct->click_info->pixbuf, g_list_length(list));
+	dnd_set_drag_icon(source, ct->click_info->pixbuf, g_list_length(list), ct->click_info->fd);
 	return dnd_file_list_content_provider(list);
 }
 

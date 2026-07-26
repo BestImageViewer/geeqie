@@ -392,7 +392,7 @@ static GdkContentProvider *vf_dnd_prepare(GtkDragSource *source, gdouble x, gdou
 
 	if (!list) return nullptr;
 
-	dnd_set_drag_icon(source, vf->click_fd->thumb_pixbuf, g_list_length(list));
+	dnd_set_drag_icon(source, vf->click_fd->thumb_pixbuf, g_list_length(list), vf->click_fd);
 	return dnd_file_list_content_provider(list);
 }
 

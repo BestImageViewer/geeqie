@@ -1415,7 +1415,7 @@ static GdkContentProvider *search_dnd_prepare(GtkDragSource *source, gdouble, gd
 
 	if (sd->click_fd)
 		{
-		dnd_set_drag_icon(source, sd->click_fd->thumb_pixbuf, g_list_length(list));
+		dnd_set_drag_icon(source, sd->click_fd->thumb_pixbuf, g_list_length(list), sd->click_fd);
 		}
 
 	return dnd_file_list_content_provider(list);
