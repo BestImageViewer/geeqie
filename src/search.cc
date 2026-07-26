@@ -1421,6 +1421,84 @@ static GdkContentProvider *search_dnd_prepare(GtkDragSource *source, gdouble, gd
 	return dnd_file_list_content_provider(list);
 }
 
+enum class SearchDndDestination
+{
+	Path,
+	Similarity,
+	Gps
+};
+
+struct SearchDndDropData
+{
+	GtkWidget *entry;
+	SearchDndDestination destination;
+};
+
+static void search_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
+{
+	auto *drop_data = static_cast<SearchDndDropData *>(data);
+	auto action = GDK_ACTION_NONE;
+
+	if (list)
+		{
+		auto *fd = static_cast<FileData *>(list->data);
+		g_autofree gchar *text = nullptr;
+
+		switch (drop_data->destination)
+			{
+			case SearchDndDestination::Path:
+				text = g_strdup(fd->path);
+				break;
+			case SearchDndDestination::Similarity:
+				text = g_strdup(fd->path);
+				break;
+			case SearchDndDestination::Gps:
+				const gdouble latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
+				const gdouble longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
+				text = (latitude != 1000 && longitude != 1000) ?
+				       g_strdup_printf("%f %f", latitude, longitude) :
+				       g_strdup(_("Image is not geocoded"));
+				break;
+			}
+
+		gq_gtk_entry_set_text(GTK_ENTRY(drop_data->entry), text);
+		gtk_widget_set_tooltip_text(drop_data->entry, text);
+		action = GDK_ACTION_COPY;
+		}
+
+	gdk_drop_finish(drop, action);
+	g_object_unref(drop_data->entry);
+	g_free(drop_data);
+}
+
+static gboolean search_dnd_drop(GtkDropTargetAsync *, GdkDrop *drop, gdouble, gdouble, gpointer data)
+{
+	auto *drop_data = g_new(SearchDndDropData, 1);
+	*drop_data = *static_cast<SearchDndDropData *>(data);
+	g_object_ref(drop_data->entry);
+	dnd_read_file_list_async(drop, search_dnd_file_received, drop_data);
+
+	return TRUE;
+}
+
+static void search_dnd_drop_data_free(gpointer data, GClosure *)
+{
+	g_free(data);
+}
+
+static void search_dnd_add_drop_target(GtkWidget *widget, SearchDndDestination destination)
+{
+	static const char *mime_types[] = {"text/uri-list"};
+	GdkContentFormats *formats = gdk_content_formats_new(mime_types, G_N_ELEMENTS(mime_types));
+	GtkDropTargetAsync *drop_target = gtk_drop_target_async_new(formats, GDK_ACTION_COPY);
+	auto *drop_data = g_new(SearchDndDropData, 1);
+	drop_data->entry = widget;
+	drop_data->destination = destination;
+	g_signal_connect_data(drop_target, "drop", G_CALLBACK(search_dnd_drop), drop_data,
+	                      search_dnd_drop_data_free, G_CONNECT_DEFAULT);
+	gtk_widget_add_controller(widget, GTK_EVENT_CONTROLLER(drop_target));
+}
+
 /*
  *-------------------------------------------------------------------
  * search core
@@ -3276,6 +3354,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
 	g_signal_connect(drag_source, "prepare", G_CALLBACK(search_dnd_prepare), sd);
 	gtk_widget_add_controller(sd->ui.result_view, GTK_EVENT_CONTROLLER(drag_source));
+	search_dnd_add_drop_target(sd->ui.path_entry, SearchDndDestination::Path);
+	search_dnd_add_drop_target(sd->ui.entry_similarity, SearchDndDestination::Similarity);
+	search_dnd_add_drop_target(sd->ui.entry_gps_coord, SearchDndDestination::Gps);
 
 	hbox = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
 
