@@ -519,6 +519,80 @@ GdkContentProvider *bar_pane_keywords_dnd_prepare(GtkDragSource *, gdouble x, gd
 	return name ? gdk_content_provider_new_typed(G_TYPE_STRING, name) : nullptr;
 }
 
+gboolean bar_pane_keywords_dnd_drop(GtkDropTarget *, const GValue *value, gdouble x, gdouble y, gpointer data)
+{
+	auto *pkd = static_cast<PaneKeywordsData *>(data);
+	const gchar *text = g_value_get_string(value);
+	if (!text) return FALSE;
+
+	GList *keywords = string_to_keywords_list(text);
+	if (!keywords) return FALSE;
+
+	auto *tree_view = GTK_TREE_VIEW(pkd->keyword_treeview);
+	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
+	GtkTreeModel *keyword_tree = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
+	auto *tree_store = GTK_TREE_STORE(keyword_tree);
+
+	g_autoptr(GtkTreePath) path = nullptr;
+	GtkTreeViewDropPosition position = GTK_TREE_VIEW_DROP_AFTER;
+	gtk_tree_view_get_dest_row_at_pos(tree_view, static_cast<gint>(x), static_cast<gint>(y), &path, &position);
+
+	GtkTreeIter destination;
+	GtkTreeIter child_destination;
+	const gboolean have_destination = path && gtk_tree_model_get_iter(model, &destination, path);
+	if (have_destination)
+		{
+		gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &child_destination, &destination);
+		}
+
+	GtkTreeIter previous;
+	gboolean have_previous = FALSE;
+	gboolean added = FALSE;
+
+	for (GList *work = keywords; work; work = work->next)
+		{
+		const auto *keyword = static_cast<const gchar *>(work->data);
+		GtkTreeIter inserted;
+
+		if (!have_destination)
+			{
+			if (keyword_exists(keyword_tree, nullptr, have_previous ? &previous : nullptr, keyword, FALSE, nullptr)) continue;
+			if (have_previous)
+				gtk_tree_store_insert_after(tree_store, &inserted, nullptr, &previous);
+			else
+				gtk_tree_store_append(tree_store, &inserted, nullptr);
+			}
+		else if ((position == GTK_TREE_VIEW_DROP_INTO_OR_BEFORE || position == GTK_TREE_VIEW_DROP_INTO_OR_AFTER) &&
+		         !gtk_tree_model_iter_has_child(keyword_tree, &child_destination))
+			{
+			if (keyword_exists(keyword_tree, &child_destination, have_previous ? &previous : nullptr, keyword, FALSE, nullptr)) continue;
+			if (have_previous)
+				gtk_tree_store_insert_after(tree_store, &inserted, &child_destination, &previous);
+			else
+				gtk_tree_store_append(tree_store, &inserted, &child_destination);
+			}
+		else
+			{
+			GtkTreeIter *sibling = have_previous ? &previous : &child_destination;
+			if (keyword_exists(keyword_tree, nullptr, &child_destination, keyword, FALSE, nullptr)) continue;
+			if (position == GTK_TREE_VIEW_DROP_BEFORE || position == GTK_TREE_VIEW_DROP_INTO_OR_BEFORE)
+				gtk_tree_store_insert_before(tree_store, &inserted, nullptr, &child_destination);
+			else
+				gtk_tree_store_insert_after(tree_store, &inserted, nullptr, sibling);
+			}
+
+		keyword_set(tree_store, &inserted, keyword, TRUE);
+		previous = inserted;
+		have_previous = TRUE;
+		added = TRUE;
+		}
+
+	g_list_free_full(keywords, g_free);
+	if (added) bar_keyword_tree_sync(pkd);
+
+	return added;
+}
+
 /*
  *-------------------------------------------------------------------
  * edit dialog
@@ -1267,6 +1341,10 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
 	g_signal_connect(drag_source, "prepare", G_CALLBACK(bar_pane_keywords_dnd_prepare), pkd);
 	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(drag_source));
+
+	GtkDropTarget *drop_target = gtk_drop_target_new(G_TYPE_STRING, GDK_ACTION_COPY);
+	g_signal_connect(drop_target, "drop", G_CALLBACK(bar_pane_keywords_dnd_drop), pkd);
+	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(drop_target));
 
 	if (options->show_predefined_keyword_tree)
 		{
