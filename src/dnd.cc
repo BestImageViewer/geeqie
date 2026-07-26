@@ -124,11 +124,21 @@ GdkContentProvider *dnd_file_list_content_provider(GList *list)
 	g_autofree gchar *uri_text = uri_text_from_filelist(list);
 	if (!uri_text || uri_text[0] == '\0') return nullptr;
 
+	g_autoptr(GPtrArray) files = g_ptr_array_new_with_free_func(g_object_unref);
+	for (GList *work = list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		g_ptr_array_add(files, g_file_new_for_path(fd->path));
+		}
+
+	GdkFileList *file_list = gdk_file_list_new_from_array(reinterpret_cast<GFile **>(files->pdata), files->len);
 	g_autoptr(GBytes) bytes = g_bytes_new(uri_text, strlen(uri_text));
 	GdkContentProvider *providers[] = {
+		gdk_content_provider_new_typed(GDK_TYPE_FILE_LIST, file_list),
 		gdk_content_provider_new_for_bytes("text/uri-list", bytes),
 		gdk_content_provider_new_typed(G_TYPE_STRING, uri_text)
 	};
+	g_boxed_free(GDK_TYPE_FILE_LIST, file_list);
 
 	return gdk_content_provider_new_union(providers, G_N_ELEMENTS(providers));
 }
