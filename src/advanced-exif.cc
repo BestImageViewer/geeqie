@@ -164,6 +164,30 @@ static void advanced_exif_clear(ExifWin *ew)
 	gtk_list_store_clear(store);
 }
 
+static GdkContentProvider *advanced_exif_dnd_prepare(GtkDragSource *, gdouble x, gdouble y, gpointer data)
+{
+	auto *ew = static_cast<ExifWin *>(data);
+	auto *tree_view = GTK_TREE_VIEW(ew->listview);
+	g_autoptr(GtkTreePath) path = nullptr;
+
+	if (!gtk_tree_view_get_path_at_pos(tree_view, static_cast<gint>(x), static_cast<gint>(y),
+	                                   &path, nullptr, nullptr, nullptr))
+		{
+		return nullptr;
+		}
+
+	gtk_tree_view_set_cursor(tree_view, path, nullptr, FALSE);
+
+	GtkTreeIter iter;
+	GtkTreeModel *model = gtk_tree_view_get_model(tree_view);
+	if (!gtk_tree_model_get_iter(model, &iter, path)) return nullptr;
+
+	g_autofree gchar *key = nullptr;
+	gtk_tree_model_get(model, &iter, EXIF_ADVCOL_NAME, &key, -1);
+
+	return key ? gdk_content_provider_new_typed(G_TYPE_STRING, key) : nullptr;
+}
+
 void advanced_exif_set_fd(GtkWidget *window, FileData *fd)
 {
 	ExifWin *ew;
@@ -394,6 +418,12 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(ew->listview), TRUE);
 	gtk_tree_view_set_search_column(GTK_TREE_VIEW(ew->listview), EXIF_ADVCOL_DESCRIPTION);
 	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(ew->listview), search_function_cb, ew, nullptr);
+
+	GtkDragSource *drag_source = gtk_drag_source_new();
+	gtk_drag_source_set_actions(drag_source, GDK_ACTION_COPY);
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
+	g_signal_connect(drag_source, "prepare", G_CALLBACK(advanced_exif_dnd_prepare), ew);
+	gtk_widget_add_controller(ew->listview, GTK_EVENT_CONTROLLER(drag_source));
 
 	GtkGesture *click = gtk_gesture_click_new();
 
