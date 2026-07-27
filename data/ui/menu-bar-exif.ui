@@ -3,24 +3,25 @@
   <menu id="menu-bar-exif">
     <section>
       <item>
-        <attribute name="action">win.bar-exif-win-configure</attribute>
+        <attribute name="action">exif.configure</attribute>
         <attribute name="label" translatable="yes">Configure </attribute>
       </item>
       <item>
-        <attribute name="action">win.bar-exif-win-remove</attribute>
+        <attribute name="action">exif.remove</attribute>
         <attribute name="label" translatable="yes">Remove </attribute>
       </item>
       <item>
-        <attribute name="action">win.bar-exif-win-copy</attribute>
+        <attribute name="action">exif.copy</attribute>
         <attribute name="label" translatable="yes">Copy </attribute>
       </item>
     </section>
     <section>
       <item>
-        <attribute name="action">win.bar-exif-win-add-entry</attribute>
+        <attribute name="action">exif.add-entry</attribute>
         <attribute name="label" translatable="yes">Add entry</attribute>
+      </item>
       <item>
-        <attribute name="action">win.bar-exif-win-show-hidden-entries/attribute>
+        <attribute name="action">exif.show-hidden-entries</attribute>
         <attribute name="label" translatable="yes">Show hidden entries</attribute>
       </item>
     </section>

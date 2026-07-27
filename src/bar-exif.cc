@@ -560,13 +560,16 @@ void bar_pane_exif_conf_dialog(GtkWidget *widget)
 	gtk_widget_show(gd->dialog);
 }
 
-[[maybe_unused]] void bar_pane_exif_conf_dialog_cb(GtkWidget *, gpointer data)
+[[maybe_unused]] void bar_pane_exif_conf_dialog_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto widget = static_cast<GtkWidget *>(data);
+	auto *popover = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(widget), "exif-popup"));
+	if (GTK_IS_POPOVER(popover)) gtk_popover_popdown(GTK_POPOVER(popover));
+
 	bar_pane_exif_conf_dialog(widget);
 }
 
-[[maybe_unused]] void bar_pane_exif_copy_entry_cb(GtkWidget *, gpointer data)
+[[maybe_unused]] void bar_pane_exif_copy_entry_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto widget = static_cast<GtkWidget *>(data);
 	const gchar *value;
@@ -581,28 +584,57 @@ void bar_pane_exif_conf_dialog(GtkWidget *widget)
 	gdk_clipboard_set_text(clipboard, value);
 }
 
-[[maybe_unused]] void bar_pane_exif_toggle_show_all_cb(GtkWidget *, gpointer data)
+[[maybe_unused]] void bar_pane_exif_toggle_show_all_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto ped = static_cast<PaneExifData *>(data);
 	ped->show_all = !ped->show_all;
 	bar_pane_exif_update(ped);
 }
 
-void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *, gdouble x, gdouble y)
+void bar_pane_exif_show_hidden_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	[[maybe_unused]] GtkWidget *menu;
+	auto *ped = static_cast<PaneExifData *>(data);
+	ped->show_all = g_variant_get_boolean(state);
+	g_simple_action_set_state(action, state);
+	bar_pane_exif_update(ped);
+}
+
+void bar_pane_exif_menu_popup(GtkWidget *widget, PaneExifData *ped, gdouble x, gdouble y)
+{
 	/* the widget can be either ExifEntry (for editing) or Pane (for new entry)
 	   we can decide it by the attached data */
-	[[maybe_unused]] auto ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
+	auto *ee = static_cast<ExifEntry *>(g_object_get_data(G_OBJECT(widget), "entry_data"));
 
-	[[maybe_unused]] GAction *action;
-	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-bar-exif.ui");
+	g_autoptr(GSimpleActionGroup) group = g_simple_action_group_new();
+
+	auto add_action = [group](const gchar *name, GCallback callback, gpointer data, gboolean enabled = TRUE)
+	{
+		GSimpleAction *action = g_simple_action_new(name, nullptr);
+		g_signal_connect(action, "activate", callback, data);
+		g_simple_action_set_enabled(action, enabled);
+		g_action_map_add_action(G_ACTION_MAP(group), G_ACTION(action));
+		g_object_unref(action);
+	};
+
+	add_action("configure", G_CALLBACK(bar_pane_exif_conf_dialog_cb), widget, ee != nullptr);
+	add_action("remove", G_CALLBACK(widget_remove_from_parent_cb), widget, ee != nullptr);
+	add_action("copy", G_CALLBACK(bar_pane_exif_copy_entry_cb), widget, ee != nullptr);
+	add_action("add-entry", G_CALLBACK(bar_pane_exif_conf_dialog_cb), ped->widget);
+
+	GSimpleAction *show_hidden = g_simple_action_new_stateful("show-hidden-entries", nullptr,
+	                                                         g_variant_new_boolean(ped->show_all));
+	g_signal_connect(show_hidden, "change-state", G_CALLBACK(bar_pane_exif_show_hidden_cb), ped);
+	g_action_map_add_action(G_ACTION_MAP(group), G_ACTION(show_hidden));
+	g_object_unref(show_hidden);
+
+	gtk_widget_insert_action_group(widget, "exif", G_ACTION_GROUP(group));
+
+	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-bar-exif.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-bar-exif"));
 
-/** @FIXME GTK4 Enable/disable the first 3 entries dependent on if (ee)
- * See original code.
- */
-	popup_menu_at(menu_model, widget, x, y);
+	GtkWidget *popover = popup_menu_at(menu_model, widget, x, y);
+	g_object_set_data(G_OBJECT(widget), "exif-popup", popover);
+	g_object_set_data(G_OBJECT(ped->widget), "exif-popup", popover);
 }
 
 void bar_pane_exif_menu_cb(GtkGestureClick *gesture, gint  /*n_press*/, gdouble x, gdouble y, gpointer data)
