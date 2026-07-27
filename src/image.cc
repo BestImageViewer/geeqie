@@ -245,10 +245,7 @@ static void image_release_cb(PixbufRenderer *, GqMouseButtonEvent *event, gpoint
 		lw = get_current_layout();
 		}
 
-/** @FIXME GTK4
 	layout_handle_user_defined_mouse_buttons(lw, event->button);
-*/
-	(void)event;
 }
 
 static void image_drag_cb(PixbufRenderer *pr, GqPointerMotionEvent *event, gpointer data)
