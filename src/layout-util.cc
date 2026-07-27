@@ -130,6 +130,18 @@ struct LayoutEditors
 
 } // namespace
 
+gboolean is_help_key(guint keyval, GdkModifierType state)
+{
+	auto *app = GTK_APPLICATION(g_application_get_default());
+	if (!app) return FALSE;
+
+	const auto modifiers = static_cast<GdkModifierType>(state & gtk_accelerator_get_default_mod_mask());
+	g_autofree gchar *accelerator = gtk_accelerator_name(keyval, modifiers);
+	g_auto(GStrv) actions = gtk_application_get_actions_for_accel(app, accelerator);
+
+	return g_strv_contains(const_cast<const gchar * const *>(actions), "app.help-contents");
+}
+
 static gboolean layout_bar_enabled(LayoutWindow *lw);
 static gboolean layout_bar_sort_enabled(LayoutWindow *lw);
 static void layout_bars_hide_toggle(LayoutWindow *lw);

@@ -1005,9 +1005,11 @@ static gboolean collection_window_keypress(GtkEventControllerKey *, guint keyval
 				break;
 			}
 		}
-
-/* @FIXME GTK4 menus
-*/
+	if (!stop_signal && is_help_key(keyval, state))
+		{
+		help_window_show("GuideCollections.html");
+		stop_signal = TRUE;
+		}
 
 	return stop_signal;
 }
