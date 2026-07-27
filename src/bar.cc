@@ -254,14 +254,12 @@ static void height_spin_key_press_cb(GtkEventControllerKey *, gint keyval, guint
 		}
 }
 
-static void expander_height_cb(GtkEventControllerKey *,
-                               [[maybe_unused]] guint keyval,
-                               [[maybe_unused]] guint keycode,
-                               [[maybe_unused]] GdkModifierType state,
-                               [[maybe_unused]] gpointer data)
+static gboolean expander_height_cb(GtkEventControllerKey *controller, guint, guint, GdkModifierType, gpointer)
 {
-/** @FIXME GTK4 Destroy the widget
- */
+	GtkWidget *window = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	gq_gtk_widget_destroy(window);
+
+	return TRUE;
 }
 
 static void bar_expander_height_cb(GtkWidget *, gpointer data)
@@ -344,13 +342,13 @@ static void bar_menu_popup(GtkWidget *widget)
 	gboolean display_height_option = FALSE;
 	if (expander)
 		{
-		gchar const *label = gtk_expander_get_label(GTK_EXPANDER(expander));
-		display_height_option = (g_strcmp0(label, "Comment") == 0) ||
-		                        (g_strcmp0(label, "Rating") == 0) ||
-		                        (g_strcmp0(label, "Title") == 0) ||
-		                        (g_strcmp0(label, "Headline") == 0) ||
-		                        (g_strcmp0(label, "Keywords") == 0) ||
-		                        (g_strcmp0(label, "GPS Map") == 0);
+		GtkWidget *pane = gtk_expander_get_child(GTK_EXPANDER(expander));
+		auto *pd = static_cast<PaneData *>(g_object_get_data(G_OBJECT(pane), "pane_data"));
+
+		display_height_option = pd && (pd->type == PANE_COMMENT ||
+		                                pd->type == PANE_KEYWORDS ||
+		                                pd->type == PANE_GPS ||
+		                                pd->type == PANE_RATING);
 		}
 
 	popup_menu_bar(expander, display_height_option ? G_CALLBACK(bar_expander_height_cb) : nullptr, widget);
