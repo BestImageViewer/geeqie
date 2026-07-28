@@ -1192,7 +1192,7 @@ static void image_pop_menu_collections_cb(GSimpleAction *, GVariant *parameter, 
 
 static void view_popup_menu(ViewWindow *vw, GtkWidget *parent, gdouble x, gdouble y)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-img-view.ui");
+	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-img-view.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-image"));
 	GList *editmenu_fd_list;
 

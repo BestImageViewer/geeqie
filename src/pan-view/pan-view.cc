@@ -2092,7 +2092,7 @@ static void pan_popup_menu(PanWindow *pw, GtkWidget *parent, gdouble x, gdouble 
 	GAction *action;
 	GList *editmenu_fd_list;
 
-	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-pan-view.ui");
+	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-pan-view.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-pan-view"));
 
 	active = (pw->click_pi != nullptr);

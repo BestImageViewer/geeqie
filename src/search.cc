@@ -1329,7 +1329,7 @@ static void search_win_result_clear_cb(GSimpleAction *, GVariant *, gpointer dat
 static void search_result_menu(SearchData *sd, bool on_row, bool empty, GtkWidget *parent, gdouble x, gdouble y)
 {
 	GAction *action;
-	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-search.ui");
+	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-search.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-search"));
 	GList *editmenu_fd_list;
 

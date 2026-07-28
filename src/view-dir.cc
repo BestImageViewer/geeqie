@@ -655,7 +655,7 @@ void vd_pop_menu(ViewDir *vd, FileData *fd, GtkWidget *parent, gdouble x, gdoubl
 			break;
 		}
 
-	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dir-popup.ui");
+	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dir-popup.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-dir-popup"));
 
 	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(vd->layout->window), "dir-win-up");
