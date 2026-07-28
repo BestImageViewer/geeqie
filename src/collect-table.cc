@@ -872,14 +872,14 @@ static void collection_table_popup_destroy_cb(GtkWidget *, gpointer data)
 static void collection_table_popup_menu(CollectTable *ct, bool over_icon, GtkWidget *parent, gdouble x, gdouble y)
 {
 	GAction *action;
-	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-collection.ui");
+	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-collection.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-collection"));
 
 	CollectWindow *cw = collection_window_find(ct->cd);
 
 	ct->editmenu_fd_list = collection_table_selection_get_list(ct);
 
-	GMenu *plugins_menu = G_MENU(g_object_ref(gtk_builder_get_object(builder, "plugins-submenu")));
+	GMenu *plugins_menu = G_MENU(gtk_builder_get_object(builder, "plugins-submenu"));
 	plugins_menu_populate(plugins_menu, "win.collection-win-plugin-run", ct->editmenu_fd_list);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(cw->window), "collection-win-view");
@@ -895,13 +895,10 @@ static void collection_table_popup_menu(CollectTable *ct, bool over_icon, GtkWid
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), over_icon);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(cw->window), "collection-win-append-from-file-selection");
-	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), over_icon);
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), TRUE);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(cw->window), "collection-win-append-from-collection");
-	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), over_icon);
-
-	action = g_action_map_lookup_action(G_ACTION_MAP(cw->window), "collection-win-append-from-collection");
-	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), over_icon);
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), TRUE);
 
 	if (parent)
 		{
