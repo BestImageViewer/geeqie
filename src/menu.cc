@@ -21,17 +21,12 @@
 
 #include "menu.h"
 
-#include <gdk/gdk.h>
-
 #include "actions.h"
 #include "bar.h"
 #include "collect-io.h"
-#include "editors.h"
 #include "image.h"
 #include "intl.h"
 #include "main-defines.h"
-#include "pixbuf-util.h"
-#include "sort-type.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 
@@ -53,219 +48,9 @@ gpointer submenu_item_get_data(GtkWidget *submenu_item)
 
 /*
  *-----------------------------------------------------------------------------
- * edit menu
- *-----------------------------------------------------------------------------
- */
-
-static void add_edit_items(GtkWidget *menu, GCallback func, GList *fd_list)
-{
-	EditorsList editors_list = editor_list_get();
-
-	for (const EditorDescription *editor : editors_list)
-		{
-		if (fd_list && editor_errors(editor_command_parse(editor, fd_list, FALSE, nullptr))) continue;
-
-		const gchar *stock_id = nullptr;
-		gchar *key = g_strdup(editor->key);
-
-		if (editor->icon && register_theme_icon_as_stock(key, editor->icon))
-			{
-			stock_id = key;
-			}
-
-		GtkWidget *item = popover_item_add_stock(menu, editor->name, stock_id, func, key);
-		g_signal_connect_swapped(G_OBJECT(item), "destroy", G_CALLBACK(g_free), key);
-		}
-}
-
-GtkWidget *submenu_add_edit(GtkWidget *menu, gboolean sensitive, GList *fd_list, GCallback func, gpointer data)
-{
-	GtkWidget *submenu;
-	submenu = popover_box_new();
-	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
-
-	add_edit_items(submenu, func, fd_list);
-
-	if (menu)
-		{
-		GtkWidget *item = popover_item_add(menu, _("_Plugins"), nullptr, nullptr);
-		gtk_widget_set_sensitive(item, sensitive);
-		}
-
-	return submenu;
-}
-
-void gsubmenu_add_edit(GMenu *menu, gboolean, GList *fd_list, GCallback, gpointer)
-{
-	EditorsList editors_list = editor_list_get();
-
-	for (const EditorDescription *editor : editors_list)
-		{
-		if (fd_list && editor_errors(editor_command_parse(editor, fd_list, FALSE, nullptr))) continue;
-
-		GMenuItem *item = g_menu_item_new(editor->name, "win.plugins");
-
-		g_menu_item_set_attribute(item, "target", "s", editor->key);
-
-		g_menu_append_item(menu, item);
-		}
-}
-
-/*
- *-----------------------------------------------------------------------------
- * sorting
- *-----------------------------------------------------------------------------
- */
-
-GtkWidget *submenu_add_sort(GtkWidget *menu, GCallback func, gpointer data,
-                            gboolean show_current, SortType type)
-{
-	GtkWidget *submenu;
-
-	if (menu)
-		{
-		submenu = popover_box_new();
-		GtkWidget *item = popover_item_add(menu, _("_Sort"), nullptr, nullptr);
-		gtk_widget_set_sensitive(item, TRUE);
-		}
-	else
-		{
-		submenu = popover_box_new();
-		}
-
-	if (!show_current) g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
-
-	for (const SortType sort_type : { SORT_NAME, SORT_NUMBER, SORT_TIME, SORT_CTIME, SORT_EXIFTIME,
-	                                  SORT_EXIFTIMEDIGITIZED, SORT_SIZE, SORT_RATING, SORT_CLASS })
-		{
-		if (show_current)
-			{
-			popover_item_add_radio(submenu, sort_type_get_text(sort_type),
-			                    GINT_TO_POINTER(sort_type), sort_type == type,
-			                    func, data);
-			}
-		else
-			{
-			popover_item_add(submenu, sort_type_get_text(sort_type),
-			              func, GINT_TO_POINTER(sort_type));
-			}
-		}
-
-	return submenu;
-}
-
-/*
- *-----------------------------------------------------------------------------
- * altering
- *-----------------------------------------------------------------------------
- */
-
-static const gchar *alter_type_get_text(AlterType type)
-{
-	switch (type)
-		{
-		case ALTER_ROTATE_90:
-			return _("Rotate clockwise 90°");
-			break;
-		case ALTER_ROTATE_90_CC:
-			return _("Rotate counterclockwise 90°");
-			break;
-		case ALTER_ROTATE_180:
-			return _("Rotate 180°");
-			break;
-		case ALTER_MIRROR:
-			return _("Mirror");
-			break;
-		case ALTER_FLIP:
-			return _("Flip");
-			break;
-		case ALTER_NONE:
-			return _("Original state");
-			break;
-		default:
-			break;
-		}
-
-	return nullptr;
-}
-
-static void submenu_add_alter_item(GtkWidget *menu, GCallback func, AlterType type,
-                                   guint accel_key, guint accel_mods)
-{
-	(void)accel_key;
-	(void)accel_mods;
-	popover_item_add_simple(menu, alter_type_get_text(type), func, GINT_TO_POINTER(type));
-}
-
-GtkWidget *submenu_add_alter(GtkWidget *menu, GCallback func, gpointer data)
-{
-	GtkWidget *submenu;
-
-	submenu = popover_box_new();
-	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
-
-	submenu_add_alter_item(submenu, func, ALTER_ROTATE_90, ']', 0);
-	submenu_add_alter_item(submenu, func, ALTER_ROTATE_90_CC, '[', 0);
-	submenu_add_alter_item(submenu, func, ALTER_ROTATE_180, 'R', GDK_SHIFT_MASK);
-	submenu_add_alter_item(submenu, func, ALTER_MIRROR, 'M', GDK_SHIFT_MASK);
-	submenu_add_alter_item(submenu, func, ALTER_FLIP, 'F', GDK_SHIFT_MASK);
-	submenu_add_alter_item(submenu, func, ALTER_NONE, 'O', GDK_SHIFT_MASK);
-
-	if (menu)
-		{
-		return popover_item_add(menu, _("_Orientation"), nullptr, nullptr);
-		}
-
-	return submenu;
-}
-
-/*
- *-----------------------------------------------------------------------------
  * collections
  *-----------------------------------------------------------------------------
  */
-
-/**
- * @brief Add submenu consisting of "New collection", and list of existing collections to a right-click menu.
- * @param[in] menu
- * @param[in] sensitive
- * @param[in] func
- * @param[in] data
- *
- *  Used by all image windows
- */
-GtkWidget *submenu_add_collections(GtkWidget *menu, gboolean sensitive,
-                                   GCallback func, gpointer data)
-{
-	GtkWidget *submenu;
-	GList *collection_list = nullptr;
-
-	submenu = popover_box_new();
-	g_object_set_data(G_OBJECT(submenu), "submenu_data", data);
-
-	popover_item_add_icon_sensitive(submenu, _("New collection"), PIXBUF_INLINE_COLLECTION,
-	                             TRUE, G_CALLBACK(func), GINT_TO_POINTER(-1));
-	popover_item_add_divider(submenu);
-
-	collect_manager_list(&collection_list,nullptr,nullptr);
-
-	gint index = 0; /* index to existing collection list menu item selected */
-	for (GList *work = collection_list; work; work = work->next, index++)
-		{
-		auto *collection_name = static_cast<gchar *>(work->data);
-		popover_item_add(submenu, collection_name, func, GINT_TO_POINTER(index));
-		}
-
-	if (menu)
-		{
-		GtkWidget *item = popover_item_add(menu, _("_Add to Collection"), nullptr, nullptr);
-		gtk_widget_set_sensitive(item, sensitive);
-		}
-
-	g_list_free_full(collection_list, g_free);
-
-	return submenu;
-}
 
 void submenu_add_collections_new(GMenu *menu, gboolean, const gchar *func, gpointer)
 {
@@ -282,28 +67,6 @@ void submenu_add_collections_new(GMenu *menu, gboolean, const gchar *func, gpoin
 		g_menu_item_set_action_and_target_value(item, func, g_variant_new_int32(index));
 
 		g_menu_append_item(menu, item);
-		}
-
-	g_list_free_full(collection_list, g_free);
-}
-
-void gsubmenu_add_collections(GMenu *menu, gboolean, GCallback, gpointer)
-{
-	GList *collection_list = nullptr;
-
-	collect_manager_list(&collection_list, nullptr, nullptr);
-
-	int index = 0; /* index to existing collection list menu item selected */
-	for (GList *work = collection_list; work; work = work->next, index++)
-		{
-		auto *collection_name = static_cast<gchar *>(work->data);
-
-		GMenuItem *item = g_menu_item_new(_(collection_name), "win.collections");
-
-		g_menu_item_set_attribute(item, "target", "i", index);
-
-		g_menu_append_item(menu, item);
-		g_object_unref(item);
 		}
 
 	g_list_free_full(collection_list, g_free);
