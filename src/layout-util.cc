@@ -2774,23 +2774,6 @@ void layout_actions_foreach(LayoutWindow *lw, GFunc func, gpointer data)
 		}
 }
 
-static void toolbar_clear_cb(GtkWidget *widget, gpointer)
-{
-	if (GTK_IS_BUTTON(widget))
-		{
-		/* Temporary GTK4 stub: legacy GtkAction signal bookkeeping has been removed. */
-		auto *action = static_cast<GObject *>(g_object_get_data(G_OBJECT(widget), "action"));
-		if (g_object_get_data(G_OBJECT(widget), "id") )
-			{
-			if (action)
-				{
-				g_signal_handler_disconnect(action, GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(widget), "id")));
-				}
-			}
-		}
-	gq_gtk_widget_destroy(widget);
-}
-
 void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 {
 	g_list_free_full(lw->toolbar_actions[type], g_free);
@@ -2800,7 +2783,7 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 		{
 		while (GtkWidget *child = gtk_widget_get_first_child(lw->toolbar[type]))
 			{
-			toolbar_clear_cb(child, nullptr);
+			gq_gtk_widget_destroy(child);
 			}
 		}
 }
