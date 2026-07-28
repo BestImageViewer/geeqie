@@ -63,7 +63,7 @@ void submenu_add_collections_new(GMenu *menu, gboolean, const gchar *func, gpoin
 		{
 		auto *collection_name = static_cast<gchar *>(work->data);
 
-		GMenuItem *item = g_menu_item_new(collection_name, nullptr);
+		g_autoptr(GMenuItem) item = g_menu_item_new(collection_name, nullptr);
 		g_menu_item_set_action_and_target_value(item, func, g_variant_new_int32(index));
 
 		g_menu_append_item(menu, item);
