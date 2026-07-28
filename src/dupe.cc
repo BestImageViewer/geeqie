@@ -3279,7 +3279,7 @@ static GtkWidget *dupe_menu_popup_main(DupeWindow *dw, DupeItem *di)
 	GList *editmenu_fd_list;
 	gboolean on_row = (di != nullptr);
 
-	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dupe-main.ui");
+	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dupe-main.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-dupe-main"));
 
 
@@ -3547,7 +3547,7 @@ static void dupe_second_menu_clear_cb(GSimpleAction *, GVariant *, gpointer data
 
 static GtkWidget *dupe_menu_popup_second(DupeWindow *dw, DupeItem *)
 {
-	GtkBuilder *builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dupe-second.ui");
+	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-dupe-second.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-dupe-second"));
 
 	popup_menu(menu_model, dw->window);
