@@ -1085,22 +1085,16 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 		g_autofree gchar *hide_text = g_strdup_printf(_("Hide \"%s\""), name);
 		popover_item_add(menu, hide_text, G_CALLBACK(bar_pane_keywords_hide_cb), pkd);
 
-		/* Temporary GTK4 stub: disabled nested mark submenu until this menu is ported. */
-		submenu = nullptr;
-		for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
+		if (is_keyword)
 			{
-			if (submenu)
+			g_autofree gchar *connect_text = g_strdup_printf(_("Connect \"%s\" to mark"), name);
+			submenu = popover_item_add_submenu(menu, connect_text);
+			for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
 				{
-				g_autofree gchar *text = g_strdup_printf(_("Mark %d"), 1 + (i < 9 ? i : -1));
+				g_autofree gchar *text = g_strdup_printf(_("Mark %d"), i + 1);
 				item = popover_item_add(submenu, text, G_CALLBACK(bar_pane_keywords_connect_mark_cb), pkd);
 				g_object_set_data(G_OBJECT(item), "mark", GINT_TO_POINTER(i + 1));
 				}
-			}
-
-		if (is_keyword)
-			{
-			g_autofree gchar *text = g_strdup_printf(_("Connect \"%s\" to mark"), name);
-			popover_item_add(menu, text, G_CALLBACK(bar_pane_keywords_disconnect_marks_cb), pkd);
 			}
 		popover_item_add_divider(menu);
 
@@ -1137,13 +1131,11 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 	popover_item_add(menu, _("Revert"), G_CALLBACK(bar_pane_keywords_revert_cb), pkd);
 	popover_item_add_divider(menu);
 
-	/* Temporary GTK4 stub: flatten "On any change" submenu until popup menus are ported. */
-	popover_item_add_check(menu, _("On any change: Expand checked"), pkd->expand_checked, G_CALLBACK(bar_pane_keywords_expand_checked_toggle_cb), pkd);
-	popover_item_add_check(menu, _("On any change: Collapse unchecked"), pkd->collapse_unchecked, G_CALLBACK(bar_pane_keywords_collapse_unchecked_toggle_cb), pkd);
-	popover_item_add_check(menu, _("On any change: Hide unchecked"), pkd->hide_unchecked, G_CALLBACK(bar_pane_keywords_hide_unchecked_toggle_cb), pkd);
+	submenu = popover_item_add_submenu(menu, _("On any change"));
+	popover_item_add_check(submenu, _("Expand checked"), pkd->expand_checked, G_CALLBACK(bar_pane_keywords_expand_checked_toggle_cb), pkd);
+	popover_item_add_check(submenu, _("Collapse unchecked"), pkd->collapse_unchecked, G_CALLBACK(bar_pane_keywords_collapse_unchecked_toggle_cb), pkd);
+	popover_item_add_check(submenu, _("Hide unchecked"), pkd->hide_unchecked, G_CALLBACK(bar_pane_keywords_hide_unchecked_toggle_cb), pkd);
 
-	(void)submenu;
-	(void)item;
 	popover_box_popup(menu);
 }
 

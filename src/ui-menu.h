@@ -63,6 +63,7 @@ GtkWidget *popover_item_add_check(GtkWidget *menu, const gchar *label, gboolean 
 			       GCallback func, gpointer data);
 GtkWidget *popover_item_add_radio(GtkWidget *menu, const gchar *label, gpointer item_data, gboolean active,
 			       GCallback func, gpointer data);
+GtkWidget *popover_item_add_submenu(GtkWidget *menu, const gchar *label);
 gpointer popover_item_radio_get_data(GtkWidget *menu_item);
 
 void popover_item_add_divider(GtkWidget *menu);

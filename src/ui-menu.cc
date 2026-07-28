@@ -222,6 +222,30 @@ GtkWidget *popover_item_add_radio(GtkWidget *menu, const gchar *label, gpointer 
 	return item;
 }
 
+GtkWidget *popover_item_add_submenu(GtkWidget *menu, const gchar *label)
+{
+	GtkWidget *item = gtk_menu_button_new();
+	GtkWidget *submenu = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	GtkWidget *popover = gtk_popover_new();
+
+	gtk_menu_button_set_label(GTK_MENU_BUTTON(item), label);
+	gtk_menu_button_set_use_underline(GTK_MENU_BUTTON(item), TRUE);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(item), popover);
+	gtk_menu_button_set_has_frame(GTK_MENU_BUTTON(item), FALSE);
+	gtk_widget_add_css_class(item, "flat");
+	gtk_widget_set_hexpand(item, TRUE);
+	gtk_widget_set_halign(item, GTK_ALIGN_FILL);
+
+	gtk_popover_set_child(GTK_POPOVER(popover), submenu);
+	/* Selecting a submenu item should dismiss the complete context menu. */
+	g_object_set_data(G_OBJECT(submenu), "gq-popover",
+	                  g_object_get_data(G_OBJECT(menu), "gq-popover"));
+
+	menu_item_finish(menu, item, nullptr, nullptr);
+
+	return submenu;
+}
+
 gpointer popover_item_radio_get_data(GtkWidget *menu_item)
 {
 	return g_object_get_data(G_OBJECT(menu_item), "menu_item_radio_data");
