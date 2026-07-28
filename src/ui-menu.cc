@@ -38,11 +38,6 @@
  *-----------------------------------------------------------------------------
  */
 
-static void menu_item_add_accelerator(GtkWidget *, GtkWidget *)
-{
-	/* Temporary GTK4 compatibility stub. */
-}
-
 static GtkWidget *menu_item_label_new(const gchar *text, gboolean use_mnemonic)
 {
 	GtkWidget *label = use_mnemonic ? gtk_label_new_with_mnemonic(text) : gtk_label_new(text);
@@ -140,8 +135,6 @@ GtkWidget *popover_item_add(GtkWidget *menu, const gchar *label,
 
 	item = menu_item_button_new(label, TRUE);
 
-	menu_item_add_accelerator(menu, item);
-
 	menu_item_finish(menu, item, func, data);
 
 	return item;
@@ -154,8 +147,6 @@ GtkWidget *popover_item_add_stock(GtkWidget *menu, const gchar *label, const gch
 
 	item = menu_item_icon_button_new(label, stock_id_to_icon_name(stock_id), TRUE);
 
-	menu_item_add_accelerator(menu, item);
-
 	menu_item_finish(menu, item, func, data);
 
 	return item;
@@ -167,8 +158,6 @@ GtkWidget *popover_item_add_icon(GtkWidget *menu, const gchar *label, const gcha
 	GtkWidget *item;
 
 	item = menu_item_icon_button_new(label, icon_name, TRUE);
-
-	menu_item_add_accelerator(menu, item);
 
 	menu_item_finish(menu, item, func, data);
 
@@ -204,8 +193,6 @@ GtkWidget *popover_item_add_check(GtkWidget *menu, const gchar *label, gboolean 
 
 	item = menu_item_check_new(label);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(item), active);
-
-	menu_item_add_accelerator(menu, item);
 
 	menu_item_finish(menu, item, func, data);
 
