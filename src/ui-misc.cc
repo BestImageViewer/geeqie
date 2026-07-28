@@ -774,9 +774,7 @@ GtkWidget *date_selection_new()
 		}
 
 	ds->button = gtk_menu_button_new();
-	/* Temporary GTK4 fallback: the old requisition/size_allocate hack used by
-	 * this button depended on GTK3 layout internals, so the button currently
-	 * uses its natural size until this widget is restyled for GTK4. */
+	gtk_widget_set_valign(ds->button, GTK_ALIGN_CENTER);
 
 	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	gtk_menu_button_set_child(GTK_MENU_BUTTON(ds->button), icon);
