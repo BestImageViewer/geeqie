@@ -2981,6 +2981,7 @@ void layout_toolbar_add_from_config(LayoutWindow *lw, ToolbarType type, const ch
 
 void layout_util_status_update_write(LayoutWindow *lw)
 {
+	constexpr auto action_name = "win.main-win-save-metadata";
 	gint n = metadata_queue_length();
 
 	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-save-metadata");
@@ -2997,10 +2998,8 @@ void layout_util_status_update_write(LayoutWindow *lw)
 		     widget;
 		     widget = gtk_widget_get_next_sibling(widget))
 			{
-			if (!GTK_IS_BUTTON(widget)) continue;
-
-			auto *waction = static_cast<GAction *>(g_object_get_data(G_OBJECT(widget), "action"));
-			if (waction != action) continue;
+			if (!GTK_IS_BUTTON(widget) || !GTK_IS_ACTIONABLE(widget)) continue;
+			if (g_strcmp0(gtk_actionable_get_action_name(GTK_ACTIONABLE(widget)), action_name) != 0) continue;
 
 			GtkWidget *image = gtk_button_get_child(GTK_BUTTON(widget));
 			if (GTK_IS_IMAGE(image))
