@@ -46,6 +46,7 @@ extern "C" {
 #include "metadata.h"
 #include "misc.h"
 #include "rcfile.h"
+#include "thumb.h"
 #include "ui-menu.h"
 #include "ui-utildlg.h"
 #include "uri-utils.h"
@@ -54,6 +55,7 @@ namespace
 {
 
 constexpr gint DEFAULT_ZOOM = 7;
+constexpr gint GPS_MARKER_THUMB_SIZE = 128;
 constexpr const gchar *DEFAULT_MAP_ID = SHUMATE_MAP_SOURCE_OSM_MAPNIK;
 constexpr const gchar *DEFAULT_MAP_NAME = "OpenStreetMap";
 constexpr const gchar *DEFAULT_MAP_LICENSE = "OpenStreetMap contributors";
@@ -95,6 +97,18 @@ struct PaneGPSDndDropData
 {
 	GtkWidget *widget;
 };
+
+struct GPSMarkerData
+{
+	FileData *fd;
+	GtkWidget *summary;
+	GtkWidget *details;
+	GtkWidget *picture;
+	ThumbLoader *thumb_loader;
+	gboolean expanded;
+};
+
+constexpr const gchar *GPS_MARKER_DATA_KEY = "geeqie-gps-marker-data";
 
 PaneGPSData *bar_pane_gps_dnd_drop_data_get_pane(PaneGPSDndDropData *drop_data)
 {
@@ -289,12 +303,141 @@ void bar_pane_gps_widget_destroy_cb(GtkWidget *widget, gpointer)
 	g_object_set_data(G_OBJECT(widget), "pane_data", nullptr);
 }
 
+void gps_marker_set_pixbuf(GPSMarkerData *marker_data, GdkPixbuf *pixbuf)
+{
+	if (!pixbuf) return;
+
+	g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(pixbuf);
+	gtk_picture_set_paintable(GTK_PICTURE(marker_data->picture), GDK_PAINTABLE(texture));
+}
+
+void gps_marker_thumb_done_cb(ThumbLoader *thumb_loader, gpointer data)
+{
+	auto *marker_data = static_cast<GPSMarkerData *>(data);
+	g_autoptr(GdkPixbuf) pixbuf = thumb_loader_get_pixbuf(thumb_loader);
+
+	gps_marker_set_pixbuf(marker_data, pixbuf);
+	thumb_loader_free(thumb_loader);
+	marker_data->thumb_loader = nullptr;
+}
+
+void gps_marker_thumb_error_cb(ThumbLoader *thumb_loader, gpointer data)
+{
+	auto *marker_data = static_cast<GPSMarkerData *>(data);
+
+	thumb_loader_free(thumb_loader);
+	marker_data->thumb_loader = nullptr;
+}
+
+void gps_marker_ensure_thumbnail(GPSMarkerData *marker_data)
+{
+	if (gtk_picture_get_paintable(GTK_PICTURE(marker_data->picture)) || marker_data->thumb_loader) return;
+
+	if (marker_data->fd->thumb_pixbuf)
+		{
+		gps_marker_set_pixbuf(marker_data, marker_data->fd->thumb_pixbuf);
+		return;
+		}
+
+	marker_data->thumb_loader = thumb_loader_new(GPS_MARKER_THUMB_SIZE, GPS_MARKER_THUMB_SIZE);
+	thumb_loader_set_callbacks(marker_data->thumb_loader,
+	                           gps_marker_thumb_done_cb,
+	                           gps_marker_thumb_error_cb,
+	                           nullptr,
+	                           marker_data);
+
+	if (!thumb_loader_start(marker_data->thumb_loader, marker_data->fd))
+		{
+		thumb_loader_free(marker_data->thumb_loader);
+		marker_data->thumb_loader = nullptr;
+		}
+}
+
+GtkWidget *gps_marker_details_new(GPSMarkerData *marker_data)
+{
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	gtk_widget_add_css_class(box, "gps-marker-details");
+
+	marker_data->picture = gtk_picture_new();
+	gtk_picture_set_content_fit(GTK_PICTURE(marker_data->picture), GTK_CONTENT_FIT_CONTAIN);
+	gtk_widget_set_size_request(marker_data->picture, GPS_MARKER_THUMB_SIZE, GPS_MARKER_THUMB_SIZE);
+	gtk_box_append(GTK_BOX(box), marker_data->picture);
+
+	GtkWidget *name = gtk_label_new(marker_data->fd->name);
+	gtk_label_set_ellipsize(GTK_LABEL(name), PANGO_ELLIPSIZE_MIDDLE);
+	gtk_label_set_max_width_chars(GTK_LABEL(name), 24);
+	gtk_box_append(GTK_BOX(box), name);
+
+	GtkWidget *date = gtk_label_new(text_from_time(marker_data->fd->date));
+	gtk_box_append(GTK_BOX(box), date);
+
+	g_autofree gchar *altitude = metadata_read_string(marker_data->fd, "formatted.GPSAltitude", METADATA_FORMATTED);
+	if (altitude)
+		{
+		gtk_box_append(GTK_BOX(box), gtk_label_new(altitude));
+		}
+
+	return box;
+}
+
+void gps_marker_click_cb(GtkGestureClick *, gint, gdouble, gdouble, gpointer data)
+{
+	auto *marker = SHUMATE_MARKER(data);
+	auto *marker_data = static_cast<GPSMarkerData *>(g_object_get_data(G_OBJECT(marker), GPS_MARKER_DATA_KEY));
+	if (!marker_data) return;
+
+	marker_data->expanded = !marker_data->expanded;
+	gtk_widget_set_visible(marker_data->summary, !marker_data->expanded);
+	gtk_widget_set_visible(marker_data->details, marker_data->expanded);
+
+	if (marker_data->expanded)
+		{
+		gps_marker_ensure_thumbnail(marker_data);
+		}
+}
+
+void gps_marker_data_free(gpointer data)
+{
+	auto *marker_data = static_cast<GPSMarkerData *>(data);
+
+	if (marker_data->thumb_loader)
+		{
+		thumb_loader_free(marker_data->thumb_loader);
+		}
+
+	file_data_unref(marker_data->fd);
+	g_free(marker_data);
+}
+
 void bar_pane_gps_add_marker(PaneGPSData *pgd, FileData *fd, gdouble latitude, gdouble longitude)
 {
-	(void)fd;
-	ShumateMarker *marker = shumate_point_new();
+	ShumateMarker *marker = shumate_marker_new();
+	auto *marker_data = g_new0(GPSMarkerData, 1);
+	marker_data->fd = file_data_ref(fd);
 
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	gtk_widget_add_css_class(box, "gps-marker");
+
+	marker_data->summary = gtk_image_new_from_icon_name("mark-location-symbolic");
+	gtk_image_set_pixel_size(GTK_IMAGE(marker_data->summary), 24);
+	gtk_widget_add_css_class(marker_data->summary, "gps-marker-summary");
+	gtk_box_append(GTK_BOX(box), marker_data->summary);
+
+	marker_data->details = gps_marker_details_new(marker_data);
+	gtk_widget_set_visible(marker_data->details, FALSE);
+	gtk_box_append(GTK_BOX(box), marker_data->details);
+
+	shumate_marker_set_child(marker, box);
+	shumate_marker_set_selectable(marker, TRUE);
 	shumate_location_set_location(SHUMATE_LOCATION(marker), latitude, longitude);
+	g_object_set_data_full(G_OBJECT(marker), GPS_MARKER_DATA_KEY, marker_data, gps_marker_data_free);
+
+	GtkGesture *click = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(click), GDK_BUTTON_PRIMARY);
+	g_signal_connect(click, "released", G_CALLBACK(gps_marker_click_cb), marker);
+	gtk_widget_add_controller(GTK_WIDGET(marker), GTK_EVENT_CONTROLLER(click));
+
+	gtk_widget_set_tooltip_text(GTK_WIDGET(marker), fd->name);
 	shumate_marker_layer_add_marker(pgd->marker_layer, marker);
 }
 
