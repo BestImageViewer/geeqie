@@ -123,10 +123,9 @@ static const GActionEntry popup_entries[] =
 
 void popup_menu_bar(GtkWidget *widget, GCallback expander_height_cb, gpointer)
 {
-	GtkBuilder *builder;
-	GSimpleActionGroup *group;
+	g_autoptr(GtkBuilder) builder = nullptr;
+	g_autoptr(GSimpleActionGroup) group = nullptr;
 	GMenu *menu_model;
-	GtkWidget *menu;
 
 	builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-popup.ui");
 
@@ -148,11 +147,7 @@ void popup_menu_bar(GtkWidget *widget, GCallback expander_height_cb, gpointer)
 			}
 		}
 
-	g_object_unref(group);
-
-	/* Temporary GTK4 path: use the shared popover helper. */
-	menu = popup_menu(menu_model, widget);
-	(void)menu;
+	popup_menu(menu_model, widget);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
