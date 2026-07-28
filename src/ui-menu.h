@@ -71,6 +71,7 @@ GtkWidget *popover_item_add_simple(GtkWidget *menu, const gchar *label,
 				GCallback func, gpointer data);
 
 GtkWidget *popover_box_new(GtkWidget *parent = nullptr, gdouble x = -1, gdouble y = -1);
+void popover_box_popup(GtkWidget *menu);
 GtkWidget *popover_parent_new(GtkWidget *child);
 void popover_set_parent(GtkWidget *popover, GtkWidget *parent);
 void popover_popup(GtkWidget *popover);

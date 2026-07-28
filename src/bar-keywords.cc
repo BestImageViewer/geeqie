@@ -1044,7 +1044,14 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 	pkd->click_tpath = nullptr;
 	gtk_tree_view_get_dest_row_at_pos(GTK_TREE_VIEW(pkd->keyword_treeview), x, y, &pkd->click_tpath, &pos);
 
-	menu = popover_box_new(widget, x, y);
+	GtkWidget *popover_parent = widget;
+#if HAVE_GTK4_22
+	if (GtkWidget *ancestor = gtk_widget_get_ancestor(widget, GTK_TYPE_POPOVER_BIN))
+		{
+		popover_parent = ancestor;
+		}
+#endif
+	menu = popover_box_new(popover_parent, x, y);
 
 	popover_item_add_icon(menu, _("New keyword"), GQ_ICON_NEW,
 	                   G_CALLBACK(bar_pane_keywords_edit_dialog_cb<FALSE>), pkd);
@@ -1137,7 +1144,7 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 
 	(void)submenu;
 	(void)item;
-	(void)menu;
+	popover_box_popup(menu);
 }
 
 gboolean bar_pane_keywords_menu_common(GtkWidget *widget, gdouble x, gdouble y, guint button, gpointer data)
@@ -1338,7 +1345,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	GtkDragSource *drag_source = gtk_drag_source_new();
 	gtk_drag_source_set_actions(drag_source, GDK_ACTION_COPY);
-	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), 0);
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(drag_source), GDK_BUTTON_PRIMARY);
 	g_signal_connect(drag_source, "prepare", G_CALLBACK(bar_pane_keywords_dnd_prepare), pkd);
 	gtk_widget_add_controller(pkd->keyword_treeview, GTK_EVENT_CONTROLLER(drag_source));
 
@@ -1348,8 +1355,10 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 
 	if (options->show_predefined_keyword_tree)
 		{
-		gq_gtk_container_add(scrolled, pkd->keyword_treeview);
+		GtkWidget *popover_parent = popover_parent_new(pkd->keyword_treeview);
+		gq_gtk_container_add(scrolled, popover_parent);
 		gtk_widget_show(pkd->keyword_treeview);
+		gtk_widget_show(popover_parent);
 		}
 
 	file_data_register_notify_func(bar_pane_keywords_notify_cb, pkd, NOTIFY_PRIORITY_LOW);

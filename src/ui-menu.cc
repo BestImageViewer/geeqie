@@ -270,10 +270,15 @@ GtkWidget *popover_box_new(GtkWidget *parent, gdouble x, gdouble y)
 			};
 			gtk_popover_set_pointing_to(GTK_POPOVER(popover), &pointing_to);
 			}
-		popover_popup(popover);
 		}
 
 	return box;
+}
+
+void popover_box_popup(GtkWidget *menu)
+{
+	auto *popover = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(menu), "gq-popover"));
+	if (GTK_IS_POPOVER(popover)) popover_popup(popover);
 }
 
 GtkWidget *popover_parent_new(GtkWidget *child)
