@@ -55,6 +55,7 @@ namespace
 {
 
 constexpr gint DEFAULT_ZOOM = 7;
+constexpr gint GPS_MARKER_DIRECTION_SIZE = 36;
 constexpr gint GPS_MARKER_THUMB_SIZE = 128;
 constexpr const gchar *DEFAULT_MAP_ID = SHUMATE_MAP_SOURCE_OSM_MAPNIK;
 constexpr const gchar *DEFAULT_MAP_NAME = "OpenStreetMap";
@@ -105,6 +106,7 @@ struct GPSMarkerData
 	GtkWidget *details;
 	GtkWidget *picture;
 	ThumbLoader *thumb_loader;
+	gdouble direction;
 	gboolean expanded;
 };
 
@@ -353,6 +355,32 @@ void gps_marker_ensure_thumbnail(GPSMarkerData *marker_data)
 		}
 }
 
+void gps_marker_direction_draw_cb(GtkDrawingArea *drawing_area, cairo_t *cr, gint width, gint height, gpointer data)
+{
+	auto *marker_data = static_cast<GPSMarkerData *>(data);
+	GdkRGBA color;
+	gtk_widget_get_color(GTK_WIDGET(drawing_area), &color);
+
+	cairo_save(cr);
+	cairo_translate(cr, width / 2.0, height / 2.0);
+	cairo_rotate(cr, marker_data->direction * G_PI / 180.0);
+	cairo_set_source_rgba(cr, color.red, color.green, color.blue, color.alpha);
+	cairo_set_line_width(cr, 2.0);
+	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+	cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
+
+	const gdouble arrow_length = MIN(width, height) * 0.35;
+	const gdouble arrow_head = arrow_length * 0.35;
+
+	cairo_move_to(cr, 0, arrow_length);
+	cairo_line_to(cr, 0, -arrow_length);
+	cairo_line_to(cr, -arrow_head, -arrow_length + arrow_head);
+	cairo_move_to(cr, 0, -arrow_length);
+	cairo_line_to(cr, arrow_head, -arrow_length + arrow_head);
+	cairo_stroke(cr);
+	cairo_restore(cr);
+}
+
 GtkWidget *gps_marker_details_new(GPSMarkerData *marker_data)
 {
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
@@ -375,6 +403,19 @@ GtkWidget *gps_marker_details_new(GPSMarkerData *marker_data)
 	if (altitude)
 		{
 		gtk_box_append(GTK_BOX(box), gtk_label_new(altitude));
+		}
+
+	marker_data->direction = metadata_read_GPS_direction(marker_data->fd, "Xmp.exif.GPSImgDirection", 1000);
+	if (marker_data->direction != 1000)
+		{
+		GtkWidget *direction = gtk_drawing_area_new();
+		gtk_widget_set_size_request(direction, GPS_MARKER_DIRECTION_SIZE, GPS_MARKER_DIRECTION_SIZE);
+		gtk_widget_set_halign(direction, GTK_ALIGN_CENTER);
+		gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(direction), gps_marker_direction_draw_cb, marker_data, nullptr);
+
+		g_autofree gchar *tooltip = g_strdup_printf(_("Image direction: %.1f°"), marker_data->direction);
+		gtk_widget_set_tooltip_text(direction, tooltip);
+		gtk_box_append(GTK_BOX(box), direction);
 		}
 
 	return box;
