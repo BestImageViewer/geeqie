@@ -181,6 +181,28 @@ void register_accels_for_action(GtkApplication *app, const char *detailed_action
 	registered_accels_set(app, detailed_action, accels);
 }
 
+void reload_registered_accels(GtkApplication *app, GKeyFile *accels_keyfile)
+{
+	if (!app || !accels_keyfile || !registered_accels) return;
+
+	const char *empty_accels[] = {nullptr};
+	GHashTableIter iter;
+	gpointer key;
+	gpointer value;
+
+	g_hash_table_iter_init(&iter, registered_accels);
+	while (g_hash_table_iter_next(&iter, &key, &value))
+		{
+		const auto *detailed_action = static_cast<const char *>(key);
+		g_auto(GStrv) accels = g_key_file_get_string_list(accels_keyfile, detailed_action, "accels", nullptr, nullptr);
+		if (!accels) accels = g_new0(gchar *, 1);
+
+		gtk_application_set_accels_for_action(app, detailed_action,
+		                                      registered_accels_suppressed ? empty_accels : const_cast<const char * const *>(accels));
+		g_hash_table_iter_replace(&iter, g_steal_pointer(&accels));
+		}
+}
+
 static GVariant *action_def_create_state(const ActionDef *d)
 {
 	switch (d->state_type)

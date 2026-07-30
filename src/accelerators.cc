@@ -108,6 +108,7 @@ void accel_map_load_merged()
 			}
 		}
 
+	g_clear_pointer(&accels_merged, g_key_file_unref);
 	accels_merged = key_file_new_merged(defaults, user);
 }
 
@@ -116,13 +117,32 @@ GKeyFile *get_keyfile_merged()
 	return accels_merged;
 }
 
-void remove_modified_shortcut(const char *action_name)
+bool accelerator_string_is_valid(const char *shortcuts)
+{
+	if (!shortcuts || !*shortcuts) return true;
+
+	g_auto(GStrv) accelerator_list = g_strsplit(shortcuts, ";", -1);
+	for (gchar **accelerator = accelerator_list; *accelerator; accelerator++)
+		{
+		g_strstrip(*accelerator);
+		if (!**accelerator) continue;
+
+		guint key = 0;
+		auto modifiers = static_cast<GdkModifierType>(0);
+		gtk_accelerator_parse(*accelerator, &key, &modifiers);
+		if (!key) return false;
+		}
+
+	return true;
+}
+
+bool remove_modified_shortcut(const char *action_name)
 {
 	if (!action_name || !*action_name)
 		{
 		log_printf("remove_modified_shortcut: invalid action_name\n");
 
-		return;
+		return false;
 		}
 
 	g_autoptr(GKeyFile) user = g_key_file_new();
@@ -136,12 +156,12 @@ void remove_modified_shortcut(const char *action_name)
 			log_printf("Failed to load user accelerators file %s: %s\n", path, error->message);
 			g_clear_error(&error);
 
-			return;
+			return false;
 			}
 		}
 	else
 		{
-		return;
+		return true;
 		}
 
 	g_key_file_remove_group(user, action_name, nullptr);
@@ -150,11 +170,16 @@ void remove_modified_shortcut(const char *action_name)
 		{
 		log_printf("Error saving accelerator file %s: %s\n", path, error->message);
 		g_clear_error(&error);
+		return false;
 		}
+
+	return true;
 }
 
-void update_modified_shortcut(const char *action_name, const char *shortcuts)
+bool update_modified_shortcut(const char *action_name, const char *shortcuts)
 {
+	if (!action_name || !*action_name || !accelerator_string_is_valid(shortcuts)) return false;
+
 	g_autoptr(GKeyFile) user = g_key_file_new();
 	g_autofree char *path = accels_ini_filename();
 	g_autoptr(GError) error = nullptr;
@@ -174,7 +199,10 @@ void update_modified_shortcut(const char *action_name, const char *shortcuts)
 		{
 		log_printf("Error saving accelerator file %s: %s\n", path, error->message);
 		g_clear_error(&error);
+		return false;
 		}
+
+	return true;
 }
 
 bool clear_modified_shortcuts()

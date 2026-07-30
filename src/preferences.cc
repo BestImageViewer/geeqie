@@ -80,8 +80,6 @@
 #include "utilops.h"
 #include "window.h"
 
-static void shortcut_editing_not_fully_implemented();
-
 namespace
 {
 
@@ -1460,48 +1458,40 @@ static void accel_store_populate()
 		}
 }
 
+static void accel_reload_and_apply()
+{
+	accel_map_load_merged();
+	reload_registered_accels(GTK_APPLICATION(g_application_get_default()), get_keyfile_merged());
+	gtk_tree_store_clear(accel_store);
+	accel_store_populate();
+}
+
 static void text_store_edited_cb(GtkCellRendererText *, char *path_string, const char *new_text, gpointer)
 {
 	GtkTreeIter iter;
-	gchar *action_name;
 
-	if (gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(accel_store), &iter, path_string))
+	if (!gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(accel_store), &iter, path_string)) return;
+
+	if (!accelerator_string_is_valid(new_text))
 		{
-		gtk_tree_store_set(accel_store, &iter, AE_KEY, new_text, -1);
+		warning_dialog(_("Invalid shortcut"), _("The shortcut must use GTK accelerator syntax. Separate multiple shortcuts with semicolons."),
+		               GQ_ICON_DIALOG_WARNING, nullptr);
+		return;
 		}
 
+	g_autofree gchar *action_name = nullptr;
 	gtk_tree_model_get(GTK_TREE_MODEL(accel_store), &iter, AE_ACTION, &action_name, -1);
 
-	update_modified_shortcut(action_name, new_text);
-
-	shortcut_editing_not_fully_implemented();
-}
-
-void shortcut_editing_not_fully_implemented()
-{
-	GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, _("Editing user-modified shortcuts"));
-
-	const char *description =
-		_("Editing within Geeqie is not yet fully implemented. \n\n \
-Geeqie must now be restarted for the changes to take effect.\n");
-
-	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", description);
-
-	gq_gtk_dialog_run(GTK_DIALOG(dialog));
-	gq_gtk_widget_destroy(dialog);
+	if (update_modified_shortcut(action_name, new_text)) accel_reload_and_apply();
 }
 
 static void accel_default_cb(GtkWidget *, gpointer)
 {
-	/** @FIXME Shortcut editing is not implemented */
-	clear_modified_shortcuts();
-	shortcut_editing_not_fully_implemented();
+	if (clear_modified_shortcuts()) accel_reload_and_apply();
 }
 
 static void accel_reset_cb(GtkWidget *, gpointer data)
 {
-	/** @FIXME Shortcut editing is not implemented */
-
 	GtkTreeSelection *selection;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -1512,19 +1502,13 @@ static void accel_reset_cb(GtkWidget *, gpointer data)
 		{
 		/* You now have the selected row iter */
 
-		char *col0 = nullptr;
-		char *key = nullptr;
+		g_autofree char *action_name = nullptr;
 
 		gtk_tree_model_get(model, &iter,
-						   0, &col0,
-						   AE_KEY, &key,
+						   AE_ACTION, &action_name,
 						   -1);
 
-		remove_modified_shortcut(col0);
-
-		g_free(col0);
-		g_free(key);
-		shortcut_editing_not_fully_implemented();
+		if (remove_modified_shortcut(action_name)) accel_reload_and_apply();
 		}
 }
 
@@ -3416,8 +3400,7 @@ static void config_tab_accelerators(GtkWidget *notebook)
 	const char *tooltip = _("Click here and type the required key combination \n \
 The converted keycode is copied to the clipboard. \n\n \
 Use a semicolon to separate multiple entries. \n \
-Double-click on the Key column and add or replace the text. \n\n \
-Geeqie must be restarted for the changes to take effect.\n");
+Double-click on the Key column and add or replace the text.\n");
 
 	gtk_widget_set_tooltip_text(key_label, tooltip);
 	gtk_widget_set_tooltip_text(key_value, tooltip);

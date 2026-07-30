@@ -50,6 +50,7 @@ const ActionDef *get_view_file_actions();
 
 void register_actions_from_table(GtkApplication *app, GtkWidget *window, const ActionDef *defs, GKeyFile *accels_keyfile, gpointer user_data);
 void register_accels_for_action(GtkApplication *app, const char *detailed_action, GStrv accels);
+void reload_registered_accels(GtkApplication *app, GKeyFile *accels_keyfile);
 const char *get_icon_for_action_name(const char *action_name);
 
 GStrv action_defs_to_aligned_lines(const ActionDef *actions);
