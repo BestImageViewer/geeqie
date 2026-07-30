@@ -21,7 +21,9 @@
 
 #include "bar-gps.h"
 
+#include <algorithm>
 #include <string>
+#include <vector>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
@@ -486,21 +488,90 @@ gboolean bar_pane_gps_add_file_marker(PaneGPSData *pgd, FileData *fd)
 {
 	if (!pgd || !fd) return FALSE;
 
-	const double lat = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 0);
-	const double lon = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 0);
+	const double lat = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
+	const double lon = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
 
-	if (lat == 0 && lon == 0)
+	if (lat == 1000 || lon == 1000)
 		{
 		return FALSE;
 		}
 
 	bar_pane_gps_add_marker(pgd, fd, lat, lon);
+	pgd->num_added++;
 	if (pgd->centre_map_checked && pgd->selection_count == 1)
 		{
 		shumate_map_center_on(shumate_simple_map_get_map(pgd->map), lat, lon);
 		}
 
 	return TRUE;
+}
+
+void bar_pane_gps_fit_markers(PaneGPSData *pgd)
+{
+	if (!pgd || !pgd->centre_map_checked || pgd->num_added < 2 || !pgd->shumate_map_source) return;
+
+	double min_latitude = 90.0;
+	double max_latitude = -90.0;
+	std::vector<double> longitudes;
+
+	for (GList *work = pgd->selection_list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		const double latitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLatitude", 1000);
+		const double longitude = metadata_read_GPS_coord(fd, "Xmp.exif.GPSLongitude", 1000);
+		if (latitude == 1000 || longitude == 1000) continue;
+
+		min_latitude = MIN(min_latitude, latitude);
+		max_latitude = MAX(max_latitude, latitude);
+		longitudes.push_back(longitude < 0.0 ? longitude + 360.0 : longitude);
+		}
+
+	if (longitudes.size() < 2) return;
+
+	std::sort(longitudes.begin(), longitudes.end());
+	double largest_gap = -1.0;
+	size_t interval_start = 0;
+	for (size_t i = 0; i < longitudes.size(); i++)
+		{
+		const double next = i + 1 < longitudes.size() ? longitudes[i + 1] : longitudes[0] + 360.0;
+		const double gap = next - longitudes[i];
+		if (gap > largest_gap)
+			{
+			largest_gap = gap;
+			interval_start = (i + 1) % longitudes.size();
+			}
+		}
+
+	const double longitude_span = 360.0 - largest_gap;
+	double centre_longitude = longitudes[interval_start] + (longitude_span / 2.0);
+	if (centre_longitude >= 360.0) centre_longitude -= 360.0;
+	if (centre_longitude > 180.0) centre_longitude -= 360.0;
+
+	const gint available_width = MAX(1, gtk_widget_get_width(GTK_WIDGET(pgd->map)) - 64);
+	const gint available_height = MAX(1, gtk_widget_get_height(GTK_WIDGET(pgd->map)) - 64);
+	const guint min_zoom = shumate_viewport_get_min_zoom_level(pgd->viewport);
+	const guint max_zoom = shumate_viewport_get_max_zoom_level(pgd->viewport);
+	double zoom = min_zoom;
+	double centre_latitude = (min_latitude + max_latitude) / 2.0;
+
+	for (gint candidate = static_cast<gint>(max_zoom); candidate >= static_cast<gint>(min_zoom); candidate--)
+		{
+		const double tile_size = shumate_map_source_get_tile_size_at_zoom(pgd->shumate_map_source, candidate);
+		const double map_width = shumate_map_source_get_column_count(pgd->shumate_map_source, candidate) * tile_size;
+		const double longitude_pixels = longitude_span / 360.0 * map_width;
+		const double min_y = shumate_map_source_get_y(pgd->shumate_map_source, candidate, min_latitude);
+		const double max_y = shumate_map_source_get_y(pgd->shumate_map_source, candidate, max_latitude);
+		const double latitude_pixels = ABS(max_y - min_y);
+
+		if (longitude_pixels <= available_width && latitude_pixels <= available_height)
+			{
+			zoom = candidate;
+			centre_latitude = shumate_map_source_get_latitude(pgd->shumate_map_source, candidate, (min_y + max_y) / 2.0);
+			break;
+			}
+		}
+
+	shumate_map_go_to_full(shumate_simple_map_get_map(pgd->map), centre_latitude, centre_longitude, zoom);
 }
 
 void bar_pane_gps_set_status(PaneGPSData *pgd)
@@ -556,12 +627,13 @@ gboolean bar_pane_gps_create_markers_cb(gpointer data)
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(pgd->progress), nullptr);
 		bar_pane_gps_clear_marker_queue(pgd);
 		pgd->create_markers_id = 0;
+		bar_pane_gps_fit_markers(pgd);
 		}
 
 	return G_SOURCE_REMOVE;
 }
 
-void bar_pane_gps_update(PaneGPSData *pgd, gboolean use_selection)
+void bar_pane_gps_update(PaneGPSData *pgd)
 {
 	if (!pgd) return;
 
@@ -573,7 +645,7 @@ void bar_pane_gps_update(PaneGPSData *pgd, gboolean use_selection)
 
 	bar_pane_gps_clear_marker_queue(pgd);
 	file_data_list_free(pgd->selection_list);
-	pgd->selection_list = use_selection ? layout_selection_list(pgd->pane.lw) : nullptr;
+	pgd->selection_list = layout_selection_list(pgd->pane.lw);
 	if (!pgd->selection_list && pgd->fd)
 		{
 		pgd->selection_list = g_list_append(nullptr, file_data_ref(pgd->fd));
@@ -648,7 +720,7 @@ void bar_pane_gps_enable_markers_checked_toggle_cb(GtkWidget *button, gpointer d
 	auto pgd = static_cast<PaneGPSData *>(data);
 
 	pgd->enable_markers_checked = gtk_check_button_get_active(GTK_CHECK_BUTTON(button));
-	bar_pane_gps_update(pgd, pgd->selection_count > 1);
+	bar_pane_gps_update(pgd);
 }
 
 void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *button, gpointer data)
@@ -656,6 +728,7 @@ void bar_pane_gps_centre_map_checked_toggle_cb(GtkWidget *button, gpointer data)
 	auto pgd = static_cast<PaneGPSData *>(data);
 
 	pgd->centre_map_checked = gtk_check_button_get_active(GTK_CHECK_BUTTON(button));
+	bar_pane_gps_fit_markers(pgd);
 }
 
 void bar_pane_gps_notify_selection(GtkWidget *bar, gint count)
@@ -666,7 +739,7 @@ void bar_pane_gps_notify_selection(GtkWidget *bar, gint count)
 	pgd = static_cast<PaneGPSData *>(g_object_get_data(G_OBJECT(bar), "pane_data"));
 	if (!pgd) return;
 
-	bar_pane_gps_update(pgd, count > 1);
+	bar_pane_gps_update(pgd);
 }
 
 void bar_pane_gps_set_fd(GtkWidget *bar, FileData *fd)
@@ -679,7 +752,7 @@ void bar_pane_gps_set_fd(GtkWidget *bar, FileData *fd)
 	file_data_unref(pgd->fd);
 	pgd->fd = file_data_ref(fd);
 
-	bar_pane_gps_update(pgd, FALSE);
+	bar_pane_gps_update(pgd);
 }
 
 gint bar_pane_gps_event(GtkWidget *bar, GdkEvent *event)
@@ -743,7 +816,7 @@ void bar_pane_gps_notify_cb(FileData *fd, NotifyType type, gpointer data)
 	if ((type & (NOTIFY_REREAD | NOTIFY_CHANGE | NOTIFY_METADATA)) &&
 	    g_list_find(pgd->selection_list, fd))
 		{
-		bar_pane_gps_update(pgd, pgd->selection_count > 1);
+		bar_pane_gps_update(pgd);
 		}
 }
 
