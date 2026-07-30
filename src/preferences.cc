@@ -3045,7 +3045,7 @@ static void config_tab_color(GtkWidget *notebook)
 #if !HAVE_LCMS
 	gtk_widget_set_sensitive(pref_group_parent(group), FALSE);
 #endif
-	pref_checkbox_new_int(group, _("Use system screen profile if available"),
+	pref_checkbox_new_int(group, _("Use system display profile when available"),
 			      options->color_profile.use_x11_screen_profile, &c_options->color_profile.use_x11_screen_profile);
 
 	table = pref_table_new(group, 2, 1, FALSE, FALSE);

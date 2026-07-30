@@ -425,15 +425,103 @@ void image_update_title(ImageWindow *imd)
  * rotation, flip, etc.
  *-------------------------------------------------------------------
  */
-static bool image_get_x11_screen_profile(ColorManMemData &screen_data)
+static gchar *image_get_colord_profile_filename(GdkMonitor *monitor)
+{
+	const gchar *connector = gdk_monitor_get_connector(monitor);
+	if (!connector || !*connector) return nullptr;
+
+	g_autoptr(GError) error = nullptr;
+	g_autoptr(GDBusProxy) client = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
+	                                                            G_DBUS_PROXY_FLAGS_NONE,
+	                                                            nullptr,
+	                                                            "org.freedesktop.ColorManager",
+	                                                            "/org/freedesktop/ColorManager",
+	                                                            "org.freedesktop.ColorManager",
+	                                                            nullptr, &error);
+	if (!client)
+		{
+		DEBUG_1("Unable to connect to colord: %s", error->message);
+		return nullptr;
+		}
+
+	/* XRandR_name is used by colord on X11. OutputName is used by newer
+	 * desktop integrations and allows the same code to work on Wayland when
+	 * the compositor exposes a connector name.
+	 */
+	const gchar *properties[] = { "OutputName", "XRANDR_name" };
+	g_autofree gchar *device_path = nullptr;
+	for (const gchar *property : properties)
+		{
+		g_clear_error(&error);
+		g_autoptr(GVariant) result = g_dbus_proxy_call_sync(client, "FindDeviceByProperty",
+		                                                     g_variant_new("(ss)", property, connector),
+		                                                     G_DBUS_CALL_FLAGS_NONE, 1000, nullptr, &error);
+		if (result)
+			{
+			const gchar *path;
+			g_variant_get(result, "(&o)", &path);
+			device_path = g_strdup(path);
+			break;
+			}
+		}
+
+	if (!device_path) return nullptr;
+
+	g_clear_error(&error);
+	g_autoptr(GDBusProxy) device = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
+	                                                            G_DBUS_PROXY_FLAGS_NONE,
+	                                                            nullptr,
+	                                                            "org.freedesktop.ColorManager",
+	                                                            device_path,
+	                                                            "org.freedesktop.ColorManager.Device",
+	                                                            nullptr, &error);
+	if (!device) return nullptr;
+
+	g_autoptr(GVariant) profiles = g_dbus_proxy_get_cached_property(device, "Profiles");
+	if (!profiles || g_variant_n_children(profiles) == 0) return nullptr;
+
+	g_autoptr(GVariant) profile_path_variant = g_variant_get_child_value(profiles, 0);
+	const gchar *profile_path = g_variant_get_string(profile_path_variant, nullptr);
+
+	g_clear_error(&error);
+	g_autoptr(GDBusProxy) profile = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
+	                                                             G_DBUS_PROXY_FLAGS_NONE,
+	                                                             nullptr,
+	                                                             "org.freedesktop.ColorManager",
+	                                                             profile_path,
+	                                                             "org.freedesktop.ColorManager.Profile",
+	                                                             nullptr, &error);
+	if (!profile) return nullptr;
+
+	g_autoptr(GVariant) filename = g_dbus_proxy_get_cached_property(profile, "Filename");
+	return filename ? g_variant_dup_string(filename, nullptr) : nullptr;
+}
+
+static bool image_get_system_screen_profile(const ImageWindow *imd, ColorManMemData &screen_data)
 {
 	screen_data.ptr.reset();
 	screen_data.len = 0;
 
-	/* GTK4: direct X11 root-window ICC profile access is not supported.
-	* Color management must be done via GdkColorProfile / colord.
-	*/
-	return false;
+	GtkNative *native = gtk_widget_get_native(imd->widget);
+	GdkSurface *surface = native ? gtk_native_get_surface(native) : nullptr;
+	GdkDisplay *display = gtk_widget_get_display(imd->widget);
+	GdkMonitor *monitor = surface ? gdk_display_get_monitor_at_surface(display, surface) : nullptr;
+	if (!monitor) return false;
+
+	g_autofree gchar *filename = image_get_colord_profile_filename(monitor);
+	if (!filename) return false;
+
+	g_autofree gchar *contents = nullptr;
+	gsize length = 0;
+	if (!g_file_get_contents(filename, &contents, &length, nullptr) || length > G_MAXUINT)
+		{
+		DEBUG_1("Unable to read colord screen profile: %s", filename);
+		return false;
+		}
+
+	screen_data.ptr.reset(reinterpret_cast<guchar *>(g_steal_pointer(&contents)));
+	screen_data.len = length;
+	return true;
 }
 
 static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
@@ -469,10 +557,10 @@ static gboolean image_post_process_color(ImageWindow *imd, gboolean run_in_bg)
 
 	ColorManMemData screen_profile;
 	if (options->color_profile.use_x11_screen_profile &&
-	    image_get_x11_screen_profile(screen_profile))
+	    image_get_system_screen_profile(imd, screen_profile))
 		{
 		screen_type = COLOR_PROFILE_MEM;
-		DEBUG_1("Using X11 screen profile, length: %u", screen_profile.len);
+		DEBUG_1("Using system screen profile, length: %u", screen_profile.len);
 		}
 	else if (options->color_profile.screen_file &&
 	    is_readable_file(options->color_profile.screen_file))

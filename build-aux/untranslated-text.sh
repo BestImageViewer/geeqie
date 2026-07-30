@@ -154,6 +154,13 @@ write_char_option
 \"Whether this tag affects the foreground color\",
 \"Width of cell\",
 
+##image.cc
+\"Filename\"
+\"FindDeviceByProperty\"
+\"OutputName\"
+\"Profiles\"
+\"XRANDR_name\"
+
 ##main.cc
 SIGABRT,
 SIGBUS,
