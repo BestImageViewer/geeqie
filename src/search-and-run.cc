@@ -42,12 +42,6 @@
 namespace
 {
 
-enum {
-	SAR_LABEL,
-	SAR_ACTION,
-	SAR_COUNT
-};
-
 struct SearchAndRunAction
 {
 	gchar *label;
@@ -58,11 +52,12 @@ struct SarData
 {
 	GtkWidget *window;
 	GtkWidget *entry;
-	GtkEntryCompletion *completion;
-	GtkListStore *command_store;
+	GtkWidget *popover;
+	GtkWidget *command_list;
+	GtkWidget *command_scroller;
+	std::vector<SearchAndRunAction *> actions;
 	LayoutWindow *lw;
 	gchar *action_name;
-	gboolean match_found;
 };
 
 void search_and_run_action_free(SearchAndRunAction *action)
@@ -72,11 +67,6 @@ void search_and_run_action_free(SearchAndRunAction *action)
 	g_free(action->label);
 	g_free(action->action_name);
 	g_free(action);
-}
-
-gint sort_iter_compare_func(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer)
-{
-	return gq_gtk_tree_iter_utf8_collate(model, a, b, SAR_LABEL);
 }
 
 gchar *action_label_from_description(const gchar *description, const gchar *target)
@@ -153,7 +143,7 @@ void append_actions_from_table(std::vector<SearchAndRunAction *> &actions, const
 		}
 }
 
-void command_store_populate(SarData *sar)
+void command_list_populate(SarData *sar)
 {
 	const ActionDef *action_sets[] =
 		{
@@ -162,36 +152,15 @@ void command_store_populate(SarData *sar)
 		nullptr
 		};
 
-	std::vector<SearchAndRunAction *> actions;
-
 	for (const ActionDef **action_set = action_sets; *action_set != nullptr; action_set++)
 		{
-		append_actions_from_table(actions, *action_set);
+		append_actions_from_table(sar->actions, *action_set);
 		}
 
-	std::sort(actions.begin(), actions.end(), [](const SearchAndRunAction *a, const SearchAndRunAction *b)
+	std::sort(sar->actions.begin(), sar->actions.end(), [](const SearchAndRunAction *a, const SearchAndRunAction *b)
 		{
 		return g_utf8_collate(a->label, b->label) < 0;
 		});
-
-	GtkTreeSortable *sortable = GTK_TREE_SORTABLE(sar->command_store);
-	gtk_tree_sortable_set_sort_func(sortable, SAR_LABEL, sort_iter_compare_func, nullptr, nullptr);
-	gtk_tree_sortable_set_sort_column_id(sortable, SAR_LABEL, GTK_SORT_ASCENDING);
-
-	for (SearchAndRunAction *action : actions)
-		{
-		GtkTreeIter iter;
-		gtk_list_store_append(sar->command_store, &iter);
-		gtk_list_store_set(sar->command_store, &iter,
-		                   SAR_LABEL, action->label,
-		                   SAR_ACTION, action->action_name,
-		                   -1);
-		}
-
-	for (SearchAndRunAction *action : actions)
-		{
-		search_and_run_action_free(action);
-		}
 }
 
 void search_and_run_destroy(SarData *sar)
@@ -203,12 +172,18 @@ void search_and_run_destroy(SarData *sar)
 		sar->lw->sar_window = nullptr;
 		}
 
+	g_signal_handlers_disconnect_by_data(sar->window, sar);
+	g_signal_handlers_disconnect_by_data(sar->entry, sar);
+	g_signal_handlers_disconnect_by_data(sar->command_list, sar);
+
 	g_clear_pointer(&sar->action_name, g_free);
-	g_clear_object(&sar->completion);
-	g_clear_object(&sar->command_store);
+	for (SearchAndRunAction *action : sar->actions)
+		{
+		search_and_run_action_free(action);
+		}
 
 	GtkWidget *window = sar->window;
-	g_free(sar);
+	delete sar;
 	gq_gtk_widget_destroy(window);
 }
 
@@ -301,56 +276,124 @@ gboolean keypress_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierTy
 		return TRUE;
 		}
 
-	if (keyval != GDK_KEY_Return && keyval != GDK_KEY_KP_Enter)
+	if (keyval == GDK_KEY_Down || keyval == GDK_KEY_Up)
 		{
-		sar->match_found = FALSE;
-		g_clear_pointer(&sar->action_name, g_free);
+		GtkListBoxRow *row = gtk_list_box_get_selected_row(GTK_LIST_BOX(sar->command_list));
+		gint index = row ? gtk_list_box_row_get_index(row) : (keyval == GDK_KEY_Down ? -1 : 1);
+		index += keyval == GDK_KEY_Down ? 1 : -1;
+		row = gtk_list_box_get_row_at_index(GTK_LIST_BOX(sar->command_list), index);
+		if (row)
+			{
+			gtk_list_box_select_row(GTK_LIST_BOX(sar->command_list), row);
+
+			graphene_rect_t bounds;
+			if (gtk_widget_compute_bounds(GTK_WIDGET(row), sar->command_list, &bounds))
+				{
+				GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(sar->command_scroller));
+				const gdouble value = gtk_adjustment_get_value(adjustment);
+				const gdouble page_size = gtk_adjustment_get_page_size(adjustment);
+				const gdouble row_bottom = bounds.origin.y + bounds.size.height;
+				if (bounds.origin.y < value)
+					{
+					gtk_adjustment_set_value(adjustment, bounds.origin.y);
+					}
+				else if (row_bottom > value + page_size)
+					{
+					gtk_adjustment_set_value(adjustment, row_bottom - page_size);
+					}
+				}
+			gtk_widget_grab_focus(sar->entry);
+			}
+		return TRUE;
 		}
 
 	return FALSE;
 }
 
-gboolean match_selected_cb(GtkEntryCompletion *, GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
+gboolean action_matches(const SearchAndRunAction *action, const gchar *key)
 {
-	auto *sar = static_cast<SarData *>(data);
-	g_autofree gchar *action_name = nullptr;
-
-	gtk_tree_model_get(model, iter, SAR_ACTION, &action_name, -1);
-	activate_action(sar, action_name);
-
-	g_idle_add(search_and_run_destroy_idle, sar);
-
-	return TRUE;
-}
-
-gboolean match_func(GtkEntryCompletion *completion, const gchar *key, GtkTreeIter *iter, gpointer data)
-{
-	GtkTreeModel *model = gtk_entry_completion_get_model(completion);
-
-	g_autofree gchar *label = nullptr;
-	g_autofree gchar *action_name = nullptr;
-	gtk_tree_model_get(model, iter, SAR_LABEL, &label, SAR_ACTION, &action_name, -1);
-
-	if (!label) return FALSE;
-
-	g_autofree gchar *normalized_label = g_utf8_normalize(label, -1, G_NORMALIZE_DEFAULT);
+	g_autofree gchar *normalized_label = g_utf8_normalize(action->label, -1, G_NORMALIZE_DEFAULT);
 	g_autofree gchar *normalized_key = g_utf8_normalize(key, -1, G_NORMALIZE_DEFAULT);
 	if (!normalized_label || !normalized_key) return FALSE;
 
 	g_autofree gchar *casefold_label = g_utf8_casefold(normalized_label, -1);
 	g_autofree gchar *casefold_key = g_utf8_casefold(normalized_key, -1);
 
-	if (!g_strstr_len(casefold_label, -1, casefold_key)) return FALSE;
+	return g_strstr_len(casefold_label, -1, casefold_key) != nullptr;
+}
 
+void command_selected_cb(GtkListBox *, GtkListBoxRow *row, gpointer data)
+{
 	auto *sar = static_cast<SarData *>(data);
-	if (!sar->match_found)
+	const auto *action_name = row
+	                              ? static_cast<const gchar *>(g_object_get_data(G_OBJECT(row), "action-name"))
+	                              : nullptr;
+
+	g_free(sar->action_name);
+	sar->action_name = g_strdup(action_name);
+}
+
+void command_activated_cb(GtkListBox *, GtkListBoxRow *row, gpointer data)
+{
+	auto *sar = static_cast<SarData *>(data);
+	const auto *action_name = static_cast<const gchar *>(g_object_get_data(G_OBJECT(row), "action-name"));
+
+	activate_action(sar, action_name);
+	g_idle_add(search_and_run_destroy_idle, sar);
+}
+
+void command_list_filter(SarData *sar, const gchar *key)
+{
+	while (GtkWidget *child = gtk_widget_get_first_child(sar->command_list))
 		{
-		g_free(sar->action_name);
-		sar->action_name = g_steal_pointer(&action_name);
-		sar->match_found = TRUE;
+		gtk_list_box_remove(GTK_LIST_BOX(sar->command_list), child);
 		}
 
-	return TRUE;
+	g_clear_pointer(&sar->action_name, g_free);
+	if (!key || key[0] == '\0')
+		{
+		gtk_popover_popdown(GTK_POPOVER(sar->popover));
+		return;
+		}
+
+	GtkListBoxRow *first_row = nullptr;
+	for (const SearchAndRunAction *action : sar->actions)
+		{
+		if (!action_matches(action, key)) continue;
+
+		GtkWidget *label = gtk_label_new(nullptr);
+		gtk_label_set_markup(GTK_LABEL(label), action->label);
+		gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+		gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
+		gtk_widget_set_hexpand(label, TRUE);
+		gtk_widget_set_margin_start(label, 6);
+		gtk_widget_set_margin_end(label, 6);
+		gtk_widget_set_margin_top(label, 4);
+		gtk_widget_set_margin_bottom(label, 4);
+
+		GtkWidget *row = gtk_list_box_row_new();
+		gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(row), label);
+		g_object_set_data_full(G_OBJECT(row), "action-name", g_strdup(action->action_name), g_free);
+		gtk_list_box_append(GTK_LIST_BOX(sar->command_list), row);
+		if (!first_row) first_row = GTK_LIST_BOX_ROW(row);
+		}
+
+	if (first_row)
+		{
+		gtk_scrolled_window_set_min_content_width(GTK_SCROLLED_WINDOW(sar->command_scroller),
+		                                          gtk_widget_get_width(sar->entry));
+		gtk_list_box_select_row(GTK_LIST_BOX(sar->command_list), first_row);
+		gtk_popover_popup(GTK_POPOVER(sar->popover));
+		}
+	else
+		{
+		gtk_popover_popdown(GTK_POPOVER(sar->popover));
+		}
+}
+
+void entry_changed_cb(GtkEditable *editable, gpointer data)
+{
+	command_list_filter(static_cast<SarData *>(data), gtk_editable_get_text(editable));
 }
 
 gboolean window_close_cb(GtkWidget *, gpointer data)
@@ -363,21 +406,9 @@ gboolean window_close_cb(GtkWidget *, gpointer data)
 
 GtkWidget *search_and_run_new(LayoutWindow *lw)
 {
-	auto *sar = g_new0(SarData, 1);
+	auto *sar = new SarData();
 	sar->lw = lw;
-
-	sar->command_store = gtk_list_store_new(SAR_COUNT, G_TYPE_STRING, G_TYPE_STRING);
-	command_store_populate(sar);
-
-	sar->completion = gtk_entry_completion_new();
-	gtk_entry_completion_set_model(sar->completion, GTK_TREE_MODEL(sar->command_store));
-	gtk_entry_completion_set_text_column(sar->completion, SAR_LABEL);
-	gtk_entry_completion_set_match_func(sar->completion, match_func, sar, nullptr);
-
-	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(sar->completion), renderer, TRUE);
-	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(sar->completion), renderer, "markup", SAR_LABEL, NULL);
-	g_signal_connect(sar->completion, "match-selected", G_CALLBACK(match_selected_cb), sar);
+	command_list_populate(sar);
 
 	sar->window = gtk_window_new();
 	DEBUG_NAME(sar->window);
@@ -391,13 +422,30 @@ GtkWidget *search_and_run_new(LayoutWindow *lw)
 	sar->entry = gtk_entry_new();
 	gtk_widget_set_tooltip_text(sar->entry, _("Search for commands and run them"));
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(sar->entry), GTK_ENTRY_ICON_PRIMARY, GQ_ICON_FIND);
-	gtk_entry_set_completion(GTK_ENTRY(sar->entry), sar->completion);
 	gtk_window_set_child(GTK_WINDOW(sar->window), sar->entry);
+
+	sar->command_list = gtk_list_box_new();
+	gtk_list_box_set_selection_mode(GTK_LIST_BOX(sar->command_list), GTK_SELECTION_BROWSE);
+	g_signal_connect(sar->command_list, "row-selected", G_CALLBACK(command_selected_cb), sar);
+	g_signal_connect(sar->command_list, "row-activated", G_CALLBACK(command_activated_cb), sar);
+
+	sar->command_scroller = gtk_scrolled_window_new();
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(sar->command_scroller), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(sar->command_scroller), 400);
+	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(sar->command_scroller), TRUE);
+	gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(sar->command_scroller), TRUE);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(sar->command_scroller), sar->command_list);
+
+	sar->popover = gtk_popover_new();
+	gtk_popover_set_autohide(GTK_POPOVER(sar->popover), FALSE);
+	gtk_popover_set_child(GTK_POPOVER(sar->popover), sar->command_scroller);
+	gtk_widget_set_parent(sar->popover, sar->entry);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(keypress_cb), sar);
 	gtk_widget_add_controller(sar->entry, controller);
 	g_signal_connect(sar->entry, "activate", G_CALLBACK(entry_activate_cb), sar);
+	g_signal_connect(sar->entry, "changed", G_CALLBACK(entry_changed_cb), sar);
 
 	gtk_widget_show(sar->entry);
 	gtk_widget_show(sar->window);
