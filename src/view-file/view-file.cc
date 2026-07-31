@@ -1142,58 +1142,94 @@ static void vf_marks_tooltip_cb(GtkGestureClick *gesture, gint, gdouble, gdouble
 	vf_marks_tooltip_open_dialog(widget, GPOINTER_TO_INT(user_data));
 }
 
-static void vf_file_filter_save_cb(GtkEntry *combo_entry, gpointer data)
+static void vf_file_filter_history_item_cb(GtkWidget *button, gpointer data)
+{
+	auto vf = static_cast<ViewFile *>(data);
+	const auto *text = static_cast<const gchar *>(g_object_get_data(G_OBJECT(button), "file-filter-text"));
+	if (!text) return;
+
+	gq_gtk_entry_set_text(GTK_ENTRY(vf->file_filter.entry), text);
+	gtk_editable_set_position(GTK_EDITABLE(vf->file_filter.entry), -1);
+	vf->file_filter.selected = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(button), "file-filter-index"));
+	vf->file_filter.last_selected = vf->file_filter.selected;
+	gtk_menu_button_set_active(GTK_MENU_BUTTON(vf->file_filter.history_button), FALSE);
+	vf_refresh(vf);
+}
+
+static void vf_file_filter_history_rebuild(ViewFile *vf)
+{
+	GtkWidget *list = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(scrolled), 400);
+	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), list);
+
+	gint index = 0;
+	const HistoryList *history = history_list_find_by_key("file_filter");
+	if (history)
+		{
+		for (const std::string &item : *history)
+			{
+			GtkWidget *button = gtk_button_new_with_label(item.c_str());
+			gtk_widget_set_halign(button, GTK_ALIGN_FILL);
+			gtk_widget_add_css_class(button, "flat");
+			g_object_set_data_full(G_OBJECT(button), "file-filter-text", g_strdup(item.c_str()), g_free);
+			g_object_set_data(G_OBJECT(button), "file-filter-index", GINT_TO_POINTER(index++));
+			g_signal_connect(button, "clicked", G_CALLBACK(vf_file_filter_history_item_cb), vf);
+			gtk_box_append(GTK_BOX(list), button);
+			}
+		}
+
+	GtkWidget *popover = gtk_popover_new();
+	gtk_popover_set_child(GTK_POPOVER(popover), scrolled);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(vf->file_filter.history_button), popover);
+	gtk_widget_set_sensitive(vf->file_filter.history_button, index > 0);
+}
+
+static void vf_file_filter_save_cb(GtkEntry *entry, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	const char *entry_text = gtk_editable_get_text(GTK_EDITABLE(combo_entry));
+	const char *entry_text = gtk_editable_get_text(GTK_EDITABLE(entry));
 
 	if (entry_text[0] != '\0')
 		{
-		bool text_found = false;
-		for (gint i = 0; !text_found && i < vf->file_filter.count; i++)
-			{
-			gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), i);
-
-			g_autofree gchar *index_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
-			text_found = (g_strcmp0(index_text, entry_text) == 0);
-			}
-
-		if (!text_found)
-			{
-			history_list_add_to_key("file_filter", entry_text, 10);
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), entry_text);
-			vf->file_filter.count++;
-			gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), vf->file_filter.count - 1);
-			}
+		history_list_add_to_key("file_filter", entry_text, 10);
+		vf_file_filter_history_rebuild(vf);
+		vf->file_filter.selected = 0;
+		vf->file_filter.last_selected = 0;
 		}
 	else if (vf->file_filter.last_selected >= 0)
 		{
-		gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), vf->file_filter.last_selected);
-		g_autofree gchar *remove_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
-		history_list_item_remove("file_filter", remove_text);
-		gtk_combo_box_text_remove(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), vf->file_filter.last_selected);
+		HistoryList *history = history_list_find_by_key("file_filter");
+		if (history && vf->file_filter.last_selected < static_cast<gint>(history->size()))
+			{
+			auto item = std::next(history->cbegin(), vf->file_filter.last_selected);
+			const std::string remove_text = *item;
+			history_list_item_remove("file_filter", remove_text.c_str());
+			vf_file_filter_history_rebuild(vf);
+			}
 
-		gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), -1);
-		vf->file_filter.last_selected = - 1;
-		gq_gtk_entry_set_text(combo_entry, "");
-		vf->file_filter.count--;
+		vf->file_filter.selected = -1;
+		vf->file_filter.last_selected = -1;
 		}
 
 	vf_refresh(vf);
 }
 
-static void vf_file_filter_cb(GtkWidget *, gpointer data)
+static void vf_file_filter_cb(GtkEditable *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
+	vf->file_filter.selected = -1;
 	vf_refresh(vf);
 }
 
 static gboolean vf_file_filter_press_cb(GtkWidget *widget, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
-	vf->file_filter.last_selected = gtk_combo_box_get_active(GTK_COMBO_BOX(vf->file_filter.combo));
+	vf->file_filter.last_selected = vf->file_filter.selected;
 
 	gtk_widget_grab_focus(widget);
 
@@ -1265,7 +1301,7 @@ static GtkWidget *vf_marks_filter_init(ViewFile *vf)
 
 void vf_file_filter_set(ViewFile *vf, gboolean enable)
 {
-	gtk_widget_set_visible(vf->file_filter.combo, enable);
+	gtk_widget_set_visible(vf->file_filter.control, enable);
 	gtk_widget_set_visible(vf->file_filter.frame, enable);
 
 	vf_refresh(vf);
@@ -1480,45 +1516,45 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 {
 	GtkWidget *frame = gtk_frame_new(nullptr);
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	GtkWidget *combo_entry;
 
-	vf->file_filter.combo = gtk_combo_box_text_new_with_entry();
-	combo_entry = gtk_combo_box_get_child(GTK_COMBO_BOX(vf->file_filter.combo));
-	if (!GTK_IS_ENTRY(combo_entry)) return frame;
+	vf->file_filter.control = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	vf->file_filter.entry = gtk_entry_new();
+	vf->file_filter.selected = -1;
+	vf->file_filter.last_selected = -1;
+	gtk_widget_set_tooltip_text(vf->file_filter.control, _("Use regular expressions"));
+	gtk_box_append(GTK_BOX(vf->file_filter.control), vf->file_filter.entry);
 
-	gtk_widget_show(combo_entry);
-	gtk_widget_show(vf->file_filter.combo);
-	gtk_widget_set_tooltip_text(vf->file_filter.combo, _("Use regular expressions"));
-
-	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(combo_entry), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
-	gtk_entry_set_icon_tooltip_text (GTK_ENTRY(combo_entry), GTK_ENTRY_ICON_SECONDARY, _("Clear"));
-	g_signal_connect(GTK_ENTRY(combo_entry), "icon-press",
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(vf->file_filter.entry), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
+	gtk_entry_set_icon_tooltip_text(GTK_ENTRY(vf->file_filter.entry), GTK_ENTRY_ICON_SECONDARY, _("Clear"));
+	g_signal_connect(GTK_ENTRY(vf->file_filter.entry), "icon-press",
 	                 G_CALLBACK(file_filter_clear_cb), nullptr);
 
-	const HistoryList *history_list = history_list_find_by_key("file_filter");
-	if (history_list)
-		{
-		vf->file_filter.count = history_list->size();
-		for (const std::string &item : *history_list)
-			{
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo), item.c_str());
-			}
-		}
-	gtk_combo_box_set_active(GTK_COMBO_BOX(vf->file_filter.combo), 0);
+	vf->file_filter.history_button = gtk_menu_button_new();
+	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(vf->file_filter.history_button), GQ_ICON_PAN_DOWN);
+	gtk_widget_set_tooltip_text(vf->file_filter.history_button, _("Show filter history"));
+	gtk_widget_set_can_focus(vf->file_filter.history_button, FALSE);
+	gtk_box_append(GTK_BOX(vf->file_filter.control), vf->file_filter.history_button);
+	vf_file_filter_history_rebuild(vf);
 
-	g_signal_connect(G_OBJECT(combo_entry), "activate",
+	const HistoryList *history_list = history_list_find_by_key("file_filter");
+	if (history_list && !history_list->empty())
+		{
+		gq_gtk_entry_set_text(GTK_ENTRY(vf->file_filter.entry), history_list->front().c_str());
+		vf->file_filter.selected = 0;
+		}
+
+	g_signal_connect(G_OBJECT(vf->file_filter.entry), "activate",
 		G_CALLBACK(vf_file_filter_save_cb), vf);
 
-	g_signal_connect(G_OBJECT(vf->file_filter.combo), "changed",
+	g_signal_connect(G_OBJECT(vf->file_filter.entry), "changed",
 		G_CALLBACK(vf_file_filter_cb), vf);
 
 	GtkGesture *filter_gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(filter_gesture), 0);
 	g_signal_connect(filter_gesture, "pressed", G_CALLBACK(vf_file_filter_gesture_press_cb), vf);
-	gtk_widget_add_controller(combo_entry, GTK_EVENT_CONTROLLER(filter_gesture));
+	gtk_widget_add_controller(vf->file_filter.entry, GTK_EVENT_CONTROLLER(filter_gesture));
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox), vf->file_filter.combo, FALSE, FALSE, 0);
-	gtk_widget_show(vf->file_filter.combo);
+	gq_gtk_box_pack_start(GTK_BOX(hbox), vf->file_filter.control, FALSE, FALSE, 0);
 	gq_gtk_container_add(frame, hbox);
 	gtk_widget_show(hbox);
 
@@ -1921,12 +1957,12 @@ guint vf_marks_get_filter(ViewFile *vf)
 
 GRegex *vf_file_filter_get_filter(ViewFile *vf)
 {
-	if (!gtk_widget_get_visible(vf->file_filter.combo))
+	if (!gtk_widget_get_visible(vf->file_filter.control))
 		{
 		return g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
 		}
 
-	g_autofree gchar *file_filter_text = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(vf->file_filter.combo));
+	const gchar *file_filter_text = gtk_editable_get_text(GTK_EDITABLE(vf->file_filter.entry));
 	if (file_filter_text[0] == '\0')
 		{
 		return g_regex_new("", static_cast<GRegexCompileFlags>(0), static_cast<GRegexMatchFlags>(0), nullptr);
@@ -1948,7 +1984,7 @@ guint vf_class_get_filter(ViewFile *vf)
 	guint ret = 0;
 	gint i;
 
-	if (!gtk_widget_get_visible(vf->file_filter.combo))
+	if (!gtk_widget_get_visible(vf->file_filter.control))
 		{
 		return G_MAXUINT;
 		}
