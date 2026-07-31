@@ -879,10 +879,12 @@ static void stereo_mode_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer d
 		}
 }
 
-static void add_stereo_mode_menu(GtkWidget *table, gint column, gint row, const gchar *text,
-			     gint option, gint *option_c, gboolean add_fixed)
+static void add_stereo_mode_menu(GtkWidget *parent_box, const gchar *text,
+                                 gint option, gint *option_c, bool add_fixed)
 {
-	pref_table_label(table, column, row, text, GTK_ALIGN_START);
+	GtkWidget *table = pref_table_new(parent_box, 2, 1, FALSE, FALSE);
+
+	pref_table_label(table, 0, 0, text, GTK_ALIGN_START);
 
 	static const char *strings[] = {
 	    _("Single image"),
@@ -939,7 +941,31 @@ static void add_stereo_mode_menu(GtkWidget *table, gint column, gint row, const 
 	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
 	                 G_CALLBACK(stereo_mode_menu_cb), option_c);
 
-	gtk_grid_attach(GTK_GRID(table), drop_down, column + 1, row, 1, 1);
+	gtk_grid_attach(GTK_GRID(table), drop_down, 1, 0, 1, 1);
+}
+
+static void add_stereo_mode_options(GtkWidget *parent_box, gint mode,
+                                    ConfOptions::Stereo::ModeOptions &mode_options)
+{
+	GtkWidget *table = pref_table_new(parent_box, 2, 2, TRUE, FALSE);
+	GtkWidget *box;
+
+	box = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
+	pref_checkbox_new_int(box, _("Mirror left image"),
+	                      mode & PR_STEREO_MIRROR_LEFT, &mode_options.mirror_left);
+	box = pref_table_box(table, 1, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
+	pref_checkbox_new_int(box, _("Flip left image"),
+	                      mode & PR_STEREO_FLIP_LEFT, &mode_options.flip_left);
+	box = pref_table_box(table, 0, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
+	pref_checkbox_new_int(box, _("Mirror right image"),
+	                      mode & PR_STEREO_MIRROR_RIGHT, &mode_options.mirror_right);
+	box = pref_table_box(table, 1, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
+	pref_checkbox_new_int(box, _("Flip right image"),
+	                      mode & PR_STEREO_FLIP_RIGHT, &mode_options.flip_right);
+	pref_checkbox_new_int(parent_box, _("Swap left and right images"),
+	                      mode & PR_STEREO_SWAP, &mode_options.swap);
+	pref_checkbox_new_int(parent_box, _("Disable stereo mode on single image source"),
+	                      mode & PR_STEREO_TEMP_DISABLE, &mode_options.temp_disable);
 }
 
 static void video_menu_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
@@ -3505,65 +3531,27 @@ static void config_tab_advanced(GtkWidget *notebook, ConfOptions *c_options)
 /* stereo tab */
 static void config_tab_stereo(GtkWidget *notebook, ConfOptions *c_options)
 {
-	GtkWidget *vbox;
 	GtkWidget *group;
-	GtkWidget *group2;
-	GtkWidget *table;
-	GtkWidget *box;
-	GtkWidget *box2;
-	GtkWidget *fs_button;
-	vbox = scrolled_notebook_page(notebook, _("Stereo"));
+
+	GtkWidget *vbox = scrolled_notebook_page(notebook, _("Stereo"));
 
 	group = pref_group_new(vbox, FALSE, _("Windowed stereo mode"), GTK_ORIENTATION_VERTICAL);
 
-	table = pref_table_new(group, 2, 1, FALSE, FALSE);
-	add_stereo_mode_menu(table, 0, 0, _("Windowed stereo mode"), options->stereo.mode, &c_options->stereo.mode, FALSE);
-
-	table = pref_table_new(group, 2, 2, TRUE, FALSE);
-	box = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
-	pref_checkbox_new_int(box, _("Mirror left image"),
-			      options->stereo.mode & PR_STEREO_MIRROR_LEFT, &c_options->stereo.tmp.mirror_left);
-	box = pref_table_box(table, 1, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
-	pref_checkbox_new_int(box, _("Flip left image"),
-			      options->stereo.mode & PR_STEREO_FLIP_LEFT, &c_options->stereo.tmp.flip_left);
-	box = pref_table_box(table, 0, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
-	pref_checkbox_new_int(box, _("Mirror right image"),
-			      options->stereo.mode & PR_STEREO_MIRROR_RIGHT, &c_options->stereo.tmp.mirror_right);
-	box = pref_table_box(table, 1, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
-	pref_checkbox_new_int(box, _("Flip right image"),
-			      options->stereo.mode & PR_STEREO_FLIP_RIGHT, &c_options->stereo.tmp.flip_right);
-	pref_checkbox_new_int(group, _("Swap left and right images"),
-			      options->stereo.mode & PR_STEREO_SWAP, &c_options->stereo.tmp.swap);
-	pref_checkbox_new_int(group, _("Disable stereo mode on single image source"),
-			      options->stereo.mode & PR_STEREO_TEMP_DISABLE, &c_options->stereo.tmp.temp_disable);
+	add_stereo_mode_menu(group, _("Windowed stereo mode"), options->stereo.mode, &c_options->stereo.mode, false);
+	add_stereo_mode_options(group, options->stereo.mode, c_options->stereo.tmp);
 
 	group = pref_group_new(vbox, FALSE, _("Fullscreen stereo mode"), GTK_ORIENTATION_VERTICAL);
-	fs_button = pref_checkbox_new_int(group, _("Use different settings for fullscreen"),
-			      options->stereo.enable_fsmode, &c_options->stereo.enable_fsmode);
-	box2 = pref_box_new(group, FALSE, GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
-	pref_checkbox_link_sensitivity(fs_button, box2);
-	table = pref_table_new(box2, 2, 1, FALSE, FALSE);
-	add_stereo_mode_menu(table, 0, 0, _("Fullscreen stereo mode"), options->stereo.fsmode, &c_options->stereo.fsmode, TRUE);
-	table = pref_table_new(box2, 2, 2, TRUE, FALSE);
-	box = pref_table_box(table, 0, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
-	pref_checkbox_new_int(box, _("Mirror left image"),
-	                      options->stereo.fsmode & PR_STEREO_MIRROR_LEFT, &c_options->stereo.fstmp.mirror_left);
-	box = pref_table_box(table, 1, 0, GTK_ORIENTATION_HORIZONTAL, nullptr);
-	pref_checkbox_new_int(box, _("Flip left image"),
-	                      options->stereo.fsmode & PR_STEREO_FLIP_LEFT, &c_options->stereo.fstmp.flip_left);
-	box = pref_table_box(table, 0, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
-	pref_checkbox_new_int(box, _("Mirror right image"),
-	                      options->stereo.fsmode & PR_STEREO_MIRROR_RIGHT, &c_options->stereo.fstmp.mirror_right);
-	box = pref_table_box(table, 1, 1, GTK_ORIENTATION_HORIZONTAL, nullptr);
-	pref_checkbox_new_int(box, _("Flip right image"),
-	                      options->stereo.fsmode & PR_STEREO_FLIP_RIGHT, &c_options->stereo.fstmp.flip_right);
-	pref_checkbox_new_int(box2, _("Swap left and right images"),
-	                      options->stereo.fsmode & PR_STEREO_SWAP, &c_options->stereo.fstmp.swap);
-	pref_checkbox_new_int(box2, _("Disable stereo mode on single image source"),
-	                      options->stereo.fsmode & PR_STEREO_TEMP_DISABLE, &c_options->stereo.fstmp.temp_disable);
 
-	group2 = pref_group_new(box2, FALSE, _("Fixed position"), GTK_ORIENTATION_VERTICAL);
-	table = pref_table_new(group2, 5, 3, FALSE, FALSE);
+	GtkWidget *fs_button = pref_checkbox_new_int(group, _("Use different settings for fullscreen"),
+	                                             options->stereo.enable_fsmode, &c_options->stereo.enable_fsmode);
+	GtkWidget *box = pref_box_new(group, FALSE, GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
+	pref_checkbox_link_sensitivity(fs_button, box);
+
+	add_stereo_mode_menu(box, _("Fullscreen stereo mode"), options->stereo.fsmode, &c_options->stereo.fsmode, true);
+	add_stereo_mode_options(box, options->stereo.fsmode, c_options->stereo.fstmp);
+
+	GtkWidget *group2 = pref_group_new(box, FALSE, _("Fixed position"), GTK_ORIENTATION_VERTICAL);
+	GtkWidget *table = pref_table_new(group2, 5, 3, FALSE, FALSE);
 	pref_table_spin_new_int(table, 0, 0, _("Width"), nullptr, 1, 5000, 1,
 	                        options->stereo.fixed_size.width, &c_options->stereo.fixed_size.width);
 	pref_table_spin_new_int(table, 3, 0, _("Height"), nullptr, 1, 5000, 1,
