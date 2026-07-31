@@ -21,9 +21,11 @@
 
 #include "bar-keywords.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdio>
 #include <string>
+#include <vector>
 
 #include <gdk/gdk.h>
 #include <gio/gio.h>
@@ -48,7 +50,8 @@
 namespace
 {
 
-GtkListStore *keyword_store = nullptr;
+std::vector<std::string> keyword_store;
+gboolean keyword_store_loaded = FALSE;
 
 void bar_pane_keywords_changed(GtkTextBuffer *buffer, gpointer data);
 
@@ -134,6 +137,10 @@ struct PaneKeywordsData
 	GList *expanded_rows;
 
 	GtkWidget *autocomplete;
+	GtkWidget *autocomplete_popover;
+	GtkWidget *autocomplete_list;
+	GtkWidget *autocomplete_scroller;
+	gboolean autocomplete_changing;
 };
 
 struct ConfDialogData
@@ -1180,13 +1187,148 @@ void bar_pane_keywords_destroy(gpointer data)
 	g_free(pkd);
 }
 
-void autocomplete_changed_cb(GtkEditable *editable, gpointer)
+gboolean autocomplete_match(const std::string &keyword, const gchar *text)
 {
-	GtkEntryCompletion *completion = gtk_entry_get_completion(GTK_ENTRY(editable));
-	const gboolean have_text = gtk_editable_get_text(editable)[0] != '\0';
+	g_autofree gchar *normalized_keyword = g_utf8_normalize(keyword.c_str(), -1, G_NORMALIZE_DEFAULT);
+	g_autofree gchar *normalized_text = g_utf8_normalize(text, -1, G_NORMALIZE_DEFAULT);
+	if (!normalized_keyword || !normalized_text) return FALSE;
 
-	gtk_entry_completion_set_popup_completion(completion, have_text);
-	if (have_text) gtk_entry_completion_complete(completion);
+	g_autofree gchar *casefold_keyword = g_utf8_casefold(normalized_keyword, -1);
+	g_autofree gchar *casefold_text = g_utf8_casefold(normalized_text, -1);
+
+	return g_str_has_prefix(casefold_keyword, casefold_text);
+}
+
+void autocomplete_selected_cb(GtkListBox *, GtkListBoxRow *row, gpointer data)
+{
+	auto pkd = static_cast<PaneKeywordsData *>(data);
+	const auto *keyword = static_cast<const gchar *>(g_object_get_data(G_OBJECT(row), "keyword"));
+	if (!keyword) return;
+
+	pkd->autocomplete_changing = TRUE;
+	gq_gtk_entry_set_text(GTK_ENTRY(pkd->autocomplete), keyword);
+	gtk_editable_set_position(GTK_EDITABLE(pkd->autocomplete), -1);
+	pkd->autocomplete_changing = FALSE;
+	gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
+}
+
+void autocomplete_row_activated_cb(GtkListBox *list, GtkListBoxRow *row, gpointer data)
+{
+	autocomplete_selected_cb(list, row, data);
+	autocomplete_activate_cb(nullptr, data);
+}
+
+void autocomplete_changed_cb(GtkEditable *editable, gpointer data)
+{
+	auto pkd = static_cast<PaneKeywordsData *>(data);
+	if (pkd->autocomplete_changing) return;
+
+	while (GtkWidget *child = gtk_widget_get_first_child(pkd->autocomplete_list))
+		{
+		gtk_list_box_remove(GTK_LIST_BOX(pkd->autocomplete_list), child);
+		}
+
+	const gchar *text = gtk_editable_get_text(editable);
+	if (!text[0])
+		{
+		gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
+		return;
+		}
+
+	GtkListBoxRow *first_row = nullptr;
+	for (const std::string &keyword : keyword_store)
+		{
+		if (!autocomplete_match(keyword, text)) continue;
+
+		GtkWidget *label = gtk_label_new(keyword.c_str());
+		gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+		gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
+		gtk_widget_set_hexpand(label, TRUE);
+		gtk_widget_set_margin_start(label, 6);
+		gtk_widget_set_margin_end(label, 6);
+		gtk_widget_set_margin_top(label, 4);
+		gtk_widget_set_margin_bottom(label, 4);
+
+		GtkWidget *row = gtk_list_box_row_new();
+		gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(row), label);
+		g_object_set_data_full(G_OBJECT(row), "keyword", g_strdup(keyword.c_str()), g_free);
+		gtk_list_box_append(GTK_LIST_BOX(pkd->autocomplete_list), row);
+		if (!first_row) first_row = GTK_LIST_BOX_ROW(row);
+		}
+
+	if (!first_row)
+		{
+		gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
+		return;
+		}
+
+	gtk_scrolled_window_set_min_content_width(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller),
+	                                          gtk_widget_get_width(pkd->autocomplete));
+	gtk_list_box_select_row(GTK_LIST_BOX(pkd->autocomplete_list), first_row);
+	gtk_popover_popup(GTK_POPOVER(pkd->autocomplete_popover));
+}
+
+gboolean autocomplete_keypress_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType, gpointer data)
+{
+	auto pkd = static_cast<PaneKeywordsData *>(data);
+
+	if (keyval == GDK_KEY_Escape)
+		{
+		gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
+		return TRUE;
+		}
+
+	if (keyval == GDK_KEY_Down || keyval == GDK_KEY_Up)
+		{
+		GtkListBoxRow *row = gtk_list_box_get_selected_row(GTK_LIST_BOX(pkd->autocomplete_list));
+		gint index = row ? gtk_list_box_row_get_index(row) : (keyval == GDK_KEY_Down ? -1 : 1);
+		index += keyval == GDK_KEY_Down ? 1 : -1;
+		row = gtk_list_box_get_row_at_index(GTK_LIST_BOX(pkd->autocomplete_list), index);
+		if (row)
+			{
+			gtk_list_box_select_row(GTK_LIST_BOX(pkd->autocomplete_list), row);
+
+			graphene_rect_t bounds;
+			if (gtk_widget_compute_bounds(GTK_WIDGET(row), pkd->autocomplete_list, &bounds))
+				{
+				GtkAdjustment *adjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller));
+				const gdouble value = gtk_adjustment_get_value(adjustment);
+				const gdouble page_size = gtk_adjustment_get_page_size(adjustment);
+				const gdouble row_bottom = bounds.origin.y + bounds.size.height;
+				if (bounds.origin.y < value)
+					{
+					gtk_adjustment_set_value(adjustment, bounds.origin.y);
+					}
+				else if (row_bottom > value + page_size)
+					{
+					gtk_adjustment_set_value(adjustment, row_bottom - page_size);
+					}
+				}
+			}
+		return TRUE;
+		}
+
+	if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
+		{
+		GtkListBoxRow *row = gtk_list_box_get_selected_row(GTK_LIST_BOX(pkd->autocomplete_list));
+		if (gtk_widget_get_visible(pkd->autocomplete_popover) && row)
+			{
+			autocomplete_selected_cb(GTK_LIST_BOX(pkd->autocomplete_list), row, pkd);
+			}
+		return FALSE;
+		}
+
+	if (keyval == GDK_KEY_Tab || keyval == GDK_KEY_ISO_Left_Tab)
+		{
+		GtkListBoxRow *row = gtk_list_box_get_selected_row(GTK_LIST_BOX(pkd->autocomplete_list));
+		if (row)
+			{
+			autocomplete_selected_cb(GTK_LIST_BOX(pkd->autocomplete_list), row, pkd);
+			return TRUE;
+			}
+		}
+
+	return FALSE;
 }
 
 
@@ -1200,7 +1342,6 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *renderer;
 	GtkTreeIter iter;
-	GtkEntryCompletion *completion;
 
 	pkd = g_new0(PaneKeywordsData, 1);
 
@@ -1263,19 +1404,29 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	g_autofree gchar *path = g_build_filename(get_rc_dir(), "keywords", NULL);
 	autocomplete_keywords_list_load(path);
 
-	completion = gtk_entry_completion_new();
-	gtk_entry_completion_set_inline_completion(completion, TRUE);
-	gtk_entry_completion_set_inline_selection(completion, TRUE);
-	gtk_entry_completion_set_popup_completion(completion, FALSE);
-	gtk_entry_completion_set_model(completion, GTK_TREE_MODEL(keyword_store));
-	gtk_entry_completion_set_text_column(completion, 0);
-	gtk_entry_set_completion(GTK_ENTRY(pkd->autocomplete), completion);
-	g_object_unref(completion);
+	pkd->autocomplete_list = gtk_list_box_new();
+	gtk_list_box_set_selection_mode(GTK_LIST_BOX(pkd->autocomplete_list), GTK_SELECTION_BROWSE);
+	g_signal_connect(pkd->autocomplete_list, "row-activated", G_CALLBACK(autocomplete_row_activated_cb), pkd);
+
+	pkd->autocomplete_scroller = gtk_scrolled_window_new();
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller), 300);
+	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller), TRUE);
+	gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller), TRUE);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller), pkd->autocomplete_list);
+
+	pkd->autocomplete_popover = gtk_popover_new();
+	gtk_popover_set_autohide(GTK_POPOVER(pkd->autocomplete_popover), FALSE);
+	gtk_popover_set_child(GTK_POPOVER(pkd->autocomplete_popover), pkd->autocomplete_scroller);
+	gtk_widget_set_parent(pkd->autocomplete_popover, pkd->autocomplete);
 
 	g_signal_connect(G_OBJECT(pkd->autocomplete), "activate",
 			 G_CALLBACK(autocomplete_activate_cb), pkd);
 	g_signal_connect(G_OBJECT(pkd->autocomplete), "changed",
-			 G_CALLBACK(autocomplete_changed_cb), nullptr);
+			 G_CALLBACK(autocomplete_changed_cb), pkd);
+	GtkEventController *autocomplete_controller = gtk_event_controller_key_new();
+	g_signal_connect(autocomplete_controller, "key-pressed", G_CALLBACK(autocomplete_keypress_cb), pkd);
+	gtk_widget_add_controller(pkd->autocomplete, autocomplete_controller);
 
 	GtkTreeStore *keyword_tree = keyword_tree_get_or_new();
 	if (!gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_tree), &iter))
@@ -1369,11 +1520,7 @@ gboolean autocomplete_activate_cb(GtkWidget *, gpointer data)
 	auto pkd = static_cast<PaneKeywordsData *>(data);
 	GtkTextBuffer *buffer;
 	GtkTextIter iter;
-	GtkTreeIter iter_t;
 	gchar *kw_split;
-	gboolean valid;
-	gboolean found = FALSE;
-	gchar *string;
 
 	g_autofree gchar *entry_text = g_strdup(gtk_editable_get_text(GTK_EDITABLE(pkd->autocomplete)));
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pkd->keyword_view));
@@ -1394,50 +1541,26 @@ gboolean autocomplete_activate_cb(GtkWidget *, gpointer data)
 
 	gq_gtk_entry_set_text(GTK_ENTRY(pkd->autocomplete), "");
 
-	valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_store), &iter_t);
-	while (valid)
+	if (entry_text[0] != '\0' &&
+	    std::find(keyword_store.begin(), keyword_store.end(), entry_text) == keyword_store.end())
 		{
-		gtk_tree_model_get (GTK_TREE_MODEL(keyword_store), &iter_t, 0, &string, -1);
-		if (g_strcmp0(entry_text, string) == 0)
+		keyword_store.emplace_back(entry_text);
+		std::sort(keyword_store.begin(), keyword_store.end(), [](const std::string &a, const std::string &b)
 			{
-			found = TRUE;
-			break;
-			}
-		valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(keyword_store), &iter_t);
-		}
-
-	if (!found)
-		{
-		gtk_list_store_append (keyword_store, &iter_t);
-		gtk_list_store_set(keyword_store, &iter_t, 0, entry_text, -1);
+			return g_utf8_collate(a.c_str(), b.c_str()) < 0;
+			});
 		}
 
 	return FALSE;
-}
-
-gint autocomplete_sort_iter_compare_func (GtkTreeModel *model,
-									GtkTreeIter *a,
-									GtkTreeIter *b,
-									gpointer)
-{
-	return gq_gtk_tree_iter_utf8_collate(model, a, b, 0);
 }
 
 void autocomplete_keywords_list_load(const gchar *path)
 {
 	gchar s_buf[1024];
 	gint len;
-	GtkTreeIter iter;
-	GtkTreeSortable *sortable;
 
-	if (keyword_store) return;
-	keyword_store = gtk_list_store_new(1, G_TYPE_STRING);
-
-	sortable = GTK_TREE_SORTABLE(keyword_store);
-	gtk_tree_sortable_set_sort_func(sortable, 0, autocomplete_sort_iter_compare_func,
-												GINT_TO_POINTER(0), nullptr);
-
-	gtk_tree_sortable_set_sort_column_id(sortable, 0, GTK_SORT_ASCENDING);
+	if (keyword_store_loaded) return;
+	keyword_store_loaded = TRUE;
 
 	g_autofree gchar *pathl = path_from_utf8(path);
 	g_autoptr(FILE) f = fopen(pathl, "r");
@@ -1465,9 +1588,13 @@ void autocomplete_keywords_list_load(const gchar *path)
 			{
 			s_buf[len-1] = 0;
 			}
-		gtk_list_store_append (keyword_store, &iter);
-		gtk_list_store_set(keyword_store, &iter, 0, g_strdup(s_buf), -1);
+		keyword_store.emplace_back(s_buf);
 		}
+
+	std::sort(keyword_store.begin(), keyword_store.end(), [](const std::string &a, const std::string &b)
+		{
+		return g_utf8_collate(a.c_str(), b.c_str()) < 0;
+		});
 }
 
 gboolean autocomplete_keywords_list_save(const gchar *path)
@@ -1476,16 +1603,10 @@ gboolean autocomplete_keywords_list_save(const gchar *path)
 
 	g_autoptr(GString) gstring = g_string_new("#Keywords list\n");
 
-	const auto keyword_save = [](GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
+	for (const std::string &keyword : keyword_store)
 	{
-		g_autofree gchar *string = nullptr;
-		gtk_tree_model_get(model, iter, 0, &string, -1);
-
-		g_string_append_printf(static_cast<GString *>(data), "%s\n", string);
-
-		return FALSE;
-	};
-	gtk_tree_model_foreach(GTK_TREE_MODEL(keyword_store), keyword_save, gstring);
+		g_string_append_printf(gstring, "%s\n", keyword.c_str());
+	}
 
 	g_string_append(gstring, "#end\n");
 
@@ -1597,20 +1718,10 @@ GList *keyword_list_pull(GtkWidget *text_widget)
 GList *keyword_list_get()
 {
 	GList *ret_list = nullptr;
-	gchar *string;
-	GtkTreeIter iter;
-	gboolean valid;
 
-	if (keyword_store)
+	for (const std::string &keyword : keyword_store)
 		{
-		valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(keyword_store), &iter);
-
-		while (valid)
-			{
-			gtk_tree_model_get(GTK_TREE_MODEL(keyword_store), &iter, 0, &string, -1);
-			ret_list = g_list_append(ret_list, string);
-			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(keyword_store), &iter);
-			}
+		ret_list = g_list_append(ret_list, g_strdup(keyword.c_str()));
 		}
 
 	return ret_list;
@@ -1618,26 +1729,22 @@ GList *keyword_list_get()
 
 void keyword_list_set(GList *keyword_list)
 {
-	GtkTreeIter iter;
-
 	if (!keyword_list) return;
 
-	if (keyword_store)
-		{
-		gtk_list_store_clear(keyword_store);
-		}
-	else
-		{
-		keyword_store = gtk_list_store_new(1, G_TYPE_STRING);
-		}
+	keyword_store.clear();
+	keyword_store_loaded = TRUE;
 
 	while (keyword_list)
 		{
-		gtk_list_store_append(keyword_store, &iter);
-		gtk_list_store_set(keyword_store, &iter, 0, keyword_list->data, -1);
+		keyword_store.emplace_back(static_cast<const gchar *>(keyword_list->data));
 
 		keyword_list = keyword_list->next;
 		}
+
+	std::sort(keyword_store.begin(), keyword_store.end(), [](const std::string &a, const std::string &b)
+		{
+		return g_utf8_collate(a.c_str(), b.c_str()) < 0;
+		});
 }
 
 gboolean bar_keywords_autocomplete_focus(LayoutWindow *lw)
