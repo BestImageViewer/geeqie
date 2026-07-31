@@ -811,44 +811,36 @@ static void gqv_cell_renderer_icon_snapshot(GtkCellRenderer *cell,
 			{
 			for (i = 0; i < cellicon->num_marks; i++)
 				{
-  				state = static_cast<GtkStateFlags>(state & ~GTK_STATE_FLAG_CHECKED);
+				const gdouble mark_x = pix_rect.x + (i * TOGGLE_SPACING) + ((TOGGLE_WIDTH - TOGGLE_SPACING) / 2.0);
+				const gdouble mark_y = pix_rect.y;
+				const gboolean checked = cellicon->marks & (1 << i);
 
-				if ((cellicon->marks & (1 << i)))
-					state = static_cast<GtkStateFlags>(state | GTK_STATE_FLAG_CHECKED);
 				cairo_save (cr);
 
 				cairo_rectangle(cr,
-						pix_rect.x + (i * TOGGLE_SPACING) + ((TOGGLE_WIDTH - TOGGLE_SPACING) / 2.0),
-						pix_rect.y,
+						mark_x,
+						mark_y,
 						TOGGLE_WIDTH, TOGGLE_WIDTH);
 				cairo_clip (cr);
 
-				gtk_style_context_save(context);
-				gtk_style_context_set_state(context, state);
+				/* GtkTreeView's style context does not reliably provide a
+				 * transparent check in GTK4. Draw it explicitly so selection
+				 * and focus styling cannot fill the mark box. */
+				cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+				cairo_set_line_width(cr, 1.0);
+				cairo_rectangle(cr, mark_x + 0.5, mark_y + 0.5,
+				                TOGGLE_WIDTH - 1.0, TOGGLE_WIDTH - 1.0);
+				cairo_stroke(cr);
 
-				gtk_style_context_add_class(context, "check");
-
-				gtk_style_context_add_class(context, "marks");
-
-				if (state & GTK_STATE_FLAG_CHECKED)
+				if (checked)
 					{
-					gtk_render_check(context, cr,
-						pix_rect.x + (i * TOGGLE_SPACING) + ((TOGGLE_WIDTH - TOGGLE_SPACING) / 2.0),
-						pix_rect.y,
-						TOGGLE_WIDTH, TOGGLE_WIDTH);
+					cairo_set_line_width(cr, 2.0);
+					cairo_move_to(cr, mark_x + 3.0, mark_y + 6.5);
+					cairo_line_to(cr, mark_x + 5.5, mark_y + 9.0);
+					cairo_line_to(cr, mark_x + 10.0, mark_y + 3.5);
+					cairo_stroke(cr);
 					}
-				gtk_render_frame(context, cr,
-					 pix_rect.x + (i * TOGGLE_SPACING) + ((TOGGLE_WIDTH - TOGGLE_SPACING) / 2.0),
-					 pix_rect.y,
-					 TOGGLE_WIDTH, TOGGLE_WIDTH);
 
-				if (cellicon->focused && gtk_widget_has_focus(widget))
-					{
-					gtk_render_focus(context, cr,
-						pix_rect.x + (i * TOGGLE_SPACING) + ((TOGGLE_WIDTH - TOGGLE_SPACING) / 2.0),
-						pix_rect.y, TOGGLE_WIDTH, TOGGLE_WIDTH);
-					}
-				gtk_style_context_restore(context);
 				cairo_restore(cr);
 				}
 			}

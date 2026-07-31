@@ -1022,6 +1022,16 @@ static void open_recent_dialog_data_free(OpenRecentDialogData *dialog_data)
 {
 	if (!dialog_data) return;
 
+	/* Destroying the list clears its selection and can emit row-selected after
+	 * the dialog buttons have already been destroyed. Do not let that callback
+	 * use stale widget pointers while the dialog is being torn down. */
+	if (dialog_data->list)
+		{
+		g_signal_handlers_disconnect_by_data(dialog_data->list, dialog_data);
+		}
+	dialog_data->list = nullptr;
+	dialog_data->open_button = nullptr;
+
 	generic_dialog_close(dialog_data->gd);
 	g_free(dialog_data);
 }

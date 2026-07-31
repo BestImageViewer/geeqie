@@ -2185,6 +2185,29 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 	             nullptr);
 	}
 
+static void collection_table_mark_toggled_cb(GtkCellRenderer *cell, gchar *path_str, gpointer data)
+{
+	g_autoptr(GtkTreePath) path = gtk_tree_path_new_from_string(path_str);
+	if (!path) return;
+
+	auto *ct = static_cast<CollectTable *>(data);
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
+	GtkTreeIter row;
+	if (!gtk_tree_model_get_iter(model, &row, path)) return;
+
+	GList *list;
+	gtk_tree_model_get(model, &row, CTABLE_COLUMN_POINTER, &list, -1);
+
+	auto column = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(cell), "column_number"));
+	auto *info = static_cast<CollectInfo *>(g_list_nth_data(list, column));
+	if (!info || !info->fd) return;
+
+	guint toggled_mark;
+	g_object_get(cell, "toggled_mark", &toggled_mark, NULL);
+
+	file_data_set_mark(info->fd, toggled_mark, !file_data_get_mark(info->fd, toggled_mark));
+}
+
 static void collection_table_append_column(CollectTable *ct, gint n)
 {
 	ColumnData *cd;
@@ -2207,6 +2230,7 @@ static void collection_table_append_column(CollectTable *ct, gint n)
 	             NULL);
 
 	g_object_set_data(G_OBJECT(column), "column_number", GINT_TO_POINTER(n));
+	g_object_set_data(G_OBJECT(renderer), "column_number", GINT_TO_POINTER(n));
 
 	cd = g_new0(ColumnData, 1);
 	cd->ct = ct;
@@ -2214,6 +2238,8 @@ static void collection_table_append_column(CollectTable *ct, gint n)
 	gtk_tree_view_column_set_cell_data_func(column, renderer, collection_table_cell_data_cb, cd, g_free);
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(ct->listview), column);
+
+	g_signal_connect(G_OBJECT(renderer), "toggled", G_CALLBACK(collection_table_mark_toggled_cb), ct);
 }
 
 /*
