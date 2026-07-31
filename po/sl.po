@@ -9543,9 +9543,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "Najboljše"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Uporabi xvpics miniature, ko so najdene (samo za branje)"
-
 #~ msgid "Dithering method:"
 #~ msgstr "Način zameglevanja"
 

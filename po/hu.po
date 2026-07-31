@@ -10634,10 +10634,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "Kezdet #"
 
-# src/preferences.cc:613
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Használja az \"xvpics\" indexképeit (csak olvasás)"
-
 # src/preferences.cc:693
 #~ msgid "Dithering method:"
 #~ msgstr "Dithering módszer:"

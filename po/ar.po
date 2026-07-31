@@ -9581,9 +9581,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "رقم البداية"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "استخدم النماذج المصغّرة من برنامج xvpics إن وجد (قراءة فقط)"
-
 #~ msgid "Dithering method:"
 #~ msgstr "نمط تربيك الصورة:"
 

@@ -9584,9 +9584,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "Khởi động"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Dùng ảnh mẫu xvpics nếu có (chỉ đọc)"
-
 #~ msgid "Faster jpeg thumbnailing (may reduce quality)"
 #~ msgstr "Tạo ảnh mẫu jpeg nhanh hơn (giảm chất lượng)"
 

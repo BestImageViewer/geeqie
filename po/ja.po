@@ -9376,9 +9376,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "起動"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "xvpics がある場合それを使用する(読み込みのみ)"
-
 #~ msgid "Dithering method:"
 #~ msgstr "ディザ手法:"
 

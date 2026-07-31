@@ -9298,9 +9298,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "最好"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "如发现 xvpics 缩略图就使用 (只读)"
-
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "屏幕外缓冲大小 (Mb 每图像):"
 

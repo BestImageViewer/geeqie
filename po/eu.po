@@ -9575,9 +9575,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "Abioa"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Xvpic argazkitxoa erabili aurkitzean (irakurketa bakarrik)"
-
 #~ msgid "Faster jpeg thumbnailing (may reduce quality)"
 #~ msgstr "Jpeg argazkitxo egite azkarra (kalitatea gutxitzen du)"
 

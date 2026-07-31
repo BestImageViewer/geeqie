@@ -41,8 +41,6 @@
 static void thumb_loader_error_cb(ImageLoader *il, gpointer data);
 static void thumb_loader_setup(ThumbLoader *tl, FileData *fd);
 
-static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h);
-
 
 /*
  *-----------------------------------------------------------------------------
@@ -237,22 +235,6 @@ static void thumb_loader_error_cb(ImageLoader *il, gpointer data)
 	if (tl->func_error) tl->func_error(tl, tl->data);
 }
 
-static gboolean thumb_loader_done_delay_cb(gpointer data)
-{
-	auto tl = static_cast<ThumbLoader *>(data);
-
-	tl->idle_done_id = 0;
-
-	if (tl->func_done) tl->func_done(tl, tl->data);
-
-	return G_SOURCE_REMOVE;
-}
-
-static void thumb_loader_delay_done(ThumbLoader *tl)
-{
-	if (!tl->idle_done_id) tl->idle_done_id = g_idle_add(thumb_loader_done_delay_cb, tl);
-}
-
 static void thumb_loader_setup(ThumbLoader *tl, FileData *fd)
 {
 	image_loader_free(tl->il);
@@ -342,17 +324,6 @@ gboolean thumb_loader_start(ThumbLoader *tl, FileData *fd)
 		{
 		g_free(cache_path);
 		cache_path = nullptr;
-		}
-
-	if (!cache_path && options->thumbnails.use_xvpics)
-		{
-		if (tl->fd->thumb_pixbuf) g_object_unref(tl->fd->thumb_pixbuf);
-		tl->fd->thumb_pixbuf = get_xv_thumbnail(tl->fd->path, tl->max_w, tl->max_h);
-		if (tl->fd->thumb_pixbuf)
-			{
-			thumb_loader_delay_done(tl);
-			return TRUE;
-			}
 		}
 
 	if (cache_path)
@@ -466,98 +437,5 @@ void thumb_notify_cb(FileData *fd, NotifyType type, gpointer)
 		g_object_unref(fd->thumb_pixbuf);
 		fd->thumb_pixbuf = nullptr;
 		}
-}
-
-
-/*
- *-----------------------------------------------------------------------------
- * xvpics thumbnail support, read-only (private)
- *-----------------------------------------------------------------------------
- */
-
-/*
- * xvpics code originally supplied by:
- * "Diederen Damien" <D.Diederen@student.ulg.ac.be>
- *
- * Note: Code has been modified to fit the style of the other code, and to use
- *       a few more glib-isms.
- * 08-28-2000: Updated to return a gdk_pixbuf, Imlib is dying a death here.
- */
-
-#define XV_BUFFER 2048
-static guchar *load_xv_thumbnail(gchar *filename, gint *widthp, gint *heightp)
-{
-	FILE *file;
-	gchar buffer[XV_BUFFER];
-	guchar *data = nullptr;
-
-	file = fopen(filename, "rt");
-	if (!file) return nullptr;
-
-	if (fgets(buffer, XV_BUFFER, file) != nullptr
-	    && strncmp(buffer, "P7 332", 6) == 0)
-		{
-		gint width;
-		gint height;
-		gint depth;
-
-		while (fgets(buffer, XV_BUFFER, file) && buffer[0] == '#') /* do_nothing() */;
-
-		if (sscanf(buffer, "%d %d %d", &width, &height, &depth) == 3)
-			{
-			gsize size = width * height;
-
-			data = g_new(guchar, size);
-			if (data && fread(data, 1, size, file) == size)
-				{
-				*widthp = width;
-				*heightp = height;
-				}
-			}
-		}
-
-	fclose(file);
-	return data;
-}
-#undef XV_BUFFER
-
-static GdkPixbuf *get_xv_thumbnail(gchar *thumb_filename, gint max_w, gint max_h)
-{
-	gint width;
-	gint height;
-
-	g_autofree gchar *path = path_from_utf8(thumb_filename);
-	g_autofree gchar *directory = g_path_get_dirname(path);
-	g_autofree gchar *name = g_path_get_basename(path);
-	g_autofree gchar *thumb_name = g_build_filename(directory, ".xvpics", name, NULL);
-
-	g_autofree guchar *packed_data = load_xv_thumbnail(thumb_name, &width, &height);
-	if (!packed_data) return nullptr;
-
-	guchar *rgb_data;
-	GdkPixbuf *pixbuf;
-
-	rgb_data = g_new(guchar, width * height * 3);
-	for (gint i = 0; i < width * height; i++)
-		{
-		rgb_data[(i * 3) + 0] = (packed_data[i] >> 5) * 36;
-		rgb_data[(i * 3) + 1] = ((packed_data[i] & 28) >> 2) * 36;
-		rgb_data[(i * 3) + 2] = (packed_data[i] & 3) * 85;
-		}
-
-	pixbuf = gdk_pixbuf_new_from_data(rgb_data, GDK_COLORSPACE_RGB, FALSE, 8,
-	                                  width, height, 3 * width, free_pixels, nullptr);
-
-	if (pixbuf_scale_aspect(width, height, max_w, max_h, width, height))
-		{
-		/* scale */
-		GdkPixbuf *tmp;
-
-		tmp = pixbuf;
-		pixbuf = gdk_pixbuf_scale_simple(tmp, width, height, GDK_INTERP_NEAREST);
-		g_object_unref(tmp);
-		}
-
-	return pixbuf;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

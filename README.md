@@ -47,7 +47,7 @@ Geeqie is a graphics file viewer. Basic features:
 
 * Zoom functions.
 
-* Thumbnails, with optional caching and .xvpics support.
+* Thumbnails, with optional caching.
 
 * Multiple file selection for move, copy, delete, rename, drag and drop.
 

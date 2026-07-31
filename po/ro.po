@@ -9337,9 +9337,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "Cea mai bună"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Foloseşte miniaturile xvpics disponibile (numai pt. citire)"
-
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "Memorie tampon în afara ecranului (Mb/imagine):"
 

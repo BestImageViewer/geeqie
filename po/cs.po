@@ -9020,9 +9020,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "Nejlepší"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Použít náhledy xvpics, pokud jsou nalezeny (jen pro čtení)"
-
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "Velikost mimoobrazovkové cache (MB na obrázek):"
 

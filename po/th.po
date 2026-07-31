@@ -9541,9 +9541,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "ดีที่สุด"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "ใช้ รูปเล็กของ xvpics เมื่อถูกพบ (อ่านอย่างเดียว)"
-
 #~ msgid "Dithering method:"
 #~ msgstr "ขั้นตอนวิธี Dithering:"
 

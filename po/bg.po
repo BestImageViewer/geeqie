@@ -9609,11 +9609,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "Стартиране"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr ""
-#~ "Използване на xvpics смалени изображения когато бъдат открити (само "
-#~ "четене)"
-
 #~ msgid "Dithering method:"
 #~ msgstr "Метод на размиване:"
 

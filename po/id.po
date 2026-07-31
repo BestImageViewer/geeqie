@@ -9599,9 +9599,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "Mulai #"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Gunakan xvpics thumbnail bila ditemukan (hanya-baca)"
-
 #~ msgid "Dithering method:"
 #~ msgstr "Metode dithering:"
 

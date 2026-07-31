@@ -9018,9 +9018,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "Bäst"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Använd xvpics-miniatyrbilder om sådana finns (endast läsning)"
-
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "Storlek på dold cache (megabyte per bild):"
 

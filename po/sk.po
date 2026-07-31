@@ -10866,10 +10866,6 @@ msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
 #~ msgid "Best"
 #~ msgstr "Najlepšia"
 
-# src/preferences.cc:613
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Použiť xvpics náhľady ak sú k dispozícii (iba na čítanie)"
-
 # src/preferences.cc:735
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "Veľkosť mimoobrazovej vyrovnávacej pamäte (Mb na obrázok):"

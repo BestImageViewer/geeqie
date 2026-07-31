@@ -38,17 +38,4 @@
       </varlistentry>
     </variablelist>
   </para>
-  <para>
-    <emphasis role="strong">
-      thumbnails.use_xvpics =  [true
-      <emphasis role="i">false</emphasis>
-      ]
-    </emphasis>
-    : xvpics is a common thumbnail caching format used by several applications. Thumbnails are stored locally to the source image in a sub folder with the name
-    <emphasis role="strong">.xvpics</emphasis>
-    . Enabling this option will allow Geeqie to read thumbnails saved in the xvpics format.
-  </para>
-  <note>
-    <para>Support for xvpics is read only, Geeqie can not generate thumbnails in this format.</para>
-  </note>
 </section>

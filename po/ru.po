@@ -9091,9 +9091,6 @@ msgstr "Предупреждение: не удалось выполнить к�
 #~ msgid "Best"
 #~ msgstr "Лучший"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Использовать миниатюры от xvpics, если найдены (только чтение)"
-
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "Размер кэша вне экрана (Mb на изображение):"
 
