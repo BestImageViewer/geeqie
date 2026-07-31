@@ -50,8 +50,9 @@ void fullscreen_hide_normal_window(FullScreenData *fs)
 	if (!fs->normal_window_was_visible) return;
 
 	fs->normal_window_was_maximized = gtk_window_is_maximized(GTK_WINDOW(fs->normal_window));
-	fs->normal_window_width = gtk_widget_get_width(fs->normal_window);
-	fs->normal_window_height = gtk_widget_get_height(fs->normal_window);
+	gtk_window_get_default_size(GTK_WINDOW(fs->normal_window),
+	                            &fs->normal_window_width,
+	                            &fs->normal_window_height);
 
 	gtk_widget_set_visible(fs->normal_window, FALSE);
 	fs->normal_window_hidden = TRUE;
@@ -62,7 +63,7 @@ void fullscreen_restore_normal_window(FullScreenData *fs)
 	if (!fs->normal_window_hidden) return;
 
 	/* Position is deliberately not restored: Wayland delegates placement to
-	 * the compositor. Restoring the last allocated size before remapping keeps
+	 * the compositor. Restoring the last default size before remapping keeps
 	 * an unmaximized window stable on both Wayland and X11. */
 	if (!fs->normal_window_was_maximized &&
 	    fs->normal_window_width > 0 && fs->normal_window_height > 0)

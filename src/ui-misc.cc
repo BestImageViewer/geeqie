@@ -1259,8 +1259,17 @@ GdkRectangle widget_get_position_geometry(GtkWidget *widget)
 	/* GTK4/Wayland does not generally expose reliable toplevel x/y. */
 	rect.x = 0;
 	rect.y = 0;
-	rect.width = gdk_surface_get_width(surface);
-	rect.height = gdk_surface_get_height(surface);
+	if (GTK_IS_WINDOW(widget))
+		{
+		/* This is the size expected by gtk_window_set_default_size(). Using
+		 * the surface allocation can repeatedly add client-side decorations. */
+		gtk_window_get_default_size(GTK_WINDOW(widget), &rect.width, &rect.height);
+		}
+	else
+		{
+		rect.width = gdk_surface_get_width(surface);
+		rect.height = gdk_surface_get_height(surface);
+		}
 
 	return rect;
 }
@@ -1286,8 +1295,17 @@ GdkRectangle widget_get_root_origin_geometry(GtkWidget *widget)
 		return rect;
 		}
 
-	rect.width = gdk_surface_get_width(surface);
-	rect.height = gdk_surface_get_height(surface);
+	if (GTK_IS_WINDOW(widget))
+		{
+		/* This is the size expected by gtk_window_set_default_size(). Using
+		 * the surface allocation can repeatedly add client-side decorations. */
+		gtk_window_get_default_size(GTK_WINDOW(widget), &rect.width, &rect.height);
+		}
+	else
+		{
+		rect.width = gdk_surface_get_width(surface);
+		rect.height = gdk_surface_get_height(surface);
+		}
 
 	/* GTK4/Wayland: window position is compositor controlled. */
 	rect.x = 0;
