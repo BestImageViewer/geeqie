@@ -904,11 +904,54 @@ void bookmark_add_dialog(const gchar *title, GtkWidget *list)
 
 struct HistoryComboData
 {
-	GtkWidget *combo;
+	GtkWidget *control;
 	GtkWidget *entry;
+	GtkWidget *history_button;
 	std::string history_key;
 	gint history_levels;
 };
+
+static void history_combo_item_cb(GtkWidget *button, gpointer data)
+{
+	auto hc = static_cast<HistoryComboData *>(data);
+	const auto *text = static_cast<const gchar *>(g_object_get_data(G_OBJECT(button), "history-text"));
+	if (!text) return;
+
+	gq_gtk_entry_set_text(GTK_ENTRY(hc->entry), text);
+	gtk_editable_set_position(GTK_EDITABLE(hc->entry), -1);
+	gtk_menu_button_set_active(GTK_MENU_BUTTON(hc->history_button), FALSE);
+}
+
+static void history_combo_rebuild(HistoryComboData *hc)
+{
+	GtkWidget *list = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(scrolled), 400);
+	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), list);
+
+	gint count = 0;
+	const HistoryList *history = history_list_find_by_key(hc->history_key.c_str());
+	if (history)
+		{
+		for (const std::string &item : *history)
+			{
+			GtkWidget *button = gtk_button_new_with_label(item.c_str());
+			gtk_widget_set_halign(button, GTK_ALIGN_FILL);
+			gtk_widget_add_css_class(button, "flat");
+			g_object_set_data_full(G_OBJECT(button), "history-text", g_strdup(item.c_str()), g_free);
+			g_signal_connect(button, "clicked", G_CALLBACK(history_combo_item_cb), hc);
+			gtk_box_append(GTK_BOX(list), button);
+			count++;
+			}
+		}
+
+	GtkWidget *popover = gtk_popover_new();
+	gtk_popover_set_child(GTK_POPOVER(popover), scrolled);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(hc->history_button), popover);
+	gtk_widget_set_sensitive(hc->history_button, count > 0);
+}
 
 /* if text is NULL, entry is set to the most recent item */
 GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
@@ -917,41 +960,33 @@ GtkWidget *history_combo_new(GtkWidget **entry, const gchar *text,
 	auto *hc = new HistoryComboData();
 	hc->history_key = std::move(history_key);
 	hc->history_levels = max_levels;
+	hc->control = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	hc->entry = gtk_entry_new();
+	gtk_widget_set_hexpand(hc->entry, TRUE);
+	gtk_box_append(GTK_BOX(hc->control), hc->entry);
 
-	hc->combo = gtk_combo_box_text_new_with_entry();
+	hc->history_button = gtk_menu_button_new();
+	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(hc->history_button), GQ_ICON_PAN_DOWN);
+	gtk_widget_set_tooltip_text(hc->history_button, _("Show history"));
+	gtk_widget_set_can_focus(hc->history_button, FALSE);
+	gtk_box_append(GTK_BOX(hc->control), hc->history_button);
 
-	hc->entry = gtk_combo_box_get_child(GTK_COMBO_BOX(hc->combo));
-	if (!GTK_IS_ENTRY(hc->entry))
-		{
-		delete hc;
-		return nullptr;
-		}
-
-	g_object_set_data_full(G_OBJECT(hc->combo), "history_combo_data", hc, delete_cb<HistoryComboData>);
+	g_object_set_data_full(G_OBJECT(hc->control), "history_combo_data", hc, delete_cb<HistoryComboData>);
 	g_object_set_data(G_OBJECT(hc->entry), "history_combo_data", hc);
+	history_combo_rebuild(hc);
 
-	gint n = 0;
 	const HistoryList *history_list = history_list_find_by_key(hc->history_key.c_str());
-	if (history_list)
-		{
-		n = history_list->size();
-		for (const std::string &item : *history_list)
-			{
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(hc->combo), item.c_str());
-			}
-		}
-
 	if (text)
 		{
 		gq_gtk_entry_set_text(GTK_ENTRY(hc->entry), text);
 		}
-	else if (n > 0)
+	else if (history_list && !history_list->empty())
 		{
-		gtk_combo_box_set_active(GTK_COMBO_BOX(hc->combo), 0);
+		gq_gtk_entry_set_text(GTK_ENTRY(hc->entry), history_list->front().c_str());
 		}
 
 	if (entry) *entry = hc->entry;
-	return hc->combo;
+	return hc->control;
 }
 
 /* if text is NULL, current entry text is used
@@ -972,22 +1007,8 @@ void history_combo_append_history(GtkWidget *widget, const gchar *text)
 
 	if (new_text && new_text[0] != '\0')
 		{
-		GtkTreeModel *store;
-
 		history_list_add_to_key(hc->history_key.c_str(), new_text, hc->history_levels);
-
-		gtk_combo_box_set_active(GTK_COMBO_BOX(hc->combo), -1);
-
-		store = gtk_combo_box_get_model(GTK_COMBO_BOX(hc->combo));
-		gtk_list_store_clear(GTK_LIST_STORE(store));
-
-		const HistoryList *history_list = history_list_find_by_key(hc->history_key.c_str());
-		if (!history_list) return;
-
-		for (const std::string &item : *history_list)
-			{
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(hc->combo), item.c_str());
-			}
+		history_combo_rebuild(hc);
 		}
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

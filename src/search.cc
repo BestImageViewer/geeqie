@@ -3039,8 +3039,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_widget_set_tooltip_text(combo,
 	                            _("When set to 'contains' or 'path contains', this field uses Perl Compatible Regular Expressions.\ne.g. use \n.*\\.jpg\n and not \n*.jpg\n\nSee the Help file."));
 
-	GtkWidget *entry = gtk_combo_box_get_child(GTK_COMBO_BOX(combo));
-	search_entry_attach_focus_controller(entry, sd);
+	search_entry_attach_focus_controller(sd->ui.entry_name, sd);
 
 	/* Search for file size */
 	hbox = menu_choice(sd->ui.box_search, _("File size is"), &sd->match_size_enable);
