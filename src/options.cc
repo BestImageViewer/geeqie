@@ -54,11 +54,11 @@ void image_overlay_init(ConfOptions::ImageOverlay &image_overlay)
 ConfOptions *options;
 CommandLine *command_line;
 
-ConfOptions *init_options(ConfOptions *options)
+ConfOptions *conf_options_new()
 {
 	gint i;
 
-	if (!options) options = g_new0(ConfOptions, 1);
+	auto *options = g_new0(ConfOptions, 1);
 
 	options->collections.rectangular_selection = FALSE;
 

@@ -3567,16 +3567,11 @@ static void config_tab_stereo(GtkWidget *notebook, ConfOptions *c_options)
 }
 
 /* Main preferences window */
-static void config_window_create(LayoutWindow *lw)
+static GtkWidget *config_window_create(LayoutWindow *lw, ConfOptions *c_options)
 {
-	GtkWidget *win_vbox;
-	GtkWidget *notebook;
 	GtkWidget *button;
-	GtkWidget *ct_button;
 
-	if (!c_options) c_options = init_options(nullptr);
-
-	configwindow = window_new("preferences", PIXBUF_INLINE_ICON_CONFIG, _("Preferences"));
+	GtkWidget *configwindow = window_new("preferences", PIXBUF_INLINE_ICON_CONFIG, _("Preferences"));
 	DEBUG_NAME(configwindow);
 	if (lw && lw->window) gtk_window_set_transient_for(GTK_WINDOW(configwindow), GTK_WINDOW(lw->window));
 	g_signal_connect(G_OBJECT(configwindow), "close-request",
@@ -3592,11 +3587,10 @@ static void config_window_create(LayoutWindow *lw)
 	gtk_window_set_resizable(GTK_WINDOW(configwindow), TRUE);
 	gq_gtk_widget_set_border_width(configwindow, PREF_PAD_BORDER);
 
-	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
-	gq_gtk_container_add(configwindow, win_vbox);
-	gtk_widget_show(win_vbox);
+	GtkWidget *win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
+	gtk_window_set_child(GTK_WINDOW(configwindow), win_vbox);
 
-	notebook = gtk_notebook_new();
+	GtkWidget *notebook = gtk_notebook_new();
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_LEFT);
 	gtk_notebook_set_scrollable(GTK_NOTEBOOK(notebook), TRUE);
 	gq_gtk_box_pack_start(GTK_BOX(win_vbox), notebook, TRUE, TRUE, 0);
@@ -3624,29 +3618,25 @@ static void config_window_create(LayoutWindow *lw)
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(config_window_help_cb), notebook);
-	gq_gtk_container_add(hbox, button);
-	gtk_widget_show(button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
 				 G_CALLBACK(config_window_ok_cb), notebook);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 	gtk_window_set_default_widget(GTK_WINDOW(configwindow), button);
-	gtk_widget_show(button);
 
-	ct_button = button;
+	GtkWidget *ct_button = button;
 
 	button = pref_button_new(nullptr, GQ_ICON_CANCEL, _("Cancel"),
 				 G_CALLBACK(config_window_close_cb), nullptr);
-	gq_gtk_container_add(hbox, button);
-	gtk_widget_show(button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	if (!get_alternative_button_order(configwindow))
 		{
 		gq_gtk_box_reorder_child(GTK_BOX(hbox), ct_button, -1);
 		}
 
-	gtk_widget_show(notebook);
-	gtk_widget_show(configwindow);
+	return configwindow;
 }
 
 /*
@@ -3657,13 +3647,14 @@ static void config_window_create(LayoutWindow *lw)
 
 void show_config_window(LayoutWindow *lw)
 {
-	if (configwindow)
+	if (!configwindow)
 		{
-		gtk_window_present(GTK_WINDOW(configwindow));
-		return;
+		if (!c_options) c_options = conf_options_new();
+
+		configwindow = config_window_create(lw, c_options);
 		}
 
-	config_window_create(lw);
+	gtk_window_present(GTK_WINDOW(configwindow));
 }
 
 /*
