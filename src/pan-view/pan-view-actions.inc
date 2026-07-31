@@ -24,7 +24,7 @@ static const gchar *const zoom_targets[] =
 	nullptr
 };
 
-static  const ActionDef pan_actions[] =
+static const ActionDef pan_actions[] =
 {
 		{
 		"win.pan-win-close-window",

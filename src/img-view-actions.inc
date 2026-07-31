@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-const ActionDef image_actions[] =
+static const ActionDef image_actions[] =
 {
 		{
 		"win.image-win-close-window",
@@ -137,19 +137,6 @@ const ActionDef image_actions[] =
 		nullptr,
 		N_("Go to directory view"),
 		view_set_layout_path_cb,
-		nullptr,
-		ActionStateType::NONE,
-		FALSE,
-		nullptr,
-		0,
-		nullptr,
-		},
-
-		{
-		"win.image-win-menu",
-		nullptr,
-		N_("Image menu"),
-		view_help_cb,
 		nullptr,
 		ActionStateType::NONE,
 		FALSE,
@@ -458,23 +445,10 @@ const ActionDef image_actions[] =
 		},
 
 		{
-		"win.image-win-zoom-1-1",
-		GQ_ICON_GENERIC,
-		N_("Zoom 1:1"),
-		view_zoom_set_cb<1>,
-		nullptr,
-		ActionStateType::NONE,
-		FALSE,
-		nullptr,
-		0,
-		nullptr,
-		},
-
-		{
 		"win.image-win-zoom-1-2",
 		GQ_ICON_GENERIC,
 		N_("Zoom 1:2"),
-		view_zoom_set_cb<2>,
+		view_zoom_set_cb<-2>,
 		nullptr,
 		ActionStateType::NONE,
 		FALSE,
@@ -499,7 +473,7 @@ const ActionDef image_actions[] =
 		{
 		"win.image-win-zoom-1-4",
 		GQ_ICON_GENERIC,
-		N_("Zoom 1:2"),
+		N_("Zoom 1:4"),
 		view_zoom_set_cb<-4>,
 		nullptr,
 		ActionStateType::NONE,
@@ -579,32 +553,6 @@ const ActionDef image_actions[] =
 		nullptr,
 		N_("Zoom in"),
 		view_zoom_cb<TRUE>,
-		nullptr,
-		ActionStateType::NONE,
-		FALSE,
-		nullptr,
-		0,
-		nullptr,
-		},
-
-		{
-		"win.image-win-zoom-in",
-		nullptr,
-		N_("Zoom in"),
-		view_zoom_cb<TRUE>,
-		nullptr,
-		ActionStateType::NONE,
-		FALSE,
-		nullptr,
-		0,
-		nullptr,
-		},
-
-		{
-		"win.image-win-zoom-out",
-		nullptr,
-		N_("Zoom out"),
-		view_zoom_cb<FALSE>,
 		nullptr,
 		ActionStateType::NONE,
 		FALSE,

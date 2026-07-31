@@ -163,7 +163,7 @@ static const ActionDef collection_actions[] =
 		{
 		"win.collection-win-menu",
 		nullptr,
-		N_("Move"),
+		N_("Context menu"),
 		collection_menu_cb,
 		nullptr,
 		ActionStateType::NONE,

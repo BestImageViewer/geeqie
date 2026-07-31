@@ -3,19 +3,6 @@
 static const ActionDef dupe_main_actions[] =
 {
 		{
-		"win.dupe-win-collections",
-		nullptr,
-		N_("Collection"),
-		nullptr,
-		G_VARIANT_TYPE_INT32,
-		ActionStateType::NONE,
-		FALSE,
-		nullptr,
-		0,
-		nullptr,
-		},
-
-		{
 		"win.dupe-win-append-file-list",
 		nullptr,
 		N_("Append list"),
@@ -161,7 +148,7 @@ static const ActionDef dupe_main_actions[] =
 		{
 		"win.dupe-win-export-to-csv",
 		nullptr,
-		N_("Close window"),
+		N_("Export to CSV"),
 		dupe_pop_menu_export_cb<EXPORT_CSV>,
 		nullptr,
 		ActionStateType::NONE,
@@ -174,7 +161,7 @@ static const ActionDef dupe_main_actions[] =
 		{
 		"win.dupe-win-export-to-tab-delimited",
 		nullptr,
-		N_("Close window"),
+		N_("Export to tab-delimited"),
 		dupe_pop_menu_export_cb<EXPORT_TSV>,
 		nullptr,
 		ActionStateType::NONE,
@@ -216,19 +203,6 @@ static const ActionDef dupe_main_actions[] =
 		N_("Plugins"),
 		dupe_menu_edit_cb,
 		G_VARIANT_TYPE_STRING,
-		ActionStateType::NONE,
-		FALSE,
-		nullptr,
-		0,
-		nullptr,
-		},
-
-		{
-		"win.dupe-win-plugins",
-		nullptr,
-		N_("Close window"),
-		dupe_pop_menu_export_cb<EXPORT_TSV>,
-		nullptr,
 		ActionStateType::NONE,
 		FALSE,
 		nullptr,
