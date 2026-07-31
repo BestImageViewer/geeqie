@@ -136,6 +136,14 @@ struct ImageWindow
 	StereoPixbufData user_stereo;
 
 	gboolean mouse_wheel_mode;
+
+	/* GTK4 scroll events do not always carry pointer coordinates. */
+	gdouble pointer_x;
+	gdouble pointer_y;
+	gboolean pointer_position_valid;
+	gdouble smooth_zoom_accumulator;
+	gdouble smooth_scroll_x;
+	gdouble smooth_scroll_y;
 };
 
 void image_set_frame(ImageWindow *imd, gboolean frame);
@@ -192,6 +200,9 @@ GdkPixbuf *image_get_pixbuf(ImageWindow *imd);
 void image_area_changed(ImageWindow *imd, gint x, gint y, gint width, gint height);
 void image_reload(ImageWindow *imd);
 void image_mousewheel_scroll(ImageWindow *imd, GdkScrollDirection direction);
+gdouble image_smooth_scroll_zoom_delta(ImageWindow *imd, gdouble delta, gdouble increment);
+void image_smooth_scroll_get_deltas(ImageWindow *imd, gdouble dx, gdouble dy, gdouble scale,
+				    gint &x, gint &y);
 void image_scroll(ImageWindow *imd, gint x, gint y);
 void image_scroll_to_point(ImageWindow *imd, gint x, gint y,
 			   gdouble x_align, gdouble y_align);

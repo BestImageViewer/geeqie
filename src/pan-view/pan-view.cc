@@ -1332,6 +1332,16 @@ static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer)
 
 	if (event->state & GDK_CONTROL_MASK)
 		{
+		if (event->direction == GDK_SCROLL_SMOOTH)
+			{
+			const gdouble increment = image_smooth_scroll_zoom_delta(imd, event->dy, ZOOM_INCREMENT);
+			if (increment != 0.0)
+				{
+				pixbuf_renderer_zoom_adjust_at_point(pr, increment, event->x, event->y);
+				}
+			return;
+			}
+
 		switch (event->direction)
 			{
 			case GDK_SCROLL_UP:
@@ -1346,6 +1356,15 @@ static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer)
 		}
 	else
 		{
+		if (event->direction == GDK_SCROLL_SMOOTH)
+			{
+			gint x;
+			gint y;
+			image_smooth_scroll_get_deltas(imd, event->dx, event->dy, 25.0, x, y);
+			if (x != 0 || y != 0) pixbuf_renderer_scroll(pr, x, y);
+			return;
+			}
+
 		switch (event->direction)
 			{
 			case GDK_SCROLL_UP:

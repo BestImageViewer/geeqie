@@ -533,6 +533,26 @@ static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer dat
 {
 	auto vw = static_cast<ViewWindow *>(data);
 
+	if (event->direction == GDK_SCROLL_SMOOTH)
+		{
+		if (event->state & GDK_CONTROL_MASK)
+			{
+			const gdouble increment = image_smooth_scroll_zoom_delta(imd, event->dy, get_zoom_increment());
+			if (increment != 0.0)
+				{
+				image_zoom_adjust_at_point(imd, increment, event->x, event->y);
+				}
+			}
+		else
+			{
+			gint x;
+			gint y;
+			image_smooth_scroll_get_deltas(imd, event->dx, event->dy, 10.0, x, y);
+			if (x != 0 || y != 0) image_scroll(imd, x, y);
+			}
+		return;
+		}
+
 	if ((event->state & GDK_CONTROL_MASK) ||
 				(imd->mouse_wheel_mode && !options->image_lm_click_nav))
 		{

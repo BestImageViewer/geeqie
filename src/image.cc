@@ -56,16 +56,6 @@ namespace
 
 constexpr gdouble aspect_ratios[5] {0.0, gdouble(1.0), gdouble(4.0) / 3, gdouble(3) / 2, gdouble(16) / 9};
 
-GdkScrollDirection scroll_direction_from_deltas(gdouble dx, gdouble dy)
-{
-	if (std::abs(dx) > std::abs(dy))
-		{
-		return dx < 0 ? GDK_SCROLL_LEFT : GDK_SCROLL_RIGHT;
-		}
-
-	return dy < 0 ? GDK_SCROLL_UP : GDK_SCROLL_DOWN;
-}
-
 /*
  * SelectionRectangle
  */
@@ -1203,7 +1193,16 @@ static void image_focus_in_cb(GtkEventControllerFocus *, gpointer data)
 		}
 }
 
-static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble, gdouble, gpointer data)
+static void image_motion_cb(GtkEventControllerMotion *, gdouble x, gdouble y, gpointer data)
+{
+	auto imd = static_cast<ImageWindow *>(data);
+
+	imd->pointer_x = x;
+	imd->pointer_y = y;
+	imd->pointer_position_valid = TRUE;
+}
+
+static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble dx, gdouble dy, gpointer data)
 {
 	auto imd = static_cast<ImageWindow *>(data);
 	GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(controller));
@@ -1213,21 +1212,29 @@ static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble, g
 		return FALSE;
 		}
 
-	gdouble x = 0;
-	gdouble y = 0;
-	gdouble dx = 0;
-	gdouble dy = 0;
-	gdk_event_get_position(event, &x, &y);
-	gdk_scroll_event_get_deltas(event, &dx, &dy);
+	gdouble event_x;
+	gdouble event_y;
+	if (gdk_event_get_position(event, &event_x, &event_y) &&
+	    std::isfinite(event_x) && std::isfinite(event_y))
+		{
+		imd->pointer_x = event_x;
+		imd->pointer_y = event_y;
+		imd->pointer_position_valid = TRUE;
+		}
+	else if (!imd->pointer_position_valid)
+		{
+		imd->pointer_x = gtk_widget_get_width(imd->pr) / 2.0;
+		imd->pointer_y = gtk_widget_get_height(imd->pr) / 2.0;
+		}
+
+	const GdkScrollDirection direction = gdk_scroll_event_get_direction(event);
 	const GqScrollEvent scroll_event{
-		x,
-		y,
+		imd->pointer_x,
+		imd->pointer_y,
 		dx,
 		dy,
 		gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(controller)),
-		gdk_scroll_event_get_direction(event) != GDK_SCROLL_SMOOTH
-			? gdk_scroll_event_get_direction(event)
-			: scroll_direction_from_deltas(dx, dy),
+		direction,
 		gdk_event_get_time(event)
 	};
 
@@ -1673,6 +1680,36 @@ void image_mousewheel_scroll(ImageWindow *imd, GdkScrollDirection direction)
 		default:
 			break;
 		}
+}
+
+gdouble image_smooth_scroll_zoom_delta(ImageWindow *imd, gdouble delta, gdouble increment)
+{
+	if (delta == 0.0) return 0.0;
+
+	if ((imd->smooth_zoom_accumulator < 0.0) != (delta < 0.0))
+		{
+		imd->smooth_zoom_accumulator = 0.0;
+		}
+
+	imd->smooth_zoom_accumulator += delta;
+	const gint steps = static_cast<gint>(imd->smooth_zoom_accumulator);
+	if (steps == 0) return 0.0;
+
+	imd->smooth_zoom_accumulator -= steps;
+	return -steps * increment;
+}
+
+void image_smooth_scroll_get_deltas(ImageWindow *imd, gdouble dx, gdouble dy, gdouble scale,
+				    gint &x, gint &y)
+{
+	imd->smooth_scroll_x += dx * scale;
+	imd->smooth_scroll_y += dy * scale;
+
+	x = static_cast<gint>(imd->smooth_scroll_x);
+	y = static_cast<gint>(imd->smooth_scroll_y);
+
+	imd->smooth_scroll_x -= x;
+	imd->smooth_scroll_y -= y;
 }
 
 void image_scroll(ImageWindow *imd, gint x, gint y)
@@ -2179,6 +2216,11 @@ ImageWindow *image_new(gboolean frame)
 			 G_CALLBACK(image_release_cb), imd);
 	g_signal_connect(G_OBJECT(imd->pr), "scroll_notify",
 			 G_CALLBACK(image_scroll_notify_cb), imd);
+
+	GtkEventController *motion_controller = gtk_event_controller_motion_new();
+	g_signal_connect(motion_controller, "enter", G_CALLBACK(image_motion_cb), imd);
+	g_signal_connect(motion_controller, "motion", G_CALLBACK(image_motion_cb), imd);
+	gtk_widget_add_controller(GTK_WIDGET(imd->pr), motion_controller);
 
 	GtkEventController *controller = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
 	g_signal_connect(controller, "scroll", G_CALLBACK(image_scroll_cb), imd);
