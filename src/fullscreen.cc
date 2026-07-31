@@ -42,6 +42,45 @@
 
 namespace {
 
+void fullscreen_hide_normal_window(FullScreenData *fs)
+{
+	if (!fs->same_region || !options->hide_window_in_fullscreen) return;
+
+	fs->normal_window_was_visible = gtk_widget_get_visible(fs->normal_window);
+	if (!fs->normal_window_was_visible) return;
+
+	fs->normal_window_was_maximized = gtk_window_is_maximized(GTK_WINDOW(fs->normal_window));
+	fs->normal_window_width = gtk_widget_get_width(fs->normal_window);
+	fs->normal_window_height = gtk_widget_get_height(fs->normal_window);
+
+	gtk_widget_set_visible(fs->normal_window, FALSE);
+	fs->normal_window_hidden = TRUE;
+}
+
+void fullscreen_restore_normal_window(FullScreenData *fs)
+{
+	if (!fs->normal_window_hidden) return;
+
+	/* Position is deliberately not restored: Wayland delegates placement to
+	 * the compositor. Restoring the last allocated size before remapping keeps
+	 * an unmaximized window stable on both Wayland and X11. */
+	if (!fs->normal_window_was_maximized &&
+	    fs->normal_window_width > 0 && fs->normal_window_height > 0)
+		{
+		gtk_window_set_default_size(GTK_WINDOW(fs->normal_window),
+		                            fs->normal_window_width,
+		                            fs->normal_window_height);
+		}
+
+	gtk_widget_set_visible(fs->normal_window, fs->normal_window_was_visible);
+	if (fs->normal_window_was_maximized)
+		{
+		gtk_window_maximize(GTK_WINDOW(fs->normal_window));
+		}
+
+	fs->normal_window_hidden = FALSE;
+}
+
 GdkMonitor *get_first_monitor(GdkDisplay *display)
 {
 	GListModel *monitors = gdk_display_get_monitors(display);
@@ -567,19 +606,9 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 	/* set timer to block screen saver */
 	fs->saver_block_id = g_timeout_add(60 * 1000, fullscreen_saver_block_cb, nullptr);
 
-	/* hide normal window */
-	 /** @FIXME properly restore this window on show
-	 */
 	if (fs->same_region)
 		{
-		if (options->hide_window_in_fullscreen)
-			{
-			/** @FIXME Wayland corrupts the size and position of the window when restoring it */
-			if (!g_getenv("WAYLAND_DISPLAY"))
-				{
-				gtk_widget_hide(fs->normal_window);
-				}
-			}
+		fullscreen_hide_normal_window(fs);
 		image_change_fd(fs->normal_imd, nullptr, image_zoom_get(fs->normal_imd));
 		}
 
@@ -603,14 +632,7 @@ void fullscreen_stop(FullScreenData *fs)
 	if (fs->same_region)
 		{
 		image_move_from_image(fs->normal_imd, fs->imd);
-		if (options->hide_window_in_fullscreen)
-			{
-			/** @FIXME Wayland corrupts the size and position of the window when restoring it */
-			if (!g_getenv("WAYLAND_DISPLAY"))
-				{
-				gtk_widget_show(fs->normal_window);
-				}
-			}
+		fullscreen_restore_normal_window(fs);
 		if (options->stereo.enable_fsmode)
 			{
 			image_stereo_set(fs->normal_imd, options->stereo.mode);

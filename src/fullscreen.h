@@ -51,6 +51,14 @@ struct FullScreenData
 	StopFunc stop_func;
 
 	gboolean same_region; /**< the returned region will overlap the current location of widget. */
+
+	/* GTK4 does not expose portable toplevel coordinates. Preserve only the
+	 * window state that applications are allowed to restore on Wayland. */
+	gboolean normal_window_hidden;
+	gboolean normal_window_was_visible;
+	gboolean normal_window_was_maximized;
+	gint normal_window_width;
+	gint normal_window_height;
 };
 
 FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
