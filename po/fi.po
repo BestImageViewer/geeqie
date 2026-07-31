@@ -10612,10 +10612,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "Käynnistys"
 
-# src/preferences.cc:613
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Käytä xvpics-pienoiskuvia jos löytyy (vain luku)"
-
 # src/preferences.cc:693
 #~ msgid "Dithering method:"
 #~ msgstr "Pehmennystapa:"

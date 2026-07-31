@@ -9235,9 +9235,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "Најбоље"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Користи xvpics приказе уколико постоје (само за читање)"
-
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "Меморија (Mb по слици):"
 

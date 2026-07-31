@@ -9605,9 +9605,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "Запуск"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Ужываць мініяцюры xvpics, калі знойдзены (толькі для чытання)"
-
 #~ msgid "Faster jpeg thumbnailing (may reduce quality)"
 #~ msgstr "Хутчэйшая jpeg-мініяцюрызацыя (можа пагоршыць якасць)"
 

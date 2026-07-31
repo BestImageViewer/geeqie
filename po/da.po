@@ -9503,9 +9503,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "Bedst"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Brug xvpics miniaturer, hvis de er der"
-
 #~ msgid "Dithering method:"
 #~ msgstr "Ditheringsmetode:"
 

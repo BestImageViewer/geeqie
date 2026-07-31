@@ -10791,10 +10791,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "啟動"
 
-# src/preferences.cc:613
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "當找到 xvpics 預覽小圖時使用它（唯讀）"
-
 #~ msgid "Faster jpeg thumbnailing (may reduce quality)"
 #~ msgstr "快速產生 jpeg 預覽小圖 (可能降低品質)"
 

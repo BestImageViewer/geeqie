@@ -9345,9 +9345,6 @@ msgstr ""
 #~ msgid "Float Controls"
 #~ msgstr "Dinamik ayarlamalar"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "xvpics tırnaklarını bulunca onları kullan (salt-okunur)"
-
 #~ msgid "#"
 #~ msgstr "#"
 

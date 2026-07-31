@@ -9341,9 +9341,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "O melhor"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Usar miniaturas xvpics quando encontradas (somente leitura)"
-
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "Tamanho do cache não visível (Mb por imagem)"
 

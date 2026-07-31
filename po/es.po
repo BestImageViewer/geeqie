@@ -9877,9 +9877,6 @@ msgstr "Error al ejecutar comando: %s\n"
 #~ msgid "Best"
 #~ msgstr "El mejor"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Utilizar miniaturas xvpics si se encuentran (sólo lectura)"
-
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "Tamaño de caché no visible (MB por imagen):"
 

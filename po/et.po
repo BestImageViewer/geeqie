@@ -9575,9 +9575,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "Algus #"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Kasuta xvpics pisipilte, kui leitud (ainult lugemine)"
-
 #~ msgid "Dithering method:"
 #~ msgstr "Virvtoonimise meetod:"
 

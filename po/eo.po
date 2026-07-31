@@ -9583,9 +9583,6 @@ msgstr ""
 #~ msgid "Startup"
 #~ msgstr "Preparado"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Uzu Xvpic miniaturojn se ili ekzistas (nur legeble)"
-
 #~ msgid "Faster jpeg thumbnailing (may reduce quality)"
 #~ msgstr "Rapida JPEG-miniaturigo (ĉi tiu povus malpliigas kvaliton)"
 

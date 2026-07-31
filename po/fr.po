@@ -9339,9 +9339,6 @@ msgstr ""
 #~ msgid "Could not init LIRC support\n"
 #~ msgstr "Impossible d'initialiser le support de LIRC\n"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Utiliser les vignettes xvpics si existantes (lecture seule)"
-
 #~ msgid "Offscreen cache size (Mb per image):"
 #~ msgstr "Taille du cache mémoire hors-écran (Mo par image) :"
 

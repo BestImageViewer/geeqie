@@ -9558,9 +9558,6 @@ msgstr ""
 #~ msgid "Best"
 #~ msgstr "Найкращий"
 
-#~ msgid "Use xvpics thumbnails when found (read only)"
-#~ msgstr "Використовувати піктограми xvpics якщо знайдено (лише читання)"
-
 #~ msgid "Dithering method:"
 #~ msgstr "Метод імітування напівкольорів:"
 
