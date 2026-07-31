@@ -62,9 +62,10 @@ struct TabCompData
 	TabCompEnterFunc enter_func;
 	TabCompTabFunc tab_func;
 	TabCompTabAppendFunc tab_append_func;
+	TabCompEnterFunc history_func;
 	gboolean directory_only;
 
-	GtkWidget *combo;
+	GtkWidget *history_button;
 	gboolean has_history;
 	gchar *history_key;
 	gint history_levels;
@@ -99,6 +100,50 @@ inline TabCompData *tab_completion_get_from_entry(GtkWidget *entry)
 
 static void tab_completion_select_show(TabCompData *td);
 static gint tab_completion_do(TabCompData *td);
+
+static void tab_completion_history_item_cb(GtkWidget *button, gpointer data)
+{
+	auto td = static_cast<TabCompData *>(data);
+	const auto *text = static_cast<const gchar *>(g_object_get_data(G_OBJECT(button), "history-text"));
+	if (!text) return;
+
+	gq_gtk_entry_set_text(GTK_ENTRY(td->entry), text);
+	gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
+	gtk_menu_button_set_active(GTK_MENU_BUTTON(td->history_button), FALSE);
+
+	if (td->history_func) td->history_func(text);
+}
+
+static void tab_completion_history_rebuild(TabCompData *td)
+{
+	GtkWidget *list = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(scrolled), 400);
+	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), list);
+
+	gint count = 0;
+	const HistoryList *history = history_list_find_by_key(td->history_key);
+	if (history)
+		{
+		for (const std::string &item : *history)
+			{
+			GtkWidget *button = gtk_button_new_with_label(item.c_str());
+			gtk_widget_set_halign(button, GTK_ALIGN_FILL);
+			gtk_widget_add_css_class(button, "flat");
+			g_object_set_data_full(G_OBJECT(button), "history-text", g_strdup(item.c_str()), g_free);
+			g_signal_connect(button, "clicked", G_CALLBACK(tab_completion_history_item_cb), td);
+			gtk_box_append(GTK_BOX(list), button);
+			count++;
+			}
+		}
+
+	GtkWidget *popover = gtk_popover_new();
+	gtk_popover_set_child(GTK_POPOVER(popover), scrolled);
+	gtk_menu_button_set_popover(GTK_MENU_BUTTON(td->history_button), popover);
+	gtk_widget_set_sensitive(td->history_button, count > 0);
+}
 
 static void tab_completion_read_dir(TabCompData *td, const gchar *path)
 {
@@ -559,81 +604,54 @@ static TabCompData *tab_completion_set_to_entry(GtkWidget *entry)
 GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *text,
                                            const gchar *history_key, gint max_levels)
 {
-	GtkWidget *box;
-	GtkWidget *combo;
-	GtkWidget *button;
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	GtkWidget *entry = gtk_entry_new();
+	gq_gtk_box_pack_start(GTK_BOX(box), entry, TRUE, TRUE, 0);
 
-	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-
-	combo = gtk_combo_box_text_new_with_entry();
-	gq_gtk_box_pack_start(GTK_BOX(box), combo, TRUE, TRUE, 0);
-	gtk_widget_show(combo);
-
-	GtkWidget *combo_entry = gtk_combo_box_get_child(GTK_COMBO_BOX(combo));
-	if (!GTK_IS_ENTRY(combo_entry)) return nullptr;
-
-	button = tab_completion_create_complete_button(combo_entry);
-	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
-
-	TabCompData *td = tab_completion_set_to_entry(combo_entry);
-	td->combo = combo;
+	TabCompData *td = tab_completion_set_to_entry(entry);
 	td->has_history = TRUE;
 	td->history_key = g_strdup(history_key);
 	td->history_levels = max_levels;
+	td->history_button = gtk_menu_button_new();
+	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(td->history_button), GQ_ICON_PAN_DOWN);
+	gtk_widget_set_tooltip_text(td->history_button, _("Show history"));
+	gtk_widget_set_can_focus(td->history_button, FALSE);
+	gq_gtk_box_pack_start(GTK_BOX(box), td->history_button, FALSE, FALSE, 0);
+	tab_completion_history_rebuild(td);
 
-	gint n = 0;
+	GtkWidget *button = tab_completion_create_complete_button(entry);
+	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
+
 	const HistoryList *history_list = history_list_find_by_key(history_key);
-	if (history_list)
-		{
-		n = history_list->size();
-		for (const std::string &item : *history_list)
-			{
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), item.c_str());
-			}
-		}
-
 	if (text)
 		{
-		gq_gtk_entry_set_text(GTK_ENTRY(combo_entry), text);
+		gq_gtk_entry_set_text(GTK_ENTRY(entry), text);
 		}
-	else if (n > 0)
+	else if (history_list && !history_list->empty())
 		{
-		gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
+		gq_gtk_entry_set_text(GTK_ENTRY(entry), history_list->front().c_str());
 		}
 
 	if (parent_box) gq_gtk_box_pack_start(GTK_BOX(parent_box), box, TRUE, TRUE, 0);
 
-	gtk_widget_show(box);
-
-	return combo_entry;
+	return entry;
 }
 
 void tab_completion_append_to_history(GtkWidget *entry, const gchar *path)
 {
-	GtkTreeModel *store;
-
 	if (!path) return;
 
 	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td || !td->has_history) return;
 
 	history_list_add_to_key(td->history_key, path, td->history_levels);
-
-	gtk_combo_box_set_active(GTK_COMBO_BOX(td->combo), -1);
-
-	store = gtk_combo_box_get_model(GTK_COMBO_BOX(td->combo));
-	gtk_list_store_clear(GTK_LIST_STORE(store));
+	tab_completion_history_rebuild(td);
 
 	gint n = 0;
 	const HistoryList *history_list = history_list_find_by_key(td->history_key);
 	if (history_list)
 		{
 		n = history_list->size();
-		for (const std::string &item : *history_list)
-			{
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(td->combo), item.c_str());
-			}
 		}
 
 	if (td->tab_append_func) td->tab_append_func(path, n);
@@ -684,6 +702,14 @@ void tab_completion_set_tab_append_func(GtkWidget *entry, const TabCompTabAppend
 	if (!td) return;
 
 	td->tab_append_func = tab_append_func;
+}
+
+void tab_completion_set_history_func(GtkWidget *entry, const TabCompEnterFunc &history_func)
+{
+	TabCompData *td = tab_completion_get_from_entry(entry);
+	if (!td) return;
+
+	td->history_func = history_func;
 }
 
 void tab_completion_set_directory_only(GtkWidget *entry, gboolean directory_only)
@@ -753,7 +779,7 @@ void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboo
 	td->fd_filter_desc = g_strdup(filter_desc);
 	td->fd_shortcuts = g_strdup(shortcuts);
 
-	parent = (td->combo) ? td->combo : td->entry;
+	parent = td->entry;
 
 	hbox = gtk_widget_get_parent(parent);
 	if (!GTK_IS_BOX(hbox)) return;
@@ -772,15 +798,7 @@ GtkWidget *tab_completion_get_box(GtkWidget *entry)
 	TabCompData *td = tab_completion_get_from_entry(entry);
 	if (!td) return nullptr;
 
-	return gtk_widget_get_parent(td->combo ? td->combo : td->entry);
-}
-
-GtkWidget *tab_completion_get_combo(GtkWidget *entry)
-{
-	TabCompData *td = tab_completion_get_from_entry(entry);
-	if (!td) return nullptr;
-
-	return td->combo;
+	return gtk_widget_get_parent(td->entry);
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

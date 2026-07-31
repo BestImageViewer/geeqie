@@ -417,16 +417,11 @@ gchar *layout_get_window_list()
  *-----------------------------------------------------------------------------
  */
 
-static void layout_path_entry_changed_cb(GtkWidget *widget, gpointer data)
+static void layout_path_entry_history_cb(LayoutWindow *lw, const gchar *path)
 {
-	auto lw = static_cast<LayoutWindow *>(data);
-
-	if (gtk_combo_box_get_active(GTK_COMBO_BOX(widget)) < 0) return;
-
-	const gchar *buf = gtk_editable_get_text(GTK_EDITABLE(lw->path_entry));
-	if (!lw->dir_fd || strcmp(buf, lw->dir_fd->path) != 0)
+	if (!lw->dir_fd || strcmp(path, lw->dir_fd->path) != 0)
 		{
-		layout_set_path(lw, buf);
+		layout_set_path(lw, path);
 		}
 }
 
@@ -485,10 +480,11 @@ static void layout_path_entry_tab_append_cb(LayoutWindow *lw, gint n)
 
 static gboolean path_entry_tooltip_cb(GtkWidget *widget, gpointer)
 {
-	GtkComboBoxText *box_child = GTK_COMBO_BOX_TEXT(gtk_widget_get_first_child(widget));
-	g_autofree gchar *current_path = gtk_combo_box_text_get_active_text(box_child);
-
-	gtk_widget_set_tooltip_text(widget, current_path);
+	GtkWidget *entry = gtk_widget_get_first_child(widget);
+	if (GTK_IS_ENTRY(entry))
+		{
+		gtk_widget_set_tooltip_text(widget, gtk_editable_get_text(GTK_EDITABLE(entry)));
+		}
 
 	return FALSE;
 }
@@ -586,17 +582,15 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		{
 		layout_path_entry_tab_append_cb(lw, n);
 		});
+	tab_completion_set_history_func(lw->path_entry, [lw](const char *path)
+		{
+		layout_path_entry_history_cb(lw, path);
+		});
 
 	gq_gtk_box_pack_start(GTK_BOX(box), tabcomp, FALSE, FALSE, 0);
 
 	gtk_widget_set_has_tooltip(tabcomp, TRUE);
 	g_signal_connect(G_OBJECT(tabcomp), "query_tooltip", G_CALLBACK(path_entry_tooltip_cb), lw);
-
-	GtkWidget *path_combo = tab_completion_get_combo(lw->path_entry);
-	if (path_combo)
-		{
-		g_signal_connect(G_OBJECT(path_combo), "changed", G_CALLBACK(layout_path_entry_changed_cb), lw);
-		}
 
 	GtkWidget *box_folders = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(box_folders);
