@@ -444,7 +444,7 @@ struct CommandLine
 extern ConfOptions *options;
 extern CommandLine *command_line;
 
-ConfOptions *init_options(ConfOptions *options);
+ConfOptions *conf_options_new();
 void setup_default_options(ConfOptions *options);
 void save_options(ConfOptions *options);
 gboolean load_options(ConfOptions *options);

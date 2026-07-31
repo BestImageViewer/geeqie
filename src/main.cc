@@ -707,7 +707,7 @@ void startup_common(GtkApplication *, gpointer)
 	pixbuf_inline_register_stock_icons();
 
 	DEBUG_1("%s main: setting default options before commandline handling", get_exec_time());
-	options = init_options(nullptr);
+	options = conf_options_new();
 	setup_default_options(options);
 	bookmark_setup_default();
 	/* Generate a unique identifier used by the open archive function */
