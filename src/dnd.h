@@ -27,13 +27,6 @@
 
 struct FileData;
 
-void drag_signal_connect(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data);
-void drag_signal_swapped(GObject *instance, const gchar *detailed_signal, GCallback c_handler, gpointer data);
-void drag_dest_unset(GtkWidget *widget);
-
-void drag_source_set(GtkWidget *widget, guint button, gpointer, gint n_targets, GdkDragAction actions);
-void drag_dest_set(GtkWidget *widget, const char **mime_types, guint n_mime_types, GdkDragAction actions);
-
 using DndFileListCallback = void (*)(GdkDrop *drop, GList *list, gpointer data);
 using DndTextCallback = void (*)(GdkDrop *drop, const gchar *text, gpointer data);
 
