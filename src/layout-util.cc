@@ -3151,7 +3151,7 @@ static void layout_util_sync_views(LayoutWindow *lw)
 
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-connected-zoom-menu");
-		g_simple_action_set_enabled(G_SIMPLE_ACTION(action), FALSE);
+		g_simple_action_set_enabled(G_SIMPLE_ACTION(action), lw->split_mode != SPLIT_NONE);
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-split-pane-sync");
 		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(lw->options.split_pane_sync));

@@ -770,51 +770,51 @@
           <attribute name="label" translatable="yes">Connected Zoom</attribute>
           <attribute name="action">win.main-win-connected-zoom-menu</attribute>
           <item>
-            <attribute name="action">win.main-win-zoom-in</attribute>
+            <attribute name="action">win.main-win-connect-zoom-in</attribute>
             <attribute name="label" translatable="yes">Zoom _in</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-out</attribute>
+            <attribute name="action">win.main-win-connect-zoom-out</attribute>
             <attribute name="label" translatable="yes">Zoom _out</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-fit</attribute>
+            <attribute name="action">win.main-win-connect-zoom-fit</attribute>
             <attribute name="label" translatable="yes">_Zoom to fit</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-fill-hor</attribute>
+            <attribute name="action">win.main-win-connect-zoom-fill-horizontal</attribute>
             <attribute name="label" translatable="yes">Zoom _Horizontally</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-fill-vert</attribute>
+            <attribute name="action">win.main-win-connect-zoom-fill-vertical</attribute>
             <attribute name="label" translatable="yes">Zoom _Vertically</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-1-1</attribute>
+            <attribute name="action">win.main-win-connect-zoom-1-1</attribute>
             <attribute name="label" translatable="yes">Zoom _1:1</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-2-1</attribute>
+            <attribute name="action">win.main-win-connect-zoom-2-1</attribute>
             <attribute name="label" translatable="yes">Zoom _2:1</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-3-1</attribute>
+            <attribute name="action">win.main-win-connect-zoom-3-1</attribute>
             <attribute name="label" translatable="yes">Zoom _3:1</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-4-1</attribute>
+            <attribute name="action">win.main-win-connect-zoom-4-1</attribute>
             <attribute name="label" translatable="yes">Zoom _4:1</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-1-2</attribute>
+            <attribute name="action">win.main-win-connect-zoom-1-2</attribute>
             <attribute name="label" translatable="yes">Zoom 1:2</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-1-3</attribute>
+            <attribute name="action">win.main-win-connect-zoom-1-3</attribute>
             <attribute name="label" translatable="yes">Zoom 1:3</attribute>
           </item>
           <item>
-            <attribute name="action">win.main-win-zoom-1-4</attribute>
+            <attribute name="action">win.main-win-connect-zoom-1-4</attribute>
             <attribute name="label" translatable="yes">Zoom 1:4</attribute>
           </item>
         </submenu>
