@@ -656,15 +656,16 @@ gchar *exif_build_formatted_localtime(ExifData *exif)
 
 	if (exif_date_time)
 		{
-		g_autofree gchar *time_zone_image = g_strconcat("TZ=", timezone, NULL);
-		g_autofree gchar *time_zone_org = g_strconcat("TZ=", getenv("TZ"), NULL);
-		setenv("TZ", "UTC", TRUE);
+		g_autofree gchar *time_zone_org = g_strdup(g_getenv("TZ"));
+		g_setenv("TZ", "UTC", TRUE);
+		tzset();
 
 		std::tm tm_utc{};
 		if (strptime(exif_date_time, "%Y:%m:%d:%H:%M:%S", &tm_utc))
 			{
 			const time_t stamp = mktime(&tm_utc); // Convert the struct to a Unix timestamp
-			putenv(time_zone_image);              // Switch to destination time zone
+			g_setenv("TZ", timezone, TRUE);       // Switch to destination time zone
+			tzset();
 
 			std::tm *tm_local = localtime(&stamp);
 
@@ -686,7 +687,15 @@ gchar *exif_build_formatted_localtime(ExifData *exif)
 				}
 			}
 
-		putenv(time_zone_org);
+		if (time_zone_org)
+			{
+			g_setenv("TZ", time_zone_org, TRUE);
+			}
+		else
+			{
+			g_unsetenv("TZ");
+			}
+		tzset();
 		}
 
 	return exif_date_time;
