@@ -283,7 +283,6 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 
 	gtk_window_set_modal(GTK_WINDOW(window), TRUE);
 	gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
-	gq_gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
 	gtk_window_set_default_size(GTK_WINDOW(window), 50, 30); //** @FIXME set these values in a more sensible way */
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(expander_height_cb), nullptr);

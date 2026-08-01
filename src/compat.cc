@@ -30,7 +30,6 @@ namespace
 constexpr auto GTK4_BOX_PACK_END_DATA_KEY = "gq-gtk4-box-pack-end";
 constexpr auto GTK4_WINDOW_POSITION_DATA_KEY = "gq-gtk4-window-position";
 constexpr auto GTK4_WINDOW_POSITION_POLICY_DATA_KEY = "gq-gtk4-window-position-policy";
-constexpr auto GTK4_WINDOW_KEEP_ABOVE_DATA_KEY = "gq-gtk4-window-keep-above";
 
 struct GqWindowPosition
 {
@@ -205,16 +204,6 @@ void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position)
 		}
 
 	gtk_box_reorder_child_after(box, child, previous);
-}
-
-void gq_gtk_window_set_keep_above(GtkWindow *window, gboolean setting)
-{
-	g_object_set_data(G_OBJECT(window), GTK4_WINDOW_KEEP_ABOVE_DATA_KEY, GINT_TO_POINTER(setting));
-
-	if (setting && gtk_widget_get_visible(GTK_WIDGET(window)))
-		{
-		gtk_window_present(window);
-		}
 }
 
 void gq_gtk_widget_show_all(GtkWidget *widget)

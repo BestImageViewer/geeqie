@@ -1258,11 +1258,6 @@ CollectWindow *collection_window_new(const gchar *path)
 
 	gtk_widget_set_size_request(cw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
-	if (options->collections_on_top)
-		{
-		gq_gtk_window_set_keep_above(GTK_WINDOW(cw->window), TRUE);
-		}
-
 	if (options->save_window_positions && path && collection_load_only_geometry(cw->cd, path))
 		{
 		gtk_window_set_default_size(GTK_WINDOW(cw->window), cw->cd->window.width, cw->cd->window.height);
