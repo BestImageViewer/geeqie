@@ -6636,16 +6636,6 @@ msgstr ""
 msgid "Allow the same image to be in a Collection more than once"
 msgstr ""
 
-#: src/preferences.cc:3614
-#, fuzzy
-msgid "Open collections on top"
-msgstr "Koleksiyon aç"
-
-#: src/preferences.cc:3616
-#, fuzzy
-msgid "Open collections window on top"
-msgstr "Koleksiyon aç"
-
 #: src/preferences.cc:3618
 msgid "Hide window in fullscreen"
 msgstr ""

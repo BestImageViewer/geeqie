@@ -6464,14 +6464,6 @@ msgstr ""
 "Разрешите одному и тому же изображению находиться в коллекции более одного "
 "раза"
 
-#: src/preferences.cc:3614
-msgid "Open collections on top"
-msgstr "Открывать коллекции поверх"
-
-#: src/preferences.cc:3616
-msgid "Open collections window on top"
-msgstr "Открывать окно коллекции поверх"
-
 #: src/preferences.cc:3618
 msgid "Hide window in fullscreen"
 msgstr "Скрывать окно при полноэкранном просмотре"

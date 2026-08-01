@@ -7641,16 +7641,6 @@ msgstr "Povoliť duplicity v zbierkach"
 msgid "Allow the same image to be in a Collection more than once"
 msgstr "Povoliť uloženie toho istého obrázka v zbierke viac ako raz"
 
-# src/collect-dlg.cc:172
-#: ../src/preferences.cc:3360
-msgid "Open collections on top"
-msgstr "Otvoriť zbierku na vrchu"
-
-# src/collect-dlg.cc:172
-#: ../src/preferences.cc:3362
-msgid "Open collections window on top"
-msgstr "Otvoriť okno so zbierkami na vrchu"
-
 #: ../src/preferences.cc:3364
 msgid "Hide window in fullscreen"
 msgstr "Skryť okno pri zobrazení na celú obrazovku"
@@ -9563,7 +9553,6 @@ msgstr "Upozornenie: Nepodarilo sa spustiť príkaz: %s\n"
 #~ msgstr "Nemôžem vytvoriť dočasný súbor\n"
 
 # src/collect-dlg.cc:172
-#~| msgid "Open collections on top"
 #~ msgid "Open Collection - Geeqie"
 #~ msgstr "Otvoriť zbierku – Geeqie"
 

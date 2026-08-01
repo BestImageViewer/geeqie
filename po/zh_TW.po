@@ -7720,18 +7720,6 @@ msgstr ""
 msgid "Allow the same image to be in a Collection more than once"
 msgstr ""
 
-# src/collect-dlg.cc:172
-#: src/preferences.cc:3614
-#, fuzzy
-msgid "Open collections on top"
-msgstr "開啟圖像集"
-
-# src/collect-dlg.cc:172
-#: src/preferences.cc:3616
-#, fuzzy
-msgid "Open collections window on top"
-msgstr "開啟圖像集"
-
 #: src/preferences.cc:3618
 msgid "Hide window in fullscreen"
 msgstr ""

@@ -6806,14 +6806,6 @@ msgstr ""
 "Permetti che la stessa immagine sia presente in una Collezione più di una "
 "volta"
 
-#: src/preferences.cc:3550
-msgid "Open collections on top"
-msgstr "Apri le Collezioni in primo piano"
-
-#: src/preferences.cc:3552
-msgid "Open collections window on top"
-msgstr "Apri le finestre delle Collezioni in primo piano"
-
 #: src/preferences.cc:3554
 msgid "Hide window in fullscreen"
 msgstr "Nascondi la finestra in modalità Schermo Intero"

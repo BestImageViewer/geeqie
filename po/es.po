@@ -7031,14 +7031,6 @@ msgstr "Permitir duplicados en Colecciones"
 msgid "Allow the same image to be in a Collection more than once"
 msgstr "Permitir que la misma imagen esté en una colección más de una vez"
 
-#: ../src/preferences.cc:3360
-msgid "Open collections on top"
-msgstr "Abrir colecciones en la parte superior"
-
-#: ../src/preferences.cc:3362
-msgid "Open collections window on top"
-msgstr "Abrir ventana de colecciones en la parte superior"
-
 #: ../src/preferences.cc:3364
 msgid "Hide window in fullscreen"
 msgstr "Ocultar ventana en pantalla completa"

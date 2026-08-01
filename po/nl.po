@@ -6749,14 +6749,6 @@ msgstr ""
 "Sta toe dat dezelfde afbeelding meer dan eenmaal in een collectie mag "
 "voorkomen"
 
-#: ../src/preferences.cc:3524
-msgid "Open collections on top"
-msgstr "Collectie openen bovenaan"
-
-#: ../src/preferences.cc:3526
-msgid "Open collections window on top"
-msgstr "Collectievenster openen bovenaan"
-
 #: ../src/preferences.cc:3528
 msgid "Hide window in fullscreen"
 msgstr "Verberg venster in volledig scherm"

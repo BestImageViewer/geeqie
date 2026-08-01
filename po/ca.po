@@ -7026,14 +7026,6 @@ msgid "Allow the same image to be in a Collection more than once"
 msgstr ""
 "Permet que la mateixa imatge estigui en una Col·lecció més d'una vegada"
 
-#: ../src/preferences.cc:3358
-msgid "Open collections on top"
-msgstr "Obre les col·leccions a la part superior"
-
-#: ../src/preferences.cc:3360
-msgid "Open collections window on top"
-msgstr "Obre la finestra de col·leccions a la part superior"
-
 #: ../src/preferences.cc:3362
 msgid "Hide window in fullscreen"
 msgstr "Amaga la finestra a pantalla completa"

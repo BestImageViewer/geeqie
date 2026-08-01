@@ -439,7 +439,6 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->marks_save = c_options->marks_save;
 	options->with_rename = c_options->with_rename;
 	options->collections_duplicates = c_options->collections_duplicates;
-	options->collections_on_top = c_options->collections_on_top;
 	options->hide_window_in_fullscreen = c_options->hide_window_in_fullscreen;
 	options->hide_osd_in_fullscreen = c_options->hide_osd_in_fullscreen;
 	config_entry_to_option(help_search_engine_entry, &options->help_search_engine, nullptr);
@@ -3112,7 +3111,7 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	GtkWidget *table;
 	GtkWidget *marks;
 	GtkWidget *with_rename;
-	GtkWidget *collections_on_top;
+	GtkWidget *collections_duplicates;
 	GtkWidget *hide_window_in_fullscreen;
 	GtkWidget *hide_osd_in_fullscreen;
 	GtkWidget *tmp;
@@ -3201,13 +3200,9 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 				options->with_rename, &c_options->with_rename);
 	gtk_widget_set_tooltip_text(with_rename,_("Change the default button for Copy/Move dialogs"));
 
-	collections_on_top = pref_checkbox_new_int(group, _("Permit duplicates in Collections"),
+	collections_duplicates = pref_checkbox_new_int(group, _("Permit duplicates in Collections"),
 				options->collections_duplicates, &c_options->collections_duplicates);
-	gtk_widget_set_tooltip_text(collections_on_top, _("Allow the same image to be in a Collection more than once"));
-
-	collections_on_top = pref_checkbox_new_int(group, _("Open collections on top"),
-				options->collections_on_top, &c_options->collections_on_top);
-	gtk_widget_set_tooltip_text(collections_on_top, _("Open collections window on top"));
+	gtk_widget_set_tooltip_text(collections_duplicates, _("Allow the same image to be in a Collection more than once"));
 
 	hide_window_in_fullscreen = pref_checkbox_new_int(group, _("Hide window in fullscreen"),
 				options->hide_window_in_fullscreen, &c_options->hide_window_in_fullscreen);

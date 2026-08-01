@@ -174,14 +174,6 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Open Collections on top</guilabel>
-        </term>
-        <listitem>
-          <para>Open collection windows with "Always on Top" set.</para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>
           <guilabel>Hide window in fullscreen</guilabel>
         </term>
         <listitem>

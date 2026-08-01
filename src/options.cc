@@ -111,7 +111,6 @@ ConfOptions *conf_options_new()
 	options->marks_save = TRUE;
 	options->with_rename = FALSE;
 	options->collections_duplicates = FALSE;
-	options->collections_on_top = FALSE;
 	options->hide_window_in_fullscreen = TRUE;
 	options->hide_osd_in_fullscreen = FALSE;
 

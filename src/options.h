@@ -141,7 +141,6 @@ struct ConfOptions
 
 	gboolean with_rename;
 	gboolean collections_duplicates;
-	gboolean collections_on_top;
 	gboolean hide_window_in_fullscreen;
 	gboolean hide_osd_in_fullscreen;
 
