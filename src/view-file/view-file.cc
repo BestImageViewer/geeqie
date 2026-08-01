@@ -1031,7 +1031,12 @@ static void vf_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 
-	if (vf->listview) g_object_set_data(G_OBJECT(vf->listview), VIEW_FILE_DATA_KEY, nullptr);
+	if (vf->listview)
+		{
+		g_object_set_data(G_OBJECT(vf->listview), VIEW_FILE_DATA_KEY, nullptr);
+		g_object_remove_weak_pointer(G_OBJECT(vf->listview), reinterpret_cast<gpointer *>(&vf->listview));
+		vf->listview = nullptr;
+		}
 
 	switch (vf->type)
 	{
@@ -1614,6 +1619,7 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	case FILEVIEW_LIST: vf = vflist_new(vf); break;
 	case FILEVIEW_ICON: vf = vficon_new(vf); break;
 	}
+	g_object_add_weak_pointer(G_OBJECT(vf->listview), reinterpret_cast<gpointer *>(&vf->listview));
 	g_object_set_data(G_OBJECT(vf->listview), VIEW_FILE_DATA_KEY, vf);
 
 	GtkEventController *key_controller = gtk_event_controller_key_new();

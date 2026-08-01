@@ -325,7 +325,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	page_text_view = gtk_text_view_new();
 	pw->page_text = gtk_text_view_get_buffer(GTK_TEXT_VIEW(page_text_view ));
-	gtk_text_buffer_set_text(GTK_TEXT_BUFFER(pw->page_text), options->printer.page_text, -1);
+	gtk_text_buffer_set_text(GTK_TEXT_BUFFER(pw->page_text), options->printer.page_text ? options->printer.page_text : "", -1);
 	g_object_ref(pw->page_text);
 
 	gtk_widget_set_tooltip_markup(page_text_view, (_("Text shown on each page of a single or multi-page print job")));

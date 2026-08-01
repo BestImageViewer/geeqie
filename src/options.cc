@@ -228,7 +228,7 @@ ConfOptions *conf_options_new()
 	options->printer.template_string = nullptr;
 	options->printer.image_font = g_strdup("Serif 10");
 	options->printer.page_font = g_strdup("Serif 10");
-	options->printer.page_text = nullptr;
+	options->printer.page_text = g_strdup("");
 	options->printer.image_text_position = FOOTER_1;
 	options->printer.page_text_position = HEADER_1;
 
