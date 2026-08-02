@@ -1209,7 +1209,7 @@ void autocomplete_selected_cb(GtkListBox *, GtkListBoxRow *row, gpointer data)
 	gq_gtk_entry_set_text(GTK_ENTRY(pkd->autocomplete), keyword);
 	gtk_editable_set_position(GTK_EDITABLE(pkd->autocomplete), -1);
 	pkd->autocomplete_changing = FALSE;
-	gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
+	if (pkd->autocomplete_popover) gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
 }
 
 void autocomplete_row_activated_cb(GtkListBox *list, GtkListBoxRow *row, gpointer data)
@@ -1231,7 +1231,7 @@ void autocomplete_changed_cb(GtkEditable *editable, gpointer data)
 	const gchar *text = gtk_editable_get_text(editable);
 	if (!text[0])
 		{
-		gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
+		if (pkd->autocomplete_popover) gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
 		return;
 		}
 
@@ -1258,10 +1258,17 @@ void autocomplete_changed_cb(GtkEditable *editable, gpointer data)
 
 	if (!first_row)
 		{
-		gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
+		if (pkd->autocomplete_popover) gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
 		return;
 		}
 
+	if (!pkd->autocomplete_popover)
+		{
+		pkd->autocomplete_popover = gtk_popover_new();
+		gtk_popover_set_autohide(GTK_POPOVER(pkd->autocomplete_popover), FALSE);
+		gtk_popover_set_child(GTK_POPOVER(pkd->autocomplete_popover), pkd->autocomplete_scroller);
+		gtk_widget_set_parent(pkd->autocomplete_popover, pkd->autocomplete);
+		}
 	gtk_scrolled_window_set_min_content_width(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller),
 	                                          gtk_widget_get_width(pkd->autocomplete));
 	gtk_list_box_select_row(GTK_LIST_BOX(pkd->autocomplete_list), first_row);
@@ -1274,7 +1281,7 @@ gboolean autocomplete_keypress_cb(GtkEventControllerKey *, guint keyval, guint, 
 
 	if (keyval == GDK_KEY_Escape)
 		{
-		gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
+		if (pkd->autocomplete_popover) gtk_popover_popdown(GTK_POPOVER(pkd->autocomplete_popover));
 		return TRUE;
 		}
 
@@ -1311,7 +1318,7 @@ gboolean autocomplete_keypress_cb(GtkEventControllerKey *, guint keyval, guint, 
 	if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
 		{
 		GtkListBoxRow *row = gtk_list_box_get_selected_row(GTK_LIST_BOX(pkd->autocomplete_list));
-		if (gtk_widget_get_visible(pkd->autocomplete_popover) && row)
+		if (pkd->autocomplete_popover && gtk_widget_get_visible(pkd->autocomplete_popover) && row)
 			{
 			autocomplete_selected_cb(GTK_LIST_BOX(pkd->autocomplete_list), row, pkd);
 			}
@@ -1414,11 +1421,6 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller), TRUE);
 	gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller), TRUE);
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(pkd->autocomplete_scroller), pkd->autocomplete_list);
-
-	pkd->autocomplete_popover = gtk_popover_new();
-	gtk_popover_set_autohide(GTK_POPOVER(pkd->autocomplete_popover), FALSE);
-	gtk_popover_set_child(GTK_POPOVER(pkd->autocomplete_popover), pkd->autocomplete_scroller);
-	gtk_widget_set_parent(pkd->autocomplete_popover, pkd->autocomplete);
 
 	g_signal_connect(G_OBJECT(pkd->autocomplete), "activate",
 			 G_CALLBACK(autocomplete_activate_cb), pkd);
