@@ -3418,9 +3418,9 @@ static gboolean layout_bar_sort_enabled(LayoutWindow *lw)
 }
 
 
-static void layout_bar_sort_destroyed(GtkWidget *, gpointer  )
+static void layout_bar_sort_destroyed(GtkWidget *, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto *lw = static_cast<LayoutWindow *>(data);
 
 	lw->bar_sort = nullptr;
 
