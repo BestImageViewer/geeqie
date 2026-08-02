@@ -10,6 +10,16 @@ modelbutton check
 	margin-right: 6px;
 }
 
+.marks-filter-button
+{
+	min-width: 12px;
+	min-height: 12px;
+	padding-left: 0;
+	padding-right: 0;
+	padding-top: 1px;
+	padding-bottom: 1px;
+}
+
 .hidden-license {
 	opacity: 0;
 	min-width: 0;

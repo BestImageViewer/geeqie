@@ -83,6 +83,7 @@ static gboolean vflist_row_rename_cb(TreeEditData *td, const gchar *old_name, co
 static void vflist_populate_view(ViewFile *vf, gboolean force);
 static gboolean vflist_is_multiline(ViewFile *vf);
 static gchar *vflist_get_formatted(ViewFile *vf, const gchar *name, const gchar *sidecars, const gchar *size, const gchar *time, gboolean expanded, const gchar *star_rating);
+static void vflist_listview_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str, gpointer data);
 
 
 /*
@@ -413,10 +414,6 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEve
 		GtkTreeModel *store;
 		gint col_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
 
-		if (event->button == GDK_BUTTON_PRIMARY &&
-		    col_idx >= FILE_COLUMN_MARKS && col_idx <= FILE_COLUMN_MARKS_LAST)
-			return FALSE;
-
 		if (col_idx >= FILE_COLUMN_MARKS && col_idx <= FILE_COLUMN_MARKS_LAST)
 			vf->clicked_mark = 1 + (col_idx - FILE_COLUMN_MARKS);
 
@@ -424,6 +421,22 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEve
 
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
+
+		if (event->button == GDK_BUTTON_PRIMARY &&
+		    col_idx >= FILE_COLUMN_MARKS && col_idx <= FILE_COLUMN_MARKS_LAST)
+			{
+			/* GtkCellRendererToggle's GTK4 activation region can be much
+			 * smaller than the check it draws.  The tree view has already
+			 * resolved the row and mark column, so activate that cell directly. */
+			GList *renderers = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
+			if (renderers)
+				{
+				g_autofree gchar *path_str = gtk_tree_path_to_string(tpath);
+				vflist_listview_mark_toggled_cb(GTK_CELL_RENDERER_TOGGLE(renderers->data), path_str, vf);
+				}
+			g_list_free(renderers);
+			return TRUE;
+			}
 		}
 
 	vf->click_fd = fd;

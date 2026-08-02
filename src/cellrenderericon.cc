@@ -69,6 +69,39 @@ static void gqv_cell_renderer_icon_snapshot(GtkCellRenderer *cell,
 					    const GdkRectangle *cell_area,
 					    GtkCellRendererState flags);
 
+gint gqv_cell_renderer_icon_mark_at(GtkCellRenderer *cell, GtkWidget *widget,
+	                                const GdkRectangle *cell_area, gdouble x, gdouble y)
+{
+	auto cellicon = GQV_CELL_RENDERER_ICON(cell);
+	if (!cellicon->show_marks) return -1;
+
+	GdkRectangle cell_rect;
+	gint xpad;
+	gint ypad;
+	gtk_cell_renderer_get_padding(cell, &xpad, &ypad);
+	gqv_cell_renderer_icon_get_size(cell, widget, cell_area,
+	                                &cell_rect.x, &cell_rect.y,
+	                                &cell_rect.width, &cell_rect.height);
+	cell_rect.x += xpad;
+	cell_rect.y += ypad;
+	cell_rect.width -= xpad * 2;
+	cell_rect.height -= ypad * 2;
+
+	const gdouble strip_y = cell_area->y + ypad + (cell_rect.height - TOGGLE_SPACING);
+	if (y < strip_y || y >= strip_y + TOGGLE_SPACING) return -1;
+
+	const gdouble first_box_x = cell_area->x + xpad +
+	                            ((cell_rect.width - TOGGLE_SPACING * cellicon->num_marks + 1) / 2.0);
+	const gdouble first_center = first_box_x + (TOGGLE_WIDTH / 2.0);
+	const gdouble strip_left = first_center - (TOGGLE_SPACING / 2.0);
+	const gdouble strip_right = first_center + ((cellicon->num_marks - 1) * TOGGLE_SPACING) +
+	                            (TOGGLE_SPACING / 2.0);
+	if (x < strip_left || x >= strip_right) return -1;
+
+	return std::clamp(static_cast<gint>(std::floor(((x - first_center) / TOGGLE_SPACING) + 0.5)),
+	                  0, cellicon->num_marks - 1);
+}
+
 static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 						GdkEvent             *event,
 						GtkWidget            *widget,
@@ -863,13 +896,9 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 	    event &&
 	    gdk_event_get_event_type(event) == GDK_BUTTON_PRESS)
 		{
-		GdkRectangle rect;
-		GdkRectangle cell_rect;
 		const auto state = gdk_event_get_modifier_state(event);
 		gdouble event_x;
 		gdouble event_y;
-		gint xpad;
-		gint ypad;
 
 		if (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK))
 			{
@@ -881,32 +910,11 @@ static gboolean gqv_cell_renderer_icon_activate(GtkCellRenderer      *cell,
 			return FALSE;
 			}
 
-		gtk_cell_renderer_get_padding(cell, &xpad, &ypad);
-
-		gqv_cell_renderer_icon_get_size(cell, widget, cell_area,
-		                                &cell_rect.x, &cell_rect.y,
-		                                &cell_rect.width, &cell_rect.height);
-
-		cell_rect.x += xpad;
-		cell_rect.y += ypad;
-		cell_rect.width -= xpad * 2;
-		cell_rect.height -= ypad * 2;
-
-		rect.width = TOGGLE_WIDTH;
-		rect.height = TOGGLE_WIDTH;
-		rect.y = cell_area->y + ypad + (cell_rect.height - TOGGLE_SPACING) + ((TOGGLE_SPACING - TOGGLE_WIDTH) / 2);
-
-		for (gint i = 0; i < cellicon->num_marks; i++)
+		gint mark = gqv_cell_renderer_icon_mark_at(cell, widget, cell_area, event_x, event_y);
+		if (mark >= 0)
 			{
-			rect.x = cell_area->x + xpad + ((cell_rect.width - TOGGLE_SPACING * cellicon->num_marks + 1) / 2) + (i * TOGGLE_SPACING);
-
-			if (event_x >= rect.x && event_x < rect.x + rect.width &&
-			    event_y >= rect.y && event_y < rect.y + rect.height)
-				{
-				cellicon->toggled_mark = i;
-				g_signal_emit(cell, toggle_cell_signals[TOGGLED], 0, path);
-				break;
-				}
+			cellicon->toggled_mark = mark;
+			g_signal_emit(cell, toggle_cell_signals[TOGGLED], 0, path);
 			}
 		}
 

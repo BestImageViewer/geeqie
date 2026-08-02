@@ -82,6 +82,8 @@ struct GQvCellRendererIconClass
 
 GType            gqv_cell_renderer_icon_get_type();
 GtkCellRenderer *gqv_cell_renderer_icon_new();
+gint gqv_cell_renderer_icon_mark_at(GtkCellRenderer *cell, GtkWidget *widget,
+	                                const GdkRectangle *cell_area, gdouble x, gdouble y);
 
 #endif /* GQV_CELL_RENDERER_ICON_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

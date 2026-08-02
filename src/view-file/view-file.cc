@@ -779,6 +779,17 @@ static void vf_pop_menu_selection_to_mark_action_cb(GSimpleAction *, GVariant *p
 		}
 }
 
+static void vf_pop_menu_toggle_clicked_mark_action_cb(GSimpleAction *, GVariant *parameter, gpointer data)
+{
+	auto *vf = vf_from_action_data(data);
+	if (!vf || !vf->click_fd || !parameter) return;
+
+	gint mark = g_variant_get_int32(parameter);
+	if (mark < 0 || mark >= FILEDATA_MARKS_SIZE) return;
+
+	file_data_set_mark(vf->click_fd, mark, !file_data_get_mark(vf->click_fd, mark));
+}
+
 static void vf_pop_menu_view_type_action_cb(GSimpleAction *action, GVariant *parameter, gpointer data)
 {
 	auto *vf = vf_from_action_data(data);
@@ -905,31 +916,55 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 
 	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-view-file.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-view-file"));
+	GMenu *marks_section = G_MENU(gtk_builder_get_object(builder, "marks-section"));
 
-	if (vf->clicked_mark > 0)
+	if (vf->clicked_mark > 0 && vf->click_fd)
 		{
-		gint mark = vf->clicked_mark;
-		g_autofree gchar *str_set_mark = g_strdup_printf(_("Set mark %d"), mark);
-		g_autofree gchar *str_res_mark = g_strdup_printf(_("Reset mark %d"), mark);
-		g_autofree gchar *str_toggle_mark = g_strdup_printf(_("Toggle mark %d"), mark);
-		g_autofree gchar *str_sel_mark = g_strdup_printf(_("Select mark %d"), mark);
-		g_autofree gchar *str_sel_mark_or = g_strdup_printf(_("Add mark %d"), mark);
-		g_autofree gchar *str_sel_mark_and = g_strdup_printf(_("Intersection with mark %d"), mark);
-		g_autofree gchar *str_sel_mark_minus = g_strdup_printf(_("Unselect mark %d"), mark);
-
-		g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
-
-		vf->active_mark = mark;
+		gint clicked_mark = vf->clicked_mark - 1;
 		vf->clicked_mark = 0;
+		g_autoptr(GMenu) mark_menu = g_menu_new();
+		g_autofree gchar *toggle_label = g_strdup_printf(file_data_get_mark(vf->click_fd, clicked_mark) ?
+		                                                    _("Clear mark %d") : _("Set mark %d"),
+		                                                    clicked_mark + 1);
+		gmenu_append_int32_action_item(mark_menu, toggle_label,
+		                                "win.view-file-toggle-clicked-mark", clicked_mark);
 
-		GMenu *marks_menu = G_MENU(gtk_builder_get_object(builder, "marks-section"));
-		gmenu_append_int32_action_item(marks_menu, str_set_mark, "win.view-file-selection-to-mark", STM_MODE_SET);
-		gmenu_append_int32_action_item(marks_menu, str_res_mark, "win.view-file-selection-to-mark", STM_MODE_RESET);
-		gmenu_append_int32_action_item(marks_menu, str_toggle_mark, "win.view-file-selection-to-mark", STM_MODE_TOGGLE);
-		gmenu_append_int32_action_item(marks_menu, str_sel_mark, "win.view-file-mark-to-selection", MTS_MODE_SET);
-		gmenu_append_int32_action_item(marks_menu, str_sel_mark_or, "win.view-file-mark-to-selection", MTS_MODE_OR);
-		gmenu_append_int32_action_item(marks_menu, str_sel_mark_and, "win.view-file-mark-to-selection", MTS_MODE_AND);
-		gmenu_append_int32_action_item(marks_menu, str_sel_mark_minus, "win.view-file-mark-to-selection", MTS_MODE_MINUS);
+		g_autoptr(GMenu) all_marks = g_menu_new();
+		for (gint mark = 0; mark < FILEDATA_MARKS_SIZE; mark++)
+			{
+			g_autofree gchar *label = g_strdup_printf("%s%d",
+			                                             file_data_get_mark(vf->click_fd, mark) ? "✓ " : "", mark + 1);
+			gmenu_append_int32_action_item(all_marks, label,
+			                                "win.view-file-toggle-clicked-mark", mark);
+			}
+		g_autoptr(GMenuItem) all_marks_item = g_menu_item_new_submenu(_("All marks"), G_MENU_MODEL(all_marks));
+		g_menu_append_item(mark_menu, all_marks_item);
+
+		GtkWidget *menu = gtk_popover_menu_new_from_model_full(G_MENU_MODEL(mark_menu), GTK_POPOVER_MENU_NESTED);
+		GtkWidget *menu_parent = parent ? parent : vf->listview;
+		popover_set_parent(menu, menu_parent);
+		if (parent)
+			{
+			GdkRectangle pointing_to{static_cast<gint>(x), static_cast<gint>(y), 1, 1};
+			gtk_popover_set_pointing_to(GTK_POPOVER(menu), &pointing_to);
+			}
+		popover_popup(menu);
+		g_signal_connect(G_OBJECT(menu), "destroy", G_CALLBACK(vf_popup_destroy_cb), vf);
+		return menu;
+		}
+
+	if (vf->click_fd)
+		{
+		g_autoptr(GMenu) individual_marks = g_menu_new();
+		for (gint mark = 0; mark < FILEDATA_MARKS_SIZE; mark++)
+			{
+			g_autofree gchar *label = g_strdup_printf("%s%d",
+			                                             file_data_get_mark(vf->click_fd, mark) ? "✓ " : "", mark + 1);
+			gmenu_append_int32_action_item(individual_marks, label,
+			                                "win.view-file-toggle-clicked-mark", mark);
+			}
+		g_autoptr(GMenuItem) marks_item = g_menu_item_new_submenu(_("Marks"), G_MENU_MODEL(individual_marks));
+		g_menu_append_item(marks_section, marks_item);
 		}
 
 	vf->editmenu_fd_list = vf_pop_menu_file_list(vf);
@@ -1030,6 +1065,21 @@ gboolean vf_set_fd(ViewFile *vf, FileData *dir_fd)
 static void vf_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
+	if (vf->marks_filter_controller && vf->layout && vf->layout->window)
+		{
+		gtk_widget_remove_controller(vf->layout->window, vf->marks_filter_controller);
+		vf->marks_filter_controller = nullptr;
+		}
+	if (vf->marks_filter_context_controller && vf->layout && vf->layout->window)
+		{
+		gtk_widget_remove_controller(vf->layout->window, vf->marks_filter_context_controller);
+		vf->marks_filter_context_controller = nullptr;
+		}
+	if (vf->marks_filter_tooltip_id && vf->layout && vf->layout->window)
+		{
+		g_signal_handler_disconnect(vf->layout->window, vf->marks_filter_tooltip_id);
+		vf->marks_filter_tooltip_id = 0;
+		}
 
 	if (vf->listview)
 		{
@@ -1064,6 +1114,57 @@ static void vf_marks_filter_toggle_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
 	vf_refresh_idle(vf);
+}
+
+static gint vf_marks_filter_at_window_coord(ViewFile *vf, GtkWidget *window, gdouble x, gdouble y)
+{
+	for (gint i = 0; i < FILEDATA_MARKS_SIZE; i++)
+		{
+		graphene_rect_t bounds;
+		if (!gtk_widget_compute_bounds(vf->filter_check[i], window, &bounds)) continue;
+		if (x >= bounds.origin.x && x < bounds.origin.x + bounds.size.width &&
+		    y >= bounds.origin.y - bounds.size.height && y < bounds.origin.y + bounds.size.height)
+			return i;
+		}
+
+	return -1;
+}
+
+static void vf_marks_filter_window_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+	GtkWidget *window = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	const gint mark = vf_marks_filter_at_window_coord(vf, window, x, y);
+	if (mark < 0) return;
+
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(vf->filter_check[mark]),
+	                             !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(vf->filter_check[mark])));
+	gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+}
+
+static gboolean vf_marks_filter_window_tooltip_cb(GtkWidget *window, gint x, gint y,
+	                                               gboolean keyboard_mode, GtkTooltip *tooltip,
+	                                               gpointer data)
+{
+	if (keyboard_mode) return FALSE;
+
+	auto *vf = static_cast<ViewFile *>(data);
+	const gint mark = vf_marks_filter_at_window_coord(vf, window, x, y);
+	if (mark < 0) return FALSE;
+
+	g_autofree gchar *default_text = g_strdup_printf(_("Mark %d"), mark + 1);
+	g_autofree gchar *text = nullptr;
+	if (options->marks_tooltips[mark] && options->marks_tooltips[mark][0] != '\0' &&
+	    g_strcmp0(options->marks_tooltips[mark], default_text) != 0)
+		{
+		text = g_strdup_printf("%s — %s", default_text, options->marks_tooltips[mark]);
+		}
+	else
+		{
+		text = g_strdup(default_text);
+		}
+	gtk_tooltip_set_text(tooltip, text);
+	return TRUE;
 }
 
 struct MarksTextEntry {
@@ -1140,11 +1241,25 @@ static void vf_marks_tooltip_open_dialog(GtkWidget *widget, gint mark_no)
 	gtk_widget_show(gd->dialog);
 }
 
-static void vf_marks_tooltip_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer user_data)
+static void vf_marks_filter_window_context_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
-	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	auto *vf = static_cast<ViewFile *>(data);
+	GtkWidget *window = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	const gint mark = vf_marks_filter_at_window_coord(vf, window, x, y);
+	if (mark < 0) return;
 
-	vf_marks_tooltip_open_dialog(widget, GPOINTER_TO_INT(user_data));
+	gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+	vf_marks_tooltip_open_dialog(vf->filter_check[mark], mark);
+}
+
+static void vf_marks_filter_tooltip_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer)
+{
+	GtkWidget *strip = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	GtkWidget *button = gtk_widget_pick(strip, x, y, GTK_PICK_DEFAULT);
+	if (!GTK_IS_TOGGLE_BUTTON(button)) return;
+
+	vf_marks_tooltip_open_dialog(button,
+	                             GPOINTER_TO_INT(g_object_get_data(G_OBJECT(button), "mark-number")));
 }
 
 static void vf_file_filter_history_item_cb(GtkWidget *button, gpointer data)
@@ -1275,33 +1390,30 @@ static void vf_file_filter_gesture_press_cb(GtkGestureClick *gesture, gint, gdou
 
 static GtkWidget *vf_marks_filter_init(ViewFile *vf)
 {
-	GtkWidget *frame = gtk_frame_new(nullptr);
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	GtkGesture *tooltip_gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(tooltip_gesture), GDK_BUTTON_SECONDARY);
+	g_signal_connect(tooltip_gesture, "released", G_CALLBACK(vf_marks_filter_tooltip_cb), nullptr);
+	gtk_widget_add_controller(hbox, GTK_EVENT_CONTROLLER(tooltip_gesture));
 
 	gint i;
 
 	for (i = 0; i < FILEDATA_MARKS_SIZE ; i++)
 		{
-		GtkWidget *check = gtk_check_button_new();
-		gq_gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
-		g_signal_connect(G_OBJECT(check), "toggled",
+		GtkWidget *button = gtk_toggle_button_new();
+		gtk_widget_set_can_target(button, FALSE);
+		gtk_widget_add_css_class(button, "marks-filter-button");
+		g_object_set_data(G_OBJECT(button), "mark-number", GINT_TO_POINTER(i));
+		gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+		g_signal_connect(G_OBJECT(button), "toggled",
 			 G_CALLBACK(vf_marks_filter_toggle_cb), vf);
 
-		GtkGesture *gesture = gtk_gesture_click_new();
-		gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
+		gtk_widget_set_tooltip_text(button, options->marks_tooltips[i]);
 
-		g_signal_connect(gesture, "released", G_CALLBACK(vf_marks_tooltip_cb), GINT_TO_POINTER(i));
-
-		gtk_widget_add_controller(check, GTK_EVENT_CONTROLLER(gesture));
-
-		gtk_widget_set_tooltip_text(check, options->marks_tooltips[i]);
-
-		vf->filter_check[i] = check;
+		vf->filter_check[i] = button;
 		}
 
-	gq_gtk_container_add(frame, hbox);
-
-	return frame;
+	return hbox;
 }
 
 void vf_file_filter_set(ViewFile *vf, gboolean enable)
@@ -1583,8 +1695,8 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 void vf_mark_filter_toggle(ViewFile *vf, gint mark)
 {
 	gint n = mark - 1;
-	auto *filter_check = GTK_CHECK_BUTTON(vf->filter_check[n]);
-	gtk_check_button_set_active(filter_check, !gtk_check_button_get_active(filter_check));
+	auto *filter_button = GTK_TOGGLE_BUTTON(vf->filter_check[n]);
+	gtk_toggle_button_set_active(filter_button, !gtk_toggle_button_get_active(filter_button));
 }
 
 ViewFile *vf_new(FileViewType type, FileData *dir_fd)
@@ -1953,7 +2065,7 @@ guint vf_marks_get_filter(ViewFile *vf)
 
 	for (i = 0; i < FILEDATA_MARKS_SIZE ; i++)
 		{
-		if (gtk_check_button_get_active(GTK_CHECK_BUTTON(vf->filter_check[i])))
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(vf->filter_check[i])))
 			{
 			ret |= 1 << i;
 			}
@@ -2009,6 +2121,26 @@ guint vf_class_get_filter(ViewFile *vf)
 void vf_set_layout(ViewFile *vf, LayoutWindow *layout)
 {
 	vf->layout = layout;
+	if (layout && layout->window)
+		{
+		GtkGesture *gesture = gtk_gesture_click_new();
+		gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_PRIMARY);
+		gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture), GTK_PHASE_CAPTURE);
+		g_signal_connect(gesture, "pressed", G_CALLBACK(vf_marks_filter_window_press_cb), vf);
+		vf->marks_filter_controller = GTK_EVENT_CONTROLLER(gesture);
+		gtk_widget_add_controller(layout->window, vf->marks_filter_controller);
+
+		GtkGesture *context_gesture = gtk_gesture_click_new();
+		gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(context_gesture), GDK_BUTTON_SECONDARY);
+		gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(context_gesture), GTK_PHASE_CAPTURE);
+		g_signal_connect(context_gesture, "released", G_CALLBACK(vf_marks_filter_window_context_cb), vf);
+		vf->marks_filter_context_controller = GTK_EVENT_CONTROLLER(context_gesture);
+		gtk_widget_add_controller(layout->window, vf->marks_filter_context_controller);
+
+		gtk_widget_set_has_tooltip(layout->window, TRUE);
+		vf->marks_filter_tooltip_id = g_signal_connect(layout->window, "query-tooltip",
+		                                                   G_CALLBACK(vf_marks_filter_window_tooltip_cb), vf);
+		}
 
 	if (layout && layout->window &&
 	    !g_action_map_lookup_action(G_ACTION_MAP(layout->window), "view-file-view-new"))

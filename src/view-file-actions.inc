@@ -302,6 +302,19 @@ static const ActionDef view_file_actions[] =
 		},
 
 		{
+		"win.view-file-toggle-clicked-mark",
+		nullptr,
+		N_("Toggle mark for file"),
+		vf_pop_menu_toggle_clicked_mark_action_cb,
+		G_VARIANT_TYPE_INT32,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.view-file-view-new",
 		GQ_ICON_NEW,
 		N_("View in new window"),

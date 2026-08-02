@@ -295,6 +295,28 @@ static void vficon_mark_toggled_cb(GtkCellRendererToggle *cell, gchar *path_str,
 	file_data_set_mark(fd, toggled_mark, !file_data_get_mark(fd, toggled_mark));
 }
 
+static gint vficon_mark_at_coord(ViewFile *vf, gint x, gint y)
+{
+	g_autoptr(GtkTreePath) path = nullptr;
+	GtkTreeViewColumn *column = nullptr;
+	if (!gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(vf->listview), x, y,
+	                                   &path, &column, nullptr, nullptr)) return -1;
+
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(vf->listview));
+	GtkTreeIter iter;
+	if (!gtk_tree_model_get_iter(model, &iter, path)) return -1;
+	gtk_tree_view_column_cell_set_cell_data(column, model, &iter, FALSE, FALSE);
+
+	GList *cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
+	if (!cells) return -1;
+	GdkRectangle area;
+	gtk_tree_view_get_cell_area(GTK_TREE_VIEW(vf->listview), path, column, &area);
+	gint mark = gqv_cell_renderer_icon_mark_at(static_cast<GtkCellRenderer *>(cells->data),
+	                                          vf->listview, &area, x, y);
+	g_list_free(cells);
+	return mark;
+}
+
 
 /*
  *-------------------------------------------------------------------
@@ -1162,7 +1184,11 @@ gboolean vficon_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEve
 					}
 				break;
 			case GDK_BUTTON_SECONDARY:
+				{
+				gint mark = vficon_mark_at_coord(vf, static_cast<gint>(event->x), static_cast<gint>(event->y));
+				vf->clicked_mark = mark >= 0 ? mark + 1 : 0;
 				vf->popup = vf_pop_menu(vf, widget, event->x, event->y);
+				}
 				break;
 			default:
 				break;
