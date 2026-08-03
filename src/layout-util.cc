@@ -3159,11 +3159,11 @@ static void layout_util_sync_views(LayoutWindow *lw)
 
 		if (lw->options.file_view_type == FILEVIEW_LIST)
 			{
-			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("main-win-list"));
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("list"));
 			}
-		else if (lw->split_mode == SPLIT_VERT)
+		else
 			{
-			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("main-win-icons"));
+			g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_string("icons"));
 			}
 	action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), "main-win-crop");
 		if (options->rectangle_draw_aspect_ratio == RECTANGLE_DRAW_ASPECT_RATIO_NONE)
