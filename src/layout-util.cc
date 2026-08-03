@@ -2913,11 +2913,6 @@ void layout_toolbar_add_default(LayoutWindow *lw, ToolbarType type)
 {
 	if (type >= TOOLBAR_COUNT) return;
 
-	if (layout_window_count() > 0)
-		{
-		return;
-		}
-
 	switch (type)
 		{
 		case TOOLBAR_MAIN:

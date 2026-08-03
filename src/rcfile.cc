@@ -1698,6 +1698,11 @@ static void options_parse_layout(GQParserData *parser_data, const gchar *element
 static void options_parse_layout_end(gpointer data)
 {
 	auto lw = static_cast<LayoutWindow *>(data);
+	for (gint i = 0; i < TOOLBAR_COUNT; i++)
+		{
+		auto type = static_cast<ToolbarType>(i);
+		if (!lw->toolbar_actions[type]) layout_toolbar_add_default(lw, type);
+		}
 	layout_util_sync(lw);
 }
 
