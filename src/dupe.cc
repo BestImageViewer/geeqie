@@ -4242,14 +4242,10 @@ DupeWindow *dupe_window_new()
 	gtk_widget_show(dw->listview);
 
 	dw->second_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_widget_set_visible(dw->second_vbox, dw->second_set);
 
 	gtk_paned_set_start_child(GTK_PANED(dw->paned), scrolled);
 	gtk_paned_set_end_child(GTK_PANED(dw->paned), dw->second_vbox);
-
-	if (dw->second_set)
-		{
-		gtk_widget_show(dw->second_vbox);
-		}
 
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
