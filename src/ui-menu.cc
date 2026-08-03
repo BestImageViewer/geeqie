@@ -324,7 +324,7 @@ static gboolean popover_detach_cb(gpointer data)
 
 static void popover_closed_cb(GtkPopover *popover, gpointer)
 {
-	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, popover_detach_cb,
+	g_idle_add_full(G_PRIORITY_LOW, popover_detach_cb,
 	                g_object_ref(popover), g_object_unref);
 }
 

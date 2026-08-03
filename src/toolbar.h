@@ -32,7 +32,7 @@ enum ToolbarType : gint {
 	TOOLBAR_COUNT
 };
 
-GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar);
+GtkWidget *toolbar_select_new(LayoutWindow *lw, GtkWidget *window, ToolbarType bar);
 void toolbar_apply(ToolbarType bar);
 
 const gchar *toolbar_type_config_name(ToolbarType type);

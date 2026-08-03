@@ -312,7 +312,7 @@ static void toolbarlist_populate(GList *toolbar_items, GtkBox *box)
 
 #include "toolbar-actions.inc"
 
-GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
+GtkWidget *toolbar_select_new(LayoutWindow *lw, GtkWidget *window, ToolbarType bar)
 {
 	GtkWidget *tbar;
 	GtkWidget *add_box;
@@ -344,11 +344,11 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, ToolbarType bar)
 	GApplication *app = g_application_get_default();
 	if (bar == TOOLBAR_MAIN)
 		{
-		register_actions_from_table(GTK_APPLICATION(app), get_config_window(), toolbar_main_actions, get_keyfile_merged(), toolbarlist[bar]);
+		register_actions_from_table(GTK_APPLICATION(app), window, toolbar_main_actions, get_keyfile_merged(), toolbarlist[bar]);
 		}
 	else
 		{
-		register_actions_from_table(GTK_APPLICATION(app), get_config_window(), toolbar_status_actions, get_keyfile_merged(), toolbarlist[bar]);
+		register_actions_from_table(GTK_APPLICATION(app), window, toolbar_status_actions, get_keyfile_merged(), toolbarlist[bar]);
 		}
 
 	toolbarlist_populate(lw->toolbar_actions[bar], GTK_BOX(toolbarlist[bar]));

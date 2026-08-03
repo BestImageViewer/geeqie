@@ -3445,12 +3445,12 @@ Double-click on the Key column and add or replace the text.\n");
 }
 
 /* toolbar tab */
-static void config_tab_toolbar(GtkWidget *notebook, ToolbarType bar)
+static void config_tab_toolbar(GtkWidget *notebook, GtkWidget *window, ToolbarType bar)
 {
 	const gchar *title = (bar == TOOLBAR_MAIN) ? _("Toolbar Main") : _("Toolbar Status");
 	GtkWidget *vbox = scrolled_notebook_page(notebook, title);
 
-	GtkWidget *toolbardata = toolbar_select_new(layout_window_first(), bar);
+	GtkWidget *toolbardata = toolbar_select_new(layout_window_first(), window, bar);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), toolbardata, TRUE, TRUE, 0);
 	gtk_widget_show(vbox);
 }
@@ -3601,8 +3601,8 @@ static GtkWidget *config_window_create(LayoutWindow *lw, ConfOptions *c_options)
 	config_tab_color(notebook, c_options);
 	config_tab_stereo(notebook, c_options);
 	config_tab_behavior(notebook, c_options);
-	config_tab_toolbar(notebook, TOOLBAR_MAIN);
-	config_tab_toolbar(notebook, TOOLBAR_STATUS);
+	config_tab_toolbar(notebook, configwindow, TOOLBAR_MAIN);
+	config_tab_toolbar(notebook, configwindow, TOOLBAR_STATUS);
 	config_tab_advanced(notebook, c_options);
 
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), lw->options.preferences_window.page_number);
