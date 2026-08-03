@@ -304,8 +304,26 @@ GtkWidget *popover_parent_new(GtkWidget *child)
 #endif
 }
 
+static void popover_closed_cb(GtkPopover *popover, gpointer)
+{
+	GtkWidget *parent = gtk_widget_get_parent(GTK_WIDGET(popover));
+	if (!parent) return;
+
+#if HAVE_GTK4_22
+	if (GTK_IS_POPOVER_BIN(parent))
+		{
+		gtk_popover_bin_set_popover(GTK_POPOVER_BIN(parent), nullptr);
+		return;
+		}
+#endif
+
+	gtk_widget_unparent(GTK_WIDGET(popover));
+}
+
 void popover_set_parent(GtkWidget *popover, GtkWidget *parent)
 {
+	g_signal_connect(popover, "closed", G_CALLBACK(popover_closed_cb), nullptr);
+
 #if HAVE_GTK4_22
 	if (GTK_IS_POPOVER_BIN(parent))
 		{

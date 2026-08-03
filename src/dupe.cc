@@ -3597,7 +3597,7 @@ static void dupe_listview_show_rank(GtkWidget *listview, gboolean rank);
 
 static void dupe_menu_type_cb(GtkDropDown *drop_down, GParamSpec *, gpointer data)
 {
-	g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(drop_down));
+	GObject *item = G_OBJECT(gtk_drop_down_get_selected_item(drop_down));
 	if (!item) return;
 
 	auto *dw = static_cast<DupeWindow *>(data);
@@ -4238,7 +4238,7 @@ DupeWindow *dupe_window_new()
 	g_signal_connect(gtk_tree_view_get_column(GTK_TREE_VIEW(dw->listview), DUPE_COLUMN_DIMENSIONS - 1), "clicked", (GCallback)column_clicked_cb, dw);
 	g_signal_connect(gtk_tree_view_get_column(GTK_TREE_VIEW(dw->listview), DUPE_COLUMN_PATH - 1), "clicked", (GCallback)column_clicked_cb, dw);
 
-	gq_gtk_container_add(scrolled, popover_parent_new(dw->listview));
+	gq_gtk_container_add(scrolled, dw->listview);
 	gtk_widget_show(dw->listview);
 
 	dw->second_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -4264,7 +4264,7 @@ DupeWindow *dupe_window_new()
 
 	dupe_listview_add_column(dw, dw->second_listview, 1, _("Compare to:"), FALSE, FALSE);
 
-	gq_gtk_container_add(scrolled, popover_parent_new(dw->second_listview));
+	gq_gtk_container_add(scrolled, dw->second_listview);
 	gtk_widget_show(dw->second_listview);
 
 	dw->second_status_label = gtk_label_new("");
@@ -4477,12 +4477,18 @@ struct CDupeConfirmD {
 	GList *list;
 };
 
-static void confirm_dir_list_cancel(GtkWidget *, gpointer)
+static void confirm_dir_list_free(CDupeConfirmD *d)
 {
-	/* do nothing */
+	file_data_list_free(d->list);
+	g_free(d);
 }
 
-static void confirm_dir_list_add(GtkWidget *, gpointer data)
+static void confirm_dir_list_cancel(GenericDialog *, gpointer data)
+{
+	confirm_dir_list_free(static_cast<CDupeConfirmD *>(data));
+}
+
+static void confirm_dir_list_add(GenericDialog *, gpointer data)
 {
 	auto d = static_cast<CDupeConfirmD *>(data);
 	GList *work;
@@ -4506,58 +4512,38 @@ static void confirm_dir_list_add(GtkWidget *, gpointer data)
 				}
 			}
 		}
+
+	confirm_dir_list_free(d);
 }
 
-static void confirm_dir_list_recurse(GtkWidget *, gpointer data)
+static void confirm_dir_list_recurse(GenericDialog *, gpointer data)
 {
 	auto d = static_cast<CDupeConfirmD *>(data);
 	dupe_window_add_files(d->dw, d->list, TRUE);
+	confirm_dir_list_free(d);
 }
 
-static void confirm_dir_list_skip(GtkWidget *, gpointer data)
+static void confirm_dir_list_skip(GenericDialog *, gpointer data)
 {
 	auto d = static_cast<CDupeConfirmD *>(data);
 	dupe_window_add_files(d->dw, d->list, FALSE);
+	confirm_dir_list_free(d);
 }
 
-static void confirm_dir_list_destroy(GtkWidget *, gpointer data)
+static void dupe_confirm_dir_list(DupeWindow *dw, GList *list)
 {
-	auto d = static_cast<CDupeConfirmD *>(data);
-	file_data_list_free(d->list);
-	g_free(d);
-}
-
-static GtkWidget *dupe_confirm_dir_list(DupeWindow *dw, GtkWidget *parent, GList *list)
-{
-	GtkWidget *menu;
-	CDupeConfirmD *d;
-
-#if HAVE_GTK4_22
-	if (GtkWidget *ancestor = gtk_widget_get_ancestor(parent, GTK_TYPE_POPOVER_BIN))
-		{
-		parent = ancestor;
-		}
-#endif
-
-	d = g_new0(CDupeConfirmD, 1);
+	auto *d = g_new0(CDupeConfirmD, 1);
 	d->dw = dw;
 	d->list = list;
 
-	menu = popover_box_new(parent, -1, -1);
-	g_signal_connect(G_OBJECT(menu), "destroy",
-			 G_CALLBACK(confirm_dir_list_destroy), d);
-
-	popover_item_add_icon_sensitive(menu, _("Dropped list includes folders - Select"), GQ_ICON_DIRECTORY, FALSE, nullptr, nullptr);
-	popover_item_add_divider(menu);
-	popover_item_add_icon(menu, _("_Add contents"), GQ_ICON_OK, G_CALLBACK(confirm_dir_list_add), d);
-	popover_item_add_icon(menu, _("Add contents _recursive"), GQ_ICON_ADD, G_CALLBACK(confirm_dir_list_recurse), d);
-	popover_item_add_icon(menu, _("_Skip folders"), GQ_ICON_REMOVE, G_CALLBACK(confirm_dir_list_skip), d);
-	popover_item_add_divider(menu);
-	popover_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, G_CALLBACK(confirm_dir_list_cancel), d);
-
-	popover_box_popup(menu);
-
-	return menu;
+	GenericDialog *gd = generic_dialog_new(_("Find duplicates"), "dupe_drop_folders",
+	                                      dw->window, TRUE, confirm_dir_list_cancel, d);
+	generic_dialog_add_message(gd, GQ_ICON_DIRECTORY, _("Dropped list includes folders"),
+	                           _("Select how folders should be added."), TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_OK, _("_Add contents"), confirm_dir_list_add, TRUE);
+	generic_dialog_add_button(gd, GQ_ICON_ADD, _("Add contents _recursive"), confirm_dir_list_recurse, FALSE);
+	generic_dialog_add_button(gd, GQ_ICON_REMOVE, _("_Skip folders"), confirm_dir_list_skip, FALSE);
+	gtk_widget_show(gd->dialog);
 }
 
 /*
@@ -4626,8 +4612,7 @@ static void dupe_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 
 		if (file_data_list_has_dir(list))
 			{
-			GtkWidget *menu = dupe_confirm_dir_list(dw, drop_data->widget, filelist_copy(list));
-			(void)menu;
+			dupe_confirm_dir_list(dw, filelist_copy(list));
 			}
 		else
 			{

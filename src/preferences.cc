@@ -729,7 +729,7 @@ static void mouse_buttons_selection_menu_cb(GtkDropDown *drop_down, GParamSpec *
 {
 	auto option = static_cast<gchar **>(data);
 
-	g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(drop_down));
+	GObject *item = G_OBJECT(gtk_drop_down_get_selected_item(drop_down));
 	const char *label = gtk_string_object_get_string(GTK_STRING_OBJECT(item));
 
 	std::vector<ActionItem> list = get_action_items();

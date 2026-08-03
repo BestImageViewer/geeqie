@@ -93,7 +93,7 @@ void pan_filter_activate_cb(PanWindow *pw, const gchar *text)
 
 	if (!text) return;
 
-	g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(ui->filter_mode_drop_down)));
+	GObject *item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(ui->filter_mode_drop_down)));
 	if (!item) return;
 
 	// Get all relevant state and reset UI.

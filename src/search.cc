@@ -439,7 +439,7 @@ gdouble get_gps_range(const SearchData *sd, gdouble latitude, gdouble longitude)
 
 bool menu_choice_get_match_type(GtkWidget *drop_down, MatchType &type)
 {
-	g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(drop_down)));
+	GObject *item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(drop_down)));
 	if (!item) return false;
 
 	type = static_cast<MatchType>(GPOINTER_TO_INT(g_object_get_data(item, MATCH_TYPE_KEY)));
@@ -2351,7 +2351,7 @@ static void search_start_do(SearchData *sd)
 			return;
 			}
 
-		g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.units_gps)));
+		GObject *item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.units_gps)));
 		const char *units_gps = item ? gtk_string_object_get_string(GTK_STRING_OBJECT(item)) : nullptr;
 
 		if (g_strcmp0(units_gps, _("km")) == 0)
@@ -2381,7 +2381,7 @@ static void search_start_do(SearchData *sd)
 
 	if (sd->match_date_enable)
 		{
-		g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.date_type)));
+		GObject *item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.date_type)));
 		const char *date_type = item ? gtk_string_object_get_string(GTK_STRING_OBJECT(item)) : nullptr;
 		const auto it = std::find_if(std::cbegin(search_date_types), std::cend(search_date_types),
 		                             [date_type](const SearchDateType &sdt){ return g_strcmp0(date_type, sdt.name) == 0; });
@@ -2398,7 +2398,7 @@ static void search_start_do(SearchData *sd)
 		{
 		menu_choice_get_match_type(sd->ui.menu_class, sd->match_class);
 
-		g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.class_type)));
+		GObject *item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.class_type)));
 		const char *class_type = item ? gtk_string_object_get_string(GTK_STRING_OBJECT(item)) : nullptr;
 
 		if (g_strcmp0(class_type, _("Image")) == 0)
@@ -2441,7 +2441,7 @@ static void search_start_do(SearchData *sd)
 
 		sd->search_marks = -1;
 
-		g_autoptr(GObject) item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.marks_type)));
+		GObject *item = G_OBJECT(gtk_drop_down_get_selected_item(GTK_DROP_DOWN(sd->ui.marks_type)));
 		const char *marks_type = item ? gtk_string_object_get_string(GTK_STRING_OBJECT(item)) : nullptr;
 
 		if (g_strcmp0(marks_type, _("Any mark")) != 0)
