@@ -597,11 +597,11 @@
       <submenu>
         <attribute name="label" translatable="yes">_Orientation</attribute>
         <item>
-          <attribute name="action">win.main-win-rotate-cw</attribute>
+          <attribute name="action">win.main-win-rotate-cw-90</attribute>
           <attribute name="label" translatable="yes">_Rotate clockwise 90°</attribute>
         </item>
         <item>
-          <attribute name="action">win.main-win-rotate-ccw</attribute>
+          <attribute name="action">win.main-win-rotate-ccw-90</attribute>
           <attribute name="label" translatable="yes">Rotate _counterclockwise 90°</attribute>
         </item>
         <item>
