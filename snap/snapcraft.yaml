@@ -20,6 +20,7 @@ apps:
     command-chain:
       - bin/fix-platform-order.sh
       - bin/env-gtk.sh
+      - bin/ensure-gdkpixbuf-cache.sh
       - bin/auto-backend.sh
       - bin/env-imagemagick.sh
       - bin/set-xdg-vars.sh
@@ -44,6 +45,7 @@ apps:
     command-chain:
       - bin/fix-platform-order.sh
       - bin/env-gtk.sh
+      - bin/ensure-gdkpixbuf-cache.sh
       - bin/force-wayland.sh
       - bin/env-imagemagick.sh
     command: usr/bin/geeqie
@@ -67,6 +69,7 @@ apps:
     command-chain:
       - bin/fix-platform-order.sh
       - bin/env-gtk.sh
+      - bin/ensure-gdkpixbuf-cache.sh
       - bin/force-x11.sh
       - bin/env-imagemagick.sh
     command: usr/bin/geeqie
@@ -243,6 +246,11 @@ parts:
       schema_dir="$CRAFT_PRIME/usr/share/glib-2.0/schemas"
       if [ -d "$schema_dir" ]; then
         glib-compile-schemas "$schema_dir"
+      fi
+
+      mime_dir="$CRAFT_PRIME/usr/share/mime"
+      if [ -d "$mime_dir/packages" ]; then
+        update-mime-database "$mime_dir"
       fi
 
       glycin_conf_dir="$CRAFT_PRIME/usr/share/glycin-loaders"

@@ -66,6 +66,12 @@ export GDK_PIXBUF_MODULE_FILE="$CACHE_FILE"
 # Rebuild cache if we found both pieces
 if [ -n "${QUERY:-}" ] && [ -n "${MODULEDIR:-}" ]; then
     GDK_PIXBUF_MODULEDIR="$MODULEDIR" "$QUERY" >"$CACHE_FILE" 2>/dev/null || true
+
+    # GdkPixbuf built with glycin also registers a format named "svg".  Glycin
+    # tries to start a nested bubblewrap sandbox, which is not permitted inside
+    # a strictly confined snap.  Give librsvg's in-process loader a distinct
+    # name so Geeqie can select it explicitly.
+    sed -i 's/^"svg" 6 /"geeqie-svg" 6 /' "$CACHE_FILE"
 else
     echo "Note: could not regenerate GDK pixbuf cache (query tool or module dir missing)." >&2
 fi

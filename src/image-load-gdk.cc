@@ -27,6 +27,7 @@
 
 #include "filedata.h"
 #include "image-load.h"
+#include "ui-fileops.h"
 
 namespace
 {
@@ -75,6 +76,11 @@ void ImageLoaderGdk::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_pre
 	if (g_ascii_strncasecmp(il->fd->extension, ".xbm", 4) == 0)
 		{
 		loader = gdk_pixbuf_loader_new_with_mime_type("image/x-xbitmap", nullptr);
+		}
+	else if (file_extension_match(il->fd->path, ".svg"))
+		{
+		loader = gdk_pixbuf_loader_new_with_type("geeqie-svg", nullptr);
+		if (!loader) loader = gdk_pixbuf_loader_new_with_mime_type("image/svg+xml", nullptr);
 		}
 	else
 		{

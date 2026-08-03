@@ -61,7 +61,8 @@ void ImageLoaderSvgz::init(AreaUpdatedCb area_updated_cb, SizePreparedCb size_pr
 {
 	g_autoptr(GError) error = nullptr;
 
-	loader = gdk_pixbuf_loader_new_with_mime_type("image/svg", &error);
+	loader = gdk_pixbuf_loader_new_with_type("geeqie-svg", nullptr);
+	if (!loader) loader = gdk_pixbuf_loader_new_with_mime_type("image/svg", &error);
 	if (error)
 		{
 		return;

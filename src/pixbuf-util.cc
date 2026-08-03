@@ -231,7 +231,26 @@ GdkPixbuf *pixbuf_inline(const gchar *key)
 		return nullptr;
 		}
 
-	GdkPixbuf *icon_pixbuf = gdk_pixbuf_new_from_stream(in_stream, nullptr, &error);
+	GdkPixbuf *icon_pixbuf = nullptr;
+	g_autoptr(GdkPixbufLoader) loader = gdk_pixbuf_loader_new_with_type("geeqie-svg", nullptr);
+	if (loader)
+		{
+		guchar buffer[4096];
+		gssize bytes_read;
+		while ((bytes_read = g_input_stream_read(in_stream, buffer, sizeof(buffer), nullptr, &error)) > 0 &&
+		       gdk_pixbuf_loader_write(loader, buffer, bytes_read, &error))
+			{
+			}
+		if (!error && bytes_read == 0 && gdk_pixbuf_loader_close(loader, &error))
+			{
+			GdkPixbuf *loaded_pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
+			if (loaded_pixbuf) icon_pixbuf = static_cast<GdkPixbuf *>(g_object_ref(loaded_pixbuf));
+			}
+		}
+	else
+		{
+		icon_pixbuf = gdk_pixbuf_new_from_stream(in_stream, nullptr, &error);
+		}
 	g_object_unref(in_stream);
 
 	if (error)
@@ -319,7 +338,7 @@ GdkPixbuf *pixbuf_fallback(FileData *fd, gint requested_width, gint requested_he
 {
 	GdkPixbuf *pixbuf;
 
-	switch (fd->format_class)
+	switch (fd ? fd->format_class : FORMAT_CLASS_UNKNOWN)
 		{
 		case FORMAT_CLASS_UNKNOWN:
 			pixbuf = pixbuf_inline(PIXBUF_INLINE_UNKNOWN);
@@ -341,6 +360,15 @@ GdkPixbuf *pixbuf_fallback(FileData *fd, gint requested_width, gint requested_he
 			break;
 		default:
 			pixbuf = pixbuf_inline(PIXBUF_INLINE_BROKEN);
+		}
+
+	if (!pixbuf)
+		{
+		pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8,
+		                        std::max(requested_width, 1),
+		                        std::max(requested_height, 1));
+		if (pixbuf) gdk_pixbuf_fill(pixbuf, 0x00000000);
+		return pixbuf;
 		}
 
 	if (requested_width && requested_height)
