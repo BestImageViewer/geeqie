@@ -210,6 +210,7 @@ ConfOptions *init_options(ConfOptions *options)
 	options->tree_descend_subdirs = FALSE;
 	options->view_dir_list_single_click_enter = TRUE;
 	options->circular_selection_lists = TRUE;
+	options->auto_next_folder = FALSE;
 	options->update_on_time_change = TRUE;
 	options->clipboard_selection = CLIPBOARD_BOTH;
 

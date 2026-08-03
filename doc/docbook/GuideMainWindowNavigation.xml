@@ -30,6 +30,7 @@
     <title>Stepping through images sequentially</title>
     <para>To change the displayed image to next or previous one within the same folder, use the respective PageDown and PageUp keys. The mouse can also be used to change the image by clicking the image display with the respective primary and middle buttons.</para>
     <para>To change to beginning or end of the image list, use the respective Home or End keys.</para>
+    <para>To navigate between sibling folders, use Ctrl+Shift+Right to go to the first image in the next folder, or Ctrl+Shift+Left to go to the last image in the previous folder. When the <emphasis role="underline"><link linkend="GuideOptionsBehavior" endterm="titleGuideOptionsBehavior" /></emphasis> preference <guilabel>Auto next folder</guilabel> is enabled, reaching the last image in a folder with Next Image will automatically advance to the first image in the next sibling folder, and reaching the first image with Previous Image will automatically go to the last image in the previous sibling folder.</para>
     <para />
   </section>
 </section>

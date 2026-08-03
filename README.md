@@ -45,6 +45,8 @@ Geeqie is a graphics file viewer. Basic features:
 
 * Single click image viewing / navigation.
 
+* Auto next folder - automatically advance to the next or previous sibling folder when reaching the last or first image in the current folder.
+
 * Zoom functions.
 
 * Thumbnails, with optional caching and .xvpics support.
