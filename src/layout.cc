@@ -2772,6 +2772,7 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	gtk_widget_show(lw->main_box);
 
 	layout_grid_setup(lw);
+	layout_menu_new_window_update(lw);
 	image_top_window_set_sync(lw->image, (lw->options.tools_float || lw->options.tools_hidden));
 
 	layout_util_sync(lw);
@@ -2800,6 +2801,10 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	if (layout_window_count() == 1)
 		{
 		gtk_widget_hide(lw->window);
+		}
+	else
+		{
+		gtk_window_present(GTK_WINDOW(lw->window));
 		}
 
 	file_data_register_notify_func(layout_image_notify_cb, lw, NOTIFY_PRIORITY_LOW);

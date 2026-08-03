@@ -2339,7 +2339,7 @@ static GList *layout_window_menu_list()
 	return g_list_sort(list, layout_window_menu_list_sort_cb);
 }
 
-static void layout_menu_new_window_update(LayoutWindow *lw)
+void layout_menu_new_window_update(LayoutWindow *lw)
 {
 	if (!lw || !lw->builder) return;
 

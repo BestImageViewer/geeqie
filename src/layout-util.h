@@ -49,6 +49,7 @@ void layout_util_status_update_write_all();
 
 void layout_recent_update_all();
 void layout_recent_add_path(const gchar *path);
+void layout_menu_new_window_update(LayoutWindow *lw);
 
 void layout_copy_path_update_all();
 
