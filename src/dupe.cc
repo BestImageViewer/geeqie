@@ -4238,7 +4238,7 @@ DupeWindow *dupe_window_new()
 	g_signal_connect(gtk_tree_view_get_column(GTK_TREE_VIEW(dw->listview), DUPE_COLUMN_DIMENSIONS - 1), "clicked", (GCallback)column_clicked_cb, dw);
 	g_signal_connect(gtk_tree_view_get_column(GTK_TREE_VIEW(dw->listview), DUPE_COLUMN_PATH - 1), "clicked", (GCallback)column_clicked_cb, dw);
 
-	gq_gtk_container_add(scrolled, dw->listview);
+	gq_gtk_container_add(scrolled, popover_parent_new(dw->listview));
 	gtk_widget_show(dw->listview);
 
 	dw->second_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -4264,7 +4264,7 @@ DupeWindow *dupe_window_new()
 
 	dupe_listview_add_column(dw, dw->second_listview, 1, _("Compare to:"), FALSE, FALSE);
 
-	gq_gtk_container_add(scrolled, dw->second_listview);
+	gq_gtk_container_add(scrolled, popover_parent_new(dw->second_listview));
 	gtk_widget_show(dw->second_listview);
 
 	dw->second_status_label = gtk_label_new("");
@@ -4527,16 +4527,23 @@ static void confirm_dir_list_destroy(GtkWidget *, gpointer data)
 	g_free(d);
 }
 
-static GtkWidget *dupe_confirm_dir_list(DupeWindow *dw, GList *list)
+static GtkWidget *dupe_confirm_dir_list(DupeWindow *dw, GtkWidget *parent, GList *list)
 {
 	GtkWidget *menu;
 	CDupeConfirmD *d;
+
+#if HAVE_GTK4_22
+	if (GtkWidget *ancestor = gtk_widget_get_ancestor(parent, GTK_TYPE_POPOVER_BIN))
+		{
+		parent = ancestor;
+		}
+#endif
 
 	d = g_new0(CDupeConfirmD, 1);
 	d->dw = dw;
 	d->list = list;
 
-	menu = popover_box_new();
+	menu = popover_box_new(parent, -1, -1);
 	g_signal_connect(G_OBJECT(menu), "destroy",
 			 G_CALLBACK(confirm_dir_list_destroy), d);
 
@@ -4547,6 +4554,8 @@ static GtkWidget *dupe_confirm_dir_list(DupeWindow *dw, GList *list)
 	popover_item_add_icon(menu, _("_Skip folders"), GQ_ICON_REMOVE, G_CALLBACK(confirm_dir_list_skip), d);
 	popover_item_add_divider(menu);
 	popover_item_add_icon(menu, _("Cancel"), GQ_ICON_CANCEL, G_CALLBACK(confirm_dir_list_cancel), d);
+
+	popover_box_popup(menu);
 
 	return menu;
 }
@@ -4617,7 +4626,7 @@ static void dupe_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 
 		if (file_data_list_has_dir(list))
 			{
-			GtkWidget *menu = dupe_confirm_dir_list(dw, filelist_copy(list));
+			GtkWidget *menu = dupe_confirm_dir_list(dw, drop_data->widget, filelist_copy(list));
 			(void)menu;
 			}
 		else
