@@ -3280,8 +3280,8 @@ static void dupe_popup_menu_centered(GMenu *menu_model, DupeWindow *dw, GtkWidge
 	if (gtk_widget_compute_bounds(pane, dw->window, &bounds))
 		{
 		popup_menu_at(menu_model, dw->window,
-		              bounds.origin.x + bounds.size.width / 2.0,
-		              bounds.origin.y + bounds.size.height / 2.0);
+		              bounds.origin.x + (bounds.size.width / 2.0),
+		              bounds.origin.y + (bounds.size.height / 2.0));
 		return;
 		}
 
