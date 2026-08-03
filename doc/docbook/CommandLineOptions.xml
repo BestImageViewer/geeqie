@@ -7,8 +7,8 @@
 <refmeta>
 <refentrytitle>GEEQIE</refentrytitle>
 <manvolnum>1</manvolnum>
-<refmiscinfo class='source'>July 2026</refmiscinfo>
-<refmiscinfo class='manual'>Geeqie 3.0 GTK4</refmiscinfo>
+<refmiscinfo class='source'>August 2026</refmiscinfo>
+<refmiscinfo class='manual'>Geeqie 3.1 GTK4</refmiscinfo>
 </refmeta>
 <refnamediv>
 <refname>Geeqie</refname>
@@ -28,7 +28,7 @@ zooming, panning, thumbnails and sorting images into collections.</para>
 
 <para>Geeqie is an image viewer.</para>
 
-<para>Version: Geeqie 3.0</para>
+<para>Version: Geeqie 3.1</para>
 </refsect2>
 
 <refsect2 id='help_options'><title>Help Options:</title>
