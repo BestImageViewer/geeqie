@@ -784,7 +784,7 @@ static void layout_menu_thumb_cb(GSimpleAction *action, GVariant *state, gpointe
 
 	layout_thumb_set(lw, enabled);
 
-	g_simple_action_set_state(action, g_variant_new_boolean(!enabled));
+	g_simple_action_set_state(action, state);
 }
 
 static void layout_menu_list_cb(GSimpleAction *action, GVariant *state, gpointer data)
