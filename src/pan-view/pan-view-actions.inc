@@ -133,7 +133,7 @@ static const ActionDef pan_actions[] =
 		{
 		"win.pan-win-escape",
 		nullptr,
-		N_("Exit fullscreen / Hide seach bar"),
+		N_("Exit fullscreen / Hide search bar"),
 		pan_escape_cb,
 		nullptr,
 		ActionStateType::NONE,
