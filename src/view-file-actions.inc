@@ -29,6 +29,32 @@ static const ActionDef view_file_actions[] =
 		},
 
 		{
+		"win.view-file-restore-copy",
+		GQ_ICON_COPY,
+		N_("Copy back to original location"),
+		vf_pop_menu_restore_action_cb<FALSE>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.view-file-restore-move",
+		GQ_ICON_GO_PREV,
+		N_("Move back to original location"),
+		vf_pop_menu_restore_action_cb<TRUE>,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.view-file-copy-path",
 		nullptr,
 		N_("Copy path"),

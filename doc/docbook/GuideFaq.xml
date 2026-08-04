@@ -39,6 +39,8 @@
         <para />
         <code>sudo chmod u+rwx .Trash-&lt;uid&gt;</code>
       </para>
+      <para>
+        If you are running Geeqie as a Snap, you may need to use Geeqie's own trash system. See <emphasis role="underline"><link linkend="Delete">Safe Delete</link></emphasis></para>
     </section>
   </section>
   <section id="Imageviewing">

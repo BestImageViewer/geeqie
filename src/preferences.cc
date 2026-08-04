@@ -1283,7 +1283,9 @@ static void filter_disable_cb(GtkWidget *widget, gpointer data)
 
 static void safe_delete_view_cb(GtkWidget *, gpointer)
 {
-	layout_set_path(nullptr, gtk_editable_get_text(GTK_EDITABLE(safe_delete_path_entry)));
+	const gchar *trash_path = gtk_editable_get_text(GTK_EDITABLE(safe_delete_path_entry));
+	g_autofree gchar *files_path = g_build_filename(trash_path, "files", nullptr);
+	layout_set_path(nullptr, isdir(files_path) ? files_path : trash_path);
 }
 
 static void safe_delete_clear_ok_cb(GenericDialog *, gpointer)

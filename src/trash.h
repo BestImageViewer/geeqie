@@ -20,10 +20,13 @@
 #define TRASH_H
 
 #include <glib.h>
+#include <gtk/gtk.h>
 
 void file_util_trash_clear();
 gboolean file_util_safe_unlink(const gchar *path);
 gchar *file_util_safe_delete_status();
+gchar *file_util_safe_trash_original_path(const gchar *path);
+gboolean file_util_safe_trash_restore(const gchar *path, gboolean move, GtkWidget *parent);
 
 #endif /* TRASH_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

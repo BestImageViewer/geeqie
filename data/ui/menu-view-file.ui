@@ -18,6 +18,7 @@
         <attribute name="label" translatable="yes">Open archive</attribute>
       </item>
     </section>
+    <section id="trash-restore-section" />
     <section>
       <item>
         <attribute name="action">win.view-file-copy</attribute>

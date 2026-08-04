@@ -44,6 +44,7 @@
 #include "options.h"
 #include "sort-type.h"
 #include "thumb.h"
+#include "trash.h"
 #include "ui-fileops.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
@@ -547,6 +548,21 @@ static void vf_pop_menu_move_cb(GtkWidget *, gpointer data)
 	file_util_move(nullptr, vf_pop_menu_file_list(vf), nullptr, vf->listview);
 }
 
+template<gboolean move>
+static void vf_pop_menu_restore_cb(GtkWidget *, gpointer data)
+{
+	auto vf = static_cast<ViewFile *>(data);
+	g_autoptr(FileDataList) list = vf_pop_menu_file_list(vf);
+
+	for (GList *work = list; work; work = work->next)
+		{
+		auto fd = static_cast<FileData *>(work->data);
+		file_util_safe_trash_restore(fd->path, move, vf->listview);
+		}
+
+	if (move) vf_refresh_idle(vf);
+}
+
 static void vf_pop_menu_rename_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -660,6 +676,12 @@ static void vf_pop_menu_copy_action_cb(GSimpleAction *, GVariant *, gpointer dat
 static void vf_pop_menu_move_action_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	vf_pop_menu_move_cb(nullptr, vf_from_action_data(data));
+}
+
+template<gboolean move>
+static void vf_pop_menu_restore_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_restore_cb<move>(nullptr, vf_from_action_data(data));
 }
 
 static void vf_pop_menu_rename_action_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -917,6 +939,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-view-file.ui");
 	GMenu *menu_model = G_MENU(gtk_builder_get_object(builder, "menu-view-file"));
 	GMenu *marks_section = G_MENU(gtk_builder_get_object(builder, "marks-section"));
+	GMenu *trash_restore_section = G_MENU(gtk_builder_get_object(builder, "trash-restore-section"));
 
 	if (vf->clicked_mark > 0 && vf->click_fd)
 		{
@@ -968,6 +991,18 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 		}
 
 	vf->editmenu_fd_list = vf_pop_menu_file_list(vf);
+	gboolean trash_selection = (vf->editmenu_fd_list != nullptr);
+	for (GList *work = vf->editmenu_fd_list; trash_selection && work; work = work->next)
+		{
+		auto fd = static_cast<FileData *>(work->data);
+		g_autofree gchar *original_path = file_util_safe_trash_original_path(fd->path);
+		trash_selection = (original_path != nullptr);
+		}
+	if (trash_selection)
+		{
+		gmenu_append_action_item(trash_restore_section, _("Copy back to original location"), "win.view-file-restore-copy");
+		gmenu_append_action_item(trash_restore_section, _("Move back to original location"), "win.view-file-restore-move");
+		}
 	GMenu *plugins_menu = G_MENU(gtk_builder_get_object(builder, "plugins-submenu"));
 	plugins_menu_populate(plugins_menu, "win.view-file-plugin-run", vf->editmenu_fd_list);
 

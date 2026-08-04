@@ -58,12 +58,13 @@
           <para>Moves deleted files to a temporary folder, for easy retrieval of deleted files. Files in the temporary folder are retained until the maximum size is reached, at which point deleting additional files will result in the removal of the oldest files to reclaim the space needed for the new files.</para>
           <note>
             <para>
-              Files moved to the Safe Delete folder are prefixed with a six digit number in the format:
-              <literal>nnnnnn_FILENAME</literal>
+              Deleted files retain their original names in the <literal>files</literal> subfolder. If a name is already present, Geeqie adds a numeric suffix before the file extension, for example <literal>image.2.jpg</literal>, to make it unique without preventing the file type from being recognized.
               <para />
-              This is used by the delete feature to distinguish which files to remove first when clearing space for new files.
+              For each file, the <literal>info</literal> subfolder contains a freedesktop.org-compatible <literal>.trashinfo</literal> file recording its original path and deletion date. This information can be used to restore the file manually.
               <para />
-              The digit counter increments with each deleted file.
+              When viewing the <literal>files</literal> subfolder in Geeqie, right-click a file to copy or move it back to its recorded original location. Copying leaves the trash entry intact; moving removes it after a successful restore.
+              <para />
+              Files created by older versions, with a six-digit prefix, remain in the Safe Delete folder and are still included when enforcing the maximum size or clearing the trash.
             </para>
           </note>
         </listitem>
@@ -105,7 +106,7 @@
           <guilabel>View button</guilabel>
         </term>
         <listitem>
-          <para>Changes the Geeqie main window to display the contents of the Safe Delete folder.</para>
+          <para>Changes the Geeqie main window to display the deleted files in the Safe Delete folder.</para>
         </listitem>
       </varlistentry>
     </variablelist>
