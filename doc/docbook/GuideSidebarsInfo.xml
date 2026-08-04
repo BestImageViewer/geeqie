@@ -17,6 +17,19 @@
     .
   </para>
   <para>It consists of several panes. Left-clicking on the pane title expands or collapses the pane. Right-clicking on the pane title or on empty space opens a context menu allowing you to add and remove panes, or move them up and down.</para>
+  <section id="AddingMetadataKeyPane">
+    <title>Adding a metadata key pane</title>
+    <para>
+      Select <guimenuitem>Metadata key…</guimenuitem> from the <guibutton>Add</guibutton> menu to create a pane for an individual metadata field. Enter the fully qualified XMP, Exif, or IPTC key and, optionally, a pane title. If the title is left empty, Geeqie uses the description of the metadata key when one is available.
+    </para>
+    <para>
+      Example keys include <code>Xmp.dc.title</code>, <code>Exif.Photo.DateTimeOriginal</code>, and <code>Iptc.Application2.Headline</code>. The <guibutton>OK</guibutton> button is enabled only when the key begins with <code>Xmp.</code>, <code>Exif.</code>, or <code>Iptc.</code>.
+    </para>
+    <note>
+      <para>XMP fields in these panes are editable. Exif and IPTC fields are displayed read-only.</para>
+    </note>
+    <para>The new pane is saved as part of the current layout configuration.</para>
+  </section>
   <para />
   <section id="Histogram">
     <title>Histogram</title>

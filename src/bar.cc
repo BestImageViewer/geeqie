@@ -29,6 +29,7 @@
 #include <config.h>
 
 #include "compat.h"
+#include "exif.h"
 #include "filedata.h"
 #include "intl.h"
 #include "layout.h"
@@ -37,6 +38,8 @@
 #include "metadata.h"
 #include "rcfile.h"
 #include "ui-misc.h"
+#include "ui-utildlg.h"
+#include "window.h"
 
 
 namespace
@@ -315,6 +318,73 @@ static void bar_expander_add_action_cb(GSimpleAction *, GVariant *parameter, gpo
 	if (!parameter) return;
 
 	const gchar *id = g_variant_get_string(parameter, nullptr);
+	if (g_str_equal(id, "metadata_key"))
+		{
+		struct MetadataPaneDialog
+		{
+			GenericDialog *gd;
+			GtkWidget *key_entry;
+			GtkWidget *title_entry;
+			GtkWidget *ok_button;
+		};
+
+		auto *mpd = g_new0(MetadataPaneDialog, 1);
+		mpd->gd = generic_dialog_new(_("Add metadata pane"), "add_metadata_pane", nullptr, FALSE,
+		                             +[](GenericDialog *gd, gpointer) { generic_dialog_close(gd); }, mpd);
+		g_signal_connect(mpd->gd->dialog, "destroy", G_CALLBACK(+[](GtkWidget *, gpointer data)
+			{
+			g_free(data);
+			}), mpd);
+
+		generic_dialog_add_message(mpd->gd, nullptr, _("Add metadata pane"),
+		                           _("Enter any XMP, EXIF, or IPTC metadata key."), FALSE);
+		mpd->ok_button = generic_dialog_add_button(mpd->gd, GQ_ICON_OK, "OK", +[](GenericDialog *, gpointer data)
+			{
+			auto *mpd = static_cast<MetadataPaneDialog *>(data);
+			const gchar *key = gtk_editable_get_text(GTK_EDITABLE(mpd->key_entry));
+			const gchar *title_text = gtk_editable_get_text(GTK_EDITABLE(mpd->title_entry));
+			if (!key || (!g_str_has_prefix(key, "Xmp.") && !g_str_has_prefix(key, "Exif.") && !g_str_has_prefix(key, "Iptc."))) return;
+
+			g_autofree gchar *description = exif_get_description_by_key(key);
+			const gchar *title = (title_text && *title_text) ? title_text : ((description && *description) ? description : key);
+			static guint pane_number = 0;
+			g_autofree gchar *id = g_strdup_printf("metadata_%08x_%u", g_str_hash(key), ++pane_number);
+			g_autofree gchar *config = g_markup_printf_escaped(
+				"<gq><layout id='_current_'><bar><pane_exif id='%s' title='%s' expanded='true'>"
+				"<entry key='%s' if_set='false' editable='%s' /></pane_exif></bar></layout></gq>",
+				id, title, key, g_str_has_prefix(key, "Xmp.") ? "true" : "false");
+			load_config_from_buf(config, strlen(config), FALSE);
+			generic_dialog_close(mpd->gd);
+			}, TRUE);
+		generic_dialog_add_button(mpd->gd, GQ_ICON_HELP, _("Help"), +[](GenericDialog *, gpointer)
+			{
+			help_window_show("GuideSidebarsInfo.html#AddingMetadataKeyPane");
+			}, FALSE);
+
+		GtkWidget *table = pref_table_new(mpd->gd->vbox, 2, 2, FALSE, TRUE);
+		pref_table_label(table, 0, 0, _("Key:"), GTK_ALIGN_END);
+		mpd->key_entry = gtk_entry_new();
+		gtk_entry_set_placeholder_text(GTK_ENTRY(mpd->key_entry), "Xmp.dc.title");
+		gtk_widget_set_sensitive(mpd->ok_button, FALSE);
+		g_signal_connect(mpd->key_entry, "changed", G_CALLBACK(+[](GtkEditable *editable, gpointer data)
+			{
+			auto *mpd = static_cast<MetadataPaneDialog *>(data);
+			const gchar *key = gtk_editable_get_text(editable);
+			gtk_widget_set_sensitive(mpd->ok_button, g_str_has_prefix(key, "Xmp.") ||
+			                                             g_str_has_prefix(key, "Exif.") ||
+			                                             g_str_has_prefix(key, "Iptc."));
+			}), mpd);
+		gtk_widget_set_size_request(mpd->key_entry, 320, -1);
+		gtk_grid_attach(GTK_GRID(table), mpd->key_entry, 1, 0, 1, 1);
+		generic_dialog_attach_default(mpd->gd, mpd->key_entry);
+
+		pref_table_label(table, 0, 1, _("Pane title:"), GTK_ALIGN_END);
+		mpd->title_entry = gtk_entry_new();
+		gtk_entry_set_placeholder_text(GTK_ENTRY(mpd->title_entry), _("Automatic"));
+		gtk_grid_attach(GTK_GRID(table), mpd->title_entry, 1, 1, 1, 1);
+		gtk_widget_show(mpd->gd->dialog);
+		return;
+		}
 	const gchar *config = bar_pane_get_default_config(id);
 
 	if (config) load_config_from_buf(config, strlen(config), FALSE);
@@ -419,6 +489,10 @@ static GtkWidget *bar_menu_add_button_new(GtkWidget *toolbar)
 		g_menu_item_set_action_and_target_value(item, "bar.add-pane", g_variant_new_string(pane->id));
 		g_menu_append_item(menu_model, item);
 		}
+
+	g_autoptr(GMenuItem) metadata_item = g_menu_item_new(_("Metadata key…"), nullptr);
+	g_menu_item_set_action_and_target_value(metadata_item, "bar.add-pane", g_variant_new_string("metadata_key"));
+	g_menu_append_item(menu_model, metadata_item);
 
 	GtkWidget *popover = gtk_popover_menu_new_from_model(G_MENU_MODEL(menu_model));
 

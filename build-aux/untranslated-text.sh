@@ -48,6 +48,7 @@ Error
 Exif.
 FIXME
 ImageLoaderType
+Iptc
 LUA_
 MonoSpace
 N_(
