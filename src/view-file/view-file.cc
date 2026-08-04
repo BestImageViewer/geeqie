@@ -1509,8 +1509,11 @@ static void vf_file_filter_rating_toggled_cb(GtkCheckButton *button, gpointer da
 		}
 }
 
-static void vf_file_filter_class_set_all(FileFilterMenuData *menu_data, gboolean state)
+template<gboolean state>
+static void vf_file_filter_class_set_all_cb(GSimpleAction *, GVariant *, gpointer data)
 {
+	auto *menu_data = static_cast<FileFilterMenuData *>(data);
+
 	for (gint i = 0; i < FILE_FORMAT_CLASSES; i++)
 		{
 		options->class_filter[i] = state;
@@ -1522,8 +1525,11 @@ static void vf_file_filter_class_set_all(FileFilterMenuData *menu_data, gboolean
 	vf_refresh(menu_data->vf);
 }
 
-static void vf_file_filter_rating_set_all(FileFilterMenuData *menu_data, gboolean state)
+template<gboolean state>
+static void vf_file_filter_rating_set_all_cb(GtkWidget *, gpointer data)
 {
+	auto *menu_data = static_cast<FileFilterMenuData *>(data);
+
 	options->rating_filter = state ? 0x00FFFF : 0;
 	menu_data->updating_rating_buttons = TRUE;
 	for (gint i = 0; i < FORMAT_RATING_COUNT; i++)
@@ -1533,6 +1539,15 @@ static void vf_file_filter_rating_set_all(FileFilterMenuData *menu_data, gboolea
 	menu_data->updating_rating_buttons = FALSE;
 
 	vf_refresh(menu_data->vf);
+}
+
+template<gboolean state>
+static void vf_file_filter_add_rating_set_all(GtkWidget *parent_box, const char *label, gpointer data)
+{
+	GtkWidget *button = gtk_button_new_with_label(label);
+	gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
+	g_signal_connect(button, "clicked", G_CALLBACK(vf_file_filter_rating_set_all_cb<state>), data);
+	gtk_box_append(GTK_BOX(parent_box), button);
 }
 
 static void vf_file_filter_rating_greater_equal_cb(GtkWidget *item, gpointer data)
@@ -1551,16 +1566,6 @@ static void vf_file_filter_rating_greater_equal_cb(GtkWidget *item, gpointer dat
 	menu_data->updating_rating_buttons = FALSE;
 	vf_refresh(menu_data->vf);
 	gtk_popover_popdown(GTK_POPOVER(g_object_get_data(G_OBJECT(item), "rating-popover")));
-}
-
-static void vf_file_filter_class_select_all_cb(GSimpleAction *, GVariant *, gpointer data)
-{
-	vf_file_filter_class_set_all(static_cast<FileFilterMenuData *>(data), TRUE);
-}
-
-static void vf_file_filter_class_select_none_cb(GSimpleAction *, GVariant *, gpointer data)
-{
-	vf_file_filter_class_set_all(static_cast<FileFilterMenuData *>(data), FALSE);
 }
 
 static GtkWidget *class_filter_popover_new(ViewFile *vf)
@@ -1586,8 +1591,8 @@ static GtkWidget *class_filter_popover_new(ViewFile *vf)
 
 	g_autoptr(GSimpleAction) select_all_action = g_simple_action_new("class-select-all", nullptr);
 	g_autoptr(GSimpleAction) select_none_action = g_simple_action_new("class-select-none", nullptr);
-	g_signal_connect(select_all_action, "activate", G_CALLBACK(vf_file_filter_class_select_all_cb), menu_data);
-	g_signal_connect(select_none_action, "activate", G_CALLBACK(vf_file_filter_class_select_none_cb), menu_data);
+	g_signal_connect(select_all_action, "activate", G_CALLBACK(vf_file_filter_class_set_all_cb<TRUE>), menu_data);
+	g_signal_connect(select_none_action, "activate", G_CALLBACK(vf_file_filter_class_set_all_cb<FALSE>), menu_data);
 	g_action_map_add_action(G_ACTION_MAP(menu_data->action_group), G_ACTION(select_all_action));
 	g_action_map_add_action(G_ACTION_MAP(menu_data->action_group), G_ACTION(select_none_action));
 
@@ -1649,20 +1654,9 @@ static GtkWidget *rating_filter_popover_new(ViewFile *vf)
 		}
 
 	gtk_box_append(GTK_BOX(vbox), gtk_separator_new(GTK_ORIENTATION_HORIZONTAL));
-	GtkWidget *select_all = gtk_button_new_with_label(_("Select all"));
-	gtk_button_set_has_frame(GTK_BUTTON(select_all), FALSE);
-	g_signal_connect(select_all, "clicked", G_CALLBACK(+[](GtkWidget *, gpointer data)
-		{
-		vf_file_filter_rating_set_all(static_cast<FileFilterMenuData *>(data), TRUE);
-		}), menu_data);
-	gtk_box_append(GTK_BOX(vbox), select_all);
-	GtkWidget *select_none = gtk_button_new_with_label(_("Ignore Rating"));
-	gtk_button_set_has_frame(GTK_BUTTON(select_none), FALSE);
-	g_signal_connect(select_none, "clicked", G_CALLBACK(+[](GtkWidget *, gpointer data)
-		{
-		vf_file_filter_rating_set_all(static_cast<FileFilterMenuData *>(data), FALSE);
-		}), menu_data);
-	gtk_box_append(GTK_BOX(vbox), select_none);
+
+	vf_file_filter_add_rating_set_all<TRUE>(vbox, _("Select all"), menu_data);
+	vf_file_filter_add_rating_set_all<FALSE>(vbox, _("Ignore Rating"), menu_data);
 
 	g_object_set_data_full(G_OBJECT(popover), "file-filter-menu-data", menu_data, file_filter_menu_data_free);
 
