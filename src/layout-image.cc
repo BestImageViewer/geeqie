@@ -770,21 +770,28 @@ static void layout_image_pop_menu_hide_selectable_toolbars_cb(GSimpleAction *act
 
 #include "layout-image-actions.inc"
 
+static GtkWidget *layout_image_pop_menu_action_window(LayoutWindow *lw)
+{
+	return lw->full_screen ? lw->full_screen->window : lw->window;
+}
+
 static void layout_image_pop_menu_ensure_actions(LayoutWindow *lw)
 {
-	if (g_object_get_data(G_OBJECT(lw->window), LAYOUT_IMAGE_POPUP_ACTIONS_KEY))
+	GtkWidget *window = layout_image_pop_menu_action_window(lw);
+	if (g_object_get_data(G_OBJECT(window), LAYOUT_IMAGE_POPUP_ACTIONS_KEY))
 		{
 		return;
 		}
 
 	GApplication *app = g_application_get_default();
-	register_actions_from_table(GTK_APPLICATION(app), lw->window, layout_image_actions, get_keyfile_merged(), lw);
-	g_object_set_data(G_OBJECT(lw->window), LAYOUT_IMAGE_POPUP_ACTIONS_KEY, GINT_TO_POINTER(TRUE));
+	register_actions_from_table(GTK_APPLICATION(app), window, layout_image_actions, get_keyfile_merged(), lw);
+	g_object_set_data(G_OBJECT(window), LAYOUT_IMAGE_POPUP_ACTIONS_KEY, GINT_TO_POINTER(TRUE));
 }
 
 static void layout_image_pop_menu_set_enabled(LayoutWindow *lw, const gchar *name, gboolean enabled)
 {
-	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), name);
+	GtkWidget *window = layout_image_pop_menu_action_window(lw);
+	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(window), name);
 	if (action)
 		{
 		g_simple_action_set_enabled(G_SIMPLE_ACTION(action), enabled);
@@ -793,7 +800,8 @@ static void layout_image_pop_menu_set_enabled(LayoutWindow *lw, const gchar *nam
 
 static void layout_image_pop_menu_set_boolean_state(LayoutWindow *lw, const gchar *name, gboolean state)
 {
-	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(lw->window), name);
+	GtkWidget *window = layout_image_pop_menu_action_window(lw);
+	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(window), name);
 	if (action)
 		{
 		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(state));
