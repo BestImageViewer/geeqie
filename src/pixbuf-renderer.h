@@ -253,6 +253,12 @@ struct PixbufRenderer
 	gint scroller_xinc;
 	gint scroller_yinc;
 
+	guint birdseye_hide_id;
+	gint birdseye_overlay;
+	gint birdseye_width;
+	gint birdseye_height;
+	gboolean birdseye_drag;
+
 	gint orientation;
 
 	gint stereo_mode;

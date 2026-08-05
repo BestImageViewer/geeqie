@@ -157,6 +157,7 @@ ConfOptions *conf_options_new()
 
 	options->lazy_image_sync = FALSE;
 	options->mousewheel_scrolls = FALSE;
+	options->show_birdseye = FALSE;
 	options->image_lm_click_nav = TRUE;
 	options->image_l_click_archive = FALSE;
 	options->image_l_click_video = TRUE;

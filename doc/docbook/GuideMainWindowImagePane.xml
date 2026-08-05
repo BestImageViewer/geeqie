@@ -86,6 +86,12 @@
       </para>
       <para>To scale the image size hold down the Ctrl key and scroll the mouse wheel up to zoom in, or down to zoom out.</para>
       <para />
+      <section id="BirdsEyeView">
+        <title>Bird's-eye view</title>
+        <para>When <emphasis>Show bird's-eye view when zoomed in</emphasis> is enabled in the <emphasis role="underline"><link linkend="GuideOptionsBehavior">Behavior Options</link></emphasis>, zooming or panning an image that is larger than the image pane temporarily displays a small overview of the complete image in the upper-right corner. A white rectangle in the overview indicates the region currently visible in the image pane. This feature is disabled by default.</para>
+        <para>Click a position in the overview to center that part of the image in the image pane. Press and hold the primary mouse button in the overview, then move the pointer to pan directly to another part of the image.</para>
+        <para>The overview remains visible while it is being used and hides automatically after a short period without zooming or scrolling. It is not displayed when the complete image fits inside the image pane.</para>
+      </section>
       <section id="SmoothScroll">
         <title>Smooth Scroll</title>
         <para>To start the smooth scroll function hold down the Control key and click the left mouse button. An icon will appear at the location of the mouse pointer, the mouse can then be positioned to pan the image. The image will pan in the direction of the mouse pointer relative to the icon. The pan speed will increase in proportion to the distance that the pointer is from the center of the icon. To end the smooth scroll function click the left mouse button within the image pane.</para>

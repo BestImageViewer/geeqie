@@ -335,6 +335,7 @@ static void config_window_apply(const ConfOptions *c_options)
 	options->slideshow = c_options->slideshow;
 
 	options->mousewheel_scrolls = c_options->mousewheel_scrolls;
+	options->show_birdseye = c_options->show_birdseye;
 	options->image_lm_click_nav = c_options->image_lm_click_nav;
 	options->image_l_click_archive = c_options->image_l_click_archive;
 	options->image_l_click_video = c_options->image_l_click_video;
@@ -3239,6 +3240,8 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 			  1, 32, 1, options->keyboard_scroll_step, reinterpret_cast<int *>(&c_options->keyboard_scroll_step));
 	pref_checkbox_new_int(group, _("Mouse wheel scrolls image"),
 			      options->mousewheel_scrolls, &c_options->mousewheel_scrolls);
+	pref_checkbox_new_int(group, _("Show bird's-eye view when zoomed in"),
+			      options->show_birdseye, &c_options->show_birdseye);
 	pref_checkbox_new_int(group, _("Navigation by left or middle click on image"),
 			      options->image_lm_click_nav, &c_options->image_lm_click_nav);
 	pref_checkbox_new_int(group, _("Open archive by left click on image"),

@@ -298,6 +298,14 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <guilabel>Show bird's-eye view when zoomed in</guilabel>
+        </term>
+        <listitem>
+          <para>When enabled, zooming or panning an image that is larger than the image pane temporarily displays an overview of the complete image. The overview indicates the visible region and can be clicked or dragged to pan the image. It hides automatically after a short period of inactivity. This option is disabled by default.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <guilabel>Navigation by left or middle click on image</guilabel>
         </term>
         <listitem>

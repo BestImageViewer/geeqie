@@ -88,6 +88,7 @@ struct ConfOptions
 	guint keyboard_scroll_step;
 	gboolean place_dialogs_under_mouse;
 	gboolean mousewheel_scrolls;
+	gboolean show_birdseye;
 	gboolean image_lm_click_nav;
 	gboolean image_l_click_archive;
 	gboolean image_l_click_video;
