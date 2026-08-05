@@ -306,6 +306,16 @@ static void collection_table_toggle_info(CollectTable *ct)
 	collection_table_populate_at_new_size(ct, allocation.width, allocation.height, TRUE);
 }
 
+static void collection_table_toggle_marks(CollectTable *ct)
+{
+	GtkAllocation allocation;
+	ct->show_marks = !ct->show_marks;
+	options->show_collection_marks = ct->show_marks;
+
+	gtk_widget_get_allocation(ct->listview, &allocation);
+	collection_table_populate_at_new_size(ct, allocation.width, allocation.height, TRUE);
+}
+
 static gint collection_table_get_icon_width(CollectTable *ct)
 {
 	if (!ct->show_text && !ct->show_infotext) return options->thumbnails.size.width;
@@ -853,6 +863,16 @@ static void collection_table_popup_show_infotext_cb(GSimpleAction *action, GVari
 	collection_table_toggle_info(ct);
 }
 
+static void collection_table_popup_show_marks_cb(GSimpleAction *action, GVariant *state, gpointer data)
+{
+	auto ct = static_cast<CollectTable *>(data);
+
+	bool enabled = g_variant_get_boolean(state);
+	g_simple_action_set_state(action, g_variant_new_boolean(enabled));
+
+	collection_table_toggle_marks(ct);
+}
+
 static void collection_table_popup_destroy_cb(GtkWidget *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
@@ -1330,13 +1350,49 @@ static void collection_table_press_cb(GtkGestureClick *gesture,  gint n_press, g
 	auto ct = static_cast<CollectTable *>(data);
 	GtkTreeIter iter;
 	CollectInfo *info;
+	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
+
+	if (button == GDK_BUTTON_PRIMARY && ct->show_marks)
+		{
+		GtkTreePath *path = nullptr;
+		GtkTreeViewColumn *column = nullptr;
+		if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(ct->listview), static_cast<gint>(x), static_cast<gint>(y),
+		                                  &path, &column, nullptr, nullptr))
+			{
+			GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(ct->listview));
+			GtkTreeIter row;
+			if (gtk_tree_model_get_iter(model, &row, path))
+				{
+				gtk_tree_view_column_cell_set_cell_data(column, model, &row, FALSE, FALSE);
+				GList *cells = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
+				GdkRectangle area;
+				gtk_tree_view_get_cell_area(GTK_TREE_VIEW(ct->listview), path, column, &area);
+				gint mark = cells ? gqv_cell_renderer_icon_mark_at(GTK_CELL_RENDERER(cells->data), ct->listview, &area, x, y) : -1;
+				g_list_free(cells);
+
+				if (mark >= 0)
+					{
+					GList *list;
+					gtk_tree_model_get(model, &row, CTABLE_COLUMN_POINTER, &list, -1);
+					gint column_number = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_number"));
+					auto *mark_info = static_cast<CollectInfo *>(g_list_nth_data(list, column_number));
+					if (mark_info && mark_info->fd)
+						{
+						file_data_set_mark(mark_info->fd, mark, !file_data_get_mark(mark_info->fd, mark));
+						gtk_tree_path_free(path);
+						gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+						return;
+						}
+					}
+				}
+			gtk_tree_path_free(path);
+			}
+		}
 
 	info = collection_table_find_data_by_coord(ct, static_cast<gint>(x), static_cast<gint>(y), &iter);
 
 	ct->click_info = info;
 	collection_table_selection_add(ct, ct->click_info, SELECTION_PRELIGHT, &iter);
-
-	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
 
 	switch (button)
 		{
@@ -2181,7 +2237,7 @@ static void collection_table_cell_data_cb(GtkTreeViewColumn *, GtkCellRenderer *
 	             "foreground-set", foreground_set,
 	             "has-focus", ct->focus_info == info,
 	             "marks", info->fd ? file_data_get_marks(info->fd) : 0,
-	             "show-marks", info->fd != nullptr,
+	             "show-marks", ct->show_marks && info->fd != nullptr,
 	             nullptr);
 	}
 
@@ -2347,6 +2403,7 @@ CollectTable *collection_table_new(CollectionData *cd)
 	ct->show_text = options->show_icon_names;
 	ct->show_stars = options->show_star_rating;
 	ct->show_infotext = options->show_collection_infotext;
+	ct->show_marks = options->show_collection_marks;
 
 	ct->scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(ct->scrolled), true);
@@ -2413,6 +2470,8 @@ CollectTable *collection_table_new(CollectionData *cd)
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->show_star_rating));
 	action = g_action_map_lookup_action(G_ACTION_MAP(cw->window), "collection-win-show-infotext");
 	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->show_collection_infotext));
+	action = g_action_map_lookup_action(G_ACTION_MAP(cw->window), "collection-win-show-marks");
+	g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(options->show_collection_marks));
 
 	return ct;
 }

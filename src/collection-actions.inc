@@ -329,6 +329,19 @@ static const ActionDef collection_actions[] =
 		},
 
 		{
+		"win.collection-win-show-marks",
+		nullptr,
+		N_("Show marks"),
+		collection_table_popup_show_marks_cb,
+		nullptr,
+		ActionStateType::BOOLEAN,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.collection-win-show-star-rating",
 		nullptr,
 		N_("Show star rating"),

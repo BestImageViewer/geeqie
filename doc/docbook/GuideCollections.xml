@@ -57,6 +57,12 @@
       in a main window, but with the addition that the contents of the collection can be organized with drag and drop.
     </para>
     <para>
+      Select <menuchoice><guimenu>View</guimenu><guimenuitem>Show marks</guimenuitem></menuchoice>
+      to display the ten file-mark checkboxes below each thumbnail. This option is off by default.
+      Clicking a checkbox sets or clears the corresponding mark for that file. Mark definitions and
+      keyboard shortcuts are shared with the file pane.
+    </para>
+    <para>
       A
       <emphasis role="strong">context menu</emphasis>
       is available for the icon pane by right clicking the mouse or pressing the Menu key.

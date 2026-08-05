@@ -161,6 +161,10 @@
         <attribute name="label" translatable="yes">Show star rating</attribute>
       </item>
       <item>
+        <attribute name="action">win.collection-win-show-marks</attribute>
+        <attribute name="label" translatable="yes">Show marks</attribute>
+      </item>
+      <item>
         <attribute name="action">win.collection-win-show-infotext</attribute>
         <attribute name="label" translatable="yes">Show infotext</attribute>
       </item>

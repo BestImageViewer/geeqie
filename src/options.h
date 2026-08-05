@@ -96,6 +96,7 @@ struct ConfOptions
 	gboolean show_icon_names;
 	gboolean show_star_rating;
 	gboolean show_collection_infotext;
+	gboolean show_collection_marks;
 	gboolean draw_rectangle;
 	gboolean show_predefined_keyword_tree;
 	gboolean overunderexposed;

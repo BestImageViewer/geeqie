@@ -400,6 +400,7 @@ static void write_global_attributes(GString *outstr, gint indent)
 	WRITE_NL(); WRITE_BOOL(*options, show_icon_names);
 	WRITE_NL(); WRITE_BOOL(*options, show_star_rating);
 	WRITE_NL(); WRITE_BOOL(*options, show_collection_infotext);
+	WRITE_NL(); WRITE_BOOL(*options, show_collection_marks);
 	WRITE_NL(); WRITE_BOOL(*options, show_predefined_keyword_tree);
 	WRITE_SEPARATOR();
 
@@ -877,6 +878,7 @@ static gboolean load_global_params(const gchar **attribute_names, const gchar **
 		if (READ_BOOL(*options, show_icon_names)) continue;
 		if (READ_BOOL(*options, show_star_rating)) continue;
 		if (READ_BOOL(*options, show_collection_infotext)) continue;
+		if (READ_BOOL(*options, show_collection_marks)) continue;
 		if (READ_BOOL(*options, show_predefined_keyword_tree)) continue;
 
 		if (READ_BOOL(*options, tree_descend_subdirs)) continue;

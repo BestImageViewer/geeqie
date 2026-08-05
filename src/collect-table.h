@@ -67,6 +67,7 @@ struct CollectTable
 	gboolean show_text;
 	gboolean show_stars;
 	gboolean show_infotext;
+	gboolean show_marks;
 
 	GList *editmenu_fd_list; /**< file list for edit menu */
 
