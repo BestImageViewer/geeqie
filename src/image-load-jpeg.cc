@@ -44,6 +44,13 @@
 #include "jpeg-parser.h"
 #include "pixbuf-renderer.h"
 
+namespace
+{
+
+constexpr guint64 JPEG_MAX_DECODED_BYTES = 1ULL << 30; // One GiB, excluding renderer and cache overhead.
+
+}
+
 /* error handler data */
 struct error_handler_data {
 	struct jpeg_error_mgr pub;
@@ -347,6 +354,27 @@ gboolean ImageLoaderJpeg::write(const guchar *buf, gsize &chunk_size, gsize coun
 		}
 	}
 	jpeg_calc_output_dimensions(&cinfo);
+
+	const guint64 output_width = stereo ? static_cast<guint64>(cinfo.output_width) * 2 : cinfo.output_width;
+	const guint64 output_channels = cinfo.out_color_space == JCS_CMYK ? 4 : 3;
+	const guint64 output_rowstride = (output_width * output_channels + 3) & ~3ULL;
+	const guint64 decoded_bytes = output_rowstride * cinfo.output_height;
+	const guint64 source_width = stereo ? static_cast<guint64>(cinfo.image_width) * 2 : cinfo.image_width;
+	const guint64 source_rowstride = (source_width * output_channels + 3) & ~3ULL;
+	const guint64 progressive_working_bytes = cinfo.progressive_mode ? source_rowstride * cinfo.image_height : 0;
+	const guint64 required_bytes = std::max(decoded_bytes, progressive_working_bytes);
+	if (required_bytes > JPEG_MAX_DECODED_BYTES)
+		{
+		g_autofree gchar *decoded_size = g_format_size(required_bytes);
+		g_autofree gchar *limit_size = g_format_size(JPEG_MAX_DECODED_BYTES);
+		g_set_error(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY,
+		            _("JPEG image is too large to decode safely (%u × %u, approximately %s working memory; limit %s)"),
+		            cinfo.image_width, cinfo.image_height, decoded_size, limit_size);
+		jpeg_destroy_decompress(&cinfo);
+		if (stereo) jpeg_destroy_decompress(&cinfo2);
+		return FALSE;
+		}
+
 	if (stereo)
 		{
 		cinfo2.scale_num = cinfo.scale_num;

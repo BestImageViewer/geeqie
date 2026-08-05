@@ -47,6 +47,7 @@
 #include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "ui-fileops.h"
+#include "ui-utildlg.h"
 
 struct ExifData;
 class FileCache;
@@ -942,7 +943,21 @@ static void image_load_size_prepared_cb(ImageLoader *, const GqSize *size, gpoin
 
 static void image_load_error_cb(ImageLoader *il, gpointer data)
 {
+	auto imd = static_cast<ImageWindow *>(data);
+	g_autoptr(GError) error = image_loader_dup_error(il);
+
 	DEBUG_1("%s image error", get_exec_time());
+	image_state_set(imd, IMAGE_STATE_ERROR);
+
+	if (error)
+		{
+		log_printf("%s: %s\n", _("Image load failed"), error->message);
+		if (error->domain == GDK_PIXBUF_ERROR && error->code == GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY)
+			{
+			warning_dialog(_("Image is too large"), error->message,
+			               GQ_ICON_DIALOG_WARNING, imd->top_window);
+			}
+		}
 
 	/* even on error handle it like it was done,
 	 * since we have a pixbuf with _something_ */

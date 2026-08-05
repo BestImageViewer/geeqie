@@ -226,7 +226,6 @@ static void image_loader_class_init(ImageLoaderClass *loader_class)
 
 }
 
-#ifdef DEBUG
 static const gchar *image_loader_get_error(ImageLoader *il)
 {
 	if (!il) return nullptr;
@@ -235,7 +234,14 @@ static const gchar *image_loader_get_error(ImageLoader *il)
 
 	return il->error ? il->error->message : nullptr;
 }
-#endif
+
+GError *image_loader_dup_error(ImageLoader *il)
+{
+	if (!il) return nullptr;
+
+	g_autoptr(GMutexLocker) locker = g_mutex_locker_new(il->data_mutex);
+	return il->error ? g_error_copy(il->error) : nullptr;
+}
 
 static void image_loader_finalize(GObject *object)
 {

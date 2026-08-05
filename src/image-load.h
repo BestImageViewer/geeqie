@@ -140,6 +140,7 @@ gdouble image_loader_get_percent(ImageLoader *il);
 gboolean image_loader_get_is_done(ImageLoader *il);
 FileData *image_loader_get_fd(ImageLoader *il);
 gboolean image_loader_get_shrunk(ImageLoader *il);
+GError *image_loader_dup_error(ImageLoader *il);
 
 gboolean image_load_dimensions(FileData *fd, GqSize &dimensions);
 
