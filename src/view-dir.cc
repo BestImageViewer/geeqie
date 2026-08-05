@@ -23,7 +23,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <array>
 #include <cstring>
 
 #include <gio/gio.h>
@@ -44,7 +43,6 @@
 #include "layout-util.h"
 #include "layout.h"
 #include "main-defines.h"
-#include "menu.h"
 #include "misc.h"
 #include "options.h"
 #include "ui-fileops.h"
@@ -61,11 +59,6 @@ namespace
 constexpr auto VIEW_DIR_DATA_KEY = "view-dir";
 constexpr gint VIEW_DIR_DND_SCROLL_REGION = 20;
 
-GIcon *load_icon(const gchar *icon_name)
-{
-	return g_themed_icon_new(icon_name);
-}
-
 GIcon *create_folder_icon_with_emblem(const gchar *emblem)
 {
 	g_autoptr(GIcon) icon_folder = g_themed_icon_new(GQ_ICON_DIRECTORY);
@@ -80,9 +73,9 @@ PixmapFolders *folder_icons_new()
 {
 	auto pf = g_new0(PixmapFolders, 1);
 
-	pf->close  = load_icon(GQ_ICON_DIRECTORY);
-	pf->open   = load_icon(GQ_ICON_OPEN);
-	pf->parent = load_icon(GQ_ICON_GO_UP);
+	pf->close  = g_themed_icon_new(GQ_ICON_DIRECTORY);
+	pf->open   = g_themed_icon_new(GQ_ICON_OPEN);
+	pf->parent = g_themed_icon_new(GQ_ICON_GO_UP);
 
 	pf->deny = create_folder_icon_with_emblem(GQ_ICON_UNREADABLE);
 
@@ -106,7 +99,8 @@ void folder_icons_free(PixmapFolders *pf)
 
 	g_free(pf);
 }
-}
+
+} // namespace
 
 static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data);
 
