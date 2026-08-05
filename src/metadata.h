@@ -64,6 +64,7 @@ gboolean metadata_write_GPS_coord(FileData *fd, const gchar *key, gdouble value)
 
 gboolean metadata_append_string(FileData *fd, const gchar *key, const char *value);
 gboolean metadata_append_list(FileData *fd, const gchar *key, const GList *values);
+gboolean metadata_remove_list(FileData *fd, const gchar *key, const GList *values);
 
 GList *string_to_keywords_list(const gchar *text);
 

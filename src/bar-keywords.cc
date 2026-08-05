@@ -441,6 +441,23 @@ void bar_pane_keywords_set_selection_cb(GSimpleAction *, GVariant *, gpointer da
 	g_list_free_full(keywords, g_free);
 }
 
+void bar_pane_keywords_remove_selection_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *pkd = static_cast<PaneKeywordsData *>(data);
+	GList *keywords = keyword_list_pull_selected(pkd->keyword_view);
+
+	g_autoptr(FileDataList) list = layout_selection_list(pkd->pane.lw);
+	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
+
+	for (GList *work = list; work; work = work->next)
+		{
+		auto *fd = static_cast<FileData *>(work->data);
+		metadata_remove_list(fd, KEYWORD_KEY, keywords);
+		}
+
+	g_list_free_full(keywords, g_free);
+}
+
 
 void bar_pane_keywords_notify_cb(FileData *fd, NotifyType type, gpointer data)
 {
@@ -475,6 +492,7 @@ void bar_pane_keywords_set_extra_menu(PaneKeywordsData *pkd)
 {
 	static const GActionEntry keyword_actions[] = {
 		{ "append-to-selection",  bar_pane_keywords_set_selection_cb<TRUE>,  nullptr, nullptr, nullptr, {} },
+		{ "remove-from-selection", bar_pane_keywords_remove_selection_cb,    nullptr, nullptr, nullptr, {} },
 		{ "replace-in-selection", bar_pane_keywords_set_selection_cb<FALSE>, nullptr, nullptr, nullptr, {} },
 	};
 
@@ -487,6 +505,10 @@ void bar_pane_keywords_set_extra_menu(PaneKeywordsData *pkd)
 	g_autoptr(GMenuItem) append_item = g_menu_item_new(_("Add selected keywords to selected files"), "keywords.append-to-selection");
 	g_menu_item_set_attribute(append_item, "verb-icon", "s", GQ_ICON_ADD);
 	g_menu_append_item(menu, append_item);
+
+	g_autoptr(GMenuItem) remove_item = g_menu_item_new(_("Remove selected keywords from selected files"), "keywords.remove-from-selection");
+	g_menu_item_set_attribute(remove_item, "verb-icon", "s", GQ_ICON_REMOVE);
+	g_menu_append_item(menu, remove_item);
 
 	g_autoptr(GMenuItem) replace_item = g_menu_item_new(_("Replace existing keywords in selected files with selected keywords"), "keywords.replace-in-selection");
 	g_menu_item_set_attribute(replace_item, "verb-icon", "s", GQ_ICON_REPLACE);
@@ -1040,6 +1062,41 @@ void bar_pane_keywords_add_to_selected_cb(GtkWidget *, gpointer data)
 	g_list_free_full(keywords, g_free);
 }
 
+/**
+ * @brief Callback for removing the selected keyword from all selected images.
+ */
+void bar_pane_keywords_remove_from_selected_cb(GtkWidget *, gpointer data)
+{
+	auto pkd = static_cast<PaneKeywordsData *>(data);
+	if (!pkd->click_tpath) return;
+
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(pkd->keyword_treeview));
+	GtkTreeIter iter;
+	if (!gtk_tree_model_get_iter(model, &iter, pkd->click_tpath)) return;
+
+	gboolean is_keyword = TRUE;
+	gtk_tree_model_get(model, &iter, FILTER_KEYWORD_COLUMN_IS_KEYWORD, &is_keyword, -1);
+	if (!is_keyword) return;
+
+	GtkTreeModel *keyword_tree = gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
+	GtkTreeIter child_iter;
+	gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(model), &child_iter, &iter);
+
+	g_autoptr(FileDataList) list = layout_selection_list(pkd->pane.lw);
+	list = file_data_process_groups_in_selection(list, FALSE, nullptr);
+	for (GList *work = list; work; work = work->next)
+		{
+		auto fd = static_cast<FileData *>(work->data);
+		GList *keywords = metadata_read_list(fd, KEYWORD_KEY, METADATA_PLAIN);
+		if (keyword_tree_is_set(keyword_tree, &child_iter, keywords))
+			{
+			keyword_tree_reset(keyword_tree, &child_iter, &keywords);
+			metadata_write_list(fd, KEYWORD_KEY, keywords);
+			}
+		g_list_free_full(keywords, g_free);
+		}
+}
+
 void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint x, gint y)
 {
 	GtkWidget *menu;
@@ -1086,6 +1143,9 @@ void bar_pane_keywords_menu_popup(GtkWidget *widget, PaneKeywordsData *pkd, gint
 			{
 			g_autofree gchar *text = g_strdup_printf(_("Add \"%s\" to all selected images"), name);
 			popover_item_add_icon(menu, text, GQ_ICON_ADD, G_CALLBACK(bar_pane_keywords_add_to_selected_cb), pkd);
+
+			g_autofree gchar *remove_text = g_strdup_printf(_("Remove \"%s\" from all selected images"), name);
+			popover_item_add_icon(menu, remove_text, GQ_ICON_REMOVE, G_CALLBACK(bar_pane_keywords_remove_from_selected_cb), pkd);
 			}
 		popover_item_add_divider(menu);
 

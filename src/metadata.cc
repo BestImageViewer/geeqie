@@ -1032,6 +1032,27 @@ static GList *find_string_in_list(GList *list, const gchar *string)
 	return g_list_find_custom(list, string_casefold, string_compare_utf8nocase);
 }
 
+gboolean metadata_remove_list(FileData *fd, const gchar *key, const GList *values)
+{
+	GList *list = metadata_read_list(fd, key, METADATA_PLAIN);
+	gboolean changed = FALSE;
+
+	for (const GList *value = values; value; value = value->next)
+		{
+		GList *match;
+		while ((match = find_string_in_list(list, static_cast<const gchar *>(value->data))))
+			{
+			g_free(match->data);
+			list = g_list_delete_link(list, match);
+			changed = TRUE;
+			}
+		}
+
+	const gboolean ret = !changed || metadata_write_list(fd, key, list);
+	g_list_free_full(list, g_free);
+	return ret;
+}
+
 GList *string_to_keywords_list(const gchar *text)
 {
 	GList *list = nullptr;
