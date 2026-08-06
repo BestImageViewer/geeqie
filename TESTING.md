@@ -22,7 +22,7 @@ See the Unit tests section for how to enable unit tests.
 
 ## Unit tests
 
-Unit tests live under `src/tests`.  Because they include a lot of extra code in
+Unit tests live under `./tests`.  Because they include a lot of extra code in
 the Geeqie binary, they must be manually enabled with a command like:
 
 ```text
