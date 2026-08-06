@@ -1282,7 +1282,7 @@ static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)
 
 ViewDir *vd_new(LayoutWindow *lw)
 {
-	auto vd = g_new0(ViewDir, 1);
+	auto *vd = new ViewDir();
 
 	vd->widget = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(vd->widget), true);
