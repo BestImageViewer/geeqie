@@ -151,6 +151,14 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <guilabel>Auto next folder</guilabel>
+        </term>
+        <listitem>
+          <para>If selected, when the last image in the current folder is reached using Next Image, Geeqie will automatically advance to the first image in the next sibling folder. Likewise, when the first image is reached using Previous Image, Geeqie will automatically go to the last image in the previous sibling folder.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <guilabel>Save marks on exit</guilabel>
         </term>
         <listitem>

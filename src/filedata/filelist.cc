@@ -232,6 +232,109 @@ gboolean FileData::FileList::read_list_real(const gchar *dir_path, GList **files
 	return TRUE;
 }
 
+gboolean FileData::FileList::read_list_real_all(const gchar *dir_path, GList **files, GList **dirs, gboolean follow_symlinks)
+{
+	DIR *dp;
+	struct dirent *dir;
+	GList *dlist = nullptr;
+	GList *flist = nullptr;
+	GList *xmp_files = nullptr;
+	gint (*stat_func)(const gchar *path, struct stat *buf);
+	GHashTable *basename_hash = nullptr;
+
+	g_assert(files || dirs);
+
+	if (files) *files = nullptr;
+	if (dirs) *dirs = nullptr;
+
+	g_autofree gchar *pathl = path_from_utf8(dir_path);
+	if (!pathl) return FALSE;
+
+	dp = opendir(pathl);
+	if (dp == nullptr)
+		{
+		return FALSE;
+		}
+
+	if (files) basename_hash = file_data_basename_hash_new();
+
+	if (follow_symlinks)
+		stat_func = stat;
+	else
+		stat_func = lstat;
+
+	while ((dir = readdir(dp)) != nullptr)
+		{
+		const gchar *name = dir->d_name;
+		g_autofree gchar *filepath = g_build_filename(pathl, name, NULL);
+
+		// Don't filter hidden files - include all directories
+		// Only skip . and .. directories
+		if (name[0] == '.' && (name[1] == '\0' || (name[1] == '.' && name[2] == '\0')))
+			{
+			continue;
+			}
+
+		struct stat ent_sbuf;
+		if (stat_func(filepath, &ent_sbuf) >= 0)
+			{
+			if (S_ISDIR(ent_sbuf.st_mode))
+				{
+				/* we ignore the .thumbnails dir for cleanliness */
+				if (dirs &&
+				    strcmp(name, GQ_CACHE_LOCAL_THUMB) != 0 &&
+				    strcmp(name, GQ_CACHE_LOCAL_METADATA) != 0 &&
+				    strcmp(name, THUMB_FOLDER_LOCAL) != 0)
+					{
+					dlist = g_list_prepend(dlist, FileData::make_new_local(filepath, &ent_sbuf, TRUE).release());
+					}
+				}
+			else
+				{
+				if (files && filter_name_exists(name))
+					{
+					FileData *fd = FileData::make_new_local(filepath, &ent_sbuf, FALSE).release();
+					flist = g_list_prepend(flist, fd);
+					if (fd->sidecar_priority && !fd->disable_grouping)
+						{
+						if (strcmp(fd->extension, ".xmp") != 0)
+							file_data_basename_hash_insert(basename_hash, fd);
+						else
+							xmp_files = g_list_append(xmp_files, fd);
+						}
+					}
+				}
+			}
+		else
+			{
+			if (errno == EOVERFLOW)
+				{
+				log_printf("stat(): EOVERFLOW, skip '%s'", filepath);
+				}
+			}
+		}
+
+	closedir(dp);
+
+	if (xmp_files)
+		{
+		g_list_foreach(xmp_files,file_data_basename_hash_insert_cb,basename_hash);
+		g_list_free(xmp_files);
+		}
+
+	if (dirs) *dirs = dlist;
+
+	if (files)
+		{
+		g_hash_table_foreach(basename_hash, file_data_basename_hash_to_sidecars, nullptr);
+
+		*files = filter_out_sidecars(flist);
+		}
+	if (basename_hash) file_data_basename_hash_free(basename_hash);
+
+	return TRUE;
+}
+
 /*
  *-----------------------------------------------------------------------------
  * filelist sorting
@@ -344,6 +447,11 @@ gboolean FileData::FileList::read_list(FileData *dir_fd, GList **files, GList **
 gboolean FileData::FileList::read_list_lstat(FileData *dir_fd, GList **files, GList **dirs)
 {
 	return read_list_real(dir_fd->path, files, dirs, FALSE);
+}
+
+gboolean FileData::FileList::read_list_lstat_all(FileData *dir_fd, GList **files, GList **dirs)
+{
+	return read_list_real_all(dir_fd->path, files, dirs, FALSE);
 }
 
 void FileData::FileList::free_list(GList *list)

@@ -109,6 +109,8 @@ struct ConfOptions
 
 	gboolean circular_selection_lists;
 
+	gboolean auto_next_folder;
+
 	gboolean lazy_image_sync;
 	gboolean update_on_time_change;
 

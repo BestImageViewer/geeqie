@@ -6,6 +6,9 @@ Geeqie 3.1
 Geeqie 3.0
 ============
 
+- New preference "Auto next folder" (Behavior tab) to automatically advance to next/previous sibling folder when reaching end/beginning of current folder
+- New actions "Next folder" and "Previous folder" with accelerators Ctrl+Shift+Right/Left
+- The feature is disabled by default
 - GTK3 to GTK4 migration
 - This is a pre-release
 
