@@ -31,7 +31,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #include <shumate/shumate.h>
+#pragma GCC diagnostic pop
 #ifdef __cplusplus
 }
 #endif
@@ -51,7 +54,6 @@ extern "C" {
 #include "thumb.h"
 #include "ui-menu.h"
 #include "ui-utildlg.h"
-#include "uri-utils.h"
 
 namespace
 {
