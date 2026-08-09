@@ -112,7 +112,6 @@ void vd_color_cb(GtkTreeViewColumn *tree_column, GtkCellRenderer *cell, GtkTreeM
 void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *column, gpointer data);
 
 gboolean vd_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
-gboolean vd_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data);
 gboolean vd_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

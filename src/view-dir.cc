@@ -1138,22 +1138,16 @@ static void vd_gesture_release_cb(GtkGestureClick *gesture,  gint, gdouble x, gd
 		}
 }
 
-static gboolean vd_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint keycode, GdkModifierType state, gpointer data)
+static gboolean vd_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
-	const GqKeyEvent event{keyval, keycode, state, 0};
-	return vd_press_key_cb(widget, &event, data);
-}
-
-gboolean vd_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data)
-{
 	auto vd = static_cast<ViewDir *>(data);
 	gboolean ret = FALSE;
 
 	switch (vd->type)
 	{
-	case DIRVIEW_LIST: ret = vdlist_press_key_cb(widget, event, data); break;
-	case DIRVIEW_TREE: ret = vdtree_press_key_cb(widget, event, data); break;
+	case DIRVIEW_LIST: ret = vdlist_press_key_cb(widget, keyval, data); break;
+	case DIRVIEW_TREE: ret = vdtree_press_key_cb(widget, keyval, data); break;
 	}
 
 	return ret;

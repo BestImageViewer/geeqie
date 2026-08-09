@@ -46,14 +46,6 @@ struct GqMouseButtonEvent
 	guint press_count;
 };
 
-struct GqKeyEvent
-{
-	guint keyval;
-	guint keycode;
-	GdkModifierType state;
-	guint32 time;
-};
-
 struct GqScrollEvent
 {
 	gdouble x;

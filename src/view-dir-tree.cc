@@ -714,7 +714,7 @@ void vdtree_refresh(ViewDir *vd)
  *----------------------------------------------------------------------------
  */
 
-gboolean vdtree_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data)
+gboolean vdtree_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 	GtkTreeIter iter;
@@ -734,7 +734,7 @@ gboolean vdtree_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointe
 		fd = (nd) ? nd->fd : nullptr;
 		}
 
-	switch (event->keyval)
+	switch (keyval)
 		{
 		case GDK_KEY_Menu:
 			vd->click_fd = fd;
