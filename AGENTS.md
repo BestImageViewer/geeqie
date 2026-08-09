@@ -159,4 +159,3 @@ tools/doxygen.sh
 - Use Meson/Ninja commands rather than ad hoc compiler invocations.
 - Avoid changing packaging, generated files, translations, or broad UI metadata
   unless the task requires it.
-
