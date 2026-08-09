@@ -20,6 +20,7 @@
 #include "cellrenderericon.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 
 #include <cairo.h>
