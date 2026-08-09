@@ -339,11 +339,11 @@ void vdlist_refresh(ViewDir *vd)
 	vdlist_populate(vd, FALSE);
 }
 
-gboolean vdlist_press_key_cb(GtkWidget *widget, const GqKeyEvent *event, gpointer data)
+gboolean vdlist_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
 {
 	auto vd = static_cast<ViewDir *>(data);
 
-	if (event->keyval != GDK_KEY_Menu) return FALSE;
+	if (keyval != GDK_KEY_Menu) return FALSE;
 
 	g_autoptr(GtkTreePath) tpath = nullptr;
 	gtk_tree_view_get_cursor(GTK_TREE_VIEW(vd->view), &tpath, nullptr);

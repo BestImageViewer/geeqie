@@ -1052,10 +1052,8 @@ static FileData *pan_menu_click_fd(PanWindow *pw)
 	return nullptr;
 }
 
-static gboolean pan_window_key_press_cb(GtkEventControllerKey *, guint keyval, guint keycode, GdkModifierType state, gpointer data)
+static gboolean pan_window_key_press_cb(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
 {
-	const GqKeyEvent event_data{keyval, keycode, state, 0};
-	const GqKeyEvent *event = &event_data;
 	auto pw = static_cast<PanWindow *>(data);
 	PixbufRenderer *pr;
 	gboolean stop_signal = FALSE;
@@ -1072,7 +1070,7 @@ static gboolean pan_window_key_press_cb(GtkEventControllerKey *, guint keyval, g
 	if (focused)
 		{
 		stop_signal = TRUE;
-		switch (event->keyval)
+		switch (keyval)
 			{
 			case GDK_KEY_Left: case GDK_KEY_KP_Left:
 				x -= 1;
@@ -1105,7 +1103,7 @@ static gboolean pan_window_key_press_cb(GtkEventControllerKey *, guint keyval, g
 
 		if (x != 0 || y != 0)
 			{
-			keyboard_scroll_calc(x, y, static_cast<GdkModifierType>(event->state), event->keyval, event->time);
+			keyboard_scroll_calc(x, y, state, keyval, 0);
 			pixbuf_renderer_scroll(pr, x, y);
 			}
 		}
