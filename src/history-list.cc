@@ -46,6 +46,8 @@ private:
 
 const gchar *HistoryChain::prev()
 {
+	if (chain.empty()) return nullptr;
+
 	is_nav_button = true;
 
 	index = index > 0 ? index - 1 : 0;
@@ -55,6 +57,8 @@ const gchar *HistoryChain::prev()
 
 const gchar *HistoryChain::next()
 {
+	if (chain.empty()) return nullptr;
+
 	is_nav_button = true;
 
 	guint last = chain.size() - 1;

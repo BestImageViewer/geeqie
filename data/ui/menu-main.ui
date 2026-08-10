@@ -103,6 +103,14 @@
           <attribute name="action">win.main-win-last-image</attribute>
           <attribute name="label" translatable="yes">_Last image</attribute>
         </item>
+        <item>
+          <attribute name="action">win.main-win-image-back</attribute>
+          <attribute name="label" translatable="yes">Image _Back</attribute>
+        </item>
+        <item>
+          <attribute name="action">win.main-win-image-forward</attribute>
+          <attribute name="label" translatable="yes">Image _Forward</attribute>
+        </item>
       </section>
       <section>
         <item>
