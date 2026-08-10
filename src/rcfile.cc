@@ -1682,10 +1682,12 @@ static void options_parse_layout(GQParserData *parser_data, const gchar *element
 		}
 	else if (g_ascii_strcasecmp(element_name, "toolbar") == 0)
 		{
+		layout_toolbar_clear(lw, TOOLBAR_MAIN);
 		parser_data->func_push(options_parse_toolbar<TOOLBAR_MAIN>, nullptr, lw);
 		}
 	else if (g_ascii_strcasecmp(element_name, "statusbar") == 0)
 		{
+		layout_toolbar_clear(lw, TOOLBAR_STATUS);
 		parser_data->func_push(options_parse_toolbar<TOOLBAR_STATUS>, nullptr, lw);
 		}
 	else if (g_ascii_strcasecmp(element_name, "dialogs") == 0)
