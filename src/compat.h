@@ -46,18 +46,6 @@ struct GqMouseButtonEvent
 	guint press_count;
 };
 
-struct GqScrollEvent
-{
-	gdouble x;
-	gdouble y;
-	gdouble dx;
-	gdouble dy;
-	GdkModifierType state;
-	GdkScrollDirection direction;
-	GdkScrollUnit unit;
-	guint32 time;
-};
-
 struct GqPointerMotionEvent
 {
 	gdouble x;
@@ -80,8 +68,6 @@ void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget);
 void gq_gtk_widget_show_all(GtkWidget *widget);
 void gq_gtk_widget_destroy(GtkWidget *widget);
 void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width);
-const gchar *stock_id_to_icon_name(const gchar *stock_id);
-GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, gint size);
 GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget);
 
 #endif /* COMPAT_H */

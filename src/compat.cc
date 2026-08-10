@@ -22,58 +22,10 @@
 
 #include <config.h>
 
-#include "main-defines.h"
-
 namespace
 {
 
 constexpr auto GTK4_BOX_PACK_END_DATA_KEY = "gq-gtk4-box-pack-end";
-constexpr auto GTK4_WINDOW_POSITION_DATA_KEY = "gq-gtk4-window-position";
-constexpr auto GTK4_WINDOW_POSITION_POLICY_DATA_KEY = "gq-gtk4-window-position-policy";
-
-struct GqWindowPosition
-{
-	gint x;
-	gint y;
-};
-
-} // namespace
-
-const gchar *stock_id_to_icon_name(const gchar *stock_id)
-{
-	if (!stock_id) return GQ_ICON_MISSING_IMAGE;
-
-	if (g_str_equal(stock_id, "gtk-ok")) return GQ_ICON_OK;
-	if (g_str_equal(stock_id, "gtk-cancel")) return GQ_ICON_CANCEL;
-	if (g_str_equal(stock_id, "gtk-close")) return GQ_ICON_CLOSE;
-	if (g_str_equal(stock_id, "gtk-open")) return GQ_ICON_OPEN;
-	if (g_str_equal(stock_id, "gtk-save")) return GQ_ICON_SAVE;
-	if (g_str_equal(stock_id, "gtk-save-as")) return GQ_ICON_SAVE_AS;
-	if (g_str_equal(stock_id, "gtk-new")) return GQ_ICON_NEW;
-	if (g_str_equal(stock_id, "gtk-delete")) return GQ_ICON_DELETE;
-	if (g_str_equal(stock_id, "gtk-copy")) return GQ_ICON_COPY;
-	if (g_str_equal(stock_id, "gtk-find")) return GQ_ICON_FIND;
-	if (g_str_equal(stock_id, "gtk-preferences")) return GQ_ICON_PREFERENCES;
-	if (g_str_equal(stock_id, "gtk-print")) return GQ_ICON_PRINT;
-	if (g_str_equal(stock_id, "gtk-quit")) return GQ_ICON_QUIT;
-	if (g_str_equal(stock_id, "gtk-stop")) return GQ_ICON_STOP;
-	if (g_str_equal(stock_id, "gtk-refresh")) return GQ_ICON_REFRESH;
-	if (g_str_equal(stock_id, "gtk-help")) return GQ_ICON_HELP;
-	if (g_str_equal(stock_id, "gtk-apply")) return GQ_ICON_APPLY;
-	if (g_str_equal(stock_id, "gtk-go-up")) return GQ_ICON_GO_UP;
-	if (g_str_equal(stock_id, "gtk-go-down")) return GQ_ICON_GO_DOWN;
-	if (g_str_equal(stock_id, "gtk-go-back")) return GQ_ICON_GO_PREV;
-	if (g_str_equal(stock_id, "gtk-go-forward")) return GQ_ICON_GO_NEXT;
-	if (g_str_equal(stock_id, "gtk-home")) return GQ_ICON_HOME;
-	if (g_str_equal(stock_id, "gtk-jump-to")) return GQ_ICON_GO_JUMP;
-	if (g_str_equal(stock_id, "gtk-missing-image")) return GQ_ICON_MISSING_IMAGE;
-	if (g_str_has_prefix(stock_id, "gtk-")) return GQ_ICON_MISSING_IMAGE;
-
-	return stock_id;
-}
-
-namespace
-{
 
 void gtk4_box_apply_child_packing(GtkBox *box, GtkWidget *child, gboolean expand, gboolean fill, guint padding)
 {
@@ -341,12 +293,6 @@ void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width)
 	gtk_widget_set_margin_bottom(widget, width);
 	gtk_widget_set_margin_start(widget, width);
 	gtk_widget_set_margin_end(widget, width);
-}
-
-GtkWidget *gq_gtk_image_new_from_stock(const gchar *stock_id, gint size)
-{
-	(void)size;
-	return gtk_image_new_from_icon_name(stock_id_to_icon_name(stock_id));
 }
 
 GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget)

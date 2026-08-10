@@ -140,18 +140,6 @@ GtkWidget *popover_item_add(GtkWidget *menu, const gchar *label,
 	return item;
 }
 
-GtkWidget *popover_item_add_stock(GtkWidget *menu, const gchar *label, const gchar *stock_id,
-			       GCallback func, gpointer data)
-{
-	GtkWidget *item;
-
-	item = menu_item_icon_button_new(label, stock_id_to_icon_name(stock_id), TRUE);
-
-	menu_item_finish(menu, item, func, data);
-
-	return item;
-}
-
 GtkWidget *popover_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *icon_name,
 			       GCallback func, gpointer data)
 {
