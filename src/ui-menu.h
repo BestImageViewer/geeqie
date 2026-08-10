@@ -51,8 +51,6 @@ struct LayoutWindow;
 
 GtkWidget *popover_item_add(GtkWidget *menu, const gchar *label,
 			 GCallback func, gpointer data);
-GtkWidget *popover_item_add_stock(GtkWidget *menu, const gchar *label, const gchar *stock_id,
-			       GCallback func, gpointer data);
 GtkWidget *popover_item_add_icon(GtkWidget *menu, const gchar *label, const gchar *icon_name,
 			       GCallback func, gpointer data);
 GtkWidget *popover_item_add_sensitive(GtkWidget *menu, const gchar *label, gboolean sensitive,

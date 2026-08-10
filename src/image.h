@@ -61,6 +61,18 @@ enum ImageState {
 	IMAGE_STATE_DELAY_FLIP	= 1 << 6
 };
 
+struct GqScrollEvent
+{
+	gdouble x;
+	gdouble y;
+	gdouble dx;
+	gdouble dy;
+	GdkModifierType state;
+	GdkScrollDirection direction;
+	GdkScrollUnit unit;
+	guint32 time;
+};
+
 struct ImageWindow
 {
 	GtkWidget *widget;	/**< use this to add it and show it */
