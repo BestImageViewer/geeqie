@@ -54,6 +54,7 @@ struct GqScrollEvent
 	gdouble dy;
 	GdkModifierType state;
 	GdkScrollDirection direction;
+	GdkScrollUnit unit;
 	guint32 time;
 };
 

@@ -1250,6 +1250,7 @@ static gboolean image_scroll_cb(GtkEventControllerScroll *controller, gdouble dx
 		dy,
 		gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(controller)),
 		direction,
+		gdk_scroll_event_get_unit(event),
 		gdk_event_get_time(event)
 	};
 
@@ -1695,6 +1696,33 @@ void image_mousewheel_scroll(ImageWindow *imd, GdkScrollDirection direction)
 		default:
 			break;
 		}
+	}
+
+gint image_scroll_navigation_steps(ImageWindow *imd, const GqScrollEvent *event)
+{
+	gdouble delta = event->dy;
+
+	if (event->unit != GDK_SCROLL_UNIT_WHEEL || delta == 0.0)
+		{
+		switch (event->direction)
+			{
+			case GDK_SCROLL_UP: delta = -1.0; break;
+			case GDK_SCROLL_DOWN: delta = 1.0; break;
+			default: return 0;
+			}
+		}
+
+	if ((delta < 0.0 && imd->wheel_navigation_accumulator > 0.0) ||
+	    (delta > 0.0 && imd->wheel_navigation_accumulator < 0.0))
+		{
+		imd->wheel_navigation_accumulator = 0.0;
+		}
+
+	imd->wheel_navigation_accumulator += delta;
+	const gint steps = static_cast<gint>(imd->wheel_navigation_accumulator);
+	imd->wheel_navigation_accumulator -= steps;
+
+	return steps;
 }
 
 gdouble image_smooth_scroll_zoom_delta(ImageWindow *imd, gdouble delta, gdouble increment)

@@ -574,16 +574,13 @@ static void scroll_cb(ImageWindow *imd, const GqScrollEvent *event, gpointer dat
 		}
 	else
 		{
-		switch (event->direction)
+		const gint steps = image_scroll_navigation_steps(imd, event);
+		for (gint step = 0; step < std::abs(steps); step++)
 			{
-			case GDK_SCROLL_UP:
+			if (steps < 0)
 				view_step_prev(vw);
-				break;
-			case GDK_SCROLL_DOWN:
+			else
 				view_step_next(vw);
-				break;
-			default:
-				break;
 			}
 		}
 }

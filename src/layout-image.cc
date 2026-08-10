@@ -1898,16 +1898,13 @@ static void layout_image_scroll_cb(ImageWindow *imd, const GqScrollEvent *event,
 		}
 	else
 		{
-		switch (event->direction)
+		const gint steps = image_scroll_navigation_steps(imd, event);
+		for (gint step = 0; step < std::abs(steps); step++)
 			{
-			case GDK_SCROLL_UP:
+			if (steps < 0)
 				layout_image_prev(lw);
-				break;
-			case GDK_SCROLL_DOWN:
+			else
 				layout_image_next(lw);
-				break;
-			default:
-				break;
 			}
 		}
 }
