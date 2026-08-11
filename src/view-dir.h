@@ -26,7 +26,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "compat.h"
 #include "filedata/ref.h"
 
 struct LayoutWindow;
@@ -110,8 +109,5 @@ void vd_dnd_init(ViewDir *vd);
 
 void vd_color_cb(GtkTreeViewColumn *tree_column, GtkCellRenderer *cell, GtkTreeModel *tree_model, GtkTreeIter *iter, gpointer data);
 void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *column, gpointer data);
-
-gboolean vd_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
-gboolean vd_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

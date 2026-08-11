@@ -768,65 +768,55 @@ gboolean vdtree_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
 	return FALSE;
 }
 
-static gboolean vdtree_clicked_on_expander(GtkTreeView *treeview, GtkTreePath *tpath,
-				           GtkTreeViewColumn *column, gint x, gint, gint *left_of_expander)
+static bool vdtree_clicked_on_expander(GtkTreeView *treeview, GtkTreePath *tpath,
+                                       GtkTreeViewColumn *column, gint x, gint, bool &left_of_expander)
 {
-	gint depth;
-	gint exp_width;
+	if (column != gtk_tree_view_get_expander_column(treeview)) return false;
 
-	if (column != gtk_tree_view_get_expander_column(treeview)) return FALSE;
-
-	depth = gtk_tree_path_get_depth(tpath);
+	const int depth = gtk_tree_path_get_depth(tpath);
 
 	/* GTK4 no longer exposes these old GtkTreeView style properties. Use a
 	 * small fixed hit area that matches the current folder icon scale. */
-	exp_width = 20;
+	constexpr int exp_width = 20;
 
-	if (x <= depth * exp_width)
-		{
-		if (left_of_expander) *left_of_expander = !(x >= (depth - 1) * exp_width);
-		return TRUE;
-		}
+	if (x > depth * exp_width) return false;
 
-	return FALSE;
+	left_of_expander = !(x >= (depth - 1) * exp_width);
+	return true;
 }
 
-gboolean vdtree_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
+bool vdtree_press_cb(ViewDir *vd, GtkWidget *widget, guint button, gdouble x, gdouble y)
 {
-	auto vd = static_cast<ViewDir *>(data);
-	GtkTreeViewColumn *column;
-	GtkTreeIter iter;
 	NodeData *nd = nullptr;
-	FileData *fd;
 
+	GtkTreeViewColumn *column;
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y,
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
 	                                  &tpath, &column, nullptr, nullptr))
 		{
-		GtkTreeModel *store;
-		gint left_of_expander;
+		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+		GtkTreeIter iter;
 
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &nd, -1);
 		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
 
+		bool left_of_expander;
 		if (vdtree_clicked_on_expander(GTK_TREE_VIEW(widget), tpath, column,
-		                               event->x, event->y,
-		                               &left_of_expander))
+		                               x, y, left_of_expander))
 			{
 			vd->click_fd = nullptr;
 
 			/* clicking this region should automatically reveal an expander, if necessary
 			 * treeview bug: the expander will not expand until a button_motion_event highlights it.
 			 */
-			if (event->button == GDK_BUTTON_PRIMARY &&
+			if (button == GDK_BUTTON_PRIMARY &&
 			    !left_of_expander &&
 			    !gtk_tree_view_row_expanded(GTK_TREE_VIEW(vd->view), tpath))
 				{
 				vdtree_populate_path_by_iter(vd, &iter, FALSE, vd->dir_fd);
 
-				fd = (nd) ? nd->fd : nullptr;
+				FileData *fd = nd ? nd->fd : nullptr;
 				if (fd && islink(fd->path))
 					{
 					vdtree_icon_set_by_iter(vd, &iter, vd->pf->link);
@@ -837,19 +827,14 @@ gboolean vdtree_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpo
 					}
 				}
 
-			return FALSE;
+			return false;
 			}
 		}
 
 	vd->click_fd = (nd) ? nd->fd : nullptr;
 	vd_color_set(vd, vd->click_fd, TRUE);
 
-	if (event->button == GDK_BUTTON_SECONDARY)
-		{
-		vd_pop_menu(vd, vd->click_fd);
-		}
-
-	return (event->button != GDK_BUTTON_PRIMARY);
+	return button != GDK_BUTTON_PRIMARY;
 }
 
 static void vdtree_update_row(ViewDir *vd, GtkTreeView *treeview, GtkTreeIter *iter, GtkTreePath *tpath, GIcon *icon)

@@ -368,19 +368,17 @@ gboolean vdlist_press_key_cb(GtkWidget *widget, guint keyval, gpointer data)
 	return TRUE;
 }
 
-gboolean vdlist_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
+bool vdlist_press_cb(ViewDir *vd, GtkWidget *widget, guint, gdouble x, gdouble y)
 {
-	auto vd = static_cast<ViewDir *>(data);
-	GtkTreeIter iter;
 	FileData *fd = nullptr;
 
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y,
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
 	                                  &tpath, nullptr, nullptr, nullptr))
 		{
-		GtkTreeModel *store;
+		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+		GtkTreeIter iter;
 
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, DIR_COLUMN_POINTER, &fd, -1);
 		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
@@ -390,12 +388,6 @@ gboolean vdlist_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpo
 
 	if (options->view_dir_list_single_click_enter)
 		vd_color_set(vd, vd->click_fd, TRUE);
-
-	if (event->button == GDK_BUTTON_SECONDARY)
-		{
-		vd_pop_menu(vd, vd->click_fd);
-		return TRUE;
-		}
 
 	return options->view_dir_list_single_click_enter;
 }

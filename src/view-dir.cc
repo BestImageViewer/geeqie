@@ -1088,53 +1088,43 @@ void vd_activate_cb(GtkTreeView *tview, GtkTreePath *tpath, GtkTreeViewColumn *,
 	vd_select_row(vd, fd);
 }
 
-gboolean vd_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
+static void vd_gesture_release_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
-	auto vd = static_cast<ViewDir *>(data);
-	FileData *fd = nullptr;
+	auto *vd = static_cast<ViewDir *>(data);
+	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
 
-	if (layout_handle_user_defined_mouse_buttons(vd->layout, event->button))
+	if (layout_handle_user_defined_mouse_buttons(vd->layout, button))
 		{
-		return TRUE;
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		return;
 		}
 
 	if (vd->type == DIRVIEW_LIST && !options->view_dir_list_single_click_enter)
-		return FALSE;
+		return;
 
-	if (!vd->click_fd) return FALSE;
+	if (!vd->click_fd) return;
+
 	vd_color_set(vd, vd->click_fd, FALSE);
 
-	if (event->button != GDK_BUTTON_PRIMARY) return TRUE;
-
-	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    (event->x != 0 || event->y != 0) &&
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y,
-					  &tpath, nullptr, nullptr, nullptr))
-		{
-		fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(widget), tpath);
-		}
-
-	if (fd && vd->click_fd == fd)
-		{
-		vd_select_row(vd, vd->click_fd);
-		}
-
-	return FALSE;
-}
-
-static void vd_gesture_release_cb(GtkGestureClick *gesture,  gint, gdouble x, gdouble y, gpointer data)
-{
-	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-	GqMouseButtonEvent event = {
-		gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
-		x,
-		y,
-		gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
-		1
-	};
-	if (vd_release_cb(widget, &event, data))
+	if (button != GDK_BUTTON_PRIMARY)
 		{
 		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		return;
+		}
+
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+
+	if (g_autoptr(GtkTreePath) tpath = nullptr;
+	    (x != 0 || y != 0) &&
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
+					  &tpath, nullptr, nullptr, nullptr))
+		{
+		FileData *fd = vd_get_fd_from_tree_path(vd, GTK_TREE_VIEW(widget), tpath);
+
+		if (fd && vd->click_fd == fd)
+			{
+			vd_select_row(vd, vd->click_fd);
+			}
 		}
 }
 
@@ -1153,14 +1143,17 @@ static gboolean vd_key_pressed_cb(GtkEventControllerKey *controller, guint keyva
 	return ret;
 }
 
-gboolean vd_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
+static void vd_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
-	auto vd = static_cast<ViewDir *>(data);
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
 
-	if (event->button == GDK_BUTTON_SECONDARY)
+	auto *vd = static_cast<ViewDir *>(data);
+
+	if (button == GDK_BUTTON_SECONDARY)
 		{
 		if (g_autoptr(GtkTreePath) tpath = nullptr;
-		    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y, &tpath, nullptr, nullptr, nullptr))
+		    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y, &tpath, nullptr, nullptr, nullptr))
 			{
 			GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 			GtkTreeIter iter;
@@ -1190,36 +1183,21 @@ gboolean vd_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointe
 				}
 			}
 
-		vd_pop_menu(vd, vd->click_fd, widget, event->x, event->y);
+		vd_pop_menu(vd, vd->click_fd, widget, x, y);
 
-		return TRUE;
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		return;
 		}
 
-	gboolean ret = FALSE;
+	bool ret = false;
 
 	switch (vd->type)
 	{
-	case DIRVIEW_LIST: ret = vdlist_press_cb(widget, event, data); break;
-	case DIRVIEW_TREE: ret = vdtree_press_cb(widget, event, data); break;
+	case DIRVIEW_LIST: ret = vdlist_press_cb(vd, widget, button, x, y); break;
+	case DIRVIEW_TREE: ret = vdtree_press_cb(vd, widget, button, x, y); break;
 	}
 
-	return ret;
-}
-
-static void vd_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
-{
-	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-	GqMouseButtonEvent event = {
-		gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
-		x,
-		y,
-		gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
-		1
-	};
-	if (vd_press_cb(widget, &event, data))
-		{
-		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
-		}
+	if (ret) gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 }
 
 static void vd_notify_cb(FileData *fd, NotifyType type, gpointer data)

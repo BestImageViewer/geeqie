@@ -28,8 +28,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "compat.h"
-
 class FileData;
 struct ViewDir;
 
@@ -53,7 +51,7 @@ FileData *vdtree_populate_path(ViewDir *vd, FileData *target_fd, gboolean expand
 void vdtree_rename_by_data(ViewDir *vd, FileData *fd);
 
 gboolean vdtree_press_key_cb(GtkWidget *widget, guint keyval, gpointer data);
-gboolean vdtree_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
+bool vdtree_press_cb(ViewDir *vd, GtkWidget *widget, guint button, gdouble x, gdouble y);
 
 void vdtree_destroy_cb(GtkWidget *widget, gpointer data);
 
