@@ -26,8 +26,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "compat.h"
-
 class FileData;
 struct ViewDir;
 
@@ -42,7 +40,7 @@ void vdlist_rename_by_row(ViewDir *vd, FileData *fd);
 FileData *vdlist_row_by_path(ViewDir *vd, const gchar *path, gint *row);
 
 gboolean vdlist_press_key_cb(GtkWidget *widget, guint keyval, gpointer data);
-gboolean vdlist_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data);
+bool vdlist_press_cb(ViewDir *vd, GtkWidget *widget, guint button, gdouble x, gdouble y);
 
 void vdlist_destroy_cb(GtkWidget *widget, gpointer data);
 
