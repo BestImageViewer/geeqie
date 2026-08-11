@@ -4,6 +4,7 @@
 *.orig
 
 # /subprojects
+/subprojects/.wraplock
 /subprojects/packagecache
 /subprojects/googletest-release-*
 
