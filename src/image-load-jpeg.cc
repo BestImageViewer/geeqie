@@ -25,7 +25,9 @@
  */
 
 /** This is a Will Not Fix */
-#pragma GCC diagnostic ignored "-Wclobbered"
+#if defined(__GNUC__) && !defined(__clang__)
+#  pragma GCC diagnostic ignored "-Wclobbered"
+#endif
 
 #include "image-load-jpeg.h"
 
