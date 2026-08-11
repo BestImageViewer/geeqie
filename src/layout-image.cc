@@ -1557,6 +1557,169 @@ std::optional<ColorManStatus> layout_image_color_profile_get_status(LayoutWindow
 	return image_color_profile_get_status(lw->image);
 }
 
+/**
+ * @brief Get the next sibling directory in the same parent directory
+ * @param lw Layout window
+ * @returns FileData for the next directory, or nullptr if none
+ *
+ * Finds the next directory alphabetically after the current directory
+ * in the same parent directory. Only returns directories that contain
+ * at least one image file.
+ */
+static FileData *layout_get_next_sibling_dir(LayoutWindow *lw)
+{
+	if (!lw || !lw->dir_fd || !lw->dir_fd->path) return nullptr;
+
+	g_autofree gchar *parent_dir = g_path_get_dirname(lw->dir_fd->path);
+	g_autofree gchar *current_name = g_path_get_basename(lw->dir_fd->path);
+
+	GList *dirs = nullptr;
+	GList *files = nullptr;
+
+	// Read the parent directory to get all subdirectories (don't follow symlinks)
+	FileData *parent_fd = file_data_new_dir(parent_dir);
+	if (!parent_fd) return nullptr;
+
+	FileData::FileList::read_list_lstat_all(parent_fd, &files, &dirs);
+	file_data_unref(parent_fd);
+
+	if (!dirs) return nullptr;
+
+	// Sort directories by name
+	FileData::FileList::SortSettings sort_settings;
+	sort_settings.method = SORT_NAME;
+	sort_settings.ascending = TRUE;
+	sort_settings.case_sensitive = FALSE;
+
+	dirs = FileData::FileList::sort(dirs, sort_settings);
+
+	// Find current directory in the list
+	GList *work = dirs;
+	FileData *next_dir = nullptr;
+	gboolean found_current = FALSE;
+
+	while (work)
+	{
+		auto *fd = static_cast<FileData *>(work->data);
+		g_autofree gchar *name = g_path_get_basename(fd->path);
+
+		if (found_current)
+		{
+			// Check if this directory has any image files
+			GList *sub_files = nullptr;
+			GList *sub_dirs = nullptr;
+			FileData::FileList::read_list_lstat_all(fd, &sub_files, &sub_dirs);
+
+			if (sub_files)
+			{
+				// Free the sub_files list and its FileData elements
+				g_list_free_full(sub_files, reinterpret_cast<GDestroyNotify>(file_data_unref));
+				if (sub_dirs) g_list_free_full(sub_dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
+
+				next_dir = fd;
+				break;
+			}
+
+			if (sub_dirs) g_list_free_full(sub_dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
+		}
+
+		if (g_strcmp0(name, current_name) == 0)
+		{
+			found_current = TRUE;
+		}
+
+		work = work->next;
+	}
+
+	// Free the directory list (but not the FileData we're returning)
+	// Actually we need to ref the one we're returning
+	if (next_dir)
+	{
+		file_data_ref(next_dir);
+	}
+
+	// Free all dirs
+	g_list_free_full(dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
+	if (files) g_list_free_full(files, reinterpret_cast<GDestroyNotify>(file_data_unref));
+
+	return next_dir;
+}
+
+/**
+ * @brief Get the previous sibling directory in the same parent directory
+ * @param lw Layout window
+ * @returns FileData for the previous directory, or nullptr if none
+ */
+static FileData *layout_get_prev_sibling_dir(LayoutWindow *lw)
+{
+	if (!lw || !lw->dir_fd || !lw->dir_fd->path) return nullptr;
+
+	g_autofree gchar *parent_dir = g_path_get_dirname(lw->dir_fd->path);
+	g_autofree gchar *current_name = g_path_get_basename(lw->dir_fd->path);
+
+	GList *dirs = nullptr;
+	GList *files = nullptr;
+
+	FileData *parent_fd = file_data_new_dir(parent_dir);
+	if (!parent_fd) return nullptr;
+
+	FileData::FileList::read_list_lstat_all(parent_fd, &files, &dirs);
+	file_data_unref(parent_fd);
+
+	if (!dirs) return nullptr;
+
+	FileData::FileList::SortSettings sort_settings;
+	sort_settings.method = SORT_NAME;
+	sort_settings.ascending = TRUE;
+	sort_settings.case_sensitive = FALSE;
+
+	dirs = FileData::FileList::sort(dirs, sort_settings);
+
+	GList *work = dirs;
+	FileData *prev_dir = nullptr;
+	FileData *last_valid_dir = nullptr;
+
+	while (work)
+	{
+		auto *fd = static_cast<FileData *>(work->data);
+		g_autofree gchar *name = g_path_get_basename(fd->path);
+
+		if (g_strcmp0(name, current_name) == 0)
+		{
+			prev_dir = last_valid_dir;
+			break;
+		}
+
+		// Check if this directory has any image files
+		GList *sub_files = nullptr;
+		GList *sub_dirs = nullptr;
+		FileData::FileList::read_list_lstat_all(fd, &sub_files, &sub_dirs);
+
+		if (sub_files)
+		{
+			g_list_free_full(sub_files, reinterpret_cast<GDestroyNotify>(file_data_unref));
+			if (sub_dirs) g_list_free_full(sub_dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
+			last_valid_dir = fd;
+		}
+		else
+		{
+			if (sub_dirs) g_list_free_full(sub_dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
+		}
+
+		work = work->next;
+	}
+
+	if (prev_dir)
+	{
+		file_data_ref(prev_dir);
+	}
+
+	g_list_free_full(dirs, reinterpret_cast<GDestroyNotify>(file_data_unref));
+	if (files) g_list_free_full(files, reinterpret_cast<GDestroyNotify>(file_data_unref));
+
+	return prev_dir;
+}
+
 /*
  *----------------------------------------------------------------------------
  * list walkers
@@ -1619,6 +1782,25 @@ void layout_image_next(LayoutWindow *lw)
 		if (static_cast<guint>(current) < layout_list_count(lw) - 1)
 			{
 			layout_image_set_index(lw, current + 1);
+			}
+		else if (options->auto_next_folder)
+			{
+			FileData *next_dir = layout_get_next_sibling_dir(lw);
+			if (next_dir)
+				{
+				layout_set_path(lw, next_dir->path);
+				file_data_unref(next_dir);
+				// Select the first image in the new folder
+				gint count = layout_list_count(lw);
+				if (count > 0)
+					{
+					layout_image_set_index(lw, 0);
+					}
+				}
+			else
+				{
+				image_osd_icon(lw->image, IMAGE_OSD_LAST, -1);
+				}
 			}
 		else
 			{
@@ -1690,6 +1872,25 @@ void layout_image_prev(LayoutWindow *lw)
 		if (current > 0)
 			{
 			layout_image_set_index(lw, current - 1);
+			}
+		else if (options->auto_next_folder)
+			{
+			FileData *prev_dir = layout_get_prev_sibling_dir(lw);
+			if (prev_dir)
+				{
+				layout_set_path(lw, prev_dir->path);
+				file_data_unref(prev_dir);
+				// Select the last image in the previous folder
+				gint count = layout_list_count(lw);
+				if (count > 0)
+					{
+					layout_image_set_index(lw, count - 1);
+					}
+				}
+			else
+				{
+				image_osd_icon(lw->image, IMAGE_OSD_FIRST, -1);
+				}
 			}
 		else
 			{

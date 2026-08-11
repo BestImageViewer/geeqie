@@ -400,6 +400,7 @@ static void config_window_apply(const ConfOptions *c_options)
 
 	options->view_dir_list_single_click_enter = c_options->view_dir_list_single_click_enter;
 	options->circular_selection_lists = c_options->circular_selection_lists;
+	options->auto_next_folder = c_options->auto_next_folder;
 
 	options->open_recent_list_maxsize = c_options->open_recent_list_maxsize;
 	options->recent_folder_image_list_maxsize = c_options->recent_folder_image_list_maxsize;
@@ -3194,6 +3195,10 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	tmp = pref_checkbox_new_int(group, _("Circular selection lists"),
 			      options->circular_selection_lists, &c_options->circular_selection_lists);
 	gtk_widget_set_tooltip_text(tmp, _("Traverse selection lists in a circular manner"));
+
+	tmp = pref_checkbox_new_int(group, _("Auto next folder"),
+			      options->auto_next_folder, &c_options->auto_next_folder);
+	gtk_widget_set_tooltip_text(tmp, _("Automatically advance to the next folder when reaching the last image in the current folder"));
 
 	marks = pref_checkbox_new_int(group, _("Save marks on exit"),
 				options->marks_save, &c_options->marks_save);
