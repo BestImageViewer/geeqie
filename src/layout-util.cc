@@ -1909,28 +1909,28 @@ template<SelectionToMarkMode mode, int mark>
 static void layout_menu_selection_to_mark_cb(GSimpleAction *, GVariant *, gpointer  )
 {
 	auto lw = get_current_layout();
-	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
+	g_assert(mark >= 0 && mark < FILEDATA_MARKS_SIZE);
 
-	layout_selection_to_mark(lw, mark, mode);
+	layout_selection_to_mark(lw, mark == 0 ? FILEDATA_MARKS_SIZE : mark, mode);
 }
 
 template<MarkToSelectionMode mode, int mark>
 static void layout_menu_mark_to_selection_cb(GSimpleAction  * , GVariant *, gpointer  )
 {
 	auto lw = get_current_layout();
-	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
+	g_assert(mark >= 0 && mark < FILEDATA_MARKS_SIZE);
 
-	layout_mark_to_selection(lw, mark, mode);
+	layout_mark_to_selection(lw, mark == 0 ? FILEDATA_MARKS_SIZE : mark, mode);
 }
 
 template<int mark>
 static void layout_menu_mark_filter_toggle_cb(GSimpleAction *, GVariant *, gpointer  )
 {
 	auto lw = get_current_layout();
-	g_assert(mark >= 1 && mark <= FILEDATA_MARKS_SIZE);
+	g_assert(mark >= 0 && mark < FILEDATA_MARKS_SIZE);
 
 	layout_marks_set(lw, TRUE);
-	layout_mark_filter_toggle(lw, mark);
+	layout_mark_filter_toggle(lw, mark == 0 ? FILEDATA_MARKS_SIZE : mark);
 }
 
 
