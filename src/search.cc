@@ -2035,7 +2035,7 @@ static gboolean search_file_next(SearchData *sd)
 			}
 		}
 
-	MatchFileData mfd_extra{fd, 0, 0, 0};
+	MatchFileData mfd_extra{ fd, {0, 0}, 0 };
 	if ((match || extra_only) && (sd->match_dimensions_enable || sd->match_similarity_enable || sd->match_broken_enable))
 		{
 		tested = TRUE;

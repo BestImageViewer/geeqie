@@ -25,7 +25,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-struct FileData;
+class FileData;
 
 using DndFileListCallback = void (*)(GdkDrop *drop, GList *list, gpointer data);
 using DndTextCallback = void (*)(GdkDrop *drop, const gchar *text, gpointer data);
