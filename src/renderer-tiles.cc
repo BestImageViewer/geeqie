@@ -142,6 +142,7 @@ struct RendererTiles
 	cairo_surface_t *surface;
 
 	guint draw_idle_id; /* event source id */
+	gboolean draw_pending;
 
 	GdkPixbuf *spare_tile;
 
@@ -175,6 +176,15 @@ void rt_queue(RendererTiles *rt, gint x, gint y, gint w, gint h,
 
 gboolean rt_queue_draw_idle_cb(gpointer data);
 void rt_redraw(RendererTiles *rt, GdkRectangle rect, bool clamp, gboolean new_data);
+
+
+void rt_present_pending(RendererTiles *rt)
+{
+	if (!rt->draw_pending) return;
+
+	rt->draw_pending = FALSE;
+	gtk_widget_queue_draw(GTK_WIDGET(rt->pr));
+}
 
 
 void rt_sync_scroll(RendererTiles *rt)
@@ -1322,7 +1332,7 @@ void rt_tile_expose(RendererTiles *rt, ImageTile *it,
 	cairo_fill (cr);
 	cairo_destroy (cr);
 
-	gtk_widget_queue_draw(GTK_WIDGET(rt->pr));
+	rt->draw_pending = TRUE;
 }
 
 
@@ -1426,6 +1436,7 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 	    (!rt->draw_queue && !rt->draw_queue_2pass) ||
 	    !rt->draw_idle_id)
 		{
+		rt_present_pending(rt);
 		pr_render_complete_signal(pr);
 
 		rt->draw_idle_id = 0;
@@ -1441,7 +1452,8 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 		{
 		if (pr->loading)
 			{
-			/* still loading, wait till done (also drops the higher priority) */
+			/* Present the completed first pass before waiting for more data. */
+			rt_present_pending(rt);
 
 			return rt_queue_schedule_next_draw(rt, FALSE);
 			}
@@ -1498,6 +1510,8 @@ gboolean rt_queue_draw_idle_cb(gpointer data)
 
 	if (!rt->draw_queue && !rt->draw_queue_2pass)
 		{
+		/* Present all tiles updated by this render batch in one frame. */
+		rt_present_pending(rt);
 		pr_render_complete_signal(pr);
 
 		rt->draw_idle_id = 0;
@@ -1889,10 +1903,10 @@ void rt_resize_cb(GtkDrawingArea *, gint width, gint height, gpointer data)
 			cairo_set_source_surface(cr, old_surface, 0, 0);
 			cairo_paint(cr);
 			}
-			cairo_destroy(cr);
-			g_clear_pointer(&old_surface, cairo_surface_destroy);
+		cairo_destroy(cr);
+		g_clear_pointer(&old_surface, cairo_surface_destroy);
 
-			rt_redraw(rt, {0, 0, width, height}, false, FALSE);
+		rt_redraw(rt, {0, 0, width, height}, false, FALSE);
 		}
 }
 
