@@ -91,43 +91,6 @@ inline gboolean info_selected(const CollectInfo *info)
 
 static void collection_table_populate_at_new_size(CollectTable *ct, gint w, gint h, gboolean force);
 
-/**
- * This array must be kept in sync with the contents of:\n
- * @link collection_table_press_key_cb @endlink \n
- * @link collection_window_keypress @endlink \n
- * @link collection_table_popup_menu @endlink
- *
- * See also @link HardcodedWindowKey @endlink
- **/
-static HardcodedWindowKeyList collection_window_keys{
-	{GDK_CONTROL_MASK, 'C', N_("Copy")},
-	{GDK_CONTROL_MASK, 'M', N_("Move")},
-	{GDK_CONTROL_MASK, 'R', N_("Rename")},
-	{GDK_CONTROL_MASK, 'D', N_("Move selection to Trash")},
-	{GDK_CONTROL_MASK, 'W', N_("Close window")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Delete, N_("Remove")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Return, N_("View")},
-	{static_cast<GdkModifierType>(0), 'V', N_("View in new window")},
-	{GDK_CONTROL_MASK, 'A', N_("Select all")},
-	{static_cast<GdkModifierType>(GDK_CONTROL_MASK + GDK_SHIFT_MASK), 'A', N_("Select none")},
-	{GDK_ALT_MASK, 'R', N_("Rectangular selection")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_space, N_("Select single file")},
-	{GDK_CONTROL_MASK, GDK_KEY_space, N_("Toggle select image")},
-	{GDK_CONTROL_MASK, 'L', N_("Append from file selection")},
-	{static_cast<GdkModifierType>(0), 'A', N_("Append from collection")},
-	{static_cast<GdkModifierType>(0), 'S', N_("Save collection")},
-	{GDK_CONTROL_MASK, 'S', N_("Save collection as")},
-	{GDK_CONTROL_MASK, 'T', N_("Show filename text")},
-	{GDK_CONTROL_MASK, 'I', N_("Show infotext")},
-	{static_cast<GdkModifierType>(0), 'N', N_("Sort by name")},
-	{static_cast<GdkModifierType>(0), 'D', N_("Sort by date")},
-	{static_cast<GdkModifierType>(0), 'B', N_("Sort by size")},
-	{static_cast<GdkModifierType>(0), 'P', N_("Sort by path")},
-	{GDK_SHIFT_MASK, 'P', N_("Print")},
-	{GDK_ALT_MASK, 'A', N_("Append (Append collection dialog)")},
-	{GDK_ALT_MASK, 'D', N_("Discard (Close modified collection dialog)")},
-};
-
 /*
  *-------------------------------------------------------------------
  * more misc

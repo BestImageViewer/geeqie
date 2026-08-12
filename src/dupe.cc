@@ -155,34 +155,6 @@ static void dupe_match_link(DupeItem *a, DupeItem *b, gdouble rank);
 static gint dupe_match_link_exists(DupeItem *child, DupeItem *parent);
 
 /**
- * This array must be kept in sync with the contents of:\n
- *  @link dupe_main_actions @endlink \n
- *  @link dupe_menu_popup_main() @endlink
- *
- * See also @link HardcodedWindowKey @endlink
- **/
-static HardcodedWindowKeyList dupe_window_keys{
-	{GDK_CONTROL_MASK, 'C', N_("Copy")},
-	{GDK_CONTROL_MASK, 'M', N_("Move")},
-	{GDK_CONTROL_MASK, 'R', N_("Rename")},
-	{GDK_CONTROL_MASK, 'D', N_("Move selection to Trash")},
-	{GDK_SHIFT_MASK, GDK_KEY_Delete, N_("Delete selection")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Delete, N_("Remove")},
-	{GDK_CONTROL_MASK, GDK_KEY_Delete, N_("Clear")},
-	{GDK_CONTROL_MASK, 'A', N_("Select all")},
-	{static_cast<GdkModifierType>(GDK_CONTROL_MASK + GDK_SHIFT_MASK), 'A', N_("Select none")},
-	{GDK_CONTROL_MASK, 'T', N_("Toggle thumbs")},
-	{GDK_CONTROL_MASK, 'W', N_("Close window")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Return, N_("View")},
-	{static_cast<GdkModifierType>(0), 'V', N_("View in new window")},
-	{static_cast<GdkModifierType>(0), 'C', N_("Collection from selection")},
-	{GDK_CONTROL_MASK, 'L', N_("Append list")},
-	{static_cast<GdkModifierType>(0), '0', N_("Select none")},
-	{static_cast<GdkModifierType>(0), '1', N_("Select group 1 duplicates")},
-	{static_cast<GdkModifierType>(0), '2', N_("Select group 2 duplicates")},
-};
-
-/**
  * @brief The function run in threads for similarity checks
  * @param d1 #DupeQueueItem
  * @param d2 #DupeWindow

@@ -131,53 +131,6 @@ static void pan_window_dnd_init(PanWindow *pw);
 static void pan_window_new_real(FileData *dir_fd);
 static void pan_popup_menu_cb(GSimpleAction *, GVariant *, gpointer data);
 
-/**
- * This array must be kept in sync with the contents of:\n
- * @link pan_window_key_press_cb @endlink \n
- * @link pan_popup_menu @endlink
- *
- * See also @link HardcodedWindowKey @endlink
- **/
-static HardcodedWindowKeyList pan_view_window_keys{
-	{GDK_CONTROL_MASK, 'C', N_("Copy")},
-	{GDK_CONTROL_MASK, 'M', N_("Move")},
-	{GDK_CONTROL_MASK, 'R', N_("Rename")},
-	{GDK_CONTROL_MASK, 'D', N_("Move to Trash")},
-	{GDK_CONTROL_MASK, 'W', N_("Close window")},
-	{GDK_CONTROL_MASK, 'F', N_("Display Find search bar")},
-	{GDK_CONTROL_MASK, 'G', N_("Start search")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Escape, N_("Exit fullscreen")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Escape, N_("Hide Find search bar")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_equal, N_("Zoom in")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_plus, N_("Zoom in")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_minus, N_("Zoom out")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Z, N_("Zoom 1:1")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_1, N_("Zoom 1:1")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_KP_Divide, N_("Zoom 1:1")},
-	{static_cast<GdkModifierType>(0), '2', N_("Zoom 2:1")},
-	{static_cast<GdkModifierType>(0), '3', N_("Zoom 3:1")},
-	{static_cast<GdkModifierType>(0), '4', N_("Zoom 4:1")},
-	{static_cast<GdkModifierType>(0), '7', N_("Zoom 1:4")},
-	{static_cast<GdkModifierType>(0), '8', N_("Zoom 1:3")},
-	{static_cast<GdkModifierType>(0), '9', N_("Zoom 1:2")},
-	{static_cast<GdkModifierType>(0), 'F', N_("Full screen")},
-	{static_cast<GdkModifierType>(0), 'V', N_("Full screen")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_F11, N_("Full screen")},
-	{static_cast<GdkModifierType>(0), '/', N_("Display Find search bar")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Left, N_("Scroll left")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Right, N_("Scroll right")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Up, N_("Scroll up")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Down, N_("Scroll down")},
-	{GDK_SHIFT_MASK, GDK_KEY_Left, N_("Scroll left faster")},
-	{GDK_SHIFT_MASK, GDK_KEY_Right, N_("Scroll right faster")},
-	{GDK_SHIFT_MASK, GDK_KEY_Up, N_("Scroll up faster")},
-	{GDK_SHIFT_MASK, GDK_KEY_Down, N_("Scroll down faster")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Page_Up, N_("Scroll display half screen up")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Page_Down, N_("Scroll display half screen down")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_Home, N_("Scroll display half screen left")},
-	{static_cast<GdkModifierType>(0), GDK_KEY_End, N_("Scroll display half screen right")},
-};
-
 /*
  *-----------------------------------------------------------------------------
  * the image/thumb loader queue
