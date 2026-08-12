@@ -226,6 +226,7 @@ static void image_loader_class_init(ImageLoaderClass *loader_class)
 
 }
 
+#ifdef DEBUG
 static const gchar *image_loader_get_error(ImageLoader *il)
 {
 	if (!il) return nullptr;
@@ -234,6 +235,7 @@ static const gchar *image_loader_get_error(ImageLoader *il)
 
 	return il->error ? il->error->message : nullptr;
 }
+#endif
 
 GError *image_loader_dup_error(ImageLoader *il)
 {

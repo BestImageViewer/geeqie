@@ -94,11 +94,6 @@ static GStrv get_targets(const char *action)
 	return reinterpret_cast<GStrv>(g_ptr_array_free(targets, FALSE));
 }
 
-static inline bool is_app_action(const char *name)
-{
-	return g_str_has_prefix(name, "app.");
-}
-
 namespace
 {
 
