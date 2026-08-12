@@ -81,7 +81,6 @@ GtkWidget *pref_box_new(GtkWidget *parent_box, gboolean fill,
 	GtkWidget *box = gtk_box_new(orientation, padding);
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), box, fill, fill, 0);
-	gtk_widget_show(box);
 
 	return box;
 }
@@ -105,7 +104,6 @@ GtkWidget *pref_group_new(GtkWidget *parent_box, gboolean fill,
 		}
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), vbox, fill, fill, 0);
-	gtk_widget_show(vbox);
 
 	label = gtk_label_new(text);
 	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
@@ -113,11 +111,9 @@ GtkWidget *pref_group_new(GtkWidget *parent_box, gboolean fill,
 	pref_label_bold(label, TRUE, FALSE);
 
 	gq_gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
-	gtk_widget_show(label);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_INDENT);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
-	gtk_widget_show(hbox);
 
 	/* indent using empty box */
 	pref_spacer(hbox, 0);
@@ -131,7 +127,6 @@ GtkWidget *pref_group_new(GtkWidget *parent_box, gboolean fill,
 		box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 		}
 	gq_gtk_box_pack_start(GTK_BOX(hbox), box, TRUE, TRUE, 0);
-	gtk_widget_show(box);
 
 	g_object_set_data(G_OBJECT(box), "pref_group", vbox);
 
@@ -165,12 +160,10 @@ GtkWidget *pref_frame_new(GtkWidget *parent_box, gboolean fill,
 
 	frame = gtk_frame_new(text);
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), frame, fill, fill, 0);
-	gtk_widget_show(frame);
 
 	box = gtk_box_new(orientation, padding);
 	gq_gtk_container_add(frame, box);
 	gq_gtk_widget_set_border_width(box, PREF_PAD_BORDER);
-	gtk_widget_show(box);
 
 	return box;
 }
@@ -181,7 +174,6 @@ GtkWidget *pref_spacer(GtkWidget *parent_box, gboolean padding)
 
 	spacer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), spacer, FALSE, FALSE, padding / 2);
-	gtk_widget_show(spacer);
 
 	return spacer;
 }
@@ -194,7 +186,6 @@ GtkWidget *pref_line(GtkWidget *parent_box, gboolean padding)
 	orientation = gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box));
 	spacer = gtk_separator_new((orientation == GTK_ORIENTATION_HORIZONTAL) ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), spacer, FALSE, FALSE, padding / 2);
-	gtk_widget_show(spacer);
 
 	return spacer;
 }
@@ -205,7 +196,6 @@ GtkWidget *pref_label_new(GtkWidget *parent_box, const gchar *text)
 
 	label = gtk_label_new(text);
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), label, FALSE, FALSE, 0);
-	gtk_widget_show(label);
 
 	return label;
 }
@@ -217,7 +207,6 @@ GtkWidget *pref_label_new_mnemonic(GtkWidget *parent_box, const gchar *text, Gtk
 	label = gtk_label_new_with_mnemonic(text);
 	gtk_label_set_mnemonic_widget(GTK_LABEL(label), widget);
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), label, FALSE, FALSE, 0);
-	gtk_widget_show(label);
 
 	return label;
 }
@@ -255,7 +244,6 @@ GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *icon_name,
 	if (parent_box)
 		{
 		gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
-		gtk_widget_show(button);
 		}
 
 	return button;
@@ -278,7 +266,6 @@ static GtkWidget *real_pref_checkbox_new(GtkWidget *parent_box, const gchar *tex
 	if (func) g_signal_connect(G_OBJECT(button), "toggled", func, data);
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
 
 	return button;
 }
@@ -354,7 +341,6 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 	if (func) g_signal_connect(G_OBJECT(button), "toggled", func, data);
 
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
 
 	return button;
 }
@@ -401,7 +387,6 @@ static GtkWidget *real_pref_spin_new(GtkWidget *parent_box, const gchar *text, c
 		}
 
 	gq_gtk_box_pack_start(GTK_BOX(box), spin, FALSE, FALSE, 0);
-	gtk_widget_show(spin);
 
 	/* perhaps this should only be PREF_PAD_GAP distance from spinbutton ? */
 	if (suffix)
@@ -462,7 +447,6 @@ GtkWidget *pref_table_new(GtkWidget *parent_box, gint, gint, gboolean, gboolean 
 	if (parent_box)
 		{
 		gq_gtk_box_pack_start(GTK_BOX(parent_box), table, fill, fill, 0);
-		gtk_widget_show(table);
 		}
 
 	return table;
@@ -494,7 +478,6 @@ GtkWidget *pref_table_box(GtkWidget *table, gint column, gint row,
 
 	gtk_grid_attach(GTK_GRID(table), shell, column, row, 1, 1);
 
-	gtk_widget_show(shell);
 
 	return box;
 }
@@ -508,7 +491,6 @@ GtkWidget *pref_table_label(GtkWidget *table, gint column, gint row,
 	gtk_widget_set_halign(label, alignment);
 	gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
 	gtk_grid_attach(GTK_GRID(table), label, column, row, 1, 1);
-	gtk_widget_show(label);
 
 	return label;
 }
@@ -521,7 +503,6 @@ GtkWidget *pref_table_button(GtkWidget *table, gint column, gint row,
 
 	button = pref_button_new(nullptr, stock_id, text, func, data);
 	gtk_grid_attach(GTK_GRID(table), button, column, row, 1, 1);
-	gtk_widget_show(button);
 
 	return button;
 }
@@ -555,7 +536,6 @@ GtkWidget *pref_table_spin(GtkWidget *table, gint column, gint row,
 		{
 		box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 		gq_gtk_box_pack_start(GTK_BOX(box), spin, FALSE, FALSE, 0);
-		gtk_widget_show(spin);
 
 		label = pref_label_new(box, suffix);
 		pref_link_sensitivity(label, spin);
@@ -566,7 +546,6 @@ GtkWidget *pref_table_spin(GtkWidget *table, gint column, gint row,
 		}
 
 	gtk_grid_attach(GTK_GRID(table), box, column, row, 1, 1);
-	gtk_widget_show(box);
 
 	return spin;
 }
@@ -594,7 +573,6 @@ GtkWidget *pref_toolbar_new(GtkWidget *parent_box)
 	if (parent_box)
 		{
 		gq_gtk_box_pack_start(GTK_BOX(parent_box), tbar, FALSE, FALSE, 0);
-		gtk_widget_show(tbar);
 		}
 	return tbar;
 }
@@ -629,7 +607,6 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 
 	if (func) g_signal_connect(item, "clicked", func, data);
 	gq_gtk_container_add(toolbar, item);
-	gtk_widget_show(item);
 
 	if (description)
 		{
@@ -778,14 +755,12 @@ GtkWidget *date_selection_new()
 
 	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	gtk_menu_button_set_child(GTK_MENU_BUTTON(ds->button), icon);
-	gtk_widget_show(icon);
 
 	gq_gtk_box_pack_start(GTK_BOX(ds->box), ds->button, FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(ds->button), "notify::active",
 			 G_CALLBACK(date_selection_button_active_cb), ds);
 	g_object_set_data(G_OBJECT(ds->box), DATE_SELECION_KEY, ds);
 	date_selection_popup(ds);
-	gtk_widget_show(ds->button);
 
 	return ds->box;
 }

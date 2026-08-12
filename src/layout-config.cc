@@ -131,7 +131,6 @@ void layout_config_table_button(GtkWidget *table, LayoutLocation l, const gchar 
 	gtk_widget_set_sensitive(button, FALSE);
 	gtk_widget_set_focusable(button, FALSE);
 	gtk_grid_attach(GTK_GRID(table), button, x1, y1, x2 - x1, y2 - y1);
-	gtk_widget_show(button);
 }
 
 GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, LayoutConfig *lc)
@@ -165,9 +164,7 @@ GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, La
 
 	gtk_widget_set_size_request(table, LAYOUT_STYLE_SIZE, LAYOUT_STYLE_SIZE);
 	gtk_check_button_set_child(GTK_CHECK_BUTTON(group), table);
-	gtk_widget_show(table);
 
-	gtk_widget_show(group);
 
 	return group;
 }
@@ -266,14 +263,12 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 		}
 	style = std::clamp<int>(style, 0, layout_config_styles.size() - 1);
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(lc->style_widgets[style]), TRUE);
-	gtk_widget_show(hbox);
 
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_NEVER);
 	gq_gtk_box_pack_start(GTK_BOX(box), scrolled, FALSE, FALSE, 0);
-	gtk_widget_show(scrolled);
 
 	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
 	lc->listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
@@ -302,7 +297,6 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 	layout_config_list_append(store, c);
 
 	gq_gtk_container_add(scrolled, lc->listview);
-	gtk_widget_show(lc->listview);
 
 	pref_label_new(box, _("(drag to change order)"));
 

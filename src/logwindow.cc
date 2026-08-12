@@ -80,7 +80,7 @@ static gboolean log_window_key_pressed_cb(GtkEventControllerKey *controller, gui
 {
 	if (keyval == GDK_KEY_Escape)
 		{
-		gtk_widget_hide(gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller)));
+		gtk_widget_set_visible(gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller)), FALSE);
 		}
 	else if (keyval == GDK_KEY_F1 && options->log_window.action[0] != '\0')
 		{
@@ -330,7 +330,6 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	DEBUG_NAME(window);
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	gq_gtk_container_add(window, win_vbox);
-	gtk_widget_show(win_vbox);
 
 	gtk_window_set_default_size(GTK_WINDOW(window), log_window.width, log_window.height);
 
@@ -342,7 +341,6 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolledwin), true);
 
 	gq_gtk_box_pack_start(GTK_BOX(win_vbox), scrolledwin, TRUE, TRUE, 0);
-	gtk_widget_show(scrolledwin);
 
 	text = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(text), FALSE);
@@ -351,7 +349,6 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_text_buffer_get_start_iter(buffer, &iter);
 	gtk_text_buffer_create_mark(buffer, "end", &iter, FALSE);
 	gq_gtk_container_add(scrolledwin, text);
-	gtk_widget_show(text);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(log_window_key_pressed_cb), text);
@@ -362,7 +359,6 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_text_buffer_create_tag(buffer, "green_bg", "background", "#00FF00", NULL);
 
 	GtkWidget *hbox = pref_box_new(win_vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gtk_widget_show(hbox);
 
 	pref_spin_new(hbox, _("Debug level:"), nullptr, DEBUG_LEVEL_MIN, DEBUG_LEVEL_MAX, 1, 0,
 	              get_debug_level(), G_CALLBACK(debug_changed_cb), nullptr);
@@ -391,14 +387,11 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	GtkWidget *search_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_container_add(hbox, search_box);
-	gtk_widget_show(search_box);
 
 	logwin->search_entry_box = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(search_box), logwin->search_entry_box, FALSE, FALSE, 0);
-	gtk_widget_show(logwin->search_entry_box);
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_PRIMARY, GQ_ICON_FIND);
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
-	gtk_widget_show(search_box);
 	gtk_widget_set_tooltip_text(logwin->search_entry_box, _("Search for text in log window"));
 	g_signal_connect(logwin->search_entry_box, "icon-press", G_CALLBACK(search_entry_icon_cb), logwin);
 	g_signal_connect(logwin->search_entry_box, "activate", G_CALLBACK(search_activate_event), logwin);
@@ -427,7 +420,6 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	logwin->regexp_box = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), logwin->regexp_box, FALSE, FALSE, 0);
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->regexp_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
-	gtk_widget_show(logwin->regexp_box);
 	g_signal_connect(G_OBJECT(logwin->regexp_box), "activate",
 	                 G_CALLBACK(log_window_regexp_cb), logwin);
 	g_signal_connect(logwin->regexp_box, "icon-press", G_CALLBACK(filter_entry_icon_cb), nullptr);

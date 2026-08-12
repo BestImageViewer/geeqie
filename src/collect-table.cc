@@ -2444,7 +2444,6 @@ CollectTable *collection_table_new(CollectionData *cd)
 	gtk_widget_add_controller(ct->listview, controller);
 
 	gq_gtk_container_add(ct->scrolled, ct->listview);
-	gtk_widget_show(ct->listview);
 
 	collection_table_dnd_init(ct);
 

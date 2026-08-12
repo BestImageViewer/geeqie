@@ -601,7 +601,7 @@ void show_overwrite_confirmation(PendingFileDialog *pending, const gchar *path)
 	gtk_dialog_add_buttons(GTK_DIALOG(dialog), _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Replace"), GTK_RESPONSE_ACCEPT, nullptr);
 	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
 	g_signal_connect(dialog, "response", G_CALLBACK(overwrite_confirm_response_cb), pending);
-	gtk_widget_show(dialog);
+	gtk_window_present(GTK_WINDOW(dialog));
 }
 
 void file_dialog_response_cb(GtkDialog *, gint response_id, gpointer data)
@@ -801,7 +801,7 @@ void file_dialog_show(const FileDialogData &fdd)
 	update_preview(pending);
 	pending->preview_timer_id = g_timeout_add(250, preview_timer_cb, pending);
 
-	gtk_widget_show(pending->dialog);
+	gtk_window_present(GTK_WINDOW(pending->dialog));
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

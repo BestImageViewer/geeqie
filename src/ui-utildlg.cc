@@ -224,7 +224,6 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, 
 		if (!alternative_order) gq_gtk_box_reorder_child(GTK_BOX(gd->hbox), button, 0);
 		}
 
-	gtk_widget_show(button);
 
 	return button;
 }
@@ -254,7 +253,6 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 		gtk_widget_set_halign(image, GTK_ALIGN_CENTER);
 		gtk_widget_set_valign(image, GTK_ALIGN_START);
 		gq_gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
-		gtk_widget_show(image);
 		}
 
 	vbox = pref_box_new(hbox, TRUE, GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
@@ -383,13 +381,10 @@ static void generic_dialog_setup(GenericDialog *gd,
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_BUTTON_SPACE);
 	gq_gtk_container_add(scrolled, vbox);
 	gq_gtk_container_add(gd->dialog, scrolled);
-	gtk_widget_show(scrolled);
 
-	gtk_widget_show(vbox);
 
 	gd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), gd->vbox, TRUE, TRUE, 0);
-	gtk_widget_show(gd->vbox);
 
 	gd->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_halign(gd->hbox, GTK_ALIGN_END);
@@ -450,7 +445,7 @@ GenericDialog *warning_dialog(const gchar *heading, const gchar *text,
 
 	generic_dialog_add_message(gd, icon_name, heading, text, TRUE);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 
 	return gd;
 }

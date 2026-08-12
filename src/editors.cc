@@ -619,31 +619,26 @@ EditorVerboseWindow::EditorVerboseWindow(EditorData *ed, const gchar *text)
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), scrolled, TRUE, TRUE, 5);
-	gtk_widget_show(scrolled);
 
 	text_view = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(text_view), FALSE);
 	gtk_widget_set_size_request(text_view, EDITOR_WINDOW_WIDTH, EDITOR_WINDOW_HEIGHT);
 	gq_gtk_container_add(scrolled, text_view);
-	gtk_widget_show(text_view);
 
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
 
 	progress_bar = gtk_progress_bar_new();
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress_bar), 0.0);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), progress_bar, TRUE, TRUE, 0);
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress_bar), "");
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress_bar), TRUE);
-	gtk_widget_show(progress_bar);
 
 	spinner = gtk_spinner_new();
 	gtk_spinner_start(GTK_SPINNER(spinner));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
-	gtk_widget_show(spinner);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 void EditorVerboseWindow::fill(const gchar *text, gint len) const

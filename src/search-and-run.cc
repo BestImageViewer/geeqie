@@ -447,8 +447,7 @@ GtkWidget *search_and_run_new(LayoutWindow *lw)
 	g_signal_connect(sar->entry, "activate", G_CALLBACK(entry_activate_cb), sar);
 	g_signal_connect(sar->entry, "changed", G_CALLBACK(entry_changed_cb), sar);
 
-	gtk_widget_show(sar->entry);
-	gtk_widget_show(sar->window);
+	gtk_window_present(GTK_WINDOW(sar->window));
 	gtk_widget_grab_focus(sar->entry);
 
 	return sar->window;

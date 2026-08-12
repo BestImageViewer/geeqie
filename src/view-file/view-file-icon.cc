@@ -352,7 +352,6 @@ static void tip_show(ViewFile *vf)
 
 	g_object_set_data(G_OBJECT(VFICON(vf)->tip_window), "tip_label", label);
 	gq_gtk_container_add(VFICON(vf)->tip_window, label);
-	gtk_widget_show(label);
 
 	display = gdk_display_get_default();
 	seat = gdk_display_get_default_seat(display);
@@ -360,7 +359,7 @@ static void tip_show(ViewFile *vf)
 	get_device_position(device, x, y);
 
 	if (!gtk_widget_get_realized(VFICON(vf)->tip_window)) gtk_widget_realize(VFICON(vf)->tip_window);
-	gtk_widget_show(VFICON(vf)->tip_window);
+	gtk_window_present(GTK_WINDOW(VFICON(vf)->tip_window));
 }
 
 static void tip_hide(ViewFile *vf)

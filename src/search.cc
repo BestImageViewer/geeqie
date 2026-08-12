@@ -2712,7 +2712,6 @@ static GtkWidget *menu_spin(GtkWidget *box, gdouble min, gdouble max, gpointer d
 	                 G_CALLBACK(menu_choice_spin_cb), data);
 
 	gq_gtk_box_pack_start(GTK_BOX(box), spin, FALSE, FALSE, 0);
-	gtk_widget_show(spin);
 
 	return spin;
 }
@@ -2771,18 +2770,15 @@ static GtkWidget *menu_choice(GtkWidget *box, const gchar *text, gboolean *value
 
 	base_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gq_gtk_box_pack_start(GTK_BOX(box), base_box, FALSE, FALSE, 0);
-	gtk_widget_show(base_box);
 
 	button = gtk_check_button_new();
 	if (value) gtk_check_button_set_active(GTK_CHECK_BUTTON(button), *value);
 	gq_gtk_box_pack_start(GTK_BOX(base_box), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
 	if (check) *check = button;
 	if (value) g_object_set_data(G_OBJECT(button), "check_var", value);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(base_box), hbox, TRUE, TRUE, 0);
-	gtk_widget_show(hbox);
 
 	g_signal_connect(G_OBJECT(button), "toggled",
 			 G_CALLBACK(menu_choice_check_cb), hbox);
@@ -2992,7 +2988,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gq_gtk_widget_set_border_width(vbox, PREF_PAD_GAP);
 	gq_gtk_container_add(sd->ui.window, vbox);
-	gtk_widget_show(vbox);
 
 	sd->ui.box_search = pref_box_new(vbox, FALSE, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
@@ -3017,14 +3012,12 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.entry_collection = gtk_entry_new();
 	gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_collection), "");
 	gq_gtk_box_pack_start(GTK_BOX(sd->ui.box_collection), sd->ui.entry_collection, TRUE, TRUE, 0);
-	gtk_widget_show(sd->ui.entry_collection);
 
 	GtkWidget *button_fd = gtk_button_new_with_label("…");
 	g_signal_connect(G_OBJECT(button_fd), "clicked", G_CALLBACK(select_collection_clicked_cb), sd);
 	gq_gtk_box_pack_start(GTK_BOX(sd->ui.box_collection), button_fd, FALSE, FALSE, 0);
-	gtk_widget_show(button_fd);
 
-	gtk_widget_hide(sd->ui.box_collection);
+	gtk_widget_set_visible(sd->ui.box_collection, FALSE);
 
 	/* Search for file name */
 	hbox = menu_choice(sd->ui.box_search, _("File"), &sd->match_name_enable);
@@ -3032,7 +3025,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	                                    nullptr, nullptr);
 	GtkWidget *combo = history_combo_new(&sd->ui.entry_name, "", "search_name", -1);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
-	gtk_widget_show(combo);
 	pref_checkbox_new_int(hbox, _("Match case"),
 			      sd->search_name_match_case, &sd->search_name_match_case);
 	pref_checkbox_new_int(hbox, _("Symbolic link"), sd->search_name_symbolic_link, &sd->search_name_symbolic_link);
@@ -3060,7 +3052,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.date_sel = date_selection_new();
 	date_selection_time_set(sd->ui.date_sel, time(nullptr));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.date_sel, FALSE, FALSE, 0);
-	gtk_widget_show(sd->ui.date_sel);
 
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
@@ -3068,7 +3059,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.date_sel_end = date_selection_new();
 	date_selection_time_set(sd->ui.date_sel_end, time(nullptr));
 	gq_gtk_box_pack_start(GTK_BOX(hbox2), sd->ui.date_sel_end, FALSE, FALSE, 0);
-	gtk_widget_show(sd->ui.date_sel_end);
 
 	GtkStringList *date_list = gtk_string_list_new(nullptr);
 	for (const SearchDateType &sdt : search_date_types)
@@ -3123,7 +3113,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_widget_set_sensitive(sd->ui.entry_keywords, sd->match_keywords_enable);
 	g_signal_connect(G_OBJECT(check_keywords), "toggled",
 	                 G_CALLBACK(menu_choice_check_cb), sd->ui.entry_keywords);
-	gtk_widget_show(sd->ui.entry_keywords);
 
 	/* Search for image comment */
 	GtkWidget *check_comment = nullptr;
@@ -3139,7 +3128,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_widget_set_sensitive(sd->ui.entry_comment, sd->match_comment_enable);
 	g_signal_connect(G_OBJECT(check_comment), "toggled",
 	                 G_CALLBACK(menu_choice_check_cb), sd->ui.entry_comment);
-	gtk_widget_show(sd->ui.entry_comment);
 	pref_checkbox_new_int(hbox, _("Match case"),
 			      sd->search_comment_match_case, &sd->search_comment_match_case);
 	gtk_widget_set_tooltip_text(sd->ui.entry_comment,
@@ -3162,7 +3150,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_widget_set_sensitive(sd->ui.entry_exif_tag, sd->match_exif_enable);
 	g_signal_connect(G_OBJECT(check_exif), "toggled",
 	                 G_CALLBACK(menu_choice_check_cb), sd->ui.entry_exif_tag);
-	gtk_widget_show(sd->ui.entry_exif_tag);
 	gtk_widget_set_tooltip_text(sd->ui.entry_exif_tag,
 	                            _("e.g. Exif.Image.Model\nThis always case-sensitive\n\nYou may drag-and-drop from the Exif Window\n\nSee https://exiv2.org/tags.html"));
 
@@ -3176,7 +3163,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_widget_set_sensitive(sd->ui.entry_exif_value, sd->match_exif_enable);
 	g_signal_connect(G_OBJECT(check_exif), "toggled",
 	                 G_CALLBACK(menu_choice_check_cb), sd->ui.entry_exif_value);
-	gtk_widget_show(sd->ui.entry_exif_value);
 
 	gtk_widget_set_tooltip_text(sd->ui.entry_exif_value,
 	                            _("e.g. Canon EOS\n\nThis field uses Perl Compatible Regular Expressions.\ne.g. use \nabc.*ghk\n and not \nabc*ghk\n\nSee the Help file."));
@@ -3221,7 +3207,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gq_gtk_box_pack_start(GTK_BOX(hbox2), sd->ui.entry_gps_coord, TRUE, TRUE, 0);
 	gtk_widget_set_sensitive(sd->ui.entry_gps_coord, TRUE);
 
-	gtk_widget_show(sd->ui.entry_gps_coord);
 
 	/* Search for image class */
 	hbox = menu_choice(sd->ui.box_search, _("Image class"), &sd->match_class_enable);
@@ -3267,7 +3252,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), scrolled, TRUE, TRUE, 0);
-	gtk_widget_show(scrolled);
 
 	store = gtk_list_store_new(8, G_TYPE_POINTER, G_TYPE_INT, GDK_TYPE_PIXBUF,
 				   G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
@@ -3298,7 +3282,6 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.result_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
 	gq_gtk_container_add(scrolled, sd->ui.result_view);
-	gtk_widget_show(sd->ui.result_view);
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(sd->ui.result_view));
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
@@ -3366,12 +3349,10 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	DEBUG_NAME(frame);
 	gtk_widget_add_css_class(frame, "frame");
 	gq_gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, PREF_PAD_SPACE);
-	gtk_widget_show(frame);
 
 	sd->ui.label_status = gtk_label_new("");
 	gtk_widget_set_size_request(sd->ui.label_status, 50, -1);
 	gq_gtk_container_add(frame, sd->ui.label_status);
-	gtk_widget_show(sd->ui.label_status);
 
 	sd->ui.label_progress = gtk_progress_bar_new();
 	gtk_widget_set_size_request(sd->ui.label_progress, 50, -1);
@@ -3380,11 +3361,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(sd->ui.label_progress), TRUE);
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.label_progress, TRUE, TRUE, 0);
-	gtk_widget_show(sd->ui.label_progress);
 
 	sd->ui.spinner = gtk_spinner_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.spinner, FALSE, FALSE, 0);
-	gtk_widget_show(sd->ui.spinner);
 
 	GtkWidget *button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(search_window_help_button_cb), sd);
 	gtk_widget_set_tooltip_text(button_help, _("Shift-F1"));
@@ -3414,7 +3393,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	GApplication *app = g_application_get_default();
 	register_actions_from_table(GTK_APPLICATION(app), sd->ui.window, search_actions, get_keyfile_merged(), sd);
 
-	gtk_widget_show(sd->ui.window);
+	gtk_window_present(GTK_WINDOW(sd->ui.window));
 }
 
 /*

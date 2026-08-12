@@ -150,13 +150,11 @@ static void generic_dialog_add_image(GenericDialog *gd, GtkWidget *box,
 
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 		gq_gtk_box_pack_start(GTK_BOX(preview_box), sep, FALSE, FALSE, 0);
-		gtk_widget_show(sep);
 		}
 	else
 		{
 		gq_gtk_box_pack_start(GTK_BOX(box), vbox, FALSE, TRUE, PREF_PAD_GAP);
 		}
-	gtk_widget_show(vbox);
 
 	if (header1)
 		{
@@ -173,7 +171,6 @@ static void generic_dialog_add_image(GenericDialog *gd, GtkWidget *box,
 	gtk_widget_set_size_request(imd->widget, DIALOG_DEF_IMAGE_DIM_X, DIALOG_DEF_IMAGE_DIM_Y);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), imd->widget, TRUE, TRUE, 0);
 	image_change_fd(imd, fd1, 0.0);
-	gtk_widget_show(imd->widget);
 
 	if (show_filename)
 		{
@@ -206,7 +203,6 @@ static void generic_dialog_add_image(GenericDialog *gd, GtkWidget *box,
 		gtk_widget_set_size_request(imd->widget, DIALOG_DEF_IMAGE_DIM_X, DIALOG_DEF_IMAGE_DIM_Y);
 		gq_gtk_box_pack_start(GTK_BOX(vbox), imd->widget, TRUE, TRUE, 0);
 		if (fd2) image_change_fd(imd, fd2, 0.0);
-		gtk_widget_show(imd->widget);
 
 		if (show_filename)
 			{
@@ -536,7 +532,6 @@ static GtkWidget *file_util_dialog_add_list(GtkWidget *box, GList *list, gboolea
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(box), scrolled, TRUE, TRUE, 0);
-	gtk_widget_show(scrolled);
 
 	store = gtk_list_store_new(UTILITY_COLUMN_COUNT, G_TYPE_POINTER, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
@@ -558,7 +553,6 @@ static GtkWidget *file_util_dialog_add_list(GtkWidget *box, GList *list, gboolea
 
 	gtk_widget_set_size_request(view, UTILITY_LIST_MIN_WIDTH, UTILITY_LIST_MIN_HEIGHT);
 	gq_gtk_container_add(scrolled, view);
-	gtk_widget_show(view);
 
 	while (list)
 		{
@@ -696,28 +690,24 @@ static void file_util_progress_window_new(UtilityData *ud)
 	gtk_label_set_xalign(GTK_LABEL(ud->progress_label), 0.0);
 	gtk_label_set_ellipsize(GTK_LABEL(ud->progress_label), PANGO_ELLIPSIZE_MIDDLE);
 	gq_gtk_box_pack_start(GTK_BOX(ud->progress_gd->vbox), ud->progress_label, FALSE, FALSE, 5);
-	gtk_widget_show(ud->progress_label);
 
 	/* Progress bar and spinner in hbox */
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_box_pack_start(GTK_BOX(ud->progress_gd->vbox), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
 
 	ud->progress_bar = gtk_progress_bar_new();
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(ud->progress_bar), 0.0);
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(ud->progress_bar), TRUE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), ud->progress_bar, TRUE, TRUE, 0);
-	gtk_widget_show(ud->progress_bar);
 
 	ud->progress_spinner = gtk_spinner_new();
 	gtk_spinner_start(GTK_SPINNER(ud->progress_spinner));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), ud->progress_spinner, FALSE, FALSE, 5);
-	gtk_widget_show(ud->progress_spinner);
 
 	/* Set default window size */
 	gtk_window_set_default_size(GTK_WINDOW(ud->progress_gd->dialog), PROGRESS_WINDOW_WIDTH, PROGRESS_WINDOW_HEIGHT);
 
-	gtk_widget_show(ud->progress_gd->dialog);
+	gtk_window_present(GTK_WINDOW(ud->progress_gd->dialog));
 }
 
 static void file_util_progress_update(UtilityData *ud)
@@ -807,7 +797,7 @@ static gint file_util_perform_ci_cb(gpointer resume_data, EditorFlags flags, GLi
 
 			generic_dialog_add_button(d, GQ_ICON_GO_NEXT, _("Co_ntinue"),
 						  file_util_resume_cb, TRUE);
-			gtk_widget_show(d->dialog);
+			gtk_window_present(GTK_WINDOW(d->dialog));
 			ret = EDITOR_CB_SUSPEND;
 			}
 		else
@@ -1207,7 +1197,7 @@ static void file_util_check_ci(UtilityData *ud)
 		/* fatal error */
 		generic_dialog_add_message(d, GQ_ICON_DIALOG_WARNING, _("This operation can't continue:"), desc, TRUE);
 		}
-	gtk_widget_show(d->dialog);
+	gtk_window_present(GTK_WINDOW(d->dialog));
 }
 
 
@@ -1666,7 +1656,7 @@ static void file_util_dialog_init_simple_list(UtilityData *ud)
 	    ud->type == UtilityType::DELETE_FOLDER)
 		box_append_safe_delete_status(ud->gd);
 
-	gtk_widget_show(ud->gd->dialog);
+	gtk_window_present(GTK_WINDOW(ud->gd->dialog));
 
 	file_util_dialog_list_select(ud->listview, 0);
 }
@@ -1693,11 +1683,9 @@ static GtkWidget *furm_simple_vlabel(GtkWidget *box, const gchar *text, gboolean
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_box_pack_start(GTK_BOX(box), vbox, expand, expand, 0);
-	gtk_widget_show(vbox);
 
 	label = gtk_label_new(text);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
-	gtk_widget_show(label);
 
 	return vbox;
 }
@@ -1759,18 +1747,16 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 		generic_dialog_add_image(ud->gd, box, nullptr, nullptr, FALSE, nullptr, nullptr, FALSE);
 		}
 
-	gtk_widget_show(ud->gd->dialog);
+	gtk_window_present(GTK_WINDOW(ud->gd->dialog));
 
 
 	ud->notebook = gtk_notebook_new();
 
 	gq_gtk_box_pack_start(GTK_BOX(ud->gd->vbox), ud->notebook, FALSE, FALSE, 0);
-	gtk_widget_show(ud->notebook);
 
 
 	page = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gtk_notebook_append_page(GTK_NOTEBOOK(ud->notebook), page, gtk_label_new(_("Manual rename")));
-	gtk_widget_show(page);
 
 	table = pref_table_new(page, 2, 2, FALSE, FALSE);
 
@@ -1787,11 +1773,9 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 	g_signal_connect(G_OBJECT(ud->rename_entry), "changed",
 			 G_CALLBACK(file_util_rename_preview_entry_cb), ud);
 
-	gtk_widget_show(ud->rename_entry);
 
 	page = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gtk_notebook_append_page(GTK_NOTEBOOK(ud->notebook), page, gtk_label_new(_("Auto rename")));
-	gtk_widget_show(page);
 
 
 	hbox = pref_box_new(page, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
@@ -1802,7 +1786,6 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 	g_signal_connect(G_OBJECT(ud->auto_entry_front), "changed",
 			 G_CALLBACK(file_util_rename_preview_entry_cb), ud);
 	gq_gtk_box_pack_start(GTK_BOX(box2), combo, TRUE, TRUE, 0);
-	gtk_widget_show(combo);
 
 	box2 = furm_simple_vlabel(hbox, _("Start #"), FALSE);
 
@@ -1816,7 +1799,6 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 	g_signal_connect(G_OBJECT(ud->auto_entry_end), "changed",
 			 G_CALLBACK(file_util_rename_preview_entry_cb), ud);
 	gq_gtk_box_pack_start(GTK_BOX(box2), combo, TRUE, TRUE, 0);
-	gtk_widget_show(combo);
 
 	ud->auto_spin_pad = pref_spin_new(page, _("Padding:"), nullptr,
 					  1.0, 8.0, 1.0, 0, options->cp_mv_rn.auto_padding,
@@ -1824,7 +1806,6 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 
 	page = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gtk_notebook_append_page(GTK_NOTEBOOK(ud->notebook), page, gtk_label_new(_("Formatted rename")));
-	gtk_widget_show(page);
 
 	hbox = pref_box_new(page, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 
@@ -1834,7 +1815,6 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 	g_signal_connect(G_OBJECT(ud->format_entry), "changed",
 			 G_CALLBACK(file_util_rename_preview_entry_cb), ud);
 	gq_gtk_box_pack_start(GTK_BOX(box2), combo, TRUE, TRUE, 0);
-	gtk_widget_show(combo);
 
 	box2 = furm_simple_vlabel(hbox, _("Start #"), FALSE);
 
@@ -2091,7 +2071,7 @@ static void file_util_details_dialog(UtilityData *ud, FileData *fd)
 
 	generic_dialog_add_image(gd, box, fd, nullptr, FALSE, nullptr, nullptr, FALSE);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *fd)
@@ -2163,7 +2143,6 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 
 		pref_label_bold(label, TRUE, FALSE);
 		gtk_grid_attach(GTK_GRID(table), label, 0, i, 1, 1);
-		gtk_widget_show(label);
 
 		label = gtk_label_new(value);
 
@@ -2172,7 +2151,6 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 
 		gtk_label_set_wrap(GTK_LABEL(label), TRUE);
 		gtk_grid_attach(GTK_GRID(table), label, 1, i, 1, 1);
-		gtk_widget_show(label);
 
 		i++;
 		}
@@ -2180,7 +2158,7 @@ static void file_util_write_metadata_details_dialog(UtilityData *ud, FileData *f
 	generic_dialog_add_image(gd, box, fd, nullptr, FALSE, nullptr, nullptr, FALSE);
 
 	gtk_widget_set_size_request(gd->dialog, DIALOG_WIDTH, -1);
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 
 	g_list_free(keys);
 }
@@ -2734,7 +2712,7 @@ static void file_util_delete_dir_full(FileData *fd, GtkWidget *parent, UtilityPh
 		rlist = filelist_sort_path(rlist);
 		file_util_dialog_add_list(box, rlist, FALSE, FALSE);
 
-		gtk_widget_show(gd->dialog);
+		gtk_window_present(GTK_WINDOW(gd->dialog));
 		}
 	else
 		{

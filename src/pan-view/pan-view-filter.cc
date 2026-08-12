@@ -120,7 +120,6 @@ void pan_filter_activate_cb(PanWindow *pw, const gchar *text)
 	GtkWidget *kw_button = gtk_button_new_with_label(label);
 
 	gq_gtk_box_pack_start(GTK_BOX(ui->filter_kw_hbox), kw_button, FALSE, FALSE, 0);
-	gtk_widget_show(kw_button);
 
 	auto cb_state = g_new0(PanFilterCallbackState, 1);
 	cb_state->pw = pw;
@@ -142,7 +141,6 @@ void pan_filter_ui_replace_filter_button_arrow(PanViewFilterUi *ui, const gchar 
 	gq_gtk_box_pack_start(GTK_BOX(parent), ui->filter_button_arrow, FALSE, FALSE, 0);
 	gq_gtk_box_reorder_child(GTK_BOX(parent), ui->filter_button_arrow, 0);
 
-	gtk_widget_show(ui->filter_button_arrow);
 };
 
 void pan_filter_toggle_cb(GtkWidget *button, gpointer data)
@@ -246,11 +244,9 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	pref_label_new(ui->filter_box, _("Keyword Filter:"));
 
 	gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), ui->filter_mode_drop_down, FALSE, FALSE, 0);
-	gtk_widget_show(ui->filter_mode_drop_down);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), hbox, TRUE, TRUE, 0);
-	gtk_widget_show(hbox);
 
 	ui->filter_entry = tab_completion_new_with_history(hbox, "", "pan_view_filter", -1);
 	tab_completion_set_enter_func(ui->filter_entry,
@@ -260,7 +256,6 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 
 	ui->filter_kw_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->filter_kw_hbox, TRUE, TRUE, 0);
-	gtk_widget_show(ui->filter_kw_hbox);
 
 	// Build the spin-button to show/hide the filter UI.
 	ui->filter_button = gtk_toggle_button_new();
@@ -268,10 +263,8 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	gtk_widget_set_focus_on_click(ui->filter_button, FALSE);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gq_gtk_container_add(ui->filter_button, hbox);
-	gtk_widget_show(hbox);
 	ui->filter_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->filter_button_arrow, FALSE, FALSE, 0);
-	gtk_widget_show(ui->filter_button_arrow);
 	pref_label_new(hbox, _("Filter"));
 
 	g_signal_connect(G_OBJECT(ui->filter_button), "clicked",
@@ -282,7 +275,6 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 		{
 		ui->filter_check_buttons[i] = gtk_check_button_new_with_label(_(format_class_list[i]));
 		gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), ui->filter_check_buttons[i], FALSE, FALSE, 0);
-		gtk_widget_show(ui->filter_check_buttons[i]);
 		}
 
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(ui->filter_check_buttons[FORMAT_CLASS_IMAGE]), TRUE);

@@ -56,7 +56,6 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_start(GTK_BOX(ui->search_box), hbox, TRUE, TRUE, 0);
-	gtk_widget_show(hbox);
 
 	ui->search_entry = tab_completion_new_with_history(hbox, "", "pan_view_search", -1);
 	tab_completion_set_enter_func(ui->search_entry,
@@ -64,7 +63,6 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 
 	ui->search_label = gtk_label_new("");
 	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->search_label, TRUE, TRUE, 0);
-	gtk_widget_show(ui->search_label);
 
 	// Build the spin-button to show/hide the search UI.
 	ui->search_button = gtk_toggle_button_new();
@@ -72,10 +70,8 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 	gtk_widget_set_focus_on_click(ui->search_button, FALSE);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gq_gtk_container_add(ui->search_button, hbox);
-	gtk_widget_show(hbox);
 	ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->search_button_arrow, FALSE, FALSE, 0);
-	gtk_widget_show(ui->search_button_arrow);
 	pref_label_new(hbox, _("Find"));
 
 	g_signal_connect(G_OBJECT(ui->search_button), "clicked",
@@ -385,7 +381,6 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		gq_gtk_box_pack_start(GTK_BOX(parent), ui->search_button_arrow, FALSE, FALSE, 0);
 		gq_gtk_box_reorder_child(GTK_BOX(parent), ui->search_button_arrow, 0);
 
-		gtk_widget_show(ui->search_button_arrow);
 		}
 	else
 		{
@@ -397,7 +392,6 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		gq_gtk_box_pack_start(GTK_BOX(parent), ui->search_button_arrow, FALSE, FALSE, 0);
 		gq_gtk_box_reorder_child(GTK_BOX(parent), ui->search_button_arrow, 0);
 
-		gtk_widget_show(ui->search_button_arrow);
 		gtk_widget_grab_focus(ui->search_entry);
 		}
 }

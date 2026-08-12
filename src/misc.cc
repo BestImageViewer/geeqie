@@ -386,7 +386,7 @@ gint gq_gtk_dialog_run(GtkDialog *dialog)
 
 	gulong handler_id = g_signal_connect(dialog, "response",
 					     G_CALLBACK(dialog_run_response_cb), &run_data);
-	gtk_widget_show(GTK_WIDGET(dialog));
+	gtk_window_present(GTK_WINDOW(GTK_WIDGET(dialog)));
 	g_main_loop_run(run_data.loop);
 	g_signal_handler_disconnect(dialog, handler_id);
 	g_main_loop_unref(run_data.loop);

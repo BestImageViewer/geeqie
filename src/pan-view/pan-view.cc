@@ -1624,7 +1624,7 @@ static gboolean pan_warning(FileData *dir_fd)
 	pref_checkbox_new(box, _("Do not show this dialog again"), hide_dlg,
 			  G_CALLBACK(pan_warning_hide_cb), nullptr);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 
 	return TRUE;
 }
@@ -1960,8 +1960,6 @@ static void pan_window_new_real(FileData *dir_fd)
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(vbox);
 	gq_gtk_container_add(pw->window, vbox);
-	gtk_widget_show(pw->window);
-	gtk_widget_show(vbox);
 
 	box = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
@@ -2029,12 +2027,6 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	gq_gtk_box_pack_start(GTK_BOX(vbox), hbox_imd_widget, true, true, 0);
 
-	gtk_widget_show(hbox_imd_widget);
-	gtk_widget_show(pw->imd->widget);
-	gtk_widget_show(vbox);
-	gtk_widget_show(vbox_imd_widget);
-	gtk_widget_show(pw->scrollbar_h);
-	gtk_widget_show(pw->scrollbar_v);
 
 	pan_window_dnd_init(pw);
 
@@ -2058,11 +2050,9 @@ static void pan_window_new_real(FileData *dir_fd)
 	gtk_widget_add_css_class(frame, "frame");
 	gtk_widget_set_size_request(frame, ZOOM_LABEL_WIDTH, -1);
 	gq_gtk_box_pack_start(GTK_BOX(box), frame, TRUE, TRUE, 0);
-	gtk_widget_show(frame);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_container_add(frame, hbox);
-	gtk_widget_show(hbox);
 
 	pref_spacer(hbox, 0);
 	pw->label_message = pref_label_new(hbox, "");
@@ -2072,19 +2062,15 @@ static void pan_window_new_real(FileData *dir_fd)
 	gtk_widget_add_css_class(frame, "frame");
 	gtk_widget_set_size_request(frame, ZOOM_LABEL_WIDTH, -1);
 	gq_gtk_box_pack_end(GTK_BOX(box), frame, FALSE, FALSE, 0);
-	gtk_widget_show(frame);
 
 	pw->label_zoom = gtk_label_new("");
 	gq_gtk_container_add(frame, pw->label_zoom);
-	gtk_widget_show(pw->label_zoom);
 
 	// Add the "Find" button to the status bar area.
 	gq_gtk_box_pack_end(GTK_BOX(box), pw->search_ui->search_button, FALSE, FALSE, 0);
-	gtk_widget_show(pw->search_ui->search_button);
 
 	// Add the "Filter" button to the status bar area.
 	gq_gtk_box_pack_end(GTK_BOX(box), pw->filter_ui->filter_button, FALSE, FALSE, 0);
-	gtk_widget_show(pw->filter_ui->filter_button);
 
 	g_signal_connect(G_OBJECT(pw->window), "close-request", G_CALLBACK(pan_window_delete_cb), pw);
 	GtkEventController *controller = gtk_event_controller_key_new();
@@ -2099,7 +2085,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	register_actions_from_table(GTK_APPLICATION(app), pw->window, pan_actions, get_keyfile_merged(), pw);
 
 	gtk_widget_grab_focus(pw->imd->widget);
-	gtk_widget_show(pw->window);
+	gtk_window_present(GTK_WINDOW(pw->window));
 }
 
 static void pan_popup_menu(PanWindow *pw, GtkWidget *parent, gdouble x, gdouble y)

@@ -558,7 +558,6 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 		image_set_complete_func(fs->imd, fullscreen_image_complete_cb, fs);
 		}
 
-	gtk_widget_show(fs->imd->widget);
 
 	if (fs->same_region)
 		{
@@ -595,7 +594,7 @@ FullScreenData *fullscreen_start(GtkWidget *window, ImageWindow *imd,
 		gtk_window_set_startup_id(GTK_WINDOW(fs->window), id);
 		}
 
-	gtk_widget_show(fs->window);
+	gtk_window_present(GTK_WINDOW(fs->window));
 
 	/* for hiding the mouse */
 	GtkEventController *controller = gtk_event_controller_motion_new();

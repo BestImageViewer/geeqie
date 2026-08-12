@@ -125,7 +125,6 @@ static void menu_item_finish(GtkWidget *menu, GtkWidget *item, GCallback func, g
 		{
 		gtk_box_append(GTK_BOX(menu), item);
 		}
-	gtk_widget_show(item);
 }
 
 GtkWidget *popover_item_add(GtkWidget *menu, const gchar *label,

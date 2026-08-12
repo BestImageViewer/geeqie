@@ -1298,7 +1298,6 @@ ViewDir *vd_new(LayoutWindow *lw)
 	GApplication *app = g_application_get_default();
 	register_actions_from_table(GTK_APPLICATION(app), lw->window, view_dir_actions, get_keyfile_merged(), vd);
 
-	gtk_widget_show(vd->view);
 
 	return vd;
 }

@@ -782,7 +782,6 @@ void bar_pane_keywords_edit_dialog_cb(GtkWidget *, gpointer data)
 	gtk_grid_attach(GTK_GRID(table), cdd->edit_widget, 1, 0, 1, 1);
 	/* here could eventually be a text view instead of entry */
 	generic_dialog_attach_default(gd, cdd->edit_widget);
-	gtk_widget_show(cdd->edit_widget);
 
 	group = pref_group_new(gd->vbox, FALSE, _("Keyword type:"), GTK_ORIENTATION_VERTICAL);
 
@@ -795,7 +794,7 @@ void bar_pane_keywords_edit_dialog_cb(GtkWidget *, gpointer data)
 
 	gtk_widget_grab_focus(cdd->edit_widget);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 void bar_pane_keywords_connect_mark_cb(GtkWidget *menu_widget, gpointer data)
@@ -835,7 +834,7 @@ void bar_pane_keywords_disconnect_marks_cb(GtkWidget *menu_widget, gpointer data
 				_("Disconnect all Marks Keywords connections?"), _("This will disconnect all Marks Keywords connections"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", bar_pane_keywords_disconnect_marks_ok_cb, TRUE);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 void bar_pane_keywords_delete_cb(GtkWidget *, gpointer data)
@@ -1434,19 +1433,16 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	pkd->widget = vbox;
 	g_object_set_data_full(G_OBJECT(pkd->widget), "pane_data", pkd, bar_pane_keywords_destroy);
 	gtk_widget_set_size_request(pkd->widget, -1, height);
-	gtk_widget_show(hbox);
 
 	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), scrolled, TRUE, TRUE, 0);
-	gtk_widget_show(scrolled);
 
 	pkd->keyword_view = gtk_text_view_new();
 	gq_gtk_container_add(scrolled, pkd->keyword_view);
 	bar_pane_keywords_set_extra_menu(pkd);
-	gtk_widget_show(pkd->keyword_view);
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pkd->keyword_view));
 	g_signal_connect(G_OBJECT(buffer), "changed",
@@ -1459,13 +1455,10 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 						GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 		gq_gtk_box_pack_start(GTK_BOX(hbox), scrolled, TRUE, TRUE, 0);
-		gtk_widget_show(scrolled);
 		}
 
 	pkd->autocomplete = gtk_entry_new();
 	gq_gtk_box_pack_end(GTK_BOX(vbox), pkd->autocomplete, FALSE, FALSE, 0);
-	gtk_widget_show(pkd->autocomplete);
-	gtk_widget_show(vbox);
 	gtk_widget_set_tooltip_text(pkd->autocomplete, _("Keyword autocomplete"));
 
 	g_autofree gchar *path = g_build_filename(get_rc_dir(), "keywords", NULL);
@@ -1562,8 +1555,6 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 		{
 		GtkWidget *popover_parent = popover_parent_new(pkd->keyword_treeview);
 		gq_gtk_container_add(scrolled, popover_parent);
-		gtk_widget_show(pkd->keyword_treeview);
-		gtk_widget_show(popover_parent);
 		}
 
 	file_data_register_notify_func(bar_pane_keywords_notify_cb, pkd, NOTIFY_PRIORITY_LOW);

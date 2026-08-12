@@ -512,7 +512,7 @@ gint exit_confirm_dlg()
 	generic_dialog_add_message(exit_dialog, GQ_ICON_DIALOG_QUESTION, quit_msg, message->str, TRUE);
 	generic_dialog_add_button(exit_dialog, GQ_ICON_QUIT, _("Quit"), exit_confirm_exit_cb, TRUE);
 
-	gtk_widget_show(exit_dialog->dialog);
+	gtk_window_present(GTK_WINDOW(exit_dialog->dialog));
 
 	return TRUE;
 }

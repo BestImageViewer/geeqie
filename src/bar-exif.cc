@@ -145,14 +145,12 @@ void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 
 	ee->box = gtk_box_new(horizontal ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_container_add(ee->ebox, ee->box);
-	gtk_widget_show(ee->box);
 
 	ee->title_label = gtk_label_new(nullptr);
 	gtk_label_set_xalign(GTK_LABEL(ee->title_label), horizontal ? 1.0 : 0.0);
 	gtk_label_set_yalign(GTK_LABEL(ee->title_label), 0.5);
 	gtk_size_group_add_widget(ped->size_group, ee->title_label);
 	gq_gtk_box_pack_start(GTK_BOX(ee->box), ee->title_label, FALSE, TRUE, 0);
-	gtk_widget_show(ee->title_label);
 
 	if (editable)
 		{
@@ -170,7 +168,6 @@ void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 		}
 
 	gq_gtk_box_pack_start(GTK_BOX(ee->box), ee->value_widget, TRUE, TRUE, 1);
-	gtk_widget_show(ee->value_widget);
 }
 
 GtkWidget *bar_pane_exif_add_entry(PaneExifData *ped, const gchar *key, const gchar *title, gboolean if_set, gboolean editable)
@@ -266,7 +263,7 @@ void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboolean up
 	if (!ped->show_all && ee->if_set && !ee->editable && (!text || !*text))
 		{
 		gtk_label_set_text(GTK_LABEL(ee->value_widget), nullptr);
-		gtk_widget_hide(entry);
+		gtk_widget_set_visible(entry, FALSE);
 		}
 	else
 		{
@@ -282,7 +279,7 @@ void bar_pane_exif_update_entry(PaneExifData *ped, GtkWidget *entry, gboolean up
 			gtk_label_set_text(GTK_LABEL(ee->value_widget), text);
 			gtk_widget_set_tooltip_text(ee->box, text);
 			}
-		gtk_widget_show(entry);
+		gtk_widget_set_visible(entry, TRUE);
 		ped->all_hidden = FALSE;
 		}
 
@@ -543,7 +540,6 @@ void bar_pane_exif_conf_dialog(GtkWidget *widget)
 	if (ee) gq_gtk_entry_set_text(GTK_ENTRY(cdd->key_entry), ee->key);
 	gtk_grid_attach(GTK_GRID(table), cdd->key_entry, 1, 0, 1, 1);
 	generic_dialog_attach_default(gd, cdd->key_entry);
-	gtk_widget_show(cdd->key_entry);
 
 	pref_table_label(table, 0, 1, _("Title:"), GTK_ALIGN_END);
 
@@ -552,12 +548,11 @@ void bar_pane_exif_conf_dialog(GtkWidget *widget)
 	if (ee) gq_gtk_entry_set_text(GTK_ENTRY(cdd->title_entry), ee->title);
 	gtk_grid_attach(GTK_GRID(table), cdd->title_entry, 1, 1, 1, 1);
 	generic_dialog_attach_default(gd, cdd->title_entry);
-	gtk_widget_show(cdd->title_entry);
 
 	pref_checkbox_new_int(gd->vbox, _("Show only if set"), cdd->if_set, &cdd->if_set);
 	pref_checkbox_new_int(gd->vbox, _("Editable (supported only for XMP)"), cdd->editable, &cdd->editable);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 [[maybe_unused]] void bar_pane_exif_conf_dialog_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -737,7 +732,6 @@ GtkWidget *bar_pane_exif_new(const gchar *id, const gchar *title, gboolean expan
 
 	file_data_register_notify_func(bar_pane_exif_notify_cb, ped, NOTIFY_PRIORITY_LOW);
 
-	gtk_widget_show(ped->widget);
 
 	return ped->widget;
 }

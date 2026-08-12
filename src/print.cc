@@ -246,14 +246,11 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	                               options->printer.image_text_position == FOOTER_2,
 	                               G_CALLBACK(image_text_position_cb<FOOTER_2>), pw);
 	pw->image_group[FOOTER_2] = button1;
-	gtk_widget_show(hbox);
 
 	image_text_template_view = gtk_text_view_new();
 
 	scrolled_pre_formatted = osd_new(PRE_FORMATTED_COLUMNS, image_text_template_view);
 	gq_gtk_box_pack_start(GTK_BOX(subgroup), scrolled_pre_formatted, FALSE, FALSE, 0);
-	gtk_widget_show(scrolled_pre_formatted);
-	gtk_widget_show(subgroup);
 
 	gtk_widget_set_tooltip_markup(image_text_template_view,
 					_("Extensive formatting options are shown in the Help file"));
@@ -264,10 +261,8 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 									GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(subgroup), scrolled, TRUE, TRUE, 5);
-	gtk_widget_show(scrolled);
 
 	gq_gtk_container_add(scrolled, image_text_template_view);
-	gtk_widget_show(image_text_template_view);
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(image_text_template_view));
 	if (options->printer.template_string) gtk_text_buffer_set_text(buffer, options->printer.template_string, -1);
@@ -281,7 +276,6 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	                         G_CALLBACK(print_set_font_cb<image_text_font_title>), options->printer.image_font);
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
 
 	pref_spacer(group, PREF_PAD_GAP);
 
@@ -313,7 +307,6 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	                               options->printer.page_text_position == FOOTER_2,
 	                               G_CALLBACK(page_text_position_cb<FOOTER_2>), pw);
 	pw->page_group[FOOTER_2] = button2;
-	gtk_widget_show(hbox);
 
 	scrolled = gtk_scrolled_window_new();
 	gtk_widget_set_size_request(scrolled, 50, 50);
@@ -321,7 +314,6 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(subgroup), scrolled, TRUE, TRUE, 5);
-	gtk_widget_show(scrolled);
 
 	page_text_view = gtk_text_view_new();
 	pw->page_text = gtk_text_view_get_buffer(GTK_TEXT_VIEW(page_text_view ));
@@ -330,7 +322,6 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 
 	gtk_widget_set_tooltip_markup(page_text_view, (_("Text shown on each page of a single or multi-page print job")));
 	gq_gtk_container_add(scrolled, page_text_view);
-	gtk_widget_show(page_text_view);
 
 	hbox = pref_box_new(subgroup, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
@@ -339,7 +330,6 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	                         G_CALLBACK(print_set_font_cb<page_text_font_title>), options->printer.page_font);
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
 }
 
 gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)
@@ -699,7 +689,6 @@ void print_window_new(GList *selection, GtkWidget *parent)
 
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_widget_set_border_width(vbox, PREF_PAD_BORDER);
-	gtk_widget_show(vbox);
 
 	print_text_menu(vbox, pw);
 	pw->vbox = vbox;

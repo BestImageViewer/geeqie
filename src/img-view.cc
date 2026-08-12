@@ -1004,7 +1004,6 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	image_top_window_set_sync(vw->imd, TRUE);
 
 	gq_gtk_container_add(vw->window, vw->imd->widget);
-	gtk_widget_show(vw->imd->widget);
 
 	view_window_dnd_init(vw);
 
@@ -1074,7 +1073,7 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 
 	gtk_window_set_default_size(GTK_WINDOW(vw->window), size.width, size.height);
 
-	gtk_widget_show(vw->window);
+	gtk_window_present(GTK_WINDOW(vw->window));
 
 	view_window_list.push_back(vw);
 

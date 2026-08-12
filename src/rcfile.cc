@@ -1676,7 +1676,7 @@ static void options_parse_layout(GQParserData *parser_data, const gchar *element
 			{
 			GtkWidget *bar = bar_sort_new_from_config(lw, attribute_names, attribute_values);
 			layout_bar_sort_set(lw, bar);
-			gtk_widget_show(lw->bar_sort);
+			gtk_widget_set_visible(lw->bar_sort, TRUE);
 			}
 		parser_data->func_push(options_parse_leaf, nullptr, nullptr);
 		}

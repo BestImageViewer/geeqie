@@ -243,7 +243,7 @@ static void tab_completion_iter_menu_items(GtkWidget *widget, TabCompPrefix &tp)
 	if (!tp.match(text))
 		{
 		/* Hide menu items not matching */
-		gtk_widget_hide(widget);
+		gtk_widget_set_visible(widget, FALSE);
 		}
 	else
 		{
@@ -664,17 +664,14 @@ GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text)
 	GtkWidget *entry = gtk_entry_new();
 	if (text) gq_gtk_entry_set_text(GTK_ENTRY(entry), text);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
-	gtk_widget_show(entry);
 
 	GtkWidget *button = tab_completion_create_complete_button(entry);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
 
 	tab_completion_set_to_entry(entry);
 
 	if (parent_box) gq_gtk_box_pack_start(GTK_BOX(parent_box), hbox, TRUE, TRUE, 0);
 
-	gtk_widget_show(hbox);
 
 	return entry;
 }
@@ -790,7 +787,6 @@ void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboo
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), td->fd_button, FALSE, FALSE, 0);
 
-	gtk_widget_show(td->fd_button);
 }
 
 GtkWidget *tab_completion_get_box(GtkWidget *entry)

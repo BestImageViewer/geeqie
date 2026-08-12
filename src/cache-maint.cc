@@ -410,20 +410,17 @@ static void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *pa
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_box_pack_start(GTK_BOX(cm->gd->vbox), hbox, FALSE, FALSE, 5);
-	gtk_widget_show(hbox);
 
 	cm->entry = gtk_entry_new();
 	gtk_widget_set_can_focus(cm->entry, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(cm->entry), FALSE);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), cm->entry, TRUE, TRUE, 0);
-	gtk_widget_show(cm->entry);
 
 	cm->spinner = gtk_spinner_new();
 	gtk_spinner_start(GTK_SPINNER(cm->spinner));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), cm->spinner, FALSE, FALSE, 0);
-	gtk_widget_show(cm->spinner);
 
-	gtk_widget_show(cm->gd->dialog);
+	gtk_window_present(GTK_WINDOW(cm->gd->dialog));
 
 	cm->idle_id = g_idle_add(cache_maintain_home_cb, cm);
 }
@@ -812,19 +809,16 @@ static void cache_manager_render_dialog(GtkWidget *widget, const gchar *path)
 	gtk_editable_set_editable(GTK_EDITABLE(cd->progress), FALSE);
 	gq_gtk_entry_set_text(GTK_ENTRY(cd->progress), _("click start to begin"));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), cd->progress, TRUE, TRUE, 0);
-	gtk_widget_show(cd->progress);
 
 	cd->progress_bar = gtk_progress_bar_new();
 	gq_gtk_box_pack_start(GTK_BOX(cd->gd->vbox), cd->progress_bar, TRUE, TRUE, 0);
-	gtk_widget_show(cd->progress_bar);
 
 	cd->spinner = gtk_spinner_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), cd->spinner, FALSE, FALSE, 0);
-	gtk_widget_show(cd->spinner);
 
 	cd->list = nullptr;
 
-	gtk_widget_show(cd->gd->dialog);
+	gtk_window_present(GTK_WINDOW(cd->gd->dialog));
 }
 
 /**
@@ -1056,13 +1050,12 @@ static void cache_manager_standard_process(GtkWidget *widget, gpointer)
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(cd->progress), _("click start to begin"));
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(cd->progress), TRUE);
 	gq_gtk_box_pack_start(GTK_BOX(cd->gd->vbox), cd->progress, FALSE, FALSE, 0);
-	gtk_widget_show(cd->progress);
 
 	cd->days = 30;
 	cd->tl = nullptr;
 	cd->idle_id = 0;
 
-	gtk_widget_show(cd->gd->dialog);
+	gtk_window_present(GTK_WINDOW(cd->gd->dialog));
 }
 
 void cache_manager_standard_process_remote(gboolean clear)
@@ -1100,7 +1093,7 @@ static void cache_manager_main_clear_confirm(GtkWidget *parent)
 				   _("This will remove all thumbnails and sim. files\nthat have been saved to disk, continue?"), TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", cache_manager_main_clear_ok_cb, TRUE);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 static void cache_manager_main_clear_cb(GtkWidget *widget, gpointer)
@@ -1415,19 +1408,16 @@ static void cache_manager_sim_load_dialog(GtkWidget *widget, const gchar *path)
 	gtk_editable_set_editable(GTK_EDITABLE(cd->progress), FALSE);
 	gq_gtk_entry_set_text(GTK_ENTRY(cd->progress), _("click start to begin"));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), cd->progress, TRUE, TRUE, 0);
-	gtk_widget_show(cd->progress);
 
 	cd->progress_bar = gtk_progress_bar_new();
 	gq_gtk_box_pack_start(GTK_BOX(cd->gd->vbox), cd->progress_bar, TRUE, TRUE, 0);
-	gtk_widget_show(cd->progress_bar);
 
 	cd->spinner = gtk_spinner_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), cd->spinner, FALSE, FALSE, 0);
-	gtk_widget_show(cd->spinner);
 
 	cd->list = nullptr;
 
-	gtk_widget_show(cd->gd->dialog);
+	gtk_window_present(GTK_WINDOW(cd->gd->dialog));
 }
 
 static void cache_manager_sim_load_cb(GtkWidget *widget, gpointer)
@@ -1517,7 +1507,7 @@ static void cache_manager_cache_maintenance_load_dialog(GtkWidget *widget, const
 
 	cd->list = nullptr;
 
-	gtk_widget_show(cd->gd->dialog);
+	gtk_window_present(GTK_WINDOW(cd->gd->dialog));
 }
 
 static void cache_manager_cache_maintenance_load_cb(GtkWidget *widget, gpointer)
@@ -1639,7 +1629,7 @@ void cache_manager_show()
 	gtk_widget_set_sensitive(group, FALSE);
 	gtk_widget_set_tooltip_text(button, _("Feature disabled in this version.\nUse command line:\nGQ_CACHE_MAINTENANCE=  geeqie --cache-maintenance=<FOLDER>"));
 
-	gtk_widget_show(cache_manager->dialog->dialog);
+	gtk_window_present(GTK_WINDOW(cache_manager->dialog->dialog));
 }
 
 void cache_maintenance_notification(GtkApplication *app, const gchar *message, gboolean show_quit_button)

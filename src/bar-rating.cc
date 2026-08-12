@@ -194,7 +194,6 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 
 	prd->radio_button_first = radio_rating;
 
-	gtk_widget_show(prd->widget);
 
 	file_data_register_notify_func(bar_pane_rating_notify_cb, prd, NOTIFY_PRIORITY_LOW);
 

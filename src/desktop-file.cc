@@ -199,11 +199,9 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	gq_gtk_container_add(ew->window, win_vbox);
-	gtk_widget_show(win_vbox);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
 
 	ew->entry = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(hbox), ew->entry, TRUE, TRUE, 0);
@@ -213,7 +211,6 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 		gq_gtk_entry_set_text(GTK_ENTRY(ew->entry), desktop_name);
 		ew->desktop_name = g_strdup(desktop_name);
 		}
-	gtk_widget_show(ew->entry);
 	g_signal_connect(G_OBJECT(ew->entry), "changed", G_CALLBACK(editor_window_entry_changed_cb), ew);
 
 	GtkWidget *button_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
@@ -225,13 +222,11 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gq_gtk_container_add(button_hbox, ew->save_button);
 	gtk_window_set_default_widget(GTK_WINDOW(ew->window), ew->save_button);
 	gtk_widget_set_sensitive(ew->save_button, FALSE);
-	gtk_widget_show(ew->save_button);
 	ct_button = ew->save_button;
 
 	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"),
 				 G_CALLBACK(editor_window_close_cb), ew);
 	gq_gtk_container_add(button_hbox, button);
-	gtk_widget_show(button);
 
 	if (!get_alternative_button_order(ew->window))
 		{
@@ -244,11 +239,9 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(win_vbox), scrolled, TRUE, TRUE, 5);
 	gq_gtk_box_reorder_child(GTK_BOX(win_vbox), hbox, -1);
-	gtk_widget_show(scrolled);
 
 	text_view = gtk_text_view_new();
 	gq_gtk_container_add(scrolled, text_view);
-	gtk_widget_show(text_view);
 
 	ew->buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
 	if (g_file_get_contents(src_path, &text, &size, nullptr))
@@ -259,7 +252,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	g_signal_connect(G_OBJECT(ew->buffer), "modified-changed",
 			 G_CALLBACK(editor_window_text_modified_cb), ew);
 
-	gtk_widget_show(ew->window);
+	gtk_window_present(GTK_WINDOW(ew->window));
 }
 
 
@@ -341,7 +334,7 @@ void editor_list_window_delete_cb(GtkWidget *, gpointer data)
 		generic_dialog_add_message(ewl->gd, GQ_ICON_DIALOG_QUESTION,
 					   _("Delete file"), text, TRUE);
 
-		gtk_widget_show(ewl->gd->dialog);
+		gtk_window_present(GTK_WINDOW(ewl->gd->dialog));
 		}
 }
 
@@ -495,7 +488,6 @@ void editor_list_window_create()
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	gq_gtk_container_add(ewl->window, win_vbox);
-	gtk_widget_show(win_vbox);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
@@ -504,31 +496,26 @@ void editor_list_window_create()
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(editor_list_window_help_cb), ewl);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_show(button);
 
 	button = pref_button_new(nullptr, GQ_ICON_NEW, _("New"),
 				 G_CALLBACK(editor_list_window_new_cb), ewl);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_show(button);
 
 	button = pref_button_new(nullptr, GQ_ICON_EDIT, _("Edit"),
 				 G_CALLBACK(editor_list_window_edit_cb), ewl);
 	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_sensitive(button, FALSE);
-	gtk_widget_show(button);
 	ewl->edit_button = button;
 
 	button = pref_button_new(nullptr, GQ_ICON_DELETE, _("Delete"),
 				 G_CALLBACK(editor_list_window_delete_cb), ewl);
 	gq_gtk_container_add(hbox, button);
 	gtk_widget_set_sensitive(button, FALSE);
-	gtk_widget_show(button);
 	ewl->delete_button = button;
 
 	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"),
 				 G_CALLBACK(editor_list_window_close_cb), ewl);
 	gq_gtk_container_add(hbox, button);
-	gtk_widget_show(button);
 
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
@@ -536,7 +523,6 @@ void editor_list_window_create()
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(win_vbox), scrolled, TRUE, TRUE, 5);
 	gq_gtk_box_reorder_child(GTK_BOX(win_vbox), hbox, -1);
-	gtk_widget_show(scrolled);
 
 	ewl->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(desktop_file_list));
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));
@@ -613,9 +599,8 @@ void editor_list_window_create()
     gtk_tree_sortable_set_sort_column_id(sortable, DESKTOP_FILE_COLUMN_NAME, GTK_SORT_ASCENDING);
 
 	gq_gtk_container_add(scrolled, ewl->view);
-	gtk_widget_show(ewl->view);
 
-	gtk_widget_show(ewl->window);
+	gtk_window_present(GTK_WINDOW(ewl->window));
 }
 
 } // namespace

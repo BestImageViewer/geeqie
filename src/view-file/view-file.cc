@@ -1271,9 +1271,8 @@ static void vf_marks_tooltip_open_dialog(GtkWidget *widget, gint mark_no)
 	g_signal_connect(GTK_ENTRY(mte->edit_widget), "icon-press",
 	                 G_CALLBACK(vf_marks_filter_on_icon_press), nullptr);
 
-	gtk_widget_show(mte->edit_widget);
 	gtk_widget_grab_focus(mte->edit_widget);
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 static void vf_marks_filter_window_context_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
@@ -1740,21 +1739,17 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), vf->file_filter.control, FALSE, FALSE, 0);
 	gq_gtk_container_add(frame, hbox);
-	gtk_widget_show(hbox);
 
 	GtkWidget *case_sensitive = gtk_check_button_new_with_label(_("Case"));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), case_sensitive, FALSE, FALSE, 0);
 	gtk_widget_set_tooltip_text(case_sensitive, _("Case sensitive"));
 	g_signal_connect(G_OBJECT(case_sensitive), "toggled", G_CALLBACK(case_sensitive_cb), vf);
-	gtk_widget_show(case_sensitive);
 
 	GtkWidget *class_button = file_filter_menu_button_new(_("Class"), _("Select Class filter"), class_filter_popover_new(vf));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), class_button, FALSE, TRUE, 0);
-	gtk_widget_show(class_button);
 
 	GtkWidget *rating_button = file_filter_menu_button_new(_("Rating"), _("Select Rating filter"), rating_filter_popover_new(vf));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), rating_button, FALSE, TRUE, 0);
-	gtk_widget_show(rating_button);
 
 	return frame;
 }
@@ -1788,7 +1783,6 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	gq_gtk_box_pack_start(GTK_BOX(vf->widget), vf->filter, FALSE, FALSE, 0);
 	gq_gtk_box_pack_start(GTK_BOX(vf->widget), vf->file_filter.frame, FALSE, FALSE, 0);
 	gq_gtk_box_pack_start(GTK_BOX(vf->widget), vf->scrolled, TRUE, TRUE, 0);
-	gtk_widget_show(vf->scrolled);
 
 	g_signal_connect(G_OBJECT(vf->widget), "destroy",
 			 G_CALLBACK(vf_destroy_cb), vf);
@@ -1814,7 +1808,6 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	gtk_widget_add_controller(vf->listview, GTK_EVENT_CONTROLLER(gesture));
 
 	gq_gtk_container_add(vf->scrolled, vf->listview);
-	gtk_widget_show(vf->listview);
 
 	vf_dnd_init(vf);
 

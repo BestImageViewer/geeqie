@@ -2189,8 +2189,6 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 
 	if (frame == imd->has_frame) return;
 
-	gtk_widget_hide(imd->pr);
-
 	if (frame)
 		{
 		imd->frame = gtk_frame_new(nullptr);
@@ -2207,7 +2205,6 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		gtk_widget_add_controller(imd->frame, controller);
 
 		gq_gtk_box_pack_start(GTK_BOX(imd->widget), imd->frame, TRUE, TRUE, 0);
-		gtk_widget_show(imd->frame);
 		}
 	else
 		{
@@ -2222,8 +2219,6 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 
 		g_object_unref(imd->pr);
 		}
-
-	gtk_widget_show(imd->pr);
 
 	imd->has_frame = frame;
 }

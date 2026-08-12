@@ -190,7 +190,6 @@ GtkWidget *help_window_new(const gchar *title,
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_container_add(window, vbox);
-	gtk_widget_show(vbox);
 
 	g_object_set_data(G_OBJECT(window), "text_vbox", vbox);
 
@@ -198,19 +197,16 @@ GtkWidget *help_window_new(const gchar *title,
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
-	gtk_widget_show(hbox);
 
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), scrolled, TRUE, TRUE, 0);
-	gtk_widget_show(scrolled);
 
 	text = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(text), FALSE);
 	gq_gtk_container_add(scrolled, text);
-	gtk_widget_show(text);
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
 	gtk_text_buffer_create_tag(buffer, "monospace",
@@ -225,13 +221,12 @@ GtkWidget *help_window_new(const gchar *title,
 			 G_CALLBACK(help_window_close), window);
 	gq_gtk_container_add(hbox, button);
 	gtk_window_set_default_widget(GTK_WINDOW(window), button);
-	gtk_widget_show(button);
 
 	g_object_set_data(G_OBJECT(window), "text_widget", text);
 
 	help_window_load_text(text, path);
 
-	gtk_widget_show(window);
+	gtk_window_present(GTK_WINDOW(window));
 
 	help_window_scroll(text, key);
 

@@ -100,7 +100,7 @@ void encoding_dialog(const gchar *path)
 	generic_dialog_add_message(gd, GQ_ICON_DIALOG_WARNING,
 				   _("Filename encoding locale mismatch"), string->str, TRUE);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 } // namespace
@@ -936,13 +936,12 @@ gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data)
 
 	web->progress = gtk_progress_bar_new();
 	gq_gtk_box_pack_start(GTK_BOX(web->gd->vbox), web->progress, FALSE, FALSE, 0);
-	gtk_widget_show(web->progress);
 	if (minimized)
 		{
 		gtk_window_minimize(GTK_WINDOW(web->gd->dialog));
 		}
 
-	gtk_widget_show(web->gd->dialog);
+	gtk_window_present(GTK_WINDOW(web->gd->dialog));
 	web->cancellable = g_cancellable_new();
 	g_file_copy_async(web->web_file, web->tmp_g_file, G_FILE_COPY_OVERWRITE, G_PRIORITY_LOW, web->cancellable, web_file_progress_cb, web, web_file_async_ready_cb, web);
 

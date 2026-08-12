@@ -388,7 +388,7 @@ static void layout_menu_clear_marks_cb(GSimpleAction *, GVariant *, gpointer)
 	generic_dialog_add_button(gd, GQ_ICON_HELP, _("Help"),
 				clear_marks_help_cb, FALSE);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 static void layout_menu_new_collection_cb(GSimpleAction *, GVariant *, gpointer)
@@ -657,7 +657,7 @@ static void layout_menu_write_rotate_cb(GSimpleAction  *, GVariant *, gpointer)
 			generic_dialog_add_message(gd, GQ_ICON_DIALOG_ERROR, _("Image orientation"), message->str, TRUE);
 			generic_dialog_add_button(gd, GQ_ICON_OK, "OK", nullptr, TRUE);
 
-			gtk_widget_show(gd->dialog);
+			gtk_window_present(GTK_WINDOW(gd->dialog));
 			}
 	});
 }
@@ -947,7 +947,7 @@ static void layout_menu_open_with_cb(GSimpleAction *, GVariant *, gpointer)
 			g_signal_connect(G_OBJECT(open_with_data->app_chooser_dialog), "response", G_CALLBACK(open_with_response_cb), open_with_data);
 			g_signal_connect(G_OBJECT(open_with_data->app_chooser_dialog), "close", G_CALLBACK(open_with_close), open_with_data);
 
-			gtk_widget_show(open_with_data->app_chooser_dialog);
+			gtk_window_present(GTK_WINDOW(open_with_data->app_chooser_dialog));
 			}
 		}
 }
@@ -1189,8 +1189,7 @@ static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointe
 	gtk_widget_set_sensitive(dialog_data->open_button, FALSE);
 	open_recent_dialog_update(dialog_data);
 
-	gtk_widget_show(dialog_data->list);
-	gtk_widget_show(dialog_data->gd->dialog);
+	gtk_window_present(GTK_WINDOW(dialog_data->gd->dialog));
 }
 
 static void open_collection_cb(GFile *file, gpointer)
@@ -2564,10 +2563,9 @@ static void layout_menu_window_rename_cb(GSimpleAction *, GVariant *, gpointer  
 	gq_gtk_entry_set_text(GTK_ENTRY(rw->window_name_entry), lw->options.id);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), rw->window_name_entry, TRUE, TRUE, 0);
 	gtk_widget_grab_focus(rw->window_name_entry);
-	gtk_widget_show(rw->window_name_entry);
 	g_signal_connect_swapped(rw->window_name_entry, "activate", G_CALLBACK(window_rename_ok), rw);
 
-	gtk_widget_show(rw->gd->dialog);
+	gtk_window_present(GTK_WINDOW(rw->gd->dialog));
 }
 
 
@@ -2630,7 +2628,7 @@ static void layout_menu_window_delete_cb(GSimpleAction *, GVariant *, gpointer  
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	pref_label_new(hbox, lw->options.id);
 
-	gtk_widget_show(dw->gd->dialog);
+	gtk_window_present(GTK_WINDOW(dw->gd->dialog));
 }
 
 static gboolean layout_editors_reload_idle_cb(gpointer user_data)
@@ -2739,7 +2737,6 @@ GtkWidget *layout_actions_toolbar(LayoutWindow *lw, ToolbarType type)
 
 	lw->toolbar[type] = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-	gtk_widget_show(lw->toolbar[type]);
 	return g_object_ref(lw->toolbar[type]);
 }
 
@@ -3379,7 +3376,7 @@ void layout_bar_toggle(LayoutWindow *lw)
 {
 	if (layout_bar_enabled(lw))
 		{
-		gtk_widget_hide(lw->bar);
+		gtk_widget_set_visible(lw->bar, FALSE);
 		}
 	else
 		{
@@ -3387,7 +3384,7 @@ void layout_bar_toggle(LayoutWindow *lw)
 			{
 			layout_bar_set_default(lw);
 			}
-		gtk_widget_show(lw->bar);
+		gtk_widget_set_visible(lw->bar, TRUE);
 		bar_set_fd(lw->bar, layout_image_get_fd(lw));
 		}
 	layout_util_sync_views(lw);
@@ -3466,7 +3463,7 @@ void layout_bar_sort_toggle(LayoutWindow *lw)
 {
 	if (layout_bar_sort_enabled(lw))
 		{
-		gtk_widget_hide(lw->bar_sort);
+		gtk_widget_set_visible(lw->bar_sort, FALSE);
 		}
 	else
 		{
@@ -3474,7 +3471,7 @@ void layout_bar_sort_toggle(LayoutWindow *lw)
 			{
 			layout_bar_sort_set_default(lw);
 			}
-		gtk_widget_show(lw->bar_sort);
+		gtk_widget_set_visible(lw->bar_sort, TRUE);
 		}
 	layout_util_sync_views(lw);
 }
@@ -3488,7 +3485,7 @@ static void layout_bars_hide_toggle(LayoutWindow *lw)
 			{
 			if (lw->bar_sort)
 				{
-				gtk_widget_show(lw->bar_sort);
+				gtk_widget_set_visible(lw->bar_sort, TRUE);
 				}
 			else
 				{
@@ -3497,7 +3494,7 @@ static void layout_bars_hide_toggle(LayoutWindow *lw)
 			}
 		if (lw->options.bars_state.info)
 			{
-			gtk_widget_show(lw->bar);
+			gtk_widget_set_visible(lw->bar, TRUE);
 			}
 		layout_tools_float_set(lw, lw->options.tools_float,
 									lw->options.bars_state.tools_hidden);
@@ -3512,11 +3509,11 @@ static void layout_bars_hide_toggle(LayoutWindow *lw)
 
 		if (lw->bar)
 			{
-			gtk_widget_hide(lw->bar);
+			gtk_widget_set_visible(lw->bar, FALSE);
 			}
 
 		if (lw->bar_sort)
-			gtk_widget_hide(lw->bar_sort);
+			gtk_widget_set_visible(lw->bar_sort, FALSE);
 		layout_tools_float_set(lw, lw->options.tools_float, TRUE);
 		}
 
@@ -3553,9 +3550,7 @@ GtkWidget *layout_bars_prepare(LayoutWindow *lw, GtkWidget *image)
 
 	gtk_paned_set_start_child(GTK_PANED(lw->utility_paned), image);
 
-	gtk_widget_show(lw->utility_paned);
 
-	gtk_widget_show(image);
 
 	return g_object_ref(lw->utility_box);
 }

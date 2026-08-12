@@ -226,7 +226,7 @@ void bar_pane_gps_dnd_file_received(GdkDrop *drop, GList *list, gpointer data)
 		generic_dialog_add_message(gd, GQ_ICON_DIALOG_QUESTION, _("Write lat/long to meta-data?"), message->str, TRUE);
 		generic_dialog_add_button(gd, GQ_ICON_SAVE, _("Save"), bar_pane_gps_close_save_cb, TRUE);
 
-		gtk_widget_show(gd->dialog);
+		gtk_window_present(GTK_WINDOW(gd->dialog));
 		action = GDK_ACTION_COPY;
 		}
 

@@ -301,7 +301,6 @@ static void bookmark_edit(const std::string &key, const BookButtonData *bb, GtkW
 	gq_gtk_entry_set_text(GTK_ENTRY(p->name_entry), bb->name.c_str());
 	gtk_grid_attach(GTK_GRID(table), p->name_entry, 1, 0, 1, 1);
 	generic_dialog_attach_default(gd, p->name_entry);
-	gtk_widget_show(p->name_entry);
 
 	pref_table_label(table, 0, 1, _("Path:"), GTK_ALIGN_END);
 
@@ -317,7 +316,7 @@ static void bookmark_edit(const std::string &key, const BookButtonData *bb, GtkW
 	gtk_grid_attach(GTK_GRID(table), tab_completion_get_box(p->icon_entry), 1, 2, 1, 1);
 	generic_dialog_attach_default(gd, p->icon_entry);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 static void bookmark_move(BookMarkData *bm, GtkWidget *button, gint direction)
@@ -512,13 +511,11 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 	GtkWidget *button = gtk_button_new();
 	gtk_widget_add_css_class(button, "flat");
 	gq_gtk_box_pack_start(GTK_BOX(bm->box), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
 
 	g_object_set_data_full(G_OBJECT(button), "bookbuttondata", b, delete_cb<BookButtonData>);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gq_gtk_container_add(button, box);
-	gtk_widget_show(box);
 
 	GtkWidget *image;
 	if (!b->icon.empty())
@@ -555,7 +552,6 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 		image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY);
 		}
 	gq_gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 0);
-	gtk_widget_show(image);
 
 	pref_label_new(box, b->name.c_str());
 
@@ -723,7 +719,6 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 
 	bm->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gq_gtk_container_add(scrolled, bm->box);
-	gtk_widget_show(bm->box);
 
 	bookmark_populate(bm);
 
@@ -863,11 +858,10 @@ static void bookmark_prompt_for_alias(GtkWidget *list, const gchar *selected_dir
 	gtk_entry_set_placeholder_text(GTK_ENTRY(entry), _("Optional name…"));
 	gtk_widget_set_tooltip_text(entry, _("Optional alias name for the shortcut.\nThis may be amended or added from the Sort Manager pane.\nIf none given, the basename of the folder is used"));
 	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), entry, FALSE, FALSE, 0);
-	gtk_widget_show(entry);
 	generic_dialog_attach_default(gd, entry);
 
 	bad->entry = entry;
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 static void bookmark_add_response_cb(GFile *file, gpointer data)

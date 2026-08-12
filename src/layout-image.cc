@@ -2272,8 +2272,6 @@ static GtkWidget *layout_image_setup_split_hv(LayoutWindow *lw, ImageSplitMode m
 	gtk_paned_set_start_child(GTK_PANED(paned), lw->split_images[0]->widget);
 	gtk_paned_set_end_child(GTK_PANED(paned), lw->split_images[1]->widget);
 
-	gtk_widget_show(lw->split_images[0]->widget);
-	gtk_widget_show(lw->split_images[1]->widget);
 
 	return paned;
 }
@@ -2316,11 +2314,9 @@ static GtkWidget *layout_image_setup_split_triple(LayoutWindow *lw)
 
 	for (i = 0; i < 3; i++)
 		{
-		gtk_widget_show(lw->split_images[i]->widget);
+		gtk_widget_set_visible(lw->split_images[i]->widget, TRUE);
 		}
 
-	gtk_widget_show(hpaned1);
-	gtk_widget_show(hpaned2);
 
 	return hpaned1;
 }
@@ -2351,10 +2347,8 @@ static GtkWidget *layout_image_setup_split_quad(LayoutWindow *lw)
 	gtk_paned_set_end_child(GTK_PANED(hpaned), vpaned2);
 
 	for (i = 0; i < 4; i++)
-		gtk_widget_show(lw->split_images[i]->widget);
+		gtk_widget_set_visible(lw->split_images[i]->widget, TRUE);
 
-	gtk_widget_show(vpaned1);
-	gtk_widget_show(vpaned2);
 
 	return hpaned;
 }

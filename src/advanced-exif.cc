@@ -373,7 +373,6 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gq_gtk_container_add(ew->window, vbox);
-	gtk_widget_show(vbox);
 
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
@@ -384,10 +383,8 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_label_set_yalign(GTK_LABEL(ew->label_file_name), 0.5);
 
 	gq_gtk_box_pack_start(GTK_BOX(box), ew->label_file_name, TRUE, TRUE, 0);
-	gtk_widget_show(ew->label_file_name);
 
 	gq_gtk_box_pack_start(GTK_BOX(vbox), box, FALSE, FALSE, 0);
-	gtk_widget_show(box);
 
 
 	store = gtk_list_store_new(7, G_TYPE_BOOLEAN,
@@ -436,8 +433,6 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), ew->scrolled, TRUE, TRUE, 0);
 	gq_gtk_container_add(ew->scrolled, ew->listview);
-	gtk_widget_show(ew->listview);
-	gtk_widget_show(ew->scrolled);
 
 	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_box_pack_end(GTK_BOX(vbox), button_box, FALSE, FALSE, 0);
@@ -460,7 +455,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	GApplication *app = g_application_get_default();
 	register_actions_from_table(GTK_APPLICATION(app), ew->window, advanced_exif_actions, get_keyfile_merged(), ew);
 
-	gtk_widget_show(ew->window);
+	gtk_window_present(GTK_WINDOW(ew->window));
 	return ew->window;
 }
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

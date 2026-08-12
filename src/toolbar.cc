@@ -75,13 +75,11 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	GtkWidget *button = gtk_button_new();
 	gtk_widget_add_css_class(button, "flat");
 	gq_gtk_box_pack_start(box, button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
 
 	g_object_set_data_full(G_OBJECT(button), action_name_key, g_strdup(name), g_free);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gq_gtk_container_add(button, hbox);
-	gtk_widget_show(hbox);
 
 	gesture = gtk_gesture_click_new();
 	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(gesture));
@@ -113,11 +111,9 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 		image = gtk_image_new_from_icon_name(GQ_ICON_GO_JUMP);
 		}
 	gq_gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
-	gtk_widget_show(image);
 
 	GtkWidget *button_label = gtk_label_new(label);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), button_label, FALSE, FALSE, 0);
-	gtk_widget_show(button_label);
 }
 
 static void toolbarlist_add_button_main_cb(GSimpleAction *, GVariant *parameter, gpointer data)
@@ -320,26 +316,21 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, GtkWidget *window, ToolbarType b
 	if (!lw) return nullptr;
 
 	GtkWidget *widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	gtk_widget_show(widget);
 
 	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gq_gtk_box_pack_start(GTK_BOX(widget), scrolled, TRUE, TRUE, 0);
-	gtk_widget_show(scrolled);
 
 	toolbarlist[bar] = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_widget_show(toolbarlist[bar]);
 	gq_gtk_container_add(scrolled, toolbarlist[bar]);
 	gtk_widget_remove_css_class(gtk_widget_get_first_child(scrolled), "frame");
 
 	add_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_widget_show(add_box);
 	gq_gtk_box_pack_end(GTK_BOX(widget), add_box, FALSE, FALSE, 0);
 	tbar = pref_toolbar_new(add_box);
 
-	GtkWidget *add_button = pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE, _("Add Toolbar Item"), G_CALLBACK(toolbar_menu_add_cb), GINT_TO_POINTER(bar));
-	gtk_widget_show(add_button);
+	pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE, _("Add Toolbar Item"), G_CALLBACK(toolbar_menu_add_cb), GINT_TO_POINTER(bar));
 
 	GApplication *app = g_application_get_default();
 	if (bar == TOOLBAR_MAIN)

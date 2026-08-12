@@ -125,14 +125,14 @@ static void bar_sort_mode_sync(SortData *sd, BarSort::Mode mode)
 
 	if (folder_mode)
 		{
-		gtk_widget_hide(sd->collection_group);
-		gtk_widget_show(sd->folder_group);
+		gtk_widget_set_visible(sd->collection_group, FALSE);
+		gtk_widget_set_visible(sd->folder_group, TRUE);
 		bookmark_list_set_key(sd->bookmarks, SORT_KEY_FOLDERS);
 		}
 	else
 		{
-		gtk_widget_hide(sd->folder_group);
-		gtk_widget_show(sd->collection_group);
+		gtk_widget_set_visible(sd->folder_group, FALSE);
+		gtk_widget_set_visible(sd->collection_group, TRUE);
 		bar_sort_collection_list_build(sd->bookmarks);
 		}
 
@@ -418,7 +418,7 @@ static void bar_filter_help_dialog()
 	generic_dialog_add_button(gd, GQ_ICON_HELP, _("Help"), bar_filter_help_cb, TRUE);
 	generic_dialog_add_button(gd, GQ_ICON_OK, "OK", nullptr, TRUE);
 
-	gtk_widget_show(gd->dialog);
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 static gboolean bar_filter_message_common(guint button)
@@ -475,7 +475,6 @@ static gboolean save_new_collection(GFile *file, gpointer data)
 
 		g_signal_connect(new_collection_file_save_failed, "response", G_CALLBACK(new_collection_file_save_failed_cb), nullptr);
 
-		gtk_widget_show(new_collection_file_save_failed);
 
 		ret = FALSE;
 		}
@@ -586,7 +585,6 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	label = gtk_label_new(_("Sort Manager"));
 	pref_label_bold(label, TRUE, FALSE);
 	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), label, FALSE, FALSE, 0);
-	gtk_widget_show(label);
 
 	static const char *sort_mode_items[] = { _("Folders"), _("Collections"), nullptr };
 	GtkWidget *drop_down = gtk_drop_down_new_from_strings(sort_mode_items);
@@ -669,7 +667,6 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 	});
 	DEBUG_NAME(sd->bookmarks);
 	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), sd->bookmarks, TRUE, TRUE, 0);
-	gtk_widget_show(sd->bookmarks);
 
 	tbar = pref_toolbar_new(sd->vbox);
 	DEBUG_NAME(tbar);
@@ -697,7 +694,7 @@ GtkWidget *bar_sort_new_from_config(LayoutWindow *lw, const gchar **, const gcha
 
 	bar = bar_sort_new(lw, lw->options.bar_sort);
 
-	if (lw->bar_sort_enabled) gtk_widget_show(bar);
+	gtk_widget_set_visible(bar, lw->bar_sort_enabled);
 	return bar;
 }
 
