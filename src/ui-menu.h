@@ -22,30 +22,9 @@
 #ifndef UI_MENU_H
 #define UI_MENU_H
 
-#include <vector>
-
-#include <gdk/gdk.h>
 #include <glib-object.h>
 #include <glib.h>
 #include <gtk/gtk.h>
-
-/**
- * @struct HardcodedWindowKey
- * @brief hard coded window shortcut keys
- *
- * Used for two purposes:\n
- * to display the shortcuts keys in popup menus\n
- * used by ./build-aux/create-shortcuts-xml.sh to generate shortcut documentation in the Help files
- *
- */
-struct HardcodedWindowKey
-{
-	GdkModifierType mask; /**< modifier key mask */
-	guint key_value;  /**< GDK_keyval */
-	const gchar *text;  /**< menu item label */
-};
-
-using HardcodedWindowKeyList = std::vector<HardcodedWindowKey>;
 
 struct LayoutWindow;
 
