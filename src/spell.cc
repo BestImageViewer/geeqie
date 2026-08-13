@@ -4,9 +4,66 @@
 
 #include "spell.h"
 
+#include <cerrno>
+#include <cstdlib>
+#include <fcntl.h>
 #include <libspelling.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
+#include "debug.h"
 #include "ui-misc.h"
+
+namespace
+{
+
+gboolean spell_backend_is_usable()
+{
+	pid_t pid = fork();
+
+	if (pid == -1)
+		{
+		log_printf("Warning: spell check disabled; failed to probe spelling backend\n");
+		return FALSE;
+		}
+
+	if (pid == 0)
+		{
+		const int null_fd = open("/dev/null", O_WRONLY);
+		if (null_fd != -1)
+			{
+			dup2(null_fd, STDERR_FILENO);
+			close(null_fd);
+			}
+
+		spelling_init();
+		SpellingChecker *checker = spelling_checker_get_default();
+		gchar **corrections = spelling_checker_list_corrections(checker, "teh");
+		g_strfreev(corrections);
+
+		_exit(EXIT_SUCCESS);
+		}
+
+	int status;
+	while (waitpid(pid, &status, 0) == -1)
+		{
+		if (errno != EINTR)
+			{
+			log_printf("Warning: spell check disabled; failed to probe spelling backend\n");
+			return FALSE;
+			}
+		}
+
+	if (!WIFEXITED(status) || WEXITSTATUS(status) != EXIT_SUCCESS)
+		{
+		log_printf("Warning: spell check disabled; spelling backend failed correction probe\n");
+		return FALSE;
+		}
+
+	return TRUE;
+}
+
+} // namespace
 
 void spell_text_view_enable(GtkTextView *text_view)
 {
@@ -14,9 +71,15 @@ void spell_text_view_enable(GtkTextView *text_view)
 
 	if (g_once_init_enter(&initialized))
 		{
-		spelling_init();
-		g_once_init_leave(&initialized, 1);
+		gsize usable = spell_backend_is_usable() ? 1 : 2;
+		if (usable == 1)
+			{
+			spelling_init();
+			}
+		g_once_init_leave(&initialized, usable);
 		}
+
+	if (initialized != 1) return;
 
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(text_view);
 	if (!GTK_SOURCE_IS_BUFFER(buffer))
