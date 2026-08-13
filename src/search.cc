@@ -1129,96 +1129,105 @@ static void search_result_menu_cb(GSimpleAction *, GVariant *, gpointer data)
  *-------------------------------------------------------------------
  */
 
-static gboolean search_result_press_cb(GtkWidget *widget, const GqMouseButtonEvent *bevent, gpointer data)
+static void search_result_press_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
 {
-	auto sd = static_cast<SearchData *>(data);
-	GtkTreeModel *store;
+	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 	GtkTreeIter iter;
 	MatchFileData *mfd = nullptr;
 
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
-
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
 	                                  &tpath, nullptr, nullptr, nullptr))
 		{
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd, -1);
 		}
 
+	auto *sd = static_cast<SearchData *>(data);
+
 	sd->click_fd = mfd ? mfd->fd : nullptr;
 
-	if (bevent->button == GDK_BUTTON_SECONDARY)
+	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
+
+	if (button == GDK_BUTTON_SECONDARY)
 		{
-		search_result_menu(sd, mfd != nullptr, search_result_count(sd) == 0, widget, bevent->x, bevent->y);
+		search_result_menu(sd, mfd != nullptr, search_result_count(sd) == 0, widget, x, y);
 		}
 
-	if (!mfd) return FALSE;
+	if (!mfd) return;
 
-	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->press_count == 2)
+	if (button == GDK_BUTTON_PRIMARY && n_press == 2)
 		{
 		layout_set_fd(nullptr, mfd->fd);
 		}
 
-	if (bevent->button == GDK_BUTTON_MIDDLE) return TRUE;
+	if (button == GDK_BUTTON_MIDDLE)
+		{
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		return;
+		}
 
-	if (bevent->button == GDK_BUTTON_SECONDARY)
+	if (button == GDK_BUTTON_SECONDARY)
 		{
 		if (!search_result_row_selected(sd, mfd->fd))
 			{
-			GtkTreeSelection *selection;
+			GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 
-			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 			gtk_tree_selection_unselect_all(selection);
 			gtk_tree_selection_select_iter(selection, &iter);
 
 			g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
 			gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
 			}
-		return TRUE;
+
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		return;
 		}
 
-	if (bevent->button == GDK_BUTTON_PRIMARY && bevent->press_count == 1 &&
-	    !(bevent->state & GDK_SHIFT_MASK ) &&
-	    !(bevent->state & GDK_CONTROL_MASK ) &&
+	const GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
+
+	if (button == GDK_BUTTON_PRIMARY && n_press == 1 &&
+	    !(state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) &&
 	    search_result_row_selected(sd, mfd->fd))
 		{
 		/* this selection handled on release_cb */
 		gtk_widget_grab_focus(widget);
-		return TRUE;
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 		}
-
-	return FALSE;
 }
 
-static gboolean search_result_release_cb(GtkWidget *widget, const GqMouseButtonEvent *bevent, gpointer data)
+static void search_result_release_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
 {
-	auto sd = static_cast<SearchData *>(data);
-	GtkTreeModel *store;
-	GtkTreeIter iter;
+	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
 
+	if (button != GDK_BUTTON_PRIMARY && button != GDK_BUTTON_MIDDLE)
+		{
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		return;
+		}
+
+	GtkTreeView *tree_view = GTK_TREE_VIEW(gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture)));
+	GtkTreeModel *store = gtk_tree_view_get_model(tree_view);
+	GtkTreeIter iter;
 	MatchFileData *mfd = nullptr;
 
-	if (bevent->button != GDK_BUTTON_PRIMARY && bevent->button != GDK_BUTTON_MIDDLE) return TRUE;
-
-	store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
-
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    (bevent->x != 0 || bevent->y != 0) &&
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bevent->x, bevent->y,
-	                                  &tpath, nullptr, nullptr, nullptr))
+	    (x != 0 || y != 0) &&
+	    gtk_tree_view_get_path_at_pos(tree_view, x, y, &tpath, nullptr, nullptr, nullptr))
 		{
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd, -1);
 		}
 
-	if (bevent->button == GDK_BUTTON_MIDDLE)
+	auto *sd = static_cast<SearchData *>(data);
+
+	if (button == GDK_BUTTON_MIDDLE)
 		{
 		if (mfd && sd->click_fd == mfd->fd)
 			{
-			GtkTreeSelection *selection;
+			GtkTreeSelection *selection = gtk_tree_view_get_selection(tree_view);
 
-			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 			if (search_result_row_selected(sd, mfd->fd))
 				{
 				gtk_tree_selection_unselect_iter(selection, &iter);
@@ -1228,27 +1237,26 @@ static gboolean search_result_release_cb(GtkWidget *widget, const GqMouseButtonE
 				gtk_tree_selection_select_iter(selection, &iter);
 				}
 			}
-		return TRUE;
+
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		return;
 		}
 
+	const GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
+
 	if (mfd && sd->click_fd == mfd->fd &&
-	    !(bevent->state & GDK_SHIFT_MASK ) &&
-	    !(bevent->state & GDK_CONTROL_MASK ) &&
+	    !(state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) &&
 	    search_result_row_selected(sd, mfd->fd))
 		{
-		GtkTreeSelection *selection;
-
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+		GtkTreeSelection *selection = gtk_tree_view_get_selection(tree_view);
 		gtk_tree_selection_unselect_all(selection);
 		gtk_tree_selection_select_iter(selection, &iter);
 
 		g_autoptr(GtkTreePath) tpath = gtk_tree_model_get_path(store, &iter);
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
+		gtk_tree_view_set_cursor(tree_view, tpath, nullptr, FALSE);
 
-		return TRUE;
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 		}
-
-	return FALSE;
 }
 
 static void search_remove_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -3300,34 +3308,8 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
-	g_signal_connect(gesture, "pressed", reinterpret_cast<GCallback>(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
-	{
-		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-		const GqMouseButtonEvent event{
-			gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
-			x, y,
-			gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
-			static_cast<guint>(n_press)
-		};
-		if (search_result_press_cb(widget, &event, data))
-			{
-			gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
-			}
-	}), sd);
-	g_signal_connect(gesture, "released", reinterpret_cast<GCallback>(+[](GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
-	{
-		GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-		const GqMouseButtonEvent event{
-			gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
-			x, y,
-			gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
-			static_cast<guint>(n_press)
-		};
-		if (search_result_release_cb(widget, &event, data))
-			{
-			gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
-			}
-	}), sd);
+	g_signal_connect(gesture, "pressed", G_CALLBACK(search_result_press_cb), sd);
+	g_signal_connect(gesture, "released", G_CALLBACK(search_result_release_cb), sd);
 	gtk_widget_add_controller(sd->ui.result_view, GTK_EVENT_CONTROLLER(gesture));
 
 	GtkDragSource *drag_source = gtk_drag_source_new();
