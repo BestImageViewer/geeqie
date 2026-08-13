@@ -468,7 +468,7 @@ static gint search_result_count(SearchData *sd, gint64 *bytes = nullptr);
 
 static void search_notify_cb(FileData *fd, NotifyType type, gpointer data);
 static void search_start_do(SearchData *sd);
-static void search_result_menu(SearchData *sd, bool on_row, bool empty, GtkWidget *parent = nullptr, gdouble x = 0, gdouble y = 0);
+static void search_result_menu(SearchData *sd, bool on_row, GtkWidget *parent = nullptr, gdouble x = 0, gdouble y = 0);
 
 /*
  *-------------------------------------------------------------------
@@ -1152,7 +1152,7 @@ static void search_result_menu_cb(GSimpleAction *, GVariant *, gpointer data)
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(sd->ui.result_view));
 	GList *list = gtk_tree_selection_get_selected_rows(selection, &store);
 
-	search_result_menu(sd, list != nullptr, search_result_count(sd) == 0);
+	search_result_menu(sd, list != nullptr);
 }
 
 /*
@@ -1184,7 +1184,7 @@ static void search_result_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 
 	if (button == GDK_BUTTON_SECONDARY)
 		{
-		search_result_menu(sd, mfd != nullptr, search_result_count(sd) == 0, widget, x, y);
+		search_result_menu(sd, mfd != nullptr, widget, x, y);
 		}
 
 	if (!mfd) return;
@@ -1366,7 +1366,7 @@ static void search_win_result_clear_cb(GSimpleAction *, GVariant *, gpointer dat
 	search_result_clear(sd);
 }
 
-static void search_result_menu(SearchData *sd, bool on_row, bool empty, GtkWidget *parent, gdouble x, gdouble y)
+static void search_result_menu(SearchData *sd, bool on_row, GtkWidget *parent, gdouble x, gdouble y)
 {
 	GAction *action;
 	g_autoptr(GtkBuilder) builder = gtk_builder_new_from_resource(GQ_RESOURCE_PATH_UI "/menu-search.ui");
@@ -1394,6 +1394,8 @@ static void search_result_menu(SearchData *sd, bool on_row, bool empty, GtkWidge
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(sd->ui.window), "search-win-view-in-new-window");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), on_row);
+
+	const bool empty = search_result_count(sd) == 0;
 
 	action = g_action_map_lookup_action(G_ACTION_MAP(sd->ui.window), "search-win-select-all");
 	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), !empty);
