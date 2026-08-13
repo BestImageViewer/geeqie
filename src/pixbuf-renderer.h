@@ -275,6 +275,15 @@ struct PixbufRenderer
 	gboolean ignore_alpha;
 };
 
+struct GqPointerMotionEvent
+{
+	gdouble x;
+	gdouble y;
+	gdouble dx;
+	gdouble dy;
+	GdkModifierType state;
+};
+
 struct PixbufRendererClass
 {
 	GtkDrawingAreaClass parent_class;
