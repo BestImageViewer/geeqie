@@ -39,6 +39,7 @@ struct CollectionData;
 struct ColorMan;
 struct ColorManStatus;
 class FileData;
+struct GqPointerMotionEvent;
 struct ImageLoader;
 
 enum AlterType : gint {
