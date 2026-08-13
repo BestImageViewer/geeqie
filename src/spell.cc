@@ -5,6 +5,7 @@
 #include "spell.h"
 
 #include <cerrno>
+#include <csignal>
 #include <cstdlib>
 #include <fcntl.h>
 #include <libspelling.h>
@@ -29,9 +30,12 @@ gboolean spell_backend_is_usable()
 
 	if (pid == 0)
 		{
+		signal(SIGABRT, SIG_DFL);
+
 		const int null_fd = open("/dev/null", O_WRONLY);
 		if (null_fd != -1)
 			{
+			dup2(null_fd, STDOUT_FILENO);
 			dup2(null_fd, STDERR_FILENO);
 			close(null_fd);
 			}
@@ -61,6 +65,61 @@ gboolean spell_backend_is_usable()
 		}
 
 	return TRUE;
+}
+
+void spell_text_view_menu_cb(GtkGestureClick *gesture, gint, gdouble x, gdouble y, gpointer data)
+{
+	auto *text_view = GTK_TEXT_VIEW(data);
+	GtkTextBuffer *buffer = gtk_text_view_get_buffer(text_view);
+	auto *adapter = static_cast<SpellingTextBufferAdapter *>(g_object_get_data(G_OBJECT(buffer), "geeqie-spelling-adapter"));
+
+	if (!adapter) return;
+
+	gint buffer_x;
+	gint buffer_y;
+	gtk_text_view_window_to_buffer_coords(text_view, GTK_TEXT_WINDOW_WIDGET, x, y, &buffer_x, &buffer_y);
+
+	GtkTextIter iter;
+	gint trailing;
+	if (gtk_text_view_get_iter_at_position(text_view, &iter, &trailing, buffer_x, buffer_y))
+		{
+		if (trailing > 0 && !gtk_text_iter_ends_word(&iter))
+			{
+			gtk_text_iter_forward_char(&iter);
+			}
+
+		if (!gtk_text_iter_starts_word(&iter) && !gtk_text_iter_inside_word(&iter) && gtk_text_iter_ends_word(&iter))
+			{
+			gtk_text_iter_backward_char(&iter);
+			}
+		else if (!gtk_text_iter_starts_word(&iter) && !gtk_text_iter_inside_word(&iter))
+			{
+			GtkTextIter next = iter;
+			if (gtk_text_iter_forward_char(&next) && gtk_text_iter_inside_word(&next))
+				{
+				iter = next;
+				}
+			else
+				{
+				GtkTextIter previous = iter;
+				if (gtk_text_iter_backward_char(&previous) && gtk_text_iter_inside_word(&previous))
+					{
+					iter = previous;
+					}
+				}
+			}
+
+		GtkTextIter selection_start;
+		GtkTextIter selection_end;
+		if (!gtk_text_buffer_get_selection_bounds(buffer, &selection_start, &selection_end) ||
+		    !gtk_text_iter_in_range(&iter, &selection_start, &selection_end))
+			{
+			gtk_text_buffer_place_cursor(buffer, &iter);
+			}
+		}
+
+	spelling_text_buffer_adapter_update_corrections(adapter);
+	gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_DENIED);
 }
 
 } // namespace
@@ -102,6 +161,12 @@ void spell_text_view_enable(GtkTextView *text_view)
 	gtk_text_view_set_extra_menu(text_view, spelling_text_buffer_adapter_get_menu_model(adapter));
 
 	g_object_set_data_full(G_OBJECT(buffer), "geeqie-spelling-adapter", adapter, g_object_unref);
+
+	GtkGesture *gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture), GTK_PHASE_CAPTURE);
+	g_signal_connect(gesture, "pressed", G_CALLBACK(spell_text_view_menu_cb), text_view);
+	gtk_widget_add_controller(GTK_WIDGET(text_view), GTK_EVENT_CONTROLLER(gesture));
 }
 
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
