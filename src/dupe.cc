@@ -35,6 +35,7 @@
 #include "accelerators.h"
 #include "actions.h"
 #include "cache.h"
+#include "cellrenderericon.h"
 #include "collect.h"
 #include "compat.h"
 #include "dnd.h"
@@ -3669,8 +3670,7 @@ static void dupe_listview_add_column(DupeWindow *, GtkWidget *listview, gint n, 
 	else
 		{
 		gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-		renderer = gtk_cell_renderer_pixbuf_new();
-		cell_renderer_height_override(renderer);
+		renderer = gqv_cell_renderer_icon_new();
 		gtk_tree_view_column_pack_start(column, renderer, TRUE);
 		gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", n);
 		}
@@ -3687,7 +3687,7 @@ static void dupe_listview_set_height(GtkWidget *listview, gboolean thumb)
 	column = gtk_tree_view_get_column(GTK_TREE_VIEW(listview), DUPE_COLUMN_THUMB - 1);
 	if (!column) return;
 
-	gtk_tree_view_column_set_fixed_width(column, thumb ? options->thumbnails.size.width : 4);
+	gtk_tree_view_column_set_fixed_width(column, thumb ? options->thumbnails.size.width + 4 : 4);
 	gtk_tree_view_column_set_visible(column, thumb);
 
 	list = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
@@ -3695,7 +3695,10 @@ static void dupe_listview_set_height(GtkWidget *listview, gboolean thumb)
 	cell = static_cast<GtkCellRenderer *>(list->data);
 	g_list_free(list);
 
-	g_object_set(cell, "height", thumb ? options->thumbnails.size.height : -1, NULL);
+	g_object_set(cell,
+	             "fixed_width", thumb ? options->thumbnails.size.width : -1,
+	             "fixed_height", thumb ? options->thumbnails.size.height : -1,
+	             NULL);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(listview));
 }
 
