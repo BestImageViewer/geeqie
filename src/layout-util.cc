@@ -808,9 +808,9 @@ static void layout_menu_list_cb(GSimpleAction *action, GVariant *state, gpointer
 		}
 }
 
-static void layout_menu_view_dir_as_cb(GSimpleAction *action, GVariant *state, gpointer)
+static void layout_menu_view_dir_as_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto lw = static_cast<LayoutWindow *>(data);
 	if (!lw)
 		{
 		return;
@@ -822,11 +822,11 @@ static void layout_menu_view_dir_as_cb(GSimpleAction *action, GVariant *state, g
 
 	if (active)
 		{
-		layout_views_set(lw, DIRVIEW_LIST, lw->options.file_view_type);
+		layout_views_set(lw, DIRVIEW_TREE, lw->options.file_view_type);
 		}
 	else
 		{
-		layout_views_set(lw, DIRVIEW_TREE, lw->options.file_view_type);
+		layout_views_set(lw, DIRVIEW_LIST, lw->options.file_view_type);
 		}
 
 	g_simple_action_set_state((action), state);
@@ -1292,13 +1292,17 @@ static void layout_menu_histogram_cb(GSimpleAction *action, GVariant *value , gp
 		}
 }
 
-static void layout_menu_animate_cb(GSimpleAction *action, GVariant *value, gpointer)
+static void layout_menu_animate_cb(GSimpleAction *action, GVariant *value, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto lw = static_cast<LayoutWindow *>(data);
+	const gboolean enabled = g_variant_get_boolean(value);
 
-	layout_image_animate_toggle(lw);
+	if (lw->options.animate != enabled)
+		{
+		layout_image_animate_toggle(lw);
+		}
 
-	g_simple_action_set_state(action,  value);
+	g_simple_action_set_state(action, g_variant_new_boolean(lw->options.animate));
 }
 
 static void layout_menu_rectangular_selection_cb(GSimpleAction *action, GVariant *state, gpointer)
@@ -1434,13 +1438,14 @@ static void layout_menu_search_and_run_cb(GSimpleAction *, GVariant *, gpointer)
 }
 
 
-static void layout_menu_float_cb(GSimpleAction *action, GVariant *state, gpointer)
+static void layout_menu_float_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto lw = static_cast<LayoutWindow *>(data);
+	const gboolean floating = g_variant_get_boolean(state);
 	layout_exit_fullscreen(lw);
-	layout_tools_float_toggle(lw);
+	layout_tools_float_set(lw, floating, FALSE);
 
-	g_simple_action_set_state((action), state);
+	g_simple_action_set_state(action, g_variant_new_boolean(lw->options.tools_float));
 }
 
 static void layout_menu_hide_cb(GSimpleAction *, GVariant *, gpointer)
@@ -1451,16 +1456,18 @@ static void layout_menu_hide_cb(GSimpleAction *, GVariant *, gpointer)
 	layout_tools_hide_toggle(lw);
 }
 
-static void layout_menu_selectable_toolbars_cb(GSimpleAction *action, GVariant *state, gpointer)
+static void layout_menu_selectable_toolbars_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto lw = static_cast<LayoutWindow *>(data);
+	const gboolean hidden = g_variant_get_boolean(state);
 
-	if (lw->options.selectable_toolbars_hidden == g_variant_get_boolean(g_action_get_state(G_ACTION(action)))) return;
+	if (lw->options.selectable_toolbars_hidden != hidden)
+		{
+		layout_exit_fullscreen(lw);
+		layout_selectable_toolbars_toggle(lw);
+		}
 
-	layout_exit_fullscreen(lw);
-	current_layout_selectable_toolbars_toggle();
-
-	g_simple_action_set_state(action, state);
+	g_simple_action_set_state(action, g_variant_new_boolean(lw->options.selectable_toolbars_hidden));
 }
 
 static void layout_menu_info_pixel_cb(GSimpleAction *action, GVariant *state, gpointer)
@@ -1497,24 +1504,30 @@ static void layout_menu_bar_sort_cb(GSimpleAction *, GVariant *, gpointer)
 
 }
 
-static void layout_menu_hide_bars_cb(GSimpleAction *action, GVariant *state, gpointer)
+static void layout_menu_hide_bars_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto lw = static_cast<LayoutWindow *>(data);
+	const gboolean hidden = g_variant_get_boolean(state);
 
-	layout_bars_hide_toggle(lw);
+	if (lw->options.bars_state.hidden != hidden)
+		{
+		layout_bars_hide_toggle(lw);
+		}
 
-	bool enabled = g_variant_get_boolean(state);
-	g_simple_action_set_state(action, g_variant_new_boolean(!enabled));
+	g_simple_action_set_state(action, g_variant_new_boolean(lw->options.bars_state.hidden));
 }
 
-static void layout_menu_slideshow_cb(GSimpleAction *action, GVariant *state, gpointer)
+static void layout_menu_slideshow_cb(GSimpleAction *action, GVariant *state, gpointer data)
 {
-	auto lw = get_current_layout();
+	auto lw = static_cast<LayoutWindow *>(data);
+	const gboolean enabled = g_variant_get_boolean(state);
 
-	layout_image_slideshow_toggle(lw);
+	if (layout_image_slideshow_active(lw) != enabled)
+		{
+		layout_image_slideshow_toggle(lw);
+		}
 
-	bool enabled = g_variant_get_boolean(state);
-	g_simple_action_set_state(action, g_variant_new_boolean(!enabled));
+	g_simple_action_set_state(action, g_variant_new_boolean(layout_image_slideshow_active(lw)));
 }
 
 static void layout_menu_slideshow_pause_cb(GSimpleAction *, GVariant *, gpointer)

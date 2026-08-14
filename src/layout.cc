@@ -1955,6 +1955,7 @@ if (!lw)
 	image = layout_image_setup_split(lw, mode);
 
 	gtk_paned_set_start_child(GTK_PANED(lw->utility_paned), image);
+	gtk_widget_set_visible(image, TRUE);
 
 	layout_util_sync(lw);
 }
@@ -2274,23 +2275,23 @@ gboolean layout_tools_float_get(LayoutWindow *lw, gboolean *popped, gboolean *hi
 	return TRUE;
 }
 
-void current_layout_selectable_toolbars_toggle()
+void layout_selectable_toolbars_toggle(LayoutWindow *lw)
 {
-	if (!layout_valid(&current_lw)) return;
-	if (!current_lw->toolbar[TOOLBAR_MAIN]) return;
-	if (!current_lw->menu_bar) return;
-	if (!current_lw->info_box) return;
+	if (!layout_valid(&lw)) return;
+	if (!lw->toolbar[TOOLBAR_MAIN]) return;
+	if (!lw->menu_bar) return;
+	if (!lw->info_box) return;
 
-	current_lw->options.selectable_toolbars_hidden = !current_lw->options.selectable_toolbars_hidden;
+	lw->options.selectable_toolbars_hidden = !lw->options.selectable_toolbars_hidden;
 
-	gtk_widget_set_visible(current_lw->toolbar[TOOLBAR_MAIN],
-	                       !options->selectable_bars.tool_bar || !current_lw->options.selectable_toolbars_hidden);
+	gtk_widget_set_visible(lw->toolbar[TOOLBAR_MAIN],
+	                       !options->selectable_bars.tool_bar || !lw->options.selectable_toolbars_hidden);
 
-	gtk_widget_set_visible(current_lw->menu_bar,
-	                       !options->selectable_bars.menu_bar || !current_lw->options.selectable_toolbars_hidden);
+	gtk_widget_set_visible(lw->menu_bar,
+	                       !options->selectable_bars.menu_bar || !lw->options.selectable_toolbars_hidden);
 
-	gtk_widget_set_visible(current_lw->info_box,
-	                       !options->selectable_bars.status_bar || !current_lw->options.selectable_toolbars_hidden);
+	gtk_widget_set_visible(lw->info_box,
+	                       !options->selectable_bars.status_bar || !lw->options.selectable_toolbars_hidden);
 }
 
 void layout_info_pixel_set(LayoutWindow *lw, gboolean show)

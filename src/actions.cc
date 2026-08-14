@@ -152,8 +152,18 @@ void registered_accels_apply(GtkApplication *app, bool suppress)
 
 void window_focus_widget_notify_cb(GtkWindow *window, GParamSpec *, gpointer data)
 {
+	if (!gtk_window_is_active(window)) return;
+
 	auto app = GTK_APPLICATION(data);
 
+	registered_accels_apply(app, focus_is_editable(window));
+}
+
+void window_is_active_notify_cb(GtkWindow *window, GParamSpec *, gpointer data)
+{
+	if (!gtk_window_is_active(window)) return;
+
+	auto app = GTK_APPLICATION(data);
 	registered_accels_apply(app, focus_is_editable(window));
 }
 
@@ -166,6 +176,7 @@ void attach_accel_focus_handler(GtkApplication *app, GtkWidget *window)
 		}
 
 	g_signal_connect(window, "notify::focus-widget", G_CALLBACK(window_focus_widget_notify_cb), app);
+	g_signal_connect(window, "notify::is-active", G_CALLBACK(window_is_active_notify_cb), app);
 	g_object_set_data(G_OBJECT(window), ACCEL_FOCUS_HANDLER_ATTACHED, GINT_TO_POINTER(TRUE));
 }
 
@@ -191,7 +202,6 @@ void reload_registered_accels(GtkApplication *app, GKeyFile *accels_keyfile)
 		const auto *detailed_action = static_cast<const char *>(key);
 		g_auto(GStrv) accels = g_key_file_get_string_list(accels_keyfile, detailed_action, "accels", nullptr, nullptr);
 		if (!accels) accels = g_new0(gchar *, 1);
-
 		gtk_application_set_accels_for_action(app, detailed_action,
 		                                      registered_accels_suppressed ? empty_accels : const_cast<const char * const *>(accels));
 		g_hash_table_iter_replace(&iter, g_steal_pointer(&accels));

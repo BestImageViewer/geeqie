@@ -762,7 +762,7 @@ static void layout_image_pop_menu_hide_selectable_toolbars_cb(GSimpleAction *act
 
 	if (lw->options.selectable_toolbars_hidden != enabled)
 		{
-		current_layout_selectable_toolbars_toggle();
+		layout_selectable_toolbars_toggle(lw);
 		}
 
 	g_simple_action_set_state(action, state);
