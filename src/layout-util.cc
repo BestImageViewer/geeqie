@@ -2597,13 +2597,15 @@ static void layout_actions_setup_editors(LayoutWindow *lw)
 
 void create_toolbars(LayoutWindow *lw)
 {
-	// creates first group called only from one place
-	int i; 
-
-	for (i = 0; i < TOOLBAR_COUNT; i++)
+	for (gint i = 0; i < TOOLBAR_COUNT; i++)
 		{
-		layout_actions_toolbar(lw, static_cast<ToolbarType>(i)); // creates the box
-		layout_toolbar_add_default(lw, static_cast<ToolbarType>(i));
+		auto type = static_cast<ToolbarType>(i);
+
+		if (!lw->toolbar[type])
+			{
+			layout_actions_toolbar(lw, type);
+			layout_toolbar_add_default(lw, type);
+			}
 		}
 }
 
