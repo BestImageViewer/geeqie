@@ -38,6 +38,7 @@
 #include "actions.h"
 #include "bar-keywords.h"
 #include "cache.h"
+#include "cellrenderericon.h"
 #include "collect.h"
 #include "compat.h"
 #include "dnd.h"
@@ -54,6 +55,7 @@
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
+#include "pixbuf-util.h"
 #include "print.h"
 #include "similar.h"
 #include "thumb.h"
@@ -648,6 +650,8 @@ static gint search_result_count(SearchData *sd, gint64 *bytes)
 	return n;
 }
 
+static GdkPixbuf *search_scale_thumb(GdkPixbuf *pixbuf);
+
 static void search_result_append(SearchData *sd, MatchFileData *mfd)
 {
 	FileData *fd;
@@ -660,13 +664,14 @@ static void search_result_append(SearchData *sd, MatchFileData *mfd)
 	g_autofree gchar *text_size = text_from_size(fd->size);
 	g_autofree gchar *text_dim = (mfd->dimensions.width > 0 && mfd->dimensions.height > 0) ?
 	            g_strdup_printf("%d x %d", mfd->dimensions.width, mfd->dimensions.height) : nullptr;
+	g_autoptr(GdkPixbuf) thumb = search_scale_thumb(fd->thumb_pixbuf);
 
 	auto *store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(sd->ui.result_view)));
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter,
 				SEARCH_COLUMN_POINTER, mfd,
 				SEARCH_COLUMN_RANK, mfd->rank,
-				SEARCH_COLUMN_THUMB, fd->thumb_pixbuf,
+				SEARCH_COLUMN_THUMB, thumb,
 				SEARCH_COLUMN_NAME, fd->name,
 				SEARCH_COLUMN_SIZE, text_size,
 				SEARCH_COLUMN_DATE, text_from_time(fd->date),
@@ -839,6 +844,26 @@ static gboolean search_result_select_cb(GtkTreeSelection *, GtkTreeModel *, GtkT
 
 static void search_result_thumb_step(SearchData *sd);
 
+static GdkPixbuf *search_scale_thumb(GdkPixbuf *pixbuf)
+{
+	if (!pixbuf) return nullptr;
+
+	gint width;
+	gint height;
+	pixbuf_scale_aspect(options->thumbnails.size.width,
+	                    options->thumbnails.size.height,
+	                    gdk_pixbuf_get_width(pixbuf),
+	                    gdk_pixbuf_get_height(pixbuf),
+	                    width, height);
+
+	if (width == gdk_pixbuf_get_width(pixbuf) && height == gdk_pixbuf_get_height(pixbuf))
+		{
+		return GDK_PIXBUF(g_object_ref(pixbuf));
+		}
+
+	return gdk_pixbuf_scale_simple(pixbuf, width, height, options->thumbnails.quality);
+}
+
 
 static void search_result_thumb_set(SearchData *sd, FileData *fd, GtkTreeIter *iter)
 {
@@ -850,7 +875,11 @@ static void search_result_thumb_set(SearchData *sd, FileData *fd, GtkTreeIter *i
 		if (search_result_find_row(sd, fd, &iter_n) >= 0) iter = &iter_n;
 		}
 
-	if (iter) gtk_list_store_set(store, iter, SEARCH_COLUMN_THUMB, fd->thumb_pixbuf, -1);
+	if (iter)
+		{
+		g_autoptr(GdkPixbuf) thumb = search_scale_thumb(fd->thumb_pixbuf);
+		gtk_list_store_set(store, iter, SEARCH_COLUMN_THUMB, thumb, -1);
+		}
 }
 
 static void search_result_thumb_do(SearchData *sd)
@@ -899,7 +928,7 @@ static void search_result_thumb_step(SearchData *sd)
 		gtk_tree_model_get(store, &iter, SEARCH_COLUMN_POINTER, &mfd, SEARCH_COLUMN_THUMB, &pixbuf, -1);
 		if (pixbuf || mfd->fd->thumb_pixbuf)
 			{
-			if (!pixbuf) gtk_list_store_set(GTK_LIST_STORE(store), &iter, SEARCH_COLUMN_THUMB, mfd->fd->thumb_pixbuf, -1);
+			if (!pixbuf) search_result_thumb_set(sd, mfd->fd, &iter);
 			row++;
 			mfd = nullptr;
 			}
@@ -946,14 +975,17 @@ static void search_result_thumb_height(SearchData *sd)
 	GtkTreeViewColumn *column = gtk_tree_view_get_column(GTK_TREE_VIEW(sd->ui.result_view), SEARCH_COLUMN_THUMB - 1);
 	if (!column) return;
 
-	gtk_tree_view_column_set_fixed_width(column, sd->thumb_enable ? options->thumbnails.size.width : 4);
+	gtk_tree_view_column_set_fixed_width(column, sd->thumb_enable ? options->thumbnails.size.width + 4 : 4);
 
 	list = gtk_cell_layout_get_cells(GTK_CELL_LAYOUT(column));
 	if (!list) return;
 	cell = static_cast<GtkCellRenderer *>(list->data);
 	g_list_free(list);
 
-	g_object_set(cell, "height", sd->thumb_enable ? options->thumbnails.size.height : -1, NULL);
+	g_object_set(cell,
+	             "fixed_width", sd->thumb_enable ? options->thumbnails.size.width : -1,
+	             "fixed_height", sd->thumb_enable ? options->thumbnails.size.height : -1,
+	             NULL);
 	gtk_tree_view_columns_autosize(GTK_TREE_VIEW(sd->ui.result_view));
 }
 
@@ -2632,8 +2664,7 @@ static void search_result_add_column(SearchData * sd, gint n, const gchar *title
 	else
 		{
 		gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
-		renderer = gtk_cell_renderer_pixbuf_new();
-		cell_renderer_height_override(renderer);
+		renderer = gqv_cell_renderer_icon_new();
 		gtk_tree_view_column_pack_start(column, renderer, TRUE);
 		gtk_tree_view_column_add_attribute(column, renderer, "pixbuf", n);
 		}

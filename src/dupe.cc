@@ -1803,6 +1803,26 @@ static void dupe_list_check_match(DupeWindow *dw, DupeItem *needle, GList *start
  * ------------------------------------------------------------------
  */
 
+static GdkPixbuf *dupe_scale_thumb(GdkPixbuf *pixbuf)
+{
+	if (!pixbuf) return nullptr;
+
+	gint width;
+	gint height;
+	pixbuf_scale_aspect(options->thumbnails.size.width,
+	                    options->thumbnails.size.height,
+	                    gdk_pixbuf_get_width(pixbuf),
+	                    gdk_pixbuf_get_height(pixbuf),
+	                    width, height);
+
+	if (width == gdk_pixbuf_get_width(pixbuf) && height == gdk_pixbuf_get_height(pixbuf))
+		{
+		return GDK_PIXBUF(g_object_ref(pixbuf));
+		}
+
+	return gdk_pixbuf_scale_simple(pixbuf, width, height, options->thumbnails.quality);
+}
+
 static void dupe_listview_set_thumb(DupeWindow *dw, DupeItem *di, GtkTreeIter *iter)
 {
 	GtkListStore *store;
@@ -1817,7 +1837,11 @@ static void dupe_listview_set_thumb(DupeWindow *dw, DupeItem *di, GtkTreeIter *i
 			}
 		}
 
-	if (iter) gtk_list_store_set(store, iter, DUPE_COLUMN_THUMB, di->pixbuf, -1);
+	if (iter)
+		{
+		g_autoptr(GdkPixbuf) thumb = dupe_scale_thumb(di->pixbuf);
+		gtk_list_store_set(store, iter, DUPE_COLUMN_THUMB, thumb, -1);
+		}
 }
 
 static void dupe_thumb_do(DupeWindow *dw)
