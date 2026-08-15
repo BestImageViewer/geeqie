@@ -31,7 +31,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "compat.h"
 #include "geometry.h"
 
 struct GqColor;
@@ -273,6 +272,15 @@ struct PixbufRenderer
 	RendererFuncs *renderer2;
 
 	gboolean ignore_alpha;
+};
+
+struct GqMouseButtonEvent
+{
+	guint button;
+	gdouble x;
+	gdouble y;
+	GdkModifierType state;
+	guint press_count;
 };
 
 struct GqPointerMotionEvent

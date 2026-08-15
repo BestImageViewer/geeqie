@@ -50,6 +50,7 @@
 #include "menu.h"
 #include "misc.h"
 #include "options.h"
+#include "pixbuf-renderer.h"
 #include "pixbuf-util.h"
 #include "print.h"
 #include "slideshow.h"

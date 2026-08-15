@@ -439,30 +439,29 @@ gboolean vflist_press_key_cb(ViewFile *vf, GtkWidget *widget, guint keyval, GdkM
 	return TRUE;
 }
 
-gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEvent *event)
+void vflist_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
-	GtkTreeIter iter;
 	FileData *fd = nullptr;
 	GtkTreeViewColumn *column;
 
 	vf->clicked_mark = 0;
 
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y,
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(event.widget), event.x, event.y,
 	                                  &tpath, &column, nullptr, nullptr))
 		{
-		GtkTreeModel *store;
 		gint col_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
 
 		if (col_idx >= FILE_COLUMN_MARKS && col_idx <= FILE_COLUMN_MARKS_LAST)
 			vf->clicked_mark = 1 + (col_idx - FILE_COLUMN_MARKS);
 
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+		GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(event.widget));
 
+		GtkTreeIter iter;
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
 
-		if (event->button == GDK_BUTTON_PRIMARY &&
+		if (event.button == GDK_BUTTON_PRIMARY &&
 		    col_idx >= FILE_COLUMN_MARKS && col_idx <= FILE_COLUMN_MARKS_LAST)
 			{
 			/* GtkCellRendererToggle's GTK4 activation region can be much
@@ -475,49 +474,38 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEve
 				vflist_listview_mark_toggled_cb(GTK_CELL_RENDERER_TOGGLE(renderers->data), path_str, vf);
 				}
 			g_list_free(renderers);
-			return TRUE;
+			return;
 			}
 		}
 
 	vf->click_fd = fd;
 
-	if (event->button == GDK_BUTTON_SECONDARY)
+	if (event.button == GDK_BUTTON_SECONDARY)
 		{
-		vf->popup = vf_pop_menu(vf, widget, event->x, event->y);
-		return TRUE;
+		vf->popup = vf_pop_menu(vf, event.widget, event.x, event.y);
+		return;
 		}
 
-	if (!fd) return FALSE;
+	if (!fd) return;
 
-	if (event->button == GDK_BUTTON_MIDDLE)
+	if (event.button == GDK_BUTTON_MIDDLE)
 		{
 		if (!vflist_is_selected(vf, fd))
 			{
 			vflist_color_set(vf, fd, TRUE);
 			}
-		return TRUE;
+		return;
 		}
 
-
-	if (event->button == GDK_BUTTON_PRIMARY && event->press_count == 1 &&
-	    !(event->state & GDK_SHIFT_MASK ) &&
-	    !(event->state & GDK_CONTROL_MASK ) &&
+	if (event.button == GDK_BUTTON_PRIMARY && event.n_press == 1 &&
+	    !(event.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) &&
 	    vflist_is_selected(vf, fd))
 		{
-		GtkTreeSelection *selection;
-
-		gtk_widget_grab_focus(widget);
-
-
-		/* returning FALSE and further processing of the event is needed for
-		   correct operation of the expander, to show the sidecar files.
-		   It however resets the selection of multiple files. With this condition
-		   it should work for both cases */
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
-		return (gtk_tree_selection_count_selected_rows(selection) > 1);
+		gtk_widget_grab_focus(event.widget);
+		return;
 		}
 
-	if (event->button == GDK_BUTTON_PRIMARY && event->press_count == 2)
+	if (event.button == GDK_BUTTON_PRIMARY && event.n_press == 2)
 		{
 		if (vf->click_fd->format_class == FORMAT_CLASS_COLLECTION)
 			{
@@ -528,49 +516,47 @@ gboolean vflist_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEve
 			if (vf->layout) layout_image_full_screen_start(vf->layout);
 			}
 		}
-
-	return FALSE;
 }
 
-gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEvent *event)
+void vflist_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
 
-	if (layout_handle_user_defined_mouse_buttons(vf->layout, event->button))
+	if (layout_handle_user_defined_mouse_buttons(vf->layout, event.button))
 		{
-		return TRUE;
+		return;
 		}
 
-	if (event->button == GDK_BUTTON_MIDDLE)
+	if (event.button == GDK_BUTTON_MIDDLE)
 		{
 		vflist_color_set(vf, vf->click_fd, FALSE);
 		}
 
-	if (event->button != GDK_BUTTON_PRIMARY && event->button != GDK_BUTTON_MIDDLE)
+	if (event.button != GDK_BUTTON_PRIMARY && event.button != GDK_BUTTON_MIDDLE)
 		{
-		return TRUE;
+		return;
 		}
 
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    (event->x != 0 || event->y != 0) &&
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), event->x, event->y,
+	    (event.x != 0 || event.y != 0) &&
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(event.widget), event.x, event.y,
 					  &tpath, nullptr, nullptr, nullptr))
 		{
 		GtkTreeModel *store;
 
-		store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+		store = gtk_tree_view_get_model(GTK_TREE_VIEW(event.widget));
 		gtk_tree_model_get_iter(store, &iter, tpath);
 		gtk_tree_model_get(store, &iter, FILE_COLUMN_POINTER, &fd, -1);
 		}
 
-	if (event->button == GDK_BUTTON_MIDDLE)
+	if (event.button == GDK_BUTTON_MIDDLE)
 		{
 		if (fd && vf->click_fd == fd)
 			{
 			GtkTreeSelection *selection;
 
-			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+			selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(event.widget));
 			if (vflist_is_selected(vf, fd))
 				{
 				gtk_tree_selection_unselect_iter(selection, &iter);
@@ -580,23 +566,20 @@ gboolean vflist_release_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonE
 				gtk_tree_selection_select_iter(selection, &iter);
 				}
 			}
-		return TRUE;
+		return;
 		}
 
 	if (fd && vf->click_fd == fd &&
-	    !(event->state & GDK_SHIFT_MASK ) &&
-	    !(event->state & GDK_CONTROL_MASK ) &&
+	    !(event.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) &&
 	    vflist_is_selected(vf, fd))
 		{
 		GtkTreeSelection *selection;
 
-		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+		selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(event.widget));
 		gtk_tree_selection_unselect_all(selection);
 		gtk_tree_selection_select_iter(selection, &iter);
 		vflist_move_cursor(vf, &iter);
 		}
-
-	return FALSE;
 }
 
 static void vflist_select_image(ViewFile *vf, FileData *sel_fd)

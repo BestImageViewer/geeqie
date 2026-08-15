@@ -30,8 +30,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "compat.h"
-
 enum StereoPixbufData : gint;
 
 struct CollectInfo;
@@ -39,6 +37,7 @@ struct CollectionData;
 struct ColorMan;
 struct ColorManStatus;
 class FileData;
+struct GqMouseButtonEvent;
 struct GqPointerMotionEvent;
 struct ImageLoader;
 

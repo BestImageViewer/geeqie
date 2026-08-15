@@ -174,35 +174,24 @@ static gboolean vf_press_key_cb(GtkEventControllerKey *, guint keyval, guint, Gd
  *-------------------------------------------------------------------
  */
 
-static gboolean vf_press_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
+static void vf_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
-	auto vf = static_cast<ViewFile *>(data);
-	gboolean ret;
-
 	switch (vf->type)
 	{
-	case FILEVIEW_LIST: ret = vflist_press_cb(vf, widget, event); break;
-	case FILEVIEW_ICON: ret = vficon_press_cb(vf, widget, event); break;
-	default: ret = FALSE;
+	case FILEVIEW_LIST: vflist_press_cb(vf, event); break;
+	case FILEVIEW_ICON: vficon_press_cb(vf, event); break;
+	default: break;
 	}
-
-	return ret;
 }
 
-static gboolean vf_release_cb(GtkWidget *widget, const GqMouseButtonEvent *event, gpointer data)
+static void vf_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
-	auto vf = static_cast<ViewFile *>(data);
-	gboolean ret;
-
 	switch (vf->type)
 	{
-	case FILEVIEW_LIST: ret = vflist_release_cb(vf, widget, event); break;
-	case FILEVIEW_ICON: ret = vficon_release_cb(vf, widget, event); break;
-
-	default: ret = FALSE;
+	case FILEVIEW_LIST: vflist_release_cb(vf, event); break;
+	case FILEVIEW_ICON: vficon_release_cb(vf, event); break;
+	default: break;
 	}
-
-	return ret;
 }
 
 
@@ -356,7 +345,8 @@ void vf_click_at_point(ViewFile *vf, gdouble x, gdouble y, GdkModifierType state
 {
 	if (!vf) return;
 
-	const GqMouseButtonEvent event{
+	const ViewFileMouseButtonEvent event{
+		vf->listview,
 		GDK_BUTTON_PRIMARY,
 		x,
 		y,
@@ -364,8 +354,8 @@ void vf_click_at_point(ViewFile *vf, gdouble x, gdouble y, GdkModifierType state
 		1
 	};
 
-	vf_press_cb(vf->listview, &event, vf);
-	vf_release_cb(vf->listview, &event, vf);
+	vf_press_cb(vf, event);
+	vf_release_cb(vf, event);
 }
 
 static GdkContentProvider *vf_dnd_prepare(GtkDragSource *source, gdouble x, gdouble y, gpointer data)
@@ -1392,28 +1382,28 @@ static gboolean vf_file_filter_press_cb(GtkWidget *widget, gpointer data)
 
 static void vf_gesture_press_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
 {
-	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-	GqMouseButtonEvent event = {
+	ViewFileMouseButtonEvent event{
+		gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture)),
 		gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
 		x,
 		y,
 		gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
-		static_cast<guint>(n_press)
+		n_press
 	};
-	vf_press_cb(widget, &event, data);
+	vf_press_cb(static_cast<ViewFile *>(data), event);
 }
 
 static void vf_gesture_release_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
 {
-	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
-	GqMouseButtonEvent event = {
+	ViewFileMouseButtonEvent event{
+		gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture)),
 		gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture)),
 		x,
 		y,
 		gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture)),
-		static_cast<guint>(n_press)
+		n_press
 	};
-	vf_release_cb(widget, &event, data);
+	vf_release_cb(static_cast<ViewFile *>(data), event);
 }
 
 static void vf_file_filter_gesture_press_cb(GtkGestureClick *gesture, gint, gdouble, gdouble, gpointer data)

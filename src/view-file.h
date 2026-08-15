@@ -108,6 +108,16 @@ struct ViewFile
 	using SelectionCallback = std::function<void(FileData *)>;
 };
 
+struct ViewFileMouseButtonEvent
+{
+	GtkWidget *widget;
+	guint button;
+	gdouble x;
+	gdouble y;
+	GdkModifierType state;
+	gint n_press;
+};
+
 void vf_send_update(ViewFile *vf);
 
 ViewFile *vf_new(FileViewType type, FileData *dir_fd);
