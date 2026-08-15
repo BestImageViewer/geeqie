@@ -1196,7 +1196,7 @@ gboolean widget_get_pointer_position(GtkWidget *widget, GqPoint &pos)
 
 	double x = 0.0;
 	double y = 0.0;
-	auto mask = static_cast<GdkModifierType>(0);
+	GdkModifierType mask = GDK_NO_MODIFIER_MASK;
 
 	if (!gdk_surface_get_device_position(surface, device, &x, &y, &mask))
 		return FALSE;
@@ -1336,7 +1336,7 @@ gboolean get_pointer_position(GtkWidget *widget, GdkDevice *device, int *x, int 
 		return FALSE;
 		}
 
-	auto local_mask = static_cast<GdkModifierType>(0);
+	GdkModifierType local_mask = GDK_NO_MODIFIER_MASK;
 	if (!gdk_surface_get_device_position(surface, device, &dx, &dy, &local_mask))
 		{
 		return FALSE;

@@ -2171,7 +2171,7 @@ static gboolean pr_mouse_motion_cb(GtkEventControllerMotion *controller, double 
 		gtk_widget_set_cursor_from_name(widget, "crosshair");
 		}
 
-	auto state = static_cast<GdkModifierType>(0);
+	GdkModifierType state = GDK_NO_MODIFIER_MASK;
 
 	if (GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(controller)))
 		{
@@ -2250,7 +2250,7 @@ static gboolean pr_mouse_press_common(GtkWidget *widget,
 			break;
 
 		case GDK_BUTTON_SECONDARY:
-			pr_clicked_signal_button(pr, button, x, y, static_cast<GdkModifierType>(0), 1);
+			pr_clicked_signal_button(pr, button, x, y, GDK_NO_MODIFIER_MASK, 1);
 			break;
 
 		default:

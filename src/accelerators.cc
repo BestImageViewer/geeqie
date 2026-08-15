@@ -128,7 +128,7 @@ bool accelerator_string_is_valid(const char *shortcuts)
 		if (!**accelerator) continue;
 
 		guint key = 0;
-		auto modifiers = static_cast<GdkModifierType>(0);
+		GdkModifierType modifiers = GDK_NO_MODIFIER_MASK;
 		gtk_accelerator_parse(*accelerator, &key, &modifiers);
 		if (!key) return false;
 		}
@@ -313,7 +313,7 @@ void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array)
 					}
 
 				unsigned int key = 0;
-				auto mods = static_cast<GdkModifierType>(0);
+				GdkModifierType mods = GDK_NO_MODIFIER_MASK;
 
 				gtk_accelerator_parse(accels[j], &key, &mods);
 				if (key == 0)
