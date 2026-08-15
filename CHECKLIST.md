@@ -30,11 +30,8 @@ options
 ./build-aux/generate-man-page.sh
 ```
 
-* Update the keyboard shortcuts window if any keyboard shortcuts have changed
-
-```sh
-./data//ui/keyboard-shortcuts.ui
-```
+* Check that changes to action descriptions or `data/accels.ini` are shown
+  correctly in the dynamically generated keyboard shortcuts window.
 
 * Commit the changes and push to the .repo
 

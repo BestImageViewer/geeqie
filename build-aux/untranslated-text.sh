@@ -214,6 +214,7 @@ format-canon.cc
 format-fuji.cc
 format-nikon.cc
 format-olympus.cc
+tests/keyboard-shortcuts.cc
 "
 
 # A POSIX-compliant function that returns 0 if the substring is present, or 1

@@ -1,7 +1,7 @@
 <child>
   <object class="GtkShortcutsSection">
     <property name="visible">1</property>
-    <property name="section-name">search</property>
+    <property name="section-name">mouse-arrow-keys</property>
     <property name="title" translatable="yes">Mouse - Arrow keys</property>
     <property name="max-height">10</property>
     <child>

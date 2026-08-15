@@ -5,6 +5,9 @@
 #ifndef KEYBOARD_SHORTCUTS_H
 #define KEYBOARD_SHORTCUTS_H
 
+#include <glib.h>
+
+gchar *shortcuts_xml_from_keyfile(GKeyFile *key_file);
 void shortcuts_window_new_from_keyfile();
 
 #endif

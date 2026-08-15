@@ -344,6 +344,11 @@ static void exif_window_close_cb(GtkWidget *, gpointer data)
  */
 #include "advanced-exif-actions.inc"
 
+const ActionDef *get_advanced_exif_actions()
+{
+	return advanced_exif_actions;
+}
+
 GtkWidget *advanced_exif_new(LayoutWindow *lw)
 {
 	ExifWin *ew;
