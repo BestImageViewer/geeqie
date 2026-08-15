@@ -1400,7 +1400,7 @@ static void collection_table_release_cb(GtkGestureClick *gesture, gint, gdouble 
 
 	const guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
 
-	auto state = static_cast<GdkModifierType>(0);
+	GdkModifierType state = GDK_NO_MODIFIER_MASK;
 	if (GdkEvent *event = gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(gesture)))
 		{
 		state = gdk_event_get_modifier_state(event);

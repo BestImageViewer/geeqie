@@ -150,7 +150,7 @@ void shortcuts_xml_append_section(GString *xml, GKeyFile *kf, const ActionTableD
 					}
 
 				guint key = 0;
-				auto modifiers = static_cast<GdkModifierType>(0);
+				GdkModifierType modifiers = GDK_NO_MODIFIER_MASK;
 				gtk_accelerator_parse(accels[a], &key, &modifiers);
 				if (key == 0)
 					{
