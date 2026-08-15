@@ -1147,57 +1147,51 @@ static gboolean vficon_motion_cb(GtkEventControllerMotion *, double x, double y,
 	return FALSE;
 }
 
-gboolean vficon_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEvent *event)
+void vficon_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
-	GtkTreeIter iter;
-	FileData *fd;
-
 	tip_unschedule(vf);
 
-	fd = vficon_find_data_by_coord(vf, static_cast<gint>(event->x), static_cast<gint>(event->y), &iter);
+	GtkTreeIter iter;
+	FileData *fd = vficon_find_data_by_coord(vf, static_cast<gint>(event.x), static_cast<gint>(event.y), &iter);
+	if (!fd) return;
 
-	if (fd)
+	vf->click_fd = fd;
+	vficon_selection_add(vf, vf->click_fd, SELECTION_PRELIGHT, &iter);
+
+	switch (event.button)
 		{
-		vf->click_fd = fd;
-		vficon_selection_add(vf, vf->click_fd, SELECTION_PRELIGHT, &iter);
-
-		switch (event->button)
-			{
-			case GDK_BUTTON_PRIMARY:
-				if (!gtk_widget_has_focus(vf->listview))
-					{
-					gtk_widget_grab_focus(vf->listview);
-					}
-
-				if (event->press_count == 2 && vf->layout)
-					{
-					if (vf->click_fd->format_class == FORMAT_CLASS_COLLECTION)
-						{
-						collection_window_new(vf->click_fd->path);
-						}
-					else
-						{
-						vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, &iter);
-						layout_image_full_screen_start(vf->layout);
-						}
-					}
-				break;
-			case GDK_BUTTON_SECONDARY:
+		case GDK_BUTTON_PRIMARY:
+			if (!gtk_widget_has_focus(vf->listview))
 				{
-				gint mark = vficon_mark_at_coord(vf, static_cast<gint>(event->x), static_cast<gint>(event->y));
-				vf->clicked_mark = mark >= 0 ? mark + 1 : 0;
-				vf->popup = vf_pop_menu(vf, widget, event->x, event->y);
+				gtk_widget_grab_focus(vf->listview);
 				}
-				break;
-			default:
-				break;
-			}
-		}
 
-	return FALSE;
+			if (event.n_press == 2 && vf->layout)
+				{
+				if (vf->click_fd->format_class == FORMAT_CLASS_COLLECTION)
+					{
+					collection_window_new(vf->click_fd->path);
+					}
+				else
+					{
+					vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, &iter);
+					layout_image_full_screen_start(vf->layout);
+					}
+				}
+			break;
+		case GDK_BUTTON_SECONDARY:
+			{
+			gint mark = vficon_mark_at_coord(vf, static_cast<gint>(event.x), static_cast<gint>(event.y));
+			vf->clicked_mark = mark >= 0 ? mark + 1 : 0;
+			vf->popup = vf_pop_menu(vf, event.widget, event.x, event.y);
+			}
+			break;
+		default:
+			break;
+		}
 }
 
-gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *event)
+void vficon_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
 	GtkTreeIter iter;
 	FileData *fd = nullptr;
@@ -1205,14 +1199,14 @@ gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *
 
 	tip_schedule(vf);
 
-	if (layout_handle_user_defined_mouse_buttons(vf->layout, event->button))
+	if (layout_handle_user_defined_mouse_buttons(vf->layout, event.button))
 		{
-		return TRUE;
+		return;
 		}
 
-	if (static_cast<gint>(event->x) != 0 || static_cast<gint>(event->y) != 0)
+	if (static_cast<gint>(event.x) != 0 || static_cast<gint>(event.y) != 0)
 		{
-		fd = vficon_find_data_by_coord(vf, static_cast<gint>(event->x), static_cast<gint>(event->y), &iter);
+		fd = vficon_find_data_by_coord(vf, static_cast<gint>(event.x), static_cast<gint>(event.y), &iter);
 		}
 
 	if (vf->click_fd)
@@ -1220,22 +1214,22 @@ gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *
 		vficon_selection_remove(vf, vf->click_fd, SELECTION_PRELIGHT, nullptr);
 		}
 
-	if (!fd || vf->click_fd != fd) return TRUE;
+	if (!fd || vf->click_fd != fd) return;
 
 	was_selected = !!(fd->selected & SELECTION_SELECTED);
 
-	switch (event->button)
+	switch (event.button)
 		{
 		case GDK_BUTTON_PRIMARY:
 			{
 			vficon_set_focus(vf, fd);
 
-			if (event->state & GDK_CONTROL_MASK)
+			if (event.state & GDK_CONTROL_MASK)
 				{
 				gboolean select;
 
 				select = !(fd->selected & SELECTION_SELECTED);
-				if ((event->state & GDK_SHIFT_MASK) && VFICON(vf)->prev_selection)
+				if ((event.state & GDK_SHIFT_MASK) && VFICON(vf)->prev_selection)
 					{
 					vficon_select_region_util(vf, VFICON(vf)->prev_selection, fd, select);
 					}
@@ -1248,7 +1242,7 @@ gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *
 				{
 				vficon_select_none(vf);
 
-				if ((event->state & GDK_SHIFT_MASK) && VFICON(vf)->prev_selection)
+				if ((event.state & GDK_SHIFT_MASK) && VFICON(vf)->prev_selection)
 					{
 					vficon_select_region_util(vf, VFICON(vf)->prev_selection, fd, TRUE);
 					}
@@ -1273,8 +1267,6 @@ gboolean vficon_release_cb(ViewFile *vf, GtkWidget *, const GqMouseButtonEvent *
 		{
 		vficon_send_layout_select(vf, fd);
 		}
-
-	return TRUE;
 }
 
 static void vficon_leave_cb(GtkEventControllerMotion *, gpointer data)

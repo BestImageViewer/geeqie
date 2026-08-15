@@ -26,7 +26,6 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "compat.h"
 #include "view-file.h"
 
 class FileData;
@@ -54,8 +53,8 @@ struct ViewFileInfoIcon
 #define VFICON(_vf_) ((ViewFileInfoIcon *)((_vf_)->info))
 
 gboolean vficon_press_key_cb(ViewFile *vf, GtkWidget *widget, guint keyval, GdkModifierType state);
-gboolean vficon_press_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEvent *event);
-gboolean vficon_release_cb(ViewFile *vf, GtkWidget *widget, const GqMouseButtonEvent *event);
+void vficon_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event);
+void vficon_release_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event);
 
 FileData *vficon_find_data_by_coord(ViewFile *vf, gint x, gint y, GtkTreeIter *iter);
 

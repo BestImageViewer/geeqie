@@ -21,17 +21,13 @@
 
 #include "menu.h"
 
-#include "actions.h"
 #include "bar.h"
 #include "collect-io.h"
-#include "image.h"
-#include "intl.h"
+#include "compat.h"
 #include "main-defines.h"
 #include "ui-menu.h"
 #include "ui-misc.h"
 
-#include "accelerators.h"
-#include "layout.h"
 /*
  *-----------------------------------------------------------------------------
  * menu utils
