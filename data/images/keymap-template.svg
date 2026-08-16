@@ -124,7 +124,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan2491">key:&lt;Primary&gt;Q</tspan></text>
+           id="tspan2491">key:&lt;Control&gt;Q</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -164,7 +164,7 @@
            sodipodi:role="line"
            id="tspan2503"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Q</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Q</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -175,7 +175,7 @@
            sodipodi:role="line"
            id="tspan25"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Q</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Q</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -228,7 +228,7 @@
            id="tspan2416"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;W</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;W</tspan></text>
       <text
          id="text2418"
          y="90"
@@ -268,7 +268,7 @@
            y="135"
            x="5"
            id="tspan2428"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;W</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;W</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2430"
@@ -279,7 +279,7 @@
            y="150"
            x="5"
            id="tspan2432"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;W</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;W</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2434"
@@ -332,7 +332,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan2452">key:&lt;Primary&gt;F</tspan></text>
+           id="tspan2452">key:&lt;Control&gt;F</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -373,7 +373,7 @@
            sodipodi:role="line"
            id="tspan2464"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;F</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;F</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -384,7 +384,7 @@
            sodipodi:role="line"
            id="tspan2468"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;F</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;F</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -437,7 +437,7 @@
            id="tspan2488"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;D</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;D</tspan></text>
       <text
          id="text2490"
          y="90"
@@ -477,7 +477,7 @@
            y="135"
            x="5"
            id="tspan2500"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;D</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;D</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2502"
@@ -488,7 +488,7 @@
            y="150"
            x="5"
            id="tspan2504"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;D</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;D</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2506"
@@ -541,7 +541,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan2524">key:&lt;Primary&gt;S</tspan></text>
+           id="tspan2524">key:&lt;Control&gt;S</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -581,7 +581,7 @@
            sodipodi:role="line"
            id="tspan2536"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;S</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;S</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -592,7 +592,7 @@
            sodipodi:role="line"
            id="tspan2540"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;S</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;S</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -645,7 +645,7 @@
            id="tspan2560"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;A</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;A</tspan></text>
       <text
          id="text2562"
          y="90"
@@ -685,7 +685,7 @@
            y="135"
            x="5"
            id="tspan2572"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;A</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;A</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2574"
@@ -696,7 +696,7 @@
            y="150"
            x="5"
            id="tspan2576"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;A</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;A</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2578"
@@ -749,7 +749,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan2596">key:&lt;Primary&gt;U</tspan></text>
+           id="tspan2596">key:&lt;Control&gt;U</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -789,7 +789,7 @@
            sodipodi:role="line"
            id="tspan2608"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;U</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;U</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -800,7 +800,7 @@
            sodipodi:role="line"
            id="tspan2612"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;U</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;U</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -853,7 +853,7 @@
            id="tspan2632"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Y</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Y</tspan></text>
       <text
          id="text2634"
          y="90"
@@ -893,7 +893,7 @@
            y="135"
            x="5"
            id="tspan2644"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Y</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Y</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2646"
@@ -904,7 +904,7 @@
            y="150"
            x="5"
            id="tspan2648"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Y</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Y</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2650"
@@ -957,7 +957,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan2668">key:&lt;Primary&gt;T</tspan></text>
+           id="tspan2668">key:&lt;Control&gt;T</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -997,7 +997,7 @@
            sodipodi:role="line"
            id="tspan2680"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;T</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;T</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1008,7 +1008,7 @@
            sodipodi:role="line"
            id="tspan2684"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;T</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;T</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1061,7 +1061,7 @@
            id="tspan2704"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;R</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;R</tspan></text>
       <text
          id="text2706"
          y="90"
@@ -1101,7 +1101,7 @@
            y="135"
            x="5"
            id="tspan2716"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;R</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;R</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2718"
@@ -1112,7 +1112,7 @@
            y="150"
            x="5"
            id="tspan2720"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;R</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;R</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2722"
@@ -1165,7 +1165,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan2740">key:&lt;Primary&gt;E</tspan></text>
+           id="tspan2740">key:&lt;Control&gt;E</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -1205,7 +1205,7 @@
            sodipodi:role="line"
            id="tspan2752"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;E</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;E</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1216,7 +1216,7 @@
            sodipodi:role="line"
            id="tspan2756"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;E</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;E</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1269,7 +1269,7 @@
            id="tspan2776"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;J</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;J</tspan></text>
       <text
          id="text2778"
          y="90"
@@ -1309,7 +1309,7 @@
            y="135"
            x="5"
            id="tspan2788"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;J</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;J</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2790"
@@ -1320,7 +1320,7 @@
            y="150"
            x="5"
            id="tspan2792"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;J</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;J</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2794"
@@ -1373,7 +1373,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan2812">key:&lt;Primary&gt;H</tspan></text>
+           id="tspan2812">key:&lt;Control&gt;H</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -1413,7 +1413,7 @@
            sodipodi:role="line"
            id="tspan2824"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;H</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;H</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1424,7 +1424,7 @@
            sodipodi:role="line"
            id="tspan2828"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;H</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;H</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1477,7 +1477,7 @@
            id="tspan2848"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;G</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;G</tspan></text>
       <text
          id="text2850"
          y="90"
@@ -1517,7 +1517,7 @@
            y="135"
            x="5"
            id="tspan2860"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;G</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;G</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2862"
@@ -1528,7 +1528,7 @@
            y="150"
            x="5"
            id="tspan2864"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;G</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;G</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2866"
@@ -1581,7 +1581,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan2884">key:&lt;Primary&gt;V</tspan></text>
+           id="tspan2884">key:&lt;Control&gt;V</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -1621,7 +1621,7 @@
            sodipodi:role="line"
            id="tspan2896"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;V</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;V</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1632,7 +1632,7 @@
            sodipodi:role="line"
            id="tspan2900"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;V</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;V</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1685,7 +1685,7 @@
            id="tspan2920"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;C</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;C</tspan></text>
       <text
          id="text2922"
          y="90"
@@ -1725,7 +1725,7 @@
            y="135"
            x="5"
            id="tspan2932"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;C</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;C</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2934"
@@ -1736,7 +1736,7 @@
            y="150"
            x="5"
            id="tspan2936"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;C</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;C</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text2938"
@@ -1789,7 +1789,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan2956">key:&lt;Primary&gt;X</tspan></text>
+           id="tspan2956">key:&lt;Control&gt;X</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -1829,7 +1829,7 @@
            sodipodi:role="line"
            id="tspan2968"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;X</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;X</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1840,7 +1840,7 @@
            sodipodi:role="line"
            id="tspan2972"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;X</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;X</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -1893,7 +1893,7 @@
            id="tspan2992"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Z</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Z</tspan></text>
       <text
          id="text2994"
          y="90"
@@ -1933,7 +1933,7 @@
            y="135"
            x="5"
            id="tspan3004"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Z</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Z</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3006"
@@ -1944,7 +1944,7 @@
            y="150"
            x="5"
            id="tspan3008"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Z</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Z</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3010"
@@ -1997,7 +1997,7 @@
            id="tspan3028"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;3</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;3</tspan></text>
       <text
          id="text3030"
          y="90"
@@ -2037,7 +2037,7 @@
            y="135"
            x="5"
            id="tspan3040"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;sterling</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;sterling</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3042"
@@ -2048,7 +2048,7 @@
            y="150"
            x="5"
            id="tspan3044"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;3</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;3</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3046"
@@ -2101,7 +2101,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3064">key:&lt;Primary&gt;2</tspan></text>
+           id="tspan3064">key:&lt;Control&gt;2</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -2141,7 +2141,7 @@
            sodipodi:role="line"
            id="tspan3076"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;quotedbl</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;quotedbl</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -2152,7 +2152,7 @@
            sodipodi:role="line"
            id="tspan3080"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;2</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;2</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -2205,7 +2205,7 @@
            id="tspan3100"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;1</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;1</tspan></text>
       <text
          id="text3102"
          y="90"
@@ -2236,7 +2236,7 @@
            y="135.35715"
            x="5"
            id="tspan3112"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;exclam</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;exclam</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3114"
@@ -2247,7 +2247,7 @@
            y="150.35715"
            x="5"
            id="tspan3116"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;1</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;1</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3118"
@@ -2311,7 +2311,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3136">key:&lt;Primary&gt;9</tspan></text>
+           id="tspan3136">key:&lt;Control&gt;9</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -2351,7 +2351,7 @@
            sodipodi:role="line"
            id="tspan3148"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;parenleft</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;parenleft</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -2362,7 +2362,7 @@
            sodipodi:role="line"
            id="tspan3152"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;9</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;9</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -2415,7 +2415,7 @@
            id="tspan3172"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;8</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;8</tspan></text>
       <text
          id="text3174"
          y="90"
@@ -2455,7 +2455,7 @@
            y="135"
            x="5"
            id="tspan3184"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;asterisk</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;asterisk</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3186"
@@ -2466,7 +2466,7 @@
            y="150"
            x="5"
            id="tspan3188"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;8</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;8</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3190"
@@ -2519,7 +2519,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3208">key:&lt;Primary&gt;7</tspan></text>
+           id="tspan3208">key:&lt;Control&gt;7</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -2559,7 +2559,7 @@
            sodipodi:role="line"
            id="tspan3220"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;ampersand</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;ampersand</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -2570,7 +2570,7 @@
            sodipodi:role="line"
            id="tspan3224"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;7</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;7</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -2623,7 +2623,7 @@
            id="tspan3244"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;6</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;6</tspan></text>
       <text
          id="text3246"
          y="90"
@@ -2663,7 +2663,7 @@
            y="135"
            x="5"
            id="tspan3256"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;asciicircum</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;asciicircum</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3258"
@@ -2674,7 +2674,7 @@
            y="150"
            x="5"
            id="tspan3260"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;6</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;6</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3262"
@@ -2727,7 +2727,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3280">key:&lt;Primary&gt;5</tspan></text>
+           id="tspan3280">key:&lt;Control&gt;5</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -2767,7 +2767,7 @@
            sodipodi:role="line"
            id="tspan3292"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;percent</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;percent</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -2778,7 +2778,7 @@
            sodipodi:role="line"
            id="tspan3296"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;5</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;5</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -2831,7 +2831,7 @@
            id="tspan3316"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;4</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;4</tspan></text>
       <text
          id="text3318"
          y="90"
@@ -2871,7 +2871,7 @@
            y="135"
            x="5"
            id="tspan3328"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;dollar</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;dollar</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3330"
@@ -2882,7 +2882,7 @@
            y="150"
            x="5"
            id="tspan3332"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;4</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;4</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3334"
@@ -2935,7 +2935,7 @@
            id="tspan3352"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;L</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;L</tspan></text>
       <text
          id="text3354"
          y="90"
@@ -2975,7 +2975,7 @@
            y="135"
            x="5"
            id="tspan3364"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;L</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;L</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3366"
@@ -2986,7 +2986,7 @@
            y="150"
            x="5"
            id="tspan3368"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;L</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;L</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3370"
@@ -3039,7 +3039,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3388">key:&lt;Primary&gt;K</tspan></text>
+           id="tspan3388">key:&lt;Control&gt;K</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -3079,7 +3079,7 @@
            sodipodi:role="line"
            id="tspan3400"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;K</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;K</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -3090,7 +3090,7 @@
            sodipodi:role="line"
            id="tspan3404"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;K</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;K</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -3143,7 +3143,7 @@
            id="tspan3424"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;O</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;O</tspan></text>
       <text
          id="text3426"
          y="90"
@@ -3183,7 +3183,7 @@
            y="135"
            x="5"
            id="tspan3436"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;O</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;O</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3438"
@@ -3194,7 +3194,7 @@
            y="150"
            x="5"
            id="tspan3440"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;O</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;O</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3442"
@@ -3247,7 +3247,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3460">key:&lt;Primary&gt;I</tspan></text>
+           id="tspan3460">key:&lt;Control&gt;I</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -3287,7 +3287,7 @@
            sodipodi:role="line"
            id="tspan3472"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;I</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;I</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -3298,7 +3298,7 @@
            sodipodi:role="line"
            id="tspan3476"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;I</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;I</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -3351,7 +3351,7 @@
            id="tspan3496"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;period</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;period</tspan></text>
       <text
          id="text3498"
          y="90"
@@ -3391,7 +3391,7 @@
            y="135"
            x="5"
            id="tspan3508"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;greater</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;greater</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3510"
@@ -3402,7 +3402,7 @@
            y="150"
            x="5"
            id="tspan3512"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;period</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;period</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3514"
@@ -3455,7 +3455,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3532">key:&lt;Primary&gt;comma</tspan></text>
+           id="tspan3532">key:&lt;Control&gt;comma</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -3495,7 +3495,7 @@
            sodipodi:role="line"
            id="tspan3544"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;less</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;less</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -3506,7 +3506,7 @@
            sodipodi:role="line"
            id="tspan3548"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;comma</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;comma</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -3559,7 +3559,7 @@
            id="tspan3568"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;M</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;M</tspan></text>
       <text
          id="text3570"
          y="90"
@@ -3599,7 +3599,7 @@
            y="135"
            x="5"
            id="tspan3580"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;M</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;M</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3582"
@@ -3610,7 +3610,7 @@
            y="150"
            x="5"
            id="tspan3584"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;M</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;M</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3586"
@@ -3663,7 +3663,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3604">key:&lt;Primary&gt;N</tspan></text>
+           id="tspan3604">key:&lt;Control&gt;N</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -3703,7 +3703,7 @@
            sodipodi:role="line"
            id="tspan3616"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;N</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;N</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -3714,7 +3714,7 @@
            sodipodi:role="line"
            id="tspan3620"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;N</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;N</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -3767,7 +3767,7 @@
            id="tspan3640"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;B</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;B</tspan></text>
       <text
          id="text3642"
          y="90"
@@ -3807,7 +3807,7 @@
            y="135"
            x="5"
            id="tspan3652"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;B</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;B</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3654"
@@ -3818,7 +3818,7 @@
            y="150"
            x="5"
            id="tspan3656"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;B</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;B</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3658"
@@ -3871,7 +3871,7 @@
            id="tspan3676"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;backslash</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;backslash</tspan></text>
       <text
          id="text3678"
          y="90"
@@ -3911,7 +3911,7 @@
            y="135"
            x="5"
            id="tspan3688"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;bar</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;bar</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3690"
@@ -3922,7 +3922,7 @@
            y="150"
            x="5"
            id="tspan3692"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;backslash</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;backslash</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3694"
@@ -3975,7 +3975,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3712">key:&lt;Primary&gt;Equal</tspan></text>
+           id="tspan3712">key:&lt;Control&gt;Equal</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12.00000048px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;line-height:125%;"
@@ -4014,7 +4014,7 @@
            sodipodi:role="line"
            id="tspan3724"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Equal</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Equal</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4025,7 +4025,7 @@
            sodipodi:role="line"
            id="tspan3728"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Equal</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Equal</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4078,7 +4078,7 @@
            id="tspan3748"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Minus</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Minus</tspan></text>
       <text
          id="text3750"
          y="90"
@@ -4118,7 +4118,7 @@
            y="135"
            x="5"
            id="tspan3760"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Minus</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Minus</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3762"
@@ -4129,7 +4129,7 @@
            y="150"
            x="5"
            id="tspan3764"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Minus</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Minus</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3766"
@@ -4182,7 +4182,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3784">key:&lt;Primary&gt;0</tspan></text>
+           id="tspan3784">key:&lt;Control&gt;0</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -4222,7 +4222,7 @@
            sodipodi:role="line"
            id="tspan3796"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;parenright</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;parenright</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4233,7 +4233,7 @@
            sodipodi:role="line"
            id="tspan3800"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;0</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;0</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4286,7 +4286,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3820">key:&lt;Primary&gt;BracketRight</tspan></text>
+           id="tspan3820">key:&lt;Control&gt;BracketRight</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -4326,7 +4326,7 @@
            sodipodi:role="line"
            id="tspan3832"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;BracketRight</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;BracketRight</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4337,7 +4337,7 @@
            sodipodi:role="line"
            id="tspan3836"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;BracketRight</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;BracketRight</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4390,7 +4390,7 @@
            id="tspan3856"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;BracketLeft</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;BracketLeft</tspan></text>
       <text
          id="text3858"
          y="90"
@@ -4430,7 +4430,7 @@
            y="135"
            x="5"
            id="tspan3868"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;BracketLeft</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;BracketLeft</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3870"
@@ -4441,7 +4441,7 @@
            y="150"
            x="5"
            id="tspan3872"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;BracketLeft</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;BracketLeft</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3874"
@@ -4494,7 +4494,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3892">key:&lt;Primary&gt;P</tspan></text>
+           id="tspan3892">key:&lt;Control&gt;P</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -4534,7 +4534,7 @@
            sodipodi:role="line"
            id="tspan3904"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;P</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;P</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4545,7 +4545,7 @@
            sodipodi:role="line"
            id="tspan3908"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;P</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;P</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4598,7 +4598,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3928">key:&lt;Primary&gt;Backspace</tspan></text>
+           id="tspan3928">key:&lt;Control&gt;Backspace</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -4638,7 +4638,7 @@
            sodipodi:role="line"
            id="tspan3940"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Backspace</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Backspace</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4649,7 +4649,7 @@
            sodipodi:role="line"
            id="tspan3944"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Backspace</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Backspace</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4702,7 +4702,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4000">key:&lt;Primary&gt;apostrophe</tspan></text>
+           id="tspan4000">key:&lt;Control&gt;apostrophe</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -4742,7 +4742,7 @@
            sodipodi:role="line"
            id="tspan4012"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;at</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;at</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4753,7 +4753,7 @@
            sodipodi:role="line"
            id="tspan4016"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;apostrophe</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;apostrophe</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -4806,7 +4806,7 @@
            id="tspan4036"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;semicolon</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;semicolon</tspan></text>
       <text
          id="text4038"
          y="90"
@@ -4846,7 +4846,7 @@
            y="135"
            x="5"
            id="tspan4048"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;colon</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;colon</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4050"
@@ -4857,7 +4857,7 @@
            y="150"
            x="5"
            id="tspan4052"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;semicolon</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;semicolon</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4054"
@@ -4910,7 +4910,7 @@
            id="tspan4072"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;slash</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;slash</tspan></text>
       <text
          id="text4074"
          y="90"
@@ -4950,7 +4950,7 @@
            y="135"
            x="5"
            id="tspan4084"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;question</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;question</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4086"
@@ -4961,7 +4961,7 @@
            y="150"
            x="5"
            id="tspan4088"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;slash</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;slash</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4090"
@@ -5014,7 +5014,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4108">key:&lt;Primary&gt;grave</tspan></text>
+           id="tspan4108">key:&lt;Control&gt;grave</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -5045,7 +5045,7 @@
            sodipodi:role="line"
            id="tspan4120"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;notsign</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;notsign</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5056,7 +5056,7 @@
            sodipodi:role="line"
            id="tspan4124"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;grave</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;grave</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5119,7 +5119,7 @@
            id="tspan4144"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;ESCAPE</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;ESCAPE</tspan></text>
       <text
          id="text4146"
          y="90"
@@ -5150,7 +5150,7 @@
            y="135"
            x="5"
            id="tspan4156"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;ESCAPE</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;ESCAPE</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4158"
@@ -5161,7 +5161,7 @@
            y="150"
            x="5"
            id="tspan4160"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;ESCAPE</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;ESCAPE</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4162"
@@ -5214,7 +5214,7 @@
            id="tspan4180"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;F4</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;F4</tspan></text>
       <text
          id="text4182"
          y="90"
@@ -5254,7 +5254,7 @@
            y="135"
            x="5"
            id="tspan4192"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;F4</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;F4</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4194"
@@ -5265,7 +5265,7 @@
            y="150"
            x="5"
            id="tspan4196"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;F4</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;F4</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4198"
@@ -5318,7 +5318,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4216">key:&lt;Primary&gt;F3</tspan></text>
+           id="tspan4216">key:&lt;Control&gt;F3</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -5358,7 +5358,7 @@
            sodipodi:role="line"
            id="tspan4228"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;F3</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;F3</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5369,7 +5369,7 @@
            sodipodi:role="line"
            id="tspan4232"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;F3</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;F3</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5422,7 +5422,7 @@
            id="tspan4252"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;F2</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;F2</tspan></text>
       <text
          id="text4254"
          y="90"
@@ -5462,7 +5462,7 @@
            y="135"
            x="5"
            id="tspan4264"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;F2</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;F2</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4266"
@@ -5473,7 +5473,7 @@
            y="150"
            x="5"
            id="tspan4268"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;F2</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;F2</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4270"
@@ -5526,7 +5526,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4288">key:&lt;Primary&gt;F1</tspan></text>
+           id="tspan4288">key:&lt;Control&gt;F1</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -5566,7 +5566,7 @@
            sodipodi:role="line"
            id="tspan4300"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;F1</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;F1</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5577,7 +5577,7 @@
            sodipodi:role="line"
            id="tspan4304"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;F1</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;F1</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5630,7 +5630,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4324">key:&lt;Primary&gt;F8</tspan></text>
+           id="tspan4324">key:&lt;Control&gt;F8</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -5670,7 +5670,7 @@
            sodipodi:role="line"
            id="tspan4336"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;F8</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;F8</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5681,7 +5681,7 @@
            sodipodi:role="line"
            id="tspan4340"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;F8</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;F8</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5734,7 +5734,7 @@
            id="tspan4360"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;F7</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;F7</tspan></text>
       <text
          id="text4362"
          y="90"
@@ -5774,7 +5774,7 @@
            y="135"
            x="5"
            id="tspan4372"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;F7</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;F7</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4374"
@@ -5785,7 +5785,7 @@
            y="150"
            x="5"
            id="tspan4376"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;F7</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;F7</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4378"
@@ -5838,7 +5838,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4396">key:&lt;Primary&gt;F6</tspan></text>
+           id="tspan4396">key:&lt;Control&gt;F6</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -5878,7 +5878,7 @@
            sodipodi:role="line"
            id="tspan4408"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;F6</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;F6</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5889,7 +5889,7 @@
            sodipodi:role="line"
            id="tspan4412"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;F6</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;F6</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -5942,7 +5942,7 @@
            id="tspan4432"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;F5</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;F5</tspan></text>
       <text
          id="text4434"
          y="90"
@@ -5982,7 +5982,7 @@
            y="135"
            x="5"
            id="tspan4444"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;F5</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;F5</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4446"
@@ -5993,7 +5993,7 @@
            y="150"
            x="5"
            id="tspan4448"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;F5</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;F5</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4450"
@@ -6046,7 +6046,7 @@
            id="tspan4468"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;F9</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;F9</tspan></text>
       <text
          id="text4470"
          y="90"
@@ -6086,7 +6086,7 @@
            y="135"
            x="5"
            id="tspan4480"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;F9</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;F9</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4482"
@@ -6097,7 +6097,7 @@
            y="150"
            x="5"
            id="tspan4484"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;F9</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;F9</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4486"
@@ -6150,7 +6150,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4504">key:&lt;Primary&gt;F10</tspan></text>
+           id="tspan4504">key:&lt;Control&gt;F10</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -6190,7 +6190,7 @@
            sodipodi:role="line"
            id="tspan4516"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;F10</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;F10</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -6201,7 +6201,7 @@
            sodipodi:role="line"
            id="tspan4520"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;F10</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;F10</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -6254,7 +6254,7 @@
            id="tspan4540"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;F11</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;F11</tspan></text>
       <text
          id="text4542"
          y="90"
@@ -6294,7 +6294,7 @@
            y="135"
            x="5"
            id="tspan4552"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;F11</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;F11</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4554"
@@ -6305,7 +6305,7 @@
            y="150"
            x="5"
            id="tspan4556"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;F11</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;F11</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4558"
@@ -6358,7 +6358,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4576">key:&lt;Primary&gt;F12</tspan></text>
+           id="tspan4576">key:&lt;Control&gt;F12</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -6398,7 +6398,7 @@
            sodipodi:role="line"
            id="tspan4588"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;F12</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;F12</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -6409,7 +6409,7 @@
            sodipodi:role="line"
            id="tspan4592"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;F12</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;F12</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -6462,7 +6462,7 @@
            id="tspan4612"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;TAB</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;TAB</tspan></text>
       <text
          id="text4614"
          y="90"
@@ -6493,7 +6493,7 @@
            y="135"
            x="5"
            id="tspan4624"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;TAB</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;TAB</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4626"
@@ -6504,7 +6504,7 @@
            y="150"
            x="5"
            id="tspan4628"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;TAB</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;TAB</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4630"
@@ -6557,7 +6557,7 @@
            id="tspan4684"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Caps Lock</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Caps Lock</tspan></text>
       <text
          id="text4686"
          y="90"
@@ -6588,7 +6588,7 @@
            y="135"
            x="5"
            id="tspan4696"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Caps Lock</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Caps Lock</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4698"
@@ -6599,7 +6599,7 @@
            y="150"
            x="5"
            id="tspan4700"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Caps Lock</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Caps Lock</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4702"
@@ -6656,7 +6656,7 @@
            sodipodi:role="line"
            x="3.1981044"
            y="98.621925"
-           id="tspan4720">key:&lt;Primary&gt;Shift</tspan></text>
+           id="tspan4720">key:&lt;Control&gt;Shift</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:15.77000427px;font-family:'Bitstream Vera Sans';fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -6690,7 +6690,7 @@
            sodipodi:role="line"
            id="tspan4732"
            x="3.4627037"
-           y="151.13431">key:&lt;Primary&gt;&lt;Shift&gt;Shift</tspan></text>
+           y="151.13431">key:&lt;Shift&gt;&lt;Control&gt;Shift</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.32491875px;line-height:100%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -6702,7 +6702,7 @@
            sodipodi:role="line"
            id="tspan4736"
            x="3.3767674"
-           y="172.40533">key:&lt;Primary&gt;&lt;Alt&gt;Shift</tspan></text>
+           y="172.40533">key:&lt;Control&gt;&lt;Alt&gt;Shift</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.51035213px;line-height:100%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -6757,7 +6757,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4756">key:&lt;Primary&gt;Alt</tspan></text>
+           id="tspan4756">key:&lt;Control&gt;Alt</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -6788,7 +6788,7 @@
            sodipodi:role="line"
            id="tspan4768"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Alt</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Alt</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -6799,7 +6799,7 @@
            sodipodi:role="line"
            id="tspan4772"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Alt</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Alt</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -6852,7 +6852,7 @@
            id="tspan4792"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Win</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Win</tspan></text>
       <text
          id="text4794"
          y="90"
@@ -6883,7 +6883,7 @@
            y="135"
            x="5"
            id="tspan4804"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Win</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Win</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4806"
@@ -6894,7 +6894,7 @@
            y="150"
            x="5"
            id="tspan4808"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Win</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Win</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4810"
@@ -6948,7 +6948,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4828">key:&lt;Primary&gt;Ctrl</tspan></text>
+           id="tspan4828">key:&lt;Control&gt;Ctrl</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -6979,7 +6979,7 @@
            sodipodi:role="line"
            id="tspan4840"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Ctrl</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Ctrl</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -6990,7 +6990,7 @@
            sodipodi:role="line"
            id="tspan4844"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Ctrl</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Ctrl</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -7045,7 +7045,7 @@
            id="tspan4864"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Shift</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Shift</tspan></text>
       <text
          id="text4866"
          y="90"
@@ -7085,7 +7085,7 @@
            y="135"
            x="5"
            id="tspan4876"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Shift</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Shift</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4878"
@@ -7096,7 +7096,7 @@
            y="150"
            x="5"
            id="tspan4880"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Shift</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Shift</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4882"
@@ -7150,7 +7150,7 @@
            id="tspan4902"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Ctrl</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Ctrl</tspan></text>
       <text
          id="text4904"
          y="90"
@@ -7181,7 +7181,7 @@
            y="135"
            x="5"
            id="tspan4914"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Ctrl</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Ctrl</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4916"
@@ -7192,7 +7192,7 @@
            y="150"
            x="5"
            id="tspan4918"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Ctrl</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Ctrl</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4920"
@@ -7246,7 +7246,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4938">key:&lt;Primary&gt;Alt</tspan></text>
+           id="tspan4938">key:&lt;Control&gt;Alt</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -7277,7 +7277,7 @@
            sodipodi:role="line"
            id="tspan4950"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Alt</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Alt</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -7288,7 +7288,7 @@
            sodipodi:role="line"
            id="tspan4954"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Alt</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Alt</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -7341,7 +7341,7 @@
            id="tspan4974"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Win</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Win</tspan></text>
       <text
          id="text4976"
          y="90"
@@ -7372,7 +7372,7 @@
            y="135"
            x="5"
            id="tspan4986"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Win</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Win</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4988"
@@ -7383,7 +7383,7 @@
            y="150"
            x="5"
            id="tspan4990"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Win</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Win</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4992"
@@ -7436,7 +7436,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan5010">key:&lt;Primary&gt;Menu</tspan></text>
+           id="tspan5010">key:&lt;Control&gt;Menu</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -7467,7 +7467,7 @@
            sodipodi:role="line"
            id="tspan5022"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Menu</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Menu</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -7478,7 +7478,7 @@
            sodipodi:role="line"
            id="tspan5026"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Menu</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Menu</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -7531,7 +7531,7 @@
            id="tspan5046"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Space</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Space</tspan></text>
       <text
          id="text5048"
          y="90"
@@ -7571,7 +7571,7 @@
            y="135"
            x="5"
            id="tspan5058"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Space</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Space</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text5060"
@@ -7582,7 +7582,7 @@
            y="150"
            x="5"
            id="tspan5062"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Space</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Space</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text5064"
@@ -7636,7 +7636,7 @@
            id="tspan5082"
            y="-78.592957"
            x="12.817163"
-           sodipodi:role="line">key:&lt;Primary&gt;Enter</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Enter</tspan></text>
       <text
          id="text5084"
          y="-55.57481"
@@ -7670,7 +7670,7 @@
            y="-9.5385094"
            x="12.817163"
            id="tspan5094"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Enter</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Enter</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text5096"
@@ -7682,7 +7682,7 @@
            y="13.479638"
            x="12.817163"
            id="tspan5098"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Enter</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Enter</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text5100"
@@ -7784,7 +7784,7 @@
          id="text3724"
          sodipodi:linespacing="125%"><tspan
            sodipodi:role="line"
-           id="tspan6377">key:&lt;Primary&gt;Print</tspan></text>
+           id="tspan6377">key:&lt;Control&gt;Print</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12.00000048px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;line-height:125%;"
@@ -7820,7 +7820,7 @@
          id="text3736"
          sodipodi:linespacing="100%"><tspan
            sodipodi:role="line"
-           id="tspan6385">key:&lt;Primary&gt;&lt;Shift&gt;Print</tspan></text>
+           id="tspan6385">key:&lt;Shift&gt;&lt;Control&gt;Print</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12.00000048px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';"
@@ -7829,7 +7829,7 @@
          id="text3740"
          sodipodi:linespacing="100%"><tspan
            sodipodi:role="line"
-           id="tspan6387">key:&lt;Primary&gt;&lt;Alt&gt;Print</tspan></text>
+           id="tspan6387">key:&lt;Control&gt;&lt;Alt&gt;Print</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12.00000048px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';"
@@ -7880,7 +7880,7 @@
            id="tspan3762"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Insert</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Insert</tspan></text>
       <text
          id="text3764"
          y="90"
@@ -7920,7 +7920,7 @@
            y="135"
            x="5"
            id="tspan3774"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Insert</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Insert</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3776"
@@ -7931,7 +7931,7 @@
            y="150"
            x="5"
            id="tspan3778"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Insert</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Insert</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3780"
@@ -7984,7 +7984,7 @@
            id="tspan3798"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Page_Up</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Page_Up</tspan></text>
       <text
          id="text3800"
          y="90"
@@ -8024,7 +8024,7 @@
            y="135"
            x="5"
            id="tspan3810"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Page_Up</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Page_Up</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3812"
@@ -8035,7 +8035,7 @@
            y="150"
            x="5"
            id="tspan3814"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Page_Up</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Page_Up</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3816"
@@ -8088,7 +8088,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3834">key:&lt;Primary&gt;Home</tspan></text>
+           id="tspan3834">key:&lt;Control&gt;Home</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -8128,7 +8128,7 @@
            sodipodi:role="line"
            id="tspan3846"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Home</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Home</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -8139,7 +8139,7 @@
            sodipodi:role="line"
            id="tspan3850"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Home</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Home</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -8192,7 +8192,7 @@
            id="tspan3870"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Pause</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Pause</tspan></text>
       <text
          id="text3872"
          y="90"
@@ -8232,7 +8232,7 @@
            y="135"
            x="5"
            id="tspan3882"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Pause</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Pause</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3884"
@@ -8243,7 +8243,7 @@
            y="150"
            x="5"
            id="tspan3886"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Pause</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Pause</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3888"
@@ -8295,7 +8295,7 @@
          id="text3904"
          sodipodi:linespacing="125%"><tspan
            sodipodi:role="line"
-           id="tspan6391">key:&lt;Primary&gt;Scroll_Lock</tspan></text>
+           id="tspan6391">key:&lt;Control&gt;Scroll_Lock</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12.00000048px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;line-height:125%;"
@@ -8331,7 +8331,7 @@
          id="text3916"
          sodipodi:linespacing="100%"><tspan
            sodipodi:role="line"
-           id="tspan6400">key:&lt;Primary&gt;&lt;Shift&gt;Scroll_Lock</tspan></text>
+           id="tspan6400">key:&lt;Shift&gt;&lt;Control&gt;Scroll_Lock</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12.00000048px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';"
@@ -8340,7 +8340,7 @@
          id="text3920"
          sodipodi:linespacing="100%"><tspan
            sodipodi:role="line"
-           id="tspan6402">key:&lt;Primary&gt;&lt;Alt&gt;Scroll_Lock</tspan></text>
+           id="tspan6402">key:&lt;Control&gt;&lt;Alt&gt;Scroll_Lock</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12.00000048px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';"
@@ -8391,7 +8391,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan3942">key:&lt;Primary&gt;Page_Down</tspan></text>
+           id="tspan3942">key:&lt;Control&gt;Page_Down</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -8431,7 +8431,7 @@
            sodipodi:role="line"
            id="tspan3954"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Page_Down</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Page_Down</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -8442,7 +8442,7 @@
            sodipodi:role="line"
            id="tspan3958"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Page_Down</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Page_Down</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -8495,7 +8495,7 @@
            id="tspan3978"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;End</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;End</tspan></text>
       <text
          id="text3980"
          y="90"
@@ -8535,7 +8535,7 @@
            y="135"
            x="5"
            id="tspan3990"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;End</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;End</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3992"
@@ -8546,7 +8546,7 @@
            y="150"
            x="5"
            id="tspan3994"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;End</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;End</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3996"
@@ -8599,7 +8599,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4014">key:&lt;Primary&gt;Delete</tspan></text>
+           id="tspan4014">key:&lt;Control&gt;Delete</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -8639,7 +8639,7 @@
            sodipodi:role="line"
            id="tspan4026"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Delete</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Delete</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -8650,7 +8650,7 @@
            sodipodi:role="line"
            id="tspan4030"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Delete</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Delete</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -8703,7 +8703,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4050">key:&lt;Primary&gt;NumLock</tspan></text>
+           id="tspan4050">key:&lt;Control&gt;NumLock</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -8743,7 +8743,7 @@
            sodipodi:role="line"
            id="tspan4062"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;NumLock</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;NumLock</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -8754,7 +8754,7 @@
            sodipodi:role="line"
            id="tspan4066"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;NumLock</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;NumLock</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -8807,7 +8807,7 @@
            id="tspan4086"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;KP_Subtract</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;KP_Subtract</tspan></text>
       <text
          id="text4088"
          y="90"
@@ -8847,7 +8847,7 @@
            y="135"
            x="5"
            id="tspan4098"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;KP_Subtract</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;KP_Subtract</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4100"
@@ -8858,7 +8858,7 @@
            y="150"
            x="5"
            id="tspan4102"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;KP_Subtract</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;KP_Subtract</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4104"
@@ -8911,7 +8911,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4122">key:&lt;Primary&gt;KP_Multiply</tspan></text>
+           id="tspan4122">key:&lt;Control&gt;KP_Multiply</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -8951,7 +8951,7 @@
            sodipodi:role="line"
            id="tspan4134"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;KP_Multiply</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;KP_Multiply</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -8962,7 +8962,7 @@
            sodipodi:role="line"
            id="tspan4138"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;KP_Multiply</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;KP_Multiply</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -9015,7 +9015,7 @@
            id="tspan4158"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;KP_Divide</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;KP_Divide</tspan></text>
       <text
          id="text4160"
          y="90"
@@ -9055,7 +9055,7 @@
            y="135"
            x="5"
            id="tspan4170"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;KP_Divide</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;KP_Divide</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4172"
@@ -9066,7 +9066,7 @@
            y="150"
            x="5"
            id="tspan4174"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;KP_Divide</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;KP_Divide</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4176"
@@ -9119,7 +9119,7 @@
            id="tspan4194"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;KP_9</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;KP_9</tspan></text>
       <text
          id="text4196"
          y="90"
@@ -9159,7 +9159,7 @@
            y="135"
            x="5"
            id="tspan4206"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;KP_9</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;KP_9</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4208"
@@ -9170,7 +9170,7 @@
            y="150"
            x="5"
            id="tspan4210"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;KP_9</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;KP_9</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4212"
@@ -9223,7 +9223,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4230">key:&lt;Primary&gt;KP_8</tspan></text>
+           id="tspan4230">key:&lt;Control&gt;KP_8</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -9263,7 +9263,7 @@
            sodipodi:role="line"
            id="tspan4242"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;KP_8</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;KP_8</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -9274,7 +9274,7 @@
            sodipodi:role="line"
            id="tspan4246"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;KP_8</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;KP_8</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -9327,7 +9327,7 @@
            id="tspan4266"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;KP_7</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;KP_7</tspan></text>
       <text
          id="text4268"
          y="90"
@@ -9367,7 +9367,7 @@
            y="135"
            x="5"
            id="tspan4278"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;KP_7</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;KP_7</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4280"
@@ -9378,7 +9378,7 @@
            y="150"
            x="5"
            id="tspan4282"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;KP_7</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;KP_7</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4284"
@@ -9431,7 +9431,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4302">key:&lt;Primary&gt;KP_3</tspan></text>
+           id="tspan4302">key:&lt;Control&gt;KP_3</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -9471,7 +9471,7 @@
            sodipodi:role="line"
            id="tspan4314"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;KP_3</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;KP_3</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -9482,7 +9482,7 @@
            sodipodi:role="line"
            id="tspan4318"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;KP_3</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;KP_3</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -9535,7 +9535,7 @@
            id="tspan4338"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;KP_2</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;KP_2</tspan></text>
       <text
          id="text4340"
          y="90"
@@ -9575,7 +9575,7 @@
            y="135"
            x="5"
            id="tspan4350"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;KP_2</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;KP_2</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4352"
@@ -9586,7 +9586,7 @@
            y="150"
            x="5"
            id="tspan4354"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;KP_2</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;KP_2</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4356"
@@ -9639,7 +9639,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4374">key:&lt;Primary&gt;KP_6</tspan></text>
+           id="tspan4374">key:&lt;Control&gt;KP_6</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -9679,7 +9679,7 @@
            sodipodi:role="line"
            id="tspan4386"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;KP_6</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;KP_6</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -9690,7 +9690,7 @@
            sodipodi:role="line"
            id="tspan4390"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;KP_6</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;KP_6</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -9743,7 +9743,7 @@
            id="tspan4410"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;KP_5</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;KP_5</tspan></text>
       <text
          id="text4412"
          y="90"
@@ -9783,7 +9783,7 @@
            y="135"
            x="5"
            id="tspan4422"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;KP_5</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;KP_5</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4424"
@@ -9794,7 +9794,7 @@
            y="150"
            x="5"
            id="tspan4426"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;KP_5</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;KP_5</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4428"
@@ -9847,7 +9847,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4446">key:&lt;Primary&gt;KP_1</tspan></text>
+           id="tspan4446">key:&lt;Control&gt;KP_1</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -9887,7 +9887,7 @@
            sodipodi:role="line"
            id="tspan4458"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;KP_1</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;KP_1</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -9898,7 +9898,7 @@
            sodipodi:role="line"
            id="tspan4462"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;KP_1</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;KP_1</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -9951,7 +9951,7 @@
            id="tspan4482"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;KP_4</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;KP_4</tspan></text>
       <text
          id="text4484"
          y="90"
@@ -9991,7 +9991,7 @@
            y="135"
            x="5"
            id="tspan4494"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;KP_4</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;KP_4</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4496"
@@ -10002,7 +10002,7 @@
            y="150"
            x="5"
            id="tspan4498"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;KP_4</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;KP_4</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4500"
@@ -10055,7 +10055,7 @@
            id="tspan4518"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;KP_0</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;KP_0</tspan></text>
       <text
          id="text4520"
          y="90"
@@ -10095,7 +10095,7 @@
            y="135"
            x="5"
            id="tspan4530"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;KP_0</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;KP_0</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4532"
@@ -10106,7 +10106,7 @@
            y="150"
            x="5"
            id="tspan4534"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;KP_0</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;KP_0</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4536"
@@ -10159,7 +10159,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4554">key:&lt;Primary&gt;KP_Delete</tspan></text>
+           id="tspan4554">key:&lt;Control&gt;KP_Delete</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -10199,7 +10199,7 @@
            sodipodi:role="line"
            id="tspan4566"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;KP_Delete</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;KP_Delete</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -10210,7 +10210,7 @@
            sodipodi:role="line"
            id="tspan4570"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;KP_Delete</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;KP_Delete</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -10263,7 +10263,7 @@
            id="tspan4590"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;KP_Enter</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;KP_Enter</tspan></text>
       <text
          id="text4592"
          y="90"
@@ -10303,7 +10303,7 @@
            y="135"
            x="5"
            id="tspan4602"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;KP_Enter</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;KP_Enter</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4604"
@@ -10314,7 +10314,7 @@
            y="150"
            x="5"
            id="tspan4606"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;KP_Enter</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;KP_Enter</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4608"
@@ -10367,7 +10367,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4626">key:&lt;Primary&gt;KP_Add</tspan></text>
+           id="tspan4626">key:&lt;Control&gt;KP_Add</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -10407,7 +10407,7 @@
            sodipodi:role="line"
            id="tspan4638"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;KP_Add</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;KP_Add</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -10418,7 +10418,7 @@
            sodipodi:role="line"
            id="tspan4642"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;KP_Add</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;KP_Add</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -10471,7 +10471,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4662">key:&lt;Primary&gt;Right</tspan></text>
+           id="tspan4662">key:&lt;Control&gt;Right</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -10511,7 +10511,7 @@
            sodipodi:role="line"
            id="tspan4674"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Right</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Right</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -10522,7 +10522,7 @@
            sodipodi:role="line"
            id="tspan4678"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Right</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Right</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -10575,7 +10575,7 @@
            id="tspan4698"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Up</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Up</tspan></text>
       <text
          id="text4700"
          y="90"
@@ -10615,7 +10615,7 @@
            y="135"
            x="5"
            id="tspan4710"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Up</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Up</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4712"
@@ -10626,7 +10626,7 @@
            y="150"
            x="5"
            id="tspan4714"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Up</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Up</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4716"
@@ -10679,7 +10679,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4734">key:&lt;Primary&gt;Left</tspan></text>
+           id="tspan4734">key:&lt;Control&gt;Left</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -10719,7 +10719,7 @@
            sodipodi:role="line"
            id="tspan4746"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;Left</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;Left</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -10730,7 +10730,7 @@
            sodipodi:role="line"
            id="tspan4750"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;Left</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;Left</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -10783,7 +10783,7 @@
            id="tspan4770"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;Down</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;Down</tspan></text>
       <text
          id="text4772"
          y="90"
@@ -10823,7 +10823,7 @@
            y="135"
            x="5"
            id="tspan4782"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;Down</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;Down</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4784"
@@ -10834,7 +10834,7 @@
            y="150"
            x="5"
            id="tspan4786"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;Down</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;Down</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4788"
@@ -10887,7 +10887,7 @@
            id="tspan4806"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;M1</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;M1</tspan></text>
       <text
          id="text4808"
          y="90"
@@ -10927,7 +10927,7 @@
            y="135"
            x="5"
            id="tspan4818"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;M1</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;M1</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4820"
@@ -10938,7 +10938,7 @@
            y="150"
            x="5"
            id="tspan4822"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;M1</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;M1</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4824"
@@ -10991,7 +10991,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4842">key:&lt;Primary&gt;M3</tspan></text>
+           id="tspan4842">key:&lt;Control&gt;M3</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -11032,7 +11032,7 @@
            sodipodi:role="line"
            id="tspan4854"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;M3</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;M3</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -11043,7 +11043,7 @@
            sodipodi:role="line"
            id="tspan4858"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;M3</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;M3</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -11096,7 +11096,7 @@
            id="tspan4878"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;M2</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;M2</tspan></text>
       <text
          id="text4880"
          y="90"
@@ -11136,7 +11136,7 @@
            y="135"
            x="5"
            id="tspan4890"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;M2</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;M2</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4893"
@@ -11147,7 +11147,7 @@
            y="150"
            x="5"
            id="tspan4895"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;M2</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;M2</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4897"
@@ -11200,7 +11200,7 @@
            sodipodi:role="line"
            x="5"
            y="75"
-           id="tspan4915">key:&lt;Primary&gt;MW5</tspan></text>
+           id="tspan4915">key:&lt;Control&gt;MW5</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-weight:normal;fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -11240,7 +11240,7 @@
            sodipodi:role="line"
            id="tspan4927"
            x="5"
-           y="135">key:&lt;Primary&gt;&lt;Shift&gt;MW5</tspan></text>
+           y="135">key:&lt;Shift&gt;&lt;Control&gt;MW5</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -11251,7 +11251,7 @@
            sodipodi:role="line"
            id="tspan4931"
            x="5"
-           y="150">key:&lt;Primary&gt;&lt;Alt&gt;MW5</tspan></text>
+           y="150">key:&lt;Control&gt;&lt;Alt&gt;MW5</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans"
@@ -11304,7 +11304,7 @@
            id="tspan4951"
            y="75"
            x="5"
-           sodipodi:role="line">key:&lt;Primary&gt;MW4</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;MW4</tspan></text>
       <text
          id="text4953"
          y="90"
@@ -11344,7 +11344,7 @@
            y="135"
            x="5"
            id="tspan4963"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Shift&gt;MW4</tspan></text>
+           sodipodi:role="line">key:&lt;Shift&gt;&lt;Control&gt;MW4</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4965"
@@ -11355,7 +11355,7 @@
            y="150"
            x="5"
            id="tspan4967"
-           sodipodi:role="line">key:&lt;Primary&gt;&lt;Alt&gt;MW4</tspan></text>
+           sodipodi:role="line">key:&lt;Control&gt;&lt;Alt&gt;MW4</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text4969"
@@ -11446,7 +11446,7 @@
          id="text2966-0"
          sodipodi:linespacing="100%"><tspan
            sodipodi:role="line"
-           id="tspan9414">&lt;Control&gt;&lt;Shift&gt;key</tspan></text>
+           id="tspan9414">&lt;Shift&gt;&lt;Control&gt;key</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.00000048px;line-height:100%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';text-align:start;writing-mode:lr;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
@@ -11502,7 +11502,7 @@
          xml:space="preserve"
          sodipodi:linespacing="125%"><tspan
            sodipodi:role="line"
-           id="tspan11461">key:&lt;Primary&gt;backslash</tspan></text>
+           id="tspan11461">key:&lt;Control&gt;backslash</tspan></text>
       <text
          id="text2994-4"
          y="90"
@@ -11538,7 +11538,7 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.00000048px;line-height:100%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';text-align:start;writing-mode:lr;text-anchor:start;fill:#808000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
          xml:space="preserve"><tspan
            sodipodi:role="line"
-           id="tspan11467">key:&lt;Primary&gt;&lt;Shift&gt;bar</tspan></text>
+           id="tspan11467">key:&lt;Shift&gt;&lt;Control&gt;bar</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3006-6"
@@ -11547,7 +11547,7 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.00000048px;line-height:100%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';text-align:start;writing-mode:lr;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
          xml:space="preserve"><tspan
            sodipodi:role="line"
-           id="tspan11469">key:&lt;Primary&gt;&lt;Alt&gt;backslash</tspan></text>
+           id="tspan11469">key:&lt;Control&gt;&lt;Alt&gt;backslash</tspan></text>
       <text
          sodipodi:linespacing="100%"
          id="text3010-7"
@@ -11594,7 +11594,7 @@
          id="text3710-6"
          sodipodi:linespacing="125%"><tspan
            sodipodi:role="line"
-           id="tspan11567">key:&lt;Primary&gt;numbersign</tspan></text>
+           id="tspan11567">key:&lt;Control&gt;numbersign</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:12.00000048px;font-family:'Bitstream Vera Sans';fill:#008000;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;-inkscape-font-specification:'Bitstream Vera Sans, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;line-height:125%;"
@@ -11630,7 +11630,7 @@
          id="text3722-0"
          sodipodi:linespacing="100%"><tspan
            sodipodi:role="line"
-           id="tspan11573">key:&lt;Primary&gt;&lt;Shift&gt;asciitilde</tspan></text>
+           id="tspan11573">key:&lt;Shift&gt;&lt;Control&gt;asciitilde</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.00000048px;line-height:100%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';text-align:start;writing-mode:lr;text-anchor:start;fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
@@ -11639,7 +11639,7 @@
          id="text3726-1"
          sodipodi:linespacing="100%"><tspan
            sodipodi:role="line"
-           id="tspan11575">key:&lt;Primary&gt;&lt;Alt&gt;numbersign</tspan></text>
+           id="tspan11575">key:&lt;Control&gt;&lt;Alt&gt;numbersign</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.00000048px;line-height:100%;font-family:'Bitstream Vera Sans';-inkscape-font-specification:'Bitstream Vera Sans, Normal';text-align:start;writing-mode:lr;text-anchor:start;fill:#008080;fill-opacity:1;stroke:none;stroke-width:1pt;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"

@@ -12,7 +12,7 @@ bool accelerator_string_is_valid(const gchar *shortcuts);
 bool remove_modified_shortcut(const gchar *action_name);
 bool update_modified_shortcut(const gchar *action_name, const gchar *shortcuts);
 bool clear_modified_shortcuts();
-void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array);
+void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array, const gchar *window_prefix = nullptr);
 
 #endif
 

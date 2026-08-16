@@ -571,6 +571,19 @@ const ActionDef main_actions[] =
 		},
 
 		{
+		"win.main-win-context-menu",
+		nullptr,
+		N_("Context menu"),
+		layout_menu_context_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.main-win-copy",
 		GQ_ICON_COPY,
 		N_("Copy…"),

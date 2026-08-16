@@ -57,11 +57,11 @@ TEST(KeyboardShortcuts, PrefersAppThenMainThenRemainingWindow)
 	g_autoptr(GKeyFile) key_file = g_key_file_new();
 
 	g_key_file_set_string(key_file, "app.open-file", "accels", "<Control>o");
-	g_key_file_set_string(key_file, "win.main-win-open-archive", "accels", "<Primary>o");
+	g_key_file_set_string(key_file, "win.main-win-open-archive", "accels", "<Control>o");
 	g_key_file_set_string(key_file, "win.main-win-close-window", "accels", "<Control>w");
-	g_key_file_set_string(key_file, "win.advanced-exif-win-close", "accels", "<Primary>w");
+	g_key_file_set_string(key_file, "win.advanced-exif-win-close", "accels", "<Control>w");
 	g_key_file_set_string(key_file, "win.advanced-exif-win-context-menu", "accels", "<Control>x");
-	g_key_file_set_string(key_file, "win.collection-win-copy", "accels", "<Primary>x");
+	g_key_file_set_string(key_file, "win.collection-win-copy", "accels", "<Control>x");
 
 	g_autofree gchar *xml = shortcuts_xml_from_keyfile(key_file);
 
@@ -82,7 +82,7 @@ TEST(KeyboardMap, PrefersAppThenMainThenRemainingWindow)
 	g_key_file_set_string(key_file, "win.dupe-win-delete", "accels", "Delete");
 	g_key_file_set_string(key_file, "win.main-win-delete", "accels", "Delete");
 	g_key_file_set_string(key_file, "win.dupe-win-open", "accels", "<Control>o");
-	g_key_file_set_string(key_file, "app.open", "accels", "<Primary>o");
+	g_key_file_set_string(key_file, "app.open", "accels", "<Control>o");
 	g_key_file_set_string(key_file, "win.dupe-win-rename", "accels", "F2");
 	g_key_file_set_string(key_file, "win.search-win-rename", "accels", "F2");
 
@@ -90,9 +90,26 @@ TEST(KeyboardMap, PrefersAppThenMainThenRemainingWindow)
 
 	ASSERT_EQ(shortcuts->len, 7);
 	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 0)), "open");
-	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 2)), "main delete");
-	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 4)), "dupe rename");
+	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 2)), "delete");
+	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 4)), "rename");
 	EXPECT_EQ(g_ptr_array_index(shortcuts, 6), nullptr);
+}
+
+TEST(KeyboardMap, FiltersSelectedWindowAndKeepsAppActions)
+{
+	g_autoptr(GKeyFile) key_file = g_key_file_new();
+	g_autoptr(GPtrArray) shortcuts = g_ptr_array_new_with_free_func(g_free);
+
+	g_key_file_set_string(key_file, "app.help", "accels", "F1");
+	g_key_file_set_string(key_file, "win.main-win-delete", "accels", "Delete");
+	g_key_file_set_string(key_file, "win.dupe-win-rename", "accels", "F2");
+
+	get_actions_and_accelerators(key_file, shortcuts, "win.main-win-");
+
+	ASSERT_EQ(shortcuts->len, 5);
+	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 0)), "help");
+	EXPECT_STREQ(static_cast<const gchar *>(g_ptr_array_index(shortcuts, 2)), "delete");
+	EXPECT_EQ(g_ptr_array_index(shortcuts, 4), nullptr);
 }
 
 } // namespace

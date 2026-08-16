@@ -261,7 +261,7 @@ bool clear_modified_shortcuts()
  *
  * used to create keyboard map image
  */
-void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array)
+void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array, const gchar *window_prefix)
 {
 	if (!key_file || !array)
 		{
@@ -278,6 +278,11 @@ void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array)
 			{
 			const char *action = actions[i];
 			if (!action || !*action)
+				{
+				continue;
+				}
+
+			if (window_prefix && !g_str_has_prefix(action, "app.") && !g_str_has_prefix(action, window_prefix))
 				{
 				continue;
 				}
@@ -335,7 +340,7 @@ void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array)
 
 				g_hash_table_add(used_accels, g_strdup(normalized));
 
-				/* Do not display the "app." or "win." prefix */
+				/* Do not display the application or window-type prefix */
 				const char *display_action = action;
 
 				if (g_str_has_prefix(action, "app.") || g_str_has_prefix(action, "win."))
@@ -343,11 +348,13 @@ void get_actions_and_accelerators(GKeyFile *key_file, GPtrArray *array)
 					display_action = action + 4;
 					}
 
-				g_auto(GStrv) parts = g_strsplit(display_action, "-win-", -1);
+				const gchar *window_separator = g_strstr_len(display_action, -1, "-win-");
+				if (window_separator)
+					{
+					display_action = window_separator + sizeof("-win-") - 1;
+					}
 
-				g_autofree gchar *split_action = g_strjoinv(" ", parts);
-
-				g_ptr_array_add(array, g_steal_pointer(&split_action));
+				g_ptr_array_add(array, g_strdup(display_action));
 				g_ptr_array_add(array, escaped);
 				}
 			}

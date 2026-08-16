@@ -262,21 +262,6 @@ static gboolean layout_key_press_common(GtkWidget *widget, guint keyval, GdkModi
 				break;
 			}
 
-		if (!stop_signal && !(state & GDK_CONTROL_MASK))
-			{
-			stop_signal = TRUE;
-
-			switch (keyval)
-				{
-				case GDK_KEY_Menu:
-					layout_image_menu_popup(lw);
-					break;
-
-				default:
-					stop_signal = FALSE;
-					break;
-				}
-			}
 		}
 
 	if (x != 0 || y != 0)
@@ -538,6 +523,13 @@ void layout_menu_close_cb(GSimpleAction *, GVariant *, gpointer)
 
 	layout_exit_fullscreen(lw);
 	layout_close(lw);
+}
+
+static void layout_menu_context_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto lw = static_cast<LayoutWindow *>(data);
+
+	layout_image_menu_popup(lw);
 }
 
 static void layout_menu_exit_cb(GSimpleAction *, GVariant *, gpointer)
@@ -1742,20 +1734,20 @@ static constexpr struct
 } keyboard_map_hardcoded[] = {
 	{"Scroll","Left"},
 	{"FastScroll", "&lt;Shift&gt;Left"},
-	{"Left Border", "&lt;Primary&gt;Left"},
-	{"Left Border", "&lt;Primary&gt;&lt;Shift&gt;Left"},
+	{"Left Border", "&lt;Control&gt;Left"},
+	{"Left Border", "&lt;Shift&gt;&lt;Control&gt;Left"},
 	{"Scroll", "Right"},
 	{"FastScroll", "&lt;Shift&gt;Right"},
-	{"Right Border", "&lt;Primary&gt;Right"},
-	{"Right Border", "&lt;Primary&gt;&lt;Shift&gt;Right"},
+	{"Right Border", "&lt;Control&gt;Right"},
+	{"Right Border", "&lt;Shift&gt;&lt;Control&gt;Right"},
 	{"Scroll", "Up"},
 	{"FastScroll", "&lt;Shift&gt;Up"},
-	{"Upper Border", "&lt;Primary&gt;Up"},
-	{"Upper Border", "&lt;Primary&gt;&lt;Shift&gt;Up"},
+	{"Upper Border", "&lt;Control&gt;Up"},
+	{"Upper Border", "&lt;Shift&gt;&lt;Control&gt;Up"},
 	{"Scroll", "Down"},
 	{"FastScroll", "&lt;Shift&gt;Down"},
-	{"Lower Border", "&lt;Primary&gt;Down"},
-	{"Lower Border", "&lt;Primary&gt;&lt;Shift&gt;Down"},
+	{"Lower Border", "&lt;Control&gt;Down"},
+	{"Lower Border", "&lt;Shift&gt;&lt;Control&gt;Down"},
 	{"Next/Drag", "M1"},
 	{"FastDrag", "&lt;Shift&gt;M1"},
 	{"DnD Start", "M2"},
@@ -1764,8 +1756,8 @@ static constexpr struct
 	{"NextImage", "MW5"},
 	{"ScrollUp", "&lt;Shift&gt;MW4"},
 	{"ScrollDown", "&lt;Shift&gt;MW5"},
-	{"ZoomIn", "&lt;Primary&gt;MW4"},
-	{"ZoomOut", "&lt;Primary&gt;MW5"},
+	{"ZoomIn", "&lt;Control&gt;MW4"},
+	{"ZoomOut", "&lt;Control&gt;MW5"},
 };
 
 static gchar *convert_template_line(const gchar *template_line, const GPtrArray *keyboard_map_array)
@@ -1804,6 +1796,7 @@ static gchar *convert_template_line(const gchar *template_line, const GPtrArray 
 static void convert_keymap_template_to_file(const gint fd, const GPtrArray *keyboard_map_array)
 {
 	g_autoptr(GIOChannel) channel = g_io_channel_unix_new(fd);
+	g_io_channel_set_close_on_unref(channel, TRUE);
 
 	g_autoptr(GInputStream) in_stream = g_resources_open_stream(GQ_RESOURCE_PATH_IMAGES "/keymap-template.svg", G_RESOURCE_LOOKUP_FLAGS_NONE, nullptr);
 	g_autoptr(GDataInputStream) data_stream = g_data_input_stream_new(in_stream);
@@ -1823,25 +1816,93 @@ static void convert_keymap_template_to_file(const gint fd, const GPtrArray *keyb
 	if (error) log_printf("Warning: Keyboard Map:%s\n", error->message);
 }
 
-static void layout_menu_kbd_map_cb(GSimpleAction *, GVariant *, gpointer)
+struct KeyboardMapScope
+{
+	const gchar *name;
+	const gchar *window_prefix;
+	const gchar *filename_type;
+};
+
+static constexpr KeyboardMapScope keyboard_map_scopes[] =
+{
+	{ N_("Main Window"), "win.main-win-", "main_window" },
+	{ N_("Image View Window"), "win.image-win-", "image_view_window" },
+	{ N_("Collection Window"), "win.collection-win-", "collection_window" },
+	{ N_("Duplicates Window"), "win.dupe-win-", "duplicates_window" },
+	{ N_("Pan View Window"), "win.pan-win-", "pan_view_window" },
+	{ N_("Search Window"), "win.search-win-", "search_window" },
+	{ N_("Advanced EXIF Window"), "win.advanced-exif-win-", "advanced_exif_window" },
+	{ N_("View File Window"), "win.view-file-", "view_file_window" },
+	{ N_("All Windows"), nullptr, "all_windows" },
+};
+
+struct KeyboardMapDialog
+{
+	GtkWidget *drop_down;
+};
+
+static void keyboard_map_show(const gchar *window_prefix, const gchar *filename_type)
 {
 	g_autofree gchar *tmp_file = nullptr;
+	g_autofree gchar *tmp_template = g_strdup_printf("geeqie_keymap_%s_XXXXXX.svg", filename_type);
 	g_autoptr(GError) error = nullptr;
 
 	g_autoptr(GPtrArray) array = g_ptr_array_new_with_free_func(g_free);
 
-	const gint fd = g_file_open_tmp("geeqie_keymap_XXXXXX.svg", &tmp_file, &error);
+	const gint fd = g_file_open_tmp(tmp_template, &tmp_file, &error);
 	if (error)
 		{
 		log_printf("Error: Keyboard Map - cannot create file:%s\n", error->message);
 		return;
 		}
 
-	get_actions_and_accelerators(get_keyfile_merged(), array);
+	get_actions_and_accelerators(get_keyfile_merged(), array, window_prefix);
 
 	convert_keymap_template_to_file(fd, array);
 
 	view_window_new(file_data_new_simple(tmp_file));
+}
+
+static void keyboard_map_dialog_close_cb(GenericDialog *, gpointer data)
+{
+	g_free(data);
+}
+
+static void keyboard_map_dialog_ok_cb(GenericDialog *, gpointer data)
+{
+	auto dialog_data = static_cast<KeyboardMapDialog *>(data);
+	const guint selected = gtk_drop_down_get_selected(GTK_DROP_DOWN(dialog_data->drop_down));
+
+	if (selected < G_N_ELEMENTS(keyboard_map_scopes))
+		{
+		keyboard_map_show(keyboard_map_scopes[selected].window_prefix,
+		                  keyboard_map_scopes[selected].filename_type);
+		}
+
+	g_free(dialog_data);
+}
+
+static void layout_menu_kbd_map_cb(GSimpleAction *, GVariant *, gpointer)
+{
+	auto dialog_data = g_new0(KeyboardMapDialog, 1);
+	GenericDialog *gd = generic_dialog_new(_("Keyboard Map"), "keyboard_map", nullptr, TRUE,
+	                                       keyboard_map_dialog_close_cb, dialog_data);
+
+	generic_dialog_add_message(gd, GQ_ICON_DIALOG_INFO, _("Keyboard Map"),
+	                           _("Select the window whose shortcuts should be displayed."), FALSE);
+
+	const gchar *scope_names[G_N_ELEMENTS(keyboard_map_scopes) + 1] = {};
+	for (guint i = 0; i < G_N_ELEMENTS(keyboard_map_scopes); i++)
+		{
+		scope_names[i] = _(keyboard_map_scopes[i].name);
+		}
+
+	dialog_data->drop_down = gtk_drop_down_new_from_strings(scope_names);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(dialog_data->drop_down), 0);
+	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), dialog_data->drop_down, FALSE, FALSE, 0);
+	generic_dialog_add_button(gd, GQ_ICON_OK, _("View"), keyboard_map_dialog_ok_cb, TRUE);
+
+	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
 
 static void layout_menu_about_cb(GSimpleAction *, GVariant *, gpointer)
