@@ -31,7 +31,7 @@ static const ActionDef search_actions[] =
 		{
 		"win.search-win-copy",
 		nullptr,
-		N_("Copy…"),
+		N_("Copy File To…"),
 		sr_menu_copy_cb,
 		nullptr,
 		ActionStateType::NONE,

@@ -586,7 +586,7 @@ const ActionDef main_actions[] =
 		{
 		"win.main-win-copy",
 		GQ_ICON_COPY,
-		N_("Copy…"),
+		N_("Copy File To…"),
 		layout_menu_copy_cb,
 		nullptr,
 		ActionStateType::NONE,
@@ -599,7 +599,7 @@ const ActionDef main_actions[] =
 		{
 		"win.main-win-copy-image",
 		nullptr,
-		N_("Copy image to clipboard"),
+		N_("Copy Image"),
 		layout_menu_copy_image_cb,
 		nullptr,
 		ActionStateType::NONE,
@@ -664,7 +664,7 @@ const ActionDef main_actions[] =
 		{
 		"win.main-win-cut-path",
 		nullptr,
-		N_("Cut to clipboard"),
+		N_("Cut File to Clipboard"),
 		layout_menu_cut_path_cb,
 		nullptr,
 		ActionStateType::NONE,

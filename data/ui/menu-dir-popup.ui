@@ -33,10 +33,6 @@
         <attribute name="action">win.dir-win-new-folder</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">_Rename…</attribute>
-        <attribute name="action">win.dir-win-rename</attribute>
-      </item>
-      <item>
         <attribute name="label" translatable="yes">_Copy to clipboard</attribute>
         <attribute name="action">win.dir-win-copy-path</attribute>
       </item>
@@ -45,8 +41,12 @@
         <attribute name="action">win.dir-win-copy-path-unquoted</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">_Cut to clipboard</attribute>
+        <attribute name="label" translatable="yes">_Cut File to Clipboard</attribute>
         <attribute name="action">win.dir-win-cut-path</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Rename…</attribute>
+        <attribute name="action">win.dir-win-rename</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Delete…</attribute>

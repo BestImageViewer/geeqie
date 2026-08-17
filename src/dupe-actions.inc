@@ -70,7 +70,7 @@ static const ActionDef dupe_main_actions[] =
 		{
 		"win.dupe-win-copy",
 		GQ_ICON_COPY,
-		N_("Copy…"),
+		N_("Copy File To…"),
 		dupe_menu_copy_cb,
 		nullptr,
 		ActionStateType::NONE,

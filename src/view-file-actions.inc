@@ -18,8 +18,21 @@ static const ActionDef view_file_actions[] =
 		{
 		"win.view-file-copy",
 		GQ_ICON_COPY,
-		N_("Copy…"),
+		N_("Copy File To…"),
 		vf_pop_menu_copy_action_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.view-file-copy-image",
+		nullptr,
+		N_("Copy Image"),
+		vf_pop_menu_copy_image_action_cb,
 		nullptr,
 		ActionStateType::NONE,
 		FALSE,
@@ -83,7 +96,7 @@ static const ActionDef view_file_actions[] =
 		{
 		"win.view-file-cut-path",
 		nullptr,
-		N_("Cut path"),
+		N_("Cut File to Clipboard"),
 		vf_pop_menu_cut_path_action_cb,
 		nullptr,
 		ActionStateType::NONE,

@@ -22,15 +22,7 @@
     <section>
       <item>
         <attribute name="action">win.view-file-copy</attribute>
-        <attribute name="label" translatable="yes">Copy…</attribute>
-      </item>
-      <item>
-        <attribute name="action">win.view-file-move</attribute>
-        <attribute name="label" translatable="yes">Move…</attribute>
-      </item>
-      <item>
-        <attribute name="action">win.view-file-rename</attribute>
-        <attribute name="label" translatable="yes">Rename…</attribute>
+        <attribute name="label" translatable="yes">Copy File To…</attribute>
       </item>
       <item>
         <attribute name="action">win.view-file-copy-path</attribute>
@@ -42,7 +34,19 @@
       </item>
       <item>
         <attribute name="action">win.view-file-cut-path</attribute>
-        <attribute name="label" translatable="yes">Cut path</attribute>
+        <attribute name="label" translatable="yes">Cut File to Clipboard</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-copy-image</attribute>
+        <attribute name="label" translatable="yes">Copy Image</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-move</attribute>
+        <attribute name="label" translatable="yes">Move…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.view-file-rename</attribute>
+        <attribute name="label" translatable="yes">Rename…</attribute>
       </item>
     </section>
     <section id="delete-section">

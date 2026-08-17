@@ -33,6 +33,7 @@
 #include "filedata.h"
 #include "filefilter.h"
 #include "history-list.h"
+#include "image-load.h"
 #include "img-view.h"
 #include "intl.h"
 #include "layout.h"
@@ -531,6 +532,49 @@ static void vf_pop_menu_copy_cb(GtkWidget *, gpointer data)
 	file_util_copy(nullptr, vf_pop_menu_file_list(vf), nullptr, vf->listview);
 }
 
+struct VfCopyImageData
+{
+	ImageLoader *loader;
+	GdkClipboard *clipboard;
+};
+
+template<gboolean success>
+static void vf_pop_menu_copy_image_done_cb(ImageLoader *loader, gpointer data)
+{
+	auto *copy_data = static_cast<VfCopyImageData *>(data);
+	GdkPixbuf *pixbuf = success ? image_loader_get_pixbuf(loader) : nullptr;
+
+	if (pixbuf)
+		{
+		g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(pixbuf);
+		gdk_clipboard_set_texture(copy_data->clipboard, texture);
+		}
+
+	g_object_unref(copy_data->clipboard);
+	image_loader_free(copy_data->loader);
+	g_free(copy_data);
+}
+
+static void vf_pop_menu_copy_image_cb(GtkWidget *, gpointer data)
+{
+	auto *vf = static_cast<ViewFile *>(data);
+	if (!vf->click_fd) return;
+
+	GdkClipboard *clipboard = gdk_display_get_clipboard(gtk_widget_get_display(vf->listview));
+	if (!clipboard) return;
+
+	auto *copy_data = g_new(VfCopyImageData, 1);
+	copy_data->loader = image_loader_new(vf->click_fd);
+	copy_data->clipboard = GDK_CLIPBOARD(g_object_ref(clipboard));
+	g_signal_connect(copy_data->loader, "done", G_CALLBACK(vf_pop_menu_copy_image_done_cb<TRUE>), copy_data);
+	g_signal_connect(copy_data->loader, "error", G_CALLBACK(vf_pop_menu_copy_image_done_cb<FALSE>), copy_data);
+
+	if (!image_loader_start(copy_data->loader))
+		{
+		vf_pop_menu_copy_image_done_cb<FALSE>(copy_data->loader, copy_data);
+		}
+}
+
 static void vf_pop_menu_move_cb(GtkWidget *, gpointer data)
 {
 	auto vf = static_cast<ViewFile *>(data);
@@ -661,6 +705,11 @@ static void vf_pop_menu_open_archive_action_cb(GSimpleAction *, GVariant *, gpoi
 static void vf_pop_menu_copy_action_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	vf_pop_menu_copy_cb(nullptr, vf_from_action_data(data));
+}
+
+static void vf_pop_menu_copy_image_action_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	vf_pop_menu_copy_image_cb(nullptr, vf_from_action_data(data));
 }
 
 static void vf_pop_menu_move_action_cb(GSimpleAction *, GVariant *, gpointer data)
@@ -1023,6 +1072,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf, GtkWidget *parent, gdouble x, gdouble y)
 	vf_pop_menu_set_action_enabled(vf, "view-file-view-new", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-open-archive", active && class_archive);
 	vf_pop_menu_set_action_enabled(vf, "view-file-copy", active);
+	vf_pop_menu_set_action_enabled(vf, "view-file-copy-image", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-move", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-rename", active);
 	vf_pop_menu_set_action_enabled(vf, "view-file-copy-path", active);

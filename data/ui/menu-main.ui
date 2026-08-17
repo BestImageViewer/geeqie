@@ -49,7 +49,7 @@
         </item>
         <item>
           <attribute name="action">win.main-win-copy</attribute>
-          <attribute name="label" translatable="yes">_Copy…</attribute>
+          <attribute name="label" translatable="yes">_Copy File To…</attribute>
         </item>
         <item>
           <attribute name="action">win.main-win-move</attribute>
@@ -186,12 +186,12 @@
           <attribute name="action">win.main-win-copy-path-unquoted</attribute>
         </item>
         <item>
-          <attribute name="label" translatable="yes">_Copy Image</attribute>
-          <attribute name="action">win.main-win-copy-image</attribute>
+          <attribute name="label" translatable="yes">_Cut File to Clipboard</attribute>
+          <attribute name="action">win.main-win-cut-path</attribute>
         </item>
         <item>
-          <attribute name="label" translatable="yes">_Cut Path</attribute>
-          <attribute name="action">win.main-win-cut-path</attribute>
+          <attribute name="label" translatable="yes">_Copy Image</attribute>
+          <attribute name="action">win.main-win-copy-image</attribute>
         </item>
       </section>
       <section>

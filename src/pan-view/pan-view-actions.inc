@@ -55,7 +55,7 @@ static const ActionDef pan_actions[] =
 		{
 		"win.pan-win-copy",
 		nullptr,
-		N_("Copy…"),
+		N_("Copy File To…"),
 		pan_copy_cb,
 		nullptr,
 		ActionStateType::NONE,

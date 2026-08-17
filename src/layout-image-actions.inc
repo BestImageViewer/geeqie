@@ -44,7 +44,7 @@ static const ActionDef layout_image_actions[] =
 		{
 		"win.layout-image-copy",
 		GQ_ICON_COPY,
-		N_("Copy…"),
+		N_("Copy File To…"),
 		layout_image_pop_menu_copy_cb,
 		nullptr,
 		ActionStateType::NONE,
@@ -57,7 +57,7 @@ static const ActionDef layout_image_actions[] =
 		{
 		"win.layout-image-copy-image",
 		nullptr,
-		N_("Copy image to clipboard"),
+		N_("Copy Image"),
 		layout_image_pop_menu_copy_image_cb,
 		nullptr,
 		ActionStateType::NONE,
@@ -96,7 +96,7 @@ static const ActionDef layout_image_actions[] =
 		{
 		"win.layout-image-cut-path",
 		nullptr,
-		N_("Cut to clipboard"),
+		N_("Cut File to Clipboard"),
 		layout_image_pop_menu_cut_path_cb,
 		nullptr,
 		ActionStateType::NONE,

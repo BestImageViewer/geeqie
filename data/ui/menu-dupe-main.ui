@@ -67,15 +67,7 @@
     <section>
       <item>
         <attribute name="action">win.dupe-win-copy</attribute>
-        <attribute name="label" translatable="yes">Copy…</attribute>
-      </item>
-      <item>
-        <attribute name="action">win.dupe-win-move</attribute>
-        <attribute name="label" translatable="yes">Move…</attribute>
-      </item>
-      <item>
-        <attribute name="action">win.dupe-win-rename</attribute>
-        <attribute name="label" translatable="yes">Rename…</attribute>
+        <attribute name="label" translatable="yes">Copy File To…</attribute>
       </item>
       <item>
         <attribute name="action">win.dupe-win-copy-path</attribute>
@@ -84,6 +76,14 @@
       <item>
         <attribute name="action">win.dupe-win-copy-path-unquoted</attribute>
         <attribute name="label" translatable="yes">Copy path unquoted</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.dupe-win-move</attribute>
+        <attribute name="label" translatable="yes">Move…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.dupe-win-rename</attribute>
+        <attribute name="label" translatable="yes">Rename…</attribute>
       </item>
     </section>
     <section id="delete-section">

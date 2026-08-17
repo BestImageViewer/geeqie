@@ -138,7 +138,7 @@ static const ActionDef view_dir_actions[] =
 		{
 		"win.dir-win-cut-to-clipboard",
 		nullptr,
-		N_("Cut to clipboard"),
+		N_("Cut File to Clipboard"),
 		vd_pop_menu_cut_path_cb,
 		nullptr,
 		ActionStateType::NONE,

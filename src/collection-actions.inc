@@ -46,7 +46,7 @@ static const ActionDef collection_actions[] =
 		{
 		"win.collection-win-copy",
 		nullptr,
-		N_("Copy"),
+		N_("Copy File To…"),
 		collection_table_popup_copy_cb,
 		nullptr,
 		ActionStateType::NONE,

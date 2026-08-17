@@ -46,15 +46,7 @@
     <section>
       <item>
         <attribute name="action">win.layout-image-copy</attribute>
-        <attribute name="label" translatable="yes">Copy…</attribute>
-      </item>
-      <item>
-        <attribute name="action">win.layout-image-move</attribute>
-        <attribute name="label" translatable="yes">Move…</attribute>
-      </item>
-      <item>
-        <attribute name="action">win.layout-image-rename</attribute>
-        <attribute name="label" translatable="yes">Rename…</attribute>
+        <attribute name="label" translatable="yes">Copy File To…</attribute>
       </item>
       <item>
         <attribute name="action">win.layout-image-copy-path</attribute>
@@ -65,12 +57,20 @@
         <attribute name="label" translatable="yes">Copy to clipboard (unquoted)</attribute>
       </item>
       <item>
-        <attribute name="action">win.layout-image-copy-image</attribute>
-        <attribute name="label" translatable="yes">Copy image to clipboard</attribute>
+        <attribute name="action">win.layout-image-cut-path</attribute>
+        <attribute name="label" translatable="yes">Cut File to Clipboard</attribute>
       </item>
       <item>
-        <attribute name="action">win.layout-image-cut-path</attribute>
-        <attribute name="label" translatable="yes">Cut to clipboard</attribute>
+        <attribute name="action">win.layout-image-copy-image</attribute>
+        <attribute name="label" translatable="yes">Copy Image</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-move</attribute>
+        <attribute name="label" translatable="yes">Move…</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.layout-image-rename</attribute>
+        <attribute name="label" translatable="yes">Rename…</attribute>
       </item>
     </section>
     <section>

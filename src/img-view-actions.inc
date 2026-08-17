@@ -31,8 +31,21 @@ static const ActionDef image_actions[] =
 		{
 		"win.image-win-copy",
 		GQ_ICON_COPY,
-		N_("Copy…"),
+		N_("Copy File To…"),
 		view_copy_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.image-win-copy-image",
+		nullptr,
+		N_("Copy Image"),
+		view_copy_image_cb,
 		nullptr,
 		ActionStateType::NONE,
 		FALSE,

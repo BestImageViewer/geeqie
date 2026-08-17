@@ -801,6 +801,20 @@ static void view_copy_cb(GSimpleAction *, GVariant *, gpointer data)
 	file_util_copy(image_get_fd(imd), nullptr, nullptr, imd->widget);
 }
 
+static void view_copy_image_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto vw = static_cast<ViewWindow *>(data);
+	ImageWindow *imd = view_window_active_image(vw);
+	GdkPixbuf *pixbuf = image_get_pixbuf(imd);
+	if (!pixbuf) return;
+
+	GdkClipboard *clipboard = gdk_display_get_clipboard(gtk_widget_get_display(imd->widget));
+	if (!clipboard) return;
+
+	g_autoptr(GdkTexture) texture = gdk_texture_new_for_pixbuf(pixbuf);
+	gdk_clipboard_set_texture(clipboard, texture);
+}
+
 static void view_move_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto vw = static_cast<ViewWindow *>(data);
