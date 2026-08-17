@@ -33,7 +33,7 @@ then
 		minor_version=$2
 #		patch_version=$3  # not used on master branch
 
-		printf '%s%s%s%s%s%s%s' "$major_version" "." "$minor_version" "+git" "$(git log --max-count=1 --date=format:"%Y%m%d" --format="%ad")" "-" "$(git rev-parse --quiet --verify --short HEAD)"
+		printf '%s%s%s%s%s%s%s' "$major_version" "." "$minor_version" "+git" "$(git log --max-count=1 --date=format:"%Y%m%d" --format="%cd")" "-" "$(git rev-parse --quiet --verify --short HEAD)"
 	else
 		version=$(head -1 NEWS)
 		# shellcheck disable=SC2086
