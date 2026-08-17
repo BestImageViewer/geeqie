@@ -11,7 +11,7 @@
         </keycombo>
       </shortcut>
       <guimenu>File</guimenu>
-      <guimenuitem>Copy</guimenuitem>
+      <guimenuitem>Copy File To…</guimenuitem>
     </menuchoice>
     and to move a file select
     <menuchoice>
@@ -29,6 +29,44 @@
   <para>The Copy and Move operations and dialogs behave the same in Geeqie, with the only difference being the final result. The remaining text of this page applies equally to the Copy and Move operations, for the remainder of this page these will be referred to as a Copy/Move operation.</para>
   <para>Initiating a Copy/Move operation will display a dialog to select the destination folder to Copy/Move the selected file, after the destination folder is selected Geeqie will proceed to Copy/Move the images to the destination. If an error occurs or a file exists with the same name as one of the files being Copy/Moved, a dialog will appear prompting how to handle the situation.</para>
   <para />
+  <section id="CopyAndClipboardCommands">
+    <title>Copy and clipboard commands</title>
+    <para>Geeqie menus contain several commands whose names include “Copy”. They copy different kinds of data and should not be confused with one another:</para>
+    <variablelist>
+      <varlistentry>
+        <term><guimenuitem>Copy File To…</guimenuitem></term>
+        <listitem>
+          <para>Opens Geeqie's file-operation dialog and copies the selected files to a destination folder. This performs the filesystem operation immediately after the destination and any conflict options are confirmed. It does not use the clipboard.</para>
+          <para>Associated sidecar files are copied with the main file and retain the corresponding destination names, preserving the group. The copy dialog lists these files in its Sidecars column. If only part of an expanded group is explicitly selected, however, the selected members are treated as independent files; unselected members of the group are not copied.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guimenuitem>Copy to clipboard</guimenuitem></term>
+        <listitem>
+          <para>Places the selected file paths on the clipboard as shell-quoted text. Geeqie also supplies file-manager clipboard data marked as a copy operation, so pasting into a compatible file manager copies the files. Pasting into a text editor inserts the paths.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guimenuitem>Copy to clipboard (unquoted)</guimenuitem></term>
+        <listitem>
+          <para>Provides the same file-copy clipboard data, but its plain-text representation contains paths without shell quoting. Paths containing spaces or shell metacharacters may therefore be ambiguous when pasted into a command line.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guimenuitem>Cut File to Clipboard</guimenuitem></term>
+        <listitem>
+          <para>Places the selected paths on the clipboard and marks the file-manager data as a cut operation. No file is moved when this command is selected. A compatible file manager moves the files when the clipboard is pasted.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><guimenuitem>Copy Image</guimenuitem></term>
+        <listitem>
+          <para>Places the decoded image pixels on the clipboard for pasting into an image editor or another application that accepts image data. It does not copy the original encoded file, file metadata, or sidecar files. In the file-pane context menu it applies to the file that was right-clicked.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>The clipboard used for path and file commands is controlled by the <emphasis role="underline"><link linkend="Behaviour">Copy path clipboard selection</link></emphasis> preference. <guimenuitem>Copy Image</guimenuitem> always uses the standard clipboard.</para>
+  </section>
   <section id="TheCopyMovedialog">
     <title>The Copy/Move dialog</title>
     <para>This is the dialog that is displayed when initiating a Copy/Move operation. The dialog contains a row of buttons near the top, vertical list of bookmarks along the left side, a vertical list of folders in the current path, a text entry field, and a row of buttons along the bottom.</para>

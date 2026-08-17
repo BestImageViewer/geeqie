@@ -164,6 +164,14 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <emphasis role="bold">Copy Image</emphasis>
+        </term>
+        <listitem>
+          <para>Loads the file that was right-clicked and copies its decoded image pixels to the clipboard. The thumbnail, original encoded file, metadata, and sidecar files are not copied.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <emphasis role="bold">Sort</emphasis>
         </term>
         <listitem>

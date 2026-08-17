@@ -529,11 +529,11 @@
                 <keycap>X</keycap>
               </keycombo>
             </shortcut>
-            <guimenu>Cut to clipboard</guimenu>
+            <guimenu>Cut File to Clipboard</guimenu>
           </menuchoice>
         </term>
         <listitem>
-          <para>Perform a standard control-X operation.</para>
+          <para>Place the selected files on the clipboard for moving when pasted into a compatible file manager. Selecting this command does not immediately move the files.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

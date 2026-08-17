@@ -152,9 +152,9 @@
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term>Copy image to clipboard</term>
+        <term>Copy Image</term>
         <listitem>
-          <para>Copy the pixbuf to the clipboard. This may be used by programs such as Gimp.</para>
+          <para>Copy the decoded image pixels to the clipboard for use by applications such as GIMP. This does not copy the original image file or its metadata.</para>
         </listitem>
       </varlistentry>
     </variablelist>
