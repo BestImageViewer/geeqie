@@ -3127,7 +3127,7 @@ static GdkContentProvider *clipboard_build_provider(const PathList &path_list, g
 	g_autoptr(GBytes) copied_bytes = g_bytes_new(copied->str, copied->len);
 
 	GdkContentProvider *copied_provider =
-	        gdk_content_provider_new_for_bytes("application/x-special-gnome-copied-files",
+	        gdk_content_provider_new_for_bytes("x-special/gnome-copied-files",
 	                                           copied_bytes);
 
 	GdkContentProvider *providers[] = {
