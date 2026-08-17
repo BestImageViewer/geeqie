@@ -48,8 +48,6 @@ constexpr int BUFSIZE = 128;
  */
 constexpr gshort STYLE_SHIFT_STANDARD = 10;
 
-constexpr gint CELL_HEIGHT_OVERRIDE = 512;
-
 } // namespace
 
 gdouble get_zoom_increment()
@@ -392,23 +390,6 @@ gint gq_gtk_dialog_run(GtkDialog *dialog)
 	g_main_loop_unref(run_data.loop);
 
 	return run_data.response_id;
-}
-
-/**
- * @brief This overrides the low default of a GtkCellRenderer from 100 to CELL_HEIGHT_OVERRIDE, something sane for our purposes
- */
-void cell_renderer_height_override(GtkCellRenderer *renderer)
-{
-	GParamSpec *spec;
-
-	spec = g_object_class_find_property(G_OBJECT_GET_CLASS(G_OBJECT(renderer)), "height");
-	if (spec && G_IS_PARAM_SPEC_INT(spec))
-		{
-		GParamSpecInt *spec_int;
-
-		spec_int = G_PARAM_SPEC_INT(spec);
-		spec_int->maximum = std::max(spec_int->maximum, CELL_HEIGHT_OVERRIDE);
-		}
 }
 
 GtkWidget *widget_get_toplevel(GtkWidget *widget)
