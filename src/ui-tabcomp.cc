@@ -804,6 +804,18 @@ GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text)
 	return entry;
 }
 
+gboolean tab_completion_complete(GtkWidget *entry, gboolean directory_only)
+{
+	TabCompData *td = tab_completion_get_from_entry(entry);
+	if (!td)
+		{
+		td = tab_completion_set_to_entry(entry);
+		}
+
+	td->directory_only = directory_only;
+	return tab_completion_do(td);
+}
+
 void tab_completion_set_enter_func(GtkWidget *entry, const TabCompEnterFunc &enter_func)
 {
 	TabCompData *td = tab_completion_get_from_entry(entry);

@@ -25,6 +25,7 @@
 #include "main-defines.h"
 #include "options.h"
 #include "ui-fileops.h"
+#include "ui-tabcomp.h"
 
 namespace {
 
@@ -42,6 +43,22 @@ struct PendingFileDialog
 };
 
 void finish_file_dialog(PendingFileDialog *pending, gint response_id);
+
+gboolean file_dialog_key_pressed_cb(GtkEventControllerKey *controller, guint keyval, guint,
+	                                GdkModifierType state, gpointer)
+{
+	if (keyval != GDK_KEY_Tab || state & GDK_CONTROL_MASK) return FALSE;
+
+	GtkWidget *dialog = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	GtkWidget *focus = gtk_window_get_focus(GTK_WINDOW(dialog));
+	if (!GTK_IS_ENTRY(focus)) return FALSE;
+
+	const gchar *text = gtk_editable_get_text(GTK_EDITABLE(focus));
+	if (text[0] != G_DIR_SEPARATOR && text[0] != '~') return FALSE;
+
+	tab_completion_complete(focus, TRUE);
+	return TRUE;
+}
 
 gboolean is_image_file(const gchar *path)
 {
@@ -775,6 +792,11 @@ void file_dialog_show(const FileDialogData &fdd)
 
 	pending->dialog = gtk_dialog_new_with_buttons(title, parent, GTK_DIALOG_MODAL, _("_Cancel"), GTK_RESPONSE_CANCEL, accept_text, GTK_RESPONSE_ACCEPT, nullptr);
 	gtk_window_set_default_size(GTK_WINDOW(pending->dialog), 1040, 640);
+
+	GtkEventController *key_controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(key_controller, GTK_PHASE_CAPTURE);
+	g_signal_connect(key_controller, "key-pressed", G_CALLBACK(file_dialog_key_pressed_cb), nullptr);
+	gtk_widget_add_controller(pending->dialog, key_controller);
 
 	pending->chooser = gtk_file_chooser_widget_new(to_gtk_file_chooser_action(fdd.action));
 	gtk_widget_set_size_request(pending->chooser, 720, 520);

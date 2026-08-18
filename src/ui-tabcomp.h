@@ -36,6 +36,7 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 void tab_completion_append_to_history(GtkWidget *entry, const gchar *path);
 
 GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text);
+gboolean tab_completion_complete(GtkWidget *entry, gboolean directory_only);
 
 void tab_completion_set_enter_func(GtkWidget *entry, const TabCompEnterFunc &enter_func);
 void tab_completion_set_tab_func(GtkWidget *entry, const TabCompTabFunc &tab_func);
