@@ -443,11 +443,11 @@ void vflist_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 {
 	FileData *fd = nullptr;
 	GtkTreeViewColumn *column;
+	g_autoptr(GtkTreePath) tpath = nullptr;
 
 	vf->clicked_mark = 0;
 
-	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(event.widget), event.x, event.y,
+	if (gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(event.widget), event.x, event.y,
 	                                  &tpath, &column, nullptr, nullptr))
 		{
 		gint col_idx = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(column), "column_store_idx"));
@@ -482,6 +482,14 @@ void vflist_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 
 	if (event.button == GDK_BUTTON_SECONDARY)
 		{
+		if (fd && !vflist_is_selected(vf, fd))
+			{
+			GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(event.widget));
+			gtk_tree_selection_unselect_all(selection);
+			gtk_tree_selection_select_path(selection, tpath);
+			gtk_tree_view_set_cursor(GTK_TREE_VIEW(event.widget), tpath, nullptr, FALSE);
+			}
+
 		vf->popup = vf_pop_menu(vf, event.widget, event.x, event.y);
 		return;
 		}

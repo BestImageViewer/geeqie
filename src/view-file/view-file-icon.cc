@@ -1181,6 +1181,14 @@ void vficon_press_cb(ViewFile *vf, const ViewFileMouseButtonEvent &event)
 			break;
 		case GDK_BUTTON_SECONDARY:
 			{
+			if (!vficon_is_selected(vf, fd))
+				{
+				vficon_select_none(vf);
+				vficon_select_util(vf, fd, TRUE);
+				vficon_set_focus(vf, fd);
+				vficon_send_layout_select(vf, fd);
+				}
+
 			gint mark = vficon_mark_at_coord(vf, static_cast<gint>(event.x), static_cast<gint>(event.y));
 			vf->clicked_mark = mark >= 0 ? mark + 1 : 0;
 			vf->popup = vf_pop_menu(vf, event.widget, event.x, event.y);

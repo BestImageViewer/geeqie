@@ -3312,9 +3312,15 @@ static void dupe_listview_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 	GtkTreeIter iter;
 	DupeItem *di = nullptr;
+	gint bin_x;
+	gint bin_y;
+
+	gtk_tree_view_convert_widget_to_bin_window_coords(GTK_TREE_VIEW(widget),
+	                                                  static_cast<gint>(x), static_cast<gint>(y),
+	                                                  &bin_x, &bin_y);
 
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bin_x, bin_y,
 	                                  &tpath, nullptr, nullptr, nullptr))
 		{
 		gtk_tree_model_get_iter(store, &iter, tpath);
@@ -3329,6 +3335,8 @@ static void dupe_listview_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 
 	if (button == GDK_BUTTON_SECONDARY)
 		{
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+
 		/* right click menu */
 		if (state & GDK_CONTROL_MASK && state & GDK_SHIFT_MASK)
 			{
@@ -3337,17 +3345,19 @@ static void dupe_listview_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 			return;
 			}
 
-		if (widget == dw->listview)
-			{
-			dupe_menu_popup_main(dw, di);
-			}
-		else
-			{
-			dupe_menu_popup_second(dw, di);
-			}
 		}
 
-	if (!di) return;
+	if (!di)
+		{
+		if (button == GDK_BUTTON_SECONDARY)
+			{
+			if (widget == dw->listview)
+				dupe_menu_popup_main(dw, nullptr);
+			else
+				dupe_menu_popup_second(dw, nullptr);
+			}
+		return;
+		}
 
 	if (button == GDK_BUTTON_PRIMARY &&
 	    n_press == 2)
@@ -3375,7 +3385,11 @@ static void dupe_listview_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 			gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
 			}
 
-		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		if (widget == dw->listview)
+			dupe_menu_popup_main(dw, di);
+		else
+			dupe_menu_popup_second(dw, di);
+
 		return;
 		}
 
@@ -4382,6 +4396,18 @@ DupeWindow *dupe_window_new()
 	g_signal_connect(gesture, "pressed", G_CALLBACK(dupe_listview_press_cb), dw);
 	g_signal_connect(gesture, "released", G_CALLBACK(dupe_listview_release_cb), dw);
 	gtk_widget_add_controller(dw->second_listview, GTK_EVENT_CONTROLLER(gesture));
+
+	GtkGesture *context_gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(context_gesture), GDK_BUTTON_SECONDARY);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(context_gesture), GTK_PHASE_CAPTURE);
+	g_signal_connect(context_gesture, "pressed", G_CALLBACK(dupe_listview_press_cb), dw);
+	gtk_widget_add_controller(dw->listview, GTK_EVENT_CONTROLLER(context_gesture));
+
+	context_gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(context_gesture), GDK_BUTTON_SECONDARY);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(context_gesture), GTK_PHASE_CAPTURE);
+	g_signal_connect(context_gesture, "pressed", G_CALLBACK(dupe_listview_press_cb), dw);
+	gtk_widget_add_controller(dw->second_listview, GTK_EVENT_CONTROLLER(context_gesture));
 
 	gtk_window_present(GTK_WINDOW(dw->window));
 

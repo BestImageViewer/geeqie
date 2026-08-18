@@ -1441,6 +1441,11 @@ static void vf_gesture_press_cb(GtkGestureClick *gesture, gint n_press, gdouble 
 		n_press
 	};
 	vf_press_cb(static_cast<ViewFile *>(data), event);
+
+	if (event.button == GDK_BUTTON_SECONDARY)
+		{
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		}
 }
 
 static void vf_gesture_release_cb(GtkGestureClick *gesture, gint n_press, gdouble x, gdouble y, gpointer data)
@@ -1843,6 +1848,7 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(gesture), GTK_PHASE_CAPTURE);
 	g_signal_connect(gesture, "pressed", G_CALLBACK(vf_gesture_press_cb), vf);
 	g_signal_connect(gesture, "released", G_CALLBACK(vf_gesture_release_cb), vf);
 	gtk_widget_add_controller(vf->listview, GTK_EVENT_CONTROLLER(gesture));

@@ -1167,9 +1167,15 @@ static void search_result_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 	GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
 	GtkTreeIter iter;
 	MatchFileData *mfd = nullptr;
+	gint bin_x;
+	gint bin_y;
+
+	gtk_tree_view_convert_widget_to_bin_window_coords(GTK_TREE_VIEW(widget),
+	                                                  static_cast<gint>(x), static_cast<gint>(y),
+	                                                  &bin_x, &bin_y);
 
 	if (g_autoptr(GtkTreePath) tpath = nullptr;
-	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), x, y,
+	    gtk_tree_view_get_path_at_pos(GTK_TREE_VIEW(widget), bin_x, bin_y,
 	                                  &tpath, nullptr, nullptr, nullptr))
 		{
 		gtk_tree_model_get_iter(store, &iter, tpath);
@@ -1184,10 +1190,17 @@ static void search_result_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 
 	if (button == GDK_BUTTON_SECONDARY)
 		{
-		search_result_menu(sd, mfd != nullptr, widget, x, y);
+		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 		}
 
-	if (!mfd) return;
+	if (!mfd)
+		{
+		if (button == GDK_BUTTON_SECONDARY)
+			{
+			search_result_menu(sd, FALSE, widget, x, y);
+			}
+		return;
+		}
 
 	if (button == GDK_BUTTON_PRIMARY && n_press == 2)
 		{
@@ -1213,7 +1226,7 @@ static void search_result_press_cb(GtkGestureClick *gesture, gint n_press, gdoub
 			gtk_tree_view_set_cursor(GTK_TREE_VIEW(widget), tpath, nullptr, FALSE);
 			}
 
-		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		search_result_menu(sd, TRUE, widget, x, y);
 		return;
 		}
 
@@ -3344,6 +3357,12 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	g_signal_connect(gesture, "pressed", G_CALLBACK(search_result_press_cb), sd);
 	g_signal_connect(gesture, "released", G_CALLBACK(search_result_release_cb), sd);
 	gtk_widget_add_controller(sd->ui.result_view, GTK_EVENT_CONTROLLER(gesture));
+
+	GtkGesture *context_gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(context_gesture), GDK_BUTTON_SECONDARY);
+	gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(context_gesture), GTK_PHASE_CAPTURE);
+	g_signal_connect(context_gesture, "pressed", G_CALLBACK(search_result_press_cb), sd);
+	gtk_widget_add_controller(sd->ui.result_view, GTK_EVENT_CONTROLLER(context_gesture));
 
 	GtkDragSource *drag_source = gtk_drag_source_new();
 	gtk_drag_source_set_actions(drag_source, static_cast<GdkDragAction>(GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK));
