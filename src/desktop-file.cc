@@ -179,8 +179,6 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	EditorWindow *ew;
 	GtkWidget *win_vbox;
 	GtkWidget *hbox;
-	GtkWidget *button;
-	GtkWidget *ct_button;
 	GtkWidget *text_view;
 	gchar *text;
 	gsize size;
@@ -217,21 +215,15 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_widget_set_halign(button_hbox, GTK_ALIGN_END);
 	gtk_box_append(GTK_BOX(hbox), button_hbox);
 
+	GtkWidget *button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"),
+	                                    G_CALLBACK(editor_window_close_cb), ew);
+	gtk_box_append(GTK_BOX(button_hbox), button);
+
 	ew->save_button = pref_button_new(nullptr, GQ_ICON_SAVE, _("Save"),
-				 G_CALLBACK(editor_window_save_cb), ew);
-	gq_gtk_container_add(button_hbox, ew->save_button);
+	                                  G_CALLBACK(editor_window_save_cb), ew);
+	gtk_box_append(GTK_BOX(button_hbox), ew->save_button);
 	gtk_window_set_default_widget(GTK_WINDOW(ew->window), ew->save_button);
 	gtk_widget_set_sensitive(ew->save_button, FALSE);
-	ct_button = ew->save_button;
-
-	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"),
-				 G_CALLBACK(editor_window_close_cb), ew);
-	gq_gtk_container_add(button_hbox, button);
-
-	if (!get_alternative_button_order(ew->window))
-		{
-		gq_gtk_box_reorder_child(GTK_BOX(button_hbox), ct_button, -1);
-		}
 
 	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);

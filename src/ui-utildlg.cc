@@ -185,45 +185,26 @@ static gboolean generic_dialog_delete_cb(GtkWidget *, gpointer data)
 	return TRUE;
 }
 
-static void generic_dialog_show_cb(GtkWidget *widget, gpointer data)
-{
-	auto gd = static_cast<GenericDialog *>(data);
-	if (gd->cancel_button)
-		{
-		gq_gtk_box_reorder_child(GTK_BOX(gd->hbox), gd->cancel_button, -1);
-		}
-
-	g_signal_handlers_disconnect_by_func(G_OBJECT(widget), (gpointer)(generic_dialog_show_cb), gd);
-}
-
 GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, const gchar *text,
 				     void (*func_cb)(GenericDialog *, gpointer), gboolean is_default)
 {
-	GtkWidget *button;
-	gboolean alternative_order;
-
-	button = pref_button_new(nullptr, icon_name, text,
-				 G_CALLBACK(generic_dialog_click_cb), gd);
+	GtkWidget *button = pref_button_new(nullptr, icon_name, text,
+	                                    G_CALLBACK(generic_dialog_click_cb), gd);
 
 	g_object_set_data(G_OBJECT(button), "dialog_function", reinterpret_cast<void *>(func_cb));
 
-	gq_gtk_container_add(gd->hbox, button);
-
-	alternative_order = get_alternative_button_order(gd->hbox);
-
 	if (is_default)
 		{
+		gtk_box_append(GTK_BOX(gd->hbox), button);
+
 		gtk_window_set_default_widget(GTK_WINDOW(gd->dialog), button);
 		gtk_widget_grab_focus(button);
 		gd->default_cb = func_cb;
-
-		if (!alternative_order) gq_gtk_box_reorder_child(GTK_BOX(gd->hbox), button, -1);
 		}
 	else
 		{
-		if (!alternative_order) gq_gtk_box_reorder_child(GTK_BOX(gd->hbox), button, 0);
+		gtk_box_prepend(GTK_BOX(gd->hbox), button);
 		}
-
 
 	return button;
 }
@@ -392,17 +373,7 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 	if (gd->cancel_cb)
 		{
-		gd->cancel_button = generic_dialog_add_button(gd, GQ_ICON_CANCEL, _("Cancel"), gd->cancel_cb, TRUE);
-		}
-	else
-		{
-		gd->cancel_button = nullptr;
-		}
-
-	if (get_alternative_button_order(gd->hbox))
-		{
-		g_signal_connect(G_OBJECT(gd->dialog), "show",
-				 G_CALLBACK(generic_dialog_show_cb), gd);
+		generic_dialog_add_button(gd, GQ_ICON_CANCEL, _("Cancel"), gd->cancel_cb, TRUE);
 		}
 
 	gd->default_cb = nullptr;

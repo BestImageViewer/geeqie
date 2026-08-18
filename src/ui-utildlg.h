@@ -39,9 +39,6 @@ struct GenericDialog
 	void (*default_cb)(GenericDialog *, gpointer);
 	void (*cancel_cb)(GenericDialog *, gpointer);
 	gpointer data;
-
-	GtkWidget *cancel_button; /**< private */
-
 };
 
 GenericDialog *generic_dialog_new(const gchar *title,

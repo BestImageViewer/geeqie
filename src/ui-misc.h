@@ -208,8 +208,6 @@ void get_device_position(GdkDevice *device, int &x, int &y);
 
 PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale);
 
-gboolean get_alternative_button_order(GtkWidget *widget);
-
 bool focus_is_text_editable(GtkWindow *window);
 bool focus_is_editable(GtkWindow *window);
 
