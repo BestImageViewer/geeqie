@@ -49,7 +49,6 @@
 #include "layout-util.h"
 #include "main-defines.h"
 #include "main.h"
-#include "menu.h"
 #include "metadata.h"
 #include "misc.h"
 #include "options.h"
@@ -2382,7 +2381,6 @@ void layout_show_config_window(LayoutWindow *lw)
 	GtkWidget *win_vbox;
 	GtkWidget *vbox;
 	GtkWidget *button;
-	GtkWidget *ct_button;
 	GtkWidget *group;
 	GtkWidget *frame;
 
@@ -2410,29 +2408,22 @@ void layout_show_config_window(LayoutWindow *lw)
 	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
 	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
 
-	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
-				 G_CALLBACK(layout_config_ok_cb), lc);
-	gq_gtk_container_add(hbox, button);
-	gtk_window_set_default_widget(GTK_WINDOW(lc->configwindow), button);
-
-	ct_button = button;
-
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(layout_config_help_cb), lc);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_APPLY, _("Apply"),
 				 G_CALLBACK(layout_config_apply_cb), lc);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_CANCEL, _("Cancel"),
 				 G_CALLBACK(layout_config_close_cb), lc);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
-	if (!get_alternative_button_order(lc->configwindow))
-		{
-		gq_gtk_box_reorder_child(GTK_BOX(hbox), ct_button, -1);
-		}
+	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
+	                         G_CALLBACK(layout_config_ok_cb), lc);
+	gtk_box_append(GTK_BOX(hbox), button);
+	gtk_window_set_default_widget(GTK_WINDOW(lc->configwindow), button);
 
 	frame = pref_frame_new(win_vbox, TRUE, nullptr, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	DEBUG_NAME(frame);

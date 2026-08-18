@@ -1259,15 +1259,6 @@ PangoAttrList *get_pango_attr_list(gboolean weight, gboolean scale)
 	return pal;
 }
 
-gboolean get_alternative_button_order(GtkWidget *widget)
-{
-	(void)widget;
-
-	/* GTK4 no longer exposes the old alternative button order setting.
-	 * Use the standard application-defined order consistently. */
-	return FALSE;
-}
-
 namespace
 {
 

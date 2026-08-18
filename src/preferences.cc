@@ -3655,21 +3655,14 @@ static GtkWidget *config_window_create(LayoutWindow *lw, ConfOptions *c_options)
 				 G_CALLBACK(config_window_help_cb), notebook);
 	gtk_box_append(GTK_BOX(hbox), button);
 
-	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
-				 G_CALLBACK(config_window_ok_cb), notebook);
-	gtk_box_append(GTK_BOX(hbox), button);
-	gtk_window_set_default_widget(GTK_WINDOW(configwindow), button);
-
-	GtkWidget *ct_button = button;
-
 	button = pref_button_new(nullptr, GQ_ICON_CANCEL, _("Cancel"),
 				 G_CALLBACK(config_window_close_cb), nullptr);
 	gtk_box_append(GTK_BOX(hbox), button);
 
-	if (!get_alternative_button_order(configwindow))
-		{
-		gq_gtk_box_reorder_child(GTK_BOX(hbox), ct_button, -1);
-		}
+	button = pref_button_new(nullptr, GQ_ICON_OK, "OK",
+	                         G_CALLBACK(config_window_ok_cb), notebook);
+	gtk_box_append(GTK_BOX(hbox), button);
+	gtk_window_set_default_widget(GTK_WINDOW(configwindow), button);
 
 	return configwindow;
 }
