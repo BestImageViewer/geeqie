@@ -252,15 +252,112 @@ static void tab_completion_iter_menu_items(GtkWidget *widget, TabCompPrefix &tp)
 		}
 }
 
+static GtkWidget *tab_completion_popup_move_selection(GtkWidget *popover, gboolean forward)
+{
+	auto *menu = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(popover), "tab-completion-menu"));
+	auto *selected = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(popover), "tab-completion-selected"));
+	GtkWidget *item = selected;
+
+	do
+		{
+		item = item ? (forward ? gtk_widget_get_next_sibling(item) : gtk_widget_get_prev_sibling(item))
+		            : (forward ? gtk_widget_get_first_child(menu) : gtk_widget_get_last_child(menu));
+		}
+	while (item && !gtk_widget_get_visible(item));
+
+	if (!item)
+		{
+		item = forward ? gtk_widget_get_first_child(menu) : gtk_widget_get_last_child(menu);
+		while (item && !gtk_widget_get_visible(item))
+			item = forward ? gtk_widget_get_next_sibling(item) : gtk_widget_get_prev_sibling(item);
+		}
+
+	if (item)
+		{
+		if (selected)
+			{
+			gtk_widget_unset_state_flags(selected, GTK_STATE_FLAG_SELECTED);
+			gtk_widget_remove_css_class(selected, "tab-completion-selected");
+			}
+		g_object_set_data(G_OBJECT(popover), "tab-completion-selected", item);
+		gtk_widget_set_state_flags(item, GTK_STATE_FLAG_SELECTED, FALSE);
+		gtk_widget_add_css_class(item, "tab-completion-selected");
+		}
+
+	return item;
+}
+
+static void tab_completion_popup_closed_cb(GtkPopover *popover, gpointer data)
+{
+	auto *entry = static_cast<GtkWidget *>(data);
+	if (g_object_get_data(G_OBJECT(entry), "tab-completion-popover") == popover)
+		g_object_set_data(G_OBJECT(entry), "tab-completion-popover", nullptr);
+}
+
+static gboolean tab_completion_popup_focus_cb(gpointer data)
+{
+	auto *popover = static_cast<GtkWidget *>(data);
+	if (!gtk_widget_get_mapped(popover)) return G_SOURCE_REMOVE;
+
+	GtkWidget *item = tab_completion_popup_move_selection(popover, TRUE);
+	if (item) gtk_widget_grab_focus(item);
+
+	return G_SOURCE_REMOVE;
+}
+
+static void tab_completion_popup_map_cb(GtkWidget *popover, gpointer)
+{
+	g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, tab_completion_popup_focus_cb,
+	                g_object_ref(popover), g_object_unref);
+}
+
 static gboolean tab_completion_popup_key_press(GtkEventControllerKey *controller, guint keyval, guint, GdkModifierType, gpointer data)
 {
 	GtkWidget *widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
 	const bool is_supported_key = keyval >= 0x20 && keyval <= 0xFF;
 
+	if (keyval == GDK_KEY_Down || keyval == GDK_KEY_KP_Down)
+		{
+		GtkWidget *item = tab_completion_popup_move_selection(widget, TRUE);
+		if (item) gtk_widget_grab_focus(item);
+		return TRUE;
+		}
+
+	if (keyval == GDK_KEY_Up || keyval == GDK_KEY_KP_Up)
+		{
+		GtkWidget *item = tab_completion_popup_move_selection(widget, FALSE);
+		if (item) gtk_widget_grab_focus(item);
+		return TRUE;
+		}
+
+	if (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter)
+		{
+		auto *selected = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(widget), "tab-completion-selected"));
+		if (selected) gtk_widget_activate(selected);
+		return selected != nullptr;
+		}
+
+	if (keyval == GDK_KEY_Escape)
+		{
+		gtk_popover_popdown(GTK_POPOVER(widget));
+		return TRUE;
+		}
+
 	if (keyval != GDK_KEY_Tab &&
 	    keyval != GDK_KEY_BackSpace &&
 	    !is_supported_key)
 		return FALSE;
+
+	if (keyval == GDK_KEY_Tab)
+		{
+		auto *td = static_cast<TabCompData *>(data);
+		gtk_popover_popdown(GTK_POPOVER(widget));
+		if (tab_completion_do(td))
+			{
+			tab_completion_emit_tab_signal(td);
+			}
+		return TRUE;
+		}
 
 	if (is_supported_key)
 		{
@@ -278,13 +375,14 @@ static gboolean tab_completion_popup_key_press(GtkEventControllerKey *controller
 		const gchar *prefix = filename_from_path(entry_text);
 		TabCompPrefix tp{ prefix, strlen(prefix), 0 };
 
-		GtkWidget *menu = gtk_popover_get_child(GTK_POPOVER(widget));
+		auto *menu = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(widget), "tab-completion-menu"));
 		for (GtkWidget *child = gtk_widget_get_first_child(menu);
 		     child;
 		     child = gtk_widget_get_next_sibling(child))
 			{
 			tab_completion_iter_menu_items(child, tp);
 			}
+		g_object_set_data(G_OBJECT(widget), "tab-completion-selected", nullptr);
 
 		if (tp.choices > 1) return TRUE; /* multiple choices */
 		if (tp.choices > 0) tab_completion_do(td); /* one choice */
@@ -326,9 +424,17 @@ static void tab_completion_popup_list(TabCompData *td, GList *list)
 #endif
 
 	GtkWidget *popover = gtk_popover_new();
+	gtk_popover_set_autohide(GTK_POPOVER(popover), TRUE);
 	GtkWidget *menu = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	GtkWidget *scrolled = gtk_scrolled_window_new();
+	gtk_widget_set_size_request(scrolled, 400, -1);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(scrolled), 400);
+	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), menu);
 	g_object_set_data(G_OBJECT(menu), "gq-popover", popover);
-	gtk_popover_set_child(GTK_POPOVER(popover), menu);
+	g_object_set_data(G_OBJECT(popover), "tab-completion-menu", menu);
+	gtk_popover_set_child(GTK_POPOVER(popover), scrolled);
 
 	work = list;
 	while (work && count < TAB_COMP_POPUP_MAX)
@@ -344,9 +450,13 @@ static void tab_completion_popup_list(TabCompData *td, GList *list)
 		}
 
 	GtkEventController *controller = gtk_event_controller_key_new();
+	gtk_event_controller_set_propagation_phase(controller, GTK_PHASE_CAPTURE);
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(tab_completion_popup_key_press), td);
 	gtk_widget_add_controller(popover, controller);
 
+	g_object_set_data(G_OBJECT(td->entry), "tab-completion-popover", popover);
+	g_signal_connect(popover, "closed", G_CALLBACK(tab_completion_popup_closed_cb), td->entry);
+	g_signal_connect(popover, "map", G_CALLBACK(tab_completion_popup_map_cb), nullptr);
 	popover_set_parent(popover, td->entry);
 	popover_popup(popover);
 }
@@ -394,42 +504,34 @@ static gboolean tab_completion_do(TabCompData *td)
 	if (isdir(entry_dir) && strcmp(entry_file, ".") != 0 && strcmp(entry_file, "..") != 0)
 		{
 		ptr = entry_dir + strlen(entry_dir) - 1;
-		if (ptr[0] == G_DIR_SEPARATOR)
+		if (ptr[0] != G_DIR_SEPARATOR)
 			{
-			if (home_exp)
-				{
-				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
-				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
-				}
-
-			tab_completion_read_dir(td, entry_dir);
-			td->file_list = g_list_sort(td->file_list, reinterpret_cast<GCompareFunc>(CASE_SORT));
-			if (td->file_list && !td->file_list->next)
-				{
-				const gchar *file;
-
-				file = static_cast<const gchar *>(td->file_list->data);
-				g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
-				if (isdir(buf))
-					{
-					g_autofree gchar *tmp = buf;
-					buf = g_strconcat(buf, G_DIR_SEPARATOR_S, NULL);
-					}
-				gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
-				gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
-				}
-			else
-				{
-				tab_completion_popup_list(td, td->file_list);
-				}
-
-			return home_exp;
+			g_autofree gchar *tmp = entry_dir;
+			entry_dir = g_strconcat(entry_dir, G_DIR_SEPARATOR_S, NULL);
+			gq_gtk_entry_set_text(GTK_ENTRY(td->entry), entry_dir);
+			gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
 			}
 
-		g_autofree gchar *buf = g_strconcat(entry_dir, G_DIR_SEPARATOR_S, NULL);
-		gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
-		gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
-		return TRUE;
+		tab_completion_read_dir(td, entry_dir);
+		td->file_list = g_list_sort(td->file_list, reinterpret_cast<GCompareFunc>(CASE_SORT));
+		if (td->file_list && !td->file_list->next)
+			{
+			const auto *file = static_cast<const gchar *>(td->file_list->data);
+			g_autofree gchar *buf = g_build_filename(entry_dir, file, NULL);
+			if (isdir(buf))
+				{
+				g_autofree gchar *tmp = buf;
+				buf = g_strconcat(buf, G_DIR_SEPARATOR_S, NULL);
+				}
+			gq_gtk_entry_set_text(GTK_ENTRY(td->entry), buf);
+			gtk_editable_set_position(GTK_EDITABLE(td->entry), -1);
+			}
+		else
+			{
+			tab_completion_popup_list(td, td->file_list);
+			}
+
+		return home_exp;
 		}
 
 	ptr = const_cast<gchar *>(filename_from_path(entry_dir));
@@ -512,6 +614,32 @@ static gboolean tab_completion_key_pressed(GtkEventControllerKey *, guint keyval
 {
 	auto td = static_cast<TabCompData *>(data);
 	gboolean stop_signal = FALSE;
+	auto *popover = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(td->entry), "tab-completion-popover"));
+
+	if (popover && (keyval == GDK_KEY_Down || keyval == GDK_KEY_KP_Down))
+		{
+		tab_completion_popup_move_selection(popover, TRUE);
+		return TRUE;
+		}
+
+	if (popover && (keyval == GDK_KEY_Up || keyval == GDK_KEY_KP_Up))
+		{
+		tab_completion_popup_move_selection(popover, FALSE);
+		return TRUE;
+		}
+
+	if (popover && (keyval == GDK_KEY_Return || keyval == GDK_KEY_KP_Enter))
+		{
+		auto *selected = static_cast<GtkWidget *>(g_object_get_data(G_OBJECT(popover), "tab-completion-selected"));
+		if (selected) gtk_widget_activate(selected);
+		return selected != nullptr;
+		}
+
+	if (popover && keyval == GDK_KEY_Escape)
+		{
+		gtk_popover_popdown(GTK_POPOVER(popover));
+		return TRUE;
+		}
 
 	switch (keyval)
 		{

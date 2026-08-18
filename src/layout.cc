@@ -435,9 +435,14 @@ static void layout_path_entry_tab_cb(LayoutWindow *lw, const gchar *path)
 		if ((!lw->dir_fd || strcmp(lw->dir_fd->path, buf) != 0) && layout_set_path(lw, buf))
 			{
 			gtk_widget_grab_focus(lw->path_entry);
-			gint pos = -1;
-			/* put the G_DIR_SEPARATOR back, if we are in tab completion for a dir and result was path change */
-			gtk_editable_insert_text(GTK_EDITABLE(lw->path_entry), G_DIR_SEPARATOR_S, -1, &pos);
+
+			const gchar *entry_text = gtk_editable_get_text(GTK_EDITABLE(lw->path_entry));
+			if (!g_str_has_suffix(entry_text, G_DIR_SEPARATOR_S))
+				{
+				/* Keep directory results ready for completion of the next component. */
+				gint pos = -1;
+				gtk_editable_insert_text(GTK_EDITABLE(lw->path_entry), G_DIR_SEPARATOR_S, -1, &pos);
+				}
 			gtk_editable_set_position(GTK_EDITABLE(lw->path_entry), -1);
 			}
 		}

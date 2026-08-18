@@ -27,3 +27,8 @@ modelbutton check
 	margin: 0;
 	padding: 0;
 }
+
+button.tab-completion-selected {
+	background-color: @theme_selected_bg_color;
+	color: @theme_selected_fg_color;
+}
