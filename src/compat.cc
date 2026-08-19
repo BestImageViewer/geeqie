@@ -22,54 +22,6 @@
 
 #include <config.h>
 
-gint gq_gtk_box_get_child_position(GtkBox *box, GtkWidget *child)
-{
-	gint position = 0;
-
-	for (GtkWidget *work = gtk_widget_get_first_child(GTK_WIDGET(box));
-	     work != nullptr;
-	     work = gtk_widget_get_next_sibling(work), position++)
-		{
-		if (work == child) return position;
-		}
-
-	return -1;
-}
-
-void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position)
-{
-	if (!GTK_IS_BOX(box) || !child) return;
-	if (gq_gtk_box_get_child_position(box, child) < 0) return;
-
-	GtkWidget *previous = nullptr;
-	if (position >= 0)
-		{
-		gint index = 0;
-
-		for (GtkWidget *work = gtk_widget_get_first_child(GTK_WIDGET(box));
-		     work != nullptr;
-		     work = gtk_widget_get_next_sibling(work))
-			{
-			if (work == child) continue;
-			if (index >= position) break;
-
-			previous = work;
-			index++;
-			}
-		}
-	else
-		{
-		for (GtkWidget *work = gtk_widget_get_first_child(GTK_WIDGET(box));
-		     work != nullptr;
-		     work = gtk_widget_get_next_sibling(work))
-			{
-			if (work != child) previous = work;
-			}
-		}
-
-	gtk_box_reorder_child_after(box, child, previous);
-}
-
 void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget)
 {
 	if (!GTK_IS_WIDGET(container) || !GTK_IS_WIDGET(widget)) return;

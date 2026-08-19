@@ -383,7 +383,7 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
 
 		gtk_box_append(GTK_BOX(parent), ui->search_button_arrow);
-		gq_gtk_box_reorder_child(GTK_BOX(parent), ui->search_button_arrow, 0);
+		gtk_box_reorder_child_after(GTK_BOX(parent), ui->search_button_arrow, nullptr);
 
 		}
 	else
@@ -394,7 +394,7 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 
 		gtk_box_append(GTK_BOX(parent), ui->search_button_arrow);
-		gq_gtk_box_reorder_child(GTK_BOX(parent), ui->search_button_arrow, 0);
+		gtk_box_reorder_child_after(GTK_BOX(parent), ui->search_button_arrow, nullptr);
 
 		gtk_widget_grab_focus(ui->search_entry);
 		}

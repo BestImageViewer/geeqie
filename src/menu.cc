@@ -91,20 +91,39 @@ static void widget_move_cb(GSimpleAction *, GVariant *, gpointer data)
 	GtkWidget *box = gtk_widget_get_ancestor(widget, GTK_TYPE_BOX);
 	if (!box) return;
 
-	gint pos = gq_gtk_box_get_child_position(GTK_BOX(box), widget);
-	if (pos < 0) return;
-
 	if (single_step)
 		{
-		pos = up ? (pos - 1) : (pos + 1);
-		pos = std::max(pos, 0);
+		if (up)
+			{
+			GtkWidget *previous = gtk_widget_get_prev_sibling(widget);
+			if (!previous) return;
+
+			gtk_box_reorder_child_after(GTK_BOX(box), widget, gtk_widget_get_prev_sibling(previous));
+			}
+		else
+			{
+			GtkWidget *next = gtk_widget_get_next_sibling(widget);
+			if (!next) return;
+
+			gtk_box_reorder_child_after(GTK_BOX(box), widget, next);
+			}
+		}
+	else if (up)
+		{
+		gtk_box_reorder_child_after(GTK_BOX(box), widget, nullptr);
 		}
 	else
 		{
-		pos = up ? 0 : -1;
-		}
+		GtkWidget *previous = nullptr;
+		for (GtkWidget *work = gtk_widget_get_first_child(box);
+		     work;
+		     work = gtk_widget_get_next_sibling(work))
+			{
+			if (work != widget) previous = work;
+			}
 
-	gq_gtk_box_reorder_child(GTK_BOX(box), widget, pos);
+		gtk_box_reorder_child_after(GTK_BOX(box), widget, previous);
+		}
 }
 
 static const GActionEntry popup_entries[] =

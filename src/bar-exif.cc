@@ -417,7 +417,20 @@ gboolean bar_pane_exif_dnd_drop(GtkDropTarget *, const GValue *value, gdouble x,
 		pos++;
 		}
 
-	gq_gtk_box_reorder_child(GTK_BOX(ped->vbox), new_entry, pos);
+	GtkWidget *previous = nullptr;
+	gint index = 0;
+	for (GtkWidget *work = gtk_widget_get_first_child(ped->vbox);
+	     work;
+	     work = gtk_widget_get_next_sibling(work))
+		{
+		if (work == new_entry) continue;
+		if (index >= pos) break;
+
+		previous = work;
+		index++;
+		}
+
+	gtk_box_reorder_child_after(GTK_BOX(ped->vbox), new_entry, previous);
 
 	return TRUE;
 }

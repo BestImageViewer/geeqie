@@ -246,7 +246,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 		gtk_widget_set_margin_bottom(scrolled, 5);
 		}
 	gtk_box_append(GTK_BOX(win_vbox), scrolled);
-	gq_gtk_box_reorder_child(GTK_BOX(win_vbox), hbox, -1);
+	gtk_box_reorder_child_after(GTK_BOX(win_vbox), hbox, scrolled);
 
 	text_view = gtk_text_view_new();
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), text_view);
@@ -544,7 +544,7 @@ void editor_list_window_create()
 		gtk_widget_set_margin_bottom(scrolled, 5);
 		}
 	gtk_box_append(GTK_BOX(win_vbox), scrolled);
-	gq_gtk_box_reorder_child(GTK_BOX(win_vbox), hbox, -1);
+	gtk_box_reorder_child_after(GTK_BOX(win_vbox), hbox, scrolled);
 
 	ewl->view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(desktop_file_list));
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(ewl->view));

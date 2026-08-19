@@ -347,7 +347,21 @@ static void bookmark_move(BookMarkData *bm, GtkWidget *button, gint direction)
 	bookmark_populate_all(key_holder);
 	bm->key = key_holder;
 
-	gq_gtk_box_reorder_child(GTK_BOX(bm->box), button, p + direction);
+	GtkWidget *previous = nullptr;
+	gint index = 0;
+	const gint position = p + direction;
+	for (GtkWidget *work = gtk_widget_get_first_child(bm->box);
+	     work;
+	     work = gtk_widget_get_next_sibling(work))
+		{
+		if (work == button) continue;
+		if (index >= position) break;
+
+		previous = work;
+		index++;
+		}
+
+	gtk_box_reorder_child_after(GTK_BOX(bm->box), button, previous);
 }
 
 static void bookmark_menu_prop_cb(GSimpleAction *, GVariant *, gpointer data)
