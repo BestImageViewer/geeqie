@@ -154,7 +154,7 @@ GtkWidget *layout_config_widget(GtkWidget *group, GtkWidget *box, gint style, La
 	g_object_set_data(G_OBJECT(group), "layout_config", lc);
 	g_signal_connect(G_OBJECT(group), "toggled",
 	                 G_CALLBACK(layout_config_widget_click_cb), GINT_TO_POINTER(style));
-	gq_gtk_box_pack_start(GTK_BOX(box), group, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), group);
 
 	table = gtk_grid_new();
 
@@ -255,7 +255,7 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 	g_object_set_data_full(G_OBJECT(box), "layout_config", lc, delete_cb<LayoutConfig>);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), hbox);
 	for (size_t i = 0; i < layout_config_styles.size(); i++)
 		{
 		group = layout_config_widget(group, hbox, i, lc);
@@ -268,7 +268,7 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-	gq_gtk_box_pack_start(GTK_BOX(box), scrolled, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), scrolled);
 
 	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
 	lc->listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));

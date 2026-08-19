@@ -2204,7 +2204,9 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		g_signal_connect(controller, "enter", G_CALLBACK(image_focus_in_cb), imd);
 		gtk_widget_add_controller(imd->frame, controller);
 
-		gq_gtk_box_pack_start(GTK_BOX(imd->widget), imd->frame, TRUE, TRUE, 0);
+		gtk_widget_set_hexpand(imd->frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+		gtk_widget_set_vexpand(imd->frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+		gtk_box_append(GTK_BOX(imd->widget), imd->frame);
 		}
 	else
 		{
@@ -2215,7 +2217,9 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 			gq_gtk_container_remove(imd->widget, imd->frame);
 			imd->frame = nullptr;
 			}
-		gq_gtk_box_pack_start(GTK_BOX(imd->widget), imd->pr, TRUE, TRUE, 0);
+		gtk_widget_set_hexpand(imd->pr, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+		gtk_widget_set_vexpand(imd->pr, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+		gtk_box_append(GTK_BOX(imd->widget), imd->pr);
 
 		g_object_unref(imd->pr);
 		}

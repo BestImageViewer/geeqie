@@ -215,7 +215,7 @@ GtkWidget *generic_dialog_add_button(GenericDialog *gd, const gchar *icon_name, 
  * @param icon_stock_id
  * @param heading
  * @param text
- * @param expand Used as the "expand" and "fill" parameters in the eventual call to gq_gtk_box_pack_start()
+ * @param expand Whether the message should expand in the box orientation
  * @returns
  *
  *
@@ -233,7 +233,7 @@ GtkWidget *generic_dialog_add_message(GenericDialog *gd, const gchar *icon_name,
 		GtkWidget *image = gtk_image_new_from_icon_name(icon_name);
 		gtk_widget_set_halign(image, GTK_ALIGN_CENTER);
 		gtk_widget_set_valign(image, GTK_ALIGN_START);
-		gq_gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(hbox), image);
 		}
 
 	vbox = pref_box_new(hbox, TRUE, GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
@@ -365,7 +365,9 @@ static void generic_dialog_setup(GenericDialog *gd,
 
 
 	gd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), gd->vbox, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(gd->vbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(gd->vbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vbox), gd->vbox);
 
 	gd->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_halign(gd->hbox, GTK_ALIGN_END);

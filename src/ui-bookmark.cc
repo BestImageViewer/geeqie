@@ -510,7 +510,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 
 	GtkWidget *button = gtk_button_new();
 	gtk_widget_add_css_class(button, "flat");
-	gq_gtk_box_pack_start(GTK_BOX(bm->box), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(bm->box), button);
 
 	g_object_set_data_full(G_OBJECT(button), "bookbuttondata", b, delete_cb<BookButtonData>);
 
@@ -551,7 +551,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 		{
 		image = gtk_image_new_from_icon_name(GQ_ICON_DIRECTORY);
 		}
-	gq_gtk_box_pack_start(GTK_BOX(box), image, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), image);
 
 	pref_label_new(box, b->name.c_str());
 
@@ -857,7 +857,7 @@ static void bookmark_prompt_for_alias(GtkWidget *list, const gchar *selected_dir
 	GtkWidget *entry = gtk_entry_new();
 	gtk_entry_set_placeholder_text(GTK_ENTRY(entry), _("Optional name…"));
 	gtk_widget_set_tooltip_text(entry, _("Optional alias name for the shortcut.\nThis may be amended or added from the Sort Manager pane.\nIf none given, the basename of the folder is used"));
-	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), entry, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(gd->vbox), entry);
 	generic_dialog_attach_default(gd, entry);
 
 	bad->entry = entry;

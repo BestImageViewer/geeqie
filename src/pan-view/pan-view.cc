@@ -1935,7 +1935,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(layout_drop_down), pw->layout);
 	g_signal_connect(G_OBJECT(layout_drop_down), "notify::selected",
 	                 G_CALLBACK(pan_window_layout_change_cb), pw);
-	gq_gtk_box_pack_start(GTK_BOX(box), layout_drop_down, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), layout_drop_down);
 
 	static const char *size_strings[] =
 		{
@@ -1955,7 +1955,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(size_drop_down), pw->size);
 	g_signal_connect(G_OBJECT(size_drop_down), "notify::selected",
 	                 G_CALLBACK(pan_window_layout_size_cb), pw);
-	gq_gtk_box_pack_start(GTK_BOX(box), size_drop_down, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), size_drop_down);
 
 	pw->imd = image_new(TRUE);
 	pw->imd_normal = pw->imd;
@@ -1966,19 +1966,25 @@ static void pan_window_new_real(FileData *dir_fd)
 	vbox_imd_widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	hbox_imd_widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-	gq_gtk_box_pack_start(GTK_BOX(vbox_imd_widget), pw->imd->widget, true, true, 0);
+	gtk_widget_set_hexpand(pw->imd->widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox_imd_widget))) == GTK_ORIENTATION_HORIZONTAL ? true : FALSE);
+	gtk_widget_set_vexpand(pw->imd->widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox_imd_widget))) == GTK_ORIENTATION_VERTICAL ? true : FALSE);
+	gtk_box_append(GTK_BOX(vbox_imd_widget), pw->imd->widget);
 
 	pw->scrollbar_h = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, nullptr);
 	g_signal_connect(G_OBJECT(pw->scrollbar_h), "value_changed",  G_CALLBACK(pan_window_scrollbar_h_value_cb), pw);
-	gq_gtk_box_pack_start(GTK_BOX(vbox_imd_widget), pw->scrollbar_h, false, false, 0);
+	gtk_box_append(GTK_BOX(vbox_imd_widget), pw->scrollbar_h);
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox_imd_widget), vbox_imd_widget, true, true, 0);
+	gtk_widget_set_hexpand(vbox_imd_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox_imd_widget))) == GTK_ORIENTATION_HORIZONTAL ? true : FALSE);
+	gtk_widget_set_vexpand(vbox_imd_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox_imd_widget))) == GTK_ORIENTATION_VERTICAL ? true : FALSE);
+	gtk_box_append(GTK_BOX(hbox_imd_widget), vbox_imd_widget);
 
 	pw->scrollbar_v = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, nullptr);
 	g_signal_connect(G_OBJECT(pw->scrollbar_v), "value_changed", G_CALLBACK(pan_window_scrollbar_v_value_cb), pw);
-	gq_gtk_box_pack_start(GTK_BOX(hbox_imd_widget), pw->scrollbar_v, false, false, 0);
+	gtk_box_append(GTK_BOX(hbox_imd_widget), pw->scrollbar_v);
 
-	gq_gtk_box_pack_start(GTK_BOX(vbox), hbox_imd_widget, true, true, 0);
+	gtk_widget_set_hexpand(hbox_imd_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? true : FALSE);
+	gtk_widget_set_vexpand(hbox_imd_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? true : FALSE);
+	gtk_box_append(GTK_BOX(vbox), hbox_imd_widget);
 
 
 	pan_window_dnd_init(pw);
@@ -1988,11 +1994,27 @@ static void pan_window_new_real(FileData *dir_fd)
 	/* find bar */
 
 	pw->search_ui = pan_search_ui_new(pw);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), pw->search_ui->search_box, FALSE, FALSE, 2);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(pw->search_ui->search_box, 2);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(pw->search_ui->search_box, 2);
+		}
+	gtk_box_append(GTK_BOX(vbox), pw->search_ui->search_box);
 
 	/* filter bar */
 	pw->filter_ui = pan_filter_ui_new(pw);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), pw->filter_ui->filter_box, FALSE, FALSE, 2);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(pw->filter_ui->filter_box, 2);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(pw->filter_ui->filter_box, 2);
+		}
+	gtk_box_append(GTK_BOX(vbox), pw->filter_ui->filter_box);
 
 	/* status bar */
 
@@ -2002,7 +2024,9 @@ static void pan_window_new_real(FileData *dir_fd)
 	DEBUG_NAME(frame);
 	gtk_widget_add_css_class(frame, "frame");
 	gtk_widget_set_size_request(frame, ZOOM_LABEL_WIDTH, -1);
-	gq_gtk_box_pack_start(GTK_BOX(box), frame, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(box), frame);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gtk_frame_set_child(GTK_FRAME(frame), hbox);

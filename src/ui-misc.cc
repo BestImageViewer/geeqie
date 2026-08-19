@@ -76,7 +76,9 @@ GtkWidget *pref_box_new(GtkWidget *parent_box, gboolean fill,
 {
 	GtkWidget *box = gtk_box_new(orientation, padding);
 
-	gq_gtk_box_pack_start(GTK_BOX(parent_box), box, fill, fill, 0);
+	gtk_widget_set_hexpand(box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_HORIZONTAL ? fill : FALSE);
+	gtk_widget_set_vexpand(box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_VERTICAL ? fill : FALSE);
+	gtk_box_append(GTK_BOX(parent_box), box);
 
 	return box;
 }
@@ -99,17 +101,21 @@ GtkWidget *pref_group_new(GtkWidget *parent_box, gboolean fill,
 		pref_spacer(vbox, PREF_PAD_GROUP - PREF_PAD_GAP);
 		}
 
-	gq_gtk_box_pack_start(GTK_BOX(parent_box), vbox, fill, fill, 0);
+	gtk_widget_set_hexpand(vbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_HORIZONTAL ? fill : FALSE);
+	gtk_widget_set_vexpand(vbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_VERTICAL ? fill : FALSE);
+	gtk_box_append(GTK_BOX(parent_box), vbox);
 
 	label = gtk_label_new(text);
 	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
 	gtk_label_set_yalign(GTK_LABEL(label), 0.5);
 	pref_label_bold(label, TRUE, FALSE);
 
-	gq_gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(vbox), label);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_INDENT);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vbox), hbox);
 
 	/* indent using empty box */
 	pref_spacer(hbox, 0);
@@ -122,7 +128,9 @@ GtkWidget *pref_group_new(GtkWidget *parent_box, gboolean fill,
 		{
 		box = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 		}
-	gq_gtk_box_pack_start(GTK_BOX(hbox), box, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), box);
 
 	g_object_set_data(G_OBJECT(box), "pref_group", vbox);
 
@@ -155,7 +163,9 @@ GtkWidget *pref_frame_new(GtkWidget *parent_box, gboolean fill,
 	GtkWidget *frame = nullptr;
 
 	frame = gtk_frame_new(text);
-	gq_gtk_box_pack_start(GTK_BOX(parent_box), frame, fill, fill, 0);
+	gtk_widget_set_hexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_HORIZONTAL ? fill : FALSE);
+	gtk_widget_set_vexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_VERTICAL ? fill : FALSE);
+	gtk_box_append(GTK_BOX(parent_box), frame);
 
 	box = gtk_box_new(orientation, padding);
 	gtk_frame_set_child(GTK_FRAME(frame), box);
@@ -169,7 +179,15 @@ GtkWidget *pref_spacer(GtkWidget *parent_box, gboolean padding)
 	GtkWidget *spacer;
 
 	spacer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(parent_box), spacer, FALSE, FALSE, padding / 2);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(spacer, padding / 2);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(spacer, padding / 2);
+		}
+	gtk_box_append(GTK_BOX(parent_box), spacer);
 
 	return spacer;
 }
@@ -181,7 +199,15 @@ GtkWidget *pref_line(GtkWidget *parent_box, gboolean padding)
 
 	orientation = gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box));
 	spacer = gtk_separator_new((orientation == GTK_ORIENTATION_HORIZONTAL) ? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL);
-	gq_gtk_box_pack_start(GTK_BOX(parent_box), spacer, FALSE, FALSE, padding / 2);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(spacer, padding / 2);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(spacer, padding / 2);
+		}
+	gtk_box_append(GTK_BOX(parent_box), spacer);
 
 	return spacer;
 }
@@ -191,7 +217,7 @@ GtkWidget *pref_label_new(GtkWidget *parent_box, const gchar *text)
 	GtkWidget *label;
 
 	label = gtk_label_new(text);
-	gq_gtk_box_pack_start(GTK_BOX(parent_box), label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(parent_box), label);
 
 	return label;
 }
@@ -202,7 +228,7 @@ GtkWidget *pref_label_new_mnemonic(GtkWidget *parent_box, const gchar *text, Gtk
 
 	label = gtk_label_new_with_mnemonic(text);
 	gtk_label_set_mnemonic_widget(GTK_LABEL(label), widget);
-	gq_gtk_box_pack_start(GTK_BOX(parent_box), label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(parent_box), label);
 
 	return label;
 }
@@ -239,7 +265,7 @@ GtkWidget *pref_button_new(GtkWidget *parent_box, const gchar *icon_name,
 
 	if (parent_box)
 		{
-		gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(parent_box), button);
 		}
 
 	return button;
@@ -261,7 +287,7 @@ static GtkWidget *real_pref_checkbox_new(GtkWidget *parent_box, const gchar *tex
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(button), active);
 	if (func) g_signal_connect(G_OBJECT(button), "toggled", func, data);
 
-	gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(parent_box), button);
 
 	return button;
 }
@@ -336,7 +362,7 @@ static GtkWidget *real_pref_radiobutton_new(GtkWidget *parent_box, GtkWidget *si
 	if (active) gtk_check_button_set_active(GTK_CHECK_BUTTON(button), active);
 	if (func) g_signal_connect(G_OBJECT(button), "toggled", func, data);
 
-	gq_gtk_box_pack_start(GTK_BOX(parent_box), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(parent_box), button);
 
 	return button;
 }
@@ -382,7 +408,7 @@ static GtkWidget *real_pref_spin_new(GtkWidget *parent_box, const gchar *text, c
 		pref_link_sensitivity(label, spin);
 		}
 
-	gq_gtk_box_pack_start(GTK_BOX(box), spin, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), spin);
 
 	/* perhaps this should only be PREF_PAD_GAP distance from spinbutton ? */
 	if (suffix)
@@ -442,7 +468,9 @@ GtkWidget *pref_table_new(GtkWidget *parent_box, gint, gint, gboolean, gboolean 
 
 	if (parent_box)
 		{
-		gq_gtk_box_pack_start(GTK_BOX(parent_box), table, fill, fill, 0);
+		gtk_widget_set_hexpand(table, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_HORIZONTAL ? fill : FALSE);
+		gtk_widget_set_vexpand(table, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_VERTICAL ? fill : FALSE);
+		gtk_box_append(GTK_BOX(parent_box), table);
 		}
 
 	return table;
@@ -531,7 +559,7 @@ GtkWidget *pref_table_spin(GtkWidget *table, gint column, gint row,
 	if (suffix)
 		{
 		box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-		gq_gtk_box_pack_start(GTK_BOX(box), spin, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(box), spin);
 
 		label = pref_label_new(box, suffix);
 		pref_link_sensitivity(label, spin);
@@ -568,7 +596,7 @@ GtkWidget *pref_toolbar_new(GtkWidget *parent_box)
 
 	if (parent_box)
 		{
-		gq_gtk_box_pack_start(GTK_BOX(parent_box), tbar, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(parent_box), tbar);
 		}
 	return tbar;
 }
@@ -752,7 +780,7 @@ GtkWidget *date_selection_new()
 	icon = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	gtk_menu_button_set_child(GTK_MENU_BUTTON(ds->button), icon);
 
-	gq_gtk_box_pack_start(GTK_BOX(ds->box), ds->button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(ds->box), ds->button);
 	g_signal_connect(G_OBJECT(ds->button), "notify::active",
 			 G_CALLBACK(date_selection_button_active_cb), ds);
 	g_object_set_data(G_OBJECT(ds->box), DATE_SELECION_KEY, ds);
@@ -920,10 +948,16 @@ GtkWidget *pref_color_button_new(GtkWidget *parent_box, const gchar *title, cons
 		GtkWidget *label = gtk_label_new(title);
 
 		GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-		gq_gtk_box_pack_start(GTK_BOX(parent_box), hbox, TRUE, TRUE, 0);
+		gtk_widget_set_hexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+		gtk_widget_set_vexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(parent_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+		gtk_box_append(GTK_BOX(parent_box), hbox);
 
-		gq_gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-		gq_gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
+		gtk_widget_set_hexpand(label, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+		gtk_widget_set_vexpand(label, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+		gtk_box_append(GTK_BOX(hbox), label);
+		gtk_widget_set_hexpand(button, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+		gtk_widget_set_vexpand(button, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+		gtk_box_append(GTK_BOX(hbox), button);
 
 		gtk_widget_set_visible(hbox, TRUE);
 		}

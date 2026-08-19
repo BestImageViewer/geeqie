@@ -684,7 +684,7 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 		gtk_expander_set_label_widget(GTK_EXPANDER(expander), bar_expander_label_widget_new(expander, pd->title));
 		}
 
-	gq_gtk_box_pack_start(GTK_BOX(bd->vbox), expander, FALSE, TRUE, 0);
+	gtk_box_append(GTK_BOX(bd->vbox), expander);
 
 	GtkGesture *gesture = gtk_gesture_click_new();
 	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
@@ -768,15 +768,19 @@ GtkWidget *bar_new(LayoutWindow *lw)
 	gtk_label_set_xalign(GTK_LABEL(bd->label_file_name), 0.5);
 	gtk_label_set_yalign(GTK_LABEL(bd->label_file_name), 0.5);
 
-	gq_gtk_box_pack_start(GTK_BOX(box), bd->label_file_name, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(bd->label_file_name, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(bd->label_file_name, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(box), bd->label_file_name);
 
-	gq_gtk_box_pack_start(GTK_BOX(bd->widget), box, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(bd->widget), box);
 
 	GtkWidget *scrolled = gtk_scrolled_window_new();
 	DEBUG_NAME(scrolled);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 		GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	gq_gtk_box_pack_start(GTK_BOX(bd->widget), scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(bd->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(bd->widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(bd->widget), scrolled);
 
 
 	bd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);

@@ -2833,12 +2833,12 @@ static GtkWidget *dupe_display_label(GtkWidget *vbox, const gchar *description, 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
 
 	label = gtk_label_new(description);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), label);
 
 	label = gtk_label_new(text);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), label);
 
-	gq_gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(vbox), hbox);
 
 	return label;
 }
@@ -2872,7 +2872,7 @@ static void dupe_display_stats(DupeWindow *dw, DupeItem *di)
 		g_autoptr(GdkPixbuf) pixbuf = di->simd->to_pixbuf();
 
 		GtkWidget *image = gtk_image_new_from_pixbuf(pixbuf);
-		gq_gtk_box_pack_start(GTK_BOX(gd->vbox), image, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(gd->vbox), image);
 		}
 
 	gtk_window_present(GTK_WINDOW(gd->dialog));
@@ -4229,7 +4229,9 @@ DupeWindow *dupe_window_new()
 		{
 		gtk_paned_set_position(GTK_PANED(dw->paned), lw->options.dupe_window.vdivider_pos);
 		}
-	gq_gtk_box_pack_start(GTK_BOX(vbox), dw->paned, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(dw->paned, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(dw->paned, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vbox), dw->paned);
 
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
@@ -4281,7 +4283,9 @@ DupeWindow *dupe_window_new()
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gq_gtk_box_pack_start(GTK_BOX(dw->second_vbox), scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(dw->second_vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(dw->second_vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(dw->second_vbox), scrolled);
 
 	store = gtk_list_store_new(2, G_TYPE_POINTER, G_TYPE_STRING);
 	dw->second_listview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
@@ -4297,17 +4301,19 @@ DupeWindow *dupe_window_new()
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), dw->second_listview);
 
 	dw->second_status_label = gtk_label_new("");
-	gq_gtk_box_pack_start(GTK_BOX(dw->second_vbox), dw->second_status_label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(dw->second_vbox), dw->second_status_label);
 
 	pref_line(dw->second_vbox, GTK_ORIENTATION_HORIZONTAL);
 
 	status_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), status_box, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(vbox), status_box);
 
 	frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
 	gtk_widget_add_css_class(frame, "frame");
-	gq_gtk_box_pack_start(GTK_BOX(status_box), frame, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(status_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(status_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(status_box), frame);
 
 	dw->status_label = gtk_label_new("");
 	gtk_frame_set_child(GTK_FRAME(frame), dw->status_label);
@@ -4316,7 +4322,15 @@ DupeWindow *dupe_window_new()
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(dw->extra_label), 0.0);
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(dw->extra_label), "");
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(dw->extra_label), TRUE);
-	gq_gtk_box_pack_start(GTK_BOX(status_box), dw->extra_label, FALSE, FALSE, PREF_PAD_SPACE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(status_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(dw->extra_label, PREF_PAD_SPACE);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(dw->extra_label, PREF_PAD_SPACE);
+		}
+	gtk_box_append(GTK_BOX(status_box), dw->extra_label);
 
 	controls_box = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 0);
 	dw->controls_box = controls_box;
@@ -4328,47 +4342,103 @@ DupeWindow *dupe_window_new()
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_thumbs), dw->show_thumbs);
 	g_signal_connect(G_OBJECT(dw->button_thumbs), "toggled",
 			 G_CALLBACK(dupe_window_show_thumb_cb), dw);
-	gq_gtk_box_pack_start(GTK_BOX(controls_box), dw->button_thumbs, FALSE, FALSE, PREF_PAD_SPACE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(controls_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(dw->button_thumbs, PREF_PAD_SPACE);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(dw->button_thumbs, PREF_PAD_SPACE);
+		}
+	gtk_box_append(GTK_BOX(controls_box), dw->button_thumbs);
 
 	label = gtk_label_new(_("Compare by:"));
-	gq_gtk_box_pack_start(GTK_BOX(controls_box), label, FALSE, FALSE, PREF_PAD_SPACE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(controls_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(label, PREF_PAD_SPACE);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(label, PREF_PAD_SPACE);
+		}
+	gtk_box_append(GTK_BOX(controls_box), label);
 
 	dw->drop_down = dupe_menu_setup(dw);
-	gq_gtk_box_pack_start(GTK_BOX(controls_box), dw->drop_down, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(controls_box), dw->drop_down);
 
 	label = gtk_label_new(_("Custom Threshold"));
-	gq_gtk_box_pack_start(GTK_BOX(controls_box), label, FALSE, FALSE, PREF_PAD_SPACE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(controls_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(label, PREF_PAD_SPACE);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(label, PREF_PAD_SPACE);
+		}
+	gtk_box_append(GTK_BOX(controls_box), label);
 	dw->custom_threshold = gtk_spin_button_new_with_range(1, 100, 1);
 	gtk_widget_set_tooltip_text(dw->custom_threshold, _("Custom similarity threshold\n(Use tab key to set value)"));
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(dw->custom_threshold), options->duplicates_similarity_threshold);
 	g_signal_connect(G_OBJECT(dw->custom_threshold), "value-changed", G_CALLBACK(dupe_window_custom_threshold_cb), dw);
-	gq_gtk_box_pack_start(GTK_BOX(controls_box), dw->custom_threshold, FALSE, FALSE, PREF_PAD_SPACE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(controls_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(dw->custom_threshold, PREF_PAD_SPACE);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(dw->custom_threshold, PREF_PAD_SPACE);
+		}
+	gtk_box_append(GTK_BOX(controls_box), dw->custom_threshold);
 
 	button = gtk_check_button_new_with_label(_("Sort"));
 	gtk_widget_set_tooltip_text(button, _("Sort by group totals"));
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(button), options->sort_totals);
 	g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(dupe_sort_totals_toggle_cb), dw);
-	gq_gtk_box_pack_start(GTK_BOX(controls_box), button, FALSE, FALSE, PREF_PAD_SPACE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(controls_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(button, PREF_PAD_SPACE);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(button, PREF_PAD_SPACE);
+		}
+	gtk_box_append(GTK_BOX(controls_box), button);
 
 	dw->button_rotation_invariant = gtk_check_button_new_with_label(_("Ignore Orientation"));
 	gtk_widget_set_tooltip_text(dw->button_rotation_invariant, _("Ignore image orientation"));
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_rotation_invariant), options->rot_invariant_sim);
 	g_signal_connect(G_OBJECT(dw->button_rotation_invariant), "toggled",
 			 G_CALLBACK(dupe_window_rotation_invariant_cb), dw);
-	gq_gtk_box_pack_start(GTK_BOX(controls_box), dw->button_rotation_invariant, FALSE, FALSE, PREF_PAD_SPACE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(controls_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(dw->button_rotation_invariant, PREF_PAD_SPACE);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(dw->button_rotation_invariant, PREF_PAD_SPACE);
+		}
+	gtk_box_append(GTK_BOX(controls_box), dw->button_rotation_invariant);
 
 	button = gtk_check_button_new_with_label(_("Compare two file sets"));
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(button), dw->second_set);
 	g_signal_connect(G_OBJECT(button), "toggled",
 			 G_CALLBACK(dupe_second_set_toggle_cb), dw);
-	gq_gtk_box_pack_start(GTK_BOX(controls_box), button, FALSE, FALSE, PREF_PAD_SPACE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(controls_box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(button, PREF_PAD_SPACE);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(button, PREF_PAD_SPACE);
+		}
+	gtk_box_append(GTK_BOX(controls_box), button);
 
 	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), button_box, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(vbox), button_box);
 	gtk_widget_set_halign(button_box, GTK_ALIGN_END);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-	gq_gtk_box_pack_start(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(button_box), hbox);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
 	g_autofree gchar *help_accel = action_accelerator_label("win.dupe-win-help");

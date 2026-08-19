@@ -74,7 +74,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 
 	GtkWidget *button = gtk_button_new();
 	gtk_widget_add_css_class(button, "flat");
-	gq_gtk_box_pack_start(box, button, FALSE, FALSE, 0);
+	gtk_box_append(box, button);
 
 	g_object_set_data_full(G_OBJECT(button), action_name_key, g_strdup(name), g_free);
 
@@ -110,10 +110,10 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 		{
 		image = gtk_image_new_from_icon_name(GQ_ICON_GO_JUMP);
 		}
-	gq_gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), image);
 
 	GtkWidget *button_label = gtk_label_new(label);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), button_label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), button_label);
 }
 
 static void toolbarlist_add_button_main_cb(GSimpleAction *, GVariant *parameter, gpointer data)
@@ -320,7 +320,9 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, GtkWidget *window, ToolbarType b
 	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
-	gq_gtk_box_pack_start(GTK_BOX(widget), scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(widget), scrolled);
 
 	toolbarlist[bar] = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), toolbarlist[bar]);

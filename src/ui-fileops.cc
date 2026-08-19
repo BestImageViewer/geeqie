@@ -935,7 +935,7 @@ gchar *download_web_file(const gchar *text, gboolean minimized, gpointer data)
 	generic_dialog_add_message(web->gd, GQ_ICON_DIALOG_INFO, message, nullptr, FALSE);
 
 	web->progress = gtk_progress_bar_new();
-	gq_gtk_box_pack_start(GTK_BOX(web->gd->vbox), web->progress, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(web->gd->vbox), web->progress);
 	if (minimized)
 		{
 		gtk_window_minimize(GTK_WINDOW(web->gd->dialog));

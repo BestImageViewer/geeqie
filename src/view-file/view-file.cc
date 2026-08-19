@@ -1483,7 +1483,7 @@ static GtkWidget *vf_marks_filter_init(ViewFile *vf)
 		gtk_widget_set_can_target(button, FALSE);
 		gtk_widget_add_css_class(button, "marks-filter-button");
 		g_object_set_data(G_OBJECT(button), "mark-number", GINT_TO_POINTER(i));
-		gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(hbox), button);
 		g_signal_connect(G_OBJECT(button), "toggled",
 			 G_CALLBACK(vf_marks_filter_toggle_cb), vf);
 
@@ -1782,19 +1782,19 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	g_signal_connect(filter_gesture, "pressed", G_CALLBACK(vf_file_filter_gesture_press_cb), vf);
 	gtk_widget_add_controller(vf->file_filter.entry, GTK_EVENT_CONTROLLER(filter_gesture));
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox), vf->file_filter.control, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), vf->file_filter.control);
 	gtk_frame_set_child(GTK_FRAME(frame), hbox);
 
 	GtkWidget *case_sensitive = gtk_check_button_new_with_label(_("Case"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), case_sensitive, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), case_sensitive);
 	gtk_widget_set_tooltip_text(case_sensitive, _("Case sensitive"));
 	g_signal_connect(G_OBJECT(case_sensitive), "toggled", G_CALLBACK(case_sensitive_cb), vf);
 
 	GtkWidget *class_button = file_filter_menu_button_new(_("Class"), _("Select Class filter"), class_filter_popover_new(vf));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), class_button, FALSE, TRUE, 0);
+	gtk_box_append(GTK_BOX(hbox), class_button);
 
 	GtkWidget *rating_button = file_filter_menu_button_new(_("Rating"), _("Select Rating filter"), rating_filter_popover_new(vf));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), rating_button, FALSE, TRUE, 0);
+	gtk_box_append(GTK_BOX(hbox), rating_button);
 
 	return frame;
 }
@@ -1825,9 +1825,11 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	vf->file_filter.frame = vf_file_filter_init(vf);
 
 	vf->widget = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(vf->widget), vf->filter, FALSE, FALSE, 0);
-	gq_gtk_box_pack_start(GTK_BOX(vf->widget), vf->file_filter.frame, FALSE, FALSE, 0);
-	gq_gtk_box_pack_start(GTK_BOX(vf->widget), vf->scrolled, TRUE, TRUE, 0);
+	gtk_box_append(GTK_BOX(vf->widget), vf->filter);
+	gtk_box_append(GTK_BOX(vf->widget), vf->file_filter.frame);
+	gtk_widget_set_hexpand(vf->scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vf->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(vf->scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vf->widget))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vf->widget), vf->scrolled);
 
 	g_signal_connect(G_OBJECT(vf->widget), "destroy",
 			 G_CALLBACK(vf_destroy_cb), vf);

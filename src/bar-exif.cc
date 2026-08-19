@@ -150,7 +150,7 @@ void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 	gtk_label_set_xalign(GTK_LABEL(ee->title_label), horizontal ? 1.0 : 0.0);
 	gtk_label_set_yalign(GTK_LABEL(ee->title_label), 0.5);
 	gtk_size_group_add_widget(ped->size_group, ee->title_label);
-	gq_gtk_box_pack_start(GTK_BOX(ee->box), ee->title_label, FALSE, TRUE, 0);
+	gtk_box_append(GTK_BOX(ee->box), ee->title_label);
 
 	if (editable)
 		{
@@ -167,7 +167,17 @@ void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 		gtk_label_set_yalign(GTK_LABEL(ee->value_widget), 0.5);
 		}
 
-	gq_gtk_box_pack_start(GTK_BOX(ee->box), ee->value_widget, TRUE, TRUE, 1);
+	gtk_widget_set_hexpand(ee->value_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(ee->box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(ee->value_widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(ee->box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(ee->box))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(ee->value_widget, 1);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(ee->value_widget, 1);
+		}
+	gtk_box_append(GTK_BOX(ee->box), ee->value_widget);
 }
 
 GtkWidget *bar_pane_exif_add_entry(PaneExifData *ped, const gchar *key, const gchar *title, gboolean if_set, gboolean editable)
@@ -194,7 +204,7 @@ GtkWidget *bar_pane_exif_add_entry(PaneExifData *ped, const gchar *key, const gc
 	gtk_widget_remove_css_class(ee->ebox, "frame");
 	g_object_set_data_full(G_OBJECT(ee->ebox), "entry_data", ee, bar_pane_exif_entry_destroy);
 
-	gq_gtk_box_pack_start(GTK_BOX(ped->vbox), ee->ebox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(ped->vbox), ee->ebox);
 
 	bar_pane_exif_entry_dnd_init(ee->ebox);
 	GtkGesture *menu_gesture = gtk_gesture_click_new();
@@ -232,7 +242,7 @@ void bar_pane_exif_reparent_entry(GtkWidget *entry, GtkWidget *pane)
 
 	ee->ped = ped;
 	gtk_size_group_add_widget(ped->size_group, ee->title_label);
-	gq_gtk_box_pack_start(GTK_BOX(ped->vbox), entry, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(ped->vbox), entry);
 }
 
 void bar_pane_exif_entry_update_title(ExifEntry *ee)

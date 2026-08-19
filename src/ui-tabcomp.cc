@@ -734,7 +734,9 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 {
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	GtkWidget *entry = gtk_entry_new();
-	gq_gtk_box_pack_start(GTK_BOX(box), entry, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(box), entry);
 
 	TabCompData *td = tab_completion_set_to_entry(entry);
 	td->has_history = TRUE;
@@ -744,11 +746,11 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 	gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(td->history_button), GQ_ICON_PAN_DOWN);
 	gtk_widget_set_tooltip_text(td->history_button, _("Show history"));
 	gtk_widget_set_can_focus(td->history_button, FALSE);
-	gq_gtk_box_pack_start(GTK_BOX(box), td->history_button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), td->history_button);
 	tab_completion_history_rebuild(td);
 
 	GtkWidget *button = tab_completion_create_complete_button(entry);
-	gq_gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), button);
 
 	const HistoryList *history_list = history_list_find_by_key(history_key);
 	if (text)
@@ -760,7 +762,12 @@ GtkWidget *tab_completion_new_with_history(GtkWidget *parent_box, const gchar *t
 		gq_gtk_entry_set_text(GTK_ENTRY(entry), history_list->front().c_str());
 		}
 
-	if (parent_box) gq_gtk_box_pack_start(GTK_BOX(parent_box), box, TRUE, TRUE, 0);
+	if (parent_box)
+		{
+		gtk_widget_set_hexpand(box, gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box)) == GTK_ORIENTATION_HORIZONTAL);
+		gtk_widget_set_vexpand(box, gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box)) == GTK_ORIENTATION_VERTICAL);
+		gtk_box_append(GTK_BOX(parent_box), box);
+		}
 
 	return entry;
 }
@@ -791,14 +798,21 @@ GtkWidget *tab_completion_new(GtkWidget *parent_box, const gchar *text)
 
 	GtkWidget *entry = gtk_entry_new();
 	if (text) gq_gtk_entry_set_text(GTK_ENTRY(entry), text);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), entry);
 
 	GtkWidget *button = tab_completion_create_complete_button(entry);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	tab_completion_set_to_entry(entry);
 
-	if (parent_box) gq_gtk_box_pack_start(GTK_BOX(parent_box), hbox, TRUE, TRUE, 0);
+	if (parent_box)
+		{
+		gtk_widget_set_hexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box)) == GTK_ORIENTATION_HORIZONTAL);
+		gtk_widget_set_vexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(parent_box)) == GTK_ORIENTATION_VERTICAL);
+		gtk_box_append(GTK_BOX(parent_box), hbox);
+		}
 
 
 	return entry;
@@ -925,7 +939,7 @@ void tab_completion_add_select_button(GtkWidget *entry, const gchar *title, gboo
 	g_signal_connect(G_OBJECT(td->fd_button), "clicked",
 			 G_CALLBACK(tab_completion_select_pressed), td);
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox), td->fd_button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), td->fd_button);
 
 }
 

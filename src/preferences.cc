@@ -1391,7 +1391,7 @@ static void safe_delete_clear_cb(GtkWidget *widget, gpointer)
 	gtk_widget_set_can_focus(entry, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(entry), FALSE);
 	if (options->file_ops.safe_delete_path) gq_gtk_entry_set_text(GTK_ENTRY(entry), options->file_ops.safe_delete_path);
-	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), entry, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(gd->vbox), entry);
 
 	gtk_window_present(GTK_WINDOW(gd->dialog));
 }
@@ -1748,12 +1748,12 @@ static void add_star_rating(GtkWidget *group, const gchar *label, gunichar star_
 	                                GTK_ENTRY_ICON_PRIMARY, _("Default"));
 	g_signal_connect(GTK_ENTRY(star_rating_entry), "icon-press",
 	                 G_CALLBACK(star_rating_icon_cb<star_rating_default>), nullptr);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), star_rating_entry, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), star_rating_entry);
 
 	GtkWidget *button = pref_button_new(nullptr, nullptr, _("Set"),
 	                                    G_CALLBACK(star_rating_symbol_test_cb), data);
 	gtk_widget_set_tooltip_text(button, _("Display selected character"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), button);
 }
 
 /* general options tab */
@@ -1972,7 +1972,7 @@ static void config_tab_general(GtkWidget *notebook, ConfOptions *c_options)
 
 	help_search_engine_entry = gtk_entry_new();
 	gq_gtk_entry_set_text(GTK_ENTRY(help_search_engine_entry), options->help_search_engine);
-	gq_gtk_box_pack_start(GTK_BOX(group), help_search_engine_entry, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(group), help_search_engine_entry);
 
 	gtk_widget_set_tooltip_text(help_search_engine_entry, _("The format varies between search engines, e.g the format may be:\nhttps://www.search_engine.com/search?q=site:geeqie.org/help\nhttps://www.search_engine.com/?q=site:geeqie.org/help"));
 
@@ -2179,7 +2179,7 @@ static void config_tab_windows(GtkWidget *notebook, ConfOptions *c_options)
 
 	c_options->fullscreen.screen = options->fullscreen.screen;
 	hbox = fullscreen_prefs_selection_new(_("Location:"), &c_options->fullscreen.screen);
-	gq_gtk_box_pack_start(GTK_BOX(group), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(group), hbox);
 
 	pref_checkbox_new_int(group, _("Smooth image flip"),
 			      options->fullscreen.clean_flip, &c_options->fullscreen.clean_flip);
@@ -2206,7 +2206,7 @@ static GtkWidget *osd_profiles(gint i, ConfOptions *c_options)
 
 	scrolled_pre_formatted = osd_new(PRE_FORMATTED_COLUMNS, image_overlay_template_view);
 	gtk_widget_set_size_request(scrolled_pre_formatted, 200, 150);
-	gq_gtk_box_pack_start(GTK_BOX(subgroup), scrolled_pre_formatted, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(subgroup), scrolled_pre_formatted);
 
 	pref_line(group, PREF_PAD_GAP);
 
@@ -2216,7 +2216,17 @@ static GtkWidget *osd_profiles(gint i, ConfOptions *c_options)
 	gtk_widget_set_size_request(scrolled, 200, 150);
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 5);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(scrolled, 5);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(scrolled, 5);
+		}
+	gtk_box_append(GTK_BOX(group), scrolled);
 
 	gtk_widget_set_tooltip_markup(image_overlay_template_view, _("Extensive formatting options are shown in the Help file"));
 
@@ -2226,14 +2236,14 @@ static GtkWidget *osd_profiles(gint i, ConfOptions *c_options)
 
 	button = pref_button_new(nullptr, GQ_ICON_SELECT_FONT, _("Font"), G_CALLBACK(image_overlay_set_font_cb), GINT_TO_POINTER(i));
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_SELECT_COLOR, _("Text"), G_CALLBACK(image_overlay_set_text_color_cb), GINT_TO_POINTER(i));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), button);
 	c_options->image_overlay_n[i].text_color = options->image_overlay_n[i].text_color;
 
 	button = pref_button_new(nullptr, GQ_ICON_SELECT_COLOR, _("Background"), G_CALLBACK(image_overlay_set_background_color_cb), GINT_TO_POINTER(i));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), button);
 	c_options->image_overlay_n[i].background = options->image_overlay_n[i].background;
 
 	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(image_overlay_default_template_cb), image_overlay_template_view);
@@ -2264,7 +2274,9 @@ static void config_tab_osd(GtkWidget *notebook, ConfOptions *c_options)
 	GtkWidget *notebook_osd_profiles = gtk_notebook_new();
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook_osd_profiles), GTK_POS_TOP);
 	gtk_notebook_set_scrollable(GTK_NOTEBOOK(notebook_osd_profiles), TRUE);
-	gq_gtk_box_pack_start(GTK_BOX(group), notebook_osd_profiles, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(notebook_osd_profiles, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(notebook_osd_profiles, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(group), notebook_osd_profiles);
 
 	for (gint i = 0; i < OVERLAY_SCREEN_DISPLAY_PROFILE_COUNT; i++)
 		{
@@ -2279,37 +2291,37 @@ static void config_tab_osd(GtkWidget *notebook, ConfOptions *c_options)
 
 	group = pref_group_new(vbox, FALSE, _("Exif, XMP or IPTC tags"), GTK_ORIENTATION_VERTICAL);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(group), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(group), hbox);
 	label = gtk_label_new(_("%Exif.Image.Orientation%"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox),label, FALSE,FALSE,0);
+	gtk_box_append(GTK_BOX(hbox), label);
 	pref_spacer(group,TRUE);
 
 	group = pref_group_new(vbox, FALSE, _("Field separators"), GTK_ORIENTATION_VERTICAL);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(group), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(group), hbox);
 	label = gtk_label_new(_("Separator shown only if both fields are non-null:\n%formatted.ShutterSpeed%|%formatted.ISOSpeedRating%"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox),label, FALSE,FALSE,0);
+	gtk_box_append(GTK_BOX(hbox), label);
 	pref_spacer(group,TRUE);
 
 	group = pref_group_new(vbox, FALSE, _("Field maximum length"), GTK_ORIENTATION_VERTICAL);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(group), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(group), hbox);
 	label = gtk_label_new(_("%path:39%"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox),label, FALSE,FALSE,0);
+	gtk_box_append(GTK_BOX(hbox), label);
 	pref_spacer(group,TRUE);
 
 	group = pref_group_new(vbox, FALSE, _("Pre- and post- text"), GTK_ORIENTATION_VERTICAL);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(group), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(group), hbox);
 	label = gtk_label_new(_("Text shown only if the field is non-null:\n%formatted.Aperture:F no. * setting%\n %formatted.Aperture:10:F no. * setting%"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox),label, FALSE,FALSE,0);
+	gtk_box_append(GTK_BOX(hbox), label);
 	pref_spacer(group,TRUE);
 
 	group = pref_group_new(vbox, FALSE, _("Pango markup"), GTK_ORIENTATION_VERTICAL);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(group), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(group), hbox);
 	label = gtk_label_new(_("<b>bold</b>\n<u>underline</u>\n<i>italic</i>\n<s>strikethrough</s>"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox),label, FALSE,FALSE,0);
+	gtk_box_append(GTK_BOX(hbox), label);
 }
 
 static GtkTreeModel *create_class_model()
@@ -2429,7 +2441,7 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 
 	sidecar_ext_entry = gtk_entry_new();
 	gq_gtk_entry_set_text(GTK_ENTRY(sidecar_ext_entry), options->sidecar.ext);
-	gq_gtk_box_pack_start(GTK_BOX(group), sidecar_ext_entry, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(group), sidecar_ext_entry);
 
 	group = pref_group_new(vbox, TRUE, _("File types"), GTK_ORIENTATION_VERTICAL);
 
@@ -2441,7 +2453,9 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(group), scrolled);
 
 	filter_store = gtk_list_store_new(1, G_TYPE_POINTER);
 	filter_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(filter_store));
@@ -2915,10 +2929,12 @@ static void keywords_find_dialog(GtkWidget *widget, const gchar *path)
 	gtk_widget_set_can_focus(kfd->progress, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(kfd->progress), FALSE);
 	gq_gtk_entry_set_text(GTK_ENTRY(kfd->progress), _("click start to begin"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), kfd->progress, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(kfd->progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(kfd->progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), kfd->progress);
 
 	kfd->spinner = gtk_spinner_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), kfd->spinner, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), kfd->spinner);
 
 	kfd->list = nullptr;
 
@@ -2971,7 +2987,9 @@ static void config_tab_keywords(GtkWidget *notebook)
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(keyword_text), GTK_WRAP_WORD);
 
 	GtkWidget *scrolled = gtk_scrolled_window_new();
-	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(group), scrolled);
 
 #if HAVE_SPELL
 	if (options->metadata.check_spelling)
@@ -3318,7 +3336,7 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	pref_label_new(hbox, _("Log Window F1 command: "));
 	log_window_f1_entry = gtk_entry_new();
 	gq_gtk_entry_set_text(GTK_ENTRY(log_window_f1_entry), options->log_window.action);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), log_window_f1_entry, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), log_window_f1_entry);
 	gtk_editable_set_width_chars(GTK_EDITABLE(log_window_f1_entry), 15);
 #endif
 }
@@ -3394,7 +3412,9 @@ static void config_tab_accelerators(GtkWidget *notebook)
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-	gq_gtk_box_pack_start(GTK_BOX(group), scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(group))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(group), scrolled);
 
 	accel_store = gtk_tree_store_new(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
@@ -3469,10 +3489,10 @@ Double-click on the Key column and add or replace the text.\n");
 	gtk_widget_set_tooltip_text(key_value, tooltip);
 
 	gtk_label_set_mnemonic_widget(GTK_LABEL(key_label), key_value);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), key_label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), key_label);
 
 	gq_gtk_entry_set_text(GTK_ENTRY(key_value), "");
-	gq_gtk_box_pack_start(GTK_BOX(hbox), key_value, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), key_value);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed",  G_CALLBACK(accel_capture_key_press), key_value);
@@ -3492,7 +3512,9 @@ static void config_tab_toolbar(GtkWidget *notebook, GtkWidget *window, ToolbarTy
 	GtkWidget *vbox = scrolled_notebook_page(notebook, title);
 
 	GtkWidget *toolbardata = toolbar_select_new(layout_window_first(), window, bar);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), toolbardata, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(toolbardata, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(toolbardata, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vbox), toolbardata);
 }
 
 /* advanced tab */
@@ -3627,7 +3649,9 @@ static GtkWidget *config_window_create(LayoutWindow *lw, ConfOptions *c_options)
 	GtkWidget *notebook = gtk_notebook_new();
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_LEFT);
 	gtk_notebook_set_scrollable(GTK_NOTEBOOK(notebook), TRUE);
-	gq_gtk_box_pack_start(GTK_BOX(win_vbox), notebook, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(notebook, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(win_vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(notebook, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(win_vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(win_vbox), notebook);
 
 	config_tab_general(notebook, c_options);
 	config_tab_image(notebook, c_options);
@@ -3878,7 +3902,7 @@ static void timezone_database_install_cb(GtkWidget *widget, gpointer data)
 	generic_dialog_add_message(tz->gd, GQ_ICON_DIALOG_INFO, _("Downloading timezone database"), nullptr, FALSE);
 
 	tz->progress = gtk_progress_bar_new();
-	gq_gtk_box_pack_start(GTK_BOX(tz->gd->vbox), tz->progress, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(tz->gd->vbox), tz->progress);
 
 	gtk_window_present(GTK_WINDOW(tz->gd->dialog));
 	tz->cancellable = g_cancellable_new();

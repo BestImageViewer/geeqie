@@ -55,14 +55,18 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 	pref_label_new(ui->search_box, _("Find:"));
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(ui->search_box), hbox, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(ui->search_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(ui->search_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(ui->search_box), hbox);
 
 	ui->search_entry = tab_completion_new_with_history(hbox, "", "pan_view_search", -1);
 	tab_completion_set_enter_func(ui->search_entry,
 	                              [pw](const gchar *text){ pan_search_activate_cb(pw, text); });
 
 	ui->search_label = gtk_label_new("");
-	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->search_label, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(ui->search_label, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(ui->search_label, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), ui->search_label);
 
 	// Build the spin-button to show/hide the search UI.
 	ui->search_button = gtk_toggle_button_new();
@@ -71,7 +75,7 @@ PanViewSearchUi *pan_search_ui_new(PanWindow *pw)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gtk_button_set_child(GTK_BUTTON(ui->search_button), hbox);
 	ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->search_button_arrow, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), ui->search_button_arrow);
 	pref_label_new(hbox, _("Find"));
 
 	g_signal_connect(G_OBJECT(ui->search_button), "clicked",
@@ -378,7 +382,7 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		gq_gtk_container_remove(parent, ui->search_button_arrow);
 		ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
 
-		gq_gtk_box_pack_start(GTK_BOX(parent), ui->search_button_arrow, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(parent), ui->search_button_arrow);
 		gq_gtk_box_reorder_child(GTK_BOX(parent), ui->search_button_arrow, 0);
 
 		}
@@ -389,7 +393,7 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		gq_gtk_container_remove(parent, ui->search_button_arrow);
 		ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 
-		gq_gtk_box_pack_start(GTK_BOX(parent), ui->search_button_arrow, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(parent), ui->search_button_arrow);
 		gq_gtk_box_reorder_child(GTK_BOX(parent), ui->search_button_arrow, 0);
 
 		gtk_widget_grab_focus(ui->search_entry);

@@ -584,11 +584,11 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 
 	label = gtk_label_new(_("Sort Manager"));
 	pref_label_bold(label, TRUE, FALSE);
-	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(sd->vbox), label);
 
 	static const char *sort_mode_items[] = { _("Folders"), _("Collections"), nullptr };
 	GtkWidget *drop_down = gtk_drop_down_new_from_strings(sort_mode_items);
-	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), drop_down, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(sd->vbox), drop_down);
 
 	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
 	                 G_CALLBACK(bar_sort_mode_cb), sd);
@@ -666,7 +666,9 @@ static GtkWidget *bar_sort_new(LayoutWindow *lw, const BarSort &bar_sort)
 		bar_sort_bookmark_drop(sd, path, list);
 	});
 	DEBUG_NAME(sd->bookmarks);
-	gq_gtk_box_pack_start(GTK_BOX(sd->vbox), sd->bookmarks, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(sd->bookmarks, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(sd->bookmarks, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(sd->vbox), sd->bookmarks);
 
 	tbar = pref_toolbar_new(sd->vbox);
 	DEBUG_NAME(tbar);

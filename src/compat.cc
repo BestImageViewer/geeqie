@@ -63,28 +63,6 @@ GtkWidget *gtk4_box_get_first_pack_end_child(GtkBox *box)
 
 } // namespace
 
-void gq_gtk_box_pack_start(GtkBox *box, GtkWidget *child, gboolean expand, gboolean fill, guint padding)
-{
-	if (GtkWidget *first_end_child = gtk4_box_get_first_pack_end_child(box))
-		{
-		GtkWidget *previous = gtk_widget_get_prev_sibling(first_end_child);
-		if (previous)
-			{
-			gtk_box_insert_child_after(box, child, previous);
-			}
-		else
-			{
-			gtk_box_prepend(box, child);
-			}
-		}
-	else
-		{
-		gtk_box_append(box, child);
-		}
-
-	gtk4_box_apply_child_packing(box, child, expand, fill, padding);
-}
-
 void gq_gtk_box_pack_end(GtkBox *box, GtkWidget *child, gboolean expand, gboolean fill, guint padding)
 {
 	g_object_set_data(G_OBJECT(child), GTK4_BOX_PACK_END_DATA_KEY, GINT_TO_POINTER(TRUE));

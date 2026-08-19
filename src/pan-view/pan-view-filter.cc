@@ -119,7 +119,7 @@ void pan_filter_activate_cb(PanWindow *pw, const gchar *text)
 	g_autofree gchar *label = g_strdup_printf("(%s) %s", short_mode, text);
 	GtkWidget *kw_button = gtk_button_new_with_label(label);
 
-	gq_gtk_box_pack_start(GTK_BOX(ui->filter_kw_hbox), kw_button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(ui->filter_kw_hbox), kw_button);
 
 	auto cb_state = g_new0(PanFilterCallbackState, 1);
 	cb_state->pw = pw;
@@ -138,7 +138,7 @@ void pan_filter_ui_replace_filter_button_arrow(PanViewFilterUi *ui, const gchar 
 	gq_gtk_container_remove(parent, ui->filter_button_arrow);
 	ui->filter_button_arrow = gtk_image_new_from_icon_name(new_icon_name);
 
-	gq_gtk_box_pack_start(GTK_BOX(parent), ui->filter_button_arrow, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(parent), ui->filter_button_arrow);
 	gq_gtk_box_reorder_child(GTK_BOX(parent), ui->filter_button_arrow, 0);
 
 };
@@ -243,10 +243,12 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	pref_spacer(ui->filter_box, 0);
 	pref_label_new(ui->filter_box, _("Keyword Filter:"));
 
-	gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), ui->filter_mode_drop_down, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(ui->filter_box), ui->filter_mode_drop_down);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), hbox, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(ui->filter_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(ui->filter_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(ui->filter_box), hbox);
 
 	ui->filter_entry = tab_completion_new_with_history(hbox, "", "pan_view_filter", -1);
 	tab_completion_set_enter_func(ui->filter_entry,
@@ -255,7 +257,9 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	ui->filter_label = gtk_label_new("");/** @todo (xsdg): Figure out whether it's useful to keep this label around. */
 
 	ui->filter_kw_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->filter_kw_hbox, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(ui->filter_kw_hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(ui->filter_kw_hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), ui->filter_kw_hbox);
 
 	// Build the spin-button to show/hide the filter UI.
 	ui->filter_button = gtk_toggle_button_new();
@@ -264,7 +268,7 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	gtk_button_set_child(GTK_BUTTON(ui->filter_button), hbox);
 	ui->filter_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->filter_button_arrow, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), ui->filter_button_arrow);
 	pref_label_new(hbox, _("Filter"));
 
 	g_signal_connect(G_OBJECT(ui->filter_button), "clicked",
@@ -274,7 +278,7 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	for (gint i = 0; i < FILE_FORMAT_CLASSES; i++)
 		{
 		ui->filter_check_buttons[i] = gtk_check_button_new_with_label(_(format_class_list[i]));
-		gq_gtk_box_pack_start(GTK_BOX(ui->filter_box), ui->filter_check_buttons[i], FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(ui->filter_box), ui->filter_check_buttons[i]);
 		}
 
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(ui->filter_check_buttons[FORMAT_CLASS_IMAGE]), TRUE);

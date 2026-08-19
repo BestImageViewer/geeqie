@@ -1109,7 +1109,9 @@ static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointe
 			 G_CALLBACK(open_recent_dialog_row_selected_cb), dialog_data);
 	g_signal_connect(dialog_data->list, "row-activated",
 			 G_CALLBACK(open_recent_dialog_row_activated_cb), dialog_data);
-	gq_gtk_box_pack_start(GTK_BOX(dialog_data->gd->vbox), dialog_data->list, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(dialog_data->list, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(dialog_data->gd->vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(dialog_data->list, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(dialog_data->gd->vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(dialog_data->gd->vbox), dialog_data->list);
 
 	HistoryList *recent_items = history_list_find_by_key("recent");
 
@@ -1150,7 +1152,7 @@ static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointe
 		{
 		GtkWidget *label = gtk_label_new(_("No recent files available."));
 		gtk_label_set_xalign(GTK_LABEL(label), 0.0);
-		gq_gtk_box_pack_start(GTK_BOX(dialog_data->gd->vbox), label, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(dialog_data->gd->vbox), label);
 		}
 	else
 		{
@@ -1884,7 +1886,7 @@ static void layout_menu_kbd_map_cb(GSimpleAction *, GVariant *, gpointer)
 
 	dialog_data->drop_down = gtk_drop_down_new_from_strings(scope_names);
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(dialog_data->drop_down), 0);
-	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), dialog_data->drop_down, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(gd->vbox), dialog_data->drop_down);
 	generic_dialog_add_button(gd, GQ_ICON_OK, _("View"), keyboard_map_dialog_ok_cb, TRUE);
 
 	gtk_window_present(GTK_WINDOW(gd->dialog));
@@ -2620,7 +2622,9 @@ static void layout_menu_window_rename_cb(GSimpleAction *, GVariant *, gpointer  
 	gtk_widget_set_can_focus(rw->window_name_entry, TRUE);
 	gtk_editable_set_editable(GTK_EDITABLE(rw->window_name_entry), TRUE);
 	gq_gtk_entry_set_text(GTK_ENTRY(rw->window_name_entry), lw->options.id);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), rw->window_name_entry, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(rw->window_name_entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(rw->window_name_entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), rw->window_name_entry);
 	gtk_widget_grab_focus(rw->window_name_entry);
 	g_signal_connect_swapped(rw->window_name_entry, "activate", G_CALLBACK(window_rename_ok), rw);
 
@@ -2813,7 +2817,7 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 		if (gtk_widget_get_parent(toolbar) != lw->menu_tool_bar)
 			{
 			widget_remove_from_parent(toolbar);
-			gq_gtk_box_pack_start(GTK_BOX(lw->menu_tool_bar), toolbar, FALSE, FALSE, 0);
+			gtk_box_append(GTK_BOX(lw->menu_tool_bar), toolbar);
 			}
 
 		return lw->menu_tool_bar;
@@ -2821,7 +2825,7 @@ GtkWidget *layout_actions_menu_tool_bar(LayoutWindow *lw)
 
 	lw->menu_tool_bar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-	gq_gtk_box_pack_start(GTK_BOX(lw->menu_tool_bar), toolbar, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(lw->menu_tool_bar), toolbar);
 
 	return g_object_ref(lw->menu_tool_bar);
 }
@@ -3602,7 +3606,9 @@ GtkWidget *layout_bars_prepare(LayoutWindow *lw, GtkWidget *image)
 	lw->utility_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
 	lw->utility_paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(lw->utility_paned);
-	gq_gtk_box_pack_start(GTK_BOX(lw->utility_box), lw->utility_paned, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(lw->utility_paned, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(lw->utility_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(lw->utility_paned, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(lw->utility_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(lw->utility_box), lw->utility_paned);
 
 	/* Prevent the info sidebar being minimized to invisible
 	 */

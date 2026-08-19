@@ -227,7 +227,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	pref_checkbox_link_sensitivity(image_text_button, subgroup);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(subgroup), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(subgroup), hbox);
 
 	/* order is important */
 	button1 = pref_radiobutton_new(hbox, nullptr,  _("Header 1"),
@@ -250,7 +250,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	image_text_template_view = gtk_text_view_new();
 
 	scrolled_pre_formatted = osd_new(PRE_FORMATTED_COLUMNS, image_text_template_view);
-	gq_gtk_box_pack_start(GTK_BOX(subgroup), scrolled_pre_formatted, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(subgroup), scrolled_pre_formatted);
 
 	gtk_widget_set_tooltip_markup(image_text_template_view,
 					_("Extensive formatting options are shown in the Help file"));
@@ -260,7 +260,17 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 									GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gq_gtk_box_pack_start(GTK_BOX(subgroup), scrolled, TRUE, TRUE, 5);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(subgroup))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(subgroup))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(subgroup))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(scrolled, 5);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(scrolled, 5);
+		}
+	gtk_box_append(GTK_BOX(subgroup), scrolled);
 
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), image_text_template_view);
 
@@ -275,7 +285,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	button = pref_button_new(nullptr, GQ_ICON_SELECT_FONT, _("Font"),
 	                         G_CALLBACK(print_set_font_cb<image_text_font_title>), options->printer.image_font);
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	pref_spacer(group, PREF_PAD_GAP);
 
@@ -288,7 +298,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	pref_checkbox_link_sensitivity(page_text_button, subgroup);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(subgroup), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(subgroup), hbox);
 
 	/* order is important */
 	button2 = pref_radiobutton_new(hbox, nullptr, _("Header 1"),
@@ -313,7 +323,17 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gq_gtk_box_pack_start(GTK_BOX(subgroup), scrolled, TRUE, TRUE, 5);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(subgroup))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(subgroup))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(subgroup))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(scrolled, 5);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(scrolled, 5);
+		}
+	gtk_box_append(GTK_BOX(subgroup), scrolled);
 
 	page_text_view = gtk_text_view_new();
 	pw->page_text = gtk_text_view_get_buffer(GTK_TEXT_VIEW(page_text_view ));
@@ -329,7 +349,7 @@ void print_text_menu(GtkWidget *box, PrintWindow *pw)
 	button = pref_button_new(nullptr, GQ_ICON_SELECT_FONT, _("Font"),
 	                         G_CALLBACK(print_set_font_cb<page_text_font_title>), options->printer.page_font);
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), button);
 }
 
 gboolean paginate_cb(GtkPrintOperation *, GtkPrintContext *, gpointer data)

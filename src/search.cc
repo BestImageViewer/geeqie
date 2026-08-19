@@ -2765,7 +2765,7 @@ static GtkWidget *menu_spin(GtkWidget *box, gdouble min, gdouble max, gpointer d
 	g_signal_connect(G_OBJECT(adj), "value_changed",
 	                 G_CALLBACK(menu_choice_spin_cb), data);
 
-	gq_gtk_box_pack_start(GTK_BOX(box), spin, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), spin);
 
 	return spin;
 }
@@ -2808,7 +2808,7 @@ static GtkWidget *menu_choice_menu(GtkWidget *box, const std::array<MatchList, N
 
 	GtkWidget *drop_down = gtk_drop_down_new(G_LIST_MODEL(string_list), nullptr);
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), 0);
-	gq_gtk_box_pack_start(GTK_BOX(box), drop_down, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), drop_down);
 
 	if (selected_cb) g_signal_connect(G_OBJECT(drop_down), "notify::selected", selected_cb, data);
 
@@ -2823,16 +2823,18 @@ static GtkWidget *menu_choice(GtkWidget *box, const gchar *text, gboolean *value
 	GtkWidget *button;
 
 	base_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	gq_gtk_box_pack_start(GTK_BOX(box), base_box, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(box), base_box);
 
 	button = gtk_check_button_new();
 	if (value) gtk_check_button_set_active(GTK_CHECK_BUTTON(button), *value);
-	gq_gtk_box_pack_start(GTK_BOX(base_box), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(base_box), button);
 	if (check) *check = button;
 	if (value) g_object_set_data(G_OBJECT(button), "check_var", value);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(base_box), hbox, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(base_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(base_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(base_box), hbox);
 
 	g_signal_connect(G_OBJECT(button), "toggled",
 			 G_CALLBACK(menu_choice_check_cb), hbox);
@@ -3065,11 +3067,13 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.box_collection = pref_box_new(hbox, TRUE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	sd->ui.entry_collection = gtk_entry_new();
 	gq_gtk_entry_set_text(GTK_ENTRY(sd->ui.entry_collection), "");
-	gq_gtk_box_pack_start(GTK_BOX(sd->ui.box_collection), sd->ui.entry_collection, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(sd->ui.entry_collection, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->ui.box_collection))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(sd->ui.entry_collection, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(sd->ui.box_collection))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(sd->ui.box_collection), sd->ui.entry_collection);
 
 	GtkWidget *button_fd = gtk_button_new_with_label("…");
 	g_signal_connect(G_OBJECT(button_fd), "clicked", G_CALLBACK(select_collection_clicked_cb), sd);
-	gq_gtk_box_pack_start(GTK_BOX(sd->ui.box_collection), button_fd, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(sd->ui.box_collection), button_fd);
 
 	gtk_widget_set_visible(sd->ui.box_collection, FALSE);
 
@@ -3078,7 +3082,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.menu_name = menu_choice_menu(hbox, text_search_menu_name,
 	                                    nullptr, nullptr);
 	GtkWidget *combo = history_combo_new(&sd->ui.entry_name, "", "search_name", -1);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), combo, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(combo, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(combo, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), combo);
 	pref_checkbox_new_int(hbox, _("Match case"),
 			      sd->search_name_match_case, &sd->search_name_match_case);
 	pref_checkbox_new_int(hbox, _("Symbolic link"), sd->search_name_symbolic_link, &sd->search_name_symbolic_link);
@@ -3094,7 +3100,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	constexpr std::size_t file_size_max = 1024*1024*1024;
 	sd->ui.spin_size = menu_spin(hbox, 0, file_size_max, &sd->search_size);
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), hbox2);
 	pref_label_new(hbox2, _("and"));
 	sd->ui.spin_size_end = menu_spin(hbox2, 0, file_size_max, &sd->search_size_end);
 
@@ -3105,14 +3111,14 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	sd->ui.date_sel = date_selection_new();
 	date_selection_time_set(sd->ui.date_sel, time(nullptr));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.date_sel, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.date_sel);
 
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), hbox2);
 	pref_label_new(hbox2, _("and"));
 	sd->ui.date_sel_end = date_selection_new();
 	date_selection_time_set(sd->ui.date_sel_end, time(nullptr));
-	gq_gtk_box_pack_start(GTK_BOX(hbox2), sd->ui.date_sel_end, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox2), sd->ui.date_sel_end);
 
 	GtkStringList *date_list = gtk_string_list_new(nullptr);
 	for (const SearchDateType &sdt : search_date_types)
@@ -3122,7 +3128,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.date_type = gtk_drop_down_new(G_LIST_MODEL(date_list), nullptr);
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.date_type), 0);
 	gtk_widget_set_tooltip_text(sd->ui.date_type, "Modified (mtime)\nStatus Changed (ctime)\nOriginal (Exif.Photo.DateTimeOriginal)\nDigitized (Exif.Photo.DateTimeDigitized)");
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.date_type, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.date_type);
 
 	/* Search for image dimensions */
 	hbox = menu_choice(sd->ui.box_search, _("Image dimensions are"), &sd->match_dimensions_enable);
@@ -3131,7 +3137,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	pad_box = pref_box_new(hbox, FALSE, GTK_ORIENTATION_HORIZONTAL, 2);
 	menu_dimensions_spin(pad_box, sd->search_dimensions);
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), hbox2);
 	pref_label_new(hbox2, _("and"));
 	pref_spacer(hbox2, PREF_PAD_SPACE - (2*2));
 	menu_dimensions_spin(hbox2, sd->search_dimensions_end);
@@ -3160,7 +3166,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.menu_keywords = menu_choice_menu(hbox, text_search_menu_keywords,
 	                                        nullptr, nullptr);
 	sd->ui.entry_keywords = gtk_entry_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.entry_keywords, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(sd->ui.entry_keywords, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(sd->ui.entry_keywords, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.entry_keywords);
 
 	search_entry_attach_focus_controller(sd->ui.entry_keywords, sd);
 
@@ -3175,7 +3183,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	sd->ui.menu_comment = menu_choice_menu(hbox, text_search_menu_comment,
 	                                       nullptr, nullptr);
 	sd->ui.entry_comment = gtk_entry_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.entry_comment, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(sd->ui.entry_comment, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(sd->ui.entry_comment, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.entry_comment);
 
 	search_entry_attach_focus_controller(sd->ui.entry_comment, sd);
 
@@ -3197,7 +3207,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	pref_label_new(hbox, _("Tag"));
 
 	sd->ui.entry_exif_tag = gtk_entry_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.entry_exif_tag, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(sd->ui.entry_exif_tag, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(sd->ui.entry_exif_tag, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.entry_exif_tag);
 
 	search_entry_attach_focus_controller(sd->ui.entry_exif_tag, sd);
 
@@ -3210,7 +3222,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	pref_label_new(hbox, _("Value"));
 
 	sd->ui.entry_exif_value = gtk_entry_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.entry_exif_value, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(sd->ui.entry_exif_value, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(sd->ui.entry_exif_value, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.entry_exif_value);
 
 	search_entry_attach_focus_controller(sd->ui.entry_exif_value, sd);
 
@@ -3231,7 +3245,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	constexpr gint rating_max = 5;
 	sd->ui.spin_size = menu_spin(hbox, rating_min, rating_max, &sd->search_rating);
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), hbox2);
 	pref_label_new(hbox2, _("and"));
 	sd->ui.spin_rating_end = menu_spin(hbox2, rating_min, rating_max, &sd->search_rating_end);
 
@@ -3242,14 +3256,14 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	                                   G_CALLBACK(menu_choice_gps_cb), sd);
 
 	hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), hbox2, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), hbox2);
 	sd->ui.spin_gps = menu_spin(hbox2, 1, 9999, &sd->search_gps);
 
 	static const char *units_strings[] = { _("km"), _("miles"), _("n.m."), nullptr };
 	sd->ui.units_gps = gtk_drop_down_new_from_strings(units_strings);
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.units_gps), 0);
 	gtk_widget_set_tooltip_text(sd->ui.units_gps, "kilometres, miles or nautical miles");
-	gq_gtk_box_pack_start(GTK_BOX(hbox2), sd->ui.units_gps, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox2), sd->ui.units_gps);
 
 	pref_label_new(hbox2, _("from"));
 
@@ -3258,7 +3272,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_widget_set_has_tooltip(sd->ui.entry_gps_coord, TRUE);
 	gtk_widget_set_tooltip_text(sd->ui.entry_gps_coord,
 	                            _("Enter a coordinate in the form:\n89.123 179.456\nor drag-and-drop a geo-coded image\nor left-click on the map and paste\nor cut-and-paste or drag-and-drop\nan internet search URL\nSee the Help file"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox2), sd->ui.entry_gps_coord, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(sd->ui.entry_gps_coord, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox2))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(sd->ui.entry_gps_coord, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox2))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox2), sd->ui.entry_gps_coord);
 	gtk_widget_set_sensitive(sd->ui.entry_gps_coord, TRUE);
 
 
@@ -3280,7 +3296,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	};
 	sd->ui.class_type = gtk_drop_down_new_from_strings(class_strings);
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.class_type), 0);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.class_type, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.class_type);
 
 	/* Search for image marks */
 	hbox = menu_choice(sd->ui.box_search, _("Marks"), &sd->match_marks_enable);
@@ -3296,7 +3312,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 		gtk_string_list_append(marks_list, marks_string->str);
 		}
 	sd->ui.marks_type = gtk_drop_down_new(G_LIST_MODEL(marks_list), nullptr);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.marks_type, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.marks_type);
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(sd->ui.marks_type), 0);
 
 	/* Done the types of searches */
@@ -3305,7 +3321,9 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vbox), scrolled);
 
 	store = gtk_list_store_new(8, G_TYPE_POINTER, G_TYPE_INT, GDK_TYPE_PIXBUF,
 				   G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
@@ -3383,7 +3401,17 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
 	gtk_widget_add_css_class(frame, "frame");
-	gq_gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, PREF_PAD_SPACE);
+	gtk_widget_set_hexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(frame, PREF_PAD_SPACE);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(frame, PREF_PAD_SPACE);
+		}
+	gtk_box_append(GTK_BOX(hbox), frame);
 
 	sd->ui.label_status = gtk_label_new("");
 	gtk_widget_set_size_request(sd->ui.label_status, 50, -1);
@@ -3395,10 +3423,12 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(sd->ui.label_progress), "");
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(sd->ui.label_progress), TRUE);
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.label_progress, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(sd->ui.label_progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(sd->ui.label_progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.label_progress);
 
 	sd->ui.spinner = gtk_spinner_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.spinner, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), sd->ui.spinner);
 
 	GtkWidget *button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(search_window_help_button_cb), sd);
 	g_autofree gchar *help_accel = action_accelerator_label("win.search-win-help");

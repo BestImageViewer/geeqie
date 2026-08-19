@@ -409,16 +409,26 @@ static void cache_maintain_home(gboolean metadata, gboolean clear, GtkWidget *pa
 	gtk_window_set_default_size(GTK_WINDOW(cm->gd->dialog), PURGE_DIALOG_WIDTH, -1);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(cm->gd->vbox), hbox, FALSE, FALSE, 5);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(cm->gd->vbox))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(hbox, 5);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(hbox, 5);
+		}
+	gtk_box_append(GTK_BOX(cm->gd->vbox), hbox);
 
 	cm->entry = gtk_entry_new();
 	gtk_widget_set_can_focus(cm->entry, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(cm->entry), FALSE);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), cm->entry, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(cm->entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(cm->entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), cm->entry);
 
 	cm->spinner = gtk_spinner_new();
 	gtk_spinner_start(GTK_SPINNER(cm->spinner));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), cm->spinner, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), cm->spinner);
 
 	gtk_window_present(GTK_WINDOW(cm->gd->dialog));
 
@@ -808,13 +818,17 @@ static void cache_manager_render_dialog(GtkWidget *widget, const gchar *path)
 	gtk_widget_set_can_focus(cd->progress, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(cd->progress), FALSE);
 	gq_gtk_entry_set_text(GTK_ENTRY(cd->progress), _("click start to begin"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), cd->progress, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(cd->progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(cd->progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), cd->progress);
 
 	cd->progress_bar = gtk_progress_bar_new();
-	gq_gtk_box_pack_start(GTK_BOX(cd->gd->vbox), cd->progress_bar, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(cd->progress_bar, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(cd->gd->vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(cd->progress_bar, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(cd->gd->vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(cd->gd->vbox), cd->progress_bar);
 
 	cd->spinner = gtk_spinner_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), cd->spinner, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), cd->spinner);
 
 	cd->list = nullptr;
 
@@ -1049,7 +1063,7 @@ static void cache_manager_standard_process(GtkWidget *widget, gpointer)
 	cd->progress = gtk_progress_bar_new();
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(cd->progress), _("click start to begin"));
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(cd->progress), TRUE);
-	gq_gtk_box_pack_start(GTK_BOX(cd->gd->vbox), cd->progress, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(cd->gd->vbox), cd->progress);
 
 	cd->days = 30;
 	cd->tl = nullptr;
@@ -1407,13 +1421,17 @@ static void cache_manager_sim_load_dialog(GtkWidget *widget, const gchar *path)
 	gtk_widget_set_can_focus(cd->progress, FALSE);
 	gtk_editable_set_editable(GTK_EDITABLE(cd->progress), FALSE);
 	gq_gtk_entry_set_text(GTK_ENTRY(cd->progress), _("click start to begin"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), cd->progress, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(cd->progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(cd->progress, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), cd->progress);
 
 	cd->progress_bar = gtk_progress_bar_new();
-	gq_gtk_box_pack_start(GTK_BOX(cd->gd->vbox), cd->progress_bar, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(cd->progress_bar, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(cd->gd->vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(cd->progress_bar, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(cd->gd->vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(cd->gd->vbox), cd->progress_bar);
 
 	cd->spinner = gtk_spinner_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), cd->spinner, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), cd->spinner);
 
 	cd->list = nullptr;
 

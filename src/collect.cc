@@ -1153,15 +1153,19 @@ CollectWindow *collection_window_new(const gchar *path)
 	gtk_window_set_child(GTK_WINDOW(cw->window), vbox);
 
 	cw->table = collection_table_new(cw->cd);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), cw->table->scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(cw->table->scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(cw->table->scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vbox), cw->table->scrolled);
 
 	cw->status_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), cw->status_box, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(vbox), cw->status_box);
 
 	GtkWidget *frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
 	gtk_widget_add_css_class(frame, "frame");
-	gq_gtk_box_pack_start(GTK_BOX(cw->status_box), frame, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(cw->status_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(cw->status_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(cw->status_box), frame);
 
 	status_label = gtk_label_new("");
 	gtk_frame_set_child(GTK_FRAME(frame), status_label);
@@ -1171,7 +1175,9 @@ CollectWindow *collection_window_new(const gchar *path)
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(extra_label), "");
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(extra_label), TRUE);
 
-	gq_gtk_box_pack_start(GTK_BOX(cw->status_box), extra_label, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(extra_label, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(cw->status_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(extra_label, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(cw->status_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(cw->status_box), extra_label);
 
 	collection_table_set_labels(cw->table, status_label, extra_label);
 

@@ -618,7 +618,17 @@ EditorVerboseWindow::EditorVerboseWindow(EditorData *ed, const gchar *text)
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), scrolled, TRUE, TRUE, 5);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(gd->vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(gd->vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(gd->vbox))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(scrolled, 5);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(scrolled, 5);
+		}
+	gtk_box_append(GTK_BOX(gd->vbox), scrolled);
 
 	text_view = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(text_view), FALSE);
@@ -626,17 +636,19 @@ EditorVerboseWindow::EditorVerboseWindow(EditorData *ed, const gchar *text)
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), text_view);
 
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(gd->vbox), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(gd->vbox), hbox);
 
 	progress_bar = gtk_progress_bar_new();
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress_bar), 0.0);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), progress_bar, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(progress_bar, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(progress_bar, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), progress_bar);
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(progress_bar), "");
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(progress_bar), TRUE);
 
 	spinner = gtk_spinner_new();
 	gtk_spinner_start(GTK_SPINNER(spinner));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), spinner);
 
 	gtk_window_present(GTK_WINDOW(gd->dialog));
 }

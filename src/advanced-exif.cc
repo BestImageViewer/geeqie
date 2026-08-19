@@ -387,9 +387,11 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_label_set_xalign(GTK_LABEL(ew->label_file_name), 0.5);
 	gtk_label_set_yalign(GTK_LABEL(ew->label_file_name), 0.5);
 
-	gq_gtk_box_pack_start(GTK_BOX(box), ew->label_file_name, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(ew->label_file_name, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(ew->label_file_name, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(box), ew->label_file_name);
 
-	gq_gtk_box_pack_start(GTK_BOX(vbox), box, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(vbox), box);
 
 
 	store = gtk_list_store_new(7, G_TYPE_BOOLEAN,
@@ -436,7 +438,9 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(ew->scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ew->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), ew->scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(ew->scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(ew->scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vbox), ew->scrolled);
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(ew->scrolled), ew->listview);
 
 	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -445,7 +449,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_spacing(GTK_BOX(hbox), PREF_PAD_SPACE);
-	gq_gtk_box_pack_start(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(button_box), hbox);
 
 	GtkWidget *button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(exif_window_help_cb), ew);
 	g_autofree gchar *help_accel = action_accelerator_label("app.help-contents");

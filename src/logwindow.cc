@@ -340,7 +340,9 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 				       GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolledwin), true);
 
-	gq_gtk_box_pack_start(GTK_BOX(win_vbox), scrolledwin, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(scrolledwin, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(win_vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolledwin, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(win_vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(win_vbox), scrolledwin);
 
 	text = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(text), FALSE);
@@ -365,17 +367,17 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	GtkWidget *pause = gtk_toggle_button_new_with_label("Pause");
 	gtk_widget_set_tooltip_text(pause, _("Pause scrolling"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), pause, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), pause);
 	g_signal_connect(pause, "toggled", G_CALLBACK(log_window_pause_cb), nullptr);
 
 	GtkWidget *wrap = gtk_toggle_button_new_with_label("Wrap");
 	gtk_widget_set_tooltip_text(wrap, _("Enable line wrap"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), wrap, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), wrap);
 	g_signal_connect(wrap, "toggled", G_CALLBACK(log_window_line_wrap_cb), text);
 
 	GtkWidget *timer_data = gtk_toggle_button_new_with_label(_("Timer"));
 	gtk_widget_set_tooltip_text(timer_data, _("Enable timer data"));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), timer_data, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), timer_data);
 	if (options->log_window.timer_data)
 		{
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(timer_data), TRUE);
@@ -386,7 +388,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_box_append(GTK_BOX(hbox), search_box);
 
 	logwin->search_entry_box = gtk_entry_new();
-	gq_gtk_box_pack_start(GTK_BOX(search_box), logwin->search_entry_box, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(search_box), logwin->search_entry_box);
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_PRIMARY, GQ_ICON_FIND);
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->search_entry_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	gtk_widget_set_tooltip_text(logwin->search_entry_box, _("Search for text in log window"));
@@ -395,12 +397,12 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 
 	GtkWidget *backwards_button = gtk_button_new_from_icon_name(GQ_ICON_PAN_UP);
 	gtk_widget_set_tooltip_text(backwards_button, _("Search backwards"));
-	gq_gtk_box_pack_start(GTK_BOX(search_box), backwards_button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(search_box), backwards_button);
 	g_signal_connect(backwards_button, "clicked", G_CALLBACK(search_keypress_event_cb<LogWindow::SEARCH_BACKWARDS>), logwin);
 
 	GtkWidget *forwards_button = gtk_button_new_from_icon_name(GQ_ICON_PAN_DOWN);
 	gtk_widget_set_tooltip_text(forwards_button, _("Search forwards"));
-	gq_gtk_box_pack_start(GTK_BOX(search_box), forwards_button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(search_box), forwards_button);
 	g_signal_connect(forwards_button, "clicked", G_CALLBACK(search_keypress_event_cb<LogWindow::SEARCH_FORWARDS>), logwin);
 
 	GtkWidget *all_button = gtk_toggle_button_new();
@@ -408,14 +410,14 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	gtk_button_set_child(GTK_BUTTON(all_button), gtk_image_new_from_icon_name("edit-select-all-symbolic"));
 
 	gtk_widget_set_tooltip_text(all_button, _("Highlight all"));
-	gq_gtk_box_pack_start(GTK_BOX(search_box), all_button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(search_box), all_button);
 
 	g_signal_connect(all_button, "toggled", G_CALLBACK(all_keypress_event_cb), logwin);
 
 	pref_label_new(hbox, _("Filter regexp"));
 
 	logwin->regexp_box = gtk_entry_new();
-	gq_gtk_box_pack_start(GTK_BOX(hbox), logwin->regexp_box, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), logwin->regexp_box);
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(logwin->regexp_box), GTK_ENTRY_ICON_SECONDARY, GQ_ICON_CLEAR);
 	g_signal_connect(G_OBJECT(logwin->regexp_box), "activate",
 	                 G_CALLBACK(log_window_regexp_cb), logwin);

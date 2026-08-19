@@ -692,7 +692,7 @@ GtkWidget *fullscreen_prefs_selection_new(const gchar *text, gint *screen_value)
 	const gint current = (it != list.cend()) ? std::distance(list.cbegin(), it) : 0;
 	gtk_drop_down_set_selected(GTK_DROP_DOWN(drop_down), current);
 
-	gq_gtk_box_pack_start(GTK_BOX(hbox), drop_down, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), drop_down);
 
 	g_signal_connect(G_OBJECT(drop_down), "notify::selected",
 	                 G_CALLBACK(fullscreen_prefs_selection_cb), screen_value);

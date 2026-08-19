@@ -146,14 +146,22 @@ static void generic_dialog_add_image(GenericDialog *gd, GtkWidget *box,
 		{
 		GtkWidget *sep;
 
-		gq_gtk_box_pack_start(GTK_BOX(preview_box), vbox, FALSE, TRUE, 0);
+		gtk_box_append(GTK_BOX(preview_box), vbox);
 
 		sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-		gq_gtk_box_pack_start(GTK_BOX(preview_box), sep, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(preview_box), sep);
 		}
 	else
 		{
-		gq_gtk_box_pack_start(GTK_BOX(box), vbox, FALSE, TRUE, PREF_PAD_GAP);
+		if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_HORIZONTAL)
+			{
+			gtk_widget_set_margin_end(vbox, PREF_PAD_GAP);
+			}
+		else
+			{
+			gtk_widget_set_margin_bottom(vbox, PREF_PAD_GAP);
+			}
+		gtk_box_append(GTK_BOX(box), vbox);
 		}
 
 	if (header1)
@@ -169,7 +177,9 @@ static void generic_dialog_add_image(GenericDialog *gd, GtkWidget *box,
 	imd = image_new(FALSE);
 	g_object_set(imd->pr, "zoom_expand", FALSE, NULL);
 	gtk_widget_set_size_request(imd->widget, DIALOG_DEF_IMAGE_DIM_X, DIALOG_DEF_IMAGE_DIM_Y);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), imd->widget, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(imd->widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(imd->widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vbox), imd->widget);
 	image_change_fd(imd, fd1, 0.0);
 
 	if (show_filename)
@@ -201,7 +211,9 @@ static void generic_dialog_add_image(GenericDialog *gd, GtkWidget *box,
 		imd = image_new(FALSE);
 		g_object_set(imd->pr, "zoom_expand", FALSE, NULL);
 		gtk_widget_set_size_request(imd->widget, DIALOG_DEF_IMAGE_DIM_X, DIALOG_DEF_IMAGE_DIM_Y);
-		gq_gtk_box_pack_start(GTK_BOX(vbox), imd->widget, TRUE, TRUE, 0);
+		gtk_widget_set_hexpand(imd->widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+		gtk_widget_set_vexpand(imd->widget, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+		gtk_box_append(GTK_BOX(vbox), imd->widget);
 		if (fd2) image_change_fd(imd, fd2, 0.0);
 
 		if (show_filename)
@@ -531,7 +543,9 @@ static GtkWidget *file_util_dialog_add_list(GtkWidget *box, GList *list, gboolea
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gq_gtk_box_pack_start(GTK_BOX(box), scrolled, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(box), scrolled);
 
 	store = gtk_list_store_new(UTILITY_COLUMN_COUNT, G_TYPE_POINTER, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
@@ -689,20 +703,38 @@ static void file_util_progress_window_new(UtilityData *ud)
 	ud->progress_label = gtk_label_new(_("Starting…"));
 	gtk_label_set_xalign(GTK_LABEL(ud->progress_label), 0.0);
 	gtk_label_set_ellipsize(GTK_LABEL(ud->progress_label), PANGO_ELLIPSIZE_MIDDLE);
-	gq_gtk_box_pack_start(GTK_BOX(ud->progress_gd->vbox), ud->progress_label, FALSE, FALSE, 5);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(ud->progress_gd->vbox))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(ud->progress_label, 5);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(ud->progress_label, 5);
+		}
+	gtk_box_append(GTK_BOX(ud->progress_gd->vbox), ud->progress_label);
 
 	/* Progress bar and spinner in hbox */
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(ud->progress_gd->vbox), hbox, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(ud->progress_gd->vbox), hbox);
 
 	ud->progress_bar = gtk_progress_bar_new();
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(ud->progress_bar), 0.0);
 	gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(ud->progress_bar), TRUE);
-	gq_gtk_box_pack_start(GTK_BOX(hbox), ud->progress_bar, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(ud->progress_bar, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(ud->progress_bar, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(hbox), ud->progress_bar);
 
 	ud->progress_spinner = gtk_spinner_new();
 	gtk_spinner_start(GTK_SPINNER(ud->progress_spinner));
-	gq_gtk_box_pack_start(GTK_BOX(hbox), ud->progress_spinner, FALSE, FALSE, 5);
+	if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL)
+		{
+		gtk_widget_set_margin_end(ud->progress_spinner, 5);
+		}
+	else
+		{
+		gtk_widget_set_margin_bottom(ud->progress_spinner, 5);
+		}
+	gtk_box_append(GTK_BOX(hbox), ud->progress_spinner);
 
 	/* Set default window size */
 	gtk_window_set_default_size(GTK_WINDOW(ud->progress_gd->dialog), PROGRESS_WINDOW_WIDTH, PROGRESS_WINDOW_HEIGHT);
@@ -1682,10 +1714,12 @@ static GtkWidget *furm_simple_vlabel(GtkWidget *box, const gchar *text, gboolean
 	GtkWidget *label;
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_box_pack_start(GTK_BOX(box), vbox, expand, expand, 0);
+	gtk_widget_set_hexpand(vbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_HORIZONTAL ? expand : FALSE);
+	gtk_widget_set_vexpand(vbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_VERTICAL ? expand : FALSE);
+	gtk_box_append(GTK_BOX(box), vbox);
 
 	label = gtk_label_new(text);
-	gq_gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(vbox), label);
 
 	return vbox;
 }
@@ -1752,7 +1786,7 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 
 	ud->notebook = gtk_notebook_new();
 
-	gq_gtk_box_pack_start(GTK_BOX(ud->gd->vbox), ud->notebook, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(ud->gd->vbox), ud->notebook);
 
 
 	page = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
@@ -1785,7 +1819,9 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 	combo = history_combo_new(&ud->auto_entry_front, "", "numerical_rename_prefix", -1);
 	g_signal_connect(G_OBJECT(ud->auto_entry_front), "changed",
 			 G_CALLBACK(file_util_rename_preview_entry_cb), ud);
-	gq_gtk_box_pack_start(GTK_BOX(box2), combo, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(combo, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box2))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(combo, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box2))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(box2), combo);
 
 	box2 = furm_simple_vlabel(hbox, _("Start #"), FALSE);
 
@@ -1798,7 +1834,9 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 	combo = history_combo_new(&ud->auto_entry_end, options->cp_mv_rn.auto_end, "numerical_rename_suffix", -1);
 	g_signal_connect(G_OBJECT(ud->auto_entry_end), "changed",
 			 G_CALLBACK(file_util_rename_preview_entry_cb), ud);
-	gq_gtk_box_pack_start(GTK_BOX(box2), combo, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(combo, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box2))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(combo, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box2))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(box2), combo);
 
 	ud->auto_spin_pad = pref_spin_new(page, _("Padding:"), nullptr,
 					  1.0, 8.0, 1.0, 0, options->cp_mv_rn.auto_padding,
@@ -1814,7 +1852,9 @@ static void file_util_dialog_init_source_dest(UtilityData *ud, gboolean second_i
 	combo = history_combo_new(&ud->format_entry, "", "auto_rename_format", -1);
 	g_signal_connect(G_OBJECT(ud->format_entry), "changed",
 			 G_CALLBACK(file_util_rename_preview_entry_cb), ud);
-	gq_gtk_box_pack_start(GTK_BOX(box2), combo, TRUE, TRUE, 0);
+	gtk_widget_set_hexpand(combo, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box2))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(combo, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box2))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(box2), combo);
 
 	box2 = furm_simple_vlabel(hbox, _("Start #"), FALSE);
 

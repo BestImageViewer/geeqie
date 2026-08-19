@@ -164,21 +164,21 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 	g_object_set_data_full(G_OBJECT(prd->widget), "pane_data", prd, bar_pane_rating_destroy);
 
 	row_1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	gq_gtk_box_pack_start(GTK_BOX(prd->widget), row_1, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(prd->widget), row_1);
 
 	radio_rejected = gtk_check_button_new_with_label(_("Rejected"));
-	gq_gtk_box_pack_start(GTK_BOX(row_1), radio_rejected, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(row_1), radio_rejected);
 	g_signal_connect(radio_rejected, "toggled", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 	prd->rating_buttons[0] = GTK_CHECK_BUTTON(radio_rejected);
 
 	radio_unrated = gtk_check_button_new_with_label(_("Unrated"));
 	gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_unrated), GTK_CHECK_BUTTON(radio_rejected));
-	gq_gtk_box_pack_start(GTK_BOX(row_1), radio_unrated, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(row_1), radio_unrated);
 	g_signal_connect(radio_unrated, "toggled", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 	prd->rating_buttons[1] = GTK_CHECK_BUTTON(radio_unrated);
 
 	row_2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	gq_gtk_box_pack_start(GTK_BOX(prd->widget), row_2, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(prd->widget), row_2);
 
 	for (gint i = 2; i <= 6; i++)
 		{
@@ -188,7 +188,15 @@ static GtkWidget *bar_pane_rating_new(const gchar *id, const gchar *title, gbool
 		gtk_check_button_set_group(GTK_CHECK_BUTTON(radio_rating), GTK_CHECK_BUTTON(radio_rejected));
 		g_signal_connect(radio_rating, "toggled", G_CALLBACK(bar_pane_rating_selected_cb), prd);
 
-		gq_gtk_box_pack_start(GTK_BOX(row_2), radio_rating, FALSE, FALSE, 1);
+		if (gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(row_2))) == GTK_ORIENTATION_HORIZONTAL)
+			{
+			gtk_widget_set_margin_end(radio_rating, 1);
+			}
+		else
+			{
+			gtk_widget_set_margin_bottom(radio_rating, 1);
+			}
+		gtk_box_append(GTK_BOX(row_2), radio_rating);
 		prd->rating_buttons[i] = GTK_CHECK_BUTTON(radio_rating);
 		}
 
