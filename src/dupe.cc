@@ -4322,7 +4322,8 @@ DupeWindow *dupe_window_new()
 	dw->controls_box = controls_box;
 
 	dw->button_thumbs = gtk_check_button_new_with_label(_("Thumbnails"));
-	gtk_widget_set_tooltip_text(dw->button_thumbs, _("Ctrl-T"));
+	g_autofree gchar *thumbs_accel = action_accelerator_label("win.dupe-win-toggle-thumbnails");
+	gtk_widget_set_tooltip_text(dw->button_thumbs, thumbs_accel);
 	dw->show_thumbs = options->duplicates_thumbnails;
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(dw->button_thumbs), dw->show_thumbs);
 	g_signal_connect(G_OBJECT(dw->button_thumbs), "toggled",
@@ -4370,14 +4371,16 @@ DupeWindow *dupe_window_new()
 	gq_gtk_box_pack_start(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
-	gtk_widget_set_tooltip_text(button, "F1");
+	g_autofree gchar *help_accel = action_accelerator_label("win.dupe-win-help");
+	gtk_widget_set_tooltip_text(button, help_accel);
 	gq_gtk_container_add(hbox, button);
 
 	button = pref_button_new(nullptr, GQ_ICON_STOP, _("Stop"), G_CALLBACK(dupe_check_stop_cb), dw);
 	gq_gtk_container_add(hbox, button);
 
 	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(dupe_window_close_button_cb), dw);
-	gtk_widget_set_tooltip_text(button, _("Ctrl-W"));
+	g_autofree gchar *close_accel = action_accelerator_label("win.dupe-win-window-close");
+	gtk_widget_set_tooltip_text(button, close_accel);
 	gq_gtk_container_add(hbox, button);
 	gtk_window_set_default_widget(GTK_WINDOW(dw->window), button);
 	dupe_dnd_init(dw);

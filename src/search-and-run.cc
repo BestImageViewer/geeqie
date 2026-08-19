@@ -82,22 +82,6 @@ gchar *action_label_from_description(const gchar *description, const gchar *targ
 	return target ? g_strdup_printf("%s %s", description, target) : g_strdup(description);
 }
 
-gchar *action_accelerator_label(const gchar *action_name)
-{
-	auto *app = GTK_APPLICATION(g_application_get_default());
-	if (!app) return nullptr;
-
-	g_auto(GStrv) accels = gtk_application_get_accels_for_action(app, action_name);
-	if (!accels || !accels[0]) return nullptr;
-
-	guint accelerator_key = 0;
-	GdkModifierType accelerator_mods = GDK_NO_MODIFIER_MASK;
-	gtk_accelerator_parse(accels[0], &accelerator_key, &accelerator_mods);
-	if (accelerator_key == 0) return nullptr;
-
-	return gtk_accelerator_get_label(accelerator_key, accelerator_mods);
-}
-
 void append_action_to_list(std::vector<SearchAndRunAction *> &actions, const gchar *action_name, const gchar *description, const gchar *target)
 {
 	if (!action_name || !action_name[0]) return;

@@ -71,6 +71,38 @@ const char *get_description_for_action_name(const char *action_name)
 	return nullptr;
 }
 
+namespace
+{
+
+gchar *accelerator_label_from_list(GStrv accels)
+{
+	if (!accels || !accels[0]) return nullptr;
+
+	guint accelerator_key = 0;
+	GdkModifierType accelerator_mods = GDK_NO_MODIFIER_MASK;
+	gtk_accelerator_parse(accels[0], &accelerator_key, &accelerator_mods);
+	if (accelerator_key == 0) return nullptr;
+
+	return gtk_accelerator_get_label(accelerator_key, accelerator_mods);
+}
+
+} // namespace
+
+gchar *action_accelerator_label(const gchar *action_name)
+{
+	auto *app = GTK_APPLICATION(g_application_get_default());
+
+	if (app)
+		{
+		g_auto(GStrv) registered_accels = gtk_application_get_accels_for_action(app, action_name);
+		g_autofree gchar *registered_label = accelerator_label_from_list(registered_accels);
+		if (registered_label) return g_steal_pointer(&registered_label);
+		}
+
+	g_auto(GStrv) configured_accels = g_key_file_get_string_list(get_keyfile_merged(), action_name, "accels", nullptr, nullptr);
+	return accelerator_label_from_list(configured_accels);
+}
+
 static GStrv get_targets(const char *action)
 {
 	g_autofree char *prefix = g_strconcat(action, "::", nullptr);

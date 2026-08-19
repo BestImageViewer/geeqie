@@ -3377,7 +3377,8 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	sd->ui.button_thumbs = pref_checkbox_new(hbox, _("Thumbnails"), FALSE,
 	                                         G_CALLBACK(search_thumb_toggle_cb), sd);
-	gtk_widget_set_tooltip_text(sd->ui.button_thumbs, _("Ctrl-T"));
+	g_autofree gchar *thumbs_accel = action_accelerator_label("win.search-win-thumbnails");
+	gtk_widget_set_tooltip_text(sd->ui.button_thumbs, thumbs_accel);
 
 	frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
@@ -3400,18 +3401,22 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	gq_gtk_box_pack_start(GTK_BOX(hbox), sd->ui.spinner, FALSE, FALSE, 0);
 
 	GtkWidget *button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(search_window_help_button_cb), sd);
-	gtk_widget_set_tooltip_text(button_help, _("Shift-F1"));
+	g_autofree gchar *help_accel = action_accelerator_label("win.search-win-help");
+	gtk_widget_set_tooltip_text(button_help, help_accel);
 	gtk_widget_set_sensitive(button_help, TRUE);
 	pref_spacer(hbox, PREF_PAD_BUTTON_GAP);
 	sd->ui.button_start = pref_button_new(hbox, GQ_ICON_FIND, _("Find"), G_CALLBACK(search_start_button_cb), sd);
-	gtk_widget_set_tooltip_text(sd->ui.button_start, _("Ctrl-Return"));
+	g_autofree gchar *start_accel = action_accelerator_label("win.search-win-search-start");
+	gtk_widget_set_tooltip_text(sd->ui.button_start, start_accel);
 	pref_spacer(hbox, PREF_PAD_BUTTON_GAP);
 	sd->ui.button_stop = pref_button_new(hbox, GQ_ICON_STOP, _("Stop"), G_CALLBACK(search_start_button_cb), sd);
-	gtk_widget_set_tooltip_text(sd->ui.button_stop, _("Ctrl-Return"));
+	g_autofree gchar *stop_accel = action_accelerator_label("win.search-win-search-start");
+	gtk_widget_set_tooltip_text(sd->ui.button_stop, stop_accel);
 	gtk_widget_set_sensitive(sd->ui.button_stop, FALSE);
 	pref_spacer(hbox, PREF_PAD_BUTTON_GAP);
 	GtkWidget *button_close = pref_button_new(hbox, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(search_window_close_button_cb), sd);
-	gtk_widget_set_tooltip_text(button_close, _("Ctrl-W"));
+	g_autofree gchar *close_accel = action_accelerator_label("win.search-win-window-close");
+	gtk_widget_set_tooltip_text(button_close, close_accel);
 	gtk_widget_set_sensitive(button_close, TRUE);
 
 	search_result_thumb_enable(sd, TRUE);

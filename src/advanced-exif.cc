@@ -448,11 +448,13 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gq_gtk_box_pack_start(GTK_BOX(button_box), hbox, FALSE, FALSE, 0);
 
 	GtkWidget *button_help = pref_button_new(hbox, GQ_ICON_HELP, _("Help"), G_CALLBACK(exif_window_help_cb), ew);
-	gtk_widget_set_tooltip_text(button_help, "F1");
+	g_autofree gchar *help_accel = action_accelerator_label("app.help-contents");
+	gtk_widget_set_tooltip_text(button_help, help_accel);
 	gtk_widget_set_sensitive(button_help, TRUE);
 
 	GtkWidget *button_close = pref_button_new(hbox, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(exif_window_close_cb), ew);
-	gtk_widget_set_tooltip_text(button_close, _("Ctrl-W"));
+	g_autofree gchar *close_accel = action_accelerator_label("win.advanced-exif-win-close");
+	gtk_widget_set_tooltip_text(button_close, close_accel);
 	gtk_widget_set_sensitive(button_close, TRUE);
 
 	gq_gtk_widget_show_all(button_box);
