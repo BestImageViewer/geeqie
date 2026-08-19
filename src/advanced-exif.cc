@@ -268,13 +268,31 @@ static gboolean advanced_exif_delete_cb(GtkWidget *, gpointer data)
 	return FALSE;
 }
 
+static gint advanced_exif_utf8_collate(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gint sort_column_id)
+{
+	g_autofree gchar *str_a = nullptr;
+	gtk_tree_model_get(model, a,
+	                   sort_column_id, &str_a,
+	                   -1);
+
+	g_autofree gchar *str_b = nullptr;
+	gtk_tree_model_get(model, b,
+	                   sort_column_id, &str_b,
+	                   -1);
+
+	if (str_a && str_b) return g_utf8_collate(str_a, str_b);
+	if (!str_a && !str_b) return 0;
+
+	return (!str_a) ? -1 : 1;
+}
+
 static gint advanced_exif_sort_cb(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer data)
 {
 	gint n = GPOINTER_TO_INT(data);
 
 	if (n < EXIF_ADVCOL_TAG || n > EXIF_ADVCOL_DESCRIPTION) g_return_val_if_reached(0);
 
-	return gq_gtk_tree_iter_utf8_collate(model, a, b, n);
+	return advanced_exif_utf8_collate(model, a, b, n);
 }
 
 static gboolean advanced_exif_mouseclick(GtkGestureClick *, gint, gdouble, gdouble, gpointer data)
