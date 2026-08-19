@@ -2273,7 +2273,6 @@ static void config_tab_osd(GtkWidget *notebook, ConfOptions *c_options)
 		gtk_notebook_append_page(GTK_NOTEBOOK(notebook_osd_profiles), page, gtk_label_new(profile_name));
 		}
 
-	gq_gtk_widget_show_all(group);
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook_osd_profiles), options->overlay_screen_display_selected_profile);
 
 	pref_line(group, PREF_PAD_GAP);

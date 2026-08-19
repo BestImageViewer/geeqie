@@ -536,14 +536,11 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 
 		widget_remove_from_parent(lw->scrolled_window);
 		gq_gtk_box_pack_start(GTK_BOX(box), lw->scrolled_window, FALSE, FALSE, 0);
-
-		gq_gtk_widget_show_all(lw->scrolled_window);
 		}
 	else
 		{
 		widget_remove_from_parent(lw->scrolled_window);
 		gq_gtk_box_pack_start(GTK_BOX(lw->main_box), lw->scrolled_window, FALSE, FALSE, 0);
-		gq_gtk_widget_show_all(lw->scrolled_window);
 		}
 
 	if (options->hamburger_menu)
@@ -551,7 +548,6 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 		GtkWidget *header = gtk_header_bar_new();
 		gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
 		gtk_window_set_titlebar(GTK_WINDOW(lw->window), header);
-		gq_gtk_widget_show_all(header);
 		GtkWidget *menu_button = gtk_menu_button_new();
 		GtkWidget *image = gtk_image_new_from_icon_name("open-menu-symbolic");
 
@@ -2044,10 +2040,8 @@ static void layout_grid_setup(LayoutWindow *lw)
 
 	v = lw->v_pane = gtk_paned_new(GTK_ORIENTATION_VERTICAL);
 	DEBUG_NAME(v);
-	gq_gtk_widget_show_all(v);
 	h = lw->h_pane = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	DEBUG_NAME(h);
-	gq_gtk_widget_show_all(h);
 
 	if (!layout_location_vertical(static_cast<LayoutLocation>(priority_location)))
 		{

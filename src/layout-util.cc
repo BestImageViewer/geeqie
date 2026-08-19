@@ -2961,7 +2961,6 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 			}
 
 		gq_gtk_container_add(lw->toolbar[type], button);
-		gq_gtk_widget_show_all(button);
 
 		lw->toolbar_actions[type] = g_list_append(lw->toolbar_actions[type], g_strdup(action_name));
 		}

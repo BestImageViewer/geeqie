@@ -158,20 +158,6 @@ void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position)
 	gtk_box_reorder_child_after(box, child, previous);
 }
 
-void gq_gtk_widget_show_all(GtkWidget *widget)
-{
-	if (!widget) return;
-
-	gtk_widget_set_visible(widget, TRUE);
-
-	for (GtkWidget *child = gtk_widget_get_first_child(widget);
-	     child != nullptr;
-	     child = gtk_widget_get_next_sibling(child))
-		{
-		gq_gtk_widget_show_all(child);
-		}
-}
-
 void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
 {
 	if (GTK_IS_BOX(container))

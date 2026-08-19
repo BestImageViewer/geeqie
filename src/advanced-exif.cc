@@ -457,8 +457,6 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_widget_set_tooltip_text(button_close, close_accel);
 	gtk_widget_set_sensitive(button_close, TRUE);
 
-	gq_gtk_widget_show_all(button_box);
-
 	GApplication *app = g_application_get_default();
 	register_actions_from_table(GTK_APPLICATION(app), ew->window, advanced_exif_actions, get_keyfile_merged(), ew);
 
