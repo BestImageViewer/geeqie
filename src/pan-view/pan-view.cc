@@ -2034,20 +2034,26 @@ static void pan_window_new_real(FileData *dir_fd)
 	pref_spacer(hbox, 0);
 	pw->label_message = pref_label_new(hbox, "");
 
+	GtkWidget *end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_set_hexpand(end_box, TRUE);
+	gtk_widget_set_halign(end_box, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(box), end_box);
+
 	frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(frame);
 	gtk_widget_add_css_class(frame, "frame");
 	gtk_widget_set_size_request(frame, ZOOM_LABEL_WIDTH, -1);
-	gq_gtk_box_pack_end(GTK_BOX(box), frame, FALSE, FALSE, 0);
 
 	pw->label_zoom = gtk_label_new("");
 	gtk_frame_set_child(GTK_FRAME(frame), pw->label_zoom);
 
-	// Add the "Find" button to the status bar area.
-	gq_gtk_box_pack_end(GTK_BOX(box), pw->search_ui->search_button, FALSE, FALSE, 0);
-
 	// Add the "Filter" button to the status bar area.
-	gq_gtk_box_pack_end(GTK_BOX(box), pw->filter_ui->filter_button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(end_box), pw->filter_ui->filter_button);
+
+	// Add the "Find" button to the status bar area.
+	gtk_box_append(GTK_BOX(end_box), pw->search_ui->search_button);
+
+	gtk_box_append(GTK_BOX(end_box), frame);
 
 	g_signal_connect(G_OBJECT(pw->window), "close-request", G_CALLBACK(pan_window_delete_cb), pw);
 	GtkEventController *controller = gtk_event_controller_key_new();

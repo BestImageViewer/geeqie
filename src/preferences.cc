@@ -2246,11 +2246,16 @@ static GtkWidget *osd_profiles(gint i, ConfOptions *c_options)
 	gtk_box_append(GTK_BOX(hbox), button);
 	c_options->image_overlay_n[i].background = options->image_overlay_n[i].background;
 
-	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(image_overlay_default_template_cb), image_overlay_template_view);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	GtkWidget *end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_hexpand(end_box, TRUE);
+	gtk_widget_set_halign(end_box, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(hbox), end_box);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"), G_CALLBACK(image_overlay_help_cb), nullptr);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(end_box), button);
+
+	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(image_overlay_default_template_cb), image_overlay_template_view);
+	gtk_box_append(GTK_BOX(end_box), button);
 
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(image_overlay_template_view));
 	if (options->image_overlay_n[i].template_string) gtk_text_buffer_set_text(buffer, options->image_overlay_n[i].template_string, -1);
@@ -2567,17 +2572,22 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
-	button = pref_button_new(nullptr, nullptr, _("Defaults"),
-				 G_CALLBACK(filter_default_cb), filter_view);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-
-	button = pref_button_new(nullptr, GQ_ICON_REMOVE, _("Remove"),
-				 G_CALLBACK(filter_remove_cb), filter_view);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	GtkWidget *end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_hexpand(end_box, TRUE);
+	gtk_widget_set_halign(end_box, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(hbox), end_box);
 
 	button = pref_button_new(nullptr, GQ_ICON_ADD, _("Add"),
 				 G_CALLBACK(filter_add_cb), filter_view);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(end_box), button);
+
+	button = pref_button_new(nullptr, GQ_ICON_REMOVE, _("Remove"),
+				 G_CALLBACK(filter_remove_cb), filter_view);
+	gtk_box_append(GTK_BOX(end_box), button);
+
+	button = pref_button_new(nullptr, nullptr, _("Defaults"),
+				 G_CALLBACK(filter_default_cb), filter_view);
+	gtk_box_append(GTK_BOX(end_box), button);
 }
 
 static void pref_checkbox_add_markup(GtkWidget *checkbox, const char *format, ...)
@@ -3219,13 +3229,18 @@ static void config_tab_behavior(GtkWidget *notebook, ConfOptions *c_options)
 	spin = pref_spin_new_int(hbox, _("Maximum size:"), _("MiB"),
 				 0, 2048, 1, options->file_ops.safe_delete_folder_maxsize, &c_options->file_ops.safe_delete_folder_maxsize);
 	gtk_widget_set_tooltip_markup(spin, _("Set to 0 for unlimited size"));
-	button = pref_button_new(nullptr, nullptr, _("View"),
-				 G_CALLBACK(safe_delete_view_cb), nullptr);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	GtkWidget *end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_hexpand(end_box, TRUE);
+	gtk_widget_set_halign(end_box, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(hbox), end_box);
 
 	button = pref_button_new(nullptr, GQ_ICON_CLEAR, nullptr,
 				 G_CALLBACK(safe_delete_clear_cb), nullptr);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(end_box), button);
+
+	button = pref_button_new(nullptr, nullptr, _("View"),
+				 G_CALLBACK(safe_delete_view_cb), nullptr);
+	gtk_box_append(GTK_BOX(end_box), button);
 
 	c_options->file_ops.no_trash = options->file_ops.no_trash;
 	c_options->file_ops.use_system_trash = options->file_ops.use_system_trash;
@@ -3498,11 +3513,16 @@ Double-click on the Key column and add or replace the text.\n");
 	g_signal_connect(controller, "key-pressed",  G_CALLBACK(accel_capture_key_press), key_value);
 	gtk_widget_add_controller(key_value, controller);
 
-	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(accel_default_cb), accel_view);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	GtkWidget *end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
+	gtk_widget_set_hexpand(end_box, TRUE);
+	gtk_widget_set_halign(end_box, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(hbox), end_box);
 
 	button = pref_button_new(nullptr, nullptr, _("Reset selected"), G_CALLBACK(accel_reset_cb), accel_view);
-	gq_gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(end_box), button);
+
+	button = pref_button_new(nullptr, nullptr, _("Defaults"), G_CALLBACK(accel_default_cb), accel_view);
+	gtk_box_append(GTK_BOX(end_box), button);
 }
 
 /* toolbar tab */

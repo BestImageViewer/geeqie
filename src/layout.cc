@@ -1030,7 +1030,10 @@ static GtkWidget *layout_status_label(const gchar *text, GtkWidget *box, gboolea
 		}
 	else
 		{
-		gq_gtk_box_pack_end(GTK_BOX(box), frame, expand, expand, 0);
+		gtk_widget_set_hexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_HORIZONTAL ? expand : FALSE);
+		gtk_widget_set_vexpand(frame, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(box))) == GTK_ORIENTATION_VERTICAL ? expand : FALSE);
+		gtk_widget_set_halign(frame, GTK_ALIGN_START);
+		gtk_box_append(GTK_BOX(box), frame);
 		}
 
 	label = gtk_label_new(text ? text : "");
@@ -1104,18 +1107,30 @@ static void layout_status_setup(LayoutWindow *lw, GtkWidget *box, gboolean small
 	gtk_frame_set_child(GTK_FRAME(toolbar_frame), toolbar);
 	lw->info_zoom = layout_zoom_button(lw, hbox, ZOOM_LABEL_WIDTH, TRUE);
 	gtk_widget_set_tooltip_text(lw->info_zoom, _("Select zoom and scroll mode"));
-	gq_gtk_box_pack_end(GTK_BOX(hbox), toolbar_frame, FALSE, FALSE, 0);
+
+	GtkWidget *status_end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_set_hexpand(status_end_box, TRUE);
+	gtk_widget_set_halign(status_end_box, GTK_ALIGN_END);
+	gtk_box_append(GTK_BOX(hbox), status_end_box);
 
 	if (small_format)
 		{
+		gtk_box_append(GTK_BOX(status_end_box), toolbar_frame);
+
 		hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 		DEBUG_NAME(hbox);
 		gtk_box_append(GTK_BOX(lw->info_box), hbox);
+
+		status_end_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+		gtk_widget_set_hexpand(status_end_box, TRUE);
+		gtk_widget_set_halign(status_end_box, GTK_ALIGN_END);
+		gtk_box_append(GTK_BOX(hbox), status_end_box);
 		}
-	lw->info_pixel = layout_status_label(nullptr, hbox, FALSE, 0, small_format); /* expand only in small format */
+	lw->info_pixel = layout_status_label(nullptr, status_end_box, TRUE, 0, small_format); /* expand only in small format */
 	DEBUG_NAME(lw->info_pixel);
 	gtk_widget_set_tooltip_text(lw->info_pixel, _("[Pixel x,y coord]: (Pixel R,G,B value)"));
 	if (!lw->options.show_info_pixel) gtk_widget_set_visible(gtk_widget_get_parent(lw->info_pixel), FALSE);
+	if (!small_format) gtk_box_append(GTK_BOX(status_end_box), toolbar_frame);
 }
 
 /*
@@ -2413,7 +2428,8 @@ void layout_show_config_window(LayoutWindow *lw)
 
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
-	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
+	gtk_widget_set_valign(hbox, GTK_ALIGN_START);
+	gtk_box_append(GTK_BOX(win_vbox), hbox);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(layout_config_help_cb), lc);
