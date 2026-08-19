@@ -284,7 +284,7 @@ gboolean register_theme_icon_as_stock(const gchar *key, const gchar *icon)
 	GdkPixbuf *pixbuf;
 	GError *error = nullptr;
 
-	icon_theme = gq_icon_theme_get_default();
+	icon_theme = gtk_icon_theme_get_for_display(gdk_display_get_default());
 
 	if (gtk_icon_theme_has_icon(icon_theme, key)) return FALSE;
 

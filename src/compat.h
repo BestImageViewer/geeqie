@@ -37,8 +37,6 @@
 #define GDK_ACTION_NONE static_cast<GdkDragAction>(0)
 #endif
 
-#define gq_icon_theme_get_default() gtk_icon_theme_get_for_display(gdk_display_get_default())
-
 gint gq_gtk_box_get_child_position(GtkBox *box, GtkWidget *child);
 void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position);
 

@@ -703,7 +703,7 @@ void startup_common(GtkApplication *, gpointer)
 		}
 
 	DEBUG_1("%s main: pixbuf_inline_register_stock_icons", get_exec_time());
-	gtk_icon_theme_add_resource_path(gq_icon_theme_get_default(), GQ_RESOURCE_PATH_ICONS);
+	gtk_icon_theme_add_resource_path(gtk_icon_theme_get_for_display(gdk_display_get_default()), GQ_RESOURCE_PATH_ICONS);
 	pixbuf_inline_register_stock_icons();
 
 	DEBUG_1("%s main: setting default options before commandline handling", get_exec_time());

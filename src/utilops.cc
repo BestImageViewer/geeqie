@@ -87,7 +87,7 @@ GdkPixbuf *file_util_get_error_icon(FileData *fd, GList *list, GtkWidget *)
 {
 	static PixmapErrors pe = []() -> PixmapErrors
 	{
-		GtkIconTheme *icon_theme = gq_icon_theme_get_default();
+		GtkIconTheme *icon_theme = gtk_icon_theme_get_for_display(gdk_display_get_default());
 
 		constexpr gint size = 16;
 
