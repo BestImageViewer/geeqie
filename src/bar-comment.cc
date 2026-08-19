@@ -272,7 +272,7 @@ static GtkWidget *bar_pane_comment_new(const gchar *id, const gchar *title, cons
 
 	pcd->comment_view = gtk_text_view_new();
 	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(pcd->comment_view), GTK_WRAP_WORD);
-	gq_gtk_container_add(scrolled, pcd->comment_view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), pcd->comment_view);
 	bar_pane_comment_set_extra_menu(pcd);
 
 #if HAVE_SPELL

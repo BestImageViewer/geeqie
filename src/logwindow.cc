@@ -329,7 +329,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	GtkWidget *window = window_new("log", nullptr, _("Log"));
 	DEBUG_NAME(window);
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
-	gq_gtk_container_add(window, win_vbox);
+	gtk_window_set_child(GTK_WINDOW(window), win_vbox);
 
 	gtk_window_set_default_size(GTK_WINDOW(window), log_window.width, log_window.height);
 
@@ -348,7 +348,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
 	gtk_text_buffer_get_start_iter(buffer, &iter);
 	gtk_text_buffer_create_mark(buffer, "end", &iter, FALSE);
-	gq_gtk_container_add(scrolledwin, text);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolledwin), text);
 
 	GtkEventController *controller = gtk_event_controller_key_new();
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(log_window_key_pressed_cb), text);
@@ -383,7 +383,7 @@ static LogWindow *log_window_create(GdkRectangle log_window)
 	g_signal_connect(timer_data, "toggled", G_CALLBACK(log_window_timer_data_cb), nullptr);
 
 	GtkWidget *search_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_container_add(hbox, search_box);
+	gtk_box_append(GTK_BOX(hbox), search_box);
 
 	logwin->search_entry_box = gtk_entry_new();
 	gq_gtk_box_pack_start(GTK_BOX(search_box), logwin->search_entry_box, FALSE, FALSE, 0);

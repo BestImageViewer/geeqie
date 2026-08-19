@@ -79,7 +79,7 @@ static void toolbarlist_add_button(const gchar *name, const gchar *label,
 	g_object_set_data_full(G_OBJECT(button), action_name_key, g_strdup(name), g_free);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-	gq_gtk_container_add(button, hbox);
+	gtk_button_set_child(GTK_BUTTON(button), hbox);
 
 	gesture = gtk_gesture_click_new();
 	gtk_widget_add_controller(button, GTK_EVENT_CONTROLLER(gesture));
@@ -323,7 +323,7 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, GtkWidget *window, ToolbarType b
 	gq_gtk_box_pack_start(GTK_BOX(widget), scrolled, TRUE, TRUE, 0);
 
 	toolbarlist[bar] = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(scrolled, toolbarlist[bar]);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), toolbarlist[bar]);
 	gtk_widget_remove_css_class(gtk_widget_get_first_child(scrolled), "frame");
 
 	add_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);

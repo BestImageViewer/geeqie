@@ -1441,7 +1441,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gq_gtk_box_pack_start(GTK_BOX(hbox), scrolled, TRUE, TRUE, 0);
 
 	pkd->keyword_view = gtk_text_view_new();
-	gq_gtk_container_add(scrolled, pkd->keyword_view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), pkd->keyword_view);
 	bar_pane_keywords_set_extra_menu(pkd);
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pkd->keyword_view));
@@ -1554,7 +1554,7 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	if (options->show_predefined_keyword_tree)
 		{
 		GtkWidget *popover_parent = popover_parent_new(pkd->keyword_treeview);
-		gq_gtk_container_add(scrolled, popover_parent);
+		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), popover_parent);
 		}
 
 	file_data_register_notify_func(bar_pane_keywords_notify_cb, pkd, NOTIFY_PRIORITY_LOW);

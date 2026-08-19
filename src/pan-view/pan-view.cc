@@ -1912,7 +1912,7 @@ static void pan_window_new_real(FileData *dir_fd)
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(vbox);
-	gq_gtk_container_add(pw->window, vbox);
+	gtk_window_set_child(GTK_WINDOW(pw->window), vbox);
 
 	box = pref_box_new(vbox, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 
@@ -2005,7 +2005,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	gq_gtk_box_pack_start(GTK_BOX(box), frame, TRUE, TRUE, 0);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_container_add(frame, hbox);
+	gtk_frame_set_child(GTK_FRAME(frame), hbox);
 
 	pref_spacer(hbox, 0);
 	pw->label_message = pref_label_new(hbox, "");
@@ -2017,7 +2017,7 @@ static void pan_window_new_real(FileData *dir_fd)
 	gq_gtk_box_pack_end(GTK_BOX(box), frame, FALSE, FALSE, 0);
 
 	pw->label_zoom = gtk_label_new("");
-	gq_gtk_container_add(frame, pw->label_zoom);
+	gtk_frame_set_child(GTK_FRAME(frame), pw->label_zoom);
 
 	// Add the "Find" button to the status bar area.
 	gq_gtk_box_pack_end(GTK_BOX(box), pw->search_ui->search_button, FALSE, FALSE, 0);

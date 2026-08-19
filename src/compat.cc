@@ -158,46 +158,6 @@ void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position)
 	gtk_box_reorder_child_after(box, child, previous);
 }
 
-void gq_gtk_container_add(GtkWidget *container, GtkWidget *widget)
-{
-	if (GTK_IS_BOX(container))
-		{
-		gtk_box_append(GTK_BOX(container), widget);
-		}
-	else if (GTK_IS_BUTTON(container))
-		{
-		gtk_button_set_child(GTK_BUTTON(container), widget);
-		}
-	else if (GTK_IS_EXPANDER(container))
-		{
-		gtk_expander_set_child(GTK_EXPANDER(container), widget);
-		}
-	else if (GTK_IS_FRAME(container))
-		{
-		gtk_frame_set_child(GTK_FRAME(container), widget);
-		}
-	else if (GTK_IS_POPOVER(container))
-		{
-		gtk_popover_set_child(GTK_POPOVER(container), widget);
-		}
-	else if (GTK_IS_SCROLLED_WINDOW(container))
-		{
-		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(container), widget);
-		}
-	else if (GTK_IS_VIEWPORT(container))
-		{
-		gtk_viewport_set_child(GTK_VIEWPORT(container), widget);
-		}
-	else if (GTK_IS_WINDOW(container))
-		{
-		gtk_window_set_child(GTK_WINDOW(container), widget);
-		}
-	else
-		{
-		g_abort();
-		}
-}
-
 void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget)
 {
 	if (!GTK_IS_WIDGET(container) || !GTK_IS_WIDGET(widget)) return;

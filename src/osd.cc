@@ -301,13 +301,13 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 
 	GtkWidget *viewport = gtk_viewport_new(nullptr, nullptr);
 	gtk_widget_remove_css_class(viewport, "frame");
-	gq_gtk_container_add(scrolled, viewport);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), viewport);
 
 	constexpr gint entries = std::size(predefined_tags);
 	const gint max_rows = ceil(static_cast<gdouble>(entries) / max_cols);
 
 	auto *grid = GTK_GRID(gtk_grid_new());
-	gq_gtk_container_add(viewport, GTK_WIDGET(grid));
+	gtk_viewport_set_child(GTK_VIEWPORT(viewport), GTK_WIDGET(grid));
 
 	gint i = 0;
 	for (gint rows = 0; rows < max_rows; rows++)

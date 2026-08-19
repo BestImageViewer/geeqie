@@ -189,7 +189,7 @@ GtkWidget *help_window_new(const gchar *title,
 			 G_CALLBACK(help_window_delete_cb), NULL);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(window, vbox);
+	gtk_window_set_child(GTK_WINDOW(window), vbox);
 
 	g_object_set_data(G_OBJECT(window), "text_vbox", vbox);
 
@@ -206,7 +206,7 @@ GtkWidget *help_window_new(const gchar *title,
 
 	text = gtk_text_view_new();
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(text), FALSE);
-	gq_gtk_container_add(scrolled, text);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), text);
 
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
 	gtk_text_buffer_create_tag(buffer, "monospace",
@@ -219,7 +219,7 @@ GtkWidget *help_window_new(const gchar *title,
 	button = gtk_button_new_from_icon_name(GQ_ICON_CLOSE);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(help_window_close), window);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 	gtk_window_set_default_widget(GTK_WINDOW(window), button);
 
 	g_object_set_data(G_OBJECT(window), "text_widget", text);

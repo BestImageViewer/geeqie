@@ -144,7 +144,7 @@ void bar_pane_exif_setup_entry_box(PaneExifData *ped, ExifEntry *ee)
 		}
 
 	ee->box = gtk_box_new(horizontal ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(ee->ebox, ee->box);
+	gtk_frame_set_child(GTK_FRAME(ee->ebox), ee->box);
 
 	ee->title_label = gtk_label_new(nullptr);
 	gtk_label_set_xalign(GTK_LABEL(ee->title_label), horizontal ? 1.0 : 0.0);

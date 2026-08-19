@@ -377,7 +377,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	g_signal_connect(G_OBJECT(ew->window), "close-request", G_CALLBACK(advanced_exif_delete_cb), ew);
 
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	gq_gtk_container_add(ew->window, vbox);
+	gtk_window_set_child(GTK_WINDOW(ew->window), vbox);
 
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
@@ -437,7 +437,7 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ew->scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), ew->scrolled, TRUE, TRUE, 0);
-	gq_gtk_container_add(ew->scrolled, ew->listview);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(ew->scrolled), ew->listview);
 
 	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gq_gtk_box_pack_end(GTK_BOX(vbox), button_box, FALSE, FALSE, 0);

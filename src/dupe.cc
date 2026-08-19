@@ -4222,7 +4222,7 @@ DupeWindow *dupe_window_new()
 			 G_CALLBACK(dupe_window_delete), dw);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(dw->window, vbox);
+	gtk_window_set_child(GTK_WINDOW(dw->window), vbox);
 
 	dw->paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
 	if (lw && options->save_window_positions && (lw->options.dupe_window.vdivider_pos != 0))
@@ -4270,7 +4270,7 @@ DupeWindow *dupe_window_new()
 	g_signal_connect(gtk_tree_view_get_column(GTK_TREE_VIEW(dw->listview), DUPE_COLUMN_DIMENSIONS - 1), "clicked", (GCallback)column_clicked_cb, dw);
 	g_signal_connect(gtk_tree_view_get_column(GTK_TREE_VIEW(dw->listview), DUPE_COLUMN_PATH - 1), "clicked", (GCallback)column_clicked_cb, dw);
 
-	gq_gtk_container_add(scrolled, dw->listview);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), dw->listview);
 
 	dw->second_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_widget_set_visible(dw->second_vbox, dw->second_set);
@@ -4294,7 +4294,7 @@ DupeWindow *dupe_window_new()
 
 	dupe_listview_add_column(dw, dw->second_listview, 1, _("Compare to:"), FALSE, FALSE);
 
-	gq_gtk_container_add(scrolled, dw->second_listview);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), dw->second_listview);
 
 	dw->second_status_label = gtk_label_new("");
 	gq_gtk_box_pack_start(GTK_BOX(dw->second_vbox), dw->second_status_label, FALSE, FALSE, 0);
@@ -4310,7 +4310,7 @@ DupeWindow *dupe_window_new()
 	gq_gtk_box_pack_start(GTK_BOX(status_box), frame, TRUE, TRUE, 0);
 
 	dw->status_label = gtk_label_new("");
-	gq_gtk_container_add(frame, dw->status_label);
+	gtk_frame_set_child(GTK_FRAME(frame), dw->status_label);
 
 	dw->extra_label = gtk_progress_bar_new();
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(dw->extra_label), 0.0);
@@ -4373,15 +4373,15 @@ DupeWindow *dupe_window_new()
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"), G_CALLBACK(dupe_help_cb), nullptr);
 	g_autofree gchar *help_accel = action_accelerator_label("win.dupe-win-help");
 	gtk_widget_set_tooltip_text(button, help_accel);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_STOP, _("Stop"), G_CALLBACK(dupe_check_stop_cb), dw);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"), G_CALLBACK(dupe_window_close_button_cb), dw);
 	g_autofree gchar *close_accel = action_accelerator_label("win.dupe-win-window-close");
 	gtk_widget_set_tooltip_text(button, close_accel);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 	gtk_window_set_default_widget(GTK_WINDOW(dw->window), button);
 	dupe_dnd_init(dw);
 

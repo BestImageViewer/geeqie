@@ -262,7 +262,7 @@ PanViewFilterUi *pan_filter_ui_new(PanWindow *pw)
 	gtk_widget_add_css_class(ui->filter_button, "flat");
 	gtk_widget_set_focus_on_click(ui->filter_button, FALSE);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	gq_gtk_container_add(ui->filter_button, hbox);
+	gtk_button_set_child(GTK_BUTTON(ui->filter_button), hbox);
 	ui->filter_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
 	gq_gtk_box_pack_start(GTK_BOX(hbox), ui->filter_button_arrow, FALSE, FALSE, 0);
 	pref_label_new(hbox, _("Filter"));

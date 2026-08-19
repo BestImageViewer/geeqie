@@ -360,8 +360,8 @@ static void generic_dialog_setup(GenericDialog *gd,
 	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
 	gtk_scrolled_window_set_propagate_natural_width(GTK_SCROLLED_WINDOW(scrolled), TRUE);
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_BUTTON_SPACE);
-	gq_gtk_container_add(scrolled, vbox);
-	gq_gtk_container_add(gd->dialog, scrolled);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), vbox);
+	gtk_window_set_child(GTK_WINDOW(gd->dialog), scrolled);
 
 
 	gd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);

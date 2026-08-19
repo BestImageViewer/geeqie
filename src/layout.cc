@@ -521,7 +521,7 @@ static GtkWidget *layout_tool_setup(LayoutWindow *lw)
 	if (gtk_widget_get_parent(menu_tool_bar) != lw->scrolled_window)
 		{
 		widget_remove_from_parent(menu_tool_bar);
-		gq_gtk_container_add(lw->scrolled_window, menu_tool_bar);
+		gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(lw->scrolled_window), menu_tool_bar);
 		}
 
 	if (!options->expand_menu_toolbar)
@@ -746,7 +746,7 @@ static GtkWidget *layout_sort_button(LayoutWindow *lw, GtkWidget *box)
 	gtk_menu_button_set_popover(GTK_MENU_BUTTON(button), layout_sort_popover_new(lw));
 	gtk_widget_add_css_class(button, "flat");
 
-	gq_gtk_container_add(frame, button);
+	gtk_frame_set_child(GTK_FRAME(frame), button);
 
 
 	return button;
@@ -822,7 +822,7 @@ static GtkWidget *layout_zoom_button(LayoutWindow *, GtkWidget *box, gint size, 
 	gtk_widget_add_css_class(button, "flat");
 	gtk_menu_button_set_popover(GTK_MENU_BUTTON(button), layout_zoom_popover_new());
 
-	gq_gtk_container_add(frame, button);
+	gtk_frame_set_child(GTK_FRAME(frame), button);
 
 	return button;
 }
@@ -1031,7 +1031,7 @@ static GtkWidget *layout_status_label(const gchar *text, GtkWidget *box, gboolea
 
 	label = gtk_label_new(text ? text : "");
 	gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
-	gq_gtk_container_add(frame, label);
+	gtk_frame_set_child(GTK_FRAME(frame), label);
 
 	return label;
 }
@@ -1096,7 +1096,7 @@ static void layout_status_setup(LayoutWindow *lw, GtkWidget *box, gboolean small
 	toolbar_frame = gtk_frame_new(nullptr);
 	DEBUG_NAME(toolbar_frame);
 	gtk_widget_add_css_class(toolbar_frame, "frame");
-	gq_gtk_container_add(toolbar_frame, toolbar);
+	gtk_frame_set_child(GTK_FRAME(toolbar_frame), toolbar);
 	gq_gtk_box_pack_end(GTK_BOX(hbox), toolbar_frame, FALSE, FALSE, 0);
 	lw->info_zoom = layout_zoom_button(lw, hbox, ZOOM_LABEL_WIDTH, TRUE);
 	gtk_widget_set_tooltip_text(lw->info_zoom, _("Select zoom and scroll mode"));
@@ -1820,7 +1820,7 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(vbox);
-	gq_gtk_container_add(lw->tools, vbox);
+	gtk_window_set_child(GTK_WINDOW(lw->tools), vbox);
 	if (options->expand_menu_toolbar)
 		{
 		if (!options->hamburger_menu)
@@ -2396,7 +2396,7 @@ void layout_show_config_window(LayoutWindow *lw)
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	DEBUG_NAME(win_vbox);
-	gq_gtk_container_add(lc->configwindow, win_vbox);
+	gtk_window_set_child(GTK_WINDOW(lc->configwindow), win_vbox);
 
 	GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
@@ -2424,7 +2424,7 @@ void layout_show_config_window(LayoutWindow *lw)
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	DEBUG_NAME(vbox);
-	gq_gtk_container_add(frame, vbox);
+	gtk_frame_set_child(GTK_FRAME(frame), vbox);
 
 
 	group = pref_group_new(vbox, FALSE, _("General options"), GTK_ORIENTATION_VERTICAL);
@@ -2721,7 +2721,7 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 
 	lw->main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	DEBUG_NAME(lw->main_box);
-	gq_gtk_container_add(lw->window, lw->main_box);
+	gtk_window_set_child(GTK_WINDOW(lw->window), lw->main_box);
 
 	layout_grid_setup(lw);
 	layout_menu_new_window_update(lw);

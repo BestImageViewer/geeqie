@@ -515,7 +515,7 @@ static void bookmark_add_button(BookMarkData *bm, const gchar *text)
 	g_object_set_data_full(G_OBJECT(button), "bookbuttondata", b, delete_cb<BookButtonData>);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
-	gq_gtk_container_add(button, box);
+	gtk_button_set_child(GTK_BUTTON(button), box);
 
 	GtkWidget *image;
 	if (!b->icon.empty())
@@ -718,7 +718,7 @@ GtkWidget *bookmark_list_new(const gchar *key, const BookmarkSelectFunc &select_
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
 	bm->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(scrolled, bm->box);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), bm->box);
 
 	bookmark_populate(bm);
 

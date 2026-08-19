@@ -2960,7 +2960,7 @@ void layout_toolbar_add(LayoutWindow *lw, ToolbarType type, const gchar *action_
 			gtk_button_set_child(GTK_BUTTON(button), image);
 			}
 
-		gq_gtk_container_add(lw->toolbar[type], button);
+		gtk_box_append(GTK_BOX(lw->toolbar[type]), button);
 
 		lw->toolbar_actions[type] = g_list_append(lw->toolbar_actions[type], g_strdup(action_name));
 		}

@@ -1150,7 +1150,7 @@ CollectWindow *collection_window_new(const gchar *path)
 	gtk_widget_add_controller(cw->window, controller);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(cw->window, vbox);
+	gtk_window_set_child(GTK_WINDOW(cw->window), vbox);
 
 	cw->table = collection_table_new(cw->cd);
 	gq_gtk_box_pack_start(GTK_BOX(vbox), cw->table->scrolled, TRUE, TRUE, 0);
@@ -1164,7 +1164,7 @@ CollectWindow *collection_window_new(const gchar *path)
 	gq_gtk_box_pack_start(GTK_BOX(cw->status_box), frame, TRUE, TRUE, 0);
 
 	status_label = gtk_label_new("");
-	gq_gtk_container_add(frame, status_label);
+	gtk_frame_set_child(GTK_FRAME(frame), status_label);
 
 	extra_label = gtk_progress_bar_new();
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(extra_label), 0.0);

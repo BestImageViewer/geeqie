@@ -2430,7 +2430,7 @@ CollectTable *collection_table_new(CollectionData *cd)
 	g_signal_connect(controller, "key-pressed", G_CALLBACK(collection_table_press_key_cb), ct);
 	gtk_widget_add_controller(ct->listview, controller);
 
-	gq_gtk_container_add(ct->scrolled, ct->listview);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(ct->scrolled), ct->listview);
 
 	collection_table_dnd_init(ct);
 

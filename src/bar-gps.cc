@@ -899,7 +899,7 @@ GtkWidget *bar_pane_gps_new(const gchar *id, const gchar *title, const gchar *ma
 
 	gtk_box_append(GTK_BOX(vbox), pgd->map_popover_parent);
 
-	gq_gtk_container_add(frame, vbox);
+	gtk_frame_set_child(GTK_FRAME(frame), vbox);
 
 	status = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 

@@ -1659,7 +1659,7 @@ static GtkWidget *rating_filter_popover_new(ViewFile *vf)
 
 	GtkWidget *popover = gtk_popover_new();
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(popover, vbox);
+	gtk_popover_set_child(GTK_POPOVER(popover), vbox);
 
 	for (int i = 0; i < FORMAT_RATING_COUNT; i++)
 		{
@@ -1685,7 +1685,7 @@ static GtkWidget *rating_filter_popover_new(ViewFile *vf)
 			g_object_set_data(G_OBJECT(comparison_item), "rating-index", GINT_TO_POINTER(i));
 			g_object_set_data(G_OBJECT(comparison_item), "rating-popover", comparison_popover);
 			g_signal_connect(comparison_item, "clicked", G_CALLBACK(vf_file_filter_rating_greater_equal_cb), menu_data);
-			gq_gtk_container_add(comparison_popover, comparison_item);
+			gtk_popover_set_child(GTK_POPOVER(comparison_popover), comparison_item);
 
 			GtkGesture *gesture = gtk_gesture_click_new();
 			gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), GDK_BUTTON_SECONDARY);
@@ -1783,7 +1783,7 @@ static GtkWidget *vf_file_filter_init(ViewFile *vf)
 	gtk_widget_add_controller(vf->file_filter.entry, GTK_EVENT_CONTROLLER(filter_gesture));
 
 	gq_gtk_box_pack_start(GTK_BOX(hbox), vf->file_filter.control, FALSE, FALSE, 0);
-	gq_gtk_container_add(frame, hbox);
+	gtk_frame_set_child(GTK_FRAME(frame), hbox);
 
 	GtkWidget *case_sensitive = gtk_check_button_new_with_label(_("Case"));
 	gq_gtk_box_pack_start(GTK_BOX(hbox), case_sensitive, FALSE, FALSE, 0);
@@ -1853,7 +1853,7 @@ ViewFile *vf_new(FileViewType type, FileData *dir_fd)
 	g_signal_connect(gesture, "released", G_CALLBACK(vf_gesture_release_cb), vf);
 	gtk_widget_add_controller(vf->listview, GTK_EVENT_CONTROLLER(gesture));
 
-	gq_gtk_container_add(vf->scrolled, vf->listview);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(vf->scrolled), vf->listview);
 
 	vf_dnd_init(vf);
 

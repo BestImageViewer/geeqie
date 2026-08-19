@@ -1270,7 +1270,7 @@ ViewDir *vd_new(LayoutWindow *lw)
 		case DIRVIEW_TREE: vd = vdtree_new(vd); break;
 		}
 
-	gq_gtk_container_add(vd->widget, vd->view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(vd->widget), vd->view);
 
 	vd_dnd_init(vd);
 

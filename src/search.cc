@@ -3041,7 +3041,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 	gq_gtk_widget_set_border_width(vbox, PREF_PAD_GAP);
-	gq_gtk_container_add(sd->ui.window, vbox);
+	gtk_window_set_child(GTK_WINDOW(sd->ui.window), vbox);
 
 	sd->ui.box_search = pref_box_new(vbox, FALSE, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
 
@@ -3335,7 +3335,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	sd->ui.result_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
-	gq_gtk_container_add(scrolled, sd->ui.result_view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), sd->ui.result_view);
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(sd->ui.result_view));
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
@@ -3387,7 +3387,7 @@ void search_new(FileData *dir_fd, FileData *example_file)
 
 	sd->ui.label_status = gtk_label_new("");
 	gtk_widget_set_size_request(sd->ui.label_status, 50, -1);
-	gq_gtk_container_add(frame, sd->ui.label_status);
+	gtk_frame_set_child(GTK_FRAME(frame), sd->ui.label_status);
 
 	sd->ui.label_progress = gtk_progress_bar_new();
 	gtk_widget_set_size_request(sd->ui.label_progress, 50, -1);

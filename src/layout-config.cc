@@ -296,7 +296,7 @@ GtkWidget *layout_config_new(gint style, const gchar *order)
 	layout_config_list_append(store, b);
 	layout_config_list_append(store, c);
 
-	gq_gtk_container_add(scrolled, lc->listview);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), lc->listview);
 
 	pref_label_new(box, _("(drag to change order)"));
 

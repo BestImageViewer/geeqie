@@ -1629,10 +1629,10 @@ static GtkWidget *scrolled_notebook_page(GtkWidget *notebook, const gchar *title
 
 	GtkWidget *viewport = gtk_viewport_new(nullptr, nullptr);
 	gtk_widget_remove_css_class(viewport, "frame");
-	gq_gtk_container_add(scrolled, viewport);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), viewport);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(viewport, vbox);
+	gtk_viewport_set_child(GTK_VIEWPORT(viewport), vbox);
 
 	return vbox;
 }
@@ -2103,7 +2103,7 @@ static GtkWidget *create_popover(GtkWidget *child, GtkPositionType pos)
 
 	gtk_popover_set_position(GTK_POPOVER (popover), pos);
 	gtk_popover_set_autohide(GTK_POPOVER(popover), FALSE);
-	gq_gtk_container_add(popover, child);
+	gtk_popover_set_child(GTK_POPOVER(popover), child);
 	gq_gtk_widget_set_border_width(popover, 6);
 	gtk_widget_show (child);
 
@@ -2154,7 +2154,7 @@ static void config_tab_windows(GtkWidget *notebook, ConfOptions *c_options)
 	pref_label_new(subgroup, _("Use current layout for default: "));
 	button = gtk_menu_button_new();
 	gtk_menu_button_set_child(GTK_MENU_BUTTON(button), gtk_label_new_with_mnemonic(_("Set")));
-	gq_gtk_container_add(subgroup, button);
+	gtk_box_append(GTK_BOX(subgroup), button);
 
 	GtkWidget *popover;
 
@@ -2220,7 +2220,7 @@ static GtkWidget *osd_profiles(gint i, ConfOptions *c_options)
 
 	gtk_widget_set_tooltip_markup(image_overlay_template_view, _("Extensive formatting options are shown in the Help file"));
 
-	gq_gtk_container_add(scrolled, image_overlay_template_view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), image_overlay_template_view);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
@@ -2549,7 +2549,7 @@ static void config_tab_files(GtkWidget *notebook, ConfOptions *c_options)
 	gtk_tree_view_column_set_sort_column_id(column, FILETYPES_COLUMN_SIDECAR);
 
 	filter_store_populate();
-	gq_gtk_container_add(scrolled, filter_view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), filter_view);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 
@@ -2980,7 +2980,7 @@ static void config_tab_keywords(GtkWidget *notebook)
 		}
 #endif
 
-	gq_gtk_container_add(scrolled, keyword_text);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), keyword_text);
 
 	GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(keyword_text));
 	gtk_text_buffer_create_tag(buffer, "monospace",
@@ -3454,7 +3454,7 @@ static void config_tab_accelerators(GtkWidget *notebook)
 	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(accel_view), accel_search_function_cb, nullptr, nullptr);
 
 	accel_store_populate();
-	gq_gtk_container_add(scrolled, accel_view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), accel_view);
 
 	hbox = pref_box_new(group, FALSE, GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 

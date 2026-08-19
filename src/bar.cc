@@ -303,7 +303,7 @@ static void bar_expander_height_cb(GtkWidget *, gpointer data)
 	gtk_widget_add_controller(spin, controller);
 
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), h);
-	gq_gtk_container_add(window, spin);
+	gtk_window_set_child(GTK_WINDOW(window), spin);
 	gtk_widget_grab_focus(spin);
 }
 
@@ -509,7 +509,7 @@ static GtkWidget *bar_menu_add_button_new(GtkWidget *toolbar)
 	gtk_widget_insert_action_group(button, "bar", G_ACTION_GROUP(action_group));
 	g_object_set_data_full(G_OBJECT(button), "bar-action-group", action_group, g_object_unref);
 
-	gq_gtk_container_add(toolbar, button);
+	gtk_box_append(GTK_BOX(toolbar), button);
 
 	return button;
 }
@@ -692,7 +692,7 @@ void bar_add(GtkWidget *bar, GtkWidget *pane)
 	gtk_widget_add_controller(expander, GTK_EVENT_CONTROLLER(gesture));
 	g_signal_connect(expander, "notify::expanded", G_CALLBACK(bar_expander_cb), pd);
 
-	gq_gtk_container_add(expander, pane);
+	gtk_expander_set_child(GTK_EXPANDER(expander), pane);
 
 	gtk_expander_set_expanded(GTK_EXPANDER(expander), pd->expanded);
 
@@ -780,7 +780,7 @@ GtkWidget *bar_new(LayoutWindow *lw)
 
 
 	bd->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_container_add(scrolled, bd->vbox);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), bd->vbox);
 	gtk_widget_remove_css_class(gtk_widget_get_first_child(scrolled), "frame");
 
 	add_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);

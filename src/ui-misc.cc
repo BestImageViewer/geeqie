@@ -158,7 +158,7 @@ GtkWidget *pref_frame_new(GtkWidget *parent_box, gboolean fill,
 	gq_gtk_box_pack_start(GTK_BOX(parent_box), frame, fill, fill, 0);
 
 	box = gtk_box_new(orientation, padding);
-	gq_gtk_container_add(frame, box);
+	gtk_frame_set_child(GTK_FRAME(frame), box);
 	gq_gtk_widget_set_border_width(box, PREF_PAD_BORDER);
 
 	return box;
@@ -602,7 +602,7 @@ GtkWidget *pref_toolbar_button(GtkWidget *toolbar,
 	gtk_button_set_use_underline(GTK_BUTTON(item), TRUE);
 
 	if (func) g_signal_connect(item, "clicked", func, data);
-	gq_gtk_container_add(toolbar, item);
+	gtk_box_append(GTK_BOX(toolbar), item);
 
 	if (description)
 		{

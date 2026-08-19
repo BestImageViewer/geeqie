@@ -196,7 +196,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gq_gtk_widget_set_border_width(ew->window, PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
-	gq_gtk_container_add(ew->window, win_vbox);
+	gtk_window_set_child(GTK_WINDOW(ew->window), win_vbox);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
 	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
@@ -233,7 +233,7 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gq_gtk_box_reorder_child(GTK_BOX(win_vbox), hbox, -1);
 
 	text_view = gtk_text_view_new();
-	gq_gtk_container_add(scrolled, text_view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), text_view);
 
 	ew->buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
 	if (g_file_get_contents(src_path, &text, &size, nullptr))
@@ -479,7 +479,7 @@ void editor_list_window_create()
 	gq_gtk_widget_set_border_width(ewl->window, PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
-	gq_gtk_container_add(ewl->window, win_vbox);
+	gtk_window_set_child(GTK_WINDOW(ewl->window), win_vbox);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
@@ -487,27 +487,27 @@ void editor_list_window_create()
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(editor_list_window_help_cb), ewl);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_NEW, _("New"),
 				 G_CALLBACK(editor_list_window_new_cb), ewl);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	button = pref_button_new(nullptr, GQ_ICON_EDIT, _("Edit"),
 				 G_CALLBACK(editor_list_window_edit_cb), ewl);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 	gtk_widget_set_sensitive(button, FALSE);
 	ewl->edit_button = button;
 
 	button = pref_button_new(nullptr, GQ_ICON_DELETE, _("Delete"),
 				 G_CALLBACK(editor_list_window_delete_cb), ewl);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 	gtk_widget_set_sensitive(button, FALSE);
 	ewl->delete_button = button;
 
 	button = pref_button_new(nullptr, GQ_ICON_CLOSE, _("Close"),
 				 G_CALLBACK(editor_list_window_close_cb), ewl);
-	gq_gtk_container_add(hbox, button);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
@@ -590,7 +590,7 @@ void editor_list_window_create()
 	/* set initial sort order */
     gtk_tree_sortable_set_sort_column_id(sortable, DESKTOP_FILE_COLUMN_NAME, GTK_SORT_ASCENDING);
 
-	gq_gtk_container_add(scrolled, ewl->view);
+	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), ewl->view);
 
 	gtk_window_present(GTK_WINDOW(ewl->window));
 }

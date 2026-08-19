@@ -351,7 +351,7 @@ static void tip_show(ViewFile *vf)
 	label = gtk_label_new(VFICON(vf)->tip_fd->name);
 
 	g_object_set_data(G_OBJECT(VFICON(vf)->tip_window), "tip_label", label);
-	gq_gtk_container_add(VFICON(vf)->tip_window, label);
+	gtk_window_set_child(GTK_WINDOW(VFICON(vf)->tip_window), label);
 
 	display = gdk_display_get_default();
 	seat = gdk_display_get_default_seat(display);
