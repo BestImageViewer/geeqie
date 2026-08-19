@@ -329,7 +329,8 @@ GtkWidget *toolbar_select_new(LayoutWindow *lw, GtkWidget *window, ToolbarType b
 	gtk_widget_remove_css_class(gtk_widget_get_first_child(scrolled), "frame");
 
 	add_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_box_pack_end(GTK_BOX(widget), add_box, FALSE, FALSE, 0);
+	gtk_widget_set_valign(add_box, GTK_ALIGN_START);
+	gtk_box_append(GTK_BOX(widget), add_box);
 	tbar = pref_toolbar_new(add_box);
 
 	pref_toolbar_button(tbar, GQ_ICON_ADD, _("Add"), FALSE, _("Add Toolbar Item"), G_CALLBACK(toolbar_menu_add_cb), GINT_TO_POINTER(bar));

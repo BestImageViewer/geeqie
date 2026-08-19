@@ -1058,7 +1058,8 @@ static void layout_status_setup(LayoutWindow *lw, GtkWidget *box, gboolean small
 		lw->info_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 		DEBUG_NAME(lw->info_box);
 		}
-	gq_gtk_box_pack_end(GTK_BOX(box), lw->info_box, FALSE, FALSE, 0);
+	gtk_widget_set_valign(lw->info_box, GTK_ALIGN_START);
+	gtk_box_append(GTK_BOX(box), lw->info_box);
 
 	if (small_format)
 		{
@@ -1984,7 +1985,9 @@ static void layout_grid_setup(LayoutWindow *lw)
 	DEBUG_NAME(lw->group_box);
 	if (options->expand_menu_toolbar)
 		{
-		gq_gtk_box_pack_end(GTK_BOX(lw->main_box), lw->group_box, TRUE, TRUE, 0);
+		gtk_widget_set_vexpand(lw->group_box, TRUE);
+		gtk_widget_set_valign(lw->group_box, GTK_ALIGN_FILL);
+		gtk_box_append(GTK_BOX(lw->main_box), lw->group_box);
 		}
 	else
 		{

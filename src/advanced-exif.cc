@@ -444,7 +444,8 @@ GtkWidget *advanced_exif_new(LayoutWindow *lw)
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(ew->scrolled), ew->listview);
 
 	button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-	gq_gtk_box_pack_end(GTK_BOX(vbox), button_box, FALSE, FALSE, 0);
+	gtk_widget_set_valign(button_box, GTK_ALIGN_START);
+	gtk_box_append(GTK_BOX(vbox), button_box);
 	gtk_widget_set_halign(button_box, GTK_ALIGN_END);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);

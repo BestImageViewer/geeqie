@@ -3520,7 +3520,8 @@ void layout_bar_sort_set(LayoutWindow *lw, GtkWidget *bar)
 	g_signal_connect(G_OBJECT(lw->bar_sort), "destroy",
 			 G_CALLBACK(layout_bar_sort_destroyed), lw);
 
-	gq_gtk_box_pack_end(GTK_BOX(lw->utility_box), lw->bar_sort, FALSE, FALSE, 0);
+	gtk_widget_set_halign(lw->bar_sort, GTK_ALIGN_START);
+	gtk_box_append(GTK_BOX(lw->utility_box), lw->bar_sort);
 }
 
 void layout_bar_sort_toggle(LayoutWindow *lw)

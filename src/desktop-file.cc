@@ -199,7 +199,8 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 	gtk_window_set_child(GTK_WINDOW(ew->window), win_vbox);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_SPACE);
-	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
+	gtk_widget_set_valign(hbox, GTK_ALIGN_START);
+	gtk_box_append(GTK_BOX(win_vbox), hbox);
 
 	ew->entry = gtk_entry_new();
 	gtk_widget_set_hexpand(ew->entry, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
@@ -495,7 +496,8 @@ void editor_list_window_create()
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_BUTTON_GAP);
 	gtk_widget_set_halign(hbox, GTK_ALIGN_END);
-	gq_gtk_box_pack_end(GTK_BOX(win_vbox), hbox, FALSE, FALSE, 0);
+	gtk_widget_set_valign(hbox, GTK_ALIGN_START);
+	gtk_box_append(GTK_BOX(win_vbox), hbox);
 
 	button = pref_button_new(nullptr, GQ_ICON_HELP, _("Help"),
 				 G_CALLBACK(editor_list_window_help_cb), ewl);
