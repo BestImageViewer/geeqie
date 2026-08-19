@@ -1974,7 +1974,14 @@ if (!lw)
 				widget_remove_from_parent(lw->split_images[i]->widget);
 			}
 		}
-	gq_gtk_container_remove(lw->utility_paned, lw->split_image_widget);
+	if (gtk_paned_get_start_child(GTK_PANED(lw->utility_paned)) == lw->split_image_widget)
+		{
+		gtk_paned_set_start_child(GTK_PANED(lw->utility_paned), nullptr);
+		}
+	else if (gtk_paned_get_end_child(GTK_PANED(lw->utility_paned)) == lw->split_image_widget)
+		{
+		gtk_paned_set_end_child(GTK_PANED(lw->utility_paned), nullptr);
+		}
 
 	image = layout_image_setup_split(lw, mode);
 
@@ -2189,7 +2196,7 @@ void layout_style_set(LayoutWindow *lw, gint style, const gchar *order)
 	lw->info_pixel = nullptr;
 	lw->info_zoom = nullptr;
 
-	gq_gtk_container_remove(lw->main_box, lw->group_box);
+	gtk_box_remove(GTK_BOX(lw->main_box), lw->group_box);
 	lw->group_box = nullptr;
 
 	/* re-fill */

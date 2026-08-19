@@ -37,7 +37,6 @@
 #define GDK_ACTION_NONE static_cast<GdkDragAction>(0)
 #endif
 
-void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget);
 void gq_gtk_widget_destroy(GtkWidget *widget);
 
 #endif /* COMPAT_H */

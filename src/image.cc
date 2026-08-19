@@ -2197,7 +2197,7 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		imd->frame = gtk_frame_new(nullptr);
 		DEBUG_NAME(imd->frame);
 		g_object_ref(imd->pr);
-		if (imd->has_frame != -1) gq_gtk_container_remove(imd->widget, imd->pr);
+		if (imd->has_frame != -1) gtk_box_remove(GTK_BOX(imd->widget), imd->pr);
 		gtk_frame_set_child(GTK_FRAME(imd->frame), imd->pr);
 
 		g_object_unref(imd->pr);
@@ -2216,8 +2216,8 @@ void image_set_frame(ImageWindow *imd, gboolean frame)
 		g_object_ref(imd->pr);
 		if (imd->frame)
 			{
-			gq_gtk_container_remove(imd->frame, imd->pr);
-			gq_gtk_container_remove(imd->widget, imd->frame);
+			gtk_frame_set_child(GTK_FRAME(imd->frame), nullptr);
+			gtk_box_remove(GTK_BOX(imd->widget), imd->frame);
 			imd->frame = nullptr;
 			}
 		gtk_widget_set_hexpand(imd->pr, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(imd->widget))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);

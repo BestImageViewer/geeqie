@@ -379,7 +379,7 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		{
 		parent = gtk_widget_get_parent(ui->search_button_arrow);
 
-		gq_gtk_container_remove(parent, ui->search_button_arrow);
+		gtk_box_remove(GTK_BOX(parent), ui->search_button_arrow);
 		ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_UP);
 
 		gtk_box_append(GTK_BOX(parent), ui->search_button_arrow);
@@ -390,7 +390,7 @@ static void pan_search_toggle_cb(GtkWidget *button, gpointer data)
 		{
 		parent = gtk_widget_get_parent(ui->search_button_arrow);
 
-		gq_gtk_container_remove(parent, ui->search_button_arrow);
+		gtk_box_remove(GTK_BOX(parent), ui->search_button_arrow);
 		ui->search_button_arrow = gtk_image_new_from_icon_name(GQ_ICON_PAN_DOWN);
 
 		gtk_box_append(GTK_BOX(parent), ui->search_button_arrow);
