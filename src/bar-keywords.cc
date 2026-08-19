@@ -1401,7 +1401,7 @@ gboolean autocomplete_keypress_cb(GtkEventControllerKey *, guint keyval, guint, 
 GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gchar *key, gboolean expanded, gint height)
 {
 	PaneKeywordsData *pkd;
-	GtkWidget *hbox;
+	GtkWidget *keyword_box;
 	GtkWidget *vbox;
 	GtkTextBuffer *buffer;
 	GtkTreeModel *store;
@@ -1427,10 +1427,10 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	pkd->expanded_rows = nullptr;
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
-	gtk_widget_set_hexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
-	gtk_widget_set_vexpand(hbox, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-	gtk_box_append(GTK_BOX(vbox), hbox);
+	keyword_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, PREF_PAD_GAP);
+	gtk_widget_set_hexpand(keyword_box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(keyword_box, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(vbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(vbox), keyword_box);
 
 	pkd->widget = vbox;
 	g_object_set_data_full(G_OBJECT(pkd->widget), "pane_data", pkd, bar_pane_keywords_destroy);
@@ -1440,9 +1440,9 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 	gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
-	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-	gtk_box_append(GTK_BOX(hbox), scrolled);
+	gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(keyword_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+	gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(keyword_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+	gtk_box_append(GTK_BOX(keyword_box), scrolled);
 
 	pkd->keyword_view = gtk_text_view_new();
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), pkd->keyword_view);
@@ -1458,13 +1458,18 @@ GtkWidget *bar_pane_keywords_new(const gchar *id, const gchar *title, const gcha
 		gtk_scrolled_window_set_has_frame(GTK_SCROLLED_WINDOW(scrolled), true);
 		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 						GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-		gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
-		gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(hbox))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
-		gtk_box_append(GTK_BOX(hbox), scrolled);
+		gtk_widget_set_hexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(keyword_box))) == GTK_ORIENTATION_HORIZONTAL ? TRUE : FALSE);
+		gtk_widget_set_vexpand(scrolled, gtk_orientable_get_orientation(GTK_ORIENTABLE(GTK_BOX(keyword_box))) == GTK_ORIENTATION_VERTICAL ? TRUE : FALSE);
+		gtk_box_append(GTK_BOX(keyword_box), scrolled);
 		}
 
+	GtkWidget *autocomplete_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_set_valign(autocomplete_box, GTK_ALIGN_START);
+	gtk_box_append(GTK_BOX(vbox), autocomplete_box);
+
 	pkd->autocomplete = gtk_entry_new();
-	gq_gtk_box_pack_end(GTK_BOX(vbox), pkd->autocomplete, FALSE, FALSE, 0);
+	gtk_widget_set_hexpand(pkd->autocomplete, TRUE);
+	gtk_box_append(GTK_BOX(autocomplete_box), pkd->autocomplete);
 	gtk_widget_set_tooltip_text(pkd->autocomplete, _("Keyword autocomplete"));
 
 	g_autofree gchar *path = g_build_filename(get_rc_dir(), "keywords", NULL);
