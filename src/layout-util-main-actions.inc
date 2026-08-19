@@ -1923,19 +1923,6 @@ const ActionDef main_actions[] =
 		},
 
 		{
-		"win.main-win-remove",
-		GQ_ICON_USER_TRASH,
-		N_("Remove selection …"),
-		layout_menu_remove_cb,
-		nullptr,
-		ActionStateType::NONE,
-		FALSE,
-		nullptr,
-		0,
-		nullptr,
-		},
-
-		{
 		"win.main-win-rename",
 		PIXBUF_INLINE_ICON_RENAME,
 		N_("Rename…"),

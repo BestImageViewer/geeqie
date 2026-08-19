@@ -504,11 +504,6 @@ static void layout_menu_return_primary_cb(GSimpleAction *, GVariant *, gpointer)
 
 }
 
-static void layout_menu_remove_cb(GSimpleAction *, GVariant *, gpointer)
-{
-
-}
-
 template<gboolean disable>
 static void layout_menu_disable_grouping_cb(GSimpleAction *, GVariant *, gpointer  )
 {

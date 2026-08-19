@@ -558,7 +558,7 @@ static void collection_table_popup_save_cb(GSimpleAction *, GVariant *, gpointer
 
 static GList *collection_table_popup_file_list(CollectTable *ct)
 {
-	if (!ct->click_info) return nullptr;
+	if (!ct->click_info) return collection_table_selection_get_list(ct);
 
 	if (info_selected(ct->click_info))
 		{
@@ -669,23 +669,39 @@ static void collection_table_popup_randomize_cb(GSimpleAction *, GVariant *, gpo
 	collection_randomize(ct->cd);
 }
 
+static void collection_table_append_main_window_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *ct = static_cast<CollectTable *>(data);
+	g_autoptr(FileDataList) list = layout_list(nullptr);
+
+	if (list) collection_table_add_filelist(ct, list);
+}
+
+static void collection_table_close_window_cb(GSimpleAction *, GVariant *, gpointer data)
+{
+	auto *ct = static_cast<CollectTable *>(data);
+	gtk_window_close(GTK_WINDOW(widget_get_toplevel(ct->listview)));
+}
+
 static void collection_table_popup_view_new_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
+	CollectInfo *info = ct->click_info ? ct->click_info : collection_table_get_focus_info(ct);
 
-	if (ct->click_info && g_list_find(ct->cd->list, ct->click_info))
+	if (info && g_list_find(ct->cd->list, info))
 		{
-		view_window_new_from_collection(ct->cd, ct->click_info);
+		view_window_new_from_collection(ct->cd, info);
 		}
 }
 
 static void collection_table_popup_view_cb(GSimpleAction *, GVariant *, gpointer data)
 {
 	auto ct = static_cast<CollectTable *>(data);
+	CollectInfo *info = ct->click_info ? ct->click_info : collection_table_get_focus_info(ct);
 
-	if (ct->click_info && g_list_find(ct->cd->list, ct->click_info))
+	if (info && g_list_find(ct->cd->list, info))
 		{
-		layout_image_set_collection(nullptr, ct->cd, ct->click_info);
+		layout_image_set_collection(nullptr, ct->cd, info);
 		}
 }
 
@@ -723,9 +739,17 @@ static void collection_table_popup_remove_cb(GSimpleAction *, GVariant *, gpoint
 	auto ct = static_cast<CollectTable *>(data);
 	GList *list;
 
-	if (!ct->click_info) return;
-
-	if (info_selected(ct->click_info))
+	if (!ct->click_info)
+		{
+		list = g_list_copy(ct->selection);
+		if (!list)
+			{
+			CollectInfo *info = collection_table_get_focus_info(ct);
+			if (!info) return;
+			list = g_list_append(nullptr, info);
+			}
+		}
+	else if (info_selected(ct->click_info))
 		{
 		list = g_list_copy(ct->selection);
 		}

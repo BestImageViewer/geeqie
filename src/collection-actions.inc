@@ -18,6 +18,19 @@ static const gchar *const sort_mode_targets[] =
 static const ActionDef collection_actions[] =
 {
 		{
+		"win.collection-win-append-from-main-window",
+		nullptr,
+		N_("Append from main window"),
+		collection_table_append_main_window_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
 		"win.collection-win-append-from-collection",
 		nullptr,
 		N_("Append from collection…"),
@@ -35,6 +48,19 @@ static const ActionDef collection_actions[] =
 		nullptr,
 		N_("Append from file selection"),
 		collection_table_popup_add_file_selection_cb,
+		nullptr,
+		ActionStateType::NONE,
+		FALSE,
+		nullptr,
+		0,
+		nullptr,
+		},
+
+		{
+		"win.collection-win-close",
+		nullptr,
+		N_("Close window"),
+		collection_table_close_window_cb,
 		nullptr,
 		ActionStateType::NONE,
 		FALSE,

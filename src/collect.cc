@@ -874,144 +874,15 @@ static void collection_notify_cb(FileData *fd, NotifyType type, gpointer data)
  *-------------------------------------------------------------------
  */
 
-static gboolean collection_window_keypress(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer data)
+static gboolean collection_window_keypress(GtkEventControllerKey *, guint keyval, guint, GdkModifierType state, gpointer)
 {
-	auto cw = static_cast<CollectWindow *>(data);
-	gboolean stop_signal = TRUE;
-
-	if (state & GDK_CONTROL_MASK)
-		{
-		switch (keyval)
-			{
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-			case '0':
-				break;
-			case 'A': case 'a':
-				if (state & GDK_SHIFT_MASK)
-					{
-					collection_table_unselect_all(cw->table);
-					}
-				else
-					{
-					collection_table_select_all(cw->table);
-					}
-				break;
-			case 'L': case 'l':
-				{
-				g_autoptr(FileDataList) list = layout_list(nullptr);
-				if (list)
-					{
-					collection_table_add_filelist(cw->table, list);
-					}
-				}
-				break;
-			case 'C': case 'c':
-				file_util_copy(nullptr, collection_table_selection_get_list(cw->table), nullptr, cw->window);
-				break;
-			case 'M': case 'm':
-				file_util_move(nullptr, collection_table_selection_get_list(cw->table), nullptr, cw->window);
-				break;
-			case 'R': case 'r':
-				file_util_rename(nullptr, collection_table_selection_get_list(cw->table), cw->window);
-				break;
-			case 'D': case 'd':
-				file_util_delete(nullptr, collection_table_selection_get_list(cw->table), cw->window, TRUE);
-				break;
-			case 'S': case 's':
-				collection_dialog_save(cw->cd);
-				break;
-			case 'W': case 'w':
-				collection_window_close(cw);
-				break;
-			default:
-				stop_signal = FALSE;
-				break;
-			}
-		}
-	else
-		{
-		switch (keyval)
-			{
-			case GDK_KEY_Return: case GDK_KEY_KP_Enter:
-				layout_image_set_collection(nullptr, cw->cd,
-					collection_table_get_focus_info(cw->table));
-				break;
-			case 'V': case 'v':
-				view_window_new_from_collection(cw->cd,
-					collection_table_get_focus_info(cw->table));
-				break;
-			case 'S': case 's':
-				if (!cw->cd->path)
-					{
-					collection_dialog_save(cw->cd);
-					}
-				else if (!collection_save(cw->cd, cw->cd->path))
-					{
-					log_printf("failed saving to collection path: %s\n", cw->cd->path);
-					}
-				break;
-			case 'A': case 'a':
-				collection_dialog_append(cw->cd);
-				break;
-			case 'N': case 'n':
-				collection_set_sort_method(cw->cd, SORT_NAME);
-				break;
-			case 'D': case 'd':
-				collection_set_sort_method(cw->cd, SORT_TIME);
-				break;
-			case 'B': case 'b':
-				collection_set_sort_method(cw->cd, SORT_SIZE);
-				break;
-			case 'P': case 'p':
-				if (state & GDK_SHIFT_MASK)
-					{
-					print_window_new(collection_table_selection_get_list(cw->table), cw->window);
-					}
-				else
-					{
-					collection_set_sort_method(cw->cd, SORT_PATH);
-					}
-				break;
-			case 'R': case 'r':
-				if (state & GDK_ALT_MASK)
-					{
-						options->collections.rectangular_selection = !(options->collections.rectangular_selection);
-					}
-				break;
-			case GDK_KEY_Delete: case GDK_KEY_KP_Delete:
-				{
-				g_autoptr(GList) list = g_list_copy(cw->table->selection);
-				if (list)
-					{
-					collection_remove_by_info_list(cw->cd, list);
-					collection_table_refresh(cw->table);
-					}
-				else
-					{
-					collection_remove_by_info(cw->cd, collection_table_get_focus_info(cw->table));
-					}
-				}
-				break;
-			default:
-				stop_signal = FALSE;
-				break;
-			}
-		}
-	if (!stop_signal && is_help_key(keyval, state))
+	if (is_help_key(keyval, state))
 		{
 		help_window_show("GuideCollections.html");
-		stop_signal = TRUE;
+		return TRUE;
 		}
 
-	return stop_signal;
+	return FALSE;
 }
 
 /*
