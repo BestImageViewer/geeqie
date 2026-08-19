@@ -758,25 +758,19 @@ If you find problems, check these files:\n \
 %s (new)\n \
 %s (revised Toolbar sections)\n \
 %s (backup of original)\n\n \
-If you press Yes to continue, shortcuts and configuration files will be automatically converted.\n\n \
+Shortcuts and configuration files will be automatically converted.\n\n \
 This message will not be shown again.\n\n \
-Continue?"),
+Select OK to dismiss this message."),
 		accels_old,
 		accels_new,
 		rc_file,
 		rc_backup);
 
-		GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, _("Some keyboard shortcuts and \n menu actions have changed."));
-		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", description);
-
-		int result = gq_gtk_dialog_run(GTK_DIALOG(dialog));
-
-		if (result == GTK_RESPONSE_NO)
-			{
-			abort();
-			}
-
-		gq_gtk_widget_destroy(dialog);
+		g_autoptr(GtkAlertDialog) dialog = gtk_alert_dialog_new("%s", _("Some keyboard shortcuts and menu actions have changed."));
+		gtk_alert_dialog_set_message(dialog, _("Changes to menus and shortcuts"));
+		gtk_alert_dialog_set_detail(dialog, description);
+		gtk_alert_dialog_set_modal(dialog, TRUE);
+		gtk_alert_dialog_show(dialog, nullptr);
 
 		convert_configuration_file();
 		convert_accel_map();

@@ -358,40 +358,6 @@ void gq_gtk_entry_set_text(GtkEntry *entry, const gchar *text)
 	gtk_entry_buffer_set_text(buffer, text, static_cast<gint>(g_utf8_strlen(text, -1)));
 }
 
-namespace
-{
-
-struct DialogRunData
-{
-	GMainLoop *loop;
-	gint response_id;
-};
-
-void dialog_run_response_cb(GtkDialog *, gint response_id, gpointer data)
-{
-	auto *run_data = static_cast<DialogRunData *>(data);
-	run_data->response_id = response_id;
-	g_main_loop_quit(run_data->loop);
-}
-
-} // namespace
-
-gint gq_gtk_dialog_run(GtkDialog *dialog)
-{
-	DialogRunData run_data{};
-	run_data.loop = g_main_loop_new(nullptr, FALSE);
-	run_data.response_id = GTK_RESPONSE_NONE;
-
-	gulong handler_id = g_signal_connect(dialog, "response",
-					     G_CALLBACK(dialog_run_response_cb), &run_data);
-	gtk_window_present(GTK_WINDOW(GTK_WIDGET(dialog)));
-	g_main_loop_run(run_data.loop);
-	g_signal_handler_disconnect(dialog, handler_id);
-	g_main_loop_unref(run_data.loop);
-
-	return run_data.response_id;
-}
-
 GtkWidget *widget_get_toplevel(GtkWidget *widget)
 {
 	auto *root = widget ? gtk_widget_get_root(widget) : nullptr;
