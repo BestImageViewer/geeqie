@@ -1949,32 +1949,6 @@ const ActionDef main_actions[] =
 		},
 
 		{
-		"win.main-win-return",
-		GQ_ICON_CLOSE,
-		N_("Close window"),
-		layout_menu_return_cb,
-		nullptr,
-		ActionStateType::NONE,
-		FALSE,
-		nullptr,
-		0,
-		nullptr,
-		},
-
-		{
-		"win.main-win-return-primary",
-		GQ_ICON_CLOSE,
-		N_("Close window"),
-		layout_menu_return_primary_cb,
-		nullptr,
-		ActionStateType::NONE,
-		FALSE,
-		nullptr,
-		0,
-		nullptr,
-		},
-
-		{
 		"win.main-win-rotate-180",
 		PIXBUF_INLINE_ICON_180,
 		N_("Image Rotate 180°"),

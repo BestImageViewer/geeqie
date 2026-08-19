@@ -494,16 +494,6 @@ static void layout_menu_delete_cb(GSimpleAction *, GVariant *, gpointer)
 		file_util_delete(nullptr, layout_selection_list(lw), layout_window(lw), safe_delete);
 }
 
-static void layout_menu_return_cb(GSimpleAction *, GVariant *, gpointer)
-{
-
-}
-
-static void layout_menu_return_primary_cb(GSimpleAction *, GVariant *, gpointer)
-{
-
-}
-
 template<gboolean disable>
 static void layout_menu_disable_grouping_cb(GSimpleAction *, GVariant *, gpointer  )
 {
