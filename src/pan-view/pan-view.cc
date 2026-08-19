@@ -1017,7 +1017,19 @@ static gboolean pan_window_key_press_cb(GtkEventControllerKey *, guint keyval, g
 
 	pr = PIXBUF_RENDERER(pw->imd->pr);
 
-	imd_widget = gq_gtk_widget_get_focus_child(pw->imd->widget);
+	imd_widget = nullptr;
+	if (GtkRoot *root = gtk_widget_get_root(pw->imd->widget))
+		{
+		GtkWidget *focus = gtk_root_get_focus(root);
+		for (GtkWidget *work = focus; work; work = gtk_widget_get_parent(work))
+			{
+			if (work == pw->imd->widget)
+				{
+				imd_widget = focus;
+				break;
+				}
+			}
+		}
 	focused = (pw->fs || (imd_widget && gtk_widget_has_focus(imd_widget)));
 
 	if (focused)

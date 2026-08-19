@@ -153,18 +153,4 @@ void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width)
 	gtk_widget_set_margin_end(widget, width);
 }
 
-GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget)
-{
-	GtkRoot *root = gtk_widget_get_root(widget);
-	if (!root) return nullptr;
-
-	GtkWidget *focus = gtk_root_get_focus(root);
-	for (GtkWidget *work = focus; work; work = gtk_widget_get_parent(work))
-		{
-		if (work == widget) return focus;
-		}
-
-	return nullptr;
-}
-
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

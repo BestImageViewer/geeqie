@@ -43,7 +43,6 @@ void gq_gtk_box_reorder_child(GtkBox *box, GtkWidget *child, gint position);
 void gq_gtk_container_remove(GtkWidget *container, GtkWidget *widget);
 void gq_gtk_widget_destroy(GtkWidget *widget);
 void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width);
-GtkWidget *gq_gtk_widget_get_focus_child(GtkWidget *widget);
 
 #endif /* COMPAT_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
