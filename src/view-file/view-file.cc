@@ -1173,7 +1173,8 @@ static void vf_destroy_cb(GtkWidget *, gpointer data)
 		{
 		g_signal_handlers_disconnect_matched(G_OBJECT(vf->popup), G_SIGNAL_MATCH_DATA,
 						     0, 0, nullptr, nullptr, vf);
-		gq_gtk_widget_destroy(vf->popup);
+		gtk_popover_popdown(GTK_POPOVER(vf->popup));
+		gtk_widget_unparent(vf->popup);
 		}
 
 	if (vf->read_metadata_in_idle_id)

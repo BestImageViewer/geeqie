@@ -2856,7 +2856,7 @@ void layout_toolbar_clear(LayoutWindow *lw, ToolbarType type)
 		{
 		while (GtkWidget *child = gtk_widget_get_first_child(lw->toolbar[type]))
 			{
-			gq_gtk_widget_destroy(child);
+			gtk_box_remove(GTK_BOX(lw->toolbar[type]), child);
 			}
 		}
 }

@@ -1836,7 +1836,7 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 		{
 		layout_tools_geometry_sync(lw);
 		/* dump the contents */
-		gq_gtk_widget_destroy(gtk_widget_get_first_child(lw->tools));
+		gtk_window_set_child(GTK_WINDOW(lw->tools), nullptr);
 		}
 
 	layout_actions_add_window(lw, lw->tools);
@@ -2066,7 +2066,7 @@ static void layout_grid_setup(LayoutWindow *lw)
 	if (lw->tools)
 		{
 		layout_tools_geometry_sync(lw);
-		gq_gtk_widget_destroy(lw->tools);
+		gtk_window_destroy(GTK_WINDOW(lw->tools));
 		lw->tools = nullptr;
 		lw->tools_pane = nullptr;
 		}

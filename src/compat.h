@@ -37,7 +37,5 @@
 #define GDK_ACTION_NONE static_cast<GdkDragAction>(0)
 #endif
 
-void gq_gtk_widget_destroy(GtkWidget *widget);
-
 #endif /* COMPAT_H */
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

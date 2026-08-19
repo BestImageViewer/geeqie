@@ -728,7 +728,7 @@ void bar_close(GtkWidget *bar)
 	if (!bd) return;
 
 	/* @FIXME This causes a g_object_unref failed error on exit */
-	gq_gtk_widget_destroy(bd->widget);
+	gtk_box_remove(GTK_BOX(gtk_widget_get_parent(bd->widget)), bd->widget);
 }
 
 static void bar_destroy(gpointer data)

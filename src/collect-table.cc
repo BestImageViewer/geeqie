@@ -2314,7 +2314,8 @@ static void collection_table_destroy(GtkWidget *, gpointer data)
 		{
 		g_signal_handlers_disconnect_matched(G_OBJECT(ct->popup), G_SIGNAL_MATCH_DATA,
 						     0, 0, nullptr, nullptr, ct);
-		gq_gtk_widget_destroy(ct->popup);
+		gtk_popover_popdown(GTK_POPOVER(ct->popup));
+		gtk_widget_unparent(ct->popup);
 		}
 
 	if (ct->sync_idle_id) g_source_remove(ct->sync_idle_id);
