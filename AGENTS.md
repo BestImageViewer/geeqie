@@ -16,7 +16,7 @@ Important project docs:
 - `DEVELOPER-NOTES.md`: implementation notes for menus, icons, file operation
   overrides, and Doxygen.
 - `meson_options.txt`: feature flags such as optional image libraries,
-  `unit_tests`, `fd_verbose_debug`, and `glib-types`.
+  `unit_tests` and `fd_verbose_debug`.
 
 ## Repository Layout
 
@@ -54,7 +54,6 @@ Useful development configurations:
 meson setup --buildtype=debug build
 meson setup -Dunit_tests=enabled build
 meson setup -C build -Dunit_tests=enabled
-meson setup -C build -Dglib-types=enabled
 meson setup -C build -Dfd_verbose_debug=enabled
 ```
 

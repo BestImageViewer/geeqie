@@ -107,7 +107,6 @@ jobs:
           -Dexr=disabled
           -Dfits=disabled
           -Dgit=disabled
-          -Dglib-types=disabled
           -Dgps-map=disabled
           -Dheif=disabled
           -Dhelp_pdf=disabled

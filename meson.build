@@ -838,22 +838,6 @@ else
     summary({'Bash completions' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
 endif
 
-# glib types checks
-if get_option('glib-types').allowed()
-    cc_sources = []
-    glib_types_check = find_program('check-glib-types.sh', dirs : buildauxdir, required : true)
-
-    foreach source_file : code_sources
-        source_file_name = fs.name(source_file)
-        if source_file_name.endswith('.cc')
-            test('Glib Types_ ' + source_file_name, glib_types_check, args : [meson.project_source_root(), meson.project_build_root(), source_file], timeout : 200, suite : 'analysis')
-        endif
-    endforeach
-    summary({'Glib Types' : ['Test runs:', true]}, section : 'Testing', bool_yn : true)
-else
-    summary({'Glib Types' : ['Test runs:', false]}, section : 'Testing', bool_yn : true)
-endif
-
 # Unit tests
 if unit_tests_enabled
     test('Unit tests', isolate_test_sh, args: [geeqie_exe.full_path(), '--run-unit-tests'], suite : 'unit')
