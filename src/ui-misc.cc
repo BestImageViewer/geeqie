@@ -169,7 +169,10 @@ GtkWidget *pref_frame_new(GtkWidget *parent_box, gboolean fill,
 
 	box = gtk_box_new(orientation, padding);
 	gtk_frame_set_child(GTK_FRAME(frame), box);
-	gq_gtk_widget_set_border_width(box, PREF_PAD_BORDER);
+	gtk_widget_set_margin_top(box, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(box, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(box, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(box, PREF_PAD_BORDER);
 
 	return box;
 }

@@ -708,7 +708,10 @@ void print_window_new(GList *selection, GtkWidget *parent)
 	pw->parent = parent;
 
 	GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gq_gtk_widget_set_border_width(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_top(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(vbox, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(vbox, PREF_PAD_BORDER);
 
 	print_text_menu(vbox, pw);
 	pw->vbox = vbox;

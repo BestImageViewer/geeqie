@@ -3042,7 +3042,10 @@ void search_new(FileData *dir_fd, FileData *example_file)
 	                 G_CALLBACK(search_window_destroy_cb), sd);
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);
-	gq_gtk_widget_set_border_width(vbox, PREF_PAD_GAP);
+	gtk_widget_set_margin_top(vbox, PREF_PAD_GAP);
+	gtk_widget_set_margin_bottom(vbox, PREF_PAD_GAP);
+	gtk_widget_set_margin_start(vbox, PREF_PAD_GAP);
+	gtk_widget_set_margin_end(vbox, PREF_PAD_GAP);
 	gtk_window_set_child(GTK_WINDOW(sd->ui.window), vbox);
 
 	sd->ui.box_search = pref_box_new(vbox, FALSE, GTK_ORIENTATION_VERTICAL, PREF_PAD_GAP);

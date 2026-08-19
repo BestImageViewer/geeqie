@@ -1140,7 +1140,10 @@ CollectWindow *collection_window_new(const gchar *path)
 
 	gtk_window_set_resizable(GTK_WINDOW(cw->window), TRUE);
 	collection_window_update_title(cw);
-	gq_gtk_widget_set_border_width(cw->window, 0);
+	gtk_widget_set_margin_top(cw->window, 0);
+	gtk_widget_set_margin_bottom(cw->window, 0);
+	gtk_widget_set_margin_start(cw->window, 0);
+	gtk_widget_set_margin_end(cw->window, 0);
 
 	g_signal_connect(G_OBJECT(cw->window), "close-request",
 			 G_CALLBACK(collection_window_delete), cw);

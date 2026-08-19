@@ -1819,7 +1819,10 @@ static void layout_tools_setup(LayoutWindow *lw, GtkWidget *tools, GtkWidget *fi
 		gtk_window_set_default_size(GTK_WINDOW(lw->tools), TOOLWINDOW_DEF_WIDTH, TOOLWINDOW_DEF_HEIGHT);
 
 		gtk_window_set_resizable(GTK_WINDOW(lw->tools), TRUE);
-		gq_gtk_widget_set_border_width(lw->tools, 0);
+		gtk_widget_set_margin_top(lw->tools, 0);
+		gtk_widget_set_margin_bottom(lw->tools, 0);
+		gtk_widget_set_margin_start(lw->tools, 0);
+		gtk_widget_set_margin_end(lw->tools, 0);
 
 		if (options->expand_menu_toolbar)
 			{
@@ -2420,7 +2423,10 @@ void layout_show_config_window(LayoutWindow *lw)
 
 	gtk_window_set_default_size(GTK_WINDOW(lc->configwindow), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
 	gtk_window_set_resizable(GTK_WINDOW(lc->configwindow), TRUE);
-	gq_gtk_widget_set_border_width(lc->configwindow, PREF_PAD_BORDER);
+	gtk_widget_set_margin_top(lc->configwindow, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(lc->configwindow, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(lc->configwindow, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(lc->configwindow, PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	DEBUG_NAME(win_vbox);
@@ -2718,7 +2724,10 @@ static LayoutWindow *layout_new(const LayoutOptions &lop)
 	register_main_window_actions(GTK_APPLICATION(app), (lw));
 
 	gtk_window_set_resizable(GTK_WINDOW(lw->window), TRUE);
-	gq_gtk_widget_set_border_width(lw->window, 0);
+	gtk_widget_set_margin_top(lw->window, 0);
+	gtk_widget_set_margin_bottom(lw->window, 0);
+	gtk_widget_set_margin_start(lw->window, 0);
+	gtk_widget_set_margin_end(lw->window, 0);
 
 	gtk_widget_set_size_request(lw->window, 32, 32);
 

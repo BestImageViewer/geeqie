@@ -1141,7 +1141,10 @@ static void layout_menu_open_recent_file_cb(GSimpleAction *, GVariant *, gpointe
 			gtk_widget_add_css_class(path_label, "dim-label");
 			gtk_box_append(GTK_BOX(box), path_label);
 
-			gq_gtk_widget_set_border_width(box, 6);
+			gtk_widget_set_margin_top(box, 6);
+			gtk_widget_set_margin_bottom(box, 6);
+			gtk_widget_set_margin_start(box, 6);
+			gtk_widget_set_margin_end(box, 6);
 			gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(row), box);
 			g_object_set_data_full(G_OBJECT(row), "recent-path", g_strdup(path.c_str()), g_free);
 			gtk_list_box_append(GTK_LIST_BOX(dialog_data->list), row);

@@ -294,7 +294,10 @@ GtkWidget *osd_new(gint max_cols, GtkWidget *template_view)
 
 	GtkWidget *scrolled = gtk_scrolled_window_new();
 	gtk_box_append(GTK_BOX(vbox), scrolled);
-	gq_gtk_widget_set_border_width(scrolled, PREF_PAD_BORDER);
+	gtk_widget_set_margin_top(scrolled, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(scrolled, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(scrolled, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(scrolled, PREF_PAD_BORDER);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
 				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	gtk_widget_set_size_request(scrolled, -1, 140);

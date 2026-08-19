@@ -193,7 +193,10 @@ void editor_window_new(const gchar *src_path, const gchar *desktop_name)
 
 	gtk_window_set_default_size(GTK_WINDOW(ew->window), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
 	gtk_window_set_resizable(GTK_WINDOW(ew->window), TRUE);
-	gq_gtk_widget_set_border_width(ew->window, PREF_PAD_BORDER);
+	gtk_widget_set_margin_top(ew->window, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(ew->window, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(ew->window, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(ew->window, PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	gtk_window_set_child(GTK_WINDOW(ew->window), win_vbox);
@@ -489,7 +492,10 @@ void editor_list_window_create()
 			 G_CALLBACK(editor_list_window_delete), NULL);
 	gtk_window_set_default_size(GTK_WINDOW(ewl->window), CONFIG_WINDOW_DEF_WIDTH, CONFIG_WINDOW_DEF_HEIGHT);
 	gtk_window_set_resizable(GTK_WINDOW(ewl->window), TRUE);
-	gq_gtk_widget_set_border_width(ewl->window, PREF_PAD_BORDER);
+	gtk_widget_set_margin_top(ewl->window, PREF_PAD_BORDER);
+	gtk_widget_set_margin_bottom(ewl->window, PREF_PAD_BORDER);
+	gtk_widget_set_margin_start(ewl->window, PREF_PAD_BORDER);
+	gtk_widget_set_margin_end(ewl->window, PREF_PAD_BORDER);
 
 	win_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, PREF_PAD_SPACE);
 	gtk_window_set_child(GTK_WINDOW(ewl->window), win_vbox);

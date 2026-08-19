@@ -1003,7 +1003,10 @@ static ViewWindow *real_view_window_new(FileData *fd, GList *list, CollectionDat
 	gtk_widget_set_size_request(vw->window, DEFAULT_MINIMAL_WINDOW_SIZE, DEFAULT_MINIMAL_WINDOW_SIZE);
 
 	gtk_window_set_resizable(GTK_WINDOW(vw->window), TRUE);
-	gq_gtk_widget_set_border_width(vw->window, 0);
+	gtk_widget_set_margin_top(vw->window, 0);
+	gtk_widget_set_margin_bottom(vw->window, 0);
+	gtk_widget_set_margin_start(vw->window, 0);
+	gtk_widget_set_margin_end(vw->window, 0);
 
 	vw->imd = image_new(FALSE);
 	image_color_profile_set(vw->imd,

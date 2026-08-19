@@ -4216,7 +4216,10 @@ DupeWindow *dupe_window_new()
 		}
 
 	gtk_window_set_resizable(GTK_WINDOW(dw->window), TRUE);
-	gq_gtk_widget_set_border_width(dw->window, 0);
+	gtk_widget_set_margin_top(dw->window, 0);
+	gtk_widget_set_margin_bottom(dw->window, 0);
+	gtk_widget_set_margin_start(dw->window, 0);
+	gtk_widget_set_margin_end(dw->window, 0);
 
 	g_signal_connect(G_OBJECT(dw->window), "close-request",
 			 G_CALLBACK(dupe_window_delete), dw);

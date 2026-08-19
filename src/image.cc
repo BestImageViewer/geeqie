@@ -2099,7 +2099,10 @@ void image_set_selectable(ImageWindow *imd, gboolean selectable)
 	if (!imd->has_frame) return;
 
 	gtk_widget_remove_css_class(imd->frame, "frame");
-	gq_gtk_widget_set_border_width(imd->frame, selectable ? 4 : 0);
+	gtk_widget_set_margin_top(imd->frame, selectable ? 4 : 0);
+	gtk_widget_set_margin_bottom(imd->frame, selectable ? 4 : 0);
+	gtk_widget_set_margin_start(imd->frame, selectable ? 4 : 0);
+	gtk_widget_set_margin_end(imd->frame, selectable ? 4 : 0);
 }
 
 void image_grab_focus(ImageWindow *imd)

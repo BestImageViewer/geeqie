@@ -346,7 +346,10 @@ static void tip_show(ViewFile *vf)
 	VFICON(vf)->tip_window = gtk_window_new();
 	gtk_window_set_transient_for(GTK_WINDOW(VFICON(vf)->tip_window), GTK_WINDOW(widget_get_toplevel(vf->listview)));
 	gtk_window_set_resizable(GTK_WINDOW(VFICON(vf)->tip_window), FALSE);
-	gq_gtk_widget_set_border_width(VFICON(vf)->tip_window, 2);
+	gtk_widget_set_margin_top(VFICON(vf)->tip_window, 2);
+	gtk_widget_set_margin_bottom(VFICON(vf)->tip_window, 2);
+	gtk_widget_set_margin_start(VFICON(vf)->tip_window, 2);
+	gtk_widget_set_margin_end(VFICON(vf)->tip_window, 2);
 
 	label = gtk_label_new(VFICON(vf)->tip_fd->name);
 

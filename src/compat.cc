@@ -145,12 +145,4 @@ void gq_gtk_widget_destroy(GtkWidget *widget)
 		}
 }
 
-void gq_gtk_widget_set_border_width(GtkWidget *widget, guint width)
-{
-	gtk_widget_set_margin_top(widget, width);
-	gtk_widget_set_margin_bottom(widget, width);
-	gtk_widget_set_margin_start(widget, width);
-	gtk_widget_set_margin_end(widget, width);
-}
-
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
